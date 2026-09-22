@@ -18,7 +18,7 @@ for d in ("beyin", "motor", "is_emri"):          # paket kopyaları yerine kayna
     if (kopya / d).exists(): shutil.rmtree(kopya / d)
     shutil.copytree(ROOT / d, kopya / d, ignore=shutil.ignore_patterns("__pycache__", "durum"))
 s = json.loads((KANAL / "settings.json").read_text(encoding="utf-8"))
-s.update(enabled=True, enabled_at=int(time.time()) - 3600, dry_run=False, mode="patron", worker="vps", vps_poll_s=1, ayarlar_json="/yok/ayarlar.json")
+s.update(enabled=True, enabled_at=int(time.time()) - 3600, dry_run=False, mode="patron", worker="vps", vps_poll_s=1, ayarlar_json="/yok/ayarlar.json", vps_komut=True)
 s["llm"]["backend"] = "manuel"
 (kopya / "settings.json").write_text(json.dumps(s, ensure_ascii=False, indent=1), encoding="utf-8")
 TOKEN = hashlib.sha256(os.urandom(16)).hexdigest()
@@ -85,6 +85,7 @@ try:
     t0 = time.time()
     r1 = subprocess.run([sys.executable, str(ROOT / "vps" / "agent.py")], env=aenv, capture_output=True, text=True, timeout=300)
     ok(r1.returncode == 3 and (vhome / "app" / "worker.py").exists() and (vhome / "app" / "PACKAGE_SHA256").read_text().strip() == PAKET_SHA, f"ilk çalıştırma: paket kuruldu, yeniden başlatma isteği (çıkış 3) [{r1.returncode}]")
+    (kopya / "komutlar").mkdir(); (kopya / "komutlar" / "k1.json").write_text(json.dumps({"komut": "echo merhaba-$PORTMAN_HOME; ls app | head -3"}), encoding="utf-8")
     r2 = subprocess.run([sys.executable, str(ROOT / "vps" / "agent.py")], env=aenv, capture_output=True, text=True, timeout=600)
     sure = time.time() - t0
     ok(r2.returncode == 0, f"ikinci çalıştırma: iş alındı ve sonuç gönderildi (çıkış {r2.returncode}, {sure:.1f} s)")
@@ -100,6 +101,8 @@ try:
     hb = json.loads((kopya / "vps-health.json").read_text(encoding="utf-8")); wh = json.loads((kopya / "worker-health.json").read_text(encoding="utf-8"))
     ok(hb["worker"] == "vps" and hb["jobs_done"] == 1 and wh["worker"] == "vps" and hb["package_sha256"] == PAKET_SHA, "heartbeat: vps-health.json + worker-health.json")
     ok((kopya / "vps.log").exists() and "iş bitti" in (kopya / "vps.log").read_text(encoding="utf-8"), "ajan günlüğü hostinge aktı (vps.log)")
+    ks = json.loads((kopya / "komutlar" / "k1.sonuc.json").read_text(encoding="utf-8")) if (kopya / "komutlar" / "k1.sonuc.json").exists() else {}
+    ok(ks.get("exit") == 0 and "merhaba-" in ks.get("stdout", "") and "PACKAGE_SHA256" in ks.get("stdout", ""), "komut kanalı (vps_komut=true): komut çalıştı, sonuç hostinge yazıldı")
     ok("sk-" not in (kopya / "state.json").read_text() and not list(vhome.rglob("*.env")) and "sk-test" not in (vhome / "logs" / "agent.log").read_text(), "anahtar ne state.json'da ne ajan diskinde/günlüğünde")
 
     print("4) hosting tick (sahte Meta) → gönderim")

@@ -210,6 +210,29 @@ def bekleyen_sonuclari_gonder() -> None:
             log("bekleyen sonuç yine gönderilemedi:", f.name, str(e)[:160]); break
 
 
+# ───────────────────────── komut kanalı (isteğe bağlı) ─────────────────────────
+def komut_calistir() -> bool:
+    """settings.vps_komut açıkken hostingteki komutlar/<id>.json'u portman kullanıcısı olarak çalıştırır; sonucu geri yollar."""
+    import subprocess
+    c = istek("komut_al", body={}, timeout=30)
+    k = c.get("komut")
+    if not k:
+        return False
+    log("komut alındı:", k["id"], repr(k["komut"][:120]))
+    t0 = time.time()
+    try:
+        r = subprocess.run(["/bin/bash", "-lc", k["komut"]], capture_output=True, text=True, timeout=min(int(k.get("timeout_s") or 600), 1800),
+                           cwd=k.get("cwd") or str(HOME), env={**os.environ, "PORTMAN_HOME": str(HOME)})
+        sonuc = {"id": k["id"], "exit": r.returncode, "stdout": r.stdout[-200000:], "stderr": r.stderr[-50000:], "sure_s": round(time.time() - t0, 1)}
+    except subprocess.TimeoutExpired as e:
+        sonuc = {"id": k["id"], "exit": -1, "stdout": (e.stdout or "")[-200000:] if isinstance(e.stdout, str) else "", "stderr": "zaman aşımı", "sure_s": round(time.time() - t0, 1)}
+    except Exception as e:
+        sonuc = {"id": k["id"], "exit": -2, "stdout": "", "stderr": str(e)[:2000], "sure_s": round(time.time() - t0, 1)}
+    istek("komut_sonuc", body=sonuc, timeout=60)
+    log("komut bitti:", k["id"], "exit", sonuc["exit"], f"{sonuc['sure_s']} s")
+    return True
+
+
 # ───────────────────────── sağlık ─────────────────────────
 def heartbeat(pk_sha: str, son_is) -> dict:
     try:
@@ -275,6 +298,12 @@ def main() -> int:
                     log("öz-test hatası:", traceback.format_exc()[-600:])
                 oz_test_yapildi = True
             bekleyen_sonuclari_gonder()
+            if ayar_uzak.get("vps_komut") is True:
+                try:
+                    while komut_calistir():
+                        gunlukleri_gonder()
+                except ApiHatasi as e:
+                    log("komut kanalı:", str(e)[:160])
             if simdi - son_hb_t > 60:
                 heartbeat(yerel_paket_sha(), son_is); son_hb_t = simdi; gunlukleri_gonder()
             if ayar_uzak.get("worker") != "vps" or ayar_uzak.get("enabled") is not True:

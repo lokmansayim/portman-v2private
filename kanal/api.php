@@ -60,6 +60,7 @@ function pm_kanal_api_settings_out(array $settings): array {
             'dry_run' => ($settings['dry_run'] ?? false) === true, 'mode' => $settings['mode'] ?? 'patron',
             'llm' => array_intersect_key(is_array($settings['llm'] ?? null) ? $settings['llm'] : [], array_flip(['backend', 'model', 'timeout_s'])),
             'patron_teknik_not' => ($settings['patron_teknik_not'] ?? true) === true, 'poll_s' => (int)($settings['vps_poll_s'] ?? 4),
+            'vps_komut' => ($settings['vps_komut'] ?? false) === true,
             'package' => pm_kanal_api_paket()];
     if (($settings['vps_llm_key_from_hosting'] ?? true) === true) {
         $key = '';
@@ -170,6 +171,37 @@ function pm_kanal_api_heartbeat(array $body): array {
     return ['ok' => true, 'worker' => (string)($settings['worker'] ?? 'hosting'), 'enabled' => ($settings['enabled'] ?? false) === true];
 }
 
+/* Komut kanalı (isteğe bağlı, settings.vps_komut === true): kanal/komutlar/<id>.json → ajan çalıştırır (portman kullanıcısı) →
+   <id>.sonuc.json. Komut dosyalarını yalnız panel/DirectAdmin üzerinden yetkili kişi yazar; her adım vps.log'a düşer. */
+function pm_kanal_api_komut_al(array $settings): array {
+    if (($settings['vps_komut'] ?? false) !== true) return ['komut' => null, 'reason' => 'vps_komut kapalı'];
+    $dir = PM_KANAL_DIR.'/komutlar';
+    if (!is_dir($dir)) return ['komut' => null];
+    $adaylar = [];
+    foreach (glob($dir.'/*.json') ?: [] as $f) {
+        $ad = basename($f, '.json');
+        if (str_ends_with($ad, '.sonuc') || str_ends_with($ad, '.running')) continue;
+        if (is_file("$dir/$ad.sonuc.json") || is_file("$dir/$ad.running.json")) continue;
+        $adaylar[$ad] = filemtime($f);
+    }
+    if (!$adaylar) return ['komut' => null];
+    asort($adaylar); $id = array_key_first($adaylar);
+    $k = json_decode((string)file_get_contents("$dir/$id.json"), true);
+    if (!is_array($k) || !is_string($k['komut'] ?? null) || !preg_match('/^[A-Za-z0-9_.-]{1,64}$/', $id)) return ['komut' => null];
+    pm_write("$dir/$id.running.json", ['at' => time(), 'ip' => $_SERVER['REMOTE_ADDR'] ?? null]);
+    return ['komut' => ['id' => $id, 'komut' => $k['komut'], 'timeout_s' => (int)($k['timeout_s'] ?? 600), 'cwd' => $k['cwd'] ?? null]];
+}
+function pm_kanal_api_komut_sonuc(array $body): array {
+    $id = (string)($body['id'] ?? '');
+    if (!preg_match('/^[A-Za-z0-9_.-]{1,64}$/', $id)) throw new RuntimeException('bad_id');
+    $dir = PM_KANAL_DIR.'/komutlar';
+    if (!is_file("$dir/$id.json")) throw new RuntimeException('komut_unknown');
+    pm_write("$dir/$id.sonuc.json", ['at' => time(), 'exit' => $body['exit'] ?? null, 'sure_s' => $body['sure_s'] ?? null,
+        'stdout' => mb_substr((string)($body['stdout'] ?? ''), 0, 200000), 'stderr' => mb_substr((string)($body['stderr'] ?? ''), 0, 50000)]);
+    @unlink("$dir/$id.running.json");
+    return ['ok' => true];
+}
+
 function pm_kanal_api_log(array $body): array {
     $lines = is_array($body['lines'] ?? null) ? $body['lines'] : [];
     $p = PM_KANAL_DIR.'/vps.log';
@@ -210,11 +242,14 @@ function pm_kanal_api(?string $raw = null, ?array $files = null, ?array $post = 
                 echo str_replace('"__PM_DURUM_HAM__"', $ham ?? 'null', json_encode($c, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)); break;
             case 'result':
                 pm_kanal_api_json(200, pm_kanal_api_result($post, $files)); break;
+            case 'komut_al':
+                pm_kanal_api_json(200, pm_kanal_api_komut_al($settings)); break;
             case 'heartbeat':
             case 'log':
+            case 'komut_sonuc':
                 $body = json_decode($raw ?? (string)file_get_contents('php://input'), true);
                 if (!is_array($body)) throw new RuntimeException('bad_json');
-                pm_kanal_api_json(200, $op === 'heartbeat' ? pm_kanal_api_heartbeat($body) : pm_kanal_api_log($body)); break;
+                pm_kanal_api_json(200, $op === 'heartbeat' ? pm_kanal_api_heartbeat($body) : ($op === 'log' ? pm_kanal_api_log($body) : pm_kanal_api_komut_sonuc($body))); break;
             default:
                 pm_kanal_api_json(400, ['error' => 'unknown_op']); pm_kanal_api_audit($op, false, 'unknown_op'); return;
         }
