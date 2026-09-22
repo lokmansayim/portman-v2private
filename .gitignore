@@ -1,0 +1,27 @@
+# sırlar ve canlı durum — asla depoya girmez
+kanal/settings.json
+kanal/state.json
+kanal/state.lock
+kanal/durum/
+kanal/projects/
+kanal/checks/
+kanal/api_token.txt
+kanal/*.log
+kanal/*-health.json
+kanal/preflight.json
+kanal/install-report.json
+kanal/self-test-result.json
+kanal/lib.snapshot.php
+*.env
+# üretilen çıktılar
+cikti/
+beyin/durum/
+# büyük referans (Lokman'ın klasöründe)
+ref_sablon/
+# python
+__pycache__/
+*.pyc
+venv/
+.venv/
+# işletim sistemi
+.DS_Store

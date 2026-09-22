@@ -1,0 +1,17 @@
+[
+ {"id": 1,  "gonderen": "BAYI-TEST-1", "mesaj": "Merhaba, katalogdaki P6001 modelinin aynalanmış halini çizebilir misiniz? Müşteri Uğur Başarır, sevk İzzettin/Çatalca.", "beklenen": "is_emri", "not": "katalog + ayna_x"},
+ {"id": 2,  "gonderen": "BAYI-TEST-1", "mesaj": "60 metrekare 2+1 verandalı bir ev istiyorum", "beklenen": "sor", "not": "m² → katalog önerisi sorusu"},
+ {"id": 3,  "gonderen": "BAYI-TEST-1", "mesaj": "P6001 olsun", "beklenen": "is_emri", "not": "öneriden seçim (devam)"},
+ {"id": 4,  "gonderen": "BAYI-TEST-2", "mesaj": "6x8 pano tek katlı 2+1 prefabrik plan oluştur", "beklenen": "is_emri", "not": "pano grid → onaylı örnek"},
+ {"id": 5,  "gonderen": "BAYI-TEST-2", "mesaj": "fiyatı ne kadar olur?", "beklenen": "cevapla", "not": "soru"},
+ {"id": 6,  "gonderen": "BAYI-TEST-2", "mesaj": "onaylıyorum", "beklenen": "cevapla", "not": "onay (bekleyen plan var)"},
+ {"id": 7,  "gonderen": "BAYI-TEST-1", "mesaj": "7x4 metre tek oda, banyolu, ön verandalı, çatı trapez sac kırmızı", "beklenen": "sor|yonlendir", "not": "serbest ölçü; şablon yok"},
+ {"id": 8,  "gonderen": "BAYI-TEST-1", "mesaj": "Bana katalogdaki P8501 kodlu modeli mirror yapıp verir misin?", "beklenen": "yonlendir", "not": "katalogda var, şablon kodlanmamış"},
+ {"id": 9,  "gonderen": "BAYI-TEST-2", "mesaj": "P6001 istiyorum ama yatak odası 1 penceresi 120x180 olsun, dış boya beyaz, çatıya osb + nem bariyeri", "beklenen": "is_emri", "not": "pencere_degistir + bina özellikleri + özel istek"},
+ {"id": 10, "gonderen": "BAYI-TEST-1", "mesaj": "selam", "beklenen": "cevapla", "not": "selam"},
+ {"id": 11, "gonderen": "BAYI-TEST-1", "mesaj": "3+1 istiyorum", "beklenen": "sor", "not": "oda var, ölçü yok"},
+ {"id": 12, "gonderen": "BAYI-TEST-1", "mesaj": "yaklaşık 95 metrekare, çelik olsun", "beklenen": "sor", "not": "m² + çelik → öneri"},
+ {"id": 13, "gonderen": "KAYITSIZ-555", "mesaj": "merhaba ev fiyatları nedir", "beklenen": "yonlendir", "not": "kayıtsız numara"},
+ {"id": 14, "gonderen": "BAYI-TEST-2", "mesaj": "6001 modelini ön arka ters çevir, kapı arka cepheye gelsin", "beklenen": "is_emri", "not": "eksik kod yazımı + ayna_y"},
+ {"id": 15, "gonderen": "BAYI-TEST-1", "mesaj": "bugün hava çok güzel", "beklenen": "cevapla", "not": "alakasız"}
+]

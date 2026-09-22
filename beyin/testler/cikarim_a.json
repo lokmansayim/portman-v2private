@@ -1,0 +1,245 @@
+[
+  {
+    "id": 1,
+    "talep": {
+      "niyet": "revizyon",
+      "katalog_kodu": "P6001",
+      "yapi_turu": null,
+      "kat_sayisi": null,
+      "oda_programi": null,
+      "alan_m2": null,
+      "dis_olcu": null,
+      "pano": null,
+      "veranda": null,
+      "cati": null,
+      "yukseklik_cm": null,
+      "pencereler": [],
+      "dis_kapi": null,
+      "ic_kapi": null,
+      "varyantlar": [
+        {
+          "tur": "ayna_x",
+          "aciklama": "aynalanmış hali"
+        }
+      ],
+      "bina_ozellikleri": {},
+      "ozel_istekler": [],
+      "musteri": {
+        "ad": "Uğur Başarır",
+        "telefon": null,
+        "sevk_adresi": "İzzettin/Çatalca"
+      },
+      "belirsizlikler": [],
+      "guven": "yuksek",
+      "ozet": "P6001 modelinin aynalanmış halinin çizimini istiyorsunuz."
+    }
+  },
+  {
+    "id": 2,
+    "talep": {
+      "niyet": "yeni_talep",
+      "katalog_kodu": null,
+      "yapi_turu": null,
+      "kat_sayisi": null,
+      "oda_programi": "2+1",
+      "alan_m2": 60,
+      "dis_olcu": null,
+      "pano": null,
+      "veranda": {
+        "istiyor": true,
+        "konum": null,
+        "alan_m2": null
+      },
+      "cati": null,
+      "yukseklik_cm": null,
+      "pencereler": [],
+      "dis_kapi": null,
+      "ic_kapi": null,
+      "varyantlar": [],
+      "bina_ozellikleri": {},
+      "ozel_istekler": [],
+      "musteri": null,
+      "belirsizlikler": [],
+      "guven": "orta",
+      "ozet": "60 metrekare, 2+1 oda ve verandası olan yeni bir ev planı istiyorsunuz."
+    }
+  },
+  {
+    "id": 3,
+    "talep": {
+      "niyet": "yeni_talep",
+      "katalog_kodu": "P6001",
+      "yapi_turu": null,
+      "kat_sayisi": null,
+      "oda_programi": null,
+      "alan_m2": null,
+      "dis_olcu": null,
+      "pano": null,
+      "veranda": null,
+      "cati": null,
+      "yukseklik_cm": null,
+      "pencereler": [],
+      "dis_kapi": null,
+      "ic_kapi": null,
+      "varyantlar": [],
+      "bina_ozellikleri": {},
+      "ozel_istekler": [],
+      "musteri": null,
+      "belirsizlikler": [],
+      "guven": "yuksek",
+      "ozet": "Sistem önerilerinden P6001 modelini seçtiniz."
+    }
+  },
+  {
+    "id": 4,
+    "talep": {
+      "niyet": "yeni_talep",
+      "katalog_kodu": null,
+      "yapi_turu": "prefabrik",
+      "kat_sayisi": 1,
+      "oda_programi": "2+1",
+      "alan_m2": null,
+      "dis_olcu": null,
+      "pano": {
+        "nx": 6,
+        "ny": 8
+      },
+      "veranda": null,
+      "cati": null,
+      "yukseklik_cm": null,
+      "pencereler": [],
+      "dis_kapi": null,
+      "ic_kapi": null,
+      "varyantlar": [],
+      "bina_ozellikleri": {},
+      "ozel_istekler": [],
+      "musteri": null,
+      "belirsizlikler": [],
+      "guven": "yuksek",
+      "ozet": "6x8 pano, tek katlı, 2+1 oda, prefabrik plan istiyorsunuz."
+    }
+  },
+  {
+    "id": 5,
+    "talep": {
+      "niyet": "soru",
+      "katalog_kodu": null,
+      "yapi_turu": null,
+      "kat_sayisi": null,
+      "oda_programi": null,
+      "alan_m2": null,
+      "dis_olcu": null,
+      "pano": null,
+      "veranda": null,
+      "cati": null,
+      "yukseklik_cm": null,
+      "pencereler": [],
+      "dis_kapi": null,
+      "ic_kapi": null,
+      "varyantlar": [],
+      "bina_ozellikleri": {},
+      "ozel_istekler": [],
+      "musteri": null,
+      "belirsizlikler": [],
+      "guven": "yuksek",
+      "ozet": "Hazırlanan plan için fiyat bilgisi sorgusu yapıyorsunuz."
+    }
+  },
+  {
+    "id": 6,
+    "talep": {
+      "niyet": "onay",
+      "katalog_kodu": null,
+      "yapi_turu": null,
+      "kat_sayisi": null,
+      "oda_programi": null,
+      "alan_m2": null,
+      "dis_olcu": null,
+      "pano": null,
+      "veranda": null,
+      "cati": null,
+      "yukseklik_cm": null,
+      "pencereler": [],
+      "dis_kapi": null,
+      "ic_kapi": null,
+      "varyantlar": [],
+      "bina_ozellikleri": {},
+      "ozel_istekler": [],
+      "musteri": null,
+      "belirsizlikler": [],
+      "guven": "yuksek",
+      "ozet": "Gönderilen planı onaylıyorsunuz."
+    }
+  },
+  {
+    "id": 7,
+    "talep": {
+      "niyet": "yeni_talep",
+      "katalog_kodu": null,
+      "yapi_turu": null,
+      "kat_sayisi": null,
+      "oda_programi": "1+0",
+      "alan_m2": null,
+      "dis_olcu": {
+        "en_m": 4,
+        "boy_m": 7
+      },
+      "pano": null,
+      "veranda": {
+        "istiyor": true,
+        "konum": "on",
+        "alan_m2": null
+      },
+      "cati": {
+        "tip": null,
+        "egim_yuzde": null,
+        "kaplama": "trapez sac",
+        "renk": "kırmızı"
+      },
+      "yukseklik_cm": null,
+      "pencereler": [],
+      "dis_kapi": null,
+      "ic_kapi": null,
+      "varyantlar": [],
+      "bina_ozellikleri": {},
+      "ozel_istekler": [
+        "banyolu"
+      ],
+      "musteri": null,
+      "belirsizlikler": [],
+      "guven": "orta",
+      "ozet": "7x4 metre, tek oda, banyolu, ön verandası, kırmızı trapez saç çatısı olan yeni bir plan istiyorsunuz."
+    }
+  },
+  {
+    "id": 8,
+    "talep": {
+      "niyet": "revizyon",
+      "katalog_kodu": "P8501",
+      "yapi_turu": null,
+      "kat_sayisi": null,
+      "oda_programi": null,
+      "alan_m2": null,
+      "dis_olcu": null,
+      "pano": null,
+      "veranda": null,
+      "cati": null,
+      "yukseklik_cm": null,
+      "pencereler": [],
+      "dis_kapi": null,
+      "ic_kapi": null,
+      "varyantlar": [
+        {
+          "tur": "ayna_x",
+          "aciklama": "mirror yapılması"
+        }
+      ],
+      "bina_ozellikleri": {},
+      "ozel_istekler": [],
+      "musteri": null,
+      "belirsizlikler": [],
+      "guven": "yuksek",
+      "ozet": "P8501 modelinin aynalanmış halini istiyorsunuz."
+    }
+  }
+]

@@ -1,0 +1,27 @@
+{
+ "enabled": false,
+ "enabled_at": 0,
+ "dry_run": true,
+ "mode": "patron",
+ "llm": {
+  "backend": "openai_chat",
+  "model": "gpt-4o-mini",
+  "timeout_s": 60
+ },
+ "ayarlar_json": "/home/<hesap>/domains/<alan>/public_html/developer/veri/ayarlar.json",
+ "patron_teknik_not": true,
+ "panel_kaydi": true,
+ "max_is_per_tick": 2,
+ "budget_s": 45,
+ "aciklama": {
+  "enabled": "Ana anahtar. false: webhook hiçbir mesajı sahiplenmez (sohbet botu bugünkü gibi çalışır), tick hiçbir şey göndermez.",
+  "enabled_at": "Etkinleştirme anı (epoch). Bundan eski mesajlar sahiplenilmez.",
+  "dry_run": "true: mesajlar işlenir, PDF üretilir, giden satırlar 'held' olur ve GÖNDERİLMEZ (sonradan da gönderilmez).",
+  "mode": "patron: yalnız panelde adı 'Patron' olan numara. kayitli: panelde kayıtlı tüm numaralar + Patron. hepsi: her gönderen (kayıtsıza yönlendirme cevabı).",
+  "llm.backend": "openai_chat (Chat Completions, sohbet botunun kanıtlı yolu) | openai (Responses) | anthropic | manuel (yalnız test)",
+  "ayarlar_json": "Panelin ayar dosyası; yalnız openai_key alanı okunur, hiçbir yere yazılmaz.",
+  "patron_teknik_not": "Patron'a giden cevabın sonuna eylem/gerekçe/token/süre satırı ekler.",
+  "panel_kaydi": "Giden mesajları panelin sohbet kaydına (mesajKaydet) da yazar."
+ },
+ "worker": "hosting"
+}

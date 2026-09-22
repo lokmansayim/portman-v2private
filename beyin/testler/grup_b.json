@@ -1,0 +1,58 @@
+[
+ {
+  "id": 9,
+  "gonderen": "BAYI-TEST-2",
+  "mesaj": "P6001 istiyorum ama yatak odası 1 penceresi 120x180 olsun, dış boya beyaz, çatıya osb + nem bariyeri",
+  "beklenen": "is_emri",
+  "not": "pencere_degistir + bina özellikleri + özel istek",
+  "baglam": ""
+ },
+ {
+  "id": 10,
+  "gonderen": "BAYI-TEST-1",
+  "mesaj": "selam",
+  "beklenen": "cevapla",
+  "not": "selam",
+  "baglam": ""
+ },
+ {
+  "id": 11,
+  "gonderen": "BAYI-TEST-1",
+  "mesaj": "3+1 istiyorum",
+  "beklenen": "sor",
+  "not": "oda var, ölçü yok",
+  "baglam": ""
+ },
+ {
+  "id": 12,
+  "gonderen": "BAYI-TEST-1",
+  "mesaj": "yaklaşık 95 metrekare, çelik olsun",
+  "beklenen": "sor",
+  "not": "m² + çelik → öneri",
+  "baglam": ""
+ },
+ {
+  "id": 13,
+  "gonderen": "KAYITSIZ-555",
+  "mesaj": "merhaba ev fiyatları nedir",
+  "beklenen": "yonlendir",
+  "not": "kayıtsız numara",
+  "baglam": ""
+ },
+ {
+  "id": 14,
+  "gonderen": "BAYI-TEST-2",
+  "mesaj": "6001 modelini ön arka ters çevir, kapı arka cepheye gelsin",
+  "beklenen": "is_emri",
+  "not": "eksik kod yazımı + ayna_y",
+  "baglam": ""
+ },
+ {
+  "id": 15,
+  "gonderen": "BAYI-TEST-1",
+  "mesaj": "bugün hava çok güzel",
+  "beklenen": "cevapla",
+  "not": "alakasız",
+  "baglam": ""
+ }
+]

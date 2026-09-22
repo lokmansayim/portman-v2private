@@ -1,0 +1,205 @@
+[
+ {
+  "id": 9,
+  "talep": {
+   "niyet": "yeni_talep",
+   "katalog_kodu": "P6001",
+   "yapi_turu": null,
+   "kat_sayisi": null,
+   "oda_programi": null,
+   "alan_m2": null,
+   "dis_olcu": null,
+   "pano": null,
+   "veranda": null,
+   "cati": null,
+   "yukseklik_cm": null,
+   "pencereler": [],
+   "dis_kapi": null,
+   "ic_kapi": null,
+   "varyantlar": [
+    {
+     "tur": "pencere_degistir",
+     "aciklama": "yatak odası 1 penceresi 120x180 olsun"
+    }
+   ],
+   "bina_ozellikleri": {
+    "dış boya rengi": "beyaz"
+   },
+   "ozel_istekler": [
+    "çatıya osb + nem bariyeri"
+   ],
+   "musteri": null,
+   "belirsizlikler": [],
+   "guven": "yuksek",
+   "ozet": "P6001 modelini yatak odası 1 penceresinde 120x180 ölçüyle, beyaz dış boyayla ve çatıya OSB+nem bariyeri ile istiyorsunuz."
+  }
+ },
+ {
+  "id": 10,
+  "talep": {
+   "niyet": "selam",
+   "katalog_kodu": null,
+   "yapi_turu": null,
+   "kat_sayisi": null,
+   "oda_programi": null,
+   "alan_m2": null,
+   "dis_olcu": null,
+   "pano": null,
+   "veranda": null,
+   "cati": null,
+   "yukseklik_cm": null,
+   "pencereler": [],
+   "dis_kapi": null,
+   "ic_kapi": null,
+   "varyantlar": [],
+   "bina_ozellikleri": {},
+   "ozel_istekler": [],
+   "musteri": null,
+   "belirsizlikler": [],
+   "guven": "yuksek",
+   "ozet": "Selamlaşıyorsunuz."
+  }
+ },
+ {
+  "id": 11,
+  "talep": {
+   "niyet": "yeni_talep",
+   "katalog_kodu": null,
+   "yapi_turu": null,
+   "kat_sayisi": null,
+   "oda_programi": "3+1",
+   "alan_m2": null,
+   "dis_olcu": null,
+   "pano": null,
+   "veranda": null,
+   "cati": null,
+   "yukseklik_cm": null,
+   "pencereler": [],
+   "dis_kapi": null,
+   "ic_kapi": null,
+   "varyantlar": [],
+   "bina_ozellikleri": {},
+   "ozel_istekler": [],
+   "musteri": null,
+   "belirsizlikler": [
+    "Ölçü veya katalog kodu belirtilmemiş"
+   ],
+   "guven": "orta",
+   "ozet": "3+1 oda programı istiyorsunuz."
+  }
+ },
+ {
+  "id": 12,
+  "talep": {
+   "niyet": "yeni_talep",
+   "katalog_kodu": null,
+   "yapi_turu": "celik",
+   "kat_sayisi": null,
+   "oda_programi": null,
+   "alan_m2": 95,
+   "dis_olcu": null,
+   "pano": null,
+   "veranda": null,
+   "cati": null,
+   "yukseklik_cm": null,
+   "pencereler": [],
+   "dis_kapi": null,
+   "ic_kapi": null,
+   "varyantlar": [],
+   "bina_ozellikleri": {},
+   "ozel_istekler": [],
+   "musteri": null,
+   "belirsizlikler": [
+    "Ölçü yaklaşık olarak verilmiş, model kodu veya oda programı belirtilmemiş"
+   ],
+   "guven": "orta",
+   "ozet": "Yaklaşık 95 metrekarelik, çelik yapı istiyorsunuz."
+  }
+ },
+ {
+  "id": 13,
+  "talep": {
+   "niyet": "soru",
+   "katalog_kodu": null,
+   "yapi_turu": null,
+   "kat_sayisi": null,
+   "oda_programi": null,
+   "alan_m2": null,
+   "dis_olcu": null,
+   "pano": null,
+   "veranda": null,
+   "cati": null,
+   "yukseklik_cm": null,
+   "pencereler": [],
+   "dis_kapi": null,
+   "ic_kapi": null,
+   "varyantlar": [],
+   "bina_ozellikleri": {},
+   "ozel_istekler": [],
+   "musteri": null,
+   "belirsizlikler": [],
+   "guven": "yuksek",
+   "ozet": "Ev fiyatları hakkında bilgi istiyorsunuz."
+  }
+ },
+ {
+  "id": 14,
+  "talep": {
+   "niyet": "revizyon",
+   "katalog_kodu": "P6001",
+   "yapi_turu": null,
+   "kat_sayisi": null,
+   "oda_programi": null,
+   "alan_m2": null,
+   "dis_olcu": null,
+   "pano": null,
+   "veranda": null,
+   "cati": null,
+   "yukseklik_cm": null,
+   "pencereler": [],
+   "dis_kapi": null,
+   "ic_kapi": null,
+   "varyantlar": [
+    {
+     "tur": "ayna_y",
+     "aciklama": "6001 modelini ön arka ters çevir, kapı arka cepheye gelsin",
+     "parametreler": {
+      "kapi_konum": "arka"
+     }
+    }
+   ],
+   "bina_ozellikleri": {},
+   "ozel_istekler": [],
+   "musteri": null,
+   "belirsizlikler": [],
+   "guven": "orta",
+   "ozet": "P6001 modelini ön-arka simetrikleştirip kapının arka cepheye gelmesini istiyorsunuz."
+  }
+ },
+ {
+  "id": 15,
+  "talep": {
+   "niyet": "diger",
+   "katalog_kodu": null,
+   "yapi_turu": null,
+   "kat_sayisi": null,
+   "oda_programi": null,
+   "alan_m2": null,
+   "dis_olcu": null,
+   "pano": null,
+   "veranda": null,
+   "cati": null,
+   "yukseklik_cm": null,
+   "pencereler": [],
+   "dis_kapi": null,
+   "ic_kapi": null,
+   "varyantlar": [],
+   "bina_ozellikleri": {},
+   "ozel_istekler": [],
+   "musteri": null,
+   "belirsizlikler": [],
+   "guven": "yuksek",
+   "ozet": "Hava güzelliğinden bahsediyorsunuz."
+  }
+ }
+]

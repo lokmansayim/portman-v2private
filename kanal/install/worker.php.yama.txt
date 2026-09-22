@@ -1,0 +1,7 @@
+worker.php (/home/portatifevcom/portman_app/worker.php) — DOSYANIN SONUNA EKLENECEK BLOK:
+
+// PORTMAN KANAL: gönderici/yayıncı (metin + PDF); üretici ayrı cron'daki kanal/worker.py (task2/venv Python). Ana anahtar kanal/settings.json → enabled.
+if (is_file(__DIR__.'/kanal/feature.php')) {
+    try { require_once '/home/portatifevcom/domains/portatifev.com/public_html/developer/config.php'; require_once __DIR__.'/kanal/feature.php'; pm_kanal_tick(); }
+    catch (Throwable $e) { error_log('Portman kanal tick stopped; inspect private kanal state.'); }
+}

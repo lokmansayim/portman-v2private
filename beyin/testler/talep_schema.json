@@ -1,0 +1,589 @@
+{
+ "$defs": {
+  "Cati": {
+   "properties": {
+    "tip": {
+     "anyOf": [
+      {
+       "enum": [
+        "besik",
+        "kirma",
+        "tek_egimli",
+        "teras"
+       ],
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Tip"
+    },
+    "egim_yuzde": {
+     "anyOf": [
+      {
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Egim Yuzde"
+    },
+    "kaplama": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "örn. trapez sac, metal kiremit, shingle",
+     "title": "Kaplama"
+    },
+    "renk": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Renk"
+    }
+   },
+   "title": "Cati",
+   "type": "object"
+  },
+  "DisOlcu": {
+   "properties": {
+    "en_m": {
+     "anyOf": [
+      {
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Kısa kenar, metre (örn. 4.0)",
+     "title": "En M"
+    },
+    "boy_m": {
+     "anyOf": [
+      {
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Uzun kenar, metre (örn. 7.0)",
+     "title": "Boy M"
+    }
+   },
+   "title": "DisOlcu",
+   "type": "object"
+  },
+  "Musteri": {
+   "properties": {
+    "ad": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Ad"
+    },
+    "telefon": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Telefon"
+    },
+    "sevk_adresi": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Sevk Adresi"
+    }
+   },
+   "title": "Musteri",
+   "type": "object"
+  },
+  "PanoGrid": {
+   "properties": {
+    "nx": {
+     "anyOf": [
+      {
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Kısa kenar pano adedi (yarım pano 0.5 adımı serbest)",
+     "title": "Nx"
+    },
+    "ny": {
+     "anyOf": [
+      {
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Uzun kenar pano adedi",
+     "title": "Ny"
+    }
+   },
+   "title": "PanoGrid",
+   "type": "object"
+  },
+  "Pencere": {
+   "properties": {
+    "mahal": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Pencerenin ait olduğu oda (mesajda geçtiği gibi)",
+     "title": "Mahal"
+    },
+    "olcu": {
+     "anyOf": [
+      {
+       "enum": [
+        "120x120",
+        "120x180",
+        "60x40",
+        "120x100",
+        "120x160",
+        "160x120",
+        "160x180",
+        "180x180",
+        "80x120",
+        "120x50"
+       ],
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Olcu"
+    },
+    "adet": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Adet"
+    },
+    "duvar": {
+     "anyOf": [
+      {
+       "enum": [
+        "on",
+        "arka",
+        "sol",
+        "sag"
+       ],
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Duvar"
+    },
+    "islem": {
+     "anyOf": [
+      {
+       "enum": [
+        "ekle",
+        "kaldir",
+        "degistir"
+       ],
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Var olan bir modelde değişiklikse",
+     "title": "Islem"
+    }
+   },
+   "title": "Pencere",
+   "type": "object"
+  },
+  "Varyant": {
+   "properties": {
+    "tur": {
+     "enum": [
+      "ayna_x",
+      "ayna_y",
+      "pencere_degistir",
+      "pencere_ekle",
+      "pencere_kaldir",
+      "kapi_degistir",
+      "veranda_ekle",
+      "veranda_kaldir",
+      "veranda_degistir",
+      "olcu_degistir",
+      "oda_ekle",
+      "oda_kaldir",
+      "cati_degistir",
+      "yukseklik_degistir",
+      "diger"
+     ],
+     "title": "Tur",
+     "type": "string"
+    },
+    "aciklama": {
+     "description": "Bayinin kendi sözleriyle istenen değişiklik",
+     "title": "Aciklama",
+     "type": "string"
+    },
+    "parametreler": {
+     "additionalProperties": true,
+     "title": "Parametreler",
+     "type": "object"
+    }
+   },
+   "required": [
+    "tur",
+    "aciklama"
+   ],
+   "title": "Varyant",
+   "type": "object"
+  },
+  "Veranda": {
+   "properties": {
+    "istiyor": {
+     "anyOf": [
+      {
+       "type": "boolean"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Veranda istiyor mu; belirtilmediyse null",
+     "title": "Istiyor"
+    },
+    "konum": {
+     "anyOf": [
+      {
+       "enum": [
+        "on",
+        "yan",
+        "arka",
+        "kose"
+       ],
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Konum"
+    },
+    "alan_m2": {
+     "anyOf": [
+      {
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Alan M2"
+    }
+   },
+   "title": "Veranda",
+   "type": "object"
+  }
+ },
+ "description": "Bir bayi mesajının yapılandırılmış hali. Mesajda OLMAYAN hiçbir alan doldurulmaz (null kalır).",
+ "properties": {
+  "niyet": {
+   "description": "yeni_talep: yeni plan/teklif istiyor; revizyon: önceki plana değişiklik; onay: planı onaylıyor; red: beğenmedi/iptal; soru: fiyat/süre/genel soru; selam: sadece selam; diger: alakasız",
+   "enum": [
+    "yeni_talep",
+    "revizyon",
+    "onay",
+    "red",
+    "soru",
+    "selam",
+    "diger"
+   ],
+   "title": "Niyet",
+   "type": "string"
+  },
+  "katalog_kodu": {
+   "anyOf": [
+    {
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "description": "P6001, Ç8201 gibi katalog kodu; sadece mesajda geçiyorsa. '6001' gibi eksik yazımı P6001'e tamamla, ancak emin değilsen belirsizliklere yaz",
+   "title": "Katalog Kodu"
+  },
+  "yapi_turu": {
+   "anyOf": [
+    {
+     "enum": [
+      "prefabrik",
+      "celik"
+     ],
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "description": "Sadece açıkça söylendiyse",
+   "title": "Yapi Turu"
+  },
+  "kat_sayisi": {
+   "anyOf": [
+    {
+     "type": "integer"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Kat Sayisi"
+  },
+  "oda_programi": {
+   "anyOf": [
+    {
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "description": "'2+1', '3+1', '1+1', 'tek oda' → '1+0'",
+   "title": "Oda Programi"
+  },
+  "alan_m2": {
+   "anyOf": [
+    {
+     "type": "number"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Alan M2"
+  },
+  "dis_olcu": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/DisOlcu"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null
+  },
+  "pano": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/PanoGrid"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null
+  },
+  "veranda": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Veranda"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null
+  },
+  "cati": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Cati"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null
+  },
+  "yukseklik_cm": {
+   "anyOf": [
+    {
+     "type": "integer"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Yukseklik Cm"
+  },
+  "pencereler": {
+   "items": {
+    "$ref": "#/$defs/Pencere"
+   },
+   "title": "Pencereler",
+   "type": "array"
+  },
+  "dis_kapi": {
+   "anyOf": [
+    {
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "description": "çelik / pvc / alüminyum / sac; sadece söylendiyse",
+   "title": "Dis Kapi"
+  },
+  "ic_kapi": {
+   "anyOf": [
+    {
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "description": "amerikan / pvc; sadece söylendiyse",
+   "title": "Ic Kapi"
+  },
+  "varyantlar": {
+   "description": "Var olan bir katalog modeline istenen değişiklikler",
+   "items": {
+    "$ref": "#/$defs/Varyant"
+   },
+   "title": "Varyantlar",
+   "type": "array"
+  },
+  "bina_ozellikleri": {
+   "additionalProperties": {
+    "type": "string"
+   },
+   "description": "Dış boya rengi, iç kapı rengi gibi pafta tablosu alanları; anahtar Türkçe, sadece söylenenler",
+   "title": "Bina Ozellikleri",
+   "type": "object"
+  },
+  "ozel_istekler": {
+   "description": "'çatıya OSB + nem bariyeri' gibi serbest istekler, bayinin sözleriyle",
+   "items": {
+    "type": "string"
+   },
+   "title": "Ozel Istekler",
+   "type": "array"
+  },
+  "musteri": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Musteri"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null
+  },
+  "belirsizlikler": {
+   "description": "Çelişkili veya emin olunamayan noktalar, Türkçe kısa cümle",
+   "items": {
+    "type": "string"
+   },
+   "title": "Belirsizlikler",
+   "type": "array"
+  },
+  "guven": {
+   "enum": [
+    "dusuk",
+    "orta",
+    "yuksek"
+   ],
+   "title": "Guven",
+   "type": "string"
+  },
+  "ozet": {
+   "description": "Anlaşılanın tek cümlelik Türkçe özeti; bayiye geri okunacak",
+   "title": "Ozet",
+   "type": "string"
+  }
+ },
+ "required": [
+  "niyet",
+  "guven",
+  "ozet"
+ ],
+ "title": "Talep",
+ "type": "object"
+}

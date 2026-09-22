@@ -1,0 +1,309 @@
+{
+ "is_emri_no": "PM-B002-20260921-16652",
+ "revizyon": 1,
+ "talep": {
+  "bayi": {
+   "kod": "B002",
+   "ad": "Nadire Hanım"
+  },
+  "kaynak": "GRID-6x8",
+  "musteri_adi": "",
+  "metin": "6x8 pano, tek katlı, 2+1 oda, prefabrik plan istiyorsunuz."
+ },
+ "yapi": {
+  "sistem": "prefabrik",
+  "kat_sayisi": 1,
+  "duvar_yuksekligi_cm": 250,
+  "olcu_kaynagi": "serbest",
+  "referans_model": "onceki-2plus1-6x8",
+  "grid": {
+   "x_pano": 6,
+   "y_pano": 8
+  },
+  "kisa_kenar": "x",
+  "giris_cephesi": "on",
+  "dis_dusey_duvar": "eksende"
+ },
+ "mahaller": [
+  {
+   "ad": "ODA 1",
+   "tur": "yatak_odasi",
+   "konum_pano": [
+    [
+     0,
+     5,
+     3,
+     8
+    ]
+   ]
+  },
+  {
+   "ad": "ODA 2",
+   "tur": "yatak_odasi",
+   "konum_pano": [
+    [
+     3,
+     5,
+     6,
+     8
+    ]
+   ]
+  },
+  {
+   "ad": "SALON",
+   "tur": "salon",
+   "konum_pano": [
+    [
+     0,
+     3,
+     4,
+     5
+    ],
+    [
+     0,
+     2,
+     3,
+     3
+    ]
+   ]
+  },
+  {
+   "ad": "BANYO / WC",
+   "tur": "banyo",
+   "konum_pano": [
+    [
+     4,
+     3,
+     6,
+     5
+    ]
+   ]
+  },
+  {
+   "ad": "MUTFAK",
+   "tur": "mutfak",
+   "konum_pano": [
+    [
+     3,
+     0,
+     6,
+     3
+    ]
+   ]
+  },
+  {
+   "ad": "VERANDA",
+   "tur": "veranda",
+   "konum_pano": [
+    [
+     0,
+     0,
+     3,
+     2
+    ]
+   ]
+  }
+ ],
+ "acik_sinirlar": [
+  {
+   "arasi": [
+    "SALON",
+    "MUTFAK"
+   ],
+   "serit": "SALON"
+  }
+ ],
+ "acikliklar": [
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "ODA 1",
+   "duvar": "sol"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "ODA 2",
+   "duvar": "sag"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "SALON",
+   "duvar": "sol"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x180",
+   "mahal": "SALON",
+   "duvar": "on"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x180",
+   "mahal": "MUTFAK",
+   "duvar": "on"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "60x40",
+   "mahal": "BANYO / WC",
+   "duvar": "sag",
+   "pano": 1
+  },
+  {
+   "tur": "dis_kapi",
+   "olcu": 97,
+   "arasi": [
+    "VERANDA",
+    "SALON"
+   ],
+   "pano": 2,
+   "mentese": "sag"
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "SALON",
+    "ODA 1"
+   ],
+   "pano": 2,
+   "mentese": "sag"
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "SALON",
+    "ODA 2"
+   ],
+   "pano": 0,
+   "mentese": "sol"
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "SALON",
+    "BANYO / WC"
+   ],
+   "pano": 0,
+   "mentese": "sol"
+  }
+ ],
+ "cati": {
+  "tip": "besik",
+  "egim_yuzde": 33,
+  "sacak_cm": 30,
+  "topuk_cm": 10,
+  "makas_yonu": "kisa_kenar"
+ },
+ "cikti": {
+  "pdf": true,
+  "dxf": true,
+  "pafta": "A2",
+  "icerik": [
+   "aksli_plan",
+   "alanli_kopya",
+   "on_gorunus",
+   "cati_profili",
+   "ozellik_tablosu"
+  ]
+ },
+ "varsayimlar": [
+  "Dış kapı 97 cm: onaylı kaynak çizimin çalışma değeri (yeni İş Emri varsayılanı 90)",
+  "Veranda yan duvarı eksende (13 Eylül onaylı çizimin konvansiyonu); yeni işlerde v1.4.3 son örnek gibi aks dışında."
+ ],
+ "eksikler": [],
+ "altin_beklenti": {
+  "pano": 41,
+  "pencere": 6,
+  "kapi": 4,
+  "dis_olcu": [
+   773,
+   1014
+  ],
+  "alanlar": {
+   "ODA 1": 13.763475,
+   "ODA 2": 13.763475,
+   "SALON": 17.007525,
+   "BANYO / WC": 6.076,
+   "MUTFAK": 13.689775,
+   "VERANDA": 9.57565
+  },
+  "footprint": [
+   [
+    0,
+    251,
+    391.5,
+    261
+   ],
+   [
+    381.5,
+    0,
+    391.5,
+    251
+   ],
+   [
+    391.5,
+    0,
+    773,
+    10
+   ],
+   [
+    763,
+    10,
+    773,
+    1004
+   ],
+   [
+    0,
+    1004,
+    773,
+    1014
+   ],
+   [
+    0,
+    261,
+    10,
+    1004
+   ],
+   [
+    10,
+    629.5,
+    763,
+    635.5
+   ],
+   [
+    383.5,
+    635.5,
+    389.5,
+    1004
+   ],
+   [
+    509,
+    378.5,
+    763,
+    384.5
+   ],
+   [
+    509,
+    384.5,
+    515,
+    629.5
+   ]
+  ]
+ },
+ "kunye": {
+  "proje_kodu": "PM-B002-20260921-16652",
+  "ilgili_kisi_telefon": "Nadire Hanım / BAYI-TEST-2",
+  "sevk_adresi": "",
+  "tarih": "21/09/2026",
+  "cizen": "Portman",
+  "kontrol": "",
+  "onay": ""
+ },
+ "bina_ozellikleri": {},
+ "ozel_istekler": []
+}

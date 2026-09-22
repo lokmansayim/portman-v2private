@@ -1,0 +1,18 @@
+webhook.php (/home/portatifevcom/domains/portatifev.com/public_html/developer/webhook.php) — 3 EKLEME (sırayla, dosyada yukarıdan aşağıya):
+
+[1] "$pmNaturalOwned = [];" satırının HEMEN ALTINA:
+$pmKanalOwned = [];   // PORTMAN KANAL: sahiplenilen mesaj kimlikleri
+
+[2] "$data = json_decode($portmanRaw, true);" satırının HEMEN ÜSTÜNE (Görev 3 bloğundan sonra):
+    // PORTMAN KANAL: izinli göndericilerin (Patron / kayıtlı bayi) mesajlarını kural katmanı kuyruğuna alır; sahiplenilenler sohbet botuna gitmez.
+    $pmKanalModule='/home/portatifevcom/portman_app/kanal/feature.php';
+    if (is_file($pmKanalModule) && function_exists('pm_config')) {
+        try { require_once $pmKanalModule; $pmKanalOwned=pm_kanal_capture($portmanRaw,$_SERVER['HTTP_X_HUB_SIGNATURE_256']??''); }
+        catch (Throwable $ignored) { error_log('Portman kanal capture stopped; inspect private kanal state.'); }
+    }
+
+[3] "mesajKaydet($from, $isim, 'gelen', $tip, $icerik, $msgId);" satırının HEMEN ALTINA:
+                if (isset($pmKanalOwned[$msgId])) continue;   // PORTMAN KANAL sahiplendi: sohbet botu cevap vermez (mesaj panelde kayıtlı)
+
+Not: Canlı webhook.php 20 Eylül paketindeki webhook.candidate.php ile BİREBİR aynıysa (önce karşılaştırılacak), dosya bütün olarak
+install/webhook.kanal.candidate.php ile değiştirilebilir. Aynı değilse yalnız yukarıdaki 3 ekleme uygulanır. Her durumda önce yedek.

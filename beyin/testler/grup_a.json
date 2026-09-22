@@ -1,0 +1,66 @@
+[
+ {
+  "id": 1,
+  "gonderen": "BAYI-TEST-1",
+  "mesaj": "Merhaba, katalogdaki P6001 modelinin aynalanmış halini çizebilir misiniz? Müşteri Uğur Başarır, sevk İzzettin/Çatalca.",
+  "beklenen": "is_emri",
+  "not": "katalog + ayna_x",
+  "baglam": ""
+ },
+ {
+  "id": 2,
+  "gonderen": "BAYI-TEST-1",
+  "mesaj": "60 metrekare 2+1 verandalı bir ev istiyorum",
+  "beklenen": "sor",
+  "not": "m² → katalog önerisi sorusu",
+  "baglam": ""
+ },
+ {
+  "id": 3,
+  "gonderen": "BAYI-TEST-1",
+  "mesaj": "P6001 olsun",
+  "beklenen": "is_emri",
+  "not": "öneriden seçim (devam)",
+  "baglam": "Bayi bir önceki mesajda 60 m² 2+1 verandalı ev istedi; sistem P6001 (60 m²), P6501 (65,6 m²), P6701 (67 m²) önerip seçim ya da dış ölçü sordu."
+ },
+ {
+  "id": 4,
+  "gonderen": "BAYI-TEST-2",
+  "mesaj": "6x8 pano tek katlı 2+1 prefabrik plan oluştur",
+  "beklenen": "is_emri",
+  "not": "pano grid → onaylı örnek",
+  "baglam": ""
+ },
+ {
+  "id": 5,
+  "gonderen": "BAYI-TEST-2",
+  "mesaj": "fiyatı ne kadar olur?",
+  "beklenen": "cevapla",
+  "not": "soru",
+  "baglam": "Bayi az önce 6x8 pano 2+1 plan istedi; plan hazırlanıp gönderildi."
+ },
+ {
+  "id": 6,
+  "gonderen": "BAYI-TEST-2",
+  "mesaj": "onaylıyorum",
+  "beklenen": "cevapla",
+  "not": "onay (bekleyen plan var)",
+  "baglam": "Bayiye 6x8 pano 2+1 ön onay planı PDF olarak gönderildi; onay bekleniyor."
+ },
+ {
+  "id": 7,
+  "gonderen": "BAYI-TEST-1",
+  "mesaj": "7x4 metre tek oda, banyolu, ön verandalı, çatı trapez sac kırmızı",
+  "beklenen": "sor|yonlendir",
+  "not": "serbest ölçü; şablon yok",
+  "baglam": ""
+ },
+ {
+  "id": 8,
+  "gonderen": "BAYI-TEST-1",
+  "mesaj": "Bana katalogdaki P8501 kodlu modeli mirror yapıp verir misin?",
+  "beklenen": "yonlendir",
+  "not": "katalogda var, şablon kodlanmamış",
+  "baglam": ""
+ }
+]
