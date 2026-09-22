@@ -628,9 +628,21 @@ class Cikarici:
                 grup_etiket[gi].append(en_yakin); yedek.remove(en_yakin)
                 self.notlar.append(f"Kutu dışındaki '{en_yakin['metin']}' etiketi ({_r(en_yakin['x'])},{_r(en_yakin['y'])}) en yakın etiketsiz bölgeye atandı")
         mahaller = []   # (etiket, cells)
+        self.dis_bolgeler = []
         for gi, g in enumerate(gruplar):
             ets = grup_etiket[gi]
             if len(ets) == 0:
+                # bina dışı mı? (kutu kenarındaki kenarlarının çoğunda duvar yok → L/T tabanın boş köşesi)
+                sinir, acik = 0, 0
+                for (u, v) in g:
+                    for (var, kenar) in ((u == 0, self.edge_y.get((0, v))), (u == self.nx2 - 1, self.edge_y.get((self.nx2, v))),
+                                         (v == 0, self.edge_x.get((0, u))), (v == self.ny2 - 1, self.edge_x.get((self.ny2, u)))):
+                        if var:
+                            sinir += 1; acik += (0 if kenar else 1)
+                if sinir >= 2 and acik >= max(2, sinir * 0.6):
+                    self.dis_bolgeler.append(set(g))
+                    self.uyusmazlik.append(f"Bina dışı bölge ({len(g)} yarım hücre, ilk hücre {min(g)}): taban dikdörtgen değil (L/T biçim) — Motor v1 desteklemiyor, bölge İş Emri'ne alınmadı")
+                    continue
                 self.uyusmazlik.append(f"Etiketsiz kapalı bölge ({len(g)} yarım hücre; ilk hücre {min(g)}) — 'MAHAL-{gi}' adı verildi")
                 mahaller.append(({"kok": f"MAHAL-{gi}", "tur": "diger", "acik": False, "m2": None, "metin": ""}, set(g)))
             elif len(ets) == 1:
@@ -775,10 +787,16 @@ class Cikarici:
             else:
                 w = int(round(gen)); olcu = {120: "120x120", 60: "60x40"}.get(w, f"{w}x?")
                 self.uyusmazlik.append(f"{mahal} {duvar} penceresi: ölçü etiketi bulunamadı, genişlikten {olcu}")
+            kaynak_olcu = olcu
             if olcu not in G.PENCERE_OLCULERI:
-                self.uyusmazlik.append(f"{mahal} {duvar} penceresi: katalog dışı ölçü {olcu}")
+                try:
+                    w0, h0 = (int(v) for v in olcu.lower().split("x"))
+                except Exception:
+                    w0, h0 = int(round(gen)), 120
+                olcu = min(G.PENCERE_OLCULERI, key=lambda k: abs(G.PENCERE_OLCULERI[k][0] - w0) * 2 + abs(G.PENCERE_OLCULERI[k][1] - h0))
+                self.uyusmazlik.append(f"{mahal} {duvar} penceresi: katalog dışı ölçü {kaynak_olcu} → çizim için en yakın katalog ölçüsü {olcu} (UYARLAMA, onay gerekir)")
             acikliklar.append({"tur": "pencere", "olcu": olcu, "mahal": mahal, "duvar": duvar,
-                               "_kaynak": {"yon": yon, "hat": hat, "a0": _r(a0), "a1": _r(a1), "orta": _r(orta), "aks_sapma": _r(sapma)}})
+                               "_kaynak": {"yon": yon, "hat": hat, "a0": _r(a0), "a1": _r(a1), "orta": _r(orta), "aks_sapma": _r(sapma), "kaynak_olcu": kaynak_olcu}})
         # kapılar
         for p in self.kapi_polys:
             if len(p) == 2:
@@ -793,7 +811,9 @@ class Cikarici:
             neg, pos = self._komsu_odalar(kp["yon"], hat, orta)
             icine, disindan = (pos, neg) if kp["acilis"] > 0 else (neg, pos)
             if G.OUT in (icine, disindan):
-                self.uyusmazlik.append(f"Kapı ({_r(kp['a0'])}–{_r(kp['a1'])}) bina dışına açılıyor; atlandı"); continue
+                self.uyusmazlik.append(f"Kapı ({_r(kp['a0'])}–{_r(kp['a1'])}) bina dışına açılıyor; Motor v1 dışa açılan kapıyı desteklemiyor — atlandı"); continue
+            if icine == disindan:
+                self.uyusmazlik.append(f"Kapı ({_r(kp['a0'])}–{_r(kp['a1'])}) aynı mahalin ({icine}) iki hücresi arasında (duvar akslara oturmadı) — atlandı"); continue
             tur = "dis_kapi" if (self._acik_mi(icine) or self._acik_mi(disindan)) else "ic_kapi"
             # menteşe: a(dışından) → b(içine) bakarken sağ/sol
             # yatay duvar: bakış +y ise sağ = +x; bakış -y ise sağ = -x. düşey duvar: bakış +x ise sağ = -y; bakış -x ise sağ = +y
@@ -879,11 +899,21 @@ class Cikarici:
                 ac["pano"] = en; ham["pano"] = en
             if abs(fark) > 3:
                 self.uyusmazlik.append(f"{ac['tur']} {ac.get('mahal') or ' → '.join(ac.get('arasi', []))} ({ac.get('duvar', '')}): kaynak merkez {k['orta']}, Motor pano merkezi {_r(motor_orta)} → fark {_r(fark)} cm (pano {en}/{len(panolar)})")
-        try:
-            self.plan = G.kur(ie)
-        except G.IsEmriHatasi as e:
-            self.uyusmazlik.append(f"Motor İş Emri'ni (pano indeksleriyle) kurmadı: {e}")
-            self.plan = plan
+        for _ in range(12):
+            try:
+                self.plan = G.kur(ie); break
+            except G.IsEmriHatasi as e:
+                msg = str(e)
+                # hatayı doğuran açıklığı bul (mesajda sözlük gösterimi var) ve düşür
+                dusen = None
+                for i, ac in enumerate(ie["acikliklar"]):
+                    if str(ac) in msg or (ac.get("mahal") and f"{ac['mahal']} mahalinin" in msg) or (ac.get("arasi") and f"{ac['arasi'][0]}–{ac['arasi'][1]}" in msg):
+                        dusen = i; break
+                if dusen is None:
+                    self.uyusmazlik.append(f"Motor İş Emri'ni kurmadı: {msg[:200]}"); self.plan = plan; break
+                ac = ie["acikliklar"].pop(dusen); self.acikliklar.pop(dusen)
+                self.uyusmazlik.append(f"Açıklık düşürüldü (Motor: {msg[:120]}): {ac.get('tur')} {ac.get('mahal') or ac.get('arasi')}")
+                ie.setdefault("eksikler", []).append(f"{ac.get('tur')} {ac.get('mahal') or ac.get('arasi')}: {msg[:100]}")
 
     # ---- 8. hepsi
     def calistir(self, kod=None):

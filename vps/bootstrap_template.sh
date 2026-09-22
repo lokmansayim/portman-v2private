@@ -27,7 +27,12 @@ if [ ! -x "$HOME_DIR/venv/bin/python" ]; then
   sudo -u portman python3 -m venv "$HOME_DIR/venv"
 fi
 sudo -u portman "$HOME_DIR/venv/bin/pip" install -q --upgrade pip
-sudo -u portman "$HOME_DIR/venv/bin/pip" install -q "ezdxf==1.4.4" "pymupdf==1.26.0" "shapely==2.1.2" "pydantic==2.13.5" "numpy>=2,<3" "pillow>=10"
+# NumPy 2.x tekerlekleri x86-64-v2 (SSE4.2) ister; Natro XCloud'un sanal CPU'su bunu sunmuyor (RuntimeError X86_V2) → NumPy 1.26 (v1 tabanı).
+sudo -u portman "$HOME_DIR/venv/bin/pip" install -q "numpy>=1.26,<2"
+sudo -u portman "$HOME_DIR/venv/bin/pip" install -q "ezdxf==1.4.4" "pymupdf==1.26.0" "shapely==2.1.2" "pydantic==2.13.5" "pillow>=10"
+if ! "$HOME_DIR/venv/bin/python" -c "import numpy" >/dev/null 2>&1; then
+  echo "   numpy yüklenemedi; 1.26.4 deneniyor"; sudo -u portman "$HOME_DIR/venv/bin/pip" install -q --force-reinstall "numpy==1.26.4"
+fi
 "$HOME_DIR/venv/bin/python" - <<'PY'
 import ezdxf, shapely, pydantic, fitz, numpy, PIL, sys
 print("   python", sys.version.split()[0], "| ezdxf", ezdxf.__version__, "| shapely", shapely.__version__, "| pydantic", pydantic.VERSION, "| pymupdf", fitz.VersionBind, "| numpy", numpy.__version__)
