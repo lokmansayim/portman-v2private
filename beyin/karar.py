@@ -179,6 +179,13 @@ def _is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, sablon: dict, kaynak
             return _bitir(k, Karar(eylem="yonlendir", gerekce=f"varyant hatası: {e}", mesaj=f"Değişiklik uygulanamadı ({e}). " + YONLENDIRME))
     # pencere listesi: 'degistir' → şablondaki mahalle eşleştirip ölçü değiştir; 'ekle'/'kaldir' → v0.1'de yönlendirme
     for p in ts.get("pencereler") or []:
+        if p.get("islem") == "ekle" and p.get("olcu") and p.get("mahal"):
+            # "yatak odası 1 penceresi 120x180" → LLM bazen 'ekle' der; mahalde zaten TEK pencere varsa bu ölçü değişikliğidir
+            eslesen = _mahal_eslestir(ie, p.get("mahal"))
+            if len(eslesen) == 1 and sum(1 for a in ie.get("acikliklar", []) if a["tur"] == "pencere" and a.get("mahal") == eslesen[0]) == 1 \
+                    and not _ekleme_acik(p.get("aciklama") or ts.get("ozet")):
+                p = {**p, "islem": "degistir"}
+                notlar.append(f"{eslesen[0]} mevcut penceresi ölçü değişikliği sayıldı (ekleme değil)")
         if p.get("islem") in ("ekle", "kaldir"):
             return _bitir(k, Karar(eylem="yonlendir", gerekce="pencere ekle/kaldır v0.1'de yok",
                                     mesaj="Pencere ekleme/kaldırma otomatik yapılamıyor. " + YONLENDIRME))
@@ -211,6 +218,12 @@ def _is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, sablon: dict, kaynak
     on_not = ts.pop("_on_not", "")
     return _bitir(k, Karar(eylem="is_emri", is_emri=ie, revizyon=ie["revizyon"], gerekce=f"şablon {kaynak}" + ek,
                             mesaj=f"{on_not}{on_bilgi}{ozet}{ek} Ön onay planını hazırlıyorum; birkaç dakika içinde PDF olarak göndereceğim."))
+
+
+def _ekleme_acik(metin: str | None) -> bool:
+    """Metinde açıkça ekleme/ilave/bir tane daha geçiyor mu? (o zaman gerçekten 'ekle')"""
+    q = varyant._norm(metin or "")
+    return any(x in q for x in ("ekle", "ilave", "bir tane daha", "ek pencere", "yeni pencere", "fazladan"))
 
 
 def _olcu_bul(metin: str) -> str | None:

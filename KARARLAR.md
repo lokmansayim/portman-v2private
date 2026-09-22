@@ -3,6 +3,8 @@
 Biçim: tarih · karar · gerekçe · kim · (geçersiz kılan karar varsa)
 
 ## 2026-09-22
+- **VPS canlıda (18:21 eşleşme, 18:29 `worker: vps`).** Öz-test VPS'te 29,4 s geçti; ilk gerçek iş 4,0 s (hostingte 13–22 s). Hibrit mimari kararı: hosting = Meta kapısı + panel + gönderim; tam taşınma Aşama 2'de ("tek makine") alt alan adı + TLS ile. — Lokman onayı
+- **Beyin kuralı:** odada tek pencere varken "penceresi 120x180" ölçü değişikliğidir (LLM 'ekle' dese de), metinde açıkça ekle/ilave yoksa. Canlı bulgu 22.09 18:34/18:37 → test #16. — Claude
 - **VPS: Natro XCloud Pro (4 vCPU / 8 GB / 200 GB, Ubuntu 24.04, aylık 29,99 $).** Gerekçe: hosting LVE 1 GB bellek sınırı (iki Python süreci aynı anda PyMuPDF yükleyince MemoryError); Türkiye'de sunucu → KVKK yurt dışı aktarım sorunu yok; üst segment: paralel iş, MySQL, ileride Blender/görsel için pay. DigitalOcean değerlendirildi: aynı sınıf 2–2,5 kat pahalı ve veri merkezi yurt dışında. — Lokman (öncelik sırası: doğruluk > fiyat > hız)
 - **Tek depo: GitHub `lokmansayim/portman` (özel).** Kod, kural sürümü, şema, testler, karar günlüğü burada. — Lokman
 - **Mimari (Astra ile uzlaşı): LLM anlar → kod karar verir → Motor çizer → insan onaylar.** Tek/sınırlı LLM çağrısı, yapılandırılmış çıktı, alan başına kaynak; ajan döngüsü yok. Ayrıntı: docs/notlar/2026-09-22_Astra_Elestirisi_Degerlendirme.md

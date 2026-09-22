@@ -5,9 +5,9 @@ Mimari: **hosting = kontrol düzlemi** (Meta webhook, kuyruk `state.json`, gönd
 Ana anahtar: `kanal/settings.json → "worker": "hosting" | "vps" | "off"` (tek düzenlemeyle geri dönüş).
 
 ## A. VPS (Lokman, Mac Terminal — bir kez)
-1. Natro panelinde sunucunun **IP adresi** ve root parolası (Claude'a verilmez).
+1. Natro panelinde sunucunun **IP adresi** ve root parolası: sunucu sayfasında **"Şifre"** satırı (göz simgesi ile görünür) — "Panel Şifresi" değil. Claude'a verilmez.
 2. Terminal: `ssh root@IP 'bash -s' < ~/Desktop/"Claude Portman Çalışması"/08_VPS/bootstrap_vps.sh`
-   (parolayı ssh sorar). ~3–5 dk: sistem paketleri, Python venv (ezdxf 1.4.4, PyMuPDF 1.26, shapely, pydantic), `portman` kullanıcısı,
+   (parolayı ssh sorar; yapıştırınca ekranda görünmez). ~3–5 dk: sistem paketleri, Python venv (ezdxf 1.4.4, PyMuPDF 1.26, shapely, pydantic), `portman` kullanıcısı,
    `portman-agent` systemd servisi, ufw (yalnız SSH), fail2ban, saat dilimi.
 3. Betiğin sonunda yazan **EŞLEŞME ANAHTARI**'nı kopyala (bir kez gösterilir; sohbete yazma).
 4. Kontrol: `systemctl status portman-agent` → active; `journalctl -u portman-agent -n 20` → "paket yok; … bekleniyor" (normal, eşleşme öncesi).
@@ -35,3 +35,7 @@ Ana anahtar: `kanal/settings.json → "worker": "hosting" | "vps" | "off"` (tek 
 ## E. Geri alma
 `worker: hosting` (tek düzenleme) → VPS devre dışı. VPS'i kapatmak: `systemctl disable --now portman-agent`.
 `developer/kanal_api.php` silinirse API kapanır; webhook/gönderim etkilenmez.
+
+## F. Bilinen notlar
+- Natro XCloud sanal CPU'su x86-64-v2 komut setini sunmuyor → NumPy 2.x çalışmaz (`RuntimeError: X86_V2`); betik NumPy 1.26'ya sabitler.
+- Betik idempotent: yarıda kesilirse aynı komut yeniden çalıştırılır; eşleşme anahtarı ilk üretimde `/etc/portman/agent.env`'de saklanır ve tekrar gösterilmez.
