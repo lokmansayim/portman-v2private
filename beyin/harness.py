@@ -36,7 +36,7 @@ def main(durum_dir: Path | None = None, sessiz: bool = False, rapor_yaz: bool = 
         except Exception as e:
             satir.update(eylem="(şema hatası)", hata=str(e)[:300], uyum=False); rapor.append(satir); continue
         k = Konusma(m["gonderen"], durum_dir)
-        karar = karar_ver(talep, k, bayiler.get(m["gonderen"]), katalog)
+        karar = karar_ver(talep, k, bayiler.get(m["gonderen"]), katalog, metin=m["mesaj"])
         uyum = karar.eylem in m["beklenen"].split("|")
         ok += uyum
         if karar.is_emri and rapor_yaz:

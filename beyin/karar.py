@@ -51,7 +51,8 @@ def fmt_m(cm: float) -> str:
     return f"{cm / 100:.2f}".replace(".", ",") + " m"
 
 
-def karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog) -> Karar:
+def karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, metin: str | None = None) -> Karar:
+    """metin: bayinin kendi mesajı (ham). Kurallar "bayi ne dedi" sorusunu LLM'in özetinden değil bu metinden okur."""
     t = talep
     k.not_dus("gelen", t.ozet, {"niyet": t.niyet, "guven": t.guven})
 
@@ -106,6 +107,7 @@ def karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog) -> 
         dusen_not = "Önceki pencere değişikliğini netleştirmediğiniz için uygulamadım; isterseniz sonra ekleriz. "
     k.birlestir(t.model_dump())
     k.d["asama"] = "topluyor"
+    k.d["son_metin"] = (metin or "").strip()      # sıfırlama(lar)dan SONRA: kurallar bayinin bu mesajdaki sözünü okur
     ts = k.d["taslak"]
     if dusen_not:
         ts["_on_not"] = dusen_not
@@ -180,10 +182,12 @@ def _is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, sablon: dict, kaynak
     # pencere listesi: 'degistir' → şablondaki mahalle eşleştirip ölçü değiştir; 'ekle'/'kaldir' → v0.1'de yönlendirme
     for p in ts.get("pencereler") or []:
         if p.get("islem") == "ekle" and p.get("olcu") and p.get("mahal"):
-            # "yatak odası 1 penceresi 120x180" → LLM bazen 'ekle' der; mahalde zaten TEK pencere varsa bu ölçü değişikliğidir
+            # "yatak odası 1 penceresi 120x180" → LLM bazen 'ekle' der; mahalde zaten TEK pencere varsa bu ölçü değişikliğidir.
+            # Ölçüt bayinin KENDİ sözleri (k.d["son_metin"]); LLM'in özeti değil — özet "eklenmesini" diye kendi kararını tekrar eder (22.09 canlı hata).
             eslesen = _mahal_eslestir(ie, p.get("mahal"))
+            bayi_sozu = k.d.get("son_metin") or p.get("aciklama") or ""
             if len(eslesen) == 1 and sum(1 for a in ie.get("acikliklar", []) if a["tur"] == "pencere" and a.get("mahal") == eslesen[0]) == 1 \
-                    and not _ekleme_acik(p.get("aciklama") or ts.get("ozet")):
+                    and not _ekleme_acik(bayi_sozu):
                 p = {**p, "islem": "degistir"}
                 notlar.append(f"{eslesen[0]} mevcut penceresi ölçü değişikliği sayıldı (ekleme değil)")
         if p.get("islem") in ("ekle", "kaldir"):

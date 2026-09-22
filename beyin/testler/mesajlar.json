@@ -110,5 +110,12 @@
   "mesaj": "P6001 aynalı, yatak odası 1 penceresi 120x180",
   "beklenen": "is_emri",
   "not": "canlı 22.09: LLM pencereyi islem=ekle ile verdi; mahalde tek pencere var → ölçü değişikliği (kural)"
+ },
+ {
+  "id": 17,
+  "gonderen": "BAYI-TEST-2",
+  "mesaj": "P6001 yatak odası 1'e bir tane daha 120x180 pencere ekle",
+  "beklenen": "yonlendir",
+  "not": "gerçek ekleme (bayi 'bir tane daha … ekle' dedi) → v0.1'de yönlendirme; kural bayinin sözüne bakar"
  }
 ]

@@ -151,7 +151,7 @@ def oz_test(settings: dict) -> None:
         talep, _ = llm.cikar_detayli(istek["mesaj"], backend="manuel", hazir=istek["hazir_cikarim"])
         k = Konusma("SELFTEST", kok / "durum")
         bayi = {"kod": "TEST", "ad": "Öz-test", "firma": "PortatifEv", "rol": "patron"}
-        karar = karar_ver(talep, k, bayi, KT.Katalog())
+        karar = karar_ver(talep, k, bayi, KT.Katalog(), metin=istek["mesaj"])
         sonuc["adimlar"]["karar"] = {"eylem": karar.eylem, "gerekce": karar.gerekce, "passed": karar.eylem == "is_emri"}
         if karar.eylem == "is_emri":
             t0 = time.time()
@@ -286,7 +286,7 @@ def isle(gelen: dict, settings: dict) -> dict:
         sonuc.update(eylem="hata", gerekce="çıkarım hatası", hata=hata)
         return {"satirlar": satirlar, "sonuc": sonuc, "hata": hata}
 
-    karar = karar_ver(talep, k, bayi, KT.Katalog())
+    karar = karar_ver(talep, k, bayi, KT.Katalog(), metin=gelen.get("text") or "")
     sonuc.update(eylem=karar.eylem, gerekce=karar.gerekce, niyet=talep.niyet, guven=talep.guven, katalog_kodu=talep.katalog_kodu,
                  varyantlar=[v.tur for v in talep.varyantlar], ozet=talep.ozet, llm=meta, asama=k.d.get("asama"))
     cizim = None

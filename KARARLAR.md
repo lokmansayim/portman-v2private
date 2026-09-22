@@ -14,6 +14,9 @@ Biçim: tarih · karar · gerekçe · kim · (geçersiz kılan karar varsa)
 - **Katalog dışı pencere ölçüleri** çizimlerde var: 180×180 (P8501, P1081), 200×200 / 400×200 (P9901), 90×180 (P7601), 105×170 (P8201). Motor v1 yalnız 120×120 / 120×180 / 60×40. Kural tablosuna eklenecek. — Ubeydullah
 - **VPS mimarisi: hosting = kontrol düzlemi, VPS = üretici.** VPS ajanı hostinge yalnız dışarıdan bağlanır (`developer/kanal_api.php`, eşleşme anahtarı `kanal/api_token.txt`); WhatsApp anahtarı VPS'e gitmez; gönderim yalnız hosting cron tick'i; `settings.worker` tek anahtarla geri dönüş. Yerel uçtan uca test 19/19. İsteğe bağlı komut kanalı (`settings.vps_komut: true` iken hostingteki `kanal/komutlar/<id>.json` VPS'te `portman` kullanıcısıyla çalışır, sonucu `<id>.sonuc.json`, her adım vps.log'da) — kapalı başlar, Lokman açar. — Claude, Lokman onayı ile kurulacak
 
+- **Kural katmanı "bayi ne dedi" sorusunu bayinin KENDİ mesajından okur, LLM özetinden değil.** Canlı bulgu (22.09, VPS): LLM `islem: ekle` deyip özette de "eklenmesini" yazınca özet ölçüt alan kural kendi kendini doğruladı → yönlendirme. `karar_ver(..., metin=)` ile ham mesaj kurala girer; harness 17/17 (fixture 16 canlı özetle, 17 gerçek ekleme). Genel ilke: LLM çıktısı kural için **kanıt değil girdi**dir. — Claude, canlı doğrulandı (PM-PATRON-20260922-93187, 26 s, PDF teslim)
+- **VPS canlı ilk İş Emri:** alım→kuyruk 27 s (LLM 2,6 s, Motor 23,5 s, doğrulama geçti), PDF Patron'a ulaştı ("read"). — 22.09 19:06
+
 ## 2026-09-21
 - **Dış kapı 90 cm** (kaynak sembol 97/100'den ölçeklendi) — çalışma kabulü. — Claude, onay bekler
 - **Kanal v1 canlı, Patron modu** (`mode: patron`, `dry_run: false`); Görev 2 Python cron'u silindi (bellek). — Lokman

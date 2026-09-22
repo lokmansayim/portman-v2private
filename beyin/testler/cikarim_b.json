@@ -236,7 +236,39 @@
    "musteri": null,
    "belirsizlikler": [],
    "guven": "yuksek",
-   "ozet": "P6001 modelinin aynalı hali ve yatak odası 1 penceresi 120x180 istiyorsunuz."
+   "ozet": "P6001 modelinin aynalı hali için yatak odası 1 penceresi 120x180 eklenmesini istiyorsunuz."
+  }
+ },
+ {
+  "id": 17,
+  "talep": {
+   "niyet": "yeni_talep",
+   "katalog_kodu": "P6001",
+   "yapi_turu": null,
+   "kat_sayisi": null,
+   "oda_programi": null,
+   "alan_m2": null,
+   "dis_olcu": null,
+   "pano": null,
+   "veranda": null,
+   "cati": null,
+   "yukseklik_cm": null,
+   "pencereler": [
+    {
+     "mahal": "Yatak Odası 1",
+     "olcu": "120x180",
+     "islem": "ekle"
+    }
+   ],
+   "dis_kapi": null,
+   "ic_kapi": null,
+   "varyantlar": [],
+   "bina_ozellikleri": {},
+   "ozel_istekler": [],
+   "musteri": null,
+   "belirsizlikler": [],
+   "guven": "yuksek",
+   "ozet": "P6001 modelinde yatak odası 1'e ek bir 120x180 pencere istiyorsunuz."
   }
  }
 ]
