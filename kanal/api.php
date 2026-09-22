@@ -94,9 +94,12 @@ function pm_kanal_api_claim(array $settings): array {
         return $s['inbound'][$id] + ['id' => $id];
     });
     if ($job === null) return ['job' => null];
-    $durum = null; $sender = (string)($job['sender'] ?? '');
-    if ($sender !== '' && pm_contact($sender) && is_file(PM_KANAL_DIR.'/durum/'.$sender.'.json')) $durum = pm_read(PM_KANAL_DIR.'/durum/'.$sender.'.json');
-    return ['job' => $job, 'durum' => $durum];
+    $durumHam = null; $sender = (string)($job['sender'] ?? '');
+    if ($sender !== '' && pm_contact($sender) && is_file(PM_KANAL_DIR.'/durum/'.$sender.'.json')) {
+        $ham = (string)file_get_contents(PM_KANAL_DIR.'/durum/'.$sender.'.json');
+        if (is_array(json_decode($ham, true))) $durumHam = $ham;      // ham metin: Python'un yazdığı {} korunur (PHP [] yapmasın)
+    }
+    return ['job' => $job, 'durum' => '__PM_DURUM_HAM__', '_durum_ham' => $durumHam];
 }
 
 /* result: multipart — cikti (JSON), durum (JSON, isteğe bağlı), file_<i> dosyaları (projects/... altına) */
@@ -134,12 +137,13 @@ function pm_kanal_api_result(array $post, array $files): array {
         $r['worker'] = 'vps';
     } unset($r);
     // görüşme durumu (yalnız bu gelenin göndericisi için)
-    if (isset($post['durum']) && (string)$post['durum'] !== '') {
-        $d = json_decode((string)$post['durum'], true);
+    if (isset($post['durum']) && (string)$post['durum'] !== '' && strlen((string)$post['durum']) <= 2 * 1024 * 1024) {
+        $ham = (string)$post['durum']; $d = json_decode($ham, true);
         $sender = (string)($in['sender'] ?? '');
         if (is_array($d) && $sender !== '' && pm_contact($sender)) {
             if (!is_dir(PM_KANAL_DIR.'/durum')) @mkdir(PM_KANAL_DIR.'/durum', 0700, true);
-            pm_write(PM_KANAL_DIR.'/durum/'.$sender.'.json', $d);
+            $dp = PM_KANAL_DIR.'/durum/'.$sender.'.json'; $tmpP = $dp.'.'.bin2hex(random_bytes(4)).'.tmp';
+            file_put_contents($tmpP, $ham); @chmod($tmpP, 0600); rename($tmpP, $dp);     // ham metin: {} korunur
         }
     }
     $n = pm_kanal_store(function (&$s) use ($cikti, $inboundId) {
@@ -201,7 +205,9 @@ function pm_kanal_api(?string $raw = null, ?array $files = null, ?array $post = 
                 header('Content-Disposition: attachment; filename="portman_worker.zip"');
                 readfile($z); break;
             case 'claim':
-                pm_kanal_api_json(200, pm_kanal_api_claim($settings)); break;
+                $c = pm_kanal_api_claim($settings); $ham = $c['_durum_ham'] ?? null; unset($c['_durum_ham']);
+                http_response_code(200); header('Content-Type: application/json; charset=utf-8'); header('Cache-Control: no-store');
+                echo str_replace('"__PM_DURUM_HAM__"', $ham ?? 'null', json_encode($c, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)); break;
             case 'result':
                 pm_kanal_api_json(200, pm_kanal_api_result($post, $files)); break;
             case 'heartbeat':

@@ -23,5 +23,7 @@
   "patron_teknik_not": "Patron'a giden cevabın sonuna eylem/gerekçe/token/süre satırı ekler.",
   "panel_kaydi": "Giden mesajları panelin sohbet kaydına (mesajKaydet) da yazar."
  },
- "worker": "hosting"
+ "worker": "hosting",
+ "vps_poll_s": 4,
+ "vps_llm_key_from_hosting": true
 }
