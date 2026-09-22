@@ -1,5 +1,26 @@
 {
-  "PATRON":      {"kod": "PATRON", "ad": "Lokman Bey", "firma": "PortatifEv", "rol": "patron"},
-  "BAYI-TEST-1": {"kod": "B001", "ad": "Ahmet Bey", "firma": "Test Bayi A.Ş.", "rol": "bayi"},
-  "BAYI-TEST-2": {"kod": "B002", "ad": "Nadire Hanım", "firma": "Test Yapı Ltd.", "rol": "bayi"}
+ "PATRON": {
+  "kod": "PATRON",
+  "ad": "Lokman Bey",
+  "firma": "PortatifEv",
+  "rol": "patron"
+ },
+ "BAYI-TEST-1": {
+  "kod": "B001",
+  "ad": "Ahmet Bey",
+  "firma": "Test Bayi A.Ş.",
+  "rol": "bayi"
+ },
+ "BAYI-TEST-2": {
+  "kod": "B002",
+  "ad": "Nadire Hanım",
+  "firma": "Test Yapı Ltd.",
+  "rol": "bayi"
+ },
+ "BAYI-TEST-3": {
+  "kod": "B003",
+  "ad": "Kerem Bey",
+  "firma": "Test İnşaat",
+  "rol": "bayi"
+ }
 }

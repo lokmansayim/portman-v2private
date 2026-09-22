@@ -270,5 +270,159 @@
    "guven": "yuksek",
    "ozet": "P6001 modelinde yatak odası 1'e ek bir 120x180 pencere istiyorsunuz."
   }
+ },
+ {
+  "id": 18,
+  "talep": {
+   "niyet": "yeni_talep",
+   "katalog_kodu": "P6001",
+   "yapi_turu": null,
+   "kat_sayisi": null,
+   "oda_programi": null,
+   "alan_m2": null,
+   "dis_olcu": null,
+   "pano": null,
+   "veranda": null,
+   "cati": null,
+   "yukseklik_cm": null,
+   "pencereler": [
+    {
+     "mahal": "Yatak Odası 1",
+     "olcu": "120x180",
+     "islem": "ekle"
+    }
+   ],
+   "dis_kapi": null,
+   "ic_kapi": null,
+   "varyantlar": [],
+   "bina_ozellikleri": {},
+   "ozel_istekler": [],
+   "musteri": null,
+   "belirsizlikler": [],
+   "guven": "yuksek",
+   "ozet": "P6001 modelinde yatak odası 1 penceresinin 120x180 olmasını istiyorsunuz."
+  }
+ },
+ {
+  "id": 19,
+  "talep": {
+   "niyet": "yeni_talep",
+   "katalog_kodu": "P6001",
+   "yapi_turu": null,
+   "kat_sayisi": null,
+   "oda_programi": null,
+   "alan_m2": null,
+   "dis_olcu": null,
+   "pano": null,
+   "veranda": null,
+   "cati": null,
+   "yukseklik_cm": null,
+   "pencereler": [
+    {
+     "mahal": "Yatak Odası 1",
+     "olcu": "120x180",
+     "islem": "ekle"
+    }
+   ],
+   "dis_kapi": null,
+   "ic_kapi": null,
+   "varyantlar": [],
+   "bina_ozellikleri": {},
+   "ozel_istekler": [],
+   "musteri": null,
+   "belirsizlikler": [],
+   "guven": "yuksek",
+   "ozet": "P6001 modelinde yatak odası 1 için 120x180 pencere istiyorsunuz."
+  }
+ },
+ {
+  "id": 20,
+  "talep": {
+   "niyet": "yeni_talep",
+   "katalog_kodu": "P6001",
+   "yapi_turu": null,
+   "kat_sayisi": null,
+   "oda_programi": null,
+   "alan_m2": null,
+   "dis_olcu": null,
+   "pano": null,
+   "veranda": null,
+   "cati": null,
+   "yukseklik_cm": null,
+   "pencereler": [
+    {
+     "mahal": "Yatak Odası 1",
+     "olcu": "120x180",
+     "islem": "ekle"
+    }
+   ],
+   "dis_kapi": null,
+   "ic_kapi": null,
+   "varyantlar": [],
+   "bina_ozellikleri": {},
+   "ozel_istekler": [],
+   "musteri": null,
+   "belirsizlikler": [],
+   "guven": "yuksek",
+   "ozet": "P6001 modelinde yatak odası 1 için 120x180 pencere."
+  }
+ },
+ {
+  "id": 21,
+  "talep": {
+   "niyet": "diger",
+   "katalog_kodu": null,
+   "yapi_turu": null,
+   "kat_sayisi": null,
+   "oda_programi": null,
+   "alan_m2": null,
+   "dis_olcu": null,
+   "pano": null,
+   "veranda": null,
+   "cati": null,
+   "yukseklik_cm": null,
+   "pencereler": [],
+   "dis_kapi": null,
+   "ic_kapi": null,
+   "varyantlar": [],
+   "bina_ozellikleri": {},
+   "ozel_istekler": [],
+   "musteri": null,
+   "belirsizlikler": [],
+   "guven": "dusuk",
+   "ozet": "Değiştir."
+  }
+ },
+ {
+  "id": 22,
+  "talep": {
+   "niyet": "yeni_talep",
+   "katalog_kodu": "P6001",
+   "yapi_turu": null,
+   "kat_sayisi": null,
+   "oda_programi": null,
+   "alan_m2": null,
+   "dis_olcu": null,
+   "pano": null,
+   "veranda": null,
+   "cati": null,
+   "yukseklik_cm": null,
+   "pencereler": [
+    {
+     "mahal": "Yatak Odası 1",
+     "olcu": "120x180",
+     "islem": "ekle"
+    }
+   ],
+   "dis_kapi": null,
+   "ic_kapi": null,
+   "varyantlar": [],
+   "bina_ozellikleri": {},
+   "ozel_istekler": [],
+   "musteri": null,
+   "belirsizlikler": [],
+   "guven": "yuksek",
+   "ozet": "P6001 modelinde yatak odası 1 penceresini 120x180 yapmanızı istiyorsunuz."
+  }
  }
 ]

@@ -3,7 +3,7 @@
 Burada LLM yok. Her karar deterministik ve gerekçeli. Geometri motoru ayrı (İş Emri'ni o çizer).
 """
 from __future__ import annotations
-import json, math, time
+import json, math, re, time
 from pathlib import Path
 
 from .sema import Talep, Karar
@@ -55,6 +55,17 @@ def karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, met
     """metin: bayinin kendi mesajı (ham). Kurallar "bayi ne dedi" sorusunu LLM'in özetinden değil bu metinden okur."""
     t = talep
     k.not_dus("gelen", t.ozet, {"niyet": t.niyet, "guven": t.guven})
+    # Askıdaki "ölçü mü değiştirelim, pencere mi ekleyelim?" sorusunun cevabı: kısa ve açık bir "değiştir"/"ekle" ise
+    # LLM'in niyet sınıflandırmasından bağımsız olarak taslaktaki pencere satırına işlenir ve akış devam eder.
+    if metin and k.d.get("son_soru_alani") == "pencere_islem" and len(metin.split()) <= 6:
+        cevap = _pencere_niyeti(metin)
+        if cevap in ("ekle", "degistir"):
+            for p in k.d["taslak"].get("pencereler") or []:
+                if p.get("islem") == "ekle":
+                    p["islem"] = cevap; p["islem_kaynak"] = "bayi cevabı"
+            k.d["son_soru_alani"] = None
+            k.not_dus("kural", f"pencere_islem cevabı: {cevap}")
+            t = t.model_copy(update={"niyet": "yeni_talep", "pencereler": []})
 
     # 0) yalnız kayıtlı bayiler
     if bayi is None:
@@ -181,15 +192,20 @@ def _is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, sablon: dict, kaynak
             return _bitir(k, Karar(eylem="yonlendir", gerekce=f"varyant hatası: {e}", mesaj=f"Değişiklik uygulanamadı ({e}). " + YONLENDIRME))
     # pencere listesi: 'degistir' → şablondaki mahalle eşleştirip ölçü değiştir; 'ekle'/'kaldir' → v0.1'de yönlendirme
     for p in ts.get("pencereler") or []:
-        if p.get("islem") == "ekle" and p.get("olcu") and p.get("mahal"):
-            # "yatak odası 1 penceresi 120x180" → LLM bazen 'ekle' der; mahalde zaten TEK pencere varsa bu ölçü değişikliğidir.
-            # Ölçüt bayinin KENDİ sözleri (k.d["son_metin"]); LLM'in özeti değil — özet "eklenmesini" diye kendi kararını tekrar eder (22.09 canlı hata).
+        if p.get("islem") == "ekle" and p.get("olcu") and p.get("mahal") and p.get("islem_kaynak") != "bayi cevabı":
+            # "yatak odası 1 penceresi 120x180" → LLM bazen 'ekle' der. Mahalde zaten TEK pencere varsa bayinin KENDİ sözlerine bakılır
+            # (k.d["son_metin"]; LLM özeti ölçüt değildir — özet "eklenmesini" diye kendi kararını tekrar eder, 22.09 canlı hata):
+            #   açık değiştirme sözü → ölçü değişikliği; açık ekleme sözü → ekleme (v0.1'de yönlendirme); ikisi de yoksa → SORULUR.
             eslesen = _mahal_eslestir(ie, p.get("mahal"))
-            bayi_sozu = k.d.get("son_metin") or p.get("aciklama") or ""
-            if len(eslesen) == 1 and sum(1 for a in ie.get("acikliklar", []) if a["tur"] == "pencere" and a.get("mahal") == eslesen[0]) == 1 \
-                    and not _ekleme_acik(bayi_sozu):
-                p = {**p, "islem": "degistir"}
-                notlar.append(f"{eslesen[0]} mevcut penceresi ölçü değişikliği sayıldı (ekleme değil)")
+            mevcut = [a for a in ie.get("acikliklar", []) if a["tur"] == "pencere" and a.get("mahal") == (eslesen[0] if len(eslesen) == 1 else None)]
+            if len(eslesen) == 1 and len(mevcut) == 1:
+                niyet = _pencere_niyeti(k.d.get("son_metin") or p.get("aciklama") or "")
+                if niyet == "degistir":
+                    p = {**p, "islem": "degistir"}
+                    notlar.append(f"{eslesen[0]} mevcut penceresi ölçü değişikliği sayıldı (ekleme değil)")
+                elif niyet == "belirsiz":
+                    return _soru(k, "pencere_islem", f"{eslesen[0]} odasında zaten bir pencere var ({mevcut[0].get('olcu', '?')}). "
+                                 f"Ölçüsünü {p['olcu']} yapalım mı, yoksa ikinci bir pencere mi ekleyelim? \"değiştir\" ya da \"ekle\" yazmanız yeterli.")
         if p.get("islem") in ("ekle", "kaldir"):
             return _bitir(k, Karar(eylem="yonlendir", gerekce="pencere ekle/kaldır v0.1'de yok",
                                     mesaj="Pencere ekleme/kaldırma otomatik yapılamıyor. " + YONLENDIRME))
@@ -224,10 +240,28 @@ def _is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, sablon: dict, kaynak
                             mesaj=f"{on_not}{on_bilgi}{ozet}{ek} Ön onay planını hazırlıyorum; birkaç dakika içinde PDF olarak göndereceğim."))
 
 
-def _ekleme_acik(metin: str | None) -> bool:
-    """Metinde açıkça ekleme/ilave/bir tane daha geçiyor mu? (o zaman gerçekten 'ekle')"""
-    q = varyant._norm(metin or "")
-    return any(x in q for x in ("ekle", "ilave", "bir tane daha", "ek pencere", "yeni pencere", "fazladan"))
+_TR = str.maketrans("ıİşŞğĞüÜöÖçÇâÂîÎûÛ", "iissgguuooccaaiiuu")
+_EKLE_RX = re.compile(r"\b(ekle\w*|ilave\w*|fazladan|ek (bir )?pencere|yeni (bir )?pencere|ikinci (bir )?pencere|bir tane daha|bir de\b"
+                      r"|(bir|1) (tane )?pencere (koy\w*|ac\w*|olsun|istiyor\w*|lazim|gerek\w*)|pencere koy\w*)")
+_DEGISTIR_RX = re.compile(r"\b(degis\w*|yap\w*|olsun|olacak|olmali|penceresi\w*|olcusu\w*|buyut\w*|kucult\w*|yerine|cevir\w*|genislet\w*)\b")
+
+
+def _sozcuk_norm(metin: str) -> str:
+    """Küçük harf, Türkçe harfler sadeleştirilmiş, noktalama boşluk; SÖZCÜK SINIRLARI KORUNUR ('bekle' ≠ 'ekle')."""
+    q = (metin or "").translate(_TR).lower()
+    return re.sub(r"\s+", " ", re.sub(r"[^a-z0-9]+", " ", q)).strip()
+
+
+def _pencere_niyeti(metin: str | None) -> str:
+    """Bayinin sözünde pencere için ne var: 'ekle' (açık ekleme sözü), 'degistir' (açık ölçü değiştirme sözü), 'belirsiz' (ikisi de yok
+    ya da ikisi de var). Sözcük sınırıyla arar: 'bekle' ekleme değildir; 'bir pencere koy' eklemedir; 'penceresi 120x180 olsun' değişikliktir."""
+    q = " " + _sozcuk_norm(metin) + " "
+    ekle = bool(_EKLE_RX.search(q)); degistir = bool(_DEGISTIR_RX.search(q))
+    if ekle and not degistir:
+        return "ekle"
+    if degistir and not ekle:
+        return "degistir"
+    return "belirsiz"
 
 
 def _olcu_bul(metin: str) -> str | None:

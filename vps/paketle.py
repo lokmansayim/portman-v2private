@@ -7,7 +7,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 VPS = ROOT / "vps"
 BUILD = VPS / "build"
-SURUM = "kanal-v1.1-" + time.strftime("%Y%m%d-%H%M")
+SURUM = "kanal-v1.1.1-" + time.strftime("%Y%m%d-%H%M")
 
 ATLA_DIZIN = {"__pycache__", "durum", "checks", "projects", "install", "tests", "package"}
 ATLA_DOSYA = {"settings.json", "state.json", "state.lock", "worker.lock", "tick.lock", "api_token.txt", "lib.snapshot.php"}
@@ -41,7 +41,9 @@ def main() -> int:
     ajan = (VPS / "agent.py").read_text(encoding="utf-8")
     assert "PYAGENT" not in ajan
     (BUILD / "bootstrap_vps.sh").write_text(sablon.replace("__AGENT_PY__", ajan.rstrip("\n")), encoding="utf-8")
-    print(f"paket {SURUM}: {len(raw)} B, sha256 {sha[:16]}…, {n + 6} dosya; bootstrap {len((BUILD / 'bootstrap_vps.sh').read_bytes())} B")
+    with zipfile.ZipFile(io.BytesIO(raw)) as z:
+        uye = len(z.namelist())                     # gerçek ZIP üye sayısı (denetim bulgusu F05: eski 'n+6' bir eksik sayıyordu)
+    print(f"paket {SURUM}: {len(raw)} B, sha256 {sha[:16]}…, {uye} dosya; bootstrap {len((BUILD / 'bootstrap_vps.sh').read_bytes())} B")
     return 0
 
 

@@ -1117,8 +1117,8 @@ def main(argv=None):
     print(md)
     if a.motor:
         from motor import dxf_out
-        res = dxf_out.uret(ie, out / "motor")
-        print("Motor:", {k: v for k, v in res.items() if k in ("dxf", "pdf", "sure_s", "dogrulama")})
+        res = dxf_out.uret(ie, out / "motor", pdf_hatada=True)     # tanı amaçlı: geçmezse '<ad>.HATALI.pdf'
+        print("Motor:", {k: v for k, v in res.items() if k in ("dxf", "pdf", "tani_pdf", "validation_passed", "duration_s")})
     return 0
 
 

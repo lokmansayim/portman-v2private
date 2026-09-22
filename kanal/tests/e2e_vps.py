@@ -17,7 +17,11 @@ shutil.copytree(KANAL, kopya, ignore=shutil.ignore_patterns("__pycache__", "stat
 for d in ("beyin", "motor", "is_emri"):          # paket kopyaları yerine kaynak dizinler
     if (kopya / d).exists(): shutil.rmtree(kopya / d)
     shutil.copytree(ROOT / d, kopya / d, ignore=shutil.ignore_patterns("__pycache__", "durum"))
-s = json.loads((KANAL / "settings.json").read_text(encoding="utf-8"))
+_ayar_p = KANAL / "settings.json"
+if not _ayar_p.exists():                                     # depoda settings.json yok (sır içerir); sırsız örnek kullanılır (denetim bulgusu F04)
+    _ayar_p = KANAL / "settings.example.json"
+s = json.loads(_ayar_p.read_text(encoding="utf-8"))
+s.setdefault("llm", {"backend": "manuel", "model": "test", "timeout_s": 5})
 s.update(enabled=True, enabled_at=int(time.time()) - 3600, dry_run=False, mode="patron", worker="vps", vps_poll_s=1, ayarlar_json="/yok/ayarlar.json", vps_komut=True)
 s["llm"]["backend"] = "manuel"
 (kopya / "settings.json").write_text(json.dumps(s, ensure_ascii=False, indent=1), encoding="utf-8")

@@ -12,7 +12,7 @@ from __future__ import annotations
 import hashlib, io, json, os, shutil, socket, sys, time, traceback, urllib.error, urllib.request, uuid, zipfile
 from pathlib import Path
 
-SURUM = "vps-agent-v1.1"
+SURUM = "vps-agent-v1.1.1"
 HOME = Path(os.environ.get("PORTMAN_HOME", "/opt/portman"))
 API = os.environ.get("PORTMAN_API_URL", "").rstrip("?")
 TOKEN = os.environ.get("PORTMAN_API_TOKEN", "")
@@ -119,6 +119,16 @@ def paketi_guncelle(pk: dict) -> bool:
     if not (yeni / "worker.py").exists():
         raise ApiHatasi("pakette worker.py yok")
     (yeni / "PACKAGE_SHA256").write_text(sha)
+    # Paketteki agent.py bu dosyadan farklıysa kendini de günceller (derlenebilirlik denetimiyle; bootstrap'ı yeniden çalıştırmadan ajan düzeltmesi).
+    try:
+        yeni_ajan = yeni / "agent.py"; ben = Path(__file__).resolve()
+        if yeni_ajan.exists() and yeni_ajan.read_bytes() != ben.read_bytes():
+            import py_compile
+            py_compile.compile(str(yeni_ajan), doraise=True)
+            gecici = ben.with_suffix(".py.new"); gecici.write_bytes(yeni_ajan.read_bytes()); gecici.chmod(0o640); gecici.replace(ben)
+            log("agent.py paketten güncellendi")
+    except Exception as e:
+        log("agent.py güncellenemedi (eski sürüm sürüyor):", str(e)[:160])
     eski = HOME / "app.old"
     if eski.exists(): shutil.rmtree(eski)
     if APP.exists(): APP.rename(eski)
@@ -149,6 +159,8 @@ def yerel_ayarlar(uzak: dict) -> dict:
     key = uzak.get("openai_key")
     if key:
         os.environ["OPENAI_API_KEY"] = key
+    else:
+        os.environ.pop("OPENAI_API_KEY", None)     # hosting anahtar göndermeyi kestiyse eski anahtar süreçte kalmaz (denetim bulgusu F10)
     return s
 
 
@@ -260,12 +272,25 @@ def heartbeat(pk_sha: str, son_is) -> dict:
     return istek("heartbeat", body=body, timeout=30)
 
 
+_log_hata = {"ardisik": 0}
+
+
 def gunlukleri_gonder() -> None:
+    """Birikmiş günlük satırlarını hostinge yazar. Yanıtın ok/n alanı denetlenir; kabul edilmeyen satırlar kuyruğa geri konur ve hata
+    genel hata sayacına düşer (denetim bulgusu F06: önceki sürüm yanıtı denetlemiyor, hatayı sayaca yazmıyordu)."""
     if not _log_kuyruk: return
     satirlar = list(_log_kuyruk); _log_kuyruk.clear()
     try:
-        istek("log", body={"lines": satirlar}, timeout=30)
-    except Exception:
+        r = istek("log", body={"lines": satirlar}, timeout=30)
+        n = int(r.get("n") or 0) if isinstance(r, dict) else 0
+        if not (isinstance(r, dict) and r.get("ok") is True and n == min(len(satirlar), 200)):
+            raise ApiHatasi(f"log kabul edilmedi: yanıt={str(r)[:120]} gönderilen={len(satirlar)}")
+        if len(satirlar) > 200:
+            _log_kuyruk[:0] = satirlar[200:]
+        _log_hata["ardisik"] = 0
+    except Exception as e:
+        _log_hata["ardisik"] += 1
+        _sayac["errors"].append(f"log: {str(e)[:100]} (ardışık {_log_hata['ardisik']})"); del _sayac["errors"][:-20]
         _log_kuyruk[:0] = satirlar[-50:]
 
 

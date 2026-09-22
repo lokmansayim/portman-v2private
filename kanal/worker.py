@@ -19,7 +19,7 @@ KOD = Path(__file__).resolve().parent                                   # kod (b
 KANAL = Path(os.environ.get("PORTMAN_KANAL_DIR") or KOD).resolve()     # veri (settings/state/durum/projects); hostingte kodla aynı dizin
 sys.path.insert(0, str(KOD))
 os.umask(0o077)
-SURUM = "kanal-v1.1"
+SURUM = "kanal-v1.1.1"
 STALE_S = 600           # 'processing' bu kadar süre ilerlemezse başarısız sayılır (otomatik tekrar yok)
 GELEN_YAZILI = ("text", "button", "interactive")
 
@@ -297,9 +297,9 @@ def isle(gelen: dict, settings: dict) -> dict:
         try:
             m = dxf_out.uret(ie, hedef)
             v = oku(hedef / "validation.json", {}) or {}
-            cizim = {"sure_s": round(time.time() - t0, 1), "passed": v.get("passed") is True, "errors": (v.get("errors") or [])[:5],
-                     "pdf": str(hedef / m["pdf"]), "dxf": str(hedef / m["dxf"]), "pdf_sha256": m["pdf_sha256"], "dxf_sha256": m["dxf_sha256"],
-                     "warnings": m.get("warnings")}
+            cizim = {"sure_s": round(time.time() - t0, 1), "passed": v.get("passed") is True and bool(m.get("pdf")), "errors": (v.get("errors") or [])[:5],
+                     "pdf": str(hedef / m["pdf"]) if m.get("pdf") else None, "dxf": str(hedef / m["dxf"]), "pdf_sha256": m.get("pdf_sha256"),
+                     "dxf_sha256": m["dxf_sha256"], "warnings": m.get("warnings")}
         except Exception as e:
             hedef.mkdir(parents=True, exist_ok=True)
             yaz(hedef / "failure.json", {"traceback": traceback.format_exc()[-6000:], "failed_at": int(time.time())})
@@ -346,6 +346,10 @@ def main() -> None:
         except BlockingIOError:
             return
         settings = ayarlar()
+        if settings.get("worker", "hosting") != "hosting":
+            # Üretim bu makinede kapalı: bağımlılık kurulumu (pip), öz-test (gerçek LLM çağrısı olabilir) ve iş alma YAPILMAZ; yalnız sağlık yazılır.
+            # (Denetim bulgusu F09: önceki sıra worker=vps iken de pip/öz-test yan etkisine izin veriyordu.)
+            saglik({"worker": settings.get("worker"), "note": "üretim bu makinede kapalı (settings.worker); pip/öz-test atlandı"}); return
         if not bagimliliklar_hazir():
             saglik({"deps": "eksik; install-report.json"}); return
         try:
@@ -354,8 +358,6 @@ def main() -> None:
             log("öz-test çalıştırılamadı:", traceback.format_exc()[-800:])
         if settings.get("enabled") is not True:
             saglik(); return
-        if settings.get("worker", "hosting") != "hosting":
-            saglik({"worker": settings.get("worker"), "note": "üretim bu makinede kapalı (settings.worker)"}); return
         butce = time.time() + float(settings.get("budget_s", 45))
         en_fazla = int(settings.get("max_is_per_tick", 2)); n = 0; son = None
         while n < en_fazla and time.time() < butce:

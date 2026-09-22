@@ -26,10 +26,24 @@ from . import geometry as G
 from .katalog import Katalog
 
 ROOT = Path(__file__).resolve().parent.parent
-REF_DXF = ROOT / "ref_source-6x8.dxf"
-REF_H = ROOT / "ref_h-connector.json"
+
+
+def _ref(ad: str) -> Path:
+    """Referans dosyası (H bloğu kaynağı, bağlantı ölçüleri, yazı tipi). Aranan yerler sırayla: PORTMAN_REF_DIR ortam değişkeni,
+    depo kökü, kökteki kanal/ (depo düzeni), motor/ dizini. Dağıtım paketinde kökte; depoda kanal/ altında dururlar (denetim bulgusu F04)."""
+    import os
+    adaylar = [Path(os.environ["PORTMAN_REF_DIR"])] if os.environ.get("PORTMAN_REF_DIR") else []
+    adaylar += [ROOT, ROOT / "kanal", Path(__file__).resolve().parent]
+    for d in adaylar:
+        if (d / ad).is_file():
+            return d / ad
+    raise FileNotFoundError(f"referans dosyası bulunamadı: {ad} (aranan: {', '.join(str(d) for d in adaylar)})")
+
+
+REF_DXF = _ref("ref_source-6x8.dxf")
+REF_H = _ref("ref_h-connector.json")
 FONT = "DejaVuSans.ttf"
-FONT_PATH = ROOT / FONT
+FONT_PATH = _ref(FONT)
 LABEL = "ÖN ONAYA SUNULAN TASLAK — ÜRETİM/STATİK PROJESİ DEĞİLDİR"
 
 PENCERE_KAYNAK = {   # olcu: (kaynak blok, doğal yön, bbox)
@@ -503,7 +517,9 @@ class Cizici:
 
 # ---------------------------------------------------------------------- üretim akışı
 
-def uret(is_emri: dict, cikti_dir: Path, ad_govde: str | None = None) -> dict:
+def uret(is_emri: dict, cikti_dir: Path, ad_govde: str | None = None, pdf_hatada: bool = False) -> dict:
+    """İş Emri → DXF (kaydet, yeniden aç, doğrula) → PDF. Doğrulama GEÇMEZSE teslim edilebilir PDF üretilmez (denetim bulgusu F08);
+    pdf_hatada=True yalnız tanı için '<ad>.HATALI.pdf' yazar. Dönen manifest'te 'pdf' o zaman None, 'validation_passed' False."""
     from . import validate as V
     cikti_dir = Path(cikti_dir); cikti_dir.mkdir(parents=True, exist_ok=True)
     plan = G.kur(is_emri)
@@ -559,17 +575,27 @@ def uret(is_emri: dict, cikti_dir: Path, ad_govde: str | None = None) -> dict:
     checks["saved_dxf_audit_errors"] = len(audit.errors); checks["saved_dxf_audit_fixes"] = len(audit.fixes)
     checks["bom_counts_from_file"] = V.bom_sayim(saved)
     (cikti_dir / "validation.json").write_text(json.dumps(checks, ensure_ascii=False, indent=2), encoding="utf-8")
-    backend = pymupdf.PyMuPdfBackend()
-    cfg = config.Configuration(background_policy=config.BackgroundPolicy.WHITE, color_policy=config.ColorPolicy.COLOR, min_lineweight=0.15)
-    Frontend(RenderContext(saved), backend, config=cfg).draw_layout(saved.modelspace())
-    page = layout.Page(594, 420, layout.Units.mm, margins=layout.Margins.all(12))
-    pdf.write_bytes(backend.get_pdf_bytes(page, settings=layout.Settings(fit_page=True)))
-    with fitz.open(pdf) as document:
-        if len(document) != 1 or not document[0].get_drawings():
-            raise RuntimeError("PDF boş veya tek sayfa değil")
-        document[0].get_pixmap(matrix=fitz.Matrix(1.6, 1.6), alpha=False).save(cikti_dir / "preview.png")
+    gecti = checks.get("passed") is True
+    pdf_yazildi = None
+    if gecti or pdf_hatada:
+        if not gecti:
+            pdf = cikti_dir / f"{stem}.HATALI.pdf"      # yalnız tanı; teslim edilmez
+        backend = pymupdf.PyMuPdfBackend()
+        cfg = config.Configuration(background_policy=config.BackgroundPolicy.WHITE, color_policy=config.ColorPolicy.COLOR, min_lineweight=0.15)
+        Frontend(RenderContext(saved), backend, config=cfg).draw_layout(saved.modelspace())
+        page = layout.Page(594, 420, layout.Units.mm, margins=layout.Margins.all(12))
+        pdf.write_bytes(backend.get_pdf_bytes(page, settings=layout.Settings(fit_page=True)))
+        with fitz.open(pdf) as document:
+            if len(document) != 1 or not document[0].get_drawings():
+                raise RuntimeError("PDF boş veya tek sayfa değil")
+            document[0].get_pixmap(matrix=fitz.Matrix(1.6, 1.6), alpha=False).save(cikti_dir / ("preview.png" if gecti else "preview.HATALI.png"))
+        pdf_yazildi = pdf
     manifest = {"is_emri_no": is_emri.get("is_emri_no"), "revizyon": is_emri.get("revizyon", 1), "generated_at": int(time.time()),
-                "duration_s": round(time.time() - t0, 2), "dxf": dxf.name, "pdf": pdf.name, "dxf_sha256": sha256(dxf), "pdf_sha256": sha256(pdf),
+                "duration_s": round(time.time() - t0, 2), "dxf": dxf.name,
+                "pdf": pdf_yazildi.name if (pdf_yazildi and gecti) else None, "dxf_sha256": sha256(dxf),
+                "pdf_sha256": sha256(pdf_yazildi) if (pdf_yazildi and gecti) else None,
+                "tani_pdf": pdf_yazildi.name if (pdf_yazildi and not gecti) else None,
+                "pdf_skipped_reason": None if gecti else "doğrulama geçmedi; teslim PDF'i üretilmedi",
                 "validation_passed": checks.get("passed"), "warnings": plan.uyarilar, "generator": "portman-motor-v1.1",
                 "generator_sha256": {f: sha256(ROOT / "motor" / f) for f in ("geometry.py", "dxf_out.py", "validate.py", "katalog.py")},
                 "reference_dxf_sha256": sha256(REF_DXF), "pdf_generated_from_reopened_dxf": True, "yeni_kodlar": [e["code"] for e in kat.yeni]}

@@ -21,7 +21,7 @@ Ana anahtar: `kanal/settings.json → "worker": "hosting" | "vps" | "off"` (tek 
    Ajan bağlanınca `kanal/vps-health.json` oluşur (60 s içinde) ve `kanal/vps.log` akar.
 
 ## C. Geçiş (kill switch)
-- `settings.json → "worker": "vps"` → ajan iş almaya başlar; hosting cron'daki worker.py üretmez (yalnız sağlık yazar).
+- `settings.json → "worker": "vps"` → ajan iş almaya başlar; hosting cron'daki worker.py üretmez, pip/öz-test de çalıştırmaz (yalnız sağlık yazar; v1.1.1).
 - Geri: `"worker": "hosting"`. Tamamen durdurmak: `"enabled": false`.
 - Aynı anda iki üretici asla çalışmaz (claim yalnız `worker == vps` iken iş verir; hosting worker.py `worker == hosting` iken).
 
@@ -39,3 +39,10 @@ Ana anahtar: `kanal/settings.json → "worker": "hosting" | "vps" | "off"` (tek 
 ## F. Bilinen notlar
 - Natro XCloud sanal CPU'su x86-64-v2 komut setini sunmuyor → NumPy 2.x çalışmaz (`RuntimeError: X86_V2`); betik NumPy 1.26'ya sabitler.
 - Betik idempotent: yarıda kesilirse aynı komut yeniden çalıştırılır; eşleşme anahtarı ilk üretimde `/etc/portman/agent.env`'de saklanır ve tekrar gösterilmez.
+
+## G. Güvenlik sınırları (bağımsız denetim 22.09, F01/F02)
+- Eşleşme anahtarını bilen taraf: `settings` ile **OpenAI anahtarını** alır (`vps_llm_key_from_hosting` true iken), gerçek iş çekebilir (`claim`) ve o işin
+  göndericisine (ya da Patron'a) `result` ile **metin/PDF gönderebilir** (gönderimi hosting tick'i yapar; alıcı = gelen mesajın göndericisi, 24 saat penceresi).
+  WhatsApp erişim anahtarını alamaz, keyfi numaraya gönderemez. Anahtar sızarsa: `rm /etc/portman/agent.env` + bootstrap + `api_token.txt` yenile, OpenAI anahtarını da yenile.
+- Paket kanalı imzasız: `kanal/package/` dosyalarını yazabilen, VPS'te `portman` kullanıcısıyla kod çalıştırır (sha aynı yerden gelir). İmzalı paket (ed25519) yol haritasında.
+- `worker.py` hosting'de `worker != hosting` iken pip/öz-test/iş almaz (v1.1.1); ajan `log` yanıtını denetler, `openai_key` gelmezse süreçteki anahtarı siler.

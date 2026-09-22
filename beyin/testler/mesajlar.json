@@ -4,7 +4,22 @@
   "gonderen": "BAYI-TEST-1",
   "mesaj": "Merhaba, katalogdaki P6001 modelinin aynalanmış halini çizebilir misiniz? Müşteri Uğur Başarır, sevk İzzettin/Çatalca.",
   "beklenen": "is_emri",
-  "not": "katalog + ayna_x"
+  "not": "katalog + ayna_x",
+  "kontrol": {
+   "pencere_sayisi": 5,
+   "kapi_sayisi": 4,
+   "mahal_konum": {
+    "YATAK ODASI 1": [
+     [
+      0,
+      3.5,
+      2.5,
+      6
+     ]
+    ]
+   },
+   "sablon_gibi_haric": []
+  }
  },
  {
   "id": 2,
@@ -18,7 +33,22 @@
   "gonderen": "BAYI-TEST-1",
   "mesaj": "P6001 olsun",
   "beklenen": "is_emri",
-  "not": "öneriden seçim (devam)"
+  "not": "öneriden seçim (devam)",
+  "kontrol": {
+   "pencere_sayisi": 5,
+   "kapi_sayisi": 4,
+   "mahal_konum": {
+    "YATAK ODASI 1": [
+     [
+      3.5,
+      3.5,
+      6,
+      6
+     ]
+    ]
+   },
+   "sablon_gibi_haric": []
+  }
  },
  {
   "id": 4,
@@ -60,7 +90,21 @@
   "gonderen": "BAYI-TEST-2",
   "mesaj": "P6001 istiyorum ama yatak odası 1 penceresi 120x180 olsun, dış boya beyaz, çatıya osb + nem bariyeri",
   "beklenen": "is_emri",
-  "not": "pencere_degistir + bina özellikleri + özel istek"
+  "not": "pencere_degistir + bina özellikleri + özel istek",
+  "kontrol": {
+   "pencere": [
+    {
+     "mahal": "YATAK ODASI 1",
+     "olcu": "120x180",
+     "adet": 1
+    }
+   ],
+   "pencere_sayisi": 5,
+   "kapi_sayisi": 4,
+   "sablon_gibi_haric": [
+    "YATAK ODASI 1"
+   ]
+  }
  },
  {
   "id": 10,
@@ -109,7 +153,31 @@
   "gonderen": "BAYI-TEST-2",
   "mesaj": "P6001 aynalı, yatak odası 1 penceresi 120x180",
   "beklenen": "is_emri",
-  "not": "canlı 22.09: LLM pencereyi islem=ekle ile verdi; mahalde tek pencere var → ölçü değişikliği (kural)"
+  "not": "canlı 22.09: LLM pencereyi islem=ekle ile verdi; mahalde tek pencere var → ölçü değişikliği (kural)",
+  "kontrol": {
+   "pencere": [
+    {
+     "mahal": "YATAK ODASI 1",
+     "olcu": "120x180",
+     "adet": 1
+    }
+   ],
+   "pencere_sayisi": 5,
+   "kapi_sayisi": 4,
+   "mahal_konum": {
+    "YATAK ODASI 1": [
+     [
+      0,
+      3.5,
+      2.5,
+      6
+     ]
+    ]
+   },
+   "sablon_gibi_haric": [
+    "YATAK ODASI 1"
+   ]
+  }
  },
  {
   "id": 17,
@@ -117,5 +185,92 @@
   "mesaj": "P6001 yatak odası 1'e bir tane daha 120x180 pencere ekle",
   "beklenen": "yonlendir",
   "not": "gerçek ekleme (bayi 'bir tane daha … ekle' dedi) → v0.1'de yönlendirme; kural bayinin sözüne bakar"
+ },
+ {
+  "id": 18,
+  "gonderen": "BAYI-TEST-2",
+  "mesaj": "P6001 yatak odası 1 penceresi 120x180 olsun, bekle",
+  "beklenen": "is_emri",
+  "not": "Astra karşı örneği: 'bekle' içinde 'ekle' var; sözcük sınırı → ekleme değil; 'penceresi … olsun' → ölçü değişikliği",
+  "kontrol": {
+   "pencere": [
+    {
+     "mahal": "YATAK ODASI 1",
+     "olcu": "120x180",
+     "adet": 1
+    }
+   ],
+   "pencere_sayisi": 5,
+   "kapi_sayisi": 4,
+   "mahal_konum": {
+    "YATAK ODASI 1": [
+     [
+      3.5,
+      3.5,
+      6,
+      6
+     ]
+    ]
+   },
+   "sablon_gibi_haric": [
+    "YATAK ODASI 1"
+   ]
+  }
+ },
+ {
+  "id": 19,
+  "gonderen": "BAYI-TEST-2",
+  "mesaj": "P6001 yatak odası 1 için bir pencere koy 120x180",
+  "beklenen": "yonlendir",
+  "not": "Astra karşı örneği: 'bir pencere koy' = ekleme → v0.1'de yönlendirme (ölçü değişikliği sayılmaz)"
+ },
+ {
+  "id": 20,
+  "gonderen": "BAYI-TEST-3",
+  "mesaj": "P6001, yatak odası 1, 120x180",
+  "beklenen": "sor",
+  "not": "belirsiz: ne 'değiştir' ne 'ekle' sözü var; mahalde tek pencere → sessizce değiştirmek yerine SORULUR"
+ },
+ {
+  "id": 21,
+  "gonderen": "BAYI-TEST-3",
+  "mesaj": "değiştir",
+  "beklenen": "is_emri",
+  "not": "20'nin cevabı: kısa 'değiştir' → LLM niyeti 'diger' dese de kural cevabı işler → ölçü değişikliği → İş Emri",
+  "kontrol": {
+   "pencere": [
+    {
+     "mahal": "YATAK ODASI 1",
+     "olcu": "120x180",
+     "adet": 1
+    }
+   ],
+   "pencere_sayisi": 5,
+   "kapi_sayisi": 4,
+   "sablon_gibi_haric": [
+    "YATAK ODASI 1"
+   ]
+  }
+ },
+ {
+  "id": 22,
+  "gonderen": "BAYI-TEST-1",
+  "mesaj": "P6001 yatak odası 1 pencereyi 120x180 yap",
+  "beklenen": "is_emri",
+  "not": "açık değiştirme fiili ('yap') → ölçü değişikliği",
+  "kontrol": {
+   "pencere": [
+    {
+     "mahal": "YATAK ODASI 1",
+     "olcu": "120x180",
+     "adet": 1
+    }
+   ],
+   "pencere_sayisi": 5,
+   "kapi_sayisi": 4,
+   "sablon_gibi_haric": [
+    "YATAK ODASI 1"
+   ]
+  }
  }
 ]
