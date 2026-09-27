@@ -1,0 +1,70 @@
+--- a/motor/geometry.py	2026-09-22 20:12:15.000000000 +0300
++++ b/motor/geometry.py	2026-09-23 20:12:26.632725979 +0300
+@@ -29,13 +29,35 @@
+     pass
+ 
+ 
++# --- v1.2-deneme: serbest aks (K16-b). İş Emri'nde yapi.aks_cm varsa akslar bu listeden okunur; yoksa v1.1 ile birebir.
++_AKS = {"x": None, "y": None}
++
++
++def aks_ayarla(x=None, y=None):
++    """Serbest aks listelerini ayarla (cm; yarım-pano indeksi k ↔ liste[k]). None → düzenli 125,5 modül."""
++    _AKS["x"] = [float(v) for v in x] if x else None
++    _AKS["y"] = [float(v) for v in y] if y else None
++
++
++def _aks_deger(liste, k2):
++    k = int(round(k2))
++    if abs(k2 - k) < 1e-9:
++        return liste[k]
++    lo = int(math.floor(k2)); f = k2 - lo
++    return liste[lo] + (liste[lo + 1] - liste[lo]) * f
++
++
+ def X(i: float) -> float:
+     """Düşey aks: dış duvar iç yüzünden başlar (kısa kenar yönü, köşe 10 cm)."""
++    if _AKS["x"] is not None:
++        return _aks_deger(_AKS["x"], 2 * i)
+     return 10.0 + MOD * i
+ 
+ 
+ def Y(j: float) -> float:
+     """Yatay aks: ön duvar orta eksenidir (uzun kenar yönü, köşe 5 cm)."""
++    if _AKS["y"] is not None:
++        return _aks_deger(_AKS["y"], 2 * j)
+     return 5.0 + MOD * j
+ 
+ 
+@@ -193,7 +215,20 @@
+     nx2, ny2 = int(round(nx * 2)), int(round(ny * 2))
+     if abs(nx2 - nx * 2) > 1e-9 or abs(ny2 - ny * 2) > 1e-9 or nx < 2 or ny < 2:
+         raise IsEmriHatasi("Grid yarım pano adımında ve en az 2×2 olmalı")
+-    W, H = MOD * nx + 20.0, MOD * ny + 10.0
++    aks = yapi.get("aks_cm")
++    if aks:
++        ax, ay = [float(v) for v in aks["x"]], [float(v) for v in aks["y"]]
++        if len(ax) != nx2 + 1 or len(ay) != ny2 + 1:
++            raise IsEmriHatasi(f"aks_cm uzunluğu grid ile uyuşmuyor (x {len(ax)} ≠ {nx2 + 1} ya da y {len(ay)} ≠ {ny2 + 1})")
++        if any(b - a < 20 for a, b in zip(ax, ax[1:])) or any(b - a < 20 for a, b in zip(ay, ay[1:])):
++            raise IsEmriHatasi("aks_cm: ardışık iki aks arası 20 cm'den az olamaz")
++        if abs(ax[0] - 10.0) > 1e-6 or abs(ay[0] - 5.0) > 1e-6:
++            raise IsEmriHatasi("aks_cm: x[0] = 10 (sol dış duvar iç yüzü), y[0] = 5 (ön duvar ekseni) olmalı")
++        aks_ayarla(ax, ay)
++        W, H = ax[-1] + 10.0, ay[-1] + 5.0
++    else:
++        aks_ayarla(None, None)
++        W, H = MOD * nx + 20.0, MOD * ny + 10.0
+     dis_v_konum = yapi.get("dis_dusey_duvar", "aks_disinda")   # 'aks_disinda' (v1.4.3 son örnek) | 'eksende' (eski 6×8)
+     uyarilar = []
+ 
+--- a/motor/cikarici.py	2026-09-22 20:12:15.000000000 +0300
++++ b/motor/cikarici.py	2026-09-23 20:19:43.436751237 +0300
+@@ -194,6 +194,7 @@
+ class Cikarici:
+     def __init__(self, dxf_path: str | Path, plan_secici: str | None = None):
+         self.path = Path(dxf_path)
++        G.aks_ayarla(None, None)       # v1.2-deneme: çıkarıcı düzenli modülle çalışır; önceki işten kalan serbest aks sıfırlanır
+         self.doc = ezdxf.readfile(str(self.path))
+         self.msp = self.doc.modelspace()
+         self.uyusmazlik: list[str] = []      # kural ile çizim arasındaki farklar

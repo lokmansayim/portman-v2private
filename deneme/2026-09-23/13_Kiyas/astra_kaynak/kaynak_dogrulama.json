@@ -1,0 +1,46 @@
+{
+  "source_manifest": {
+    "yeni-2plus1-yan-verandali.dwg": {
+      "path": "/Users/lokmansayim/Documents/Codex/2026-09-05/prefabrik-2-arti-1-6x8/outputs/01a072b7-c330-70f2-8df5-19b264b98ae7/yeni-2plus1-yan-verandali/yeni-2plus1-yan-verandali.dwg",
+      "sha256": "c1bbe4c465a3f8017d8dbaa9f1ca3378f302e93e5ae65af69f4e50ed5228a0a1"
+    },
+    "yeni-2plus1-yan-verandali.dxf": {
+      "path": "/Users/lokmansayim/Documents/Codex/2026-09-05/prefabrik-2-arti-1-6x8/outputs/01a072b7-c330-70f2-8df5-19b264b98ae7/yeni-2plus1-yan-verandali/yeni-2plus1-yan-verandali.dxf",
+      "sha256": "f1ad005637c60e34307e1eea2d136449c97b6be199a32f153943b612e37e2086"
+    },
+    "BOM_SAYIM_KAYDI.json": {
+      "path": "/Users/lokmansayim/Documents/Codex/2026-09-05/prefabrik-2-arti-1-6x8/outputs/01a072b7-c330-70f2-8df5-19b264b98ae7/yeni-2plus1-yan-verandali/BOM_SAYIM_KAYDI.json",
+      "sha256": "20f28818f99eb5e8d40884a0b752fc47e3a4d34a47162e66a2803fbab25418e4"
+    },
+    "DOGRULAMA.json": {
+      "path": "/Users/lokmansayim/Documents/Codex/2026-09-05/prefabrik-2-arti-1-6x8/outputs/01a072b7-c330-70f2-8df5-19b264b98ae7/yeni-2plus1-yan-verandali/DOGRULAMA.json",
+      "sha256": "1382785e05c878d7ad8ccbc7bcb562b821d58e40a2f4afdc4d066b4a935ed261"
+    },
+    "PROJE NOTLARI.md": {
+      "path": "/Users/lokmansayim/Documents/Codex/2026-09-05/prefabrik-2-arti-1-6x8/outputs/01a072b7-c330-70f2-8df5-19b264b98ae7/yeni-2plus1-yan-verandali/PROJE NOTLARI.md",
+      "sha256": "f59e45b8cc8a1971584a9434f130e10cffc4c89981e16340244296df001ec309"
+    },
+    "Yan-Verandali-2plus1-Yukleme-Listesi.xlsx": {
+      "path": "/Users/lokmansayim/Documents/Codex/2026-09-05/prefabrik-2-arti-1-6x8/outputs/01a072b7-c330-70f2-8df5-19b264b98ae7/yeni-2plus1-yan-verandali/Yan-Verandali-2plus1-Yukleme-Listesi.xlsx",
+      "sha256": "ff991785d068f9307b4a21a08986de87a3352d29cda72dfc36fd2befdb8bd054"
+    },
+    "KURALLAR.json": {
+      "path": "/Users/lokmansayim/Documents/Codex/2026-09-05/prefabrik-2-arti-1-6x8/outputs/AI Çizim Dosyaları/KURALLAR.json",
+      "sha256": "567b0f6964eacc1deeacd08589ebc8427424dcf595908912fc30d19c1980d757"
+    },
+    "MALZEME_KATALOGU.json": {
+      "path": "/Users/lokmansayim/Documents/Codex/2026-09-05/prefabrik-2-arti-1-6x8/outputs/AI Çizim Dosyaları/MALZEME_KATALOGU.json",
+      "sha256": "8de0e995a3ee511d344bfb5c7094307ea13fe3b48fe32cc7c584acca67a4f9a0"
+    },
+    "prefabrik-cizim-kurallari.md": {
+      "path": "/Users/lokmansayim/Documents/Codex/2026-09-05/prefabrik-2-arti-1-6x8/outputs/AI Çizim Dosyaları/prefabrik-cizim-kurallari.md",
+      "sha256": "5fb4e5299b401226678b40d69eb0193c725bc677acea32c1264b9a61ef3d9d14"
+    }
+  },
+  "wrong_pilot_modified_sources": false,
+  "blender_version": "5.2.1 LTS",
+  "autocad_product": "Autodesk AutoCAD 2026 for Mac",
+  "autocad_version": "25.1.119.325",
+  "export_method": "Previously verified native AutoCAD DXF, hash matches saved DWG verification record",
+  "new_design": false
+}

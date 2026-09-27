@@ -1,0 +1,24 @@
+{
+ "pano": 65,
+ "brut_hacim_m3": 13.4316,
+ "qto_net_hacim_m3": 11.5086,
+ "geometri_net_hacim_m3": 11.5086,
+ "fark_yuzde": 0.0,
+ "en_buyuk_fark": {
+  "pano": "PANO_D_TAM_125.3_10",
+  "qto": 0.30699,
+  "geometri": 0.30698
+ },
+ "geometri_uretilen_nesne": {
+  "IfcWall": 65,
+  "IfcOpeningElement": 19,
+  "IfcWindow": 8,
+  "IfcDoor": 1,
+  "IfcSpace": 9,
+  "IfcSlab": 5,
+  "IfcPlate": 3,
+  "IfcMember": 72,
+  "IfcColumn": 2,
+  "IfcBeam": 4
+ }
+}

@@ -1,0 +1,2511 @@
+{
+ "ozet": {
+  "eleman": {
+   "astra": 67,
+   "eslesen_AYNI": 65,
+   "plan_ayni_kot_farkli": 0,
+   "astra_3B_yok": 2,
+   "FARK": 0,
+   "bizde_fazla": []
+  },
+  "aciklik": {
+   "astra": 13,
+   "AYNI": 13,
+   "FARK": 0
+  },
+  "oda_max_fark_m2": 0.0,
+  "astra_kod": {
+   "D01": 19,
+   "D02": 4,
+   "D04": 1,
+   "D06": 2,
+   "D03": 2,
+   "D07": 1,
+   "D08": 1,
+   "I01": 8,
+   "I06": 4,
+   "I11": 2,
+   "I04": 2,
+   "I02": 1,
+   "I07": 3,
+   "I09": 1,
+   "I10": 1,
+   "B02": 6,
+   "B01": 1,
+   "B03": 4,
+   "V03": 1,
+   "V04": 1,
+   "B04": 2,
+   "P01": 4,
+   "P03": 1,
+   "P02": 2,
+   "K02": 1,
+   "K01": 4
+  },
+  "bizim_kod": {
+   "D01": 19,
+   "D02": 4,
+   "I06": 4,
+   "I01": 8,
+   "I11": 2,
+   "D08": 1,
+   "I10": 1,
+   "I04": 2,
+   "D04": 1,
+   "D06": 2,
+   "I07": 3,
+   "I02": 1,
+   "I09": 1,
+   "D03": 2,
+   "D07": 1,
+   "B02": 6,
+   "B01": 1,
+   "B03": 4,
+   "B04": 2,
+   "V04": 1,
+   "V03": 1,
+   "P01": 4,
+   "K01": 4,
+   "P03": 1,
+   "P02": 2,
+   "K02": 1
+  },
+  "bizde_ek_nesne": {
+   "IfcSpace": 7,
+   "IfcSlab": 3,
+   "IfcPlate": 2,
+   "IfcMember": 80
+  }
+ },
+ "elemanlar": [
+  {
+   "astra_kaynak": "29AD",
+   "kod": "D01",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    10.0,
+    1066.75,
+    0.0,
+    135.5,
+    1076.75,
+    250.0
+   ],
+   "astra_3B": "side_0",
+   "bizim": "PANO_D_TAM_125.5_18",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    10.0,
+    1066.75,
+    0.0,
+    135.5,
+    1076.75,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.31375,
+   "bizim_hacim_m3": 0.31375,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "29AF",
+   "kod": "D01",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    135.5,
+    1066.75,
+    0.0,
+    261.0,
+    1076.75,
+    250.0
+   ],
+   "astra_3B": "side_0",
+   "bizim": "PANO_D_TAM_125.5_19",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    135.5,
+    1066.75,
+    0.0,
+    261.0,
+    1076.75,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.31375,
+   "bizim_hacim_m3": 0.31375,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "29B1",
+   "kod": "D01",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    261.0,
+    1066.75,
+    0.0,
+    386.5,
+    1076.75,
+    250.0
+   ],
+   "astra_3B": "side_0",
+   "bizim": "PANO_D_TAM_125.5_20",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    261.0,
+    1066.75,
+    0.0,
+    386.5,
+    1076.75,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.31375,
+   "bizim_hacim_m3": 0.31375,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "29B3",
+   "kod": "D01",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    386.5,
+    1066.75,
+    0.0,
+    512.0,
+    1076.75,
+    250.0
+   ],
+   "astra_3B": "side_0",
+   "bizim": "PANO_D_TAM_125.5_21",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    386.5,
+    1066.75,
+    0.0,
+    512.0,
+    1076.75,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.31375,
+   "bizim_hacim_m3": 0.31375,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "29BB",
+   "kod": "D02",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    512.0,
+    1066.75,
+    0.0,
+    637.5,
+    1076.75,
+    250.0
+   ],
+   "astra_3B": "above_opening,below_opening,side_0,side_1",
+   "bizim": "PANO_D_TAM_125.5_22",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    512.0,
+    1066.75,
+    0.0,
+    637.5,
+    1076.75,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.16975,
+   "bizim_hacim_m3": 0.16975,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "29BD",
+   "kod": "D01",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    637.5,
+    1066.75,
+    0.0,
+    763.0,
+    1076.75,
+    250.0
+   ],
+   "astra_3B": "side_0",
+   "bizim": "PANO_D_TAM_125.5_23",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    637.5,
+    1066.75,
+    0.0,
+    763.0,
+    1076.75,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.31375,
+   "bizim_hacim_m3": 0.31375,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "29BF",
+   "kod": "D01",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    10.0,
+    0.0,
+    0.0,
+    135.5,
+    10.0,
+    250.0
+   ],
+   "astra_3B": "side_0",
+   "bizim": "PANO_D_TAM_125.5_00",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    10.0,
+    0.0,
+    0.0,
+    135.5,
+    10.0,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.31375,
+   "bizim_hacim_m3": 0.31375,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "29C1",
+   "kod": "D02",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    135.5,
+    0.0,
+    0.0,
+    261.0,
+    10.0,
+    250.0
+   ],
+   "astra_3B": "above_opening,below_opening,side_0,side_1",
+   "bizim": "PANO_D_TAM_125.5_01",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    135.5,
+    0.0,
+    0.0,
+    261.0,
+    10.0,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.16975,
+   "bizim_hacim_m3": 0.16975,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "29C3",
+   "kod": "D01",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    261.0,
+    0.0,
+    0.0,
+    386.5,
+    10.0,
+    250.0
+   ],
+   "astra_3B": "side_0",
+   "bizim": "PANO_D_TAM_125.5_02",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    261.0,
+    0.0,
+    0.0,
+    386.5,
+    10.0,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.31375,
+   "bizim_hacim_m3": 0.31375,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "29C5",
+   "kod": "D02",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    386.5,
+    0.0,
+    0.0,
+    512.0,
+    10.0,
+    250.0
+   ],
+   "astra_3B": "above_opening,below_opening,side_0,side_1",
+   "bizim": "PANO_D_TAM_125.5_03",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    386.5,
+    0.0,
+    0.0,
+    512.0,
+    10.0,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.16975,
+   "bizim_hacim_m3": 0.16975,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "29C7",
+   "kod": "D01",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    512.0,
+    0.0,
+    0.0,
+    637.5,
+    10.0,
+    250.0
+   ],
+   "astra_3B": "side_0",
+   "bizim": "PANO_D_TAM_125.5_04",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    512.0,
+    0.0,
+    0.0,
+    637.5,
+    10.0,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.31375,
+   "bizim_hacim_m3": 0.31375,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "29CD",
+   "kod": "D01",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    0.0,
+    5.0,
+    0.0,
+    10.0,
+    130.5,
+    250.0
+   ],
+   "astra_3B": "side_0",
+   "bizim": "PANO_D_TAM_125.5_24",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    0.0,
+    5.0,
+    0.0,
+    10.0,
+    130.5,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.31375,
+   "bizim_hacim_m3": 0.31375,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "29CF",
+   "kod": "D01",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    0.0,
+    130.5,
+    0.0,
+    10.0,
+    256.0,
+    250.0
+   ],
+   "astra_3B": "side_0",
+   "bizim": "PANO_D_TAM_125.5_25",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    0.0,
+    130.5,
+    0.0,
+    10.0,
+    256.0,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.31375,
+   "bizim_hacim_m3": 0.31375,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "29D1",
+   "kod": "D01",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    0.0,
+    256.0,
+    0.0,
+    10.0,
+    381.5,
+    250.0
+   ],
+   "astra_3B": "side_0",
+   "bizim": "PANO_D_TAM_125.5_26",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    0.0,
+    256.0,
+    0.0,
+    10.0,
+    381.5,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.31375,
+   "bizim_hacim_m3": 0.31375,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "29D9",
+   "kod": "D04",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    0.0,
+    381.5,
+    0.0,
+    10.0,
+    507.0,
+    250.0
+   ],
+   "astra_3B": "above_opening,below_opening,side_0,side_1",
+   "bizim": "PANO_D_TAM_125.5_27",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    0.0,
+    381.5,
+    0.0,
+    10.0,
+    507.0,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.28975,
+   "bizim_hacim_m3": 0.28975,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "29DB",
+   "kod": "D01",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    0.0,
+    507.0,
+    0.0,
+    10.0,
+    632.5,
+    250.0
+   ],
+   "astra_3B": "side_0",
+   "bizim": "PANO_D_TAM_125.5_28",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    0.0,
+    507.0,
+    0.0,
+    10.0,
+    632.5,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.31375,
+   "bizim_hacim_m3": 0.31375,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "29DD",
+   "kod": "D01",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    0.0,
+    632.5,
+    0.0,
+    10.0,
+    758.0,
+    250.0
+   ],
+   "astra_3B": "side_0",
+   "bizim": "PANO_D_TAM_125.5_29",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    0.0,
+    632.5,
+    0.0,
+    10.0,
+    758.0,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.31375,
+   "bizim_hacim_m3": 0.31375,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "29E5",
+   "kod": "D02",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    0.0,
+    758.0,
+    0.0,
+    10.0,
+    883.5,
+    250.0
+   ],
+   "astra_3B": "above_opening,below_opening,side_0,side_1",
+   "bizim": "PANO_D_TAM_125.5_30",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    0.0,
+    758.0,
+    0.0,
+    10.0,
+    883.5,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.16975,
+   "bizim_hacim_m3": 0.16975,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "29E7",
+   "kod": "D01",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    0.0,
+    883.5,
+    0.0,
+    10.0,
+    1009.0,
+    250.0
+   ],
+   "astra_3B": "side_0",
+   "bizim": "PANO_D_TAM_125.5_31",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    0.0,
+    883.5,
+    0.0,
+    10.0,
+    1009.0,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.31375,
+   "bizim_hacim_m3": 0.31375,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "29ED",
+   "kod": "D06",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    0.0,
+    1009.0,
+    0.0,
+    10.0,
+    1071.75,
+    250.0
+   ],
+   "astra_3B": "side_0",
+   "bizim": "PANO_D_YARIM_62.8_32",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    0.0,
+    1009.0,
+    0.0,
+    10.0,
+    1071.75,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.15687,
+   "bizim_hacim_m3": 0.15687,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "29EF",
+   "kod": "D01",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    763.0,
+    507.0,
+    0.0,
+    773.0,
+    632.5,
+    250.0
+   ],
+   "astra_3B": "side_0",
+   "bizim": "PANO_D_TAM_125.5_47",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    763.0,
+    507.0,
+    0.0,
+    773.0,
+    632.5,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.31375,
+   "bizim_hacim_m3": 0.31375,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "29F1",
+   "kod": "D01",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    763.0,
+    632.5,
+    0.0,
+    773.0,
+    758.0,
+    250.0
+   ],
+   "astra_3B": "side_0",
+   "bizim": "PANO_D_TAM_125.5_48",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    763.0,
+    632.5,
+    0.0,
+    773.0,
+    758.0,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.31375,
+   "bizim_hacim_m3": 0.31375,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "29F9",
+   "kod": "D03",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    763.0,
+    758.0,
+    0.0,
+    773.0,
+    883.5,
+    250.0
+   ],
+   "astra_3B": "above_opening,below_opening,side_0,side_1",
+   "bizim": "PANO_D_TAM_125.5_49",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    763.0,
+    758.0,
+    0.0,
+    773.0,
+    883.5,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.09775,
+   "bizim_hacim_m3": 0.09775,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "29FB",
+   "kod": "D01",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    763.0,
+    883.5,
+    0.0,
+    773.0,
+    1009.0,
+    250.0
+   ],
+   "astra_3B": "side_0",
+   "bizim": "PANO_D_TAM_125.5_50",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    763.0,
+    883.5,
+    0.0,
+    773.0,
+    1009.0,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.31375,
+   "bizim_hacim_m3": 0.31375,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "29FD",
+   "kod": "D06",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    763.0,
+    1009.0,
+    0.0,
+    773.0,
+    1071.75,
+    250.0
+   ],
+   "astra_3B": "side_0",
+   "bizim": "PANO_D_YARIM_62.8_51",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    763.0,
+    1009.0,
+    0.0,
+    773.0,
+    1071.75,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.15687,
+   "bizim_hacim_m3": 0.15688,
+   "hacim_fark_yuzde": 0.006,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "29FF",
+   "kod": "D01",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    637.5,
+    5.0,
+    0.0,
+    647.5,
+    130.5,
+    250.0
+   ],
+   "astra_3B": "side_0",
+   "bizim": "PANO_D_TAM_125.5_43",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    637.5,
+    5.0,
+    0.0,
+    647.5,
+    130.5,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.31375,
+   "bizim_hacim_m3": 0.31375,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "2A01",
+   "kod": "D03",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    637.5,
+    130.5,
+    0.0,
+    647.5,
+    256.0,
+    250.0
+   ],
+   "astra_3B": "above_opening,below_opening,side_0,side_1",
+   "bizim": "PANO_D_TAM_125.5_44",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    637.5,
+    130.5,
+    0.0,
+    647.5,
+    256.0,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.09775,
+   "bizim_hacim_m3": 0.09775,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "2A03",
+   "kod": "D01",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    637.5,
+    256.0,
+    0.0,
+    647.5,
+    381.5,
+    250.0
+   ],
+   "astra_3B": "side_0",
+   "bizim": "PANO_D_TAM_125.5_45",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    637.5,
+    256.0,
+    0.0,
+    647.5,
+    381.5,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.31375,
+   "bizim_hacim_m3": 0.31375,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "2A0B",
+   "kod": "D07",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    637.5,
+    381.5,
+    0.0,
+    647.5,
+    502.0,
+    250.0
+   ],
+   "astra_3B": "above_opening,side_0,side_1",
+   "bizim": "PANO_D_OZEL_120.5_46",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    637.5,
+    381.5,
+    0.0,
+    647.5,
+    502.0,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.10725,
+   "bizim_hacim_m3": 0.10725,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "2A0D",
+   "kod": "D08",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    642.5,
+    502.0,
+    0.0,
+    763.0,
+    512.0,
+    250.0
+   ],
+   "astra_3B": "side_0",
+   "bizim": "PANO_D_OZEL_120.5_11",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    642.5,
+    502.0,
+    0.0,
+    763.0,
+    512.0,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.30125,
+   "bizim_hacim_m3": 0.30125,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "2A13",
+   "kod": "I01",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    10.0,
+    378.5,
+    0.0,
+    135.5,
+    384.5,
+    250.0
+   ],
+   "astra_3B": "side_0",
+   "bizim": "PANO_I_TAM_125.5_05",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    10.0,
+    378.5,
+    0.0,
+    135.5,
+    384.5,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.18825,
+   "bizim_hacim_m3": 0.18825,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "2A19",
+   "kod": "I06",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    135.5,
+    378.5,
+    0.0,
+    198.25,
+    384.5,
+    250.0
+   ],
+   "astra_3B": "side_0",
+   "bizim": "PANO_I_YARIM_62.8_06",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    135.5,
+    378.5,
+    0.0,
+    198.25,
+    384.5,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.09413,
+   "bizim_hacim_m3": 0.09413,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "2A21",
+   "kod": "I11",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    198.25,
+    378.5,
+    0.0,
+    323.75,
+    384.5,
+    250.0
+   ],
+   "astra_3B": "above_opening,side_0,side_1",
+   "bizim": "PANO_I_TAM_125.5_07",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    198.25,
+    378.5,
+    0.0,
+    323.75,
+    384.5,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.08985,
+   "bizim_hacim_m3": 0.08985,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "2A23",
+   "kod": "I01",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    10.0,
+    629.5,
+    0.0,
+    135.5,
+    635.5,
+    250.0
+   ],
+   "astra_3B": "side_0",
+   "bizim": "PANO_I_TAM_125.5_15",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    10.0,
+    629.5,
+    0.0,
+    135.5,
+    635.5,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.18825,
+   "bizim_hacim_m3": 0.18825,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "2A25",
+   "kod": "I06",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    135.5,
+    629.5,
+    0.0,
+    198.25,
+    635.5,
+    250.0
+   ],
+   "astra_3B": "side_0",
+   "bizim": "PANO_I_YARIM_62.8_16",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    135.5,
+    629.5,
+    0.0,
+    198.25,
+    635.5,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.09413,
+   "bizim_hacim_m3": 0.09412,
+   "hacim_fark_yuzde": -0.011,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "2A2D",
+   "kod": "I04",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    198.25,
+    629.5,
+    0.0,
+    320.75,
+    635.5,
+    250.0
+   ],
+   "astra_3B": "above_opening,side_0,side_1",
+   "bizim": "PANO_I_OZEL_122.5_17",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    198.25,
+    629.5,
+    0.0,
+    320.75,
+    635.5,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.08535,
+   "bizim_hacim_m3": 0.08535,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "2A35",
+   "kod": "I11",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    323.75,
+    378.5,
+    0.0,
+    449.25,
+    384.5,
+    250.0
+   ],
+   "astra_3B": "above_opening,side_0,side_1",
+   "bizim": "PANO_I_TAM_125.5_08",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    323.75,
+    378.5,
+    0.0,
+    449.25,
+    384.5,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.08985,
+   "bizim_hacim_m3": 0.08985,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "2A37",
+   "kod": "I01",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    449.25,
+    378.5,
+    0.0,
+    574.75,
+    384.5,
+    250.0
+   ],
+   "astra_3B": "side_0",
+   "bizim": "PANO_I_TAM_125.5_09",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    449.25,
+    378.5,
+    0.0,
+    574.75,
+    384.5,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.18825,
+   "bizim_hacim_m3": 0.18825,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "2A39",
+   "kod": "I06",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    574.75,
+    378.5,
+    0.0,
+    637.5,
+    384.5,
+    250.0
+   ],
+   "astra_3B": "side_0",
+   "bizim": "PANO_I_YARIM_62.8_10",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    574.75,
+    378.5,
+    0.0,
+    637.5,
+    384.5,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.09413,
+   "bizim_hacim_m3": 0.09412,
+   "hacim_fark_yuzde": -0.011,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "2A3F",
+   "kod": "I02",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    320.75,
+    10.0,
+    0.0,
+    326.75,
+    130.5,
+    250.0
+   ],
+   "astra_3B": "side_0",
+   "bizim": "PANO_I_OZEL_120.5_35",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    320.75,
+    10.0,
+    0.0,
+    326.75,
+    130.5,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.18075,
+   "bizim_hacim_m3": 0.18075,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "2A45",
+   "kod": "I01",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    320.75,
+    130.5,
+    0.0,
+    326.75,
+    256.0,
+    250.0
+   ],
+   "astra_3B": "side_0",
+   "bizim": "PANO_I_TAM_125.5_36",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    320.75,
+    130.5,
+    0.0,
+    326.75,
+    256.0,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.18825,
+   "bizim_hacim_m3": 0.18825,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "2A4B",
+   "kod": "I07",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    320.75,
+    256.0,
+    0.0,
+    326.75,
+    378.5,
+    250.0
+   ],
+   "astra_3B": "side_0",
+   "bizim": "PANO_I_OZEL_122.5_37",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    320.75,
+    256.0,
+    0.0,
+    326.75,
+    378.5,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.18375,
+   "bizim_hacim_m3": 0.18375,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "2A53",
+   "kod": "I04",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    195.25,
+    384.5,
+    0.0,
+    201.25,
+    507.0,
+    250.0
+   ],
+   "astra_3B": "above_opening,side_0,side_1",
+   "bizim": "PANO_I_OZEL_122.5_33",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    195.25,
+    384.5,
+    0.0,
+    201.25,
+    507.0,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.08535,
+   "bizim_hacim_m3": 0.08535,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "2A55",
+   "kod": "I07",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    195.25,
+    507.0,
+    0.0,
+    201.25,
+    629.5,
+    250.0
+   ],
+   "astra_3B": "side_0",
+   "bizim": "PANO_I_OZEL_122.5_34",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    195.25,
+    507.0,
+    0.0,
+    201.25,
+    629.5,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.18375,
+   "bizim_hacim_m3": 0.18375,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "2A57",
+   "kod": "I07",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    320.75,
+    510.0,
+    0.0,
+    326.75,
+    632.5,
+    250.0
+   ],
+   "astra_3B": "side_0",
+   "bizim": "PANO_I_OZEL_122.5_38",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    320.75,
+    510.0,
+    0.0,
+    326.75,
+    632.5,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.18375,
+   "bizim_hacim_m3": 0.18375,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "2A59",
+   "kod": "I01",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    320.75,
+    632.5,
+    0.0,
+    326.75,
+    758.0,
+    250.0
+   ],
+   "astra_3B": "side_0",
+   "bizim": "PANO_I_TAM_125.5_39",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    320.75,
+    632.5,
+    0.0,
+    326.75,
+    758.0,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.18825,
+   "bizim_hacim_m3": 0.18825,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "2A5B",
+   "kod": "I01",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    320.75,
+    758.0,
+    0.0,
+    326.75,
+    883.5,
+    250.0
+   ],
+   "astra_3B": "side_0",
+   "bizim": "PANO_I_TAM_125.5_40",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    320.75,
+    758.0,
+    0.0,
+    326.75,
+    883.5,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.18825,
+   "bizim_hacim_m3": 0.18825,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "2A5D",
+   "kod": "I01",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    320.75,
+    883.5,
+    0.0,
+    326.75,
+    1009.0,
+    250.0
+   ],
+   "astra_3B": "side_0",
+   "bizim": "PANO_I_TAM_125.5_41",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    320.75,
+    883.5,
+    0.0,
+    326.75,
+    1009.0,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.18825,
+   "bizim_hacim_m3": 0.18825,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "2A63",
+   "kod": "I09",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    320.75,
+    1009.0,
+    0.0,
+    326.75,
+    1066.75,
+    250.0
+   ],
+   "astra_3B": "side_0",
+   "bizim": "PANO_I_OZEL_57.8_42",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    320.75,
+    1009.0,
+    0.0,
+    326.75,
+    1066.75,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.08662,
+   "bizim_hacim_m3": 0.08662,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "2A65",
+   "kod": "I01",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    323.75,
+    504.0,
+    0.0,
+    449.25,
+    510.0,
+    250.0
+   ],
+   "astra_3B": "side_0",
+   "bizim": "PANO_I_TAM_125.5_12",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    323.75,
+    504.0,
+    0.0,
+    449.25,
+    510.0,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.18825,
+   "bizim_hacim_m3": 0.18825,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "2A6C",
+   "kod": "I10",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    449.25,
+    504.0,
+    0.0,
+    574.75,
+    510.0,
+    250.0
+   ],
+   "astra_3B": "above_opening,side_0,side_1",
+   "bizim": "PANO_I_TAM_125.5_13",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    449.25,
+    504.0,
+    0.0,
+    574.75,
+    510.0,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.08985,
+   "bizim_hacim_m3": 0.08985,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "2A6E",
+   "kod": "I06",
+   "tur": "panel",
+   "astra_kutu_cm": [
+    574.75,
+    504.0,
+    0.0,
+    637.5,
+    510.0,
+    250.0
+   ],
+   "astra_3B": "side_0",
+   "bizim": "PANO_I_YARIM_62.8_14",
+   "bizim_sinif": "IfcWall",
+   "bizim_kutu_cm": [
+    574.75,
+    504.0,
+    0.0,
+    637.5,
+    510.0,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.09413,
+   "bizim_hacim_m3": 0.09413,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "2A70",
+   "kod": "B02",
+   "tur": "connection",
+   "astra_kutu_cm": [
+    0.0,
+    0.0,
+    0.0,
+    10.0,
+    5.0,
+    250.0
+   ],
+   "astra_3B": "profile_0",
+   "bizim": "BAGLANTI_B02_00",
+   "bizim_sinif": "IfcMember",
+   "bizim_kutu_cm": [
+    0.0,
+    0.0,
+    0.0,
+    10.0,
+    5.0,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.0125,
+   "bizim_hacim_m3": 0.0125,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "2A72",
+   "kod": "B02",
+   "tur": "connection",
+   "astra_kutu_cm": [
+    637.5,
+    0.0,
+    0.0,
+    647.5,
+    5.0,
+    250.0
+   ],
+   "astra_3B": "profile_0",
+   "bizim": "BAGLANTI_B02_01",
+   "bizim_sinif": "IfcMember",
+   "bizim_kutu_cm": [
+    637.5,
+    0.0,
+    0.0,
+    647.5,
+    5.0,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.0125,
+   "bizim_hacim_m3": 0.0125,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "2A74",
+   "kod": "B02",
+   "tur": "connection",
+   "astra_kutu_cm": [
+    763.0,
+    502.0,
+    0.0,
+    773.0,
+    507.0,
+    250.0
+   ],
+   "astra_3B": "profile_0",
+   "bizim": "BAGLANTI_B02_04",
+   "bizim_sinif": "IfcMember",
+   "bizim_kutu_cm": [
+    763.0,
+    502.0,
+    0.0,
+    773.0,
+    507.0,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.0125,
+   "bizim_hacim_m3": 0.0125,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "2A76",
+   "kod": "B02",
+   "tur": "connection",
+   "astra_kutu_cm": [
+    763.0,
+    1071.75,
+    0.0,
+    773.0,
+    1076.75,
+    250.0
+   ],
+   "astra_3B": "profile_0",
+   "bizim": "BAGLANTI_B02_05",
+   "bizim_sinif": "IfcMember",
+   "bizim_kutu_cm": [
+    763.0,
+    1071.75,
+    0.0,
+    773.0,
+    1076.75,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.0125,
+   "bizim_hacim_m3": 0.0125,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "2A78",
+   "kod": "B02",
+   "tur": "connection",
+   "astra_kutu_cm": [
+    0.0,
+    1071.75,
+    0.0,
+    10.0,
+    1076.75,
+    250.0
+   ],
+   "astra_3B": "profile_0",
+   "bizim": "BAGLANTI_B02_02",
+   "bizim_sinif": "IfcMember",
+   "bizim_kutu_cm": [
+    0.0,
+    1071.75,
+    0.0,
+    10.0,
+    1076.75,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.0125,
+   "bizim_hacim_m3": 0.0125,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "2A7A",
+   "kod": "B01",
+   "tur": "connection",
+   "astra_kutu_cm": [
+    320.75,
+    504.0,
+    0.0,
+    323.75,
+    510.0,
+    250.0
+   ],
+   "astra_3B": "profile_0",
+   "bizim": "BAGLANTI_B01_06",
+   "bizim_sinif": "IfcMember",
+   "bizim_kutu_cm": [
+    320.75,
+    504.0,
+    0.0,
+    323.75,
+    510.0,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.0045,
+   "bizim_hacim_m3": 0.0045,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "2A7C",
+   "kod": "B03",
+   "tur": "connection",
+   "astra_kutu_cm": [
+    195.25,
+    378.5,
+    0.0,
+    201.25,
+    387.0,
+    250.0
+   ],
+   "astra_3B": "profile_surface_0,profile_surface_1,profile_surface_2,profile_surface_3,profile_surface_4,profile_surface_5,profile_surface_6,profile_surface_7",
+   "bizim": "BAGLANTI_B03_09",
+   "bizim_sinif": "IfcMember",
+   "bizim_kutu_cm": [
+    195.25,
+    378.5,
+    0.0,
+    201.25,
+    387.0,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.0,
+   "bizim_hacim_m3": 0.01275,
+   "hacim_fark_yuzde": null,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "2A7E",
+   "kod": "B03",
+   "tur": "connection",
+   "astra_kutu_cm": [
+    320.75,
+    376.0,
+    0.0,
+    326.75,
+    384.5,
+    250.0
+   ],
+   "astra_3B": "profile_surface_0,profile_surface_1,profile_surface_2,profile_surface_3,profile_surface_4,profile_surface_5,profile_surface_6,profile_surface_7",
+   "bizim": "BAGLANTI_B03_08",
+   "bizim_sinif": "IfcMember",
+   "bizim_kutu_cm": [
+    320.75,
+    376.0,
+    0.0,
+    326.75,
+    384.5,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.0,
+   "bizim_hacim_m3": 0.01275,
+   "hacim_fark_yuzde": null,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "2A80",
+   "kod": "B03",
+   "tur": "connection",
+   "astra_kutu_cm": [
+    195.25,
+    627.0,
+    0.0,
+    201.25,
+    635.5,
+    250.0
+   ],
+   "astra_3B": "profile_surface_0,profile_surface_1,profile_surface_2,profile_surface_3,profile_surface_4,profile_surface_5,profile_surface_6,profile_surface_7",
+   "bizim": "BAGLANTI_B03_10",
+   "bizim_sinif": "IfcMember",
+   "bizim_kutu_cm": [
+    195.25,
+    627.0,
+    0.0,
+    201.25,
+    635.5,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.0,
+   "bizim_hacim_m3": 0.01275,
+   "hacim_fark_yuzde": null,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "2A82",
+   "kod": "B03",
+   "tur": "connection",
+   "astra_kutu_cm": [
+    318.25,
+    629.5,
+    0.0,
+    326.75,
+    635.5,
+    250.0
+   ],
+   "astra_3B": "profile_surface_0,profile_surface_1,profile_surface_2,profile_surface_3,profile_surface_4,profile_surface_5,profile_surface_6,profile_surface_7",
+   "bizim": "BAGLANTI_B03_07",
+   "bizim_sinif": "IfcMember",
+   "bizim_kutu_cm": [
+    318.25,
+    629.5,
+    0.0,
+    326.75,
+    635.5,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.0,
+   "bizim_hacim_m3": 0.01275,
+   "hacim_fark_yuzde": null,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "2A89",
+   "kod": "V03",
+   "tur": "reference_profile",
+   "astra_kutu_cm": [
+    763.0,
+    0.0,
+    773.0,
+    502.0
+   ],
+   "astra_3B": "yok (referans çizgisi)",
+   "bizim": "VERANDA_PROFIL_V03_14",
+   "bizim_sinif": "IfcBeam",
+   "bizim_kutu_cm": [
+    763.0,
+    0.0,
+    240.0,
+    773.0,
+    502.0,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": null,
+   "astra_hacim_m3": 0.0,
+   "bizim_hacim_m3": 0.0502,
+   "hacim_fark_yuzde": null,
+   "durum": "plan eşleşti; Astra 3B yok"
+  },
+  {
+   "astra_kaynak": "2A90",
+   "kod": "V04",
+   "tur": "reference_profile",
+   "astra_kutu_cm": [
+    647.5,
+    0.0,
+    773.0,
+    10.0
+   ],
+   "astra_3B": "yok (referans çizgisi)",
+   "bizim": "VERANDA_PROFIL_V04_13",
+   "bizim_sinif": "IfcBeam",
+   "bizim_kutu_cm": [
+    647.5,
+    0.0,
+    240.0,
+    773.0,
+    10.0,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": null,
+   "astra_hacim_m3": 0.0,
+   "bizim_hacim_m3": 0.01255,
+   "hacim_fark_yuzde": null,
+   "durum": "plan eşleşti; Astra 3B yok"
+  },
+  {
+   "astra_kaynak": "2A96",
+   "kod": "B04",
+   "tur": "veranda_post",
+   "astra_kutu_cm": [
+    763.0,
+    0.0,
+    0.0,
+    773.0,
+    10.0,
+    250.0
+   ],
+   "astra_3B": "profile_0",
+   "bizim": "DIKME_B04_11",
+   "bizim_sinif": "IfcColumn",
+   "bizim_kutu_cm": [
+    763.0,
+    0.0,
+    0.0,
+    773.0,
+    10.0,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.025,
+   "bizim_hacim_m3": 0.025,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "2A98",
+   "kod": "B04",
+   "tur": "veranda_post",
+   "astra_kutu_cm": [
+    763.0,
+    246.0,
+    0.0,
+    773.0,
+    256.0,
+    250.0
+   ],
+   "astra_3B": "profile_0",
+   "bizim": "DIKME_B04_12",
+   "bizim_sinif": "IfcColumn",
+   "bizim_kutu_cm": [
+    763.0,
+    246.0,
+    0.0,
+    773.0,
+    256.0,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.025,
+   "bizim_hacim_m3": 0.025,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  },
+  {
+   "astra_kaynak": "3E4F",
+   "kod": "B02",
+   "tur": "connection",
+   "astra_kutu_cm": [
+    637.5,
+    502.0,
+    0.0,
+    642.5,
+    512.0,
+    250.0
+   ],
+   "astra_3B": "profile_0",
+   "bizim": "BAGLANTI_B02_03",
+   "bizim_sinif": "IfcMember",
+   "bizim_kutu_cm": [
+    637.5,
+    502.0,
+    0.0,
+    642.5,
+    512.0,
+    250.0
+   ],
+   "plan_kutu_fark_cm": 0.0,
+   "kutu_fark_cm": 0.0,
+   "astra_hacim_m3": 0.0125,
+   "bizim_hacim_m3": 0.0125,
+   "hacim_fark_yuzde": 0.0,
+   "durum": "AYNI"
+  }
+ ],
+ "acikliklar": [
+  {
+   "kod": "P01",
+   "tur": "window",
+   "astra_plan_kutu": [
+    514.75,
+    1066.75,
+    634.75,
+    1076.75
+   ],
+   "astra_kot": [
+    80.0,
+    200.0
+   ],
+   "astra_en": 120.0,
+   "bizim_bosluk": "BOSLUK_PANO_D_TAM_125.5_22_06",
+   "bizim_kutu": [
+    514.75,
+    1064.75,
+    80.0,
+    634.75,
+    1078.75,
+    200.0
+   ],
+   "fark_cm": 0.0,
+   "bizim_dolgu": [
+    "IfcWindow:PENCERE_120x120_06"
+   ],
+   "durum": "AYNI"
+  },
+  {
+   "kod": "P01",
+   "tur": "window",
+   "astra_plan_kutu": [
+    138.25,
+    0.0,
+    258.25,
+    10.0
+   ],
+   "astra_kot": [
+    80.0,
+    200.0
+   ],
+   "astra_en": 120.0,
+   "bizim_bosluk": "BOSLUK_PANO_D_TAM_125.5_01_00",
+   "bizim_kutu": [
+    138.25,
+    -2.0,
+    80.0,
+    258.25,
+    12.0,
+    200.0
+   ],
+   "fark_cm": 0.0,
+   "bizim_dolgu": [
+    "IfcWindow:PENCERE_120x120_00"
+   ],
+   "durum": "AYNI"
+  },
+  {
+   "kod": "P01",
+   "tur": "window",
+   "astra_plan_kutu": [
+    389.25,
+    0.0,
+    509.25,
+    10.0
+   ],
+   "astra_kot": [
+    80.0,
+    200.0
+   ],
+   "astra_en": 120.0,
+   "bizim_bosluk": "BOSLUK_PANO_D_TAM_125.5_03_01",
+   "bizim_kutu": [
+    389.25,
+    -2.0,
+    80.0,
+    509.25,
+    12.0,
+    200.0
+   ],
+   "fark_cm": 0.0,
+   "bizim_dolgu": [
+    "IfcWindow:PENCERE_120x120_01"
+   ],
+   "durum": "AYNI"
+  },
+  {
+   "kod": "P03",
+   "tur": "window",
+   "astra_plan_kutu": [
+    0.0,
+    414.25,
+    10.0,
+    474.25
+   ],
+   "astra_kot": [
+    160.0,
+    200.0
+   ],
+   "astra_en": 60.0,
+   "bizim_bosluk": "BOSLUK_PANO_D_TAM_125.5_27_07",
+   "bizim_kutu": [
+    -2.0,
+    414.25,
+    160.0,
+    12.0,
+    474.25,
+    200.0
+   ],
+   "fark_cm": 0.0,
+   "bizim_dolgu": [
+    "IfcWindow:PENCERE_60x40_07"
+   ],
+   "durum": "AYNI"
+  },
+  {
+   "kod": "P01",
+   "tur": "window",
+   "astra_plan_kutu": [
+    0.0,
+    760.75,
+    10.0,
+    880.75
+   ],
+   "astra_kot": [
+    80.0,
+    200.0
+   ],
+   "astra_en": 120.0,
+   "bizim_bosluk": "BOSLUK_PANO_D_TAM_125.5_30_08",
+   "bizim_kutu": [
+    -2.0,
+    760.75,
+    80.0,
+    12.0,
+    880.75,
+    200.0
+   ],
+   "fark_cm": 0.0,
+   "bizim_dolgu": [
+    "IfcWindow:PENCERE_120x120_08"
+   ],
+   "durum": "AYNI"
+  },
+  {
+   "kod": "P02",
+   "tur": "window",
+   "astra_plan_kutu": [
+    763.0,
+    760.75,
+    773.0,
+    880.75
+   ],
+   "astra_kot": [
+    20.0,
+    200.0
+   ],
+   "astra_en": 120.0,
+   "bizim_bosluk": "BOSLUK_PANO_D_TAM_125.5_49_12",
+   "bizim_kutu": [
+    761.0,
+    760.75,
+    20.0,
+    775.0,
+    880.75,
+    200.0
+   ],
+   "fark_cm": 0.0,
+   "bizim_dolgu": [
+    "IfcWindow:PENCERE_120x180_12"
+   ],
+   "durum": "AYNI"
+  },
+  {
+   "kod": "P02",
+   "tur": "window",
+   "astra_plan_kutu": [
+    637.5,
+    133.25,
+    647.5,
+    253.25
+   ],
+   "astra_kot": [
+    20.0,
+    200.0
+   ],
+   "astra_en": 120.0,
+   "bizim_bosluk": "BOSLUK_PANO_D_TAM_125.5_44_10",
+   "bizim_kutu": [
+    635.5,
+    133.25,
+    20.0,
+    649.5,
+    253.25,
+    200.0
+   ],
+   "fark_cm": 0.0,
+   "bizim_dolgu": [
+    "IfcWindow:PENCERE_120x180_10"
+   ],
+   "durum": "AYNI"
+  },
+  {
+   "kod": "K02",
+   "tur": "door",
+   "astra_plan_kutu": [
+    637.5,
+    393.25,
+    647.5,
+    490.25
+   ],
+   "astra_kot": [
+    0,
+    200
+   ],
+   "astra_en": 97.0,
+   "bizim_bosluk": "BOSLUK_PANO_D_OZEL_120.5_46_11",
+   "bizim_kutu": [
+    635.5,
+    393.25,
+    0.0,
+    649.5,
+    490.25,
+    200.0
+   ],
+   "fark_cm": 0.0,
+   "bizim_dolgu": [
+    "IfcDoor:KAPI_DIS_CELIK_11"
+   ],
+   "durum": "AYNI"
+  },
+  {
+   "kod": "K01",
+   "tur": "door",
+   "astra_plan_kutu": [
+    220.0,
+    378.5,
+    302.0,
+    384.5
+   ],
+   "astra_kot": [
+    0,
+    200
+   ],
+   "astra_en": 82.0,
+   "bizim_bosluk": "BOSLUK_PANO_I_TAM_125.5_07_02",
+   "bizim_kutu": [
+    220.0,
+    376.5,
+    0.0,
+    302.0,
+    386.5,
+    200.0
+   ],
+   "fark_cm": 0.0,
+   "bizim_dolgu": [
+    "IfcDoor:KAPI_IC_PANEL_02"
+   ],
+   "durum": "AYNI"
+  },
+  {
+   "kod": "K01",
+   "tur": "door",
+   "astra_plan_kutu": [
+    218.5,
+    629.5,
+    300.5,
+    635.5
+   ],
+   "astra_kot": [
+    0,
+    200
+   ],
+   "astra_en": 82.0,
+   "bizim_bosluk": "BOSLUK_PANO_I_OZEL_122.5_17_05",
+   "bizim_kutu": [
+    218.5,
+    627.5,
+    0.0,
+    300.5,
+    637.5,
+    200.0
+   ],
+   "fark_cm": 0.0,
+   "bizim_dolgu": [
+    "IfcDoor:KAPI_IC_PANEL_05"
+   ],
+   "durum": "AYNI"
+  },
+  {
+   "kod": "K01",
+   "tur": "door",
+   "astra_plan_kutu": [
+    345.5,
+    378.5,
+    427.5,
+    384.5
+   ],
+   "astra_kot": [
+    0,
+    200
+   ],
+   "astra_en": 82.0,
+   "bizim_bosluk": "BOSLUK_PANO_I_TAM_125.5_08_03",
+   "bizim_kutu": [
+    345.5,
+    376.5,
+    0.0,
+    427.5,
+    386.5,
+    200.0
+   ],
+   "fark_cm": 0.0,
+   "bizim_dolgu": [
+    "IfcDoor:KAPI_IC_PANEL_03"
+   ],
+   "durum": "AYNI"
+  },
+  {
+   "kod": "K01",
+   "tur": "door",
+   "astra_plan_kutu": [
+    195.25,
+    404.75,
+    201.25,
+    486.75
+   ],
+   "astra_kot": [
+    0,
+    200
+   ],
+   "astra_en": 82.0,
+   "bizim_bosluk": "BOSLUK_PANO_I_OZEL_122.5_33_09",
+   "bizim_kutu": [
+    193.25,
+    404.75,
+    0.0,
+    203.25,
+    486.75,
+    200.0
+   ],
+   "fark_cm": 0.0,
+   "bizim_dolgu": [
+    "IfcDoor:KAPI_IC_PANEL_09"
+   ],
+   "durum": "AYNI"
+  },
+  {
+   "kod": null,
+   "tur": "open_passage",
+   "astra_plan_kutu": [
+    471.0,
+    504.0,
+    553.0,
+    510.0
+   ],
+   "astra_kot": [
+    0,
+    200
+   ],
+   "astra_en": 82.0,
+   "bizim_bosluk": "BOSLUK_PANO_I_TAM_125.5_13_04",
+   "bizim_kutu": [
+    471.0,
+    502.0,
+    0.0,
+    553.0,
+    512.0,
+    200.0
+   ],
+   "fark_cm": 0.0,
+   "bizim_dolgu": [
+    "dolgu yok"
+   ],
+   "durum": "AYNI"
+  }
+ ],
+ "odalar": [
+  {
+   "oda": "ODA 1",
+   "astra_m2": 13.4011,
+   "bizim_m2": 13.4011,
+   "fark_m2": 0.0
+  },
+  {
+   "oda": "ODA 2",
+   "astra_m2": 11.4511,
+   "bizim_m2": 11.4511,
+   "fark_m2": -0.0
+  },
+  {
+   "oda": "MUTFAK",
+   "astra_m2": 11.4511,
+   "bizim_m2": 11.4511,
+   "fark_m2": -0.0
+  },
+  {
+   "oda": "BANYO/WC",
+   "astra_m2": 4.5386,
+   "bizim_m2": 4.5386,
+   "fark_m2": -0.0
+  },
+  {
+   "oda": "SALON",
+   "astra_m2": 24.2631,
+   "bizim_m2": 24.2631,
+   "fark_m2": -0.0
+  },
+  {
+   "oda": "ANTRE",
+   "astra_m2": 6.7621,
+   "bizim_m2": 6.7621,
+   "fark_m2": -0.0
+  },
+  {
+   "oda": "VERANDA",
+   "astra_m2": 6.3001,
+   "bizim_m2": 6.3001,
+   "fark_m2": 0.0
+  }
+ ]
+}

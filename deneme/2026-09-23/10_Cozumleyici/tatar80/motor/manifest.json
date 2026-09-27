@@ -1,0 +1,38 @@
+{
+  "is_emri_no": "PM-BAYI-TATAR-80M2-1609",
+  "revizyon": 1,
+  "generated_at": 1790183915,
+  "duration_s": 32.12,
+  "dxf": "Portman_PM-BAYI-TATAR-80M2-1609_r01.dxf",
+  "pdf": "Portman_PM-BAYI-TATAR-80M2-1609_r01.pdf",
+  "dxf_sha256": "24f4f6153d5118944575090dcd5e9a14d364ca0e4f39d7a8b0c01e12d7002110",
+  "pdf_sha256": "7217336d5dca6b176f80bafe21afdc32720d4e6408eda586f3b44c510bf78258",
+  "tani_pdf": null,
+  "pdf_skipped_reason": null,
+  "validation_passed": true,
+  "warnings": [],
+  "generator": "portman-motor-v1.1",
+  "generator_sha256": {
+    "geometry.py": "1328ae5ad8ec803c4c9dd968fb22e00f4abeee5807eeb66fd2060f0609ac1182",
+    "dxf_out.py": "b2c96ce97c1af53e9a1de05d69ee9d9da51927680e658f29d2bf487422e75344",
+    "validate.py": "e94a73de8192fc93226158cc27147033a35ba6302547cfc60bbe49ad4a8771ee",
+    "katalog.py": "7f0e505e2fb34783b138c394b2eb591b1655f2b8d592daa93b5296aec5917b3d"
+  },
+  "reference_dxf_sha256": "22cc9304106725f555afc59223433b8383fbe3a19ba8ff4a3b40eb23b61fab66",
+  "pdf_generated_from_reopened_dxf": true,
+  "yeni_kodlar": [
+    "D09",
+    "K03",
+    "D10",
+    "I12",
+    "I13",
+    "I14",
+    "I15",
+    "I16",
+    "D11",
+    "D12",
+    "I17",
+    "I18",
+    "V05"
+  ]
+}

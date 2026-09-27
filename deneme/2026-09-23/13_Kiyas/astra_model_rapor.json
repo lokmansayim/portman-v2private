@@ -1,0 +1,5442 @@
+{
+ "ASTRA_YanVerandali_R01": {
+  "yol": "/Users/lokmansayim/Documents/Codex/2026-09-05/prefabrik-2-arti-1-6x8/outputs/blender-aktarim/yan-verandali-2plus1-R01/model.blend",
+  "nesne": 232,
+  "tur": {
+   "CURVE": 67,
+   "MESH": 153,
+   "CAMERA": 2,
+   "LIGHT": 3,
+   "FONT": 7
+  },
+  "koleksiyonlar": [
+   "PEV_Windows",
+   "PEV_Veranda_posts",
+   "PEV_Roof_reference",
+   "PEV_Presentation",
+   "PEV_Panels",
+   "PEV_Doors",
+   "PEV_Connections",
+   "PEV_CAD_profile_references",
+   "Collection"
+  ],
+  "sahneler": [
+   "Scene"
+  ],
+  "genel_kutu": {
+   "min_m": [
+    -1.3,
+    -6.45,
+    -1.0
+   ],
+   "max_m": [
+    19.76,
+    11.767,
+    3.503
+   ],
+   "boyut_cm": [
+    2106.0,
+    1821.7,
+    450.3
+   ]
+  },
+  "isim_kokleri": {
+   "db35153a_profile_surface": 8,
+   "62582641_profile_surface": 8,
+   "29ce1c90_profile_surface": 8,
+   "0759a7bf_profile_surface": 8,
+   "PEV_light": 3,
+   "label_ODA ": 2,
+   "fbf03a49_side": 2,
+   "f8badccc_side": 2,
+   "e59bda53_side": 2,
+   "d40a9898_side": 2,
+   "b7799e23_source_jamb": 2,
+   "afd71c96_side": 2,
+   "86d40e65_side": 2,
+   "83c3943d_source_jamb": 2,
+   "81a3829a_side": 2,
+   "74a90101_side": 2,
+   "641d6b10_source_jamb": 2,
+   "5402db10_side": 2,
+   "4aa7a62a_source_jamb": 2,
+   "3b8f649e_source_jamb": 2,
+   "3ae9c2ac_source_jamb": 2,
+   "317d4ea0_source_jamb": 2,
+   "2c61cad4_side": 2,
+   "24f5e611_side": 2,
+   "1c92e47e_side": 2,
+   "0393bcde_side": 2,
+   "roof-pro_original_elevation_lines": 1,
+   "presenta_support_plane": 1,
+   "PEV_Top": 1,
+   "PEV_Perspective": 1,
+   "label_VERANDA": 1,
+   "label_SALON": 1,
+   "label_MUTFAK": 1,
+   "label_BANYO/WC": 1,
+   "label_ANTRE": 1,
+   "fbf03a49_module_outline": 1,
+   "fbf03a49_below_opening": 1,
+   "fbf03a49_above_opening": 1,
+   "f8badccc_module_outline": 1,
+   "f8badccc_above_opening": 1,
+   "f21f3457_profile": 1,
+   "ef00702c_original_plan_symbol": 1,
+   "ef00702c_open_leaf": 1,
+   "ee970d65_cad_profile": 1,
+   "ec610120_side": 1,
+   "ec610120_module_outline": 1,
+   "ebc658db_side": 1,
+   "ebc658db_module_outline": 1,
+   "e59bda53_module_outline": 1,
+   "e59bda53_above_opening": 1,
+   "df4abea1_side": 1,
+   "df4abea1_module_outline": 1,
+   "dd97ceec_side": 1,
+   "dd97ceec_module_outline": 1,
+   "dd85dee0_side": 1,
+   "dd85dee0_module_outline": 1,
+   "dc851c23_side": 1,
+   "dc851c23_module_outline": 1,
+   "db11778e_profile": 1,
+   "d7b18062_profile": 1
+  },
+  "malzemeler": {
+   "PEV_wall": 64,
+   "PEV_connection": 41,
+   "PEV_special": 21,
+   "PEV_frame": 14,
+   "PEV_window": 7,
+   "PEV_door": 5,
+   "PEV_ground": 1
+  },
+  "en_sik_mesh_boyutlari_cm": [
+   [
+    [
+     10.0,
+     125.5,
+     250.0
+    ],
+    19
+   ],
+   [
+    [
+     0.0,
+     2.5,
+     250.0
+    ],
+    16
+   ],
+   [
+    [
+     2.8,
+     10.0,
+     250.0
+    ],
+    8
+   ],
+   [
+    [
+     6.0,
+     125.5,
+     250.0
+    ],
+    8
+   ],
+   [
+    [
+     0.0,
+     6.0,
+     250.0
+    ],
+    8
+   ],
+   [
+    [
+     0.0,
+     5.0,
+     250.0
+    ],
+    8
+   ],
+   [
+    [
+     6.0,
+     6.0,
+     120.0
+    ],
+    8
+   ],
+   [
+    [
+     10.0,
+     50.0,
+     120.0
+    ],
+    6
+   ],
+   [
+    [
+     5.0,
+     10.0,
+     250.0
+    ],
+    6
+   ],
+   [
+    [
+     6.0,
+     50.0,
+     82.0
+    ],
+    5
+   ],
+   [
+    [
+     2.7,
+     10.0,
+     250.0
+    ],
+    4
+   ],
+   [
+    [
+     6.0,
+     21.7,
+     250.0
+    ],
+    4
+   ],
+   [
+    [
+     3.9,
+     74.2,
+     200.0
+    ],
+    4
+   ],
+   [
+    [
+     10.0,
+     80.0,
+     120.0
+    ],
+    4
+   ],
+   [
+    [
+     6.0,
+     6.0,
+     180.0
+    ],
+    4
+   ],
+   [
+    [
+     0.0,
+     108.0,
+     120.0
+    ],
+    4
+   ],
+   [
+    [
+     6.0,
+     122.5,
+     250.0
+    ],
+    3
+   ],
+   [
+    [
+     10.0,
+     20.0,
+     120.0
+    ],
+    2
+   ],
+   [
+    [
+     6.0,
+     21.8,
+     250.0
+    ],
+    2
+   ],
+   [
+    [
+     6.0,
+     62.8,
+     250.0
+    ],
+    2
+   ],
+   [
+    [
+     10.0,
+     10.0,
+     250.0
+    ],
+    2
+   ],
+   [
+    [
+     6.0,
+     62.7,
+     250.0
+    ],
+    2
+   ],
+   [
+    [
+     0.0,
+     108.0,
+     180.0
+    ],
+    2
+   ],
+   [
+    [
+     6.0,
+     20.2,
+     250.0
+    ],
+    2
+   ],
+   [
+    [
+     10.0,
+     62.7,
+     250.0
+    ],
+    2
+   ]
+  ],
+  "ozellikli_nesne": 232,
+  "ozellik_ornekleri": [
+   {
+    "ad": "roof-pro_original_elevation_lines.001",
+    "ozellik": {
+     "transfer_owner": "PEV-YAN-VERANDALI-2PLUS1/BLENDER-R01",
+     "source_entity_id": "roof-profile-reference",
+     "subpart_id": "original_elevation_lines",
+     "source_cad_path": "YENI_CATI",
+     "product_code": "",
+     "source_revision": "BLENDER-R01",
+     "model_data_sha256": "32ddbacbb10f67e4c84b59dc0e3fbdfb1ba93fabb94b58893aa56e1c0895dd06",
+     "scope": "reference",
+     "bom_scope": false
+    }
+   },
+   {
+    "ad": "presenta_support_plane.001",
+    "ozellik": {
+     "transfer_owner": "PEV-YAN-VERANDALI-2PLUS1/BLENDER-R01",
+     "source_entity_id": "presentation",
+     "subpart_id": "support_plane",
+     "source_cad_path": "",
+     "product_code": "",
+     "source_revision": "BLENDER-R01",
+     "model_data_sha256": "32ddbacbb10f67e4c84b59dc0e3fbdfb1ba93fabb94b58893aa56e1c0895dd06",
+     "scope": "presentation",
+     "bom_scope": false
+    }
+   },
+   {
+    "ad": "PEV_Top",
+    "ozellik": {
+     "transfer_owner": "PEV-YAN-VERANDALI-2PLUS1/BLENDER-R01",
+     "source_entity_id": "presentation",
+     "subpart_id": "Top",
+     "source_cad_path": "",
+     "product_code": "",
+     "source_revision": "BLENDER-R01",
+     "model_data_sha256": "32ddbacbb10f67e4c84b59dc0e3fbdfb1ba93fabb94b58893aa56e1c0895dd06",
+     "scope": "physical",
+     "bom_scope": false
+    }
+   },
+   {
+    "ad": "PEV_Perspective",
+    "ozellik": {
+     "transfer_owner": "PEV-YAN-VERANDALI-2PLUS1/BLENDER-R01",
+     "source_entity_id": "presentation",
+     "subpart_id": "Perspective",
+     "source_cad_path": "",
+     "product_code": "",
+     "source_revision": "BLENDER-R01",
+     "model_data_sha256": "32ddbacbb10f67e4c84b59dc0e3fbdfb1ba93fabb94b58893aa56e1c0895dd06",
+     "scope": "physical",
+     "bom_scope": false
+    }
+   },
+   {
+    "ad": "PEV_light_2.001",
+    "ozellik": {
+     "transfer_owner": "PEV-YAN-VERANDALI-2PLUS1/BLENDER-R01",
+     "source_entity_id": "presentation",
+     "subpart_id": "light2",
+     "source_cad_path": "",
+     "product_code": "",
+     "source_revision": "BLENDER-R01",
+     "model_data_sha256": "32ddbacbb10f67e4c84b59dc0e3fbdfb1ba93fabb94b58893aa56e1c0895dd06",
+     "scope": "physical",
+     "bom_scope": false
+    }
+   },
+   {
+    "ad": "PEV_light_1.001",
+    "ozellik": {
+     "transfer_owner": "PEV-YAN-VERANDALI-2PLUS1/BLENDER-R01",
+     "source_entity_id": "presentation",
+     "subpart_id": "light1",
+     "source_cad_path": "",
+     "product_code": "",
+     "source_revision": "BLENDER-R01",
+     "model_data_sha256": "32ddbacbb10f67e4c84b59dc0e3fbdfb1ba93fabb94b58893aa56e1c0895dd06",
+     "scope": "physical",
+     "bom_scope": false
+    }
+   },
+   {
+    "ad": "PEV_light_0.001",
+    "ozellik": {
+     "transfer_owner": "PEV-YAN-VERANDALI-2PLUS1/BLENDER-R01",
+     "source_entity_id": "presentation",
+     "subpart_id": "light0",
+     "source_cad_path": "",
+     "product_code": "",
+     "source_revision": "BLENDER-R01",
+     "model_data_sha256": "32ddbacbb10f67e4c84b59dc0e3fbdfb1ba93fabb94b58893aa56e1c0895dd06",
+     "scope": "physical",
+     "bom_scope": false
+    }
+   },
+   {
+    "ad": "label_VERANDA.001",
+    "ozellik": {
+     "transfer_owner": "PEV-YAN-VERANDALI-2PLUS1/BLENDER-R01",
+     "source_entity_id": "room-2AA0",
+     "subpart_id": "label",
+     "source_cad_path": "2AA0",
+     "product_code": "",
+     "source_revision": "BLENDER-R01",
+     "model_data_sha256": "32ddbacbb10f67e4c84b59dc0e3fbdfb1ba93fabb94b58893aa56e1c0895dd06",
+     "scope": "presentation",
+     "bom_scope": false
+    }
+   },
+   {
+    "ad": "label_SALON.001",
+    "ozellik": {
+     "transfer_owner": "PEV-YAN-VERANDALI-2PLUS1/BLENDER-R01",
+     "source_entity_id": "room-2A9E",
+     "subpart_id": "label",
+     "source_cad_path": "2A9E",
+     "product_code": "",
+     "source_revision": "BLENDER-R01",
+     "model_data_sha256": "32ddbacbb10f67e4c84b59dc0e3fbdfb1ba93fabb94b58893aa56e1c0895dd06",
+     "scope": "presentation",
+     "bom_scope": false
+    }
+   },
+   {
+    "ad": "label_ODA 2.001",
+    "ozellik": {
+     "transfer_owner": "PEV-YAN-VERANDALI-2PLUS1/BLENDER-R01",
+     "source_entity_id": "room-2A9B",
+     "subpart_id": "label",
+     "source_cad_path": "2A9B",
+     "product_code": "",
+     "source_revision": "BLENDER-R01",
+     "model_data_sha256": "32ddbacbb10f67e4c84b59dc0e3fbdfb1ba93fabb94b58893aa56e1c0895dd06",
+     "scope": "presentation",
+     "bom_scope": false
+    }
+   },
+   {
+    "ad": "label_ODA 1.001",
+    "ozellik": {
+     "transfer_owner": "PEV-YAN-VERANDALI-2PLUS1/BLENDER-R01",
+     "source_entity_id": "room-2A9A",
+     "subpart_id": "label",
+     "source_cad_path": "2A9A",
+     "product_code": "",
+     "source_revision": "BLENDER-R01",
+     "model_data_sha256": "32ddbacbb10f67e4c84b59dc0e3fbdfb1ba93fabb94b58893aa56e1c0895dd06",
+     "scope": "presentation",
+     "bom_scope": false
+    }
+   },
+   {
+    "ad": "label_MUTFAK.001",
+    "ozellik": {
+     "transfer_owner": "PEV-YAN-VERANDALI-2PLUS1/BLENDER-R01",
+     "source_entity_id": "room-2A9C",
+     "subpart_id": "label",
+     "source_cad_path": "2A9C",
+     "product_code": "",
+     "source_revision": "BLENDER-R01",
+     "model_data_sha256": "32ddbacbb10f67e4c84b59dc0e3fbdfb1ba93fabb94b58893aa56e1c0895dd06",
+     "scope": "presentation",
+     "bom_scope": false
+    }
+   },
+   {
+    "ad": "label_BANYO/WC.001",
+    "ozellik": {
+     "transfer_owner": "PEV-YAN-VERANDALI-2PLUS1/BLENDER-R01",
+     "source_entity_id": "room-2A9D",
+     "subpart_id": "label",
+     "source_cad_path": "2A9D",
+     "product_code": "",
+     "source_revision": "BLENDER-R01",
+     "model_data_sha256": "32ddbacbb10f67e4c84b59dc0e3fbdfb1ba93fabb94b58893aa56e1c0895dd06",
+     "scope": "presentation",
+     "bom_scope": false
+    }
+   },
+   {
+    "ad": "label_ANTRE.001",
+    "ozellik": {
+     "transfer_owner": "PEV-YAN-VERANDALI-2PLUS1/BLENDER-R01",
+     "source_entity_id": "room-2A9F",
+     "subpart_id": "label",
+     "source_cad_path": "2A9F",
+     "product_code": "",
+     "source_revision": "BLENDER-R01",
+     "model_data_sha256": "32ddbacbb10f67e4c84b59dc0e3fbdfb1ba93fabb94b58893aa56e1c0895dd06",
+     "scope": "presentation",
+     "bom_scope": false
+    }
+   },
+   {
+    "ad": "fbf03a49_side_1.001",
+    "ozellik": {
+     "transfer_owner": "PEV-YAN-VERANDALI-2PLUS1/BLENDER-R01",
+     "source_entity_id": "fbf03a49-5b7c-5137-8974-7c0bd27591c8",
+     "subpart_id": "side_1",
+     "source_cad_path": "2A01",
+     "product_code": "D03",
+     "source_revision": "BLENDER-R01",
+     "model_data_sha256": "32ddbacbb10f67e4c84b59dc0e3fbdfb1ba93fabb94b58893aa56e1c0895dd06",
+     "scope": "physical",
+     "bom_scope": true
+    }
+   },
+   {
+    "ad": "fbf03a49_side_0.001",
+    "ozellik": {
+     "transfer_owner": "PEV-YAN-VERANDALI-2PLUS1/BLENDER-R01",
+     "source_entity_id": "fbf03a49-5b7c-5137-8974-7c0bd27591c8",
+     "subpart_id": "side_0",
+     "source_cad_path": "2A01",
+     "product_code": "D03",
+     "source_revision": "BLENDER-R01",
+     "model_data_sha256": "32ddbacbb10f67e4c84b59dc0e3fbdfb1ba93fabb94b58893aa56e1c0895dd06",
+     "scope": "physical",
+     "bom_scope": true
+    }
+   },
+   {
+    "ad": "fbf03a49_module_outline.001",
+    "ozellik": {
+     "transfer_owner": "PEV-YAN-VERANDALI-2PLUS1/BLENDER-R01",
+     "source_entity_id": "fbf03a49-5b7c-5137-8974-7c0bd27591c8",
+     "subpart_id": "module_outline",
+     "source_cad_path": "2A01",
+     "product_code": "D03",
+     "source_revision": "BLENDER-R01",
+     "model_data_sha256": "32ddbacbb10f67e4c84b59dc0e3fbdfb1ba93fabb94b58893aa56e1c0895dd06",
+     "scope": "presentation",
+     "bom_scope": true
+    }
+   },
+   {
+    "ad": "fbf03a49_below_opening.001",
+    "ozellik": {
+     "transfer_owner": "PEV-YAN-VERANDALI-2PLUS1/BLENDER-R01",
+     "source_entity_id": "fbf03a49-5b7c-5137-8974-7c0bd27591c8",
+     "subpart_id": "below_opening",
+     "source_cad_path": "2A01",
+     "product_code": "D03",
+     "source_revision": "BLENDER-R01",
+     "model_data_sha256": "32ddbacbb10f67e4c84b59dc0e3fbdfb1ba93fabb94b58893aa56e1c0895dd06",
+     "scope": "physical",
+     "bom_scope": true
+    }
+   },
+   {
+    "ad": "fbf03a49_above_opening.001",
+    "ozellik": {
+     "transfer_owner": "PEV-YAN-VERANDALI-2PLUS1/BLENDER-R01",
+     "source_entity_id": "fbf03a49-5b7c-5137-8974-7c0bd27591c8",
+     "subpart_id": "above_opening",
+     "source_cad_path": "2A01",
+     "product_code": "D03",
+     "source_revision": "BLENDER-R01",
+     "model_data_sha256": "32ddbacbb10f67e4c84b59dc0e3fbdfb1ba93fabb94b58893aa56e1c0895dd06",
+     "scope": "physical",
+     "bom_scope": true
+    }
+   },
+   {
+    "ad": "f8badccc_side_1.001",
+    "ozellik": {
+     "transfer_owner": "PEV-YAN-VERANDALI-2PLUS1/BLENDER-R01",
+     "source_entity_id": "f8badccc-5d58-5da8-96ad-ebd10412234b",
+     "subpart_id": "side_1",
+     "source_cad_path": "2A21",
+     "product_code": "I11",
+     "source_revision": "BLENDER-R01",
+     "model_data_sha256": "32ddbacbb10f67e4c84b59dc0e3fbdfb1ba93fabb94b58893aa56e1c0895dd06",
+     "scope": "physical",
+     "bom_scope": true
+    }
+   },
+   {
+    "ad": "f8badccc_side_0.001",
+    "ozellik": {
+     "transfer_owner": "PEV-YAN-VERANDALI-2PLUS1/BLENDER-R01",
+     "source_entity_id": "f8badccc-5d58-5da8-96ad-ebd10412234b",
+     "subpart_id": "side_0",
+     "source_cad_path": "2A21",
+     "product_code": "I11",
+     "source_revision": "BLENDER-R01",
+     "model_data_sha256": "32ddbacbb10f67e4c84b59dc0e3fbdfb1ba93fabb94b58893aa56e1c0895dd06",
+     "scope": "physical",
+     "bom_scope": true
+    }
+   },
+   {
+    "ad": "f8badccc_module_outline.001",
+    "ozellik": {
+     "transfer_owner": "PEV-YAN-VERANDALI-2PLUS1/BLENDER-R01",
+     "source_entity_id": "f8badccc-5d58-5da8-96ad-ebd10412234b",
+     "subpart_id": "module_outline",
+     "source_cad_path": "2A21",
+     "product_code": "I11",
+     "source_revision": "BLENDER-R01",
+     "model_data_sha256": "32ddbacbb10f67e4c84b59dc0e3fbdfb1ba93fabb94b58893aa56e1c0895dd06",
+     "scope": "presentation",
+     "bom_scope": true
+    }
+   },
+   {
+    "ad": "f8badccc_above_opening.001",
+    "ozellik": {
+     "transfer_owner": "PEV-YAN-VERANDALI-2PLUS1/BLENDER-R01",
+     "source_entity_id": "f8badccc-5d58-5da8-96ad-ebd10412234b",
+     "subpart_id": "above_opening",
+     "source_cad_path": "2A21",
+     "product_code": "I11",
+     "source_revision": "BLENDER-R01",
+     "model_data_sha256": "32ddbacbb10f67e4c84b59dc0e3fbdfb1ba93fabb94b58893aa56e1c0895dd06",
+     "scope": "physical",
+     "bom_scope": true
+    }
+   },
+   {
+    "ad": "f21f3457_profile_0.001",
+    "ozellik": {
+     "transfer_owner": "PEV-YAN-VERANDALI-2PLUS1/BLENDER-R01",
+     "source_entity_id": "f21f3457-57b9-5025-8418-5fcf80027b9a",
+     "subpart_id": "profile_0",
+     "source_cad_path": "2A76",
+     "product_code": "B02",
+     "source_revision": "BLENDER-R01",
+     "model_data_sha256": "32ddbacbb10f67e4c84b59dc0e3fbdfb1ba93fabb94b58893aa56e1c0895dd06",
+     "scope": "physical",
+     "bom_scope": true
+    }
+   },
+   {
+    "ad": "ef00702c_original_plan_symbol.001",
+    "ozellik": {
+     "transfer_owner": "PEV-YAN-VERANDALI-2PLUS1/BLENDER-R01",
+     "source_entity_id": "ef00702c-9382-58ab-8491-f68fac273afc",
+     "subpart_id": "original_plan_symbol",
+     "source_cad_path": "2A21/2A1D",
+     "product_code": "K01",
+     "source_revision": "BLENDER-R01",
+     "model_data_sha256": "32ddbacbb10f67e4c84b59dc0e3fbdfb1ba93fabb94b58893aa56e1c0895dd06",
+     "scope": "reference",
+     "bom_scope": true
+    }
+   }
+  ],
+  "tum_nesneler": [
+   {
+    "ad": "roof-pro_original_elevation_lines.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     2106.0,
+     472.4,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "presenta_support_plane.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     773.0,
+     1076.7,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_Top",
+    "tur": "CAMERA",
+    "boyut_cm": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_Perspective",
+    "tur": "CAMERA",
+    "boyut_cm": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_light_2.001",
+    "tur": "LIGHT",
+    "boyut_cm": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_light_1.001",
+    "tur": "LIGHT",
+    "boyut_cm": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_light_0.001",
+    "tur": "LIGHT",
+    "boyut_cm": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "label_VERANDA.001",
+    "tur": "FONT",
+    "boyut_cm": [
+     82.3,
+     30.5,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "label_SALON.001",
+    "tur": "FONT",
+    "boyut_cm": [
+     63.5,
+     30.6,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "label_ODA 2.001",
+    "tur": "FONT",
+    "boyut_cm": [
+     60.5,
+     30.6,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "label_ODA 1.001",
+    "tur": "FONT",
+    "boyut_cm": [
+     60.5,
+     30.6,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "label_MUTFAK.001",
+    "tur": "FONT",
+    "boyut_cm": [
+     68.6,
+     30.5,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "label_BANYO/WC.001",
+    "tur": "FONT",
+    "boyut_cm": [
+     96.3,
+     30.6,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "label_ANTRE.001",
+    "tur": "FONT",
+    "boyut_cm": [
+     56.3,
+     30.5,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "fbf03a49_side_1.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     10.0,
+     2.7,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "fbf03a49_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     10.0,
+     2.8,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "fbf03a49_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     210.0,
+     325.5,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "fbf03a49_below_opening.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     10.0,
+     120.0,
+     20.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "fbf03a49_above_opening.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     10.0,
+     120.0,
+     50.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "f8badccc_side_1.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     21.7,
+     6.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "f8badccc_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     21.8,
+     6.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "f8badccc_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     325.5,
+     206.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "f8badccc_above_opening.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     82.0,
+     6.0,
+     50.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "f21f3457_profile_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     10.0,
+     5.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "ef00702c_original_plan_symbol.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     286.0,
+     282.3,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "ef00702c_open_leaf.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     3.9,
+     74.2,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "ee970d65_cad_profile.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     325.5,
+     210.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "ec610120_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     6.0,
+     122.5,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "ec610120_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     206.0,
+     322.5,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "ebc658db_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     125.5,
+     6.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "ebc658db_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     325.5,
+     206.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "e59bda53_side_1.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     21.7,
+     6.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "e59bda53_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     21.7,
+     6.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "e59bda53_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     325.5,
+     206.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "e59bda53_above_opening.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     82.0,
+     6.0,
+     50.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "df4abea1_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     62.8,
+     6.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "df4abea1_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     262.8,
+     206.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "dd97ceec_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     6.0,
+     125.5,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "dd97ceec_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     206.0,
+     325.5,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "dd85dee0_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     6.0,
+     125.5,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "dd85dee0_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     206.0,
+     325.5,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "dc851c23_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     10.0,
+     125.5,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "dc851c23_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     210.0,
+     325.5,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "db35153a_profile_surface_7.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     2.5,
+     0.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "db35153a_profile_surface_6.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     0.0,
+     6.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "db35153a_profile_surface_5.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     2.5,
+     0.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "db35153a_profile_surface_4.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     0.0,
+     5.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "db35153a_profile_surface_3.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     0.0,
+     5.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "db35153a_profile_surface_2.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     0.0,
+     2.5,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "db35153a_profile_surface_1.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     6.0,
+     0.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "db35153a_profile_surface_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     0.0,
+     2.5,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "db11778e_profile_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     10.0,
+     10.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "d7b18062_profile_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     10.0,
+     5.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "d40a9898_side_1.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     2.8,
+     10.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "d40a9898_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     2.8,
+     10.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "d40a9898_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     325.5,
+     210.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "d40a9898_below_opening.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     120.0,
+     10.0,
+     80.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "d40a9898_above_opening.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     120.0,
+     10.0,
+     50.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "d2b7c6ca_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     62.7,
+     6.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "d2b7c6ca_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     262.8,
+     206.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "ce7c0b93_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     6.0,
+     125.5,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "ce7c0b93_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     206.0,
+     325.5,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "c24d9d85_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     10.0,
+     125.5,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "c24d9d85_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     210.0,
+     325.5,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "b7799e23_source_jamb_1.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     6.0,
+     6.0,
+     180.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "b7799e23_source_jamb_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     6.0,
+     6.0,
+     180.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "b7799e23_glazing_reference.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     0.0,
+     108.0,
+     180.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "b7799e23_cad_sill_trace.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     210.0,
+     320.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "b6a8a606_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     125.5,
+     10.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "b6a8a606_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     325.5,
+     210.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "b399c046_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     62.8,
+     6.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "b399c046_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     262.8,
+     206.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "b126cf3d_profile_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     10.0,
+     5.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "afd71c96_side_1.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     20.2,
+     6.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "afd71c96_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     20.2,
+     6.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "afd71c96_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     322.5,
+     206.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "afd71c96_above_opening.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     82.0,
+     6.0,
+     50.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "ac2ad9fe_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     10.0,
+     125.5,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "ac2ad9fe_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     210.0,
+     325.5,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "a4b95e63_original_plan_symbol.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     282.3,
+     286.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "a4b95e63_open_leaf.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     74.2,
+     3.9,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "a22dde3b_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     125.5,
+     6.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "a22dde3b_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     325.5,
+     206.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "9efe757c_profile_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     10.0,
+     5.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "9ebeb241_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     10.0,
+     125.5,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "9ebeb241_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     210.0,
+     325.5,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "9ea5a67c_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     125.5,
+     10.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "9ea5a67c_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     325.5,
+     210.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "99dd55ad_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     62.7,
+     6.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "99dd55ad_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     262.8,
+     206.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "8f13ebbc_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     10.0,
+     125.5,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "8f13ebbc_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     210.0,
+     325.5,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "86d40e65_side_1.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     10.0,
+     32.8,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "86d40e65_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     10.0,
+     32.7,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "86d40e65_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     210.0,
+     325.5,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "86d40e65_below_opening.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     10.0,
+     60.0,
+     160.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "86d40e65_above_opening.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     10.0,
+     60.0,
+     50.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "83c3943d_source_jamb_1.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     6.0,
+     6.0,
+     120.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "83c3943d_source_jamb_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     6.0,
+     6.0,
+     120.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "83c3943d_glazing_reference.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     0.0,
+     108.0,
+     120.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "83c3943d_cad_sill_trace.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     210.0,
+     320.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "83afb6f3_profile_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     10.0,
+     5.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "825d5e6c_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     10.0,
+     125.5,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "825d5e6c_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     210.0,
+     325.5,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "81a3829a_side_1.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     21.7,
+     6.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "81a3829a_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     21.8,
+     6.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "81a3829a_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     325.5,
+     206.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "81a3829a_above_opening.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     82.0,
+     6.0,
+     50.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "7f57ac53_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     10.0,
+     62.7,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "7f57ac53_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     210.0,
+     262.7,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "7e0a7704_original_plan_symbol.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     286.0,
+     282.3,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "7e0a7704_open_leaf.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     3.9,
+     74.2,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "78acf3e0_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     125.5,
+     10.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "78acf3e0_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     325.5,
+     210.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "760478f3_cad_profile.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     210.0,
+     702.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "74a90101_side_1.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     6.0,
+     20.3,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "74a90101_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     6.0,
+     20.3,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "74a90101_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     206.0,
+     322.5,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "74a90101_above_opening.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     6.0,
+     82.0,
+     50.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "70365d76_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     6.0,
+     57.7,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "70365d76_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     206.0,
+     257.7,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "6e957bb8_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     6.0,
+     122.5,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "6e957bb8_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     206.0,
+     322.5,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "6d62ce4d_original_plan_symbol.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     286.0,
+     282.3,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "6d62ce4d_open_leaf.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     3.9,
+     74.2,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "6aa8418a_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     120.5,
+     10.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "6aa8418a_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     320.5,
+     210.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "641d6b10_source_jamb_1.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     6.0,
+     6.0,
+     180.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "641d6b10_source_jamb_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     6.0,
+     6.0,
+     180.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "641d6b10_glazing_reference.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     0.0,
+     108.0,
+     180.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "641d6b10_cad_sill_trace.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     210.0,
+     320.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "633a48e8_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     10.0,
+     62.7,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "633a48e8_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     210.0,
+     262.7,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "6318af92_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     10.0,
+     125.5,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "6318af92_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     210.0,
+     325.5,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "627975fa_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     10.0,
+     125.5,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "627975fa_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     210.0,
+     325.5,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "62582641_profile_surface_7.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     0.0,
+     2.5,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "62582641_profile_surface_6.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     6.0,
+     0.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "62582641_profile_surface_5.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     0.0,
+     2.5,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "62582641_profile_surface_4.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     5.0,
+     0.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "62582641_profile_surface_3.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     5.0,
+     0.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "62582641_profile_surface_2.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     2.5,
+     0.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "62582641_profile_surface_1.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     0.0,
+     6.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "62582641_profile_surface_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     2.5,
+     0.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "59df7016_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     6.0,
+     120.5,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "59df7016_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     206.0,
+     320.5,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "560507d0_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     6.0,
+     125.5,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "560507d0_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     206.0,
+     325.5,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "54d8c506_profile_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     5.0,
+     10.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "5402db10_side_1.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     2.7,
+     10.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "5402db10_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     2.8,
+     10.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "5402db10_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     325.5,
+     210.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "5402db10_below_opening.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     120.0,
+     10.0,
+     80.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "5402db10_above_opening.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     120.0,
+     10.0,
+     50.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "4aa7a62a_source_jamb_1.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     6.0,
+     6.0,
+     120.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "4aa7a62a_source_jamb_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     6.0,
+     6.0,
+     120.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "4aa7a62a_glazing_reference.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     108.0,
+     0.0,
+     120.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "4aa7a62a_cad_sill_trace.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     320.0,
+     210.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "40e25514_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     10.0,
+     125.5,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "40e25514_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     210.0,
+     325.5,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "40d8be5f_profile_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     10.0,
+     10.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "3b8f649e_source_jamb_1.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     6.0,
+     6.0,
+     40.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "3b8f649e_source_jamb_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     6.0,
+     6.0,
+     40.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "3b8f649e_glazing_reference.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     0.0,
+     48.0,
+     40.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "3b8f649e_cad_sill_trace.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     210.0,
+     260.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "3b161b58_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     6.0,
+     122.5,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "3b161b58_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     206.0,
+     322.5,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "3ae9c2ac_source_jamb_1.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     6.0,
+     6.0,
+     120.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "3ae9c2ac_source_jamb_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     6.0,
+     6.0,
+     120.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "3ae9c2ac_glazing_reference.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     108.0,
+     0.0,
+     120.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "3ae9c2ac_cad_sill_trace.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     320.0,
+     210.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "3707a42c_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     125.5,
+     10.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "3707a42c_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     325.5,
+     210.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "317d4ea0_source_jamb_1.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     6.0,
+     6.0,
+     120.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "317d4ea0_source_jamb_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     6.0,
+     6.0,
+     120.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "317d4ea0_glazing_reference.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     108.0,
+     0.0,
+     120.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "317d4ea0_cad_sill_trace.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     320.0,
+     210.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "3124dc67_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     125.5,
+     10.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "3124dc67_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     325.5,
+     210.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "30c3daef_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     10.0,
+     125.5,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "30c3daef_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     210.0,
+     325.5,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "2ee28865_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     125.5,
+     6.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "2ee28865_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     325.5,
+     206.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "2c61cad4_side_1.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     2.7,
+     10.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "2c61cad4_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     2.7,
+     10.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "2c61cad4_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     325.5,
+     210.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "2c61cad4_below_opening.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     120.0,
+     10.0,
+     80.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "2c61cad4_above_opening.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     120.0,
+     10.0,
+     50.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "29ce1c90_profile_surface_7.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     0.0,
+     2.5,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "29ce1c90_profile_surface_6.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     6.0,
+     0.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "29ce1c90_profile_surface_5.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     0.0,
+     2.5,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "29ce1c90_profile_surface_4.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     5.0,
+     0.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "29ce1c90_profile_surface_3.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     5.0,
+     0.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "29ce1c90_profile_surface_2.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     2.5,
+     0.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "29ce1c90_profile_surface_1.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     0.0,
+     6.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "29ce1c90_profile_surface_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     2.5,
+     0.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "27b5a816_original_plan_symbol.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     295.3,
+     295.9,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "27b5a816_open_leaf.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     84.3,
+     3.9,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "26d7c239_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     125.5,
+     10.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "26d7c239_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     325.5,
+     210.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "24f5e611_side_1.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     10.0,
+     11.7,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "24f5e611_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     10.0,
+     11.7,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "24f5e611_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     210.0,
+     320.5,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "24f5e611_above_opening.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     10.0,
+     97.0,
+     50.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "1c92e47e_side_1.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     10.0,
+     2.8,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "1c92e47e_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     10.0,
+     2.8,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "1c92e47e_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     210.0,
+     325.5,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "1c92e47e_below_opening.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     10.0,
+     120.0,
+     80.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "1c92e47e_above_opening.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     10.0,
+     120.0,
+     50.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "1b193e11_profile_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     3.0,
+     6.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "1a3cdbc3_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     10.0,
+     125.5,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "1a3cdbc3_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     210.0,
+     325.5,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "148c744b_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     125.5,
+     10.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "148c744b_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     325.5,
+     210.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "13016e19_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     125.5,
+     10.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "13016e19_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     325.5,
+     210.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "0759a7bf_profile_surface_7.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     0.0,
+     2.5,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "0759a7bf_profile_surface_6.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     6.0,
+     0.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "0759a7bf_profile_surface_5.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     0.0,
+     2.5,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "0759a7bf_profile_surface_4.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     5.0,
+     0.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "0759a7bf_profile_surface_3.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     5.0,
+     0.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "0759a7bf_profile_surface_2.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     2.5,
+     0.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "0759a7bf_profile_surface_1.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     0.0,
+     6.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "0759a7bf_profile_surface_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     2.5,
+     0.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "046ee0e0_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     125.5,
+     6.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "046ee0e0_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     325.5,
+     206.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "0393bcde_side_1.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     10.0,
+     2.8,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "0393bcde_side_0.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     10.0,
+     2.8,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "0393bcde_module_outline.001",
+    "tur": "CURVE",
+    "boyut_cm": [
+     210.0,
+     325.5,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "0393bcde_below_opening.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     10.0,
+     120.0,
+     20.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "0393bcde_above_opening.001",
+    "tur": "MESH",
+    "boyut_cm": [
+     10.0,
+     120.0,
+     50.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   }
+  ]
+ },
+ "ASTRA_PEV_5x4_R01": {
+  "yol": "/Users/lokmansayim/.codex/.chatgpt-projects/g-p-6a9ea230a0d48191ada01d0bf8806a28/PEV_5x4_R01.blend",
+  "nesne": 83,
+  "tur": {
+   "CURVE": 44,
+   "FONT": 27,
+   "MESH": 7,
+   "LIGHT": 3,
+   "CAMERA": 2
+  },
+  "koleksiyonlar": [
+   "PEV_R01 | 07 Işıklar",
+   "PEV_R01 | 06 Kameralar",
+   "PEV_R01 | 05 Perspektif açıklamaları",
+   "PEV_R01 | 04 Üst görünüş ölçüleri",
+   "PEV_R01 | 03 Zemin referansı",
+   "PEV_R01 | 02 WC bölmeleri",
+   "PEV_R01 | 01 Dış duvarlar"
+  ],
+  "sahneler": [
+   "PEV_R01"
+  ],
+  "genel_kutu": {
+   "min_m": [
+    -1.66,
+    -1.65,
+    0.0
+   ],
+   "max_m": [
+    6.44,
+    5.025,
+    3.54
+   ],
+   "boyut_cm": [
+    810.0,
+    667.5,
+    354.0
+   ]
+  },
+  "isim_kokleri": {
+   "PEV_R01__wc_width_tick": 2,
+   "PEV_R01__wc_width_extension": 2,
+   "PEV_R01__wc_depth_tick": 2,
+   "PEV_R01__wc_depth_extension": 2,
+   "PEV_R01__partition_front_thickness_tick": 2,
+   "PEV_R01__partition_front_thickness_extension": 2,
+   "PEV_R01__outer_width_tick": 2,
+   "PEV_R01__outer_width_extension": 2,
+   "PEV_R01__outer_depth_tick": 2,
+   "PEV_R01__outer_depth_extension": 2,
+   "PEV_R01__inner_width_tick": 2,
+   "PEV_R01__inner_width_extension": 2,
+   "PEV_R01__inner_depth_tick": 2,
+   "PEV_R01__inner_depth_extension": 2,
+   "PEV_R01__external_thickness_tick": 2,
+   "PEV_R01__external_thickness_extension": 2,
+   "PEV_R01__wc_width_line": 1,
+   "PEV_R01__wc_width_label": 1,
+   "PEV_R01__wc_left": 1,
+   "PEV_R01__wc_label": 1,
+   "PEV_R01__wc_front": 1,
+   "PEV_R01__wc_depth_line": 1,
+   "PEV_R01__wc_depth_label": 1,
+   "PEV_R01__top_title": 1,
+   "PEV_R01__top_subtitle": 1,
+   "PEV_R01__top_height": 1,
+   "PEV_R01__tolerance_note": 1,
+   "PEV_R01__stage_note": 1,
+   "PEV_R01__rear_direction": 1,
+   "PEV_R01__partition_thickness_value": 1,
+   "PEV_R01__partition_thickness_leader": 1,
+   "PEV_R01__partition_front_value": 1,
+   "PEV_R01__partition_front_thickness_line": 1,
+   "PEV_R01__partition_front_thickness_label": 1,
+   "PEV_R01__partition_front_leader": 1,
+   "PEV_R01__outer_width_line": 1,
+   "PEV_R01__outer_width_label": 1,
+   "PEV_R01__outer_depth_line": 1,
+   "PEV_R01__outer_depth_label": 1,
+   "PEV_R01__origin_marker": 1,
+   "PEV_R01__origin_label": 1,
+   "PEV_R01__living_subtitle": 1,
+   "PEV_R01__living_label": 1,
+   "PEV_R01__light_rear": 1,
+   "PEV_R01__light_key": 1,
+   "PEV_R01__light_fill": 1,
+   "PEV_R01__iso_wc": 1,
+   "PEV_R01__iso_title": 1,
+   "PEV_R01__iso_subtitle": 1,
+   "PEV_R01__iso_note": 1,
+   "PEV_R01__iso_dimensions": 1,
+   "PEV_R01__inner_width_line": 1,
+   "PEV_R01__inner_width_label": 1,
+   "PEV_R01__inner_depth_line": 1,
+   "PEV_R01__inner_depth_label": 1,
+   "PEV_R01__front_direction": 1,
+   "PEV_R01__floor_reference": 1,
+   "PEV_R01__external_thickness_value": 1,
+   "PEV_R01__external_thickness_line": 1,
+   "PEV_R01__external_thickness_leader": 1
+  },
+  "malzemeler": {
+   "PEV_MAT_wall": 4,
+   "PEV_MAT_partition": 2,
+   "PEV_MAT_floor": 1
+  },
+  "en_sik_mesh_boyutlari_cm": [
+   [
+    [
+     13.0,
+     250.0,
+     374.0
+    ],
+    2
+   ],
+   [
+    [
+     13.0,
+     250.0,
+     500.0
+    ],
+    2
+   ],
+   [
+    [
+     13.0,
+     113.0,
+     250.0
+    ],
+    1
+   ],
+   [
+    [
+     13.0,
+     200.0,
+     250.0
+    ],
+    1
+   ],
+   [
+    [
+     0.0,
+     400.0,
+     500.0
+    ],
+    1
+   ]
+  ],
+  "ozellikli_nesne": 83,
+  "ozellik_ornekleri": [
+   {
+    "ad": "PEV_R01__wc_width_tick_1",
+    "ozellik": {
+     "pev_owner": "PortatifEv_5x4_R01",
+     "pev_role": "wc_width_tick_1",
+     "pev_scene": "PEV_R01"
+    }
+   },
+   {
+    "ad": "PEV_R01__wc_width_tick_0",
+    "ozellik": {
+     "pev_owner": "PortatifEv_5x4_R01",
+     "pev_role": "wc_width_tick_0",
+     "pev_scene": "PEV_R01"
+    }
+   },
+   {
+    "ad": "PEV_R01__wc_width_line",
+    "ozellik": {
+     "pev_owner": "PortatifEv_5x4_R01",
+     "pev_role": "wc_width_line",
+     "pev_scene": "PEV_R01"
+    }
+   },
+   {
+    "ad": "PEV_R01__wc_width_label",
+    "ozellik": {
+     "pev_owner": "PortatifEv_5x4_R01",
+     "pev_role": "wc_width_label",
+     "pev_scene": "PEV_R01",
+     "measured_length_mm": 2000.0,
+     "label_source": "Evaluated mesh world-space surface endpoints"
+    }
+   },
+   {
+    "ad": "PEV_R01__wc_width_extension_1",
+    "ozellik": {
+     "pev_owner": "PortatifEv_5x4_R01",
+     "pev_role": "wc_width_extension_1",
+     "pev_scene": "PEV_R01"
+    }
+   },
+   {
+    "ad": "PEV_R01__wc_width_extension_0",
+    "ozellik": {
+     "pev_owner": "PortatifEv_5x4_R01",
+     "pev_role": "wc_width_extension_0",
+     "pev_scene": "PEV_R01"
+    }
+   },
+   {
+    "ad": "PEV_R01__wc_left",
+    "ozellik": {
+     "pev_owner": "PortatifEv_5x4_R01",
+     "pev_role": "wc_left",
+     "pev_scene": "PEV_R01",
+     "physical_element": true
+    }
+   },
+   {
+    "ad": "PEV_R01__wc_label",
+    "ozellik": {
+     "pev_owner": "PortatifEv_5x4_R01",
+     "pev_role": "wc_label",
+     "pev_scene": "PEV_R01"
+    }
+   },
+   {
+    "ad": "PEV_R01__wc_front",
+    "ozellik": {
+     "pev_owner": "PortatifEv_5x4_R01",
+     "pev_role": "wc_front",
+     "pev_scene": "PEV_R01",
+     "physical_element": true
+    }
+   },
+   {
+    "ad": "PEV_R01__wc_depth_tick_1",
+    "ozellik": {
+     "pev_owner": "PortatifEv_5x4_R01",
+     "pev_role": "wc_depth_tick_1",
+     "pev_scene": "PEV_R01"
+    }
+   },
+   {
+    "ad": "PEV_R01__wc_depth_tick_0",
+    "ozellik": {
+     "pev_owner": "PortatifEv_5x4_R01",
+     "pev_role": "wc_depth_tick_0",
+     "pev_scene": "PEV_R01"
+    }
+   },
+   {
+    "ad": "PEV_R01__wc_depth_line",
+    "ozellik": {
+     "pev_owner": "PortatifEv_5x4_R01",
+     "pev_role": "wc_depth_line",
+     "pev_scene": "PEV_R01"
+    }
+   },
+   {
+    "ad": "PEV_R01__wc_depth_label",
+    "ozellik": {
+     "pev_owner": "PortatifEv_5x4_R01",
+     "pev_role": "wc_depth_label",
+     "pev_scene": "PEV_R01",
+     "measured_length_mm": 1000.0,
+     "label_source": "Evaluated mesh world-space surface endpoints"
+    }
+   },
+   {
+    "ad": "PEV_R01__wc_depth_extension_1",
+    "ozellik": {
+     "pev_owner": "PortatifEv_5x4_R01",
+     "pev_role": "wc_depth_extension_1",
+     "pev_scene": "PEV_R01"
+    }
+   },
+   {
+    "ad": "PEV_R01__wc_depth_extension_0",
+    "ozellik": {
+     "pev_owner": "PortatifEv_5x4_R01",
+     "pev_role": "wc_depth_extension_0",
+     "pev_scene": "PEV_R01"
+    }
+   },
+   {
+    "ad": "PEV_R01__top_title",
+    "ozellik": {
+     "pev_owner": "PortatifEv_5x4_R01",
+     "pev_role": "top_title",
+     "pev_scene": "PEV_R01"
+    }
+   },
+   {
+    "ad": "PEV_R01__top_subtitle",
+    "ozellik": {
+     "pev_owner": "PortatifEv_5x4_R01",
+     "pev_role": "top_subtitle",
+     "pev_scene": "PEV_R01"
+    }
+   },
+   {
+    "ad": "PEV_R01__top_height",
+    "ozellik": {
+     "pev_owner": "PortatifEv_5x4_R01",
+     "pev_role": "top_height",
+     "pev_scene": "PEV_R01"
+    }
+   },
+   {
+    "ad": "PEV_R01__tolerance_note",
+    "ozellik": {
+     "pev_owner": "PortatifEv_5x4_R01",
+     "pev_role": "tolerance_note",
+     "pev_scene": "PEV_R01"
+    }
+   },
+   {
+    "ad": "PEV_R01__stage_note",
+    "ozellik": {
+     "pev_owner": "PortatifEv_5x4_R01",
+     "pev_role": "stage_note",
+     "pev_scene": "PEV_R01"
+    }
+   },
+   {
+    "ad": "PEV_R01__rear_direction",
+    "ozellik": {
+     "pev_owner": "PortatifEv_5x4_R01",
+     "pev_role": "rear_direction",
+     "pev_scene": "PEV_R01"
+    }
+   },
+   {
+    "ad": "PEV_R01__partition_thickness_value",
+    "ozellik": {
+     "pev_owner": "PortatifEv_5x4_R01",
+     "pev_role": "partition_thickness_value",
+     "pev_scene": "PEV_R01"
+    }
+   },
+   {
+    "ad": "PEV_R01__partition_thickness_leader",
+    "ozellik": {
+     "pev_owner": "PortatifEv_5x4_R01",
+     "pev_role": "partition_thickness_leader",
+     "pev_scene": "PEV_R01"
+    }
+   },
+   {
+    "ad": "PEV_R01__partition_front_value",
+    "ozellik": {
+     "pev_owner": "PortatifEv_5x4_R01",
+     "pev_role": "partition_front_value",
+     "pev_scene": "PEV_R01"
+    }
+   },
+   {
+    "ad": "PEV_R01__partition_front_thickness_tick_1",
+    "ozellik": {
+     "pev_owner": "PortatifEv_5x4_R01",
+     "pev_role": "partition_front_thickness_tick_1",
+     "pev_scene": "PEV_R01"
+    }
+   }
+  ],
+  "tum_nesneler": [
+   {
+    "ad": "PEV_R01__wc_width_tick_1",
+    "tur": "CURVE",
+    "boyut_cm": [
+     204.9,
+     204.9,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__wc_width_tick_0",
+    "tur": "CURVE",
+    "boyut_cm": [
+     204.9,
+     204.9,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__wc_width_line",
+    "tur": "CURVE",
+    "boyut_cm": [
+     400.0,
+     200.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__wc_width_label",
+    "tur": "FONT",
+    "boyut_cm": [
+     39.8,
+     7.1,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__wc_width_extension_1",
+    "tur": "CURVE",
+    "boyut_cm": [
+     200.0,
+     228.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__wc_width_extension_0",
+    "tur": "CURVE",
+    "boyut_cm": [
+     200.0,
+     228.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__wc_left",
+    "tur": "MESH",
+    "boyut_cm": [
+     13.0,
+     113.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__wc_label",
+    "tur": "FONT",
+    "boyut_cm": [
+     20.6,
+     9.5,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__wc_front",
+    "tur": "MESH",
+    "boyut_cm": [
+     200.0,
+     13.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__wc_depth_tick_1",
+    "tur": "CURVE",
+    "boyut_cm": [
+     204.9,
+     204.9,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__wc_depth_tick_0",
+    "tur": "CURVE",
+    "boyut_cm": [
+     204.9,
+     204.9,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__wc_depth_line",
+    "tur": "CURVE",
+    "boyut_cm": [
+     200.0,
+     300.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__wc_depth_label",
+    "tur": "FONT",
+    "boyut_cm": [
+     36.0,
+     6.6,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__wc_depth_extension_1",
+    "tur": "CURVE",
+    "boyut_cm": [
+     226.0,
+     200.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__wc_depth_extension_0",
+    "tur": "CURVE",
+    "boyut_cm": [
+     226.0,
+     200.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__top_title",
+    "tur": "FONT",
+    "boyut_cm": [
+     159.9,
+     16.2,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__top_subtitle",
+    "tur": "FONT",
+    "boyut_cm": [
+     186.5,
+     9.2,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__top_height",
+    "tur": "FONT",
+    "boyut_cm": [
+     184.2,
+     8.0,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__tolerance_note",
+    "tur": "FONT",
+    "boyut_cm": [
+     243.4,
+     8.3,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__stage_note",
+    "tur": "FONT",
+    "boyut_cm": [
+     209.4,
+     11.4,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__rear_direction",
+    "tur": "FONT",
+    "boyut_cm": [
+     73.7,
+     6.4,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__partition_thickness_value",
+    "tur": "FONT",
+    "boyut_cm": [
+     29.7,
+     19.6,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__partition_thickness_leader",
+    "tur": "CURVE",
+    "boyut_cm": [
+     232.5,
+     212.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__partition_front_value",
+    "tur": "FONT",
+    "boyut_cm": [
+     28.4,
+     6.0,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__partition_front_thickness_tick_1",
+    "tur": "CURVE",
+    "boyut_cm": [
+     204.9,
+     204.9,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__partition_front_thickness_tick_0",
+    "tur": "CURVE",
+    "boyut_cm": [
+     204.9,
+     204.9,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__partition_front_thickness_line",
+    "tur": "CURVE",
+    "boyut_cm": [
+     200.0,
+     213.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__partition_front_thickness_label",
+    "tur": "FONT",
+    "boyut_cm": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__partition_front_thickness_extension_1",
+    "tur": "CURVE",
+    "boyut_cm": [
+     206.0,
+     200.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__partition_front_thickness_extension_0",
+    "tur": "CURVE",
+    "boyut_cm": [
+     206.0,
+     200.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__partition_front_leader",
+    "tur": "CURVE",
+    "boyut_cm": [
+     242.0,
+     222.5,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__outer_width_tick_1",
+    "tur": "CURVE",
+    "boyut_cm": [
+     204.9,
+     204.9,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__outer_width_tick_0",
+    "tur": "CURVE",
+    "boyut_cm": [
+     204.9,
+     204.9,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__outer_width_line",
+    "tur": "CURVE",
+    "boyut_cm": [
+     700.0,
+     200.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__outer_width_label",
+    "tur": "FONT",
+    "boyut_cm": [
+     51.9,
+     9.3,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__outer_width_extension_1",
+    "tur": "CURVE",
+    "boyut_cm": [
+     200.0,
+     265.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__outer_width_extension_0",
+    "tur": "CURVE",
+    "boyut_cm": [
+     200.0,
+     265.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__outer_depth_tick_1",
+    "tur": "CURVE",
+    "boyut_cm": [
+     204.9,
+     204.9,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__outer_depth_tick_0",
+    "tur": "CURVE",
+    "boyut_cm": [
+     204.9,
+     204.9,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__outer_depth_line",
+    "tur": "CURVE",
+    "boyut_cm": [
+     200.0,
+     600.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__outer_depth_label",
+    "tur": "FONT",
+    "boyut_cm": [
+     52.3,
+     9.3,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__outer_depth_extension_1",
+    "tur": "CURVE",
+    "boyut_cm": [
+     266.0,
+     200.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__outer_depth_extension_0",
+    "tur": "CURVE",
+    "boyut_cm": [
+     266.0,
+     200.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__origin_marker",
+    "tur": "CURVE",
+    "boyut_cm": [
+     220.0,
+     200.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__origin_label",
+    "tur": "FONT",
+    "boyut_cm": [
+     13.5,
+     6.5,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__living_subtitle",
+    "tur": "FONT",
+    "boyut_cm": [
+     75.1,
+     8.3,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__living_label",
+    "tur": "FONT",
+    "boyut_cm": [
+     84.0,
+     11.9,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__light_rear",
+    "tur": "LIGHT",
+    "boyut_cm": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__light_key",
+    "tur": "LIGHT",
+    "boyut_cm": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__light_fill",
+    "tur": "LIGHT",
+    "boyut_cm": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__iso_wc",
+    "tur": "FONT",
+    "boyut_cm": [
+     11.4,
+     0.7,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__iso_title",
+    "tur": "FONT",
+    "boyut_cm": [
+     12.2,
+     1.2,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__iso_subtitle",
+    "tur": "FONT",
+    "boyut_cm": [
+     18.3,
+     0.7,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__iso_note",
+    "tur": "FONT",
+    "boyut_cm": [
+     12.4,
+     0.7,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__iso_dimensions",
+    "tur": "FONT",
+    "boyut_cm": [
+     21.3,
+     0.7,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__inner_width_tick_1",
+    "tur": "CURVE",
+    "boyut_cm": [
+     204.9,
+     204.9,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__inner_width_tick_0",
+    "tur": "CURVE",
+    "boyut_cm": [
+     204.9,
+     204.9,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__inner_width_line",
+    "tur": "CURVE",
+    "boyut_cm": [
+     674.0,
+     200.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__inner_width_label",
+    "tur": "FONT",
+    "boyut_cm": [
+     43.8,
+     9.2,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__inner_width_extension_1",
+    "tur": "CURVE",
+    "boyut_cm": [
+     200.0,
+     274.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__inner_width_extension_0",
+    "tur": "CURVE",
+    "boyut_cm": [
+     200.0,
+     274.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__inner_depth_tick_1",
+    "tur": "CURVE",
+    "boyut_cm": [
+     204.9,
+     204.9,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__inner_depth_tick_0",
+    "tur": "CURVE",
+    "boyut_cm": [
+     204.9,
+     204.9,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__inner_depth_line",
+    "tur": "CURVE",
+    "boyut_cm": [
+     200.0,
+     574.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__inner_depth_label",
+    "tur": "FONT",
+    "boyut_cm": [
+     43.8,
+     9.2,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__inner_depth_extension_1",
+    "tur": "CURVE",
+    "boyut_cm": [
+     249.0,
+     200.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__inner_depth_extension_0",
+    "tur": "CURVE",
+    "boyut_cm": [
+     249.0,
+     200.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__front_direction",
+    "tur": "FONT",
+    "boyut_cm": [
+     67.1,
+     7.5,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__floor_reference",
+    "tur": "MESH",
+    "boyut_cm": [
+     500.0,
+     400.0,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__external_thickness_value",
+    "tur": "FONT",
+    "boyut_cm": [
+     36.4,
+     19.5,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__external_thickness_tick_1",
+    "tur": "CURVE",
+    "boyut_cm": [
+     204.9,
+     204.9,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__external_thickness_tick_0",
+    "tur": "CURVE",
+    "boyut_cm": [
+     204.9,
+     204.9,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__external_thickness_line",
+    "tur": "CURVE",
+    "boyut_cm": [
+     213.0,
+     200.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__external_thickness_leader",
+    "tur": "CURVE",
+    "boyut_cm": [
+     250.5,
+     220.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__external_thickness_label",
+    "tur": "FONT",
+    "boyut_cm": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__external_thickness_extension_1",
+    "tur": "CURVE",
+    "boyut_cm": [
+     200.0,
+     206.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__external_thickness_extension_0",
+    "tur": "CURVE",
+    "boyut_cm": [
+     200.0,
+     206.0,
+     200.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__exterior_right",
+    "tur": "MESH",
+    "boyut_cm": [
+     13.0,
+     374.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__exterior_left",
+    "tur": "MESH",
+    "boyut_cm": [
+     13.0,
+     374.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__exterior_front",
+    "tur": "MESH",
+    "boyut_cm": [
+     500.0,
+     13.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__exterior_back",
+    "tur": "MESH",
+    "boyut_cm": [
+     500.0,
+     13.0,
+     250.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__camera_top",
+    "tur": "CAMERA",
+    "boyut_cm": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "ad": "PEV_R01__camera_iso",
+    "tur": "CAMERA",
+    "boyut_cm": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "konum_m": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   }
+  ]
+ }
+}

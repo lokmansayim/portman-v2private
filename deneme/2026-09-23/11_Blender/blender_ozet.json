@@ -1,0 +1,26 @@
+{
+ "pano_nesnesi": 65,
+ "pencere_eke_denk_gelen_panolar": [
+  3,
+  4,
+  19,
+  20,
+  57,
+  58
+ ],
+ "dograma": {
+  "120x120": 4,
+  "120x180": 2,
+  "60x40": 2,
+  "ic_kapi": 7,
+  "dis_kapi": 1
+ },
+ "cati": {
+  "mahya_cm": 401.9,
+  "makas": 9,
+  "cati_alan_m2": 93.19,
+  "veranda_cati_alan_m2": 3.22,
+  "veranda_mahya_cm": 344.1
+ },
+ "bom_kalem_sayisi": 35
+}

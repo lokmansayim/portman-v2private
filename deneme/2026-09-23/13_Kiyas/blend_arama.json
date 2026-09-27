@@ -1,0 +1,54 @@
+{
+ "blender": "5.2.1 LTS",
+ "son_dosyalar": [
+  "/Users/lokmansayim/Documents/Codex/2026-09-05/prefabrik-2-arti-1-6x8/outputs/blender-aktarim/yan-verandali-2plus1-R01/model.blend",
+  "/Users/lokmansayim/.codex/.chatgpt-projects/g-p-6a9ea230a0d48191ada01d0bf8806a28/PEV_5x4_R01.blend"
+ ],
+ "bulunan": [
+  {
+   "yol": "/Users/lokmansayim/Desktop/Claude Portman Çalışması/12_IFC/Tatar_80m2_bayi_plani.ifc",
+   "boyut": 367276,
+   "degisme": "2026-09-23 21:16"
+  },
+  {
+   "yol": "/Users/lokmansayim/Desktop/Claude Portman Çalışması/11_Blender/Tatar_80m2_bayi_plani.blend",
+   "boyut": 206103,
+   "degisme": "2026-09-23 20:43"
+  },
+  {
+   "yol": "/Users/lokmansayim/Documents/Codex/2026-09-05/prefabrik-2-arti-1-6x8/outputs/blender-animasyon/yan-verandali-oda-turu-R01/yan-verandali_oda_turu_R01.blend",
+   "boyut": 435196,
+   "degisme": "2026-09-07 18:27"
+  },
+  {
+   "yol": "/Users/lokmansayim/Documents/Codex/2026-09-05/prefabrik-2-arti-1-6x8/outputs/blender-animasyon/yan-verandali-oda-turu-R01/kaynak_acik_sahne.blend",
+   "boyut": 339305,
+   "degisme": "2026-09-07 18:26"
+  },
+  {
+   "yol": "/Users/lokmansayim/Documents/Codex/2026-09-05/prefabrik-2-arti-1-6x8/outputs/blender-aktarim/yan-verandali-2plus1-R01/model.blend",
+   "boyut": 330837,
+   "degisme": "2026-09-07 18:05"
+  }
+ ],
+ "bonsai_modulleri": [],
+ "cevrimici_erisim": false,
+ "depolar": [
+  [
+   "extensions.blender.org",
+   "https://extensions.blender.org/api/v1/extensions/",
+   true
+  ],
+  [
+   "User Default",
+   "",
+   true
+  ],
+  [
+   "System",
+   "",
+   true
+  ]
+ ],
+ "sure_s": 2.9
+}

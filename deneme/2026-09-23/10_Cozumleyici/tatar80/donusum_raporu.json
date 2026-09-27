@@ -1,0 +1,210 @@
+{
+ "aks_cm": {
+  "x": [
+   10.0,
+   222.35,
+   288.05,
+   347.85,
+   476.3,
+   790.0
+  ],
+  "y": [
+   5.0,
+   130.5,
+   256.0,
+   507.0,
+   632.5,
+   758.0,
+   964.0
+  ]
+ },
+ "grid": {
+  "x": 2.5,
+  "y": 3.0
+ },
+ "alanlar": [
+  {
+   "mahal": "SALON",
+   "bayi_etiket_m2": 15.35,
+   "bayi_cizim_net_m2": 15.35,
+   "motor_net_m2": 15.35
+  },
+  {
+   "mahal": "YATAK ODASI 1",
+   "bayi_etiket_m2": 10.0,
+   "bayi_cizim_net_m2": 10.06,
+   "motor_net_m2": 10.05
+  },
+  {
+   "mahal": "HOL",
+   "bayi_etiket_m2": 7.4,
+   "bayi_cizim_net_m2": 8.95,
+   "motor_net_m2": 9.09
+  },
+  {
+   "mahal": "BANYO",
+   "bayi_etiket_m2": 3.6,
+   "bayi_cizim_net_m2": 3.61,
+   "motor_net_m2": 3.61
+  },
+  {
+   "mahal": "MUTFAK",
+   "bayi_etiket_m2": 8.1,
+   "bayi_cizim_net_m2": 8.12,
+   "motor_net_m2": 8.17
+  },
+  {
+   "mahal": "YATAK ODASI 3",
+   "bayi_etiket_m2": 8.26,
+   "bayi_cizim_net_m2": 8.28,
+   "motor_net_m2": 8.2
+  },
+  {
+   "mahal": "YATAK ODASI 2",
+   "bayi_etiket_m2": 9.6,
+   "bayi_cizim_net_m2": 9.65,
+   "motor_net_m2": 9.61
+  },
+  {
+   "mahal": "WC",
+   "bayi_etiket_m2": 4.0,
+   "bayi_cizim_net_m2": 2.5,
+   "motor_net_m2": 2.5
+  },
+  {
+   "mahal": "VERANDA",
+   "bayi_etiket_m2": 8.3,
+   "bayi_cizim_net_m2": null,
+   "motor_net_m2": 5.55
+  }
+ ],
+ "aciklik_sapmalari": [
+  {
+   "aciklik": "pencere SALON",
+   "bayi_merkez": 444.2,
+   "motor_merkez": 444.2,
+   "fark_cm": -0.1
+  },
+  {
+   "aciklik": "pencere YATAK ODASI 3",
+   "bayi_merkez": 381.4,
+   "motor_merkez": 318.8,
+   "fark_cm": 62.7
+  },
+  {
+   "aciklik": "pencere YATAK ODASI 2",
+   "bayi_merkez": 821.2,
+   "motor_merkez": 820.8,
+   "fark_cm": 0.5
+  },
+  {
+   "aciklik": "pencere YATAK ODASI 1",
+   "bayi_merkez": 797.3,
+   "motor_merkez": 820.8,
+   "fark_cm": -23.5
+  },
+  {
+   "aciklik": "pencere SALON",
+   "bayi_merkez": 634.8,
+   "motor_merkez": 661.6,
+   "fark_cm": -26.9
+  },
+  {
+   "aciklik": "pencere MUTFAK",
+   "bayi_merkez": 152.6,
+   "motor_merkez": 198.2,
+   "fark_cm": -45.7
+  },
+  {
+   "aciklik": "pencere BANYO",
+   "bayi_merkez": 441.4,
+   "motor_merkez": 323.8,
+   "fark_cm": 117.7
+  },
+  {
+   "aciklik": "pencere WC",
+   "bayi_merkez": 554.2,
+   "motor_merkez": 569.8,
+   "fark_cm": -15.6
+  },
+  {
+   "aciklik": "ic_kapi HOL→BANYO",
+   "bayi_merkez": 423.4,
+   "motor_merkez": 410.6,
+   "fark_cm": 12.8
+  },
+  {
+   "aciklik": "ic_kapi HOL→YATAK ODASI 1",
+   "bayi_merkez": 691.5,
+   "motor_merkez": 695.2,
+   "fark_cm": -3.7
+  },
+  {
+   "aciklik": "ic_kapi HOL→SALON",
+   "bayi_merkez": 579.7,
+   "motor_merkez": 569.8,
+   "fark_cm": 9.9
+  },
+  {
+   "aciklik": "ic_kapi HOL→MUTFAK",
+   "bayi_merkez": 202.9,
+   "motor_merkez": 195.8,
+   "fark_cm": 7.2
+  },
+  {
+   "aciklik": "dis_kapi VERANDA→HOL",
+   "bayi_merkez": 416.9,
+   "motor_merkez": 413.1,
+   "fark_cm": 3.8
+  },
+  {
+   "aciklik": "ic_kapi HOL→YATAK ODASI 3",
+   "bayi_merkez": 290.4,
+   "motor_merkez": 285.1,
+   "fark_cm": 5.2
+  },
+  {
+   "aciklik": "ic_kapi HOL→WC",
+   "bayi_merkez": 557.0,
+   "motor_merkez": 569.8,
+   "fark_cm": -12.7
+  },
+  {
+   "aciklik": "ic_kapi HOL→YATAK ODASI 2",
+   "bayi_merkez": 290.9,
+   "motor_merkez": 285.1,
+   "fark_cm": 5.8
+  }
+ ],
+ "sapmalar": [
+  "Aks x=350.8: dış duvar (340.7–350.7) oda yüzü 340.7 → 350.8 (+10.1 cm kaydırıldı; iki duvar tek aksa alındı)",
+  "HOL→BANYO kapısı: çizimde 80.1 cm, İş Emri 82 (standart)",
+  "HOL→YATAK ODASI 1 kapısı: çizimde 80.1 cm, İş Emri 82 (standart)",
+  "HOL→SALON kapısı: çizimde 79.9 cm, İş Emri 82 (standart)",
+  "HOL→MUTFAK kapısı: çizimde 80.1 cm, İş Emri 82 (standart)",
+  "VERANDA→HOL kapısı: çizimde 100.0 cm, İş Emri 90 (standart)",
+  "HOL→YATAK ODASI 3 kapısı: çizimde 79.9 cm, İş Emri 82 (standart)",
+  "HOL→WC kapısı: çizimde 79.9 cm, İş Emri 82 (standart)",
+  "HOL→YATAK ODASI 2 kapısı: çizimde 79.9 cm, İş Emri 82 (standart)",
+  "Kıymık pano 2.95 cm (duvar 3): aks x 350.8 → 347.85 (-2.95 cm; koşu modüle oturtuldu — bayi bu köşede özel panoyu koşu başına koyuyor, Motor sona)",
+  "pencere YATAK ODASI 3: bayi merkezi 381.4, Motor pano merkezi 318.8 → +62.7 cm (açıklık panoda ortalanır kuralı)",
+  "pencere YATAK ODASI 1: bayi merkezi 797.3, Motor pano merkezi 820.8 → -23.5 cm (açıklık panoda ortalanır kuralı)",
+  "pencere SALON: bayi merkezi 634.8, Motor pano merkezi 661.6 → -26.9 cm (açıklık panoda ortalanır kuralı)",
+  "pencere MUTFAK: bayi merkezi 152.6, Motor pano merkezi 198.2 → -45.7 cm (açıklık panoda ortalanır kuralı)",
+  "pencere BANYO: bayi merkezi 441.4, Motor pano merkezi 323.8 → +117.7 cm (açıklık panoda ortalanır kuralı)",
+  "pencere WC: bayi merkezi 554.2, Motor pano merkezi 569.8 → -15.6 cm (açıklık panoda ortalanır kuralı)",
+  "ic_kapi HOL→BANYO: bayi merkezi 423.4, Motor pano merkezi 410.6 → +12.8 cm (açıklık panoda ortalanır kuralı)",
+  "ic_kapi HOL→YATAK ODASI 1: bayi merkezi 691.5, Motor pano merkezi 695.2 → -3.7 cm (açıklık panoda ortalanır kuralı)",
+  "ic_kapi HOL→SALON: bayi merkezi 579.7, Motor pano merkezi 569.8 → +9.9 cm (açıklık panoda ortalanır kuralı)",
+  "ic_kapi HOL→MUTFAK: bayi merkezi 202.9, Motor pano merkezi 195.8 → +7.2 cm (açıklık panoda ortalanır kuralı)",
+  "dis_kapi VERANDA→HOL: bayi merkezi 416.9, Motor pano merkezi 413.1 → +3.8 cm (açıklık panoda ortalanır kuralı)",
+  "ic_kapi HOL→YATAK ODASI 3: bayi merkezi 290.4, Motor pano merkezi 285.1 → +5.2 cm (açıklık panoda ortalanır kuralı)",
+  "ic_kapi HOL→WC: bayi merkezi 557.0, Motor pano merkezi 569.8 → -12.7 cm (açıklık panoda ortalanır kuralı)",
+  "ic_kapi HOL→YATAK ODASI 2: bayi merkezi 290.9, Motor pano merkezi 285.1 → +5.8 cm (açıklık panoda ortalanır kuralı)"
+ ],
+ "notlar": [
+  "Dış genislik: çizim 800.1 → bayinin yazdığı 800.0 cm alındı",
+  "Dış derinlik: çizim 968.9 → bayinin yazdığı 969.0 cm alındı"
+ ],
+ "motor_uyarilari": []
+}

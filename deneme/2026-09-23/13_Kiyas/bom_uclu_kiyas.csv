@@ -1,0 +1,28 @@
+﻿Kod;Grup;Malzeme;Ölçü (mm);Astra DWG BOM;Motor DXF BOM;IFC (bizim);Durum
+D01;Dış duvar panoları;Dolu pano;1255×100×2500;19;19;19;aynı
+D02;Dış duvar panoları;120×120 pencereli pano;1255×100×2500;4;4;4;aynı
+D03;Dış duvar panoları;120×180 pencereli pano;1255×100×2500;2;2;2;aynı
+D04;Dış duvar panoları;60×40 vasistaslı pano;1255×100×2500;1;1;1;aynı
+D06;Dış duvar panoları;Özel dolu pano;627.5×100×2500;2;2;2;aynı
+D07;Dış duvar panoları;Dış kapılı özel pano;1205.0×100×2500;1;1;1;aynı
+D08;Dış duvar panoları;Özel dolu pano;1205×100×2500;1;1;1;aynı
+I01;İç duvar panoları;Dolu pano;1255×60×2500;8;8;8;aynı
+I02;İç duvar panoları;Özel dolu pano;1205×60×2500;1;1;1;aynı
+I04;İç duvar panoları;İç kapılı özel pano;1225×60×2500;2;2;2;aynı
+I06;İç duvar panoları;Özel dolu pano;627.5×60×2500;4;4;4;aynı
+I07;İç duvar panoları;Özel dolu pano;1225.0×60×2500;3;3;3;aynı
+I09;İç duvar panoları;Özel dolu pano;577.5×60×2500;1;1;1;aynı
+I10;İç duvar panoları;Kapısız geçişli pano;1255.0×60×2500;1;1;1;aynı
+I11;İç duvar panoları;İç kapılı pano;1255.0×60×2500;2;2;2;aynı
+B01;Bağlantı ve veranda;İç köşe bağlantısı;30×60;1;1;1;aynı
+B02;Bağlantı ve veranda;100×50 köşe bağlantısı;50×100;6;6;6;aynı
+B03;Bağlantı ve veranda;Üçlü H bağlantı;60;4;4;4;aynı
+B04;Bağlantı ve veranda;Veranda dikmesi;100×100;2;2;2;aynı
+K01;Kapı ve pencereler;İç kapı;820;4;4;4;aynı
+K02;Kapı ve pencereler;Dış kapı;970;1;1;1;aynı
+P01;Kapı ve pencereler;Pencere 120×120;1200×1200;4;4;4;aynı
+P02;Kapı ve pencereler;Pencere 120×180;1200×1800;2;2;2;aynı
+P03;Kapı ve pencereler;Vasistas 60×40;600×400;1;1;1;aynı
+V03;Bağlantı ve veranda;Veranda yan profil gösterimi;5020×100;1;1;1;aynı
+V04;Bağlantı ve veranda;Veranda ön profil gösterimi;1255.0×100;1;1;1;aynı
+TOPLAM;;;;79;79;79;

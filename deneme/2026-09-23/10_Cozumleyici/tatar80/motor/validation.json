@@ -1,0 +1,249 @@
+{
+  "passed": true,
+  "errors": [],
+  "outer_cm": [
+    800.0,
+    969.0
+  ],
+  "panel_grid": [
+    2.5,
+    3.0
+  ],
+  "units": "cm",
+  "panel_count": 58,
+  "corner_count": 9,
+  "windows": 8,
+  "doors": 8,
+  "openings": [
+    {
+      "kind": "pencere",
+      "name": "BOM_D03_1255p0_DIS_P02",
+      "gap": [
+        138.25,
+        0.0,
+        258.25,
+        10.000000000000007
+      ],
+      "length": 120.0
+    },
+    {
+      "kind": "kapi",
+      "name": "BOM_D07_1205p0_DIS_K02",
+      "gap": [
+        368.1,
+        125.5,
+        458.1,
+        135.5
+      ],
+      "length": 90.0
+    },
+    {
+      "kind": "pencere",
+      "name": "BOM_D03_1255p0_DIS_P02",
+      "gap": [
+        601.6,
+        125.5,
+        721.6,
+        135.5
+      ],
+      "length": 120.0
+    },
+    {
+      "kind": "kapi",
+      "name": "BOM_I11_1255p0_IC_K01_SAG_UST",
+      "gap": [
+        244.1,
+        504.0,
+        326.1,
+        510.0
+      ],
+      "length": 82.0
+    },
+    {
+      "kind": "kapi",
+      "name": "BOM_I11_1255p0_IC_K01_SOL_UST",
+      "gap": [
+        244.1,
+        629.5,
+        326.1,
+        635.5
+      ],
+      "length": 82.0
+    },
+    {
+      "kind": "kapi",
+      "name": "BOM_I16_1254p5_IC_K01_SOL_UST",
+      "gap": [
+        369.57500000000005,
+        755.0,
+        451.57500000000005,
+        761.0
+      ],
+      "length": 82.0
+    },
+    {
+      "kind": "pencere",
+      "name": "BOM_D04_1255p0_DIS_P03",
+      "gap": [
+        293.75,
+        959.0,
+        353.75,
+        969.0
+      ],
+      "length": 60.0
+    },
+    {
+      "kind": "pencere",
+      "name": "BOM_D02_1255p0_DIS_P01",
+      "gap": [
+        0.0,
+        258.75,
+        10.0,
+        378.75
+      ],
+      "length": 120.0
+    },
+    {
+      "kind": "pencere",
+      "name": "BOM_D04_1255p0_DIS_P03",
+      "gap": [
+        0.0,
+        539.75,
+        10.0,
+        599.75
+      ],
+      "length": 60.0
+    },
+    {
+      "kind": "pencere",
+      "name": "BOM_D02_1255p0_DIS_P01",
+      "gap": [
+        0.0,
+        760.75,
+        10.0,
+        880.75
+      ],
+      "length": 120.0
+    },
+    {
+      "kind": "kapi",
+      "name": "BOM_I05_1195p0_IC_K01_SOL_ALT",
+      "gap": [
+        219.35,
+        528.75,
+        225.35,
+        610.75
+      ],
+      "length": 82.0
+    },
+    {
+      "kind": "kapi",
+      "name": "BOM_I18_1205p0_IC_K01_SOL_UST",
+      "gap": [
+        344.85,
+        154.75,
+        350.85,
+        236.75
+      ],
+      "length": 82.0
+    },
+    {
+      "kind": "kapi",
+      "name": "BOM_I11_1255p0_IC_K01_SAG_UST",
+      "gap": [
+        473.3,
+        528.75,
+        479.3,
+        610.75
+      ],
+      "length": 82.0
+    },
+    {
+      "kind": "kapi",
+      "name": "BOM_I11_1255p0_IC_K01_SAG_ALT",
+      "gap": [
+        473.3,
+        654.25,
+        479.3,
+        736.25
+      ],
+      "length": 82.0
+    },
+    {
+      "kind": "pencere",
+      "name": "BOM_D02_1255p0_DIS_P01",
+      "gap": [
+        790.0,
+        384.25,
+        800.0,
+        504.25
+      ],
+      "length": 120.0
+    },
+    {
+      "kind": "pencere",
+      "name": "BOM_D02_1255p0_DIS_P01",
+      "gap": [
+        790.0,
+        760.75,
+        800.0,
+        880.75
+      ],
+      "length": 120.0
+    }
+  ],
+  "rooms_m2": {
+    "SALON": 15.34858,
+    "YATAK ODASI 1": 10.051145,
+    "HOL": 9.085503,
+    "BANYO": 3.60855,
+    "MUTFAK": 8.174505,
+    "YATAK ODASI 3": 8.203825,
+    "YATAK ODASI 2": 9.612478,
+    "WC": 2.501733,
+    "VERANDA": 5.548983
+  },
+  "h_connectors": 6,
+  "footprint_diff_cm2": 0.0,
+  "wall_overlap": true,
+  "altin": null,
+  "warnings": [],
+  "scope": "Ön onay taslağı; statik, üretim, BOM veya yeni oda tasarımı değildir",
+  "saved_dxf_audit_errors": 0,
+  "saved_dxf_audit_fixes": 0,
+  "bom_counts_from_file": {
+    "B01": 3,
+    "B02": 6,
+    "B03": 6,
+    "D01": 15,
+    "D02": 4,
+    "D03": 2,
+    "D04": 2,
+    "D07": 1,
+    "D08": 1,
+    "D09": 1,
+    "D10": 1,
+    "D11": 1,
+    "D12": 2,
+    "I01": 9,
+    "I02": 1,
+    "I05": 1,
+    "I07": 3,
+    "I08": 1,
+    "I11": 4,
+    "I12": 1,
+    "I13": 2,
+    "I14": 1,
+    "I15": 1,
+    "I16": 1,
+    "I17": 2,
+    "I18": 1,
+    "K01": 7,
+    "K03": 1,
+    "P01": 4,
+    "P02": 2,
+    "P03": 2,
+    "V01": 1,
+    "V05": 1
+  }
+}

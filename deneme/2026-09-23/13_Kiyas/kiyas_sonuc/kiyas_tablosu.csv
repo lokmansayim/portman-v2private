@@ -1,0 +1,92 @@
+﻿Kod;Tür;Astra kaynak;Astra 3B parçalar;Bizim IFC ürünü;IFC sınıfı;Plan kutu farkı cm;3B kutu farkı cm;Astra hacim m³;Bizim hacim m³;Hacim farkı %;Durum
+B01;connection;2A7A;profile_0;BAGLANTI_B01_06;IfcMember;0.0;0.0;0.0045;0.0045;0.0;AYNI
+B02;connection;2A70;profile_0;BAGLANTI_B02_00;IfcMember;0.0;0.0;0.0125;0.0125;0.0;AYNI
+B02;connection;2A72;profile_0;BAGLANTI_B02_01;IfcMember;0.0;0.0;0.0125;0.0125;0.0;AYNI
+B02;connection;2A74;profile_0;BAGLANTI_B02_04;IfcMember;0.0;0.0;0.0125;0.0125;0.0;AYNI
+B02;connection;2A76;profile_0;BAGLANTI_B02_05;IfcMember;0.0;0.0;0.0125;0.0125;0.0;AYNI
+B02;connection;2A78;profile_0;BAGLANTI_B02_02;IfcMember;0.0;0.0;0.0125;0.0125;0.0;AYNI
+B02;connection;3E4F;profile_0;BAGLANTI_B02_03;IfcMember;0.0;0.0;0.0125;0.0125;0.0;AYNI
+B03;connection;2A7C;profile_surface_0,profile_surface_1,profile_surface_2,profile_surface_3,profile_surface_4,profile_surface_5,profile_surface_6,profile_surface_7;BAGLANTI_B03_09;IfcMember;0.0;0.0;0.0;0.01275;;AYNI
+B03;connection;2A7E;profile_surface_0,profile_surface_1,profile_surface_2,profile_surface_3,profile_surface_4,profile_surface_5,profile_surface_6,profile_surface_7;BAGLANTI_B03_08;IfcMember;0.0;0.0;0.0;0.01275;;AYNI
+B03;connection;2A80;profile_surface_0,profile_surface_1,profile_surface_2,profile_surface_3,profile_surface_4,profile_surface_5,profile_surface_6,profile_surface_7;BAGLANTI_B03_10;IfcMember;0.0;0.0;0.0;0.01275;;AYNI
+B03;connection;2A82;profile_surface_0,profile_surface_1,profile_surface_2,profile_surface_3,profile_surface_4,profile_surface_5,profile_surface_6,profile_surface_7;BAGLANTI_B03_07;IfcMember;0.0;0.0;0.0;0.01275;;AYNI
+B04;veranda_post;2A96;profile_0;DIKME_B04_11;IfcColumn;0.0;0.0;0.025;0.025;0.0;AYNI
+B04;veranda_post;2A98;profile_0;DIKME_B04_12;IfcColumn;0.0;0.0;0.025;0.025;0.0;AYNI
+D01;panel;29AD;side_0;PANO_D_TAM_125.5_18;IfcWall;0.0;0.0;0.31375;0.31375;0.0;AYNI
+D01;panel;29AF;side_0;PANO_D_TAM_125.5_19;IfcWall;0.0;0.0;0.31375;0.31375;0.0;AYNI
+D01;panel;29B1;side_0;PANO_D_TAM_125.5_20;IfcWall;0.0;0.0;0.31375;0.31375;0.0;AYNI
+D01;panel;29B3;side_0;PANO_D_TAM_125.5_21;IfcWall;0.0;0.0;0.31375;0.31375;0.0;AYNI
+D01;panel;29BD;side_0;PANO_D_TAM_125.5_23;IfcWall;0.0;0.0;0.31375;0.31375;0.0;AYNI
+D01;panel;29BF;side_0;PANO_D_TAM_125.5_00;IfcWall;0.0;0.0;0.31375;0.31375;0.0;AYNI
+D01;panel;29C3;side_0;PANO_D_TAM_125.5_02;IfcWall;0.0;0.0;0.31375;0.31375;0.0;AYNI
+D01;panel;29C7;side_0;PANO_D_TAM_125.5_04;IfcWall;0.0;0.0;0.31375;0.31375;0.0;AYNI
+D01;panel;29CD;side_0;PANO_D_TAM_125.5_24;IfcWall;0.0;0.0;0.31375;0.31375;0.0;AYNI
+D01;panel;29CF;side_0;PANO_D_TAM_125.5_25;IfcWall;0.0;0.0;0.31375;0.31375;0.0;AYNI
+D01;panel;29D1;side_0;PANO_D_TAM_125.5_26;IfcWall;0.0;0.0;0.31375;0.31375;0.0;AYNI
+D01;panel;29DB;side_0;PANO_D_TAM_125.5_28;IfcWall;0.0;0.0;0.31375;0.31375;0.0;AYNI
+D01;panel;29DD;side_0;PANO_D_TAM_125.5_29;IfcWall;0.0;0.0;0.31375;0.31375;0.0;AYNI
+D01;panel;29E7;side_0;PANO_D_TAM_125.5_31;IfcWall;0.0;0.0;0.31375;0.31375;0.0;AYNI
+D01;panel;29EF;side_0;PANO_D_TAM_125.5_47;IfcWall;0.0;0.0;0.31375;0.31375;0.0;AYNI
+D01;panel;29F1;side_0;PANO_D_TAM_125.5_48;IfcWall;0.0;0.0;0.31375;0.31375;0.0;AYNI
+D01;panel;29FB;side_0;PANO_D_TAM_125.5_50;IfcWall;0.0;0.0;0.31375;0.31375;0.0;AYNI
+D01;panel;29FF;side_0;PANO_D_TAM_125.5_43;IfcWall;0.0;0.0;0.31375;0.31375;0.0;AYNI
+D01;panel;2A03;side_0;PANO_D_TAM_125.5_45;IfcWall;0.0;0.0;0.31375;0.31375;0.0;AYNI
+D02;panel;29BB;above_opening,below_opening,side_0,side_1;PANO_D_TAM_125.5_22;IfcWall;0.0;0.0;0.16975;0.16975;0.0;AYNI
+D02;panel;29C1;above_opening,below_opening,side_0,side_1;PANO_D_TAM_125.5_01;IfcWall;0.0;0.0;0.16975;0.16975;0.0;AYNI
+D02;panel;29C5;above_opening,below_opening,side_0,side_1;PANO_D_TAM_125.5_03;IfcWall;0.0;0.0;0.16975;0.16975;0.0;AYNI
+D02;panel;29E5;above_opening,below_opening,side_0,side_1;PANO_D_TAM_125.5_30;IfcWall;0.0;0.0;0.16975;0.16975;0.0;AYNI
+D03;panel;29F9;above_opening,below_opening,side_0,side_1;PANO_D_TAM_125.5_49;IfcWall;0.0;0.0;0.09775;0.09775;0.0;AYNI
+D03;panel;2A01;above_opening,below_opening,side_0,side_1;PANO_D_TAM_125.5_44;IfcWall;0.0;0.0;0.09775;0.09775;0.0;AYNI
+D04;panel;29D9;above_opening,below_opening,side_0,side_1;PANO_D_TAM_125.5_27;IfcWall;0.0;0.0;0.28975;0.28975;0.0;AYNI
+D06;panel;29ED;side_0;PANO_D_YARIM_62.8_32;IfcWall;0.0;0.0;0.15687;0.15687;0.0;AYNI
+D06;panel;29FD;side_0;PANO_D_YARIM_62.8_51;IfcWall;0.0;0.0;0.15687;0.15688;0.006;AYNI
+D07;panel;2A0B;above_opening,side_0,side_1;PANO_D_OZEL_120.5_46;IfcWall;0.0;0.0;0.10725;0.10725;0.0;AYNI
+D08;panel;2A0D;side_0;PANO_D_OZEL_120.5_11;IfcWall;0.0;0.0;0.30125;0.30125;0.0;AYNI
+I01;panel;2A13;side_0;PANO_I_TAM_125.5_05;IfcWall;0.0;0.0;0.18825;0.18825;0.0;AYNI
+I01;panel;2A23;side_0;PANO_I_TAM_125.5_15;IfcWall;0.0;0.0;0.18825;0.18825;0.0;AYNI
+I01;panel;2A37;side_0;PANO_I_TAM_125.5_09;IfcWall;0.0;0.0;0.18825;0.18825;0.0;AYNI
+I01;panel;2A45;side_0;PANO_I_TAM_125.5_36;IfcWall;0.0;0.0;0.18825;0.18825;0.0;AYNI
+I01;panel;2A59;side_0;PANO_I_TAM_125.5_39;IfcWall;0.0;0.0;0.18825;0.18825;0.0;AYNI
+I01;panel;2A5B;side_0;PANO_I_TAM_125.5_40;IfcWall;0.0;0.0;0.18825;0.18825;0.0;AYNI
+I01;panel;2A5D;side_0;PANO_I_TAM_125.5_41;IfcWall;0.0;0.0;0.18825;0.18825;0.0;AYNI
+I01;panel;2A65;side_0;PANO_I_TAM_125.5_12;IfcWall;0.0;0.0;0.18825;0.18825;0.0;AYNI
+I02;panel;2A3F;side_0;PANO_I_OZEL_120.5_35;IfcWall;0.0;0.0;0.18075;0.18075;0.0;AYNI
+I04;panel;2A2D;above_opening,side_0,side_1;PANO_I_OZEL_122.5_17;IfcWall;0.0;0.0;0.08535;0.08535;0.0;AYNI
+I04;panel;2A53;above_opening,side_0,side_1;PANO_I_OZEL_122.5_33;IfcWall;0.0;0.0;0.08535;0.08535;0.0;AYNI
+I06;panel;2A19;side_0;PANO_I_YARIM_62.8_06;IfcWall;0.0;0.0;0.09413;0.09413;0.0;AYNI
+I06;panel;2A25;side_0;PANO_I_YARIM_62.8_16;IfcWall;0.0;0.0;0.09413;0.09412;-0.011;AYNI
+I06;panel;2A39;side_0;PANO_I_YARIM_62.8_10;IfcWall;0.0;0.0;0.09413;0.09412;-0.011;AYNI
+I06;panel;2A6E;side_0;PANO_I_YARIM_62.8_14;IfcWall;0.0;0.0;0.09413;0.09413;0.0;AYNI
+I07;panel;2A4B;side_0;PANO_I_OZEL_122.5_37;IfcWall;0.0;0.0;0.18375;0.18375;0.0;AYNI
+I07;panel;2A55;side_0;PANO_I_OZEL_122.5_34;IfcWall;0.0;0.0;0.18375;0.18375;0.0;AYNI
+I07;panel;2A57;side_0;PANO_I_OZEL_122.5_38;IfcWall;0.0;0.0;0.18375;0.18375;0.0;AYNI
+I09;panel;2A63;side_0;PANO_I_OZEL_57.8_42;IfcWall;0.0;0.0;0.08662;0.08662;0.0;AYNI
+I10;panel;2A6C;above_opening,side_0,side_1;PANO_I_TAM_125.5_13;IfcWall;0.0;0.0;0.08985;0.08985;0.0;AYNI
+I11;panel;2A21;above_opening,side_0,side_1;PANO_I_TAM_125.5_07;IfcWall;0.0;0.0;0.08985;0.08985;0.0;AYNI
+I11;panel;2A35;above_opening,side_0,side_1;PANO_I_TAM_125.5_08;IfcWall;0.0;0.0;0.08985;0.08985;0.0;AYNI
+V03;reference_profile;2A89;yok (referans çizgisi);VERANDA_PROFIL_V03_14;IfcBeam;0.0;;0.0;0.0502;;"plan eşleşti; Astra 3B yok"
+V04;reference_profile;2A90;yok (referans çizgisi);VERANDA_PROFIL_V04_13;IfcBeam;0.0;;0.0;0.01255;;"plan eşleşti; Astra 3B yok"
+
+Kod;Tür;Astra plan kutusu;Astra kot (eşik–üst);Bizim boşluk;Fark cm;Bizim dolgu;Durum
+P01;window;[514.75, 1066.75, 634.75, 1076.75];[80.0, 200.0];BOSLUK_PANO_D_TAM_125.5_22_06;0.0;IfcWindow:PENCERE_120x120_06;AYNI
+P01;window;[138.25, 0.0, 258.25, 10.0];[80.0, 200.0];BOSLUK_PANO_D_TAM_125.5_01_00;0.0;IfcWindow:PENCERE_120x120_00;AYNI
+P01;window;[389.25, 0.0, 509.25, 10.0];[80.0, 200.0];BOSLUK_PANO_D_TAM_125.5_03_01;0.0;IfcWindow:PENCERE_120x120_01;AYNI
+P03;window;[0.0, 414.25, 10.0, 474.25];[160.0, 200.0];BOSLUK_PANO_D_TAM_125.5_27_07;0.0;IfcWindow:PENCERE_60x40_07;AYNI
+P01;window;[0.0, 760.75, 10.0, 880.75];[80.0, 200.0];BOSLUK_PANO_D_TAM_125.5_30_08;0.0;IfcWindow:PENCERE_120x120_08;AYNI
+P02;window;[763.0, 760.75, 773.0, 880.75];[20.0, 200.0];BOSLUK_PANO_D_TAM_125.5_49_12;0.0;IfcWindow:PENCERE_120x180_12;AYNI
+P02;window;[637.5, 133.25, 647.5, 253.25];[20.0, 200.0];BOSLUK_PANO_D_TAM_125.5_44_10;0.0;IfcWindow:PENCERE_120x180_10;AYNI
+K02;door;[637.5, 393.25, 647.5, 490.25];[0, 200];BOSLUK_PANO_D_OZEL_120.5_46_11;0.0;IfcDoor:KAPI_DIS_CELIK_11;AYNI
+K01;door;[220.0, 378.5, 302.0, 384.5];[0, 200];BOSLUK_PANO_I_TAM_125.5_07_02;0.0;IfcDoor:KAPI_IC_PANEL_02;AYNI
+K01;door;[218.5, 629.5, 300.5, 635.5];[0, 200];BOSLUK_PANO_I_OZEL_122.5_17_05;0.0;IfcDoor:KAPI_IC_PANEL_05;AYNI
+K01;door;[345.5, 378.5, 427.5, 384.5];[0, 200];BOSLUK_PANO_I_TAM_125.5_08_03;0.0;IfcDoor:KAPI_IC_PANEL_03;AYNI
+K01;door;[195.25, 404.75, 201.25, 486.75];[0, 200];BOSLUK_PANO_I_OZEL_122.5_33_09;0.0;IfcDoor:KAPI_IC_PANEL_09;AYNI
+;open_passage;[471.0, 504.0, 553.0, 510.0];[0, 200];BOSLUK_PANO_I_TAM_125.5_13_04;0.0;dolgu yok;AYNI
+
+Oda;Astra m²;Bizim m²;Fark m²
+ODA 1;13.4011;13.4011;0.0
+ODA 2;11.4511;11.4511;-0.0
+MUTFAK;11.4511;11.4511;-0.0
+BANYO/WC;4.5386;4.5386;-0.0
+SALON;24.2631;24.2631;-0.0
+ANTRE;6.7621;6.7621;-0.0
+VERANDA;6.3001;6.3001;0.0

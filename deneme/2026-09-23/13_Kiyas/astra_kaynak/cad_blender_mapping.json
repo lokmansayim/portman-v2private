@@ -1,0 +1,1816 @@
+{
+  "id_policy": "Persistent sidecar UUID; source path = top CAD handle + nested handle. Mapping is valid for this verified revision; reconcile identities before accepting a different source revision. CAD not modified.",
+  "source_sha256": "f1ad005637c60e34307e1eea2d136449c97b6be199a32f153943b612e37e2086",
+  "rows": [
+    {
+      "entity_id": "3707a42c-2478-5d0a-847c-454bece7bbfc",
+      "source_path": "29AD",
+      "type": "panel",
+      "product_code": "D01",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "3707a42c_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "3707a42c_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "13016e19-15a1-5135-aa07-cd6160f3a144",
+      "source_path": "29AF",
+      "type": "panel",
+      "product_code": "D01",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "13016e19_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "13016e19_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "148c744b-6b4d-5aff-a428-0e0a850982b4",
+      "source_path": "29B1",
+      "type": "panel",
+      "product_code": "D01",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "148c744b_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "148c744b_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "b6a8a606-29ec-5f11-8b34-3f02c386cd1f",
+      "source_path": "29B3",
+      "type": "panel",
+      "product_code": "D01",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "b6a8a606_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "b6a8a606_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "d40a9898-1a72-50c3-9566-bad10d05a3d1",
+      "source_path": "29BB",
+      "type": "panel",
+      "product_code": "D02",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "d40a9898_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "d40a9898_side_1.001",
+          "part": "side_1",
+          "scope": "physical"
+        },
+        {
+          "object": "d40a9898_below_opening.001",
+          "part": "below_opening",
+          "scope": "physical"
+        },
+        {
+          "object": "d40a9898_above_opening.001",
+          "part": "above_opening",
+          "scope": "physical"
+        },
+        {
+          "object": "d40a9898_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "78acf3e0-043b-5ab9-bebd-70426ea8f254",
+      "source_path": "29BD",
+      "type": "panel",
+      "product_code": "D01",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "78acf3e0_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "78acf3e0_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "3124dc67-c572-5007-95f8-4cb98eb88380",
+      "source_path": "29BF",
+      "type": "panel",
+      "product_code": "D01",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "3124dc67_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "3124dc67_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "5402db10-f8e6-5a3f-8091-e0f26c45c458",
+      "source_path": "29C1",
+      "type": "panel",
+      "product_code": "D02",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "5402db10_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "5402db10_side_1.001",
+          "part": "side_1",
+          "scope": "physical"
+        },
+        {
+          "object": "5402db10_below_opening.001",
+          "part": "below_opening",
+          "scope": "physical"
+        },
+        {
+          "object": "5402db10_above_opening.001",
+          "part": "above_opening",
+          "scope": "physical"
+        },
+        {
+          "object": "5402db10_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "9ea5a67c-7ab5-5ac6-88ce-3ce569283051",
+      "source_path": "29C3",
+      "type": "panel",
+      "product_code": "D01",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "9ea5a67c_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "9ea5a67c_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "2c61cad4-0bab-56c0-9727-04519d6313bb",
+      "source_path": "29C5",
+      "type": "panel",
+      "product_code": "D02",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "2c61cad4_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "2c61cad4_side_1.001",
+          "part": "side_1",
+          "scope": "physical"
+        },
+        {
+          "object": "2c61cad4_below_opening.001",
+          "part": "below_opening",
+          "scope": "physical"
+        },
+        {
+          "object": "2c61cad4_above_opening.001",
+          "part": "above_opening",
+          "scope": "physical"
+        },
+        {
+          "object": "2c61cad4_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "26d7c239-0557-5b35-ae0a-2c16df4bed66",
+      "source_path": "29C7",
+      "type": "panel",
+      "product_code": "D01",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "26d7c239_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "26d7c239_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "30c3daef-3d30-5ec6-a1ee-bd52e319d1d3",
+      "source_path": "29CD",
+      "type": "panel",
+      "product_code": "D01",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "30c3daef_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "30c3daef_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "40e25514-b686-5831-b96b-c0c620eb1b59",
+      "source_path": "29CF",
+      "type": "panel",
+      "product_code": "D01",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "40e25514_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "40e25514_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "c24d9d85-6e7c-5653-b2e8-79445573f7d6",
+      "source_path": "29D1",
+      "type": "panel",
+      "product_code": "D01",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "c24d9d85_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "c24d9d85_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "86d40e65-22cc-5c9a-8f48-ecb33e8a4e6c",
+      "source_path": "29D9",
+      "type": "panel",
+      "product_code": "D04",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "86d40e65_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "86d40e65_side_1.001",
+          "part": "side_1",
+          "scope": "physical"
+        },
+        {
+          "object": "86d40e65_below_opening.001",
+          "part": "below_opening",
+          "scope": "physical"
+        },
+        {
+          "object": "86d40e65_above_opening.001",
+          "part": "above_opening",
+          "scope": "physical"
+        },
+        {
+          "object": "86d40e65_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "6318af92-6501-5fc9-9330-a36a0c3f1b02",
+      "source_path": "29DB",
+      "type": "panel",
+      "product_code": "D01",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "6318af92_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "6318af92_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "9ebeb241-b809-5a52-8014-2c460f055895",
+      "source_path": "29DD",
+      "type": "panel",
+      "product_code": "D01",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "9ebeb241_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "9ebeb241_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "1c92e47e-ee0a-5ec8-8674-1c381a6cd669",
+      "source_path": "29E5",
+      "type": "panel",
+      "product_code": "D02",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "1c92e47e_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "1c92e47e_side_1.001",
+          "part": "side_1",
+          "scope": "physical"
+        },
+        {
+          "object": "1c92e47e_below_opening.001",
+          "part": "below_opening",
+          "scope": "physical"
+        },
+        {
+          "object": "1c92e47e_above_opening.001",
+          "part": "above_opening",
+          "scope": "physical"
+        },
+        {
+          "object": "1c92e47e_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "dc851c23-f9c5-541b-9328-49d87717fcea",
+      "source_path": "29E7",
+      "type": "panel",
+      "product_code": "D01",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "dc851c23_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "dc851c23_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "7f57ac53-b47a-55b8-a3da-e06251a0aa70",
+      "source_path": "29ED",
+      "type": "panel",
+      "product_code": "D06",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "7f57ac53_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "7f57ac53_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "ac2ad9fe-b87b-5d72-ac52-c698bfc8db18",
+      "source_path": "29EF",
+      "type": "panel",
+      "product_code": "D01",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "ac2ad9fe_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "ac2ad9fe_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "825d5e6c-7ecd-54a0-a351-e8959924eba1",
+      "source_path": "29F1",
+      "type": "panel",
+      "product_code": "D01",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "825d5e6c_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "825d5e6c_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "0393bcde-885c-5f27-84b4-019a7b81a0e6",
+      "source_path": "29F9",
+      "type": "panel",
+      "product_code": "D03",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "0393bcde_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "0393bcde_side_1.001",
+          "part": "side_1",
+          "scope": "physical"
+        },
+        {
+          "object": "0393bcde_below_opening.001",
+          "part": "below_opening",
+          "scope": "physical"
+        },
+        {
+          "object": "0393bcde_above_opening.001",
+          "part": "above_opening",
+          "scope": "physical"
+        },
+        {
+          "object": "0393bcde_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "8f13ebbc-d94e-50e2-aa2e-83b2308a4f62",
+      "source_path": "29FB",
+      "type": "panel",
+      "product_code": "D01",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "8f13ebbc_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "8f13ebbc_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "633a48e8-2dc9-5a87-84bc-d7336c2da0f6",
+      "source_path": "29FD",
+      "type": "panel",
+      "product_code": "D06",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "633a48e8_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "633a48e8_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "627975fa-e9d1-5c38-b238-97d9f18f1ed4",
+      "source_path": "29FF",
+      "type": "panel",
+      "product_code": "D01",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "627975fa_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "627975fa_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "fbf03a49-5b7c-5137-8974-7c0bd27591c8",
+      "source_path": "2A01",
+      "type": "panel",
+      "product_code": "D03",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "fbf03a49_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "fbf03a49_side_1.001",
+          "part": "side_1",
+          "scope": "physical"
+        },
+        {
+          "object": "fbf03a49_below_opening.001",
+          "part": "below_opening",
+          "scope": "physical"
+        },
+        {
+          "object": "fbf03a49_above_opening.001",
+          "part": "above_opening",
+          "scope": "physical"
+        },
+        {
+          "object": "fbf03a49_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "1a3cdbc3-695f-5e10-bbbe-bb41a17b3cb5",
+      "source_path": "2A03",
+      "type": "panel",
+      "product_code": "D01",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "1a3cdbc3_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "1a3cdbc3_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "24f5e611-f5f9-5ee0-a0c6-28661fc8deb6",
+      "source_path": "2A0B",
+      "type": "panel",
+      "product_code": "D07",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "24f5e611_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "24f5e611_side_1.001",
+          "part": "side_1",
+          "scope": "physical"
+        },
+        {
+          "object": "24f5e611_above_opening.001",
+          "part": "above_opening",
+          "scope": "physical"
+        },
+        {
+          "object": "24f5e611_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "6aa8418a-4830-52f8-abb7-87c56a9c5ce5",
+      "source_path": "2A0D",
+      "type": "panel",
+      "product_code": "D08",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "6aa8418a_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "6aa8418a_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "046ee0e0-4ff8-57e8-9e2d-11fada396635",
+      "source_path": "2A13",
+      "type": "panel",
+      "product_code": "I01",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "046ee0e0_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "046ee0e0_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "99dd55ad-0a3c-5f27-b89c-dc09f58139ed",
+      "source_path": "2A19",
+      "type": "panel",
+      "product_code": "I06",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "99dd55ad_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "99dd55ad_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "f8badccc-5d58-5da8-96ad-ebd10412234b",
+      "source_path": "2A21",
+      "type": "panel",
+      "product_code": "I11",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "f8badccc_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "f8badccc_side_1.001",
+          "part": "side_1",
+          "scope": "physical"
+        },
+        {
+          "object": "f8badccc_above_opening.001",
+          "part": "above_opening",
+          "scope": "physical"
+        },
+        {
+          "object": "f8badccc_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "ebc658db-ec96-5ef6-a4a1-2e194105f38e",
+      "source_path": "2A23",
+      "type": "panel",
+      "product_code": "I01",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "ebc658db_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "ebc658db_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "d2b7c6ca-d8cb-53e8-858d-70df98f8750c",
+      "source_path": "2A25",
+      "type": "panel",
+      "product_code": "I06",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "d2b7c6ca_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "d2b7c6ca_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "afd71c96-2438-5dac-9a40-1907f82c42b9",
+      "source_path": "2A2D",
+      "type": "panel",
+      "product_code": "I04",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "afd71c96_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "afd71c96_side_1.001",
+          "part": "side_1",
+          "scope": "physical"
+        },
+        {
+          "object": "afd71c96_above_opening.001",
+          "part": "above_opening",
+          "scope": "physical"
+        },
+        {
+          "object": "afd71c96_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "e59bda53-ecf5-5922-a2f9-f1d2aa34ddca",
+      "source_path": "2A35",
+      "type": "panel",
+      "product_code": "I11",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "e59bda53_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "e59bda53_side_1.001",
+          "part": "side_1",
+          "scope": "physical"
+        },
+        {
+          "object": "e59bda53_above_opening.001",
+          "part": "above_opening",
+          "scope": "physical"
+        },
+        {
+          "object": "e59bda53_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "2ee28865-618a-5e98-87ba-e91eff3df90d",
+      "source_path": "2A37",
+      "type": "panel",
+      "product_code": "I01",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "2ee28865_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "2ee28865_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "df4abea1-bb3f-5fc4-940b-6de373e73c83",
+      "source_path": "2A39",
+      "type": "panel",
+      "product_code": "I06",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "df4abea1_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "df4abea1_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "59df7016-dd46-5630-9a10-cf65901da9e1",
+      "source_path": "2A3F",
+      "type": "panel",
+      "product_code": "I02",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "59df7016_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "59df7016_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "ce7c0b93-64dc-5bde-ab35-e3e61ecb227b",
+      "source_path": "2A45",
+      "type": "panel",
+      "product_code": "I01",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "ce7c0b93_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "ce7c0b93_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "6e957bb8-4923-5b1d-9830-0db6db9b4a7e",
+      "source_path": "2A4B",
+      "type": "panel",
+      "product_code": "I07",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "6e957bb8_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "6e957bb8_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "74a90101-25ea-5895-af86-46fba11d34c7",
+      "source_path": "2A53",
+      "type": "panel",
+      "product_code": "I04",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "74a90101_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "74a90101_side_1.001",
+          "part": "side_1",
+          "scope": "physical"
+        },
+        {
+          "object": "74a90101_above_opening.001",
+          "part": "above_opening",
+          "scope": "physical"
+        },
+        {
+          "object": "74a90101_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "ec610120-2118-5f50-858c-f519809409c3",
+      "source_path": "2A55",
+      "type": "panel",
+      "product_code": "I07",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "ec610120_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "ec610120_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "3b161b58-5684-5fc8-aa3f-ec92ec136d17",
+      "source_path": "2A57",
+      "type": "panel",
+      "product_code": "I07",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "3b161b58_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "3b161b58_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "dd85dee0-5afa-545a-bb5f-2d3fee274216",
+      "source_path": "2A59",
+      "type": "panel",
+      "product_code": "I01",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "dd85dee0_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "dd85dee0_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "560507d0-2c21-5162-9694-e66ce9ab328f",
+      "source_path": "2A5B",
+      "type": "panel",
+      "product_code": "I01",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "560507d0_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "560507d0_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "dd97ceec-15be-5c46-ba21-30161f6d4f6b",
+      "source_path": "2A5D",
+      "type": "panel",
+      "product_code": "I01",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "dd97ceec_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "dd97ceec_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "70365d76-2e62-5eaf-8cba-746d1948b00a",
+      "source_path": "2A63",
+      "type": "panel",
+      "product_code": "I09",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "70365d76_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "70365d76_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "a22dde3b-e010-5497-8aac-8a888bf7a1fd",
+      "source_path": "2A65",
+      "type": "panel",
+      "product_code": "I01",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "a22dde3b_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "a22dde3b_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "81a3829a-abd1-5ad2-862e-b6e03d95bb4c",
+      "source_path": "2A6C",
+      "type": "panel",
+      "product_code": "I10",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "81a3829a_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "81a3829a_side_1.001",
+          "part": "side_1",
+          "scope": "physical"
+        },
+        {
+          "object": "81a3829a_above_opening.001",
+          "part": "above_opening",
+          "scope": "physical"
+        },
+        {
+          "object": "81a3829a_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "b399c046-0fbe-5d7c-b2c8-bcd8f3bc6274",
+      "source_path": "2A6E",
+      "type": "panel",
+      "product_code": "I06",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "b399c046_side_0.001",
+          "part": "side_0",
+          "scope": "physical"
+        },
+        {
+          "object": "b399c046_module_outline.001",
+          "part": "module_outline",
+          "scope": "presentation"
+        }
+      ]
+    },
+    {
+      "entity_id": "83afb6f3-5aa9-50e6-95a2-e71c449dd1e6",
+      "source_path": "2A70",
+      "type": "connection",
+      "product_code": "B02",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "83afb6f3_profile_0.001",
+          "part": "profile_0",
+          "scope": "physical"
+        }
+      ]
+    },
+    {
+      "entity_id": "b126cf3d-cf62-5198-8a6a-ccd0770c045c",
+      "source_path": "2A72",
+      "type": "connection",
+      "product_code": "B02",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "b126cf3d_profile_0.001",
+          "part": "profile_0",
+          "scope": "physical"
+        }
+      ]
+    },
+    {
+      "entity_id": "9efe757c-86fd-5619-adac-98ef55d4a62a",
+      "source_path": "2A74",
+      "type": "connection",
+      "product_code": "B02",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "9efe757c_profile_0.001",
+          "part": "profile_0",
+          "scope": "physical"
+        }
+      ]
+    },
+    {
+      "entity_id": "f21f3457-57b9-5025-8418-5fcf80027b9a",
+      "source_path": "2A76",
+      "type": "connection",
+      "product_code": "B02",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "f21f3457_profile_0.001",
+          "part": "profile_0",
+          "scope": "physical"
+        }
+      ]
+    },
+    {
+      "entity_id": "d7b18062-319e-5f07-b624-60449560223b",
+      "source_path": "2A78",
+      "type": "connection",
+      "product_code": "B02",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "d7b18062_profile_0.001",
+          "part": "profile_0",
+          "scope": "physical"
+        }
+      ]
+    },
+    {
+      "entity_id": "1b193e11-a49b-5eb0-9bdf-3b418dc406e4",
+      "source_path": "2A7A",
+      "type": "connection",
+      "product_code": "B01",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "1b193e11_profile_0.001",
+          "part": "profile_0",
+          "scope": "physical"
+        }
+      ]
+    },
+    {
+      "entity_id": "62582641-1027-510e-8e53-ffd0806f9a99",
+      "source_path": "2A7C",
+      "type": "connection",
+      "product_code": "B03",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "62582641_profile_surface_0.001",
+          "part": "profile_surface_0",
+          "scope": "physical"
+        },
+        {
+          "object": "62582641_profile_surface_1.001",
+          "part": "profile_surface_1",
+          "scope": "physical"
+        },
+        {
+          "object": "62582641_profile_surface_2.001",
+          "part": "profile_surface_2",
+          "scope": "physical"
+        },
+        {
+          "object": "62582641_profile_surface_3.001",
+          "part": "profile_surface_3",
+          "scope": "physical"
+        },
+        {
+          "object": "62582641_profile_surface_4.001",
+          "part": "profile_surface_4",
+          "scope": "physical"
+        },
+        {
+          "object": "62582641_profile_surface_5.001",
+          "part": "profile_surface_5",
+          "scope": "physical"
+        },
+        {
+          "object": "62582641_profile_surface_6.001",
+          "part": "profile_surface_6",
+          "scope": "physical"
+        },
+        {
+          "object": "62582641_profile_surface_7.001",
+          "part": "profile_surface_7",
+          "scope": "physical"
+        }
+      ]
+    },
+    {
+      "entity_id": "0759a7bf-6ff7-5535-a009-b614047821c7",
+      "source_path": "2A7E",
+      "type": "connection",
+      "product_code": "B03",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "0759a7bf_profile_surface_0.001",
+          "part": "profile_surface_0",
+          "scope": "physical"
+        },
+        {
+          "object": "0759a7bf_profile_surface_1.001",
+          "part": "profile_surface_1",
+          "scope": "physical"
+        },
+        {
+          "object": "0759a7bf_profile_surface_2.001",
+          "part": "profile_surface_2",
+          "scope": "physical"
+        },
+        {
+          "object": "0759a7bf_profile_surface_3.001",
+          "part": "profile_surface_3",
+          "scope": "physical"
+        },
+        {
+          "object": "0759a7bf_profile_surface_4.001",
+          "part": "profile_surface_4",
+          "scope": "physical"
+        },
+        {
+          "object": "0759a7bf_profile_surface_5.001",
+          "part": "profile_surface_5",
+          "scope": "physical"
+        },
+        {
+          "object": "0759a7bf_profile_surface_6.001",
+          "part": "profile_surface_6",
+          "scope": "physical"
+        },
+        {
+          "object": "0759a7bf_profile_surface_7.001",
+          "part": "profile_surface_7",
+          "scope": "physical"
+        }
+      ]
+    },
+    {
+      "entity_id": "29ce1c90-bc41-517e-b2db-bf6f1bb4c830",
+      "source_path": "2A80",
+      "type": "connection",
+      "product_code": "B03",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "29ce1c90_profile_surface_0.001",
+          "part": "profile_surface_0",
+          "scope": "physical"
+        },
+        {
+          "object": "29ce1c90_profile_surface_1.001",
+          "part": "profile_surface_1",
+          "scope": "physical"
+        },
+        {
+          "object": "29ce1c90_profile_surface_2.001",
+          "part": "profile_surface_2",
+          "scope": "physical"
+        },
+        {
+          "object": "29ce1c90_profile_surface_3.001",
+          "part": "profile_surface_3",
+          "scope": "physical"
+        },
+        {
+          "object": "29ce1c90_profile_surface_4.001",
+          "part": "profile_surface_4",
+          "scope": "physical"
+        },
+        {
+          "object": "29ce1c90_profile_surface_5.001",
+          "part": "profile_surface_5",
+          "scope": "physical"
+        },
+        {
+          "object": "29ce1c90_profile_surface_6.001",
+          "part": "profile_surface_6",
+          "scope": "physical"
+        },
+        {
+          "object": "29ce1c90_profile_surface_7.001",
+          "part": "profile_surface_7",
+          "scope": "physical"
+        }
+      ]
+    },
+    {
+      "entity_id": "db35153a-389d-513a-9383-d2bb20fce363",
+      "source_path": "2A82",
+      "type": "connection",
+      "product_code": "B03",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "db35153a_profile_surface_0.001",
+          "part": "profile_surface_0",
+          "scope": "physical"
+        },
+        {
+          "object": "db35153a_profile_surface_1.001",
+          "part": "profile_surface_1",
+          "scope": "physical"
+        },
+        {
+          "object": "db35153a_profile_surface_2.001",
+          "part": "profile_surface_2",
+          "scope": "physical"
+        },
+        {
+          "object": "db35153a_profile_surface_3.001",
+          "part": "profile_surface_3",
+          "scope": "physical"
+        },
+        {
+          "object": "db35153a_profile_surface_4.001",
+          "part": "profile_surface_4",
+          "scope": "physical"
+        },
+        {
+          "object": "db35153a_profile_surface_5.001",
+          "part": "profile_surface_5",
+          "scope": "physical"
+        },
+        {
+          "object": "db35153a_profile_surface_6.001",
+          "part": "profile_surface_6",
+          "scope": "physical"
+        },
+        {
+          "object": "db35153a_profile_surface_7.001",
+          "part": "profile_surface_7",
+          "scope": "physical"
+        }
+      ]
+    },
+    {
+      "entity_id": "760478f3-3ae7-5a03-87be-877fd45c9736",
+      "source_path": "2A89",
+      "type": "reference_profile",
+      "product_code": "V03",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "760478f3_cad_profile.001",
+          "part": "cad_profile",
+          "scope": "reference"
+        }
+      ]
+    },
+    {
+      "entity_id": "ee970d65-b4c1-5162-8300-d851aa858920",
+      "source_path": "2A90",
+      "type": "reference_profile",
+      "product_code": "V04",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "ee970d65_cad_profile.001",
+          "part": "cad_profile",
+          "scope": "reference"
+        }
+      ]
+    },
+    {
+      "entity_id": "40d8be5f-0dc8-5e93-b3be-0930b78e6bb9",
+      "source_path": "2A96",
+      "type": "veranda_post",
+      "product_code": "B04",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "40d8be5f_profile_0.001",
+          "part": "profile_0",
+          "scope": "physical"
+        }
+      ]
+    },
+    {
+      "entity_id": "db11778e-3f46-59d6-8869-808ccc74e40e",
+      "source_path": "2A98",
+      "type": "veranda_post",
+      "product_code": "B04",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "db11778e_profile_0.001",
+          "part": "profile_0",
+          "scope": "physical"
+        }
+      ]
+    },
+    {
+      "entity_id": "54d8c506-46f3-56b7-959b-454be5888c61",
+      "source_path": "3E4F",
+      "type": "connection",
+      "product_code": "B02",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "54d8c506_profile_0.001",
+          "part": "profile_0",
+          "scope": "physical"
+        }
+      ]
+    },
+    {
+      "entity_id": "317d4ea0-c3c4-53f2-a160-b09e418bf5e3",
+      "source_path": "29BB/29B7",
+      "type": "window",
+      "product_code": "P01",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "317d4ea0_source_jamb_0.001",
+          "part": "source_jamb_0",
+          "scope": "physical"
+        },
+        {
+          "object": "317d4ea0_source_jamb_1.001",
+          "part": "source_jamb_1",
+          "scope": "physical"
+        },
+        {
+          "object": "317d4ea0_glazing_reference.001",
+          "part": "glazing_reference",
+          "scope": "schematic"
+        },
+        {
+          "object": "317d4ea0_cad_sill_trace.001",
+          "part": "cad_sill_trace",
+          "scope": "reference"
+        }
+      ]
+    },
+    {
+      "entity_id": "3ae9c2ac-a558-55df-8bb5-5f4e5b5bc0d4",
+      "source_path": "29C1/29B7",
+      "type": "window",
+      "product_code": "P01",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "3ae9c2ac_source_jamb_0.001",
+          "part": "source_jamb_0",
+          "scope": "physical"
+        },
+        {
+          "object": "3ae9c2ac_source_jamb_1.001",
+          "part": "source_jamb_1",
+          "scope": "physical"
+        },
+        {
+          "object": "3ae9c2ac_glazing_reference.001",
+          "part": "glazing_reference",
+          "scope": "schematic"
+        },
+        {
+          "object": "3ae9c2ac_cad_sill_trace.001",
+          "part": "cad_sill_trace",
+          "scope": "reference"
+        }
+      ]
+    },
+    {
+      "entity_id": "4aa7a62a-814e-548f-a60f-2cf813dd29c1",
+      "source_path": "29C5/29B7",
+      "type": "window",
+      "product_code": "P01",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "4aa7a62a_source_jamb_0.001",
+          "part": "source_jamb_0",
+          "scope": "physical"
+        },
+        {
+          "object": "4aa7a62a_source_jamb_1.001",
+          "part": "source_jamb_1",
+          "scope": "physical"
+        },
+        {
+          "object": "4aa7a62a_glazing_reference.001",
+          "part": "glazing_reference",
+          "scope": "schematic"
+        },
+        {
+          "object": "4aa7a62a_cad_sill_trace.001",
+          "part": "cad_sill_trace",
+          "scope": "reference"
+        }
+      ]
+    },
+    {
+      "entity_id": "3b8f649e-5463-5e8f-8125-4b3b36863e3b",
+      "source_path": "29D9/29D5",
+      "type": "window",
+      "product_code": "P03",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "3b8f649e_source_jamb_0.001",
+          "part": "source_jamb_0",
+          "scope": "physical"
+        },
+        {
+          "object": "3b8f649e_source_jamb_1.001",
+          "part": "source_jamb_1",
+          "scope": "physical"
+        },
+        {
+          "object": "3b8f649e_glazing_reference.001",
+          "part": "glazing_reference",
+          "scope": "schematic"
+        },
+        {
+          "object": "3b8f649e_cad_sill_trace.001",
+          "part": "cad_sill_trace",
+          "scope": "reference"
+        }
+      ]
+    },
+    {
+      "entity_id": "83c3943d-ea4a-568a-8a61-19fcb9af6a54",
+      "source_path": "29E5/29E1",
+      "type": "window",
+      "product_code": "P01",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "83c3943d_source_jamb_0.001",
+          "part": "source_jamb_0",
+          "scope": "physical"
+        },
+        {
+          "object": "83c3943d_source_jamb_1.001",
+          "part": "source_jamb_1",
+          "scope": "physical"
+        },
+        {
+          "object": "83c3943d_glazing_reference.001",
+          "part": "glazing_reference",
+          "scope": "schematic"
+        },
+        {
+          "object": "83c3943d_cad_sill_trace.001",
+          "part": "cad_sill_trace",
+          "scope": "reference"
+        }
+      ]
+    },
+    {
+      "entity_id": "b7799e23-b745-5ef1-9380-7f7f89e226c6",
+      "source_path": "29F9/29F5",
+      "type": "window",
+      "product_code": "P02",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "b7799e23_source_jamb_0.001",
+          "part": "source_jamb_0",
+          "scope": "physical"
+        },
+        {
+          "object": "b7799e23_source_jamb_1.001",
+          "part": "source_jamb_1",
+          "scope": "physical"
+        },
+        {
+          "object": "b7799e23_glazing_reference.001",
+          "part": "glazing_reference",
+          "scope": "schematic"
+        },
+        {
+          "object": "b7799e23_cad_sill_trace.001",
+          "part": "cad_sill_trace",
+          "scope": "reference"
+        }
+      ]
+    },
+    {
+      "entity_id": "641d6b10-6182-5333-9f18-89554a8a5640",
+      "source_path": "2A01/29F5",
+      "type": "window",
+      "product_code": "P02",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "641d6b10_source_jamb_0.001",
+          "part": "source_jamb_0",
+          "scope": "physical"
+        },
+        {
+          "object": "641d6b10_source_jamb_1.001",
+          "part": "source_jamb_1",
+          "scope": "physical"
+        },
+        {
+          "object": "641d6b10_glazing_reference.001",
+          "part": "glazing_reference",
+          "scope": "schematic"
+        },
+        {
+          "object": "641d6b10_cad_sill_trace.001",
+          "part": "cad_sill_trace",
+          "scope": "reference"
+        }
+      ]
+    },
+    {
+      "entity_id": "27b5a816-7c64-53fa-8f11-8f60955d3e6f",
+      "source_path": "2A0B/2A07",
+      "type": "door",
+      "product_code": "K02",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "27b5a816_open_leaf.001",
+          "part": "open_leaf",
+          "scope": "physical"
+        },
+        {
+          "object": "27b5a816_original_plan_symbol.001",
+          "part": "original_plan_symbol",
+          "scope": "reference"
+        }
+      ]
+    },
+    {
+      "entity_id": "ef00702c-9382-58ab-8491-f68fac273afc",
+      "source_path": "2A21/2A1D",
+      "type": "door",
+      "product_code": "K01",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "ef00702c_open_leaf.001",
+          "part": "open_leaf",
+          "scope": "physical"
+        },
+        {
+          "object": "ef00702c_original_plan_symbol.001",
+          "part": "original_plan_symbol",
+          "scope": "reference"
+        }
+      ]
+    },
+    {
+      "entity_id": "7e0a7704-25c4-582a-9fa4-067ece5f8972",
+      "source_path": "2A2D/2A29",
+      "type": "door",
+      "product_code": "K01",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "7e0a7704_open_leaf.001",
+          "part": "open_leaf",
+          "scope": "physical"
+        },
+        {
+          "object": "7e0a7704_original_plan_symbol.001",
+          "part": "original_plan_symbol",
+          "scope": "reference"
+        }
+      ]
+    },
+    {
+      "entity_id": "6d62ce4d-2bf6-5f06-b27a-95b4b89eb82e",
+      "source_path": "2A35/2A31",
+      "type": "door",
+      "product_code": "K01",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "6d62ce4d_open_leaf.001",
+          "part": "open_leaf",
+          "scope": "physical"
+        },
+        {
+          "object": "6d62ce4d_original_plan_symbol.001",
+          "part": "original_plan_symbol",
+          "scope": "reference"
+        }
+      ]
+    },
+    {
+      "entity_id": "a4b95e63-e2bb-5457-b6ef-5313dc4473c4",
+      "source_path": "2A53/2A4F",
+      "type": "door",
+      "product_code": "K01",
+      "bom_scope": true,
+      "blender_objects": [
+        {
+          "object": "a4b95e63_open_leaf.001",
+          "part": "open_leaf",
+          "scope": "physical"
+        },
+        {
+          "object": "a4b95e63_original_plan_symbol.001",
+          "part": "original_plan_symbol",
+          "scope": "reference"
+        }
+      ]
+    },
+    {
+      "entity_id": "a3ed88fc-512f-5fda-aeb6-9c50506f2e86",
+      "source_path": "2A6C/OPEN",
+      "type": "open_passage",
+      "product_code": null,
+      "bom_scope": false,
+      "blender_objects": []
+    }
+  ],
+  "model_data_sha256": "32ddbacbb10f67e4c84b59dc0e3fbdfb1ba93fabb94b58893aa56e1c0895dd06"
+}
