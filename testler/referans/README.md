@@ -12,8 +12,10 @@ python3 testler/referans/dogrula.py --hizli    # ~45 sn: 16 katalog planı hari�
 Betik yalnız v1.1.1 ağacını geçici bir klasöre kopyalar (`deneme/`, `testler/`, `KARARLAR/` hariç) ve `denetim/kos.py`'yi orada koşar; depoya yazmaz. Ağ, LLM, WhatsApp ya da canlı sunucu kullanmaz. Çıkış kodu 0, referansla aynı demektir.
 
 Kurallar:
-- Referans girdiler değişmemeli: İş Emri şablonları, `ref_*` çizimleri, Beyin test mesajları ve kayıtlı LLM çıkarımları. Kod dosyalarının özeti yalnız bilgi olarak raporlanır; kod değişikliği tek başına fark sayılmaz.
-- Beyin harness'inde tüm vakalar uyumlu olmalı. Vaka sayısı 22'den az olamaz, yeni vaka eklenebilir.
+- Referans girdiler değişmemeli: İş Emri şablonları (`is_emri/`), referans çizim ve kayıtlar (`ref_katalog/`, `ref_yan/`, `kanal/ref_*`), katalog verisi ve test bayi kaydı (`beyin/veri/`); toplam 23 dosya. Dondurulan dosya silinemez; yeni dosya bilgi olarak raporlanır.
+- Beyin test vakaları vaka vaka izlenir. Harness'in okuduğu her şey vakanın özetindedir: mesaj kaydı (beklenen eylem ve içerik kontrolü dahil), LLM'e giden grup kaydı ve kayıtlı LLM çıkarımı. Dondurulan 22 vaka aynı sırayla ve değişmeden durmalı. Yeni vaka yalnız sona eklenebilir, çünkü aynı göndericinin vakaları konuşma durumunu paylaşır ve sıra sonucu etkiler.
+- Kod dosyalarının özeti yalnız bilgi olarak raporlanır; kod değişikliği tek başına fark sayılmaz.
+- Beyin harness'inde tüm vakalar uyumlu olmalı; vaka sayısı 22'den az olamaz.
 - Motor sayıları, BOM sayımları, çıkarıcı sonuçları ve içerik parmak izleri aynı kalmalı. Bilerek yapılan bir değişiklik bunları değiştirirse referans gerekçesiyle ve yeni tarihle yeniden dondurulur; eskisi silinmez.
 
 **Dikkat:** `denetim/kos.py`'yi bu dalın kökünde doğrudan koşmayın. Sır taraması `deneme/` altındaki IFC dosyasındaki ondalık koordinatları telefon numarası sanıyor ve adım "failed" dönüyor (9 yanlış bulgu). `kos.py`'yi `main`'de ya da `dogrula.py` üzerinden koşun. Kalıbın düzeltilmesi İE-02'de.
@@ -24,6 +26,7 @@ Ortam (28.09, pip ile kurulan sürümler): Python 3.11.15, ezdxf 1.4.4, pymupdf 
 
 | Adım | Sonuç |
 |---|---|
+| Referans girdiler | 23 dosya ve 22 Beyin vakası donduruldu (`referans_girdiler.json`); dosya özetleri `SHA256SUMS` ile aynı |
 | Beyin kural katmanı (harness) | 22/22 beklenen eylemle uyumlu. LLM çıkarımı kayıtlı dosyalardan gelir, gerçek API çağrılmaz. |
 | Motor altın testi 6×8 | 41 pano, dış ölçü 773 × 1014 cm, ayak izi farkı 0 cm² |
 | Motor altın testi Yan Verandalı 6×8,5 | 52 pano, dış ölçü 773 × 1076,75 cm, BOM 26 kod referans sayımla birebir |
@@ -35,6 +38,7 @@ Ortam (28.09, pip ile kurulan sürümler): Python 3.11.15, ezdxf 1.4.4, pymupdf 
 | PDF sayfa sayısı ve ölçüsü | 18 çıktı, aynı (`pdf_parmak_izleri.txt`) |
 
 Dosyalar:
+- `referans_girdiler.json`: 23 girdi dosyasının özeti ve 22 Beyin vakasının vaka özeti. Bilerek yapılan bir değişiklikten sonra `python3 testler/referans/dogrula.py --girdi-dokumu` ile yeniden üretilir.
 - `denetim_kosum_2026-09-28.json`: `kos.py --planlar` sonucu.
 - `dxf_parmak_izleri.txt`: 18 DXF'in içerik parmak izi.
 - `pdf_parmak_izleri.txt`: 18 PDF'in sayfa sayısı ve ölçüsü.
