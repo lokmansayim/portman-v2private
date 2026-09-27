@@ -11,11 +11,11 @@ Koşum:
 B1 (kritik): Bayinin kendi sözü belirsizken ("P6001, yatak odası 1, 120x180": ne "değiştir" ne "ekle" var) kural
    katmanı soru sormalı. Kod bayinin sözüne yalnız LLM pencere işlemini "ekle" verdiğinde bakıyor (beyin/karar.py,
    pencere döngüsü); işlem boş ya da "degistir" gelirse pencereyi sessizce değiştirip İş Emri üretiyor.
-B2 (karar sizde): Görüşme durumunda zaman aşımı yok (beyin/konusma.py). 22.09'da 3,5 saat sonra gelen "P6001 …"
+B2 (karar Lokman'ın): Görüşme durumunda zaman aşımı yok (beyin/konusma.py). 22.09'da 3,5 saat sonra gelen "P6001 …"
    mesajı eski aynalı taslağın revizyonu sayıldı; mesajda ayna yoktu ama çıktı aynalı geldi.
-   Seçenekler: (a) böyle kalsın, (b) taslak N saat sonra düşer, (c) sistem "önceki taslağın revizyonu mu, yeni talep mi?"
-   diye sorar. Bu test (b) ve (c)'nin ortak koşulunu sınar: uzun aradan sonra eski taslağın varyantı SESSİZCE
-   devralınmaz. (a) seçilirse bu test silinir.
+   Seçenekler (DURUM.md, 23.09): (a) böyle kalsın, (b) taslak N saat sonra kapansın, (c) model koduyla başlayan mesaj
+   yeni talep sayılsın. Bu test (b) ve (c)'nin ortak sonucunu sınar: uzun aradan sonra, model koduyla başlayan
+   mesajda eski taslağın varyantı sessizce devralınmaz. Sistemin sorması da kabul edilir. (a) seçilirse test silinir.
 """
 from __future__ import annotations
 import json, sys, tempfile, time
@@ -115,8 +115,11 @@ def b2_uzun_aradan_sonra():
 
 # ---------------------------------------------------------------- pytest
 if pytest is not None:
-    xfail_b1 = pytest.mark.xfail(strict=True, reason="B1: belirsiz sözde işlem boş/degistir gelince soru sorulmuyor (karar.py)")
-    xfail_b2 = pytest.mark.xfail(strict=True, reason="B2: görüşmede zaman aşımı yok; eski aynalı taslak sessizce devralınıyor (konusma.py)")
+    # raises=AssertionError: yalnız beklenen davranış farkı "bilinen hata" sayılır; kurulum hatası (ImportError vb.) testi düşürür.
+    xfail_b1 = pytest.mark.xfail(strict=True, raises=AssertionError,
+                                 reason="B1: belirsiz sözde işlem boş/degistir gelince soru sorulmuyor (karar.py)")
+    xfail_b2 = pytest.mark.xfail(strict=True, raises=AssertionError,
+                                 reason="B2: görüşmede zaman aşımı yok; eski aynalı taslak sessizce devralınıyor (konusma.py)")
 
     @xfail_b1
     def test_b1_islem_bos_iken_sorulmali():
@@ -132,10 +135,14 @@ if pytest is not None:
     def test_b1_kontrol_acik_sozde_is_emri():
         assert b1_kontrol_acik_soz() == "is_emri"
 
+    def test_b2_on_kosul_ilk_taslak_aynali():
+        """Ön koşul ayrı sınanır: ilk İş Emri aynalı değilse B2 testi anlamsızdır ve bu test düşer."""
+        ilk_aynali, *_ = b2_uzun_aradan_sonra()
+        assert ilk_aynali
+
     @xfail_b2
     def test_b2_uzun_aradan_sonra_eski_varyant_sessizce_devralinmamali():
-        ilk_aynali, eylem, aynali, _rev = b2_uzun_aradan_sonra()
-        assert ilk_aynali, "ön koşul: ilk İş Emri aynalı olmalı"
+        _ilk, eylem, aynali, _rev = b2_uzun_aradan_sonra()
         assert eylem == "sor" or (eylem == "is_emri" and not aynali)
 
 
@@ -146,4 +153,4 @@ if __name__ == "__main__":
     print("Kontrol açık söz  :", b1_kontrol_acik_soz(), "(beklenen: is_emri)")
     ilk, e, a, r = b2_uzun_aradan_sonra()
     print(f"B2 3,5 saat sonra : ilk aynalı={ilk}; ikinci eylem={e}, aynalı={a}, revizyon={r} "
-          "(beklenen: soru ya da aynasız yeni İş Emri)")
+          "(beklenen: aynasız yeni İş Emri ya da soru)")

@@ -1,10 +1,18 @@
 """Dondurulmuş referansa karşı doğrulama: v1.1.1 çekirdeği (Beyin kuralları, Motor, çıkarıcı) bugün de aynı sonucu
 veriyor mu?
 
-Depo koduna dokunmaz: ağacı geçici bir klasöre kopyalar, `denetim/kos.py --planlar` koşar ve sonucu şu iki
-dondurulmuş kayıtla karşılaştırır (28 Eylül 2026, temiz ortam, iki bağımsız koşuda aynı):
+Depo koduna dokunmaz: v1.1.1 ağacını geçici bir klasöre kopyalar (deneme/, testler/, KARARLAR/ hariç),
+`denetim/kos.py --planlar` koşar ve sonucu dondurulmuş kayıtlarla karşılaştırır (28 Eylül 2026, üç ayrı temiz koşuda aynı):
   denetim_kosum_2026-09-28.json  adım durumları, sayılar, BOM sayımları, girdi özetleri, 16 plan sonucu
   dxf_parmak_izleri.txt          18 DXF çıktısının içerik parmak izi (parmak_izi.py; zaman damgası ve kimlikler hariç)
+  pdf_parmak_izleri.txt          18 PDF çıktısının sayfa sayısı ve ölçüsü
+
+Kurallar:
+  - Referans girdiler (İş Emri şablonları, ref_* çizimleri, Beyin test mesajları ve kayıtlı LLM çıkarımları) değişmemeli.
+    Kod dosyalarının özeti yalnız bilgi olarak raporlanır; kod değişikliği tek başına farka sayılmaz.
+  - Beyin harness'inde tüm vakalar uyumlu olmalı; vaka sayısı referanstan az olamaz (yeni vaka eklenebilir).
+  - Motor sayıları, BOM sayımları, çıkarıcı sonuçları ve içerik parmak izleri referansla aynı olmalı. Bilerek yapılan
+    bir değişiklik bunları değiştirirse referans gerekçesiyle ve yeni tarihle yeniden dondurulur; eskisi silinmez.
 
 Kullanım (depo kökünde):  python3 testler/referans/dogrula.py [--hizli]
     --hizli: 16 katalog planını atlar (~45 sn yerine ~4,5 dk)
@@ -19,6 +27,7 @@ REF = Path(__file__).resolve().parent
 sys.path.insert(0, str(REF))
 from parmak_izi import ozet  # noqa: E402
 
+HIZLI = {"altin_6x8", "altin_yan", "p6001"}  # --hizli koşuda üretilen çıktılar (+ çıkarıcı P6001)
 SAYILAR = {
     "motor_altin_6x8": ["pano", "kose", "aciklik", "ucluH", "ayak_izi_fark_cm2", "altin", "dis_olcu"],
     "motor_altin_yan_6x8p5_bom": ["pano", "kose", "aciklik", "ucluH", "ayak_izi_fark_cm2", "altin", "dis_olcu"],
@@ -36,7 +45,8 @@ def _yoksay(dizin, adlar):
 def main() -> int:
     ap = argparse.ArgumentParser(); ap.add_argument("--hizli", action="store_true"); a = ap.parse_args()
     ref = json.loads((REF / "denetim_kosum_2026-09-28.json").read_text(encoding="utf-8"))
-    ref_pi = dict(reversed(l.split("  ", 1)) for l in (REF / "dxf_parmak_izleri.txt").read_text().splitlines() if l.strip())
+    oku = lambda f: dict(reversed(l.split("  ", 1)) for l in (REF / f).read_text().splitlines() if l.strip())
+    ref_pi, ref_pdf = oku("dxf_parmak_izleri.txt"), oku("pdf_parmak_izleri.txt")
     satir, kotu = [], 0
 
     def yaz(ad, ok, ek=""):
@@ -56,9 +66,19 @@ def main() -> int:
         ra, ya = ref["adimlar"], yeni["adimlar"]
         for adim, v in ya.items():
             yaz(f"{adim}: durum", v.get("durum") == "passed", v.get("durum"))
-        yaz("girdi_hashleri", ya["girdi_hashleri"]["hashler"] == ra["girdi_hashleri"]["hashler"])
-        yaz("beyin_harness", ya["beyin_harness"]["sayilar"] == ra["beyin_harness"]["sayilar"],
-            f"{ya['beyin_harness']['sayilar']['uyumlu']}/{ya['beyin_harness']['sayilar']['toplam']}")
+        def duz(d, on=""):
+            out = {}
+            for k, v in d.items():
+                out.update(duz(v, on + k + "/") if isinstance(v, dict) else {on + k: v})
+            return out
+        yh, rh = duz(ya["girdi_hashleri"]["hashler"]), duz(ra["girdi_hashleri"]["hashler"])
+        kod = lambda y: y.endswith((".py", ".php"))
+        veri_fark = sorted(k for k in set(yh) | set(rh) if not kod(k) and yh.get(k) != rh.get(k))
+        kod_fark = sorted(k for k in set(yh) | set(rh) if kod(k) and yh.get(k) != rh.get(k))
+        yaz("referans girdiler (şablon, çizim, test verisi)", not veri_fark, ", ".join(veri_fark) if veri_fark else f"{sum(not kod(k) for k in rh)} dosya")
+        satir.append(("kod dosyaları (bilgi)", ("değişti: " + ", ".join(kod_fark)) if kod_fark else "değişmedi"))
+        yb, rb = ya["beyin_harness"]["sayilar"], ra["beyin_harness"]["sayilar"]
+        yaz("beyin_harness", yb["uyumlu"] == yb["toplam"] and yb["toplam"] >= rb["toplam"], f"{yb['uyumlu']}/{yb['toplam']} (referans {rb['toplam']} vaka)")
         for adim, alanlar in SAYILAR.items():
             ys, rs = ya[adim]["sayilar"], ra[adim]["sayilar"]
             yaz(f"{adim}: sayılar", all(ys.get(k) == rs.get(k) for k in alanlar), f"pano {ys.get('pano')}, dış ölçü {ys.get('dis_olcu')}")
@@ -72,13 +92,14 @@ def main() -> int:
             yaz("cikarici_16_plan: özet", ys["sayilar"] == rs["sayilar"], f"{ys['sayilar']['motor_passed']}/{ys['sayilar']['toplam']}")
             plan = lambda d: {k: (v.get("cikis_kodu"), v.get("motor_passed")) for k, v in d["planlar"].items()}
             yaz("cikarici_16_plan: plan plan", plan(ys) == plan(rs))
-        pi_fark = []
-        for dxf in sorted((W / "cikti/denetim").rglob("*.dxf")):
-            rel = str(dxf.relative_to(W))
-            if rel in ref_pi and ozet(dxf) != ref_pi[rel]:
-                pi_fark.append(rel)
-        sayilan = sum(1 for d in (W / "cikti/denetim").rglob("*.dxf") if str(d.relative_to(W)) in ref_pi)
-        yaz("DXF içerik parmak izleri", not pi_fark and sayilan > 0, f"{sayilan} dosya" + (f", fark: {pi_fark}" if pi_fark else ""))
+        for tur, ref_d in (("DXF", ref_pi), ("PDF", ref_pdf)):
+            beklenen = [k for k in ref_d if a.hizli is False or k.split("/")[2] in HIZLI or k.startswith("cikti/denetim/cikarici/P6001/")]
+            eksik = [k for k in beklenen if not (W / k).exists()]
+            fark = [k for k in beklenen if (W / k).exists() and ozet(W / k) != ref_d[k]]
+            ek = f"{len(beklenen) - len(eksik)}/{len(beklenen)} dosya"
+            if eksik: ek += f", eksik: {eksik}"
+            if fark: ek += f", fark: {fark}"
+            yaz(f"{tur} içerik parmak izleri" if tur == "DXF" else "PDF sayfa sayısı ve ölçüsü", not eksik and not fark, ek)
 
     g = max(len(x) for x, _ in satir)
     for x, s in satir:

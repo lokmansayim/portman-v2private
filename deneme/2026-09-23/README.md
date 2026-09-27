@@ -42,8 +42,8 @@ Gerekenler: ezdxf 1.4.4, pymupdf, shapely, pydantic, numpy, pillow, ifcopenshell
 
 ## Dışarıda bırakılanlar
 
-Görseller (PNG, yaklaşık 20 MB), `.blend` ve `.glb` modelleri, Tatar Motor çıktılarının DXF, PDF ve önizlemesi. Hepsi yukarıdaki betikle yeniden üretilebilir; asılları masaüstü klasöründe duruyor.
+Görseller (PNG, yaklaşık 20 MB), `.blend` ve `.glb` modelleri, Tatar Motor çıktılarının DXF, PDF ve önizlemesi. `.blend`, `.glb` ve Motor çıktıları yukarıdaki betikle yeniden üretilir. PNG görseller için render gerekir (`blender_ciz.py --render`, `ifc_gorsel.py --render`, bpy ile); betik render almaz. Asılları masaüstü klasöründe duruyor.
 
 ## Kişisel veri
 
-Bayi PDF'i yalnız oda adlarını ve ölçüleri içeriyor; ad, telefon ya da adres yok (28.09'da kontrol edildi). Dosya adlarında ve notlarda bayinin adı geçiyor. Metin dosyaları telefon numarası, e-posta ve anahtar kalıplarına göre tarandı; bulgu yok.
+Bayi PDF'i yalnız oda adlarını ve ölçüleri içeriyor; ad, telefon ya da adres yok (28.09'da kontrol edildi). Bayinin adı dosya adlarında, notlarda, `11_Blender/kod/blender_hazirla.py`'de ve ondan üretilen `blender_girdi.json` ile Tatar IFC'sinde geçiyor. `13_Kiyas` altındaki 7 dosyada Mac'teki mutlak yollar (kullanıcı adı dahil) duruyor; kıyası etkilemedikleri için değiştirilmedi. Metin dosyaları telefon numarası, e-posta ve anahtar kalıplarına göre tarandı; bulgu yok.

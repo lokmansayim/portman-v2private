@@ -66,7 +66,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 
 ## Açık kararlar (sahibi Lokman)
 
-- **B2:** Görüşmede zaman aşımı: (a) böyle kalsın, (b) taslak N saat sonra düşer, (c) sistem sorar. Test: `testler/bilinen_hatalar/test_b1_b2.py`.
+- **B2:** Görüşmede zaman aşımı yok. Seçenekler (DURUM.md, 23.09): (a) böyle kalsın, (b) taslak N saat sonra kapansın, (c) model koduyla başlayan mesaj yeni talep sayılsın. Test: `testler/bilinen_hatalar/test_b1_b2.py`.
 - **K16:** Modül dışı katalog planları için (a) modüle uyarlama ya da (b) serbest aks. 23 Eylül önerisi: bayi planlarında (b).
 - **K3 ve K4:** Güncel Şablon 2024 blok adlarına geçiş; kapı genişlikleri.
 - **Z-03 ve Z-06 eşikleri:** %98 ve günde 50 talep öneridir.

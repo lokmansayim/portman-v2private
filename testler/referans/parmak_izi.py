@@ -1,13 +1,16 @@
 """İçerik parmak izi: DXF ve PDF çıktılarının dosya özeti her koşuda değişir, içeriği değişmemelidir.
 
-Motor'un DXF'i oluşturma zamanı ($TDCREATE, $TDUPDATE) ve rastgele kimlikler ($FINGERPRINTGUID, $VERSIONGUID)
-taşır; PDF de oluşturma tarihi ve kimlik taşır. Bu yüzden aynı girdiden iki koşu farklı sha256 verir
-(28.09 ölçümü, testler/referans/README.md). Bu betik içerikten özet çıkarır:
+Motor'un DXF'i her koşuda farklı bayt üretir: oluşturma ve güncelleme zamanı ($TDCREATE, $TDUPDATE), rastgele
+kimlikler ($FINGERPRINTGUID, $VERSIONGUID), ezdxf'in üst veri zamanları ve OBJECTS bölümündeki nesne sırası
+(Python karma tohumuna bağlı; PYTHONHASHSEED=0 ile sabitlenir). Motor ayrıca her çizime üretim zamanını yazar
+(PORTMAN_INFO katmanı: "Üretim: 2026-09-27 22:11:55 UTC"). Bu betik bunları dışarıda bırakıp içerikten özet çıkarır:
 
-  DXF: model ve kâğıt alanındaki her varlık (tür, katman, blok adı, yuvarlanmış geometri, metin) sıralı listeye
-       yazılır; tutamaç (handle), zaman ve kimlik alanları dışarıda kalır.
-  PDF: yalnız sayfa sayısı ve sayfa ölçüleri. PDF, DXF'ten basılır ve üretim zamanını çizgi olarak taşır;
-       piksel özeti her koşuda değişir. İçerik referansı DXF parmak izidir.
+  DXF: model alanı, kâğıt alanları ve blok tanımlarındaki her varlık. Varlığın tüm DXF öznitelikleri (tutamaç ve
+       sahip hariç) yuvarlanarak yazılır; ayrıca türüne göre köşe noktaları ve eğimler (LWPOLYLINE, POLYLINE),
+       metin içeriği (MTEXT), tarama sınırları (HATCH), blok eki öznitelikleri (INSERT) eklenir. Metinlerdeki
+       tarih-saat "<zaman>" ile değiştirilir. Satırlar sıralanır; varlık sırası özeti değiştirmez.
+  PDF: sayfa sayısı ve sayfa ölçüleri. PDF, DXF'ten basılır ve üretim zamanını çizgi olarak taşır; piksel özeti
+       her koşuda değişir. İçerik referansı DXF parmak izidir.
 
 Kullanım:  python3 testler/referans/parmak_izi.py <dosya.dxf|dosya.pdf> [...]
 Çıktı: her dosya için "<özet>  <yol>" (özet = sha256, içerikten).
@@ -17,59 +20,64 @@ import hashlib, json, re, sys
 from pathlib import Path
 
 YUVARLA = 3  # mm altı gürültüyü kes (DXF birimi cm)
-# Motor her çizime üretim zamanını yazar (PORTMAN_INFO katmanı): "Üretim: 2026-09-27 22:11:55 UTC"
-ZAMAN = re.compile(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}( UTC)?")
+ZAMAN = re.compile(r"\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}( UTC)?")
+ATLA = {"handle", "owner"}
 
 
-def _r(x):
-    try:
-        return round(float(x), YUVARLA)
-    except (TypeError, ValueError):
-        return str(x)
+def _d(v):
+    """Değeri yuvarlanmış, karşılaştırılabilir biçime çevirir."""
+    if isinstance(v, float):
+        return round(v, YUVARLA)
+    if isinstance(v, (int, bool)) or v is None:
+        return v
+    if isinstance(v, str):
+        return ZAMAN.sub("<zaman>", v)
+    if isinstance(v, (tuple, list)):
+        return [_d(x) for x in v]
+    try:  # ezdxf Vec2/Vec3
+        return [_d(float(x)) for x in v]
+    except TypeError:
+        return str(v)
 
 
-def _nokta(p):
-    return tuple(_r(c) for c in p)
+def _varlik(e) -> list:
+    t = e.dxftype()
+    oz = sorted((k, _d(v)) for k, v in e.dxfattribs().items() if k not in ATLA)
+    ek = []
+    if t == "LWPOLYLINE":
+        ek = [_d(p) for p in e.get_points("xyseb")]
+    elif t == "POLYLINE":
+        ek = [_d(v.dxf.location) for v in e.vertices]
+    elif t == "MTEXT":
+        ek = [_d(e.text)]
+    elif t == "HATCH":
+        for yol in e.paths:
+            if hasattr(yol, "vertices"):
+                ek.append(["poly", _d([tuple(v) for v in yol.vertices]), bool(getattr(yol, "is_closed", True))])
+            else:
+                ek.append(["kenar", [[type(k).__name__, _d(getattr(k, "start", None)), _d(getattr(k, "end", None)),
+                                      _d(getattr(k, "center", None)), _d(getattr(k, "radius", None))]
+                                     for k in getattr(yol, "edges", [])]])
+    elif t == "INSERT":
+        ek = sorted([a.dxf.tag, _d(a.dxf.text), _d(a.dxf.insert)] for a in e.attribs)
+    elif t == "SPLINE":
+        ek = [_d(list(e.control_points)), _d(list(e.fit_points))]
+    return [t, oz, ek]
 
 
 def dxf_ozet(yol: Path) -> str:
     import ezdxf
     doc = ezdxf.readfile(yol)
     satirlar = []
-    for alan_adi, alan in [("model", doc.modelspace())] + [(f"kagit:{l.name}", l) for l in doc.layouts if l.name != "Model"]:
+    alanlar = [("model", doc.modelspace())] + [(f"kagit:{l.name}", l) for l in doc.layouts if l.name != "Model"]
+    for ad, alan in alanlar:
         for e in alan:
-            t = e.dxftype()
-            kayit = [alan_adi, t, e.dxf.get("layer", ""), ]
-            if t == "INSERT":
-                kayit += [e.dxf.name, _nokta(e.dxf.insert), _r(e.dxf.get("rotation", 0)),
-                          _r(e.dxf.get("xscale", 1)), _r(e.dxf.get("yscale", 1))]
-                kayit += sorted((a.dxf.tag, a.dxf.text) for a in e.attribs)
-            elif t == "LINE":
-                kayit += sorted([_nokta(e.dxf.start), _nokta(e.dxf.end)])
-            elif t in ("LWPOLYLINE",):
-                kayit += [tuple(_nokta(p[:2]) for p in e.get_points("xy")), bool(e.closed)]
-            elif t in ("CIRCLE", "ARC"):
-                kayit += [_nokta(e.dxf.center), _r(e.dxf.radius), _r(e.dxf.get("start_angle", 0)), _r(e.dxf.get("end_angle", 0))]
-            elif t in ("TEXT", "MTEXT"):
-                metin = e.dxf.text if t == "TEXT" else e.text
-                boy = e.dxf.get("height", 0) if t == "TEXT" else e.dxf.get("char_height", 0)
-                kayit += [ZAMAN.sub("<zaman>", metin), _nokta(e.dxf.insert), _r(boy)]
-            elif t == "HATCH":
-                kayit += [e.dxf.pattern_name, len(e.paths)]
-            elif t == "DIMENSION":
-                kayit += [_nokta(e.dxf.get("defpoint", (0, 0, 0))), e.dxf.get("text", "")]
-            else:
-                try:
-                    kayit += [str(sorted((k, str(v)) for k, v in e.dxfattribs().items() if k not in ("handle", "owner")))]
-                except Exception:
-                    pass
-            satirlar.append(json.dumps(kayit, ensure_ascii=False, default=str))
-    # blok tanımları (pano, doğrama blokları) içerikleriyle
+            satirlar.append(json.dumps([ad] + _varlik(e), ensure_ascii=False, default=str))
     for blok in doc.blocks:
-        if blok.name.startswith("*"):
+        if blok.name.lower().startswith(("*model_space", "*paper_space")):
             continue
-        icerik = sorted(json.dumps([e.dxftype(), e.dxf.get("layer", "")], ensure_ascii=False) for e in blok)
-        satirlar.append(json.dumps(["blok", blok.name, icerik], ensure_ascii=False))
+        for e in blok:
+            satirlar.append(json.dumps([f"blok:{blok.name}"] + _varlik(e), ensure_ascii=False, default=str))
     satirlar.sort()
     return hashlib.sha256("\n".join(satirlar).encode("utf-8")).hexdigest()
 

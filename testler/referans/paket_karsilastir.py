@@ -56,6 +56,7 @@ def karsilastir(z: zipfile.ZipFile, esle) -> dict:
 def main(hosting_zip: str) -> int:
     ham = Path(hosting_zip).read_bytes()
     print(f"hosting paketi: {Path(hosting_zip).name}  sha256 {sha(ham)}")
+    # Paketin kendi dosyaları (kanal/package/: current.zip, current.sha256, SURUM.txt) depoyla eşlenmez; ayrıca incelenir.
     with zipfile.ZipFile(io.BytesIO(ham)) as hz:
         h = karsilastir(hz, hosting_esle)
         ic = hz.read("kanal/package/current.zip")
@@ -71,7 +72,8 @@ def main(hosting_zip: str) -> int:
     for k in ("farkli", "yalniz_pakette"):
         for a in v[k]:
             print(f"    {k}: {a}")
-    kod_farki = [a for a in h["farkli"] + v["farkli"] if not a.split("/")[-1].startswith(("is_emri_", "rapor"))]
+    test_ciktisi = lambda a: "/testler/" in "/" + a and a.split("/")[-1].startswith(("is_emri_", "rapor"))
+    kod_farki = [a for a in h["farkli"] + v["farkli"] + h["yalniz_pakette"] + v["yalniz_pakette"] if not test_ciktisi(a)]
     print("SONUÇ:", "kod dosyalarında fark yok" if not kod_farki else f"kod farkı: {kod_farki}")
     return 0 if not kod_farki else 1
 
