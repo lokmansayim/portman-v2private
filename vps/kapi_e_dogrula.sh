@@ -7,7 +7,7 @@
 # Test için: PM_HOME, PM_ENV, PM_BASLANGIC ("YYYY-MM-DD HH:MM:SS"; varsayılan 28.09 23:00).
 set -u
 export PM_HOME="${PM_HOME:-/opt/portman}" PM_ENV="${PM_ENV:-/etc/portman/agent.env}" PM_BASLANGIC="${PM_BASLANGIC:-2026-09-28 23:00:00}"
-echo "== Kapı E · salt okunur doğrulama · betik 2026-09-28 · $(date '+%Y-%m-%d %H:%M:%S %Z')"
+echo "== Kapı E · salt okunur doğrulama · betik 2026-09-28b · $(date '+%Y-%m-%d %H:%M:%S %Z')"
 echo "-- servis"
 systemctl show portman-agent -p ActiveState -p SubState -p MainPID -p ActiveEnterTimestamp -p NRestarts -p DropInPaths --no-pager 2>&1 | sed 's/^/   /'
 echo "   PORTMAN_PG_DSN: $(grep -c '^PORTMAN_PG_DSN=' "$PM_ENV" 2>/dev/null || true) · /etc/portman/pg.env: $([ -e /etc/portman/pg.env ] && echo VAR || echo yok) · kalici.conf: $([ -e /etc/systemd/system/portman-agent.service.d/kalici.conf ] && echo VAR || echo yok)"
@@ -77,6 +77,7 @@ try:
     with urllib.request.urlopen(req, timeout=25) as r:
         j = json.loads(r.read().decode()); pk = j.get("package") or {}
     print(f"   HTTP 200 · api {j.get('api')} · enabled {j.get('enabled')} · worker {j.get('worker')} · mode {j.get('mode')} · dry_run {j.get('dry_run')} · vps_komut {j.get('vps_komut')}")
+    print(f"   LLM ayarı: backend {(j.get('llm') or {}).get('backend')} · model {(j.get('llm') or {}).get('model')} · agent.env'de ANTHROPIC_API_KEY: {'var' if env.get('ANTHROPIC_API_KEY') else 'yok'}")
     print(f"   hosting'in dağıttığı paket: {pk.get('surum')} · {str(pk.get('sha256'))[:16]} · VPS'teki kurulu paketle {'aynı' if pk.get('sha256') == pksha else 'FARKLI'}")
 except urllib.error.HTTPError as e:
     print(f"   HTTP {e.code}")

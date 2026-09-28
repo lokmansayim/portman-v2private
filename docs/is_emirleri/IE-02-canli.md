@@ -307,6 +307,15 @@ Yüklenecekler (`18_Kapi_E/yukle/`; depo `ie-02`, işçi etiketi commit'i sonras
 
 Patron deneme mesajı gönderilmedi. Sayaçlar: OpenAI 1 istek (reddedildi, ücretsiz), WhatsApp 0. Kredi eklemek Lokman'ın kararı. E bu kararı bekliyor.
 
+**E değişikliği: Portman'ın çıkarımı Claude'a geçer (Lokman, 28.09 23:49; OpenAI'de kredi yok).**
+- Kod değişmez. `beyin/llm.py`'nin `anthropic` arka ucu (Messages API, zorunlu araç çağrısıyla şema) kullanılır; model `claude-haiku-4-5-20251001`. Bu yol canlı anahtarla ilk kez burada denenir. Sahte cevapla yerelde sınandı.
+- **Anahtar yalnız VPS'te:** `agent.env` → `ANTHROPIC_API_KEY`, 0640 root:portman. Anahtar `pbpaste | ssh …` ile ekrana gelmeden yazılır (`vps/anthropic_anahtar.py`) ve ücretsiz `GET /v1/models` ile sınanır. Hosting bu anahtarı hiç görmez; K13'teki OpenAI yolundan (hosting'ten dağıtım) farklı.
+- **Hosting `settings.json`:** `llm.backend` `anthropic`, `llm.model` `claude-haiku-4-5-20251001`.
+- **Öz-test yeniden koşulur** (`vps/oz_test_yenile.sh`): sonuç dosyası silinir, servis yeniden başlar, 1 Claude çağrısı yapılır (şema hatasında +1).
+- **Maliyet** (resmî fiyat sayfası 28.09): Haiku 4.5, 1M giriş 1 $, 1M çıkış 5 $; zorunlu araç çağrısı giriş başına +588 token. Çağrı başına ~4.500 giriş ve ~600 çıkış tahminiyle ~0,008 $. E'de kalan en çok 5 çağrı (toplam sınır 6; biri OpenAI'de reddedildi): en çok ~0,04 $. Tahmindir; gerçek token'lar öz-testten ve Patron teknik notundan okunur.
+- **Sohbet botu (`ai.php`) OpenAI'de kalır;** OpenAI'ye kredi yüklenene dek cevap üretemez. Botu Claude'a geçirmek `ai.php` değişikliği ister; ayrı karar.
+- **K10 değişir:** çıkarım modeli gpt-4o-mini'den Claude Haiku 4.5'e geçer. Belirsiz pencere vakasındaki (B1) davranışı ölçülmedi; kural katmanı belirsizlikte yine sorar.
+
 **Durdurma:** bir mesaja beklenenden fazla cevap gelirse, aynı cevap tekrarlanırsa ya da hata görülürse DirectAdmin'de `portman_app/kanal/settings.json` → `"worker": "off"` yapılır (yeni iş alınmaz) ve asistana haber verilir.
 
 **Geri alma (E.5, gerekirse):** `yedek/`'teki eski `feature.php` ve `api.php` geri yüklenir. Paketin eski üç dosyası geri yüklenir, `current.sha256` en son. Ajan v1.1.1 paketini ve `agent.py`'sini geri kurar.
