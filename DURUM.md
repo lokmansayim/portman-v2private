@@ -22,7 +22,7 @@ Durumlar: **Taslak** yalnız belgede · **Kodlandı** kod var, testi yok ya da d
 
 | Bileşen | Durum | Kanıt (tarih) | Kapsam sınırı |
 |---|---|---|---|
-| Kanal v1.1.1: WhatsApp → hosting webhook → kuyruk → gönderim | Canlıda doğrulandı | 21.09 (v1.0): 3 mesaj, 1'i bekletildi, 2 PDF okundu · 22.09 22:31: v1.1.1 paketi (`bd1ca27c…`), öz-test geçti · 22.09 22:33–38: 3 Patron mesajı yanıtlandı | Yalnız Patron modu; kuyruk hostingte bir JSON dosyası (`state.json`) |
+| Kanal v1.1.1: WhatsApp → hosting webhook → kuyruk → gönderim | Canlıda doğrulandı | 21.09 (v1.0): 3 mesaj, 1'i bekletildi, 2 PDF okundu · 22.09 22:31: v1.1.1 paketi (`bd1ca27c…`), öz-test geçti · 22.09 22:33–38: 3 Patron mesajı yanıtlandı · 28.09 (kapı A, salt okunur): VPS'teki uygulama (48/48 dosya), hosting'in dağıttığı paket ve hosting'teki `feature.php` ile `api.php` v1.1.1 ile birebir (tam hash); servis 25.09'dan beri kesintisiz | Yalnız Patron modu; kuyruk hostingte bir JSON dosyası (`state.json`) |
 | VPS ajanı (Natro, portman-agent v1.1.1) | Canlıda doğrulandı | 22.09 19:06: ilk gerçek İş Emri, 27 sn · 22.09 22:14: v1.1.1, `vps-health.json` | ufw etkin ama kuralları okunmadı; root parolayla SSH'ye girebiliyor (22.09 23:59) |
 | Beyin: LLM çıkarımı (gpt-4o-mini), kural katmanı, varyant | Test edildi | Harness 22/22 (sabit girdiler; 28.09'da yeniden) · 22.09 22:33–38 canlı davranış testi 2/3 (B1) | B1 ve B2 `ie-02` dalında düzeltildi (B2: D-01), canlıda değil; yalnız P6001 şablonu canlı |
 | Motor v1.1.1: İş Emri → DXF → doğrulama → PDF | Test edildi | Altın testler 6×8 (41 pano, 0 cm²) ve Yan Verandalı 6×8,5 (BOM 26 kod); P6001 katalog testi (773 × 763) · 28.09: üç temiz koşuda içerik parmak izi aynı | Plan PDF'i üretir, ön onay paftası değil; canlı PDF içeriği insan gözüyle doğrulanmadı |
@@ -33,7 +33,7 @@ Durumlar: **Taslak** yalnız belgede · **Kodlandı** kod var, testi yok ya da d
 | Blender modeli | Kodlandı | 28.09: `yeniden_kos.py` ile bpy 5.0.1'de yeniden kuruldu, 65 pano, BOM aynı | Test dar: tek plan; sunum içindir, hesap burada yapılmaz |
 | Depo | Kodlandı | 28.09: `portman-v2private` açıldı; v1.1.1 geçmişiyle alındı; İE-01, Lokman'ın onayıyla `main`'e birleştirildi | Eski depo `lokmansayim/portman` yalnız okunuyor |
 | Yapı Tanımı şeması | Taslak | Zemin, 27.09; temeli İş Emri şeması v0.1 (21.09) | Ölçü anlamları ve ürün ailesi ayrımı eksik |
-| Veritabanı: kalıcı konuşma ve iş akışı (Postgres) | Test edildi | 28.09: `testler/kalici/`, gerçek Postgres 16'da 148 test geçti. Kabul gösterimi 10/10 (simülasyon: WhatsApp ve LLM sahte). Ajanın kalıcı modu sahte hosting ile sınandı (600 sn süpürme ve hata enjeksiyonu dahil). | Yalnız izole ortamda; canlıda yok. Gerçek PHP hattı (`feature.php` `context_id`, `api.php` v1.2) `portman/lib.php` olmadan koşulamadı. Yer: mevcut VPS (D-04). Canlıya bağlama planı ve onay kapıları: `docs/is_emirleri/IE-02-canli.md`. pgvector yok (RAG'la gelir). |
+| Veritabanı: kalıcı konuşma ve iş akışı (Postgres) | Test edildi | 28.09: `testler/kalici/`, gerçek Postgres 16'da 175 test geçti. Kabul gösterimi 10/10 (simülasyon: WhatsApp ve LLM sahte). Ajanın kalıcı modu sahte hosting ile sınandı (600 sn süpürme ve hata enjeksiyonu dahil). | Yalnız izole ortamda; canlıda yok. Gerçek PHP hattı (`feature.php` `context_id`, `api.php` v1.2) `portman/lib.php` olmadan koşulamadı. Yer: mevcut VPS (D-04). Canlıya bağlama planı ve onay kapıları: `docs/is_emirleri/IE-02-canli.md`. pgvector yok (RAG'la gelir). |
 | RAG | Taslak | Araştırma notu, 21.09 | Aşama 2 sonrası |
 | Model geçidi | Kodlandı | `llm.py`'de OpenAI ve Anthropic yolları var; canlıda gpt-4o-mini · 23.09 kıyas: gpt-4o-mini 6/7, gpt-6-sol 4/7 | Anthropic yolu canlı anahtarla denenmedi; hosting ayarı VPS'e yalnız arka uç, model ve zaman aşımını geçiriyor (B4) |
 | PortmanBench | Taslak | Tohum: `testler/referans/` (28.09) | Uçtan uca ölçüm ve kritik hata türleri yok |
@@ -64,9 +64,10 @@ Yapıldı:
 - dördüncü bağımsız incelemenin düzeltmeleri: Postgres kesintisinde mesaj kaybı yok, sonuç claim'den önce verilir, D-03 hosting'in 600 sn'sine sığar, hosting hata sınıfları, `worker=off` ile boşaltma, eşitleme ve onay sınırı, yeniden girişte boş veritabanı (`test_hosting_devri.py`);
 - beşinci bağımsız incelemenin düzeltmeleri: bir işin devir hatası ötekini bekletmez, geçici hatada cevap atılmaz (uyarı), Postgres'e yazılamayan mesaj kuyruğu tıkamaz, açık iş varken yeni mesaj alınmaz, Meta'nın iletemediği metin uyarıya düşer, WhatsApp kimliği (numarayı içerir) günlüğe ve kanıt çıktısına yalnız özetiyle yazılır.
 - altıncı tur (aynı inceleyicinin yeniden denetimi): devir hatasında hosting'e ulaşılabiliyor mu diye sorulur; işe özgü hatada aralıklı yeniden deneme (öteki işler beklemez), süpürme sınırına yaklaşan sonuç claim'den önce denenir, süpürme ancak hosting'e sorularak kabul edilir; yeniden kuyruğa konan mesajın süresi yeniden başlar.
+- kapı D'nin ön koşulları (28.09 akşam, Lokman): yedeklerin otomatik silinmesi ayrı tercih, varsayılanı kapalı; geri yükleme denemesi yalnız kendi açıp işaretlediği veritabanını siler; yerel bağlantı şartı sağlanmıyorsa kurulum durur (`test_pg_kurulum.py`, 27 test);
+- kapı A (28.09, salt okunur): canlı sürüm v1.1.1, beklenenle fark yok (VPS'teki uygulama, hosting paketi, hosting `feature.php` ve `api.php` tam hash'le); eşleşme anahtarı iki tarafta aynı; sızan anahtar büyük olasılıkla hâlâ etkin, kanıtlanmadı.
 
 Kalan (sırayla, her biri ayrı onayla; `docs/is_emirleri/IE-02-canli.md`):
-- A: canlı sürümün salt okunur doğrulanması;
 - B: `lib.php` kopyasıyla gerçek PHP testleri;
 - C: sızan anahtarın yenilenmesi;
 - D: VPS'e Postgres;

@@ -2,6 +2,34 @@
 
 Dal: `ie-02`. Dayanak: Astra'nın 28 Eylül ikinci değerlendirmesi, D-03 ve D-04. Bu plan onaya sunulur. Her kapı (A–H) ayrı açık onayla açılır; onaylanmayan kapıdan sonrası yapılmaz. Sunucu komutlarını Lokman kendi terminalinden çalıştırır. Hiçbir komut anahtar değeri yazdırmaz; anahtarlar yalnız 12 haneli özet parmak iziyle karşılaştırılır.
 
+## 0. Kısa özet
+
+**Kapılar.** A (salt okunur) 28.09'da onaylandı ve yapıldı: canlı sürüm v1.1.1; VPS'te ve hosting'te denetlenen her şey beklenenle aynı (hosting PHP dosyaları tam hash'le); eşleşme anahtarı iki tarafta aynı; sızan anahtar büyük olasılıkla hâlâ etkin, kanıtlanmadı (ayrıntı A'da). B–H her biri ayrı onay bekler. Anahtar yenileme (C), kurulum (D), canlı değişiklik (E, F, H), veri silme ve ücretli deneme (E, G) ayrı ayrı onaylanır.
+
+**Cevapsız kalabilecek işler.** Hepsi uyarıda ve kanıt sorgusu 6'da görünür; hiçbiri sessiz değildir.
+- Hosting'in `claim` cevabı ajana ulaşmazsa, ya da ajan cevabı alıp diske ve Postgres'e yazamadan ölürse (milisaniyeler): satır hosting'te 600 sn sonra "takılı" sayılır. Bu v1.1.1'de de böyledir.
+- Postgres'e yazılamayan mesaj (veri hatası): `kalici_bekleyen/hatali/`'ye ayrılır. NUL karakteri bilinen tek nedendi, yazmadan önce temizleniyor.
+- Hosting sonucu kesin reddederse (yol, boyut, PDF biçimi, 413), ya da mesaj artık onda işlenmekte değilse ve satırlar orada yoksa: `gonderilmedi`. Mesaj yeniden kuyruğa konursa cevap o zaman verilir.
+- WhatsApp tarafı:
+  - hosting göndermezse (`held`: 24 saat penceresi kapalı ya da `dry_run`): `gonderilmedi`;
+  - sonuç belirsizse (`uncertain`): `belirsiz`, yeniden gönderilmez;
+  - Meta "failed" derse: uyarı.
+- D-03: üç denemede bitmeyen iş sonuçsuz kalır. Bayiye "işleyemedim" ve Patron'a bildirim gider.
+- Geçiş ya da geri dönüş 24 saati aşarsa, bekleyen mesajların cevabı `held` olur.
+
+**Uyarılar nereden izlenir.** Panelde ayrı bir uyarı yok, WhatsApp'a bildirim gitmez. Uyarılar şuralarda görünür:
+- hosting'te `kanal/vps-health.json` → `errors` alanı: "gönderilmedi", "belirsiz", "Meta iletemedi", "hosting'e verilemiyor", "Postgres'e yazılamadı";
+- `kanal/vps.log` (hosting) ve `/opt/portman/logs/agent.log` (VPS);
+- kanıt sorgusu 6 (`kanit_sorgulari.sql`).
+
+**Geri dönüşte yarım işlerin korunması (H).**
+1. `worker=off` yapılır. Ajan yeni mesaj almaz; Postgres'te açık kalan işleri bitirir ve sonuçlarını hosting'e verir.
+2. Açık iş 0 olunca ve diskte bekleyen mesaj kalmayınca devam edilir.
+3. Hosting'e verilemeyen sonuçlar Postgres'te `bekliyor`/`gonderilmedi` olarak kalır. Hosting'te o mesajların satırı `processing` kalır; H.6'da hosting onları "takılı" sayar.
+4. Veritabanı silinmez: `pg_dump` alınır, Mac'e kopyalanır ve veritabanının adı `portman_pilot_<tarih>` yapılır.
+5. Diskte kalan mesaj dosyaları yedeğin yanına taşınır.
+6. Yeniden giriş yalnız boş bir veritabanına yapılır.
+
 ## 1. Durum: hazır olan ve olmayan
 
 | Parça | Durum | Kanıt ya da eksik |
@@ -9,7 +37,8 @@ Dal: `ie-02`. Dayanak: Astra'nın 28 Eylül ikinci değerlendirmesi, D-03 ve D-0
 | Postgres kalıcı akış (depo, işleyici, göç 001–002) | Test edildi, izole | `testler/kalici`: gerçek Postgres 16 |
 | Ajanın kalıcı modu (`vps/agent.py`) | Test edildi, **sahte hosting ile** | `test_baglanti.py`, `test_hosting_devri.py`. Sahte hosting `api.php`'nin bir kısmını taklit eder (600 sn süpürme, hata enjeksiyonu dahil; taklit etmediği yerler dosyasının başında yazılı). PHP'yi sınamaz |
 | `feature.php` (`context_id`), `api.php` v1.2 (`giden_durum`) | Yazıldı; **gerçek `lib.php` ile koşulmadı** | `kanal/tests/baglanti_test.php` ve `e2e_kalici.py` `portman/lib.php` ister; bu dosya depoda yok (kapı B) |
-| VPS Postgres kurulumu | Betik hazır; VPS'te koşulmadı | `vps/pg_kurulum.sh`: parolasız peer bağlantısı, saf psycopg ve göçler ayrı bir deneme kümesinde sınandı; systemd ve cron adımları VPS'te görülecek |
+| Canlı sürüm | Doğrulandı (A, 28.09) | VPS'teki uygulama (48/48 dosya), hosting'in dağıttığı paket ve hosting'teki `feature.php` ile `api.php` v1.1.1 ile birebir (tam hash) |
+| VPS Postgres kurulumu | Betik hazır; VPS'te koşulmadı (A: Postgres kurulu değil) | `vps/pg_kurulum.sh`: parolasız peer bağlantısı, saf psycopg ve göçler ayrı bir deneme kümesinde sınandı. Durdurma koşulları, sahiplik denetimi, işaretli deneme veritabanı ve yedek silme tercihi ayrı geçici kümelerde uçtan uca sınandı (`test_pg_kurulum.py`). apt, systemd ve cron adımları VPS'te görülecek |
 | Gerçek WhatsApp, gerçek LLM | Denenmedi | Kapı G (kabul gösterimi) |
 
 ## 2. Dar değişiklikler (depoda, `ie-02`)
@@ -23,7 +52,7 @@ Dal: `ie-02`. Dayanak: Astra'nın 28 Eylül ikinci değerlendirmesi, D-03 ve D-0
 | `kanal/goc/002_…sql` | API kabulü (`kabul_edildi`, `kabul_zamani`) ile Meta bildirimleri (`gonderildi_zamani`, `teslim_durumu`, `teslim_zamani`) ayrı; `hostingte` durumu; `onay_zinciri` ve `cevap_baglari` görünümleri. |
 | `kanal/depo_aktar.py` | Komut satırı yalnız boş veritabanına aktarır (geri dönüşten sonra eski durum sessizce kullanılmasın). |
 | `vps/pg_kurulum.sh`, `vps/kanit_sorgulari.sql`, `vps/tekrar_dene.py` | Kurulum (kapı D), salt okunur kanıt sorguları ve tekrar gelen mesaj denemesi (kapı G). |
-| `vps/anahtar_yenile.py`, `vps/api_denetim.py` | Anahtar yenileme (kapı C.1) ve salt okunur API denetimi (kapı E.4); ikisi de anahtar değeri yazdırmaz. Pakete girmez, Mac'ten `ssh` ile çalıştırılır. |
+| `vps/kapi_a_salt_okunur.sh`, `vps/anahtar_yenile.py`, `vps/api_denetim.py` | Salt okunur canlı denetim (kapı A), anahtar yenileme (kapı C.1) ve salt okunur API denetimi (kapı E.4); üçü de anahtar değeri yazdırmaz. Pakete girmez, Mac'ten `ssh` ile çalıştırılır. |
 
 Dokunulmayanlar: `webhook.php`, `worker.php`, panel dosyaları, `portman/lib.php`, `store.json`, Görev 2/3 ve hosting'teki `worker.py`.
 
@@ -37,48 +66,94 @@ Sahte gönderici ve sahte hosting testleri PHP'yi doğrulamaz; bunları tamamlan
    - `python3 kanal/tests/e2e_vps.py lib.php`: dosya modu, gerçek `api.php` ile ajan (`php -S`), 19 test;
    - `python3 kanal/tests/e2e_kalici.py lib.php`: kalıcı mod, gerçek `api.php` + ajan + Postgres; tekrar gelen mesaj, onay zinciri ve süpürmeyi yalnız `claim`'in yaptığı (ajanın tur sırasının dayandığı özellik) dahil, 18 test.
 
-   Meta'ya ve OpenAI'ye bağlanılmaz. Bu testler 28.09'da elle yazılmış taslak bir `lib` ile ön denemeden geçti (30/30, 16/16, 19/19, 18/18). Bu ön deneme **sayılmaz**; yalnız benim kodumdaki hataları erken yakalamak içindi.
+   Meta'ya ve OpenAI'ye bağlanılmaz. Hosting PHP 8.2.30 kullanıyor (A, `health.json`); testler bu sürümle koşulur (B.5). Bu testler 28.09'da elle yazılmış taslak bir `lib` ile, PHP 8.4'te ön denemeden geçti (30/30, 16/16, 19/19, 18/18). Bu ön deneme **sayılmaz**; yalnız benim kodumdaki hataları erken yakalamak içindi.
 2. **Canlıda (kapı E, F ve G).** PHP yüklendikten sonra önce dosya modunda bir Patron mesajı gönderilir (gerileme denetimi). Kalıcı mod bu testten sonra açılır ve kabul gösterimi gerçek Meta ile yapılır.
 
 ## 4. Onay kapıları
 
 Yollar: hosting `/home/portatifevcom/portman_app/kanal` (aşağıda `KANAL`), VPS `/opt/portman`, servis `portman-agent`. Mac'teki yedek klasörü `~/PortmanYedek/` (aşağıda `YEDEK`).
 
-### A · Güncel sürümün salt okunur doğrulanması (değişiklik yok)
-Hosting'te (SSH ya da DirectAdmin terminali):
+### A · Güncel sürümün salt okunur doğrulanması (değişiklik yok; 28.09 onaylandı ve yapıldı)
+**VPS** (asistanın ağ yolu yok; Lokman Mac'ten çalıştırır, root parolasını kendisi girer, sonucu asistan klasörden okur):
 ```
-cd /home/portatifevcom/portman_app/kanal
-sha256sum feature.php api.php worker.py | cut -c1-16
-php -r '$s=json_decode(file_get_contents("settings.json"),true); echo json_encode(array_intersect_key($s, array_flip(["enabled","worker","mode","dry_run"]))),"\n";'
-php -r 'foreach(["health.json","vps-health.json"] as $f){$h=json_decode(@file_get_contents($f),true)?:[]; echo $f," ",$h["surum"]??"-"," ",substr($h["package_sha256"]??"",0,12)," ",date("c",$h["checked_at"]??0),"\n";}'
-cat package/SURUM.txt; cut -c1-12 package/current.sha256
-stat -c '%y' api_token.txt
-php -r 'echo "eşleşme anahtarı parmak izi: ", substr(hash("sha256", trim(file_get_contents("api_token.txt"))), 0, 12), "\n";'
+ssh root@<VPS> 'bash -s' < ~/Desktop/"Claude Portman Çalışması"/14_Kapi_A/kapi_a_salt_okunur.sh > ~/Desktop/"Claude Portman Çalışması"/14_Kapi_A/kapi_a_vps_sonuc.txt 2>&1
 ```
-VPS'te:
-```
-cat /opt/portman/app/SURUM.txt; cut -c1-12 /opt/portman/app/PACKAGE_SHA256
-sha256sum /opt/portman/agent.py | cut -c1-16
-systemctl is-active portman-agent; systemctl show portman-agent -p ActiveEnterTimestamp
-stat -c '%y' /etc/portman/agent.env
-python3 -c 'import hashlib; v=[l.split("=",1)[1] for l in open("/etc/portman/agent.env") if l.startswith("PORTMAN_API_TOKEN=")][0].strip(); print("eşleşme anahtarı parmak izi:", hashlib.sha256(v.encode()).hexdigest()[:12])'
-```
-İki parmak izi aynı biçimde hesaplanır (PHP `trim` ve Python `strip`: satır sonu ve boşluk atılır; hosting de anahtarı böyle okur).
+`vps/kapi_a_salt_okunur.sh` hiçbir şeyi değiştirmez ve anahtar, numara, mesaj kimliği ya da metin yazdırmaz (sahte düzende sınandı: çıktıda değer yok, dosyalar aynı kaldı). Topladıkları:
+- sürüm, paket ve dosya hash'leri; uygulamanın kurulu paketle birebir aynı olup olmadığı;
+- servis durumu;
+- `agent.env`'in tarihi ve izni;
+- anahtarın parmak izi, hem dosyadaki hem çalışan süreçteki;
+- hosting'e ajanın her birkaç saniyede zaten attığı iki okuma isteği (`settings`, `package`). Bunlar hosting'in bu anahtarı şu an kabul edip etmediğini, API sürümünü, ayarları ve dağıttığı paketi gösterir; cevaptaki OpenAI anahtarı okunmadan atılır, yalnız "veriliyor mu" yazılır;
+- hosting ve VPS saatleri arasındaki fark.
 
-Karşılaştırma (v1.1.1, `SHA256SUMS`):
-- `feature.php` `91c954a62537606e`, `api.php` `455f8c7414442183`, `worker.py` `3687f3763c9a759a`, `agent.py` `72acb4238c1bfb1d`;
-- paket `bd1ca27c…` (22.09).
+**Hosting dosyaları** (`feature.php`, `api.php`): asistanın DirectAdmin'e tarayıcıdan erişimi bu ortamın izin denetiminde engellendi (28.09). Lokman 28.09 akşamı Safari'deki kendi DirectAdmin oturumundan yalnız bu iki dosyayı indirdi ve SHA-256'yı kendi Mac'inde hesapladı. Canlıda hiçbir dosya ya da ayar değişmedi; anahtar ve müşteri verisi dosyaları açılmadı. Ayrıca `package/SURUM.txt`, `package/current.sha256`, `health.json` ve `vps-health.json`'u okudu. Dosyalar klasöre konmadı; asistan verilen tam hash ve boyutları referanslarla karşılaştırdı. `api_token.txt` açılmaz, indirilmez; eşleşme, hosting'in anahtarı kabul edip etmediğiyle gösterilir.
 
-Değer farklıysa "canlı v1.1.1" yazılmaz; fark önce incelenir. İki parmak izi aynıysa ve `api_token.txt` 22.09'dan eskiyse sızan eşleşme anahtarı hâlâ etkindir.
+Karşılaştırma (v1.1.1; 22.09 dağıtım zip'lerinden doğrulandı): `feature.php` `91c954a62537606e` (v1.0'dan beri aynı), `api.php` `455f8c7414442183`, `worker.py` `3687f3763c9a759a`, `agent.py` `72acb4238c1bfb1d`, paket `bd1ca27c22d7b5c0` (`kanal-v1.1.1-20260922-2011`). Farklı bir değer git geçmişindeki ve zip'lerdeki sürümlerle eşlenir.
 
-### B · `lib.php` kopyası ile yerel PHP testleri (değişiklik yok)
-`lib.php` kütüphane kodudur; anahtarlar `data/config.json` ve `ayarlar.json`'dadır. Yine de dosya sohbete eklenmeden önce Lokman kendisi bakar. Hosting'te iki komut yalnız satır numarası ve anahtar adını yazar, değer yazmaz:
-```
-F=/home/portatifevcom/public_html/portman/lib.php
-grep -noiE "api_?key|access_?token|app_?secret|client_?secret|password|passwd|db_?pass|parola|sifre|secret|bearer" "$F" | sort -t: -k1,1n -u
-grep -nE "EAA[A-Za-z0-9]{20,}|sk-[A-Za-z0-9_-]{20,}|[0-9a-f]{32,}|define\(" "$F" | cut -d: -f1 | tr '\n' ' '; echo
-```
-Lokman bu satırları kendi düzenleyicisinde açar. Hiçbirinde gerçek bir anahtar ya da parola değeri yoksa dosyayı sohbete ekler. Varsa eklemez; o değerleri `X` ile değiştirdiği bir kopyayı ekler ya da birlikte bakarız. Karar sayıma bırakılmaz. Ardından 3. bölümdeki dört test koşulur.
+**Sızan anahtar için kanıt düzeyi.** Parmak izi eşitliği ve dosya tarihi tek başına "sızan anahtar kesin hâlâ etkin" demek değildir. Gösterilebilenler:
+- hosting'in çalışan ajanın anahtarını şu an kabul ettiği (canlı istek);
+- dosyadaki ve süreçteki anahtarın aynı olduğu;
+- anahtarın hangi tarihten beri değişmediği (bootstrap var olan `agent.env`'e dokunmaz; tarihi anahtarın üretildiği andır).
+
+Kaydedilen sızıntı 22.09 18:15'te bir ekran görüntüsüyle oldu. Görüntüdeki anahtarın bugünkü anahtar olduğunu kesinleştirmek için o değerle karşılaştırmak gerekir; asistan değeri görmemek için görüntüyü açmaz. Bu yüzden sonuç en çok "büyük olasılıkla etkin, kanıtlanmadı" olabilir. C bu soruyu her durumda kapatır.
+
+**Sonuç.** VPS betiğini Lokman 28.09 20:06'da koştu; değerlendirme çıktı dosyasından yapıldı. Çalıştırılan betik `2026-09-28b` (sha256 `56960c3c87bb3b87`); çıktı `14_Kapi_A/kapi_a_vps_sonuc.txt`, içinde anahtar, numara ya da mesaj kimliği yok. Depodaki sürüm yalnız bir görüntü satırında farklıdır (Postgres servis durumu tek satır).
+
+| Denetlenen | Beklenen (v1.1.1) | Canlı | Sonuç |
+|---|---|---|---|
+| Paket | `kanal-v1.1.1-20260922-2011`; `bd1ca27c22d7b5c06722d0ddab855a5c2d821c96e78cc1049afe0c6e78b7a408`, 639.306 B (`hosting_guncelleme_2011.zip` içindeki `current.zip`'ten hesaplandı) | VPS: aynı. Hosting: `SURUM.txt`, `current.sha256` ve `vps-health.json` → `package_sha256` aynı (tam 64 hane) | ✓ |
+| `agent.py` | `72acb4238c1bfb1d` | aynı (22.09 22:14'te kuruldu) | ✓ |
+| `worker.py`, `karar.py`, `dxf_out.py`, `cikarici.py` | `3687f376…`, `9f01d064…`, `b2c96ce9…`, `acab9e16…` | aynı | ✓ |
+| Kurulu uygulama ↔ paket | birebir | 48 dosya aynı; farklı, eksik ya da fazla 0 | ✓ |
+| Hosting'in dağıttığı paket | `bd1ca27c…` | VPS betiği `op=package` ile gelen baytların SHA-256'sını hesapladı ve tam olarak karşılaştırdı (çıktıda ilk 16 hane): ayarlardaki ve VPS'teki kopyayla aynı; 639.306 B, 22.09 20:12 | ✓ |
+| Hosting `api.php` | `455f8c7414442183f6c5fbf779605fea343ff9cdff0b71ee26975db4e11a0867`, 16.675 B (git `a3050c3`; `portman_kanal_v1.1_20260922.zip`; `KAYNAK_KODU.zip` = `ec4e9a3`) | aynı hash ve boyut (panel tarihi 22.09). API cevabı da uyumlu: `kanal-api-v1.1`, `vps_komut` alanı var | ✓ |
+| Hosting `feature.php` | `91c954a62537606e6cf77cc2beed5d0fd71325b8b8fb820966eb37fbd5955d0e`, 24.111 B (git `d3d18e5`; `portman_kanal_v1.0_20260921.zip`, `v1.0.1`; `KAYNAK_KODU.zip`) | aynı hash ve boyut (panel tarihi 21.09) | ✓ |
+| Hosting sağlık kayıtları | hata yok | `vps-health.json`: `vps-agent-v1.1.1`, öz-test `passed`, `errors` boş. `health.json`: PHP 8.2.30, `enabled` true, `dry_run` false, `error` null, sürüm `kanal-v1.0` (aşağıda) | ✓ |
+| Ayarlar | açık, `worker` vps, Patron, `dry_run` kapalı, `vps_komut` kapalı | aynı; LLM `gpt-4o-mini` | ✓ |
+| Servis | çalışıyor | 25.09 06:46'dan beri çalışıyor; 0 yeniden başlatma; kullanıcı `portman`; ek yapılandırma yok | ✓ |
+| Saat farkı (hosting − VPS) | küçük | 0 sn | ✓ |
+
+**Beklenenden fark: yok.** Denetlenen her şey tam hash ya da birebir değerle beklenenle aynı.
+
+`health.json`'daki `kanal-v1.0` etiketi fark değildir. `health.json`'u `feature.php` yazar ve içine kendi sabitini koyar (`PM_KANAL_SURUM = 'kanal-v1.0'`, satır 13 ve 248). `feature.php` v1.0'dan beri değişmedi; hash'i 21.09 v1.0 zip'iyle aynı. v1.1 ve v1.1.1'de sürüm etiketi değişen parçalar başkaydı:
+- paketi (VPS'te çalışan Python kodu; sürümü `package/SURUM.txt`'te);
+- `api.php`'yi (`kanal-api-v1.1`);
+- ajanı (`vps-agent-v1.1.1`, `vps-health.json`'da).
+
+Yani ayrı parçaların ayrı etiketleri var; eski bir kurulumun işareti değil. E'de `feature.php` `kanal-v1.2` olunca `health.json` da `kanal-v1.2` gösterir (E.4).
+
+**Anahtarlar iki tarafta eşleşiyor.**
+- VPS: `agent.env`'deki ve çalışan süreçteki anahtarın parmak izi aynı (`3173020445c2`, 64 hane).
+- Hosting: bu anahtarı 28.09 17:06 UTC'de kabul etti (`settings` ve `package` HTTP 200). Hosting yalnız `api_token.txt`'teki anahtarı kabul eder; demek ki o dosyada da aynı anahtar var. `api_token.txt` açılmadı.
+- Hosting bu anahtarı taşıyana OpenAI anahtarını veriyor: evet (değer okunmadı).
+- `agent.env` 22.09 18:19:43'ten beri değişmedi; sahibi root:portman, izni 0640.
+
+**Sızan anahtar: büyük olasılıkla hâlâ etkin; kanıtlanmadı.**
+- Bootstrap anahtarı yalnız `agent.env`'i oluştururken üretir ve ekrana bir kez yazar; var olan dosyaya dokunmaz. Dosya 18:19:43'ten beri değişmedi.
+- Oturum günlüğü sızıntıdan sonra anahtarın yenilenmediğini yazıyor (22:09'da yenileme ertelendi).
+- Ama günlükteki sızıntı saati (18:15) dosya tarihinden 4,5 dakika önce. Saat yaklaşık yazılmış olabilir. Yazılmamışsa görüntüdeki anahtar, ondan önce oluşturulup silinmiş bir dosyaya ait olabilir; günlükte böyle bir silme geçmiyor.
+- Kesin kanıt ancak görüntüdeki değerle karşılaştırmadır; yapılmadı. C yapılırsa bu soru kalmaz.
+
+**Öteki bulgular:**
+- Hosting PHP 8.2.30 (B'deki testler bu sürümle koşulur).
+- Postgres kurulu değil (D'nin başlangıç durumu).
+- Disk: 195 GB'ın 178 GB'ı boş. Kullanılabilir bellek: 7,3 GB. Ubuntu 24.04.4, Python 3.12.3.
+- Gönderilemeyip bekleyen sonuç: 0.
+- Öz-test geçti (22.09 22:32, 27,2 sn).
+- Son 24 saatte günlük satırı yok; hata da yok, iş de yok.
+
+### B · `lib.php` kopyası ile yerel PHP testleri (değişiklik yok; ayrı onay)
+Teknik denetimi asistan yapar; Lokman yalnız dosyayı sağlar ve paylaşımı onaylar.
+1. Lokman DirectAdmin'den `public_html/portman/lib.php`'yi indirip `Claude Portman Çalışması/15_Kapi_B/` içine koyar. Hosting'te hiçbir şey değişmez.
+2. **Sır denetimi Lokman'ın bilgisayarında** (bağlı klasörün yerel yalıtılmış ortamı). Asistan dosyayı değer yazdırmayan bir betikle tarar. Çıktıda yalnız satır numarası, bulgunun türü ve tanımlayıcı adı görünür:
+   - anahtar biçimli dizgeler (`sk-`, `EAA`, uzun onaltılık, `Bearer`);
+   - parola ya da sır ataması;
+   - `define` sabitleri;
+   - telefon numarası ya da e-posta biçimleri.
+3. Temizse dosya, değilse bulunan değerlerin yer tutucuyla değiştirildiği bir kopya, asistanın yalıtılmış test ortamına alınır. Özgün dosya bilgisayardan çıkmaz; sohbete eklenmez. Testler Lokman'ın bilgisayarında koşulamaz: oradaki yalıtılmış ortamda PHP yok ve yönetici yetkisi olmadığı için kurulamıyor.
+4. Koşmadan önce `lib.php`'nin test kancalarını (`PM_OFFLINE_TEST`, `pm_test_remote`) içerdiği denetlenir. İçermiyorsa Meta'ya istek gönderebilecek testler koşulmaz ve bu Lokman'a söylenir. Testler sahte anahtar, sahte numara ve geçici veri klasörüyle koşar; gerçek yapılandırma okunmaz.
+5. PHP sürümü: hosting 8.2.30 kullanıyor. Testler PHP 8.2.30 ile koşulur. Bu sürüm, php-src'nin resmi `php-8.2.30` etiketinden asistanın ortamında derlenir; kaynak ve derleme araçları erişilebilir, derleme henüz yapılmadı. Testler ortamdaki 8.4 ile de koşulur; iki sonuç ayrı yazılır. Kendi PHP dosyalarımızda 8.3 ve 8.4'e özgü işlev ya da sözdizimi taraması temiz çıktı; tarama, çalıştırmanın yerini tutmaz.
+6. 3. bölümdeki dört test koşulur. Sonuç yalnız sayılar ve dosya/satır olarak raporlanır. Test ortamındaki kopya ardından silinir.
 
 ### C · Sızan anahtarın yenilenmesi (A'da etkin çıkarsa; ayrı onay)
 Bu adım sırasında Patron numarasından mesaj yazılmaz (anahtar iki tarafta eşleşene kadar ajanın çağrıları 401 alır; kalıcı modda bekleyen sonuçlar geçici hata sayılıp yeniden denenir, dosya modunda `data/pending/`'e alınır).
@@ -103,14 +178,24 @@ Geri dönüş bu anahtarları eski hâline getirmez; hiçbir adım eski anahtar�
 ```
 ssh root@<VPS> 'bash -s' < vps/pg_kurulum.sh
 ```
-- Kurulanlar: Postgres 16; yalnız yerel bağlantı; parolasız `portman` rolü (peer); saf psycopg; günlük `pg_dump` (14 gün VPS diskinde saklanır, daha eskisi silinir).
-- Betik sonunda bir yedek alıp ayrı bir deneme veritabanına geri yükler; geri yükleme başarısızsa durur ve hata verir. Tekrar çalıştırılabilir.
+- Kurulanlar: Postgres 16; yalnız yerel bağlantı; parolasız `portman` rolü (peer); saf psycopg; günlük `pg_dump`.
+- **Yedeklerin otomatik silinmesi varsayılan olarak kapalı (pilot).** Açmak ayrı bir tercih ve ayrı onaydır: `ssh root@<VPS> 'PM_YEDEK_SAKLA_GUN=14 bash -s' < vps/pg_kurulum.sh`. Kapalıyken yedekler birikir; disk VPS betiğiyle izlenir.
+- **Yerel bağlantı şartı sağlanmıyorsa betik durur**, uyarıp geçmez. Durdurma koşulları:
+  - `listen_addresses` yerel değilse;
+  - `pg_hba.conf` yerel olmayan bir adrese TCP açıyorsa;
+  - 5432 yerel olmayan bir adreste dinleniyorsa;
+  - güvenlik duvarında 5432 kuralı varsa.
+
+  O durumda rol, veritabanı, yedek klasörü ve cron oluşmaz.
+- `portman` veritabanı zaten var ama sahibi `portman` değilse betik ona dokunmaz ve durur.
+- **Geri yükleme denemesi yalnız kendi açtığı veritabanını siler.** Deneme veritabanının adı her çalıştırmada benzersizdir ve üzerine o çalıştırmanın işareti yazılır; silmeden önce bu işaret denetlenir. Aynı adda başka bir veritabanı varsa dokunulmaz ve betik durur. Geri yükleme başarısızsa deneme veritabanı incelenmek üzere bırakılır. Tekrar çalıştırılabilir.
+- Bu özelliklerin her biri, ayrı bir geçici Postgres kümesinde uçtan uca sınandı (`test_pg_kurulum.py`). Kasıtlı zayıflatmaların hepsi yakalandı.
 - Yedekler yalnız VPS diskindedir. Mac'e kopya F, G ve H'de elle alınır (aşağıda). Otomatik dış yedek bu planın kapsamında değil.
 - Ajan dosya modunda kalır.
 - Geri alma: `apt-get remove postgresql` ve `/etc/cron.d/portman-pg-yedek` silinir. İçinde veri yoktur.
 
 ### E · Hosting PHP ve paket yüklemesi (dosya modu sürer; B geçmiş olmalı)
-1. Yedek: `KANAL/feature.php`, `api.php` → `*.before-ie02-<tarih>.php`. `package/` klasörü → `package.before-ie02-<tarih>/`.
+1. Yedek: `KANAL/feature.php`, `api.php` → `*.before-ie02-<tarih>.php`. `package/` klasörü → `package.before-ie02-<tarih>/`. Yedeklenen iki dosya A'daki tam hash'le aynı olmalı (A'dan beri değişmemiş); farklıysa E durur.
 2. Depodan `kanal/feature.php` ve `kanal/api.php` → `KANAL/`.
 3. `python3 vps/paketle.py` → `vps/build/current.zip`, `current.sha256`, `SURUM.txt` → `KANAL/package/`. Ajan paketi kendisi günceller. `PORTMAN_PG_DSN` olmadığı için dosya modunda kalır.
 4. Doğrulama:
@@ -181,9 +266,17 @@ Bu yedi adım, kayıtlı çıkarım ve sahte hosting ile `test_baglanti.py::test
 
 Adım 2'de LLM mesajı revizyon değil yeni talep sayabilir. O zaman akış başka bir soruya gider; bu da kaydedilir, uydurulmaz. Böyle olursa adım model koduyla yinelenir ("P6001 yatak odası 1 penceresi 120x180") ya da D-01 sorusu için 2 saat beklenir.
 
-**Ücretli kapsam.**
-- OpenAI (gpt-4o-mini): yaklaşık 8 çağrı. Maliyeti OpenAI panelinden izlenir; tutarı burada doğrulanmadı.
-- WhatsApp: yaklaşık 12 giden mesaj. 1 Ekim 2026'dan itibaren Meta, 24 saatlik pencere içindeki şablonsuz (servis) mesajları da ücretlendiriyor. Oran pazara göre ve utility oranıyla aynı ([Meta](https://developers.facebook.com/documentation/business-messaging/whatsapp/pricing/non-template-messages)). Türkiye oranı gösterimden önce Meta'nın fiyat tablosundan okunur. Gösterim 1 Ekim'den önce yapılırsa bu mesajlar ücretsizdir.
+**Ücretli kapsam (E ve G birlikte).** Planlı gerçek çağrılar yalnız bu iki kapıda olur. A, B, C, D, F ve H kendiliğinden gerçek LLM ya da WhatsApp çağrısı yapmaz: öz-test paket başına bir kez koşar, servis yeniden başlatmaları onu tekrarlamaz. Ama F ve H'de kuyrukta bekleyen gerçek mesaj varsa işlenir ve cevaplanır; Patron modunda bunlar yalnız Lokman'ın mesajlarıdır.
+
+| Kapı | OpenAI (gpt-4o-mini) | WhatsApp giden mesaj |
+|---|---|---|
+| E | Paket öz-testi 1 çağrı (şema hatasında 1 tekrar) ve gerileme mesajı 1 çağrı (+1): 2–4 | Gerileme mesajının cevabı: metin + PDF, en çok 3 |
+| G | 7 adımda yaklaşık 8 çağrı (tekrarlarla en çok 16) | Yaklaşık 12 |
+| Toplam | 10–20 çağrı | Yaklaşık 15 |
+
+- OpenAI: 22.09'daki ölçüme göre çağrı başına yaklaşık 3.100 giriş ve 200 çıkış token'ı. Toplamda en çok ~62.000 giriş ve ~4.000 çıkış token'ı. Tutar, o günkü OpenAI fiyatıyla OpenAI panelinden izlenir; burada doğrulanmadı.
+- WhatsApp: Meta, 1 Ekim 2026'dan itibaren 24 saatlik pencere içindeki şablonsuz (servis) mesajları, her pazarın utility oranıyla mesaj başına ücretlendiriyor ([Meta](https://developers.facebook.com/documentation/business-messaging/whatsapp/pricing/non-template-messages)). 1 Ekim'den önce ücretsizdir.
+- Türkiye oranı Meta'nın fiyat sayfası metninde yok; oradaki fiyat dosyasında (CSV/PDF) ([Meta fiyatlandırma](https://developers.facebook.com/documentation/business-messaging/whatsapp/pricing)). **E ve G'den hemen önce** asistan o günkü dosyadan Türkiye utility oranını okur, mesaj sayısıyla çarpar ve onaya sunar. Üçüncü taraf sitelerdeki oranlar kullanılmaz.
 
 ### H · Geri dönüş (gerektiğinde; onayla)
 1. `settings.json` → `"worker": "off"`. Gelen mesajlar kuyrukta bekler. Ajan yeni mesaj almaz; Postgres'te açık kalan işleri bitirir ve sonuçlarını hosting'e verir (boşaltma).
@@ -204,6 +297,8 @@ Postgres'e yeniden geçiş: `/opt/portman/data/kalici_bekleyen/` boş olmalı (i
 - **Gerçek PHP hattı:** `feature.php` ve `api.php` değişiklikleri gerçek `lib.php` ile koşulmadı (kapı B).
 - **Gerçek WhatsApp ve LLM:** yalnız kapı G'de görülür. Sahte hosting Meta'nın gecikmeli ya da eksik bildirimlerini, 24 saat penceresini ve `dry_run`'ı taklit etmez.
 - **VPS:** Postgres kurulumu, systemd ve cron adımları VPS'te koşulmadı (kapı D).
+- **PHP sürümü:** hosting 8.2.30 kullanıyor; yerel PHP testleri şimdiye dek 8.4'te koştu. B'de 8.2.30 ile koşulur.
+- **Sızan anahtar:** A'ya göre büyük olasılıkla hâlâ etkin (kanıtlanmadı). Bu anahtarı bilen, hosting API'sine ajan gibi bağlanabilir: OpenAI anahtarını alabilir, kuyruktaki mesajı alıp ona cevap verdirebilir (Patron modunda yalnız Lokman'ın mesajları). C onaylanana dek bu risk sürer.
 - **v1.1.1'den kalan pencere:** hosting `claim` cevabını gönderip ajan onu alamazsa (ağ kopması) ya da ajan cevabı aldıktan sonra diske ya da Postgres'e yazamadan ölürse (milisaniyeler), satır hosting'te 600 sn sonra "failed" olur ve cevapsız kalır. Bu v1.1.1'de de böyledir; hosting kuyruğunda görünür ve yeniden kuyruğa konursa (tekrar gelen mesaj) cevap verilir.
 - **VPS saati:** "hosting satırı süpürüldü" kararı VPS saatindeki iki an arasındaki farka dayanır (ajanın mesajı aldığı an ve sonraki başarılı claim). Çalışan sunucuda saat 660 sn'den çok ileri atlarsa (ör. açılışta büyük bir NTP düzeltmesi) ve aynı anda o işin devri hata veriyorsa, hosting'in hâlâ alabileceği bir sonuç "gönderilmedi" sayılabilir; uyarıda ve sorgu 6'da görünür.
 - **Süpürme sınırındaki deneme sıklığı:** mesaj alınalı 480 sn olmuş ve sonucu işe özgü bir hatayla hep reddedilen bir iş, "süpürüldü" kesinleşene dek (en çok ~3 dakika) her turda yeniden yüklenir; bu, hosting'in süpürmesinden önce son denemeyi kaçırmamak içindir. Boşaltmada (`worker=off`) claim olmadığı için bu, geçiş bitene dek her turda sürer (H.2).
