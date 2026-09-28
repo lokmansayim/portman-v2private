@@ -293,13 +293,15 @@ def test_goc_ikinci_kez_bir_sey_uygulamaz(depo):
 def test_beklenmeyen_hatada_yarim_durum_yazilmaz(depo, monkeypatch):
     asil = W.isle
 
-    def bozuk(gelen, settings, k=None, cikarim=None):
-        k.d["asama"] = "yarim_kalmis"; k.d["taslak"] = {"bozuk": True}
+    degisti = []
+
+    def bozuk(gelen, settings, k=None, cikarim=None, **kw):
+        k.d["asama"] = "yarim_kalmis"; k.d["taslak"] = {"bozuk": True}; degisti.append(1)
         raise RuntimeError("beklenmeyen")
     monkeypatch.setattr(W, "isle", bozuk)
     g = mesaj("P6001 aynalı", T_P6001); depo.mesaj_kaydet(g)
     r = kalici.bir_is(depo, AYAR, "A")
-    assert r["durum"] == "basarisiz"
+    assert r["durum"] == "basarisiz" and degisti == [1]          # durum gerçekten yarıda değişti, sonra hata
     d, _ = depo.konusma_oku(NUMARA_A)
     assert d["asama"] == "bos" and d["taslak"] == {}
     assert [x["alici"] for x in sorgu(depo, "SELECT alici FROM giden ORDER BY sira")] == [NUMARA_A, "PATRON"]
@@ -337,4 +339,75 @@ def test_sigterm_eldeki_isi_bitirip_cikar(depo):
     j = tek(depo, "SELECT * FROM isler")
     assert (j["durum"], j["deneme"]) == ("bitti", 1)
     assert tek(depo, "SELECT count(*) n FROM giden")["n"] == 2
-    assert "900000" not in cikti                                  # numara çıktıya yazılmadı
+    satirlar = [json.loads(l) for l in cikti.splitlines() if l.startswith("{")]
+    assert satirlar and all(set(x) <= {"durum", "is_id", "eylem", "giden", "proje_id", "revizyon_id"} for x in satirlar)
+    assert "900000" not in cikti and "aynalı" not in cikti          # numara ve bayinin metni çıktıya yazılmadı
+
+
+# ───────────────────────── ikinci inceleme turu (34c1888) ─────────────────────────
+def _pdf_yerinde(depo) -> Path:
+    r = tek(depo, "SELECT r.pdf_yolu, g.dosya FROM revizyonlar r JOIN giden g ON g.revizyon_id = r.id ORDER BY r.id DESC LIMIT 1")
+    p = Path(r["pdf_yolu"])
+    assert r["pdf_yolu"] == r["dosya"] and p.is_file() and ".hazirlik" not in p.parts and p.parent.parent.parent == W.KANAL / "projects"
+    return p
+
+
+def test_pdf_yolu_kayitta_ve_satirda_yerinde_hazirlik_temiz(depo, wa, hizli_motor):
+    plan_iste(depo, wa)
+    _pdf_yerinde(depo)
+    assert not any((W.KANAL / "projects" / ".hazirlik").glob("*"))
+
+
+def test_cakisma_tasinan_dosyalari_siler_numara_bosalir(depo, hizli_motor, monkeypatch):
+    """Dosya yerine taşındıktan sonra kayıt çakışırsa bu işin projects/<no>/rNN'i ve hazırlığı silinir."""
+    g = mesaj("P6001 aynalı", T_P6001); depo.mesaj_kaydet(g)
+    asil = kalici._yerlestir
+
+    def tasi_sonra_baskasi_yazsin(cikti, hazirlik):
+        yer = asil(cikti, hazirlik)
+        with depo.baglan() as c:                               # taşımadan sonra başka bir yazma
+            c.execute("INSERT INTO konusmalar (gonderen, durum) VALUES (%s, %s)", (NUMARA_A, Jsonb({"asama": "baskasi"})))
+        tasi_sonra_baskasi_yazsin.hedef = yer[1]
+        return yer
+    monkeypatch.setattr(kalici, "_yerlestir", tasi_sonra_baskasi_yazsin)
+    r = kalici.bir_is(depo, AYAR, "A")
+    assert r["durum"] == "cakisma"
+    assert not tasi_sonra_baskasi_yazsin.hedef.exists()
+    assert not any((W.KANAL / "projects" / ".hazirlik").glob("*"))
+    assert tek(depo, "SELECT count(*) n FROM revizyonlar")["n"] == 0
+
+
+def test_commit_sonrasi_baglanti_hatasinda_dosya_yerinde_kalir(depo, hizli_motor, monkeypatch):
+    """Kayıt yazıldı ama istemci hata aldı (ör. COMMIT sırasında bağlantı koptu): yazılmış revizyonun PDF'i silinmez."""
+    import psycopg
+    g = mesaj("P6001 aynalı", T_P6001); depo.mesaj_kaydet(g)
+    asil = depo.isi_bitir
+
+    def yazip_hata_ver(*a, **k):
+        asil(*a, **k)
+        raise psycopg.OperationalError("bağlantı koptu")
+    monkeypatch.setattr(depo, "isi_bitir", yazip_hata_ver)
+    with pytest.raises(psycopg.OperationalError):
+        kalici.bir_is(depo, AYAR, "A")
+    assert tek(depo, "SELECT durum FROM isler")["durum"] == "bitti"
+    _pdf_yerinde(depo)
+
+
+def test_hicbir_sey_sorulmadiysa_soru_kaydi_acilmaz(depo, hizli_motor):
+    """Kaydı olmayan eski bir soru askıdayken (ör. tablo öncesinden) selam gelir: bu mesaj o sorunun kaynağı sayılmaz."""
+    with depo.baglan() as c:
+        from beyin.konusma import Konusma
+        d = Konusma._bos(); d.update(asama="topluyor", son_soru_alani="oda_programi", taslak={"dis_olcu": {"en_m": 6, "boy_m": 8}})
+        c.execute("INSERT INTO konusmalar (gonderen, durum) VALUES (%s, %s)", (NUMARA_A, Jsonb(d)))
+    depo.mesaj_kaydet(mesaj("merhaba", talep("selam", "selam"))); [r] = isle_hepsi(depo)
+    assert r["eylem"] != "sor"
+    assert tek(depo, "SELECT count(*) n FROM sorular")["n"] == 0
+
+
+def test_soru_kaydi_kural_katmaninin_askidaki_sorusunu_izler(depo, wa, hizli_motor):
+    """"Neyi değiştirelim?" (plan reddedildi) kural katmanında askıdaki soru olarak tutulmuyor (son_soru_alani boş);
+    soru kaydı da açılmaz. Soru kaydı yalnız konuşmadaki askıdaki soruyu izler, kendi sorusunu uydurmaz."""
+    plan_iste(depo, wa)
+    depo.mesaj_kaydet(mesaj("beğenmedim", talep("red", "beğenmedim"))); [r] = isle_hepsi(depo)
+    assert r["eylem"] == "sor" and depo.konusma_oku(NUMARA_A)[0]["son_soru_alani"] is None
+    assert tek(depo, "SELECT count(*) n FROM sorular")["n"] == 0

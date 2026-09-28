@@ -15,11 +15,13 @@ import argparse
 import hashlib
 import json
 import os
+import shutil
 import signal
 import socket
 import sys
 import time
 import traceback
+import uuid
 from pathlib import Path
 
 KOD = Path(__file__).resolve().parent
@@ -122,7 +124,7 @@ def bir_is(depo: Depo, settings: dict, sahip: str | None = None) -> dict | None:
             cikarim = {"hata": f"{type(e).__name__}: {str(e)[:300]}"}
         if not depo.cikarim_kaydet(j["id"], sahip, cikarim):
             return {"durum": "atildi", "is_id": j["id"], "neden": "kira kaybedildi (çıkarım kaydı)"}
-    hazirlik = W.KANAL / "projects" / ".hazirlik" / f"is{j['id']}-d{j['deneme']}"
+    hazirlik = W.KANAL / "projects" / ".hazirlik" / f"is{j['id']}-{uuid.uuid4().hex[:8]}"      # her deneme kendi klasöründe
     try:
         cikti = W.isle(gelen, settings, k=k, cikarim=cikarim if yazili else None, proje_koku=hazirlik)
         # Onay denetimi kuralın sonucuna bakar: hangi yoldan olursa olsun (ör. süresi dolan D-01 sorusundan sonra) bir onay
@@ -143,17 +145,16 @@ def bir_is(depo: Depo, settings: dict, sahip: str | None = None) -> dict | None:
     try:
         yer = _yerlestir(cikti, hazirlik)
         kayit = depo.isi_bitir(j, sahip, gelen, surum, d_eski, k.d, cikti, _karar_ozeti(d_eski, k, cikti))
-    except Cakisma as e:
-        _yerlestirmeyi_geri_al(yer)
+    except Cakisma as e:                            # kayıt kesin yazılmadı: bu işin dosyaları silinir, numara boşalır
+        _dosyalari_sil(yer, hazirlik)
         depo.is_geri_birak(j["id"], sahip, str(e))
         return {"durum": "cakisma", "is_id": j["id"], "neden": str(e)}
     except KiraKaybi as e:
-        _yerlestirmeyi_geri_al(yer)
+        _dosyalari_sil(yer, hazirlik)
         return {"durum": "atildi", "is_id": j["id"], "neden": str(e)}
-    except BaseException:
-        _yerlestirmeyi_geri_al(yer)
-        raise
-    _bos_klasorleri_sil(hazirlik)
+    # Başka bir hata (ör. COMMIT sırasında bağlantı koptu) yukarı çıkar ve dosyalara dokunulmaz: kayıt yazılmış olabilir,
+    # dosyayı geri almak yazılmış bir revizyonun PDF'ini yok ederdi. Kaydı olmayan bir klasör kalırsa gönderilmez.
+    shutil.rmtree(hazirlik, ignore_errors=True)
     return {"durum": "basarisiz" if cikti.get("hata") else "bitti", "is_id": j["id"], "mesaj_id": gelen["id"],
             "eylem": cikti["sonuc"].get("eylem"), "gerekce": cikti["sonuc"].get("gerekce"), "giden": len(cikti["satirlar"]), **kayit}
 
@@ -187,23 +188,12 @@ def _yerlestir(cikti: dict, hazirlik: Path):
     return kaynak, hedef
 
 
-def _yerlestirmeyi_geri_al(yer) -> None:
-    """Kayıt yazılamadıysa taşınan dosyalar hazırlığa geri döner; projects/<no>/rNN boşalır (numara başkasını engellemez)."""
-    if not yer:
-        return
-    kaynak, hedef = yer
-    kaynak.mkdir(parents=True, exist_ok=True)
-    for f in hedef.iterdir():
-        os.replace(f, kaynak / f.name)
-    hedef.rmdir()
-
-
-def _bos_klasorleri_sil(hazirlik: Path) -> None:
-    for d in sorted((p for p in hazirlik.rglob("*") if p.is_dir()), key=lambda p: -len(p.parts)) + [hazirlik]:
-        try:
-            d.rmdir()
-        except OSError:
-            pass
+def _dosyalari_sil(yer, hazirlik: Path) -> None:
+    """Kaydı kesin yazılmayan işin Motor dosyaları: bu işin açtığı projects/<no>/rNN (os.mkdir ile yalnız bu iş açtı) ve
+    hazırlık klasörü. Numara başka bir işi engellemez; eski dosya hazırlıkta birikmez."""
+    if yer:
+        shutil.rmtree(yer[1], ignore_errors=True)
+    shutil.rmtree(hazirlik, ignore_errors=True)
 
 
 # ───────────────────────── gönderim ─────────────────────────

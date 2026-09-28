@@ -1,4 +1,5 @@
 -- İE-02 · 001: kalıcı konuşma ve iş akışı. Göç çalıştırıcı: kanal/depo.py (Depo.goc_uygula).
+-- Bir ortamda uygulandıktan sonra bu dosya değiştirilmez; şema değişikliği 002_… olarak eklenir (28.09: yalnız testlerde uygulandı).
 -- Zamanlar timestamptz (UTC). Telefon numarası yalnız yönlendirme anahtarıdır; günlüklere maskeli yazılır.
 
 -- Bayi kimliği WhatsApp numarasıdır (Meta imzalı webhook doğrular). 'kod' yalnız etikettir: panelde kod yoksa feature.php
