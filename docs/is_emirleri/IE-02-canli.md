@@ -316,6 +316,17 @@ Patron deneme mesajı gönderilmedi. Sayaçlar: OpenAI 1 istek (reddedildi, ücr
 - **Sohbet botu (`ai.php`) OpenAI'de kalır;** OpenAI'ye kredi yüklenene dek cevap üretemez. Botu Claude'a geçirmek `ai.php` değişikliği ister; ayrı karar.
 - **K10 değişir:** çıkarım modeli gpt-4o-mini'den Claude Haiku 4.5'e geçer. Belirsiz pencere vakasındaki (B1) davranışı ölçülmedi; kural katmanı belirsizlikte yine sorar.
 
+**29.09 00:00–00:50 · Opus 5.5 geçişi (Lokman'ın seçimi; başka bir ajan (Codex) yaptı; `19_Devir_Opus/`, rapor `18_Kapi_E/CLAUDE_DEVIR_RAPORU_20260929.md`).** Rapora göre:
+- Portman'ın çıkarımı ve bayi sohbet botu (`ai.php` + `portman_app/claude_api.php`) Claude Opus 5.5'e geçti.
+- Paket `kanal-v1.2-opus55-20260929` (`f2bff20a…`); yalnız `beyin/llm.py` değişti.
+- Hosting `settings.json`: `llm.backend` anthropic, `llm.model` claude-opus-5-5.
+- Anahtar VPS `agent.env`'de ve hosting `claude_api.json`'da (0600).
+- Canlı öz-test geçti: 5.309 + 488 token, ~0,031 $.
+- VPS'e php8.3-cli kuruldu; `/root/portman-migration-staging` var.
+- Depoya commit atılmadı.
+
+**Durum:** Asistan bu beyanları henüz doğrulamadı. Raporun andığı yedek ve aday dosyalar `18_Kapi_E`'de yok. Doğrulama `vps/devir_dogrula.sh` (salt okunur) ve canlı `llm.py`, `ai.php`, `claude_api.php` kopyalarıyla yapılacak. Patron deneme mesajı hâlâ gönderilmedi. E'nin sayacı 4/6 çağrı (1 OpenAI reddi + 3 Claude).
+
 **Durdurma:** bir mesaja beklenenden fazla cevap gelirse, aynı cevap tekrarlanırsa ya da hata görülürse DirectAdmin'de `portman_app/kanal/settings.json` → `"worker": "off"` yapılır (yeni iş alınmaz) ve asistana haber verilir.
 
 **Geri alma (E.5, gerekirse):** `yedek/`'teki eski `feature.php` ve `api.php` geri yüklenir. Paketin eski üç dosyası geri yüklenir, `current.sha256` en son. Ajan v1.1.1 paketini ve `agent.py`'sini geri kurar.
