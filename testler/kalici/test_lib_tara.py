@@ -126,3 +126,16 @@ def test_temiz_kopya_ayni_davranir(tmp_path, php):
     a = subprocess.run([php, str(lib)], capture_output=True, text=True).stdout
     b = subprocess.run([php, str(temiz)], capture_output=True, text=True).stdout
     assert a.split("|")[:2] == b.split("|")[:2] == ["6", "32"]                  # uzunluk korunur
+
+
+def test_ara_ve_url_yollari_deger_yazmaz(tmp_path):
+    lib = tmp_path / "ai.php"
+    lib.write_text("<?php\nrequire __DIR__ . '/config.php';\nfunction cevapla($m) {\n    $k = ayarlarOku()['openai_key'];\n"
+                   "    return pm_post('https://api.openai.com/v1/chat/completions?x=1', $k, $m);\n}\n"
+                   "$yol = '/home/x/veri/ayarlar.json';\n$gizli = '" + G["openai"] + "';\n")
+    r = _kos(lib, "--ara", "openai_key,ayarlarOku,ayarlar.json")
+    assert "ara 'openai_key': 1 yer · satır 4 (cevapla, dizge)" in r.stdout
+    assert "ara 'ayarlarOku': 1 yer · satır 4 (cevapla, kod)" in r.stdout
+    assert "ara 'ayarlar.json': 1 yer · satır 7 ((işlev dışı), dizge içinde)" in r.stdout
+    assert "api.openai.com/v1/chat/completions" in r.stdout and "x=1" not in r.stdout
+    assert "openai_anahtari" in r.stdout and G["openai"][:12] not in r.stdout

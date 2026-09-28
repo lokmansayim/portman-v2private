@@ -4,7 +4,7 @@ Dal: `ie-02`. Dayanak: Astra'nın 28 Eylül ikinci değerlendirmesi, D-03 ve D-0
 
 ## 0. Kısa özet
 
-**Kapılar.** A (salt okunur) 28.09'da onaylandı ve yapıldı: canlı sürüm v1.1.1; VPS'te ve hosting'te denetlenen her şey beklenenle aynı (hosting PHP dosyaları tam hash'le); eşleşme anahtarı iki tarafta aynı; sızan anahtar büyük olasılıkla hâlâ etkin, kanıtlanmadı (ayrıntı A'da). B de 28.09'da onaylandı ve geçti: gerçek `lib.php`'nin temiz kopyasıyla dört takım PHP 8.2.30'da ve 8.4'te tam geçti, ağsız ortamda. C–H her biri ayrı onay bekler. Anahtar yenileme (C), kurulum (D), canlı değişiklik (E, F, H), veri silme ve ücretli deneme (E, G) ayrı ayrı onaylanır.
+**Kapılar.** A (salt okunur) 28.09'da onaylandı ve yapıldı: canlı sürüm v1.1.1; VPS'te ve hosting'te denetlenen her şey beklenenle aynı (hosting PHP dosyaları tam hash'le); eşleşme anahtarı iki tarafta aynı; sızan anahtar büyük olasılıkla hâlâ etkin, kanıtlanmadı (ayrıntı A'da). B de 28.09'da onaylandı ve geçti: gerçek `lib.php`'nin temiz kopyasıyla dört takım PHP 8.2.30'da ve 8.4'te tam geçti, ağsız ortamda. C 28.09'da yalnız iki anahtarın yenilenmesi için onaylandı (bugünkü canlı sürümde; Postgres, PHP ya da paket yok). D–H her biri ayrı onay bekler. Anahtar yenileme (C), kurulum (D), canlı değişiklik (E, F, H), veri silme ve ücretli deneme (E, G) ayrı ayrı onaylanır.
 
 **Cevapsız kalabilecek işler.** Hepsi uyarıda ve kanıt sorgusu 6'da görünür; hiçbiri sessiz değildir.
 - Hosting'in `claim` cevabı ajana ulaşmazsa, ya da ajan cevabı alıp diske ve Postgres'e yazamadan ölürse (milisaniyeler): satır hosting'te 600 sn sonra "takılı" sayılır. Bu v1.1.1'de de böyledir.
@@ -180,24 +180,31 @@ Teknik denetimi asistan yapar; Lokman yalnız dosyayı sağlar ve paylaşımı o
 - Çıktılarda ve `php -S` günlüklerinde PHP uyarısı, kullanımdan kalkma bildirimi ya da hata yok.
 - Test ortamındaki kopya ve geçici test klasörleri silindi. `lib.php`, `lib.clean.php` ve `lib_tara.py` Lokman'ın `15_Kapi_B` klasöründe duruyor.
 
-### C · Sızan anahtarın yenilenmesi (A'da etkin çıkarsa; ayrı onay)
-Bu adım sırasında Patron numarasından mesaj yazılmaz (anahtar iki tarafta eşleşene kadar ajanın çağrıları 401 alır; kalıcı modda bekleyen sonuçlar geçici hata sayılıp yeniden denenir, dosya modunda `data/pending/`'e alınır).
+**Kayıtta kalan sınırlamalar (Lokman, 28.09):** medya indirme yolu (`pm_download` → `pm_stream_media`) B'de sınanmadı; temiz kopyada bir kişinin ön adı kaldı.
 
-1. VPS'te yeni eşleşme anahtarı üretilir; ekrana, komut satırına ya da günlüğe yazılmaz, yalnız eski ve yeni parmak izi yazılır. Betik önce anahtar satırı çıkarılmış bir yedek alır; dosyanın izni ve sahibi korunur (`test_vps_betikleri.py`). Mac'ten:
-   ```
-   ssh root@<VPS> 'python3 -' < vps/anahtar_yenile.py
-   ```
-2. Anahtar hosting'e aktarılır.
-   - Hosting'e SSH varsa, Mac'ten ekrana yazmadan:
-     ```
-     ssh root@<VPS> "grep '^PORTMAN_API_TOKEN=' /etc/portman/agent.env | cut -d= -f2-" | ssh <hosting> "umask 077; cat > /home/portatifevcom/portman_app/kanal/api_token.txt"
-     ```
-   - SSH yoksa değer yalnız Lokman'ın kendi ekranında bir kez gösterilir ve DirectAdmin'de dosyaya yapıştırılır; sohbete yazılmaz.
-3. `systemctl restart portman-agent`.
-4. Doğrulama: A'daki iki parmak izi yeniden alınır. Yeni değerler birbirine eşit, eskisinden farklı olmalı. `vps-health.json` güncellenmeli. Hosting yalnız dosyadaki anahtarı kabul ettiği için eski anahtar geçersiz olur; `api-audit.json`'da yanlış anahtar denemeleri görünür.
-5. OpenAI anahtarı da yenilenir (sızan eşleşme anahtarıyla okunabiliyordu). Lokman OpenAI panelinde yapar; `ayarlar.json` güncellenir. Ücretsizdir. Ayrı onayla.
+**Kural (Lokman, 28.09):** bundan sonraki her dışarı aktarımda kişi adları da maskelenir. Tarayıcıya ad denetimi eklenmeden yeni bir dosya dışarı aktarılmaz.
 
-Geri dönüş bu anahtarları eski hâline getirmez; hiçbir adım eski anahtarı yeniden etkinleştirmez.
+### C · Eşleşme ve OpenAI anahtarlarının kontrollü yenilenmesi (28.09 onaylandı; yalnız anahtar yenileme)
+Kapsam: bugünkü canlı sürümde (v1.1.1, dosya modu) yalnız iki anahtar yenilenir. Postgres, PHP ya da paket yüklemesi yok; mod Patron kalır. Denetimlerin hepsi ücretsizdir: hosting'e `op=settings` ve OpenAI'ye `GET /v1/models` (token harcamaz). Gerçek mesajla uçtan uca deneme ücretlidir ve C'ye dahil değildir.
+
+Kurallar:
+- Hiçbir anahtar değeri sohbete, günlüğe, dosya adına ya da depoya girmez; çıktılarda yalnız 12 haneli parmak izi var. OpenAI'nin hata mesajı anahtarın bir parçasını içerdiği için yalnız hata kodu yazılır.
+- Eski anahtarlar geri kullanılmaz. Geri dönüş yolu yeni bir anahtar daha üretmektir; `agent.env` yedeğinde anahtar satırı yoktur.
+- Eski iki anahtar, iptal edildiklerini sınamak için, yalnız işlem boyunca VPS'te root'a özel bir klasörde (`/root/.portman_kapi_c`, 0700; dosyalar 0600) durur. Son adım onları siler; yarıda kalırsa `temizle` siler.
+- İşlem boyunca Patron numarasından mesaj yazılmaz ve ekran görüntüsü alınmaz. Eşleşme anahtarının hosting'e yazıldığı andan servis yeniden başlatılana dek (birkaç dakika) ajan hosting'e bağlanamaz. Gelen mesaj kuyrukta bekler; gönderilemeyen sonuç `data/pending/`'e alınıp sonra gönderilir.
+
+Adımlar (`vps/kapi_c.py`; her adım öncekinin geçtiğini denetler, geçmezse "DUR" ve yapılacak işi yazar):
+1. **Sohbet botunun OpenAI anahtarını nereden okuduğu** (salt okunur). Lokman `developer/ai.php`, `developer/config.php` ve `portman_app/kanal/settings.json`'u `16_Kapi_C/`'ye indirir; asistan Mac'te `denetim/lib_tara.py --ara` ile değer yazdırmadan tarar. Amaç: eski anahtar iptal edilince bayilere cevap veren sohbet botunun durmaması. Yeni anahtarın izinleri ve nereye kaydedileceği bu sonuca göre belirlenir.
+2. `hazirla`: servis çalışıyor, dosyadaki ve süreçteki anahtar aynı, hosting bugünkü anahtarı kabul ediyor, bugünkü OpenAI anahtarı geçerli. Eski iki anahtar geçici klasöre alınır.
+3. Lokman OpenAI'da yeni anahtar oluşturur (eskisini henüz iptal etmez), panele kaydeder, panoyu temizler.
+4. `yenile`: `agent.env`'de yeni eşleşme anahtarı. İzin ve sahip korunur; yedekte anahtar satırı yok. Servis yeniden başlatılmaz.
+5. Lokman yeni eşleşme anahtarını ekrana getirmeden panoya alır (`… | pbcopy`), DirectAdmin'de `api_token.txt`'ye yapıştırır, panoyu temizler.
+6. `ara`: hosting yeni eşleşme anahtarını kabul ediyor, eskisini reddediyor (401); panel yeni bir OpenAI anahtarı veriyor ve o anahtar OpenAI'de geçerli. Biri tutmazsa servis yeniden başlatılmaz.
+7. `yeniden_baslat`: servis yeniden başlatılır. Süreç yeni anahtarla çalışıyor olmalı; hosting onu kabul etmeli; günlükte yeniden başlatmadan sonra 401 olmamalı.
+8. Lokman OpenAI'da eski anahtarı iptal eder (Revoke).
+9. `bitir`: eski eşleşme anahtarı hosting'te, eski OpenAI anahtarı OpenAI'de geçersiz (401); yenileri çalışıyor. Sonra geçici klasör silinir. Eski OpenAI anahtarı hâlâ geçerliyse klasör silinmez, adım yinelenir.
+
+Sınanması: `testler/kalici/test_kapi_c.py`. Sahte hosting, sahte OpenAI ve sahte systemctl ile uçtan uca sınandı: sıra zorunlu; hosting güncellenmeden yeniden başlatma yok; iptalsiz bitiş yok; hiçbir çıktıda anahtar parçası yok.
 
 ### D · VPS'e Postgres kurulumu (trafik değişmez)
 ```
@@ -320,6 +327,7 @@ Postgres'e yeniden geçiş: `/opt/portman/data/kalici_bekleyen/` boş olmalı (i
 ## 5. Henüz doğrulanamayan ve kalan riskler
 
 - **Gerçek PHP hattı:** `feature.php` ve `api.php` değişiklikleri gerçek `lib.php` ile yerelde geçti (B), ama canlıda henüz yok. Canlıda E'de (dosya modu) ve G'de (kalıcı mod) görülür.
+- **Medya indirme yolu:** `lib.php`'deki `pm_download` → `pm_stream_media` (bayinin gönderdiği dosyanın arşivlenmesi) B'de sınanmadı; testler oraya girmiyor. Bu yol İE-02'de değişmedi.
 - **Gerçek WhatsApp ve LLM:** yalnız kapı G'de görülür. Sahte hosting Meta'nın gecikmeli ya da eksik bildirimlerini, 24 saat penceresini ve `dry_run`'ı taklit etmez.
 - **VPS:** Postgres kurulumu, systemd ve cron adımları VPS'te koşulmadı (kapı D).
 - **Sızan anahtar:** A'ya göre büyük olasılıkla hâlâ etkin (kanıtlanmadı). Bu anahtarı bilen, hosting API'sine ajan gibi bağlanabilir: OpenAI anahtarını alabilir, kuyruktaki mesajı alıp ona cevap verdirebilir (Patron modunda yalnız Lokman'ın mesajları). C onaylanana dek bu risk sürer.

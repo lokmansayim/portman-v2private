@@ -315,6 +315,25 @@ class Tarama:
                     adlar.add(re.sub(r"\d{5,}", "…", m.group(1).lower()))
         return sorted(adlar)
 
+    def url_yollari(self) -> list[str]:
+        """URL'lerin alan adı + yolu (sorgu dizgesi ve 5+ haneli sayılar atılır); hangi API uç noktalarının çağrıldığını gösterir."""
+        yollar = set()
+        for p in self.p:
+            if p.tur in METIN:
+                for m in re.finditer(r"(?i)\b(?:https?|wss?)://([A-Za-z0-9.\-]+)(/[A-Za-z0-9_./\-{}$]*)?", self.s[p.ic_bas:p.ic_son]):
+                    yollar.add(re.sub(r"\d{5,}", "…", (m.group(1) + (m.group(2) or "")).lower()))
+        return sorted(yollar)
+
+    def ara(self, ad: str) -> list[tuple[int, str, str]]:
+        """ad'ın geçtiği yerler: koddaki tanımlayıcı, tam eşleşen dizge ya da dizgenin bir parçası (satır, işlev, nerede)."""
+        yerler = [(self.satir(self.ozgun(m.start())), self.islev(m.start()), "kod")
+                  for m in re.finditer(r"(?<![\w$])" + re.escape(ad) + r"(?!\w)", self.m)]
+        for k, p in self.dizge.items():
+            ic = self.s[p.ic_bas:p.ic_son]
+            if ad in ic:
+                yerler.append((self.satir(p.ic_bas), self.islev(self._mkonum_dizge(k)), "dizge" if ic == ad else "dizge içinde"))
+        return sorted(set(yerler))
+
     def eklentiler(self) -> dict:
         onekler = {"curl": r"curl_\w+", "mbstring": r"mb_\w+", "openssl": r"openssl_\w+", "fileinfo": r"finfo_\w+|mime_content_type",
                    "session": r"session_\w+", "iconv": r"iconv\w*", "zlib": r"gz\w+", "zip": r"ZipArchive|zip_\w+", "json": r"json_\w+",
@@ -375,7 +394,7 @@ class Cikti:
         self.satirlar.append(satir); print(satir)
 
 
-def rapor(t: Tarama, yol: Path, veri: bytes, c: Cikti):
+def rapor(t: Tarama, yol: Path, veri: bytes, c: Cikti, aranan: list[str] | None = None):
     c.yaz(f"== Kapı B · sır taraması ({SURUM}) · salt okunur · değer yazılmaz")
     c.yaz(f"dosya: {yol.name} · {len(veri):,} bayt · {t.s.count(chr(10)) + (not t.s.endswith(chr(10)))} satır · sha256 {hashlib.sha256(veri).hexdigest()[:16]}…".replace(",", "."))
     c.yaz(f"-- bulgular: {len(t.bulgular)} (satır · tür · ad · uzunluk)")
@@ -392,21 +411,28 @@ def rapor(t: Tarama, yol: Path, veri: bytes, c: Cikti):
     if not ag:
         c.yaz("   yok")
     c.yaz(f"-- URL'lerdeki alan adları: {', '.join(t.alan_adlari()) or 'yok'}")
+    c.yaz(f"-- URL yolları (sorgusuz): {', '.join(t.url_yollari()) or 'yok'}")
     c.yaz(f"-- kullanılan eklenti işlevleri: {', '.join(f'{k} {v}' for k, v in t.eklentiler().items()) or 'yok'}")
     c.yaz(f"-- işlev sayısı: {len(t.islev_araliklari)}")
+    for ad in aranan or []:
+        if not AD.match(ad.replace(".", "_")):
+            c.yaz(f"-- ara: geçersiz ad atlandı"); continue
+        yerler = t.ara(ad)
+        c.yaz(f"-- ara '{ad}': {len(yerler)} yer" + (" · " + ", ".join(f"satır {s} ({i}, {n})" for s, i, n in yerler[:30]) if yerler else ""))
 
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("dosya")
     ap.add_argument("--temiz-kopya", help="bulgu varsa yer tutuculu kopyanın yolu (özgün dosyanın yolu olamaz)")
+    ap.add_argument("--ara", default="", help="virgülle ayrılmış adlar (ör. openai_key,ayarlarOku): yalnız geçtikleri satır ve işlev yazılır")
     a = ap.parse_args()
     yol = Path(a.dosya)
     veri = yol.read_bytes()                                                # yalnız okuma
     metin = veri.decode("utf-8", errors="surrogateescape")
     t = Tarama(metin)
     c = Cikti([metin[b["bas"]:b["son"]] for b in t.bulgular])
-    rapor(t, yol, veri, c)
+    rapor(t, yol, veri, c, [x.strip() for x in a.ara.split(",") if x.strip()])
     if not t.bulgular:
         c.yaz("SONUÇ: gizli ya da kişisel veri bulgusu yok" + (" → temiz kopya gerekmedi, yazılmadı" if a.temiz_kopya else ""))
         return 0
