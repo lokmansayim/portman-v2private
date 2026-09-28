@@ -244,8 +244,10 @@ def teknik_not(karar, talep, meta: dict, cizim: dict | None) -> str:
     return "\n— teknik: " + " | ".join(p)
 
 
-def isle(gelen: dict, settings: dict) -> dict:
-    """Bir gelen mesajı işler; giden satırlarını ve sonucu döndürür (state.json'a yazmaz — çağıran yazar)."""
+def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None) -> dict:
+    """Bir gelen mesajı işler; giden satırlarını ve sonucu döndürür (state.json'a yazmaz — çağıran yazar).
+    İE-02 (kalıcı akış, kanal/kalici.py): k verilirse konuşma dosyadan değil o nesneden okunur; cikarim verilirse
+    ({"talep": …, "meta": …} ya da {"hata": …}) LLM çağrılmaz. İkisi de verilmezse davranış v1.1.1 ile aynı."""
     from beyin import llm, katalog as KT
     from beyin.konusma import Konusma
     from beyin.karar import karar_ver
@@ -272,15 +274,18 @@ def isle(gelen: dict, settings: dict) -> dict:
         sonuc.update(eylem="cevapla", gerekce="metin dışı mesaj")
         return {"satirlar": satirlar, "sonuc": sonuc}
 
-    k = Konusma(sender, KANAL / "durum")
-    llm_ayar = settings.get("llm") or {}
-    backend = llm_ayar.get("backend", "openai_chat")
+    if k is None:
+        k = Konusma(sender, KANAL / "durum")
     try:
-        talep, meta = llm.cikar_guvenli(gelen["text"], baglam_ozeti(k), backend=backend, model=llm_ayar.get("model") or None,
-                                        hazir=gelen.get("test_cikarim") if backend == "manuel" else None,   # yalnız yerel test
-                                        ayarlar_json=settings.get("ayarlar_json"), timeout=int(llm_ayar.get("timeout_s", 60)))
+        if cikarim is not None:
+            if cikarim.get("hata"):
+                raise CikarimHatasi(cikarim["hata"])
+            from beyin.sema import Talep
+            talep, meta = Talep.model_validate(cikarim["talep"]), dict(cikarim.get("meta") or {})
+        else:
+            talep, meta = cikar(gelen, settings, k)
     except Exception as e:
-        hata = f"{type(e).__name__}: {str(e)[:300]}"
+        hata = str(e)[:320] if isinstance(e, CikarimHatasi) else f"{type(e).__name__}: {str(e)[:300]}"
         ekle("Mesajınızı şu an işleyemedim; Lokman Bey'e iletiyorum, en kısa sürede dönüş yapılacak.")
         patrona(f"Portman: {kim} mesajı işlenemedi (çıkarım hatası). Mesaj: \"{gelen['text'][:300]}\"")
         sonuc.update(eylem="hata", gerekce="çıkarım hatası", hata=hata)
@@ -326,6 +331,20 @@ def isle(gelen: dict, settings: dict) -> dict:
     if karar.eylem == "yonlendir":
         patrona(f"Portman yönlendirme: {kim} — {karar.gerekce}. Mesaj: \"{gelen['text'][:300]}\"")
     return {"satirlar": satirlar, "sonuc": sonuc}
+
+
+class CikarimHatasi(Exception):
+    """Kayıtlı çıkarım bir hata taşıyor (kalıcı akış: LLM çağrısı önceki denemede başarısız oldu)."""
+
+
+def cikar(gelen: dict, settings: dict, k):
+    """LLM çıkarımı (yalnız "bayi ne dedi?"). isle() ve kalıcı akış (kanal/kalici.py) aynı yolu kullanır."""
+    from beyin import llm
+    llm_ayar = settings.get("llm") or {}
+    backend = llm_ayar.get("backend", "openai_chat")
+    return llm.cikar_guvenli(gelen["text"], baglam_ozeti(k), backend=backend, model=llm_ayar.get("model") or None,
+                             hazir=gelen.get("test_cikarim") if backend == "manuel" else None,   # yalnız yerel test
+                             ayarlar_json=settings.get("ayarlar_json"), timeout=int(llm_ayar.get("timeout_s", 60)))
 
 
 def kaydet(gelen: dict, cikti: dict) -> None:

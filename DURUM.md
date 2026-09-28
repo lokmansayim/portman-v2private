@@ -1,6 +1,6 @@
 # Portman · DURUM
 
-**Son güncelleme: 28 Eylül 2026 (İE-01 birleştirildi; İE-02 başladı).** Her oturumun son adımı bu dosyayı güncellemektir.
+**Son güncelleme: 28 Eylül 2026 (İE-01 birleştirildi; İE-02 sürüyor: B1, B2 ve Postgres kalıcı akışı `ie-02` dalında).** Her oturumun son adımı bu dosyayı güncellemektir.
 
 Canlıda çalışan akış şu: WhatsApp → hosting kanalı → VPS ajanı → Beyin ve Motor → plan PDF'i. Akış yalnız Patron modunda açık. En son 22 Eylülde gerçek mesajla doğrulandı; canlı sunucu 27–28 Eylülde okunmadı. Bu depo o sürümün (v1.1.1, `ec4e9a3`) devridir. Hedefteki "90 m² 3+1, üç seçenek" akışı henüz taslak.
 
@@ -11,7 +11,9 @@ Durumlar: **Taslak** yalnız belgede · **Kodlandı** kod var, testi yok ya da d
 | Yol | İçerik |
 |---|---|
 | Kökteki v1.1.1 ağacı | `lokmansayim/portman` deposunun geçmişiyle birlikte, değiştirilmeden (`ec4e9a3`, 22.09 20:12). Özetleri `SHA256SUMS`'ta. |
-| `testler/referans/` | Dondurulmuş referans (`2026-09-28/`) ve `dogrula.py` |
+| `testler/referans/` | Dondurulmuş referanslar (`2026-09-28/`, `2026-09-28b/`) ve `dogrula.py` |
+| `testler/kalici/` | İE-02 kalıcı akış testleri (gerçek Postgres; T1–T10) ve kabul gösterimi |
+| `docs/is_emirleri/` | İE-02 iş emri |
 | `testler/bilinen_hatalar/` | B1 ve B2 testleri (ikisi de `ie-02` dalında düzeltildi) |
 | `deneme/2026-09-23/` | 23 Eylül denemeleri ve `yeniden_kos.py` |
 | `KARARLAR/` | K01–K25 ve Z-01–Z-10, her karar ayrı dosyada |
@@ -31,7 +33,7 @@ Durumlar: **Taslak** yalnız belgede · **Kodlandı** kod var, testi yok ya da d
 | Blender modeli | Kodlandı | 28.09: `yeniden_kos.py` ile bpy 5.0.1'de yeniden kuruldu, 65 pano, BOM aynı | Test dar: tek plan; sunum içindir, hesap burada yapılmaz |
 | Depo | Kodlandı | 28.09: `portman-v2private` açıldı; v1.1.1 geçmişiyle alındı; İE-01, Lokman'ın onayıyla `main`'e birleştirildi | Eski depo `lokmansayim/portman` yalnız okunuyor |
 | Yapı Tanımı şeması | Taslak | Zemin, 27.09; temeli İş Emri şeması v0.1 (21.09) | Ölçü anlamları ve ürün ailesi ayrımı eksik |
-| Veritabanı (Postgres + pgvector) | Taslak | — | Kurulmadı (İE-02) |
+| Veritabanı: kalıcı konuşma ve iş akışı (Postgres) | Test edildi | 28.09: `testler/kalici/`, gerçek Postgres 16'da 27 test (T1–T10) geçti. Kabul gösterimi 10/10 (simülasyon: WhatsApp ve LLM sahte). | İzole ortamda; canlıda yok. VPS ajanına bağlanmadı. Postgres'in yeri Lokman'ın kararı (K12'yi değiştirir). pgvector yok (RAG'la gelir). |
 | RAG | Taslak | Araştırma notu, 21.09 | Aşama 2 sonrası |
 | Model geçidi | Kodlandı | `llm.py`'de OpenAI ve Anthropic yolları var; canlıda gpt-4o-mini · 23.09 kıyas: gpt-4o-mini 6/7, gpt-6-sol 4/7 | Anthropic yolu canlı anahtarla denenmedi; hosting ayarı VPS'e yalnız arka uç, model ve zaman aşımını geçiriyor (B4) |
 | PortmanBench | Taslak | Tohum: `testler/referans/` (28.09) | Uçtan uca ölçüm ve kritik hata türleri yok |
@@ -52,7 +54,26 @@ Durumlar: **Taslak** yalnız belgede · **Kodlandı** kod var, testi yok ya da d
 
 ## Sıradaki iş: İE-02 · Kalıcı akış
 
-Dal: `ie-02`. Yapıldı: B2 düzeltmesi (D-01) ve B1 düzeltmesi. Kalan: mesaj, bayi, proje, revizyon ve iş tabloları (Postgres ve göç altyapısı); tekrar gelen mesaj, yarım iş, yeniden başlatma, başka bayinin proje kimliği ve eski revizyon butonu testleri. `kos.py` sır taramasındaki telefon kalıbının sınırlanması (bugün `deneme/` altındaki IFC koordinatlarını numara sanıyor). Test verisindeki olası müşteri adının takma adla değiştirilmesi. Kabul şartı: `testler/referans/dogrula.py` referansla aynı kalır (kod değişikliği serbest; referans girdiler, dondurulan 22 Beyin vakası, Motor sayıları ve parmak izleri aynı; yeni Beyin vakası sona eklenebilir). Vaka 1'deki takma ad gibi bilerek yapılan bir değişiklik referansı değiştirirse `dogrula.py --dondur` ile gerekçeli, tarihli yeni referans alınır; eskisi silinmez.
+Dal: `ie-02`. İş emri: `docs/is_emirleri/IE-02.md`.
+
+Yapıldı:
+- B2 düzeltmesi (D-01) ve B1 düzeltmesi;
+- referansın PDF içeriğini izlemesi (D-02, `2026-09-28b`);
+- Postgres üzerinde kalıcı akış: `kanal/depo.py`, `kanal/kalici.py`, `kanal/depo_aktar.py`, `kanal/goc/001`. Testler `testler/kalici/`.
+
+Kalan:
+- VPS ajanının Postgres yoluna bağlanması;
+- `kos.py` sır taramasındaki telefon kalıbının sınırlanması (bugün `deneme/` altındaki IFC koordinatlarını numara sanıyor);
+- test verisindeki olası müşteri adının takma adla değiştirilmesi;
+- canlı adımlar (ayrı onayla).
+
+Kabul şartı: `testler/referans/dogrula.py` referansla aynı kalır.
+
+Lokman'ın açık kararları (İE-02):
+- Postgres'in yeri (öneri: mevcut VPS; K12'yi değiştirir);
+- D-03 (yarım işin yeniden alınması).
+
+Sonraki iş adayı (İE-03): küçük, kaynaklı, sürüm ve yetki ayrımlı RAG.
 
 Lokman'ın açık kararları: K16 (a/b), K3 ve K4, Z-03 ve Z-06 eşikleri. Ayrıntı: `KARARLAR/README.md`.
 

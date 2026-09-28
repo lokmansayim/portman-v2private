@@ -1,0 +1,86 @@
+"""İE-02 · geçiş ve geri dönüş: dosya düzeni (durum/*.json, state.json) ↔ Postgres.
+
+  içe aktar  : durum/<numara>.json → konusmalar (bekleyen B1/B2 soruları durumun içinde olduğu için onlar da gelir);
+               state.json inbound → mesajlar + isler. 'queued' satır iş olarak sıraya girer; bitmiş satırlar yalnız
+               tekilleştirme için kaydedilir (aynı mesaj yeniden gelirse yeniden işlenmez).
+  dışa aktar : konusmalar → durum/<numara>.json (geri dönüşte hosting ya da eski ajan kaldığı yerden sürer).
+Var olan kayıtların üzerine yazılmaz; atlananlar sayılır. Anahtar ya da sır okumaz, yazmaz.
+
+  python kanal/depo_aktar.py ice  --kanal KLASOR
+  python kanal/depo_aktar.py disa --hedef KLASOR
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from pathlib import Path
+
+from psycopg.types.json import Jsonb
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from depo import Depo  # noqa: E402
+
+_IS_DURUMU = {"queued": "sirada", "done": "bitti", "failed": "basarisiz", "processing": "basarisiz"}
+
+
+def ice_aktar(depo: Depo, kanal: Path) -> dict:
+    kanal = Path(kanal)
+    say = {"konusma": 0, "konusma_atlandi": 0, "mesaj": 0, "mesaj_atlandi": 0, "sirada": 0}
+    with depo.baglan() as c, c.transaction():
+        for p in sorted((kanal / "durum").glob("*.json")):
+            d = json.loads(p.read_text(encoding="utf-8"))
+            r = c.execute("INSERT INTO konusmalar (gonderen, durum) VALUES (%s, %s) ON CONFLICT (gonderen) DO NOTHING RETURNING surum",
+                          (p.stem, Jsonb(d))).fetchone()
+            say["konusma" if r else "konusma_atlandi"] += 1
+        st = kanal / "state.json"
+        inbound = (json.loads(st.read_text(encoding="utf-8")).get("inbound") or {}) if st.exists() else {}
+        for mid, g in sorted(inbound.items(), key=lambda x: (x[1].get("timestamp", 0), x[1].get("received_at", 0))):
+            if not str(mid).startswith("wamid.") or g.get("self_test"):
+                continue
+            g = {**g, "id": mid}
+            bayi = g.get("bayi") if isinstance(g.get("bayi"), dict) else None
+            if bayi and bayi.get("kod"):
+                c.execute("INSERT INTO bayiler (kod, ad, rol) VALUES (%s, %s, %s) ON CONFLICT (kod) DO NOTHING",
+                          (bayi["kod"], bayi.get("ad") or "", "patron" if bayi.get("rol") == "patron" else "bayi"))
+            r = c.execute("INSERT INTO mesajlar (id, gonderen, bayi_kod, tur, metin, alinti_id, wa_zamani, ham) "
+                          "VALUES (%s, %s, %s, %s, %s, %s, to_timestamp(%s), %s) ON CONFLICT (id) DO NOTHING RETURNING id",
+                          (mid, str(g["sender"]), (bayi or {}).get("kod"), g.get("type") or "text", g.get("text") or "",
+                           g.get("context_id"), float(g.get("timestamp") or 0), Jsonb(g))).fetchone()
+            if r is None:
+                say["mesaj_atlandi"] += 1
+                continue
+            durum = _IS_DURUMU.get(g.get("state"), "basarisiz")
+            c.execute("INSERT INTO isler (mesaj_id, gonderen, durum, sonuc, hata, bitti) VALUES (%s, %s, %s, %s, %s, "
+                      "CASE WHEN %s = 'sirada' THEN NULL ELSE now() END)",
+                      (mid, str(g["sender"]), durum, Jsonb(g.get("result")) if g.get("result") is not None else None,
+                       None if durum != "basarisiz" else (g.get("error") or f"geçişte '{g.get('state')}' durumundaydı; yeniden işlenmez"),
+                       durum))
+            say["mesaj"] += 1; say["sirada"] += durum == "sirada"
+    return say
+
+
+def disa_aktar(depo: Depo, hedef: Path) -> dict:
+    hedef = Path(hedef) / "durum"; hedef.mkdir(parents=True, exist_ok=True)
+    n = 0
+    with depo.baglan() as c:
+        for r in c.execute("SELECT gonderen, durum FROM konusmalar ORDER BY gonderen"):
+            d = dict(r["durum"]); d.pop("proje_id", None)          # proje kimliği yalnız Postgres düzeninde anlamlı
+            (hedef / f"{r['gonderen']}.json").write_text(json.dumps(d, ensure_ascii=False, indent=1), encoding="utf-8")
+            n += 1
+    return {"konusma": n}
+
+
+def main(argv=None) -> int:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    alt = ap.add_subparsers(dest="komut", required=True)
+    alt.add_parser("ice").add_argument("--kanal", required=True)
+    alt.add_parser("disa").add_argument("--hedef", required=True)
+    ns = ap.parse_args(argv)
+    depo = Depo()
+    print(json.dumps(ice_aktar(depo, Path(ns.kanal)) if ns.komut == "ice" else disa_aktar(depo, Path(ns.hedef)), ensure_ascii=False))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

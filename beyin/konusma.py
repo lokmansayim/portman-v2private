@@ -79,3 +79,16 @@ class Konusma:
     def not_dus(self, yon: str, metin: str, ek: dict | None = None):
         self.d["gecmis"].append({"t": int(time.time()), "yon": yon, "metin": metin, **(ek or {})})
         self.d["gecmis"] = self.d["gecmis"][-40:]
+
+
+class BellekKonusma(Konusma):
+    """İE-02 kalıcı akış: durum dosyadan değil çağıranın verdiği sözlükten okunur; kaydet() dosyaya yazmaz.
+    Durumu Postgres'e, işin öteki kayıtlarıyla aynı işlemde kanal/depo.py yazar."""
+
+    def __init__(self, gonderen: str, d: dict | None = None):
+        self.gonderen = gonderen
+        self.path = None
+        self.d = json.loads(json.dumps(d)) if d else self._bos()
+
+    def kaydet(self):
+        self.d["guncellendi"] = int(time.time())
