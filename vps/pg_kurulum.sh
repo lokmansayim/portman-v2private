@@ -59,6 +59,16 @@ yerel_soketler() {
 
 if [ -n "$SAKLA" ] && ! [[ "$SAKLA" =~ ^[1-9][0-9]{0,3}$ ]]; then dur "PM_YEDEK_SAKLA_GUN geçersiz: '$SAKLA' (boş ya da 1–9999 gün)"; fi
 kimlik "$DB"
+cd /tmp                                          # sudo -u <kullanıcı> çalışma klasörü uyarısı vermesin (root'un evi kapalı)
+if [ -z "$TEST" ]; then
+  [ "$(id -u)" = "0" ] || dur "root olarak çalıştırılmalı"
+  command -v sudo >/dev/null 2>&1 || dur "sudo yok"
+  id -u portman >/dev/null 2>&1 || dur "'portman' sistem kullanıcısı yok (bootstrap_vps.sh çalışmamış)"
+  [ -x "$HOME_DIR/venv/bin/python" ] || dur "$HOME_DIR/venv yok"
+  # Kurulum sırasında hiçbir servis kendiliğinden yeniden başlatılmasın (Ubuntu needrestart); portman-agent'a dokunulmaz.
+  export NEEDRESTART_SUSPEND=1 NEEDRESTART_MODE=l
+  AJAN_ONCE="$(systemctl show portman-agent -p MainPID --value 2>/dev/null || true)"
+fi
 
 echo "== [1/6] Postgres paketi"
 if [ -z "$TEST" ]; then
@@ -98,7 +108,7 @@ fi
 
 echo "== [4/6] Python sürücüsü (saf psycopg; sistem libpq)"
 if [ -z "$TEST" ]; then
-  sudo -u portman "$HOME_DIR/venv/bin/pip" install -q "psycopg==3.3.6"
+  sudo -u portman "$HOME_DIR/venv/bin/pip" install -q --no-cache-dir "psycopg==3.3.6"
   sudo -u portman "$HOME_DIR/venv/bin/python" -c "import psycopg; c = psycopg.connect('dbname=portman'); print('   psycopg', psycopg.__version__, psycopg.pq.__impl__, 'bağlantı', c.execute('select 1').fetchone()[0])"
 fi
 
@@ -138,4 +148,9 @@ else
   dur "geri yükleme başarısız; '$DENEME' incelenmek üzere bırakıldı"
 fi
 echo
+if [ -z "$TEST" ]; then
+  AJAN_SONRA="$(systemctl show portman-agent -p MainPID --value 2>/dev/null || true)"
+  echo "   portman-agent: $(systemctl is-active portman-agent 2>/dev/null) · PID $AJAN_ONCE → $AJAN_SONRA ($( [ "$AJAN_ONCE" = "$AJAN_SONRA" ] && echo 'yeniden başlamadı' || echo 'DEĞİŞTİ'))"
+  echo "   agent.env'de PORTMAN_PG_DSN: $(grep -c '^PORTMAN_PG_DSN=' /etc/portman/agent.env 2>/dev/null || true) · /etc/portman/pg.env: $([ -e /etc/portman/pg.env ] && echo VAR || echo yok)"
+fi
 echo "Kuruldu. Ajan hâlâ dosya modunda (PORTMAN_PG_DSN yok). Göç ve geçiş ayrı onaylı adımdır (docs/is_emirleri/IE-02-canli.md)."

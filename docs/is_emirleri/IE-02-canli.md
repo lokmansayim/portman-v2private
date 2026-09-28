@@ -4,7 +4,7 @@ Dal: `ie-02`. Dayanak: Astra'nın 28 Eylül ikinci değerlendirmesi, D-03 ve D-0
 
 ## 0. Kısa özet
 
-**Kapılar.** A (salt okunur) 28.09'da onaylandı ve yapıldı: canlı sürüm v1.1.1; VPS'te ve hosting'te denetlenen her şey beklenenle aynı (hosting PHP dosyaları tam hash'le); eşleşme anahtarı iki tarafta aynı; sızan anahtar büyük olasılıkla hâlâ etkin, kanıtlanmadı (ayrıntı A'da). B de 28.09'da onaylandı ve geçti: gerçek `lib.php`'nin temiz kopyasıyla dört takım PHP 8.2.30'da ve 8.4'te tam geçti, ağsız ortamda. C 28.09'da onaylandı ve tamamlandı: eşleşme ve OpenAI anahtarları yenilendi, eski ikisi geçersiz (hosting ve OpenAI 401), yenileri çalışıyor; yalnız anahtar yenilendi, başka bir şey değişmedi. D–H her biri ayrı onay bekler. Anahtar yenileme (C), kurulum (D), canlı değişiklik (E, F, H), veri silme ve ücretli deneme (E, G) ayrı ayrı onaylanır.
+**Kapılar.** A (salt okunur) 28.09'da onaylandı ve yapıldı: canlı sürüm v1.1.1; VPS'te ve hosting'te denetlenen her şey beklenenle aynı (hosting PHP dosyaları tam hash'le); eşleşme anahtarı iki tarafta aynı; sızan anahtar büyük olasılıkla hâlâ etkin, kanıtlanmadı (ayrıntı A'da). B de 28.09'da onaylandı ve geçti: gerçek `lib.php`'nin temiz kopyasıyla dört takım PHP 8.2.30'da ve 8.4'te tam geçti, ağsız ortamda. C 28.09'da onaylandı ve tamamlandı: eşleşme ve OpenAI anahtarları yenilendi, eski ikisi geçersiz (hosting ve OpenAI 401), yenileri çalışıyor; yalnız anahtar yenilendi, başka bir şey değişmedi. D 28.09'da onaylandı (yalnız Postgres kurulumu; ajan dosya modunda kalır). E–H her biri ayrı onay bekler. Anahtar yenileme (C), kurulum (D), canlı değişiklik (E, F, H), veri silme ve ücretli deneme (E, G) ayrı ayrı onaylanır.
 
 **Cevapsız kalabilecek işler.** Hepsi uyarıda ve kanıt sorgusu 6'da görünür; hiçbiri sessiz değildir.
 - Hosting'in `claim` cevabı ajana ulaşmazsa, ya da ajan cevabı alıp diske ve Postgres'e yazamadan ölürse (milisaniyeler): satır hosting'te 600 sn sonra "takılı" sayılır. Bu v1.1.1'de de böyledir.
@@ -226,10 +226,15 @@ Adımlar (`vps/kapi_c.py`; her adım öncekinin geçtiğini denetler, geçmezse 
 
 Sınanması: `testler/kalici/test_kapi_c.py`. Sahte hosting, sahte OpenAI ve sahte systemctl ile uçtan uca sınandı: sıra zorunlu; hosting güncellenmeden yeniden başlatma yok; iptalsiz bitiş yok; hiçbir çıktıda anahtar parçası yok.
 
-### D · VPS'e Postgres kurulumu (trafik değişmez)
+### D · VPS'e Postgres kurulumu (trafik değişmez; 28.09 onaylandı)
+Mac'ten, Lokman (`K="$HOME/Desktop/Claude Portman Çalışması/17_Kapi_D"`):
 ```
-ssh root@<VPS> 'bash -s' < vps/pg_kurulum.sh
+ssh root@<VPS> 'bash -s' < "$K/pg_kurulum.sh" 2>&1 | tee "$K/1_kurulum.txt"
+ssh root@<VPS> 'bash -s' < "$K/kapi_d_dogrula.sh" 2>&1 | tee "$K/2_dogrula.txt"
 ```
+- Kurulum başlamadan betik root, `sudo`, `portman` kullanıcısı ve ajanın venv'ini denetler. apt sırasında hiçbir servis kendiliğinden yeniden başlatılmaz (Ubuntu needrestart askıya alınır). Sonda `portman-agent`'ın PID'inin değişmediği yazılır.
+- `vps/kapi_d_dogrula.sh` salt okunurdur. Kurulan sürümü, yalnız yerel bağlantıyı, rolü ve veritabanını, peer bağlantısını ve psycopg'yi, yedek klasörü ile cron satırını (otomatik silme yok) ve deneme yedeğinin okunabildiğini gösterir. Portman servisinin sağlığını ve dosya modunda kaldığını da gösterir (`PORTMAN_PG_DSN` yok, ek yapılandırma yok, hosting ajanın anahtarını kabul ediyor).
+- Sınır: `portman` veritabanı D'de boştur (göç uygulanmaz). Geri yükleme denemesi bu yüzden yedekten geri yüklemeye giden zinciri kanıtlar (izinler, klasör, `pg_dump`/`pg_restore`, işaretli deneme veritabanı), veriyle doğruluğu değil. Veriyle doğruluk yerelde T8'de sınandı. Canlı veriyle ilk yedek F.3'te, G'den sonra yine alınır.
 - Kurulanlar: Postgres 16; yalnız yerel bağlantı; parolasız `portman` rolü (peer); saf psycopg; günlük `pg_dump`.
 - **Yedeklerin otomatik silinmesi varsayılan olarak kapalı (pilot).** Açmak ayrı bir tercih ve ayrı onaydır: `ssh root@<VPS> 'PM_YEDEK_SAKLA_GUN=14 bash -s' < vps/pg_kurulum.sh`. Kapalıyken yedekler birikir; disk VPS betiğiyle izlenir.
 - **Yerel bağlantı şartı sağlanmıyorsa betik durur**, uyarıp geçmez. Durdurma koşulları:
