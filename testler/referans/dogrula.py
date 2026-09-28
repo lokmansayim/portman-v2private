@@ -5,7 +5,7 @@ Referans, testler/referans/ altında tarihli bir klasördür (ilki 2026-09-28). 
   referans_girdiler.json   girdi dosyalarının özeti ve Beyin test vakalarının vaka vaka özeti
   denetim_kosum.json       kos.py adım durumları, sayılar, BOM sayımları, 16 plan sonucu
   dxf_parmak_izleri.txt    DXF çıktılarının içerik parmak izi (parmak_izi.py; zaman damgası ve kimlikler hariç)
-  pdf_parmak_izleri.txt    PDF çıktılarının sayfa sayısı ve ölçüsü
+  pdf_parmak_izleri.txt    PDF çıktılarının sayfa ölçüsü ve bütün çizimleri (2026-09-28b'den beri; D-02)
   GEREKCE.md               neden ve hangi kodla donduruldu
 
 Depo koduna dokunmaz: v1.1.1 ağacını geçici bir klasöre kopyalar (deneme/, testler/, KARARLAR/ hariç) ve
@@ -24,8 +24,10 @@ Kurallar:
     kod değişikliği tek başına fark sayılmaz.
   - Beyin harness'inde tüm vakalar uyumlu olmalı; vaka sayısı referanstan az olamaz.
   - Motor sayıları, BOM sayımları, çıkarıcı sonuçları ve içerik parmak izleri referansla aynı olmalı.
+  - Betik ilk satırda koşulan kodu (commit ve kaydedilmemiş değişiklikler) yazar; her zaman çalışma ağacını koşar.
+    Referans koşularında üretim zamanı sabitlenir (sabit_zaman/), böylece PDF çizimleri koşudan koşuya aynı kalır.
   - Bilerek yapılan bir değişiklik referansı değiştirirse --dondur ile gerekçeli ve tarihli yeni klasör açılır; eskisi
-    silinmez. Bir adım geçmiyorsa ya da test verisi okunamıyorsa dondurulmaz. Önceki referansa göre kaldırma ya da
+    silinmez. Önceki referanstan farklıysa dayandığı karar --karar ile verilmelidir (KARARLAR/<AD>.md). Bir adım geçmiyorsa ya da test verisi okunamıyorsa dondurulmaz. Önceki referansa göre kaldırma ya da
     azalma (girdi dosyası, vaka, çıktı, vaka sayısı, Motor'dan geçen plan) varsa --kaldirmaya-izin gerekir; izin ve
     fark listesi GEREKCE.md'ye yazılır.
   - Referans dosyaları elle değiştirilmez. Her koşuda GEREKCE.md'deki dosya özetleri sınanır ve her referans bir
@@ -35,7 +37,7 @@ Kullanım (depo kökünde):
   python3 testler/referans/dogrula.py                       en yeni referansla tam karşılaştırma (~4,5 dk)
   python3 testler/referans/dogrula.py --hizli               16 katalog planı hariç (~45 sn)
   python3 testler/referans/dogrula.py --referans 2026-09-28 belirli bir referansla
-  python3 testler/referans/dogrula.py --dondur --gerekce "…" [--ad 2026-10-02] [--kaldirmaya-izin]
+  python3 testler/referans/dogrula.py --dondur --gerekce "…" --karar D-02 [--ad 2026-10-02] [--kaldirmaya-izin]
                                                             yeni referans (tam koşu, ~5 dk)
   python3 testler/referans/dogrula.py --girdi-dokumu        bugünkü girdi özetini yazar; koşu yapmaz
 Çıkış kodu 0 = referansla aynı (ya da dondurma tamam), 1 = fark var, 2 = referans bozuk ya da koşu sonuç vermedi.
@@ -60,6 +62,8 @@ SAYILAR = {
     "motor_p6001": ["pano", "kose", "aciklik", "ucluH", "ayak_izi_fark_cm2", "dis_olcu", "dis_olcu_ok"],
 }
 LISTE_SINIRI = 12
+SABIT_ZAMAN = 1767225600          # 2026-01-01 00:00:00 UTC; referans koşularında üretim zamanı
+KARARLAR = KOK / "KARARLAR"
 
 
 def _sha(p: Path) -> str:
@@ -168,6 +172,9 @@ def _kos(W: Path, hizli: bool) -> Path | None:
     """kos.py'yi kopyada koşar. PORTMAN_* (başka referans klasörü, bayi kaydı, durum dizini) ve LLM anahtarları
     alt sürece geçmez; test canlı ayarlardan etkilenmez ve ücretli bir çağrı yapamaz."""
     ortam = {k: v for k, v in os.environ.items() if not k.startswith("PORTMAN_") and k not in ("OPENAI_API_KEY", "ANTHROPIC_API_KEY")}
+    # Üretim zamanı sabit: PDF'teki "Üretim: … UTC" çizimi koşudan koşuya aynı olur (sabit_zaman/sitecustomize.py)
+    ortam["TEST_SABIT_ZAMAN"] = str(SABIT_ZAMAN)
+    ortam["PYTHONPATH"] = os.pathsep.join([str(REF / "sabit_zaman")] + ([ortam["PYTHONPATH"]] if ortam.get("PYTHONPATH") else []))
     komut = [sys.executable, "denetim/kos.py"] + ([] if hizli else ["--planlar"])
     r = subprocess.run(komut, cwd=W, capture_output=True, text=True, env=ortam)
     yol = W / "cikti/denetim/sonuc.json"
@@ -221,7 +228,8 @@ def referans_yukle(klasor: Path) -> dict:
     if bozuk:
         raise ReferansHatasi(f"{klasor.name}: {bozuk} GEREKCE.md'deki özetle uyuşmuyor; referans dosyaları elle değiştirilmemeli (--dondur kullanın)")
     try:
-        return {"ad": klasor.name, "gerekce": gerekce, "izin": IZIN_SATIRI in g,
+        karar = next((l.split(":", 1)[1].strip() for l in g.splitlines() if l.startswith("Karar:")), None)
+        return {"ad": klasor.name, "gerekce": gerekce, "izin": IZIN_SATIRI in g, "karar": karar,
                 "kosum": json.loads((klasor / "denetim_kosum.json").read_text(encoding="utf-8")),
                 "girdi": json.loads((klasor / "referans_girdiler.json").read_text(encoding="utf-8")),
                 "dxf": _izler(klasor / "dxf_parmak_izleri.txt"), "pdf": _izler(klasor / "pdf_parmak_izleri.txt")}
@@ -261,6 +269,11 @@ def referans_farki(eski: dict, yeni: dict) -> tuple[list[str], list[str]]:
     return kaldir, degis
 
 
+def _karar_var(karar: str | None) -> bool:
+    """GEREKCE.md'deki "Karar:" satırı KARARLAR/ altında var olan bir karar dosyasını gösteriyor mu (ör. D-02, K21)?"""
+    return bool(karar) and bool(re.fullmatch(r"[A-Z]{1,2}-?\d{1,3}", karar)) and (KARARLAR / f"{karar}.md").is_file()
+
+
 def referans_zinciri(son: Path) -> tuple[dict, list[str]]:
     """Seçilen referansı ve ondan önceki her referansı sınar. Önceki referansa göre kaldırma ya da azalma varsa
     klasörün GEREKCE.md'sinde açık izin olmalı. Dönen: (seçilen referans, bilgi satırları)."""
@@ -271,6 +284,9 @@ def referans_zinciri(son: Path) -> tuple[dict, list[str]]:
         if yeni["gerekce"] == eski["gerekce"]:
             raise ReferansHatasi(f"{yeni['ad']}: gerekçe önceki referansla ({eski['ad']}) aynı; her dondurma kendi gerekçesini yazar")
         kaldir, degis = referans_farki(eski, yeni)
+        if (kaldir or degis) and not _karar_var(yeni.get("karar")):
+            raise ReferansHatasi(f"{yeni['ad']}: önceki referansa ({eski['ad']}) göre değişiklik var ama dayandığı karar yazılı değil "
+                                 f"ya da KARARLAR/'da yok (Karar: {yeni.get('karar')})")
         if kaldir and not yeni["izin"]:
             raise ReferansHatasi(f"{yeni['ad']}: önceki referansa ({eski['ad']}) göre kaldırma ya da azalma var ve izin kaydı yok: {kaldir[:5]}")
         if yeni is yuklu[-1] and (kaldir or degis):
@@ -279,6 +295,14 @@ def referans_zinciri(son: Path) -> tuple[dict, list[str]]:
             if len(kaldir) > LISTE_SINIRI or len(degis) > LISTE_SINIRI:
                 bilgi.append(f"  … tam liste: testler/referans/{yeni['ad']}/GEREKCE.md")
     return yuklu[-1], bilgi
+
+
+def kosulan_kod() -> str:
+    """Karşılaştırılan kod: dalın son commit'i ve kaydedilmemiş değişiklikler (dogrula her zaman bu ağacı koşar)."""
+    git = lambda *a: subprocess.run(["git", "-C", str(KOK), *a], capture_output=True, text=True).stdout.strip()
+    head, dal = git("rev-parse", "--short", "HEAD") or "git yok", git("rev-parse", "--abbrev-ref", "HEAD")
+    kirli = [l[3:] for l in git("status", "--porcelain").splitlines() if l.strip()]
+    return f"{head} ({dal})" + (f" + {len(kirli)} kaydedilmemiş değişiklik: {', '.join(kirli[:6])}" + (" …" if len(kirli) > 6 else "") if kirli else "")
 
 
 def karsilastir(R: dict, bilgi: list[str], hizli: bool) -> int:
@@ -338,8 +362,9 @@ def karsilastir(R: dict, bilgi: list[str], hizli: bool) -> int:
             ek = f"{len(beklenen) - len(eksik)}/{len(beklenen)} dosya"
             if eksik: ek += f", eksik: {eksik}"
             if fark: ek += f", fark: {fark}"
-            yaz(f"{tur} içerik parmak izleri" if tur == "DXF" else "PDF sayfa sayısı ve ölçüsü", not eksik and not fark, ek)
+            yaz(f"{tur} içerik parmak izleri", not eksik and not fark, ek)
 
+    print(f"Koşulan kod: {kosulan_kod()}")
     print(f"Referans: testler/referans/{R['ad']} · {R['gerekce']}" + (f" · {bilgi[0]}" if bilgi else ""))
     for b in bilgi[1:]:
         print(b)
@@ -350,7 +375,7 @@ def karsilastir(R: dict, bilgi: list[str], hizli: bool) -> int:
     return 0 if not kotu else 1
 
 
-def dondur(gerekce: str, ad: str | None, kaldirmaya_izin: bool) -> int:
+def dondur(gerekce: str, ad: str | None, kaldirmaya_izin: bool, karar: str | None = None) -> int:
     """Yeni referans: tam koşu, tüm adımlar geçmeli. Yeni tarihli klasöre yazar; var olan klasöre dokunmaz. Önceki
     referansa göre kaldırma ya da azalma (dosya, vaka, çıktı, vaka sayısı, geçen plan) varsa açık izin ister."""
     ad = ad or datetime.date.today().isoformat()
@@ -388,6 +413,12 @@ def dondur(gerekce: str, ad: str | None, kaldirmaya_izin: bool) -> int:
                 "dxf": {k: v for k, v in izler.items() if k.lower().endswith(".dxf")},
                 "pdf": {k: v for k, v in izler.items() if k.lower().endswith(".pdf")}}
         kaldir, degis = referans_farki(onceki, yeni) if onceki else ([], [])
+        if (kaldir or degis) and not _karar_var(karar):
+            print("dondurulmadı: önceki referansa göre değişiklik var; beklenen davranışın hangi karara dayandığını --karar ile verin "
+                  "(KARARLAR/ altında var olan bir dosya, ör. --karar D-02). Yalnız testi geçirmek için referans güncellenmez.")
+            for x in (kaldir + degis)[:20]:
+                print("  -", x)
+            return 1
         if kaldir and not kaldirmaya_izin:
             print("dondurulmadı: önceki referansa göre kaldırma ya da azalma var. Bilerek yapıldıysa --kaldirmaya-izin ile tekrarlayın:")
             for x in kaldir:
@@ -412,6 +443,7 @@ def dondur(gerekce: str, ad: str | None, kaldirmaya_izin: bool) -> int:
             f"- Önceki referans: {onceki['ad'] if onceki else 'yok'}\n"
             f"- İçerik: {len(girdi['dosyalar'])} girdi dosyası, {len(girdi['vakalar'])} Beyin vakası, {len(yeni['dxf'])} DXF, "
             f"{len(yeni['pdf'])} PDF\n"
+            + (f"\nKarar: {karar}\n" if karar else "")
             + (f"\n{IZIN_SATIRI}\n" if kaldir else "")
             + (f"\n## Önceki referansa göre kaldırılan ya da azalan\n\n{liste(kaldir)}" if kaldir else "")
             + (f"\n## Önceki referansa göre değişen ya da eklenen\n\n{liste(degis)}" if degis else "")
@@ -428,6 +460,7 @@ def main() -> int:
     ap.add_argument("--gerekce", default="", help="--dondur için: neyin neden değiştiği")
     ap.add_argument("--ad", help="--dondur için klasör adı (varsayılan: bugünün tarihi)")
     ap.add_argument("--kaldirmaya-izin", action="store_true", help="--dondur için: kaldırma ya da azalmaya bilerek izin ver")
+    ap.add_argument("--karar", help="--dondur için: değişikliğin dayandığı karar (KARARLAR/<AD>.md, ör. D-02)")
     ap.add_argument("--girdi-dokumu", action="store_true", help="bugünkü girdi özetini JSON olarak yaz; koşu yapma")
     a = ap.parse_args()
     try:
@@ -440,7 +473,7 @@ def main() -> int:
         if a.dondur:
             if a.hizli or a.referans:
                 print("--dondur tam koşu ister; --hizli ve --referans ile kullanılmaz"); return 1
-            return dondur(a.gerekce, a.ad, a.kaldirmaya_izin)
+            return dondur(a.gerekce, a.ad, a.kaldirmaya_izin, a.karar)
         klasorler = referans_klasorleri()
         if a.referans:
             secilen = [p for p in klasorler if p.name == a.referans]

@@ -9,8 +9,8 @@ kimlikler ($FINGERPRINTGUID, $VERSIONGUID), ezdxf'in üst veri zamanları ve OBJ
        sahip hariç) yuvarlanarak yazılır; ayrıca türüne göre köşe noktaları ve eğimler (LWPOLYLINE, POLYLINE),
        metin içeriği (MTEXT), tarama sınırları (HATCH), blok eki öznitelikleri (INSERT) eklenir. Metinlerdeki
        tarih-saat "<zaman>" ile değiştirilir. Satırlar sıralanır; varlık sırası özeti değiştirmez.
-  PDF: sayfa sayısı ve sayfa ölçüleri. PDF, DXF'ten basılır ve üretim zamanını çizgi olarak taşır; piksel özeti
-       her koşuda değişir. İçerik referansı DXF parmak izidir.
+  PDF: sayfa sayısı ve ölçüleri + her sayfadaki bütün çizimler (yazılar da çizgi olarak basılır). Üretim zamanı da
+       çizim olduğundan özet, zamanı sabitlenmiş koşularda karşılaştırılır (dogrula.py, sabit_zaman/sitecustomize.py).
 
 Kullanım:  python3 testler/referans/parmak_izi.py <dosya.dxf|dosya.pdf> [...]
 Çıktı: her dosya için "<özet>  <yol>" (özet = sha256, içerikten).
@@ -82,11 +82,38 @@ def dxf_ozet(yol: Path) -> str:
     return hashlib.sha256("\n".join(satirlar).encode("utf-8")).hexdigest()
 
 
+def _pdf_ogesi(n):
+    """PyMuPDF yol parçası ögesi (Point, Rect, Quad ya da sayı) → yuvarlanmış liste."""
+    if hasattr(n, "x0"):
+        return [round(n.x0, 2), round(n.y0, 2), round(n.x1, 2), round(n.y1, 2)]
+    if hasattr(n, "ul"):
+        return [[round(q.x, 2), round(q.y, 2)] for q in (n.ul, n.ur, n.ll, n.lr)]
+    if hasattr(n, "x"):
+        return [round(n.x, 2), round(n.y, 2)]
+    if isinstance(n, (int, float)):
+        return round(n, 2)
+    return str(n)
+
+
+def _cizim(x) -> str:
+    """PDF'teki bir çizim (yol): sınır kutusu, renkler, kalınlık ve her parçanın türüyle noktaları (0,01 pt)."""
+    parcalar = [[it[0]] + [_pdf_ogesi(n) for n in it[1:]] for it in x.get("items") or []]
+    return json.dumps([_pdf_ogesi(x.get("rect")), _d(list(x.get("color") or [])), _d(list(x.get("fill") or [])),
+                       _d(x.get("width")), x.get("closePath"), parcalar], default=str)
+
+
 def pdf_ozet(yol: Path) -> str:
+    """Sayfa sayısı ve ölçüleri + her sayfadaki bütün çizimler (Motor PDF'inde yazılar da çizgi olarak basılır; metin
+    katmanı yoktur). Eksik plan, yanlış revizyon yazısı ya da kaymış bir çizgi özeti değiştirir. Üretim zamanı da çizim
+    olduğundan karşılaştırma zamanı sabitlenmiş koşularda anlamlıdır (dogrula.py bunu yapar; sabit_zaman/)."""
     import fitz
+    sayfalar = []
     with fitz.open(yol) as d:
-        olculer = [(round(s.rect.width / 72 * 25.4), round(s.rect.height / 72 * 25.4)) for s in d]
-    return hashlib.sha256(json.dumps(olculer).encode()).hexdigest()
+        for s in d:
+            cizimler = sorted(_cizim(x) for x in s.get_drawings())
+            sayfalar.append([round(s.rect.width / 72 * 25.4), round(s.rect.height / 72 * 25.4), len(cizimler),
+                             hashlib.sha256("\n".join(cizimler).encode("utf-8")).hexdigest()])
+    return hashlib.sha256(json.dumps(sayfalar).encode()).hexdigest()
 
 
 def ozet(yol: Path) -> str:
