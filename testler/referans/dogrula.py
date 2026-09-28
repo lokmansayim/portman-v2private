@@ -161,6 +161,16 @@ def _yoksay(dizin, adlar):
     return [a for a in adlar if a in {"__pycache__", ".git"}]
 
 
+def _surum(paket: str) -> str:
+    """PDF parmak izi PyMuPDF'in çizim çıktısına dayanır (D-02); sürümü GEREKCE.md'ye yazılır. kos.py'nin ortam adımı bu sürümü
+    okuyamıyor ("(64-bit)."), v1.1.1 kodu olduğu için ona dokunulmadı."""
+    try:
+        from importlib.metadata import version
+        return version(paket)
+    except Exception:
+        return "?"
+
+
 def _ozet_guvenli(yol: Path) -> str:
     try:
         return ozet(yol)
@@ -439,7 +449,7 @@ def dondur(gerekce: str, ad: str | None, kaldirmaya_izin: bool, karar: str | Non
             f"# Referans · {ad}\n\nGerekçe: {' '.join(gerekce.split())}\n\n"
             f"- Dondurulduğu kod: `{head}`" + (" üzerine kaydedilmemiş değişiklikler" if kirli else "") + "\n"
             f"- Ortam: Python {o.get('python')}, ezdxf {o.get('ezdxf')}, shapely {o.get('shapely')}, pydantic {o.get('pydantic')}, "
-            f"numpy {o.get('numpy')}\n"
+            f"numpy {o.get('numpy')}, PyMuPDF {_surum('pymupdf')}\n"
             f"- Önceki referans: {onceki['ad'] if onceki else 'yok'}\n"
             f"- İçerik: {len(girdi['dosyalar'])} girdi dosyası, {len(girdi['vakalar'])} Beyin vakası, {len(yeni['dxf'])} DXF, "
             f"{len(yeni['pdf'])} PDF\n"
