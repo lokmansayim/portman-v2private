@@ -33,7 +33,7 @@ Durumlar: **Taslak** yalnız belgede · **Kodlandı** kod var, testi yok ya da d
 | Blender modeli | Kodlandı | 28.09: `yeniden_kos.py` ile bpy 5.0.1'de yeniden kuruldu, 65 pano, BOM aynı | Test dar: tek plan; sunum içindir, hesap burada yapılmaz |
 | Depo | Kodlandı | 28.09: `portman-v2private` açıldı; v1.1.1 geçmişiyle alındı; İE-01, Lokman'ın onayıyla `main`'e birleştirildi | Eski depo `lokmansayim/portman` yalnız okunuyor |
 | Yapı Tanımı şeması | Taslak | Zemin, 27.09; temeli İş Emri şeması v0.1 (21.09) | Ölçü anlamları ve ürün ailesi ayrımı eksik |
-| Veritabanı: kalıcı konuşma ve iş akışı (Postgres) | Test edildi | 28.09: `testler/kalici/`, gerçek Postgres 16'da 123 test geçti. Kabul gösterimi 10/10 (simülasyon: WhatsApp ve LLM sahte). Ajanın kalıcı modu sahte hosting ile sınandı (600 sn süpürme ve hata enjeksiyonu dahil). | Yalnız izole ortamda; canlıda yok. Gerçek PHP hattı (`feature.php` `context_id`, `api.php` v1.2) `portman/lib.php` olmadan koşulamadı. Yer: mevcut VPS (D-04). Canlıya bağlama planı ve onay kapıları: `docs/is_emirleri/IE-02-canli.md`. pgvector yok (RAG'la gelir). |
+| Veritabanı: kalıcı konuşma ve iş akışı (Postgres) | Test edildi | 28.09: `testler/kalici/`, gerçek Postgres 16'da 135 test geçti. Kabul gösterimi 10/10 (simülasyon: WhatsApp ve LLM sahte). Ajanın kalıcı modu sahte hosting ile sınandı (600 sn süpürme ve hata enjeksiyonu dahil). | Yalnız izole ortamda; canlıda yok. Gerçek PHP hattı (`feature.php` `context_id`, `api.php` v1.2) `portman/lib.php` olmadan koşulamadı. Yer: mevcut VPS (D-04). Canlıya bağlama planı ve onay kapıları: `docs/is_emirleri/IE-02-canli.md`. pgvector yok (RAG'la gelir). |
 | RAG | Taslak | Araştırma notu, 21.09 | Aşama 2 sonrası |
 | Model geçidi | Kodlandı | `llm.py`'de OpenAI ve Anthropic yolları var; canlıda gpt-4o-mini · 23.09 kıyas: gpt-4o-mini 6/7, gpt-6-sol 4/7 | Anthropic yolu canlı anahtarla denenmedi; hosting ayarı VPS'e yalnız arka uç, model ve zaman aşımını geçiriyor (B4) |
 | PortmanBench | Taslak | Tohum: `testler/referans/` (28.09) | Uçtan uca ölçüm ve kritik hata türleri yok |
@@ -61,7 +61,8 @@ Yapıldı:
 - referansın PDF içeriğini izlemesi (D-02, `2026-09-28b`);
 - Postgres üzerinde kalıcı akış (D-03, D-04);
 - ajanın kalıcı modu, hosting bağlantısı (`api.php` v1.2, `feature.php` `context_id`), göç 002 (kabul ve teslim ayrı, onay zinciri), VPS kurulum betiği;
-- dördüncü bağımsız incelemenin düzeltmeleri: Postgres kesintisinde mesaj kaybı yok, sonuç claim'den önce verilir, D-03 hosting'in 600 sn'sine sığar, hosting hata sınıfları, `worker=off` ile boşaltma, eşitleme ve onay sınırı, yeniden girişte boş veritabanı (`test_hosting_devri.py`).
+- dördüncü bağımsız incelemenin düzeltmeleri: Postgres kesintisinde mesaj kaybı yok, sonuç claim'den önce verilir, D-03 hosting'in 600 sn'sine sığar, hosting hata sınıfları, `worker=off` ile boşaltma, eşitleme ve onay sınırı, yeniden girişte boş veritabanı (`test_hosting_devri.py`);
+- beşinci bağımsız incelemenin düzeltmeleri: bir işin devir hatası ötekini bekletmez, geçici hatada cevap atılmaz (uyarı), Postgres'e yazılamayan mesaj kuyruğu tıkamaz, açık iş varken yeni mesaj alınmaz, Meta'nın iletemediği metin uyarıya düşer, WhatsApp kimliği (numarayı içerir) günlüğe ve kanıt çıktısına yalnız özetiyle yazılır.
 
 Kalan (sırayla, her biri ayrı onayla; `docs/is_emirleri/IE-02-canli.md`):
 - A: canlı sürümün salt okunur doğrulanması;

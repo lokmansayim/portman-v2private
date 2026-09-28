@@ -80,6 +80,24 @@ def satir_id(gelen_id: str, sira: int) -> str:
     return "out_" + hashlib.sha256(f"{gelen_id}|{sira}".encode()).hexdigest()[:24]
 
 
+def kimlik_izi(mesaj_id: str | None) -> str:
+    """WhatsApp mesaj kimliğinin (wamid) kısa özeti. wamid karşı tarafın numarasını base64 olarak içerdiği için kimlik
+    günlüğe ve kanıt çıktısına yazılmaz; yerine bu yazılır (SQL karşılığı: left(md5(id), 10))."""
+    return hashlib.md5(str(mesaj_id).encode()).hexdigest()[:10] if mesaj_id else "-"
+
+
+def _nulsuz(x):
+    """Postgres metin ve jsonb alanları NUL (U+0000) karakteri kabul etmez; PHP satırı olduğu gibi geçirir. Mesajın
+    yazılamayıp kuyruğu tıkamaması için NUL karakterleri atılır (metnin geri kalanı aynı kalır)."""
+    if isinstance(x, str):
+        return x.replace("\x00", "")
+    if isinstance(x, dict):
+        return {_nulsuz(k): _nulsuz(v) for k, v in x.items()}
+    if isinstance(x, list):
+        return [_nulsuz(v) for v in x]
+    return x
+
+
 def maske(numara: str) -> str:
     n = str(numara or "")
     return (n[:3] + "…" + n[-2:]) if len(n) > 6 else "…"
@@ -164,6 +182,7 @@ class Depo:
     def mesaj_kaydet(self, gelen: dict) -> bool:
         """Kuyruk satırını (feature.php biçimi) mesaj ve iş olarak yazar. Yeni ise True; aynı kimlik daha önce geldiyse
         hiçbir şey değişmez ve False döner."""
+        gelen = _nulsuz(gelen)
         mid = str(gelen.get("id") or "")
         if not mid or len(mid) > 300:
             raise ValueError("mesaj kimliği yok ya da çok uzun")
@@ -483,22 +502,28 @@ class Depo:
             return c.execute("UPDATE giden SET durum = 'bekliyor', hata = NULL WHERE is_id = %s AND durum = 'gonderilmedi' "
                              "AND hostinge_verildi IS NULL", (is_id,)).rowcount
 
-    def gonderilemeyen_sayisi(self, saat: int = 24) -> dict:
-        """Son 'saat' saatte bayiye (ya da Patron'a) ulaşmadığı bilinen ya da sonucu belirsiz giden satırlar (sağlık uyarısı)."""
+    def gonderilemeyen_sayisi(self, saat: int = 24, devir_sn: int = 300) -> dict:
+        """Sağlık uyarısı için, son 'saat' saatte: gönderilmediği kesin (gonderilmedi), sonucu belirsiz (belirsiz), Meta'nın
+        iletemedim dediği (teslim 'failed') satırlar; ve işi 'devir_sn' saniyeden uzun süre önce bittiği hâlde hâlâ hosting'e
+        verilemeyen (bekliyor) satırlar."""
         with self.baglan() as c:
-            r = c.execute("SELECT count(*) FILTER (WHERE durum = 'gonderilmedi') AS gonderilmedi, "
-                          "count(*) FILTER (WHERE durum = 'belirsiz') AS belirsiz FROM giden "
-                          "WHERE olusturuldu > now() - make_interval(hours => %s)", (saat,)).fetchone()
-        return {"gonderilmedi": r["gonderilmedi"], "belirsiz": r["belirsiz"]}
+            r = c.execute("SELECT count(*) FILTER (WHERE g.durum = 'gonderilmedi') AS gonderilmedi, "
+                          "count(*) FILTER (WHERE g.durum = 'belirsiz') AS belirsiz, "
+                          "count(*) FILTER (WHERE g.teslim_durumu = 'failed') AS meta_iletemedi, "
+                          "count(*) FILTER (WHERE g.durum = 'bekliyor' AND j.durum IN ('bitti', 'basarisiz') "
+                          "                 AND j.bitti < now() - make_interval(secs => %s)) AS devir_bekliyor "
+                          "FROM giden g JOIN isler j ON j.id = g.is_id WHERE g.olusturuldu > now() - make_interval(hours => %s)",
+                          (devir_sn, saat)).fetchone()
+        return dict(r)
 
     def esitlenecek_satirlar(self, en_fazla: int = 200, gun: int = 3) -> list[str]:
-        """Hosting'e devredilmiş ve sonucu hosting'te değişebilecek satırlar, yeniden eskiye (son 'gun' gün): gönderimi süren
-        (hostingte), sonucu belirsiz (Meta'nın imzalı durum bildirimi sonradan kabulü gösterebilir) ve kabul edilip teslim
-        bildirimi henüz gelmemiş PDF satırları (onay denetimi PDF'in teslimine bakar; metin satırlarının teslimi beklenmez)."""
+        """Hosting'e devredilmiş ve sonucu hosting'te değişebilecek satırlar, yeniden eskiye (son 'gun' gün; en çok 'en_fazla'):
+        gönderimi süren (hostingte), sonucu belirsiz (Meta'nın imzalı durum bildirimi sonradan kabulü gösterebilir) ve kabul
+        edilip teslim ya da hata bildirimi henüz gelmemiş satırlar (PDF: onay denetimi; metin: Meta 'failed' derse uyarı)."""
         with self.baglan() as c:
             return [r["id"] for r in c.execute(
                 "SELECT id FROM giden WHERE hostinge_verildi IS NOT NULL AND (durum IN ('hostingte', 'belirsiz') OR (durum = 'kabul_edildi' "
-                "AND kind = 'document' AND teslim_zamani IS NULL AND coalesce(teslim_durumu, '') <> 'failed')) "
+                "AND teslim_zamani IS NULL AND coalesce(teslim_durumu, '') <> 'failed')) "
                 "AND olusturuldu > now() - make_interval(days => %s) ORDER BY olusturuldu DESC LIMIT %s", (gun, en_fazla))]
 
     def hosting_durumu_isle(self, satir_id_: str, st: dict) -> None:

@@ -56,10 +56,11 @@ Gerçek WhatsApp ve gerçek LLM ile denenmedi. Bu testler canlı doğrulama değ
 
 - **Postgres kesintisi:** Postgres'e ulaşılamıyorsa hosting'ten mesaj alınmaz; alınıp yazılamayan mesaj diske alınır, Postgres dönünce yazılır ve işlenir.
 - **Hosting'in 600 sn'si:** uzun bir kesintiden sonra bekleyen cevap claim'den (süpürmeden) önce verilir. D-03'ün üç denemesi (3 × 120 sn) `feature.php`'deki `PM_KANAL_STALE`'e sığar; tükenen işin ve başarısız işin bildirimi hosting'e verilir.
-- **Hata sınıfları:** 401, 403, 429, 5xx ve geçici 422 yeniden denenir; bilinen kesin retler (yol, PDF biçimi, satır uyuşmazlığı, 413) hemen "gönderilmedi" olur ve sağlık uyarısına düşer; geçici hata 15 dakikayı aşarsa da öyle.
+- **Hata sınıfları:** 401, 403, 429, 5xx ve geçici 422 yeniden denenir, uzasa da vazgeçilmez (uyarıya düşer); bilinen kesin retler (yol, PDF biçimi, satır uyuşmazlığı, 413) hemen "gönderilmedi" olur ve uyarıya düşer; hosting mesajı hiç bilmiyorsa mutabakat yapılır. Bir işin hatası ötekinin teslimini bekletmez.
 - **Tek etkin işleyici ve boşaltma:** `worker=off` iken ajanın ana döngüsü claim çağırmaz, açık işi bitirip hosting'e verir; `worker=hosting` iken hiçbir şey yapmaz. İçe aktarma yalnız boş veritabanına; canlı geçişte kuyruktakiler iş olmaz. Ölü kira yalnız bu makinedeki süreçler için düşer.
 - **Eşitleme ve onay sınırı:** belirsiz satır sonradan kabul görürse işlenir ve onay kabul edilir; iş işlenmeden önce durum okunur; en yeni 200 satır önce, metin satırlarının teslimi beklenmez; Meta'nın "sent" anı hosting saatinden önce gelir; aynı saniyede yazılan onay reddedilir, bir saniye sonrası kabul edilir; hosting durumlarının her biri; teslim durumu geri gitmez, ilk teslim anı kalır.
 - **Tekrar gelen mesaj:** ilk işin hosting'e verilemeyen ya da bekleyen cevabı bu alımla verilir; hosting'in tuttuğu satır yeniden verilmez; kayıttan sonra değişen PDF hosting'e verilmez.
+- **Beşinci inceleme:** NUL karakterli mesaj yazılır; Postgres'e yazılamayan mesaj `hatali/`'ye ayrılır, ajan sürer; diskte bekleyen tekrar mesajın kapanışı reddedilse de sürer; Postgres'te açık iş varken yeni mesaj alınmaz; Meta'nın iletemediği metin satırı uyarıya düşer; tekrar gelen mesaj başarısız işin bildirimini yeniden verir; ana döngü `worker=hosting` ya da `enabled=false` iken hiçbir şey yapmaz; içe aktarma komutu dolu veritabanına aktarmaz.
 - `test_vps_betikleri.py`: anahtar yenileme ve API denetimi betikleri anahtar değerini yazdırmaz, dosya iznini korur.
 
 ## Kabul gösterimi

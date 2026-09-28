@@ -219,7 +219,7 @@ def bekleyen_sonuclari_gonder() -> None:
         try:
             kayit = json.loads(f.read_text(encoding="utf-8"))
             r = sonucu_gonder(kayit["job"], kayit["cikti"])
-            log("bekleyen sonuç gönderildi:", kayit["job"]["id"][:20], r)
+            log("bekleyen sonuç gönderildi:", izi(kayit["job"]["id"]), r)
             f.unlink()
         except Exception as e:
             log("bekleyen sonuç yine gönderilemedi:", f.name, str(e)[:160]); break
@@ -237,10 +237,20 @@ PG_DSN = os.environ.get("PORTMAN_PG_DSN", "")
 GEREKEN_API = (1, 2)                     # kanal/api.php v1.2: giden_durum ve context_id
 HOSTING_TAKILI_SN = 600                  # kanal/feature.php PM_KANAL_STALE: claim, bundan eski 'processing' satırı 'failed' yapar
 KIRA_SN = 120                            # D-03: 3 deneme × 120 sn = 360 sn < 600 sn; tükenme bildirimi de hosting vazgeçmeden verilir
-TESLIM_VAZGEC_SN = 900                   # geçici hatayla hosting'e verilemeyen sonuç bu kadar sürerse 'gonderilmedi' (uyarıya düşer)
+DEVIR_UYARI_SN = 300                     # işi bu kadar önce bittiği hâlde hosting'e verilemeyen satır sağlık uyarısına düşer
 KESIN_RED = ("bad_path", "file_size", "pdf_invalid", "row_inbound_mismatch")      # aynı istek her seferinde reddedilir
-_kalici: dict = {"depo": None, "K": None, "son_esitleme": 0.0, "son_uyari": 0.0, "teslim_hata": {}}
+_kalici: dict = {"depo": None, "K": None, "son_esitleme": 0.0, "son_uyari": 0.0}
 _dur = {"istendi": False}
+
+
+def izi(mesaj_id) -> str:
+    """Mesaj kimliğinin kısa özeti (depo.kimlik_izi ile aynı): wamid numarayı içerdiği için günlüğe kimlik yazılmaz."""
+    return hashlib.md5(str(mesaj_id).encode()).hexdigest()[:10] if mesaj_id else "-"
+
+
+def _pg_baglanti_hatasi(e: BaseException) -> bool:
+    """Postgres'e ulaşılamıyor mu (geçici)? Veri hataları (DataError, IntegrityError …) değil."""
+    return type(e).__module__.startswith("psycopg") and any(c.__name__ in ("OperationalError", "InterfaceError") for c in type(e).__mro__)
 
 
 def kalici_kip(ayar_uzak: dict) -> str | None:
@@ -284,7 +294,8 @@ def _is_normal(job: dict) -> dict:
 
 # Hosting'ten alınıp Postgres'e yazılamayan mesaj (ör. Postgres o an yeniden başlıyor) diske yazılır ve bir sonraki turun
 # başında Postgres'e alınır. Hosting'teki satır 'processing' kaldığı için kuyruktan ikinci kez gelmez; bu dosya olmasa mesaj
-# 600 sn sonra hosting'te 'failed' olur ve cevapsız kalırdı.
+# 600 sn sonra hosting'te 'failed' olur ve cevapsız kalırdı. Postgres'e ulaşılamıyorsa dosya bekler; mesajın kendisi
+# yazılamıyorsa (veri hatası) dosya hatali/ altına alınır, uyarıya düşer ve kuyruğu tıkamaz.
 def _bekleyen_dizini() -> Path:
     return DATA / "kalici_bekleyen"
 
@@ -299,7 +310,7 @@ def bekleyene_yaz(job: dict) -> Path:
 
 def mesaji_al(d, job: dict) -> None:
     if d.mesaj_kaydet(job):
-        log("iş alındı → Postgres", job["id"][:20], "kimden", maske(job.get("sender", "")), "tür", job.get("type"))
+        log("iş alındı → Postgres", izi(job["id"]), "kimden", maske(job.get("sender", "")), "tür", job.get("type"))
     else:
         tekrar_gelen(d, job)
 
@@ -310,7 +321,16 @@ def bekleyenleri_al(d) -> int:
         return 0
     n = 0
     for f in sorted(dz.glob("*.json"), key=lambda x: x.stat().st_mtime):
-        mesaji_al(d, json.loads(f.read_text(encoding="utf-8")))       # Postgres yine yoksa hata yükselir, dosya kalır
+        try:
+            mesaji_al(d, json.loads(f.read_text(encoding="utf-8")))
+        except ApiHatasi:
+            raise                                # hosting'e ulaşılamadı: dosya kalır, sonra yeniden denenir
+        except Exception as e:
+            if _pg_baglanti_hatasi(e):
+                raise                            # Postgres yine yok: dosya kalır
+            hd = dz / "hatali"; hd.mkdir(exist_ok=True); f.replace(hd / f.name)
+            log("diskteki mesaj Postgres'e yazılamıyor (veri hatası); hatali/ altına alındı:", f.name, type(e).__name__, str(e)[:120])
+            continue
         f.unlink(); n += 1
     return n
 
@@ -326,14 +346,19 @@ def tekrar_gelen(d, job: dict) -> None:
     if m and m["is_durum"] in ("bitti", "basarisiz"):
         yeniden = d.hostinge_yeniden_dene(m["is_id"])
         if yeniden or m["bekleyen_giden"]:
-            log("tekrar gelen mesaj", job["id"][:20], ": ikinci iş açılmadı; ilk işin (", m["is_id"], ") hosting'e verilmemiş",
+            log("tekrar gelen mesaj", izi(job["id"]), ": ikinci iş açılmadı; ilk işin (", m["is_id"], ") hosting'e verilmemiş",
                 yeniden + m["bekleyen_giden"], "satırı bu alımla veriliyor")
             return
         cikti = {"satirlar": [], "sonuc": {"eylem": "yoksay", "gerekce": "tekrar gelen mesaj: Postgres'te zaten işlendi", "worker": "vps"}}
-        istek("result", multipart=multipart_kodla({"inbound_id": job["id"], "cikti": json.dumps(cikti, ensure_ascii=False)}, []), timeout=60)
-        log("tekrar gelen mesaj", job["id"][:20], ": ikinci iş açılmadı (ilk iş", m["is_id"], m["is_durum"] + ")")
+        try:
+            istek("result", multipart=multipart_kodla({"inbound_id": job["id"], "cikti": json.dumps(cikti, ensure_ascii=False)}, []), timeout=60)
+        except ApiHatasi as e:
+            if _hata_sinifi(str(e)) != "mutabakat":
+                raise
+            # hosting'teki satır zaten işlenmekte değil (ör. diskte beklerken süpürüldü): kapatılacak bir şey yok
+        log("tekrar gelen mesaj", izi(job["id"]), ": ikinci iş açılmadı (ilk iş", m["is_id"], m["is_durum"] + ")")
     else:
-        log("tekrar gelen mesaj", job["id"][:20], ": ilk iş sürüyor; ikinci iş açılmadı")
+        log("tekrar gelen mesaj", izi(job["id"]), ": ilk iş sürüyor; ikinci iş açılmadı")
 
 
 def _hata_sinifi(m: str) -> str:
@@ -350,10 +375,12 @@ def _hata_sinifi(m: str) -> str:
 def hostinge_teslim(d) -> int:
     """Bitmiş (ya da başarısız) işlerin giden satırlarını hosting'e verir (result). Hosting satırları kimliğe göre
     tekilleştirir, bu yüzden cevabı kaybolan çağrı güvenle yeniden denenir: hosting "işlenmekte değil" derse giden_durum ile
-    satırların orada olup olmadığına bakılır. Geçici hata yeniden denenir; TESLIM_VAZGEC_SN boyunca sürerse satırlar
-    'gonderilmedi' olur. Bu bir WhatsApp gönderimi değildir; gönderimi hosting yapar, sonucu belirsizse tekrar etmez.
-    Dönen: hosting'e verilen iş sayısı."""
-    n = 0; hatalar = _kalici["teslim_hata"]
+    satırların orada olup olmadığına bakılır. Satır yalnız hosting'in kesin reddiyle ya da hosting onu artık işlenmekte
+    saymıyorsa 'gonderilmedi' olur; geçici hatada ajan vazgeçmez (hosting'teki satır teslim alınabilir durumdayken cevabı
+    atmak cevap kaybı olurdu), uzayan devir sağlık uyarısına düşer. Hosting cevap verdiyse (HTTP hatası) sıradaki işe
+    geçilir, bir işin hatası ötekileri bekletmez; hosting'e ulaşılamıyorsa tur burada kesilir. Bu bir WhatsApp gönderimi
+    değildir; gönderimi hosting yapar, sonucu belirsizse tekrar etmez. Dönen: hosting'e verilen iş sayısı."""
+    n = 0
     for is_id in d.teslim_bekleyen_isler():
         pk = d.teslim_paketi(is_id)
         dosyalar, alanlar, gidecek, bozuk = [], {"inbound_id": pk["inbound_id"]}, [], []
@@ -381,7 +408,7 @@ def hostinge_teslim(d) -> int:
             alanlar["durum"] = json.dumps(pk["durum"], ensure_ascii=False)       # hosting'teki durum/ aynası (panel, geri dönüş)
         try:
             istek("result", multipart=multipart_kodla(alanlar, dosyalar), timeout=180)
-            d.hostinge_verildi(ids); hatalar.pop(is_id, None); n += 1
+            d.hostinge_verildi(ids); n += 1
         except ApiHatasi as e:
             m = str(e); sinif = _hata_sinifi(m)
             if sinif == "mutabakat":
@@ -390,18 +417,16 @@ def hostinge_teslim(d) -> int:
                 yok = [i for i in ids if i not in orada]
                 if yok:
                     d.hostinge_verilemedi(yok, f"hosting kabul etmedi: {m[:160]}")
-                    log("hosting sonucu kabul etmedi:", pk["inbound_id"][:20], m[:120])
-                hatalar.pop(is_id, None)
+                    log("hosting sonucu kabul etmedi:", izi(pk["inbound_id"]), m[:120])
             elif sinif == "kesin":
-                d.hostinge_verilemedi(ids, f"hosting reddetti: {m[:160]}"); hatalar.pop(is_id, None)
-                log("hosting sonucu reddetti (kesin):", m[:160])
+                d.hostinge_verilemedi(ids, f"hosting reddetti: {m[:160]}")
+                log("hosting sonucu reddetti (kesin): iş", is_id, m[:160])
+            elif m.startswith("HTTP "):
+                log("hosting'e teslim ertelendi (yeniden denenecek): iş", is_id, m[:160])
+                continue                           # hosting cevap verdi: bu işe özgü olabilir, sıradaki işi bekletme
             else:
-                ilk = hatalar.setdefault(is_id, time.time())
-                if time.time() - ilk >= TESLIM_VAZGEC_SN:
-                    d.hostinge_verilemedi(ids, f"hosting'e {TESLIM_VAZGEC_SN // 60} dakika boyunca verilemedi: {m[:140]}"); hatalar.pop(is_id, None)
-                    log("hosting'e verilemedi, vazgeçildi: iş", is_id, m[:120])
-                else:
-                    log("hosting'e teslim ertelendi (yeniden denenecek):", m[:160]); break
+                log("hosting'e ulaşılamadı, teslim ertelendi:", m[:160])
+                break
     return n
 
 
@@ -432,7 +457,9 @@ def kalici_tur(ayar: dict, is_al: bool = True) -> bool:
     yapildi = bool(bekleyenleri_al(d))
     if hostinge_teslim(d):
         yapildi = True
-    if is_al:
+    # Postgres'te açık iş varken hosting'ten yeni mesaj alınmaz: alınan mesaj hosting'in 600 sn'lik süresi içinde işlenip
+    # verilmeli; önceki iş bitmeden alınanlar birikirse süreyi aşabilir. Alınmayan mesaj hosting kuyruğunda güvenle bekler.
+    if is_al and not d.acik_is_sayisi():
         job = istek("claim", body={}, timeout=30).get("job")
         if job:
             job = _is_normal(job)
@@ -440,10 +467,11 @@ def kalici_tur(ayar: dict, is_al: bool = True) -> bool:
                 mesaji_al(d, job)
             except ApiHatasi:
                 raise                             # tekrar gelen mesajın kapanışı gönderilemedi; mesaj Postgres'te
-            except Exception:
+            except Exception as e:
                 p = bekleyene_yaz(job)
-                log("mesaj Postgres'e yazılamadı; diske alındı, sonraki turda yazılacak:", job["id"][:20], p.name)
-                raise
+                log("mesaj Postgres'e yazılamadı; diske alındı, sonraki turda yeniden denenecek:", izi(job["id"]), p.name, type(e).__name__)
+                if _pg_baglanti_hatasi(e):
+                    raise
             yapildi = True
     if d.acik_is_sayisi():
         # İşlemeden önce gönderim/teslim durumu tazelenir: bayi PDF'i görüp hemen "onaylıyorum" yazdıysa onay denetimi
@@ -471,14 +499,19 @@ def kalici_uyarilari() -> list[str]:
         return []
     u = []
     try:
-        say = d.gonderilemeyen_sayisi(24)
-        if say["gonderilmedi"] or say["belirsiz"]:
-            u.append(f"kalıcı: son 24 saatte {say['gonderilmedi']} giden satır gönderilmedi, {say['belirsiz']} satırın sonucu belirsiz")
+        s = d.gonderilemeyen_sayisi(24, DEVIR_UYARI_SN)
+        if s["gonderilmedi"] or s["belirsiz"] or s["meta_iletemedi"]:
+            u.append(f"kalıcı: son 24 saatte {s['gonderilmedi']} giden satır gönderilmedi, {s['belirsiz']} satırın sonucu belirsiz, "
+                     f"{s['meta_iletemedi']} satırı Meta iletemedi")
+        if s["devir_bekliyor"]:
+            u.append(f"kalıcı: {s['devir_bekliyor']} giden satır {DEVIR_UYARI_SN // 60} dakikadan uzun süredir hosting'e verilemiyor")
     except Exception as e:
         u.append(f"kalıcı: Postgres okunamadı ({type(e).__name__})")
     dz = _bekleyen_dizini()
     if dz.exists() and any(dz.glob("*.json")):
         u.append(f"kalıcı: {len(list(dz.glob('*.json')))} mesaj Postgres'e yazılmayı bekliyor (diskte)")
+    if (dz / "hatali").exists() and any((dz / "hatali").glob("*.json")):
+        u.append(f"kalıcı: {len(list((dz / 'hatali').glob('*.json')))} mesaj Postgres'e yazılamadı (veri hatası; data/kalici_bekleyen/hatali)")
     return u
 
 
@@ -623,7 +656,7 @@ def main() -> int:
                 if ONESHOT and time.time() - BASLANGIC > 90:
                     log("oneshot: iş yok"); return 4
                 time.sleep(poll); continue
-            log("iş alındı", job["id"][:20], "kimden", maske(job.get("sender", "")), "tür", job.get("type"))
+            log("iş alındı", izi(job["id"]), "kimden", maske(job.get("sender", "")), "tür", job.get("type"))
             t0 = time.time()
             cikti = isi_yap(job, c.get("durum"), ayar)
             try:
@@ -632,9 +665,9 @@ def main() -> int:
                 kayit = DATA / "pending" / f"{hashlib.sha256(job['id'].encode()).hexdigest()[:16]}.json"
                 kayit.write_text(json.dumps({"job": job, "cikti": cikti}, ensure_ascii=False), encoding="utf-8")
                 log("sonuç gönderilemedi (bekleyene alındı):", str(e)[:200]); r = {"pending": True}
-            son_is = {"id": job["id"][:24], "eylem": cikti["sonuc"].get("eylem"), "sure_s": round(time.time() - t0, 1), "gonderim": r}
+            son_is = {"id": izi(job["id"]), "eylem": cikti["sonuc"].get("eylem"), "sure_s": round(time.time() - t0, 1), "gonderim": r}
             _sayac["done" if not cikti.get("hata") else "failed"] += 1
-            log("iş bitti", job["id"][:20], "→", cikti["sonuc"].get("eylem"), f"({cikti['sonuc'].get('gerekce')})", f"{son_is['sure_s']} s", "giden:", len(cikti["satirlar"]), r)
+            log("iş bitti", izi(job["id"]), "→", cikti["sonuc"].get("eylem"), f"({cikti['sonuc'].get('gerekce')})", f"{son_is['sure_s']} s", "giden:", len(cikti["satirlar"]), r)
             heartbeat(yerel_paket_sha(), son_is); son_hb_t = time.time(); gunlukleri_gonder()
             if ONESHOT:
                 return 0
@@ -644,7 +677,7 @@ def main() -> int:
         except KeyboardInterrupt:
             return 0
         except Exception as e:
-            if type(e).__module__.startswith("psycopg"):      # Postgres kapalı/yeniden başlıyor: iş alınmadı; tur yeniden denenir
+            if _pg_baglanti_hatasi(e):                        # Postgres kapalı/yeniden başlıyor: iş alınmadı; tur yeniden denenir
                 if time.time() - _kalici["son_uyari"] > 300:
                     log("Postgres'e ulaşılamadı; hosting'ten iş alınmıyor:", type(e).__name__, str(e)[:120]); _kalici["son_uyari"] = time.time()
                 _sayac["errors"].append(f"postgres: {type(e).__name__}"); del _sayac["errors"][:-20]; time.sleep(15); continue

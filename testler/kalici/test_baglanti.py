@@ -251,12 +251,16 @@ def test_ajan_ayni_kanal_mesaji_yeniden_gelince_ikinci_is_acmaz(ajan, depo, hizl
 
 
 def test_ajan_ilk_is_surerken_ayni_mesaj_gelirse_satir_ilk_isle_kapanir(ajan, depo, hizli_motor):
+    """Mesaj hem Postgres'te (açık iş) hem hosting kuyruğunda (yalnız --sirada is ile çevrimdışı aktarımda olur; canlı
+    geçişte kuyruktakiler aktarılmaz). Açık iş varken yeni mesaj alınmaz: iş biter, hosting satırı henüz 'processing'
+    olmadığı için devir reddedilir; sonraki turda aynı mesaj alınınca ikinci iş açılmaz, ilk işin cevabı verilir."""
     A, h, ayar = ajan
     g = mesaj("P6001 aynalı", T_P6001)
-    depo.mesaj_kaydet(g); h.mesaj_gelir(g)                        # ör. geçişte Postgres'e alınmış, hosting'te de kuyrukta
-    A.kalici_hazir(h.settings()); A.kalici_tur(ayar)
+    depo.mesaj_kaydet(g); h.mesaj_gelir(g)
+    A.kalici_hazir(h.settings()); A.kalici_tur(ayar); A.kalici_tur(ayar)
     assert tek(depo, "SELECT count(*) n FROM isler")["n"] == 1
     assert h.inbound[g["id"]]["state"] == "done" and len(h.outbound) == 2 and h.inbound[g["id"]]["result"]["eylem"] == "is_emri"
+    assert {x["durum"] for x in sorgu(depo, "SELECT durum FROM giden")} == {"hostingte"}
 
 
 def test_ajan_yeniden_baslayinca_olu_surecin_isini_hemen_alir(ajan, depo, hizli_motor):
@@ -306,6 +310,7 @@ def test_kanit_sorgulari_calisir_ve_numara_yazmaz(depo, hizli_motor):
     assert "onaylandi" in r.stdout and "mesaj_basina_en_cok_is" in r.stdout and "meta_gonderdi" in r.stdout
     assert NUMARA_A not in r.stdout and NUMARA_A[:3] + "…" + NUMARA_A[-2:] in r.stdout
     assert "P6001 aynalı" not in r.stdout and "onaylıyorum" not in r.stdout          # mesaj metni yazılmaz
+    assert "wamid." not in r.stdout                                                   # kimlik numarayı içerir: yalnız izi yazılır
 
 
 def test_canli_gosterim_provasi_sahte_hosting(ajan, depo, hizli_motor):
@@ -367,4 +372,7 @@ def test_tekrar_dene_betigi_ikinci_is_acmaz(depo, hizli_motor):
     r = subprocess.run([sys.executable, str(KOK / "vps" / "tekrar_dene.py"), g["id"][:16]], capture_output=True, text=True, env=env)
     assert r.returncode == 0, r.stderr[-500:]
     assert "yeni iş açıldı mı: hayır" in r.stdout and "iş sayısı: 1" in r.stdout
+    from depo import kimlik_izi
+    r = subprocess.run([sys.executable, str(KOK / "vps" / "tekrar_dene.py"), kimlik_izi(g["id"])], capture_output=True, text=True, env=env)
+    assert r.returncode == 0 and "yeni iş açıldı mı: hayır" in r.stdout and kimlik_izi(g["id"]) in r.stdout and "wamid." not in r.stdout
     assert tek(depo, "SELECT count(*) n FROM isler")["n"] == 1
