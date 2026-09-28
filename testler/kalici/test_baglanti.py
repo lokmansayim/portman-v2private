@@ -234,6 +234,8 @@ def test_ajan_cevabi_kaybolan_teslimi_guvenle_yeniden_dener(ajan, depo, hizli_mo
     h.result_sonrasi_kopar = 1                                    # hosting kaydetti, cevap istemciye ulaşmadı
     A.kalici_tur(ayar)
     assert {x["durum"] for x in sorgu(depo, "SELECT durum FROM giden")} == {"bekliyor"} and len(h.outbound) == 2
+    for b in A._kalici["devir"].values():                         # hosting ulaşılabilir: işe özgü sayıldı, 30 sn sonra yeniden
+        b["sonraki"] = 0
     A.kalici_tur(ayar)                                            # yeniden dene → "işlenmekte değil" → giden_durum: satırlar orada
     assert {x["durum"] for x in sorgu(depo, "SELECT durum FROM giden")} == {"hostingte"}
     assert len(h.outbound) == 2 and h.cagri.count("result") == 2 and "giden_durum" in h.cagri

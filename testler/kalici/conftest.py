@@ -178,8 +178,8 @@ def ajan(depo, tmp_path, monkeypatch):
     for ad, deger in {"API": url, "TOKEN": tok, "DATA": worker.KANAL, "APP": KOK / "kanal", "LOGS": tmp_path / "logs",
                       "PKG": tmp_path / "pkg", "PG_DSN": depo.dsn}.items():
         monkeypatch.setattr(A, ad, deger)
-    A._kalici.update(depo=None, K=None, son_esitleme=0.0, son_uyari=0.0, teslim_hata={})
+    A._kalici.update(depo=None, K=None, son_esitleme=0.0, son_uyari=0.0, devir={}, son_claim=0.0)
     ayar = A.yerel_ayarlar(h.settings())
     yield A, h, ayar
     h.dur()
-    A._kalici.update(depo=None, K=None, teslim_hata={})
+    A._kalici.update(depo=None, K=None, devir={}, son_claim=0.0)

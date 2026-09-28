@@ -238,8 +238,11 @@ GEREKEN_API = (1, 2)                     # kanal/api.php v1.2: giden_durum ve co
 HOSTING_TAKILI_SN = 600                  # kanal/feature.php PM_KANAL_STALE: claim, bundan eski 'processing' satırı 'failed' yapar
 KIRA_SN = 120                            # D-03: 3 deneme × 120 sn = 360 sn < 600 sn; tükenme bildirimi de hosting vazgeçmeden verilir
 DEVIR_UYARI_SN = 300                     # işi bu kadar önce bittiği hâlde hosting'e verilemeyen satır sağlık uyarısına düşer
+DEVIR_BEKLEME = (30, 300)                # bir işe özgü devir hatasında o işin yeniden denenmesi: 30 sn'den başlar, 300 sn'de durur
+RISK_PAYI_SN = 120                       # mesaj alınalı 600 − 120 = 480 sn olduysa bekleme yok sayılır (süpürülmeden son deneme)
+SUPURME_PAYI_SN = 60                     # mesaj alındıktan 600 + 60 sn sonra başarılı bir claim olduysa hosting satırı süpürmüştür
 KESIN_RED = ("bad_path", "file_size", "pdf_invalid", "row_inbound_mismatch")      # aynı istek her seferinde reddedilir
-_kalici: dict = {"depo": None, "K": None, "son_esitleme": 0.0, "son_uyari": 0.0}
+_kalici: dict = {"depo": None, "K": None, "son_esitleme": 0.0, "son_uyari": 0.0, "devir": {}, "son_claim": 0.0}
 _dur = {"istendi": False}
 
 
@@ -344,6 +347,8 @@ def tekrar_gelen(d, job: dict) -> None:
     - İlk işin satırları zaten hosting'te: hosting'teki satır boş bir sonuçla kapanır."""
     m = d.mesaj_durumu(job["id"])
     if m and m["is_durum"] in ("bitti", "basarisiz"):
+        d.alinma_anini_yenile(job["id"], float(job.get("_ajan_aldi") or time.time()))   # hosting'teki süre yeniden başladı
+        _kalici["devir"].pop(m["is_id"], None)                                         # satır yeniden işlenmekte: beklemeden dene
         yeniden = d.hostinge_yeniden_dene(m["is_id"])
         if yeniden or m["bekleyen_giden"]:
             log("tekrar gelen mesaj", izi(job["id"]), ": ikinci iş açılmadı; ilk işin (", m["is_id"], ") hosting'e verilmemiş",
@@ -372,16 +377,50 @@ def _hata_sinifi(m: str) -> str:
     return "gecici"
 
 
+def _hosting_ulasilabilir() -> bool:
+    """Devir hatası bu işe mi özgü, yoksa hosting'e mi ulaşılamıyor? Küçük, salt okunur bir istekle (settings) anlaşılır.
+    Büyük gövdede sunucunun erken reddi (ör. 413) istemciye bağlantı kopması olarak da gelebilir; bu yüzden hata türüne
+    bakılmaz, hosting'e sorulur."""
+    try:
+        istek("settings", timeout=15)
+        return True
+    except ApiHatasi:
+        return False
+
+
+def _mutabakat(d, pk: dict, ids: list[str], neden: str) -> None:
+    """Hosting bu gelen mesajı artık işlenmekte saymıyor: satırlar oraya ulaşmış mı, giden_durum ile bakılır (önceki bir
+    devrin cevabı kaybolmuş olabilir). Ulaşmışlar 'hostingte', ulaşmamışlar 'gonderilmedi'."""
+    orada = set(istek("giden_durum", body={"ids": ids}, timeout=30).get("satirlar") or {})
+    d.hostinge_verildi([i for i in ids if i in orada])
+    yok = [i for i in ids if i not in orada]
+    if yok:
+        d.hostinge_verilemedi(yok, neden[:300])
+        log("hosting sonucu almadı:", izi(pk["inbound_id"]), neden[:120])
+
+
 def hostinge_teslim(d) -> int:
-    """Bitmiş (ya da başarısız) işlerin giden satırlarını hosting'e verir (result). Hosting satırları kimliğe göre
-    tekilleştirir, bu yüzden cevabı kaybolan çağrı güvenle yeniden denenir: hosting "işlenmekte değil" derse giden_durum ile
-    satırların orada olup olmadığına bakılır. Satır yalnız hosting'in kesin reddiyle ya da hosting onu artık işlenmekte
-    saymıyorsa 'gonderilmedi' olur; geçici hatada ajan vazgeçmez (hosting'teki satır teslim alınabilir durumdayken cevabı
-    atmak cevap kaybı olurdu), uzayan devir sağlık uyarısına düşer. Hosting cevap verdiyse (HTTP hatası) sıradaki işe
-    geçilir, bir işin hatası ötekileri bekletmez; hosting'e ulaşılamıyorsa tur burada kesilir. Bu bir WhatsApp gönderimi
-    değildir; gönderimi hosting yapar, sonucu belirsizse tekrar etmez. Dönen: hosting'e verilen iş sayısı."""
-    n = 0
-    for is_id in d.teslim_bekleyen_isler():
+    """Bitmiş (ya da başarısız) işlerin giden satırlarını hosting'e verir (result). Bu bir WhatsApp gönderimi değildir;
+    gönderimi hosting yapar, sonucu belirsizse tekrar etmez. Dönen: hosting'e verilen iş sayısı.
+    - Hosting satırları kimliğe göre tekilleştirir: cevabı kaybolan çağrı güvenle yeniden denenir.
+    - Satır yalnız hosting'in kararıyla 'gonderilmedi' olur: kesin ret, ya da hosting mesajı artık işlenmekte saymıyor ve
+      satırlar orada değil (mutabakat). Ajan mesajı aldıktan 660 sn sonra başarılı bir claim olduysa hosting o mesajın
+      satırını süpürmüştür; o iş için istek atılmadan mutabakat yapılır.
+    - Başka her hatada hosting'e ulaşılabiliyor mu diye sorulur. Ulaşılamıyorsa tur kesilir; sonraki turda yeniden denenir.
+      Ulaşılabiliyorsa hata o işe özgüdür: iş 30 sn'den 300 sn'ye kadar artan aralıkla yeniden denenir, öteki işler beklemez.
+    - Mesaj alınalı 480 sn olduysa aralık yok sayılır: hosting'in 600 sn'de süpürebileceği her sonuç, claim'den önce denenir.
+    - Geçici hatada ajan vazgeçmez; uzayan devir sağlık uyarısına düşer."""
+    n = 0; simdi = time.time(); bekleme = _kalici["devir"]
+    haric = [i for i, b in bekleme.items() if b["sonraki"] > simdi]
+    adaylar = []
+    for a in d.teslim_bekleyen_isler(haric=haric, risk_sn=HOSTING_TAKILI_SN - RISK_PAYI_SN):
+        is_id, aldi = a["is_id"], float(a["aldi"])
+        if _kalici["son_claim"] > aldi + HOSTING_TAKILI_SN + SUPURME_PAYI_SN:
+            pk = d.teslim_paketi(is_id)
+            _mutabakat(d, pk, [s["id"] for s in pk["cikti"]["satirlar"]], "hosting satırı 600 sn'yi aştı ve süpürüldü; sonuç verilemedi")
+            bekleme.pop(is_id, None); continue
+        adaylar.append(is_id)
+    for is_id in adaylar:
         pk = d.teslim_paketi(is_id)
         dosyalar, alanlar, gidecek, bozuk = [], {"inbound_id": pk["inbound_id"]}, [], []
         for i, s in enumerate(pk["cikti"]["satirlar"]):
@@ -408,24 +447,20 @@ def hostinge_teslim(d) -> int:
             alanlar["durum"] = json.dumps(pk["durum"], ensure_ascii=False)       # hosting'teki durum/ aynası (panel, geri dönüş)
         try:
             istek("result", multipart=multipart_kodla(alanlar, dosyalar), timeout=180)
-            d.hostinge_verildi(ids); n += 1
+            d.hostinge_verildi(ids); bekleme.pop(is_id, None); n += 1
         except ApiHatasi as e:
             m = str(e); sinif = _hata_sinifi(m)
             if sinif == "mutabakat":
-                orada = set(istek("giden_durum", body={"ids": ids}, timeout=30).get("satirlar") or {})
-                d.hostinge_verildi([i for i in ids if i in orada])
-                yok = [i for i in ids if i not in orada]
-                if yok:
-                    d.hostinge_verilemedi(yok, f"hosting kabul etmedi: {m[:160]}")
-                    log("hosting sonucu kabul etmedi:", izi(pk["inbound_id"]), m[:120])
+                _mutabakat(d, pk, ids, f"hosting kabul etmedi: {m[:160]}"); bekleme.pop(is_id, None)
             elif sinif == "kesin":
-                d.hostinge_verilemedi(ids, f"hosting reddetti: {m[:160]}")
+                d.hostinge_verilemedi(ids, f"hosting reddetti: {m[:160]}"); bekleme.pop(is_id, None)
                 log("hosting sonucu reddetti (kesin): iş", is_id, m[:160])
-            elif m.startswith("HTTP "):
-                log("hosting'e teslim ertelendi (yeniden denenecek): iş", is_id, m[:160])
-                continue                           # hosting cevap verdi: bu işe özgü olabilir, sıradaki işi bekletme
+            elif _hosting_ulasilabilir():
+                b = bekleme.setdefault(is_id, {"n": 0}); b["n"] += 1
+                b["sonraki"] = time.time() + min(DEVIR_BEKLEME[0] * 2 ** (b["n"] - 1), DEVIR_BEKLEME[1])
+                log("hosting bu işin sonucunu almadı; iş", is_id, f"{int(b['sonraki'] - time.time())} sn sonra yeniden denenecek:", m[:140])
             else:
-                log("hosting'e ulaşılamadı, teslim ertelendi:", m[:160])
+                log("hosting'e ulaşılamadı; bekleyen sonuçlar sonraki turda yeniden denenecek:", m[:140])
                 break
     return n
 
@@ -460,9 +495,11 @@ def kalici_tur(ayar: dict, is_al: bool = True) -> bool:
     # Postgres'te açık iş varken hosting'ten yeni mesaj alınmaz: alınan mesaj hosting'in 600 sn'lik süresi içinde işlenip
     # verilmeli; önceki iş bitmeden alınanlar birikirse süreyi aşabilir. Alınmayan mesaj hosting kuyruğunda güvenle bekler.
     if is_al and not d.acik_is_sayisi():
+        t_claim = time.time()
         job = istek("claim", body={}, timeout=30).get("job")
+        _kalici["son_claim"] = t_claim                # claim başarılı: hosting bu andan sonra 600 sn'yi aşan satırları süpürdü
         if job:
-            job = _is_normal(job)
+            job = _is_normal(job); job["_ajan_aldi"] = time.time()
             try:
                 mesaji_al(d, job)
             except ApiHatasi:

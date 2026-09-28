@@ -12,6 +12,8 @@ Taklit edilenler (api.php / feature.php'deki karşılığıyla):
   tick/teslim  pending → accepted (wamid) ya da seçilen satırlar için uncertain / held / upload_failed; Meta durum
                bildirimi (sent/delivered/read/failed) delivery_events'e yazılır, durum yalnız ileri gider.
   hata         self.hatalar[op] = [(http_kodu, {"error": ...}), ...]: sıradaki çağrı bu cevabı alır (işlem yapılmaz).
+               self.kopar[op] = n: sıradaki n çağrıda bağlantı cevapsız kapanır, işlem yapılmaz (ör. büyük gövdede sunucunun
+               erken reddi istemciye bağlantı kopması olarak gelir).
 Taklit EDİLMEYENLER (ayrım bilerek bırakıldı; gerçek PHP testleri ya da canlı denemede görülür):
   claim cevabındaki ham durum/<numara>.json metni (hep None); tick'te 24 saat penceresi, dry_run, PDF yüklemenin ikinci
   denemesi, Meta'ya gerçek istek; biz_opaque ile eşleşen geç bildirimin 'uncertain' satıra wamid yazması; state.json kilidi,
@@ -41,6 +43,7 @@ class SahteHosting:
         self.enabled = True
         self.kayma = 0.0                          # hosting saatinin ileri alınması (sn): 600 sn'lik süpürmeyi sınamak için
         self.hatalar: dict[str, list[tuple[int, dict]]] = {}
+        self.kopar: dict[str, int] = {}
         self.inbound: dict[str, dict] = {}
         self.outbound: dict[str, dict] = {}
         self.durum: dict[str, str] = {}
@@ -190,6 +193,13 @@ class SahteHosting:
                     enjekte = (hosting.hatalar.get(op) or [None]).pop(0) if hosting.hatalar.get(op) else None
                 if enjekte is not None:
                     return self._yaz(*enjekte)
+                with hosting.kilit:
+                    kes = hosting.kopar.get(op, 0) > 0
+                    if kes:
+                        hosting.kopar[op] -= 1
+                if kes:
+                    self.close_connection = True
+                    return
                 try:
                     if op == "settings":
                         return self._yaz(200, hosting.settings())

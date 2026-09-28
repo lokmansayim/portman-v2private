@@ -57,10 +57,14 @@ def test_alinip_postgrese_yazilamayan_mesaj_diske_alinir_sonra_islenir(ajan, dep
         A.kalici_tur(ayar)                                        # claim oldu, yazma olmadı
     assert h.inbound[g["id"]]["state"] == "processing" and tek(depo, "SELECT count(*) n FROM mesajlar")["n"] == 0
     assert len(list((W.KANAL / "kalici_bekleyen").glob("*.json"))) == 1
+    t_al = time.time()
     assert any("Postgres'e yazılmayı bekliyor" in u for u in A.kalici_uyarilari())
     monkeypatch.setattr(d, "mesaj_kaydet", asil)
+    time.sleep(0.5)
     A.kalici_tur(ayar)                                            # Postgres döndü: diskteki mesaj yazılır ve işlenir
     assert tek(depo, "SELECT durum FROM isler WHERE mesaj_id = %s", g["id"])["durum"] == "bitti"
+    r = tek(depo, "SELECT (ham->>'_ajan_aldi')::float8 AS aldi, extract(epoch FROM alindi) AS yazildi FROM mesajlar")
+    assert r["aldi"] <= t_al < float(r["yazildi"])                # hosting'ten alınma anı, Postgres'e yazılma değil
     assert h.inbound[g["id"]]["state"] == "done" and len(h.outbound) == 2
     assert not list((W.KANAL / "kalici_bekleyen").glob("*.json"))
 
@@ -70,9 +74,9 @@ def test_uzun_kesintiden_sonra_bekleyen_cevap_supurmeden_once_verilir(ajan, depo
     A, h, ayar = ajan
     g = mesaj("P6001 aynalı", T_P6001); h.mesaj_gelir(g)
     A.kalici_hazir(h.settings())
-    h.hatalar["result"] = [(503, {"error": "bakım"})]
+    h.hatalar["result"] = [(503, {"error": "bakım"})]; h.hatalar["settings"] = [(503, {"error": "bakım"})]   # hosting kapalı
     A.kalici_tur(ayar)                                            # iş bitti, hosting'e verilemedi
-    assert set(_durumlar(depo).values()) == {"bekliyor"}
+    assert set(_durumlar(depo).values()) == {"bekliyor"} and not A._kalici["devir"]          # ulaşılamıyor: aralık yok
     h.kayma = 700                                                 # 10 dakikadan uzun kesinti; hosting süpürmedi (claim yoktu)
     n0 = len(h.cagri)
     A.kalici_tur(ayar)                                            # önce teslim, sonra claim (süpürme)
@@ -115,17 +119,37 @@ def test_basarisiz_isin_bildirimi_hostinge_verilir(ajan, depo, monkeypatch):
 
 
 # ───────────────────────── 3. hata sınıfları ─────────────────────────
-@pytest.mark.parametrize("kod, hata", [(401, "unauthorized"), (403, "forbidden"), (500, "sunucu"), (429, "yavaş"),
-                                       (422, "file_write"), (422, "kanal_state_lock"), (422, "document_file_missing")])
-def test_gecici_hosting_hatasi_yeniden_denenir(ajan, depo, hizli_motor, kod, hata):
+@pytest.mark.parametrize("kod, hata", [(401, "unauthorized"), (403, "forbidden"), (500, "sunucu"), (429, "yavaş"), (503, "bakım")])
+def test_hostinge_ulasilamiyorsa_sonraki_turda_hemen_yeniden_denenir(ajan, depo, hizli_motor, kod, hata):
+    """Hata bütün isteklerde (ör. anahtar yenilenirken 401): hosting'e ulaşılamıyor sayılır; sonuç atılmaz, sonraki turda
+    beklemeden yeniden denenir."""
     A, h, ayar = ajan
     g = mesaj("P6001 aynalı", T_P6001); h.mesaj_gelir(g)
     A.kalici_hazir(h.settings())
-    h.hatalar["result"] = [(kod, {"error": hata})]
+    h.hatalar["result"] = [(kod, {"error": hata})]; h.hatalar["settings"] = [(kod, {"error": hata})]
     A.kalici_tur(ayar)
-    assert set(_durumlar(depo).values()) == {"bekliyor"}
+    assert set(_durumlar(depo).values()) == {"bekliyor"} and not A._kalici["devir"]
     A.kalici_tur(ayar)
     assert set(_durumlar(depo).values()) == {"hostingte"} and h.inbound[g["id"]]["state"] == "done"
+
+
+@pytest.mark.parametrize("kod, hata", [(403, "forbidden"), (500, "sunucu"), (422, "file_write"), (422, "kanal_state_lock"),
+                                       (422, "document_file_missing"), (422, "bad_result")])
+def test_ise_ozgu_hata_araliklarla_yeniden_denenir(ajan, depo, hizli_motor, kod, hata):
+    """Hosting ulaşılabilir ama bu işin sonucunu almıyor: sonuç atılmaz; iş aralıkla (30 sn'den başlayarak) yeniden denenir,
+    her turda değil."""
+    A, h, ayar = ajan
+    g = mesaj("P6001 aynalı", T_P6001); h.mesaj_gelir(g)
+    A.kalici_hazir(h.settings())
+    h.hatalar["result"] = [(kod, {"error": hata})] * 50
+    for _ in range(5):
+        A.kalici_tur(ayar)
+    assert set(_durumlar(depo).values()) == {"bekliyor"} and h.cagri.count("result") == 1
+    is_id = tek(depo, "SELECT id FROM isler")["id"]
+    assert A._kalici["devir"][is_id]["n"] == 1 and A._kalici["devir"][is_id]["sonraki"] > time.time() + 20
+    h.hatalar["result"] = []; A._kalici["devir"][is_id]["sonraki"] = 0      # süre doldu, hosting düzeldi
+    A.kalici_tur(ayar)
+    assert set(_durumlar(depo).values()) == {"hostingte"} and is_id not in A._kalici["devir"]
 
 
 @pytest.mark.parametrize("kod, hata", [(422, "bad_path"), (422, "pdf_invalid"), (422, "row_inbound_mismatch"), (413, "too large")])
@@ -140,23 +164,119 @@ def test_kesin_hosting_hatasi_gonderilmedi_ve_uyari(ajan, depo, hizli_motor, kod
 
 
 def test_gecici_hata_uzasa_da_vazgecilmez_uyari_verilir(ajan, depo, hizli_motor):
-    """Hosting uzun süre yazamıyor (ör. disk kotası: result 422 file_write, claim de başarısız). Hosting'teki satır teslim
-    alınabilir durumda kaldığı sürece ajan cevabı atmaz; uzayan devir uyarıya düşer; hosting düzelince cevap verilir."""
+    """Hosting uzun süre yazamıyor (ör. disk kotası: result 422 file_write, claim de başarısız; settings okunuyor). Hosting'teki
+    satır teslim alınabilir durumda kaldığı sürece ajan cevabı atmaz; mesaj alınalı 480 sn olunca bekleme yok sayılır (her
+    turda denenir); uzayan devir uyarıya düşer; hosting düzelince cevap verilir."""
     A, h, ayar = ajan
     g = mesaj("P6001 aynalı", T_P6001); h.mesaj_gelir(g)
     A.kalici_hazir(h.settings())
-    h.hatalar["result"] = [(422, {"error": "file_write"})] * 3
-    A.kalici_tur(ayar)
-    with depo.baglan() as c:
-        c.execute("UPDATE isler SET bitti = now() - interval '20 minutes'")      # iş 20 dakika önce bitti
+    h.hatalar["result"] = [(422, {"error": "file_write"})] * 2
+    A.kalici_tur(ayar)                                            # iş bitti, sonuç verilemedi (işe özgü: aralıkla)
+    with depo.baglan() as c:                                      # 700 sn geçti (hosting ve ajan saati birlikte)
+        c.execute("UPDATE isler SET bitti = now() - interval '20 minutes'")
+        c.execute("UPDATE mesajlar SET ham = jsonb_set(ham, '{_ajan_aldi}', to_jsonb(extract(epoch FROM now()) - 700))")
+    A._kalici["son_claim"] = 0; h.kayma = 700                     # o zamandan beri başarılı claim yok: hosting süpürmedi
     h.hatalar["claim"] = [(422, {"error": "kanal_state_lock"})]
     with pytest.raises(Exception):
-        A.kalici_tur(ayar)                                        # teslim yine olmadı; claim de başarısız
+        A.kalici_tur(ayar)                                        # aralık yok sayılır (480 sn+): denendi, olmadı; claim de olmadı
     assert set(_durumlar(depo).values()) == {"bekliyor"}
     assert any("dakikadan uzun süredir hosting'e verilemiyor" in u for u in A.kalici_uyarilari())
-    A.kalici_tur(ayar)                                            # 3. enjekte hata
-    A.kalici_tur(ayar)                                            # hosting düzeldi
+    A.kalici_tur(ayar)                                            # hosting düzeldi: sonuç claim'den (süpürmeden) önce verilir
     assert set(_durumlar(depo).values()) == {"hostingte"} and h.inbound[g["id"]]["state"] == "done"
+    assert h.cagri.count("result") == 3
+
+
+def test_baglanti_kopmasi_ise_ozguyse_otekiler_verilir(ajan, depo, hizli_motor):
+    """Büyük gövdede sunucunun erken reddi istemciye bağlantı kopması olarak gelir. Hosting'e ulaşılabildiği için hata o
+    işe özgü sayılır; öteki iş aynı turda verilir, kopan iş aralıkla yeniden denenir."""
+    A, h, ayar = ajan
+    g1 = mesaj("P6001 aynalı", T_P6001); g2 = mesaj("P6001 aynalı", T_P6001, numara="900000000303")
+    for g in (g1, g2):
+        h.mesaj_gelir(g)
+    A.kalici_hazir(h.settings())
+    for g in (g1, g2):
+        h.claim(); depo.mesaj_kaydet(g)
+    isle_hepsi(depo)
+    h.kopar["result"] = 1
+    A.hostinge_teslim(A._kalici["depo"])
+    d = {r["mesaj_id"]: r["durum"] for r in sorgu(depo, "SELECT DISTINCT mesaj_id, durum FROM giden")}
+    assert d == {g1["id"]: "bekliyor", g2["id"]: "hostingte"} and len(A._kalici["devir"]) == 1
+
+
+def test_supurulmus_satirin_sonucu_mutabakatla_kapanir(ajan, depo, hizli_motor):
+    """İşe özgü hata sürüyor (ör. bad_result, satır durumundan önce denetlenir) ve mesaj alındıktan 660 sn sonra başarılı bir
+    claim oldu: hosting satırı süpürmüştür. Ajan artık istek atmaz; giden_durum ile bakar, satırlar orada değilse
+    'gonderilmedi' (uyarıya düşer). Aynı sonuç hosting'e önceden ulaşmışsa 'hostingte'."""
+    A, h, ayar = ajan
+    g = mesaj("P6001 aynalı", T_P6001); h.mesaj_gelir(g)
+    A.kalici_hazir(h.settings())
+    h.hatalar["result"] = [(422, {"error": "bad_result"})] * 50
+    A.kalici_tur(ayar)
+    with depo.baglan() as c:
+        c.execute("UPDATE mesajlar SET ham = jsonb_set(ham, '{_ajan_aldi}', to_jsonb(extract(epoch FROM now()) - 700))")
+    n = h.cagri.count("result")
+    A.kalici_tur(ayar)                                            # önceki turdaki claim, alındıktan 660 sn sonra: süpürülmüş
+    assert set(_durumlar(depo).values()) == {"gonderilmedi"} and "süpürüldü" in tek(depo, "SELECT hata FROM giden LIMIT 1")["hata"]
+    assert h.cagri.count("result") == n and "giden_durum" in h.cagri              # istek atılmadı, hosting'e soruldu
+
+
+def test_supurme_denetimi_hostinge_sorar_cevap_oraya_ulasmissa_kabul(ajan, depo, hizli_motor):
+    """Sonuç hosting'e ulaştı ama cevabı kayboldu (bağlantı koptu); hosting ulaşılabilir olduğu için iş aralıkla bekliyor.
+    Mesaj alınalı 660 sn'den çok olunca ajan satırı 'süpürüldü' sanıp atmaz: giden_durum'a sorar, satırlar oradaysa
+    'hostingte'."""
+    A, h, ayar = ajan
+    g = mesaj("P6001 aynalı", T_P6001); h.mesaj_gelir(g)
+    A.kalici_hazir(h.settings())
+    h.result_sonrasi_kopar = 1
+    A.kalici_tur(ayar)
+    assert set(_durumlar(depo).values()) == {"bekliyor"} and len(h.outbound) == 2
+    with depo.baglan() as c:
+        c.execute("UPDATE mesajlar SET ham = jsonb_set(ham, '{_ajan_aldi}', to_jsonb(extract(epoch FROM now()) - 700))")
+    A.kalici_tur(ayar)
+    assert set(_durumlar(depo).values()) == {"hostingte"} and h.cagri.count("result") == 1
+
+
+def test_uzun_sure_sonra_yeniden_kuyruga_konan_mesajin_cevabi_verilir(ajan, depo, hizli_motor):
+    """Cevap hosting'e verilemedi ve satır süpürüldü; yönetici mesajı çok sonra (660 sn'den uzun) kuyruğa geri koydu. Yeni
+    alımla hosting'teki süre yeniden başlar: cevap 'süpürüldü' sayılmadan verilir."""
+    A, h, ayar = ajan
+    g = mesaj("P6001 aynalı", T_P6001); h.mesaj_gelir(g)
+    A.kalici_hazir(h.settings())
+    h.claim(); depo.mesaj_kaydet(g)
+    h.inbound[g["id"]]["state"] = "failed"
+    A.kalici_tur(ayar)
+    assert set(_durumlar(depo).values()) == {"gonderilmedi"}
+    with depo.baglan() as c:
+        c.execute("UPDATE mesajlar SET ham = jsonb_set(ham, '{_ajan_aldi}', to_jsonb(extract(epoch FROM now()) - 2000))")
+    h.yeniden_sirala(g["id"]); A.kalici_tur(ayar)
+    assert set(_durumlar(depo).values()) == {"hostingte"} and h.inbound[g["id"]]["result"]["eylem"] == "is_emri"
+
+
+def test_bekleyen_isler_yeni_isi_bekletmez(ajan, depo, hizli_motor):
+    """Aralıkla bekleyen çok sayıda iş varken yeni biten iş aynı turda denenir (aday listesine takılmaz)."""
+    A, h, ayar = ajan
+    A.kalici_hazir(h.settings())
+    with depo.baglan() as c:
+        for i in range(60):
+            mid = f"wamid.ESKI{i:03d}"
+            c.execute("INSERT INTO mesajlar (id, gonderen, tur, wa_zamani, ham) VALUES (%s, %s, 'text', now(), '{}')", (mid, NUMARA_A))
+            j = c.execute("INSERT INTO isler (mesaj_id, gonderen, durum, bitti) VALUES (%s, %s, 'bitti', now()) RETURNING id",
+                          (mid, NUMARA_A)).fetchone()["id"]
+            c.execute("INSERT INTO giden (id, is_id, mesaj_id, sira, alici, tur, kind, govde, satir) VALUES (%s, %s, %s, 1, %s, "
+                      "'cevap', 'text', 'x', '{}')", (f"out_eski{i:03d}", j, mid, NUMARA_A))
+            A._kalici["devir"][j] = {"n": 3, "sonraki": time.time() + 300}
+    g = mesaj("P6001 aynalı", T_P6001, numara="900000000303"); h.mesaj_gelir(g)
+    A.kalici_tur(ayar)
+    assert h.inbound[g["id"]]["state"] == "done" and h.cagri.count("result") == 1
+
+
+def test_gunluge_whatsapp_kimligi_yazilmaz(ajan, depo, hizli_motor, tmp_path):
+    A, h, ayar = ajan
+    g = mesaj("P6001 aynalı", T_P6001); h.mesaj_gelir(g)
+    A.kalici_hazir(h.settings()); A.kalici_tur(ayar)
+    h.yeniden_sirala(g["id"]); A.kalici_tur(ayar)
+    gunluk = (tmp_path / "logs" / "agent.log").read_text(encoding="utf-8")
+    assert "iş alındı → Postgres" in gunluk and "tekrar gelen mesaj" in gunluk and "wamid." not in gunluk
 
 
 def test_bir_isin_hatasi_otekinin_teslimini_bekletmez(ajan, depo, hizli_motor):
@@ -383,9 +503,9 @@ def test_tekrar_gelen_mesaj_teslimi_bekleyen_cevabi_bu_alimla_verir(ajan, depo, 
     A, h, ayar = ajan
     g = mesaj("P6001 aynalı", T_P6001); h.mesaj_gelir(g)
     A.kalici_hazir(h.settings())
-    h.hatalar["result"] = [(503, {"error": "bakım"})] * 2
+    h.hatalar["result"] = [(503, {"error": "bakım"})]
     A.kalici_tur(ayar)
-    assert set(_durumlar(depo).values()) == {"bekliyor"}
+    assert set(_durumlar(depo).values()) == {"bekliyor"} and A._kalici["devir"]                   # işe özgü: aralıkla
     h.yeniden_sirala(g["id"])                                     # ör. yönetici hosting'te yeniden kuyruğa koydu
     A.kalici_tur(ayar)
     assert tek(depo, "SELECT count(*) n FROM isler")["n"] == 1

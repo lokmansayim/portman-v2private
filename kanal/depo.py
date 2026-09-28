@@ -464,12 +464,18 @@ class Depo:
                       (yeni, zaman, zaman, zaman, satir_id_))
 
     # ───────────────────────── hosting'e devir (VPS ajanı, kalıcı mod) ─────────────────────────
-    def teslim_bekleyen_isler(self, en_fazla: int = 20) -> list[int]:
-        """Bitmiş (ya da başarısız) ve satırları henüz hosting'e devredilmemiş işler, eskiden yeniye."""
+    def teslim_bekleyen_isler(self, en_fazla: int = 50, haric: list[int] | tuple = (), risk_sn: float = 480) -> list[dict]:
+        """Bitmiş (ya da başarısız) ve satırları henüz hosting'e devredilmemiş işler, eskiden yeniye: {"is_id", "aldi"}.
+        aldi: ajanın mesajı hosting'ten son aldığı an (epoch, VPS saati; ham._ajan_aldi, yoksa Postgres'e yazıldığı an).
+        haric: şimdilik denenmeyecek işler (ajanın aralıklı yeniden denemesi); sıradaki işleri bekletmesinler. Mesaj alınalı
+        'risk_sn' saniye olduysa haric'te olsa da döner (hosting'in süpürmesinden önce son deneme)."""
+        aldi = "coalesce((m.ham->>'_ajan_aldi')::float8, extract(epoch FROM m.alindi)::float8)"
         with self.baglan() as c:
-            return [r["is_id"] for r in c.execute(
-                "SELECT g.is_id FROM giden g JOIN isler j ON j.id = g.is_id WHERE g.durum = 'bekliyor' AND j.durum IN ('bitti', 'basarisiz') "
-                "GROUP BY g.is_id ORDER BY g.is_id LIMIT %s", (en_fazla,))]
+            return c.execute(
+                f"SELECT j.id AS is_id, {aldi} AS aldi FROM isler j JOIN mesajlar m ON m.id = j.mesaj_id "
+                "WHERE j.durum IN ('bitti', 'basarisiz') AND EXISTS (SELECT 1 FROM giden g WHERE g.is_id = j.id AND g.durum = 'bekliyor') "
+                f"AND NOT (j.id = ANY(%s) AND {aldi} > extract(epoch FROM now()) - %s) ORDER BY j.id LIMIT %s",
+                (list(haric), risk_sn, en_fazla)).fetchall()
 
     def teslim_paketi(self, is_id: int) -> dict:
         """Hosting'in result çağrısının beklediği biçim: {"inbound_id", "gonderen", "cikti": {"satirlar", "sonuc", "hata"},
@@ -494,6 +500,11 @@ class Depo:
             return c.execute("UPDATE giden SET durum = 'gonderilmedi', hata = %s WHERE id = ANY(%s) AND durum = 'bekliyor'",
                              (neden[:300], list(satir_idleri))).rowcount
 
+    def alinma_anini_yenile(self, mesaj_id: str, an: float) -> None:
+        """Aynı kanal mesajı hosting'ten yeniden alındı: hosting'teki satırın 600 sn'lik süresi bu andan yeniden başlar."""
+        with self.baglan() as c, c.transaction():
+            c.execute("UPDATE mesajlar SET ham = jsonb_set(ham, '{_ajan_aldi}', to_jsonb(%s::float8)) WHERE id = %s", (an, mesaj_id))
+
     def hostinge_yeniden_dene(self, is_id: int) -> int:
         """Aynı kanal mesajı hosting kuyruğuna yeniden konup yeniden alındı: ilk işin hosting'e hiç verilemeyen (hosting
         reddetti ya da gelen satırı orada artık işlenmekte değildi) satırları yeniden 'bekliyor' olur ve bu yeni alımla
@@ -504,16 +515,16 @@ class Depo:
 
     def gonderilemeyen_sayisi(self, saat: int = 24, devir_sn: int = 300) -> dict:
         """Sağlık uyarısı için, son 'saat' saatte: gönderilmediği kesin (gonderilmedi), sonucu belirsiz (belirsiz), Meta'nın
-        iletemedim dediği (teslim 'failed') satırlar; ve işi 'devir_sn' saniyeden uzun süre önce bittiği hâlde hâlâ hosting'e
-        verilemeyen (bekliyor) satırlar."""
+        iletemedim dediği (teslim 'failed') satırlar; ve (süre sınırı olmadan) işi 'devir_sn' saniyeden uzun süre önce bittiği
+        hâlde hâlâ hosting'e verilemeyen (bekliyor) satırlar."""
         with self.baglan() as c:
-            r = c.execute("SELECT count(*) FILTER (WHERE g.durum = 'gonderilmedi') AS gonderilmedi, "
-                          "count(*) FILTER (WHERE g.durum = 'belirsiz') AS belirsiz, "
-                          "count(*) FILTER (WHERE g.teslim_durumu = 'failed') AS meta_iletemedi, "
+            r = c.execute("WITH s AS (SELECT now() - make_interval(hours => %s) AS t) "
+                          "SELECT count(*) FILTER (WHERE g.durum = 'gonderilmedi' AND g.olusturuldu > s.t) AS gonderilmedi, "
+                          "count(*) FILTER (WHERE g.durum = 'belirsiz' AND g.olusturuldu > s.t) AS belirsiz, "
+                          "count(*) FILTER (WHERE g.teslim_durumu = 'failed' AND g.olusturuldu > s.t) AS meta_iletemedi, "
                           "count(*) FILTER (WHERE g.durum = 'bekliyor' AND j.durum IN ('bitti', 'basarisiz') "
                           "                 AND j.bitti < now() - make_interval(secs => %s)) AS devir_bekliyor "
-                          "FROM giden g JOIN isler j ON j.id = g.is_id WHERE g.olusturuldu > now() - make_interval(hours => %s)",
-                          (devir_sn, saat)).fetchone()
+                          "FROM giden g JOIN isler j ON j.id = g.is_id CROSS JOIN s", (saat, devir_sn)).fetchone()
         return dict(r)
 
     def esitlenecek_satirlar(self, en_fazla: int = 200, gun: int = 3) -> list[str]:
