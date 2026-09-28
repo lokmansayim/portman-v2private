@@ -352,6 +352,33 @@ Patron deneme mesajı gönderilmedi. Sayaçlar: OpenAI 1 istek (reddedildi, ücr
 
 **Sayaç (E):** 4/6 LLM çağrısı: 1 OpenAI (reddedildi, ücretsiz) + 3 Claude (Codex: 2 hazırlık + 1 canlı öz-test). Codex'in raporladığı token'larla 3 Claude çağrısı ~0,062 $. WhatsApp 0. Patron deneme mesajı gönderilmedi.
 
+**Kapı E sonucu (29.09 01:25; Lokman 01:10'da Opus maliyetini onayladı).** E kapandı.
+- **Deneme:** 01:16'da Patron numarasından tek mesaj gönderildi: "Yeni talep: P6001 aynalı olsun". İkinci mesaj gerekmedi.
+- **İşlem (`18_Kapi_E/7_son.txt`):** 01:16:43'te iş alındı, 25,9 sn'de bitti.
+  - Sonuç `is_emri` (PM-PATRON-20260929-33807 **r01**).
+  - Giden 2: metin ve PDF (691 kB). İkisi de 01:18'de telefona ulaştı (Lokman'ın ekran görüntüsü).
+  - Hata, tekrar ya da bekleyen sonuç yok.
+- **Patron teknik notu:**
+  - `eylem=is_emri`; gerekçe "şablon P6001 (sol-sağ aynalandı)".
+  - `niyet=yeni_talep/yuksek`.
+  - LLM `claude-opus-5-5`, 5.280 + 337 token, 4.317 ms, tekrar yok.
+  - Çizim 21,1 sn, doğrulama geçti.
+  - "Yeni talep" eski taslağı kapattı; D-01 sorusu gelmedi.
+- **Sürümler:**
+  - hosting `feature.php` `kanal-v1.2`, `api.php` `kanal-api-v1.2`;
+  - paket `f2bff20a…` (hosting etiketi `kanal-v1.2-opus55-20260929`);
+  - ajan `vps-agent-v1.2`, işçi `kanal-v1.2`; kurulu uygulama paketle 50/50 aynı.
+- **Mod:** Ajan dosya modunda (`PORTMAN_PG_DSN`, `pg.env` ve `kalici.conf` yok). Patron modu korundu; `dry_run` false.
+- **Sayaçlar (sınır 6/6):**
+  - LLM çağrısı 5: 1 OpenAI, reddedildi, ücretsiz; 4 Claude.
+  - Giden WhatsApp mesajı 2. Patron deneme mesajı 1 (sınır 2).
+- **Maliyet:**
+  - Deneme mesajı, ölçülen token'larla resmî fiyattan hesaplandı: 5.280 × 4 $/1M + 337 × 20 $/1M ≈ **0,028 $**.
+  - E'deki Claude çağrılarının toplamı ≈ 0,090 $. Codex'in 3 çağrısı ~0,062 $; onların token'larını asistan ölçmedi, raporundan alındı.
+  - Fatura tutarı Claude Console'dan okunur.
+  - WhatsApp mesajları 1 Ekim'den önce gönderildiği için ücretsiz.
+- **Doğrulanmayan:** PDF'in içeriğine (aynalanmış plan) insan gözüyle bakılmadı. Meta'nın "delivered" bildirimi okunmadı; telefona ulaştığı ekran görüntüsünden görülüyor.
+
 **Durdurma:** bir mesaja beklenenden fazla cevap gelirse, aynı cevap tekrarlanırsa ya da hata görülürse DirectAdmin'de `portman_app/kanal/settings.json` → `"worker": "off"` yapılır (yeni iş alınmaz) ve asistana haber verilir.
 
 **Geri alma (E.5, gerekirse):** `yedek/`'teki eski `feature.php` ve `api.php` geri yüklenir. Paketin eski üç dosyası geri yüklenir, `current.sha256` en son. Ajan v1.1.1 paketini ve `agent.py`'sini geri kurar.

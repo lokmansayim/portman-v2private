@@ -1,8 +1,8 @@
 # Portman · DURUM
 
-**Son güncelleme: 29 Eylül 2026 (İE-02 kapı E sürüyor: v1.2 canlıda, dosya modunda; LLM Claude Opus 5.5; Patron deneme mesajı bekliyor).** Her oturumun son adımı bu dosyayı güncellemektir.
+**Son güncelleme: 29 Eylül 2026 (İE-02 kapı E kapandı: v1.2 canlıda, dosya modunda; LLM Claude Opus 5.5; gerçek Patron mesajı r01 PDF'iyle cevaplandı).** Her oturumun son adımı bu dosyayı güncellemektir.
 
-Canlıda çalışan akış şu: WhatsApp → hosting kanalı → VPS ajanı → Beyin ve Motor → plan PDF'i. Akış yalnız Patron modunda açık. En son 22 Eylülde gerçek mesajla doğrulandı. 28–29 Eylülde canlıya v1.2 kuruldu (dosya modu) ve LLM Claude Opus 5.5'e geçti; bu sürüm henüz gerçek mesajla denenmedi. Depo, v1.1.1'in (`ec4e9a3`) devridir. Hedefteki "90 m² 3+1, üç seçenek" akışı henüz taslak.
+Canlıda çalışan akış şu: WhatsApp → hosting kanalı → VPS ajanı → Beyin ve Motor → plan PDF'i. Akış yalnız Patron modunda açık. En son 22 Eylülde gerçek mesajla doğrulandı. 28–29 Eylülde canlıya v1.2 kuruldu (dosya modu) ve LLM Claude Opus 5.5'e geçti; 29.09 01:16'da gerçek bir Patron mesajıyla denendi (r01 PDF'i telefona geldi). Depo, v1.1.1'in (`ec4e9a3`) devridir. Hedefteki "90 m² 3+1, üç seçenek" akışı henüz taslak.
 
 Durumlar: **Taslak** yalnız belgede · **Kodlandı** kod var, testi yok ya da dar · **Test edildi** tekrarlanabilir testten geçti · **Canlıda doğrulandı** gerçek kullanımda (gerçek mesaj ya da planlı koşu) görüldü ve tarihli.
 
@@ -22,7 +22,7 @@ Durumlar: **Taslak** yalnız belgede · **Kodlandı** kod var, testi yok ya da d
 
 | Bileşen | Durum | Kanıt (tarih) | Kapsam sınırı |
 |---|---|---|---|
-| Kanal v1.1.1: WhatsApp → hosting webhook → kuyruk → gönderim | Canlıda doğrulandı | 21.09 (v1.0): 3 mesaj, 1'i bekletildi, 2 PDF okundu · 22.09 22:31: v1.1.1 paketi (`bd1ca27c…`), öz-test geçti · 22.09 22:33–38: 3 Patron mesajı yanıtlandı · 28.09 (kapı A, salt okunur): VPS'teki uygulama (48/48 dosya), hosting'in dağıttığı paket ve hosting'teki `feature.php` ile `api.php` v1.1.1 ile birebir (tam hash); servis 25.09'dan beri kesintisiz · 28.09 23:31 (kapı E): hosting `feature.php` ve `api.php` v1.2, paket v1.2; 29.09 00:47: Opus paketi `f2bff20a…`, öz-test geçti; gerçek mesajla henüz denenmedi | Yalnız Patron modu; kuyruk hostingte bir JSON dosyası (`state.json`) |
+| Kanal v1.1.1: WhatsApp → hosting webhook → kuyruk → gönderim | Canlıda doğrulandı | 21.09 (v1.0): 3 mesaj, 1'i bekletildi, 2 PDF okundu · 22.09 22:31: v1.1.1 paketi (`bd1ca27c…`), öz-test geçti · 22.09 22:33–38: 3 Patron mesajı yanıtlandı · 28.09 (kapı A, salt okunur): VPS'teki uygulama (48/48 dosya), hosting'in dağıttığı paket ve hosting'teki `feature.php` ile `api.php` v1.1.1 ile birebir (tam hash); servis 25.09'dan beri kesintisiz · 28.09 23:31 (kapı E): hosting `feature.php` ve `api.php` v1.2, paket v1.2; 29.09 00:47: Opus paketi `f2bff20a…`, öz-test geçti · 29.09 01:16: 1 Patron mesajı → iş emri r01, 25,9 sn, metin + PDF telefona ulaştı | Yalnız Patron modu; kuyruk hostingte bir JSON dosyası (`state.json`) |
 | VPS ajanı (Natro, portman-agent; 28.09'dan beri v1.2) | Canlıda doğrulandı | 22.09 19:06: ilk gerçek İş Emri, 27 sn · 22.09 22:14: v1.1.1, `vps-health.json` · 29.09 00:57: v1.2, dosya modunda, 50/50 dosya paketle aynı | ufw etkin ama kuralları okunmadı; root parolayla SSH'ye girebiliyor (22.09 23:59) |
 | Beyin: LLM çıkarımı (29.09'dan beri Claude Opus 5.5; önce gpt-4o-mini), kural katmanı, varyant | Test edildi | Harness 22/22 (sabit girdiler; 28.09'da yeniden) · 22.09 22:33–38 canlı davranış testi 2/3 (B1) | B1 ve B2 `ie-02` dalında düzeltildi (B2: D-01), canlıda değil; yalnız P6001 şablonu canlı |
 | Motor v1.1.1: İş Emri → DXF → doğrulama → PDF | Test edildi | Altın testler 6×8 (41 pano, 0 cm²) ve Yan Verandalı 6×8,5 (BOM 26 kod); P6001 katalog testi (773 × 763) · 28.09: üç temiz koşuda içerik parmak izi aynı | Plan PDF'i üretir, ön onay paftası değil; canlı PDF içeriği insan gözüyle doğrulanmadı |
@@ -35,7 +35,7 @@ Durumlar: **Taslak** yalnız belgede · **Kodlandı** kod var, testi yok ya da d
 | Yapı Tanımı şeması | Taslak | Zemin, 27.09; temeli İş Emri şeması v0.1 (21.09) | Ölçü anlamları ve ürün ailesi ayrımı eksik |
 | Veritabanı: kalıcı konuşma ve iş akışı (Postgres) | Test edildi | 28.09: `testler/kalici/`, gerçek Postgres 16'da 185 test geçti. Kabul gösterimi 10/10 (simülasyon: WhatsApp ve LLM sahte). Ajanın kalıcı modu sahte hosting ile sınandı (600 sn süpürme ve hata enjeksiyonu dahil). | Yalnız izole ortamda; canlıda yok. Gerçek PHP hattı (`feature.php` `context_id`, `api.php` v1.2) hosting'teki `lib.php`'nin temiz kopyasıyla yerelde geçti (kapı B; PHP 8.2.30 ve 8.4); canlıda değil. Yer: mevcut VPS (D-04). Canlıya bağlama planı ve onay kapıları: `docs/is_emirleri/IE-02-canli.md`. pgvector yok (RAG'la gelir). |
 | RAG | Taslak | Araştırma notu, 21.09 | Aşama 2 sonrası |
-| Model geçidi | Canlıda | `llm.py`'de OpenAI ve Anthropic yolları var; 29.09'dan beri canlıda `claude-opus-5-5` (K10), öz-test geçti (5.309 + 488 token, ~0,031 $) · 23.09 kıyas: gpt-4o-mini 6/7, gpt-6-sol 4/7 | Opus gerçek bir mesajla henüz denenmedi (E'deki Patron mesajı); B1 vakasında ölçülmedi. Claude anahtarı VPS `agent.env`'de ve hosting `claude_api.json`'da; bilinen son kullanma 29.10. Hosting ayarı VPS'e yalnız arka uç, model ve zaman aşımını geçiriyor (B4) |
+| Model geçidi | Canlıda | `llm.py`'de OpenAI ve Anthropic yolları var; 29.09'dan beri canlıda `claude-opus-5-5` (K10), öz-test geçti (5.309 + 488 token, ~0,031 $) · 23.09 kıyas: gpt-4o-mini 6/7, gpt-6-sol 4/7 | 29.09 01:16'da tek gerçek Patron mesajında 5.280 + 337 token, ~0,028 $; B1 vakasında ölçülmedi. Claude anahtarı VPS `agent.env`'de ve hosting `claude_api.json`'da; bilinen son kullanma 29.10. Hosting ayarı VPS'e yalnız arka uç, model ve zaman aşımını geçiriyor (B4) |
 | PortmanBench | Taslak | Tohum: `testler/referans/` (28.09) | Uçtan uca ölçüm ve kritik hata türleri yok |
 | Ön onay paketi | Taslak | Hedef format notu, 21.09 | Motor PDF'inde çalışma ön görünüşü ve basit özellik tablosu var; yan görünüş, Güncel Şablon 2024 düzeni, fiyat ve onay durumları yok |
 | BOM'dan fiyat | Taslak | Fiyat MVP Excel'i · CTKBF V1.1 27.09'da incelendi, 19 bulgu | Canlı akışta fiyat yok |
@@ -70,14 +70,13 @@ Yapıldı:
 - kuralı (Lokman, 28.09): dışarı aktarımda kişi adları da maskelenir; B'nin sınırlamaları kayıtta: medya indirme yolu sınanmadı, temiz kopyada bir ön ad kaldı.
 - kapı C (28.09): eşleşme anahtarı (`3173020445c2` → `9238aa8aadce`) ve OpenAI anahtarı (`0acef17e0f05` → `4cf00ec74492`) yenilendi; eskileri hosting'te ve OpenAI'de 401; eski anahtarların kopyası kalmadı (`vps/kapi_c.py`, adımları Lokman yürüttü).
 - kapı D (28.09): VPS'e PostgreSQL 16.15, yalnız yerel bağlantı; `portman` rolü ve veritabanı (parolasız peer); psycopg 3.3.6; günlük yedek 03:17, otomatik silme kapalı; yedek ve geri yükleme denemesi geçti; ajan yeniden başlamadı, dosya modunda.
-- kapı E (28–29.09, sürüyor):
+- kapı E (28–29.09, kapandı):
   - `feature.php` ve `api.php` v1.2 ile paket yüklendi; ajan `vps-agent-v1.2`, dosya modunda.
   - Öz-test OpenAI'de kredi bitince (429) geçmedi. Lokman Claude'a geçişi istedi ve Opus 5.5'i seçti.
   - Geçişi başka bir ajan (Codex) yaptı; Portman çıkarımı ve bayi botu Opus 5.5'te. Asistan dosyalardan doğruladı; canlı `llm.py`, `ai.php` ve `claude_api.php` depoda (`hosting/`).
-  - Öz-test Opus'la geçti. Patron deneme mesajı, Opus'un yeni maliyeti için Lokman'ın onayını bekliyor.
+  - Öz-test Opus'la geçti. Lokman Opus maliyetini onayladı; tek Patron mesajı ("Yeni talep: P6001 aynalı olsun") iş emri r01 üretti; metin + PDF telefona ulaştı. Sayaç: LLM 5/6, WhatsApp 2/6; Claude toplamı ~0,090 $.
 
 Kalan (sırayla, her biri ayrı onayla; `docs/is_emirleri/IE-02-canli.md`):
-- E: tek Patron deneme mesajı ve son doğrulama;
 - F: kalıcı moda geçiş;
 - G: gerçek WhatsApp ve LLM ile kabul gösterimi.
 
