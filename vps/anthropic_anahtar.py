@@ -23,8 +23,15 @@ st = os.stat(ENV)
 with open(ENV, encoding="utf-8") as f:
     satirlar = f.read().splitlines()
 gizli = ("PORTMAN_API_TOKEN=", "ANTHROPIC_API_KEY=")
-yedek = f"{ENV}.before-anthropic-{time.strftime('%Y%m%d-%H%M%S')}"
-fd = os.open(yedek, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+for n in range(100):   # aynı saniyede ikinci çalıştırma eski yedeğin üzerine yazmasın
+    yedek = f"{ENV}.before-anthropic-{time.strftime('%Y%m%d-%H%M%S')}" + (f"-{n}" if n else "")
+    try:
+        fd = os.open(yedek, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        break
+    except FileExistsError:
+        continue
+else:
+    sys.exit("DUR: yedek dosyası oluşturulamadı; dosyaya dokunulmadı.")
 with os.fdopen(fd, "w", encoding="utf-8") as f:
     f.write("\n".join(s for s in satirlar if not s.startswith(gizli)) + "\n")
 eski = [s for s in satirlar if s.startswith("ANTHROPIC_API_KEY=")]
@@ -44,7 +51,8 @@ req = urllib.request.Request(BASE + "/models", headers={"x-api-key": anahtar, "a
 try:
     with urllib.request.urlopen(req, timeout=25) as r:
         modeller = [m.get("id") for m in json.loads(r.read().decode()).get("data", [])]
-    print(f"   Anthropic GET /v1/models: HTTP 200 · claude-haiku-4-5 erişilebilir: {'evet' if any(str(m).startswith('claude-haiku-4-5') for m in modeller) else 'HAYIR'}")
+    var = lambda ad: 'evet' if any(str(m).startswith(ad) for m in modeller) else 'HAYIR'
+    print(f"   Anthropic GET /v1/models: HTTP 200 · claude-opus-5-5 erişilebilir: {var('claude-opus-5-5')} · claude-haiku-4-5: {var('claude-haiku-4-5')}")
 except urllib.error.HTTPError as e:
     try:
         tur = str((json.loads(e.read().decode()).get("error") or {}).get("type") or "")

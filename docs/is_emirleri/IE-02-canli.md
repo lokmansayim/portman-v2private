@@ -325,7 +325,32 @@ Patron deneme mesajı gönderilmedi. Sayaçlar: OpenAI 1 istek (reddedildi, ücr
 - VPS'e php8.3-cli kuruldu; `/root/portman-migration-staging` var.
 - Depoya commit atılmadı.
 
-**Durum:** Asistan bu beyanları henüz doğrulamadı. Raporun andığı yedek ve aday dosyalar `18_Kapi_E`'de yok. Doğrulama `vps/devir_dogrula.sh` (salt okunur) ve canlı `llm.py`, `ai.php`, `claude_api.php` kopyalarıyla yapılacak. Patron deneme mesajı hâlâ gönderilmedi. E'nin sayacı 4/6 çağrı (1 OpenAI reddi + 3 Claude).
+**Doğrulama (29.09 01:10; asistan, dosyalardan ve Lokman'ın koştuğu `vps/devir_dogrula.sh` çıktısından, `19_Devir_Opus/1_dogrula.txt`).**
+- VPS: servis çalışıyor (00:47:41'den beri). Paket `f2bff20a…aabed2`; zip'in gerçek sha'sı adıyla aynı, 672.324 B. Kurulu uygulama paketle 50/50 aynı, `agent.py` paketle aynı, ajan `vps-agent-v1.2`.
+- Dosya modunda kaldı: `PORTMAN_PG_DSN` yok, drop-in yok.
+- `beyin/llm.py` = `ff4a009f…` (depoya alındı). `worker.py`, `agent.py`, `prompt.md`, `sema.py` değişmedi. Eski ve yeni zip arasında fark yalnız `beyin/llm.py`.
+- `agent.env`: 640 0:988; satır adları PORTMAN_API_URL, PORTMAN_API_TOKEN, PORTMAN_HOME, PYTHONUNBUFFERED, ANTHROPIC_API_KEY.
+- Öz-test geçti (00:48:12): harness, karar, motor, LLM. LLM `anthropic claude-opus-5-5`, 5.309 giriş, 488 çıkış token'ı, tekrar yok, 5,5 sn.
+- Hosting: API `kanal-api-v1.2`, `worker` vps, `mode` patron, `dry_run` false, `llm` anthropic/claude-opus-5-5 (60 sn). Dağıtılan paket VPS'teki ile aynı.
+- Günlükte 29.09'dan beri hata yok; iş alınmadı; bekleyen sonuç 0.
+- Yedekler (`19_Devir_Opus/yedek/`): `ai.before.php` `93111a58…`, `current.before.zip` `b4bf4727…` (E'de yüklenen paket), `llm.before.py` `70574c08…` (depodaki önceki sürüm), `settings.before.json`.
+- `ai.php`: `baglamMetni`'den sonrası yedekle aynı; değişen tek şey `openaiSor`'un gövdesi (artık `portmanClaudeSor`'u çağırıyor).
+- Adaptör `claude_api.php`, sahte cevaplarla PHP 8.2.30 ve 8.4'te geçti (`hosting/tests/claude_api_test.php`). Opus isteğinin biçimi ve hata yolları: `testler/kalici/test_llm_opus.py`.
+- `19_Devir_Opus` dosyalarında anahtar biçimli dizge yok.
+
+**Doğrulanamayanlar:**
+- Hosting'teki `ai.php` ve `claude_api.php`'nin canlı hash'leri ile `claude_api.json`'un 0600 izni. Bunlar yalnız Codex'in geçici betiğinin çıktısında (`hosting-dogrulama.json`) var; değerler depodaki dosyalarla aynı.
+- Geçiş klasörü `/root/portman-migration-staging` (90 dosya, 5,4 MB; canlı yedek kopyaları içerir): desen taraması 2 dosyada eşleşme buldu. Codex, güncel anahtarların hiçbirinin orada olmadığını ve eşleşmelerin yanlış pozitif olduğunu yazıyor; asistan bağımsız doğrulamadı. Klasör E'den sonra ayrı onayla silinir.
+
+**Farklar ve notlar:**
+- Paketin içindeki `SURUM.txt` hâlâ `kanal-v1.2-20260928-2306`; hosting'teki `SURUM.txt` `kanal-v1.2-opus55-20260929`. Kimlik sha'dır; etiket yalnız görünüm.
+- Hosting ayarı OpenAI anahtarını VPS'e vermeyi sürdürüyor (K13 yolu); Opus'la kullanılmıyor.
+- `tool_choice: auto` yüzünden Opus düz metin dönerse iş `LLMHatasi` ile biter; kendiliğinden tekrar yok. Patron'a hata bildirimi gider.
+- VPS'e php8.3-cli kuruldu. DirectAdmin çöp kutusunda geçici `claude_gecis_kontrol.php` var. İkisi de ayrı onayla temizlenir.
+- Claude anahtarının bilinen son kullanma tarihi 29 Ekim 2026 (Codex'in beyanı). Bitmeden VPS `agent.env` ve hosting `claude_api.json` birlikte yenilenmeli; yoksa hem Portman hem bot durur.
+- Bayi botunun gerçek trafiği artık Opus ücreti doğurur; E'nin sayacına girmez.
+
+**Sayaç (E):** 4/6 LLM çağrısı: 1 OpenAI (reddedildi, ücretsiz) + 3 Claude (Codex: 2 hazırlık + 1 canlı öz-test). Codex'in raporladığı token'larla 3 Claude çağrısı ~0,062 $. WhatsApp 0. Patron deneme mesajı gönderilmedi.
 
 **Durdurma:** bir mesaja beklenenden fazla cevap gelirse, aynı cevap tekrarlanırsa ya da hata görülürse DirectAdmin'de `portman_app/kanal/settings.json` → `"worker": "off"` yapılır (yeni iş alınmaz) ve asistana haber verilir.
 
@@ -416,6 +441,14 @@ Adım 2'de LLM mesajı revizyon değil yeni talep sayabilir. O zaman akış baş
   - en çok 6 OpenAI çağrısı ve en çok 6 giden WhatsApp mesajı.
   - Bir mesaja beklenenden fazla cevap gider ya da çağrılar tekrar tekrar yapılırsa E durdurulur: `settings.json` → `worker: off`. Sonra E.5 ile geri alınır.
   - Sayım ajan günlüğünden (`iş bitti`, öz-test sonucu), hosting giden kuyruğundan ve OpenAI kullanım panelinden yapılır.
+- **Güncelleme (29.09, Opus 5.5):** sınır artık OpenAI değil, toplam LLM çağrısıdır (6).
+  - Fiyat (resmî fiyat sayfası): 1M giriş 4 $, 1M çıkış 20 $.
+  - Ölçülen öz-test çağrısı 5.309 + 488 token, ~0,031 $.
+  - Patron deneme mesajı 1 çağrı; şema hatasında +1. Yani ~0,031 $, en çok ~0,062 $.
+  - E'nin toplamı en çok ~0,124 $: şimdiye dek ~0,062 $ + deneme.
+  - Bu, onaylanan tahminin (~0,006 $) üstünde; deneme mesajından önce Lokman'ın onayı gerekir.
+  - Kalan 2 çağrı hakkı, deneme ve tekrarına tam yeter.
+  - WhatsApp 1 Ekim'den önce ücretsiz.
 
 ### H · Geri dönüş (gerektiğinde; onayla)
 1. `settings.json` → `"worker": "off"`. Gelen mesajlar kuyrukta bekler. Ajan yeni mesaj almaz; Postgres'te açık kalan işleri bitirir ve sonuçlarını hosting'e verir (boşaltma).

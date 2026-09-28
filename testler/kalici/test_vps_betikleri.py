@@ -66,7 +66,7 @@ def test_anthropic_anahtar_degeri_yazdirmaz_izni_korur(tmp_path):
         def log_message(self, *a): pass
         def do_GET(self):
             ok = self.headers.get("x-api-key") == anahtar
-            b = _json.dumps({"data": [{"id": "claude-haiku-4-5-20251001"}]} if ok else {"error": {"type": "authentication_error", "message": "invalid x-api-key " + str(self.headers.get("x-api-key"))}}).encode()
+            b = _json.dumps({"data": [{"id": "claude-opus-5-5"}, {"id": "claude-haiku-4-5-20251001"}]} if ok else {"error": {"type": "authentication_error", "message": "invalid x-api-key " + str(self.headers.get("x-api-key"))}}).encode()
             self.send_response(200 if ok else 401); self.end_headers(); self.wfile.write(b)
     srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), Hd); threading.Thread(target=srv.serve_forever, daemon=True).start()
     ortam = {**os.environ, "PM_ENV": str(p), "PM_ANTHROPIC_BASE": f"http://127.0.0.1:{srv.server_address[1]}/v1"}
@@ -87,4 +87,6 @@ def test_anthropic_anahtar_degeri_yazdirmaz_izni_korur(tmp_path):
     r3 = subprocess.run([sys.executable, betik], input=ikinci, capture_output=True, text=True, env=ortam)
     assert r3.returncode == 0 and "değiştirildi" in r3.stdout and "HTTP 401 authentication_error" in r3.stdout and ikinci not in r3.stdout
     assert sum(s.startswith("ANTHROPIC_API_KEY=") for s in p.read_text().splitlines()) == 1
+    yedekler = list(tmp_path.glob("agent.env.before-anthropic-*"))                                                   # aynı saniyede bile ayrı yedek
+    assert len(yedekler) == 2 and not any("ANTHROPIC" in y.read_text() or "PORTMAN_API_TOKEN" in y.read_text() for y in yedekler)
     srv.shutdown()

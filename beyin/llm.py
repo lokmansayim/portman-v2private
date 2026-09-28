@@ -106,12 +106,20 @@ def cikar_detayli(mesaj: str, baglam: str = "", backend: str = "manuel", model: 
         talep = Talep.model_validate(_json_ayikla(metin))
     elif backend == "anthropic":
         key = anahtar_bul(backend, anahtar, ayarlar_json)
+        opus55 = model == "claude-opus-5-5"
+        govde = {"model": model, "max_tokens": 4096 if opus55 else 1500,
+                 "system": PROMPT + ("\nTalebi yalnız talep_kaydet aracını bir kez çağırarak bildir." if opus55 else ""),
+                 "tools": [{"name": "talep_kaydet", "description": "Yapılandırılmış talep", "input_schema": schema}],
+                 "tool_choice": {"type": "auto", "disable_parallel_tool_use": True} if opus55 else {"type": "tool", "name": "talep_kaydet"},
+                 "messages": [{"role": "user", "content": kullanici}]}
+        if opus55:
+            govde["output_config"] = {"effort": "low"}
         out = _post("https://api.anthropic.com/v1/messages",
-                    {"x-api-key": key, "anthropic-version": "2023-06-01"},
-                    {"model": model, "max_tokens": 1500, "system": PROMPT,
-                     "tools": [{"name": "talep_kaydet", "description": "Yapılandırılmış talep", "input_schema": schema}],
-                     "tool_choice": {"type": "tool", "name": "talep_kaydet"},
-                     "messages": [{"role": "user", "content": kullanici}]}, timeout)
+                    {"x-api-key": key, "anthropic-version": "2023-06-01"}, govde, timeout)
+        if opus55:
+            calls = [b for b in out.get("content", []) if b.get("type") == "tool_use"]
+            if out.get("stop_reason") != "tool_use" or len(calls) != 1 or calls[0].get("name") != "talep_kaydet":
+                raise LLMHatasi("Opus talep yanıtı tamamlanmadı veya beklenen araç çağrısı dönmedi")
         kullanim = out.get("usage") or {}
         meta.update(model=out.get("model") or model, girdi_token=kullanim.get("input_tokens"), cikti_token=kullanim.get("output_tokens"))
         talep = None
