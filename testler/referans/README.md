@@ -10,7 +10,7 @@ python3 testler/referans/dogrula.py --hizli                # ~45 sn: 16 katalog 
 python3 testler/referans/dogrula.py --referans 2026-09-28  # belirli bir referansla
 ```
 
-Betik yalnız v1.1.1 ağacını geçici bir klasöre kopyalar (`deneme/`, `testler/`, `KARARLAR/` hariç) ve `denetim/kos.py`'yi orada koşar; depoya yazmaz. `PORTMAN_*` ortam değişkenleri (başka referans klasörü, bayi kaydı, durum dizini) ve LLM anahtarları alt sürece geçmez. Ağ, LLM, WhatsApp ya da canlı sunucu kullanmaz. Karşılaştırma en yeni tarihli referans klasörüyle yapılır; çıkış kodu 0, referansla aynı demektir.
+Betik yalnız v1.1.1 ağacını geçici bir klasöre kopyalar (`deneme/`, `testler/`, `KARARLAR/` hariç) ve `denetim/kos.py`'yi orada koşar; depoya yazmaz. `PORTMAN_*` ortam değişkenleri (başka referans klasörü, bayi kaydı, durum dizini) ve LLM anahtarları alt sürece geçmez. Ağ, LLM, WhatsApp ya da canlı sunucu kullanmaz. Karşılaştırma en yeni tarihli referans klasörüyle yapılır. Çıkış kodu 0 referansla aynı, 1 fark var, 2 referans bozuk ya da koşu sonuç vermedi demektir.
 
 Kurallar:
 - Referans girdiler değişmemeli: İş Emri şablonları (`is_emri/`), referans çizim ve kayıtlar (`ref_katalog/`, `ref_yan/`, `kanal/ref_*`), katalog verisi ve test bayi kaydı (`beyin/veri/`); toplam 23 dosya. Dondurulan dosya silinemez; yeni dosya bilgi olarak raporlanır.
@@ -27,7 +27,9 @@ Bilerek yapılan bir değişiklik referansı değiştirirse (örneğin vaka 1'de
 python3 testler/referans/dogrula.py --dondur --gerekce "neyin neden değiştiği"   # tam koşu, ~5 dk
 ```
 
-Betik bugünün tarihiyle yeni bir klasör açar (`--ad` ile başka ad verilebilir; aynı gün ikincisi için sonda bir harf, örneğin `2026-10-02b`). Var olan klasöre yazmaz; eski referans silinmez. Bir adım geçmiyorsa ya da test verisi okunamıyorsa dondurmaz. Gerekçe, dondurulduğu commit ve ortam klasördeki `GEREKCE.md`'ye yazılır. Yeni klasör, değişikliği getiren commit'le birlikte kaydedilir; `git diff` eski ve yeni referansı yan yana gösterir.
+Betik bugünün tarihiyle yeni bir klasör açar (`--ad` ile geçmiş bir tarih verilebilir; aynı gün ikincisi için sonda bir harf, örneğin `2026-10-02b`). Var olan klasöre yazmaz; eski referans silinmez. Bir adım geçmiyorsa ya da test verisi okunamıyorsa dondurmaz. Önceki referansa göre bir şey kaldırılıyor ya da azalıyorsa (girdi dosyası, vaka, çıktı, vaka sayısı, Motor'dan geçen plan) `--kaldirmaya-izin` ister. Gerekçe, dondurulduğu commit, ortam, önceki referansa göre değişenler ve dört dosyanın özeti klasördeki `GEREKCE.md`'ye yazılır. Yeni klasör, değişikliği getiren commit'le birlikte kaydedilir; `git diff` eski ve yeni referansı yan yana gösterir.
+
+Referans dosyaları elle değiştirilmez. `dogrula.py` her koşuda `GEREKCE.md`'deki özetleri sınar ve her referansı bir öncekine göre denetler: izinsiz kaldırma, önceki referansla aynı gerekçe ya da ileri tarih varsa "REFERANS BOZUK" yazar ve 2 ile çıkar. Bu denetim kazara ya da yarım kalmış değişikliği yakalar; özetleri de yeniden hesaplanmış, kasıtlı olarak elle yazılmış bir referansı yakalamaz. Onu inceleme yakalar: yeni klasör `git diff`'te görünür ve `dogrula.py` her koşuda hangi referansla, hangi gerekçeyle ve önceki referansa göre kaç değişiklikle karşılaştırdığını ilk satırda yazar.
 
 **Dikkat:** `denetim/kos.py`'yi bu dalın kökünde doğrudan koşmayın. Sır taraması `deneme/` altındaki IFC dosyasındaki ondalık koordinatları telefon numarası sanıyor ve adım "failed" dönüyor (9 yanlış bulgu). `kos.py`'yi `main`'de ya da `dogrula.py` üzerinden koşun. Kalıbın düzeltilmesi İE-02'de.
 
@@ -49,7 +51,7 @@ Ortam (28.09, pip ile kurulan sürümler): Python 3.11.15, ezdxf 1.4.4, pymupdf 
 | PDF sayfa sayısı ve ölçüsü | 18 çıktı, aynı (`pdf_parmak_izleri.txt`) |
 
 Dosyalar, `2026-09-28/` altında:
-- `GEREKCE.md`: neden ve hangi kodla donduruldu.
+- `GEREKCE.md`: neden ve hangi kodla donduruldu; diğer dört dosyanın özeti.
 - `referans_girdiler.json`: 23 girdi dosyasının özeti ve 22 Beyin vakasının vaka özeti.
 - `denetim_kosum.json`: `kos.py --planlar` sonucu.
 - `dxf_parmak_izleri.txt`: 18 DXF'in içerik parmak izi.
