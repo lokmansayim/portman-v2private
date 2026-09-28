@@ -31,7 +31,7 @@ Betik bugünün tarihiyle yeni bir klasör açar (`--ad` ile geçmiş bir tarih 
 
 Referans dosyaları elle değiştirilmez. `dogrula.py` her koşuda `GEREKCE.md`'deki özetleri sınar ve her referansı bir öncekine göre denetler: izinsiz kaldırma, önceki referansla aynı gerekçe ya da ileri tarih varsa "REFERANS BOZUK" yazar ve 2 ile çıkar. Bu denetim kazara ya da yarım kalmış değişikliği yakalar; özetleri de yeniden hesaplanmış, kasıtlı olarak elle yazılmış bir referansı yakalamaz. Onu inceleme yakalar: yeni klasör `git diff`'te görünür ve `dogrula.py` her koşuda hangi referansla, hangi gerekçeyle karşılaştırdığını ve önceki referansa göre neyin değiştiğini en üstte yazar. Bir vakanın değişmesi (örneğin beklenen eylemin genişletilmesi ya da içerik kontrolünün silinmesi) izin istemez, yalnız bu listede görünür; incelemede özellikle bakılacak yer burasıdır.
 
-**Dikkat:** `denetim/kos.py`'yi bu dalın kökünde doğrudan koşmayın. Sır taraması `deneme/` altındaki IFC dosyasındaki ondalık koordinatları telefon numarası sanıyor ve adım "failed" dönüyor (9 yanlış bulgu). `kos.py`'yi `main`'de ya da `dogrula.py` üzerinden koşun. Kalıbın düzeltilmesi İE-02'de.
+**Dikkat:** `denetim/kos.py`'yi depo kökünde doğrudan koşmayın. Sır taraması `deneme/` altındaki IFC dosyasındaki ondalık koordinatları telefon numarası sanıyor ve adım "failed" dönüyor (9 yanlış bulgu). `kos.py`'yi `dogrula.py` üzerinden koşun; o, `deneme/` olmadan geçici bir kopyada koşar. Kalıbın düzeltilmesi İE-02'de.
 
 Ortam (28.09, pip ile kurulan sürümler): Python 3.11.15, ezdxf 1.4.4, pymupdf 1.26.0, shapely 2.1.2, pydantic 2.13.5, numpy 2.4.6. `kos.py`'nin kaydı pymupdf için sürüm yerine "(64-bit)." yazıyor.
 
