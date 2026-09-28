@@ -411,3 +411,25 @@ def test_soru_kaydi_kural_katmaninin_askidaki_sorusunu_izler(depo, wa, hizli_mot
     depo.mesaj_kaydet(mesaj("beğenmedim", talep("red", "beğenmedim"))); [r] = isle_hepsi(depo)
     assert r["eylem"] == "sor" and depo.konusma_oku(NUMARA_A)[0]["son_soru_alani"] is None
     assert tek(depo, "SELECT count(*) n FROM sorular")["n"] == 0
+
+
+def test_kirasi_devredilen_eski_sahip_yeni_sahibin_hazirlik_dosyalarini_silmez(depo, monkeypatch):
+    """Üçüncü tur (N25): her denemenin hazırlık klasörü ayrı. Eski sahip KiraKaybi'nden sonra kendi klasörünü temizlerken
+    aynı işi yürüten yeni sahibin henüz taşınmamış dosyalarını silmemeli."""
+    import threading
+    from motor import dxf_out
+    from conftest import sahte_uret
+
+    def yavas(ie, hedef, *a, **k):
+        m = sahte_uret(ie, hedef)                  # dosyalar önce yazılır, sonra Motor "sürer"
+        time.sleep(2.0)
+        return m
+    monkeypatch.setattr(dxf_out, "uret", yavas)
+    depo.mesaj_kaydet(mesaj("P6001 aynalı", T_P6001))
+    sonuc = {}
+    a = threading.Thread(target=lambda: sonuc.setdefault("A", kalici.bir_is(depo, {**AYAR, "kira_sn": 1}, "A")))
+    a.start(); time.sleep(1.3)                     # A'nın kirası doldu, A hâlâ Motor'da
+    b = threading.Thread(target=lambda: sonuc.setdefault("B", kalici.bir_is(depo, AYAR, "B")))
+    b.start(); a.join(); b.join()
+    assert sonuc["A"]["durum"] == "atildi" and sonuc["B"]["durum"] == "bitti"
+    _pdf_yerinde(depo)
