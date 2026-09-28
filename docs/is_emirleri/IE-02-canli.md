@@ -378,12 +378,39 @@ Patron deneme mesajı gönderilmedi. Sayaçlar: OpenAI 1 istek (reddedildi, ücr
   - Fatura tutarı Claude Console'dan okunur.
   - WhatsApp mesajları 1 Ekim'den önce gönderildiği için ücretsiz.
 - **Doğrulanmayan:** PDF'in içeriğine (aynalanmış plan) insan gözüyle bakılmadı. Meta'nın "delivered" bildirimi okunmadı; telefona ulaştığı ekran görüntüsünden görülüyor.
+- **Kabul (Lokman, 29.09 01:33):** E, bağlantı ve dosya modundaki gerçek çalışma kapsamında tamamlandı. PDF'in aynalama doğruluğu ve Meta teslim bildirimi doğrulanmamış noktalar olarak kayıtta kalır.
 
 **Durdurma:** bir mesaja beklenenden fazla cevap gelirse, aynı cevap tekrarlanırsa ya da hata görülürse DirectAdmin'de `portman_app/kanal/settings.json` → `"worker": "off"` yapılır (yeni iş alınmaz) ve asistana haber verilir.
 
 **Geri alma (E.5, gerekirse):** `yedek/`'teki eski `feature.php` ve `api.php` geri yüklenir. Paketin eski üç dosyası geri yüklenir, `current.sha256` en son. Ajan v1.1.1 paketini ve `agent.py`'sini geri kurar.
 
 ### F · Kalıcı moda geçiş
+**Onay (Lokman, 29.09 01:33):** yalnız F.
+- Konuşma ve proje durumu Postgres'e geçer. Patron modu ve Opus ayarı korunur; model, anahtar ve paket değişmez.
+- Yeni ücretli deneme yok. İşleyici yeniden açılmadan önce kuyrukta ücretli işlem doğuracak mesaj varsa ayrıca bildirilir.
+- Beklenmeyen dolu veritabanı ya da kayıt uyuşmazlığında silinmez, üzerine yazılmaz; durulur ve bildirilir.
+- E projesinin (`PM-PATRON-20260929-33807`) r01 durumu, konuşmayla ilişkisi ve PDF'i geçişte korunmalı; öncesi ve sonrası değer yazmadan karşılaştırılır.
+- G ve H'ye geçilmez; yerel ya da geçici dosya silinmez.
+
+**Uyarlama (29.09):** hosting'e kabuk erişimi yok, yalnız DirectAdmin var. Aşağıdaki hosting komutları panel adımlarıyla yapılır:
+- Boşalma, hosting yedeğinden (`state.json`) okunur.
+- Hosting yedeği, DirectAdmin'de sıkıştırılıp indirilen arşivdir.
+- Kuyruk denetimi, `state.json` yeniden indirilerek yapılır.
+
+Betikler:
+- `vps/kapi_f_on.sh`: salt okunur ön durum.
+- `vps/kapi_f.py`: Mac'te hosting yedeğinin özeti; VPS'te kaynak ↔ Postgres karşılaştırması. Değer yazmaz.
+- `vps/kapi_f_yedek.sh`: VPS arşivi.
+- `vps/kapi_f_aktar.sh`: göç ve içe aktarma. Ön koşullarda durur: yedeğin özeti, worker off, boş veritabanı.
+- `vps/kapi_f_kalici_ac.sh`: kalıcı mod.
+- `vps/kapi_f_dogrula.sh`: salt okunur son durum.
+
+Testler: `testler/kalici/test_kapi_f.py` (sahte yedek, gerçek Postgres, sahte hosting ve systemctl).
+
+**Tasarım gereği sınır:** geçişten önceki planlar (E'nin r01'i dahil) `projeler`/`revizyonlar` tablolarına yazılmaz.
+- r01 konuşma durumunda (`son_is_emri`, aşama `onay_bekliyor`), işin sonucunda (PDF yolu ve özeti) ve PDF dosyasında korunur.
+- Bu plana verilecek bir onay, eski yoldan (teslim sınırı denetimi olmadan) kaydedilir; `kalici.py` "geçişten önceki plan: revizyon kaydı yok".
+
 Geçiş sırasında gelen mesajlar: 1. adımdan 6. adıma kadar webhook yakalamaya devam eder, satırlar hosting kuyruğunda `queued` bekler; hiçbiri işlenmez ve kaybolmaz. 6. adımda ajan onları geliş sırasıyla alır. Geçiş 24 saati aşarsa hosting o mesajlara cevap göndermez (Meta'nın 24 saat penceresi; satır "held" olur ve uyarıya düşer).
 
 1. `KANAL/settings.json` → `"worker": "off"`. Hiçbir işleyici yeni iş almaz.
