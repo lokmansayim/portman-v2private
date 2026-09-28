@@ -255,7 +255,7 @@ ssh root@<VPS> 'bash -s' < "$K/kapi_d_dogrula.sh" 2>&1 | tee "$K/2_dogrula.txt"
   - PID 86646 kurulumdan önce ve sonra aynı; yeniden başlamadı;
   - dosya modunda: `PORTMAN_PG_DSN` yok, `pg.env` yok, ek yapılandırma yok;
   - `vps-agent-v1.1.1`; gönderilemeyip bekleyen sonuç 0; hosting ajanın anahtarını kabul ediyor (`worker` vps, `mode` patron, `dry_run` false).
-- **Günlük:** son 2 saatte 12 `api:` hatası var. Toplam 13 satırın biri 22:03:53'teki başlama satırı. C'nin 22:04 denetimi yeniden başlatmadan sonra 401 görmemişti; bu yüzden hataların C sırasındaki eski anahtar retleri olduğu düşünülüyor (hosting güncellendikten sonra, yeniden başlatmadan önce). Saatlerle kesinleştirilmedi.
+- **Günlük** (28.09 22:52, `gunluk_api_hatalari.sh`, salt okunur; `17_Kapi_D/3_api_hatalari.txt`): 12 `api:` hatasının hepsi HTTP 401 `unauthorized` (11 `settings`, 1 `claim`). Hepsi 22:00:54 ile 22:03:51 arasında, 16 sn aralıkla (ajanın 15 sn beklemesi) geldi. Hepsi C'de hosting'e yeni anahtar yazıldıktan sonra ve 22:03:53'teki yeniden başlatmadan önce; sonrasında hata 0. Bu, eski anahtarla çalışan sürecin reddedildiği pencere; not kapandı.
 - Kurulanlar: Postgres 16; yalnız yerel bağlantı; parolasız `portman` rolü (peer); saf psycopg; günlük `pg_dump`.
 - **Yedeklerin otomatik silinmesi varsayılan olarak kapalı (pilot).** Açmak ayrı bir tercih ve ayrı onaydır: `ssh root@<VPS> 'PM_YEDEK_SAKLA_GUN=14 bash -s' < vps/pg_kurulum.sh`. Kapalıyken yedekler birikir; disk VPS betiğiyle izlenir.
 - **Yerel bağlantı şartı sağlanmıyorsa betik durur**, uyarıp geçmez. Durdurma koşulları:
