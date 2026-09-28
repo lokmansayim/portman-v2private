@@ -89,6 +89,16 @@ class BellekKonusma(Konusma):
         self.gonderen = gonderen
         self.path = None
         self.d = json.loads(json.dumps(d)) if d else self._bos()
+        self.sifirlandi = False          # bu işte konuşma sıfırlandı mı (yeni talep, iptal, başka model)
+        self.yeni_notlar: list[dict] = []  # bu işte düşülen notlar (soru kaydı için; aynı saniyedeki eş notlarla karışmaz)
 
     def kaydet(self):
         self.d["guncellendi"] = int(time.time())
+
+    def sifirla(self):
+        super().sifirla()
+        self.sifirlandi = True
+
+    def not_dus(self, yon: str, metin: str, ek: dict | None = None):
+        super().not_dus(yon, metin, ek)
+        self.yeni_notlar.append(self.d["gecmis"][-1])

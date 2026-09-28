@@ -31,11 +31,12 @@ Gerçek WhatsApp ve gerçek LLM ile denenmedi. Bu testler canlı doğrulama değ
 | T3 | Yarım iş: süreç Motor sırasında öldürülür, yeniden başlayan işleyici bitirir; LLM yeniden çağrılmaz; üç denemede bitmeyen iş başarısız sayılır, bayiye ve Patron'a bildirim yazılır | `test_yeniden_baslatma.py` (gerçek süreç ve Motor), `test_kalici.py` |
 | T4 | Eski sürümle yazma reddedilir; kirası devredilen işin geç sonucu atılır; üç işleyici eşzamanlı çalışırken art arda iki değişiklik sırayla işlenir ve ikisi de son revizyonda olur | `test_kalici.py` |
 | T5 | Sonucu belirsiz gönderim yeniden gönderilmez; yarıda kalan gönderim belirsiz sayılır; kesin gönderilmeyen satır işaretlenir | `test_kalici.py` |
-| T6 | Başka bayinin revizyonu ve çıktısı okunamaz; bir bayinin onayı ya da cevabı ötekinin kaydını değiştirmez | `test_kalici.py` |
+| T6 | Başka numaranın revizyonu ve çıktısı okunamaz; bir bayinin onayı ya da cevabı ötekinin kaydını değiştirmez | `test_kalici.py`, `test_inceleme.py` |
 | T7 | Yeni revizyon iletilmeden yazılan onay, eski revizyonu alıntılayan onay ve iletimi belirsiz revizyona gelen onay kaydedilmez | `test_kalici.py` |
 | T8 | `pg_dump` yedeği ayrı bir veritabanına `pg_restore` ile yüklenir; bütün tablolar aynı; askıdaki soru oradan doğru cevapla sürer; asıl veritabanı etkilenmez | `test_kalici.py` |
 | T9 | Dosya düzeni (`durum/*.json`, `state.json`) → Postgres → dosya düzeni kayıpsız; askıdaki D-01 sorusu geçişten sonra cevaplanır; işlenmiş mesaj yeniden işlenmez | `test_kalici.py` |
 | T10 | Kabul gösterimi (aşağıda) | `kabul_gosterimi.py`, `test_kabul.py` |
+| İnceleme | Bağımsız incelemenin (28.09) bulguları ve yakalanmayan mutasyonlar. İşin bitişi yazılamazsa hiçbir sonuç kalmaz; mesaj ve iş birlikte yazılır (ikisi de tetikleyiciyle sınanır). İlk yazmada da sessiz ezme olmaz. Kirası devredilen işin eski sahibi yazamaz. Süresi dolan D-01 sorusundan sonra gelen onay da denetlenir. Soru kaydı cevaplandı, düştü ya da devredildi diye doğru kapanır. Aynı bayi kodlu iki numara birbirinin kaydını göremez ve aynı İş Emri numarası üretilse de dosya ezilmez. Değişmiş PDF gönderilmez. Geç gelen gönderim teyidi kaybolmaz. İşlenmekte olan mesaj varken geçiş yapılmaz. SIGTERM'de eldeki iş bitirilir. | `test_inceleme.py` |
 
 ## Kabul gösterimi
 

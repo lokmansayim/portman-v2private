@@ -244,11 +244,13 @@ def teknik_not(karar, talep, meta: dict, cizim: dict | None) -> str:
     return "\n— teknik: " + " | ".join(p)
 
 
-def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None) -> dict:
+def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje_koku: Path | None = None) -> dict:
     """Bir gelen mesajı işler; giden satırlarını ve sonucu döndürür (state.json'a yazmaz — çağıran yazar).
     İE-02 (kalıcı akış, kanal/kalici.py): k verilirse konuşma dosyadan değil o nesneden okunur; cikarim verilirse
-    ({"talep": …, "meta": …} ya da {"hata": …}) LLM çağrılmaz. İkisi de verilmezse davranış v1.1.1 ile aynı."""
-    from beyin import llm, katalog as KT
+    ({"talep": …, "meta": …} ya da {"hata": …}) LLM çağrılmaz; proje_koku verilirse Motor çıktısı projects/ yerine oraya
+    yazılır (kalıcı akış önce hazırlık klasörüne yazar, kayıtla birlikte yerine taşır). Hiçbiri verilmezse davranış
+    v1.1.1 ile aynı."""
+    from beyin import katalog as KT
     from beyin.konusma import Konusma
     from beyin.karar import karar_ver
     from motor import dxf_out
@@ -299,7 +301,7 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None) -> di
     cizim = None
     if karar.eylem == "is_emri" and karar.is_emri:
         ie = karar.is_emri; no = ie["is_emri_no"]; rev = int(ie.get("revizyon", 1))
-        hedef = KANAL / "projects" / no / f"r{rev:02d}"
+        hedef = (Path(proje_koku) if proje_koku else KANAL / "projects") / no / f"r{rev:02d}"
         t0 = time.time()
         try:
             m = dxf_out.uret(ie, hedef)

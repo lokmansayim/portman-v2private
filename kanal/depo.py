@@ -29,6 +29,36 @@ ESKI_SORU_SN = 24 * 3600                    # beyin/karar.py ile aynı süre
 HATA_BAYIYE = "Mesajınızı şu an işleyemedim; Lokman Bey'e iletiyorum, en kısa sürede dönüş yapılacak."
 
 
+# Eksik bilgi sorusu → cevabın düşeceği taslak alanları (beyin/karar.py::_soru çağrıları)
+SORU_ALANLARI = {"oda_programi": ("oda_programi",), "katalog_kodu": ("katalog_kodu",), "dis_olcu": ("dis_olcu", "alan_m2", "pano"),
+                 "model_veya_olcu": ("katalog_kodu", "dis_olcu", "pano"), "pencere_olcu": ("pencereler",), "pencere_mahal": ("pencereler",)}
+
+
+def _cevap_mi(alan: str, d_eski: dict, d_yeni: dict, sonuc: dict, ozet: dict) -> bool:
+    """Kapanan soru bu mesajla mı cevaplandı (değilse düştü)? D-01 ve B1 soruları kural katmanının notundan; eksik bilgi
+    soruları, sorulan alanın bu mesajla dolup dolmadığından okunur. İptal cevap sayılmaz."""
+    if alan == ESKI_TASLAK_SORUSU:
+        return bool(ozet.get("d01_cevap"))
+    if alan == "pencere_islem":
+        return bool(ozet.get("pencere_cevap"))
+    if sonuc.get("gerekce") == "iptal":
+        return False
+    te, ty = (d_eski or {}).get("taslak") or {}, (d_yeni or {}).get("taslak") or {}
+    alanlar = SORU_ALANLARI.get(alan)
+    if alanlar is None:                       # ör. revizyon_ne: taslak bu mesajla değiştiyse cevap
+        return ty != te
+    return any(ty.get(f) not in (None, [], {}, "") and ty.get(f) != te.get(f) for f in alanlar)
+
+
+def soru_ayrintisi(d: dict, alan: str) -> tuple:
+    """(bekletilen_talep, bekletilen_metin, pencere_satiri, deneme) — sorular tablosu için."""
+    d01 = alan == ESKI_TASLAK_SORUSU
+    return (Jsonb(d["bekleyen_talep"]) if d01 and d.get("bekleyen_talep") else None,
+            d.get("bekleyen_metin") if d01 else None,
+            Jsonb(d["pencere_islem_satiri"]) if alan == "pencere_islem" and d.get("pencere_islem_satiri") is not None else None,
+            int(d.get("eski_taslak_soru") or 1) if d01 else 1)
+
+
 class Cakisma(Exception):
     """Konuşma okunduktan sonra başka bir yazma oldu; sonuç yazılmadı (iş yeniden sıraya girer)."""
 
@@ -97,10 +127,11 @@ class Depo:
             raise ValueError("mesaj kimliği yok ya da çok uzun")
         bayi = gelen.get("bayi") or None
         with self.baglan() as c, c.transaction():
-            if isinstance(bayi, dict) and bayi.get("kod"):
-                c.execute("INSERT INTO bayiler (kod, ad, rol) VALUES (%s, %s, %s) ON CONFLICT (kod) DO UPDATE "
-                          "SET ad = EXCLUDED.ad, rol = EXCLUDED.rol, guncellendi = now()",
-                          (bayi["kod"], bayi.get("ad") or "", "patron" if (gelen.get("role") or bayi.get("rol")) == "patron" else "bayi"))
+            if isinstance(bayi, dict):          # kimlik numaradır; kod yalnız etiket (benzersiz değil, bkz. goc/001)
+                c.execute("INSERT INTO bayiler (numara, kod, ad, rol) VALUES (%s, %s, %s, %s) ON CONFLICT (numara) DO UPDATE "
+                          "SET kod = EXCLUDED.kod, ad = EXCLUDED.ad, rol = EXCLUDED.rol, guncellendi = now()",
+                          (str(gelen["sender"]), bayi.get("kod"), bayi.get("ad") or "",
+                           "patron" if (gelen.get("role") or bayi.get("rol")) == "patron" else "bayi"))
             r = c.execute(
                 "INSERT INTO mesajlar (id, gonderen, bayi_kod, tur, metin, alinti_id, wa_zamani, ham) "
                 "VALUES (%s, %s, %s, %s, %s, %s, to_timestamp(%s), %s) ON CONFLICT (id) DO NOTHING RETURNING id",
@@ -153,9 +184,9 @@ class Depo:
             return r is not None
 
     def is_geri_birak(self, is_id: int, sahip: str, neden: str) -> None:
-        """Çakışmada iş sıraya geri döner (deneme sayısı kalır); sahibi değilse dokunulmaz."""
+        """Çakışmada iş sıraya geri döner; çakışma bir çöküş olmadığı için deneme hakkından düşülmez. Sahibi değilse dokunulmaz."""
         with self.baglan() as c, c.transaction():
-            c.execute("UPDATE isler SET durum = 'sirada', sahip = NULL, kira_bitis = NULL, hata = %s "
+            c.execute("UPDATE isler SET durum = 'sirada', sahip = NULL, kira_bitis = NULL, hata = %s, deneme = greatest(deneme - 1, 0) "
                       "WHERE id = %s AND sahip = %s AND durum = 'isleniyor'", (neden, is_id, sahip))
 
     # ───────────────────────── konuşma ─────────────────────────
@@ -234,28 +265,24 @@ class Depo:
 
     def _soru_kaydi(self, c, gelen: dict, d_eski: dict, d_yeni: dict, sonuc: dict, karar_ozeti: dict) -> None:
         """Konuşmadaki askıdaki soruyu sorular tablosuna işler (aynı işlemde). Kural katmanının okuduğu kaynak konuşma
-        kaydıdır; bu tablo hangi mesajın soruyu doğurduğunu, hangisinin kapattığını tutar."""
+        kaydıdır; bu tablo hangi mesajın soruyu doğurduğunu, hangisinin kapattığını ve nasıl kapandığını tutar."""
         acik = c.execute("SELECT * FROM sorular WHERE gonderen = %s AND durum = 'acik' FOR UPDATE", (gelen["sender"],)).fetchone()
         alan = d_yeni.get("son_soru_alani")
         eylem = sonuc.get("eylem")
         simdi = time.time()
-
-        def kapat(durum: str):
-            c.execute("UPDATE sorular SET durum = %s, cevap_mesaj_id = %s, kapandi = now() WHERE id = %s", (durum, gelen["id"], acik["id"]))
-
-        def kapanis() -> str:
-            if eylem == "yonlendir":
-                return "devredildi"
-            if acik["alan"] == ESKI_TASLAK_SORUSU:
-                return "cevaplandi" if karar_ozeti.get("d01_cevap") else "dustu"
-            if acik["alan"] == "pencere_islem":
-                return "cevaplandi" if karar_ozeti.get("pencere_cevap") else "dustu"
-            return "cevaplandi"
-
-        ayni = acik is not None and alan == acik["alan"] and (
-            alan != ESKI_TASLAK_SORUSU or (d_yeni.get("bekleyen_metin") or "") == (acik["bekletilen_metin"] or ""))
+        ayni = (acik is not None and not karar_ozeti.get("sifirlandi") and alan == acik["alan"]
+                and (alan != ESKI_TASLAK_SORUSU or (d_yeni.get("bekleyen_metin") or "") == (acik["bekletilen_metin"] or "")))
         if acik is not None and not ayni:
-            kapat(kapanis())
+            # Sorulan bilgi bu mesajla geldiyse cevaplandi. Talep insana devredildiyse devredildi (devirde taslak boşaldığı
+            # için cevabın gelip gelmediği okunamaz). Konuşma sıfırlandıysa (yeni talep, iptal, başka model) ya da soru
+            # başka yoldan kalktıysa dustu.
+            if _cevap_mi(acik["alan"], d_eski, d_yeni, sonuc, karar_ozeti):
+                kapanis = "cevaplandi"
+            elif eylem == "yonlendir" and not karar_ozeti.get("sifirlandi"):
+                kapanis = "devredildi"
+            else:
+                kapanis = "dustu"
+            c.execute("UPDATE sorular SET durum = %s, cevap_mesaj_id = %s, kapandi = now() WHERE id = %s", (kapanis, gelen["id"], acik["id"]))
             acik = None
         if alan is None:
             return
@@ -265,14 +292,13 @@ class Depo:
                 c.execute("UPDATE sorular SET deneme = %s, son_soruldu = now(), gecerlilik_sonu = %s WHERE id = %s",
                           (max(deneme, acik["deneme"]), self._gecerlilik(d_yeni, alan), acik["id"]))
             return
+        if eylem != "sor":
+            return                  # bu işte sorulmadı (ör. kaydı olmayan eski soru): bu mesaj onun kaynağı değil
         c.execute(
             "INSERT INTO sorular (gonderen, proje_id, alan, kaynak_mesaj_id, bekletilen_talep, bekletilen_metin, pencere_satiri, deneme, "
             "soruldu, son_soruldu, gecerlilik_sonu) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, to_timestamp(%s), to_timestamp(%s), %s)",
-            (gelen["sender"], d_yeni.get("proje_id"), alan, gelen["id"],
-             Jsonb(d_yeni["bekleyen_talep"]) if alan == ESKI_TASLAK_SORUSU and d_yeni.get("bekleyen_talep") else None,
-             d_yeni.get("bekleyen_metin") if alan == ESKI_TASLAK_SORUSU else None,
-             Jsonb(d_yeni["pencere_islem_satiri"]) if alan == "pencere_islem" and d_yeni.get("pencere_islem_satiri") is not None else None,
-             int(d_yeni.get("eski_taslak_soru") or 1) if alan == ESKI_TASLAK_SORUSU else 1, simdi, simdi, self._gecerlilik(d_yeni, alan)))
+            (gelen["sender"], d_yeni.get("proje_id"), alan, gelen["id"], *soru_ayrintisi(d_yeni, alan), simdi, simdi,
+             self._gecerlilik(d_yeni, alan)))
 
     @staticmethod
     def _gecerlilik(d: dict, alan: str):
@@ -300,19 +326,21 @@ class Depo:
                 "WHERE g.dis_id = %s AND r.gonderen = %s ORDER BY r.id DESC LIMIT 1", (dis_id, gonderen)).fetchone()
 
     # ───────────────────────── bayi kapsamlı okuma ─────────────────────────
-    def projeler(self, bayi_kod: str) -> list[dict]:
+    # Kapsam anahtarı bayinin WhatsApp numarasıdır (Meta imzalı webhook'un doğruladığı gönderen); bayi kodu benzersiz değildir.
+    # Bugün bu işlevleri akışın kendisi çağırmıyor (akış zaten gönderen numarasına bağlı); panel ya da yeniden gönderim için.
+    def projeler(self, gonderen: str) -> list[dict]:
         with self.baglan() as c:
-            return c.execute("SELECT id, ilk_is_emri_no, olusturuldu FROM projeler WHERE bayi_kod = %s ORDER BY id", (bayi_kod,)).fetchall()
+            return c.execute("SELECT id, ilk_is_emri_no, olusturuldu FROM projeler WHERE gonderen = %s ORDER BY id", (gonderen,)).fetchall()
 
-    def revizyon(self, bayi_kod: str, is_emri_no: str, rev: int | None = None) -> dict | None:
+    def revizyon(self, gonderen: str, is_emri_no: str, rev: int | None = None) -> dict | None:
         """Başka bayinin revizyonu için None (numara bilinse bile). rev verilmezse o numaranın son revizyonu."""
         with self.baglan() as c:
             return c.execute("SELECT id, proje_id, rev, is_emri_no, durum, pdf_yolu, pdf_sha256 FROM revizyonlar "
-                             "WHERE bayi_kod = %s AND is_emri_no = %s AND (%s::int IS NULL OR rev = %s) ORDER BY rev DESC LIMIT 1",
-                             (bayi_kod, is_emri_no, rev, rev)).fetchone()
+                             "WHERE gonderen = %s AND is_emri_no = %s AND (%s::int IS NULL OR rev = %s) ORDER BY rev DESC LIMIT 1",
+                             (gonderen, is_emri_no, rev, rev)).fetchone()
 
-    def cikti_yolu(self, bayi_kod: str, is_emri_no: str, rev: int | None = None) -> str | None:
-        r = self.revizyon(bayi_kod, is_emri_no, rev)
+    def cikti_yolu(self, gonderen: str, is_emri_no: str, rev: int | None = None) -> str | None:
+        r = self.revizyon(gonderen, is_emri_no, rev)
         return r["pdf_yolu"] if r else None
 
     # ───────────────────────── gönderim ─────────────────────────
@@ -332,7 +360,13 @@ class Depo:
             return r
 
     def gonderim_sonucu(self, satir_id_: str, durum: str, dis_id: str | None = None, hata: str | None = None) -> None:
+        """'iletildi' = WhatsApp API gönderimi kabul etti (teslim değil). Belirsiz sayıldıktan sonra gelen kabul teyidi de
+        yazılır (bilgi kaybolmaz; yeniden gönderim değildir). Öteki sonuçlar yalnız 'gonderiliyor' satırına yazılır."""
         assert durum in ("iletildi", "belirsiz", "gonderilmedi")
         with self.baglan() as c, c.transaction():
-            c.execute("UPDATE giden SET durum = %s, dis_id = %s, hata = %s, iletildi = CASE WHEN %s = 'iletildi' THEN now() END "
-                      "WHERE id = %s AND durum = 'gonderiliyor'", (durum, dis_id, hata, durum, satir_id_))
+            if durum == "iletildi":
+                c.execute("UPDATE giden SET durum = 'iletildi', dis_id = %s, iletildi = now(), "
+                          "hata = CASE WHEN durum = 'belirsiz' THEN 'Belirsiz sayıldıktan sonra kabul teyidi geldi.' END "
+                          "WHERE id = %s AND durum IN ('gonderiliyor', 'belirsiz')", (dis_id, satir_id_))
+            else:
+                c.execute("UPDATE giden SET durum = %s, hata = %s WHERE id = %s AND durum = 'gonderiliyor'", (durum, hata, satir_id_))

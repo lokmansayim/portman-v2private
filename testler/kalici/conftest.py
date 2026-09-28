@@ -106,6 +106,16 @@ class SahteWhatsApp:
         return f"wamid.OUT{len(self.gonderilen):04d}"
 
 
+@pytest.fixture(autouse=True)
+def kanal_dizini(tmp_path, monkeypatch):
+    """Her test kendi projects/ klasörünü kullanır (İş Emri numarası saniyeye bağlı: testler arası klasör çakışmasın)."""
+    import worker
+    d = tmp_path / "kanal"; d.mkdir()
+    monkeypatch.setattr(worker, "KANAL", d)
+    monkeypatch.setenv("PORTMAN_KANAL_DIR", str(d))
+    return d
+
+
 @pytest.fixture
 def wa():
     return SahteWhatsApp()

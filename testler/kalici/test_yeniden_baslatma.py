@@ -16,13 +16,14 @@ from pathlib import Path
 from conftest import AYAR, KANAL_VERI, KOK, mesaj, sorgu, talep, tek
 
 import kalici
+import worker as W
 
 T_P6001 = talep(ozet="P6001 aynalı", katalog_kodu="P6001", varyantlar=[{"tur": "ayna_x", "aciklama": "aynalı"}])
 
 
 def _isleyici(depo, ayar: Path) -> subprocess.Popen:
     env = {k: v for k, v in os.environ.items() if not k.startswith(("OPENAI", "ANTHROPIC"))}
-    env.update(PORTMAN_PG_DSN=depo.dsn, PORTMAN_KANAL_DIR=str(KANAL_VERI))
+    env.update(PORTMAN_PG_DSN=depo.dsn, PORTMAN_KANAL_DIR=str(W.KANAL))
     return subprocess.Popen([sys.executable, str(KOK / "kanal" / "kalici.py"), "isle", "--ayar", str(ayar), "--tek"],
                             env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 

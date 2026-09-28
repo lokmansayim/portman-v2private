@@ -114,7 +114,7 @@ def yeni_surecte_isle(depo, *, tek=True) -> dict:
              "import conftest\nfrom motor import dxf_out\ndxf_out.uret = conftest.sahte_uret\n"
              "import kalici\nsys.exit(kalici.main(['isle', '--ayar', %r] + (['--tek'] if %r else [])))\n"
              % (str(KOK / "testler" / "kalici"), str(KOK), str(KOK / "kanal"), str(ayar), tek))
-    env = {**os.environ, "PORTMAN_PG_DSN": depo.dsn, "PORTMAN_KANAL_DIR": str(KANAL_VERI)}
+    env = {**os.environ, "PORTMAN_PG_DSN": depo.dsn, "PORTMAN_KANAL_DIR": str(W.KANAL)}
     r = subprocess.run([sys.executable, "-c", betik], capture_output=True, text=True, env=env, timeout=300)
     assert r.returncode == 0, r.stderr[-2000:]
     satirlar = [l for l in r.stdout.splitlines() if l.startswith("{")]
@@ -351,9 +351,9 @@ def test_t6_baska_bayinin_kaydi_okunamaz_ve_onayi_etkilemez(depo, wa, hizli_moto
     plan_iste(depo, wa, numara=NUMARA_B, bayi=BAYI_B)
     ra = tek(depo, "SELECT * FROM revizyonlar WHERE bayi_kod = 'TSTA'")
     rb = tek(depo, "SELECT * FROM revizyonlar WHERE bayi_kod = 'TSTB'")
-    assert depo.revizyon("TSTB", ra["is_emri_no"]) is None and depo.cikti_yolu("TSTB", ra["is_emri_no"]) is None
-    assert depo.revizyon("TSTA", ra["is_emri_no"])["id"] == ra["id"]
-    assert [p["ilk_is_emri_no"] for p in depo.projeler("TSTB")] == [rb["is_emri_no"]]
+    assert depo.revizyon(NUMARA_B, ra["is_emri_no"]) is None and depo.cikti_yolu(NUMARA_B, ra["is_emri_no"]) is None
+    assert depo.revizyon(NUMARA_A, ra["is_emri_no"])["id"] == ra["id"]
+    assert [p["ilk_is_emri_no"] for p in depo.projeler(NUMARA_B)] == [rb["is_emri_no"]]
     time.sleep(1.1)
     depo.mesaj_kaydet(mesaj("onaylıyorum", T_ONAY, numara=NUMARA_B, bayi=BAYI_B)); isle_hepsi(depo)
     assert tek(depo, "SELECT durum FROM revizyonlar WHERE id = %s", ra["id"])["durum"] == "onay_bekliyor"
@@ -482,7 +482,9 @@ def test_t9_json_postgres_json_kayipsiz_ve_bekleyen_soru_surer(depo, tmp_path, h
     (kanal / "state.json").write_text(json.dumps({"version": 1, "inbound": kuyruk, "outbound": {}}, ensure_ascii=False))
     once = {p.name: json.loads(p.read_text()) for p in (kanal / "durum").glob("*.json")}
     say = depo_aktar.ice_aktar(depo, kanal)
-    assert say == {"konusma": 2, "konusma_atlandi": 0, "mesaj": 2, "mesaj_atlandi": 0, "sirada": 1}
+    assert say == {"konusma": 2, "konusma_atlandi": 0, "soru": 1, "mesaj": 2, "mesaj_atlandi": 0, "sirada": 1}
+    s = tek(depo, "SELECT * FROM sorular")
+    assert (s["alan"], s["kaynak_mesaj_id"], s["durum"]) == ("yeni_mi_degisiklik", None, "acik") and "120x180" in s["bekletilen_metin"]
     assert depo_aktar.ice_aktar(depo, kanal)["konusma_atlandi"] == 2                # ikinci kez: üzerine yazılmaz
     assert depo.mesaj_kaydet(kuyruk["wamid.ESKI1"]) is False                        # işlenmiş mesaj yeniden gelirse işlenmez
     geri = tmp_path / "geri"
@@ -490,6 +492,8 @@ def test_t9_json_postgres_json_kayipsiz_ve_bekleyen_soru_surer(depo, tmp_path, h
     assert {p.name: json.loads(p.read_text()) for p in (geri / "durum").glob("*.json")} == once
     [r] = isle_hepsi(depo)                                          # geçişte sıradaki cevap, askıdaki soruya bağlanır
     assert r["mesaj_id"] == "wamid.BEKLEYEN1" and r["eylem"] == "is_emri"
+    s = tek(depo, "SELECT * FROM sorular")
+    assert (s["durum"], s["cevap_mesaj_id"]) == ("cevaplandi", "wamid.BEKLEYEN1")
     ie = tek(depo, "SELECT is_emri FROM revizyonlar")["is_emri"]
     assert _aynali(ie) and _pencere_var(ie, "YATAK ODASI 1", "120x180")
 

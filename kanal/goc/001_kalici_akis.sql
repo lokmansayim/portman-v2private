@@ -1,8 +1,11 @@
 -- İE-02 · 001: kalıcı konuşma ve iş akışı. Göç çalıştırıcı: kanal/depo.py (Depo.goc_uygula).
 -- Zamanlar timestamptz (UTC). Telefon numarası yalnız yönlendirme anahtarıdır; günlüklere maskeli yazılır.
 
+-- Bayi kimliği WhatsApp numarasıdır (Meta imzalı webhook doğrular). 'kod' yalnız etikettir: panelde kod yoksa feature.php
+-- numaranın son 4 hanesinden türetir ('B' + 4 hane), bu yüzden benzersiz değildir ve yetki ayrımında kullanılmaz.
 CREATE TABLE bayiler (
-    kod          text PRIMARY KEY,
+    numara       text PRIMARY KEY,
+    kod          text,
     ad           text NOT NULL DEFAULT '',
     rol          text NOT NULL DEFAULT 'bayi' CHECK (rol IN ('bayi', 'patron')),
     olusturuldu  timestamptz NOT NULL DEFAULT now(),
@@ -13,7 +16,7 @@ CREATE TABLE bayiler (
 CREATE TABLE mesajlar (
     id           text PRIMARY KEY,
     gonderen     text NOT NULL,
-    bayi_kod     text REFERENCES bayiler(kod),
+    bayi_kod     text,                          -- etiket (bkz. bayiler)
     tur          text NOT NULL,
     metin        text NOT NULL DEFAULT '',
     alinti_id    text,                          -- bayinin alıntılayarak cevap verdiği mesaj (WhatsApp context.id), varsa
@@ -44,7 +47,7 @@ CREATE INDEX isler_acik ON isler (gonderen, id) WHERE durum IN ('sirada', 'islen
 -- Gönderen başına konuşma durumu (beyin/konusma.py'nin sözlüğü). surum: okunan sürümle yazılır, sessiz ezme olmaz.
 CREATE TABLE konusmalar (
     gonderen     text PRIMARY KEY,
-    bayi_kod     text REFERENCES bayiler(kod),
+    bayi_kod     text,
     durum        jsonb NOT NULL,
     surum        bigint NOT NULL DEFAULT 1,
     guncellendi  timestamptz NOT NULL DEFAULT now()
@@ -53,11 +56,11 @@ CREATE TABLE konusmalar (
 CREATE TABLE projeler (
     id              bigserial PRIMARY KEY,
     gonderen        text NOT NULL,
-    bayi_kod        text REFERENCES bayiler(kod),
+    bayi_kod        text,
     ilk_is_emri_no  text NOT NULL,
     olusturuldu     timestamptz NOT NULL DEFAULT now()
 );
-CREATE INDEX projeler_bayi ON projeler (bayi_kod, id);
+CREATE INDEX projeler_gonderen ON projeler (gonderen, id);
 
 CREATE TABLE revizyonlar (
     id              bigserial PRIMARY KEY,
@@ -65,7 +68,7 @@ CREATE TABLE revizyonlar (
     rev             int NOT NULL,
     is_emri_no      text NOT NULL,
     gonderen        text NOT NULL,
-    bayi_kod        text REFERENCES bayiler(kod),
+    bayi_kod        text,
     kaynak_mesaj_id text NOT NULL REFERENCES mesajlar(id),
     is_emri         jsonb NOT NULL,
     pdf_yolu        text,
@@ -87,7 +90,7 @@ CREATE TABLE sorular (
     gonderen         text NOT NULL,
     proje_id         bigint REFERENCES projeler(id),
     alan             text NOT NULL,             -- son_soru_alani: yeni_mi_degisiklik, pencere_islem, pencere_mahal, …
-    kaynak_mesaj_id  text NOT NULL REFERENCES mesajlar(id),
+    kaynak_mesaj_id  text REFERENCES mesajlar(id),   -- boş: soru dosya düzeninden geçişte geldi, doğuran mesaj bilinmiyor
     bekletilen_talep jsonb,                     -- D-01: bekletilen mesajın talebi
     bekletilen_metin text,
     pencere_satiri   jsonb,                     -- B1: sorulan pencere satırı
@@ -118,6 +121,7 @@ CREATE TABLE giden (
                      CHECK (durum IN ('bekliyor', 'gonderiliyor', 'iletildi', 'belirsiz', 'gonderilmedi')),
     deneme           int NOT NULL DEFAULT 0,
     dis_id           text,                      -- WhatsApp'ın verdiği giden mesaj kimliği
+    -- 'iletildi' ve iletildi zamanı: WhatsApp API'nin gönderimi KABUL ETTİĞİ an (Cloud API 'accepted'); bayiye teslim değildir.
     hata             text,
     olusturuldu      timestamptz NOT NULL DEFAULT now(),
     gonderim_basladi timestamptz,

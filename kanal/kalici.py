@@ -12,8 +12,10 @@ Komut satırı (yalnız yerel/izole ortam; PORTMAN_PG_DSN ve PORTMAN_KANAL_DIR o
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
+import signal
 import socket
 import sys
 import time
@@ -45,11 +47,11 @@ def _kopya(d):
 
 
 # ───────────────────────── revizyon onayı ─────────────────────────
-def onay_denetimi(depo: Depo, gelen: dict, d: dict | None, talep: dict) -> dict | None:
-    """Onay, bayinin mesajı yazdığı anda kendisine iletilmiş son revizyona bağlanır. Bağlanamıyorsa
-    {"neden", "mesaj", "patrona"} döner ve onay kaydedilmez; bağlanıyorsa (ya da denetlenecek bir şey yoksa) None."""
-    if (talep or {}).get("niyet") != "onay" or not d or d.get("asama") != "onay_bekliyor" or d.get("son_soru_alani") \
-            or not d.get("son_is_emri"):
+def onay_denetimi(depo: Depo, gelen: dict, d: dict | None) -> dict | None:
+    """Kural katmanı bir onay kaydettiyse çağrılır (d: işten önceki konuşma). Onay, bayinin mesajı yazdığı anda WhatsApp'ın
+    gönderimini kabul ettiği son revizyona bağlanır ("iletildi": API kabulü, teslim değil). Bağlanamıyorsa
+    {"neden", "mesaj", "patrona"} döner ve onay kaydedilmez; bağlanıyorsa None."""
+    if not d or d.get("asama") != "onay_bekliyor" or not d.get("son_is_emri"):
         return None
     ie = d["son_is_emri"]; no = ie.get("is_emri_no"); rev = int(ie.get("revizyon") or 1)
     r = depo.revizyon_iletimi(gelen["sender"], no, rev)
@@ -85,14 +87,14 @@ def _red_ciktisi(gelen: dict, k: BellekKonusma, talep: dict, red: dict) -> dict:
                                              "asama": k.d.get("asama")}}
 
 
-def _karar_ozeti(d_eski: dict | None, d_yeni: dict, cikti: dict, t0: float) -> dict:
-    """Soru ve revizyon kayıtları için bu işte ne olduğunu konuşma notlarından okur (kural koduna dokunmadan)."""
-    eski = (d_eski or {}).get("gecmis") or []
-    yeni = [g for g in d_yeni.get("gecmis") or [] if int(g.get("t") or 0) >= int(t0) and g not in eski]
-    kural = [str(g.get("metin") or "") for g in yeni if g.get("yon") == "kural"]
+def _karar_ozeti(d_eski: dict | None, k: BellekKonusma, cikti: dict) -> dict:
+    """Soru ve revizyon kayıtları için bu işte ne olduğu: kural katmanının bu işte düştüğü notlardan ve konuşmanın
+    sıfırlanıp sıfırlanmadığından okunur (kural koduna dokunmadan)."""
+    kural = [str(g.get("metin") or "") for g in k.yeni_notlar if g.get("yon") == "kural"]
     onay = (cikti.get("sonuc") or {}).get("gerekce") == "plan onaylandı"
     ie = (d_eski or {}).get("son_is_emri") or {}
-    return {"d01_cevap": any(n.startswith("eski taslak sorusunun cevabı") for n in kural),
+    return {"sifirlandi": k.sifirlandi,
+            "d01_cevap": any(n.startswith("eski taslak sorusunun cevabı") for n in kural),
             "pencere_cevap": any(n.startswith("pencere_islem cevabı") for n in kural),
             "onaylanan_is_emri_no": ie.get("is_emri_no") if onay else None,
             "onaylanan_rev": int(ie.get("revizyon") or 1) if onay else None}
@@ -120,10 +122,15 @@ def bir_is(depo: Depo, settings: dict, sahip: str | None = None) -> dict | None:
             cikarim = {"hata": f"{type(e).__name__}: {str(e)[:300]}"}
         if not depo.cikarim_kaydet(j["id"], sahip, cikarim):
             return {"durum": "atildi", "is_id": j["id"], "neden": "kira kaybedildi (çıkarım kaydı)"}
+    hazirlik = W.KANAL / "projects" / ".hazirlik" / f"is{j['id']}-d{j['deneme']}"
     try:
-        red = onay_denetimi(depo, gelen, d, cikarim["talep"]) if yazili and not cikarim.get("hata") else None
-        cikti = _red_ciktisi(gelen, k, cikarim["talep"], red) if red else \
-            W.isle(gelen, settings, k=k, cikarim=cikarim if yazili else None)
+        cikti = W.isle(gelen, settings, k=k, cikarim=cikarim if yazili else None, proje_koku=hazirlik)
+        # Onay denetimi kuralın sonucuna bakar: hangi yoldan olursa olsun (ör. süresi dolan D-01 sorusundan sonra) bir onay
+        # kaydedildiyse, onay bayinin gördüğü revizyona bağlanabiliyor mu diye sınanır; bağlanamıyorsa onay yazılmaz.
+        red = onay_denetimi(depo, gelen, d) if (cikti.get("sonuc") or {}).get("gerekce") == "plan onaylandı" else None
+        if red:
+            k = BellekKonusma(gelen["sender"], d)
+            cikti = _red_ciktisi(gelen, k, cikarim["talep"], red)
     except Exception:
         hata = traceback.format_exc()[-2500:]
         k = BellekKonusma(gelen["sender"], d)       # yarım kalan durum değişikliği yazılmaz
@@ -132,15 +139,71 @@ def bir_is(depo: Depo, settings: dict, sahip: str | None = None) -> dict | None:
                     [W.giden_metin(gelen, f"Portman: {maske(gelen['sender'])} mesajı işlenirken hata oluştu; günlüğe bakın.", 2, "PATRON", "bildirim")]),
                  "sonuc": {"eylem": "hata", "gerekce": "beklenmeyen hata"}, "hata": hata}
     cikti["sonuc"]["worker"] = "kalici"; cikti["sonuc"]["sure_s"] = round(time.time() - t0, 1)
+    yer = None
     try:
-        kayit = depo.isi_bitir(j, sahip, gelen, surum, d_eski, k.d, cikti, _karar_ozeti(d_eski, k.d, cikti, t0))
+        yer = _yerlestir(cikti, hazirlik)
+        kayit = depo.isi_bitir(j, sahip, gelen, surum, d_eski, k.d, cikti, _karar_ozeti(d_eski, k, cikti))
     except Cakisma as e:
+        _yerlestirmeyi_geri_al(yer)
         depo.is_geri_birak(j["id"], sahip, str(e))
         return {"durum": "cakisma", "is_id": j["id"], "neden": str(e)}
     except KiraKaybi as e:
+        _yerlestirmeyi_geri_al(yer)
         return {"durum": "atildi", "is_id": j["id"], "neden": str(e)}
+    except BaseException:
+        _yerlestirmeyi_geri_al(yer)
+        raise
+    _bos_klasorleri_sil(hazirlik)
     return {"durum": "basarisiz" if cikti.get("hata") else "bitti", "is_id": j["id"], "mesaj_id": gelen["id"],
             "eylem": cikti["sonuc"].get("eylem"), "gerekce": cikti["sonuc"].get("gerekce"), "giden": len(cikti["satirlar"]), **kayit}
+
+
+def _yerlestir(cikti: dict, hazirlik: Path):
+    """Motor çıktısını hazırlık klasöründen projects/<no>/rNN'e taşır. Hedef klasör yalnız yoksa açılır (os.mkdir, süreçler
+    arası da tek); varsa başka bir iş aynı numarayı üretmiştir: üzerine yazılmaz, Cakisma. Satırlardaki yollar güncellenir."""
+    s = cikti.get("sonuc") or {}
+    if not s.get("is_emri_no"):
+        return None
+    rev_ad = f"r{int(s.get('revizyon') or 1):02d}"
+    kaynak = hazirlik / s["is_emri_no"] / rev_ad
+    if not kaynak.is_dir():
+        return None
+    hedef = W.KANAL / "projects" / s["is_emri_no"] / rev_ad
+    hedef.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        os.mkdir(hedef)
+    except FileExistsError:
+        raise Cakisma(f"projects/{s['is_emri_no']}/{rev_ad} başka bir işe ait; üzerine yazılmaz") from None
+    for f in kaynak.iterdir():
+        os.replace(f, hedef / f.name)
+    eski, yeni = str(kaynak), str(hedef)
+    for r in cikti.get("satirlar") or []:
+        if r.get("file"):
+            r["file"] = r["file"].replace(eski, yeni, 1)
+    cz = s.get("cizim") or {}
+    for a in ("pdf", "dxf"):
+        if cz.get(a):
+            cz[a] = cz[a].replace(eski, yeni, 1)
+    return kaynak, hedef
+
+
+def _yerlestirmeyi_geri_al(yer) -> None:
+    """Kayıt yazılamadıysa taşınan dosyalar hazırlığa geri döner; projects/<no>/rNN boşalır (numara başkasını engellemez)."""
+    if not yer:
+        return
+    kaynak, hedef = yer
+    kaynak.mkdir(parents=True, exist_ok=True)
+    for f in hedef.iterdir():
+        os.replace(f, kaynak / f.name)
+    hedef.rmdir()
+
+
+def _bos_klasorleri_sil(hazirlik: Path) -> None:
+    for d in sorted((p for p in hazirlik.rglob("*") if p.is_dir()), key=lambda p: -len(p.parts)) + [hazirlik]:
+        try:
+            d.rmdir()
+        except OSError:
+            pass
 
 
 # ───────────────────────── gönderim ─────────────────────────
@@ -152,6 +215,12 @@ def gonder(depo: Depo, gonderici, en_fazla: int = 100) -> dict:
         r = depo.gonderime_al()
         if r is None:
             break
+        if r["kind"] == "document":         # feature.php gibi: dosya yoksa ya da kayıttaki özetle uyuşmuyorsa gönderilmez
+            p = Path(r["dosya"] or "")
+            if not p.is_file() or (r["sha256"] and hashlib.sha256(p.read_bytes()).hexdigest() != r["sha256"]):
+                depo.gonderim_sonucu(r["id"], "gonderilmedi", hata="PDF dosyası yok ya da kayıttan sonra değişmiş; gönderilmedi")
+                say["gonderilmedi"] += 1
+                continue
         try:
             dis_id = gonderici(r)
             depo.gonderim_sonucu(r["id"], "iletildi", dis_id=dis_id); say["iletildi"] += 1
@@ -179,16 +248,23 @@ def main(argv=None) -> int:
         return 0
     settings = json.loads(Path(ns.ayar).read_text(encoding="utf-8"))
     sahip = isleyici_adi()
-    while True:
+    dur = {"istendi": False}
+    # SIGTERM (servis yeniden başlatma): elindeki işi bitirir, sonra çıkar; iş yarıda kalıp kira beklemez
+    signal.signal(signal.SIGTERM, lambda *_: dur.__setitem__("istendi", True))
+    while not dur["istendi"]:
         r = bir_is(depo, settings, sahip)
         if r is not None:
-            print(json.dumps({k: v for k, v in r.items() if k != "mesaj_id"}, ensure_ascii=False), flush=True)
+            # günlüğe bayinin metni ya da numarası yazılmaz
+            print(json.dumps({k: r.get(k) for k in ("durum", "is_id", "eylem", "giden", "proje_id", "revizyon_id")}, ensure_ascii=False), flush=True)
             if ns.tek:
                 return 0
             continue
         if ns.bos_bekle <= 0:
             return 0
-        time.sleep(ns.bos_bekle)
+        bitis = time.time() + ns.bos_bekle
+        while time.time() < bitis and not dur["istendi"]:
+            time.sleep(min(0.1, ns.bos_bekle))
+    return 0
 
 
 if __name__ == "__main__":
