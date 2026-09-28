@@ -204,6 +204,13 @@ Adımlar (`vps/kapi_c.py`; her adım öncekinin geçtiğini denetler, geçmezse 
 8. Lokman OpenAI'da eski anahtarı iptal eder (Revoke).
 9. `bitir`: eski eşleşme anahtarı hosting'te, eski OpenAI anahtarı OpenAI'de geçersiz (401); yenileri çalışıyor. Sonra geçici klasör silinir. Eski OpenAI anahtarı hâlâ geçerliyse klasör silinmez, adım yinelenir.
 
+**Adım 1 sonucu (28.09 21:40; dosyalar Lokman'ın Mac'inde tarandı, dışarı çıkmadı).**
+- Sohbet botu (`ai.php`) OpenAI anahtarını kendi içinde tutmuyor. `otomatikYanit` → `ayarlarOku()` → `openaiSor` yolunu izliyor; `ayarlarOku`, `jsonOku('ayarlar')` ile `developer/veri/ayarlar.json`'u okuyor (`config.php`).
+- Portman'ın okuduğu dosya da aynı: `settings.json` → `ayarlar_json` = `…/public_html/developer/veri/ayarlar.json`. Anahtar tek yerde değişince ikisi birlikte yeni anahtara geçer; eski anahtarın iptali sohbet botunu durdurmaz.
+- Bot yalnız `api.openai.com/v1/chat/completions` çağırıyor. Yeni anahtar kısıtlı olabilir: Models okuma, Model capabilities yazma, gerisi kapalı.
+- `config.php`'de WhatsApp erişim anahtarı, doğrulama belirteci, panel parolası ve telefon numaraları kodun içinde. C'nin kapsamı dışında; yalnız not edildi. Yerel kopyalar C'den sonra silinmeli.
+- Asistanın ortamlarından VPS'in 22. portuna ağ yolu yok: Mac'teki yalıtılmış Linux ortamında "Network is unreachable", bulut ortamında zaman aşımı. Lokman'ın Mac'teki SSH anahtarı bu ortamlardan görünmez ve okunmadı. VPS adımlarını Lokman yürütür.
+
 Sınanması: `testler/kalici/test_kapi_c.py`. Sahte hosting, sahte OpenAI ve sahte systemctl ile uçtan uca sınandı: sıra zorunlu; hosting güncellenmeden yeniden başlatma yok; iptalsiz bitiş yok; hiçbir çıktıda anahtar parçası yok.
 
 ### D · VPS'e Postgres kurulumu (trafik değişmez)
