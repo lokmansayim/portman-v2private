@@ -275,6 +275,9 @@ def referans_zinciri(son: Path) -> tuple[dict, list[str]]:
             raise ReferansHatasi(f"{yeni['ad']}: önceki referansa ({eski['ad']}) göre kaldırma ya da azalma var ve izin kaydı yok: {kaldir[:5]}")
         if yeni is yuklu[-1] and (kaldir or degis):
             bilgi.append(f"önceki referans {eski['ad']}; değişen {len(degis)}, izinli kaldırma {len(kaldir)}")
+            bilgi += [f"  izinli: {x}" for x in kaldir[:LISTE_SINIRI]] + [f"  değişen: {x}" for x in degis[:LISTE_SINIRI]]
+            if len(kaldir) > LISTE_SINIRI or len(degis) > LISTE_SINIRI:
+                bilgi.append(f"  … tam liste: testler/referans/{yeni['ad']}/GEREKCE.md")
     return yuklu[-1], bilgi
 
 
@@ -337,7 +340,9 @@ def karsilastir(R: dict, bilgi: list[str], hizli: bool) -> int:
             if fark: ek += f", fark: {fark}"
             yaz(f"{tur} içerik parmak izleri" if tur == "DXF" else "PDF sayfa sayısı ve ölçüsü", not eksik and not fark, ek)
 
-    print(f"Referans: testler/referans/{R['ad']} · {R['gerekce']}" + "".join(f" · {b}" for b in bilgi))
+    print(f"Referans: testler/referans/{R['ad']} · {R['gerekce']}" + (f" · {bilgi[0]}" if bilgi else ""))
+    for b in bilgi[1:]:
+        print(b)
     g = max(len(x) for x, _ in satir)
     for x, s in satir:
         print(f"{x:<{g}}  {s}")
