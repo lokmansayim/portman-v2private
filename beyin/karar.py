@@ -8,7 +8,7 @@ from pathlib import Path
 
 from .sema import Talep, Karar
 from .katalog import Katalog
-from .konusma import Konusma, MAX_REVIZYON, MAX_SORU
+from .konusma import Konusma, MAX_REVIZYON, MAX_SORU, ESKI_TASLAK_SN
 from . import varyant
 
 MOD = 125.5
@@ -18,6 +18,9 @@ BAYI_JSON = Path(__file__).resolve().parent / "veri" / "bayiler.json"
 GRID_SABLON = {(6.0, 8.0, "2+1"): "ALTIN_2plus1_6x8.json", (6.0, 8.5, "2+1"): "YAN_VERANDALI_2plus1_6x8p5.json",
                (6.0, 6.0, "2+1"): "P6001_2plus1_6x6.json"}
 YONLENDIRME = "Bu konuyu Lokman Bey'e iletiyorum; en kısa sürede dönüş yapılacak."
+ESKI_TASLAK_SORUSU = "yeni_mi_degisiklik"      # D-01
+ESKI_TASLAK_EN_COK = 3                         # cevapsız kalırsa en çok bu kadar sorulur, sonra insana devredilir
+ESKI_SORU_SN = 24 * 3600                       # D-01 sorusu bu süreden sonra cevaplanırsa yok sayılır, mesaj normal işlenir
 
 
 def bayileri_yukle() -> dict:
@@ -52,7 +55,18 @@ def fmt_m(cm: float) -> str:
 
 
 def karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, metin: str | None = None) -> Karar:
-    """metin: bayinin kendi mesajı (ham). Kurallar "bayi ne dedi" sorusunu LLM'in özetinden değil bu metinden okur."""
+    """metin: bayinin kendi mesajı (ham). Kurallar "bayi ne dedi" sorusunu LLM'in özetinden değil bu metinden okur.
+    Kural katmanı bu mesajın yerine bekletilen bir mesajı işlediyse (D-01), o talep Karar.kullanilan_talep'te döner."""
+    k.kullanilan_talep, k.bekleyen_not = None, ""
+    karar = _karar_ver(talep, k, bayi, katalog, metin)
+    if k.kullanilan_talep is not None:
+        karar.kullanilan_talep = k.kullanilan_talep.model_dump(mode="json")
+    if k.bekleyen_not:              # D-01: bekletilen mesaj işlenmeden düştüyse bayi bunu bu cevapta öğrenir
+        karar.mesaj = k.bekleyen_not + karar.mesaj
+    return karar
+
+
+def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, metin: str | None) -> Karar:
     t = talep
     k.not_dus("gelen", t.ozet, {"niyet": t.niyet, "guven": t.guven})
     # Askıdaki "ölçü mü değiştirelim, pencere mi ekleyelim?" sorusunun cevabı: kısa ve açık bir "değiştir"/"ekle" ise
@@ -66,6 +80,38 @@ def karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, met
             k.d["son_soru_alani"] = None
             k.not_dus("kural", f"pencere_islem cevabı: {cevap}")
             t = t.model_copy(update={"niyet": "yeni_talep", "pencereler": []})
+
+    # D-01: askıda "yeni talep mi, önceki taslağın değişikliği mi?" sorusu varken gelen mesaj. Yalnız kısa ve saf bir cevap
+    # ("yeni", "değişiklik", "önceki taslağın değişikliği") cevap sayılır; o zaman soruyu doğuran mesaj (bekletilen talep ve
+    # bayinin o mesajdaki sözü) seçilen yola göre işlenir, LLM'in bu kısa cevaba verdiği niyete bakılmaz.
+    eski_taslak_cevabi = None
+    if k.d.get("son_soru_alani") == ESKI_TASLAK_SORUSU and k.d.get("bekleyen_talep") and bayi is not None:
+        kodlar, kalan_metin = _model_kodlari_ve_kalan(metin, katalog)
+        bekleyen_kod = Katalog.kod_normalize(k.d["bekleyen_talep"].get("katalog_kodu") or k.d["taslak"].get("katalog_kodu"))
+        if time.time() - (k.d.get("bekleyen_zamani") or 0) > ESKI_SORU_SN or t.niyet in ("red", "onay"):
+            _bekleyeni_birak(k); k.d.pop("eski_taslak_soru", None)          # iptal, onay ya da çok eski soru: normal akış
+        elif any(Katalog.kod_normalize(c) != bekleyen_kod for c in kodlar):
+            k.bekleyen_not = _dusen_not(_bekleyeni_birak(k))                # başka model kodlu yeni mesaj: normal akış
+        else:
+            # aynı model kodu cevabın parçası olabilir ("P6001 yeni", "P6001 değişiklik"): kod çıkarılıp kalan değerlendirilir
+            cevap, saf, deneme = _eski_taslak_cevabi(kalan_metin)
+            if cevap and saf:
+                eski_taslak_cevabi = cevap
+                bekleyen_metin = k.d.get("bekleyen_metin")
+                t = Talep.model_validate(k.d["bekleyen_talep"])
+                metin = bekleyen_metin or metin
+                _bekleyeni_birak(k); k.d.pop("eski_taslak_soru", None)
+                if cevap == "yeni":
+                    k.sifirla()
+                    t = t.model_copy(update={"niyet": "yeni_talep"})
+                else:
+                    t = t.model_copy(update={"niyet": "revizyon" if k.d.get("son_is_emri") else "yeni_talep"})
+                k.kullanilan_talep = t
+                k.not_dus("kural", f"eski taslak sorusunun cevabı: {cevap}")
+            elif not deneme and (_icerikli(t) or len((metin or "").split()) > 6):
+                k.bekleyen_not = _dusen_not(_bekleyeni_birak(k))            # cevap denemesi yok, yeni bir istek: normal akış
+            else:
+                return _eski_taslak_sor(k)          # anlaşılmadı, olumsuz, iki cevap birden ya da cevap + ek istek: yinele
 
     # 0) yalnız kayıtlı bayiler
     if bayi is None:
@@ -100,15 +146,23 @@ def karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, met
         return _bitir(k, Karar(eylem="cevapla", gerekce="iptal", mesaj="Talep kapatıldı. Yeni bir plan istediğinizde yazmanız yeterli."))
 
     # 2) yeni_talep / revizyon
+    kapanmis = t.niyet == "yeni_talep" and k.d["asama"] in ("uretildi", "onay_bekliyor", "onaylandi", "yonlendirildi")
+    baska_model = bool(t.niyet == "yeni_talep" and t.katalog_kodu and k.d["taslak"].get("katalog_kodu")
+                       and Katalog.kod_normalize(t.katalog_kodu) != Katalog.kod_normalize(k.d["taslak"]["katalog_kodu"]))
+    # D-01: mesaj eski bir taslağa eklenecekse ve taslak ESKI_TASLAK_SN'den eskiyse, model koduyla başlayan mesajda tahmin
+    # edilmez, sorulur (22.09: 3,5 saat sonra gelen "P6001 …" eski aynalı taslağın revizyonu sayılmıştı).
+    if eski_taslak_cevabi is None and t.niyet in ("yeni_talep", "revizyon") and k.d["taslak"] and not kapanmis \
+            and not baska_model and _eski_taslak(k) and _model_koduyla_basliyor(metin, katalog):
+        return _eski_taslak_sor(k, t, metin)
+    k.d.pop("eski_taslak_soru", None)
     if t.niyet == "revizyon" and k.d.get("son_is_emri"):
         k.d["revizyon"] += 1
         if k.d["revizyon"] > MAX_REVIZYON:
             return _bitir(k, Karar(eylem="yonlendir", gerekce="revizyon sınırı",
                                     mesaj=f"Bu plan için {MAX_REVIZYON} revizyon hakkı doldu. " + YONLENDIRME))
-    elif t.niyet == "yeni_talep" and k.d["asama"] in ("uretildi", "onay_bekliyor", "onaylandi", "yonlendirildi"):
+    elif kapanmis:
         k.sifirla()  # önceki proje kapandı ya da insana devredildi; yeni talep
-    elif t.niyet == "yeni_talep" and t.katalog_kodu and k.d["taslak"].get("katalog_kodu") \
-            and Katalog.kod_normalize(t.katalog_kodu) != Katalog.kod_normalize(k.d["taslak"]["katalog_kodu"]):
+    elif baska_model:
         k.sifirla()  # başka bir modele geçti
     # askıda kalan pencere sorusu cevaplanmadan başka bir istek geldiyse: pencere değişikliğini düşür, bayiye söyle
     dusen_not = ""
@@ -292,6 +346,126 @@ def _mahal_eslestir(ie: dict, mahal: str | None) -> list[str]:
     return [a for a in adlar if q in varyant._norm(a) or varyant._norm(a) in q]
 
 
+def _eski_taslak(k: Konusma) -> bool:
+    """Taslağın son değiştiği an (selam ya da genel soru cevabı saymaz); eski durum dosyasında yoksa son kayıt anı."""
+    son = k.d.get("taslak_zamani") or k.d.get("guncellendi") or 0
+    return son > 0 and time.time() - son > ESKI_TASLAK_SN
+
+
+_SELAM = {"merhaba", "merhabalar", "selam", "selamlar", "slm", "sa", "gunaydin", "iyi", "gunler", "aksamlar", "hayirli",
+          "isler", "kolay", "gelsin", "lokman", "bey", "beyefendi", "hocam", "abi", "abim", "hanim", "tesekkurler"}
+
+
+def _model_kodlari_ve_kalan(metin: str | None, katalog: Katalog) -> tuple[list[str], str]:
+    """Mesajdaki katalog kodları ve kodlar çıkarılınca kalan metin (başa gelen selamlaşma sözcükleri dahil edilmez)."""
+    kodlar, kalan = [], []
+    for sira, soz, kod in _sozcukler(metin, katalog):
+        (kodlar.append(kod) if kod else kalan.append(soz))
+    return kodlar, " ".join(kalan)
+
+
+def _sozcukler(metin: str | None, katalog: Katalog) -> list[tuple[int, str, str | None]]:
+    """(sözcük sırası, sözcük, katalog kodu ya da None). WhatsApp biçim işaretleri (*_~) atlanır; "P 6001", "p-6001",
+    "6001", "P6001'i", "P6001/aynalı" kod olarak tanınır. Baştaki selamlaşma sözcükleri atlanır, sıra onlardan sonra başlar."""
+    toks = [x for x in re.split(r"[\s,.;:!?'’/()*_~\-]+", metin or "") if x]
+    out, i, sira = [], 0, 0
+    while i < len(toks):
+        a = toks[i]
+        if sira == 0 and _sozcuk_norm(a) in _SELAM:
+            i += 1; continue
+        if a.upper() in ("P", "Ç", "C") and i + 1 < len(toks) and re.fullmatch(r"\d{4}", toks[i + 1]):
+            a = a + toks[i + 1]; i += 1
+        m = katalog.bul(a)
+        out.append((sira, a, m["code"] if m else None))
+        sira += 1; i += 1
+    return out
+
+
+def _model_koduyla_basliyor(metin: str | None, katalog: Katalog) -> str | None:
+    """Bayinin mesajı (selamlaşma sözcüklerinden sonra) katalogdaki bir model koduyla mı başlıyor? Öyleyse kodu döner."""
+    ilk = [kod for sira, _soz, kod in _sozcukler(metin, katalog) if sira == 0 and kod]
+    return ilk[0] if ilk else None
+
+
+_YENI_SOZ = re.compile(r"yeni(si|sini)?|sifirdan|baska")
+_DEGISIKLIK_SOZ = re.compile(r"degisikli[kg]\w*|degistir\w*|revizyon\w*|revize|onceki\w*|devam\w*|ayni(si|sina)?|eski(si|sinin|sine|sini)?")
+_OLUMSUZ = {"degil", "yok", "hayir", "olmasin", "istemiyorum", "istemem"}
+_DOLGU = {"ve", "ama", "evet", "tamam", "lutfen", "bu", "o", "su", "bir", "talep", "talebi", "talebim", "olsun", "proje", "projesi",
+          "taslak", "taslagin", "taslagi", "taslaga", "mesaj", "mesajim", "benim", "is", "isi", "plan", "plani", "planin"}
+
+
+def _eski_taslak_cevabi(metin: str | None) -> tuple[str | None, bool, bool]:
+    """(cevap, saf, deneme). cevap: 'yeni' | 'degisiklik' | None (yok, ikisi birden ya da olumsuzlanmış). saf: cevap ve
+    dolgu sözcükleri dışında sözcük yok. deneme: mesajda cevap sözcüğü ya da olumsuzluk var (bayi cevap vermeye çalışmış).
+    "yeni değil", "değişiklik yok" anlaşılmadı sayılır; "yeniden" yeni sayılmaz."""
+    soz = _sozcuk_norm(metin).split()
+    yeni = [w for w in soz if _YENI_SOZ.fullmatch(w)]
+    degis = [w for w in soz if _DEGISIKLIK_SOZ.fullmatch(w)]
+    olumsuz = [w for w in soz if w in _OLUMSUZ]
+    kalan = [w for w in soz if w not in yeni and w not in degis and w not in olumsuz and w not in _DOLGU and w not in _SELAM]
+    deneme = bool(yeni or degis or olumsuz)
+    if olumsuz or bool(yeni) == bool(degis):
+        return None, False, deneme
+    return ("yeni" if yeni else "degisiklik"), not kalan, deneme
+
+
+def _icerikli(t: Talep) -> bool:
+    """LLM çıkarımında plan içeriği var mı (model, ölçü, oda, pencere, varyant, özel istek…)?"""
+    d = t.model_dump(exclude={"niyet", "guven", "ozet", "belirsizlikler", "musteri"})
+    return any(v not in (None, [], {}, "") for v in d.values())
+
+
+def _kisalt(metin: str | None, n: int = 60) -> str:
+    m = " ".join((metin or "").split())
+    return m if len(m) <= n else m[:n - 1] + "…"
+
+
+def _dusen_not(bekleyen_metin: str) -> str:
+    return f"Sorumu cevaplamadan yeni mesaj yazdığınız için önceki mesajınızı («{_kisalt(bekleyen_metin)}») işlemedim; gerekirse yeniden yazın. "
+
+
+def _sure_metni(saniye: float) -> str:
+    saat = int(saniye // 3600)
+    return f"{saat // 24} gün" if saat >= 48 else f"{max(saat, 1)} saat"
+
+
+def _bekleyeni_birak(k: Konusma) -> str:
+    """Askıdaki D-01 sorusunu kapatır; bekletilen mesajın metnini döner. Soru sayacı (eski_taslak_soru) kalır."""
+    k.d.pop("bekleyen_talep", None); k.d.pop("bekleyen_zamani", None)
+    if k.d.get("son_soru_alani") == ESKI_TASLAK_SORUSU:
+        k.d["son_soru_alani"] = None
+    return k.d.pop("bekleyen_metin", "") or ""
+
+
+def _eski_taslak_sor(k: Konusma, t: Talep | None = None, metin: str | None = None) -> Karar:
+    """D-01: mesaj bekletilir, bayiye yeni mi değişiklik mi diye sorulur. t verilmezse bekleyen mesaj korunur ve soru
+    yinelenir. Soru, eksik bilgi sorularının sınırına (MAX_SORU) sayılmaz; ESKI_TASLAK_EN_COK kez sorulduktan sonra
+    talep insana devredilir."""
+    n = k.d.get("eski_taslak_soru", 0) + 1
+    if t is not None:
+        k.d["bekleyen_talep"] = t.model_dump(mode="json")
+        k.d["bekleyen_metin"] = (metin or "").strip()
+    if n > ESKI_TASLAK_EN_COK:
+        bekleyen = _bekleyeni_birak(k); k.d.pop("eski_taslak_soru", None)
+        return _bitir(k, Karar(eylem="yonlendir", gerekce=f"eski taslak sorusu cevapsız (D-01); bekleyen mesaj: «{_kisalt(bekleyen, 200)}»",
+                               mesaj="Önceki taslakla ilgili sorumu netleştiremedim. " + YONLENDIRME))
+    k.d["bekleyen_zamani"] = int(time.time())
+    k.d["son_soru_alani"] = ESKI_TASLAK_SORUSU
+    k.d["eski_taslak_soru"] = n
+    if n == 1:
+        ts = k.d["taslak"]
+        ie_no = (k.d.get("son_is_emri") or {}).get("is_emri_no")
+        ne = ts.get("ozet") or ts.get("katalog_kodu") or "açık taslak"
+        son = k.d.get("taslak_zamani") or k.d.get("guncellendi") or time.time()
+        mesaj = (f"Önceki taslağınız ({_kisalt(ne)}{', ' + ie_no if ie_no else ''}) {_sure_metni(time.time() - son)} önce kaldı. "
+                 "Bu mesaj yeni bir talep mi, yoksa o taslağın değişikliği mi? \"yeni\" ya da \"değişiklik\" yazmanız yeterli.")
+    else:
+        mesaj = ("Anlayamadım: bu yeni bir talep mi, yoksa önceki taslağınızın değişikliği mi? Lütfen yalnız \"yeni\" ya da "
+                 "\"değişiklik\" yazın; ek isteğinizi sonra yazabilirsiniz.")
+    return _bitir(k, Karar(eylem="sor", soru_alani=ESKI_TASLAK_SORUSU, mesaj=mesaj,
+                           gerekce="eski taslak: yeni mi değişiklik mi (D-01)" + (" · yinelendi" if n > 1 else "")))
+
+
 def _soru(k: Konusma, alan: str, metin: str) -> Karar:
     k.d["soru_sayisi"] += 1
     k.d["son_soru_alani"] = alan
@@ -301,6 +475,8 @@ def _soru(k: Konusma, alan: str, metin: str) -> Karar:
 
 
 def _bitir(k: Konusma, karar: Karar) -> Karar:
+    if k.d.get("son_soru_alani") != ESKI_TASLAK_SORUSU:
+        k.d.pop("eski_taslak_soru", None)             # D-01 sorusu askıda değilse sayaç da kalmaz
     if karar.eylem == "is_emri":
         k.d["bekleyen_onay"] = karar.is_emri.get("is_emri_no") if karar.is_emri else None
         k.d["asama"] = "onay_bekliyor"

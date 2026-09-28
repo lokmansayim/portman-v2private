@@ -1,6 +1,6 @@
 # Portman · DURUM
 
-**Son güncelleme: 28 Eylül 2026 (İE-01).** Her oturumun son adımı bu dosyayı güncellemektir.
+**Son güncelleme: 28 Eylül 2026 (İE-01 birleştirildi; İE-02 başladı).** Her oturumun son adımı bu dosyayı güncellemektir.
 
 Canlıda çalışan akış şu: WhatsApp → hosting kanalı → VPS ajanı → Beyin ve Motor → plan PDF'i. Akış yalnız Patron modunda açık. En son 22 Eylülde gerçek mesajla doğrulandı; canlı sunucu 27–28 Eylülde okunmadı. Bu depo o sürümün (v1.1.1, `ec4e9a3`) devridir. Hedefteki "90 m² 3+1, üç seçenek" akışı henüz taslak.
 
@@ -12,7 +12,7 @@ Durumlar: **Taslak** yalnız belgede · **Kodlandı** kod var, testi yok ya da d
 |---|---|
 | Kökteki v1.1.1 ağacı | `lokmansayim/portman` deposunun geçmişiyle birlikte, değiştirilmeden (`ec4e9a3`, 22.09 20:12). Özetleri `SHA256SUMS`'ta. |
 | `testler/referans/` | Dondurulmuş referans (`2026-09-28/`) ve `dogrula.py` |
-| `testler/bilinen_hatalar/` | B1 ve B2 kırmızı testleri |
+| `testler/bilinen_hatalar/` | B1 kırmızı testleri; B2 testleri (`ie-02` dalında düzeltildi) |
 | `deneme/2026-09-23/` | 23 Eylül denemeleri ve `yeniden_kos.py` |
 | `KARARLAR/` | K01–K25 ve Z-01–Z-10, her karar ayrı dosyada |
 
@@ -22,7 +22,7 @@ Durumlar: **Taslak** yalnız belgede · **Kodlandı** kod var, testi yok ya da d
 |---|---|---|---|
 | Kanal v1.1.1: WhatsApp → hosting webhook → kuyruk → gönderim | Canlıda doğrulandı | 21.09 (v1.0): 3 mesaj, 1'i bekletildi, 2 PDF okundu · 22.09 22:31: v1.1.1 paketi (`bd1ca27c…`), öz-test geçti · 22.09 22:33–38: 3 Patron mesajı yanıtlandı | Yalnız Patron modu; kuyruk hostingte bir JSON dosyası (`state.json`) |
 | VPS ajanı (Natro, portman-agent v1.1.1) | Canlıda doğrulandı | 22.09 19:06: ilk gerçek İş Emri, 27 sn · 22.09 22:14: v1.1.1, `vps-health.json` | ufw etkin ama kuralları okunmadı; root parolayla SSH'ye girebiliyor (22.09 23:59) |
-| Beyin: LLM çıkarımı (gpt-4o-mini), kural katmanı, varyant | Test edildi | Harness 22/22 (sabit girdiler; 28.09'da yeniden) · 22.09 22:33–38 canlı davranış testi 2/3 (B1) | B1 ve B2 açık (kırmızı test var); yalnız P6001 şablonu canlı |
+| Beyin: LLM çıkarımı (gpt-4o-mini), kural katmanı, varyant | Test edildi | Harness 22/22 (sabit girdiler; 28.09'da yeniden) · 22.09 22:33–38 canlı davranış testi 2/3 (B1) | B1 açık (kırmızı test var); B2 `ie-02` dalında düzeltildi (D-01), canlıda değil; yalnız P6001 şablonu canlı |
 | Motor v1.1.1: İş Emri → DXF → doğrulama → PDF | Test edildi | Altın testler 6×8 (41 pano, 0 cm²) ve Yan Verandalı 6×8,5 (BOM 26 kod); P6001 katalog testi (773 × 763) · 28.09: üç temiz koşuda içerik parmak izi aynı | Plan PDF'i üretir, ön onay paftası değil; canlı PDF içeriği insan gözüyle doğrulanmadı |
 | Çıkarıcı: katalog DXF → İş Emri | Kodlandı | 16 planın 15'i Motor doğrulamasından geçti (22.09 ve 28.09) | P1051'de kapılar, P8501, P9501 ve P1081'de bazı açıklıklar düşüyor; P9901 desteklenmiyor; insan kabulü yok |
 | Serbest aks (Motor yaması) | Kodlandı | 23.09: Tatar 80 m²'de denendi · 28.09: `yeniden_kos.py` ile yeniden koşuldu, sonuçlar aynı | Test dar: tek plan. `deneme/` altında ayrı yama; ana kodda ve canlıda değil; K16'ya bağlı |
@@ -45,16 +45,16 @@ Durumlar: **Taslak** yalnız belgede · **Kodlandı** kod var, testi yok ya da d
 
 - **Sızan eşleşme anahtarı (ertelendi).** Anahtar 22 Eylülde bir ekran görüntüsüyle sohbete girdi. Bilen biri OpenAI anahtarını alabilir, bekleyen işleri çekebilir ve bir işin göndericisine metin ya da PDF gönderebilir. 27 Eylülde yeniden ertelendi (Lokman): OpenAI hesabında ciddi bakiye ve otomatik ödeme yok; anahtar yeni API anahtarıyla birlikte yenilenecek. Bayilere açılmadan önce yenilenmesi şart (K17).
 - **B1.** Belirsiz bir pencere isteğinde sistem soru sormak yerine İş Emri üretiyor. Kanal yalnız Patron modunda olduğu için bayiye ulaşmıyor.
-- **B2.** Görüşmede zaman aşımı yok; eski taslak sessizce devralınabiliyor. Seçenekler: (a) böyle kalsın, (b) taslak N saat sonra kapansın, (c) model koduyla başlayan mesaj yeni talep sayılsın. Karar Lokman'ın.
+- **B2.** Görüşmede zaman aşımı yok; eski taslak sessizce devralınabiliyor. Karar verildi (D-01, 28.09): taslak 2 saatten eskiyse ve mesaj model koduyla başlıyorsa sistem sorar. Düzeltme `ie-02` dalında, testleri geçiyor; canlıda değil.
 - **Sunucu erişimi.** root parolayla SSH girişi açık; ufw kuralları okunmadı. Anahtarla girişe geçmek canlı değişikliktir, onayla yapılır.
 - **İmzasız paket kanalı.** Hostinge dosya yazabilen biri VPS'te kod çalıştırabilir (K14, K25).
 - **Test verisinde olası kişisel veri.** `beyin/testler/mesajlar.json` vaka 1 (bkz. `testler/referans/README.md`).
 
 ## Sıradaki iş: İE-02 · Kalıcı akış
 
-Mesaj, bayi, proje, revizyon ve iş tabloları (Postgres ve göç altyapısı). Tekrar gelen mesaj, yarım iş, yeniden başlatma, başka bayinin proje kimliği ve eski revizyon butonu testleri. B1 düzeltmesi ve B2 kararı. `kos.py` sır taramasındaki telefon kalıbının sınırlanması (bugün `deneme/` altındaki IFC koordinatlarını numara sanıyor). Test verisindeki olası müşteri adının takma adla değiştirilmesi. Kabul şartı: `testler/referans/dogrula.py` referansla aynı kalır (kod değişikliği serbest; referans girdiler, dondurulan 22 Beyin vakası, Motor sayıları ve parmak izleri aynı; yeni Beyin vakası sona eklenebilir). Vaka 1'deki takma ad gibi bilerek yapılan bir değişiklik referansı değiştirirse `dogrula.py --dondur` ile gerekçeli, tarihli yeni referans alınır; eskisi silinmez.
+Dal: `ie-02`. Yapıldı: B2 düzeltmesi (D-01). Kalan: mesaj, bayi, proje, revizyon ve iş tabloları (Postgres ve göç altyapısı); tekrar gelen mesaj, yarım iş, yeniden başlatma, başka bayinin proje kimliği ve eski revizyon butonu testleri; B1 düzeltmesi. `kos.py` sır taramasındaki telefon kalıbının sınırlanması (bugün `deneme/` altındaki IFC koordinatlarını numara sanıyor). Test verisindeki olası müşteri adının takma adla değiştirilmesi. Kabul şartı: `testler/referans/dogrula.py` referansla aynı kalır (kod değişikliği serbest; referans girdiler, dondurulan 22 Beyin vakası, Motor sayıları ve parmak izleri aynı; yeni Beyin vakası sona eklenebilir). Vaka 1'deki takma ad gibi bilerek yapılan bir değişiklik referansı değiştirirse `dogrula.py --dondur` ile gerekçeli, tarihli yeni referans alınır; eskisi silinmez.
 
-Lokman'ın açık kararları: B2 (a/b/c), K16 (a/b), K3 ve K4, Z-03 ve Z-06 eşikleri. Ayrıntı: `KARARLAR/README.md`.
+Lokman'ın açık kararları: K16 (a/b), K3 ve K4, Z-03 ve Z-06 eşikleri. Ayrıntı: `KARARLAR/README.md`.
 
 ## Kaynaklar
 

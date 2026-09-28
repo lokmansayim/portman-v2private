@@ -287,6 +287,8 @@ def isle(gelen: dict, settings: dict) -> dict:
         return {"satirlar": satirlar, "sonuc": sonuc, "hata": hata}
 
     karar = karar_ver(talep, k, bayi, KT.Katalog(), metin=gelen.get("text") or "")
+    if karar.kullanilan_talep:      # D-01: bayi "yeni"/"değişiklik" diye cevap verdi; işlenen, bekletilen mesajın talebidir
+        talep = type(talep).model_validate(karar.kullanilan_talep)
     sonuc.update(eylem=karar.eylem, gerekce=karar.gerekce, niyet=talep.niyet, guven=talep.guven, katalog_kodu=talep.katalog_kodu,
                  varyantlar=[v.tur for v in talep.varyantlar], ozet=talep.ozet, llm=meta, asama=k.d.get("asama"))
     cizim = None
