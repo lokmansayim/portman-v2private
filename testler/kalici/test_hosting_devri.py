@@ -90,6 +90,8 @@ def test_d03_kira_ve_deneme_hosting_takili_suresine_sigar(ajan):
     stale = int(re.search(r"const PM_KANAL_STALE = (\d+);", (KOK / "kanal" / "feature.php").read_text()).group(1))
     assert A.HOSTING_TAKILI_SN == stale == h.STALE
     assert 3 * A.KIRA_SN + 60 < stale                              # üçüncü denemenin sonu ve tükenme bildirimi için pay
+    # devir sınırlarının yönü: son deneme süpürmeden önce başlar; "süpürüldü" kabulü süpürmeden sonra
+    assert 3 * A.KIRA_SN < stale - A.RISK_PAYI_SN < stale < stale + A.SUPURME_PAYI_SN and A.SUPURME_PAYI_SN >= 30
 
 
 def test_d03_tukenen_isin_bildirimi_hostinge_verilir(ajan, depo, hizli_motor):
@@ -672,3 +674,41 @@ def test_bosaltmada_acik_is_yokken_de_mesaj_alinmaz(ajan, depo, hizli_motor, mon
     monkeypatch.setattr(W, "bagimliliklar_hazir", lambda: False)
     assert _ana_dongu_bir_sure(A) == 0
     assert "settings" in h.cagri and "claim" not in h.cagri and h.inbound[g["id"]]["state"] == "queued"
+
+
+def test_supurme_sinirindan_once_sonuc_denenir(ajan, depo, hizli_motor):
+    """Mesaj 620 sn önce alındı; hosting'in süresi (600) dolmuş olabilir ama süpürüldüğü kesin değil (660 sn payı): ajan
+    sonucu vermeyi dener, 'süpürüldü' saymaz."""
+    A, h, ayar = ajan
+    g = mesaj("P6001 aynalı", T_P6001); h.mesaj_gelir(g)
+    A.kalici_hazir(h.settings())
+    h.hatalar["result"] = [(500, {"error": "sunucu"})]
+    A.kalici_tur(ayar)
+    with depo.baglan() as c:
+        c.execute("UPDATE mesajlar SET ham = jsonb_set(ham, '{_ajan_aldi}', to_jsonb(extract(epoch FROM now()) - 620))")
+    A._kalici["son_claim"] = time.time()
+    A.kalici_tur(ayar)
+    assert set(_durumlar(depo).values()) == {"hostingte"} and h.cagri.count("result") == 2
+
+
+def test_supurmeden_donen_claim_supurme_sayilmaz(ajan, depo, hizli_motor):
+    """Ayarlar önbellekte hâlâ worker=vps iken hosting'te worker=off yapıldı: claim 'reason' ile süpürmeden döner; ajan bunu
+    süpürme saymaz."""
+    A, h, ayar = ajan
+    A.kalici_hazir(h.settings())
+    h.worker = "off"
+    A.kalici_tur(ayar, is_al=True)
+    assert "claim" in h.cagri and A._kalici["son_claim"] == 0
+    h.worker = "vps"
+    A.kalici_tur(ayar, is_al=True)
+    assert A._kalici["son_claim"] > 0
+
+
+def test_devir_uyarisi_zamanla_kaybolmaz(depo):
+    with depo.baglan() as c:
+        c.execute("INSERT INTO mesajlar (id, gonderen, tur, wa_zamani, ham) VALUES ('wamid.D', %s, 'text', now(), '{}')", (NUMARA_A,))
+        j = c.execute("INSERT INTO isler (mesaj_id, gonderen, durum, bitti) VALUES ('wamid.D', %s, 'bitti', now() - interval '25 hours') "
+                      "RETURNING id", (NUMARA_A,)).fetchone()["id"]
+        c.execute("INSERT INTO giden (id, is_id, mesaj_id, sira, alici, tur, kind, govde, olusturuldu) VALUES "
+                  "('out_d', %s, 'wamid.D', 1, %s, 'cevap', 'text', 'x', now() - interval '25 hours')", (j, NUMARA_A))
+    assert depo.gonderilemeyen_sayisi(24, 300)["devir_bekliyor"] == 1

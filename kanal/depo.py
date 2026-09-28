@@ -464,7 +464,7 @@ class Depo:
                       (yeni, zaman, zaman, zaman, satir_id_))
 
     # ───────────────────────── hosting'e devir (VPS ajanı, kalıcı mod) ─────────────────────────
-    def teslim_bekleyen_isler(self, en_fazla: int = 50, haric: list[int] | tuple = (), risk_sn: float = 480) -> list[dict]:
+    def teslim_bekleyen_isler(self, en_fazla: int = 100, haric: list[int] | tuple = (), risk_sn: float = 480) -> list[dict]:
         """Bitmiş (ya da başarısız) ve satırları henüz hosting'e devredilmemiş işler, eskiden yeniye: {"is_id", "aldi"}.
         aldi: ajanın mesajı hosting'ten son aldığı an (epoch, VPS saati; ham._ajan_aldi, yoksa Postgres'e yazıldığı an).
         haric: şimdilik denenmeyecek işler (ajanın aralıklı yeniden denemesi); sıradaki işleri bekletmesinler. Mesaj alınalı

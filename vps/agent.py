@@ -496,8 +496,10 @@ def kalici_tur(ayar: dict, is_al: bool = True) -> bool:
     # verilmeli; önceki iş bitmeden alınanlar birikirse süreyi aşabilir. Alınmayan mesaj hosting kuyruğunda güvenle bekler.
     if is_al and not d.acik_is_sayisi():
         t_claim = time.time()
-        job = istek("claim", body={}, timeout=30).get("job")
-        _kalici["son_claim"] = t_claim                # claim başarılı: hosting bu andan sonra 600 sn'yi aşan satırları süpürdü
+        cevap = istek("claim", body={}, timeout=30)
+        job = cevap.get("job")
+        if not cevap.get("reason"):                   # api.php 'reason' dönüyorsa (disabled, worker≠vps) süpürmeden döndü
+            _kalici["son_claim"] = t_claim            # süpürdü: bu andan sonra 600 sn'yi aşan 'processing' satır kalmadı
         if job:
             job = _is_normal(job); job["_ajan_aldi"] = time.time()
             try:
