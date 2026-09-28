@@ -298,6 +298,15 @@ Yüklenecekler (`18_Kapi_E/yukle/`; depo `ie-02`, işçi etiketi commit'i sonras
 5. **Tek Patron deneme mesajı:** "Yeni talep: P6001 aynalı olsun". "Yeni talep" sözü eski taslağı kapatır; D-01 sorusu yerine r01 beklenir. Beklenen cevap: metin (Patron teknik notunda LLM token'ları) + PDF, en çok 3 mesaj. İkinci mesaj yalnız ilki kod dışı bir nedenle cevapsız kalırsa gönderilir.
 6. **Son doğrulama:** `kapi_e_dogrula.sh` yeniden koşulur (iş alındı ve bitti, giden sayısı, hata). Lokman telefona gelenleri bildirir.
 
+**Durum (28.09 23:40).** 1–3 yapıldı:
+- yedekler A'daki tam hash'lerle aynı (`18_Kapi_E/yedek/`);
+- hosting API `kanal-api-v1.2`;
+- ajan 23:31'de paketi kurdu: `vps-agent-v1.2`, `mod dosya`, 50/50 aynı.
+
+Öz-testin LLM adımı **geçmedi**: OpenAI HTTP 429, "no credits remaining" (hesapta kredi yok). Kod hatası değil; öteki adımlar (harness, karar, Motor) geçti. Aynı anahtarı sohbet botu da kullandığı için bot da şu an cevap üretemiyor olabilir.
+
+Patron deneme mesajı gönderilmedi. Sayaçlar: OpenAI 1 istek (reddedildi, ücretsiz), WhatsApp 0. Kredi eklemek Lokman'ın kararı. E bu kararı bekliyor.
+
 **Durdurma:** bir mesaja beklenenden fazla cevap gelirse, aynı cevap tekrarlanırsa ya da hata görülürse DirectAdmin'de `portman_app/kanal/settings.json` → `"worker": "off"` yapılır (yeni iş alınmaz) ve asistana haber verilir.
 
 **Geri alma (E.5, gerekirse):** `yedek/`'teki eski `feature.php` ve `api.php` geri yüklenir. Paketin eski üç dosyası geri yüklenir, `current.sha256` en son. Ajan v1.1.1 paketini ve `agent.py`'sini geri kurar.
