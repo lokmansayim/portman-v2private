@@ -352,7 +352,7 @@ Patron deneme mesajı gönderilmedi. Sayaçlar: OpenAI 1 istek (reddedildi, ücr
 
 **Sayaç (E):** 4/6 LLM çağrısı: 1 OpenAI (reddedildi, ücretsiz) + 3 Claude (Codex: 2 hazırlık + 1 canlı öz-test). Codex'in raporladığı token'larla 3 Claude çağrısı ~0,062 $. WhatsApp 0. Patron deneme mesajı gönderilmedi.
 
-**Kapı E sonucu (29.09 01:25; Lokman 01:10'da Opus maliyetini onayladı).** E kapandı.
+**Kapı E sonucu (29.09 01:25; Opus maliyeti 01:10'da bildirildi, denemeyi Lokman 01:16'da kendisi yaptı).** E kapandı.
 - **Deneme:** 01:16'da Patron numarasından tek mesaj gönderildi: "Yeni talep: P6001 aynalı olsun". İkinci mesaj gerekmedi.
 - **İşlem (`18_Kapi_E/7_son.txt`):** 01:16:43'te iş alındı, 25,9 sn'de bitti.
   - Sonuç `is_emri` (PM-PATRON-20260929-33807 **r01**).

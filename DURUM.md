@@ -74,7 +74,7 @@ Yapıldı:
   - `feature.php` ve `api.php` v1.2 ile paket yüklendi; ajan `vps-agent-v1.2`, dosya modunda.
   - Öz-test OpenAI'de kredi bitince (429) geçmedi. Lokman Claude'a geçişi istedi ve Opus 5.5'i seçti.
   - Geçişi başka bir ajan (Codex) yaptı; Portman çıkarımı ve bayi botu Opus 5.5'te. Asistan dosyalardan doğruladı; canlı `llm.py`, `ai.php` ve `claude_api.php` depoda (`hosting/`).
-  - Öz-test Opus'la geçti. Lokman Opus maliyetini onayladı; tek Patron mesajı ("Yeni talep: P6001 aynalı olsun") iş emri r01 üretti; metin + PDF telefona ulaştı. Sayaç: LLM 5/6, WhatsApp 2/6; Claude toplamı ~0,090 $.
+  - Öz-test Opus'la geçti. Opus maliyeti bildirildikten sonra Lokman'ın gönderdiği tek Patron mesajı ("Yeni talep: P6001 aynalı olsun") iş emri r01 üretti; metin + PDF telefona ulaştı. Sayaç: LLM 5/6, WhatsApp 2/6; Claude toplamı ~0,090 $.
 
 Kalan (sırayla, her biri ayrı onayla; `docs/is_emirleri/IE-02-canli.md`):
 - F: kalıcı moda geçiş;
