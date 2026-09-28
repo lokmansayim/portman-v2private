@@ -4,7 +4,7 @@ Dal: `ie-02`. Dayanak: Astra'nın 28 Eylül ikinci değerlendirmesi, D-03 ve D-0
 
 ## 0. Kısa özet
 
-**Kapılar.** A (salt okunur) 28.09'da onaylandı ve yapıldı: canlı sürüm v1.1.1; VPS'te ve hosting'te denetlenen her şey beklenenle aynı (hosting PHP dosyaları tam hash'le); eşleşme anahtarı iki tarafta aynı; sızan anahtar büyük olasılıkla hâlâ etkin, kanıtlanmadı (ayrıntı A'da). B de 28.09'da onaylandı ve geçti: gerçek `lib.php`'nin temiz kopyasıyla dört takım PHP 8.2.30'da ve 8.4'te tam geçti, ağsız ortamda. C 28.09'da yalnız iki anahtarın yenilenmesi için onaylandı (bugünkü canlı sürümde; Postgres, PHP ya da paket yok). D–H her biri ayrı onay bekler. Anahtar yenileme (C), kurulum (D), canlı değişiklik (E, F, H), veri silme ve ücretli deneme (E, G) ayrı ayrı onaylanır.
+**Kapılar.** A (salt okunur) 28.09'da onaylandı ve yapıldı: canlı sürüm v1.1.1; VPS'te ve hosting'te denetlenen her şey beklenenle aynı (hosting PHP dosyaları tam hash'le); eşleşme anahtarı iki tarafta aynı; sızan anahtar büyük olasılıkla hâlâ etkin, kanıtlanmadı (ayrıntı A'da). B de 28.09'da onaylandı ve geçti: gerçek `lib.php`'nin temiz kopyasıyla dört takım PHP 8.2.30'da ve 8.4'te tam geçti, ağsız ortamda. C 28.09'da onaylandı ve tamamlandı: eşleşme ve OpenAI anahtarları yenilendi, eski ikisi geçersiz (hosting ve OpenAI 401), yenileri çalışıyor; yalnız anahtar yenilendi, başka bir şey değişmedi. D–H her biri ayrı onay bekler. Anahtar yenileme (C), kurulum (D), canlı değişiklik (E, F, H), veri silme ve ücretli deneme (E, G) ayrı ayrı onaylanır.
 
 **Cevapsız kalabilecek işler.** Hepsi uyarıda ve kanıt sorgusu 6'da görünür; hiçbiri sessiz değildir.
 - Hosting'in `claim` cevabı ajana ulaşmazsa, ya da ajan cevabı alıp diske ve Postgres'e yazamadan ölürse (milisaniyeler): satır hosting'te 600 sn sonra "takılı" sayılır. Bu v1.1.1'de de böyledir.
@@ -211,6 +211,19 @@ Adımlar (`vps/kapi_c.py`; her adım öncekinin geçtiğini denetler, geçmezse 
 - `config.php`'de WhatsApp erişim anahtarı, doğrulama belirteci, panel parolası ve telefon numaraları kodun içinde. C'nin kapsamı dışında; yalnız not edildi. Yerel kopyalar C'den sonra silinmeli.
 - Asistanın ortamlarından VPS'in 22. portuna ağ yolu yok: Mac'teki yalıtılmış Linux ortamında "Network is unreachable", bulut ortamında zaman aşımı. Lokman'ın Mac'teki SSH anahtarı bu ortamlardan görünmez ve okunmadı. VPS adımlarını Lokman yürütür.
 
+**Sonuç (28.09; Lokman adımları 21:43–22:23'te yürüttü; çıktılar `16_Kapi_C/2_…9_*.txt`, içlerinde anahtar değeri yok).** Kapı C tamam.
+
+| Anahtar | Eski parmak izi | Yeni parmak izi | Eskisi geçersiz mi | Yenisi çalışıyor mu |
+|---|---|---|---|---|
+| Eşleşme (VPS ↔ hosting) | `3173020445c2` (A'daki, sızdığı düşünülen) | `9238aa8aadce` | Hosting 401 veriyor (22:03 ve 22:23) | Hosting 200; çalışan süreç ve dosya aynı anahtarla |
+| OpenAI | `0acef17e0f05` | `4cf00ec74492` | OpenAI 401 `invalid_api_key` (22:23; Lokman iptal etti) | OpenAI 200; hosting'in verdiği anahtar bu |
+
+- `agent.env`'in izni ve sahibi korundu (0640, root:portman). Yedekte anahtar satırı yok.
+- Servis 22:03:53'te yeniden başladı (PID 75217 → 86646). Yeniden başlatmadan sonra günlükte 401 yok. Yenilemeden önce gönderilemeyip bekleyen sonuç 0'dı.
+- Eski iki anahtarın geçici kopyası (`/root/.portman_kapi_c`) son adımda silindi. Eski eşleşme anahtarı yeniden başlatmayla süreç belleğinden de çıktı.
+- Sohbet botu aynı panel dosyasını okuduğu için yeni OpenAI anahtarına kendiliğinden geçti; bu, koddan gösterildi (adım 1). Gerçek bir mesajla denenmedi; o deneme ücretlidir ve ayrı onay ister.
+- Kalan temizlik Lokman'ın kararında: `16_Kapi_C`'deki `config.php` (WhatsApp erişim anahtarı ve panel parolası içeriyor), `ai.php`, `settings.json` ve `15_Kapi_B`'deki `lib.php`/`lib.clean.php` yerel kopyalarının silinmesi.
+
 Sınanması: `testler/kalici/test_kapi_c.py`. Sahte hosting, sahte OpenAI ve sahte systemctl ile uçtan uca sınandı: sıra zorunlu; hosting güncellenmeden yeniden başlatma yok; iptalsiz bitiş yok; hiçbir çıktıda anahtar parçası yok.
 
 ### D · VPS'e Postgres kurulumu (trafik değişmez)
@@ -337,7 +350,7 @@ Postgres'e yeniden geçiş: `/opt/portman/data/kalici_bekleyen/` boş olmalı (i
 - **Medya indirme yolu:** `lib.php`'deki `pm_download` → `pm_stream_media` (bayinin gönderdiği dosyanın arşivlenmesi) B'de sınanmadı; testler oraya girmiyor. Bu yol İE-02'de değişmedi.
 - **Gerçek WhatsApp ve LLM:** yalnız kapı G'de görülür. Sahte hosting Meta'nın gecikmeli ya da eksik bildirimlerini, 24 saat penceresini ve `dry_run`'ı taklit etmez.
 - **VPS:** Postgres kurulumu, systemd ve cron adımları VPS'te koşulmadı (kapı D).
-- **Sızan anahtar:** A'ya göre büyük olasılıkla hâlâ etkin (kanıtlanmadı). Bu anahtarı bilen, hosting API'sine ajan gibi bağlanabilir: OpenAI anahtarını alabilir, kuyruktaki mesajı alıp ona cevap verdirebilir (Patron modunda yalnız Lokman'ın mesajları). C onaylanana dek bu risk sürer.
+- **Sızan anahtar:** C'de kapandı (28.09). Sızdığı düşünülen eşleşme anahtarı ve onunla alınabilen OpenAI anahtarı artık geçersiz.
 - **v1.1.1'den kalan pencere:** hosting `claim` cevabını gönderip ajan onu alamazsa (ağ kopması) ya da ajan cevabı aldıktan sonra diske ya da Postgres'e yazamadan ölürse (milisaniyeler), satır hosting'te 600 sn sonra "failed" olur ve cevapsız kalır. Bu v1.1.1'de de böyledir; hosting kuyruğunda görünür ve yeniden kuyruğa konursa (tekrar gelen mesaj) cevap verilir.
 - **VPS saati:** "hosting satırı süpürüldü" kararı VPS saatindeki iki an arasındaki farka dayanır (ajanın mesajı aldığı an ve sonraki başarılı claim). Çalışan sunucuda saat 660 sn'den çok ileri atlarsa (ör. açılışta büyük bir NTP düzeltmesi) ve aynı anda o işin devri hata veriyorsa, hosting'in hâlâ alabileceği bir sonuç "gönderilmedi" sayılabilir; uyarıda ve sorgu 6'da görünür.
 - **Süpürme sınırındaki deneme sıklığı:** mesaj alınalı 480 sn olmuş ve sonucu işe özgü bir hatayla hep reddedilen bir iş, "süpürüldü" kesinleşene dek (en çok ~3 dakika) her turda yeniden yüklenir; bu, hosting'in süpürmesinden önce son denemeyi kaçırmamak içindir. Boşaltmada (`worker=off`) claim olmadığı için bu, geçiş bitene dek her turda sürer (H.2).
