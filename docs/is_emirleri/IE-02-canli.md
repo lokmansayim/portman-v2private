@@ -356,6 +356,19 @@ Adım 2'de LLM mesajı revizyon değil yeni talep sayabilir. O zaman akış baş
 - WhatsApp: Meta, 1 Ekim 2026'dan itibaren 24 saatlik pencere içindeki şablonsuz (servis) mesajları, her pazarın utility oranıyla mesaj başına ücretlendiriyor ([Meta](https://developers.facebook.com/documentation/business-messaging/whatsapp/pricing/non-template-messages)). 1 Ekim'den önce ücretsizdir.
 - Türkiye oranı Meta'nın fiyat sayfası metninde yok; oradaki fiyat dosyasında (CSV/PDF) ([Meta fiyatlandırma](https://developers.facebook.com/documentation/business-messaging/whatsapp/pricing)). **E ve G'den hemen önce** asistan o günkü dosyadan Türkiye utility oranını okur, mesaj sayısıyla çarpar ve onaya sunar. Üçüncü taraf sitelerdeki oranlar kullanılmaz.
 
+**E'nin maliyeti ve sınırı (28.09 22:50'de resmî kaynaklardan; G ayrı onaylanır).**
+- **OpenAI** (`gpt-4o-mini`; resmî model sayfası 28.09): 1M giriş token'ı 0,15 $, 1M çıkış token'ı 0,60 $. Model kullanımdan kaldırılanlar listesinde yok.
+  - Planlı: 2 çağrı (paket öz-testi 1, gerileme mesajı 1). Şema hatasında birer tekrarla en çok 4.
+  - 22.09 ölçümü çağrı başına ~3.100 giriş ve ~200 çıkış token'ı. Güvenlik payıyla 5.000 giriş ve 500 çıkış alınırsa 6 çağrı en çok ~0,006 $ tutar (1 sentin altında).
+- **WhatsApp** (resmî "Non-template message pricing" sayfası 28.09): 24 saatlik pencere içindeki servis mesajları 1 Ekim 2026'ya dek ücretsiz. 1 Ekim'den sonra mesaj başına, pazarın utility oranıyla ücretlendirilir; servis mesajlarında hacim kademesi yok. Türkiye, 1 Ekim oran değişikliği listesinde yok. Geçerli oran, 1 Temmuz 2026 fiyat dosyasındaki Türkiye utility oranı.
+  - Oran dosyadan okunamadı: bağlantılar sayfa metninde yok. E 1 Ekim'den önce yapılırsa WhatsApp payı 0'dır. Sonra yapılırsa E'den hemen önce Lokman USD fiyat dosyasını (CSV) indirir, asistan Türkiye satırını okur.
+  - Planlı giden mesaj: metin + PDF (+ Patron teknik notu), en çok 3.
+- **Aşılmayacak sınır (E):**
+  - en çok 2 Patron deneme mesajı: 1 planlı; ikincisi yalnız ilki kod dışı bir nedenle, örneğin ağ yüzünden cevapsız kalırsa;
+  - en çok 6 OpenAI çağrısı ve en çok 6 giden WhatsApp mesajı.
+  - Bir mesaja beklenenden fazla cevap gider ya da çağrılar tekrar tekrar yapılırsa E durdurulur: `settings.json` → `worker: off`. Sonra E.5 ile geri alınır.
+  - Sayım ajan günlüğünden (`iş bitti`, öz-test sonucu), hosting giden kuyruğundan ve OpenAI kullanım panelinden yapılır.
+
 ### H · Geri dönüş (gerektiğinde; onayla)
 1. `settings.json` → `"worker": "off"`. Gelen mesajlar kuyrukta bekler. Ajan yeni mesaj almaz; Postgres'te açık kalan işleri bitirir ve sonuçlarını hosting'e verir (boşaltma).
 2. Boşalma beklenir. VPS'te:
