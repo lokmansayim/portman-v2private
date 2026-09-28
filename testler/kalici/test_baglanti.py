@@ -203,24 +203,7 @@ def test_d03_belirsiz_gonderim_is_tekrarina_karismaz(depo, wa, hizli_motor):
     assert kalici.gonder(depo, wa)["kabul_edildi"] == 0 and {x["durum"] for x in sorgu(depo, "SELECT durum FROM giden")} == {"belirsiz"}
 
 
-# ───────────────────────── D. ajan kalıcı modu (sahte hosting) ─────────────────────────
-@pytest.fixture
-def ajan(depo, tmp_path, monkeypatch):
-    from sahte_hosting import SahteHosting
-    sys.path.insert(0, str(KOK / "vps"))
-    import agent as A
-    tok = os.urandom(32).hex()
-    h = SahteHosting(tmp_path / "hosting", tok)
-    url = h.basla()
-    for ad, deger in {"API": url, "TOKEN": tok, "DATA": W.KANAL, "APP": KOK / "kanal", "LOGS": tmp_path / "logs", "PG_DSN": depo.dsn}.items():
-        monkeypatch.setattr(A, ad, deger)
-    A._kalici.update(depo=None, K=None, son_esitleme=0.0, son_uyari=0.0)
-    ayar = A.yerel_ayarlar(h.settings())
-    yield A, h, ayar
-    h.dur()
-    A._kalici.update(depo=None, K=None)
-
-
+# ───────────────────────── D. ajan kalıcı modu (sahte hosting; fikstür: conftest.ajan) ─────────────────────────
 def test_ajan_uctan_uca_claim_postgres_teslim_esitleme(ajan, depo, hizli_motor):
     A, h, ayar = ajan
     g = mesaj("P6001 aynalı", T_P6001); h.mesaj_gelir(g)
@@ -320,8 +303,9 @@ def test_kanit_sorgulari_calisir_ve_numara_yazmaz(depo, hizli_motor):
     r = subprocess.run([shutil.which("psql"), "-X", "-v", "ON_ERROR_STOP=1", "-d", depo.dsn, "-f", str(KOK / "vps" / "kanit_sorgulari.sql")],
                        capture_output=True, text=True)
     assert r.returncode == 0, r.stderr[-800:]
-    assert "onaylandi" in r.stdout and "mesaj_basina_en_cok_is" in r.stdout
+    assert "onaylandi" in r.stdout and "mesaj_basina_en_cok_is" in r.stdout and "meta_gonderdi" in r.stdout
     assert NUMARA_A not in r.stdout and NUMARA_A[:3] + "…" + NUMARA_A[-2:] in r.stdout
+    assert "P6001 aynalı" not in r.stdout and "onaylıyorum" not in r.stdout          # mesaj metni yazılmaz
 
 
 def test_canli_gosterim_provasi_sahte_hosting(ajan, depo, hizli_motor):

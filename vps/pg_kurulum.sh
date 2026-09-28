@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
-# PORTMAN · VPS'e Postgres kurulumu (İE-02, onay kapısı C). Ubuntu 24.04, root olarak bir kez; tekrar çalıştırılabilir.
+# PORTMAN · VPS'e Postgres kurulumu (İE-02, onay kapısı D). Ubuntu 24.04, root olarak; tekrar çalıştırılabilir (var olanı bozmaz).
 #   ssh root@<VPS> 'bash -s' < vps/pg_kurulum.sh
 # Yaptıkları: Postgres 16 (Ubuntu deposu), yalnız yerel bağlantı; 'portman' rolü ve veritabanı (PAROLASIZ: yerel soket +
 # peer kimlik doğrulaması; ajan 'portman' sistem kullanıcısıyla çalıştığı için sır yok); saf psycopg sürücüsü ajanın
-# venv'ine; günlük pg_dump yedeği (14 gün saklanır, daha eskisi silinir — bu silme bu onayın parçasıdır).
+# venv'ine; günlük pg_dump yedeği (14 gün saklanır, daha eskisi silinir — bu silme bu onayın parçasıdır). Yedek yalnız VPS
+# diskindedir; Mac'e kopyalama planda (kapı D, F, G, H) Lokman'ın elle yaptığı adımdır.
 # Yapmadıkları: ajanı kalıcı moda almaz (PORTMAN_PG_DSN yazılmaz), göç uygulamaz, trafiği değiştirmez, 5432'yi açmaz.
 set -euo pipefail
 export DEBIAN_FRONTEND=noninteractive
@@ -38,10 +39,16 @@ cat > /etc/cron.d/portman-pg-yedek <<'EOF'
 EOF
 chmod 644 /etc/cron.d/portman-pg-yedek
 
-echo "== [6/6] yedek + ayrı veritabanına geri yükleme denemesi (boş veritabanıyla)"
+echo "== [6/6] yedek + ayrı veritabanına geri yükleme denemesi"
 sudo -u postgres pg_dump -Fc -d portman -f /var/backups/portman/kurulum-deneme.dump
+sudo -u postgres dropdb --if-exists portman_geri_deneme          # önceki yarım denemeden kalmışsa (yalnız deneme veritabanı)
 sudo -u postgres createdb portman_geri_deneme
-sudo -u postgres pg_restore --exit-on-error -d portman_geri_deneme /var/backups/portman/kurulum-deneme.dump && echo "   geri yükleme: tamam"
-sudo -u postgres dropdb portman_geri_deneme
+if sudo -u postgres pg_restore --exit-on-error -d portman_geri_deneme /var/backups/portman/kurulum-deneme.dump; then
+  echo "   geri yükleme: tamam"
+  sudo -u postgres dropdb portman_geri_deneme
+else
+  echo "HATA: geri yükleme başarısız; portman_geri_deneme incelenmek üzere bırakıldı" >&2
+  exit 1
+fi
 echo
 echo "Kuruldu. Ajan hâlâ dosya modunda (PORTMAN_PG_DSN yok). Göç ve geçiş ayrı onaylı adımdır (docs/is_emirleri/IE-02-canli.md)."

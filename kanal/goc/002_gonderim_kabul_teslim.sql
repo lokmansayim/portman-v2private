@@ -4,6 +4,9 @@
 --   * hostingte: satır hosting'e devredildi, gönderimi hosting (feature.php) yapıyor; sonucu giden_durum ile okunur.
 --   * satir: worker'ın ürettiği giden satırı, hosting'in beklediği biçimde (result çağrısı bunu olduğu gibi taşır).
 --   * onay_zinciri ve cevap_baglari: gönderilen mesaj kimliği → revizyon → proje → gelen cevap bağlantısı.
+--   * gonderildi_zamani: Meta'nın ilk 'sent' bildirimi (Meta saati). Onay denetiminde teslim bildirimi yoksa kabul anından
+--     (hosting saati) önce buna bakılır.
+-- Bu dosya hiçbir canlı veritabanına uygulanmadan önce son hâlini aldı (28.09); uygulandıktan sonra değiştirilmez.
 
 ALTER TABLE giden DROP CONSTRAINT giden_durum_check;
 UPDATE giden SET durum = 'kabul_edildi' WHERE durum = 'iletildi';
@@ -14,13 +17,15 @@ ALTER TABLE giden
     ADD COLUMN hostinge_verildi timestamptz,
     ADD COLUMN teslim_durumu    text CHECK (teslim_durumu IN ('sent', 'delivered', 'read', 'failed')),
     ADD COLUMN teslim_zamani    timestamptz,     -- Meta bildirimindeki ilk 'delivered' ya da 'read' anı
+    ADD COLUMN gonderildi_zamani timestamptz,    -- Meta bildirimindeki ilk 'sent' (ya da sonraki) anı
     ADD COLUMN satir            jsonb;
-CREATE INDEX giden_esitlenecek ON giden (id) WHERE durum = 'hostingte' OR (durum = 'kabul_edildi' AND teslim_zamani IS NULL);
+CREATE INDEX giden_esitlenecek ON giden (olusturuldu DESC) WHERE hostinge_verildi IS NOT NULL
+    AND (durum IN ('hostingte', 'belirsiz') OR (durum = 'kabul_edildi' AND teslim_zamani IS NULL));
 
 -- Her revizyon: PDF'in giden satırı ve WhatsApp kimliği, kabul ve teslim, onay mesajı ve alıntıladığı mesaj.
 CREATE VIEW onay_zinciri AS
 SELECT r.gonderen, r.proje_id, r.id AS revizyon_id, r.is_emri_no, r.rev, r.durum AS revizyon_durumu,
-       g.id AS pdf_satiri, g.dis_id AS pdf_wamid, g.durum AS gonderim_durumu, g.kabul_zamani, g.teslim_durumu, g.teslim_zamani,
+       g.id AS pdf_satiri, g.dis_id AS pdf_wamid, g.durum AS gonderim_durumu, g.kabul_zamani, g.gonderildi_zamani, g.teslim_durumu, g.teslim_zamani,
        r.onay_mesaj_id, om.wa_zamani AS onay_yazildi, om.alinti_id AS onay_alintisi, r.onaylandi
 FROM revizyonlar r
 LEFT JOIN giden g ON g.revizyon_id = r.id AND g.kind = 'document'

@@ -50,7 +50,17 @@ Gerçek WhatsApp ve gerçek LLM ile denenmedi. Bu testler canlı doğrulama değ
   - hosting satırı bırakmışsa satırlar "gönderilmedi" olur;
   - eski API ya da eksik göçle ajan çalışmaz;
   - canlı kabul gösteriminin yedi adımı provadan geçer.
-- **Sahte hosting PHP değildir.** Gerçek PHP hattı `kanal/tests/baglanti_test.php` ve `kanal/tests/e2e_kalici.py` ile sınanır; ikisi de `portman/lib.php` ister (`docs/is_emirleri/IE-02-canli.md`, kapı B).
+- **Sahte hosting PHP değildir.** Gerçek PHP hattı `kanal/tests/baglanti_test.php` ve `kanal/tests/e2e_kalici.py` ile sınanır; ikisi de `portman/lib.php` ister (`docs/is_emirleri/IE-02-canli.md`, kapı B). Sahte hostingin neyi taklit ettiği ve etmediği `sahte_hosting.py`'nin başında yazılı.
+
+## Hosting'e devir (`test_hosting_devri.py`, dördüncü inceleme)
+
+- **Postgres kesintisi:** Postgres'e ulaşılamıyorsa hosting'ten mesaj alınmaz; alınıp yazılamayan mesaj diske alınır, Postgres dönünce yazılır ve işlenir.
+- **Hosting'in 600 sn'si:** uzun bir kesintiden sonra bekleyen cevap claim'den (süpürmeden) önce verilir. D-03'ün üç denemesi (3 × 120 sn) `feature.php`'deki `PM_KANAL_STALE`'e sığar; tükenen işin ve başarısız işin bildirimi hosting'e verilir.
+- **Hata sınıfları:** 401, 403, 429, 5xx ve geçici 422 yeniden denenir; bilinen kesin retler (yol, PDF biçimi, satır uyuşmazlığı, 413) hemen "gönderilmedi" olur ve sağlık uyarısına düşer; geçici hata 15 dakikayı aşarsa da öyle.
+- **Tek etkin işleyici ve boşaltma:** `worker=off` iken ajanın ana döngüsü claim çağırmaz, açık işi bitirip hosting'e verir; `worker=hosting` iken hiçbir şey yapmaz. İçe aktarma yalnız boş veritabanına; canlı geçişte kuyruktakiler iş olmaz. Ölü kira yalnız bu makinedeki süreçler için düşer.
+- **Eşitleme ve onay sınırı:** belirsiz satır sonradan kabul görürse işlenir ve onay kabul edilir; iş işlenmeden önce durum okunur; en yeni 200 satır önce, metin satırlarının teslimi beklenmez; Meta'nın "sent" anı hosting saatinden önce gelir; aynı saniyede yazılan onay reddedilir, bir saniye sonrası kabul edilir; hosting durumlarının her biri; teslim durumu geri gitmez, ilk teslim anı kalır.
+- **Tekrar gelen mesaj:** ilk işin hosting'e verilemeyen ya da bekleyen cevabı bu alımla verilir; hosting'in tuttuğu satır yeniden verilmez; kayıttan sonra değişen PDF hosting'e verilmez.
+- `test_vps_betikleri.py`: anahtar yenileme ve API denetimi betikleri anahtar değerini yazdırmaz, dosya iznini korur.
 
 ## Kabul gösterimi
 

@@ -46,7 +46,7 @@ Ortam (28.09, pip ile kurulan sürümler): Python 3.11.15, ezdxf 1.4.4, pymupdf 
 | Motor P6001 katalog testi | 36 pano, dış ölçü 773 × 763 cm. Altın beklenti yok; kural doğrulaması. |
 | Çıkarıcı P6001 altın testi | Izgara eşit, mahal 5/5, açıklık 7/9. İki fark menteşe yorumu; insan kararı bekliyor. |
 | Çıkarıcı, 16 katalog planı | 15/16 Motor doğrulamasından geçti. P9901 desteklenmiyor (artı biçimli taban). P1051'de kapılar düşüyor. |
-| Sır taraması | 4 bulgu, hepsi beklenen: 3'ü PHP testlerindeki sahte sabit, 1'i `kos.py`'nin kendi arama kalıbı |
+| Sır taraması | 4 bulgu, hepsi beklenen: 3'ü PHP testlerindeki sahte sabit, 1'i `kos.py`'nin kendi arama kalıbı. `dogrula.py` beklenmeyen bulgu sayısını (bulgu − beklenen) karşılaştırır, 0 olmalı; `kanal/tests`'e sahte sabitli yeni test dosyası eklemek ham sayıyı artırır ama fark sayılmaz (İE-02: `baglanti_test.php` ile 5) |
 | DXF içerik parmak izi | 18 çıktı, üç ayrı temiz koşuda birebir aynı (`dxf_parmak_izleri.txt`) |
 | PDF içerik parmak izi | 18 çıktı: sayfa ölçüsü ve bütün çizimler (2026-09-28b'den beri, D-02; önce yalnız sayfa ölçüsü) |
 

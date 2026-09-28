@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""PORTMAN VPS AJANI v1.1 — hosting API'sinden (kanal/api.php) iş çeker, Beyin+Motor ile üretir, sonucu geri yollar.
+"""PORTMAN VPS AJANI v1.2 — hosting API'sinden (kanal/api.php) iş çeker, Beyin+Motor ile üretir, sonucu geri yollar.
 
 Hosting kontrol düzlemidir: kuyruk, gönderim, WhatsApp anahtarı, durum dosyaları hostingte. Bu ajan yalnız dışarı bağlanır
 (hosting API + OpenAI). Hiçbir WhatsApp mesajı göndermez. Paket (worker.py, beyin/, motor/ …) hostingten çekilir ve
-sha256 değişince kendini günceller; ayarlar hostingten okunur (settings.worker != "vps" ise boşta bekler).
+sha256 değişince kendini günceller; ayarlar hostingten okunur (settings.worker != "vps" ise iş almaz; kalıcı modda
+"off" iken yalnız açık işleri bitirir, bkz. "kalıcı mod" bölümü). PORTMAN_PG_DSN varsa kalıcı mod (İE-02, Postgres).
 
 Ortam (/etc/portman/agent.env): PORTMAN_API_URL, PORTMAN_API_TOKEN, PORTMAN_HOME (/opt/portman)
 Dizinler: $PORTMAN_HOME/app (paket), data (durum/, projects/, self-test), logs, pkg
@@ -227,12 +228,27 @@ def bekleyen_sonuclari_gonder() -> None:
 # ───────────────────────── kalıcı mod (İE-02: Postgres) ─────────────────────────
 # PORTMAN_PG_DSN tanımlıysa (/etc/portman/pg.env) konuşma ve iş durumunun asıl kaydı Postgres'tir; dosya modu (isi_yap,
 # data/durum/) bu ajanda çalışmaz. Hosting WhatsApp tarafında kalır: kuyruk (claim), gönderim (tick), gönderim durumu
-# (giden_durum). Aynı anda tek etkin işleyici settings.worker ile seçilir: "vps" → bu ajan, "hosting" → hosting worker.py.
+# (giden_durum). Tek etkin işleyici settings.worker ile seçilir:
+#   "vps"     → bu ajan hosting'ten iş alır ve işler;
+#   "off"     → kimse iş almaz; bu ajan yalnız Postgres'te açık kalan işleri bitirir ve sonuçlarını hosting'e verir (boşaltma,
+#               geri dönüşte kapı H);
+#   "hosting" → hosting'in worker.py'si işler; bu ajan hiçbir şey yapmaz (iki işleyici aynı konuşmaya yazmasın).
 PG_DSN = os.environ.get("PORTMAN_PG_DSN", "")
 GEREKEN_API = (1, 2)                     # kanal/api.php v1.2: giden_durum ve context_id
-KIRA_SN = 300                            # hosting'in 600 sn'lik "takılı iş" süresinden kısa: yarım iş hosting vazgeçmeden biter
-_kalici: dict = {"depo": None, "K": None, "son_esitleme": 0.0, "son_uyari": 0.0}
+HOSTING_TAKILI_SN = 600                  # kanal/feature.php PM_KANAL_STALE: claim, bundan eski 'processing' satırı 'failed' yapar
+KIRA_SN = 120                            # D-03: 3 deneme × 120 sn = 360 sn < 600 sn; tükenme bildirimi de hosting vazgeçmeden verilir
+TESLIM_VAZGEC_SN = 900                   # geçici hatayla hosting'e verilemeyen sonuç bu kadar sürerse 'gonderilmedi' (uyarıya düşer)
+KESIN_RED = ("bad_path", "file_size", "pdf_invalid", "row_inbound_mismatch")      # aynı istek her seferinde reddedilir
+_kalici: dict = {"depo": None, "K": None, "son_esitleme": 0.0, "son_uyari": 0.0, "teslim_hata": {}}
 _dur = {"istendi": False}
+
+
+def kalici_kip(ayar_uzak: dict) -> str | None:
+    """Kalıcı modda bu turun işi: "is_al" (worker=vps), "bosalt" (worker=off: iş alınmaz, açık işler biter) ya da None
+    (enabled değil ya da worker=hosting: ajan hiçbir şey yapmaz)."""
+    if ayar_uzak.get("enabled") is not True:
+        return None
+    return {"vps": "is_al", "off": "bosalt"}.get(str(ayar_uzak.get("worker")))
 
 
 def _api_surumu(ayar_uzak: dict) -> tuple:
@@ -266,11 +282,53 @@ def _is_normal(job: dict) -> dict:
     return job
 
 
+# Hosting'ten alınıp Postgres'e yazılamayan mesaj (ör. Postgres o an yeniden başlıyor) diske yazılır ve bir sonraki turun
+# başında Postgres'e alınır. Hosting'teki satır 'processing' kaldığı için kuyruktan ikinci kez gelmez; bu dosya olmasa mesaj
+# 600 sn sonra hosting'te 'failed' olur ve cevapsız kalırdı.
+def _bekleyen_dizini() -> Path:
+    return DATA / "kalici_bekleyen"
+
+
+def bekleyene_yaz(job: dict) -> Path:
+    dz = _bekleyen_dizini(); dz.mkdir(parents=True, exist_ok=True)
+    p = dz / f"{hashlib.sha256(job['id'].encode()).hexdigest()[:16]}.json"
+    gecici = p.with_suffix(".tmp")
+    gecici.write_text(json.dumps(job, ensure_ascii=False), encoding="utf-8"); os.chmod(gecici, 0o600); gecici.replace(p)
+    return p
+
+
+def mesaji_al(d, job: dict) -> None:
+    if d.mesaj_kaydet(job):
+        log("iş alındı → Postgres", job["id"][:20], "kimden", maske(job.get("sender", "")), "tür", job.get("type"))
+    else:
+        tekrar_gelen(d, job)
+
+
+def bekleyenleri_al(d) -> int:
+    dz = _bekleyen_dizini()
+    if not dz.exists():
+        return 0
+    n = 0
+    for f in sorted(dz.glob("*.json"), key=lambda x: x.stat().st_mtime):
+        mesaji_al(d, json.loads(f.read_text(encoding="utf-8")))       # Postgres yine yoksa hata yükselir, dosya kalır
+        f.unlink(); n += 1
+    return n
+
+
 def tekrar_gelen(d, job: dict) -> None:
-    """Hosting aynı kanal mesajını yeniden verdi (Postgres'te zaten var): ikinci iş açılmaz. İlk iş bitmiş ve satırları
-    hosting'e verilmişse hosting'teki satır boş bir sonuçla kapanır; ilk iş sürüyorsa satırı ilk işin sonucu kapatır."""
+    """Hosting aynı kanal mesajını yeniden verdi (Postgres'te zaten var): ikinci iş açılmaz.
+    - İlk iş sürüyor: hosting'teki satırı ilk işin sonucu kapatır.
+    - İlk iş bitmiş, satırlarının bir kısmı hosting'e hiç verilememiş (ör. hosting satırı 'takılı' sayıp reddetmişti) ya da
+      hâlâ bekliyor: o satırlar bu yeni alımla hosting'e verilir; bayi cevabını alır. Gönderim tekrarı değildir: hosting'e bir
+      kez verilmiş satır yeniden verilmez.
+    - İlk işin satırları zaten hosting'te: hosting'teki satır boş bir sonuçla kapanır."""
     m = d.mesaj_durumu(job["id"])
-    if m and m["is_durum"] in ("bitti", "basarisiz") and m["bekleyen_giden"] == 0:
+    if m and m["is_durum"] in ("bitti", "basarisiz"):
+        yeniden = d.hostinge_yeniden_dene(m["is_id"])
+        if yeniden or m["bekleyen_giden"]:
+            log("tekrar gelen mesaj", job["id"][:20], ": ikinci iş açılmadı; ilk işin (", m["is_id"], ") hosting'e verilmemiş",
+                yeniden + m["bekleyen_giden"], "satırı bu alımla veriliyor")
+            return
         cikti = {"satirlar": [], "sonuc": {"eylem": "yoksay", "gerekce": "tekrar gelen mesaj: Postgres'te zaten işlendi", "worker": "vps"}}
         istek("result", multipart=multipart_kodla({"inbound_id": job["id"], "cikti": json.dumps(cikti, ensure_ascii=False)}, []), timeout=60)
         log("tekrar gelen mesaj", job["id"][:20], ": ikinci iş açılmadı (ilk iş", m["is_id"], m["is_durum"] + ")")
@@ -278,11 +336,24 @@ def tekrar_gelen(d, job: dict) -> None:
         log("tekrar gelen mesaj", job["id"][:20], ": ilk iş sürüyor; ikinci iş açılmadı")
 
 
+def _hata_sinifi(m: str) -> str:
+    """Hosting'in result hatası: 'mutabakat' (gelen satırı orada artık işlenmekte değil: satırlar oraya ulaşmış mı bakılır),
+    'kesin' (aynı istek her seferinde reddedilir) ya da 'gecici' (ağ, 5xx, 401/403 ör. anahtar yenilenirken, 429, dosya ya
+    da kilit hatası; api.php her PHP istisnasını 422 döner, bu yüzden 422'nin yalnız bilinen kesin nedenleri kesindir)."""
+    if m.startswith("HTTP 422") and ("inbound_not_claimed_by_vps" in m or "inbound_unknown" in m):
+        return "mutabakat"
+    if m.startswith("HTTP 413") or (m.startswith("HTTP 422") and any(k in m for k in KESIN_RED)):
+        return "kesin"
+    return "gecici"
+
+
 def hostinge_teslim(d) -> int:
-    """Bitmiş işlerin giden satırlarını hosting'e verir (result). Hosting satırları kimliğe göre tekilleştirir, bu yüzden
-    cevabı kaybolan çağrı güvenle yeniden denenir: hosting "işlenmekte değil" derse giden_durum ile satırların orada olup
-    olmadığına bakılır. Bu bir WhatsApp gönderimi değildir; gönderimi hosting yapar, sonucu belirsizse tekrar etmez."""
-    n = 0
+    """Bitmiş (ya da başarısız) işlerin giden satırlarını hosting'e verir (result). Hosting satırları kimliğe göre
+    tekilleştirir, bu yüzden cevabı kaybolan çağrı güvenle yeniden denenir: hosting "işlenmekte değil" derse giden_durum ile
+    satırların orada olup olmadığına bakılır. Geçici hata yeniden denenir; TESLIM_VAZGEC_SN boyunca sürerse satırlar
+    'gonderilmedi' olur. Bu bir WhatsApp gönderimi değildir; gönderimi hosting yapar, sonucu belirsizse tekrar etmez.
+    Dönen: hosting'e verilen iş sayısı."""
+    n = 0; hatalar = _kalici["teslim_hata"]
     for is_id in d.teslim_bekleyen_isler():
         pk = d.teslim_paketi(is_id)
         dosyalar, alanlar, gidecek, bozuk = [], {"inbound_id": pk["inbound_id"]}, [], []
@@ -303,33 +374,40 @@ def hostinge_teslim(d) -> int:
             gidecek.append(s)
         if bozuk:
             d.hostinge_verilemedi(bozuk, "PDF dosyası yok ya da kayıttan sonra değişmiş; hosting'e verilmedi")
+            log("PDF kayıtla uyuşmuyor, hosting'e verilmedi: iş", is_id)
         ids = [s["id"] for s in gidecek]
         alanlar["cikti"] = json.dumps({**pk["cikti"], "satirlar": gidecek}, ensure_ascii=False)
         if pk["durum"] is not None:
             alanlar["durum"] = json.dumps(pk["durum"], ensure_ascii=False)       # hosting'teki durum/ aynası (panel, geri dönüş)
         try:
             istek("result", multipart=multipart_kodla(alanlar, dosyalar), timeout=180)
-            d.hostinge_verildi(ids)
+            d.hostinge_verildi(ids); hatalar.pop(is_id, None); n += 1
         except ApiHatasi as e:
-            m = str(e)
-            if m.startswith("HTTP 422") and ("inbound_not_claimed_by_vps" in m or "inbound_unknown" in m):
+            m = str(e); sinif = _hata_sinifi(m)
+            if sinif == "mutabakat":
                 orada = set(istek("giden_durum", body={"ids": ids}, timeout=30).get("satirlar") or {})
                 d.hostinge_verildi([i for i in ids if i in orada])
                 yok = [i for i in ids if i not in orada]
                 if yok:
                     d.hostinge_verilemedi(yok, f"hosting kabul etmedi: {m[:160]}")
                     log("hosting sonucu kabul etmedi:", pk["inbound_id"][:20], m[:120])
-            elif m.startswith("HTTP 4"):
-                d.hostinge_verilemedi(ids, f"hosting reddetti: {m[:160]}"); log("hosting sonucu reddetti:", m[:160])
+                hatalar.pop(is_id, None)
+            elif sinif == "kesin":
+                d.hostinge_verilemedi(ids, f"hosting reddetti: {m[:160]}"); hatalar.pop(is_id, None)
+                log("hosting sonucu reddetti (kesin):", m[:160])
             else:
-                log("hosting'e teslim ertelendi (yeniden denenecek):", m[:160]); break
-        n += 1
+                ilk = hatalar.setdefault(is_id, time.time())
+                if time.time() - ilk >= TESLIM_VAZGEC_SN:
+                    d.hostinge_verilemedi(ids, f"hosting'e {TESLIM_VAZGEC_SN // 60} dakika boyunca verilemedi: {m[:140]}"); hatalar.pop(is_id, None)
+                    log("hosting'e verilemedi, vazgeçildi: iş", is_id, m[:120])
+                else:
+                    log("hosting'e teslim ertelendi (yeniden denenecek):", m[:160]); break
     return n
 
 
 def durum_esitle(d) -> int:
     """Hosting'teki gönderim ve teslim durumunu Postgres'e işler: API kabulü (kabul_edildi, wamid, kabul zamanı) ve Meta'nın
-    teslim bildirimi (delivered/read/failed) ayrı alanlardır."""
+    bildirimleri (ilk 'sent' anı; delivered/read/failed) ayrı alanlardır."""
     ids = d.esitlenecek_satirlar()
     if not ids:
         return 0
@@ -339,22 +417,37 @@ def durum_esitle(d) -> int:
     return len(satirlar)
 
 
-def kalici_tur(ayar: dict) -> bool:
-    """Kalıcı modda bir tur: hosting'ten bir iş al → Postgres'e yaz; bir iş işle; bitmişleri hosting'e ver; durum eşitle.
+def kalici_tur(ayar: dict, is_al: bool = True) -> bool:
+    """Kalıcı modda bir tur. Sıra önemlidir:
+      1. Postgres'e bağlanılamıyorsa tur burada biter: hosting'ten mesaj alınmaz (alınıp yazılamazsa kaybolurdu).
+      2. Önceki turda alınıp Postgres'e yazılamamış mesajlar yazılır.
+      3. Bitmiş işlerin sonuçları hosting'e verilir. claim'den ÖNCE: claim hosting'te 600 sn'yi aşan 'processing' satırları
+         'failed' yapar; uzun bir hosting/ağ kesintisinden sonra bekleyen cevaplar böylece reddedilmeden verilir.
+      4. is_al ise (worker=vps) hosting'ten bir mesaj alınır ve Postgres'e yazılır; boşaltmada (worker=off) alınmaz.
+      5. Açık iş varsa gönderim/teslim durumu eşitlenir (onay denetimi hosting'in son bildiğini görsün), bir iş işlenir.
+      6. Sonuç hosting'e verilir; durum dönemsel olarak eşitlenir.
     Bir şey yapıldıysa True."""
     d, K = _kalici["depo"], _kalici["K"]
-    yapildi = False
-    job = istek("claim", body={}, timeout=30).get("job")
-    if job:
-        job = _is_normal(job)
-        if d.mesaj_kaydet(job):
-            log("iş alındı → Postgres", job["id"][:20], "kimden", maske(job.get("sender", "")), "tür", job.get("type"))
-        else:
-            tekrar_gelen(d, job)
+    d.saglik()
+    yapildi = bool(bekleyenleri_al(d))
+    if hostinge_teslim(d):
         yapildi = True
+    if is_al:
+        job = istek("claim", body={}, timeout=30).get("job")
+        if job:
+            job = _is_normal(job)
+            try:
+                mesaji_al(d, job)
+            except ApiHatasi:
+                raise                             # tekrar gelen mesajın kapanışı gönderilemedi; mesaj Postgres'te
+            except Exception:
+                p = bekleyene_yaz(job)
+                log("mesaj Postgres'e yazılamadı; diske alındı, sonraki turda yazılacak:", job["id"][:20], p.name)
+                raise
+            yapildi = True
     if d.acik_is_sayisi():
         # İşlemeden önce gönderim/teslim durumu tazelenir: bayi PDF'i görüp hemen "onaylıyorum" yazdıysa onay denetimi
-        # hosting'in son bildiğini (API kabulü, Meta teslimi) görmeli; yoksa ulaşmış plan "ulaşmadı" sayılırdı.
+        # hosting'in son bildiğini (API kabulü, Meta bildirimleri) görmeli; yoksa ulaşmış plan "ulaşmadı" sayılırdı.
         durum_esitle(d); _kalici["son_esitleme"] = time.time()
     r = K.bir_is(d, {**ayar, "kira_sn": KIRA_SN, "en_cok_deneme": 3}, K.isleyici_adi())
     if r is not None:
@@ -368,6 +461,25 @@ def kalici_tur(ayar: dict) -> bool:
             yapildi = True
         _kalici["son_esitleme"] = time.time()
     return yapildi
+
+
+def kalici_uyarilari() -> list[str]:
+    """Sağlık bildirimine (vps-health.json 'errors') eklenen uyarılar: bayiye ya da Patron'a ulaşmadığı bilinen ya da sonucu
+    belirsiz giden satırlar, diskte bekleyen mesajlar. Ayrıntı: kanit_sorgulari.sql 6."""
+    d = _kalici["depo"]
+    if d is None:
+        return []
+    u = []
+    try:
+        say = d.gonderilemeyen_sayisi(24)
+        if say["gonderilmedi"] or say["belirsiz"]:
+            u.append(f"kalıcı: son 24 saatte {say['gonderilmedi']} giden satır gönderilmedi, {say['belirsiz']} satırın sonucu belirsiz")
+    except Exception as e:
+        u.append(f"kalıcı: Postgres okunamadı ({type(e).__name__})")
+    dz = _bekleyen_dizini()
+    if dz.exists() and any(dz.glob("*.json")):
+        u.append(f"kalıcı: {len(list(dz.glob('*.json')))} mesaj Postgres'e yazılmayı bekliyor (diskte)")
+    return u
 
 
 # ───────────────────────── komut kanalı (isteğe bağlı) ─────────────────────────
@@ -416,7 +528,7 @@ def heartbeat(pk_sha: str, son_is) -> dict:
     body = {"surum": SURUM + (" kalici" if PG_DSN else ""), "python": sys.version.split()[0], "package_sha256": pk_sha, "uptime_s": int(time.time() - BASLANGIC),
             "load": [round(x, 2) for x in load] if load else None, "disk_free_mb": (st.free // 2**20) if st else None, "mem_free_mb": mem_free,
             "last_job": son_is, "jobs_done": _sayac["done"], "jobs_failed": _sayac["failed"], "self_test": self_test, "host": socket.gethostname(),
-            "started_at": int(BASLANGIC), "errors": _sayac["errors"][-5:]}
+            "started_at": int(BASLANGIC), "errors": _sayac["errors"][-5:] + kalici_uyarilari()}
     return istek("heartbeat", body=body, timeout=30)
 
 
@@ -483,23 +595,28 @@ def main() -> int:
                     log("komut kanalı:", str(e)[:160])
             if simdi - son_hb_t > 60:
                 heartbeat(yerel_paket_sha(), son_is); son_hb_t = simdi; gunlukleri_gonder()
-            if ayar_uzak.get("worker") != "vps" or ayar_uzak.get("enabled") is not True:
-                time.sleep(poll * 3); continue
+            isci = ayar_uzak.get("worker")
             if PG_DSN:                                    # kalıcı mod: dosya modu bu ajanda çalışmaz
+                kip = kalici_kip(ayar_uzak)
+                if kip is None:
+                    time.sleep(poll * 3); continue        # kapalı ya da hosting işliyor: tek etkin işleyici
                 neden = kalici_hazir(ayar_uzak)
                 if neden:
                     if time.time() - _kalici["son_uyari"] > 300:
                         log("kalıcı mod bekliyor:", neden); _kalici["son_uyari"] = time.time(); gunlukleri_gonder()
                     time.sleep(poll * 3); continue
-                if kalici_tur(ayar):
+                # worker=off: iş alınmaz; Postgres'te açık kalan işler biter ve sonuçları hosting'e verilir (boşaltma)
+                if kalici_tur(ayar, is_al=(kip == "is_al")):
                     heartbeat(yerel_paket_sha(), {"mod": "kalici", "at": int(time.time())}); son_hb_t = time.time(); gunlukleri_gonder()
                     if ONESHOT and not _kalici["depo"].teslim_bekleyen_isler() and _kalici["depo"].acik_is_sayisi() == 0:
                         return 0
                 else:
                     if ONESHOT and time.time() - BASLANGIC > 90:
                         log("oneshot: iş yok"); return 4
-                    time.sleep(poll)
+                    time.sleep(poll if kip == "is_al" else poll * 3)
                 continue
+            if isci != "vps" or ayar_uzak.get("enabled") is not True:
+                time.sleep(poll * 3); continue
             c = istek("claim", body={}, timeout=30)
             job = c.get("job")
             if not job:
@@ -526,7 +643,11 @@ def main() -> int:
             time.sleep(15)
         except KeyboardInterrupt:
             return 0
-        except Exception:
+        except Exception as e:
+            if type(e).__module__.startswith("psycopg"):      # Postgres kapalı/yeniden başlıyor: iş alınmadı; tur yeniden denenir
+                if time.time() - _kalici["son_uyari"] > 300:
+                    log("Postgres'e ulaşılamadı; hosting'ten iş alınmıyor:", type(e).__name__, str(e)[:120]); _kalici["son_uyari"] = time.time()
+                _sayac["errors"].append(f"postgres: {type(e).__name__}"); del _sayac["errors"][:-20]; time.sleep(15); continue
             log("beklenmeyen:", traceback.format_exc()[-800:]); _sayac["errors"].append("beklenmeyen hata"); time.sleep(15)
     log("durduruldu (SIGTERM): eldeki adım bitti"); gunlukleri_gonder()
     return 0

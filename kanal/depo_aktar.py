@@ -8,7 +8,8 @@
                (çevrimdışı) kullanımda --sirada is ile iş olarak sıraya girer. Kuyrukta 'processing' satır varsa aktarma yapılmaz: eski
                işleyici durdurulup kuyruk boşalmadan geçilmez (yarım işin sonucu bilinmez).
   dışa aktar : konusmalar → durum/<numara>.json (geri dönüşte hosting ya da eski ajan kaldığı yerden sürer).
-Var olan kayıtların üzerine yazılmaz; atlananlar sayılır. Anahtar ya da sır okumaz, yazmaz.
+Var olan kayıtların üzerine yazılmaz; atlananlar sayılır. Komut satırı yalnız boş veritabanına aktarır. Anahtar ya da
+sır okumaz, yazmaz.
 
   python kanal/depo_aktar.py ice  --kanal KLASOR
   python kanal/depo_aktar.py disa --hedef KLASOR
@@ -28,8 +29,17 @@ from depo import Depo, soru_ayrintisi  # noqa: E402
 _IS_DURUMU = {"queued": "sirada", "done": "bitti", "failed": "basarisiz"}
 
 
-def ice_aktar(depo: Depo, kanal: Path, sirada_olanlar: str = "atla") -> dict:
+def ice_aktar(depo: Depo, kanal: Path, sirada_olanlar: str = "atla", bos_olmali: bool = False) -> dict:
+    """bos_olmali: hedef veritabanında konuşma ya da mesaj varsa aktarılmaz. Komut satırı bunu her zaman ister: geri
+    dönüşten sonra yeniden girişte eski veritabanı üzerine aktarılırsa, dosya modunda ilerlemiş konuşmalar "zaten var"
+    diye atlanır ve Postgres'teki eski durum sessizce kullanılırdı (kapı H: eski veritabanı adı değiştirilip saklanır)."""
     assert sirada_olanlar in ("atla", "is")
+    if bos_olmali:
+        with depo.baglan() as c:
+            dolu = c.execute("SELECT (SELECT count(*) FROM konusmalar) + (SELECT count(*) FROM mesajlar) AS n").fetchone()["n"]
+        if dolu:
+            raise ValueError(f"hedef veritabanı boş değil ({dolu} konuşma/mesaj); yeniden girişte eski veritabanının adı "
+                             "değiştirilir ve boş bir veritabanına aktarılır (IE-02-canli.md, kapı H)")
     kanal = Path(kanal)
     say = {"konusma": 0, "konusma_atlandi": 0, "soru": 0, "mesaj": 0, "mesaj_atlandi": 0, "sirada": 0, "kuyrukta_birakildi": 0}
     st = kanal / "state.json"
@@ -98,7 +108,7 @@ def main(argv=None) -> int:
     alt.add_parser("disa").add_argument("--hedef", required=True)
     ns = ap.parse_args(argv)
     depo = Depo()
-    print(json.dumps(ice_aktar(depo, Path(ns.kanal), ns.sirada) if ns.komut == "ice" else disa_aktar(depo, Path(ns.hedef)),
+    print(json.dumps(ice_aktar(depo, Path(ns.kanal), ns.sirada, bos_olmali=True) if ns.komut == "ice" else disa_aktar(depo, Path(ns.hedef)),
                      ensure_ascii=False))
     return 0
 

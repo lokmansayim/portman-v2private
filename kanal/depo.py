@@ -141,15 +141,24 @@ class Depo:
             return c.execute("UPDATE isler SET kira_bitis = now() WHERE durum = 'isleniyor' AND split_part(sahip, ':', 1) = %s "
                              "AND sahip <> %s", (makine, ben)).rowcount
 
+    def saglik(self) -> None:
+        """Postgres'e bağlanılabiliyor mu? Bağlanılamıyorsa hata yükselir (ajan o turda hosting'ten iş almaz)."""
+        with self.baglan() as c:
+            c.execute("SELECT 1")
+
     def acik_is_sayisi(self) -> int:
         with self.baglan() as c:
             return c.execute("SELECT count(*) AS n FROM isler WHERE durum IN ('sirada', 'isleniyor')").fetchone()["n"]
 
     def mesaj_durumu(self, mesaj_id: str) -> dict | None:
-        """Bir gelen mesajın işi ve hosting'e devredilmemiş giden satır sayısı (tekrar gelen kanal mesajı için)."""
+        """Bir gelen mesajın işi, hosting'e devredilmemiş giden satır sayısı ve hosting'e hiç verilemeden 'gonderilmedi'
+        sayılmış satır sayısı (tekrar gelen kanal mesajı için)."""
         with self.baglan() as c:
-            return c.execute("SELECT j.id AS is_id, j.durum AS is_durum, (SELECT count(*) FROM giden g WHERE g.is_id = j.id "
-                             "AND g.durum = 'bekliyor') AS bekleyen_giden FROM isler j WHERE j.mesaj_id = %s", (mesaj_id,)).fetchone()
+            return c.execute("SELECT j.id AS is_id, j.durum AS is_durum, "
+                             "(SELECT count(*) FROM giden g WHERE g.is_id = j.id AND g.durum = 'bekliyor') AS bekleyen_giden, "
+                             "(SELECT count(*) FROM giden g WHERE g.is_id = j.id AND g.durum = 'gonderilmedi' "
+                             " AND g.hostinge_verildi IS NULL) AS verilemeyen_giden "
+                             "FROM isler j WHERE j.mesaj_id = %s", (mesaj_id,)).fetchone()
 
     # ───────────────────────── gelen ─────────────────────────
     def mesaj_kaydet(self, gelen: dict) -> bool:
@@ -344,12 +353,13 @@ class Depo:
 
     # ───────────────────────── revizyon onayı için ─────────────────────────
     def revizyon_iletimi(self, gonderen: str, is_emri_no: str, rev: int) -> dict | None:
-        """Revizyonun PDF satırı: {"id", "rev", "durum", "pdf_durum", "pdf_wamid", "kabul", "teslim_durumu", "teslim"}.
-        kabul: WhatsApp API'nin gönderimi kabul ettiği an; teslim: Meta bildirimindeki ilk 'delivered'/'read' anı. Kayıt yoksa None."""
+        """Revizyonun PDF satırı: {"id", "rev", "durum", "pdf_durum", "pdf_wamid", "kabul", "gonderildi", "teslim_durumu", "teslim"}.
+        kabul: hosting'in WhatsApp API kabulünü kaydettiği an (hosting saati); gonderildi: Meta'nın ilk 'sent' bildirimi; teslim:
+        Meta bildirimindeki ilk 'delivered'/'read' anı (ikisi Meta saati). Kayıt yoksa None."""
         with self.baglan() as c:
             return c.execute(
                 "SELECT r.id, r.rev, r.durum, g.durum AS pdf_durum, g.dis_id AS pdf_wamid, extract(epoch FROM g.kabul_zamani) AS kabul, "
-                "g.teslim_durumu, extract(epoch FROM g.teslim_zamani) AS teslim "
+                "extract(epoch FROM g.gonderildi_zamani) AS gonderildi, g.teslim_durumu, extract(epoch FROM g.teslim_zamani) AS teslim "
                 "FROM revizyonlar r LEFT JOIN giden g ON g.revizyon_id = r.id AND g.kind = 'document' "
                 "WHERE r.gonderen = %s AND r.is_emri_no = %s AND r.rev = %s ORDER BY g.olusturuldu DESC NULLS LAST LIMIT 1",
                 (gonderen, is_emri_no, rev)).fetchone()
@@ -413,10 +423,15 @@ class Depo:
 
     _TESLIM_SIRASI = {"sent": 1, "failed": 2, "delivered": 3, "read": 4}      # feature.php::pm_kanal_status ile aynı sıra
 
-    def teslim_bildir(self, satir_id_: str, teslim_durumu: str, teslim_zamani: float | None = None) -> None:
+    def teslim_bildir(self, satir_id_: str, teslim_durumu: str | None, teslim_zamani: float | None = None,
+                      gonderildi_zamani: float | None = None) -> None:
         """Meta'nın imzalı durum bildirimi (hosting'ten okunur): sent / delivered / read / failed. Durum yalnız ileri gider;
-        teslim_zamani ilk 'delivered' ya da 'read' anıdır."""
+        teslim_zamani ilk 'delivered' ya da 'read' anı, gonderildi_zamani ilk 'sent' (ya da sonraki) anıdır."""
         sira = self._TESLIM_SIRASI
+        if gonderildi_zamani is not None:
+            with self.baglan() as c, c.transaction():
+                c.execute("UPDATE giden SET gonderildi_zamani = least(coalesce(gonderildi_zamani, to_timestamp(%s::float8)), "
+                          "to_timestamp(%s::float8)) WHERE id = %s", (gonderildi_zamani, gonderildi_zamani, satir_id_))
         if teslim_durumu not in sira:
             return
         with self.baglan() as c, c.transaction():
@@ -460,24 +475,48 @@ class Depo:
             return c.execute("UPDATE giden SET durum = 'gonderilmedi', hata = %s WHERE id = ANY(%s) AND durum = 'bekliyor'",
                              (neden[:300], list(satir_idleri))).rowcount
 
+    def hostinge_yeniden_dene(self, is_id: int) -> int:
+        """Aynı kanal mesajı hosting kuyruğuna yeniden konup yeniden alındı: ilk işin hosting'e hiç verilemeyen (hosting
+        reddetti ya da gelen satırı orada artık işlenmekte değildi) satırları yeniden 'bekliyor' olur ve bu yeni alımla
+        hosting'e verilir. Hosting'e bir kez verilmiş satırlara dokunulmaz (gönderim tekrarı değildir)."""
+        with self.baglan() as c, c.transaction():
+            return c.execute("UPDATE giden SET durum = 'bekliyor', hata = NULL WHERE is_id = %s AND durum = 'gonderilmedi' "
+                             "AND hostinge_verildi IS NULL", (is_id,)).rowcount
+
+    def gonderilemeyen_sayisi(self, saat: int = 24) -> dict:
+        """Son 'saat' saatte bayiye (ya da Patron'a) ulaşmadığı bilinen ya da sonucu belirsiz giden satırlar (sağlık uyarısı)."""
+        with self.baglan() as c:
+            r = c.execute("SELECT count(*) FILTER (WHERE durum = 'gonderilmedi') AS gonderilmedi, "
+                          "count(*) FILTER (WHERE durum = 'belirsiz') AS belirsiz FROM giden "
+                          "WHERE olusturuldu > now() - make_interval(hours => %s)", (saat,)).fetchone()
+        return {"gonderilmedi": r["gonderilmedi"], "belirsiz": r["belirsiz"]}
+
     def esitlenecek_satirlar(self, en_fazla: int = 200, gun: int = 3) -> list[str]:
-        """Hosting'e devredilmiş ve gönderim ya da teslim sonucu henüz bilinmeyen satırlar (son 'gun' gün)."""
+        """Hosting'e devredilmiş ve sonucu hosting'te değişebilecek satırlar, yeniden eskiye (son 'gun' gün): gönderimi süren
+        (hostingte), sonucu belirsiz (Meta'nın imzalı durum bildirimi sonradan kabulü gösterebilir) ve kabul edilip teslim
+        bildirimi henüz gelmemiş PDF satırları (onay denetimi PDF'in teslimine bakar; metin satırlarının teslimi beklenmez)."""
         with self.baglan() as c:
             return [r["id"] for r in c.execute(
-                "SELECT id FROM giden WHERE hostinge_verildi IS NOT NULL AND (durum = 'hostingte' OR (durum = 'kabul_edildi' "
-                "AND teslim_zamani IS NULL AND coalesce(teslim_durumu, '') <> 'failed')) "
-                "AND olusturuldu > now() - make_interval(days => %s) ORDER BY olusturuldu LIMIT %s", (gun, en_fazla))]
+                "SELECT id FROM giden WHERE hostinge_verildi IS NOT NULL AND (durum IN ('hostingte', 'belirsiz') OR (durum = 'kabul_edildi' "
+                "AND kind = 'document' AND teslim_zamani IS NULL AND coalesce(teslim_durumu, '') <> 'failed')) "
+                "AND olusturuldu > now() - make_interval(days => %s) ORDER BY olusturuldu DESC LIMIT %s", (gun, en_fazla))]
 
     def hosting_durumu_isle(self, satir_id_: str, st: dict) -> None:
         """api.php giden_durum'un bir satırı → Postgres. Hosting durumları (feature.php): pending/uploading/sending → sürüyor;
-        accepted/sent/delivered/read/failed (wamid'li) → API kabul etti (+ Meta teslim durumu); uncertain → belirsiz;
-        held ya da tükenmiş upload_failed → gönderilmedi."""
+        accepted/sent/delivered/read/failed (wamid'li) → API kabul etti (+ Meta'nın 'sent' anı ve teslim durumu); uncertain →
+        belirsiz; held (hosting sonradan da göndermez) ya da yeniden denenmeyecek upload_failed (PDF'te 2. deneme, metinde
+        ilki; feature.php::pm_kanal_tick) → gönderilmedi."""
         durum = st.get("state")
         if durum in ("accepted", "sent", "delivered", "read", "failed") and st.get("wamid"):
             self.gonderim_sonucu(satir_id_, "kabul_edildi", dis_id=st["wamid"], kabul_zamani=st.get("request_accepted_at"))
-            if st.get("delivery_state"):
-                self.teslim_bildir(satir_id_, st["delivery_state"], st.get("delivered_at"))
+            if st.get("delivery_state") or st.get("sent_at"):
+                self.teslim_bildir(satir_id_, st.get("delivery_state"), st.get("delivered_at"), st.get("sent_at"))
         elif durum == "uncertain":
             self.gonderim_sonucu(satir_id_, "belirsiz", hata=str(st.get("error") or "hosting: gönderim sonucu belirsiz")[:300])
-        elif durum == "held" or (durum == "upload_failed" and int(st.get("attempts") or 0) >= 2):
+        elif durum == "held" or (durum == "upload_failed" and (self._tur(satir_id_) != "document" or int(st.get("attempts") or 0) >= 2)):
             self.gonderim_sonucu(satir_id_, "gonderilmedi", hata=str(st.get("error") or f"hosting: {durum}")[:300])
+
+    def _tur(self, satir_id_: str) -> str | None:
+        with self.baglan() as c:
+            r = c.execute("SELECT kind FROM giden WHERE id = %s", (satir_id_,)).fetchone()
+        return r["kind"] if r else None

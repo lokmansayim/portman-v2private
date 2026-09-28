@@ -1,7 +1,22 @@
 """SAHTE hosting API (yalnız ajanın Python tarafını sınamak için). kanal/api.php + feature.php'nin ajanı ilgilendiren
-davranışını Python'da taklit eder: claim, result, giden_durum, settings, heartbeat, log ve gönderim (tick) ile Meta durum
-bildirimi. GERÇEK PHP HATTININ DOĞRULAMASI DEĞİLDİR: gerçek hat kanal/tests/baglanti_test.php + e2e_vps.py (portman/lib.php
-ile) ve canlı Patron denemesiyle doğrulanır. Taklit edilen kurallar api.php'den satır satır alındı; ayrıldığı yer yok.
+davranışının bir kısmını Python'da taklit eder. GERÇEK PHP HATTININ DOĞRULAMASI DEĞİLDİR: gerçek hat
+kanal/tests/baglanti_test.php, e2e_vps.py ve e2e_kalici.py (portman/lib.php ile, kapı B) ve canlı Patron denemesiyle
+(kapı F, G) doğrulanır.
+
+Taklit edilenler (api.php / feature.php'deki karşılığıyla):
+  claim        worker/enabled denetimi; 600 sn'den eski 'processing' satırı 'failed' yapma (PM_KANAL_STALE, saat elle
+               ilerletilebilir: self.saat); en eski 'queued' satır → 'processing', worker 'vps'.
+  result       cikti/satirlar/sonuc biçimi; gelen satır 'processing' + worker 'vps' değilse 422 inbound_not_claimed_by_vps;
+               yol, belge dosyası ve sha denetimi; satır kimliğiyle tekilleştirme; gelen satır done/failed.
+  giden_durum  salt okunur; state, wamid, request_accepted_at, sent_at, delivery_state, delivered_at, attempts, error.
+  tick/teslim  pending → accepted (wamid) ya da seçilen satırlar için uncertain / held / upload_failed; Meta durum
+               bildirimi (sent/delivered/read/failed) delivery_events'e yazılır, durum yalnız ileri gider.
+  hata         self.hatalar[op] = [(http_kodu, {"error": ...}), ...]: sıradaki çağrı bu cevabı alır (işlem yapılmaz).
+Taklit EDİLMEYENLER (ayrım bilerek bırakıldı; gerçek PHP testleri ya da canlı denemede görülür):
+  claim cevabındaki ham durum/<numara>.json metni (hep None); tick'te 24 saat penceresi, dry_run, PDF yüklemenin ikinci
+  denemesi, Meta'ya gerçek istek; biz_opaque ile eşleşen geç bildirimin 'uncertain' satıra wamid yazması; state.json kilidi,
+  dosya izinleri, api-audit, 401'de 1 sn bekleme, heartbeat/log içeriği; PHP'nin her istisnayı 422 döndürmesi (burada yalnız
+  bilinen nedenler).
 """
 from __future__ import annotations
 
@@ -18,9 +33,14 @@ from urllib.parse import parse_qs, urlparse
 
 
 class SahteHosting:
+    STALE = 600                                   # feature.php PM_KANAL_STALE
+
     def __init__(self, kok: Path, token: str, api: str = "kanal-api-v1.2", worker: str = "vps"):
         self.kok = Path(kok); self.kok.mkdir(parents=True, exist_ok=True)
         self.token, self.api, self.worker = token, api, worker
+        self.enabled = True
+        self.kayma = 0.0                          # hosting saatinin ileri alınması (sn): 600 sn'lik süpürmeyi sınamak için
+        self.hatalar: dict[str, list[tuple[int, dict]]] = {}
         self.inbound: dict[str, dict] = {}
         self.outbound: dict[str, dict] = {}
         self.durum: dict[str, str] = {}
@@ -31,18 +51,21 @@ class SahteHosting:
         self.sunucu = None
 
     # ── kuyruk (feature.php::pm_kanal_capture'ın yazdığı satır) ──
+    def saat(self) -> int:
+        return int(time.time() + self.kayma)
+
     def mesaj_gelir(self, g: dict) -> None:
         with self.kilit:
             if g["id"] not in self.inbound:          # PHP: aynı wamid ikinci satır açmaz
-                self.inbound[g["id"]] = {**g, "state": "queued", "attempts": 0}
+                self.inbound[g["id"]] = {**g, "state": "queued", "attempts": 0, "updated_at": self.saat()}
 
     def yeniden_sirala(self, mid: str) -> None:
         """Yönetici işlemi: işlenmiş bir mesajı kuyruğa geri koyar (aynı kanal mesajının yeniden işlenmesi)."""
         with self.kilit:
-            self.inbound[mid]["state"] = "queued"
+            self.inbound[mid].update(state="queued", updated_at=self.saat())
 
     # ── gönderim (feature.php::pm_kanal_tick) ve Meta durum bildirimi (pm_kanal_status) ──
-    def tick(self, belirsiz: set[str] | None = None) -> None:
+    def tick(self, belirsiz: set[str] | None = None, tutulan: set[str] | None = None, yuklenemeyen: set[str] | None = None) -> None:
         with self.kilit:
             for rid, r in sorted(self.outbound.items(), key=lambda x: (x[1].get("created_at", 0), x[1].get("seq", 0))):
                 if r["state"] != "pending":
@@ -50,8 +73,15 @@ class SahteHosting:
                 if belirsiz and rid in belirsiz:
                     r.update(state="uncertain", attempts=1, error="Gönderim sonucu belirsiz; otomatik tekrar yok.")
                     continue
+                if tutulan and rid in tutulan:
+                    r.update(state="held", error="Gönderilmedi: reply_window_closed")
+                    continue
+                if yuklenemeyen and rid in yuklenemeyen:
+                    r.update(state="upload_failed", attempts=r.get("attempts", 0) + (1 if r.get("kind") == "document" else 0),
+                             error="Yükleme/doğrulama başarısız; gönderilmedi.")
+                    continue
                 self._n += 1
-                r.update(state="accepted", wamid=f"wamid.HOST{self._n:04d}", request_accepted_at=int(time.time()), attempts=1)
+                r.update(state="accepted", wamid=f"wamid.HOST{self._n:04d}", request_accepted_at=self.saat(), attempts=1)
 
     def teslim(self, wamid: str, durum: str = "delivered", zaman: int | None = None) -> None:
         with self.kilit:
@@ -65,24 +95,30 @@ class SahteHosting:
 
     # ── API (api.php) ──
     def settings(self) -> dict:
-        return {"api": self.api, "now": int(time.time()), "enabled": True, "worker": self.worker, "dry_run": False, "mode": "patron",
+        return {"api": self.api, "now": self.saat(), "enabled": self.enabled, "worker": self.worker, "dry_run": False, "mode": "patron",
                 "llm": {"backend": "manuel"}, "patron_teknik_not": False, "poll_s": 1, "vps_komut": False, "package": None}
 
     def claim(self) -> dict:
+        if not self.enabled:
+            return {"job": None, "reason": "disabled"}
         if self.worker != "vps":
             return {"job": None, "reason": f"worker={self.worker}"}
         with self.kilit:
+            simdi = self.saat()
+            for r in self.inbound.values():               # api.php: takılı 'processing' → failed, otomatik tekrar yok
+                if r["state"] == "processing" and r.get("updated_at", 0) < simdi - self.STALE:
+                    r.update(state="failed", error="İşlem teyit edilmeden bitti; otomatik tekrar yok.", updated_at=simdi)
             aday = [r for r in self.inbound.values() if r["state"] == "queued"]
             if not aday:
                 return {"job": None}
             r = min(aday, key=lambda x: (x.get("timestamp", 0), x.get("received_at", 0)))
-            r.update(state="processing", attempts=r["attempts"] + 1, worker="vps")
+            r.update(state="processing", attempts=r["attempts"] + 1, worker="vps", started_at=simdi, updated_at=simdi)
             return {"job": dict(r), "durum": None}
 
     def result(self, alanlar: dict, dosyalar: dict) -> dict:
         cikti = json.loads(alanlar.get("cikti") or "null")
         iid = alanlar.get("inbound_id") or ""
-        if not isinstance(cikti, dict) or not isinstance(cikti.get("satirlar"), list) or not iid:
+        if not isinstance(cikti, dict) or not isinstance(cikti.get("satirlar"), list) or not isinstance(cikti.get("sonuc"), dict) or not iid:
             raise ValueError("bad_result")
         with self.kilit:
             gelen = self.inbound.get(iid)
@@ -110,7 +146,8 @@ class SahteHosting:
             for r in cikti["satirlar"]:
                 if r["id"] not in self.outbound:
                     self.outbound[r["id"]] = {**r, "state": "pending"}; n += 1
-            gelen.update(state="failed" if cikti.get("hata") else "done", result=cikti.get("sonuc"))
+            gelen.update(state="failed" if cikti.get("hata") else "done", result=cikti.get("sonuc"), updated_at=self.saat(),
+                         outbound_ids=[r["id"] for r in cikti["satirlar"]])
             return {"ok": True, "outbound": n, "files": len(yazilan)}
 
     def giden_durum(self, body: dict) -> dict:
@@ -121,8 +158,11 @@ class SahteHosting:
                 r = self.outbound.get(i)
                 if r is None:
                     continue
-                teslim = [e["timestamp"] for e in (r.get("delivery_events") or {}).values() if e["status"] in ("delivered", "read")]
+                olaylar = list((r.get("delivery_events") or {}).values())
+                teslim = [e["timestamp"] for e in olaylar if e["status"] in ("delivered", "read")]
+                gonderildi = [e["timestamp"] for e in olaylar if e["status"] in ("sent", "delivered", "read")]
                 out[i] = {"state": r["state"], "wamid": r.get("wamid"), "request_accepted_at": r.get("request_accepted_at"),
+                          "sent_at": min(gonderildi) if gonderildi else None,
                           "delivery_state": r.get("delivery_state"), "delivered_at": min(teslim) if teslim else None,
                           "attempts": r.get("attempts", 0), "error": r.get("error")}
         return {"satirlar": out, "now": int(time.time())}
@@ -143,9 +183,13 @@ class SahteHosting:
             def _isle(self):
                 op = (parse_qs(urlparse(self.path).query).get("op") or [""])[0]
                 hosting.cagri.append(op)
+                govde = self.rfile.read(int(self.headers.get("Content-Length") or 0))
                 if self.headers.get("X-Portman-Token") != hosting.token:
                     return self._yaz(401, {"error": "unauthorized"})
-                govde = self.rfile.read(int(self.headers.get("Content-Length") or 0))
+                with hosting.kilit:
+                    enjekte = (hosting.hatalar.get(op) or [None]).pop(0) if hosting.hatalar.get(op) else None
+                if enjekte is not None:
+                    return self._yaz(*enjekte)
                 try:
                     if op == "settings":
                         return self._yaz(200, hosting.settings())

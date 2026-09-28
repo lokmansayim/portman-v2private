@@ -79,12 +79,15 @@ pm_kanal_capture($rawS, sig($rawS));
 pm_kanal_store(function (&$s) use ($satir, $U, $H) { $s['outbound'][$U] = $satir($U, 3, ['state' => 'uncertain', 'attempts' => 1, 'error' => 'Gönderim sonucu belirsiz']);
                                                    $s['outbound'][$H] = $satir($H, 4, ['state' => 'held', 'error' => 'Gönderilmedi: reply_window_closed']); });
 $ids = [$T, $D, $U, $H, oid('olmayan'), 'out_KOTU', 'x'];
+clearstatcache(); $once = [hash_file('sha256', PM_KANAL_DIR.'/state.json'), filemtime(PM_KANAL_DIR.'/state.json')]; sleep(1);
 $g = pm_kanal_api_giden_durum(['ids' => $ids]); $g = json_decode(json_encode($g), true);
+clearstatcache(); ok([hash_file('sha256', PM_KANAL_DIR.'/state.json'), filemtime(PM_KANAL_DIR.'/state.json')] === $once, 'giden_durum salt okunur: state.json yazılmadı (içerik ve zaman aynı)');
 ok(count($g['satirlar']) === 4 && !isset($g['satirlar'][oid('olmayan')]), 'yalnız var olan ve biçimi doğru kimlikler döner');
 ok($g['satirlar'][$T]['state'] === 'accepted' && str_starts_with((string)$g['satirlar'][$T]['wamid'], 'wamid.') && is_int($g['satirlar'][$T]['request_accepted_at'])
    && $g['satirlar'][$T]['delivered_at'] === null, 'metin: API kabul etti; teslim bildirimi yok → delivered_at null (kabul teslim sayılmaz)');
-ok($g['satirlar'][$D]['state'] === 'read' && $g['satirlar'][$D]['delivery_state'] === 'read' && $g['satirlar'][$D]['delivered_at'] === $teslimTs,
-   'belge: ilk "delivered" anı teslim zamanı (Meta zamanı), durum read');
+ok($g['satirlar'][$D]['state'] === 'read' && $g['satirlar'][$D]['delivery_state'] === 'read' && $g['satirlar'][$D]['delivered_at'] === $teslimTs
+   && $g['satirlar'][$D]['sent_at'] === $teslimTs, 'belge: ilk "delivered" anı teslim zamanı ve ilk gönderim anı (Meta zamanı), durum read');
+ok($g['satirlar'][$T]['sent_at'] === null, 'metin: Meta bildirimi yok → sent_at null');
 ok($g['satirlar'][$U]['state'] === 'uncertain' && $g['satirlar'][$H]['state'] === 'held', 'belirsiz ve tutulan satırlar olduğu gibi');
 $cok = []; for ($i = 0; $i < 250; $i++) $cok[] = oid("n$i");
 ok(count(json_decode(json_encode(pm_kanal_api_giden_durum(['ids' => $cok])), true)['satirlar']) === 0, 'en çok 200 kimlik okunur; boş yanıt nesne');

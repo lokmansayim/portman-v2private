@@ -7,7 +7,7 @@ declare(strict_types=1);
    package    → güncel işçi paketi (zip)
    claim      → en eski 'queued' gelen satırını 'processing' yapar, satırı + görüşme durumunu (durum/<sender>.json) verir
    result     → giden satırları + PDF/DXF dosyaları + güncel durum; state.json'a yazar (tick gönderir)
-   giden_durum → verilen giden satırlarının gönderim durumu (v1.2, İE-02: ajan Postgres'teki kaydı günceller; salt okunur)
+   giden_durum → verilen giden satırlarının gönderim durumu (v1.2, İE-02: ajan Postgres'teki kaydı günceller; state.json'a yazmaz)
    heartbeat  → vps-health.json / worker-health.json
    log        → vps.log (2 MB döner)
  Kimlik: X-Portman-Token başlığı == kanal/api_token.txt (hash_equals). Eşleşmeyen istek 401 + 1 s bekleme.
@@ -203,24 +203,32 @@ function pm_kanal_api_komut_sonuc(array $body): array {
     return ['ok' => true];
 }
 
-/* giden_durum (v1.2): ajanın hosting'e devrettiği giden satırlarının durumu. Salt okunur; en çok 200 satır.
-   request_accepted_at: WhatsApp API'nin gönderimi kabul ettiği an (teslim değil). delivered_at: Meta'nın imzalı durum
-   bildirimlerindeki ilk 'delivered' ya da 'read' anı (Meta zamanı). Satır yoksa yanıtta da yoktur. */
+/* giden_durum (v1.2): ajanın hosting'e devrettiği giden satırlarının durumu; en çok 200 satır. Gerçekten salt okunur: state.json
+   paylaşımlı kilit (LOCK_SH) altında okunur, yazılmaz (pm_kanal_store her çağrıda yeniden yazdığı için kullanılmaz).
+   request_accepted_at: hosting'in API kabulünü kaydettiği an (hosting saati). sent_at / delivered_at: Meta'nın imzalı durum
+   bildirimlerindeki ilk 'sent' ve ilk 'delivered'/'read' anları (Meta saati). Kabul teslim değildir. Satır yoksa yanıtta yoktur. */
 function pm_kanal_api_giden_durum(array $body): array {
     $ids = [];
     foreach ((is_array($body['ids'] ?? null) ? $body['ids'] : []) as $x)
         if (is_string($x) && preg_match('/^out_[0-9a-f]{24}$/', $x)) $ids[$x] = true;
     $ids = array_slice($ids, 0, 200, true);
-    $satirlar = pm_kanal_store(fn(&$s) => array_intersect_key($s['outbound'], $ids));
+    $f = fopen(PM_KANAL_DIR.'/state.lock', 'c');
+    if (!$f || !flock($f, LOCK_SH)) throw new RuntimeException('kanal_state_lock');
+    try {
+        $p = PM_KANAL_DIR.'/state.json';
+        $s = is_file($p) ? pm_read($p) : [];
+        $satirlar = array_intersect_key(is_array($s['outbound'] ?? null) ? $s['outbound'] : [], $ids);
+    } finally { flock($f, LOCK_UN); fclose($f); }
     $out = [];
     foreach ($satirlar as $id => $r) {
-        $teslim = null;
+        $gonderildi = null; $teslim = null;
         foreach ((is_array($r['delivery_events'] ?? null) ? $r['delivery_events'] : []) as $e) {
-            if (in_array($e['status'] ?? '', ['delivered', 'read'], true) && (int)($e['timestamp'] ?? 0) > 0)
-                $teslim = $teslim === null ? (int)$e['timestamp'] : min($teslim, (int)$e['timestamp']);
+            $ts = (int)($e['timestamp'] ?? 0); if ($ts <= 0) continue;
+            if (in_array($e['status'] ?? '', ['sent', 'delivered', 'read'], true)) $gonderildi = $gonderildi === null ? $ts : min($gonderildi, $ts);
+            if (in_array($e['status'] ?? '', ['delivered', 'read'], true)) $teslim = $teslim === null ? $ts : min($teslim, $ts);
         }
         $out[$id] = ['state' => $r['state'] ?? null, 'wamid' => $r['wamid'] ?? null, 'request_accepted_at' => $r['request_accepted_at'] ?? null,
-            'delivery_state' => $r['delivery_state'] ?? null, 'delivered_at' => $teslim, 'attempts' => (int)($r['attempts'] ?? 0),
+            'sent_at' => $gonderildi, 'delivery_state' => $r['delivery_state'] ?? null, 'delivered_at' => $teslim, 'attempts' => (int)($r['attempts'] ?? 0),
             'error' => isset($r['error']) ? mb_substr((string)$r['error'], 0, 160) : null];
     }
     return ['satirlar' => (object)$out, 'now' => time()];

@@ -358,7 +358,11 @@ def karsilastir(R: dict, bilgi: list[str], hizli: bool) -> int:
         alan3 = ("grid_esit", "mahal_esit", "aciklik_esit")
         yaz("cikarici_p6001_altin: sayılar", bool(ys) and {k: ys.get(k) for k in alan3} == {k: rs.get(k) for k in alan3},
             f"mahal {ys.get('mahal_esit')}, açıklık {ys.get('aciklik_esit')}")
-        yaz("sir_taramasi", say("sir_taramasi") == ra["sir_taramasi"]["sayilar"])
+        # Sır taraması: beklenmeyen bulgu sayısı (bulgu − bilinen sahte test sabitleri) referanstaki gibi 0 olmalı. Ham sayı
+        # karşılaştırılmaz: kanal/tests'e sahte sabitli yeni bir test dosyası eklemek ham sayıyı artırır ama sır değildir.
+        bek = lambda s: (s.get("bulgu") or 0) - (s.get("beklenen_sahte") or 0)
+        ys, rs = say("sir_taramasi"), ra["sir_taramasi"]["sayilar"]
+        yaz("sir_taramasi", bool(ys) and bek(ys) == bek(rs) == 0, f"beklenmeyen {bek(ys)} · sahte test sabiti {ys.get('beklenen_sahte')}")
         if not hizli:
             ys, rs = ya.get("cikarici_16_plan") or {}, ra["cikarici_16_plan"]
             yaz("cikarici_16_plan: özet", ys.get("sayilar") == rs["sayilar"],

@@ -129,6 +129,45 @@ try:
     ok(q("SELECT count(*) n FROM isler")[0]["n"] == 2 and state()["inbound"]["wamid.K1"]["result"]["eylem"] == "yoksay",
        "Postgres'te iş sayısı değişmedi; hosting satırı 'yoksay' ile kapandı")
     ok(len(state()["outbound"]) == 3, "hosting'te yeni giden satır yok")
+
+    print("6) süpürmeyi yalnız claim yapar: 600 sn'yi aşmış satıra, claim'den önce verilen sonuç kabul edilir (ajanın tur sırası)")
+    sys.path.insert(0, str(ROOT / "vps"))
+    import agent as AJ  # noqa: E402  (yalnız çok parçalı gövde kodlayıcısı için)
+    import urllib.request, urllib.error  # noqa: E402
+
+    def api(op, body=None, alanlar=None):
+        url = f"http://127.0.0.1:{port}/kanal_api.php?op={op}"; h = {"X-Portman-Token": TOKEN}
+        if alanlar is not None:
+            ctype, veri = AJ.multipart_kodla(alanlar, []); h["Content-Type"] = ctype
+        else:
+            veri = json.dumps(body or {}).encode(); h["Content-Type"] = "application/json"
+        try:
+            with urllib.request.urlopen(urllib.request.Request(url, data=veri, headers=h, method="POST"), timeout=30) as r:
+                return r.status, json.loads(r.read())
+        except urllib.error.HTTPError as e:
+            return e.code, json.loads(e.read() or b"{}")
+
+    def eskit(mid, sn=700):
+        st = state(); st["inbound"][mid]["updated_at"] -= sn
+        (kopya / "state.json").write_text(json.dumps(st, ensure_ascii=False, indent=1), encoding="utf-8")
+
+    def sonuc_govdesi(mid):
+        satir = {"id": "out_" + uuid.uuid4().hex[:24], "kind": "text", "to": state()["inbound"][mid]["sender"], "body": "x", "tur": "cevap",
+                 "inbound_id": mid, "seq": 1, "state": "pending", "wamid": None, "attempts": 0, "error": None}
+        return {"inbound_id": mid, "cikti": json.dumps({"satirlar": [satir], "sonuc": {"eylem": "cevapla"}})}
+    run(php_steps + ["capture", str(tmp), lib, "kesinti öncesi", "wamid.K3"])
+    kod, c = api("claim")
+    ok(kod == 200 and (c.get("job") or {}).get("id") == "wamid.K3", "claim: K3 işleniyor")
+    eskit("wamid.K3")                                            # uzun kesinti: hosting'te 600 sn'yi aştı, arada claim yok
+    kod, c = api("result", alanlar=sonuc_govdesi("wamid.K3"))
+    ok(kod == 200 and state()["inbound"]["wamid.K3"]["state"] == "done", "result claim'den önce: kabul edildi (done)")
+    run(php_steps + ["capture", str(tmp), lib, "süpürülecek", "wamid.K4"])
+    api("claim"); eskit("wamid.K4")
+    run(php_steps + ["capture", str(tmp), lib, "sonraki", "wamid.K5"])
+    kod, c = api("claim")                                       # claim süpürür
+    ok(state()["inbound"]["wamid.K4"]["state"] == "failed", "claim 600 sn'yi aşan satırı 'failed' yapar")
+    kod, c = api("result", alanlar=sonuc_govdesi("wamid.K4"))
+    ok(kod == 422 and "inbound_not_claimed_by_vps" in (c.get("error") or ""), "süpürülen satıra sonuç: 422 inbound_not_claimed_by_vps")
 finally:
     srv.terminate()
     with psycopg.connect(ADMIN + " dbname=postgres", autocommit=True) as c:

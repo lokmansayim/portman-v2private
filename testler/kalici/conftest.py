@@ -162,3 +162,24 @@ def sorgu(depo, sql: str, *arg):
 def tek(depo, sql: str, *arg):
     r = sorgu(depo, sql, *arg)
     return r[0] if r else None
+
+
+@pytest.fixture
+def ajan(depo, tmp_path, monkeypatch):
+    """vps/agent.py kalıcı modda, sahte hosting API'sine (sahte_hosting.py) bağlı. Gerçek PHP hattı değildir."""
+    import sys
+    import worker
+    from sahte_hosting import SahteHosting
+    sys.path.insert(0, str(KOK / "vps"))
+    import agent as A
+    tok = os.urandom(32).hex()
+    h = SahteHosting(tmp_path / "hosting", tok)
+    url = h.basla()
+    for ad, deger in {"API": url, "TOKEN": tok, "DATA": worker.KANAL, "APP": KOK / "kanal", "LOGS": tmp_path / "logs",
+                      "PKG": tmp_path / "pkg", "PG_DSN": depo.dsn}.items():
+        monkeypatch.setattr(A, ad, deger)
+    A._kalici.update(depo=None, K=None, son_esitleme=0.0, son_uyari=0.0, teslim_hata={})
+    ayar = A.yerel_ayarlar(h.settings())
+    yield A, h, ayar
+    h.dur()
+    A._kalici.update(depo=None, K=None, teslim_hata={})

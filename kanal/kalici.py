@@ -51,8 +51,10 @@ def _kopya(d):
 # ───────────────────────── revizyon onayı ─────────────────────────
 def onay_denetimi(depo: Depo, gelen: dict, d: dict | None) -> dict:
     """Kural katmanı bir onay kaydettiyse çağrılır (d: işten önceki konuşma). Onay, bayinin mesajı yazdığı anda telefonuna
-    ulaşmış son revizyona bağlanır. Ulaşma anı: Meta'nın 'delivered'/'read' bildirimi varsa o (teslim); yoksa WhatsApp
-    API'nin gönderimi kabul ettiği an (kabul). Kabul teslim değildir; yalnız teslim bildirimi gelmediğinde alt sınırdır.
+    ulaşmış son revizyona bağlanır. Ulaşma anı için ilk bulunan alt sınır kullanılır: Meta'nın ilk 'delivered'/'read'
+    bildirimi (teslim); yoksa Meta'nın ilk 'sent' bildirimi (gonderildi); o da yoksa hosting'in WhatsApp API kabulünü
+    kaydettiği an (kabul). İlk ikisi, bayinin mesaj zamanı gibi Meta saatidir; kabul hosting saatidir. Kabul teslim
+    değildir; yalnız Meta bildirimi gelmediğinde alt sınırdır. Onay sınırdan SONRA (aynı saniye değil) yazılmış olmalı.
     Dönen: {"kabul": bool, "is_emri_no", "rev", "pdf_wamid", "alinti_id", "sinir", "neden", "mesaj"?, "patrona"?}."""
     bilgi = {"kabul": True, "alinti_id": gelen.get("context_id"), "is_emri_no": None, "rev": None, "pdf_wamid": None,
              "sinir": None, "neden": None}
@@ -80,14 +82,16 @@ def onay_denetimi(depo: Depo, gelen: dict, d: dict | None) -> dict:
     if r["pdf_durum"] in ("belirsiz", "gonderilmedi") or r["teslim_durumu"] == "failed":
         neden = f"PDF gönderimi teyitsiz ({r['teslim_durumu'] if r['teslim_durumu'] == 'failed' else r['pdf_durum']})"
         return red(neden, f"{etiket} planının size ulaştığını teyit edemedim; onayınızı kaydetmedim. Lokman Bey'e iletiyorum.", True)
-    sinir, an = ("teslim", r["teslim"]) if r["teslim"] is not None else ("kabul", r["kabul"])
-    bilgi["sinir"] = sinir if an is not None else None
+    sinir, an = next(((s, r[s]) for s in ("teslim", "gonderildi", "kabul") if r[s] is not None), (None, None))
+    bilgi["sinir"] = sinir
     yazildi = float(gelen.get("timestamp") or 0)
-    if an is None or yazildi < float(an):
+    if an is None or yazildi <= float(an):
         return red("onay, plan ulaşmadan yazılmış",
                    f"Onay mesajınız {etiket} planı size ulaşmadan yazılmış görünüyor; onayınızı kaydetmedim. "
                    f"Planı inceledikten sonra {tekrar[0].lower()}{tekrar[1:]}")
-    bilgi["neden"] = f"plan {'teslim edildikten' if sinir == 'teslim' else 'gönderimi kabul edildikten'} sonra yazılmış"
+    bilgi["neden"] = {"teslim": "plan teslim edildikten sonra yazılmış",
+                      "gonderildi": "Meta planı gönderdikten sonra yazılmış (teslim bildirimi henüz yok)",
+                      "kabul": "plan gönderimi kabul edildikten sonra yazılmış (Meta bildirimi henüz yok)"}[sinir]
     return bilgi
 
 
