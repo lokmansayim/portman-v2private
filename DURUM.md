@@ -69,9 +69,9 @@ Yapıldı:
 - kapı B (28.09): gerçek `lib.php`'nin temiz kopyasıyla (7. satırdaki iki numara sahte rakamlarla değiştirildi; orijinal Mac'ten çıkmadı) dört PHP takımı PHP 8.2.30'da ve 8.4'te 30/30, 16/16, 19/19, 18/18; ağsız ortamda, PHP ağ işlevleri kapalıyken de aynı.
 - kuralı (Lokman, 28.09): dışarı aktarımda kişi adları da maskelenir; B'nin sınırlamaları kayıtta: medya indirme yolu sınanmadı, temiz kopyada bir ön ad kaldı.
 - kapı C (28.09): eşleşme anahtarı (`3173020445c2` → `9238aa8aadce`) ve OpenAI anahtarı (`0acef17e0f05` → `4cf00ec74492`) yenilendi; eskileri hosting'te ve OpenAI'de 401; eski anahtarların kopyası kalmadı (`vps/kapi_c.py`, adımları Lokman yürüttü).
+- kapı D (28.09): VPS'e PostgreSQL 16.15, yalnız yerel bağlantı; `portman` rolü ve veritabanı (parolasız peer); psycopg 3.3.6; günlük yedek 03:17, otomatik silme kapalı; yedek ve geri yükleme denemesi geçti; ajan yeniden başlamadı, dosya modunda.
 
 Kalan (sırayla, her biri ayrı onayla; `docs/is_emirleri/IE-02-canli.md`):
-- D: VPS'e Postgres;
 - E: PHP ve paket yüklemesi;
 - F: kalıcı moda geçiş;
 - G: gerçek WhatsApp ve LLM ile kabul gösterimi.

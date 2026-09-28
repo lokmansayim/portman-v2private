@@ -4,7 +4,7 @@ Dal: `ie-02`. Dayanak: Astra'nın 28 Eylül ikinci değerlendirmesi, D-03 ve D-0
 
 ## 0. Kısa özet
 
-**Kapılar.** A (salt okunur) 28.09'da onaylandı ve yapıldı: canlı sürüm v1.1.1; VPS'te ve hosting'te denetlenen her şey beklenenle aynı (hosting PHP dosyaları tam hash'le); eşleşme anahtarı iki tarafta aynı; sızan anahtar büyük olasılıkla hâlâ etkin, kanıtlanmadı (ayrıntı A'da). B de 28.09'da onaylandı ve geçti: gerçek `lib.php`'nin temiz kopyasıyla dört takım PHP 8.2.30'da ve 8.4'te tam geçti, ağsız ortamda. C 28.09'da onaylandı ve tamamlandı: eşleşme ve OpenAI anahtarları yenilendi, eski ikisi geçersiz (hosting ve OpenAI 401), yenileri çalışıyor; yalnız anahtar yenilendi, başka bir şey değişmedi. D 28.09'da onaylandı (yalnız Postgres kurulumu; ajan dosya modunda kalır). E–H her biri ayrı onay bekler. Anahtar yenileme (C), kurulum (D), canlı değişiklik (E, F, H), veri silme ve ücretli deneme (E, G) ayrı ayrı onaylanır.
+**Kapılar.** A (salt okunur) 28.09'da onaylandı ve yapıldı: canlı sürüm v1.1.1; VPS'te ve hosting'te denetlenen her şey beklenenle aynı (hosting PHP dosyaları tam hash'le); eşleşme anahtarı iki tarafta aynı; sızan anahtar büyük olasılıkla hâlâ etkin, kanıtlanmadı (ayrıntı A'da). B de 28.09'da onaylandı ve geçti: gerçek `lib.php`'nin temiz kopyasıyla dört takım PHP 8.2.30'da ve 8.4'te tam geçti, ağsız ortamda. C 28.09'da onaylandı ve tamamlandı: eşleşme ve OpenAI anahtarları yenilendi, eski ikisi geçersiz (hosting ve OpenAI 401), yenileri çalışıyor; yalnız anahtar yenilendi, başka bir şey değişmedi. D 28.09'da onaylandı ve tamamlandı: PostgreSQL 16.15 yalnız yerelden bağlanılır biçimde kuruldu; yedek ve geri yükleme denemesi geçti; ajan dosya modunda kaldı ve yeniden başlamadı. E–H her biri ayrı onay bekler. Anahtar yenileme (C), kurulum (D), canlı değişiklik (E, F, H), veri silme ve ücretli deneme (E, G) ayrı ayrı onaylanır.
 
 **Cevapsız kalabilecek işler.** Hepsi uyarıda ve kanıt sorgusu 6'da görünür; hiçbiri sessiz değildir.
 - Hosting'in `claim` cevabı ajana ulaşmazsa, ya da ajan cevabı alıp diske ve Postgres'e yazamadan ölürse (milisaniyeler): satır hosting'te 600 sn sonra "takılı" sayılır. Bu v1.1.1'de de böyledir.
@@ -235,6 +235,27 @@ ssh root@<VPS> 'bash -s' < "$K/kapi_d_dogrula.sh" 2>&1 | tee "$K/2_dogrula.txt"
 - Kurulum başlamadan betik root, `sudo`, `portman` kullanıcısı ve ajanın venv'ini denetler. apt sırasında hiçbir servis kendiliğinden yeniden başlatılmaz (Ubuntu needrestart askıya alınır). Sonda `portman-agent`'ın PID'inin değişmediği yazılır.
 - `vps/kapi_d_dogrula.sh` salt okunurdur. Kurulan sürümü, yalnız yerel bağlantıyı, rolü ve veritabanını, peer bağlantısını ve psycopg'yi, yedek klasörü ile cron satırını (otomatik silme yok) ve deneme yedeğinin okunabildiğini gösterir. Portman servisinin sağlığını ve dosya modunda kaldığını da gösterir (`PORTMAN_PG_DSN` yok, ek yapılandırma yok, hosting ajanın anahtarını kabul ediyor).
 - Sınır: `portman` veritabanı D'de boştur (göç uygulanmaz). Geri yükleme denemesi bu yüzden yedekten geri yüklemeye giden zinciri kanıtlar (izinler, klasör, `pg_dump`/`pg_restore`, işaretli deneme veritabanı), veriyle doğruluğu değil. Veriyle doğruluk yerelde T8'de sınandı. Canlı veriyle ilk yedek F.3'te, G'den sonra yine alınır.
+
+**Sonuç (28.09 22:38; Lokman koştu; çıktılar `17_Kapi_D/1_kurulum.txt`, `2_dogrula.txt`).** Kapı D tamam.
+- **Sürüm:** PostgreSQL 16.15 (Ubuntu paketi `16.15-0ubuntu0.24.04.1`). Küme `16/main` çevrimiçi; servis açık ve açılışta başlıyor.
+- **Yalnız yerel bağlantı:**
+  - `listen_addresses` `localhost`; 5432'yi yalnız `127.0.0.1` dinliyor;
+  - `pg_hba`'daki TCP kuralları yalnız `127.0.0.1` ve `::1`; hatalı satır 0;
+  - güvenlik duvarı açık, 5432 kuralı yok.
+- **Rol ve veritabanı:**
+  - `portman` rolü giriş yapabiliyor, parolasız, süper kullanıcı değil, veritabanı ya da rol açamıyor;
+  - `portman` veritabanının sahibi `portman`, UTF8, 0 tablo;
+  - `portman` kullanıcısı parolasız (peer) bağlanıyor;
+  - ajanın ortamında psycopg 3.3.6 (saf Python, libpq 16.15) bağlanıyor.
+- **Yedek:**
+  - klasör `postgres:postgres` 700; cron satırı 03:17, otomatik silme yok;
+  - deneme yedeği alındı ve kendi açıp işaretlediği ayrı veritabanına geri yüklendi; o veritabanı silindi, kalıntı 0;
+  - deneme yedeği `pg_restore --list` ile okunuyor.
+- **Portman servisi:**
+  - PID 86646 kurulumdan önce ve sonra aynı; yeniden başlamadı;
+  - dosya modunda: `PORTMAN_PG_DSN` yok, `pg.env` yok, ek yapılandırma yok;
+  - `vps-agent-v1.1.1`; gönderilemeyip bekleyen sonuç 0; hosting ajanın anahtarını kabul ediyor (`worker` vps, `mode` patron, `dry_run` false).
+- **Günlük:** son 2 saatte 12 `api:` hatası var. Toplam 13 satırın biri 22:03:53'teki başlama satırı. C'nin 22:04 denetimi yeniden başlatmadan sonra 401 görmemişti; bu yüzden hataların C sırasındaki eski anahtar retleri olduğu düşünülüyor (hosting güncellendikten sonra, yeniden başlatmadan önce). Saatlerle kesinleştirilmedi.
 - Kurulanlar: Postgres 16; yalnız yerel bağlantı; parolasız `portman` rolü (peer); saf psycopg; günlük `pg_dump`.
 - **Yedeklerin otomatik silinmesi varsayılan olarak kapalı (pilot).** Açmak ayrı bir tercih ve ayrı onaydır: `ssh root@<VPS> 'PM_YEDEK_SAKLA_GUN=14 bash -s' < vps/pg_kurulum.sh`. Kapalıyken yedekler birikir; disk VPS betiğiyle izlenir.
 - **Yerel bağlantı şartı sağlanmıyorsa betik durur**, uyarıp geçmez. Durdurma koşulları:
@@ -354,7 +375,7 @@ Postgres'e yeniden geçiş: `/opt/portman/data/kalici_bekleyen/` boş olmalı (i
 - **Gerçek PHP hattı:** `feature.php` ve `api.php` değişiklikleri gerçek `lib.php` ile yerelde geçti (B), ama canlıda henüz yok. Canlıda E'de (dosya modu) ve G'de (kalıcı mod) görülür.
 - **Medya indirme yolu:** `lib.php`'deki `pm_download` → `pm_stream_media` (bayinin gönderdiği dosyanın arşivlenmesi) B'de sınanmadı; testler oraya girmiyor. Bu yol İE-02'de değişmedi.
 - **Gerçek WhatsApp ve LLM:** yalnız kapı G'de görülür. Sahte hosting Meta'nın gecikmeli ya da eksik bildirimlerini, 24 saat penceresini ve `dry_run`'ı taklit etmez.
-- **VPS:** Postgres kurulumu, systemd ve cron adımları VPS'te koşulmadı (kapı D).
+- **VPS:** Postgres D'de kuruldu (28.09). Kalıcı moda geçiş (F) ve göçler henüz yapılmadı; cron yedeği ilk kez 29.09 03:17'de çalışacak.
 - **Sızan anahtar:** C'de kapandı (28.09). Sızdığı düşünülen eşleşme anahtarı ve onunla alınabilen OpenAI anahtarı artık geçersiz.
 - **v1.1.1'den kalan pencere:** hosting `claim` cevabını gönderip ajan onu alamazsa (ağ kopması) ya da ajan cevabı aldıktan sonra diske ya da Postgres'e yazamadan ölürse (milisaniyeler), satır hosting'te 600 sn sonra "failed" olur ve cevapsız kalır. Bu v1.1.1'de de böyledir; hosting kuyruğunda görünür ve yeniden kuyruğa konursa (tekrar gelen mesaj) cevap verilir.
 - **VPS saati:** "hosting satırı süpürüldü" kararı VPS saatindeki iki an arasındaki farka dayanır (ajanın mesajı aldığı an ve sonraki başarılı claim). Çalışan sunucuda saat 660 sn'den çok ileri atlarsa (ör. açılışta büyük bir NTP düzeltmesi) ve aynı anda o işin devri hata veriyorsa, hosting'in hâlâ alabileceği bir sonuç "gönderilmedi" sayılabilir; uyarıda ve sorgu 6'da görünür.
