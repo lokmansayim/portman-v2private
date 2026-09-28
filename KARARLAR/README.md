@@ -62,7 +62,8 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 |---|---|---|
 | [D-01](D-01.md) | B2: taslak 2 saatten eskiyse ve mesaj model koduyla başlıyorsa sistem sorar (yeni talep mi, değişiklik mi) | 28.09 |
 | [D-02](D-02.md) | Referans PDF'in içeriğini de izler (bütün çizimler, sabit üretim zamanı); yeniden dondurma bir karara dayanır | 28.09 |
-| [D-03](D-03.md) | Kalıcı akışta yarım kalan iş en çok üç kez yeniden alınır; LLM yeniden çağrılmaz, gönderim tekrarlanmaz (**önerildi, canlıdan önce Lokman onayı**) | 28.09 |
+| [D-03](D-03.md) | Kalıcı akışta yarım kalan iş, ilk deneme dâhil en çok üç kez alınır; yalnız geçici teknik hatada (süreç düştü, kira doldu). Gönderim ve kayıtlı sonuç üreten durumlar tekrarlanmaz | 28.09 |
+| [D-04](D-04.md) | Postgres mevcut VPS'te; konuşma ve iş durumunun asıl kaydı Postgres; tek etkin işleyici `settings.worker` ile (K12'nin görüşme durumu bölümünü değiştirir) | 28.09 |
 
 ## 27 Eylülde Lokman'ın verdiği kararlar
 

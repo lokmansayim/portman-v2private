@@ -195,7 +195,7 @@ def main(argv=None) -> int:
         say = kalici.gonder(depo, wa)
         pdf = [x for x in wa.gonderilen if x["kind"] == "document"][-1]
         veri = Path(pdf["dosya"]).read_bytes()
-        G.denetle(say["iletildi"] == 2 and veri[:5] == b"%PDF-" and hashlib.sha256(veri).hexdigest() == pdf["sha256"],
+        G.denetle(say["kabul_edildi"] == 2 and veri[:5] == b"%PDF-" and hashlib.sha256(veri).hexdigest() == pdf["sha256"],
                   f"metin + PDF gönderildi: {Path(pdf['dosya']).name} ({len(veri)} B, sha256 {pdf['sha256'][:12]}…)")
 
         G.yaz("\n## 6. Aynı mesaj yeniden geldi: ikinci iş oluşmadı")
@@ -204,7 +204,7 @@ def main(argv=None) -> int:
         time.sleep(1.5)
         say2 = kalici.gonder(depo, wa)
         G.denetle(tekrar is False and G.q("SELECT count(*) n FROM isler")[0]["n"] == n_is
-                  and G.q("SELECT count(*) n FROM giden")[0]["n"] == n_giden and say2["iletildi"] == 0,
+                  and G.q("SELECT count(*) n FROM giden")[0]["n"] == n_giden and say2["kabul_edildi"] == 0,
                   f"iş sayısı {n_is}, giden satır {n_giden}: değişmedi; yeni gönderim yok")
         G.isleyici_durdur()
     finally:

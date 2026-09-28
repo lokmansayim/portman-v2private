@@ -49,32 +49,46 @@ def _kopya(d):
 
 
 # ───────────────────────── revizyon onayı ─────────────────────────
-def onay_denetimi(depo: Depo, gelen: dict, d: dict | None) -> dict | None:
-    """Kural katmanı bir onay kaydettiyse çağrılır (d: işten önceki konuşma). Onay, bayinin mesajı yazdığı anda WhatsApp'ın
-    gönderimini kabul ettiği son revizyona bağlanır ("iletildi": API kabulü, teslim değil). Bağlanamıyorsa
-    {"neden", "mesaj", "patrona"} döner ve onay kaydedilmez; bağlanıyorsa None."""
+def onay_denetimi(depo: Depo, gelen: dict, d: dict | None) -> dict:
+    """Kural katmanı bir onay kaydettiyse çağrılır (d: işten önceki konuşma). Onay, bayinin mesajı yazdığı anda telefonuna
+    ulaşmış son revizyona bağlanır. Ulaşma anı: Meta'nın 'delivered'/'read' bildirimi varsa o (teslim); yoksa WhatsApp
+    API'nin gönderimi kabul ettiği an (kabul). Kabul teslim değildir; yalnız teslim bildirimi gelmediğinde alt sınırdır.
+    Dönen: {"kabul": bool, "is_emri_no", "rev", "pdf_wamid", "alinti_id", "sinir", "neden", "mesaj"?, "patrona"?}."""
+    bilgi = {"kabul": True, "alinti_id": gelen.get("context_id"), "is_emri_no": None, "rev": None, "pdf_wamid": None,
+             "sinir": None, "neden": None}
     if not d or d.get("asama") != "onay_bekliyor" or not d.get("son_is_emri"):
-        return None
+        bilgi["neden"] = "onay bekleyen plan yok"
+        return bilgi
     ie = d["son_is_emri"]; no = ie.get("is_emri_no"); rev = int(ie.get("revizyon") or 1)
+    bilgi.update(is_emri_no=no, rev=rev)
     r = depo.revizyon_iletimi(gelen["sender"], no, rev)
     if r is None:
-        return None                     # geçişten önceki plan: revizyon kaydı yok, bugünkü davranış
+        bilgi["neden"] = "geçişten önceki plan: revizyon kaydı yok"      # bugünkü davranış
+        return bilgi
+    bilgi["pdf_wamid"] = r["pdf_wamid"]
     etiket = f"{no} r{rev:02d}"
     tekrar = f"{etiket} planını onaylıyorsanız lütfen yeniden \"onaylıyorum\" yazın."
+
+    def red(neden: str, mesaj: str, patrona: bool = False) -> dict:
+        bilgi.update(kabul=False, neden=neden, mesaj=mesaj, patrona=patrona)
+        return bilgi
     if gelen.get("context_id"):
         ar = depo.alintinin_revizyonu(gelen["sender"], gelen["context_id"])
         if ar and (ar["is_emri_no"], ar["rev"]) != (no, rev):
-            return {"neden": "alıntı başka revizyona ait", "patrona": False,
-                    "mesaj": f"Alıntıladığınız mesaj {ar['is_emri_no']} r{ar['rev']:02d} planına ait; güncel plan {etiket}. {tekrar}"}
-    if r["pdf_durum"] in ("belirsiz", "gonderilmedi"):
-        return {"neden": f"PDF iletimi teyitsiz ({r['pdf_durum']})", "patrona": True,
-                "mesaj": f"{etiket} planının size ulaştığını teyit edemedim; onayınızı kaydetmedim. Lokman Bey'e iletiyorum."}
+            return red("alıntı başka revizyona ait",
+                       f"Alıntıladığınız mesaj {ar['is_emri_no']} r{ar['rev']:02d} planına ait; güncel plan {etiket}. {tekrar}")
+    if r["pdf_durum"] in ("belirsiz", "gonderilmedi") or r["teslim_durumu"] == "failed":
+        neden = f"PDF gönderimi teyitsiz ({r['teslim_durumu'] if r['teslim_durumu'] == 'failed' else r['pdf_durum']})"
+        return red(neden, f"{etiket} planının size ulaştığını teyit edemedim; onayınızı kaydetmedim. Lokman Bey'e iletiyorum.", True)
+    sinir, an = ("teslim", r["teslim"]) if r["teslim"] is not None else ("kabul", r["kabul"])
+    bilgi["sinir"] = sinir if an is not None else None
     yazildi = float(gelen.get("timestamp") or 0)
-    if r["iletildi"] is None or yazildi < float(r["iletildi"]):
-        return {"neden": "onay, plan iletilmeden yazılmış", "patrona": False,
-                "mesaj": f"Onay mesajınız {etiket} planı size ulaşmadan yazılmış görünüyor; onayınızı kaydetmedim. "
-                         f"Planı inceledikten sonra {tekrar[0].lower()}{tekrar[1:]}"}
-    return None
+    if an is None or yazildi < float(an):
+        return red("onay, plan ulaşmadan yazılmış",
+                   f"Onay mesajınız {etiket} planı size ulaşmadan yazılmış görünüyor; onayınızı kaydetmedim. "
+                   f"Planı inceledikten sonra {tekrar[0].lower()}{tekrar[1:]}")
+    bilgi["neden"] = f"plan {'teslim edildikten' if sinir == 'teslim' else 'gönderimi kabul edildikten'} sonra yazılmış"
+    return bilgi
 
 
 def _red_ciktisi(gelen: dict, k: BellekKonusma, talep: dict, red: dict) -> dict:
@@ -129,10 +143,12 @@ def bir_is(depo: Depo, settings: dict, sahip: str | None = None) -> dict | None:
         cikti = W.isle(gelen, settings, k=k, cikarim=cikarim if yazili else None, proje_koku=hazirlik)
         # Onay denetimi kuralın sonucuna bakar: hangi yoldan olursa olsun (ör. süresi dolan D-01 sorusundan sonra) bir onay
         # kaydedildiyse, onay bayinin gördüğü revizyona bağlanabiliyor mu diye sınanır; bağlanamıyorsa onay yazılmaz.
-        red = onay_denetimi(depo, gelen, d) if (cikti.get("sonuc") or {}).get("gerekce") == "plan onaylandı" else None
-        if red:
-            k = BellekKonusma(gelen["sender"], d)
-            cikti = _red_ciktisi(gelen, k, cikarim["talep"], red)
+        if (cikti.get("sonuc") or {}).get("gerekce") == "plan onaylandı":
+            denetim = onay_denetimi(depo, gelen, d)
+            if not denetim["kabul"]:
+                k = BellekKonusma(gelen["sender"], d)
+                cikti = _red_ciktisi(gelen, k, cikarim["talep"], denetim)
+            cikti["sonuc"]["onay"] = {a: denetim.get(a) for a in ("kabul", "is_emri_no", "rev", "pdf_wamid", "alinti_id", "sinir", "neden")}
     except Exception:
         hata = traceback.format_exc()[-2500:]
         k = BellekKonusma(gelen["sender"], d)       # yarım kalan durum değişikliği yazılmaz
@@ -198,9 +214,9 @@ def _dosyalari_sil(yer, hazirlik: Path) -> None:
 
 # ───────────────────────── gönderim ─────────────────────────
 def gonder(depo: Depo, gonderici, en_fazla: int = 100) -> dict:
-    """Bekleyen giden satırlarını sırayla gönderir. gonderici(satir) WhatsApp kimliğini döner; Gonderilmedi → kesin
+    """Bekleyen giden satırlarını sırayla doğrudan gönderir (testler ve doğrudan gönderici; canlıda gönderimi hosting yapar, bkz. vps/agent.py). gonderici(satir) WhatsApp API kabul ederse giden mesaj kimliğini döner; Gonderilmedi → kesin
     gönderilmedi; başka her hata → belirsiz (otomatik yeniden gönderilmez)."""
-    say = {"iletildi": 0, "belirsiz": 0, "gonderilmedi": 0, "yarim_belirsiz": depo.yarim_gonderimleri_belirsiz_say()}
+    say = {"kabul_edildi": 0, "belirsiz": 0, "gonderilmedi": 0, "yarim_belirsiz": depo.yarim_gonderimleri_belirsiz_say()}
     for _ in range(en_fazla):
         r = depo.gonderime_al()
         if r is None:
@@ -213,7 +229,7 @@ def gonder(depo: Depo, gonderici, en_fazla: int = 100) -> dict:
                 continue
         try:
             dis_id = gonderici(r)
-            depo.gonderim_sonucu(r["id"], "iletildi", dis_id=dis_id); say["iletildi"] += 1
+            depo.gonderim_sonucu(r["id"], "kabul_edildi", dis_id=dis_id); say["kabul_edildi"] += 1
         except Gonderilmedi as e:
             depo.gonderim_sonucu(r["id"], "gonderilmedi", hata=str(e)[:300]); say["gonderilmedi"] += 1
         except Exception as e:

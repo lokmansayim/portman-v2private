@@ -59,6 +59,14 @@ def soru_ayrintisi(d: dict, alan: str) -> tuple:
             int(d.get("eski_taslak_soru") or 1) if d01 else 1)
 
 
+def metin_satiri(gelen: dict, metin: str, sira: int, alici: str, tur: str) -> dict:
+    """kanal/worker.py::giden_metin ile aynı biçim (testle denetlenir): depo, worker'ı yüklemeden hata satırı yazabilsin."""
+    simdi = int(time.time())
+    return {"id": satir_id(gelen["id"], sira), "kind": "text", "to": alici, "body": metin[:4000], "tur": tur, "inbound_id": gelen["id"],
+            "seq": sira, "state": "pending", "wamid": None, "media_id": None, "attempts": 0, "error": None, "delivery_state": None,
+            "created_at": simdi, "updated_at": simdi}
+
+
 class Cakisma(Exception):
     """Konuşma okunduktan sonra başka bir yazma oldu; sonuç yazılmadı (iş yeniden sıraya girer)."""
 
@@ -118,6 +126,31 @@ class Depo:
                 c.commit()
         return uygulanan
 
+    def eksik_goc(self) -> list[int]:
+        """Pakette olup veritabanına uygulanmamış göçler (ajan bunlar varken çalışmaz; göç ayrı ve onaylı bir adımdır)."""
+        paket = sorted(int(p.name[:3]) for p in GOC_DIR.glob("[0-9][0-9][0-9]_*.sql"))
+        with self.baglan() as c:
+            var = c.execute("SELECT to_regclass('sema_surumu') IS NOT NULL AS v").fetchone()["v"]
+            uygulanan = {r["surum"] for r in c.execute("SELECT surum FROM sema_surumu")} if var else set()
+        return [n for n in paket if n not in uygulanan]
+
+    def olu_kiralari_birak(self, makine: str, ben: str) -> int:
+        """Ajan yeniden başlarken: bu makinedeki başka (artık yaşamayan) süreçlerin kiraları hemen düşer, iş kira süresini
+        beklemeden yeniden alınır (D-03). Makinede tek ajan süreci çalışır (systemd); başka makinenin kiralarına dokunulmaz."""
+        with self.baglan() as c, c.transaction():
+            return c.execute("UPDATE isler SET kira_bitis = now() WHERE durum = 'isleniyor' AND split_part(sahip, ':', 1) = %s "
+                             "AND sahip <> %s", (makine, ben)).rowcount
+
+    def acik_is_sayisi(self) -> int:
+        with self.baglan() as c:
+            return c.execute("SELECT count(*) AS n FROM isler WHERE durum IN ('sirada', 'isleniyor')").fetchone()["n"]
+
+    def mesaj_durumu(self, mesaj_id: str) -> dict | None:
+        """Bir gelen mesajın işi ve hosting'e devredilmemiş giden satır sayısı (tekrar gelen kanal mesajı için)."""
+        with self.baglan() as c:
+            return c.execute("SELECT j.id AS is_id, j.durum AS is_durum, (SELECT count(*) FROM giden g WHERE g.is_id = j.id "
+                             "AND g.durum = 'bekliyor') AS bekleyen_giden FROM isler j WHERE j.mesaj_id = %s", (mesaj_id,)).fetchone()
+
     # ───────────────────────── gelen ─────────────────────────
     def mesaj_kaydet(self, gelen: dict) -> bool:
         """Kuyruk satırını (feature.php biçimi) mesaj ve iş olarak yazar. Yeni ise True; aynı kimlik daha önce geldiyse
@@ -174,8 +207,10 @@ class Depo:
             satirlar.append((2, "PATRON", "bildirim",
                              f"Portman: {maske(gelen['sender'])} mesajı işlenemedi ({neden}). Panelden bakabilirsiniz."))
         for sira, alici, tur, govde in satirlar:
-            c.execute("INSERT INTO giden (id, is_id, mesaj_id, sira, alici, tur, kind, govde) VALUES (%s, %s, %s, %s, %s, %s, 'text', %s) "
-                      "ON CONFLICT (id) DO NOTHING", (satir_id(gelen["id"], sira), j["id"], gelen["id"], sira, alici, tur, govde))
+            c.execute("INSERT INTO giden (id, is_id, mesaj_id, sira, alici, tur, kind, govde, satir) "
+                      "VALUES (%s, %s, %s, %s, %s, %s, 'text', %s, %s) ON CONFLICT (id) DO NOTHING",
+                      (satir_id(gelen["id"], sira), j["id"], gelen["id"], sira, alici, tur, govde,
+                       Jsonb(metin_satiri(gelen, govde, sira, alici, tur))))
 
     def cikarim_kaydet(self, is_id: int, sahip: str, cikarim: dict) -> bool:
         with self.baglan() as c, c.transaction():
@@ -255,10 +290,10 @@ class Depo:
             self._soru_kaydi(c, gelen, d_eski or {}, d_yeni, sonuc, karar_ozeti)
             for s in cikti.get("satirlar") or []:
                 c.execute(
-                    "INSERT INTO giden (id, is_id, mesaj_id, sira, alici, tur, kind, govde, dosya, sha256, revizyon_id) "
-                    "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                    "INSERT INTO giden (id, is_id, mesaj_id, sira, alici, tur, kind, govde, dosya, sha256, revizyon_id, satir) "
+                    "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
                     (s["id"], j["id"], gelen["id"], s["seq"], s["to"], s.get("tur") or "cevap", s.get("kind") or "text", s.get("body") or "",
-                     s.get("file"), s.get("sha256"), revizyon_id if s.get("kind") == "document" else None))
+                     s.get("file"), s.get("sha256"), revizyon_id if s.get("kind") == "document" else None, Jsonb(s)))
             c.execute("UPDATE isler SET durum = %s, sonuc = %s, hata = %s, bitti = now(), sahip = NULL, kira_bitis = NULL WHERE id = %s",
                       ("basarisiz" if cikti.get("hata") else "bitti", Jsonb(sonuc), cikti.get("hata"), j["id"]))
         return {"proje_id": proje_id, "revizyon_id": revizyon_id}
@@ -309,10 +344,12 @@ class Depo:
 
     # ───────────────────────── revizyon onayı için ─────────────────────────
     def revizyon_iletimi(self, gonderen: str, is_emri_no: str, rev: int) -> dict | None:
-        """Revizyon ve PDF satırının gönderim durumu: {"id", "rev", "durum", "pdf_durum", "iletildi"}; kayıt yoksa None."""
+        """Revizyonun PDF satırı: {"id", "rev", "durum", "pdf_durum", "pdf_wamid", "kabul", "teslim_durumu", "teslim"}.
+        kabul: WhatsApp API'nin gönderimi kabul ettiği an; teslim: Meta bildirimindeki ilk 'delivered'/'read' anı. Kayıt yoksa None."""
         with self.baglan() as c:
             return c.execute(
-                "SELECT r.id, r.rev, r.durum, g.durum AS pdf_durum, extract(epoch FROM g.iletildi) AS iletildi "
+                "SELECT r.id, r.rev, r.durum, g.durum AS pdf_durum, g.dis_id AS pdf_wamid, extract(epoch FROM g.kabul_zamani) AS kabul, "
+                "g.teslim_durumu, extract(epoch FROM g.teslim_zamani) AS teslim "
                 "FROM revizyonlar r LEFT JOIN giden g ON g.revizyon_id = r.id AND g.kind = 'document' "
                 "WHERE r.gonderen = %s AND r.is_emri_no = %s AND r.rev = %s ORDER BY g.olusturuldu DESC NULLS LAST LIMIT 1",
                 (gonderen, is_emri_no, rev)).fetchone()
@@ -359,14 +396,88 @@ class Depo:
             c.execute("UPDATE giden SET durum = 'gonderiliyor', deneme = deneme + 1, gonderim_basladi = now() WHERE id = %s", (r["id"],))
             return r
 
-    def gonderim_sonucu(self, satir_id_: str, durum: str, dis_id: str | None = None, hata: str | None = None) -> None:
-        """'iletildi' = WhatsApp API gönderimi kabul etti (teslim değil). Belirsiz sayıldıktan sonra gelen kabul teyidi de
-        yazılır (bilgi kaybolmaz; yeniden gönderim değildir). Öteki sonuçlar yalnız 'gonderiliyor' satırına yazılır."""
-        assert durum in ("iletildi", "belirsiz", "gonderilmedi")
+    def gonderim_sonucu(self, satir_id_: str, durum: str, dis_id: str | None = None, hata: str | None = None,
+                        kabul_zamani: float | None = None) -> None:
+        """'kabul_edildi' = WhatsApp API gönderimi kabul etti; bayinin telefonuna teslim DEĞİLDİR (teslim: teslim_bildir).
+        Belirsiz sayıldıktan sonra gelen kabul teyidi de yazılır (bilgi kaybolmaz; yeniden gönderim değildir). Öteki sonuçlar
+        yalnız gönderimi süren ('gonderiliyor', 'hostingte') satıra yazılır."""
+        assert durum in ("kabul_edildi", "belirsiz", "gonderilmedi")
         with self.baglan() as c, c.transaction():
-            if durum == "iletildi":
-                c.execute("UPDATE giden SET durum = 'iletildi', dis_id = %s, iletildi = now(), "
+            if durum == "kabul_edildi":
+                c.execute("UPDATE giden SET durum = 'kabul_edildi', dis_id = %s, kabul_zamani = coalesce(to_timestamp(%s::float8), now()), "
                           "hata = CASE WHEN durum = 'belirsiz' THEN 'Belirsiz sayıldıktan sonra kabul teyidi geldi.' END "
-                          "WHERE id = %s AND durum IN ('gonderiliyor', 'belirsiz')", (dis_id, satir_id_))
+                          "WHERE id = %s AND durum IN ('gonderiliyor', 'hostingte', 'belirsiz')", (dis_id, kabul_zamani, satir_id_))
             else:
-                c.execute("UPDATE giden SET durum = %s, hata = %s WHERE id = %s AND durum = 'gonderiliyor'", (durum, hata, satir_id_))
+                c.execute("UPDATE giden SET durum = %s, hata = %s WHERE id = %s AND durum IN ('gonderiliyor', 'hostingte')",
+                          (durum, hata, satir_id_))
+
+    _TESLIM_SIRASI = {"sent": 1, "failed": 2, "delivered": 3, "read": 4}      # feature.php::pm_kanal_status ile aynı sıra
+
+    def teslim_bildir(self, satir_id_: str, teslim_durumu: str, teslim_zamani: float | None = None) -> None:
+        """Meta'nın imzalı durum bildirimi (hosting'ten okunur): sent / delivered / read / failed. Durum yalnız ileri gider;
+        teslim_zamani ilk 'delivered' ya da 'read' anıdır."""
+        sira = self._TESLIM_SIRASI
+        if teslim_durumu not in sira:
+            return
+        with self.baglan() as c, c.transaction():
+            r = c.execute("SELECT teslim_durumu FROM giden WHERE id = %s FOR UPDATE", (satir_id_,)).fetchone()
+            if r is None:
+                return
+            yeni = teslim_durumu if sira[teslim_durumu] >= sira.get(r["teslim_durumu"], 0) else r["teslim_durumu"]
+            zaman = teslim_zamani if teslim_durumu in ("delivered", "read") else None
+            c.execute("UPDATE giden SET teslim_durumu = %s, teslim_zamani = CASE WHEN %s::float8 IS NULL THEN teslim_zamani "
+                      "ELSE least(coalesce(teslim_zamani, to_timestamp(%s::float8)), to_timestamp(%s::float8)) END WHERE id = %s",
+                      (yeni, zaman, zaman, zaman, satir_id_))
+
+    # ───────────────────────── hosting'e devir (VPS ajanı, kalıcı mod) ─────────────────────────
+    def teslim_bekleyen_isler(self, en_fazla: int = 20) -> list[int]:
+        """Bitmiş (ya da başarısız) ve satırları henüz hosting'e devredilmemiş işler, eskiden yeniye."""
+        with self.baglan() as c:
+            return [r["is_id"] for r in c.execute(
+                "SELECT g.is_id FROM giden g JOIN isler j ON j.id = g.is_id WHERE g.durum = 'bekliyor' AND j.durum IN ('bitti', 'basarisiz') "
+                "GROUP BY g.is_id ORDER BY g.is_id LIMIT %s", (en_fazla,))]
+
+    def teslim_paketi(self, is_id: int) -> dict:
+        """Hosting'in result çağrısının beklediği biçim: {"inbound_id", "gonderen", "cikti": {"satirlar", "sonuc", "hata"},
+        "durum", "dosyalar": [(satir_id, yol, sha256)]}. Konuşma durumu hosting'teki durum/ aynası içindir (kaynak Postgres)."""
+        with self.baglan() as c:
+            j = c.execute("SELECT * FROM isler WHERE id = %s", (is_id,)).fetchone()
+            satirlar = c.execute("SELECT * FROM giden WHERE is_id = %s AND durum = 'bekliyor' ORDER BY sira", (is_id,)).fetchall()
+            k = c.execute("SELECT durum FROM konusmalar WHERE gonderen = %s", (j["gonderen"],)).fetchone()
+        durum = {kk: v for kk, v in k["durum"].items() if kk != "proje_id"} if k else None
+        return {"inbound_id": j["mesaj_id"], "gonderen": j["gonderen"],
+                "cikti": {"satirlar": [dict(s["satir"]) for s in satirlar], "sonuc": j["sonuc"] or {}, "hata": j["hata"]},
+                "durum": durum, "dosyalar": [(s["id"], s["dosya"], s["sha256"]) for s in satirlar if s["kind"] == "document"]}
+
+    def hostinge_verildi(self, satir_idleri: list[str]) -> int:
+        with self.baglan() as c, c.transaction():
+            return c.execute("UPDATE giden SET durum = 'hostingte', hostinge_verildi = now() WHERE id = ANY(%s) AND durum = 'bekliyor'",
+                             (list(satir_idleri),)).rowcount
+
+    def hostinge_verilemedi(self, satir_idleri: list[str], neden: str) -> int:
+        """Hosting satırları kesin olarak reddetti (ör. gelen mesaj orada artık işlenmekte değil): gönderilmedi."""
+        with self.baglan() as c, c.transaction():
+            return c.execute("UPDATE giden SET durum = 'gonderilmedi', hata = %s WHERE id = ANY(%s) AND durum = 'bekliyor'",
+                             (neden[:300], list(satir_idleri))).rowcount
+
+    def esitlenecek_satirlar(self, en_fazla: int = 200, gun: int = 3) -> list[str]:
+        """Hosting'e devredilmiş ve gönderim ya da teslim sonucu henüz bilinmeyen satırlar (son 'gun' gün)."""
+        with self.baglan() as c:
+            return [r["id"] for r in c.execute(
+                "SELECT id FROM giden WHERE hostinge_verildi IS NOT NULL AND (durum = 'hostingte' OR (durum = 'kabul_edildi' "
+                "AND teslim_zamani IS NULL AND coalesce(teslim_durumu, '') <> 'failed')) "
+                "AND olusturuldu > now() - make_interval(days => %s) ORDER BY olusturuldu LIMIT %s", (gun, en_fazla))]
+
+    def hosting_durumu_isle(self, satir_id_: str, st: dict) -> None:
+        """api.php giden_durum'un bir satırı → Postgres. Hosting durumları (feature.php): pending/uploading/sending → sürüyor;
+        accepted/sent/delivered/read/failed (wamid'li) → API kabul etti (+ Meta teslim durumu); uncertain → belirsiz;
+        held ya da tükenmiş upload_failed → gönderilmedi."""
+        durum = st.get("state")
+        if durum in ("accepted", "sent", "delivered", "read", "failed") and st.get("wamid"):
+            self.gonderim_sonucu(satir_id_, "kabul_edildi", dis_id=st["wamid"], kabul_zamani=st.get("request_accepted_at"))
+            if st.get("delivery_state"):
+                self.teslim_bildir(satir_id_, st["delivery_state"], st.get("delivered_at"))
+        elif durum == "uncertain":
+            self.gonderim_sonucu(satir_id_, "belirsiz", hata=str(st.get("error") or "hosting: gönderim sonucu belirsiz")[:300])
+        elif durum == "held" or (durum == "upload_failed" and int(st.get("attempts") or 0) >= 2):
+            self.gonderim_sonucu(satir_id_, "gonderilmedi", hata=str(st.get("error") or f"hosting: {durum}")[:300])

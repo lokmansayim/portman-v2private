@@ -2,8 +2,10 @@
 
   içe aktar  : durum/<numara>.json → konusmalar (bekleyen B1/B2 soruları durumun içinde olduğu için onlar da gelir; askıdaki
                soru sorular tablosuna da yazılır, doğuran mesaj bilinmediği için kaynağı boş); state.json inbound →
-               mesajlar + isler. 'queued' satır iş olarak sıraya girer; bitmiş satırlar yalnız tekilleştirme için kaydedilir
-               (aynı mesaj yeniden gelirse yeniden işlenmez). Kuyrukta 'processing' satır varsa aktarma yapılmaz: eski
+               mesajlar + isler. Bitmiş satırlar yalnız tekilleştirme için kaydedilir (aynı mesaj yeniden gelirse yeniden
+               işlenmez). 'queued' satırlar canlı geçişte ATLANIR (varsayılan): hosting kuyruğunda kalır, ajan claim ile
+               alır; böylece hosting'teki satır 'processing' olmadan Postgres'te işlenip sonucu reddedilmez. Yalnız hosting'siz
+               (çevrimdışı) kullanımda --sirada is ile iş olarak sıraya girer. Kuyrukta 'processing' satır varsa aktarma yapılmaz: eski
                işleyici durdurulup kuyruk boşalmadan geçilmez (yarım işin sonucu bilinmez).
   dışa aktar : konusmalar → durum/<numara>.json (geri dönüşte hosting ya da eski ajan kaldığı yerden sürer).
 Var olan kayıtların üzerine yazılmaz; atlananlar sayılır. Anahtar ya da sır okumaz, yazmaz.
@@ -26,9 +28,10 @@ from depo import Depo, soru_ayrintisi  # noqa: E402
 _IS_DURUMU = {"queued": "sirada", "done": "bitti", "failed": "basarisiz"}
 
 
-def ice_aktar(depo: Depo, kanal: Path) -> dict:
+def ice_aktar(depo: Depo, kanal: Path, sirada_olanlar: str = "atla") -> dict:
+    assert sirada_olanlar in ("atla", "is")
     kanal = Path(kanal)
-    say = {"konusma": 0, "konusma_atlandi": 0, "soru": 0, "mesaj": 0, "mesaj_atlandi": 0, "sirada": 0}
+    say = {"konusma": 0, "konusma_atlandi": 0, "soru": 0, "mesaj": 0, "mesaj_atlandi": 0, "sirada": 0, "kuyrukta_birakildi": 0}
     st = kanal / "state.json"
     inbound = (json.loads(st.read_text(encoding="utf-8")).get("inbound") or {}) if st.exists() else {}
     yarim = [m for m, g in inbound.items() if g.get("state") == "processing"]
@@ -49,6 +52,9 @@ def ice_aktar(depo: Depo, kanal: Path) -> dict:
                 say["soru"] += 1
         for mid, g in sorted(inbound.items(), key=lambda x: (x[1].get("timestamp", 0), x[1].get("received_at", 0))):
             if not str(mid).startswith("wamid.") or g.get("self_test"):
+                continue
+            if g.get("state") == "queued" and sirada_olanlar == "atla":
+                say["kuyrukta_birakildi"] += 1          # ajan hosting kuyruğundan claim ile alacak
                 continue
             g = {**g, "id": mid}
             bayi = g.get("bayi") if isinstance(g.get("bayi"), dict) else None
@@ -86,11 +92,14 @@ def disa_aktar(depo: Depo, hedef: Path) -> dict:
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     alt = ap.add_subparsers(dest="komut", required=True)
-    alt.add_parser("ice").add_argument("--kanal", required=True)
+    ice = alt.add_parser("ice")
+    ice.add_argument("--kanal", required=True)
+    ice.add_argument("--sirada", choices=["atla", "is"], default="atla", help="kuyruktaki mesajlar: atla (canlı geçiş) | is")
     alt.add_parser("disa").add_argument("--hedef", required=True)
     ns = ap.parse_args(argv)
     depo = Depo()
-    print(json.dumps(ice_aktar(depo, Path(ns.kanal)) if ns.komut == "ice" else disa_aktar(depo, Path(ns.hedef)), ensure_ascii=False))
+    print(json.dumps(ice_aktar(depo, Path(ns.kanal), ns.sirada) if ns.komut == "ice" else disa_aktar(depo, Path(ns.hedef)),
+                     ensure_ascii=False))
     return 0
 
 

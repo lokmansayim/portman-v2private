@@ -52,7 +52,7 @@ def test_isin_bitisi_yazilamazsa_hicbir_sonuc_kalmaz(depo, wa, hizli_motor):
     r = kalici.bir_is(depo, AYAR, "B")
     assert r["durum"] == "bitti"
     assert tek(depo, "SELECT count(*) n FROM giden")["n"] == 2 and tek(depo, "SELECT count(*) n FROM revizyonlar")["n"] == 1
-    assert kalici.gonder(depo, wa)["iletildi"] == 2 and len(wa.gonderilen) == 2
+    assert kalici.gonder(depo, wa)["kabul_edildi"] == 2 and len(wa.gonderilen) == 2
 
 
 def test_mesaj_ve_is_birlikte_yazilir(depo):
@@ -128,7 +128,7 @@ def test_suresi_dolan_d01_sorusundan_sonra_onay_da_denetlenir(depo, wa, hizli_mo
     plan_iste(depo, wa)
     wa.mod = "belirsiz"
     with depo.baglan() as c:                                    # r01'in PDF'i belirsiz kalmış olsun
-        c.execute("UPDATE giden SET durum = 'belirsiz', iletildi = NULL WHERE kind = 'document'")
+        c.execute("UPDATE giden SET durum = 'belirsiz', kabul_zamani = NULL WHERE kind = 'document'")
     wa.mod = "tamam"
     geri_al(depo, NUMARA_A, 3.5)
     depo.mesaj_kaydet(mesaj("P6001 yatak odası 1 penceresi 120x180 olsun", T_PENCERE_DEGISTIR)); isle_hepsi(depo)
@@ -239,7 +239,7 @@ def test_ayni_is_emri_numarasi_uretilirse_oteki_bayinin_dosyasi_ezilmez(depo, wa
     assert r["durum"] == "bitti" and r["eylem"] == "is_emri"
     no = [x["is_emri_no"] for x in sorgu(depo, "SELECT is_emri_no FROM revizyonlar ORDER BY id")]
     assert len(set(no)) == 2
-    assert kalici.gonder(depo, wa)["iletildi"] == 2 and hashlib.sha256(pdf_a.read_bytes()).hexdigest() == once
+    assert kalici.gonder(depo, wa)["kabul_edildi"] == 2 and hashlib.sha256(pdf_a.read_bytes()).hexdigest() == once
 
 
 def test_dosyasi_degismis_pdf_gonderilmez(depo, wa, hizli_motor):
@@ -271,23 +271,25 @@ def test_yeni_baslayan_gonderim_belirsiz_sayilmaz(depo, hizli_motor):
 
 def test_gec_gelen_sonuc_iletilmis_satiri_bozmaz_gec_teyit_kaybolmaz(depo, hizli_motor):
     depo.mesaj_kaydet(mesaj("P6001 aynalı", T_P6001)); isle_hepsi(depo)
-    r1 = depo.gonderime_al(); depo.gonderim_sonucu(r1["id"], "iletildi", dis_id="wamid.X1")
+    r1 = depo.gonderime_al(); depo.gonderim_sonucu(r1["id"], "kabul_edildi", dis_id="wamid.X1")
     depo.gonderim_sonucu(r1["id"], "belirsiz", hata="geç gelen zaman aşımı")
-    assert tek(depo, "SELECT durum, dis_id FROM giden WHERE id = %s", r1["id"]) == {"durum": "iletildi", "dis_id": "wamid.X1"}
+    assert tek(depo, "SELECT durum, dis_id FROM giden WHERE id = %s", r1["id"]) == {"durum": "kabul_edildi", "dis_id": "wamid.X1"}
     r2 = depo.gonderime_al()
     with depo.baglan() as c:
         c.execute("UPDATE giden SET gonderim_basladi = now() - interval '11 minutes' WHERE id = %s", (r2["id"],))
     assert depo.yarim_gonderimleri_belirsiz_say() == 1
-    depo.gonderim_sonucu(r2["id"], "iletildi", dis_id="wamid.X2")     # gönderici sonunda cevap aldı
+    depo.gonderim_sonucu(r2["id"], "kabul_edildi", dis_id="wamid.X2")     # gönderici sonunda cevap aldı
     s = tek(depo, "SELECT durum, dis_id, hata FROM giden WHERE id = %s", r2["id"])
-    assert (s["durum"], s["dis_id"]) == ("iletildi", "wamid.X2") and "sonra" in s["hata"]
+    assert (s["durum"], s["dis_id"]) == ("kabul_edildi", "wamid.X2") and "sonra" in s["hata"]
     assert depo.gonderime_al() is None                           # yeniden gönderilecek satır yok
 
 
 # ───────────────────────── göç, hata yolu, geçiş ─────────────────────────
 def test_goc_ikinci_kez_bir_sey_uygulamaz(depo):
     assert depo.goc_uygula() == []
-    assert [r["surum"] for r in sorgu(depo, "SELECT surum FROM sema_surumu")] == [1]
+    from depo import GOC_DIR
+    beklenen = sorted(int(p.name[:3]) for p in GOC_DIR.glob("[0-9][0-9][0-9]_*.sql"))
+    assert beklenen[:2] == [1, 2] and [r["surum"] for r in sorgu(depo, "SELECT surum FROM sema_surumu ORDER BY surum")] == beklenen
 
 
 def test_beklenmeyen_hatada_yarim_durum_yazilmaz(depo, monkeypatch):

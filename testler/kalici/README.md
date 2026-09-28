@@ -38,6 +38,20 @@ Gerçek WhatsApp ve gerçek LLM ile denenmedi. Bu testler canlı doğrulama değ
 | T10 | Kabul gösterimi (aşağıda) | `kabul_gosterimi.py`, `test_kabul.py` |
 | İnceleme | Bağımsız incelemenin (28.09) bulguları ve yakalanmayan mutasyonlar. İşin bitişi yazılamazsa hiçbir sonuç kalmaz; mesaj ve iş birlikte yazılır (ikisi de tetikleyiciyle sınanır). İlk yazmada da sessiz ezme olmaz. Kirası devredilen işin eski sahibi yazamaz. Süresi dolan D-01 sorusundan sonra gelen onay da denetlenir. Soru kaydı cevaplandı, düştü ya da devredildi diye doğru kapanır. Aynı bayi kodlu iki numara birbirinin kaydını göremez ve aynı İş Emri numarası üretilse de dosya ezilmez. Değişmiş PDF gönderilmez. Geç gelen gönderim teyidi kaybolmaz. İşlenmekte olan mesaj varken geçiş yapılmaz. SIGTERM'de eldeki iş bitirilir. İkinci tur: PDF yolu kayıtta ve satırda yerinde, hazırlık klasörü temiz; çakışmada taşınan dosya silinir; kayıt yazıldıktan sonra bağlantı koparsa PDF yerinde kalır; hiçbir şey sorulmadıysa soru kaydı açılmaz. | `test_inceleme.py` |
 
+## Bağlantı turu (`test_baglanti.py`)
+
+- **Göç 002:** 001'den yükseltme; API kabulü ile Meta teslimi ayrı alanlarda.
+- **Onay zinciri:** gönderilen PDF'in mesaj kimliği → revizyon → proje → gelen cevap ve alıntısı. Eski revizyona verilen onayın reddi ve güncel revizyonun doğru onayının kabulü aynı akışta gösterilir. Kabul edilmiş ama teslim edilmemiş plana yazılan onay reddedilir; Meta "failed" bildirdiyse onay kaydedilmez.
+- **D-03 kapsamı:** yetkisiz numara, soru, geçersiz ya da hatalı LLM çıktısı, yazısız mesaj ve beklenmeyen hata bir kez yazılır, tekrar edilmez. Belirsiz gönderim işi yeniden açmaz.
+- **Ajan kalıcı modu** (`vps/agent.py`), **sahte hosting** ile (`sahte_hosting.py`): claim → Postgres → hosting'e devir → durum eşitleme. Ayrıca şunlar sınanır:
+  - cevabı kaybolan devir yeniden denenir;
+  - aynı kanal mesajı ikinci iş açmaz;
+  - yeniden başlayan ajan ölü sürecin işini hemen alır;
+  - hosting satırı bırakmışsa satırlar "gönderilmedi" olur;
+  - eski API ya da eksik göçle ajan çalışmaz;
+  - canlı kabul gösteriminin yedi adımı provadan geçer.
+- **Sahte hosting PHP değildir.** Gerçek PHP hattı `kanal/tests/baglanti_test.php` ve `kanal/tests/e2e_kalici.py` ile sınanır; ikisi de `portman/lib.php` ister (`docs/is_emirleri/IE-02-canli.md`, kapı B).
+
 ## Kabul gösterimi
 
 `kabul_gosterimi.py` şu sırayı koşar ve her adımı veritabanından denetler:

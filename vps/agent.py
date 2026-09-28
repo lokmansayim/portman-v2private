@@ -9,10 +9,10 @@ Ortam (/etc/portman/agent.env): PORTMAN_API_URL, PORTMAN_API_TOKEN, PORTMAN_HOME
 Dizinler: $PORTMAN_HOME/app (paket), data (durum/, projects/, self-test), logs, pkg
 """
 from __future__ import annotations
-import hashlib, io, json, os, shutil, socket, sys, time, traceback, urllib.error, urllib.request, uuid, zipfile
+import hashlib, http.client, io, json, os, shutil, socket, sys, time, traceback, urllib.error, urllib.request, uuid, zipfile
 from pathlib import Path
 
-SURUM = "vps-agent-v1.1.1"
+SURUM = "vps-agent-v1.2"
 HOME = Path(os.environ.get("PORTMAN_HOME", "/opt/portman"))
 API = os.environ.get("PORTMAN_API_URL", "").rstrip("?")
 TOKEN = os.environ.get("PORTMAN_API_TOKEN", "")
@@ -70,6 +70,8 @@ def istek(op: str, method: str = "GET", body: dict | None = None, multipart: tup
         raise ApiHatasi(f"HTTP {e.code} {op}: {govde}") from None
     except urllib.error.URLError as e:
         raise ApiHatasi(f"bağlantı {op}: {str(e.reason)[:200]}") from None
+    except (OSError, http.client.HTTPException) as e:        # cevap okunurken kopma/zaman aşımı: sonuç bilinmiyor
+        raise ApiHatasi(f"bağlantı {op}: {type(e).__name__}: {str(e)[:160]}") from None
 
 
 def multipart_kodla(alanlar: dict, dosyalar: list[tuple[str, str, bytes]]) -> tuple[str, bytes]:
@@ -222,6 +224,152 @@ def bekleyen_sonuclari_gonder() -> None:
             log("bekleyen sonuç yine gönderilemedi:", f.name, str(e)[:160]); break
 
 
+# ───────────────────────── kalıcı mod (İE-02: Postgres) ─────────────────────────
+# PORTMAN_PG_DSN tanımlıysa (/etc/portman/pg.env) konuşma ve iş durumunun asıl kaydı Postgres'tir; dosya modu (isi_yap,
+# data/durum/) bu ajanda çalışmaz. Hosting WhatsApp tarafında kalır: kuyruk (claim), gönderim (tick), gönderim durumu
+# (giden_durum). Aynı anda tek etkin işleyici settings.worker ile seçilir: "vps" → bu ajan, "hosting" → hosting worker.py.
+PG_DSN = os.environ.get("PORTMAN_PG_DSN", "")
+GEREKEN_API = (1, 2)                     # kanal/api.php v1.2: giden_durum ve context_id
+KIRA_SN = 300                            # hosting'in 600 sn'lik "takılı iş" süresinden kısa: yarım iş hosting vazgeçmeden biter
+_kalici: dict = {"depo": None, "K": None, "son_esitleme": 0.0, "son_uyari": 0.0}
+_dur = {"istendi": False}
+
+
+def _api_surumu(ayar_uzak: dict) -> tuple:
+    import re
+    m = re.match(r"kanal-api-v(\d+)\.(\d+)", str(ayar_uzak.get("api") or ""))
+    return (int(m.group(1)), int(m.group(2))) if m else (0, 0)
+
+
+def kalici_hazir(ayar_uzak: dict) -> str | None:
+    """Kalıcı mod bu turda çalışabilir mi? Çalışamıyorsa nedeni döner (ajan iş almaz, yalnız sağlık bildirir)."""
+    if _api_surumu(ayar_uzak) < GEREKEN_API:
+        return f"hosting API {ayar_uzak.get('api')!r}; kalıcı mod için kanal-api-v1.2 gerekli (kanal/api.php yüklenmemiş)"
+    if _kalici["depo"] is None:
+        worker_modulu()
+        import depo as D, kalici as K     # paketle.py pakete koyar (kökte, worker.py'nin yanında)
+        d = D.Depo(PG_DSN)
+        eksik = d.eksik_goc()
+        if eksik:
+            return f"Postgres göçü uygulanmamış: {eksik} (onaylı adımda: python app/kalici.py goc)"
+        n = d.olu_kiralari_birak(socket.gethostname(), K.isleyici_adi())
+        if n:
+            log("yeniden başlama: yarım kalan", n, "işin kirası düşürüldü; hemen yeniden alınacak (D-03)")
+        _kalici.update(depo=d, K=K)
+    return None
+
+
+def _is_normal(job: dict) -> dict:
+    if isinstance(job.get("test_cikarim"), dict):          # yalnız yerel test: PHP boş sözlüğü [] yazar
+        for k in ("bina_ozellikleri",):
+            if job["test_cikarim"].get(k) == []: job["test_cikarim"][k] = {}
+    return job
+
+
+def tekrar_gelen(d, job: dict) -> None:
+    """Hosting aynı kanal mesajını yeniden verdi (Postgres'te zaten var): ikinci iş açılmaz. İlk iş bitmiş ve satırları
+    hosting'e verilmişse hosting'teki satır boş bir sonuçla kapanır; ilk iş sürüyorsa satırı ilk işin sonucu kapatır."""
+    m = d.mesaj_durumu(job["id"])
+    if m and m["is_durum"] in ("bitti", "basarisiz") and m["bekleyen_giden"] == 0:
+        cikti = {"satirlar": [], "sonuc": {"eylem": "yoksay", "gerekce": "tekrar gelen mesaj: Postgres'te zaten işlendi", "worker": "vps"}}
+        istek("result", multipart=multipart_kodla({"inbound_id": job["id"], "cikti": json.dumps(cikti, ensure_ascii=False)}, []), timeout=60)
+        log("tekrar gelen mesaj", job["id"][:20], ": ikinci iş açılmadı (ilk iş", m["is_id"], m["is_durum"] + ")")
+    else:
+        log("tekrar gelen mesaj", job["id"][:20], ": ilk iş sürüyor; ikinci iş açılmadı")
+
+
+def hostinge_teslim(d) -> int:
+    """Bitmiş işlerin giden satırlarını hosting'e verir (result). Hosting satırları kimliğe göre tekilleştirir, bu yüzden
+    cevabı kaybolan çağrı güvenle yeniden denenir: hosting "işlenmekte değil" derse giden_durum ile satırların orada olup
+    olmadığına bakılır. Bu bir WhatsApp gönderimi değildir; gönderimi hosting yapar, sonucu belirsizse tekrar etmez."""
+    n = 0
+    for is_id in d.teslim_bekleyen_isler():
+        pk = d.teslim_paketi(is_id)
+        dosyalar, alanlar, gidecek, bozuk = [], {"inbound_id": pk["inbound_id"]}, [], []
+        for i, s in enumerate(pk["cikti"]["satirlar"]):
+            s = dict(s)
+            if s.get("kind") == "document":
+                p = Path(s.get("file") or "")
+                try:
+                    veri = p.read_bytes()
+                    rel = "projects/" + p.resolve().relative_to((DATA / "projects").resolve()).as_posix()
+                    saglam = hashlib.sha256(veri).hexdigest() == s.get("sha256")
+                except (OSError, ValueError):
+                    saglam = False
+                if not saglam:
+                    bozuk.append(s["id"]); continue
+                alan = f"file_{i}"
+                dosyalar.append((alan, p.name, veri)); alanlar[f"path_{alan}"] = rel; s["file"] = rel
+            gidecek.append(s)
+        if bozuk:
+            d.hostinge_verilemedi(bozuk, "PDF dosyası yok ya da kayıttan sonra değişmiş; hosting'e verilmedi")
+        ids = [s["id"] for s in gidecek]
+        alanlar["cikti"] = json.dumps({**pk["cikti"], "satirlar": gidecek}, ensure_ascii=False)
+        if pk["durum"] is not None:
+            alanlar["durum"] = json.dumps(pk["durum"], ensure_ascii=False)       # hosting'teki durum/ aynası (panel, geri dönüş)
+        try:
+            istek("result", multipart=multipart_kodla(alanlar, dosyalar), timeout=180)
+            d.hostinge_verildi(ids)
+        except ApiHatasi as e:
+            m = str(e)
+            if m.startswith("HTTP 422") and ("inbound_not_claimed_by_vps" in m or "inbound_unknown" in m):
+                orada = set(istek("giden_durum", body={"ids": ids}, timeout=30).get("satirlar") or {})
+                d.hostinge_verildi([i for i in ids if i in orada])
+                yok = [i for i in ids if i not in orada]
+                if yok:
+                    d.hostinge_verilemedi(yok, f"hosting kabul etmedi: {m[:160]}")
+                    log("hosting sonucu kabul etmedi:", pk["inbound_id"][:20], m[:120])
+            elif m.startswith("HTTP 4"):
+                d.hostinge_verilemedi(ids, f"hosting reddetti: {m[:160]}"); log("hosting sonucu reddetti:", m[:160])
+            else:
+                log("hosting'e teslim ertelendi (yeniden denenecek):", m[:160]); break
+        n += 1
+    return n
+
+
+def durum_esitle(d) -> int:
+    """Hosting'teki gönderim ve teslim durumunu Postgres'e işler: API kabulü (kabul_edildi, wamid, kabul zamanı) ve Meta'nın
+    teslim bildirimi (delivered/read/failed) ayrı alanlardır."""
+    ids = d.esitlenecek_satirlar()
+    if not ids:
+        return 0
+    satirlar = istek("giden_durum", body={"ids": ids}, timeout=30).get("satirlar") or {}
+    for i, st in satirlar.items():
+        d.hosting_durumu_isle(i, st)
+    return len(satirlar)
+
+
+def kalici_tur(ayar: dict) -> bool:
+    """Kalıcı modda bir tur: hosting'ten bir iş al → Postgres'e yaz; bir iş işle; bitmişleri hosting'e ver; durum eşitle.
+    Bir şey yapıldıysa True."""
+    d, K = _kalici["depo"], _kalici["K"]
+    yapildi = False
+    job = istek("claim", body={}, timeout=30).get("job")
+    if job:
+        job = _is_normal(job)
+        if d.mesaj_kaydet(job):
+            log("iş alındı → Postgres", job["id"][:20], "kimden", maske(job.get("sender", "")), "tür", job.get("type"))
+        else:
+            tekrar_gelen(d, job)
+        yapildi = True
+    if d.acik_is_sayisi():
+        # İşlemeden önce gönderim/teslim durumu tazelenir: bayi PDF'i görüp hemen "onaylıyorum" yazdıysa onay denetimi
+        # hosting'in son bildiğini (API kabulü, Meta teslimi) görmeli; yoksa ulaşmış plan "ulaşmadı" sayılırdı.
+        durum_esitle(d); _kalici["son_esitleme"] = time.time()
+    r = K.bir_is(d, {**ayar, "kira_sn": KIRA_SN, "en_cok_deneme": 3}, K.isleyici_adi())
+    if r is not None:
+        yapildi = True
+        _sayac["done" if r.get("durum") == "bitti" else "failed"] += r.get("durum") in ("bitti", "basarisiz")
+        log("iş", r.get("is_id"), r.get("durum"), "→", r.get("eylem"), "giden:", r.get("giden"))
+    if hostinge_teslim(d):
+        yapildi = True
+    if yapildi or time.time() - _kalici["son_esitleme"] > 15:
+        if durum_esitle(d):
+            yapildi = True
+        _kalici["son_esitleme"] = time.time()
+    return yapildi
+
+
 # ───────────────────────── komut kanalı (isteğe bağlı) ─────────────────────────
 def komut_calistir() -> bool:
     """settings.vps_komut açıkken hostingteki komutlar/<id>.json'u portman kullanıcısı olarak çalıştırır; sonucu geri yollar."""
@@ -265,7 +413,7 @@ def heartbeat(pk_sha: str, son_is) -> dict:
             self_test["adimlar"] = {k: (v.get("passed") if isinstance(v, dict) else v) for k, v in (j.get("adimlar") or {}).items()}
         except Exception:
             pass
-    body = {"surum": SURUM, "python": sys.version.split()[0], "package_sha256": pk_sha, "uptime_s": int(time.time() - BASLANGIC),
+    body = {"surum": SURUM + (" kalici" if PG_DSN else ""), "python": sys.version.split()[0], "package_sha256": pk_sha, "uptime_s": int(time.time() - BASLANGIC),
             "load": [round(x, 2) for x in load] if load else None, "disk_free_mb": (st.free // 2**20) if st else None, "mem_free_mb": mem_free,
             "last_job": son_is, "jobs_done": _sayac["done"], "jobs_failed": _sayac["failed"], "self_test": self_test, "host": socket.gethostname(),
             "started_at": int(BASLANGIC), "errors": _sayac["errors"][-5:]}
@@ -296,12 +444,16 @@ def gunlukleri_gonder() -> None:
 
 # ───────────────────────── ana döngü ─────────────────────────
 def main() -> int:
-    log("başladı", SURUM, "home", HOME, "api", API.split("?")[0] if API else "-")
+    log("başladı", SURUM, "home", HOME, "api", API.split("?")[0] if API else "-", "mod", "kalıcı (Postgres)" if PG_DSN else "dosya")
+    import signal
+    # SIGTERM (systemctl restart/stop): elindeki adımı bitirir, sonra çıkar. Kalıcı modda yarıda kalan iş de kaybolmaz:
+    # yeniden başlayan ajan ölü sürecin kirasını düşürür (olu_kiralari_birak).
+    signal.signal(signal.SIGTERM, lambda *_: _dur.__setitem__("istendi", True))
     for d in (APP, DATA, LOGS, PKG, DATA / "pending"):
         d.mkdir(parents=True, exist_ok=True)
     son_ayar_t = 0.0; son_hb_t = 0.0; ayar_uzak = {}; son_is = None; poll = 4
     oz_test_yapildi = False
-    while True:
+    while not _dur["istendi"]:
         try:
             simdi = time.time()
             if simdi - son_ayar_t > 60 or not ayar_uzak:
@@ -333,6 +485,21 @@ def main() -> int:
                 heartbeat(yerel_paket_sha(), son_is); son_hb_t = simdi; gunlukleri_gonder()
             if ayar_uzak.get("worker") != "vps" or ayar_uzak.get("enabled") is not True:
                 time.sleep(poll * 3); continue
+            if PG_DSN:                                    # kalıcı mod: dosya modu bu ajanda çalışmaz
+                neden = kalici_hazir(ayar_uzak)
+                if neden:
+                    if time.time() - _kalici["son_uyari"] > 300:
+                        log("kalıcı mod bekliyor:", neden); _kalici["son_uyari"] = time.time(); gunlukleri_gonder()
+                    time.sleep(poll * 3); continue
+                if kalici_tur(ayar):
+                    heartbeat(yerel_paket_sha(), {"mod": "kalici", "at": int(time.time())}); son_hb_t = time.time(); gunlukleri_gonder()
+                    if ONESHOT and not _kalici["depo"].teslim_bekleyen_isler() and _kalici["depo"].acik_is_sayisi() == 0:
+                        return 0
+                else:
+                    if ONESHOT and time.time() - BASLANGIC > 90:
+                        log("oneshot: iş yok"); return 4
+                    time.sleep(poll)
+                continue
             c = istek("claim", body={}, timeout=30)
             job = c.get("job")
             if not job:
@@ -361,6 +528,8 @@ def main() -> int:
             return 0
         except Exception:
             log("beklenmeyen:", traceback.format_exc()[-800:]); _sayac["errors"].append("beklenmeyen hata"); time.sleep(15)
+    log("durduruldu (SIGTERM): eldeki adım bitti"); gunlukleri_gonder()
+    return 0
 
 
 if __name__ == "__main__":

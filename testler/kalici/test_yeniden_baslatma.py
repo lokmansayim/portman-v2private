@@ -66,7 +66,7 @@ def test_t3_motor_sirasinda_oldurulen_isleyici_yeniden_baslayinca_isi_bitirir(de
     rev = tek(depo, "SELECT * FROM revizyonlar")
     assert rev["dogrulandi"] is True and rev["durum"] == "onay_bekliyor"
 
-    assert kalici.gonder(depo, wa)["iletildi"] == 2
+    assert kalici.gonder(depo, wa)["kabul_edildi"] == 2
     assert depo.mesaj_kaydet(g) is False                       # aynı mesaj yeniden geldi
     assert kalici.bir_is(depo, AYAR, "ucuncu") is None
     assert tek(depo, "SELECT count(*) n FROM isler")["n"] == 1 and len(wa.gonderilen) == 2

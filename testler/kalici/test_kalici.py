@@ -324,7 +324,7 @@ def test_t5_belirsiz_gonderim_yeniden_gonderilmez(depo, wa, hizli_motor):
     assert kalici.gonder(depo, wa)["belirsiz"] == 2
     ilk = len(wa.gonderilen)
     wa.mod = "tamam"
-    assert kalici.gonder(depo, wa)["iletildi"] == 0 and len(wa.gonderilen) == ilk
+    assert kalici.gonder(depo, wa)["kabul_edildi"] == 0 and len(wa.gonderilen) == ilk
     assert {x["durum"] for x in sorgu(depo, "SELECT durum FROM giden")} == {"belirsiz"}
 
 
@@ -334,7 +334,7 @@ def test_t5_yarida_kalan_gonderim_belirsiz_sayilir(depo, wa, hizli_motor):
     with depo.baglan() as c:
         c.execute("UPDATE giden SET gonderim_basladi = now() - interval '11 minutes' WHERE id = %s", (r["id"],))
     say = kalici.gonder(depo, wa)
-    assert say["yarim_belirsiz"] == 1 and say["iletildi"] == 1
+    assert say["yarim_belirsiz"] == 1 and say["kabul_edildi"] == 1
     assert r["id"] not in [x["id"] for x in wa.gonderilen]
     assert tek(depo, "SELECT durum FROM giden WHERE id = %s", r["id"])["durum"] == "belirsiz"
 
@@ -381,7 +381,7 @@ def _revizyon_iste(depo):
 
 
 def test_t7_iletilmeden_yazilan_onay_yeni_revizyonu_onaylamaz(depo, wa, hizli_motor):
-    plan_iste(depo, wa)                                           # r01 iletildi
+    plan_iste(depo, wa)                                           # r01 gönderildi (API kabul etti)
     _revizyon_iste(depo)                                          # r02 hazır, henüz gönderilmedi
     o = mesaj("onaylıyorum", T_ONAY)                              # bayi r01'i görüp yazdı
     depo.mesaj_kaydet(o)
@@ -390,7 +390,7 @@ def test_t7_iletilmeden_yazilan_onay_yeni_revizyonu_onaylamaz(depo, wa, hizli_mo
     assert [x["durum"] for x in sorgu(depo, "SELECT durum FROM revizyonlar ORDER BY rev")] == ["yerini_aldi", "onay_bekliyor"]
     d, _ = depo.konusma_oku(NUMARA_A)
     assert d["asama"] == "onay_bekliyor"
-    kalici.gonder(depo, wa)                                       # r02 iletildi
+    kalici.gonder(depo, wa)                                       # r02 gönderildi (API kabul etti)
     time.sleep(1.1)
     o2 = mesaj("onaylıyorum", T_ONAY); depo.mesaj_kaydet(o2)
     [r] = isle_hepsi(depo)
@@ -481,11 +481,11 @@ def test_t9_json_postgres_json_kayipsiz_ve_bekleyen_soru_surer(depo, tmp_path, h
               "wamid.BEKLEYEN1": {**mesaj("değişiklik", talep("diger", "değişiklik"), mid="wamid.BEKLEYEN1"), "state": "queued"}}
     (kanal / "state.json").write_text(json.dumps({"version": 1, "inbound": kuyruk, "outbound": {}}, ensure_ascii=False))
     once = {p.name: json.loads(p.read_text()) for p in (kanal / "durum").glob("*.json")}
-    say = depo_aktar.ice_aktar(depo, kanal)
-    assert say == {"konusma": 2, "konusma_atlandi": 0, "soru": 1, "mesaj": 2, "mesaj_atlandi": 0, "sirada": 1}
+    say = depo_aktar.ice_aktar(depo, kanal, sirada_olanlar="is")          # hosting'siz: kuyruktaki mesaj iş olur
+    assert say == {"konusma": 2, "konusma_atlandi": 0, "soru": 1, "mesaj": 2, "mesaj_atlandi": 0, "sirada": 1, "kuyrukta_birakildi": 0}
     s = tek(depo, "SELECT * FROM sorular")
     assert (s["alan"], s["kaynak_mesaj_id"], s["durum"]) == ("yeni_mi_degisiklik", None, "acik") and "120x180" in s["bekletilen_metin"]
-    assert depo_aktar.ice_aktar(depo, kanal)["konusma_atlandi"] == 2                # ikinci kez: üzerine yazılmaz
+    assert depo_aktar.ice_aktar(depo, kanal, sirada_olanlar="is")["konusma_atlandi"] == 2   # ikinci kez: üzerine yazılmaz
     assert depo.mesaj_kaydet(kuyruk["wamid.ESKI1"]) is False                        # işlenmiş mesaj yeniden gelirse işlenmez
     geri = tmp_path / "geri"
     depo_aktar.disa_aktar(depo, geri)

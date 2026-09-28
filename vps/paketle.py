@@ -7,7 +7,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 VPS = ROOT / "vps"
 BUILD = VPS / "build"
-SURUM = "kanal-v1.1.1-" + time.strftime("%Y%m%d-%H%M")
+SURUM = "kanal-v1.2-" + time.strftime("%Y%m%d-%H%M")
 
 ATLA_DIZIN = {"__pycache__", "durum", "checks", "projects", "install", "tests", "package"}
 ATLA_DOSYA = {"settings.json", "state.json", "state.lock", "worker.lock", "tick.lock", "api_token.txt", "lib.snapshot.php"}
@@ -28,6 +28,13 @@ def main() -> int:
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
         z.write(ROOT / "kanal" / "worker.py", "worker.py")
+        # İE-02 kalıcı mod: Postgres deposu, kalıcı işleyici, aktarma ve göçler (ajan yalnız PORTMAN_PG_DSN varken kullanır)
+        for ad in ("depo.py", "kalici.py", "depo_aktar.py"):
+            z.write(ROOT / "kanal" / ad, ad)
+        z.write(VPS / "kanit_sorgulari.sql", "kanit_sorgulari.sql")     # salt okunur kanıt sorguları (canlı kabul gösterimi)
+        z.write(VPS / "tekrar_dene.py", "tekrar_dene.py")               # kabul gösterimi adım 7 (aynı kanal mesajı yeniden)
+        for g in sorted((ROOT / "kanal" / "goc").glob("[0-9][0-9][0-9]_*.sql")):
+            z.write(g, f"goc/{g.name}")
         for ad in ("self-test-request.json", "ref_h-connector.json", "ref_source-6x8.dxf", "DejaVuSans.ttf"):
             z.write(ROOT / "kanal" / ad, ad)
         n = ekle_dizin(z, ROOT / "beyin", "beyin") + ekle_dizin(z, ROOT / "motor", "motor") + ekle_dizin(z, ROOT / "is_emri", "is_emri")
