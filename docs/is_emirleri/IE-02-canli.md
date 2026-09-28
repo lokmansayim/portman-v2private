@@ -272,16 +272,35 @@ ssh root@<VPS> 'bash -s' < "$K/kapi_d_dogrula.sh" 2>&1 | tee "$K/2_dogrula.txt"
 - Ajan dosya modunda kalır.
 - Geri alma: `apt-get remove postgresql` ve `/etc/cron.d/portman-pg-yedek` silinir. İçinde veri yoktur.
 
-### E · Hosting PHP ve paket yüklemesi (dosya modu sürer; B geçmiş olmalı)
-1. Yedek: `KANAL/feature.php`, `api.php` → `*.before-ie02-<tarih>.php`. `package/` klasörü → `package.before-ie02-<tarih>/`. Yedeklenen iki dosya A'daki tam hash'le aynı olmalı (A'dan beri değişmemiş); farklıysa E durur.
-2. Depodan `kanal/feature.php` ve `kanal/api.php` → `KANAL/`.
-3. `python3 vps/paketle.py` → `vps/build/current.zip`, `current.sha256`, `SURUM.txt` → `KANAL/package/`. Ajan paketi kendisi günceller. `PORTMAN_PG_DSN` olmadığı için dosya modunda kalır.
-4. Doğrulama:
-   - `health.json` surum `kanal-v1.2`;
-   - `vps-health.json` surum `vps-agent-v1.2`;
-   - VPS'ten salt okunur API denetimi (anahtar yazdırılmaz; yalnız `api`, `worker`, `enabled`, `mode`, `dry_run` yazılır). Mac'ten `ssh root@<VPS> 'python3 -' < vps/api_denetim.py`. Beklenen: `api` `kanal-api-v1.2`.
-   - Patron numarasından bir mesaj eskisi gibi cevaplanır (dosya modu, gerileme denetimi).
-5. Geri alma: yedek dosyalar ve eski paket geri konur.
+### E · Hosting PHP ve paket yüklemesi (dosya modu sürer; 28.09 23:00 onaylandı)
+Kapsam: yalnız yeni PHP ve paket yüklenir, ajan kendini günceller. Patron modu ve dosya modu sürer; Postgres'e geçilmez. Maliyet ve sınır: aşağıdaki "E'nin maliyeti ve sınırı".
+
+Yüklenecekler (`18_Kapi_E/yukle/`; depo `ie-02`, işçi etiketi commit'i sonrası):
+
+| Dosya | SHA-256 | Sürüm |
+|---|---|---|
+| `feature.php` | `8b47ac75b8dedb775097a35e5dae9cdc3ca2742adcb76abc3c7d846d57d299f0` | `kanal-v1.2` |
+| `api.php` | `18eaf8058fb5371a38309685ba1e3e4e72249b4d55e7ad85e7fd947f1dcac8da` | `kanal-api-v1.2` |
+| `package/current.zip` | `b4bf47279405ffa4671805ac36e14bea459a4cd6ddbff8d3808b63861615d3da` (672.096 B, 50 dosya) | `kanal-v1.2-20260928-2306`; ajan `vps-agent-v1.2`, işçi `kanal-v1.2` |
+
+1. **Yedek ve karşılaştırma** (canlıda değişiklik yok).
+   - Lokman DirectAdmin'den iki klasördeki dosyaları `18_Kapi_E/yedek/` içine indirir: `portman_app/kanal/feature.php` ve `api.php`; `portman_app/kanal/package/current.zip`, `current.sha256` ve `SURUM.txt`.
+   - Asistan Mac'te hash'leri A'daki tam değerlerle karşılaştırır: `feature.php` `91c954a6…`, `api.php` `455f8c74…`, paket `bd1ca27c…a408` ve `kanal-v1.1.1-20260922-2011`. Biri farklıysa hiçbir şey yüklenmez.
+   - Geri alma bu Mac yedeğinden yapılır.
+2. **PHP.** `yukle/feature.php` ve `yukle/api.php`, `portman_app/kanal/`'daki eskilerinin üzerine yüklenir. Denetim: `api_denetim.py` → `api` `kanal-api-v1.2`, `worker` vps, `mode` patron, `dry_run` false. v1.1.1 ajanı v1.2 API ile çalışmaya devam eder, çünkü öteki işlemler değişmedi.
+3. **Paket.** `portman_app/kanal/package/`'a şu sırayla yüklenir: `current.zip` → `SURUM.txt` → **en son** `current.sha256`. Ajan sha'yı görünce paketi indirir, doğrular, kurar ve `agent.py`'yi günceller. Sonra yeniden başlar ve öz-testi bir kez koşar (1 gerçek LLM çağrısı; WhatsApp'a göndermez). Birkaç dakika sürer.
+4. **Doğrulama** (`kapi_e_dogrula.sh`, salt okunur):
+   - ajan `vps-agent-v1.2`, `mod dosya`;
+   - kurulu uygulama paketle birebir; `PORTMAN_PG_DSN` yok;
+   - öz-test geçti (LLM token'ları ve tekrar);
+   - hosting paketi aynı; API v1.2; api hatası yok.
+   Asistan onaylamadan deneme mesajı gönderilmez.
+5. **Tek Patron deneme mesajı:** "Yeni talep: P6001 aynalı olsun". "Yeni talep" sözü eski taslağı kapatır; D-01 sorusu yerine r01 beklenir. Beklenen cevap: metin (Patron teknik notunda LLM token'ları) + PDF, en çok 3 mesaj. İkinci mesaj yalnız ilki kod dışı bir nedenle cevapsız kalırsa gönderilir.
+6. **Son doğrulama:** `kapi_e_dogrula.sh` yeniden koşulur (iş alındı ve bitti, giden sayısı, hata). Lokman telefona gelenleri bildirir.
+
+**Durdurma:** bir mesaja beklenenden fazla cevap gelirse, aynı cevap tekrarlanırsa ya da hata görülürse DirectAdmin'de `portman_app/kanal/settings.json` → `"worker": "off"` yapılır (yeni iş alınmaz) ve asistana haber verilir.
+
+**Geri alma (E.5, gerekirse):** `yedek/`'teki eski `feature.php` ve `api.php` geri yüklenir. Paketin eski üç dosyası geri yüklenir, `current.sha256` en son. Ajan v1.1.1 paketini ve `agent.py`'sini geri kurar.
 
 ### F · Kalıcı moda geçiş
 Geçiş sırasında gelen mesajlar: 1. adımdan 6. adıma kadar webhook yakalamaya devam eder, satırlar hosting kuyruğunda `queued` bekler; hiçbiri işlenmez ve kaybolmaz. 6. adımda ajan onları geliş sırasıyla alır. Geçiş 24 saati aşarsa hosting o mesajlara cevap göndermez (Meta'nın 24 saat penceresi; satır "held" olur ve uyarıya düşer).
