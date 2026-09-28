@@ -4,7 +4,7 @@ Dal: `ie-02`. Dayanak: Astra'nın 28 Eylül ikinci değerlendirmesi, D-03 ve D-0
 
 ## 0. Kısa özet
 
-**Kapılar.** A (salt okunur) 28.09'da onaylandı ve yapıldı: canlı sürüm v1.1.1; VPS'te ve hosting'te denetlenen her şey beklenenle aynı (hosting PHP dosyaları tam hash'le); eşleşme anahtarı iki tarafta aynı; sızan anahtar büyük olasılıkla hâlâ etkin, kanıtlanmadı (ayrıntı A'da). B–H her biri ayrı onay bekler. Anahtar yenileme (C), kurulum (D), canlı değişiklik (E, F, H), veri silme ve ücretli deneme (E, G) ayrı ayrı onaylanır.
+**Kapılar.** A (salt okunur) 28.09'da onaylandı ve yapıldı: canlı sürüm v1.1.1; VPS'te ve hosting'te denetlenen her şey beklenenle aynı (hosting PHP dosyaları tam hash'le); eşleşme anahtarı iki tarafta aynı; sızan anahtar büyük olasılıkla hâlâ etkin, kanıtlanmadı (ayrıntı A'da). B de 28.09'da onaylandı ve geçti: gerçek `lib.php`'nin temiz kopyasıyla dört takım PHP 8.2.30'da ve 8.4'te tam geçti, ağsız ortamda. C–H her biri ayrı onay bekler. Anahtar yenileme (C), kurulum (D), canlı değişiklik (E, F, H), veri silme ve ücretli deneme (E, G) ayrı ayrı onaylanır.
 
 **Cevapsız kalabilecek işler.** Hepsi uyarıda ve kanıt sorgusu 6'da görünür; hiçbiri sessiz değildir.
 - Hosting'in `claim` cevabı ajana ulaşmazsa, ya da ajan cevabı alıp diske ve Postgres'e yazamadan ölürse (milisaniyeler): satır hosting'te 600 sn sonra "takılı" sayılır. Bu v1.1.1'de de böyledir.
@@ -36,7 +36,7 @@ Dal: `ie-02`. Dayanak: Astra'nın 28 Eylül ikinci değerlendirmesi, D-03 ve D-0
 |---|---|---|
 | Postgres kalıcı akış (depo, işleyici, göç 001–002) | Test edildi, izole | `testler/kalici`: gerçek Postgres 16 |
 | Ajanın kalıcı modu (`vps/agent.py`) | Test edildi, **sahte hosting ile** | `test_baglanti.py`, `test_hosting_devri.py`. Sahte hosting `api.php`'nin bir kısmını taklit eder (600 sn süpürme, hata enjeksiyonu dahil; taklit etmediği yerler dosyasının başında yazılı). PHP'yi sınamaz |
-| `feature.php` (`context_id`), `api.php` v1.2 (`giden_durum`) | Yazıldı; **gerçek `lib.php` ile koşulmadı** | `kanal/tests/baglanti_test.php` ve `e2e_kalici.py` `portman/lib.php` ister; bu dosya depoda yok (kapı B) |
+| `feature.php` (`context_id`), `api.php` v1.2 (`giden_durum`) | Test edildi, **gerçek `lib.php` ile yerelde** (B, 28.09); canlıda değil | Hosting'teki `lib.php`'nin temiz kopyası; PHP 8.2.30 (hosting sürümü) ve 8.4'te 30/30, 16/16, 19/19, 18/18; ağsız ortam. `lib.php` depoya girmez |
 | Canlı sürüm | Doğrulandı (A, 28.09) | VPS'teki uygulama (48/48 dosya), hosting'in dağıttığı paket ve hosting'teki `feature.php` ile `api.php` v1.1.1 ile birebir (tam hash) |
 | VPS Postgres kurulumu | Betik hazır; VPS'te koşulmadı (A: Postgres kurulu değil) | `vps/pg_kurulum.sh`: parolasız peer bağlantısı, saf psycopg ve göçler ayrı bir deneme kümesinde sınandı. Durdurma koşulları, sahiplik denetimi, işaretli deneme veritabanı ve yedek silme tercihi ayrı geçici kümelerde uçtan uca sınandı (`test_pg_kurulum.py`). apt, systemd ve cron adımları VPS'te görülecek |
 | Gerçek WhatsApp, gerçek LLM | Denenmedi | Kapı G (kabul gösterimi) |
@@ -66,7 +66,7 @@ Sahte gönderici ve sahte hosting testleri PHP'yi doğrulamaz; bunları tamamlan
    - `python3 kanal/tests/e2e_vps.py lib.php`: dosya modu, gerçek `api.php` ile ajan (`php -S`), 19 test;
    - `python3 kanal/tests/e2e_kalici.py lib.php`: kalıcı mod, gerçek `api.php` + ajan + Postgres; tekrar gelen mesaj, onay zinciri ve süpürmeyi yalnız `claim`'in yaptığı (ajanın tur sırasının dayandığı özellik) dahil, 18 test.
 
-   Meta'ya ve OpenAI'ye bağlanılmaz. Hosting PHP 8.2.30 kullanıyor (A, `health.json`); testler bu sürümle koşulur (B.5). Bu testler 28.09'da elle yazılmış taslak bir `lib` ile, PHP 8.4'te ön denemeden geçti (30/30, 16/16, 19/19, 18/18). Bu ön deneme **sayılmaz**; yalnız benim kodumdaki hataları erken yakalamak içindi.
+   Meta'ya ve OpenAI'ye bağlanılmaz. Hosting PHP 8.2.30 kullanıyor (A, `health.json`); testler bu sürümle koşulur (B.5). **28.09'da gerçek `lib.php` ile geçti (B, aşağıda).** Bu testler 28.09'da elle yazılmış taslak bir `lib` ile, PHP 8.4'te ön denemeden geçti (30/30, 16/16, 19/19, 18/18). Bu ön deneme **sayılmaz**; yalnız benim kodumdaki hataları erken yakalamak içindi.
 2. **Canlıda (kapı E, F ve G).** PHP yüklendikten sonra önce dosya modunda bir Patron mesajı gönderilir (gerileme denetimi). Kalıcı mod bu testten sonra açılır ve kabul gösterimi gerçek Meta ile yapılır.
 
 ## 4. Onay kapıları
@@ -142,7 +142,7 @@ Yani ayrı parçaların ayrı etiketleri var; eski bir kurulumun işareti değil
 - Öz-test geçti (22.09 22:32, 27,2 sn).
 - Son 24 saatte günlük satırı yok; hata da yok, iş de yok.
 
-### B · `lib.php` kopyası ile yerel PHP testleri (değişiklik yok; ayrı onay)
+### B · `lib.php` kopyası ile yerel PHP testleri (değişiklik yok; 28.09 onaylandı ve geçti)
 Teknik denetimi asistan yapar; Lokman yalnız dosyayı sağlar ve paylaşımı onaylar.
 1. Lokman DirectAdmin'den `public_html/portman/lib.php`'yi indirip `Claude Portman Çalışması/15_Kapi_B/` içine koyar. Hosting'te hiçbir şey değişmez.
 2. **Sır denetimi Lokman'ın bilgisayarında** (bağlı klasörün yerel yalıtılmış ortamı). Asistan dosyayı değer yazdırmayan bir betikle tarar. Çıktıda yalnız satır numarası, bulgunun türü ve tanımlayıcı adı görünür:
@@ -152,8 +152,33 @@ Teknik denetimi asistan yapar; Lokman yalnız dosyayı sağlar ve paylaşımı o
    - telefon numarası ya da e-posta biçimleri.
 3. Temizse dosya, değilse bulunan değerlerin yer tutucuyla değiştirildiği bir kopya, asistanın yalıtılmış test ortamına alınır. Özgün dosya bilgisayardan çıkmaz; sohbete eklenmez. Testler Lokman'ın bilgisayarında koşulamaz: oradaki yalıtılmış ortamda PHP yok ve yönetici yetkisi olmadığı için kurulamıyor.
 4. Koşmadan önce `lib.php`'nin test kancalarını (`PM_OFFLINE_TEST`, `pm_test_remote`) içerdiği denetlenir. İçermiyorsa Meta'ya istek gönderebilecek testler koşulmaz ve bu Lokman'a söylenir. Testler sahte anahtar, sahte numara ve geçici veri klasörüyle koşar; gerçek yapılandırma okunmaz.
-5. PHP sürümü: hosting 8.2.30 kullanıyor. Testler PHP 8.2.30 ile koşulur. Bu sürüm, php-src'nin resmi `php-8.2.30` etiketinden asistanın ortamında derlenir; kaynak ve derleme araçları erişilebilir, derleme henüz yapılmadı. Testler ortamdaki 8.4 ile de koşulur; iki sonuç ayrı yazılır. Kendi PHP dosyalarımızda 8.3 ve 8.4'e özgü işlev ya da sözdizimi taraması temiz çıktı; tarama, çalıştırmanın yerini tutmaz.
+5. PHP sürümü: hosting 8.2.30 kullanıyor. Testler PHP 8.2.30 ile koşulur. Bu sürüm, php-src'nin resmi `php-8.2.30` etiketinden asistanın ortamında derlenir. Testler ortamdaki 8.4 ile de koşulur; iki sonuç ayrı yazılır. Kendi PHP dosyalarımızda 8.3 ve 8.4'e özgü işlev ya da sözdizimi taraması temiz çıktı; tarama, çalıştırmanın yerini tutmaz.
 6. 3. bölümdeki dört test koşulur. Sonuç yalnız sayılar ve dosya/satır olarak raporlanır. Test ortamındaki kopya ardından silinir.
+
+**Sonuç (28.09 21:00).**
+- **Dosya:** `lib.php`, 28.004 bayt, sha256 `09b29f7b2099d1c3…`. Lokman 20:41'de indirdi.
+- **Tarama** Lokman'ın bilgisayarında yapıldı (`denetim/lib_tara.py`; değer yazdırmaz, sahte sırlarla sınandı: `test_lib_tara.py`).
+  - API anahtarı, erişim anahtarı, parola ya da e-posta yok.
+  - 7. satırda iki telefon numarası var (`PM_RECIPIENTS`). Yalnız gelen mesajın görünen adını seçmek için kullanılıyor (satır 76).
+- **Temiz kopya:** `lib.clean.php` (sha256 `49a6bd87eb263f23…`). İki numara aynı uzunlukta sahte rakamlarla değiştirildi.
+  - Yeniden tarama temiz. Kod iskeleti orijinalle aynı; değişen tek satır 7.
+  - Orijinal değişmedi (hash ve tarih aynı) ve bilgisayardan çıkmadı; test ortamına yalnız temiz kopya alındı.
+  - Tarayıcı kişi adı aramaz. Kodda bir kişinin yalnız ön adı, görünen ad etiketi olarak geçiyor ve kopyada kaldı; numarası temizlendi.
+- **Kancalar:**
+  - `pm_remote`: `PM_OFFLINE_TEST` + `pm_test_remote`. Dört takım da ikisini tanımlıyor.
+  - `pm_stream_media`: `PM_OFFLINE_TEST` + `pm_test_stream`. Bu işlevi yalnız `pm_download` çağırıyor; testler oraya girmiyor.
+  - Bütün `curl` çağrıları bu iki işlevde.
+- **Ağ yalıtımı:** testler yalnız loopback'i olan ayrı bir ağ ad alanında koştu; dış bağlantı denemesi başarısız oldu. Ayrıca PHP'nin ağ işlevleri (`curl_init`, `curl_exec`, `fsockopen` …) kapatılarak yinelendi; sonuç aynı, yani hiçbir test yolu ağ işlevine ulaşmadı.
+
+| Takım | PHP 8.2.30 (resmi kaynaktan derlendi) | PHP 8.4.21 |
+|---|---|---|
+| `offline_test.php` | 30/30 | 30/30 |
+| `baglanti_test.php` | 16/16 | 16/16 |
+| `e2e_vps.py` | 19/19 | 19/19 |
+| `e2e_kalici.py` | 18/18 | 18/18 |
+
+- Çıktılarda ve `php -S` günlüklerinde PHP uyarısı, kullanımdan kalkma bildirimi ya da hata yok.
+- Test ortamındaki kopya ve geçici test klasörleri silindi. `lib.php`, `lib.clean.php` ve `lib_tara.py` Lokman'ın `15_Kapi_B` klasöründe duruyor.
 
 ### C · Sızan anahtarın yenilenmesi (A'da etkin çıkarsa; ayrı onay)
 Bu adım sırasında Patron numarasından mesaj yazılmaz (anahtar iki tarafta eşleşene kadar ajanın çağrıları 401 alır; kalıcı modda bekleyen sonuçlar geçici hata sayılıp yeniden denenir, dosya modunda `data/pending/`'e alınır).
@@ -294,10 +319,9 @@ Postgres'e yeniden geçiş: `/opt/portman/data/kalici_bekleyen/` boş olmalı (i
 
 ## 5. Henüz doğrulanamayan ve kalan riskler
 
-- **Gerçek PHP hattı:** `feature.php` ve `api.php` değişiklikleri gerçek `lib.php` ile koşulmadı (kapı B).
+- **Gerçek PHP hattı:** `feature.php` ve `api.php` değişiklikleri gerçek `lib.php` ile yerelde geçti (B), ama canlıda henüz yok. Canlıda E'de (dosya modu) ve G'de (kalıcı mod) görülür.
 - **Gerçek WhatsApp ve LLM:** yalnız kapı G'de görülür. Sahte hosting Meta'nın gecikmeli ya da eksik bildirimlerini, 24 saat penceresini ve `dry_run`'ı taklit etmez.
 - **VPS:** Postgres kurulumu, systemd ve cron adımları VPS'te koşulmadı (kapı D).
-- **PHP sürümü:** hosting 8.2.30 kullanıyor; yerel PHP testleri şimdiye dek 8.4'te koştu. B'de 8.2.30 ile koşulur.
 - **Sızan anahtar:** A'ya göre büyük olasılıkla hâlâ etkin (kanıtlanmadı). Bu anahtarı bilen, hosting API'sine ajan gibi bağlanabilir: OpenAI anahtarını alabilir, kuyruktaki mesajı alıp ona cevap verdirebilir (Patron modunda yalnız Lokman'ın mesajları). C onaylanana dek bu risk sürer.
 - **v1.1.1'den kalan pencere:** hosting `claim` cevabını gönderip ajan onu alamazsa (ağ kopması) ya da ajan cevabı aldıktan sonra diske ya da Postgres'e yazamadan ölürse (milisaniyeler), satır hosting'te 600 sn sonra "failed" olur ve cevapsız kalır. Bu v1.1.1'de de böyledir; hosting kuyruğunda görünür ve yeniden kuyruğa konursa (tekrar gelen mesaj) cevap verilir.
 - **VPS saati:** "hosting satırı süpürüldü" kararı VPS saatindeki iki an arasındaki farka dayanır (ajanın mesajı aldığı an ve sonraki başarılı claim). Çalışan sunucuda saat 660 sn'den çok ileri atlarsa (ör. açılışta büyük bir NTP düzeltmesi) ve aynı anda o işin devri hata veriyorsa, hosting'in hâlâ alabileceği bir sonuç "gönderilmedi" sayılabilir; uyarıda ve sorgu 6'da görünür.

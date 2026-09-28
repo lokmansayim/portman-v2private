@@ -33,7 +33,7 @@ Durumlar: **Taslak** yalnız belgede · **Kodlandı** kod var, testi yok ya da d
 | Blender modeli | Kodlandı | 28.09: `yeniden_kos.py` ile bpy 5.0.1'de yeniden kuruldu, 65 pano, BOM aynı | Test dar: tek plan; sunum içindir, hesap burada yapılmaz |
 | Depo | Kodlandı | 28.09: `portman-v2private` açıldı; v1.1.1 geçmişiyle alındı; İE-01, Lokman'ın onayıyla `main`'e birleştirildi | Eski depo `lokmansayim/portman` yalnız okunuyor |
 | Yapı Tanımı şeması | Taslak | Zemin, 27.09; temeli İş Emri şeması v0.1 (21.09) | Ölçü anlamları ve ürün ailesi ayrımı eksik |
-| Veritabanı: kalıcı konuşma ve iş akışı (Postgres) | Test edildi | 28.09: `testler/kalici/`, gerçek Postgres 16'da 175 test geçti. Kabul gösterimi 10/10 (simülasyon: WhatsApp ve LLM sahte). Ajanın kalıcı modu sahte hosting ile sınandı (600 sn süpürme ve hata enjeksiyonu dahil). | Yalnız izole ortamda; canlıda yok. Gerçek PHP hattı (`feature.php` `context_id`, `api.php` v1.2) `portman/lib.php` olmadan koşulamadı. Yer: mevcut VPS (D-04). Canlıya bağlama planı ve onay kapıları: `docs/is_emirleri/IE-02-canli.md`. pgvector yok (RAG'la gelir). |
+| Veritabanı: kalıcı konuşma ve iş akışı (Postgres) | Test edildi | 28.09: `testler/kalici/`, gerçek Postgres 16'da 180 test geçti. Kabul gösterimi 10/10 (simülasyon: WhatsApp ve LLM sahte). Ajanın kalıcı modu sahte hosting ile sınandı (600 sn süpürme ve hata enjeksiyonu dahil). | Yalnız izole ortamda; canlıda yok. Gerçek PHP hattı (`feature.php` `context_id`, `api.php` v1.2) hosting'teki `lib.php`'nin temiz kopyasıyla yerelde geçti (kapı B; PHP 8.2.30 ve 8.4); canlıda değil. Yer: mevcut VPS (D-04). Canlıya bağlama planı ve onay kapıları: `docs/is_emirleri/IE-02-canli.md`. pgvector yok (RAG'la gelir). |
 | RAG | Taslak | Araştırma notu, 21.09 | Aşama 2 sonrası |
 | Model geçidi | Kodlandı | `llm.py`'de OpenAI ve Anthropic yolları var; canlıda gpt-4o-mini · 23.09 kıyas: gpt-4o-mini 6/7, gpt-6-sol 4/7 | Anthropic yolu canlı anahtarla denenmedi; hosting ayarı VPS'e yalnız arka uç, model ve zaman aşımını geçiriyor (B4) |
 | PortmanBench | Taslak | Tohum: `testler/referans/` (28.09) | Uçtan uca ölçüm ve kritik hata türleri yok |
@@ -66,9 +66,9 @@ Yapıldı:
 - altıncı tur (aynı inceleyicinin yeniden denetimi): devir hatasında hosting'e ulaşılabiliyor mu diye sorulur; işe özgü hatada aralıklı yeniden deneme (öteki işler beklemez), süpürme sınırına yaklaşan sonuç claim'den önce denenir, süpürme ancak hosting'e sorularak kabul edilir; yeniden kuyruğa konan mesajın süresi yeniden başlar.
 - kapı D'nin ön koşulları (28.09 akşam, Lokman): yedeklerin otomatik silinmesi ayrı tercih, varsayılanı kapalı; geri yükleme denemesi yalnız kendi açıp işaretlediği veritabanını siler; yerel bağlantı şartı sağlanmıyorsa kurulum durur (`test_pg_kurulum.py`, 27 test);
 - kapı A (28.09, salt okunur): canlı sürüm v1.1.1, beklenenle fark yok (VPS'teki uygulama, hosting paketi, hosting `feature.php` ve `api.php` tam hash'le); eşleşme anahtarı iki tarafta aynı; sızan anahtar büyük olasılıkla hâlâ etkin, kanıtlanmadı.
+- kapı B (28.09): gerçek `lib.php`'nin temiz kopyasıyla (7. satırdaki iki numara sahte rakamlarla değiştirildi; orijinal Mac'ten çıkmadı) dört PHP takımı PHP 8.2.30'da ve 8.4'te 30/30, 16/16, 19/19, 18/18; ağsız ortamda, PHP ağ işlevleri kapalıyken de aynı.
 
 Kalan (sırayla, her biri ayrı onayla; `docs/is_emirleri/IE-02-canli.md`):
-- B: `lib.php` kopyasıyla gerçek PHP testleri;
 - C: sızan anahtarın yenilenmesi;
 - D: VPS'e Postgres;
 - E: PHP ve paket yüklemesi;
