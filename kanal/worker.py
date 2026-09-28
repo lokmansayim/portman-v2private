@@ -19,7 +19,7 @@ KOD = Path(__file__).resolve().parent                                   # kod (b
 KANAL = Path(os.environ.get("PORTMAN_KANAL_DIR") or KOD).resolve()     # veri (settings/state/durum/projects); hostingte kodla aynı dizin
 sys.path.insert(0, str(KOD))
 os.umask(0o077)
-SURUM = "kanal-v1.1.1"
+SURUM = "kanal-v1.2"
 STALE_S = 600           # 'processing' bu kadar süre ilerlemezse başarısız sayılır (otomatik tekrar yok)
 GELEN_YAZILI = ("text", "button", "interactive")
 
