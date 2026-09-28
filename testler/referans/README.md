@@ -1,22 +1,33 @@
 # Referans testleri · 28 Eylül 2026
 
-v1.1.1 çekirdeği (`ec4e9a3`) temiz ortamda üç ayrı koşuda aynı sonucu verdi. Bu klasör o sonucu dondurur; bundan sonra yazılan her parça `dogrula.py`'yi geçmek zorundadır.
+v1.1.1 çekirdeği (`ec4e9a3`) temiz ortamda üç ayrı koşuda aynı sonucu verdi. `2026-09-28/` klasörü o sonucu dondurur; bundan sonra yazılan her parça `dogrula.py`'yi geçmek zorundadır.
 
 ## Nasıl doğrulanır
 
 ```
-python3 testler/referans/dogrula.py            # ~4,5 dk: kos.py --planlar + karşılaştırma
-python3 testler/referans/dogrula.py --hizli    # ~45 sn: 16 katalog planı hariç
+python3 testler/referans/dogrula.py                        # ~4,5 dk: kos.py --planlar + karşılaştırma
+python3 testler/referans/dogrula.py --hizli                # ~45 sn: 16 katalog planı hariç
+python3 testler/referans/dogrula.py --referans 2026-09-28  # belirli bir referansla
 ```
 
-Betik yalnız v1.1.1 ağacını geçici bir klasöre kopyalar (`deneme/`, `testler/`, `KARARLAR/` hariç) ve `denetim/kos.py`'yi orada koşar; depoya yazmaz. Ağ, LLM, WhatsApp ya da canlı sunucu kullanmaz. Çıkış kodu 0, referansla aynı demektir.
+Betik yalnız v1.1.1 ağacını geçici bir klasöre kopyalar (`deneme/`, `testler/`, `KARARLAR/` hariç) ve `denetim/kos.py`'yi orada koşar; depoya yazmaz. `PORTMAN_*` ortam değişkenleri (başka referans klasörü, bayi kaydı, durum dizini) ve LLM anahtarları alt sürece geçmez. Ağ, LLM, WhatsApp ya da canlı sunucu kullanmaz. Karşılaştırma en yeni tarihli referans klasörüyle yapılır; çıkış kodu 0, referansla aynı demektir.
 
 Kurallar:
 - Referans girdiler değişmemeli: İş Emri şablonları (`is_emri/`), referans çizim ve kayıtlar (`ref_katalog/`, `ref_yan/`, `kanal/ref_*`), katalog verisi ve test bayi kaydı (`beyin/veri/`); toplam 23 dosya. Dondurulan dosya silinemez; yeni dosya bilgi olarak raporlanır.
-- Beyin test vakaları vaka vaka izlenir. Harness'in okuduğu her şey vakanın özetindedir: mesaj kaydı (beklenen eylem ve içerik kontrolü dahil), LLM'e giden grup kaydı ve kayıtlı LLM çıkarımı. Dondurulan 22 vaka aynı sırayla ve değişmeden durmalı. Yeni vaka yalnız sona eklenebilir, çünkü aynı göndericinin vakaları konuşma durumunu paylaşır ve sıra sonucu etkiler.
-- Kod dosyalarının özeti yalnız bilgi olarak raporlanır; kod değişikliği tek başına fark sayılmaz.
+- Beyin test vakaları vaka vaka izlenir. Vakanın özeti harness'in okuduğu her şeyi kapsar: mesaj kaydı (beklenen eylem ve içerik kontrolü dahil) ve kayıtlı LLM çıkarımı. Çıkarımın kaynağı olan grup kaydı da özete girer; harness onu okumaz. Kimlikler tamsayı olmalı; çıkarım, harness'teki gibi kimliğin kendisiyle eşlenir. Dondurulan 22 vaka aynı sırayla ve değişmeden durmalı. Yeni vaka yalnız sona eklenebilir, çünkü aynı göndericinin vakaları konuşma durumunu paylaşır ve sıra sonucu etkiler.
+- v1.1.1 ağacındaki değişiklikler (`SHA256SUMS`'a göre değişen, eksik ve yeni dosyalar) yalnız bilgi olarak raporlanır; kod değişikliği tek başına fark sayılmaz.
 - Beyin harness'inde tüm vakalar uyumlu olmalı; vaka sayısı 22'den az olamaz.
-- Motor sayıları, BOM sayımları, çıkarıcı sonuçları ve içerik parmak izleri aynı kalmalı. Bilerek yapılan bir değişiklik bunları değiştirirse referans gerekçesiyle ve yeni tarihle yeniden dondurulur; eskisi silinmez.
+- Motor sayıları, BOM sayımları, çıkarıcı sonuçları ve içerik parmak izleri aynı kalmalı.
+
+## Yeniden dondurma
+
+Bilerek yapılan bir değişiklik referansı değiştirirse (örneğin vaka 1'deki adın takma adla değiştirilmesi) yeni referans alınır:
+
+```
+python3 testler/referans/dogrula.py --dondur --gerekce "neyin neden değiştiği"   # tam koşu, ~5 dk
+```
+
+Betik bugünün tarihiyle yeni bir klasör açar (`--ad` ile başka ad verilebilir; aynı gün ikincisi için sonda bir harf, örneğin `2026-10-02b`). Var olan klasöre yazmaz; eski referans silinmez. Bir adım geçmiyorsa ya da test verisi okunamıyorsa dondurmaz. Gerekçe, dondurulduğu commit ve ortam klasördeki `GEREKCE.md`'ye yazılır. Yeni klasör, değişikliği getiren commit'le birlikte kaydedilir; `git diff` eski ve yeni referansı yan yana gösterir.
 
 **Dikkat:** `denetim/kos.py`'yi bu dalın kökünde doğrudan koşmayın. Sır taraması `deneme/` altındaki IFC dosyasındaki ondalık koordinatları telefon numarası sanıyor ve adım "failed" dönüyor (9 yanlış bulgu). `kos.py`'yi `main`'de ya da `dogrula.py` üzerinden koşun. Kalıbın düzeltilmesi İE-02'de.
 
@@ -26,7 +37,7 @@ Ortam (28.09, pip ile kurulan sürümler): Python 3.11.15, ezdxf 1.4.4, pymupdf 
 
 | Adım | Sonuç |
 |---|---|
-| Referans girdiler | 23 dosya ve 22 Beyin vakası donduruldu (`referans_girdiler.json`); dosya özetleri `SHA256SUMS` ile aynı |
+| Referans girdiler | 23 dosya ve 22 Beyin vakası (`referans_girdiler.json`); dosya özetleri `SHA256SUMS` ile aynı |
 | Beyin kural katmanı (harness) | 22/22 beklenen eylemle uyumlu. LLM çıkarımı kayıtlı dosyalardan gelir, gerçek API çağrılmaz. |
 | Motor altın testi 6×8 | 41 pano, dış ölçü 773 × 1014 cm, ayak izi farkı 0 cm² |
 | Motor altın testi Yan Verandalı 6×8,5 | 52 pano, dış ölçü 773 × 1076,75 cm, BOM 26 kod referans sayımla birebir |
@@ -37,13 +48,16 @@ Ortam (28.09, pip ile kurulan sürümler): Python 3.11.15, ezdxf 1.4.4, pymupdf 
 | DXF içerik parmak izi | 18 çıktı, üç ayrı temiz koşuda birebir aynı (`dxf_parmak_izleri.txt`) |
 | PDF sayfa sayısı ve ölçüsü | 18 çıktı, aynı (`pdf_parmak_izleri.txt`) |
 
-Dosyalar:
-- `referans_girdiler.json`: 23 girdi dosyasının özeti ve 22 Beyin vakasının vaka özeti. Bilerek yapılan bir değişiklikten sonra `python3 testler/referans/dogrula.py --girdi-dokumu` ile yeniden üretilir.
-- `denetim_kosum_2026-09-28.json`: `kos.py --planlar` sonucu.
+Dosyalar, `2026-09-28/` altında:
+- `GEREKCE.md`: neden ve hangi kodla donduruldu.
+- `referans_girdiler.json`: 23 girdi dosyasının özeti ve 22 Beyin vakasının vaka özeti.
+- `denetim_kosum.json`: `kos.py --planlar` sonucu.
 - `dxf_parmak_izleri.txt`: 18 DXF'in içerik parmak izi.
 - `pdf_parmak_izleri.txt`: 18 PDF'in sayfa sayısı ve ölçüsü.
+
+Araçlar, bu klasörde:
+- `dogrula.py`: referansa karşı doğrulama ve yeniden dondurma (`--girdi-dokumu` bugünkü girdi özetini yalnız yazdırır).
 - `parmak_izi.py`: parmak izi aracı.
-- `dogrula.py`: referansa karşı doğrulama.
 - `paket_karsilastir.py`: canlıya giden paketleri depo koduyla karşılaştırır.
 
 ## 22 Eylül koşusuyla karşılaştırma
@@ -63,4 +77,4 @@ DXF ve PDF dosyalarının özetleri ise her koşuda değişiyor. DXF'te değişe
 
 ## Açık not
 
-`beyin/testler/mesajlar.json` dosyasının 1. vakasında gerçek olabilecek bir müşteri adı ve sevk yeri var. Gerçekse takma adla değiştirilmeli. v1.1.1 ağacı dondurulduğu için İE-01'de dokunulmadı; iş İE-02'ye bırakıldı.
+`beyin/testler/mesajlar.json` dosyasının 1. vakasında gerçek olabilecek bir müşteri adı ve sevk yeri var. Gerçekse takma adla değiştirilmeli. v1.1.1 ağacı dondurulduğu için İE-01'de dokunulmadı; iş İE-02'ye bırakıldı. Değişiklik vaka 1'in özetini değiştirir; bu yüzden gerekçeli yeniden dondurmayla birlikte yapılır.

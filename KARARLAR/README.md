@@ -6,7 +6,7 @@ Her kararda şu alanlar aranır: gerekçe, kapsam, tarih, kanıt, yeniden değer
 
 ## K01–K25 · 20–22 Eylül karar kaydı (sürüm 2)
 
-Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve kanıt. "Lokman onayladı" ifadesi yalnız sohbette açık bir onay varsa yazılmıştır. Bir alan kendi etiketiyle ya da metin içinde açıkça geçiyorsa var sayılır: kim, başlıkta ya da imzada ("— Claude") adı geçen kişidir; kanıt, kararın dayanağının ya da uygulamasının denetlenebileceği bir kaynağa (belge, commit, kod, ekran, denetim bulgusu) yapılan atıftır. Başka bir karara yapılan atıf kanıt sayılmaz. Atıf yapılan kaynakların bir kısmı depoda değil, Lokman'ın masaüstü klasöründedir (`07_Denetim/`).
+Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve kanıt. "Lokman onayladı" ifadesi yalnız sohbette açık bir onay varsa yazılmıştır. Bir alan kendi etiketiyle ya da metin içinde açıkça geçiyorsa var sayılır: kim, başlıkta ya da imzada ("— Claude") adı geçen kişidir; kanıt, kararın dayanağının ya da uygulamasının denetlenebileceği bir kaynağa (belge, commit, kod, ekran, denetim bulgusu) yapılan atıftır. Karar günlüğüne (kökteki `KARARLAR.md`) ya da başka bir karara yapılan atıf kanıt sayılmaz; bunlar kararın kaydıdır, dayanağı değil. Alan kararın yalnız bir kısmı için varsa dipnotta "kısmen" diye yazılır. Atıf yapılan kaynakların bir kısmı depoda değil, Lokman'ın masaüstü klasöründedir (`07_Denetim/`).
 
 | No | Karar |
 |---|---|

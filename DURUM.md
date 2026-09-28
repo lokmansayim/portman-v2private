@@ -11,7 +11,7 @@ Durumlar: **Taslak** yalnız belgede · **Kodlandı** kod var, testi yok ya da d
 | Yol | İçerik |
 |---|---|
 | Kökteki v1.1.1 ağacı | `lokmansayim/portman` deposunun geçmişiyle birlikte, değiştirilmeden (`ec4e9a3`, 22.09 20:12). Özetleri `SHA256SUMS`'ta. |
-| `testler/referans/` | Dondurulmuş referans (28.09) ve `dogrula.py` |
+| `testler/referans/` | Dondurulmuş referans (`2026-09-28/`) ve `dogrula.py` |
 | `testler/bilinen_hatalar/` | B1 ve B2 kırmızı testleri |
 | `deneme/2026-09-23/` | 23 Eylül denemeleri ve `yeniden_kos.py` |
 | `KARARLAR/` | K01–K25 ve Z-01–Z-10, her karar ayrı dosyada |
@@ -52,7 +52,7 @@ Durumlar: **Taslak** yalnız belgede · **Kodlandı** kod var, testi yok ya da d
 
 ## Sıradaki iş: İE-02 · Kalıcı akış
 
-Mesaj, bayi, proje, revizyon ve iş tabloları (Postgres ve göç altyapısı). Tekrar gelen mesaj, yarım iş, yeniden başlatma, başka bayinin proje kimliği ve eski revizyon butonu testleri. B1 düzeltmesi ve B2 kararı. `kos.py` sır taramasındaki telefon kalıbının sınırlanması (bugün `deneme/` altındaki IFC koordinatlarını numara sanıyor). Test verisindeki olası müşteri adının takma adla değiştirilmesi. Kabul şartı: `testler/referans/dogrula.py` referansla aynı kalır (kod değişikliği serbest; referans girdiler, dondurulan 22 Beyin vakası, Motor sayıları ve parmak izleri aynı; yeni Beyin vakası sona eklenebilir).
+Mesaj, bayi, proje, revizyon ve iş tabloları (Postgres ve göç altyapısı). Tekrar gelen mesaj, yarım iş, yeniden başlatma, başka bayinin proje kimliği ve eski revizyon butonu testleri. B1 düzeltmesi ve B2 kararı. `kos.py` sır taramasındaki telefon kalıbının sınırlanması (bugün `deneme/` altındaki IFC koordinatlarını numara sanıyor). Test verisindeki olası müşteri adının takma adla değiştirilmesi. Kabul şartı: `testler/referans/dogrula.py` referansla aynı kalır (kod değişikliği serbest; referans girdiler, dondurulan 22 Beyin vakası, Motor sayıları ve parmak izleri aynı; yeni Beyin vakası sona eklenebilir). Vaka 1'deki takma ad gibi bilerek yapılan bir değişiklik referansı değiştirirse `dogrula.py --dondur` ile gerekçeli, tarihli yeni referans alınır; eskisi silinmez.
 
 Lokman'ın açık kararları: B2 (a/b/c), K16 (a/b), K3 ve K4, Z-03 ve Z-06 eşikleri. Ayrıntı: `KARARLAR/README.md`.
 
