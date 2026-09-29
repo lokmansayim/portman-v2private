@@ -4,8 +4,8 @@ Bu not, 28–30 Eylül arasında süren uzun çalışma penceresinin devridir. Y
 
 ## 0. Yeni pencerede ilk adımlar
 
-1. **Depo ve dal.** Depo `lokmansayim/portman-v2private` (özel). Aktif dal `ie-04`; `main` = `ae39380`.
-   - Kökteki `CLAUDE.md` kuralları ve okuma sırasını taşır. `main`'e birleşene kadar yalnız `ie-04` ve `altyapi` dallarında var.
+1. **Depo ve dal.** Depo `lokmansayim/portman-v2private` (özel). Aktif dal `ie-04`; `main` = `e8014e7`.
+   - Kökteki `CLAUDE.md` kuralları ve okuma sırasını taşır. 30.09 01:15'ten beri `main`'de; her yeni oturum onu kendiliğinden okur.
 2. **Okuma sırası:**
    1. bu not;
    2. `DURUM.md` (`ie-04`'teki);
@@ -94,7 +94,8 @@ Bu not, 28–30 Eylül arasında süren uzun çalışma penceresinin devridir. Y
 - Çalışma betiği depoya alındı (`deneme/2026-09-30_asama2/`); yeniden koşumda sonuç aynı çıktı.
 - Aday paketi Mac'e kondu (`23_Asama2_Adaylar/`).
 - **Altyapı (01:10):**
-  - `CLAUDE.md` ve tek komutla yerel ortam kurulumu (`araclar/`), `main`'den açılan `altyapi` dalında; `ie-04`'e de alındı.
+  - `CLAUDE.md` ve tek komutla yerel ortam kurulumu (`araclar/`) hazırlandı. Önce `main`'den açılan `altyapi` dalına kondu ve `ie-04`'e alındı.
+  - Lokman'ın onayıyla 01:15'te `main`'e birleştirildi (`e8014e7`). Yalnız bu iki şey girdi; kod, canlı paket ve veri değişmedi.
   - Dış çizim denetimi: `kos.py --dxf` ve `kaynak_sayimlari.json`. Beş adayın tek paftalık DXF'i bu yoldan geçti; İş Emri'ler katalogdakiyle aynı.
   - Mac'te `24_Astra_Cizimler/`: Astra'ya maskeli brief, kaynak DXF'ler, `gelen/` ve `denetim/` klasörleri.
 
@@ -184,7 +185,6 @@ Ayrıca açık olanlar:
 
 **Onay bekleyen öteki işler**
 - Temizlik (`IE-02-canli.md` §7 A ve B). A1 öncelikli: Mac'te `16_Kapi_C/config.php` canlı WhatsApp anahtarını taşıyor.
-- `altyapi` dalının (`CLAUDE.md`, `araclar/`) `main`'e birleştirilmesi. Bu yapılınca her yeni pencere kuralları kendiliğinden okur.
 - `ie-03` ve `ie-04`'ün `main`'e birleştirilmesi.
 - İE-03'ün geniş parçaları.
 - SSH'de parola yerine anahtarla girişe geçiş.
@@ -228,10 +228,10 @@ Lokman çizimleri Astra'ya (GPT) yaptıracak. Hangi çizimlerin yaptırılacağ�
 ## 8. Yerler ve kimlikler
 
 - **Dallar:**
-  - `main` `ae39380`;
+  - `main` `e8014e7` (İE-02 kapanışı `ae39380` + altyapı);
   - `ie-03` `cc0b338`;
   - `ie-04` (aktif; son commit bu notu taşıyan commit);
-  - `altyapi` (`main`'den; yalnız `CLAUDE.md` ve `araclar/`; `main`'e birleşme onayı bekliyor);
+  - `altyapi` (`main`'e birleşti, 30.09 01:15);
   - geçmiş dallar: `ie-01-devir`, `ie-02`, `ie-02-b1-opus`.
   - Eski depo `lokmansayim/portman` yalnız okunur.
 - **Zemin (Claude Docs):** belge kimliği `65844cef-e6c5-4a5d-b714-ee003c57fe5b`.

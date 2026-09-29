@@ -5,7 +5,7 @@
 **Oturum devri (30.09 01:10):** 28–30 Eylül penceresi kapandı. Yeni pencere `docs/devir/2026-09-30_Oturum_Devri.md` ile başlar: kurallar, yapılanlar, bekleyen kararlar, sıradaki işler, Astra'ya çizim işi için ölçütler.
 
 Yeni pencere için hazırlıklar:
-- `CLAUDE.md` (oturum kuralları) ve `bash araclar/ortam_kur.sh` (tek komutla yerel ortam). İkisi `altyapi` dalında; `main`'e birleşmeleri onay bekliyor.
+- `CLAUDE.md` (oturum kuralları) ve `bash araclar/ortam_kur.sh` (tek komutla yerel ortam). İkisi 30.09 01:15'te Lokman'ın onayıyla `main`'e birleştirildi (`e8014e7`).
 - Dış çizim denetimi: `deneme/2026-09-30_asama2/kos.py --dxf`.
 - Mac'te `24_Astra_Cizimler/`.
 
@@ -69,7 +69,7 @@ Onay: Lokman 29.09 23:49. İş emri: `docs/is_emirleri/IE-04.md` (dal `ie-04`). 
 | Vektör PDF plan okuyucu | Kodlandı | 23.09 Tatar 80: ölçek iki yöntemle %0,05 tutarlı · 28.09: `yeniden_kos.py` ile aynı | Test dar: tek plan. Deneme sürümü; el çizimi okumuyor |
 | IFC4 üretimi (IfcOpenShell) | Kodlandı | 30.09: P9401 ve P9201 İş Emri'nden IFC4 (7/5 ve 6/5 açıklık, şema hatası 0) · 28.09 yeniden koşum (`yeniden_kos.py`): şema 0 hata, çift sayım 35/35, hacim farkı %0,0 · Yan Verandalı: Astra modeliyle 65/67 eleman, açıklık 13/13 | Tekrarlanabilir test var ama dar: iki plan. Şema doğrulaması üretim doğruluğu değildir |
 | Blender modeli | Kodlandı | 28.09: `yeniden_kos.py` ile bpy 5.0.1'de yeniden kuruldu, 65 pano, BOM aynı | Test dar: tek plan; sunum içindir, hesap burada yapılmaz |
-| Depo | Kodlandı | 28.09: `portman-v2private` açıldı; v1.1.1 geçmişiyle alındı; İE-01, Lokman'ın onayıyla `main`'e birleştirildi · 29.09: İE-02 Lokman'ın onayıyla `main`'e birleştirildi | Eski depo `lokmansayim/portman` yalnız okunuyor |
+| Depo | Kodlandı | 28.09: `portman-v2private` açıldı; v1.1.1 geçmişiyle alındı; İE-01, Lokman'ın onayıyla `main`'e birleştirildi · 29.09: İE-02 Lokman'ın onayıyla `main`'e birleştirildi · 30.09 01:15: altyapı (`CLAUDE.md`, `araclar/`) Lokman'ın onayıyla `main`'e birleştirildi (`e8014e7`) | Eski depo `lokmansayim/portman` yalnız okunuyor |
 | Yapı Tanımı şeması | Taslak | Zemin, 27.09; temeli İş Emri şeması v0.1 (21.09) | Ölçü anlamları ve ürün ailesi ayrımı eksik |
 | Veritabanı: kalıcı konuşma ve iş akışı (Postgres) | Canlıda doğrulandı | 29.09 G (19:25–19:59) ve yeniden denemesi (21:05–21:34): 11 gerçek Patron mesajı; soru kaydı yeniden başlatmadan sonra korundu, onay zinciri eski revizyonu reddetti, tekrar gelen mesaj ikinci iş açmadı · 29.09 kapı F: canlı VPS'te göçler 1–2; hosting'ten 1 konuşma, 14 mesaj/iş aktarıldı, kaynak ↔ Postgres 15/15 aynı; ajan 18:59'dan beri kalıcı modda, `worker` vps. 28.09: `testler/kalici/`, gerçek Postgres 16'da 185 test geçti. Kabul gösterimi 10/10 (simülasyon: WhatsApp ve LLM sahte). Ajanın kalıcı modu sahte hosting ile sınandı (600 sn süpürme ve hata enjeksiyonu dahil). | Geçişten önceki planlar `projeler`/`revizyonlar`'da yok (tasarım gereği; onayları eski yoldan). Canlı verinin yedekleri elle alındı (G öncesi/sonrası, yeniden deneme öncesi/sonrası; Mac'te); günlük cron'un canlı veriyle ilk koşusu 30.09 03:17. Yer: mevcut VPS (D-04). Canlıya bağlama planı ve onay kapıları: `docs/is_emirleri/IE-02-canli.md`. pgvector yok (İE-03 planında zorunlu değil, ölçüme bağlı). |
 | Kaynaklı hafıza ve getirme (İE-03) | Taslak | Araştırma notu, 21.09 · İE-03 planı 29.09 (`docs/is_emirleri/IE-03.md`, `ie-03` dalı) | Uygulama, veri paylaşımı, ücretli deneme ve canlı değişiklik ayrı onayla |
