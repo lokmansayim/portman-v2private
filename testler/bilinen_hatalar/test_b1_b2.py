@@ -281,6 +281,107 @@ if pytest is not None:
     def test_b1_kontrol_acik_sozde_is_emri():
         assert b1_kontrol_acik_soz() == "is_emri"
 
+    # ── G-1…G-4 (29.09, İE-02 kapı G, canlı Opus 5.5): Opus kısa "değiştir" cevabına bağlamdaki pencere isteğini yeniden doldurdu
+    #    (satır + pencere_degistir varyantı, niyet revizyon). v1.2'de: soru 'dustu', numara r03, gerekçede not iki kez; yalnız
+    #    varyant gelirse belirsiz sözde pencere sessizce değişiyordu. Testler canlıdaki çıkarımın biçimini kullanır.
+    def T_OPUS(niyet, guven, kod=None, satir=True, var=True, mahal="yatak odası 1", olcu="120x180"):
+        return _talep(niyet, f"{mahal} penceresi {olcu}", guven, katalog_kodu=kod,
+                      pencereler=[Pencere(mahal=mahal, olcu=olcu, islem="degistir")] if satir else [],
+                      varyantlar=[Varyant(tur="pencere_degistir", aciklama=f"{mahal} penceresi {olcu}",
+                                          parametreler={"mahal": mahal, "yeni": olcu})] if var else [])
+
+    def _kural(d):
+        return [g["metin"] for g in d["gecmis"] if g["yon"] == "kural"]
+
+    def _yo1(ie):
+        return [a.get("olcu") for a in (ie or {}).get("acikliklar", []) if a["tur"] == "pencere" and a.get("mahal") == "YATAK ODASI 1"]
+
+    def test_g1_kisa_cevap_llm_baglami_yinelese_de_soruya_baglanir():
+        (k1, k2, k3), d = senaryo(ILK, (0, "yatak odası 1, 120x180", T_OPUS("revizyon", "orta")),
+                                  (0, "değiştir", T_OPUS("revizyon", "yuksek", "P6001")))
+        assert (k2.eylem, k2.soru_alani) == ("sor", "pencere_islem")
+        assert k3.eylem == "is_emri" and "pencere_islem cevabı: degistir" in _kural(d)
+        assert _yo1(k3.is_emri) == ["120x180"] and _aynali_mi(k3.is_emri)
+
+    def test_g1_kisa_ekle_cevabi_llm_degistir_dese_de_ekleme_sayilir():
+        (_, _, k3), d = senaryo(ILK, (0, "yatak odası 1, 120x180", T_OPUS("revizyon", "orta")),
+                                (0, "ekle", T_OPUS("revizyon", "yuksek", "P6001")))
+        assert k3.eylem == "yonlendir" and "pencere_islem cevabı: ekle" in _kural(d)
+
+    def test_g2_soru_soran_revizyon_turu_numara_tuketmez():
+        (k1, k2, k3), d = senaryo(ILK, (0, "yatak odası 1, 120x180", T_OPUS("revizyon", "orta")),
+                                  (0, "değiştir", T_OPUS("revizyon", "yuksek", "P6001")))
+        assert (k1.revizyon, k3.revizyon) == (1, 2) and d["revizyon"] == 1
+
+    def test_g2_soru_cevap_yerine_acik_yeniden_yazim_da_r02():
+        (_, _, k3), d = senaryo(ILK, (0, "yatak odası 1, 120x180", T_OPUS("revizyon", "orta")),
+                                (0, "P6001 yatak odası 1 penceresi 120x180 olsun", T_OPUS("revizyon", "yuksek", "P6001")))
+        assert k3.eylem == "is_emri" and k3.revizyon == 2 and _yo1(k3.is_emri) == ["120x180"]
+
+    def test_g3_satir_ve_varyant_birlikte_gelince_not_bir_kez():
+        (_, _, k3), _ = senaryo(ILK, (0, "yatak odası 1, 120x180", T_OPUS("revizyon", "orta")),
+                                (0, "değiştir", T_OPUS("revizyon", "yuksek", "P6001")))
+        assert k3.gerekce.count("YATAK ODASI 1 penceresi 120x180") == 1
+
+    def test_g4_yalniz_varyant_belirsiz_sozde_pencere_sessizce_degismez():
+        (_, k2), _ = senaryo(ILK, (0, "yatak odası 1, 120x180", T_OPUS("revizyon", "orta", satir=False)))
+        assert (k2.eylem, k2.soru_alani) == ("sor", "pencere_islem")
+
+    def test_g4_yalniz_varyant_acik_sozde_degistirir():
+        (_, k2), _ = senaryo(ILK, (0, "P6001 yatak odası 1 penceresi 120x180 olsun", T_OPUS("revizyon", "yuksek", "P6001", satir=False)))
+        assert k2.eylem == "is_emri" and k2.revizyon == 2 and _yo1(k2.is_emri) == ["120x180"]
+        assert k2.gerekce.count("YATAK ODASI 1 penceresi 120x180") == 1
+
+    def test_g4_odasi_belli_olmayan_varyant_eskisi_gibi_sorulur():
+        v = _talep("revizyon", "pencereyi 120x180 yapalım", "yuksek",
+                   varyantlar=[Varyant(tur="pencere_degistir", aciklama="pencereyi 120x180 yapalım", parametreler={"yeni": "120x180"})])
+        (_, k2), _ = senaryo(ILK, (0, "pencereyi 120x180 yapalım", v))
+        assert (k2.eylem, k2.soru_alani) == ("sor", "pencere_mahal")
+
+    # ── Astra 29.09 (25c49b7 incelemesi): olumsuz kısa cevap ve odası yalnız açıklamada yazılı varyant ──
+    OLUMSUZ = ["değiştirme", "değiştirmeyin", "ekleme", "eklemeyin"]
+
+    @pytest.mark.parametrize("metin", OLUMSUZ + ["değiştirelim mi?", "ekleyelim mi"])
+    def test_a1_olumsuz_ya_da_soru_bicimli_kisa_soz_islem_sayilmaz(metin):
+        from beyin.karar import _pencere_niyeti
+        assert _pencere_niyeti(metin) == "belirsiz"
+
+    @pytest.mark.parametrize("metin", OLUMSUZ)
+    @pytest.mark.parametrize("llm", ["bos", "baglamdan", "red"])
+    def test_a1_olumsuz_kisa_cevap_olumlu_isleme_donusmez_soru_yinelenir(metin, llm):
+        cikarim = {"bos": _talep("diger", metin), "baglamdan": T_OPUS("revizyon", "yuksek", "P6001"),
+                   "red": _talep("red", "Değişiklik istemiyor", "yuksek")}[llm]
+        (k1, k2, k3), d = senaryo(ILK, (0, "yatak odası 1, 120x180", T_OPUS("revizyon", "orta")), (0, metin, cikarim))
+        assert (k3.eylem, k3.soru_alani) == ("sor", "pencere_islem") and k3.mesaj.startswith("Anlayamadım.") and "YATAK ODASI 1" in k3.mesaj
+        assert not any(g["metin"].startswith("pencere_islem cevabı: ") for g in d["gecmis"] if g["yon"] == "kural")
+        assert d["son_is_emri"]["revizyon"] == 1 and d["revizyon"] == 0                 # talep kapanmadı, numara tüketilmedi
+        assert not any(p.get("islem_kaynak") == "bayi cevabı" for p in d["taslak"].get("pencereler") or [])
+
+    def test_a1_olumsuz_cevaptan_sonra_degistir_yine_soruya_baglanir():
+        (_, _, k3, k4), d = senaryo(ILK, (0, "yatak odası 1, 120x180", T_OPUS("revizyon", "orta")),
+                                    (0, "değiştirmeyin", _talep("diger", "değiştirmeyin")), kisa("değiştir"))
+        assert k3.eylem == "sor" and k4.eylem == "is_emri" and k4.revizyon == 2 and _yo1(k4.is_emri) == ["120x180"]
+        assert "pencere_islem cevabı: degistir" in _kural(d)
+
+    def T_ACIKLAMADA(niyet="revizyon", guven="orta", kod=None):
+        """Oda yalnız açıklamada: parametreler.mahal boş (Astra)."""
+        return _talep(niyet, "yatak odası 1 penceresi 120x180", guven, katalog_kodu=kod,
+                      varyantlar=[Varyant(tur="pencere_degistir", aciklama="yatak odası 1 penceresi 120x180", parametreler={"yeni": "120x180"})])
+
+    def test_a2_odasi_aciklamada_varyant_belirsiz_sozde_sorulur():
+        (_, k2), d = senaryo(ILK, (0, "yatak odası 1, 120x180", T_ACIKLAMADA()))
+        assert (k2.eylem, k2.soru_alani) == ("sor", "pencere_islem") and "YATAK ODASI 1" in k2.mesaj
+        assert not [v for v in d["taslak"].get("varyantlar") or [] if v.get("tur") == "pencere_degistir"]   # satıra çevrildi
+
+    def test_a2_odasi_aciklamada_varyant_sorusu_degistir_ile_cevaplanir():
+        (_, k2, k3), d = senaryo(ILK, (0, "yatak odası 1, 120x180", T_ACIKLAMADA()), kisa("değiştir"))
+        assert k2.eylem == "sor" and k3.eylem == "is_emri" and k3.revizyon == 2 and _yo1(k3.is_emri) == ["120x180"]
+        assert "pencere_islem cevabı: degistir" in _kural(d) and k3.gerekce.count("YATAK ODASI 1 penceresi 120x180") == 1
+
+    def test_a2_odasi_aciklamada_varyant_acik_sozde_degistirir():
+        (_, k2), _ = senaryo(ILK, (0, "P6001 yatak odası 1 penceresi 120x180 olsun", T_ACIKLAMADA("revizyon", "yuksek", "P6001")))
+        assert k2.eylem == "is_emri" and k2.revizyon == 2 and _yo1(k2.is_emri) == ["120x180"]
+
     def test_b2_on_kosul_ilk_taslak_aynali():
         """Ön koşul ayrı sınanır: ilk İş Emri aynalı değilse B2 testleri anlamsızdır ve bu test düşer."""
         (k1,), _ = senaryo(ILK)

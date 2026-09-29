@@ -517,3 +517,49 @@ def _aynali(ie: dict | None) -> bool:
 
 def _pencere_var(ie: dict | None, mahal: str, olcu: str) -> bool:
     return bool(ie) and any(a["tur"] == "pencere" and a.get("mahal") == mahal and a.get("olcu") == olcu for a in ie["acikliklar"])
+
+
+# ───────────────────────── G-1/G-2 (29.09 canlı kapı G, Opus 5.5) ─────────────────────────
+def test_g1_g2_canli_sira_opus_cikarimiyla_soru_cevaplanir_ve_r02_ayni_projede(depo, wa, hizli_motor):
+    """Canlıdaki sıra, canlıdaki çıkarım biçimiyle: Opus kısa "değiştir"e bağlamdaki pencere isteğini (satır + varyant, niyet
+    revizyon) yeniden doldurdu. v1.2'de soru 'dustu' kapanıyor, plan r03 oluyordu; beklenen: soru 'cevaplandi', aynı projede r02."""
+    P = [{"mahal": "yatak odası 1", "olcu": "120x180", "islem": "degistir"}]
+    V = [{"tur": "pencere_degistir", "aciklama": "yatak odası 1 penceresi 120x180", "parametreler": {"mahal": "yatak odası 1", "yeni": "120x180"}}]
+    plan_iste(depo, wa)
+    g2 = mesaj("yatak odası 1, 120x180", talep("revizyon", "yatak odası 1 penceresi 120x180", guven="orta", pencereler=P, varyantlar=V))
+    assert depo.mesaj_kaydet(g2)
+    [r2] = isle_hepsi(depo)
+    assert r2["eylem"] == "sor"
+    kalici.gonder(depo, wa)
+    g3 = mesaj("değiştir", talep("revizyon", "yatak odası 1 penceresi 120x180", katalog_kodu="P6001", pencereler=P, varyantlar=V))
+    assert depo.mesaj_kaydet(g3)
+    [r3] = isle_hepsi(depo)
+    assert r3["eylem"] == "is_emri"
+    soru = tek(depo, "SELECT * FROM sorular")
+    assert (soru["alan"], soru["durum"], soru["kaynak_mesaj_id"], soru["cevap_mesaj_id"]) == ("pencere_islem", "cevaplandi", g2["id"], g3["id"])
+    revler = sorgu(depo, "SELECT proje_id, rev, durum FROM revizyonlar ORDER BY id")
+    assert [(r["rev"], r["durum"]) for r in revler] == [(1, "yerini_aldi"), (2, "onay_bekliyor")]
+    assert revler[0]["proje_id"] == revler[1]["proje_id"] == soru["proje_id"]
+
+
+def test_a1_olumsuz_kisa_cevap_soruyu_yineler_proje_ve_revizyon_degismez(depo, wa, hizli_motor):
+    """Astra 29.09: bekleyen pencere sorusuna "değiştirme" (LLM bağlamdan doldurdu). Pencere değişmez, plan çıkmaz; soru açık kalır
+    ve yinelenir (deneme 2); sonra "değiştir" gelince aynı soru cevaplanır, aynı projede r02."""
+    P = [{"mahal": "yatak odası 1", "olcu": "120x180", "islem": "degistir"}]
+    plan_iste(depo, wa)
+    for metin, cik in (("yatak odası 1, 120x180", talep("revizyon", "yatak odası 1 penceresi 120x180", guven="orta", pencereler=P)),
+                       ("değiştirme", talep("revizyon", "yatak odası 1 penceresi 120x180", katalog_kodu="P6001", pencereler=P))):
+        assert depo.mesaj_kaydet(mesaj(metin, cik))
+        [r] = isle_hepsi(depo)
+        assert r["eylem"] == "sor"
+        kalici.gonder(depo, wa)
+    soru = tek(depo, "SELECT * FROM sorular")
+    assert (soru["durum"], soru["deneme"]) == ("acik", 2)
+    assert [(r["rev"], r["durum"]) for r in sorgu(depo, "SELECT rev, durum FROM revizyonlar ORDER BY id")] == [(1, "onay_bekliyor")]
+    g = mesaj("değiştir", talep("diger", "değiştir", guven="dusuk"))
+    assert depo.mesaj_kaydet(g)
+    [r] = isle_hepsi(depo)
+    assert r["eylem"] == "is_emri"
+    soru = tek(depo, "SELECT * FROM sorular")
+    assert (soru["durum"], soru["cevap_mesaj_id"]) == ("cevaplandi", g["id"])
+    assert [(r["rev"], r["durum"]) for r in sorgu(depo, "SELECT rev, durum FROM revizyonlar ORDER BY id")] == [(1, "yerini_aldi"), (2, "onay_bekliyor")]
