@@ -245,6 +245,14 @@ def karsilastir(kanal: Path, veri: Path, proje: str, yalniz_kaynak: bool) -> int
     if yalniz_kaynak:
         return 0
     s = v["sayilar"]; ke = k["e"]
+    # Hosting'in PDF'i: kaynakta projects/ varsa dosyanın kendisi; aktarılan kopyada yoksa (yalnız state.json ve durum/ taşınır)
+    # hosting'in giden satırında kayıtlı özet: api.php dosyayı alırken bu özeti dosyayla karşılaştırır (document_sha_mismatch).
+    hosting_pdf = {a: x["sha"] for a, x in ke["dosyalar"].items() if a.endswith(".pdf")}
+    hosting_pdf_kaynagi = "hosting'teki dosya"
+    if not hosting_pdf:
+        rev = f"r{int((ke.get('gelen') or {}).get('revizyon') or 1):02d}"
+        hosting_pdf = {f"{rev}/{b['dosya']}": b["sha"] for b in ke.get("giden") or [] if b.get("tur") == "document"}
+        hosting_pdf_kaynagi = "hosting'in giden satırındaki özet; kopyada projects/ yok"
     denetim = [
         ("konuşma sayısı", k["konusma"]["sayi"], v["konusma"]["sayi"]),
         ("konuşmaların toplu özeti (içerik birebir)", k["konusma"]["ozet"], v["konusma"]["ozet"]),
@@ -261,7 +269,7 @@ def karsilastir(kanal: Path, veri: Path, proje: str, yalniz_kaynak: bool) -> int
          {a: (e.get("is") or {}).get(a) for a in ("revizyon", "eylem", "pdf", "pdf_sha", "konusmayla_ayni_kisi")}),
         ("E: iş durumu", IS_DURUMU.get((ke.get("gelen") or {}).get("durum"), "basarisiz") if ke.get("gelen") else None, (e.get("is") or {}).get("durum")),
         ("E: VPS'teki PDF kayıttaki özetle aynı", True, (e.get("is") or {}).get("vps_pdf_sha_ayni")),
-        ("E: hosting ve VPS'teki r01 PDF'i aynı", {a: x["sha"] for a, x in ke["dosyalar"].items() if a.endswith(".pdf")},
+        (f"E: hosting'teki r01 PDF'i VPS'tekiyle aynı ({hosting_pdf_kaynagi})", hosting_pdf,
          {a: x["sha"] for a, x in e["vps_dosyalar"].items() if a.endswith(".pdf")}),
     ]
     hata = 0

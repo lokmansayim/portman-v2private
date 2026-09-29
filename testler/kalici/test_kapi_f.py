@@ -116,6 +116,13 @@ def test_karsilastir_aktarimdan_sonra_birebir_ve_uyusmazligi_bulur(tmp_path, dep
     _gizli_yok(r.stdout)
     assert "kayıtlar birebir korundu" in r.stdout and "FARKLI" not in r.stdout
     assert "'vps_pdf_sha_ayni': True" in r.stdout and "projeler/revizyonlar kaydı: 0/0" in r.stdout
+    assert "aynı  · E: hosting'teki r01 PDF'i VPS'tekiyle aynı (hosting'teki dosya)" in r.stdout
+    # canlıdaki gibi: VPS'e yalnız state.json ve durum/ taşınır (projects/ yok) → hosting'in giden satırındaki özetle karşılaştırılır
+    import shutil
+    shutil.rmtree(kanal / "projects")
+    r = _karsilastir(kanal, tmp_path / "v", depo.ad)
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert "aynı  · E: hosting'teki r01 PDF'i VPS'tekiyle aynı (hosting'in giden satırındaki özet; kopyada projects/ yok)" in r.stdout
     # VPS'teki PDF değişirse ya da bir konuşma farklıysa: uyuşmazlık, çıkış 2
     (tmp_path / "v" / "projects" / PROJE / "r01" / f"Portman_{PROJE}_r01.pdf").write_bytes(b"%PDF-1.4\n% degisti\n")
     with depo.baglan() as c:
@@ -123,6 +130,7 @@ def test_karsilastir_aktarimdan_sonra_birebir_ve_uyusmazligi_bulur(tmp_path, dep
     r = _karsilastir(kanal, tmp_path / "v", depo.ad)
     assert r.returncode == 2 and "UYUŞMAZLIK" in r.stdout
     assert "FARKLI · konuşmaların toplu özeti" in r.stdout and "FARKLI · E: VPS'teki PDF kayıttaki özetle aynı" in r.stdout
+    assert "FARKLI · E: hosting'teki r01 PDF'i VPS'tekiyle aynı" in r.stdout
     _gizli_yok(r.stdout)
 
 
