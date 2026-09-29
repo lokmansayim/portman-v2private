@@ -1,10 +1,37 @@
 # Portman · DURUM
 
-**Son güncelleme: 29 Eylül 2026 23:40 (İE-02 kapandı ve `main`'e birleştirildi; İE-03 Aşama 0 envanteri ve plan güncellemesi, `ie-03` dalında).** Her oturumun son adımı bu dosyayı güncellemektir.
+**Son güncelleme: 30 Eylül 2026 00:30 (tek aktif teslim: Aşama 2 kabul vakası, İE-04; aday karşılaştırması yapıldı, kararlar bekleniyor).** Her oturumun son adımı bu dosyayı güncellemektir.
 
 Canlıda çalışan akış şu: WhatsApp → hosting kanalı → VPS ajanı → Beyin ve Motor → plan PDF'i. Akış yalnız Patron modunda açık. Son gerçek mesaj doğrulaması 29.09 21:16–21:32 (kapı G yeniden denemesi, 6 Patron mesajı). 28–29 Eylülde canlıya v1.2 kuruldu (dosya modu) ve LLM Claude Opus 5.5'e geçti; 29.09 01:16'da gerçek bir Patron mesajıyla denendi (r01 PDF'i telefona geldi). 29.09 18:59'dan beri ajan kalıcı modda: konuşma ve iş durumu Postgres'te (kapı F); 29.09 19:27–19:56'da kalıcı modda 5 gerçek Patron mesajı işlendi (kapı G). 29.09 21:09'dan beri canlıda düzeltilmiş paket `9c76af59…` var; 21:16–21:32 arasında 6 gerçek Patron mesajıyla G'nin kabul adımları geçti. Depo, v1.1.1'in (`ec4e9a3`) devridir. Hedefteki "90 m² 3+1, üç seçenek" akışı henüz taslak.
 
 Durumlar: **Taslak** yalnız belgede · **Kodlandı** kod var, testi yok ya da dar · **Test edildi** tekrarlanabilir testten geçti · **Canlıda doğrulandı** gerçek kullanımda (gerçek mesaj ya da planlı koşu) görüldü ve tarihli.
+
+## Tek aktif teslim: Aşama 2 kabul vakası · yaklaşık 90 m² 3+1 (İE-04)
+
+Onay: Lokman 29.09 23:49. İş emri: `docs/is_emirleri/IE-04.md` (dal `ie-04`). Yerel geliştirme ve testler onaylı; yeni harcama, veri paylaşımı, silme ve canlı değişiklik ayrıca onaylanır. P6001 referans ve gerileme testi olarak kalır.
+
+**Bitiş koşulu:** Aşağıdaki altı kullanıcı adımının hepsi Patron modunda canlıda, aynı yeni projede çalışır. Seçenekler, kaynak uygunluk denetiminden ve Ubeydullah kabulünden geçmiş üç geçerli adaydan gelir. P6001 akışı, harness, altın testler ve `yeniden_kos.py` çıktıları değişmez. İlerleme test sayısıyla değil, bu tablodaki adım durumlarıyla bildirilir.
+
+| # | Kullanıcı adımı | Durum (30.09) |
+|---|---|---|
+| A1 | "3+1, 90 m² civarı" → yalnız gerekli sorular | Kısmen: m² ve oda programıyla yakın modeller listeleniyor; liste denetimden geçmiyor, öncelik soruları yok |
+| A2 | Teknik olarak uygun üç alternatif | Çalışmıyor: 2 aday koşullu uygun (P9401, P9201), 0 geçerli; üçüncü aday K16 kararına bağlı |
+| A3 | Seçim → o adaydan r01 | Çalışmıyor: canlıda yalnız P6001 şablonu |
+| A4 | Bir değişiklik → aynı projede r02 | Kısmen: P6001'de canlıda çalışıyor (29.09); 3+1 adaylarında yok |
+| A5 | Aynı revizyondan PDF ve 3D bağlantısı | Kısmen: PDF canlıda (P6001); IFC P9401 ve P9201 için yerelde üretildi, bağlantı yok |
+| A6 | Eski revizyon onayı reddi, güncel onay kabulü | Canlıda çalışıyor (P6001, 29.09) |
+
+**Beklenen kararlar** (aday paketi `docs/raporlar/2026-09-30_Asama2_3arti1_Aday_Karsilastirmasi.md`, K-A1–K-A10):
+- alan tanımı ve tolerans;
+- katalog PDF'i ile DXF'in önceliği;
+- kutu dışı veranda;
+- açık plan sınırı;
+- açıklık konumu, kapı genişlikleri, iç duvar ekseni;
+- K16 (üçüncü aday);
+- kaynak uygunluk denetimi;
+- insan kabulü.
+
+İE-03'ten bu teslime alınanlar: kaynaklı aday bilgisi, ilgili değişikliği doğru anlayan konuşma davranışı, düzeltme adaylarının kaydı. Geniş hafıza depoları ve ölçüm çalışması bu teslimin ön koşulu değil.
 
 ## Bu depoda ne var
 
@@ -13,7 +40,7 @@ Durumlar: **Taslak** yalnız belgede · **Kodlandı** kod var, testi yok ya da d
 | Kökteki v1.1.1 ağacı | `lokmansayim/portman` deposunun geçmişiyle birlikte, değiştirilmeden (`ec4e9a3`, 22.09 20:12). Özetleri `SHA256SUMS`'ta. |
 | `testler/referans/` | Dondurulmuş referanslar (`2026-09-28/`, `2026-09-28b/`) ve `dogrula.py` |
 | `testler/kalici/` | İE-02 kalıcı akış testleri (gerçek Postgres; T1–T10) ve kabul gösterimi |
-| `docs/is_emirleri/` | İE-02 iş emri ve canlıya bağlama kaydı (kapandı 29.09); İE-03 planı ve Aşama 0 envanteri (`ie-03` dalı) |
+| `docs/is_emirleri/` | İE-02 (kapandı 29.09); İE-03 planı ve Aşama 0 envanteri; İE-04 Aşama 2 kabul vakası (aktif) |
 | `testler/bilinen_hatalar/` | B1 ve B2 testleri; G ve Astra (A1/A2) testleri. Düzeltmeler canlıda: B1 ve B2 28.09 23:31'den, B1'in Opus'la kısa cevap yolu 29.09 21:09'dan beri |
 | `deneme/2026-09-23/` | 23 Eylül denemeleri ve `yeniden_kos.py` |
 | `KARARLAR/` | K01–K25 ve Z-01–Z-10, her karar ayrı dosyada |
@@ -26,10 +53,10 @@ Durumlar: **Taslak** yalnız belgede · **Kodlandı** kod var, testi yok ya da d
 | VPS ajanı (Natro, portman-agent; 28.09'dan beri v1.2) | Canlıda doğrulandı | 22.09 19:06: ilk gerçek İş Emri, 27 sn · 22.09 22:14: v1.1.1, `vps-health.json` · 29.09 00:57: v1.2, dosya modunda, 50/50 dosya paketle aynı · 29.09 18:59: kalıcı mod (Postgres), 19:09'da sağlıklı · 29.09 21:09: paket `9c76af59…`, kalıcı modda, 50/50 dosya paketle aynı | ufw etkin ama kuralları okunmadı; root parolayla SSH'ye girebiliyor (22.09 23:59) |
 | Beyin: LLM çıkarımı (29.09'dan beri Claude Opus 5.5; önce gpt-4o-mini), kural katmanı, varyant | Canlıda doğrulandı | Harness 22/22 (sabit girdiler; 28.09 ve 29.09'da yeniden) · 22.09 22:33–38 canlı davranış testi 2/3 (B1) · 29.09 G yeniden denemesi (Opus): belirsiz pencere sözünde soru, olumsuz cevapta soru yinelemesi, "değiştir" ile aynı soruya bağlanma ve aynı projede r02 gerçek mesajla geçti | Yalnız P6001 şablonu ve pencere senaryosu canlıda görüldü; B2 (D-01) canlıda gerçek mesajla tetiklenmedi; olumsuz ya da soru biçimli kısa cevaba "Anlayamadım" (pilot sınırlaması, İE-03 gereksinimi) |
 | Motor v1.1.1: İş Emri → DXF → doğrulama → PDF | Test edildi | Altın testler 6×8 (41 pano, 0 cm²) ve Yan Verandalı 6×8,5 (BOM 26 kod); P6001 katalog testi (773 × 763) · 28.09: üç temiz koşuda içerik parmak izi aynı | Plan PDF'i üretir, ön onay paftası değil; canlı PDF içeriği insan gözüyle doğrulanmadı |
-| Çıkarıcı: katalog DXF → İş Emri | Kodlandı | 16 planın 15'i Motor doğrulamasından geçti (22.09 ve 28.09) | P1051'de kapılar, P8501, P9501 ve P1081'de bazı açıklıklar düşüyor; P9901 desteklenmiyor; insan kabulü yok |
+| Çıkarıcı: katalog DXF → İş Emri | Kodlandı | 30.09: 90 m² civarı 3+1 adaylarında kaynakla karşılaştırıldı: P9401 ve P9201 bütün açıklıklarla, P9501 ve P1051 oda yerleşimi yanlış; Motor doğrulaması yanlış çizimi de geçiriyor (kaynak uygunluk denetimi önerildi) · 16 planın 15'i Motor doğrulamasından geçti (22.09 ve 28.09) | P1051'de kapılar, P8501, P9501 ve P1081'de bazı açıklıklar düşüyor; P9901 desteklenmiyor; insan kabulü yok |
 | Serbest aks (Motor yaması) | Kodlandı | 23.09: Tatar 80 m²'de denendi · 28.09: `yeniden_kos.py` ile yeniden koşuldu, sonuçlar aynı | Test dar: tek plan. `deneme/` altında ayrı yama; ana kodda ve canlıda değil; K16'ya bağlı |
 | Vektör PDF plan okuyucu | Kodlandı | 23.09 Tatar 80: ölçek iki yöntemle %0,05 tutarlı · 28.09: `yeniden_kos.py` ile aynı | Test dar: tek plan. Deneme sürümü; el çizimi okumuyor |
-| IFC4 üretimi (IfcOpenShell) | Kodlandı | 28.09 yeniden koşum (`yeniden_kos.py`): şema 0 hata, çift sayım 35/35, hacim farkı %0,0 · Yan Verandalı: Astra modeliyle 65/67 eleman, açıklık 13/13 | Tekrarlanabilir test var ama dar: iki plan. Şema doğrulaması üretim doğruluğu değildir |
+| IFC4 üretimi (IfcOpenShell) | Kodlandı | 30.09: P9401 ve P9201 İş Emri'nden IFC4 (7/5 ve 6/5 açıklık, şema hatası 0) · 28.09 yeniden koşum (`yeniden_kos.py`): şema 0 hata, çift sayım 35/35, hacim farkı %0,0 · Yan Verandalı: Astra modeliyle 65/67 eleman, açıklık 13/13 | Tekrarlanabilir test var ama dar: iki plan. Şema doğrulaması üretim doğruluğu değildir |
 | Blender modeli | Kodlandı | 28.09: `yeniden_kos.py` ile bpy 5.0.1'de yeniden kuruldu, 65 pano, BOM aynı | Test dar: tek plan; sunum içindir, hesap burada yapılmaz |
 | Depo | Kodlandı | 28.09: `portman-v2private` açıldı; v1.1.1 geçmişiyle alındı; İE-01, Lokman'ın onayıyla `main`'e birleştirildi · 29.09: İE-02 Lokman'ın onayıyla `main`'e birleştirildi | Eski depo `lokmansayim/portman` yalnız okunuyor |
 | Yapı Tanımı şeması | Taslak | Zemin, 27.09; temeli İş Emri şeması v0.1 (21.09) | Ölçü anlamları ve ürün ailesi ayrımı eksik |
@@ -101,7 +128,10 @@ Kapı G ve yeniden denemesi (`docs/is_emirleri/IE-02-canli.md`):
 
 Canlı dışı kalan: `kos.py` sır taramasındaki telefon kalıbı; test verisinde takma ad.
 
-## Sıradaki iş: İE-03 · Kaynaklı hafıza ve deneyimden yararlanma (plan)
+## İE-03 · Kaynaklı hafıza (plan; ertelendi, silinmedi)
+
+29.09 23:49: İE-03 planı duruyor. Üç parçası (kaynaklı aday bilgisi, kapsamlı olumsuzluk davranışı, düzeltme adayı kaydı) İE-04'e alındı. Geniş hafıza depoları ve ölçüm çalışması Aşama 2'den sonraya kaldı.
+
 
 Plan: `docs/is_emirleri/IE-03.md` (`ie-03` dalı). 29.09 23:04: ana yön onaylandı (üç ayrı depo, mevcut altyapı); Aşama 0 envanteri yapıldı (`IE-03-envanter.md`: yalnız depo ve İE-02'nin maskelenmiş örnekleri; yeni veri alınmadı, ihtiyaç ve izin listesi §7) ve plan netleştirildi (kod/paket değişmeden kullanım, taslağı sistem hazırlar, kapsamlı olumsuzluk, aynı karar koduyla ve başlangıca göre ölçüm, üç iz, getirme sırası, Patron modunda bayi ayrımı testi). Uygulama, yeni veri paylaşımı, ücretli ölçüm ve canlı değişiklik ayrı onayla. Açık gereksinim (29.09): LLM'in bayinin talimatını anlaması ve doğrulanmış bayi düzeltmelerinden yararlanması; faydası ölçülerek kabul edilir.
 
