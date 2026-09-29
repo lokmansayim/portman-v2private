@@ -58,7 +58,10 @@ def karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, met
     """metin: bayinin kendi mesajı (ham). Kurallar "bayi ne dedi" sorusunu LLM'in özetinden değil bu metinden okur.
     Kural katmanı bu mesajın yerine bekletilen bir mesajı işlediyse (D-01), o talep Karar.kullanilan_talep'te döner."""
     k.kullanilan_talep, k.bekleyen_not = None, ""
+    rev0 = int(k.d.get("revizyon") or 0)
     karar = _karar_ver(talep, k, bayi, katalog, metin)
+    if karar.eylem != "is_emri" and int(k.d.get("revizyon") or 0) > rev0:
+        k.d["revizyon"] = rev0      # G-2 (29.09): soru soran ya da yönlendiren revizyon turu revizyon numarası tüketmez
     if k.kullanilan_talep is not None:
         karar.kullanilan_talep = k.kullanilan_talep.model_dump(mode="json")
     if k.bekleyen_not:              # D-01: bekletilen mesaj işlenmeden düştüyse bayi bunu bu cevapta öğrenir
@@ -71,10 +74,10 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
     k.not_dus("gelen", t.ozet, {"niyet": t.niyet, "guven": t.guven})
     # Askıdaki "ölçü mü değiştirelim, pencere mi ekleyelim?" sorusunun cevabı: kısa ve açık bir "değiştir"/"ekle" ise
     # LLM'in niyet sınıflandırmasından bağımsız olarak taslaktaki pencere satırına işlenir ve akış devam eder.
-    # Cevap yalnız kısa ve saf bir "değiştir"/"ekle" ise ve LLM mesajda başka içerik bulmadıysa sayılır ("aynalı olsun" cevap
-    # değildir); yalnız sorulan pencere satırı çözülür (B1 incelemesi, 28.09).
-    if metin and k.d.get("son_soru_alani") == "pencere_islem" and len(metin.split()) <= 6 and _pencere_cevabi_saf(metin) \
-            and not _icerikli(t):
+    # Cevap yalnız kısa ve saf bir "değiştir"/"ekle" ise sayılır ("aynalı olsun" cevap değildir); yalnız sorulan pencere satırı
+    # çözülür (B1 incelemesi, 28.09). Saf metin ("değiştir", "ekle" ve dolgu sözcükleri) yeni içerik taşıyamaz: LLM'in bu kısa
+    # cevaba bağlamdan yinelediği oda, ölçü ya da model (29.09 G-1: Opus 5.5 böyle yaptı ve soru 'dustu' kapandı) yok sayılır.
+    if metin and k.d.get("son_soru_alani") == "pencere_islem" and len(metin.split()) <= 6 and _pencere_cevabi_saf(metin):
         cevap = _pencere_niyeti(metin)
         if cevap in ("ekle", "degistir"):
             sorulan = k.d.get("pencere_islem_satiri")
@@ -86,7 +89,7 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
             k.d.pop("pencere_islem_satiri", None)
             k.d["son_soru_alani"] = None
             k.not_dus("kural", f"pencere_islem cevabı: {cevap}")
-            t = t.model_copy(update={"niyet": "yeni_talep", "pencereler": []})
+            t = Talep(niyet="yeni_talep", guven=t.guven, ozet=t.ozet)      # LLM'in bu kısa cevaba verdiği içerik yok sayılır
 
     # D-01: askıda "yeni talep mi, önceki taslağın değişikliği mi?" sorusu varken gelen mesaj. Yalnız kısa ve saf bir cevap
     # ("yeni", "değişiklik", "önceki taslağın değişikliği") cevap sayılır; o zaman soruyu doğuran mesaj (bekletilen talep ve
@@ -188,6 +191,7 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
             and not any(v.tur.startswith("pencere") for v in t.varyantlar):
         k.d["taslak"].pop("pencereler", None); k.d["son_soru_alani"] = None
         dusen_not = "Önceki pencere değişikliğini netleştirmediğiniz için uygulamadım; isterseniz sonra ekleriz. "
+    t = _pencere_varyantlarini_satira_cevir(t)       # G-3/G-4 (29.09): pencere değişikliği tek yoldan, B1 kurallarıyla
     k.birlestir(t.model_dump())
     k.d["asama"] = "topluyor"
     k.d["son_metin"] = (metin or "").strip()      # sıfırlama(lar)dan SONRA: kurallar bayinin bu mesajdaki sözünü okur
@@ -258,6 +262,8 @@ def _is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, sablon: dict, kaynak
                 ie = varyant.ayna(ie, "y"); notlar.append("ön-arka aynalandı")
             elif tur == "pencere_degistir":
                 p = v.get("parametreler") or {}
+                if p.get("mahal") and any(varyant._norm(r.get("mahal") or "") == varyant._norm(p["mahal"]) for r in ts.get("pencereler") or []):
+                    continue        # G-3: aynı odanın pencere satırı var; değişikliği satır yolu (B1) uygular, not iki kez yazılmaz
                 acik = v.get("aciklama", "")
                 yeni = p.get("yeni") or p.get("olcu") or p.get("yeni_olcu") or _olcu_bul(acik)
                 if not yeni:
@@ -321,7 +327,9 @@ def _is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, sablon: dict, kaynak
                 return _bitir(k, Karar(eylem="yonlendir", gerekce=f"pencere hatası: {e}", mesaj=f"Pencere değişikliği uygulanamadı ({e}). " + YONLENDIRME))
     seq = int(time.time()) % 100000
     ie["is_emri_no"] = f"PM-{bayi.get('kod','BAYI')}-{time.strftime('%Y%m%d')}-{seq}"
-    ie["revizyon"] = k.d["revizyon"] + 1
+    # G-2 (29.09): numara, gönderilmiş son planın numarasından (konuşma sıfırlandıysa 1); sayaç plan sayısıyla eşitlenir.
+    ie["revizyon"] = int((k.d.get("son_is_emri") or {}).get("revizyon") or 0) + 1
+    k.d["revizyon"] = ie["revizyon"] - 1
     ie["talep"] = {"bayi": {"kod": bayi.get("kod"), "ad": bayi.get("ad")}, "kaynak": kaynak,
                    "musteri_adi": (ts.get("musteri") or {}).get("ad") or "", "metin": ts.get("ozet", "")}
     ie["kunye"] = {"proje_kodu": ie["is_emri_no"], "ilgili_kisi_telefon": f"{bayi.get('ad','')} / {k.gonderen}",
@@ -413,6 +421,33 @@ def _pencere_niyeti(metin: str | None) -> str:
     if degistir and not ekle:
         return "degistir"
     return "belirsiz"
+
+
+def _pencere_varyantlarini_satira_cevir(t: Talep) -> Talep:
+    """LLM odası ve yeni ölçüsü belli bir "pencere_degistir" varyantı verirse, varyant pencere satırına çevrilir (aynı oda için
+    satır zaten varsa varyant düşer). Satıra bayinin bu mesajdaki sözü işlenir ve B1 kuralları uygulanır: söz belirsizse sorulur.
+    29.09 (G-4): Opus 5.5 pencere isteğini hem satır hem varyant olarak verdi; varyant yolu B1'e bakmadan pencereyi değiştiriyordu
+    (satır yoksa sessizce, satır varsa not iki kez: G-3). Odası ya da ölçüsü belli olmayan varyant olduğu gibi kalır (sorulur)."""
+    from pydantic import ValidationError
+    from .sema import Pencere
+    satirlar = list(t.pencereler); kalan = []
+    odalar = {varyant._norm(p.mahal) for p in satirlar if p.mahal}
+    for v in t.varyantlar:
+        prm = v.parametreler or {}
+        if v.tur == "pencere_degistir" and prm.get("mahal"):
+            olcu = prm.get("yeni") or prm.get("olcu") or prm.get("yeni_olcu") or _olcu_bul(v.aciklama)
+            try:
+                satir = Pencere(mahal=str(prm["mahal"]), olcu=olcu, islem="degistir") if olcu else None
+            except ValidationError:
+                satir = None
+            if satir is not None:
+                if varyant._norm(satir.mahal) not in odalar:
+                    satirlar.append(satir); odalar.add(varyant._norm(satir.mahal))
+                continue
+        kalan.append(v)
+    if len(kalan) == len(t.varyantlar):
+        return t
+    return t.model_copy(update={"pencereler": satirlar, "varyantlar": kalan})
 
 
 def _olcu_bul(metin: str) -> str | None:
