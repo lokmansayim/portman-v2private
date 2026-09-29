@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import hashlib
 import os
+from pathlib import Path
 import subprocess
 import time
 
@@ -49,7 +50,7 @@ def ortam(tmp_path, depo):
          "PM_PSQL": f"psql -X -q -tA {baglanti}", "PM_PGDUMP": f"pg_dump {baglanti}", "PM_PGRESTORE": "pg_restore",
          "PM_DB": depo.ad, "PM_YEDEK": str(tmp_path / "yedek")}
     (tmp_path / "yedek").mkdir()
-    yield {"o": o, "tok": tok, "tmp": tmp_path}
+    yield {"o": o, "tok": tok, "tmp": tmp_path, "h": h, "home": home}
     h.dur()
 
 
@@ -82,7 +83,7 @@ def test_durum_kanit_ve_maliyet_deger_yazmadan(ortam, depo, wa, hizli_motor):
     assert f"mesaj {iz}" in out and "eylem is_emri" in out and "onay denetimi: kabul True" in out
     assert "LLM claude-opus-5-5 · çağrı 1 · 5280+337 token" in out and "çağrı 2 · 5300+100 token · tekrar EVET" in out
     # 5280×4 + 337×20 = 0,027860 $; ikincisi tekrarlı: (5300×4 + 100×20)×2 = 0,046400 $ → 0,0743
-    assert "Patron mesajı 2/7 · LLM çağrısı 3/10 (token'ı bilinmeyen 0) · 10580 giriş + 437 çıkış token · maliyet ≈ 0.0743 $" in out
+    assert "Patron mesajı 2/7 · LLM çağrısı 3/9 (öz-test dahil; token'ı bilinmeyen 0) · 10580 giriş + 437 çıkış token · maliyet ≈ 0.0743 $ / 0,30 $" in out
     assert "giden WhatsApp 3/12" in out and "açık iş 0 · mesaj başına en çok iş 1" in out
     assert "onaylandi" in out and "PDF Portman_" in out
     r2 = _kos("kapi_g_durum.sh", {**ortam["o"], "PM_BASLANGIC": ""})
@@ -115,3 +116,73 @@ def test_teshis_deger_yazmadan(ortam, depo, wa, hizli_motor):
     _temiz(out, ortam["tok"], g["id"], o["id"])
     assert "LLM niyet yeni_talep/yuksek · dolu alanlar ['katalog_kodu', 'varyantlar']" in out and "LLM varyantlar: ['ayna_x']" in out
     assert "-- konuşma (şimdi): aşama onaylandi" in out and "-- revizyon PM-TSTA-" in out and "r01 (onaylandi)" in out
+
+
+def test_durum_bu_turdaki_oz_testi_sayar_oncekini_saymaz(ortam, depo, wa, hizli_motor):
+    """Yeniden deneme turu: yükleme öncesindeki andan sonra koşan paket öz-testi 1 LLM çağrısı olarak sayaçlara girer."""
+    import json
+    bas_t = time.time() - 5
+    bas = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(bas_t))
+    veri = ortam["home"] / "data"; veri.mkdir()
+    st = {"state": "passed", "surum": "kanal-v1.2-20260929-2052", "started_at": int(bas_t) - 3600, "finished_at": int(bas_t) - 3590,
+          "adimlar": {"llm": {"passed": True, "model": "claude-opus-5-5", "girdi_token": 5309, "cikti_token": 488, "tekrar": 0, "ozet": "gizliozet"}}}
+    (veri / "self-test-result.json").write_text(json.dumps(st))
+    _plan_ve_onay(depo, wa)
+    out = _kos("kapi_g_durum.sh", {**ortam["o"], "PM_BASLANGIC": bas}).stdout
+    assert "paket öz-testi" not in out and "LLM çağrısı 3/9" in out            # önceki paketin öz-testi bu tura girmez
+    st["started_at"] = int(bas_t) + 2; st["finished_at"] = int(bas_t) + 20
+    (veri / "self-test-result.json").write_text(json.dumps(st))
+    out = _kos("kapi_g_durum.sh", {**ortam["o"], "PM_BASLANGIC": bas}).stdout
+    assert "-- paket öz-testi (bu turda): passed · sürüm kanal-v1.2-20260929-2052 · LLM claude-opus-5-5 · çağrı 1 · 5309+488 token · tekrar hayır" in out
+    # 0,0743 + 5309×4/1M + 488×20/1M (0,021236 + 0,00976) = 0,1053
+    assert "LLM çağrısı 4/9 (öz-test dahil; token'ı bilinmeyen 0) · 15889 giriş + 925 çıkış token · maliyet ≈ 0.1053 $ / 0,30 $" in out
+    assert "gizliozet" not in out
+
+
+def test_paket_denetimi_deger_yazmadan(ortam):
+    """kapi_g2_paket.sh: kurulu paket, dosya dosya karşılaştırma, karar.py özeti, öz-test, korunan ayarların adları, hosting paketi."""
+    import io, json, zipfile
+    home, tmp = ortam["home"], ortam["tmp"]
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as z:
+        z.writestr("worker.py", "# işçi\n"); z.writestr("beyin/karar.py", "# karar\n"); z.writestr("agent.py", "# ajan\n"); z.writestr("SURUM.txt", "kanal-v1.2-deneme\n")
+    ham = buf.getvalue(); sha = hashlib.sha256(ham).hexdigest(); karar = hashlib.sha256(b"# karar\n").hexdigest()
+    (home / "app").unlink()
+    (home / "pkg").mkdir(); (home / "pkg" / f"{sha}.zip").write_bytes(ham); (home / "pkg" / ("e" * 64 + ".zip")).write_bytes(b"eski")
+    with zipfile.ZipFile(io.BytesIO(ham)) as z:
+        z.extractall(home / "app")
+    (home / "app" / "PACKAGE_SHA256").write_text(sha); (home / "app" / "beyin" / "__pycache__").mkdir(); (home / "app" / "beyin" / "__pycache__" / "k.pyc").write_bytes(b"x")
+    (home / "app.old").mkdir(); (home / "app.old" / "PACKAGE_SHA256").write_text("e" * 64); (home / "app.old" / "SURUM.txt").write_text("kanal-v1.2-eski\n")
+    (home / "agent.py").write_text("# ajan\n")
+    (home / "data").mkdir()
+    (home / "data" / "self-test-result.json").write_text(json.dumps({"state": "passed", "surum": "kanal-v1.2-deneme", "started_at": int(time.time()), "finished_at": int(time.time()),
+        "sure_s": 9, "adimlar": {"beyin_harness": {"passed": True}, "llm": {"passed": True, "backend": "anthropic", "model": "claude-opus-5-5", "girdi_token": 5309,
+        "cikti_token": 488, "tekrar": 0, "sure_ms": 4000, "niyet": "yeni_talep", "katalog_kodu": "P6001", "ozet": "gizliozet"}}}))
+    bas = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time() - 5))
+    (home / "logs" / "agent.log").write_text(f"{time.strftime('%Y-%m-%d %H:%M:%S')} paket güncelleniyor: kanal-v1.2-deneme {sha[:12]} {len(ham)} B\n"
+                                             f"{time.strftime('%Y-%m-%d %H:%M:%S')} iş alındı → Postgres abc kimden …0101 tür text\n")
+    etc = tmp / "etc"; (etc / "portman").mkdir(parents=True); (etc / "portman" / "pg.env").write_text("PORTMAN_PG_DSN=dbname=portman\n")
+    (etc / "systemd" / "system" / "portman-agent.service.d").mkdir(parents=True); (etc / "systemd" / "system" / "portman-agent.service.d" / "kalici.conf").write_text("[Service]\n")
+    gizli = "sk-ant-gizlideger-0123456789"
+    env = Path(ortam["o"]["PM_ENV"]); env.write_text(env.read_text() + f"ANTHROPIC_API_KEY={gizli}\n")
+    from sahte_hosting import SahteHosting
+    h = ortam["h"]; h.settings = lambda: {**SahteHosting.settings(h), "package": {"sha256": sha, "size": len(ham), "surum": "kanal-v1.2-deneme"}}
+    o = {**ortam["o"], "PM_ETC": str(etc), "PM_BEKLENEN": sha, "PM_KARAR": karar, "PM_BASLANGIC": bas}
+    r = _kos("kapi_g2_paket.sh", o)
+    out = r.stdout + r.stderr
+    assert r.returncode == 0, out
+    _temiz(out, ortam["tok"], gizli, "gizliozet", sha[16:])
+    assert f"-- kurulu paket: {sha[:16]}… · beklenenle aynı: EVET · sürüm kanal-v1.2-deneme" in out
+    assert "pakette 4 dosya · kurulu dizinle birebir aynı 4 · farklı ya da eksik [] · pakette olmayan []" in out
+    assert "beyin/karar.py: " + karar[:16] + "… · beklenenle aynı: EVET" in out and "çalışan agent.py paketteki ile aynı: EVET" in out
+    assert "app.old): eeeeeeeeeeeeeeee… · sürüm kanal-v1.2-eski" in out
+    assert "-- öz-test: passed" in out and "LLM: anthropic/claude-opus-5-5 · 5309+488 token · tekrar 0" in out
+    assert "anahtar adları ['PORTMAN_API_URL', 'PORTMAN_API_TOKEN', 'ANTHROPIC_API_KEY']" in out and "pg.env: var" in out and "kalici.conf: var" in out
+    assert "worker vps · mode patron" in out and "hosting paketi: " + sha[:16] + "… · " + str(len(ham)) + " B · sürüm kanal-v1.2-deneme · beklenenle aynı: EVET" in out
+    assert "paket güncelleniyor" in out and "iş alındı" not in out
+    (home / "app" / "beyin" / "karar.py").write_text("# başka\n")
+    out = _kos("kapi_g2_paket.sh", o).stdout
+    assert "farklı ya da eksik ['beyin/karar.py']" in out and "beklenenle aynı: HAYIR" in out
+    out = _kos("kapi_g2_paket.sh", {**o, "PM_BEKLENEN": "f" * 64}).stdout
+    assert "-- kurulu paket: " + sha[:16] + "… · beklenenle aynı: HAYIR" in out and "zip YOK" in out
+    assert "DUR: PM_BEKLENEN" in _kos("kapi_g2_paket.sh", {**o, "PM_BEKLENEN": ""}).stdout

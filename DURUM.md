@@ -1,6 +1,6 @@
 # Portman · DURUM
 
-**Son güncelleme: 29 Eylül 2026 20:05 (İE-02 kapı G yapıldı, AÇIK: 7 adımın 6'sı geçti; B1 cevabı Opus'la soruya bağlanmadı ve r03 numarası çıktı. Düzeltme önerisi onay bekliyor).** Her oturumun son adımı bu dosyayı güncellemektir.
+**Son güncelleme: 29 Eylül 2026 21:00 (İE-02 kapı G açık; düzeltme `ie-02`'ye alındı, kontrollü dağıtım ve yeniden deneme onaylandı, yürütülüyor).** Her oturumun son adımı bu dosyayı güncellemektir.
 
 Canlıda çalışan akış şu: WhatsApp → hosting kanalı → VPS ajanı → Beyin ve Motor → plan PDF'i. Akış yalnız Patron modunda açık. En son 22 Eylülde gerçek mesajla doğrulandı. 28–29 Eylülde canlıya v1.2 kuruldu (dosya modu) ve LLM Claude Opus 5.5'e geçti; 29.09 01:16'da gerçek bir Patron mesajıyla denendi (r01 PDF'i telefona geldi). 29.09 18:59'dan beri ajan kalıcı modda: konuşma ve iş durumu Postgres'te (kapı F); 29.09 19:27–19:56'da kalıcı modda 5 gerçek Patron mesajı işlendi (kapı G). Depo, v1.1.1'in (`ec4e9a3`) devridir. Hedefteki "90 m² 3+1, üç seçenek" akışı henüz taslak.
 
@@ -85,11 +85,13 @@ Yapıldı:
 Kalan (sırayla, her biri ayrı onayla; `docs/is_emirleri/IE-02-canli.md`):
 - G (29.09 19:25–19:59, açık): 5 Patron mesajı; 5 LLM çağrısı, 26.731 + 1.381 token, 0,1345 $; 7 giden mesaj, hepsi okundu. Kabul: yeniden başlatmadan sonra soru kayıtlı, eski revizyon onayı reddedildi, güncel onay kabul edildi, tekrar gelen mesaj ikinci iş açmadı. Açık: G-1 kısa "değiştir" cevabı soruya bağlanmadı (`dustu`), G-2 r02 yerine r03, G-3 gerekçede yinelenen not. Pencere değişikliği çizimde doğru (Lokman). Yedekler öncesi ve sonrası Mac'te.
 
+- G yeniden denemesi (onay 29.09 20:45): düzeltme `ie-02`'ye alındı (`e726432`; `main` değil). Yeni paket `9c76af59…` canlıdakinden yalnız `beyin/karar.py` ve sürüm etiketiyle farklı. Sınırlar: 0,30 $, 9 LLM çağrısı (öz-test dahil), 12 giden, 7 Patron mesajı. "Değiştirmeyin"e "Anlayamadım" cevabı güvenli pilot sınırlaması; nihai konuşma başarısı sayılmaz.
+
 G tamamlanınca İE-02 kapanır.
 
 Canlı dışı kalan: `kos.py` sır taramasındaki telefon kalıbı; test verisinde takma ad.
 
-Sonraki iş adayı (İE-03): küçük, kaynaklı, sürüm ve yetki ayrımlı RAG.
+Sonraki iş adayı (İE-03): küçük, kaynaklı, sürüm ve yetki ayrımlı RAG. Açık gereksinim (29.09): LLM'in bayinin talimatını anlaması ve doğrulanmış bayi düzeltmelerinden yararlanması.
 
 Lokman'ın açık kararları: K16 (a/b), K3 ve K4, Z-03 ve Z-06 eşikleri. Ayrıntı: `KARARLAR/README.md`.
 

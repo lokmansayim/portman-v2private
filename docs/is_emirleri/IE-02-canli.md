@@ -716,6 +716,53 @@ Bayi sohbet botunun Opus trafiği bu tabloya dahil değil; Console'dan izlenir.
 
 *G'nin kapanması:* Yeniden denemede soru-cevap bağı (G-1) ve r02 (G-2) canlıda geçerse; A1 ve A2 yerel testlerle kanıtlı.
 
+**G yeniden denemesi: onay ve hazırlık (Lokman 29.09 20:45).** Onaylanan: `2d50148` düzeltmesinin kontrollü canlı dağıtımı ve G'nin yeniden denemesi. `main`'e birleştirme bu onayın kapsamında değil.
+
+*Çalışma hattı:*
+- Dal `ie-02-b1-opus` (`2d50148`), `ie-02`'ye alındı (birleştirme commit'i `e726432`); `main`'e dokunulmadı.
+- `beyin/karar.py` iki dalda aynı. Tam test takımı 328 geçti (+ G betik testleri); harness 22/22.
+
+*Paket (yüklenecek):*
+- `kanal-v1.2-20260929-2052`: 673.389 B, sha256 `9c76af59df065dc5fc2fbde52940312134afc02ab3a7b28e8855bfe623c7f2f3`, 50 dosya.
+- Canlı paketle (`f2bff20a…`, `kanal-v1.2-20260928-2306`) dosya dosya karşılaştırıldı: 48 dosya birebir aynı. Fark yalnız `SURUM.txt` (sürüm etiketi) ve `beyin/karar.py`.
+- `beyin/karar.py` sha256: canlıda `dc71738a…` (= `8d2cd16`), yeni pakette `25bb87f2…` (= `e726432`).
+
+*Pilot sınırlaması (Lokman'ın kaydı):* Bekleyen pencere sorusuna "değiştirmeyin" gibi olumsuz ya da soru biçimli kısa cevaba verilen "Anlayamadım." + soru yinelemesi **şimdilik güvenli pilot sınırlaması** olarak kaydedilir. Nihai konuşma başarısı sayılmaz.
+
+*Açık gereksinim (İE-03, kaynaklı hafıza):* LLM'in bayinin talimatını anlaması ve doğrulanmış bayi düzeltmelerinden yararlanması, sonraki kaynaklı hafıza çalışmasının açık gereksinimidir.
+
+*Bu turun sınırları (önceki harcamalara ek; her biri ayrı ayrı geçerli):*
+- LLM bütçesi en çok **0,30 $**.
+- LLM çağrısı en çok **9**: öz-test ve tekrarlar dahil.
+- Giden WhatsApp en çok **12**.
+- Lokman'ın göndereceği mesaj en çok **7**.
+- Planlı: 6 Patron mesajı, 7 LLM çağrısı (öz-test 1 + mesaj başına 1), 8 giden. Tahmin ~0,19–0,22 $ (çağrı başına ~0,027–0,031 $).
+- WhatsApp: servis mesajları 1 Ekim 2026'ya dek ücretsiz; tur 29–30 Eylül'de biterse WhatsApp payı 0. 1 Ekim'e kalırsa önce güncel oran sunulur.
+
+*Zorunlu kabul adımları (isteğe bağlı adım yok):*
+
+| # | Ne | Beklenen |
+|---|---|---|
+| 1 | "Yeni talep: P6001 aynalı olsun" | Yeni proje r01 (metin + PDF) |
+| 2 | "yatak odası 1, 120x180" | `pencere_islem` sorusu; revizyon yok |
+| 3 | "değiştirmeyin" | "Anlayamadım." + aynı soru. Pencere değişmez, revizyon oluşmaz; soru `acik`, deneme 2 |
+| 4 | `systemctl restart portman-agent` | Soru hâlâ `acik`; öz-test ve LLM çağrısı yok |
+| 5 | "değiştir" | Aynı soru `cevaplandi`, kapatan bu mesaj; aynı projede **r02**; YATAK ODASI 1 120x180; not bir kez; r01 `yerini_aldi` |
+| 6 | r01 PDF'ine alıntıyla "onaylıyorum" | Ret: alıntı başka revizyona ait |
+| 7 | r02 PDF'ine alıntıyla "onaylıyorum" (yalnız 6 ret verdiyse) | Kabul; r02 `onaylandi` |
+| 8 | `tekrar_dene.py <1. mesajın izi>` | İkinci iş açılmaz; mesaj başına en çok 1 iş |
+
+*Yedek ve durdurma:*
+- Yüklemeden önce: hosting'teki üç paket dosyası ve `portman-g-tekrar-20260929.dump` Mac'e alınır, özetleri doğrulanır.
+- Sonra: `portman-g-tekrarsonrasi-20260929.dump`.
+- Beklenmeyen tekrar ya da hata olursa `worker` off; açık işlerin durumu bildirilir. Veritabanı eski yedekle ezilmez.
+- Geri alma: önceki paketin üç dosyası yeniden yüklenir (Mac'te ve VPS'te `pkg/f2bff20a….zip`).
+- Ajanın kendi güncelleme yolu, kurulumda bir önceki `app.old`'u yenisiyle değiştirir. Silinen, `f2bff20a`'dan önceki paketin açılmış kopyasıdır; zip'i `pkg/`'de ve F yedeğinde durur.
+
+*Betikler:*
+- `kapi_g2_paket.sh` (yeni, salt okunur): kurulu paketin özeti; dosya dosya paket karşılaştırması; `karar.py` özeti; öz-test sonucu ve token'ları; korunan ayarların adları ve değişme zamanları; hosting'in bildirdiği paket.
+- `kapi_g_durum.sh`: bu turun sınırları (7 / 9 / 0,30 $ / 12). Başlangıçtan sonra başlayan öz-test sayaçlara girer; soruların deneme sayısı gösterilir.
+
 **Ücretli kapsam (E ve G birlikte).** Planlı gerçek çağrılar yalnız bu iki kapıda olur. A, B, C, D, F ve H kendiliğinden gerçek LLM ya da WhatsApp çağrısı yapmaz: öz-test paket başına bir kez koşar, servis yeniden başlatmaları onu tekrarlamaz. Ama F ve H'de kuyrukta bekleyen gerçek mesaj varsa işlenir ve cevaplanır; Patron modunda bunlar yalnız Lokman'ın mesajlarıdır.
 
 | Kapı | OpenAI (gpt-4o-mini) | WhatsApp giden mesaj |

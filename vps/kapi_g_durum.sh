@@ -4,6 +4,8 @@
 # Gösterir: servis ve kalıcı mod, hosting ayarı, G başladıktan sonraki günlük olayları; G'de açılan her iş (mesaj izi, eylem, niyet,
 # proje ve revizyon, LLM token'ları, onay denetimi); sorular (doğuran ve kapatan mesaj); projeler ve revizyonlar (PDF adı, özeti,
 # gönderim ve teslim durumu); giden satırlar; mesaj başına iş sayısı; açık iş; token üzerinden maliyet ve sınırlar.
+# Yeniden deneme turu (29.09 20:45 onayı): sınırlar Patron mesajı 7, LLM çağrısı 9, 0,30 $, giden WhatsApp 12; PM_BASLANGIC'ten sonra
+# başlayan paket öz-testinin LLM çağrısı ve token'ları da sayılır (yükleme öncesindeki an verilmelidir).
 # Yazdırmaz: telefon numarası, mesaj metni, WhatsApp kimliği (yalnız md5 izi, ilk 10 hane), anahtar, gerekçenin serbest metni.
 # Test için: PM_HOME, PM_ENV, PM_PY, PM_OLARAK, PM_BASLANGIC.
 # Gövde tek işlevdir ve girdisi /dev/null'dur (bkz. kapi_f_*.sh: 'bash -s' betiğinin kalanını sudo yutmasın).
@@ -42,13 +44,14 @@ g = HOME / "logs" / "agent.log"
 for x in (g.read_text(errors="replace").splitlines() if g.exists() else []):
     if x[:19] < BAS: continue
     r = x[20:]
-    if r.startswith(("başladı", "durduruldu", "iş ", "tekrar gelen", "öz-test", "kalıcı mod bekliyor", "yeniden başlama", "hosting sonucu", "diskteki")) \
+    if r.startswith(("başladı", "durduruldu", "iş ", "tekrar gelen", "öz-test", "kalıcı mod bekliyor", "yeniden başlama", "hosting sonucu", "diskteki", "paket", "agent.py")) \
             or " api:" in " " + r or r.startswith("beklenmeyen") or r.startswith("Postgres"):
         r = re.sub(r"kimden \S+", "kimden …", r)
         print(f"   {x[:19]} · {re.sub(r'[0-9a-f]{16,}', '…', r)[:120]}")
 PY
 KOD="$(cat <<'PY'
 import sys, time, hashlib, json
+from pathlib import Path
 sys.path.insert(0, sys.argv[1])
 import depo
 bas = time.mktime(time.strptime(sys.argv[2], "%Y-%m-%d %H:%M:%S"))
@@ -62,6 +65,21 @@ with d.baglan() as c:
                       "FROM isler i JOIN mesajlar m ON m.id = i.mesaj_id WHERE i.olusturuldu >= to_timestamp(%s) ORDER BY i.id", (bas,)).fetchall()
     print(f"-- G'deki işler ({len(isler)})")
     cagri = 0; gt = 0; ct = 0; bilinmeyen = 0; maliyet = 0.0
+    st = Path(sys.argv[3]) / "self-test-result.json"          # yeni paketin öz-testi bu turda koştuysa (1 LLM çağrısı) sayılır
+    try:
+        oz = json.loads(st.read_text(encoding="utf-8")) if st.exists() else {}
+    except Exception:
+        oz = {}
+    ol = (oz.get("adimlar") or {}).get("llm") or {}
+    if (oz.get("started_at") or 0) >= bas and ("girdi_token" in ol or ol.get("passed") is False):
+        n = 1 + int(ol.get("tekrar") or 0); cagri += n
+        if ol.get("girdi_token") is not None and ol.get("cikti_token") is not None:
+            gt += ol["girdi_token"]; ct += ol["cikti_token"]
+            maliyet += (ol["girdi_token"] * GIRIS / 1e6 + ol["cikti_token"] * CIKIS / 1e6) * (2 if ol.get("tekrar") else 1)
+        else:
+            bilinmeyen += n
+        print(f"-- paket öz-testi (bu turda): {oz.get('state')} · sürüm {oz.get('surum')} · LLM {ol.get('model')} · çağrı {n} · "
+              f"{ol.get('girdi_token')}+{ol.get('cikti_token')} token · tekrar {'EVET' if ol.get('tekrar') else 'hayır'}")
     for j in isler:
         s = j["sonuc"] or {}; ck = j["cikarim"] or {}; m = ck.get("meta") or s.get("llm") or {}
         n = (1 + int(m.get("tekrar") or 0)) if ck else 0
@@ -87,7 +105,7 @@ with d.baglan() as c:
     for r in c.execute("SELECT s.id, s.alan, s.kaynak_mesaj_id, s.cevap_mesaj_id, s.durum, s.deneme, s.proje_id, "
                        "to_char(s.soruldu AT TIME ZONE 'Europe/Istanbul', 'HH24:MI:SS') AS soruldu, to_char(s.kapandi AT TIME ZONE 'Europe/Istanbul', 'HH24:MI:SS') AS kapandi "
                        "FROM sorular s WHERE s.soruldu >= to_timestamp(%s) ORDER BY s.id", (bas,)):
-        print(f"   soru {r['id']} · alan {r['alan']} · doğuran mesaj {iz(r['kaynak_mesaj_id'])} · {r['durum']} · kapatan mesaj {iz(r['cevap_mesaj_id'])}"
+        print(f"   soru {r['id']} · alan {r['alan']} · doğuran mesaj {iz(r['kaynak_mesaj_id'])} · {r['durum']} (deneme {r['deneme']}) · kapatan mesaj {iz(r['cevap_mesaj_id'])}"
               f" · proje {r['proje_id']} · soruldu {r['soruldu']} · kapandı {r['kapandi']}")
     print("-- projeler ve revizyonlar (G'de açılan)")
     for r in c.execute("SELECT z.proje_id, z.is_emri_no, z.rev, z.revizyon_durumu, z.pdf_wamid, z.gonderim_durumu, z.teslim_durumu, "
@@ -107,11 +125,11 @@ with d.baglan() as c:
     gd = c.execute("SELECT count(*) AS n FROM giden WHERE olusturuldu >= to_timestamp(%s)", (bas,)).fetchone()["n"]
     uy = d.gonderilemeyen_sayisi(24, 300)
 print(f"-- sağlık: açık iş {acik} · mesaj başına en çok iş {en} · son 24 saat {uy}")
-print(f"== sayaçlar: Patron mesajı {gm}/7 · LLM çağrısı {cagri}/10 (token'ı bilinmeyen {bilinmeyen}) · {gt} giriş + {ct} çıkış token"
-      f" · maliyet ≈ {maliyet:.4f} $ / 0,35 $ (Opus 4 $ + 20 $ / 1M; tekrar varsa ilk çağrı aynı büyüklükte sayıldı) · giden WhatsApp {gd}/12")
+print(f"== sayaçlar (bu tur): Patron mesajı {gm}/7 · LLM çağrısı {cagri}/9 (öz-test dahil; token'ı bilinmeyen {bilinmeyen}) · {gt} giriş + {ct} çıkış token"
+      f" · maliyet ≈ {maliyet:.4f} $ / 0,30 $ (Opus 4 $ + 20 $ / 1M; tekrar varsa ilk çağrı aynı büyüklükte sayıldı) · giden WhatsApp {gd}/12")
 PY
 )"
-$OLARAK "$PY" -c "$KOD" "$APP" "$BAS" 2>&1 | sed 's/^/ /'
+$OLARAK "$PY" -c "$KOD" "$APP" "$BAS" "$PM_HOME/data" 2>&1 | sed 's/^/ /'
 echo "== bitti"
 }
 ana "$@" < /dev/null
