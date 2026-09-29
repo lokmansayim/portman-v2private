@@ -448,6 +448,68 @@ Geçiş sırasında gelen mesajlar: 1. adımdan 6. adıma kadar webhook yakalama
    Ajan günlüğünde `mod kalıcı (Postgres)` görünür.
 6. `settings.json` → `"worker": "vps"`. Ajan kuyruktakileri sırayla alır; geçiş sırasında gelen mesajlar da buna dahildir.
 
+**Kapı F sonucu (29.09 18:14–19:10; komutları Lokman yürüttü, çıktılar `20_Kapi_F/`).** F tamamlandı: ajan kalıcı modda (Postgres), `worker` vps, kayıtlar birebir.
+
+*Durdurma ve boşalma (F.1–F.2, `2_on_durum.txt`; hosting yedeğinden `3_hosting_ozet.txt`):*
+- Hosting'te `worker` off. Ajanın elinde iş yok; gönderilemeyip bekleyen sonuç 0; ajan dosya modundaydı.
+- `portman` veritabanında tablo yoktu (beklendiği gibi boş).
+- Hosting kuyruğu: işlenmekte 0, gönderimde 0, sırada 0.
+  - Gelen 14 satırın hepsi `done`.
+  - Giden 21 satır: 19'u `read`, 2'si `held` (eski, son durum).
+
+*Yedekler (F.3–F.4):*
+- Hosting (DirectAdmin'de sıkıştırılıp indirildi; `state.json`, `settings.json`, `durum/`, `projects/`): `yedek-ie02-f-20260929.tar.gz`, 5.962.246 B, sha256 `79e04043…8595f`.
+  - Arşivde anahtar biçimli dizge ya da `api_token` dosyası yok.
+  - Arşivin bir kopyası hosting'te `portman_app/kanal` altında kaldı.
+- VPS (`/var/backups/portman/opt-portman-ie02-f-20260929.tgz`: `data/`, `app/`, `agent.py`; `/etc/portman` hariç): 10.006.180 B, sha256 `38155a56…66274`.
+  - Mac'teki kopya aynı özette.
+- 01:30'dan sonraki 6 `api:` hatası 05:41–05:45 arasındaydı: hosting'e bağlantı reddi ve SSL el sıkışma zaman aşımı. Yaklaşık 4 dakikalık bir hosting kesintisi; sonra düzeldi (`5a_api_hatalari.txt`).
+
+*Aktarma (F.5, 18:27):*
+- Taşınan kopyanın `state.json`'u (`fa4351fd…`) ve konuşma özeti (`d751464b…`), Mac'te doğrulanan yedekle aynıydı; aktarma betiği bunu şart koştu.
+- Göçler 1 ve 2 uygulandı.
+- İçe aktarılanlar: 1 konuşma, 14 mesaj ve iş (`bitti`), 1 gönderen kaydı. Askıda soru ve kuyrukta bırakılan mesaj yoktu.
+
+*İki betik sorunu (veriyi etkilemedi, düzeltildi, testleri eklendi):*
+- VPS'te `sudo`, `bash -s` ile girdiden okunan betiğin kalanını yuttu. İçe aktarma yapıldı ama sonraki satırlar (karşılaştırma) çalışmadı ve pencere takılı kaldı.
+  - Teşhis (`5b_teshis.txt`): açık oturum ya da kilit yok; kayıtlar yazılmış.
+  - Düzeltme: F betiklerinin gövdesi tek işlev ve girdisi `/dev/null`; sudo'lu Python kodu `-c` ile verilir.
+- Karşılaştırma (`5c_karsilastir.txt`) 15 denetimden birinde "FARKLI" dedi. Nedeni: hosting PDF'ini, bilerek yalnız `state.json` ve `durum/` taşınan kopyada aramıştı.
+  - Hosting'teki dosya Mac'te doğrulanmıştı (`b3f04268…`, VPS'tekiyle aynı).
+  - Denetim artık bu durumda hosting'in giden satırındaki özeti kullanır; api.php dosyayı alırken bu özeti dosyayla karşılaştırır.
+
+*Kalıcı mod (F.6, 18:59:16; `6_kalici.txt`):*
+- `pg.env` (root:portman 640) ve `kalici.conf` yazıldı. Servis yeniden başladı; günlükte `mod kalıcı (Postgres)`.
+- Açılmadan önce karşılaştırma yeniden koşuldu: uyuşmayan 0.
+- Öz-test yeniden koşmadı; LLM çağrısı yok.
+
+*Kuyruk (F.7):* Yeniden indirilen `state.json`, yedekle birebir aynıydı (`fa4351fd…`). `worker` off olduğundan beri mesaj gelmemiş; kuyrukta ücretli işlem doğuracak mesaj yoktu.
+
+*Son durum (F.8, 19:09; `8_son.txt`):*
+- Hosting'te `worker` vps; `mode` patron; `llm` anthropic/claude-opus-5-5; paket `f2bff20a…`, VPS'le aynı. Model, anahtar ve paket değişmedi.
+- Servis çalışıyor; ajan sürecinin ortamında `PORTMAN_PG_DSN` var. Yeniden başlamadan beri günlükte hata ya da uyarı yok.
+- Postgres 16.15: eksik göç yok, açık iş 0, giden satır yok. Son 24 saatte gönderilmeyen, belirsiz ya da Meta'nın iletemediği satır 0; diskte bekleyen mesaj 0. F'den sonra işlenen iş 0.
+- Kaynak ↔ Postgres karşılaştırması 15/15 aynı.
+
+*E projesi (`PM-PATRON-20260929-33807`) korundu:*
+- Konuşma `onay_bekliyor`, `son_is_emri` r01. Konuşmanın özeti hosting'te, VPS kopyasında ve Postgres'te aynı (`d751464b…`).
+- İş kaydı `bitti`, sonucu r01; konuşmayla aynı gönderene bağlı.
+- PDF (691.341 B, `b3f04268…`) VPS'te var ve kayıttaki özetle aynı; hosting'e gönderilenle de aynı.
+- `projeler`/`revizyonlar` kaydı yok; tasarım gereği, yukarıda.
+
+*Sonradan gelen kanıt (E):* F'nin hosting yedeğinde E'nin iki giden satırının (metin ve PDF) Meta durumu `read`. E'nin kabulündeki "Meta teslim bildirimi doğrulanmadı" notu, Lokman'ın kararıyla olduğu gibi kalır; bu bulgu ayrıca kaydedildi.
+
+*Geriye kalanlar (silmek ayrı onay ister; kişisel veri içerirler):*
+- VPS `/var/tmp/portman-gecis` (konuşma kopyası).
+- Hosting `portman_app/kanal/yedek-ie02-f-20260929.tar.gz`.
+- Mac `20_Kapi_F/yedek/` (iki arşiv ve açılmış hosting kopyası), `20_Kapi_F/gecis/`, `20_Kapi_F/7_kuyruk/`.
+- VPS'teki `/var/backups/portman/opt-portman-ie02-f-20260929.tgz` yedek olarak kalır.
+- İlk canlı veriyle Postgres yedeği 30.09 03:17'de cron'la alınır.
+
+*Sınır:* 21.09'da hosting'in kendi işleyicisinin ürettiği üç eski projenin dosyaları VPS'te yok. Hosting'te ve yedekte duruyorlar. Kalıcı mod onlara ihtiyaç duymaz: revizyon, konuşmadaki İş Emri'nden üretilir.
+
+*Geri dönüş (H'nin 4. adımı; ayrı onay):* `kalici.conf` ve `pg.env` kaldırılır, daemon-reload yapılır ve servis yeniden başlatılır. Veritabanı silinmez.
+
 ### G · Kabul gösterimi (gerçek WhatsApp ve gerçek LLM; ücretli kapsam aşağıda)
 Lokman Patron numarasından yazar:
 
@@ -470,6 +532,36 @@ Adım 7 hosting'e dokunmaz. Aynı mesajın hosting kuyruğundan ikinci kez gelme
 Bu yedi adım, kayıtlı çıkarım ve sahte hosting ile `test_baglanti.py::test_canli_gosterim_provasi_sahte_hosting` testinde provadan geçti. Prova canlı doğrulama değildir.
 
 Adım 2'de LLM mesajı revizyon değil yeni talep sayabilir. O zaman akış başka bir soruya gider; bu da kaydedilir, uydurulmaz. Böyle olursa adım model koduyla yinelenir ("P6001 yatak odası 1 penceresi 120x180") ya da D-01 sorusu için 2 saat beklenir.
+
+**G · güncel hazırlık (29.09 19:15, F'den sonra; ayrı onaya sunulur, henüz onaylanmadı).**
+
+*Değişen ön koşul:* Patron konuşmasında E'nin planı (`PM-PATRON-20260929-33807` r01) `onay_bekliyor` durumunda açık.
+- Adım 1 bu yüzden **"Yeni talep: P6001 aynalı olsun"** diye yazılır. "Yeni talep" sözü açık planı kapatır ve geçişten sonraki ilk projeyi (r01) açar.
+- "Yeni talep" demeden yazılırsa iki olasılık var:
+  - Mesaj E projesinin revizyonu sayılır. O projenin r01'inin revizyon kaydı yok (geçiş öncesi); 5. adımdaki alıntı denetimi o zaman sınanamaz.
+  - Ya da D-01 sorusu gelir.
+- Öteki adımlar tablodaki gibidir. 1. adımda E'nin r01'i konuşmadan çıkar; kayıtları (iş sonucu, PDF) Postgres'te ve diskte kalır.
+
+*Güncel model ve maliyet:* `claude-opus-5-5`.
+- Fiyat (resmî sayfa): 1M giriş 4 $, 1M çıkış 20 $.
+- Ölçülen çağrılar: E'deki Patron mesajı 5.280 + 337 token (~0,028 $); öz-test 5.309 + 488 (~0,031 $). Konuşma bağlamı büyüdükçe giriş biraz artar; çağrı başına ~0,03–0,035 $ alınır.
+- **Planlı LLM çağrısı 5:** her yazılı mesaja bir çıkarım (adım 1, 2, 4, 5, 6). Adım 3 ve 7 LLM çağırmaz; öz-test yeniden koşmaz.
+  - Tahmin ~0,15–0,18 $.
+  - Şema hatası tekrarları ve 2. adımın model koduyla yinelenmesi dahil **sınır 10 çağrı, en çok ~0,35 $**.
+  - Tahmindir; gerçek token'lar Patron teknik notundan okunur.
+- **Planlı giden WhatsApp mesajı 7:** adım 1'de metin + PDF; 2'de soru; 4'te metin + PDF; 5'te ret; 6'da kabul. **Sınır 12.**
+  - Meta servis mesajları 1 Ekim 2026'ya dek ücretsiz. G 30 Eylül bitmeden yapılırsa WhatsApp payı 0.
+  - Sonra yapılırsa, G'den hemen önce Meta'nın o günkü fiyat dosyasından Türkiye utility oranı okunur ve onaya sunulur.
+- **Patron mesajı en çok 7:** 5 planlı; en çok 2 yineleme, yalnız kod dışı bir nedenle ya da 2. adım yeni talep sayılırsa.
+
+*Ölçülmeyen risk:* 2. adımdaki belirsiz pencere sözünün (B1) Opus'la nasıl anlaşılacağı ölçülmedi (22.09 ölçümü gpt-4o-mini idi). Kural katmanı belirsizlikte yine sorar. Farklı bir akış olursa kaydedilir, uydurulmaz.
+
+*Durdurma:* beklenenden fazla ya da tekrar eden cevap gelirse `settings.json` → `"worker": "off"`. Ajan kalıcı modda açık işleri bitirip durur (boşaltma). Gerekirse H ayrı onayla uygulanır.
+
+*Kanıt ve yedek:*
+- Kanıt sorguları: `ssh portman-vps 'cd /tmp && sudo -u portman psql -d portman -f /opt/portman/app/kanit_sorgulari.sql' < /dev/null`. Numaralar maskelidir; mesaj metni yazılmaz.
+- Gösterimden sonra: `pg_dump` ile yedek alınır ve Mac'e kopyalanır.
+- Adım 7'deki `tekrar_dene.py` komutu da `< /dev/null` ile koşulur.
 
 **Ücretli kapsam (E ve G birlikte).** Planlı gerçek çağrılar yalnız bu iki kapıda olur. A, B, C, D, F ve H kendiliğinden gerçek LLM ya da WhatsApp çağrısı yapmaz: öz-test paket başına bir kez koşar, servis yeniden başlatmaları onu tekrarlamaz. Ama F ve H'de kuyrukta bekleyen gerçek mesaj varsa işlenir ve cevaplanır; Patron modunda bunlar yalnız Lokman'ın mesajlarıdır.
 
