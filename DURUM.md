@@ -1,6 +1,6 @@
 # Portman · DURUM
 
-**Son güncelleme: 29 Eylül 2026 22:50 (İE-02 kapandı ve `main`'e birleştirildi; İE-03 yalnız plan aşamasında).** Her oturumun son adımı bu dosyayı güncellemektir.
+**Son güncelleme: 29 Eylül 2026 23:40 (İE-02 kapandı ve `main`'e birleştirildi; İE-03 Aşama 0 envanteri ve plan güncellemesi, `ie-03` dalında).** Her oturumun son adımı bu dosyayı güncellemektir.
 
 Canlıda çalışan akış şu: WhatsApp → hosting kanalı → VPS ajanı → Beyin ve Motor → plan PDF'i. Akış yalnız Patron modunda açık. Son gerçek mesaj doğrulaması 29.09 21:16–21:32 (kapı G yeniden denemesi, 6 Patron mesajı). 28–29 Eylülde canlıya v1.2 kuruldu (dosya modu) ve LLM Claude Opus 5.5'e geçti; 29.09 01:16'da gerçek bir Patron mesajıyla denendi (r01 PDF'i telefona geldi). 29.09 18:59'dan beri ajan kalıcı modda: konuşma ve iş durumu Postgres'te (kapı F); 29.09 19:27–19:56'da kalıcı modda 5 gerçek Patron mesajı işlendi (kapı G). 29.09 21:09'dan beri canlıda düzeltilmiş paket `9c76af59…` var; 21:16–21:32 arasında 6 gerçek Patron mesajıyla G'nin kabul adımları geçti. Depo, v1.1.1'in (`ec4e9a3`) devridir. Hedefteki "90 m² 3+1, üç seçenek" akışı henüz taslak.
 
@@ -13,7 +13,7 @@ Durumlar: **Taslak** yalnız belgede · **Kodlandı** kod var, testi yok ya da d
 | Kökteki v1.1.1 ağacı | `lokmansayim/portman` deposunun geçmişiyle birlikte, değiştirilmeden (`ec4e9a3`, 22.09 20:12). Özetleri `SHA256SUMS`'ta. |
 | `testler/referans/` | Dondurulmuş referanslar (`2026-09-28/`, `2026-09-28b/`) ve `dogrula.py` |
 | `testler/kalici/` | İE-02 kalıcı akış testleri (gerçek Postgres; T1–T10) ve kabul gösterimi |
-| `docs/is_emirleri/` | İE-02 iş emri ve canlıya bağlama kaydı (kapandı 29.09); İE-03 planı `ie-03` dalında |
+| `docs/is_emirleri/` | İE-02 iş emri ve canlıya bağlama kaydı (kapandı 29.09); İE-03 planı ve Aşama 0 envanteri (`ie-03` dalı) |
 | `testler/bilinen_hatalar/` | B1 ve B2 testleri; G ve Astra (A1/A2) testleri. Düzeltmeler canlıda: B1 ve B2 28.09 23:31'den, B1'in Opus'la kısa cevap yolu 29.09 21:09'dan beri |
 | `deneme/2026-09-23/` | 23 Eylül denemeleri ve `yeniden_kos.py` |
 | `KARARLAR/` | K01–K25 ve Z-01–Z-10, her karar ayrı dosyada |
@@ -103,7 +103,7 @@ Canlı dışı kalan: `kos.py` sır taramasındaki telefon kalıbı; test verisi
 
 ## Sıradaki iş: İE-03 · Kaynaklı hafıza ve deneyimden yararlanma (plan)
 
-Plan: `docs/is_emirleri/IE-03.md` (`ie-03` dalı). 29.09'da yalnız plan hazırlığı onaylandı; uygulama, veri paylaşımı, ücretli deneme ve canlı değişiklik ayrı onayla. Açık gereksinim (29.09): LLM'in bayinin talimatını anlaması ve doğrulanmış bayi düzeltmelerinden yararlanması; faydası ölçülerek kabul edilir.
+Plan: `docs/is_emirleri/IE-03.md` (`ie-03` dalı). 29.09 23:04: ana yön onaylandı (üç ayrı depo, mevcut altyapı); Aşama 0 envanteri yapıldı (`IE-03-envanter.md`: yalnız depo ve İE-02'nin maskelenmiş örnekleri; yeni veri alınmadı, ihtiyaç ve izin listesi §7) ve plan netleştirildi (kod/paket değişmeden kullanım, taslağı sistem hazırlar, kapsamlı olumsuzluk, aynı karar koduyla ve başlangıca göre ölçüm, üç iz, getirme sırası, Patron modunda bayi ayrımı testi). Uygulama, yeni veri paylaşımı, ücretli ölçüm ve canlı değişiklik ayrı onayla. Açık gereksinim (29.09): LLM'in bayinin talimatını anlaması ve doğrulanmış bayi düzeltmelerinden yararlanması; faydası ölçülerek kabul edilir.
 
 Lokman'ın açık kararları: K16 (a/b), K3 ve K4, Z-03 ve Z-06 eşikleri. Ayrıntı: `KARARLAR/README.md`.
 
