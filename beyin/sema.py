@@ -91,6 +91,7 @@ class Karar(BaseModel):
     is_emri: Optional[dict] = None
     revizyon: int = 0
     gerekce: str = ""
+    kullanilan_talep: Optional[dict] = Field(None, description="Kural katmanı bu mesaj yerine bekletilen bir mesajı işlediyse o talep (D-01)")
 
 
 def json_schema() -> dict:

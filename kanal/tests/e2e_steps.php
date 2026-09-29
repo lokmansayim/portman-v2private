@@ -20,13 +20,26 @@ if ($step === 'init') {
     echo "init ok\n"; exit;
 }
 if ($step === 'capture') {
-    $text = $argv[4] ?? 'P6001 aynalı'; $id = $argv[5] ?? 'wamid.E2E1';
+    $text = $argv[4] ?? 'P6001 aynalı'; $id = $argv[5] ?? 'wamid.E2E1'; $ctx = $argv[6] ?? '';   // İE-02: isteğe bağlı alıntı (context.id)
+    $m = ['from' => $PATRON, 'id' => $id, 'timestamp' => (string)time(), 'type' => 'text', 'text' => ['body' => $text]];
+    if ($ctx !== '') $m['context'] = ['from' => '4448056', 'id' => $ctx];
     $raw = json_encode(['object' => 'whatsapp_business_account', 'entry' => [['id' => 'waba', 'changes' => [['field' => 'messages', 'value' => ['messaging_product' => 'whatsapp',
         'metadata' => ['display_phone_number' => '4448056', 'phone_number_id' => $PHONE], 'contacts' => [['wa_id' => $PATRON, 'profile' => ['name' => 'Lokman']]],
-        'messages' => [['from' => $PATRON, 'id' => $id, 'timestamp' => (string)time(), 'type' => 'text', 'text' => ['body' => $text]]]]]]]]], JSON_UNESCAPED_UNICODE);
+        'messages' => [$m]]]]]]], JSON_UNESCAPED_UNICODE);
     $owned = pm_kanal_capture($raw, 'sha256='.hash_hmac('sha256', $raw, $SECRET));
     echo json_encode(['owned' => array_keys($owned)])."\n"; exit;
 }
+if ($step === 'status') {   // İE-02: imzalı Meta durum bildirimi (delivered/read/failed) — php e2e_steps.php status <tmp> <lib> <wamid> <durum> [zaman]
+    $wamid = $argv[4] ?? ''; $kind = $argv[5] ?? 'delivered'; $ts = (int)($argv[6] ?? time());
+    $raw = json_encode(['object' => 'whatsapp_business_account', 'entry' => [['id' => 'waba', 'changes' => [['field' => 'messages', 'value' => ['messaging_product' => 'whatsapp',
+        'metadata' => ['display_phone_number' => '4448056', 'phone_number_id' => $PHONE], 'statuses' => [['id' => $wamid, 'status' => $kind, 'timestamp' => (string)$ts, 'recipient_id' => $PATRON]]]]]]]]);
+    pm_kanal_capture($raw, 'sha256='.hash_hmac('sha256', $raw, $SECRET));
+    echo json_encode(['ok' => true])."\n"; exit;
+}
+if ($step === 'requeue') {  // İE-02: işlenmiş bir gelen satırı kuyruğa geri koyar (aynı kanal mesajının yeniden işlenmesi)
+    $id = $argv[4] ?? ''; pm_kanal_store(function (&$s) use ($id) { if (isset($s['inbound'][$id])) $s['inbound'][$id]['state'] = 'queued'; });
+    echo json_encode(['ok' => true])."\n"; exit;
+}
 if ($step === 'tick') { pm_kanal_tick(); echo json_encode(pm_read(PM_KANAL_DIR.'/health.json'), JSON_UNESCAPED_UNICODE)."\n"; exit; }
 if ($step === 'dump') { echo json_encode(['state' => pm_kanal_store(fn(&$s) => $s), 'outgoing' => pm_store(fn(&$d) => $d['outgoing'])], JSON_UNESCAPED_UNICODE)."\n"; exit; }
-fwrite(STDERR, "adım? init|capture|tick|dump\n"); exit(2);
+fwrite(STDERR, "adım? init|capture|status|requeue|tick|dump\n"); exit(2);

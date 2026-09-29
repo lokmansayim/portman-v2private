@@ -1,0 +1,653 @@
+{
+ "basladi": "2026-09-28 10:54:17",
+ "adimlar": {
+  "ortam": {
+   "python": "3.11.15",
+   "platform": "Linux-6.18.44-fc-v37-x86_64-with-glibc2.39",
+   "ezdxf": "1.4.4",
+   "shapely": "2.1.2",
+   "pydantic": "2.13.5",
+   "numpy": "2.4.6",
+   "pymupdf": "(64-bit).",
+   "cwd": "/tmp/tmp6o747ygc/is",
+   "utc": "2026-01-01T00:00:00Z",
+   "durum": "passed",
+   "sure_s": 0.5
+  },
+  "girdi_hashleri": {
+   "hashler": {
+    "is_emri/ALTIN_2plus1_6x8.json": "a1eb230c737822e3",
+    "is_emri/YAN_VERANDALI_2plus1_6x8p5.json": "3fd14b523342367d",
+    "is_emri/P6001_2plus1_6x6.json": "f6cb05ed94cbae94",
+    "kanal/ref_source-6x8.dxf": "22cc9304106725f5",
+    "kanal/ref_h-connector.json": "9cc058640cae5a05",
+    "ref_yan/yeni-2plus1-yan-verandali.dxf": "f1ad005637c60e34",
+    "ref_yan/BOM_SAYIM_KAYDI.json": "20f28818f99eb5e8",
+    "ref_katalog/P6001.dxf": "a3e131588bc712d0",
+    "ref_katalog/TEK_KAT_PREFABRIK_PLANLARI.dxf": "709dfe9409f09c69",
+    "beyin/karar.py": "dc71738a959a8be9",
+    "beyin/harness.py": "40fa0c829c48127c",
+    "beyin/testler/mesajlar.json": "181cc07744fc68d0",
+    "beyin/testler/cikarim_b.json": "8a4dffc4a36793f5",
+    "motor/geometry.py": "76a6dcd7cd0ba996",
+    "motor/dxf_out.py": "b2c96ce97c1af53e",
+    "motor/validate.py": "e94a73de8192fc93",
+    "motor/cikarici.py": "acab9e166ccc67a8",
+    "kanal/worker.py": "0dc01b53b39199f9",
+    "kanal/api.php": "455f8c7414442183",
+    "vps/agent.py": "72acb4238c1bfb1d"
+   },
+   "durum": "passed",
+   "sure_s": 0.0
+  },
+  "beyin_harness": {
+   "passed": true,
+   "sayilar": {
+    "uyumlu": 22,
+    "toplam": 22
+   },
+   "durum": "passed",
+   "sure_s": 0.1
+  },
+  "motor_altin_6x8": {
+   "passed": true,
+   "sayilar": {
+    "passed": true,
+    "pdf": "Portman_PM-ALTIN-6x8_r01.pdf",
+    "pano": 41,
+    "kose": 7,
+    "aciklik": {
+     "pencere": 6,
+     "kapi": 4
+    },
+    "ucluH": 2,
+    "ayak_izi_fark_cm2": 0.0,
+    "altin": {
+     "pano": true,
+     "pencere": true,
+     "kapi": true,
+     "dis_olcu": true,
+     "alanlar": true,
+     "footprint": true
+    },
+    "dis_olcu": [
+     773.0,
+     1014.0
+    ],
+    "dis_olcu_ok": true
+   },
+   "validation_keys": [
+    "altin",
+    "bom_counts_from_file",
+    "corner_count",
+    "doors",
+    "errors",
+    "footprint_diff_cm2",
+    "h_connectors",
+    "openings",
+    "outer_cm",
+    "panel_count",
+    "panel_grid",
+    "passed",
+    "rooms_m2",
+    "saved_dxf_audit_errors",
+    "saved_dxf_audit_fixes",
+    "scope",
+    "units",
+    "wall_overlap",
+    "warnings",
+    "windows"
+   ],
+   "bom_sayim": {
+    "B01": 1,
+    "B02": 6,
+    "B03": 2,
+    "D01": 19,
+    "D02": 3,
+    "D03": 2,
+    "D04": 1,
+    "D08": 2,
+    "D09": 1,
+    "I01": 7,
+    "I02": 1,
+    "I04": 1,
+    "I07": 2,
+    "I11": 2,
+    "K01": 3,
+    "K02": 1,
+    "P01": 3,
+    "P02": 2,
+    "P03": 1,
+    "V02": 1,
+    "V05": 1
+   },
+   "manifest": {
+    "dxf_sha256": "885d3bd6a24608b21c069773d2d602adc3bd0496b0c802c10388e48b9fb6f69b",
+    "pdf_sha256": "e28f432c0832500d20a6b6ace1b4f07aad6d7dea1896fbd19614f4de268d60a8",
+    "validation_passed": true,
+    "duration_s": 13.43
+   },
+   "durum": "passed",
+   "sure_s": 14.1
+  },
+  "motor_altin_yan_6x8p5_bom": {
+   "passed": true,
+   "sayilar": {
+    "passed": true,
+    "pdf": "Portman_PM-ALTIN-YAN-6x8p5_r01.pdf",
+    "pano": 52,
+    "kose": 7,
+    "aciklik": {
+     "pencere": 7,
+     "kapi": 5,
+     "gecis": 1
+    },
+    "ucluH": 4,
+    "ayak_izi_fark_cm2": 0.0,
+    "altin": {
+     "pano": true,
+     "pencere": true,
+     "kapi": true,
+     "gecis": true,
+     "bom_counts": true,
+     "panel_rects": true,
+     "corner_rects": true,
+     "gaps": true,
+     "dis_olcu": true,
+     "alanlar": true
+    },
+    "bom_ref_ile_ayni": true,
+    "bom_fark": {},
+    "dis_olcu": [
+     773.0,
+     1076.75
+    ],
+    "dis_olcu_ok": true
+   },
+   "validation_keys": [
+    "altin",
+    "bom_counts_from_file",
+    "corner_count",
+    "doors",
+    "errors",
+    "footprint_diff_cm2",
+    "h_connectors",
+    "openings",
+    "outer_cm",
+    "panel_count",
+    "panel_grid",
+    "passed",
+    "rooms_m2",
+    "saved_dxf_audit_errors",
+    "saved_dxf_audit_fixes",
+    "scope",
+    "units",
+    "wall_overlap",
+    "warnings",
+    "windows"
+   ],
+   "bom_sayim": {
+    "B01": 1,
+    "B02": 6,
+    "B03": 4,
+    "B04": 2,
+    "D01": 19,
+    "D02": 4,
+    "D03": 2,
+    "D04": 1,
+    "D06": 2,
+    "D07": 1,
+    "D08": 1,
+    "I01": 8,
+    "I02": 1,
+    "I04": 2,
+    "I06": 4,
+    "I07": 3,
+    "I09": 1,
+    "I10": 1,
+    "I11": 2,
+    "K01": 4,
+    "K02": 1,
+    "P01": 4,
+    "P02": 2,
+    "P03": 1,
+    "V03": 1,
+    "V04": 1
+   },
+   "manifest": {
+    "dxf_sha256": "1539f2a5ecdb1ac5e2484153be72886dea4f03cfe6f0d2b34b131711122a306b",
+    "pdf_sha256": "4f283f31db2a9b6e92ab0c65426b9c2e727cc3b63cbd0c9712d7840065e94923",
+    "validation_passed": true,
+    "duration_s": 16.29
+   },
+   "durum": "passed",
+   "sure_s": 16.9
+  },
+  "motor_p6001": {
+   "passed": true,
+   "sayilar": {
+    "passed": true,
+    "pdf": "Portman_PM-KATALOG-P6001_r02.pdf",
+    "pano": 36,
+    "kose": 7,
+    "aciklik": {
+     "pencere": 5,
+     "kapi": 4
+    },
+    "ucluH": 2,
+    "ayak_izi_fark_cm2": 0.0,
+    "altin": null,
+    "dis_olcu": [
+     773.0,
+     763.0
+    ],
+    "dis_olcu_ok": true
+   },
+   "validation_keys": [
+    "altin",
+    "bom_counts_from_file",
+    "corner_count",
+    "doors",
+    "errors",
+    "footprint_diff_cm2",
+    "h_connectors",
+    "openings",
+    "outer_cm",
+    "panel_count",
+    "panel_grid",
+    "passed",
+    "rooms_m2",
+    "saved_dxf_audit_errors",
+    "saved_dxf_audit_fixes",
+    "scope",
+    "units",
+    "wall_overlap",
+    "warnings",
+    "windows"
+   ],
+   "bom_sayim": {
+    "B01": 1,
+    "B02": 6,
+    "B03": 2,
+    "D01": 16,
+    "D02": 2,
+    "D03": 2,
+    "D04": 1,
+    "D06": 1,
+    "D08": 1,
+    "D09": 1,
+    "D10": 1,
+    "I01": 3,
+    "I03": 1,
+    "I04": 1,
+    "I06": 2,
+    "I07": 1,
+    "I09": 1,
+    "I11": 2,
+    "K01": 3,
+    "K03": 1,
+    "P01": 2,
+    "P02": 2,
+    "P03": 1,
+    "V05": 1,
+    "V06": 1
+   },
+   "manifest": {
+    "dxf_sha256": "5622d2dd4f275be658e70df59a347e1dac7d04d2c1eae9a7214efd6efffb97be",
+    "pdf_sha256": "15676df5631b783f5dcb2d5d0c82c84528c1498f8f033f2d3dcd99dd33448726",
+    "validation_passed": true,
+    "duration_s": 12.3
+   },
+   "durum": "passed",
+   "sure_s": 12.9
+  },
+  "cikarici_p6001_altin": {
+   "passed": true,
+   "cikis_kodu": 0,
+   "sayilar": {
+    "grid_esit": true,
+    "mahal_esit": "5/5",
+    "aciklik_esit": "7/9",
+    "aciklik_farklar": [
+     {
+      "cikarim": {
+       "tur": "ic_kapi",
+       "olcu": 82,
+       "arasi": [
+        "YASAM ALANI",
+        "BANYO"
+       ],
+       "mentese": "sol"
+      },
+      "kaynak": {
+       "yon": "y",
+       "hat": 9,
+       "a0": 353.25,
+       "a1": 433.25,
+       "orta": 393.25,
+       "genislik": 80.0,
+       "aks_sapma": 3.0,
+       "motor_pano": [
+        259.0,
+        381.5
+       ],
+       "motor_orta": 320.25,
+       "fark_cm": 73.0,
+       "aday_sayisi": 1
+      },
+      "sablon": {
+       "tur": "ic_kapi",
+       "olcu": 82,
+       "arasi": [
+        "YASAM ALANI",
+        "BANYO"
+       ],
+       "mentese": "sag"
+      },
+      "etkin_pano": {
+       "cikarim": {
+        "pano": 0,
+        "aday": 1,
+        "a0": 259.0,
+        "a1": 381.5,
+        "orta": 320.25
+       },
+       "sablon": {
+        "pano": 0,
+        "aday": 1,
+        "a0": 259.0,
+        "a1": 381.5,
+        "orta": 320.25
+       }
+      },
+      "durum": "farklı",
+      "farklar": [
+       "menteşe sol ≠ sag"
+      ]
+     },
+     {
+      "cikarim": {
+       "tur": "dis_kapi",
+       "olcu": 90,
+       "arasi": [
+        "VERANDA",
+        "YASAM ALANI"
+       ],
+       "mentese": "sol",
+       "pano": 2
+      },
+      "kaynak": {
+       "yon": "x",
+       "hat": 4,
+       "a0": 329.25,
+       "a1": 429.25,
+       "orta": 379.25,
+       "genislik": 100.0,
+       "aks_sapma": 5.0,
+       "motor_pano": [
+        261.0,
+        386.5
+       ],
+       "motor_orta": 323.75,
+       "fark_cm": 55.5,
+       "aday_sayisi": 3
+      },
+      "sablon": {
+       "tur": "dis_kapi",
+       "olcu": 90,
+       "arasi": [
+        "VERANDA",
+        "YASAM ALANI"
+       ],
+       "pano": 2,
+       "mentese": "sag"
+      },
+      "etkin_pano": {
+       "cikarim": {
+        "pano": 2,
+        "aday": 3,
+        "a0": 261.0,
+        "a1": 386.5,
+        "orta": 323.75
+       },
+       "sablon": {
+        "pano": 2,
+        "aday": 3,
+        "a0": 261.0,
+        "a1": 386.5,
+        "orta": 323.75
+       }
+      },
+      "durum": "farklı",
+      "farklar": [
+       "menteşe sol ≠ sag"
+      ]
+     }
+    ]
+   },
+   "son_satirlar": "63 cm (pano 1/3)\n- ic_kapi ['YASAM ALANI', 'BANYO']: kaynak açıklık (353.25–433.25) hiçbir aday panoyla yarıdan çok örtüşmüyor\n- ic_kapi YASAM ALANI → BANYO (): kaynak merkez 393.25, Motor pano merkezi 320.25 → fark 73.0 cm (pano 0/1)\n- ic_kapi YASAM ALANI → YATAK ODASI 2 (): kaynak merkez 499.25, Motor pano merkezi 512.0 → fark -12.75 cm (pano 0/1)\n- dis_kapi VERANDA → YASAM ALANI (): kaynak merkez 379.25, Motor pano merkezi 323.75 → fark 55.5 cm (pano 2/3)\n- ic_kapi YASAM ALANI → YATAK ODASI 1 (): kaynak merkez 502.25, Motor pano merkezi 512.0 → fark -9.75 cm (pano 1/3)\n\n**Özet:** mahal 5/5 eşit, açıklık 7/9 eşit, 17 uyuşmazlık.\n\nMotor: {'duration_s': 12.68, 'dxf': 'Portman_PM-KATALOG-P6001_r01.dxf', 'pdf': 'Portman_PM-KATALOG-P6001_r01.pdf', 'tani_pdf': None, 'validation_passed': True}\n",
+   "not": "aciklik_farklar: menteşe yorumu farkları (insan kararı bekler)",
+   "durum": "passed",
+   "sure_s": 13.9
+  },
+  "cikarici_16_plan": {
+   "passed": true,
+   "sayilar": {
+    "motor_passed": 15,
+    "toplam": 16,
+    "kapisiz_plan": [
+     "P1051"
+    ]
+   },
+   "planlar": {
+    "P6001": {
+     "cikis_kodu": 0,
+     "motor_passed": true,
+     "pdf": "Portman_PM-KATALOG-P6001_r01.pdf",
+     "pencere": 5,
+     "kapi": 4,
+     "mahal": 5,
+     "sure_s": 18.2,
+     "hata": null
+    },
+    "P6501": {
+     "cikis_kodu": 0,
+     "motor_passed": true,
+     "pdf": "Portman_PM-KATALOG-P6501_r01.pdf",
+     "pencere": 5,
+     "kapi": 4,
+     "mahal": 6,
+     "sure_s": 17.5,
+     "hata": null
+    },
+    "P6701": {
+     "cikis_kodu": 0,
+     "motor_passed": true,
+     "pdf": "Portman_PM-KATALOG-P6701_r01.pdf",
+     "pencere": 6,
+     "kapi": 4,
+     "mahal": 5,
+     "sure_s": 16.9,
+     "hata": null
+    },
+    "P7001": {
+     "cikis_kodu": 0,
+     "motor_passed": true,
+     "pdf": "Portman_PM-KATALOG-P7001_r01.pdf",
+     "pencere": 2,
+     "kapi": 5,
+     "mahal": 7,
+     "sure_s": 22.3,
+     "hata": null
+    },
+    "P7401": {
+     "cikis_kodu": 0,
+     "motor_passed": true,
+     "pdf": "Portman_PM-KATALOG-P7401_r01.pdf",
+     "pencere": 5,
+     "kapi": 4,
+     "mahal": 6,
+     "sure_s": 17.7,
+     "hata": null
+    },
+    "P7601": {
+     "cikis_kodu": 0,
+     "motor_passed": true,
+     "pdf": "Portman_PM-KATALOG-P7601_r01.pdf",
+     "pencere": 8,
+     "kapi": 5,
+     "mahal": 6,
+     "sure_s": 24.4,
+     "hata": null
+    },
+    "P8201": {
+     "cikis_kodu": 0,
+     "motor_passed": true,
+     "pdf": "Portman_PM-KATALOG-P8201_r01.pdf",
+     "pencere": 4,
+     "kapi": 4,
+     "mahal": 6,
+     "sure_s": 20.3,
+     "hata": null
+    },
+    "P8501": {
+     "cikis_kodu": 0,
+     "motor_passed": true,
+     "pdf": "Portman_PM-KATALOG-P8501_r01.pdf",
+     "pencere": 6,
+     "kapi": 5,
+     "mahal": 8,
+     "sure_s": 26.7,
+     "hata": null
+    },
+    "P9201": {
+     "cikis_kodu": 0,
+     "motor_passed": true,
+     "pdf": "Portman_PM-KATALOG-P9201_r01.pdf",
+     "pencere": 6,
+     "kapi": 5,
+     "mahal": 7,
+     "sure_s": 26.0,
+     "hata": null
+    },
+    "P9401": {
+     "cikis_kodu": 0,
+     "motor_passed": true,
+     "pdf": "Portman_PM-KATALOG-P9401_r01.pdf",
+     "pencere": 7,
+     "kapi": 5,
+     "mahal": 6,
+     "sure_s": 25.3,
+     "hata": null
+    },
+    "P9501": {
+     "cikis_kodu": 0,
+     "motor_passed": true,
+     "pdf": "Portman_PM-KATALOG-P9501_r01.pdf",
+     "pencere": 5,
+     "kapi": 3,
+     "mahal": 9,
+     "sure_s": 15.2,
+     "hata": null
+    },
+    "P9901": {
+     "cikis_kodu": 1,
+     "motor_passed": null,
+     "pdf": null,
+     "pencere": 8,
+     "kapi": 5,
+     "mahal": 7,
+     "sure_s": 4.3,
+     "hata": "motor/geometry.py\", line 220, in kur\n    raise IsEmriHatasi(f\"Grid tamamen mahallere bölünmemiş; boş hücreler: {eksik[:8]}\")\nmotor.geometry.IsEmriHatasi: Grid tamamen mahallere bölünmemiş; boş hücreler: [(0.0, 0.0), (0.0, 0.5), (0.0, 1.0), (0.0, 1.5), (0.0, 2.0), (0.0, 2.5), (0.0, 8.0), (0.0, 8.5)]\n"
+    },
+    "P1051": {
+     "cikis_kodu": 0,
+     "motor_passed": true,
+     "pdf": "Portman_PM-KATALOG-P1051_r01.pdf",
+     "pencere": 8,
+     "kapi": 0,
+     "mahal": 6,
+     "sure_s": 10.4,
+     "hata": null
+    },
+    "P1081": {
+     "cikis_kodu": 0,
+     "motor_passed": true,
+     "pdf": "Portman_PM-KATALOG-P1081_r01.pdf",
+     "pencere": 6,
+     "kapi": 2,
+     "mahal": 6,
+     "sure_s": 13.3,
+     "hata": null
+    },
+    "P1121": {
+     "cikis_kodu": 0,
+     "motor_passed": true,
+     "pdf": "Portman_PM-KATALOG-P1121_r01.pdf",
+     "pencere": 4,
+     "kapi": 6,
+     "mahal": 7,
+     "sure_s": 37.3,
+     "hata": null
+    },
+    "P3701": {
+     "cikis_kodu": 0,
+     "motor_passed": true,
+     "pdf": "Portman_PM-KATALOG-P3701_r01.pdf",
+     "pencere": 1,
+     "kapi": 4,
+     "mahal": 5,
+     "sure_s": 17.0,
+     "hata": null
+    }
+   },
+   "not": "motor_passed = kural doğrulaması; mimari doğruluk/insan kabulü değildir. kapisiz_plan: kaynakta kapı olup çıkarımda düşenler (rapor: P1051).",
+   "durum": "passed",
+   "sure_s": 312.8
+  },
+  "sir_taramasi": {
+   "passed": true,
+   "sayilar": {
+    "bulgu": 4,
+    "beklenen_sahte": 4
+   },
+   "bulgular": [
+    {
+     "dosya": "kanal/tests/e2e_steps.php",
+     "satir": 5,
+     "ornek": "$PHONE = '106…'; $PAT… = '905…'; $SEC… = 'test-app-sec…';"
+    },
+    {
+     "dosya": "kanal/tests/offline_test.php",
+     "satir": 13,
+     "ornek": "$PHONE = '106…'; $PAT… = '905…'; $BAYI = '905…'; $YAB… = '905…'; $SEC… = 'test-app-sec…';"
+    },
+    {
+     "dosya": "kanal/tests/api_endpoint_test.php",
+     "satir": 6,
+     "ornek": "$PHONE = '106…'; $PAT… = '905…'; $SEC… = 'test-app-sec…';"
+    },
+    {
+     "dosya": "denetim/kos.py",
+     "satir": 138,
+     "ornek": "# bil… sahte test değerl… (kanal/tests/*.php: 905……, 'test-app-sec…') ve bu betiğin kendi metni bek… bul…ır"
+    }
+   ],
+   "not": "Beklenen: kanal/tests içindeki sahte numara/sır sabitleri ve bu betik. Başka her bulgu incelenmeli.",
+   "durum": "passed",
+   "sure_s": 0.1
+  }
+ },
+ "bitti": "2026-09-28 11:00:28",
+ "ozet": {
+  "ortam": "passed",
+  "girdi_hashleri": "passed",
+  "beyin_harness": "passed",
+  "motor_altin_6x8": "passed",
+  "motor_altin_yan_6x8p5_bom": "passed",
+  "motor_p6001": "passed",
+  "cikarici_p6001_altin": "passed",
+  "cikarici_16_plan": "passed",
+  "sir_taramasi": "passed"
+ }
+}

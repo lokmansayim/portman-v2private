@@ -1,24 +1,26 @@
-"""Bilinen hatalar B1 ve B2: bugünkü kodla (v1.1.1, ec4e9a3) BAŞARISIZ olması beklenen testler.
+"""Bilinen hatalar B1 ve B2: v1.1.1'de (ec4e9a3) başarısız olan, İE-02'de (dal ie-02) düzeltilen davranışların testleri.
 
 Kaynak: DURUM.md (23 Eylül 2026), bölüm 3; canlı test 22.09 22:33–38 (Patron, 3 mesajın 2'si doğru).
 Hiçbir test ağa, LLM'e, WhatsApp'a ya da canlı sunucuya bağlanmaz: LLM'in çıkarımı elle verilir, konuşma durumu
 geçici klasörde tutulur.
 
 Koşum:
-    python3 -m pytest testler/bilinen_hatalar -v      # xfail = hata sürüyor; XPASS (strict) = hata düzeldi, işareti kaldırın
+    python3 -m pytest testler/bilinen_hatalar -v
     python3 testler/bilinen_hatalar/test_b1_b2.py      # pytest yoksa: her vakanın bugünkü sonucunu yazar
 
-B1 (kritik): Bayinin kendi sözü belirsizken ("P6001, yatak odası 1, 120x180": ne "değiştir" ne "ekle" var) kural
-   katmanı soru sormalı. Kod bayinin sözüne yalnız LLM pencere işlemini "ekle" verdiğinde bakıyor (beyin/karar.py,
-   pencere döngüsü); işlem boş ya da "degistir" gelirse pencereyi sessizce değiştirip İş Emri üretiyor.
-B2 (karar Lokman'ın): Görüşme durumunda zaman aşımı yok (beyin/konusma.py). 22.09'da 3,5 saat sonra gelen "P6001 …"
-   mesajı eski aynalı taslağın revizyonu sayıldı; mesajda ayna yoktu ama çıktı aynalı geldi.
-   Seçenekler (DURUM.md, 23.09): (a) böyle kalsın, (b) taslak N saat sonra kapansın, (c) model koduyla başlayan mesaj
-   yeni talep sayılsın. Bu test (b) ve (c)'nin ortak sonucunu sınar: uzun aradan sonra, model koduyla başlayan
-   mesajda eski taslağın varyantı sessizce devralınmaz. Sistemin sorması da kabul edilir. (a) seçilirse test silinir.
+B1 (düzeltildi, İE-02): Bayinin kendi sözü belirsizken ("P6001, yatak odası 1, 120x180": ne "değiştir" ne "ekle" var)
+   kural katmanı soru sormalı. v1.1.1 bayinin sözüne yalnız LLM pencere işlemini "ekle" verdiğinde bakıyordu; işlem boş
+   ya da "degistir" gelince pencereyi sessizce değiştiriyordu. Artık mahalde tek pencere varsa LLM ne derse desin ölçüt
+   bayinin sözüdür (K18, K21): değiştir → ölçü değişikliği, ekle → ekleme (v0.1'de yönlendirme), belirsiz → soru. Söz,
+   pencere satırının geldiği mesajdan kaydedilir; sonraki bir revizyonun sözü ("ayna") eski satırı yeniden yorumlamaz.
+B2 (düzeltildi, İE-02): Görüşme durumunda zaman aşımı yoktu (beyin/konusma.py). 22.09'da 3,5 saat sonra gelen
+   "P6001 …" mesajı eski aynalı taslağın revizyonu sayıldı; mesajda ayna yoktu ama çıktı aynalı geldi.
+   Karar D-01 (Lokman, 28.09; KARARLAR/D-01.md): taslak 2 saatten eskiyse ve bayinin mesajı model koduyla başlıyorsa
+   sistem sorar: "yeni" → eski taslak kapanır, mesaj yeni talep olarak işlenir; "değişiklik" → mesaj o taslağa eklenir.
+   Kısa arada gelen ya da model koduyla başlamayan mesajda soru sorulmaz (kontrol testleri).
 """
 from __future__ import annotations
-import json, sys, tempfile, time
+import json, sys, tempfile
 from pathlib import Path
 
 KOK = Path(__file__).resolve().parents[2]
@@ -89,45 +91,189 @@ def b1_kontrol_acik_soz():
     return karar.eylem
 
 
-# ---------------------------------------------------------------- B2
-def b2_uzun_aradan_sonra():
-    """1) 'P6001 aynalı' → aynalı İş Emri. 2) 3,5 saat sonra 'P6001 yatak odası 1 penceresi 120x180 olsun' (aynasız),
-    LLM niyeti 'revizyon'. Döner: (ilk_aynali, ikinci_eylem, ikinci_aynali, ikinci_revizyon)."""
+# ---------------------------------------------------------------- B2 (D-01)
+GONDEREN_B2 = "BAYI-TEST-2"
+PENCERE_SOZU = "yatak odası 1 penceresi 120x180 olsun"   # model kodu yok
+
+
+def _talep(niyet="diger", ozet="", guven="dusuk", **kw) -> Talep:
+    return Talep(niyet=niyet, guven=guven, ozet=ozet, **kw)
+
+
+T_AYNA = _talep("yeni_talep", "P6001 aynalı.", "yuksek", katalog_kodu="P6001", varyantlar=[Varyant(tur="ayna_x", aciklama="aynalı")])
+
+
+def T_PENCERE(niyet="revizyon", mahal="Yatak Odası 1", olcu="120x180", islem="degistir"):
+    return _talep(niyet, f"P6001 {mahal.lower()} penceresi {olcu}.", "yuksek", katalog_kodu="P6001",
+                  pencereler=[Pencere(mahal=mahal, olcu=olcu, islem=islem)])
+
+
+def kisa(metin: str) -> tuple:
+    """Bayinin kısa mesajı; LLM'in ona anlamlı bir niyet vermediği varsayılır ('diger', içerik yok)."""
+    return (0, metin, _talep("diger", metin))
+
+
+def _geri_al(yol: Path, saat: float):
+    """Durum dosyasındaki bütün zamanları `saat` saat geriye alır (o kadar zaman geçmiş gibi)."""
+    dur = json.loads(yol.read_text())
+    geri = int(saat * 3600)
+    for a in ("guncellendi", "taslak_zamani", "bekleyen_zamani"):
+        if dur.get(a):
+            dur[a] -= geri
+    for g in dur.get("gecmis", []):
+        g["t"] -= geri
+    yol.write_text(json.dumps(dur, ensure_ascii=False))
+
+
+def senaryo(*adimlar):
+    """adimlar: (kaç saat sonra, bayinin metni, LLM'in çıkarımı). Döner: kararlar ve son durum."""
     with tempfile.TemporaryDirectory() as d:
-        kok = Path(d)
-        t1 = Talep(niyet="yeni_talep", katalog_kodu="P6001", guven="yuksek", ozet="P6001 aynalı.",
-                   varyantlar=[Varyant(tur="ayna_x", aciklama="aynalı")])
-        k1, k = _karar(t1, "P6001 aynalı olsun", "BAYI-TEST-2", kok)
-        ilk_aynali = _aynali_mi(k1.is_emri)
-        # 3,5 saat geçmiş gibi: kayıt zamanlarını geri al
-        yol = kok / "BAYI-TEST-2.json"
-        dur = json.loads(yol.read_text())
-        geri = 3.5 * 3600
-        dur["guncellendi"] = int(dur["guncellendi"] - geri)
-        for g in dur.get("gecmis", []):
-            g["t"] = int(g["t"] - geri)
-        yol.write_text(json.dumps(dur, ensure_ascii=False))
-        t2 = Talep(niyet="revizyon", katalog_kodu="P6001", guven="yuksek", ozet="P6001 yatak odası 1 penceresi 120x180.",
-                   pencereler=[Pencere(mahal="Yatak Odası 1", olcu="120x180", islem="degistir")])
-        k2, _ = _karar(t2, ACIK, "BAYI-TEST-2", kok)
-        return ilk_aynali, k2.eylem, _aynali_mi(k2.is_emri), k2.revizyon
+        kok = Path(d); yol = kok / f"{GONDEREN_B2}.json"; kararlar = []
+        for adim in adimlar:
+            if callable(adim):          # adımlar arasında durum dosyasına müdahale (eski sürümden kalan kayıt gibi)
+                adim(yol); continue
+            saat, metin, talep = adim
+            if saat and yol.exists():
+                _geri_al(yol, saat)
+            kr, _k = _karar(talep, metin, GONDEREN_B2, kok)
+            kararlar.append(kr)
+        return kararlar, json.loads(yol.read_text())
+
+
+def _pencere_var(ie: dict | None, mahal: str, olcu: str) -> bool:
+    return bool(ie) and any(a["tur"] == "pencere" and a.get("mahal") == mahal and a.get("olcu") == olcu for a in ie["acikliklar"])
+
+
+SORU = ("sor", "yeni_mi_degisiklik")
+ILK = (0, "P6001 aynalı olsun", T_AYNA)
+UC_BUCUK_SAAT_SONRA = (3.5, ACIK, T_PENCERE())
+
+
+def b2_uzun_aradan_sonra():
+    """Düz koşum çıktısı için: (ilk_aynali, ikinci_eylem, ikinci_aynali, ikinci_revizyon)."""
+    (k1, k2), _ = senaryo(ILK, UC_BUCUK_SAAT_SONRA)
+    return _aynali_mi(k1.is_emri), k2.eylem, _aynali_mi(k2.is_emri), k2.revizyon
 
 
 # ---------------------------------------------------------------- pytest
 if pytest is not None:
-    # raises=AssertionError: yalnız beklenen davranış farkı "bilinen hata" sayılır; kurulum hatası (ImportError vb.) testi düşürür.
-    xfail_b1 = pytest.mark.xfail(strict=True, raises=AssertionError,
-                                 reason="B1: belirsiz sözde işlem boş/degistir gelince soru sorulmuyor (karar.py)")
-    xfail_b2 = pytest.mark.xfail(strict=True, raises=AssertionError,
-                                 reason="B2: görüşmede zaman aşımı yok; eski aynalı taslak sessizce devralınıyor (konusma.py)")
+    def T_B1(islem, niyet="yeni_talep"):
+        return _talep(niyet, "P6001, yatak odası 1 penceresi 120x180.", "yuksek", katalog_kodu="P6001",
+                      pencereler=[Pencere(mahal="Yatak Odası 1", olcu="120x180", islem=islem)])
 
-    @xfail_b1
     def test_b1_islem_bos_iken_sorulmali():
         assert b1_islem_bos() == "sor"
 
-    @xfail_b1
     def test_b1_islem_degistir_ama_soz_belirsiz_iken_sorulmali():
         assert b1_islem_degistir() == "sor"
+
+    @pytest.mark.parametrize("islem", [None, "degistir", "ekle"])
+    def test_b1_belirsiz_sozde_llm_ne_derse_desin_pencere_sorusu(islem):
+        (k1,), _ = senaryo((0, BELIRSIZ, T_B1(islem)))
+        assert (k1.eylem, k1.soru_alani) == ("sor", "pencere_islem")
+
+    @pytest.mark.parametrize("metin", ["P6001, yatak odası 1, 120x180; çatı beşik olsun",
+                                       "P6001 yatak odası 1 120x180, çatı beşik olsun",
+                                       "P6001 pencereyi 120x180 yapsak fiyat değişir mi?",
+                                       "P6001 yatak odası 1 penceresi 120x180 olmasın",
+                                       "P6001 yatak odası 1 penceresi 120x180 olsun mu?",
+                                       "P6001 yatak odası 1 penceresini 120x180 yapmayalım"])
+    def test_b1_baska_ogeye_ait_olumsuz_ya_da_soru_bicimli_soz_pencereyi_degistirmez(metin):
+        """Astra 28.09: "olsun" başka bir öğeye (çatı) aitse, söz olumsuzsa ya da soru biçimindeyse pencere değişmez; sorulur."""
+        (k1,), _ = senaryo((0, metin, T_B1(None)))
+        assert (k1.eylem, k1.soru_alani) == ("sor", "pencere_islem")
+
+    @pytest.mark.parametrize("metin", ["P6001 yatak odası 1 penceresi 120x180 olsun, çatı beşik olsun",
+                                       "P6001 yatak odası 1'in penceresini değiştirelim. 120x180 olsun.",
+                                       "P6001 yatak odası 1 120x180 yapalım"])
+    def test_b1_kontrol_pencereye_ait_acik_soz_degistirir(metin):
+        (k1,), _ = senaryo((0, metin, T_B1(None)))
+        assert k1.eylem == "is_emri" and _pencere_var(k1.is_emri, "YATAK ODASI 1", "120x180")
+
+    def test_b1_acik_ekleme_sozu_llm_degistir_dese_de_ekleme_sayilir():
+        """Ekleme v0.1'de otomatik yapılmıyor: yönlendirilir. Pencere sessizce değiştirilmez."""
+        (k1,), _ = senaryo((0, "P6001 yatak odası 1'e bir tane daha 120x180 pencere ekle", T_B1("degistir")))
+        assert k1.eylem == "yonlendir"
+
+    def test_b1_acik_degistirme_sozu_llm_ekle_dese_de_degisiklik_sayilir():
+        (k1,), _ = senaryo((0, ACIK, T_B1("ekle")))
+        assert k1.eylem == "is_emri" and _pencere_var(k1.is_emri, "YATAK ODASI 1", "120x180")
+
+    @pytest.mark.parametrize("islem", [None, "degistir"])
+    def test_b1_soru_cevabi_degistir_ise_olcu_degisir(islem):
+        (_, k2), _ = senaryo((0, BELIRSIZ, T_B1(islem)), kisa("değiştir"))
+        assert k2.eylem == "is_emri" and _pencere_var(k2.is_emri, "YATAK ODASI 1", "120x180")
+
+    def test_b1_soru_cevabi_ekle_ise_yonlendirilir():
+        (_, k2), _ = senaryo((0, BELIRSIZ, T_B1(None)), kisa("ekle"))
+        assert k2.eylem == "yonlendir"
+
+    def T_ODA(mahal, olcu, islem=None, niyet="yeni_talep"):
+        return _talep(niyet, f"P6001, {mahal.lower()} penceresi {olcu}.", "yuksek", katalog_kodu="P6001",
+                      pencereler=[Pencere(mahal=mahal, olcu=olcu, islem=islem)])
+
+    def test_b1_pencere_sorusu_askidayken_ilgisiz_mesaj_cevap_sayilmaz():
+        """'aynalı olsun' içindeki 'olsun' pencere sorusunun cevabı değildir; pencere sessizce değişmez, soru yinelenir."""
+        ayna = _talep("revizyon", "Aynalı olsun.", "yuksek", varyantlar=[Varyant(tur="ayna_x", aciklama="aynalı")])
+        (_, k2), _ = senaryo((0, BELIRSIZ, T_B1(None)), (0, "aynalı olsun", ayna))
+        assert (k2.eylem, k2.soru_alani) == ("sor", "pencere_islem")
+
+    @pytest.mark.parametrize("metin, islem", [("P6001, yaşam alanı, 120x180", None),
+                                              ("P6001 yaşam alanı penceresi 120x180 olsun", None),
+                                              ("P6001 yaşam alanına bir tane daha 120x180 pencere ekle", "degistir")])
+    def test_b1_cok_pencereli_odada_pencere_sessizce_degismez(metin, islem):
+        (k1,), _ = senaryo((0, metin, T_ODA("Yaşam Alanı", "120x180", islem)))
+        assert k1.eylem == "yonlendir"
+
+    def test_b1_cevap_yalniz_sorulan_satiri_cozer():
+        """İki belirsiz satır: YO1 sorulur, 'değiştir' yalnız YO1'i çözer; sonra YO2 ayrıca sorulur."""
+        iki = _talep("yeni_talep", "P6001 iki pencere.", "yuksek", katalog_kodu="P6001",
+                     pencereler=[Pencere(mahal="Yatak Odası 1", olcu="120x180", islem=None),
+                                 Pencere(mahal="Yatak Odası 2", olcu="120x120", islem=None)])
+        k1, k2 = senaryo((0, "P6001 yatak odası 1 120x180, yatak odası 2 120x120", iki), kisa("değiştir"))[0]
+        assert (k1.eylem, k1.soru_alani) == ("sor", "pencere_islem") and "YATAK ODASI 1" in k1.mesaj
+        assert (k2.eylem, k2.soru_alani) == ("sor", "pencere_islem") and "YATAK ODASI 2" in k2.mesaj
+
+    def test_b1_belirsiz_satir_acik_sozle_yeniden_gelince_yeniden_sorulmaz():
+        """Bayi soruya cevap yerine talebi açıkça yeniden yazar, LLM bu kez 'degistir' der: eski belirsiz satır düşer."""
+        (_, k2), d = senaryo((0, BELIRSIZ, T_B1(None)), (0, ACIK, T_B1("degistir")))
+        assert k2.eylem == "is_emri" and _pencere_var(k2.is_emri, "YATAK ODASI 1", "120x180")
+        assert len([p for p in d["taslak"]["pencereler"] if p["mahal"].lower() == "yatak odası 1"]) == 1
+
+    def test_b1_plan_ciktiktan_sonra_eski_pencere_sorusu_askida_kalmaz():
+        """Soru yerine açık yeniden yazımla plan çıkınca 'tamam olsun' onaydır, pencere cevabı değil; taslak silinmez."""
+        onay = _talep("onay", "Onaylıyor.", "yuksek")
+        (_, k2, k3), _ = senaryo((0, BELIRSIZ, T_B1(None)), (0, ACIK, T_B1("degistir")), (0, "tamam olsun", onay))
+        assert k2.eylem == "is_emri"
+        assert k3.eylem == "cevapla" and "Onayınız kaydedildi" in k3.mesaj
+        assert f"revizyon {k2.revizyon}" in k3.mesaj and k3.revizyon == k2.revizyon == 1    # onay, gönderilen planın numarasını söyler
+
+    def test_b1_oda_adi_yazimi_farkli_olsa_da_eski_satir_duser():
+        (_, k2), d = senaryo((0, BELIRSIZ, T_ODA("Yatak odasi 1", "120x180")), (0, ACIK, T_B1("degistir")))
+        assert k2.eylem == "is_emri" and len(d["taslak"]["pencereler"]) == 1
+
+    def test_b1_baska_odanin_belirsiz_satiri_onceki_odayi_yeniden_sordurmaz():
+        (k1, k2), _ = senaryo((0, ACIK, T_B1(None)), (0.5, "yatak odası 2, 120x120", T_ODA("Yatak Odası 2", "120x120", None, "revizyon")))
+        assert k1.eylem == "is_emri"
+        assert (k2.eylem, k2.soru_alani) == ("sor", "pencere_islem") and "YATAK ODASI 2" in k2.mesaj
+
+    def test_b1_eski_surumden_kalan_kayit_yeniden_sorulmaz():
+        """v1.1.1 durum dosyasında pencere satırında 'soz_niyeti' yoktur; İş Emri'ne girmiş satır değişiklik sayılır."""
+        def soz_sil(yol):
+            d = json.loads(yol.read_text())
+            for p in d["taslak"].get("pencereler", []):
+                p.pop("soz_niyeti", None)
+            yol.write_text(json.dumps(d, ensure_ascii=False))
+        ayna = _talep("revizyon", "Aynalı olsun.", "yuksek", varyantlar=[Varyant(tur="ayna_x", aciklama="ayna")])
+        (_, k2), _ = senaryo((0, ACIK, T_B1(None)), soz_sil, (0.5, "ayna", ayna))
+        assert k2.eylem == "is_emri" and _aynali_mi(k2.is_emri) and _pencere_var(k2.is_emri, "YATAK ODASI 1", "120x180")
+
+    def test_b1_sonraki_revizyonun_sozu_eski_pencere_satirini_yeniden_yorumlamaz():
+        """1) 'penceresi 120x180 olsun' → İş Emri. 2) yarım saat sonra yalnız 'ayna' → aynalı İş Emri; pencere yine sorulmaz."""
+        ayna = _talep("revizyon", "Aynalı olsun.", "yuksek", varyantlar=[Varyant(tur="ayna_x", aciklama="ayna")])
+        (k1, k2), _ = senaryo((0, ACIK, T_B1(None)), (0.5, "ayna", ayna))
+        assert k1.eylem == "is_emri"
+        assert (k2.eylem, _aynali_mi(k2.is_emri)) == ("is_emri", True) and _pencere_var(k2.is_emri, "YATAK ODASI 1", "120x180")
 
     def test_b1_kontrol_islem_ekle_iken_soruluyor():
         assert b1_kontrol_ekle() == "sor"
@@ -135,15 +281,247 @@ if pytest is not None:
     def test_b1_kontrol_acik_sozde_is_emri():
         assert b1_kontrol_acik_soz() == "is_emri"
 
-    def test_b2_on_kosul_ilk_taslak_aynali():
-        """Ön koşul ayrı sınanır: ilk İş Emri aynalı değilse B2 testi anlamsızdır ve bu test düşer."""
-        ilk_aynali, *_ = b2_uzun_aradan_sonra()
-        assert ilk_aynali
+    # ── G-1…G-4 (29.09, İE-02 kapı G, canlı Opus 5.5): Opus kısa "değiştir" cevabına bağlamdaki pencere isteğini yeniden doldurdu
+    #    (satır + pencere_degistir varyantı, niyet revizyon). v1.2'de: soru 'dustu', numara r03, gerekçede not iki kez; yalnız
+    #    varyant gelirse belirsiz sözde pencere sessizce değişiyordu. Testler canlıdaki çıkarımın biçimini kullanır.
+    def T_OPUS(niyet, guven, kod=None, satir=True, var=True, mahal="yatak odası 1", olcu="120x180"):
+        return _talep(niyet, f"{mahal} penceresi {olcu}", guven, katalog_kodu=kod,
+                      pencereler=[Pencere(mahal=mahal, olcu=olcu, islem="degistir")] if satir else [],
+                      varyantlar=[Varyant(tur="pencere_degistir", aciklama=f"{mahal} penceresi {olcu}",
+                                          parametreler={"mahal": mahal, "yeni": olcu})] if var else [])
 
-    @xfail_b2
-    def test_b2_uzun_aradan_sonra_eski_varyant_sessizce_devralinmamali():
-        _ilk, eylem, aynali, _rev = b2_uzun_aradan_sonra()
-        assert eylem == "sor" or (eylem == "is_emri" and not aynali)
+    def _kural(d):
+        return [g["metin"] for g in d["gecmis"] if g["yon"] == "kural"]
+
+    def _yo1(ie):
+        return [a.get("olcu") for a in (ie or {}).get("acikliklar", []) if a["tur"] == "pencere" and a.get("mahal") == "YATAK ODASI 1"]
+
+    def test_g1_kisa_cevap_llm_baglami_yinelese_de_soruya_baglanir():
+        (k1, k2, k3), d = senaryo(ILK, (0, "yatak odası 1, 120x180", T_OPUS("revizyon", "orta")),
+                                  (0, "değiştir", T_OPUS("revizyon", "yuksek", "P6001")))
+        assert (k2.eylem, k2.soru_alani) == ("sor", "pencere_islem")
+        assert k3.eylem == "is_emri" and "pencere_islem cevabı: degistir" in _kural(d)
+        assert _yo1(k3.is_emri) == ["120x180"] and _aynali_mi(k3.is_emri)
+
+    def test_g1_kisa_ekle_cevabi_llm_degistir_dese_de_ekleme_sayilir():
+        (_, _, k3), d = senaryo(ILK, (0, "yatak odası 1, 120x180", T_OPUS("revizyon", "orta")),
+                                (0, "ekle", T_OPUS("revizyon", "yuksek", "P6001")))
+        assert k3.eylem == "yonlendir" and "pencere_islem cevabı: ekle" in _kural(d)
+
+    def test_g2_soru_soran_revizyon_turu_numara_tuketmez():
+        (k1, k2, k3), d = senaryo(ILK, (0, "yatak odası 1, 120x180", T_OPUS("revizyon", "orta")),
+                                  (0, "değiştir", T_OPUS("revizyon", "yuksek", "P6001")))
+        assert (k1.revizyon, k3.revizyon) == (1, 2) and d["revizyon"] == 1
+
+    def test_g2_soru_cevap_yerine_acik_yeniden_yazim_da_r02():
+        (_, _, k3), d = senaryo(ILK, (0, "yatak odası 1, 120x180", T_OPUS("revizyon", "orta")),
+                                (0, "P6001 yatak odası 1 penceresi 120x180 olsun", T_OPUS("revizyon", "yuksek", "P6001")))
+        assert k3.eylem == "is_emri" and k3.revizyon == 2 and _yo1(k3.is_emri) == ["120x180"]
+
+    def test_g3_satir_ve_varyant_birlikte_gelince_not_bir_kez():
+        (_, _, k3), _ = senaryo(ILK, (0, "yatak odası 1, 120x180", T_OPUS("revizyon", "orta")),
+                                (0, "değiştir", T_OPUS("revizyon", "yuksek", "P6001")))
+        assert k3.gerekce.count("YATAK ODASI 1 penceresi 120x180") == 1
+
+    def test_g4_yalniz_varyant_belirsiz_sozde_pencere_sessizce_degismez():
+        (_, k2), _ = senaryo(ILK, (0, "yatak odası 1, 120x180", T_OPUS("revizyon", "orta", satir=False)))
+        assert (k2.eylem, k2.soru_alani) == ("sor", "pencere_islem")
+
+    def test_g4_yalniz_varyant_acik_sozde_degistirir():
+        (_, k2), _ = senaryo(ILK, (0, "P6001 yatak odası 1 penceresi 120x180 olsun", T_OPUS("revizyon", "yuksek", "P6001", satir=False)))
+        assert k2.eylem == "is_emri" and k2.revizyon == 2 and _yo1(k2.is_emri) == ["120x180"]
+        assert k2.gerekce.count("YATAK ODASI 1 penceresi 120x180") == 1
+
+    def test_g4_odasi_belli_olmayan_varyant_eskisi_gibi_sorulur():
+        v = _talep("revizyon", "pencereyi 120x180 yapalım", "yuksek",
+                   varyantlar=[Varyant(tur="pencere_degistir", aciklama="pencereyi 120x180 yapalım", parametreler={"yeni": "120x180"})])
+        (_, k2), _ = senaryo(ILK, (0, "pencereyi 120x180 yapalım", v))
+        assert (k2.eylem, k2.soru_alani) == ("sor", "pencere_mahal")
+
+    # ── Astra 29.09 (25c49b7 incelemesi): olumsuz kısa cevap ve odası yalnız açıklamada yazılı varyant ──
+    OLUMSUZ = ["değiştirme", "değiştirmeyin", "ekleme", "eklemeyin"]
+
+    @pytest.mark.parametrize("metin", OLUMSUZ + ["değiştirelim mi?", "ekleyelim mi"])
+    def test_a1_olumsuz_ya_da_soru_bicimli_kisa_soz_islem_sayilmaz(metin):
+        from beyin.karar import _pencere_niyeti
+        assert _pencere_niyeti(metin) == "belirsiz"
+
+    @pytest.mark.parametrize("metin", OLUMSUZ)
+    @pytest.mark.parametrize("llm", ["bos", "baglamdan", "red"])
+    def test_a1_olumsuz_kisa_cevap_olumlu_isleme_donusmez_soru_yinelenir(metin, llm):
+        cikarim = {"bos": _talep("diger", metin), "baglamdan": T_OPUS("revizyon", "yuksek", "P6001"),
+                   "red": _talep("red", "Değişiklik istemiyor", "yuksek")}[llm]
+        (k1, k2, k3), d = senaryo(ILK, (0, "yatak odası 1, 120x180", T_OPUS("revizyon", "orta")), (0, metin, cikarim))
+        assert (k3.eylem, k3.soru_alani) == ("sor", "pencere_islem") and k3.mesaj.startswith("Anlayamadım.") and "YATAK ODASI 1" in k3.mesaj
+        assert not any(g["metin"].startswith("pencere_islem cevabı: ") for g in d["gecmis"] if g["yon"] == "kural")
+        assert d["son_is_emri"]["revizyon"] == 1 and d["revizyon"] == 0                 # talep kapanmadı, numara tüketilmedi
+        assert not any(p.get("islem_kaynak") == "bayi cevabı" for p in d["taslak"].get("pencereler") or [])
+
+    def test_a1_olumsuz_cevaptan_sonra_degistir_yine_soruya_baglanir():
+        (_, _, k3, k4), d = senaryo(ILK, (0, "yatak odası 1, 120x180", T_OPUS("revizyon", "orta")),
+                                    (0, "değiştirmeyin", _talep("diger", "değiştirmeyin")), kisa("değiştir"))
+        assert k3.eylem == "sor" and k4.eylem == "is_emri" and k4.revizyon == 2 and _yo1(k4.is_emri) == ["120x180"]
+        assert "pencere_islem cevabı: degistir" in _kural(d)
+
+    def T_ACIKLAMADA(niyet="revizyon", guven="orta", kod=None):
+        """Oda yalnız açıklamada: parametreler.mahal boş (Astra)."""
+        return _talep(niyet, "yatak odası 1 penceresi 120x180", guven, katalog_kodu=kod,
+                      varyantlar=[Varyant(tur="pencere_degistir", aciklama="yatak odası 1 penceresi 120x180", parametreler={"yeni": "120x180"})])
+
+    def test_a2_odasi_aciklamada_varyant_belirsiz_sozde_sorulur():
+        (_, k2), d = senaryo(ILK, (0, "yatak odası 1, 120x180", T_ACIKLAMADA()))
+        assert (k2.eylem, k2.soru_alani) == ("sor", "pencere_islem") and "YATAK ODASI 1" in k2.mesaj
+        assert not [v for v in d["taslak"].get("varyantlar") or [] if v.get("tur") == "pencere_degistir"]   # satıra çevrildi
+
+    def test_a2_odasi_aciklamada_varyant_sorusu_degistir_ile_cevaplanir():
+        (_, k2, k3), d = senaryo(ILK, (0, "yatak odası 1, 120x180", T_ACIKLAMADA()), kisa("değiştir"))
+        assert k2.eylem == "sor" and k3.eylem == "is_emri" and k3.revizyon == 2 and _yo1(k3.is_emri) == ["120x180"]
+        assert "pencere_islem cevabı: degistir" in _kural(d) and k3.gerekce.count("YATAK ODASI 1 penceresi 120x180") == 1
+
+    def test_a2_odasi_aciklamada_varyant_acik_sozde_degistirir():
+        (_, k2), _ = senaryo(ILK, (0, "P6001 yatak odası 1 penceresi 120x180 olsun", T_ACIKLAMADA("revizyon", "yuksek", "P6001")))
+        assert k2.eylem == "is_emri" and k2.revizyon == 2 and _yo1(k2.is_emri) == ["120x180"]
+
+    def test_b2_on_kosul_ilk_taslak_aynali():
+        """Ön koşul ayrı sınanır: ilk İş Emri aynalı değilse B2 testleri anlamsızdır ve bu test düşer."""
+        (k1,), _ = senaryo(ILK)
+        assert k1.eylem == "is_emri" and _aynali_mi(k1.is_emri)
+
+    def test_b2_uzun_aradan_sonra_model_koduyla_gelen_mesajda_sorulur():
+        (_, k2), d = senaryo(ILK, UC_BUCUK_SAAT_SONRA)
+        assert (k2.eylem, k2.soru_alani) == SORU and d.get("bekleyen_talep")
+
+    @pytest.mark.parametrize("cevap", ["yeni", "yeni talep", "yenisi", "başka bir talep", "sıfırdan", "Yeni."])
+    def test_b2_cevap_yeni_ise_eski_taslak_kapanir(cevap):
+        (_, _, k3), d = senaryo(ILK, UC_BUCUK_SAAT_SONRA, kisa(cevap))
+        assert (k3.eylem, _aynali_mi(k3.is_emri), k3.revizyon) == ("is_emri", False, 1)
+        assert _pencere_var(k3.is_emri, "YATAK ODASI 1", "120x180") and not d.get("bekleyen_talep")
+        assert k3.kullanilan_talep and k3.kullanilan_talep["katalog_kodu"] == "P6001"   # worker PDF başlığını buradan alır
+
+    @pytest.mark.parametrize("cevap", ["değişiklik", "o taslağın değişikliği", "önceki", "eskisinin devamı", "aynı proje"])
+    def test_b2_cevap_degisiklik_ise_eski_taslaga_eklenir(cevap):
+        (_, _, k3), _ = senaryo(ILK, UC_BUCUK_SAAT_SONRA, kisa(cevap))
+        assert (k3.eylem, _aynali_mi(k3.is_emri), k3.revizyon) == ("is_emri", True, 2)
+
+    @pytest.mark.parametrize("cevap", ["yeni değil", "değişiklik yok", "hayır yeni", "yeni değişiklik", "evet", "yeniden çiz",
+                                       "değişiklik ama ayna olmasın", "yeni ev", "yenile", "Eskişehir"])
+    def test_b2_belirsiz_olumsuz_ya_da_ekli_cevapta_soru_yinelenir(cevap):
+        (_, _, k3), d = senaryo(ILK, UC_BUCUK_SAAT_SONRA, kisa(cevap))
+        assert (k3.eylem, k3.soru_alani) == SORU and d.get("bekleyen_talep")
+
+    def test_b2_anlasilmayan_cevapta_yinelenir_sonra_insana_devredilir():
+        kararlar, d = senaryo(ILK, UC_BUCUK_SAAT_SONRA, kisa("bilmiyorum"), kisa("hmm"), kisa("tamam"))
+        assert [x.eylem for x in kararlar[1:]] == ["sor", "sor", "sor", "yonlendir"]
+        assert "bekleyen mesaj" in kararlar[-1].gerekce and "P6001" in kararlar[-1].gerekce   # Lokman'a giden bildirimde
+        assert not d.get("bekleyen_talep") and d.get("son_soru_alani") is None
+
+    def test_b2_selam_sonrasi_da_sorulur():
+        """2 saatlik süre taslağın değiştiği andan sayılır; araya giren selam süreyi yenilemez."""
+        (_, _, k3), _ = senaryo(ILK, (3.5, "Merhaba", _talep("selam", "selam", "yuksek")), (0, ACIK, T_PENCERE()))
+        assert (k3.eylem, k3.soru_alani) == SORU
+
+    @pytest.mark.parametrize("metin", ["Merhaba, P6001 yatak odası 1 penceresi 120x180 olsun",
+                                       "*P6001* yatak odası 1 penceresi 120x180 olsun", "P 6001 yatak odası 1 penceresi 120x180 olsun",
+                                       "6001 yatak odası 1 penceresi 120x180 olsun", "P6001'in yatak odası 1 penceresi 120x180 olsun"])
+    def test_b2_model_kodu_bicimleri_taninir(metin):
+        (_, k2), _ = senaryo(ILK, (3.5, metin, T_PENCERE()))
+        assert (k2.eylem, k2.soru_alani) == SORU
+
+    def test_b2_soru_askidayken_baska_model_yeni_talep_olarak_islenir():
+        t = _talep("yeni_talep", "P7401 istiyorum.", "yuksek", katalog_kodu="P7401")
+        (_, _, k3), d = senaryo(ILK, UC_BUCUK_SAAT_SONRA, (0, "P7401 istiyorum", t))
+        assert (k3.eylem, k3.soru_alani) != SORU and not d.get("bekleyen_talep")
+        assert "P7401" in k3.mesaj          # P7401 yeni talep olarak işlendi (şablonu yok → Lokman'a yönlendirilir)
+
+    def test_b2_soru_askidayken_uzun_mesaj_normal_islenir_eski_mesaj_dirilmez():
+        uzun = "müşteri aslında yatak odası penceresini de büyük istiyor sanırım"
+        kararlar, d = senaryo(ILK, UC_BUCUK_SAAT_SONRA, kisa(uzun), kisa("yeni"))
+        assert (kararlar[2].eylem, kararlar[2].soru_alani) != SORU and kararlar[3].eylem != "is_emri"
+        assert "işlemedim" in kararlar[2].mesaj and not d.get("bekleyen_talep")      # düşen mesaj bayiye söylenir
+
+    @pytest.mark.parametrize("cevap, aynali", [("P6001 yeni", False), ("P6001 değişiklik", True), ("*P6001* yeni talep", False)])
+    def test_b2_ayni_model_koduyla_verilen_cevap_cevap_sayilir(cevap, aynali):
+        niyet = "yeni_talep" if "yeni" in cevap else "revizyon"
+        t = _talep(niyet, cevap, "orta", katalog_kodu="P6001")
+        (_, _, k3), _ = senaryo(ILK, UC_BUCUK_SAAT_SONRA, (0, cevap, t))
+        assert (k3.eylem, _aynali_mi(k3.is_emri)) == ("is_emri", aynali)
+        assert _pencere_var(k3.is_emri, "YATAK ODASI 1", "120x180")                # bekletilen pencere değişikliği kaybolmadı
+
+    def test_b2_soru_askidayken_genel_soru_bekleyeni_dusurur_bayiye_soyler_sayac_kalmaz():
+        t = _talep("soru", "P6001 fiyatı soruluyor.", "yuksek", katalog_kodu="P6001")
+        (_, _, k3), d = senaryo(ILK, UC_BUCUK_SAAT_SONRA, (0, "P6001 fiyatı ne kadar", t))
+        assert k3.eylem == "cevapla" and "işlemedim" in k3.mesaj
+        assert not d.get("bekleyen_talep") and "eski_taslak_soru" not in d
+
+    def test_b2_soru_askidayken_iptal_yalniz_bekletilen_mesaji_iptal_eder():
+        (_, _, k3), d = senaryo(ILK, UC_BUCUK_SAAT_SONRA, (0, "iptal", _talep("red", "iptal", "yuksek")))
+        assert k3.eylem == "cevapla" and "iptal ettim" in k3.mesaj and not d.get("bekleyen_talep")
+        assert d["asama"] == "onay_bekliyor" and d["son_is_emri"]      # eski plan olduğu gibi duruyor
+
+    @pytest.mark.parametrize("metin", ["tamam", "onaylıyorum", "ok"])
+    def test_b2_soru_askidayken_onay_eski_plani_onaylamaz(metin):
+        """Astra 28.09: "yeni mi, değişiklik mi?" beklerken gelen "tamam" eski taslağı onaylamamalı, bekletilen mesaj düşmemeli."""
+        (_, _, k3), d = senaryo(ILK, UC_BUCUK_SAAT_SONRA, (0, metin, _talep("onay", "Onay.", "yuksek")))
+        assert (k3.eylem, k3.soru_alani) == SORU and d.get("bekleyen_talep") and d["asama"] != "onaylandi"
+
+    @pytest.mark.parametrize("metin, niyet", [("yeni talep: P6001 yatak odası 1 penceresi 120x180 olsun", "revizyon"),
+                                              ("yeni bir ev için P6001 yatak odası 1 penceresi 120x180 olsun", "yeni_talep"),
+                                              ("başka müşteri için P6001 yatak odası 1 penceresi 120x180 olsun", "revizyon")])
+    def test_b2_acik_yeni_talep_sozu_sure_dolmadan_da_yeni_talep(metin, niyet):
+        """Astra 28.09: bayi açıkça "yeni talep" diyorsa, 2 saat dolmadı diye eski taslağa eklenmez."""
+        (_, k2), _ = senaryo(ILK, (1.0, metin, T_PENCERE(niyet)))
+        assert (k2.eylem, _aynali_mi(k2.is_emri), k2.revizyon) == ("is_emri", False, 1)
+        assert _pencere_var(k2.is_emri, "YATAK ODASI 1", "120x180")
+
+    @pytest.mark.parametrize("metin", ["yatak odası 1 için yeni pencere 120x180 olsun", "yeni talep değil, yatak odası 1 penceresi 120x180 olsun"])
+    def test_b2_kontrol_yeni_pencere_ya_da_olumsuz_soz_yeni_talep_sayilmaz(metin):
+        """'yeni pencere' ya da 'yeni talep değil' yeni talep değildir; 2 saat dolmadıysa taslak (ayna) sürer."""
+        (_, k2), d = senaryo(ILK, (1.0, metin, T_PENCERE()))
+        assert any(v.get("tur") == "ayna_x" for v in d["taslak"].get("varyantlar", []))    # eski taslak kapanmadı
+        assert k2.revizyon != 1 or k2.eylem != "is_emri"
+
+    def test_b2_soru_askidayken_yeni_model_kodlu_mesaj_bekleyeni_degistirir():
+        yo2 = (0, "P6001 yatak odası 2 penceresi 60x40 olsun", T_PENCERE(mahal="Yatak Odası 2", olcu="60x40"))
+        kararlar, _ = senaryo(ILK, UC_BUCUK_SAAT_SONRA, yo2, kisa("yeni"))
+        assert (kararlar[2].eylem, kararlar[2].soru_alani) == SORU
+        son = kararlar[3]
+        assert son.eylem == "is_emri" and not _aynali_mi(son.is_emri)
+        assert _pencere_var(son.is_emri, "YATAK ODASI 2", "60x40") and not _pencere_var(son.is_emri, "YATAK ODASI 1", "120x180")
+
+    def test_b2_cevapta_bekletilen_mesajin_sozu_okunur():
+        """Kurallar bayinin sözünü bekletilen mesajdan okur, kısa cevaptan değil ('ekle' → desteklenmiyor, İş Emri yok)."""
+        ekle = (3.5, "P6001 yatak odası 1'e bir tane daha 120x180 pencere ekle", T_PENCERE(islem="ekle"))
+        (_, _, k3), _ = senaryo(ILK, ekle, kisa("değişiklik"))
+        assert k3.eylem != "is_emri"
+
+    def test_b2_cevap_yeni_toplanan_taslakta_da_eskiyi_kapatir():
+        """İş Emri çıkmamış, bilgi toplanan bir taslakta da 'yeni' eski aynayı taşımamalı."""
+        eksik = (0, "P6001 aynalı, yatak odası 1 penceresi", _talep("yeni_talep", "P6001 aynalı, yatak odası 1 penceresi.", "yuksek",
+                 katalog_kodu="P6001", varyantlar=[Varyant(tur="ayna_x", aciklama="aynalı")],
+                 pencereler=[Pencere(mahal="Yatak Odası 1", olcu=None, islem="degistir")]))
+        kararlar, _ = senaryo(eksik, (3.5, ACIK, T_PENCERE("yeni_talep")), kisa("yeni"))
+        assert kararlar[0].eylem == "sor", "ön koşul: ilk mesaj bilgi toplayan bir taslak bırakmalı"
+        assert (kararlar[1].eylem, kararlar[1].soru_alani) == SORU
+        assert (kararlar[2].eylem, _aynali_mi(kararlar[2].is_emri)) == ("is_emri", False)
+
+    def test_b2_bir_gunden_eski_soru_yok_sayilir():
+        kararlar, d = senaryo(ILK, UC_BUCUK_SAAT_SONRA, (25, "yeni", _talep("diger", "yeni")))
+        assert kararlar[2].eylem != "is_emri" and not d.get("bekleyen_talep")
+
+    def test_b2_kontrol_kisa_arada_sorulmaz():
+        """2 saatten kısa arada gelen mesaj taslağın devamıdır (bugünkü davranış korunur)."""
+        (_, k2), _ = senaryo(ILK, (1.0, ACIK, T_PENCERE()))
+        assert (k2.eylem, _aynali_mi(k2.is_emri), k2.revizyon) == ("is_emri", True, 2)
+
+    def test_b2_kontrol_model_kodu_yoksa_sorulmaz():
+        """Uzun aradan sonra da olsa model koduyla başlamayan mesaj taslağın devamıdır (D-01 kapsamı)."""
+        (_, k2), _ = senaryo(ILK, (3.5, PENCERE_SOZU, T_PENCERE()))
+        assert (k2.eylem, _aynali_mi(k2.is_emri), k2.revizyon) == ("is_emri", True, 2)
+
+    def test_b2_kontrol_model_kodu_ortada_ise_sorulmaz():
+        """D-01 'model koduyla başlayan' der; kod ortada geçiyorsa bugünkü davranış sürer."""
+        (_, k2), _ = senaryo(ILK, (3.5, "yatak odası 1 penceresi P6001 için 120x180 olsun", T_PENCERE()))
+        assert (k2.eylem, k2.soru_alani) != SORU
 
 
 if __name__ == "__main__":
@@ -152,5 +530,4 @@ if __name__ == "__main__":
     print("Kontrol işlem ekle:", b1_kontrol_ekle(), "(beklenen: sor)")
     print("Kontrol açık söz  :", b1_kontrol_acik_soz(), "(beklenen: is_emri)")
     ilk, e, a, r = b2_uzun_aradan_sonra()
-    print(f"B2 3,5 saat sonra : ilk aynalı={ilk}; ikinci eylem={e}, aynalı={a}, revizyon={r} "
-          "(beklenen: aynasız yeni İş Emri ya da soru)")
+    print(f"B2 3,5 saat sonra : ilk aynalı={ilk}; ikinci eylem={e}, aynalı={a}, revizyon={r} (beklenen: sor)")

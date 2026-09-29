@@ -10,6 +10,9 @@ import os
 DURUM_DIR = Path(os.environ.get("PORTMAN_DURUM_DIR") or (Path(__file__).resolve().parent / "durum"))
 MAX_REVIZYON = 4
 MAX_SORU = 4
+# D-01 (B2 kararı, Lokman, 28.09): taslak bu süreden uzun süre önce kaldıysa ve bayinin mesajı model koduyla başlıyorsa
+# sistem mesajı eski taslağa eklemeden önce sorar: yeni talep mi, o taslağın değişikliği mi?
+ESKI_TASLAK_SN = 2 * 3600
 
 
 def _anahtar(v, alan: str):
@@ -45,7 +48,7 @@ class Konusma:
     @staticmethod
     def _bos() -> dict:
         return {"asama": "bos", "taslak": {}, "soru_sayisi": 0, "revizyon": 0, "son_soru_alani": None,
-                "bekleyen_onay": None, "son_is_emri": None, "gecmis": [], "guncellendi": 0}
+                "bekleyen_onay": None, "son_is_emri": None, "gecmis": [], "guncellendi": 0, "taslak_zamani": 0}
 
     def sifirla(self):
         self.d = self._bos(); self.kaydet()
@@ -58,6 +61,7 @@ class Konusma:
         """Yeni mesajdan gelen dolu alanları taslağa ekle (null olanlar öncekini ezmez).
         Listeler birleşirken tekilleşir: ayna_x/ayna_y bayrak gibidir (bir kez), pencere değişikliği mahal başına sonuncu kazanır."""
         t = self.d["taslak"]
+        self.d["taslak_zamani"] = int(time.time())     # D-01: taslağın son değiştiği an (selam ya da soru cevabı saymaz)
         for k, v in talep.items():
             if v in (None, [], {}, ""):
                 continue
@@ -75,3 +79,26 @@ class Konusma:
     def not_dus(self, yon: str, metin: str, ek: dict | None = None):
         self.d["gecmis"].append({"t": int(time.time()), "yon": yon, "metin": metin, **(ek or {})})
         self.d["gecmis"] = self.d["gecmis"][-40:]
+
+
+class BellekKonusma(Konusma):
+    """İE-02 kalıcı akış: durum dosyadan değil çağıranın verdiği sözlükten okunur; kaydet() dosyaya yazmaz.
+    Durumu Postgres'e, işin öteki kayıtlarıyla aynı işlemde kanal/depo.py yazar."""
+
+    def __init__(self, gonderen: str, d: dict | None = None):
+        self.gonderen = gonderen
+        self.path = None
+        self.d = json.loads(json.dumps(d)) if d else self._bos()
+        self.sifirlandi = False          # bu işte konuşma sıfırlandı mı (yeni talep, iptal, başka model)
+        self.yeni_notlar: list[dict] = []  # bu işte düşülen notlar (soru kaydı için; aynı saniyedeki eş notlarla karışmaz)
+
+    def kaydet(self):
+        self.d["guncellendi"] = int(time.time())
+
+    def sifirla(self):
+        super().sifirla()
+        self.sifirlandi = True
+
+    def not_dus(self, yon: str, metin: str, ek: dict | None = None):
+        super().not_dus(yon, metin, ek)
+        self.yeni_notlar.append(self.d["gecmis"][-1])

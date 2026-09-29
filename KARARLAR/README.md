@@ -1,6 +1,6 @@
 # Karar defteri
 
-Portman'ın kararları iki seride tutulur. Numaralar çakışmasın diye ayrıdır: **K01–K25**, 20–22 Eylül karar kaydıdır; **Z-01–Z-10**, 27 Eylül Zemin kararlarıdır. Kökteki `KARARLAR.md`, v1.1.1 ağacının tarihli karar günlüğüdür ve değiştirilmedi.
+Portman'ın kararları üç seride tutulur. Numaralar çakışmasın diye ayrıdır: **K01–K25**, 20–22 Eylül karar kaydıdır; **Z-01–Z-10**, 27 Eylül Zemin kararlarıdır; **D-01'den** sonrası, bu depoda alınan kararlardır. Kökteki `KARARLAR.md`, v1.1.1 ağacının tarihli karar günlüğüdür ve değiştirilmedi.
 
 Her kararda şu alanlar aranır: gerekçe, kapsam, tarih, kanıt, yeniden değerlendirme koşulu ve geri dönüş yolu. Kaynağında olmayan alan uydurulmadı; dosyanın sonunda "kayıtta olmayan alanlar" diye yazılıdır. Bir karar yeni kanıtla açılır; kritik hata ve güvenlik sorunu tetik beklemez. Eski kayıt silinmez, yeni sürüm eklenir.
 
@@ -19,7 +19,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [K07](K07.md) | Patron modu + önce kuru çalışma, sonra gerçek gönderim; kill switch'ler (21.09) |
 | [K08](K08.md) | Görev 2 Python cron'u silindi (21.09) |
 | [K09](K09.md) | Kalıcı ilkeler (21.09, Lokman): öz-test asla WhatsApp'a göndermez; sunucu değişikliği yalnız yetkiyle, yedek + geri alma ile; sırlar koda/sohbete/rapora/günlüğe yazılmaz; numaralar maskelenir |
-| [K10](K10.md) | Beyin çıkarım arka ucu: OpenAI Chat Completions, gpt-4o-mini, anahtar panelin `ayarlar.json`'undan yalnız okunur (21.09) |
+| [K10](K10.md) | Beyin çıkarım arka ucu: OpenAI Chat Completions, gpt-4o-mini, anahtar panelin `ayarlar.json`'undan yalnız okunur (21.09) · **29.09'dan beri canlıda Claude Opus 5.5** (Portman ve bayi botu) |
 | [K11](K11.md) | VPS: Natro XCloud Pro, aylık 29,99 $ (22.09) |
 | [K12](K12.md) | Hibrit mimari: hosting = kontrol düzlemi (Meta webhook, kuyruk, gönderim, WhatsApp anahtarı, görüşme durumu); VPS = üretici; ajan yalnız dışarıdan bağlanır (22.09) |
 | [K13](K13.md) | Eşleşme anahtarı modeli: VPS'te üretilen 64-hex anahtar, hosting'te `api_token.txt`; `hash_equals`; OpenAI anahtarı hosting'ten HTTPS ile ajana gider, VPS diskine yazılmaz (22.09) |
@@ -49,12 +49,21 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [Z-02](Z-02.md) | Önce Yapı Tanımı; çıktılar ondan türetilir | Tanım bir çıktının ihtiyacını taşıyamazsa |
 | [Z-03](Z-03.md) | Öneren ve hakem ayrı; bağlayıcı karar tekrar üretilebilir, sürümlü ve testli | Bir model PortmanBench geometri görevlerinde %98'i geçerse birincil öneren o olur; kuralların anlamı ve onay izi korunur |
 | [Z-04](Z-04.md) | Tek veritabanı: Postgres + pgvector, ayrı vektör veritabanı yok | Arama süresi ya da vektör sayısı sorun olursa |
-| [Z-05](Z-05.md) | Birincil model Claude Opus 5.5, model geçidi arkasında (canlıda bugün gpt-4o-mini) | Başka bir model (açık ya da yerel dahil) PortmanBench'te aynı skoru daha ucuza alırsa |
+| [Z-05](Z-05.md) | Birincil model Claude Opus 5.5, model geçidi arkasında (29.09'dan beri canlıda) | Başka bir model (açık ya da yerel dahil) PortmanBench'te aynı skoru daha ucuza alırsa |
 | [Z-06](Z-06.md) | Tek sunucu, GPU yok | Ölçülen render süresi ya da kuyruk beklemesi işi tıkarsa ya da günlük talep 50'yi geçerse |
 | [Z-07](Z-07.md) | BIM çıktısı IFC4 (açık ISO standardı) | Bir araç ya da müşteri başka bir IFC sürümü gerektirirse |
 | [Z-08](Z-08.md) | Kişisel veri sunucuda, LLM'e takma adla | Hukuki görüş başka bir şey söylerse |
 | [Z-09](Z-09.md) | Ayda bir alan taraması: BenchCAD, Text2CAD-Bench, plan üretimi, IFC ve görsel modeller; her ayın 1'inde planlı görev | Süreç kararı; bir varsayımı bozan gelişme ilgili kararı açar |
 | [Z-10](Z-10.md) | Çift doğrulama: her teklif iki bağımsız yöntemle hesaplanır, modelden kesin metraj (IFC) ve CTKBF mantığıyla parametrik tahmin (Python); kalem grubu eşik dışındaysa ön onay durur, mühendis inceler | İki yöntem gerçek yükleme listelerinde aynı hatayı paylaşırsa; eşikler PortmanBench ile ayarlanır |
+
+## D-01 ve sonrası · Bu depoda alınan kararlar
+
+| No | Karar | Tarih |
+|---|---|---|
+| [D-01](D-01.md) | B2: taslak 2 saatten eskiyse ve mesaj model koduyla başlıyorsa sistem sorar (yeni talep mi, değişiklik mi) | 28.09 |
+| [D-02](D-02.md) | Referans PDF'in içeriğini de izler (bütün çizimler, sabit üretim zamanı); yeniden dondurma bir karara dayanır | 28.09 |
+| [D-03](D-03.md) | Kalıcı akışta yarım kalan iş, ilk deneme dâhil en çok üç kez alınır; yalnız geçici teknik hatada (süreç düştü, kira doldu). Gönderim ve kayıtlı sonuç üreten durumlar tekrarlanmaz | 28.09 |
+| [D-04](D-04.md) | Postgres mevcut VPS'te; konuşma ve iş durumunun asıl kaydı Postgres; tek etkin işleyici `settings.worker` ile (K12'nin görüşme durumu bölümünü değiştirir) | 28.09 |
 
 ## 27 Eylülde Lokman'ın verdiği kararlar
 
@@ -66,7 +75,6 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 
 ## Açık kararlar (sahibi Lokman)
 
-- **B2:** Görüşmede zaman aşımı yok. Seçenekler (DURUM.md, 23.09): (a) böyle kalsın, (b) taslak N saat sonra kapansın, (c) model koduyla başlayan mesaj yeni talep sayılsın. Test: `testler/bilinen_hatalar/test_b1_b2.py`.
 - **K16:** Modül dışı katalog planları için (a) modüle uyarlama ya da (b) serbest aks. 23 Eylül önerisi: bayi planlarında (b).
 - **K3 ve K4:** Güncel Şablon 2024 blok adlarına geçiş; kapı genişlikleri.
 - **Z-03 ve Z-06 eşikleri:** %98 ve günde 50 talep öneridir.

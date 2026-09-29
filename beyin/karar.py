@@ -8,7 +8,7 @@ from pathlib import Path
 
 from .sema import Talep, Karar
 from .katalog import Katalog
-from .konusma import Konusma, MAX_REVIZYON, MAX_SORU
+from .konusma import Konusma, MAX_REVIZYON, MAX_SORU, ESKI_TASLAK_SN
 from . import varyant
 
 MOD = 125.5
@@ -18,6 +18,9 @@ BAYI_JSON = Path(__file__).resolve().parent / "veri" / "bayiler.json"
 GRID_SABLON = {(6.0, 8.0, "2+1"): "ALTIN_2plus1_6x8.json", (6.0, 8.5, "2+1"): "YAN_VERANDALI_2plus1_6x8p5.json",
                (6.0, 6.0, "2+1"): "P6001_2plus1_6x6.json"}
 YONLENDIRME = "Bu konuyu Lokman Bey'e iletiyorum; en kısa sürede dönüş yapılacak."
+ESKI_TASLAK_SORUSU = "yeni_mi_degisiklik"      # D-01
+ESKI_TASLAK_EN_COK = 3                         # cevapsız kalırsa en çok bu kadar sorulur, sonra insana devredilir
+ESKI_SORU_SN = 24 * 3600                       # D-01 sorusu bu süreden sonra cevaplanırsa yok sayılır, mesaj normal işlenir
 
 
 def bayileri_yukle() -> dict:
@@ -52,20 +55,83 @@ def fmt_m(cm: float) -> str:
 
 
 def karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, metin: str | None = None) -> Karar:
-    """metin: bayinin kendi mesajı (ham). Kurallar "bayi ne dedi" sorusunu LLM'in özetinden değil bu metinden okur."""
+    """metin: bayinin kendi mesajı (ham). Kurallar "bayi ne dedi" sorusunu LLM'in özetinden değil bu metinden okur.
+    Kural katmanı bu mesajın yerine bekletilen bir mesajı işlediyse (D-01), o talep Karar.kullanilan_talep'te döner."""
+    k.kullanilan_talep, k.bekleyen_not = None, ""
+    k.rev0 = int(k.d.get("revizyon") or 0)          # G-2: _bitir, plan üretmeyen turda sayacı buna geri alır
+    karar = _karar_ver(talep, k, bayi, katalog, metin)
+    if k.kullanilan_talep is not None:
+        karar.kullanilan_talep = k.kullanilan_talep.model_dump(mode="json")
+    if k.bekleyen_not:              # D-01: bekletilen mesaj işlenmeden düştüyse bayi bunu bu cevapta öğrenir
+        karar.mesaj = k.bekleyen_not + karar.mesaj
+    return karar
+
+
+def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, metin: str | None) -> Karar:
     t = talep
     k.not_dus("gelen", t.ozet, {"niyet": t.niyet, "guven": t.guven})
     # Askıdaki "ölçü mü değiştirelim, pencere mi ekleyelim?" sorusunun cevabı: kısa ve açık bir "değiştir"/"ekle" ise
     # LLM'in niyet sınıflandırmasından bağımsız olarak taslaktaki pencere satırına işlenir ve akış devam eder.
-    if metin and k.d.get("son_soru_alani") == "pencere_islem" and len(metin.split()) <= 6:
+    # Cevap yalnız kısa ve saf bir "değiştir"/"ekle" ise sayılır ("aynalı olsun" cevap değildir); yalnız sorulan pencere satırı
+    # çözülür (B1 incelemesi, 28.09). Saf metin ("değiştir", "ekle" ve dolgu sözcükleri) yeni içerik taşıyamaz: LLM'in bu kısa
+    # cevaba bağlamdan yinelediği oda, ölçü ya da model (29.09 G-1: Opus 5.5 böyle yaptı ve soru 'dustu' kapandı) yok sayılır.
+    if metin and k.d.get("son_soru_alani") == "pencere_islem" and len(metin.split()) <= 6 and _pencere_cevabi_saf(metin):
         cevap = _pencere_niyeti(metin)
         if cevap in ("ekle", "degistir"):
+            sorulan = k.d.get("pencere_islem_satiri")
             for p in k.d["taslak"].get("pencereler") or []:
-                if p.get("islem") == "ekle":
+                if p.get("islem_kaynak") == "bayi cevabı":
+                    continue
+                if (list(_pencere_anahtari(p)) == sorulan) if sorulan else (p.get("islem") == "ekle" or p.get("soz_niyeti") == "belirsiz"):
                     p["islem"] = cevap; p["islem_kaynak"] = "bayi cevabı"
+            k.d.pop("pencere_islem_satiri", None)
             k.d["son_soru_alani"] = None
             k.not_dus("kural", f"pencere_islem cevabı: {cevap}")
-            t = t.model_copy(update={"niyet": "yeni_talep", "pencereler": []})
+            t = Talep(niyet="yeni_talep", guven=t.guven, ozet=t.ozet)      # LLM'in bu kısa cevaba verdiği içerik yok sayılır
+        elif _olumsuz_ya_da_soru(metin):
+            # 29.09 (Astra): "değiştirme", "eklemeyin" gibi olumsuz ya da soru biçimli kısa cevap hiçbir işleme çevrilmez; LLM ne
+            # derse desin (boş, bağlamdan doldurulmuş ya da "red") soru yinelenir: pencere değişmez, eklenmez, talep kapanmaz.
+            k.not_dus("kural", "pencere_islem cevabı olumsuz ya da soru biçimli: soru yinelendi")
+            return _soru(k, "pencere_islem", "Anlayamadım. " + (k.d.get("pencere_islem_sorusu") or
+                         "Mevcut pencerenin ölçüsünü mü değiştirelim, yoksa ikinci bir pencere mi ekleyelim? \"değiştir\" ya da \"ekle\" yazmanız yeterli."))
+
+    # D-01: askıda "yeni talep mi, önceki taslağın değişikliği mi?" sorusu varken gelen mesaj. Yalnız kısa ve saf bir cevap
+    # ("yeni", "değişiklik", "önceki taslağın değişikliği") cevap sayılır; o zaman soruyu doğuran mesaj (bekletilen talep ve
+    # bayinin o mesajdaki sözü) seçilen yola göre işlenir, LLM'in bu kısa cevaba verdiği niyete bakılmaz.
+    eski_taslak_cevabi = None
+    if k.d.get("son_soru_alani") == ESKI_TASLAK_SORUSU and k.d.get("bekleyen_talep") and bayi is not None:
+        kodlar, kalan_metin = _model_kodlari_ve_kalan(metin, katalog)
+        bekleyen_kod = Katalog.kod_normalize(k.d["bekleyen_talep"].get("katalog_kodu") or k.d["taslak"].get("katalog_kodu"))
+        if time.time() - (k.d.get("bekleyen_zamani") or 0) > ESKI_SORU_SN:
+            _bekleyeni_birak(k); k.d.pop("eski_taslak_soru", None)          # çok eski soru: normal akış
+        elif t.niyet == "onay":
+            return _eski_taslak_sor(k)       # "tamam/onay" bu sorunun cevabı değil; eski plan onaylanmaz, bekletilen mesaj düşmez
+        elif t.niyet == "red":               # iptal yalnız bekletilen mesajı iptal eder; eski taslağa dokunulmaz
+            bekleyen = _bekleyeni_birak(k); k.d.pop("eski_taslak_soru", None)
+            return _bitir(k, Karar(eylem="cevapla", gerekce="bekletilen mesaj iptal edildi (D-01)",
+                                   mesaj=f"Bekleyen mesajınızı («{_kisalt(bekleyen)}») iptal ettim; önceki taslağınız olduğu gibi duruyor."))
+        elif any(Katalog.kod_normalize(c) != bekleyen_kod for c in kodlar):
+            k.bekleyen_not = _dusen_not(_bekleyeni_birak(k))                # başka model kodlu yeni mesaj: normal akış
+        else:
+            # aynı model kodu cevabın parçası olabilir ("P6001 yeni", "P6001 değişiklik"): kod çıkarılıp kalan değerlendirilir
+            cevap, saf, deneme = _eski_taslak_cevabi(kalan_metin)
+            if cevap and saf:
+                eski_taslak_cevabi = cevap
+                bekleyen_metin = k.d.get("bekleyen_metin")
+                t = Talep.model_validate(k.d["bekleyen_talep"])
+                metin = bekleyen_metin or metin
+                _bekleyeni_birak(k); k.d.pop("eski_taslak_soru", None)
+                if cevap == "yeni":
+                    k.sifirla()
+                    t = t.model_copy(update={"niyet": "yeni_talep"})
+                else:
+                    t = t.model_copy(update={"niyet": "revizyon" if k.d.get("son_is_emri") else "yeni_talep"})
+                k.kullanilan_talep = t
+                k.not_dus("kural", f"eski taslak sorusunun cevabı: {cevap}")
+            elif not deneme and (_icerikli(t) or len((metin or "").split()) > 6):
+                k.bekleyen_not = _dusen_not(_bekleyeni_birak(k))            # cevap denemesi yok, yeni bir istek: normal akış
+            else:
+                return _eski_taslak_sor(k)          # anlaşılmadı, olumsuz, iki cevap birden ya da cevap + ek istek: yinele
 
     # 0) yalnız kayıtlı bayiler
     if bayi is None:
@@ -87,8 +153,9 @@ def karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, met
     if t.niyet == "onay":
         if k.d["asama"] == "onay_bekliyor" and k.d.get("son_is_emri"):
             k.d["asama"] = "onaylandi"
-            return _bitir(k, Karar(eylem="cevapla", gerekce="plan onaylandı", revizyon=k.d["revizyon"],
-                                    mesaj=f"Onayınız kaydedildi ({k.d['son_is_emri'].get('is_emri_no')}, revizyon {k.d['revizyon']}). Teklif aşamasına geçiliyor."))
+            rev = k.d["son_is_emri"].get("revizyon", k.d["revizyon"] + 1)   # gönderilen planın numarası (r01 = 1)
+            return _bitir(k, Karar(eylem="cevapla", gerekce="plan onaylandı", revizyon=rev,
+                                    mesaj=f"Onayınız kaydedildi ({k.d['son_is_emri'].get('is_emri_no')}, revizyon {rev}). Teklif aşamasına geçiliyor."))
         return _bitir(k, Karar(eylem="cevapla", gerekce="onaylanacak plan yok",
                                 mesaj="Onaylanacak açık bir plan görünmüyor. Yeni plan için model kodu ya da ölçü yazabilirsiniz."))
     if t.niyet == "red":
@@ -100,15 +167,27 @@ def karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, met
         return _bitir(k, Karar(eylem="cevapla", gerekce="iptal", mesaj="Talep kapatıldı. Yeni bir plan istediğinizde yazmanız yeterli."))
 
     # 2) yeni_talep / revizyon
+    kapanmis = t.niyet == "yeni_talep" and k.d["asama"] in ("uretildi", "onay_bekliyor", "onaylandi", "yonlendirildi")
+    # Bayi açıkça yeni talep dediyse ("yeni talep", "yeni bir ev", "başka müşteri için") süre ne olursa olsun eski taslak kapanır.
+    if eski_taslak_cevabi is None and t.niyet in ("yeni_talep", "revizyon") and k.d["taslak"] and _acik_yeni_talep(metin):
+        k.sifirla(); k.not_dus("kural", "açık yeni talep sözü: önceki taslak kapandı")
+        t = t.model_copy(update={"niyet": "yeni_talep"}); kapanmis = False
+    baska_model = bool(t.niyet == "yeni_talep" and t.katalog_kodu and k.d["taslak"].get("katalog_kodu")
+                       and Katalog.kod_normalize(t.katalog_kodu) != Katalog.kod_normalize(k.d["taslak"]["katalog_kodu"]))
+    # D-01: mesaj eski bir taslağa eklenecekse ve taslak ESKI_TASLAK_SN'den eskiyse, model koduyla başlayan mesajda tahmin
+    # edilmez, sorulur (22.09: 3,5 saat sonra gelen "P6001 …" eski aynalı taslağın revizyonu sayılmıştı).
+    if eski_taslak_cevabi is None and t.niyet in ("yeni_talep", "revizyon") and k.d["taslak"] and not kapanmis \
+            and not baska_model and _eski_taslak(k) and _model_koduyla_basliyor(metin, katalog):
+        return _eski_taslak_sor(k, t, metin)
+    k.d.pop("eski_taslak_soru", None)
     if t.niyet == "revizyon" and k.d.get("son_is_emri"):
         k.d["revizyon"] += 1
         if k.d["revizyon"] > MAX_REVIZYON:
             return _bitir(k, Karar(eylem="yonlendir", gerekce="revizyon sınırı",
                                     mesaj=f"Bu plan için {MAX_REVIZYON} revizyon hakkı doldu. " + YONLENDIRME))
-    elif t.niyet == "yeni_talep" and k.d["asama"] in ("uretildi", "onay_bekliyor", "onaylandi", "yonlendirildi"):
+    elif kapanmis:
         k.sifirla()  # önceki proje kapandı ya da insana devredildi; yeni talep
-    elif t.niyet == "yeni_talep" and t.katalog_kodu and k.d["taslak"].get("katalog_kodu") \
-            and Katalog.kod_normalize(t.katalog_kodu) != Katalog.kod_normalize(k.d["taslak"]["katalog_kodu"]):
+    elif baska_model:
         k.sifirla()  # başka bir modele geçti
     # askıda kalan pencere sorusu cevaplanmadan başka bir istek geldiyse: pencere değişikliğini düşür, bayiye söyle
     dusen_not = ""
@@ -116,10 +195,22 @@ def karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, met
             and not any(v.tur.startswith("pencere") for v in t.varyantlar):
         k.d["taslak"].pop("pencereler", None); k.d["son_soru_alani"] = None
         dusen_not = "Önceki pencere değişikliğini netleştirmediğiniz için uygulamadım; isterseniz sonra ekleriz. "
+    t = _pencere_varyantlarina_soz_isle(t, metin)    # G-3/G-4 (29.09): pencere değişikliği tek yoldan, B1 kurallarıyla
     k.birlestir(t.model_dump())
     k.d["asama"] = "topluyor"
     k.d["son_metin"] = (metin or "").strip()      # sıfırlama(lar)dan SONRA: kurallar bayinin bu mesajdaki sözünü okur
     ts = k.d["taslak"]
+    # B1: bu mesajdan gelen pencere satırlarına bayinin BU mesajdaki sözü işlenir (değiştir / ekle / belirsiz). Kural sonraki
+    # mesajlarda da bu kayda bakar; "ayna olsun" gibi sonraki bir revizyonun sözü eski pencere satırını yeniden yorumlamaz.
+    # Aynı oda için yeni bir satır gelince o odanın eski satırları düşer: son söz geçerli (eski belirsiz satır yeniden sorulmaz).
+    if t.pencereler:
+        yeni_anahtarlar = {_pencere_anahtari(p) for p in t.model_dump()["pencereler"]}
+        yeni_mahaller = {varyant._norm(a[0]) for a in yeni_anahtarlar}
+        ts["pencereler"] = [p for p in ts.get("pencereler") or []
+                            if _pencere_anahtari(p) in yeni_anahtarlar or varyant._norm(_pencere_anahtari(p)[0]) not in yeni_mahaller]
+        for p in ts["pencereler"]:
+            if _pencere_anahtari(p) in yeni_anahtarlar and p.get("islem_kaynak") != "bayi cevabı":
+                p["soz_niyeti"] = _pencere_soz_niyeti(metin, p.get("mahal"), p.get("olcu"))
     if dusen_not:
         ts["_on_not"] = dusen_not
 
@@ -184,7 +275,15 @@ def _is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, sablon: dict, kaynak
                 if len(eslesen) != 1:
                     secenek = ", ".join(m["ad"] for m in ie["mahaller"] if any(a.get("mahal") == m["ad"] for a in ie["acikliklar"] if a["tur"] == "pencere"))
                     return _soru(k, "pencere_mahal", f"Hangi odanın penceresini {yeni} yapalım? Seçenekler: {secenek}.")
-                ie = varyant.pencere_degistir(ie, eslesen[0], p.get("eski"), yeni); notlar.append(f"{eslesen[0]} penceresi {yeni}")
+                # G-3/G-4 (29.09): oda ve ölçü belli; değişikliği satır yolu B1 kurallarıyla uygular. Aynı odanın satırı varsa varyant
+                # düşer (not iki kez yazılmaz); yoksa varyant, geldiği mesajdaki sözle satıra çevrilir. Oda parametrede değil yalnız
+                # açıklamada yazılı olsa da (Astra) söz belirsizse B1 sorar: pencere varyant yoluyla sessizce değişmez.
+                if not any(varyant._norm(r.get("mahal") or "") == varyant._norm(eslesen[0]) for r in ts.get("pencereler") or []):
+                    satir = {"mahal": eslesen[0], "olcu": yeni, "adet": None, "duvar": None, "islem": "degistir"}
+                    if p.get("soz_niyeti"):
+                        satir["soz_niyeti"] = p["soz_niyeti"]
+                    ts.setdefault("pencereler", []).append(satir)
+                ts["varyantlar"] = [x for x in ts.get("varyantlar") or [] if x is not v]
             else:
                 return _bitir(k, Karar(eylem="yonlendir", gerekce=f"varyant desteklenmiyor: {tur}",
                                         mesaj=f"\"{v.get('aciklama','')}\" değişikliği otomatik yapılamıyor. " + YONLENDIRME))
@@ -192,20 +291,37 @@ def _is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, sablon: dict, kaynak
             return _bitir(k, Karar(eylem="yonlendir", gerekce=f"varyant hatası: {e}", mesaj=f"Değişiklik uygulanamadı ({e}). " + YONLENDIRME))
     # pencere listesi: 'degistir' → şablondaki mahalle eşleştirip ölçü değiştir; 'ekle'/'kaldir' → v0.1'de yönlendirme
     for p in ts.get("pencereler") or []:
-        if p.get("islem") == "ekle" and p.get("olcu") and p.get("mahal") and p.get("islem_kaynak") != "bayi cevabı":
-            # "yatak odası 1 penceresi 120x180" → LLM bazen 'ekle' der. Mahalde zaten TEK pencere varsa bayinin KENDİ sözlerine bakılır
-            # (k.d["son_metin"]; LLM özeti ölçüt değildir — özet "eklenmesini" diye kendi kararını tekrar eder, 22.09 canlı hata):
+        if p.get("islem") in (None, "degistir", "ekle") and p.get("olcu") and p.get("mahal") and p.get("islem_kaynak") != "bayi cevabı":
+            # Mahalde zaten TEK pencere varsa ölçüt bayinin KENDİ sözüdür, LLM'in işlem alanı ya da özeti değil (K18, K21; 22.09 canlı
+            # hata: LLM 'ekle' dedi; B1: LLM boş ya da 'degistir' verince belirsiz söz sessizce değişiklik sayılıyordu):
             #   açık değiştirme sözü → ölçü değişikliği; açık ekleme sözü → ekleme (v0.1'de yönlendirme); ikisi de yoksa → SORULUR.
+            # Söz, pencere satırının geldiği mesajdan kaydedilir (soz_niyeti); eski kayıtlarda son mesaja bakılır.
             eslesen = _mahal_eslestir(ie, p.get("mahal"))
             mevcut = [a for a in ie.get("acikliklar", []) if a["tur"] == "pencere" and a.get("mahal") == (eslesen[0] if len(eslesen) == 1 else None)]
+            niyet = p.get("soz_niyeti")
+            if niyet is None:   # v1.1.1'den kalan kayıt: İş Emri'ne girmiş satır değişiklik sayılır, yoksa son mesaja bakılır
+                niyet = "degistir" if k.d.get("son_is_emri") else _pencere_soz_niyeti(k.d.get("son_metin") or p.get("aciklama") or "",
+                                                                                     p.get("mahal"), p.get("olcu"))
+            if len(eslesen) == 1 and len(mevcut) > 1:
+                if niyet == "ekle":
+                    p = {**p, "islem": "ekle"}
+                else:           # hangi pencere? otomatik seçilmez (v0.1'de soru yerine devir)
+                    olculer = ", ".join(a.get("olcu", "?") for a in mevcut)
+                    return _bitir(k, Karar(eylem="yonlendir", gerekce=f"{eslesen[0]}: {len(mevcut)} pencere, hangisi belirsiz",
+                                           mesaj=f"{eslesen[0]} odasında {len(mevcut)} pencere var ({olculer}); hangisinin {p['olcu']} "
+                                                 "olacağını otomatik seçemiyorum. " + YONLENDIRME))
             if len(eslesen) == 1 and len(mevcut) == 1:
-                niyet = _pencere_niyeti(k.d.get("son_metin") or p.get("aciklama") or "")
                 if niyet == "degistir":
+                    if p.get("islem") == "ekle":
+                        notlar.append(f"{eslesen[0]} mevcut penceresi ölçü değişikliği sayıldı (ekleme değil)")
                     p = {**p, "islem": "degistir"}
-                    notlar.append(f"{eslesen[0]} mevcut penceresi ölçü değişikliği sayıldı (ekleme değil)")
-                elif niyet == "belirsiz":
-                    return _soru(k, "pencere_islem", f"{eslesen[0]} odasında zaten bir pencere var ({mevcut[0].get('olcu', '?')}). "
-                                 f"Ölçüsünü {p['olcu']} yapalım mı, yoksa ikinci bir pencere mi ekleyelim? \"değiştir\" ya da \"ekle\" yazmanız yeterli.")
+                elif niyet == "ekle":
+                    p = {**p, "islem": "ekle"}
+                else:
+                    k.d["pencere_islem_satiri"] = list(_pencere_anahtari(p))
+                    k.d["pencere_islem_sorusu"] = (f"{eslesen[0]} odasında zaten bir pencere var ({mevcut[0].get('olcu', '?')}). "
+                                                   f"Ölçüsünü {p['olcu']} yapalım mı, yoksa ikinci bir pencere mi ekleyelim? \"değiştir\" ya da \"ekle\" yazmanız yeterli.")
+                    return _soru(k, "pencere_islem", k.d["pencere_islem_sorusu"])
         if p.get("islem") in ("ekle", "kaldir"):
             return _bitir(k, Karar(eylem="yonlendir", gerekce="pencere ekle/kaldır v0.1'de yok",
                                     mesaj="Pencere ekleme/kaldırma otomatik yapılamıyor. " + YONLENDIRME))
@@ -222,7 +338,9 @@ def _is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, sablon: dict, kaynak
                 return _bitir(k, Karar(eylem="yonlendir", gerekce=f"pencere hatası: {e}", mesaj=f"Pencere değişikliği uygulanamadı ({e}). " + YONLENDIRME))
     seq = int(time.time()) % 100000
     ie["is_emri_no"] = f"PM-{bayi.get('kod','BAYI')}-{time.strftime('%Y%m%d')}-{seq}"
-    ie["revizyon"] = k.d["revizyon"] + 1
+    # G-2 (29.09): numara, gönderilmiş son planın numarasından (konuşma sıfırlandıysa 1); sayaç plan sayısıyla eşitlenir.
+    ie["revizyon"] = int((k.d.get("son_is_emri") or {}).get("revizyon") or 0) + 1
+    k.d["revizyon"] = ie["revizyon"] - 1
     ie["talep"] = {"bayi": {"kod": bayi.get("kod"), "ad": bayi.get("ad")}, "kaynak": kaynak,
                    "musteri_adi": (ts.get("musteri") or {}).get("ad") or "", "metin": ts.get("ozet", "")}
     ie["kunye"] = {"proje_kodu": ie["is_emri_no"], "ilgili_kisi_telefon": f"{bayi.get('ad','')} / {k.gonderen}",
@@ -252,16 +370,92 @@ def _sozcuk_norm(metin: str) -> str:
     return re.sub(r"\s+", " ", re.sub(r"[^a-z0-9]+", " ", q)).strip()
 
 
+_PENCERE_CEVAP_SOZ = re.compile(r"degis\w*|ekle\w*|ilave\w*|yap\w*|olsun|olcu\w*|pencere\w*|ikinci|tane|daha|sadece|onu")
+
+
+def _pencere_cevabi_saf(metin: str | None) -> bool:
+    """Kısa cevapta "değiştir"/"ekle" ve dolgu sözcükleri dışında sözcük yok mu? ("aynalı olsun" saf değildir.)"""
+    return all(_PENCERE_CEVAP_SOZ.fullmatch(w) or w in _DOLGU or w in _SELAM for w in _sozcuk_norm(metin).split())
+
+
+def _pencere_anahtari(p: dict) -> tuple:
+    """Konuşma taslağındaki pencere satırının kimliği (konusma._anahtar ile aynı: mahal, işlem, duvar)."""
+    return (str(p.get("mahal") or "").strip().lower(), p.get("islem"), p.get("duvar"))
+
+
+_OLUMSUZ_PENCERE = re.compile(r"\b(olmasin\w*|olmayacak|istemiyor\w*|istemem|degil\w*|yok|degistirme\w*|yapma\w*|ekleme\w*|koyma\w*)\b")
+_SORU_EKI = re.compile(r"\b(mi|mu|misiniz|musunuz|miyiz|muyuz|midir|mudur|mismiz)\b")
+_ACIK_YENI = re.compile(r"\b(yeni (bir )?(talep|proje|ev|siparis|musteri|teklif)\w*|baska (bir )?(talep|proje|ev|musteri|siparis)\w*|sifirdan)\b")
+
+
+def _acik_yeni_talep(metin: str | None) -> bool:
+    """Bayi açıkça yeni bir talep mi diyor? ("yeni talep", "yeni bir ev", "başka müşteri için", "sıfırdan"; "yeni pencere"
+    ve hemen ardından olumsuzlanan "yeni talep değil" sayılmaz)"""
+    q = " " + _sozcuk_norm(metin) + " "
+    return any(not re.match(r"\s*(degil|yok)\b", q[m.end():]) for m in _ACIK_YENI.finditer(q))
+
+
+def _olcu_norm(s: str | None) -> str | None:
+    m = re.search(r"(\d{2,3})\s*[xX×*]\s*(\d{2,3})", s or "")
+    return f"{m.group(1)}x{m.group(2)}" if m else None
+
+
+def _pencere_soz_niyeti(metin: str | None, mahal: str | None, olcu: str | None) -> str:
+    """Bir pencere satırı için bayinin sözü. Yalnız o satırı anan bölümler okunur (oda adı, ölçü ya da "pencere" geçen);
+    "çatı beşik olsun"daki "olsun" pencereye sayılmaz. Bu bölümlerde olumsuzluk ("olmasın", "değiştirmeyin") ya da soru
+    ("… yapsak değişir mi?") varsa söz belirsizdir: pencere sessizce değişmez, sorulur."""
+    parcalar = re.findall(r"[^;,.!?\n]+[;,.!?\n]*", metin or "")
+    mahal_n = varyant._norm(mahal or "") if mahal else ""
+    olcu_n = _olcu_norm(olcu) if olcu else None
+    ilgili = []
+    for parca in parcalar:
+        q = _sozcuk_norm(parca)
+        bitisik = q.replace(" ", "")
+        if (olcu_n and _olcu_norm(parca) == olcu_n) or (mahal_n and mahal_n in bitisik) or re.search(r"\bpencere\w*", q):
+            ilgili.append(parca)
+    if not ilgili:
+        return _pencere_niyeti(metin)
+    for parca in ilgili:
+        q = " " + _sozcuk_norm(parca) + " "
+        if "?" in parca or _SORU_EKI.search(q) or _OLUMSUZ_PENCERE.search(q):
+            return "belirsiz"
+    return _pencere_niyeti(" ".join(ilgili))
+
+
+def _olumsuz_ya_da_soru(metin: str | None) -> bool:
+    q = " " + _sozcuk_norm(metin) + " "
+    return "?" in (metin or "") or bool(_SORU_EKI.search(q)) or bool(_OLUMSUZ_PENCERE.search(q))
+
+
 def _pencere_niyeti(metin: str | None) -> str:
     """Bayinin sözünde pencere için ne var: 'ekle' (açık ekleme sözü), 'degistir' (açık ölçü değiştirme sözü), 'belirsiz' (ikisi de yok
     ya da ikisi de var). Sözcük sınırıyla arar: 'bekle' ekleme değildir; 'bir pencere koy' eklemedir; 'penceresi 120x180 olsun' değişikliktir."""
     q = " " + _sozcuk_norm(metin) + " "
+    if _olumsuz_ya_da_soru(metin):      # 29.09 (Astra): "değiştirme", "eklemeyin", "olmasın", "… mi?" hiçbir işlem sayılmaz
+        return "belirsiz"
     ekle = bool(_EKLE_RX.search(q)); degistir = bool(_DEGISTIR_RX.search(q))
     if ekle and not degistir:
         return "ekle"
     if degistir and not ekle:
         return "degistir"
     return "belirsiz"
+
+
+def _pencere_varyantlarina_soz_isle(t: Talep, metin: str | None) -> Talep:
+    """Bu mesajdan gelen her "pencere_degistir" varyantına bayinin bu mesajdaki sözü (soz_niyeti) işlenir. Varyant İş Emri
+    üretilirken odası bulunursa pencere satırına çevrilir ve B1 kuralları uygulanır (bkz. _is_emri_uret): söz belirsizse sorulur."""
+    if not any(v.tur == "pencere_degistir" for v in t.varyantlar):
+        return t
+    from .sema import Varyant
+    yeni = []
+    for v in t.varyantlar:
+        if v.tur == "pencere_degistir":
+            prm = dict(v.parametreler or {})
+            olcu = prm.get("yeni") or prm.get("olcu") or prm.get("yeni_olcu") or _olcu_bul(v.aciklama)
+            prm["soz_niyeti"] = _pencere_soz_niyeti(metin, prm.get("mahal"), olcu)
+            v = Varyant(tur=v.tur, aciklama=v.aciklama, parametreler=prm)
+        yeni.append(v)
+    return t.model_copy(update={"varyantlar": yeni})
 
 
 def _olcu_bul(metin: str) -> str | None:
@@ -292,6 +486,126 @@ def _mahal_eslestir(ie: dict, mahal: str | None) -> list[str]:
     return [a for a in adlar if q in varyant._norm(a) or varyant._norm(a) in q]
 
 
+def _eski_taslak(k: Konusma) -> bool:
+    """Taslağın son değiştiği an (selam ya da genel soru cevabı saymaz); eski durum dosyasında yoksa son kayıt anı."""
+    son = k.d.get("taslak_zamani") or k.d.get("guncellendi") or 0
+    return son > 0 and time.time() - son > ESKI_TASLAK_SN
+
+
+_SELAM = {"merhaba", "merhabalar", "selam", "selamlar", "slm", "sa", "gunaydin", "iyi", "gunler", "aksamlar", "hayirli",
+          "isler", "kolay", "gelsin", "lokman", "bey", "beyefendi", "hocam", "abi", "abim", "hanim", "tesekkurler"}
+
+
+def _model_kodlari_ve_kalan(metin: str | None, katalog: Katalog) -> tuple[list[str], str]:
+    """Mesajdaki katalog kodları ve kodlar çıkarılınca kalan metin (başa gelen selamlaşma sözcükleri dahil edilmez)."""
+    kodlar, kalan = [], []
+    for sira, soz, kod in _sozcukler(metin, katalog):
+        (kodlar.append(kod) if kod else kalan.append(soz))
+    return kodlar, " ".join(kalan)
+
+
+def _sozcukler(metin: str | None, katalog: Katalog) -> list[tuple[int, str, str | None]]:
+    """(sözcük sırası, sözcük, katalog kodu ya da None). WhatsApp biçim işaretleri (*_~) atlanır; "P 6001", "p-6001",
+    "6001", "P6001'i", "P6001/aynalı" kod olarak tanınır. Baştaki selamlaşma sözcükleri atlanır, sıra onlardan sonra başlar."""
+    toks = [x for x in re.split(r"[\s,.;:!?'’/()*_~\-]+", metin or "") if x]
+    out, i, sira = [], 0, 0
+    while i < len(toks):
+        a = toks[i]
+        if sira == 0 and _sozcuk_norm(a) in _SELAM:
+            i += 1; continue
+        if a.upper() in ("P", "Ç", "C") and i + 1 < len(toks) and re.fullmatch(r"\d{4}", toks[i + 1]):
+            a = a + toks[i + 1]; i += 1
+        m = katalog.bul(a)
+        out.append((sira, a, m["code"] if m else None))
+        sira += 1; i += 1
+    return out
+
+
+def _model_koduyla_basliyor(metin: str | None, katalog: Katalog) -> str | None:
+    """Bayinin mesajı (selamlaşma sözcüklerinden sonra) katalogdaki bir model koduyla mı başlıyor? Öyleyse kodu döner."""
+    ilk = [kod for sira, _soz, kod in _sozcukler(metin, katalog) if sira == 0 and kod]
+    return ilk[0] if ilk else None
+
+
+_YENI_SOZ = re.compile(r"yeni(si|sini)?|sifirdan|baska")
+_DEGISIKLIK_SOZ = re.compile(r"degisikli[kg]\w*|degistir\w*|revizyon\w*|revize|onceki\w*|devam\w*|ayni(si|sina)?|eski(si|sinin|sine|sini)?")
+_OLUMSUZ = {"degil", "yok", "hayir", "olmasin", "istemiyorum", "istemem"}
+_DOLGU = {"ve", "ama", "evet", "tamam", "lutfen", "bu", "o", "su", "bir", "talep", "talebi", "talebim", "olsun", "proje", "projesi",
+          "taslak", "taslagin", "taslagi", "taslaga", "mesaj", "mesajim", "benim", "is", "isi", "plan", "plani", "planin"}
+
+
+def _eski_taslak_cevabi(metin: str | None) -> tuple[str | None, bool, bool]:
+    """(cevap, saf, deneme). cevap: 'yeni' | 'degisiklik' | None (yok, ikisi birden ya da olumsuzlanmış). saf: cevap ve
+    dolgu sözcükleri dışında sözcük yok. deneme: mesajda cevap sözcüğü ya da olumsuzluk var (bayi cevap vermeye çalışmış).
+    "yeni değil", "değişiklik yok" anlaşılmadı sayılır; "yeniden" yeni sayılmaz."""
+    soz = _sozcuk_norm(metin).split()
+    yeni = [w for w in soz if _YENI_SOZ.fullmatch(w)]
+    degis = [w for w in soz if _DEGISIKLIK_SOZ.fullmatch(w)]
+    olumsuz = [w for w in soz if w in _OLUMSUZ]
+    kalan = [w for w in soz if w not in yeni and w not in degis and w not in olumsuz and w not in _DOLGU and w not in _SELAM]
+    deneme = bool(yeni or degis or olumsuz)
+    if olumsuz or bool(yeni) == bool(degis):
+        return None, False, deneme
+    return ("yeni" if yeni else "degisiklik"), not kalan, deneme
+
+
+def _icerikli(t: Talep) -> bool:
+    """LLM çıkarımında plan içeriği var mı (model, ölçü, oda, pencere, varyant, özel istek…)?"""
+    d = t.model_dump(exclude={"niyet", "guven", "ozet", "belirsizlikler", "musteri"})
+    return any(v not in (None, [], {}, "") for v in d.values())
+
+
+def _kisalt(metin: str | None, n: int = 60) -> str:
+    m = " ".join((metin or "").split())
+    return m if len(m) <= n else m[:n - 1] + "…"
+
+
+def _dusen_not(bekleyen_metin: str) -> str:
+    return f"Sorumu cevaplamadan yeni mesaj yazdığınız için önceki mesajınızı («{_kisalt(bekleyen_metin)}») işlemedim; gerekirse yeniden yazın. "
+
+
+def _sure_metni(saniye: float) -> str:
+    saat = int(saniye // 3600)
+    return f"{saat // 24} gün" if saat >= 48 else f"{max(saat, 1)} saat"
+
+
+def _bekleyeni_birak(k: Konusma) -> str:
+    """Askıdaki D-01 sorusunu kapatır; bekletilen mesajın metnini döner. Soru sayacı (eski_taslak_soru) kalır."""
+    k.d.pop("bekleyen_talep", None); k.d.pop("bekleyen_zamani", None)
+    if k.d.get("son_soru_alani") == ESKI_TASLAK_SORUSU:
+        k.d["son_soru_alani"] = None
+    return k.d.pop("bekleyen_metin", "") or ""
+
+
+def _eski_taslak_sor(k: Konusma, t: Talep | None = None, metin: str | None = None) -> Karar:
+    """D-01: mesaj bekletilir, bayiye yeni mi değişiklik mi diye sorulur. t verilmezse bekleyen mesaj korunur ve soru
+    yinelenir. Soru, eksik bilgi sorularının sınırına (MAX_SORU) sayılmaz; ESKI_TASLAK_EN_COK kez sorulduktan sonra
+    talep insana devredilir."""
+    n = k.d.get("eski_taslak_soru", 0) + 1
+    if t is not None:
+        k.d["bekleyen_talep"] = t.model_dump(mode="json")
+        k.d["bekleyen_metin"] = (metin or "").strip()
+    if n > ESKI_TASLAK_EN_COK:
+        bekleyen = _bekleyeni_birak(k); k.d.pop("eski_taslak_soru", None)
+        return _bitir(k, Karar(eylem="yonlendir", gerekce=f"eski taslak sorusu cevapsız (D-01); bekleyen mesaj: «{_kisalt(bekleyen, 200)}»",
+                               mesaj="Önceki taslakla ilgili sorumu netleştiremedim. " + YONLENDIRME))
+    k.d["bekleyen_zamani"] = int(time.time())
+    k.d["son_soru_alani"] = ESKI_TASLAK_SORUSU
+    k.d["eski_taslak_soru"] = n
+    if n == 1:
+        ts = k.d["taslak"]
+        ie_no = (k.d.get("son_is_emri") or {}).get("is_emri_no")
+        ne = ts.get("ozet") or ts.get("katalog_kodu") or "açık taslak"
+        son = k.d.get("taslak_zamani") or k.d.get("guncellendi") or time.time()
+        mesaj = (f"Önceki taslağınız ({_kisalt(ne)}{', ' + ie_no if ie_no else ''}) {_sure_metni(time.time() - son)} önce kaldı. "
+                 "Bu mesaj yeni bir talep mi, yoksa o taslağın değişikliği mi? \"yeni\" ya da \"değişiklik\" yazmanız yeterli.")
+    else:
+        mesaj = ("Anlayamadım: bu yeni bir talep mi, yoksa önceki taslağınızın değişikliği mi? Lütfen yalnız \"yeni\" ya da "
+                 "\"değişiklik\" yazın; ek isteğinizi sonra yazabilirsiniz.")
+    return _bitir(k, Karar(eylem="sor", soru_alani=ESKI_TASLAK_SORUSU, mesaj=mesaj,
+                           gerekce="eski taslak: yeni mi değişiklik mi (D-01)" + (" · yinelendi" if n > 1 else "")))
+
+
 def _soru(k: Konusma, alan: str, metin: str) -> Karar:
     k.d["soru_sayisi"] += 1
     k.d["son_soru_alani"] = alan
@@ -301,11 +615,21 @@ def _soru(k: Konusma, alan: str, metin: str) -> Karar:
 
 
 def _bitir(k: Konusma, karar: Karar) -> Karar:
+    if karar.eylem in ("is_emri", "yonlendir"):
+        k.d["son_soru_alani"] = None                  # plan çıktı ya da insana devredildi: askıda soru kalmaz
+    if k.d.get("son_soru_alani") != ESKI_TASLAK_SORUSU:
+        k.d.pop("eski_taslak_soru", None)             # D-01 sorusu askıda değilse sayaç da kalmaz
+    if k.d.get("son_soru_alani") != "pencere_islem":
+        k.d.pop("pencere_islem_satiri", None)         # B1: sorulan pencere satırı yalnız soru askıdayken tutulur
+        k.d.pop("pencere_islem_sorusu", None)
     if karar.eylem == "is_emri":
         k.d["bekleyen_onay"] = karar.is_emri.get("is_emri_no") if karar.is_emri else None
         k.d["asama"] = "onay_bekliyor"
     elif karar.eylem == "yonlendir":
         k.d["asama"] = "yonlendirildi"; k.d["taslak"] = {}; k.d["soru_sayisi"] = 0   # insana devredildi; taslak kapanır
+    rev0 = getattr(k, "rev0", None)
+    if karar.eylem != "is_emri" and rev0 is not None and int(k.d.get("revizyon") or 0) > rev0:
+        k.d["revizyon"] = rev0      # G-2 (29.09): soru soran ya da yönlendiren revizyon turu revizyon numarası tüketmez
     k.not_dus("giden", karar.mesaj, {"eylem": karar.eylem, "gerekce": karar.gerekce})
     k.kaydet()
     return karar

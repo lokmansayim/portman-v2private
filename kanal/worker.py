@@ -19,7 +19,7 @@ KOD = Path(__file__).resolve().parent                                   # kod (b
 KANAL = Path(os.environ.get("PORTMAN_KANAL_DIR") or KOD).resolve()     # veri (settings/state/durum/projects); hostingte kodla aynı dizin
 sys.path.insert(0, str(KOD))
 os.umask(0o077)
-SURUM = "kanal-v1.1.1"
+SURUM = "kanal-v1.2"
 STALE_S = 600           # 'processing' bu kadar süre ilerlemezse başarısız sayılır (otomatik tekrar yok)
 GELEN_YAZILI = ("text", "button", "interactive")
 
@@ -244,9 +244,13 @@ def teknik_not(karar, talep, meta: dict, cizim: dict | None) -> str:
     return "\n— teknik: " + " | ".join(p)
 
 
-def isle(gelen: dict, settings: dict) -> dict:
-    """Bir gelen mesajı işler; giden satırlarını ve sonucu döndürür (state.json'a yazmaz — çağıran yazar)."""
-    from beyin import llm, katalog as KT
+def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje_koku: Path | None = None) -> dict:
+    """Bir gelen mesajı işler; giden satırlarını ve sonucu döndürür (state.json'a yazmaz — çağıran yazar).
+    İE-02 (kalıcı akış, kanal/kalici.py): k verilirse konuşma dosyadan değil o nesneden okunur; cikarim verilirse
+    ({"talep": …, "meta": …} ya da {"hata": …}) LLM çağrılmaz; proje_koku verilirse Motor çıktısı projects/ yerine oraya
+    yazılır (kalıcı akış önce hazırlık klasörüne yazar, kayıtla birlikte yerine taşır). Hiçbiri verilmezse davranış
+    v1.1.1 ile aynı."""
+    from beyin import katalog as KT
     from beyin.konusma import Konusma
     from beyin.karar import karar_ver
     from motor import dxf_out
@@ -272,27 +276,32 @@ def isle(gelen: dict, settings: dict) -> dict:
         sonuc.update(eylem="cevapla", gerekce="metin dışı mesaj")
         return {"satirlar": satirlar, "sonuc": sonuc}
 
-    k = Konusma(sender, KANAL / "durum")
-    llm_ayar = settings.get("llm") or {}
-    backend = llm_ayar.get("backend", "openai_chat")
+    if k is None:
+        k = Konusma(sender, KANAL / "durum")
     try:
-        talep, meta = llm.cikar_guvenli(gelen["text"], baglam_ozeti(k), backend=backend, model=llm_ayar.get("model") or None,
-                                        hazir=gelen.get("test_cikarim") if backend == "manuel" else None,   # yalnız yerel test
-                                        ayarlar_json=settings.get("ayarlar_json"), timeout=int(llm_ayar.get("timeout_s", 60)))
+        if cikarim is not None:
+            if cikarim.get("hata"):
+                raise CikarimHatasi(cikarim["hata"])
+            from beyin.sema import Talep
+            talep, meta = Talep.model_validate(cikarim["talep"]), dict(cikarim.get("meta") or {})
+        else:
+            talep, meta = cikar(gelen, settings, k)
     except Exception as e:
-        hata = f"{type(e).__name__}: {str(e)[:300]}"
+        hata = str(e)[:320] if isinstance(e, CikarimHatasi) else f"{type(e).__name__}: {str(e)[:300]}"
         ekle("Mesajınızı şu an işleyemedim; Lokman Bey'e iletiyorum, en kısa sürede dönüş yapılacak.")
         patrona(f"Portman: {kim} mesajı işlenemedi (çıkarım hatası). Mesaj: \"{gelen['text'][:300]}\"")
         sonuc.update(eylem="hata", gerekce="çıkarım hatası", hata=hata)
         return {"satirlar": satirlar, "sonuc": sonuc, "hata": hata}
 
     karar = karar_ver(talep, k, bayi, KT.Katalog(), metin=gelen.get("text") or "")
+    if karar.kullanilan_talep:      # D-01: bayi "yeni"/"değişiklik" diye cevap verdi; işlenen, bekletilen mesajın talebidir
+        talep = type(talep).model_validate(karar.kullanilan_talep)
     sonuc.update(eylem=karar.eylem, gerekce=karar.gerekce, niyet=talep.niyet, guven=talep.guven, katalog_kodu=talep.katalog_kodu,
                  varyantlar=[v.tur for v in talep.varyantlar], ozet=talep.ozet, llm=meta, asama=k.d.get("asama"))
     cizim = None
     if karar.eylem == "is_emri" and karar.is_emri:
         ie = karar.is_emri; no = ie["is_emri_no"]; rev = int(ie.get("revizyon", 1))
-        hedef = KANAL / "projects" / no / f"r{rev:02d}"
+        hedef = (Path(proje_koku) if proje_koku else KANAL / "projects") / no / f"r{rev:02d}"
         t0 = time.time()
         try:
             m = dxf_out.uret(ie, hedef)
@@ -324,6 +333,20 @@ def isle(gelen: dict, settings: dict) -> dict:
     if karar.eylem == "yonlendir":
         patrona(f"Portman yönlendirme: {kim} — {karar.gerekce}. Mesaj: \"{gelen['text'][:300]}\"")
     return {"satirlar": satirlar, "sonuc": sonuc}
+
+
+class CikarimHatasi(Exception):
+    """Kayıtlı çıkarım bir hata taşıyor (kalıcı akış: LLM çağrısı önceki denemede başarısız oldu)."""
+
+
+def cikar(gelen: dict, settings: dict, k):
+    """LLM çıkarımı (yalnız "bayi ne dedi?"). isle() ve kalıcı akış (kanal/kalici.py) aynı yolu kullanır."""
+    from beyin import llm
+    llm_ayar = settings.get("llm") or {}
+    backend = llm_ayar.get("backend", "openai_chat")
+    return llm.cikar_guvenli(gelen["text"], baglam_ozeti(k), backend=backend, model=llm_ayar.get("model") or None,
+                             hazir=gelen.get("test_cikarim") if backend == "manuel" else None,   # yalnız yerel test
+                             ayarlar_json=settings.get("ayarlar_json"), timeout=int(llm_ayar.get("timeout_s", 60)))
 
 
 def kaydet(gelen: dict, cikti: dict) -> None:

@@ -10,7 +10,7 @@ declare(strict_types=1);
  pm_contact) ve developer/config.php (numaralarOku, ayarlarOku, isteğe bağlı mesajKaydet).
 */
 if (!defined('PM_KANAL_DIR')) define('PM_KANAL_DIR', __DIR__);
-const PM_KANAL_SURUM = 'kanal-v1.0';
+const PM_KANAL_SURUM = 'kanal-v1.2';   // v1.2 (İE-02): gelen satırda context_id
 const PM_KANAL_STALE = 600;
 
 function pm_kanal_settings(): array { $p = PM_KANAL_DIR.'/settings.json'; return is_file($p) ? pm_read($p) : []; }
@@ -97,7 +97,10 @@ function pm_kanal_capture(string $raw, string $signature): array {
             $owned[$mid] = true;
             if ($ts < (int)($settings['enabled_at'] ?? 0) || $ts > $simdi + 60 || $simdi - $ts >= 900) continue; // eski / geç tekrar teslim: kuyruğa alma
             $bayi = pm_kanal_bayi($from); $media = is_array($m[$type] ?? null) ? $m[$type] : [];
-            $yeni[$mid] = ['id' => $mid, 'sender' => $from, 'name' => $names[$from] ?? '', 'role' => $bayi['rol'] ?? 'bayi', 'bayi' => $bayi,
+            // İE-02: bayi bir mesajı alıntılayarak cevap verdiyse alıntılanan mesajın kimliği (onayı doğru revizyona bağlamak için)
+            $ctx = is_array($m['context'] ?? null) ? (string)($m['context']['id'] ?? '') : '';
+            $yeni[$mid] = ['id' => $mid, 'context_id' => (str_starts_with($ctx, 'wamid.') && strlen($ctx) <= 300) ? $ctx : null,
+                'sender' => $from, 'name' => $names[$from] ?? '', 'role' => $bayi['rol'] ?? 'bayi', 'bayi' => $bayi,
                 'type' => $type, 'text' => mb_substr(pm_kanal_text($m), 0, 4000), 'media_id' => $media['id'] ?? null, 'filename' => $media['filename'] ?? null,
                 'timestamp' => $ts, 'received_at' => $simdi, 'phone_number_id' => $cfg['phone_number_id'], 'source' => 'Meta imzalı webhook',
                 'mode' => (string)($settings['mode'] ?? 'patron'), 'state' => 'queued', 'attempts' => 0, 'result' => null, 'error' => null, 'updated_at' => $simdi];
