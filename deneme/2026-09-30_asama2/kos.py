@@ -9,12 +9,22 @@ Depo koduna dokunmaz. Her aday için:
   3. --ifc ile verilen adaylar için aynı İş Emri'nden IFC4. 23.09 deneme kodu (deneme/2026-09-23) geçici bir
      klasörde tek `cozumleyici` paketinde birleştirilir; Motor yamasızdır (serbest aks YOK).
 
-Kaynaktaki kapı ve pencere sayıları görüntüden elle sayıldı (rapor §2); bu betik yalnız Motor tarafını özetler.
-Motor'un "passed" sonucu kaynağa uygunluk DEĞİLDİR (rapor, K-A9).
+Kaynaktaki kapı ve pencere sayıları görüntüden elle sayıldı (rapor §2) ve kaynak_sayimlari.json'da duruyor.
+Betik Motor'un çizdiğini bu kaynak sayılarıyla yan yana yazar (kaynak_karsilastirma.txt). Yalnız farkı gösterir,
+"geçerli" demez: eşikler K-A9 kararıyla konur. Motor'un "passed" sonucu kaynağa uygunluk DEĞİLDİR.
 
 Kullanım (depo kökünde):
     python3 deneme/2026-09-30_asama2/kos.py --cikti <klasör>
     python3 deneme/2026-09-30_asama2/kos.py --cikti <klasör> --kodlar P9401 --ifc P9401
+
+Dışarıdan gelen bir çizim (ör. Astra'nın DXF'i) aynı zincirden geçer ve katalog kaynağıyla kıyaslanır:
+    python3 deneme/2026-09-30_asama2/kos.py --cikti <klasör> --dxf <çizim.dxf> --kodlar P9401 [--secici <etiket>] [--ifc P9401]
+  --kodlar tek aday olmalı: kıyasın yapılacağı katalog adayı. Çizimde pafta başlığı ("PORT - P9401" gibi) varsa betik onu
+  kendisi bulur ve çıkarıcıya seçici olarak verir; katalogdaki paftayla aynı bölge okunur (5 adayda sınandı, İş Emri
+  katalogdakiyle aynı). Başlık yoksa bütün dosya okunur; duvar gövdesi parçalıysa çıkarıcı "uzak duvar parçası" atabilir
+  (P9201'de görüldü) ve betik uyarır. --secici ile başlık elle verilebilir.
+  Çizimin çıkarıcıda okunması için: birim cm; duvar katmanı "0" ya da "DUVAR", pencere "Pencere", kapı "Kapı",
+  veranda "Veranda"; dış kutu 125,5·nx + 20 × 125,5·ny + 10 cm (±2,5); oda adı ve m² odanın içinde MTEXT.
 
 Gerekenler: Python 3.11, ezdxf 1.4.4, matplotlib, shapely, numpy, pillow, pymupdf; IFC için ifcopenshell 0.8.5.
 Ağ, LLM, WhatsApp ya da canlı sunucu kullanılmaz.
@@ -28,6 +38,7 @@ D23 = KOK / "deneme" / "2026-09-23"
 DXF = KOK / "ref_katalog" / "TEK_KAT_PREFABRIK_PLANLARI.dxf"
 PY = sys.executable
 ADAYLAR = ["P9401", "P9201", "P9501", "P1051", "P1121"]
+KAYNAK = json.loads((Path(__file__).resolve().parent / "kaynak_sayimlari.json").read_text(encoding="utf-8"))["adaylar"]
 
 
 def kos(komut: list[str], cwd: Path, gunluk: Path | None = None) -> int:
@@ -40,7 +51,7 @@ def kos(komut: list[str], cwd: Path, gunluk: Path | None = None) -> int:
     return r.returncode
 
 
-def kaynak_gorseli(kodlar: list[str], cikti: Path) -> None:
+def kaynak_gorseli(kodlar: list[str], cikti: Path, dxf: Path = DXF, secici: str | None = "") -> None:
     """Katalog DXF'indeki paftayı (ham çizgi, kapı yayları, yazılar) ve çıkarıcının tanı görselini PNG'ye çizer."""
     sys.path.insert(0, str(KOK))
     import matplotlib; matplotlib.use("Agg")
@@ -50,10 +61,15 @@ def kaynak_gorseli(kodlar: list[str], cikti: Path) -> None:
     from ezdxf.addons.drawing.config import Configuration, BackgroundPolicy
     from motor.cikarici import Cikarici, tani_png
     for kod in kodlar:
-        cik = Cikarici(str(DXF), plan_secici=kod)
+        cik = Cikarici(str(dxf), plan_secici=(kod if secici == "" else secici))
         ie = cik.calistir(kod)
         tani_png(cik, ie, cikti / f"{kod}_tani.png")
-        x0, y0, x1, y1 = cik._plan_bolgesi()
+        bolge = cik._plan_bolgesi()               # seçici yoksa (tek planlık dış çizim) None döner: bütün çizim
+        if bolge is None:
+            from ezdxf import bbox
+            e = bbox.extents(cik.msp)
+            bolge = (e.extmin.x, e.extmin.y, e.extmax.x, e.extmax.y)
+        x0, y0, x1, y1 = bolge
         fig = plt.figure(figsize=(12, 12 * (y1 - y0) / (x1 - x0)))
         ax = fig.add_axes([0, 0, 1, 1])
         # Beyaz zemin şart: renk 7 (beyaz/siyah) çizgiler aksi hâlde beyaz üstüne beyaz çıkar (P9201'de duvarlar görünmüyordu).
@@ -82,6 +98,29 @@ def ozet(kod: str, klasor: Path) -> str:
             f"pano {v.get('panel_count')} · pencere {v.get('windows')} · kapı {v.get('doors')} · odalar: {odalar}")
 
 
+def karsilastir(kod: str, klasor: Path) -> str:
+    """Motor'un çizdiğini kaynak sayılarıyla yan yana yazar. Hüküm vermez (K-A9 eşikleri yok)."""
+    k = KAYNAK.get(kod)
+    if not k:
+        return f"{kod}: kaynak sayımı yok (kaynak_sayimlari.json)"
+    v = json.loads((klasor / "motor" / "validation.json").read_text(encoding="utf-8"))
+    oda = {a: m for a, m in (v.get("rooms_m2") or {}).items()}
+    s = [f"{kod}: pencere kaynak {k['pencere']} → çizilen {v.get('windows')} · kapı kaynak {k['kapi']} → çizilen {v.get('doors')}"]
+    for ad, m2 in k["etiketler"].items():
+        c = oda.pop(ad, None)
+        s.append(f"   {ad}: etiket {m2} ↔ Motor " + ("YOK" if c is None else f"{round(c, 2)} ({(c - m2) / m2 * 100:+.1f}%)"))
+    if k["etiketler"]:
+        e = sum(m for a, m in k["etiketler"].items() if a != "VERANDA")
+        c = sum(m for a, m in (v.get("rooms_m2") or {}).items() if a != "VERANDA")
+        s.append(f"   net oda toplamı (verandasız): etiket {round(e, 2)} ↔ Motor {round(c, 2)} ({(c - e) / e * 100:+.1f}%)")
+        if oda:
+            s.append("   kaynakta etiketi olmayan Motor mahalleri: " + ", ".join(f"{a} {round(m, 2)}" for a, m in oda.items()))
+    else:
+        s.append("   oda etiketleri: eşleme elle doğrulanmadı, kıyas yok")
+    s.append(f"   not: {k['not']}")
+    return "\n".join(s)
+
+
 def ifc_ozet(kod: str, yol: Path) -> str:
     """IFC sınıf sayıları ve şema doğrulaması (şema doğrulaması üretim doğruluğu değildir)."""
     import ifcopenshell, ifcopenshell.validate
@@ -97,18 +136,43 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--cikti", required=True, type=Path)
     ap.add_argument("--kodlar", nargs="+", default=ADAYLAR)
-    ap.add_argument("--ifc", nargs="*", default=["P9401", "P9201"], help="IFC üretilecek adaylar (boş: IFC yok)")
+    ap.add_argument("--ifc", nargs="*", default=None, help="IFC üretilecek adaylar (varsayılan: katalogda P9401 P9201, dış çizimde yok)")
+    ap.add_argument("--dxf", type=Path, default=DXF, help="çizim (varsayılan: katalog DXF'i)")
+    ap.add_argument("--secici", default=None, help="dış çizimde plan etiketi (tek plan varsa verilmez)")
     a = ap.parse_args()
+    dis = a.dxf.resolve() != DXF.resolve()
+    if dis and len(a.kodlar) != 1:
+        print("DUR: dış çizimde --kodlar tek aday olmalı (kıyasın yapılacağı katalog adayı)"); return 2
+    if a.ifc is None:
+        a.ifc = [] if dis else ["P9401", "P9201"]
+    secici = a.secici if dis else ""          # "": kod ile aynı (katalogda)
+    if dis and secici is None:
+        sys.path.insert(0, str(KOK))
+        from motor.cikarici import Cikarici, CikarimHatasi
+        try:
+            Cikarici(str(a.dxf.resolve()), plan_secici=a.kodlar[0])._plan_bolgesi()
+            secici = a.kodlar[0]
+            print(f"-- çizimde pafta başlığı bulundu ({secici}); katalogdaki gibi başlığın paftası okunacak")
+        except CikarimHatasi:
+            print("-- UYARI: çizimde pafta başlığı yok; bütün dosya okunacak (parçalı duvar gövdesinde uzak parçalar atılabilir)")
     c = a.cikti.resolve(); c.mkdir(parents=True, exist_ok=True)
-    satirlar = []
+    satirlar, kiyas = [], []
     for kod in a.kodlar:
         k = c / "cikarici" / kod
-        print(f"-- {kod}: çıkarıcı → İş Emri → Motor")
-        if kos([PY, "-m", "motor.cikarici", str(DXF), "--secici", kod, "--kod", kod, "--cikti", str(k), "--motor"], KOK, c / f"{kod}.log"):
+        print(f"-- {kod}: çıkarıcı → İş Emri → Motor" + (f" · çizim {a.dxf.name}" if dis else ""))
+        komut = [PY, "-m", "motor.cikarici", str(a.dxf.resolve()), "--kod", kod, "--cikti", str(k), "--motor"]
+        sec = kod if secici == "" else secici
+        if sec:
+            komut[4:4] = ["--secici", sec]
+        if kos(komut, KOK, c / f"{kod}.log"):
             return 1
         satirlar.append(ozet(kod, k))
+        kiyas.append(karsilastir(kod, k))
+        rapor = (k / "cikarim_raporu.md").read_text(encoding="utf-8") if (k / "cikarim_raporu.md").exists() else ""
+        if "uzak duvar parçası yok sayıldı" in rapor:
+            kiyas.append(f"   UYARI: çıkarıcı uzak duvar parçalarını attı (cikarim_raporu.md); pafta başlığıyla (--secici) yeniden koşun")
     print("-- kaynak ve tanı görselleri")
-    kaynak_gorseli(a.kodlar, c)
+    kaynak_gorseli(a.kodlar, c, a.dxf.resolve(), secici)
     if a.ifc:
         with tempfile.TemporaryDirectory() as t:
             W = ifc_paketi(Path(t))
@@ -123,7 +187,9 @@ def main() -> int:
                     return 1
                 satirlar.append(ifc_ozet(kod, c / f"{kod}.ifc"))
     (c / "ozet.txt").write_text("\n".join(satirlar) + "\n", encoding="utf-8")
-    print("\n".join(satirlar))
+    baslik = f"Kaynakla kıyas · çizim: {'dış çizim ' + a.dxf.name if dis else 'katalog DXF'} · hüküm yok (K-A9 eşikleri bekleniyor)"
+    (c / "kaynak_karsilastirma.txt").write_text(baslik + "\n" + "\n".join(kiyas) + "\n", encoding="utf-8")
+    print("\n".join(satirlar)); print(baslik); print("\n".join(kiyas))
     return 0
 
 

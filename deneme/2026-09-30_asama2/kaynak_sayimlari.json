@@ -1,0 +1,19 @@
+{
+  "aciklama": "Aşama 2 adaylarının KAYNAK sayıları (30.09.2026). Pencere ve kapı: katalog DXF paftasında görüntüden elle sayıldı (rapor §2); çıkarıcının kendi raporuna dayanılmadı. Etiketler: katalog DXF'indeki oda yazıları (ad → m²); yalnız oda eşlemesi raporda doğrulanan P9401 ve P9201 için. Katalog PDF'inin toplam m²'si ve oda listesi beyin/veri/katalog_37_proje.json'dadır. Bu dosya karşılaştırma içindir; geçerlilik eşikleri K-A9 kararıyla konur.",
+  "rapor": "docs/raporlar/2026-09-30_Asama2_3arti1_Aday_Karsilastirmasi.md",
+  "adaylar": {
+    "P9401": {
+      "pencere": 7, "kapi": 5,
+      "etiketler": {"YATAK ODASI 1": 11.5, "YATAK ODASI 2": 11.3, "YATAK ODASI 3": 8.9, "BANYO": 4.5, "YASAM ALANI": 41.6, "VERANDA": 12.0},
+      "not": "Veranda bina kutusunun 62 cm dışına taşıyor (K-A3)."
+    },
+    "P9201": {
+      "pencere": 6, "kapi": 5,
+      "etiketler": {"YATAK ODASI 1": 12.13, "YATAK ODASI 2": 11.45, "YATAK ODASI 3": 9.0, "HOL": 1.47, "SALON": 32.72, "BANYO": 4.51, "VERANDA": 16.5},
+      "not": "SALON etiketi çizimde 'SALON + MUTFAK'. Hol ile salon arasında duvar yok (K-A4). Veranda çizimde 502 × 314; katalog 15,7, çizim yazısı 16,5 (K-A2)."
+    },
+    "P9501": {"pencere": 9, "kapi": 7, "etiketler": {}, "not": "Salonda üç pencereli cumba. Oda etiketlerinin eşlemesi elle doğrulanmadı."},
+    "P1051": {"pencere": 8, "kapi": 5, "etiketler": {}, "not": "Veranda (19,1) ve sundurma (1,5) kutunun dışında. Oda etiketlerinin eşlemesi elle doğrulanmadı."},
+    "P1121": {"pencere": 12, "kapi": 6, "etiketler": {}, "not": "Katalogda 112, çizimde 127,0 m²; iki cumba. Aralık dışı."}
+  }
+}

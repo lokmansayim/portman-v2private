@@ -1,10 +1,11 @@
-# Portman · Oturum devri (30 Eylül 2026, 00:45)
+# Portman · Oturum devri (30 Eylül 2026, 01:10)
 
 Bu not, 28–30 Eylül arasında süren uzun çalışma penceresinin devridir. Yeni pencere buradan başlar. Güncel durumun kaydı her zaman `DURUM.md`'dir. Bu not onun yerine geçmez; nerede kaldığımızı ve sırayı söyler.
 
 ## 0. Yeni pencerede ilk adımlar
 
 1. **Depo ve dal.** Depo `lokmansayim/portman-v2private` (özel). Aktif dal `ie-04`; `main` = `ae39380`.
+   - Kökteki `CLAUDE.md` kuralları ve okuma sırasını taşır. `main`'e birleşene kadar yalnız `ie-04` ve `altyapi` dallarında var.
 2. **Okuma sırası:**
    1. bu not;
    2. `DURUM.md` (`ie-04`'teki);
@@ -12,10 +13,12 @@ Bu not, 28–30 Eylül arasında süren uzun çalışma penceresinin devridir. Y
    4. `docs/raporlar/2026-09-30_Asama2_3arti1_Aday_Karsilastirmasi.md`.
 
    Gerekirse ayrıca `docs/is_emirleri/IE-03.md` (§4.3 ve §4.5), `IE-02-canli.md` (§6–§7) ve `KARARLAR/README.md`.
-3. **Yerel ortam.** Bulut çalışma alanı her oturumda boş başlar.
-   - Python 3.11 sanal ortamı: ezdxf 1.4.4, matplotlib, shapely, numpy, pillow, pymupdf, pydantic, ifcopenshell 0.8.5, psycopg[binary] 3.3.6, pytest.
-   - Kalıcı akış testleri için yerel Postgres 16 gerekir: yalnız 127.0.0.1, port 55432. Komut: `PORTMAN_TEST_PG="host=127.0.0.1 port=55432 user=postgres" python -m pytest -q`.
-   - Harness: `python -m beyin.harness`. Ardından `git checkout -- beyin/testler/` ile geri al ve izlenmeyen `is_emri_*.json` dosyalarını kaldır.
+3. **Yerel ortam.** Bulut çalışma alanı her oturumda boş başlar. Tek komutla kurulur: `bash araclar/ortam_kur.sh`.
+   - Betik sanal ortamı ve sabit sürümlü paketleri kurar (`araclar/gereksinimler.txt`).
+   - Yerel Postgres 16'yı 127.0.0.1:55432'de açar ve içe aktarmayı denetler.
+   - `--dogrula` ile harness, referans ve bütün testler de koşar; harness'in yazdıklarını geri alır.
+   - 30.09'da boş ortamdan sınandı (ayrı port): harness 22/22, testler geçti, DXF ve PDF parmak izleri AYNI. Süre, paket kurulumu dahil yaklaşık 9 dakika.
+   - Referansta "2 kontrolde fark" beklenir. Sır taraması `vps/kapi_d_dogrula.sh:25`'i işaretliyor; bu yanlış pozitif, satırda sır yok.
 4. **Sağlama.** `python3 deneme/2026-09-30_asama2/kos.py --cikti /tmp/a2`, raporun sayılarını yaklaşık 2,5 dakikada yeniden üretir. Sonuç `deneme/2026-09-30_asama2/sonuc/ozet.txt` ile aynı çıkmalı.
 
 ## 1. Değişmeyen kurallar (Lokman)
@@ -90,6 +93,10 @@ Bu not, 28–30 Eylül arasında süren uzun çalışma penceresinin devridir. Y
 - Zemin'in "Güncel durum" sekmesi ve Hedef WhatsApp Akışı kanvası 30.09'a güncellendi.
 - Çalışma betiği depoya alındı (`deneme/2026-09-30_asama2/`); yeniden koşumda sonuç aynı çıktı.
 - Aday paketi Mac'e kondu (`23_Asama2_Adaylar/`).
+- **Altyapı (01:10):**
+  - `CLAUDE.md` ve tek komutla yerel ortam kurulumu (`araclar/`), `main`'den açılan `altyapi` dalında; `ie-04`'e de alındı.
+  - Dış çizim denetimi: `kos.py --dxf` ve `kaynak_sayimlari.json`. Beş adayın tek paftalık DXF'i bu yoldan geçti; İş Emri'ler katalogdakiyle aynı.
+  - Mac'te `24_Astra_Cizimler/`: Astra'ya maskeli brief, kaynak DXF'ler, `gelen/` ve `denetim/` klasörleri.
 
 ## 4. Aşama 2 nerede
 
@@ -154,8 +161,8 @@ Ayrıca açık olanlar:
    - T1–T3 tetikleri kodla türetilir; LLM yok.
    - Taslak doğru yorumu sistem hazırlar. Kayıt henüz isteme girmez.
 4. K-A9 iskeleti.
-   - Kaynak sayımlarının (rapor §2) makine okunur kaydı ve karşılaştırma tablosunun kendiliğinden üretilmesi.
-   - Eşikler K-A9 onayından sonra konur.
+   - İlk parçası yapıldı (30.09): kaynak sayımları `deneme/2026-09-30_asama2/kaynak_sayimlari.json`'da. `kos.py` Motor'un çizdiğini bunlarla yan yana yazıyor (`kaynak_karsilastirma.txt`); hüküm vermiyor.
+   - Kalan iş: denetimin asıl koda alınması ve sonucun Postgres'te adayın kaydında tutulması. Eşikler K-A9 onayından sonra konur.
 
 **2. Kararlardan sonra İE-04 adım 1–6** (`IE-04.md`, "Sıra" tablosu):
 - kaynak uygunluk denetimi;
@@ -177,6 +184,7 @@ Ayrıca açık olanlar:
 
 **Onay bekleyen öteki işler**
 - Temizlik (`IE-02-canli.md` §7 A ve B). A1 öncelikli: Mac'te `16_Kapi_C/config.php` canlı WhatsApp anahtarını taşıyor.
+- `altyapi` dalının (`CLAUDE.md`, `araclar/`) `main`'e birleştirilmesi. Bu yapılınca her yeni pencere kuralları kendiliğinden okur.
 - `ie-03` ve `ie-04`'ün `main`'e birleştirilmesi.
 - İE-03'ün geniş parçaları.
 - SSH'de parola yerine anahtarla girişe geçiş.
@@ -185,11 +193,25 @@ Ayrıca açık olanlar:
 
 Lokman çizimleri Astra'ya (GPT) yaptıracak. Hangi çizimlerin yaptırılacağı Lokman'dadır. Çizim hangi aday için olursa olsun, zincirde kullanılabilmesi ve denetlenebilmesi için aşağıdakiler gerekir.
 
-**Kaynaklar**
+**Hazır olan (Mac, `24_Astra_Cizimler/`)**
+- `ASTRA_BRIEF.md`: Astra'ya verilecek çizim kuralları. Kişi adı yok.
+- `kaynak_dxf/`: beş adayın katalog paftası, tek başına DXF. Başlık, katmanlar, bloklar ve ölçüler korunmuştur. `pafta_ayir.py` ile üretildi.
+- `gelen/`: Astra'nın teslimleri buraya konur (`<kod>_astra_<AAGG>.dxf`).
+- `denetim/`: her teslimin denetim çıktısı buraya yazılır.
+- Astra'ya neyin verileceği Lokman'ın kararıdır. Dosyalar yalnız katalog çizimi içerir.
+
+**Denetim komutu**
+
+`python3 deneme/2026-09-30_asama2/kos.py --cikti <denetim/…> --dxf <gelen/…dxf> --kodlar <kod>`
+
+- Çizimdeki pafta başlığını ("PORT - Pxxxx") betik kendisi bulur.
+- Başlık yoksa uyarır: başlıksız P9201 kopyasında 6 pencereden 1'i okundu.
+
+**Öteki kaynaklar**
 - Katalog DXF'i: `ref_katalog/TEK_KAT_PREFABRIK_PLANLARI.dxf`.
 - Katalog verisi: `beyin/veri/katalog_37_proje.json`.
 - Yan yana görseller: `docs/raporlar/gorseller/asama2/`.
-- Mac'teki `23_Asama2_Adaylar/` paketi kişisel veri içermez. Astra'ya verilip verilmeyeceği Lokman'ın kararıdır.
+- Mac'teki `23_Asama2_Adaylar/` paketi (Motor PDF'leri, IFC'ler).
 
 **Çıkarıcının okuyabileceği DXF** (`motor/cikarici.py`'den doğrulandı)
 - Birim cm.
@@ -209,6 +231,7 @@ Lokman çizimleri Astra'ya (GPT) yaptıracak. Hangi çizimlerin yaptırılacağ�
   - `main` `ae39380`;
   - `ie-03` `cc0b338`;
   - `ie-04` (aktif; son commit bu notu taşıyan commit);
+  - `altyapi` (`main`'den; yalnız `CLAUDE.md` ve `araclar/`; `main`'e birleşme onayı bekliyor);
   - geçmiş dallar: `ie-01-devir`, `ie-02`, `ie-02-b1-opus`.
   - Eski depo `lokmansayim/portman` yalnız okunur.
 - **Zemin (Claude Docs):** belge kimliği `65844cef-e6c5-4a5d-b714-ee003c57fe5b`.
@@ -217,7 +240,7 @@ Lokman çizimleri Astra'ya (GPT) yaptıracak. Hangi çizimlerin yaptırılacağ�
 - **Hedef WhatsApp Akışı (Design kanvası):** https://claude.ai/artifact/478avu6uRTg3tP7q8A3qoL, sürüm 13 (30.09).
   - Panolar: Main, Adim2–6, Sira; not `okuma`.
   - Yayınlarken yalnız değişen dosyalar gönderilir; `canvas.json` yalnız not veya düzen değiştiğinde, gönderimden hemen önce yeniden okunarak.
-- **Mac:** `~/Desktop/Claude Portman Çalışması/`, 10–23 numaralı klasörler.
+- **Mac:** `~/Desktop/Claude Portman Çalışması/`, 10–24 numaralı klasörler.
   - Kökteki `DURUM.md` 23.09'un devir raporudur, güncel değildir.
   - Güncel durum depodaki `DURUM.md`'dedir.
 - **VPS denetim betikleri:** `vps/`. Salt okunurdur; Lokman `ssh portman-vps 'bash -s' < betik > çıktı.txt` ile koşar.

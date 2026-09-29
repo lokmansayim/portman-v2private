@@ -1,8 +1,13 @@
 # Portman · DURUM
 
-**Son güncelleme: 30 Eylül 2026 00:45 (tek aktif teslim: Aşama 2 kabul vakası, İE-04; aday karşılaştırması yapıldı, kararlar bekleniyor).** Her oturumun son adımı bu dosyayı güncellemektir.
+**Son güncelleme: 30 Eylül 2026 01:10 (tek aktif teslim: Aşama 2 kabul vakası, İE-04; aday karşılaştırması yapıldı, kararlar bekleniyor).** Her oturumun son adımı bu dosyayı güncellemektir.
 
-**Oturum devri (30.09 00:45):** 28–30 Eylül penceresi kapandı. Yeni pencere `docs/devir/2026-09-30_Oturum_Devri.md` ile başlar: kurallar, yapılanlar, bekleyen kararlar, sıradaki işler, Astra'ya çizim işi için ölçütler.
+**Oturum devri (30.09 01:10):** 28–30 Eylül penceresi kapandı. Yeni pencere `docs/devir/2026-09-30_Oturum_Devri.md` ile başlar: kurallar, yapılanlar, bekleyen kararlar, sıradaki işler, Astra'ya çizim işi için ölçütler.
+
+Yeni pencere için hazırlıklar:
+- `CLAUDE.md` (oturum kuralları) ve `bash araclar/ortam_kur.sh` (tek komutla yerel ortam). İkisi `altyapi` dalında; `main`'e birleşmeleri onay bekliyor.
+- Dış çizim denetimi: `deneme/2026-09-30_asama2/kos.py --dxf`.
+- Mac'te `24_Astra_Cizimler/`.
 
 Canlıda çalışan akış şu: WhatsApp → hosting kanalı → VPS ajanı → Beyin ve Motor → plan PDF'i. Akış yalnız Patron modunda açık. Son gerçek mesaj doğrulaması 29.09 21:16–21:32 (kapı G yeniden denemesi, 6 Patron mesajı). 28–29 Eylülde canlıya v1.2 kuruldu (dosya modu) ve LLM Claude Opus 5.5'e geçti; 29.09 01:16'da gerçek bir Patron mesajıyla denendi (r01 PDF'i telefona geldi). 29.09 18:59'dan beri ajan kalıcı modda: konuşma ve iş durumu Postgres'te (kapı F); 29.09 19:27–19:56'da kalıcı modda 5 gerçek Patron mesajı işlendi (kapı G). 29.09 21:09'dan beri canlıda düzeltilmiş paket `9c76af59…` var; 21:16–21:32 arasında 6 gerçek Patron mesajıyla G'nin kabul adımları geçti. Depo, v1.1.1'in (`ec4e9a3`) devridir. Hedefteki "90 m² 3+1, üç seçenek" akışı henüz taslak.
 
@@ -45,8 +50,10 @@ Onay: Lokman 29.09 23:49. İş emri: `docs/is_emirleri/IE-04.md` (dal `ie-04`). 
 | `docs/is_emirleri/` | İE-02 (kapandı 29.09); İE-03 planı ve Aşama 0 envanteri; İE-04 Aşama 2 kabul vakası (aktif) |
 | `testler/bilinen_hatalar/` | B1 ve B2 testleri; G ve Astra (A1/A2) testleri. Düzeltmeler canlıda: B1 ve B2 28.09 23:31'den, B1'in Opus'la kısa cevap yolu 29.09 21:09'dan beri |
 | `deneme/2026-09-23/` | 23 Eylül denemeleri ve `yeniden_kos.py` |
-| `deneme/2026-09-30_asama2/` | Aşama 2 aday karşılaştırmasını yeniden üreten `kos.py` ve küçük çıktılar (30.09'da yeniden koşuldu, sonuç aynı) |
+| `deneme/2026-09-30_asama2/` | Aşama 2 aday karşılaştırmasını yeniden üreten `kos.py` (dış çizim için `--dxf`), kaynak sayımları, pafta ayırıcı ve küçük çıktılar |
 | `docs/devir/` | Oturum devir notları (en yenisi en günceli) |
+| `CLAUDE.md` | Her oturumun kendiliğinden okuduğu kurallar ve okuma sırası |
+| `araclar/` | `ortam_kur.sh` (tek komutla yerel ortam; `--dogrula` ile gerileme) ve `gereksinimler.txt` |
 | `KARARLAR/` | K01–K25 ve Z-01–Z-10, her karar ayrı dosyada |
 
 ## Bileşenler
