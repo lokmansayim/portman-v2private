@@ -16,17 +16,20 @@ OLARAK="${PM_OLARAK:-sudo -u portman env PORTMAN_PG_DSN=dbname=portman PORTMAN_K
 PSQL="${PM_PSQL:-sudo -u postgres psql -X -q -tA}"; DB="${PM_DB:-portman}"
 SAHIP="${PM_SAHIP:-portman:portman}"
 BEKLENEN="${PM_BEKLENEN_STATE_SHA:-__STATE_SHA__}"
+BEKLENEN_KONUSMA="${PM_BEKLENEN_KONUSMA_OZETI:-__KONUSMA_OZETI__}"   # Mac'te hosting yedeğinden: konuşmaların toplu özeti
 dur() { echo "DUR: $*"; echo "   hiçbir şey değiştirilmedi."; echo "== bitti (durdu)"; exit 1; }
 
 echo "== Kapı F.5 · Postgres'e aktarma · betik 2026-09-29 · $(date '+%Y-%m-%d %H:%M:%S %Z')"
 echo "-- ön koşullar (biri tutmazsa hiçbir şey yapılmaz)"
 [ "$(id -u)" = "0" ] || [ -n "${PM_TEST:-}" ] || dur "root olarak çalıştırılmalı"
-[[ "$BEKLENEN" =~ ^[0-9a-f]{64}$ ]] || dur "beklenen state.json özeti betiğe yazılmamış"
+[[ "$BEKLENEN" =~ ^[0-9a-f]{64}$ ]] && [[ "$BEKLENEN_KONUSMA" =~ ^[0-9a-f]{16}$ ]] || dur "beklenen özetler betiğe yazılmamış"
 [ -f "$KANAL/state.json" ] && [ -d "$KANAL/durum" ] || dur "$KANAL/state.json ya da durum/ yok (scp adımı yapılmadı mı?)"
 [ -f "$GECIS/kapi_f.py" ] || dur "$GECIS/kapi_f.py yok"
 GERCEK="$(sha256sum "$KANAL/state.json" | cut -d' ' -f1)"
 [ "$GERCEK" = "$BEKLENEN" ] || dur "kopyadaki state.json Mac'te doğrulanan yedekle aynı değil (${GERCEK:0:16} ≠ ${BEKLENEN:0:16})"
-echo "   state.json Mac'teki yedekle aynı: ${GERCEK:0:16} · konuşma dosyası $(ls "$KANAL"/durum/*.json 2>/dev/null | wc -l)"
+KOZ="$(python3 -c "import sys; sys.path.insert(0, '$GECIS'); import kapi_f; print(kapi_f.kaynak(sys.argv[1])['konusma']['ozet'])" "$KANAL" 2>&1 | tail -1)"
+[ "$KOZ" = "$BEKLENEN_KONUSMA" ] || dur "kopyadaki konuşmalar Mac'te doğrulanan yedekle aynı değil ($KOZ ≠ $BEKLENEN_KONUSMA)"
+echo "   state.json ve konuşmalar Mac'teki yedekle aynı: ${GERCEK:0:16} · $KOZ · konuşma dosyası $(ls "$KANAL"/durum/*.json 2>/dev/null | wc -l)"
 [ ! -e /etc/portman/pg.env ] && [ ! -e /etc/systemd/system/portman-agent.service.d/kalici.conf ] && ! grep -q '^PORTMAN_PG_DSN=' "$PM_ENV" \
   || dur "ajan zaten kalıcı moda ayarlı görünüyor"
 BEKLEYEN="$(ls "$PM_HOME"/data/pending/*.json 2>/dev/null | wc -l)"

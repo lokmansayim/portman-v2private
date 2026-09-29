@@ -164,12 +164,19 @@ def ortam(tmp_path, sablon):
          "PM_OLARAK": f"env PORTMAN_PG_DSN=postgresql://{host.get('user', 'postgres')}@{host.get('host', '127.0.0.1')}:{host.get('port', '5432')}/{ad} "
                       f"PORTMAN_KANAL_DIR={home / 'data'}",
          "PM_ETC": str(tmp_path / "etc"), "PM_DROPIN": str(tmp_path / "dropin"), "PM_BASLANGIC": "2000-01-01 00:00:00",
-         "PM_BEKLENEN_STATE_SHA": hashlib.sha256((kanal / "state.json").read_bytes()).hexdigest()}
+         "PM_BEKLENEN_STATE_SHA": hashlib.sha256((kanal / "state.json").read_bytes()).hexdigest(),
+         "PM_BEKLENEN_KONUSMA_OZETI": _kf().kaynak(kanal)["konusma"]["ozet"]}
     (tmp_path / "etc").mkdir()
     yield {"o": o, "h": h, "ad": ad, "home": home, "kanal": kanal, "tok": tok, "tmp": tmp_path}
     h.dur()
     with _admin() as c:
         c.execute(f"DROP DATABASE IF EXISTS {ad} WITH (FORCE)")
+
+
+def _kf():
+    sys.path.insert(0, str(KOK / "vps"))
+    import kapi_f
+    return kapi_f
 
 
 def _kos(betik: str, o: dict) -> subprocess.CompletedProcess:
@@ -200,6 +207,8 @@ def test_aktar_on_kosul_tutmazsa_hicbir_sey_yapmaz(ortam):
     o = ortam["o"]
     r = _kos("kapi_f_aktar.sh", {**o, "PM_BEKLENEN_STATE_SHA": "0" * 64})          # Mac'te doğrulanandan farklı kopya
     assert r.returncode == 1 and "DUR: kopyadaki state.json" in r.stdout and _tablo_sayisi(ortam["ad"]) == 0
+    r = _kos("kapi_f_aktar.sh", {**o, "PM_BEKLENEN_KONUSMA_OZETI": "0" * 16})       # konuşma dosyaları farklı
+    assert r.returncode == 1 and "DUR: kopyadaki konuşmalar" in r.stdout and _tablo_sayisi(ortam["ad"]) == 0
     ortam["h"].worker = "vps"                                                     # işleyici durdurulmamış
     r = _kos("kapi_f_aktar.sh", o)
     assert r.returncode == 1 and "worker off değil" in r.stdout and _tablo_sayisi(ortam["ad"]) == 0
