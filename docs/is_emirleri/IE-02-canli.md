@@ -563,6 +563,51 @@ Adım 2'de LLM mesajı revizyon değil yeni talep sayabilir. O zaman akış baş
 - Gösterimden sonra: `pg_dump` ile yedek alınır ve Mac'e kopyalanır.
 - Adım 7'deki `tekrar_dene.py` komutu da `< /dev/null` ile koşulur.
 
+**Kapı G sonucu (29.09 19:25–19:59; onay Lokman 19:19, Seçenek 1 onayı 19:50; çıktılar `21_Kapi_G/`). G AÇIK KALIR:** Adım 4'teki soru-cevap bağı geçmedi.
+
+*Yedekler:*
+- G öncesi: `portman-g-oncesi-20260929.dump`, 33.730 B, sha256 `7651717c…a36e`. İçinde 1 konuşma, 14 mesaj ve iş.
+- G sonrası: `portman-g-sonrasi-20260929.dump`, 40.671 B, sha256 `5ed5a2a9…7c00`. İçinde 19 mesaj ve iş, 1 proje, 2 revizyon, 1 soru, 7 giden.
+- İkisi de `pg_restore` ile okunuyor. Mac kopyaları aynı özette. Var olan yedeklere dokunulmadı.
+
+*Adımlar (mesaj izleri md5'in ilk 10 hanesi; kanıt: `g1…g7`, `g4_teshis.txt`, `g7_kanit.txt`):*
+
+| # | Ne | Sonuç | Kanıt |
+|---|---|---|---|
+| 1 | "Yeni talep: P6001 aynalı olsun" (19:27, `8c5845be9e`) | **Geçti.** İş 15 `is_emri`. Yeni proje 1: `PM-PATRON-20260929-99238` r01, aynalı. Metin ve PDF 19:28'de okundu | g1 |
+| 2 | "yatak odası 1, 120x180" (19:31, `56d43394c0`) | **Geçti.** İş 16 `sor`. Soru 1 `pencere_islem` açıldı; kaynağı bu mesaj, proje 1. PDF yok. LLM: revizyon/orta, pencere satırı "degistir" (kural katmanı belirsiz söz için yine sordu) | g2, g4_teshis |
+| 3 | `systemctl restart portman-agent` (19:34:14) | **Geçti.** Servis kalıcı modda yeniden başladı; öz-test ve LLM çağrısı yok. Yeniden başlamadan sonra soru 1 hâlâ açık | g3 |
+| 4 | "değiştir" (19:35, `cafb202ad1`) | **Kısmen.** İş 17 `is_emri`: aynı proje 1'de `PM-PATRON-20260929-99718` **r03**. YATAK ODASI 1 penceresi 120x120 → 120x180; aynalı; öteki pencereler aynı. r01 `yerini_aldi`. **Soru 1 `dustu`** (kapatan bu mesaj, `cevaplandi` değil) | g4, g4_teshis |
+| 5 | r01 PDF'ine (`2bcece5665`) alıntıyla "onaylıyorum" (19:53, `c309d6b0e7`) | **Geçti.** Onay denetimi: kabul false, "alıntı başka revizyona ait". Cevap: "…99238 r01 planına ait; güncel plan …99718 r03" | g6, kanıt 5 |
+| 6 | r03 PDF'ine (`82b029de40`) alıntıyla "onaylıyorum" (19:56, `aa01ab4812`) | **Geçti.** Kabul true, sınır `teslim` (PDF 19:36:08'de okundu). r03 `onaylandi`; onay mesajı ve alıntısı kayıtlı | g6, kanıt 4–5 |
+| 7 | `tekrar_dene.py 8c5845be9e` | **Geçti.** "yeni iş açıldı mı: hayır; bu mesajın iş sayısı: 1". Kanıt 2: 19 mesaj, 19 iş, mesaj başına en çok 1 iş | g7 |
+
+*Lokman'ın değerlendirmesi (19:50):* Pencere istenen şekilde değişti; Adım 4 çizim sonucu açısından başarılı sayılır.
+
+*Açık maddeler (G bunlar çözülmeden kapanmaz):*
+- **G-1 `dustu`:** Kısa "değiştir" cevabı soruya bağlanmadı.
+- **G-2 numara:** r02 yerine r03 verildi.
+- **G-3 gerekçe:** Gerekçede "YATAK ODASI 1 penceresi 120x180" notu iki kez yazıldı; çizime etkisi yok.
+
+Nedenleri ve önerilen düzeltme aşağıdaki "G açık maddeleri" bölümünde.
+
+*Sayaçlar:*
+- Patron mesajı 5/7.
+- LLM çağrısı 5/10, tekrar yok.
+- Token: 26.731 giriş + 1.381 çıkış. Maliyet 26.731 × 4 $/1M + 1.381 × 20 $/1M = **0,1345 $** (sınır 0,35 $); token'dan hesaplandı, fatura Console'dan okunur.
+- Giden WhatsApp 7/12. Hepsi hosting'e verildi, hepsi Meta'dan `read` döndü. 1 Ekim'den önce, ücretsiz servis mesajı.
+- G boyunca açık iş, gönderilemeyen ya da belirsiz satır, API hatası ve beklenmeyen tekrar yok.
+
+*Kabul ölçütleri (Lokman 19:19):*
+
+| Ölçüt | Sonuç |
+|---|---|
+| Yeniden başlatmadan sonra sorunun hatırlanması | Kayıt olarak geçti (adım 3) |
+| Cevabın aynı projeye bağlanması | Proje bağı geçti (proje 1); soru bağı geçmedi (G-1) |
+| Eski revizyon onayının reddi | Geçti (adım 5) |
+| Güncel onayın kabulü | Geçti (adım 6) |
+| Aynı mesajın ikinci iş açmaması | Geçti (adım 7) |
+
 **Ücretli kapsam (E ve G birlikte).** Planlı gerçek çağrılar yalnız bu iki kapıda olur. A, B, C, D, F ve H kendiliğinden gerçek LLM ya da WhatsApp çağrısı yapmaz: öz-test paket başına bir kez koşar, servis yeniden başlatmaları onu tekrarlamaz. Ama F ve H'de kuyrukta bekleyen gerçek mesaj varsa işlenir ve cevaplanır; Patron modunda bunlar yalnız Lokman'ın mesajlarıdır.
 
 | Kapı | OpenAI (gpt-4o-mini) | WhatsApp giden mesaj |

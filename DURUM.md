@@ -1,8 +1,8 @@
 # Portman · DURUM
 
-**Son güncelleme: 29 Eylül 2026 19:15 (İE-02 kapı F kapandı: canlı ajan kalıcı modda, Postgres; kayıtlar birebir aktarıldı. Sırada G, ayrı onayla).** Her oturumun son adımı bu dosyayı güncellemektir.
+**Son güncelleme: 29 Eylül 2026 20:05 (İE-02 kapı G yapıldı, AÇIK: 7 adımın 6'sı geçti; B1 cevabı Opus'la soruya bağlanmadı ve r03 numarası çıktı. Düzeltme önerisi onay bekliyor).** Her oturumun son adımı bu dosyayı güncellemektir.
 
-Canlıda çalışan akış şu: WhatsApp → hosting kanalı → VPS ajanı → Beyin ve Motor → plan PDF'i. Akış yalnız Patron modunda açık. En son 22 Eylülde gerçek mesajla doğrulandı. 28–29 Eylülde canlıya v1.2 kuruldu (dosya modu) ve LLM Claude Opus 5.5'e geçti; 29.09 01:16'da gerçek bir Patron mesajıyla denendi (r01 PDF'i telefona geldi). 29.09 18:59'dan beri ajan kalıcı modda: konuşma ve iş durumu Postgres'te (kapı F); kalıcı modda henüz gerçek mesaj işlenmedi. Depo, v1.1.1'in (`ec4e9a3`) devridir. Hedefteki "90 m² 3+1, üç seçenek" akışı henüz taslak.
+Canlıda çalışan akış şu: WhatsApp → hosting kanalı → VPS ajanı → Beyin ve Motor → plan PDF'i. Akış yalnız Patron modunda açık. En son 22 Eylülde gerçek mesajla doğrulandı. 28–29 Eylülde canlıya v1.2 kuruldu (dosya modu) ve LLM Claude Opus 5.5'e geçti; 29.09 01:16'da gerçek bir Patron mesajıyla denendi (r01 PDF'i telefona geldi). 29.09 18:59'dan beri ajan kalıcı modda: konuşma ve iş durumu Postgres'te (kapı F); 29.09 19:27–19:56'da kalıcı modda 5 gerçek Patron mesajı işlendi (kapı G). Depo, v1.1.1'in (`ec4e9a3`) devridir. Hedefteki "90 m² 3+1, üç seçenek" akışı henüz taslak.
 
 Durumlar: **Taslak** yalnız belgede · **Kodlandı** kod var, testi yok ya da dar · **Test edildi** tekrarlanabilir testten geçti · **Canlıda doğrulandı** gerçek kullanımda (gerçek mesaj ya da planlı koşu) görüldü ve tarihli.
 
@@ -83,7 +83,7 @@ Yapıldı:
   - Kişisel veri içeren geçici kopyalar VPS'te, hosting'te ve Mac'te duruyor; silinmeleri ayrı onayla.
 
 Kalan (sırayla, her biri ayrı onayla; `docs/is_emirleri/IE-02-canli.md`):
-- G: gerçek WhatsApp ve LLM ile kabul gösterimi.
+- G (29.09 19:25–19:59, açık): 5 Patron mesajı; 5 LLM çağrısı, 26.731 + 1.381 token, 0,1345 $; 7 giden mesaj, hepsi okundu. Kabul: yeniden başlatmadan sonra soru kayıtlı, eski revizyon onayı reddedildi, güncel onay kabul edildi, tekrar gelen mesaj ikinci iş açmadı. Açık: G-1 kısa "değiştir" cevabı soruya bağlanmadı (`dustu`), G-2 r02 yerine r03, G-3 gerekçede yinelenen not. Pencere değişikliği çizimde doğru (Lokman). Yedekler öncesi ve sonrası Mac'te.
 
 G tamamlanınca İE-02 kapanır.
 
