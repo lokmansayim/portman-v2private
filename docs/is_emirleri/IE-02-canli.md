@@ -763,6 +763,66 @@ Bayi sohbet botunun Opus trafiği bu tabloya dahil değil; Console'dan izlenir.
 - `kapi_g2_paket.sh` (yeni, salt okunur): kurulu paketin özeti; dosya dosya paket karşılaştırması; `karar.py` özeti; öz-test sonucu ve token'ları; korunan ayarların adları ve değişme zamanları; hosting'in bildirdiği paket.
 - `kapi_g_durum.sh`: bu turun sınırları (7 / 9 / 0,30 $ / 12). Başlangıçtan sonra başlayan öz-test sayaçlara girer; soruların deneme sayısı gösterilir.
 
+**G yeniden denemesi sonucu (29.09 21:05–21:34; çıktılar `22_Kapi_G2/`). G KAPANDI: kritik kabul adımlarının hepsi geçti.**
+
+*Yedekler (Mac kopyaları VPS'teki özetle aynı):*
+- Yükleme öncesi hosting paketi: `current.zip` `f2bff20a…`, `current.sha256` aynı özeti taşıyor, `SURUM.txt` `kanal-v1.2-opus55-20260929` (`yedek/hosting-paket/`).
+- Yükleme öncesi veritabanı: `portman-g-tekrar-20260929.dump`, 40.671 B, sha256 `6c8908b3…1ae2`. İçinde 19 mesaj ve iş, 1 proje, 2 revizyon, 1 soru, 7 giden.
+- Deneme sonrası veritabanı: `portman-g-tekrarsonrasi-20260929.dump`, 44.159 B, sha256 `f68b9041…8afd`. İçinde 25 mesaj ve iş, 2 proje, 4 revizyon, 2 soru, 15 giden.
+- İkisi de `pg_restore` ile okunuyor. Var olan yedeklere dokunulmadı; veritabanına yedekten geri yükleme yapılmadı.
+
+*Dağıtım (`0_paket_once`, `1_paket_sonra`):*
+- `current.sha256` en son yüklendi. Ajan 21:09:06'da paketi indirdi, kurdu ve 21:09:12'de kalıcı modda yeniden başladı.
+- Kurulu paket `9c76af59…`; 50 dosyanın 50'si paketle aynı. `beyin/karar.py` `25bb87f2…`. Çalışan `agent.py` paketle aynı.
+- `app.old`, bir önceki paket `f2bff20a…` oldu. `pkg/` altındaki tüm zip'ler duruyor.
+- Öz-test geçti: 5.309 + 458 token.
+- Kalıcı mod (süreçte `PORTMAN_PG_DSN`), `pg.env` ve `kalici.conf` korundu. `agent.env` 00:14'ten beri değişmedi. Hosting'te `worker vps`, `patron`, `anthropic/claude-opus-5-5`.
+
+*Adımlar (mesaj izleri md5'in ilk 10 hanesi):*
+
+| # | Ne | Sonuç | Kanıt |
+|---|---|---|---|
+| 1 | "Yeni talep: P6001 aynalı olsun" (21:16, `b61957f5dc`) | **Geçti.** İş 20 `is_emri`. Yeni proje 2: `PM-PATRON-20260929-5781` r01, aynalı. Metin ve PDF teslim edildi | g2_a |
+| 2 | "yatak odası 1, 120x180" (21:17, `8aa3ef73fd`) | **Geçti.** İş 21 `sor`. Soru 2 `pencere_islem` açıldı; kaynağı bu mesaj, proje 2, deneme 1. Revizyon sayacı 0, PDF yok. Opus pencere satırı ve `pencere_degistir` varyantını birlikte verdi (G-3/G-4 biçimi); tek satıra indi, söz belirsiz sayıldı | g2_a, g2_a_teshis |
+| 3 | "değiştirmeyin" (21:23, `7e9fbfb5fd`) | **Geçti (pilot sınırlaması).** İş 22 `sor`; LLM `red/dusuk`. Kural notu "cevabı olumsuz ya da soru biçimli: soru yinelendi"; "Anlayamadım." + soru gitti. Soru 2 `acik`, deneme 2. Revizyon yok, sayaç 0; r01'de YATAK ODASI 1 hâlâ 120x120 | g2_b, g2_b_teshis |
+| 4 | `systemctl restart portman-agent` (21:25:15) | **Geçti.** Düzgün durdu ("eldeki adım bitti"), kalıcı modda başladı. Öz-test ve LLM çağrısı yok. Soru 2 hâlâ `acik` (deneme 2), proje 2 | g2_c |
+| 5 | "değiştir" (21:28, `d7f88d7fce`) | **Geçti.** İş 23 `is_emri`: aynı proje 2'de `PM-PATRON-20260929-6517` **r02**. Soru 2 **`cevaplandi`**, kapatan bu mesaj (21:29:00). YATAK ODASI 1 120x120 → 120x180; öteki pencereler ve aynalama aynı. Pencere notu gerekçede bir kez. r01 `yerini_aldi`, sayaç 1. Opus alanları bağlamdan yine doldurdu; kısa cevap yolu bu kez bağladı | g2_d, g2_d_teshis |
+| 6 | r01 PDF'ine (`54ebab3e74`) alıntıyla "onaylıyorum" (21:31, `17b78f5409`) | **Geçti.** Kabul false, "alıntı başka revizyona ait"; denetlenen r02 | g2_e, kanıt 5 |
+| 7 | r02 PDF'ine (`a5c0ea1b24`) alıntıyla "onaylıyorum" (21:32, `cffd0f619b`) | **Geçti.** Kabul true, sınır `teslim`. r02 `onaylandi`; onay mesajı ve alıntısı kayıtlı | g2_e, kanıt 4–5 |
+| 8 | `tekrar_dene.py b61957f5dc` | **Geçti.** "yeni iş açıldı mı: hayır; bu mesajın iş sayısı: 1". 20 sn sonra kanıt 2: 25 mesaj, 25 iş, mesaj başına en çok 1 | g2_f_tekrar, g2_f_kanit |
+
+İş Emri numarası her revizyonda yenidir (5781 → 6517); iki revizyonu `proje_id` bağlar (G'de de 99238 → 99718).
+
+*G'nin açık maddeleri:*
+- **G-1** (soru `dustu`): kapandı; adım 5'te `cevaplandi`.
+- **G-2** (r03): kapandı; aynı projede r02.
+- **G-3** (yinelenen not): kapandı; not bir kez.
+- **G-4** (yalnız varyantla sessiz değişiklik): canlıda satır + varyant biçimi B1'e bağlandı (adım 2). Yalnız varyant biçimi yerel testlerle kanıtlı.
+- **A1** (olumsuz kısa cevap): canlıda adım 3. **A2** (oda yalnız açıklamada): yerel testlerle kanıtlı.
+
+*Pilot sınırlaması:* "değiştirmeyin"e verilen "Anlayamadım." cevabı güvenli pilot sınırlamasıdır; nihai konuşma başarısı sayılmaz. LLM'in talimatı anlaması ve doğrulanmış bayi düzeltmelerinden yararlanması İE-03'ün açık gereksinimidir.
+
+*Sayaçlar (bu tur; sınırlar ayrı ayrı):*
+- Patron mesajı **6/7**.
+- LLM çağrısı **7/9**: öz-test 1 + mesaj 6; tekrar yok.
+- Token: 37.356 giriş + 2.522 çıkış. Maliyet 37.356 × 4 $/1M + 2.522 × 20 $/1M = **0,1999 $** (sınır 0,30 $). Token'dan hesaplandı; fatura Console'dan okunur.
+- Giden WhatsApp **8/12**. Hepsi hosting'e verildi; 6'sı `read`, 2'si (r01 metni ve PDF'i) `delivered`.
+- **WhatsApp ücreti yok:** hepsi 1 Ekim 2026'dan önce, 24 saat penceresinde servis mesajı.
+- Açık iş, gönderilemeyen ya da belirsiz satır, API hatası ve beklenmeyen tekrar yok.
+
+*İE-02 toplamı (E + F + G + G yeniden deneme):* 16 Claude çağrısı, ~0,425 $ (~0,090 + 0 + 0,1345 + 0,1999), 17 giden WhatsApp, 12 Patron mesajı.
+
+*Kabul ölçütleri (Lokman 19:19 ve 20:45):*
+
+| Ölçüt | Sonuç |
+|---|---|
+| Olumsuz cevapta pencere değişmez, revizyon oluşmaz | Geçti (adım 3) |
+| Yeniden başlatmadan sonra sorunun hatırlanması | Geçti (adım 4) |
+| "değiştir" ile aynı soru `cevaplandi`, aynı projede r02 | Geçti (adım 5) |
+| Eski revizyon onayının reddi | Geçti (adım 6) |
+| Güncel onayın kabulü | Geçti (adım 7) |
+| Aynı mesajın ikinci iş açmaması | Geçti (adım 8) |
+
 **Ücretli kapsam (E ve G birlikte).** Planlı gerçek çağrılar yalnız bu iki kapıda olur. A, B, C, D, F ve H kendiliğinden gerçek LLM ya da WhatsApp çağrısı yapmaz: öz-test paket başına bir kez koşar, servis yeniden başlatmaları onu tekrarlamaz. Ama F ve H'de kuyrukta bekleyen gerçek mesaj varsa işlenir ve cevaplanır; Patron modunda bunlar yalnız Lokman'ın mesajlarıdır.
 
 | Kapı | OpenAI (gpt-4o-mini) | WhatsApp giden mesaj |
@@ -827,3 +887,5 @@ Postgres'e yeniden geçiş: `/opt/portman/data/kalici_bekleyen/` boş olmalı (i
 ## 6. Kabul ve İE-02'nin kapanışı
 
 Kapı G'deki yedi adım kanıt sorgularıyla gösterildiğinde İE-02 kapanır. Sonraki iş İE-03'tür: küçük, kaynaklı, yetki ayrımlı RAG (`IE-02.md` "Sonraki iş").
+
+**29.09 21:34:** G'nin kabul adımları yeniden denemede kanıt sorgularıyla gösterildi; G kapandı. `main`'e birleştirme ve kişisel veri içeren geçici kopyaların silinmesi Lokman'ın ayrı onayına bağlı; H (geri dönüş) yalnız gerektiğinde, onayla.
