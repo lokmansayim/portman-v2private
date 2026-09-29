@@ -1,8 +1,8 @@
 # Portman · DURUM
 
-**Son güncelleme: 29 Eylül 2026 21:40 (İE-02 kapı G KAPANDI: düzeltilmiş paket canlıda, yeniden denemede tüm kabul adımları geçti).** Her oturumun son adımı bu dosyayı güncellemektir.
+**Son güncelleme: 29 Eylül 2026 22:50 (İE-02 kapandı ve `main`'e birleştirildi; İE-03 yalnız plan aşamasında).** Her oturumun son adımı bu dosyayı güncellemektir.
 
-Canlıda çalışan akış şu: WhatsApp → hosting kanalı → VPS ajanı → Beyin ve Motor → plan PDF'i. Akış yalnız Patron modunda açık. En son 22 Eylülde gerçek mesajla doğrulandı. 28–29 Eylülde canlıya v1.2 kuruldu (dosya modu) ve LLM Claude Opus 5.5'e geçti; 29.09 01:16'da gerçek bir Patron mesajıyla denendi (r01 PDF'i telefona geldi). 29.09 18:59'dan beri ajan kalıcı modda: konuşma ve iş durumu Postgres'te (kapı F); 29.09 19:27–19:56'da kalıcı modda 5 gerçek Patron mesajı işlendi (kapı G). 29.09 21:09'dan beri canlıda düzeltilmiş paket `9c76af59…` var; 21:16–21:32 arasında 6 gerçek Patron mesajıyla G'nin kabul adımları geçti. Depo, v1.1.1'in (`ec4e9a3`) devridir. Hedefteki "90 m² 3+1, üç seçenek" akışı henüz taslak.
+Canlıda çalışan akış şu: WhatsApp → hosting kanalı → VPS ajanı → Beyin ve Motor → plan PDF'i. Akış yalnız Patron modunda açık. Son gerçek mesaj doğrulaması 29.09 21:16–21:32 (kapı G yeniden denemesi, 6 Patron mesajı). 28–29 Eylülde canlıya v1.2 kuruldu (dosya modu) ve LLM Claude Opus 5.5'e geçti; 29.09 01:16'da gerçek bir Patron mesajıyla denendi (r01 PDF'i telefona geldi). 29.09 18:59'dan beri ajan kalıcı modda: konuşma ve iş durumu Postgres'te (kapı F); 29.09 19:27–19:56'da kalıcı modda 5 gerçek Patron mesajı işlendi (kapı G). 29.09 21:09'dan beri canlıda düzeltilmiş paket `9c76af59…` var; 21:16–21:32 arasında 6 gerçek Patron mesajıyla G'nin kabul adımları geçti. Depo, v1.1.1'in (`ec4e9a3`) devridir. Hedefteki "90 m² 3+1, üç seçenek" akışı henüz taslak.
 
 Durumlar: **Taslak** yalnız belgede · **Kodlandı** kod var, testi yok ya da dar · **Test edildi** tekrarlanabilir testten geçti · **Canlıda doğrulandı** gerçek kullanımda (gerçek mesaj ya da planlı koşu) görüldü ve tarihli.
 
@@ -13,8 +13,8 @@ Durumlar: **Taslak** yalnız belgede · **Kodlandı** kod var, testi yok ya da d
 | Kökteki v1.1.1 ağacı | `lokmansayim/portman` deposunun geçmişiyle birlikte, değiştirilmeden (`ec4e9a3`, 22.09 20:12). Özetleri `SHA256SUMS`'ta. |
 | `testler/referans/` | Dondurulmuş referanslar (`2026-09-28/`, `2026-09-28b/`) ve `dogrula.py` |
 | `testler/kalici/` | İE-02 kalıcı akış testleri (gerçek Postgres; T1–T10) ve kabul gösterimi |
-| `docs/is_emirleri/` | İE-02 iş emri |
-| `testler/bilinen_hatalar/` | B1 ve B2 testleri (ikisi de `ie-02` dalında düzeltildi) |
+| `docs/is_emirleri/` | İE-02 iş emri ve canlıya bağlama kaydı (kapandı 29.09); İE-03 planı `ie-03` dalında |
+| `testler/bilinen_hatalar/` | B1 ve B2 testleri; G ve Astra (A1/A2) testleri. Düzeltmeler canlıda: B1 ve B2 28.09 23:31'den, B1'in Opus'la kısa cevap yolu 29.09 21:09'dan beri |
 | `deneme/2026-09-23/` | 23 Eylül denemeleri ve `yeniden_kos.py` |
 | `KARARLAR/` | K01–K25 ve Z-01–Z-10, her karar ayrı dosyada |
 
@@ -22,20 +22,20 @@ Durumlar: **Taslak** yalnız belgede · **Kodlandı** kod var, testi yok ya da d
 
 | Bileşen | Durum | Kanıt (tarih) | Kapsam sınırı |
 |---|---|---|---|
-| Kanal v1.1.1: WhatsApp → hosting webhook → kuyruk → gönderim | Canlıda doğrulandı | 21.09 (v1.0): 3 mesaj, 1'i bekletildi, 2 PDF okundu · 22.09 22:31: v1.1.1 paketi (`bd1ca27c…`), öz-test geçti · 22.09 22:33–38: 3 Patron mesajı yanıtlandı · 28.09 (kapı A, salt okunur): VPS'teki uygulama (48/48 dosya), hosting'in dağıttığı paket ve hosting'teki `feature.php` ile `api.php` v1.1.1 ile birebir (tam hash); servis 25.09'dan beri kesintisiz · 28.09 23:31 (kapı E): hosting `feature.php` ve `api.php` v1.2, paket v1.2; 29.09 00:47: Opus paketi `f2bff20a…`, öz-test geçti · 29.09 01:16: 1 Patron mesajı → iş emri r01, 25,9 sn, metin + PDF telefona ulaştı | Yalnız Patron modu; kuyruk hostingte bir JSON dosyası (`state.json`) |
-| VPS ajanı (Natro, portman-agent; 28.09'dan beri v1.2) | Canlıda doğrulandı | 22.09 19:06: ilk gerçek İş Emri, 27 sn · 22.09 22:14: v1.1.1, `vps-health.json` · 29.09 00:57: v1.2, dosya modunda, 50/50 dosya paketle aynı · 29.09 18:59: kalıcı mod (Postgres), 19:09'da sağlıklı | ufw etkin ama kuralları okunmadı; root parolayla SSH'ye girebiliyor (22.09 23:59) |
-| Beyin: LLM çıkarımı (29.09'dan beri Claude Opus 5.5; önce gpt-4o-mini), kural katmanı, varyant | Test edildi | Harness 22/22 (sabit girdiler; 28.09'da yeniden) · 22.09 22:33–38 canlı davranış testi 2/3 (B1) | B1 ve B2 `ie-02` dalında düzeltildi (B2: D-01), canlıda değil; yalnız P6001 şablonu canlı |
+| Kanal v1.1.1: WhatsApp → hosting webhook → kuyruk → gönderim | Canlıda doğrulandı | 21.09 (v1.0): 3 mesaj, 1'i bekletildi, 2 PDF okundu · 22.09 22:31: v1.1.1 paketi (`bd1ca27c…`), öz-test geçti · 22.09 22:33–38: 3 Patron mesajı yanıtlandı · 28.09 (kapı A, salt okunur): VPS'teki uygulama (48/48 dosya), hosting'in dağıttığı paket ve hosting'teki `feature.php` ile `api.php` v1.1.1 ile birebir (tam hash); servis 25.09'dan beri kesintisiz · 28.09 23:31 (kapı E): hosting `feature.php` ve `api.php` v1.2, paket v1.2; 29.09 00:47: Opus paketi `f2bff20a…`, öz-test geçti · 29.09 01:16: 1 Patron mesajı → iş emri r01, 25,9 sn, metin + PDF telefona ulaştı · 29.09 21:09: paket `9c76af59…` (G düzeltmesi), öz-test geçti · 29.09 G ve yeniden denemesi: 11 Patron mesajı, 15 giden, hepsi Meta'ya teslim | Yalnız Patron modu; gelen kuyruk hosting'te bir JSON dosyası (`state.json`); konuşma ve iş durumu 29.09 18:59'dan beri VPS'te Postgres'te |
+| VPS ajanı (Natro, portman-agent; 28.09'dan beri v1.2) | Canlıda doğrulandı | 22.09 19:06: ilk gerçek İş Emri, 27 sn · 22.09 22:14: v1.1.1, `vps-health.json` · 29.09 00:57: v1.2, dosya modunda, 50/50 dosya paketle aynı · 29.09 18:59: kalıcı mod (Postgres), 19:09'da sağlıklı · 29.09 21:09: paket `9c76af59…`, kalıcı modda, 50/50 dosya paketle aynı | ufw etkin ama kuralları okunmadı; root parolayla SSH'ye girebiliyor (22.09 23:59) |
+| Beyin: LLM çıkarımı (29.09'dan beri Claude Opus 5.5; önce gpt-4o-mini), kural katmanı, varyant | Canlıda doğrulandı | Harness 22/22 (sabit girdiler; 28.09 ve 29.09'da yeniden) · 22.09 22:33–38 canlı davranış testi 2/3 (B1) · 29.09 G yeniden denemesi (Opus): belirsiz pencere sözünde soru, olumsuz cevapta soru yinelemesi, "değiştir" ile aynı soruya bağlanma ve aynı projede r02 gerçek mesajla geçti | Yalnız P6001 şablonu ve pencere senaryosu canlıda görüldü; B2 (D-01) canlıda gerçek mesajla tetiklenmedi; olumsuz ya da soru biçimli kısa cevaba "Anlayamadım" (pilot sınırlaması, İE-03 gereksinimi) |
 | Motor v1.1.1: İş Emri → DXF → doğrulama → PDF | Test edildi | Altın testler 6×8 (41 pano, 0 cm²) ve Yan Verandalı 6×8,5 (BOM 26 kod); P6001 katalog testi (773 × 763) · 28.09: üç temiz koşuda içerik parmak izi aynı | Plan PDF'i üretir, ön onay paftası değil; canlı PDF içeriği insan gözüyle doğrulanmadı |
 | Çıkarıcı: katalog DXF → İş Emri | Kodlandı | 16 planın 15'i Motor doğrulamasından geçti (22.09 ve 28.09) | P1051'de kapılar, P8501, P9501 ve P1081'de bazı açıklıklar düşüyor; P9901 desteklenmiyor; insan kabulü yok |
 | Serbest aks (Motor yaması) | Kodlandı | 23.09: Tatar 80 m²'de denendi · 28.09: `yeniden_kos.py` ile yeniden koşuldu, sonuçlar aynı | Test dar: tek plan. `deneme/` altında ayrı yama; ana kodda ve canlıda değil; K16'ya bağlı |
 | Vektör PDF plan okuyucu | Kodlandı | 23.09 Tatar 80: ölçek iki yöntemle %0,05 tutarlı · 28.09: `yeniden_kos.py` ile aynı | Test dar: tek plan. Deneme sürümü; el çizimi okumuyor |
 | IFC4 üretimi (IfcOpenShell) | Kodlandı | 28.09 yeniden koşum (`yeniden_kos.py`): şema 0 hata, çift sayım 35/35, hacim farkı %0,0 · Yan Verandalı: Astra modeliyle 65/67 eleman, açıklık 13/13 | Tekrarlanabilir test var ama dar: iki plan. Şema doğrulaması üretim doğruluğu değildir |
 | Blender modeli | Kodlandı | 28.09: `yeniden_kos.py` ile bpy 5.0.1'de yeniden kuruldu, 65 pano, BOM aynı | Test dar: tek plan; sunum içindir, hesap burada yapılmaz |
-| Depo | Kodlandı | 28.09: `portman-v2private` açıldı; v1.1.1 geçmişiyle alındı; İE-01, Lokman'ın onayıyla `main`'e birleştirildi | Eski depo `lokmansayim/portman` yalnız okunuyor |
+| Depo | Kodlandı | 28.09: `portman-v2private` açıldı; v1.1.1 geçmişiyle alındı; İE-01, Lokman'ın onayıyla `main`'e birleştirildi · 29.09: İE-02 Lokman'ın onayıyla `main`'e birleştirildi | Eski depo `lokmansayim/portman` yalnız okunuyor |
 | Yapı Tanımı şeması | Taslak | Zemin, 27.09; temeli İş Emri şeması v0.1 (21.09) | Ölçü anlamları ve ürün ailesi ayrımı eksik |
-| Veritabanı: kalıcı konuşma ve iş akışı (Postgres) | Canlıda (işlem yok) | 29.09 kapı F: canlı VPS'te göçler 1–2; hosting'ten 1 konuşma, 14 mesaj/iş aktarıldı, kaynak ↔ Postgres 15/15 aynı; ajan 18:59'dan beri kalıcı modda, `worker` vps. 28.09: `testler/kalici/`, gerçek Postgres 16'da 185 test geçti. Kabul gösterimi 10/10 (simülasyon: WhatsApp ve LLM sahte). Ajanın kalıcı modu sahte hosting ile sınandı (600 sn süpürme ve hata enjeksiyonu dahil). | Kalıcı modda 29.09'da 11 gerçek Patron mesajı işlendi (G ve yeniden denemesi). Geçişten önceki planlar `projeler`/`revizyonlar`'da yok (tasarım gereği; onayları eski yoldan). İlk canlı veri yedeği 30.09 03:17 cron'u. Yer: mevcut VPS (D-04). Canlıya bağlama planı ve onay kapıları: `docs/is_emirleri/IE-02-canli.md`. pgvector yok (RAG'la gelir). |
-| RAG | Taslak | Araştırma notu, 21.09 | Aşama 2 sonrası |
-| Model geçidi | Canlıda | `llm.py`'de OpenAI ve Anthropic yolları var; 29.09'dan beri canlıda `claude-opus-5-5` (K10), öz-test geçti (5.309 + 488 token, ~0,031 $) · 23.09 kıyas: gpt-4o-mini 6/7, gpt-6-sol 4/7 | 29.09 01:16'da tek gerçek Patron mesajında 5.280 + 337 token, ~0,028 $; B1 vakasında ölçülmedi. Claude anahtarı VPS `agent.env`'de ve hosting `claude_api.json`'da; bilinen son kullanma 29.10. Hosting ayarı VPS'e yalnız arka uç, model ve zaman aşımını geçiriyor (B4) |
+| Veritabanı: kalıcı konuşma ve iş akışı (Postgres) | Canlıda doğrulandı | 29.09 G (19:25–19:59) ve yeniden denemesi (21:05–21:34): 11 gerçek Patron mesajı; soru kaydı yeniden başlatmadan sonra korundu, onay zinciri eski revizyonu reddetti, tekrar gelen mesaj ikinci iş açmadı · 29.09 kapı F: canlı VPS'te göçler 1–2; hosting'ten 1 konuşma, 14 mesaj/iş aktarıldı, kaynak ↔ Postgres 15/15 aynı; ajan 18:59'dan beri kalıcı modda, `worker` vps. 28.09: `testler/kalici/`, gerçek Postgres 16'da 185 test geçti. Kabul gösterimi 10/10 (simülasyon: WhatsApp ve LLM sahte). Ajanın kalıcı modu sahte hosting ile sınandı (600 sn süpürme ve hata enjeksiyonu dahil). | Geçişten önceki planlar `projeler`/`revizyonlar`'da yok (tasarım gereği; onayları eski yoldan). Canlı verinin yedekleri elle alındı (G öncesi/sonrası, yeniden deneme öncesi/sonrası; Mac'te); günlük cron'un canlı veriyle ilk koşusu 30.09 03:17. Yer: mevcut VPS (D-04). Canlıya bağlama planı ve onay kapıları: `docs/is_emirleri/IE-02-canli.md`. pgvector yok (İE-03 planında zorunlu değil, ölçüme bağlı). |
+| Kaynaklı hafıza ve getirme (İE-03) | Taslak | Araştırma notu, 21.09 · İE-03 planı 29.09 (`docs/is_emirleri/IE-03.md`, `ie-03` dalı) | Uygulama, veri paylaşımı, ücretli deneme ve canlı değişiklik ayrı onayla |
+| Model geçidi | Canlıda doğrulandı | `llm.py`'de OpenAI ve Anthropic yolları var; 29.09'dan beri canlıda `claude-opus-5-5` (K10), öz-test geçti (5.309 + 488 token, ~0,031 $; 29.09 21:09'da yeni paketle 5.309 + 458) · 23.09 kıyas: gpt-4o-mini 6/7, gpt-6-sol 4/7 | 29.09 01:16'da tek gerçek Patron mesajında 5.280 + 337 token, ~0,028 $; 29.09 G yeniden denemesinde (B1 vakası dahil) çağrı başına 5.280–5.382 giriş + 135–623 çıkış token (~0,024–0,034 $), tekrar yok. Claude anahtarı VPS `agent.env`'de ve hosting `claude_api.json`'da; bilinen son kullanma 29.10. Hosting ayarı VPS'e yalnız arka uç, model ve zaman aşımını geçiriyor (B4) |
 | PortmanBench | Taslak | Tohum: `testler/referans/` (28.09) | Uçtan uca ölçüm ve kritik hata türleri yok |
 | Ön onay paketi | Taslak | Hedef format notu, 21.09 | Motor PDF'inde çalışma ön görünüşü ve basit özellik tablosu var; yan görünüş, Güncel Şablon 2024 düzeni, fiyat ve onay durumları yok |
 | BOM'dan fiyat | Taslak | Fiyat MVP Excel'i · CTKBF V1.1 27.09'da incelendi, 19 bulgu | Canlı akışta fiyat yok |
@@ -45,16 +45,21 @@ Durumlar: **Taslak** yalnız belgede · **Kodlandı** kod var, testi yok ya da d
 
 ## Açık riskler
 
-- **Sızan eşleşme anahtarı (ertelendi).** Anahtar 22 Eylülde bir ekran görüntüsüyle sohbete girdi. Bilen biri OpenAI anahtarını alabilir, bekleyen işleri çekebilir ve bir işin göndericisine metin ya da PDF gönderebilir. 27 Eylülde yeniden ertelendi (Lokman): OpenAI hesabında ciddi bakiye ve otomatik ödeme yok; anahtar yeni API anahtarıyla birlikte yenilenecek. Bayilere açılmadan önce yenilenmesi şart (K17).
-- **B1.** Belirsiz bir pencere isteğinde sistem soru sormak yerine İş Emri üretiyor. Kanal yalnız Patron modunda olduğu için bayiye ulaşmıyor. Düzeltme `ie-02` dalında, testleri geçiyor; canlıda değil.
-- **B2.** Görüşmede zaman aşımı yok; eski taslak sessizce devralınabiliyor. Karar verildi (D-01, 28.09): taslak 2 saatten eskiyse ve mesaj model koduyla başlıyorsa sistem sorar. Düzeltme `ie-02` dalında, testleri geçiyor; canlıda değil.
+- **Olumsuz ya da soru biçimli kısa cevap (pilot sınırlaması, 29.09).** Bekleyen pencere sorusuna "değiştirmeyin" gibi cevapta sistem "Anlayamadım." deyip soruyu yineler. Güvenlidir (pencere ve revizyon değişmez) ama nihai konuşma başarısı sayılmaz; LLM'in talimatı anlaması İE-03'ün açık gereksinimi.
+- **Claude anahtarının son kullanma tarihi 29.10.2026.** Bitmeden VPS `agent.env` ve hosting `claude_api.json` birlikte yenilenmeli; yoksa hem Portman hem bayi botu durur.
+- **Kişisel veri içeren geçici kopyalar.** VPS, hosting ve Mac'te duruyor; silinmeleri ayrı onayla (liste: `docs/is_emirleri/IE-02-canli.md` §7).
 - **Sunucu erişimi.** root parolayla SSH girişi açık; ufw kuralları okunmadı. Anahtarla girişe geçmek canlı değişikliktir, onayla yapılır.
 - **İmzasız paket kanalı.** Hostinge dosya yazabilen biri VPS'te kod çalıştırabilir (K14, K25).
 - **Test verisinde olası kişisel veri.** `beyin/testler/mesajlar.json` vaka 1 (bkz. `testler/referans/README.md`).
 
-## Sıradaki iş: İE-02 · Kalıcı akış
+Kapananlar (tarihli):
+- **Sızan eşleşme anahtarı** — 22.09'da ekran görüntüsüyle sohbete girmişti; 28.09'da kapı C'de eşleşme ve OpenAI anahtarları yenilendi, eskileri 401 dönüyor.
+- **B1** (belirsiz pencere isteğinde soru yerine İş Emri) — düzeltme 28.09 23:31'den beri canlıda; Opus'la kısa cevap yolu 29.09 21:09'da düzeltildi ve G yeniden denemesinde canlıda doğrulandı.
+- **B2** (eski taslağın sessizce devralınması; D-01) — düzeltme 28.09 23:31'den beri canlıda, testleri geçiyor; canlıda gerçek mesajla henüz tetiklenmedi.
 
-Dal: `ie-02`. İş emri: `docs/is_emirleri/IE-02.md`.
+## İE-02 · Kalıcı akış (kapandı 29.09 22:30)
+
+Dal: `ie-02`, 29.09'da `main`'e birleştirildi. İş emri: `docs/is_emirleri/IE-02.md`; canlı kayıt ve kapanış: `docs/is_emirleri/IE-02-canli.md` (§6 kapanış kaydı, §7 temizlik listesi).
 
 Yapıldı:
 - B2 düzeltmesi (D-01) ve B1 düzeltmesi;
@@ -82,7 +87,7 @@ Yapıldı:
   - İki betik sorunu (sudo'nun girdiyi yutması; karşılaştırmanın PDF'i taşınmayan klasörde araması) veriye dokunmadı; düzeltildi, testlendi.
   - Kişisel veri içeren geçici kopyalar VPS'te, hosting'te ve Mac'te duruyor; silinmeleri ayrı onayla.
 
-Kalan (sırayla, her biri ayrı onayla; `docs/is_emirleri/IE-02-canli.md`):
+Kapı G ve yeniden denemesi (`docs/is_emirleri/IE-02-canli.md`):
 - G (29.09 19:25–19:59; açık maddeleri yeniden denemede kapandı): 5 Patron mesajı; 5 LLM çağrısı, 26.731 + 1.381 token, 0,1345 $; 7 giden mesaj, hepsi okundu. Kabul: yeniden başlatmadan sonra soru kayıtlı, eski revizyon onayı reddedildi, güncel onay kabul edildi, tekrar gelen mesaj ikinci iş açmadı. Açık: G-1 kısa "değiştir" cevabı soruya bağlanmadı (`dustu`), G-2 r02 yerine r03, G-3 gerekçede yinelenen not. Pencere değişikliği çizimde doğru (Lokman). Yedekler öncesi ve sonrası Mac'te.
 
 - G yeniden denemesi (onay 20:45; 29.09 21:05–21:34, **G KAPANDI**): düzeltme `ie-02`'ye alındı (`e726432`; `main` değil). Canlı paket `9c76af59…`, öncekinden (`f2bff20a…`) yalnız `beyin/karar.py` ve sürüm etiketiyle farklı; öz-test geçti, kalıcı mod, Patron modu, model ve anahtarlar korundu.
@@ -92,15 +97,17 @@ Kalan (sırayla, her biri ayrı onayla; `docs/is_emirleri/IE-02-canli.md`):
   - Yedekler (öncesi ve sonrası, hosting paketi) Mac'te, özetler aynı.
   - "Değiştirmeyin"e "Anlayamadım" cevabı güvenli pilot sınırlaması; nihai konuşma başarısı sayılmaz.
 
-G tamamlandı; İE-02'nin kabul ölçütü karşılandı. `main`'e birleştirme ve kişisel veri içeren geçici kopyaların silinmesi (VPS, hosting, Mac) ayrı onay bekliyor.
+İE-02, 29.09 22:30'da Lokman'ın onayıyla tanımlı kapsamıyla kapandı ve `main`'e birleştirildi. Kişisel veri içeren geçici kopyaların silinmesi ayrı onay bekliyor (§7).
 
 Canlı dışı kalan: `kos.py` sır taramasındaki telefon kalıbı; test verisinde takma ad.
 
-Sonraki iş adayı (İE-03): küçük, kaynaklı, sürüm ve yetki ayrımlı RAG. Açık gereksinim (29.09): LLM'in bayinin talimatını anlaması ve doğrulanmış bayi düzeltmelerinden yararlanması.
+## Sıradaki iş: İE-03 · Kaynaklı hafıza ve deneyimden yararlanma (plan)
+
+Plan: `docs/is_emirleri/IE-03.md` (`ie-03` dalı). 29.09'da yalnız plan hazırlığı onaylandı; uygulama, veri paylaşımı, ücretli deneme ve canlı değişiklik ayrı onayla. Açık gereksinim (29.09): LLM'in bayinin talimatını anlaması ve doğrulanmış bayi düzeltmelerinden yararlanması; faydası ölçülerek kabul edilir.
 
 Lokman'ın açık kararları: K16 (a/b), K3 ve K4, Z-03 ve Z-06 eşikleri. Ayrıntı: `KARARLAR/README.md`.
 
 ## Kaynaklar
 
 - Zemin belgesi (sekmeler: Zemin, Güncel durum, Düzeltme kaydı, İlk iş emri, CTKBF): https://claude.ai/code/artifact/65844cef-e6c5-4a5d-b714-ee003c57fe5b
-- Masaüstündeki "Claude Portman Çalışması" klasörü: DURUM.md (23.09 00:35), `07_Denetim/` (22.09 20:30), `08_VPS/hosting_paket/`, 10–13 numaralı klasörler (23.09).
+- Masaüstündeki "Claude Portman Çalışması" klasörü: DURUM.md (23.09 00:35), `07_Denetim/` (22.09 20:30), `08_VPS/hosting_paket/`, 10–13 numaralı klasörler (23.09), 14–22 numaralı klasörler (İE-02 kapıları A–G, 28–29.09).

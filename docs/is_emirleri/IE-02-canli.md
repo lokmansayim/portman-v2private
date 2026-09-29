@@ -1,10 +1,10 @@
 # İE-02 · Canlıya bağlama planı (Patron numarası)
 
-Dal: `ie-02`. Dayanak: Astra'nın 28 Eylül ikinci değerlendirmesi, D-03 ve D-04. Bu plan onaya sunulur. Her kapı (A–H) ayrı açık onayla açılır; onaylanmayan kapıdan sonrası yapılmaz. Sunucu komutlarını Lokman kendi terminalinden çalıştırır. Hiçbir komut anahtar değeri yazdırmaz; anahtarlar yalnız 12 haneli özet parmak iziyle karşılaştırılır.
+Dal: `ie-02`. Dayanak: Astra'nın 28 Eylül ikinci değerlendirmesi, D-03 ve D-04. Plan kapı kapı onaylanarak uygulandı; İE-02 29.09 22:30'da Lokman'ın onayıyla kapandı (§6). Her kapı (A–H) ayrı açık onayla açıldı; onaylanmayan kapıdan sonrası yapılmaz. Sunucu komutlarını Lokman kendi terminalinden çalıştırır. Hiçbir komut anahtar değeri yazdırmaz; anahtarlar yalnız 12 haneli özet parmak iziyle karşılaştırılır.
 
 ## 0. Kısa özet
 
-**Kapılar.** A (salt okunur) 28.09'da onaylandı ve yapıldı: canlı sürüm v1.1.1; VPS'te ve hosting'te denetlenen her şey beklenenle aynı (hosting PHP dosyaları tam hash'le); eşleşme anahtarı iki tarafta aynı; sızan anahtar büyük olasılıkla hâlâ etkin, kanıtlanmadı (ayrıntı A'da). B de 28.09'da onaylandı ve geçti: gerçek `lib.php`'nin temiz kopyasıyla dört takım PHP 8.2.30'da ve 8.4'te tam geçti, ağsız ortamda. C 28.09'da onaylandı ve tamamlandı: eşleşme ve OpenAI anahtarları yenilendi, eski ikisi geçersiz (hosting ve OpenAI 401), yenileri çalışıyor; yalnız anahtar yenilendi, başka bir şey değişmedi. D 28.09'da onaylandı ve tamamlandı: PostgreSQL 16.15 yalnız yerelden bağlanılır biçimde kuruldu; yedek ve geri yükleme denemesi geçti; ajan dosya modunda kaldı ve yeniden başlamadı. E–H her biri ayrı onay bekler. Anahtar yenileme (C), kurulum (D), canlı değişiklik (E, F, H), veri silme ve ücretli deneme (E, G) ayrı ayrı onaylanır.
+**Kapılar.** A (salt okunur) 28.09'da onaylandı ve yapıldı: canlı sürüm v1.1.1; VPS'te ve hosting'te denetlenen her şey beklenenle aynı (hosting PHP dosyaları tam hash'le); eşleşme anahtarı iki tarafta aynı; sızan anahtar büyük olasılıkla hâlâ etkin, kanıtlanmadı (ayrıntı A'da). B de 28.09'da onaylandı ve geçti: gerçek `lib.php`'nin temiz kopyasıyla dört takım PHP 8.2.30'da ve 8.4'te tam geçti, ağsız ortamda. C 28.09'da onaylandı ve tamamlandı: eşleşme ve OpenAI anahtarları yenilendi, eski ikisi geçersiz (hosting ve OpenAI 401), yenileri çalışıyor; yalnız anahtar yenilendi, başka bir şey değişmedi. D 28.09'da onaylandı ve tamamlandı: PostgreSQL 16.15 yalnız yerelden bağlanılır biçimde kuruldu; yedek ve geri yükleme denemesi geçti; ajan dosya modunda kaldı ve yeniden başlamadı. E (28–29.09), F (29.09) ve G (29.09, yeniden denemesiyle) onaylandı ve yapıldı; H (geri dönüş) gerekmedi, yapılmadı. Anahtar yenileme (C), kurulum (D), canlı değişiklik (E, F, H), veri silme ve ücretli deneme (E, G) ayrı ayrı onaylanır.
 
 **Cevapsız kalabilecek işler.** Hepsi uyarıda ve kanıt sorgusu 6'da görünür; hiçbiri sessiz değildir.
 - Hosting'in `claim` cevabı ajana ulaşmazsa, ya da ajan cevabı alıp diske ve Postgres'e yazamadan ölürse (milisaniyeler): satır hosting'te 600 sn sonra "takılı" sayılır. Bu v1.1.1'de de böyledir.
@@ -30,18 +30,18 @@ Dal: `ie-02`. Dayanak: Astra'nın 28 Eylül ikinci değerlendirmesi, D-03 ve D-0
 5. Diskte kalan mesaj dosyaları yedeğin yanına taşınır.
 6. Yeniden giriş yalnız boş bir veritabanına yapılır.
 
-## 1. Durum: hazır olan ve olmayan
+## 1. Durum: hazır olan ve olmayan (ilk hâli 28.09; kapanışta 29.09 22:30 güncellendi)
 
 | Parça | Durum | Kanıt ya da eksik |
 |---|---|---|
-| Postgres kalıcı akış (depo, işleyici, göç 001–002) | Test edildi, izole | `testler/kalici`: gerçek Postgres 16 |
-| Ajanın kalıcı modu (`vps/agent.py`) | Test edildi, **sahte hosting ile** | `test_baglanti.py`, `test_hosting_devri.py`. Sahte hosting `api.php`'nin bir kısmını taklit eder (600 sn süpürme, hata enjeksiyonu dahil; taklit etmediği yerler dosyasının başında yazılı). PHP'yi sınamaz |
-| `feature.php` (`context_id`), `api.php` v1.2 (`giden_durum`) | Test edildi, **gerçek `lib.php` ile yerelde** (B, 28.09); canlıda değil | Hosting'teki `lib.php`'nin temiz kopyası; PHP 8.2.30 (hosting sürümü) ve 8.4'te 30/30, 16/16, 19/19, 18/18; ağsız ortam. `lib.php` depoya girmez |
-| Canlı sürüm | Doğrulandı (A, 28.09) | VPS'teki uygulama (48/48 dosya), hosting'in dağıttığı paket ve hosting'teki `feature.php` ile `api.php` v1.1.1 ile birebir (tam hash) |
-| VPS Postgres kurulumu | Betik hazır; VPS'te koşulmadı (A: Postgres kurulu değil) | `vps/pg_kurulum.sh`: parolasız peer bağlantısı, saf psycopg ve göçler ayrı bir deneme kümesinde sınandı. Durdurma koşulları, sahiplik denetimi, işaretli deneme veritabanı ve yedek silme tercihi ayrı geçici kümelerde uçtan uca sınandı (`test_pg_kurulum.py`). apt, systemd ve cron adımları VPS'te görülecek |
-| Gerçek WhatsApp, gerçek LLM | Denenmedi | Kapı G (kabul gösterimi) |
+| Postgres kalıcı akış (depo, işleyici, göç 001–002) | Canlıda doğrulandı (F 29.09 18:59; G ve yeniden denemesi 29.09) | `testler/kalici`: gerçek Postgres 16. Canlıda 11 gerçek Patron mesajı (§4 G) |
+| Ajanın kalıcı modu (`vps/agent.py`) | Canlıda doğrulandı, gerçek hosting ile (29.09, F ve G); öncesinde **sahte hosting ile** test edildi | `test_baglanti.py`, `test_hosting_devri.py`. Sahte hosting `api.php`'nin bir kısmını taklit eder (600 sn süpürme, hata enjeksiyonu dahil; taklit etmediği yerler dosyasının başında yazılı). PHP'yi sınamaz |
+| `feature.php` (`context_id`), `api.php` v1.2 (`giden_durum`) | Test edildi, **gerçek `lib.php` ile yerelde** (B, 28.09); canlıda E'den (28.09 23:31) beri; G'de alıntılı onay (`context_id`) ve Meta teslim bildirimleri (`giden_durum`) gerçek mesajla görüldü | Hosting'teki `lib.php`'nin temiz kopyası; PHP 8.2.30 (hosting sürümü) ve 8.4'te 30/30, 16/16, 19/19, 18/18; ağsız ortam. `lib.php` depoya girmez |
+| Canlı sürüm | Doğrulandı (A, 28.09; o günkü sürüm v1.1.1). 29.09 21:09'dan beri canlı paket `9c76af59…` (§6) | VPS'teki uygulama (48/48 dosya), hosting'in dağıttığı paket ve hosting'teki `feature.php` ile `api.php` v1.1.1 ile birebir (tam hash) |
+| VPS Postgres kurulumu | Kuruldu (D, 28.09; A'da henüz kurulu değildi); göçler 1–2 F'de (29.09) | `vps/pg_kurulum.sh`: parolasız peer bağlantısı, saf psycopg ve göçler ayrı bir deneme kümesinde sınandı. Durdurma koşulları, sahiplik denetimi, işaretli deneme veritabanı ve yedek silme tercihi ayrı geçici kümelerde uçtan uca sınandı (`test_pg_kurulum.py`). apt, systemd ve cron adımları VPS'te görülecek |
+| Gerçek WhatsApp, gerçek LLM | Denendi: E (29.09 01:16, dosya modu), G (19:25–19:59) ve yeniden denemesi (21:05–21:34, kalıcı mod) | Kapı E ve G kanıtları (§4) |
 
-## 2. Dar değişiklikler (depoda, `ie-02`)
+## 2. Dar değişiklikler (depoda, `ie-02`; 29.09'da `main`'e birleştirildi)
 
 | Dosya | Değişiklik |
 |---|---|
@@ -55,6 +55,8 @@ Dal: `ie-02`. Dayanak: Astra'nın 28 Eylül ikinci değerlendirmesi, D-03 ve D-0
 | `vps/kapi_a_salt_okunur.sh`, `vps/anahtar_yenile.py`, `vps/api_denetim.py` | Salt okunur canlı denetim (kapı A), anahtar yenileme (kapı C.1) ve salt okunur API denetimi (kapı E.4); üçü de anahtar değeri yazdırmaz. Pakete girmez, Mac'ten `ssh` ile çalıştırılır. |
 
 Dokunulmayanlar: `webhook.php`, `worker.php`, panel dosyaları, `portman/lib.php`, `store.json`, Görev 2/3 ve hosting'teki `worker.py`.
+
+Sonradan (E ve G'de) eklenenler: `beyin/llm.py` (Anthropic yolu, Opus 5.5; E), `hosting/` (Codex'in `ai.php` ve `claude_api.php`'si; E), `beyin/karar.py` (G-1…G-4 ve A1/A2 dar düzeltmesi; G), kapı betikleri `vps/kapi_*.sh` ve `vps/kapi_f.py` (pakete girmez).
 
 ## 3. Gerçek PHP hattı nasıl doğrulanır
 
@@ -132,7 +134,7 @@ Yani ayrı parçaların ayrı etiketleri var; eski bir kurulumun işareti değil
 - Bootstrap anahtarı yalnız `agent.env`'i oluştururken üretir ve ekrana bir kez yazar; var olan dosyaya dokunmaz. Dosya 18:19:43'ten beri değişmedi.
 - Oturum günlüğü sızıntıdan sonra anahtarın yenilenmediğini yazıyor (22:09'da yenileme ertelendi).
 - Ama günlükteki sızıntı saati (18:15) dosya tarihinden 4,5 dakika önce. Saat yaklaşık yazılmış olabilir. Yazılmamışsa görüntüdeki anahtar, ondan önce oluşturulup silinmiş bir dosyaya ait olabilir; günlükte böyle bir silme geçmiyor.
-- Kesin kanıt ancak görüntüdeki değerle karşılaştırmadır; yapılmadı. C yapılırsa bu soru kalmaz.
+- Kesin kanıt ancak görüntüdeki değerle karşılaştırmadır; yapılmadı. C yapılırsa bu soru kalmaz. (C 28.09'da yapıldı; soru kalmadı.)
 
 **Öteki bulgular:**
 - Hosting PHP 8.2.30 (B'deki testler bu sürümle koşulur).
@@ -384,7 +386,7 @@ Patron deneme mesajı gönderilmedi. Sayaçlar: OpenAI 1 istek (reddedildi, ücr
 
 **Geri alma (E.5, gerekirse):** `yedek/`'teki eski `feature.php` ve `api.php` geri yüklenir. Paketin eski üç dosyası geri yüklenir, `current.sha256` en son. Ajan v1.1.1 paketini ve `agent.py`'sini geri kurar.
 
-### F · Kalıcı moda geçiş
+### F · Kalıcı moda geçiş (29.09; kapandı)
 **Onay (Lokman, 29.09 01:33):** yalnız F.
 - Konuşma ve proje durumu Postgres'e geçer. Patron modu ve Opus ayarı korunur; model, anahtar ve paket değişmez.
 - Yeni ücretli deneme yok. İşleyici yeniden açılmadan önce kuyrukta ücretli işlem doğuracak mesaj varsa ayrıca bildirilir.
@@ -510,7 +512,7 @@ Geçiş sırasında gelen mesajlar: 1. adımdan 6. adıma kadar webhook yakalama
 
 *Geri dönüş (H'nin 4. adımı; ayrı onay):* `kalici.conf` ve `pg.env` kaldırılır, daemon-reload yapılır ve servis yeniden başlatılır. Veritabanı silinmez.
 
-### G · Kabul gösterimi (gerçek WhatsApp ve gerçek LLM; ücretli kapsam aşağıda)
+### G · Kabul gösterimi (gerçek WhatsApp ve gerçek LLM; ücretli kapsam aşağıda) · 29.09: ilk deneme açık kaldı, yeniden denemede kapandı
 Lokman Patron numarasından yazar:
 
 | # | Ne yapılır | Beklenen | Kanıt |
@@ -533,7 +535,7 @@ Bu yedi adım, kayıtlı çıkarım ve sahte hosting ile `test_baglanti.py::test
 
 Adım 2'de LLM mesajı revizyon değil yeni talep sayabilir. O zaman akış başka bir soruya gider; bu da kaydedilir, uydurulmaz. Böyle olursa adım model koduyla yinelenir ("P6001 yatak odası 1 penceresi 120x180") ya da D-01 sorusu için 2 saat beklenir.
 
-**G · güncel hazırlık (29.09 19:15, F'den sonra; ayrı onaya sunulur, henüz onaylanmadı).**
+**G · güncel hazırlık (29.09 19:15, F'den sonra; Lokman 19:19'da onayladı).**
 
 *Değişen ön koşul:* Patron konuşmasında E'nin planı (`PM-PATRON-20260929-33807` r01) `onay_bekliyor` durumunda açık.
 - Adım 1 bu yüzden **"Yeni talep: P6001 aynalı olsun"** diye yazılır. "Yeni talep" sözü açık planı kapatır ve geçişten sonraki ilk projeyi (r01) açar.
@@ -563,7 +565,7 @@ Adım 2'de LLM mesajı revizyon değil yeni talep sayabilir. O zaman akış baş
 - Gösterimden sonra: `pg_dump` ile yedek alınır ve Mac'e kopyalanır.
 - Adım 7'deki `tekrar_dene.py` komutu da `< /dev/null` ile koşulur.
 
-**Kapı G sonucu (29.09 19:25–19:59; onay Lokman 19:19, Seçenek 1 onayı 19:50; çıktılar `21_Kapi_G/`). G AÇIK KALIR:** Adım 4'teki soru-cevap bağı geçmedi.
+**Kapı G sonucu (29.09 19:25–19:59; onay Lokman 19:19, Seçenek 1 onayı 19:50; çıktılar `21_Kapi_G/`). G AÇIK KALIR:** Adım 4'teki soru-cevap bağı geçmedi. (Yeniden denemede kapandı; aşağıda.)
 
 *Yedekler:*
 - G öncesi: `portman-g-oncesi-20260929.dump`, 33.730 B, sha256 `7651717c…a36e`. İçinde 1 konuşma, 14 mesaj ve iş.
@@ -584,7 +586,7 @@ Adım 2'de LLM mesajı revizyon değil yeni talep sayabilir. O zaman akış baş
 
 *Lokman'ın değerlendirmesi (19:50):* Pencere istenen şekilde değişti; Adım 4 çizim sonucu açısından başarılı sayılır.
 
-*Açık maddeler (G bunlar çözülmeden kapanmaz):*
+*Açık maddeler (G bunlar çözülmeden kapanmaz; üçü de 29.09 21:34'te yeniden denemede kapandı):*
 - **G-1 `dustu`:** Kısa "değiştir" cevabı soruya bağlanmadı.
 - **G-2 numara:** r02 yerine r03 verildi.
 - **G-3 gerekçe:** Gerekçede "YATAK ODASI 1 penceresi 120x180" notu iki kez yazıldı; çizime etkisi yok.
@@ -608,7 +610,7 @@ Nedenleri ve önerilen düzeltme aşağıdaki "G açık maddeleri" bölümünde.
 | Güncel onayın kabulü | Geçti (adım 6) |
 | Aynı mesajın ikinci iş açmaması | Geçti (adım 7) |
 
-**G açık maddeleri: kesin neden ve dar kapsamlı düzeltme önerisi (29.09 20:30; canlıya ALINMADI, ayrı onay bekler).**
+**G açık maddeleri: kesin neden ve dar kapsamlı düzeltme önerisi (29.09 20:30; Astra incelemesiyle genişletildi, 20:45'te onaylandı, 21:09'da canlıya alındı).**
 
 Canlıdaki çıkarım (`g4_teshis.txt`) yerelde birebir yeniden üretildi. Eski kodda aynı sonuç çıktı: soru `dustu`, r03, not iki kez.
 
@@ -649,7 +651,7 @@ Opus ikisini birlikte verdi; ikisi de uyguladı.
 5. WhatsApp payı, 30 Eylül bitmeden yapılırsa 0'dır.
 6. Geri alma: önceki paketin üç dosyası yeniden yüklenir.
 
-**Astra incelemesi (29.09 20:22) ve güncel öneri (dal `ie-02-b1-opus`, commit `2d50148`; canlıya ALINMADI).**
+**Astra incelemesi (29.09 20:22) ve güncel öneri (dal `ie-02-b1-opus`, commit `2d50148`; 20:45'te onaylandı, 21:09'da canlıya alındı).**
 
 Astra `25c49b7`'de iki ek durum buldu; ikisi de doğrulandı.
 - **A1 · olumsuz kısa cevap:** Bekleyen `pencere_islem` sorusuna "değiştirme", "değiştirmeyin", "ekleme", "eklemeyin" kısa cevap işlevlerinden olumlu işlem olarak çıkıyordu. `_pencere_cevabi_saf` doğru, `_pencere_niyeti` "degistir"/"ekle" döndürüyordu.
@@ -676,7 +678,7 @@ Astra `25c49b7`'de iki ek durum buldu; ikisi de doğrulandı.
 - Toplam: kalici + bilinen_hatalar 321 geçti; harness 22/22.
 - Deneme paketi (yerelde, yüklenmedi) canlıdakiyle (`f2bff20a…`) karşılaştırıldı: 50/50 dosya; fark yalnız `beyin/karar.py` ve `SURUM.txt`.
 
-**Sonraki dağıtım planı (canlı onayı ayrıca verilecek; henüz hiçbir şey yüklenmedi, ücretli çağrı yapılmadı).**
+**Dağıtım planı (29.09 20:40'ta hazırlandı; 20:45'te onaylandı ve aşağıdaki yeniden denemede uygulandı).**
 
 *Şimdiye dek İE-02'de gerçekleşen harcama ve sayaçlar (Claude Opus 5.5, 4 $ + 20 $ / 1M token):*
 
@@ -856,7 +858,7 @@ Bayi sohbet botunun Opus trafiği bu tabloya dahil değil; Console'dan izlenir.
   - Kalan 2 çağrı hakkı, deneme ve tekrarına tam yeter.
   - WhatsApp 1 Ekim'den önce ücretsiz.
 
-### H · Geri dönüş (gerektiğinde; onayla)
+### H · Geri dönüş (gerektiğinde; onayla) · İE-02 boyunca gerekmedi, yapılmadı
 1. `settings.json` → `"worker": "off"`. Gelen mesajlar kuyrukta bekler. Ajan yeni mesaj almaz; Postgres'te açık kalan işleri bitirir ve sonuçlarını hosting'e verir (boşaltma).
 2. Boşalma beklenir. VPS'te:
    ```
@@ -870,12 +872,13 @@ Bayi sohbet botunun Opus trafiği bu tabloya dahil değil; Console'dan izlenir.
 
 Postgres'e yeniden geçiş: `/opt/portman/data/kalici_bekleyen/` boş olmalı (içinde kalan dosya eski veritabanına aittir; `hatali/` ile birlikte `portman_pilot_<tarih>` yedeğinin yanına taşınır). Sonra `sudo -u postgres createdb -O portman -E UTF8 portman` ve F'nin 1–6. adımları. İçe aktarma yalnız boş veritabanına yapılır; dosya modunda ilerlemiş konuşmalar böylece Postgres'teki eski durumla ezilmez.
 
-## 5. Henüz doğrulanamayan ve kalan riskler
+## 5. Henüz doğrulanamayan ve kalan riskler (ilk hâli 28.09; kapanışta 29.09 güncellendi)
 
-- **Gerçek PHP hattı:** `feature.php` ve `api.php` değişiklikleri gerçek `lib.php` ile yerelde geçti (B), ama canlıda henüz yok. Canlıda E'de (dosya modu) ve G'de (kalıcı mod) görülür.
+- **Gerçek PHP hattı:** `feature.php` ve `api.php` değişiklikleri gerçek `lib.php` ile yerelde geçti (B, 28.09) ve E'den (28.09 23:31) beri canlıda; E'de dosya modunda, G'de kalıcı modda gerçek mesajla görüldü.
 - **Medya indirme yolu:** `lib.php`'deki `pm_download` → `pm_stream_media` (bayinin gönderdiği dosyanın arşivlenmesi) B'de sınanmadı; testler oraya girmiyor. Bu yol İE-02'de değişmedi.
-- **Gerçek WhatsApp ve LLM:** yalnız kapı G'de görülür. Sahte hosting Meta'nın gecikmeli ya da eksik bildirimlerini, 24 saat penceresini ve `dry_run`'ı taklit etmez.
-- **VPS:** Postgres D'de kuruldu (28.09). Kalıcı moda geçiş (F) ve göçler henüz yapılmadı; cron yedeği ilk kez 29.09 03:17'de çalışacak.
+- **Gerçek WhatsApp ve LLM:** E ve G'de görüldü; Meta'nın `delivered`/`read` bildirimleri geldi. Sahte hosting Meta'nın gecikmeli ya da eksik bildirimlerini, 24 saat penceresini ve `dry_run`'ı taklit etmez; 24 saat penceresi ve `held` yolu canlıda sınanmadı.
+- **Olumsuz ya da soru biçimli kısa cevap (pilot sınırlaması, 29.09):** bekleyen pencere sorusuna "değiştirmeyin" gibi cevapta sistem "Anlayamadım." deyip soruyu yineler; güvenli ama nihai konuşma başarısı değil. LLM'in talimatı anlaması İE-03'ün açık gereksinimi.
+- **VPS:** Postgres D'de kuruldu (28.09); göçler ve kalıcı mod F'de (29.09 18:59). Günlük cron yedeği ilk kez 29.09 03:17'de koştu (o sırada veritabanı boştu); canlı veriyle ilk koşusu 30.09 03:17. Canlı verinin elle alınmış yedekleri G ve yeniden denemesinin öncesinde ve sonrasında alındı (§7).
 - **Sızan anahtar:** C'de kapandı (28.09). Sızdığı düşünülen eşleşme anahtarı ve onunla alınabilen OpenAI anahtarı artık geçersiz.
 - **v1.1.1'den kalan pencere:** hosting `claim` cevabını gönderip ajan onu alamazsa (ağ kopması) ya da ajan cevabı aldıktan sonra diske ya da Postgres'e yazamadan ölürse (milisaniyeler), satır hosting'te 600 sn sonra "failed" olur ve cevapsız kalır. Bu v1.1.1'de de böyledir; hosting kuyruğunda görünür ve yeniden kuyruğa konursa (tekrar gelen mesaj) cevap verilir.
 - **VPS saati:** "hosting satırı süpürüldü" kararı VPS saatindeki iki an arasındaki farka dayanır (ajanın mesajı aldığı an ve sonraki başarılı claim). Çalışan sunucuda saat 660 sn'den çok ileri atlarsa (ör. açılışta büyük bir NTP düzeltmesi) ve aynı anda o işin devri hata veriyorsa, hosting'in hâlâ alabileceği bir sonuç "gönderilmedi" sayılabilir; uyarıda ve sorgu 6'da görünür.
@@ -889,3 +892,55 @@ Postgres'e yeniden geçiş: `/opt/portman/data/kalici_bekleyen/` boş olmalı (i
 Kapı G'deki yedi adım kanıt sorgularıyla gösterildiğinde İE-02 kapanır. Sonraki iş İE-03'tür: küçük, kaynaklı, yetki ayrımlı RAG (`IE-02.md` "Sonraki iş").
 
 **29.09 21:34:** G'nin kabul adımları yeniden denemede kanıt sorgularıyla gösterildi; G kapandı. `main`'e birleştirme ve kişisel veri içeren geçici kopyaların silinmesi Lokman'ın ayrı onayına bağlı; H (geri dönüş) yalnız gerektiğinde, onayla.
+
+## 7. Temizlik listesi (29.09 22:50; öneri, hiçbir şey silinmedi)
+
+Silme ayrı onayla yapılır. Aşağıdaki A ve B yalnız geçici kopyalardır. Canlı kaynaklar, gerekli yedekler ve kabul kanıtları C'dedir ve bu listeye girmez. Mac yolları `~/Desktop/Claude Portman Çalışması/` altındadır.
+
+**A. Silinmesi önerilen geçici kopyalar (kişisel veri ya da gizli bilgi içerir)**
+
+| # | Yer | Tam yol | İçerik | Neden artık gerekmiyor | Yerine kalan |
+|---|---|---|---|---|---|
+| A1 | Mac | `16_Kapi_C/config.php` | **Canlı WhatsApp erişim anahtarı ve panel parolası** | C'de (28.09) botun anahtarı nereden okuduğunu göstermek için indirildi; iş bitti. Öncelikli | Asıl dosya hosting'te yerinde |
+| A2 | Mac | `16_Kapi_C/ai.php`, `16_Kapi_C/settings.json` | C'deki canlı dosya kopyaları | Salt okunur inceleme bitti; `ai.php` Opus geçişinde değişti, kopya güncel değil | Opus öncesi `ai.php` ve ayarın yedeği `19_Devir_Opus/yedek/` |
+| A3 | Mac | `15_Kapi_B/lib.php`, `15_Kapi_B/lib.clean.php` | Hosting `lib.php` kopyası (7. satırda iki gerçek numara) ve temizlenmiş kopyası (bir ön ad kaldı) | B'nin PHP testleri 28.09'da bitti | Asıl dosya hosting'te; test sonuçları §4 B |
+| A4 | Mac | `20_Kapi_F/gecis/` (`kanal/state.json`, `kanal/durum/`, `kapi_f.py` kopyası, `__pycache__/`) | VPS'e taşınan konuşma kopyası | İçe aktarma 29.09 18:27'de yapıldı; kaynak ↔ Postgres 15/15 aynı; Postgres asıl kayıt | Aynı içerik `20_Kapi_F/yedek/yedek-ie02-f-20260929.tar.gz`'de (C) |
+| A5 | Mac | `20_Kapi_F/yedek/hosting_acik/` | Hosting arşivinin karşılaştırma için açılmış hâli | Karşılaştırma bitti | Arşivin kendisi korunur (C) |
+| A6 | Mac | `20_Kapi_F/7_kuyruk/state.json` | F.7'de yeniden indirilen kuyruk | Yedekle birebir aynıydı (`fa4351fd…`); denetim bitti | Özeti `20_Kapi_F/7_kuyruk_ozet.txt` (C) |
+| A7 | VPS | `/var/tmp/portman-gecis/` | F'de hosting'ten taşınan `state.json` ve `durum/` | İçe aktarma bitti ve doğrulandı (yukarıdaki gibi) | VPS `/var/backups/portman/opt-portman-ie02-f-20260929.tgz` ve Mac'teki hosting arşivi (C) |
+| A8 | VPS | `/root/portman-migration-staging/` | Codex'in Opus geçiş klasörü: 90 dosya, 5,4 MB, canlı yedek kopyaları; desen taramasında 2 eşleşme (bağımsız doğrulanmadı) | Opus geçişi 29.09 01:10'da doğrulandı; öncesinin yedeği Mac'te | Mac `19_Devir_Opus/yedek/` (C) |
+| A9 | Hosting | `/home/portatifevcom/portman_app/kanal/yedek-ie02-f-20260929.tar.gz` | F öncesi hosting arşivi, 5,96 MB (konuşmalar, PDF'ler) | Paylaşımlı hosting'te durması gerekmiyor | Aynı özetli (`79e04043…`) kopyası Mac'te (C) |
+| A10 | Hosting | DirectAdmin çöp kutusundaki `claude_gecis_kontrol.php` | Codex'in geçici denetim betiği (29.09) | İşi bitti; çöp kutusunda duruyor | Çıktısı `19_Devir_Opus/hosting-dogrulama.json` (C) |
+
+**B. İsteğe bağlı (kişisel veri yok; düşük öncelik)**
+- B1 · VPS `php8.3-cli` paketi (Codex, 29.09). Canlı akış PHP'yi VPS'te kullanmıyor. Kaldırmak `apt` ile bir sistem değişikliğidir; ayrı onay.
+- B2 · VPS `/var/backups/portman/kurulum-deneme-20260928223804_86879.dump`: D'deki yedek ve geri yükleme denemesinin çıktısı. Canlı veri değildir; deneme 28.09'da geçti.
+- Bu oturumun bulut çalışma alanındaki kopyalar oturumla birlikte silinir; ayrıca işlem gerekmez.
+
+**C. Korunacaklar (temizlik listesine girmez)**
+
+*Canlı kaynaklar:*
+- VPS:
+  - `/opt/portman/app` (canlı paket `9c76af59…`) ve `/opt/portman/app.old` (bir önceki paket `f2bff20a…`; hızlı geri dönüş);
+  - `/opt/portman/pkg/*.zip` (paket arşivi), `/opt/portman/data/`, `/opt/portman/logs/`, `/opt/portman/agent.py`, `/opt/portman/venv/`;
+  - `/etc/portman/agent.env`, `/etc/portman/pg.env`, `/etc/systemd/system/portman-agent.service.d/kalici.conf`, `/etc/cron.d/portman-pg-yedek`;
+  - Postgres `portman` veritabanı.
+- Hosting:
+  - `portman_app/kanal/` (`settings.json`, `state.json`, `durum/`, `projects/`, `package/`);
+  - `developer/kanal_api.php`, `developer/ai.php`, `portman_app/claude_api.php`, `claude_api.json`.
+
+*Gerekli yedekler (kişisel veri içerenlerin saklama süresi ayrı karar; bkz. DURUM "Kişisel veri: takma ad"):*
+- VPS `/var/backups/portman/`:
+  - `portman-g-oncesi-20260929.dump`, `portman-g-sonrasi-20260929.dump`, `portman-g-tekrar-20260929.dump`, `portman-g-tekrarsonrasi-20260929.dump` (son hâl, `f68b9041…`);
+  - `opt-portman-ie02-f-20260929.tgz` (kalıcı moda geçiş öncesi `/opt/portman`);
+  - `portman-20260929.dump` ve sonraki günlük cron yedekleri.
+- Mac:
+  - `20_Kapi_F/yedek/yedek-ie02-f-20260929.tar.gz` ve `20_Kapi_F/yedek/opt-portman-ie02-f-20260929.tgz` (F öncesi hosting ve VPS);
+  - `21_Kapi_G/yedek/*.dump`, `22_Kapi_G2/yedek/*.dump`;
+  - `22_Kapi_G2/yedek/hosting-paket/` (`f2bff20a…`; paket geri alma);
+  - `18_Kapi_E/yedek/` (E öncesi PHP ve paket; H'de tam dönüş), `19_Devir_Opus/yedek/` (Opus öncesi dosyalar);
+  - `22_Kapi_G2/yukle/` (canlı paketin kendisi), `18_Kapi_E/yukle/`, `19_Devir_Opus/codex-aday/`.
+
+*Kabul kanıtları:*
+- Mac: `14_Kapi_A/`, `16_Kapi_C/` altındaki `2_…9_*.txt` çıktıları, `17_Kapi_D/`, `18_Kapi_E/` çıktıları ve devir raporu, `19_Devir_Opus/` (`1_dogrula.txt`, raporlar, `DOSYA_HASHLERI.json`, `hosting-dogrulama.json`, `canli-oz-test.json`), `20_Kapi_F/*.txt` ve `3_hosting_ozet.*`, `21_Kapi_G/*.txt`, `22_Kapi_G2/*.txt`; her klasördeki betikler.
+- Depo: bu belge, `IE-02.md`, `DURUM.md`, `testler/`.
