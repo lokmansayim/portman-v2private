@@ -649,6 +649,73 @@ Opus ikisini birlikte verdi; ikisi de uyguladı.
 5. WhatsApp payı, 30 Eylül bitmeden yapılırsa 0'dır.
 6. Geri alma: önceki paketin üç dosyası yeniden yüklenir.
 
+**Astra incelemesi (29.09 20:22) ve güncel öneri (dal `ie-02-b1-opus`, commit `2d50148`; canlıya ALINMADI).**
+
+Astra `25c49b7`'de iki ek durum buldu; ikisi de doğrulandı.
+- **A1 · olumsuz kısa cevap:** Bekleyen `pencere_islem` sorusuna "değiştirme", "değiştirmeyin", "ekleme", "eklemeyin" kısa cevap işlevlerinden olumlu işlem olarak çıkıyordu. `_pencere_cevabi_saf` doğru, `_pencere_niyeti` "degistir"/"ekle" döndürüyordu.
+  - Canlı kodda (ie-02) da vardı: LLM alanları boşken olumsuz cevap pencereyi değiştirir ya da ekleme sayılırdı.
+  - Pencere satırının sözü de, oda ya da ölçü geçmeyen metinde aynı işleve düşüyordu. "hayır değiştirme" böyle "degistir" sayılabiliyordu.
+- **A2 · oda yalnız açıklamada:** `parametreler.mahal` boş ama açıklamada oda ve ölçü yazılı bir `pencere_degistir` varyantı, `25c49b7`'nin dönüştürme yolunu atlıyordu. Eski yol odayı `_mahal_eslestir_metinde` ile bulup B1'e bakmadan değiştiriyordu.
+
+*Düzeltme (yalnız `beyin/karar.py`):*
+- `_pencere_niyeti` olumsuzluk ya da soru biçiminde "belirsiz" döner. `_pencere_soz_niyeti` zaten böyle davranıyordu; aynı kural kısa cevaba ve yedek yola da uygulandı.
+- Kısa, saf ama olumsuz ya da soru biçimli cevapta LLM ne derse desin (boş, bağlamdan doldurulmuş, "red") soru yinelenir: "Anlayamadım." + sorulan sorunun metni.
+  - Pencere değişmez, eklenmez; talep kapanmaz; revizyon numarası tüketilmez.
+  - Sonra gelen "değiştir" aynı soruya bağlanır.
+- Varyanta birleştirmede bayinin o mesajdaki sözü (`soz_niyeti`) işlenir. İş Emri üretilirken odası parametreden ya da açıklamadan bulunan varyant pencere satırına çevrilir ve B1 uygular.
+  - Aynı odanın satırı varsa varyant düşer (G-3).
+  - Odası hiç bulunamayan varyant eskisi gibi odayı sorar.
+- G-2'nin sayaç geri alması, dosya modunda konuşma kaydedildikten sonra yapılıyordu; kayda geçmiyordu. Numara yine doğruydu. Geri alma `_bitir`'e, kaydetmeden önceye taşındı.
+
+*Testler:*
+- `bilinen_hatalar`'a 22 test eklendi:
+  - A1: 6 yardımcı işlev testi; 4 olumsuz cevabın her biri 3 LLM biçimiyle (12); olumsuz cevaptan sonra "değiştir" (1).
+  - A2: belirsiz sözde soru, "değiştir" ile cevap, açık sözde değişiklik (3).
+- `kalici`'ye 1 test eklendi (Postgres): olumsuz cevapta soru `acik` kalır, deneme 2 olur, revizyon oluşmaz; sonra "değiştir" ile `cevaplandi` ve aynı projede r02.
+- Yeni 30 kural testinin canlı kodda 27'si, `25c49b7`'de 21'i düşüyor. Değişmemesi gereken davranışı denetleyen 3 test (açık sözde değişiklik, odası belli olmayan varyant) iki sürümde de geçiyor.
+- Toplam: kalici + bilinen_hatalar 321 geçti; harness 22/22.
+- Deneme paketi (yerelde, yüklenmedi) canlıdakiyle (`f2bff20a…`) karşılaştırıldı: 50/50 dosya; fark yalnız `beyin/karar.py` ve `SURUM.txt`.
+
+**Sonraki dağıtım planı (canlı onayı ayrıca verilecek; henüz hiçbir şey yüklenmedi, ücretli çağrı yapılmadı).**
+
+*Şimdiye dek İE-02'de gerçekleşen harcama ve sayaçlar (Claude Opus 5.5, 4 $ + 20 $ / 1M token):*
+
+| Kapı | LLM çağrısı | Token (giriş + çıkış) | Maliyet | Giden WhatsApp | Patron mesajı |
+|---|---|---|---|---|---|
+| E | 4 Claude (Codex 3 + Patron 1) ve 1 OpenAI reddi (ücretsiz) | 3 Codex çağrısı Codex'in raporundan; Patron 5.280 + 337 | ~0,062 $ + 0,028 $ = **~0,090 $** | 2 | 1 |
+| F | 0 | — | 0 | 0 | 0 |
+| G | 5 | 26.731 + 1.381 | **0,1345 $** | 7 | 5 |
+| **Toplam** | **9 Claude** | | **~0,225 $** | **9** | **6** |
+
+Bayi sohbet botunun Opus trafiği bu tabloya dahil değil; Console'dan izlenir.
+
+*Dağıtım adımları:*
+1. Dal `ie-02-b1-opus`, `ie-02`'ye alınır.
+2. Paket üretilir. Canlıdakiyle fark yalnız `beyin/karar.py` ve `SURUM.txt` olmalı; asistan doğrular.
+3. Hosting'teki mevcut paketin üç dosyası Mac'e yedeklenir. Yeni üç dosya yüklenir; `current.sha256` en son.
+4. Ajan paketi kurar ve kalıcı modda yeniden başlar. **Öz-test bir kez koşar:** 1 LLM çağrısı, ~5.300 + ~500 token, **~0,031 $**; şema hatasında +1, en çok ~0,062 $.
+5. Salt okunur doğrulama: sürüm, 50/50 dosya, kalıcı mod, öz-test.
+6. **G yeniden denemesi**, yeni bir projeyle:
+   - "Yeni talep: P6001 aynalı olsun" → r01.
+   - "yatak odası 1, 120x180" → soru.
+   - İsteğe bağlı A1: "değiştirmeyin" → soru yinelenir.
+   - Servis yeniden başlatılır.
+   - "değiştir" → soru `cevaplandi`, aynı projede **r02**, not bir kez.
+   - İsteğe bağlı, orijinal senaryoyu r01/r02 ile tamamlamak için: r01 PDF'ine onay → ret; r02 PDF'ine onay → kabul; `tekrar_dene`.
+7. Öncesi ve sonrası Postgres yedeği alınıp Mac'e kopyalanır.
+
+*Önerilen sınır:*
+- LLM çağrısı en çok **9**: öz-test 1–2, yeniden deneme 4–7.
+- Harcama en çok **0,30 $**. Tahmin 0,15–0,25 $ (çağrı başına ~0,028–0,035 $).
+- Giden WhatsApp en çok **12**. Tahmin 5–8: soru metinleri 2, r01 ve r02 için metin + PDF 4, onay cevapları 2.
+- Patron mesajı en çok **7**.
+
+*Zamanlama:* WhatsApp servis mesajları 1 Ekim 2026'ya dek ücretsiz. Dağıtım ve yeniden deneme **30 Eylül bitmeden** yapılırsa WhatsApp payı 0. Sonraya kalırsa önce Meta'nın o günkü Türkiye utility oranı okunup sunulur.
+
+*Geri alma:* Önceki paketin (`f2bff20a…`) üç dosyası yeniden yüklenir; ajan onu kurar. Veritabanı değişmez.
+
+*G'nin kapanması:* Yeniden denemede soru-cevap bağı (G-1) ve r02 (G-2) canlıda geçerse; A1 ve A2 yerel testlerle kanıtlı.
+
 **Ücretli kapsam (E ve G birlikte).** Planlı gerçek çağrılar yalnız bu iki kapıda olur. A, B, C, D, F ve H kendiliğinden gerçek LLM ya da WhatsApp çağrısı yapmaz: öz-test paket başına bir kez koşar, servis yeniden başlatmaları onu tekrarlamaz. Ama F ve H'de kuyrukta bekleyen gerçek mesaj varsa işlenir ve cevaplanır; Patron modunda bunlar yalnız Lokman'ın mesajlarıdır.
 
 | Kapı | OpenAI (gpt-4o-mini) | WhatsApp giden mesaj |
