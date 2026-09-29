@@ -608,6 +608,47 @@ Nedenleri ve önerilen düzeltme aşağıdaki "G açık maddeleri" bölümünde.
 | Güncel onayın kabulü | Geçti (adım 6) |
 | Aynı mesajın ikinci iş açmaması | Geçti (adım 7) |
 
+**G açık maddeleri: kesin neden ve dar kapsamlı düzeltme önerisi (29.09 20:30; canlıya ALINMADI, ayrı onay bekler).**
+
+Canlıdaki çıkarım (`g4_teshis.txt`) yerelde birebir yeniden üretildi. Eski kodda aynı sonuç çıktı: soru `dustu`, r03, not iki kez.
+
+*G-1 (soru `dustu`):* B1'in kısa cevap yolu iki şarta bağlıydı: metin kısa ve saf ("değiştir"/"ekle" ve dolgu sözcükleri), **ve** LLM'in mesajda içerik bulmamış olması (`_icerikli`).
+- Testler, LLM'in kısa cevaba içeriksiz "diger" döndüreceğini varsayıyordu; gpt-4o-mini böyle davranıyordu.
+- Opus 5.5 ise bağlamdaki bekleyen soruyu okuyup oda, ölçü ve model alanlarını yeniden doldurdu ve niyeti revizyon verdi (iş 17). İkinci şart tutmadı.
+- Mesaj normal revizyon olarak işlendi; kural notu "pencere_islem cevabı" düşülmediği için `sorular` kaydı `dustu` kapandı.
+- Pencere yine değişti, çünkü "değiştir" sözü açıktı.
+
+*G-2 (r03):* Revizyon sayacı, soru soran revizyon turunda da artıyor (adım 2: 0→1). Cevap, cevap yolundan değil normal revizyon olarak işlenince ikinci kez arttı (1→2); numara sayaç + 1 = 3 oldu.
+
+*G-3 (not iki kez):* Pencere ölçü değişikliği iki yoldan uygulanıyor:
+- pencere satırı (`pencereler`): B1 kurallarıyla, bayinin sözüne bakar;
+- `pencere_degistir` varyantı: kuralsız.
+
+Opus ikisini birlikte verdi; ikisi de uyguladı.
+
+*G-4 (yeni bulgu, canlıda görülmedi):* LLM belirsiz bir pencere sözü için yalnız varyant verirse (satır yok), varyant yolu B1'e bakmadan pencereyi **sessizce değiştiriyor**. Bu, Opus'la B1 korumasının atlanabileceği bir yol.
+
+*Önerilen düzeltme (dal `ie-02-b1-opus`, commit `25c49b7`, yalnız `beyin/karar.py`; 41 satır eklenir, 6 satır çıkar):*
+1. **G-1:** Kısa cevap yolundan `_icerikli` şartı kalkar. Saf metin yeni içerik taşıyamaz: sözcük listesinde oda adı ya da ölçü yok. Tanınan cevapta LLM'in içeriği yok sayılır; D-01'deki kısa cevapla aynı ilke.
+2. **G-2:** Plan üretmeyen tur (soru, yönlendirme) sayacı geri alır. Numara gönderilmiş son planın numarasından hesaplanır (konuşma sıfırlandıysa 1); sayaç plan sayısıyla eşitlenir.
+3. **G-3/G-4:** Odası ve ölçüsü belli bir `pencere_degistir` varyantı mesaj birleştirilmeden önce pencere satırına çevrilir; aynı oda için satır varsa varyant düşer.
+   - Satıra bayinin o mesajdaki sözü işlenir; belirsizse sorulur.
+   - Odası belli olmayan varyant eskisi gibi kalır (oda sorulur).
+   - Taslakta kalmış eski varyantlar için: aynı odanın satırı varsa varyant uygulanmaz.
+
+*Testler:*
+- `testler/bilinen_hatalar/test_b1_b2.py`'ye 8 test eklendi; canlıdaki çıkarım biçimiyle. 6'sı eski kodda düşüyor, 2'si davranışın değişmediğini denetler.
+- `testler/kalici/test_kalici.py`'ye Postgres düzeyinde canlı sıra testi eklendi: soru `cevaplandi`, aynı projede r01 → r02. Eski kodda düşüyor.
+- Toplam: kalici + bilinen_hatalar 298 geçti. Harness 22/22; çıktısı düzeltmeden önceyle aynı.
+
+*Canlıya almak için (ayrı onay):*
+1. Yeni paket hazırlanır; canlıdakinden (`f2bff20a…`) yalnız `beyin/karar.py` farklı olmalı, bu paket kurulmadan önce denetlenir.
+2. E'deki gibi hosting'teki paket yedeklenir ve yeni paket yüklenir (`current.sha256` en son). Ajan kendini günceller.
+3. Yeni paket için öz-test bir kez koşar: 1 LLM çağrısı, ~0,03 $.
+4. Doğrulama için G'nin 1–4. adımları yeni bir projeyle yinelenir; isterseniz 5–6 da. 3–5 LLM çağrısı (~0,09–0,15 $) ve 5–7 giden mesaj.
+5. WhatsApp payı, 30 Eylül bitmeden yapılırsa 0'dır.
+6. Geri alma: önceki paketin üç dosyası yeniden yüklenir.
+
 **Ücretli kapsam (E ve G birlikte).** Planlı gerçek çağrılar yalnız bu iki kapıda olur. A, B, C, D, F ve H kendiliğinden gerçek LLM ya da WhatsApp çağrısı yapmaz: öz-test paket başına bir kez koşar, servis yeniden başlatmaları onu tekrarlamaz. Ama F ve H'de kuyrukta bekleyen gerçek mesaj varsa işlenir ve cevaplanır; Patron modunda bunlar yalnız Lokman'ın mesajlarıdır.
 
 | Kapı | OpenAI (gpt-4o-mini) | WhatsApp giden mesaj |
