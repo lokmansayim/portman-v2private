@@ -104,3 +104,14 @@ def test_yedek_yeni_dosya_okunur_ve_uzerine_yazmaz(ortam, depo, wa, hizli_motor)
     assert r2.returncode == 1 and "üzerine yazılmaz" in r2.stdout and dosya.read_bytes() == once
     r3 = _kos("kapi_g_yedek.sh", {**ortam["o"], "PM_AD": "../baska"})
     assert r3.returncode == 1 and "biçimi yanlış" in r3.stdout
+
+
+def test_teshis_deger_yazmadan(ortam, depo, wa, hizli_motor):
+    bas = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time() - 5))
+    g, o = _plan_ve_onay(depo, wa)
+    r = _kos("kapi_g_teshis.sh", {**ortam["o"], "PM_BASLANGIC": bas})
+    out = r.stdout + r.stderr
+    assert r.returncode == 0, out
+    _temiz(out, ortam["tok"], g["id"], o["id"])
+    assert "LLM niyet yeni_talep/yuksek · dolu alanlar ['katalog_kodu', 'varyantlar']" in out and "LLM varyantlar: ['ayna_x']" in out
+    assert "-- konuşma (şimdi): aşama onaylandi" in out and "-- revizyon PM-TSTA-" in out and "r01 (onaylandi)" in out
