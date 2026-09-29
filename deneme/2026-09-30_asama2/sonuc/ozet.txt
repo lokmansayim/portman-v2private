@@ -1,0 +1,7 @@
+P9401: Motor doğrulaması geçti (kaynağa uygunluk değil) · dış [1024.0, 888.5] cm · pano 49 · pencere 7 · kapı 5 · odalar: YATAK ODASI 1 11.45, YATAK ODASI 2 11.34, YATAK ODASI 3 9.11, BANYO 4.54, YASAM ALANI 41.61, VERANDA 7.88
+P9201: Motor doğrulaması geçti (kaynağa uygunluk değil) · dış [835.75, 1139.5] cm · pano 48 · pencere 6 · kapı 5 · odalar: YATAK ODASI 1 12.2, YATAK ODASI 2 11.45, YATAK ODASI 3 9.08, HOL 6.6, SALON 27.55, BANYO 4.43, VERANDA 18.9
+P9501: Motor doğrulaması geçti (kaynağa uygunluk değil) · dış [898.5, 1014.0] cm · pano 43 · pencere 5 · kapı 3 · odalar: SALON 23.49, VERANDA 9.06, CAMASIR 1.54, BANYO 2.18, MUTFAK 12.22, YATAK ODASI 1 10.58, YATAK ODASI 2 10.0, YATAK ODASI 3 8.55, HOL 8.97
+P1051: Motor doğrulaması geçti (kaynağa uygunluk değil) · dış [835.75, 1014.0] cm · pano 30 · pencere 8 · kapı 0 · odalar: YASAM ALANI 31.43, YATAK ODASI 1 8.34, YATAK ODASI 2 8.99, YATAK ODASI 3 11.65, BANYO 12.28, HOL 8.4
+P1121: Motor doğrulaması geçti (kaynağa uygunluk değil) · dış [1149.5, 1139.5] cm · pano 65 · pencere 4 · kapı 6 · odalar: YATAK ODASI 1 18.01, YATAK ODASI 2 12.25, YATAK ODASI 3 11.34, YASAM ALANI 40.74, VERANDA 28.22, HOL 9.69, BANYO 4.43
+P9401 IFC: IfcWall 49 · IfcWindow 7 · IfcDoor 5 · IfcSpace 6 · IfcOpeningElement 12 · şema hatası 0
+P9201 IFC: IfcWall 48 · IfcWindow 6 · IfcDoor 5 · IfcSpace 7 · IfcOpeningElement 11 · şema hatası 0

@@ -1,0 +1,356 @@
+{
+ "is_emri_no": "PM-KATALOG-P1051",
+ "revizyon": 1,
+ "talep": {
+  "bayi": {
+   "kod": "KATALOG",
+   "ad": "Çıkarıcı"
+  },
+  "musteri_adi": "KATALOG P1051",
+  "metin": "TEK_KAT_PREFABRIK_PLANLARI.dxf dosyasından otomatik çıkarıldı (motor/cikarici v0.1)"
+ },
+ "yapi": {
+  "sistem": "prefabrik",
+  "kat_sayisi": 1,
+  "duvar_yuksekligi_cm": 250,
+  "olcu_kaynagi": "serbest",
+  "referans_model": "P1051",
+  "grid": {
+   "x_pano": 6.5,
+   "y_pano": 8.0
+  },
+  "kisa_kenar": "x",
+  "giris_cephesi": "on",
+  "dis_dusey_duvar": "aks_disinda"
+ },
+ "mahaller": [
+  {
+   "ad": "YASAM ALANI",
+   "tur": "salon",
+   "konum_pano": [
+    [
+     0.0,
+     0.0,
+     6.0,
+     2.5
+    ],
+    [
+     1.5,
+     2.5,
+     4.5,
+     3.5
+    ],
+    [
+     6.0,
+     0.0,
+     6.5,
+     2.0
+    ],
+    [
+     0.5,
+     2.5,
+     1.5,
+     3.0
+    ],
+    [
+     4.5,
+     2.5,
+     5.5,
+     3.0
+    ]
+   ]
+  },
+  {
+   "ad": "YATAK ODASI 1",
+   "tur": "yatak_odasi",
+   "konum_pano": [
+    [
+     0.5,
+     6.5,
+     3.0,
+     8.0
+    ],
+    [
+     1.5,
+     6.0,
+     3.0,
+     6.5
+    ],
+    [
+     0.0,
+     7.0,
+     0.5,
+     8.0
+    ],
+    [
+     2.0,
+     5.5,
+     2.5,
+     6.0
+    ]
+   ]
+  },
+  {
+   "ad": "YATAK ODASI 2",
+   "tur": "yatak_odasi",
+   "konum_pano": [
+    [
+     3.0,
+     6.5,
+     6.0,
+     8.0
+    ],
+    [
+     3.0,
+     6.0,
+     5.0,
+     6.5
+    ],
+    [
+     6.0,
+     7.0,
+     6.5,
+     8.0
+    ]
+   ]
+  },
+  {
+   "ad": "YATAK ODASI 3",
+   "tur": "yatak_odasi",
+   "konum_pano": [
+    [
+     0.0,
+     3.0,
+     1.5,
+     6.5
+    ],
+    [
+     1.5,
+     3.5,
+     2.0,
+     6.0
+    ],
+    [
+     2.0,
+     4.5,
+     2.5,
+     5.5
+    ],
+    [
+     0.0,
+     2.5,
+     0.5,
+     3.0
+    ],
+    [
+     0.0,
+     6.5,
+     0.5,
+     7.0
+    ]
+   ]
+  },
+  {
+   "ad": "BANYO",
+   "tur": "banyo",
+   "konum_pano": [
+    [
+     4.5,
+     3.0,
+     6.5,
+     6.0
+    ],
+    [
+     5.0,
+     6.0,
+     6.5,
+     6.5
+    ],
+    [
+     5.5,
+     2.5,
+     6.5,
+     3.0
+    ],
+    [
+     6.0,
+     2.0,
+     6.5,
+     2.5
+    ],
+    [
+     6.0,
+     6.5,
+     6.5,
+     7.0
+    ]
+   ]
+  },
+  {
+   "ad": "HOL",
+   "tur": "hol",
+   "konum_pano": [
+    [
+     2.5,
+     3.5,
+     4.5,
+     6.0
+    ],
+    [
+     2.0,
+     3.5,
+     2.5,
+     4.5
+    ]
+   ]
+  }
+ ],
+ "acik_sinirlar": [
+  [
+   "YASAM ALANI",
+   "YATAK ODASI 1"
+  ],
+  [
+   "YASAM ALANI",
+   "YATAK ODASI 3"
+  ],
+  [
+   "YASAM ALANI",
+   "BANYO"
+  ],
+  [
+   "YASAM ALANI",
+   "HOL"
+  ],
+  [
+   "YASAM ALANI",
+   "YATAK ODASI 2"
+  ],
+  [
+   "YATAK ODASI 1",
+   "YATAK ODASI 3"
+  ],
+  [
+   "YATAK ODASI 1",
+   "BANYO"
+  ],
+  [
+   "YATAK ODASI 1",
+   "HOL"
+  ],
+  [
+   "YATAK ODASI 1",
+   "YATAK ODASI 2"
+  ],
+  [
+   "YATAK ODASI 3",
+   "BANYO"
+  ],
+  [
+   "YATAK ODASI 3",
+   "HOL"
+  ],
+  [
+   "YATAK ODASI 3",
+   "YATAK ODASI 2"
+  ],
+  [
+   "BANYO",
+   "HOL"
+  ],
+  [
+   "BANYO",
+   "YATAK ODASI 2"
+  ],
+  [
+   "HOL",
+   "YATAK ODASI 2"
+  ]
+ ],
+ "acikliklar": [
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "YASAM ALANI",
+   "duvar": "sol",
+   "pano": 1
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "YATAK ODASI 3",
+   "duvar": "sol",
+   "pano": 1
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "YATAK ODASI 3",
+   "duvar": "sol",
+   "pano": 3
+  },
+  {
+   "tur": "pencere",
+   "olcu": "60x40",
+   "mahal": "BANYO",
+   "duvar": "sag",
+   "pano": 3
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "BANYO",
+   "duvar": "sag",
+   "pano": 4
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x180",
+   "mahal": "YASAM ALANI",
+   "duvar": "on",
+   "pano": 1
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x180",
+   "mahal": "YASAM ALANI",
+   "duvar": "on",
+   "pano": 3
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x180",
+   "mahal": "YASAM ALANI",
+   "duvar": "on",
+   "pano": 5
+  }
+ ],
+ "cati": {
+  "tip": "besik",
+  "egim_yuzde": 33,
+  "sacak_cm": 30,
+  "topuk_cm": 10,
+  "makas_yonu": "kisa_kenar"
+ },
+ "cikti": {
+  "pdf": true,
+  "dxf": true,
+  "pafta": "A2",
+  "icerik": [
+   "aksli_plan",
+   "alanli_kopya",
+   "montaj_kopyasi",
+   "on_gorunus",
+   "cati_profili",
+   "ozellik_tablosu"
+  ]
+ },
+ "varsayimlar": [
+  "Otomatik çıkarım: TEK_KAT_PREFABRIK_PLANLARI.dxf; kaynak konumlar ve artıklar cikarim_raporu.json'da."
+ ],
+ "eksikler": [
+  "ic_kapi ['HOL', 'BANYO']: HOL–BANYO arasında duvar yok: {'tur': 'ic_kapi', 'olcu': 82, 'arasi': ['HOL', 'BANYO'], 'mentese': '",
+  "ic_kapi ['HOL', 'YATAK ODASI 1']: HOL–YATAK ODASI 1 arasında duvar yok: {'tur': 'ic_kapi', 'olcu': 82, 'arasi': ['HOL', 'YATAK ODASI 1",
+  "ic_kapi ['HOL', 'YATAK ODASI 2']: HOL–YATAK ODASI 2 arasında duvar yok: {'tur': 'ic_kapi', 'olcu': 82, 'arasi': ['HOL', 'YATAK ODASI 2"
+ ]
+}

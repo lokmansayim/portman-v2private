@@ -1,0 +1,134 @@
+{
+  "passed": true,
+  "errors": [],
+  "outer_cm": [
+    835.75,
+    1014.0
+  ],
+  "panel_grid": [
+    6.5,
+    8.0
+  ],
+  "units": "cm",
+  "panel_count": 30,
+  "corner_count": 4,
+  "windows": 8,
+  "doors": 0,
+  "openings": [
+    {
+      "kind": "pencere",
+      "name": "BOM_D03_1255p0_DIS_P02",
+      "gap": [
+        138.25,
+        0.0,
+        258.25,
+        10.000000000000007
+      ],
+      "length": 120.0
+    },
+    {
+      "kind": "pencere",
+      "name": "BOM_D03_1255p0_DIS_P02",
+      "gap": [
+        389.25,
+        0.0,
+        509.25,
+        10.000000000000007
+      ],
+      "length": 120.0
+    },
+    {
+      "kind": "pencere",
+      "name": "BOM_D03_1255p0_DIS_P02",
+      "gap": [
+        640.25,
+        0.0,
+        760.25,
+        10.000000000000007
+      ],
+      "length": 120.0
+    },
+    {
+      "kind": "pencere",
+      "name": "BOM_D02_1255p0_DIS_P01",
+      "gap": [
+        0.0,
+        133.25,
+        10.0,
+        253.25
+      ],
+      "length": 120.0
+    },
+    {
+      "kind": "pencere",
+      "name": "BOM_D02_1255p0_DIS_P01",
+      "gap": [
+        0.0,
+        509.75,
+        10.0,
+        629.75
+      ],
+      "length": 120.0
+    },
+    {
+      "kind": "pencere",
+      "name": "BOM_D02_1255p0_DIS_P01",
+      "gap": [
+        0.0,
+        760.75,
+        10.0,
+        880.75
+      ],
+      "length": 120.0
+    },
+    {
+      "kind": "pencere",
+      "name": "BOM_D04_1255p0_DIS_P03",
+      "gap": [
+        825.75,
+        665.25,
+        835.75,
+        725.25
+      ],
+      "length": 60.0
+    },
+    {
+      "kind": "pencere",
+      "name": "BOM_D02_1255p0_DIS_P01",
+      "gap": [
+        825.75,
+        760.75,
+        835.75,
+        880.75
+      ],
+      "length": 120.0
+    }
+  ],
+  "rooms_m2": {
+    "YASAM ALANI": 31.426975,
+    "YATAK ODASI 1": 8.339081,
+    "YATAK ODASI 2": 8.99,
+    "YATAK ODASI 3": 11.646862,
+    "BANYO": 12.282644,
+    "HOL": 8.402688
+  },
+  "h_connectors": 0,
+  "footprint_diff_cm2": 0.0,
+  "wall_overlap": true,
+  "altin": null,
+  "warnings": [],
+  "scope": "Ön onay taslağı; statik, üretim, BOM veya yeni oda tasarımı değildir",
+  "saved_dxf_audit_errors": 0,
+  "saved_dxf_audit_fixes": 0,
+  "bom_counts_from_file": {
+    "B02": 4,
+    "D01": 20,
+    "D02": 4,
+    "D03": 3,
+    "D04": 1,
+    "D06": 2,
+    "P01": 4,
+    "P02": 3,
+    "P03": 1
+  }
+}

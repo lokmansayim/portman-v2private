@@ -1,0 +1,150 @@
+{
+  "passed": true,
+  "errors": [],
+  "outer_cm": [
+    898.5,
+    1014.0
+  ],
+  "panel_grid": [
+    7.0,
+    8.0
+  ],
+  "units": "cm",
+  "panel_count": 43,
+  "corner_count": 11,
+  "windows": 5,
+  "doors": 3,
+  "openings": [
+    {
+      "kind": "kapi",
+      "name": "BOM_I11_1255p0_IC_K01_SOL_UST",
+      "gap": [
+        471.0,
+        252.99999999999997,
+        553.0,
+        259.0
+      ],
+      "length": 82.0
+    },
+    {
+      "kind": "pencere",
+      "name": "BOM_D02_1255p0_DIS_P01",
+      "gap": [
+        389.25,
+        1004.0,
+        509.25,
+        1014.0
+      ],
+      "length": 120.0
+    },
+    {
+      "kind": "pencere",
+      "name": "BOM_D03_1255p0_DIS_P02",
+      "gap": [
+        0.0,
+        258.75,
+        10.0,
+        378.75
+      ],
+      "length": 120.0
+    },
+    {
+      "kind": "pencere",
+      "name": "BOM_D04_1255p0_DIS_P03",
+      "gap": [
+        0.0,
+        539.75,
+        10.0,
+        599.75
+      ],
+      "length": 60.0
+    },
+    {
+      "kind": "pencere",
+      "name": "BOM_D03_1255p0_DIS_P02",
+      "gap": [
+        0.0,
+        760.75,
+        10.0,
+        880.75
+      ],
+      "length": 120.0
+    },
+    {
+      "kind": "kapi",
+      "name": "BOM_I05_1195p0_IC_K01_SOL_UST",
+      "gap": [
+        320.75,
+        528.75,
+        326.75,
+        610.75
+      ],
+      "length": 82.0
+    },
+    {
+      "kind": "kapi",
+      "name": "BOM_I04_1225p0_IC_K01_SOL_UST",
+      "gap": [
+        446.25,
+        401.75,
+        452.25,
+        483.75
+      ],
+      "length": 82.0
+    },
+    {
+      "kind": "pencere",
+      "name": "BOM_D03_1255p0_DIS_P02",
+      "gap": [
+        888.5,
+        760.75,
+        898.5,
+        880.75
+      ],
+      "length": 120.0
+    }
+  ],
+  "rooms_m2": {
+    "SALON": 23.492031,
+    "VERANDA": 9.056394,
+    "CAMASIR": 1.536475,
+    "BANYO": 2.176988,
+    "MUTFAK": 12.215394,
+    "YATAK ODASI 1": 10.578819,
+    "YATAK ODASI 2": 9.999813,
+    "YATAK ODASI 3": 8.549687,
+    "HOL": 8.9679
+  },
+  "h_connectors": 1,
+  "footprint_diff_cm2": 0.0,
+  "wall_overlap": true,
+  "altin": null,
+  "warnings": [],
+  "scope": "Ön onay taslağı; statik, üretim, BOM veya yeni oda tasarımı değildir",
+  "saved_dxf_audit_errors": 0,
+  "saved_dxf_audit_fixes": 0,
+  "bom_counts_from_file": {
+    "B01": 3,
+    "B02": 8,
+    "B03": 1,
+    "D01": 22,
+    "D02": 1,
+    "D03": 3,
+    "D04": 1,
+    "D06": 1,
+    "D08": 1,
+    "D09": 3,
+    "I01": 5,
+    "I04": 1,
+    "I05": 1,
+    "I06": 2,
+    "I07": 1,
+    "I11": 1,
+    "K01": 3,
+    "P01": 1,
+    "P02": 3,
+    "P03": 1,
+    "V05": 1,
+    "V06": 1
+  }
+}
