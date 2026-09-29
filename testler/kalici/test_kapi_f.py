@@ -157,11 +157,13 @@ def ortam(tmp_path, sablon):
     with _admin() as c:
         c.execute(f"CREATE DATABASE {ad}")                 # boş: göç yok (canlıdaki gibi)
     bin_ = tmp_path / "bin"; bin_.mkdir(); (bin_ / "systemctl").write_text(SAHTE_SYSTEMCTL); (bin_ / "systemctl").chmod(0o755)
+    # 29.09 F.5: canlıda "sudo -u portman" betiğin kalanını girdiden yuttu. Sahte sarmalayıcı da girdiyi okuyup atar.
+    (bin_ / "yutan").write_text('#!/usr/bin/env bash\ncat > /dev/null\nexec "$@"\n'); (bin_ / "yutan").chmod(0o755)
     host = dict(x.split("=", 1) for x in ADMIN.split())
     o = {**os.environ, "PATH": f"{bin_}:{os.environ['PATH']}", "PM_TEST": "1", "PM_HOME": str(home), "PM_ENV": str(env),
          "PM_GECIS": str(gecis), "PM_PY": sys.executable, "PM_SAHIP": f"{os.getuid()}:{os.getgid()}", "PM_DB": ad,
          "PM_PSQL": f"psql -X -q -tA -h {host.get('host', '127.0.0.1')} -p {host.get('port', '5432')} -U {host.get('user', 'postgres')}",
-         "PM_OLARAK": f"env PORTMAN_PG_DSN=postgresql://{host.get('user', 'postgres')}@{host.get('host', '127.0.0.1')}:{host.get('port', '5432')}/{ad} "
+         "PM_OLARAK": f"{bin_ / 'yutan'} env PORTMAN_PG_DSN=postgresql://{host.get('user', 'postgres')}@{host.get('host', '127.0.0.1')}:{host.get('port', '5432')}/{ad} "
                       f"PORTMAN_KANAL_DIR={home / 'data'}",
          "PM_ETC": str(tmp_path / "etc"), "PM_DROPIN": str(tmp_path / "dropin"), "PM_BASLANGIC": "2000-01-01 00:00:00",
          "PM_BEKLENEN_STATE_SHA": hashlib.sha256((kanal / "state.json").read_bytes()).hexdigest(),
@@ -180,7 +182,9 @@ def _kf():
 
 
 def _kos(betik: str, o: dict) -> subprocess.CompletedProcess:
-    return subprocess.run(["bash", str(KOK / "vps" / betik)], capture_output=True, text=True, env=o, timeout=180)
+    """VPS'teki gibi: ssh portman-vps 'bash -s' < betik (betik girdiden okunur)."""
+    with open(KOK / "vps" / betik, "rb") as f:
+        return subprocess.run(["bash", "-s"], stdin=f, capture_output=True, text=True, env=o, timeout=180)
 
 
 def _tablo_sayisi(ad: str) -> int:
@@ -236,10 +240,18 @@ def test_aktar_kalici_ac_ve_dogrula_uctan_uca(ortam):
     r3 = _kos("kapi_f_kalici_ac.sh", o)
     assert r3.returncode == 1 and "worker off değil" in r3.stdout and not (ortam["tmp"] / "etc" / "pg.env").exists()
     ortam["h"].worker = "off"
+    import psycopg                                                                # kayıt uyuşmazlığı: açılmaz
+    with psycopg.connect(dsn(ortam["ad"]), autocommit=True) as c:
+        c.execute("UPDATE konusmalar SET durum = durum || '{\"asama\": \"bos\"}'::jsonb WHERE durum->>'asama' = 'topluyor'")
+    r35 = _kos("kapi_f_kalici_ac.sh", o)
+    assert r35.returncode == 1 and "karşılaştırması temiz değil" in r35.stdout and not (ortam["tmp"] / "etc" / "pg.env").exists()
+    with psycopg.connect(dsn(ortam["ad"]), autocommit=True) as c:
+        c.execute("UPDATE konusmalar SET durum = durum || '{\"asama\": \"topluyor\"}'::jsonb WHERE durum->>'asama' = 'bos'")
     r4 = _kos("kapi_f_kalici_ac.sh", o)
     out4 = _temiz(r4, ortam["tok"])
     assert r4.returncode == 0, out4
     assert "eksik_goc=[] konusma=2 acik_is=0" in out4 and "kalıcı mod AÇIK" in out4
+    assert "kaynak ↔ Postgres: kayıtlar birebir korundu · uyuşmayan 0" in out4
     assert (ortam["tmp"] / "etc" / "pg.env").read_text() == "PORTMAN_PG_DSN=dbname=portman\n"
     assert f"EnvironmentFile={ortam['tmp'] / 'etc'}/pg.env" in (ortam["tmp"] / "dropin" / "kalici.conf").read_text()
     assert (ortam["home"] / "systemctl.log").read_text().split() == ["daemon-reload", "restart"]

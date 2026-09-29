@@ -5,6 +5,9 @@
 #   ssh portman-vps 'bash -s' < kapi_f_yedek.sh > 4_vps_yedek.txt
 # Sonra Mac'e:  scp portman-vps:/var/backups/portman/opt-portman-ie02-f-20260929.tgz yedek/
 # Test için: PM_HOME, PM_YEDEK, PM_AD.
+# Gövde tek işlevdir ve girdisi /dev/null'dur: 'bash -s' betiği girdiden okurken içindeki bir komut (ör. sudo) betiğin kalanını
+# yutmasın (29.09 F.5'te aktarmadan sonraki satırlar böyle çalışmadı). Bash işlevi çalıştırmadan önce dosyanın tamamını okur.
+ana() {
 set -u
 PM_HOME="${PM_HOME:-/opt/portman}"; YEDEK="${PM_YEDEK:-/var/backups/portman}"; AD="${PM_AD:-opt-portman-ie02-f-20260929.tgz}"
 echo "== Kapı F.4 · VPS yedeği · betik 2026-09-29 · $(date '+%Y-%m-%d %H:%M:%S %Z')"
@@ -18,3 +21,5 @@ echo "   sha256: $(sha256sum "$YEDEK/$AD" | cut -d' ' -f1)"
 echo "   içerik: $(tar tzf "$YEDEK/$AD" | wc -l) girdi · durum/ $(tar tzf "$YEDEK/$AD" | grep -c '^data/durum/.*\.json$') konuşma · projects/ $(tar tzf "$YEDEK/$AD" | grep -c '^data/projects/.*\.pdf$') PDF · agent.py $(tar tzf "$YEDEK/$AD" | grep -cx 'agent.py')"
 echo "   arşivde anahtar dosyası (agent.env/pg.env): $(tar tzf "$YEDEK/$AD" | grep -cE '(agent|pg)\.env$')"
 echo "== bitti"
+}
+ana "$@" < /dev/null

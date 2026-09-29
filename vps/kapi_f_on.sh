@@ -5,6 +5,9 @@
 # ajanın dosya modunda olduğu, Postgres'teki portman veritabanının BOŞ olduğu (tablo yok), VPS'teki konuşma ve proje dosyalarının
 # sayısı ve E projesinin r01 dosyaları (ad, boyut, özet). Yazdırmaz: anahtar, numara, mesaj metni.
 # Test için: PM_HOME, PM_ENV, PM_BASLANGIC, PM_PSQL (postgres olarak psql), PM_PROJE.
+# Gövde tek işlevdir ve girdisi /dev/null'dur: 'bash -s' betiği girdiden okurken içindeki bir komut (ör. sudo) betiğin kalanını
+# yutmasın (29.09 F.5'te aktarmadan sonraki satırlar böyle çalışmadı). Bash işlevi çalıştırmadan önce dosyanın tamamını okur.
+ana() {
 set -u
 export PM_HOME="${PM_HOME:-/opt/portman}" PM_ENV="${PM_ENV:-/etc/portman/agent.env}" PM_BASLANGIC="${PM_BASLANGIC:-2026-09-29 01:30:00}"
 export PM_PROJE="${PM_PROJE:-PM-PATRON-20260929-33807}"
@@ -84,3 +87,5 @@ except Exception as e:
 print(f"== hazır mı: worker {'off ✓' if w == 'off' else repr(w) + ' ✗ (off olmalı)'} · elde iş {'yok ✓' if acik <= 0 else 'VAR ✗'} · bekleyen sonuç {'0 ✓' if not bekleyen else str(bekleyen) + ' ✗'}")
 PY
 echo "== bitti"
+}
+ana "$@" < /dev/null

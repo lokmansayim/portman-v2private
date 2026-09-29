@@ -8,6 +8,9 @@
 # varsa (beklenmeyen dolu veritabanı: silinmez, üzerine yazılmaz). İçe aktarma yalnız boş veritabanına yapılır (depo_aktar.py).
 # Sonunda kaynak ile Postgres değer yazmadan karşılaştırılır (kapi_f.py); uyuşmazlıkta çıkış kodu 2 ve "DUR".
 # Test için: PM_HOME, PM_ENV, PM_GECIS, PM_PY, PM_OLARAK, PM_PSQL, PM_BEKLENEN_STATE_SHA, PM_SAHIP.
+# Gövde tek işlevdir ve girdisi /dev/null'dur: 'bash -s' betiği girdiden okurken içindeki bir komut (ör. sudo) betiğin kalanını
+# yutmasın (29.09 F.5'te aktarmadan sonraki satırlar böyle çalışmadı). Bash işlevi çalıştırmadan önce dosyanın tamamını okur.
+ana() {
 set -u
 cd /tmp
 PM_HOME="${PM_HOME:-/opt/portman}"; PM_ENV="${PM_ENV:-/etc/portman/agent.env}"; GECIS="${PM_GECIS:-/var/tmp/portman-gecis}"
@@ -84,3 +87,5 @@ echo "-- servis (değişmedi; dosya modunda)"
 systemctl show portman-agent -p ActiveState -p SubState -p MainPID -p ActiveEnterTimestamp --no-pager 2>&1 | sed 's/^/   /'
 [ "$RC" = "0" ] || { echo "DUR: karşılaştırmada uyuşmazlık var; kalıcı moda GEÇME, asistana bildir."; echo "== bitti (durdu)"; exit 2; }
 echo "== bitti: aktarma tamam; ajan hâlâ dosya modunda, worker off"
+}
+ana "$@" < /dev/null

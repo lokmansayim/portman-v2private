@@ -4,16 +4,21 @@
 #   daemon-reload, portman-agent yeniden başlatılır. agent.env, paket, model, anahtar ve hosting değişmez.
 #   ssh portman-vps 'bash -s' < kapi_f_kalici_ac.sh > 6_kalici.txt
 # Hosting'te worker hâlâ "off" olmalı: ajan kalıcı modda başlar ama iş ALMAZ (yalnız Postgres'te açık iş varsa bitirir; yok).
-# Ön koşullar: worker off; göçler tam; içe aktarma yapılmış (konuşma > 0); Postgres'te açık iş yok; bekleyen sonuç yok.
+# Ön koşullar: worker off; göçler tam; içe aktarma yapılmış (konuşma > 0); Postgres'te açık iş yok; bekleyen sonuç yok;
+# aktarılan kopya ile Postgres birebir (kapi_f.py karsilastir, E projesi dahil).
 # Biri tutmazsa hiçbir şey yapılmaz. Öz-test yeniden koşmaz (bu paket için sonucu var): LLM çağrısı yok.
 # Geri almak gerekirse (dosya moduna dönüş):
 #   rm /etc/systemd/system/portman-agent.service.d/kalici.conf /etc/portman/pg.env; systemctl daemon-reload; systemctl restart portman-agent
 # Test için: PM_HOME, PM_ENV, PM_PY, PM_OLARAK, PM_ETC, PM_DROPIN, PM_TEST.
+# Gövde tek işlevdir ve girdisi /dev/null'dur: 'bash -s' betiği girdiden okurken içindeki bir komut (ör. sudo) betiğin kalanını
+# yutmasın (29.09 F.5'te aktarmadan sonraki satırlar böyle çalışmadı). Bash işlevi çalıştırmadan önce dosyanın tamamını okur.
+ana() {
 set -u
 cd /tmp
 PM_HOME="${PM_HOME:-/opt/portman}"; PM_ENV="${PM_ENV:-/etc/portman/agent.env}"; PY="${PM_PY:-$PM_HOME/venv/bin/python}"; APP="$PM_HOME/app"
 OLARAK="${PM_OLARAK:-sudo -u portman env PORTMAN_PG_DSN=dbname=portman PORTMAN_KANAL_DIR=$PM_HOME/data}"
 ETC="${PM_ETC:-/etc/portman}"; DROPIN="${PM_DROPIN:-/etc/systemd/system/portman-agent.service.d}"
+GECIS="${PM_GECIS:-/var/tmp/portman-gecis}"
 dur() { echo "DUR: $*"; echo "   hiçbir şey değiştirilmedi."; echo "== bitti (durdu)"; exit 1; }
 
 echo "== Kapı F.6 · kalıcı modu açma · betik 2026-09-29 · $(date '+%Y-%m-%d %H:%M:%S %Z')"
@@ -33,7 +38,7 @@ with urllib.request.urlopen(req, timeout=25) as r:
 print(f"   hosting: api {j.get('api')} · worker {j.get('worker')} · mode {j.get('mode')} · llm {(j.get('llm') or {}).get('backend')}/{(j.get('llm') or {}).get('model')}")
 sys.exit(0 if j.get("worker") == "off" and str(j.get("api", "")).startswith("kanal-api-v1.2") else 1)
 PY
-DB_DURUM="$($OLARAK "$PY" - "$APP" <<'PY' 2>&1 | tail -1
+KOD="$(cat <<'PY'
 import sys
 sys.path.insert(0, sys.argv[1])
 import depo
@@ -44,8 +49,12 @@ with d.baglan() as c:
 print(f"eksik_goc={d.eksik_goc()} konusma={k} acik_is={a}")
 PY
 )"
+DB_DURUM="$($OLARAK "$PY" -c "$KOD" "$APP" 2>&1 | tail -1)"      # kod girdiden değil -c ile: sudo girdiyi aktarmasa da çalışır
 echo "   Postgres: $DB_DURUM"
 [[ "$DB_DURUM" =~ ^eksik_goc=\[\]\ konusma=[1-9][0-9]*\ acik_is=0$ ]] || dur "Postgres hazır değil (göç eksik, içe aktarma yok ya da açık iş var)"
+KRS="$($OLARAK "$PY" "$GECIS/kapi_f.py" karsilastir "$GECIS/kanal" --veri "$PM_HOME/data" 2>&1)"; RC_KRS=$?
+echo "   kaynak ↔ Postgres: $(grep -E '^== sonuç' <<< "$KRS" | sed 's/^== sonuç: //') · uyuşmayan $(grep -c 'FARKLI' <<< "$KRS")"
+[ "$RC_KRS" = "0" ] || dur "kaynak ↔ Postgres karşılaştırması temiz değil (çıkış $RC_KRS)"
 
 echo "-- kalıcı mod dosyaları"
 ONCE="$(date '+%Y-%m-%d %H:%M:%S')"
@@ -71,3 +80,5 @@ awk -v t="$ONCE" 'substr($0, 1, 19) >= t' "$PM_HOME/logs/agent.log" 2>/dev/null 
 M="$(awk -v t="$ONCE" 'substr($0, 1, 19) >= t' "$PM_HOME/logs/agent.log" 2>/dev/null)"
 echo "   özet: kalıcı başlama $(grep -c 'mod kalıcı (Postgres)' <<< "$M") · 'kalıcı mod bekliyor' $(grep -c 'kalıcı mod bekliyor' <<< "$M") · Postgres'e ulaşılamadı $(grep -c "Postgres'e ulaşılamadı" <<< "$M") · api hatası $(grep -c ' api:' <<< "$M") · beklenmeyen $(grep -c 'beklenmeyen' <<< "$M") · iş alındı $(grep -c 'iş alındı' <<< "$M")"
 echo "== bitti: kalıcı mod $(grep -q 'mod kalıcı (Postgres)' <<< "$M" && echo AÇIK || echo 'AÇILMADI (yukarıya bak)'); worker hâlâ off: yeni iş alınmıyor"
+}
+ana "$@" < /dev/null

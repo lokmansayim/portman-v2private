@@ -4,6 +4,9 @@
 # Gösterir: aktarmayla ilgili süreçler (süre, durum, bekleme noktası), portman veritabanındaki oturumlar (durum, bekleme türü,
 # işlem süresi, kimin engellediği, sorgunun ilk 70 karakteri: psycopg değerleri $1 gibi yer tutucuyla gönderir), verilmemiş
 # kilitler ve tablolardaki kayıt sayıları. Yazdırmaz: anahtar, numara, mesaj metni.
+# Gövde tek işlevdir ve girdisi /dev/null'dur: 'bash -s' betiği girdiden okurken içindeki bir komut (ör. sudo) betiğin kalanını
+# yutmasın (29.09 F.5'te aktarmadan sonraki satırlar böyle çalışmadı). Bash işlevi çalıştırmadan önce dosyanın tamamını okur.
+ana() {
 set -u
 cd /tmp
 echo "== Kapı F · aktarma teşhisi · $(date '+%Y-%m-%d %H:%M:%S %Z')"
@@ -18,3 +21,5 @@ echo "-- kayıt sayıları (işlem bitmediyse 0 görünür)"
 sudo -u postgres psql -X -q -tA -d portman -c "SELECT 'konusmalar ' || (SELECT count(*) FROM konusmalar) || ' · mesajlar ' || (SELECT count(*) FROM mesajlar) || ' · isler ' || (SELECT count(*) FROM isler) || ' · bayiler ' || (SELECT count(*) FROM bayiler)" 2>&1 | sed 's/^/   /'
 echo "-- Postgres servisi: $(systemctl is-active postgresql 2>/dev/null) · portman-agent: $(systemctl is-active portman-agent 2>/dev/null)"
 echo "== bitti"
+}
+ana "$@" < /dev/null
