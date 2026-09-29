@@ -1,0 +1,12 @@
+# Yerel geliştirme ve test ortamı (bulut çalışma alanı). 30.09.2026'da bu sürümlerle sınandı; Python 3.11.
+# Canlı VPS'in kendi sanal ortamı vardır; bu dosya onu değiştirmez.
+ezdxf==1.4.4
+matplotlib==3.11.2
+numpy==2.4.6
+pillow==12.3.0
+shapely==2.1.2
+PyMuPDF==1.26.0
+pydantic==2.13.5
+psycopg[binary]==3.3.6
+ifcopenshell==0.8.5
+pytest==9.1.1
