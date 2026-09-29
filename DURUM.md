@@ -97,7 +97,7 @@ Kapı G ve yeniden denemesi (`docs/is_emirleri/IE-02-canli.md`):
   - Yedekler (öncesi ve sonrası, hosting paketi) Mac'te, özetler aynı.
   - "Değiştirmeyin"e "Anlayamadım" cevabı güvenli pilot sınırlaması; nihai konuşma başarısı sayılmaz.
 
-İE-02, 29.09 22:30'da Lokman'ın onayıyla tanımlı kapsamıyla kapandı ve `main`'e birleştirildi. Kişisel veri içeren geçici kopyaların silinmesi ayrı onay bekliyor (§7).
+İE-02, 29.09 22:30'da Lokman'ın onayıyla tanımlı kapsamıyla kapandı ve `main`'e birleştirildi (`a043d1a`). Canlı paket `9c76af59…` `e726432`'deki kaynaktan üretildi; pakete giren kaynaklar `main`'de aynı, fark yalnız sürüm etiketi (§6). Kişisel veri içeren geçici kopyaların silinmesi ayrı onay bekliyor (§7).
 
 Canlı dışı kalan: `kos.py` sır taramasındaki telefon kalıbı; test verisinde takma ad.
 

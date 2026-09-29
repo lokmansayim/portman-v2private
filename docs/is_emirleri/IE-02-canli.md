@@ -891,7 +891,28 @@ Postgres'e yeniden geçiş: `/opt/portman/data/kalici_bekleyen/` boş olmalı (i
 
 Kapı G'deki yedi adım kanıt sorgularıyla gösterildiğinde İE-02 kapanır. Sonraki iş İE-03'tür: küçük, kaynaklı, yetki ayrımlı RAG (`IE-02.md` "Sonraki iş").
 
-**29.09 21:34:** G'nin kabul adımları yeniden denemede kanıt sorgularıyla gösterildi; G kapandı. `main`'e birleştirme ve kişisel veri içeren geçici kopyaların silinmesi Lokman'ın ayrı onayına bağlı; H (geri dönüş) yalnız gerektiğinde, onayla.
+**29.09 21:34:** G'nin kabul adımları yeniden denemede kanıt sorgularıyla gösterildi; G kapandı.
+
+**Kapanış kaydı (Lokman'ın onayı 29.09 22:30; kayıt 22:45).**
+- **Onay:** G'nin kabul sonucu ve İE-02'nin tanımlı kapsamıyla resmen kapatılması; `ie-02`'nin `main`'e birleştirilmesi.
+- **Birleştirme:** `main`'de commit `a043d1a` (`--no-ff`). İçeriği `a3912a8`'deki `ie-02` çalışması ve onun üstünde yalnız belge değiştiren kapanış düzeltmeleri (`0302773`: §1, §5, §7, `IE-02.md`, `DURUM.md`).
+- **Bu kayıt:** `a043d1a`'dan sonraki, yalnız bu belgeyi ve `DURUM.md`'yi değiştiren commit'tir.
+- **Canlı paket:** `kanal-v1.2-20260929-2052`, sha256 `9c76af59df065dc5fc2fbde52940312134afc02ab3a7b28e8855bfe623c7f2f3`, 50 dosya. 29.09 21:09'dan beri VPS'te kurulu ve hosting'te dağıtılıyor. `e726432`'deki kaynaktan üretildi.
+- **Paketle ilişki:**
+  - Pakete giren kaynaklar `e726432`, `a3912a8`, `0302773` ve `a043d1a`'da birebir aynı: `beyin/`, `motor/`, `is_emri/`, `kanal/` içindeki işçi, depo ve göç dosyaları, `vps/agent.py`, `tekrar_dene.py`, `kanit_sorgulari.sql`, `paketle.py`.
+  - `a043d1a`'dan yeniden üretilen paket 50 dosyanın 49'unda canlı paketle birebir aynı. Fark yalnız `SURUM.txt`, yani üretim anının etiketi.
+  - Zip özeti etiket ve zaman damgası yüzünden farklıdır; kimlik dosya içerikleridir. Yeniden üretilen paket yüklenmedi.
+- **Tetiklenen canlı işlem yok:**
+  - Depoda iş akışı yok (GitHub API: 0 workflow) ve git kancası yok.
+  - VPS paketi yalnız hosting'teki `current.sha256` değişince alır; hosting dosyaları DirectAdmin'den elle yüklenir.
+  - Depo webhook'larının listesi bu ortamdan okunamadı; ama canlı tarafta git olayını dinleyen bir bileşen yok.
+  - Birleştirme ve push sırasında yükleme, servis yeniden başlatma ya da ücretli çağrı olmadı.
+- **Kapanışta açık kalanlar:**
+  - geçici kopyaların temizliği (§7, ayrı onay);
+  - olumsuz kısa cevap pilot sınırlaması (İE-03 gereksinimi);
+  - Claude anahtarının 29.10.2026'daki son kullanma tarihi;
+  - B2 (D-01) canlıda gerçek mesajla tetiklenmedi.
+  - H gerekmedi; yalnız gerektiğinde ve onayla uygulanır.
 
 ## 7. Temizlik listesi (29.09 22:50; öneri, hiçbir şey silinmedi)
 
