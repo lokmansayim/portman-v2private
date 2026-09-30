@@ -85,3 +85,7 @@ Meta'nın etkileşimli mesajı ya da görsel başlığı reddetmesi ilk kez ger�
 - Betikler: `vps/kapi_m_goc.sh` (yeni), `vps/kapi_g_yedek.sh` (ad deseni `portman-<kapı>-<ne>-<tarih>`), `vps/kapi_g2_paket.sh`, `vps/kapi_g_durum.sh`, `vps/kapi_g_teshis.sh`, `vps/api_denetim.py`, `vps/canli_kontrol.sh`.
 - Kod: `kanal/worker.py` `GEREKLI` / `ISTEGE_BAGLI` ayrımı ve kurulum sonrası yeniden denetim; 3D bağlantısı yokken söz veren metin kaldırıldı; Patron teknik notuna ekler özeti.
 - Sonuçlar ve saatler bu belgenin altına, çıktı dosyalarına atıfla eklenir (M0 → M1 → M2).
+
+## 4. Onaylar ve kayıt
+
+- **30.09 20:05, Lokman:** M1 onaylandı (M0 ile başlanır); M2, M1.5–M1.6 temiz çıkarsa aynı akşam; M3 için karar: **hosting'te statik sayfa** (ayrı kapıyla, yerelde yapılıp canlıya alınır). Bu satırın altına adımların saatleri ve çıktı dosyaları eklenir.
