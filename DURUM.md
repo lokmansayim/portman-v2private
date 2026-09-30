@@ -1,8 +1,8 @@
 # Portman · DURUM
 
-**Son güncelleme: 30 Eylül 2026 20:00 (tek aktif teslim: Aşama 2 kabul vakası, İE-04; mesaj katmanı yerelde tamam, canlıya alma Kapı M hazır ve onay bekliyor; Astra çizim/veriye başladı).** Her oturumun son adımı bu dosyayı güncellemektir. Aktif dal `ie-04`.
+**Son güncelleme: 30 Eylül 2026 22:05 (tek aktif teslim: Aşama 2 kabul vakası, İE-04; mesaj katmanı kanal v1.3 CANLIDA ve açık — Kapı M 30.09 akşamı geçti; kritik yol Astra'nın üç 3+1 adayı + Ubeydullah kabulü + K-A kararları; 3D bağlantısı M3 ayrı iş).** Her oturumun son adımı bu dosyayı güncellemektir. Aktif dal `ie-04`.
 
-**Oturum devri (30.09 01:10):** 28–30 Eylül penceresi kapandı. Yeni pencere `docs/devir/2026-09-30_Oturum_Devri.md` ile başlar: kurallar, yapılanlar, bekleyen kararlar, sıradaki işler, Astra'ya çizim işi için ölçütler.
+**Oturum devri:** `docs/devir/2026-09-30_Aksam_Devri.md` (30.09 akşamı, Kapı M sonrası; sıra ve bakım listesi) ve `docs/devir/2026-09-30_Oturum_Devri.md` (30.09 01:10; kurallar, K-A kararları, Astra ölçütleri). 28–30 Eylül penceresi kapandı. Yeni pencere bu ikisiyle başlar: kurallar, yapılanlar, bekleyen kararlar, sıradaki işler, Astra'ya çizim işi için ölçütler.
 
 Yeni pencere için hazırlıklar:
 - `CLAUDE.md` (oturum kuralları) ve `bash araclar/ortam_kur.sh` (tek komutla yerel ortam). İkisi 30.09 01:15'te Lokman'ın onayıyla `main`'e birleştirildi (`e8014e7`).
@@ -19,14 +19,14 @@ Onay: Lokman 29.09 23:49. İş emri: `docs/is_emirleri/IE-04.md` (dal `ie-04`). 
 
 **Bitiş koşulu:** Aşağıdaki altı kullanıcı adımının hepsi Patron modunda canlıda, aynı yeni projede çalışır. Seçenekler, kaynak uygunluk denetiminden ve Ubeydullah kabulünden geçmiş üç geçerli adaydan gelir. P6001 akışı, harness, altın testler ve `yeniden_kos.py` çıktıları değişmez. İlerleme test sayısıyla değil, bu tablodaki adım durumlarıyla bildirilir.
 
-| # | Kullanıcı adımı | Durum (30.09 akşam) |
+| # | Kullanıcı adımı | Durum (30.09 22:00, Kapı M sonrası) |
 |---|---|---|
-| A1 | "3+1, 90 m² civarı" → yalnız gerekli sorular | Kısmen. Yerelde öncelik sorusu (butonlu/metinle), söylenen tekrar sorulmuyor; canlıda v1.2 (yakın model listesi) |
-| A2 | Teknik olarak uygun üç alternatif | Yerelde çalışıyor, yalnız TEST adaylarıyla; gerçek adayla çalışmıyor (0 geçerli aday; kararlar ve çizim çalışması bekleniyor) |
-| A3 | Seçim → o adaydan r01 | Yerelde çalışıyor (TEST adayları, P6001): butonla/kodla seçim → r01; eski liste seçim yapmaz. Canlıda yalnız P6001 |
-| A4 | Bir değişiklik → aynı projede r02 | Yerelde çalışıyor: Revize butonu → soru → metinle r02 aynı projede. Canlıda P6001 (29.09) |
-| A5 | Aynı revizyondan PDF ve 3D bağlantısı | Yerelde çalışıyor: aynı İş Emri'nden görsel + PDF + IFC + 3D sayfası; bağlantı butonu ayarla. Canlıda PDF (P6001) |
-| A6 | Eski revizyon onayı reddi, güncel onay kabulü | Yerelde butonla çalışıyor (eski revizyon reddi); canlıda metinle (P6001, 29.09) |
+| A1 | "3+1, 90 m² civarı" → yalnız gerekli sorular | Kısmen. Kod canlıda (öncelik sorusu butonlu); aday kaydı yokken canlı v1.2 gibi (yakın model listesi) |
+| A2 | Teknik olarak uygun üç alternatif | Çalışmıyor — 0 geçerli aday. Kod ve tablolar canlıda; Astra'nın üç adayı + kaynak uygunluk denetimi + Ubeydullah kabulü + paket gerekir |
+| A3 | Seçim → o adaydan r01 | Yerelde TEST adaylarıyla çalışıyor; canlıda P6001 doğrudan plan (buton/görsel/PDF, 30.09 T1). Adaylarla canlı test bekliyor |
+| A4 | Bir değişiklik → aynı projede r02 | **Canlıda çalışıyor** (30.09 T2–T3, T6): Revize butonu → soru → metin → aynı projede r02/r03; gerçek geometri değişikliği (120x120 → 120x180) görselde ve PDF'te |
+| A5 | Aynı revizyondan PDF ve 3D bağlantısı | Kısmen canlıda: görsel + PDF aynı İş Emri'nden gidiyor; IFC ve 3D sayfası üretilip VPS'te duruyor; **bağlantı yok** (M3: hosting'te statik sayfa, karar 30.09) |
+| A6 | Eski revizyon onayı reddi, güncel onay kabulü | **Canlıda çalışıyor** (30.09 T4–T5): eski Onayla reddedildi ve durum değişmedi; güncel Onayla → onaylandi |
 
 **Beklenen kararlar** (aday paketi `docs/raporlar/2026-09-30_Asama2_3arti1_Aday_Karsilastirmasi.md`, K-A1–K-A10):
 - alan tanımı ve tolerans;
@@ -44,9 +44,9 @@ Onay: Lokman 29.09 23:49. İş emri: `docs/is_emirleri/IE-04.md` (dal `ie-04`). 
 
 **Mesaj katmanı (kanal v1.3), 30.09 07:54 onayı, yalnız yerel:** `docs/is_emirleri/IE-04-mesaj-katmani.md`. Ajan/Beyin, hosting PHP (`feature.php`, `api.php` v1.3), göç 003 (yalnız ekler), `motor/bayi_gorseli.py`, `motor/ifc_uret.py`, `motor/ucb_sayfa.py`. Ayar `mesaj_katmani` kapalıyken davranış v1.2 ile aynı. Testler: 343 Python + harness 22/22 + PHP çevrimdışı 44/44 + gerçek PHP hattı uçtan uca (katman kapalı 18/18, açık 21/21); referans DXF/PDF parmak izleri AYNI. Canlıya alınması (hosting PHP, paket, göç 003, 3D barınağı) ayrı onay.
 
-**Canlıya alma (Kapı M), 30.09 akşam, hazır — onay bekliyor:** `docs/is_emirleri/IE-04-canli.md`; Mac `27_Kapi_M/` (`KOMUTLAR.txt`, `yukle/`, `betikler/`). Paket `kanal-v1.3-20260930-1948` `34ae192c15a88def…` (60 dosya; canlıya göre 42 aynı, 8 değişen, 10 yeni; test adayı yok), hosting `feature.php` `47d63a67…`, `api.php` `36b62e00…`, göç 003 betiği `vps/kapi_m_goc.sh` (gerçek Postgres'te sınandı). Sıra: M0 salt okunur kontrol → M1 PHP + paket + göç, bayrak kapalı (WhatsApp davranışı v1.2 ile aynı; 2 LLM çağrısı) → M2 `mesaj_katmani: true` ve beş Patron testi (≈3 LLM çağrısı) → M3 3D barınağı kararı. Ajan tarafında isteğe bağlı paketler (matplotlib, pillow, ifcopenshell) kurulamazsa ekler üretilmez, akış durmaz. Canlıda henüz hiçbir şey değişmedi.
+**Canlıya alma (Kapı M), 30.09 19:59–21:56 — GEÇTİ:** `docs/is_emirleri/IE-04-canli.md` §4 (saatler, çıktılar), Mac `27_Kapi_M/` (`cikti/`, `yedek/`). Canlı: hosting `feature.php`/`api.php` v1.3, paket `kanal-v1.3-20260930-1948` `34ae192c…` (60/60 birebir; öz-test geçti), göç 003, `mesaj_katmani: true`, `ucb_taban_url` yok. Ajan venv'ine matplotlib/pillow/ifcopenshell kuruldu (numpy 2.5.3'e yükseldi; öz-test sonra geçti). Gerçek hatta T1–T6: görsel başlıklı buton mesajı + PDF + teknik not; Revize butonu; aynı projede r02 ve r03 (gerçek pencere değişikliği); eski Onayla reddi; güncel Onayla kabulü; 9 Patron mesajı (işler 26–34), 21 giden, okunan kanıtta hepsi teslim; 5 LLM çağrısı ≈0,14 $. Kozmetik kusurlar (buton işlerinde "LLM None…", sayaçların bunları LLM sayması, "birkaç dakika içinde PDF" kalıbı, "vps-agent-v1.2" etiketi) sonraki pakete. Ürün soruları: onaylanmış planın Revize butonu; sıfır fark revizyonu. **1 Ekim'den itibaren WhatsApp servis mesajları ücretli:** her plan 3 mesaj (teknik not kapatılırsa 2); tutar Meta tarifesinden okunacak.
 
-**Günlük canlı kontrol:** `vps/canli_kontrol.sh` (salt okunur; Lokman `ssh portman-vps 'bash -s' < canli_kontrol.sh` ile koşar): servis, paket, hosting, öz-test, disk, yedekler, Postgres sayıları, günlükteki hatalar. 30.09'da sahte VPS düzeniyle sınandı; canlıda henüz koşulmadı.
+**Günlük canlı kontrol:****Günlük canlı kontrol:** `vps/canli_kontrol.sh` (salt okunur; Lokman `ssh portman-vps 'bash -s' < canli_kontrol.sh` ile koşar): servis, paket, hosting, öz-test, disk, yedekler, Postgres sayıları, günlükteki hatalar. 30.09 19:59'da canlıda ilk kez koşuldu (temiz); beklenen paket varsayılanı v1.3 (`34ae192c…`).
 
 ## Bu depoda ne var
 
