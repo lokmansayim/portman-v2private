@@ -3,7 +3,7 @@
 #
 # Mac'ten, Lokman çalıştırır:
 #   ssh portman-vps 'bash -s' < canli_kontrol.sh > canli_$(date +%Y%m%d).txt
-# İsteğe bağlı: PM_BEKLENEN=<64 haneli sha256> (varsayılan: 29.09 21:09'dan beri canlıda olan paket), PM_SAAT=24 (günlük ve sayaç penceresi, saat).
+# İsteğe bağlı: PM_BEKLENEN=<64 haneli sha256> (varsayılan: 30.09 20:56'dan beri canlıda olan v1.3 paketi), PM_SAAT=24 (günlük ve sayaç penceresi, saat).
 #
 # Gösterir: servis (durum, başlangıç, yeniden başlama sayısı) ve kalıcı mod; kurulu paket beklenenle aynı mı; hosting'in bildirdiği
 # worker/mode/paket; son öz-test; disk doluluğu; yedekler (son üç dosya, bugünkü var mı, cron satırı); Postgres sayıları (toplam ve son
@@ -16,7 +16,7 @@ set -u
 cd /tmp
 PM_HOME="${PM_HOME:-/opt/portman}"; PM_ENV="${PM_ENV:-/etc/portman/agent.env}"
 YEDEK="${PM_YEDEK:-/var/backups/portman}"; CRON="${PM_CRON:-/etc/cron.d/portman-pg-yedek}"
-BEK="${PM_BEKLENEN:-9c76af59df065dc5fc2fbde52940312134afc02ab3a7b28e8855bfe623c7f2f3}"
+BEK="${PM_BEKLENEN:-34ae192c15a88defbb0aea757decc77a8ca21644aa7dc34b88d33b6cd5179810}"
 SAAT="${PM_SAAT:-24}"
 PSQL="${PM_PSQL:-sudo -u postgres psql -X -q -tA -d portman}"
 [[ "$BEK" =~ ^[0-9a-f]{64}$ ]] || { echo "DUR: PM_BEKLENEN 64 haneli sha256 olmalı"; exit 1; }

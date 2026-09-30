@@ -89,3 +89,9 @@ Meta'nın etkileşimli mesajı ya da görsel başlığı reddetmesi ilk kez ger�
 ## 4. Onaylar ve kayıt
 
 - **30.09 20:05, Lokman:** M1 onaylandı (M0 ile başlanır); M2, M1.5–M1.6 temiz çıkarsa aynı akşam; M3 için karar: **hosting'te statik sayfa** (ayrı kapıyla, yerelde yapılıp canlıya alınır). Bu satırın altına adımların saatleri ve çıktı dosyaları eklenir.
+- **30.09 19:59 M0** `cikti/0_canli.txt`: temiz (servis 29.09 21:25'ten beri, açık iş 0, paket ve hosting `9c76af59…`, bugünkü yedek var, hata yok).
+- **20:00 M1.1** Postgres yedeği `portman-m-oncesi-20260930.dump` 44.159 B `e14cdbf7…` (VPS ve Mac aynı); hosting v1.2 dosyaları `yedek/hosting/` — özetler beklenenle birebir.
+- **20:52 M1.2** PHP v1.3 yüklendi; `cikti/2_api.txt`: `kanal-api-v1.3`, worker vps, mode patron, dry_run false.
+- **20:55:59 M1.3** paket `34ae192c…` kuruldu, `agent.py` paketten güncellendi, 20:56:04 yeniden başladı; pip: matplotlib 3.11.2 + ifcopenshell 0.8.5 kuruldu (pillow vardı; numpy 1.26.4 → 2.5.3 bağımlılık olarak yükseldi), `kalan_istege_bagli=[]`; öz-test 20:56:29–20:56:58 **passed** (LLM 5309+405 token) — numpy yükseltmesinden sonra; 20:56:58 "kalıcı mod bekliyor: [3]" (beklenen). `cikti/3_paket.txt`: 60/60 birebir, `karar.py` `73f9037b…`, hosting paketi aynı.
+- **21:01:10 M1.4** göç 003 uygulandı (`cikti/4_goc.txt`): `eksik_goc=[]`, `adaylar` + `secenek_setleri`, `revizyonlar.ekler`, `giden.kind` image/interactive; kayıtlar aynı (4 revizyon, 15 giden).
+- **21:03:28 M1.6** Patron "Yeni talep: P6001 aynalı olsun" → iş 26, `PM-PATRON-20260930-91421 r01`, **text + document** (v1.2 ile aynı), ikisi de Meta'ya teslim (21:05:08); LLM 5280+338 token, 4,6 s. Tur maliyeti ≈0,057 $ (öz-test dahil). `cikti/6_durum.txt`. **M1 tamam; canlı paket artık `34ae192c…`, bayrak kapalı.**
