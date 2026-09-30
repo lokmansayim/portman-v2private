@@ -36,7 +36,7 @@ TOKEN = hashlib.sha256(os.urandom(16)).hexdigest()
 (kopya / "package").mkdir()
 buf = io.BytesIO()
 with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
-    for ad in ("worker.py", "depo.py", "kalici.py", "depo_aktar.py", "ref_h-connector.json", "ref_source-6x8.dxf", "DejaVuSans.ttf"):
+    for ad in ("worker.py", "depo.py", "kalici.py", "depo_aktar.py", "etkilesim.py", "ref_h-connector.json", "ref_source-6x8.dxf", "DejaVuSans.ttf"):
         z.write(kopya / ad, ad)
     for g in sorted((kopya / "goc").glob("*.sql")):
         z.write(g, f"goc/{g.name}")

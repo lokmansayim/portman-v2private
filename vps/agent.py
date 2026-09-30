@@ -158,7 +158,9 @@ def worker_modulu():
 def yerel_ayarlar(uzak: dict) -> dict:
     """worker.isle'nin beklediği settings: LLM ayarları + anahtar (ortam değişkeni, diske yazılmaz)."""
     s = {"enabled": uzak.get("enabled"), "worker": uzak.get("worker"), "mode": uzak.get("mode"), "dry_run": uzak.get("dry_run"),
-         "llm": uzak.get("llm") or {}, "patron_teknik_not": uzak.get("patron_teknik_not", True), "max_is_per_tick": 1, "budget_s": 600}
+         "llm": uzak.get("llm") or {}, "patron_teknik_not": uzak.get("patron_teknik_not", True), "max_is_per_tick": 1, "budget_s": 600,
+         # İE-04 mesaj katmanı: hosting ayarından (api.php settings); test_adaylari canlıda hiçbir zaman açılmaz (yalnız yerel testler)
+         "mesaj_katmani": uzak.get("mesaj_katmani") is True, "ucb_taban_url": uzak.get("ucb_taban_url") or None}
     key = uzak.get("openai_key")
     if key:
         os.environ["OPENAI_API_KEY"] = key
@@ -193,16 +195,18 @@ def sonucu_gonder(job: dict, cikti: dict) -> dict:
     """Giden satırlar + belge dosyaları (projects/...) + güncel durum → hosting. Dosya yolu hostingte yeniden yazılır."""
     dosyalar = []; alanlar = {"inbound_id": job["id"]}
     for i, r in enumerate(cikti["satirlar"]):
-        if r.get("kind") == "document":
+        if r.get("file"):                                   # PDF, görsel ya da başlık görselli etkileşim (İE-04)
             p = Path(r["file"])
             try:
                 rel = p.resolve().relative_to((DATA / "projects").resolve())
             except ValueError:
-                raise ApiHatasi(f"belge projects/ dışında: {p}")
+                raise ApiHatasi(f"dosya projects/ dışında: {p}")
             rel_s = "projects/" + rel.as_posix()
             alan = f"file_{i}"
             dosyalar.append((alan, p.name, p.read_bytes())); alanlar[f"path_{alan}"] = rel_s
             r["file"] = rel_s
+            if isinstance(r.get("interactive"), dict) and isinstance(r["interactive"].get("header"), dict) and r["interactive"]["header"].get("file"):
+                r["interactive"]["header"]["file"] = rel_s
     alanlar["cikti"] = json.dumps(cikti, ensure_ascii=False)
     dp = DATA / "durum" / f"{job.get('sender', '')}.json"
     if dp.exists():
@@ -424,8 +428,8 @@ def hostinge_teslim(d) -> int:
         pk = d.teslim_paketi(is_id)
         dosyalar, alanlar, gidecek, bozuk = [], {"inbound_id": pk["inbound_id"]}, [], []
         for i, s in enumerate(pk["cikti"]["satirlar"]):
-            s = dict(s)
-            if s.get("kind") == "document":
+            s = json.loads(json.dumps(s))
+            if s.get("file"):                                   # PDF, görsel ya da başlık görselli etkileşim (İE-04)
                 p = Path(s.get("file") or "")
                 try:
                     veri = p.read_bytes()
@@ -437,10 +441,12 @@ def hostinge_teslim(d) -> int:
                     bozuk.append(s["id"]); continue
                 alan = f"file_{i}"
                 dosyalar.append((alan, p.name, veri)); alanlar[f"path_{alan}"] = rel; s["file"] = rel
+                if isinstance(s.get("interactive"), dict) and isinstance(s["interactive"].get("header"), dict) and s["interactive"]["header"].get("file"):
+                    s["interactive"]["header"]["file"] = rel
             gidecek.append(s)
         if bozuk:
-            d.hostinge_verilemedi(bozuk, "PDF dosyası yok ya da kayıttan sonra değişmiş; hosting'e verilmedi")
-            log("PDF kayıtla uyuşmuyor, hosting'e verilmedi: iş", is_id)
+            d.hostinge_verilemedi(bozuk, "Dosya yok ya da kayıttan sonra değişmiş; hosting'e verilmedi")
+            log("dosya kayıtla uyuşmuyor, hosting'e verilmedi: iş", is_id)
         ids = [s["id"] for s in gidecek]
         alanlar["cikti"] = json.dumps({**pk["cikti"], "satirlar": gidecek}, ensure_ascii=False)
         if pk["durum"] is not None:

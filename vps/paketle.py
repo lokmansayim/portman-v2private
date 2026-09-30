@@ -7,10 +7,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 VPS = ROOT / "vps"
 BUILD = VPS / "build"
-SURUM = "kanal-v1.2-" + time.strftime("%Y%m%d-%H%M")
+SURUM = "kanal-v1.3-" + time.strftime("%Y%m%d-%H%M")
 
 ATLA_DIZIN = {"__pycache__", "durum", "checks", "projects", "install", "tests", "package"}
-ATLA_DOSYA = {"settings.json", "state.json", "state.lock", "worker.lock", "tick.lock", "api_token.txt", "lib.snapshot.php"}
+# adaylar_test.json ve TEST* şablonları yalnız yerel testlerde (settings.test_adaylari) yüklenir; pakete girmez (canlıda test adayı yok)
+ATLA_DOSYA = {"settings.json", "state.json", "state.lock", "worker.lock", "tick.lock", "api_token.txt", "lib.snapshot.php", "adaylar_test.json"}
 
 
 def ekle_dizin(z: zipfile.ZipFile, kaynak: Path, hedef: str) -> int:
@@ -19,6 +20,7 @@ def ekle_dizin(z: zipfile.ZipFile, kaynak: Path, hedef: str) -> int:
         if p.is_dir(): continue
         if any(part in ATLA_DIZIN for part in p.relative_to(kaynak).parts): continue
         if p.name in ATLA_DOSYA or p.suffix in (".pyc", ".log"): continue
+        if p.name.upper().startswith("TEST") and "adaylar" in p.parts: continue      # test aday şablonu ve görseli
         z.write(p, f"{hedef}/{p.relative_to(kaynak).as_posix()}"); n += 1
     return n
 
@@ -29,7 +31,7 @@ def main() -> int:
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
         z.write(ROOT / "kanal" / "worker.py", "worker.py")
         # İE-02 kalıcı mod: Postgres deposu, kalıcı işleyici, aktarma ve göçler (ajan yalnız PORTMAN_PG_DSN varken kullanır)
-        for ad in ("depo.py", "kalici.py", "depo_aktar.py"):
+        for ad in ("depo.py", "kalici.py", "depo_aktar.py", "etkilesim.py"):        # etkilesim.py: İE-04 buton/liste cevabı çözümü
             z.write(ROOT / "kanal" / ad, ad)
         z.write(VPS / "kanit_sorgulari.sql", "kanit_sorgulari.sql")     # salt okunur kanıt sorguları (canlı kabul gösterimi)
         z.write(VPS / "tekrar_dene.py", "tekrar_dene.py")               # kabul gösterimi adım 7 (aynı kanal mesajı yeniden)

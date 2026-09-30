@@ -29,6 +29,16 @@ if ($step === 'capture') {
     $owned = pm_kanal_capture($raw, 'sha256='.hash_hmac('sha256', $raw, $SECRET));
     echo json_encode(['owned' => array_keys($owned)])."\n"; exit;
 }
+if ($step === 'button') {   // İE-04: buton cevabı — php e2e_steps.php button <tmp> <lib> <reply_id> <baslik> <mesaj id> <cevaplanan wamid>
+    $rid = $argv[4] ?? ''; $baslik = $argv[5] ?? 'Onayla'; $id = $argv[6] ?? 'wamid.E2EB1'; $ctx = $argv[7] ?? '';
+    $m = ['from' => $PATRON, 'id' => $id, 'timestamp' => (string)time(), 'type' => 'interactive', 'interactive' => ['type' => 'button_reply', 'button_reply' => ['id' => $rid, 'title' => $baslik]]];
+    if ($ctx !== '') $m['context'] = ['from' => '4448056', 'id' => $ctx];
+    $raw = json_encode(['object' => 'whatsapp_business_account', 'entry' => [['id' => 'waba', 'changes' => [['field' => 'messages', 'value' => ['messaging_product' => 'whatsapp',
+        'metadata' => ['display_phone_number' => '4448056', 'phone_number_id' => $PHONE], 'contacts' => [['wa_id' => $PATRON, 'profile' => ['name' => 'Lokman']]],
+        'messages' => [$m]]]]]]], JSON_UNESCAPED_UNICODE);
+    $owned = pm_kanal_capture($raw, 'sha256='.hash_hmac('sha256', $raw, $SECRET));
+    echo json_encode(['owned' => array_keys($owned)])."\n"; exit;
+}
 if ($step === 'status') {   // İE-02: imzalı Meta durum bildirimi (delivered/read/failed) — php e2e_steps.php status <tmp> <lib> <wamid> <durum> [zaman]
     $wamid = $argv[4] ?? ''; $kind = $argv[5] ?? 'delivered'; $ts = (int)($argv[6] ?? time());
     $raw = json_encode(['object' => 'whatsapp_business_account', 'entry' => [['id' => 'waba', 'changes' => [['field' => 'messages', 'value' => ['messaging_product' => 'whatsapp',
@@ -42,4 +52,4 @@ if ($step === 'requeue') {  // İE-02: işlenmiş bir gelen satırı kuyruğa ge
 }
 if ($step === 'tick') { pm_kanal_tick(); echo json_encode(pm_read(PM_KANAL_DIR.'/health.json'), JSON_UNESCAPED_UNICODE)."\n"; exit; }
 if ($step === 'dump') { echo json_encode(['state' => pm_kanal_store(fn(&$s) => $s), 'outgoing' => pm_store(fn(&$d) => $d['outgoing'])], JSON_UNESCAPED_UNICODE)."\n"; exit; }
-fwrite(STDERR, "adım? init|capture|status|requeue|tick|dump\n"); exit(2);
+fwrite(STDERR, "adım? init|capture|button|status|requeue|tick|dump\n"); exit(2);

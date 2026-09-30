@@ -10,8 +10,12 @@ declare(strict_types=1);
  pm_contact) ve developer/config.php (numaralarOku, ayarlarOku, isteğe bağlı mesajKaydet).
 */
 if (!defined('PM_KANAL_DIR')) define('PM_KANAL_DIR', __DIR__);
-const PM_KANAL_SURUM = 'kanal-v1.2';   // v1.2 (İE-02): gelen satırda context_id
+const PM_KANAL_SURUM = 'kanal-v1.3';   // v1.2 (İE-02): gelen satırda context_id · v1.3 (İE-04): reply_id; image ve interactive gönderimi
 const PM_KANAL_STALE = 600;
+const PM_KANAL_MAX_IMAGE = 5 * 1024 * 1024;          // WhatsApp görsel sınırı
+// WhatsApp Cloud API etkileşimli mesaj sınırları (ajan da aynı sınırlarla üretir; burada gönderimden önce yeniden denetlenir)
+const PM_KANAL_WA = ['buton' => 3, 'buton_baslik' => 20, 'buton_id' => 256, 'liste_dugme' => 20, 'liste_satir' => 10, 'satir_baslik' => 24,
+                     'satir_aciklama' => 72, 'satir_id' => 200, 'bolum_baslik' => 24, 'govde' => 1024, 'altbilgi' => 60, 'baslik_metin' => 60, 'cta_metin' => 20];
 
 function pm_kanal_settings(): array { $p = PM_KANAL_DIR.'/settings.json'; return is_file($p) ? pm_read($p) : []; }
 function pm_kanal_enabled(): bool { return (pm_kanal_settings()['enabled'] ?? false) === true; }
@@ -71,6 +75,97 @@ function pm_kanal_text(array $m): string {
     };
 }
 
+/* İE-04: etkileşimli cevabın kimliği: interactive.button_reply.id | interactive.list_reply.id | button.payload (şablon butonu). */
+function pm_kanal_reply(array $m): array {
+    $type = (string)($m['type'] ?? ''); $id = null; $kind = null;
+    if ($type === 'interactive' && is_array($m['interactive'] ?? null)) {
+        foreach (['button_reply', 'list_reply'] as $k) if (is_array($m['interactive'][$k] ?? null) && isset($m['interactive'][$k]['id'])) { $id = (string)$m['interactive'][$k]['id']; $kind = $k; }
+    } elseif ($type === 'button' && is_array($m['button'] ?? null) && isset($m['button']['payload'])) { $id = (string)$m['button']['payload']; $kind = 'button'; }
+    if ($id === null || $id === '' || strlen($id) > 256 || preg_match('/[\x00-\x1F]/', $id)) return [null, null];
+    return [$id, $kind];
+}
+
+/* İE-04: satırın dosyası (PDF, PNG, JPEG): projects/ altında, kayıtlı özetle aynı, türü başlığından. Dönen: [gerçek yol, mime]. */
+function pm_kanal_dosya(array $r, array $izinli): array {
+    $path = (string)($r['file'] ?? ''); $real = $path !== '' ? realpath($path) : false;
+    if ($real === false || !str_starts_with($real, PM_KANAL_DIR.'/projects/') || !is_file($real) || filesize($real) < 1) throw new RuntimeException('local_file_invalid');
+    if (!empty($r['sha256']) && !hash_equals((string)$r['sha256'], hash_file('sha256', $real))) throw new RuntimeException('local_file_changed');
+    $bas = (string)file_get_contents($real, false, null, 0, 8);
+    $mime = str_starts_with($bas, '%PDF-') ? 'application/pdf' : (str_starts_with($bas, "\x89PNG\r\n\x1a\n") ? 'image/png' : (str_starts_with($bas, "\xFF\xD8\xFF") ? 'image/jpeg' : ''));
+    if ($mime === '' || !in_array($mime, $izinli, true)) throw new RuntimeException($mime === '' ? 'file_type_unknown' : 'file_type_not_allowed');
+    if ($mime === 'application/pdf' && filesize($real) > 25 * 1024 * 1024) throw new RuntimeException('pdf_too_large');
+    if ($mime !== 'application/pdf' && filesize($real) > PM_KANAL_MAX_IMAGE) throw new RuntimeException('image_too_large');
+    return [$real, $mime];
+}
+
+/* İE-04: medya yükleme (bir kez; media_id satırda saklanır, yeniden denemede yeniden yüklenmez). */
+function pm_kanal_medya(string $id, array $r, string $real, string $mime, array $cfg, string $anahtar = 'media_id'): string {
+    $media = (string)($r[$anahtar] ?? '');
+    if (ctype_digit($media) && $media !== '') return $media;
+    pm_kanal_update($id, ['state' => 'uploading', 'attempts' => ($r['attempts'] ?? 0) + 1, 'send_started_at' => time()]);
+    $upload = pm_remote('https://graph.facebook.com/'.$cfg['graph_version'].'/'.$cfg['phone_number_id'].'/media', $cfg['access_token'], 'POST',
+        ['messaging_product' => 'whatsapp', 'type' => $mime, 'file' => new CURLFile($real, $mime, (string)($r['filename'] ?? basename($real)))]);
+    $media = (string)($upload['id'] ?? '');
+    if (!ctype_digit($media) || $media === '') throw new RuntimeException('media_response');
+    pm_kanal_update($id, [$anahtar => $media]);
+    return $media;
+}
+
+/* İE-04: etkileşimli mesajın Meta payload'ı; sınırlar burada da denetlenir (aşan satır gönderilmez: interactive_invalid). */
+function pm_kanal_interactive(array $r, ?string $headerMediaId): array {
+    $L = PM_KANAL_WA; $i = is_array($r['interactive'] ?? null) ? $r['interactive'] : [];
+    $tip = (string)($i['type'] ?? ''); $govde = trim((string)($i['body']['text'] ?? $r['body'] ?? ''));
+    $kes = fn($v, $n) => mb_strlen($v, 'UTF-8') <= $n;
+    if (!in_array($tip, ['button', 'list', 'cta_url'], true)) throw new RuntimeException('interactive_invalid: type');
+    if ($govde === '' || !$kes($govde, $L['govde'])) throw new RuntimeException('interactive_invalid: body');
+    $out = ['type' => $tip, 'body' => ['text' => $govde]];
+    if (isset($i['footer']['text']) && trim((string)$i['footer']['text']) !== '') {
+        if (!$kes((string)$i['footer']['text'], $L['altbilgi'])) throw new RuntimeException('interactive_invalid: footer');
+        $out['footer'] = ['text' => (string)$i['footer']['text']];
+    }
+    $h = is_array($i['header'] ?? null) ? $i['header'] : null;
+    if ($h !== null) {
+        if (($h['type'] ?? '') === 'image') {
+            if ($tip === 'list') throw new RuntimeException('interactive_invalid: list header image');
+            if ($headerMediaId === null) throw new RuntimeException('interactive_invalid: header media');
+            $out['header'] = ['type' => 'image', 'image' => ['id' => $headerMediaId]];
+        } elseif (($h['type'] ?? '') === 'text') {
+            if (!$kes((string)($h['text'] ?? ''), $L['baslik_metin'])) throw new RuntimeException('interactive_invalid: header text');
+            $out['header'] = ['type' => 'text', 'text' => (string)$h['text']];
+        } else throw new RuntimeException('interactive_invalid: header type');
+    }
+    $a = is_array($i['action'] ?? null) ? $i['action'] : [];
+    if ($tip === 'button') {
+        $butonlar = is_array($a['buttons'] ?? null) ? $a['buttons'] : []; $ids = [];
+        if (count($butonlar) < 1 || count($butonlar) > $L['buton']) throw new RuntimeException('interactive_invalid: buttons');
+        $out['action'] = ['buttons' => []];
+        foreach ($butonlar as $b) {
+            $rid = (string)($b['reply']['id'] ?? $b['id'] ?? ''); $baslik = (string)($b['reply']['title'] ?? $b['title'] ?? '');
+            if ($rid === '' || !$kes($rid, $L['buton_id']) || $baslik === '' || !$kes($baslik, $L['buton_baslik']) || isset($ids[$rid])) throw new RuntimeException('interactive_invalid: button');
+            $ids[$rid] = true; $out['action']['buttons'][] = ['type' => 'reply', 'reply' => ['id' => $rid, 'title' => $baslik]];
+        }
+    } elseif ($tip === 'list') {
+        $dugme = (string)($a['button'] ?? ''); $n = 0; $ids = []; $bolumler = [];
+        if ($dugme === '' || !$kes($dugme, $L['liste_dugme'])) throw new RuntimeException('interactive_invalid: list button');
+        foreach ((is_array($a['sections'] ?? null) ? $a['sections'] : []) as $sec) {
+            $rows = [];
+            foreach ((is_array($sec['rows'] ?? null) ? $sec['rows'] : []) as $row) {
+                $rid = (string)($row['id'] ?? ''); $baslik = (string)($row['title'] ?? ''); $ac = (string)($row['description'] ?? '');
+                if ($rid === '' || !$kes($rid, $L['satir_id']) || $baslik === '' || !$kes($baslik, $L['satir_baslik']) || !$kes($ac, $L['satir_aciklama']) || isset($ids[$rid])) throw new RuntimeException('interactive_invalid: row');
+                $ids[$rid] = true; $n++; $x = ['id' => $rid, 'title' => $baslik]; if ($ac !== '') $x['description'] = $ac; $rows[] = $x;
+            }
+            if ($rows) { $t = (string)($sec['title'] ?? ''); if (!$kes($t, $L['bolum_baslik'])) throw new RuntimeException('interactive_invalid: section'); $bolumler[] = ($t !== '' ? ['title' => $t] : []) + ['rows' => $rows]; }
+        }
+        if ($n < 1 || $n > $L['liste_satir']) throw new RuntimeException('interactive_invalid: rows');
+        $out['action'] = ['button' => $dugme, 'sections' => $bolumler];
+    } else {
+        $p = is_array($a['parameters'] ?? null) ? $a['parameters'] : []; $url = (string)($p['url'] ?? ''); $metin = (string)($p['display_text'] ?? '');
+        if ($metin === '' || !$kes($metin, $L['cta_metin']) || !preg_match('#^https://[^\s"\'<>]{4,1900}$#u', $url)) throw new RuntimeException('interactive_invalid: cta_url');
+        $out['action'] = ['name' => 'cta_url', 'parameters' => ['display_text' => $metin, 'url' => $url]];
+    }
+    return $out;
+}
+
 /* Webhook: imza doğrulanır, ana kayda (store.json) yazılır, izinli göndericinin mesajı kuyruğa alınır; sahiplenilenler döner (sohbet botuna gitmez). */
 function pm_kanal_capture(string $raw, string $signature): array {
     $owned = []; $settings = pm_kanal_settings();
@@ -99,7 +194,10 @@ function pm_kanal_capture(string $raw, string $signature): array {
             $bayi = pm_kanal_bayi($from); $media = is_array($m[$type] ?? null) ? $m[$type] : [];
             // İE-02: bayi bir mesajı alıntılayarak cevap verdiyse alıntılanan mesajın kimliği (onayı doğru revizyona bağlamak için)
             $ctx = is_array($m['context'] ?? null) ? (string)($m['context']['id'] ?? '') : '';
+            // İE-04: buton ya da liste cevabının KİMLİĞİ (görünen başlık text'te kalır; ajan yalnız kimliği seçim sayar)
+            [$reply, $replyKind] = pm_kanal_reply($m);
             $yeni[$mid] = ['id' => $mid, 'context_id' => (str_starts_with($ctx, 'wamid.') && strlen($ctx) <= 300) ? $ctx : null,
+                'reply_id' => $reply, 'reply_kind' => $replyKind,
                 'sender' => $from, 'name' => $names[$from] ?? '', 'role' => $bayi['rol'] ?? 'bayi', 'bayi' => $bayi,
                 'type' => $type, 'text' => mb_substr(pm_kanal_text($m), 0, 4000), 'media_id' => $media['id'] ?? null, 'filename' => $media['filename'] ?? null,
                 'timestamp' => $ts, 'received_at' => $simdi, 'phone_number_id' => $cfg['phone_number_id'], 'source' => 'Meta imzalı webhook',
@@ -160,22 +258,26 @@ function pm_kanal_send(string $id, array $r, array $cfg, array $settings): void 
     try {
         $payload = ['messaging_product' => 'whatsapp', 'recipient_type' => 'individual', 'to' => $to, 'biz_opaque_callback_data' => $id];
         if ($kind === 'document') {
-            $path = (string)($r['file'] ?? ''); $real = $path !== '' ? realpath($path) : false;
-            if ($real === false || !str_starts_with($real, PM_KANAL_DIR.'/projects/') || !is_file($real) || filesize($real) < 1 || filesize($real) > 25 * 1024 * 1024) throw new RuntimeException('local_file_invalid');
-            if (!empty($r['sha256']) && !hash_equals($r['sha256'], hash_file('sha256', $real))) throw new RuntimeException('local_file_changed');
-            if (!str_starts_with((string)file_get_contents($real, false, null, 0, 5), '%PDF-')) throw new RuntimeException('pdf_invalid');
-            $media = (string)($r['media_id'] ?? '');
-            if (!ctype_digit($media) || $media === '') {
-                pm_kanal_update($id, ['state' => 'uploading', 'attempts' => ($r['attempts'] ?? 0) + 1, 'to_resolved' => $to, 'send_started_at' => time()]);
-                $upload = pm_remote('https://graph.facebook.com/'.$cfg['graph_version'].'/'.$cfg['phone_number_id'].'/media', $cfg['access_token'], 'POST',
-                    ['messaging_product' => 'whatsapp', 'type' => 'application/pdf', 'file' => new CURLFile($real, 'application/pdf', (string)$r['filename'])]);
-                $media = (string)($upload['id'] ?? '');
-                if (!ctype_digit($media) || $media === '') throw new RuntimeException('media_response');
-                pm_kanal_update($id, ['media_id' => $media]);
-            }
+            [$real, $mime] = pm_kanal_dosya($r, ['application/pdf']);
+            pm_kanal_update($id, ['to_resolved' => $to]);
+            $media = pm_kanal_medya($id, $r, $real, $mime, $cfg);
             $payload['type'] = 'document';
             $payload['document'] = ['id' => $media, 'filename' => (string)$r['filename']];
             if (trim((string)($r['body'] ?? '')) !== '') $payload['document']['caption'] = mb_substr((string)$r['body'], 0, 1000);
+        } elseif ($kind === 'image') {                                   // İE-04: plan görseli (PNG/JPEG ≤5 MB)
+            [$real, $mime] = pm_kanal_dosya($r, ['image/png', 'image/jpeg']);
+            pm_kanal_update($id, ['to_resolved' => $to]);
+            $media = pm_kanal_medya($id, $r, $real, $mime, $cfg);
+            $payload['type'] = 'image'; $payload['image'] = ['id' => $media];
+            if (trim((string)($r['body'] ?? '')) !== '') $payload['image']['caption'] = mb_substr((string)$r['body'], 0, 1024);
+        } elseif ($kind === 'interactive') {                             // İE-04: buton, liste, bağlantı butonu (başlıkta görsel olabilir)
+            $headerMedia = null;
+            if ((($r['interactive']['header']['type'] ?? '') === 'image')) {
+                [$real, $mime] = pm_kanal_dosya($r, ['image/png', 'image/jpeg']);
+                pm_kanal_update($id, ['to_resolved' => $to]);
+                $headerMedia = pm_kanal_medya($id, $r, $real, $mime, $cfg);
+            }
+            $payload['type'] = 'interactive'; $payload['interactive'] = pm_kanal_interactive($r, $headerMedia);
         } else {
             if (trim((string)($r['body'] ?? '')) === '') throw new RuntimeException('empty_text');
             $payload['type'] = 'text'; $payload['text'] = ['body' => mb_substr((string)$r['body'], 0, 4000), 'preview_url' => false];
@@ -228,7 +330,8 @@ function pm_kanal_tick(): void {
         $deadline = time() + 40;
         foreach ($rows as $id => $r) {
             if (time() > $deadline) break;
-            $retry = ($r['state'] ?? '') === 'upload_failed' && ($r['attempts'] ?? 0) < 2 && ($r['kind'] ?? '') === 'document';
+            $retry = ($r['state'] ?? '') === 'upload_failed' && ($r['attempts'] ?? 0) < 2 && in_array($r['kind'] ?? '', ['document', 'image', 'interactive'], true)
+                     && !str_starts_with((string)($r['error'] ?? ''), 'Yükleme/doğrulama başarısız; gönderilmedi. interactive_invalid');
             if (($r['state'] ?? '') !== 'pending' && !$retry) continue;
             if (($settings['dry_run'] ?? false) === true) { pm_kanal_update($id, ['state' => 'held', 'error' => 'dry_run: gönderilmedi (sonradan da gönderilmez)']); $held++; continue; }
             try { pm_kanal_send($id, $r, $cfg, $settings); $sent++; }
@@ -265,22 +368,36 @@ function pm_kanal_publish(array $settings): void {
     pm_store(function (&$d) use ($rows) {
         foreach ($rows as $id => $r) {
             if (!empty($r['self_test']) || ($r['request_accepted_at'] ?? null) === null) continue;
+            $medya = in_array($r['kind'], ['document', 'image'], true) || !empty($r['file']);
             $d['outgoing'][$id] = ['request_id' => $id, 'parent_message_id' => $r['inbound_id'], 'recipient' => $r['to_resolved'] ?? $r['to'],
-                'kind' => $r['kind'] === 'document' ? 'document' : 'text', 'body' => (string)($r['body'] ?? ''), 'filename' => $r['filename'] ?? null,
-                'sha256' => $r['sha256'] ?? null, 'local_file' => null, 'mime' => $r['mime'] ?? null, 'transport' => $r['kind'] === 'document' ? 'media' : 'text',
+                'kind' => $medya ? 'document' : 'text', 'body' => pm_kanal_panel_metni($r), 'filename' => $r['filename'] ?? null,
+                'sha256' => $r['sha256'] ?? null, 'local_file' => null, 'mime' => $r['mime'] ?? null, 'transport' => $medya ? 'media' : 'text',
                 'state' => $r['state'], 'timestamp' => $r['created_at'], 'updated' => $r['updated_at'], 'phone_number_id' => $r['phone_number_id'] ?? null,
                 'wamid' => $r['wamid'], 'media_id' => $r['media_id'] ?? null, 'error' => $r['error'], 'request_accepted_at' => $r['request_accepted_at'],
-                'delivery_state' => $r['delivery_state'] ?? null, 'evidence' => 'İmzalı WhatsApp → Portman kanal (Beyin+Motor, hosting) → '.($r['kind'] === 'document' ? 'PDF' : 'metin')];
+                'delivery_state' => $r['delivery_state'] ?? null, 'kanal_kind' => $r['kind'],
+                'evidence' => 'İmzalı WhatsApp → Portman kanal (Beyin+Motor, hosting) → '.(['document' => 'PDF', 'image' => 'görsel', 'interactive' => 'etkileşimli mesaj'][$r['kind']] ?? 'metin')];
         }
     });
     if (($settings['panel_kaydi'] ?? true) !== true || !function_exists('mesajKaydet')) return;
     foreach ($rows as $id => $r) {
         if (!empty($r['self_test']) || !empty($r['panel_logged']) || !is_string($r['wamid'] ?? null)) continue;
-        $icerik = $r['kind'] === 'document' ? '📎 '.($r['filename'] ?? 'belge.pdf').(trim((string)$r['body']) !== '' ? ' — '.$r['body'] : '') : (string)$r['body'];
+        $icerik = $r['kind'] === 'document' ? '📎 '.($r['filename'] ?? 'belge.pdf').(trim((string)$r['body']) !== '' ? ' — '.$r['body'] : '')
+                : ($r['kind'] === 'image' ? '🖼 '.($r['filename'] ?? 'gorsel.png').(trim((string)$r['body']) !== '' ? ' — '.$r['body'] : '') : pm_kanal_panel_metni($r));
         try { mesajKaydet($r['to_resolved'] ?? $r['to'], 'Portman', 'giden', 'text', $icerik, $r['wamid'], ['ai' => true, 'portman' => 'kanal']); }
         catch (Throwable $e) { error_log('Portman kanal panel kaydı: '.$e->getMessage()); }
         pm_kanal_update($id, ['panel_logged' => true]);
     }
+}
+
+/* İE-04: panel ve sohbet kaydı için etkileşimli mesajın metni: gövde + buton/liste başlıkları (kimlikler yazılmaz). */
+function pm_kanal_panel_metni(array $r): string {
+    $govde = (string)($r['body'] ?? '');
+    if (($r['kind'] ?? '') !== 'interactive' || !is_array($r['interactive'] ?? null)) return $govde;
+    $i = $r['interactive']; $a = is_array($i['action'] ?? null) ? $i['action'] : []; $ek = [];
+    foreach ((is_array($a['buttons'] ?? null) ? $a['buttons'] : []) as $b) $ek[] = (string)($b['reply']['title'] ?? $b['title'] ?? '');
+    foreach ((is_array($a['sections'] ?? null) ? $a['sections'] : []) as $sec) foreach ((is_array($sec['rows'] ?? null) ? $sec['rows'] : []) as $row) $ek[] = (string)($row['title'] ?? '');
+    if (isset($a['parameters']['display_text'])) $ek[] = (string)$a['parameters']['display_text'].' → '.(string)($a['parameters']['url'] ?? '');
+    return $govde.($ek ? ' ['.implode(' | ', array_filter($ek)).']' : '');
 }
 
 /* Kurulum ön kontrolü: sır yazmaz (yalnız var/yok); preflight.json. Hiçbir şey göndermez. */

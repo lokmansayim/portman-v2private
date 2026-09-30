@@ -371,7 +371,11 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
             k.not_dus("kural", f"eski buton: {etk.get('neden')}")
             k.not_dus("giden", etk["mesaj"], {"eylem": "cevapla", "gerekce": "eski buton"})
             k.kaydet()
-            ekle(etk["mesaj"])
+            teknik = f"— teknik: eylem=cevapla | gerekçe=eski buton: {etk.get('neden')} | kimlik={etk.get('kimlik')}" if (patron_mu and settings.get("patron_teknik_not", True)) else ""
+            if teknik and settings.get("mesaj_katmani"):
+                ekle(etk["mesaj"]); ekle(teknik)
+            else:
+                ekle(etk["mesaj"] + ("\n" + teknik if teknik else ""))
             sonuc.update(eylem="cevapla", gerekce=f"eski buton: {etk.get('neden')}", buton=etk.get("kimlik"), asama=k.d.get("asama"))
             return {"satirlar": satirlar, "sonuc": sonuc}
         metin_kural = etk["metin"]
