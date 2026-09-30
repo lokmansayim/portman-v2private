@@ -1,6 +1,6 @@
 # Portman · DURUM
 
-**Son güncelleme: 30 Eylül 2026 01:10 (tek aktif teslim: Aşama 2 kabul vakası, İE-04; aday karşılaştırması yapıldı, kararlar bekleniyor).** Her oturumun son adımı bu dosyayı güncellemektir.
+**Son güncelleme: 30 Eylül 2026 09:40 (tek aktif teslim: Aşama 2 kabul vakası, İE-04; aday karşılaştırması yapıldı, kararlar bekleniyor).** Her oturumun son adımı bu dosyayı güncellemektir.
 
 **Oturum devri (30.09 01:10):** 28–30 Eylül penceresi kapandı. Yeni pencere `docs/devir/2026-09-30_Oturum_Devri.md` ile başlar: kurallar, yapılanlar, bekleyen kararlar, sıradaki işler, Astra'ya çizim işi için ölçütler.
 
@@ -19,14 +19,14 @@ Onay: Lokman 29.09 23:49. İş emri: `docs/is_emirleri/IE-04.md` (dal `ie-04`). 
 
 **Bitiş koşulu:** Aşağıdaki altı kullanıcı adımının hepsi Patron modunda canlıda, aynı yeni projede çalışır. Seçenekler, kaynak uygunluk denetiminden ve Ubeydullah kabulünden geçmiş üç geçerli adaydan gelir. P6001 akışı, harness, altın testler ve `yeniden_kos.py` çıktıları değişmez. İlerleme test sayısıyla değil, bu tablodaki adım durumlarıyla bildirilir.
 
-| # | Kullanıcı adımı | Durum (30.09) |
+| # | Kullanıcı adımı | Durum (30.09 akşam) |
 |---|---|---|
-| A1 | "3+1, 90 m² civarı" → yalnız gerekli sorular | Kısmen: m² ve oda programıyla yakın modeller listeleniyor; liste denetimden geçmiyor, öncelik soruları yok |
-| A2 | Teknik olarak uygun üç alternatif | Çalışmıyor: 2 aday koşullu uygun (P9401, P9201), 0 geçerli; üçüncü aday K16 kararına bağlı |
-| A3 | Seçim → o adaydan r01 | Çalışmıyor: canlıda yalnız P6001 şablonu |
-| A4 | Bir değişiklik → aynı projede r02 | Kısmen: P6001'de canlıda çalışıyor (29.09); 3+1 adaylarında yok |
-| A5 | Aynı revizyondan PDF ve 3D bağlantısı | Kısmen: PDF canlıda (P6001); IFC P9401 ve P9201 için yerelde üretildi, bağlantı yok |
-| A6 | Eski revizyon onayı reddi, güncel onay kabulü | Canlıda çalışıyor (P6001, 29.09) |
+| A1 | "3+1, 90 m² civarı" → yalnız gerekli sorular | Kısmen. Yerelde öncelik sorusu (butonlu/metinle), söylenen tekrar sorulmuyor; canlıda v1.2 (yakın model listesi) |
+| A2 | Teknik olarak uygun üç alternatif | Yerelde çalışıyor, yalnız TEST adaylarıyla; gerçek adayla çalışmıyor (0 geçerli aday; kararlar ve çizim çalışması bekleniyor) |
+| A3 | Seçim → o adaydan r01 | Yerelde çalışıyor (TEST adayları, P6001): butonla/kodla seçim → r01; eski liste seçim yapmaz. Canlıda yalnız P6001 |
+| A4 | Bir değişiklik → aynı projede r02 | Yerelde çalışıyor: Revize butonu → soru → metinle r02 aynı projede. Canlıda P6001 (29.09) |
+| A5 | Aynı revizyondan PDF ve 3D bağlantısı | Yerelde çalışıyor: aynı İş Emri'nden görsel + PDF + IFC + 3D sayfası; bağlantı butonu ayarla. Canlıda PDF (P6001) |
+| A6 | Eski revizyon onayı reddi, güncel onay kabulü | Yerelde butonla çalışıyor (eski revizyon reddi); canlıda metinle (P6001, 29.09) |
 
 **Beklenen kararlar** (aday paketi `docs/raporlar/2026-09-30_Asama2_3arti1_Aday_Karsilastirmasi.md`, K-A1–K-A10):
 - alan tanımı ve tolerans;
@@ -41,6 +41,8 @@ Onay: Lokman 29.09 23:49. İş emri: `docs/is_emirleri/IE-04.md` (dal `ie-04`). 
 İE-03'ten bu teslime alınanlar: kaynaklı aday bilgisi, ilgili değişikliği doğru anlayan konuşma davranışı, düzeltme adaylarının kaydı. Geniş hafıza depoları ve ölçüm çalışması bu teslimin ön koşulu değil.
 
 **Hedef akış (30.09 07:14, Lokman):** Hedef WhatsApp Akışı kanvası (sürüm 13) hedef akıştır. Aşama 2 kanvasın 1–4. adımlarını kapsar; seçenekler görsel + buton + liste ile gider. Bugünkü kanal yalnız metin ve PDF gönderiyor; görsel, buton, liste ve bağlantı butonu hosting PHP ve ajan değişikliğidir (yerelde geliştirilir, canlıya alınması ayrı onay). Kanvasın 5–6. adımları Aşama 3–4'te.
+
+**Mesaj katmanı (kanal v1.3), 30.09 07:54 onayı, yalnız yerel:** `docs/is_emirleri/IE-04-mesaj-katmani.md`. Ajan/Beyin, hosting PHP (`feature.php`, `api.php` v1.3), göç 003 (yalnız ekler), `motor/bayi_gorseli.py`, `motor/ifc_uret.py`, `motor/ucb_sayfa.py`. Ayar `mesaj_katmani` kapalıyken davranış v1.2 ile aynı. Testler: 336 Python + harness 22/22 + PHP çevrimdışı 44/44 + gerçek PHP hattı uçtan uca (katman kapalı 18/18, açık 21/21); referans DXF/PDF parmak izleri AYNI. Canlıya alınması (hosting PHP, paket, göç 003, 3D barınağı) ayrı onay.
 
 **Günlük canlı kontrol:** `vps/canli_kontrol.sh` (salt okunur; Lokman `ssh portman-vps 'bash -s' < canli_kontrol.sh` ile koşar): servis, paket, hosting, öz-test, disk, yedekler, Postgres sayıları, günlükteki hatalar. 30.09'da sahte VPS düzeniyle sınandı; canlıda henüz koşulmadı.
 
