@@ -40,6 +40,10 @@ Onay: Lokman 29.09 23:49. İş emri: `docs/is_emirleri/IE-04.md` (dal `ie-04`). 
 
 İE-03'ten bu teslime alınanlar: kaynaklı aday bilgisi, ilgili değişikliği doğru anlayan konuşma davranışı, düzeltme adaylarının kaydı. Geniş hafıza depoları ve ölçüm çalışması bu teslimin ön koşulu değil.
 
+**Hedef akış (30.09 07:14, Lokman):** Hedef WhatsApp Akışı kanvası (sürüm 13) hedef akıştır. Aşama 2 kanvasın 1–4. adımlarını kapsar; seçenekler görsel + buton + liste ile gider. Bugünkü kanal yalnız metin ve PDF gönderiyor; görsel, buton, liste ve bağlantı butonu hosting PHP ve ajan değişikliğidir (yerelde geliştirilir, canlıya alınması ayrı onay). Kanvasın 5–6. adımları Aşama 3–4'te.
+
+**Günlük canlı kontrol:** `vps/canli_kontrol.sh` (salt okunur; Lokman `ssh portman-vps 'bash -s' < canli_kontrol.sh` ile koşar): servis, paket, hosting, öz-test, disk, yedekler, Postgres sayıları, günlükteki hatalar. 30.09'da sahte VPS düzeniyle sınandı; canlıda henüz koşulmadı.
+
 ## Bu depoda ne var
 
 | Yol | İçerik |
