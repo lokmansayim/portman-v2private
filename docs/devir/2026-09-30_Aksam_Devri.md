@@ -17,7 +17,7 @@ Bir önceki devir notu (`2026-09-30_Oturum_Devri.md`) hâlâ geçerli: kurallar,
 4. **Bakım paketi (Kapı N ile birlikte):** buton işlerinde teknik notta "LLM None…" (worker.teknik_not: backend `etkilesim` → "buton, LLM yok"); `kapi_g_durum.sh` sayaçlarının buton işlerini LLM çağrısı saymaması; plan metnindeki "birkaç dakika içinde PDF olarak göndereceğim" kalıbı (katman açıkken "plan ve PDF ekte"); `vps/agent.py` başlangıç etiketi `vps-agent-v1.3`.
 5. **Ürün soruları (Lokman):** onaylanmış planın "Revize et" butonu "neyi değiştirelim" sorusunu açsın mı (bugün: "isteğinizi yazın"); sıfır fark isteyen revizyonda (T3) "zaten öyle" cevabı verilsin mi.
 6. **1 Ekim WhatsApp ücreti:** servis mesajları ücretli; her plan 3 mesaj (teknik not kapatılırsa 2: `patron_teknik_not: false`). Tutarı Meta'nın tarifesinden oku, Lokman'a bildir, tercihini al. Günlük kontrol: `25_Canli_Kontrol/` (`canli_kontrol.sh`, varsayılan paket v1.3).
-7. Zemin (Claude Docs `65844cef-…`) "Güncel durum" sekmesi bu akşamın durumuyla güncellenmeli (bu oturumda yapılmadı).
+7. Zemin (Claude Docs `65844cef-…`) "Güncel durum" sekmesi 30.09 22:15'te bu akşamın durumuyla güncellendi (giriş paragrafı, Kanal, VPS ajanı, Beyin, IFC, Veritabanı, Hedef akış satırları).
 
 ## Canlıya dokunmadan önce (değişmez)
 
