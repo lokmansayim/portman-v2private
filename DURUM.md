@@ -1,6 +1,6 @@
 # Portman · DURUM
 
-**Son güncelleme: 30 Eylül 2026 09:40 (tek aktif teslim: Aşama 2 kabul vakası, İE-04; aday karşılaştırması yapıldı, kararlar bekleniyor).** Her oturumun son adımı bu dosyayı güncellemektir.
+**Son güncelleme: 30 Eylül 2026 20:00 (tek aktif teslim: Aşama 2 kabul vakası, İE-04; mesaj katmanı yerelde tamam, canlıya alma Kapı M hazır ve onay bekliyor; Astra çizim/veriye başladı).** Her oturumun son adımı bu dosyayı güncellemektir. Aktif dal `ie-04`.
 
 **Oturum devri (30.09 01:10):** 28–30 Eylül penceresi kapandı. Yeni pencere `docs/devir/2026-09-30_Oturum_Devri.md` ile başlar: kurallar, yapılanlar, bekleyen kararlar, sıradaki işler, Astra'ya çizim işi için ölçütler.
 
@@ -42,7 +42,9 @@ Onay: Lokman 29.09 23:49. İş emri: `docs/is_emirleri/IE-04.md` (dal `ie-04`). 
 
 **Hedef akış (30.09 07:14, Lokman):** Hedef WhatsApp Akışı kanvası (sürüm 13) hedef akıştır. Aşama 2 kanvasın 1–4. adımlarını kapsar; seçenekler görsel + buton + liste ile gider. Bugünkü kanal yalnız metin ve PDF gönderiyor; görsel, buton, liste ve bağlantı butonu hosting PHP ve ajan değişikliğidir (yerelde geliştirilir, canlıya alınması ayrı onay). Kanvasın 5–6. adımları Aşama 3–4'te.
 
-**Mesaj katmanı (kanal v1.3), 30.09 07:54 onayı, yalnız yerel:** `docs/is_emirleri/IE-04-mesaj-katmani.md`. Ajan/Beyin, hosting PHP (`feature.php`, `api.php` v1.3), göç 003 (yalnız ekler), `motor/bayi_gorseli.py`, `motor/ifc_uret.py`, `motor/ucb_sayfa.py`. Ayar `mesaj_katmani` kapalıyken davranış v1.2 ile aynı. Testler: 336 Python + harness 22/22 + PHP çevrimdışı 44/44 + gerçek PHP hattı uçtan uca (katman kapalı 18/18, açık 21/21); referans DXF/PDF parmak izleri AYNI. Canlıya alınması (hosting PHP, paket, göç 003, 3D barınağı) ayrı onay.
+**Mesaj katmanı (kanal v1.3), 30.09 07:54 onayı, yalnız yerel:** `docs/is_emirleri/IE-04-mesaj-katmani.md`. Ajan/Beyin, hosting PHP (`feature.php`, `api.php` v1.3), göç 003 (yalnız ekler), `motor/bayi_gorseli.py`, `motor/ifc_uret.py`, `motor/ucb_sayfa.py`. Ayar `mesaj_katmani` kapalıyken davranış v1.2 ile aynı. Testler: 343 Python + harness 22/22 + PHP çevrimdışı 44/44 + gerçek PHP hattı uçtan uca (katman kapalı 18/18, açık 21/21); referans DXF/PDF parmak izleri AYNI. Canlıya alınması (hosting PHP, paket, göç 003, 3D barınağı) ayrı onay.
+
+**Canlıya alma (Kapı M), 30.09 akşam, hazır — onay bekliyor:** `docs/is_emirleri/IE-04-canli.md`; Mac `27_Kapi_M/` (`KOMUTLAR.txt`, `yukle/`, `betikler/`). Paket `kanal-v1.3-20260930-1948` `34ae192c15a88def…` (60 dosya; canlıya göre 42 aynı, 8 değişen, 10 yeni; test adayı yok), hosting `feature.php` `47d63a67…`, `api.php` `36b62e00…`, göç 003 betiği `vps/kapi_m_goc.sh` (gerçek Postgres'te sınandı). Sıra: M0 salt okunur kontrol → M1 PHP + paket + göç, bayrak kapalı (WhatsApp davranışı v1.2 ile aynı; 2 LLM çağrısı) → M2 `mesaj_katmani: true` ve beş Patron testi (≈3 LLM çağrısı) → M3 3D barınağı kararı. Ajan tarafında isteğe bağlı paketler (matplotlib, pillow, ifcopenshell) kurulamazsa ekler üretilmez, akış durmaz. Canlıda henüz hiçbir şey değişmedi.
 
 **Günlük canlı kontrol:** `vps/canli_kontrol.sh` (salt okunur; Lokman `ssh portman-vps 'bash -s' < canli_kontrol.sh` ile koşar): servis, paket, hosting, öz-test, disk, yedekler, Postgres sayıları, günlükteki hatalar. 30.09'da sahte VPS düzeniyle sınandı; canlıda henüz koşulmadı.
 

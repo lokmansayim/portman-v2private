@@ -104,7 +104,7 @@ def test_secenek_akisi_butonla(depo, wa, hizli_motor):
     assert ekler["ifc"]["sema_hatasi"] == 0 and ekler["ifc"]["pencere"] == 6 and ekler["ifc"]["kapi"] == 5
     assert ekler["ucb"]["url"] is None                                   # barınak ayarı yok: bağlantı butonu gönderilmez
     son = [x for x in wa.gonderilen if x["id"] in {s["id"] for s in sorgu(depo, "SELECT id FROM giden WHERE mesaj_id = %s", r4["mesaj_id"])}]
-    assert [x["kind"] for x in son] == ["interactive", "document", "text"]
+    assert [x["kind"] for x in son] == ["interactive", "document"]        # 3D bağlantısı yok (ucb_taban_url ayarı yok): söz veren metin de yok
     onay = gonderilen_satir(depo, "interactive")
     no = rev["is_emri_no"]
     assert kimlikler(onay["satir"]) == sorted([f"o:{no}:1", f"r:{no}:1"])

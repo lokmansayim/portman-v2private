@@ -82,24 +82,39 @@ def maske(numara: str) -> str:
 
 # ───────────────────────── bağımlılıklar ─────────────────────────
 GEREKLI = {"shapely": "shapely", "pydantic": "pydantic", "ezdxf": "ezdxf", "fitz": "pymupdf", "numpy": "numpy"}
+# İE-04 mesaj katmanı ekleri (bayi plan görseli: matplotlib + pillow; IFC ve 3D sayfası: ifcopenshell). Kurulmaya çalışılır; kurulamazsa
+# ekler üretilmez (ekler_uret her birini ayrı dener), üretim ve öz-test DURMAZ. Sürümler yerel ortamla aynı (araclar/gereksinimler.txt).
+ISTEGE_BAGLI = {"matplotlib": "matplotlib==3.11.2", "PIL": "pillow", "ifcopenshell": "ifcopenshell==0.8.5"}
 
 
-def bagimliliklar_hazir() -> bool:
-    """Eksik paket varsa venv pip'iyle bir kez kurmayı dener (install-report.json); bu tikte üretim yapmaz."""
+def _eksik_moduller(modlar: dict) -> list[str]:
     eksik = []
-    for mod in GEREKLI:
+    for mod in modlar:
         try:
             importlib.import_module(mod)
         except Exception:
             eksik.append(mod)
-    if not eksik:
+    return eksik
+
+
+def bagimliliklar_hazir() -> bool:
+    """Eksik paket varsa venv pip'iyle kurmayı dener (en çok 3 deneme; install-report.json). Kurulum bitince aynı süreçte yeniden
+    denetler: zorunlular tamamsa True (öz-test ve üretim bu tikte sürer). İsteğe bağlılar eksik kalsa da True döner."""
+    eksik = _eksik_moduller(GEREKLI)
+    eksik_ib = _eksik_moduller(ISTEGE_BAGLI)
+    if not eksik and not eksik_ib:
         return True
     rapor_p = KANAL / "install-report.json"
     rapor = oku(rapor_p, {}) or {}
     if rapor.get("attempts", 0) >= 3:
-        log("bağımlılık eksik, kurulum 3 kez denendi; elle müdahale gerekli:", eksik)
-        return False
-    paketler = [GEREKLI[m] for m in eksik]
+        if eksik:
+            log("bağımlılık eksik, kurulum 3 kez denendi; elle müdahale gerekli:", eksik)
+            return False
+        if rapor.get("bildirildi") is not True:
+            log("isteğe bağlı paket eksik (ekler üretilmez), kurulum 3 kez denendi:", eksik_ib)
+            yaz(rapor_p, {**rapor, "bildirildi": True})
+        return True
+    paketler = [GEREKLI[m] for m in eksik] + [ISTEGE_BAGLI[m] for m in eksik_ib]
     log("eksik paket kuruluyor:", paketler)
     try:
         r = subprocess.run([sys.executable, "-m", "pip", "install", "--disable-pip-version-check", "--no-input", *paketler],
@@ -107,9 +122,16 @@ def bagimliliklar_hazir() -> bool:
         sonuc = {"returncode": r.returncode, "stdout": r.stdout[-3000:], "stderr": r.stderr[-3000:]}
     except Exception as e:
         sonuc = {"returncode": -1, "stdout": "", "stderr": str(e)[:500]}
-    rapor = {"attempts": rapor.get("attempts", 0) + 1, "at": int(time.time()), "python": sys.executable, "packages": paketler, **sonuc}
+    importlib.invalidate_caches()
+    kalan, kalan_ib = _eksik_moduller(GEREKLI), _eksik_moduller(ISTEGE_BAGLI)
+    rapor = {"attempts": rapor.get("attempts", 0) + 1, "at": int(time.time()), "python": sys.executable, "packages": paketler,
+             "kalan_zorunlu": kalan, "kalan_istege_bagli": kalan_ib, **sonuc}
     yaz(rapor_p, rapor)
-    return False
+    if kalan:
+        return False
+    if kalan_ib:
+        log("isteğe bağlı paket kurulamadı (ekler üretilmez; yeniden denenecek):", kalan_ib)
+    return True
 
 
 # ───────────────────────── sağlık ─────────────────────────
@@ -308,6 +330,10 @@ def teknik_not(karar, talep, meta: dict, cizim: dict | None) -> str:
         p.append(f"LLM {meta.get('model')} {meta.get('girdi_token')}+{meta.get('cikti_token')} token {meta.get('sure_ms')} ms" + (" (tekrar)" if meta.get("tekrar") else ""))
     if cizim:
         p.append(f"çizim {cizim.get('sure_s')} s, doğrulama {'geçti' if cizim.get('passed') else 'GEÇMEDİ'}")
+        ek = cizim.get("ekler")
+        if ek is not None:      # İE-04: aynı revizyondan türeyen ekler (görsel, IFC, 3D sayfası); üretilemeyen 'yok'
+            p.append("ekler görsel " + ("var" if ek.get("gorsel") else "yok") + ", IFC " + ("var" if ek.get("ifc") else "yok")
+                     + ", 3D " + ("bağlantı" if (ek.get("ucb") or {}).get("url") else ("sayfa" if ek.get("ucb") else "yok")))
     return "\n— teknik: " + " | ".join(p)
 
 
@@ -460,8 +486,7 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
         if ucb and ucb.get("url"):
             ekle_satir(giden_etkilesim(gelen, f"{no} r{rev:02d} planının basit 3D modeli. Tarayıcıda açılır; odalara dokunarak gezebilirsiniz.", 0,
                                        baglanti={"metin": "3D'de gez", "url": ucb["url"]}, tur="cevap", is_emri_no=no, revizyon=rev))
-        elif ucb and ucb.get("dosya"):
-            ekle(f"{no} r{rev:02d} için 3D model aynı revizyondan üretildi; bağlantısı yayınlanınca göndereceğim.")
+        # ucb_taban_url yoksa 3D sayfası yalnız kayıtta (revizyonlar.ekler) durur; bayiye söz veren bir mesaj gönderilmez (barınak kararı ayrı)
     elif butonlar:
         ekle_satir(giden_etkilesim(gelen, metin, 0, butonlar=butonlar))
     else:

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# PORTMAN · Kapı G (İE-02): canlı portman veritabanının yedeği (pg_dump -Fc). Yalnız /var/backups/portman altına YENİ bir dosya
+# PORTMAN · Kapı G (İE-02) ve sonraki kapılar (M: İE-04): canlı portman veritabanının yedeği (pg_dump -Fc). Ad: portman-<kapı>-<ne>-<tarih>. Yalnız /var/backups/portman altına YENİ bir dosya
 # yazar; var olan hiçbir yedeği silmez, üzerine yazmaz. Veritabanını değiştirmez.
 #   ssh portman-vps 'PM_AD=portman-g-oncesi-20260929 bash -s' < kapi_g_yedek.sh > 0_pg_yedek.txt
 #   scp portman-vps:/var/backups/portman/portman-g-oncesi-20260929.dump yedek/
@@ -13,7 +13,7 @@ cd /tmp
 YEDEK="${PM_YEDEK:-/var/backups/portman}"; AD="${PM_AD:-}"; DB="${PM_DB:-portman}"
 PSQL="${PM_PSQL:-sudo -u postgres psql -X -q -tA}"; PGDUMP="${PM_PGDUMP:-sudo -u postgres pg_dump}"; PGRESTORE="${PM_PGRESTORE:-sudo -u postgres pg_restore}"
 echo "== Kapı G · Postgres yedeği · betik 2026-09-29 · $(date '+%Y-%m-%d %H:%M:%S %Z')"
-[[ "$AD" =~ ^portman-g-[a-z]+-[0-9]{8}(-[0-9]+)?$ ]] || { echo "DUR: PM_AD verilmedi ya da biçimi yanlış (ör. portman-g-oncesi-20260929)"; exit 1; }
+[[ "$AD" =~ ^portman-[a-z0-9]{1,3}-[a-z]+-[0-9]{8}(-[0-9]+)?$ ]] || { echo "DUR: PM_AD verilmedi ya da biçimi yanlış (ör. portman-g-oncesi-20260929, portman-m-oncesi-20260930)"; exit 1; }
 DOSYA="$YEDEK/$AD.dump"
 [ -e "$DOSYA" ] && { echo "DUR: $DOSYA zaten var; üzerine yazılmaz (özeti $(sha256sum "$DOSYA" | cut -d' ' -f1))"; exit 1; }
 [ -d "$YEDEK" ] || { echo "DUR: $YEDEK yok (kapı D'de kurulmuştu)"; exit 1; }
