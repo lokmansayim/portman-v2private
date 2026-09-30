@@ -1,0 +1,1237 @@
+[
+  {
+    "file": "00_BURADAN_BASLA.md",
+    "bytes": 3657,
+    "sha256": "d68e84e1eae24e431011e26438f1de829a39f1c7b87852ae4e6981d56b389a8c"
+  },
+  {
+    "file": "01_KARARLAR_VE_KURAL_DURUMU.md",
+    "bytes": 4419,
+    "sha256": "612b973e74b3096bda394a86ac3d05129c9388e8a64245e6480f6e075e7126f9"
+  },
+  {
+    "file": "02_MODEL_DURUMU_VE_ACIK_FARKLAR.md",
+    "bytes": 3422,
+    "sha256": "1eaf49bb709779f4de0ac477ae17d623fbb406c737d2e87978ca36d07f3583c2"
+  },
+  {
+    "file": "CLAUDE_BASLANGIC_MESAJI.md",
+    "bytes": 1016,
+    "sha256": "e7c8397e9c83bb77a859621d84cce5b70dccecde31a80d33119039732adda106"
+  },
+  {
+    "file": "CLAUDE_IS_EMRI.md",
+    "bytes": 2595,
+    "sha256": "78410a0e8115d9a7a7c8d3c3acdac08947949e3dfa681942137ee1ba483df0dd"
+  },
+  {
+    "file": "KOD_HARITASI.md",
+    "bytes": 5121,
+    "sha256": "92c705d29e2ade71a18df1c442aecab9db37768d1841370257799b97d9dffc99"
+  },
+  {
+    "file": "KOPYA_KAYDI.json",
+    "bytes": 83226,
+    "sha256": "d7c98eaa42f25d44311cad75a4c68503d18a188edeb4763f46f4b94aeed04967"
+  },
+  {
+    "file": "ORTAM.json",
+    "bytes": 1286,
+    "sha256": "5aa21583988b8c92b6c050a221418d2f13e017a3cd3407486bcb0714347cc335"
+  },
+  {
+    "file": "YENIDEN_CALISTIRMA.md",
+    "bytes": 4775,
+    "sha256": "f061039cbb59a398386472586780da51f0899c2ce5243558caca245ee716af51"
+  },
+  {
+    "file": "devri_kontrol_et.py",
+    "bytes": 2397,
+    "sha256": "78b55a21c465e6ad4c85b4f9b92bc22fdebe6d511fd793d5da62810d8f905333"
+  },
+  {
+    "file": "durum/37_Model_Takip.md",
+    "bytes": 7400,
+    "sha256": "eca320658e962e983f69a3491c98239dc0c45c3b3075c356ee2504e93160739a"
+  },
+  {
+    "file": "durum/Onceki_Sohbet_Baglami.md",
+    "bytes": 11597,
+    "sha256": "b6095b231b2766670438ff07e84d1de2ea9da436de56debc8a67c6288c40704a"
+  },
+  {
+    "file": "durum/P9201_Ilk_Is_Emri.md",
+    "bytes": 10212,
+    "sha256": "6cd011b4c16c514c7c8376c5be2536ea870cffc7b83243d1ad1bc6e249a162aa"
+  },
+  {
+    "file": "kanit/aktarim_kontrolu/p9401_cati_qa/P9401_Cati_Kaynak_Kontrolu.md",
+    "bytes": 5036,
+    "sha256": "6f75a6fb6aeb0733d29b2f1471a01da3b790bf5be16ba509b8d1e8e7fc72213d"
+  },
+  {
+    "file": "kanit/aktarim_kontrolu/p9401_cati_qa/blend_source_check.json",
+    "bytes": 3697,
+    "sha256": "76b93c1c1c717cf574d2183e2dc9bc790be09e25475a75da96bc8be48180721f"
+  },
+  {
+    "file": "kanit/aktarim_kontrolu/p9401_cati_qa/source_geometry.json",
+    "bytes": 136034,
+    "sha256": "c7bd6935c824fe0596af5edf9f65daf6c5eb7475817f24c4294a85975ac9d105"
+  },
+  {
+    "file": "kanit/aktarim_kontrolu/roof_qa/P9201_world_check.json",
+    "bytes": 226,
+    "sha256": "9b117fe58c27a6658ffca463f94641cb17f0a6bd9ae63691743d2a237ccd96d0"
+  },
+  {
+    "file": "kanit/aktarim_kontrolu/roof_qa/P9401_world_check.json",
+    "bytes": 224,
+    "sha256": "56d3a1027c3e30e4c9d556463dfd7323874ecb588565dd7fbc68dd9ff8f01ce4"
+  },
+  {
+    "file": "kanit/aktarim_kontrolu/roof_qa/P9501_world_check.json",
+    "bytes": 226,
+    "sha256": "10eb515c29f3a8d9dc9807485cbf431ae4034cd7e7b526084c1d5f83f361b807"
+  },
+  {
+    "file": "kanit/aktarim_kontrolu/roof_qa/blend_matrix_differences.json",
+    "bytes": 38681,
+    "sha256": "3802f89f3e45998d93da37425ebc280242273b723c1fa43315a53d7156f06d8b"
+  },
+  {
+    "file": "kanit/aktarim_kontrolu/roof_qa/face_materials.json",
+    "bytes": 782398,
+    "sha256": "2f712479e3de2c631d27ca4d316916c28586430f0c9558e984c10c759dc1e373"
+  },
+  {
+    "file": "kanit/aktarim_kontrolu/roof_qa/homogeneous_api_check.json",
+    "bytes": 38326,
+    "sha256": "6cf72074dfe31baea02defd176a7d5a6ba4924b1702ca15040d683e2f40038a5"
+  },
+  {
+    "file": "kanit/son_kosular/P9501_ifc_final.log",
+    "bytes": 879,
+    "sha256": "9fe4592cd79ee73a85390e2047d712a18855a6dcb014ed8d859834337173c14a"
+  },
+  {
+    "file": "kanit/son_kosular/cati_ifc.log",
+    "bytes": 2136,
+    "sha256": "25c005075657bbb52125cbb1a1b34295758f1e88ac0c9221ea76ad10c5b2e43a"
+  },
+  {
+    "file": "kanit/son_kosular/cati_ifc_D.log",
+    "bytes": 912,
+    "sha256": "2514e8862e6e4facf5932b7454e3ead0db762529db70378f839164e725f58cb3"
+  },
+  {
+    "file": "kanit/son_kosular/cati_verify_ifc.log",
+    "bytes": 556,
+    "sha256": "5823318461ff410ebad19e77e2730a5896173853853c95e1d902d8f0a0ea4181"
+  },
+  {
+    "file": "kanit/son_kosular/verify_saved_final.log",
+    "bytes": 556,
+    "sha256": "43386f9c1532644a8221e08f8b8c8984837ecec51c6220e9ff9369e80a08a458"
+  },
+  {
+    "file": "kaynaklar/eski_motor_r01/P9201/Portman_PM-KATALOG-P9201_r01.dxf",
+    "bytes": 1120829,
+    "sha256": "1d031a89de4e3d3af3d98ea0c67605a6cc763103d0d16d59e98aa26796e46fd0"
+  },
+  {
+    "file": "kaynaklar/eski_motor_r01/P9201/Portman_PM-KATALOG-P9201_r01.pdf",
+    "bytes": 873540,
+    "sha256": "b8e3479064caa00890e8ea012bdf7281bed987d3a5a5a3379fbe302fd1b4e45a"
+  },
+  {
+    "file": "kaynaklar/eski_motor_r01/P9201/bom.csv",
+    "bytes": 2510,
+    "sha256": "9e84b9b983dce50a8d4867061be0712a9e40ffdb093a61d3eee6993ecfa86c80"
+  },
+  {
+    "file": "kaynaklar/eski_motor_r01/P9201/bom.json",
+    "bytes": 7123,
+    "sha256": "22a46240707e4ac4cfe6e4449721b25423b565a41b4bc73ad4bf79f7fb4cf2d7"
+  },
+  {
+    "file": "kaynaklar/eski_motor_r01/P9201/extraction.json",
+    "bytes": 7439,
+    "sha256": "3539c1234fe6738676b25433eb5c02f9b3ccfe2299165ab35b099aa9ef3cff45"
+  },
+  {
+    "file": "kaynaklar/eski_motor_r01/P9201/is_emri.json",
+    "bytes": 4212,
+    "sha256": "c2bf6f356c99596f4bf4cf1c3750bf9955fd2b3a5553de0c95fd03f5187f4353"
+  },
+  {
+    "file": "kaynaklar/eski_motor_r01/P9201/malzeme_katalogu.guncel.json",
+    "bytes": 9658,
+    "sha256": "350e55f89b8a7d796bce171692c84a39a45e86946f8abc4adf6f482752b23ab2"
+  },
+  {
+    "file": "kaynaklar/eski_motor_r01/P9201/manifest.json",
+    "bytes": 1005,
+    "sha256": "dec85de9de3f422d36641a9a03c3160523405b97a995eeeac8c7b5c11f2d97cc"
+  },
+  {
+    "file": "kaynaklar/eski_motor_r01/P9201/preview.png",
+    "bytes": 349582,
+    "sha256": "2fdf20c68457506b2218a9daef3014a92d047ce43d0c5d90d67b2ff73a1d18a9"
+  },
+  {
+    "file": "kaynaklar/eski_motor_r01/P9201/validation.json",
+    "bytes": 3120,
+    "sha256": "db3674d6bf2cfb7811b27f1b421a128842cab2deb5adbbb8b087e4032303071e"
+  },
+  {
+    "file": "kaynaklar/eski_motor_r01/P9401/Portman_PM-KATALOG-P9401_r01.dxf",
+    "bytes": 1109327,
+    "sha256": "7ef620a1f2b7dcbdb07be04eb6926b70d57831d707106e50d0efc6543e111934"
+  },
+  {
+    "file": "kaynaklar/eski_motor_r01/P9401/Portman_PM-KATALOG-P9401_r01.pdf",
+    "bytes": 844346,
+    "sha256": "f62e2fef05aa6e6fd30bea8d3f80698f5bd68b4303bcf5aa4d50d8f96ca17468"
+  },
+  {
+    "file": "kaynaklar/eski_motor_r01/P9401/bom.csv",
+    "bytes": 2587,
+    "sha256": "6ec1e99556ca2ba4e91e6d52288bf22188646f4f26a2d209331da6299953bb25"
+  },
+  {
+    "file": "kaynaklar/eski_motor_r01/P9401/bom.json",
+    "bytes": 7484,
+    "sha256": "ecb1b51f38fafa56699098c7d075dbc7d1089d9cd7ac4bfe49edb0afa5621f74"
+  },
+  {
+    "file": "kaynaklar/eski_motor_r01/P9401/extraction.json",
+    "bytes": 7875,
+    "sha256": "9419df09cde1c8b7b5f93602bad6d488b5e72f75b2c0fe6ffebc61cf801d2eb1"
+  },
+  {
+    "file": "kaynaklar/eski_motor_r01/P9401/is_emri.json",
+    "bytes": 4085,
+    "sha256": "9ff0892b140d4e2560d9f05004b375f099017f02dabf01891760bd388ac931e0"
+  },
+  {
+    "file": "kaynaklar/eski_motor_r01/P9401/malzeme_katalogu.guncel.json",
+    "bytes": 9951,
+    "sha256": "b70c2097e64825175574c56d596d8e266159f952767869cfb6c6aaca17f16f9d"
+  },
+  {
+    "file": "kaynaklar/eski_motor_r01/P9401/manifest.json",
+    "bytes": 1016,
+    "sha256": "7b7b649d46df09b659309157fba4b22012653865699aaa6e67273ee390792fca"
+  },
+  {
+    "file": "kaynaklar/eski_motor_r01/P9401/preview.png",
+    "bytes": 310322,
+    "sha256": "ae9fafbbab4433011c9909178c6173fc6b3fe8107ebd89c11220c1f2b73167d8"
+  },
+  {
+    "file": "kaynaklar/eski_motor_r01/P9401/validation.json",
+    "bytes": 3278,
+    "sha256": "f66f848b38cf0fdfcbd34988afc2a4a2244659e0afa3f24c74fbbfa3ae9e1153"
+  },
+  {
+    "file": "kaynaklar/eski_motor_r01/P9501/Portman_PM-KATALOG-P9501_r01.dxf",
+    "bytes": 1096160,
+    "sha256": "fa906c76716cf9b1df703eee950d5bdb6e2bae654b9d074aeb70dba3fa6d506a"
+  },
+  {
+    "file": "kaynaklar/eski_motor_r01/P9501/Portman_PM-KATALOG-P9501_r01.pdf",
+    "bytes": 807514,
+    "sha256": "37effb874d70f11c6c550f2c57a6586fd1a51608da4347d5fd5772d5055f9b49"
+  },
+  {
+    "file": "kaynaklar/eski_motor_r01/P9501/bom.csv",
+    "bytes": 2455,
+    "sha256": "e06df77267177c960a148d1dd8bfc951b5b78961a02eb291fb87581b10c0950b"
+  },
+  {
+    "file": "kaynaklar/eski_motor_r01/P9501/bom.json",
+    "bytes": 7187,
+    "sha256": "43a465335efe209f91bc7ccd6e7106e3bfe727472d76ca5f9aeaed52fcffa990"
+  },
+  {
+    "file": "kaynaklar/eski_motor_r01/P9501/extraction.json",
+    "bytes": 11425,
+    "sha256": "c2930f684cbed9313c4fc355718b7737f717dbf43f160c06301e1f0d317bc09d"
+  },
+  {
+    "file": "kaynaklar/eski_motor_r01/P9501/is_emri.json",
+    "bytes": 6289,
+    "sha256": "3dd42ad467ce10c4da3c211d9808388d03370902576a02f2bafb5ac98bc21a87"
+  },
+  {
+    "file": "kaynaklar/eski_motor_r01/P9501/malzeme_katalogu.guncel.json",
+    "bytes": 9961,
+    "sha256": "8dadc22ec186d4f59fca9c9f589911d0a65b1565ad0cf0def22eb59684606d14"
+  },
+  {
+    "file": "kaynaklar/eski_motor_r01/P9501/manifest.json",
+    "bytes": 1016,
+    "sha256": "d79aeaa1e596fee3c9baf630f6654bb5acffe8e0f4061c97b8205e96295db642"
+  },
+  {
+    "file": "kaynaklar/eski_motor_r01/P9501/preview.png",
+    "bytes": 327414,
+    "sha256": "80582bb3a82dba42febe5731ec6ac010eec74a41901e32141dc1cb6b013fa457"
+  },
+  {
+    "file": "kaynaklar/eski_motor_r01/P9501/validation.json",
+    "bytes": 2581,
+    "sha256": "fdcc3235fa78e4499dcd9fdf018915b77f5f5d56f479be7ff7459c03760f826c"
+  },
+  {
+    "file": "kaynaklar/uc_model/Kaynak_Kaydi.json",
+    "bytes": 7338,
+    "sha256": "9c1bcd9d00fe6c6731c05454283c0462a38a8e801ebe966334327da3185edc70"
+  },
+  {
+    "file": "kaynaklar/uc_model/Kaynaklari_Ac.md",
+    "bytes": 2136,
+    "sha256": "38ea2f4e08434cb6a3be5b1d28ff120c0a161003217d5fd7e797b4ad46286a2a"
+  },
+  {
+    "file": "kaynaklar/uc_model/Ortak/TEK_KAT_PREFABRIK_PLANLARI.dwg",
+    "bytes": 807490,
+    "sha256": "f4a55a73e4f46ed91f0ad86963b3b07cdc34e41b3f07bd4b9e5cddc7a229b0d8"
+  },
+  {
+    "file": "kaynaklar/uc_model/P9201/92 M2 PEYZAJLI.skp",
+    "bytes": 7675039,
+    "sha256": "31fc08e97bbeee8483cbca308e0648bb10e87d96b187d3bd9ff9e07b214777fc"
+  },
+  {
+    "file": "kaynaklar/uc_model/P9201/PS-1092.jpg",
+    "bytes": 407015,
+    "sha256": "00721a420fabf42f97fd1b2091f25084f553e7e43d2742a3d3ee771f1102c8cb"
+  },
+  {
+    "file": "kaynaklar/uc_model/P9201/p9201_1_1 - Photo.jpg",
+    "bytes": 6335749,
+    "sha256": "a1a5f0475dd1aaba41b301c53df1923cb27bed849913dd27b7c31d57a1e4c1a5"
+  },
+  {
+    "file": "kaynaklar/uc_model/P9201/p9201__1 - Photo.jpg",
+    "bytes": 6234898,
+    "sha256": "ec3af28922be8f89249ac809af55706192fbed6b05aafb9e5a980322f73567be"
+  },
+  {
+    "file": "kaynaklar/uc_model/P9201/p9201__2 - Photo.jpg",
+    "bytes": 6280606,
+    "sha256": "1fde0811bd5f866ce95bbc6f89b256a19efb9ffd8b99b67144f38cc7fd3195aa"
+  },
+  {
+    "file": "kaynaklar/uc_model/P9201/p9201__3 - Photo.jpg",
+    "bytes": 4875775,
+    "sha256": "dcb0a4d88555e75dbfe1126ec50f6ffc29c16ac6dfd46f7bfa2eba6d655cd4c2"
+  },
+  {
+    "file": "kaynaklar/uc_model/P9401/9401.skp",
+    "bytes": 10156587,
+    "sha256": "57ea5920c5d6a7345b576575aa9e276dd1774e9f90c6fda5e7605b9ac808bc44"
+  },
+  {
+    "file": "kaynaklar/uc_model/P9401/9401__1 - Photo_1 - Photo.jpg",
+    "bytes": 6352954,
+    "sha256": "116acfe358906ca0a4d60df46bd58bc1987a6002cc5d05a655e34d8e6f718b57"
+  },
+  {
+    "file": "kaynaklar/uc_model/P9401/9401__1 - Photo_2 - Photo.jpg",
+    "bytes": 6511005,
+    "sha256": "5f2b4a7e5c039424f1affc5298641b96648aacd074d867fda4e1309da3bc312e"
+  },
+  {
+    "file": "kaynaklar/uc_model/P9401/9401__1 - Photo_3 - Photo.jpg",
+    "bytes": 6981627,
+    "sha256": "3440b3dbce4869a43d2d3d7c601257cd9d08c336f6ae15748ca474a76d641480"
+  },
+  {
+    "file": "kaynaklar/uc_model/P9401/PS-1094.jpg",
+    "bytes": 2517256,
+    "sha256": "d30ff88e1a570d5c4a0be0b0aac40a2fecf34fbaccf47919f74863d0353115d1"
+  },
+  {
+    "file": "kaynaklar/uc_model/P9501/1095_1_1 - Photo.jpg",
+    "bytes": 6605456,
+    "sha256": "7d47a03d6dc6fa186e985a8dd6380c4c7e3446ab7b7c535ab02c3076aa716f53"
+  },
+  {
+    "file": "kaynaklar/uc_model/P9501/1095_1_2 - Photo.jpg",
+    "bytes": 6633540,
+    "sha256": "2432706e81a8767a0e16e7af3fce1a71b9e4002bb8e70bb55fd6d205f2ae2c46"
+  },
+  {
+    "file": "kaynaklar/uc_model/P9501/1095_1_3.jpg",
+    "bytes": 6431673,
+    "sha256": "8e35a3576296c4ef773ea7e14676040ecbce2d6ca2be16455e74fa18aa5c22f9"
+  },
+  {
+    "file": "kaynaklar/uc_model/P9501/AMASRA SKP.skp",
+    "bytes": 3323246,
+    "sha256": "395085dc28338e2df78d40404b88958e04f7467d86eaca34c6e51b07f57dc109"
+  },
+  {
+    "file": "kaynaklar/uc_model/P9501/PS-1095.jpg",
+    "bytes": 497313,
+    "sha256": "3f0495ddc06fdf565256f493428a6274eca3fbc307e80783dd444ef254802688"
+  },
+  {
+    "file": "kaynaklar/video_onizleme/14.02.37_sheet.jpg",
+    "bytes": 123595,
+    "sha256": "af79f442a2302a7d59aafa336ce35f69b027d23cd79faca44666621e221ce9c5"
+  },
+  {
+    "file": "kaynaklar/video_onizleme/14.02.47_sheet.jpg",
+    "bytes": 99221,
+    "sha256": "00f337dd8b424311a8eb17ec627181a93e9527d1eb92b8eb1e64e0eb817b56e6"
+  },
+  {
+    "file": "kaynaklar/video_onizleme/14.07.27_sheet.jpg",
+    "bytes": 118097,
+    "sha256": "7e8475e8278ecb7fdda45fdebe26b807c30b76821ef1c6ff99c4aa31ccd3428c"
+  },
+  {
+    "file": "kaynaklar/video_onizleme/14.07.55_sheet.jpg",
+    "bytes": 121544,
+    "sha256": "f373dcc47b9924421f6d0993cf9c89e41fe09c84d540329082841ff88a7ad7bb"
+  },
+  {
+    "file": "kaynaklar/video_onizleme/14.08.49_sheet.jpg",
+    "bytes": 123555,
+    "sha256": "0e9cae6a87fb6c56f598b106fddb2519ec22322907a5313cb0deb7f4fdfd04d7"
+  },
+  {
+    "file": "kaynaklar/video_onizleme/14.10.19_sheet.jpg",
+    "bytes": 128617,
+    "sha256": "3bcf20091b78e655cd0ffd445d42666c4da05bd43612d3dc2e0d26ff4309b4cf"
+  },
+  {
+    "file": "kaynaklar/videolar/WhatsApp Video 2026-09-29 at 14.02.37.mp4",
+    "bytes": 4756905,
+    "sha256": "a41f794df17204ffa79554b0ba03dd7105dc763d54e60668a60ef844e1b4f37f"
+  },
+  {
+    "file": "kaynaklar/videolar/WhatsApp Video 2026-09-29 at 14.02.47.mp4",
+    "bytes": 9171595,
+    "sha256": "b2b3a9177c416ab4b57671f538a4e12f8d743cdecf64a5d81e6ef53a09c53103"
+  },
+  {
+    "file": "kaynaklar/videolar/WhatsApp Video 2026-09-29 at 14.07.27.mp4",
+    "bytes": 4056578,
+    "sha256": "d7ded2d75d558aaddcc486fa32d48371d3dc6f08232ef750dce31c04a6f3f26b"
+  },
+  {
+    "file": "kaynaklar/videolar/WhatsApp Video 2026-09-29 at 14.07.55.mp4",
+    "bytes": 6453154,
+    "sha256": "f0c6b2e7ce8032d95e4184063f2665f1dd6b834cb35cd19c2a6d6f348aa21502"
+  },
+  {
+    "file": "kaynaklar/videolar/WhatsApp Video 2026-09-29 at 14.08.49.mp4",
+    "bytes": 10713069,
+    "sha256": "c93d9e4a59bf9cfdf45f8d2181f84779e1c97b9455c11109218277537a96af0d"
+  },
+  {
+    "file": "kaynaklar/videolar/WhatsApp Video 2026-09-29 at 14.10.19.mp4",
+    "bytes": 9951374,
+    "sha256": "58613abb8132cc9f40376ade348d5e956364f6a276c441c238056f90c10602f6"
+  },
+  {
+    "file": "kod_arsivi/p9401_cati/contact.py",
+    "bytes": 933,
+    "sha256": "a28a820e2ed177d0cc0bd31a4c3b321ff454b10a8588464d8761ad1cd0a7454b"
+  },
+  {
+    "file": "kod_arsivi/p9401_cati/create_variants.py",
+    "bytes": 7082,
+    "sha256": "5684f20c32bf9d537f3dcbb2373b698210b72aff20ae1f7bd97f539cddc4f4bb"
+  },
+  {
+    "file": "kod_arsivi/p9401_cati/export_variants.py",
+    "bytes": 1244,
+    "sha256": "8309210cd81fc933c96a8a7c9e0ec34ae3b5b8e55c022024ad1c21ee8dde3fd4"
+  },
+  {
+    "file": "kod_arsivi/p9401_cati/render_variants.py",
+    "bytes": 3721,
+    "sha256": "2befc3ad4c3da2f63f367c102d2d779928da49536d1a741bd956504cabd09c12"
+  },
+  {
+    "file": "kod_arsivi/p9401_cati/test_viewer.cjs",
+    "bytes": 2129,
+    "sha256": "27ca1b131ce9bbd87380a54c50743e23aa07ee85706490e24cc1cc08c3fa2ddf"
+  },
+  {
+    "file": "kod_arsivi/p9401_cati/verify_ifc.py",
+    "bytes": 1857,
+    "sha256": "6a09833e19e6bcc62d0d5a0a18b1117d6b593229b9c7bc1c4c7a1c6bf3f84423"
+  },
+  {
+    "file": "kod_arsivi/p9401_cati_qa/check_saved_blend.py",
+    "bytes": 996,
+    "sha256": "59da6df4c56a12cccb1946b648ff9b42a5d6ae886cc31337a3f14d879557186b"
+  },
+  {
+    "file": "kod_arsivi/p9401_cati_qa/inspect_roof.py",
+    "bytes": 1518,
+    "sha256": "dec31950cd9662d5c4961c6b43afb81dc34b7f417467aa4b2583c135784bf8a9"
+  },
+  {
+    "file": "kod_arsivi/roof_qa/check_blend.py",
+    "bytes": 1062,
+    "sha256": "843b53be4f29cdf1552905b81099c83f6edbc2fb479b52e7170006af7a742bd8"
+  },
+  {
+    "file": "kod_arsivi/roof_qa/check_homogeneous.py",
+    "bytes": 2176,
+    "sha256": "879e398fa565ef9671b1b5d9c271d3d6c6216f16516523cc750c78a933d62555"
+  },
+  {
+    "file": "kod_arsivi/roof_qa/check_materials.py",
+    "bytes": 1909,
+    "sha256": "a0f888ec98c319a1636e124c8e5eb563352b5fc77f9cf2cdb9bd734051a7dca2"
+  },
+  {
+    "file": "kod_arsivi/roof_qa/check_overlap.py",
+    "bytes": 2084,
+    "sha256": "c7e1a147da508ab75c4c06b46c1ca57c23730070cfd04f06df0cd4fd6d9eb2a9"
+  },
+  {
+    "file": "kod_arsivi/roof_qa/verify_world.py",
+    "bytes": 1437,
+    "sha256": "a3536bb4ef862b5b4bdafa44d8cde0a6d9e70931e5d3216473c8516411c1ed13"
+  },
+  {
+    "file": "kod_arsivi/skp_import/correct_blend_transforms.py",
+    "bytes": 2124,
+    "sha256": "85def983789cc353981f7f052c61a3040e4424bb6862977848dad291988a2fa4"
+  },
+  {
+    "file": "kod_arsivi/skp_import/cut_preview.py",
+    "bytes": 1175,
+    "sha256": "b6efaaac5ecbf2afaf186dc274676fd62e0f38c2376695375629ba93ff06d9f5"
+  },
+  {
+    "file": "kod_arsivi/skp_import/export_ifc.py",
+    "bytes": 7027,
+    "sha256": "26f8d615619e9457b9e1a5984f83548e9c55d66c72590446a705d4641a0181cd"
+  },
+  {
+    "file": "kod_arsivi/skp_import/final_ui_checks.cjs",
+    "bytes": 2218,
+    "sha256": "6c6e853eed11d771c19b1639b322531a5fd4160065584a25726b0648a63cf0d0"
+  },
+  {
+    "file": "kod_arsivi/skp_import/finalize_blend.py",
+    "bytes": 2658,
+    "sha256": "164270aba28754570427586990179da85c14f5410bb2b413b83ac1924ff2df58"
+  },
+  {
+    "file": "kod_arsivi/skp_import/make_blend.py",
+    "bytes": 3524,
+    "sha256": "63c1f9e0714b1ba18f0bfaf3f208435859dd1601425afbc5318efd1caedc75c9"
+  },
+  {
+    "file": "kod_arsivi/skp_import/normalize_world.py",
+    "bytes": 943,
+    "sha256": "4ecae9374cc391d764db7062a73d097ddf81e73722d189ca2cc80376bd161aa5"
+  },
+  {
+    "file": "kod_arsivi/skp_import/package_delivery.py",
+    "bytes": 2118,
+    "sha256": "1af16bd99c83dc89621900b802d3814c9a8bf5e3c5aa777536bc6534907a76e3"
+  },
+  {
+    "file": "kod_arsivi/skp_import/prepare_delivery.py",
+    "bytes": 5022,
+    "sha256": "0406f61da80b0cb4e08c77d118b643619731054a287a4d3b2c974b7ddd5c97bd"
+  },
+  {
+    "file": "kod_arsivi/skp_import/prepare_viewer_data.py",
+    "bytes": 3305,
+    "sha256": "00d03708bdaf1f4632ecdc82af6761a2c9ee241e343433f54fa466181ef1fb46"
+  },
+  {
+    "file": "kod_arsivi/skp_import/read_skp.py",
+    "bytes": 8227,
+    "sha256": "0198732e04ce9ffdcc43a6488ebf0b75e35c4c921adc74e5350bea11eba34c35"
+  },
+  {
+    "file": "kod_arsivi/skp_import/test_mobile.cjs",
+    "bytes": 897,
+    "sha256": "2a66f226bb45f8bf4613980f7ec88bdb1c44cc05ff8ca855efb005ecc7e6b9a1"
+  },
+  {
+    "file": "kod_arsivi/skp_import/test_viewer.cjs",
+    "bytes": 1870,
+    "sha256": "5dbf8004cb940a846629ec326bfc919cb28e5922f834aecc7ae9d2b66879ddcd"
+  },
+  {
+    "file": "kod_arsivi/skp_import/verify_saved.py",
+    "bytes": 1840,
+    "sha256": "5afe38828daa751970a65fa3a8edba124d21dc5b48b21ce4bc1ec044b1e4b7a5"
+  },
+  {
+    "file": "kod_arsivi/video_inceleme/extract.swift",
+    "bytes": 1226,
+    "sha256": "7c0c3b061020d042a108e0e587ceba97aae1464733f6058511831472ad4d757d"
+  },
+  {
+    "file": "kod_arsivi/video_inceleme/prepare_sources.py",
+    "bytes": 3532,
+    "sha256": "868889a6804d799c26cb3945c2b79b489168435d8a1ee9d186a15311dcff74fb"
+  },
+  {
+    "file": "kurallar/depo_okuma_2026-09-30/DURUM.md",
+    "bytes": 18309,
+    "sha256": "d16aa46ca1c429a367103c38b85908f3ab773984fe139b2bd1c04779548c2d4f"
+  },
+  {
+    "file": "kurallar/depo_okuma_2026-09-30/KARARLAR/K02.md",
+    "bytes": 893,
+    "sha256": "cc16e68a048383717b45943dc1c9aeef364b894c41afaea862d260777a20f027"
+  },
+  {
+    "file": "kurallar/depo_okuma_2026-09-30/KARARLAR/K04.md",
+    "bytes": 752,
+    "sha256": "7daf70adb2efc0249351f20b7daaeb7da22bdd4641b490114832c07bdb1b0482"
+  },
+  {
+    "file": "kurallar/depo_okuma_2026-09-30/KARARLAR/K16.md",
+    "bytes": 1017,
+    "sha256": "c6a7cc3d71ae8a16558c63517829438f6a196be5be47c33df92ce36f14ba0172"
+  },
+  {
+    "file": "kurallar/depo_okuma_2026-09-30/KARARLAR/README.md",
+    "bytes": 9050,
+    "sha256": "67481de7ce3a4a7c171f905942ca396b8e3b56feeb79335525ebb1ab31a1562c"
+  },
+  {
+    "file": "kurallar/depo_okuma_2026-09-30/OKUMA_KAYDI.json",
+    "bytes": 1366,
+    "sha256": "2d6531db387332ae4f9207127c59ab0b8d5f0740e1e35e464883771f8b6819b3"
+  },
+  {
+    "file": "kurallar/depo_okuma_2026-09-30/beyin/veri/katalog_37_proje.json",
+    "bytes": 14854,
+    "sha256": "d3e8a755448acf28d6cad36d2bd4a42c85a662787d39918167a89f8ab7326876"
+  },
+  {
+    "file": "kurallar/yerel_2026-09-07/BLENDER_CIZIM_KURALLARI.md",
+    "bytes": 5849,
+    "sha256": "21627106709014e35855eff2e682bd0bf5dcde3431b456df921be298a3fbd792"
+  },
+  {
+    "file": "kurallar/yerel_2026-09-07/BLENDER_KURALLAR.json",
+    "bytes": 6727,
+    "sha256": "66c147f5c56d56e476871b4206ff069de2af7fbdc2e8329a2d3857a178b253d4"
+  },
+  {
+    "file": "kurallar/yerel_2026-09-07/CIZIM_VE_BOM_IS_AKISI.md",
+    "bytes": 14432,
+    "sha256": "3152d2cbfe66fb0fedfe95203ee986f7b177caf334be3b5308fb5ef8a02289bb"
+  },
+  {
+    "file": "kurallar/yerel_2026-09-07/KURALLAR.json",
+    "bytes": 79330,
+    "sha256": "567b0f6964eacc1deeacd08589ebc8427424dcf595908912fc30d19c1980d757"
+  },
+  {
+    "file": "kurallar/yerel_2026-09-07/MALZEME_KATALOGU.json",
+    "bytes": 8943,
+    "sha256": "8de0e995a3ee511d344bfb5c7094307ea13fe3b48fe32cc7c584acca67a4f9a0"
+  },
+  {
+    "file": "kurallar/yerel_2026-09-07/prefabrik-cizim-kurallari.md",
+    "bytes": 49300,
+    "sha256": "5fb4e5299b401226678b40d69eb0193c725bc677acea32c1264b9a61ef3d9d14"
+  },
+  {
+    "file": "teslimler/P9401_Cati_Alternatifleri/A/P9401_Cati_A.blend",
+    "bytes": 10379134,
+    "sha256": "705aa2a4b47c95f1b12515ed0d0a982a6821f7667ac5510917f922b119ca3be1"
+  },
+  {
+    "file": "teslimler/P9401_Cati_Alternatifleri/A/P9401_Cati_A.ifc",
+    "bytes": 7166587,
+    "sha256": "89e851681c11c033df62cf0cf954f38b0a6825138b3d13f86854f968d57641f0"
+  },
+  {
+    "file": "teslimler/P9401_Cati_Alternatifleri/A/dis_gorunus.png",
+    "bytes": 1695532,
+    "sha256": "261ebca0ae15369af52b35e60b548648b002bd4c5a0f8f1b9419acde1107793b"
+  },
+  {
+    "file": "teslimler/P9401_Cati_Alternatifleri/A/govde_kontrol.json",
+    "bytes": 152,
+    "sha256": "589a1475ecbb357047912164906714347f96500792c14b417e5700be4b4e410b"
+  },
+  {
+    "file": "teslimler/P9401_Cati_Alternatifleri/A/ifc_kontrol.json",
+    "bytes": 767,
+    "sha256": "207ae8b2e725dfd684d387c17d7886a03115aab7b5e86f0c715debb28e6ad2cc"
+  },
+  {
+    "file": "teslimler/P9401_Cati_Alternatifleri/B/P9401_Cati_B.blend",
+    "bytes": 10381538,
+    "sha256": "0315c9b897fe6b250fadc6c622f5f9362b3a2e85a2dc6a6bbb407e33fd3a48a9"
+  },
+  {
+    "file": "teslimler/P9401_Cati_Alternatifleri/B/P9401_Cati_B.ifc",
+    "bytes": 7158592,
+    "sha256": "666cdc6a730a526dddc8a4107af81693f1a5a2373b97f8888f10bad6133d0a42"
+  },
+  {
+    "file": "teslimler/P9401_Cati_Alternatifleri/B/dis_gorunus.png",
+    "bytes": 1672352,
+    "sha256": "e0555841c0df1a9723b884563a93229f0ab017a561b988f0f6a09a417adfe3a6"
+  },
+  {
+    "file": "teslimler/P9401_Cati_Alternatifleri/B/govde_kontrol.json",
+    "bytes": 152,
+    "sha256": "69ec5bf5fbd395c4b7580c58e77c6c6f697310ccd13844420dc5af15f396396c"
+  },
+  {
+    "file": "teslimler/P9401_Cati_Alternatifleri/B/ifc_kontrol.json",
+    "bytes": 767,
+    "sha256": "29cc6b9fcdfa0d872c31e8d4616670caedc172c650b4b14ed72cf3da4dd6a792"
+  },
+  {
+    "file": "teslimler/P9401_Cati_Alternatifleri/C/P9401_Cati_C.blend",
+    "bytes": 10386847,
+    "sha256": "fe675f988057cd2900340b56494a1939709a51d5e0c472a0c5b0d2299c347792"
+  },
+  {
+    "file": "teslimler/P9401_Cati_Alternatifleri/C/P9401_Cati_C.ifc",
+    "bytes": 7170887,
+    "sha256": "0b37e677f3e2069dc7a67743234fce689a017f4ee72ee9a2fea4bc3ba0943137"
+  },
+  {
+    "file": "teslimler/P9401_Cati_Alternatifleri/C/dis_gorunus.png",
+    "bytes": 1684076,
+    "sha256": "c32d127801635049b2664fd09153c23e318324e9de5cc6bd36da47fd77653214"
+  },
+  {
+    "file": "teslimler/P9401_Cati_Alternatifleri/C/govde_kontrol.json",
+    "bytes": 152,
+    "sha256": "3e50eced70e0d10467f45ccfa6fc855fa91904a970c5358ca9d98e72a5c9e17a"
+  },
+  {
+    "file": "teslimler/P9401_Cati_Alternatifleri/C/ifc_kontrol.json",
+    "bytes": 767,
+    "sha256": "3b17ba55660cb334e62b0d9118f7b37b341b34895721ca7113bd3d9c4efe59c9"
+  },
+  {
+    "file": "teslimler/P9401_Cati_Alternatifleri/D/P9401_Cati_D.blend",
+    "bytes": 10379763,
+    "sha256": "5a2ff3c76dbc807a26799b414a594be56b78e310b2c9d73ba1559be53c32bece"
+  },
+  {
+    "file": "teslimler/P9401_Cati_Alternatifleri/D/P9401_Cati_D.ifc",
+    "bytes": 7165180,
+    "sha256": "01732989aaf549d253542305c247267d2aecdcb2223e087fc063a5660cc0c971"
+  },
+  {
+    "file": "teslimler/P9401_Cati_Alternatifleri/D/dis_gorunus.png",
+    "bytes": 1716235,
+    "sha256": "9342526fa72650618cf362d94c980763d52265c9aadbea3b09efa486860259b7"
+  },
+  {
+    "file": "teslimler/P9401_Cati_Alternatifleri/D/govde_kontrol.json",
+    "bytes": 152,
+    "sha256": "98490ca0eb78f7c5ca6818b7ad7839a4bc60b22ada528d1bb9d9b2e5df7beaa5"
+  },
+  {
+    "file": "teslimler/P9401_Cati_Alternatifleri/D/ifc_kontrol.json",
+    "bytes": 767,
+    "sha256": "d53c873eda7f15604fb12f0b716e2dc6d79156d5add5761ff3415fb68f615f2c"
+  },
+  {
+    "file": "teslimler/P9401_Cati_Alternatifleri/Incele.html",
+    "bytes": 13898,
+    "sha256": "7c1ccc3fbdd2f5552e7e7c3127ffba77e27478b902bbdf987d42d89939ffa8d5"
+  },
+  {
+    "file": "teslimler/P9401_Cati_Alternatifleri/Kaynak_Cati_Kontrolu.md",
+    "bytes": 5036,
+    "sha256": "6f75a6fb6aeb0733d29b2f1471a01da3b790bf5be16ba509b8d1e8e7fc72213d"
+  },
+  {
+    "file": "teslimler/P9401_Cati_Alternatifleri/OKU.md",
+    "bytes": 5238,
+    "sha256": "d4508f2b956dd7945e3101c936cd47cba5e35bfc8d657b4722ca6261eee5ad64"
+  },
+  {
+    "file": "teslimler/P9401_Cati_Alternatifleri/P9401_Dort_Cati.jpg",
+    "bytes": 261524,
+    "sha256": "91a493d3443d288aab795ed0b5f4632d71c436ef3be5ebafe56cd289d4f1f32d"
+  },
+  {
+    "file": "teslimler/P9401_Cati_Alternatifleri/Tasarim_Kaydi.json",
+    "bytes": 3520,
+    "sha256": "6fac042672397b3aefc979fedba0e0b3122b7508f842522d449a44b4541db450"
+  },
+  {
+    "file": "teslimler/P9401_Cati_Alternatifleri/kaynak_model.js",
+    "bytes": 8434754,
+    "sha256": "ea0f711dd443b42bf406a6e72e797757be545cb6329b0d6232562c2b2deff594"
+  },
+  {
+    "file": "teslimler/P9401_Cati_Alternatifleri/kaynak_plan.jpg",
+    "bytes": 2517256,
+    "sha256": "d30ff88e1a570d5c4a0be0b0aac40a2fecf34fbaccf47919f74863d0353115d1"
+  },
+  {
+    "file": "teslimler/P9401_Cati_Alternatifleri/secenekler.js",
+    "bytes": 15437,
+    "sha256": "a347463624a637033da98820239b3a47324dcd422b5b740a76bb3c822d3e115b"
+  },
+  {
+    "file": "teslimler/P9401_Cati_Alternatifleri/sunum_kontrol.json",
+    "bytes": 599,
+    "sha256": "2cdfede34b179edc46346a190c623504eb3cefeb34a79ac473503ac05b643af0"
+  },
+  {
+    "file": "teslimler/P9401_Cati_Alternatifleri/teslim_sha256.json",
+    "bytes": 4473,
+    "sha256": "ce1767e989772b3e11a35e896bbfcc9503804c21bf4640d24eb813930ea43d54"
+  },
+  {
+    "file": "teslimler/P9401_Cati_Alternatifleri/vendor/THREE_LICENSE.txt",
+    "bytes": 1081,
+    "sha256": "852e0e8699169bf9f6fdc6bda3e682d078dcbc738b5d33e74df594721bff271d"
+  },
+  {
+    "file": "teslimler/P9401_Cati_Alternatifleri/vendor/three.min.js",
+    "bytes": 669884,
+    "sha256": "170c6789f43217c96b3170f4b42fafe135de7f7cd48497a4218f9757ee1d49fa"
+  },
+  {
+    "file": "teslimler/Uc_Model_Sunum/37_Model_Takip.md",
+    "bytes": 7091,
+    "sha256": "478a5ae8f6beff419fc510eab33d4d66aa45593df01e733bc591334748bee4b6"
+  },
+  {
+    "file": "teslimler/Uc_Model_Sunum/Incele.html",
+    "bytes": 14266,
+    "sha256": "4bf8d1ccfb56fb3e3db1383aad656d6357dbfb8a82140271c846a22e45c134d2"
+  },
+  {
+    "file": "teslimler/Uc_Model_Sunum/OKU.md",
+    "bytes": 6742,
+    "sha256": "04064b9809e0866ef98e5f861b10d1aa828730631badb7c6cc295fcde7ddd0a7"
+  },
+  {
+    "file": "teslimler/Uc_Model_Sunum/P9201/P9201_inceleme.blend",
+    "bytes": 12297636,
+    "sha256": "d2d707de981816f309dcef6e8930c3c698e867d42db531cfb8181836fe2abf8f"
+  },
+  {
+    "file": "teslimler/Uc_Model_Sunum/P9201/P9201_referans.ifc",
+    "bytes": 17124226,
+    "sha256": "776849c5f8e68f148a3ad77b758f0e7539c69f87acc68b56f7e72a89ec455811"
+  },
+  {
+    "file": "teslimler/Uc_Model_Sunum/P9201/blender_kontrol.json",
+    "bytes": 325,
+    "sha256": "a729a34018a55e4afc21f6cb31cd54e0f18d04486c0cb136808ca817125935d0"
+  },
+  {
+    "file": "teslimler/Uc_Model_Sunum/P9201/blender_son_dosya_kontrol.json",
+    "bytes": 226,
+    "sha256": "9b117fe58c27a6658ffca463f94641cb17f0a6bd9ae63691743d2a237ccd96d0"
+  },
+  {
+    "file": "teslimler/Uc_Model_Sunum/P9201/cati_acik.png",
+    "bytes": 1781759,
+    "sha256": "587c86e27290267184ca535a33a8db59fc540943f7326fc5092d4083d9c32f43"
+  },
+  {
+    "file": "teslimler/Uc_Model_Sunum/P9201/dis_gorunus.png",
+    "bytes": 1927241,
+    "sha256": "30b486204bca6cb6c6782bb82af046baac69f1a92c3f9f47908ed872e8191d68"
+  },
+  {
+    "file": "teslimler/Uc_Model_Sunum/P9201/ifc_kontrol.json",
+    "bytes": 737,
+    "sha256": "58504e4285422fc5861f47cff2f890d290728f81d3e1221b13795286db25287f"
+  },
+  {
+    "file": "teslimler/Uc_Model_Sunum/P9201/kaynak_plan.jpg",
+    "bytes": 407015,
+    "sha256": "00721a420fabf42f97fd1b2091f25084f553e7e43d2742a3d3ee771f1102c8cb"
+  },
+  {
+    "file": "teslimler/Uc_Model_Sunum/P9201/model.js",
+    "bytes": 10983536,
+    "sha256": "ab1f23716125d7aa8c9685200afc0d8198068c49103e73afa44888663611f7e8"
+  },
+  {
+    "file": "teslimler/Uc_Model_Sunum/P9201_Ilk_Is_Emri.md",
+    "bytes": 10212,
+    "sha256": "6cd011b4c16c514c7c8376c5be2536ea870cffc7b83243d1ad1bc6e249a162aa"
+  },
+  {
+    "file": "teslimler/Uc_Model_Sunum/P9401/P9401_inceleme.blend",
+    "bytes": 10103521,
+    "sha256": "18d192a12703e3b6dc62c1ce1200f93dce2ed902ae15f04adb33fb67d3eb0e59"
+  },
+  {
+    "file": "teslimler/Uc_Model_Sunum/P9401/P9401_referans.ifc",
+    "bytes": 7153358,
+    "sha256": "166c11c63971899eab3c3332f48214cf77b4dae9760e31dbd7bd0e568779a4b0"
+  },
+  {
+    "file": "teslimler/Uc_Model_Sunum/P9401/blender_kontrol.json",
+    "bytes": 325,
+    "sha256": "6eaf82fc39b823b7cb9781cf3e5a89d7ab8c3eb331709cce5f07c9abf269b617"
+  },
+  {
+    "file": "teslimler/Uc_Model_Sunum/P9401/blender_son_dosya_kontrol.json",
+    "bytes": 224,
+    "sha256": "56d3a1027c3e30e4c9d556463dfd7323874ecb588565dd7fbc68dd9ff8f01ce4"
+  },
+  {
+    "file": "teslimler/Uc_Model_Sunum/P9401/cati_acik.png",
+    "bytes": 1678964,
+    "sha256": "1460d95207eebe9e44a8747b6f1b9b7ea8ae46486882d7c74193b497a39e6a4a"
+  },
+  {
+    "file": "teslimler/Uc_Model_Sunum/P9401/dis_gorunus.png",
+    "bytes": 1505425,
+    "sha256": "d077d735fd9cd867106bf05e7fad67179d1883f69cc1bc4525e5279ca3cbcde4"
+  },
+  {
+    "file": "teslimler/Uc_Model_Sunum/P9401/ifc_kontrol.json",
+    "bytes": 732,
+    "sha256": "2b6e4f657b1bbce62aabd68a253b08e3991042fb1733fea6723edcdfbf1f2acc"
+  },
+  {
+    "file": "teslimler/Uc_Model_Sunum/P9401/kaynak_plan.jpg",
+    "bytes": 2517256,
+    "sha256": "d30ff88e1a570d5c4a0be0b0aac40a2fecf34fbaccf47919f74863d0353115d1"
+  },
+  {
+    "file": "teslimler/Uc_Model_Sunum/P9401/model.js",
+    "bytes": 8434754,
+    "sha256": "ea0f711dd443b42bf406a6e72e797757be545cb6329b0d6232562c2b2deff594"
+  },
+  {
+    "file": "teslimler/Uc_Model_Sunum/P9501/P9501_inceleme.blend",
+    "bytes": 8425281,
+    "sha256": "6ae19f1ae4e52ad2166437d4f2ef82f8da9f0333f1a3c64b0b55cd5348562223"
+  },
+  {
+    "file": "teslimler/Uc_Model_Sunum/P9501/P9501_referans.ifc",
+    "bytes": 7461747,
+    "sha256": "bc417343ab95317d174390f896619c8a133ae8ff903f5dafdfab061a75f61d63"
+  },
+  {
+    "file": "teslimler/Uc_Model_Sunum/P9501/blender_kontrol.json",
+    "bytes": 324,
+    "sha256": "e7dd1ea73c669ca93999447cb39dc140475a1904d19e855eac7947f1ad4cbbd4"
+  },
+  {
+    "file": "teslimler/Uc_Model_Sunum/P9501/blender_son_dosya_kontrol.json",
+    "bytes": 226,
+    "sha256": "10eb515c29f3a8d9dc9807485cbf431ae4034cd7e7b526084c1d5f83f361b807"
+  },
+  {
+    "file": "teslimler/Uc_Model_Sunum/P9501/cati_acik.png",
+    "bytes": 1789433,
+    "sha256": "854634bef148a05b20b190e792349966bf4adafc5ce3bce2708da3a5f73c957b"
+  },
+  {
+    "file": "teslimler/Uc_Model_Sunum/P9501/dis_gorunus.png",
+    "bytes": 1924316,
+    "sha256": "f591c851b7e04f611f16943fb15572dcf86010f27e471e4d8a861785d514e9c7"
+  },
+  {
+    "file": "teslimler/Uc_Model_Sunum/P9501/ifc_kontrol.json",
+    "bytes": 734,
+    "sha256": "14c1f7313a2724e656a0c691b557d792b46fa6e6a95ebe2066dd3d8a0f2c482a"
+  },
+  {
+    "file": "teslimler/Uc_Model_Sunum/P9501/kaynak_donusum_kontrol.json",
+    "bytes": 35835,
+    "sha256": "ad088498e316f3759cf65c05b79d92f30bc8740cee16953f2553c148d7d4f52e"
+  },
+  {
+    "file": "teslimler/Uc_Model_Sunum/P9501/kaynak_plan.jpg",
+    "bytes": 497313,
+    "sha256": "3f0495ddc06fdf565256f493428a6274eca3fbc307e80783dd444ef254802688"
+  },
+  {
+    "file": "teslimler/Uc_Model_Sunum/P9501/model.js",
+    "bytes": 4779198,
+    "sha256": "dba483cdddcc5736f6eb46aaf68f5db4e8d7005ea7ea8feb50a34fcbf936725c"
+  },
+  {
+    "file": "teslimler/Uc_Model_Sunum/Uc_Model_Onizleme.jpg",
+    "bytes": 262584,
+    "sha256": "8008420798b1cafcdf62257a08ad7e65630221e1919a7a72901f3652fa68b9d6"
+  },
+  {
+    "file": "teslimler/Uc_Model_Sunum/kaynak_manifest.json",
+    "bytes": 1944,
+    "sha256": "8d770d5f2aec98b390e42720082b34f062f4193cc725267a0053c5edad5f2b57"
+  },
+  {
+    "file": "teslimler/Uc_Model_Sunum/orijinal_kaynak_kaydi.json",
+    "bytes": 7338,
+    "sha256": "9c1bcd9d00fe6c6731c05454283c0462a38a8e801ebe966334327da3185edc70"
+  },
+  {
+    "file": "teslimler/Uc_Model_Sunum/sunum_kontrol.json",
+    "bytes": 753,
+    "sha256": "9dc5a00e4907db68132792d019ffa8be166ce32c8897cf2790ffe038f7953ae2"
+  },
+  {
+    "file": "teslimler/Uc_Model_Sunum/teslim_sha256.json",
+    "bytes": 5647,
+    "sha256": "7c64afefdcc4d0885933134c21e4036dc5ffba64e9752f22d5c7d5061593948d"
+  },
+  {
+    "file": "teslimler/Uc_Model_Sunum/vendor/THREE_LICENSE.txt",
+    "bytes": 1081,
+    "sha256": "852e0e8699169bf9f6fdc6bda3e682d078dcbc738b5d33e74df594721bff271d"
+  },
+  {
+    "file": "teslimler/Uc_Model_Sunum/vendor/three.min.js",
+    "bytes": 669884,
+    "sha256": "170c6789f43217c96b3170f4b42fafe135de7f7cd48497a4218f9757ee1d49fa"
+  },
+  {
+    "file": "veri/p9401_cati/A_selected.json",
+    "bytes": 8434867,
+    "sha256": "8022088b9d48257a8f4ac99cc87cb18e5a78c0478d974d5f442ac4a4e5c4d3e1"
+  },
+  {
+    "file": "veri/p9401_cati/B_selected.json",
+    "bytes": 8436200,
+    "sha256": "ff2fbe1d8ca07cdaa611bde892383a7fe6bf1757ff5ccba3ef49e3b8239e6b2a"
+  },
+  {
+    "file": "veri/p9401_cati/C_selected.json",
+    "bytes": 8440257,
+    "sha256": "3ef17935791c92325d5aff9bc209d0b5bb297727899dbdb882d510973ea47276"
+  },
+  {
+    "file": "veri/p9401_cati/D_selected.json",
+    "bytes": 8439903,
+    "sha256": "406e124c690ddc3a35e86e5231ceade1650e41ea85568a3d110e46d612d377cd"
+  },
+  {
+    "file": "veri/skp/P9201/scene.json",
+    "bytes": 8675999,
+    "sha256": "8e0e5c162a5b2e613bdd26d577c1dbdadcbcb1baabe10d7f1e49101703a6301b"
+  },
+  {
+    "file": "veri/skp/P9201/selected.json",
+    "bytes": 10983456,
+    "sha256": "ddb318616850104aab673364f7f61c351d005aa9fc998ff6095ef4ed40845ce2"
+  },
+  {
+    "file": "veri/skp/P9201/source.blend",
+    "bytes": 2922980,
+    "sha256": "f0870663c7580d62a93baf169f2b0538a81c224ba5d7c932139ef78842ad445e"
+  },
+  {
+    "file": "veri/skp/P9201/textures/000.png",
+    "bytes": 86021,
+    "sha256": "77c02a2f1f6fea8602bec7ab8bf6e11990d92d10575a02303ab6a32da00b9120"
+  },
+  {
+    "file": "veri/skp/P9201/textures/001.png",
+    "bytes": 120453,
+    "sha256": "9007dc3717cfe326cd857e17dbe3aba45ff795ac88226cdd6fe995842647ffac"
+  },
+  {
+    "file": "veri/skp/P9201/textures/002.png",
+    "bytes": 102530,
+    "sha256": "4f21f621a13273b09b6ebf3ef9051ef0c9c62372ae3cbd1ae681764d5f0061fc"
+  },
+  {
+    "file": "veri/skp/P9201/textures/004.png",
+    "bytes": 10734,
+    "sha256": "83d3ed8fe1169a734e3dc2a5a0a2de09e14c0d19bedc916c42925f232ea62a87"
+  },
+  {
+    "file": "veri/skp/P9201/textures/008.png",
+    "bytes": 143337,
+    "sha256": "3337b4fea19f8cafb41ded643d051744177d0684ad2774b4d9086b58893743d1"
+  },
+  {
+    "file": "veri/skp/P9201/textures/009.png",
+    "bytes": 99146,
+    "sha256": "f3f9cf3f7bcd8fe6c935cb9bab4aa0cff39133e9fcf1de3de39c745e4068ae96"
+  },
+  {
+    "file": "veri/skp/P9201/textures/010.png",
+    "bytes": 242328,
+    "sha256": "a998fa172bcde0421c3b1a01676c540e850dc94a66bbff73aaa0850c2d69f166"
+  },
+  {
+    "file": "veri/skp/P9201/textures/011.png",
+    "bytes": 243529,
+    "sha256": "9d2e417a4172f280b7cc0c02073255134c2d8dc8f6e18f5a4cd1653b60879a16"
+  },
+  {
+    "file": "veri/skp/P9201/textures/014.png",
+    "bytes": 349392,
+    "sha256": "51887fcb3f5558384e8ada854b685a7ce5df0d14377b547c7e482d45fe246660"
+  },
+  {
+    "file": "veri/skp/P9201/textures/019.png",
+    "bytes": 5884768,
+    "sha256": "604fec2190db311f6448b7a2b392dd9b16197204dfe16de469136139f4a13ecd"
+  },
+  {
+    "file": "veri/skp/P9201/textures/024.png",
+    "bytes": 102934,
+    "sha256": "20ea04b53f4de9b23c9818adeddbf8c8e25203121a92685ed98e6d3648b7708e"
+  },
+  {
+    "file": "veri/skp/P9201/textures/025.png",
+    "bytes": 123861,
+    "sha256": "f2f1c47e9365db2f69e80377dbcff649240ee9abf226164a93b3aabcd72d9ba3"
+  },
+  {
+    "file": "veri/skp/P9201/textures/027.png",
+    "bytes": 557661,
+    "sha256": "52b6120cfef851c45d33d6d612a6b17d61737764c0a5a1bbc37870a37b8a9cb8"
+  },
+  {
+    "file": "veri/skp/P9201/textures/032.png",
+    "bytes": 1243767,
+    "sha256": "225a2a602a613fe6fa2db58107cc796bb2da8c598931b7c53a42b0be5fdfd777"
+  },
+  {
+    "file": "veri/skp/P9401/scene.json",
+    "bytes": 6380499,
+    "sha256": "faeed82dc35fefb6362cf6a4943bd7c2b697fb1f6a830bef4e29d491c0c31e92"
+  },
+  {
+    "file": "veri/skp/P9401/selected.json",
+    "bytes": 8434674,
+    "sha256": "be423676b5a9153c08b6b14046a424093025c06f1d74711f7721eea285f470e2"
+  },
+  {
+    "file": "veri/skp/P9401/source.blend",
+    "bytes": 3009358,
+    "sha256": "f1d94c287c50348ed952021783a9c352d42fb54cf7b077a8ef16528c8bcfe817"
+  },
+  {
+    "file": "veri/skp/P9401/textures/000.png",
+    "bytes": 78707,
+    "sha256": "e84639f04bb3b9d32938680c1fcb59cdd66723a0f33e9aad2799a7baec5598fb"
+  },
+  {
+    "file": "veri/skp/P9401/textures/004.png",
+    "bytes": 81181,
+    "sha256": "9ccf9b1a156f3b23f6515edf08ebc1f7f5c56e44a1122d4cbe0adb408c15f7a3"
+  },
+  {
+    "file": "veri/skp/P9401/textures/010.png",
+    "bytes": 1033346,
+    "sha256": "89d785cc80141fd242fc312379b963c8b197d5767ffba010ac31feb067b6e890"
+  },
+  {
+    "file": "veri/skp/P9401/textures/011.png",
+    "bytes": 2125,
+    "sha256": "2273fbe9faf6e3ba6970a203fec493fdb7d0a807607ee67a8b77eb04a85d4f8e"
+  },
+  {
+    "file": "veri/skp/P9401/textures/012.png",
+    "bytes": 988,
+    "sha256": "d4bc57782a71301767867829c6fc3eec01079a0f3e9bdbbf64712df142ed4a69"
+  },
+  {
+    "file": "veri/skp/P9401/textures/013.png",
+    "bytes": 1096,
+    "sha256": "32fb9f9325be03cd5b6ce1b14104cac7753506bd9ede22ea87d9d43a1f5b2ea4"
+  },
+  {
+    "file": "veri/skp/P9401/textures/016.png",
+    "bytes": 1009,
+    "sha256": "4c7a61cf4c0f171e7afaf74ce4baaf2a09495176f50e6776677bdc5c6077f78c"
+  },
+  {
+    "file": "veri/skp/P9401/textures/023.png",
+    "bytes": 5588575,
+    "sha256": "431cd4f45014336d03bf843a6d3fca1db5739a798366f06f09f0bdd85da38aff"
+  },
+  {
+    "file": "veri/skp/P9401/textures/024.png",
+    "bytes": 413543,
+    "sha256": "b87b4dfd020931a467a485c7a0b4ae6a5ab9445ebb418696dda7aa43cedf11d2"
+  },
+  {
+    "file": "veri/skp/P9501/scene.json",
+    "bytes": 2714068,
+    "sha256": "0138b1e5206f46358d17bd6f9134f1d87ec9cf6232d61fd1ea1c0802fb814c6a"
+  },
+  {
+    "file": "veri/skp/P9501/selected.json",
+    "bytes": 4779118,
+    "sha256": "c75d69c3194e454779f63172ea305bd170114422841418e3923091501f41150f"
+  },
+  {
+    "file": "veri/skp/P9501/source.blend",
+    "bytes": 972638,
+    "sha256": "b2472f7193098c43a93e7315dd807dce2e3687caecea59a8e73ceeff08226c43"
+  },
+  {
+    "file": "veri/skp/P9501/textures/004.png",
+    "bytes": 79180,
+    "sha256": "311ddb45f759c4df2b8b6827e28e94f41b1b447e0e997942dfcd1317ab69bf51"
+  },
+  {
+    "file": "veri/skp/P9501/textures/005.png",
+    "bytes": 373393,
+    "sha256": "53776c9ea96afff72da7b0384812bc31a7db9654acdd5b55bb29d4c5cffee9cb"
+  },
+  {
+    "file": "veri/skp/P9501/textures/006.png",
+    "bytes": 304706,
+    "sha256": "1950a499650ff4a6a97718d2daa07d514dda83460744773996ef35a09d2c17bf"
+  },
+  {
+    "file": "veri/skp/P9501/textures/007.png",
+    "bytes": 384073,
+    "sha256": "dc36d06e435dbf95cffc8092af9d7c67c260361ff9588f54730ad37dc19debc5"
+  },
+  {
+    "file": "veri/skp/P9501/textures/008.png",
+    "bytes": 149334,
+    "sha256": "f9c31b919c583a9204932bd79f8aace424ac9fc5bb11434ee366316402680866"
+  },
+  {
+    "file": "veri/skp/P9501/textures/009.png",
+    "bytes": 104605,
+    "sha256": "659454cf42eab7f7a46561c75698869dc9139176b6c3223a1573e4e4fe7e2c60"
+  },
+  {
+    "file": "veri/skp/P9501/textures/012.png",
+    "bytes": 5884768,
+    "sha256": "604fec2190db311f6448b7a2b392dd9b16197204dfe16de469136139f4a13ecd"
+  },
+  {
+    "file": "veri/skp/P9501/textures/016.png",
+    "bytes": 52727,
+    "sha256": "4fff95f7487140aef714adb05f1f69ef72a44741999fe3b246764d9e4795e3b0"
+  },
+  {
+    "file": "veri/skp/P9501/textures/018.png",
+    "bytes": 81181,
+    "sha256": "9ccf9b1a156f3b23f6515edf08ebc1f7f5c56e44a1122d4cbe0adb408c15f7a3"
+  },
+  {
+    "file": "veri/skp/P9501/textures/022.png",
+    "bytes": 19746,
+    "sha256": "b989910b5a7487aefd6326c98c062e09a58c2d2db6dc6cfbddcd40e17f55ae5e"
+  }
+]

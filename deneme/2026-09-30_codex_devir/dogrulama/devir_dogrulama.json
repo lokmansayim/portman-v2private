@@ -1,0 +1,826 @@
+{
+  "tarih": "2026-09-30 07:24:32",
+  "depo_commit": "2ba4f1817a6c75e088ebe00208ceb59b46cf6b83",
+  "ifcopenshell": "0.8.5",
+  "adimlar": {
+    "paket": {
+      "gecti": true,
+      "manifest_dosya": 247,
+      "ayni": 89,
+      "farkli": [],
+      "aktarilmamis": 158,
+      "manifest_sha256": "a9d402ef67f3d6c6bfb2dc9bae1a73d7e1740d8e7ccea93a1fd487a609defa22"
+    },
+    "modeller": {
+      "P9201": {
+        "model": "P9201",
+        "selected_sha256": "ddb318616850104aab673364f7f61c351d005aa9fc998ff6095ef4ed40845ce2",
+        "kaynak_sha256": "31fc08e97bbeee8483cbca308e0648bb10e87d96b187d3bd9ff9e07b214777fc",
+        "secim": {
+          "ayni": true,
+          "dugum_ayni": true,
+          "ag_ayni": true,
+          "malzeme_ayni": true,
+          "dugum": [
+            190,
+            190
+          ],
+          "ag": [
+            52,
+            52
+          ],
+          "cati_dugumu": 54,
+          "gecti": true
+        },
+        "yeniden_uretim": {
+          "ayni": true,
+          "veri_satiri": [
+            3396,
+            3396
+          ],
+          "farkli_satir": 0,
+          "ilk_farklar": [],
+          "baslik_ayni": {
+            "FILE_DESCRIPTION": true,
+            "FILE_SCHEMA": true,
+            "FILE_NAME": false
+          },
+          "gecti": true
+        },
+        "kayitli_ifc": {
+          "gecti": true,
+          "ifc_sha256": "776849c5f8e68f148a3ad77b758f0e7539c69f87acc68b56f7e72a89ec455811",
+          "kapilar": {
+            "sema": {
+              "gecti": true,
+              "sorun": 0
+            },
+            "nesne": {
+              "gecti": true,
+              "beklenen": 190,
+              "bulunan": 190,
+              "eksik_dugum": [],
+              "fazla": 0,
+              "cift": 0
+            },
+            "koordinat": {
+              "gecti": true,
+              "en_buyuk_fark_m": 0.0,
+              "esik_m": 1e-06,
+              "kip": "blender32",
+              "uyusmayan_dugum": []
+            },
+            "topoloji": {
+              "gecti": true,
+              "saklanan_ucgen": 117247,
+              "kaynak_ucgen": 117247,
+              "uyusmayan_dugum": []
+            },
+            "ozellik": {
+              "gecti": true
+            },
+            "geometri": {
+              "gecti": true,
+              "sinir_kutusu_farki_m": 0.0,
+              "motor_ucgen": 117005,
+              "not": "Motorun yeniden üçgenlemesi kaynak üçgen sayısından farklı olabilir; sayı kapı değildir."
+            }
+          }
+        },
+        "gecti": true
+      },
+      "P9401": {
+        "model": "P9401",
+        "selected_sha256": "be423676b5a9153c08b6b14046a424093025c06f1d74711f7721eea285f470e2",
+        "kaynak_sha256": "57ea5920c5d6a7345b576575aa9e276dd1774e9f90c6fda5e7605b9ac808bc44",
+        "secim": {
+          "ayni": true,
+          "dugum_ayni": true,
+          "ag_ayni": true,
+          "malzeme_ayni": true,
+          "dugum": [
+            82,
+            82
+          ],
+          "ag": [
+            31,
+            31
+          ],
+          "cati_dugumu": 1,
+          "gecti": true
+        },
+        "yeniden_uretim": {
+          "ayni": true,
+          "veri_satiri": [
+            1522,
+            1522
+          ],
+          "farkli_satir": 0,
+          "ilk_farklar": [],
+          "baslik_ayni": {
+            "FILE_DESCRIPTION": true,
+            "FILE_SCHEMA": true,
+            "FILE_NAME": false
+          },
+          "gecti": true
+        },
+        "kayitli_ifc": {
+          "gecti": true,
+          "ifc_sha256": "166c11c63971899eab3c3332f48214cf77b4dae9760e31dbd7bd0e568779a4b0",
+          "kapilar": {
+            "sema": {
+              "gecti": true,
+              "sorun": 0
+            },
+            "nesne": {
+              "gecti": true,
+              "beklenen": 82,
+              "bulunan": 82,
+              "eksik_dugum": [],
+              "fazla": 0,
+              "cift": 0
+            },
+            "koordinat": {
+              "gecti": true,
+              "en_buyuk_fark_m": 0.0,
+              "esik_m": 1e-06,
+              "kip": "blender32",
+              "uyusmayan_dugum": []
+            },
+            "topoloji": {
+              "gecti": true,
+              "saklanan_ucgen": 45772,
+              "kaynak_ucgen": 45772,
+              "uyusmayan_dugum": []
+            },
+            "ozellik": {
+              "gecti": true
+            },
+            "geometri": {
+              "gecti": true,
+              "sinir_kutusu_farki_m": 0.0,
+              "motor_ucgen": 45517,
+              "not": "Motorun yeniden üçgenlemesi kaynak üçgen sayısından farklı olabilir; sayı kapı değildir."
+            }
+          }
+        },
+        "gecti": true
+      },
+      "P9501": {
+        "model": "P9501",
+        "selected_sha256": "c75d69c3194e454779f63172ea305bd170114422841418e3923091501f41150f",
+        "kaynak_sha256": "395085dc28338e2df78d40404b88958e04f7467d86eaca34c6e51b07f57dc109",
+        "secim": {
+          "ayni": true,
+          "dugum_ayni": true,
+          "ag_ayni": true,
+          "malzeme_ayni": true,
+          "dugum": [
+            339,
+            339
+          ],
+          "ag": [
+            54,
+            54
+          ],
+          "cati_dugumu": 38,
+          "gecti": true
+        },
+        "yeniden_uretim": {
+          "ayni": true,
+          "veri_satiri": [
+            5944,
+            5944
+          ],
+          "farkli_satir": 0,
+          "ilk_farklar": [],
+          "baslik_ayni": {
+            "FILE_DESCRIPTION": true,
+            "FILE_SCHEMA": true,
+            "FILE_NAME": false
+          },
+          "gecti": true
+        },
+        "kayitli_ifc": {
+          "gecti": true,
+          "ifc_sha256": "bc417343ab95317d174390f896619c8a133ae8ff903f5dafdfab061a75f61d63",
+          "kapilar": {
+            "sema": {
+              "gecti": true,
+              "sorun": 0
+            },
+            "nesne": {
+              "gecti": true,
+              "beklenen": 339,
+              "bulunan": 339,
+              "eksik_dugum": [],
+              "fazla": 0,
+              "cift": 0
+            },
+            "koordinat": {
+              "gecti": true,
+              "en_buyuk_fark_m": 0.0,
+              "esik_m": 1e-06,
+              "kip": "blender32",
+              "uyusmayan_dugum": []
+            },
+            "topoloji": {
+              "gecti": true,
+              "saklanan_ucgen": 64390,
+              "kaynak_ucgen": 64390,
+              "uyusmayan_dugum": []
+            },
+            "ozellik": {
+              "gecti": true
+            },
+            "geometri": {
+              "gecti": true,
+              "sinir_kutusu_farki_m": 0.0,
+              "motor_ucgen": 63969,
+              "not": "Motorun yeniden üçgenlemesi kaynak üçgen sayısından farklı olabilir; sayı kapı değildir."
+            }
+          }
+        },
+        "gecti": true
+      }
+    },
+    "cati_veri": {
+      "gecti": true,
+      "bayt_bayt_ayni": {
+        "A_selected.json": true,
+        "B_selected.json": true,
+        "C_selected.json": true,
+        "D_selected.json": true,
+        "secenekler.js": true,
+        "Tasarim_Kaydi.json": true
+      },
+      "betik_sha256": "5684f20c32bf9d537f3dcbb2373b698210b72aff20ae1f7bd97f539cddc4f4bb"
+    },
+    "catilar": {
+      "A": {
+        "secenek": "A",
+        "revizyon": "P9401-CATI-A-01",
+        "govde": {
+          "secenek": "A",
+          "revizyon": "P9401-CATI-A-01",
+          "gecti": true,
+          "hatalar": [],
+          "govde_dugumu": 81,
+          "kaynak_cati_dugumu": 1,
+          "tasinan_kaynak_cati": 1,
+          "oneri_parcasi": 0,
+          "oneriler": [],
+          "kapsam": "Gövde korunumu ve etiket denetimi. Öneri ölçüleri onaylı değildir; teknik tasarım (taşıyıcı, drenaj, katman) yapılmadı."
+        },
+        "yeniden_uretim": {
+          "ayni": true,
+          "veri_satiri": [
+            1695,
+            1695
+          ],
+          "farkli_satir": 0,
+          "ilk_farklar": [],
+          "baslik_ayni": {
+            "FILE_DESCRIPTION": true,
+            "FILE_SCHEMA": true,
+            "FILE_NAME": false
+          },
+          "gecti": true
+        },
+        "kayitli_ifc": {
+          "gecti": true,
+          "ifc_sha256": "89e851681c11c033df62cf0cf954f38b0a6825138b3d13f86854f968d57641f0",
+          "kapilar": {
+            "sema": {
+              "gecti": true,
+              "sorun": 0
+            },
+            "nesne": {
+              "gecti": true,
+              "beklenen": 82,
+              "bulunan": 82,
+              "eksik_dugum": [],
+              "fazla": 0,
+              "cift": 0
+            },
+            "koordinat": {
+              "gecti": true,
+              "en_buyuk_fark_m": 0.0,
+              "esik_m": 1e-06,
+              "kip": "blender32",
+              "uyusmayan_dugum": []
+            },
+            "topoloji": {
+              "gecti": true,
+              "saklanan_ucgen": 45772,
+              "kaynak_ucgen": 45772,
+              "uyusmayan_dugum": []
+            },
+            "ozellik": {
+              "gecti": true
+            },
+            "geometri": {
+              "gecti": true,
+              "sinir_kutusu_farki_m": 0.0,
+              "motor_ucgen": 45517,
+              "not": "Motorun yeniden üçgenlemesi kaynak üçgen sayısından farklı olabilir; sayı kapı değildir."
+            }
+          }
+        },
+        "ifc_govde": {
+          "gecti": true,
+          "govde_nesnesi": 81,
+          "farkli": []
+        },
+        "gecti": true
+      },
+      "B": {
+        "secenek": "B",
+        "revizyon": "P9401-CATI-B-01",
+        "govde": {
+          "secenek": "B",
+          "revizyon": "P9401-CATI-B-01",
+          "gecti": true,
+          "hatalar": [],
+          "govde_dugumu": 81,
+          "kaynak_cati_dugumu": 1,
+          "tasinan_kaynak_cati": 0,
+          "oneri_parcasi": 2,
+          "oneriler": [
+            {
+              "id": 1000,
+              "ad": "Kırma çatı önerisi",
+              "malzeme": "roof",
+              "ucgen": 20,
+              "kutu_m": [
+                [
+                  -0.25,
+                  0.3675,
+                  3.1017
+                ],
+                [
+                  10.49,
+                  9.7525,
+                  4.64
+                ]
+              ]
+            },
+            {
+              "id": 1001,
+              "ad": "Veranda örtüsü önerisi",
+              "malzeme": "roof",
+              "ucgen": 12,
+              "kutu_m": [
+                [
+                  3.715,
+                  -1.515,
+                  3.1017
+                ],
+                [
+                  10.49,
+                  0.3675,
+                  3.2017
+                ]
+              ]
+            }
+          ],
+          "kapsam": "Gövde korunumu ve etiket denetimi. Öneri ölçüleri onaylı değildir; teknik tasarım (taşıyıcı, drenaj, katman) yapılmadı."
+        },
+        "yeniden_uretim": {
+          "ayni": true,
+          "veri_satiri": [
+            1710,
+            1710
+          ],
+          "farkli_satir": 0,
+          "ilk_farklar": [],
+          "baslik_ayni": {
+            "FILE_DESCRIPTION": true,
+            "FILE_SCHEMA": true,
+            "FILE_NAME": false
+          },
+          "gecti": true
+        },
+        "kayitli_ifc": {
+          "gecti": true,
+          "ifc_sha256": "666cdc6a730a526dddc8a4107af81693f1a5a2373b97f8888f10bad6133d0a42",
+          "kapilar": {
+            "sema": {
+              "gecti": true,
+              "sorun": 0
+            },
+            "nesne": {
+              "gecti": true,
+              "beklenen": 83,
+              "bulunan": 83,
+              "eksik_dugum": [],
+              "fazla": 0,
+              "cift": 0
+            },
+            "koordinat": {
+              "gecti": true,
+              "en_buyuk_fark_m": 0.0,
+              "esik_m": 1e-06,
+              "kip": "blender32",
+              "uyusmayan_dugum": []
+            },
+            "topoloji": {
+              "gecti": true,
+              "saklanan_ucgen": 45705,
+              "kaynak_ucgen": 45705,
+              "uyusmayan_dugum": []
+            },
+            "ozellik": {
+              "gecti": true
+            },
+            "geometri": {
+              "gecti": true,
+              "sinir_kutusu_farki_m": 0.0,
+              "motor_ucgen": 45455,
+              "not": "Motorun yeniden üçgenlemesi kaynak üçgen sayısından farklı olabilir; sayı kapı değildir."
+            }
+          }
+        },
+        "ifc_govde": {
+          "gecti": true,
+          "govde_nesnesi": 81,
+          "farkli": []
+        },
+        "gecti": true
+      },
+      "C": {
+        "secenek": "C",
+        "revizyon": "P9401-CATI-C-01",
+        "govde": {
+          "secenek": "C",
+          "revizyon": "P9401-CATI-C-01",
+          "gecti": true,
+          "hatalar": [],
+          "govde_dugumu": 81,
+          "kaynak_cati_dugumu": 1,
+          "tasinan_kaynak_cati": 0,
+          "oneri_parcasi": 8,
+          "oneriler": [
+            {
+              "id": 1000,
+              "ad": "Tek eğimli çatı önerisi",
+              "malzeme": "roof",
+              "ucgen": 12,
+              "kutu_m": [
+                [
+                  -0.25,
+                  0.3675,
+                  3.1017
+                ],
+                [
+                  10.49,
+                  9.7525,
+                  4.2017
+                ]
+              ]
+            },
+            {
+              "id": 1001,
+              "ad": "Veranda örtüsü önerisi",
+              "malzeme": "roof",
+              "ucgen": 12,
+              "kutu_m": [
+                [
+                  3.715,
+                  -1.515,
+                  3.1017
+                ],
+                [
+                  10.49,
+                  0.3675,
+                  3.2017
+                ]
+              ]
+            },
+            {
+              "id": 1002,
+              "ad": "Üst kapama önerisi 1",
+              "malzeme": "wall",
+              "ucgen": 12,
+              "kutu_m": [
+                [
+                  0.0,
+                  0.6175,
+                  3.1017
+                ],
+                [
+                  3.965,
+                  0.6675,
+                  3.1337
+                ]
+              ]
+            },
+            {
+              "id": 1003,
+              "ad": "Üst kapama önerisi 2",
+              "malzeme": "wall",
+              "ucgen": 12,
+              "kutu_m": [
+                [
+                  3.915,
+                  0.6175,
+                  3.1017
+                ],
+                [
+                  3.965,
+                  2.5,
+                  3.3289
+                ]
+              ]
+            },
+            {
+              "id": 1004,
+              "ad": "Üst kapama önerisi 3",
+              "malzeme": "wall",
+              "ucgen": 12,
+              "kutu_m": [
+                [
+                  3.965,
+                  2.5,
+                  3.1017
+                ],
+                [
+                  10.24,
+                  2.55,
+                  3.3343
+                ]
+              ]
+            },
+            {
+              "id": 1005,
+              "ad": "Üst kapama önerisi 4",
+              "malzeme": "wall",
+              "ucgen": 12,
+              "kutu_m": [
+                [
+                  10.19,
+                  2.5,
+                  3.1017
+                ],
+                [
+                  10.24,
+                  9.5025,
+                  4.0751
+                ]
+              ]
+            },
+            {
+              "id": 1006,
+              "ad": "Üst kapama önerisi 5",
+              "malzeme": "wall",
+              "ucgen": 12,
+              "kutu_m": [
+                [
+                  0.0,
+                  9.4525,
+                  3.1017
+                ],
+                [
+                  10.24,
+                  9.5025,
+                  4.0751
+                ]
+              ]
+            },
+            {
+              "id": 1007,
+              "ad": "Üst kapama önerisi 6",
+              "malzeme": "wall",
+              "ucgen": 12,
+              "kutu_m": [
+                [
+                  0.0,
+                  0.6175,
+                  3.1017
+                ],
+                [
+                  0.05,
+                  9.5025,
+                  4.0751
+                ]
+              ]
+            }
+          ],
+          "kapsam": "Gövde korunumu ve etiket denetimi. Öneri ölçüleri onaylı değildir; teknik tasarım (taşıyıcı, drenaj, katman) yapılmadı."
+        },
+        "yeniden_uretim": {
+          "ayni": true,
+          "veri_satiri": [
+            1824,
+            1824
+          ],
+          "farkli_satir": 0,
+          "ilk_farklar": [],
+          "baslik_ayni": {
+            "FILE_DESCRIPTION": true,
+            "FILE_SCHEMA": true,
+            "FILE_NAME": false
+          },
+          "gecti": true
+        },
+        "kayitli_ifc": {
+          "gecti": true,
+          "ifc_sha256": "0b37e677f3e2069dc7a67743234fce689a017f4ee72ee9a2fea4bc3ba0943137",
+          "kapilar": {
+            "sema": {
+              "gecti": true,
+              "sorun": 0
+            },
+            "nesne": {
+              "gecti": true,
+              "beklenen": 89,
+              "bulunan": 89,
+              "eksik_dugum": [],
+              "fazla": 0,
+              "cift": 0
+            },
+            "koordinat": {
+              "gecti": true,
+              "en_buyuk_fark_m": 0.0,
+              "esik_m": 1e-06,
+              "kip": "blender32",
+              "uyusmayan_dugum": []
+            },
+            "topoloji": {
+              "gecti": true,
+              "saklanan_ucgen": 45769,
+              "kaynak_ucgen": 45769,
+              "uyusmayan_dugum": []
+            },
+            "ozellik": {
+              "gecti": true
+            },
+            "geometri": {
+              "gecti": true,
+              "sinir_kutusu_farki_m": 0.0,
+              "motor_ucgen": 45519,
+              "not": "Motorun yeniden üçgenlemesi kaynak üçgen sayısından farklı olabilir; sayı kapı değildir."
+            }
+          }
+        },
+        "ifc_govde": {
+          "gecti": true,
+          "govde_nesnesi": 81,
+          "farkli": []
+        },
+        "gecti": true
+      },
+      "D": {
+        "secenek": "D",
+        "revizyon": "P9401-CATI-D-01",
+        "govde": {
+          "secenek": "D",
+          "revizyon": "P9401-CATI-D-01",
+          "gecti": true,
+          "hatalar": [],
+          "govde_dugumu": 81,
+          "kaynak_cati_dugumu": 1,
+          "tasinan_kaynak_cati": 0,
+          "oneri_parcasi": 4,
+          "oneriler": [
+            {
+              "id": 1000,
+              "ad": "Ana çatı yüzeyi taslağı",
+              "malzeme": "roof",
+              "ucgen": 12,
+              "kutu_m": [
+                [
+                  -0.25,
+                  0.3675,
+                  3.1017
+                ],
+                [
+                  10.49,
+                  9.7525,
+                  3.2017
+                ]
+              ]
+            },
+            {
+              "id": 1001,
+              "ad": "Veranda çatı yüzeyi taslağı",
+              "malzeme": "roof",
+              "ucgen": 12,
+              "kutu_m": [
+                [
+                  3.715,
+                  -1.515,
+                  3.1017
+                ],
+                [
+                  10.49,
+                  0.3675,
+                  3.2017
+                ]
+              ]
+            },
+            {
+              "id": 1002,
+              "ad": "Kesintisiz parapet önerisi",
+              "malzeme": "wall",
+              "ucgen": 48,
+              "kutu_m": [
+                [
+                  -0.25,
+                  -1.515,
+                  3.2017
+                ],
+                [
+                  10.49,
+                  9.7525,
+                  3.6517
+                ]
+              ]
+            },
+            {
+              "id": 1003,
+              "ad": "Parapet üst kapak önerisi",
+              "malzeme": "edge",
+              "ucgen": 48,
+              "kutu_m": [
+                [
+                  -0.25,
+                  -1.515,
+                  3.6517
+                ],
+                [
+                  10.49,
+                  9.7525,
+                  3.6867
+                ]
+              ]
+            }
+          ],
+          "kapsam": "Gövde korunumu ve etiket denetimi. Öneri ölçüleri onaylı değildir; teknik tasarım (taşıyıcı, drenaj, katman) yapılmadı."
+        },
+        "yeniden_uretim": {
+          "ayni": true,
+          "veri_satiri": [
+            1748,
+            1748
+          ],
+          "farkli_satir": 0,
+          "ilk_farklar": [],
+          "baslik_ayni": {
+            "FILE_DESCRIPTION": true,
+            "FILE_SCHEMA": true,
+            "FILE_NAME": false
+          },
+          "gecti": true
+        },
+        "kayitli_ifc": {
+          "gecti": true,
+          "ifc_sha256": "01732989aaf549d253542305c247267d2aecdcb2223e087fc063a5660cc0c971",
+          "kapilar": {
+            "sema": {
+              "gecti": true,
+              "sorun": 0
+            },
+            "nesne": {
+              "gecti": true,
+              "beklenen": 85,
+              "bulunan": 85,
+              "eksik_dugum": [],
+              "fazla": 0,
+              "cift": 0
+            },
+            "koordinat": {
+              "gecti": true,
+              "en_buyuk_fark_m": 0.0,
+              "esik_m": 1e-06,
+              "kip": "blender32",
+              "uyusmayan_dugum": []
+            },
+            "topoloji": {
+              "gecti": true,
+              "saklanan_ucgen": 45793,
+              "kaynak_ucgen": 45793,
+              "uyusmayan_dugum": []
+            },
+            "ozellik": {
+              "gecti": true
+            },
+            "geometri": {
+              "gecti": true,
+              "sinir_kutusu_farki_m": 0.0,
+              "motor_ucgen": 45543,
+              "not": "Motorun yeniden üçgenlemesi kaynak üçgen sayısından farklı olabilir; sayı kapı değildir."
+            }
+          }
+        },
+        "ifc_govde": {
+          "gecti": true,
+          "govde_nesnesi": 81,
+          "farkli": []
+        },
+        "gecti": true
+      }
+    }
+  },
+  "gecti": true
+}

@@ -1,0 +1,47 @@
+{
+  "status": "passed",
+  "checked_files": 247,
+  "syntax_parsed_python_files": 24,
+  "ifc_report_records": [
+    {
+      "file": "teslimler/Uc_Model_Sunum/P9201/ifc_kontrol.json",
+      "recorded_report_passed": true
+    },
+    {
+      "file": "teslimler/Uc_Model_Sunum/P9501/ifc_kontrol.json",
+      "recorded_report_passed": true
+    },
+    {
+      "file": "teslimler/Uc_Model_Sunum/P9401/ifc_kontrol.json",
+      "recorded_report_passed": true
+    },
+    {
+      "file": "teslimler/P9401_Cati_Alternatifleri/A/ifc_kontrol.json",
+      "recorded_report_passed": true
+    },
+    {
+      "file": "teslimler/P9401_Cati_Alternatifleri/C/ifc_kontrol.json",
+      "recorded_report_passed": true
+    },
+    {
+      "file": "teslimler/P9401_Cati_Alternatifleri/D/ifc_kontrol.json",
+      "recorded_report_passed": true
+    },
+    {
+      "file": "teslimler/P9401_Cati_Alternatifleri/B/ifc_kontrol.json",
+      "recorded_report_passed": true
+    }
+  ],
+  "runtime_paths_present": {
+    "blender": true,
+    "python_with_pillow": true,
+    "node": true,
+    "playwright_module": true,
+    "chrome": true,
+    "sketchup_api": true,
+    "ifc_runtime": true
+  },
+  "local_rule_md_matches_json_recorded_hash": true,
+  "issues": [],
+  "scope": "Paket hashleri, Python sözdizimi, mevcut rapor kayıtları ve bağımlılık yolları kontrol edildi. Geometri yeniden üretilmedi; üretim veya entegrasyon kabulü değildir."
+}

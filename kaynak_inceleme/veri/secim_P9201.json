@@ -1,0 +1,102 @@
+{
+  "model": "P9201",
+  "revizyon": "SKP-inceleme-01",
+  "kaynak_dosya": "92 M2 PEYZAJLI.skp",
+  "kaynak_sha256": "31fc08e97bbeee8483cbca308e0648bb10e87d96b187d3bd9ff9e07b214777fc",
+  "birim": {
+    "kaynak": "inches",
+    "hedef": "meters",
+    "katsayi": 0.0254
+  },
+  "cati_kokleri": [
+    {
+      "sira": 1,
+      "kalici_kimlik": 176764,
+      "ad": "Group#67"
+    },
+    {
+      "sira": 67,
+      "kalici_kimlik": 176761,
+      "ad": "Group#61"
+    },
+    {
+      "sira": 78,
+      "kalici_kimlik": 176760,
+      "ad": "Group#64"
+    },
+    {
+      "sira": 114,
+      "kalici_kimlik": 176869,
+      "ad": "Group#83"
+    },
+    {
+      "sira": 121,
+      "kalici_kimlik": 176763,
+      "ad": "Group#67"
+    },
+    {
+      "sira": 137,
+      "kalici_kimlik": 176839,
+      "ad": "Group#78"
+    },
+    {
+      "sira": 139,
+      "kalici_kimlik": 176837,
+      "ad": "Group#5"
+    },
+    {
+      "sira": 145,
+      "kalici_kimlik": 176871,
+      "ad": "Group#81"
+    },
+    {
+      "sira": 146,
+      "kalici_kimlik": 176767,
+      "ad": "Group#65"
+    },
+    {
+      "sira": 154,
+      "kalici_kimlik": 176766,
+      "ad": "Group#66"
+    },
+    {
+      "sira": 162,
+      "kalici_kimlik": 176765,
+      "ad": "Group#63"
+    },
+    {
+      "sira": 170,
+      "kalici_kimlik": 176838,
+      "ad": "Group#78"
+    },
+    {
+      "sira": 174,
+      "kalici_kimlik": 176762,
+      "ad": "Group#17"
+    },
+    {
+      "sira": 203,
+      "kalici_kimlik": 181002,
+      "ad": "Group#27"
+    }
+  ],
+  "dislanan_kokler": [
+    {
+      "sira": 14,
+      "kalici_kimlik": 176874,
+      "ad": "Group#7"
+    },
+    {
+      "sira": 87,
+      "kalici_kimlik": 176873,
+      "ad": "Group#2"
+    },
+    {
+      "sira": 287,
+      "kalici_kimlik": 176875,
+      "ad": "rgthrh"
+    }
+  ],
+  "kopya_kurali": null,
+  "not": "Sıra numarası yalnız bu SHA256'lı okuma içindir; eşleme kalıcı kimlikle yapılır."
+}

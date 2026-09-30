@@ -1,0 +1,77 @@
+{
+  "model": "P9501",
+  "revizyon": "SKP-inceleme-01",
+  "kaynak_dosya": "AMASRA SKP.skp",
+  "kaynak_sha256": "395085dc28338e2df78d40404b88958e04f7467d86eaca34c6e51b07f57dc109",
+  "birim": {
+    "kaynak": "inches",
+    "hedef": "meters",
+    "katsayi": 0.0254
+  },
+  "cati_kokleri": [
+    {
+      "sira": 112,
+      "kalici_kimlik": 50041,
+      "ad": "Group#69"
+    },
+    {
+      "sira": 328,
+      "kalici_kimlik": 53998,
+      "ad": "Group#28"
+    },
+    {
+      "sira": 332,
+      "kalici_kimlik": 55988,
+      "ad": "Group#65"
+    },
+    {
+      "sira": 371,
+      "kalici_kimlik": 52458,
+      "ad": "GRİ#1"
+    },
+    {
+      "sira": 372,
+      "kalici_kimlik": 52460,
+      "ad": "GRİ#1"
+    },
+    {
+      "sira": 373,
+      "kalici_kimlik": 52461,
+      "ad": "GRİ#1"
+    },
+    {
+      "sira": 374,
+      "kalici_kimlik": 52462,
+      "ad": "GRİ#1"
+    },
+    {
+      "sira": 375,
+      "kalici_kimlik": 52463,
+      "ad": "GRİ#1"
+    },
+    {
+      "sira": 376,
+      "kalici_kimlik": 52464,
+      "ad": "GRİ#2"
+    },
+    {
+      "sira": 377,
+      "kalici_kimlik": 52465,
+      "ad": "GRİ#1"
+    },
+    {
+      "sira": 378,
+      "kalici_kimlik": 52466,
+      "ad": "GRİ#1"
+    }
+  ],
+  "dislanan_kokler": [
+    {
+      "sira": 9,
+      "kalici_kimlik": 50012,
+      "ad": "Group#61"
+    }
+  ],
+  "kopya_kurali": null,
+  "not": "Sıra numarası yalnız bu SHA256'lı okuma içindir; eşleme kalıcı kimlikle yapılır."
+}

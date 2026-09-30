@@ -1,0 +1,16 @@
+Codex devri yeniden doğrulama · 2026-09-30 07:24:32 · commit 2ba4f18 · IfcOpenShell 0.8.5
+SONUÇ: GEÇTİ
+
+paket: GEÇTİ · manifestte 247 · aktarılan ve aynı 89 · farklı 0
+
+P9201: GEÇTİ · seçim yeniden kuruldu GEÇTİ (190 düğüm) · IFC yeniden üretim GEÇTİ · kayıtlı IFC kapıları GEÇTİ (nesne 190, üçgen 117247, koordinat farkı 0.0 m)
+P9401: GEÇTİ · seçim yeniden kuruldu GEÇTİ (82 düğüm) · IFC yeniden üretim GEÇTİ · kayıtlı IFC kapıları GEÇTİ (nesne 82, üçgen 45772, koordinat farkı 0.0 m)
+P9501: GEÇTİ · seçim yeniden kuruldu GEÇTİ (339 düğüm) · IFC yeniden üretim GEÇTİ · kayıtlı IFC kapıları GEÇTİ (nesne 339, üçgen 64390, koordinat farkı 0.0 m)
+
+çatı verisi yeniden üretim: GEÇTİ · {'A_selected.json': True, 'B_selected.json': True, 'C_selected.json': True, 'D_selected.json': True, 'secenekler.js': True, 'Tasarim_Kaydi.json': True}
+P9401-CATI-A-01: GEÇTİ · gövde korunumu GEÇTİ (81 düğüm; öneri parçası 0) · IFC yeniden üretim GEÇTİ · kayıtlı IFC kapıları GEÇTİ · IFC gövde = referans GEÇTİ
+P9401-CATI-B-01: GEÇTİ · gövde korunumu GEÇTİ (81 düğüm; öneri parçası 2) · IFC yeniden üretim GEÇTİ · kayıtlı IFC kapıları GEÇTİ · IFC gövde = referans GEÇTİ
+P9401-CATI-C-01: GEÇTİ · gövde korunumu GEÇTİ (81 düğüm; öneri parçası 8) · IFC yeniden üretim GEÇTİ · kayıtlı IFC kapıları GEÇTİ · IFC gövde = referans GEÇTİ
+P9401-CATI-D-01: GEÇTİ · gövde korunumu GEÇTİ (81 düğüm; öneri parçası 4) · IFC yeniden üretim GEÇTİ · kayıtlı IFC kapıları GEÇTİ · IFC gövde = referans GEÇTİ
+
+Kapsam: aktarım bütünlüğü ve yeniden üretilebilirlik. Kaynak plana (JPG/DWG) uygunluk, BIM/BOM, Lokman seçimi ve üretim kabulü DEĞİLDİR.

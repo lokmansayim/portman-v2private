@@ -1,0 +1,93 @@
+{
+  "model": "P9401",
+  "source_revision": "SKP-inceleme-01",
+  "source_sha256": "57ea5920c5d6a7345b576575aa9e276dd1774e9f90c6fda5e7605b9ac808bc44",
+  "request": "Lokman: videolardaki gibi birkaç çatı modeli",
+  "classification": "Modele özgü tasarım seçenekleri",
+  "reference_video": "WhatsApp Video 2026-09-29 at 14.07.27.mp4 · seçenek galerisi sunum yaklaşımı; ölçü kaynağı değil",
+  "source_roof_footprint_m": {
+    "main": [
+      -0.25,
+      10.49,
+      0.3675,
+      9.7525
+    ],
+    "porch": [
+      3.715,
+      10.49,
+      -1.515,
+      0.3675
+    ],
+    "wall_top": 3.1017
+  },
+  "assumptions": {
+    "roof_skin_thickness_m": 0.1,
+    "single_slope_infill_thickness_m": 0.05,
+    "parapet_cap_thickness_m": 0.035,
+    "note": "Yeni seçeneklerde 0,10 m kabuk görsel kalınlıktır; gerçek çatı katman sistemi değildir. Kaynak çatı geometrisi A içinde korunur. B-C yatay veranda örtüsü ve D yüzeyi drenaj tasarımı içermez. C üst kapama yüzeyleri yeni tasarım parçalarıdır."
+  },
+  "variants": [
+    {
+      "id": "A",
+      "title": "Kaynak çatı",
+      "description": "Veranda koluyla birleşen beşik çatı. Mevcut SKP geometrisi.",
+      "revision": "P9401-CATI-A-01",
+      "source_roof": true,
+      "parameters": {
+        "Saçak altı (kaynak)": "3,102 m",
+        "Ana mahya (kaynak)": "4,640 m",
+        "Veranda mahyası (kaynak)": "4,202 m"
+      },
+      "status": "Lokman seçimi ve teknik değerlendirme bekliyor",
+      "scope": "P9401 modele özgü çatı seçeneği; genel katalog kuralı değil"
+    },
+    {
+      "id": "B",
+      "title": "Sade kırma",
+      "description": "Dört yöne eğimli ana çatı ve alçak veranda örtüsü.",
+      "revision": "P9401-CATI-B-01",
+      "source_roof": false,
+      "parameters": {
+        "Ana üst kot": "4,640 m · kaynakla aynı tutulan öneri",
+        "Ana eğim": "%30.7 · öneri",
+        "Veranda örtüsü": "3,202 m üst kot · yatay görsel taslak"
+      },
+      "status": "Lokman seçimi ve teknik değerlendirme bekliyor",
+      "scope": "P9401 modele özgü çatı seçeneği; genel katalog kuralı değil"
+    },
+    {
+      "id": "C",
+      "title": "Tek eğimli",
+      "description": "Önden arkaya yükselen tek yüzey; veranda alçak örtüyle ayrılıyor.",
+      "revision": "P9401-CATI-C-01",
+      "source_roof": false,
+      "parameters": {
+        "Yükselme": "1,00 m · tasarım önerisi",
+        "Ana eğim": "%10.7 · öneri",
+        "Arka üst kot": "4.202 m · öneri"
+      },
+      "status": "Lokman seçimi ve teknik değerlendirme bekliyor",
+      "scope": "P9401 modele özgü çatı seçeneği; genel katalog kuralı değil"
+    },
+    {
+      "id": "D",
+      "title": "Parapetli düz görünüş",
+      "description": "Çatı kenarı parapetin arkasında kalır; yatay bir siluet oluşturur.",
+      "revision": "P9401-CATI-D-01",
+      "source_roof": false,
+      "parameters": {
+        "Parapet yüksekliği": "0,45 m · tasarım önerisi",
+        "Parapet kalınlığı": "0,15 m · görsel taslak",
+        "Drenaj / çatı eğimi": "Bu aşamada çözülmedi"
+      },
+      "status": "Lokman seçimi ve teknik değerlendirme bekliyor",
+      "scope": "P9401 modele özgü çatı seçeneği; genel katalog kuralı değil"
+    }
+  ],
+  "acceptance": {
+    "Lokman_secimi": "bekliyor",
+    "teknik_kabul": "bekliyor",
+    "Claude_entegrasyonu": "yapılmadı"
+  },
+  "display_palette": "Nötr karşılaştırma renkleri; ürün rengi onayı değil"
+}

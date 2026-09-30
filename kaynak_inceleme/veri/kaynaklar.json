@@ -1,0 +1,227 @@
+{
+  "aciklama": "Codex devrinin (30.09.2026) kaynak kimlikleri. Yalnız köken kaydıdır: dosya yolu (devir klasörüne göre) ve SHA256. Kabul ve durum bilgisi burada tutulmaz (DURUM.md ve docs/raporlar/2026-09-30_Codex_Devir_Kabul.md). Büyük dosyalar depoda değildir; Lokman'ın Mac'inde, devir klasöründedir.",
+  "paket": {
+    "ad": "Claude_Devir_2026-09-30",
+    "hazirlayan": "Codex (Bilge)",
+    "tarih": "2026-09-30",
+    "manifest": "deneme/2026-09-30_codex_devir/belgeler/DOSYA_MANIFESTI.json",
+    "manifest_sha256": "a9d402ef67f3d6c6bfb2dc9bae1a73d7e1740d8e7ccea93a1fd487a609defa22",
+    "dosya_sayisi": 247
+  },
+  "ortak": {
+    "dwg": {
+      "yol": "kaynaklar/uc_model/Ortak/TEK_KAT_PREFABRIK_PLANLARI.dwg",
+      "sha256": "f4a55a73e4f46ed91f0ad86963b3b07cdc34e41b3f07bd4b9e5cddc7a229b0d8",
+      "not": "DWG açılıp doğrulanmadı; depodaki ref_katalog/TEK_KAT_PREFABRIK_PLANLARI.dxf (sha256 709dfe94…) ile ilişkisi doğrulanmadı."
+    }
+  },
+  "modeller": {
+    "P9201": {
+      "revizyon": "SKP-inceleme-01",
+      "skp": {
+        "yol": "kaynaklar/uc_model/P9201/92 M2 PEYZAJLI.skp",
+        "sha256": "31fc08e97bbeee8483cbca308e0648bb10e87d96b187d3bd9ff9e07b214777fc"
+      },
+      "plan_jpg": {
+        "yol": "kaynaklar/uc_model/P9201/PS-1092.jpg",
+        "sha256": "00721a420fabf42f97fd1b2091f25084f553e7e43d2742a3d3ee771f1102c8cb"
+      },
+      "scene": {
+        "yol": "veri/skp/P9201/scene.json",
+        "sha256": "8e0e5c162a5b2e613bdd26d577c1dbdadcbcb1baabe10d7f1e49101703a6301b"
+      },
+      "selected": {
+        "yol": "veri/skp/P9201/selected.json",
+        "sha256": "ddb318616850104aab673364f7f61c351d005aa9fc998ff6095ef4ed40845ce2"
+      },
+      "source_blend": {
+        "yol": "veri/skp/P9201/source.blend",
+        "sha256": "f0870663c7580d62a93baf169f2b0538a81c224ba5d7c932139ef78842ad445e"
+      },
+      "ifc": {
+        "yol": "teslimler/Uc_Model_Sunum/P9201/P9201_referans.ifc",
+        "sha256": "776849c5f8e68f148a3ad77b758f0e7539c69f87acc68b56f7e72a89ec455811"
+      },
+      "blend": {
+        "yol": "teslimler/Uc_Model_Sunum/P9201/P9201_inceleme.blend",
+        "sha256": "d2d707de981816f309dcef6e8930c3c698e867d42db531cfb8181836fe2abf8f"
+      },
+      "secim_kaydi": "kaynak_inceleme/veri/secim_P9201.json"
+    },
+    "P9401": {
+      "revizyon": "SKP-inceleme-01",
+      "skp": {
+        "yol": "kaynaklar/uc_model/P9401/9401.skp",
+        "sha256": "57ea5920c5d6a7345b576575aa9e276dd1774e9f90c6fda5e7605b9ac808bc44"
+      },
+      "plan_jpg": {
+        "yol": "kaynaklar/uc_model/P9401/PS-1094.jpg",
+        "sha256": "d30ff88e1a570d5c4a0be0b0aac40a2fecf34fbaccf47919f74863d0353115d1"
+      },
+      "scene": {
+        "yol": "veri/skp/P9401/scene.json",
+        "sha256": "faeed82dc35fefb6362cf6a4943bd7c2b697fb1f6a830bef4e29d491c0c31e92"
+      },
+      "selected": {
+        "yol": "veri/skp/P9401/selected.json",
+        "sha256": "be423676b5a9153c08b6b14046a424093025c06f1d74711f7721eea285f470e2"
+      },
+      "source_blend": {
+        "yol": "veri/skp/P9401/source.blend",
+        "sha256": "f1d94c287c50348ed952021783a9c352d42fb54cf7b077a8ef16528c8bcfe817"
+      },
+      "ifc": {
+        "yol": "teslimler/Uc_Model_Sunum/P9401/P9401_referans.ifc",
+        "sha256": "166c11c63971899eab3c3332f48214cf77b4dae9760e31dbd7bd0e568779a4b0"
+      },
+      "blend": {
+        "yol": "teslimler/Uc_Model_Sunum/P9401/P9401_inceleme.blend",
+        "sha256": "18d192a12703e3b6dc62c1ce1200f93dce2ed902ae15f04adb33fb67d3eb0e59"
+      },
+      "secim_kaydi": "kaynak_inceleme/veri/secim_P9401.json"
+    },
+    "P9501": {
+      "revizyon": "SKP-inceleme-01",
+      "skp": {
+        "yol": "kaynaklar/uc_model/P9501/AMASRA SKP.skp",
+        "sha256": "395085dc28338e2df78d40404b88958e04f7467d86eaca34c6e51b07f57dc109"
+      },
+      "plan_jpg": {
+        "yol": "kaynaklar/uc_model/P9501/PS-1095.jpg",
+        "sha256": "3f0495ddc06fdf565256f493428a6274eca3fbc307e80783dd444ef254802688"
+      },
+      "scene": {
+        "yol": "veri/skp/P9501/scene.json",
+        "sha256": "0138b1e5206f46358d17bd6f9134f1d87ec9cf6232d61fd1ea1c0802fb814c6a"
+      },
+      "selected": {
+        "yol": "veri/skp/P9501/selected.json",
+        "sha256": "c75d69c3194e454779f63172ea305bd170114422841418e3923091501f41150f"
+      },
+      "source_blend": {
+        "yol": "veri/skp/P9501/source.blend",
+        "sha256": "b2472f7193098c43a93e7315dd807dce2e3687caecea59a8e73ceeff08226c43"
+      },
+      "ifc": {
+        "yol": "teslimler/Uc_Model_Sunum/P9501/P9501_referans.ifc",
+        "sha256": "bc417343ab95317d174390f896619c8a133ae8ff903f5dafdfab061a75f61d63"
+      },
+      "blend": {
+        "yol": "teslimler/Uc_Model_Sunum/P9501/P9501_inceleme.blend",
+        "sha256": "6ae19f1ae4e52ad2166437d4f2ef82f8da9f0333f1a3c64b0b55cd5348562223"
+      },
+      "secim_kaydi": "kaynak_inceleme/veri/secim_P9501.json"
+    }
+  },
+  "p9401_catilar": {
+    "A": {
+      "revizyon": "P9401-CATI-A-01",
+      "kaynak_cati": true,
+      "selected": {
+        "yol": "veri/p9401_cati/A_selected.json",
+        "sha256": "8022088b9d48257a8f4ac99cc87cb18e5a78c0478d974d5f442ac4a4e5c4d3e1"
+      },
+      "ifc": {
+        "yol": "teslimler/P9401_Cati_Alternatifleri/A/P9401_Cati_A.ifc",
+        "sha256": "89e851681c11c033df62cf0cf954f38b0a6825138b3d13f86854f968d57641f0"
+      },
+      "blend": {
+        "yol": "teslimler/P9401_Cati_Alternatifleri/A/P9401_Cati_A.blend",
+        "sha256": "705aa2a4b47c95f1b12515ed0d0a982a6821f7667ac5510917f922b119ca3be1"
+      }
+    },
+    "B": {
+      "revizyon": "P9401-CATI-B-01",
+      "kaynak_cati": false,
+      "selected": {
+        "yol": "veri/p9401_cati/B_selected.json",
+        "sha256": "ff2fbe1d8ca07cdaa611bde892383a7fe6bf1757ff5ccba3ef49e3b8239e6b2a"
+      },
+      "ifc": {
+        "yol": "teslimler/P9401_Cati_Alternatifleri/B/P9401_Cati_B.ifc",
+        "sha256": "666cdc6a730a526dddc8a4107af81693f1a5a2373b97f8888f10bad6133d0a42"
+      },
+      "blend": {
+        "yol": "teslimler/P9401_Cati_Alternatifleri/B/P9401_Cati_B.blend",
+        "sha256": "0315c9b897fe6b250fadc6c622f5f9362b3a2e85a2dc6a6bbb407e33fd3a48a9"
+      }
+    },
+    "C": {
+      "revizyon": "P9401-CATI-C-01",
+      "kaynak_cati": false,
+      "selected": {
+        "yol": "veri/p9401_cati/C_selected.json",
+        "sha256": "3ef17935791c92325d5aff9bc209d0b5bb297727899dbdb882d510973ea47276"
+      },
+      "ifc": {
+        "yol": "teslimler/P9401_Cati_Alternatifleri/C/P9401_Cati_C.ifc",
+        "sha256": "0b37e677f3e2069dc7a67743234fce689a017f4ee72ee9a2fea4bc3ba0943137"
+      },
+      "blend": {
+        "yol": "teslimler/P9401_Cati_Alternatifleri/C/P9401_Cati_C.blend",
+        "sha256": "fe675f988057cd2900340b56494a1939709a51d5e0c472a0c5b0d2299c347792"
+      }
+    },
+    "D": {
+      "revizyon": "P9401-CATI-D-01",
+      "kaynak_cati": false,
+      "selected": {
+        "yol": "veri/p9401_cati/D_selected.json",
+        "sha256": "406e124c690ddc3a35e86e5231ceade1650e41ea85568a3d110e46d612d377cd"
+      },
+      "ifc": {
+        "yol": "teslimler/P9401_Cati_Alternatifleri/D/P9401_Cati_D.ifc",
+        "sha256": "01732989aaf549d253542305c247267d2aecdcb2223e087fc063a5660cc0c971"
+      },
+      "blend": {
+        "yol": "teslimler/P9401_Cati_Alternatifleri/D/P9401_Cati_D.blend",
+        "sha256": "5a2ff3c76dbc807a26799b414a594be56b78e310b2c9d73ba1559be53c32bece"
+      }
+    },
+    "tasarim_kaydi": {
+      "yol": "teslimler/P9401_Cati_Alternatifleri/Tasarim_Kaydi.json",
+      "sha256": "6fac042672397b3aefc979fedba0e0b3122b7508f842522d449a44b4541db450"
+    }
+  },
+  "kurallar_yerel_2026_09_07": {
+    "BLENDER_CIZIM_KURALLARI.md": "21627106709014e35855eff2e682bd0bf5dcde3431b456df921be298a3fbd792",
+    "BLENDER_KURALLAR.json": "66c147f5c56d56e476871b4206ff069de2af7fbdc2e8329a2d3857a178b253d4",
+    "CIZIM_VE_BOM_IS_AKISI.md": "3152d2cbfe66fb0fedfe95203ee986f7b177caf334be3b5308fb5ef8a02289bb",
+    "KURALLAR.json": "567b0f6964eacc1deeacd08589ebc8427424dcf595908912fc30d19c1980d757",
+    "MALZEME_KATALOGU.json": "8de0e995a3ee511d344bfb5c7094307ea13fe3b48fe32cc7c584acca67a4f9a0",
+    "prefabrik-cizim-kurallari.md": "5fb4e5299b401226678b40d69eb0193c725bc677acea32c1264b9a61ef3d9d14"
+  },
+  "eski_motor_r01": {
+    "not": "22.09 Motor v1.1 çıktıları; karşılaştırma içindir, kabul edilmedi. manifest.json'daki reference_dxf_sha256 (22cc9304…) depodaki kanal/ref_source-6x8.dxf'tir, katalog DXF'i değildir.",
+    "P9201": {
+      "dxf": {
+        "yol": "kaynaklar/eski_motor_r01/P9201/Portman_PM-KATALOG-P9201_r01.dxf",
+        "sha256": "1d031a89de4e3d3af3d98ea0c67605a6cc763103d0d16d59e98aa26796e46fd0"
+      },
+      "is_emri": {
+        "yol": "kaynaklar/eski_motor_r01/P9201/is_emri.json",
+        "sha256": "c2bf6f356c99596f4bf4cf1c3750bf9955fd2b3a5553de0c95fd03f5187f4353"
+      }
+    },
+    "P9401": {
+      "dxf": {
+        "yol": "kaynaklar/eski_motor_r01/P9401/Portman_PM-KATALOG-P9401_r01.dxf",
+        "sha256": "7ef620a1f2b7dcbdb07be04eb6926b70d57831d707106e50d0efc6543e111934"
+      },
+      "is_emri": {
+        "yol": "kaynaklar/eski_motor_r01/P9401/is_emri.json",
+        "sha256": "9ff0892b140d4e2560d9f05004b375f099017f02dabf01891760bd388ac931e0"
+      }
+    },
+    "P9501": {
+      "dxf": {
+        "yol": "kaynaklar/eski_motor_r01/P9501/Portman_PM-KATALOG-P9501_r01.dxf",
+        "sha256": "fa906c76716cf9b1df703eee950d5bdb6e2bae654b9d074aeb70dba3fa6d506a"
+      },
+      "is_emri": {
+        "yol": "kaynaklar/eski_motor_r01/P9501/is_emri.json",
+        "sha256": "3dd42ad467ce10c4da3c211d9808388d03370902576a02f2bafb5ac98bc21a87"
+      }
+    }
+  }
+}

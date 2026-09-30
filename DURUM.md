@@ -1,6 +1,12 @@
 # Portman · DURUM
 
-**Son güncelleme: 30 Eylül 2026 01:10 (tek aktif teslim: Aşama 2 kabul vakası, İE-04; aday karşılaştırması yapıldı, kararlar bekleniyor).** Her oturumun son adımı bu dosyayı güncellemektir.
+**Son güncelleme: 30 Eylül 2026 07:40 (tek aktif teslim: Aşama 2 kabul vakası, İE-04; aday karşılaştırması yapıldı, kararlar bekleniyor. Codex devri yerel aday olarak `ie-04-codex-devir` dalında, kabul bekliyor).** Her oturumun son adımı bu dosyayı güncellemektir.
+
+**Codex devri (30.09 07:40, yerel aday; `ie-04-codex-devir`, `ie-04`'e alınması Lokman'ın onayına bağlı).** Codex'in (Bilge) üç model kaynak incelemesi (P9201, P9401, P9501; SKP → geometrik IFC4 ve Blender) ve P9401 çatı seçenekleri (A kaynak; B/C/D seçilmemiş, modele özgü öneri) devralındı. Rapor: `docs/raporlar/2026-09-30_Codex_Devir_Kabul.md`.
+- Paket (Mac, 247 dosya) manifestle 247/247 aynı. Depoya yalnız küçük metin dosyaları (`deneme/2026-09-30_codex_devir/`) ve yeni `kaynak_inceleme/` paketi girdi. Büyük veri (JSON, IFC, `.blend`) Mac'te; depoya alınması yeni veri paylaşımı, onay bekler.
+- Bu oturumda Mac'siz ve Blender'sız yeniden üretildi: seçim 3/3, IFC 7/7 (tarih damgası dışında satır satır aynı), çatı verisi A–D bayt bayt. Kayıtlı IFC 7/7 ve `.blend` 7/7 bağlayıcı kapılardan geçti. Gövde A–D'de birebir korunuyor.
+- Gerileme (bu dal): harness 22/22; referans parmak izleri AYNI, beklenen 2 fark; bütün testler 345 geçti (yerel Postgres 16), 1 atlandı (gerçek veri testi, ayrıca geçti).
+- Motor, çıkarıcı, 23.09 IFC/Blender kodu ve canlı paket değişmedi. İE-02 açılmadı. Lokman görsel kabulü, teknik kabul ve kaynak önceliği (K-A2) açık. İE-04 A1–A6 durumları değişmedi.
 
 **Oturum devri (30.09 01:10):** 28–30 Eylül penceresi kapandı. Yeni pencere `docs/devir/2026-09-30_Oturum_Devri.md` ile başlar: kurallar, yapılanlar, bekleyen kararlar, sıradaki işler, Astra'ya çizim işi için ölçütler.
 
@@ -55,6 +61,8 @@ Onay: Lokman 29.09 23:49. İş emri: `docs/is_emirleri/IE-04.md` (dal `ie-04`). 
 | `CLAUDE.md` | Her oturumun kendiliğinden okuduğu kurallar ve okuma sırası |
 | `araclar/` | `ortam_kur.sh` (tek komutla yerel ortam; `--dogrula` ile gerileme) ve `gereksinimler.txt` |
 | `KARARLAR/` | K01–K25 ve Z-01–Z-10, her karar ayrı dosyada |
+| `kaynak_inceleme/` | Codex devrinin yerel entegrasyon adayı (30.09): SKP kaynak modelinden geometrik IFC4, bağlayıcı IFC ve `.blend` denetimi, kalıcı kimlikli seçim, P9401 çatı/gövde denetimi, devir yeniden doğrulaması. Üretim hattı değildir |
+| `deneme/2026-09-30_codex_devir/` | Codex devir belgeleri ve kod arşivi (değiştirilmeden, manifestle aynı), doğrulama çıktıları |
 
 ## Bileşenler
 
@@ -68,6 +76,7 @@ Onay: Lokman 29.09 23:49. İş emri: `docs/is_emirleri/IE-04.md` (dal `ie-04`). 
 | Serbest aks (Motor yaması) | Kodlandı | 23.09: Tatar 80 m²'de denendi · 28.09: `yeniden_kos.py` ile yeniden koşuldu, sonuçlar aynı | Test dar: tek plan. `deneme/` altında ayrı yama; ana kodda ve canlıda değil; K16'ya bağlı |
 | Vektör PDF plan okuyucu | Kodlandı | 23.09 Tatar 80: ölçek iki yöntemle %0,05 tutarlı · 28.09: `yeniden_kos.py` ile aynı | Test dar: tek plan. Deneme sürümü; el çizimi okumuyor |
 | IFC4 üretimi (IfcOpenShell) | Kodlandı | 30.09: P9401 ve P9201 İş Emri'nden IFC4 (7/5 ve 6/5 açıklık, şema hatası 0) · 28.09 yeniden koşum (`yeniden_kos.py`): şema 0 hata, çift sayım 35/35, hacim farkı %0,0 · Yan Verandalı: Astra modeliyle 65/67 eleman, açıklık 13/13 | Tekrarlanabilir test var ama dar: iki plan. Şema doğrulaması üretim doğruluğu değildir |
+| Kaynak inceleme: katalog SKP → geometrik IFC4 (Codex devri; `kaynak_inceleme/`) | Test edildi | 30.09: üç model ve dört P9401 çatısı Mac'siz yeniden üretildi, kayıtlı IFC'lerle tarih damgası dışında aynı; kayıtlı IFC 7/7 ve `.blend` 7/7 (bpy 5.2.2) bağlayıcı kapılardan geçti; bozma denemeleri yakalandı; 17 sentetik test (`testler/kaynak_inceleme`) | Geometri referansı (`IfcBuildingElementProxy`); BIM/BOM ve üretim kabulü değil. Büyük veri Mac'te. SKP okuma ve Blender sahne kurma Mac'e bağlı. Kaynak önceliği (JPG/DXF/SKP) K-A2 |
 | Blender modeli | Kodlandı | 28.09: `yeniden_kos.py` ile bpy 5.0.1'de yeniden kuruldu, 65 pano, BOM aynı | Test dar: tek plan; sunum içindir, hesap burada yapılmaz |
 | Depo | Kodlandı | 28.09: `portman-v2private` açıldı; v1.1.1 geçmişiyle alındı; İE-01, Lokman'ın onayıyla `main`'e birleştirildi · 29.09: İE-02 Lokman'ın onayıyla `main`'e birleştirildi · 30.09 01:15: altyapı (`CLAUDE.md`, `araclar/`) Lokman'ın onayıyla `main`'e birleştirildi (`e8014e7`) | Eski depo `lokmansayim/portman` yalnız okunuyor |
 | Yapı Tanımı şeması | Taslak | Zemin, 27.09; temeli İş Emri şeması v0.1 (21.09) | Ölçü anlamları ve ürün ailesi ayrımı eksik |

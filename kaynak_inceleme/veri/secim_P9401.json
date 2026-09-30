@@ -1,0 +1,297 @@
+{
+  "model": "P9401",
+  "revizyon": "SKP-inceleme-01",
+  "kaynak_dosya": "9401.skp",
+  "kaynak_sha256": "57ea5920c5d6a7345b576575aa9e276dd1774e9f90c6fda5e7605b9ac808bc44",
+  "birim": {
+    "kaynak": "inches",
+    "hedef": "meters",
+    "katsayi": 0.0254
+  },
+  "cati_kokleri": [
+    {
+      "sira": 223,
+      "kalici_kimlik": 111297,
+      "ad": "Group#35"
+    }
+  ],
+  "dislanan_kokler": [
+    {
+      "sira": 13,
+      "kalici_kimlik": 41963,
+      "ad": "Group#6"
+    },
+    {
+      "sira": 221,
+      "kalici_kimlik": 111235,
+      "ad": "Group#6"
+    }
+  ],
+  "kopya_kurali": {
+    "aciklama": "Kök grubun sınır kutusu x_min değeri eşiği aşarsa (ikinci yapı kopyası) dışarıda",
+    "x_min_esigi_m": 12.0,
+    "dislanan": [
+      {
+        "sira": 86,
+        "kalici_kimlik": 111245,
+        "ad": "Group#15"
+      },
+      {
+        "sira": 89,
+        "kalici_kimlik": 111248,
+        "ad": "Group#15"
+      },
+      {
+        "sira": 92,
+        "kalici_kimlik": 111246,
+        "ad": "Group#15"
+      },
+      {
+        "sira": 95,
+        "kalici_kimlik": 111249,
+        "ad": "Group#15"
+      },
+      {
+        "sira": 98,
+        "kalici_kimlik": 111247,
+        "ad": "Group#15"
+      },
+      {
+        "sira": 101,
+        "kalici_kimlik": 111277,
+        "ad": "Group#32"
+      },
+      {
+        "sira": 128,
+        "kalici_kimlik": 111252,
+        "ad": "Group#29"
+      },
+      {
+        "sira": 129,
+        "kalici_kimlik": 111232,
+        "ad": "Group#16"
+      },
+      {
+        "sira": 130,
+        "kalici_kimlik": 111228,
+        "ad": "Group#41"
+      },
+      {
+        "sira": 131,
+        "kalici_kimlik": 111231,
+        "ad": "Group#11"
+      },
+      {
+        "sira": 132,
+        "kalici_kimlik": 111234,
+        "ad": "Group#8"
+      },
+      {
+        "sira": 133,
+        "kalici_kimlik": 111229,
+        "ad": "Group#39"
+      },
+      {
+        "sira": 134,
+        "kalici_kimlik": 111233,
+        "ad": "Group#8"
+      },
+      {
+        "sira": 135,
+        "kalici_kimlik": 111238,
+        "ad": "Group#7"
+      },
+      {
+        "sira": 136,
+        "kalici_kimlik": 111239,
+        "ad": "Group#7"
+      },
+      {
+        "sira": 137,
+        "kalici_kimlik": 111227,
+        "ad": "Group#36"
+      },
+      {
+        "sira": 138,
+        "kalici_kimlik": 111273,
+        "ad": "Group#27"
+      },
+      {
+        "sira": 139,
+        "kalici_kimlik": 111266,
+        "ad": "Group#29"
+      },
+      {
+        "sira": 140,
+        "kalici_kimlik": 111267,
+        "ad": "Group#29"
+      },
+      {
+        "sira": 141,
+        "kalici_kimlik": 111261,
+        "ad": "Group#29"
+      },
+      {
+        "sira": 142,
+        "kalici_kimlik": 111274,
+        "ad": "Group#27"
+      },
+      {
+        "sira": 143,
+        "kalici_kimlik": 111255,
+        "ad": "Group#29"
+      },
+      {
+        "sira": 144,
+        "kalici_kimlik": 111275,
+        "ad": "Group#27"
+      },
+      {
+        "sira": 145,
+        "kalici_kimlik": 111264,
+        "ad": "Group#29"
+      },
+      {
+        "sira": 146,
+        "kalici_kimlik": 111262,
+        "ad": "Group#28"
+      },
+      {
+        "sira": 147,
+        "kalici_kimlik": 111265,
+        "ad": "Group#29"
+      },
+      {
+        "sira": 148,
+        "kalici_kimlik": 111271,
+        "ad": "Group#29"
+      },
+      {
+        "sira": 149,
+        "kalici_kimlik": 111258,
+        "ad": "Group#29"
+      },
+      {
+        "sira": 150,
+        "kalici_kimlik": 111256,
+        "ad": "Group#29"
+      },
+      {
+        "sira": 151,
+        "kalici_kimlik": 111263,
+        "ad": "Group#29"
+      },
+      {
+        "sira": 152,
+        "kalici_kimlik": 111257,
+        "ad": "Group#29"
+      },
+      {
+        "sira": 153,
+        "kalici_kimlik": 111259,
+        "ad": "Group#29"
+      },
+      {
+        "sira": 154,
+        "kalici_kimlik": 111269,
+        "ad": "Group#29"
+      },
+      {
+        "sira": 155,
+        "kalici_kimlik": 111253,
+        "ad": "Group#29"
+      },
+      {
+        "sira": 156,
+        "kalici_kimlik": 111237,
+        "ad": "Group#7"
+      },
+      {
+        "sira": 157,
+        "kalici_kimlik": 111250,
+        "ad": "Group#21"
+      },
+      {
+        "sira": 182,
+        "kalici_kimlik": 111268,
+        "ad": "Group#29"
+      },
+      {
+        "sira": 183,
+        "kalici_kimlik": 111230,
+        "ad": "Group#16"
+      },
+      {
+        "sira": 184,
+        "kalici_kimlik": 111270,
+        "ad": "Group#29"
+      },
+      {
+        "sira": 185,
+        "kalici_kimlik": 111226,
+        "ad": "Group#37"
+      },
+      {
+        "sira": 189,
+        "kalici_kimlik": 111254,
+        "ad": "Group#29"
+      },
+      {
+        "sira": 190,
+        "kalici_kimlik": 111276,
+        "ad": "Group#27"
+      },
+      {
+        "sira": 191,
+        "kalici_kimlik": 111260,
+        "ad": "Group#29"
+      },
+      {
+        "sira": 192,
+        "kalici_kimlik": 111272,
+        "ad": "Group#27"
+      },
+      {
+        "sira": 193,
+        "kalici_kimlik": 111251,
+        "ad": "Group#18"
+      },
+      {
+        "sira": 212,
+        "kalici_kimlik": 111240,
+        "ad": "Group#9"
+      },
+      {
+        "sira": 213,
+        "kalici_kimlik": 111241,
+        "ad": "Group#9"
+      },
+      {
+        "sira": 214,
+        "kalici_kimlik": 111236,
+        "ad": "Group#14"
+      },
+      {
+        "sira": 221,
+        "kalici_kimlik": 111235,
+        "ad": "Group#6"
+      },
+      {
+        "sira": 222,
+        "kalici_kimlik": 111242,
+        "ad": "Group#10"
+      },
+      {
+        "sira": 240,
+        "kalici_kimlik": 111244,
+        "ad": "Tildenville Outdoor Club Chair with Cushions"
+      },
+      {
+        "sira": 248,
+        "kalici_kimlik": 111243,
+        "ad": "Tildenville Outdoor Club Chair with Cushions"
+      }
+    ]
+  },
+  "not": "Sıra numarası yalnız bu SHA256'lı okuma içindir; eşleme kalıcı kimlikle yapılır."
+}
