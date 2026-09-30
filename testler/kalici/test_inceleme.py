@@ -369,7 +369,7 @@ def test_cakisma_tasinan_dosyalari_siler_numara_bosalir(depo, hizli_motor, monke
         yer = asil(cikti, hazirlik)
         with depo.baglan() as c:                               # taşımadan sonra başka bir yazma
             c.execute("INSERT INTO konusmalar (gonderen, durum) VALUES (%s, %s)", (NUMARA_A, Jsonb({"asama": "baskasi"})))
-        tasi_sonra_baskasi_yazsin.hedef = yer[1]
+        tasi_sonra_baskasi_yazsin.hedef = yer[0][1]          # İE-04: _yerlestir [(kaynak, hedef), …] döner
         return yer
     monkeypatch.setattr(kalici, "_yerlestir", tasi_sonra_baskasi_yazsin)
     r = kalici.bir_is(depo, AYAR, "A")

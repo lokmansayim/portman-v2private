@@ -1,0 +1,238 @@
+{
+ "is_emri_no": "PM-ADAY-TEST03",
+ "revizyon": 1,
+ "talep": {
+  "bayi": {
+   "kod": "ADAY",
+   "ad": "Aday kaydı"
+  },
+  "musteri_adi": "ADAY TEST03",
+  "metin": "TEST: katalog P9401 çıkarımı, sol-sağ aynalı (30.09)"
+ },
+ "yapi": {
+  "sistem": "prefabrik",
+  "kat_sayisi": 1,
+  "duvar_yuksekligi_cm": 250,
+  "olcu_kaynagi": "serbest",
+  "referans_model": "P9401",
+  "grid": {
+   "x_pano": 8.0,
+   "y_pano": 7.0
+  },
+  "kisa_kenar": "x",
+  "giris_cephesi": "on",
+  "dis_dusey_duvar": "aks_disinda"
+ },
+ "mahaller": [
+  {
+   "ad": "YATAK ODASI 1",
+   "tur": "yatak_odasi",
+   "konum_pano": [
+    [
+     5.5,
+     4.0,
+     8.0,
+     7.0
+    ]
+   ]
+  },
+  {
+   "ad": "YATAK ODASI 2",
+   "tur": "yatak_odasi",
+   "konum_pano": [
+    [
+     3.0,
+     4.0,
+     5.5,
+     7.0
+    ]
+   ]
+  },
+  {
+   "ad": "YATAK ODASI 3",
+   "tur": "yatak_odasi",
+   "konum_pano": [
+    [
+     5.0,
+     0.0,
+     8.0,
+     2.0
+    ]
+   ]
+  },
+  {
+   "ad": "BANYO",
+   "tur": "banyo",
+   "konum_pano": [
+    [
+     6.5,
+     2.0,
+     8.0,
+     4.0
+    ]
+   ]
+  },
+  {
+   "ad": "YASAM ALANI",
+   "tur": "salon",
+   "konum_pano": [
+    [
+     0.0,
+     1.0,
+     3.0,
+     7.0
+    ],
+    [
+     3.0,
+     2.0,
+     6.5,
+     4.0
+    ],
+    [
+     3.0,
+     1.0,
+     5.0,
+     2.0
+    ]
+   ]
+  },
+  {
+   "ad": "VERANDA",
+   "tur": "veranda",
+   "konum_pano": [
+    [
+     0.0,
+     0.0,
+     5.0,
+     1.0
+    ]
+   ]
+  }
+ ],
+ "acik_sinirlar": [],
+ "acikliklar": [
+  {
+   "tur": "pencere",
+   "olcu": "60x40",
+   "mahal": "BANYO",
+   "duvar": "sag",
+   "pano": 1
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "YATAK ODASI 1",
+   "duvar": "sag",
+   "pano": 1
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "YASAM ALANI",
+   "duvar": "sol",
+   "pano": 3
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x180",
+   "mahal": "YATAK ODASI 3",
+   "duvar": "on",
+   "pano": 1
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x180",
+   "mahal": "YASAM ALANI",
+   "duvar": "on",
+   "pano": 2
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x180",
+   "mahal": "YASAM ALANI",
+   "duvar": "on",
+   "pano": 0
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "YATAK ODASI 2",
+   "duvar": "arka",
+   "pano": 1
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "YASAM ALANI",
+    "YATAK ODASI 1"
+   ],
+   "mentese": "sol"
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "YASAM ALANI",
+    "YATAK ODASI 3"
+   ],
+   "mentese": "sag",
+   "pano": 0
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "YASAM ALANI",
+    "YATAK ODASI 2"
+   ],
+   "mentese": "sag",
+   "pano": 0
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "YASAM ALANI",
+    "BANYO"
+   ],
+   "mentese": "sol",
+   "pano": 1
+  },
+  {
+   "tur": "dis_kapi",
+   "olcu": 90,
+   "arasi": [
+    "VERANDA",
+    "YASAM ALANI"
+   ],
+   "mentese": "sag",
+   "pano": 4
+  }
+ ],
+ "cati": {
+  "tip": "besik",
+  "egim_yuzde": 33,
+  "sacak_cm": 30,
+  "topuk_cm": 10,
+  "makas_yonu": "kisa_kenar"
+ },
+ "cikti": {
+  "pdf": true,
+  "dxf": true,
+  "pafta": "A2",
+  "icerik": [
+   "aksli_plan",
+   "alanli_kopya",
+   "montaj_kopyasi",
+   "on_gorunus",
+   "cati_profili",
+   "ozellik_tablosu"
+  ]
+ },
+ "varsayimlar": [
+  "Otomatik çıkarım: TEK_KAT_PREFABRIK_PLANLARI.dxf; kaynak konumlar ve artıklar cikarim_raporu.json'da.",
+  "Varyant: ayna_x uygulandı (pano biriminde deterministik dönüşüm)."
+ ],
+ "eksikler": []
+}

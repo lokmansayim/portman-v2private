@@ -10,6 +10,7 @@ from .sema import Talep, Karar
 from .katalog import Katalog
 from .konusma import Konusma, MAX_REVIZYON, MAX_SORU, ESKI_TASLAK_SN
 from . import varyant
+from . import secenek as SC
 
 MOD = 125.5
 ROOT = Path(__file__).resolve().parent.parent
@@ -94,6 +95,19 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
             k.not_dus("kural", "pencere_islem cevabı olumsuz ya da soru biçimli: soru yinelendi")
             return _soru(k, "pencere_islem", "Anlayamadım. " + (k.d.get("pencere_islem_sorusu") or
                          "Mevcut pencerenin ölçüsünü mü değiştirelim, yoksa ikinci bir pencere mi ekleyelim? \"değiştir\" ya da \"ekle\" yazmanız yeterli."))
+
+    # İE-04: askıdaki öncelik sorusunun cevabı ("bütçe", "yaşam alanı", "kısa montaj", "fark etmez"; buton kimliği q:oncelik:<deger>
+    # aynı metne çevrilir). Kısa ve açık cevap taslağa yazılır; LLM'in bu kısa cevaba verdiği içerik yok sayılır. Cevap değilse
+    # soru bir daha sorulmaz (öncelik "yok"), mesaj normal işlenir: "söylenen bilgi tekrar sorulmaz".
+    if k.d.get("son_soru_alani") == "oncelik":
+        cevap = _oncelik_cevabi(metin)
+        k.d["son_soru_alani"] = None
+        k.d["taslak"]["oncelik"] = cevap or "yok"
+        if cevap:
+            k.not_dus("kural", f"öncelik cevabı: {cevap}")
+            t = Talep(niyet="yeni_talep", guven=t.guven, ozet=t.ozet)
+        else:
+            k.not_dus("kural", "öncelik sorusuna cevap yok: öncelik belirtilmedi sayıldı, mesaj normal işlendi")
 
     # D-01: askıda "yeni talep mi, önceki taslağın değişikliği mi?" sorusu varken gelen mesaj. Yalnız kısa ve saf bir cevap
     # ("yeni", "değişiklik", "önceki taslağın değişikliği") cevap sayılır; o zaman soruyu doğuran mesaj (bekletilen talep ve
@@ -214,16 +228,19 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
     if dusen_not:
         ts["_on_not"] = dusen_not
 
-    # 2a) katalog modeli
+    # 2a) katalog modeli ya da aday (İE-04: aday kaydındaki şablon; seçim açık seçenek setini kapatır)
     if ts.get("katalog_kodu"):
+        aday = katalog.aday(ts["katalog_kodu"])
         model = katalog.bul(ts["katalog_kodu"])
-        if model is None:
+        if aday is None and model is None:
             return _soru(k, "katalog_kodu", f"Katalogda \"{ts['katalog_kodu']}\" kodlu model bulamadım. Kodu kontrol eder misiniz? (örn. P6001, P7401, Ç8201)")
-        yol = katalog.sablon_yolu(model["code"])
+        kod = aday["kod"] if aday else model["code"]
+        yol = katalog.sablon_yolu(kod)
         if yol is None:
             return _bitir(k, Karar(eylem="yonlendir", gerekce="şablon kodlanmamış",
-                                    mesaj=f"{Katalog.kisa(model)} katalogda kayıtlı; çizim şablonu sisteme henüz işlenmedi. " + YONLENDIRME))
-        return _is_emri_uret(k, bayi, katalog, json.loads(yol.read_text(encoding="utf-8")), model["code"], ts)
+                                    mesaj=f"{Katalog.kisa(model) if model else kod} katalogda kayıtlı; çizim şablonu sisteme henüz işlenmedi. " + YONLENDIRME))
+        _seti_kapat(k, kod)
+        return _is_emri_uret(k, bayi, katalog, json.loads(yol.read_text(encoding="utf-8")), kod, ts)
 
     # 2b) serbest talep — zorunlu: oda programı + (dış ölçü | pano | alan)
     if not ts.get("oda_programi"):
@@ -235,6 +252,10 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
         en, boy = sorted([float(ts["dis_olcu"]["en_m"]), float(ts["dis_olcu"]["boy_m"])])
         nx, ny = pano_sayisi(en, 20), pano_sayisi(boy, 10)
     elif ts.get("alan_m2"):
+        # İE-04: aday kaydında uyan aday varsa seçenekler sunulur (öncelik sorusu bir kez); yoksa bugünkü davranış.
+        secenek = _secenekler(k, katalog, ts)
+        if secenek is not None:
+            return secenek
         adaylar = katalog.yakin_modeller(float(ts["alan_m2"]), ts["oda_programi"], ts.get("yapi_turu"))
         if adaylar:
             liste = ", ".join(Katalog.kisa(m) for m in adaylar)
@@ -245,6 +266,10 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
 
     W, H = dis_olcu_cm(nx, ny)
     anahtar = (nx, ny, ts["oda_programi"])
+    if anahtar not in GRID_SABLON:
+        secenek = _secenekler(k, katalog, {**ts, "alan_m2": None, "pano": {"nx": nx, "ny": ny}})     # İE-04: pano ızgarasıyla aday
+        if secenek is not None:
+            return secenek
     if anahtar in GRID_SABLON:
         ie = json.loads((ROOT / "is_emri" / GRID_SABLON[anahtar]).read_text(encoding="utf-8"))
         ts.setdefault("belirsizlikler", []).append(f"Grid {nx:g}x{ny:g} pano → onaylı örnek şablonu kullanıldı ({GRID_SABLON[anahtar]}).")
@@ -606,17 +631,77 @@ def _eski_taslak_sor(k: Konusma, t: Talep | None = None, metin: str | None = Non
                            gerekce="eski taslak: yeni mi değişiklik mi (D-01)" + (" · yinelendi" if n > 1 else "")))
 
 
-def _soru(k: Konusma, alan: str, metin: str) -> Karar:
+_ONCELIK_SOZ = {"butce": re.compile(r"\b(butce|ucuz|ekonomik|fiyat|maliyet)\w*"),
+                "yasam": re.compile(r"\b(yasam|salon|genis|ferah|buyuk oda)\w*"),
+                "montaj": re.compile(r"\b(montaj|hizli|cabuk|kisa sure|erken)\w*"),
+                "yok": re.compile(r"\b(fark etmez|farketmez|hepsi|yok|onemli degil|onemsiz|gecin|atla)\w*")}
+
+
+def _oncelik_cevabi(metin: str | None) -> str | None:
+    """Kısa öncelik cevabı: 'butce' | 'yasam' | 'montaj' | 'yok' | None (cevap değil ya da iki öncelik birden)."""
+    q = " " + _sozcuk_norm(metin) + " "
+    if len(q.split()) > 8:
+        return None
+    eslesen = [ad for ad, rx in _ONCELIK_SOZ.items() if rx.search(q)]
+    return eslesen[0] if len(eslesen) == 1 else None
+
+
+def _seti_kapat(k: Konusma, kod: str) -> None:
+    """Açık seçenek seti varsa seçimle kapanır (setteki ya da set dışı bir aday kodu)."""
+    st = k.d.get("secenek_seti")
+    if st and st.get("durum") == "acik":
+        st["durum"] = "secildi"; st["secilen_kod"] = kod
+        st["set_disi"] = kod not in {a["kod"] for a in st.get("adaylar") or []}
+        k.not_dus("kural", f"seçenek setinden seçim: {kod}" + (" (set dışı)" if st["set_disi"] else ""))
+
+
+def _secenekler(k: Konusma, katalog: Katalog, ts: dict) -> Karar | None:
+    """İE-04: aday kaydından uyan aday varsa seçenek seti. Önce (bir kez) öncelik sorulur; sonra set sunulur. Hiç aday yoksa None
+    (çağıran bugünkü davranışa döner). Set kaydı konuşmadadır; kimlikler s:<set>:<kod>; eski set 'eskidi' olur."""
+    uygun = SC.uygun_adaylar(katalog, ts)
+    if not uygun:
+        return None
+    if ts.get("oncelik") is None and len(uygun) >= 2:
+        k.d["taslak"]["oncelik_soruldu"] = True
+        return _soru(k, "oncelik", "Sıralamada ne öne çıksın: bütçe mi, yaşam alanı mı, kısa montaj mı? Fark etmezse \"fark etmez\" yazın.",
+                     butonlar=[{"id": "q:oncelik:butce", "baslik": "Bütçe önce"}, {"id": "q:oncelik:yasam", "baslik": "Yaşam alanı önce"},
+                               {"id": "q:oncelik:montaj", "baslik": "Kısa montaj"}])
+    sirali = SC.puanla(uygun, ts)
+    kaynak_id = getattr(k, "son_mesaj_id", None) or f"{k.gonderen}:{int(time.time())}"   # worker.isle verir: aynı mesaj → aynı set kimliği
+    st = SC.set_kaydi(kaynak_id, sirali, ts)
+    eski = k.d.get("secenek_seti")
+    if eski and eski.get("durum") == "acik" and eski.get("id") != st["id"]:
+        eski["durum"] = "eskidi"
+        k.d.setdefault("eski_setler", []).append(eski)
+        k.d["eski_setler"] = k.d["eski_setler"][-5:]
+    k.d["secenek_seti"] = st
+    test_var = any(a.get("durum") == "test" for a in st["adaylar"])
+    mesaj = SC.mesaj_metni(sirali, ts)
+    if test_var:
+        mesaj = "[TEST VERİSİ — gerçek seçenek değildir] " + mesaj
+    butonlar = [{"id": f"s:{st['id']}:{a['kod']}", "baslik": f"{a['sira']}. {a['kod']}"[:20]} for a in sirali[:SC.EN_COK_GORSEL]]
+    k.d["soru_sayisi"] += 1
+    k.d["son_soru_alani"] = "secenek"
+    if k.d["soru_sayisi"] > MAX_SORU:
+        return _bitir(k, Karar(eylem="yonlendir", gerekce="soru sınırı", mesaj="Talebi netleştiremedim. " + YONLENDIRME))
+    return _bitir(k, Karar(eylem="secenek", soru_alani="secenek", mesaj=mesaj, secenek_seti=st, butonlar=butonlar,
+                           gerekce=f"seçenek seti {st['id']}: {len(sirali)} aday" + (" (test verisi)" if test_var else "")))
+
+
+def _soru(k: Konusma, alan: str, metin: str, butonlar: list[dict] | None = None) -> Karar:
     k.d["soru_sayisi"] += 1
     k.d["son_soru_alani"] = alan
     if k.d["soru_sayisi"] > MAX_SORU:
         return _bitir(k, Karar(eylem="yonlendir", gerekce="soru sınırı", mesaj="Talebi netleştiremedim. " + YONLENDIRME))
-    return _bitir(k, Karar(eylem="sor", soru_alani=alan, mesaj=metin, gerekce=f"eksik: {alan}"))
+    return _bitir(k, Karar(eylem="sor", soru_alani=alan, mesaj=metin, gerekce=f"eksik: {alan}", butonlar=butonlar))
 
 
 def _bitir(k: Konusma, karar: Karar) -> Karar:
     if karar.eylem in ("is_emri", "yonlendir"):
         k.d["son_soru_alani"] = None                  # plan çıktı ya da insana devredildi: askıda soru kalmaz
+    st = k.d.get("secenek_seti")
+    if st and st.get("durum") == "acik" and karar.eylem == "yonlendir":
+        st["durum"] = "dustu"                         # insana devredildi: açık set seçim yapmaz
     if k.d.get("son_soru_alani") != ESKI_TASLAK_SORUSU:
         k.d.pop("eski_taslak_soru", None)             # D-01 sorusu askıda değilse sayaç da kalmaz
     if k.d.get("son_soru_alani") != "pencere_islem":
