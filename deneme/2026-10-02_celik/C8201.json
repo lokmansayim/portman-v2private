@@ -239,7 +239,9 @@
     "sacak_alti_kaplama": true,
     "topuk": 10,
     "topuk_varsayim": false,
-    "topuk_kaynak": "SKP ölçümü, 2 Ekim 2026: 62, 81 ve 90 m² çelik modellerde makasın üst yüzü saçak ucunda 280 cm (duvar 270 + 10); saçak altı 270 cm",
+    "topuk_kaynak": "SKP ölçümü, 2 Ekim 2026: 62, 81 ve 90 m² çelik modellerde makasın üst yüzü saçak ucunda 280 cm (duvar 270 + 10); saçak altı 270 cm. Lokman, 2 Ekim 22:05: makaslar %33 eğim ve 10 cm topukla çizilir",
+    "panel_kalinligi": 8,
+    "panel_kaynak": "Lokman, 2 Ekim 2026 22:05: makasların üzerine 8 cm çatı paneli gelir; saçak kaplaması 10 cm topuk + panelin eğimdeki ölçüsü kadar yapılır",
     "kapsam": "kapali+veranda",
     "kaynak": "Lokman, 2 Ekim 2026 20:40 (kırma/dört omuz, %33, saçak 30 cm kaplamalı); kapsam katalog görsellerinden"
   }

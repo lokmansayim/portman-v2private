@@ -63,7 +63,7 @@ Tutmayanlar ve yeni çıkanlar (Lokman'a soruldu):
 2. **Eğim.** 62 m² projede dört yönde de %30,0.
 3. **Dikme aralığı.** 90 m² projede 62,5 cm.
 4. **Profil.** 81 m² modelde başlık 54 mm; öteki iki modelde ve yükleme listesinde 45 mm.
-5. **Topuk.** Makasın üst yüzü saçak ucunda 280: duvar üstünden 10 cm yukarıda. Alt başlık saçak ucuna kadar düz gidiyor; saçak altı 270 kotunda. İlk hesapta topuk duvar hizasında varsayılmıştı; düzeltildi (`cati.md`).
+5. **Topuk.** Makasın üst yüzü saçak ucunda 280: duvar üstünden 10 cm yukarıda. Alt başlık saçak ucuna kadar düz gidiyor; saçak altı 270 kotunda. İlk hesapta topuk duvar hizasında varsayılmıştı; düzeltildi (`cati.md`). Lokman 22:05'te teyit etti: makaslar %33 eğim ve 10 cm topukla çizilir; üzerine 8 cm çatı paneli gelir (modellerde panel yok, yalnız karkas var).
 6. **Makas aralığı.** Üç modelde de 125 cm.
 
 ## Doğrulama

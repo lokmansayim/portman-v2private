@@ -8,10 +8,13 @@ Kaynak: Lokman'ın anlattıkları (2 Ekim 2026). Madde sonundaki saat, söylendi
 - Eğim değişmez. (20:40)
 - Kırma çatı "dört omuz" diye de geçer; mimaride "zarf" diyen de var. Farkı: yandan %33'tür ve önden de kırılır; birleşim noktası (mahya) ortada kalan kısımdır. (20:40)
 - Çatı bitişi (topuklar): saçaklar 30 cm, kaplamalı. (20:40)
+- Çelik karkas makaslar %33 eğim ve 10 cm topukla çizilir. (22:05)
+- Makasların üzerine 8 cm çatı paneli gelir. (22:05)
+- Saçak kaplaması (alın): 10 cm topuk + üzerine konan panelin eğimdeki ölçüsü; "kaç cm oluyorsa" o kadar kaplanır. (22:05)
 
 ## Modellerden ölçülenler (2 Ekim 21:40; ayrıntı `skp_olcumleri.md`)
 
-Üç çelik projenin SketchUp modelinden (62, 81 ve 90 m²) alındı; Lokman'ın teyidini bekliyor.
+Üç çelik projenin SketchUp modelinden (62, 81 ve 90 m²) alındı. Topuğun 10 cm olduğunu Lokman 22:05'te teyit etti; öteki maddeler teyit bekliyor.
 
 - Topuk 10 cm ve saçak ucunda: makasın üst yüzü saçak ucunda 280 kotunda (duvar 270 + 10). Üç modelde de aynı.
 - Makasın alt başlığı saçak ucuna kadar düz gider; saçak altı duvar üst kotundadır (270).
@@ -25,7 +28,9 @@ Kaynak: Lokman'ın anlattıkları (2 Ekim 2026). Madde sonundaki saat, söylendi
 - Eşit eğimli kırma çatıda mahya uzunluğu = saçak dahil uzun kenar − saçak dahil kısa kenar.
 - Mahya kotu (makas üstü) = duvar yüksekliği + topuk + (saçak dahil kısa kenar ÷ 2) × eğim. 90 m² modelde: 270 + 10 + 324 × 0,33 = 387; modelde ölçülen 387,0.
 - Çatı yüzeyi = saçak dahil plan alanı × √(1 + 0,33²) = plan alanı × 1,053.
-- Bu kotlar çelik makasın üst yüzüdür. Aşık, OSB ve örtü kalınlığı üstüne gelir; hesaba katılmadı.
+- Panelin düşey ölçüsü = 8 × √(1 + 0,33²) = 8,42 cm. Alın yüksekliği = 10 + 8,42 = 18,4 cm (panelin ucu şakülünde kesilirse; gönyesinde kesilirse 10 + 8 ÷ 1,053 = 17,6 cm).
+- Çatı üst yüzü, makas üst yüzünden 8,42 cm yukarıdadır: saçak ucunda 288,4; mahyada makas kotu + 8,42.
+- Alın kaplaması = saçak ucu çevresi × alın yüksekliği.
 - Düzeltme (2 Ekim 21:50): ilk hesapta topuk duvar hizasında varsayılmış, saçak ucu 270 kotuna indirilmişti. Modellere göre saçak ucu 280'dir; mahya kotu 10 cm yükseldi.
 
 ## Ç8201'e uygulama
@@ -33,13 +38,15 @@ Kaynak: Lokman'ın anlattıkları (2 Ekim 2026). Madde sonundaki saat, söylendi
 Katalog görsellerine göre tek bir kırma çatı, kapalı kısmı ve verandayı birlikte örtüyor; verandanın dış kenarında iki köşe ve bir orta kolon var.
 
 - Örtülen ayak izi 1094 × 750 cm; saçak dahil plan 1154 × 810 cm.
-- Mahya 344 cm, uzun kenar boyunca, ortada. Mahya kotu 414 cm (270 + 10 + 405 × 0,33); saçak ucu 280, saçak altı 270.
+- Mahya 344 cm, uzun kenar boyunca, ortada. Makas üstünde mahya kotu 414 cm (270 + 10 + 405 × 0,33), saçak ucu 280; saçak altı 270.
+- 8 cm çatı paneliyle çatı üst yüzü: saçak ucunda 288,4, mahyada 422 cm.
+- Alın 18,4 cm; alın kaplaması 39,28 m × 18,4 cm = 7,2 m².
 - Çatı yüzeyi 98,4 m² (plan 93,5 m²). Saçak altı 11,4 m²; veranda tavanı 18,3 m².
 - Çizim: `deneme/2026-10-02_celik/sonuc/C8201_pafta.png`.
 
 ## Açık sorular
 
-- Topuk: modellerde 10 cm ve saçak ucunda. Kural böyle mi yazılsın?
+- 8 cm çatı paneli hangi katmanlardan oluşuyor (yükleme listesindeki aşık, OSB, şilte ve örtüyle ilişkisi)?
 - 62 m² projede eğim neden %30? "Eğim değişmez" kuralının istisnası var mı?
 - Makas aralığı 125 cm kural mı?
 - Veranda kolonunun kesiti (çizimde 20 cm varsayıldı) ve kaplaması.

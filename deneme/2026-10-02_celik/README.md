@@ -26,13 +26,15 @@ python gorunus.py C8201.json                # çatı + görünüşler + pafta
 - `--cizim-kalinligi`: beş mahalin alanı çizimdeki etiketlerle aynı (11,8 · 11,8 · 4,3 · 6,7 · 23,3). Çıkış kodu 0.
 - Katmanlardan: 11,9 · 11,9 · 4,3 · 6,7 · 23,5; kapalı net 58,4 m². Dış ölçü 850 × 750 (veranda dahil 1094 × 750).
 - Dış Boardex: 32,0 m × 2,70 m − 19,6 m² = 66,8 m²; fire hariç 24 levha. Yükleme listesiyle karşılaştırılmadı.
-- Çatı (kırma, %33, saçak 30): plan 1154 × 810, mahya 344 cm, saçak ucu 280, mahya kotu 414 cm, yüzey 98,4 m². 21:50 düzeltmesi: topuk saçak ucunda (SKP ölçümü); önceki mahya kotu 404'tü.
+- Çatı (kırma, %33, saçak 30): plan 1154 × 810, mahya 344 cm, yüzey 98,4 m². Makas üstü: saçak ucunda 280, mahyada 414 cm. 8 cm çatı paneliyle çatı üst yüzü: saçak ucunda 288,4, mahyada 422 cm.
+- Alın (saçak kaplaması) 18,4 cm = topuk 10 + panelin eğimdeki düşey ölçüsü 8,4; alın kaplaması 39,28 m × 18,4 cm = 7,2 m².
+- Düzeltmeler: 21:50 topuk saçak ucunda (SKP ölçümü; önceki mahya kotu 404'tü); 22:05 çatı paneli ve alın (Lokman).
 - Açıklık üst kotu 200 cm (lento 70).
 
 ## Sınırlar
 
 - Yalnız dikdörtgen kapalı kutu ve eksenlere paralel iç duvarlar.
 - Yalnız kırma çatı; 3B ve yükleme listesinin öteki kalemleri yok.
-- Varsayım: veranda kolonu 20 cm. Topuk 10 cm modellerden ölçüldü (`docs/sartname/skp_olcumleri.md`). Subasman, merdiven ve cephe kaplaması çizilmiyor.
+- Varsayım: veranda kolonu 20 cm; panelin ucu şakülünde kesilir (gönyesinde kesilirse alın 17,6 cm). Topuk 10 cm modellerden ölçüldü, Lokman teyit etti. Subasman, merdiven ve cephe kaplaması çizilmiyor.
 - Açık çelişki: lento 70 cm kuralı üst kotu 200 yapıyor; yükleme listelerinde ve üç SKP modelinde kapı başlıkları 214 (iç) ve 210 (dış). Çizimde kapılar 200; Lokman'ın cevabı bekleniyor.
 - Kaynak çizim (DWG) depoda değil; tanım dosyası elle, çizimden okunarak yazıldı.
