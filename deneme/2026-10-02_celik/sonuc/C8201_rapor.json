@@ -1,0 +1,52 @@
+{
+ "kod": "Ç8201",
+ "mod": "katmanlardan",
+ "duvar_cm": {
+  "dis": 10.5,
+  "ic": 10.5
+ },
+ "mahaller": [
+  {
+   "mahal": "Yatak Odası 1",
+   "alan_m2": 11.918,
+   "cizim_etiketi_m2": 11.8,
+   "fark_m2": 0.118
+  },
+  {
+   "mahal": "Yatak Odası 2",
+   "alan_m2": 11.918,
+   "cizim_etiketi_m2": 11.8,
+   "fark_m2": 0.118
+  },
+  {
+   "mahal": "Banyo",
+   "alan_m2": 4.3,
+   "cizim_etiketi_m2": 4.3,
+   "fark_m2": 0.0
+  },
+  {
+   "mahal": "Hol",
+   "alan_m2": 6.748,
+   "cizim_etiketi_m2": 6.7,
+   "fark_m2": 0.048
+  },
+  {
+   "mahal": "Yaşam Alanı",
+   "alan_m2": 23.484,
+   "cizim_etiketi_m2": 23.3,
+   "fark_m2": 0.184
+  }
+ ],
+ "kapali_net_m2": 58.368,
+ "kapali_brut_m2": 63.75,
+ "veranda_m2": 18.3,
+ "toplam_oturum_m2": 82.05,
+ "boardex": {
+  "cevre_m": 32.0,
+  "yukseklik_m": 2.7,
+  "brut_m2": 86.4,
+  "bosluk_m2": 19.64,
+  "net_m2": 66.76,
+  "levha_adedi_firesiz": 24
+ }
+}

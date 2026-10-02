@@ -17,12 +17,18 @@
     "x": 850,
     "y": 0,
     "en": 244,
-    "boy": 750
+    "boy": 750,
+    "kolon": {
+      "adet": 3,
+      "kenar": 20,
+      "kenar_varsayim": true,
+      "kaynak": "katalog görselleri: dış kenarda iki köşe ve bir orta kolon"
+    }
   },
   "duvar_yuksekligi": 270,
   "dis_duvar_tipi": "DIS-80",
   "ic_duvar_tipi": "IC-80",
-  "olcu_kurali": "Dış duvarlarda dış yüz sabittir; iç duvarlarda aks (duvar ortası) sabittir. Öneri; Lokman'ın teyidini bekliyor.",
+  "olcu_kurali": "Dış duvarlarda dış yüz sabittir; iç duvarlarda aks (duvar ortası) sabittir. Lokman, 2 Ekim 2026 20:40: \"dış duvarlar dıştan, iç duvarlar tam ortadan\".",
   "ic_duvarlar": [
     {
       "ad": "A",
@@ -172,8 +178,7 @@
       "duvar": "dis:alt",
       "bas": 383,
       "en": 100,
-      "yuk": 210,
-      "yuk_varsayim": true,
+      "yuk": 200,
       "mentese": "son",
       "acilim": "ic"
     },
@@ -184,7 +189,8 @@
       "en": 90,
       "mentese": "son",
       "acilim": "sol",
-      "not": "Yatak Odası 1"
+      "not": "Yatak Odası 1",
+      "yuk": 200
     },
     {
       "tur": "ic_kapi",
@@ -193,7 +199,8 @@
       "en": 90,
       "mentese": "bas",
       "acilim": "sol",
-      "not": "Yatak Odası 2"
+      "not": "Yatak Odası 2",
+      "yuk": 200
     },
     {
       "tur": "ic_kapi",
@@ -202,7 +209,8 @@
       "en": 80,
       "mentese": "bas",
       "acilim": "ust",
-      "not": "Banyo"
+      "not": "Banyo",
+      "yuk": 200
     },
     {
       "tur": "ic_kapi",
@@ -211,7 +219,8 @@
       "en": 90,
       "mentese": "son",
       "acilim": "sag",
-      "not": "Yaşam Alanı"
+      "not": "Yaşam Alanı",
+      "yuk": 200
     }
   ],
   "cizim_etiketleri_m2": {
@@ -221,5 +230,16 @@
     "Hol": 6.7,
     "Yaşam Alanı": 23.3,
     "Veranda": 18.4
+  },
+  "lento": 70,
+  "cati": {
+    "tip": "kirma",
+    "egim_yuzde": 33,
+    "sacak": 30,
+    "sacak_alti_kaplama": true,
+    "topuk": 10,
+    "topuk_varsayim": true,
+    "kapsam": "kapali+veranda",
+    "kaynak": "Lokman, 2 Ekim 2026 20:40 (kırma/dört omuz, %33, saçak 30 cm kaplamalı); kapsam katalog görsellerinden"
   }
 }

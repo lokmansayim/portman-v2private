@@ -9,24 +9,30 @@ Amaç: tek kat çelik bir modeli, pano ızgarası olmadan, bir tanım dosyasınd
 | `duvar_tipleri.json` | Baz paket duvar tipleri (katman listesi). Duvar kalınlığı katmanların toplamıdır |
 | `C8201.json` | Ç8201'in tanımı: dış kutu, iç duvar aksları, mahaller, açıklıklar (arşivdeki çizimden) |
 | `ciz.py` | Hesap ve plan çizimi |
-| `cikti/` | Plan görselleri ve raporlar |
+| `gorunus.py` | Çatı hesabı, çatı planı, dört görünüş ve tek pafta |
+| `cikti/` | Koşu çıktıları (depoya girmez) |
+| `sonuc/` | 2 Ekim koşusunun kanıtları: plan, pafta, raporlar |
 
 ## Çalıştırma
 
 ```
 python ciz.py C8201.json                    # baz paketin katmanlarıyla (10,5 cm duvar)
 python ciz.py C8201.json --cizim-kalinligi  # arşiv çiziminin kalınlıklarıyla (12 / 11 cm); etiketlerle karşılaştırır
+python gorunus.py C8201.json                # çatı + görünüşler + pafta
 ```
 
 ## Sonuç (2 Ekim 2026)
 
 - `--cizim-kalinligi`: beş mahalin alanı çizimdeki etiketlerle aynı (11,8 · 11,8 · 4,3 · 6,7 · 23,3). Çıkış kodu 0.
 - Katmanlardan: 11,9 · 11,9 · 4,3 · 6,7 · 23,5; kapalı net 58,4 m². Dış ölçü 850 × 750 (veranda dahil 1094 × 750).
-- Dış Boardex: 32,0 m × 2,70 m − 19,7 m² = 66,7 m²; fire hariç 24 levha. Dış kapı yüksekliği 210 varsayıldı. Yükleme listesiyle karşılaştırılmadı.
+- Dış Boardex: 32,0 m × 2,70 m − 19,6 m² = 66,8 m²; fire hariç 24 levha. Yükleme listesiyle karşılaştırılmadı.
+- Çatı (kırma, %33, saçak 30): plan 1154 × 810, mahya 344 cm, mahya kotu 404 cm, yüzey 98,4 m².
+- Açıklık üst kotu 200 cm (lento 70).
 
 ## Sınırlar
 
 - Yalnız dikdörtgen kapalı kutu ve eksenlere paralel iç duvarlar.
-- Görünüş, çatı, 3B ve yükleme listesinin öteki kalemleri yok.
-- Ölçü kuralı (dış yüz ve iç aks sabit) öneridir; Lokman'ın teyidini bekliyor.
+- Yalnız kırma çatı; 3B ve yükleme listesinin öteki kalemleri yok.
+- Varsayımlar: topuk 10 cm, veranda kolonu 20 cm. Subasman, merdiven ve cephe kaplaması çizilmiyor.
+- Açık çelişki: lento 70 cm kuralı üst kotu 200 yapıyor; yükleme listelerinde kapılar 210 ve 214.
 - Kaynak çizim (DWG) depoda değil; tanım dosyası elle, çizimden okunarak yazıldı.

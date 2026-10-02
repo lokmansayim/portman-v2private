@@ -1,0 +1,20 @@
+{
+ "ayak_izi": [
+  1094,
+  750
+ ],
+ "plan": [
+  1154,
+  810
+ ],
+ "mahya_uzunlugu": 344,
+ "mahya_yonu": "x",
+ "z_sacak": 270.1,
+ "z_mahya": 403.75,
+ "plan_m2": 93.474,
+ "yuzey_m2": 98.432,
+ "sacak_alti_m2": 11.424,
+ "veranda_tavani_m2": 18.3,
+ "sacak": 30,
+ "egim": 0.33
+}

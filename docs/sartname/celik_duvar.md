@@ -28,6 +28,15 @@ Kaynak: Lokman'ın anlattıkları (1–2 Ekim 2026). Madde sonundaki tarih, söy
 - Yükseklik genelde 270 cm. (1 Ekim)
 - Çelikte aks mantığı teknik olarak yok; ama kaplama ve yalıtım malzemeleri yüzünden ölçü tamamen serbest değil. (2 Ekim 19:21)
 
+## Ölçünün alındığı yer
+
+- Dış duvarlar dıştan, iç duvarlar tam ortadan (aks) alınır. (2 Ekim 20:40)
+- Sonuç: duvar kalınlığı değişse de dış ölçü değişmez; mahaller büyür ya da küçülür. Ç8201'de 12/11 cm yerine 10,5 cm duvarla kapalı net alan 57,8'den 58,4 m²'ye çıkar (`deneme/2026-10-02_celik/`).
+
+## Açıklıklar
+
+- Lentolar her zaman 70 cm olacak; geriye ne kalırsa. (2 Ekim 20:40)
+
 ## Dış kaplama düzeni (270 cm)
 
 - Boardex levha yatay durur: yatayda 240, düşeyde 120. (2 Ekim 19:31)
@@ -51,12 +60,13 @@ Kaynak: Lokman'ın anlattıkları (1–2 Ekim 2026). Madde sonundaki tarih, söy
 - 240'lık levha tam dört dikme aralığına oturur (4 × 60); yatay profiller 120 ve 240'taki levha ek yerlerine denk gelir.
 - 122 × 244 levhada aynı düzen 61 cm aksla çalışır; yükseklik 270'te sabitse üstte 30 değil 26 cm kalır.
 - Levha adedi = metraj ÷ levha alanı (120 × 240 için 2,88 m²), yukarı yuvarlanır.
-- Ölçü kuralı (öneri): duvar inceldiğinde dış duvarlarda dış yüz, iç duvarlarda aks sabit kalır. Dış ölçü değişmez; mahaller birkaç santim büyür. Ç8201'de kapalı net alan 57,8'den 58,4 m²'ye çıkar (`deneme/2026-10-02_celik/`).
+- 270 cm duvarda lento 70 cm ise açıklıkların üst kotu 200 cm olur; pencere denizliği = 200 − pencere yüksekliği (120/180'de 20, 120/100'de 100, 60/40'ta 160 cm).
 
 ## Açık sorular
 
 - Mineral yün kalınlığı.
-- Ölçü kuralının teyidi (yukarıdaki öneri).
+- Boardex kalınlığı: 2 Ekim'de 12,5 mm denildi; 2025 tarihli bir yükleme listesinde 8 mm yazıyor (`yukleme_listesi_celik.md`).
+- Lento ve kapı yüksekliği: aynı listede kapılar 90 × 214 ve 90 × 210; lento 70 cm ile üst kot 200 cm'de kalıyor.
 - Varsayılan levha: 120 × 240 (60 aks) mı, 122 × 244 (61 aks) mı?
 - Bayiye giden ölçü bitmiş dış yüzden dış yüze mi?
 - Paketlerin adları ve tam içerikleri.

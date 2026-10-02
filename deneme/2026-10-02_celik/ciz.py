@@ -94,7 +94,18 @@ def hesapla(tanim: dict, tipler: dict, cizim: bool) -> dict:
     cevre = 2 * (W + H) / 100.0
     bosluklar = sum(a["en"] * a["yuk"] / 1e4 for a in tanim["acikliklar"] if a["duvar"].startswith("dis:"))
     net = cevre * h - bosluklar
+    # Lento kuralı (Lokman, 2 Ekim 20:40): lento her zaman 70 cm; açıklığın üst kotu = duvar yüksekliği − lento.
+    ust_kot = tanim["duvar_yuksekligi"] - tanim["lento"] if "lento" in tanim else None
+    kotlar = []
+    for a in tanim["acikliklar"]:
+        if ust_kot is None or "yuk" not in a:
+            continue
+        alt_kot = ust_kot - a["yuk"] if a["tur"] == "pencere" else 0
+        if alt_kot < 0 or (a["tur"] != "pencere" and a["yuk"] != ust_kot):
+            raise SystemExit(f"Lento kuralına uymayan açıklık: {a}")
+        kotlar.append({"duvar": a["duvar"], "bas": a["bas"], "en": a["en"], "tur": a["tur"], "alt": alt_kot, "ust": ust_kot})
     return {
+        "aciklik_ust_kotu": ust_kot, "aciklik_kotlari": kotlar,
         "td": td, "ti": ti, "dis_halka": dis_halka, "ic_duvarlar": ic, "mahaller": mahaller,
         "kapali_brut_m2": W * H / 1e4, "kapali_net_m2": sum(m["alan_m2"] for m in mahaller),
         "veranda_m2": veranda_m2, "toplam_oturum_m2": W * H / 1e4 + veranda_m2,
@@ -151,11 +162,11 @@ def olcu(ax, p1, p2, metin, kaydir=0.0, yatay=True):
         ax.text(x1 + kaydir, (y1 + y2) / 2, metin, ha="right" if kaydir <= 0 else "left", va="center", fontsize=7.5, color="#222", rotation=90)
 
 
-def plan_ciz(tanim: dict, tipler: dict, s: dict, cikti: Path, cizim: bool):
+def plan_eksen(ax, tanim: dict, s: dict, cizim: bool = False, baslik: bool = True, bilgi: bool = True):
+    """Planı verilen eksene çizer."""
     W, H = tanim["kapali"]["en"], tanim["kapali"]["boy"]
     td, ti = s["td"], s["ti"]
     v = tanim.get("veranda")
-    fig, ax = plt.subplots(figsize=(13.5, 9.2), dpi=150)
     renk = {"Yaşam Alanı": "#fdf1d6", "Hol": "#f3ead9", "Banyo": "#dcefee", "Yatak Odası 1": "#e3ebf7", "Yatak Odası 2": "#e3ebf7"}
     for m in s["mahaller"]:
         ax.add_patch(MplPolygon(list(m["poligon"].exterior.coords), closed=True, fc=renk.get(m["ad"], "#f2f2f2"), ec="none", zorder=1))
@@ -206,9 +217,10 @@ def plan_ciz(tanim: dict, tipler: dict, s: dict, cikti: Path, cizim: bool):
     olcu(ax, (-100, 0), (-100, H), tr(H).replace(",0", ""), -4, yatay=False)
     sag = alt[-1]
     b = s["boardex"]
-    baslik = f"{tanim['kod']} · {tanim['ad']} · paket: {tanim['paket']}"
-    ax.set_title(baslik + ("\nKARŞILAŞTIRMA: arşiv çiziminin duvar kalınlıklarıyla" if cizim else "\nTASLAK · çizim kurallarından yeniden kuruldu · üretim projesi değildir"),
-                 fontsize=11, weight="bold", loc="left")
+    bas = f"{tanim['kod']} · {tanim['ad']} · paket: {tanim['paket']}"
+    if baslik:
+        ax.set_title(bas + ("\nKARŞILAŞTIRMA: arşiv çiziminin duvar kalınlıklarıyla" if cizim else "\nTASLAK · çizim kurallarından yeniden kuruldu · üretim projesi değildir"),
+                     fontsize=11, weight="bold", loc="left")
     satirlar = [
         f"Dış ölçü (veranda dahil): {tr(sag).replace(',0', '')} × {H} cm = {tr(s['toplam_oturum_m2'])} m²",
         f"Kapalı kısım: {W} × {H} cm · brüt {tr(s['kapali_brut_m2'], 2)} m² · net {tr(s['kapali_net_m2'])} m²",
@@ -217,13 +229,19 @@ def plan_ciz(tanim: dict, tipler: dict, s: dict, cikti: Path, cizim: bool):
         f"(fire hariç {b['levha_adedi_firesiz']} levha)",
         "Ölçü zinciri: dış yüzler ve iç duvar aksları · ölçüler cm",
     ]
-    ax.text(0, -172, "\n".join(satirlar), ha="left", va="top", fontsize=8.5, linespacing=1.5)
+    if bilgi:
+        ax.text(0, -172, "\n".join(satirlar), ha="left", va="top", fontsize=8.5, linespacing=1.5)
     ax.annotate("GİRİŞ", xy=(433, -4), xytext=(433, -40), ha="center", fontsize=8, color="#b03030",
                 arrowprops=dict(arrowstyle="->", color="#b03030", lw=1.0))
     ax.set_xlim(-140, sag + 60)
-    ax.set_ylim(-312, H + 100)
+    ax.set_ylim(-312 if bilgi else -150, H + 100)
     ax.set_aspect("equal")
     ax.axis("off")
+
+
+def plan_ciz(tanim: dict, tipler: dict, s: dict, cikti: Path, cizim: bool):
+    fig, ax = plt.subplots(figsize=(13.5, 9.2), dpi=150)
+    plan_eksen(ax, tanim, s, cizim)
     fig.savefig(cikti, bbox_inches="tight", facecolor="white")
     plt.close(fig)
 
