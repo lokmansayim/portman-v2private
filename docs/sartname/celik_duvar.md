@@ -55,18 +55,31 @@ Kaynak: Lokman'ın anlattıkları (1–2 Ekim 2026). Madde sonundaki tarih, söy
 - Dış Boardex metrajı = dış duvarların tüm çevre uzunluğu × yükseklik − kapı ve pencere boşlukları. (2 Ekim 19:52)
 - Yükleme listesi de çıkarılacak. (2 Ekim 19:52)
 
+## Modellerden ölçülenler (2 Ekim 21:40; ayrıntı `skp_olcumleri.md`)
+
+Üç çelik projenin SketchUp modelinden (62, 81 ve 90 m²) alındı; Lokman'ın teyidini bekliyor.
+
+- Duvar yüksekliği üç modelde de 270,0 cm.
+- Karkas derinliği: 81 ve 90 m² modellerde dış ve iç 80 mm; 62 m² modelde dış 140 mm, iç 80 mm.
+- Dikme aralığı: iki modelde 61 cm, 90 m² modelde 62,5 cm.
+- Yatay kuşaklar 122–124 ve 242–246 kotlarında.
+- Pencere üst kotu 200 (lento 70). İç kapı başlığı 214, dış kapı başlığı 210: üç modelde de.
+- Profil: 81 m² modelde C 80 × 54 × 10, et 1,2 mm; öteki iki modelde başlık 45 mm.
+- 81 m² modelde 17 duvar paneli var; panel boyları 125–569 cm.
+
 ## Çıkarımlar (teyit bekliyor)
 
 - 240'lık levha tam dört dikme aralığına oturur (4 × 60); yatay profiller 120 ve 240'taki levha ek yerlerine denk gelir.
 - 122 × 244 levhada aynı düzen 61 cm aksla çalışır; yükseklik 270'te sabitse üstte 30 değil 26 cm kalır.
 - Levha adedi = metraj ÷ levha alanı (120 × 240 için 2,88 m²), yukarı yuvarlanır.
-- 270 cm duvarda lento 70 cm ise açıklıkların üst kotu 200 cm olur; pencere denizliği = 200 − pencere yüksekliği (120/180'de 20, 120/100'de 100, 60/40'ta 160 cm).
+- 270 cm duvarda lento 70 cm ise açıklıkların üst kotu 200 cm olur; pencere denizliği = 200 − pencere yüksekliği (120/180'de 20, 120/100'de 100, 60/40'ta 160 cm). Modeller pencerelerde bunu doğruluyor; kapılarda doğrulamıyor (başlık 214 ve 210).
 
 ## Açık sorular
 
 - Mineral yün kalınlığı.
 - Boardex kalınlığı: 2 Ekim'de 12,5 mm denildi; 2025 tarihli bir yükleme listesinde 8 mm yazıyor (`yukleme_listesi_celik.md`).
-- Lento ve kapı yüksekliği: aynı listede kapılar 90 × 214 ve 90 × 210; lento 70 cm ile üst kot 200 cm'de kalıyor.
-- Varsayılan levha: 120 × 240 (60 aks) mı, 122 × 244 (61 aks) mı?
+- Lento ve kapı yüksekliği: yükleme listesinde kapılar 90 × 214 ve 90 × 210; üç modelde de iç kapı başlığı 214, dış kapı başlığı 210 kotunda. "Lento her zaman 70 cm" pencereler için mi?
+- Varsayılan levha: 120 × 240 (60 aks) mı, 122 × 244 (61 aks) mı? Modellerde dikme 61, kuşak 122; bir modelde dikme 62,5.
+- Profil başlığı 45 mm mi, 54 mm mi? (Yükleme listesi 45; 81 m² model 54.)
 - Bayiye giden ölçü bitmiş dış yüzden dış yüze mi?
 - Paketlerin adları ve tam içerikleri.

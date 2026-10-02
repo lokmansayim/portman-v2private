@@ -5,7 +5,8 @@ Deneme kodudur; canlıda değildir. `ciz.py` ile aynı tanım dosyasını okur.
 
 Çatı kuralları (Lokman, 2 Ekim 2026 20:40): kırma (dört omuz) çatı; eğim %33, yandan da önden de;
 mahya ortada kalan kısımdır; saçak 30 cm, altı kaplamalı. Lento her zaman 70 cm.
-Topuk (10 cm) ve veranda kolonunun kenarı (20 cm) varsayımdır; tanım dosyasında işaretlidir.
+Topuk 10 cm: makasın üst yüzü saçak ucunda duvar üst kotundan 10 cm yukarıdadır; saçak altı duvar üst kotundadır
+(üç çelik SKP modelinden ölçüldü, `docs/sartname/skp_olcumleri.md`). Veranda kolonunun kenarı (20 cm) varsayımdır.
 
 Kullanım:
     python gorunus.py C8201.json
@@ -47,14 +48,14 @@ def cati_hesapla(tanim: dict) -> dict:
     px, py = L + 2 * s, H + 2 * s                                 # saçak dahil plan
     kisa, uzun = min(px, py), max(px, py)
     h = tanim["duvar_yuksekligi"]
-    z_sacak = h + c.get("topuk", 0) - s * e                      # saçak ucunun kotu
+    z_sacak = h + c.get("topuk", 0)                              # saçak ucunda çatı (makas üst yüzü) kotu; saçak altı h kotunda
     z_mahya = z_sacak + (kisa / 2) * e
     plan_m2 = px * py / 1e4
     return {
         "ayak_izi": (L, H), "plan": (px, py), "mahya_uzunlugu": uzun - kisa, "mahya_yonu": "x" if px >= py else "y",
         "z_sacak": z_sacak, "z_mahya": z_mahya, "plan_m2": plan_m2, "yuzey_m2": plan_m2 * math.sqrt(1 + e * e),
         "sacak_alti_m2": (px * py - L * H) / 1e4, "veranda_tavani_m2": (v["en"] * v["boy"] / 1e4) if v else 0.0,
-        "sacak": s, "egim": e,
+        "sacak": s, "egim": e, "z_sacak_alti": h,
     }
 
 
@@ -120,7 +121,8 @@ def gorunus_eksen(ax, tanim: dict, s: dict, c: dict, taraf: str):
     # çatı
     sil = _cati_siluet(tanim, c, taraf)
     ax.add_patch(MplPolygon(sil, closed=True, fc=CATI, ec="#2f343c", lw=1.0, zorder=7))
-    ax.plot([-c["sacak"], uz + c["sacak"]], [c["z_sacak"], c["z_sacak"]], color="#2f343c", lw=1.6, zorder=8)
+    # alın: saçak ucunda duvar üst kotu ile çatı başlangıcı arasındaki topuk yüksekliği
+    ax.add_patch(Rectangle((-c["sacak"], h), uz + 2 * c["sacak"], c["z_sacak"] - h, fc="#454b55", ec="#2f343c", lw=0.8, zorder=8))
     # zemin ve kotlar
     ax.plot([-70, uz + 70], [0, 0], color="#333", lw=1.2, zorder=1)
     olcu(ax, (uz + 52, 0), (uz + 52, h), str(h), 4, yatay=False)
@@ -190,7 +192,7 @@ def pafta(tanim: dict, s: dict, c: dict, cikti: Path):
         f"Çatı: kırma (dört omuz) · eğim %{ct['egim_yuzde']} · saçak {ct['sacak']} cm, altı kaplamalı",
         f"Çatı planı {tr(c['plan'][0]).replace(',0', '')} × {tr(c['plan'][1]).replace(',0', '')} cm · mahya {tr(c['mahya_uzunlugu']).replace(',0', '')} cm · mahya kotu {tr(c['z_mahya'], 0)} cm",
         f"Çatı yüzeyi {tr(c['yuzey_m2'])} m² (plan {tr(c['plan_m2'])} m²) · saçak altı {tr(c['sacak_alti_m2'])} m² · veranda tavanı {tr(c['veranda_tavani_m2'])} m²",
-        f"Varsayımlar: topuk {ct.get('topuk', 0)} cm · veranda kolonu {v.get('kolon', {}).get('kenar', '—')} cm, {v.get('kolon', {}).get('adet', '—')} adet",
+        f"Topuk {ct.get('topuk', 0)} cm (saçak ucunda; çelik modellerden ölçüldü) · varsayım: veranda kolonu {v.get('kolon', {}).get('kenar', '—')} cm, {v.get('kolon', {}).get('adet', '—')} adet",
         "Subasman, merdiven ve cephe kaplaması çizilmedi · ölçüler cm",
     ]
     ax.text(0.0, 0.95, "\n".join(sol), ha="left", va="top", fontsize=9.2, linespacing=1.55, transform=ax.transAxes)

@@ -15,6 +15,8 @@ Astra dönemindeki kurallar (v1.4.3) kanıt olarak alınır; buraya ancak tek te
 | `yukleme_listesi_celik.md` | Gerçek bir çelik yükleme listesinin grupları ve kalemleri; kurallarla tutmayan noktalar |
 | `modeller/C8201.md` | İlk çalışılan model: tek kat çelik, 82 m² |
 | `katalog_denetimi_tek_kat_celik.md` | Tek kat çelik on modelde çizim ile katalog kaydının karşılaştırması |
+| `skp_olcumleri.md` | Üç çelik projenin SketchUp modelinden ölçülenler; kurallarla tutan ve tutmayan yerler |
 | `../../deneme/2026-10-02_celik/` | İlk deneme: Ç8201'in tanım dosyası, duvar tipleri, hesap; plan, çatı planı ve dört görünüşlü pafta |
+| `../../deneme/2026-10-02_skp/` | SKP okuma denemesi: betikler ve üç modelin ölçü özeti |
 
 Kapsam (2 Ekim 2026): çalışma tek kat çelik üzerine. Kat döşemesi ve merdiven çift kat konusudur; şimdilik kapsam dışı.
