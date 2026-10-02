@@ -2,6 +2,8 @@
 
 **Son güncelleme: 30 Eylül 2026 22:05 (tek aktif teslim: Aşama 2 kabul vakası, İE-04; mesaj katmanı kanal v1.3 CANLIDA ve açık — Kapı M 30.09 akşamı geçti; kritik yol Astra'nın üç 3+1 adayı + Ubeydullah kabulü + K-A kararları; 3D bağlantısı M3 ayrı iş).** Her oturumun son adımı bu dosyayı güncellemektir. Aktif dal `ie-04`.
 
+**2 Ekim 2026 20:30 eki (dal `ie-05`):** İE-05 taslağı açıldı: ürün platformu şartnamesi, tek kat çelik 82 m² (Ç8201) ile başlar. İş emri `docs/is_emirleri/IE-05.md` (taslak; Lokman'ın onayını bekliyor), kayıtlar `docs/sartname/`. Yalnız belge eklendi; koda ve canlıya dokunulmadı; P6001 çıktıları etkilenmedi. İE-04 kapanmadı, olduğu yerde bekliyor. Bulgular: (1) tek kat çelik on modelin üçünde katalog kaydı çizimle tutmuyor (Ç8201, Ç1031, Ç1151; `docs/sartname/katalog_denetimi_tek_kat_celik.md`); (2) `beyin/veri/katalog_37_proje.json` 37 modelin hepsini "tek kat" sayıyor; 13'ü çift katlı (Lokman'ın arşiv klasörleriyle doğrulandı: çelik Ç1142, Ç1202, Ç1302, Ç1322, Ç1352, Ç1402, Ç1552, Ç2226; prefabrik P1142, P1202, P1322, P1422, P1552). Yakın model araması kat sayısına bakmıyor. İkisi de bayilere açılmadan önce düzeltilmeli; düzeltme yapılmadı.
+
 **Oturum devri:** `docs/devir/2026-09-30_Aksam_Devri.md` (30.09 akşamı, Kapı M sonrası; sıra ve bakım listesi) ve `docs/devir/2026-09-30_Oturum_Devri.md` (30.09 01:10; kurallar, K-A kararları, Astra ölçütleri). 28–30 Eylül penceresi kapandı. Yeni pencere bu ikisiyle başlar: kurallar, yapılanlar, bekleyen kararlar, sıradaki işler, Astra'ya çizim işi için ölçütler.
 
 Yeni pencere için hazırlıklar:
