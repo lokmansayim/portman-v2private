@@ -13,5 +13,6 @@ Astra dönemindeki kurallar (v1.4.3) kanıt olarak alınır; buraya ancak tek te
 | `prefabrik_duvar.md` | Prefabrik panel duvar: panel, aks, köşe dikmeleri |
 | `modeller/C8201.md` | İlk çalışılan model: tek kat çelik, 82 m² |
 | `katalog_denetimi_tek_kat_celik.md` | Tek kat çelik on modelde çizim ile katalog kaydının karşılaştırması |
+| `../../deneme/2026-10-02_celik/` | İlk deneme: Ç8201'in tanım dosyası, duvar tipleri, hesap ve plan çizimi |
 
 Kapsam (2 Ekim 2026): çalışma tek kat çelik üzerine. Kat döşemesi ve merdiven çift kat konusudur; şimdilik kapsam dışı.

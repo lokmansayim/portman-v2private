@@ -10,6 +10,10 @@ Kaynak: Lokman'ın anlattıkları (1–2 Ekim 2026). Madde sonundaki tarih, söy
 | Bir üst paket | Dış duvar karkası 140 mm | — |
 | Onun üstü | — | İç duvarlarda 11 mm OSB gibi eklemeler |
 
+- Boardex 12,5 mm; alçıpan 12,5 mm. (2 Ekim 20:24)
+- Baz pakette duvar kalınlığı katmanların toplamıdır: 12,5 + 80 + 12,5 = 105 mm, yani dış duvar da iç duvar da 10,5 cm. (2 Ekim 20:24)
+- Arşivdeki çizimlerde dış duvar 12, iç duvar 11 cm çizilmiş. Fark, çelikteki birleşimlerde vida kabarması ya da içlerde ince sıyırma sıva payıdır. Hesapta kullanılmaz: duvar "sıfır hatalı ve sıvasız" kabul edilir. (2 Ekim 20:24)
+- Sıva grubu genelde verilmez. (2 Ekim 20:24)
 - Çalışma baz paketle başlar ("bu şekilde başla"). Üst paketler modifikasyon olarak sonra gelir. (2 Ekim 20:15)
 - Çatı ayrıntıları sonra gelecek. (2 Ekim 20:15)
 - Katalogda teknik detaylar var. (2 Ekim 20:15)
@@ -47,12 +51,12 @@ Kaynak: Lokman'ın anlattıkları (1–2 Ekim 2026). Madde sonundaki tarih, söy
 - 240'lık levha tam dört dikme aralığına oturur (4 × 60); yatay profiller 120 ve 240'taki levha ek yerlerine denk gelir.
 - 122 × 244 levhada aynı düzen 61 cm aksla çalışır; yükseklik 270'te sabitse üstte 30 değil 26 cm kalır.
 - Levha adedi = metraj ÷ levha alanı (120 × 240 için 2,88 m²), yukarı yuvarlanır.
-- Katman kalınlıkları toplamı çizimdeki duvar kalınlığını vermeli: Ç8201 çiziminde dış duvar 12 cm, iç duvar 11 cm.
+- Ölçü kuralı (öneri): duvar inceldiğinde dış duvarlarda dış yüz, iç duvarlarda aks sabit kalır. Dış ölçü değişmez; mahaller birkaç santim büyür. Ç8201'de kapalı net alan 57,8'den 58,4 m²'ye çıkar (`deneme/2026-10-02_celik/`).
 
 ## Açık sorular
 
-- Boardex ve alçıpan kalınlıkları; mineral yün kalınlığı.
-- Çizimde dış duvar 12 cm, iç duvar 11 cm: baz paketin katmanlarıyla bu kalınlıklar nasıl oluşuyor?
+- Mineral yün kalınlığı.
+- Ölçü kuralının teyidi (yukarıdaki öneri).
 - Varsayılan levha: 120 × 240 (60 aks) mı, 122 × 244 (61 aks) mı?
 - Bayiye giden ölçü bitmiş dış yüzden dış yüze mi?
 - Paketlerin adları ve tam içerikleri.

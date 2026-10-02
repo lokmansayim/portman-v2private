@@ -1,0 +1,225 @@
+{
+  "sema": "portman.yapi_tanimi/0.2-taslak",
+  "kod": "Ç8201",
+  "ad": "Tek kat çelik, 2+1, 82 m²",
+  "aile": "tek_kat_celik",
+  "paket": "baz",
+  "birim": "cm",
+  "kaynak": {
+    "cizim": "Arşiv/TEK KAT ÇELİK/PORTATİF EV TEK KAT ÇELİK PLANLAR.dwg (2 Ekim 2026'da okundu)",
+    "not": "Ölçüler ve açıklık yerleri çizimden. Başlangıç: kapalı kısmın sol-alt dış köşesi (0,0); +x sağa, +y yukarı. Dış kapı alt kenarda (y=0)."
+  },
+  "kapali": {
+    "en": 850,
+    "boy": 750
+  },
+  "veranda": {
+    "x": 850,
+    "y": 0,
+    "en": 244,
+    "boy": 750
+  },
+  "duvar_yuksekligi": 270,
+  "dis_duvar_tipi": "DIS-80",
+  "ic_duvar_tipi": "IC-80",
+  "olcu_kurali": "Dış duvarlarda dış yüz sabittir; iç duvarlarda aks (duvar ortası) sabittir. Öneri; Lokman'ın teyidini bekliyor.",
+  "ic_duvarlar": [
+    {
+      "ad": "A",
+      "yon": "dusey",
+      "aks": 347.5,
+      "bas": 0,
+      "son": 750,
+      "not": "yatak odaları ile hol ve banyo arası"
+    },
+    {
+      "ad": "P",
+      "yon": "yatay",
+      "aks": 375,
+      "bas": 0,
+      "son": 347.5,
+      "not": "iki yatak odası arası"
+    },
+    {
+      "ad": "Bb",
+      "yon": "yatay",
+      "aks": 496,
+      "bas": 347.5,
+      "son": 538.5,
+      "not": "banyonun alt duvarı"
+    },
+    {
+      "ad": "R",
+      "yon": "dusey",
+      "aks": 538.5,
+      "bas": 496,
+      "son": 750,
+      "not": "banyo ile mutfak arası"
+    },
+    {
+      "ad": "B",
+      "yon": "dusey",
+      "aks": 498.5,
+      "bas": 0,
+      "son": 496,
+      "not": "hol ile yaşam alanı arası"
+    }
+  ],
+  "mahaller": [
+    {
+      "ad": "Yatak Odası 1",
+      "nokta": [
+        170,
+        190
+      ]
+    },
+    {
+      "ad": "Yatak Odası 2",
+      "nokta": [
+        170,
+        560
+      ]
+    },
+    {
+      "ad": "Banyo",
+      "nokta": [
+        440,
+        620
+      ]
+    },
+    {
+      "ad": "Hol",
+      "nokta": [
+        420,
+        250
+      ]
+    },
+    {
+      "ad": "Yaşam Alanı",
+      "nokta": [
+        680,
+        300
+      ]
+    }
+  ],
+  "acikliklar": [
+    {
+      "tur": "pencere",
+      "duvar": "dis:alt",
+      "bas": 117,
+      "en": 120,
+      "yuk": 180,
+      "mahal": "Yatak Odası 1"
+    },
+    {
+      "tur": "pencere",
+      "duvar": "dis:alt",
+      "bas": 611,
+      "en": 120,
+      "yuk": 180,
+      "mahal": "Yaşam Alanı"
+    },
+    {
+      "tur": "pencere",
+      "duvar": "dis:ust",
+      "bas": 117,
+      "en": 120,
+      "yuk": 180,
+      "mahal": "Yatak Odası 2"
+    },
+    {
+      "tur": "pencere",
+      "duvar": "dis:ust",
+      "bas": 363,
+      "en": 60,
+      "yuk": 40,
+      "mahal": "Banyo"
+    },
+    {
+      "tur": "pencere",
+      "duvar": "dis:ust",
+      "bas": 631,
+      "en": 120,
+      "yuk": 100,
+      "mahal": "Yaşam Alanı"
+    },
+    {
+      "tur": "pencere",
+      "duvar": "dis:sag",
+      "bas": 105,
+      "en": 180,
+      "yuk": 180,
+      "mahal": "Yaşam Alanı"
+    },
+    {
+      "tur": "pencere",
+      "duvar": "dis:sag",
+      "bas": 285,
+      "en": 180,
+      "yuk": 180,
+      "mahal": "Yaşam Alanı"
+    },
+    {
+      "tur": "pencere",
+      "duvar": "dis:sag",
+      "bas": 465,
+      "en": 180,
+      "yuk": 180,
+      "mahal": "Yaşam Alanı"
+    },
+    {
+      "tur": "dis_kapi",
+      "duvar": "dis:alt",
+      "bas": 383,
+      "en": 100,
+      "yuk": 210,
+      "yuk_varsayim": true,
+      "mentese": "son",
+      "acilim": "ic"
+    },
+    {
+      "tur": "ic_kapi",
+      "duvar": "A",
+      "bas": 269.5,
+      "en": 90,
+      "mentese": "son",
+      "acilim": "sol",
+      "not": "Yatak Odası 1"
+    },
+    {
+      "tur": "ic_kapi",
+      "duvar": "A",
+      "bas": 390.5,
+      "en": 90,
+      "mentese": "bas",
+      "acilim": "sol",
+      "not": "Yatak Odası 2"
+    },
+    {
+      "tur": "ic_kapi",
+      "duvar": "Bb",
+      "bas": 363,
+      "en": 80,
+      "mentese": "bas",
+      "acilim": "ust",
+      "not": "Banyo"
+    },
+    {
+      "tur": "ic_kapi",
+      "duvar": "B",
+      "bas": 390.5,
+      "en": 90,
+      "mentese": "son",
+      "acilim": "sag",
+      "not": "Yaşam Alanı"
+    }
+  ],
+  "cizim_etiketleri_m2": {
+    "Yatak Odası 1": 11.8,
+    "Yatak Odası 2": 11.8,
+    "Banyo": 4.3,
+    "Hol": 6.7,
+    "Yaşam Alanı": 23.3,
+    "Veranda": 18.4
+  }
+}
