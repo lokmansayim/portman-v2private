@@ -15,7 +15,7 @@ Yöntem, kaynaklar ve bulgular: `docs/sartname/yukleme_listesi_yontemi.md`.
 | `tablo_uret.py` | Şartname belgesindeki tabloları hesap çıktılarından üretir (`sonuc/tablolar.md`) |
 | `belge_uret.py` | Şartname belgesini (`docs/sartname/yukleme_listesi_yontemi.md`) tablolardan ve hesap çıktılarından üretir |
 | `hepsini_kos.sh` | Bütün hesapları sırayla koşar |
-| `sayfa_uret.py` | Ç8201 taslağını okunur tek bir sayfaya çevirir (Lokman'a giden özel artefakt: https://claude.ai/artifact/XkfYhAKG1hb79bY5VEjNV9); çıktı depoya yazılmaz |
+| `sayfa_uret.py` | Ç8201 taslağını okunur tek bir sayfaya çevirir (Lokman'a giden artefakt: https://claude.ai/artifact/XkfYhAKG1hb79bY5VEjNV9); plan görselini içine gömer; sayfa bağlantıyla paylaşılabildiği için kişi adı yazmaz; çıktı depoya yazılmaz |
 | `ornek_90m2_*.json`, `ornek_62m2_*.json`, `ornek_105m2_*.json` | Üç gerçek listenin girdileri ve kalemleri. Kişi, bayi ve firma adı içermez |
 | `sonuc/` | Karşılaştırma sonuçları; Ç8201 taslakları (baz, dış 140 mm, altı çatı kaplaması, yöntem B); tablolar |
 

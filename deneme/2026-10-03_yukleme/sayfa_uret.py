@@ -36,6 +36,19 @@ def tr(x, n=0):
 def e(s):
     return html.escape(str(s), quote=True)
 
+# Sayfa bağlantıyla paylaşılabildiği için kişi adı taşımaz: hesap çıktısındaki notlarda geçen adlar okura hitaba ("siz") ya da role çevrilir.
+SAYFA_DILI = (
+    ("Lokman makas ve kirişleri bir makas ölçüsünden ayrıca verecek", "makas ve kirişleri bir makas ölçüsünden ayrıca vereceksiniz"),
+    ("Lokman'ın kuralı", "sizin kuralınız"), ("Lokman'ın", "sizin"), ("Lokman,", "siz,"), ("Lokman", "siz"),
+    ("Ubeydullah'ın", "mühendisin"), ("Ubeydullah", "mühendis"),
+)
+
+
+def sayfa_dili(s):
+    for eski, yeni in SAYFA_DILI:
+        s = s.replace(eski, yeni)
+    return s
+
 DURUM = {
     "lokman": ("Sizin kuralınız", "ok", "Kuralı siz söylediniz"),
     "muhendis": ("Mühendisin kuralı", "ok", "Kuralı ya da değeri inşaat mühendisi verdi (3 Ekim)"),
@@ -102,8 +115,8 @@ def satir_html(s):
     if s["olcu"] is not None:
         alt.append(e(olcu(s)))
     if s["formul"]:
-        alt.append(e(s["formul"]))
-    notu = f'<div class="not">{e(s["not"])}</div>' if s.get("not") else ""
+        alt.append(e(sayfa_dili(s["formul"])))
+    notu = f'<div class="not">{e(sayfa_dili(s["not"]))}</div>' if s.get("not") else ""
     return (f'<tr data-d="{"bekle" if bekleyen(s) else "tamam"}"><td class="kalem"><div class="ad">{e(s["kalem"])}</div><div class="alt">{" · ".join(alt)}</div>{notu}</td>'
             f'<td class="boyut">{e(s["boyut"])}</td>{hucre}<td><span class="rozet {sinif}" title="{e(DURUM[s["durum"]][2])}">{ad}</span></td></tr>')
 
@@ -322,5 +335,8 @@ td.say {{ font-size: 15px; font-weight: 500; }}
 }})();
 </script>
 """
+for ad in ("Lokman", "Ubeydullah"):   # sayfada kişi adı kalmamalı
+    if ad in sayfa:
+        raise SystemExit(f"Sayfada kişi adı kaldı: {ad}")
 A.cikti.write_text(sayfa, encoding="utf-8")
 print("yazıldı:", A.cikti, "·", toplam_satir, "satır; teyit ya da değer bekleyen", bekleyen_sayisi)
