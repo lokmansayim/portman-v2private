@@ -2,6 +2,14 @@
 
 **Son güncelleme: 29 Eylül 2026 22:50 (İE-02 kapandı ve `main`'e birleştirildi; İE-03 yalnız plan aşamasında).** Her oturumun son adımı bu dosyayı güncellemektir.
 
+**3 Ekim 2026 23:05 eki (dal `claude/lucid-ritchie-66j34y`, BK-01):**
+- **Bu dosya geride.** Güncel durum `ie-05` dalındaki DURUM'dadır; aktif iş İE-04, taslak iş İE-05.
+- **Yapılan bakım** (`docs/is_emirleri/BK-01.md`):
+  - `araclar/ortam_kur.sh` artık `main`'de olmayan `deneme/2026-09-30_asama2/kos.py`'yi önermiyor; dosya varsa (`ie-04`, `ie-05`) öneri görünüyor.
+  - `README.md` harness için "15 mesaj" yerine "22 vaka" diyor.
+- **Gerileme** (`ortam_kur.sh --dogrula`, 22:50–23:00): harness 22/22; DXF ve PDF parmak izleri AYNI (18/18); yalnız bilinen sır taraması farkı; testler 328 geçti.
+- **Sınırlar:** Canlıya, veriye ve sunucuya dokunulmadı. `main`'e birleştirme Lokman'ın onayını bekliyor. `ie-04` birleşirken bu paragraf onun DURUM'una elle taşınır.
+
 Canlıda çalışan akış şu: WhatsApp → hosting kanalı → VPS ajanı → Beyin ve Motor → plan PDF'i. Akış yalnız Patron modunda açık. Son gerçek mesaj doğrulaması 29.09 21:16–21:32 (kapı G yeniden denemesi, 6 Patron mesajı). 28–29 Eylülde canlıya v1.2 kuruldu (dosya modu) ve LLM Claude Opus 5.5'e geçti; 29.09 01:16'da gerçek bir Patron mesajıyla denendi (r01 PDF'i telefona geldi). 29.09 18:59'dan beri ajan kalıcı modda: konuşma ve iş durumu Postgres'te (kapı F); 29.09 19:27–19:56'da kalıcı modda 5 gerçek Patron mesajı işlendi (kapı G). 29.09 21:09'dan beri canlıda düzeltilmiş paket `9c76af59…` var; 21:16–21:32 arasında 6 gerçek Patron mesajıyla G'nin kabul adımları geçti. Depo, v1.1.1'in (`ec4e9a3`) devridir. Hedefteki "90 m² 3+1, üç seçenek" akışı henüz taslak.
 
 Durumlar: **Taslak** yalnız belgede · **Kodlandı** kod var, testi yok ya da dar · **Test edildi** tekrarlanabilir testten geçti · **Canlıda doğrulandı** gerçek kullanımda (gerçek mesaj ya da planlı koşu) görüldü ve tarihli.
