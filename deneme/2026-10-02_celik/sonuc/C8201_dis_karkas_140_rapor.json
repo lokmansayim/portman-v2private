@@ -54,14 +54,14 @@
   "cevre_m": 32.0,
   "yukseklik_m": 2.7,
   "brut_m2": 86.4,
-  "bosluk_m2": 19.64,
-  "net_m2": 66.76,
+  "bosluk_m2": 19.635,
+  "net_m2": 66.765,
   "levha_adedi_firesiz": 24
  },
  "dis_duvar": {
   "tip": "DIS-140",
   "karkas_mm": 140,
   "ic_yuz_cevre_m": 30.68,
-  "ic_yuz_net_m2": 63.196
+  "ic_yuz_net_m2": 63.201
  }
 }

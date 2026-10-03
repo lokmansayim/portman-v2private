@@ -1,36 +1,84 @@
-| Grup | Kalem | Boyut | Adet | Ölçü | Durum |
-|---|---|---|---|---|---|
-| Dış cephe kaplama | Dış cephe Boardex | 1200 × 2400 | 33 | 80,7 m² | varsayim |
-| İç cephe kaplama | Duvar alçıpan beyaz | 1200 × 2500 | 46 | 130,4 m² | excel |
-| İç cephe kaplama | Duvar alçıpan yeşil | 1200 × 2500 | 8 | 20,3 m² | excel |
-| İç cephe kaplama | Tavan alçıpan beyaz | 1200 × 2500 | 19 | 52,4 m² | uydurma |
-| İç cephe kaplama | Tavan alçıpan yeşil | 1200 × 2500 | 8 | 22,5 m² | uydurma |
-| İç cephe kaplama | OSB 9 mm (TV, klima ve mutfak dolabı arkası) | 1220 × 2440 |  |  | soru |
-| İç cephe kaplama | Duvar izolasyonu | paket 8,64 m² | 23 | 196,7 m² | uydurma |
-| Çatı kaplamaları | Sandviç panel | L 4300 · 100 cm kapatır | 26 | 98,4 m² | uydurma |
-| Çatı kaplamaları | Metal kiremit mahyası | L 2800 | 11 | 27,0 m | varsayim |
-| Çatı kaplamaları | Sandviç panel kapaması | L 2500 | 18 | 39,3 m | uydurma |
-| Çatı kaplamaları | Çatı şiltesi 80 mm | 9,6 m²/adet | 10 | 88,9 m² | uydurma |
-| Dere | Metal dere | L 4000 | 11 | 39,3 m | varsayim |
-| Dere | Dere iniş borusu | L 3000 | 7 |  | soru |
-| Dere | Dere iniş aparatı | adet | 7 |  | soru |
-| Dere | Açık dirsek | adet | 14 |  | soru |
-| Dere | Kapalı dirsek | adet | 7 |  | soru |
-| Dere | İniş kelepçesi | adet | 14 |  | soru |
-| Dere | Dere kelepçesi | adet | 88 |  | uydurma |
-| Metal aksam | Saçak sacı (30'luk) | L 2500 | 18 | 39,3 m | uydurma |
-| Metal aksam | Geniş saçak omegası (180 × 2500) | L 2500 | 18 | 39,3 m | uydurma |
-| Metal aksam | Saçaklar için Boardex | 1200 × 2400 | 5 | 11,8 m² | uydurma |
-| Metal aksam | Tavan omegası (60'lık) | L 3750 | 34 | 124,7 m | uydurma |
-| Metal aksam | Köşebent | L 2500 | 55 | 137,3 m | soru |
-| Metal aksam | Aşık | L 4200 | 49 | 193,5 m | uydurma |
-| Kapı ve pencere | Melamin kapı (80'lik kanat) | 90 × 214 | 3 |  | model |
-| Kapı ve pencere | Melamin kapı (çizimde 80 cm; listelerde bütün iç kapılar 90 × 214) | soru | 1 |  | soru |
-| Kapı ve pencere | Kompozit çelik kapı | 90 × 210 | 1 |  | model |
-| Kapı ve pencere | PVC pencere | 120/180 | 3 |  | model |
-| Kapı ve pencere | PVC vasistas | 60/40 | 1 |  | model |
-| Kapı ve pencere | PVC pencere | 120/100 | 1 |  | model |
-| Kapı ve pencere | PVC pencere | 180/180 | 3 |  | model |
-| Vida | Alçıpan vidası (3,5 × 35) | adet | 5000 | 119,0 levha | excel |
-| Vida | Pencere vidası (4,8 × 70) | adet | 160 | 8,0 pencere | excel |
-| Vida | İnox taş | adet | 9 | 82,0 m² | excel |
+# Ç8201 · Tek kat çelik, 2+1, 82 m² · paket: dış 140
+
+Çatı yöntemi: A · çatı ve tavan paneli (çelik konstrüksiyon standardı). Çatı kaplaması (seçenek): sandviç panel.
+
+| Grup | Kalem | Boyut | Adet | Ölçü | kg | Durum | Not |
+|---|---|---|---|---|---|---|---|
+| Çelik panel | Dış cephe duvar panelleri | 140 × 45 × 0,8 | 8 | 32,0 m | 582 | motor | et kalınlığı ve panel adedi tahmin; teyit bekliyor |
+| Çelik panel | İç cephe duvar panelleri | 80 × 45 × 0,8 | 6 | 19,4 m | 252 | motor | et kalınlığı ve panel adedi tahmin; teyit bekliyor |
+| Çelik panel | Veranda dikmeleri (kolon paneli) | 80 × 45 × 1,2 | 3 | 7,2 m | 46 | motor | dikme sayısı ve yeri katalog görsellerinden |
+| Çelik panel | Veranda kirişleri (kiriş paneli) | 80 × 45 × 1,2 | 4 | 12,4 m | 81 | motor |  |
+| Çelik panel | Çatı makas panelleri | 80 × 45 × 0,8 | 25 | 93,5 m² | 706 | motor | geçici: Lokman makas ve kirişleri bir makas ölçüsünden ayrıca verecek |
+| Çelik panel | Tavan paneli (makas arası) | roll form çelik |  | 74,8 m² |  | bekliyor |  |
+| Çelik panel | Çatı paneli (makas üstü, sırt 80 mm) | roll form çelik |  | 98,4 m² |  | bekliyor |  |
+| Çelik panel | Boy C profil | 80 × 45 × 0,8 | 3 |  | 15 | motor |  |
+| Çelik panel | Boy C profil | 80 × 45 × 1,2 | 3 |  | 15 | motor |  |
+| Çelik panel | Toplam (adedi ve kg'ı bilinenler) |  | 52 |  | 1697 | motor |  |
+| Metal aksam | Saçak omegası | L 2500 |  | 39,3 m |  | soru |  |
+| Metal aksam | Saçaklar için Boardex | 1200 × 2400 | 5 | 11,8 m² |  | uydurma | saçak altının Boardex olduğu: Lokman, 3 Ekim 13:27; formül 62 m² listeden |
+| Metal aksam | Saçak yüzü için Boardex | 1200 × 2400 | 3 | 7,2 m² |  | varsayim | saçak yüzünün kaplandığını Lokman söyledi (2 Ekim 22:05); malzemenin Boardex olduğu varsayım |
+| Metal aksam | Köşebent | L 2500 | 33 | 82,0 m² |  | lokman | gerçek listelerde adet bunun yaklaşık iki katı (70, 50, 85) |
+| Dış cephe kaplama | Dış cephe Boardex | 1200 × 2400 | 33 | 80,7 m² |  | excel |  |
+| İç cephe kaplama | Duvar alçıpan beyaz | 1200 × 2500 | 46 | 130,2 m² |  | excel |  |
+| İç cephe kaplama | Duvar alçıpan yeşil | 1200 × 2500 | 8 | 20,1 m² |  | excel |  |
+| İç cephe kaplama | Tavan alçıpan beyaz | 1200 × 2500 | 19 | 52,4 m² |  | motor |  |
+| İç cephe kaplama | Tavan alçıpan yeşil | 1200 × 2500 | 8 | 22,5 m² |  | lokman |  |
+| İç cephe kaplama | OSB (TV ve mutfak dolabı arkası takviyesi) | 1220 × 2440 | 15 | 41,5 m² |  | lokman | okuma teyit bekliyor: salon ve mutfak aynı mahalde olduğu için o mahalin bütün duvarları alındı |
+| İç cephe kaplama | Duvar izolasyonu | paket 8,64 m² | 23 | 197,8 m² |  | uydurma | dış duvar 2 kat |
+| Çatı kaplamaları | Sandviç panel | L 4300 · 100 cm kapatır | 26 | 98,4 m² |  | uydurma | gerçek adet panel yerleşiminden bulunur |
+| Çatı kaplamaları | Metal kiremit mahyası | L 2800 | 11 | 27,0 m |  | lokman |  |
+| Çatı kaplamaları | Sandviç panel kapaması | L 2500 | 18 | 39,3 m |  | uydurma |  |
+| Çatı kaplamaları | Çatı şiltesi 80 mm | 9,6 m²/adet | 10 | 88,9 m² |  | uydurma |  |
+| Dere | Metal dere | L 4000 | 11 | 39,3 m |  | motor |  |
+| Dere | Dere iniş borusu | L 3000 | 6 |  |  | lokman |  |
+| Dere | Dere iniş aparatı | adet | 6 |  |  | motor |  |
+| Dere | Açık dirsek | adet | 12 |  |  | motor |  |
+| Dere | Kapalı dirsek | adet | 6 |  |  | motor |  |
+| Dere | İniş kelepçesi | adet | 12 |  |  | motor |  |
+| Dere | Dere kelepçesi | adet | 88 |  |  | motor |  |
+| Kapı ve pencere | Melamin kapı (80'lik kanat) | 90 × 214 | 4 |  |  | lokman |  |
+| Kapı ve pencere | Kompozit çelik kapı | 90 × 210 | 1 |  |  | model |  |
+| Kapı ve pencere | PVC pencere | 120/180 | 3 |  |  | model |  |
+| Kapı ve pencere | PVC vasistas | 60/40 | 1 |  |  | model |  |
+| Kapı ve pencere | PVC pencere | 120/100 | 1 |  |  | model |  |
+| Kapı ve pencere | PVC pencere | 180/180 | 3 |  |  | model |  |
+| Elektrik | Duy, glop, ampul, anahtar, priz, sigorta, buat ve NYM kablolar | adet / metre |  |  |  | bekliyor |  |
+| Elektrik | Uydu kablo | metre | 25 |  |  | motor |  |
+| Elektrik | Besleme kablosu (sigorta kutuları arası) | metre | 5 |  |  | motor |  |
+| Elektrik | Besleme kablo borusu | metre | 5 |  |  | motor |  |
+| Elektrik | Zil | adet | 1 |  |  | motor |  |
+| Elektrik | Sigorta kutusu (12'li) | adet | 1 |  |  | motor |  |
+| Elektrik | İzole bant | adet | 5 | 82,0 m² |  | motor |  |
+| Elektrik | Kaçak akım rölesi | adet | 1 |  |  | motor |  |
+| Vida | RYSB pul başlı (3,9 × 32) | adet | 615 | 82,0 m² |  | motor | gerçek listelerde daha az (62 m²'de 400, 105 m²'de 500) |
+| Vida | Alçıpan vidası (3,5 × 35) | adet | 5000 | 122,0 levha |  | excel |  |
+| Vida | OSB ve yalıpan vidası (3,9 × 32) | adet | 1000 | 864,0 vida |  | motor | priz sayısı bilinmediği için priz payı yok |
+| Vida | Pencere vidası (4,8 × 70) | adet | 160 | 8,0 pencere |  | excel |  |
+| Vida | Trapez vida (5,5 × 25) | adet | 750 | 718,0 vida |  | excel | tavan ve çatı panellerinin vidası hariç; çelik panel adedi tahmin |
+| Vida | Trapez vida (5,5 × 60) | adet | 250 | 205,0 vida |  | motor |  |
+| Vida | Trapez vida (5,5 × 110; sandviç panel) | adet | 750 | 559,0 vida |  | motor | 62 m² gerçek listede 750 var; bu formül o listede 500 veriyor |
+| Vida | Çelik dübel (klipsli) | adet | 28 | 14,0 panel |  | motor | duvar paneli adedi tahmin |
+| Vida | Şase pul | adet | 28 | 14,0 panel |  | motor | duvar paneli adedi tahmin |
+| Vida | 8'lik trapez uç | adet | 6 | 82,0 m² |  | motor |  |
+| Vida | PH2 uç | adet | 6 | 82,0 m² |  | motor |  |
+| Vida | 230'luk kesme taşı | adet | 6 | 82,0 m² |  | uydurma | motorda m² × 0,02; iki gerçek listede m² ÷ 15'e denk (5 ve 7) |
+| Vida | İnox taş | adet | 9 | 82,0 m² |  | excel |  |
+| Vida | Çırpı ipi | adet | 1 |  |  | motor |  |
+| Sıhhi tesisat | Temiz su borusu | L 4000 | 6 | 1,0 ıslak hacim |  | motor |  |
+| Sıhhi tesisat | Normal dirsek 20 mm | adet | 15 | 1,0 ıslak hacim |  | motor |  |
+| Sıhhi tesisat | Kulaklı dirsek 20 mm | adet | 12 | 1,0 ıslak hacim |  | motor |  |
+| Sıhhi tesisat | Düz T 20 mm | adet | 6 | 1,0 ıslak hacim |  | motor |  |
+| Sıhhi tesisat | Maşon 20 mm | adet | 15 | 1,0 ıslak hacim |  | motor |  |
+| Sıhhi tesisat | İç dişli T 20 mm | adet | 6 | 1,0 ıslak hacim |  | motor |  |
+| Sıhhi tesisat | Atlama parçası (yarım parmak) | adet | 3 | 1,0 ıslak hacim |  | motor |  |
+| Sıhhi tesisat | Duşakabin (90 × 90) | takım | 1 | 1,0 ıslak hacim |  | motor |  |
+| Sıhhi tesisat | Klozet | takım | 1 | 1,0 ıslak hacim |  | motor |  |
+| Sıhhi tesisat | Banyo dolabı | takım | 1 | 1,0 ıslak hacim |  | motor |  |
+| Sıhhi tesisat | Banyo batarya grubu | takım | 1 | 1,0 ıslak hacim |  | motor |  |
+| Boya | Dış cephe boyası | kova 17,5 kg | 2 | 82,0 m² |  | motor |  |
+| Boya | İç cephe boyası | kova 17,5 kg | 2 | 82,0 m² |  | motor |  |
+| Boya | Tavan boyası | kova 17,5 kg | 1 | 82,0 m² |  | motor |  |
+| Boya | Astar | kova 17,5 kg | 1 | 82,0 m² |  | motor |  |
+| Boya | Silikonize mastik | adet | 8 | 8,0 pencere |  | uydurma | motorda mantolamasız cephede + m² × 2/3 var ('ayrıca eklenir'); üç gerçek listede de 8 |
+| Boya | Dayson | adet | 5 | 82,0 m² |  | motor |  |
+| Boya | Poliüretan köpük | adet | 2 |  |  | motor |  |

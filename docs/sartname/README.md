@@ -11,14 +11,14 @@ Astra dönemindeki kurallar (v1.4.3) kanıt olarak alınır; buraya ancak tek te
 | `aileler.md` | Beş kural ailesi ve ürün kategorilerinin bu ailelerden nasıl kurulduğu |
 | `celik_duvar.md` | Çelik (LGF) duvar sistemi: paketler, katmanlar, kaplama düzeni, karkas, metraj |
 | `prefabrik_duvar.md` | Prefabrik panel duvar: panel, aks, köşe dikmeleri |
-| `cati.md` | Çatı: kırma (dört omuz) kuralları, saçak, Ç8201'e uygulama |
+| `cati.md` | Çatı: kırma (dört omuz) kuralları, saçak, iki çatı işleme yöntemi, kaplama seçenekleri, dere inişi, veranda çerçevesi, Ç8201'e uygulama |
 | `yukleme_listesi_celik.md` | Gerçek bir çelik yükleme listesinin grupları ve kalemleri; kurallarla tutmayan noktalar |
-| `yukleme_listesi_yontemi.md` | Yükleme listesinin yöntemi (PortatifEv'in kendi çalışma kitaplarından), iki gerçek listeyle karşılaştırma, Ç8201'in ilk taslağı, açık sorular |
+| `yukleme_listesi_yontemi.md` | Yükleme listesinin yöntemi: Lokman'ın 3 Ekim cevapları, gerçek listelerin çalışma kitapları ve Excel hesaplama motoru; çelik kg; üç gerçek listeyle karşılaştırma; Ç8201 taslağı; bayi kuralı; açık sorular |
 | `modeller/C8201.md` | İlk çalışılan model: tek kat çelik, 82 m² |
 | `katalog_denetimi_tek_kat_celik.md` | Tek kat çelik on modelde çizim ile katalog kaydının karşılaştırması |
 | `skp_olcumleri.md` | Üç çelik projenin SketchUp modelinden ölçülenler; kurallarla tutan ve tutmayan yerler |
 | `../../deneme/2026-10-02_celik/` | İlk deneme: Ç8201'in tanım dosyası, duvar tipleri, hesap; plan, çatı planı ve dört görünüşlü pafta |
 | `../../deneme/2026-10-02_skp/` | SKP okuma denemesi: betikler ve üç modelin ölçü özeti |
-| `../../deneme/2026-10-03_yukleme/` | Yükleme listesi denemesi: kurallar, hesap, iki gerçek listeyle karşılaştırma, Ç8201 taslağı |
+| `../../deneme/2026-10-03_yukleme/` | Yükleme listesi denemesi: kurallar, hesap, üç gerçek listeyle karşılaştırma, Ç8201 taslağı (baz, dış 140, kaplama seçenekleri), bayi kuralı örneği |
 
 Kapsam (2 Ekim 2026): çalışma tek kat çelik üzerine. Kat döşemesi ve merdiven çift kat konusudur; şimdilik kapsam dışı.

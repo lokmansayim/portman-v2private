@@ -1,16 +1,53 @@
 {
- "sema": "portman.yukleme_girdisi/0.1-taslak",
+ "sema": "portman.yukleme_girdisi/0.2-taslak",
  "ad": "Ç8201 · Tek kat çelik, 2+1, 82 m² · paket: dış 140",
  "kaynak": "deneme/2026-10-02_celik/C8201.json + dis_karkas_140.json",
  "bina_m2": 82,
+ "dis_olcu_m": [
+  10.94,
+  7.5
+ ],
+ "kat_adedi": 1,
+ "oda_sayisi": 5,
  "kat_yuksekligi_m": 2.7,
+ "celik": {
+  "dis": {
+   "profil": "140x45x0,8",
+   "boy_m": 32.0,
+   "panel_adedi": 8,
+   "not": "et kalınlığı ve panel adedi tahmin; teyit bekliyor"
+  },
+  "ic": {
+   "profil": "80x45x0,8",
+   "boy_m": 19.38,
+   "panel_adedi": 6,
+   "not": "et kalınlığı ve panel adedi tahmin; teyit bekliyor"
+  },
+  "dikme": {
+   "profil": "80x45x1,2",
+   "adet": 3,
+   "boy_m": 2.4,
+   "not": "dikme sayısı ve yeri katalog görsellerinden"
+  },
+  "kiris": {
+   "profil": "80x45x1,2",
+   "boy_m": 12.38
+  },
+  "cati": {
+   "tip": "kirma",
+   "profil": "80x45x0,8",
+   "plan_m2": 93.47
+  },
+  "tavan_paneli_m2": 74.84,
+  "cati_paneli_m2": 98.43
+ },
  "dis": {
   "cevre_m": 32.0,
   "duvar_kalinligi_m": 0.165,
   "karkas_mm": 140,
   "kolon_kiris": [
    {
-    "ad": "veranda kolonu",
+    "ad": "veranda dikmesi",
     "adet": 3,
     "cevre_m": 0.76,
     "boy_m": 2.4
@@ -22,7 +59,7 @@
     "boy_m": 12.38
    }
   ],
-  "kolon_kiris_varsayim": true,
+  "kolon_kiris_varsayim": false,
   "alin_m2": [],
   "bosluklar": [
    {
@@ -85,7 +122,7 @@
    "alan_m2": 4.192,
    "bosluk_m2": [
     0.24,
-    1.712
+    1.926
    ]
   },
   {
@@ -97,7 +134,7 @@
     1.995,
     1.926,
     1.926,
-    1.712,
+    1.926,
     1.926
    ]
   },
@@ -117,13 +154,21 @@
   }
  ],
  "ic_kapi_adedi": 4,
+ "ic_duvar_boyu_m": 19.38,
+ "osb_takviye": {
+  "odalar": [
+   "Yaşam Alanı"
+  ],
+  "net_m2": 41.52
+ },
  "tavan_m2": {
   "beyaz": 52.35,
   "yesil": 22.49
  },
  "cati": {
   "tip": "kirma",
-  "ortu": "sandvic_panel",
+  "yontem": "panel",
+  "kaplama": "sandvic_panel",
   "egim": 0.33,
   "plan_m": [
    11.54,
@@ -137,31 +182,35 @@
    8.1
   ],
   "sacak_boyu_toplam_m": 39.28,
+  "cephe_kenarlari_m": [
+   10.94,
+   7.5,
+   10.94,
+   7.5
+  ],
+  "kose_adedi": 4,
   "mahya_hatti_m": 26.97,
   "panel_boyu_m": 4.3,
   "bina_eni_m": 7.5,
   "cati_boyu_m": 11.54,
   "sacak_alti": "boardex",
-  "sacak_omegasi": "Geniş saçak omegası (180 × 2500)"
+  "sacak_alti_eni_m": 0.3,
+  "sacak_yuzu_m2": 7.24
  },
  "kapi_pencere": [
   {
    "kalem": "Melamin kapı (80'lik kanat)",
    "boyut": "90 × 214",
-   "adet": 3,
-   "durum": "model"
-  },
-  {
-   "kalem": "Melamin kapı (çizimde 80 cm; listelerde bütün iç kapılar 90 × 214)",
-   "boyut": "soru",
-   "adet": 1,
-   "durum": "soru"
+   "adet": 4,
+   "durum": "lokman",
+   "formul": "iç kapı sayısı; boşluk 90 × 214, kanat 200 cm: Lokman, 3 Ekim 13:27; kalemin adı ve 80'lik kanat listelerden"
   },
   {
    "kalem": "Kompozit çelik kapı",
    "boyut": "90 × 210",
    "adet": 1,
-   "durum": "model"
+   "durum": "model",
+   "formul": "dış kapı sayısı; ölçü gerçek listelerden"
   },
   {
    "kalem": "PVC pencere",
@@ -189,11 +238,13 @@
   }
  ],
  "varsayimlar": [
-  "Çatı örtüsü sandviç panel alındı (Lokman, 2 Ekim 22:05: makasların üzerine 8 cm çatı paneli gelir); panel boyu eğimli boydan, 10 cm'ye yuvarlandı.",
-  "Veranda kolonu ve kirişi Boardex'le kaplanır sayıldı; kolon çevresi 0,76 m × 2,40 m ve kiriş çevresi 0,68 m gerçek listelerdeki değerlerdir; kiriş boyu verandanın üç kenarı.",
-  "Yeşil tavan = ıslak hacim + veranda tavanı (iki gerçek listeden çıkarım).",
-  "Saçak altı Boardex ve geniş saçak omegası alındı (62 m² kırma çatılı listedeki gibi).",
-  "İç kapı boşluğu çizimdeki genişlik × 2,14 m; dış kapı 0,95 × 2,10 m (çalışma kitabındaki değerler).",
-  "İniş sayısı 7 alındı (iki gerçek listede de 7)."
+  "Çatı kaplaması seçenektir; baz paketin kaplaması söylenmedi. Örnek olarak sandviç panel alındı; `--kaplama` ile öteki seçenekler hesaplanır. Panel boyu eğimli boydan, 10 cm'ye yuvarlandı.",
+  "Çelik et kalınlığı gerçek listelerden çıkarıldı: 80 mm dış karkasta duvarlar 1,2 mm; 140 mm dış karkasta dış ve iç duvarlar 0,8 mm. Teyit bekliyor.",
+  "Duvar paneli adedi tahmin: her duvar hattı bir panel, 5,7 m'yi aşarsa bölünür. Gerçek adet karkas yerleşiminden gelir.",
+  "Veranda dikmelerinin sayısı ve yeri katalog görsellerinden: dış kenarda iki köşe ve bir orta.",
+  "Saçak yüzü (saçak ucunda topuk + panel, 18,4 cm) Boardex'le kaplanır sayıldı; kaplandığını Lokman söyledi, malzemesini söylemedi.",
+  "OSB takviyesi: salon ve mutfak aynı mahalde (Yaşam Alanı) olduğu için o mahalin bütün duvar yüzeyi alındı.",
+  "Dış kapı boşluğu 0,95 × 2,10 m (çalışma kitaplarındaki değer); katalog çiziminde kapı 100 cm.",
+  "Elektrik paftası yok: duy, glop, anahtar, priz ve sigorta sayıları hesaplanmadı."
  ]
 }

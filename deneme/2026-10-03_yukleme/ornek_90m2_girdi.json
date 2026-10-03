@@ -1,5 +1,5 @@
 {
-  "sema": "portman.yukleme_girdisi/0.1-taslak",
+  "sema": "portman.yukleme_girdisi/0.2-taslak",
   "ad": "Örnek proje: 90 m², tek kat, çelik (liste tarihi 30 Eylül 2025)",
   "kaynak": "PortatifEv'in yükleme listesi çalışma kitabının hesap sayfalarındaki girdiler. Kişi ve firma adları alınmadı. Çatı uzunlukları ve tavan alanları listede elle yazılmış değerlerdir.",
   "kat_yuksekligi_m": 2.7,
@@ -126,9 +126,7 @@
     "alin_saci_m": 16.56,
     "egimli_boy_m": 3.45,
     "cati_boyu_m": 15.98,
-    "inis_adedi": 7,
     "dere_kapagi": 6,
-    "ortu": "osb_kiremit",
     "egim": 0.33,
     "sacak_kenarlari_m": [
       15.98,
@@ -137,9 +135,53 @@
     "bina_eni_m": 5.88,
     "sacak_alti": "sac",
     "sacak_omegasi": "Saçak omegası",
-    "silte_liste_m2": 97.17
+    "silte_liste_m2": 97.17,
+    "kaplama": "osb_kiremit",
+    "yontem": "omega_asik",
+    "cephe_kenarlari_m": [
+      15.23,
+      15.23
+    ],
+    "cephe_kaynak": "dere yalnız iki uzun saçakta: bina 13,57 m + sundurma 1,66 m (SketchUp modelinden)",
+    "kose_adedi": 4,
+    "inis_adedi_liste": 7,
+    "inis_notu": "Listede 7 iniş var; hesapta iniş sayısı Lokman'ın kuralından gelir (köşeler + 10 m ve üzeri cephelerin ortası)."
   },
   "bina_m2": 90,
   "celik_panel_adedi": 44,
-  "kosebent_adedi": 70
+  "kosebent_adedi": 70,
+  "bayi": {
+    "gruplar": {
+      "Vida": false,
+      "Elektrik": false,
+      "Sıhhi tesisat": false
+    },
+    "not": "Bu listede vida, elektrik ve sıhhi tesisat grupları yok (bayi kuralı örneği)."
+  },
+  "boya_dahil": false,
+  "celik": {
+    "dis": {
+      "profil": "80x45x1,2",
+      "boy_m": 38.85
+    },
+    "ic": {
+      "profil": "80x45x1,2",
+      "boy_m": 24.91
+    },
+    "dikme": {
+      "profil": "80x45x1,2",
+      "adet": 2,
+      "boy_m": 2.4
+    },
+    "kiris": {
+      "profil": "80x45x1,2",
+      "boy_m": 8.78
+    },
+    "cati": {
+      "tip": "besik",
+      "profil": "80x45x0,8",
+      "plan_m2": 103.55
+    },
+    "kaynak": "Dış çevre ve veranda ölçüleri hesap sayfasından; iç duvar boyu oda çevrelerinden; çatı planı 15,98 × (5,88 + 0,60) m. Listede bütün duvar panelleri 80×45×10×1,2."
+  }
 }

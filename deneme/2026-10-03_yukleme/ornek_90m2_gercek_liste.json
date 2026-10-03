@@ -1,37 +1,119 @@
 {
   "ad": "Örnek proje (90 m²) gerçek yükleme listesi; kişi ve firma adları alınmadı",
   "kalemler": {
-    "Dış cephe Boardex": {"adet": 46},
-    "Duvar alçıpan beyaz": {"adet": 67, "net": 187.5},
-    "Duvar alçıpan yeşil": {"adet": 9, "net": 23.6},
-    "Tavan alçıpan beyaz": {"adet": 25, "net": 69.1},
-    "Tavan alçıpan yeşil": {"adet": 6, "net": 13.9},
-    "OSB 9 mm (duvar)": {"adet": 13, "net": 35.1},
-    "Duvar izolasyonu": {"adet": 18, "net": 152, "brut": 172},
-    "Çatı OSB": {"adet": 39},
-    "Metal kiremit": {"adet": 30},
-    "Metal kiremit mahyası": {"adet": 7, "net": 16.13},
-    "OSB mahyası": {"adet": 7, "net": 16.13},
-    "Özel mahya (geniş)": {"adet": 2, "net": 2.98},
-    "Çatı şiltesi 80 mm": {"adet": 11, "net": 97.17},
-    "Metal dere": {"adet": 9, "net": 31.96},
-    "Dere iniş borusu": {"adet": 7},
-    "Dere iniş aparatı": {"adet": 7},
-    "Dere kapağı": {"adet": 6},
-    "Açık dirsek": {"adet": 14},
-    "Kapalı dirsek": {"adet": 7},
-    "İniş kelepçesi": {"adet": 14},
-    "Dere kelepçesi": {"adet": 72},
-    "Saçak sacı (30'luk)": {"adet": 14, "net": 31.96},
-    "Saçak omegası": {"adet": 14},
-    "Alın sacı (30'luk)": {"adet": 9, "net": 16.56},
-    "Tavan omegası (60'lık)": {"adet": 40},
-    "Köşebent": {"adet": 70},
-    "Aşık": {"adet": 57}
+    "Dış cephe Boardex": {
+      "adet": 46
+    },
+    "Duvar alçıpan beyaz": {
+      "adet": 67,
+      "net": 187.5
+    },
+    "Duvar alçıpan yeşil": {
+      "adet": 9,
+      "net": 23.6
+    },
+    "Tavan alçıpan beyaz": {
+      "adet": 25,
+      "net": 69.1
+    },
+    "Tavan alçıpan yeşil": {
+      "adet": 6,
+      "net": 13.9
+    },
+    "OSB 9 mm (duvar)": {
+      "adet": 13,
+      "net": 35.1
+    },
+    "Duvar izolasyonu": {
+      "adet": 18,
+      "net": 152,
+      "brut": 172
+    },
+    "Çatı OSB": {
+      "adet": 39
+    },
+    "Metal kiremit": {
+      "adet": 30
+    },
+    "Metal kiremit mahyası": {
+      "adet": 7,
+      "net": 16.13
+    },
+    "OSB mahyası": {
+      "adet": 7,
+      "net": 16.13
+    },
+    "Özel mahya (geniş)": {
+      "adet": 2,
+      "net": 2.98
+    },
+    "Çatı şiltesi 80 mm": {
+      "adet": 11,
+      "net": 97.17
+    },
+    "Metal dere": {
+      "adet": 9,
+      "net": 31.96
+    },
+    "Dere iniş borusu": {
+      "adet": 7
+    },
+    "Dere iniş aparatı": {
+      "adet": 7
+    },
+    "Dere kapağı": {
+      "adet": 6
+    },
+    "Açık dirsek": {
+      "adet": 14
+    },
+    "Kapalı dirsek": {
+      "adet": 7
+    },
+    "İniş kelepçesi": {
+      "adet": 14
+    },
+    "Dere kelepçesi": {
+      "adet": 72
+    },
+    "Saçak sacı (30'luk)": {
+      "adet": 14,
+      "net": 31.96
+    },
+    "Saçak omegası": {
+      "adet": 14
+    },
+    "Alın sacı (30'luk)": {
+      "adet": 9,
+      "net": 16.56
+    },
+    "Tavan omegası (60'lık)": {
+      "adet": 40
+    },
+    "Köşebent": {
+      "adet": 70
+    },
+    "Aşık": {
+      "adet": 57
+    },
+    "Silikonize mastik": {
+      "adet": 8
+    },
+    "Dayson": {
+      "adet": 6
+    },
+    "Poliüretan köpük": {
+      "adet": 2
+    }
   },
-  "hesaplanmayanlar": {
+  "celik_kg": {
+    "duvar": 1345,
+    "kiris_kolon": 100,
+    "cati": 535,
+    "toplam": 1980
+  },
+  "listedeki_oteki_bilgiler": {
     "Çelik panel grubu": "Duvar paneli 24 adet 1345 kg; kiriş paneli 5 adet 100 kg; çatı makası 3 adet 150 kg (1,2 mm) ve 12 adet 385 kg (0,8 mm); parça C profil 4 adet; toplam 44 panel 1980 kg",
-    "Kapı ve pencere": "Melamin kapı (80'lik kanat) 90×214 dört adet; kompozit çelik kapı 90×210 bir adet; PVC pencere 120/120 iki, 120/180 iki, 120/100 bir; vasistas 60/40 bir",
-    "Boya grubu": "Silikonize mastik 8, dayson 6, poliüretan köpük 2"
+    "Kapı ve pencere": "Melamin kapı (80'lik kanat) 90×214 dört adet; kompozit çelik kapı 90×210 bir adet; PVC pencere 120/120 iki, 120/180 iki, 120/100 bir; vasistas 60/40 bir"
   }
 }

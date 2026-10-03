@@ -1,5 +1,5 @@
 {
-  "sema": "portman.yukleme_girdisi/0.1-taslak",
+  "sema": "portman.yukleme_girdisi/0.2-taslak",
   "ad": "Örnek proje: 62 m², tek kat, çelik, kırma çatı, dış karkas 140 mm (liste tarihi 19 Eylül 2025)",
   "kaynak": "PortatifEv'in yükleme listesi çalışma kitabının hesap sayfasındaki girdiler; çatı planı aynı projenin SketchUp modelinden (1214,7 × 605,7 cm, eğim %30). Kişi ve firma adları alınmadı.",
   "bina_m2": 62,
@@ -97,7 +97,6 @@
   },
   "cati": {
     "tip": "kirma",
-    "ortu": "sandvic_panel",
     "egim": 0.3,
     "plan_m": [
       12.147,
@@ -120,8 +119,48 @@
     "cati_boyu_m": 12.147,
     "sacak_alti": "boardex",
     "sacak_omegasi": "Geniş saçak omegası (180 × 2500)",
-    "inis_adedi": 7
+    "kaplama": "sandvic_panel",
+    "yontem": "omega_asik",
+    "cephe_kenarlari_m": [
+      11.49,
+      5.441,
+      11.49,
+      5.441
+    ],
+    "cephe_kaynak": "karkas dış ölçüsü 1149,0 × 544,1 cm (SketchUp modelinden)",
+    "kose_adedi": 4,
+    "inis_adedi_liste": 7,
+    "inis_notu": "Listede 7 iniş var; hesapta iniş sayısı Lokman'ın kuralından gelir (köşeler + 10 m ve üzeri cephelerin ortası)."
   },
   "celik_panel_adedi": 63,
-  "kosebent_adedi": 50
+  "kosebent_adedi": 50,
+  "duvar_paneli_adedi": 16,
+  "duvar_paneli_kaynak": "listede dış cephe duvar paneli 3 + 7, iç cephe duvar paneli 6",
+  "boya_dahil": false,
+  "vitrifiye_dahil": false,
+  "celik": {
+    "dis": {
+      "profil": "140x45x0,8",
+      "boy_m": 28.98
+    },
+    "ic": {
+      "profil": "80x45x0,8",
+      "boy_m": 12.08
+    },
+    "dikme": {
+      "profil": "80x45x1,2",
+      "adet": 4,
+      "boy_m": 2.4
+    },
+    "kiris": {
+      "profil": "80x45x1,2",
+      "boy_m": 12.73
+    },
+    "cati": {
+      "tip": "kirma",
+      "profil": "80x45x0,8",
+      "plan_m2": 73.57
+    },
+    "kaynak": "Dış çevre, iç duvar boyu ve veranda ölçüleri hesap sayfasından; çatı planı SketchUp modelinden 12,147 × 6,057 m. Listede dış duvar panellerinin 3'ü 1,2 mm, 7'si 0,8 mm; hesapta hepsi 0,8 alındı."
+  }
 }

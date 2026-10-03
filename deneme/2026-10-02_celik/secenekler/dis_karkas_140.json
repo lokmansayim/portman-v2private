@@ -23,6 +23,7 @@
   "Dış ölçü değişmez (dış duvarlar dıştan ölçülür); duvar içeri doğru kalınlaşır, dış duvara komşu mahaller küçülür.",
   "İç duvar aksları değişmez (iç duvarlar tam ortadan ölçülür).",
   "Dış Boardex metrajı değişmez (çevre × yükseklik − boşluklar).",
-  "Dış duvar çeliği ve yalıtımı 140 mm karkasa göre değişir; bu kalemler henüz hesaplanmıyor."
+  "Dış duvar yalıtımı çift kat olur (gerçek listelerden). Duvar çeliği Excel motorunun birim ağırlıklarıyla hesaplanır; et kalınlığı 0,8 mm varsayıldı (140 mm dış karkaslı iki gerçek listede dış duvarların çoğu 0,8 mm). Yükleme listesi: deneme/2026-10-03_yukleme/.",
+  "Çatı yöntemi B'de (saçak sacı) dış duvar 14 cm olunca geniş saçak omegası (180 × 2500) kullanılır (Excel motorundaki not)."
  ]
 }

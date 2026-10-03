@@ -94,6 +94,39 @@ def aciklik_kutusu(a: dict, tanim: dict, td: float, ti: float):
     return box(b, d["aks"] - ti / 2, e, d["aks"] + ti / 2)
 
 
+def bosluk_m2(a: dict) -> float:
+    """Açıklığın duvarda bıraktığı boşluk (m²). Kapıda kaba boşluk ayrıca verilmişse o kullanılır."""
+    en, yuk = a.get("bosluk", (a["en"], a["yuk"]))
+    return en * yuk / 1e4
+
+
+def veranda_cercevesi(tanim: dict) -> dict | None:
+    """Veranda çerçevesi (Lokman, 3 Ekim 2026 13:27): sırtı 80 mm, genişliği 30 cm; kirişler yanlara ve karşıya,
+    altlarına 240 cm, kiriş gibi dikmeler. Kirişler `kiris_kenarlari`nda, dikmeler `dikme_kenari` boyunca eşit aralıkla."""
+    v = tanim.get("veranda")
+    if not v or "cerceve" not in v:
+        return None
+    c = v["cerceve"]
+    x0, y0, x1, y1 = v["x"], v["y"], v["x"] + v["en"], v["y"] + v["boy"]
+    kenar = {"alt": ((x0, y0), (x1, y0)), "ust": ((x0, y1), (x1, y1)), "sag": ((x1, y0), (x1, y1)), "sol": ((x0, y0), (x0, y1))}
+    kirisler = [kenar[k] for k in c["kiris_kenarlari"]]
+    (ax_, ay_), (bx_, by_) = kenar[c["dikme_kenari"]]
+    n, g, sr = c["dikme_adedi"], c["genislik"], c["sirt"]
+    dikmeler = []
+    for i in range(n):
+        if ax_ == bx_:   # düşey kenar: dikmenin geniş yüzü kenar boyunca
+            y = ay_ + i * (by_ - ay_ - g) / max(n - 1, 1)
+            x = ax_ - sr if c["dikme_kenari"] == "sag" else ax_
+            dikmeler.append(box(x, y, x + sr, y + g))
+        else:
+            x = ax_ + i * (bx_ - ax_ - g) / max(n - 1, 1)
+            y = ay_ - sr if c["dikme_kenari"] == "ust" else ay_
+            dikmeler.append(box(x, y, x + g, y + sr))
+    return {"kirisler": kirisler, "kiris_boyu": sum(math.dist(a, b) for a, b in kirisler), "dikmeler": dikmeler,
+            "sirt": sr, "genislik": g, "dikme_boyu": c["dikme_boyu"], "dikme_adedi": n, "dikme_kenari": c["dikme_kenari"],
+            "kiris_kenarlari": list(c["kiris_kenarlari"])}
+
+
 def hesapla(tanim: dict, tipler: dict, cizim: bool) -> dict:
     W, H = tanim["kapali"]["en"], tanim["kapali"]["boy"]
     td, ti = kalinliklar(tipler, tanim, cizim)
@@ -115,19 +148,27 @@ def hesapla(tanim: dict, tipler: dict, cizim: bool) -> dict:
     # Boardex: dış duvarların tüm çevre uzunluğu × yükseklik − kapı ve pencere boşlukları (Lokman, 2 Ekim)
     h = tanim["duvar_yuksekligi"] / 100.0
     cevre = 2 * (W + H) / 100.0
-    bosluklar = sum(a["en"] * a["yuk"] / 1e4 for a in tanim["acikliklar"] if a["duvar"].startswith("dis:"))
+    bosluklar = sum(bosluk_m2(a) for a in tanim["acikliklar"] if a["duvar"].startswith("dis:"))
     net = cevre * h - bosluklar
     ic_cevre = 2 * ((W - 2 * td) + (H - 2 * td)) / 100.0          # dış duvarların iç yüzü (alçıpan yüzü)
-    # Lento kuralı (Lokman, 2 Ekim 20:40): lento her zaman 70 cm; açıklığın üst kotu = duvar yüksekliği − lento.
+    # Lento kuralı (Lokman, 2 Ekim 20:40): lento her zaman 70 cm; pencerenin üst kotu = duvar yüksekliği − lento.
+    # Kapılarda başlık kotu açıklığın kendi yüksekliğidir: iç kapı boşluğu 214 (Lokman, 3 Ekim 13:27), dış kapı 210 (modeller ve listeler).
     ust_kot = tanim["duvar_yuksekligi"] - tanim["lento"] if "lento" in tanim else None
     kotlar = []
     for a in tanim["acikliklar"]:
-        if ust_kot is None or "yuk" not in a:
+        if "yuk" not in a:
             continue
-        alt_kot = ust_kot - a["yuk"] if a["tur"] == "pencere" else 0
-        if alt_kot < 0 or (a["tur"] != "pencere" and a["yuk"] != ust_kot):
-            raise SystemExit(f"Lento kuralına uymayan açıklık: {a}")
-        kotlar.append({"duvar": a["duvar"], "bas": a["bas"], "en": a["en"], "tur": a["tur"], "alt": alt_kot, "ust": ust_kot})
+        if a["tur"] == "pencere":
+            if ust_kot is None:
+                continue
+            alt, ust = ust_kot - a["yuk"], ust_kot
+            if alt < 0:
+                raise SystemExit(f"Lento kuralına uymayan pencere: {a}")
+        else:
+            alt, ust = 0, a["yuk"]
+            if ust > tanim["duvar_yuksekligi"]:
+                raise SystemExit(f"Kapı duvardan yüksek: {a}")
+        kotlar.append({"duvar": a["duvar"], "bas": a["bas"], "en": a["en"], "tur": a["tur"], "alt": alt, "ust": ust})
     return {
         "aciklik_ust_kotu": ust_kot, "aciklik_kotlari": kotlar,
         "td": td, "ti": ti, "dis_halka": dis_halka, "ic_duvarlar": ic, "mahaller": mahaller,
@@ -206,6 +247,12 @@ def plan_eksen(ax, tanim: dict, s: dict, cizim: bool = False, baslik: bool = Tru
                 bbox=dict(fc="white", ec="none", pad=1.5))
         ax.text(v["x"] + v["en"] / 2, v["y"] + v["boy"] / 2 - 14, f"{tr(s['veranda_m2'])} m²", ha="center", fontsize=9, zorder=6,
                 bbox=dict(fc="white", ec="none", pad=1.5))
+    vc = veranda_cercevesi(tanim)
+    if vc:   # kirişler (üstte; kesik çizgi) ve dikmeler
+        for (ax_, ay_), (bx_, by_) in vc["kirisler"]:
+            ax.plot([ax_, bx_], [ay_, by_], color="#4d4d4d", lw=2.2, ls=(0, (4, 2)), zorder=4)
+        for dk in vc["dikmeler"]:
+            ax.add_patch(MplPolygon(list(dk.exterior.coords), closed=True, fc="#1f1f1f", ec="#1f1f1f", lw=0.8, zorder=5))
     delik = unary_union([aciklik_kutusu(a, tanim, td, ti) for a in tanim["acikliklar"]])
     for g, fc in ((s["dis_halka"].difference(delik), "#3a3a3a"), (s["ic_duvarlar"].difference(delik), "#6b6b6b")):
         for p in (g.geoms if hasattr(g, "geoms") else [g]):
@@ -255,6 +302,9 @@ def plan_eksen(ax, tanim: dict, s: dict, cizim: bool = False, baslik: bool = Tru
         f"(fire hariç {b['levha_adedi_firesiz']} levha)",
         "Ölçü zinciri: dış yüzler ve iç duvar aksları · ölçüler cm",
     ]
+    if vc:
+        satirlar.insert(3, f"Veranda çerçevesi: sırt {vc['sirt']} cm, genişlik {vc['genislik']} cm · kiriş {tr(vc['kiris_boyu'] / 100, 2)} m (kesik çizgi) · "
+                           f"dikme {vc['dikme_adedi']} adet, {vc['dikme_boyu']} cm")
     if bilgi:
         ax.text(0, -172, "\n".join(satirlar), ha="left", va="top", fontsize=8.5, linespacing=1.5)
     ax.annotate("GİRİŞ", xy=(433, -4), xytext=(433, -40), ha="center", fontsize=8, color="#b03030",

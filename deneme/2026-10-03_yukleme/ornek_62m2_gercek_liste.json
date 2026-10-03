@@ -102,14 +102,58 @@
     },
     "İnox taş": {
       "adet": 7
+    },
+    "RYSB pul başlı (3,9 × 32)": {
+      "adet": 400
+    },
+    "OSB ve yalıpan vidası (3,9 × 32)": {
+      "adet": 3500
+    },
+    "Trapez vida (5,5 × 60)": {
+      "adet": 250
+    },
+    "Trapez vida (5,5 × 110; sandviç panel)": {
+      "adet": 750
+    },
+    "Çelik dübel (klipsli)": {
+      "adet": 32
+    },
+    "Şase pul": {
+      "adet": 32
+    },
+    "8'lik trapez uç": {
+      "adet": 5
+    },
+    "PH2 uç": {
+      "adet": 5
+    },
+    "230'luk kesme taşı": {
+      "adet": 5
+    },
+    "Silikonize mastik": {
+      "adet": 8
+    },
+    "Dayson": {
+      "adet": 4
+    },
+    "Poliüretan köpük": {
+      "adet": 2
     }
   },
-  "hesaplanmayanlar": {
+  "celik_kg": {
+    "dis": 577,
+    "ic": 180,
+    "duvar": 757,
+    "kiris_kolon": 161,
+    "cati": 426,
+    "toplam": 1364,
+    "not": "çatı = makas 370 + çatı paneli 56; toplamda 20 kg süs paneli de var"
+  },
+  "listedeki_oteki_bilgiler": {
     "Çelik panel grubu": "Dış cephe duvar paneli 140×45×10×1,2: 3 adet 212 kg ve ×0,8: 7 adet 365 kg; iç cephe duvar paneli 80×45×10×0,8: 6 adet 180 kg; çatı paneli 4 adet 56 kg; çatı makas paneli 29 adet 370 kg; kiriş kolon paneli 80×45×10×1,2: 10 adet 161 kg; süs paneli 4 adet 20 kg; parça C profil 5; toplam 63 panel 1364 kg",
     "Çatıda ayrıca": "Sandviç panel L 1000: 2 adet; ters mahya L 2800: 1 adet; özel açılı köşe direği ve kapaması 100×100×2330: 4 adet",
     "Kapı ve pencere": "Melamin kapı (80'lik kanat) 90×214 üç adet; kompozit çelik kapı 90×210 bir adet; PVC pencere 140/150 iki, 200/220 sürgülü üç; vasistas 60/40 bir",
-    "Vida grubu": "RYSB pul başlı 3,9×32: 400; alçıpan vidası 3,5×35: 4000; OSB ve yalıpan 3,9×32: 3500; pencere vidası 4,8×70: 120; trapez vida 5,5×25: 1750; 5,5×60: 250; 5,5×110 (sandviç panel): 750; çelik dübel 32; şase pul 32; 8'lik trapez uç 5; PH2 uç 5; 230'luk kesme taşı 5; inox taş 7; çırpı ipi 2 m",
-    "Boya grubu": "Silikonize mastik 8, dayson 4, poliüretan köpük 2",
+    "Vida grubu": "Çırpı ipi 2 m (hesapta 1 adet)",
     "Elektrik ve sıhhi tesisat": "Listede ayrı gruplar var (duy, glop, kablo, anahtar, priz, sigorta; temiz su borusu ve ek parçaları)"
   }
 }

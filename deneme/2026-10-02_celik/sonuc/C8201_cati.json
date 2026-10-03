@@ -31,5 +31,46 @@
  "kirma_boyu": 588.143,
  "mahya_hatti_toplam": 2696.572,
  "mahya_parca_boyu": 280,
- "mahya_parca_adedi_bindirmesiz": 10
+ "mahya_parca_adedi_bindirmesiz": 10,
+ "mahya_bindirme": 30,
+ "mahya_parca_adedi": 11,
+ "inis_noktalari": [
+  [
+   -30,
+   -30,
+   "kose"
+  ],
+  [
+   1124,
+   -30,
+   "kose"
+  ],
+  [
+   1124,
+   780,
+   "kose"
+  ],
+  [
+   -30,
+   780,
+   "kose"
+  ],
+  [
+   547.0,
+   -30,
+   "orta"
+  ],
+  [
+   547.0,
+   780,
+   "orta"
+  ]
+ ],
+ "inis_adedi": 6,
+ "cephe": [
+  1094,
+  750
+ ],
+ "yontem": "panel",
+ "kaplama": "sandvic_panel"
 }

@@ -1,11 +1,11 @@
 {
-  "sema": "portman.yukleme_kurallari/0.1-taslak",
-  "aciklama": "Çelik (A1) ve çatı (A5) yükleme listesi için katsayılar. Her değerin kaynağı ve durumu yanında. durum: excel = PortatifEv'in kendi yükleme listesi çalışma kitabındaki formül ya da not; liste = gerçek listedeki boyut bilgisi; uydurma = iki gerçek listedeki (90 m² beşik, 62 m² kırma) adetleri tutturan kural, teyit bekliyor; varsayim = Claude'un varsayımı, teyit bekliyor.",
+  "sema": "portman.yukleme_kurallari/0.2-taslak",
+  "aciklama": "Çelik (A1) ve çatı (A5) yükleme listesi için katsayılar. Her değerin kaynağı ve durumu yanında. durum: lokman = Lokman'ın söylediği kural (tarih ve saat kaynakta); excel = PortatifEv'in yükleme listesi çalışma kitaplarındaki formül ya da not; motor = PortatifEv'in Excel hesaplama motorundaki (CTKBF V1.1) formül, not ya da ortalama; liste = gerçek listedeki boyut bilgisi; uydurma = gerçek listelerdeki adetleri tutturan kural, teyit bekliyor; varsayim = Claude'un varsayımı, teyit bekliyor.",
   "zayiat": {
     "boardex": {
       "deger": 0.15,
       "durum": "excel",
-      "kaynak": "Dış Cephe Boardex = net + net × 15/100"
+      "kaynak": "Yükleme listesi çalışma kitabı: Dış Cephe Boardex = net + net × 15/100. Excel motorunda ve 105 m² listenin hesap sayfasında %8 yazıyor; ama üç gerçek listedeki adetlere %15 yakın düşüyor (hesap / liste: 32 / 32, 45 / 46, 52 / 51); %8 ile 2–3 levha eksik kalıyor"
     },
     "duvar_alcipan": {
       "deger": 0.05,
@@ -14,18 +14,18 @@
     },
     "tavan_alcipan": {
       "deger": 0.05,
-      "durum": "uydurma",
-      "kaynak": "beyaz tavanda 25 adedi tutturuyor; yeşil tavanda 5 veriyor, listede 6"
+      "durum": "motor",
+      "kaynak": "Excel hesaplama motoru (CTKBF V1.1): tavan toplam alan × 1,05 ÷ alçıpan alanı. Üç gerçek listede 25, 15 ve 31 adedi tutturuyor"
     },
     "osb": {
       "deger": 0.05,
       "durum": "excel",
       "kaynak": "Duvar OSB = net + net × 5/100; çatı OSB'sinde 39 adedi tutturuyor"
     },
-    "sandvic_panel": {
+    "cati_kaplama_kirma": {
       "deger": 0.1,
       "durum": "uydurma",
-      "kaynak": "62 m² kırma çatıda 27 adet L 3200 paneli tutturuyor (yüzey 76,8 m²)"
+      "kaynak": "62 m² kırma çatıda 27 adet L 3200 sandviç paneli tutturuyor (yüzey 76,8 m²). Excel motorunda dört omuz katsayısı 1,06; motorun notu: gerçek adet AutoCAD'de yerleşim yapılarak bulunur. Tek kat panel ve kiremit desen sac için de aynı pay kullanıldı"
     }
   },
   "levha_m2": {
@@ -95,23 +95,38 @@
       "deger": 4.2,
       "durum": "liste",
       "kaynak": "L 4200"
+    },
+    "sandvic_kapama": {
+      "deger": 2.5,
+      "durum": "liste",
+      "kaynak": "Sandviç panel kapaması ve tek kat panel kapaması L 2500 (62 ve 105 m² listeler)"
     }
   },
   "kiremit_kapatma_m": {
     "deger": 1.1,
     "durum": "liste",
-    "kaynak": "Metal kiremit (110 cm kapatır)"
+    "kaynak": "Metal kiremit (110 cm kapatır); montaj paftası notunda da 110 cm. Excel motorunda 105 cm"
   },
   "bindirme_m": {
     "mahya": {
-      "deger": 0.2,
-      "durum": "varsayim",
-      "kaynak": "16,13 m için 7 adet: bindirme en az 12 cm ya da bir yedek parça; 20 cm varsayıldı"
+      "deger": 0.3,
+      "durum": "lokman",
+      "kaynak": "Lokman, 3 Ekim 2026 13:27: mühendisler bindirmeyi saçak, mahya ve alın sacında hep 30 cm kabul eder (fire dahil); örneği: \"saçak sacı L:2800 ise cephe 10 metre / 2,5\". Çıkarım: L 2800 mahya parçasında uzunluk ÷ 2,5. Excel motorunun notunda 20 cm (÷ 2,6). Üç gerçek listede iki payla da aynı adet çıkıyor (7, 11, 10)"
+    },
+    "sacak_saci": {
+      "deger": 0.3,
+      "durum": "lokman",
+      "kaynak": "Lokman, 3 Ekim 2026 13:27: bindirme 30 cm (fire dahil). Çıkarım: listelerde saçak sacı L 2500 olduğu için uzunluk ÷ 2,2 (Lokman'ın örneğinde parça L 2800 ve ÷ 2,5; saçak sacının boyu sorulacak). Dosya tarihi 26 Kasım 2025 olan 105 m² listede 39,2 m için 18 adet (÷ 2,2 ile tutuyor). Eylül 2025 listelerinde 14 ve 17 adet: ÷ 2,3 ile tutuyor (Excel motorundaki 20 cm), ÷ 2,2 ile 15 ve 18 çıkıyor"
+    },
+    "alin_saci": {
+      "deger": 0.3,
+      "durum": "lokman",
+      "kaynak": "Lokman, 3 Ekim 2026 13:27: bindirme 30 cm (fire dahil). Çıkarım: alın sacı L 2500 olduğu için uzunluk ÷ 2,2. 105 m² listede 17 m için 8 adet (tutuyor); 90 m² listede 16,56 m için 9 adet (8 çıkıyor)"
     },
     "dere": {
-      "deger": 0.1,
-      "durum": "varsayim",
-      "kaynak": "31,96 m için 9 adet: 10 cm bindirmeyle tutuyor"
+      "deger": 0.2,
+      "durum": "motor",
+      "kaynak": "Excel hesaplama motoru (CTKBF V1.1): toplam dere uzunluğu ÷ 3,8; 3,8 = 4,0 − 20 cm bindirme. Üç gerçek listede tutuyor (9, 10, 11). Soruda mahya ve dere bindirmesi sorulmuştu; Lokman saçak, mahya ve alın sacını saydı, dereyi saymadı. 30 cm ile (÷ 3,7) 62 m² listede 11 çıkıyor (listede 10). Açık soru"
     }
   },
   "inis_basina": {
@@ -122,8 +137,8 @@
       "acik_dirsek": 2,
       "inis_kelepcesi": 2
     },
-    "durum": "uydurma",
-    "kaynak": "7 iniş için 7, 7, 7, 14, 14"
+    "durum": "motor",
+    "kaynak": "Excel hesaplama motoru (CTKBF V1.1): açık dirsek = iniş borusu × 2; kapalı dirsek × 1; iniş kelepçesi × 2; iniş aparatı = boru adedi. Üç gerçek listede aynı"
   },
   "kapi_boslugu_m": {
     "ic": {
@@ -131,8 +146,8 @@
         0.9,
         2.14
       ],
-      "durum": "excel",
-      "kaynak": "İç kapı 0,9 × 2,14"
+      "durum": "lokman",
+      "kaynak": "Lokman, 3 Ekim 2026 13:27: çelik (LGF) yapılarda iç kapı boşluğu en 90, yükseklik 214 cm; kasa sağ, sol ve üstte 5'er cm; altta 5 cm şap ve 2–3 cm parke; kanat 200 cm'e düşer. Kanat eni 80: listelerdeki \"80'lik kanat\" adından ve 90 − 2 × 5'ten (çıkarım). Yükleme listesi çalışma kitaplarında da boşluk 0,9 × 2,14"
     },
     "dis": {
       "deger": [
@@ -140,13 +155,8 @@
         2.1
       ],
       "durum": "excel",
-      "kaynak": "Dış kapı 0,95 × 2,1"
+      "kaynak": "Yükleme listesi çalışma kitapları: dış kapı boşluğu 90 ve 105 m² listelerde 0,95 × 2,10, 62 m² listede 0,95 × 2,00; listelerde kompozit çelik kapı 90 × 210. Üç çelik SKP modelinde dış kapı başlığı 210, net en 94. Lokman'ın teyidi yok"
     }
-  },
-  "kosebent_kati": {
-    "deger": 2.0,
-    "durum": "varsayim",
-    "kaynak": "90 m² listede 70 adet (175 m) oda çevreleri toplamının iki katına denk; 62 m² listede 50 adet (125 m) bu kuralla 42 çıkıyor: kural bilinmiyor"
   },
   "asik": {
     "aralik_m": {
@@ -157,13 +167,8 @@
     "zayiat": {
       "deger": 0.05,
       "durum": "uydurma",
-      "kaynak": "62 m² kırma çatıda 41 adedi tutturuyor; 90 m² beşik çatıda 56 veriyor, listede 57"
+      "kaynak": "62 m² kırma çatıda 41 adedi tutturuyor; 90 m² beşik çatıda 56 veriyor, listede 57. Yalnız yöntem B. Excel motorunda (m² × 1,18) ÷ 2,46 + 10; notunda %15 zayiat ve 10 cm bindirme"
     }
-  },
-  "alin_saci_zayiat": {
-    "deger": 0.05,
-    "durum": "varsayim",
-    "kaynak": "16,56 m için 7 veriyor, listede 9"
   },
   "sandvic_panel_kapatma_m": {
     "deger": 1.0,
@@ -172,18 +177,13 @@
   },
   "dere_kelepcesi_dere_basina": {
     "deger": 8,
-    "durum": "uydurma",
-    "kaynak": "9 dere için 72, 10 dere için 80 kelepçe: iki listede de dere başına 8"
-  },
-  "inis_adedi_varsayilan": {
-    "deger": 7,
-    "durum": "varsayim",
-    "kaynak": "90 ve 62 m² listelerde 7 iniş; 105 m² listede 10. Sabit değil; kuralı bilinmiyor"
+    "durum": "motor",
+    "kaynak": "Excel hesaplama motoru (CTKBF V1.1): metal dere adedi × 8. Üç gerçek listede aynı (72, 80, 88)"
   },
   "tavan_omegasi_aralik_m": {
     "deger": 0.6,
     "durum": "uydurma",
-    "kaynak": "62 m² listede 26 adedi tutturuyor (tavan 58,0 m²); 90 m² listede 37 veriyor, listede 40"
+    "kaynak": "62 m² listede 26 adedi tutturuyor (tavan 58,0 m²); 90 m² listede 37 veriyor, listede 40. Yalnız yöntem B (tavan omegası ve aşık). Excel motorunda (bina + veranda m²) ÷ 2,19 + 5; 2,19 = 0,60 × 3,65 (10 cm bindirme)"
   },
   "sacak_parcasi_kenar_kenar": {
     "deger": true,
@@ -193,7 +193,7 @@
   "sacak_alti_boardex_eni_m": {
     "deger": 0.3,
     "durum": "uydurma",
-    "kaynak": "62 m² listede saçaklar için Boardex 11,5 m²: 37,92 m × 0,30"
+    "kaynak": "62 m² listede saçaklar için Boardex 11,5 m² yazıyor; saçak boyu 37,92 m × 0,30 = 11,4 m². Saçak 30 cm: Lokman, 2 Ekim 20:40. Çatı ve tavan panelli yöntemde saçak altının Boardex olduğu: Lokman, 3 Ekim 2026 13:27. 105 m² listede saçak altı 0,50 m (19,6 m² = 39,2 × 0,50)"
   },
   "yalitim_kat": {
     "deger": {
@@ -201,7 +201,7 @@
       "140": 2
     },
     "durum": "uydurma",
-    "kaynak": "62 m² listede (dış karkas 140 mm) brüt 189 m² = 2 × dış duvar + iç duvar; 90 m² listede (80 mm) brüt 172 = dış + iç"
+    "kaynak": "62 m² listede (dış karkas 140 mm) brüt 189 m² = 2 × dış duvar + iç duvar; 90 m² listede (80 mm) brüt 172 = dış + iç. 105 m² listenin hesap sayfasında da 'dış × 2' + iç yazıyor; sayfa yalıtımda çevreyi 52,48 m alıp 333 m² buluyor, bu kural 53,04 m çevreyle 335,6 m² veriyor. Dış boşluklar bir kez düşülüyor (listelerdeki alanlar böyle tutuyor)"
   },
   "silte_en_payi_m": {
     "deger": 0.2,
@@ -220,10 +220,242 @@
         "celik_panel": 10,
         "kosebent": 6
       },
-      "celik_dubel_duvar_paneli_basina": 3,
-      "inox_tasi_m2_bolu": 10
+      "celik_dubel_duvar_paneli_basina": 2,
+      "inox_tasi_m2_bolu": 10,
+      "rysb_m2_basina": 7.5,
+      "osb_vidasi": {
+        "osb_levha": 40,
+        "priz": 4,
+        "sacak_saci": 4,
+        "dere_kelepcesi": 3,
+        "yuvarlama": 500
+      },
+      "trapez_5_5x60_m2_basina": 2.5,
+      "trapez_panel_boyu_bolu_mm": 200,
+      "trapez_yuvarlama": 250,
+      "uc_m2_bolu": 15,
+      "kesme_tasi_m2_bolu": 15,
+      "cirpi_ipi": 1
     },
     "durum": "excel",
-    "kaynak": "çalışma kitabının vida sayfasındaki notlar: 1 alçıpan ya da Boardex için 40; 1 OSB için 40; 1 pencere için 20; aşık 10, omega (375) 10, omega (240) 6, çelik panel 10, köşebent 6; orta uzunlukta duvar paneline 3 çelik dübel; şase pul = dübel; inox taşı = bina m² ÷ 10"
+    "kaynak": "Yükleme listesi çalışma kitabının vida notları: 1 alçıpan ya da Boardex için 40; 1 OSB için 40; 1 pencere için 20; trapez (5,5 × 25): aşık 10, omega (375) 10, omega (240) 6, çelik panel 10, köşebent 6. Excel hesaplama motoru (CTKBF V1.1): RYSB = m² × 7,5; OSB vidası = OSB × 40 + priz × 4 + saçak sacı × 4 + dere kelepçesi × 3; 5,5 × 60 = m² × 2,5; panel vidası = panel boyu ÷ 200 × adet; çelik dübel = duvar paneli × 2; şase pul = dübel; uçlar = m² ÷ 15; inox taş = m² ÷ 10; 'genelde 250 katları gönderilir'. İki gerçek listeyle (62 ve 105 m²) karşılaştırma docs/sartname/yukleme_listesi_yontemi.md içinde. Kesme taşı motorda m² × 0,02; 62 ve 105 m² listelerde m² ÷ 15'e denk (5 ve 7): katsayı bu iki listeye bakılarak seçildi"
+  },
+  "inis": {
+    "deger": {
+      "kose_basina": 1,
+      "orta_inis_esigi_m": 10.0,
+      "cephe_basina_en_cok_orta": 1
+    },
+    "durum": "lokman",
+    "kaynak": "Lokman, 3 Ekim 2026 13:27: saçaklarda her köşeye iniş yapılır; dört omuz çatıda saçakların tamamı dere ile dönülür. Uzun cephe 10 m olursa ortasına bir iniş daha konur; 14 metrede üç tane konmaz. Örnek: 82 m²'de köşelere birer, 10 metrelik cephelerin ortasına birer, toplam 6. Gerçek listelerde 7, 7 ve 10 iniş var; ilk ikisinde kural 6 veriyor (fark 1; nedeni bilinmiyor)"
+  },
+  "dere_kapagi": {
+    "deger": {
+      "besik": 5,
+      "kirma": 0,
+      "besik_cumba": 6,
+      "besik_2_cumba": 7
+    },
+    "durum": "motor",
+    "kaynak": "Excel hesaplama motoru (CTKBF V1.1): beşik 5, dört omuz 0, beşik + cumba 6, beşik + 2 cumba 7; not: montaj paftasından sayılır. Gerçek listelerde 6 (90 m² beşik) ve 6 (105 m² beşik + cumba)"
+  },
+  "kosebent_m2_bolu": {
+    "deger": 2.5,
+    "durum": "lokman",
+    "kaynak": "Lokman, 3 Ekim 2026 13:27: kural olarak bina m² ÷ 2,5; 50 ya da 70 olması çok önemli değil. Gerçek listelerde adet bunun yaklaşık iki katı: 90 m²'de 70, 62 m²'de 50, 105 m²'de 85 (bir listede 100 m²'de 40). 105 m² listenin hesap sayfasında oda çevreleri toplamı ÷ 2,5 = 43,7 yazıyor, listede 85. Excel motorunda (uzun × 6 + kısa × 6 + 9 × 4 × 2,7) ÷ 2,5"
+  },
+  "veranda_cercevesi": {
+    "deger": {
+      "sirt_mm": 80,
+      "genislik_cm": 30,
+      "dikme_boyu_cm": 240,
+      "dikme_kaplama_cevresi_m": 0.76,
+      "kiris_kaplama_cevresi_m": 0.68
+    },
+    "durum": "lokman",
+    "kaynak": "Lokman, 3 Ekim 2026 13:27: kaplanır; her projede sırtı 80 mm (çelik karkas), genişliği 30 cm. Üzerinde çalışılan projede (Ç8201) verandanın bütün çerçevesi böyle: kirişler yanlara ve karşıya, altlarına 240 cm, kiriş gibi dikme. Kaplama çevreleri gerçek listelerin hesap sayfalarından: dikme 2 × (30 + 8) = 76 cm, kiriş 30 + 30 + 8 = 68 cm (üstü kapalı). Excel motorunda ikisi de 0,8 m"
+  },
+  "osb_takviye": {
+    "deger": {
+      "oda_anahtarlari": [
+        "yaşam",
+        "salon",
+        "mutfak"
+      ],
+      "zayiat": 0.05
+    },
+    "durum": "lokman",
+    "kaynak": "Lokman, 3 Ekim 2026 13:27: \"içlerde osb yoksa mutfak dolabı tv ünitesi takarken mukavemet sağlasın diye gönderdiğimiz ürünler yani sen salonun bir odası ile mutfağın 1 odasının tüm yüzeyini hesapla\". Okuma (teyit bekliyor): salon ve mutfak aynı mahaldeyse o mahalin bütün duvar yüzeyi. Gerçek listelerde alan daha küçük: 90 m² projede 35,1 m² (13 adet); 105 m² projede brüt 42,9, net 39,3 m² (15 adet; hesap sayfasında OSB zayiatı %15, × 1,05 ile 14 çıkıyor). Listelerde kalemin adı \"TV, klima ve mutfak dolabı arkası\""
+  },
+  "tek_kat_panel_kapatma_m": {
+    "deger": 0.87,
+    "durum": "liste",
+    "kaynak": "105 m² liste ve 90 m² projenin montaj paftası notu: tek kat panel 87 cm kapatır. Excel motorunda 100 cm"
+  },
+  "nem_bariyeri": {
+    "deger": {
+      "birim": "m²"
+    },
+    "durum": "motor",
+    "kaynak": "Excel hesaplama motoru (CTKBF V1.1): çatıda nem bariyeri = çatı yüzeyi (m²) × çatı katsayısı"
+  },
+  "cati_yontemi": {
+    "deger": {
+      "panel": "A · çelik konstrüksiyon standardı: makas arasına tavan paneli, makas üstüne çatı paneli; saçak altı Boardex",
+      "omega_asik": "B · prefabrikte kullanılan ve PortatifEv'in çelikte de uyguladığı yöntem: tavan omegası, aşık, alın sacı, saçak sacı"
+    },
+    "durum": "lokman",
+    "kaynak": "Lokman, 3 Ekim 2026 13:27: hafif çelikte normalde makas arasına tavan paneli, üstüne çatı paneli konur; \"ama biz prefabrikte kullandığımız metod olan tavan omegası, aşık, alın sacı ve saçak sacı yöntemini uyguluyoruz\"; çatı işleme iki varyant; iki yöntem birlikte kullanılmaz. Şimdilik çelik konstrüksiyon standardı (çatı ve tavan paneli) baz alınır. Üç gerçek liste de yöntem B'dedir"
+  },
+  "celik": {
+    "duvar_kg_m": {
+      "deger": {
+        "dis": {
+          "80x45x1,2": 20.33,
+          "140x45x0,8": 18.2,
+          "140x45x1,2": 29.04
+        },
+        "ic": {
+          "80x45x0,8": 13.0,
+          "80x45x1,2": 19.75
+        }
+      },
+      "durum": "motor",
+      "kaynak": "Excel hesaplama motoru (CTKBF V1.1), 'DIS-IC DUVAR TONAJ' sayfası: gerçek projelerde duvar tonajı ÷ duvar uzunluğu, kat yüksekliği 2,70 m; proje ortalamaları. Dış 80×1,2: 4 proje (19,6–21,2); iç 80×1,2: 7 ölçüm (17,3–21,3); dış 140×1,2: 3 proje (26,7–31,4); dış 140×0,8: 2 proje (18,2); iç 80×0,8: 2 proje (12,1 ve 13,9). Dış 80×0,8, 80×1,5 ve 140×1,5 için motorda değer yok. Kullanım (Lokman, 3 Ekim 13:27): dış cephe ve iç cephe uzunluğu × birim ağırlık"
+    },
+    "dikme_kg_m": {
+      "deger": {
+        "80x45x1,2": 6.42,
+        "140x45x1,2": 8.26
+      },
+      "durum": "motor",
+      "kaynak": "Excel hesaplama motoru (CTKBF V1.1): kolon tonajı ÷ kolon boyu (adet × 2,4 m); 80×1,2: 4 proje, 140×1,2: 3 proje"
+    },
+    "kiris_kg_m": {
+      "deger": {
+        "80x45x1,2": 6.55,
+        "140x45x1,2": 8.27,
+        "140x45x1,5": 11.04
+      },
+      "durum": "motor",
+      "kaynak": "Excel hesaplama motoru (CTKBF V1.1): kiriş tonajı ÷ kiriş boyu; 80×1,2: 5 proje"
+    },
+    "cati_kg_m2": {
+      "deger": {
+        "besik": 5.7,
+        "kirma": 7.55,
+        "besik_cumba": 5.65,
+        "besik_2_cumba": 6.08
+      },
+      "durum": "motor",
+      "kaynak": "Excel hesaplama motoru (CTKBF V1.1), 'CATI TONAJ' sayfası: çatı çeliği (80×45×0,8) ÷ saçak dahil çatı plan alanı. Dört omuz: 3 proje (9,46 · 6,86 · 6,33). Gerçek listelerde: 62 m² kırma 5,8 kg/m² (makas 370 + çatı paneli 56 kg, plan 73,6 m²), 90 m² beşik 5,2 kg/m² (535 kg, plan 103,6 m²). Lokman, 3 Ekim 13:27: makas ve kirişler yaklaşık bir makas ölçüsünden ayrıca verilecek; o zamana kadar geçici"
+    },
+    "boy_c_profil": {
+      "deger": {
+        "80x45x0,8": {
+          "adet": 3,
+          "kg": 15
+        },
+        "80x45x1,2": {
+          "adet": 3,
+          "kg": 15
+        }
+      },
+      "durum": "motor",
+      "kaynak": "Excel hesaplama motoru (CTKBF V1.1): sabit; gerçek listelerde 'parça C profil' 3 + 3 ya da 4–5 adet"
+    },
+    "et_kalinligi_varsayilan": {
+      "deger": {
+        "dis_80": "1,2",
+        "ic_dis80": "1,2",
+        "dis_140": "0,8",
+        "ic_dis140": "0,8",
+        "dikme": "1,2",
+        "kiris": "1,2",
+        "cati": "0,8"
+      },
+      "durum": "varsayim",
+      "kaynak": "Gerçek listelerden çıkarım; teyit bekliyor. 80 mm dış karkaslı 90 m² listede bütün duvarlar 1,2 mm. 140 mm dış karkaslı 62 ve 105 m² listelerde dış duvar çoğunlukla 0,8 mm (3 panel 1,2 mm), iç duvar 80×0,8. Kiriş ve kolon panelleri 1,2; makaslar çoğunlukla 0,8"
+    },
+    "panel_boyu_en_cok_m": {
+      "deger": 5.7,
+      "durum": "varsayim",
+      "kaynak": "81 m² çelik SKP modelinde en uzun duvar paneli 569 cm. Panel adedi tahmini: köşeden köşeye her duvar hattı, bu boyu aşıyorsa eşit bölünür. Gerçek adet karkas yerleşiminden gelir"
+    },
+    "kiris_panel_boyu_m": {
+      "deger": 4.0,
+      "durum": "motor",
+      "kaynak": "Excel hesaplama motoru (CTKBF V1.1): kiriş adedi = kiriş uzunluğu ÷ 4, yukarı"
+    },
+    "cati_panel_adedi": {
+      "deger": {
+        "besik": 15,
+        "besik_cumba": 20,
+        "besik_2_cumba": 25,
+        "kirma": 25
+      },
+      "durum": "motor",
+      "kaynak": "Excel hesaplama motoru (CTKBF V1.1): çatı panel adedi çatı tipine göre sabit. Gerçek listelerde makas 15, 29 ve 20"
+    }
+  },
+  "boya": {
+    "deger": {
+      "dis_cephe_kova_m2_basina": 0.02,
+      "ic_cephe_kova_m2_basina": 0.02,
+      "tavan_kova_m2_basina": 0.01,
+      "astar_kova_m2_basina": 0.01,
+      "mastik_pencere_basina": 1,
+      "mastik_mantolamasiz_m2_basina": 0.6667,
+      "dayson_m2_basina": 0.06,
+      "kopuk": 2
+    },
+    "durum": "motor",
+    "kaynak": "Excel hesaplama motoru (CTKBF V1.1): 100 m²'ye dış 2, iç 2, tavan 1, astar 1 kova (17,5 kg); mastik = pencere adedi (dışta mantolama yoksa + m² × 2/3, 'ayrıca eklenir'); dayson m² × 0,06 (notta beşik çatı için 0,03 yazıyor ama formül her çatıda 0,06; gerçek listelerde 90 m² beşikte 6, 62 m² kırmada 4, 105 m²'de 6); köpük 2. Gerçek listelerde boya kovası yok; mastik üç listede de 8"
+  },
+  "tesisat": {
+    "deger": {
+      "temiz_su_borusu_4m": 6,
+      "normal_dirsek_20": 15,
+      "kulakli_dirsek_20": 12,
+      "duz_t_20": 6,
+      "mason_20": 15,
+      "ic_disli_t_20": 6,
+      "atlama_parcasi": 3,
+      "vitrifiye": {
+        "dusakabin_90x90": 1,
+        "klozet": 1,
+        "banyo_dolabi": 1,
+        "batarya_grubu": 1
+      }
+    },
+    "durum": "motor",
+    "kaynak": "Excel hesaplama motoru (CTKBF V1.1): ıslak hacim (WC/banyo) başına adetler. 105 m² gerçek listede iki ıslak hacim için tam iki katı (12, 30, 24, 12, 30, 12, 6). Vitrifiye o listede yok"
+  },
+  "elektrik": {
+    "deger": {
+      "besleme_kablosu_kat_basina_m": 5,
+      "uydu_kablo_priz_basina_m": 25,
+      "sigorta_kutusu_kat_basina": 1,
+      "kacak_akim_rolesi": 1,
+      "zil": 1,
+      "izole_bant_m2_basina": 0.06,
+      "kablo": "sigorta adedi × binanın köşegeni + (priz ya da anahtar sayısı) × 2 m",
+      "buat_kasa": "anahtar + priz + oda sayısı",
+      "ampul": "tijli duy + glop"
+    },
+    "durum": "motor",
+    "kaynak": "Excel hesaplama motoru (CTKBF V1.1): duy, glop, anahtar, priz ve sigorta sayıları 'AutoCAD montaj paftasından sayılır'. Sayım olmadan bu kalemler hesaplanamaz. 105 m² gerçek listede: duy 10, glop 4, tekli anahtar 4, çiftli anahtar 5, tekli priz 20, çiftli priz 4, uydu prizi 1, sigorta 9, buat 37, izole bant 3"
+  },
+  "bayi_kurali": {
+    "deger": {
+      "varsayilan_gruplar": {
+        "Vida": true,
+        "Boya": true,
+        "Elektrik": true,
+        "Sıhhi tesisat": true
+      }
+    },
+    "durum": "lokman",
+    "kaynak": "Lokman, 3 Ekim 2026 13:27: vida, boya, elektrik ve tesisat bütün paketlerde var; bayilerle paylaşılan katalog ve fiyat listelerinde de yer alıyor. Bayi kuralı olarak ele alınacak (örnek: bir bayi için çelikte standart ne, bir başkası için prefabrikte standart ne); canlıda bayi numaraları veritabanında birincil anahtar olacak, liste mesajı atana göre kurulacak"
   }
 }

@@ -1,5 +1,5 @@
 {
-  "sema": "portman.yapi_tanimi/0.2-taslak",
+  "sema": "portman.yapi_tanimi/0.3-taslak",
   "kod": "Ç8201",
   "ad": "Tek kat çelik, 2+1, 82 m²",
   "aile": "tek_kat_celik",
@@ -18,11 +18,19 @@
     "y": 0,
     "en": 244,
     "boy": 750,
-    "kolon": {
-      "adet": 3,
-      "kenar": 20,
-      "kenar_varsayim": true,
-      "kaynak": "katalog görselleri: dış kenarda iki köşe ve bir orta kolon"
+    "cerceve": {
+      "sirt": 8,
+      "genislik": 30,
+      "dikme_boyu": 240,
+      "dikme_adedi": 3,
+      "dikme_kenari": "sag",
+      "kiris_kenarlari": [
+        "alt",
+        "sag",
+        "ust"
+      ],
+      "kaynak": "Lokman, 3 Ekim 2026 13:27: kaplanır; her projede sırtı 80 mm (çelik karkas), genişliği 30 cm. Bu projede verandanın bütün çerçevesi böyle yapılır: kirişler yanlara ve karşıya konur; altlarına 240 cm, kiriş gibi dikme konur.",
+      "dikme_kaynak": "Dikme sayısı ve yeri katalog görsellerinden: dış kenarda iki köşe ve bir orta. Teyit bekliyor."
     }
   },
   "duvar_yuksekligi": 270,
@@ -178,9 +186,18 @@
       "duvar": "dis:alt",
       "bas": 383,
       "en": 100,
-      "yuk": 200,
+      "yuk": 210,
       "mentese": "son",
-      "acilim": "ic"
+      "acilim": "ic",
+      "bosluk": [
+        95,
+        210
+      ],
+      "kapi": [
+        90,
+        210
+      ],
+      "kaynak": "Genişlik 100 katalog çiziminden. Boşluk 95 × 210 ve kapı 90 × 210: yükleme listesi çalışma kitapları ile üç çelik SKP modeli (dış kapı başlığı 210, net en 94). Lokman'ın teyidi yok."
     },
     {
       "tur": "ic_kapi",
@@ -190,7 +207,11 @@
       "mentese": "son",
       "acilim": "sol",
       "not": "Yatak Odası 1",
-      "yuk": 200
+      "yuk": 214,
+      "kanat": [
+        80,
+        200
+      ]
     },
     {
       "tur": "ic_kapi",
@@ -200,17 +221,26 @@
       "mentese": "bas",
       "acilim": "sol",
       "not": "Yatak Odası 2",
-      "yuk": 200
+      "yuk": 214,
+      "kanat": [
+        80,
+        200
+      ]
     },
     {
       "tur": "ic_kapi",
       "duvar": "Bb",
       "bas": 363,
-      "en": 80,
+      "en": 90,
       "mentese": "bas",
       "acilim": "ust",
       "not": "Banyo",
-      "yuk": 200
+      "yuk": 214,
+      "cizimdeki_en": 80,
+      "kanat": [
+        80,
+        200
+      ]
     },
     {
       "tur": "ic_kapi",
@@ -220,7 +250,11 @@
       "mentese": "son",
       "acilim": "sag",
       "not": "Yaşam Alanı",
-      "yuk": 200
+      "yuk": 214,
+      "kanat": [
+        80,
+        200
+      ]
     }
   ],
   "cizim_etiketleri_m2": {
@@ -241,12 +275,21 @@
     "topuk_varsayim": false,
     "topuk_kaynak": "SKP ölçümü, 2 Ekim 2026: 62, 81 ve 90 m² çelik modellerde makasın üst yüzü saçak ucunda 280 cm (duvar 270 + 10); saçak altı 270 cm. Lokman, 2 Ekim 22:05: makaslar %33 eğim ve 10 cm topukla çizilir",
     "panel_kalinligi": 8,
-    "panel_kaynak": "Lokman, 2 Ekim 2026 22:05: makasların üzerine 8 cm çatı paneli gelir; saçak kaplaması 10 cm topuk + panelin eğimdeki ölçüsü kadar yapılır",
+    "panel_kaynak": "Lokman, 2 Ekim 2026 22:05: makasların üzerine 8 cm çatı paneli gelir; saçak kaplaması 10 cm topuk + panelin eğimdeki ölçüsü kadar yapılır. 3 Ekim 13:27: makasların üzerine yine kendi malzemesinden çatı paneli konur. Çıkarım: ikisi aynı parça (sırt 80 mm); çatı kaplaması onun üzerine gelir.",
     "mahya_kirmalarda": true,
     "mahya_kaynak": "Lokman, 3 Ekim 2026 11:57: tepeye konan mahya çatının kırmalarına da konur; aynı malzeme",
     "mahya_parca_boyu": 280,
-    "mahya_parca_kaynak": "90 m² çelik projenin yükleme listesi: metal kiremit mahyası ve OSB mahyası L 2800. Bindirme payı bilinmiyor",
+    "mahya_parca_kaynak": "Parça boyu L 2800: gerçek yükleme listeleri. Bindirme 30 cm (fire dahil): Lokman, 3 Ekim 2026 13:27; L 2800 parçada uzunluk ÷ 2,5.",
     "kapsam": "kapali+veranda",
-    "kaynak": "Lokman, 2 Ekim 2026 20:40 (kırma/dört omuz, %33, saçak 30 cm kaplamalı); kapsam katalog görsellerinden"
-  }
+    "kaynak": "Lokman, 2 Ekim 2026 20:40 (kırma/dört omuz, %33, saçak 30 cm kaplamalı); kapsam katalog görsellerinden",
+    "yontem": "panel",
+    "yontem_kaynak": "Lokman, 3 Ekim 2026 13:27: çatı işlemede iki varyant var ve birlikte kullanılmaz. (A) hafif çelikte normal olan: makasların arasına tavan paneli, üzerine çatı paneli; ikisi de makasla aynı malzemeden, aynı roll form makinesinden. (B) PortatifEv'in uyguladığı, prefabrikte kullanılan yöntem: tavan omegası, aşık, alın sacı, saçak sacı. Şimdilik A baz alınır; Ç8201 çatı ve tavan panelli, saçak altı Boardex kaplamalı.",
+    "kaplama": "sandvic_panel",
+    "kaplama_kaynak": "Lokman, 3 Ekim 2026 13:27: 'çatı kaplaması' seçenektir: tek kat panel, sandviç panel ya da OSB + nem bariyeri + kiremit desen sac vb. Baz paketin kaplaması söylenmedi; hesapta sandviç panel örnek alındı, öteki iki seçenek de hesaplanıyor.",
+    "sacak_alti": "boardex",
+    "mahya_bindirme": 30
+  },
+  "lento_kapsam": "pencere",
+  "lento_kaynak": "Lokman, 2 Ekim 2026 20:40: lento her zaman 70 cm. 3 Ekim 13:27: iç kapı boşluğu 90 × 214. Çıkarım: lento 70 cm kuralı pencerelerde uygulanıyor; kapı boşlukları kendi yüksekliğinde.",
+  "ic_kapi_kurali": "Lokman, 3 Ekim 2026 13:27: çelik (LGF) yapılarda iç kapı için bırakılan boşluk en 90, yükseklik 214 cm. Kasa sağda, solda ve üstte 5'er cm; altta 5 cm şap ve 2–3 cm parke payı; kanat 200 cm'e düşer. Kanat eni 80: listelerdeki \"80'lik kanat\" adından ve 90 − 2 × 5'ten (çıkarım)."
 }
