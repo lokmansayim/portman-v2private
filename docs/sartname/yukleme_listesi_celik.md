@@ -50,6 +50,8 @@ Sütunlar gruba göre değişiyor: boyut, adet, kg ya da uzunluk, net alan, brü
 
 ## Kurallarla karşılaştırma: açık noktalar
 
+3 Ekim 2026 notu: bu listenin çalışma kitabındaki hesap sayfaları okundu; yöntem ve karşılaştırma `yukleme_listesi_yontemi.md`'de. Boardex adedi orada açıklanıyor: duvarlara ek olarak veranda kolonu, kirişi ve alın alanları da sayılıyor, üstüne %15 zayiat ekleniyor (hesap 45, liste 46).
+
 - **Boardex kalınlığı.** Listede dış cephe Boardex 8 mm; Lokman 2 Ekim'de Boardex ve alçıpanın 12,5 mm olduğunu söyledi. Hangisi baz paket?
 - **Kapı yüksekliği.** Listede kapılar 90 × 214 ve 90 × 210. "Lento her zaman 70 cm" kuralıyla 270 cm duvarda açıklık üst kotu 200 cm eder. Kapılarda lento mu kısalıyor, yoksa 70 cm başka bir ölçüyü mü anlatıyor?
 - **Boardex adedi.** 46 levha 132,5 m² eder. "Çevre × yükseklik − boşluklar" kuralının bu projede ne verdiği, aynı klasördeki çizimle hesaplanacak; fark çıkarsa nedeni (fire, saçak altı, veranda, alınlık) aranacak.

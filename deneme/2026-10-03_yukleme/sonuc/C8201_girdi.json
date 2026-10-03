@@ -1,0 +1,199 @@
+{
+ "sema": "portman.yukleme_girdisi/0.1-taslak",
+ "ad": "Ç8201 · Tek kat çelik, 2+1, 82 m² · paket: baz",
+ "kaynak": "deneme/2026-10-02_celik/C8201.json",
+ "bina_m2": 82,
+ "kat_yuksekligi_m": 2.7,
+ "dis": {
+  "cevre_m": 32.0,
+  "duvar_kalinligi_m": 0.105,
+  "karkas_mm": 80,
+  "kolon_kiris": [
+   {
+    "ad": "veranda kolonu",
+    "adet": 3,
+    "cevre_m": 0.76,
+    "boy_m": 2.4
+   },
+   {
+    "ad": "veranda kirişi",
+    "adet": 1,
+    "cevre_m": 0.68,
+    "boy_m": 12.38
+   }
+  ],
+  "kolon_kiris_varsayim": true,
+  "alin_m2": [],
+  "bosluklar": [
+   {
+    "ad": "120/180",
+    "adet": 3,
+    "en": 1.2,
+    "boy": 1.8
+   },
+   {
+    "ad": "60/40",
+    "adet": 1,
+    "en": 0.6,
+    "boy": 0.4
+   },
+   {
+    "ad": "120/100",
+    "adet": 1,
+    "en": 1.2,
+    "boy": 1.0
+   },
+   {
+    "ad": "180/180",
+    "adet": 3,
+    "en": 1.8,
+    "boy": 1.8
+   },
+   {
+    "ad": "dış kapı",
+    "adet": 1,
+    "en": 0.95,
+    "boy": 2.1
+   }
+  ]
+ },
+ "odalar": [
+  {
+   "ad": "Yatak Odası 1",
+   "tur": "beyaz",
+   "cevre_m": 13.82,
+   "alan_m2": 11.918,
+   "bosluk_m2": [
+    2.16,
+    1.926
+   ]
+  },
+  {
+   "ad": "Yatak Odası 2",
+   "tur": "beyaz",
+   "cevre_m": 13.82,
+   "alan_m2": 11.918,
+   "bosluk_m2": [
+    2.16,
+    1.926
+   ]
+  },
+  {
+   "ad": "Banyo",
+   "tur": "yesil",
+   "cevre_m": 8.375,
+   "alan_m2": 4.3,
+   "bosluk_m2": [
+    0.24,
+    1.712
+   ]
+  },
+  {
+   "ad": "Hol",
+   "tur": "beyaz",
+   "cevre_m": 12.415,
+   "alan_m2": 6.748,
+   "bosluk_m2": [
+    1.995,
+    1.926,
+    1.926,
+    1.712,
+    1.926
+   ]
+  },
+  {
+   "ad": "Yaşam Alanı",
+   "tur": "beyaz",
+   "cevre_m": 21.295,
+   "alan_m2": 23.484,
+   "bosluk_m2": [
+    2.16,
+    1.2,
+    3.24,
+    3.24,
+    3.24,
+    1.926
+   ]
+  }
+ ],
+ "ic_kapi_adedi": 4,
+ "tavan_m2": {
+  "beyaz": 54.07,
+  "yesil": 22.6
+ },
+ "cati": {
+  "tip": "kirma",
+  "ortu": "sandvic_panel",
+  "egim": 0.33,
+  "plan_m": [
+   11.54,
+   8.1
+  ],
+  "yuzey_m2": 98.43,
+  "sacak_kenarlari_m": [
+   11.54,
+   8.1,
+   11.54,
+   8.1
+  ],
+  "sacak_boyu_toplam_m": 39.28,
+  "mahya_hatti_m": 26.97,
+  "panel_boyu_m": 4.3,
+  "bina_eni_m": 7.5,
+  "cati_boyu_m": 11.54,
+  "sacak_alti": "boardex",
+  "sacak_omegasi": "Geniş saçak omegası (180 × 2500)"
+ },
+ "kapi_pencere": [
+  {
+   "kalem": "Melamin kapı (80'lik kanat)",
+   "boyut": "90 × 214",
+   "adet": 3,
+   "durum": "model"
+  },
+  {
+   "kalem": "Melamin kapı (çizimde 80 cm; listelerde bütün iç kapılar 90 × 214)",
+   "boyut": "soru",
+   "adet": 1,
+   "durum": "soru"
+  },
+  {
+   "kalem": "Kompozit çelik kapı",
+   "boyut": "90 × 210",
+   "adet": 1,
+   "durum": "model"
+  },
+  {
+   "kalem": "PVC pencere",
+   "boyut": "120/180",
+   "adet": 3,
+   "durum": "model"
+  },
+  {
+   "kalem": "PVC vasistas",
+   "boyut": "60/40",
+   "adet": 1,
+   "durum": "model"
+  },
+  {
+   "kalem": "PVC pencere",
+   "boyut": "120/100",
+   "adet": 1,
+   "durum": "model"
+  },
+  {
+   "kalem": "PVC pencere",
+   "boyut": "180/180",
+   "adet": 3,
+   "durum": "model"
+  }
+ ],
+ "varsayimlar": [
+  "Çatı örtüsü sandviç panel alındı (Lokman, 2 Ekim 22:05: makasların üzerine 8 cm çatı paneli gelir); panel boyu eğimli boydan, 10 cm'ye yuvarlandı.",
+  "Veranda kolonu ve kirişi Boardex'le kaplanır sayıldı; kolon çevresi 0,76 m × 2,40 m ve kiriş çevresi 0,68 m gerçek listelerdeki değerlerdir; kiriş boyu verandanın üç kenarı.",
+  "Yeşil tavan = ıslak hacim + veranda tavanı (iki gerçek listeden çıkarım).",
+  "Saçak altı Boardex ve geniş saçak omegası alındı (62 m² kırma çatılı listedeki gibi).",
+  "İç kapı boşluğu çizimdeki genişlik × 2,14 m; dış kapı 0,95 × 2,10 m (çalışma kitabındaki değerler).",
+  "İniş sayısı 7 alındı (iki gerçek listede de 7)."
+ ]
+}

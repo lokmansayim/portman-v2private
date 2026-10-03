@@ -1,0 +1,481 @@
+{
+ "ad": "Örnek proje: 62 m², tek kat, çelik, kırma çatı, dış karkas 140 mm (liste tarihi 19 Eylül 2025)",
+ "satirlar": [
+  {
+   "grup": "Dış cephe kaplama",
+   "kalem": "Dış cephe Boardex",
+   "boyut": "1200 × 2400",
+   "adet": 32,
+   "olcu": 78.16,
+   "brut": 97.7,
+   "birim": "m²",
+   "formul": "(çevre × yükseklik + kolon/kiriş kaplaması + alın − boşluklar) × 1,15 ÷ 2,88",
+   "durum": "excel"
+  },
+  {
+   "grup": "Dış cephe kaplama",
+   "kalem": "Dış duvar OSB 9 mm",
+   "boyut": "1220 × 2440",
+   "adet": 31,
+   "olcu": 78.16,
+   "brut": null,
+   "birim": "m²",
+   "formul": "Boardex ile aynı alan (× 1,15) ÷ 2,98; üst paket",
+   "durum": "excel"
+  },
+  {
+   "grup": "İç cephe kaplama",
+   "kalem": "Duvar alçıpan beyaz",
+   "boyut": "1200 × 2500",
+   "adet": 32,
+   "olcu": 88.95,
+   "brut": 117.88,
+   "birim": "m²",
+   "formul": "oda oda: (iç çevre × yükseklik − o odadaki boşluklar) toplamı × 1,05 ÷ 3,0",
+   "durum": "excel"
+  },
+  {
+   "grup": "İç cephe kaplama",
+   "kalem": "Duvar alçıpan yeşil",
+   "boyut": "1200 × 2500",
+   "adet": 7,
+   "olcu": 19.89,
+   "brut": 22.06,
+   "birim": "m²",
+   "formul": "oda oda: (iç çevre × yükseklik − o odadaki boşluklar) toplamı × 1,05 ÷ 3,0",
+   "durum": "excel"
+  },
+  {
+   "grup": "İç cephe kaplama",
+   "kalem": "Tavan alçıpan beyaz",
+   "boyut": "1200 × 2500",
+   "adet": 15,
+   "olcu": 40.14,
+   "brut": null,
+   "birim": "m²",
+   "formul": "tavan alanı × 1,05 ÷ 3,0",
+   "durum": "uydurma"
+  },
+  {
+   "grup": "İç cephe kaplama",
+   "kalem": "Tavan alçıpan yeşil",
+   "boyut": "1200 × 2500",
+   "adet": 7,
+   "olcu": 17.88,
+   "brut": null,
+   "birim": "m²",
+   "formul": "tavan alanı × 1,05 ÷ 3,0; yeşil = ıslak hacim + veranda tavanı",
+   "durum": "uydurma"
+  },
+  {
+   "grup": "İç cephe kaplama",
+   "kalem": "İç duvar OSB 9 mm",
+   "boyut": "1220 × 2440",
+   "adet": 39,
+   "olcu": 108.85,
+   "brut": null,
+   "birim": "m²",
+   "formul": "bütün iç yüzler (beyaz + yeşil net) × 1,05 ÷ 2,98; üst paket",
+   "durum": "excel"
+  },
+  {
+   "grup": "İç cephe kaplama",
+   "kalem": "Duvar izolasyonu",
+   "boyut": "paket 8,64 m²",
+   "adet": 19,
+   "olcu": 163.8,
+   "brut": 189.12,
+   "birim": "m²",
+   "formul": "dış duvar × 2 kat + iç duvar × 1 kat − boşluklar; ÷ 8,64",
+   "durum": "uydurma"
+  },
+  {
+   "grup": "Çatı kaplamaları",
+   "kalem": "Sandviç panel",
+   "boyut": "L 3200 · 100 cm kapatır",
+   "adet": 27,
+   "olcu": 76.82,
+   "brut": null,
+   "birim": "m²",
+   "formul": "çatı yüzeyi × 1,10 ÷ (panel boyu × 1,00); panel boyu = eğimli boy",
+   "durum": "uydurma"
+  },
+  {
+   "grup": "Çatı kaplamaları",
+   "kalem": "Metal kiremit mahyası",
+   "boyut": "L 2800",
+   "adet": 11,
+   "olcu": 26.43,
+   "brut": null,
+   "birim": "m",
+   "formul": "mahya hattı (tepe + kırmalar) ÷ (2,8 − 0,20 bindirme)",
+   "durum": "varsayim"
+  },
+  {
+   "grup": "Çatı kaplamaları",
+   "kalem": "Sandviç panel kapaması",
+   "boyut": "L 2500",
+   "adet": 16,
+   "olcu": 37.92,
+   "brut": null,
+   "birim": "m",
+   "formul": "her saçak kenarı ÷ 2,5, ayrı ayrı yukarı",
+   "durum": "uydurma"
+  },
+  {
+   "grup": "Çatı kaplamaları",
+   "kalem": "Çatı şiltesi 80 mm",
+   "boyut": "9,6 m²/adet",
+   "adet": 8,
+   "olcu": 68.51,
+   "brut": null,
+   "birim": "m²",
+   "formul": "çatı boyu × (bina eni + 0,20) ÷ 9,6",
+   "durum": "uydurma"
+  },
+  {
+   "grup": "Dere",
+   "kalem": "Metal dere",
+   "boyut": "L 4000",
+   "adet": 10,
+   "olcu": 37.92,
+   "brut": null,
+   "birim": "m",
+   "formul": "saçak boyu ÷ (4,0 − 0,10 bindirme)",
+   "durum": "varsayim"
+  },
+  {
+   "grup": "Dere",
+   "kalem": "Dere iniş borusu",
+   "boyut": "L 3000",
+   "adet": 7,
+   "olcu": null,
+   "brut": null,
+   "birim": "",
+   "formul": "iniş sayısı (7) × 1; iniş sayısının kuralı bilinmiyor (listelerde 7, 7 ve 10)",
+   "durum": "uydurma"
+  },
+  {
+   "grup": "Dere",
+   "kalem": "Dere iniş aparatı",
+   "boyut": "adet",
+   "adet": 7,
+   "olcu": null,
+   "brut": null,
+   "birim": "",
+   "formul": "iniş sayısı (7) × 1; iniş sayısının kuralı bilinmiyor (listelerde 7, 7 ve 10)",
+   "durum": "uydurma"
+  },
+  {
+   "grup": "Dere",
+   "kalem": "Açık dirsek",
+   "boyut": "adet",
+   "adet": 14,
+   "olcu": null,
+   "brut": null,
+   "birim": "",
+   "formul": "iniş sayısı (7) × 2; iniş sayısının kuralı bilinmiyor (listelerde 7, 7 ve 10)",
+   "durum": "uydurma"
+  },
+  {
+   "grup": "Dere",
+   "kalem": "Kapalı dirsek",
+   "boyut": "adet",
+   "adet": 7,
+   "olcu": null,
+   "brut": null,
+   "birim": "",
+   "formul": "iniş sayısı (7) × 1; iniş sayısının kuralı bilinmiyor (listelerde 7, 7 ve 10)",
+   "durum": "uydurma"
+  },
+  {
+   "grup": "Dere",
+   "kalem": "İniş kelepçesi",
+   "boyut": "adet",
+   "adet": 14,
+   "olcu": null,
+   "brut": null,
+   "birim": "",
+   "formul": "iniş sayısı (7) × 2; iniş sayısının kuralı bilinmiyor (listelerde 7, 7 ve 10)",
+   "durum": "uydurma"
+  },
+  {
+   "grup": "Dere",
+   "kalem": "Dere kelepçesi",
+   "boyut": "adet",
+   "adet": 80,
+   "olcu": null,
+   "brut": null,
+   "birim": "",
+   "formul": "dere adedi × 8",
+   "durum": "uydurma"
+  },
+  {
+   "grup": "Metal aksam",
+   "kalem": "Saçak sacı (30'luk)",
+   "boyut": "L 2500",
+   "adet": 16,
+   "olcu": 37.92,
+   "brut": null,
+   "birim": "m",
+   "formul": "her saçak kenarı ÷ 2,5, ayrı ayrı yukarı",
+   "durum": "uydurma"
+  },
+  {
+   "grup": "Metal aksam",
+   "kalem": "Geniş saçak omegası (180 × 2500)",
+   "boyut": "L 2500",
+   "adet": 16,
+   "olcu": 37.92,
+   "brut": null,
+   "birim": "m",
+   "formul": "her saçak kenarı ÷ 2,5, ayrı ayrı yukarı",
+   "durum": "uydurma"
+  },
+  {
+   "grup": "Metal aksam",
+   "kalem": "Saçaklar için Boardex",
+   "boyut": "1200 × 2400",
+   "adet": 5,
+   "olcu": 11.38,
+   "brut": null,
+   "birim": "m²",
+   "formul": "saçak boyu × 0,30 × 1,15 ÷ 2,88",
+   "durum": "uydurma"
+  },
+  {
+   "grup": "Metal aksam",
+   "kalem": "Tavan omegası (60'lık)",
+   "boyut": "L 3750",
+   "adet": 26,
+   "olcu": 96.7,
+   "brut": null,
+   "birim": "m",
+   "formul": "tavan alanı ÷ 0,60 ÷ 3,75",
+   "durum": "uydurma"
+  },
+  {
+   "grup": "Metal aksam",
+   "kalem": "Köşebent",
+   "boyut": "L 2500",
+   "adet": 42,
+   "olcu": 103.66,
+   "brut": null,
+   "birim": "m",
+   "formul": "oda çevreleri toplamı × 2 ÷ 2,5; 62 m² listeyi tutturmuyor",
+   "durum": "soru"
+  },
+  {
+   "grup": "Metal aksam",
+   "kalem": "Aşık",
+   "boyut": "L 4200",
+   "adet": 41,
+   "olcu": 161.66,
+   "brut": null,
+   "birim": "m",
+   "formul": "eğim boyunca 60 cm aralık, 6 halka + mahya aşıkları; × 1,05 ÷ 4,2",
+   "durum": "uydurma"
+  },
+  {
+   "grup": "Vida",
+   "kalem": "Alçıpan vidası (3,5 × 35)",
+   "boyut": "adet",
+   "adet": 4000,
+   "olcu": 98,
+   "brut": null,
+   "birim": "levha",
+   "formul": "alçıpan ve Boardex levha sayısı × 40; 250'ye yuvarlandı",
+   "durum": "excel"
+  },
+  {
+   "grup": "Vida",
+   "kalem": "Pencere vidası (4,8 × 70)",
+   "boyut": "adet",
+   "adet": 120,
+   "olcu": 6,
+   "brut": null,
+   "birim": "pencere",
+   "formul": "pencere sayısı × 20",
+   "durum": "excel"
+  },
+  {
+   "grup": "Vida",
+   "kalem": "Trapez vida (5,5 × 25)",
+   "boyut": "adet",
+   "adet": 1750,
+   "olcu": 1696,
+   "brut": null,
+   "birim": "vida",
+   "formul": "aşık × 10 + tavan omegası × 10 + saçak omegası × 6 + çelik panel × 10 + köşebent × 6; 250'ye yuvarlandı",
+   "durum": "excel"
+  },
+  {
+   "grup": "Vida",
+   "kalem": "İnox taş",
+   "boyut": "adet",
+   "adet": 7,
+   "olcu": 62,
+   "brut": null,
+   "birim": "m²",
+   "formul": "bina m² ÷ 10",
+   "durum": "excel"
+  }
+ ],
+ "ara": {
+  "dis_net_m2": 78.158,
+  "beyaz_net_m2": 88.952,
+  "yesil_net_m2": 19.893,
+  "ic_duvar_boyu_m": 12.08,
+  "oda_cevreleri_m": 51.83,
+  "yalitim_brut_m2": 189.12,
+  "yalitim_net_m2": 163.8,
+  "asik_boyu_m": 161.7
+ },
+ "karsilastirma": {
+  "Dış cephe Boardex": {
+   "hesap": 32,
+   "liste": 32,
+   "durum": "excel"
+  },
+  "Dış duvar OSB 9 mm": {
+   "hesap": 31,
+   "liste": 31,
+   "durum": "excel"
+  },
+  "Duvar alçıpan beyaz": {
+   "hesap": 32,
+   "liste": 32,
+   "durum": "excel"
+  },
+  "Duvar alçıpan yeşil": {
+   "hesap": 7,
+   "liste": 8,
+   "durum": "excel"
+  },
+  "Tavan alçıpan beyaz": {
+   "hesap": 15,
+   "liste": 15,
+   "durum": "uydurma"
+  },
+  "Tavan alçıpan yeşil": {
+   "hesap": 7,
+   "liste": 7,
+   "durum": "uydurma"
+  },
+  "İç duvar OSB 9 mm": {
+   "hesap": 39,
+   "liste": 39,
+   "durum": "excel"
+  },
+  "Duvar izolasyonu": {
+   "hesap": 19,
+   "liste": 19,
+   "durum": "uydurma"
+  },
+  "Sandviç panel": {
+   "hesap": 27,
+   "liste": 27,
+   "durum": "uydurma"
+  },
+  "Metal kiremit mahyası": {
+   "hesap": 11,
+   "liste": 11,
+   "durum": "varsayim"
+  },
+  "Sandviç panel kapaması": {
+   "hesap": 16,
+   "liste": 16,
+   "durum": "uydurma"
+  },
+  "Çatı şiltesi 80 mm": {
+   "hesap": 8,
+   "liste": 8,
+   "durum": "uydurma"
+  },
+  "Metal dere": {
+   "hesap": 10,
+   "liste": 10,
+   "durum": "varsayim"
+  },
+  "Dere iniş borusu": {
+   "hesap": 7,
+   "liste": 7,
+   "durum": "uydurma"
+  },
+  "Dere iniş aparatı": {
+   "hesap": 7,
+   "liste": 7,
+   "durum": "uydurma"
+  },
+  "Açık dirsek": {
+   "hesap": 14,
+   "liste": 14,
+   "durum": "uydurma"
+  },
+  "Kapalı dirsek": {
+   "hesap": 7,
+   "liste": 7,
+   "durum": "uydurma"
+  },
+  "İniş kelepçesi": {
+   "hesap": 14,
+   "liste": 14,
+   "durum": "uydurma"
+  },
+  "Dere kelepçesi": {
+   "hesap": 80,
+   "liste": 80,
+   "durum": "uydurma"
+  },
+  "Saçak sacı (30'luk)": {
+   "hesap": 16,
+   "liste": 17,
+   "durum": "uydurma"
+  },
+  "Geniş saçak omegası (180 × 2500)": {
+   "hesap": 16,
+   "liste": 16,
+   "durum": "uydurma"
+  },
+  "Saçaklar için Boardex": {
+   "hesap": 5,
+   "liste": 5,
+   "durum": "uydurma"
+  },
+  "Tavan omegası (60'lık)": {
+   "hesap": 26,
+   "liste": 26,
+   "durum": "uydurma"
+  },
+  "Köşebent": {
+   "hesap": 42,
+   "liste": 50,
+   "durum": "soru"
+  },
+  "Aşık": {
+   "hesap": 41,
+   "liste": 41,
+   "durum": "uydurma"
+  },
+  "Alçıpan vidası (3,5 × 35)": {
+   "hesap": 4000,
+   "liste": 4000,
+   "durum": "excel"
+  },
+  "Pencere vidası (4,8 × 70)": {
+   "hesap": 120,
+   "liste": 120,
+   "durum": "excel"
+  },
+  "Trapez vida (5,5 × 25)": {
+   "hesap": 1750,
+   "liste": 1750,
+   "durum": "excel"
+  },
+  "İnox taş": {
+   "hesap": 7,
+   "liste": 7,
+   "durum": "excel"
+  }
+ }
+}

@@ -1,0 +1,145 @@
+{
+  "sema": "portman.yukleme_girdisi/0.1-taslak",
+  "ad": "Örnek proje: 90 m², tek kat, çelik (liste tarihi 30 Eylül 2025)",
+  "kaynak": "PortatifEv'in yükleme listesi çalışma kitabının hesap sayfalarındaki girdiler. Kişi ve firma adları alınmadı. Çatı uzunlukları ve tavan alanları listede elle yazılmış değerlerdir.",
+  "kat_yuksekligi_m": 2.7,
+  "dis": {
+    "cevre_m": 38.85,
+    "duvar_kalinligi_m": 0.105,
+    "kolon_kiris": [
+      {
+        "ad": "veranda kolonu",
+        "adet": 2,
+        "cevre_m": 0.76,
+        "boy_m": 2.4
+      },
+      {
+        "ad": "veranda kirişi",
+        "adet": 1,
+        "cevre_m": 0.68,
+        "boy_m": 8.78
+      }
+    ],
+    "alin_m2": [
+      4.1,
+      4.1
+    ],
+    "bosluklar": [
+      {
+        "ad": "120/120",
+        "adet": 2,
+        "en": 1.2,
+        "boy": 1.2
+      },
+      {
+        "ad": "120/100",
+        "adet": 1,
+        "en": 1.2,
+        "boy": 1.0
+      },
+      {
+        "ad": "120/180",
+        "adet": 2,
+        "en": 1.2,
+        "boy": 1.8
+      },
+      {
+        "ad": "dış kapı",
+        "adet": 1,
+        "en": 0.95,
+        "boy": 2.1
+      },
+      {
+        "ad": "60/40",
+        "adet": 1,
+        "en": 0.6,
+        "boy": 0.4
+      }
+    ],
+    "karkas_mm": 80
+  },
+  "odalar": [
+    {
+      "ad": "oda 1",
+      "tur": "beyaz",
+      "cevre_m": 17.72,
+      "bosluk_m2": [
+        1.44,
+        1.926
+      ]
+    },
+    {
+      "ad": "oda 2",
+      "tur": "beyaz",
+      "cevre_m": 14.26,
+      "bosluk_m2": [
+        1.44,
+        1.926
+      ]
+    },
+    {
+      "ad": "oda 3",
+      "tur": "beyaz",
+      "cevre_m": 14.56,
+      "bosluk_m2": [
+        1.44,
+        1.926
+      ]
+    },
+    {
+      "ad": "salon, mutfak ve hol",
+      "tur": "beyaz",
+      "cevre_m": 31.78,
+      "bosluk_m2": [
+        1.926,
+        1.926,
+        1.926,
+        1.926,
+        1.995,
+        2.16,
+        2.16
+      ]
+    },
+    {
+      "ad": "banyo",
+      "tur": "yesil",
+      "cevre_m": 9.52,
+      "bosluk_m2": [
+        0.24,
+        1.926
+      ]
+    }
+  ],
+  "ic_kapi_adedi": 4,
+  "tavan_m2": {
+    "beyaz": 69.1,
+    "yesil": 13.9
+  },
+  "osb_duvar_m2": 35.1,
+  "cati": {
+    "tip": "besik",
+    "yuzey_m2": 110.262,
+    "yuzey_kaynak": "2 × 15,98 m × 3,45 m (saçak boyu × kiremit boyu)",
+    "sacak_boyu_toplam_m": 31.96,
+    "mahya_hatti_m": 16.13,
+    "ozel_mahya_m": 2.98,
+    "alin_saci_m": 16.56,
+    "egimli_boy_m": 3.45,
+    "cati_boyu_m": 15.98,
+    "inis_adedi": 7,
+    "dere_kapagi": 6,
+    "ortu": "osb_kiremit",
+    "egim": 0.33,
+    "sacak_kenarlari_m": [
+      15.98,
+      15.98
+    ],
+    "bina_eni_m": 5.88,
+    "sacak_alti": "sac",
+    "sacak_omegasi": "Saçak omegası",
+    "silte_liste_m2": 97.17
+  },
+  "bina_m2": 90,
+  "celik_panel_adedi": 44,
+  "kosebent_adedi": 70
+}

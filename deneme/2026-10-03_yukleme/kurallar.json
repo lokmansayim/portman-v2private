@@ -1,0 +1,229 @@
+{
+  "sema": "portman.yukleme_kurallari/0.1-taslak",
+  "aciklama": "Çelik (A1) ve çatı (A5) yükleme listesi için katsayılar. Her değerin kaynağı ve durumu yanında. durum: excel = PortatifEv'in kendi yükleme listesi çalışma kitabındaki formül ya da not; liste = gerçek listedeki boyut bilgisi; uydurma = iki gerçek listedeki (90 m² beşik, 62 m² kırma) adetleri tutturan kural, teyit bekliyor; varsayim = Claude'un varsayımı, teyit bekliyor.",
+  "zayiat": {
+    "boardex": {
+      "deger": 0.15,
+      "durum": "excel",
+      "kaynak": "Dış Cephe Boardex = net + net × 15/100"
+    },
+    "duvar_alcipan": {
+      "deger": 0.05,
+      "durum": "excel",
+      "kaynak": "Duvar Alçıpan = net + net × 5/100 (sütun başlığı %15 yazıyor, formül %5)"
+    },
+    "tavan_alcipan": {
+      "deger": 0.05,
+      "durum": "uydurma",
+      "kaynak": "beyaz tavanda 25 adedi tutturuyor; yeşil tavanda 5 veriyor, listede 6"
+    },
+    "osb": {
+      "deger": 0.05,
+      "durum": "excel",
+      "kaynak": "Duvar OSB = net + net × 5/100; çatı OSB'sinde 39 adedi tutturuyor"
+    },
+    "sandvic_panel": {
+      "deger": 0.1,
+      "durum": "uydurma",
+      "kaynak": "62 m² kırma çatıda 27 adet L 3200 paneli tutturuyor (yüzey 76,8 m²)"
+    }
+  },
+  "levha_m2": {
+    "boardex": {
+      "deger": 2.88,
+      "durum": "excel",
+      "kaynak": "1,2 × 2,4"
+    },
+    "alcipan": {
+      "deger": 3.0,
+      "durum": "excel",
+      "kaynak": "1,2 × 2,5"
+    },
+    "osb": {
+      "deger": 2.9768,
+      "durum": "excel",
+      "kaynak": "1,22 × 2,44"
+    }
+  },
+  "yalitim_paket_m2": {
+    "deger": 8.64,
+    "durum": "liste",
+    "kaynak": "Duvar izolasyonu: paket / 8,64 m²"
+  },
+  "silte_adet_m2": {
+    "deger": 9.6,
+    "durum": "liste",
+    "kaynak": "Çatı şiltesi 80 mm: 9,6 m²/adet"
+  },
+  "parca_boyu_m": {
+    "mahya": {
+      "deger": 2.8,
+      "durum": "liste",
+      "kaynak": "L 2800"
+    },
+    "dere": {
+      "deger": 4.0,
+      "durum": "liste",
+      "kaynak": "L 4000"
+    },
+    "inis_borusu": {
+      "deger": 3.0,
+      "durum": "liste",
+      "kaynak": "L 3000"
+    },
+    "sacak_saci": {
+      "deger": 2.5,
+      "durum": "liste",
+      "kaynak": "L 2500"
+    },
+    "alin_saci": {
+      "deger": 2.5,
+      "durum": "liste",
+      "kaynak": "300 × 2500"
+    },
+    "tavan_omegasi": {
+      "deger": 3.75,
+      "durum": "liste",
+      "kaynak": "L 3750"
+    },
+    "kosebent": {
+      "deger": 2.5,
+      "durum": "liste",
+      "kaynak": "L 2500"
+    },
+    "asik": {
+      "deger": 4.2,
+      "durum": "liste",
+      "kaynak": "L 4200"
+    }
+  },
+  "kiremit_kapatma_m": {
+    "deger": 1.1,
+    "durum": "liste",
+    "kaynak": "Metal kiremit (110 cm kapatır)"
+  },
+  "bindirme_m": {
+    "mahya": {
+      "deger": 0.2,
+      "durum": "varsayim",
+      "kaynak": "16,13 m için 7 adet: bindirme en az 12 cm ya da bir yedek parça; 20 cm varsayıldı"
+    },
+    "dere": {
+      "deger": 0.1,
+      "durum": "varsayim",
+      "kaynak": "31,96 m için 9 adet: 10 cm bindirmeyle tutuyor"
+    }
+  },
+  "inis_basina": {
+    "deger": {
+      "inis_borusu": 1,
+      "inis_aparati": 1,
+      "kapali_dirsek": 1,
+      "acik_dirsek": 2,
+      "inis_kelepcesi": 2
+    },
+    "durum": "uydurma",
+    "kaynak": "7 iniş için 7, 7, 7, 14, 14"
+  },
+  "kapi_boslugu_m": {
+    "ic": {
+      "deger": [
+        0.9,
+        2.14
+      ],
+      "durum": "excel",
+      "kaynak": "İç kapı 0,9 × 2,14"
+    },
+    "dis": {
+      "deger": [
+        0.95,
+        2.1
+      ],
+      "durum": "excel",
+      "kaynak": "Dış kapı 0,95 × 2,1"
+    }
+  },
+  "kosebent_kati": {
+    "deger": 2.0,
+    "durum": "varsayim",
+    "kaynak": "90 m² listede 70 adet (175 m) oda çevreleri toplamının iki katına denk; 62 m² listede 50 adet (125 m) bu kuralla 42 çıkıyor: kural bilinmiyor"
+  },
+  "asik": {
+    "aralik_m": {
+      "deger": 0.6,
+      "durum": "liste",
+      "kaynak": "Montaj paftası notu: aşıklar 60 cm aralıklarla; mahya aşığı 20 cm'de"
+    },
+    "zayiat": {
+      "deger": 0.05,
+      "durum": "uydurma",
+      "kaynak": "62 m² kırma çatıda 41 adedi tutturuyor; 90 m² beşik çatıda 56 veriyor, listede 57"
+    }
+  },
+  "alin_saci_zayiat": {
+    "deger": 0.05,
+    "durum": "varsayim",
+    "kaynak": "16,56 m için 7 veriyor, listede 9"
+  },
+  "sandvic_panel_kapatma_m": {
+    "deger": 1.0,
+    "durum": "liste",
+    "kaynak": "Sandviç panel (100 cm kapatır)"
+  },
+  "dere_kelepcesi_dere_basina": {
+    "deger": 8,
+    "durum": "uydurma",
+    "kaynak": "9 dere için 72, 10 dere için 80 kelepçe: iki listede de dere başına 8"
+  },
+  "inis_adedi_varsayilan": {
+    "deger": 7,
+    "durum": "varsayim",
+    "kaynak": "90 ve 62 m² listelerde 7 iniş; 105 m² listede 10. Sabit değil; kuralı bilinmiyor"
+  },
+  "tavan_omegasi_aralik_m": {
+    "deger": 0.6,
+    "durum": "uydurma",
+    "kaynak": "62 m² listede 26 adedi tutturuyor (tavan 58,0 m²); 90 m² listede 37 veriyor, listede 40"
+  },
+  "sacak_parcasi_kenar_kenar": {
+    "deger": true,
+    "durum": "uydurma",
+    "kaynak": "saçak parçaları her kenarda ayrı ayrı yukarı yuvarlanınca 90 m²'de 14, 62 m²'de 16 çıkıyor (listede saçak omegası ve kapama 16, saçak sacı 17)"
+  },
+  "sacak_alti_boardex_eni_m": {
+    "deger": 0.3,
+    "durum": "uydurma",
+    "kaynak": "62 m² listede saçaklar için Boardex 11,5 m²: 37,92 m × 0,30"
+  },
+  "yalitim_kat": {
+    "deger": {
+      "80": 1,
+      "140": 2
+    },
+    "durum": "uydurma",
+    "kaynak": "62 m² listede (dış karkas 140 mm) brüt 189 m² = 2 × dış duvar + iç duvar; 90 m² listede (80 mm) brüt 172 = dış + iç"
+  },
+  "silte_en_payi_m": {
+    "deger": 0.2,
+    "durum": "uydurma",
+    "kaynak": "90 m² listede 97,17 m² = çatı boyu 15,98 × (bina eni 5,88 + 0,20)"
+  },
+  "vida": {
+    "deger": {
+      "alcipan_vidasi_levha_basina": 40,
+      "osb_vidasi_levha_basina": 40,
+      "pencere_vidasi_pencere_basina": 20,
+      "trapez_5_5x25": {
+        "asik": 10,
+        "omega_375": 10,
+        "omega_240": 6,
+        "celik_panel": 10,
+        "kosebent": 6
+      },
+      "celik_dubel_duvar_paneli_basina": 3,
+      "inox_tasi_m2_bolu": 10
+    },
+    "durum": "excel",
+    "kaynak": "çalışma kitabının vida sayfasındaki notlar: 1 alçıpan ya da Boardex için 40; 1 OSB için 40; 1 pencere için 20; aşık 10, omega (375) 10, omega (240) 6, çelik panel 10, köşebent 6; orta uzunlukta duvar paneline 3 çelik dübel; şase pul = dübel; inox taşı = bina m² ÷ 10"
+  }
+}

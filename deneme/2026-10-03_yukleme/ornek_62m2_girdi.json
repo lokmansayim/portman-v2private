@@ -1,0 +1,127 @@
+{
+  "sema": "portman.yukleme_girdisi/0.1-taslak",
+  "ad": "Örnek proje: 62 m², tek kat, çelik, kırma çatı, dış karkas 140 mm (liste tarihi 19 Eylül 2025)",
+  "kaynak": "PortatifEv'in yükleme listesi çalışma kitabının hesap sayfasındaki girdiler; çatı planı aynı projenin SketchUp modelinden (1214,7 × 605,7 cm, eğim %30). Kişi ve firma adları alınmadı.",
+  "bina_m2": 62,
+  "kat_yuksekligi_m": 2.7,
+  "dis": {
+    "cevre_m": 28.98,
+    "duvar_kalinligi_m": 0.165,
+    "karkas_mm": 140,
+    "dis_osb": true,
+    "kolon_kiris": [
+      {
+        "ad": "veranda kolonu",
+        "adet": 4,
+        "cevre_m": 0.76,
+        "boy_m": 2.4
+      },
+      {
+        "ad": "veranda kirişi",
+        "adet": 1,
+        "cevre_m": 0.68,
+        "boy_m": 12.73
+      }
+    ],
+    "alin_m2": [
+      3.5
+    ],
+    "bosluklar": [
+      {
+        "ad": "140/150",
+        "adet": 2,
+        "en": 1.4,
+        "boy": 1.5
+      },
+      {
+        "ad": "60/40",
+        "adet": 1,
+        "en": 0.6,
+        "boy": 0.4
+      },
+      {
+        "ad": "200/220",
+        "adet": 3,
+        "en": 2.0,
+        "boy": 2.2
+      },
+      {
+        "ad": "dış kapı",
+        "adet": 1,
+        "en": 0.95,
+        "boy": 2.0
+      }
+    ]
+  },
+  "odalar": [
+    {
+      "ad": "oda 1",
+      "tur": "beyaz",
+      "cevre_m": 11.58,
+      "bosluk_m2": []
+    },
+    {
+      "ad": "oda 2",
+      "tur": "beyaz",
+      "cevre_m": 11.0,
+      "bosluk_m2": []
+    },
+    {
+      "ad": "salon, mutfak ve hol",
+      "tur": "beyaz",
+      "cevre_m": 21.08,
+      "bosluk_m2": [
+        7.704,
+        1.926,
+        4.2,
+        13.2,
+        1.9
+      ]
+    },
+    {
+      "ad": "banyo",
+      "tur": "yesil",
+      "cevre_m": 8.17,
+      "bosluk_m2": [
+        0.24,
+        1.926
+      ]
+    }
+  ],
+  "oda_bosluk_notu": "Çalışma kitabı boşlukları oda oda değil, beyaz ve yeşil toplamı olarak düşüyor; beyazların tamamı tek odaya yazıldı.",
+  "ic_kapi_adedi": 3,
+  "ic_osb_tum_duvarlar": true,
+  "tavan_m2": {
+    "beyaz": 40.14,
+    "yesil": 17.88
+  },
+  "cati": {
+    "tip": "kirma",
+    "ortu": "sandvic_panel",
+    "egim": 0.3,
+    "plan_m": [
+      12.147,
+      6.057
+    ],
+    "yuzey_m2": 76.82,
+    "yuzey_kaynak": "12,147 × 6,057 × 1,044 (modelden; giriş saçağı hariç)",
+    "sacak_kenarlari_m": [
+      12.147,
+      6.057,
+      12.147,
+      6.057
+    ],
+    "sacak_boyu_toplam_m": 37.92,
+    "sacak_boyu_kaynak": "listede yazan uzunluk (giriş saçağı dahil)",
+    "mahya_hatti_m": 26.43,
+    "mahya_kaynak": "listede yazan uzunluk; ana çatının tepe ve kırmaları modelden 23,6 m",
+    "panel_boyu_m": 3.2,
+    "bina_eni_m": 5.44,
+    "cati_boyu_m": 12.147,
+    "sacak_alti": "boardex",
+    "sacak_omegasi": "Geniş saçak omegası (180 × 2500)",
+    "inis_adedi": 7
+  },
+  "celik_panel_adedi": 63,
+  "kosebent_adedi": 50
+}
