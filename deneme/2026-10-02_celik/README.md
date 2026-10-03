@@ -12,7 +12,7 @@ Amaç: tek kat çelik bir modeli, pano ızgarası olmadan, bir tanım dosyasınd
 | `gorunus.py` | Çatı hesabı, çatı planı, dört görünüş ve tek pafta |
 | `secenekler/` | Seçenekler (değişiklik operatörleri): model tanımını değiştirmeden paket farkını uygular. İlk örnek: `dis_karkas_140.json` |
 | `cikti/` | Koşu çıktıları (depoya girmez) |
-| `sonuc/` | Son koşunun kanıtları (3 Ekim 15:10): plan, pafta, raporlar |
+| `sonuc/` | Son koşunun kanıtları (3 Ekim 14:50): plan, pafta, raporlar |
 
 ## Çalıştırma
 

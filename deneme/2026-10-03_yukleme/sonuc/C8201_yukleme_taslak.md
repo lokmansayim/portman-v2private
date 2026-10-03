@@ -23,7 +23,7 @@
 | İç cephe kaplama | Duvar alçıpan yeşil | 1200 × 2500 | 8 | 20,4 m² |  | excel |  |
 | İç cephe kaplama | Tavan alçıpan beyaz | 1200 × 2500 | 19 | 54,1 m² |  | motor |  |
 | İç cephe kaplama | Tavan alçıpan yeşil | 1200 × 2500 | 8 | 22,6 m² |  | lokman |  |
-| İç cephe kaplama | OSB (TV ve mutfak dolabı arkası takviyesi) | 1220 × 2440 | 15 | 42,5 m² |  | lokman | okuma teyit bekliyor: salon ve mutfak aynı mahalde olduğu için o mahalin bütün duvarları alındı |
+| İç cephe kaplama | OSB (TV ve mutfak dolabı arkası takviyesi) | 1220 × 2440 | 15 | 42,5 m² |  | varsayim | Lokman, 3 Ekim 13:27: 'salonun bir odası ile mutfağın 1 odasının tüm yüzeyi'; salon ve mutfak aynı mahalde olduğu için o mahalin bütün duvarları alındı (okuma teyit bekliyor) |
 | İç cephe kaplama | Duvar izolasyonu | paket 8,64 m² | 13 | 112,2 m² |  | uydurma | dış duvar 1 kat |
 | Çatı kaplamaları | Sandviç panel | L 4300 · 100 cm kapatır | 26 | 98,4 m² |  | uydurma | gerçek adet panel yerleşiminden bulunur |
 | Çatı kaplamaları | Metal kiremit mahyası | L 2800 | 11 | 27,0 m |  | lokman |  |

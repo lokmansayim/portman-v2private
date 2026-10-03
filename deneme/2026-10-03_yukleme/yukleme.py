@@ -202,8 +202,8 @@ def hesapla(g: dict, k: dict) -> dict:
     elif g.get("osb_takviye"):
         ot = g["osb_takviye"]
         ekle("İç cephe kaplama", "OSB (TV ve mutfak dolabı arkası takviyesi)", "1220 × 2440", tavan(ot["net_m2"] * (1 + zo) / deg(k, "levha_m2", "osb")), ot["net_m2"],
-             formul=f"{', '.join(ot['odalar'])}: bütün duvar yüzeyi (iç çevre × yükseklik − boşluklar) × 1,05 ÷ 2,98", durum="lokman",
-             not_="okuma teyit bekliyor: salon ve mutfak aynı mahalde olduğu için o mahalin bütün duvarları alındı")
+             formul=f"{', '.join(ot['odalar'])}: bütün duvar yüzeyi (iç çevre × yükseklik − boşluklar) × 1,05 ÷ 2,98", durum="varsayim",
+             not_="Lokman, 3 Ekim 13:27: 'salonun bir odası ile mutfağın 1 odasının tüm yüzeyi'; salon ve mutfak aynı mahalde olduğu için o mahalin bütün duvarları alındı (okuma teyit bekliyor)")
     elif g.get("osb_duvar_m2"):
         ekle("İç cephe kaplama", "OSB 9 mm (duvar)", "1220 × 2440", tavan(g["osb_duvar_m2"] * (1 + zo) / deg(k, "levha_m2", "osb")),
              g["osb_duvar_m2"], formul="listede yazan alan × 1,05 ÷ 2,98; alanın nasıl seçildiği listede yazmıyor", durum="excel")

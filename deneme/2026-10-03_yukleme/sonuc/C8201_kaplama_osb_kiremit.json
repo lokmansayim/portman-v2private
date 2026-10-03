@@ -262,8 +262,8 @@
    "birim": "m²",
    "kg": null,
    "formul": "Yaşam Alanı: bütün duvar yüzeyi (iç çevre × yükseklik − boşluklar) × 1,05 ÷ 2,98",
-   "durum": "lokman",
-   "not": "okuma teyit bekliyor: salon ve mutfak aynı mahalde olduğu için o mahalin bütün duvarları alındı"
+   "durum": "varsayim",
+   "not": "Lokman, 3 Ekim 13:27: 'salonun bir odası ile mutfağın 1 odasının tüm yüzeyi'; salon ve mutfak aynı mahalde olduğu için o mahalin bütün duvarları alındı (okuma teyit bekliyor)"
   },
   {
    "grup": "İç cephe kaplama",

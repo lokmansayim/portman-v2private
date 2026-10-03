@@ -14,6 +14,7 @@ Yöntem, kaynaklar ve bulgular: `docs/sartname/yukleme_listesi_yontemi.md`.
 | `bayi_kurallari_ornek.json` | Bayi kuralı örneği: listeye giren gruplar, bayinin çatı yöntemi. Gerçek numara ya da ad içermez |
 | `tablo_uret.py` | Şartname belgesindeki tabloları hesap çıktılarından üretir (`sonuc/tablolar.md`) |
 | `hepsini_kos.sh` | Bütün hesapları sırayla koşar |
+| `sayfa_uret.py` | Ç8201 taslağını okunur tek bir sayfaya çevirir (Lokman'a giden özel artefakt: https://claude.ai/artifact/XkfYhAKG1hb79bY5VEjNV9); çıktı depoya yazılmaz |
 | `ornek_90m2_*.json`, `ornek_62m2_*.json`, `ornek_105m2_*.json` | Üç gerçek listenin girdileri ve kalemleri. Kişi, bayi ve firma adı içermez |
 | `sonuc/` | Karşılaştırma sonuçları; Ç8201 taslakları (baz, dış 140 mm, üç çatı kaplaması); tablolar |
 
@@ -36,7 +37,7 @@ python yukleme.py sonuc/C8201_girdi.json --bayi ORNEK-BAYI-2
 3. Excel hesaplama motoru (CTKBF V1.1): çelik birim ağırlıkları, vida, boya ve tesisat formülleri: `motor`.
 4. Gerçek listelere uydurulan kurallar (`uydurma`) ve varsayımlar (`varsayim`); teyit bekler.
 
-## Sonuç (3 Ekim 2026, 15:10)
+## Sonuç (3 Ekim 2026, 14:50)
 
 - Üç gerçek listeyle karşılaştırma (adet): 90 m² 29 kalemin 15'i, 62 m² 41 kalemin 30'u, 105 m² 49 kalemin 31'i aynı; toplam 119 karşılaştırmanın 76'sı. Adedi doğrudan listeden alınan satırlar sayılmadı. 43 farkın 10'u tek bir farktan: iniş sayısı kuralı iki listede 6 veriyor, listelerde 7.
 - Çelik kg, motorun birim ağırlıklarıyla: iki listede toplam +%0,5 ve +%3,7; duvarlar %5–13 eksik, çatı %10–30 fazla.
