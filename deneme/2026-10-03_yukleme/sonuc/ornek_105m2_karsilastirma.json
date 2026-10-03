@@ -113,14 +113,14 @@
    "grup": "Metal aksam",
    "kalem": "Köşebent",
    "boyut": "L 2500",
-   "adet": 42,
-   "olcu": 105,
+   "adet": 70,
+   "olcu": 174.61,
    "brut": null,
-   "birim": "m²",
+   "birim": "m",
    "kg": null,
-   "formul": "bina m² ÷ 2,5",
-   "durum": "lokman",
-   "not": "gerçek listelerde adet bunun yaklaşık iki katı (70, 50, 85)"
+   "formul": "(oda tavan çevreleri 109,81 m + 24 iç köşe × 2,7 m) ÷ 2,5",
+   "durum": "muhendis",
+   "not": "planı yok: oda başına 4 iç köşe sayıldı (alt sınır)"
   },
   {
    "grup": "Dış cephe kaplama",
@@ -888,7 +888,24 @@
   "asik_boyu_m": 0.0,
   "inis_kural": null,
   "inis_kural_aciklama": "cephe ölçüleri girdide yok",
-  "celik_panel_adedi": 57
+  "celik_panel_adedi": 57,
+  "kosebent": {
+   "tavan_cevresi_m": 109.81,
+   "ic_kose": 24,
+   "boy_m": 174.61
+  },
+  "elektrik_kaynagi": "pafta",
+  "elektrik_kural": {
+   "tijli_duy": 7,
+   "glop": 2,
+   "tekli_anahtar": 7,
+   "cift_anahtar": 1,
+   "tekli_priz": 21,
+   "cift_priz": 2,
+   "uydu_prizi": 1,
+   "sigorta": 9
+  },
+  "kirma_kaplama_yerlesim_adedi": null
  },
  "karsilastirma": {
   "Saçak sacı (30'luk)": {
@@ -917,9 +934,9 @@
    "durum": "uydurma"
   },
   "Köşebent": {
-   "hesap": 42,
+   "hesap": 70,
    "liste": 85,
-   "durum": "lokman"
+   "durum": "muhendis"
   },
   "Dış cephe Boardex": {
    "hesap": 52,

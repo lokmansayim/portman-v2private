@@ -18,6 +18,11 @@ Mahya malzemesi tepe mahyasına ve dört kırma hattına konur; aynı malzeme (L
 - Veranda çerçevesi: her projede sırt 80 mm, genişlik 30 cm; bu projede kirişler yanlarda ve karşıda, altlarında 240 cm dikmeler.
 - İç kapı boşluğu 90 × 214 cm. (Çıkarım: lento 70 cm kuralı pencerelerde uygulanır.)
 
+3 Ekim 2026 (inşaat mühendisi Ubeydullah'ın cevapları; Lokman 18:14'te iletti):
+- Yöntem A'da saçak omegası gerekmez; saçak yüzü de Boardex'le kaplanır.
+- Dere inişi plana bakarak yerleştirilir; düz bir saçakta ortalama 5 metrede bir yazılır. Tanımda `cati.inis_noktalari` verilirse o kullanılır, yoksa Lokman'ın kuralı.
+- OSB takviyesi yalnız dolap ve TV ünitesi gelen duvarlara: planda turuncu çizgi.
+
 Kullanım:
     python gorunus.py C8201.json
     python gorunus.py C8201.json --secenek secenekler/dis_karkas_140.json
@@ -37,7 +42,7 @@ import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from matplotlib.patches import Polygon as MplPolygon, Rectangle
 
-from ciz import BURADA, hesapla, olcu, plan_eksen, secenek_uygula, tr, veranda_cercevesi
+from ciz import BURADA, hesapla, olcu, osb_takviye_satiri, plan_eksen, secenek_uygula, tr, veranda_cercevesi
 
 DUVAR = "#dcd7cb"
 DUVAR_GERI = "#c9c4b8"
@@ -46,6 +51,8 @@ CAM = "#cfe6f7"
 CERCEVE = "#2a78b8"
 KAPI = "#b08a5a"
 KOLON = "#8f8f8f"
+KAPLAMA_ADI = {"sandvic_panel": "sandviç panel", "tek_kat_panel": "tek kat panel", "osb_kiremit": "OSB + nem bariyeri + kiremit desen sac (metal kiremit)",
+               "osb_trapez": "OSB + nem bariyeri + trapez sac", "trapez_sac": "trapez sac", "osb_shingle": "OSB + membran + shingle"}
 INIS_ORTA_ESIK_CM = 1000   # bu boydan kısa cepheye orta iniş konmaz (Lokman, 3 Ekim 13:27)
 
 
@@ -87,7 +94,10 @@ def cati_hesapla(tanim: dict, inis_esik_cm: float = INIS_ORTA_ESIK_CM) -> dict:
     parca = c.get("mahya_parca_boyu")
     bindirme = c.get("mahya_bindirme", 0)
     plan_m2 = px * py / 1e4
-    inis = inis_noktalari(L, H, s, inis_esik_cm)
+    if c.get("inis_noktalari"):                                  # plana bakarak elle yerleştirilmiş inişler (Ubeydullah, 3 Ekim 2026)
+        inis = [(float(x), float(y), "plan") for x, y in c["inis_noktalari"]]
+    else:
+        inis = inis_noktalari(L, H, s, inis_esik_cm)
     return {
         "ayak_izi": (L, H), "plan": (px, py), "mahya_uzunlugu": uzun - kisa, "mahya_yonu": "x" if px >= py else "y",
         "z_sacak": z_sacak, "z_mahya": z_mahya, "plan_m2": plan_m2, "yuzey_m2": plan_m2 * math.sqrt(1 + e * e),
@@ -98,7 +108,8 @@ def cati_hesapla(tanim: dict, inis_esik_cm: float = INIS_ORTA_ESIK_CM) -> dict:
         "kirma_adedi": 4, "kirma_plan_boyu": kirma_plan, "kirma_boyu": kirma, "mahya_hatti_toplam": mahya_hatti,
         "mahya_parca_boyu": parca, "mahya_parca_adedi_bindirmesiz": math.ceil(mahya_hatti / parca - 1e-9) if parca else None,
         "mahya_bindirme": bindirme, "mahya_parca_adedi": math.ceil(mahya_hatti / (parca - bindirme) - 1e-9) if parca else None,
-        "inis_noktalari": inis, "inis_adedi": len(inis), "cephe": (L, H),
+        "inis_noktalari": inis, "inis_adedi": len(inis), "inis_kaynagi": "plan" if c.get("inis_noktalari") else "kural", "cephe": (L, H),
+        "oturum_m2": L * H / 1e4,
         "yontem": c.get("yontem"), "kaplama": c.get("kaplama"),
     }
 
@@ -239,7 +250,7 @@ def pafta(tanim: dict, s: dict, c: dict, cikti: Path):
     vc = veranda_cercevesi(tanim)
     kapilar = {a["tur"]: a for a in tanim["acikliklar"] if a["tur"] != "pencere"}
     ik, dk = kapilar.get("ic_kapi", {}), kapilar.get("dis_kapi", {})
-    kap = {"sandvic_panel": "sandviç panel", "tek_kat_panel": "tek kat panel", "osb_kiremit": "OSB + nem bariyeri + kiremit desen sac"}.get(ct.get("kaplama"), "—")
+    kap = KAPLAMA_ADI.get(ct.get("kaplama"), "—")
     sol = [
         f"Dış ölçü (veranda dahil): {tr(c['ayak_izi'][0]).replace(',0', '')} × {c['ayak_izi'][1]} cm = {tr(s['toplam_oturum_m2'])} m²",
         f"Kapalı kısım: {tanim['kapali']['en']} × {tanim['kapali']['boy']} cm · brüt {tr(s['kapali_brut_m2'], 2)} m² · net {tr(s['kapali_net_m2'])} m²",
@@ -248,8 +259,10 @@ def pafta(tanim: dict, s: dict, c: dict, cikti: Path):
         f"(kanat {' × '.join(str(x) for x in ik.get('kanat', []))}) · dış kapı {dk.get('en', '—')}/{dk.get('yuk', '—')}",
         f"Dış Boardex: {tr(b['cevre_m'])} m × {tr(b['yukseklik_m'], 2)} m − {tr(b['bosluk_m2'])} m² = {tr(b['net_m2'])} m² (fire hariç {b['levha_adedi_firesiz']} levha)",
     ]
+    if s.get("osb_takviye"):
+        sol.append(osb_takviye_satiri(s["osb_takviye"], kisa=True))
     sag = [
-        f"Çatı: kırma (dört omuz) · eğim %{ct['egim_yuzde']} · saçak {ct['sacak']} cm, altı Boardex · çatı ve tavan panelli (çelik) · kaplama seçenek: {kap}",
+        f"Çatı: kırma (dört omuz) · eğim %{ct['egim_yuzde']} · saçak {ct['sacak']} cm, altı ve yüzü Boardex · çatı ve tavan panelli (çelik) · kaplama seçenek: {kap}",
         f"Çatı planı {tr(c['plan'][0]).replace(',0', '')} × {tr(c['plan'][1]).replace(',0', '')} cm · mahya kotu {tr(c['z_mahya'], 0)} cm (makas üstü {tr(c['z_makas_mahya'], 0)})",
         f"Mahya (tepe ve kırmalar, aynı malzeme): {tr(c['mahya_uzunlugu']).replace(',0', '')} + {c['kirma_adedi']} × {tr(c['kirma_boyu'], 0)} = {tr(c['mahya_hatti_toplam'], 0)} cm"
         + (f" · {tr(c['mahya_parca_boyu'] / 100)} m'lik parça, {c['mahya_bindirme']} cm bindirmeyle {c['mahya_parca_adedi']} adet" if c["mahya_parca_boyu"] else ""),
@@ -257,7 +270,8 @@ def pafta(tanim: dict, s: dict, c: dict, cikti: Path):
         f"Saçak yüzü {tr(c['alin_yuksekligi'])} cm = topuk {ct.get('topuk', 0)} + {ct.get('panel_kalinligi', 0)} cm çatı panelinin eğimdeki düşey ölçüsü {tr(c['panel_dusey'])} · kaplaması {tr(c['alin_cevre_m'])} m × {tr(c['alin_yuksekligi'])} cm = {tr(c['alin_m2'])} m²",
         (f"Veranda çerçevesi: sırt {vc['sirt']}, genişlik {vc['genislik']} cm · kiriş {tr(vc['kiris_boyu'] / 100, 2)} m (yanlar ve karşı) · dikme {vc['dikme_adedi']} × {vc['dikme_boyu']} cm "
          f"(yerleri katalog görsellerinden)" if vc else "Veranda yok"),
-        f"Dere inişi {c['inis_adedi']} adet (köşeler; 10 m ve daha uzun cephelerin ortası) · subasman, merdiven ve cephe kaplaması çizilmedi · ölçüler cm",
+        f"Dere inişi {c['inis_adedi']} adet (" + ("plana yerleştirildi" if c["inis_kaynagi"] == "plan" else "köşeler; 10 m ve daha uzun cephelerin ortası")
+        + ") · subasman, merdiven ve cephe kaplaması çizilmedi · ölçüler cm",
     ]
     ax.text(0.0, 0.95, "\n".join(sol), ha="left", va="top", fontsize=9.2, linespacing=1.55, transform=ax.transAxes)
     ax.text(0.52, 0.95, "\n".join(sag), ha="left", va="top", fontsize=9.2, linespacing=1.55, transform=ax.transAxes)

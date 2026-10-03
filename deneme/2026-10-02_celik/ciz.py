@@ -69,10 +69,93 @@ def kalinliklar(tipler: dict, tanim: dict, cizim: bool) -> tuple[float, float]:
     return toplam(tanim["dis_duvar_tipi"]), toplam(tanim["ic_duvar_tipi"])
 
 
-def ic_duvar_kutusu(d: dict, ti: float):
+def ic_duvar_kutusu(d: dict, ti: float, hepsi=()):
+    """İç duvarın plandaki dikdörtgeni. Ucu, kendisine dik başka bir iç duvarın aksında bitiyorsa yarım kalınlık uzatılır:
+    L birleşimde dış köşe dolar; T birleşimde uzantı öteki duvarın içinde kalır."""
+    bas, son = d["bas"], d["son"]
+    for o in hepsi:
+        if o is d or o["yon"] == d["yon"] or not (o["bas"] - 1e-6 <= d["aks"] <= o["son"] + 1e-6):
+            continue
+        if abs(o["aks"] - bas) < 1e-6:
+            bas -= ti / 2
+        if abs(o["aks"] - son) < 1e-6:
+            son += ti / 2
     if d["yon"] == "dusey":
-        return box(d["aks"] - ti / 2, d["bas"], d["aks"] + ti / 2, d["son"])
-    return box(d["bas"], d["aks"] - ti / 2, d["son"], d["aks"] + ti / 2)
+        return box(d["aks"] - ti / 2, bas, d["aks"] + ti / 2, son)
+    return box(bas, d["aks"] - ti / 2, son, d["aks"] + ti / 2)
+
+
+def oda_koseleri(poligon) -> tuple[int, int]:
+    """Odanın (iç köşe, dış köşe) sayısı. İç köşe: iki duvarın odanın içinde buluştuğu köşe; dış köşe: odaya doğru çıkıntı yapan köşe."""
+    from shapely.geometry.polygon import orient
+    k = list(orient(poligon, 1.0).exterior.coords)[:-1]
+    ic = dis = 0
+    for i in range(len(k)):
+        (x0, y0), (x1, y1), (x2, y2) = k[i - 1], k[i], k[(i + 1) % len(k)]
+        capraz = (x1 - x0) * (y2 - y1) - (y1 - y0) * (x2 - x1)
+        if capraz > 1e-6:
+            ic += 1
+        elif capraz < -1e-6:
+            dis += 1
+    return ic, dis
+
+
+def yuz_parcalari(poligon, tanim: dict, td: float, ti: float, duvar: str) -> list:
+    """Odanın sınırının, verilen duvarın yüzü üzerinde kalan parçaları: [((x0, y0), (x1, y1)), ...].
+    Parçalar saat yönünün tersine sıralıdır (oda, parçanın solunda kalır). duvar: iç duvar adı ya da dis:alt | dis:ust | dis:sol | dis:sag."""
+    from shapely.geometry.polygon import orient
+    W, H = tanim["kapali"]["en"], tanim["kapali"]["boy"]
+    if duvar.startswith("dis:"):
+        yatay = duvar in ("dis:alt", "dis:ust")
+        sabitler = [{"dis:alt": td, "dis:ust": H - td, "dis:sol": td, "dis:sag": W - td}[duvar]]
+        alt, ust = -1e9, 1e9
+    else:
+        d = next(x for x in tanim["ic_duvarlar"] if x["ad"] == duvar)
+        yatay = d["yon"] == "yatay"
+        sabitler = [d["aks"] - ti / 2, d["aks"] + ti / 2]
+        alt, ust = d["bas"] - ti / 2 - 1e-6, d["son"] + ti / 2 + 1e-6
+    k = list(orient(poligon, 1.0).exterior.coords)
+    parcalar = []
+    for (x0, y0), (x1, y1) in zip(k, k[1:]):
+        if yatay and abs(y0 - y1) < 1e-6 and any(abs(y0 - c) < 1e-6 for c in sabitler) and min(x0, x1) >= alt and max(x0, x1) <= ust:
+            parcalar.append(((x0, y0), (x1, y1)))
+        elif not yatay and abs(x0 - x1) < 1e-6 and any(abs(x0 - c) < 1e-6 for c in sabitler) and min(y0, y1) >= alt and max(y0, y1) <= ust:
+            parcalar.append(((x0, y0), (x1, y1)))
+    return parcalar
+
+
+def yuz_boyu(poligon, tanim: dict, td: float, ti: float, duvar: str) -> float:
+    """Odanın sınırının, verilen duvarın yüzü üzerinde kalan boyu (cm)."""
+    return sum(math.dist(a, b) for a, b in yuz_parcalari(poligon, tanim, td, ti, duvar))
+
+
+def osb_takviye_hesapla(tanim: dict, mahaller: list, td: float, ti: float) -> dict | None:
+    """İç duvarda OSB takviyesi (Ubeydullah, 3 Ekim 2026): bütün oda değil, yalnız dolap ve TV ünitesi gelen duvarların metrajı.
+    Tanımdaki `osb_takviye.duvarlar` listesinden: her duvarın o odaya bakan yüzünün boyu × duvar yüksekliği − o yüzdeki boşluklar."""
+    ot = tanim.get("osb_takviye")
+    if not ot:
+        return None
+    h = tanim["duvar_yuksekligi"] / 100.0
+    satirlar, brut, bosluk = [], 0.0, 0.0
+    for dv in ot["duvarlar"]:
+        m = next((x for x in mahaller if x["ad"] == dv["mahal"]), None)
+        if m is None:
+            raise SystemExit(f"OSB takviyesi: mahal bulunamadı: {dv['mahal']}")
+        parcalar = yuz_parcalari(m["poligon"], tanim, td, ti, dv["duvar"])
+        boy = sum(math.dist(a, b) for a, b in parcalar)
+        if boy <= 0:
+            raise SystemExit(f"OSB takviyesi: {dv['mahal']} mahalinin {dv['duvar']} duvarına bakan yüzü yok.")
+        bos = [a for a in tanim["acikliklar"] if a["duvar"] == dv["duvar"] and aciklik_kutusu(a, tanim, td, ti).buffer(0.5).intersects(m["poligon"])]
+        b = sum(bosluk_m2(a) for a in bos)
+        brut += boy / 100.0 * h
+        bosluk += b
+        if dv["duvar"].startswith("dis:"):
+            duvar_adi = {"dis:alt": "alt dış duvar", "dis:ust": "üst dış duvar", "dis:sol": "sol dış duvar", "dis:sag": "sağ dış duvar"}[dv["duvar"]]
+        else:
+            duvar_adi = next(x for x in tanim["ic_duvarlar"] if x["ad"] == dv["duvar"]).get("not", dv["duvar"]) + " duvar"
+        satirlar.append({"mahal": dv["mahal"], "duvar": dv["duvar"], "duvar_adi": duvar_adi, "neden": dv.get("neden"), "boy_cm": boy, "bosluk_m2": b,
+                         "parcalar": parcalar, "bosluk_araliklari": [(a["bas"], a["bas"] + a["en"]) for a in bos]})
+    return {"duvarlar": satirlar, "brut_m2": brut, "bosluk_m2": bosluk, "net_m2": brut - bosluk}
 
 
 def aciklik_kutusu(a: dict, tanim: dict, td: float, ti: float):
@@ -132,7 +215,7 @@ def hesapla(tanim: dict, tipler: dict, cizim: bool) -> dict:
     td, ti = kalinliklar(tipler, tanim, cizim)
     ic_kutu = box(td, td, W - td, H - td)
     dis_halka = box(0, 0, W, H).difference(ic_kutu)
-    ic = unary_union([ic_duvar_kutusu(d, ti) for d in tanim["ic_duvarlar"]]).intersection(ic_kutu)
+    ic = unary_union([ic_duvar_kutusu(d, ti, tanim["ic_duvarlar"]) for d in tanim["ic_duvarlar"]]).intersection(ic_kutu)
     bosluk = ic_kutu.difference(ic)
     parcalar = list(bosluk.geoms) if hasattr(bosluk, "geoms") else [bosluk]
     mahaller = []
@@ -140,7 +223,9 @@ def hesapla(tanim: dict, tipler: dict, cizim: bool) -> dict:
         p = next((g for g in parcalar if g.contains(Point(*m["nokta"]))), None)
         if p is None:
             raise SystemExit(f"Mahal bulunamadı: {m['ad']}")
-        mahaller.append({"ad": m["ad"], "poligon": p, "alan_m2": p.area / 1e4})
+        ic_kose, dis_kose = oda_koseleri(p)
+        mahaller.append({"ad": m["ad"], "poligon": p, "alan_m2": p.area / 1e4, "cevre_m": p.length / 100.0,
+                         "ic_kose": ic_kose, "dis_kose": dis_kose, "islev": list(m.get("islev", []))})
     if len(parcalar) != len(mahaller):
         raise SystemExit(f"Kapalı kısım {len(parcalar)} parçaya bölündü, {len(mahaller)} mahal tanımlı.")
     v = tanim.get("veranda")
@@ -172,6 +257,7 @@ def hesapla(tanim: dict, tipler: dict, cizim: bool) -> dict:
     return {
         "aciklik_ust_kotu": ust_kot, "aciklik_kotlari": kotlar,
         "td": td, "ti": ti, "dis_halka": dis_halka, "ic_duvarlar": ic, "mahaller": mahaller,
+        "osb_takviye": osb_takviye_hesapla(tanim, mahaller, td, ti),
         "kapali_brut_m2": W * H / 1e4, "kapali_net_m2": sum(m["alan_m2"] for m in mahaller),
         "veranda_m2": veranda_m2, "toplam_oturum_m2": W * H / 1e4 + veranda_m2,
         "boardex": {"cevre_m": cevre, "yukseklik_m": h, "brut_m2": cevre * h, "bosluk_m2": bosluklar,
@@ -179,6 +265,15 @@ def hesapla(tanim: dict, tipler: dict, cizim: bool) -> dict:
         "dis_duvar": {"tip": tanim["dis_duvar_tipi"], "karkas_mm": None if cizim else karkas_mm(tipler, tanim["dis_duvar_tipi"]),
                       "ic_yuz_cevre_m": ic_cevre, "ic_yuz_net_m2": ic_cevre * h - bosluklar},
     }
+
+
+def osb_takviye_satiri(ot: dict, kisa: bool = False) -> str:
+    """Planın altındaki bilgi satırı: OSB takviyesi gelen duvarlar ve net alan. `kisa`: paftadaki dar sütun için."""
+    if kisa:
+        return (f"OSB takviyesi (turuncu çizgi): dolap ve TV ünitesi duvarları, {len(ot['duvarlar'])} duvar, "
+                f"{tr(sum(d['boy_cm'] for d in ot['duvarlar']) / 100, 2)} m · net {tr(ot['net_m2'])} m²")
+    duvar = " + ".join(f"{d['duvar_adi']} {tr(d['boy_cm'] / 100, 2)} m" for d in ot["duvarlar"])
+    return f"OSB takviyesi (turuncu çizgi; dolap ve TV ünitesi duvarları): {duvar} · net {tr(ot['net_m2'])} m²"
 
 
 def kapi_ciz(ax, a: dict, tanim: dict, td: float, ti: float):
@@ -275,6 +370,30 @@ def plan_eksen(ax, tanim: dict, s: dict, cizim: bool = False, baslik: bool = Tru
                 ax.text(-16, (y1 + y2) / 2, et, ha="right", va="center", fontsize=7.5, color="#1f5f93", rotation=90)
         else:
             kapi_ciz(ax, a, tanim, td, ti)
+    ot = s.get("osb_takviye")
+    if ot:   # OSB takviyesi gelen duvar yüzleri (dolap ve TV ünitesi duvarları): odanın içinde, duvara paralel turuncu çizgi; boşluklarda kesilir
+        for dv in ot["duvarlar"]:
+            for (x0, y0), (x1, y1) in dv["parcalar"]:
+                uz = math.hypot(x1 - x0, y1 - y0)
+                nx, ny = -(y1 - y0) / uz, (x1 - x0) / uz          # oda, parçanın solundadır
+                yatay_p = abs(y1 - y0) < 1e-6
+                araliklar = [tuple(sorted((x0, x1) if yatay_p else (y0, y1)))]
+                for b0, b1 in dv["bosluk_araliklari"]:
+                    yeni = []
+                    for c0, c1 in araliklar:
+                        if b1 <= c0 or b0 >= c1:
+                            yeni.append((c0, c1))
+                            continue
+                        if b0 > c0:
+                            yeni.append((c0, b0))
+                        if b1 < c1:
+                            yeni.append((b1, c1))
+                    araliklar = yeni
+                for c0, c1 in araliklar:
+                    if yatay_p:
+                        ax.plot([c0, c1], [y0 + ny * 5] * 2, color="#e07b00", lw=3.0, solid_capstyle="butt", zorder=5)
+                    else:
+                        ax.plot([x0 + nx * 5] * 2, [c0, c1], color="#e07b00", lw=3.0, solid_capstyle="butt", zorder=5)
     # ölçü zincirleri: dış yüzler ve iç duvar aksları
     dusey = sorted(d["aks"] for d in tanim["ic_duvarlar"] if d["yon"] == "dusey")
     alt = [0.0] + [x for x in dusey if any(d["aks"] == x and d["bas"] == 0 for d in tanim["ic_duvarlar"])] + [W] + ([v["x"] + v["en"]] if v else [])
@@ -305,6 +424,8 @@ def plan_eksen(ax, tanim: dict, s: dict, cizim: bool = False, baslik: bool = Tru
     if vc:
         satirlar.insert(3, f"Veranda çerçevesi: sırt {vc['sirt']} cm, genişlik {vc['genislik']} cm · kiriş {tr(vc['kiris_boyu'] / 100, 2)} m (kesik çizgi) · "
                            f"dikme {vc['dikme_adedi']} adet, {vc['dikme_boyu']} cm")
+    if ot:
+        satirlar.insert(-1, osb_takviye_satiri(ot))
     if bilgi:
         ax.text(0, -172, "\n".join(satirlar), ha="left", va="top", fontsize=8.5, linespacing=1.5)
     ax.annotate("GİRİŞ", xy=(433, -4), xytext=(433, -40), ha="center", fontsize=8, color="#b03030",
@@ -346,7 +467,8 @@ def main() -> int:
         f = None if e is None else m["alan_m2"] - e
         if a.cizim_kalinligi and f is not None and abs(f) > ETIKET_TOL:
             fark_var = True
-        satir.append({"mahal": m["ad"], "alan_m2": round(m["alan_m2"], 3), "cizim_etiketi_m2": e, "fark_m2": None if f is None else round(f, 3)})
+        satir.append({"mahal": m["ad"], "alan_m2": round(m["alan_m2"], 3), "cizim_etiketi_m2": e, "fark_m2": None if f is None else round(f, 3),
+                      "cevre_m": round(m["cevre_m"], 3), "ic_kose": m["ic_kose"], "dis_kose": m["dis_kose"], "islev": m["islev"]})
     rapor = {
         "kod": tanim["kod"], "mod": "cizim_kalinligi" if a.cizim_kalinligi else "katmanlardan",
         "paket": tanim["paket"], "secenekler": tanim["secenekler"],
@@ -356,6 +478,11 @@ def main() -> int:
         "boardex": {k: (round(v, 3) if isinstance(v, float) else v) for k, v in s["boardex"].items()},
         "dis_duvar": {k: (round(v, 3) if isinstance(v, float) else v) for k, v in s["dis_duvar"].items()},
     }
+    if s["osb_takviye"] and not a.cizim_kalinligi:
+        o = s["osb_takviye"]
+        rapor["osb_takviye"] = {"duvarlar": [{"mahal": d["mahal"], "duvar": d["duvar"], "duvar_adi": d["duvar_adi"], "neden": d["neden"], "boy_cm": round(d["boy_cm"], 2),
+                                              "bosluk_m2": round(d["bosluk_m2"], 3)} for d in o["duvarlar"]],
+                                "brut_m2": round(o["brut_m2"], 3), "bosluk_m2": round(o["bosluk_m2"], 3), "net_m2": round(o["net_m2"], 3)}
     (a.cikti / f"{kod}_rapor{ek}.json").write_text(json.dumps(rapor, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     print(f"{tanim['kod']} · paket {tanim['paket']} · duvar dış {tr(s['td'])} ({tanim['dis_duvar_tipi']}) / iç {tr(s['ti'])} ({tanim['ic_duvar_tipi']}) cm")
     for r in satir:

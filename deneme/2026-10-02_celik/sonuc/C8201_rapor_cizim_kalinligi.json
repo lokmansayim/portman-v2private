@@ -14,34 +14,65 @@
    "mahal": "Yatak Odası 1",
    "alan_m2": 11.797,
    "cizim_etiketi_m2": 11.8,
-   "fark_m2": -0.003
+   "fark_m2": -0.003,
+   "cevre_m": 13.75,
+   "ic_kose": 4,
+   "dis_kose": 0,
+   "islev": [
+    "yatak_odasi"
+   ]
   },
   {
    "mahal": "Yatak Odası 2",
    "alan_m2": 11.797,
    "cizim_etiketi_m2": 11.8,
-   "fark_m2": -0.003
+   "fark_m2": -0.003,
+   "cevre_m": 13.75,
+   "ic_kose": 4,
+   "dis_kose": 0,
+   "islev": [
+    "yatak_odasi"
+   ]
   },
   {
    "mahal": "Banyo",
    "alan_m2": 4.257,
    "cizim_etiketi_m2": 4.3,
-   "fark_m2": -0.043
+   "fark_m2": -0.043,
+   "cevre_m": 8.33,
+   "ic_kose": 4,
+   "dis_kose": 0,
+   "islev": [
+    "banyo"
+   ]
   },
   {
    "mahal": "Hol",
    "alan_m2": 6.699,
    "cizim_etiketi_m2": 6.7,
-   "fark_m2": -0.001
+   "fark_m2": -0.001,
+   "cevre_m": 12.37,
+   "ic_kose": 4,
+   "dis_kose": 0,
+   "islev": [
+    "hol"
+   ]
   },
   {
    "mahal": "Yaşam Alanı",
-   "alan_m2": 23.261,
+   "alan_m2": 23.258,
    "cizim_etiketi_m2": 23.3,
-   "fark_m2": -0.039
+   "fark_m2": -0.042,
+   "cevre_m": 21.2,
+   "ic_kose": 5,
+   "dis_kose": 1,
+   "islev": [
+    "salon",
+    "mutfak"
+   ]
   }
  ],
- "kapali_net_m2": 57.812,
+ "kapali_net_m2": 57.809,
  "kapali_brut_m2": 63.75,
  "veranda_m2": 18.3,
  "toplam_oturum_m2": 82.05,

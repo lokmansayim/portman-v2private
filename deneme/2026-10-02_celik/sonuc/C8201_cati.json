@@ -67,10 +67,12 @@
   ]
  ],
  "inis_adedi": 6,
+ "inis_kaynagi": "kural",
  "cephe": [
   1094,
   750
  ],
+ "oturum_m2": 82.05,
  "yontem": "panel",
  "kaplama": "sandvic_panel"
 }

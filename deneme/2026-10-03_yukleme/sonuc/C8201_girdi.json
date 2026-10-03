@@ -1,10 +1,14 @@
 {
- "sema": "portman.yukleme_girdisi/0.2-taslak",
+ "sema": "portman.yukleme_girdisi/0.3-taslak",
  "ad": "Ç8201 · Tek kat çelik, 2+1, 82 m² · paket: baz",
  "kaynak": "deneme/2026-10-02_celik/C8201.json",
  "bina_m2": 82,
  "dis_olcu_m": [
   10.94,
+  7.5
+ ],
+ "kapali_olcu_m": [
+  8.5,
   7.5
  ],
  "kat_adedi": 1,
@@ -19,7 +23,7 @@
   },
   "ic": {
    "profil": "80x45x1,2",
-   "boy_m": 19.68,
+   "boy_m": 19.7,
    "panel_adedi": 6,
    "not": "et kalınlığı ve panel adedi tahmin; teyit bekliyor"
   },
@@ -36,7 +40,8 @@
   "cati": {
    "tip": "kirma",
    "profil": "80x45x0,8",
-   "plan_m2": 93.47
+   "plan_m2": 93.47,
+   "oturum_m2": 82.05
   },
   "tavan_paneli_m2": 76.67,
   "cati_paneli_m2": 98.43
@@ -103,6 +108,11 @@
    "bosluk_m2": [
     2.16,
     1.926
+   ],
+   "ic_kose": 4,
+   "dis_kose": 0,
+   "islev": [
+    "yatak_odasi"
    ]
   },
   {
@@ -113,6 +123,11 @@
    "bosluk_m2": [
     2.16,
     1.926
+   ],
+   "ic_kose": 4,
+   "dis_kose": 0,
+   "islev": [
+    "yatak_odasi"
    ]
   },
   {
@@ -123,6 +138,11 @@
    "bosluk_m2": [
     0.24,
     1.926
+   ],
+   "ic_kose": 4,
+   "dis_kose": 0,
+   "islev": [
+    "banyo"
    ]
   },
   {
@@ -136,13 +156,18 @@
     1.926,
     1.926,
     1.926
+   ],
+   "ic_kose": 4,
+   "dis_kose": 0,
+   "islev": [
+    "hol"
    ]
   },
   {
    "ad": "Yaşam Alanı",
    "tur": "beyaz",
    "cevre_m": 21.295,
-   "alan_m2": 23.484,
+   "alan_m2": 23.481,
    "bosluk_m2": [
     2.16,
     1.2,
@@ -150,19 +175,89 @@
     3.24,
     3.24,
     1.926
+   ],
+   "ic_kose": 5,
+   "dis_kose": 1,
+   "islev": [
+    "salon",
+    "mutfak"
    ]
   }
  ],
  "ic_kapi_adedi": 4,
- "ic_duvar_boyu_m": 19.68,
+ "ic_duvar_boyu_m": 19.7,
  "osb_takviye": {
-  "odalar": [
-   "Yaşam Alanı"
+  "duvarlar": [
+   {
+    "mahal": "Yaşam Alanı",
+    "duvar": "R",
+    "duvar_adi": "banyo ile mutfak arası duvar",
+    "neden": "mutfak dolabı",
+    "boy_m": 2.4875,
+    "bosluk_m2": 0
+   },
+   {
+    "mahal": "Yaşam Alanı",
+    "duvar": "dis:ust",
+    "duvar_adi": "üst dış duvar",
+    "neden": "mutfak dolabı ve eviye",
+    "boy_m": 2.9575,
+    "bosluk_m2": 1.2
+   },
+   {
+    "mahal": "Yaşam Alanı",
+    "duvar": "B",
+    "duvar_adi": "hol ile yaşam alanı arası duvar",
+    "neden": "TV ünitesi",
+    "boy_m": 4.8025,
+    "bosluk_m2": 1.926
+   }
   ],
-  "net_m2": 42.49
+  "brut_m2": 27.67,
+  "bosluk_m2": 3.126,
+  "net_m2": 24.54
  },
+ "elektrik_odalar": [
+  {
+   "ad": "Yatak Odası 1",
+   "islev": [
+    "yatak_odasi"
+   ]
+  },
+  {
+   "ad": "Yatak Odası 2",
+   "islev": [
+    "yatak_odasi"
+   ]
+  },
+  {
+   "ad": "Banyo",
+   "islev": [
+    "banyo"
+   ]
+  },
+  {
+   "ad": "Hol",
+   "islev": [
+    "hol"
+   ]
+  },
+  {
+   "ad": "Yaşam Alanı",
+   "islev": [
+    "salon",
+    "mutfak"
+   ]
+  },
+  {
+   "ad": "Veranda",
+   "islev": [
+    "veranda"
+   ]
+  }
+ ],
  "tavan_m2": {
-  "beyaz": 54.07,
+  "beyaz": 54.06,
   "yesil": 22.6
  },
  "cati": {
@@ -238,13 +333,15 @@
   }
  ],
  "varsayimlar": [
-  "Çatı kaplaması seçenektir; baz paketin kaplaması söylenmedi. Örnek olarak sandviç panel alındı; `--kaplama` ile öteki seçenekler hesaplanır. Panel boyu eğimli boydan, 10 cm'ye yuvarlandı.",
+  "Çatı kaplaması seçenektir; baz paketin kaplaması söylenmedi. Örnek olarak sandviç panel alındı; `--kaplama` ile öteki beş seçenek hesaplanır. Panel boyu eğimli boydan, 10 cm'ye yuvarlandı.",
   "Çelik et kalınlığı gerçek listelerden çıkarıldı: 80 mm dış karkasta duvarlar 1,2 mm; 140 mm dış karkasta dış ve iç duvarlar 0,8 mm. Teyit bekliyor.",
   "Duvar paneli adedi tahmin: her duvar hattı bir panel, 5,7 m'yi aşarsa bölünür. Gerçek adet karkas yerleşiminden gelir.",
+  "Tavan paneli ve çatı paneli: mühendisin 100 m² bina için verdiği kg ve adet, çatının örttüğü oturum alanına oranlandı.",
   "Veranda dikmelerinin sayısı ve yeri katalog görsellerinden: dış kenarda iki köşe ve bir orta.",
-  "Saçak yüzü (saçak ucunda topuk + panel, 18,4 cm) Boardex'le kaplanır sayıldı; kaplandığını Lokman söyledi, malzemesini söylemedi.",
-  "OSB takviyesi: salon ve mutfak aynı mahalde (Yaşam Alanı) olduğu için o mahalin bütün duvar yüzeyi alındı.",
-  "Dış kapı boşluğu 0,95 × 2,10 m (çalışma kitaplarındaki değer); katalog çiziminde kapı 100 cm.",
-  "Elektrik paftası yok: duy, glop, anahtar, priz ve sigorta sayıları hesaplanmadı."
+  "OSB takviyesi: dolap ve TV ünitesi gelen duvarlar katalog görselinden seçildi; her duvarın o odaya bakan yüzünün tamamı alındı.",
+  "Elektrik: pafta yok; sayılar mühendisin oda başına kuralından (doğruluk payı yaklaşık %75). Salon ile mutfağın aynı mahalde olduğu yerde ikisinin kuralı birlikte uygulandı.",
+  "Kablo boyunda 'sigortadan evin en uzak mesafesi' kapalı kısmın köşegeni alındı (Excel motorundaki gibi).",
+  "Köşebent: yalnız iç köşeler sayıldı; odaya doğru çıkıntı yapan köşeler ve veranda tavanı sayılmadı.",
+  "Dış kapı boşluğu 0,95 × 2,10 m (çalışma kitaplarındaki değer); katalog çiziminde kapı 100 cm."
  ]
 }

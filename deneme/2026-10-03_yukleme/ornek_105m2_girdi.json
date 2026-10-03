@@ -149,6 +149,47 @@
     "uydu_prizi": 1,
     "sigorta": 9
   },
+  "elektrik_odalar": [
+    {
+      "ad": "oda 1",
+      "islev": [
+        "yatak_odasi"
+      ]
+    },
+    {
+      "ad": "oda 2",
+      "islev": [
+        "yatak_odasi"
+      ]
+    },
+    {
+      "ad": "oda 3",
+      "islev": [
+        "yatak_odasi"
+      ]
+    },
+    {
+      "ad": "salon, mutfak ve hol",
+      "islev": [
+        "salon",
+        "mutfak",
+        "hol"
+      ]
+    },
+    {
+      "ad": "banyo 1",
+      "islev": [
+        "banyo"
+      ]
+    },
+    {
+      "ad": "banyo 2",
+      "islev": [
+        "banyo"
+      ]
+    }
+  ],
+  "elektrik_odalar_notu": "Oda başına elektrik kuralını (Ubeydullah, 3 Ekim 2026) pafta sayımıyla sınamak için. Odaların işlevi hesap sayfasındaki oda adlarından; 'oda' yatak odası sayıldı. Veranda bilgisi yok. Listede pafta sayımı olduğu için hesapta sayım kullanılır; kuralın verdiği sayılar çıktıda `ara.elektrik_kural` altındadır.",
   "islak_hacim_sayisi": 2,
   "vitrifiye_dahil": false,
   "boya_dahil": false,

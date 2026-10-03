@@ -1,6 +1,6 @@
 # A1 · Çelik (LGF) duvar sistemi
 
-Kaynak: Lokman'ın anlattıkları (1–3 Ekim 2026). Madde sonundaki tarih, söylendiği günü gösterir.
+Kaynak: Lokman'ın anlattıkları (1–3 Ekim 2026) ve inşaat mühendisi Ubeydullah'ın 3 Ekim cevapları (Lokman 18:14'te iletti). Madde sonundaki tarih, söylendiği günü gösterir.
 
 ## Paketler ve katmanlar
 
@@ -44,7 +44,9 @@ Kaynak: Lokman'ın anlattıkları (1–3 Ekim 2026). Madde sonundaki tarih, söy
 ## İç duvarda OSB takviyesi
 
 - İç duvarlarda OSB yoksa, mutfak dolabı ve TV ünitesi takılırken mukavemet sağlasın diye OSB gönderilir: "salonun bir odası ile mutfağın 1 odasının tüm yüzeyini hesapla". (3 Ekim 13:27)
-- Okuma (teyit bekliyor): salon ve mutfak aynı mahaldeyse o mahalin bütün duvar yüzeyi. Gerçek listelerdeki alanlar daha küçük; ayrıntı `yukleme_listesi_yontemi.md`, açık soru 4.
+- "Bütün oda değil sadece dolap ve TV ünitesi gelen duvar metrajı alınır." (Mühendis, 3 Ekim 18:14)
+- Uygulama: dolap ve TV ünitesi gelen duvarlar modelin tanımına yazılır (`osb_takviye.duvarlar`); her duvarın o odaya bakan yüzünün tamamı alınır, o yüzdeki boşluklar düşülür. Önceki okuma (salon ve mutfağın bulunduğu mahalin bütün duvarları) kalktı.
+- Ç8201'de duvarlar katalog görselinden seçildi (teyit bekliyor): banyo ile mutfak arası duvar, üst dış duvar (tezgâh ve eviye), hol ile yaşam alanı arası duvar (TV). 24,5 m² → 9 levha; planda turuncu çizgi.
 
 ## Çelik ağırlığı
 
@@ -52,6 +54,13 @@ Kaynak: Lokman'ın anlattıkları (1–3 Ekim 2026). Madde sonundaki tarih, söy
 - Kirişler ve makaslar yaklaşık bir makas ölçüsünden ayrıca verilecek; sonra hesaplama motoruna eklenecek. (3 Ekim 13:27)
 - İleride karkas için bir Blender eklentisi yapılacak: Vertex BD ya da FrameCAD gibi, SketchUp'taki eklenti (MRD framework) gibi. Şimdi konu değil. (3 Ekim 13:27)
 - Motordaki birim ağırlıklar (kg/m), üç gerçek listeyle karşılaştırma ve et kalınlığı sorusu: `yukleme_listesi_yontemi.md`.
+- Mühendis birim ağırlıkları aynı değerlerle yazdı ve 140 × 0,8 duvarın 80 × 1,2 duvardan hafif olduğunu belirtti; kalınlığın neye göre seçildiğini yazmadı. (3 Ekim 18:14)
+- Yöntem A'nın tavan ve çatı paneli: 100 m² binada 8 adet 429,83 kg ve 12 parça 561,6 kg. (Mühendis, 3 Ekim 18:14) Ayrıntı `cati.md`.
+
+## Köşebent ve elektrik
+
+- Köşebent = (bütün odaların tavan çevresi + bütün oda iç köşeleri × 2,7 m) ÷ 2,5. (Mühendis, 3 Ekim 18:14) Lokman'ın 13:27'deki m² ÷ 2,5 kuralının yerine geçti; o kural plan bilinmediğinde yedek.
+- Elektrik sayıları oda başına bir kuralla, yaklaşık %75 doğrulukla hesaplanabilir. (Mühendis, 3 Ekim 18:14) Kural ve sınaması: `yukleme_listesi_yontemi.md`. Modelin tanımında her mahalin işlevi yazılır.
 
 ## Veranda çerçevesi
 
@@ -98,7 +107,7 @@ Tanım dosyası: `deneme/2026-10-02_celik/secenekler/dis_karkas_140.json`. Model
 - Ç8201'e uygulaması: `modeller/C8201.md`.
 - Çıkarım (teyit bekliyor): 140 mm pakette Boardex ve alçıpan baz paketle aynı sayıldı; yalnız karkas değişti.
 - Yalıtım: 140 mm karkasta dış duvar yalıtımı çift kat (gerçek listelerden; 100 m² listede kalemin adında yazıyor, 105 m² listenin hesap sayfasında "dış × 2").
-- Çelik: 140 mm dış karkaslı iki gerçek listede dış duvar panellerinin çoğu 0,8 mm (üçer paneli 1,2 mm), iç duvarlar 80 × 0,8. Hesapta böyle varsayıldı; teyit bekliyor.
+- Çelik: 140 mm dış karkaslı iki gerçek listede (2025, tek kat) dış duvar panellerinin çoğu 0,8 mm (üçer paneli 1,2 mm), iç duvarlar 80 × 0,8. Hesapta böyle varsayıldı; teyit bekliyor. Excel motorunun verisinde 140 × 0,8 dış duvar yalnız iki katlı iki projenin üst katında; motordaki tek katlı 140'lık örnekte (55 m²) dış duvar 1,2 mm.
 - Yöntem B'de (saçak sacı) dış duvar 14 cm olunca geniş saçak omegası (180 × 2500) kullanılır (Excel motorundaki not).
 
 ## Çıkarımlar (teyit bekliyor)
@@ -113,7 +122,8 @@ Tanım dosyası: `deneme/2026-10-02_celik/secenekler/dis_karkas_140.json`. Model
 - Mineral yün kalınlığı (80 mm ve 140 mm karkas için ayrı ayrı).
 - Boardex kalınlığı: 2 Ekim'de 12,5 mm denildi; 2025 tarihli yükleme listelerinde ve Excel motorunda 8 mm yazıyor (`yukleme_listesi_celik.md`).
 - Dış kapı: listelerde boşluk 95 × 210, kapı 90 × 210; üç modelde başlık 210. Katalog çiziminde (Ç8201) kapı 100 cm. Hangisi çizilecek?
-- Çelik et kalınlığı: 80 mm karkasta 1,2 mm, 140 mm'de 0,8 mm mi? Neye göre seçiliyor?
+- Çelik et kalınlığı: tek katta dış 140'lık duvar 0,8 mm mi (2025 listeleri), 1,2 mm mi (motordaki örnek)? 80 mm karkasta hep 1,2 mi? Mühendis ölçütü yazmadı.
+- OSB takviyesi: duvarın tamamı mı, yalnız dolabın ve TV'nin arkası mı? Klima duvarı da sayılır mı (listelerde kalemin adı "TV, klima ve mutfak dolabı arkası")?
 - OSB kalınlığı: yukarıda 11 mm (2 Ekim; Excel motorunda da 11 mm); gerçek listelerde 9 mm.
 - Varsayılan levha: 120 × 240 (60 aks) mı, 122 × 244 (61 aks) mı? Modellerde dikme 61, kuşak 122; bir modelde dikme 62,5.
 - Profil başlığı 45 mm mi, 54 mm mi? (Yükleme listesi 45; 81 m² model 54.)

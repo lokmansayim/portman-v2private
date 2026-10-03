@@ -52,6 +52,7 @@ Sütunlar gruba göre değişiyor: boyut, adet, kg ya da uzunluk, net alan, brü
 
 3 Ekim 2026 notu: bu listenin çalışma kitabındaki hesap sayfaları okundu; yöntem ve karşılaştırma `yukleme_listesi_yontemi.md`'de. Boardex adedi orada açıklanıyor: duvarlara ek olarak veranda kolonu, kirişi ve alın alanları da sayılıyor, üstüne %15 zayiat ekleniyor (hesap 45, liste 46).
 
+- **Köşebent ve OSB.** Bu listedeki 70 köşebent ve 35,1 m² OSB için kurallar 3 Ekim 18:14'te mühendisin cevaplarıyla geldi: köşebent = (odaların tavan çevresi + iç köşeler × 2,7 m) ÷ 2,5; OSB yalnız dolap ve TV ünitesi duvarlarına. Ayrıntı `yukleme_listesi_yontemi.md`.
 - **Boardex kalınlığı.** Listede dış cephe Boardex 8 mm; Lokman 2 Ekim'de Boardex ve alçıpanın 12,5 mm olduğunu söyledi. Hangisi baz paket?
 - **Kapı yüksekliği.** Cevaplandı (Lokman, 3 Ekim 13:27): iç kapı boşluğu 90 × 214; kasa sağ, sol ve üstte 5'er cm, altta 5 cm şap ve 2–3 cm parke; kanat 200. Çıkarım: lento 70 cm kuralı pencerelerde uygulanıyor. Dış kapı 90 × 210 listelerden; teyidi yok.
 - **Alçıpan boyu** 250 cm; duvar 270 cm. Ek parça kuralı sorulacak.

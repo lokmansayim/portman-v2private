@@ -9,7 +9,7 @@
 | Metal aksam | Alın sacı (30'luk) | alın boyu ÷ (2,5 − 0,30 bindirme) | lokman | 8 / 9 ✗ | — | 8 / 8 |
 | Metal aksam | Tavan omegası (60'lık) | tavan alanı ÷ 0,60 ÷ 3,75 | uydurma | 37 / 40 ✗ | 26 / 26 | 42 / 44 ✗ |
 | Metal aksam | Aşık | eğim boyunca 60 cm aralıkla sıralar + mahya aşığı; kırmada her sıra çatıyı dolanır; × 1,05 ÷ 4,2 | uydurma | 56 / 57 ✗ | 41 / 41 | — |
-| Metal aksam | Köşebent | bina m² ÷ 2,5 | lokman | 36 / 70 ✗ | 25 / 50 ✗ | 42 / 85 ✗ |
+| Metal aksam | Köşebent | (oda tavan çevreleri 87,84 m + 20 iç köşe × 2,7 m) ÷ 2,5 | muhendis | 57 / 70 ✗ | 39 / 50 ✗ | 70 / 85 ✗ |
 | Metal aksam | Geniş saçak omegası (180 × 2500) | her saçak kenarı ÷ 2,5, ayrı ayrı yukarı | uydurma | — | 16 / 16 | 16 / 16 |
 | Metal aksam | Saçaklar için Boardex | saçak boyu × saçak eni × 1,15 ÷ 2,88 | uydurma | — | 5 / 5 | 8 / 7 ✗ |
 | Dış cephe kaplama | Dış cephe Boardex | (çevre × yükseklik + kolon/kiriş kaplaması + çatı alnı (kalkan) − boşluklar) × 1,15 ÷ 2,88 | excel | 45 / 46 ✗ | 32 / 32 | 52 / 51 ✗ |
@@ -91,7 +91,7 @@
 | Metal aksam | Alın sacı (30'luk) | alın boyu ÷ (2,5 − 0,30 bindirme) | lokman | 8 / 9 ✗ | — | 8 / 8 |
 | Metal aksam | Tavan omegası (60'lık) | tavan alanı ÷ 0,60 ÷ 3,75 | uydurma | 37 / 40 ✗ | 26 / 26 | 42 / 44 ✗ |
 | Metal aksam | Aşık | eğim boyunca 60 cm aralıkla sıralar + mahya aşığı; kırmada her sıra çatıyı dolanır; × 1,05 ÷ 4,2 | uydurma | 56 / 57 ✗ | 41 / 41 | — |
-| Metal aksam | Köşebent | bina m² ÷ 2,5 | lokman | 36 / 70 ✗ | 25 / 50 ✗ | 42 / 85 ✗ |
+| Metal aksam | Köşebent | (oda tavan çevreleri 87,84 m + 20 iç köşe × 2,7 m) ÷ 2,5 | muhendis | 57 / 70 ✗ | 39 / 50 ✗ | 70 / 85 ✗ |
 | Metal aksam | Saçaklar için Boardex | saçak boyu × saçak eni × 1,15 ÷ 2,88 | uydurma | — | 5 / 5 | 8 / 7 ✗ |
 | Dış cephe kaplama | Dış cephe Boardex | (çevre × yükseklik + kolon/kiriş kaplaması + çatı alnı (kalkan) − boşluklar) × 1,15 ÷ 2,88 | excel | 45 / 46 ✗ | 32 / 32 | 52 / 51 ✗ |
 | İç cephe kaplama | Duvar alçıpan beyaz | oda oda: (iç çevre × yükseklik − o odadaki boşluklar) toplamı × 1,05 ÷ 3,0 | excel | 66 / 67 ✗ | 32 / 32 | 78 / 79 ✗ |
@@ -126,21 +126,20 @@
 | Çelik panel | Veranda dikmeleri (kolon paneli) | 80 × 45 × 1,2 | 3 | aynı | 7,2 m | 46 | motor |
 | Çelik panel | Veranda kirişleri (kiriş paneli) | 80 × 45 × 1,2 | 4 | aynı | 12,4 m | 81 | motor |
 | Çelik panel | Çatı makas panelleri | 80 × 45 × 0,8 | 25 | aynı | 93,5 m² | 706 | motor |
-| Çelik panel | Tavan paneli (makas arası) | roll form çelik |  | 74,8 m² | 76,7 m² |  | bekliyor |
-| Çelik panel | Çatı paneli (makas üstü, sırt 80 mm) | roll form çelik |  | aynı | 98,4 m² |  | bekliyor |
+| Çelik panel | Tavan paneli (makas arası) | roll form çelik | 7 | aynı | 82,0 m² | 353 | muhendis |
+| Çelik panel | Çatı paneli (makas üstü, sırt 80 mm) | roll form çelik | 10 | aynı | 82,0 m² | 461 | muhendis |
 | Çelik panel | Boy C profil | 80 × 45 × 0,8 | 3 | aynı |  | 15 | motor |
 | Çelik panel | Boy C profil | 80 × 45 × 1,2 | 3 | aynı |  | 15 | motor |
-| Çelik panel | Toplam (adedi ve kg'ı bilinenler) |  | 52 | 1697 kg |  | 1902 | motor |
-| Metal aksam | Saçak omegası | L 2500 |  | aynı | 39,3 m |  | soru |
+| Çelik panel | Toplam (adedi ve kg'ı bilinenler) |  | 69 | 2511 kg |  | 2716 | motor |
 | Metal aksam | Saçaklar için Boardex | 1200 × 2400 | 5 | aynı | 11,8 m² |  | uydurma |
-| Metal aksam | Saçak yüzü için Boardex | 1200 × 2400 | 3 | aynı | 7,2 m² |  | varsayim |
-| Metal aksam | Köşebent | L 2500 | 33 | aynı | 82,0 m² |  | lokman |
+| Metal aksam | Saçak yüzü için Boardex | 1200 × 2400 | 3 | aynı | 7,2 m² |  | muhendis |
+| Metal aksam | Köşebent | L 2500 | 51 | aynı | 126,4 m |  | muhendis |
 | Dış cephe kaplama | Dış cephe Boardex | 1200 × 2400 | 33 | aynı | 80,7 m² |  | excel |
 | İç cephe kaplama | Duvar alçıpan beyaz | 1200 × 2500 | 47 | 46 | 132,8 m² |  | excel |
 | İç cephe kaplama | Duvar alçıpan yeşil | 1200 × 2500 | 8 | aynı | 20,4 m² |  | excel |
 | İç cephe kaplama | Tavan alçıpan beyaz | 1200 × 2500 | 19 | aynı | 54,1 m² |  | motor |
 | İç cephe kaplama | Tavan alçıpan yeşil | 1200 × 2500 | 8 | aynı | 22,6 m² |  | lokman |
-| İç cephe kaplama | OSB (TV ve mutfak dolabı arkası takviyesi) | 1220 × 2440 | 15 | aynı | 42,5 m² |  | varsayim |
+| İç cephe kaplama | OSB (TV ve mutfak dolabı arkası takviyesi) | 1220 × 2440 | 9 | aynı | 24,5 m² |  | muhendis |
 | İç cephe kaplama | Duvar izolasyonu | paket 8,64 m² | 13 | 23 | 112,2 m² |  | uydurma |
 | Çatı kaplamaları | Sandviç panel | L 4300 · 100 cm kapatır | 26 | aynı | 98,4 m² |  | uydurma |
 | Çatı kaplamaları | Metal kiremit mahyası | L 2800 | 11 | aynı | 27,0 m |  | lokman |
@@ -159,7 +158,18 @@
 | Kapı ve pencere | PVC vasistas | 60/40 | 1 | aynı |  |  | model |
 | Kapı ve pencere | PVC pencere | 120/100 | 1 | aynı |  |  | model |
 | Kapı ve pencere | PVC pencere | 180/180 | 3 | aynı |  |  | model |
-| Elektrik | Duy, glop, ampul, anahtar, priz, sigorta, buat ve NYM kablolar | adet / metre |  | aynı |  |  | bekliyor |
+| Elektrik | Tijli duy | adet | 6 | aynı |  |  | muhendis |
+| Elektrik | Yuvarlak glop | adet | 3 | aynı |  |  | muhendis |
+| Elektrik | Ampul | adet | 9 | aynı |  |  | motor |
+| Elektrik | Tekli anahtar | adet | 5 | aynı |  |  | muhendis |
+| Elektrik | Çiftli anahtar | adet | 2 | aynı |  |  | muhendis |
+| Elektrik | Tekli priz | adet | 16 | aynı |  |  | muhendis |
+| Elektrik | Çiftli priz | adet | 2 | aynı |  |  | muhendis |
+| Elektrik | Uydu prizi | adet | 1 | aynı |  |  | muhendis |
+| Elektrik | W otomat (sigorta) | adet | 9 | aynı |  |  | muhendis |
+| Elektrik | NYM kablo (3 × 2,5) | metre | 145 | aynı |  |  | motor |
+| Elektrik | NYM kablo (2 × 1,5) | metre | 121 | aynı |  |  | motor |
+| Elektrik | Buat kasa | adet | 31 | aynı |  |  | motor |
 | Elektrik | Uydu kablo | metre | 25 | aynı |  |  | motor |
 | Elektrik | Besleme kablosu (sigorta kutuları arası) | metre | 5 | aynı |  |  | motor |
 | Elektrik | Besleme kablo borusu | metre | 5 | aynı |  |  | motor |
@@ -169,9 +179,9 @@
 | Elektrik | Kaçak akım rölesi | adet | 1 | aynı |  |  | motor |
 | Vida | RYSB pul başlı (3,9 × 32) | adet | 615 | aynı | 82,0 m² |  | motor |
 | Vida | Alçıpan vidası (3,5 × 35) | adet | 5000 | aynı | 123,0 levha |  | excel |
-| Vida | OSB ve yalıpan vidası (3,9 × 32) | adet | 1000 | aynı | 864,0 vida |  | motor |
+| Vida | OSB ve yalıpan vidası (3,9 × 32) | adet | 1000 | aynı | 700,0 vida |  | motor |
 | Vida | Pencere vidası (4,8 × 70) | adet | 160 | aynı | 8,0 pencere |  | excel |
-| Vida | Trapez vida (5,5 × 25) | adet | 750 | aynı | 718,0 vida |  | excel |
+| Vida | Trapez vida (5,5 × 25) | adet | 1000 | aynı | 996,0 vida |  | excel |
 | Vida | Trapez vida (5,5 × 60) | adet | 250 | aynı | 205,0 vida |  | motor |
 | Vida | Trapez vida (5,5 × 110; sandviç panel) | adet | 750 | aynı | 559,0 vida |  | motor |
 | Vida | Çelik dübel (klipsli) | adet | 28 | aynı | 14,0 panel |  | motor |
@@ -218,11 +228,68 @@
 | Tek kat panel | OSB ve yalıpan vidası (3,9 × 32) | adet | 1000 | motor |
 | Tek kat panel | Trapez vida (5,5 × 60) | adet | 250 | motor |
 | Tek kat panel | Trapez vida (5,5 × 76; tek kat panel) | adet | 750 | motor |
-| OSB + nem bariyeri + kiremit desen sac | Çatı OSB | 1220 × 2440 | 35 | uydurma |
-| OSB + nem bariyeri + kiremit desen sac | Nem bariyeri | m² | 105 | motor |
-| OSB + nem bariyeri + kiremit desen sac | Metal kiremit (kiremit desen sac) | L 4300 · 110 cm kapatır | 23 | uydurma |
-| OSB + nem bariyeri + kiremit desen sac | Metal kiremit mahyası | L 2800 | 11 | lokman |
-| OSB + nem bariyeri + kiremit desen sac | OSB mahyası | L 2800 | 11 | lokman |
-| OSB + nem bariyeri + kiremit desen sac | Çatı şiltesi 80 mm | 9,6 m²/adet | 10 | uydurma |
-| OSB + nem bariyeri + kiremit desen sac | OSB ve yalıpan vidası (3,9 × 32) | adet | 2500 | motor |
-| OSB + nem bariyeri + kiremit desen sac | Trapez vida (5,5 × 60) | adet | 750 | motor |
+| OSB + nem bariyeri + kiremit desen sac (motorda: OSB + membran + metal kiremit) | Çatı OSB | 1220 × 2440 | 35 | uydurma |
+| OSB + nem bariyeri + kiremit desen sac (motorda: OSB + membran + metal kiremit) | Nem bariyeri | m² | 105 | motor |
+| OSB + nem bariyeri + kiremit desen sac (motorda: OSB + membran + metal kiremit) | Metal kiremit (kiremit desen sac) | L 4300 · 110 cm kapatır | 23 | uydurma |
+| OSB + nem bariyeri + kiremit desen sac (motorda: OSB + membran + metal kiremit) | Metal kiremit mahyası | L 2800 | 11 | lokman |
+| OSB + nem bariyeri + kiremit desen sac (motorda: OSB + membran + metal kiremit) | OSB mahyası | L 2800 | 11 | lokman |
+| OSB + nem bariyeri + kiremit desen sac (motorda: OSB + membran + metal kiremit) | Çatı şiltesi 80 mm | 9,6 m²/adet | 10 | uydurma |
+| OSB + nem bariyeri + kiremit desen sac (motorda: OSB + membran + metal kiremit) | OSB ve yalıpan vidası (3,9 × 32) | adet | 2500 | motor |
+| OSB + nem bariyeri + kiremit desen sac (motorda: OSB + membran + metal kiremit) | Trapez vida (5,5 × 60) | adet | 750 | motor |
+| OSB + nem bariyeri + trapez sac | Çatı OSB | 1220 × 2440 | 35 | uydurma |
+| OSB + nem bariyeri + trapez sac | Nem bariyeri | m² | 105 | motor |
+| OSB + nem bariyeri + trapez sac | Trapez sac | L 4300 · 80 cm kapatır | 32 | uydurma |
+| OSB + nem bariyeri + trapez sac | Trapez sac mahyası | L 800 | 45 | motor |
+| OSB + nem bariyeri + trapez sac | OSB mahyası | L 2800 | 11 | lokman |
+| OSB + nem bariyeri + trapez sac | Çatı şiltesi 80 mm | 9,6 m²/adet | 10 | uydurma |
+| OSB + nem bariyeri + trapez sac | OSB ve yalıpan vidası (3,9 × 32) | adet | 2500 | motor |
+| OSB + nem bariyeri + trapez sac | Trapez vida (5,5 × 60) | adet | 1000 | motor |
+| Trapez sac | Trapez sac | L 4300 · 80 cm kapatır | 32 | uydurma |
+| Trapez sac | Trapez sac mahyası | L 800 | 45 | motor |
+| Trapez sac | Çatı şiltesi 80 mm | 9,6 m²/adet | 10 | uydurma |
+| Trapez sac | OSB ve yalıpan vidası (3,9 × 32) | adet | 1000 | motor |
+| Trapez sac | Trapez vida (5,5 × 60) | adet | 1000 | motor |
+| OSB + membran + shingle | Çatı OSB | 1220 × 2440 | 35 | uydurma |
+| OSB + membran + shingle | Nem bariyeri | m² | 105 | motor |
+| OSB + membran + shingle | Membran | adet / 8 m² | 14 | motor |
+| OSB + membran + shingle | Shingle | adet / 8 m² | 14 | motor |
+| OSB + membran + shingle | OSB mahyası | L 2800 | 11 | lokman |
+| OSB + membran + shingle | Çatı şiltesi 80 mm | 9,6 m²/adet | 10 | uydurma |
+| OSB + membran + shingle | OSB ve yalıpan vidası (3,9 × 32) | adet | 2500 | motor |
+| OSB + membran + shingle | Trapez vida (5,5 × 60) | adet | 250 | motor |
+
+## Köşebent: mühendisin formülü
+
+| Liste | Oda çevreleri (m) | Oda sayısı | Hesap (oda başına 4 iç köşe) | Listede | Listedeki adedin denk geldiği iç köşe |
+|---|---|---|---|---|---|
+| 90 m² | 87,84 | 5 | 57 | 70 | 32,3 |
+| 62 m² | 51,83 | 4 | 39 | 50 | 27,1 |
+| 105 m² | 109,81 | 6 | 70 | 85 | 38,0 |
+
+Ç8201 (planından): oda çevreleri 69,72 m, iç köşe 21; (69,72 + 21 × 2,7) ÷ 2,5 = 50,6 → 51 adet.
+
+## Elektrik kuralının sınaması (105 m² liste)
+
+| Kalem | Kural | Pafta sayımı (liste) |
+|---|---|---|
+| Tijli duy | 7 | 10 |
+| Yuvarlak glop | 2 | 4 |
+| Tekli anahtar | 7 | 4 |
+| Çiftli anahtar | 1 | 5 |
+| Tekli priz | 21 | 20 |
+| Çiftli priz | 2 | 4 |
+| Uydu prizi | 1 | 1 |
+| Toplam | 41 | 48 |
+| W otomat (sigorta) | 9 | 9 |
+
+## Ç8201: elektrik, oda oda
+
+| Mahal | Kural | Tijli duy | Yuvarlak glop | Tekli anahtar | Çiftli anahtar | Tekli priz | Çiftli priz | Uydu prizi |
+|---|---|---|---|---|---|---|---|---|
+| Yatak Odası 1 | yatak odası | 1 |  | 1 |  | 3 |  |  |
+| Yatak Odası 2 | yatak odası | 1 |  | 1 |  | 3 |  |  |
+| Banyo | banyo |  | 1 | 1 |  | 2 |  |  |
+| Hol | hol | 1 |  | 1 |  |  |  |  |
+| Yaşam Alanı | salon + mutfak | 3 |  | 1 | 1 | 8 | 2 | 1 |
+| Veranda | veranda |  | 2 |  | 1 |  |  |  |
+| Toplam | | 6 | 3 | 5 | 2 | 16 | 2 | 1 |

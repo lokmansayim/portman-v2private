@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Yapı Tanımı taslağından (deneme/2026-10-02_celik) yükleme listesi girdisi üretir.
 
-Geometriden gelenler: dış çevre, iç duvar boyu, oda iç çevreleri, oda oda boşluklar, tavan alanları, çatı planı ve uzunlukları,
-veranda çerçevesi (dikme ve kiriş), dere inişlerinin yeri. Varsayımlar girdinin içinde `varsayimlar` altında yazılıdır.
+Geometriden gelenler: dış çevre, iç duvar boyu, oda iç çevreleri ve iç köşeleri, oda oda boşluklar, tavan alanları, çatı planı ve uzunlukları,
+veranda çerçevesi (dikme ve kiriş), dere inişlerinin yeri, OSB takviyesi gelen duvar yüzleri. Tanımdan gelenler: odaların işlevi (elektrik kuralı için).
+Varsayımlar girdinin içinde `varsayimlar` altında yazılıdır.
 
 Kullanım:
     python girdi_uret.py ../2026-10-02_celik/C8201.json
@@ -69,7 +70,8 @@ def main() -> int:
             if aciklik_kutusu(ac, tanim, td, ti).buffer(0.5).intersects(m["poligon"]):
                 bos.append(round(alan(ac), 4))
         odalar.append({"ad": m["ad"], "tur": "yesil" if any(x in m["ad"].lower() for x in ISLAK) else "beyaz",
-                       "cevre_m": round(m["poligon"].length / 100, 3), "alan_m2": round(m["alan_m2"], 3), "bosluk_m2": bos})
+                       "cevre_m": round(m["poligon"].length / 100, 3), "alan_m2": round(m["alan_m2"], 3), "bosluk_m2": bos,
+                       "ic_kose": m["ic_kose"], "dis_kose": m["dis_kose"], "islev": m["islev"]})
     h = tanim["duvar_yuksekligi"] / 100
     v = tanim.get("veranda")
     vc = veranda_cercevesi(tanim)
@@ -91,18 +93,26 @@ def main() -> int:
     dis_panel = sum(math.ceil(x / 100 / en_cok - 1e-9) for x in (W, H, W, H))
     ic_panel = sum(math.ceil((d["son"] - d["bas"]) / 100 / en_cok - 1e-9) for d in tanim["ic_duvarlar"])
     et_notu = "et kalınlığı ve panel adedi tahmin; teyit bekliyor"
-    # OSB takviyesi: salon ve mutfağın bulunduğu mahal(ler)in bütün duvar yüzeyi
-    anahtarlar = kur["osb_takviye"]["deger"]["oda_anahtarlari"]
-    takviye = [o for o in odalar if any(x in o["ad"].lower() for x in anahtarlar)]
+    # OSB takviyesi (Ubeydullah, 3 Ekim 2026): yalnız dolap ve TV ünitesi gelen duvarlar; duvarlar modelin tanımında yazılıdır
+    ot = s["osb_takviye"]
+    osb_takviye = None if not ot else {
+        "duvarlar": [{"mahal": x["mahal"], "duvar": x["duvar"], "duvar_adi": x["duvar_adi"], "neden": x["neden"], "boy_m": round(x["boy_cm"] / 100, 4),
+                      "bosluk_m2": round(x["bosluk_m2"], 4)} for x in ot["duvarlar"]],
+        "brut_m2": round(ot["brut_m2"], 2), "bosluk_m2": round(ot["bosluk_m2"], 3), "net_m2": round(ot["net_m2"], 2)}
+    # elektrik kuralı için odaların işlevi (veranda dahil); işlevi yazılmamış oda varsa kural uygulanmaz
+    elektrik_odalar = [{"ad": o["ad"], "islev": o["islev"]} for o in odalar] + ([{"ad": "Veranda", "islev": list(v.get("islev", []))}] if v else [])
+    if not all(o["islev"] for o in elektrik_odalar):
+        elektrik_odalar = None
     ic_kapi = [ac for ac in tanim["acikliklar"] if ac["tur"] == "ic_kapi"]
     kanat = ic_kapi[0]["kanat"] if ic_kapi else [80, 200]
     yontem = ct.get("yontem", "omega_asik")
     girdi = {
-        "sema": "portman.yukleme_girdisi/0.2-taslak",
+        "sema": "portman.yukleme_girdisi/0.3-taslak",
         "ad": f"{tanim['kod']} · {tanim['ad']} · paket: {tanim['paket']}",
         "kaynak": f"deneme/2026-10-02_celik/{a.tanim.name}" + ("" if not a.secenek else " + " + ", ".join(x.name for x in a.secenek)),
         "bina_m2": round(s["toplam_oturum_m2"]),
         "dis_olcu_m": [L, Hc],
+        "kapali_olcu_m": [W / 100, H / 100],
         "kat_adedi": 1,
         "oda_sayisi": len(odalar),
         "kat_yuksekligi_m": h,
@@ -112,7 +122,7 @@ def main() -> int:
             "dikme": ({"profil": f"80x45x{ev['dikme']}", "adet": vc["dikme_adedi"], "boy_m": vc["dikme_boyu"] / 100,
                        "not": "dikme sayısı ve yeri katalog görsellerinden"} if vc else None),
             "kiris": ({"profil": f"80x45x{ev['kiris']}", "boy_m": round(vc["kiris_boyu"] / 100, 2)} if vc else None),
-            "cati": {"tip": ct["tip"], "profil": f"80x45x{ev['cati']}", "plan_m2": round(c["plan_m2"], 2)},
+            "cati": {"tip": ct["tip"], "profil": f"80x45x{ev['cati']}", "plan_m2": round(c["plan_m2"], 2), "oturum_m2": round(c["oturum_m2"], 2)},
             "tavan_paneli_m2": round(s["kapali_net_m2"] + veranda_m2, 2) if yontem == "panel" else None,
             "cati_paneli_m2": round(c["yuzey_m2"], 2) if yontem == "panel" else None,
         },
@@ -127,8 +137,8 @@ def main() -> int:
         "odalar": odalar,
         "ic_kapi_adedi": len(ic_kapi),
         "ic_duvar_boyu_m": round(ic_boy, 2),
-        "osb_takviye": ({"odalar": [o["ad"] for o in takviye],
-                         "net_m2": round(sum(o["cevre_m"] * h - sum(o["bosluk_m2"]) for o in takviye), 2)} if takviye else None),
+        "osb_takviye": osb_takviye,
+        "elektrik_odalar": elektrik_odalar,
         "tavan_m2": {"beyaz": round(sum(o["alan_m2"] for o in odalar if o["tur"] == "beyaz"), 2),
                      "yesil": round(sum(o["alan_m2"] for o in odalar if o["tur"] == "yesil") + veranda_m2, 2)},
         "cati": {
@@ -139,7 +149,8 @@ def main() -> int:
             "panel_boyu_m": math.ceil(min(px, py) / 2 * kok * 10 - 1e-9) / 10,
             "bina_eni_m": min(c["ayak_izi"]) / 100, "cati_boyu_m": max(px, py),
             "sacak_alti": ct.get("sacak_alti", "boardex"), "sacak_alti_eni_m": ct["sacak"] / 100,
-            "sacak_yuzu_m2": round(c["alin_m2"], 2) if yontem == "panel" else None,
+            "sacak_yuzu_m2": round(c["alin_m2"], 2) if yontem == "panel" and ct.get("sacak_yuzu", "boardex") == "boardex" else None,
+            **({"inis_adedi_plan": c["inis_adedi"]} if c["inis_kaynagi"] == "plan" else {}),
         },
         "kapi_pencere": (
             [{"kalem": f"Melamin kapı ({kanat[0]}'lik kanat)", "boyut": f"{round(ik[0] * 100)} × {round(ik[1] * 100)}", "adet": len(ic_kapi),
@@ -149,14 +160,16 @@ def main() -> int:
             + [{"kalem": ("PVC vasistas" if x["ad"] == "60/40" else "PVC pencere"), "boyut": x["ad"], "adet": x["adet"], "durum": "model"} for x in dis.values() if x["ad"] != "dış kapı"]
         ),
         "varsayimlar": [
-            "Çatı kaplaması seçenektir; baz paketin kaplaması söylenmedi. Örnek olarak sandviç panel alındı; `--kaplama` ile öteki seçenekler hesaplanır. Panel boyu eğimli boydan, 10 cm'ye yuvarlandı.",
+            "Çatı kaplaması seçenektir; baz paketin kaplaması söylenmedi. Örnek olarak sandviç panel alındı; `--kaplama` ile öteki beş seçenek hesaplanır. Panel boyu eğimli boydan, 10 cm'ye yuvarlandı.",
             "Çelik et kalınlığı gerçek listelerden çıkarıldı: 80 mm dış karkasta duvarlar 1,2 mm; 140 mm dış karkasta dış ve iç duvarlar 0,8 mm. Teyit bekliyor.",
             f"Duvar paneli adedi tahmin: her duvar hattı bir panel, {str(en_cok).replace('.', ',')} m'yi aşarsa bölünür. Gerçek adet karkas yerleşiminden gelir.",
+            "Tavan paneli ve çatı paneli: mühendisin 100 m² bina için verdiği kg ve adet, çatının örttüğü oturum alanına oranlandı.",
             "Veranda dikmelerinin sayısı ve yeri katalog görsellerinden: dış kenarda iki köşe ve bir orta.",
-            "Saçak yüzü (saçak ucunda topuk + panel, 18,4 cm) Boardex'le kaplanır sayıldı; kaplandığını Lokman söyledi, malzemesini söylemedi.",
-            "OSB takviyesi: salon ve mutfak aynı mahalde (Yaşam Alanı) olduğu için o mahalin bütün duvar yüzeyi alındı.",
+            "OSB takviyesi: dolap ve TV ünitesi gelen duvarlar katalog görselinden seçildi; her duvarın o odaya bakan yüzünün tamamı alındı.",
+            "Elektrik: pafta yok; sayılar mühendisin oda başına kuralından (doğruluk payı yaklaşık %75). Salon ile mutfağın aynı mahalde olduğu yerde ikisinin kuralı birlikte uygulandı.",
+            "Kablo boyunda 'sigortadan evin en uzak mesafesi' kapalı kısmın köşegeni alındı (Excel motorundaki gibi).",
+            "Köşebent: yalnız iç köşeler sayıldı; odaya doğru çıkıntı yapan köşeler ve veranda tavanı sayılmadı.",
             "Dış kapı boşluğu 0,95 × 2,10 m (çalışma kitaplarındaki değer); katalog çiziminde kapı 100 cm.",
-            "Elektrik paftası yok: duy, glop, anahtar, priz ve sigorta sayıları hesaplanmadı.",
         ],
     }
     a.cikti.mkdir(parents=True, exist_ok=True)
@@ -167,7 +180,8 @@ def main() -> int:
         print(f"  {o['ad']:15s} {o['tur']:6s} çevre {o['cevre_m']:6.2f} m  alan {o['alan_m2']:6.2f} m²  boşluk {sum(o['bosluk_m2']):5.2f} m² ({len(o['bosluk_m2'])})")
     print(f"  dış çevre {girdi['dis']['cevre_m']:.2f} m · iç duvar boyu {ic_boy:.2f} m · profil dış {dis_profil} / iç {ic_profil} · panel (tahmin) dış {dis_panel} / iç {ic_panel}")
     if girdi["osb_takviye"]:
-        print(f"  OSB takviyesi: {', '.join(girdi['osb_takviye']['odalar'])} net {girdi['osb_takviye']['net_m2']:.2f} m²")
+        print("  OSB takviyesi: " + ", ".join(f"{x['duvar']} {x['boy_m']:.2f} m" for x in girdi["osb_takviye"]["duvarlar"]) + f" · net {girdi['osb_takviye']['net_m2']:.2f} m²")
+    print(f"  iç köşe {sum(o['ic_kose'] for o in odalar)} · dış köşe {sum(o['dis_kose'] for o in odalar)} · oda çevreleri {sum(o['cevre_m'] for o in odalar):.3f} m")
     return 0
 
 

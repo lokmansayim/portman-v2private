@@ -178,14 +178,14 @@
    "grup": "Metal aksam",
    "kalem": "Köşebent",
    "boyut": "L 2500",
-   "adet": 25,
-   "olcu": 62,
+   "adet": 39,
+   "olcu": 95.03,
    "brut": null,
-   "birim": "m²",
+   "birim": "m",
    "kg": null,
-   "formul": "bina m² ÷ 2,5",
-   "durum": "lokman",
-   "not": "gerçek listelerde adet bunun yaklaşık iki katı (70, 50, 85)"
+   "formul": "(oda tavan çevreleri 51,83 m + 16 iç köşe × 2,7 m) ÷ 2,5",
+   "durum": "muhendis",
+   "not": "planı yok: oda başına 4 iç köşe sayıldı (alt sınır)"
   },
   {
    "grup": "Dış cephe kaplama",
@@ -302,7 +302,7 @@
    "kg": null,
    "formul": "çatı yüzeyi × 1,10 ÷ (panel boyu × 1,00); panel boyu = eğimli boy",
    "durum": "uydurma",
-   "not": "gerçek adet panel yerleşiminden bulunur"
+   "not": "gerçek adet panel yerleşiminden bulunur. Sağlama: şerit şerit yerleşimle (parçalar dikdörtgen kesilir, artıklar yüzler arasında paylaşılmazsa) 30 adet"
   },
   {
    "grup": "Çatı kaplamaları",
@@ -367,7 +367,7 @@
    "kg": null,
    "formul": "4 köşe + 2 orta (10 m ve üzeri cepheler)",
    "durum": "lokman",
-   "not": null
+   "not": "iniş plana bakarak yerleştirilir; düz saçakta ortalama 5 m'de bir (mühendis, 3 Ekim). Planda elle yerleştirilmediği için Lokman'ın kuralı kullanıldı"
   },
   {
    "grup": "Dere",
@@ -443,7 +443,7 @@
    "brut": null,
    "birim": "",
    "kg": null,
-   "formul": "motorun notu: montaj paftasından sayılır; elektrik paftası ya da oda başına kural gerekli",
+   "formul": "elektrik paftası yok ve odaların işlevi bilinmiyor; pafta sayımı ya da oda başına kural gerekli",
    "durum": "bekliyor",
    "not": null
   },
@@ -862,7 +862,15 @@
   "asik_boyu_m": 161.7,
   "inis_kural": 6,
   "inis_kural_aciklama": "4 köşe + 2 orta (10 m ve üzeri cepheler)",
-  "celik_panel_adedi": 63
+  "celik_panel_adedi": 63,
+  "kosebent": {
+   "tavan_cevresi_m": 51.83,
+   "ic_kose": 16,
+   "boy_m": 95.03
+  },
+  "elektrik_kaynagi": null,
+  "elektrik_kural": null,
+  "kirma_kaplama_yerlesim_adedi": 30
  },
  "karsilastirma": {
   "Saçak sacı (30'luk)": {
@@ -891,9 +899,9 @@
    "durum": "uydurma"
   },
   "Köşebent": {
-   "hesap": 25,
+   "hesap": 39,
    "liste": 50,
-   "durum": "lokman"
+   "durum": "muhendis"
   },
   "Dış cephe Boardex": {
    "hesap": 32,

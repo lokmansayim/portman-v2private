@@ -1,5 +1,5 @@
 {
-  "sema": "portman.yapi_tanimi/0.3-taslak",
+  "sema": "portman.yapi_tanimi/0.4-taslak",
   "kod": "Ç8201",
   "ad": "Tek kat çelik, 2+1, 82 m²",
   "aile": "tek_kat_celik",
@@ -18,6 +18,9 @@
     "y": 0,
     "en": 244,
     "boy": 750,
+    "islev": [
+      "veranda"
+    ],
     "cerceve": {
       "sirt": 8,
       "genislik": 30,
@@ -85,6 +88,9 @@
       "nokta": [
         170,
         190
+      ],
+      "islev": [
+        "yatak_odasi"
       ]
     },
     {
@@ -92,6 +98,9 @@
       "nokta": [
         170,
         560
+      ],
+      "islev": [
+        "yatak_odasi"
       ]
     },
     {
@@ -99,6 +108,9 @@
       "nokta": [
         440,
         620
+      ],
+      "islev": [
+        "banyo"
       ]
     },
     {
@@ -106,6 +118,9 @@
       "nokta": [
         420,
         250
+      ],
+      "islev": [
+        "hol"
       ]
     },
     {
@@ -113,9 +128,14 @@
       "nokta": [
         680,
         300
+      ],
+      "islev": [
+        "salon",
+        "mutfak"
       ]
     }
   ],
+  "islev_kaynak": "Oda işlevleri mahal adlarından. Yaşam Alanı salon ile mutfağı birlikte içerir (katalog görseli: mutfak tezgâhı ve oturma grubu aynı mahalde). Elektrik kuralı (Ubeydullah, 3 Ekim 2026) oda işlevine göre uygulanır; Yaşam Alanı'nda salon + mutfak birlikte sayılır (okuma; teyit bekliyor).",
   "acikliklar": [
     {
       "tur": "pencere",
@@ -285,11 +305,34 @@
     "yontem": "panel",
     "yontem_kaynak": "Lokman, 3 Ekim 2026 13:27: çatı işlemede iki varyant var ve birlikte kullanılmaz. (A) hafif çelikte normal olan: makasların arasına tavan paneli, üzerine çatı paneli; ikisi de makasla aynı malzemeden, aynı roll form makinesinden. (B) PortatifEv'in uyguladığı, prefabrikte kullanılan yöntem: tavan omegası, aşık, alın sacı, saçak sacı. Şimdilik A baz alınır; Ç8201 çatı ve tavan panelli, saçak altı Boardex kaplamalı.",
     "kaplama": "sandvic_panel",
-    "kaplama_kaynak": "Lokman, 3 Ekim 2026 13:27: 'çatı kaplaması' seçenektir: tek kat panel, sandviç panel ya da OSB + nem bariyeri + kiremit desen sac vb. Baz paketin kaplaması söylenmedi; hesapta sandviç panel örnek alındı, öteki iki seçenek de hesaplanıyor.",
+    "kaplama_kaynak": "Lokman, 3 Ekim 2026 13:27: 'çatı kaplaması' seçenektir: tek kat panel, sandviç panel ya da OSB + nem bariyeri + kiremit desen sac vb. Ubeydullah (inşaat mühendisi), 3 Ekim 2026: Excel motorundaki (CTKBF V1.1) kaplamalar altı tane: OSB + membran + shingle, OSB + nem bariyeri + trapez sac, trapez sac, tek kat panel, sandviç panel, OSB + membran + metal kiremit. Baz paketin kaplaması söylenmedi; hesapta sandviç panel örnek alındı, altı seçenek de hesaplanıyor.",
     "sacak_alti": "boardex",
-    "mahya_bindirme": 30
+    "mahya_bindirme": 30,
+    "sacak_yuzu": "boardex",
+    "sacak_yuzu_kaynak": "Lokman, 2 Ekim 2026 22:05: saçak yüzü (topuk + panelin eğimdeki ölçüsü) kaplanır. Ubeydullah, 3 Ekim 2026: \"Saçak omegası gerekmiyor. Saçak yüzü de boardex ile kaplanıyor.\"",
+    "inis_kaynak": "Lokman, 3 Ekim 2026 13:27: her köşeye bir iniş, 10 metrelik cephelerin ortasına birer tane; bu modelde toplam 6. Ubeydullah, 3 Ekim 2026: iniş plana bakarak yerleştirilir; düz bir saçakta ortalama 5 metrede bir yazılır. Planda elle yerleştirilmiş iniş yok; yerler kuraldan. Elle yerleştirilirse `inis_noktalari` alanına [x, y] listesi yazılır."
   },
   "lento_kapsam": "pencere",
   "lento_kaynak": "Lokman, 2 Ekim 2026 20:40: lento her zaman 70 cm. 3 Ekim 13:27: iç kapı boşluğu 90 × 214. Çıkarım: lento 70 cm kuralı pencerelerde uygulanıyor; kapı boşlukları kendi yüksekliğinde.",
-  "ic_kapi_kurali": "Lokman, 3 Ekim 2026 13:27: çelik (LGF) yapılarda iç kapı için bırakılan boşluk en 90, yükseklik 214 cm. Kasa sağda, solda ve üstte 5'er cm; altta 5 cm şap ve 2–3 cm parke payı; kanat 200 cm'e düşer. Kanat eni 80: listelerdeki \"80'lik kanat\" adından ve 90 − 2 × 5'ten (çıkarım)."
+  "ic_kapi_kurali": "Lokman, 3 Ekim 2026 13:27: çelik (LGF) yapılarda iç kapı için bırakılan boşluk en 90, yükseklik 214 cm. Kasa sağda, solda ve üstte 5'er cm; altta 5 cm şap ve 2–3 cm parke payı; kanat 200 cm'e düşer. Kanat eni 80: listelerdeki \"80'lik kanat\" adından ve 90 − 2 × 5'ten (çıkarım).",
+  "osb_takviye": {
+    "duvarlar": [
+      {
+        "mahal": "Yaşam Alanı",
+        "duvar": "R",
+        "neden": "mutfak dolabı"
+      },
+      {
+        "mahal": "Yaşam Alanı",
+        "duvar": "dis:ust",
+        "neden": "mutfak dolabı ve eviye"
+      },
+      {
+        "mahal": "Yaşam Alanı",
+        "duvar": "B",
+        "neden": "TV ünitesi"
+      }
+    ],
+    "kaynak": "Kural: Ubeydullah (inşaat mühendisi), 3 Ekim 2026: \"Bütün oda değil sadece dolap ve TV ünitesi gelen duvar metrajı alınır.\" Lokman, 3 Ekim 13:27: mutfak dolabı ve TV ünitesi takılırken mukavemet sağlasın diye; \"tüm yüzeyini hesapla\". Duvarların seçimi katalog görselinden (Arşiv/TEK KAT ÇELİK/Ç8201/PORT-Ç8201.jpg): mutfak tezgâhı L biçiminde, banyo–mutfak duvarı (R) ile üst dış duvar boyunca; TV ünitesi hol–yaşam alanı duvarında (B). Her duvarın Yaşam Alanı'na bakan yüzünün tamamı alındı. Duvar seçimi teyit bekliyor."
+  }
 }

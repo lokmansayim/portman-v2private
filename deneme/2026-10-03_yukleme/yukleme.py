@@ -5,9 +5,10 @@ Deneme kodudur; canlıda değildir. Hesapta LLM yoktur: aynı girdi her zaman ay
 
 Kuralların kaynağı, öncelik sırasıyla:
   1. Lokman'ın söyledikleri (3 Ekim 2026 13:27 cevapları ve öncekiler),
-  2. PortatifEv'in yükleme listesi çalışma kitaplarındaki formüller ve notlar,
-  3. PortatifEv'in Excel hesaplama motoru (CTKBF V1.1): çelik birim ağırlıkları, vida, boya, tesisat formülleri,
-  4. gerçek listelere uydurulan kurallar ve Claude'un varsayımları (teyit bekler).
+  2. PortatifEv'in inşaat mühendisi Ubeydullah'ın cevapları (3 Ekim 2026; Lokman 18:14'te iletti),
+  3. PortatifEv'in yükleme listesi çalışma kitaplarındaki formüller ve notlar,
+  4. PortatifEv'in Excel hesaplama motoru (CTKBF V1.1): çelik birim ağırlıkları, vida, boya, tesisat formülleri,
+  5. gerçek listelere uydurulan kurallar ve Claude'un varsayımları (teyit bekler).
 
 Çatı işlemede iki yöntem vardır ve birlikte kullanılmaz (Lokman, 3 Ekim 13:27):
   panel       (A) çelik konstrüksiyon standardı: makas arasına tavan paneli, makas üstüne çatı paneli; saçak altı Boardex. Baz budur.
@@ -16,6 +17,7 @@ Kuralların kaynağı, öncelik sırasıyla:
 
 Her satırın bir durumu vardır:
   lokman    kuralı Lokman söyledi
+  muhendis  kuralı ya da değeri inşaat mühendisi Ubeydullah verdi
   excel     yükleme listesi çalışma kitabındaki formül ya da not
   motor     Excel hesaplama motorundaki formül, not ya da proje ortalaması
   uydurma   gerçek listelerdeki adedi tutturan kural; teyit bekliyor
@@ -45,7 +47,12 @@ from pathlib import Path
 BURADA = Path(__file__).resolve().parent
 GRUP_SIRASI = ["Çelik panel", "Metal aksam", "Dış cephe kaplama", "İç cephe kaplama", "Çatı kaplamaları", "Dere", "Kapı ve pencere",
                "Elektrik", "Vida", "Sıhhi tesisat", "Boya"]
-KAPLAMA_ADI = {"sandvic_panel": "sandviç panel", "tek_kat_panel": "tek kat panel", "osb_kiremit": "OSB + nem bariyeri + kiremit desen sac"}
+# Çatı kaplaması seçenekleri: Excel motorundaki altı seçenek (Ubeydullah, 3 Ekim 2026). İlk üçü gerçek listelerle karşılaştırıldı; son üçü yalnız motorun formülleriyle.
+KAPLAMA_ADI = {"sandvic_panel": "sandviç panel", "tek_kat_panel": "tek kat panel", "osb_kiremit": "OSB + nem bariyeri + kiremit desen sac (metal kiremit)",
+               "osb_trapez": "OSB + nem bariyeri + trapez sac", "trapez_sac": "trapez sac", "osb_shingle": "OSB + membran + shingle"}
+OSBLI_KAPLAMA = ("osb_kiremit", "osb_trapez", "osb_shingle")
+ISLEV_ADI = {"yatak_odasi": "yatak odası", "banyo": "banyo", "salon": "salon", "mutfak": "mutfak", "hol": "hol", "veranda": "veranda"}
+ELEKTRIK_KALEMLERI = ("tijli_duy", "glop", "tekli_anahtar", "cift_anahtar", "tekli_priz", "cift_priz", "uydu_prizi")
 YONTEM_ADI = {"panel": "A · çatı ve tavan paneli (çelik konstrüksiyon standardı)", "omega_asik": "B · tavan omegası, aşık, alın sacı, saçak sacı (prefabrik yöntemi)"}
 
 
@@ -81,6 +88,56 @@ def inis_sayisi(c: dict, k: dict) -> tuple[int | None, str]:
     kose = c.get("kose_adedi", 4)
     orta = sum(min(kr["cephe_basina_en_cok_orta"], 1) for x in c.get("cephe_kenarlari_m", []) if x >= kr["orta_inis_esigi_m"] - 1e-9)
     return kose * kr["kose_basina"] + orta, f"{kose} köşe + {orta} orta ({tr(kr['orta_inis_esigi_m'], 0)} m ve üzeri cepheler)"
+
+
+def kirma_yerlesim(px: float, py: float, egim: float, kapatma: float, boy: float) -> int:
+    """Kırma çatıda kaplama adedinin sağlaması: her yüz, saçaktan mahyaya `kapatma` genişliğinde şeritlere bölünür; her şeride en uzun yerindeki boyda
+    dikdörtgen bir parça gerekir; parçalar `boy` uzunluğundaki saclardan, her yüz için ayrı ayrı çıkarılır (büyükten küçüğe, ilk sığana).
+    Köşegen kesimlerin artıkları kullanılmadığı için üst sınıra yakındır. Listeye yazılan adet bu değildir; satırın notunda sağlama olarak görünür."""
+    if px < py:
+        px, py = py, px
+    y0 = py / 2
+    s = y0 * math.sqrt(1 + egim * egim)
+
+    def yuz(taban: float, tepe_bas: float, tepe_son: float) -> int:
+        kalan: list[float] = []
+        n = tavan(taban / kapatma)
+        parcalar = []
+        for i in range(n):
+            a, b = i * kapatma, min(taban, (i + 1) * kapatma)
+            oran = b / tepe_bas if b <= tepe_bas else ((taban - a) / (taban - tepe_son) if a >= tepe_son else 1.0)
+            parcalar.append(min(s * oran, boy))
+        for x in sorted(parcalar, reverse=True):
+            for i, r in enumerate(kalan):
+                if x <= r + 1e-9:
+                    kalan[i] = r - x
+                    break
+            else:
+                kalan.append(boy - x)
+        return len(kalan)
+
+    return 2 * yuz(px, y0, px - y0) + 2 * yuz(py, y0, py - y0)
+
+
+def elektrik_kurali(odalar: list[dict] | None, k: dict) -> tuple[dict | None, dict]:
+    """Oda başına elektrik kuralı (Ubeydullah, 3 Ekim 2026; doğruluk payı yaklaşık %75). Salon ile mutfak aynı mahaldeyse ikisi de uygulanır.
+    Dönen: (sayım, kalem → döküm metni). Odaların işlevi bilinmiyorsa (None, {})."""
+    if not odalar or not all(o.get("islev") for o in odalar):
+        return None, {}
+    ko = deg(k, "elektrik_oda")
+    sayim = {x: 0 for x in ELEKTRIK_KALEMLERI}
+    dokum: dict[str, list[str]] = {x: [] for x in ELEKTRIK_KALEMLERI}
+    for islev, tablo in ko["odalar"].items():
+        n = sum(o["islev"].count(islev) for o in odalar)
+        for kalem, adet in tablo.items():
+            if n:
+                sayim[kalem] += n * adet
+                dokum[kalem].append(f"{ISLEV_ADI[islev]} {n} × {adet}" if n > 1 else f"{ISLEV_ADI[islev]} {adet}")
+    bilinmeyen = sorted({i for o in odalar for i in o["islev"]} - set(ko["odalar"]))
+    if bilinmeyen:
+        raise SystemExit(f"Elektrik kuralında bu oda işlevleri yok: {', '.join(bilinmeyen)}")
+    sayim["sigorta"] = ko["sigorta"]
+    return sayim, {x: " + ".join(v) for x, v in dokum.items()}
 
 
 def asik_boyu(c: dict, aralik: float) -> tuple[float, str]:
@@ -121,6 +178,7 @@ def hesapla(g: dict, k: dict) -> dict:
     # ── Çelik panel ─────────────────────────────────────────────────────────
     ce = g.get("celik")
     celik_toplam_adet = None
+    panel_eksik = False
     if ce:
         ck = k["celik"]
         oran = h / 2.7                                         # motorun birim ağırlıkları 2,70 m kat yüksekliği içindir
@@ -150,17 +208,27 @@ def hesapla(g: dict, k: dict) -> dict:
             ekle("Çelik panel", "Çatı makas panelleri", x["profil"].replace("x", " × "), deg(ck, "cati_panel_adedi")[x["tip"]], x["plan_m2"], birim="m²",
                  kg=x["plan_m2"] * birim, formul=f"saçak dahil çatı planı × {tr(birim)} kg/m² (motorun proje ortalaması); adet çatı tipine göre sabit", durum="motor",
                  not_="geçici: Lokman makas ve kirişleri bir makas ölçüsünden ayrıca verecek")
-        if yontem == "panel":
-            for ad, anahtar, aciklama in (("Tavan paneli (makas arası)", "tavan_paneli_m2", "tavan alanı"), ("Çatı paneli (makas üstü, sırt 80 mm)", "cati_paneli_m2", "çatı yüzeyi")):
-                if ce.get(anahtar):
-                    ekle("Çelik panel", ad, "roll form çelik", None, ce[anahtar], birim="m²", formul=f"{aciklama}; adet ve kg için panel ölçüsü gerekli", durum="bekliyor")
+        if yontem == "panel":   # yöntem A: tavan paneli ve çatı paneli (Ubeydullah, 3 Ekim 2026: 100 m² bina için kg ve adet)
+            oturum = (ce.get("cati") or {}).get("oturum_m2")
+            for ad, anahtar, kural, aciklama in (("Tavan paneli (makas arası)", "tavan_paneli_m2", "tavan_paneli", "tavan alanı"),
+                                                  ("Çatı paneli (makas üstü, sırt 80 mm)", "cati_paneli_m2", "cati_paneli", "çatı yüzeyi")):
+                if not ce.get(anahtar):
+                    continue
+                pk = deg(ck, kural)
+                if oturum:
+                    ekle("Çelik panel", ad, "roll form çelik", tavan(oturum / 100 * pk["adet_100m2"]), oturum, birim="m²", kg=oturum / 100 * pk["kg_100m2"],
+                         formul=f"çatının örttüğü oturum alanı ÷ 100 × {tr(pk['kg_100m2'])} kg; adet: ÷ 100 × {pk['adet_100m2']}, yukarı ({aciklama} {tr(ce[anahtar], 1)} m²)",
+                         durum="muhendis", not_="kg ve adet 10 × 10 m (100 m²) bina için verildi; oturum alanına oranlandı (tahmin)")
+                else:
+                    ekle("Çelik panel", ad, "roll form çelik", None, ce[anahtar], birim="m²", formul=f"{aciklama}; kg ve adet için çatının örttüğü oturum alanı gerekli", durum="bekliyor")
         if ce.get("cati"):   # çatısı hesaplanamayan örnekte toplam da eksik kalır; boy C profil eklenmez
             for profil, x in deg(ck, "boy_c_profil").items():
                 ekle("Çelik panel", "Boy C profil", profil.replace("x", " × "), x["adet"], birim="", kg=x["kg"], formul="motorda sabit", durum="motor")
         cs = [s for s in S if s["grup"] == "Çelik panel"]
         celik_toplam_adet = sum(s["adet"] or 0 for s in cs)
+        panel_eksik = any(s["kalem"].startswith(("Tavan paneli", "Çatı paneli")) and s["kg"] is None for s in cs)
         ekle("Çelik panel", "Toplam (adedi ve kg'ı bilinenler)", "", celik_toplam_adet or None, birim="", kg=sum(s["kg"] or 0 for s in cs),
-             formul="tavan ve çatı panelleri hariç" if yontem == "panel" else "", durum="motor")
+             formul="tavan ve çatı panelleri hariç" if panel_eksik else ("tavan ve çatı panelleri dahil" if yontem == "panel" else ""), durum="motor")
 
     # ── Dış cephe ────────────────────────────────────────────────────────────
     dis_duvar = d["cevre_m"] * h
@@ -199,11 +267,15 @@ def hesapla(g: dict, k: dict) -> dict:
     if g.get("ic_osb_tum_duvarlar"):
         ekle("İç cephe kaplama", "İç duvar OSB 9 mm", "1220 × 2440", tavan(ic_net * (1 + zo) / deg(k, "levha_m2", "osb")), ic_net,
              formul="bütün iç yüzler (beyaz + yeşil net) × 1,05 ÷ 2,98; üst paket")
-    elif g.get("osb_takviye"):
+    elif g.get("osb_takviye"):   # yalnız dolap ve TV ünitesi gelen duvarlar (Ubeydullah, 3 Ekim 2026)
         ot = g["osb_takviye"]
-        ekle("İç cephe kaplama", "OSB (TV ve mutfak dolabı arkası takviyesi)", "1220 × 2440", tavan(ot["net_m2"] * (1 + zo) / deg(k, "levha_m2", "osb")), ot["net_m2"],
-             formul=f"{', '.join(ot['odalar'])}: bütün duvar yüzeyi (iç çevre × yükseklik − boşluklar) × 1,05 ÷ 2,98", durum="varsayim",
-             not_="Lokman, 3 Ekim 13:27: 'salonun bir odası ile mutfağın 1 odasının tüm yüzeyi'; salon ve mutfak aynı mahalde olduğu için o mahalin bütün duvarları alındı (okuma teyit bekliyor)")
+        duvarlar = "; ".join(f"{x['duvar_adi']} {tr(x['boy_m'])} m ({x['neden']})" for x in ot["duvarlar"])
+        ekle("İç cephe kaplama", "OSB (TV ve mutfak dolabı arkası takviyesi)", "1220 × 2440", tavan(ot["net_m2"] * (1 + zo) / deg(k, "levha_m2", "osb")), ot["net_m2"], ot["brut_m2"],
+             formul="dolap ve TV ünitesi gelen duvarlar: (duvar yüzünün boyu × yükseklik − boşluklar) × 1,05 ÷ 2,98", durum="muhendis",
+             not_=f"{duvarlar}. Duvarların seçimi katalog görselinden; teyit bekliyor")
+    elif "osb_takviye" in g:
+        ekle("İç cephe kaplama", "OSB (TV ve mutfak dolabı arkası takviyesi)", "1220 × 2440", None,
+             formul="dolap ve TV ünitesi gelen duvarlar modelin tanımında yazılı değil", durum="bekliyor")
     elif g.get("osb_duvar_m2"):
         ekle("İç cephe kaplama", "OSB 9 mm (duvar)", "1220 × 2440", tavan(g["osb_duvar_m2"] * (1 + zo) / deg(k, "levha_m2", "osb")),
              g["osb_duvar_m2"], formul="listede yazan alan × 1,05 ÷ 2,98; alanın nasıl seçildiği listede yazmıyor", durum="excel")
@@ -226,6 +298,14 @@ def hesapla(g: dict, k: dict) -> dict:
     pm, bm = deg(k, "parca_boyu_m", "mahya"), deg(k, "bindirme_m", "mahya")
     mahya_formul = f"mahya hattı (tepe + kırmalar) ÷ ({tr(pm, 1)} − {tr(bm)} bindirme)"
     zc = deg(k, "zayiat", "cati_kaplama_kirma")
+    yerlesim = {}
+
+    def yerlesim_notu(kapatma: float) -> str:
+        """Kırma çatıda adedin sağlaması: şerit şerit yerleşim (bkz. kirma_yerlesim)."""
+        if not (kirma and c.get("plan_m") and c.get("panel_boyu_m")):
+            return ""
+        yerlesim["adet"] = kirma_yerlesim(c["plan_m"][0], c["plan_m"][1], c["egim"], kapatma, c["panel_boyu_m"])
+        return f". Sağlama: şerit şerit yerleşimle (parçalar dikdörtgen kesilir, artıklar yüzler arasında paylaşılmazsa) {yerlesim['adet']} adet"
     if kaplama in ("sandvic_panel", "tek_kat_panel"):
         sandvic = kaplama == "sandvic_panel"
         kap = deg(k, "sandvic_panel_kapatma_m") if sandvic else deg(k, "tek_kat_panel_kapatma_m")
@@ -234,25 +314,58 @@ def hesapla(g: dict, k: dict) -> dict:
             ekle("Çatı kaplamaları", ad, f"L {round(c['panel_boyu_m'] * 1000)} · {round(kap * 100)} cm kapatır",
                  tavan(c["yuzey_m2"] * (1 + zc) / (c["panel_boyu_m"] * kap)), c["yuzey_m2"],
                  formul=f"çatı yüzeyi × 1,10 ÷ (panel boyu × {tr(kap)}); panel boyu = eğimli boy", durum="uydurma",
-                 not_="gerçek adet panel yerleşiminden bulunur")
+                 not_="gerçek adet panel yerleşiminden bulunur" + yerlesim_notu(kap))
         ekle("Çatı kaplamaları", "Metal kiremit mahyası", "L 2800", tavan(c["mahya_hatti_m"] / (pm - bm)), c["mahya_hatti_m"], birim="m", formul=mahya_formul, durum="lokman")
         ekle("Çatı kaplamaları", f"{ad} kapaması", "L 2500", kenar_kenar(kenarlar, deg(k, "parca_boyu_m", "sandvic_kapama")), sacak, birim="m",
              formul="her saçak kenarı ÷ 2,5, ayrı ayrı yukarı", durum="uydurma")
-    elif kaplama == "osb_kiremit":
-        ekle("Çatı kaplamaları", "Çatı OSB", "1220 × 2440", tavan(c["yuzey_m2"] * (1 + zo) / deg(k, "levha_m2", "osb")), c["yuzey_m2"],
-             formul="çatı yüzeyi × 1,05 ÷ 2,98", durum="uydurma")
-        if c.get("nem_bariyeri", yontem == "panel"):
-            ekle("Çatı kaplamaları", "Nem bariyeri", "m²", tavan(c["yuzey_m2"] * (1.06 if kirma else 1.0)), c["yuzey_m2"],
-                 formul="çatı yüzeyi × çatı katsayısı (dört omuz 1,06)", durum="motor")
-        kk_m = deg(k, "kiremit_kapatma_m")
-        if kirma:
-            ekle("Çatı kaplamaları", "Metal kiremit (kiremit desen sac)", f"L {round(c['panel_boyu_m'] * 1000)} · {round(kk_m * 100)} cm kapatır",
-                 tavan(c["yuzey_m2"] * (1 + zc) / (c["panel_boyu_m"] * kk_m)), c["yuzey_m2"],
-                 formul=f"çatı yüzeyi × 1,10 ÷ (sac boyu × {tr(kk_m)})", durum="uydurma", not_="kırma çatıda gerçek listeyle sınanmadı; gerçek adet yerleşimden bulunur")
-        else:
-            ekle("Çatı kaplamaları", "Metal kiremit", "110 cm kapatır", tavan(sacak / kk_m), sacak, birim="m",
-                 formul="saçak boyu ÷ 1,10; boy = eğimli boy", durum="uydurma")
-        for ad in ("Metal kiremit mahyası", "OSB mahyası"):
+    elif (kaplama in OSBLI_KAPLAMA or kaplama == "trapez_sac") and not c.get("yuzey_m2"):
+        ekle("Çatı kaplamaları", f"Çatı kaplaması ({KAPLAMA_ADI[kaplama]})", "", None, birim="",
+             formul="çatı yüzeyi girdide yok; kaplama kalemleri hesaplanmadı", durum="bekliyor")
+    elif kaplama in OSBLI_KAPLAMA or kaplama == "trapez_sac":
+        ckat = deg(k, "cati_katsayisi").get(c["tip"], 1.0)
+        if kaplama in OSBLI_KAPLAMA:
+            ekle("Çatı kaplamaları", "Çatı OSB", "1220 × 2440", tavan(c["yuzey_m2"] * (1 + zo) / deg(k, "levha_m2", "osb")), c["yuzey_m2"],
+                 formul="çatı yüzeyi × 1,05 ÷ 2,98", durum="uydurma",
+                 not_=(f"kırma çatıda gerçek listeyle sınanmadı; motorun çatı katsayısıyla (× {tr(ckat)}) {tavan(c['yuzey_m2'] * ckat / deg(k, 'levha_m2', 'osb'))} adet; "
+                       "mühendisin 10 × 10 m dört omuz metrajında yüzeyin 1,13 katı OSB var") if kirma else None)
+            if c.get("nem_bariyeri", yontem == "panel"):
+                ekle("Çatı kaplamaları", "Nem bariyeri", "m²", tavan(c["yuzey_m2"] * ckat), c["yuzey_m2"],
+                     formul=f"çatı yüzeyi × çatı katsayısı ({tr(ckat)})", durum="motor")
+        if kaplama == "osb_kiremit":
+            kk_m = deg(k, "kiremit_kapatma_m")
+            if kirma:
+                ekle("Çatı kaplamaları", "Metal kiremit (kiremit desen sac)", f"L {round(c['panel_boyu_m'] * 1000)} · {round(kk_m * 100)} cm kapatır",
+                     tavan(c["yuzey_m2"] * (1 + zc) / (c["panel_boyu_m"] * kk_m)), c["yuzey_m2"],
+                     formul=f"çatı yüzeyi × 1,10 ÷ (sac boyu × {tr(kk_m)})", durum="uydurma",
+                     not_="kırma çatıda gerçek listeyle sınanmadı; gerçek adet yerleşimden bulunur" + yerlesim_notu(kk_m))
+            else:
+                ekle("Çatı kaplamaları", "Metal kiremit", "110 cm kapatır", tavan(sacak / kk_m), sacak, birim="m",
+                     formul="saçak boyu ÷ 1,10; boy = eğimli boy", durum="uydurma")
+            mahyalar = ("Metal kiremit mahyası", "OSB mahyası")
+        elif kaplama in ("osb_trapez", "trapez_sac"):
+            tk = deg(k, "trapez_sac_kapatma_m")
+            trapez_notu = ("gerçek listeyle karşılaştırılmadı; gerçek adet yerleşimden bulunur. Excel motorundaki formül kapatma genişliğiyle çarpıyor (× 0,8); "
+                           "mühendisin 10 × 10 m beşik çatı metrajındaki 28 adedi ÷ 0,8 veriyor, o yüzden motorun formülü kullanılmadı")
+            if kirma:
+                ekle("Çatı kaplamaları", "Trapez sac", f"L {round(c['panel_boyu_m'] * 1000)} · {round(tk * 100)} cm kapatır",
+                     tavan(c["yuzey_m2"] * (1 + zc) / (c["panel_boyu_m"] * tk)), c["yuzey_m2"],
+                     formul=f"çatı yüzeyi × 1,10 ÷ (sac boyu × {tr(tk)})", durum="uydurma", not_=trapez_notu + yerlesim_notu(tk))
+            else:
+                ekle("Çatı kaplamaları", "Trapez sac", f"{round(tk * 100)} cm kapatır", kenar_kenar(kenarlar, tk), sacak, birim="m",
+                     formul=f"her saçak kenarı ÷ {tr(tk)}, ayrı ayrı yukarı; boy = eğimli boy", durum="uydurma", not_=trapez_notu)
+            pt, bt = deg(k, "parca_boyu_m", "trapez_mahyasi"), deg(k, "bindirme_m", "trapez_mahyasi")
+            ekle("Çatı kaplamaları", "Trapez sac mahyası", f"L {round(pt * 1000)}", tavan(c["mahya_hatti_m"] / (pt - bt)), c["mahya_hatti_m"], birim="m",
+                 formul=f"mahya hattı (tepe + kırmalar) ÷ ({tr(pt, 1)} − {tr(bt)} bindirme)", durum="motor",
+                 not_="bindirme motordaki 20 cm; Lokman'ın 30 cm kuralı uygulanırsa ÷ 0,5. Gerçek listeyle karşılaştırılmadı")
+            mahyalar = ("OSB mahyası",) if kaplama == "osb_trapez" else ()
+        else:   # osb_shingle
+            for ad, anahtar in (("Membran", "membran_adet_m2"), ("Shingle", "shingle_adet_m2")):
+                b = deg(k, anahtar)
+                ekle("Çatı kaplamaları", ad, f"adet / {tr(b, 0)} m²", tavan(c["yuzey_m2"] * ckat / b), c["yuzey_m2"],
+                     formul=f"çatı yüzeyi × çatı katsayısı ({tr(ckat)}) ÷ {tr(b, 0)}", durum="motor",
+                     not_="yalnız Excel motorunun formülüyle; gerçek listeyle karşılaştırılmadı")
+            mahyalar = ("OSB mahyası",)
+        for ad in mahyalar:
             ekle("Çatı kaplamaları", ad, "L 2800", tavan(c["mahya_hatti_m"] / (pm - bm)), c["mahya_hatti_m"], birim="m", formul=mahya_formul, durum="lokman")
     if c.get("ozel_mahya_m"):
         ekle("Çatı kaplamaları", "Özel mahya (geniş)", "L 2800", tavan(c["ozel_mahya_m"] / (pm - bm)), c["ozel_mahya_m"], birim="m",
@@ -274,6 +387,9 @@ def hesapla(g: dict, k: dict) -> dict:
     if "inis_adedi" in c:
         n, n_durum = c["inis_adedi"], "liste"
         n_formul = f"listedeki iniş sayısı ({n}); " + (f"kural {n_kural} verir" if n_kural is not None else "kural hesaplanmadı: cephe ölçüleri yok")
+    elif "inis_adedi_plan" in c:   # plana bakarak elle yerleştirilen inişler (Ubeydullah, 3 Ekim 2026)
+        n, n_durum = c["inis_adedi_plan"], "model"
+        n_formul = f"plana yerleştirilen iniş sayısı ({n}); " + (f"kural {n_kural} verir" if n_kural is not None else "kural hesaplanmadı")
     else:
         n, n_durum, n_formul = n_kural, "lokman", n_not
     ib = deg(k, "inis_basina")
@@ -281,7 +397,9 @@ def hesapla(g: dict, k: dict) -> dict:
                         ("Kapalı dirsek", "kapali_dirsek"), ("İniş kelepçesi", "inis_kelepcesi")):
         ekle("Dere", ad, "L 3000" if anahtar == "inis_borusu" else "adet", n * ib[anahtar], birim="",
              formul=(n_formul if anahtar == "inis_borusu" else f"iniş sayısı × {ib[anahtar]}"),
-             durum=n_durum if (anahtar == "inis_borusu" or n_durum == "liste") else "motor")
+             durum=n_durum if (anahtar == "inis_borusu" or n_durum == "liste") else "motor",
+             not_=("iniş plana bakarak yerleştirilir; düz saçakta ortalama 5 m'de bir (mühendis, 3 Ekim). Planda elle yerleştirilmediği için Lokman'ın kuralı kullanıldı"
+                   if anahtar == "inis_borusu" and n_durum == "lokman" else None))
     if c.get("dere_kapagi") is not None:
         ekle("Dere", "Dere kapağı", "adet", c["dere_kapagi"], birim="", formul="listedeki sayı; motorda çatı tipine göre sabit", durum="liste")
     elif deg(k, "dere_kapagi").get(c["tip"]):
@@ -311,9 +429,7 @@ def hesapla(g: dict, k: dict) -> dict:
             ekle("Metal aksam", "Aşık", "L 4200", tavan(boy * (1 + deg(k, "asik", "zayiat")) / deg(k, "parca_boyu_m", "asik")), boy, birim="m",
                  formul="eğim boyunca 60 cm aralıkla sıralar + mahya aşığı; kırmada her sıra çatıyı dolanır; × 1,05 ÷ 4,2", durum="uydurma", not_=not_)
     else:
-        boy = 0.0
-        ekle("Metal aksam", "Saçak omegası", "L 2500", None, sacak, birim="m",
-             formul="çatı ve tavan panelli yöntemde saçak altı Boardex'inin taşıyıcısı olarak gerekip gerekmediği bilinmiyor", durum="soru")
+        boy = 0.0   # yöntem A'da saçak omegası gerekmez (Ubeydullah, 3 Ekim 2026)
     if c.get("sacak_alti") == "boardex":
         sa = sacak * c.get("sacak_alti_eni_m", deg(k, "sacak_alti_boardex_eni_m"))
         ekle("Metal aksam", "Saçaklar için Boardex", "1200 × 2400", tavan(sa * (1 + deg(k, "zayiat", "boardex")) / deg(k, "levha_m2", "boardex")), sa,
@@ -321,11 +437,21 @@ def hesapla(g: dict, k: dict) -> dict:
              not_="saçak altının Boardex olduğu: Lokman, 3 Ekim 13:27; formül 62 m² listeden" if yontem == "panel" else None)
     if c.get("sacak_yuzu_m2"):
         ekle("Metal aksam", "Saçak yüzü için Boardex", "1200 × 2400", tavan(c["sacak_yuzu_m2"] * (1 + deg(k, "zayiat", "boardex")) / deg(k, "levha_m2", "boardex")), c["sacak_yuzu_m2"],
-             formul="saçak ucu çevresi × saçak yüzü yüksekliği (topuk + panelin düşey ölçüsü) × 1,15 ÷ 2,88", durum="varsayim",
-             not_="saçak yüzünün kaplandığını Lokman söyledi (2 Ekim 22:05); malzemenin Boardex olduğu varsayım")
-    kb = m2 / deg(k, "kosebent_m2_bolu")
-    ekle("Metal aksam", "Köşebent", "L 2500", tavan(kb), m2, birim="m²",
-         formul="bina m² ÷ 2,5", durum="lokman", not_="gerçek listelerde adet bunun yaklaşık iki katı (70, 50, 85)")
+             formul="saçak ucu çevresi × saçak yüzü yüksekliği (topuk + panelin düşey ölçüsü) × 1,15 ÷ 2,88", durum="muhendis",
+             not_="saçak yüzü Boardex'le kaplanır: mühendis, 3 Ekim; kaplandığı: Lokman, 2 Ekim 22:05. Alan geometriden")
+    # köşebent (Ubeydullah, 3 Ekim 2026): (bütün odaların tavan çevresi + iç köşeler × 2,7 m) ÷ 2,5
+    kr = deg(k, "kosebent")
+    cevre_top = sum(o["cevre_m"] for o in g["odalar"])
+    if all("ic_kose" in o for o in g["odalar"]):
+        kose = sum(o["ic_kose"] for o in g["odalar"])
+        dis_kose = sum(o.get("dis_kose", 0) for o in g["odalar"])
+        kose_notu = f"odaya doğru çıkıntı yapan {dis_kose} köşe ve veranda tavanı sayılmadı" if dis_kose else None
+    else:
+        kose = len(g["odalar"]) * kr["plan_yoksa_oda_basina_ic_kose"]
+        kose_notu = f"planı yok: oda başına {kr['plan_yoksa_oda_basina_ic_kose']} iç köşe sayıldı (alt sınır)"
+    kb_boy = cevre_top + kose * kr["kose_boyu_m"]
+    ekle("Metal aksam", "Köşebent", "L 2500", tavan(kb_boy / kr["parca_boyu_m"]), kb_boy, birim="m",
+         formul=f"(oda tavan çevreleri {tr(cevre_top)} m + {kose} iç köşe × {tr(kr['kose_boyu_m'], 1)} m) ÷ {tr(kr['parca_boyu_m'], 1)}", durum="muhendis", not_=kose_notu)
 
     # ── Kapı ve pencere (modelden doğrudan) ─────────────────────────────────
     for x in g.get("kapi_pencere", []):
@@ -333,27 +459,40 @@ def hesapla(g: dict, k: dict) -> dict:
     pencere = sum(x["adet"] for x in d["bosluklar"] if "kapı" not in x["ad"])
 
     # ── Elektrik ────────────────────────────────────────────────────────────
+    # Sayılar: pafta sayımı varsa o (kesin); yoksa oda başına kural (Ubeydullah, 3 Ekim 2026; doğruluk payı yaklaşık %75).
     ek = deg(k, "elektrik")
-    es = g.get("elektrik_sayim")
+    es_pafta = g.get("elektrik_sayim")
+    es_kural, es_dokum = elektrik_kurali(g.get("elektrik_odalar"), k)
+    es = es_pafta or es_kural
     kat_adedi = g.get("kat_adedi", 1)
     priz = 0
     if es:
         priz = es["tekli_priz"] + es["cift_priz"] + es["uydu_prizi"]
         anahtar = es["tekli_anahtar"] + es["cift_anahtar"]
-        kosegen = math.hypot(*g["dis_olcu_m"]) if g.get("dis_olcu_m") else None
-        for ad, a in (("Tijli duy", es["tijli_duy"]), ("Yuvarlak glop", es["glop"]), ("Ampul", es["tijli_duy"] + es["glop"]),
-                      ("Tekli anahtar", es["tekli_anahtar"]), ("Çiftli anahtar", es["cift_anahtar"]), ("Tekli priz", es["tekli_priz"]),
-                      ("Çiftli priz", es["cift_priz"]), ("Uydu prizi", es["uydu_prizi"]), ("W otomat (sigorta)", es["sigorta"])):
-            ekle("Elektrik", ad, "adet", a, birim="", formul="pafta sayımı" if ad != "Ampul" else "duy + glop", durum="liste" if ad != "Ampul" else "motor")
+        olcu_k = g.get("kapali_olcu_m") or g.get("dis_olcu_m")
+        kosegen = math.hypot(*olcu_k) if olcu_k else None
+        kural_notu = "oda başına kural; doğruluk payı yaklaşık %75 (mühendis, 3 Ekim). Kesin sayı elektrik paftasından gelir"
+        cok_islevli = [f"{o['ad']} ({' + '.join(ISLEV_ADI[i] for i in o['islev'])})" for o in (g.get("elektrik_odalar") or []) if len(o["islev"]) > 1]
+        if cok_islevli and not es_pafta:
+            kural_notu += ". Birden çok işlevi olan mahalde kurallar birlikte uygulandı: " + ", ".join(cok_islevli)
+        for ad, kalem in (("Tijli duy", "tijli_duy"), ("Yuvarlak glop", "glop"), ("Ampul", None), ("Tekli anahtar", "tekli_anahtar"), ("Çiftli anahtar", "cift_anahtar"),
+                          ("Tekli priz", "tekli_priz"), ("Çiftli priz", "cift_priz"), ("Uydu prizi", "uydu_prizi"), ("W otomat (sigorta)", "sigorta")):
+            if kalem is None:
+                ekle("Elektrik", ad, "adet", es["tijli_duy"] + es["glop"], birim="", formul="duy + glop", durum="motor")
+            elif es_pafta:
+                ekle("Elektrik", ad, "adet", es[kalem], birim="", formul="pafta sayımı", durum="liste")
+            else:
+                ekle("Elektrik", ad, "adet", es[kalem], birim="", formul="bina başına 9" if kalem == "sigorta" else (es_dokum[kalem] or "bu odalarda yok"),
+                     durum="muhendis", not_=kural_notu if kalem == "tijli_duy" else None)
         if kosegen:
             ekle("Elektrik", "NYM kablo (3 × 2,5)", "metre", tavan(es["sigorta"] * kosegen + (es["tekli_priz"] + 2 * es["cift_priz"] + es["uydu_prizi"]) * 2), birim="",
-                 formul="sigorta adedi × binanın köşegeni + (tekli priz + çiftli priz × 2 + uydu prizi) × 2 m", durum="motor")
+                 formul=f"sigorta adedi × sigortadan en uzak mesafe (kapalı kısmın köşegeni, {tr(kosegen)} m) + (tekli priz + çiftli priz × 2 + uydu prizi) × 2 m", durum="motor")
             ekle("Elektrik", "NYM kablo (2 × 1,5)", "metre", tavan(es["sigorta"] * kosegen + (es["tekli_anahtar"] + 2 * es["cift_anahtar"]) * 2), birim="",
-                 formul="sigorta adedi × binanın köşegeni + (tekli anahtar + çiftli anahtar × 2) × 2 m", durum="motor")
+                 formul=f"sigorta adedi × sigortadan en uzak mesafe (kapalı kısmın köşegeni, {tr(kosegen)} m) + (tekli anahtar + çiftli anahtar × 2) × 2 m", durum="motor")
         ekle("Elektrik", "Buat kasa", "adet", anahtar + priz + g["oda_sayisi"], birim="", formul="anahtar + priz + oda sayısı", durum="motor")
     else:
         ekle("Elektrik", "Duy, glop, ampul, anahtar, priz, sigorta, buat ve NYM kablolar", "adet / metre", None, birim="",
-             formul="motorun notu: montaj paftasından sayılır; elektrik paftası ya da oda başına kural gerekli", durum="bekliyor")
+             formul="elektrik paftası yok ve odaların işlevi bilinmiyor; pafta sayımı ya da oda başına kural gerekli", durum="bekliyor")
     ekle("Elektrik", "Uydu kablo", "metre", ek["uydu_kablo_priz_basina_m"] * (es["uydu_prizi"] if es else 1), birim="", formul="uydu prizi (1) × 25 m", durum="motor")
     ekle("Elektrik", "Besleme kablosu (sigorta kutuları arası)", "metre", ek["besleme_kablosu_kat_basina_m"] * kat_adedi, birim="", formul="kat adedi × 5 m", durum="motor")
     ekle("Elektrik", "Besleme kablo borusu", "metre", ek["besleme_kablosu_kat_basina_m"] * kat_adedi, birim="", formul="kat adedi × 5 m", durum="motor")
@@ -386,12 +525,14 @@ def hesapla(g: dict, k: dict) -> dict:
                + panel_adedi * t["celik_panel"] + (g.get("kosebent_adedi") or adet_of("Köşebent")) * t["kosebent"])
         ekle("Vida", "Trapez vida (5,5 × 25)", "adet", kat(say, yv), say, birim="vida",
              formul="aşık × 10 + tavan omegası × 10 + saçak omegası × 6 + çelik panel × 10 + köşebent × 6; 250'ye yuvarlandı",
-             not_=("tavan ve çatı panellerinin vidası hariç; çelik panel adedi tahmin" if yontem == "panel" and "celik_panel_adedi" not in g else None))
+             not_=((("tavan ve çatı panellerinin vidası hariç; " if panel_eksik else "") + "çelik panel adedi tahmin")
+                   if yontem == "panel" and "celik_panel_adedi" not in g else None))
     say60 = m2 * v["trapez_5_5x60_m2_basina"]
-    if kaplama == "osb_kiremit" and kirma:
-        say60 += c["panel_boyu_m"] * 1000 / v["trapez_panel_boyu_bolu_mm"] * adet_of("Metal kiremit (kiremit desen sac)")
+    sac_adedi = (adet_of("Metal kiremit (kiremit desen sac)") + adet_of("Trapez sac")) if c.get("panel_boyu_m") else 0
+    if sac_adedi:   # motor: + metal kiremit boyu ÷ 200 × adet + trapez sac boyu ÷ 200 × adet
+        say60 += c["panel_boyu_m"] * 1000 / v["trapez_panel_boyu_bolu_mm"] * sac_adedi
     ekle("Vida", "Trapez vida (5,5 × 60)", "adet", kat(say60, yv), say60, birim="vida",
-         formul="bina m² × 2,5" + (" + sac boyu ÷ 200 × sac adedi" if kaplama == "osb_kiremit" and kirma else "") + "; 250'ye yuvarlandı", durum="motor")
+         formul="bina m² × 2,5" + (" + sac boyu ÷ 200 × sac adedi" if sac_adedi else "") + "; 250'ye yuvarlandı", durum="motor")
     for anahtar, ad, vida_adi in (("tek_kat_panel", "Tek kat panel", "Trapez vida (5,5 × 76; tek kat panel)"), ("sandvic_panel", "Sandviç panel", "Trapez vida (5,5 × 110; sandviç panel)")):
         if kaplama == anahtar and adet_of(ad):
             say = c["panel_boyu_m"] * 1000 / v["trapez_panel_boyu_bolu_mm"] * adet_of(ad)
@@ -443,7 +584,10 @@ def hesapla(g: dict, k: dict) -> dict:
             "ara": {"dis_net_m2": round(dis_net, 3), "beyaz_net_m2": round(ozet["beyaz"][0], 3), "yesil_net_m2": round(ozet["yesil"][0], 3),
                     "ic_duvar_boyu_m": round(ic_boy, 2), "oda_cevreleri_m": round(ic_yuz, 2),
                     "yalitim_brut_m2": round(yal_brut, 2), "yalitim_net_m2": round(yal_net, 2), "asik_boyu_m": round(boy, 1),
-                    "inis_kural": n_kural, "inis_kural_aciklama": n_not, "celik_panel_adedi": panel_adedi}}
+                    "inis_kural": n_kural, "inis_kural_aciklama": n_not, "celik_panel_adedi": panel_adedi,
+                    "kosebent": {"tavan_cevresi_m": round(cevre_top, 3), "ic_kose": kose, "boy_m": round(kb_boy, 3)},
+                    "elektrik_kaynagi": "pafta" if es_pafta else ("kural" if es_kural else None), "elektrik_kural": es_kural,
+                    "kirma_kaplama_yerlesim_adedi": yerlesim.get("adet")}}
 
 
 def bayi_uygula(g: dict, anahtar: str, bk: dict) -> None:
@@ -484,11 +628,11 @@ def md_yaz(sonuc: dict, ad: str) -> str:
     satir = [f"# {ad}", "",
              f"Çatı yöntemi: {sonuc['yontem_adi']}. Çatı kaplaması (seçenek): {sonuc['cati_kaplamasi']}."
              + (f" Bayi kuralıyla kapalı gruplar: {', '.join(sonuc['kapali_gruplar'])}." if sonuc["kapali_gruplar"] else ""), "",
-             "| Grup | Kalem | Boyut | Adet | Ölçü | kg | Durum | Not |", "|---|---|---|---|---|---|---|---|"]
+             "| Grup | Kalem | Boyut | Adet | Ölçü | kg | Kural | Durum | Not |", "|---|---|---|---|---|---|---|---|---|"]
     for x in sonuc["satirlar"]:
         olcu = "" if x["olcu"] is None else f"{x['olcu']:.1f} {x['birim']}".replace(".", ",")
         kg = "" if x["kg"] is None else f"{x['kg']:.0f}"
-        satir.append(f"| {x['grup']} | {x['kalem']} | {x['boyut']} | {'' if x['adet'] is None else x['adet']} | {olcu} | {kg} | {x['durum']} | {x['not'] or ''} |")
+        satir.append(f"| {x['grup']} | {x['kalem']} | {x['boyut']} | {'' if x['adet'] is None else x['adet']} | {olcu} | {kg} | {x['formul']} | {x['durum']} | {x['not'] or ''} |")
     return "\n".join(satir) + "\n"
 
 
@@ -498,7 +642,7 @@ def main() -> int:
     ap.add_argument("--karsilastir", type=Path)
     ap.add_argument("--cikti", type=Path)
     ap.add_argument("--md", type=Path, help="tabloyu Markdown olarak yaz")
-    ap.add_argument("--kaplama", choices=sorted(KAPLAMA_ADI), help="çatı kaplaması seçeneğini girdidekinin yerine kullan")
+    ap.add_argument("--kaplama", choices=list(KAPLAMA_ADI), help="çatı kaplaması seçeneğini girdidekinin yerine kullan")
     ap.add_argument("--bayi", help="bayi kuralı anahtarı (canlıda bayinin telefon numarası); bayi_kurallari_ornek.json içinden okunur")
     ap.add_argument("--bayi-kurallari", type=Path, default=BURADA / "bayi_kurallari_ornek.json")
     a = ap.parse_args()

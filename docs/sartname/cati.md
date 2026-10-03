@@ -1,6 +1,6 @@
 # A5 · Çatı
 
-Kaynak: Lokman'ın anlattıkları (2–3 Ekim 2026). Madde sonundaki saat, söylendiği anı gösterir; tarih yazmayan saatler 2 Ekim'dir.
+Kaynak: Lokman'ın anlattıkları (2–3 Ekim 2026) ve inşaat mühendisi Ubeydullah'ın 3 Ekim cevapları (Lokman 18:14'te iletti). Madde sonundaki saat, söylendiği anı gösterir; tarih yazmayan saatler 2 Ekim'dir.
 
 ## Kurallar
 
@@ -22,10 +22,18 @@ Kaynak: Lokman'ın anlattıkları (2–3 Ekim 2026). Madde sonundaki saat, söyl
 - Şimdilik yöntem A baz alınır: "çelik konstrüksiyon standardı olan çatı ve tavan paneli yöntemini baz al".
 - Saçaklarda saçak sacı varsa Boardex kaplanmaz. Dosyalarda iki yöntem de görülüyor; Ç8201 Boardex kaplamalı, çatı ve tavan panelli model olarak çalışılır.
 
-### Çatı kaplaması (3 Ekim 13:27)
+### Çatı kaplaması (3 Ekim 13:27 ve 18:14)
 
-- Listede "çatı kaplaması" diye geçer ve seçenektir. Çelik konstrüksiyon için örnekler: tek kat panel, sandviç panel, OSB + nem bariyeri + kiremit desen sac. Öteki seçenekler zaman içinde verilecek.
+- Listede "çatı kaplaması" diye geçer ve seçenektir. Çelik konstrüksiyon için örnekler: tek kat panel, sandviç panel, OSB + nem bariyeri + kiremit desen sac. Öteki seçenekler zaman içinde verilecek. (Lokman, 13:27)
+- Excel motorundaki (CTKBF V1.1) kaplamalar altı tane: OSB + membran + shingle; OSB + nem bariyeri + trapez sac; trapez sac; tek kat panel; sandviç panel; OSB + membran + metal kiremit. (Mühendis, 18:14)
 - Baz paketin kaplaması söylenmedi.
+
+### Mühendisin cevapları (3 Ekim; Lokman 18:14'te iletti)
+
+- Yöntem A'da saçak omegası gerekmez. Saçak yüzü de Boardex'le kaplanır.
+- 10 × 10 m (100 m²) bir binada tavan paneli 8 adet, 429,83 kg; çatı paneli 12 parça, 561,6 kg.
+- Motor çatı çeliğini dört grupta (beşik, beşik + cumba, beşik + 2 cumba, dört omuz) ortalama ağırlıkla hesaplıyor. Çatıdaki Boardex kaplaması motorda henüz hesaplanmıyor.
+- Dere inişi plana bakarak yerleştirilir; normalde düz bir saçakta ortalama 5 metrede bir iniş yazılır.
 
 ### Bindirme, mahya çeşitleri, dere inişi (3 Ekim 13:27)
 
@@ -65,8 +73,10 @@ Kaynak: Lokman'ın anlattıkları (2–3 Ekim 2026). Madde sonundaki saat, söyl
 - Mahya hattı = tepe mahyası + 4 × kırma boyu. Parça adedi = mahya hattı ÷ (parça boyu − 30 cm bindirme), yukarı yuvarlanır. Bindirme 3 Ekim 13:27 kuralından; listelerde mahya L 2800, saçak sacı ve alın sacı L 2500: L 2500 parçada ÷ 2,2.
 - 22:05'te söylenen 8 cm çatı paneli ile 3 Ekim 13:27'de anlatılan çatı paneli aynı parça sayıldı: makasla aynı malzemeden, sırtı 80 mm. Çatı kaplaması onun üzerine gelir.
 - OSB'li kaplamada OSB mahyası metal kiremit mahyasıyla aynı boyda gider (gerçek listelerde ve Excel motorunda aynı adet).
-- Saçak yüzünün malzemesi: yöntem A'da saçak altı Boardex olduğu için saçak yüzü de Boardex sayıldı. Kaplandığını Lokman söyledi (22:05); malzemesini söylemedi.
-- İniş sayısı = köşe sayısı + 10 m ve daha uzun cephe sayısı. Gerçek listelerde 7, 7 ve 10 iniş var; ilk ikisinde bu kural 6 veriyor.
+- Saçak yüzünün malzemesi Boardex: önce çıkarımdı, mühendis teyit etti (3 Ekim 18:14).
+- İniş sayısı = köşe sayısı + 10 m ve daha uzun cephe sayısı. Gerçek listelerde 7, 7 ve 10 iniş var; ilk ikisinde bu kural 6 veriyor. Mühendise göre iniş plana bakarak yerleştirilir: tanımda iniş yerleri elle verilirse (`cati.inis_noktalari`) o sayı kullanılır. Mühendisin 10 × 10 m metrajındaki sayıları (dört omuz 8, beşik 6) bu kural veriyor.
+- Tavan paneli ve çatı panelinin kg'ı ve adedi, mühendisin 100 m² için verdiği değerlerin çatının örttüğü oturum alanına oranıyla bulunur. Değerlerin hangi çatı tipi, saçak ve eğim için olduğu yazılmadı.
+- Kırma çatıda kaplama adedi = çatı yüzeyi × 1,10 ÷ (sac boyu × kapatma genişliği): pay 62 m² gerçek listeye uyduruldu. Şerit şerit yerleşimle (parçalar dikdörtgen kesilir, artıklar yüzler arasında paylaşılmazsa) daha fazlası çıkıyor; mühendisin 10 × 10 m dört omuz metrajında trapez sac yüzeyin 1,44 katı.
 - Veranda dikmesinin kaplama çevresi 2 × (30 + 8) = 76 cm, kirişinki 30 + 30 + 8 = 68 cm (üstü kapalı). Gerçek listelerin hesap sayfalarındaki 0,76 ve 0,68 değerleri bununla aynı.
 - Düzeltme (2 Ekim 21:50): ilk hesapta topuk duvar hizasında varsayılmış, saçak ucu 270 kotuna indirilmişti. Modellere göre saçak ucu 280'dir; mahya kotu 10 cm yükseldi.
 
@@ -80,12 +90,16 @@ Katalog görsellerine göre tek bir kırma çatı, kapalı kısmı ve verandayı
 - Saçak yüzü 18,4 cm; kaplaması 39,28 m × 18,4 cm = 7,2 m².
 - Mahya malzemesi: tepe 344 + 4 kırma × 588 = 2697 cm (27,0 m). 2,8 m'lik parça ve 30 cm bindirmeyle 11 adet (bindirmesiz 10). Parça boyu gerçek yükleme listelerinden (L 2800).
 - Çatı yüzeyi 98,4 m² (plan 93,5 m²). Saçak altı 11,4 m² (yükleme listesinde saçak boyu × 0,30 = 11,8 m² alınır); veranda tavanı 18,3 m².
-- Yöntem A: tavan paneli alanı 76,7 m² (mahaller 58,4 + veranda 18,3); çatı paneli alanı 98,4 m². Panel adedi ve kg için panel ölçüsü gerekli (sorulacak).
-- Dere inişi 6: dört köşe ve iki uzun cephenin (10,94 m) ortası. Kısa cepheler 7,50 m; orta iniş yok.
+- Yöntem A: tavan paneli alanı 76,7 m² (mahaller 58,4 + veranda 18,3); çatı paneli alanı 98,4 m². Mühendisin 100 m² değerlerinden, oturum alanına (82,05 m²) oranla: tavan paneli 353 kg ve 7 adet, çatı paneli 461 kg ve 10 adet (oran çıkarım).
+- Saçak yüzü için Boardex 3 levha (7,2 m² × 1,15 ÷ 2,88); saçak omegası yok.
+- Dere inişi 6: dört köşe ve iki uzun cephenin (10,94 m) ortası. Kısa cepheler 7,50 m; orta iniş yok. Planda elle yerleştirilmiş iniş yok.
+- Çatı kaplaması altı seçenekle hesaplanıyor (`yukleme_listesi_yontemi.md`): sandviç panel 26, tek kat panel 29, kiremit desen sac 23, trapez sac 32 (hepsi L 4300); shingle ve membran 14'er.
 - Veranda çerçevesi: kiriş 244 + 750 + 244 = 1238 cm (yanlar ve karşı); dikme 3 adet, 240 cm. Dikmelerin sayısı ve yeri katalog görsellerinden (dış kenarda iki köşe, bir orta); teyit bekliyor.
 - Çizim: `deneme/2026-10-02_celik/sonuc/C8201_pafta.png` (çatı planında iniş yerleri işaretli).
 
-## Cevaplananlar (3 Ekim 13:27)
+## Cevaplananlar
+
+3 Ekim 13:27 (Lokman):
 
 - Bindirme: saçak, mahya ve alın sacında 30 cm.
 - Özel mahya ve ters mahyanın yeri (yukarıda).
@@ -93,14 +107,22 @@ Katalog görsellerine göre tek bir kırma çatı, kapalı kısmı ve verandayı
 - Veranda çerçevesi: sırt 80 mm, genişlik 30 cm; kaplanır. Ç8201'de dikme 240 cm.
 - Saçak altı: çatı ve tavan panelli modelde Boardex. Veranda tavanı: yeşil alçıpan (ıslak hacimlerle birlikte).
 
+3 Ekim 18:14 (mühendis):
+
+- Yöntem A'da tavan ve çatı panelinin kg'ı ve adedi (100 m² için).
+- Saçak omegası gerekmiyor; saçak yüzü Boardex.
+- İniş sayısındaki fark: iniş plana bakarak yerleştirilir.
+- Çatı kaplaması seçenekleri: altı tane.
+
 ## Açık sorular
 
-- Yöntem A'da tavan panelinin ve çatı panelinin ölçüsü, adedi ve kg'ı. (Lokman kiriş ve makasları "yaklaşık bir makasın ölçüsünden" vereceğini söyledi; paneller sorulacak.)
-- Yöntem A'da saçak omegası kullanılıyor mu? Saçak yüzü Boardex'le mi kaplanıyor?
-- Saçak sacının boyu: örnekte L 2800, listelerde L 2500. Derede bindirme de 30 cm mi (Excel motorunda 20 cm)?
+- Baz paketin çatı kaplaması hangisi (altı seçenekten)?
+- Lokman kiriş ve makasları "yaklaşık bir makasın ölçüsünden" verecek. Tavan ve çatı panelinin 100 m² değerleri hangi çatı tipi için; oturum alanına oranlamak doğru mu?
+- Kırma çatıda kaplama adedi: yüzeyin %10 fazlası mı, yerleşimle mi?
+- Excel motorundaki trapez sac ve metal kiremit adedi formülü kapatma genişliğiyle çarpıyor (bölmesi gerekir görünüyor); mühendise sorulacak.
+- Motorda olup okunan listelerde olmayan kalemler: çatı müdahale kapağı, mahya bandı. Listeye girecek mi?
+- Saçak sacının boyu: örnekte L 2800, listelerde L 2500. Derede ve L 800 trapez mahyasında bindirme de 30 cm mi (Excel motorunda 20 cm)?
 - 62 ve 105 m² listelerde hem saçak sacı hem saçaklar için Boardex var; kurala göre birlikte olmaz. O Boardex nereye gidiyor?
-- Baz paketin çatı kaplaması hangisi?
-- İniş sayısı: iki gerçek listede 7 var, kural 6 veriyor. Fark neden (giriş saçağı, yedek)?
 - 62 m² projede eğim neden %30? "Eğim değişmez" kuralının istisnası var mı?
 - Makas aralığı 125 cm kural mı?
 - Veranda dikmelerinin sayısı ve yeri neye göre belirleniyor?

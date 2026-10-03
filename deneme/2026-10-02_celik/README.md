@@ -7,12 +7,12 @@ Amaç: tek kat çelik bir modeli, pano ızgarası olmadan, bir tanım dosyasınd
 | Dosya | İçerik |
 |---|---|
 | `duvar_tipleri.json` | Baz paket duvar tipleri (katman listesi). Duvar kalınlığı katmanların toplamıdır |
-| `C8201.json` | Ç8201'in tanımı: dış kutu, iç duvar aksları, mahaller, açıklıklar (arşivdeki çizimden); veranda çerçevesi, çatı yöntemi ve kaplaması |
+| `C8201.json` | Ç8201'in tanımı: dış kutu, iç duvar aksları, mahaller ve işlevleri, açıklıklar (arşivdeki çizimden); veranda çerçevesi, çatı yöntemi ve kaplaması; OSB takviyesi gelen duvarlar |
 | `ciz.py` | Hesap ve plan çizimi |
 | `gorunus.py` | Çatı hesabı, çatı planı, dört görünüş ve tek pafta |
 | `secenekler/` | Seçenekler (değişiklik operatörleri): model tanımını değiştirmeden paket farkını uygular. İlk örnek: `dis_karkas_140.json` |
 | `cikti/` | Koşu çıktıları (depoya girmez) |
-| `sonuc/` | Son koşunun kanıtları (3 Ekim 14:50): plan, pafta, raporlar |
+| `sonuc/` | Son koşunun kanıtları (3 Ekim 2026 19:12): plan, pafta, raporlar |
 
 ## Çalıştırma
 
@@ -43,6 +43,15 @@ python gorunus.py C8201.json --secenek secenekler/dis_karkas_140.json
 - Çatı: yöntem A (çatı ve tavan paneli); saçak altı Boardex; kaplama seçenek.
 - Dere inişi 6 adet; çatı planında sarı noktalar.
 - Alanlar değişmedi; `--cizim-kalinligi` karşılaştırması yine AYNI.
+
+## 3 Ekim 18:14 (mühendisin cevapları) ile değişenler
+
+- Tanıma her mahalin işlevi yazıldı (`islev`; Yaşam Alanı salon + mutfak, veranda ayrı): yükleme listesindeki elektrik kuralının girdisi.
+- Tanıma OSB takviyesi gelen duvarlar yazıldı (`osb_takviye.duvarlar`; katalog görselinden): banyo ile mutfak arası duvar, üst dış duvar, hol ile yaşam alanı arası duvar. Planda turuncu çizgi; boşluklarda kesilir. Net 24,5 m².
+- Rapor her mahalin iç çevresini, iç ve dış köşe sayısını da veriyor (köşebent hesabının girdisi): çevreler toplamı 69,725 m, iç köşe 21, dış köşe 1.
+- İç duvarların L birleşimi dolduruldu (banyonun alt duvarı ile banyo–mutfak duvarının köşesi): Yaşam Alanı'nda 5 × 5 cm'lik çentik kalktı; alanlar iki ondalıkta aynı, `--cizim-kalinligi` karşılaştırması yine AYNI.
+- Çatı: saçak yüzü Boardex (teyitli), saçak omegası yok. Dere inişi tanımda elle verilebilir (`cati.inis_noktalari`); verilmediği için kuraldan 6.
+- Çatı kaplaması adları altı seçeneğe çıkarıldı.
 
 ## Sınırlar
 

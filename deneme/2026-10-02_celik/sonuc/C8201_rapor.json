@@ -14,34 +14,65 @@
    "mahal": "Yatak Odası 1",
    "alan_m2": 11.918,
    "cizim_etiketi_m2": 11.8,
-   "fark_m2": 0.118
+   "fark_m2": 0.118,
+   "cevre_m": 13.82,
+   "ic_kose": 4,
+   "dis_kose": 0,
+   "islev": [
+    "yatak_odasi"
+   ]
   },
   {
    "mahal": "Yatak Odası 2",
    "alan_m2": 11.918,
    "cizim_etiketi_m2": 11.8,
-   "fark_m2": 0.118
+   "fark_m2": 0.118,
+   "cevre_m": 13.82,
+   "ic_kose": 4,
+   "dis_kose": 0,
+   "islev": [
+    "yatak_odasi"
+   ]
   },
   {
    "mahal": "Banyo",
    "alan_m2": 4.3,
    "cizim_etiketi_m2": 4.3,
-   "fark_m2": 0.0
+   "fark_m2": 0.0,
+   "cevre_m": 8.375,
+   "ic_kose": 4,
+   "dis_kose": 0,
+   "islev": [
+    "banyo"
+   ]
   },
   {
    "mahal": "Hol",
    "alan_m2": 6.748,
    "cizim_etiketi_m2": 6.7,
-   "fark_m2": 0.048
+   "fark_m2": 0.048,
+   "cevre_m": 12.415,
+   "ic_kose": 4,
+   "dis_kose": 0,
+   "islev": [
+    "hol"
+   ]
   },
   {
    "mahal": "Yaşam Alanı",
-   "alan_m2": 23.484,
+   "alan_m2": 23.481,
    "cizim_etiketi_m2": 23.3,
-   "fark_m2": 0.184
+   "fark_m2": 0.181,
+   "cevre_m": 21.295,
+   "ic_kose": 5,
+   "dis_kose": 1,
+   "islev": [
+    "salon",
+    "mutfak"
+   ]
   }
  ],
- "kapali_net_m2": 58.368,
+ "kapali_net_m2": 58.365,
  "kapali_brut_m2": 63.75,
  "veranda_m2": 18.3,
  "toplam_oturum_m2": 82.05,
@@ -58,5 +89,36 @@
   "karkas_mm": 80,
   "ic_yuz_cevre_m": 31.16,
   "ic_yuz_net_m2": 64.497
+ },
+ "osb_takviye": {
+  "duvarlar": [
+   {
+    "mahal": "Yaşam Alanı",
+    "duvar": "R",
+    "duvar_adi": "banyo ile mutfak arası duvar",
+    "neden": "mutfak dolabı",
+    "boy_cm": 248.75,
+    "bosluk_m2": 0
+   },
+   {
+    "mahal": "Yaşam Alanı",
+    "duvar": "dis:ust",
+    "duvar_adi": "üst dış duvar",
+    "neden": "mutfak dolabı ve eviye",
+    "boy_cm": 295.75,
+    "bosluk_m2": 1.2
+   },
+   {
+    "mahal": "Yaşam Alanı",
+    "duvar": "B",
+    "duvar_adi": "hol ile yaşam alanı arası duvar",
+    "neden": "TV ünitesi",
+    "boy_cm": 480.25,
+    "bosluk_m2": 1.926
+   }
+  ],
+  "brut_m2": 27.668,
+  "bosluk_m2": 3.126,
+  "net_m2": 24.542
  }
 }

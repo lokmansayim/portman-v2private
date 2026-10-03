@@ -95,14 +95,68 @@ def taslak_tablosu() -> list[str]:
     return cik
 
 
+KAPLAMALAR = (("Sandviç panel", "C8201_yukleme_taslak.json"), ("Tek kat panel", "C8201_kaplama_tek_kat_panel.json"),
+              ("OSB + nem bariyeri + kiremit desen sac (motorda: OSB + membran + metal kiremit)", "C8201_kaplama_osb_kiremit.json"),
+              ("OSB + nem bariyeri + trapez sac", "C8201_kaplama_osb_trapez.json"), ("Trapez sac", "C8201_kaplama_trapez_sac.json"),
+              ("OSB + membran + shingle", "C8201_kaplama_osb_shingle.json"))
+ELEKTRIK = (("Tijli duy", "tijli_duy"), ("Yuvarlak glop", "glop"), ("Tekli anahtar", "tekli_anahtar"), ("Çiftli anahtar", "cift_anahtar"),
+            ("Tekli priz", "tekli_priz"), ("Çiftli priz", "cift_priz"), ("Uydu prizi", "uydu_prizi"))
+ISLEV_ADI = {"yatak_odasi": "yatak odası", "banyo": "banyo", "salon": "salon", "mutfak": "mutfak", "hol": "hol", "veranda": "veranda"}
+
+
 def kaplama_tablosu() -> list[str]:
-    secenek = (("Sandviç panel", "C8201_yukleme_taslak.json"), ("Tek kat panel", "C8201_kaplama_tek_kat_panel.json"), ("OSB + nem bariyeri + kiremit desen sac", "C8201_kaplama_osb_kiremit.json"))
     cik = ["| Seçenek | Kalem | Boyut | Adet | Durum |", "|---|---|---|---|---|"]
-    for ad, dosya in secenek:
+    for ad, dosya in KAPLAMALAR:
         v = oku(dosya)
         satirlar = [s for s in v["satirlar"] if s["grup"] == "Çatı kaplamaları" or (s["grup"] == "Vida" and ("Trapez vida (5,5 × 60)" in s["kalem"] or "panel)" in s["kalem"] or "OSB ve yalıpan" in s["kalem"]))]
         for s in satirlar:
             cik.append(f"| {ad} | {s['kalem']} | {s['boyut']} | {adet(s['adet'])} | {s['durum']} |")
+    return cik
+
+
+def kosebent_tablosu() -> list[str]:
+    """Köşebent kuralı (Ubeydullah): üç gerçek listede oda çevreleri bilinir, iç köşe sayısı bilinmez."""
+    k = json.loads((BURADA / "kurallar.json").read_text(encoding="utf-8"))["kosebent"]["deger"]
+    cik = ["| Liste | Oda çevreleri (m) | Oda sayısı | Hesap (oda başına 4 iç köşe) | Listede | Listedeki adedin denk geldiği iç köşe |", "|---|---|---|---|---|---|"]
+    for ad, dosya in ORNEKLER:
+        v = oku(f"{dosya}_karsilastirma.json")
+        kb, liste = v["ara"]["kosebent"], v["karsilastirma"]["Köşebent"]["liste"]
+        denk = (liste * k["parca_boyu_m"] - kb["tavan_cevresi_m"]) / k["kose_boyu_m"]
+        cik.append(f"| {ad} | {tr(kb['tavan_cevresi_m'], 2)} | {kb['ic_kose'] // k['plan_yoksa_oda_basina_ic_kose']} | {v['karsilastirma']['Köşebent']['hesap']} | {liste} | {tr(denk, 1)} |")
+    c = oku("C8201_yukleme_taslak.json")
+    kb = c["ara"]["kosebent"]
+    kose = next(s for s in c["satirlar"] if s["kalem"] == "Köşebent")
+    cik += ["", f"Ç8201 (planından): oda çevreleri {tr(kb['tavan_cevresi_m'], 2)} m, iç köşe {kb['ic_kose']}; ({tr(kb['tavan_cevresi_m'], 2)} + {kb['ic_kose']} × 2,7) ÷ 2,5 = {tr(kb['boy_m'] / k['parca_boyu_m'], 1)} → {kose['adet']} adet."]
+    return cik
+
+
+def elektrik_sinama_tablosu() -> list[str]:
+    """Oda başına elektrik kuralı (Ubeydullah) ile 105 m² listenin pafta sayımı."""
+    v = oku("ornek_105m2_karsilastirma.json")
+    kural = v["ara"]["elektrik_kural"]
+    sayim = {s["kalem"]: s["adet"] for s in v["satirlar"] if s["grup"] == "Elektrik"}
+    cik = ["| Kalem | Kural | Pafta sayımı (liste) |", "|---|---|---|"]
+    tk = ts = 0
+    for ad, anahtar in ELEKTRIK:
+        cik.append(f"| {ad} | {kural[anahtar]} | {sayim[ad]} |")
+        tk, ts = tk + kural[anahtar], ts + sayim[ad]
+    cik.append(f"| Toplam | {tk} | {ts} |")
+    cik.append(f"| W otomat (sigorta) | {kural['sigorta']} | {sayim['W otomat (sigorta)']} |")
+    return cik
+
+
+def elektrik_oda_tablosu() -> list[str]:
+    """Ç8201: elektrik kuralının oda oda dökümü."""
+    k = json.loads((BURADA / "kurallar.json").read_text(encoding="utf-8"))["elektrik_oda"]["deger"]["odalar"]
+    g = oku("C8201_girdi.json")
+    cik = ["| Mahal | Kural | " + " | ".join(ad for ad, _ in ELEKTRIK) + " |", "|---|---|" + "---|" * len(ELEKTRIK)]
+    top = {a: 0 for _, a in ELEKTRIK}
+    for o in g["elektrik_odalar"]:
+        say = {a: sum(k[i].get(a, 0) for i in o["islev"]) for _, a in ELEKTRIK}
+        for a, n in say.items():
+            top[a] += n
+        cik.append(f"| {o['ad']} | {' + '.join(ISLEV_ADI[i] for i in o['islev'])} | " + " | ".join(str(say[a]) if say[a] else "" for _, a in ELEKTRIK) + " |")
+    cik.append("| Toplam | | " + " | ".join(str(top[a]) for _, a in ELEKTRIK) + " |")
     return cik
 
 
@@ -112,6 +166,9 @@ def main() -> int:
     cik += ["", "## Adedi tutmayan kalemler", ""] + kt[:2] + [x for x in kt[2:] if "✗" in x]
     cik += ["", "## Ç8201 taslak: baz ve dış 140", ""] + taslak_tablosu()
     cik += ["", "## Ç8201: çatı kaplaması seçenekleri", ""] + kaplama_tablosu()
+    cik += ["", "## Köşebent: mühendisin formülü", ""] + kosebent_tablosu()
+    cik += ["", "## Elektrik kuralının sınaması (105 m² liste)", ""] + elektrik_sinama_tablosu()
+    cik += ["", "## Ç8201: elektrik, oda oda", ""] + elektrik_oda_tablosu()
     (S / "tablolar.md").write_text("\n".join(cik) + "\n", encoding="utf-8")
     print("yazıldı: sonuc/tablolar.md,", len(cik), "satır")
     return 0
