@@ -13,6 +13,17 @@
         {"malzeme": "Alçıpan", "kalinlik": 12.5, "yuz": "ic"}
       ]
     },
+    "DIS-140": {
+      "aile": "A1",
+      "paket": "dış 140",
+      "kullanim": "dis",
+      "kaynak": "Lokman, 2 Ekim 2026 20:15 (bir üst paket: dış duvar karkası 140 mm); 3 Ekim 11:49 (yalnız dış duvarlar). 62 m² çelik SKP modelinde dış karkas 140 mm ölçüldü.",
+      "katmanlar": [
+        {"malzeme": "Boardex", "kalinlik": 12.5, "levha": [1200, 2400], "yuz": "dis"},
+        {"malzeme": "Çelik karkas", "kalinlik": 140, "dolgu": "mineral yün"},
+        {"malzeme": "Alçıpan", "kalinlik": 12.5, "yuz": "ic"}
+      ]
+    },
     "IC-80": {
       "aile": "A1",
       "paket": "baz",

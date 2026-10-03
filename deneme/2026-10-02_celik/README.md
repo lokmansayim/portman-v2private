@@ -10,6 +10,7 @@ Amaç: tek kat çelik bir modeli, pano ızgarası olmadan, bir tanım dosyasınd
 | `C8201.json` | Ç8201'in tanımı: dış kutu, iç duvar aksları, mahaller, açıklıklar (arşivdeki çizimden) |
 | `ciz.py` | Hesap ve plan çizimi |
 | `gorunus.py` | Çatı hesabı, çatı planı, dört görünüş ve tek pafta |
+| `secenekler/` | Seçenekler (değişiklik operatörleri): model tanımını değiştirmeden paket farkını uygular. İlk örnek: `dis_karkas_140.json` |
 | `cikti/` | Koşu çıktıları (depoya girmez) |
 | `sonuc/` | 2 Ekim koşusunun kanıtları: plan, pafta, raporlar |
 
@@ -19,6 +20,8 @@ Amaç: tek kat çelik bir modeli, pano ızgarası olmadan, bir tanım dosyasınd
 python ciz.py C8201.json                    # baz paketin katmanlarıyla (10,5 cm duvar)
 python ciz.py C8201.json --cizim-kalinligi  # arşiv çiziminin kalınlıklarıyla (12 / 11 cm); etiketlerle karşılaştırır
 python gorunus.py C8201.json                # çatı + görünüşler + pafta
+python ciz.py C8201.json --secenek secenekler/dis_karkas_140.json      # dış duvar karkası 140 mm
+python gorunus.py C8201.json --secenek secenekler/dis_karkas_140.json
 ```
 
 ## Sonuç (2 Ekim 2026)
@@ -30,6 +33,7 @@ python gorunus.py C8201.json                # çatı + görünüşler + pafta
 - Alın (saçak kaplaması) 18,4 cm = topuk 10 + panelin eğimdeki düşey ölçüsü 8,4; alın kaplaması 39,28 m × 18,4 cm = 7,2 m².
 - Düzeltmeler: 21:50 topuk saçak ucunda (SKP ölçümü; önceki mahya kotu 404'tü); 22:05 çatı paneli ve alın (Lokman).
 - Açıklık üst kotu 200 cm (lento 70).
+- Dış 140 mm seçeneği (3 Ekim): dış duvar 16,5 cm, iç 10,5 cm; dış ölçü aynı; kapalı net 58,4 → 56,5 m²; Boardex ve çatı aynı. Karşılaştırma tablosu: `docs/sartname/modeller/C8201.md`.
 
 ## Sınırlar
 

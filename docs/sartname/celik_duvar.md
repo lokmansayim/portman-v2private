@@ -15,6 +15,7 @@ Kaynak: Lokman'ın anlattıkları (1–2 Ekim 2026). Madde sonundaki tarih, söy
 - Arşivdeki çizimlerde dış duvar 12, iç duvar 11 cm çizilmiş. Fark, çelikteki birleşimlerde vida kabarması ya da içlerde ince sıyırma sıva payıdır. Hesapta kullanılmaz: duvar "sıfır hatalı ve sıvasız" kabul edilir. (2 Ekim 20:24)
 - Sıva grubu genelde verilmez. (2 Ekim 20:24)
 - Çalışma baz paketle başlar ("bu şekilde başla"). Üst paketler modifikasyon olarak sonra gelir. (2 Ekim 20:15)
+- 140 mm karkas yalnız dış duvarlarda uygulanır. Bayi "dışlar 140'lık olsun" dediğinde bu anlaşılmalı; seçim WhatsApp'ta onay kutulu formla da alınabilir (ayrı konu). (3 Ekim 11:49)
 - Çatı ayrıntıları sonra gelecek. (2 Ekim 20:15)
 - Katalogda teknik detaylar var. (2 Ekim 20:15)
 - Çıplak (kaplamasız) karkas: dış duvar genelde 140 ve 80 mm; iç duvar %95 80 mm, 90 mm çok nadir, şimdilik göz ardı. (1 Ekim)
@@ -67,6 +68,17 @@ Kaynak: Lokman'ın anlattıkları (1–2 Ekim 2026). Madde sonundaki tarih, söy
 - Profil: 81 m² modelde C 80 × 54 × 10, et 1,2 mm; öteki iki modelde başlık 45 mm.
 - 81 m² modelde 17 duvar paneli var; panel boyları 125–569 cm.
 
+## Seçenek: dış duvar karkası 140 mm (3 Ekim 2026)
+
+Tanım dosyası: `deneme/2026-10-02_celik/secenekler/dis_karkas_140.json`. Model tanımı değişmez; seçenek yalnız dış duvar tipini `DIS-140` yapar.
+
+- Dış duvar kalınlığı katmanlardan: 12,5 + 140 + 12,5 = 165 mm (16,5 cm). İç duvarlar 10,5 cm kalır.
+- Dış ölçü değişmez (dış duvarlar dıştan ölçülür); duvar içeri doğru kalınlaşır, dış duvara komşu mahaller küçülür.
+- İç duvar aksları, açıklıklar ve çatı değişmez.
+- Dış Boardex metrajı değişmez; dış duvarın iç yüzü (alçıpan yüzü) biraz azalır.
+- Ç8201'e uygulaması: `modeller/C8201.md`.
+- Çıkarım (teyit bekliyor): 140 mm pakette Boardex ve alçıpan baz paketle aynı sayıldı; yalnız karkas değişti.
+
 ## Çıkarımlar (teyit bekliyor)
 
 - 240'lık levha tam dört dikme aralığına oturur (4 × 60); yatay profiller 120 ve 240'taki levha ek yerlerine denk gelir.
@@ -76,7 +88,7 @@ Kaynak: Lokman'ın anlattıkları (1–2 Ekim 2026). Madde sonundaki tarih, söy
 
 ## Açık sorular
 
-- Mineral yün kalınlığı.
+- Mineral yün kalınlığı (80 mm ve 140 mm karkas için ayrı ayrı).
 - Boardex kalınlığı: 2 Ekim'de 12,5 mm denildi; 2025 tarihli bir yükleme listesinde 8 mm yazıyor (`yukleme_listesi_celik.md`).
 - Lento ve kapı yüksekliği: yükleme listesinde kapılar 90 × 214 ve 90 × 210; üç modelde de iç kapı başlığı 214, dış kapı başlığı 210 kotunda. "Lento her zaman 70 cm" pencereler için mi?
 - Varsayılan levha: 120 × 240 (60 aks) mı, 122 × 244 (61 aks) mı? Modellerde dikme 61, kuşak 122; bir modelde dikme 62,5.

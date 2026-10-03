@@ -1,10 +1,14 @@
 {
  "kod": "Ç8201",
  "mod": "katmanlardan",
+ "paket": "baz",
+ "secenekler": [],
  "duvar_cm": {
   "dis": 10.5,
   "ic": 10.5
  },
+ "dis_duvar_tipi": "DIS-80",
+ "ic_duvar_tipi": "IC-80",
  "mahaller": [
   {
    "mahal": "Yatak Odası 1",
@@ -48,5 +52,11 @@
   "bosluk_m2": 19.64,
   "net_m2": 66.76,
   "levha_adedi_firesiz": 24
+ },
+ "dis_duvar": {
+  "tip": "DIS-80",
+  "karkas_mm": 80,
+  "ic_yuz_cevre_m": 31.16,
+  "ic_yuz_net_m2": 64.492
  }
 }

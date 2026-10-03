@@ -12,6 +12,7 @@ Veranda kolonunun kenarı (20 cm) varsayımdır.
 
 Kullanım:
     python gorunus.py C8201.json
+    python gorunus.py C8201.json --secenek secenekler/dis_karkas_140.json
 """
 from __future__ import annotations
 
@@ -28,7 +29,7 @@ import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from matplotlib.patches import Polygon as MplPolygon, Rectangle
 
-from ciz import BURADA, hesapla, olcu, plan_eksen, tr
+from ciz import BURADA, hesapla, olcu, plan_eksen, secenek_uygula, tr
 
 DUVAR = "#dcd7cb"
 DUVAR_GERI = "#c9c4b8"
@@ -217,14 +218,16 @@ def pafta(tanim: dict, s: dict, c: dict, cikti: Path):
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("tanim", type=Path)
+    ap.add_argument("--secenek", type=Path, action="append", default=[], help="seçenek dosyası (yinelenebilir)")
     ap.add_argument("--cikti", type=Path, default=BURADA / "cikti")
     a = ap.parse_args()
     tanim = json.loads(a.tanim.read_text(encoding="utf-8"))
+    tanim, sek = secenek_uygula(tanim, a.secenek)
     tipler = json.loads((BURADA / "duvar_tipleri.json").read_text(encoding="utf-8"))
     s = hesapla(tanim, tipler, False)
     c = cati_hesapla(tanim)
     a.cikti.mkdir(parents=True, exist_ok=True)
-    kod = tanim["kod"].replace("Ç", "C")
+    kod = tanim["kod"].replace("Ç", "C") + sek
     pafta(tanim, s, c, a.cikti / f"{kod}_pafta.png")
     rapor = {k: (round(v, 3) if isinstance(v, float) else v) for k, v in c.items()}
     (a.cikti / f"{kod}_cati.json").write_text(json.dumps(rapor, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")

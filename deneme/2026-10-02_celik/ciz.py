@@ -6,9 +6,13 @@ Duvar kalınlığı duvar tipinin katmanlarından hesaplanır (duvar_tipleri.jso
 `--cizim-kalinligi` ile arşivdeki çizimin kalınlıkları (12 / 11 cm) kullanılır ve
 hesaplanan mahal alanları çizimdeki etiketlerle karşılaştırılır (okuma denetimi).
 
+Seçenek (değişiklik operatörü): `--secenek secenekler/<kod>.json` tanımın alanlarını değiştirir;
+çıktı adlarına seçeneğin kodu eklenir. Örnek: dış duvar karkası 140 mm.
+
 Kullanım:
     python ciz.py C8201.json                    # katmanlardan: plan + rapor
     python ciz.py C8201.json --cizim-kalinligi  # çizimle karşılaştırma; fark varsa çıkış kodu 1
+    python ciz.py C8201.json --secenek secenekler/dis_karkas_140.json
 """
 from __future__ import annotations
 
@@ -33,6 +37,25 @@ ETIKET_TOL = 0.06  # çizim etiketleri 0,1 m²'ye yuvarlı
 
 def tr(v: float, n: int = 1) -> str:
     return f"{v:.{n}f}".replace(".", ",")
+
+
+def secenek_uygula(tanim: dict, yollar) -> tuple[dict, str]:
+    """Seçenek dosyalarını tanıma uygular. Dönen ek, çıktı adlarına eklenir."""
+    ek, uygulanan = "", []
+    for y in yollar or []:
+        sc = json.loads(Path(y).read_text(encoding="utf-8"))
+        for k, v in sc["degisiklik"].items():
+            if k not in tanim:
+                raise SystemExit(f"Seçenek {sc['kod']}: tanımda '{k}' alanı yok.")
+            tanim[k] = v
+        ek += "_" + sc["kod"]
+        uygulanan.append({"kod": sc["kod"], "ad": sc["ad"]})
+    tanim["secenekler"] = uygulanan
+    return tanim, ek
+
+
+def karkas_mm(tipler: dict, ad: str) -> float:
+    return next(k["kalinlik"] for k in tipler["tipler"][ad]["katmanlar"] if k["malzeme"] == "Çelik karkas")
 
 
 def kalinliklar(tipler: dict, tanim: dict, cizim: bool) -> tuple[float, float]:
@@ -94,6 +117,7 @@ def hesapla(tanim: dict, tipler: dict, cizim: bool) -> dict:
     cevre = 2 * (W + H) / 100.0
     bosluklar = sum(a["en"] * a["yuk"] / 1e4 for a in tanim["acikliklar"] if a["duvar"].startswith("dis:"))
     net = cevre * h - bosluklar
+    ic_cevre = 2 * ((W - 2 * td) + (H - 2 * td)) / 100.0          # dış duvarların iç yüzü (alçıpan yüzü)
     # Lento kuralı (Lokman, 2 Ekim 20:40): lento her zaman 70 cm; açıklığın üst kotu = duvar yüksekliği − lento.
     ust_kot = tanim["duvar_yuksekligi"] - tanim["lento"] if "lento" in tanim else None
     kotlar = []
@@ -111,6 +135,8 @@ def hesapla(tanim: dict, tipler: dict, cizim: bool) -> dict:
         "veranda_m2": veranda_m2, "toplam_oturum_m2": W * H / 1e4 + veranda_m2,
         "boardex": {"cevre_m": cevre, "yukseklik_m": h, "brut_m2": cevre * h, "bosluk_m2": bosluklar,
                     "net_m2": net, "levha_adedi_firesiz": math.ceil(net / LEVHA_M2 - 1e-9)},
+        "dis_duvar": {"tip": tanim["dis_duvar_tipi"], "karkas_mm": None if cizim else karkas_mm(tipler, tanim["dis_duvar_tipi"]),
+                      "ic_yuz_cevre_m": ic_cevre, "ic_yuz_net_m2": ic_cevre * h - bosluklar},
     }
 
 
@@ -250,14 +276,18 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("tanim", type=Path)
     ap.add_argument("--cizim-kalinligi", action="store_true")
+    ap.add_argument("--secenek", type=Path, action="append", default=[], help="seçenek dosyası (yinelenebilir)")
     ap.add_argument("--cikti", type=Path, default=BURADA / "cikti")
     a = ap.parse_args()
+    if a.cizim_kalinligi and a.secenek:
+        raise SystemExit("--cizim-kalinligi arşiv çizimiyle karşılaştırma içindir; seçenekle birlikte kullanılmaz.")
     tanim = json.loads(a.tanim.read_text(encoding="utf-8"))
+    tanim, sek = secenek_uygula(tanim, a.secenek)
     tipler = json.loads((BURADA / "duvar_tipleri.json").read_text(encoding="utf-8"))
     s = hesapla(tanim, tipler, a.cizim_kalinligi)
     a.cikti.mkdir(parents=True, exist_ok=True)
     ek = "_cizim_kalinligi" if a.cizim_kalinligi else ""
-    kod = tanim["kod"].replace("Ç", "C")
+    kod = tanim["kod"].replace("Ç", "C") + sek
     plan_ciz(tanim, tipler, s, a.cikti / f"{kod}_plan{ek}.png", a.cizim_kalinligi)
     etiket = tanim.get("cizim_etiketleri_m2", {})
     satir, fark_var = [], False
@@ -269,13 +299,15 @@ def main() -> int:
         satir.append({"mahal": m["ad"], "alan_m2": round(m["alan_m2"], 3), "cizim_etiketi_m2": e, "fark_m2": None if f is None else round(f, 3)})
     rapor = {
         "kod": tanim["kod"], "mod": "cizim_kalinligi" if a.cizim_kalinligi else "katmanlardan",
-        "duvar_cm": {"dis": s["td"], "ic": s["ti"]}, "mahaller": satir,
+        "paket": tanim["paket"], "secenekler": tanim["secenekler"],
+        "duvar_cm": {"dis": s["td"], "ic": s["ti"]}, "dis_duvar_tipi": tanim["dis_duvar_tipi"], "ic_duvar_tipi": tanim["ic_duvar_tipi"], "mahaller": satir,
         "kapali_net_m2": round(s["kapali_net_m2"], 3), "kapali_brut_m2": round(s["kapali_brut_m2"], 3),
         "veranda_m2": round(s["veranda_m2"], 3), "toplam_oturum_m2": round(s["toplam_oturum_m2"], 3),
         "boardex": {k: (round(v, 3) if isinstance(v, float) else v) for k, v in s["boardex"].items()},
+        "dis_duvar": {k: (round(v, 3) if isinstance(v, float) else v) for k, v in s["dis_duvar"].items()},
     }
     (a.cikti / f"{kod}_rapor{ek}.json").write_text(json.dumps(rapor, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
-    print(f"{tanim['kod']} · duvar dış {tr(s['td'])} / iç {tr(s['ti'])} cm")
+    print(f"{tanim['kod']} · paket {tanim['paket']} · duvar dış {tr(s['td'])} ({tanim['dis_duvar_tipi']}) / iç {tr(s['ti'])} ({tanim['ic_duvar_tipi']}) cm")
     for r in satir:
         print(f"  {r['mahal']:15s} {tr(r['alan_m2'], 2):>6s} m²   çizim etiketi {r['cizim_etiketi_m2']}   fark {r['fark_m2']:+.2f}")
     print(f"  kapalı net {tr(s['kapali_net_m2'], 2)} · brüt {tr(s['kapali_brut_m2'], 2)} · veranda {tr(s['veranda_m2'], 2)} · toplam {tr(s['toplam_oturum_m2'], 2)} m²")

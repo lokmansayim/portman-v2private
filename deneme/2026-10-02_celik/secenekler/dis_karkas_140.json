@@ -1,0 +1,28 @@
+{
+ "sema": "portman.secenek/0.1-taslak",
+ "kod": "dis_karkas_140",
+ "ad": "Dış duvar karkası 140 mm",
+ "kaynak": "Lokman, 2 Ekim 2026 20:15: bir üst pakette dış duvar karkası 140 mm. 3 Ekim 11:49: yalnız dış duvarlar; bayi \"dışlar 140'lık olsun\" dediğinde anlaşılmalı.",
+ "kapsam": "Yalnız dış duvarlar. İç duvarlar, çatı ve açıklıklar değişmez.",
+ "degisiklik": {
+  "dis_duvar_tipi": "DIS-140",
+  "paket": "dış 140"
+ },
+ "bayi_ifadeleri": {
+  "lokman_ornegi": [
+   "dışlar 140'lık olsun"
+  ],
+  "tahmin_teyit_bekliyor": [
+   "dış duvarlar 140 olsun",
+   "dış karkas 140'lık",
+   "dışlar 14'lük olsun"
+  ]
+ },
+ "etki": [
+  "Dış duvar kalınlığı katmanlardan: 12,5 + 140 + 12,5 = 165 mm.",
+  "Dış ölçü değişmez (dış duvarlar dıştan ölçülür); duvar içeri doğru kalınlaşır, dış duvara komşu mahaller küçülür.",
+  "İç duvar aksları değişmez (iç duvarlar tam ortadan ölçülür).",
+  "Dış Boardex metrajı değişmez (çevre × yükseklik − boşluklar).",
+  "Dış duvar çeliği ve yalıtımı 140 mm karkasa göre değişir; bu kalemler henüz hesaplanmıyor."
+ ]
+}
