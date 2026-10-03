@@ -31,7 +31,8 @@ python gorunus.py C8201.json --secenek secenekler/dis_karkas_140.json
 - Dış Boardex: 32,0 m × 2,70 m − 19,6 m² = 66,8 m²; fire hariç 24 levha. Yükleme listesiyle karşılaştırılmadı.
 - Çatı (kırma, %33, saçak 30): plan 1154 × 810, mahya 344 cm, yüzey 98,4 m². Makas üstü: saçak ucunda 280, mahyada 414 cm. 8 cm çatı paneliyle çatı üst yüzü: saçak ucunda 288,4, mahyada 422 cm.
 - Alın (saçak kaplaması) 18,4 cm = topuk 10 + panelin eğimdeki düşey ölçüsü 8,4; alın kaplaması 39,28 m × 18,4 cm = 7,2 m².
-- Düzeltmeler: 21:50 topuk saçak ucunda (SKP ölçümü; önceki mahya kotu 404'tü); 22:05 çatı paneli ve alın (Lokman).
+- Mahya malzemesi tepeye ve dört kırmaya konur: 344 + 4 × 588 = 2697 cm; 2,8 m'lik parçayla bindirme ve fire hariç 10 adet.
+- Düzeltmeler: 21:50 topuk saçak ucunda (SKP ölçümü; önceki mahya kotu 404'tü); 22:05 çatı paneli ve alın (Lokman); 3 Ekim 11:57 kırmalarda mahya (Lokman).
 - Açıklık üst kotu 200 cm (lento 70).
 - Dış 140 mm seçeneği (3 Ekim): dış duvar 16,5 cm, iç 10,5 cm; dış ölçü aynı; kapalı net 58,4 → 56,5 m²; Boardex ve çatı aynı. Karşılaştırma tablosu: `docs/sartname/modeller/C8201.md`.
 

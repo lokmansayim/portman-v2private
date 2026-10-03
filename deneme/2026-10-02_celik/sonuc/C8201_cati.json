@@ -25,5 +25,11 @@
  "alin_yuksekligi": 18.424,
  "alin_gonye_kesimde": 17.597,
  "alin_cevre_m": 39.28,
- "alin_m2": 7.237
+ "alin_m2": 7.237,
+ "kirma_adedi": 4,
+ "kirma_plan_boyu": 572.756,
+ "kirma_boyu": 588.143,
+ "mahya_hatti_toplam": 2696.572,
+ "mahya_parca_boyu": 280,
+ "mahya_parca_adedi_bindirmesiz": 10
 }

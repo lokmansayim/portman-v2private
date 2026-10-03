@@ -11,6 +11,7 @@ Kaynak: Lokman'ın anlattıkları (2 Ekim 2026). Madde sonundaki saat, söylendi
 - Çelik karkas makaslar %33 eğim ve 10 cm topukla çizilir. (22:05)
 - Makasların üzerine 8 cm çatı paneli gelir. (22:05)
 - Saçak kaplaması (alın): 10 cm topuk + üzerine konan panelin eğimdeki ölçüsü; "kaç cm oluyorsa" o kadar kaplanır. (22:05)
+- Tepeye konan mahya çatının kırmalarına da konur; aynı malzeme kullanılır. (3 Ekim 11:57)
 
 ## Modellerden ölçülenler (2 Ekim 21:40; ayrıntı `skp_olcumleri.md`)
 
@@ -31,6 +32,8 @@ Kaynak: Lokman'ın anlattıkları (2 Ekim 2026). Madde sonundaki saat, söylendi
 - Panelin düşey ölçüsü = 8 × √(1 + 0,33²) = 8,42 cm. Alın yüksekliği = 10 + 8,42 = 18,4 cm (panelin ucu şakülünde kesilirse; gönyesinde kesilirse 10 + 8 ÷ 1,053 = 17,6 cm).
 - Çatı üst yüzü, makas üst yüzünden 8,42 cm yukarıdadır: saçak ucunda 288,4; mahyada makas kotu + 8,42.
 - Alın kaplaması = saçak ucu çevresi × alın yüksekliği.
+- Kırma boyu (saçak köşesinden mahya ucuna, eğimli gerçek boy) = √(2 × y² + (y × eğim)²); y = saçak dahil kısa kenarın yarısı. %33'te kırma boyu = y × 1,452.
+- Mahya hattı = tepe mahyası + 4 × kırma boyu. Parça adedi = mahya hattı ÷ parça boyu, yukarı yuvarlanır; bindirme ve fire ayrıca eklenir.
 - Düzeltme (2 Ekim 21:50): ilk hesapta topuk duvar hizasında varsayılmış, saçak ucu 270 kotuna indirilmişti. Modellere göre saçak ucu 280'dir; mahya kotu 10 cm yükseldi.
 
 ## Ç8201'e uygulama
@@ -41,11 +44,14 @@ Katalog görsellerine göre tek bir kırma çatı, kapalı kısmı ve verandayı
 - Mahya 344 cm, uzun kenar boyunca, ortada. Makas üstünde mahya kotu 414 cm (270 + 10 + 405 × 0,33), saçak ucu 280; saçak altı 270.
 - 8 cm çatı paneliyle çatı üst yüzü: saçak ucunda 288,4, mahyada 422 cm.
 - Alın 18,4 cm; alın kaplaması 39,28 m × 18,4 cm = 7,2 m².
+- Mahya malzemesi: tepe 344 + 4 kırma × 588 = 2697 cm (27,0 m). 2,8 m'lik parçayla, bindirme ve fire hariç 10 adet. Parça boyu 90 m² projenin yükleme listesinden alındı (L 2800).
 - Çatı yüzeyi 98,4 m² (plan 93,5 m²). Saçak altı 11,4 m²; veranda tavanı 18,3 m².
 - Çizim: `deneme/2026-10-02_celik/sonuc/C8201_pafta.png`.
 
 ## Açık sorular
 
+- Mahya parçasının boyu 2,8 m mi; bindirme payı kaç cm?
+- Yükleme listesindeki üç mahya kalemi (metal kiremit mahyası, OSB mahyası, özel geniş mahya) hangi hatlara konuyor?
 - 8 cm çatı paneli hangi katmanlardan oluşuyor (yükleme listesindeki aşık, OSB, şilte ve örtüyle ilişkisi)?
 - 62 m² projede eğim neden %30? "Eğim değişmez" kuralının istisnası var mı?
 - Makas aralığı 125 cm kural mı?

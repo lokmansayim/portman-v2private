@@ -8,6 +8,7 @@ mahya ortada kalan kısımdır; saçak 30 cm, altı kaplamalı. Lento her zaman 
 Topuk 10 cm: makasın üst yüzü saçak ucunda duvar üst kotundan 10 cm yukarıdadır; saçak altı duvar üst kotundadır
 (üç çelik SKP modelinden ölçüldü, `docs/sartname/skp_olcumleri.md`; Lokman 2 Ekim 22:05'te teyit etti).
 Makasların üzerine 8 cm çatı paneli gelir; alın (saçak kaplaması) = topuk + panelin eğimdeki düşey ölçüsü (Lokman, 22:05).
+Mahya malzemesi tepe mahyasına ve dört kırma hattına konur; aynı malzeme (Lokman, 3 Ekim 11:57).
 Veranda kolonunun kenarı (20 cm) varsayımdır.
 
 Kullanım:
@@ -60,6 +61,11 @@ def cati_hesapla(tanim: dict) -> dict:
     z_mahya = z_makas_mahya + panel_dusey                        # çatı üst yüzü, mahyada
     alin = z_sacak - h                                           # alın (saçak kaplaması) yüksekliği = topuk + panelin düşey ölçüsü
     cevre = 2 * (px + py)                                        # saçak ucu çevresi
+    # Mahya malzemesi tepeye ve dört kırma hattına konur (Lokman, 3 Ekim 11:57). Kırma: saçak köşesinden mahya ucuna.
+    kirma_plan = (kisa / 2) * math.sqrt(2)                       # plandaki boy (45°)
+    kirma = math.hypot(kirma_plan, (kisa / 2) * e)               # eğimli gerçek boy
+    mahya_hatti = (uzun - kisa) + 4 * kirma
+    parca = c.get("mahya_parca_boyu")
     plan_m2 = px * py / 1e4
     return {
         "ayak_izi": (L, H), "plan": (px, py), "mahya_uzunlugu": uzun - kisa, "mahya_yonu": "x" if px >= py else "y",
@@ -68,6 +74,8 @@ def cati_hesapla(tanim: dict) -> dict:
         "sacak": s, "egim": e, "z_sacak_alti": h,
         "z_makas_sacak": z_makas_sacak, "z_makas_mahya": z_makas_mahya, "panel_kalinligi": panel, "panel_dusey": panel_dusey,
         "alin_yuksekligi": alin, "alin_gonye_kesimde": topuk + panel / kok, "alin_cevre_m": cevre / 100, "alin_m2": cevre * alin / 1e4,
+        "kirma_adedi": 4, "kirma_plan_boyu": kirma_plan, "kirma_boyu": kirma, "mahya_hatti_toplam": mahya_hatti,
+        "mahya_parca_boyu": parca, "mahya_parca_adedi_bindirmesiz": math.ceil(mahya_hatti / parca - 1e-9) if parca else None,
     }
 
 
@@ -163,7 +171,14 @@ def cati_plani_eksen(ax, tanim: dict, c: dict):
     ax.plot([m1[0], m2[0]], [m1[1], m2[1]], color="#1c1f24", lw=2.0, zorder=3)
     for kx, ky in kose:
         hedef = m1 if (kx < L / 2 if c["mahya_yonu"] == "x" else ky < H / 2) else m2
-        ax.plot([kx, hedef[0]], [ky, hedef[1]], color="#1c1f24", lw=1.2, zorder=3)
+        ax.plot([kx, hedef[0]], [ky, hedef[1]], color="#1c1f24", lw=2.0, zorder=3)   # kırma: mahya ile aynı malzeme
+        aci = math.degrees(math.atan2(hedef[1] - ky, hedef[0] - kx))
+        if aci > 90 or aci < -90:
+            aci += 180
+        ox, oy = (kx + hedef[0]) / 2, (ky + hedef[1]) / 2
+        nx, ny = -math.sin(math.radians(aci)), math.cos(math.radians(aci))
+        ax.text(ox + nx * 15, oy + ny * 15, f"mahya {tr(c['kirma_boyu'], 0)}", ha="center", va="center", fontsize=7.5, color="white",
+                rotation=aci, rotation_mode="anchor", zorder=4)
     ax.add_patch(Rectangle((0, 0), L, H, fill=False, ec="white", lw=0.9, ls=(0, (5, 3)), zorder=2))   # duvar dış yüzü
     ax.plot([W, W], [0, H], color="white", lw=0.8, ls=(0, (2, 3)), zorder=2)
     ax.text((m1[0] + m2[0]) / 2, m1[1] + 16, f"mahya {tr(c['mahya_uzunlugu']).replace(',0', '')}", ha="center", fontsize=8, color="white", zorder=4)
@@ -202,7 +217,9 @@ def pafta(tanim: dict, s: dict, c: dict, cikti: Path):
     ]
     sag = [
         f"Çatı: kırma (dört omuz) · eğim %{ct['egim_yuzde']} · saçak {ct['sacak']} cm, altı kaplamalı",
-        f"Çatı planı {tr(c['plan'][0]).replace(',0', '')} × {tr(c['plan'][1]).replace(',0', '')} cm · mahya {tr(c['mahya_uzunlugu']).replace(',0', '')} cm · mahya kotu {tr(c['z_mahya'], 0)} cm (makas üstü {tr(c['z_makas_mahya'], 0)})",
+        f"Çatı planı {tr(c['plan'][0]).replace(',0', '')} × {tr(c['plan'][1]).replace(',0', '')} cm · mahya kotu {tr(c['z_mahya'], 0)} cm (makas üstü {tr(c['z_makas_mahya'], 0)})",
+        f"Mahya (tepe ve kırmalar, aynı malzeme): {tr(c['mahya_uzunlugu']).replace(',0', '')} + {c['kirma_adedi']} × {tr(c['kirma_boyu'], 0)} = {tr(c['mahya_hatti_toplam'], 0)} cm"
+        + (f" · {tr(c['mahya_parca_boyu'] / 100)} m'lik parçayla {c['mahya_parca_adedi_bindirmesiz']} adet (bindirme ve fire hariç)" if c["mahya_parca_boyu"] else ""),
         f"Çatı yüzeyi {tr(c['yuzey_m2'])} m² (plan {tr(c['plan_m2'])} m²) · saçak altı {tr(c['sacak_alti_m2'])} m² · veranda tavanı {tr(c['veranda_tavani_m2'])} m²",
         f"Alın {tr(c['alin_yuksekligi'])} cm = topuk {ct.get('topuk', 0)} + {ct.get('panel_kalinligi', 0)} cm çatı panelinin eğimdeki düşey ölçüsü {tr(c['panel_dusey'])} · alın kaplaması {tr(c['alin_cevre_m'])} m × {tr(c['alin_yuksekligi'])} cm = {tr(c['alin_m2'])} m²",
         f"Varsayım: veranda kolonu {v.get('kolon', {}).get('kenar', '—')} cm, {v.get('kolon', {}).get('adet', '—')} adet · subasman, merdiven ve cephe kaplaması çizilmedi · ölçüler cm",
@@ -233,6 +250,8 @@ def main() -> int:
     (a.cikti / f"{kod}_cati.json").write_text(json.dumps(rapor, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     print(f"{tanim['kod']} çatı: plan {c['plan'][0]} × {c['plan'][1]} cm · mahya {c['mahya_uzunlugu']} cm ({c['mahya_yonu']} yönünde) · "
           f"saçak ucu {tr(c['z_sacak'])} (makas üstü {tr(c['z_makas_sacak'])}) · mahya kotu {tr(c['z_mahya'])} (makas üstü {tr(c['z_makas_mahya'])}) cm")
+    print(f"  mahya hattı: tepe {tr(c['mahya_uzunlugu'], 1)} + {c['kirma_adedi']} kırma × {tr(c['kirma_boyu'], 2)} (planda {tr(c['kirma_plan_boyu'], 2)}) = {tr(c['mahya_hatti_toplam'], 1)} cm"
+          + (f" · {c['mahya_parca_boyu']} cm'lik parçayla {c['mahya_parca_adedi_bindirmesiz']} adet (bindirme ve fire hariç)" if c["mahya_parca_boyu"] else ""))
     print(f"  alın {tr(c['alin_yuksekligi'], 2)} cm (panel ucu gönyesinde kesilirse {tr(c['alin_gonye_kesimde'], 2)}) · alın kaplaması {tr(c['alin_cevre_m'], 2)} m × {tr(c['alin_yuksekligi'], 2)} cm = {tr(c['alin_m2'], 2)} m²")
     print(f"  yüzey {tr(c['yuzey_m2'], 2)} m² (plan {tr(c['plan_m2'], 2)}) · saçak altı {tr(c['sacak_alti_m2'], 2)} m² · veranda tavanı {tr(c['veranda_tavani_m2'], 2)} m²")
     print("  açıklık kotları:", sorted({(k["tur"], k["en"], k["alt"], k["ust"]) for k in s["aciklik_kotlari"]}))
