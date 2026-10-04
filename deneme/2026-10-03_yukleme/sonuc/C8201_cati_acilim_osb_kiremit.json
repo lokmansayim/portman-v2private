@@ -5,20 +5,23 @@
  ],
  "egim": 0.33,
  "kapatma_m": 1.1,
- "panel_boyu_m": 4.3,
+ "panel_boyu_m": 4.315,
  "artan_parca_karsi_yuzde": false,
  "baslangic": "sol",
+ "baslangic_adi": "her yüzde sol köşeden",
  "egimli_boy_m": 4.265,
  "mahya_m": 3.44,
+ "tasma_m": 0.05,
  "yuzey_m2": 98.43,
+ "kaplanan_m2": 100.4,
  "adet": 26,
- "alan_alt_siniri": 21,
+ "alan_alt_siniri": 22,
  "tam_boy_panel": 10,
  "iki_parca_veren_kesim": 0,
  "artigi_kullanilmayan_parca": 28,
  "parca_adedi": 38,
- "kesim_payi_m": 0.0,
- "en_dar_pay_m": 0.256,
+ "kesim_payi_m": 0.005,
+ "en_dar_pay_m": null,
  "yuzler": {
   "ön": [
    {
@@ -26,8 +29,8 @@
     "x0_m": 0.0,
     "x1_m": 1.1,
     "tip": "L",
-    "uzun_m": 1.158,
-    "kisa_m": 0.0,
+    "uzun_m": 1.208,
+    "kisa_m": 0.05,
     "panel": 1,
     "konum": "tek"
    },
@@ -36,8 +39,8 @@
     "x0_m": 1.1,
     "x1_m": 2.2,
     "tip": "L",
-    "uzun_m": 2.317,
-    "kisa_m": 1.158,
+    "uzun_m": 2.367,
+    "kisa_m": 1.208,
     "panel": 2,
     "konum": "tek"
    },
@@ -46,8 +49,8 @@
     "x0_m": 2.2,
     "x1_m": 3.3,
     "tip": "L",
-    "uzun_m": 3.475,
-    "kisa_m": 2.317,
+    "uzun_m": 3.525,
+    "kisa_m": 2.367,
     "panel": 3,
     "konum": "tek"
    },
@@ -56,8 +59,8 @@
     "x0_m": 3.3,
     "x1_m": 4.4,
     "tip": "karma",
-    "uzun_m": 4.265,
-    "kisa_m": 3.475,
+    "uzun_m": 4.315,
+    "kisa_m": 3.525,
     "panel": 4,
     "konum": "tam"
    },
@@ -66,8 +69,8 @@
     "x0_m": 4.4,
     "x1_m": 5.5,
     "tip": "duz",
-    "uzun_m": 4.265,
-    "kisa_m": 4.265,
+    "uzun_m": 4.315,
+    "kisa_m": 4.315,
     "panel": 5,
     "konum": "tam"
    },
@@ -76,8 +79,8 @@
     "x0_m": 5.5,
     "x1_m": 6.6,
     "tip": "duz",
-    "uzun_m": 4.265,
-    "kisa_m": 4.265,
+    "uzun_m": 4.315,
+    "kisa_m": 4.315,
     "panel": 6,
     "konum": "tam"
    },
@@ -86,8 +89,8 @@
     "x0_m": 6.6,
     "x1_m": 7.7,
     "tip": "karma",
-    "uzun_m": 4.265,
-    "kisa_m": 4.044,
+    "uzun_m": 4.315,
+    "kisa_m": 4.094,
     "panel": 7,
     "konum": "tam"
    },
@@ -96,8 +99,8 @@
     "x0_m": 7.7,
     "x1_m": 8.8,
     "tip": "R",
-    "uzun_m": 4.044,
-    "kisa_m": 2.885,
+    "uzun_m": 4.094,
+    "kisa_m": 2.935,
     "panel": 8,
     "konum": "tek"
    },
@@ -106,8 +109,8 @@
     "x0_m": 8.8,
     "x1_m": 9.9,
     "tip": "R",
-    "uzun_m": 2.885,
-    "kisa_m": 1.727,
+    "uzun_m": 2.935,
+    "kisa_m": 1.777,
     "panel": 1,
     "konum": "tek"
    },
@@ -116,8 +119,8 @@
     "x0_m": 9.9,
     "x1_m": 11.0,
     "tip": "R",
-    "uzun_m": 1.727,
-    "kisa_m": 0.569,
+    "uzun_m": 1.777,
+    "kisa_m": 0.619,
     "panel": 2,
     "konum": "tek"
    },
@@ -126,8 +129,8 @@
     "x0_m": 11.0,
     "x1_m": 11.54,
     "tip": "R",
-    "uzun_m": 0.569,
-    "kisa_m": 0.0,
+    "uzun_m": 0.619,
+    "kisa_m": 0.05,
     "panel": 3,
     "konum": "tek"
    }
@@ -138,8 +141,8 @@
     "x0_m": 0.0,
     "x1_m": 1.1,
     "tip": "L",
-    "uzun_m": 1.158,
-    "kisa_m": 0.0,
+    "uzun_m": 1.208,
+    "kisa_m": 0.05,
     "panel": 14,
     "konum": "tek"
    },
@@ -148,8 +151,8 @@
     "x0_m": 1.1,
     "x1_m": 2.2,
     "tip": "L",
-    "uzun_m": 2.317,
-    "kisa_m": 1.158,
+    "uzun_m": 2.367,
+    "kisa_m": 1.208,
     "panel": 15,
     "konum": "tek"
    },
@@ -158,8 +161,8 @@
     "x0_m": 2.2,
     "x1_m": 3.3,
     "tip": "L",
-    "uzun_m": 3.475,
-    "kisa_m": 2.317,
+    "uzun_m": 3.525,
+    "kisa_m": 2.367,
     "panel": 16,
     "konum": "tek"
    },
@@ -168,8 +171,8 @@
     "x0_m": 3.3,
     "x1_m": 4.4,
     "tip": "karma",
-    "uzun_m": 4.265,
-    "kisa_m": 3.475,
+    "uzun_m": 4.315,
+    "kisa_m": 3.525,
     "panel": 17,
     "konum": "tam"
    },
@@ -178,8 +181,8 @@
     "x0_m": 4.4,
     "x1_m": 5.5,
     "tip": "duz",
-    "uzun_m": 4.265,
-    "kisa_m": 4.265,
+    "uzun_m": 4.315,
+    "kisa_m": 4.315,
     "panel": 18,
     "konum": "tam"
    },
@@ -188,8 +191,8 @@
     "x0_m": 5.5,
     "x1_m": 6.6,
     "tip": "duz",
-    "uzun_m": 4.265,
-    "kisa_m": 4.265,
+    "uzun_m": 4.315,
+    "kisa_m": 4.315,
     "panel": 19,
     "konum": "tam"
    },
@@ -198,8 +201,8 @@
     "x0_m": 6.6,
     "x1_m": 7.7,
     "tip": "karma",
-    "uzun_m": 4.265,
-    "kisa_m": 4.044,
+    "uzun_m": 4.315,
+    "kisa_m": 4.094,
     "panel": 20,
     "konum": "tam"
    },
@@ -208,8 +211,8 @@
     "x0_m": 7.7,
     "x1_m": 8.8,
     "tip": "R",
-    "uzun_m": 4.044,
-    "kisa_m": 2.885,
+    "uzun_m": 4.094,
+    "kisa_m": 2.935,
     "panel": 21,
     "konum": "tek"
    },
@@ -218,8 +221,8 @@
     "x0_m": 8.8,
     "x1_m": 9.9,
     "tip": "R",
-    "uzun_m": 2.885,
-    "kisa_m": 1.727,
+    "uzun_m": 2.935,
+    "kisa_m": 1.777,
     "panel": 9,
     "konum": "tek"
    },
@@ -228,8 +231,8 @@
     "x0_m": 9.9,
     "x1_m": 11.0,
     "tip": "R",
-    "uzun_m": 1.727,
-    "kisa_m": 0.569,
+    "uzun_m": 1.777,
+    "kisa_m": 0.619,
     "panel": 10,
     "konum": "tek"
    },
@@ -238,8 +241,8 @@
     "x0_m": 11.0,
     "x1_m": 11.54,
     "tip": "R",
-    "uzun_m": 0.569,
-    "kisa_m": 0.0,
+    "uzun_m": 0.619,
+    "kisa_m": 0.05,
     "panel": 11,
     "konum": "tek"
    }
@@ -250,8 +253,8 @@
     "x0_m": 0.0,
     "x1_m": 1.1,
     "tip": "L",
-    "uzun_m": 1.158,
-    "kisa_m": 0.0,
+    "uzun_m": 1.208,
+    "kisa_m": 0.05,
     "panel": 9,
     "konum": "tek"
    },
@@ -260,8 +263,8 @@
     "x0_m": 1.1,
     "x1_m": 2.2,
     "tip": "L",
-    "uzun_m": 2.317,
-    "kisa_m": 1.158,
+    "uzun_m": 2.367,
+    "kisa_m": 1.208,
     "panel": 10,
     "konum": "tek"
    },
@@ -270,8 +273,8 @@
     "x0_m": 2.2,
     "x1_m": 3.3,
     "tip": "L",
-    "uzun_m": 3.475,
-    "kisa_m": 2.317,
+    "uzun_m": 3.525,
+    "kisa_m": 2.367,
     "panel": 11,
     "konum": "tek"
    },
@@ -280,8 +283,8 @@
     "x0_m": 3.3,
     "x1_m": 4.4,
     "tip": "karma",
-    "uzun_m": 4.265,
-    "kisa_m": 3.475,
+    "uzun_m": 4.315,
+    "kisa_m": 3.525,
     "panel": 12,
     "konum": "tam"
    },
@@ -290,8 +293,8 @@
     "x0_m": 4.4,
     "x1_m": 5.5,
     "tip": "R",
-    "uzun_m": 3.896,
-    "kisa_m": 2.738,
+    "uzun_m": 3.946,
+    "kisa_m": 2.788,
     "panel": 13,
     "konum": "tek"
    },
@@ -300,8 +303,8 @@
     "x0_m": 5.5,
     "x1_m": 6.6,
     "tip": "R",
-    "uzun_m": 2.738,
-    "kisa_m": 1.58,
+    "uzun_m": 2.788,
+    "kisa_m": 1.63,
     "panel": 14,
     "konum": "tek"
    },
@@ -310,8 +313,8 @@
     "x0_m": 6.6,
     "x1_m": 7.7,
     "tip": "R",
-    "uzun_m": 1.58,
-    "kisa_m": 0.421,
+    "uzun_m": 1.63,
+    "kisa_m": 0.471,
     "panel": 15,
     "konum": "tek"
    },
@@ -320,8 +323,8 @@
     "x0_m": 7.7,
     "x1_m": 8.1,
     "tip": "R",
-    "uzun_m": 0.421,
-    "kisa_m": 0.0,
+    "uzun_m": 0.471,
+    "kisa_m": 0.05,
     "panel": 16,
     "konum": "tek"
    }
@@ -332,8 +335,8 @@
     "x0_m": 0.0,
     "x1_m": 1.1,
     "tip": "L",
-    "uzun_m": 1.158,
-    "kisa_m": 0.0,
+    "uzun_m": 1.208,
+    "kisa_m": 0.05,
     "panel": 22,
     "konum": "tek"
    },
@@ -342,8 +345,8 @@
     "x0_m": 1.1,
     "x1_m": 2.2,
     "tip": "L",
-    "uzun_m": 2.317,
-    "kisa_m": 1.158,
+    "uzun_m": 2.367,
+    "kisa_m": 1.208,
     "panel": 23,
     "konum": "tek"
    },
@@ -352,8 +355,8 @@
     "x0_m": 2.2,
     "x1_m": 3.3,
     "tip": "L",
-    "uzun_m": 3.475,
-    "kisa_m": 2.317,
+    "uzun_m": 3.525,
+    "kisa_m": 2.367,
     "panel": 24,
     "konum": "tek"
    },
@@ -362,8 +365,8 @@
     "x0_m": 3.3,
     "x1_m": 4.4,
     "tip": "karma",
-    "uzun_m": 4.265,
-    "kisa_m": 3.475,
+    "uzun_m": 4.315,
+    "kisa_m": 3.525,
     "panel": 25,
     "konum": "tam"
    },
@@ -372,8 +375,8 @@
     "x0_m": 4.4,
     "x1_m": 5.5,
     "tip": "R",
-    "uzun_m": 3.896,
-    "kisa_m": 2.738,
+    "uzun_m": 3.946,
+    "kisa_m": 2.788,
     "panel": 26,
     "konum": "tek"
    },
@@ -382,8 +385,8 @@
     "x0_m": 5.5,
     "x1_m": 6.6,
     "tip": "R",
-    "uzun_m": 2.738,
-    "kisa_m": 1.58,
+    "uzun_m": 2.788,
+    "kisa_m": 1.63,
     "panel": 22,
     "konum": "tek"
    },
@@ -392,8 +395,8 @@
     "x0_m": 6.6,
     "x1_m": 7.7,
     "tip": "R",
-    "uzun_m": 1.58,
-    "kisa_m": 0.421,
+    "uzun_m": 1.63,
+    "kisa_m": 0.471,
     "panel": 23,
     "konum": "tek"
    },
@@ -402,8 +405,8 @@
     "x0_m": 7.7,
     "x1_m": 8.1,
     "tip": "R",
-    "uzun_m": 0.421,
-    "kisa_m": 0.0,
+    "uzun_m": 0.471,
+    "kisa_m": 0.05,
     "panel": 24,
     "konum": "tek"
    }
@@ -412,16 +415,16 @@
  "paneller": [
   {
    "no": 1,
-   "artan_boy_m": 0.256,
+   "artan_boy_m": 0.166,
    "kesimler": [
     {
-     "boy_m": 2.885,
+     "boy_m": 2.935,
      "parcalar": [
       "ön 9 (tek)"
      ]
     },
     {
-     "boy_m": 1.158,
+     "boy_m": 1.208,
      "parcalar": [
       "ön 1 (tek)"
      ]
@@ -430,16 +433,16 @@
   },
   {
    "no": 2,
-   "artan_boy_m": 0.256,
+   "artan_boy_m": 0.166,
    "kesimler": [
     {
-     "boy_m": 2.317,
+     "boy_m": 2.367,
      "parcalar": [
       "ön 2 (tek)"
      ]
     },
     {
-     "boy_m": 1.727,
+     "boy_m": 1.777,
      "parcalar": [
       "ön 10 (tek)"
      ]
@@ -448,16 +451,16 @@
   },
   {
    "no": 3,
-   "artan_boy_m": 0.256,
+   "artan_boy_m": 0.166,
    "kesimler": [
     {
-     "boy_m": 3.475,
+     "boy_m": 3.525,
      "parcalar": [
       "ön 3 (tek)"
      ]
     },
     {
-     "boy_m": 0.569,
+     "boy_m": 0.619,
      "parcalar": [
       "ön 11 (tek)"
      ]
@@ -466,10 +469,10 @@
   },
   {
    "no": 4,
-   "artan_boy_m": 0.035,
+   "artan_boy_m": 0.0,
    "kesimler": [
     {
-     "boy_m": 4.265,
+     "boy_m": 4.315,
      "parcalar": [
       "ön 4 (tam)"
      ]
@@ -478,10 +481,10 @@
   },
   {
    "no": 5,
-   "artan_boy_m": 0.035,
+   "artan_boy_m": 0.0,
    "kesimler": [
     {
-     "boy_m": 4.265,
+     "boy_m": 4.315,
      "parcalar": [
       "ön 5 (tam)"
      ]
@@ -490,10 +493,10 @@
   },
   {
    "no": 6,
-   "artan_boy_m": 0.035,
+   "artan_boy_m": 0.0,
    "kesimler": [
     {
-     "boy_m": 4.265,
+     "boy_m": 4.315,
      "parcalar": [
       "ön 6 (tam)"
      ]
@@ -502,10 +505,10 @@
   },
   {
    "no": 7,
-   "artan_boy_m": 0.035,
+   "artan_boy_m": 0.0,
    "kesimler": [
     {
-     "boy_m": 4.265,
+     "boy_m": 4.315,
      "parcalar": [
       "ön 7 (tam)"
      ]
@@ -514,10 +517,10 @@
   },
   {
    "no": 8,
-   "artan_boy_m": 0.256,
+   "artan_boy_m": 0.221,
    "kesimler": [
     {
-     "boy_m": 4.044,
+     "boy_m": 4.094,
      "parcalar": [
       "ön 8 (tek)"
      ]
@@ -526,16 +529,16 @@
   },
   {
    "no": 9,
-   "artan_boy_m": 0.256,
+   "artan_boy_m": 0.166,
    "kesimler": [
     {
-     "boy_m": 2.885,
+     "boy_m": 2.935,
      "parcalar": [
       "arka 9 (tek)"
      ]
     },
     {
-     "boy_m": 1.158,
+     "boy_m": 1.208,
      "parcalar": [
       "sol 1 (tek)"
      ]
@@ -544,16 +547,16 @@
   },
   {
    "no": 10,
-   "artan_boy_m": 0.256,
+   "artan_boy_m": 0.166,
    "kesimler": [
     {
-     "boy_m": 2.317,
+     "boy_m": 2.367,
      "parcalar": [
       "sol 2 (tek)"
      ]
     },
     {
-     "boy_m": 1.727,
+     "boy_m": 1.777,
      "parcalar": [
       "arka 10 (tek)"
      ]
@@ -562,16 +565,16 @@
   },
   {
    "no": 11,
-   "artan_boy_m": 0.256,
+   "artan_boy_m": 0.166,
    "kesimler": [
     {
-     "boy_m": 3.475,
+     "boy_m": 3.525,
      "parcalar": [
       "sol 3 (tek)"
      ]
     },
     {
-     "boy_m": 0.569,
+     "boy_m": 0.619,
      "parcalar": [
       "arka 11 (tek)"
      ]
@@ -580,10 +583,10 @@
   },
   {
    "no": 12,
-   "artan_boy_m": 0.035,
+   "artan_boy_m": 0.0,
    "kesimler": [
     {
-     "boy_m": 4.265,
+     "boy_m": 4.315,
      "parcalar": [
       "sol 4 (tam)"
      ]
@@ -592,10 +595,10 @@
   },
   {
    "no": 13,
-   "artan_boy_m": 0.404,
+   "artan_boy_m": 0.369,
    "kesimler": [
     {
-     "boy_m": 3.896,
+     "boy_m": 3.946,
      "parcalar": [
       "sol 5 (tek)"
      ]
@@ -604,16 +607,16 @@
   },
   {
    "no": 14,
-   "artan_boy_m": 0.404,
+   "artan_boy_m": 0.314,
    "kesimler": [
     {
-     "boy_m": 2.738,
+     "boy_m": 2.788,
      "parcalar": [
       "sol 6 (tek)"
      ]
     },
     {
-     "boy_m": 1.158,
+     "boy_m": 1.208,
      "parcalar": [
       "arka 1 (tek)"
      ]
@@ -622,16 +625,16 @@
   },
   {
    "no": 15,
-   "artan_boy_m": 0.404,
+   "artan_boy_m": 0.314,
    "kesimler": [
     {
-     "boy_m": 2.317,
+     "boy_m": 2.367,
      "parcalar": [
       "arka 2 (tek)"
      ]
     },
     {
-     "boy_m": 1.58,
+     "boy_m": 1.63,
      "parcalar": [
       "sol 7 (tek)"
      ]
@@ -640,16 +643,16 @@
   },
   {
    "no": 16,
-   "artan_boy_m": 0.404,
+   "artan_boy_m": 0.314,
    "kesimler": [
     {
-     "boy_m": 3.475,
+     "boy_m": 3.525,
      "parcalar": [
       "arka 3 (tek)"
      ]
     },
     {
-     "boy_m": 0.421,
+     "boy_m": 0.471,
      "parcalar": [
       "sol 8 (tek)"
      ]
@@ -658,10 +661,10 @@
   },
   {
    "no": 17,
-   "artan_boy_m": 0.035,
+   "artan_boy_m": 0.0,
    "kesimler": [
     {
-     "boy_m": 4.265,
+     "boy_m": 4.315,
      "parcalar": [
       "arka 4 (tam)"
      ]
@@ -670,10 +673,10 @@
   },
   {
    "no": 18,
-   "artan_boy_m": 0.035,
+   "artan_boy_m": 0.0,
    "kesimler": [
     {
-     "boy_m": 4.265,
+     "boy_m": 4.315,
      "parcalar": [
       "arka 5 (tam)"
      ]
@@ -682,10 +685,10 @@
   },
   {
    "no": 19,
-   "artan_boy_m": 0.035,
+   "artan_boy_m": 0.0,
    "kesimler": [
     {
-     "boy_m": 4.265,
+     "boy_m": 4.315,
      "parcalar": [
       "arka 6 (tam)"
      ]
@@ -694,10 +697,10 @@
   },
   {
    "no": 20,
-   "artan_boy_m": 0.035,
+   "artan_boy_m": 0.0,
    "kesimler": [
     {
-     "boy_m": 4.265,
+     "boy_m": 4.315,
      "parcalar": [
       "arka 7 (tam)"
      ]
@@ -706,10 +709,10 @@
   },
   {
    "no": 21,
-   "artan_boy_m": 0.256,
+   "artan_boy_m": 0.221,
    "kesimler": [
     {
-     "boy_m": 4.044,
+     "boy_m": 4.094,
      "parcalar": [
       "arka 8 (tek)"
      ]
@@ -718,16 +721,16 @@
   },
   {
    "no": 22,
-   "artan_boy_m": 0.404,
+   "artan_boy_m": 0.314,
    "kesimler": [
     {
-     "boy_m": 2.738,
+     "boy_m": 2.788,
      "parcalar": [
       "sağ 6 (tek)"
      ]
     },
     {
-     "boy_m": 1.158,
+     "boy_m": 1.208,
      "parcalar": [
       "sağ 1 (tek)"
      ]
@@ -736,16 +739,16 @@
   },
   {
    "no": 23,
-   "artan_boy_m": 0.404,
+   "artan_boy_m": 0.314,
    "kesimler": [
     {
-     "boy_m": 2.317,
+     "boy_m": 2.367,
      "parcalar": [
       "sağ 2 (tek)"
      ]
     },
     {
-     "boy_m": 1.58,
+     "boy_m": 1.63,
      "parcalar": [
       "sağ 7 (tek)"
      ]
@@ -754,16 +757,16 @@
   },
   {
    "no": 24,
-   "artan_boy_m": 0.404,
+   "artan_boy_m": 0.314,
    "kesimler": [
     {
-     "boy_m": 3.475,
+     "boy_m": 3.525,
      "parcalar": [
       "sağ 3 (tek)"
      ]
     },
     {
-     "boy_m": 0.421,
+     "boy_m": 0.471,
      "parcalar": [
       "sağ 8 (tek)"
      ]
@@ -772,10 +775,10 @@
   },
   {
    "no": 25,
-   "artan_boy_m": 0.035,
+   "artan_boy_m": 0.0,
    "kesimler": [
     {
-     "boy_m": 4.265,
+     "boy_m": 4.315,
      "parcalar": [
       "sağ 4 (tam)"
      ]
@@ -784,10 +787,10 @@
   },
   {
    "no": 26,
-   "artan_boy_m": 0.404,
+   "artan_boy_m": 0.369,
    "kesimler": [
     {
-     "boy_m": 3.896,
+     "boy_m": 3.946,
      "parcalar": [
       "sağ 5 (tek)"
      ]
@@ -797,11 +800,14 @@
  ],
  "ad": "Ç8201 · Tek kat çelik, 2+1, 82 m² · paket: baz",
  "kaplama": "osb_kiremit",
- "baslangic_kosesine_gore_adet": {
+ "baslangica_gore_adet": {
   "sol": 26,
-  "sag": 26,
+  "kose_orta": 26,
+  "orta_kose": 26,
   "orta": 26,
+  "sag": 26,
   "plan_yonu": 26
  },
+ "kesim_payisiz_adet": 26,
  "bir_cm_kesim_payiyla_adet": 26
 }

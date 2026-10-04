@@ -1,13 +1,13 @@
 # Çelik yükleme listesi: yöntem ve taslak (3–4 Ekim 2026)
 
-Son güncelleme: 4 Ekim 2026 02:58. Lokman, 3 Ekim 12:03: yükleme listesi sistemi kurulacak. Bundan sonraki çelik modellerde model verilecek, liste aynı sistemle dönecek. Kapsam: tek kat çelik, çift katın üst katı ve çatı ailesi. Canlıya alınacak.
+Son güncelleme: 4 Ekim 2026 13:22. Lokman, 3 Ekim 12:03: yükleme listesi sistemi kurulacak. Bundan sonraki çelik modellerde model verilecek, liste aynı sistemle dönecek. Kapsam: tek kat çelik, çift katın üst katı ve çatı ailesi. Canlıya alınacak.
 
 Deneme kodu: `deneme/2026-10-03_yukleme/`. Hesapta LLM yok: aynı girdi her zaman aynı listeyi verir. Buradaki tablolar ve sayılar hesap çıktılarından üretilir (`belge_uret.py`; tablolar `sonuc/tablolar.md`).
 
 ## Kaynaklar
 
 1. **Lokman'ın söyledikleri.** 3 Ekim 13:27'de on bir soruya verdiği cevaplar (aşağıda), 4 Ekim 01:24'teki düzeltmesi (tavan ve çatı panelinin ağırlığı), 4 Ekim 01:42'deki düzeltmesi (baz kaplama; kırma çatıda kaplama adedinin çatı açılımından bulunması) ve önceki kurallar.
-2. **Mühendisin cevapları.** PortatifEv'in inşaat mühendisi Ubeydullah'ın iki tur cevabı: 3 Ekim 14:50 sürümündeki yedi soruya (Lokman 3 Ekim 18:14'te iletti) ve 19:12 sürümündeki yedi soruya (Lokman 4 Ekim 01:24'te iletti). İkisi de aşağıda. Kurallarda durumu `muhendis`. İkinci turun iki cevabını (baz kaplama; kırma çatıda kaplama adedi) Lokman 01:42'de düzeltti.
+2. **Mühendisin cevapları.** PortatifEv'in inşaat mühendisi Ubeydullah'ın üç tur cevabı: 3 Ekim 14:50 sürümündeki yedi soruya (Lokman 3 Ekim 18:14'te iletti), 19:12 sürümündeki yedi soruya (Lokman 4 Ekim 01:24'te iletti) ve 4 Ekim 02:58 sürümündeki on iki soruya (Lokman 4 Ekim 12:14'te iletti). Üçü de aşağıda. Kurallarda durumu `muhendis`. İkinci turun iki cevabını (baz kaplama; kırma çatıda kaplama adedi) Lokman 01:42'de düzeltti. Üçüncü turun mesajında cevapların kimden olduğu yazmıyor; 11. cevaptaki anlatım mühendisin olduğu için on iki cevap da mühendisin sayıldı.
 3. **Gerçek yükleme listeleri.** Lokman'ın bağladığı klasördeki çalışma kitapları. Üçü hesap sayfalarıyla okundu. Üçünde de çatı yöntem B ile (tavan omegası, aşık, saçak sacı) hazırlanmış: PortatifEv bugüne kadar çelikte de bu yöntemi uygulamış. Şimdi baz alınan yöntem A için karşılaştırılacak gerçek liste yok.
    - **90 m²**, beşik çatı, OSB üstü metal kiremit, karkas 80 mm (30 Eylül 2025).
    - **62 m²**, kırma çatı, sandviç panel, dış karkas 140 mm, verandalı (19 Eylül 2025). Ç8201'e en yakın örnek.
@@ -21,11 +21,11 @@ Bayi, müşteri ve öteki personel adları alınmadı. Çalışma kitapları dep
 
 | # | Konu | Cevap (özet) | Uygulama |
 |---|---|---|---|
-| 1 | Çelik kg | Excel motorundaki gibi: çeliğin et kalınlığı ve sırt kalınlığına göre, ortalama cephe uzunluğundan. Dış cephe (140'lıksa 140) ve iç cephe (80) uzunluğuyla kg verilir. Kirişler ve makaslar yaklaşık bir makas ölçüsünden ayrıca verilecek. İleride Blender eklentisi (şimdi değil). | Duvar kg = duvar boyu × motorun birim ağırlığı. Dikme, kiriş ve makas motorun ortalamasıyla, "geçici" notuyla. Tavan ve çatı paneli 100 m² için verilen ağırlıktan, alana oranla (ağırlıklar Lokman'ın 4 Ekim düzeltmesiyle). |
+| 1 | Çelik kg | Excel motorundaki gibi: çeliğin et kalınlığı ve sırt kalınlığına göre, ortalama cephe uzunluğundan. Dış cephe (140'lıksa 140) ve iç cephe (80) uzunluğuyla kg verilir. Kirişler ve makaslar yaklaşık bir makas ölçüsünden ayrıca verilecek. İleride Blender eklentisi (şimdi değil). | Duvar kg = duvar boyu × motorun birim ağırlığı. Dikme, kiriş ve makas motorun ortalamasıyla, "şimdilik" notuyla (mühendis, 4 Ekim 12:14: "şimdilik Excel hesaplama motoruna uy"). Tavan ve çatı paneli 100 m² için verilen ağırlıktan, alana oranla (ağırlıklar Lokman'ın 4 Ekim düzeltmesiyle). |
 | 2 | Çatı örtüsü | "Çatı kaplaması" seçenektir: tek kat panel, sandviç panel, OSB + nem bariyeri + kiremit desen sac vb.; ötekiler zamanla verilecek. Hafif çelikte normalde makas arasına tavan paneli, üstüne çatı paneli konur; "ama biz prefabrikte kullandığımız metod olan tavan omegası, aşık, alın sacı ve saçak sacı yöntemini uyguluyoruz". İki varyant var; şimdilik çatı ve tavan panelli yöntem baz. | Çatı yöntemi A; kaplama seçenek. Baz pakette tek kat panel (Lokman, 4 Ekim 01:42); motordaki altı kaplama da hesaplanıyor. |
 | 3 | Veranda kolonu ve kirişi | Kaplanıyor. Her projede sırt 80 mm (çelik karkas), genişlik 30 cm. Bu projede verandanın bütün çerçevesi böyle: kirişler yanlarda ve karşıda; altlarında 240 cm, kiriş gibi dikmeler. | Ç8201: dikme 3 × 240 cm, kiriş 12,38 m; kaplama çevreleri 0,76 ve 0,68 m. Çizime işlendi. |
 | 4 | Yeşil alçıpan | Doğru: duvarda ıslak hacim; tavanda ıslak hacim ile veranda tavanı. | Hesap değişmedi; kural teyitli. |
-| 5 | Köşebent | Kural olarak bina m² ÷ 2,5; 50 ya da 70 olması çok önemli değil. | Yerini mühendisin plandan hesaplayan formülü aldı (18:14): Ç8201'de 51 (m² ÷ 2,5 ile 33'tü). m² ÷ 2,5 kurallarda yedek olarak duruyor. |
+| 5 | Köşebent | Kural olarak bina m² ÷ 2,5; 50 ya da 70 olması çok önemli değil. | Yerini mühendisin plandan hesaplayan formülü aldı (18:14): Ç8201'de 59 (m² ÷ 2,5 ile 33'tü; veranda tavanı eklenmeden önce 51). m² ÷ 2,5 kurallarda yedek olarak duruyor. |
 | 6 | Dere inişi | Her köşeye bir; 10 metrelik cephenin ortasına bir daha (14 metrede üç tane konmaz); 82 m²'de toplam 6. | Kural kodda. Ç8201: 6; çatı planında işaretli. Mühendis: iniş plana bakarak yerleştirilir (18:14); elle yerleştirilirse o sayı kullanılır. |
 | 7 | Bindirme, mahyalar | Saçak, mahya ve alın sacında bindirme hep 30 cm (fire dahil); örnek: "saçak sacı L:2800 ise cephe 10 metre ÷ 2,5". Ters mahya: cumbalı çatıda vadi. Özel mahya: ana bina ile veranda çatısının birleşimi. | Mahya (L 2800) ÷ 2,5 → 11. Yöntem B'de saçak ve alın sacı listelerde L 2500 olduğu için ÷ 2,2 (çıkarım). Dere sayılmadı: 20 cm'de kaldı (soru). |
 | 8 | Saçak altı | İki yöntem birlikte kullanılmaz; saçak sacı varsa Boardex kaplanmaz. Ç8201 Boardex kaplamalı, çatı ve tavan panelli. | Baz listede saçak sacı yok; saçaklar için Boardex var. Saçak yüzü de Boardex; saçak omegası yok (mühendis, 18:14). |
@@ -43,7 +43,7 @@ Sorular 14:50 sürümündeki yedi soruydu. "Denetim" sütunu, cevabın elimizdek
 | 2 | Tavan ve çatı panelinin ölçüsü, adedi, kg'ı? Saçak omegası gerekiyor mu? Saçak yüzü Boardex mi? | Motor çatıları dört grupta (beşik, beşik + cumba, beşik + 2 cumba, dört omuz) ortalama ağırlıkla hesaplıyor; çatıdaki Boardex kaplaması motorda henüz hesaplanmıyor. "10 m x 10 m (100 m2) bir binada tavan paneli koyduğumuzu düşünürsek (8 adet) tavan paneli ağırlığı 429,83 kg, çatı paneli (12 parça) koyduğumuzda 561,6 kg geliyor. Saçak omegası gerekmiyor. Saçak yüzü de boardex ile kaplanıyor." | 429,83 ve 561,6 okunan çalışma kitaplarında bulunamadı; mühendisin beyanı olarak kayıtlı. Hangi çatı tipi, saçak ve eğim için olduğu yazılmadı. Motorda "saçaklar için Boardex" satırı gerçekten 0. | kg ve adet çatının örttüğü oturum alanına oranlandı: o gün Ç8201'de tavan paneli 353 kg, çatı paneli 461 kg; çelik toplamı 1902 → 2716 kg. Ağırlıkları Lokman 4 Ekim'de düzeltti (aşağıda). Saçak omegası satırı kalktı. Saçak yüzü için Boardex teyitli. |
 | 3 | Baz pakette hangi çatı kaplaması var? | Motordaki kaplamalar: OSB + membran + shingle; OSB + nem bariyeri + trapez sac; trapez sac; tek kat panel; sandviç panel; OSB + membran + metal kiremit. | Motorun seçenek listesi aynı. Baz paket cevapta yok. Motorun trapez sac ve metal kiremit adedi formülü hatalı görünüyor (aşağıda "Excel motoruyla ilgili gözlemler"). | Altı seçenek hesaplanıyor. Lokman'ın "OSB + nem bariyeri + kiremit desen sac"ı motorun "OSB + membran + metal kiremit"iyle eşlendi (motor o seçenekte nem bariyeri hesaplıyor, membran hesaplamıyor). Baz paket: mühendis ikinci cevaplarda sandviç panel yazdı; Lokman tek kat panel diye düzeltti (4 Ekim 01:42). |
 | 4 | OSB takviyesi bütün oda mı, yalnız o duvarlar mı? | "Bütün oda değil sadece dolap ve TV ünitesi gelen duvar metrajı alınır." | Gerçek listelerdeki alanlar (35 ve 39 m²) bütün odadan (72 ve 112 m²) küçük: cevapla aynı yönde. | Modelin tanımına dolap ve TV duvarları yazılır. Ç8201'de katalog görselinden üç duvar: banyo ile mutfak arası duvar 2,49 m (mutfak dolabı); üst dış duvar 2,96 m (mutfak dolabı ve eviye); hol ile yaşam alanı arası duvar 4,80 m (TV ünitesi). Net 24,5 m² → 9 levha. Duvar seçimini mühendis ikinci cevaplarda doğruladı. |
-| 5 | Köşebent: m² ÷ 2,5 gerçek listelerin yarısını veriyor. | "Köşebent hesabı bina içerisinde bulunan bütün odaların tavan çevresi uzunluğu ile bütün oda iç köşe uzunlukları (standart kat yüksekliğimiz 2,7 metre alınır) toplamının 2,5 metreye bölünmesiyle bulunur." | Motordaki formül aynı yapıda ama plansız: (uzun × 6 + kısa × 6 + 9 × 4 × 2,7) ÷ 2,5. Üç gerçek listede iç köşe sayısı bilinmiyor (planları yok); aşağıdaki tablo. | Ç8201 (planından): (69,72 + 21 × 2,7) ÷ 2,5 → 51. Yalnız iç köşeler sayıldı. |
+| 5 | Köşebent: m² ÷ 2,5 gerçek listelerin yarısını veriyor. | "Köşebent hesabı bina içerisinde bulunan bütün odaların tavan çevresi uzunluğu ile bütün oda iç köşe uzunlukları (standart kat yüksekliğimiz 2,7 metre alınır) toplamının 2,5 metreye bölünmesiyle bulunur." | Motordaki formül aynı yapıda ama plansız: (uzun × 6 + kısa × 6 + 9 × 4 × 2,7) ÷ 2,5. Üç gerçek listede iç köşe sayısı bilinmiyor (planları yok); aşağıdaki tablo. | Ç8201 (planından): (69,72 + veranda tavanı 19,88 + 21 × 2,7) ÷ 2,5 → 59. Yalnız iç köşeler sayılır. Veranda tavanının çevresi üçüncü cevaplarla eklendi (önce 51). |
 | 6 | İniş sayısı iki listede kuraldan bir fazla. | "Dere inişi plana bakarak yerleştirilmesi doğru olur. Normalde düz bir saçakta ortalama 5 metrede bir dere inişi yazılır." | Mühendisin 10 × 10 m metrajında dört omuz çatıda 8, beşik çatıda 6 iniş var: Lokman'ın kuralı ikisini de veriyor. Motorun formülü farklı (dere adedi ÷ 5 + 6). | Kural değişmedi (Ç8201: 6). Tanımda iniş yerleri elle verilirse (`cati.inis_noktalari`) o sayı kullanılır. Listelerdeki 7'ler plana göre yerleşimle açıklanıyor. |
 | 7 | Elektrik sayıları paftadan mı, oda başına kuraldan mı? | Oda başına kural; "%75 lik bir doğruluk payı olacağı düşünülerek" (aşağıda). | 105 m² listenin pafta sayımıyla sınandı (aşağıda): kural 41, sayım 48 parça. | Pafta sayımı varsa o; yoksa kural. Ç8201: duy 6, glop 3, tekli anahtar 5, çiftli anahtar 2, tekli priz 16, çiftli priz 2, uydu prizi 1, sigorta 9. Yaşam Alanı'nda salon ve mutfak kuralları birlikte uygulandı (mühendis ikinci cevaplarda doğruladı). |
 
@@ -62,7 +62,7 @@ Sorular 14:50 sürümündeki yedi soruydu. "Denetim" sütunu, cevabın elimizdek
 - Bina başına (cevapta holün altında): 12'li sigorta kutusu 1, sigorta 9, besleme kablosu 5 m, zil 1, kaçak akım rölesi 1; salonda 25 m uydu kablosu.
 - Buat kasa = anahtar + priz + oda sayısı.
 - 3 × 2,5 kablo = sigorta adedi × sigortadan evin en uzak mesafesi + (tekli priz + 2 × çiftli priz) × 2. 2 × 1,5 kablo = sigorta adedi × en uzak mesafe + (tekli anahtar + 2 × çiftli anahtar) × 2.
-- Okuma: cevaptaki "anahtar" tekli anahtar, "priz" tekli priz sayıldı. "En uzak mesafe" motordaki gibi kapalı kısmın köşegeni alındı (Ç8201: 11,34 m); motor 3 × 2,5 kabloda uydu prizini de sayıyor, hesap öyle yapıldı (fark 2 m). Buat için oda sayısı planın mahal sayısı alındı (Ç8201: 5).
+- Okuma: cevaptaki "anahtar" tekli anahtar, "priz" tekli priz sayıldı. "En uzak mesafe" motordaki gibi kapalı kısmın köşegeni alındı (Ç8201: 11,34 m); motor 3 × 2,5 kabloda uydu prizini de sayıyor, hesap öyle yapıldı (fark 2 m). Buat için oda sayısı planın mahal sayısı alındı (Ç8201: 5). Mühendis üçüncü cevaplarda ikisini de teyit etti: "Veranda hariç odaları say. Yatak odası ve banyodaki prizler tekli."
 
 Ç8201'de oda oda:
 
@@ -100,9 +100,9 @@ Toplamda kural sayımın %85'ini veriyor; kalem kalem farklar büyük (çiftli a
 | 62 m² | 51,83 | 4 | 39 | 50 | 27,1 |
 | 105 m² | 109,81 | 6 | 70 | 85 | 38,0 |
 
-Ç8201 (planından): oda çevreleri 69,72 m, iç köşe 21; (69,72 + 21 × 2,7) ÷ 2,5 = 50,6 → 51 adet.
+Ç8201 (planından): oda çevreleri 69,72 m, veranda tavanının çevresi 19,88 m, iç köşe 21; (69,72 + 19,88 + 21 × 2,7) ÷ 2,5 = 58,5 → 59 adet.
 
-Listelerdeki adetler, her odada ortalama 6–7 iç köşe varsa formülle çıkar. Salon, mutfak ve holün tek mahal olduğu planlarda bu olabilir; planlar elde olmadığı için sınanamadı. Ç8201'in planı sade: beş mahal, 21 iç köşe.
+Listelerdeki adetler, her odada ortalama 6–7 iç köşe varsa formülle çıkar. Salon, mutfak ve holün tek mahal olduğu planlarda bu olabilir; planlar elde olmadığı için sınanamadı. Ç8201'in planı sade: beş mahal, 21 iç köşe. Veranda tavanının çevresi (üçüncü cevaplar) örneklerde bilinmediği için bu tabloya eklenmedi; verandalı projede eklenince fark azalır.
 
 ## Lokman'ın düzeltmesi ve mühendisin ikinci cevapları (4 Ekim 01:24) ve uygulanışı
 
@@ -113,12 +113,12 @@ Sorular 19:12 sürümündeki yedi soruydu. 1. ve 6. cevabı Lokman 01:42'de düz
 | # | Soru | Cevap | Uygulama |
 |---|---|---|---|
 | 1 | Baz pakette altı seçenekten hangi çatı kaplaması var? | "Baz paket sandviç panel olarak al." | **Lokman düzeltti (01:42):** baz kaplama tek kat panel. Sandviç panel öteki dört kaplamayla birlikte seçenek olarak hesaplanıyor. |
-| 2 | Tek katta dış 140'lık duvarın et kalınlığı 0,8 mi, 1,2 mi? | Tek katlı binada zemin kattaki çelik 140x45x12 ya da 80x45x12. İki katlı binada zemin kat yine böyle; 1. kat 140x45x0,8 ya da 80x45x0,8. İki katlıda "1. Katta büyük pencereler varsa mesela 200 cm ve daha geniş pencere varsa ozaman o duvarı 1,2 mm et kalınlığında alırız. Genelde 1. Katta 1 veya 2 adet duvar bu şekilde 1,2 mm et kalınlığı olacak şekilde tasarlanıyor." | Okuma: cevaptaki "12 mm" ve "8 mm", 1,2 ve 0,8 mm'dir. Tek katta ve zemin katta dış ve iç duvarlar 1,2 mm; üst katta 0,8 mm. Dış 140 seçeneği: dış 140 × 1,2 ve iç 80 × 1,2 → çelik 2828 kg, baz paketten 273 kg ağır (3 Ekim'de 0,8 mm varsayılmış, daha hafif çıkmıştı). Üst katta geniş pencereli duvar kuralı kayıtlı; çift kat modeli gelince uygulanacak. 2025 tarihli iki tek katlı listede dış 140'lık duvarların çoğu 0,8 mm'di: kuralla uyuşmuyor. |
-| 3 | OSB takviyesi için seçilen üç duvar doğru mu? | "Evet doğru yeri almışsın. Ancak bunun yeri en doğru şekilde genel mimari planda mutfak tezgahı ve TV ünitesi yeri gösterilirse o kısımlar alınarak bulunabilir." | Seçim teyitli; satırdaki "teyit bekliyor" notu kalktı. Kural: yer, mimari plandaki tezgâh ve TV ünitesi yerinden alınır. "O kısımlar" sözü duvarın yalnız o bölümü diye de okunabilir; duvar yüzünün tamamı alınmaya devam ediyor (açık nokta). |
+| 2 | Tek katta dış 140'lık duvarın et kalınlığı 0,8 mi, 1,2 mi? | Tek katlı binada zemin kattaki çelik 140x45x12 ya da 80x45x12. İki katlı binada zemin kat yine böyle; 1. kat 140x45x0,8 ya da 80x45x0,8. İki katlıda "1. Katta büyük pencereler varsa mesela 200 cm ve daha geniş pencere varsa ozaman o duvarı 1,2 mm et kalınlığında alırız. Genelde 1. Katta 1 veya 2 adet duvar bu şekilde 1,2 mm et kalınlığı olacak şekilde tasarlanıyor." | Okuma: cevaptaki "12 mm" ve "8 mm", 1,2 ve 0,8 mm'dir. Tek katta ve zemin katta dış ve iç duvarlar 1,2 mm; üst katta 0,8 mm. Dış 140 seçeneği: dış 140 × 1,2 ve iç 80 × 1,2 → çelik 2828 kg, baz paketten 273 kg ağır (3 Ekim'de 0,8 mm varsayılmış, daha hafif çıkmıştı). Üst katta geniş pencereli duvar kuralı kayıtlı; çift kat modeli gelince uygulanacak. 2025 tarihli iki tek katlı listede dış 140'lık duvarların çoğu 0,8 mm'di: kuralla uyuşmuyor. Mühendis üçüncü cevaplarda kuralı yineledi: tek katta 1,2 mm. |
+| 3 | OSB takviyesi için seçilen üç duvar doğru mu? | "Evet doğru yeri almışsın. Ancak bunun yeri en doğru şekilde genel mimari planda mutfak tezgahı ve TV ünitesi yeri gösterilirse o kısımlar alınarak bulunabilir." | Seçim teyitli; satırdaki "teyit bekliyor" notu kalktı. Kural: yer, mimari plandaki tezgâh ve TV ünitesi yerinden alınır. "O kısımlar" sözü duvarın yalnız o bölümü diye de okunabiliyordu; üçüncü cevaplarla kapandı: "Duvarın tamamını al." |
 | 4 | Yaşam Alanı'nda salon ve mutfak kuralları birlikte mi uygulanır? | "Evet doğru ikisini de uygulamamız gerekiyor. Çünkü mutfak eşyaları ayrı, salon eşyaları ayrı." | Teyitli; hesap değişmedi. |
-| 5 | Makas ve kiriş ölçüsü gelene kadar çatı çeliği motorun ortalamasıyla; panel adedi alana oranlandı. | "Tamamdır." | Çatı çeliği motorun ortalamasıyla kalıyor ("geçici" notuyla; Lokman makas ölçüsünü verince değişecek). Panel adedi alana oranlanıyor. |
+| 5 | Makas ve kiriş ölçüsü gelene kadar çatı çeliği motorun ortalamasıyla; panel adedi alana oranlandı. | "Tamamdır." | Çatı çeliği motorun ortalamasıyla kalıyor (makas ölçüsü verilince değişecek; üçüncü cevaplar: "şimdilik Excel hesaplama motoruna uy"). Panel adedi alana oranlanıyor. |
 | 6 | Kırma çatıda kaplama adedi yerleşimle mi bulunsun? | "Kırma çatıda çatı kaplama malzemesi hesabı sağlıklı olarak autocad üzerinden hesaplanarak yapılması daha sağlıklı. Ancak yüzeysel olarak çatı yüzey alanı m2 belirtilerek (%10 luk pay alınabilir) bu m2 olacak şekilde çatı kaplama malzemesi sipariş edilmeli şeklinde not edilebilir." | **Lokman düzeltti (01:42):** adet AutoCAD'e bırakılmaz; çatı açılımından ve dizilimden çıkar (aşağıda). %10 pay ve "sipariş bu m² olacak şekilde" notu listeden kalktı; pay kurallarda kayıt olarak duruyor. |
-| 7 | Çatı müdahale kapağı ve mahya bandı listeye girsin mi? | "Çatı müdahale kapağı müşterinin talebine göre ekleniyor. Herhangi bir detay belirtilmemişse yani standart bir pakette çatı müdahale kapağı göndermiyoruz. Mahya bandını ekle." | Mahya bandı eklendi: düz ve ters mahya boyları toplamı ÷ 10 m → Ç8201'de 3 rulo. Çatı müdahale kapağı standart listede yok; müşteri isterse eklenir (`--mudahale-kapagi`; kat adedi kadar). |
+| 7 | Çatı müdahale kapağı ve mahya bandı listeye girsin mi? | "Çatı müdahale kapağı müşterinin talebine göre ekleniyor. Herhangi bir detay belirtilmemişse yani standart bir pakette çatı müdahale kapağı göndermiyoruz. Mahya bandını ekle." | Mahya bandı eklendi. O gün mahya uzunluğundan hesaplandı (Ç8201'de 3 rulo); üçüncü cevaplardaki formülle 4 rulo. Çatı müdahale kapağı standart listede yok; müşteri isterse eklenir (`--mudahale-kapagi`; kat adedi kadar). |
 
 ## Lokman'ın ikinci düzeltmesi (4 Ekim 01:42): baz kaplama ve çatı açılımı
 
@@ -127,35 +127,99 @@ Lokman: "mühendis 2 cevapta hata yapmış onları düzeltmem gerekiyor".
 1. **Baz kaplama.** "çatıda baz model Tek Kat panel olarak geçiyor". Uygulama: baz paketin çatı kaplaması tek kat panel (87 cm kapatır); Ç8201'in tanımı ve listesi buna göre. Sandviç panel seçenek.
 2. **Kırma çatıda kaplama adedi.** "biz AutoCAD bulaşmak istemiyoruz"; "sen eğime göre 82 m² olduğu gibi çatıyı çizip sonra çatıyı açman lazım zarfı açar gibi yüzeye dizilimini bulmak için". "çatı formunun çapraz kesimleri diğer tarafa kullanabilirsin": sol taraftaki üçgende kullanılan panel sağ tarafa aynı açıyla; ön taraftaki yamuktan çıkan açılı kesilmiş parçalar arka taraftaki aynı biçimdeki açılı yere.
 
-Uygulama (`deneme/2026-10-03_yukleme/cati_acilim.py`):
+Uygulama (`deneme/2026-10-03_yukleme/cati_acilim.py`). Taşma, kesim payı ve başlangıç seçimi mühendisin üçüncü cevaplarından sonra eklendi (aşağıdaki bölüm):
 
 - **Açılım.** Çatının dört yüzü gerçek boyutuyla açılır: uzun saçaklarda iki yamuk (ön, arka), kısa saçaklarda iki üçgen (sol, sağ). Yüzün yüksekliği eğimli boydur: (kısa kenar ÷ 2) × √(1 + eğim²). Ç8201'de 426,5 cm; saçaklar 1154 ve 810 cm, mahya 344 cm. Kırma çizgisi açılımda dört yüzde de aynı açıdadır.
 - **Dizilim.** Her yüz, saçağa dik, kaplamanın kapattığı genişlikte şeritlere bölünür. Mahyanın altındaki şeritler tam boydur; kırmaya gelen şeritler çapraz kesilir.
-- **Artan parça.** Bir panel gönyesinde kesilerek kısa dikdörtgenlere, her dikdörtgen tek bir çapraz kesimle iki parçaya ayrılır. Alt parça olduğu gibi kullanılır. Üst parça, düz ucu saçağa gelecek biçimde karşı yüze konur; orada aynı açılı yere oturur (ön yüzün sol kırması ↔ arka yüzün sol kırması, dışarıdan bakışla; planda çapraz köşeler). Parça ters yüz edilmez.
-- **Eşleme.** En uzun parçadan başlanır; karşı yüzde, onunla aynı panelden çıkabilen en uzun parça eş yapılır. İki parçanın birlikte istediği boy: uzun kenarlarının toplamı − bir şeritlik boy farkı.
-- **Varsayımlar.** Dizilim her yüzde, dışarıdan bakışla sol köşeden başlar. Kesim payı ve boy bindirmesi yok. Panel tek boyda (eğimli boy, 10 cm'ye yukarı: L 4300).
+- **Taşma** (mühendis, 4 Ekim 12:14). Kaplama saçaktan 5 cm dışarı uzatılır. Panel boyu = eğimli boy + 5 cm, mm'ye yukarı: Ç8201'de L 4315. Açılımda her parçanın boyu 5 cm artar. Excel motorundaki sac boyu da aynı: eğimli boy + 0,05. Panel boyu gerçek listeden geliyorsa ve kısaysa taşma panelin yettiği kadar alınır (62 m² örnekte 3,8 cm).
+- **Artan parça.** Bir panel gönyesinde kesilerek kısa dikdörtgenlere, her dikdörtgen tek bir çapraz kesimle iki parçaya ayrılır. Alt parça olduğu gibi kullanılır. Üst parça, düz ucu saçağa gelecek biçimde karşı yüze konur; orada aynı açılı yere oturur (ön yüzün sol kırması ↔ arka yüzün sol kırması, dışarıdan bakışla; planda çapraz köşeler). Parça ters yüz edilmez. Kiremit desen sacda artan parça kullanılmaz: desen ters gelir (mühendis, 4 Ekim 12:14).
+- **Eşleme.** En uzun parçadan başlanır; karşı yüzde, onunla aynı panelden çıkabilen en uzun parça eş yapılır. İki parçanın birlikte istediği boy: uzun kenarlarının toplamı − bir şeritlik boy farkı + kesim payı.
+- **Kesim payı** (varsayım; soruldu, cevap gelmedi). 5 mm: çapraz kesimde iki parçanın arasına ve aynı panelden çıkan dikdörtgenlerin arasına. Birkaç milimetrelik paya güvenilmesin diye kondu.
+- **Dizilimin başladığı yer** (varsayım; soruldu, cevap gelmedi). Altı başlangıç denenir: her yüzde sol köşeden · uzun yüzlerde sol köşeden, kısa yüzlerde ortadan · uzun yüzlerde ortadan, kısa yüzlerde sol köşeden · her yüzde ortadan · her yüzde sağ köşeden · karşılıklı yüzlerde planda aynı uçtan. En az paneli veren ilk başlangıç listeye girer. "Ortadan": yüzün ortasına bir ek yeri gelir, şeritler iki yana eşit dağılır; köşe hep dışarıdan bakışla.
+- **Yok sayılanlar.** Boy bindirmesi yok (panel tek boyda); yedek panel eklenmez.
 
-Ç8201, tek kat panel: **28 adet** (12 tam boy + 16 kesilen; kesilen her panelden iki parça çıkıyor: biri bir yüze, öteki karşı yüze). Çizimler: `deneme/2026-10-03_yukleme/sonuc/C8201_cati_acilim.png` (açılım; her parçada panel numarası) ve `C8201_cati_kesim.png` (her panelin kesimi); döküm `C8201_cati_acilim.json`.
+Ç8201, tek kat panel: **28 adet L 4315** (10 tam boy + 18 kesilen; kesilen her panelden iki parça çıkıyor: biri bir yüze, öteki karşı yüze). Dizilim uzun yüzlerde sol köşeden, kısa yüzlerde ortadan başlıyor. Çizimler: `deneme/2026-10-03_yukleme/sonuc/C8201_cati_acilim.png` (açılım; her parçada panel numarası) ve `C8201_cati_kesim.png` (her panelin kesimi); döküm `C8201_cati_acilim.json`.
 
-| Çatı | Kaplama | Kapatır | Artan parça karşı yüzde | Artan parça kullanılmazsa | Listeye giren | Alan olarak en az | Önceki kural (yüzey + %10) | Başlangıç köşesine göre | 1 cm kesim payıyla |
-|---|---|---|---|---|---|---|---|---|---|
-| Ç8201 (L 4300) | Tek kat panel (baz paket) | 87 cm | 28 (12 tam boy + 16 kesilen) | 32 | 28 | 27 | 29 | 28 | 28 |
-| Ç8201 (L 4300) | Sandviç panel | 100 cm | 24 (10 tam boy + 14 kesilen) | 28 | 24 | 23 | 26 | 24–26 | 25 |
-| Ç8201 (L 4300) | Trapez sac | 80 cm | 30 (12 tam boy + 18 kesilen) | 34 | 30 | 29 | 32 | 30–32 | 30 |
-| Ç8201 (L 4300) | Kiremit desen sac | 110 cm | 24 (10 tam boy + 14 kesilen) | 26 | 26 (varsayım) | 21 | 23 | 26 | 26 |
-| 62 m² gerçek liste (L 3200; listede 27) | Sandviç panel | 100 cm | 26 (16 tam boy + 10 kesilen) | 29 | 26 | 25 | 27 | 26–27 | 26 |
-| Mühendisin 10 × 10 m dört omuz metrajı (L 5900; metrajda 36) | Trapez sac | 80 cm | 27 (4 tam boy + 23 kesilen) | 30 | 27 | 26 | 28 | 27–28 | 28 |
+| Çatı | Kaplama | Kapatır | Adet (listeye giren) | Dizilimin başladığı yer | Her yüzde sol köşeden | Öteki başlangıçlarla | Artan parça kullanılmazsa | Alan olarak en az | Kesim payı sıfır / 1 cm | Taşma |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Ç8201 (L 4315) | Tek kat panel (baz paket) | 87 cm | 28 (10 tam boy + 18 kesilen) | uzun yüzlerde sol köşeden, kısa yüzlerde ortadan | 29 | 28–29 | 32 | 27 | 28 / 28 | 5,0 cm |
+| Ç8201 (L 4315) | Sandviç panel | 100 cm | 26 (10 tam boy + 16 kesilen) | uzun yüzlerde ortadan, kısa yüzlerde sol köşeden | 27 | 26–27 | 28 | 24 | 25 / 26 | 5,0 cm |
+| Ç8201 (L 4315) | Trapez sac | 80 cm | 32 (12 tam boy + 20 kesilen) | her yüzde sol köşeden | 32 | 32 | 36 | 30 | 30 / 32 | 5,0 cm |
+| Ç8201 (L 4315) | Kiremit desen sac | 110 cm | 26 (10 tam boy + 16 kesilen) | her yüzde sol köşeden | 26 | 26 | 26 (listeye giren) | 22 | 26 / 26 | 5,0 cm |
+| 62 m² gerçek liste (L 3200; listede 27) | Sandviç panel | 100 cm | 28 (16 tam boy + 12 kesilen) | her yüzde sol köşeden | 28 | 28 | 32 | 25 | 28 / 28 | 3,8 cm |
+| Mühendisin 10 × 10 m dört omuz metrajı (L 5900; metrajda 36) | Trapez sac | 80 cm | 28 (4 tam boy + 24 kesilen) | her yüzde sol köşeden | 28 | 28 | 30 | 26 | 28 / 28 | 5,0 cm |
 
 Okuma:
 
-- **Sağlama.** Aynı kural, bu koda bakmadan ayrıca hesaplandı (bağımsız denetim, 4 Ekim): Ç8201'in dört satırındaki ve 62 m² satırındaki adetler ile "kullanılmazsa" sütunu aynı çıktı; adetlerin bu dizilim için en az olduğu gösterildi. Her paneldeki parçaların panele sığdığı, üst üste binmediği ve yüzdeki yerine tam oturduğu çokgenlerle sınanıyor (`cati_acilim_saglama.py`; rastgele 200 kırma çatıda da sorun çıkmadı; kural bilerek bozulunca sınama yakalıyor).
-- **Tek kat panel sağlam.** 28 adet; dizilim sol köşeden, sağ köşeden ya da ortadan başlasa da, 1 cm kesim payıyla da aynı. En dar kesimde 6,7 cm pay kalıyor. Dizilim köşeye ya da ortaya oturmayan bir yerden başlatılırsa adet 30'a kadar çıkabiliyor (bağımsız denetimin taraması).
-- **Sandviç panel hassas.** 24 adet, ama üç kesimde pay 4 mm; 1 cm kesim payıyla 25, dizilim ortadan başlarsa 26.
-- **Kiremit desen sac.** Desen yönlü olduğu için artan parça karşı yüzde kullanılmadı (varsayım; sorulacak): 26 adet. Kullanılabilirse 24.
-- **Önceki kural** (yüzey + %10) dizilime göre tek kat panelde 1, sandviç panelde ve trapez sacda 2 fazla, kiremit desen sacda 3 eksik veriyordu.
-- **62 m² gerçek liste** (kırma çatı, sandviç panel L 3200): listede 27 adet (ayrıca 2 adet L 1000); dizilim 26 veriyor. Fark 1: yedek mi, başka bir dizilim mi bilinmiyor (sorulacak). Karşılıklı yüzler planda aynı uçtan başlatılırsa dizilim de 27 veriyor.
+- **Sağlama.** Aynı kural, bu koda bakmadan ayrıca hesaplandı (bağımsız denetim, 4 Ekim; taşma ve kesim payı eklendikten sonra yeniden): beş örnek (Ç8201'in dört kaplaması ve 62 m² liste) × altı başlangıç × üç kesim payı (0, 5 mm, 1 cm) = 90 adedin hepsi aynı çıktı; her birinin o dizilim için en az olduğu gösterildi. Her paneldeki parçaların panele sığdığı, üst üste binmediği ve yüzdeki yerine tam oturduğu çokgenlerle sınanıyor (`cati_acilim_saglama.py`; rastgele 120 kırma çatıda, 1440 dizilimde sorun çıkmadı; kural bilerek bozulunca sınama yakalıyor).
+- **Tek kat panel (baz paket).** 28 adet (10 tam boy + 18 kesilen); dizilim uzun yüzlerde sol köşeden, kısa yüzlerde ortadan başlıyor (en az paneli veren başlangıç); her yüzde sol köşeden başlanırsa 29, altı başlangıçla 28–29; kesim payı sıfır da olsa 1 cm de olsa aynı. En dar kesimde 6,1 cm pay kalıyor.
+- **Sandviç panel.** 26 adet (10 tam boy + 16 kesilen); dizilim uzun yüzlerde ortadan, kısa yüzlerde sol köşeden başlıyor (en az paneli veren başlangıç); her yüzde sol köşeden başlanırsa 27, altı başlangıçla 26–27; kesim payı sıfır alınırsa 25, 1 cm alınırsa 26.
+- **Trapez sac.** 32 adet (12 tam boy + 20 kesilen); altı başlangıcın hepsinde aynı; kesim payı sıfır alınırsa 30, 1 cm alınırsa 32.
+- **Kiremit desen sac.** 26 adet (10 tam boy + 16 kesilen); altı başlangıcın hepsinde aynı; kesim payı sıfır da olsa 1 cm de olsa aynı; artan parça kullanılmıyor (desen ters gelir: mühendis, 4 Ekim 12:14).
+- **Taşmanın ve kesim payının etkisi.** 02:58 sürümünde (taşma ve kesim payı yok; L 4300) tek kat panel 28, sandviç panel 24, trapez sac 30, kiremit desen sac 26'ydı; şimdi 28, 26, 32 ve 26. Taşma her parçayı 5 cm uzatır; iki parçalı kesim 10 cm fazla boy ister. Sandviç panelde ve trapez sacda bazı eşler artık aynı panele sığmıyor.
+- **Önceki kural** (yüzey + %10, aynı panel boyuyla): tek kat panelde 29, sandviç panelde 26, trapez sacda 32, kiremit desen sacda 23 verir.
+- **62 m² gerçek liste** (kırma çatı, sandviç panel L 3200): listede 27 adet (ayrıca 2 adet L 1000); dizilim 28 veriyor (02:58 sürümünde, taşmasız, 26'ydı). Listedeki 27 uzun ve 2 kısa panel alan olarak 27,6 panel eder. Kısa panellerin köşe parçaları için gönderilip gönderilmediği bilinmiyor.
 - **Mühendisin 10 × 10 m dört omuz metrajı** (trapez sac L 5900): metrajda 36 adet var; dizilim tablonun son satırındaki adedi veriyor. Çatı planı saçak dahil 10,6 × 10,6 m ve eğim %33 alındı; yüzey metrajdaki 118 m²'yi tutuyor.
+- **Dar yerler** (bağımsız denetimin notları; kesim payı taramasıyla doğrulandı). Kesim payı 2,8 mm ya da daha az alınırsa sandviç panel 25, trapez sac 30 olur; 2,9 mm'den 3 cm'ye kadar adetler değişmiyor. Tam boy parçada pay yok: panel boyu tam eğimli boy + taşma. İki saçağın taşmalarının kesiştiği köşe (yaklaşık 5 × 5 cm) örtülmez: parçalar uzuyor, genişlemiyor. Kesim payı panel boyu yönünde ölçülüyor.
 - **Sınır.** Yalnız dikdörtgen planlı, dört yanı eşit eğimli kırma çatı. Cumbalı çatıda (ters mahya) dizilim henüz yok.
+
+## Mühendisin üçüncü cevapları (Lokman 4 Ekim 12:14'te iletti) ve uygulanışı
+
+Sorular, liste sayfasının 4 Ekim 02:58 sürümündeki on iki soruydu ("Sizden beklenenler"). Cevaplar tırnak içinde, yazıldığı gibi.
+
+| # | Soru | Cevap | Uygulama |
+|---|---|---|---|
+| 1 | Makas ve kiriş ölçüsü | "şimdilik Excel hesaplama motoruna uy" | Çatı çeliği, veranda dikmeleri ve kirişleri motorun ortalamasıyla kalıyor: 706, 46 ve 81 kg. Hesap değişmedi; makas ölçüsü verilirse değişir. |
+| 2 | Tek katta et kalınlığı: kural mı, 2025 listelerindeki uygulama mı? | "Tek katta et kalınlığını 1,2 mm alarak devam ediyoruz." | Kural geçerli; hesap değişmedi (baz 2555 kg, dış 140 2828 kg). 2025 listelerindeki 0,8 mm eski uygulama olarak kayıtlı. |
+| 3 | Çatı açılımı: başlangıç köşesi, kesim payı, yedek, kiremit desen sac | "5 cm çatı yüzeyinin dışında kalacak şekilde uzatıyoruz çatı kaplamalarını. Kiremit desen sacda artan parça karşı yüzde desen ters geldiğinden kullanılmaz." | Taşma 5 cm eklendi: panel boyu L 4300 → L 4315; tek kat panel yine 28 adet. Sandviç panel 24 → 26, trapez sac 30 → 32. Kiremit desen sacda artan parçanın kullanılmaması teyitli (26 adet). Başlangıç köşesi, kesim payı ve yedek cevaplanmadı: yukarıdaki varsayımlarla. |
+| 4 | Tavan ve çatı panelinin adedi; hangi çatı tipi için? | "Genelde dörtomuz çatı tipinde tavan paneli ve çatı panelini kullanıyoruz. 100m2 için bu adetler üzerinden ilerleyebilrsin." | 100 m²'de 8 ve 12 adet geçerli; alana oranla Ç8201'de 7 ve 10. Hesap değişmedi. |
+| 5 | OSB takviyesi: duvarın tamamı mı, yalnız tezgâhın ve TV ünitesinin arkası mı? Klima duvarı? | "Duvarın tamamını al." | Hesap değişmedi (9 levha). Klima duvarı cevaplanmadı; sayılmıyor. |
+| 6 | Köşebent: çıkıntı yapan köşeler ve veranda tavanı sayılır mı? | "Odaya doğru çıkıntı yapan köşeler sayılmıyor. Veranda tavan çevresi sayılır." | Veranda tavanının çevresi (19,88 m; brüt ölçüyle) eklendi: 51 → 59. Çıkıntı yapan 1 köşe sayılmıyor. Verandada köşe boyu eklenmedi. Buna bağlı trapez vida (5,5 × 25) 1000 → 1250. |
+| 7 | Elektrik: buat için hangi odalar? Yatak odası ve banyodaki prizler tekli mi? | "Veranda hariç odaları say. Yatak odası ve banyodaki prizler tekli." | İkisi de zaten öyleydi: oda sayısı 5, buat kasa 31. Hesap değişmedi. |
+| 8 | Mahya bandı: mahya uzunluğundan mı, parça adedinden mi? | "Mahya bandı şu şekilde hesaplanır: “(Mahya Adedi * 2,8 (metre) + Ters Mahya Adedi * 2,8 (metre) + Damlalık adedi * 2,5 (metre))/10” şeklinde bulunur." | (11 × 2,8 + 0 + 0) ÷ 10 → 3 yerine 4 rulo. Damlalık okunan listelerde yok; sıfır alındı (açık soru). Trapez sac seçeneklerinde motordaki gibi trapez sac mahyası × 0,8 m toplanır. |
+| 9 | Dış kapı: 100 mü, 95 mi? | "Dış kapı boşluğu 95x210, iç oda kapı boşluğu 90x214 alınır." | Tanımda dış kapı boşluğu 100 → 95 cm (ekseni yerinde kaldı); plan ve paftalar yeniden çizildi. Liste hesabı zaten 95 × 210 ile yapılıyordu. |
+| 10 | Boardex ve OSB kalınlığı; Boardex zayiatı | "Boardex 12.5 mm. OSB 11 mm. Boardex zayiatı %8." | Satırların boyutu 12,5 × 1200 × 2400 ve 11 × 1220 × 2440 oldu. Boardex zayiatı %15 → %8: dış cephe Boardex 33 → 31; saçak altı ve saçak yüzü aynı (5 ve 3). 2025 listelerindeki adetler %15'e uyuyor (aşağıda). |
+| 11 | Excel motorundaki trapez sac formülü | Formülü yapıştırdı ve açıkladı: "Eğer K24 hücresi Trapez saç ise yüzey alanını ve trapez saç uzunluğunu hesaplayıp trapez saç uzunluğuyla trapez saç genişliği olan 0,8 metre ile çarpıyor." Yeniden kontrol edilmesini istedi: "Hangi hücreden neyi çekiyorum formül nasıl işliyor". | Formül yeniden okundu (aşağıda). Bulgu aynı: 0,8 paydanın parantezinin dışında. |
+| 12 | Bayi standartları | "Şimdilik standartlarımız tam oturmadı. Tek tük bayilerin standartları var ancak bunu ileriki zamanlarda daha net söyleyebiliriz." | Bütün gruplar listede kalıyor; bayi kuralı örnek dosyasıyla duruyor. |
+
+### Excel motorundaki çatı kaplaması formülü: hangi hücre ne, formül nasıl işliyor (11. cevap üzerine)
+
+Motorun (`CTKBF V1.1`) MALZEMELER sayfası 4 Ekim'de yeniden okundu. Mühendisin yapıştırdığı formül 61. satırdaki (trapez sac) formüldür; aynı uzun ifade 58, 59, 61, 64, 67 ve 72. satırlarda da var. Her satırın başındaki EĞER, o satırın kaplaması seçili değilse 0 verir.
+
+| Hücre | Ne |
+|---|---|
+| K10 | Bina dış uzun kenar (m) |
+| K11 | Bina dış kısa kenar (m) |
+| K13, K14 | Sundurma dış uzun ve kısa kenar |
+| K17 | Oturum dışı veranda dış kısa kenar |
+| K23 | Çatı tipi |
+| K24 | Çatı kaplama |
+
+Hepsi MUSTERI TALEP sayfasının C sütunundan gelir.
+
+Formülün parçaları:
+
+- **Çatı yüzeyi** = (K11 + 0,6) × √(1 + 0,33²) × (K10 + K17) + K13 × K14. Kısa kenara iki saçak (0,6 m) eklenir, %33 eğimle eğimli genişliğe çevrilir, uzun kenarla (veranda dahil) çarpılır; sundurma düz alanıyla eklenir.
+- **Sac boyu** = ((K11 + 0,6) ÷ 2) × √(1 + 0,33²) + 0,05: saçaktan mahyaya eğimli boy + 5 cm taşma. B sütunu bunu mm olarak gösterir.
+- **Adet** = yüzey ÷ sac boyu × kaplama katsayısı × çatı katsayısı, yukarı yuvarlanır. Kaplama katsayısı: trapez sac 0,8 · tek kat ve sandviç panel 1 · metal kiremit 1,05. Çatı katsayısı: beşik 1 · beşik + cumba 1,14 · beşik + 2 cumba 1,27 · dört omuz 1,06.
+
+Bulgular:
+
+1. **Parantez (işlem sırası).** Formülde `yüzey / (sac boyu) * 0,8` yazıyor. Excel bölmeyi ve çarpmayı soldan sağa yapar: sonuç (yüzey ÷ sac boyu) × 0,8'dir. Mühendisin anlattığı hesap (sac boyu × 0,8 = bir sacın kapattığı alan; yüzey ÷ o alan) için 0,8'in paydanın parantezi içinde olması gerekir: `yüzey / ((sac boyu) * 0,8)`. Şimdiki haliyle trapez sacda adet olması gerekenin 0,64 katı çıkar (0,8 × 0,8). Metal kiremitte 1,05 de aynı yerde: adet %10 fazla çıkar. Tek kat ve sandviç panelde katsayı 1 olduğu için fark yok.
+2. **Uzun kenarda saçak yok.** Yüzeyde kısa kenara 0,6 eklenmiş, uzun kenara (K10 + K17) eklenmemiş. Aynı sayfadaki çatı izolasyonu satırı (84) uzun kenara da 0,6 ekliyor. 10 × 10 m binada formülün yüzeyi 111,6 m²; mühendisin kendi metrajında 118 m².
+3. **Kapatma genişlikleri.** Motorda tek kat panel "100 cm kapatır", metal kiremit "105 cm kapatır" yazıyor. Gerçek listelerde ve montaj paftasında tek kat panel 87 cm, kiremit desen sac 110 cm. Tek kat panelde motor bu yüzden %13 az verir.
+4. **Sac boyu hücresi (B61).** Yalnız "Trapez Saç" seçiliyken hesaplıyor; "OSB+Nem Bariyeri+Trapez Saç" seçiliyken 0 gösteriyor. Trapez vida (5,5 × 60) formülü (129. satır) sac boyunu bu hücreden aldığı için o seçenekte sacın vidası hesaba girmez.
+5. **Sundurma.** Bu formülde sundurma alanı eğimle çarpılmıyor (K13 × K14); OSB ve nem bariyeri satırlarında (79, 81) çarpılıyor.
+
+Örnekler (formül yazıldığı gibi → parantez düzeltilince):
+
+| Örnek | Yüzey ÷ sac boyu | Trapez sac | Metal kiremit | Not |
+|---|---|---|---|---|
+| Motorun şablonundaki kayıtlı örnek (9,74 × 7,44; veranda 2,12; dört omuz) | 100,41 ÷ 4,283 = 23,44 | 20 → 32 | 27 → 24 | Şablonda metal kiremit seçili; hücrede kayıtlı değer 27 |
+| Mühendisin 10 × 10 m beşik çatısı | 111,62 ÷ 5,631 = 19,82 | 16 → 25 | 21 → 19 | Metrajda 28 trapez sac var (her saçakta 10,6 ÷ 0,8 → 14). Düzeltilmiş formül 25 veriyor; kalan fark uzun kenara eklenmeyen saçaktan ve her saçağın ayrı yuvarlanmasından |
+| Ç8201 (K10 8,50; K11 7,50; K17 2,44; dört omuz) | 93,31 ÷ 4,315 = 21,63 | 19 → 29 | 25 → 22 | Çatı açılımı trapez sacda 32, kiremit desen sacda 26 veriyor. Motor tek kat panelde 23 verir (87 cm ile 27); açılım 28 |
+
+Motorun sac boyu Ç8201'de 4315 mm: listedeki L 4315 ile aynı. Yükleme listesi kaplama adedini bu formülden almıyor; kırma çatıda çatı açılımından alıyor. Bulgular motorun kendisi için.
 
 ## Listenin grupları ve bayi kuralı
 
@@ -163,7 +227,7 @@ Okuma:
 
 - Bir grubun listeye girip girmeyeceği bayinin standardına bağlıdır. Örnek: 90 m² gerçek listede vida, elektrik ve sıhhi tesisat yok; 62 ve 105 m² listelerde var.
 - Denemede: `bayi_kurallari_ornek.json` ve `yukleme.py --bayi <anahtar>`. Anahtar canlıda bayinin telefon numarası olacak; dosyada gerçek numara ya da ad yok. Kural grupları açıp kapatır; boya kovası ve vitrifiyeyi dahil eder ya da etmez; çatı yöntemini ve kaplamasını bayinin standardına çevirir.
-- Hangi bayinin standardının ne olduğu bilinmiyor; sorulacak.
+- Hangi bayinin standardının ne olduğu soruldu. Mühendis (4 Ekim 12:14): standartlar henüz oturmadı; tek tük bayinin standardı var, ileride netleşecek. O zamana kadar bütün gruplar listede.
 
 ## Çelik: birim ağırlıklar (Excel motorundan)
 
@@ -183,8 +247,8 @@ Mühendisin tablosunda 140 × 0,8 satırında iç duvar 12,06 yazıyor: motorun 
 
 - Hesap: duvar kg = duvar boyu × birim ağırlık. Dış duvar boyu = dış çevre; iç duvar boyu plandan (iç duvarların toplam boyu).
 - Motor girdi olarak yalnız dikdörtgenin kenarlarını ve bölme sayısını alıyor; iç duvar boyunu (uzun + kısa) × (0,1543 × bölme sayısı + 0,756) diye tahmin ediyor. Planımız olduğu için gerçek boylar kullanıldı.
-- Dikme = adet × 2,40 m × birim ağırlık; kiriş = boy × birim ağırlık; çatı = çatı planı × kg/m². Bunlar geçici: Lokman kiriş ve makasları bir makas ölçüsünden verecek.
-- **Tavan paneli ve çatı paneli** (yöntem A). 100 m² binada tavan paneli 354,84 kg, çatı paneli 440,32 kg (Lokman'ın 4 Ekim düzeltmesi; mühendisin ilk cevabında 429,83 ve 561,6 kg'dı). Adet 100 m²'de 8 ve 12 (mühendisin ilk cevabı). Hesap: çatının örttüğü oturum alanı ÷ 100 × bu değerler; adet yukarı yuvarlanır. Ç8201 (82,05 m²): 291 kg / 7 adet ve 361 kg / 10 adet. Oranlamayı Lokman onayladı; kesin adet panel yerleşiminden gelir.
+- Dikme = adet × 2,40 m × birim ağırlık; kiriş = boy × birim ağırlık; çatı = çatı planı × kg/m². Bunlar şimdilik böyle (mühendis, 4 Ekim 12:14: "şimdilik Excel hesaplama motoruna uy"); Lokman kiriş ve makasları bir makas ölçüsünden verirse değişir.
+- **Tavan paneli ve çatı paneli** (yöntem A). 100 m² binada tavan paneli 354,84 kg, çatı paneli 440,32 kg (Lokman'ın 4 Ekim düzeltmesi; mühendisin ilk cevabında 429,83 ve 561,6 kg'dı). Adet 100 m²'de 8 ve 12 (mühendisin ilk cevabı; üçüncü cevaplarda teyit etti: bu adetlerle ilerlenir, paneller genelde dört omuz çatıda kullanılır). Hesap: çatının örttüğü oturum alanı ÷ 100 × bu değerler; adet yukarı yuvarlanır. Ç8201 (82,05 m²): 291 kg / 7 adet ve 361 kg / 10 adet. Oranlamayı Lokman onayladı; kesin adet panel yerleşiminden gelir.
 
 ### Üç gerçek listeyle karşılaştırma (kg)
 
@@ -214,7 +278,7 @@ Kural: tek katlı binada ve iki katlının zemin katında duvarlar 1,2 mm (dış
 | Motorun verisi: iki katlı iki projenin üst katı | 140 mm | 0,8 mm | 0,8 mm | uyuyor |
 | Motorun verisi: iki katlı iki projenin zemin katı | 140 mm | 1,2 mm | 1,2 mm | uyuyor |
 
-3 Ekim'de dış 140 için 0,8 mm varsayılmıştı (2025 listelerindeki gibi); kuralla 1,2 mm oldu. Bu yüzden Ç8201'de dış 140 seçeneği artık baz paketten ağır. 2025 tarihli iki tek katlı listenin kurala uymaması açık soru olarak duruyor.
+3 Ekim'de dış 140 için 0,8 mm varsayılmıştı (2025 listelerindeki gibi); kuralla 1,2 mm oldu. Bu yüzden Ç8201'de dış 140 seçeneği artık baz paketten ağır. 2025 tarihli iki tek katlı liste kurala uymuyor; mühendis üçüncü cevaplarda kuralı yineledi ("Tek katta et kalınlığını 1,2 mm alarak devam ediyoruz."). O listeler eski uygulama olarak kayıtlı; üç gerçek listeyle karşılaştırma o listelerdeki kalınlıklarla yapılıyor.
 
 | Ç8201 | Baz (dış 80) | Dış 140 |
 |---|---|---|
@@ -227,28 +291,29 @@ Kural: tek katlı binada ve iki katlının zemin katında duvarlar 1,2 mm (dış
 Durum: `lokman` Lokman söyledi · `muhendis` mühendis söyledi · `excel` yükleme listesi çalışma kitabındaki formül · `motor` Excel motorundaki formül ya da not · `uydurma` gerçek listelerdeki adedi tutturan kural · `varsayim` Claude'un varsayımı · `soru` kural bilinmiyor · `bekliyor` değer henüz yok (sorulacak ya da paftadan gelecek) · `model` modeldeki açıklıklardan ya da plandan · `liste` örnekte gerçek listeden alınan sayı. Katsayılar ve kaynakları: `deneme/2026-10-03_yukleme/kurallar.json`.
 
 - **Terim.** PortatifEv listelerinde "alın" beşik çatının kalkan yüzüdür (alın sacı, çatı alnı). Saçak ucundaki düşey yüz (topuk + çatı panelinin düşey ölçüsü; Lokman'ın deyişiyle "saçak genişliği") burada "saçak yüzü" diye geçer; önceki kayıtlarda ve kodun içinde "alın" denmişti.
-- **Dış cephe** (excel). Net alan = çevre × kat yüksekliği + dikme ve kiriş kaplaması (adet × çevre × boy) + çatı alnı (kalkan) alanları − kapı ve pencere boşlukları. Boardex = net × 1,15 ÷ (1,2 × 2,4). Motorda ve bir hesap sayfasında zayiat %8 yazıyor; ama üç listedeki adetlere %15 yakın düşüyor (hesap / liste: 32 / 32, 45 / 46, 52 / 51); %8 ile 2–3 levha eksik kalıyor.
+- **Dış cephe** (excel; zayiat muhendis). Net alan = çevre × kat yüksekliği + dikme ve kiriş kaplaması (adet × çevre × boy) + çatı alnı (kalkan) alanları − kapı ve pencere boşlukları. Boardex = net × 1,08 ÷ (1,2 × 2,4): zayiat %8 (mühendis, 4 Ekim 12:14; motorda ve bir hesap sayfasında da %8). Listelerin çalışma kitabındaki formül %15'ti ve üç listedeki adetler %15'e uyuyor (hesap / liste, 90 · 62 · 105 m²: 45 / 46, 32 / 32, 52 / 51); %8 ile 43 / 46 · 30 / 32 · 48 / 51. Ç8201'de %8 ile 31, %15 ile 33 levha.
+- **Kalınlıklar** (muhendis, 4 Ekim 12:14). Boardex 12,5 mm; OSB 11 mm. 2025 listelerinde Boardex 8 mm, OSB 9 mm yazıyor; motorda Boardex 8 mm, OSB 11 mm.
 - **İç cephe** (excel). Odalar "beyaz" ve "yeşil" diye ayrılır. Oda oda: iç çevre × kat yüksekliği − o odadaki boşluklar. Alçıpan = net × 1,05 ÷ (1,2 × 2,5). Tavan alçıpanı = tavan alanı × 1,05 ÷ 3,0.
-- **OSB takviyesi** (muhendis). Yalnız dolap ve TV ünitesi gelen duvarlar: modelin tanımında yazılır. Her duvarın o odaya bakan yüzünün boyu × kat yüksekliği − o yüzdeki boşluklar; × 1,05 ÷ 2,98. Duvarın tamamı alındı (Lokman: "tüm yüzeyini"). Tanımda duvar yazmıyorsa kalem hesaplanmaz.
-- **Kapı boşlukları.** İç kapı 0,90 × 2,14 (lokman; çalışma kitaplarında da aynı). Dış kapı 0,95 × 2,10 (excel: 90 ve 105 m² listeler; 62 m² listede 0,95 × 2,00).
+- **OSB takviyesi** (muhendis). Yalnız dolap ve TV ünitesi gelen duvarlar: modelin tanımında yazılır. Her duvarın o odaya bakan yüzünün boyu × kat yüksekliği − o yüzdeki boşluklar; × 1,05 ÷ 2,98. Duvarın tamamı alınır (Lokman: "tüm yüzeyini"; mühendis, 4 Ekim 12:14: "Duvarın tamamını al."). Tanımda duvar yazmıyorsa kalem hesaplanmaz.
+- **Kapı boşlukları.** İç kapı 0,90 × 2,14 (lokman; çalışma kitaplarında da aynı). Dış kapı 0,95 × 2,10 (muhendis, 4 Ekim 12:14; 90 ve 105 m² listelerde de böyle, 62 m² listede 0,95 × 2,00).
 - **Duvar izolasyonu** (uydurma). Dış duvar × kat sayısı (80 mm karkasta 1, 140 mm'de 2) + iç duvar − boşluklar; ÷ 8,64. 105 m² listenin hesap sayfasında "dış × 2" diye yazıyor.
-- **Çatı kaplaması.** Baz pakette tek kat panel (lokman). Kırma çatıda panel ve sac adedi çatı açılımından (lokman; yukarıda "Lokman'ın ikinci düzeltmesi"): yüzler şerit şerit dizilir, çapraz kesimden artan parça karşı yüzde kullanılır. Çatı planı girdide yoksa yüzey × 1,10 ÷ (boy × kapatma genişliği) (uydurma). Beşik çatıda saçak boyu ÷ kapatma genişliği (uydurma). Kapatma: sandviç panel 100, tek kat panel 87, kiremit desen sac 110, trapez sac 80 cm.
+- **Çatı kaplaması.** Baz pakette tek kat panel (lokman). Kırma çatıda panel ve sac adedi çatı açılımından (lokman; yukarıda "Lokman'ın ikinci düzeltmesi"): yüzler şerit şerit dizilir, çapraz kesimden artan parça karşı yüzde kullanılır. Kaplama saçaktan 5 cm taşar: panel boyu = eğimli boy + 5 cm (muhendis, 4 Ekim 12:14). Çatı planı girdide yoksa yüzey × 1,10 ÷ (boy × kapatma genişliği) (uydurma). Beşik çatıda saçak boyu ÷ kapatma genişliği (uydurma). Kapatma: sandviç panel 100, tek kat panel 87, kiremit desen sac 110, trapez sac 80 cm.
 - **Shingle ve membran** (motor). Adet = çatı yüzeyi × çatı katsayısı ÷ 8 ("adet / 8 m²"). Çatı katsayısı: beşik 1; beşik + cumba 1,14; beşik + 2 cumba 1,27; dört omuz 1,06. Gerçek listeyle karşılaştırılmadı.
 - **Mahya** (lokman). Mahya hattı ÷ (2,8 − 0,30). Kırma çatıda hat = tepe + dört kırma. Trapez sac mahyası L 800: mahya hattı ÷ (0,8 − 0,20) (motor).
-- **Mahya bandı** (excel; listeye girmesi mühendisten, 4 Ekim). Düz ve ters mahya gelen yerlerin uzunlukları toplamı ÷ 10 m (rulo / 10 m), yukarı. Formül PortatifEv'in açıklamalı prefabrik yükleme listesi çalışma kitabından; mühendisin 10 × 10 m metrajındaki 2 ve 4 ruloyu veriyor. Motorda parça adedi × parça boyu ÷ 10 (Ç8201'de 4 verir).
+- **Mahya bandı** (muhendis, 4 Ekim 12:14). (Mahya adedi × 2,8 m + ters mahya adedi × 2,8 m + damlalık adedi × 2,5 m) ÷ 10 m (rulo / 10 m), yukarı. Excel motorundaki formül aynı; motorda trapez sac mahyası × 0,8 m de toplanır, OSB mahyası ve özel mahya toplanmaz. Damlalık (L 2500) motorda adedi elle girilen bir kalem; okunan listelerde yok, sıfır alınır. Ç8201: 11 × 2,8 ÷ 10 → 4 rulo. 01:24'teki uygulama mahya uzunluğundandı (3 rulo; açıklamalı prefabrik yükleme listesi çalışma kitabındaki formül).
 - **Çatı müdahale kapağı** (muhendis). Standart pakette gönderilmez; müşteri isterse kat adedi kadar eklenir.
 - **Dere** (motor). Metal dere = saçak boyu ÷ (4,0 − 0,20); Lokman'ın 30 cm kuralında dere sayılmadı. Kelepçe = dere × 8. İniş başına: boru 1, aparat 1, açık dirsek 2, kapalı dirsek 1, iniş kelepçesi 2. İniş sayısı Lokman'ın kuralıyla; plana elle yerleştirilmişse o sayı (muhendis).
-- **Köşebent** (muhendis). (Odaların tavan çevresi + iç köşe sayısı × 2,7 m) ÷ 2,5. İç köşe: iki duvarın odanın içinde buluştuğu köşe. Odaya doğru çıkıntı yapan köşeler ve veranda tavanı sayılmadı (okuma). Planı olmayan örnekte oda başına 4 iç köşe sayılır.
-- **Saçak altı ve saçak yüzü.** Yöntem A'da saçak altı Boardex (lokman); adet formülü 62 m² listeden (uydurma): saçak boyu × 0,30 × 1,15 ÷ 2,88. Saçak yüzü de Boardex (muhendis): saçak ucu çevresi × yüz yüksekliği × 1,15 ÷ 2,88. Yöntem A'da saçak omegası yok (muhendis).
+- **Köşebent** (muhendis). (Odaların tavan çevresi + veranda tavanının çevresi + iç köşe sayısı × 2,7 m) ÷ 2,5. İç köşe: iki duvarın odanın içinde buluştuğu köşe. Odaya doğru çıkıntı yapan köşeler sayılmaz; veranda tavanının çevresi sayılır (4 Ekim 12:14). Veranda çevresi brüt ölçüyle alınır; verandada köşe boyu eklenmez (okuma). Planı olmayan örnekte oda başına 4 iç köşe sayılır.
+- **Saçak altı ve saçak yüzü.** Yöntem A'da saçak altı Boardex (lokman); adet formülü 62 m² listeden (uydurma): saçak boyu × 0,30 × 1,08 ÷ 2,88. Saçak yüzü de Boardex (muhendis): saçak ucu çevresi × yüz yüksekliği × 1,08 ÷ 2,88. Zayiat Boardex'in %8'i (62 m² listenin formülünde %15'ti). Yöntem A'da saçak omegası yok (muhendis).
 - **Yöntem B kalemleri.** Saçak sacı ve alın sacı = boy ÷ (2,5 − 0,30): 30 cm bindirme Lokman'dan; parça boyu L 2500 listelerden (÷ 2,2 çıkarım). Saçak omegası, tavan omegası ve aşık kuralları iki listeye uydurulmuştu; değişmedi.
 - **Vida, boya, tesisat** (motor ve excel). Alçıpan vidası = levha × 40; OSB vidası = OSB × 40 + priz × 4 + saçak sacı × 4 + dere kelepçesi × 3; pencere vidası = pencere × 20; trapez (5,5 × 25) = aşık × 10 + omega × 10 ya da 6 + çelik panel × 10 + köşebent × 6; trapez (5,5 × 60) = m² × 2,5 + sac boyu ÷ 200 × sac adedi; panel vidası = panel boyu ÷ 200 × adet; çelik dübel = duvar paneli × 2; uçlar ve kesme taşı = m² ÷ 15; inox taş = m² ÷ 10; RYSB = m² × 7,5. Boya: 100 m²'ye dış 2, iç 2, tavan 1, astar 1 kova; dayson = m² × 0,06; köpük 2; mastik = pencere adedi. Tesisat: ıslak hacim başına 6 boru, 15 dirsek, 12 kulaklı dirsek, 6 düz T, 15 maşon, 6 iç dişli T, 3 atlama parçası; vitrifiye dahilse duşakabin, klozet, dolap ve batarya grubu.
 - **Elektrik.** Pafta sayımı varsa o kullanılır (motorun notu: sayılar "montaj paftasından sayılır"). Yoksa mühendisin oda başına kuralı (yukarıda). Kablo, buat, besleme kablosu, zil, sigorta kutusu, kaçak akım rölesi ve izole bant motorun formülleriyle.
 
 ## Üç gerçek listeyle karşılaştırma (adet)
 
-Özet: 90 m²: 29 kalemin 15 tanesinde adet aynı; 62 m²: 41 kalemin 29 tanesinde adet aynı; 105 m²: 49 kalemin 31 tanesinde adet aynı. Toplam 119 karşılaştırmanın 75 tanesi aynı.
+Özet: 90 m²: 29 kalemin 15 tanesinde adet aynı; 62 m²: 41 kalemin 28 tanesinde adet aynı; 105 m²: 49 kalemin 31 tanesinde adet aynı. Toplam 119 karşılaştırmanın 74 tanesi aynı.
 
-Tam tablo: `deneme/2026-10-03_yukleme/sonuc/tablolar.md`. Adedi doğrudan listeden alınan satırlar karşılaştırmaya girmedi: dere kapağı, elektrik sayımı ve 105 m² listede iniş sayısı ile ona bağlı dört satır. 90 ve 62 m² listelerde iniş sayısı Lokman'ın kuralından hesaplandı (6; listelerde 7): bu tek fark beş satırda birden görünüyor, yani 44 farkın 10'u oradan.
+Tam tablo: `deneme/2026-10-03_yukleme/sonuc/tablolar.md`. Adedi doğrudan listeden alınan satırlar karşılaştırmaya girmedi: dere kapağı, elektrik sayımı ve 105 m² listede iniş sayısı ile ona bağlı dört satır. 90 ve 62 m² listelerde iniş sayısı Lokman'ın kuralından hesaplandı (6; listelerde 7): bu tek fark beş satırda birden görünüyor, yani 45 farkın 10'u oradan.
 
 **Bu bir sınama değil.** `uydurma` kuralların katsayıları 90 ve 62 m² listelere bakılarak seçilmişti; o listelerle tutması kanıt sayılmaz. 105 m² liste levha, çatı ve dere kurallarından sonra eklendi; ama vida, boya, elektrik ve tesisat formülleri onunla aynı anda eklendi, kesme taşı katsayısı 62 ve 105 m² listelere bakılarak seçildi. Onun da çatı planı yok: saçak, mahya, alın boyları ve elektrik sayımı listede yazan değerlerdir. Üç örnekte de çatı uzunlukları ve tavan alanları listelerdeki değerlerdir. Yani hiçbiri kör sınama değil; yöntem A için ise hiç gerçek liste yok. Mühendisin cevaplarıyla gelen kurallardan (tavan ve çatı paneli, OSB takviyesinin duvarları, saçak yüzü) hiçbiri bu üç listeyle sınanamıyor; köşebent ve elektrik kuralı yukarıda sınandı. Çatı açılımı tek bir gerçek listeyle (62 m²) karşılaştırılabildi.
 
@@ -261,14 +326,14 @@ Adedi tutmayan kalemler:
 | Metal aksam | Tavan omegası (60'lık) | tavan alanı ÷ 0,60 ÷ 3,75 | uydurma | 37 / 40 ✗ | 26 / 26 | 42 / 44 ✗ |
 | Metal aksam | Aşık | eğim boyunca 60 cm aralıkla sıralar + mahya aşığı; kırmada her sıra çatıyı dolanır; × 1,05 ÷ 4,2 | uydurma | 56 / 57 ✗ | 41 / 41 | — |
 | Metal aksam | Köşebent | (oda tavan çevreleri 87,84 m + 20 iç köşe × 2,7 m) ÷ 2,5 | muhendis | 57 / 70 ✗ | 39 / 50 ✗ | 70 / 85 ✗ |
-| Metal aksam | Saçaklar için Boardex | saçak boyu × saçak eni × 1,15 ÷ 2,88 | uydurma | — | 5 / 5 | 8 / 7 ✗ |
-| Dış cephe kaplama | Dış cephe Boardex | (çevre × yükseklik + kolon/kiriş kaplaması + çatı alnı (kalkan) − boşluklar) × 1,15 ÷ 2,88 | excel | 45 / 46 ✗ | 32 / 32 | 52 / 51 ✗ |
+| Metal aksam | Saçaklar için Boardex | saçak boyu × saçak eni × 1,08 ÷ 2,88 | uydurma | — | 5 / 5 | 8 / 7 ✗ |
+| Dış cephe kaplama | Dış cephe Boardex | (çevre × yükseklik + kolon/kiriş kaplaması + çatı alnı (kalkan) − boşluklar) × 1,08 ÷ 2,88 | excel | 43 / 46 ✗ | 30 / 32 ✗ | 48 / 51 ✗ |
 | İç cephe kaplama | Duvar alçıpan beyaz | oda oda: (iç çevre × yükseklik − o odadaki boşluklar) toplamı × 1,05 ÷ 3,0 | excel | 66 / 67 ✗ | 32 / 32 | 78 / 79 ✗ |
 | İç cephe kaplama | Duvar alçıpan yeşil | oda oda: (iç çevre × yükseklik − o odadaki boşluklar) toplamı × 1,05 ÷ 3,0; yeşil = ıslak hacimler | excel | 9 / 9 | 7 / 8 ✗ | 13 / 14 ✗ |
 | İç cephe kaplama | Tavan alçıpan yeşil | tavan alanı × 1,05 ÷ 3,0; yeşil = ıslak hacim + veranda tavanı | lokman | 5 / 6 ✗ | 7 / 7 | 3 / 3 |
 | İç cephe kaplama | OSB 9 mm (duvar) | listede yazan alan × 1,05 ÷ 2,98; alanın nasıl seçildiği listede yazmıyor | excel | 13 / 13 | — | 14 / 15 ✗ |
 | İç cephe kaplama | Duvar izolasyonu | dış duvar × kat sayısı (80 mm karkasta 1, 140 mm'de 2) + iç duvar − boşluklar; ÷ 8,64 | uydurma | 18 / 18 | 19 / 19 | 39 / 38 ✗ |
-| Çatı kaplamaları | Sandviç panel | çatı açılımı: yüzler şerit şerit dizilir; çapraz kesimden artan parça karşı yüzde kullanılır; panel boyu = eğimli boy | lokman | — | 26 / 27 ✗ | — |
+| Çatı kaplamaları | Sandviç panel | çatı açılımı: yüzler şerit şerit dizilir; çapraz kesimden artan parça karşı yüzde kullanılır; panel boyu = eğimli boy + taşma | lokman | — | 28 / 27 ✗ | — |
 | Dere | Dere iniş borusu | 4 köşe + 2 orta (10 m ve üzeri cepheler) | lokman | 6 / 7 ✗ | 6 / 7 ✗ | — |
 | Dere | Dere iniş aparatı | iniş sayısı × 1 | motor | 6 / 7 ✗ | 6 / 7 ✗ | — |
 | Dere | Açık dirsek | iniş sayısı × 2 | motor | 12 / 14 ✗ | 12 / 14 ✗ | — |
@@ -277,24 +342,25 @@ Adedi tutmayan kalemler:
 | Boya | Silikonize mastik | pencere adedi | uydurma | 6 / 8 ✗ | 6 / 8 ✗ | 8 / 8 |
 | Boya | Dayson | bina m² × 0,06 | motor | 6 / 6 | 4 / 4 | 7 / 6 ✗ |
 | Vida | RYSB pul başlı (3,9 × 32) | bina m² × 7,5 | motor | — | 465 / 400 ✗ | 788 / 500 ✗ |
-| Vida | Alçıpan vidası (3,5 × 35) | alçıpan ve Boardex levha sayısı × 40; 250'ye yuvarlandı | excel | — | 4000 / 4000 | 7500 / 8500 ✗ |
+| Vida | Alçıpan vidası (3,5 × 35) | alçıpan ve Boardex levha sayısı × 40; 250'ye yuvarlandı | excel | — | 4000 / 4000 | 7250 / 8500 ✗ |
 | Vida | OSB ve yalıpan vidası (3,9 × 32) | OSB levha × 40 + priz × 4 + saçak sacı × 4 + dere kelepçesi × 3; 500'e yuvarlandı | motor | — | 3500 / 3500 | 1000 / 1500 ✗ |
 | Vida | Pencere vidası (4,8 × 70) | pencere sayısı × 20 | excel | — | 120 / 120 | 160 / 180 ✗ |
 | Vida | Trapez vida (5,5 × 110; sandviç panel) | panel boyu (mm) ÷ 200 × panel adedi; 250'ye yuvarlandı | motor | — | 500 / 750 ✗ | — |
 | Vida | Çelik dübel (klipsli) | duvar paneli adedi × 2 | motor | — | 32 / 32 | 72 / 80 ✗ |
 | Vida | Şase pul | çelik dübel adedi kadar | motor | — | 32 / 32 | 72 / 80 ✗ |
 | Vida | İnox taş | bina m² ÷ 10 | excel | — | 7 / 7 | 11 / 10 ✗ |
-| Elektrik | Buat kasa | anahtar + priz + oda sayısı | motor | — | — | 40 / 37 ✗ |
+| Elektrik | Buat kasa | anahtar + priz + oda sayısı (veranda hariç) | motor | — | — | 40 / 37 ✗ |
 | Elektrik | İzole bant | bina m² × 0,06 | motor | — | — | 7 / 3 ✗ |
 
 Okuma:
 
 - **Köşebent.** Mühendisin formülü, oda başına 4 iç köşeyle listelerin altında kalıyor (57 / 70, 39 / 50, 70 / 85); önceki kural (m² ÷ 2,5) yarısını veriyordu. Gerçek iç köşe sayıları bilinmiyor.
-- **Sandviç panel (62 m², kırma çatı).** Liste 27 adet; açılım dizilimi 26 veriyor. Önceki kural (yüzey + %10) 27'yi tutturuyordu, ama o listeye uydurulmuştu.
+- **Sandviç panel (62 m², kırma çatı).** Liste 27 adet L 3200 (ayrıca 2 adet L 1000); açılım dizilimi taşmayla 28 veriyor (taşmasız 26'ydı). Önceki kural (yüzey + %10) 27'yi tutturuyordu, ama o listeye uydurulmuştu.
+- **Dış cephe Boardex.** Zayiat %8 olunca üç listede de 2–3 levha az: 43 / 46 · 30 / 32 · 48 / 51. %15 ile 45 / 46 · 32 / 32 · 52 / 51'di. Karşılaştırmadaki bir eksilme buradan (74 / 119; önce 75).
 - **İniş sayısı.** Kural 90 ve 62 m² projelerde 6 veriyor (dört köşe + iki uzun cephe); listelerde 7. Mühendis: iniş plana bakarak yerleştirilir. 105 m² listede 10; cephe ölçüleri olmadığı için kural hesaplanmadı.
 - **Saçak sacı.** L 2500 parça ve 30 cm bindirme (÷ 2,2) en yeni listeyi (Kasım 2025) tutturuyor; Eylül 2025 listelerinde birer fazla veriyor. Excel motorundaki 20 cm (÷ 2,3) üç listeyi de tutturuyor (14, 17, 18).
 - **İki yöntem aynı listede.** 62 ve 105 m² listelerde hem saçak sacı hem saçaklar için Boardex var; kurala göre birlikte olmaz. 105 m² listede saçak altı 0,50 m alınmış (19,6 m² = 39,2 × 0,50).
-- **Levhalar** (Boardex, alçıpan, OSB, izolasyon). Farklar 1 adet: listelerde yuvarlama bir yukarı, bir en yakına yapılmış. 105 m² listede beyaz duvar alçıpanındaki fark çalışma kitabındaki bir hücre hatasından: bir odada iki iç kapı boşluğu (3,85 m²) yerine 2 m² düşülmüş.
+- **Öteki levhalar** (alçıpan, OSB, izolasyon, saçak Boardex'i). Farklar 1 adet: listelerde yuvarlama bir yukarı, bir en yakına yapılmış. 105 m² listede beyaz duvar alçıpanındaki fark çalışma kitabındaki bir hücre hatasından: bir odada iki iç kapı boşluğu (3,85 m²) yerine 2 m² düşülmüş.
 - **Sarf kalemleri** (RYSB, alçıpan vidası, izole bant, mastik). Motorun m² formülleri listelerdeki sayıları vermiyor. Mastik üç listede de 8.
 - **Tutanlar.** Beyaz tavan alçıpanı, mahya, dere, dere kelepçesi, sıhhi tesisat (105 m²'de yedi kalemin yedisi), uçlar ve kesme taşı.
 
@@ -316,20 +382,20 @@ Not: saçaklar için Boardex'te alan liste yöntemiyle saçak boyu × 0,30 = 11,
 | Çelik panel | Boy C profil | 80 × 45 × 0,8 | 3 | aynı |  | 15 | motor |
 | Çelik panel | Boy C profil | 80 × 45 × 1,2 | 3 | aynı |  | 15 | motor |
 | Çelik panel | Toplam (adedi ve kg'ı bilinenler) |  | 69 | 2828 kg |  | 2555 | motor |
-| Metal aksam | Saçaklar için Boardex | 1200 × 2400 | 5 | aynı | 11,8 m² |  | uydurma |
-| Metal aksam | Saçak yüzü için Boardex | 1200 × 2400 | 3 | aynı | 7,2 m² |  | muhendis |
-| Metal aksam | Köşebent | L 2500 | 51 | aynı | 126,4 m |  | muhendis |
-| Dış cephe kaplama | Dış cephe Boardex | 1200 × 2400 | 33 | aynı | 80,7 m² |  | excel |
+| Metal aksam | Saçaklar için Boardex | 12,5 × 1200 × 2400 | 5 | aynı | 11,8 m² |  | uydurma |
+| Metal aksam | Saçak yüzü için Boardex | 12,5 × 1200 × 2400 | 3 | aynı | 7,2 m² |  | muhendis |
+| Metal aksam | Köşebent | L 2500 | 59 | aynı | 146,3 m |  | muhendis |
+| Dış cephe kaplama | Dış cephe Boardex | 12,5 × 1200 × 2400 | 31 | aynı | 80,7 m² |  | excel |
 | İç cephe kaplama | Duvar alçıpan beyaz | 1200 × 2500 | 47 | 46 | 132,8 m² |  | excel |
 | İç cephe kaplama | Duvar alçıpan yeşil | 1200 × 2500 | 8 | aynı | 20,4 m² |  | excel |
 | İç cephe kaplama | Tavan alçıpan beyaz | 1200 × 2500 | 19 | aynı | 54,1 m² |  | motor |
 | İç cephe kaplama | Tavan alçıpan yeşil | 1200 × 2500 | 8 | aynı | 22,6 m² |  | lokman |
-| İç cephe kaplama | OSB (TV ve mutfak dolabı arkası takviyesi) | 1220 × 2440 | 9 | aynı | 24,5 m² |  | muhendis |
+| İç cephe kaplama | OSB (TV ve mutfak dolabı arkası takviyesi) | 11 × 1220 × 2440 | 9 | aynı | 24,5 m² |  | muhendis |
 | İç cephe kaplama | Duvar izolasyonu | paket 8,64 m² | 13 | 23 | 112,2 m² |  | uydurma |
-| Çatı kaplamaları | Tek kat panel | L 4300 · 87 cm kapatır | 28 | aynı | 98,4 m² |  | lokman |
+| Çatı kaplamaları | Tek kat panel | L 4315 · 87 cm kapatır | 28 | aynı | 98,4 m² |  | lokman |
 | Çatı kaplamaları | Metal kiremit mahyası | L 2800 | 11 | aynı | 27,0 m |  | lokman |
 | Çatı kaplamaları | Tek kat panel kapaması | L 2500 | 18 | aynı | 39,3 m |  | uydurma |
-| Çatı kaplamaları | Mahya bandı | rulo / 10 m | 3 | aynı | 27,0 m |  | excel |
+| Çatı kaplamaları | Mahya bandı | rulo / 10 m | 4 | aynı | 30,8 m |  | muhendis |
 | Çatı kaplamaları | Çatı şiltesi 80 mm | 9,6 m²/adet | 10 | aynı | 88,9 m² |  | uydurma |
 | Dere | Metal dere | L 4000 | 11 | aynı | 39,3 m |  | motor |
 | Dere | Dere iniş borusu | L 3000 | 6 | aynı |  |  | lokman |
@@ -364,12 +430,12 @@ Not: saçaklar için Boardex'te alan liste yöntemiyle saçak boyu × 0,30 = 11,
 | Elektrik | İzole bant | adet | 5 | aynı | 82,0 m² |  | motor |
 | Elektrik | Kaçak akım rölesi | adet | 1 | aynı |  |  | motor |
 | Vida | RYSB pul başlı (3,9 × 32) | adet | 615 | aynı | 82,0 m² |  | motor |
-| Vida | Alçıpan vidası (3,5 × 35) | adet | 5000 | aynı | 123,0 levha |  | excel |
+| Vida | Alçıpan vidası (3,5 × 35) | adet | 5000 | aynı | 121,0 levha |  | excel |
 | Vida | OSB ve yalıpan vidası (3,9 × 32) | adet | 1000 | aynı | 700,0 vida |  | motor |
 | Vida | Pencere vidası (4,8 × 70) | adet | 160 | aynı | 8,0 pencere |  | excel |
-| Vida | Trapez vida (5,5 × 25) | adet | 1000 | aynı | 996,0 vida |  | excel |
+| Vida | Trapez vida (5,5 × 25) | adet | 1250 | aynı | 1044,0 vida |  | excel |
 | Vida | Trapez vida (5,5 × 60) | adet | 250 | aynı | 205,0 vida |  | motor |
-| Vida | Trapez vida (5,5 × 76; tek kat panel) | adet | 750 | aynı | 602,0 vida |  | motor |
+| Vida | Trapez vida (5,5 × 76; tek kat panel) | adet | 750 | aynı | 604,1 vida |  | motor |
 | Vida | Çelik dübel (klipsli) | adet | 28 | aynı | 14,0 panel |  | motor |
 | Vida | Şase pul | adet | 28 | aynı | 14,0 panel |  | motor |
 | Vida | 8'lik trapez uç | adet | 6 | aynı | 82,0 m² |  | motor |
@@ -402,47 +468,47 @@ Baz pakette tek kat panel (Lokman, 4 Ekim 01:42). Altı seçenekte değişen kal
 
 | Seçenek | Kalem | Boyut | Adet | Durum |
 |---|---|---|---|---|
-| Tek kat panel (baz paket) | Tek kat panel | L 4300 · 87 cm kapatır | 28 | lokman |
+| Tek kat panel (baz paket) | Tek kat panel | L 4315 · 87 cm kapatır | 28 | lokman |
 | Tek kat panel (baz paket) | Metal kiremit mahyası | L 2800 | 11 | lokman |
 | Tek kat panel (baz paket) | Tek kat panel kapaması | L 2500 | 18 | uydurma |
-| Tek kat panel (baz paket) | Mahya bandı | rulo / 10 m | 3 | excel |
+| Tek kat panel (baz paket) | Mahya bandı | rulo / 10 m | 4 | muhendis |
 | Tek kat panel (baz paket) | Çatı şiltesi 80 mm | 9,6 m²/adet | 10 | uydurma |
 | Tek kat panel (baz paket) | OSB ve yalıpan vidası (3,9 × 32) | adet | 1000 | motor |
 | Tek kat panel (baz paket) | Trapez vida (5,5 × 60) | adet | 250 | motor |
 | Tek kat panel (baz paket) | Trapez vida (5,5 × 76; tek kat panel) | adet | 750 | motor |
-| Sandviç panel | Sandviç panel | L 4300 · 100 cm kapatır | 24 | lokman |
+| Sandviç panel | Sandviç panel | L 4315 · 100 cm kapatır | 26 | lokman |
 | Sandviç panel | Metal kiremit mahyası | L 2800 | 11 | lokman |
 | Sandviç panel | Sandviç panel kapaması | L 2500 | 18 | uydurma |
-| Sandviç panel | Mahya bandı | rulo / 10 m | 3 | excel |
+| Sandviç panel | Mahya bandı | rulo / 10 m | 4 | muhendis |
 | Sandviç panel | Çatı şiltesi 80 mm | 9,6 m²/adet | 10 | uydurma |
 | Sandviç panel | OSB ve yalıpan vidası (3,9 × 32) | adet | 1000 | motor |
 | Sandviç panel | Trapez vida (5,5 × 60) | adet | 250 | motor |
 | Sandviç panel | Trapez vida (5,5 × 110; sandviç panel) | adet | 750 | motor |
-| OSB + nem bariyeri + kiremit desen sac (motorda: OSB + membran + metal kiremit) | Çatı OSB | 1220 × 2440 | 35 | uydurma |
+| OSB + nem bariyeri + kiremit desen sac (motorda: OSB + membran + metal kiremit) | Çatı OSB | 11 × 1220 × 2440 | 35 | uydurma |
 | OSB + nem bariyeri + kiremit desen sac (motorda: OSB + membran + metal kiremit) | Nem bariyeri | m² | 105 | motor |
-| OSB + nem bariyeri + kiremit desen sac (motorda: OSB + membran + metal kiremit) | Metal kiremit (kiremit desen sac) | L 4300 · 110 cm kapatır | 26 | varsayim |
+| OSB + nem bariyeri + kiremit desen sac (motorda: OSB + membran + metal kiremit) | Metal kiremit (kiremit desen sac) | L 4315 · 110 cm kapatır | 26 | lokman |
 | OSB + nem bariyeri + kiremit desen sac (motorda: OSB + membran + metal kiremit) | Metal kiremit mahyası | L 2800 | 11 | lokman |
 | OSB + nem bariyeri + kiremit desen sac (motorda: OSB + membran + metal kiremit) | OSB mahyası | L 2800 | 11 | lokman |
-| OSB + nem bariyeri + kiremit desen sac (motorda: OSB + membran + metal kiremit) | Mahya bandı | rulo / 10 m | 3 | excel |
+| OSB + nem bariyeri + kiremit desen sac (motorda: OSB + membran + metal kiremit) | Mahya bandı | rulo / 10 m | 4 | muhendis |
 | OSB + nem bariyeri + kiremit desen sac (motorda: OSB + membran + metal kiremit) | Çatı şiltesi 80 mm | 9,6 m²/adet | 10 | uydurma |
 | OSB + nem bariyeri + kiremit desen sac (motorda: OSB + membran + metal kiremit) | OSB ve yalıpan vidası (3,9 × 32) | adet | 2500 | motor |
 | OSB + nem bariyeri + kiremit desen sac (motorda: OSB + membran + metal kiremit) | Trapez vida (5,5 × 60) | adet | 1000 | motor |
-| OSB + nem bariyeri + trapez sac | Çatı OSB | 1220 × 2440 | 35 | uydurma |
+| OSB + nem bariyeri + trapez sac | Çatı OSB | 11 × 1220 × 2440 | 35 | uydurma |
 | OSB + nem bariyeri + trapez sac | Nem bariyeri | m² | 105 | motor |
-| OSB + nem bariyeri + trapez sac | Trapez sac | L 4300 · 80 cm kapatır | 30 | lokman |
+| OSB + nem bariyeri + trapez sac | Trapez sac | L 4315 · 80 cm kapatır | 32 | lokman |
 | OSB + nem bariyeri + trapez sac | Trapez sac mahyası | L 800 | 45 | motor |
 | OSB + nem bariyeri + trapez sac | OSB mahyası | L 2800 | 11 | lokman |
-| OSB + nem bariyeri + trapez sac | Mahya bandı | rulo / 10 m | 3 | excel |
+| OSB + nem bariyeri + trapez sac | Mahya bandı | rulo / 10 m | 4 | muhendis |
 | OSB + nem bariyeri + trapez sac | Çatı şiltesi 80 mm | 9,6 m²/adet | 10 | uydurma |
 | OSB + nem bariyeri + trapez sac | OSB ve yalıpan vidası (3,9 × 32) | adet | 2500 | motor |
 | OSB + nem bariyeri + trapez sac | Trapez vida (5,5 × 60) | adet | 1000 | motor |
-| Trapez sac | Trapez sac | L 4300 · 80 cm kapatır | 30 | lokman |
+| Trapez sac | Trapez sac | L 4315 · 80 cm kapatır | 32 | lokman |
 | Trapez sac | Trapez sac mahyası | L 800 | 45 | motor |
-| Trapez sac | Mahya bandı | rulo / 10 m | 3 | excel |
+| Trapez sac | Mahya bandı | rulo / 10 m | 4 | muhendis |
 | Trapez sac | Çatı şiltesi 80 mm | 9,6 m²/adet | 10 | uydurma |
 | Trapez sac | OSB ve yalıpan vidası (3,9 × 32) | adet | 1000 | motor |
 | Trapez sac | Trapez vida (5,5 × 60) | adet | 1000 | motor |
-| OSB + membran + shingle | Çatı OSB | 1220 × 2440 | 35 | uydurma |
+| OSB + membran + shingle | Çatı OSB | 11 × 1220 × 2440 | 35 | uydurma |
 | OSB + membran + shingle | Nem bariyeri | m² | 105 | motor |
 | OSB + membran + shingle | Membran | adet / 8 m² | 14 | motor |
 | OSB + membran + shingle | Shingle | adet / 8 m² | 14 | motor |
@@ -455,40 +521,36 @@ Baz pakette tek kat panel (Lokman, 4 Ekim 01:42). Altı seçenekte değişen kal
 
 Bayi kuralı çatıyı yöntem B'ye çevirirse (`--bayi ORNEK-BAYI-3`; çıktı `sonuc/C8201_yontem_B.md`): tavan ve çatı paneli ile saçak altı ve saçak yüzü Boardex'i çıkar; saçak sacı 18, saçak omegası 18, tavan omegası 35, aşık 49 girer. Çelik 1903 kg, trapez vida (5,5 × 25) 2000 olur.
 
-## Excel motoruyla ilgili gözlemler (mühendise sorulacak)
+## Excel motoruyla ilgili gözlemler (mühendise iletilecek)
 
-- **Trapez sac adedi.** Motorun formülü: çatı yüzeyi ÷ sac boyu × 0,8. Kapatma genişliğine (0,8 m) bölmesi gerekirken çarpıyor görünüyor. 10 × 10 m beşik çatıda motor 16 verir; mühendisin kendi metrajında 28 var (her saçakta 10,6 ÷ 0,8 → 14). Metal kiremitte de × 1,05 var (÷ 1,05 olmalı; fark yaklaşık %10). Tek kat ve sandviç panelde katsayı 1 olduğu için fark yok. Bu yüzden trapez sacda motorun formülü kullanılmadı.
+- **Trapez sac ve metal kiremit adedi.** Formülde 0,8 ve 1,05 paydanın parantezi dışında: kapatma genişliğine bölmek yerine çarpıyor. Hücreler, formülün işleyişi, örnekler ve öteki dört bulgu yukarıda ("Excel motorundaki çatı kaplaması formülü"). Mühendis 11. cevabında formülü yeniden kontrol etmemizi istedi; bulgu ona iletilecek. Trapez sacda motorun formülü kullanılmıyor.
 - **Kırma çatıda kaplama adedi.** Motor yüzeyden hesaplıyor; notunda gerçek adedin AutoCAD'de yerleşimle bulunacağı yazıyor. Mühendisin 10 × 10 m dört omuz metrajında 118 m² yüzey için 36 adet L 5900 trapez sac var (yüzeyin 1,44 katı). 62 m² gerçek listede 27 adet L 3200 ve 2 adet L 1000 sandviç panel var (yüzeyin 1,15 katı). Lokman'ın 4 Ekim 01:42 kuralıyla adet artık çatı açılımından çıkıyor; karşılaştırma yukarıdaki tabloda.
-- **Köşebent.** Motor plansız hesaplıyor: oda çevrelerini bina kenarlarının altı katı, iç köşeyi 36 sayıyor. Ç8201'in ölçüleriyle 78 verir; plandan 51.
+- **Köşebent.** Motor plansız hesaplıyor: oda çevrelerini bina kenarlarının altı katı, iç köşeyi 36 sayıyor. Ç8201'in ölçüleriyle 78 verir; plandan 59.
 - **Elektrik.** Motorda sayılar sabit: duy 7, glop 3, tekli anahtar 9, çiftli anahtar 2, tekli priz 22, çiftli priz 3, uydu prizi 1, sigorta 9; buat = anahtar + priz + 9.
 - **İniş borusu.** Motorda dere adedi ÷ 5 + 6; mühendisin 10 × 10 m metrajındaki sayıları (8 ve 6) vermiyor (9 ve 8 verir).
-- **Motorda olup listede olmayan kalemler.** Mühendisin ikinci cevaplarıyla: mahya bandı listeye eklendi; çatı müdahale kapağı standart pakette yok, müşteri isterse eklenir. Ters mahya kenar kutuları (ters mahya × 2) cumbalı çatı çalışılınca sorulacak; hesapta yok.
+- **Motorda olup listede olmayan kalemler.** Mühendisin ikinci cevaplarıyla: mahya bandı listeye eklendi; çatı müdahale kapağı standart pakette yok, müşteri isterse eklenir. Ters mahya kenar kutuları (ters mahya × 2) cumbalı çatı çalışılınca sorulacak; hesapta yok. Damlalık (L 2500): motorda adedi elle giriliyor (şablonda 0), mahya bandı formülünde geçiyor; okunan listelerde yok.
 
 ## Açık sorular
 
-1. **Makas ve kiriş.** Lokman bir makas ölçüsünden verecek. O zamana kadar çatı çeliği, dikme ve kiriş motorun ortalamasıyla (mühendis, 4 Ekim: "Tamamdır").
-2. **Tavan ve çatı panelinin adedi.** 100 m²'deki 8 ve 12 adet mühendisin ilk cevabından; ağırlıklar Lokman'ın düzeltmesiyle değişti. Adetler yeni ağırlıklarla da geçerli mi? Değerler hangi çatı tipi, saçak ve eğim için?
-3. **Et kalınlığı: 2025 listeleri.** Kurala göre tek katta duvarlar 1,2 mm. 2025 tarihli iki tek katlı 140'lık listede dış duvarların çoğu ve iç duvarlar 0,8 mm: dış duvar 19,9 kg/m'ye geliyor, kuralla 29,04 kg/m. Bundan sonra kural mı geçerli, o listelerdeki uygulama mı? Ç8201 dış 140'ta fark 478 kg. Üç gerçek listeyle karşılaştırma o listelerdeki kalınlıklarla yapılıyor.
-4. **OSB takviyesi.** Mühendis: yer, mimari plandaki tezgâh ve TV ünitesi yerinden "o kısımlar alınarak" bulunur. Duvar yüzünün tamamı mı alınır (Lokman: "tüm yüzeyini"), yalnız tezgâhın ve TV ünitesinin arkası mı? Klima duvarı da sayılacak mı (listelerde kalemin adı "TV, klima ve mutfak dolabı arkası")?
-5. **Elektrik.** Buat için "oda sayısı" hangi odalar? Yatak odası ve banyodaki prizler tekli mi?
-6. **Köşebent.** Odaya doğru çıkıntı yapan köşeler ve veranda tavanının çevresi sayılır mı?
-7. **Excel motorundaki trapez sac ve metal kiremit formülü.** Kapatma genişliğine bölmesi gerekirken çarpıyor görünüyor (yukarıdaki gözlem). Doğru mu okuduk?
-8. **Çatı açılımı.** Dizilim hangi köşeden başlar (sandviç panelde ve trapez sacda adet buna göre 2 değişiyor)? Kesim payı bırakılır mı? Dizilimden çıkan adede yedek eklenir mi (62 m² listede 27, dizilim 26)? Kiremit desen sacda artan parça karşı yüzde kullanılır mı?
-9. **Mahya bandı.** Mahya uzunluğundan mı hesaplanır (Ç8201: 3 rulo), motordaki gibi mahya parçalarının toplam boyundan mı (4 rulo)?
-10. **Bindirme.** Örnekte saçak sacı L 2800; listelerde L 2500. Saçak sacının boyu hangisi? Eylül 2025 listeleri 20 cm ile tutuyor. Derede ve L 800 trapez mahyasında bindirme de 30 cm mi (motorda 20 cm)?
-11. **Dış kapı.** Katalog çiziminde 100 cm; listelerde boşluk 95 × 210 (bir listede 95 × 200), kapı 90 × 210.
-12. **Veranda dikmeleri.** Sayısı ve yeri neye göre belirleniyor?
-13. **Kalınlıklar.** Boardex: 2 Ekim'de 12,5 mm denildi; listelerde ve motorda 8 mm. OSB: listelerde 9 mm; motorda ve 2 Ekim kaydında 11 mm.
-14. **Zayiat.** Boardex %15 mi, %8 mi (motor)? OSB %5 mi, %15 mi (105 m² listede %15)? Alçıpan %5.
-15. **İki yöntem aynı listede.** 62 ve 105 m² listelerde hem saçak sacı hem saçaklar için Boardex var. O Boardex nereye gidiyor?
-16. **Yöntem B.** Tavan omegası ve aşık aralığı 60 cm mi (sandviç panelde de)?
-17. **Bayi standartları.** Hangi bayide hangi gruplar, hangi çatı yöntemi ve kaplaması standart?
-18. **Sırası gelince.** Çift kat modeli: üst katta 200 cm ve daha geniş pencereli duvarın 1,2 mm alınması (kural kayıtlı, uygulanmadı). Cumbalı çatı: ters mahya kenar kutuları ve cumbalı çatının açılımı.
+1. **Çatı dizilimi.** Dizilim nereden başlar? Listeye en az paneli veren başlangıç giriyor: Ç8201'de uzun yüzlerde sol köşeden, kısa yüzlerde ortadan, 28 panel; her yüzde sol köşeden başlanırsa 29. Montaj ekibi dizilim şemasına uyar mı? Kesim payı 5 mm uygun mu? Dizilimden çıkan adede yedek eklenir mi (62 m² listede 27 uzun ve 2 kısa panel; dizilim 28)? Üçüncü tur bu üçünü cevaplamadı.
+2. **Excel motorundaki kaplama formülü.** Beş bulgu mühendise iletilecek (yukarıda): parantez, uzun kenardaki saçak, kapatma genişlikleri, B61, sundurma. Kapatma genişliği sorusu listeyi de ilgilendiriyor: tek kat panel 87 cm mi (listeler, montaj paftası), 100 cm mi (motor)? Kiremit desen sac 110 mu, 105 mi? Liste 87 ve 110 ile hesaplıyor.
+3. **Boardex zayiatı.** %8 ile 2025 listelerinden 2–3 levha az çıkıyor (Ç8201: 31; %15 ile 33). Bilerek mi?
+4. **Damlalık.** Mahya bandı formülünde geçiyor; okunan listelerde yok, motorda adedi elle giriliyor. Hangi durumda listeye girer, adedi nasıl bulunur?
+5. **Klima duvarı.** OSB takviyesinde sayılır mı (listelerde kalemin adı "TV, klima ve mutfak dolabı arkası")? Cevaplanmadı; sayılmıyor.
+6. **Makas ve kiriş.** Şimdilik motorun ortalamasıyla (mühendis, 4 Ekim 12:14). Lokman bir makas ölçüsünden verirse çatı çeliği, dikme ve kiriş değişir.
+7. **Bindirme.** Örnekte saçak sacı L 2800; listelerde L 2500. Saçak sacının boyu hangisi? Eylül 2025 listeleri 20 cm ile tutuyor. Derede ve L 800 trapez mahyasında bindirme de 30 cm mi (motorda 20 cm)?
+8. **Veranda dikmeleri.** Sayısı ve yeri neye göre belirleniyor?
+9. **OSB zayiatı.** %5 mi, %15 mi (105 m² listede %15)? Alçıpan %5.
+10. **İki yöntem aynı listede.** 62 ve 105 m² listelerde hem saçak sacı hem saçaklar için Boardex var. O Boardex nereye gidiyor?
+11. **Yöntem B.** Tavan omegası ve aşık aralığı 60 cm mi (sandviç panelde de)?
+12. **Bayi standartları.** Henüz oturmadı (mühendis, 4 Ekim 12:14). Netleşince hangi bayide hangi gruplar, hangi çatı yöntemi ve kaplaması standart: bayi kuralı tablosuna yazılacak.
+13. **Sırası gelince.** Çift kat modeli: üst katta 200 cm ve daha geniş pencereli duvarın 1,2 mm alınması (kural kayıtlı, uygulanmadı). Cumbalı çatı: ters mahya kenar kutuları ve cumbalı çatının açılımı.
 
 Kapananlar:
 
 - **Mühendisin 3 Ekim cevaplarıyla:** saçak omegası (gerekmiyor); saçak yüzünün malzemesi (Boardex); OSB takviyesinin kapsamı (yalnız dolap ve TV duvarları); köşebent formülü; iniş sayısındaki fark (plana göre yerleşim); elektrik sayıları (oda başına kural); çatı kaplaması seçenekleri (altı).
 - **Lokman'ın 4 Ekim düzeltmeleri ve mühendisin ikinci cevaplarıyla:** tavan ve çatı panelinin ağırlığı ve alana oranlanması; baz paketin çatı kaplaması (tek kat panel; Lokman); kırma çatıda kaplama adedi (çatı açılımı ve dizilim; Lokman); et kalınlığı kuralı; OSB takviyesi için seçilen duvarlar; salon ile mutfak kurallarının birlikte uygulanması; mahya bandı (listede) ve çatı müdahale kapağı (yalnız müşteri isterse).
+- **Mühendisin üçüncü cevaplarıyla (4 Ekim 12:14):** tek katta et kalınlığı (1,2 mm ile devam; 2025 listeleri eski uygulama); tavan ve çatı panelinin adedi (100 m²'de 8 ve 12); OSB takviyesinde duvarın tamamı; köşebentte çıkıntı yapan köşeler (sayılmaz) ve veranda tavanı (sayılır); buat için oda sayısı (veranda hariç) ve tekli prizler; mahya bandı formülü; dış kapı boşluğu (95 × 210); Boardex 12,5 mm, OSB 11 mm, Boardex zayiatı %8; kaplamanın saçaktan 5 cm taşması; kiremit desen sacda artan parçanın kullanılmaması.
 
 ## Canlıya alırken (öneri; ayrı onay gerekir)
 

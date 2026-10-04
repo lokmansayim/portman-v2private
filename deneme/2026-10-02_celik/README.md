@@ -12,7 +12,7 @@ Amaç: tek kat çelik bir modeli, pano ızgarası olmadan, bir tanım dosyasınd
 | `gorunus.py` | Çatı hesabı, çatı planı, dört görünüş ve tek pafta |
 | `secenekler/` | Seçenekler (değişiklik operatörleri): model tanımını değiştirmeden paket farkını uygular. İlk örnek: `dis_karkas_140.json` |
 | `cikti/` | Koşu çıktıları (depoya girmez) |
-| `sonuc/` | Son koşunun kanıtları (4 Ekim 2026 02:58): plan, pafta, raporlar |
+| `sonuc/` | Son koşunun kanıtları (4 Ekim 2026 13:22): plan, pafta, raporlar; `C8201_plan_cizim_kalinligi.png` arşiv çiziminin duvar kalınlıklarıyla (12 / 11 cm) çizilen karşılaştırma planı |
 
 ## Çalıştırma
 
@@ -38,7 +38,7 @@ python gorunus.py C8201.json --secenek secenekler/dis_karkas_140.json
 
 ## 3 Ekim 13:27 cevaplarıyla değişenler
 
-- İç kapı boşluğu 90 × 214, kanat 200 (eni 80 listelerden); banyo kapısı da 90 (çizimde 80'di). Dış kapı 210 yüksekliğinde çizildi (modeller ve listeler; teyidi yok).
+- İç kapı boşluğu 90 × 214, kanat 200 (eni 80 listelerden); banyo kapısı da 90 (çizimde 80'di). Dış kapı 210 yüksekliğinde çizildi (modeller ve listeler; boşluk 95 × 210 mühendisin 4 Ekim 12:14 cevabıyla teyit edildi).
 - Veranda çerçevesi: sırt 8, genişlik 30 cm; kirişler üç açık kenarda (12,38 m); dikme 3 adet, 240 cm. Planda ve görünüşlerde çizildi. Önceki 20 × 20 kolon varsayımı kalktı.
 - Çatı: yöntem A (çatı ve tavan paneli); saçak altı Boardex; kaplama seçenek.
 - Dere inişi 6 adet; çatı planında sarı noktalar.
@@ -60,10 +60,16 @@ python gorunus.py C8201.json --secenek secenekler/dis_karkas_140.json
 - Dış 140 seçeneğinin açıklaması: et kalınlığı mühendisin kuralıyla 1,2 mm (çizim değişmedi).
 - Çatı açılımı ve kaplama dizilimi yükleme listesi denemesinde: `../2026-10-03_yukleme/cati_acilim.py`.
 
+## 4 Ekim 12:14 (mühendisin üçüncü cevapları) ile değişenler
+
+- Dış kapı boşluğu 95 × 210 ("Dış kapı boşluğu 95x210, iç oda kapı boşluğu 90x214 alınır."): tanımda genişlik 100 → 95 cm, başlangıç 383 → 385,5 (kapının ekseni yerinde). Plan ve paftalar yeniden çizildi (dört görsel).
+- Alanlar ve dış Boardex metrajı değişmedi (metraj zaten 0,95 × 2,10 boşlukla hesaplanıyordu); `--cizim-kalinligi` karşılaştırması yine AYNI. Karşılaştırma planı `sonuc/C8201_plan_cizim_kalinligi.png` olarak eklendi.
+- OSB takviyesi: duvarın tamamı alınır (teyit); tanımdaki kaynak notuna yazıldı.
+- Yükleme listesindeki değişiklikler (taşma, köşebent, Boardex zayiatı, mahya bandı): `../2026-10-03_yukleme/`.
+
 ## Sınırlar
 
 - Yalnız dikdörtgen kapalı kutu ve eksenlere paralel iç duvarlar.
 - Yalnız kırma çatı; 3B ve yükleme listesinin öteki kalemleri yok.
 - Varsayım: veranda dikmelerinin sayısı ve yeri (katalog görsellerinden); panelin ucu şakülünde kesilir (gönyesinde kesilirse saçak yüzü 17,6 cm). Topuk 10 cm modellerden ölçüldü, Lokman teyit etti. Subasman, merdiven ve cephe kaplaması çizilmiyor.
-- Açık: dış kapı katalog çiziminde 100 cm; listelerde boşluk 95 × 210, kapı 90 × 210.
 - Kaynak çizim (DWG) depoda değil; tanım dosyası elle, çizimden okunarak yazıldı.

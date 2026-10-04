@@ -120,36 +120,38 @@ def kaplama_tablosu() -> list[str]:
 
 
 def dizilim_tablosu() -> list[str]:
-    """Kırma çatıda kaplama adedi: çatı açılımı ve dizilim (Lokman, 4 Ekim 2026 01:42). Ç8201'de şerit dizilen dört kaplama ve 62 m² gerçek liste."""
+    """Kırma çatıda kaplama adedi: çatı açılımı ve dizilim (Lokman, 4 Ekim 2026 01:42; taşma: mühendis, 12:14).
+    Ç8201'de şerit dizilen dört kaplama, 62 m² gerçek liste ve mühendisin 10 × 10 m dört omuz metrajı."""
     import math
-    from cati_acilim import adet_denemeleri, dizilim
+    from cati_acilim import BASLANGIC_ADI, dizilim, kural_dizilimi
     kr = json.loads((BURADA / "kurallar.json").read_text(encoding="utf-8"))
-    baz_kaplama, yok = kr["baz_paket_cati_kaplamasi"]["deger"], kr["kirma_cati_dizilim"]["deger"]["artan_parca_kullanilmayan_kaplamalar"]
+    kd = kr["kirma_cati_dizilim"]["deger"]
+    baz_kaplama = kr["baz_paket_cati_kaplamasi"]["deger"]
     c = oku("C8201_girdi.json")["cati"]
-    cik = ["| Çatı | Kaplama | Kapatır | Artan parça karşı yüzde | Artan parça kullanılmazsa | Listeye giren | Alan olarak en az | Önceki kural (yüzey + %10) | Başlangıç köşesine göre | 1 cm kesim payıyla |",
-           "|---|---|---|---|---|---|---|---|---|---|"]
+    cik = ["| Çatı | Kaplama | Kapatır | Adet (listeye giren) | Dizilimin başladığı yer | Her yüzde sol köşeden | Öteki başlangıçlarla | Artan parça kullanılmazsa | Alan olarak en az | Kesim payı sıfır / 1 cm | Taşma |",
+           "|---|---|---|---|---|---|---|---|---|---|---|"]
 
-    def satir(cati: str, ad: str, px: float, py: float, egim: float, w: float, boy: float, paylas: bool, yuzey: float) -> str:
-        d, ds = dizilim(px, py, egim, w, boy, True), dizilim(px, py, egim, w, boy, False)
-        den = adet_denemeleri(px, py, egim, w, boy, paylas)
+    def satir(cati_adi: str, ad: str, cati: dict, kaplama: str) -> str:
+        d = kural_dizilimi(kr, cati, kaplama)
+        den = d["denemeler"]
+        px, py = cati["plan_m"]
+        # artan parça hiç kullanılmasa: aynı ayarlarla, en az paneli veren başlangıç
+        kullanmadan = min(dizilim(px, py, cati["egim"], d["kapatma_m"], cati["panel_boyu_m"], False, bs, kd["kesim_payi_m"], d["tasma_m"])["adet"] for bs in kd["baslangic_sirasi"])
         aralik = str(min(den.values())) if len(set(den.values())) == 1 else f"{min(den.values())}–{max(den.values())}"
-        giren = d["adet"] if paylas else ds["adet"]
-        return (f"| {cati} | {ad} | {round(w * 100)} cm | {d['adet']} ({d['tam_boy_adedi']} tam boy + {d['adet'] - d['tam_boy_adedi']} kesilen) | {ds['adet']} | "
-                f"{giren}{'' if paylas else ' (varsayım)'} | {(d if paylas else ds)['alan_alt_siniri']} | {math.ceil(yuzey * 1.10 / (boy * w) - 1e-9)} | {aralik} | "
-                f"{dizilim(px, py, egim, w, boy, paylas, kesim_payi=0.01)['adet']} |")
+        return (f"| {cati_adi} | {ad} | {round(d['kapatma_m'] * 100)} cm | {d['adet']} ({d['tam_boy_adedi']} tam boy + {d['adet'] - d['tam_boy_adedi']} kesilen) | "
+                f"{BASLANGIC_ADI[d['baslangic']]} | {den['sol']} | {aralik} | {kullanmadan}{'' if d['paylas'] else ' (listeye giren)'} | {d['alan_alt_siniri']} | "
+                f"{d['paysiz_adet']} / {d['bir_cm_payla_adet']} | {tr(d['tasma_m'] * 100, 1)} cm |")
 
-    sirali = sorted((("tek_kat_panel", "Tek kat panel", "tek_kat_panel_kapatma_m"), ("sandvic_panel", "Sandviç panel", "sandvic_panel_kapatma_m"),
-                     ("trapez_sac", "Trapez sac", "trapez_sac_kapatma_m"), ("osb_kiremit", "Kiremit desen sac", "kiremit_kapatma_m")), key=lambda x: x[0] != baz_kaplama)
-    for anahtar, ad, kural in sirali:
-        cik.append(satir("Ç8201 (L 4300)", ad + (" (baz paket)" if anahtar == baz_kaplama else ""), c["plan_m"][0], c["plan_m"][1], c["egim"],
-                         kr[kural]["deger"], c["panel_boyu_m"], anahtar not in yok, c["yuzey_m2"]))
+    sirali = sorted((("tek_kat_panel", "Tek kat panel"), ("sandvic_panel", "Sandviç panel"), ("trapez_sac", "Trapez sac"), ("osb_kiremit", "Kiremit desen sac")),
+                    key=lambda x: x[0] != baz_kaplama)
+    for anahtar, ad in sirali:
+        cik.append(satir(f"Ç8201 (L {round(c['panel_boyu_m'] * 1000)})", ad + (" (baz paket)" if anahtar == baz_kaplama else ""), c, anahtar))
     g62 = json.loads((BURADA / "ornek_62m2_girdi.json").read_text(encoding="utf-8"))["cati"]
     liste = json.loads((BURADA / "ornek_62m2_gercek_liste.json").read_text(encoding="utf-8"))["kalemler"]["Sandviç panel"]["adet"]
-    cik.append(satir(f"62 m² gerçek liste (L {round(g62['panel_boyu_m'] * 1000)}; listede {liste})", "Sandviç panel", g62["plan_m"][0], g62["plan_m"][1], g62["egim"],
-                     kr["sandvic_panel_kapatma_m"]["deger"], g62["panel_boyu_m"], True, g62["yuzey_m2"]))
+    cik.append(satir(f"62 m² gerçek liste (L {round(g62['panel_boyu_m'] * 1000)}; listede {liste})", "Sandviç panel", g62, "sandvic_panel"))
     # Mühendisin 10 × 10 m dört omuz metrajı (Çatı Hesapları çalışma kitabı): 118 m² yüzey, trapez sac L 5900, 36 adet.
     # Plan saçak dahil 10,6 × 10,6 m ve eğim %33 alındı: yüzey 10,6² × 1,053 = 118,3 m² (metrajdaki yüzeyi veriyor).
-    cik.append(satir("Mühendisin 10 × 10 m dört omuz metrajı (L 5900; metrajda 36)", "Trapez sac", 10.6, 10.6, 0.33, kr["trapez_sac_kapatma_m"]["deger"], 5.9, True, 10.6 * 10.6 * math.sqrt(1 + 0.33 ** 2)))
+    cik.append(satir("Mühendisin 10 × 10 m dört omuz metrajı (L 5900; metrajda 36)", "Trapez sac", {"plan_m": [10.6, 10.6], "egim": 0.33, "panel_boyu_m": 5.9}, "trapez_sac"))
     return cik
 
 
@@ -165,7 +167,10 @@ def kosebent_tablosu() -> list[str]:
     c = oku("C8201_yukleme_taslak.json")
     kb = c["ara"]["kosebent"]
     kose = next(s for s in c["satirlar"] if s["kalem"] == "Köşebent")
-    cik += ["", f"Ç8201 (planından): oda çevreleri {tr(kb['tavan_cevresi_m'], 2)} m, iç köşe {kb['ic_kose']}; ({tr(kb['tavan_cevresi_m'], 2)} + {kb['ic_kose']} × 2,7) ÷ 2,5 = {tr(kb['boy_m'] / k['parca_boyu_m'], 1)} → {kose['adet']} adet."]
+    veranda = kb.get("veranda_tavan_cevresi_m") or 0.0     # veranda tavanının çevresi de sayılır (mühendis, 4 Ekim 12:14)
+    assert abs(kb["tavan_cevresi_m"] + veranda + kb["ic_kose"] * k["kose_boyu_m"] - kb["boy_m"]) < 0.01, kb
+    cik += ["", f"Ç8201 (planından): oda çevreleri {tr(kb['tavan_cevresi_m'], 2)} m, veranda tavanının çevresi {tr(veranda, 2)} m, iç köşe {kb['ic_kose']}; "
+                f"({tr(kb['tavan_cevresi_m'], 2)} + {tr(veranda, 2)} + {kb['ic_kose']} × 2,7) ÷ 2,5 = {tr(kb['boy_m'] / k['parca_boyu_m'], 1)} → {kose['adet']} adet."]
     return cik
 
 

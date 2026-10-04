@@ -204,8 +204,8 @@
     {
       "tur": "dis_kapi",
       "duvar": "dis:alt",
-      "bas": 383,
-      "en": 100,
+      "bas": 385.5,
+      "en": 95,
       "yuk": 210,
       "mentese": "son",
       "acilim": "ic",
@@ -217,7 +217,7 @@
         90,
         210
       ],
-      "kaynak": "Genişlik 100 katalog çiziminden. Boşluk 95 × 210 ve kapı 90 × 210: yükleme listesi çalışma kitapları ile üç çelik SKP modeli (dış kapı başlığı 210, net en 94). Lokman'ın teyidi yok."
+      "kaynak": "Boşluk 95 × 210: Ubeydullah (inşaat mühendisi), üçüncü cevaplar (Lokman 4 Ekim 2026 12:14'te iletti): \"Dış kapı boşluğu 95x210, iç oda kapı boşluğu 90x214 alınır.\" Katalog çiziminde genişlik 100'dü (383–483); boşluk 95'e indirildi, kapının ortası yerinde tutuldu. Kapı 90 × 210: yükleme listesi çalışma kitapları; üç çelik SKP modelinde dış kapı başlığı 210, net en 94."
     },
     {
       "tur": "ic_kapi",
@@ -333,7 +333,7 @@
         "neden": "TV ünitesi"
       }
     ],
-    "kaynak": "Kural: Ubeydullah (inşaat mühendisi), 3 Ekim 2026: \"Bütün oda değil sadece dolap ve TV ünitesi gelen duvar metrajı alınır.\" Lokman, 3 Ekim 13:27: mutfak dolabı ve TV ünitesi takılırken mukavemet sağlasın diye; \"tüm yüzeyini hesapla\". Duvarların seçimi katalog görselinden (Arşiv/TEK KAT ÇELİK/Ç8201/PORT-Ç8201.jpg): mutfak tezgâhı L biçiminde, banyo–mutfak duvarı (R) ile üst dış duvar boyunca; TV ünitesi hol–yaşam alanı duvarında (B). Her duvarın Yaşam Alanı'na bakan yüzünün tamamı alındı. Mühendis seçimi doğruladı (ikinci cevaplar; Lokman 4 Ekim 2026 01:24'te iletti): \"Evet doğru yeri almışsın. Ancak bunun yeri en doğru şekilde genel mimari planda mutfak tezgahı ve TV ünitesi yeri gösterilirse o kısımlar alınarak bulunabilir.\"",
+    "kaynak": "Kural: Ubeydullah (inşaat mühendisi), 3 Ekim 2026: \"Bütün oda değil sadece dolap ve TV ünitesi gelen duvar metrajı alınır.\" Lokman, 3 Ekim 13:27: mutfak dolabı ve TV ünitesi takılırken mukavemet sağlasın diye; \"tüm yüzeyini hesapla\". Duvarların seçimi katalog görselinden (Arşiv/TEK KAT ÇELİK/Ç8201/PORT-Ç8201.jpg): mutfak tezgâhı L biçiminde, banyo–mutfak duvarı (R) ile üst dış duvar boyunca; TV ünitesi hol–yaşam alanı duvarında (B). Her duvarın Yaşam Alanı'na bakan yüzünün tamamı alındı. Mühendis seçimi doğruladı (ikinci cevaplar; Lokman 4 Ekim 2026 01:24'te iletti): \"Evet doğru yeri almışsın. Ancak bunun yeri en doğru şekilde genel mimari planda mutfak tezgahı ve TV ünitesi yeri gösterilirse o kısımlar alınarak bulunabilir.\" Üçüncü cevaplar (Lokman 4 Ekim 2026 12:14'te iletti): \"Duvarın tamamını al.\"",
     "teyit": "muhendis"
   }
 }

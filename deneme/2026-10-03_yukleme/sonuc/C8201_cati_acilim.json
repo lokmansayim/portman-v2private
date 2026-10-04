@@ -5,20 +5,23 @@
  ],
  "egim": 0.33,
  "kapatma_m": 0.87,
- "panel_boyu_m": 4.3,
+ "panel_boyu_m": 4.315,
  "artan_parca_karsi_yuzde": true,
- "baslangic": "sol",
+ "baslangic": "kose_orta",
+ "baslangic_adi": "uzun yüzlerde sol köşeden, kısa yüzlerde ortadan",
  "egimli_boy_m": 4.265,
  "mahya_m": 3.44,
+ "tasma_m": 0.05,
  "yuzey_m2": 98.43,
+ "kaplanan_m2": 100.4,
  "adet": 28,
  "alan_alt_siniri": 27,
- "tam_boy_panel": 12,
- "iki_parca_veren_kesim": 18,
+ "tam_boy_panel": 10,
+ "iki_parca_veren_kesim": 19,
  "artigi_kullanilmayan_parca": 0,
  "parca_adedi": 48,
- "kesim_payi_m": 0.0,
- "en_dar_pay_m": 0.067,
+ "kesim_payi_m": 0.005,
+ "en_dar_pay_m": 0.061,
  "yuzler": {
   "ön": [
    {
@@ -26,8 +29,8 @@
     "x0_m": 0.0,
     "x1_m": 0.87,
     "tip": "L",
-    "uzun_m": 0.916,
-    "kisa_m": 0.0,
+    "uzun_m": 0.966,
+    "kisa_m": 0.05,
     "panel": 1,
     "konum": "alt"
    },
@@ -36,8 +39,8 @@
     "x0_m": 0.87,
     "x1_m": 1.74,
     "tip": "L",
-    "uzun_m": 1.832,
-    "kisa_m": 0.916,
+    "uzun_m": 1.882,
+    "kisa_m": 0.966,
     "panel": 2,
     "konum": "alt"
    },
@@ -46,8 +49,8 @@
     "x0_m": 1.74,
     "x1_m": 2.61,
     "tip": "L",
-    "uzun_m": 2.748,
-    "kisa_m": 1.832,
+    "uzun_m": 2.798,
+    "kisa_m": 1.882,
     "panel": 3,
     "konum": "alt"
    },
@@ -56,8 +59,8 @@
     "x0_m": 2.61,
     "x1_m": 3.48,
     "tip": "L",
-    "uzun_m": 3.665,
-    "kisa_m": 2.748,
+    "uzun_m": 3.715,
+    "kisa_m": 2.798,
     "panel": 4,
     "konum": "alt"
    },
@@ -66,8 +69,8 @@
     "x0_m": 3.48,
     "x1_m": 4.35,
     "tip": "karma",
-    "uzun_m": 4.265,
-    "kisa_m": 3.665,
+    "uzun_m": 4.315,
+    "kisa_m": 3.715,
     "panel": 5,
     "konum": "tam"
    },
@@ -76,8 +79,8 @@
     "x0_m": 4.35,
     "x1_m": 5.22,
     "tip": "duz",
-    "uzun_m": 4.265,
-    "kisa_m": 4.265,
+    "uzun_m": 4.315,
+    "kisa_m": 4.315,
     "panel": 6,
     "konum": "tam"
    },
@@ -86,8 +89,8 @@
     "x0_m": 5.22,
     "x1_m": 6.09,
     "tip": "duz",
-    "uzun_m": 4.265,
-    "kisa_m": 4.265,
+    "uzun_m": 4.315,
+    "kisa_m": 4.315,
     "panel": 7,
     "konum": "tam"
    },
@@ -96,8 +99,8 @@
     "x0_m": 6.09,
     "x1_m": 6.96,
     "tip": "duz",
-    "uzun_m": 4.265,
-    "kisa_m": 4.265,
+    "uzun_m": 4.315,
+    "kisa_m": 4.315,
     "panel": 8,
     "konum": "tam"
    },
@@ -106,8 +109,8 @@
     "x0_m": 6.96,
     "x1_m": 7.83,
     "tip": "karma",
-    "uzun_m": 4.265,
-    "kisa_m": 3.907,
+    "uzun_m": 4.315,
+    "kisa_m": 3.957,
     "panel": 9,
     "konum": "tam"
    },
@@ -116,8 +119,8 @@
     "x0_m": 7.83,
     "x1_m": 8.7,
     "tip": "R",
-    "uzun_m": 3.907,
-    "kisa_m": 2.991,
+    "uzun_m": 3.957,
+    "kisa_m": 3.041,
     "panel": 10,
     "konum": "alt"
    },
@@ -126,8 +129,8 @@
     "x0_m": 8.7,
     "x1_m": 9.57,
     "tip": "R",
-    "uzun_m": 2.991,
-    "kisa_m": 2.074,
+    "uzun_m": 3.041,
+    "kisa_m": 2.124,
     "panel": 11,
     "konum": "alt"
    },
@@ -136,8 +139,8 @@
     "x0_m": 9.57,
     "x1_m": 10.44,
     "tip": "R",
-    "uzun_m": 2.074,
-    "kisa_m": 1.158,
+    "uzun_m": 2.124,
+    "kisa_m": 1.208,
     "panel": 12,
     "konum": "alt"
    },
@@ -146,8 +149,8 @@
     "x0_m": 10.44,
     "x1_m": 11.31,
     "tip": "R",
-    "uzun_m": 1.158,
-    "kisa_m": 0.242,
+    "uzun_m": 1.208,
+    "kisa_m": 0.292,
     "panel": 13,
     "konum": "alt"
    },
@@ -156,8 +159,8 @@
     "x0_m": 11.31,
     "x1_m": 11.54,
     "tip": "R",
-    "uzun_m": 0.242,
-    "kisa_m": 0.0,
+    "uzun_m": 0.292,
+    "kisa_m": 0.05,
     "panel": 1,
     "konum": "alt"
    }
@@ -168,8 +171,8 @@
     "x0_m": 0.0,
     "x1_m": 0.87,
     "tip": "L",
-    "uzun_m": 0.916,
-    "kisa_m": 0.0,
+    "uzun_m": 0.966,
+    "kisa_m": 0.05,
     "panel": 4,
     "konum": "üst"
    },
@@ -178,8 +181,8 @@
     "x0_m": 0.87,
     "x1_m": 1.74,
     "tip": "L",
-    "uzun_m": 1.832,
-    "kisa_m": 0.916,
+    "uzun_m": 1.882,
+    "kisa_m": 0.966,
     "panel": 3,
     "konum": "üst"
    },
@@ -188,8 +191,8 @@
     "x0_m": 1.74,
     "x1_m": 2.61,
     "tip": "L",
-    "uzun_m": 2.748,
-    "kisa_m": 1.832,
+    "uzun_m": 2.798,
+    "kisa_m": 1.882,
     "panel": 2,
     "konum": "üst"
    },
@@ -198,8 +201,8 @@
     "x0_m": 2.61,
     "x1_m": 3.48,
     "tip": "L",
-    "uzun_m": 3.665,
-    "kisa_m": 2.748,
+    "uzun_m": 3.715,
+    "kisa_m": 2.798,
     "panel": 1,
     "konum": "üst"
    },
@@ -208,9 +211,9 @@
     "x0_m": 3.48,
     "x1_m": 4.35,
     "tip": "karma",
-    "uzun_m": 4.265,
-    "kisa_m": 3.665,
-    "panel": 23,
+    "uzun_m": 4.315,
+    "kisa_m": 3.715,
+    "panel": 24,
     "konum": "tam"
    },
    {
@@ -218,9 +221,9 @@
     "x0_m": 4.35,
     "x1_m": 5.22,
     "tip": "duz",
-    "uzun_m": 4.265,
-    "kisa_m": 4.265,
-    "panel": 24,
+    "uzun_m": 4.315,
+    "kisa_m": 4.315,
+    "panel": 25,
     "konum": "tam"
    },
    {
@@ -228,9 +231,9 @@
     "x0_m": 5.22,
     "x1_m": 6.09,
     "tip": "duz",
-    "uzun_m": 4.265,
-    "kisa_m": 4.265,
-    "panel": 25,
+    "uzun_m": 4.315,
+    "kisa_m": 4.315,
+    "panel": 26,
     "konum": "tam"
    },
    {
@@ -238,9 +241,9 @@
     "x0_m": 6.09,
     "x1_m": 6.96,
     "tip": "duz",
-    "uzun_m": 4.265,
-    "kisa_m": 4.265,
-    "panel": 26,
+    "uzun_m": 4.315,
+    "kisa_m": 4.315,
+    "panel": 27,
     "konum": "tam"
    },
    {
@@ -248,9 +251,9 @@
     "x0_m": 6.96,
     "x1_m": 7.83,
     "tip": "karma",
-    "uzun_m": 4.265,
-    "kisa_m": 3.907,
-    "panel": 27,
+    "uzun_m": 4.315,
+    "kisa_m": 3.957,
+    "panel": 28,
     "konum": "tam"
    },
    {
@@ -258,8 +261,8 @@
     "x0_m": 7.83,
     "x1_m": 8.7,
     "tip": "R",
-    "uzun_m": 3.907,
-    "kisa_m": 2.991,
+    "uzun_m": 3.957,
+    "kisa_m": 3.041,
     "panel": 13,
     "konum": "üst"
    },
@@ -268,8 +271,8 @@
     "x0_m": 8.7,
     "x1_m": 9.57,
     "tip": "R",
-    "uzun_m": 2.991,
-    "kisa_m": 2.074,
+    "uzun_m": 3.041,
+    "kisa_m": 2.124,
     "panel": 12,
     "konum": "üst"
    },
@@ -278,8 +281,8 @@
     "x0_m": 9.57,
     "x1_m": 10.44,
     "tip": "R",
-    "uzun_m": 2.074,
-    "kisa_m": 1.158,
+    "uzun_m": 2.124,
+    "kisa_m": 1.208,
     "panel": 11,
     "konum": "üst"
    },
@@ -288,8 +291,8 @@
     "x0_m": 10.44,
     "x1_m": 11.31,
     "tip": "R",
-    "uzun_m": 1.158,
-    "kisa_m": 0.242,
+    "uzun_m": 1.208,
+    "kisa_m": 0.292,
     "panel": 10,
     "konum": "üst"
    },
@@ -298,8 +301,8 @@
     "x0_m": 11.31,
     "x1_m": 11.54,
     "tip": "R",
-    "uzun_m": 0.242,
-    "kisa_m": 0.0,
+    "uzun_m": 0.292,
+    "kisa_m": 0.05,
     "panel": 1,
     "konum": "üst"
    }
@@ -308,101 +311,101 @@
    {
     "serit": 1,
     "x0_m": 0.0,
-    "x1_m": 0.87,
+    "x1_m": 0.57,
     "tip": "L",
-    "uzun_m": 0.916,
-    "kisa_m": 0.0,
+    "uzun_m": 0.65,
+    "kisa_m": 0.05,
     "panel": 14,
     "konum": "alt"
    },
    {
     "serit": 2,
-    "x0_m": 0.87,
-    "x1_m": 1.74,
+    "x0_m": 0.57,
+    "x1_m": 1.44,
     "tip": "L",
-    "uzun_m": 1.832,
-    "kisa_m": 0.916,
+    "uzun_m": 1.566,
+    "kisa_m": 0.65,
     "panel": 15,
     "konum": "alt"
    },
    {
     "serit": 3,
-    "x0_m": 1.74,
-    "x1_m": 2.61,
+    "x0_m": 1.44,
+    "x1_m": 2.31,
     "tip": "L",
-    "uzun_m": 2.748,
-    "kisa_m": 1.832,
+    "uzun_m": 2.483,
+    "kisa_m": 1.566,
     "panel": 16,
     "konum": "alt"
    },
    {
     "serit": 4,
-    "x0_m": 2.61,
-    "x1_m": 3.48,
+    "x0_m": 2.31,
+    "x1_m": 3.18,
     "tip": "L",
-    "uzun_m": 3.665,
-    "kisa_m": 2.748,
+    "uzun_m": 3.399,
+    "kisa_m": 2.483,
     "panel": 17,
     "konum": "alt"
    },
    {
     "serit": 5,
-    "x0_m": 3.48,
-    "x1_m": 4.35,
-    "tip": "karma",
-    "uzun_m": 4.265,
-    "kisa_m": 3.665,
+    "x0_m": 3.18,
+    "x1_m": 4.05,
+    "tip": "L",
+    "uzun_m": 4.315,
+    "kisa_m": 3.399,
     "panel": 18,
-    "konum": "tam"
+    "konum": "alt"
    },
    {
     "serit": 6,
-    "x0_m": 4.35,
-    "x1_m": 5.22,
+    "x0_m": 4.05,
+    "x1_m": 4.92,
     "tip": "R",
-    "uzun_m": 3.949,
-    "kisa_m": 3.033,
+    "uzun_m": 4.315,
+    "kisa_m": 3.399,
     "panel": 19,
     "konum": "alt"
    },
    {
     "serit": 7,
-    "x0_m": 5.22,
-    "x1_m": 6.09,
+    "x0_m": 4.92,
+    "x1_m": 5.79,
     "tip": "R",
-    "uzun_m": 3.033,
-    "kisa_m": 2.117,
+    "uzun_m": 3.399,
+    "kisa_m": 2.483,
     "panel": 20,
     "konum": "alt"
    },
    {
     "serit": 8,
-    "x0_m": 6.09,
-    "x1_m": 6.96,
+    "x0_m": 5.79,
+    "x1_m": 6.66,
     "tip": "R",
-    "uzun_m": 2.117,
-    "kisa_m": 1.2,
+    "uzun_m": 2.483,
+    "kisa_m": 1.566,
     "panel": 21,
     "konum": "alt"
    },
    {
     "serit": 9,
-    "x0_m": 6.96,
-    "x1_m": 7.83,
+    "x0_m": 6.66,
+    "x1_m": 7.53,
     "tip": "R",
-    "uzun_m": 1.2,
-    "kisa_m": 0.284,
+    "uzun_m": 1.566,
+    "kisa_m": 0.65,
     "panel": 22,
     "konum": "alt"
    },
    {
     "serit": 10,
-    "x0_m": 7.83,
+    "x0_m": 7.53,
     "x1_m": 8.1,
     "tip": "R",
-    "uzun_m": 0.284,
-    "kisa_m": 0.0,
-    "panel": 1,
+    "uzun_m": 0.65,
+    "kisa_m": 0.05,
+    "panel": 23,
     "konum": "alt"
    }
   ],
@@ -410,101 +413,101 @@
    {
     "serit": 1,
     "x0_m": 0.0,
-    "x1_m": 0.87,
+    "x1_m": 0.57,
     "tip": "L",
-    "uzun_m": 0.916,
-    "kisa_m": 0.0,
-    "panel": 17,
+    "uzun_m": 0.65,
+    "kisa_m": 0.05,
+    "panel": 18,
     "konum": "üst"
    },
    {
     "serit": 2,
-    "x0_m": 0.87,
-    "x1_m": 1.74,
+    "x0_m": 0.57,
+    "x1_m": 1.44,
     "tip": "L",
-    "uzun_m": 1.832,
-    "kisa_m": 0.916,
-    "panel": 16,
+    "uzun_m": 1.566,
+    "kisa_m": 0.65,
+    "panel": 17,
     "konum": "üst"
    },
    {
     "serit": 3,
-    "x0_m": 1.74,
-    "x1_m": 2.61,
+    "x0_m": 1.44,
+    "x1_m": 2.31,
     "tip": "L",
-    "uzun_m": 2.748,
-    "kisa_m": 1.832,
-    "panel": 15,
+    "uzun_m": 2.483,
+    "kisa_m": 1.566,
+    "panel": 16,
     "konum": "üst"
    },
    {
     "serit": 4,
-    "x0_m": 2.61,
-    "x1_m": 3.48,
+    "x0_m": 2.31,
+    "x1_m": 3.18,
     "tip": "L",
-    "uzun_m": 3.665,
-    "kisa_m": 2.748,
-    "panel": 14,
+    "uzun_m": 3.399,
+    "kisa_m": 2.483,
+    "panel": 15,
     "konum": "üst"
    },
    {
     "serit": 5,
-    "x0_m": 3.48,
-    "x1_m": 4.35,
-    "tip": "karma",
-    "uzun_m": 4.265,
-    "kisa_m": 3.665,
-    "panel": 28,
-    "konum": "tam"
+    "x0_m": 3.18,
+    "x1_m": 4.05,
+    "tip": "L",
+    "uzun_m": 4.315,
+    "kisa_m": 3.399,
+    "panel": 14,
+    "konum": "üst"
    },
    {
     "serit": 6,
-    "x0_m": 4.35,
-    "x1_m": 5.22,
+    "x0_m": 4.05,
+    "x1_m": 4.92,
     "tip": "R",
-    "uzun_m": 3.949,
-    "kisa_m": 3.033,
-    "panel": 22,
+    "uzun_m": 4.315,
+    "kisa_m": 3.399,
+    "panel": 23,
     "konum": "üst"
    },
    {
     "serit": 7,
-    "x0_m": 5.22,
-    "x1_m": 6.09,
+    "x0_m": 4.92,
+    "x1_m": 5.79,
     "tip": "R",
-    "uzun_m": 3.033,
-    "kisa_m": 2.117,
-    "panel": 21,
+    "uzun_m": 3.399,
+    "kisa_m": 2.483,
+    "panel": 22,
     "konum": "üst"
    },
    {
     "serit": 8,
-    "x0_m": 6.09,
-    "x1_m": 6.96,
+    "x0_m": 5.79,
+    "x1_m": 6.66,
     "tip": "R",
-    "uzun_m": 2.117,
-    "kisa_m": 1.2,
-    "panel": 20,
+    "uzun_m": 2.483,
+    "kisa_m": 1.566,
+    "panel": 21,
     "konum": "üst"
    },
    {
     "serit": 9,
-    "x0_m": 6.96,
-    "x1_m": 7.83,
+    "x0_m": 6.66,
+    "x1_m": 7.53,
     "tip": "R",
-    "uzun_m": 1.2,
-    "kisa_m": 0.284,
-    "panel": 19,
+    "uzun_m": 1.566,
+    "kisa_m": 0.65,
+    "panel": 20,
     "konum": "üst"
    },
    {
     "serit": 10,
-    "x0_m": 7.83,
+    "x0_m": 7.53,
     "x1_m": 8.1,
     "tip": "R",
-    "uzun_m": 0.284,
-    "kisa_m": 0.0,
-    "panel": 1,
+    "uzun_m": 0.65,
+    "kisa_m": 0.05,
+    "panel": 19,
     "konum": "üst"
    }
   ]
@@ -512,24 +515,17 @@
  "paneller": [
   {
    "no": 1,
-   "artan_boy_m": 0.109,
+   "artan_boy_m": 0.248,
    "kesimler": [
     {
-     "boy_m": 3.665,
+     "boy_m": 3.77,
      "parcalar": [
       "ön 1 (alt)",
       "arka 4 (üst)"
      ]
     },
     {
-     "boy_m": 0.284,
-     "parcalar": [
-      "sol 10 (alt)",
-      "sağ 10 (üst)"
-     ]
-    },
-    {
-     "boy_m": 0.242,
+     "boy_m": 0.292,
      "parcalar": [
       "ön 14 (alt)",
       "arka 14 (üst)"
@@ -539,10 +535,10 @@
   },
   {
    "no": 2,
-   "artan_boy_m": 0.635,
+   "artan_boy_m": 0.545,
    "kesimler": [
     {
-     "boy_m": 3.665,
+     "boy_m": 3.77,
      "parcalar": [
       "ön 2 (alt)",
       "arka 3 (üst)"
@@ -552,10 +548,10 @@
   },
   {
    "no": 3,
-   "artan_boy_m": 0.635,
+   "artan_boy_m": 0.545,
    "kesimler": [
     {
-     "boy_m": 3.665,
+     "boy_m": 3.77,
      "parcalar": [
       "ön 3 (alt)",
       "arka 2 (üst)"
@@ -565,10 +561,10 @@
   },
   {
    "no": 4,
-   "artan_boy_m": 0.635,
+   "artan_boy_m": 0.545,
    "kesimler": [
     {
-     "boy_m": 3.665,
+     "boy_m": 3.77,
      "parcalar": [
       "ön 4 (alt)",
       "arka 1 (üst)"
@@ -578,10 +574,10 @@
   },
   {
    "no": 5,
-   "artan_boy_m": 0.035,
+   "artan_boy_m": 0.0,
    "kesimler": [
     {
-     "boy_m": 4.265,
+     "boy_m": 4.315,
      "parcalar": [
       "ön 5 (tam)"
      ]
@@ -590,10 +586,10 @@
   },
   {
    "no": 6,
-   "artan_boy_m": 0.035,
+   "artan_boy_m": 0.0,
    "kesimler": [
     {
-     "boy_m": 4.265,
+     "boy_m": 4.315,
      "parcalar": [
       "ön 6 (tam)"
      ]
@@ -602,10 +598,10 @@
   },
   {
    "no": 7,
-   "artan_boy_m": 0.035,
+   "artan_boy_m": 0.0,
    "kesimler": [
     {
-     "boy_m": 4.265,
+     "boy_m": 4.315,
      "parcalar": [
       "ön 7 (tam)"
      ]
@@ -614,10 +610,10 @@
   },
   {
    "no": 8,
-   "artan_boy_m": 0.035,
+   "artan_boy_m": 0.0,
    "kesimler": [
     {
-     "boy_m": 4.265,
+     "boy_m": 4.315,
      "parcalar": [
       "ön 8 (tam)"
      ]
@@ -626,10 +622,10 @@
   },
   {
    "no": 9,
-   "artan_boy_m": 0.035,
+   "artan_boy_m": 0.0,
    "kesimler": [
     {
-     "boy_m": 4.265,
+     "boy_m": 4.315,
      "parcalar": [
       "ön 9 (tam)"
      ]
@@ -638,10 +634,10 @@
   },
   {
    "no": 10,
-   "artan_boy_m": 0.151,
+   "artan_boy_m": 0.061,
    "kesimler": [
     {
-     "boy_m": 4.149,
+     "boy_m": 4.254,
      "parcalar": [
       "ön 10 (alt)",
       "arka 13 (üst)"
@@ -651,10 +647,10 @@
   },
   {
    "no": 11,
-   "artan_boy_m": 0.151,
+   "artan_boy_m": 0.061,
    "kesimler": [
     {
-     "boy_m": 4.149,
+     "boy_m": 4.254,
      "parcalar": [
       "ön 11 (alt)",
       "arka 12 (üst)"
@@ -664,10 +660,10 @@
   },
   {
    "no": 12,
-   "artan_boy_m": 0.151,
+   "artan_boy_m": 0.061,
    "kesimler": [
     {
-     "boy_m": 4.149,
+     "boy_m": 4.254,
      "parcalar": [
       "ön 12 (alt)",
       "arka 11 (üst)"
@@ -677,10 +673,10 @@
   },
   {
    "no": 13,
-   "artan_boy_m": 0.151,
+   "artan_boy_m": 0.061,
    "kesimler": [
     {
-     "boy_m": 4.149,
+     "boy_m": 4.254,
      "parcalar": [
       "ön 13 (alt)",
       "arka 10 (üst)"
@@ -690,126 +686,140 @@
   },
   {
    "no": 14,
-   "artan_boy_m": 0.635,
+   "artan_boy_m": 0.0,
    "kesimler": [
     {
-     "boy_m": 3.665,
+     "boy_m": 4.315,
      "parcalar": [
       "sol 1 (alt)",
-      "sağ 4 (üst)"
+      "sağ 5 (üst)"
      ]
     }
    ]
   },
   {
    "no": 15,
-   "artan_boy_m": 0.635,
+   "artan_boy_m": 0.261,
    "kesimler": [
     {
-     "boy_m": 3.665,
+     "boy_m": 4.054,
      "parcalar": [
       "sol 2 (alt)",
-      "sağ 3 (üst)"
+      "sağ 4 (üst)"
      ]
     }
    ]
   },
   {
    "no": 16,
-   "artan_boy_m": 0.635,
+   "artan_boy_m": 0.261,
    "kesimler": [
     {
-     "boy_m": 3.665,
+     "boy_m": 4.054,
      "parcalar": [
       "sol 3 (alt)",
-      "sağ 2 (üst)"
+      "sağ 3 (üst)"
      ]
     }
    ]
   },
   {
    "no": 17,
-   "artan_boy_m": 0.635,
+   "artan_boy_m": 0.261,
    "kesimler": [
     {
-     "boy_m": 3.665,
+     "boy_m": 4.054,
      "parcalar": [
       "sol 4 (alt)",
-      "sağ 1 (üst)"
+      "sağ 2 (üst)"
      ]
     }
    ]
   },
   {
    "no": 18,
-   "artan_boy_m": 0.035,
+   "artan_boy_m": 0.0,
    "kesimler": [
     {
-     "boy_m": 4.265,
+     "boy_m": 4.315,
      "parcalar": [
-      "sol 5 (tam)"
+      "sol 5 (alt)",
+      "sağ 1 (üst)"
      ]
     }
    ]
   },
   {
    "no": 19,
-   "artan_boy_m": 0.067,
+   "artan_boy_m": 0.0,
    "kesimler": [
     {
-     "boy_m": 4.233,
+     "boy_m": 4.315,
      "parcalar": [
       "sol 6 (alt)",
-      "sağ 9 (üst)"
+      "sağ 10 (üst)"
      ]
     }
    ]
   },
   {
    "no": 20,
-   "artan_boy_m": 0.067,
+   "artan_boy_m": 0.261,
    "kesimler": [
     {
-     "boy_m": 4.233,
+     "boy_m": 4.054,
      "parcalar": [
       "sol 7 (alt)",
-      "sağ 8 (üst)"
+      "sağ 9 (üst)"
      ]
     }
    ]
   },
   {
    "no": 21,
-   "artan_boy_m": 0.067,
+   "artan_boy_m": 0.261,
    "kesimler": [
     {
-     "boy_m": 4.233,
+     "boy_m": 4.054,
      "parcalar": [
       "sol 8 (alt)",
-      "sağ 7 (üst)"
+      "sağ 8 (üst)"
      ]
     }
    ]
   },
   {
    "no": 22,
-   "artan_boy_m": 0.067,
+   "artan_boy_m": 0.261,
    "kesimler": [
     {
-     "boy_m": 4.233,
+     "boy_m": 4.054,
      "parcalar": [
       "sol 9 (alt)",
-      "sağ 6 (üst)"
+      "sağ 7 (üst)"
      ]
     }
    ]
   },
   {
    "no": 23,
-   "artan_boy_m": 0.035,
+   "artan_boy_m": 0.0,
    "kesimler": [
     {
-     "boy_m": 4.265,
+     "boy_m": 4.315,
+     "parcalar": [
+      "sol 10 (alt)",
+      "sağ 6 (üst)"
+     ]
+    }
+   ]
+  },
+  {
+   "no": 24,
+   "artan_boy_m": 0.0,
+   "kesimler": [
+    {
+     "boy_m": 4.315,
      "parcalar": [
       "arka 5 (tam)"
      ]
@@ -817,11 +827,11 @@
    ]
   },
   {
-   "no": 24,
-   "artan_boy_m": 0.035,
+   "no": 25,
+   "artan_boy_m": 0.0,
    "kesimler": [
     {
-     "boy_m": 4.265,
+     "boy_m": 4.315,
      "parcalar": [
       "arka 6 (tam)"
      ]
@@ -829,11 +839,11 @@
    ]
   },
   {
-   "no": 25,
-   "artan_boy_m": 0.035,
+   "no": 26,
+   "artan_boy_m": 0.0,
    "kesimler": [
     {
-     "boy_m": 4.265,
+     "boy_m": 4.315,
      "parcalar": [
       "arka 7 (tam)"
      ]
@@ -841,11 +851,11 @@
    ]
   },
   {
-   "no": 26,
-   "artan_boy_m": 0.035,
+   "no": 27,
+   "artan_boy_m": 0.0,
    "kesimler": [
     {
-     "boy_m": 4.265,
+     "boy_m": 4.315,
      "parcalar": [
       "arka 8 (tam)"
      ]
@@ -853,25 +863,13 @@
    ]
   },
   {
-   "no": 27,
-   "artan_boy_m": 0.035,
+   "no": 28,
+   "artan_boy_m": 0.0,
    "kesimler": [
     {
-     "boy_m": 4.265,
+     "boy_m": 4.315,
      "parcalar": [
       "arka 9 (tam)"
-     ]
-    }
-   ]
-  },
-  {
-   "no": 28,
-   "artan_boy_m": 0.035,
-   "kesimler": [
-    {
-     "boy_m": 4.265,
-     "parcalar": [
-      "sağ 5 (tam)"
      ]
     }
    ]
@@ -879,11 +877,14 @@
  ],
  "ad": "Ç8201 · Tek kat çelik, 2+1, 82 m² · paket: baz",
  "kaplama": "tek_kat_panel",
- "baslangic_kosesine_gore_adet": {
-  "sol": 28,
-  "sag": 28,
+ "baslangica_gore_adet": {
+  "sol": 29,
+  "kose_orta": 28,
+  "orta_kose": 29,
   "orta": 28,
-  "plan_yonu": 28
+  "sag": 29,
+  "plan_yonu": 29
  },
+ "kesim_payisiz_adet": 28,
  "bir_cm_kesim_payiyla_adet": 28
 }

@@ -100,13 +100,13 @@
   {
    "grup": "Metal aksam",
    "kalem": "Saçaklar için Boardex",
-   "boyut": "1200 × 2400",
+   "boyut": "12,5 × 1200 × 2400",
    "adet": 8,
    "olcu": 19.6,
    "brut": null,
    "birim": "m²",
    "kg": null,
-   "formul": "saçak boyu × saçak eni × 1,15 ÷ 2,88",
+   "formul": "saçak boyu × saçak eni × 1,08 ÷ 2,88",
    "durum": "uydurma",
    "not": null
   },
@@ -126,15 +126,15 @@
   {
    "grup": "Dış cephe kaplama",
    "kalem": "Dış cephe Boardex",
-   "boyut": "1200 × 2400",
-   "adet": 52,
+   "boyut": "12,5 × 1200 × 2400",
+   "adet": 48,
    "olcu": 127.94,
    "brut": 148.42,
    "birim": "m²",
    "kg": null,
-   "formul": "(çevre × yükseklik + kolon/kiriş kaplaması + çatı alnı (kalkan) − boşluklar) × 1,15 ÷ 2,88",
+   "formul": "(çevre × yükseklik + kolon/kiriş kaplaması + çatı alnı (kalkan) − boşluklar) × 1,08 ÷ 2,88",
    "durum": "excel",
-   "not": null
+   "not": "zayiat %8: mühendis, 4 Ekim 12:14. Gerçek listelerdeki adetler %15'e uyuyor; %15 ile 52 levha"
   },
   {
    "grup": "İç cephe kaplama",
@@ -258,13 +258,13 @@
    "kalem": "Mahya bandı",
    "boyut": "rulo / 10 m",
    "adet": 4,
-   "olcu": 31.88,
+   "olcu": 36.4,
    "brut": null,
    "birim": "m",
    "kg": null,
-   "formul": "düz ve ters mahya gelen yerlerin uzunlukları toplamı ÷ 10 m",
-   "durum": "excel",
-   "not": "listeye girmesi: mühendis, 4 Ekim. Excel motorunda parça adedi × parça boyu ÷ 10"
+   "formul": "(metal kiremit mahyası 10 × 2,8 m + ters mahya 3 × 2,8 m + damlalık 0 × 2,5 m) ÷ 10",
+   "durum": "muhendis",
+   "not": "formül: mühendis, 4 Ekim 12:14 (Excel motorundaki gibi). Damlalık listede yok; sıfır alındı"
   },
   {
    "grup": "Dere",
@@ -496,7 +496,7 @@
    "brut": null,
    "birim": "",
    "kg": null,
-   "formul": "anahtar + priz + oda sayısı",
+   "formul": "anahtar + priz + oda sayısı (veranda hariç)",
    "durum": "motor",
    "not": null
   },
@@ -608,8 +608,8 @@
    "grup": "Vida",
    "kalem": "Alçıpan vidası (3,5 × 35)",
    "boyut": "adet",
-   "adet": 7500,
-   "olcu": 185,
+   "adet": 7250,
+   "olcu": 181,
    "brut": null,
    "birim": "levha",
    "kg": null,
@@ -905,6 +905,7 @@
   "celik_panel_adedi": 57,
   "kosebent": {
    "tavan_cevresi_m": 109.81,
+   "veranda_tavan_cevresi_m": 0.0,
    "ic_kose": 24,
    "boy_m": 174.61
   },
@@ -953,7 +954,7 @@
    "durum": "muhendis"
   },
   "Dış cephe Boardex": {
-   "hesap": 52,
+   "hesap": 48,
    "liste": 51,
    "durum": "excel"
   },
@@ -1063,7 +1064,7 @@
    "durum": "motor"
   },
   "Alçıpan vidası (3,5 × 35)": {
-   "hesap": 7500,
+   "hesap": 7250,
    "liste": 8500,
    "durum": "excel"
   },

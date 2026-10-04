@@ -113,7 +113,7 @@ def main() -> int:
     kanat = ic_kapi[0]["kanat"] if ic_kapi else [80, 200]
     yontem = ct.get("yontem", "omega_asik")
     girdi = {
-        "sema": "portman.yukleme_girdisi/0.3-taslak",
+        "sema": "portman.yukleme_girdisi/0.4-taslak",
         "ad": f"{tanim['kod']} · {tanim['ad']} · paket: {tanim['paket']}",
         "kaynak": f"deneme/2026-10-02_celik/{a.tanim.name}" + ("" if not a.secenek else " + " + ", ".join(x.name for x in a.secenek)),
         "bina_m2": round(s["toplam_oturum_m2"]),
@@ -143,6 +143,8 @@ def main() -> int:
         "odalar": odalar,
         "ic_kapi_adedi": len(ic_kapi),
         "ic_duvar_boyu_m": round(ic_boy, 2),
+        # köşebent için veranda tavanının çevresi (mühendis, 4 Ekim 2026 12:14: sayılır); brüt ölçüyle
+        "veranda_tavan_cevresi_m": round(2 * (v["en"] + v["boy"]) / 100, 2) if v else None,
         "osb_takviye": osb_takviye,
         "osb_takviye_teyit": (tanim.get("osb_takviye") or {}).get("teyit"),
         "elektrik_odalar": elektrik_odalar,
@@ -153,7 +155,8 @@ def main() -> int:
             "yuzey_m2": round(c["yuzey_m2"], 2), "sacak_kenarlari_m": [px, py, px, py], "sacak_boyu_toplam_m": round(2 * (px + py), 2),
             "cephe_kenarlari_m": [L, Hc, L, Hc], "kose_adedi": 4,
             "mahya_hatti_m": round(c["mahya_hatti_toplam"] / 100, 2),
-            "panel_boyu_m": math.ceil(min(px, py) / 2 * kok * 10 - 1e-9) / 10,
+            # panel boyu = eğimli boy + taşma (mühendis, 4 Ekim 2026 12:14: 5 cm; Excel motorundaki gibi mm'ye yukarı)
+            "panel_boyu_m": math.ceil((min(px, py) / 2 * kok + kur["cati_kaplama_tasma_m"]["deger"]) * 1000 - 1e-9) / 1000,
             "bina_eni_m": min(c["ayak_izi"]) / 100, "cati_boyu_m": max(px, py),
             "sacak_alti": ct.get("sacak_alti", "boardex"), "sacak_alti_eni_m": ct["sacak"] / 100,
             "sacak_yuzu_m2": round(c["alin_m2"], 2) if yontem == "panel" and ct.get("sacak_yuzu", "boardex") == "boardex" else None,
@@ -167,17 +170,18 @@ def main() -> int:
             + [{"kalem": ("PVC vasistas" if x["ad"] == "60/40" else "PVC pencere"), "boyut": x["ad"], "adet": x["adet"], "durum": "model"} for x in dis.values() if x["ad"] != "dış kapı"]
         ),
         "varsayimlar": [
-            "Çatı kaplaması seçenektir; baz pakette tek kat panel (Lokman, 4 Ekim 01:42). `--kaplama` ile öteki beş seçenek hesaplanır. Panel boyu eğimli boydan, 10 cm'ye yuvarlandı.",
+            "Çatı kaplaması seçenektir; baz pakette tek kat panel (Lokman, 4 Ekim 01:42). `--kaplama` ile öteki beş seçenek hesaplanır. Panel boyu = eğimli boy + 5 cm taşma (mühendis, 4 Ekim 12:14), mm'ye yukarı.",
             "Kırma çatıda kaplama adedi çatı açılımından: yüzler şerit şerit dizilir, çapraz kesimden artan parça karşı yüzde kullanılır (Lokman, 4 Ekim 01:42; `cati_acilim.py`). "
-            "Dizilim her yüzde sol köşeden başlar; kesim payı yok (varsayım).",
+            "Dizilim en az paneli veren başlangıçla kurulur; kesim payı 5 mm (varsayım). Kiremit desen sacda artan parça kullanılmaz (mühendis, 4 Ekim 12:14).",
             f"Duvar paneli adedi tahmin: her duvar hattı bir panel, {str(en_cok).replace('.', ',')} m'yi aşarsa bölünür. Gerçek adet karkas yerleşiminden gelir.",
-            "Tavan paneli ve çatı paneli: 100 m² bina için verilen kg (Lokman'ın 4 Ekim düzeltmesi) ve adet (mühendisin ilk cevabı), çatının örttüğü oturum alanına oranlandı.",
+            "Tavan paneli ve çatı paneli: 100 m² bina için verilen kg (Lokman'ın 4 Ekim düzeltmesi) ve adet (mühendis: bu adetlerle ilerle), çatının örttüğü oturum alanına oranlandı.",
             "Veranda dikmelerinin sayısı ve yeri katalog görsellerinden: dış kenarda iki köşe ve bir orta.",
-            "OSB takviyesi: dolap ve TV ünitesi gelen duvarlar katalog görselinden seçildi (mühendis doğruladı); her duvarın o odaya bakan yüzünün tamamı alındı.",
+            "OSB takviyesi: dolap ve TV ünitesi gelen duvarlar katalog görselinden seçildi (mühendis doğruladı); her duvarın o odaya bakan yüzünün tamamı alındı (mühendis, 4 Ekim 12:14).",
             "Elektrik: pafta yok; sayılar mühendisin oda başına kuralından (doğruluk payı yaklaşık %75). Salon ile mutfağın aynı mahalde olduğu yerde ikisinin kuralı birlikte uygulandı (mühendis doğruladı).",
             "Kablo boyunda 'sigortadan evin en uzak mesafesi' kapalı kısmın köşegeni alındı (Excel motorundaki gibi).",
-            "Köşebent: yalnız iç köşeler sayıldı; odaya doğru çıkıntı yapan köşeler ve veranda tavanı sayılmadı.",
-            "Dış kapı boşluğu 0,95 × 2,10 m (çalışma kitaplarındaki değer); katalog çiziminde kapı 100 cm.",
+            "Köşebent: yalnız iç köşeler sayıldı; odaya doğru çıkıntı yapan köşeler sayılmaz, veranda tavanının çevresi sayılır (mühendis, 4 Ekim 12:14). Veranda çevresi brüt ölçüyle.",
+            "Dış kapı boşluğu 0,95 × 2,10 m (mühendis, 4 Ekim 12:14); katalog çiziminde kapı 100 cm'di.",
+            "Boardex zayiatı %8, Boardex 12,5 mm, OSB 11 mm (mühendis, 4 Ekim 12:14).",
         ],
     }
     a.cikti.mkdir(parents=True, exist_ok=True)

@@ -41,7 +41,7 @@
    "brut": null,
    "birim": "m",
    "kg": 46.22,
-   "formul": "adet × 2,40 m × 6,42 kg/m",
+   "formul": "adet × 2,40 m × 6,42 kg/m (motorun proje ortalaması)",
    "durum": "motor",
    "not": "dikme sayısı ve yeri katalog görsellerinden"
   },
@@ -69,7 +69,7 @@
    "kg": 705.7,
    "formul": "saçak dahil çatı planı × 7,55 kg/m² (motorun proje ortalaması); adet çatı tipine göre sabit",
    "durum": "motor",
-   "not": "geçici: Lokman makas ve kirişleri bir makas ölçüsünden ayrıca verecek; o zamana kadar motorun ortalaması (mühendis, 4 Ekim: tamam)"
+   "not": "şimdilik Excel motorunun ortalamasıyla (mühendis, 4 Ekim 12:14); makas ölçüsü verilirse değişir"
   },
   {
    "grup": "Çelik panel",
@@ -82,7 +82,7 @@
    "kg": 291.15,
    "formul": "çatının örttüğü oturum alanı ÷ 100 × 354,84 kg; adet: ÷ 100 × 8, yukarı (tavan alanı 76,7 m²)",
    "durum": "lokman",
-   "not": "100 m² için verilen ağırlık oturum alanına oranlandı (Lokman, 4 Ekim düzeltmesi). Adet tahmin: alana oranlandı (mühendis, 4 Ekim: tamam); kesin adet panel yerleşiminden gelir"
+   "not": "100 m² için verilen ağırlık oturum alanına oranlandı (Lokman, 4 Ekim düzeltmesi). Adet 100 m²'deki 8 adetten aynı oranla (mühendis, 4 Ekim 12:14: bu adetlerle ilerle; dört omuz çatı için)"
   },
   {
    "grup": "Çelik panel",
@@ -95,7 +95,7 @@
    "kg": 361.28,
    "formul": "çatının örttüğü oturum alanı ÷ 100 × 440,32 kg; adet: ÷ 100 × 12, yukarı (çatı yüzeyi 98,4 m²)",
    "durum": "lokman",
-   "not": "100 m² için verilen ağırlık oturum alanına oranlandı (Lokman, 4 Ekim düzeltmesi). Adet tahmin: alana oranlandı (mühendis, 4 Ekim: tamam); kesin adet panel yerleşiminden gelir"
+   "not": "100 m² için verilen ağırlık oturum alanına oranlandı (Lokman, 4 Ekim düzeltmesi). Adet 100 m²'deki 12 adetten aynı oranla (mühendis, 4 Ekim 12:14: bu adetlerle ilerle; dört omuz çatı için)"
   },
   {
    "grup": "Çelik panel",
@@ -139,26 +139,26 @@
   {
    "grup": "Metal aksam",
    "kalem": "Saçaklar için Boardex",
-   "boyut": "1200 × 2400",
+   "boyut": "12,5 × 1200 × 2400",
    "adet": 5,
    "olcu": 11.78,
    "brut": null,
    "birim": "m²",
    "kg": null,
-   "formul": "saçak boyu × saçak eni × 1,15 ÷ 2,88",
+   "formul": "saçak boyu × saçak eni × 1,08 ÷ 2,88",
    "durum": "uydurma",
    "not": "saçak altının Boardex olduğu: Lokman, 3 Ekim 13:27; formül 62 m² listeden"
   },
   {
    "grup": "Metal aksam",
    "kalem": "Saçak yüzü için Boardex",
-   "boyut": "1200 × 2400",
+   "boyut": "12,5 × 1200 × 2400",
    "adet": 3,
    "olcu": 7.24,
    "brut": null,
    "birim": "m²",
    "kg": null,
-   "formul": "saçak ucu çevresi × saçak yüzü yüksekliği (topuk + panelin düşey ölçüsü) × 1,15 ÷ 2,88",
+   "formul": "saçak ucu çevresi × saçak yüzü yüksekliği (topuk + panelin düşey ölçüsü) × 1,08 ÷ 2,88",
    "durum": "muhendis",
    "not": "saçak yüzü Boardex'le kaplanır: mühendis, 3 Ekim; kaplandığı: Lokman, 2 Ekim 22:05. Alan geometriden"
   },
@@ -166,27 +166,27 @@
    "grup": "Metal aksam",
    "kalem": "Köşebent",
    "boyut": "L 2500",
-   "adet": 51,
-   "olcu": 126.42,
+   "adet": 59,
+   "olcu": 146.31,
    "brut": null,
    "birim": "m",
    "kg": null,
-   "formul": "(oda tavan çevreleri 69,72 m + 21 iç köşe × 2,7 m) ÷ 2,5",
+   "formul": "(oda tavan çevreleri 69,72 m + veranda tavanı çevresi 19,88 m + 21 iç köşe × 2,7 m) ÷ 2,5",
    "durum": "muhendis",
-   "not": "odaya doğru çıkıntı yapan 1 köşe ve veranda tavanı sayılmadı"
+   "not": "odaya doğru çıkıntı yapan 1 köşe sayılmaz (mühendis, 4 Ekim 12:14); veranda tavanının çevresi sayıldı (mühendis, 4 Ekim 12:14)"
   },
   {
    "grup": "Dış cephe kaplama",
    "kalem": "Dış cephe Boardex",
-   "boyut": "1200 × 2400",
-   "adet": 33,
+   "boyut": "12,5 × 1200 × 2400",
+   "adet": 31,
    "olcu": 80.66,
    "brut": 100.29,
    "birim": "m²",
    "kg": null,
-   "formul": "(çevre × yükseklik + kolon/kiriş kaplaması + çatı alnı (kalkan) − boşluklar) × 1,15 ÷ 2,88",
+   "formul": "(çevre × yükseklik + kolon/kiriş kaplaması + çatı alnı (kalkan) − boşluklar) × 1,08 ÷ 2,88",
    "durum": "excel",
-   "not": null
+   "not": "zayiat %8: mühendis, 4 Ekim 12:14. Gerçek listelerdeki adetler %15'e uyuyor; %15 ile 33 levha"
   },
   {
    "grup": "İç cephe kaplama",
@@ -243,7 +243,7 @@
   {
    "grup": "İç cephe kaplama",
    "kalem": "OSB (TV ve mutfak dolabı arkası takviyesi)",
-   "boyut": "1220 × 2440",
+   "boyut": "11 × 1220 × 2440",
    "adet": 9,
    "olcu": 24.54,
    "brut": 27.67,
@@ -251,7 +251,7 @@
    "kg": null,
    "formul": "dolap ve TV ünitesi gelen duvarlar: (duvar yüzünün boyu × yükseklik − boşluklar) × 1,05 ÷ 2,98",
    "durum": "muhendis",
-   "not": "banyo ile mutfak arası duvar 2,49 m (mutfak dolabı); üst dış duvar 2,96 m (mutfak dolabı ve eviye); hol ile yaşam alanı arası duvar 4,80 m (TV ünitesi). Duvarların seçimi katalog görselinden; mühendis doğruladı (4 Ekim)"
+   "not": "banyo ile mutfak arası duvar 2,49 m (mutfak dolabı); üst dış duvar 2,96 m (mutfak dolabı ve eviye); hol ile yaşam alanı arası duvar 4,80 m (TV ünitesi). Duvarların seçimi katalog görselinden; mühendis doğruladı (4 Ekim). Duvar yüzünün tamamı alınır (mühendis, 4 Ekim 12:14)"
   },
   {
    "grup": "İç cephe kaplama",
@@ -269,15 +269,15 @@
   {
    "grup": "Çatı kaplamaları",
    "kalem": "Tek kat panel",
-   "boyut": "L 4300 · 87 cm kapatır",
+   "boyut": "L 4315 · 87 cm kapatır",
    "adet": 28,
    "olcu": 98.43,
    "brut": null,
    "birim": "m²",
    "kg": null,
-   "formul": "çatı açılımı: yüzler şerit şerit dizilir; çapraz kesimden artan parça karşı yüzde kullanılır; panel boyu = eğimli boy",
+   "formul": "çatı açılımı: yüzler şerit şerit dizilir; çapraz kesimden artan parça karşı yüzde kullanılır; panel boyu = eğimli boy + taşma",
    "durum": "lokman",
-   "not": "12 panel tam boy, 16 panel kesilerek; alan olarak en az 27. Dizilim her yüzde sol köşeden başlar (varsayım); kesim payı yok"
+   "not": "10 panel tam boy, 18 panel kesilerek; alan olarak en az 27. Dizilim uzun yüzlerde sol köşeden, kısa yüzlerde ortadan başlar (en az paneli veren başlangıç; her yüzde sol köşeden başlanırsa 29, öteki başlangıçlarla 28–29). Kaplama saçaktan 5 cm taşar; kesim payı 5 mm (varsayım)"
   },
   {
    "grup": "Çatı kaplamaları",
@@ -309,14 +309,14 @@
    "grup": "Çatı kaplamaları",
    "kalem": "Mahya bandı",
    "boyut": "rulo / 10 m",
-   "adet": 3,
-   "olcu": 26.97,
+   "adet": 4,
+   "olcu": 30.8,
    "brut": null,
    "birim": "m",
    "kg": null,
-   "formul": "düz ve ters mahya gelen yerlerin uzunlukları toplamı ÷ 10 m",
-   "durum": "excel",
-   "not": "listeye girmesi: mühendis, 4 Ekim. Excel motorunda parça adedi × parça boyu ÷ 10"
+   "formul": "(metal kiremit mahyası 11 × 2,8 m + damlalık 0 × 2,5 m) ÷ 10",
+   "durum": "muhendis",
+   "not": "formül: mühendis, 4 Ekim 12:14 (Excel motorundaki gibi). Damlalık listede yok; sıfır alındı"
   },
   {
    "grup": "Çatı kaplamaları",
@@ -652,7 +652,7 @@
    "brut": null,
    "birim": "",
    "kg": null,
-   "formul": "anahtar + priz + oda sayısı",
+   "formul": "anahtar + priz + oda sayısı (veranda hariç)",
    "durum": "motor",
    "not": null
   },
@@ -765,7 +765,7 @@
    "kalem": "Alçıpan vidası (3,5 × 35)",
    "boyut": "adet",
    "adet": 5000,
-   "olcu": 123,
+   "olcu": 121,
    "brut": null,
    "birim": "levha",
    "kg": null,
@@ -803,8 +803,8 @@
    "grup": "Vida",
    "kalem": "Trapez vida (5,5 × 25)",
    "boyut": "adet",
-   "adet": 1000,
-   "olcu": 996,
+   "adet": 1250,
+   "olcu": 1044,
    "brut": null,
    "birim": "vida",
    "kg": null,
@@ -830,7 +830,7 @@
    "kalem": "Trapez vida (5,5 × 76; tek kat panel)",
    "boyut": "adet",
    "adet": 750,
-   "olcu": 602.0,
+   "olcu": 604.1,
    "brut": null,
    "birim": "vida",
    "kg": null,
@@ -1178,8 +1178,9 @@
   "celik_panel_adedi": 69,
   "kosebent": {
    "tavan_cevresi_m": 69.725,
+   "veranda_tavan_cevresi_m": 19.88,
    "ic_kose": 21,
-   "boy_m": 126.425
+   "boy_m": 146.305
   },
   "elektrik_kaynagi": "kural",
   "elektrik_kural": {
@@ -1194,20 +1195,28 @@
   },
   "kirma_dizilim": {
    "adet": 28,
-   "tam_boy": 12,
-   "kesilen": 16,
+   "tam_boy": 10,
+   "kesilen": 18,
    "alan_alt_siniri": 27,
    "artan_parca_karsi_yuzde": true,
-   "baslangic": "sol",
-   "baslangic_kosesine_gore": {
-    "sol": 28,
-    "sag": 28,
+   "baslangic": "kose_orta",
+   "baslangic_adi": "uzun yüzlerde sol köşeden, kısa yüzlerde ortadan",
+   "baslangica_gore": {
+    "sol": 29,
+    "kose_orta": 28,
+    "orta_kose": 29,
     "orta": 28,
-    "plan_yonu": 28
+    "sag": 29,
+    "plan_yonu": 29
    },
    "kapatma_m": 0.87,
-   "en_dar_pay_cm": 6.7,
-   "bir_cm_kesim_payiyla": 28
+   "tasma_cm": 5.0,
+   "tasma_kural_cm": 5.0,
+   "kesim_payi_mm": 5.0,
+   "paysiz_adet": 28,
+   "bir_cm_payla_adet": 28,
+   "en_dar_pay_cm": 6.1,
+   "egimli_boy_m": 4.2648
   }
  }
 }

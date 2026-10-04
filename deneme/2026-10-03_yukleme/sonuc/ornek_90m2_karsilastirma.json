@@ -45,7 +45,7 @@
    "brut": null,
    "birim": "m",
    "kg": 30.82,
-   "formul": "adet × 2,40 m × 6,42 kg/m",
+   "formul": "adet × 2,40 m × 6,42 kg/m (motorun proje ortalaması)",
    "durum": "motor",
    "not": null
   },
@@ -73,7 +73,7 @@
    "kg": 590.24,
    "formul": "saçak dahil çatı planı × 5,70 kg/m² (motorun proje ortalaması); adet çatı tipine göre sabit",
    "durum": "motor",
-   "not": "geçici: Lokman makas ve kirişleri bir makas ölçüsünden ayrıca verecek; o zamana kadar motorun ortalaması (mühendis, 4 Ekim: tamam)"
+   "not": "şimdilik Excel motorunun ortalamasıyla (mühendis, 4 Ekim 12:14); makas ölçüsü verilirse değişir"
   },
   {
    "grup": "Çelik panel",
@@ -195,15 +195,15 @@
   {
    "grup": "Dış cephe kaplama",
    "kalem": "Dış cephe Boardex",
-   "boyut": "1200 × 2400",
-   "adet": 45,
+   "boyut": "12,5 × 1200 × 2400",
+   "adet": 43,
    "olcu": 112.08,
    "brut": 122.71,
    "birim": "m²",
    "kg": null,
-   "formul": "(çevre × yükseklik + kolon/kiriş kaplaması + çatı alnı (kalkan) − boşluklar) × 1,15 ÷ 2,88",
+   "formul": "(çevre × yükseklik + kolon/kiriş kaplaması + çatı alnı (kalkan) − boşluklar) × 1,08 ÷ 2,88",
    "durum": "excel",
-   "not": null
+   "not": "zayiat %8: mühendis, 4 Ekim 12:14. Gerçek listelerdeki adetler %15'e uyuyor; %15 ile 45 levha"
   },
   {
    "grup": "İç cephe kaplama",
@@ -286,7 +286,7 @@
   {
    "grup": "Çatı kaplamaları",
    "kalem": "Çatı OSB",
-   "boyut": "1220 × 2440",
+   "boyut": "11 × 1220 × 2440",
    "adet": 39,
    "olcu": 110.26,
    "brut": null,
@@ -353,13 +353,13 @@
    "kalem": "Mahya bandı",
    "boyut": "rulo / 10 m",
    "adet": 2,
-   "olcu": 16.13,
+   "olcu": 19.6,
    "brut": null,
    "birim": "m",
    "kg": null,
-   "formul": "düz ve ters mahya gelen yerlerin uzunlukları toplamı ÷ 10 m",
-   "durum": "excel",
-   "not": "listeye girmesi: mühendis, 4 Ekim. Excel motorunda parça adedi × parça boyu ÷ 10"
+   "formul": "(metal kiremit mahyası 7 × 2,8 m + damlalık 0 × 2,5 m) ÷ 10",
+   "durum": "muhendis",
+   "not": "formül: mühendis, 4 Ekim 12:14 (Excel motorundaki gibi). Damlalık listede yok; sıfır alındı"
   },
   {
    "grup": "Çatı kaplamaları",
@@ -532,6 +532,7 @@
   "celik_panel_adedi": 44,
   "kosebent": {
    "tavan_cevresi_m": 87.84,
+   "veranda_tavan_cevresi_m": 0.0,
    "ic_kose": 20,
    "boy_m": 141.84
   },
@@ -571,7 +572,7 @@
    "durum": "muhendis"
   },
   "Dış cephe Boardex": {
-   "hesap": 45,
+   "hesap": 43,
    "liste": 46,
    "durum": "excel"
   },

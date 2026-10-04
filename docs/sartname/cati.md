@@ -1,6 +1,6 @@
 # A5 · Çatı
 
-Kaynak: Lokman'ın anlattıkları (2–4 Ekim 2026; 4 Ekim 01:24 ve 01:42 düzeltmeleri dahil) ve inşaat mühendisi Ubeydullah'ın iki tur cevabı (Lokman 3 Ekim 18:14'te ve 4 Ekim 01:24'te iletti). Madde sonundaki saat, söylendiği anı gösterir; tarih yazmayan saatler 2 Ekim'dir.
+Kaynak: Lokman'ın anlattıkları (2–4 Ekim 2026; 4 Ekim 01:24 ve 01:42 düzeltmeleri dahil) ve inşaat mühendisi Ubeydullah'ın üç tur cevabı (Lokman 3 Ekim 18:14'te, 4 Ekim 01:24'te ve 4 Ekim 12:14'te iletti). Madde sonundaki saat, söylendiği anı gösterir; tarih yazmayan saatler 2 Ekim'dir.
 
 ## Kurallar
 
@@ -50,6 +50,16 @@ Kaynak: Lokman'ın anlattıkları (2–4 Ekim 2026; 4 Ekim 01:24 ve 01:42 düzel
 - Çatı eğime göre çizilir, sonra "zarfı açar gibi" açılır; kaplama yüzeye dizilir.
 - Çapraz kesimler öteki tarafa kullanılır: sol taraftaki üçgende kullanılan panel sağ tarafa aynı açıyla yerleştirilir; ön taraftaki yamuktan çıkan açılı kesilmiş parçalar arka taraftaki aynı biçimdeki açılı yere.
 
+### Mühendisin üçüncü cevapları (4 Ekim; Lokman 12:14'te iletti)
+
+- Taşma: "5 cm çatı yüzeyinin dışında kalacak şekilde uzatıyoruz çatı kaplamalarını."
+- "Kiremit desen sacda artan parça karşı yüzde desen ters geldiğinden kullanılmaz."
+- Tavan ve çatı paneli: "Genelde dörtomuz çatı tipinde tavan paneli ve çatı panelini kullanıyoruz. 100m2 için bu adetler üzerinden ilerleyebilrsin."
+- Mahya bandı = (mahya adedi × 2,8 m + ters mahya adedi × 2,8 m + damlalık adedi × 2,5 m) ÷ 10.
+- Makas ve kiriş ölçüsü: "şimdilik Excel hesaplama motoruna uy".
+- Dizilimin hangi köşeden başladığı, kesim payı ve yedek panel soruları cevaplanmadı.
+- Excel motorundaki trapez sac formülünü açıkladı ve yeniden kontrol edilmesini istedi; hücreler ve bulgular `yukleme_listesi_yontemi.md`'de.
+
 ### Bindirme, mahya çeşitleri, dere inişi (3 Ekim 13:27)
 
 - Mühendisler bindirmeyi saçak, mahya ve alın sacında hep 30 cm kabul eder; fire dahildir. Örnek: "saçak sacı L:2800 ise cephe 10 metre ÷ 2,5".
@@ -90,9 +100,9 @@ Kaynak: Lokman'ın anlattıkları (2–4 Ekim 2026; 4 Ekim 01:24 ve 01:42 düzel
 - OSB'li kaplamada OSB mahyası metal kiremit mahyasıyla aynı boyda gider (gerçek listelerde ve Excel motorunda aynı adet).
 - Saçak yüzünün malzemesi Boardex: önce çıkarımdı, mühendis teyit etti (3 Ekim 18:14).
 - İniş sayısı = köşe sayısı + 10 m ve daha uzun cephe sayısı. Gerçek listelerde 7, 7 ve 10 iniş var; ilk ikisinde bu kural 6 veriyor. Mühendise göre iniş plana bakarak yerleştirilir: tanımda iniş yerleri elle verilirse (`cati.inis_noktalari`) o sayı kullanılır. Mühendisin 10 × 10 m metrajındaki sayıları (dört omuz 8, beşik 6) bu kural veriyor.
-- Tavan paneli ve çatı panelinin kg'ı ve adedi, 100 m² için verilen değerlerin çatının örttüğü oturum alanına oranıyla bulunur. Oranlamayı Lokman onayladı (4 Ekim 01:24); adet için mühendis: "Tamamdır." Değerlerin hangi çatı tipi, saçak ve eğim için olduğu yazılmadı.
-- Kırma çatıda kaplama adedi çatı açılımından bulunur (`deneme/2026-10-03_yukleme/cati_acilim.py`; ayrıntı `yukleme_listesi_yontemi.md`). Dört yüz gerçek boyutuyla açılır; her yüz saçağa dik, kaplamanın kapattığı genişlikte şeritlere bölünür. Bir panel gönyesinde ve çapraz kesilir: alt parça olduğu gibi kullanılır, üst parça düz ucu saçağa gelecek biçimde karşı yüze konur (ters yüz edilmez). Uygulamadaki varsayımlar: dizilim her yüzde dışarıdan bakışla sol köşeden başlar; kesim payı ve boy bindirmesi yok; panel tek boyda (eğimli boy, 10 cm'ye yukarı). Kiremit desen sacda desen yönlü olduğu için artan parça kullanılmadı (varsayım). Çatı planı bilinmiyorsa yüzey × 1,10 ÷ (boy × kapatma genişliği) kalır.
-- Mahya bandı = düz ve ters mahya gelen yerlerin uzunlukları toplamı ÷ 10 m, yukarı (rulo 10 m). Formül PortatifEv'in açıklamalı prefabrik yükleme listesi çalışma kitabından; mühendisin 10 × 10 m metrajındaki 2 ve 4 ruloyu veriyor. Excel motorunda mahya parçası adedi × parça boyu ÷ 10.
+- Tavan paneli ve çatı panelinin kg'ı ve adedi, 100 m² için verilen değerlerin çatının örttüğü oturum alanına oranıyla bulunur. Oranlamayı Lokman onayladı (4 Ekim 01:24); adet için mühendis: "Tamamdır." Mühendis 4 Ekim 12:14'te teyit etti: paneller genelde dört omuz çatıda kullanılır; 100 m²'deki adetlerle ilerlenir.
+- Kırma çatıda kaplama adedi çatı açılımından bulunur (`deneme/2026-10-03_yukleme/cati_acilim.py`; ayrıntı `yukleme_listesi_yontemi.md`). Dört yüz gerçek boyutuyla açılır; her yüz saçağa dik, kaplamanın kapattığı genişlikte şeritlere bölünür. Bir panel gönyesinde ve çapraz kesilir: alt parça olduğu gibi kullanılır, üst parça düz ucu saçağa gelecek biçimde karşı yüze konur (ters yüz edilmez). Kaplama saçaktan 5 cm taşar: panel boyu = eğimli boy + 5 cm, mm'ye yukarı (mühendis, 4 Ekim 12:14). Kiremit desen sacda artan parça kullanılmaz: desen ters gelir (mühendis). Uygulamadaki varsayımlar: altı başlangıç denenir (her yüzde sol köşeden; uzun yüzlerde sol köşeden, kısa yüzlerde ortadan; tersi; ortadan; sağ köşeden; karşılıklı yüzlerde planda aynı uçtan) ve en az paneli veren alınır; kesim payı 5 mm; boy bindirmesi ve yedek panel yok. Çatı planı bilinmiyorsa yüzey × 1,10 ÷ (boy × kapatma genişliği) kalır.
+- Mahya bandı = (mahya adedi × 2,8 m + ters mahya adedi × 2,8 m + damlalık adedi × 2,5 m) ÷ 10 m, yukarı (rulo 10 m; mühendis, 4 Ekim 12:14; Excel motorundaki formül de bu). Motorda trapez sac mahyası × 0,8 m de toplanır. Damlalık okunan listelerde yok; sıfır alınır. 4 Ekim 01:24'teki uygulama mahya uzunluğundandı (açıklamalı prefabrik yükleme listesi çalışma kitabındaki formül).
 - Veranda dikmesinin kaplama çevresi 2 × (30 + 8) = 76 cm, kirişinki 30 + 30 + 8 = 68 cm (üstü kapalı). Gerçek listelerin hesap sayfalarındaki 0,76 ve 0,68 değerleri bununla aynı.
 - Düzeltme (2 Ekim 21:50): ilk hesapta topuk duvar hizasında varsayılmış, saçak ucu 270 kotuna indirilmişti. Modellere göre saçak ucu 280'dir; mahya kotu 10 cm yükseldi.
 
@@ -107,10 +117,10 @@ Katalog görsellerine göre tek bir kırma çatı, kapalı kısmı ve verandayı
 - Mahya malzemesi: tepe 344 + 4 kırma × 588 = 2697 cm (27,0 m). 2,8 m'lik parça ve 30 cm bindirmeyle 11 adet (bindirmesiz 10). Parça boyu gerçek yükleme listelerinden (L 2800).
 - Çatı yüzeyi 98,4 m² (plan 93,5 m²). Saçak altı 11,4 m² (yükleme listesinde saçak boyu × 0,30 = 11,8 m² alınır); veranda tavanı 18,3 m².
 - Yöntem A: tavan paneli alanı 76,7 m² (mahaller 58,4 + veranda 18,3); çatı paneli alanı 98,4 m². Lokman'ın 100 m² için verdiği ağırlıklardan (354,84 ve 440,32 kg), oturum alanına (82,05 m²) oranla: tavan paneli 291 kg, çatı paneli 361 kg. Adet, mühendisin 100 m²'deki 8 ve 12'sinden aynı oranla: 7 ve 10 (tahmin; kesin adet panel yerleşiminden).
-- Saçak yüzü için Boardex 3 levha (7,2 m² × 1,15 ÷ 2,88); saçak omegası yok.
+- Saçak yüzü için Boardex 3 levha (7,2 m² × 1,08 ÷ 2,88; Boardex zayiatı %8: mühendis, 4 Ekim 12:14); saçak omegası yok.
 - Dere inişi 6: dört köşe ve iki uzun cephenin (10,94 m) ortası. Kısa cepheler 7,50 m; orta iniş yok. Planda elle yerleştirilmiş iniş yok.
-- Çatı kaplaması: baz pakette tek kat panel (87 cm kapatır), 28 adet L 4300. Adet çatı açılımından: eğimli boy 426,5 cm; 12 panel tam boy, 16 panel kesilerek (kesilen her panelden iki parça: biri bir yüze, öteki karşı yüze). Dizilim hangi köşeden başlarsa başlasın 28. Çizimler: `deneme/2026-10-03_yukleme/sonuc/C8201_cati_acilim.png` ve `C8201_cati_kesim.png`. Öteki seçenekler de hesaplanıyor: sandviç panel 24 (kesimlerde pay 4 mm; 1 cm kesim payıyla 25), trapez sac 30, kiremit desen sac 26 (artan parça kullanılmadan); shingle ve membran 14'er.
-- Mahya bandı 3 rulo (27,0 m ÷ 10). Çatı müdahale kapağı standart listede yok.
+- Çatı kaplaması: baz pakette tek kat panel (87 cm kapatır), 28 adet L 4315. Adet çatı açılımından: eğimli boy 426,5 cm + 5 cm taşma; 10 panel tam boy, 18 panel kesilerek (kesilen her panelden iki parça: biri bir yüze, öteki karşı yüze). Dizilim uzun yüzlerde sol köşeden, kısa yüzlerde ortadan başlar (en az paneli veren başlangıç); her yüzde sol köşeden başlanırsa 29. Kesim payı 5 mm (varsayım); sıfır da olsa 1 cm de olsa 28. Çizimler: `deneme/2026-10-03_yukleme/sonuc/C8201_cati_acilim.png` ve `C8201_cati_kesim.png`. Öteki seçenekler de hesaplanıyor: sandviç panel 26 (kesim payı sıfır alınırsa 25), trapez sac 32 (sıfır alınırsa 30), kiremit desen sac 26 (artan parça kullanılmaz); shingle ve membran 14'er. Taşma eklenmeden önce (4 Ekim 02:58) L 4300 ile 28, 24, 30 ve 26'ydı.
+- Mahya bandı 4 rulo (11 mahya × 2,8 m ÷ 10; önce mahya uzunluğundan 3'tü). Çatı müdahale kapağı standart listede yok.
 - Veranda çerçevesi: kiriş 244 + 750 + 244 = 1238 cm (yanlar ve karşı); dikme 3 adet, 240 cm. Dikmelerin sayısı ve yeri katalog görsellerinden (dış kenarda iki köşe, bir orta); teyit bekliyor.
 - Çizim: `deneme/2026-10-02_celik/sonuc/C8201_pafta.png` (çatı planında iniş yerleri işaretli).
 
@@ -138,14 +148,22 @@ Katalog görsellerine göre tek bir kırma çatı, kapalı kısmı ve verandayı
 - Kırma çatıda kaplama adedi: çatı açılımı ve dizilim (Lokman, 01:42; mühendisin "AutoCAD" cevabını düzeltti).
 - Mahya bandı listede; çatı müdahale kapağı yalnız müşteri isterse.
 
+4 Ekim 12:14 (mühendis):
+
+- Kaplama saçaktan 5 cm taşar.
+- Kiremit desen sacda artan parça karşı yüzde kullanılmaz.
+- Tavan ve çatı panelinin 100 m²'deki adetleri (8 ve 12) geçerli; paneller genelde dört omuz çatıda kullanılır.
+- Mahya bandı formülü (mahya, ters mahya ve damlalık adedinden).
+- Makas ve kiriş: şimdilik Excel motorundaki gibi.
+
 ## Açık sorular
 
-- Lokman kiriş ve makasları "yaklaşık bir makasın ölçüsünden" verecek; o zamana kadar çatı çeliği motorun ortalamasıyla.
-- Tavan ve çatı panelinin 100 m²'deki adedi (8 ve 12) yeni ağırlıklarla da geçerli mi? Değerler hangi çatı tipi için?
-- Çatı açılımı: dizilim hangi köşeden başlar? Kesim payı bırakılır mı? Dizilimden çıkan adede yedek eklenir mi (62 m² gerçek listede 27 sandviç panel var; dizilim 26 veriyor)? Kiremit desen sacda artan parça karşı yüzde kullanılır mı?
+- Lokman kiriş ve makasları "yaklaşık bir makasın ölçüsünden" verecek; o zamana kadar çatı çeliği motorun ortalamasıyla (mühendis, 4 Ekim 12:14: "şimdilik Excel hesaplama motoruna uy").
+- Çatı açılımı: dizilim nereden başlar? Listeye en az paneli veren başlangıç giriyor (Ç8201'de 28; her yüzde sol köşeden başlanırsa 29). Kesim payı 5 mm uygun mu? Dizilimden çıkan adede yedek eklenir mi (62 m² gerçek listede 27 uzun ve 2 kısa sandviç panel var; dizilim 28 veriyor)? Üçüncü tur bu üçünü cevaplamadı.
 - Cumbalı çatıda (ters mahya) açılım ve dizilim henüz yok.
-- Mahya bandı: mahya uzunluğundan mı (Ç8201: 3 rulo), motordaki gibi mahya parçalarının toplam boyundan mı (4 rulo)?
-- Excel motorundaki trapez sac ve metal kiremit adedi formülü kapatma genişliğiyle çarpıyor (bölmesi gerekir görünüyor); mühendise sorulacak.
+- Damlalık (L 2500): mahya bandı formülünde geçiyor; okunan listelerde yok, Excel motorunda adedi elle giriliyor. Hangi durumda listeye girer, adedi nasıl bulunur?
+- Excel motorundaki kaplama formülü: 0,8 ve 1,05 paydanın parantezi dışında (kapatma genişliğine bölmek yerine çarpıyor); uzun kenara saçak eklenmemiş. Bulgular mühendise iletilecek (`yukleme_listesi_yontemi.md`).
+- Kapatma genişliği: tek kat panel 87 cm mi (gerçek listeler, montaj paftası), 100 cm mi (Excel motoru)? Kiremit desen sac 110 mu, 105 mi? Liste 87 ve 110 ile hesaplıyor.
 - Ters mahya kenar kutuları (motorda ters mahya × 2): cumbalı çatı çalışılınca sorulacak.
 - Saçak sacının boyu: örnekte L 2800, listelerde L 2500. Derede ve L 800 trapez mahyasında bindirme de 30 cm mi (Excel motorunda 20 cm)?
 - 62 ve 105 m² listelerde hem saçak sacı hem saçaklar için Boardex var; kurala göre birlikte olmaz. O Boardex nereye gidiyor?

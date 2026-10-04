@@ -41,7 +41,7 @@
    "brut": null,
    "birim": "m",
    "kg": 61.63,
-   "formul": "adet × 2,40 m × 6,42 kg/m",
+   "formul": "adet × 2,40 m × 6,42 kg/m (motorun proje ortalaması)",
    "durum": "motor",
    "not": null
   },
@@ -69,7 +69,7 @@
    "kg": 555.45,
    "formul": "saçak dahil çatı planı × 7,55 kg/m² (motorun proje ortalaması); adet çatı tipine göre sabit",
    "durum": "motor",
-   "not": "geçici: Lokman makas ve kirişleri bir makas ölçüsünden ayrıca verecek; o zamana kadar motorun ortalaması (mühendis, 4 Ekim: tamam)"
+   "not": "şimdilik Excel motorunun ortalamasıyla (mühendis, 4 Ekim 12:14); makas ölçüsü verilirse değişir"
   },
   {
    "grup": "Çelik panel",
@@ -165,13 +165,13 @@
   {
    "grup": "Metal aksam",
    "kalem": "Saçaklar için Boardex",
-   "boyut": "1200 × 2400",
+   "boyut": "12,5 × 1200 × 2400",
    "adet": 5,
    "olcu": 11.38,
    "brut": null,
    "birim": "m²",
    "kg": null,
-   "formul": "saçak boyu × saçak eni × 1,15 ÷ 2,88",
+   "formul": "saçak boyu × saçak eni × 1,08 ÷ 2,88",
    "durum": "uydurma",
    "not": null
   },
@@ -191,15 +191,15 @@
   {
    "grup": "Dış cephe kaplama",
    "kalem": "Dış cephe Boardex",
-   "boyut": "1200 × 2400",
-   "adet": 32,
+   "boyut": "12,5 × 1200 × 2400",
+   "adet": 30,
    "olcu": 78.16,
    "brut": 97.7,
    "birim": "m²",
    "kg": null,
-   "formul": "(çevre × yükseklik + kolon/kiriş kaplaması + çatı alnı (kalkan) − boşluklar) × 1,15 ÷ 2,88",
+   "formul": "(çevre × yükseklik + kolon/kiriş kaplaması + çatı alnı (kalkan) − boşluklar) × 1,08 ÷ 2,88",
    "durum": "excel",
-   "not": null
+   "not": "zayiat %8: mühendis, 4 Ekim 12:14. Gerçek listelerdeki adetler %15'e uyuyor; %15 ile 32 levha"
   },
   {
    "grup": "Dış cephe kaplama",
@@ -296,14 +296,14 @@
    "grup": "Çatı kaplamaları",
    "kalem": "Sandviç panel",
    "boyut": "L 3200 · 100 cm kapatır",
-   "adet": 26,
+   "adet": 28,
    "olcu": 76.82,
    "brut": null,
    "birim": "m²",
    "kg": null,
-   "formul": "çatı açılımı: yüzler şerit şerit dizilir; çapraz kesimden artan parça karşı yüzde kullanılır; panel boyu = eğimli boy",
+   "formul": "çatı açılımı: yüzler şerit şerit dizilir; çapraz kesimden artan parça karşı yüzde kullanılır; panel boyu = eğimli boy + taşma",
    "durum": "lokman",
-   "not": "16 panel tam boy, 10 panel kesilerek; alan olarak en az 25. Dizilim her yüzde sol köşeden başlar (varsayım); kesim payı yok. Başlangıç köşesi değişirse 26–27"
+   "not": "16 panel tam boy, 12 panel kesilerek; alan olarak en az 25. Dizilim her yüzde sol köşeden başlar. Kaplama saçaktan 3,8 cm taşar (kural 5 cm; listedeki panel boyu o kadarına yetiyor); kesim payı 5 mm (varsayım)"
   },
   {
    "grup": "Çatı kaplamaları",
@@ -335,14 +335,14 @@
    "grup": "Çatı kaplamaları",
    "kalem": "Mahya bandı",
    "boyut": "rulo / 10 m",
-   "adet": 3,
-   "olcu": 26.43,
+   "adet": 4,
+   "olcu": 30.8,
    "brut": null,
    "birim": "m",
    "kg": null,
-   "formul": "düz ve ters mahya gelen yerlerin uzunlukları toplamı ÷ 10 m",
-   "durum": "excel",
-   "not": "listeye girmesi: mühendis, 4 Ekim. Excel motorunda parça adedi × parça boyu ÷ 10"
+   "formul": "(metal kiremit mahyası 11 × 2,8 m + damlalık 0 × 2,5 m) ÷ 10",
+   "durum": "muhendis",
+   "not": "formül: mühendis, 4 Ekim 12:14 (Excel motorundaki gibi). Damlalık listede yok; sıfır alındı"
   },
   {
    "grup": "Çatı kaplamaları",
@@ -570,7 +570,7 @@
    "kalem": "Alçıpan vidası (3,5 × 35)",
    "boyut": "adet",
    "adet": 4000,
-   "olcu": 98,
+   "olcu": 96,
    "brut": null,
    "birim": "levha",
    "kg": null,
@@ -635,7 +635,7 @@
    "kalem": "Trapez vida (5,5 × 110; sandviç panel)",
    "boyut": "adet",
    "adet": 500,
-   "olcu": 416.0,
+   "olcu": 448.0,
    "brut": null,
    "birim": "vida",
    "kg": null,
@@ -879,27 +879,36 @@
   "celik_panel_adedi": 63,
   "kosebent": {
    "tavan_cevresi_m": 51.83,
+   "veranda_tavan_cevresi_m": 0.0,
    "ic_kose": 16,
    "boy_m": 95.03
   },
   "elektrik_kaynagi": null,
   "elektrik_kural": null,
   "kirma_dizilim": {
-   "adet": 26,
+   "adet": 28,
    "tam_boy": 16,
-   "kesilen": 10,
+   "kesilen": 12,
    "alan_alt_siniri": 25,
    "artan_parca_karsi_yuzde": true,
    "baslangic": "sol",
-   "baslangic_kosesine_gore": {
-    "sol": 26,
-    "sag": 26,
-    "orta": 26,
-    "plan_yonu": 27
+   "baslangic_adi": "her yüzde sol köşeden",
+   "baslangica_gore": {
+    "sol": 28,
+    "kose_orta": 28,
+    "orta_kose": 28,
+    "orta": 28,
+    "sag": 28,
+    "plan_yonu": 28
    },
    "kapatma_m": 1.0,
-   "en_dar_pay_cm": 0.8,
-   "bir_cm_kesim_payiyla": 26
+   "tasma_cm": 3.8,
+   "tasma_kural_cm": 5.0,
+   "kesim_payi_mm": 5.0,
+   "paysiz_adet": 28,
+   "bir_cm_payla_adet": 28,
+   "en_dar_pay_cm": 42.4,
+   "egimli_boy_m": 3.1618
   }
  },
  "karsilastirma": {
@@ -934,7 +943,7 @@
    "durum": "muhendis"
   },
   "Dış cephe Boardex": {
-   "hesap": 32,
+   "hesap": 30,
    "liste": 32,
    "durum": "excel"
   },
@@ -974,7 +983,7 @@
    "durum": "uydurma"
   },
   "Sandviç panel": {
-   "hesap": 26,
+   "hesap": 28,
    "liste": 27,
    "durum": "lokman"
   },
@@ -1111,7 +1120,7 @@
  },
  "karsilastirma_ozeti": {
   "karsilastirilan": 41,
-  "ayni": 29
+  "ayni": 28
  },
  "celik_kg_karsilastirma": {
   "dis": {

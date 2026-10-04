@@ -2,7 +2,7 @@
 """Çatı açılımı diziliminin geometrik sağlaması (`cati_acilim.dizilim`).
 
 Çokgenlerle (shapely) şunlara bakar:
-  1. Her yüzün şerit parçaları yüzü tam örtüyor ve üst üste binmiyor mu?
+  1. Her yüzün şerit parçaları yüzü (saçaktan taşan şeritle birlikte) tam örtüyor ve üst üste binmiyor mu?
   2. Her paneldeki parçalar panelin (kapatma × boy) içinde mi; birbirinin üstüne biniyor mu?
   3. Her parça, atandığı yüz parçasıyla eş mi? Alt parça yalnız ötelenir; üst parça 180° çevrilir (ters yüz edilmez).
   4. Eşleme kuralı: iki parça veren kesimde parçalar karşılıklı yüzlerde ve aynı türden mi?
@@ -25,7 +25,7 @@ from shapely.affinity import rotate, translate
 from shapely.geometry import Polygon, box
 from shapely.ops import unary_union
 
-from cati_acilim import BASLANGIC, dizilim
+from cati_acilim import BASLANGIC, dizilim, kural_dizilimi
 
 BURADA = Path(__file__).resolve().parent
 TOL = 1e-6
@@ -40,7 +40,7 @@ def panel_sekilleri(d: dict):
             l, ps = dk["boy"], dk["parcalar"]
             if len(ps) == 1 and ps[0].konum == "tam":
                 p = ps[0]
-                yield pn["no"], p, Polygon([(x - p.x0, t + taban) for x, t in p.kose]), "alt"
+                yield pn["no"], p, Polygon([(x - p.x0, t + d["tasma_m"] + taban) for x, t in p.kose]), "alt"
             else:
                 alt = ps[0]
                 a, b, en = alt.uzun, alt.kisa, alt.en
@@ -61,13 +61,21 @@ def es_mi(s1: Polygon, s2: Polygon) -> bool:
     return a.symmetric_difference(b).area < TOL
 
 
-def sagla(px: float, py: float, egim: float, w: float, boy: float, paylas: bool = True, baslangic: str = "sol") -> tuple[int, list[str]]:
-    d = dizilim(px, py, egim, w, boy, paylas, baslangic)
+def sagla(px: float, py: float, egim: float, w: float, boy: float, paylas: bool = True, baslangic: str = "sol", tasma: float = 0.0,
+          kesim_payi: float = 0.0) -> tuple[int, list[str]]:
+    d = dizilim(px, py, egim, w, boy, paylas, baslangic, kesim_payi, tasma)
+    return d["adet"], dizilim_hatalari(d)
+
+
+def dizilim_hatalari(d: dict) -> list[str]:
+    """Bir dizilimin geometrik sağlaması; sorun yoksa boş liste."""
+    (uzun_k, kisa_k), w, boy, paylas, ts = d["plan_m"], d["kapatma_m"], d["boy_m"], d["paylas"], d["tasma_m"]
+    px, py = uzun_k, kisa_k
     hata: list[str] = []
     y0, H = min(px, py) / 2, d["egimli_boy_m"]
-    for ad, ps in d["yuzler"].items():                       # 1) yüz parçaları yüzü tam örtüyor
+    for ad, ps in d["yuzler"].items():                       # 1) yüz parçaları yüzü (taşma şeridiyle) tam örtüyor
         E = max(px, py) if ad in ("ön", "arka") else min(px, py)
-        yuz = Polygon([(0, 0), (E, 0), (E - y0, H), (y0, H)]) if E - 2 * y0 > 1e-9 else Polygon([(0, 0), (E, 0), (y0, H)])
+        yuz = Polygon([(0, -ts), (E, -ts), (E, 0), (E - y0, H), (y0, H), (0, 0)]) if E - 2 * y0 > 1e-9 else Polygon([(0, -ts), (E, -ts), (E, 0), (y0, H), (0, 0)])
         parcalar = [Polygon(p.kose) for p in ps]
         parcalar = [s for s in parcalar if s.area > 1e-12]
         if abs(sum(s.area for s in parcalar) - yuz.area) > TOL or abs(unary_union(parcalar).area - yuz.area) > TOL:
@@ -101,38 +109,38 @@ def sagla(px: float, py: float, egim: float, w: float, boy: float, paylas: bool 
                     hata.append(f"panel {pn['no']}: eşleme kuralı bozuk")
     if d["adet"] < d["alan_alt_siniri"]:                      # 5)
         hata.append("adet, alan olarak en az gerekenden az")
-    return d["adet"], hata
+    return hata
 
 
 def main() -> int:
     kr = json.loads((BURADA / "kurallar.json").read_text(encoding="utf-8"))
     c = json.loads((BURADA / "sonuc" / "C8201_girdi.json").read_text(encoding="utf-8"))["cati"]
     g62 = json.loads((BURADA / "ornek_62m2_girdi.json").read_text(encoding="utf-8"))["cati"]
-    yok = kr["kirma_cati_dizilim"]["deger"]["artan_parca_kullanilmayan_kaplamalar"]
-    denemeler = [(f"Ç8201 {ad}", (c["plan_m"][0], c["plan_m"][1], c["egim"], kr[kural]["deger"], c["panel_boyu_m"], anahtar not in yok))
-                 for anahtar, ad, kural in (("tek_kat_panel", "tek kat panel", "tek_kat_panel_kapatma_m"), ("sandvic_panel", "sandviç panel", "sandvic_panel_kapatma_m"),
-                                            ("trapez_sac", "trapez sac", "trapez_sac_kapatma_m"), ("osb_kiremit", "kiremit desen sac", "kiremit_kapatma_m"))]
-    denemeler.append(("62 m² sandviç panel", (g62["plan_m"][0], g62["plan_m"][1], g62["egim"], kr["sandvic_panel_kapatma_m"]["deger"], g62["panel_boyu_m"], True)))
     sorun = 0
-    for ad, olcu in denemeler:
-        sonuc = {b: sagla(*olcu, baslangic=b) for b in BASLANGIC}
-        hatalar = [h for _, hs in sonuc.values() for h in hs]
+    # 1) kurallardaki ayarlarla listeye giren dizilimler
+    for ad, cati, kaplama in ([(f"Ç8201 {x}", c, x) for x in ("tek_kat_panel", "sandvic_panel", "trapez_sac", "osb_kiremit")] + [("62 m² sandvic_panel", g62, "sandvic_panel")]):
+        d = kural_dizilimi(kr, cati, kaplama)
+        hatalar = dizilim_hatalari(d)
         sorun += len(hatalar)
-        print(f"{ad:28s} " + " · ".join(f"{b} {n}" for b, (n, _) in sonuc.items()) + ("  geometri TAMAM" if not hatalar else "  HATA: " + "; ".join(hatalar[:3])))
+        print(f"{ad:24s} {d['adet']:3d} adet · başlangıç {d['baslangic']:10s} · taşma {d['tasma_m'] * 100:.1f} cm · denemeler {d['denemeler']}"
+              + ("  geometri TAMAM" if not hatalar else "  HATA: " + "; ".join(hatalar[:3])))
+    # 2) rastgele kırma çatılar: bütün başlangıçlar, artan parça kullanılarak ve kullanılmadan, taşmalı ve taşmasız
     random.seed(8201)
     n = 0
-    for _ in range(200):
+    for _ in range(120):
         px = round(random.uniform(5, 16), random.choice((1, 2, 3)))
         py = round(random.uniform(4, px), random.choice((1, 2, 3)))
         egim, w = random.choice((0.25, 0.30, 0.33, 0.40)), random.choice((0.80, 0.87, 1.00, 1.10))
-        boy = math.ceil(min(px, py) / 2 * math.sqrt(1 + egim ** 2) * 10 - 1e-9) / 10
+        tasma = random.choice((0.0, 0.05))
+        pay = random.choice((0.0, 0.005))
+        boy = math.ceil((min(px, py) / 2 * math.sqrt(1 + egim ** 2) + tasma) * 1000 - 1e-9) / 1000
         for paylas in (True, False):
             for b in BASLANGIC:
                 n += 1
-                _, hata = sagla(px, py, egim, w, boy, paylas, b)
+                _, hata = sagla(px, py, egim, w, boy, paylas, b, tasma, pay)
                 if hata:
                     sorun += 1
-                    print("SORUN", px, py, egim, w, boy, paylas, b, hata[:3])
+                    print("SORUN", px, py, egim, w, boy, paylas, b, tasma, pay, hata[:3])
     print(f"rastgele kırma çatılar: {n} dizilim denendi; toplam sorun {sorun}")
     return 1 if sorun else 0
 
