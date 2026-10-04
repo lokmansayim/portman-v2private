@@ -2,6 +2,11 @@
 
 **Son güncelleme: 29 Eylül 2026 22:50 (İE-02 kapandı ve `main`'e birleştirildi; İE-03 yalnız plan aşamasında).** Her oturumun son adımı bu dosyayı güncellemektir.
 
+**4 Ekim 2026 13:45 eki (dal `bk-02-depo-iskeleti`, BK-02; BK-01'in üstüne):**
+- **Depo iskeleti kuruldu** (`docs/is_emirleri/BK-02.md`): `AGENTS.md` (Claude ve Codex için ortak değişmez kurallar), kısaltılmış `CLAUDE.md` (`@AGENTS.md` içe alır), `.claude/rules/` (test politikası her oturumda; motor, beyin, kanal kuralları ilgili dosya açılınca), komutlar `/is-emri` `/kapanis` `/sahip-ozeti`, hakemler `geometri-hakemi` ve `kvkk-denetcisi`, üç hook (sır/dondurulmuş dosya koruması, komut freni, sözdizimi denetimi) ve izin listesi (`.claude/settings.json`).
+- **Gerileme** (`dogrula.py --hizli`, 13:41–13:43): harness 22/22, parmak izleri AYNI, yalnız bilinen sır taraması farkı (BK-01 ile aynı sayılar); ürün koduna dokunulmadı.
+- **Sınırlar:** Canlıya, veriye ve sunucuya dokunulmadı. Hook'lar gerçek Code oturumunda henüz görülmedi (B1–B8 Lokman'ın ilk oturumunda). `main`'e birleştirme Lokman'ın onayını bekliyor; BK-01 önce birleşmeli.
+
 **3 Ekim 2026 23:05 eki (dal `claude/lucid-ritchie-66j34y`, BK-01):**
 - **Bu dosya geride.** Güncel durum `ie-05` dalındaki DURUM'dadır; aktif iş İE-04, taslak iş İE-05.
 - **Yapılan bakım** (`docs/is_emirleri/BK-01.md`):

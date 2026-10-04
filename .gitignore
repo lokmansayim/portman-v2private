@@ -28,3 +28,7 @@ venv/
 
 # vps derleme çıktıları
 vps/build/
+
+# Claude Code · kişisel ayar ve worktree (BK-02)
+.claude/settings.local.json
+.claude/worktrees/
