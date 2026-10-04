@@ -121,7 +121,7 @@ def kaplama_tablosu() -> list[str]:
 
 def dizilim_tablosu() -> list[str]:
     """Kırma çatıda kaplama adedi: çatı açılımı ve dizilim (Lokman, 4 Ekim 2026 01:42; taşma: mühendis, 12:14;
-    her yüzde köşeden başlama, kesim payı ve kapatma genişlikleri: Lokman, 15:18).
+    her yüzde köşeden başlama, kesim payı ve kapatma genişlikleri: Lokman, 15:18; panel boyunun uzatılması: Lokman, 16:18).
     Ç8201'de şerit dizilen kaplamalar (güncel ürün genişlikleriyle ve Lokman'ın andığı öteki ürünlerle), 62 m² gerçek liste
     ve mühendisin 10 × 10 m dört omuz metrajı."""
     from cati_acilim import BASLANGIC_ADI, dizilim, kural_dizilimi
@@ -130,8 +130,8 @@ def dizilim_tablosu() -> list[str]:
     baz_kaplama = kr["baz_paket_cati_kaplamasi"]["deger"]
     c = oku("C8201_girdi.json")["cati"]
     assert kd["baslangic"] != "en_az", "tablo başlıkları dizilimin kuralda yazılı yerden başladığını söylüyor"
-    cik = [f"| Çatı | Kaplama | Kapatır | Adet ({BASLANGIC_ADI[kd['baslangic']]}) | En az paneli veren dizilimle | Altı başlangıçla | Artan parça kullanılmazsa | Alan olarak en az | Kesim payı sıfır / 1 cm | Taşma |",
-           "|---|---|---|---|---|---|---|---|---|---|"]
+    cik = [f"| Çatı | Kaplama | Kapatır | Panel boyu | Adet ({BASLANGIC_ADI[kd['baslangic']]}) | Taban boyla | En az paneli veren dizilimle | Altı başlangıçla | Artan parça kullanılmazsa | Alan olarak en az | Kesim payı sıfır / 1 cm | Taşma |",
+           "|---|---|---|---|---|---|---|---|---|---|---|---|"]
 
     def satir(cati_adi: str, ad: str, cati: dict, kaplama: str, kapatma: float | None = None) -> str:
         if kapatma is not None:      # başka bir ürünün genişliğiyle (kuraldaki güncel değerin yerine)
@@ -139,13 +139,15 @@ def dizilim_tablosu() -> list[str]:
         d = kural_dizilimi(kr, cati, kaplama)
         den = d["denemeler"]
         px, py = cati["plan_m"]
-        kullanmadan = dizilim(px, py, cati["egim"], d["kapatma_m"], cati["panel_boyu_m"], False, d["baslangic"], kd["kesim_payi_m"], d["tasma_m"])["adet"]
+        kullanmadan = dizilim(px, py, cati["egim"], d["kapatma_m"], d["boy_m"], False, d["baslangic"], kd["kesim_payi_m"], d["tasma_m"])["adet"]
         aralik = str(min(den.values())) if len(set(den.values())) == 1 else f"{min(den.values())}–{max(den.values())}"
-        return (f"| {cati_adi} | {ad} | {round(d['kapatma_m'] * 100)} cm | {d['adet']} ({d['tam_boy_adedi']} tam boy + {d['adet'] - d['tam_boy_adedi']} kesilen) | "
-                f"{d['en_az_adet']} | {aralik} | {kullanmadan}{'' if d['paylas'] else ' (listeye giren)'} | {d['alan_alt_siniri']} | "
+        # panel boyu: kuraldan geliyorsa (Ç8201) adedi düşürdüğü yerde uzatılmıştır; taban boyla adet yanında
+        taban = f"{d['taban_adet']} (L {round(d['taban_boy_m'] * 1000)})" if d["uzatma"] else ("uzatma adedi düşürmüyor" if cati.get("panel_boyu_kaynak") == "kural" else "boy listeden")
+        return (f"| {cati_adi} | {ad} | {round(d['kapatma_m'] * 100)} cm | L {round(d['boy_m'] * 1000)} | {d['adet']} ({d['tam_boy_adedi']} tam boy + {d['adet'] - d['tam_boy_adedi']} kesilen) | "
+                f"{taban} | {d['en_az_adet']} | {aralik} | {kullanmadan}{'' if d['paylas'] else ' (listeye giren)'} | {d['alan_alt_siniri']} | "
                 f"{d['paysiz_adet']} / {d['bir_cm_payla_adet']} | {tr(d['tasma_m'] * 100, 1)} cm |")
 
-    boy = f"Ç8201 (L {round(c['panel_boyu_m'] * 1000)})"
+    boy = "Ç8201"
     sirali = sorted((("tek_kat_panel", "Tek kat panel"), ("sandvic_panel", "Sandviç panel"), ("trapez_sac", "Trapez sac"), ("osb_kiremit", "Kiremit desen sac")),
                     key=lambda x: x[0] != baz_kaplama)
     for anahtar, ad in sirali:
@@ -157,10 +159,10 @@ def dizilim_tablosu() -> list[str]:
     cik.append(satir(boy, "Kiremit desen sac, 110 cm kapatan ürün (2025 listeleri)", c, "osb_kiremit", 1.10))
     g62 = json.loads((BURADA / "ornek_62m2_girdi.json").read_text(encoding="utf-8"))["cati"]
     liste = json.loads((BURADA / "ornek_62m2_gercek_liste.json").read_text(encoding="utf-8"))["kalemler"]["Sandviç panel"]["adet"]
-    cik.append(satir(f"62 m² gerçek liste (L {round(g62['panel_boyu_m'] * 1000)}; listede {liste})", "Sandviç panel", g62, "sandvic_panel"))
+    cik.append(satir(f"62 m² gerçek liste (listede {liste})", "Sandviç panel", g62, "sandvic_panel"))
     # Mühendisin 10 × 10 m dört omuz metrajı (Çatı Hesapları çalışma kitabı): 118 m² yüzey, trapez sac L 5900, 36 adet.
     # Plan saçak dahil 10,6 × 10,6 m ve eğim %33 alındı: yüzey 10,6² × 1,053 = 118,3 m² (metrajdaki yüzeyi veriyor).
-    cik.append(satir("Mühendisin 10 × 10 m dört omuz metrajı (L 5900; metrajda 36)", "Trapez sac", {"plan_m": [10.6, 10.6], "egim": 0.33, "panel_boyu_m": 5.9}, "trapez_sac"))
+    cik.append(satir("Mühendisin 10 × 10 m dört omuz metrajı (metrajda 36)", "Trapez sac", {"plan_m": [10.6, 10.6], "egim": 0.33, "panel_boyu_m": 5.9}, "trapez_sac"))
     return cik
 
 

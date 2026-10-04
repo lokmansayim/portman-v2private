@@ -5,7 +5,7 @@
  ],
  "egim": 0.33,
  "kapatma_m": 1.0,
- "panel_boyu_m": 4.315,
+ "panel_boyu_m": 4.325,
  "artan_parca_karsi_yuzde": true,
  "baslangic": "sol",
  "baslangic_adi": "her yüzde sol köşeden",
@@ -14,14 +14,14 @@
  "tasma_m": 0.05,
  "yuzey_m2": 98.43,
  "kaplanan_m2": 100.4,
- "adet": 27,
+ "adet": 25,
  "alan_alt_siniri": 24,
  "tam_boy_panel": 10,
- "iki_parca_veren_kesim": 14,
- "artigi_kullanilmayan_parca": 4,
+ "iki_parca_veren_kesim": 16,
+ "artigi_kullanilmayan_parca": 0,
  "parca_adedi": 42,
  "kesim_payi_m": 0.005,
- "en_dar_pay_m": 0.806,
+ "en_dar_pay_m": 0.008,
  "yuzler": {
   "ön": [
    {
@@ -78,7 +78,7 @@
     "sag_kenar_m": 4.262,
     "arada": [],
     "panel": 4,
-    "konum": "tek"
+    "konum": "alt"
    },
    {
     "serit": 5,
@@ -215,7 +215,7 @@
     "sol_kenar_m": 0.05,
     "sag_kenar_m": 1.103,
     "arada": [],
-    "panel": 3,
+    "panel": 4,
     "konum": "üst"
    },
    {
@@ -229,7 +229,7 @@
     "sol_kenar_m": 1.103,
     "sag_kenar_m": 2.156,
     "arada": [],
-    "panel": 2,
+    "panel": 3,
     "konum": "üst"
    },
    {
@@ -243,7 +243,7 @@
     "sol_kenar_m": 2.156,
     "sag_kenar_m": 3.209,
     "arada": [],
-    "panel": 1,
+    "panel": 2,
     "konum": "üst"
    },
    {
@@ -257,8 +257,8 @@
     "sol_kenar_m": 3.209,
     "sag_kenar_m": 4.262,
     "arada": [],
-    "panel": 21,
-    "konum": "tek"
+    "panel": 1,
+    "konum": "üst"
    },
    {
     "serit": 5,
@@ -276,7 +276,7 @@
       4.315
      ]
     ],
-    "panel": 22,
+    "panel": 21,
     "konum": "tam"
    },
    {
@@ -290,7 +290,7 @@
     "sol_kenar_m": 4.315,
     "sag_kenar_m": 4.315,
     "arada": [],
-    "panel": 23,
+    "panel": 22,
     "konum": "tam"
    },
    {
@@ -304,7 +304,7 @@
     "sol_kenar_m": 4.315,
     "sag_kenar_m": 4.315,
     "arada": [],
-    "panel": 24,
+    "panel": 23,
     "konum": "tam"
    },
    {
@@ -323,7 +323,7 @@
       4.315
      ]
     ],
-    "panel": 25,
+    "panel": 24,
     "konum": "tam"
    },
    {
@@ -438,7 +438,7 @@
     "sag_kenar_m": 4.262,
     "arada": [],
     "panel": 16,
-    "konum": "tek"
+    "konum": "alt"
    },
    {
     "serit": 5,
@@ -528,7 +528,7 @@
     "sol_kenar_m": 0.05,
     "sag_kenar_m": 1.103,
     "arada": [],
-    "panel": 15,
+    "panel": 16,
     "konum": "üst"
    },
    {
@@ -542,7 +542,7 @@
     "sol_kenar_m": 1.103,
     "sag_kenar_m": 2.156,
     "arada": [],
-    "panel": 14,
+    "panel": 15,
     "konum": "üst"
    },
    {
@@ -556,7 +556,7 @@
     "sol_kenar_m": 2.156,
     "sag_kenar_m": 3.209,
     "arada": [],
-    "panel": 13,
+    "panel": 14,
     "konum": "üst"
    },
    {
@@ -570,8 +570,8 @@
     "sol_kenar_m": 3.209,
     "sag_kenar_m": 4.262,
     "arada": [],
-    "panel": 26,
-    "konum": "tek"
+    "panel": 13,
+    "konum": "üst"
    },
    {
     "serit": 5,
@@ -589,7 +589,7 @@
       4.315
      ]
     ],
-    "panel": 27,
+    "panel": 25,
     "konum": "tam"
    },
    {
@@ -653,58 +653,59 @@
  "paneller": [
   {
    "no": 1,
-   "artan_boy_m": 1.051,
+   "artan_boy_m": 0.008,
    "kesimler": [
     {
-     "boy_m": 3.264,
+     "boy_m": 4.317,
      "parcalar": [
       "ön 1 (alt)",
-      "arka 3 (üst)"
+      "arka 4 (üst)"
      ]
     }
    ]
   },
   {
    "no": 2,
-   "artan_boy_m": 1.051,
+   "artan_boy_m": 0.008,
    "kesimler": [
     {
-     "boy_m": 3.264,
+     "boy_m": 4.317,
      "parcalar": [
       "ön 2 (alt)",
-      "arka 2 (üst)"
+      "arka 3 (üst)"
      ]
     }
    ]
   },
   {
    "no": 3,
-   "artan_boy_m": 1.051,
+   "artan_boy_m": 0.008,
    "kesimler": [
     {
-     "boy_m": 3.264,
+     "boy_m": 4.317,
      "parcalar": [
       "ön 3 (alt)",
-      "arka 1 (üst)"
+      "arka 2 (üst)"
      ]
     }
    ]
   },
   {
    "no": 4,
-   "artan_boy_m": 0.053,
+   "artan_boy_m": 0.008,
    "kesimler": [
     {
-     "boy_m": 4.262,
+     "boy_m": 4.317,
      "parcalar": [
-      "ön 4 (tek)"
+      "ön 4 (alt)",
+      "arka 1 (üst)"
      ]
     }
    ]
   },
   {
    "no": 5,
-   "artan_boy_m": 0.0,
+   "artan_boy_m": 0.01,
    "kesimler": [
     {
      "boy_m": 4.315,
@@ -716,7 +717,7 @@
   },
   {
    "no": 6,
-   "artan_boy_m": 0.0,
+   "artan_boy_m": 0.01,
    "kesimler": [
     {
      "boy_m": 4.315,
@@ -728,7 +729,7 @@
   },
   {
    "no": 7,
-   "artan_boy_m": 0.0,
+   "artan_boy_m": 0.01,
    "kesimler": [
     {
      "boy_m": 4.315,
@@ -740,7 +741,7 @@
   },
   {
    "no": 8,
-   "artan_boy_m": 0.0,
+   "artan_boy_m": 0.01,
    "kesimler": [
     {
      "boy_m": 4.315,
@@ -752,7 +753,7 @@
   },
   {
    "no": 9,
-   "artan_boy_m": 0.377,
+   "artan_boy_m": 0.387,
    "kesimler": [
     {
      "boy_m": 3.778,
@@ -772,7 +773,7 @@
   },
   {
    "no": 10,
-   "artan_boy_m": 0.967,
+   "artan_boy_m": 0.977,
    "kesimler": [
     {
      "boy_m": 3.348,
@@ -785,7 +786,7 @@
   },
   {
    "no": 11,
-   "artan_boy_m": 0.967,
+   "artan_boy_m": 0.977,
    "kesimler": [
     {
      "boy_m": 3.348,
@@ -798,7 +799,7 @@
   },
   {
    "no": 12,
-   "artan_boy_m": 0.537,
+   "artan_boy_m": 0.547,
    "kesimler": [
     {
      "boy_m": 3.778,
@@ -811,58 +812,59 @@
   },
   {
    "no": 13,
-   "artan_boy_m": 1.051,
+   "artan_boy_m": 0.008,
    "kesimler": [
     {
-     "boy_m": 3.264,
+     "boy_m": 4.317,
      "parcalar": [
       "sol 1 (alt)",
-      "sağ 3 (üst)"
+      "sağ 4 (üst)"
      ]
     }
    ]
   },
   {
    "no": 14,
-   "artan_boy_m": 1.051,
+   "artan_boy_m": 0.008,
    "kesimler": [
     {
-     "boy_m": 3.264,
+     "boy_m": 4.317,
      "parcalar": [
       "sol 2 (alt)",
-      "sağ 2 (üst)"
+      "sağ 3 (üst)"
      ]
     }
    ]
   },
   {
    "no": 15,
-   "artan_boy_m": 1.051,
+   "artan_boy_m": 0.008,
    "kesimler": [
     {
-     "boy_m": 3.264,
+     "boy_m": 4.317,
      "parcalar": [
       "sol 3 (alt)",
-      "sağ 1 (üst)"
+      "sağ 2 (üst)"
      ]
     }
    ]
   },
   {
    "no": 16,
-   "artan_boy_m": 0.053,
+   "artan_boy_m": 0.008,
    "kesimler": [
     {
-     "boy_m": 4.262,
+     "boy_m": 4.317,
      "parcalar": [
-      "sol 4 (tek)"
+      "sol 4 (alt)",
+      "sağ 1 (üst)"
      ]
     }
    ]
   },
   {
    "no": 17,
-   "artan_boy_m": 0.0,
+   "artan_boy_m": 0.01,
    "kesimler": [
     {
      "boy_m": 4.315,
@@ -874,7 +876,7 @@
   },
   {
    "no": 18,
-   "artan_boy_m": 0.84,
+   "artan_boy_m": 0.85,
    "kesimler": [
     {
      "boy_m": 3.475,
@@ -887,7 +889,7 @@
   },
   {
    "no": 19,
-   "artan_boy_m": 0.84,
+   "artan_boy_m": 0.85,
    "kesimler": [
     {
      "boy_m": 3.475,
@@ -900,7 +902,7 @@
   },
   {
    "no": 20,
-   "artan_boy_m": 0.84,
+   "artan_boy_m": 0.85,
    "kesimler": [
     {
      "boy_m": 3.475,
@@ -913,19 +915,7 @@
   },
   {
    "no": 21,
-   "artan_boy_m": 0.053,
-   "kesimler": [
-    {
-     "boy_m": 4.262,
-     "parcalar": [
-      "arka 4 (tek)"
-     ]
-    }
-   ]
-  },
-  {
-   "no": 22,
-   "artan_boy_m": 0.0,
+   "artan_boy_m": 0.01,
    "kesimler": [
     {
      "boy_m": 4.315,
@@ -936,8 +926,8 @@
    ]
   },
   {
-   "no": 23,
-   "artan_boy_m": 0.0,
+   "no": 22,
+   "artan_boy_m": 0.01,
    "kesimler": [
     {
      "boy_m": 4.315,
@@ -948,8 +938,8 @@
    ]
   },
   {
-   "no": 24,
-   "artan_boy_m": 0.0,
+   "no": 23,
+   "artan_boy_m": 0.01,
    "kesimler": [
     {
      "boy_m": 4.315,
@@ -960,8 +950,8 @@
    ]
   },
   {
-   "no": 25,
-   "artan_boy_m": 0.0,
+   "no": 24,
+   "artan_boy_m": 0.01,
    "kesimler": [
     {
      "boy_m": 4.315,
@@ -972,20 +962,8 @@
    ]
   },
   {
-   "no": 26,
-   "artan_boy_m": 0.053,
-   "kesimler": [
-    {
-     "boy_m": 4.262,
-     "parcalar": [
-      "sağ 4 (tek)"
-     ]
-    }
-   ]
-  },
-  {
-   "no": 27,
-   "artan_boy_m": 0.0,
+   "no": 25,
+   "artan_boy_m": 0.01,
    "kesimler": [
     {
      "boy_m": 4.315,
@@ -999,17 +977,23 @@
  "ad": "Ç8201 · Tek kat çelik, 2+1, 82 m² · paket: baz",
  "kaplama": "tek_kat_panel",
  "baslangica_gore_adet": {
-  "sol": 27,
-  "kose_orta": 27,
-  "orta_kose": 26,
+  "sol": 25,
+  "kose_orta": 26,
+  "orta_kose": 25,
   "orta": 26,
-  "sag": 27,
+  "sag": 25,
   "plan_yonu": 26
  },
  "kesim_payisiz_adet": 25,
- "bir_cm_kesim_payiyla_adet": 27,
- "uzun_panelle": {
-  "boy_mm": 4318,
-  "adet": 25
- }
+ "bir_cm_kesim_payiyla_adet": 25,
+ "taban_boy_m": 4.315,
+ "taban_adet": 27,
+ "uzatma": {
+  "taban_boy_mm": 4315,
+  "taban_adet": 27,
+  "boy_mm": 4325,
+  "adet": 25,
+  "esik_boy_mm": 4318
+ },
+ "uzun_panelle": null
 }

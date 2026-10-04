@@ -250,8 +250,8 @@
    "birim": "m²",
    "kg": null,
    "formul": "dolap ve TV ünitesi gelen duvarlar: (duvar yüzünün boyu × yükseklik − boşluklar) × 1,05 ÷ 2,98",
-   "durum": "muhendis",
-   "not": "banyo ile mutfak arası duvar 2,49 m (mutfak dolabı); üst dış duvar 2,96 m (mutfak dolabı ve eviye); hol ile yaşam alanı arası duvar 4,80 m (TV ünitesi). Duvarların seçimi katalog görselinden; mühendis doğruladı (4 Ekim). Duvar yüzünün tamamı alınır (mühendis, 4 Ekim 12:14). Odanın bütün yüzeyi sayılırsa (ilk hesap) 42,5 m² → 15 levha; az olan baz alındı, öteki bayiye belirtilecek (Lokman, 4 Ekim 15:18). Klima duvarı sayılmadı"
+   "durum": "lokman",
+   "not": "banyo ile mutfak arası duvar 2,49 m (mutfak dolabı); üst dış duvar 2,96 m (mutfak dolabı ve eviye); hol ile yaşam alanı arası duvar 4,80 m (TV ünitesi). Duvarların seçimi katalog görselinden; mühendis doğruladı (4 Ekim). Duvar yüzünün tamamı alınır (mühendis, 4 Ekim 12:14). Geçerli kural bu: yalnız dolap ve TV duvarları (Lokman, 4 Ekim 16:18). Bilgi: odanın bütün yüzeyi sayılsaydı 42,5 m² → 15 levha (bayiye belirtilecek). Klima duvarı sayılmaz"
   },
   {
    "grup": "İç cephe kaplama",

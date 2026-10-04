@@ -23,5 +23,5 @@ done
 "$PY" girdi_uret.py $C/C8201.json --secenek $C/secenekler/dis_karkas_140.json > /dev/null
 "$PY" yukleme.py sonuc/C8201_dis_karkas_140_girdi.json --cikti sonuc/C8201_dis_karkas_140_yukleme_taslak.json --md sonuc/C8201_dis_karkas_140_yukleme_taslak.md > /dev/null
 "$PY" tablo_uret.py
-# çatı açılımının geometrik sağlaması (çokgenlerle; yaklaşık yarım dakika). Sorun varsa çıkış kodu 1.
+# çatı açılımının geometrik sağlaması (çokgenlerle; panel boyu uzatma kuralı dahil; yaklaşık bir dakika). Sorun varsa çıkış kodu 1.
 "$PY" cati_acilim_saglama.py | tail -1

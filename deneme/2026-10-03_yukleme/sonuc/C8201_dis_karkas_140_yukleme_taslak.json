@@ -250,8 +250,8 @@
    "birim": "m²",
    "kg": null,
    "formul": "dolap ve TV ünitesi gelen duvarlar: (duvar yüzünün boyu × yükseklik − boşluklar) × 1,05 ÷ 2,98",
-   "durum": "muhendis",
-   "not": "banyo ile mutfak arası duvar 2,43 m (mutfak dolabı); üst dış duvar 2,90 m (mutfak dolabı ve eviye); hol ile yaşam alanı arası duvar 4,74 m (TV ünitesi). Duvarların seçimi katalog görselinden; mühendis doğruladı (4 Ekim). Duvar yüzünün tamamı alınır (mühendis, 4 Ekim 12:14). Odanın bütün yüzeyi sayılırsa (ilk hesap) 41,5 m² → 15 levha; az olan baz alındı, öteki bayiye belirtilecek (Lokman, 4 Ekim 15:18). Klima duvarı sayılmadı"
+   "durum": "lokman",
+   "not": "banyo ile mutfak arası duvar 2,43 m (mutfak dolabı); üst dış duvar 2,90 m (mutfak dolabı ve eviye); hol ile yaşam alanı arası duvar 4,74 m (TV ünitesi). Duvarların seçimi katalog görselinden; mühendis doğruladı (4 Ekim). Duvar yüzünün tamamı alınır (mühendis, 4 Ekim 12:14). Geçerli kural bu: yalnız dolap ve TV duvarları (Lokman, 4 Ekim 16:18). Bilgi: odanın bütün yüzeyi sayılsaydı 41,5 m² → 15 levha (bayiye belirtilecek). Klima duvarı sayılmaz"
   },
   {
    "grup": "İç cephe kaplama",
@@ -269,15 +269,15 @@
   {
    "grup": "Çatı kaplamaları",
    "kalem": "Tek kat panel",
-   "boyut": "L 4315 · 100 cm kapatır",
-   "adet": 27,
+   "boyut": "L 4325 · 100 cm kapatır",
+   "adet": 25,
    "olcu": 98.43,
    "brut": null,
    "birim": "m²",
    "kg": null,
-   "formul": "çatı açılımı: yüzler şerit şerit dizilir; çapraz kesimden artan parça karşı yüzde kullanılır; panel boyu = eğimli boy + taşma",
+   "formul": "çatı açılımı: yüzler şerit şerit dizilir; çapraz kesimden artan parça karşı yüzde kullanılır; panel boyu = eğimli boy + taşma + 1 cm (adet düşüyor)",
    "durum": "lokman",
-   "not": "10 panel tam boy, 17 panel kesilerek; alan olarak en az 24. Dizilim her yüzde sol köşeden başlar (Lokman, 4 Ekim 15:18); en az paneli veren dizilimle 26 olurdu. Kaplama saçaktan 5 cm taşar; kesim payı 5 mm; yedek panel yok: kesim planı montajcıya verilir (Lokman, 4 Ekim 15:18). Panel L 4318 ve daha uzun sipariş edilirse 25 panel yeter (öneri; karar bekliyor)"
+   "not": "10 panel tam boy, 15 panel kesilerek; alan olarak en az 24. Dizilim her yüzde sol köşeden başlar (Lokman, 4 Ekim 15:18). Kaplama saçaktan 5 cm taşar; kesim payı 5 mm; yedek panel yok: kesim planı montajcıya verilir (Lokman, 4 Ekim 15:18). Panel boyu 1 cm uzatıldı (Lokman, 4 Ekim 16:18: adet düşüyorsa en çok 3 cm): L 4315 ile 27 gerekiyordu, L 4325 ile 25 yetiyor. Tam boy giden 10 panelde fazlalık mahya ucunda kalır; taşma 5 cm"
   },
   {
    "grup": "Çatı kaplamaları",
@@ -291,19 +291,6 @@
    "formul": "mahya hattı (tepe + kırmalar) ÷ (2,8 − 0,30 bindirme)",
    "durum": "lokman",
    "not": null
-  },
-  {
-   "grup": "Çatı kaplamaları",
-   "kalem": "Tek kat panel kapaması",
-   "boyut": "L 2500",
-   "adet": 18,
-   "olcu": 39.28,
-   "brut": null,
-   "birim": "m",
-   "kg": null,
-   "formul": "her saçak kenarı ÷ 2,5, ayrı ayrı yukarı",
-   "durum": "uydurma",
-   "not": "2025 listelerindeki sac kapama; Excel motorunda damlalıktan ayrı kalem. Damlalık çıkarıldı, bu kalem duruyor. Plastik kapama aparatı bunun yerine mi geçecek: soruldu (teyit bekliyor)"
   },
   {
    "grup": "Çatı kaplamaları",
@@ -830,7 +817,7 @@
    "kalem": "Trapez vida (5,5 × 76; tek kat panel)",
    "boyut": "adet",
    "adet": 750,
-   "olcu": 582.52,
+   "olcu": 540.62,
    "brut": null,
    "birim": "vida",
    "kg": null,
@@ -1194,19 +1181,19 @@
    "sigorta": 9
   },
   "kirma_dizilim": {
-   "adet": 27,
+   "adet": 25,
    "tam_boy": 10,
-   "kesilen": 17,
+   "kesilen": 15,
    "alan_alt_siniri": 24,
    "artan_parca_karsi_yuzde": true,
    "baslangic": "sol",
    "baslangic_adi": "her yüzde sol köşeden",
    "baslangica_gore": {
-    "sol": 27,
-    "kose_orta": 27,
-    "orta_kose": 26,
+    "sol": 25,
+    "kose_orta": 26,
+    "orta_kose": 25,
     "orta": 26,
-    "sag": 27,
+    "sag": 25,
     "plan_yonu": 26
    },
    "kapatma_m": 1.0,
@@ -1214,16 +1201,23 @@
    "tasma_kural_cm": 5.0,
    "kesim_payi_mm": 5.0,
    "paysiz_adet": 25,
-   "bir_cm_payla_adet": 27,
-   "en_az_adet": 26,
+   "bir_cm_payla_adet": 25,
+   "en_az_adet": 25,
    "baslangic_kurali": "sol",
-   "cift": 14,
-   "tek": 4,
-   "uzun_panelle": {
-    "boy_mm": 4318,
-    "adet": 25
+   "cift": 16,
+   "tek": 0,
+   "uzun_panelle": null,
+   "panel_boyu_m": 4.325,
+   "taban_boy_m": 4.315,
+   "taban_adet": 27,
+   "uzatma": {
+    "taban_boy_mm": 4315,
+    "taban_adet": 27,
+    "boy_mm": 4325,
+    "adet": 25,
+    "esik_boy_mm": 4318
    },
-   "en_dar_pay_cm": 80.6,
+   "en_dar_pay_cm": 0.8,
    "egimli_boy_m": 4.2648
   },
   "osb_takviye": {

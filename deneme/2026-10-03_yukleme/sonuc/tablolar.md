@@ -140,11 +140,10 @@
 | İç cephe kaplama | Duvar alçıpan yeşil | 1200 × 2500 | 8 | aynı | 20,4 m² |  | excel |
 | İç cephe kaplama | Tavan alçıpan beyaz | 1200 × 2500 | 19 | aynı | 54,1 m² |  | motor |
 | İç cephe kaplama | Tavan alçıpan yeşil | 1200 × 2500 | 8 | aynı | 22,6 m² |  | lokman |
-| İç cephe kaplama | OSB (TV ve mutfak dolabı arkası takviyesi) | 11 × 1220 × 2440 | 9 | aynı | 24,5 m² |  | muhendis |
+| İç cephe kaplama | OSB (TV ve mutfak dolabı arkası takviyesi) | 11 × 1220 × 2440 | 9 | aynı | 24,5 m² |  | lokman |
 | İç cephe kaplama | Duvar izolasyonu | paket 8,64 m² | 13 | 23 | 112,2 m² |  | uydurma |
-| Çatı kaplamaları | Tek kat panel | L 4315 · 100 cm kapatır | 27 | aynı | 98,4 m² |  | lokman |
+| Çatı kaplamaları | Tek kat panel | L 4325 · 100 cm kapatır | 25 | aynı | 98,4 m² |  | lokman |
 | Çatı kaplamaları | Metal kiremit mahyası | L 2800 | 11 | aynı | 27,0 m |  | lokman |
-| Çatı kaplamaları | Tek kat panel kapaması | L 2500 | 18 | aynı | 39,3 m |  | uydurma |
 | Çatı kaplamaları | Mahya bandı | rulo / 10 m | 4 | aynı | 30,8 m |  | muhendis |
 | Çatı kaplamaları | Çatı şiltesi 80 mm | 9,6 m²/adet | 10 | aynı | 88,9 m² |  | uydurma |
 | Dere | Metal dere | L 4000 | 11 | aynı | 39,3 m |  | motor |
@@ -185,7 +184,7 @@
 | Vida | Pencere vidası (4,8 × 70) | adet | 160 | aynı | 8,0 pencere |  | excel |
 | Vida | Trapez vida (5,5 × 25) | adet | 1250 | aynı | 1044,0 vida |  | excel |
 | Vida | Trapez vida (5,5 × 60) | adet | 250 | aynı | 205,0 vida |  | motor |
-| Vida | Trapez vida (5,5 × 76; tek kat panel) | adet | 750 | aynı | 582,5 vida |  | motor |
+| Vida | Trapez vida (5,5 × 76; tek kat panel) | adet | 750 | aynı | 540,6 vida |  | motor |
 | Vida | Çelik dübel (klipsli) | adet | 28 | aynı | 14,0 panel |  | motor |
 | Vida | Şase pul | adet | 28 | aynı | 14,0 panel |  | motor |
 | Vida | 8'lik trapez uç | adet | 6 | aynı | 82,0 m² |  | motor |
@@ -216,15 +215,14 @@
 
 | Seçenek | Kalem | Boyut | Adet | Durum |
 |---|---|---|---|---|
-| Tek kat panel (baz paket) | Tek kat panel | L 4315 · 100 cm kapatır | 27 | lokman |
+| Tek kat panel (baz paket) | Tek kat panel | L 4325 · 100 cm kapatır | 25 | lokman |
 | Tek kat panel (baz paket) | Metal kiremit mahyası | L 2800 | 11 | lokman |
-| Tek kat panel (baz paket) | Tek kat panel kapaması | L 2500 | 18 | uydurma |
 | Tek kat panel (baz paket) | Mahya bandı | rulo / 10 m | 4 | muhendis |
 | Tek kat panel (baz paket) | Çatı şiltesi 80 mm | 9,6 m²/adet | 10 | uydurma |
 | Tek kat panel (baz paket) | OSB ve yalıpan vidası (3,9 × 32) | adet | 1000 | motor |
 | Tek kat panel (baz paket) | Trapez vida (5,5 × 60) | adet | 250 | motor |
 | Tek kat panel (baz paket) | Trapez vida (5,5 × 76; tek kat panel) | adet | 750 | motor |
-| Sandviç panel | Sandviç panel | L 4315 · 100 cm kapatır | 27 | lokman |
+| Sandviç panel | Sandviç panel | L 4325 · 100 cm kapatır | 25 | lokman |
 | Sandviç panel | Metal kiremit mahyası | L 2800 | 11 | lokman |
 | Sandviç panel | Sandviç panel kapaması | L 2500 | 18 | uydurma |
 | Sandviç panel | Mahya bandı | rulo / 10 m | 4 | muhendis |
@@ -234,7 +232,7 @@
 | Sandviç panel | Trapez vida (5,5 × 110; sandviç panel) | adet | 750 | motor |
 | OSB + nem bariyeri + kiremit desen sac (motorda: OSB + membran + metal kiremit) | Çatı OSB | 11 × 1220 × 2440 | 35 | uydurma |
 | OSB + nem bariyeri + kiremit desen sac (motorda: OSB + membran + metal kiremit) | Nem bariyeri | m² | 105 | motor |
-| OSB + nem bariyeri + kiremit desen sac (motorda: OSB + membran + metal kiremit) | Metal kiremit (kiremit desen sac) | L 4315 · 100 cm kapatır | 30 | lokman |
+| OSB + nem bariyeri + kiremit desen sac (motorda: OSB + membran + metal kiremit) | Metal kiremit (kiremit desen sac) | L 4325 · 100 cm kapatır | 28 | lokman |
 | OSB + nem bariyeri + kiremit desen sac (motorda: OSB + membran + metal kiremit) | Metal kiremit mahyası | L 2800 | 11 | lokman |
 | OSB + nem bariyeri + kiremit desen sac (motorda: OSB + membran + metal kiremit) | OSB mahyası | L 2800 | 11 | lokman |
 | OSB + nem bariyeri + kiremit desen sac (motorda: OSB + membran + metal kiremit) | Mahya bandı | rulo / 10 m | 4 | muhendis |
@@ -243,14 +241,14 @@
 | OSB + nem bariyeri + kiremit desen sac (motorda: OSB + membran + metal kiremit) | Trapez vida (5,5 × 60) | adet | 1000 | motor |
 | OSB + nem bariyeri + trapez sac | Çatı OSB | 11 × 1220 × 2440 | 35 | uydurma |
 | OSB + nem bariyeri + trapez sac | Nem bariyeri | m² | 105 | motor |
-| OSB + nem bariyeri + trapez sac | Trapez sac | L 4315 · 80 cm kapatır | 32 | lokman |
+| OSB + nem bariyeri + trapez sac | Trapez sac | L 4325 · 80 cm kapatır | 30 | lokman |
 | OSB + nem bariyeri + trapez sac | Trapez sac mahyası | L 800 | 45 | motor |
 | OSB + nem bariyeri + trapez sac | OSB mahyası | L 2800 | 11 | lokman |
 | OSB + nem bariyeri + trapez sac | Mahya bandı | rulo / 10 m | 4 | muhendis |
 | OSB + nem bariyeri + trapez sac | Çatı şiltesi 80 mm | 9,6 m²/adet | 10 | uydurma |
 | OSB + nem bariyeri + trapez sac | OSB ve yalıpan vidası (3,9 × 32) | adet | 2500 | motor |
 | OSB + nem bariyeri + trapez sac | Trapez vida (5,5 × 60) | adet | 1000 | motor |
-| Trapez sac | Trapez sac | L 4315 · 80 cm kapatır | 32 | lokman |
+| Trapez sac | Trapez sac | L 4325 · 80 cm kapatır | 30 | lokman |
 | Trapez sac | Trapez sac mahyası | L 800 | 45 | motor |
 | Trapez sac | Mahya bandı | rulo / 10 m | 4 | muhendis |
 | Trapez sac | Çatı şiltesi 80 mm | 9,6 m²/adet | 10 | uydurma |
@@ -267,17 +265,17 @@
 
 ## Kırma çatıda kaplama dizilimi
 
-| Çatı | Kaplama | Kapatır | Adet (her yüzde sol köşeden) | En az paneli veren dizilimle | Altı başlangıçla | Artan parça kullanılmazsa | Alan olarak en az | Kesim payı sıfır / 1 cm | Taşma |
-|---|---|---|---|---|---|---|---|---|---|
-| Ç8201 (L 4315) | Tek kat panel (baz paket) | 100 cm | 27 (10 tam boy + 17 kesilen) | 26 | 26–27 | 30 | 24 | 25 / 27 | 5,0 cm |
-| Ç8201 (L 4315) | Sandviç panel | 100 cm | 27 (10 tam boy + 17 kesilen) | 26 | 26–27 | 30 | 24 | 25 / 27 | 5,0 cm |
-| Ç8201 (L 4315) | Trapez sac | 80 cm | 32 (12 tam boy + 20 kesilen) | 32 | 32 | 36 | 30 | 30 / 32 | 5,0 cm |
-| Ç8201 (L 4315) | Kiremit desen sac | 100 cm | 30 (10 tam boy + 20 kesilen) | 28 | 28–30 | 30 (listeye giren) | 24 | 28 / 30 | 5,0 cm |
-| Ç8201 (L 4315) | Sandviç panel, 80 cm kapatan ürün | 80 cm | 32 (12 tam boy + 20 kesilen) | 32 | 32 | 36 | 30 | 30 / 32 | 5,0 cm |
-| Ç8201 (L 4315) | Tek kat panel, 87 cm kapatan ürün (2025 listeleri) | 87 cm | 29 (12 tam boy + 17 kesilen) | 28 | 28–29 | 32 | 27 | 29 / 29 | 5,0 cm |
-| Ç8201 (L 4315) | Kiremit desen sac, 110 cm kapatan ürün (2025 listeleri) | 110 cm | 26 (10 tam boy + 16 kesilen) | 26 | 26 | 26 (listeye giren) | 22 | 26 / 26 | 5,0 cm |
-| 62 m² gerçek liste (L 3200; listede 27) | Sandviç panel | 100 cm | 28 (16 tam boy + 12 kesilen) | 28 | 28 | 32 | 25 | 28 / 28 | 3,8 cm |
-| Mühendisin 10 × 10 m dört omuz metrajı (L 5900; metrajda 36) | Trapez sac | 80 cm | 28 (4 tam boy + 24 kesilen) | 28 | 28 | 32 | 26 | 28 / 28 | 5,0 cm |
+| Çatı | Kaplama | Kapatır | Panel boyu | Adet (her yüzde sol köşeden) | Taban boyla | En az paneli veren dizilimle | Altı başlangıçla | Artan parça kullanılmazsa | Alan olarak en az | Kesim payı sıfır / 1 cm | Taşma |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| Ç8201 | Tek kat panel (baz paket) | 100 cm | L 4325 | 25 (10 tam boy + 15 kesilen) | 27 (L 4315) | 25 | 25–26 | 28 | 24 | 25 / 25 | 5,0 cm |
+| Ç8201 | Sandviç panel | 100 cm | L 4325 | 25 (10 tam boy + 15 kesilen) | 27 (L 4315) | 25 | 25–26 | 28 | 24 | 25 / 25 | 5,0 cm |
+| Ç8201 | Trapez sac | 80 cm | L 4325 | 30 (12 tam boy + 18 kesilen) | 32 (L 4315) | 30 | 30–32 | 34 | 30 | 30 / 30 | 5,0 cm |
+| Ç8201 | Kiremit desen sac | 100 cm | L 4325 | 28 (10 tam boy + 18 kesilen) | 30 (L 4315) | 28 | 28–29 | 28 (listeye giren) | 24 | 28 / 28 | 5,0 cm |
+| Ç8201 | Sandviç panel, 80 cm kapatan ürün | 80 cm | L 4325 | 30 (12 tam boy + 18 kesilen) | 32 (L 4315) | 30 | 30–32 | 34 | 30 | 30 / 30 | 5,0 cm |
+| Ç8201 | Tek kat panel, 87 cm kapatan ürün (2025 listeleri) | 87 cm | L 4345 | 28 (12 tam boy + 16 kesilen) | 29 (L 4315) | 28 | 28–29 | 32 | 27 | 28 / 28 | 5,0 cm |
+| Ç8201 | Kiremit desen sac, 110 cm kapatan ürün (2025 listeleri) | 110 cm | L 4315 | 26 (10 tam boy + 16 kesilen) | uzatma adedi düşürmüyor | 26 | 26 | 26 (listeye giren) | 22 | 26 / 26 | 5,0 cm |
+| 62 m² gerçek liste (listede 27) | Sandviç panel | 100 cm | L 3200 | 28 (16 tam boy + 12 kesilen) | boy listeden | 28 | 28 | 32 | 25 | 28 / 28 | 3,8 cm |
+| Mühendisin 10 × 10 m dört omuz metrajı (metrajda 36) | Trapez sac | 80 cm | L 5900 | 28 (4 tam boy + 24 kesilen) | boy listeden | 28 | 28 | 32 | 26 | 28 / 28 | 5,0 cm |
 
 ## Köşebent: mühendisin formülü
 

@@ -303,7 +303,7 @@
    "kg": null,
    "formul": "çatı açılımı: yüzler şerit şerit dizilir; çapraz kesimden artan parça karşı yüzde kullanılır; panel boyu = eğimli boy + taşma",
    "durum": "lokman",
-   "not": "16 panel tam boy, 12 panel kesilerek; alan olarak en az 25. Dizilim her yüzde sol köşeden başlar (Lokman, 4 Ekim 15:18). Kaplama saçaktan 3,8 cm taşar (kural 5 cm; listedeki panel boyu o kadarına yetiyor); kesim payı 5 mm; yedek panel yok: kesim planı montajcıya verilir (Lokman, 4 Ekim 15:18). Panel L 3214 ve daha uzun sipariş edilirse 26 panel yeter (öneri; karar bekliyor)"
+   "not": "16 panel tam boy, 12 panel kesilerek; alan olarak en az 25. Dizilim her yüzde sol köşeden başlar (Lokman, 4 Ekim 15:18). Kaplama saçaktan 3,8 cm taşar (kural 5 cm; listedeki panel boyu o kadarına yetiyor); kesim payı 5 mm; yedek panel yok: kesim planı montajcıya verilir (Lokman, 4 Ekim 15:18). Panel L 3214 ve daha uzun olsaydı 26 panel yeterdi (bilgi; boy listeden)"
   },
   {
    "grup": "Çatı kaplamaları",
@@ -329,7 +329,7 @@
    "kg": null,
    "formul": "her saçak kenarı ÷ 2,5, ayrı ayrı yukarı",
    "durum": "uydurma",
-   "not": "2025 listelerindeki sac kapama; Excel motorunda damlalıktan ayrı kalem. Damlalık çıkarıldı, bu kalem duruyor. Plastik kapama aparatı bunun yerine mi geçecek: soruldu (teyit bekliyor)"
+   "not": "2025 listelerindeki sac kapama. Tek kat panel kapaması listeden çıktı (Lokman, 4 Ekim 16:18); sandviç panelde de çıksın mı: soruldu (teyit bekliyor)"
   },
   {
    "grup": "Çatı kaplamaları",
@@ -915,6 +915,10 @@
     "boy_mm": 3214,
     "adet": 26
    },
+   "panel_boyu_m": 3.2,
+   "taban_boy_m": 3.2,
+   "taban_adet": 28,
+   "uzatma": null,
    "en_dar_pay_cm": 42.4,
    "egimli_boy_m": 3.1618
   },

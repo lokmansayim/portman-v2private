@@ -1,6 +1,6 @@
 # A1 · Çelik (LGF) duvar sistemi
 
-Kaynak: Lokman'ın anlattıkları (1–4 Ekim 2026; 4 Ekim 15:18 cevapları dahil) ve inşaat mühendisi Ubeydullah'ın üç tur cevabı (Lokman 3 Ekim 18:14'te, 4 Ekim 01:24'te ve 4 Ekim 12:14'te iletti). Lokman'ın söylediği ile mühendisin söylediği çelişirse Lokman'ınki geçerlidir (4 Ekim 15:18). Madde sonundaki tarih, söylendiği günü gösterir.
+Kaynak: Lokman'ın anlattıkları (1–4 Ekim 2026; 4 Ekim 15:18 ve 16:18 cevapları dahil) ve inşaat mühendisi Ubeydullah'ın üç tur cevabı (Lokman 3 Ekim 18:14'te, 4 Ekim 01:24'te ve 4 Ekim 12:14'te iletti). Lokman'ın söylediği ile mühendisin söylediği çelişirse Lokman'ınki geçerlidir (4 Ekim 15:18). Madde sonundaki tarih, söylendiği günü gösterir.
 
 ## Paketler ve katmanlar
 
@@ -51,7 +51,8 @@ Kaynak: Lokman'ın anlattıkları (1–4 Ekim 2026; 4 Ekim 15:18 cevapları dahi
 - Ç8201'de duvarlar katalog görselinden seçildi: banyo ile mutfak arası duvar, üst dış duvar (tezgâh ve eviye), hol ile yaşam alanı arası duvar (TV). 24,5 m² → 9 levha; planda turuncu çizgi.
 - Seçimi mühendis doğruladı: "Evet doğru yeri almışsın. Ancak bunun yeri en doğru şekilde genel mimari planda mutfak tezgahı ve TV ünitesi yeri gösterilirse o kısımlar alınarak bulunabilir." (Lokman 4 Ekim 01:24'te iletti) Kural: yer, mimari plandaki tezgâh ve TV ünitesi yerinden alınır.
 - "Duvarın tamamını al." (Mühendis, 4 Ekim 12:14) Duvarın yalnız dolap gelen bölümü değil, o yüzünün tamamı alınır.
-- Klima duvarı sorusu üzerine Lokman (4 Ekim 15:18): "sen ilk seferdeki gibi say bayi maliyeti de göz önüne alıyor bunu bayiye belirtmem lazım şimdilik hangisi az ise onu baz al". Okuma (teyidi istendi): iki hesap yapılır. Biri odanın bütün yüzeyi (ilk hesap; 3 Ekim 13:27 kuralı), öteki yalnız dolap ve TV duvarları. Az olan baz alınır; öteki, bayiye belirtilmek üzere satırın notunda durur. Ç8201: duvarlar 24,5 m² → 9 levha (baz); Yaşam Alanı'nın bütün duvar yüzleri 42,5 m² → 15 levha (notta). Klima duvarı baz hesapta sayılmaz.
+- Klima duvarı sorusu üzerine Lokman (4 Ekim 15:18): "sen ilk seferdeki gibi say bayi maliyeti de göz önüne alıyor bunu bayiye belirtmem lazım şimdilik hangisi az ise onu baz al". O günkü okuma: iki hesap yapılır. Biri odanın bütün yüzeyi (ilk hesap; 3 Ekim 13:27 kuralı), öteki yalnız dolap ve TV duvarları. Az olan baz alınır; öteki, bayiye belirtilmek üzere satırın notunda durur. Ç8201: duvarlar 24,5 m² → 9 levha (baz); Yaşam Alanı'nın bütün duvar yüzleri 42,5 m² → 15 levha (notta). Klima duvarı baz hesapta sayılmaz.
+- "evet 9 sayısını veren hangisi ise o kuralı geçerli say" (Lokman, 4 Ekim 16:18). Geçerli kural: yalnız dolap ve TV ünitesi gelen duvarlar. İki hesaptan az olanı alma uygulaması kalktı; odanın bütün yüzeyi (Ç8201'de 15 levha) yalnız bilgi olarak satırın notunda durur (bayiye belirtilecek). Klima duvarı sayılmaz.
 
 ## Çelik ağırlığı
 
@@ -136,7 +137,6 @@ Tanım dosyası: `deneme/2026-10-02_celik/secenekler/dis_karkas_140.json`. Model
 ## Açık sorular
 
 - Mineral yün kalınlığı (80 mm ve 140 mm karkas için ayrı ayrı).
-- OSB takviyesi: "ilk seferdeki gibi say … hangisi az ise onu baz al" sözünün okunuşu (iki hesap; az olan baz: Ç8201'de 9 levha, öteki 15 levha notta) teyit bekliyor.
 - Varsayılan levha: 120 × 240 (60 aks) mı, 122 × 244 (61 aks) mı? Modellerde dikme 61, kuşak 122; bir modelde dikme 62,5.
 - Profil başlığı 45 mm mi, 54 mm mi? (Yükleme listesi 45; 81 m² model 54.)
 - Bayiye giden ölçü bitmiş dış yüzden dış yüze mi?
@@ -145,3 +145,5 @@ Tanım dosyası: `deneme/2026-10-02_celik/secenekler/dis_karkas_140.json`. Model
 Kapananlar (mühendis, 4 Ekim 12:14): Boardex 12,5 mm ve OSB 11 mm; dış kapı boşluğu 95 × 210; tek katta et kalınlığı 1,2 mm; OSB takviyesinde duvarın tamamı.
 
 Kapananlar (Lokman, 4 Ekim 15:18): Boardex zayiatı %8 ile devam (2025 listelerinden 2–3 levha az çıkıyor; `yukleme_listesi_yontemi.md`); klima duvarı baz hesapta sayılmaz; makas ve kirişte Excel motoru kıstas.
+
+Kapananlar (Lokman, 4 Ekim 16:18): OSB takviyesinde geçerli kural yalnız dolap ve TV ünitesi gelen duvarlar.

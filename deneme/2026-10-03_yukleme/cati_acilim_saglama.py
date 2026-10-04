@@ -7,6 +7,8 @@
   3. Her parça, atandığı yüz parçasıyla eş mi? Alt parça yalnız ötelenir; üst parça 180° çevrilir (ters yüz edilmez).
   4. Eşleme kuralı: iki parça veren kesimde parçalar karşılıklı yüzlerde ve aynı türden mi?
   5. Adet, alan olarak en az gereken panelden az olamaz.
+  6. Panel boyu uzatma kuralı (Lokman, 4 Ekim 2026 16:18): adet ve toplam boy artmıyor; uzatma kuraldaki sınırı aşmıyor;
+     uzatılan boyda adet, kesim payı 1 cm olsa da aynı; uzatılmayan çatıda koşulu sağlayan aday yok.
 
 Ç8201'in dört kaplaması, 62 m² gerçek liste örneği ve rastgele kırma çatılar denenir. Sorun varsa çıkış kodu 1.
 
@@ -125,7 +127,39 @@ def main() -> int:
                 if hata:
                     sorun += 1
                     print("SORUN", px, py, egim, w, boy, paylas, b, tasma, pay, hata[:3])
-    print(f"rastgele kırma çatılar: {n} dizilim denendi; toplam sorun {sorun}")
+    # 3) panel boyu uzatma kuralı (Lokman, 4 Ekim 2026 16:18) rastgele kırma çatılarda: geometri; adet ve toplam boy artmıyor;
+    #    uzatma en çok kuraldaki kadar; uzatılan boyda adet kesim payı 1 cm olsa da aynı; uzatılmadıysa hiçbir aday koşulu sağlamıyor
+    uz, kd = kr["panel_boyu_uzatma"]["deger"], kr["kirma_cati_dizilim"]["deger"]
+    tasma_k, m, uzatilan = kr["cati_kaplama_tasma_m"]["deger"], 0, 0
+    random.seed(4325)
+    for _ in range(150):
+        px = round(random.uniform(5, 16), random.choice((1, 2, 3)))
+        py = round(random.uniform(4, px), random.choice((1, 2, 3)))
+        egim = random.choice((0.25, 0.30, 0.33, 0.40))
+        taban = math.ceil((min(px, py) / 2 * math.sqrt(1 + egim ** 2) + tasma_k) * 1000 - 1e-9) / 1000
+        for kaplama in ("tek_kat_panel", "trapez_sac", "osb_kiremit"):
+            m += 1
+            cati = {"plan_m": [max(px, py), min(px, py)], "egim": egim, "panel_boyu_m": taban, "panel_boyu_kaynak": "kural"}
+            d = kural_dizilimi(kr, cati, kaplama)
+            hata = dizilim_hatalari(d)
+
+            def adet(b: float, pay: float) -> int:
+                return dizilim(d["plan_m"][0], d["plan_m"][1], egim, d["kapatma_m"], b, d["paylas"], kd["baslangic"], pay, d["tasma_m"])["adet"]
+
+            adaylar = [round(taban + i * uz["adim_m"], 6) for i in range(1, round(uz["en_cok_m"] / uz["adim_m"]) + 1)]
+            uygun = [b for b in adaylar if adet(b, kd["kesim_payi_m"]) < d["taban_adet"] and adet(b, uz["saglamlik_kesim_payi_m"]) == adet(b, kd["kesim_payi_m"])]
+            if d["uzatma"]:
+                uzatilan += 1
+                if not (d["adet"] < d["taban_adet"] and d["boy_m"] - taban <= uz["en_cok_m"] + 1e-9 and d["bir_cm_payla_adet"] == d["adet"]
+                        and d["adet"] * d["boy_m"] < d["taban_adet"] * taban and d["boy_m"] in uygun
+                        and d["adet"] == min(adet(b, kd["kesim_payi_m"]) for b in uygun)):
+                    hata.append("uzatma kuralı koşulları sağlanmıyor")
+            elif uygun or d["adet"] != d["taban_adet"] or abs(d["boy_m"] - taban) > 1e-9:
+                hata.append("uzatma uygulanmalıydı ya da taban boy değişmiş")
+            if hata:
+                sorun += 1
+                print("SORUN (uzatma)", px, py, egim, kaplama, taban, d["boy_m"], hata[:3])
+    print(f"rastgele kırma çatılar: {n} dizilim denendi; panel boyu uzatma kuralı {m} çatı ve kaplamada denendi ({uzatilan} tanesinde boy uzadı); toplam sorun {sorun}")
     return 1 if sorun else 0
 
 

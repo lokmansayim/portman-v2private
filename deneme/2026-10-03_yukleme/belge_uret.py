@@ -109,8 +109,21 @@ boyle = [oku(f"ornek_{n}m2_karsilastirma.json")["karsilastirma"]["Dış cephe Bo
 YAYIMLANAN = {"kosebent": 51, "boardex": 33, "mahya_bandi": 3, "panel_boyu_mm": 4300, "sandvic": 24, "trapez": 30}      # 4 Ekim 02:58 sürümü (commit 61d1996)
 # 4 Ekim 13:22 sürümü (commit 22ddf7e): taşma 5 cm, kesim payı 5 mm, en az paneli veren başlangıç; tek kat panel 87, kiremit desen sac 110 cm
 S1322 = {"tek_kat": 28, "sandvic": 26, "trapez": 32, "kiremit": 26}
+# 4 Ekim 16:13 sürümü (commit 21ed582): her yüzde sol köşeden, kapatma 100 cm, panel boyu eğimli boy + taşma (L 4315); liste 89 satır
+S1613 = {"tek_kat": 27, "sandvic": 27, "trapez": 32, "kiremit": 30, "sandvic_80": 32, "kapama": 18, "satir": 89}
 osb_iki = baz["ara"]["osb_takviye"]          # OSB takviyesi: yalnız dolap ve TV duvarları / odanın bütün yüzeyi
-up = dz["uzun_panelle"]                        # panel biraz uzun sipariş edilirse adet (öneri)
+uz = dz["uzatma"]                              # panel boyu uzatma kuralının uyguladığı değişiklik (Lokman, 4 Ekim 16:18)
+UZ_KR = K["panel_boyu_uzatma"]["deger"]
+taban_mm, boy_mm = round(gb["cati"]["panel_boyu_m"] * 1000), round(dz["panel_boyu_m"] * 1000)
+fazla_cm = tr((boy_mm - taban_mm) / 10, 0)     # tam boy giden panellerde mahya ucunda kalan fazlalık
+
+
+def metre(n: int, mm: int) -> str:
+    """Toplam boy (m, bir hane; yarım yukarı): adet × panel boyu. Tam sayıyla hesaplanır ki 129,45 → 129,5 olsun."""
+    return tr((n * mm + 50) // 100 / 10, 1)
+
+
+kesim_notu = "artığı kullanılmayan kesim yok" if not dz["tek"] else f"{dz['tek']} kesimde artan parça kullanılmıyor"
 KAP = {a: K[a]["deger"] for a in ("tek_kat_panel_kapatma_m", "sandvic_panel_kapatma_m", "kiremit_kapatma_m", "trapez_sac_kapatma_m")}
 
 
@@ -123,8 +136,27 @@ assert dz["tasma_cm"] == tasma_cm and dz["kesim_payi_mm"] == kesim_mm, "belge ta
 assert not dz_k["artan_parca_karsi_yuzde"] and dz["artan_parca_karsi_yuzde"], "belge: artan parça yalnız kiremit desen sacda kullanılmaz"
 assert DZ_KR["baslangic"] == "sol" == dz["baslangic"], "belge: dizilim her yüzde sol köşeden başlıyor diyor"
 assert KAP == {"tek_kat_panel_kapatma_m": 1.0, "sandvic_panel_kapatma_m": 1.0, "kiremit_kapatma_m": 1.0, "trapez_sac_kapatma_m": 0.8}, "belge kapatma genişliklerini 100, 100, 100 ve 80 cm diye anlatıyor"
-assert up and dz_s["uzun_panelle"] and dz_t["uzun_panelle"] and dz_k["uzun_panelle"] and len({z["uzun_panelle"]["boy_mm"] for z in (dz, dz_s, dz_t, dz_k)}) == 1, "belge: dört kaplamada adet aynı panel boyunda düşüyor diyor"
-assert (osb_iki["duvarlar_adet"], adet(baz, "OSB (TV ve mutfak dolabı arkası takviyesi)")) == (osb_iki["duvarlar_adet"],) * 2 and osb_iki["duvarlar_adet"] < osb_iki["butun_oda_adet"], "belge: OSB takviyesinde az olan (duvarlar) baz diyor"
+assert uz and all(z["uzatma"] and z["uzatma"]["boy_mm"] == uz["boy_mm"] and z["uzatma"]["esik_boy_mm"] == uz["esik_boy_mm"] for z in (dz_s, dz_t, dz_k)), "belge: dört kaplamada panel boyu aynı boya uzuyor diyor"
+assert (uz["taban_boy_mm"], uz["boy_mm"], uz["esik_boy_mm"]) == (taban_mm, boy_mm, 4318) == (4315, 4325, 4318), "belge: Ç8201'de panel boyu L 4315'ten L 4325'e uzuyor, eşik L 4318 diyor"
+assert (uz["taban_adet"], dz_s["uzatma"]["taban_adet"], dz_t["uzatma"]["taban_adet"], dz_k["uzatma"]["taban_adet"]) == (S1613["tek_kat"], S1613["sandvic"], S1613["trapez"], S1613["kiremit"]), \
+    "belge: taban boydaki adetler 16:13 sürümündekilerle aynı diyor"
+assert all(z["bir_cm_payla_adet"] == z["adet"] for z in (dz, dz_s, dz_t, dz_k)), "belge: uzatılan boyda adet, kesim payı 1 cm olsa da aynı diyor"
+assert UZ_KR == {"uygula": True, "en_cok_m": 0.03, "adim_m": 0.01, "saglamlik_kesim_payi_m": 0.01}, "belge uzatma kuralını 1 cm adım, en çok 3 cm ve 1 cm kesim payına dayanıklı diye anlatıyor"
+assert K["osb_takviye"]["deger"]["baz"] == "duvarlar" and osb_iki["duvarlar_adet"] == adet(baz, "OSB (TV ve mutfak dolabı arkası takviyesi)") < osb_iki["butun_oda_adet"], \
+    "belge: OSB takviyesinde geçerli kural dolap ve TV duvarları diyor"
+assert not K["panel_kapamasi"]["deger"]["tek_kat_panel"] and not any(x["kalem"] == "Tek kat panel kapaması" for x in baz["satirlar"]) and len(baz["satirlar"]) == S1613["satir"] - 1, \
+    "belge: tek kat panel kapaması listeden çıktı, liste bir satır kısaldı diyor"
+
+
+def dizilim_satiri(metin: str) -> list[str]:
+    """Dizilim tablosundan bir satırın hücreleri (Çatı, Kaplama, Kapatır, Panel boyu, Adet, Taban boyla, …)."""
+    satir_ = next(x for x in dizilim_tablo.split("\n") if metin in x)
+    return [h.strip() for h in satir_.strip().strip("|").split("|")]
+
+
+d87, d110 = dizilim_satiri("87 cm kapatan ürün"), dizilim_satiri("110 cm kapatan ürün")
+assert (d87[3], d87[4].split(" ")[0], d87[5]) == ("L 4345", "28", "29 (L 4315)") and (d110[3], d110[4].split(" ")[0]) == ("L 4315", "26"), \
+    "belge: 87 cm'lik üründe boy L 4345'e uzuyor (29 → 28), 110 cm'likte uzamıyor (26) diyor"
 
 
 def aralik(den: dict) -> str:
@@ -144,8 +176,10 @@ def dizilim_okuma(ad: str, z: dict) -> str:
         p.append(f"kesim payı sıfır alınırsa {z['paysiz_adet']}, 1 cm alınırsa {z['bir_cm_payla_adet']}")
     else:
         p.append("kesim payı sıfır da olsa 1 cm de olsa aynı")
-    if z.get("uzun_panelle"):
-        p.append(f"panel L {z['uzun_panelle']['boy_mm']} ve daha uzun olursa {z['uzun_panelle']['adet']}")
+    if z.get("uzatma"):
+        p.append(f"panel boyu L {z['uzatma']['taban_boy_mm']} → L {z['uzatma']['boy_mm']} (taban boyla {z['uzatma']['taban_adet']} gerekiyordu)")
+    elif z.get("uzun_panelle"):
+        p.append(f"panel L {z['uzun_panelle']['boy_mm']} ve daha uzun olsaydı {z['uzun_panelle']['adet']}")
     if not z["artan_parca_karsi_yuzde"]:
         p.append("artan parça kullanılmıyor (desen ters gelir: mühendis, 4 Ekim 12:14)")
     return f"- **{ad}.** " + "; ".join(p) + "."
@@ -160,7 +194,7 @@ def onceki_kural(kapatma: float) -> int:
 # Ç8201'de K10 kapalı kısmın uzun kenarı, K11 kısa kenar, K17 verandanın kısa kenarı.
 mk_ornek, mk_besik = SABLON, BESIK_10
 mk_c = motor_kaplama(uzun, kisa, gb["dis_olcu_m"][0] - uzun, "kirma")
-assert mk_c["sac_boyu_mm"] == round(gb["cati"]["panel_boyu_m"] * 1000), "belge: motorun sac boyu listedeki panel boyuyla aynı"
+assert mk_c["sac_boyu_mm"] == taban_mm, "belge: motorun sac boyu listedeki panel boyunun tabanıyla aynı"
 
 D = f"""# Çelik yükleme listesi: yöntem ve taslak (3–4 Ekim 2026)
 
@@ -170,7 +204,7 @@ Deneme kodu: `deneme/2026-10-03_yukleme/`. Hesapta LLM yok: aynı girdi her zama
 
 ## Kaynaklar
 
-1. **Lokman'ın söyledikleri.** 3 Ekim 13:27'de on bir soruya verdiği cevaplar (aşağıda), 4 Ekim 01:24'teki düzeltmesi (tavan ve çatı panelinin ağırlığı), 4 Ekim 01:42'deki düzeltmesi (baz kaplama; kırma çatıda kaplama adedinin çatı açılımından bulunması), 4 Ekim 15:18'de altı soruya verdiği cevaplar (aşağıda) ve önceki kurallar. Lokman'ın söylediği ile mühendisin söylediği çelişirse Lokman'ınki geçerlidir (15:18: en iyi bilgiyi kendisi verecek).
+1. **Lokman'ın söyledikleri.** 3 Ekim 13:27'de on bir soruya verdiği cevaplar (aşağıda), 4 Ekim 01:24'teki düzeltmesi (tavan ve çatı panelinin ağırlığı), 4 Ekim 01:42'deki düzeltmesi (baz kaplama; kırma çatıda kaplama adedinin çatı açılımından bulunması), 4 Ekim 15:18'de altı soruya ve 16:18'de üç soruya verdiği cevaplar (aşağıda) ve önceki kurallar. Lokman'ın söylediği ile mühendisin söylediği çelişirse Lokman'ınki geçerlidir (15:18: en iyi bilgiyi kendisi verecek).
 2. **Mühendisin cevapları.** PortatifEv'in inşaat mühendisi Ubeydullah'ın üç tur cevabı: 3 Ekim 14:50 sürümündeki yedi soruya (Lokman 3 Ekim 18:14'te iletti), 19:12 sürümündeki yedi soruya (Lokman 4 Ekim 01:24'te iletti) ve 4 Ekim 02:58 sürümündeki on iki soruya (Lokman 4 Ekim 12:14'te iletti). Üçü de aşağıda. Kurallarda durumu `muhendis`. İkinci turun iki cevabını (baz kaplama; kırma çatıda kaplama adedi) Lokman 01:42'de düzeltti. Üçüncü turun mesajında cevapların kimden olduğu yazmıyor; 11. cevaptaki anlatım mühendisin olduğu için on iki cevap da mühendisin sayıldı.
 3. **Gerçek yükleme listeleri.** Lokman'ın bağladığı klasördeki çalışma kitapları. Üçü hesap sayfalarıyla okundu. Üçünde de çatı yöntem B ile (tavan omegası, aşık, saçak sacı) hazırlanmış: PortatifEv bugüne kadar çelikte de bu yöntemi uygulamış. Şimdi baz alınan yöntem A için karşılaştırılacak gerçek liste yok.
    - **90 m²**, beşik çatı, OSB üstü metal kiremit, karkas 80 mm (30 Eylül 2025).
@@ -267,35 +301,36 @@ Lokman: "mühendis 2 cevapta hata yapmış onları düzeltmem gerekiyor".
 1. **Baz kaplama.** "çatıda baz model Tek Kat panel olarak geçiyor". Uygulama: baz paketin çatı kaplaması tek kat panel; Ç8201'in tanımı ve listesi buna göre. Sandviç panel seçenek. O gün 87 cm kapatan panelle hesaplandı; güncel ürün {tr(KAP["tek_kat_panel_kapatma_m"] * 100)} cm kapatıyor (Lokman, 15:18).
 2. **Kırma çatıda kaplama adedi.** "biz AutoCAD bulaşmak istemiyoruz"; "sen eğime göre 82 m² olduğu gibi çatıyı çizip sonra çatıyı açman lazım zarfı açar gibi yüzeye dizilimini bulmak için". "çatı formunun çapraz kesimleri diğer tarafa kullanabilirsin": sol taraftaki üçgende kullanılan panel sağ tarafa aynı açıyla; ön taraftaki yamuktan çıkan açılı kesilmiş parçalar arka taraftaki aynı biçimdeki açılı yere.
 
-Uygulama (`deneme/2026-10-03_yukleme/cati_acilim.py`). Taşma mühendisin üçüncü cevaplarıyla (12:14) eklendi; dizilimin başladığı yer, kesim payı, yedek ve kapatma genişlikleri Lokman'ın 15:18 cevaplarıyla kesinleşti (aşağıdaki bölümler):
+Uygulama (`deneme/2026-10-03_yukleme/cati_acilim.py`). Taşma mühendisin üçüncü cevaplarıyla (12:14) eklendi; dizilimin başladığı yer, kesim payı, yedek ve kapatma genişlikleri Lokman'ın 15:18 cevaplarıyla kesinleşti; panel boyunun uzatılması 16:18 cevabıyla kural oldu (aşağıdaki bölümler):
 
 - **Açılım.** Çatının dört yüzü gerçek boyutuyla açılır: uzun saçaklarda iki yamuk (ön, arka), kısa saçaklarda iki üçgen (sol, sağ). Yüzün yüksekliği eğimli boydur: (kısa kenar ÷ 2) × √(1 + eğim²). Ç8201'de {tr(dz_H * 100, 1)} cm; saçaklar {tr(gb["cati"]["plan_m"][0] * 100)} ve {tr(gb["cati"]["plan_m"][1] * 100)} cm, mahya {tr((gb["cati"]["plan_m"][0] - gb["cati"]["plan_m"][1]) * 100)} cm. Kırma çizgisi açılımda dört yüzde de aynı açıdadır.
 - **Dizilim.** Her yüz, saçağa dik, kaplamanın kapattığı genişlikte şeritlere bölünür. Dizilim her yüzde, dışarıdan bakışla sol köşeden başlar (Lokman, 4 Ekim 15:18: "her köşeden başlayacak gibi hesapla"); son şerit dar kalabilir. Mahyanın altındaki şeritler tam boydur; kırmaya gelen şeritler çapraz kesilir.
 - **Kapatma genişliği.** Ürüne göre değişir (Lokman, 15:18). Güncel: tek kat panel {tr(KAP["tek_kat_panel_kapatma_m"] * 100)}, sandviç panel {tr(KAP["sandvic_panel_kapatma_m"] * 100)} (80 cm kapatanı da var), kiremit desen sac {tr(KAP["kiremit_kapatma_m"] * 100)}, trapez sac {tr(KAP["trapez_sac_kapatma_m"] * 100)} cm. 2025 listelerinde tek kat panel 87, kiremit desen sac 110 cm'di. Girdide `cati.kapatma_m` yazıyorsa o kullanılır.
-- **Taşma** (mühendis, 4 Ekim 12:14). Kaplama saçaktan {tr(tasma_cm)} cm dışarı uzatılır. Panel boyu = eğimli boy + {tr(tasma_cm)} cm, mm'ye yukarı: Ç8201'de L {round(gb["cati"]["panel_boyu_m"] * 1000)}. Açılımda her parçanın boyu {tr(tasma_cm)} cm artar. Excel motorundaki sac boyu da aynı: eğimli boy + 0,05. Panel boyu gerçek listeden geliyorsa ve kısaysa taşma panelin yettiği kadar alınır (62 m² örnekte 3,8 cm).
+- **Taşma** (mühendis, 4 Ekim 12:14). Kaplama saçaktan {tr(tasma_cm)} cm dışarı uzatılır. Panel boyunun tabanı = eğimli boy + {tr(tasma_cm)} cm, mm'ye yukarı: Ç8201'de L {taban_mm}. Açılımda her parçanın boyu {tr(tasma_cm)} cm artar. Excel motorundaki sac boyu da aynı: eğimli boy + 0,05. Panel boyu gerçek listeden geliyorsa ve kısaysa taşma panelin yettiği kadar alınır (62 m² örnekte 3,8 cm).
+- **Panel boyu uzatma** (Lokman, 4 Ekim 16:18). Boy 1'er cm uzatılarak denenir, en çok 3 cm; adet düşüyorsa liste uzun boyu yazar. Taşma değişmez. Ç8201'de L {taban_mm} → L {boy_mm}. Ayrıntı aşağıda, "Panel boyu uzatma kuralı" başlığında.
 - **Artan parça.** Bir panel gönyesinde kesilerek kısa dikdörtgenlere, her dikdörtgen tek bir çapraz kesimle iki parçaya ayrılır. Alt parça olduğu gibi kullanılır. Üst parça, düz ucu saçağa gelecek biçimde karşı yüze konur; orada aynı açılı yere oturur (ön yüzün sol kırması ↔ arka yüzün sol kırması, dışarıdan bakışla; planda çapraz köşeler). Parça ters yüz edilmez. Kiremit desen sacda artan parça kullanılmaz: desen ters gelir (mühendis, 4 Ekim 12:14).
 - **Eşleme.** En uzun parçadan başlanır; karşı yüzde, onunla aynı panelden çıkabilen en uzun parça eş yapılır. İki parçanın birlikte istediği boy: uzun kenarlarının toplamı − bir şeritlik boy farkı + kesim payı.
 - **Kesim payı** (Lokman onayladı, 4 Ekim 15:18). {tr(kesim_mm)} mm: çapraz kesimde iki parçanın arasına ve aynı panelden çıkan dikdörtgenlerin arasına.
 - **Yedek ve bindirme.** Yedek panel eklenmez: kesim planı montajcıya verilir (Lokman, 15:18). Boy bindirmesi yok (panel tek boyda).
 - **Öteki başlangıçlar.** Bilgi için beş başlangıç daha denenir: uzun yüzlerde sol köşeden, kısa yüzlerde ortadan · uzun yüzlerde ortadan, kısa yüzlerde sol köşeden · her yüzde ortadan · her yüzde sağ köşeden · karşılıklı yüzlerde planda aynı uçtan. En az paneli veren dizilim tabloda ayrı sütunda. "Ortadan": yüzün ortasına bir ek yeri gelir, şeritler iki yana eşit dağılır.
 
-Ç8201, tek kat panel: **{kaplama_s["adet"]} adet L {round(gb["cati"]["panel_boyu_m"] * 1000)}** ({dz["tam_boy"]} tam boy + {dz["kesilen"]} kesilen: {dz["cift"]} kesimden ikişer parça çıkıyor, biri bir yüze, öteki karşı yüze; {dz["tek"]} kesimde artan parça kullanılmıyor). Çizimler: `deneme/2026-10-03_yukleme/sonuc/C8201_cati_acilim.png` (açılım; her parçada panel numarası) ve `C8201_cati_kesim.png` (her panelin kesimi); döküm `C8201_cati_acilim.json`; kesim ölçüleri `C8201_cati_kesim_olculeri.md`.
+Ç8201, tek kat panel: **{kaplama_s["adet"]} adet L {boy_mm}** ({dz["tam_boy"]} tam boy + {dz["kesilen"]} kesilen: {dz["cift"]} kesimden ikişer parça çıkıyor, biri bir yüze, öteki karşı yüze; {kesim_notu}). Çizimler: `deneme/2026-10-03_yukleme/sonuc/C8201_cati_acilim.png` (açılım; her parçada panel numarası) ve `C8201_cati_kesim.png` (her panelin kesimi); döküm `C8201_cati_acilim.json`; kesim ölçüleri `C8201_cati_kesim_olculeri.md`.
 
 {dizilim_tablo}
 
 Okuma:
 
-- **Sağlama.** Aynı kural, bu koda bakmadan ayrıca hesaplandı (bağımsız denetim, 4 Ekim; 15:18 cevaplarından sonra yeniden): 100 cm kapatma, her yüzde sol köşeden ve 5 mm kesim payıyla artan parça kullanılarak {dz["adet"]}, kullanılmadan {dz_k["adet"]}; 80 cm kapatmada {dz_t["adet"]}. Panel 4,320 m olursa {up["adet"]}, {dz_k["uzun_panelle"]["adet"]} ve {dz_t["uzun_panelle"]["adet"]}; adedin düştüğü en kısa boy 4,318 m. Hepsi aynı çıktı ve bu dizilim için en az oldukları gösterildi. Önceki turda 90 adet (beş örnek × altı başlangıç × üç kesim payı) aynı çıkmıştı. Her paneldeki parçaların panele sığdığı, üst üste binmediği ve yüzdeki yerine tam oturduğu çokgenlerle sınanıyor (`cati_acilim_saglama.py`; rastgele 120 kırma çatıda, 1440 dizilimde sorun çıkmadı; kural bilerek bozulunca sınama yakalıyor). Çizim, ölçü tablosu ve sınama aynı yerleşimi kullanıyor.
+- **Sağlama.** Aynı kural, bu koda bakmadan ayrıca hesaplandı (bağımsız denetim, 4 Ekim; 16:18 cevabından sonra yeniden). Panel boyu uzatma kuralı beş durumda uygulandı: 100 cm kapatma; 80 cm; 100 cm ve artan parça kullanılmadan; 87 cm; 110 cm ve artan parça kullanılmadan. Seçilen boylar 4,325 · 4,325 · 4,325 · 4,345 · 4,315 m, adetler {dz["adet"]} · {dz_t["adet"]} · {dz_k["adet"]} · {d87[4].split(" ")[0]} · {d110[4].split(" ")[0]} (taban boyla {uz["taban_adet"]} · {dz_t["uzatma"]["taban_adet"]} · {dz_k["uzatma"]["taban_adet"]} · 29 · 26): hepsi aynı çıktı. Tek kat panelde {dz["adet"]}'in bu şerit dizilimi için en az olduğu gösterildi (hiçbir ikilisi aynı panele sığmayan {dz["adet"]} parça var); adedin düştüğü en kısa boy 4,318 m. Önceki turlarda 90 adet (beş örnek × altı başlangıç × üç kesim payı) ve 16:13 sürümünün adetleri de aynı çıkmıştı. Her paneldeki parçaların panele sığdığı, üst üste binmediği ve yüzdeki yerine tam oturduğu çokgenlerle sınanıyor (`cati_acilim_saglama.py`; rastgele 120 kırma çatıda, 1440 dizilimde sorun çıkmadı; uzatma kuralı 450 çatı ve kaplamada denendi, 34'ünde boy uzadı; kural bilerek bozulunca sınama yakalıyor). Çizim, ölçü tablosu ve sınama aynı yerleşimi kullanıyor.
 {dizilim_okuma("Tek kat panel (baz paket)", dz)}
 {dizilim_okuma("Sandviç panel", dz_s)}
 {dizilim_okuma("Trapez sac", dz_t)}
 {dizilim_okuma("Kiremit desen sac", dz_k)}
-- **Panel boyu (öneri; karar bekliyor).** Aşağıda, "Panel boyu" başlığında: panel L {up["boy_mm"]} ve daha uzun sipariş edilirse tek kat panel {dz["adet"]} yerine {up["adet"]} yetiyor.
-- **Sürümler.** 02:58 (taşma ve kesim payı yok; L {YAYIMLANAN["panel_boyu_mm"]}; tek kat panel 87, kiremit desen sac 110 cm): tek kat panel 28, sandviç panel {YAYIMLANAN["sandvic"]}, trapez sac {YAYIMLANAN["trapez"]}, kiremit desen sac 26. 13:22 (taşma {tr(tasma_cm)} cm, kesim payı {tr(kesim_mm)} mm, en az paneli veren başlangıç): {S1322["tek_kat"]}, {S1322["sandvic"]}, {S1322["trapez"]}, {S1322["kiremit"]}. Şimdi (her yüzde sol köşeden; tek kat panel ve kiremit desen sac 100 cm): {dz["adet"]}, {dz_s["adet"]}, {dz_t["adet"]}, {dz_k["adet"]}.
-- **Önceki kural** (yüzey + %10, aynı panel boyu ve güncel kapatma genişlikleriyle): tek kat panelde {onceki_kural(KAP["tek_kat_panel_kapatma_m"])}, sandviç panelde {onceki_kural(KAP["sandvic_panel_kapatma_m"])}, trapez sacda {onceki_kural(KAP["trapez_sac_kapatma_m"])}, kiremit desen sacda {onceki_kural(KAP["kiremit_kapatma_m"])} verir.
+- **Panel boyu.** Kuralla L {taban_mm} → L {boy_mm} (Lokman, 4 Ekim 16:18; aşağıda "Panel boyu uzatma kuralı"): taban boyla tek kat panel {uz["taban_adet"]} gerekiyordu.
+- **Sürümler.** 02:58 (taşma ve kesim payı yok; L {YAYIMLANAN["panel_boyu_mm"]}; tek kat panel 87, kiremit desen sac 110 cm): tek kat panel 28, sandviç panel {YAYIMLANAN["sandvic"]}, trapez sac {YAYIMLANAN["trapez"]}, kiremit desen sac 26. 13:22 (taşma {tr(tasma_cm)} cm, kesim payı {tr(kesim_mm)} mm, en az paneli veren başlangıç): {S1322["tek_kat"]}, {S1322["sandvic"]}, {S1322["trapez"]}, {S1322["kiremit"]}. 16:13 (her yüzde sol köşeden; tek kat panel ve kiremit desen sac 100 cm; L {taban_mm}): {S1613["tek_kat"]}, {S1613["sandvic"]}, {S1613["trapez"]}, {S1613["kiremit"]}. Şimdi (panel boyu uzatma kuralıyla L {boy_mm}): {dz["adet"]}, {dz_s["adet"]}, {dz_t["adet"]}, {dz_k["adet"]}.
+- **Önceki kural** (yüzey + %10, taban panel boyu ve güncel kapatma genişlikleriyle): tek kat panelde {onceki_kural(KAP["tek_kat_panel_kapatma_m"])}, sandviç panelde {onceki_kural(KAP["sandvic_panel_kapatma_m"])}, trapez sacda {onceki_kural(KAP["trapez_sac_kapatma_m"])}, kiremit desen sacda {onceki_kural(KAP["kiremit_kapatma_m"])} verir.
 - **62 m² gerçek liste** (kırma çatı, sandviç panel L 3200): listede {k62["liste"]} adet (ayrıca 2 adet L 1000); dizilim {k62["hesap"]} veriyor (02:58 sürümünde, taşmasız, 26'ydı). Listedeki {k62["liste"]} uzun ve 2 kısa panel alan olarak {tr(k62["liste"] + 2 * 1.0 / 3.2, 1)} panel eder. Kısa panellerin köşe parçaları için gönderilip gönderilmediği bilinmiyor.
 - **Mühendisin 10 × 10 m dört omuz metrajı** (trapez sac L 5900): metrajda 36 adet var; dizilim tablonun son satırındaki adedi veriyor. Çatı planı saçak dahil 10,6 × 10,6 m ve eğim %33 alındı; yüzey metrajdaki 118 m²'yi tutuyor.
-- **Dar yerler** (bağımsız denetimin notları). Tam boy parçada pay yok: panel boyu tam eğimli boy + taşma. İki saçağın taşmalarının kesiştiği köşe (yaklaşık 5 × 5 cm) örtülmez: parçalar uzuyor, genişlemiyor. Kesim payı panel boyu yönünde ölçülüyor: çapraz kesim yaklaşık 46° olduğu için boyda 5 mm, 3,4 mm kalınlığında bir kesime denk gelir. Boyuna kesimin (dar son şerit) payı hesapta yok.
+- **Dar yerler** (bağımsız denetimin notları). Panel boyu uzatılınca tam boy parçalarda {fazla_cm} cm fazlalık olur: mahya ucunda kalır ya da kesilir; kesilmezse o şeritlerde taşma artar. İki saçağın taşmalarının kesiştiği köşe (yaklaşık 5 × 5 cm) örtülmez: parçalar uzuyor, genişlemiyor. Kesim payı panel boyu yönünde ölçülüyor: çapraz kesim yaklaşık 46° olduğu için boyda 5 mm, 3,4 mm kalınlığında bir kesime denk gelir. Boyuna kesimin (dar son şerit) payı hesapta yok.
 - **Sınır.** Yalnız dikdörtgen planlı, dört yanı eşit eğimli kırma çatı. Cumbalı çatıda (ters mahya) dizilim henüz yok.
 
 ## Mühendisin üçüncü cevapları (Lokman 4 Ekim 12:14'te iletti) ve uygulanışı
@@ -306,7 +341,7 @@ Sorular, liste sayfasının 4 Ekim 02:58 sürümündeki on iki soruydu ("Sizden 
 |---|---|---|---|
 | 1 | Makas ve kiriş ölçüsü | "şimdilik Excel hesaplama motoruna uy" | Çatı çeliği, veranda dikmeleri ve kirişleri motorun ortalamasıyla kalıyor: {tr(kg(baz, "Çatı makas panelleri"))}, {tr(kg(baz, "Veranda dikmeleri (kolon paneli)"))} ve {tr(kg(baz, "Veranda kirişleri (kiriş paneli)"))} kg. Hesap değişmedi; makas ölçüsü verilirse değişir. |
 | 2 | Tek katta et kalınlığı: kural mı, 2025 listelerindeki uygulama mı? | "Tek katta et kalınlığını 1,2 mm alarak devam ediyoruz." | Kural geçerli; hesap değişmedi (baz {tr(kg(baz, TOPLAM))} kg, dış 140 {tr(kg(d140, TOPLAM))} kg). 2025 listelerindeki 0,8 mm eski uygulama olarak kayıtlı. |
-| 3 | Çatı açılımı: başlangıç köşesi, kesim payı, yedek, kiremit desen sac | "5 cm çatı yüzeyinin dışında kalacak şekilde uzatıyoruz çatı kaplamalarını. Kiremit desen sacda artan parça karşı yüzde desen ters geldiğinden kullanılmaz." | Taşma {tr(tasma_cm)} cm eklendi: panel boyu L {YAYIMLANAN["panel_boyu_mm"]} → L {round(gb["cati"]["panel_boyu_m"] * 1000)}; tek kat panel o gün yine {S1322["tek_kat"]} adetti (87 cm kapatan panel, en az paneli veren başlangıç). Sandviç panel {YAYIMLANAN["sandvic"]} → {S1322["sandvic"]}, trapez sac {YAYIMLANAN["trapez"]} → {S1322["trapez"]}. Kiremit desen sacda artan parçanın kullanılmaması teyitli ({S1322["kiremit"]} adet; 110 cm kapatan sacla). Başlangıç köşesi, kesim payı ve yedek cevaplanmadı; Lokman 15:18'de cevapladı (aşağıda). |
+| 3 | Çatı açılımı: başlangıç köşesi, kesim payı, yedek, kiremit desen sac | "5 cm çatı yüzeyinin dışında kalacak şekilde uzatıyoruz çatı kaplamalarını. Kiremit desen sacda artan parça karşı yüzde desen ters geldiğinden kullanılmaz." | Taşma {tr(tasma_cm)} cm eklendi: panel boyu L {YAYIMLANAN["panel_boyu_mm"]} → L {taban_mm}; tek kat panel o gün yine {S1322["tek_kat"]} adetti (87 cm kapatan panel, en az paneli veren başlangıç). Sandviç panel {YAYIMLANAN["sandvic"]} → {S1322["sandvic"]}, trapez sac {YAYIMLANAN["trapez"]} → {S1322["trapez"]}. Kiremit desen sacda artan parçanın kullanılmaması teyitli ({S1322["kiremit"]} adet; 110 cm kapatan sacla). Başlangıç köşesi, kesim payı ve yedek cevaplanmadı; Lokman 15:18'de cevapladı (aşağıda). |
 | 4 | Tavan ve çatı panelinin adedi; hangi çatı tipi için? | "Genelde dörtomuz çatı tipinde tavan paneli ve çatı panelini kullanıyoruz. 100m2 için bu adetler üzerinden ilerleyebilrsin." | 100 m²'de {pk_tavan["adet_100m2"]} ve {pk_cati["adet_100m2"]} adet geçerli; alana oranla Ç8201'de {tp["adet"]} ve {cp["adet"]}. Hesap değişmedi. |
 | 5 | OSB takviyesi: duvarın tamamı mı, yalnız tezgâhın ve TV ünitesinin arkası mı? Klima duvarı? | "Duvarın tamamını al." | Hesap değişmedi ({osb_s["adet"]} levha). Klima duvarı cevaplanmadı; Lokman 15:18'de cevapladı (aşağıda). |
 | 6 | Köşebent: çıkıntı yapan köşeler ve veranda tavanı sayılır mı? | "Odaya doğru çıkıntı yapan köşeler sayılmıyor. Veranda tavan çevresi sayılır." | Veranda tavanının çevresi ({tr(kb["veranda_tavan_cevresi_m"], 2)} m; brüt ölçüyle) eklendi: {YAYIMLANAN["kosebent"]} → {adet(baz, "Köşebent")}. Çıkıntı yapan {dis_kose} köşe sayılmıyor. Verandada köşe boyu eklenmedi. Buna bağlı trapez vida (5,5 × 25) 1000 → {adet(baz, "Trapez vida (5,5 × 25)")}. |
@@ -354,7 +389,7 @@ Bulgular:
 | Mühendisin 10 × 10 m beşik çatısı | {tr(mk_besik["yuzey_m2"], 2)} ÷ {tr(mk_besik["sac_boyu_m"], 3)} = {tr(mk_besik["oran"], 2)} | {mk_besik["yazilan"]["trapez"]} → {mk_besik["duzeltilmis"]["trapez"]} | {mk_besik["yazilan"]["kiremit"]} → {mk_besik["duzeltilmis"]["kiremit"]} | Metrajda 28 trapez sac var (her saçakta 10,6 ÷ 0,8 → 14). Düzeltilmiş formül 25 veriyor; kalan fark uzun kenara eklenmeyen saçaktan ve her saçağın ayrı yuvarlanmasından |
 | Ç8201 (K10 {tr(uzun, 2)}; K11 {tr(kisa, 2)}; K17 {tr(gb["dis_olcu_m"][0] - uzun, 2)}; dört omuz) | {tr(mk_c["yuzey_m2"], 2)} ÷ {tr(mk_c["sac_boyu_m"], 3)} = {tr(mk_c["oran"], 2)} | {mk_c["yazilan"]["trapez"]} → {mk_c["duzeltilmis"]["trapez"]} | {mk_c["yazilan"]["kiremit"]} → {mk_c["duzeltilmis"]["kiremit"]} | Çatı açılımı trapez sacda {dz_t["adet"]}, kiremit desen sacda {dz_k["adet"]} veriyor (artan parça kullanılmadan). Motor tek kat panelde {mk_c["yazilan"]["panel"]} verir; açılım {dz["adet"]}. Kiremit desen sac 100 cm kapatırken motorun doğru formülü {mk_c["kiremit_100"]} verir |
 
-Motorun sac boyu Ç8201'de {mk_c["sac_boyu_mm"]} mm: listedeki L {round(gb["cati"]["panel_boyu_m"] * 1000)} ile aynı. Yükleme listesi kaplama adedini bu formülden almıyor; kırma çatıda çatı açılımından alıyor. Bulgular motorun kendisi için.
+Motorun sac boyu Ç8201'de {mk_c["sac_boyu_mm"]} mm: listedeki panel boyunun tabanıyla (L {taban_mm}) aynı; liste, adet düştüğü için L {boy_mm} yazıyor (Lokman, 4 Ekim 16:18). Yükleme listesi kaplama adedini bu formülden almıyor; kırma çatıda çatı açılımından alıyor. Bulgular motorun kendisi için.
 
 ## Lokman'ın cevapları (4 Ekim 15:18) ve uygulanışı
 
@@ -362,11 +397,11 @@ Sorular, liste sayfasının 4 Ekim 13:22 sürümündeki altı soruydu. Cevaplar 
 
 | # | Soru | Cevap | Uygulama |
 |---|---|---|---|
-| 1 | Çatı dizilimi: nereden başlar, kesim payı, yedek | "her köşeden başlayacak gibi hesapla yani 29 hesapla, evet kesim payı için 5 mm uygundur, senin yaptığın kesim planı ile yedek panele gerek yok bizde aynı kesim plan paftasını montajcıya vereceğiz" | Dizilim her yüzde sol köşeden başlıyor; kesim payı {tr(kesim_mm)} mm ve yedeksiz adet kesinleşti. 29, 87 cm kapatan panelle çıkan adetti; 2. cevapla panel 100 cm kapatır olunca aynı kural **{dz["adet"]}** veriyor. Lokman 15:23'te teyit etti: "yok yanlış anlamadın aynen devam et". Açılım ve kesim planı yeniden çizildi; kesim ölçüleri tablosu eklendi. |
-| 2 | Kapatma genişliği: tek kat panel 87 mi, 100 mü; kiremit desen sac 110 mu, 105 mi? | "aslında aldığımız ürünler değişiyor güncel olarak Tek Kat panelde 100 kapatır geliyor, kiremit desen sacıda 100 al sandviç panelde şimdilik 100 al ama 80 kapatırıda var bu bilgiyi daha sonra güncellenecek gibi hesaba kat" | Kurallarda tek kat panel 0,87 → 1,00; kiremit desen sac 1,10 → 1,00; sandviç panel 1,00 (80 cm kapatan ürün not edildi). Değerler ürüne göre değişir: girdide `cati.kapatma_m` yazıyorsa o kullanılır; üç gerçek liste örneği kendi ürünlerinin genişliğiyle (110, 100 ve 87 cm) hesaplanmaya devam ediyor, karşılaştırma değişmedi ({kars_ayni} / {kars_top}). Seçeneklerde sandviç panel {S1322["sandvic"]} → {dz_s["adet"]}, kiremit desen sac {S1322["kiremit"]} → {dz_k["adet"]}; sandviç panelin 80 cm kapatanıyla {dz_t["adet"]}. |
+| 1 | Çatı dizilimi: nereden başlar, kesim payı, yedek | "her köşeden başlayacak gibi hesapla yani 29 hesapla, evet kesim payı için 5 mm uygundur, senin yaptığın kesim planı ile yedek panele gerek yok bizde aynı kesim plan paftasını montajcıya vereceğiz" | Dizilim her yüzde sol köşeden başlıyor; kesim payı {tr(kesim_mm)} mm ve yedeksiz adet kesinleşti. 29, 87 cm kapatan panelle çıkan adetti; 2. cevapla panel 100 cm kapatır olunca aynı kural **{S1613["tek_kat"]}** veriyor (16:18'den sonra panel boyu uzatılınca {dz["adet"]}; aşağıda). Lokman 15:23'te teyit etti: "yok yanlış anlamadın aynen devam et". Açılım ve kesim planı yeniden çizildi; kesim ölçüleri tablosu eklendi. |
+| 2 | Kapatma genişliği: tek kat panel 87 mi, 100 mü; kiremit desen sac 110 mu, 105 mi? | "aslında aldığımız ürünler değişiyor güncel olarak Tek Kat panelde 100 kapatır geliyor, kiremit desen sacıda 100 al sandviç panelde şimdilik 100 al ama 80 kapatırıda var bu bilgiyi daha sonra güncellenecek gibi hesaba kat" | Kurallarda tek kat panel 0,87 → 1,00; kiremit desen sac 1,10 → 1,00; sandviç panel 1,00 (80 cm kapatan ürün not edildi). Değerler ürüne göre değişir: girdide `cati.kapatma_m` yazıyorsa o kullanılır; üç gerçek liste örneği kendi ürünlerinin genişliğiyle (110, 100 ve 87 cm) hesaplanmaya devam ediyor, karşılaştırma değişmedi ({kars_ayni} / {kars_top}). Seçeneklerde sandviç panel {S1322["sandvic"]} → {S1613["sandvic"]}, kiremit desen sac {S1322["kiremit"]} → {S1613["kiremit"]}; sandviç panelin 80 cm kapatanıyla {S1613["sandvic_80"]}. |
 | 3 | Boardex zayiatı %8 ile 2025 listelerinden az | "devam et" | %{tr(zb * 100)} ile devam: dış cephe Boardex {boardex_s["adet"]}. |
-| 4 | Damlalık hangi durumda listeye girer? | "damlalık uygulamasını yanlış buluyorum tamamen listeden çıkar, orijinal kapama aparatı var plastik ondan sipariş verirsek listeye sokarız damlalığı şimdilik çıkar hiçbir montajcı kullanmıyor" | Damlalık listede kalem olarak yoktu; mahya bandı formülündeki terimi çıkarıldı, adet değişmedi ({bant_s["adet"]} rulo). Plastik kapama aparatı kurallara not edildi (`kapama_aparati`); sipariş verilirse listeye girecek. Listedeki "tek kat panel kapaması" (L 2500, {adet(baz, "Tek kat panel kapaması")} adet; 2025 listelerinden) duruyor: Excel motorunda damlalıktan ayrı kalem. Plastik aparatın onun yerine geçip geçmeyeceği soruldu. |
-| 5 | Klima duvarı OSB takviyesinde sayılır mı? | "sen ilk seferdeki gibi say bayi maliyeti de göz önüne alıyor bunu bayiye belirtmem lazım şimdilik hangisi az ise onu baz al" | Okuma: iki hesap yapılır, az olan baz alınır. Yalnız dolap ve TV duvarları: {tr(osb_iki["duvarlar_m2"], 1)} m² → {osb_iki["duvarlar_adet"]} levha (baz). Odanın bütün yüzeyi (ilk hesap; Lokman'ın 3 Ekim 13:27 kuralı): {tr(osb_iki["butun_oda_m2"], 1)} m² → {osb_iki["butun_oda_adet"]} levha; satırın notunda, bayiye belirtilmek üzere. Klima duvarı baz hesapta sayılmıyor. Okumanın teyidi istendi. |
+| 4 | Damlalık hangi durumda listeye girer? | "damlalık uygulamasını yanlış buluyorum tamamen listeden çıkar, orijinal kapama aparatı var plastik ondan sipariş verirsek listeye sokarız damlalığı şimdilik çıkar hiçbir montajcı kullanmıyor" | Damlalık listede kalem olarak yoktu; mahya bandı formülündeki terimi çıkarıldı, adet değişmedi ({bant_s["adet"]} rulo). Plastik kapama aparatı kurallara not edildi (`kapama_aparati`); sipariş verilirse listeye girecek. Listedeki "tek kat panel kapaması" (L 2500, {S1613["kapama"]} adet; 2025 listelerinden) o gün duruyordu: Excel motorunda damlalıktan ayrı kalem. Soruldu; Lokman 16:18'de onu da çıkardı (aşağıda). |
+| 5 | Klima duvarı OSB takviyesinde sayılır mı? | "sen ilk seferdeki gibi say bayi maliyeti de göz önüne alıyor bunu bayiye belirtmem lazım şimdilik hangisi az ise onu baz al" | Okuma: iki hesap yapılır, az olan baz alınır. Yalnız dolap ve TV duvarları: {tr(osb_iki["duvarlar_m2"], 1)} m² → {osb_iki["duvarlar_adet"]} levha (baz). Odanın bütün yüzeyi (ilk hesap; Lokman'ın 3 Ekim 13:27 kuralı): {tr(osb_iki["butun_oda_m2"], 1)} m² → {osb_iki["butun_oda_adet"]} levha; satırın notunda, bayiye belirtilmek üzere. Klima duvarı baz hesapta sayılmıyor. Okumanın teyidi istendi; Lokman 16:18'de geçerli kuralı söyledi (aşağıda). |
 | 6 | Makas ve kiriş ölçüsü | "Tamam motoruda inceleyeceğim şimdilik motoru kastas al" | Çatı çeliği, veranda dikmeleri ve kirişleri Excel motorunun ortalamasıyla kalıyor: {tr(kg(baz, "Çatı makas panelleri"))}, {tr(kg(baz, "Veranda dikmeleri (kolon paneli)"))} ve {tr(kg(baz, "Veranda kirişleri (kiriş paneli)"))} kg. Lokman motoru inceleyecek. |
 
 ### Kesim planının ölçüleri
@@ -377,24 +412,37 @@ Kesim planı montajcıya verilecek (Lokman, 15:18). Çizimde ölçü yazmadığ�
 - **Kesim ölçüleri.** Panel panel her parçanın paneldeki yeri: panelin sol ve sağ kenarında alt uçtan kaç cm ile kaç cm arası. Üst parça 180° çevrilerek karşı yüze konur; ters yüz edilmez.
 - **Paneller.** Her panelden çıkan parçalar ve kullanılmayan boy.
 
-Çizim, bu tablolar ve geometrik sağlama aynı yerleşimden üretilir. Ölçüler kaplamanın kapattığı genişliğe göredir; panelin bindirme payı ayrıca düşünülmedi.
+Çizim, bu tablolar ve geometrik sağlama aynı yerleşimden üretilir. Ölçüler kaplamanın kapattığı genişliğe göredir; panelin bindirme payı ayrıca düşünülmedi. Panel boyu uzatıldığı için (16:18) tam boy panellerde {fazla_cm} cm kullanılmayan boy görünür: panelin üst ucunda, mahya ucunda kalır.
 
-### Panel boyu: 3 mm uzun sipariş edilirse iki panel az (öneri; karar bekliyor)
+## Lokman'ın cevapları (4 Ekim 16:18) ve uygulanışı
 
-Panel boyu eğimli boy + taşma alınınca (L {round(gb["cati"]["panel_boyu_m"] * 1000)}) en uzun kesik parça ile köşe parçası aynı panelden çıkmıyor. İkisi birlikte 4 × 105,3 + 2 × 5 + 0,5 = 431,7 cm ister; panel 431,5 cm: 2,2 mm ile kaçıyor. 2. ve 3. şeritlerin eşleşmesi de aynı boyu istiyor. Bu yüzden her yüzün 4. şeridi bir paneli tek başına harcıyor ({dz["tek"]} panel).
+Sorular, liste sayfasının 4 Ekim 16:13 sürümündeki ilk üç soruydu. Cevaplar tırnak içinde, yazıldığı gibi.
 
-| Panel boyu | Tek kat panel ve sandviç panel (100 cm) | Trapez sac ve 80 cm kapatan sandviç panel | Kiremit desen sac (100 cm; artan parça yok) |
+| # | Soru | Cevap | Uygulama |
 |---|---|---|---|
-| L {round(gb["cati"]["panel_boyu_m"] * 1000)} (eğimli boy + taşma) | {dz["adet"]} | {dz_t["adet"]} | {dz_k["adet"]} |
-| L {up["boy_mm"]} ve üzeri | {up["adet"]} | {dz_t["uzun_panelle"]["adet"]} | {dz_k["uzun_panelle"]["adet"]} |
+| 1 | Panel boyu: 1 cm uzun sipariş edelim mi? Kural yapayım mı: panel boyu en çok 3 cm uzatılınca adet düşüyorsa liste uzun boyu yazsın? | "evet 1. yi kural yap çok mantıklı bir çıkarım da bulunmuşsun tebrik ederim" | Kural yazıldı (`panel_boyu_uzatma`; aşağıda). Ç8201: tek kat panel L {taban_mm} × {uz["taban_adet"]} → **L {boy_mm} × {dz["adet"]}**. Seçeneklerde sandviç panel {S1613["sandvic"]} → {dz_s["adet"]}, trapez sac {S1613["trapez"]} → {dz_t["adet"]}, kiremit desen sac {S1613["kiremit"]} → {dz_k["adet"]}. Açılım, kesim planı ve kesim ölçüleri yeniden üretildi. |
+| 2 | OSB takviyesi: doğru mu anladım (az olan {osb_iki["duvarlar_adet"]} levha listede, {osb_iki["butun_oda_adet"]} levha notta)? | "evet 9 sayısını veren hangisi ise o kuralı geçerli say" | Geçerli kural: yalnız dolap ve TV ünitesi gelen duvarlar ({osb_iki["duvarlar_adet"]} levha). "Az olan baz" uygulaması kalktı; odanın bütün yüzeyi ({osb_iki["butun_oda_adet"]} levha) yalnız bilgi olarak satırın notunda duruyor (15:18: bayiye belirtilecek). Kuralın durumu `lokman`. Klima duvarı sayılmaz. Adet değişmedi. |
+| 3 | Sac kapama: o da çıksın mı (tek kat panel kapaması, L 2500, {S1613["kapama"]} adet)? | "evet tek kat panel kapasınıda çıkar aynısı geçerli" | Tek kat panel kapaması listeden çıktı (`panel_kapamasi`): liste {S1613["satir"]} → {len(baz["satirlar"])} satır. Plastik kapama aparatı sipariş verilirse listeye girecek. Sandviç panel seçeneğindeki sac kapama için cevap yok: soruldu; o zamana kadar o seçenekte duruyor. Kapaması olan 2025 listesi örneği (105 m²) kendi uygulamasıyla hesaplanıyor (`cati.panel_kapamasi`); karşılaştırma değişmedi ({kars_ayni} / {kars_top}). |
 
-- Tek kat panelde toplam boy {tr(dz["adet"] * gb["cati"]["panel_boyu_m"], 1)} m'den {tr(up["adet"] * 4.325, 1)} m'ye iner (L 4325 ile).
-- L {up["boy_mm"]} tam eşik; pay kalsın diye L 4325 önerilir (kesim payı 1 cm olsa da yeter).
-- Eksik 2,2 mm olduğu için kesim payı 2,8 mm ve altında kalırsa L {round(gb["cati"]["panel_boyu_m"] * 1000)} ile de {dz["paysiz_adet"]} çıkar; liste 5 mm ile hesaplıyor ve buna güvenmiyor.
-- Uzun panelin bedeli: tam boy giden {dz["tam_boy"]} panel 1 cm fazla gelir; saçakta taşma 6 cm olur ya da mahya ucundan 1 cm kesilir.
-- Hesap bunu her modelde kendisi arıyor (`uzun_panelle`): panel boyunu 3 cm'ye kadar uzatmak adedi düşürüyorsa ilk düşüren boyu ve adedi verir. Kural yapılırsa liste uzun boyu yazar.
-- Bağımsız hesap aynı eşiği ve aynı adetleri buldu.
-- Karar Lokman'da: panel boyu kuralı mühendisin cevabından ve Excel motorundan geliyor (eğimli boy + 5 cm). Liste şimdilik L {round(gb["cati"]["panel_boyu_m"] * 1000)} ve {dz["adet"]} adetle duruyor.
+### Panel boyu uzatma kuralı
+
+- **Taban boy.** Eğimli boy + taşma, mm'ye yukarı (mühendis, 4 Ekim 12:14; Excel motorundaki sac boyu): Ç8201'de L {taban_mm}.
+- **Neden.** Taban boyda en uzun kesik parça ile köşe parçası aynı panelden çıkmıyor: ikisi birlikte 4 × 105,3 + 2 × 5 + 0,5 = 431,7 cm ister; panel 431,5 cm, 2,2 mm eksik. 2. ve 3. şeritlerin eşleşmesi de aynı boyu ister. Bu yüzden taban boyda her yüzün 4. şeridi bir paneli tek başına harcıyordu (4 panel).
+- **Kural.** Boy 1'er cm uzatılarak denenir, en çok 3 cm. Adet düşüyorsa liste o boyu yazar; birden çok boy düşürüyorsa en az adedi veren, eşitlikte en kısası alınır.
+- **Pay koşulu** (uygulama ayrıntısı; öneride "pay kalsın diye L 4325" denmişti). Aday boyda adet, kesim payı 1 cm'ye çıksa da aynı kalmalı; kalmıyorsa o boy aday sayılmaz. Ç8201'de adedin düştüğü en kısa boy L {uz["esik_boy_mm"]}; L {boy_mm} kesim payı 12 mm'ye kadar {dz["adet"]} veriyor.
+- **Taşma değişmez.** Parçalar uzamaz, panel uzar: tam boy giden {dz["tam_boy"]} panelde {fazla_cm} cm fazlalık mahya ucunda kalır ya da kesilir (kesilmezse o şeritlerde taşma {tr(tasma_cm + (boy_mm - taban_mm) / 10)} cm olur).
+- **Kapsam.** Yalnız panel boyu kuraldan geldiğinde uygulanır (girdide `cati.panel_boyu_kaynak: kural`); boyu gerçek listeden gelen örneklerde uygulanmaz. Hesap deterministik: aynı çatı ve kaplama aynı boyu verir.
+
+| Kaplama | Taban boyla (L {taban_mm}) | Kuralla | Toplam boy |
+|---|---|---|---|
+| Tek kat panel ve sandviç panel (100 cm) | {uz["taban_adet"]} | L {boy_mm} × {dz["adet"]} | {metre(uz["taban_adet"], taban_mm)} → {metre(dz["adet"], boy_mm)} m |
+| Trapez sac ve 80 cm kapatan sandviç panel | {dz_t["uzatma"]["taban_adet"]} | L {dz_t["uzatma"]["boy_mm"]} × {dz_t["adet"]} | {metre(dz_t["uzatma"]["taban_adet"], taban_mm)} → {metre(dz_t["adet"], dz_t["uzatma"]["boy_mm"])} m |
+| Kiremit desen sac (100 cm; artan parça kullanılmaz) | {dz_k["uzatma"]["taban_adet"]} | L {dz_k["uzatma"]["boy_mm"]} × {dz_k["adet"]} | {metre(dz_k["uzatma"]["taban_adet"], taban_mm)} → {metre(dz_k["adet"], dz_k["uzatma"]["boy_mm"])} m |
+| Tek kat panel, 87 cm kapatan ürün (2025 listeleri) | 29 | {d87[3]} × {d87[4].split(" ")[0]} | {metre(29, taban_mm)} → {metre(28, 4345)} m |
+| Kiremit desen sac, 110 cm kapatan ürün (2025 listeleri) | 26 | uzatma adedi düşürmüyor: {d110[3]} × {d110[4].split(" ")[0]} | {metre(26, taban_mm)} m |
+
+- Kesim payı 2,8 mm ve altında kalırsa taban boyla da {dz["paysiz_adet"]} çıkardı; liste buna güvenmiyor, boyu uzatıyor.
+- Sağlama: bağımsız hesap beş durumda aynı boyları ve adetleri buldu; çokgen sınaması uzatma kuralını rastgele 450 çatı ve kaplamada denedi (34'ünde boy uzadı; sorun yok).
 
 ## Listenin grupları ve bayi kuralı
 
@@ -462,10 +510,10 @@ Durum: `lokman` Lokman söyledi · `muhendis` mühendis söyledi · `excel` yük
 - **Dış cephe** (excel; zayiat muhendis). Net alan = çevre × kat yüksekliği + dikme ve kiriş kaplaması (adet × çevre × boy) + çatı alnı (kalkan) alanları − kapı ve pencere boşlukları. Boardex = net × {tr(1 + zb, 2)} ÷ (1,2 × 2,4): zayiat %{tr(zb * 100)} (mühendis, 4 Ekim 12:14; motorda ve bir hesap sayfasında da %8). Listelerin çalışma kitabındaki formül %15'ti ve üç listedeki adetler %15'e uyuyor (hesap / liste, 90 · 62 · 105 m²: 45 / 46, 32 / 32, 52 / 51); %8 ile {" · ".join(f"{b['hesap']} / {b['liste']}" for b in boyle)}. Ç8201'de %8 ile {boardex_s["adet"]}, %15 ile {boardex_15} levha.
 - **Kalınlıklar** (muhendis, 4 Ekim 12:14). Boardex 12,5 mm; OSB 11 mm. 2025 listelerinde Boardex 8 mm, OSB 9 mm yazıyor; motorda Boardex 8 mm, OSB 11 mm.
 - **İç cephe** (excel). Odalar "beyaz" ve "yeşil" diye ayrılır. Oda oda: iç çevre × kat yüksekliği − o odadaki boşluklar. Alçıpan = net × 1,05 ÷ (1,2 × 2,5). Tavan alçıpanı = tavan alanı × 1,05 ÷ 3,0.
-- **OSB takviyesi** (muhendis). Yalnız dolap ve TV ünitesi gelen duvarlar: modelin tanımında yazılır. Her duvarın o odaya bakan yüzünün boyu × kat yüksekliği − o yüzdeki boşluklar; × 1,05 ÷ 2,98. Duvarın tamamı alınır (Lokman: "tüm yüzeyini"; mühendis, 4 Ekim 12:14: "Duvarın tamamını al."). Odanın bütün yüzeyi de hesaplanır (Lokman'ın 3 Ekim kuralı); az olan baz alınır, öteki bayiye belirtilmek üzere satırın notunda durur (Lokman, 4 Ekim 15:18). Klima duvarı baz hesapta sayılmaz. Tanımda duvar yazmıyorsa kalem hesaplanmaz.
+- **OSB takviyesi** (lokman; ilk kez muhendis). Yalnız dolap ve TV ünitesi gelen duvarlar: modelin tanımında yazılır. Her duvarın o odaya bakan yüzünün boyu × kat yüksekliği − o yüzdeki boşluklar; × 1,05 ÷ 2,98. Duvarın tamamı alınır (Lokman: "tüm yüzeyini"; mühendis, 4 Ekim 12:14: "Duvarın tamamını al."). Geçerli kural bu (Lokman, 4 Ekim 16:18: "9 sayısını veren hangisi ise o kuralı geçerli say"). Odanın bütün yüzeyi (Lokman'ın 3 Ekim kuralı) yalnız bilgi olarak satırın notunda durur (15:18: bayiye belirtilecek). Klima duvarı sayılmaz. Tanımda duvar yazmıyorsa kalem hesaplanmaz.
 - **Kapı boşlukları.** İç kapı 0,90 × 2,14 (lokman; çalışma kitaplarında da aynı). Dış kapı 0,95 × 2,10 (muhendis, 4 Ekim 12:14; 90 ve 105 m² listelerde de böyle, 62 m² listede 0,95 × 2,00).
 - **Duvar izolasyonu** (uydurma). Dış duvar × kat sayısı (80 mm karkasta 1, 140 mm'de 2) + iç duvar − boşluklar; ÷ 8,64. 105 m² listenin hesap sayfasında "dış × 2" diye yazıyor.
-- **Çatı kaplaması.** Baz pakette tek kat panel (lokman). Kırma çatıda panel ve sac adedi çatı açılımından (lokman; yukarıda "Lokman'ın ikinci düzeltmesi"): yüzler şerit şerit dizilir, çapraz kesimden artan parça karşı yüzde kullanılır. Dizilim her yüzde köşeden başlar; kesim payı 5 mm; yedek yok (lokman, 4 Ekim 15:18). Kaplama saçaktan 5 cm taşar: panel boyu = eğimli boy + 5 cm (muhendis, 4 Ekim 12:14). Çatı planı girdide yoksa yüzey × 1,10 ÷ (boy × kapatma genişliği) (uydurma). Beşik çatıda saçak boyu ÷ kapatma genişliği (uydurma). Kapatma (lokman, 4 Ekim 15:18; ürüne göre değişir): tek kat panel, sandviç panel ve kiremit desen sac 100 cm; trapez sac 80 cm (motor). Sandviç panelin 80 cm kapatanı da var. 2025 listelerinde tek kat panel 87, kiremit desen sac 110 cm'di.
+- **Çatı kaplaması.** Baz pakette tek kat panel (lokman). Kırma çatıda panel ve sac adedi çatı açılımından (lokman; yukarıda "Lokman'ın ikinci düzeltmesi"): yüzler şerit şerit dizilir, çapraz kesimden artan parça karşı yüzde kullanılır. Dizilim her yüzde köşeden başlar; kesim payı 5 mm; yedek yok (lokman, 4 Ekim 15:18). Kaplama saçaktan 5 cm taşar: panel boyunun tabanı = eğimli boy + 5 cm (muhendis, 4 Ekim 12:14); adet düşüyorsa boy en çok 3 cm uzatılır (lokman, 4 Ekim 16:18). Çatı planı girdide yoksa yüzey × 1,10 ÷ (boy × kapatma genişliği) (uydurma). Beşik çatıda saçak boyu ÷ kapatma genişliği (uydurma). Kapatma (lokman, 4 Ekim 15:18; ürüne göre değişir): tek kat panel, sandviç panel ve kiremit desen sac 100 cm; trapez sac 80 cm (motor). Sandviç panelin 80 cm kapatanı da var. 2025 listelerinde tek kat panel 87, kiremit desen sac 110 cm'di. Panel kapaması (sac, L 2500; 2025 listelerinden): tek kat panelde listeden çıktı (lokman, 4 Ekim 16:18); sandviç panel seçeneğinde her saçak kenarı ÷ 2,5 (uydurma; soruldu).
 - **Shingle ve membran** (motor). Adet = çatı yüzeyi × çatı katsayısı ÷ 8 ("adet / 8 m²"). Çatı katsayısı: beşik 1; beşik + cumba 1,14; beşik + 2 cumba 1,27; dört omuz 1,06. Gerçek listeyle karşılaştırılmadı.
 - **Mahya** (lokman). Mahya hattı ÷ (2,8 − 0,30). Kırma çatıda hat = tepe + dört kırma. Trapez sac mahyası L 800: mahya hattı ÷ (0,8 − 0,20) (motor).
 - **Mahya bandı** (muhendis, 4 Ekim 12:14). Mühendisin formülü: (mahya adedi × 2,8 m + ters mahya adedi × 2,8 m + damlalık adedi × 2,5 m) ÷ 10 m (rulo / 10 m), yukarı. Excel motorundaki formül aynı; motorda trapez sac mahyası × 0,8 m de toplanır, OSB mahyası ve özel mahya toplanmaz. Damlalık listeden tamamen çıkarıldı (Lokman, 4 Ekim 15:18: montajcılar kullanmıyor); terimi formülde yok. Ç8201: {adet(baz, "Metal kiremit mahyası")} × 2,8 ÷ 10 → {bant_s["adet"]} rulo. 01:24'teki uygulama mahya uzunluğundandı ({onceki_bant} rulo; açıklamalı prefabrik yükleme listesi çalışma kitabındaki formül).
@@ -526,30 +574,30 @@ Bayi kuralı çatıyı yöntem B'ye çevirirse (`--bayi ORNEK-BAYI-3`; çıktı 
 - **Köşebent.** Motor plansız hesaplıyor: oda çevrelerini bina kenarlarının altı katı, iç köşeyi 36 sayıyor. Ç8201'in ölçüleriyle {motor_kosebent} verir; plandan {adet(baz, "Köşebent")}.
 - **Elektrik.** Motorda sayılar sabit: duy 7, glop 3, tekli anahtar 9, çiftli anahtar 2, tekli priz 22, çiftli priz 3, uydu prizi 1, sigorta 9; buat = anahtar + priz + 9.
 - **İniş borusu.** Motorda dere adedi ÷ 5 + 6; mühendisin 10 × 10 m metrajındaki sayıları (8 ve 6) vermiyor (9 ve 8 verir).
-- **Motorda olup listede olmayan kalemler.** Mühendisin ikinci cevaplarıyla: mahya bandı listeye eklendi; çatı müdahale kapağı standart pakette yok, müşteri isterse eklenir. Ters mahya kenar kutuları (ters mahya × 2) cumbalı çatı çalışılınca sorulacak; hesapta yok. Damlalık (L 2500; motorda 78. satır, adedi elle, şablonda 0): Lokman listeden tamamen çıkardı (4 Ekim 15:18); yerine düşünülen plastik kapama aparatı sipariş verilirse listeye girecek. Motorda panel kapamaları damlalıktan ayrı kalemler: tek kat panel kapaması (66. satır, L 2500, adedi elle) ve sandviç panel kapaması (69. satır, L 2800; saçak boyu × çatı katsayısı ÷ 2,6). Listedeki kapama 2025 listelerinden: L 2500, her saçak kenarı ÷ 2,5.
+- **Motorda olup listede olmayan kalemler.** Mühendisin ikinci cevaplarıyla: mahya bandı listeye eklendi; çatı müdahale kapağı standart pakette yok, müşteri isterse eklenir. Ters mahya kenar kutuları (ters mahya × 2) cumbalı çatı çalışılınca sorulacak; hesapta yok. Damlalık (L 2500; motorda 78. satır, adedi elle, şablonda 0): Lokman listeden tamamen çıkardı (4 Ekim 15:18); yerine düşünülen plastik kapama aparatı sipariş verilirse listeye girecek. Motorda panel kapamaları damlalıktan ayrı kalemler: tek kat panel kapaması (66. satır, L 2500, adedi elle) ve sandviç panel kapaması (69. satır, L 2800; saçak boyu × çatı katsayısı ÷ 2,6). Listedeki kapama 2025 listelerinden (L 2500, her saçak kenarı ÷ 2,5): tek kat panel kapaması Lokman'ın 4 Ekim 16:18 cevabıyla çıktı; sandviç panel kapaması soruldu.
 
 ## Açık sorular
 
-1. **Panel boyu.** Panel L {up["boy_mm"]} ve daha uzun sipariş edilirse tek kat panel {dz["adet"]} yerine {up["adet"]} yetiyor (yukarıda). Öneri L 4325. Kural olarak sorulan: panel boyu en çok 3 cm uzatılınca adet düşüyorsa liste uzun boyu yazsın mı? Karar Lokman'da.
-2. **OSB takviyesi.** "sen ilk seferdeki gibi say … şimdilik hangisi az ise onu baz al" sözü şöyle okundu: iki hesap yapılır, az olan ({osb_iki["duvarlar_adet"]} levha) baz alınır, öteki ({osb_iki["butun_oda_adet"]} levha) bayiye belirtilir. Doğru mu?
+1. **Sandviç panel kapaması.** Tek kat panel kapaması çıktı (Lokman, 4 Ekim 16:18). Sandviç panel seçeneğindeki sac kapama (L 2500, {secenek("sandvic_panel", "Sandviç panel kapaması")["adet"]} adet) da çıksın mı? Plastik kapama aparatı sipariş verilirse listeye girecek; adedinin kuralı o zaman.
+2. **Kesim planı paftası.** Montajcıya verilecek tek pafta (açılım, kesim planı, ölçüler) istenirse hazırlanacak. Ölçüler kaplamanın kapattığı genişliğe göre; panelin yan bindirme payı ve kısa yüzlerdeki 10 cm'lik son şerit paftada ayrıca gösterilmeli.
 3. **Kapatma genişlikleri.** Şimdilik tek kat panel, sandviç panel ve kiremit desen sac 100 cm; sandviç panelin 80 cm kapatanı da var. Ürün değiştikçe güncellenecek (Lokman, 4 Ekim 15:18).
 4. **Excel motorundaki kaplama formülü.** Bulgular mühendise iletilecek (yukarıda): parantez, uzun kenardaki saçak, metal kiremit katsayısı, B61, sundurma.
 5. **Makas ve kiriş.** Excel motoru kıstas (Lokman, 4 Ekim 15:18); Lokman motoru inceleyecek. Bir makas ölçüsü verilirse çatı çeliği, dikme ve kiriş değişir.
-6. **Panel kapaması ve plastik kapama aparatı.** Listede tek kat panel kapaması (L 2500, {adet(baz, "Tek kat panel kapaması")} adet) duruyor: 2025 listelerinde var, Excel motorunda damlalıktan ayrı kalem. Çıkarılan yalnız damlalık mı, yoksa bu sac kapama da mı (plastik aparat onun yerine mi geçecek)? Aparat sipariş verilirse listeye girecek; adedinin kuralı o zaman.
-7. **Bindirme.** Örnekte saçak sacı L 2800; listelerde L 2500. Saçak sacının boyu hangisi? Eylül 2025 listeleri 20 cm ile tutuyor. Derede ve L 800 trapez mahyasında bindirme de 30 cm mi (motorda 20 cm)?
-8. **Veranda dikmeleri.** Sayısı ve yeri neye göre belirleniyor?
-9. **OSB zayiatı.** %5 mi, %15 mi (105 m² listede %15)? Alçıpan %5.
-10. **İki yöntem aynı listede.** 62 ve 105 m² listelerde hem saçak sacı hem saçaklar için Boardex var. O Boardex nereye gidiyor?
-11. **Yöntem B.** Tavan omegası ve aşık aralığı 60 cm mi (sandviç panelde de)?
-12. **Bayi standartları.** Henüz oturmadı (mühendis, 4 Ekim 12:14). Netleşince hangi bayide hangi gruplar, hangi çatı yöntemi ve kaplaması standart: bayi kuralı tablosuna yazılacak.
-13. **Sırası gelince.** Çift kat modeli: üst katta 200 cm ve daha geniş pencereli duvarın 1,2 mm alınması (kural kayıtlı, uygulanmadı). Cumbalı çatı: ters mahya kenar kutuları ve cumbalı çatının açılımı.
+6. **Bindirme.** Örnekte saçak sacı L 2800; listelerde L 2500. Saçak sacının boyu hangisi? Eylül 2025 listeleri 20 cm ile tutuyor. Derede ve L 800 trapez mahyasında bindirme de 30 cm mi (motorda 20 cm)?
+7. **Veranda dikmeleri.** Sayısı ve yeri neye göre belirleniyor?
+8. **OSB zayiatı.** %5 mi, %15 mi (105 m² listede %15)? Alçıpan %5.
+9. **İki yöntem aynı listede.** 62 ve 105 m² listelerde hem saçak sacı hem saçaklar için Boardex var. O Boardex nereye gidiyor?
+10. **Yöntem B.** Tavan omegası ve aşık aralığı 60 cm mi (sandviç panelde de)?
+11. **Bayi standartları.** Henüz oturmadı (mühendis, 4 Ekim 12:14). Netleşince hangi bayide hangi gruplar, hangi çatı yöntemi ve kaplaması standart: bayi kuralı tablosuna yazılacak.
+12. **Sırası gelince.** Çift kat modeli: üst katta 200 cm ve daha geniş pencereli duvarın 1,2 mm alınması (kural kayıtlı, uygulanmadı). Cumbalı çatı: ters mahya kenar kutuları ve cumbalı çatının açılımı.
 
 Kapananlar:
 
 - **Mühendisin 3 Ekim cevaplarıyla:** saçak omegası (gerekmiyor); saçak yüzünün malzemesi (Boardex); OSB takviyesinin kapsamı (yalnız dolap ve TV duvarları); köşebent formülü; iniş sayısındaki fark (plana göre yerleşim); elektrik sayıları (oda başına kural); çatı kaplaması seçenekleri (altı).
 - **Lokman'ın 4 Ekim düzeltmeleri ve mühendisin ikinci cevaplarıyla:** tavan ve çatı panelinin ağırlığı ve alana oranlanması; baz paketin çatı kaplaması (tek kat panel; Lokman); kırma çatıda kaplama adedi (çatı açılımı ve dizilim; Lokman); et kalınlığı kuralı; OSB takviyesi için seçilen duvarlar; salon ile mutfak kurallarının birlikte uygulanması; mahya bandı (listede) ve çatı müdahale kapağı (yalnız müşteri isterse).
 - **Mühendisin üçüncü cevaplarıyla (4 Ekim 12:14):** tek katta et kalınlığı (1,2 mm ile devam; 2025 listeleri eski uygulama); tavan ve çatı panelinin adedi (100 m²'de {pk_tavan["adet_100m2"]} ve {pk_cati["adet_100m2"]}); OSB takviyesinde duvarın tamamı; köşebentte çıkıntı yapan köşeler (sayılmaz) ve veranda tavanı (sayılır); buat için oda sayısı (veranda hariç) ve tekli prizler; mahya bandı formülü; dış kapı boşluğu (95 × 210); Boardex 12,5 mm, OSB 11 mm, Boardex zayiatı %8; kaplamanın saçaktan 5 cm taşması; kiremit desen sacda artan parçanın kullanılmaması.
-- **Lokman'ın 4 Ekim 15:18 cevaplarıyla:** dizilimin başladığı yer (her yüzde köşeden); kesim payı (5 mm); yedek panel (yok; kesim planı montajcıya verilir); kapatma genişlikleri (güncel ürünler: 100 cm); Boardex zayiatı (%8 ile devam); damlalık (listeden çıktı); klima duvarı (baz hesapta sayılmaz; az olan baz); makas ve kirişte Excel motoru kıstas.
+- **Lokman'ın 4 Ekim 15:18 cevaplarıyla:** dizilimin başladığı yer (her yüzde köşeden); kesim payı (5 mm); yedek panel (yok; kesim planı montajcıya verilir); kapatma genişlikleri (güncel ürünler: 100 cm); Boardex zayiatı (%8 ile devam); damlalık (listeden çıktı); klima duvarı (sayılmaz); makas ve kirişte Excel motoru kıstas.
+- **Lokman'ın 4 Ekim 16:18 cevaplarıyla:** panel boyu (adet düşüyorsa en çok 3 cm uzatılır; Ç8201'de L {boy_mm} × {dz["adet"]}); OSB takviyesinde geçerli kural (yalnız dolap ve TV duvarları); tek kat panel kapaması (listeden çıktı).
 
 ## Canlıya alırken (öneri; ayrı onay gerekir)
 

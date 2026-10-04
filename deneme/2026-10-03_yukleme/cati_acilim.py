@@ -20,7 +20,9 @@ Model (dikdörtgen planlı, dört yanı eşit eğimli kırma çatı):
     Dikdörtgenler panellere büyükten küçüğe, ilk sığana yerleştirilir.
   - Boy bindirmesi yoktur. Kesim payı (`kesim_payi`): çapraz kesimde iki parçanın arasına ve aynı panelden çıkan
     dikdörtgenlerin arasına eklenir; kurallarda 5 mm (Lokman onayladı, 15:18). Yedek panel eklenmez: kesim planı montajcıya verilir.
-    Panel tek boydur: eğimli boy + taşma (Excel motorundaki gibi; mm'ye yukarı).
+    Panel tek boydur. Taban boy eğimli boy + taşmadır (Excel motorundaki gibi; mm'ye yukarı). Boy 1'er cm uzatılınca (en çok 3 cm)
+    adet düşüyorsa uzun boy alınır (Lokman, 4 Ekim 2026 16:18; `panel_boyu_uzatma`): taşma değişmez, tam boy giden panellerde
+    fazlalık mahya ucunda kalır.
   - Kesim planının ölçüleri (`--olcu-md`): her parçanın çatıdaki kenar boyları ve paneldeki yeri; çizim, ölçü tablosu ve
     geometrik sağlama aynı yerleşimi (`panel_yerlesimi`) kullanır.
 Hesapta LLM yok: aynı girdi aynı dizilimi verir.
@@ -239,33 +241,63 @@ def kural_dizilimi(kr: dict, cati: dict, kaplama: str) -> dict | None:
     `sol`); `en_az` yazıyorsa kurallardaki sırayla denenir ve en az paneli veren ilk başlangıç alınır. Sıradaki öteki başlangıçlar
     her durumda bilgi için denenir (`denemeler`, `en_az_adet`).
     Panel boyu listeden geliyorsa ve eğimli boy + taşmadan kısaysa taşma panelin yettiği kadardır.
+    Panel boyu kuraldan geliyorsa (`cati.panel_boyu_kaynak: kural`) uzatma kuralı uygulanır: `boy_m` seçilen boydur, `taban_boy_m` ve
+    `taban_adet` uzatmadan önceki değerler, `uzatma` kuralın uyguladığı değişiklik (yoksa None).
     Dönen: dizilim sözlüğü ve ek olarak denemeler, paysız ve 1 cm paylı adet. Çatı planı yoksa ya da panel eğimli boydan kısaysa None."""
     if not (cati.get("plan_m") and cati.get("panel_boyu_m") and cati.get("egim")) or kaplama not in KAPATMA_KURALI:
         return None
     kd = kr["kirma_cati_dizilim"]["deger"]
-    px, py, egim, boy = cati["plan_m"][0], cati["plan_m"][1], cati["egim"], cati["panel_boyu_m"]
+    px, py, egim, taban_boy = cati["plan_m"][0], cati["plan_m"][1], cati["egim"], cati["panel_boyu_m"]
     H = min(px, py) / 2 * math.sqrt(1 + egim * egim)
-    if boy + EPS < H:
+    if taban_boy + EPS < H:
         return None
     kapatma = kapatma_genisligi(kr, cati, kaplama)
     paylas = kaplama not in kd["artan_parca_kullanilmayan_kaplamalar"]
-    tasma = max(0.0, min(kr["cati_kaplama_tasma_m"]["deger"], boy - H))
+    tasma = max(0.0, min(kr["cati_kaplama_tasma_m"]["deger"], taban_boy - H))
     pay = kd["kesim_payi_m"]
     sira = list(kd["baslangic_sirasi"]) + ([kd["baslangic"]] if kd["baslangic"] not in ("en_az", *kd["baslangic_sirasi"]) else [])
-    den = {b: dizilim(px, py, egim, kapatma, boy, paylas, b, pay, tasma)["adet"] for b in sira}
-    secilen = next(b for b in sira if den[b] == min(den.values())) if kd["baslangic"] == "en_az" else kd["baslangic"]
+
+    def sec(b: float) -> tuple[str, dict]:
+        """Verilen panel boyunda dizilimin başladığı yer ve altı başlangıcın adetleri."""
+        den_ = {s: dizilim(px, py, egim, kapatma, b, paylas, s, pay, tasma)["adet"] for s in sira}
+        return (next(s for s in sira if den_[s] == min(den_.values())) if kd["baslangic"] == "en_az" else kd["baslangic"]), den_
+
+    def adet(b: float, kesim_payi: float) -> int:
+        return dizilim(px, py, egim, kapatma, b, paylas, sec(b)[0], kesim_payi, tasma)["adet"]
+
+    taban_adet = adet(taban_boy, pay)
+    # Panel biraz uzun olursa adet düşüyor mu? Panel boyu = eğimli boy + taşma tam boy parçaya ancak yeter; en uzun kesik parça ile
+    # köşe parçasının aynı panelden çıkması için kesim payı kadar yer kalmayabilir. Eşik: 3 cm'ye kadar mm mm denenir (bilgi).
+    uzun_panelle = None
+    for ek_mm in range(1, 31):
+        n = adet(taban_boy + ek_mm / 1000, pay)
+        if n < taban_adet:
+            uzun_panelle = {"boy_mm": round(taban_boy * 1000) + ek_mm, "adet": n}
+            break
+    # Panel boyu uzatma kuralı (Lokman, 4 Ekim 2026 16:18): boy 1'er cm uzatılarak denenir (en çok 3 cm); adet düşüyorsa liste o boyu
+    # yazar. Aday boyda adet, kesim payı 1 cm'ye çıksa da aynı kalmalı (pay kalsın diye). En az adedi veren, eşitlikte en kısa boy alınır.
+    # Yalnız panel boyu kuraldan geldiğinde uygulanır; boyu gerçek listeden gelen örneklerde uygulanmaz.
+    uz = (kr.get("panel_boyu_uzatma") or {}).get("deger") or {}
+    boy, uzatma = taban_boy, None
+    if uz.get("uygula") and cati.get("panel_boyu_kaynak") == "kural":
+        adaylar = []
+        for i in range(1, round(uz["en_cok_m"] / uz["adim_m"]) + 1):
+            b = round(taban_boy + i * uz["adim_m"], 6)
+            n = adet(b, pay)
+            if n < taban_adet and adet(b, uz["saglamlik_kesim_payi_m"]) == n:
+                adaylar.append((n, b))
+        if adaylar:
+            n, boy = min(adaylar)
+            uzatma = {"taban_boy_mm": round(taban_boy * 1000), "taban_adet": taban_adet, "boy_mm": round(boy * 1000), "adet": n,
+                      "esik_boy_mm": uzun_panelle["boy_mm"] if uzun_panelle else None}
+    secilen, den = sec(boy)
     d = dizilim(px, py, egim, kapatma, boy, paylas, secilen, pay, tasma)
     d.update(denemeler=den, en_az_adet=min(den.values()), baslangic_kurali=kd["baslangic"], kaplama=kaplama, tasma_kural_m=kr["cati_kaplama_tasma_m"]["deger"],
              paysiz_adet=dizilim(px, py, egim, kapatma, boy, paylas, secilen, 0.0, tasma)["adet"],
-             bir_cm_payla_adet=dizilim(px, py, egim, kapatma, boy, paylas, secilen, 0.01, tasma)["adet"])
-    # Panel biraz uzun sipariş edilirse adet düşüyor mu? Panel boyu = eğimli boy + taşma tam boy parçaya ancak yeter; en uzun kesik
-    # parça ile köşe parçasının aynı panelden çıkması için kesim payı kadar yer kalmayabilir. 3 cm'ye kadar mm mm denenir (yalnız bilgi).
-    d["uzun_panelle"] = None
-    for ek_mm in range(1, 31):
-        n = dizilim(px, py, egim, kapatma, boy + ek_mm / 1000, paylas, secilen, pay, tasma)["adet"]
-        if n < d["adet"]:
-            d["uzun_panelle"] = {"boy_mm": round(boy * 1000) + ek_mm, "adet": n}
-            break
+             bir_cm_payla_adet=dizilim(px, py, egim, kapatma, boy, paylas, secilen, 0.01, tasma)["adet"],
+             taban_boy_m=taban_boy, taban_adet=taban_adet, uzatma=uzatma,
+             # uzatma uygulanmadıysa: taban boydan biraz uzun panelle adet düşüyor mu (yalnız bilgi)
+             uzun_panelle=None if uzatma else uzun_panelle)
     return d
 
 
@@ -483,8 +515,11 @@ def main() -> int:
     d = kural_dizilimi(kr, c, kaplama)
     if d is None:
         raise SystemExit(f"Dizilim kurulamadı (kaplama şerit olarak dizilmiyor, çatı planı yok ya da panel kısa): {kaplama}")
-    kapatma, boy_mm = d["kapatma_m"], round(c["panel_boyu_m"] * 1000)
+    kapatma, boy_mm = d["kapatma_m"], round(d["boy_m"] * 1000)
     print(f"{g['ad']}: {KAPLAMA_ADI[kaplama]}, {_tr(kapatma * 100)} cm kapatır, L {boy_mm}")
+    if d["uzatma"]:
+        u = d["uzatma"]
+        print(f"  panel boyu uzatıldı: taban L {u['taban_boy_mm']} ile {u['taban_adet']}, L {u['boy_mm']} ile {u['adet']} (adedin düştüğü en kısa boy L {u['esik_boy_mm']})")
     print(f"  yüzey {_tr(d['yuzey_m2'], 2)} m² · eğimli boy {_tr(d['egimli_boy_m'] * 100, 1)} cm · taşma {_tr(d['tasma_m'] * 100, 1)} cm · parça {d['parca_adedi']}")
     print(f"  panel {d['adet']} (tam boy {d['tam_boy_adedi']}, iki parça veren kesim {d['cift_adedi']}, artığı kullanılmayan parça {d['tek_adedi']}) · alan olarak en az {d['alan_alt_siniri']}")
     print(f"  başlangıç: {BASLANGIC_ADI[d['baslangic']]} · denemeler {d['denemeler']} · en dar pay",
@@ -497,7 +532,7 @@ def main() -> int:
     if a.cikti:
         s = sozluk(d)
         s.update({"ad": g["ad"], "kaplama": kaplama, "baslangica_gore_adet": d["denemeler"], "kesim_payisiz_adet": d["paysiz_adet"], "bir_cm_kesim_payiyla_adet": d["bir_cm_payla_adet"],
-                  "uzun_panelle": d["uzun_panelle"]})
+                  "taban_boy_m": d["taban_boy_m"], "taban_adet": d["taban_adet"], "uzatma": d["uzatma"], "uzun_panelle": d["uzun_panelle"]})
         a.cikti.write_text(json.dumps(s, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     if a.acilim_png:
         acilim_ciz(d, a.acilim_png, f"{ad} · çatı açılımı ve kaplama dizilimi · {alt}")
@@ -507,8 +542,11 @@ def main() -> int:
         a.olcu_md.write_text("\n".join(
             [f"# {ad} · kesim planının ölçüleri · {alt}", "",
              f"Hesap çıktısıdır; elle düzeltilmez (`cati_acilim.py --olcu-md`). Dizilim {BASLANGIC_ADI[d['baslangic']]} başlar; kaplama saçaktan {_tr(d['tasma_m'] * 100, 1)} cm taşar; "
-             f"kesim payı {_tr(d['kesim_payi_m'] * 1000)} mm. Ölçüler cm. Boylar saçak ucundan (taşma dahil) ölçülür; sol ve sağ, çatıya dışarıdan bakışla.", "",
-             "## Parçalar (yüz yüz, soldan sağa)", ""] + parca_tablosu(d)
+             f"kesim payı {_tr(d['kesim_payi_m'] * 1000)} mm. Ölçüler cm. Boylar saçak ucundan (taşma dahil) ölçülür; sol ve sağ, çatıya dışarıdan bakışla.", ""]
+            + ([f"Panel boyu kuralla uzatıldı (Lokman, 4 Ekim 16:18): taban boy L {d['uzatma']['taban_boy_mm']} (eğimli boy + taşma) ile {d['uzatma']['taban_adet']} panel gerekiyordu; "
+                f"L {d['uzatma']['boy_mm']} ile {d['uzatma']['adet']} panel yetiyor. Taşma değişmez: tam boy giden panellerde fazla "
+                f"{_tr((d['boy_m'] - d['taban_boy_m']) * 100, 1)} cm panelin üst ucunda (mahya ucunda) kalır.", ""] if d["uzatma"] else [])
+            + ["## Parçalar (yüz yüz, soldan sağa)", ""] + parca_tablosu(d)
             + ["", "## Kesim ölçüleri (panel panel)", "",
                "Her satır bir parçanın paneldeki yeridir: panelin sol ve sağ kenarında, alt uçtan (saçak ucu) kaç cm ile kaç cm arası. "
                "Parça bu iki aralığın arasında kalan dörtgendir. \"180° çevrilerek\" yazan parça, düz ucu saçağa gelecek biçimde çevrilip karşı yüze konur; ters yüz edilmez.", ""]

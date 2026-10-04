@@ -155,8 +155,10 @@ def main() -> int:
             "yuzey_m2": round(c["yuzey_m2"], 2), "sacak_kenarlari_m": [px, py, px, py], "sacak_boyu_toplam_m": round(2 * (px + py), 2),
             "cephe_kenarlari_m": [L, Hc, L, Hc], "kose_adedi": 4,
             "mahya_hatti_m": round(c["mahya_hatti_toplam"] / 100, 2),
-            # panel boyu = eğimli boy + taşma (mühendis, 4 Ekim 2026 12:14: 5 cm; Excel motorundaki gibi mm'ye yukarı)
+            # panel boyunun tabanı = eğimli boy + taşma (mühendis, 4 Ekim 2026 12:14: 5 cm; Excel motorundaki gibi mm'ye yukarı).
+            # Kaynağı "kural": adedi düşürüyorsa hesap bu boyu en çok 3 cm uzatır (Lokman, 4 Ekim 2026 16:18; `panel_boyu_uzatma`).
             "panel_boyu_m": math.ceil((min(px, py) / 2 * kok + kur["cati_kaplama_tasma_m"]["deger"]) * 1000 - 1e-9) / 1000,
+            "panel_boyu_kaynak": "kural",
             "bina_eni_m": min(c["ayak_izi"]) / 100, "cati_boyu_m": max(px, py),
             "sacak_alti": ct.get("sacak_alti", "boardex"), "sacak_alti_eni_m": ct["sacak"] / 100,
             "sacak_yuzu_m2": round(c["alin_m2"], 2) if yontem == "panel" and ct.get("sacak_yuzu", "boardex") == "boardex" else None,
@@ -170,7 +172,7 @@ def main() -> int:
             + [{"kalem": ("PVC vasistas" if x["ad"] == "60/40" else "PVC pencere"), "boyut": x["ad"], "adet": x["adet"], "durum": "model"} for x in dis.values() if x["ad"] != "dış kapı"]
         ),
         "varsayimlar": [
-            "Çatı kaplaması seçenektir; baz pakette tek kat panel (Lokman, 4 Ekim 01:42). `--kaplama` ile öteki beş seçenek hesaplanır. Panel boyu = eğimli boy + 5 cm taşma (mühendis, 4 Ekim 12:14), mm'ye yukarı. "
+            "Çatı kaplaması seçenektir; baz pakette tek kat panel (Lokman, 4 Ekim 01:42). `--kaplama` ile öteki beş seçenek hesaplanır. Panel boyunun tabanı = eğimli boy + 5 cm taşma (mühendis, 4 Ekim 12:14), mm'ye yukarı; adedi düşürüyorsa boy en çok 3 cm uzatılır (Lokman, 4 Ekim 16:18). "
             "Kapatma genişliği ürüne göre değişir (Lokman, 4 Ekim 15:18): güncel değerler kurallarda (tek kat panel, kiremit desen sac ve sandviç panel 100 cm); bu girdiye `cati.kapatma_m` yazılırsa o kullanılır.",
             "Kırma çatıda kaplama adedi çatı açılımından: yüzler şerit şerit dizilir, çapraz kesimden artan parça karşı yüzde kullanılır (Lokman, 4 Ekim 01:42; `cati_acilim.py`). "
             "Dizilim her yüzde köşeden başlar; kesim payı 5 mm; yedek panel yok, kesim planı montajcıya verilir (Lokman, 4 Ekim 15:18). Kiremit desen sacda artan parça kullanılmaz (mühendis, 4 Ekim 12:14).",
@@ -178,13 +180,14 @@ def main() -> int:
             "Tavan paneli ve çatı paneli: 100 m² bina için verilen kg (Lokman'ın 4 Ekim düzeltmesi) ve adet (mühendis: bu adetlerle ilerle), çatının örttüğü oturum alanına oranlandı.",
             "Veranda dikmelerinin sayısı ve yeri katalog görsellerinden: dış kenarda iki köşe ve bir orta.",
             "OSB takviyesi: dolap ve TV ünitesi gelen duvarlar katalog görselinden seçildi (mühendis doğruladı); her duvarın o odaya bakan yüzünün tamamı alındı (mühendis, 4 Ekim 12:14). "
-            "Odanın bütün yüzeyi de hesaplanır; az olan baz alınır, öteki bayiye belirtilir (Lokman, 4 Ekim 15:18). Klima duvarı sayılmadı.",
+            "Geçerli kural bu (Lokman, 4 Ekim 16:18); odanın bütün yüzeyi yalnız bilgi olarak satırın notunda durur. Klima duvarı sayılmaz.",
             "Elektrik: pafta yok; sayılar mühendisin oda başına kuralından (doğruluk payı yaklaşık %75). Salon ile mutfağın aynı mahalde olduğu yerde ikisinin kuralı birlikte uygulandı (mühendis doğruladı).",
             "Kablo boyunda 'sigortadan evin en uzak mesafesi' kapalı kısmın köşegeni alındı (Excel motorundaki gibi).",
             "Köşebent: yalnız iç köşeler sayıldı; odaya doğru çıkıntı yapan köşeler sayılmaz, veranda tavanının çevresi sayılır (mühendis, 4 Ekim 12:14). Veranda çevresi brüt ölçüyle.",
             "Dış kapı boşluğu 0,95 × 2,10 m (mühendis, 4 Ekim 12:14); katalog çiziminde kapı 100 cm'di.",
             "Boardex zayiatı %8, Boardex 12,5 mm, OSB 11 mm (mühendis, 4 Ekim 12:14; zayiat için Lokman, 4 Ekim 15:18: devam).",
-            "Damlalık listede yok (Lokman, 4 Ekim 15:18: montajcılar kullanmıyor); mahya bandı yalnız mahyalardan.",
+            "Damlalık ve tek kat panel kapaması listede yok (Lokman, 4 Ekim 15:18 ve 16:18: montajcılar kullanmıyor; plastik kapama aparatı sipariş verilirse eklenir); "
+            "mahya bandı yalnız mahyalardan.",
             "Çatı çeliği, veranda dikmesi ve kirişi şimdilik Excel motorunun ortalamasıyla (Lokman, 4 Ekim 15:18: motor kıstas).",
         ],
     }
