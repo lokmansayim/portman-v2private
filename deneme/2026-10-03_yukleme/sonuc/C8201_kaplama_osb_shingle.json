@@ -69,7 +69,7 @@
    "kg": 705.7,
    "formul": "saçak dahil çatı planı × 7,55 kg/m² (motorun proje ortalaması); adet çatı tipine göre sabit",
    "durum": "motor",
-   "not": "şimdilik Excel motorunun ortalamasıyla (mühendis, 4 Ekim 12:14); makas ölçüsü verilirse değişir"
+   "not": "şimdilik Excel motoru kıstas (mühendis, 4 Ekim 12:14; Lokman, 4 Ekim 15:18); makas ölçüsü verilirse değişir"
   },
   {
    "grup": "Çelik panel",
@@ -186,7 +186,7 @@
    "kg": null,
    "formul": "(çevre × yükseklik + kolon/kiriş kaplaması + çatı alnı (kalkan) − boşluklar) × 1,08 ÷ 2,88",
    "durum": "excel",
-   "not": "zayiat %8: mühendis, 4 Ekim 12:14. Gerçek listelerdeki adetler %15'e uyuyor; %15 ile 33 levha"
+   "not": "zayiat %8: mühendis, 4 Ekim 12:14; Lokman, 4 Ekim 15:18: bununla devam. 2025 listelerindeki adetler %15'e uyuyor; %15 ile 33 levha"
   },
   {
    "grup": "İç cephe kaplama",
@@ -251,7 +251,7 @@
    "kg": null,
    "formul": "dolap ve TV ünitesi gelen duvarlar: (duvar yüzünün boyu × yükseklik − boşluklar) × 1,05 ÷ 2,98",
    "durum": "muhendis",
-   "not": "banyo ile mutfak arası duvar 2,49 m (mutfak dolabı); üst dış duvar 2,96 m (mutfak dolabı ve eviye); hol ile yaşam alanı arası duvar 4,80 m (TV ünitesi). Duvarların seçimi katalog görselinden; mühendis doğruladı (4 Ekim). Duvar yüzünün tamamı alınır (mühendis, 4 Ekim 12:14)"
+   "not": "banyo ile mutfak arası duvar 2,49 m (mutfak dolabı); üst dış duvar 2,96 m (mutfak dolabı ve eviye); hol ile yaşam alanı arası duvar 4,80 m (TV ünitesi). Duvarların seçimi katalog görselinden; mühendis doğruladı (4 Ekim). Duvar yüzünün tamamı alınır (mühendis, 4 Ekim 12:14). Odanın bütün yüzeyi sayılırsa (ilk hesap) 42,5 m² → 15 levha; az olan baz alındı, öteki bayiye belirtilecek (Lokman, 4 Ekim 15:18). Klima duvarı sayılmadı"
   },
   {
    "grup": "İç cephe kaplama",
@@ -1193,6 +1193,12 @@
    "uydu_prizi": 1,
    "sigorta": 9
   },
-  "kirma_dizilim": null
+  "kirma_dizilim": null,
+  "osb_takviye": {
+   "duvarlar_m2": 24.54,
+   "duvarlar_adet": 9,
+   "butun_oda_m2": 42.49,
+   "butun_oda_adet": 15
+  }
  }
 }

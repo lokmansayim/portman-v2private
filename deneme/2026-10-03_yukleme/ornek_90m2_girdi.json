@@ -145,7 +145,9 @@
     "cephe_kaynak": "dere yalnız iki uzun saçakta: bina 13,57 m + sundurma 1,66 m (SketchUp modelinden)",
     "kose_adedi": 4,
     "inis_adedi_liste": 7,
-    "inis_notu": "Listede 7 iniş var; hesapta iniş sayısı Lokman'ın kuralından gelir (köşeler + 10 m ve üzeri cephelerin ortası)."
+    "inis_notu": "Listede 7 iniş var; hesapta iniş sayısı Lokman'ın kuralından gelir (köşeler + 10 m ve üzeri cephelerin ortası).",
+    "kapatma_m": 1.1,
+    "kapatma_kaynak": "listedeki ürün: metal kiremit (110 cm kapatır)"
   },
   "bina_m2": 90,
   "celik_panel_adedi": 44,

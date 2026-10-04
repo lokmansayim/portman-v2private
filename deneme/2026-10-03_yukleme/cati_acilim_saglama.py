@@ -25,33 +25,17 @@ from shapely.affinity import rotate, translate
 from shapely.geometry import Polygon, box
 from shapely.ops import unary_union
 
-from cati_acilim import BASLANGIC, dizilim, kural_dizilimi
+from cati_acilim import BASLANGIC, dizilim, kural_dizilimi, panel_yerlesimi
 
 BURADA = Path(__file__).resolve().parent
 TOL = 1e-6
 
 
 def panel_sekilleri(d: dict):
-    """Kesim planındaki yerleşim (cati_acilim.kesim_ciz ile aynı): (panel no, parça, çokgen [panel koordinatı; m], alt mı üst mü)."""
-    w = d["kapatma_m"]
-    for pn in d["paneller"]:
-        taban = 0.0
-        for dk in pn["dikdortgenler"]:
-            l, ps = dk["boy"], dk["parcalar"]
-            if len(ps) == 1 and ps[0].konum == "tam":
-                p = ps[0]
-                yield pn["no"], p, Polygon([(x - p.x0, t + d["tasma_m"] + taban) for x, t in p.kose]), "alt"
-            else:
-                alt = ps[0]
-                a, b, en = alt.uzun, alt.kisa, alt.en
-                kose = [(w - en, 0), (w, 0), (w, a), (w - en, b)] if alt.tip == "L" else [(0, 0), (en, 0), (en, b), (0, a)]
-                yield pn["no"], alt, Polygon([(x, y + taban) for x, y in kose]), "alt"
-                if len(ps) == 2:
-                    ust = ps[1]
-                    a, b, en = ust.uzun, ust.kisa, ust.en
-                    kose = [(0, l), (en, l), (en, l - b), (0, l - a)] if ust.tip == "L" else [(w, l), (w - en, l), (w - en, l - b), (w, l - a)]
-                    yield pn["no"], ust, Polygon([(x, y + taban) for x, y in kose]), "ust"
-            taban += l
+    """Kesim planındaki yerleşim (`cati_acilim.panel_yerlesimi`; çizim ve ölçü tablosuyla aynı çokgenler):
+    (panel no, parça, çokgen [panel koordinatı; m], alt mı üst mü)."""
+    for no, p, kose, konum in panel_yerlesimi(d):
+        yield no, p, Polygon(kose), konum
 
 
 def es_mi(s1: Polygon, s2: Polygon) -> bool:

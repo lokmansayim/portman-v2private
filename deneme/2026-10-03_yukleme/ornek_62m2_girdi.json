@@ -130,7 +130,9 @@
     "cephe_kaynak": "karkas dış ölçüsü 1149,0 × 544,1 cm (SketchUp modelinden)",
     "kose_adedi": 4,
     "inis_adedi_liste": 7,
-    "inis_notu": "Listede 7 iniş var; hesapta iniş sayısı Lokman'ın kuralından gelir (köşeler + 10 m ve üzeri cephelerin ortası)."
+    "inis_notu": "Listede 7 iniş var; hesapta iniş sayısı Lokman'ın kuralından gelir (köşeler + 10 m ve üzeri cephelerin ortası).",
+    "kapatma_m": 1.0,
+    "kapatma_kaynak": "listedeki ürün: sandviç panel (100 cm kapatır)"
   },
   "celik_panel_adedi": 63,
   "kosebent_adedi": 50,

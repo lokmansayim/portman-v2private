@@ -69,7 +69,7 @@
    "kg": 555.45,
    "formul": "saçak dahil çatı planı × 7,55 kg/m² (motorun proje ortalaması); adet çatı tipine göre sabit",
    "durum": "motor",
-   "not": "şimdilik Excel motorunun ortalamasıyla (mühendis, 4 Ekim 12:14); makas ölçüsü verilirse değişir"
+   "not": "şimdilik Excel motoru kıstas (mühendis, 4 Ekim 12:14; Lokman, 4 Ekim 15:18); makas ölçüsü verilirse değişir"
   },
   {
    "grup": "Çelik panel",
@@ -199,7 +199,7 @@
    "kg": null,
    "formul": "(çevre × yükseklik + kolon/kiriş kaplaması + çatı alnı (kalkan) − boşluklar) × 1,08 ÷ 2,88",
    "durum": "excel",
-   "not": "zayiat %8: mühendis, 4 Ekim 12:14. Gerçek listelerdeki adetler %15'e uyuyor; %15 ile 32 levha"
+   "not": "zayiat %8: mühendis, 4 Ekim 12:14; Lokman, 4 Ekim 15:18: bununla devam. 2025 listelerindeki adetler %15'e uyuyor; %15 ile 32 levha"
   },
   {
    "grup": "Dış cephe kaplama",
@@ -303,7 +303,7 @@
    "kg": null,
    "formul": "çatı açılımı: yüzler şerit şerit dizilir; çapraz kesimden artan parça karşı yüzde kullanılır; panel boyu = eğimli boy + taşma",
    "durum": "lokman",
-   "not": "16 panel tam boy, 12 panel kesilerek; alan olarak en az 25. Dizilim her yüzde sol köşeden başlar. Kaplama saçaktan 3,8 cm taşar (kural 5 cm; listedeki panel boyu o kadarına yetiyor); kesim payı 5 mm (varsayım)"
+   "not": "16 panel tam boy, 12 panel kesilerek; alan olarak en az 25. Dizilim her yüzde sol köşeden başlar (Lokman, 4 Ekim 15:18). Kaplama saçaktan 3,8 cm taşar (kural 5 cm; listedeki panel boyu o kadarına yetiyor); kesim payı 5 mm; yedek panel yok: kesim planı montajcıya verilir (Lokman, 4 Ekim 15:18). Panel L 3214 ve daha uzun sipariş edilirse 26 panel yeter (öneri; karar bekliyor)"
   },
   {
    "grup": "Çatı kaplamaları",
@@ -329,7 +329,7 @@
    "kg": null,
    "formul": "her saçak kenarı ÷ 2,5, ayrı ayrı yukarı",
    "durum": "uydurma",
-   "not": null
+   "not": "2025 listelerindeki sac kapama; Excel motorunda damlalıktan ayrı kalem. Damlalık çıkarıldı, bu kalem duruyor. Plastik kapama aparatı bunun yerine mi geçecek: soruldu (teyit bekliyor)"
   },
   {
    "grup": "Çatı kaplamaları",
@@ -340,9 +340,9 @@
    "brut": null,
    "birim": "m",
    "kg": null,
-   "formul": "(metal kiremit mahyası 11 × 2,8 m + damlalık 0 × 2,5 m) ÷ 10",
+   "formul": "(metal kiremit mahyası 11 × 2,8 m) ÷ 10",
    "durum": "muhendis",
-   "not": "formül: mühendis, 4 Ekim 12:14 (Excel motorundaki gibi). Damlalık listede yok; sıfır alındı"
+   "not": "formül: mühendis, 4 Ekim 12:14 (Excel motorundaki gibi). Damlalık kullanılmıyor: listede yok, formüldeki terimi de çıkarıldı (Lokman, 4 Ekim 15:18)"
   },
   {
    "grup": "Çatı kaplamaları",
@@ -907,9 +907,18 @@
    "kesim_payi_mm": 5.0,
    "paysiz_adet": 28,
    "bir_cm_payla_adet": 28,
+   "en_az_adet": 28,
+   "baslangic_kurali": "sol",
+   "cift": 10,
+   "tek": 4,
+   "uzun_panelle": {
+    "boy_mm": 3214,
+    "adet": 26
+   },
    "en_dar_pay_cm": 42.4,
    "egimli_boy_m": 3.1618
-  }
+  },
+  "osb_takviye": null
  },
  "karsilastirma": {
   "Saçak sacı (30'luk)": {

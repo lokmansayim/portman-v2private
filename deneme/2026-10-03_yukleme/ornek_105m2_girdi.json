@@ -134,7 +134,9 @@
     "sacak_alti": "boardex",
     "sacak_alti_eni_m": 0.5,
     "sacak_alti_notu": "Listede saçaklar için Boardex 19,6 m² = 39,2 m × 0,50.",
-    "sacak_omegasi": "Geniş saçak omegası (180 × 2500)"
+    "sacak_omegasi": "Geniş saçak omegası (180 × 2500)",
+    "kapatma_m": 0.87,
+    "kapatma_kaynak": "listedeki ürün: tek kat panel (87 cm kapatır)"
   },
   "celik_panel_adedi": 57,
   "kosebent_adedi": 85,

@@ -1,11 +1,11 @@
 {
-  "sema": "portman.yukleme_kurallari/0.6-taslak",
-  "aciklama": "Çelik (A1) ve çatı (A5) yükleme listesi için katsayılar. Her değerin kaynağı ve durumu yanında. durum: lokman = Lokman'ın söylediği kural (tarih ve saat kaynakta); muhendis = PortatifEv'in inşaat mühendisi Ubeydullah'ın verdiği kural ya da değer (cevaplarını Lokman 3 Ekim 2026 18:14'te ve 4 Ekim 2026 01:24'te iletti); excel = PortatifEv'in yükleme listesi çalışma kitaplarındaki formül ya da not; motor = PortatifEv'in Excel hesaplama motorundaki (CTKBF V1.1) formül, not ya da ortalama; liste = gerçek listedeki boyut bilgisi; uydurma = gerçek listelerdeki adetleri tutturan kural, teyit bekliyor; varsayim = Claude'un varsayımı, teyit bekliyor.",
+  "sema": "portman.yukleme_kurallari/0.7-taslak",
+  "aciklama": "Çelik (A1) ve çatı (A5) yükleme listesi için katsayılar. Her değerin kaynağı ve durumu yanında. durum: lokman = Lokman'ın söylediği kural (tarih ve saat kaynakta); muhendis = PortatifEv'in inşaat mühendisi Ubeydullah'ın verdiği kural ya da değer (cevaplarını Lokman 3 Ekim 2026 18:14'te ve 4 Ekim 2026 01:24'te iletti); excel = PortatifEv'in yükleme listesi çalışma kitaplarındaki formül ya da not; motor = PortatifEv'in Excel hesaplama motorundaki (CTKBF V1.1) formül, not ya da ortalama; liste = gerçek listedeki boyut bilgisi; uydurma = gerçek listelerdeki adetleri tutturan kural, teyit bekliyor; varsayim = Claude'un varsayımı, teyit bekliyor. Lokman'ın söylediği ile mühendisin söylediği çelişirse Lokman'ınki geçerlidir (4 Ekim 2026 15:18: en iyi bilgiyi kendisinin vereceğini söyledi).",
   "zayiat": {
     "boardex": {
       "deger": 0.08,
       "durum": "muhendis",
-      "kaynak": "Ubeydullah (inşaat mühendisi), üçüncü cevaplar (Lokman 4 Ekim 2026 12:14'te iletti): \"Boardex zayiatı %8.\" Excel motorunda ve 105 m² listenin hesap sayfasında da %8. Önceki değer %15'ti (yükleme listesi çalışma kitabı: Dış Cephe Boardex = net + net × 15/100); üç gerçek listedeki adetler %15'e uyuyor (hesap / liste: 32 / 32, 45 / 46, 52 / 51), %8 ile 2–3 levha az çıkıyor."
+      "kaynak": "Ubeydullah (inşaat mühendisi), üçüncü cevaplar (Lokman 4 Ekim 2026 12:14'te iletti): \"Boardex zayiatı %8.\" Excel motorunda ve 105 m² listenin hesap sayfasında da %8. Önceki değer %15'ti (yükleme listesi çalışma kitabı: Dış Cephe Boardex = net + net × 15/100); üç gerçek listedeki adetler %15'e uyuyor (hesap / liste: 32 / 32, 45 / 46, 52 / 51), %8 ile 2–3 levha az çıkıyor. Lokman, 4 Ekim 2026 15:18: \"devam et\" (%8 ile)."
     },
     "duvar_alcipan": {
       "deger": 0.05,
@@ -113,9 +113,9 @@
     }
   },
   "kiremit_kapatma_m": {
-    "deger": 1.1,
-    "durum": "liste",
-    "kaynak": "Metal kiremit (110 cm kapatır); montaj paftası notunda da 110 cm. Excel motorunda 105 cm"
+    "deger": 1.0,
+    "durum": "lokman",
+    "kaynak": "Lokman, 4 Ekim 2026 15:18: \"kiremit desen sacıda 100 al\"; ürüne göre değişir, sonra güncellenecek. Önceki değer 1,10'du (2025 listeleri: metal kiremit 110 cm kapatır; montaj paftası notunda da 110 cm). Excel motorunda 105 cm. Girdide `cati.kapatma_m` yazıyorsa o kullanılır."
   },
   "bindirme_m": {
     "mahya": {
@@ -187,8 +187,11 @@
   },
   "sandvic_panel_kapatma_m": {
     "deger": 1.0,
-    "durum": "liste",
-    "kaynak": "Sandviç panel (100 cm kapatır)"
+    "durum": "lokman",
+    "diger_urunler_m": [
+      0.8
+    ],
+    "kaynak": "Lokman, 4 Ekim 2026 15:18: \"sandviç panelde şimdilik 100 al ama 80 kapatırıda var bu bilgiyi daha sonra güncellenecek gibi hesaba kat\". 2025 listelerinde de sandviç panel 100 cm kapatır. 80 cm kapatan ürün gelirse girdide `cati.kapatma_m` 0,8 yazılır ya da bu değer güncellenir."
   },
   "dere_kelepcesi_dere_basina": {
     "deger": 8,
@@ -293,15 +296,16 @@
   "osb_takviye": {
     "deger": {
       "kapsam": "dolap ve TV ünitesi gelen duvarlar; duvar yüzünün tamamı",
-      "zayiat": 0.05
+      "zayiat": 0.05,
+      "baz": "az_olan"
     },
     "durum": "muhendis",
-    "kaynak": "Ubeydullah (inşaat mühendisi), 3 Ekim 2026: \"Bütün oda değil sadece dolap ve TV ünitesi gelen duvar metrajı alınır.\" Lokman, 3 Ekim 2026 13:27: \"içlerde osb yoksa mutfak dolabı tv ünitesi takarken mukavemet sağlasın diye gönderdiğimiz ürünler yani sen salonun bir odası ile mutfağın 1 odasının tüm yüzeyini hesapla\". Uygulama: modelin tanımında dolap ve TV ünitesi gelen duvarlar yazılır (`osb_takviye.duvarlar`); her duvarın o odaya bakan yüzünün tamamı × kat yüksekliği − o yüzdeki boşluklar; × 1,05 ÷ 2,98. Duvarın tamamı mı, yalnız dolabın arkası mı: Lokman'ın 'tüm yüzeyini' sözünden duvarın tamamı alındı. Tanımda duvar yazmıyorsa kalem hesaplanmaz (bekliyor). Gerçek listelerde: 90 m² projede 35,1 m² (13 adet); 105 m² projede brüt 42,9, net 39,3 m² (15 adet; hesap sayfasında OSB zayiatı %15). Listelerde kalemin adı \"TV, klima ve mutfak dolabı arkası\" Ubeydullah (inşaat mühendisi), ikinci cevaplar (Lokman 4 Ekim 2026 01:24'te iletti): Ç8201'de seçilen üç duvar için \"Evet doğru yeri almışsın. Ancak bunun yeri en doğru şekilde genel mimari planda mutfak tezgahı ve TV ünitesi yeri gösterilirse o kısımlar alınarak bulunabilir.\" Yani yer, mimari plandaki tezgâh ve TV ünitesi yerinden alınır. \"O kısımlar\" sözü duvarın yalnız dolap ve TV gelen bölümü diye de okunabilir; Lokman'ın \"tüm yüzeyini\" sözüyle duvar yüzünün tamamı alınıyordu. Ubeydullah (inşaat mühendisi), üçüncü cevaplar (Lokman 4 Ekim 2026 12:14'te iletti): \"Duvarın tamamını al.\" Klima duvarının sayılıp sayılmayacağı cevaplanmadı; sayılmıyor."
+    "kaynak": "Ubeydullah (inşaat mühendisi), 3 Ekim 2026: \"Bütün oda değil sadece dolap ve TV ünitesi gelen duvar metrajı alınır.\" Lokman, 3 Ekim 2026 13:27: \"içlerde osb yoksa mutfak dolabı tv ünitesi takarken mukavemet sağlasın diye gönderdiğimiz ürünler yani sen salonun bir odası ile mutfağın 1 odasının tüm yüzeyini hesapla\". Uygulama: modelin tanımında dolap ve TV ünitesi gelen duvarlar yazılır (`osb_takviye.duvarlar`); her duvarın o odaya bakan yüzünün tamamı × kat yüksekliği − o yüzdeki boşluklar; × 1,05 ÷ 2,98. Duvarın tamamı mı, yalnız dolabın arkası mı: Lokman'ın 'tüm yüzeyini' sözünden duvarın tamamı alındı. Tanımda duvar yazmıyorsa kalem hesaplanmaz (bekliyor). Gerçek listelerde: 90 m² projede 35,1 m² (13 adet); 105 m² projede brüt 42,9, net 39,3 m² (15 adet; hesap sayfasında OSB zayiatı %15). Listelerde kalemin adı \"TV, klima ve mutfak dolabı arkası\" Ubeydullah (inşaat mühendisi), ikinci cevaplar (Lokman 4 Ekim 2026 01:24'te iletti): Ç8201'de seçilen üç duvar için \"Evet doğru yeri almışsın. Ancak bunun yeri en doğru şekilde genel mimari planda mutfak tezgahı ve TV ünitesi yeri gösterilirse o kısımlar alınarak bulunabilir.\" Yani yer, mimari plandaki tezgâh ve TV ünitesi yerinden alınır. \"O kısımlar\" sözü duvarın yalnız dolap ve TV gelen bölümü diye de okunabilir; Lokman'ın \"tüm yüzeyini\" sözüyle duvar yüzünün tamamı alınıyordu. Ubeydullah (inşaat mühendisi), üçüncü cevaplar (Lokman 4 Ekim 2026 12:14'te iletti): \"Duvarın tamamını al.\" Klima duvarının sayılıp sayılmayacağı cevaplanmadı; sayılmıyor. Lokman, 4 Ekim 2026 15:18 (klima duvarı sorusuna): \"sen ilk seferdeki gibi say bayi maliyeti de göz önüne alıyor bunu bayiye belirtmem lazım şimdilik hangisi az ise onu baz al\". Okuma: iki hesap yapılır: yalnız dolap ve TV ünitesi gelen duvarlar ve odanın bütün yüzeyi (Lokman'ın 3 Ekim 13:27 kuralı; ilk hesap). Listeye az olan girer; öteki, bayiye belirtilmek üzere satırın notunda durur. Klima duvarı baz hesapta sayılmaz."
   },
   "tek_kat_panel_kapatma_m": {
-    "deger": 0.87,
-    "durum": "liste",
-    "kaynak": "105 m² liste ve 90 m² projenin montaj paftası notu: tek kat panel 87 cm kapatır. Excel motorunda 100 cm"
+    "deger": 1.0,
+    "durum": "lokman",
+    "kaynak": "Lokman, 4 Ekim 2026 15:18: \"aslında aldığımız ürünler değişiyor güncel olarak Tek Kat panelde 100 kapatır geliyor\"; \"bu bilgiyi daha sonra güncellenecek gibi hesaba kat\". Ürüne göre değişir: önceki değer 0,87'ydi (2025 tarihli 105 m² liste ve 90 m² projenin montaj paftası notu: tek kat panel 87 cm kapatır). Girdide `cati.kapatma_m` yazıyorsa o kullanılır: gerçek liste örnekleri kendi ürünlerinin genişliğiyle hesaplanır. Excel motorunda 100 cm."
   },
   "nem_bariyeri": {
     "deger": {
@@ -340,7 +344,7 @@
         "140x45x1,2": 8.26
       },
       "durum": "motor",
-      "kaynak": "Excel hesaplama motoru (CTKBF V1.1): kolon tonajı ÷ kolon boyu (adet × 2,4 m); 80×1,2: 4 proje, 140×1,2: 3 proje Ubeydullah (inşaat mühendisi), üçüncü cevaplar (Lokman 4 Ekim 2026 12:14'te iletti): makas, veranda dikmesi ve kirişi için \"şimdilik Excel hesaplama motoruna uy\"."
+      "kaynak": "Excel hesaplama motoru (CTKBF V1.1): kolon tonajı ÷ kolon boyu (adet × 2,4 m); 80×1,2: 4 proje, 140×1,2: 3 proje Ubeydullah (inşaat mühendisi), üçüncü cevaplar (Lokman 4 Ekim 2026 12:14'te iletti): makas, veranda dikmesi ve kirişi için \"şimdilik Excel hesaplama motoruna uy\". Lokman, 4 Ekim 2026 15:18: \"Tamam motoruda inceleyeceğim şimdilik motoru kastas al\" (motor kıstas alınır)."
     },
     "kiris_kg_m": {
       "deger": {
@@ -349,7 +353,7 @@
         "140x45x1,5": 11.04
       },
       "durum": "motor",
-      "kaynak": "Excel hesaplama motoru (CTKBF V1.1): kiriş tonajı ÷ kiriş boyu; 80×1,2: 5 proje Ubeydullah (inşaat mühendisi), üçüncü cevaplar (Lokman 4 Ekim 2026 12:14'te iletti): makas, veranda dikmesi ve kirişi için \"şimdilik Excel hesaplama motoruna uy\"."
+      "kaynak": "Excel hesaplama motoru (CTKBF V1.1): kiriş tonajı ÷ kiriş boyu; 80×1,2: 5 proje Ubeydullah (inşaat mühendisi), üçüncü cevaplar (Lokman 4 Ekim 2026 12:14'te iletti): makas, veranda dikmesi ve kirişi için \"şimdilik Excel hesaplama motoruna uy\". Lokman, 4 Ekim 2026 15:18: \"Tamam motoruda inceleyeceğim şimdilik motoru kastas al\" (motor kıstas alınır)."
     },
     "cati_kg_m2": {
       "deger": {
@@ -359,7 +363,7 @@
         "besik_2_cumba": 6.08
       },
       "durum": "motor",
-      "kaynak": "Excel hesaplama motoru (CTKBF V1.1), 'CATI TONAJ' sayfası: çatı çeliği (80×45×0,8) ÷ saçak dahil çatı plan alanı. Dört omuz: 3 proje (9,46 · 6,86 · 6,33). Gerçek listelerde: 62 m² kırma 5,8 kg/m² (makas 370 + çatı paneli 56 kg, plan 73,6 m²), 90 m² beşik 5,2 kg/m² (535 kg, plan 103,6 m²). Lokman, 3 Ekim 13:27: makas ve kirişler yaklaşık bir makas ölçüsünden ayrıca verilecek; o zamana kadar geçici Ubeydullah (inşaat mühendisi), ikinci cevaplar (Lokman 4 Ekim 2026 01:24'te iletti): çatı çeliğinin şimdilik motorun ortalamasıyla hesaplanmasına ve tavan ile çatı paneli adedinin alana oranlanmasına \"Tamamdır.\" Ubeydullah (inşaat mühendisi), üçüncü cevaplar (Lokman 4 Ekim 2026 12:14'te iletti): makas, veranda dikmesi ve kirişi için \"şimdilik Excel hesaplama motoruna uy\"."
+      "kaynak": "Excel hesaplama motoru (CTKBF V1.1), 'CATI TONAJ' sayfası: çatı çeliği (80×45×0,8) ÷ saçak dahil çatı plan alanı. Dört omuz: 3 proje (9,46 · 6,86 · 6,33). Gerçek listelerde: 62 m² kırma 5,8 kg/m² (makas 370 + çatı paneli 56 kg, plan 73,6 m²), 90 m² beşik 5,2 kg/m² (535 kg, plan 103,6 m²). Lokman, 3 Ekim 13:27: makas ve kirişler yaklaşık bir makas ölçüsünden ayrıca verilecek; o zamana kadar geçici Ubeydullah (inşaat mühendisi), ikinci cevaplar (Lokman 4 Ekim 2026 01:24'te iletti): çatı çeliğinin şimdilik motorun ortalamasıyla hesaplanmasına ve tavan ile çatı paneli adedinin alana oranlanmasına \"Tamamdır.\" Ubeydullah (inşaat mühendisi), üçüncü cevaplar (Lokman 4 Ekim 2026 12:14'te iletti): makas, veranda dikmesi ve kirişi için \"şimdilik Excel hesaplama motoruna uy\". Lokman, 4 Ekim 2026 15:18: \"Tamam motoruda inceleyeceğim şimdilik motoru kastas al\" (motor kıstas alınır)."
     },
     "boy_c_profil": {
       "deger": {
@@ -590,11 +594,10 @@
   },
   "motorda_olup_listede_olmayanlar": {
     "deger": [
-      "Ters mahya kenar kutuları (ters mahya × 2)",
-      "Damlalık (L 2500; motorda adedi elle giriliyor)"
+      "Ters mahya kenar kutuları (ters mahya × 2)"
     ],
     "durum": "soru",
-    "kaynak": "Excel hesaplama motoru (CTKBF V1.1) bu kalemi hesaplıyor; okunan üç gerçek listeden çıkarılan kalemlerde yok. Cumbalı çatı çalışılınca sorulacak; hesapta yok. Aynı listedeki öteki iki kalem mühendisin ikinci cevaplarıyla kapandı: mahya bandı eklendi (`mahya_bandi`); çatı müdahale kapağı yalnız müşteri isterse (`cati_mudahale_kapagi`). Damlalık: mahya bandı formülünde geçiyor (üçüncü cevaplar); hangi durumda listeye girdiği sorulacak."
+    "kaynak": "Excel hesaplama motoru (CTKBF V1.1) bu kalemi hesaplıyor; okunan üç gerçek listeden çıkarılan kalemlerde yok. Cumbalı çatı çalışılınca sorulacak; hesapta yok. Aynı listedeki öteki iki kalem mühendisin ikinci cevaplarıyla kapandı: mahya bandı eklendi (`mahya_bandi`); çatı müdahale kapağı yalnız müşteri isterse (`cati_mudahale_kapagi`). Damlalık: mahya bandı formülünde geçiyor (üçüncü cevaplar); hangi durumda listeye girdiği sorulacak. Lokman, 4 Ekim 2026 15:18: damlalık listeden tamamen çıkarıldı (montajcılar kullanmıyor); soru kapandı."
   },
   "baz_paket_cati_kaplamasi": {
     "deger": "tek_kat_panel",
@@ -607,12 +610,11 @@
       "parca_boyu_m": {
         "metal_kiremit_mahyasi": 2.8,
         "ters_mahya": 2.8,
-        "trapez_sac_mahyasi": 0.8,
-        "damlalik": 2.5
+        "trapez_sac_mahyasi": 0.8
       }
     },
     "durum": "muhendis",
-    "kaynak": "Ubeydullah (inşaat mühendisi), üçüncü cevaplar (Lokman 4 Ekim 2026 12:14'te iletti): \"Mahya bandı şu şekilde hesaplanır: (Mahya Adedi * 2,8 (metre) + Ters Mahya Adedi * 2,8 (metre) + Damlalık adedi * 2,5 (metre))/10\". Excel motorundaki formül (MALZEMELER C83) aynı: (trapez sac mahyası × 0,8 + metal kiremit mahyası × 2,8 + ters mahya × 2,8 + damlalık × 2,5) ÷ 10, yukarı. OSB mahyası ve özel mahya formülde yok. Damlalık (L 2500) motorda adedi elle girilen bir kalem (şablonda 0); yükleme listesinde yok, sıfır alınır. Önceki uygulama mahya uzunluğundandı (Ç8201'de 3 rulo); bu formülle 4. Listeye girmesi: ikinci cevaplar (\"Mahya bandını ekle.\")."
+    "kaynak": "Ubeydullah (inşaat mühendisi), üçüncü cevaplar (Lokman 4 Ekim 2026 12:14'te iletti): \"Mahya bandı şu şekilde hesaplanır: (Mahya Adedi * 2,8 (metre) + Ters Mahya Adedi * 2,8 (metre) + Damlalık adedi * 2,5 (metre))/10\". Excel motorundaki formül (MALZEMELER C83) aynı: (trapez sac mahyası × 0,8 + metal kiremit mahyası × 2,8 + ters mahya × 2,8 + damlalık × 2,5) ÷ 10, yukarı. OSB mahyası ve özel mahya formülde yok. Damlalık (L 2500) motorda adedi elle girilen bir kalem (şablonda 0); yükleme listesinde yok, sıfır alınır. Önceki uygulama mahya uzunluğundandı (Ç8201'de 3 rulo); bu formülle 4. Listeye girmesi: ikinci cevaplar (\"Mahya bandını ekle.\"). Lokman, 4 Ekim 2026 15:18: \"damlalık uygulamasını yanlış buluyorum tamamen listeden çıkar\"; \"hiçbir montajcı kullanmıyor\". Damlalık terimi formülden çıkarıldı; mühendisin formülündeki öteki terimler duruyor."
   },
   "cati_mudahale_kapagi": {
     "deger": {
@@ -626,7 +628,7 @@
     "deger": {
       "yontem": "acilim",
       "artan_parca": "karsi_yuz",
-      "baslangic": "en_az",
+      "baslangic": "sol",
       "artan_parca_kullanilmayan_kaplamalar": [
         "osb_kiremit"
       ],
@@ -638,10 +640,11 @@
         "orta",
         "sag",
         "plan_yonu"
-      ]
+      ],
+      "yedek_panel": 0
     },
     "durum": "lokman",
-    "kaynak": "Lokman, 4 Ekim 2026 01:42: kırma çatıda kaplama adedi AutoCAD'e bırakılmaz (\"biz AutoCAD bulaşmak istemiyoruz\"; mühendisin \"autocad üzerinden hesaplanarak\" cevabını düzeltti). Çatı eğime göre çizilir ve \"zarfı açar gibi\" açılır; kaplama yüzeye dizilir. \"çatı formunun çapraz kesimleri diğer tarafa kullanabilirsin\": sol üçgende kullanılan panelin artanı sağ tarafa aynı açıyla; ön yamuktan çıkan açılı kesilmiş parçalar arka taraftaki aynı biçimdeki açılı yere. Uygulama (`cati_acilim.py`): dört yüz gerçek boyutuyla açılır, saçağa dik şeritlere bölünür; bir panel gönyesinde ve çapraz kesilir, çapraz kesimin üst parçası karşı yüzde kullanılır. Ubeydullah (inşaat mühendisi), üçüncü cevaplar (Lokman 4 Ekim 2026 12:14'te iletti): kaplama çatı yüzeyinin 5 cm dışına uzatılır (`cati_kaplama_tasma_m`); \"Kiremit desen sacda artan parça karşı yüzde desen ters geldiğinden kullanılmaz.\" Dizilimin hangi köşeden başladığı, kesim payı ve yedek sorularına cevap gelmedi. Uygulamadaki varsayımlar: başlangıç `baslangic_sirasi`ndaki sırayla denenir (sol: her yüzde sol köşeden; kose_orta: uzun yüzlerde sol köşeden, kısa yüzlerde ortadan; orta_kose: tersi; orta; sag; plan_yonu: karşılıklı yüzlerde planda aynı uçtan) ve en az paneli veren ilk başlangıç alınır; kesim payı 5 mm (çapraz kesimde iki parçanın arasına ve aynı panelden çıkan dikdörtgenlerin arasına; birkaç milimetrelik paya güvenilmesin diye); boy bindirmesi yok; yedek panel eklenmez."
+    "kaynak": "Lokman, 4 Ekim 2026 01:42: kırma çatıda kaplama adedi AutoCAD'e bırakılmaz (\"biz AutoCAD bulaşmak istemiyoruz\"; mühendisin \"autocad üzerinden hesaplanarak\" cevabını düzeltti). Çatı eğime göre çizilir ve \"zarfı açar gibi\" açılır; kaplama yüzeye dizilir. \"çatı formunun çapraz kesimleri diğer tarafa kullanabilirsin\": sol üçgende kullanılan panelin artanı sağ tarafa aynı açıyla; ön yamuktan çıkan açılı kesilmiş parçalar arka taraftaki aynı biçimdeki açılı yere. Uygulama (`cati_acilim.py`): dört yüz gerçek boyutuyla açılır, saçağa dik şeritlere bölünür; bir panel gönyesinde ve çapraz kesilir, çapraz kesimin üst parçası karşı yüzde kullanılır. Ubeydullah (inşaat mühendisi), üçüncü cevaplar (Lokman 4 Ekim 2026 12:14'te iletti): kaplama çatı yüzeyinin 5 cm dışına uzatılır (`cati_kaplama_tasma_m`); \"Kiremit desen sacda artan parça karşı yüzde desen ters geldiğinden kullanılmaz.\" Lokman, 4 Ekim 2026 15:18: \"her köşeden başlayacak gibi hesapla yani 29 hesapla, evet kesim payı için 5 mm uygundur, senin yaptığın kesim planı ile yedek panele gerek yok bizde aynı kesim plan paftasını montajcıya vereceğiz\". Uygulama: dizilim her yüzde, dışarıdan bakışla sol köşeden başlar (`baslangic: sol`); `baslangic_sirasi`ndaki öteki başlangıçlar yalnız bilgi için denenir (en az paneli veren dizilim satırın notunda yazar). Kesim payı 5 mm: çapraz kesimde iki parçanın arasına ve aynı panelden çıkan dikdörtgenlerin arasına. Yedek panel eklenmez; kesim planı montajcıya verilir. Boy bindirmesi yok. Lokman'ın söylediği 29, 87 cm kapatan panelle her yüzde köşeden başlanınca çıkan adetti; aynı cevapta tek kat panelin artık 100 cm kapattığını söyledi (`tek_kat_panel_kapatma_m`): aynı kural Ç8201'de 27 verir."
   },
   "cati_kaplama_tasma_m": {
     "deger": 0.05,
@@ -655,5 +658,12 @@
     },
     "durum": "muhendis",
     "kaynak": "Ubeydullah (inşaat mühendisi), üçüncü cevaplar (Lokman 4 Ekim 2026 12:14'te iletti): \"Boardex 12.5 mm. OSB 11 mm.\" Lokman 2 Ekim'de de Boardex ve alçıpan için 12,5 mm, OSB için 11 mm demişti. 2025 tarihli gerçek listelerde Boardex 8 mm, OSB 9 mm yazıyor; Excel motorunda Boardex 8 mm, OSB 11 mm."
+  },
+  "kapama_aparati": {
+    "deger": {
+      "listede": false
+    },
+    "durum": "lokman",
+    "kaynak": "Lokman, 4 Ekim 2026 15:18: \"orijinal kapama aparatı var plastik ondan sipariş verirsek listeye sokarız\". Damlalığın yerine düşünülen parça; şimdilik listede yok, sipariş verilirse eklenecek. Excel motorunda (MALZEMELER) üç ayrı kalem var: tek kat panel kapaması (66. satır, L 2500, adedi elle), sandviç panel kapaması (69. satır, L 2800; saçak boyu × çatı katsayısı ÷ 2,6) ve damlalık (78. satır, L 2500, adedi elle; şablonda 0). Listedeki \"tek kat panel kapaması\" ve \"sandviç panel kapaması\" (2025 listelerinden, L 2500) damlalık sayılmadı ve duruyor; plastik aparatın bu sac kapamanın yerine geçip geçmeyeceği soruldu."
   }
 }

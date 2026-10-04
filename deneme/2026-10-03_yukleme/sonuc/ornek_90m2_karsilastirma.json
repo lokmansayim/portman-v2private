@@ -73,7 +73,7 @@
    "kg": 590.24,
    "formul": "saçak dahil çatı planı × 5,70 kg/m² (motorun proje ortalaması); adet çatı tipine göre sabit",
    "durum": "motor",
-   "not": "şimdilik Excel motorunun ortalamasıyla (mühendis, 4 Ekim 12:14); makas ölçüsü verilirse değişir"
+   "not": "şimdilik Excel motoru kıstas (mühendis, 4 Ekim 12:14; Lokman, 4 Ekim 15:18); makas ölçüsü verilirse değişir"
   },
   {
    "grup": "Çelik panel",
@@ -203,7 +203,7 @@
    "kg": null,
    "formul": "(çevre × yükseklik + kolon/kiriş kaplaması + çatı alnı (kalkan) − boşluklar) × 1,08 ÷ 2,88",
    "durum": "excel",
-   "not": "zayiat %8: mühendis, 4 Ekim 12:14. Gerçek listelerdeki adetler %15'e uyuyor; %15 ile 45 levha"
+   "not": "zayiat %8: mühendis, 4 Ekim 12:14; Lokman, 4 Ekim 15:18: bununla devam. 2025 listelerindeki adetler %15'e uyuyor; %15 ile 45 levha"
   },
   {
    "grup": "İç cephe kaplama",
@@ -357,9 +357,9 @@
    "brut": null,
    "birim": "m",
    "kg": null,
-   "formul": "(metal kiremit mahyası 7 × 2,8 m + damlalık 0 × 2,5 m) ÷ 10",
+   "formul": "(metal kiremit mahyası 7 × 2,8 m) ÷ 10",
    "durum": "muhendis",
-   "not": "formül: mühendis, 4 Ekim 12:14 (Excel motorundaki gibi). Damlalık listede yok; sıfır alındı"
+   "not": "formül: mühendis, 4 Ekim 12:14 (Excel motorundaki gibi). Damlalık kullanılmıyor: listede yok, formüldeki terimi de çıkarıldı (Lokman, 4 Ekim 15:18)"
   },
   {
    "grup": "Çatı kaplamaları",
@@ -538,7 +538,8 @@
   },
   "elektrik_kaynagi": null,
   "elektrik_kural": null,
-  "kirma_dizilim": null
+  "kirma_dizilim": null,
+  "osb_takviye": null
  },
  "karsilastirma": {
   "Saçak sacı (30'luk)": {

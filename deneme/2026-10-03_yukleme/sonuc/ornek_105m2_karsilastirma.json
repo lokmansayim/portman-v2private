@@ -134,7 +134,7 @@
    "kg": null,
    "formul": "(çevre × yükseklik + kolon/kiriş kaplaması + çatı alnı (kalkan) − boşluklar) × 1,08 ÷ 2,88",
    "durum": "excel",
-   "not": "zayiat %8: mühendis, 4 Ekim 12:14. Gerçek listelerdeki adetler %15'e uyuyor; %15 ile 52 levha"
+   "not": "zayiat %8: mühendis, 4 Ekim 12:14; Lokman, 4 Ekim 15:18: bununla devam. 2025 listelerindeki adetler %15'e uyuyor; %15 ile 52 levha"
   },
   {
    "grup": "İç cephe kaplama",
@@ -238,7 +238,7 @@
    "kg": null,
    "formul": "her saçak kenarı ÷ 2,5, ayrı ayrı yukarı",
    "durum": "uydurma",
-   "not": null
+   "not": "2025 listelerindeki sac kapama; Excel motorunda damlalıktan ayrı kalem. Damlalık çıkarıldı, bu kalem duruyor. Plastik kapama aparatı bunun yerine mi geçecek: soruldu (teyit bekliyor)"
   },
   {
    "grup": "Çatı kaplamaları",
@@ -262,9 +262,9 @@
    "brut": null,
    "birim": "m",
    "kg": null,
-   "formul": "(metal kiremit mahyası 10 × 2,8 m + ters mahya 3 × 2,8 m + damlalık 0 × 2,5 m) ÷ 10",
+   "formul": "(metal kiremit mahyası 10 × 2,8 m + ters mahya 3 × 2,8 m) ÷ 10",
    "durum": "muhendis",
-   "not": "formül: mühendis, 4 Ekim 12:14 (Excel motorundaki gibi). Damlalık listede yok; sıfır alındı"
+   "not": "formül: mühendis, 4 Ekim 12:14 (Excel motorundaki gibi). Damlalık kullanılmıyor: listede yok, formüldeki terimi de çıkarıldı (Lokman, 4 Ekim 15:18)"
   },
   {
    "grup": "Dere",
@@ -920,7 +920,8 @@
    "uydu_prizi": 1,
    "sigorta": 9
   },
-  "kirma_dizilim": null
+  "kirma_dizilim": null,
+  "osb_takviye": null
  },
  "karsilastirma": {
   "Saçak sacı (30'luk)": {

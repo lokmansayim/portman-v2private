@@ -14,7 +14,8 @@ for kp in tek_kat_panel sandvic_panel osb_kiremit osb_trapez trapez_sac osb_shin
   "$PY" yukleme.py sonuc/C8201_girdi.json --kaplama $kp --cikti sonuc/C8201_kaplama_$kp.json --md sonuc/C8201_kaplama_$kp.md > /dev/null
 done
 # çatı açılımı ve kaplama dizilimi (kırma çatıda adet buradan): baz kaplama çizimle; şerit dizilen öteki kaplamalar yalnız JSON
-"$PY" cati_acilim.py sonuc/C8201_girdi.json --cikti sonuc/C8201_cati_acilim.json --acilim-png sonuc/C8201_cati_acilim.png --kesim-png sonuc/C8201_cati_kesim.png | sed -n 1,4p
+"$PY" cati_acilim.py sonuc/C8201_girdi.json --cikti sonuc/C8201_cati_acilim.json --acilim-png sonuc/C8201_cati_acilim.png --kesim-png sonuc/C8201_cati_kesim.png \
+  --olcu-md sonuc/C8201_cati_kesim_olculeri.md | sed -n 1,4p
 for kp in sandvic_panel osb_kiremit trapez_sac; do
   "$PY" cati_acilim.py sonuc/C8201_girdi.json --kaplama $kp --cikti sonuc/C8201_cati_acilim_$kp.json | sed -n 3,4p
 done

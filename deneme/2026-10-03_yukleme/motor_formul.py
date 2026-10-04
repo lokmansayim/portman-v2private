@@ -16,6 +16,8 @@ Formül (61, 64, 67 ve 72. satırlar; 58 ve 59. satırlarda da aynı ifade var):
 Kaplama katsayısı: trapez sac 0,8 · tek kat ve sandviç panel 1 · metal kiremit 1,05.
 Excel bölmeyi ve çarpmayı soldan sağa yaptığı için bu (yüzey ÷ sac boyu) × katsayıdır; kapatma genişliğine bölmek için
 katsayının paydanın parantezi içinde olması gerekir.
+Kapatma genişliği ürüne göre değişir (Lokman, 4 Ekim 2026 15:18): güncel ürünlerde tek kat panel, kiremit desen sac ve
+sandviç panel 100 cm (sandviç panelin 80 cm kapatanı da var); 2025 listelerinde tek kat panel 87, kiremit desen sac 110 cm'di.
 
 Kullanım:
     python motor_formul.py
@@ -45,7 +47,7 @@ def motor_kaplama(k10: float, k11: float, k17: float, cati: str, k13: float = 0.
         "yuzey_m2": yuzey, "sac_boyu_m": boy, "sac_boyu_mm": yukari(boy * 1000), "oran": yuzey / boy, "cati_katsayisi": ck,
         "yazilan": {ad: yukari(yuzey / boy * k * ck) for ad, k in KAPLAMA_KATSAYISI.items()},
         "duzeltilmis": {ad: yukari(yuzey / (boy * k) * ck) for ad, k in KAPLAMA_KATSAYISI.items()},
-        "tek_kat_87": yukari(yuzey / (boy * 0.87) * ck),      # tek kat panel gerçek listelerde 87 cm kapatır; motorda 100 cm yazıyor
+        "kiremit_100": yukari(yuzey / (boy * 1.0) * ck),      # kiremit desen sac güncel üründe 100 cm kapatır (Lokman); motorda 105 cm yazıyor
     }
 
 

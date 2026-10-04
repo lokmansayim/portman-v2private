@@ -8,8 +8,9 @@ panelin artanı sağ üçgene, ön yamuktan çıkan açılı kesilmiş parça ar
 Model (dikdörtgen planlı, dört yanı eşit eğimli kırma çatı):
   - Dört yüz gerçek boyutuyla açılır: uzun saçaklarda iki yamuk (ön, arka), kısa saçaklarda iki üçgen (sol, sağ).
     Yüzün yüksekliği eğimli boydur: (kısa kenar ÷ 2) × √(1 + eğim²). Kırma çizgisi açılımda bütün yüzlerde aynı açıdadır.
-  - Her yüz, saçağa dik, `kapatma` genişliğinde şeritlere bölünür. Dizilimin başladığı yer seçilebilir (köşe ya da orta);
-    kurallardaki sırayla denenir ve en az paneli veren başlangıç alınır.
+  - Her yüz, saçağa dik, `kapatma` genişliğinde şeritlere bölünür. Kapatma genişliği ürüne göre değişir (Lokman, 4 Ekim 2026 15:18).
+    Dizilim her yüzde, dışarıdan bakışla sol köşeden başlar (Lokman, 15:18: "her köşeden başlayacak gibi hesapla"); öteki
+    başlangıçlar (sağ köşe, orta, karışık) yalnız bilgi için denenir.
   - Kaplama saçak çizgisinden `tasma` kadar dışarı uzar (mühendis, 4 Ekim 2026 12:14: 5 cm): her parçanın boyu o kadar artar.
   - Şerit parçası: düz (tam boy dikdörtgen), L (boyu soldan sağa artan), R (azalan) ya da karma (içinde mahya ucu ya da tepe var).
   - Bir panel gönyesinde kesilerek kısa dikdörtgenlere, her dikdörtgen tek bir çapraz kesimle iki parçaya ayrılır:
@@ -18,13 +19,15 @@ Model (dikdörtgen planlı, dört yanı eşit eğimli kırma çatı):
   - Eşleme: en uzun parçadan başlanır; karşı yüzde, onunla aynı panelden çıkabilen en uzun parça eş yapılır.
     Dikdörtgenler panellere büyükten küçüğe, ilk sığana yerleştirilir.
   - Boy bindirmesi yoktur. Kesim payı (`kesim_payi`): çapraz kesimde iki parçanın arasına ve aynı panelden çıkan
-    dikdörtgenlerin arasına eklenir; birkaç milimetrelik paya güvenilmesin diye kurallarda 5 mm (varsayım).
+    dikdörtgenlerin arasına eklenir; kurallarda 5 mm (Lokman onayladı, 15:18). Yedek panel eklenmez: kesim planı montajcıya verilir.
     Panel tek boydur: eğimli boy + taşma (Excel motorundaki gibi; mm'ye yukarı).
+  - Kesim planının ölçüleri (`--olcu-md`): her parçanın çatıdaki kenar boyları ve paneldeki yeri; çizim, ölçü tablosu ve
+    geometrik sağlama aynı yerleşimi (`panel_yerlesimi`) kullanır.
 Hesapta LLM yok: aynı girdi aynı dizilimi verir.
 
 Kullanım:
     python cati_acilim.py sonuc/C8201_girdi.json --cikti sonuc/C8201_cati_acilim.json \\
-        --acilim-png sonuc/C8201_cati_acilim.png --kesim-png sonuc/C8201_cati_kesim.png
+        --acilim-png sonuc/C8201_cati_acilim.png --kesim-png sonuc/C8201_cati_kesim.png --olcu-md sonuc/C8201_cati_kesim_olculeri.md
 """
 from __future__ import annotations
 
@@ -197,9 +200,44 @@ def adet_denemeleri(px: float, py: float, egim: float, kapatma: float, boy: floa
     return {b: dizilim(px, py, egim, kapatma, boy, paylas, b, kesim_payi, tasma)["adet"] for b in BASLANGIC}
 
 
+def kapatma_genisligi(kr: dict, cati: dict, kaplama: str) -> float:
+    """Kaplamanın kapattığı genişlik (m). Ürüne göre değişir (Lokman, 4 Ekim 2026 15:18): girdide `cati.kapatma_m` yazıyorsa o
+    (gerçek liste örnekleri kendi ürünleriyle hesaplanır), yoksa kurallardaki güncel değer."""
+    return cati.get("kapatma_m") or kr[KAPATMA_KURALI[kaplama]]["deger"]
+
+
+def panel_yerlesimi(d: dict):
+    """Kesim planındaki yerleşim: her parça için (panel no, parça, çokgen [panel koordinatı; m; saçak ucu altta], 'alt' | 'ust').
+    Dikdörtgenler panelde saçak ucundan yukarı dizilir; aralarında kesim payı bırakılır. Alt parça olduğu gibi kullanılır;
+    üst parça çatıya 180° çevrilerek (ters yüz edilmeden) konur. Çizim, ölçü tablosu ve geometrik sağlama bu çokgenleri kullanır."""
+    w, pay, ts = d["kapatma_m"], d["kesim_payi_m"], d["tasma_m"]
+    for pn in d["paneller"]:
+        taban = 0.0
+        for dk in pn["dikdortgenler"]:
+            l, ps = dk["boy"], dk["parcalar"]
+            if len(ps) == 1 and ps[0].konum == "tam":
+                q = ps[0]
+                yield pn["no"], q, [(x - q.x0, t + ts + taban) for x, t in q.kose], "alt"
+            else:
+                alt = ps[0]
+                a, b, en = alt.uzun, alt.kisa, alt.en
+                # boyu sağa doğru artan (L) dar parça sağa, azalan (R) sola yaslanır
+                kose = [(w - en, 0), (w, 0), (w, a), (w - en, b)] if alt.tip == "L" else [(0, 0), (en, 0), (en, b), (0, a)]
+                yield pn["no"], alt, [(x, y + taban) for x, y in kose], "alt"
+                if len(ps) == 2:
+                    ust = ps[1]
+                    a, b, en = ust.uzun, ust.kisa, ust.en
+                    # üst parça çevrilmeden önce: kalın ucu alt parçanın ince ucunun üstünde, dikdörtgenin üst kenarından asılı
+                    kose = [(0, l), (en, l), (en, l - b), (0, l - a)] if ust.tip == "L" else [(w, l), (w - en, l), (w - en, l - b), (w, l - a)]
+                    yield pn["no"], ust, [(x, y + taban) for x, y in kose], "ust"
+            taban += l + pay
+
+
 def kural_dizilimi(kr: dict, cati: dict, kaplama: str) -> dict | None:
-    """Kurallardaki ayarlarla kırma çatının dizilimi: taşma, kesim payı, artan parçanın kullanılıp kullanılmayacağı ve
-    başlangıç seçimi (kurallardaki sırayla denenir; en az paneli veren ilk başlangıç alınır).
+    """Kurallardaki ayarlarla kırma çatının dizilimi: kapatma genişliği, taşma, kesim payı, artan parçanın kullanılıp
+    kullanılmayacağı ve dizilimin başladığı yer. Başlangıç kuralda adıyla yazılıdır (Lokman, 4 Ekim 2026 15:18: her yüzde köşeden,
+    `sol`); `en_az` yazıyorsa kurallardaki sırayla denenir ve en az paneli veren ilk başlangıç alınır. Sıradaki öteki başlangıçlar
+    her durumda bilgi için denenir (`denemeler`, `en_az_adet`).
     Panel boyu listeden geliyorsa ve eğimli boy + taşmadan kısaysa taşma panelin yettiği kadardır.
     Dönen: dizilim sözlüğü ve ek olarak denemeler, paysız ve 1 cm paylı adet. Çatı planı yoksa ya da panel eğimli boydan kısaysa None."""
     if not (cati.get("plan_m") and cati.get("panel_boyu_m") and cati.get("egim")) or kaplama not in KAPATMA_KURALI:
@@ -209,31 +247,93 @@ def kural_dizilimi(kr: dict, cati: dict, kaplama: str) -> dict | None:
     H = min(px, py) / 2 * math.sqrt(1 + egim * egim)
     if boy + EPS < H:
         return None
-    kapatma = kr[KAPATMA_KURALI[kaplama]]["deger"]
+    kapatma = kapatma_genisligi(kr, cati, kaplama)
     paylas = kaplama not in kd["artan_parca_kullanilmayan_kaplamalar"]
     tasma = max(0.0, min(kr["cati_kaplama_tasma_m"]["deger"], boy - H))
     pay = kd["kesim_payi_m"]
-    den = {b: dizilim(px, py, egim, kapatma, boy, paylas, b, pay, tasma)["adet"] for b in kd["baslangic_sirasi"]}
-    secilen = next(b for b in kd["baslangic_sirasi"] if den[b] == min(den.values()))
+    sira = list(kd["baslangic_sirasi"]) + ([kd["baslangic"]] if kd["baslangic"] not in ("en_az", *kd["baslangic_sirasi"]) else [])
+    den = {b: dizilim(px, py, egim, kapatma, boy, paylas, b, pay, tasma)["adet"] for b in sira}
+    secilen = next(b for b in sira if den[b] == min(den.values())) if kd["baslangic"] == "en_az" else kd["baslangic"]
     d = dizilim(px, py, egim, kapatma, boy, paylas, secilen, pay, tasma)
-    d.update(denemeler=den, kaplama=kaplama, tasma_kural_m=kr["cati_kaplama_tasma_m"]["deger"],
+    d.update(denemeler=den, en_az_adet=min(den.values()), baslangic_kurali=kd["baslangic"], kaplama=kaplama, tasma_kural_m=kr["cati_kaplama_tasma_m"]["deger"],
              paysiz_adet=dizilim(px, py, egim, kapatma, boy, paylas, secilen, 0.0, tasma)["adet"],
              bir_cm_payla_adet=dizilim(px, py, egim, kapatma, boy, paylas, secilen, 0.01, tasma)["adet"])
+    # Panel biraz uzun sipariş edilirse adet düşüyor mu? Panel boyu = eğimli boy + taşma tam boy parçaya ancak yeter; en uzun kesik
+    # parça ile köşe parçasının aynı panelden çıkması için kesim payı kadar yer kalmayabilir. 3 cm'ye kadar mm mm denenir (yalnız bilgi).
+    d["uzun_panelle"] = None
+    for ek_mm in range(1, 31):
+        n = dizilim(px, py, egim, kapatma, boy + ek_mm / 1000, paylas, secilen, pay, tasma)["adet"]
+        if n < d["adet"]:
+            d["uzun_panelle"] = {"boy_mm": round(boy * 1000) + ek_mm, "adet": n}
+            break
     return d
+
+
+def kenarlar(p: Parca, tasma: float) -> dict:
+    """Parçanın çatıdaki yerinde, dışarıdan bakışla sol ve sağ kenar boyu (saçak ucundan, taşma dahil) ve varsa aradaki
+    kırık noktaları: (sol kenardan uzaklık, o noktadaki boy). Hepsi m. Kesim için ölçü buradan okunur."""
+    ust = p.kose[2:]                        # (x1, boy), aradaki kırıklar sağdan sola, (x0, boy)
+    return {"sol": ust[-1][1] + tasma, "sag": ust[0][1] + tasma, "ara": [(x - p.x0, t + tasma) for x, t in reversed(ust[1:-1])]}
+
+
+KONUM_ADI = {"tam": "tam boy panel", "alt": "çapraz kesimin alt parçası", "üst": "aynı panelin artan parçası (çevrilerek)", "tek": "tek parça; artığı kullanılmıyor"}
+
+
+def parca_tablosu(d: dict) -> list[str]:
+    """Yüz yüz, şerit şerit parça ölçüleri (markdown): montajcı için. Ölçüler cm; boylar saçak ucundan, taşma dahil."""
+    cik = ["| Yüz | Şerit | Saçaktaki yeri (soldan) | En | Sol kenar | Sağ kenar | Arada | Panel | Nasıl çıkar |", "|---|---|---|---|---|---|---|---|---|"]
+    for ad in NUMARA_SIRASI:
+        for q in d["yuzler"][ad]:
+            kn = kenarlar(q, d["tasma_m"])
+            ara = "; ".join(f"soldan {_tr(u * 100, 1)} cm'de {_tr(b * 100, 1)}" for u, b in kn["ara"])
+            cik.append(f"| {ad} | {q.serit} | {_tr(q.x0 * 100, 1)}–{_tr(q.x1 * 100, 1)} | {_tr(q.en * 100, 1)} | {_tr(kn['sol'] * 100, 1)} | {_tr(kn['sag'] * 100, 1)} | {ara} | {q.panel} | {KONUM_ADI[q.konum]} |")
+    return cik
+
+
+def panel_tablosu(d: dict) -> list[str]:
+    """Panel panel kesim ölçüleri (markdown): her parçanın paneldeki yeri. Ölçüler cm; boy saçak ucundan (panelin alt ucundan) yukarı,
+    en panelin sol kenarından. Parça, sol ve sağ kenardaki iki aralığın arasında kalan dörtgendir; köşesi kesilen tam boy panelde
+    aradaki kırık noktası ayrıca yazılır."""
+    def cm(x: float) -> str:
+        return _tr(x * 100 + 0.0, 1)        # −0,0 yazılmasın
+
+    cik = ["| Panel | Parça | Enine (soldan) | Sol kenarda (alttan) | Sağ kenarda (alttan) | Arada | Çatıya |", "|---|---|---|---|---|---|---|"]
+    for no, q, kose, konum in panel_yerlesimi(d):
+        xs = [x for x, _ in kose]
+        x0, x1 = min(xs), max(xs)
+        sol = [y for x, y in kose if abs(x - x0) < EPS]
+        sag = [y for x, y in kose if abs(x - x1) < EPS]
+        ara = "; ".join(f"soldan {cm(x)}'de {cm(y)}" for x, y in sorted((x, y) for x, y in kose if x0 + EPS < x < x1 - EPS))
+        cik.append(f"| {no} | {q.yuz} {q.serit} | {cm(x0)}–{cm(x1)} | {cm(min(sol))}–{cm(max(sol))} | {cm(min(sag))}–{cm(max(sag))} | {ara} | "
+                   f"{'180° çevrilerek' if konum == 'ust' else 'olduğu gibi'} |")
+    return cik
+
+
+def panel_ozeti(d: dict) -> list[str]:
+    """Panel başına özet (markdown): içinden çıkan parçalar ve kullanılmayan boy (cm)."""
+    cik = ["| Panel | Parçalar | Kullanılmayan boy |", "|---|---|---|"]
+    for pn in d["paneller"]:
+        parcalar = " · ".join(" + ".join(f"{q.yuz} {q.serit}" for q in x["parcalar"]) for x in pn["dikdortgenler"])
+        cik.append(f"| {pn['no']} | {parcalar} | {_tr(max(pn['kalan'], 0.0) * 100, 1)} |")
+    return cik
 
 
 def sozluk(d: dict) -> dict:
     """JSON'a yazılacak biçim (ölçüler m, üç hane)."""
     def r(x: float) -> float:
         return round(x, 3)
+
+    def kn(q: Parca) -> dict:
+        k = kenarlar(q, d["tasma_m"])
+        return {"sol_kenar_m": r(k["sol"]), "sag_kenar_m": r(k["sag"]), "arada": [[r(u), r(b)] for u, b in k["ara"]]}
     return {"plan_m": [r(x) for x in d["plan_m"]], "egim": d["egim"], "kapatma_m": d["kapatma_m"], "panel_boyu_m": d["boy_m"],
             "artan_parca_karsi_yuzde": d["paylas"], "baslangic": d["baslangic"], "baslangic_adi": BASLANGIC_ADI[d["baslangic"]],
             "egimli_boy_m": r(d["egimli_boy_m"]), "mahya_m": r(d["mahya_m"]), "tasma_m": r(d["tasma_m"]),
             "yuzey_m2": round(d["yuzey_m2"], 2), "kaplanan_m2": round(d["kaplanan_m2"], 2), "adet": d["adet"], "alan_alt_siniri": d["alan_alt_siniri"],
             "tam_boy_panel": d["tam_boy_adedi"], "iki_parca_veren_kesim": d["cift_adedi"], "artigi_kullanilmayan_parca": d["tek_adedi"], "parca_adedi": d["parca_adedi"],
             "kesim_payi_m": d["kesim_payi_m"], "en_dar_pay_m": None if d["en_dar_pay_m"] is None else r(d["en_dar_pay_m"]),
-            "yuzler": {ad: [{"serit": p.serit, "x0_m": r(p.x0), "x1_m": r(p.x1), "tip": p.tip, "uzun_m": r(p.uzun), "kisa_m": r(p.kisa), "panel": p.panel, "konum": p.konum}
-                            for p in ps] for ad, ps in d["yuzler"].items()},
+            "yuzler": {ad: [{"serit": p.serit, "x0_m": r(p.x0), "x1_m": r(p.x1), "en_m": r(p.en), "tip": p.tip, "uzun_m": r(p.uzun), "kisa_m": r(p.kisa), **kn(p),
+                             "panel": p.panel, "konum": p.konum} for p in ps] for ad, ps in d["yuzler"].items()},
             "paneller": [{"no": pn["no"], "artan_boy_m": r(pn["kalan"]),
                           "kesimler": [{"boy_m": r(x["boy"]), "parcalar": [f"{p.yuz} {p.serit} ({p.konum})" for p in x["parcalar"]]} for x in pn["dikdortgenler"]]}
                          for pn in d["paneller"]]}
@@ -330,42 +430,22 @@ def kesim_ciz(d: dict, cikti: Path, baslik: str) -> None:
     gen = sutun * (w + ara) - ara
     ust_y, alt_y = boy + 60, -(satir_n - 1) * (boy + satir_ara) - 150
     fig, ax = plt.subplots(figsize=(13.2, 13.2 * 0.96 * (ust_y - alt_y) / (gen + 60) / 0.94 + 0.1), dpi=140)
+    yer: dict[int, list] = {}
+    for no, q, kose, _ in panel_yerlesimi(d):
+        yer.setdefault(no, []).append((q, [(x * 100, y * 100) for x, y in kose]))
     for i, pn in enumerate(d["paneller"]):
         sx = (i % sutun) * (w + ara)
         sy = -(i // sutun) * (boy + satir_ara)
-        taban = 0.0
         ax.add_patch(MplPolygon([(sx, sy), (sx + w, sy), (sx + w, sy + boy), (sx, sy + boy)], closed=True, fc="white", ec=CIZGI, lw=0.6, hatch="////", zorder=1))
-        for dk in pn["dikdortgenler"]:
-            l = dk["boy"] * 100
-            ps = dk["parcalar"]
-            sekiller = []
-            if len(ps) == 1 and ps[0].konum == "tam":
-                p = ps[0]
-                sekiller.append((p, [((x - p.x0) * 100, (t + d["tasma_m"]) * 100) for x, t in p.kose]))
-            else:
-                alt = ps[0]
-                a, b, en = alt.uzun * 100, alt.kisa * 100, alt.en * 100
-                if alt.tip == "L":     # boyu sağa doğru artar; dar parça sağa yaslanır
-                    sekiller.append((alt, [(w - en, 0), (w, 0), (w, a), (w - en, b)]))
-                else:
-                    sekiller.append((alt, [(0, 0), (en, 0), (en, b), (0, a)]))
-                if len(ps) == 2:
-                    ust = ps[1]
-                    a, b, en = ust.uzun * 100, ust.kisa * 100, ust.en * 100
-                    if ust.tip == "L":   # üst parça çevrilmeden önce: kalın ucu solda, yukarıdan asılı
-                        sekiller.append((ust, [(0, l), (en, l), (en, l - b), (0, l - a)]))
-                    else:
-                        sekiller.append((ust, [(w, l), (w - en, l), (w - en, l - b), (w, l - a)]))
-            for p, kose in sekiller:
-                kose = [(sx + x, sy + taban + y) for x, y in kose]
-                ax.add_patch(MplPolygon(kose, closed=True, fc=RENK[p.konum], ec=CIZGI, lw=0.7, zorder=2))
-                ys = [y for _, y in kose]
-                if max(ys) - min(ys) > 70:
-                    a2 = sum(x0 * y1 - x1 * y0 for (x0, y0), (x1, y1) in zip(kose, kose[1:] + kose[:1]))
-                    cx = sum((x0 + x1) * (x0 * y1 - x1 * y0) for (x0, y0), (x1, y1) in zip(kose, kose[1:] + kose[:1])) / (3 * a2)
-                    cy = sum((y0 + y1) * (x0 * y1 - x1 * y0) for (x0, y0), (x1, y1) in zip(kose, kose[1:] + kose[:1])) / (3 * a2)
-                    ax.text(cx, cy, f"{KISA_AD[p.yuz]} {p.serit}", rotation=90, ha="center", va="center", fontsize=9.6, color="#12161b", zorder=4)
-            taban += l
+        for q, kose in yer.get(pn["no"], []):
+            kose = [(sx + x, sy + y) for x, y in kose]
+            ax.add_patch(MplPolygon(kose, closed=True, fc=RENK[q.konum], ec=CIZGI, lw=0.7, zorder=2))
+            ys = [y for _, y in kose]
+            if max(ys) - min(ys) > 70:
+                a2 = sum(x0 * y1 - x1 * y0 for (x0, y0), (x1, y1) in zip(kose, kose[1:] + kose[:1]))
+                cx = sum((x0 + x1) * (x0 * y1 - x1 * y0) for (x0, y0), (x1, y1) in zip(kose, kose[1:] + kose[:1])) / (3 * a2)
+                cy = sum((y0 + y1) * (x0 * y1 - x1 * y0) for (x0, y0), (x1, y1) in zip(kose, kose[1:] + kose[:1])) / (3 * a2)
+                ax.text(cx, cy, f"{KISA_AD[q.yuz]} {q.serit}", rotation=90, ha="center", va="center", fontsize=9.6, color="#12161b", zorder=4)
         ax.add_patch(MplPolygon([(sx, sy), (sx + w, sy), (sx + w, sy + boy), (sx, sy + boy)], closed=True, fc="none", ec="#12161b", lw=1.3, zorder=3))
         ax.text(sx + w / 2, sy + boy + 16, str(pn["no"]), ha="center", va="bottom", fontsize=11.5, weight="bold", color="#12161b")
     ax.set_xlim(-30, gen + 30)
@@ -373,7 +453,8 @@ def kesim_ciz(d: dict, cikti: Path, baslik: str) -> None:
     ax.set_aspect("equal")
     ax.axis("off")
     ax.legend(handles=_lejant(d, bos=True), loc="upper left", bbox_to_anchor=(0.0, 0.105), ncol=5, frameon=False, fontsize=10.5, handlelength=1.6, columnspacing=1.6, borderaxespad=0.0)
-    ax.text(0.0, 0.025, f"Her dikdörtgen bir panel ({_tr(w)} × {_tr(boy)} cm; saçak ucu altta). İçindeki yazı parçanın gideceği yer: yüz ve şerit numarası (soldan).",
+    ax.text(0.0, 0.025, f"Her dikdörtgen bir panel ({_tr(w)} × {_tr(boy, 1).replace(',0', '')} cm; saçak ucu altta). İçindeki yazı parçanın gideceği yer: yüz ve şerit numarası (soldan). "
+            "Kesim ölçüleri ayrı tabloda.",
             fontsize=9.6, color="#3a4350", ha="left", va="center", transform=ax.transAxes)
     fig.subplots_adjust(left=0.02, right=0.98, top=0.95, bottom=0.01)
     fig.suptitle(baslik, fontsize=13.5, weight="bold", x=0.03, ha="left", y=0.99)
@@ -391,6 +472,7 @@ def main() -> int:
     ap.add_argument("--cikti", type=Path, help="dizilimi JSON olarak yaz")
     ap.add_argument("--acilim-png", type=Path)
     ap.add_argument("--kesim-png", type=Path)
+    ap.add_argument("--olcu-md", type=Path, help="parça ölçüleri ve panel kesimleri (markdown; montajcıya verilecek kesim planının ölçüleri)")
     a = ap.parse_args()
     g = json.loads(a.girdi.read_text(encoding="utf-8"))
     kr = json.loads((BURADA / "kurallar.json").read_text(encoding="utf-8"))
@@ -414,12 +496,23 @@ def main() -> int:
     alt = f"{KAPLAMA_ADI[kaplama]} · {_tr(kapatma * 100)} cm kapatır · L {boy_mm} · {d['adet']} adet"
     if a.cikti:
         s = sozluk(d)
-        s.update({"ad": g["ad"], "kaplama": kaplama, "baslangica_gore_adet": d["denemeler"], "kesim_payisiz_adet": d["paysiz_adet"], "bir_cm_kesim_payiyla_adet": d["bir_cm_payla_adet"]})
+        s.update({"ad": g["ad"], "kaplama": kaplama, "baslangica_gore_adet": d["denemeler"], "kesim_payisiz_adet": d["paysiz_adet"], "bir_cm_kesim_payiyla_adet": d["bir_cm_payla_adet"],
+                  "uzun_panelle": d["uzun_panelle"]})
         a.cikti.write_text(json.dumps(s, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     if a.acilim_png:
         acilim_ciz(d, a.acilim_png, f"{ad} · çatı açılımı ve kaplama dizilimi · {alt}")
     if a.kesim_png:
         kesim_ciz(d, a.kesim_png, f"{ad} · kesim planı · {alt}")
+    if a.olcu_md:
+        a.olcu_md.write_text("\n".join(
+            [f"# {ad} · kesim planının ölçüleri · {alt}", "",
+             f"Hesap çıktısıdır; elle düzeltilmez (`cati_acilim.py --olcu-md`). Dizilim {BASLANGIC_ADI[d['baslangic']]} başlar; kaplama saçaktan {_tr(d['tasma_m'] * 100, 1)} cm taşar; "
+             f"kesim payı {_tr(d['kesim_payi_m'] * 1000)} mm. Ölçüler cm. Boylar saçak ucundan (taşma dahil) ölçülür; sol ve sağ, çatıya dışarıdan bakışla.", "",
+             "## Parçalar (yüz yüz, soldan sağa)", ""] + parca_tablosu(d)
+            + ["", "## Kesim ölçüleri (panel panel)", "",
+               "Her satır bir parçanın paneldeki yeridir: panelin sol ve sağ kenarında, alt uçtan (saçak ucu) kaç cm ile kaç cm arası. "
+               "Parça bu iki aralığın arasında kalan dörtgendir. \"180° çevrilerek\" yazan parça, düz ucu saçağa gelecek biçimde çevrilip karşı yüze konur; ters yüz edilmez.", ""]
+            + panel_tablosu(d) + ["", "## Paneller (özet)", ""] + panel_ozeti(d)) + "\n", encoding="utf-8")
     return 0
 
 
