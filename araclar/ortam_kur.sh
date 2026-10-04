@@ -89,4 +89,6 @@ say ""
 say "Hazır. Bu kabukta kullanmak için:"
 say "  source $VENV/bin/activate"
 [[ $PG_OK == 1 ]] && say "  export PORTMAN_TEST_PG=\"host=127.0.0.1 port=$PORT user=postgres\""
-say "Aday karşılaştırması: python deneme/2026-09-30_asama2/kos.py --cikti <klasör>"
+if [[ -f "$KOK/deneme/2026-09-30_asama2/kos.py" ]]; then
+  say "Aday karşılaştırması: python deneme/2026-09-30_asama2/kos.py --cikti <klasör>"
+fi

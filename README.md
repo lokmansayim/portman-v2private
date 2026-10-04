@@ -22,7 +22,7 @@ Depoda **olmayanlar**: sırlar (API anahtarı, WhatsApp erişim anahtarı, telef
 ## Çalıştırma (yerel)
 ```
 python3 -m venv venv && venv/bin/pip install ezdxf==1.4.4 pymupdf==1.26.0 shapely pydantic numpy pillow
-venv/bin/python -m beyin.harness                      # Beyin kural katmanı: 15 mesaj
+venv/bin/python -m beyin.harness                      # Beyin kural katmanı: 22 vaka (kayıtlı LLM çıkarımlarıyla; LLM çağrısı yok)
 venv/bin/python -m motor.cikarici ref_katalog/P6001.dxf --kod P6001 --sablon is_emri/P6001_2plus1_6x6.json --motor
 venv/bin/python -m motor.cikarici ref_katalog/TEK_KAT_PREFABRIK_PLANLARI.dxf --secici P9401 --motor
 php kanal/tests/offline_test.php <lib.php yolu>       # kanal PHP tarafı (30 test)
