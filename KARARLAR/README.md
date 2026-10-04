@@ -26,7 +26,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [K14](K14.md) | Paket dağıtımı hosting kanalıyla (`kanal/package/current.zip` sha değişince ajan kendini günceller, öz-test koşar); komut kanalı (`vps_komut`) kapalı başlar (22.09) |
 | [K15](K15.md) | Tek depo: GitHub `lokmansayim/portman` (özel); kod, kural sürümü, şema, testler, KARARLAR.md (22.09) |
 | [K16](K16.md) | Katalog planları çıkarıcıyla okunur, elle kodlanmaz; artıklar raporlanır, sessiz yuvarlama yok (22.09) |
-| [K17](K17.md) | Sızan eşleşme anahtarı yenilenecek: `rm /etc/portman/agent.env` + bootstrap tekrar + yeni anahtar `api_token.txt`'e (22.09, **uygulanmadı**) |
+| [K17](K17.md) | Sızan eşleşme anahtarı yenilenecek: `rm /etc/portman/agent.env` + bootstrap tekrar + yeni anahtar `api_token.txt`'e (22.09, **uygulanmadı**) · **28.09'da kapı C'de başka yoldan uygulandı** (eşleşme ve OpenAI anahtarı yenilendi, eskileri 401; bkz. K17 › Uygulanış) |
 | [K18](K18.md) | Beyin kuralı (22.09, iki adım): odada tek pencere varken "penceresi 120x180" ölçü değişikliğidir; ölçüt **bayinin kendi mesajı**, LLM özeti değil |
 | [K19](K19.md) | NumPy < 2 sabitlemesi (VPS) (22.09) |
 | [K20](K20.md) | Yol haritası kabul ölçütleriyle ilerler, takvim tahmindir; Lokman'ın açık kararları: pilot planlar, pafta örneği, K16(a/b), K3 (22.09) |
@@ -78,4 +78,4 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 - **K16:** Modül dışı katalog planları için (a) modüle uyarlama ya da (b) serbest aks. 23 Eylül önerisi: bayi planlarında (b).
 - **K3 ve K4:** Güncel Şablon 2024 blok adlarına geçiş; kapı genişlikleri.
 - **Z-03 ve Z-06 eşikleri:** %98 ve günde 50 talep öneridir.
-- **Anahtar yenileme (K17):** 27 Eylülde yeniden ertelendi; bayilere açılmadan önce şart.
+- ~~**Anahtar yenileme (K17):** 27 Eylülde yeniden ertelendi; bayilere açılmadan önce şart.~~ **Kapandı:** 28.09'da kapı C'de yapıldı (K17 › Uygulanış; 4 Ekim'de işaretlendi, BK-03). Claude anahtarının 29.10.2026 son kullanma tarihi ayrı bir risktir (`DURUM.md`).
