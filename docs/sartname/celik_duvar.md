@@ -123,7 +123,7 @@ Tanım dosyası: `deneme/2026-10-02_celik/secenekler/dis_karkas_140.json`. Model
 - Dış Boardex metrajı değişmez; dış duvarın iç yüzü (alçıpan yüzü) biraz azalır.
 - Ç8201'e uygulaması: `modeller/C8201.md`.
 - Çıkarım (teyit bekliyor): 140 mm pakette Boardex ve alçıpan baz paketle aynı sayıldı; yalnız karkas değişti.
-- Yalıtım: 140 mm karkasta dış duvar yalıtımı çift kat (gerçek listelerden; 100 m² listede kalemin adında yazıyor, 105 m² listenin hesap sayfasında "dış × 2").
+- Yalıtım: 140 mm karkasta dış duvar yalıtımı çift kat (gerçek listelerden; 100 m² listede kalemin adında yazıyor, 105 m² listenin hesap sayfasında "dış × 2"; aynı projenin duvar panelleri paftasındaki not: "Dış duvarlarda çift kat izolasyon malzemesi kullanılacaktır").
 - Çelik: mühendisin kuralıyla tek katta dış duvar 140 × 45 × 1,2, iç duvar 80 × 45 × 1,2 (4 Ekim). 3 Ekim'de 0,8 mm varsayılmıştı: 140 mm dış karkaslı iki gerçek listede (2025, tek kat) dış duvar panellerinin çoğu 0,8 mm (üçer paneli 1,2 mm), iç duvarlar 80 × 0,8. O iki liste kurala uymuyor; mühendis kuralı yineledi (4 Ekim 12:14), listeler eski uygulama. Excel motorunun verisi kuralla uyumlu: 140 × 0,8 dış duvar yalnız iki katlı iki projenin üst katında; tek katlı 140'lık örnekte (55 m²) dış duvar 1,2 mm.
 - Yöntem B'de (saçak sacı) dış duvar 14 cm olunca geniş saçak omegası (180 × 2500) kullanılır (Excel motorundaki not).
 

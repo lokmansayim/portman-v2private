@@ -364,12 +364,13 @@ def hesapla(g: dict, k: dict) -> dict:
                  formul=f_ + boy_formulu(), durum=d_, not_=not__)
         ekle("Çatı kaplamaları", "Metal kiremit mahyası", "L 2800", tavan(c["mahya_hatti_m"] / (pm - bm)), c["mahya_hatti_m"], birim="m", formul=mahya_formul, durum="lokman")
         # Sac panel kapaması (2025 listelerinden). Tek kat panelde listeden çıktı (Lokman, 4 Ekim 2026 16:18: damlalıkla aynı gerekçe);
-        # sandviç panelde soruldu. Girdide `cati.panel_kapamasi` yazıyorsa o: kapaması olan gerçek liste örnekleri öyle hesaplanır.
+        # sandviç panelde şimdilik kalıyor (Lokman, 4 Ekim 2026 17:46). Girdide `cati.panel_kapamasi` yazıyorsa o: kapaması olan gerçek liste örnekleri öyle hesaplanır.
         if c.get("panel_kapamasi", deg(k, "panel_kapamasi")[kaplama]):
             ekle("Çatı kaplamaları", f"{ad} kapaması", "L 2500", kenar_kenar(kenarlar, deg(k, "parca_boyu_m", "sandvic_kapama")), sacak, birim="m",
                  formul="her saçak kenarı ÷ 2,5, ayrı ayrı yukarı", durum="uydurma",
                  not_="listedeki uygulama (2025): sac kapama" if "panel_kapamasi" in c else
-                      "2025 listelerindeki sac kapama. Tek kat panel kapaması listeden çıktı (Lokman, 4 Ekim 16:18); sandviç panelde de çıksın mı: soruldu (teyit bekliyor)")
+                      "2025 listelerindeki sac kapama. Tek kat panel kapaması listeden çıktı (Lokman, 4 Ekim 16:18); sandviç panelde şimdilik kalıyor "
+                      "(Lokman, 4 Ekim 17:46). Adet formülü 2025 listelerinden çıkarıldı")
     elif (kaplama in OSBLI_KAPLAMA or kaplama == "trapez_sac") and not c.get("yuzey_m2"):
         ekle("Çatı kaplamaları", f"Çatı kaplaması ({KAPLAMA_ADI[kaplama]})", "", None, birim="",
              formul="çatı yüzeyi girdide yok; kaplama kalemleri hesaplanmadı", durum="bekliyor")

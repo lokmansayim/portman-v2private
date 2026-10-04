@@ -172,8 +172,8 @@ bekleyen_sayisi = sum(1 for s in baz["satirlar"] if bekleyen(s))
 def satir(v, kalem):
     return next(s for s in v["satirlar"] if s["kalem"] == kalem)
 
-# 4 Ekim 16:18 cevaplarıyla değişenler.
-# "Önce" değerleri yayımlanmış son sürümden (4 Ekim 16:13; commit 21ed582; sabit), "sonra" değerleri hesap çıktısından.
+# 4 Ekim 17:46 cevaplarıyla değişenler: bu turda sayı değişmedi. Sayfadaki açılım ve seçenek metinleri 16:18 turundaki değişikliğe dayanıyor:
+# "önce" değerleri 16:13 sürümünden (commit 21ed582; sabit), "sonra" değerleri hesap çıktısından. 16:54 sürümü (commit 4e1e8c5) ile sayılar aynı.
 ONCE = {"tek_kat": 27, "panel_boyu_mm": 4315, "sandvic": 27, "trapez": 32, "kiremit": 30, "mahya_bandi": 4, "boardex": 31, "osb": 9, "kapama": 18, "satir": 89}
 K = json.loads((S.parent / "kurallar.json").read_text(encoding="utf-8"))
 G = json.loads((S / "C8201_girdi.json").read_text(encoding="utf-8"))
@@ -201,7 +201,7 @@ def dz_oku(kod):
 
 
 dz_s, dz_t, dz_k = dz_oku("sandvic_panel"), dz_oku("trapez_sac"), dz_oku("osb_kiremit")
-EK_NOT = {"Sandviç panel": f"80 cm kapatan ürün gelirse {dz_t['adet']} (trapez sacla aynı dizilim). Sac kapama bu seçenekte duruyor; sorum yukarıda"}
+EK_NOT = {"Sandviç panel": f"80 cm kapatan ürün gelirse {dz_t['adet']} (trapez sacla aynı dizilim). Sac kapama bu seçenekte şimdilik kalıyor (17:46 cevabınız)"}
 kaplama = "".join(kap_tablo(ad, v, ". ".join(x for x in (notu, EK_NOT.get(ad)) if x) or None) for ad, v, notu in KAPLAMALAR)
 # Sayfadaki sabit cümlelerin dayandığı durumlar; hesap değişirse sayfa üretilmez, metin gözden geçirilir.
 assert kap_s["adet"] == dz["adet"] and dz["baslangic"] == "sol" == K["kirma_cati_dizilim"]["deger"]["baslangic"], "sayfa: dizilim her yüzde sol köşeden başlıyor diyor"
@@ -219,21 +219,25 @@ assert bant_s["adet"] == ONCE["mahya_bandi"] and boardex_s["adet"] == ONCE["boar
 assert not any(x["kalem"] == "Tek kat panel kapaması" for x in baz["satirlar"]) and toplam_satir == ONCE["satir"] - 1, "sayfa: tek kat panel kapaması çıktı, liste bir satır kısaldı diyor"
 sandvic_kapama = next(x for x in json.loads((S / "C8201_kaplama_sandvic_panel.json").read_text(encoding="utf-8"))["satirlar"] if x["kalem"] == "Sandviç panel kapaması")
 
+# Montaj paftalarından okunanlar (üç gerçek listenin projeleri; paftalar depoda değil). Sayılar `belge_uret.py`'deki PAFTA sabitiyle aynı.
+PAFTA = {"klasor": 13, "pdf": 84, "pafta_pdf": 80, "liste_pdf": 4, "inis": {62: 7, 90: 8, 105: 10}, "omega_en_az": {62: 25, 90: 39, 105: 43}}
+_kars = {n: json.loads((S / f"ornek_{n}m2_karsilastirma.json").read_text(encoding="utf-8"))["karsilastirma"] for n in (62, 90, 105)}
+omega = {n: _kars[n]["Tavan omegası (60'lık)"] for n in (62, 90, 105)}
+inis_hesap = _kars[62]["Dere iniş borusu"]["hesap"]
+assert all(omega[n]["liste"] == PAFTA["omega_en_az"][n] + 1 for n in (62, 90, 105)), "sayfa: tavan omegası üç projede de paftadaki kesimden bir fazla diyor"
+assert _kars[62]["Dere iniş borusu"]["liste"] == PAFTA["inis"][62] == 7 and inis_hesap == 6 and adet(baz, "Dere iniş borusu") == 6, \
+    "sayfa: 62 m² projede paftada ve listede 7 iniş, kuralda 6; Ç8201'de 6 diyor"
+assert K["panel_kapamasi"]["deger"]["sandvic_panel"] and sandvic_kapama["adet"] > 0, "sayfa: sandviç panel kapaması şimdilik kalıyor diyor"
+assert toplam_satir == ONCE["satir"] - 1 == 88 and kap_s["adet"] == 25 and boy_mm == 4325, "sayfa: bu turda sayı değişmedi diyor (16:54 sürümü: 88 satır, L 4325 × 25)"
+
 degisenler = [
-    (f"Tek kat panel {ONCE['tek_kat']} → {kap_s['adet']}",
-     f"Panel boyu kuralı yazıldı: boy 1'er cm uzatılarak denenir (en çok 3 cm); adet düşüyorsa liste uzun boyu yazar. "
-     f"Ç8201'de L {taban_mm} × {uz['taban_adet']} yerine L {boy_mm} × {kap_s['adet']} ({dz['tam_boy']} tam boy + {dz['kesilen']} kesilen). "
-     f"Toplam boy {metre(uz['taban_adet'], taban_mm)} m'den {metre(kap_s['adet'], boy_mm)} m'ye indi. Açılım, kesim planı ve kesim ölçüleri yeniden üretildi."),
-    ("Kural her kaplamada kendiliğinden çalışıyor",
-     f"Seçeneklerde sandviç panel {ONCE['sandvic']} → {dz_s['adet']}, trapez sac {ONCE['trapez']} → {dz_t['adet']}, kiremit desen sac {ONCE['kiremit']} → {dz_k['adet']}. "
-     "Uzatma adedi düşürmüyorsa boy değişmez."),
-    ("Pay", f"Seçilen boyda adet, kesim payı 1 cm'ye çıksa da aynı kalıyor; kalmasaydı o boy seçilmezdi. "
-            f"Tam boy giden {dz['tam_boy']} panelde {tr((boy_mm - taban_mm) / 10)} cm fazlalık mahya ucunda kalır; taşma {tr(tasma_cm)} cm."),
-    ("OSB takviyesi", f"Geçerli kural: yalnız dolap ve TV duvarları, {osb_s['adet']} levha. Odanın bütün yüzeyi ({osb_iki['butun_oda_adet']} levha) "
-                      "yalnız bilgi olarak satırın notunda; bayiye belirtmeniz için."),
-    ("Tek kat panel kapaması çıktı", f"Liste {ONCE['satir']} satırdan {toplam_satir} satıra indi. Plastik kapama aparatını sipariş verirseniz listeye eklerim."),
-    ("Sağlama", f"Kuralı, kodu görmeyen ayrı bir hesap beş durumda aynı buldu. Tek kat panelde {kap_s['adet']} bu dizilim için en az: "
-                "hiçbir ikilisi aynı panele sığmayan o kadar parça var."),
+    ("Sayılar değişmedi", f"Liste {toplam_satir} satır; tek kat panel L {boy_mm} × {kap_s['adet']}. Bu turda iki kararınızı ve paftalardan çıkan kaynak notlarını işledim."),
+    ("Sandviç panel kapaması kalıyor", f"\"O kalsın şimdilik\" dediniz: sandviç panel seçeneğinde sac kapama duruyor (L 2500, {sandvic_kapama['adet']} adet). "
+                                       "Tek kat panelde kapama yok."),
+    ("Kesim planı paftası montaj paftası işinde", "Şimdi ayrı bir pafta hazırlamıyorum. Açılım ve kesim planı, yükleme listesinden sonra yapacağımız montaj paftası çalışmasında "
+                                                  "\"çatı kaplaması yerleşim planı\" paftası olacak."),
+    ("Montaj paftalarını buldum", f"{PAFTA['klasor']} klasörde {PAFTA['pdf']} PDF ve proje başına bir ana DWG. Ne anladığımı aşağıda, "
+                                  "\"Montaj paftası: klasörlerde bulduklarım\" bölümünde yazdım; yanlışım varsa düzeltin."),
 ]
 
 
@@ -245,17 +249,63 @@ def baslikli(b, m):
 degisen_html = "".join(baslikli(b, m) for b, m in degisenler)
 
 sorular = [
-    ("Sandviç panel kapaması: o da çıksın mı?",
-     f"Tek kat panel kapamasını çıkardım. Sandviç panel seçeneğinde aynı sac kapama duruyor (L 2500, {sandvic_kapama['adet']} adet). O da çıksın mı?"),
-    ("Kesim planı paftası",
-     "Panel boyu kesinleşti. Montajcıya vermek için açılımı, kesim planını ve ölçüleri tek bir PDF paftada toplayayım mı? "
-     "Kısa yüzlerde son şerit 10 cm kalıyor (810 = 8 × 100 + 10); paftada ayrıca işaretlerim."),
+    ("Dere inişi: giriş saçağının köşeleri de sayılsın mı?",
+     f"Montaj paftalarındaki iniş işaretlerini saydım. 62 m² projede {PAFTA['inis'][62]} işaret var: dört köşe, arka cephede bir tane ve giriş saçağının iki ön köşesi; ön cephenin ortasında yok; "
+     f"liste de {PAFTA['inis'][62]}. Kuralınızı dört köşe ve iki orta diye uyguladığım için hesap {inis_hesap} veriyor. \"Her köşe\" derken saçak çizgisinin bütün dış köşelerini mi "
+     f"sayayım (giriş saçağı, verandadaki kademe)? Evet derseniz köşeleri modelin saçak çizgisinden sayarım; giriş saçağının böldüğü cepheye orta iniş koymam. "
+     f"Ç8201'de sayı değişmiyor ({adet(baz, 'Dere iniş borusu')})."),
     ("Excel motorundaki formül", "Sayfanın sonundaki \"Excel motorundaki kaplama formülü\" bölümünü mühendise iletir misiniz? "
                                  "Kiremit desen sac 100 cm kapatıyorsa motordaki 1,05 katsayısının da 1 olması gerekir."),
     ("Makas ve kiriş ölçüsü", f"Motoru inceleyeceğinizi yazdınız. O zamana kadar motor kıstas: makaslar {tr(kg(baz, 'Çatı makas panelleri'))} kg, "
                               f"veranda dikmeleri {tr(kg(baz, 'Veranda dikmeleri (kolon paneli)'))} kg, veranda kirişleri {tr(kg(baz, 'Veranda kirişleri (kiriş paneli)'))} kg."),
 ]
 soru_html = "".join(baslikli(b, m) for b, m in sorular)
+
+# Montaj paftası: klasörlerde bulunanlar (ayrıntı depoda: docs/sartname/montaj_paftasi.md). Pafta işi yükleme listesinden sonra.
+PAFTALAR = (
+    ("Müşteri onay paftası", "Tefrişli kat planı, oda adları ve alanları, doğrama etiketleri, pencere görünüşleri", "Yok", "Portman'ın ön onay paftası bunun karşılığı"),
+    ("Duvar panelleri yerleşim planı", "Panel adları (D01…), ölçü zinciri, birleşim detayları", "Çelik kg, köşebent", "Panel bölümlemesi yok; kg formülle"),
+    ("Tavan omega yerleşim planı", "Omega hatları ve parça boyları (tam parça 365)", "Tavan omegası adedi", "Dizilim yok; alan formülü (yöntem B)"),
+    ("Makas ve dere yerleşim planı", "Makas adları ve aralıkları, dere hattı, iniş işaretleri", "Dere, iniş ve dirsek adetleri", "İniş kuralı var; makas dizilimi yok"),
+    ("Aşık yerleşim planı", "Açılmış çatı yüzleri, 60 cm aralıklı aşık hatları, parça boyları (tam parça 410)", "Aşık adedi", "Dizilim yok; formül (yöntem B)"),
+    ("Çatı kaplaması yerleşim planı", "Açılmış yüzler, şeritler, boy ve adet, çatı alanı ve kaplama alanı", "Kaplama adedi ve boyu", "Var: açılım, kesim planı, kesim ölçüleri (kırma çatı)"),
+    ("Duvar kaplamaları yerleşim planı", "OSB gelen duvarlar: dolap ve TV arkası", "OSB takviyesi", "Var: kural ve duvarlar"),
+    ("Elektrik yerleşim planı", "Tefrişli plan, anahtar, priz ve aydınlatma işaretleri, lejant", "Elektrik sayımı", "Sayım var (oda başına kural); yerleşim yok"),
+    ("Çift katta ek paftalar", "Döşeme, döşeme kaplaması, merdiven, 1. kat duvar ve tavan omega, özel büküm saclar", "Çift kat kalemleri", "Kapsam dışı; çift kat sırası gelince"),
+)
+PAFTA_BASLIK = ("Pafta", "Üzerinde ne var", "Listedeki karşılığı", "Bugün elimizde")
+
+
+def pafta_hucresi(i: int, h: str) -> str:
+    """İlk sütun paftanın adı; öteki hücreler dar ekranda başlığıyla birlikte görünsün diye `data-b` taşır."""
+    return f"<td>{e(h)}</td>" if i == 0 else f'<td data-b="{e(PAFTA_BASLIK[i])}">{e(h)}</td>'
+
+
+pafta_satirlari = "".join("<tr>" + "".join(pafta_hucresi(i, h) for i, h in enumerate(r)) + "</tr>" for r in PAFTALAR)
+pafta_notlari = [
+    ("Listedeki sayılar paftadan geliyor",
+     "Üç gerçek listenin projelerinde karşılaştırdım. Çatı kaplamasının adedi ve boyu paftadakinin aynısı (62 m²: 27 + 2 kısa; 90 m²: 28 + 2; 105 m²: 24 + 30). "
+     f"İniş sayısı paftadaki işaret sayısı ({PAFTA['inis'][62]} ve {PAFTA['inis'][105]}). Tavan omegası üç projede de paftadaki parçaların kesiminden bir fazla "
+     f"({' · '.join(str(omega[n]['liste']) for n in (62, 90, 105))}); alan formülümüz {' · '.join(str(omega[n]['hesap']) for n in (62, 90, 105))} veriyor. "
+     "Sayımı ayrı bir hesaba da yaptırdım: aynı sayılar çıktı."),
+    ("Kırma çatıda kesim planı yok",
+     "Sekiz çatı kaplaması paftasının hepsi beşik çatıda. Kırma çatılı tek projede yüzler dikdörtgen çizilmiş; çapraz kesim ve artan parçanın karşı yüzde "
+     "kullanılması gösterilmemiş. Ç8201 için ürettiğim açılım ve kesim planı, bu paftanın kırma çatıdaki karşılığı."),
+    ("Çatı ve tavan panelli yöntem için örnek yok",
+     "Paftaların hepsi tavan omegası ve aşıkla hazırlanmış (yöntem B). Baz aldığımız yöntemde bu iki paftanın yerini tavan ve çatı paneli yerleşimi alacak; "
+     "klasörlerde örneği yok."),
+    ("Şablondan kalan yazılar",
+     "\"Çatı m²: 120\" yazısı çatısı 77,5, 107 ve 124 m² olan üç projenin aşık paftasında da aynı. Paftalar listeyle aynı hesaptan üretilirse böyle farklar kalmaz."),
+]
+pafta_html = (
+    '<section><h2>Montaj paftası: klasörlerde bulduklarım</h2>'
+    f'<p class="aciklama" style="margin-bottom:10px">Montaj paftası tek bir çizim değil; her proje için hazırlanan, ortak çerçeveli bir pafta seti. '
+    f'Klasörlerinizde {PAFTA["klasor"]} montaj klasöründe {PAFTA["pdf"]} PDF buldum ({PAFTA["pafta_pdf"]} pafta, {PAFTA["liste_pdf"]} yükleme listesi; 2019\'dan Ocak 2026\'ya). '
+    'Her projenin bir ana DWG\'si var: paftalar onun içinde yan yana çizilmiş, PDF\'ler oradan basılmış. '
+    'Pafta işine yükleme listesinden sonra başlayacağız; burada yalnız ne anladığımı yazıyorum.</p>'
+    '<div class="kaydir"><table class="pafta"><thead><tr>' + "".join(f"<th>{e(b)}</th>" for b in PAFTA_BASLIK) + '</tr></thead>'
+    f'<tbody>{pafta_satirlari}</tbody></table></div>'
+    '<ul class="degisen" style="margin-top:14px">' + "".join(baslikli(b, m) for b, m in pafta_notlari) + '</ul></section>')
 
 # Excel motorundaki kaplama formülü (mühendisin isteği: hangi hücreden ne geliyor, formül nasıl işliyor). Sayılar `motor_formul.py`'den.
 uzun, kisa = G["kapali_olcu_m"]
@@ -335,6 +385,7 @@ if _acilim.is_file() and _kesim.is_file():
         f"Tam boy giden {dz['tam_boy']} panelde {tr((boy_mm - taban_mm) / 10)} cm fazlalık panelin üst ucunda, mahya ucunda kalır.",
         "Aynı kuralı ayrı bir hesapla da denetledim: aynı boy ve aynı adetler çıktı; bu dizilimde daha az panelle olmuyor.",
         f"62 m² gerçek listede (kırma çatı, sandviç panel) {k62['liste']} adet L 3200 ve 2 adet L 1000 var; aynı yöntem {k62['hesap']} veriyor.",
+        "Bu çizim ve ölçüler, montaj paftası çalışmasında \"çatı kaplaması yerleşim planı\" paftası olacak; kısa yüzlerdeki 10 cm'lik son şerit orada ayrıca işaretlenecek.",
     ]
     # kesim ölçüleri: hesap çıktısındaki markdown tablolarından (cati_acilim.py --olcu-md)
     _olcu = (S / "C8201_cati_kesim_olculeri.md").read_text(encoding="utf-8")
@@ -449,6 +500,18 @@ table.olcu {{ min-width: 560px; }}
 table.olcu td {{ font-family: var(--mono); font-size: 12.5px; white-space: nowrap; padding: 5px 10px; font-variant-numeric: tabular-nums; }}
 table.olcu th {{ padding: 6px 10px; }}
 table.hucre td:first-child, table.hucre th:first-child {{ width: 92px; }}
+table.pafta {{ min-width: 720px; }}
+table.pafta td {{ font-size: 13.5px; }}
+table.pafta td:first-child {{ font-weight: 500; min-width: 150px; }}
+@media (max-width: 640px) {{
+  table.pafta {{ min-width: 0; }}
+  table.pafta thead {{ display: none; }}
+  table.pafta tr {{ display: block; padding: 10px 12px; border-bottom: 1px solid var(--cizgi); }}
+  table.pafta tbody tr:last-child {{ border-bottom: 0; }}
+  table.pafta td {{ display: block; padding: 2px 0; border: 0; min-width: 0; }}
+  table.pafta td:first-child {{ font-size: 14.5px; padding-bottom: 4px; }}
+  table.pafta td[data-b]::before {{ content: attr(data-b) ": "; color: var(--soluk); font-size: 12px; }}
+}}
 .formul {{ background: var(--kagit); border: 1px solid var(--cizgi); padding: 10px 12px; display: flex; flex-direction: column; gap: 10px; }}
 .formul > div {{ display: flex; flex-direction: column; gap: 2px; min-width: 0; }}
 .formul code {{ font-family: var(--mono); font-size: 12.5px; overflow-wrap: anywhere; }}
@@ -478,7 +541,7 @@ table.hucre td:first-child, table.hucre th:first-child {{ width: 92px; }}
 </div>
 
 <section>
-  <h2>4 Ekim 16:18 cevaplarınızla değişenler</h2>
+  <h2>4 Ekim 17:46 cevaplarınızla değişenler</h2>
   <ul class="degisen">{degisen_html}</ul>
 </section>
 
@@ -486,6 +549,8 @@ table.hucre td:first-child, table.hucre th:first-child {{ width: 92px; }}
   <h2>Sizden beklenenler</h2>
   <ol class="sorular">{soru_html}</ol>
 </section>
+
+{pafta_html}
 
 <section>
   <h2>Kaynak işaretleri</h2>
@@ -511,7 +576,7 @@ table.hucre td:first-child, table.hucre th:first-child {{ width: 92px; }}
 
 {motor_html}
 
-<p class="dip">Kaynaklar: 3 Ekim 13:27, 4 Ekim 15:18 ve 16:18 cevaplarınız, 4 Ekim 01:24 ve 01:42 düzeltmeleriniz; inşaat mühendisinin üç tur cevabı (3 Ekim 18:14, 4 Ekim 01:24 ve 12:14'te ilettiniz); üç gerçek yükleme listesinin çalışma kitapları (62, 90 ve 105 m²); Excel hesaplama motoru (CTKBF V1.1). Bu modelin kendi gerçek listesi yok: sayılar yalnız kurallardan çıkıyor. Üç gerçek listeyle karşılaştırmada {kars_toplam} kalemin {kars_ayni} tanesinde adet aynı; bu bir sınama değil, çünkü katsayıların bir kısmı o listelere bakılarak seçildi. Ayrıntı depoda: docs/sartname/yukleme_listesi_yontemi.md.</p>
+<p class="dip">Kaynaklar: 3 Ekim 13:27, 4 Ekim 15:18, 16:18 ve 17:46 cevaplarınız, 4 Ekim 01:24 ve 01:42 düzeltmeleriniz; inşaat mühendisinin üç tur cevabı (3 Ekim 18:14, 4 Ekim 01:24 ve 12:14'te ilettiniz); üç gerçek yükleme listesinin çalışma kitapları (62, 90 ve 105 m²); Excel hesaplama motoru (CTKBF V1.1); klasörlerinizdeki montaj paftaları. Bu modelin kendi gerçek listesi yok: sayılar yalnız kurallardan çıkıyor. Üç gerçek listeyle karşılaştırmada {kars_toplam} kalemin {kars_ayni} tanesinde adet aynı; bu bir sınama değil, çünkü katsayıların bir kısmı o listelere bakılarak seçildi. Ayrıntı depoda: docs/sartname/yukleme_listesi_yontemi.md ve docs/sartname/montaj_paftasi.md.</p>
 </div>
 <script>
 (function () {{

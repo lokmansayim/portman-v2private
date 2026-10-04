@@ -177,12 +177,12 @@
     "aralik_m": {
       "deger": 0.6,
       "durum": "liste",
-      "kaynak": "Montaj paftası notu: aşıklar 60 cm aralıklarla; mahya aşığı 20 cm'de"
+      "kaynak": "Montaj paftası notu: aşıklar 60 cm aralıklarla; mahya aşığı 20 cm'de. 62 ve 90 m² projelerin aşık yerleşim planlarında hatlar 60,0 cm aralıklı ölçüldü (62 m² proje sandviç panelli); mahya aşığı 20 cm'de."
     },
     "zayiat": {
       "deger": 0.05,
       "durum": "uydurma",
-      "kaynak": "62 m² kırma çatıda 41 adedi tutturuyor; 90 m² beşik çatıda 56 veriyor, listede 57. Yalnız yöntem B. Excel motorunda (m² × 1,18) ÷ 2,46 + 10; notunda %15 zayiat ve 10 cm bindirme"
+      "kaynak": "62 m² kırma çatıda 41 adedi tutturuyor; 90 m² beşik çatıda 56 veriyor, listede 57. Yalnız yöntem B. Excel motorunda (m² × 1,18) ÷ 2,46 + 10; notunda %15 zayiat ve 10 cm bindirme. Montaj paftalarında (4 Ekim 2026) parça boyu yazısı 410. Paftadaki parçaların 410'luk boylara en iyi yerleşimi 62 m²'de 39 (liste 41), 90 m²'de 55 (liste 57), 105 m²'de 71 (liste 71): tavan omegasındaki gibi sabit bir fark yok."
     }
   },
   "sandvic_panel_kapatma_m": {
@@ -201,7 +201,7 @@
   "tavan_omegasi_aralik_m": {
     "deger": 0.6,
     "durum": "uydurma",
-    "kaynak": "62 m² listede 26 adedi tutturuyor (tavan 58,0 m²); 90 m² listede 37 veriyor, listede 40. Yalnız yöntem B (tavan omegası ve aşık). Excel motorunda (bina + veranda m²) ÷ 2,19 + 5; 2,19 = 0,60 × 3,65 (10 cm bindirme)"
+    "kaynak": "62 m² listede 26 adedi tutturuyor (tavan 58,0 m²); 90 m² listede 37 veriyor, listede 40. Yalnız yöntem B (tavan omegası ve aşık). Excel motorunda (bina + veranda m²) ÷ 2,19 + 5; 2,19 = 0,60 × 3,65 (10 cm bindirme). Montaj paftalarında (4 Ekim 2026): 62 ve 90 m² projelerde omega hatları 60,0 cm aralıklı; tam parça yazısı 365. Üç projede de listedeki adet, paftadaki parçaların 365'lik boylara en iyi yerleşiminden bir fazla: 62 m² 25 + 1 = 26, 90 m² 39 + 1 = 40, 105 m² 43 + 1 = 44 (en az boy, alt sınırla kanıtlı; bağımsız denetim aynı buldu). Bu formül 26, 37 ve 42 veriyor. Omega dizilimi (oda oda hatlar ve parça boyları) montaj paftası çalışmasında kurulunca adet oradan sayılacak (`docs/sartname/montaj_paftasi.md`)."
   },
   "sacak_parcasi_kenar_kenar": {
     "deger": true,
@@ -219,7 +219,7 @@
       "140": 2
     },
     "durum": "uydurma",
-    "kaynak": "62 m² listede (dış karkas 140 mm) brüt 189 m² = 2 × dış duvar + iç duvar; 90 m² listede (80 mm) brüt 172 = dış + iç. 105 m² listenin hesap sayfasında da 'dış × 2' + iç yazıyor; sayfa yalıtımda çevreyi 52,48 m alıp 333 m² buluyor, bu kural 53,04 m çevreyle 335,6 m² veriyor. Dış boşluklar bir kez düşülüyor (listelerdeki alanlar böyle tutuyor)"
+    "kaynak": "62 m² listede (dış karkas 140 mm) brüt 189 m² = 2 × dış duvar + iç duvar; 90 m² listede (80 mm) brüt 172 = dış + iç. 105 m² listenin hesap sayfasında da 'dış × 2' + iç yazıyor; sayfa yalıtımda çevreyi 52,48 m alıp 333 m² buluyor, bu kural 53,04 m çevreyle 335,6 m² veriyor. Dış boşluklar bir kez düşülüyor (listelerdeki alanlar böyle tutuyor). 105 m² projenin (dış karkas 140 mm) duvar panelleri paftasındaki not da böyle: \"Dış duvarlarda çift kat izolasyon malzemesi kullanılacaktır\"."
   },
   "silte_en_payi_m": {
     "deger": 0.2,
@@ -265,7 +265,7 @@
       "cephe_basina_en_cok_orta": 1
     },
     "durum": "lokman",
-    "kaynak": "Lokman, 3 Ekim 2026 13:27: saçaklarda her köşeye iniş yapılır; dört omuz çatıda saçakların tamamı dere ile dönülür. Uzun cephe 10 m olursa ortasına bir iniş daha konur; 14 metrede üç tane konmaz. Örnek: 82 m²'de köşelere birer, 10 metrelik cephelerin ortasına birer, toplam 6. Gerçek listelerde 7, 7 ve 10 iniş var; ilk ikisinde kural 6 veriyor (fark 1; nedeni bilinmiyor) Ubeydullah (inşaat mühendisi), 3 Ekim 2026: \"Dere inişi plana bakarak yerleştirilmesi doğru olur. Normalde düz bir saçakta ortalama 5 metrede bir dere inişi yazılır.\" Uygulama: tanımda iniş yerleri elle verilmişse (`cati.inis_noktalari`) o sayı kullanılır; verilmemişse Lokman'ın kuralı. Listelerdeki 7'lerin kuraldan farkı plana göre yerleşimle açıklanıyor. Mühendisin 10 × 10 m metrajında dört omuz çatıda 8, beşik çatıda 6 iniş var; Lokman'ın kuralı ikisini de veriyor. Excel motorunda iniş borusu = dere adedi ÷ 5 + 6 (yukarı)."
+    "kaynak": "Lokman, 3 Ekim 2026 13:27: saçaklarda her köşeye iniş yapılır; dört omuz çatıda saçakların tamamı dere ile dönülür. Uzun cephe 10 m olursa ortasına bir iniş daha konur; 14 metrede üç tane konmaz. Örnek: 82 m²'de köşelere birer, 10 metrelik cephelerin ortasına birer, toplam 6. Gerçek listelerde 7, 7 ve 10 iniş var; ilk ikisinde kural 6 veriyor (fark 1; nedeni aşağıda, montaj paftalarından). Ubeydullah (inşaat mühendisi), 3 Ekim 2026: \"Dere inişi plana bakarak yerleştirilmesi doğru olur. Normalde düz bir saçakta ortalama 5 metrede bir dere inişi yazılır.\" Uygulama: tanımda iniş yerleri elle verilmişse (`cati.inis_noktalari`) o sayı kullanılır; verilmemişse Lokman'ın kuralı. Listelerdeki 7'lerin kuraldan farkı plana göre yerleşimle açıklanıyor. Mühendisin 10 × 10 m metrajında dört omuz çatıda 8, beşik çatıda 6 iniş var; Lokman'ın kuralı ikisini de veriyor. Excel motorunda iniş borusu = dere adedi ÷ 5 + 6 (yukarı). Montaj paftalarındaki iniş işaretleri (4 Ekim 2026; makas ve dere yerleşim planları): 62 m² projede 7 işaret: dört köşe, arka cephede bir tane (ortaya yakın: köşelerden 655 ve 554 cm) ve giriş saçağının iki ön köşesi; ön cephenin ortasında yok (liste 7). 105 m² projede 10 işaret (liste 10). 90 m² projede (beşik çatı) 8 işaret: üç saçak çizgisinin (iki uzun saçak ve verandanın kademeli kısa saçağı) uçlarında altı, iki uzun saçağın ortasına yakın iki; kısa saçağın iç köşedeki ucundaki işaret çizginin üzerinde değil, yanında (liste 7). Listelerdeki sayı paftadaki yerleşimden geliyor. Kural dört köşe ve iki orta sayarak 6 veriyor. Köşe, saçak çizgisinin bütün dış köşeleri olarak sayılırsa iki listedeki 7 çıkıyor: 62 m²'de altı dış köşe + arka cephenin ortası (giriş saçağı ön cepheyi böldüğü için oraya orta iniş gelmiyor); 90 m²'de beş dış köşe + iki uzun saçağın ortası (paftadaki sekizinci işaret iç köşede). Sayımı kodu görmeyen ayrı bir Claude oturumu da yaptı: aynı sayılar ve aynı yerler. Bu okuma Lokman'a soruldu; cevaba kadar örneklerde dört köşe sayılıyor (girdide `cati.kose_adedi` ile değiştirilebilir)."
   },
   "dere_kapagi": {
     "deger": {
@@ -665,7 +665,7 @@
       "listede": false
     },
     "durum": "lokman",
-    "kaynak": "Lokman, 4 Ekim 2026 15:18: \"orijinal kapama aparatı var plastik ondan sipariş verirsek listeye sokarız\". Damlalığın yerine düşünülen parça; şimdilik listede yok, sipariş verilirse eklenecek. Excel motorunda (MALZEMELER) üç ayrı kalem var: tek kat panel kapaması (66. satır, L 2500, adedi elle), sandviç panel kapaması (69. satır, L 2800; saçak boyu × çatı katsayısı ÷ 2,6) ve damlalık (78. satır, L 2500, adedi elle; şablonda 0). Listedeki \"tek kat panel kapaması\" ve \"sandviç panel kapaması\" (2025 listelerinden, L 2500) damlalık sayılmamıştı. Lokman, 4 Ekim 2026 16:18: tek kat panel kapaması da çıkarıldı (`panel_kapamasi`); sandviç panel kapaması soruldu."
+    "kaynak": "Lokman, 4 Ekim 2026 15:18: \"orijinal kapama aparatı var plastik ondan sipariş verirsek listeye sokarız\". Damlalığın yerine düşünülen parça; şimdilik listede yok, sipariş verilirse eklenecek. Excel motorunda (MALZEMELER) üç ayrı kalem var: tek kat panel kapaması (66. satır, L 2500, adedi elle), sandviç panel kapaması (69. satır, L 2800; saçak boyu × çatı katsayısı ÷ 2,6) ve damlalık (78. satır, L 2500, adedi elle; şablonda 0). Listedeki \"tek kat panel kapaması\" ve \"sandviç panel kapaması\" (2025 listelerinden, L 2500) damlalık sayılmamıştı. Lokman, 4 Ekim 2026 16:18: tek kat panel kapaması da çıkarıldı (`panel_kapamasi`); sandviç panel kapaması şimdilik kalıyor (Lokman, 4 Ekim 2026 17:46)."
   },
   "panel_boyu_uzatma": {
     "deger": {
@@ -683,6 +683,6 @@
       "sandvic_panel": true
     },
     "durum": "lokman",
-    "kaynak": "Lokman, 4 Ekim 2026 16:18 (\"Sac kapama: o da çıksın mı?\" sorusuna): \"evet tek kat panel kapasınıda çıkar aynısı geçerli\". Tek kat panel kapaması (L 2500; 2025 listelerinden) listeden çıkarıldı: damlalıkla aynı gerekçe (15:18: montajcılar kullanmıyor; plastik kapama aparatı sipariş verilirse listeye girer). Sandviç panel kapaması için cevap yok: soruldu; o zamana kadar sandviç panel seçeneğinde duruyor. Girdide `cati.panel_kapamasi` yazıyorsa o kullanılır: kapaması olan gerçek liste örnekleri (2025 uygulaması) öyle hesaplanır."
+    "kaynak": "Lokman, 4 Ekim 2026 16:18 (\"Sac kapama: o da çıksın mı?\" sorusuna): \"evet tek kat panel kapasınıda çıkar aynısı geçerli\". Tek kat panel kapaması (L 2500; 2025 listelerinden) listeden çıkarıldı: damlalıkla aynı gerekçe (15:18: montajcılar kullanmıyor; plastik kapama aparatı sipariş verilirse listeye girer). Sandviç panel kapaması: Lokman, 4 Ekim 2026 17:46 (\"Sandviç panel kapaması: o da çıksın mı?\" sorusuna): \"o kalsın şimdilik\". Sandviç panel seçeneğinde sac kapama duruyor; adedi 2025 listelerinden çıkarılan formülle (her saçak kenarı ÷ 2,5; uydurma). Bir çift kat çelik projenin çatı kaplaması paftasındaki metrajda da kalem var: \"Sandviç Panel Kapak L saç: 20 m\" (iki ana yüzde onar şerit × 100 cm: kapama saçak boyunca). Girdide `cati.panel_kapamasi` yazıyorsa o kullanılır: kapaması olan gerçek liste örnekleri (2025 uygulaması) öyle hesaplanır."
   }
 }

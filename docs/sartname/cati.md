@@ -1,6 +1,6 @@
 # A5 · Çatı
 
-Kaynak: Lokman'ın anlattıkları (2–4 Ekim 2026; 4 Ekim 01:24 ve 01:42 düzeltmeleri ile 15:18 ve 16:18 cevapları dahil) ve inşaat mühendisi Ubeydullah'ın üç tur cevabı (Lokman 3 Ekim 18:14'te, 4 Ekim 01:24'te ve 4 Ekim 12:14'te iletti). Lokman'ın söylediği ile mühendisin söylediği çelişirse Lokman'ınki geçerlidir (4 Ekim 15:18). Madde sonundaki saat, söylendiği anı gösterir; tarih yazmayan saatler 2 Ekim'dir.
+Kaynak: Lokman'ın anlattıkları (2–4 Ekim 2026; 4 Ekim 01:24 ve 01:42 düzeltmeleri ile 15:18, 16:18 ve 17:46 cevapları dahil) ve inşaat mühendisi Ubeydullah'ın üç tur cevabı (Lokman 3 Ekim 18:14'te, 4 Ekim 01:24'te ve 4 Ekim 12:14'te iletti). Lokman'ın söylediği ile mühendisin söylediği çelişirse Lokman'ınki geçerlidir (4 Ekim 15:18). Madde sonundaki saat, söylendiği anı gösterir; tarih yazmayan saatler 2 Ekim'dir.
 
 ## Kurallar
 
@@ -73,7 +73,12 @@ Kaynak: Lokman'ın anlattıkları (2–4 Ekim 2026; 4 Ekim 01:24 ve 01:42 düzel
 ### Lokman'ın cevapları (4 Ekim 16:18)
 
 - Panel boyu: "evet 1. yi kural yap çok mantıklı bir çıkarım da bulunmuşsun". Kural: panel boyunun tabanı eğimli boy + taşmadır; boy 1'er cm uzatılarak denenir, en çok 3 cm; adet düşüyorsa liste uzun boyu yazar. Taşma değişmez: tam boy giden panellerde fazlalık mahya ucunda kalır. Uygulama ayrıntısı: seçilen boyda adet, kesim payı 1 cm'ye çıksa da aynı kalmalı.
-- Sac kapama: "evet tek kat panel kapasınıda çıkar aynısı geçerli". Tek kat panel kapaması (L 2500; 2025 listelerinden) damlalık gibi listeden çıktı; plastik kapama aparatı sipariş verilirse listeye girer. Sandviç panel seçeneğindeki sac kapama soruldu.
+- Sac kapama: "evet tek kat panel kapasınıda çıkar aynısı geçerli". Tek kat panel kapaması (L 2500; 2025 listelerinden) damlalık gibi listeden çıktı; plastik kapama aparatı sipariş verilirse listeye girer. Sandviç panel seçeneğindeki sac kapama soruldu (cevap aşağıda).
+
+### Lokman'ın cevapları (4 Ekim 17:46)
+
+- Sandviç panel kapaması: "o kalsın şimdilik". Sandviç panel seçeneğinde sac kapama (L 2500) duruyor; adedi her saçak kenarı ÷ 2,5 (2025 listelerinden; uydurma). Bir çift kat çelik projenin çatı kaplaması paftasındaki metrajda da kalem var: "Sandviç Panel Kapak L saç: 20 m" (kapama saçak boyunca).
+- Kesim planı paftası: "BOM dan sonra montaj paftası için ayrı çalışacağız klasörleri dolaş ve montaj paftalarını bul ne demek istediğimi anlarsın". Pafta şimdi hazırlanmıyor. Montaj paftası, proje başına hazırlanan ortak çerçeveli bir pafta seti; açılım ve kesim planı o setteki "çatı kaplaması yerleşim planı" paftasının kırma çatıdaki karşılığı. Kayıt: `montaj_paftasi.md`.
 
 ### Bindirme, mahya çeşitleri, dere inişi (3 Ekim 13:27)
 
@@ -99,6 +104,7 @@ Kaynak: Lokman'ın anlattıkları (2–4 Ekim 2026; 4 Ekim 01:24 ve 01:42 düzel
 - Eğim: 90 m² modelde %33,0, 81 m² modelde %32,9, 62 m² modelde dört yönde %30,0.
 - Makas aralığı üç modelde 125 cm.
 - 90 m² projenin montaj paftasındaki not: aşıklar 60 cm aralıkla, mahya aşığı 20 cm'de.
+- Montaj paftalarından (4 Ekim; `montaj_paftasi.md`): aşık hatları 62 ve 90 m² projelerde 60,0 cm aralıklı ölçüldü (62 m² proje sandviç panelli); tavan omegası hatları da 60,0 cm. Makas ve dere paftalarındaki iniş işaretleri: 62 m² projede 7 (dört köşe, arka cephede bir tane, giriş saçağının iki ön köşesi), 90 m² projede 8 (üç saçak çizgisinin uçlarında altı, iki uzun saçağın ortasına yakın iki), 105 m² projede 10. Paftalardaki 117 cm makaslar arası net açıklık: makas 8 cm, eksen aralığı 125 cm (90 ve 105 m² projeler). Çatı kaplaması paftalarının hepsi beşik çatıda; kırma çatılı 62 m² projede yüzler dikdörtgen çizilmiş, çapraz kesim paftada yok.
 
 ## Çıkarımlar (teyit bekliyor)
 
@@ -183,17 +189,22 @@ Katalog görsellerine göre tek bir kırma çatı, kapalı kısmı ve verandayı
 - Panel boyu: adet düşüyorsa en çok 3 cm uzatılır (kural).
 - Tek kat panel kapaması listeden çıktı.
 
+4 Ekim 17:46 (Lokman):
+
+- Sandviç panel kapaması şimdilik kalıyor.
+- Montaj paftası yükleme listesinden sonra ayrı iş; kesim planı o setin içinde pafta olur.
+
 ## Açık sorular
 
 - Lokman kiriş ve makasları "yaklaşık bir makasın ölçüsünden" verecek; o zamana kadar çatı çeliği motorun ortalamasıyla (mühendis, 4 Ekim 12:14: "şimdilik Excel hesaplama motoruna uy"; Lokman, 4 Ekim 15:18: "şimdilik motoru kastas al", motoru inceleyecek).
-- Kesim planının ölçüleri kaplamanın kapattığı genişliğe göre; panelin yan bindirme payı, kırma hattındaki yan pay ve boyuna kesimin payı ayrıca düşünülmedi. Kısa yüzlerde son şerit 10 cm kalıyor. Montajcıya verilecek pafta için gözden geçirilmeli; pafta istenirse hazırlanacak.
+- Kesim planının ölçüleri kaplamanın kapattığı genişliğe göre; panelin yan bindirme payı, kırma hattındaki yan pay ve boyuna kesimin payı ayrıca düşünülmedi. Kısa yüzlerde son şerit 10 cm kalıyor. Montajcıya verilecek pafta için gözden geçirilmeli; pafta, montaj paftası çalışmasında hazırlanacak (yükleme listesinden sonra; Lokman, 4 Ekim 17:46).
 - Cumbalı çatıda (ters mahya) açılım ve dizilim henüz yok.
-- Sandviç panel kapaması: tek kat panel kapaması çıktı (Lokman, 4 Ekim 16:18). Sandviç panel seçeneğindeki sac kapama (L 2500) da çıksın mı? Plastik kapama aparatı sipariş verilirse listeye girecek; adedinin kuralı o zaman.
+- Dere inişi: köşe, saçak çizgisinin bütün dış köşeleri mi (giriş saçağı, verandadaki kademe)? Montaj paftalarında öyle yerleştirilmiş: 62 m² projede 7 iniş; kural dört köşe ve iki orta sayınca 6 veriyor. Lokman'a soruldu (4 Ekim). Ç8201'de sayı değişmez (6).
 - Excel motorundaki kaplama formülü: 0,8 ve 1,05 paydanın parantezi dışında (kapatma genişliğine bölmek yerine çarpıyor); uzun kenara saçak eklenmemiş. Güncel ürünle (kiremit desen sac 100 cm) metal kiremit katsayısının 1,05 yerine 1 olması gerekir. Bulgular mühendise iletilecek (`yukleme_listesi_yontemi.md`).
 - Kapatma genişlikleri ürün değiştikçe güncellenecek: sandviç panelin 80 cm kapatanı var, şimdilik 100 alınıyor (Lokman, 4 Ekim 15:18).
 - Ters mahya kenar kutuları (motorda ters mahya × 2): cumbalı çatı çalışılınca sorulacak.
 - Saçak sacının boyu: örnekte L 2800, listelerde L 2500. Derede ve L 800 trapez mahyasında bindirme de 30 cm mi (Excel motorunda 20 cm)?
-- 62 ve 105 m² listelerde hem saçak sacı hem saçaklar için Boardex var; kurala göre birlikte olmaz. O Boardex nereye gidiyor?
+- 62 ve 105 m² listelerde hem saçak sacı hem saçaklar için Boardex var; kurala göre birlikte olmaz. O Boardex nereye gidiyor? 62 m² projenin paftasında "saçak çıkması: 30 cm / saçak sacı üzerinde boardex" yazıyor: Boardex saçak sacının üzerine mi kaplanıyor?
 - 62 m² projede eğim neden %30? "Eğim değişmez" kuralının istisnası var mı?
-- Makas aralığı 125 cm kural mı?
+- Makas aralığı 125 cm kural mı? Montaj paftalarında da öyle: yazı 117 cm (net açıklık) + 8 cm makas (90 ve 105 m² projeler).
 - Veranda dikmelerinin sayısı ve yeri neye göre belirleniyor?

@@ -79,6 +79,7 @@ Tutmayanlar ve yeni çıkanlar (Lokman'a soruldu):
 - "Duvar birleşimleri köşebent ile birleştirilecektir."
 - Kaplama genişlikleri: trapez sac 80 cm, sandviç panel 100 cm, metal kiremit 110 cm, tek kat panel 87 cm kapatır.
 - Doğrama notlarında "verilen ölçüler iç ölçülerdir" yazıyor.
+- Montaj paftalarının tamamı 4 Ekim'de incelendi (13 klasör, 84 PDF, ana DWG'ler): `montaj_paftasi.md`.
 
 ## Sınırlar
 
