@@ -2,7 +2,8 @@
  "ad": "Örnek proje: 105 m², tek kat, çelik, beşik + cumba çatı, tek kat panel, dış karkas 140 mm (dosya tarihi 26 Kasım 2025)",
  "yontem": "omega_asik",
  "yontem_adi": "B · tavan omegası, aşık, alın sacı, saçak sacı (prefabrik yöntemi)",
- "cati_kaplamasi": "tek kat panel",
+ "cati_kaplamasi": "tek kat panel (baz paket)",
+ "cati_kaplamasi_anahtar": "tek_kat_panel",
  "kapali_gruplar": [],
  "satirlar": [
   {
@@ -251,6 +252,19 @@
    "formul": "cumbalı çatıda çatıların birleştiği vadi boyu ÷ (2,8 − 0,30)",
    "durum": "lokman",
    "not": null
+  },
+  {
+   "grup": "Çatı kaplamaları",
+   "kalem": "Mahya bandı",
+   "boyut": "rulo / 10 m",
+   "adet": 4,
+   "olcu": 31.88,
+   "brut": null,
+   "birim": "m",
+   "kg": null,
+   "formul": "düz ve ters mahya gelen yerlerin uzunlukları toplamı ÷ 10 m",
+   "durum": "excel",
+   "not": "listeye girmesi: mühendis, 4 Ekim. Excel motorunda parça adedi × parça boyu ÷ 10"
   },
   {
    "grup": "Dere",
@@ -905,7 +919,7 @@
    "uydu_prizi": 1,
    "sigorta": 9
   },
-  "kirma_kaplama_yerlesim_adedi": null
+  "kirma_dizilim": null
  },
  "karsilastirma": {
   "Saçak sacı (30'luk)": {

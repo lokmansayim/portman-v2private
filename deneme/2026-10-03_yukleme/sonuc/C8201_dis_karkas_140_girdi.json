@@ -16,16 +16,16 @@
  "kat_yuksekligi_m": 2.7,
  "celik": {
   "dis": {
-   "profil": "140x45x0,8",
+   "profil": "140x45x1,2",
    "boy_m": 32.0,
    "panel_adedi": 8,
-   "not": "et kalınlığı ve panel adedi tahmin; teyit bekliyor"
+   "not": "panel adedi tahmin; gerçek adet karkas yerleşiminden gelir"
   },
   "ic": {
-   "profil": "80x45x0,8",
+   "profil": "80x45x1,2",
    "boy_m": 19.4,
    "panel_adedi": 6,
-   "not": "et kalınlığı ve panel adedi tahmin; teyit bekliyor"
+   "not": "panel adedi tahmin; gerçek adet karkas yerleşiminden gelir"
   },
   "dikme": {
    "profil": "80x45x1,2",
@@ -217,6 +217,7 @@
   "bosluk_m2": 3.126,
   "net_m2": 24.06
  },
+ "osb_takviye_teyit": "muhendis",
  "elektrik_odalar": [
   {
    "ad": "Yatak Odası 1",
@@ -263,7 +264,7 @@
  "cati": {
   "tip": "kirma",
   "yontem": "panel",
-  "kaplama": "sandvic_panel",
+  "kaplama": "tek_kat_panel",
   "egim": 0.33,
   "plan_m": [
    11.54,
@@ -333,13 +334,13 @@
   }
  ],
  "varsayimlar": [
-  "Çatı kaplaması seçenektir; baz paketin kaplaması söylenmedi. Örnek olarak sandviç panel alındı; `--kaplama` ile öteki beş seçenek hesaplanır. Panel boyu eğimli boydan, 10 cm'ye yuvarlandı.",
-  "Çelik et kalınlığı gerçek listelerden çıkarıldı: 80 mm dış karkasta duvarlar 1,2 mm; 140 mm dış karkasta dış ve iç duvarlar 0,8 mm. Teyit bekliyor.",
+  "Çatı kaplaması seçenektir; baz pakette tek kat panel (Lokman, 4 Ekim 01:42). `--kaplama` ile öteki beş seçenek hesaplanır. Panel boyu eğimli boydan, 10 cm'ye yuvarlandı.",
+  "Kırma çatıda kaplama adedi çatı açılımından: yüzler şerit şerit dizilir, çapraz kesimden artan parça karşı yüzde kullanılır (Lokman, 4 Ekim 01:42; `cati_acilim.py`). Dizilim her yüzde sol köşeden başlar; kesim payı yok (varsayım).",
   "Duvar paneli adedi tahmin: her duvar hattı bir panel, 5,7 m'yi aşarsa bölünür. Gerçek adet karkas yerleşiminden gelir.",
-  "Tavan paneli ve çatı paneli: mühendisin 100 m² bina için verdiği kg ve adet, çatının örttüğü oturum alanına oranlandı.",
+  "Tavan paneli ve çatı paneli: 100 m² bina için verilen kg (Lokman'ın 4 Ekim düzeltmesi) ve adet (mühendisin ilk cevabı), çatının örttüğü oturum alanına oranlandı.",
   "Veranda dikmelerinin sayısı ve yeri katalog görsellerinden: dış kenarda iki köşe ve bir orta.",
-  "OSB takviyesi: dolap ve TV ünitesi gelen duvarlar katalog görselinden seçildi; her duvarın o odaya bakan yüzünün tamamı alındı.",
-  "Elektrik: pafta yok; sayılar mühendisin oda başına kuralından (doğruluk payı yaklaşık %75). Salon ile mutfağın aynı mahalde olduğu yerde ikisinin kuralı birlikte uygulandı.",
+  "OSB takviyesi: dolap ve TV ünitesi gelen duvarlar katalog görselinden seçildi (mühendis doğruladı); her duvarın o odaya bakan yüzünün tamamı alındı.",
+  "Elektrik: pafta yok; sayılar mühendisin oda başına kuralından (doğruluk payı yaklaşık %75). Salon ile mutfağın aynı mahalde olduğu yerde ikisinin kuralı birlikte uygulandı (mühendis doğruladı).",
   "Kablo boyunda 'sigortadan evin en uzak mesafesi' kapalı kısmın köşegeni alındı (Excel motorundaki gibi).",
   "Köşebent: yalnız iç köşeler sayıldı; odaya doğru çıkıntı yapan köşeler ve veranda tavanı sayılmadı.",
   "Dış kapı boşluğu 0,95 × 2,10 m (çalışma kitaplarındaki değer); katalog çiziminde kapı 100 cm."

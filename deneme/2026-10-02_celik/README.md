@@ -12,7 +12,7 @@ Amaç: tek kat çelik bir modeli, pano ızgarası olmadan, bir tanım dosyasınd
 | `gorunus.py` | Çatı hesabı, çatı planı, dört görünüş ve tek pafta |
 | `secenekler/` | Seçenekler (değişiklik operatörleri): model tanımını değiştirmeden paket farkını uygular. İlk örnek: `dis_karkas_140.json` |
 | `cikti/` | Koşu çıktıları (depoya girmez) |
-| `sonuc/` | Son koşunun kanıtları (3 Ekim 2026 19:12): plan, pafta, raporlar |
+| `sonuc/` | Son koşunun kanıtları (4 Ekim 2026 02:58): plan, pafta, raporlar |
 
 ## Çalıştırma
 
@@ -52,6 +52,13 @@ python gorunus.py C8201.json --secenek secenekler/dis_karkas_140.json
 - İç duvarların L birleşimi dolduruldu (banyonun alt duvarı ile banyo–mutfak duvarının köşesi): Yaşam Alanı'nda 5 × 5 cm'lik çentik kalktı; alanlar iki ondalıkta aynı, `--cizim-kalinligi` karşılaştırması yine AYNI.
 - Çatı: saçak yüzü Boardex (teyitli), saçak omegası yok. Dere inişi tanımda elle verilebilir (`cati.inis_noktalari`); verilmediği için kuraldan 6.
 - Çatı kaplaması adları altı seçeneğe çıkarıldı.
+
+## 4 Ekim 01:24 ve 01:42 ile değişenler
+
+- Baz paketin çatı kaplaması tek kat panel (Lokman, 01:42): tanımda `cati.kaplama`; paftadaki yazı ve çatı raporu buna göre. Plan görseli bayt bayt aynı.
+- Tanıma OSB takviyesi duvarlarının teyidi yazıldı (mühendis doğruladı).
+- Dış 140 seçeneğinin açıklaması: et kalınlığı mühendisin kuralıyla 1,2 mm (çizim değişmedi).
+- Çatı açılımı ve kaplama dizilimi yükleme listesi denemesinde: `../2026-10-03_yukleme/cati_acilim.py`.
 
 ## Sınırlar
 

@@ -95,10 +95,10 @@ def taslak_tablosu() -> list[str]:
     return cik
 
 
-KAPLAMALAR = (("Sandviç panel", "C8201_yukleme_taslak.json"), ("Tek kat panel", "C8201_kaplama_tek_kat_panel.json"),
-              ("OSB + nem bariyeri + kiremit desen sac (motorda: OSB + membran + metal kiremit)", "C8201_kaplama_osb_kiremit.json"),
-              ("OSB + nem bariyeri + trapez sac", "C8201_kaplama_osb_trapez.json"), ("Trapez sac", "C8201_kaplama_trapez_sac.json"),
-              ("OSB + membran + shingle", "C8201_kaplama_osb_shingle.json"))
+# Altı kaplamanın çıktısı `sonuc/C8201_kaplama_<anahtar>.json`; baz paketin kaplaması (kurallar.json) tabloda başa alınır.
+KAPLAMALAR = (("tek_kat_panel", "Tek kat panel"), ("sandvic_panel", "Sandviç panel"),
+              ("osb_kiremit", "OSB + nem bariyeri + kiremit desen sac (motorda: OSB + membran + metal kiremit)"),
+              ("osb_trapez", "OSB + nem bariyeri + trapez sac"), ("trapez_sac", "Trapez sac"), ("osb_shingle", "OSB + membran + shingle"))
 ELEKTRIK = (("Tijli duy", "tijli_duy"), ("Yuvarlak glop", "glop"), ("Tekli anahtar", "tekli_anahtar"), ("Çiftli anahtar", "cift_anahtar"),
             ("Tekli priz", "tekli_priz"), ("Çiftli priz", "cift_priz"), ("Uydu prizi", "uydu_prizi"))
 ISLEV_ADI = {"yatak_odasi": "yatak odası", "banyo": "banyo", "salon": "salon", "mutfak": "mutfak", "hol": "hol", "veranda": "veranda"}
@@ -106,11 +106,50 @@ ISLEV_ADI = {"yatak_odasi": "yatak odası", "banyo": "banyo", "salon": "salon", 
 
 def kaplama_tablosu() -> list[str]:
     cik = ["| Seçenek | Kalem | Boyut | Adet | Durum |", "|---|---|---|---|---|"]
-    for ad, dosya in KAPLAMALAR:
-        v = oku(dosya)
+    baz_kaplama = json.loads((BURADA / "kurallar.json").read_text(encoding="utf-8"))["baz_paket_cati_kaplamasi"]["deger"]
+    assert oku("C8201_yukleme_taslak.json")["cati_kaplamasi_anahtar"] == baz_kaplama, "Ç8201 taslağı baz paketin kaplamasıyla hesaplanmalı"
+    for anahtar, ad in sorted(KAPLAMALAR, key=lambda x: x[0] != baz_kaplama):
+        v = oku(f"C8201_kaplama_{anahtar}.json")
+        assert v["cati_kaplamasi_anahtar"] == anahtar, (anahtar, v["cati_kaplamasi_anahtar"])
+        if anahtar == baz_kaplama:
+            ad += " (baz paket)"
         satirlar = [s for s in v["satirlar"] if s["grup"] == "Çatı kaplamaları" or (s["grup"] == "Vida" and ("Trapez vida (5,5 × 60)" in s["kalem"] or "panel)" in s["kalem"] or "OSB ve yalıpan" in s["kalem"]))]
         for s in satirlar:
             cik.append(f"| {ad} | {s['kalem']} | {s['boyut']} | {adet(s['adet'])} | {s['durum']} |")
+    return cik
+
+
+def dizilim_tablosu() -> list[str]:
+    """Kırma çatıda kaplama adedi: çatı açılımı ve dizilim (Lokman, 4 Ekim 2026 01:42). Ç8201'de şerit dizilen dört kaplama ve 62 m² gerçek liste."""
+    import math
+    from cati_acilim import adet_denemeleri, dizilim
+    kr = json.loads((BURADA / "kurallar.json").read_text(encoding="utf-8"))
+    baz_kaplama, yok = kr["baz_paket_cati_kaplamasi"]["deger"], kr["kirma_cati_dizilim"]["deger"]["artan_parca_kullanilmayan_kaplamalar"]
+    c = oku("C8201_girdi.json")["cati"]
+    cik = ["| Çatı | Kaplama | Kapatır | Artan parça karşı yüzde | Artan parça kullanılmazsa | Listeye giren | Alan olarak en az | Önceki kural (yüzey + %10) | Başlangıç köşesine göre | 1 cm kesim payıyla |",
+           "|---|---|---|---|---|---|---|---|---|---|"]
+
+    def satir(cati: str, ad: str, px: float, py: float, egim: float, w: float, boy: float, paylas: bool, yuzey: float) -> str:
+        d, ds = dizilim(px, py, egim, w, boy, True), dizilim(px, py, egim, w, boy, False)
+        den = adet_denemeleri(px, py, egim, w, boy, paylas)
+        aralik = str(min(den.values())) if len(set(den.values())) == 1 else f"{min(den.values())}–{max(den.values())}"
+        giren = d["adet"] if paylas else ds["adet"]
+        return (f"| {cati} | {ad} | {round(w * 100)} cm | {d['adet']} ({d['tam_boy_adedi']} tam boy + {d['adet'] - d['tam_boy_adedi']} kesilen) | {ds['adet']} | "
+                f"{giren}{'' if paylas else ' (varsayım)'} | {(d if paylas else ds)['alan_alt_siniri']} | {math.ceil(yuzey * 1.10 / (boy * w) - 1e-9)} | {aralik} | "
+                f"{dizilim(px, py, egim, w, boy, paylas, kesim_payi=0.01)['adet']} |")
+
+    sirali = sorted((("tek_kat_panel", "Tek kat panel", "tek_kat_panel_kapatma_m"), ("sandvic_panel", "Sandviç panel", "sandvic_panel_kapatma_m"),
+                     ("trapez_sac", "Trapez sac", "trapez_sac_kapatma_m"), ("osb_kiremit", "Kiremit desen sac", "kiremit_kapatma_m")), key=lambda x: x[0] != baz_kaplama)
+    for anahtar, ad, kural in sirali:
+        cik.append(satir("Ç8201 (L 4300)", ad + (" (baz paket)" if anahtar == baz_kaplama else ""), c["plan_m"][0], c["plan_m"][1], c["egim"],
+                         kr[kural]["deger"], c["panel_boyu_m"], anahtar not in yok, c["yuzey_m2"]))
+    g62 = json.loads((BURADA / "ornek_62m2_girdi.json").read_text(encoding="utf-8"))["cati"]
+    liste = json.loads((BURADA / "ornek_62m2_gercek_liste.json").read_text(encoding="utf-8"))["kalemler"]["Sandviç panel"]["adet"]
+    cik.append(satir(f"62 m² gerçek liste (L {round(g62['panel_boyu_m'] * 1000)}; listede {liste})", "Sandviç panel", g62["plan_m"][0], g62["plan_m"][1], g62["egim"],
+                     kr["sandvic_panel_kapatma_m"]["deger"], g62["panel_boyu_m"], True, g62["yuzey_m2"]))
+    # Mühendisin 10 × 10 m dört omuz metrajı (Çatı Hesapları çalışma kitabı): 118 m² yüzey, trapez sac L 5900, 36 adet.
+    # Plan saçak dahil 10,6 × 10,6 m ve eğim %33 alındı: yüzey 10,6² × 1,053 = 118,3 m² (metrajdaki yüzeyi veriyor).
+    cik.append(satir("Mühendisin 10 × 10 m dört omuz metrajı (L 5900; metrajda 36)", "Trapez sac", 10.6, 10.6, 0.33, kr["trapez_sac_kapatma_m"]["deger"], 5.9, True, 10.6 * 10.6 * math.sqrt(1 + 0.33 ** 2)))
     return cik
 
 
@@ -166,6 +205,7 @@ def main() -> int:
     cik += ["", "## Adedi tutmayan kalemler", ""] + kt[:2] + [x for x in kt[2:] if "✗" in x]
     cik += ["", "## Ç8201 taslak: baz ve dış 140", ""] + taslak_tablosu()
     cik += ["", "## Ç8201: çatı kaplaması seçenekleri", ""] + kaplama_tablosu()
+    cik += ["", "## Kırma çatıda kaplama dizilimi", ""] + dizilim_tablosu()
     cik += ["", "## Köşebent: mühendisin formülü", ""] + kosebent_tablosu()
     cik += ["", "## Elektrik kuralının sınaması (105 m² liste)", ""] + elektrik_sinama_tablosu()
     cik += ["", "## Ç8201: elektrik, oda oda", ""] + elektrik_oda_tablosu()

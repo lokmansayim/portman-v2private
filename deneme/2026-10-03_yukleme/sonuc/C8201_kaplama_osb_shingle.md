@@ -4,16 +4,16 @@
 
 | Grup | Kalem | Boyut | Adet | Ölçü | kg | Kural | Durum | Not |
 |---|---|---|---|---|---|---|---|---|
-| Çelik panel | Dış cephe duvar panelleri | 80 × 45 × 1,2 | 8 | 32,0 m | 651 | duvar boyu × 20,33 kg/m (motorun proje ortalaması) | motor | et kalınlığı ve panel adedi tahmin; teyit bekliyor |
-| Çelik panel | İç cephe duvar panelleri | 80 × 45 × 1,2 | 6 | 19,7 m | 389 | duvar boyu × 19,75 kg/m (motorun proje ortalaması) | motor | et kalınlığı ve panel adedi tahmin; teyit bekliyor |
+| Çelik panel | Dış cephe duvar panelleri | 80 × 45 × 1,2 | 8 | 32,0 m | 651 | duvar boyu × 20,33 kg/m (motorun proje ortalaması) | motor | panel adedi tahmin; gerçek adet karkas yerleşiminden gelir |
+| Çelik panel | İç cephe duvar panelleri | 80 × 45 × 1,2 | 6 | 19,7 m | 389 | duvar boyu × 19,75 kg/m (motorun proje ortalaması) | motor | panel adedi tahmin; gerçek adet karkas yerleşiminden gelir |
 | Çelik panel | Veranda dikmeleri (kolon paneli) | 80 × 45 × 1,2 | 3 | 7,2 m | 46 | adet × 2,40 m × 6,42 kg/m | motor | dikme sayısı ve yeri katalog görsellerinden |
 | Çelik panel | Veranda kirişleri (kiriş paneli) | 80 × 45 × 1,2 | 4 | 12,4 m | 81 | kiriş boyu × 6,55 kg/m; adet = boy ÷ 4 | motor |  |
-| Çelik panel | Çatı makas panelleri | 80 × 45 × 0,8 | 25 | 93,5 m² | 706 | saçak dahil çatı planı × 7,55 kg/m² (motorun proje ortalaması); adet çatı tipine göre sabit | motor | geçici: Lokman makas ve kirişleri bir makas ölçüsünden ayrıca verecek |
-| Çelik panel | Tavan paneli (makas arası) | roll form çelik | 7 | 82,0 m² | 353 | çatının örttüğü oturum alanı ÷ 100 × 429,83 kg; adet: ÷ 100 × 8, yukarı (tavan alanı 76,7 m²) | muhendis | kg ve adet 10 × 10 m (100 m²) bina için verildi; oturum alanına oranlandı (tahmin) |
-| Çelik panel | Çatı paneli (makas üstü, sırt 80 mm) | roll form çelik | 10 | 82,0 m² | 461 | çatının örttüğü oturum alanı ÷ 100 × 561,60 kg; adet: ÷ 100 × 12, yukarı (çatı yüzeyi 98,4 m²) | muhendis | kg ve adet 10 × 10 m (100 m²) bina için verildi; oturum alanına oranlandı (tahmin) |
+| Çelik panel | Çatı makas panelleri | 80 × 45 × 0,8 | 25 | 93,5 m² | 706 | saçak dahil çatı planı × 7,55 kg/m² (motorun proje ortalaması); adet çatı tipine göre sabit | motor | geçici: Lokman makas ve kirişleri bir makas ölçüsünden ayrıca verecek; o zamana kadar motorun ortalaması (mühendis, 4 Ekim: tamam) |
+| Çelik panel | Tavan paneli (makas arası) | roll form çelik | 7 | 82,0 m² | 291 | çatının örttüğü oturum alanı ÷ 100 × 354,84 kg; adet: ÷ 100 × 8, yukarı (tavan alanı 76,7 m²) | lokman | 100 m² için verilen ağırlık oturum alanına oranlandı (Lokman, 4 Ekim düzeltmesi). Adet tahmin: alana oranlandı (mühendis, 4 Ekim: tamam); kesin adet panel yerleşiminden gelir |
+| Çelik panel | Çatı paneli (makas üstü, sırt 80 mm) | roll form çelik | 10 | 82,0 m² | 361 | çatının örttüğü oturum alanı ÷ 100 × 440,32 kg; adet: ÷ 100 × 12, yukarı (çatı yüzeyi 98,4 m²) | lokman | 100 m² için verilen ağırlık oturum alanına oranlandı (Lokman, 4 Ekim düzeltmesi). Adet tahmin: alana oranlandı (mühendis, 4 Ekim: tamam); kesin adet panel yerleşiminden gelir |
 | Çelik panel | Boy C profil | 80 × 45 × 0,8 | 3 |  | 15 | motorda sabit | motor |  |
 | Çelik panel | Boy C profil | 80 × 45 × 1,2 | 3 |  | 15 | motorda sabit | motor |  |
-| Çelik panel | Toplam (adedi ve kg'ı bilinenler) |  | 69 |  | 2716 | tavan ve çatı panelleri dahil | motor |  |
+| Çelik panel | Toplam (adedi ve kg'ı bilinenler) |  | 69 |  | 2555 | tavan ve çatı panelleri dahil | motor |  |
 | Metal aksam | Saçaklar için Boardex | 1200 × 2400 | 5 | 11,8 m² |  | saçak boyu × saçak eni × 1,15 ÷ 2,88 | uydurma | saçak altının Boardex olduğu: Lokman, 3 Ekim 13:27; formül 62 m² listeden |
 | Metal aksam | Saçak yüzü için Boardex | 1200 × 2400 | 3 | 7,2 m² |  | saçak ucu çevresi × saçak yüzü yüksekliği (topuk + panelin düşey ölçüsü) × 1,15 ÷ 2,88 | muhendis | saçak yüzü Boardex'le kaplanır: mühendis, 3 Ekim; kaplandığı: Lokman, 2 Ekim 22:05. Alan geometriden |
 | Metal aksam | Köşebent | L 2500 | 51 | 126,4 m |  | (oda tavan çevreleri 69,72 m + 21 iç köşe × 2,7 m) ÷ 2,5 | muhendis | odaya doğru çıkıntı yapan 1 köşe ve veranda tavanı sayılmadı |
@@ -22,7 +22,7 @@
 | İç cephe kaplama | Duvar alçıpan yeşil | 1200 × 2500 | 8 | 20,4 m² |  | oda oda: (iç çevre × yükseklik − o odadaki boşluklar) toplamı × 1,05 ÷ 3,0; yeşil = ıslak hacimler | excel |  |
 | İç cephe kaplama | Tavan alçıpan beyaz | 1200 × 2500 | 19 | 54,1 m² |  | tavan alanı × 1,05 ÷ 3,0 | motor |  |
 | İç cephe kaplama | Tavan alçıpan yeşil | 1200 × 2500 | 8 | 22,6 m² |  | tavan alanı × 1,05 ÷ 3,0; yeşil = ıslak hacim + veranda tavanı | lokman |  |
-| İç cephe kaplama | OSB (TV ve mutfak dolabı arkası takviyesi) | 1220 × 2440 | 9 | 24,5 m² |  | dolap ve TV ünitesi gelen duvarlar: (duvar yüzünün boyu × yükseklik − boşluklar) × 1,05 ÷ 2,98 | muhendis | banyo ile mutfak arası duvar 2,49 m (mutfak dolabı); üst dış duvar 2,96 m (mutfak dolabı ve eviye); hol ile yaşam alanı arası duvar 4,80 m (TV ünitesi). Duvarların seçimi katalog görselinden; teyit bekliyor |
+| İç cephe kaplama | OSB (TV ve mutfak dolabı arkası takviyesi) | 1220 × 2440 | 9 | 24,5 m² |  | dolap ve TV ünitesi gelen duvarlar: (duvar yüzünün boyu × yükseklik − boşluklar) × 1,05 ÷ 2,98 | muhendis | banyo ile mutfak arası duvar 2,49 m (mutfak dolabı); üst dış duvar 2,96 m (mutfak dolabı ve eviye); hol ile yaşam alanı arası duvar 4,80 m (TV ünitesi). Duvarların seçimi katalog görselinden; mühendis doğruladı (4 Ekim) |
 | İç cephe kaplama | Duvar izolasyonu | paket 8,64 m² | 13 | 112,2 m² |  | dış duvar × kat sayısı (80 mm karkasta 1, 140 mm'de 2) + iç duvar − boşluklar; ÷ 8,64 | uydurma | dış duvar 1 kat |
 | Çatı kaplamaları | Çatı OSB | 1220 × 2440 | 35 | 98,4 m² |  | çatı yüzeyi × 1,05 ÷ 2,98 | uydurma | kırma çatıda gerçek listeyle sınanmadı; motorun çatı katsayısıyla (× 1,06) 36 adet; mühendisin 10 × 10 m dört omuz metrajında yüzeyin 1,13 katı OSB var |
 | Çatı kaplamaları | Nem bariyeri | m² | 105 | 98,4 m² |  | çatı yüzeyi × çatı katsayısı (1,06) | motor |  |
@@ -43,7 +43,7 @@
 | Kapı ve pencere | PVC vasistas | 60/40 | 1 |  |  | modeldeki açıklıklardan | model |  |
 | Kapı ve pencere | PVC pencere | 120/100 | 1 |  |  | modeldeki açıklıklardan | model |  |
 | Kapı ve pencere | PVC pencere | 180/180 | 3 |  |  | modeldeki açıklıklardan | model |  |
-| Elektrik | Tijli duy | adet | 6 |  |  | yatak odası 2 × 1 + salon 2 + mutfak 1 + hol 1 | muhendis | oda başına kural; doğruluk payı yaklaşık %75 (mühendis, 3 Ekim). Kesin sayı elektrik paftasından gelir. Birden çok işlevi olan mahalde kurallar birlikte uygulandı: Yaşam Alanı (salon + mutfak) |
+| Elektrik | Tijli duy | adet | 6 |  |  | yatak odası 2 × 1 + salon 2 + mutfak 1 + hol 1 | muhendis | oda başına kural; doğruluk payı yaklaşık %75 (mühendis, 3 Ekim). Kesin sayı elektrik paftasından gelir. Salon ile mutfak aynı mahaldeyse iki kural birlikte uygulanır (mühendis, 4 Ekim): Yaşam Alanı (salon + mutfak) |
 | Elektrik | Yuvarlak glop | adet | 3 |  |  | banyo 1 + veranda 2 | muhendis |  |
 | Elektrik | Ampul | adet | 9 |  |  | duy + glop | motor |  |
 | Elektrik | Tekli anahtar | adet | 5 |  |  | yatak odası 2 × 1 + banyo 1 + mutfak 1 + hol 1 | muhendis |  |

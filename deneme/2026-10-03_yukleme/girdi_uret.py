@@ -87,12 +87,18 @@ def main() -> int:
     ic_boy = s["ic_duvarlar"].area / ti / 100
     # çelik: profil ve panel adedi
     ev = kur["celik"]["et_kalinligi_varsayilan"]["deger"]
+    # duvarların et kalınlığı (mühendis, 4 Ekim 2026): tek katta ve zemin katta 1,2 mm; üst katta 0,8 mm
+    ed = kur["celik"]["et_kalinligi_duvar"]["deger"]
+    kat = tanim.get("kat", "zemin")
+    if kat not in ("zemin", "ust"):
+        raise SystemExit(f"Tanımda bilinmeyen kat: {kat}")
+    et = ed["zemin_kat" if kat == "zemin" else "ust_kat"]
     en_cok = kur["celik"]["panel_boyu_en_cok_m"]["deger"]
-    dis_profil = f"{karkas}x45x{ev['dis_80' if karkas == 80 else 'dis_140']}"
-    ic_profil = f"80x45x{ev['ic_dis80' if karkas == 80 else 'ic_dis140']}"
+    dis_profil = f"{karkas}x45x{et}"
+    ic_profil = f"80x45x{et}"
     dis_panel = sum(math.ceil(x / 100 / en_cok - 1e-9) for x in (W, H, W, H))
     ic_panel = sum(math.ceil((d["son"] - d["bas"]) / 100 / en_cok - 1e-9) for d in tanim["ic_duvarlar"])
-    et_notu = "et kalınlığı ve panel adedi tahmin; teyit bekliyor"
+    et_notu = "panel adedi tahmin; gerçek adet karkas yerleşiminden gelir"
     # OSB takviyesi (Ubeydullah, 3 Ekim 2026): yalnız dolap ve TV ünitesi gelen duvarlar; duvarlar modelin tanımında yazılıdır
     ot = s["osb_takviye"]
     osb_takviye = None if not ot else {
@@ -138,11 +144,12 @@ def main() -> int:
         "ic_kapi_adedi": len(ic_kapi),
         "ic_duvar_boyu_m": round(ic_boy, 2),
         "osb_takviye": osb_takviye,
+        "osb_takviye_teyit": (tanim.get("osb_takviye") or {}).get("teyit"),
         "elektrik_odalar": elektrik_odalar,
         "tavan_m2": {"beyaz": round(sum(o["alan_m2"] for o in odalar if o["tur"] == "beyaz"), 2),
                      "yesil": round(sum(o["alan_m2"] for o in odalar if o["tur"] == "yesil") + veranda_m2, 2)},
         "cati": {
-            "tip": ct["tip"], "yontem": yontem, "kaplama": ct.get("kaplama", "sandvic_panel"), "egim": c["egim"], "plan_m": [px, py],
+            "tip": ct["tip"], "yontem": yontem, "kaplama": ct.get("kaplama", kur["baz_paket_cati_kaplamasi"]["deger"]), "egim": c["egim"], "plan_m": [px, py],
             "yuzey_m2": round(c["yuzey_m2"], 2), "sacak_kenarlari_m": [px, py, px, py], "sacak_boyu_toplam_m": round(2 * (px + py), 2),
             "cephe_kenarlari_m": [L, Hc, L, Hc], "kose_adedi": 4,
             "mahya_hatti_m": round(c["mahya_hatti_toplam"] / 100, 2),
@@ -160,13 +167,14 @@ def main() -> int:
             + [{"kalem": ("PVC vasistas" if x["ad"] == "60/40" else "PVC pencere"), "boyut": x["ad"], "adet": x["adet"], "durum": "model"} for x in dis.values() if x["ad"] != "dış kapı"]
         ),
         "varsayimlar": [
-            "Çatı kaplaması seçenektir; baz paketin kaplaması söylenmedi. Örnek olarak sandviç panel alındı; `--kaplama` ile öteki beş seçenek hesaplanır. Panel boyu eğimli boydan, 10 cm'ye yuvarlandı.",
-            "Çelik et kalınlığı gerçek listelerden çıkarıldı: 80 mm dış karkasta duvarlar 1,2 mm; 140 mm dış karkasta dış ve iç duvarlar 0,8 mm. Teyit bekliyor.",
+            "Çatı kaplaması seçenektir; baz pakette tek kat panel (Lokman, 4 Ekim 01:42). `--kaplama` ile öteki beş seçenek hesaplanır. Panel boyu eğimli boydan, 10 cm'ye yuvarlandı.",
+            "Kırma çatıda kaplama adedi çatı açılımından: yüzler şerit şerit dizilir, çapraz kesimden artan parça karşı yüzde kullanılır (Lokman, 4 Ekim 01:42; `cati_acilim.py`). "
+            "Dizilim her yüzde sol köşeden başlar; kesim payı yok (varsayım).",
             f"Duvar paneli adedi tahmin: her duvar hattı bir panel, {str(en_cok).replace('.', ',')} m'yi aşarsa bölünür. Gerçek adet karkas yerleşiminden gelir.",
-            "Tavan paneli ve çatı paneli: mühendisin 100 m² bina için verdiği kg ve adet, çatının örttüğü oturum alanına oranlandı.",
+            "Tavan paneli ve çatı paneli: 100 m² bina için verilen kg (Lokman'ın 4 Ekim düzeltmesi) ve adet (mühendisin ilk cevabı), çatının örttüğü oturum alanına oranlandı.",
             "Veranda dikmelerinin sayısı ve yeri katalog görsellerinden: dış kenarda iki köşe ve bir orta.",
-            "OSB takviyesi: dolap ve TV ünitesi gelen duvarlar katalog görselinden seçildi; her duvarın o odaya bakan yüzünün tamamı alındı.",
-            "Elektrik: pafta yok; sayılar mühendisin oda başına kuralından (doğruluk payı yaklaşık %75). Salon ile mutfağın aynı mahalde olduğu yerde ikisinin kuralı birlikte uygulandı.",
+            "OSB takviyesi: dolap ve TV ünitesi gelen duvarlar katalog görselinden seçildi (mühendis doğruladı); her duvarın o odaya bakan yüzünün tamamı alındı.",
+            "Elektrik: pafta yok; sayılar mühendisin oda başına kuralından (doğruluk payı yaklaşık %75). Salon ile mutfağın aynı mahalde olduğu yerde ikisinin kuralı birlikte uygulandı (mühendis doğruladı).",
             "Kablo boyunda 'sigortadan evin en uzak mesafesi' kapalı kısmın köşegeni alındı (Excel motorundaki gibi).",
             "Köşebent: yalnız iç köşeler sayıldı; odaya doğru çıkıntı yapan köşeler ve veranda tavanı sayılmadı.",
             "Dış kapı boşluğu 0,95 × 2,10 m (çalışma kitaplarındaki değer); katalog çiziminde kapı 100 cm.",

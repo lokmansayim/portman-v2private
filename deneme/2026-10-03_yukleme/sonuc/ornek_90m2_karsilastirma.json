@@ -3,6 +3,7 @@
  "yontem": "omega_asik",
  "yontem_adi": "B · tavan omegası, aşık, alın sacı, saçak sacı (prefabrik yöntemi)",
  "cati_kaplamasi": "OSB + nem bariyeri + kiremit desen sac (metal kiremit)",
+ "cati_kaplamasi_anahtar": "osb_kiremit",
  "kapali_gruplar": [
   "Vida",
   "Elektrik",
@@ -72,7 +73,7 @@
    "kg": 590.24,
    "formul": "saçak dahil çatı planı × 5,70 kg/m² (motorun proje ortalaması); adet çatı tipine göre sabit",
    "durum": "motor",
-   "not": "geçici: Lokman makas ve kirişleri bir makas ölçüsünden ayrıca verecek"
+   "not": "geçici: Lokman makas ve kirişleri bir makas ölçüsünden ayrıca verecek; o zamana kadar motorun ortalaması (mühendis, 4 Ekim: tamam)"
   },
   {
    "grup": "Çelik panel",
@@ -349,6 +350,19 @@
   },
   {
    "grup": "Çatı kaplamaları",
+   "kalem": "Mahya bandı",
+   "boyut": "rulo / 10 m",
+   "adet": 2,
+   "olcu": 16.13,
+   "brut": null,
+   "birim": "m",
+   "kg": null,
+   "formul": "düz ve ters mahya gelen yerlerin uzunlukları toplamı ÷ 10 m",
+   "durum": "excel",
+   "not": "listeye girmesi: mühendis, 4 Ekim. Excel motorunda parça adedi × parça boyu ÷ 10"
+  },
+  {
+   "grup": "Çatı kaplamaları",
    "kalem": "Çatı şiltesi 80 mm",
    "boyut": "9,6 m²/adet",
    "adet": 11,
@@ -523,7 +537,7 @@
   },
   "elektrik_kaynagi": null,
   "elektrik_kural": null,
-  "kirma_kaplama_yerlesim_adedi": null
+  "kirma_dizilim": null
  },
  "karsilastirma": {
   "Saçak sacı (30'luk)": {

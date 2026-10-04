@@ -3,17 +3,20 @@
 
 Sayılar `sonuc/` altındaki hesap çıktılarından alınır; elle yazılmaz. Önce `hepsini_kos.sh` koşulmalı.
 Sayfa Claude'un artefakt biçimindedir (doctype, html, head, body etiketleri yok). Depoya çıktı yazılmaz.
-Şimdilik Ç8201'e özgüdür: dosya adları, "değişenler" ve "sizden beklenenler" metinleri bu modele göredir.
+Şimdilik Ç8201'e özgüdür: dosya adları, "değişenler", çatı açılımı ve "sizden beklenenler" metinleri bu modele göredir.
 Sayfa Lokman'ın özel artefaktıdır ama paylaşılabilir; o yüzden kişi adı yazılmaz (mühendis "mühendis" diye geçer).
 
 Kullanım:
-    python sayfa_uret.py --cikti /tmp/C8201_yukleme_listesi.html --zaman "3 Ekim 2026 19:30"
+    python sayfa_uret.py --cikti /tmp/C8201_yukleme_listesi.html --zaman "4 Ekim 2026 02:00"
 """
 import argparse
 import base64
 import html
 import json
+import math
 from pathlib import Path
+
+from cati_acilim import dizilim
 
 S = Path(__file__).resolve().parent / "sonuc"
 ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -22,9 +25,9 @@ ap.add_argument("--zaman", required=True, help="künyede görünecek tarih ve sa
 A = ap.parse_args()
 baz = json.loads((S / "C8201_yukleme_taslak.json").read_text(encoding="utf-8"))
 d140 = json.loads((S / "C8201_dis_karkas_140_yukleme_taslak.json").read_text(encoding="utf-8"))
-KAPLAMALAR = [("Sandviç panel", baz, None)] + [
+KAPLAMALAR = [("Tek kat panel (baz paket)", baz, None)] + [
     (ad, json.loads((S / f"C8201_kaplama_{kod}.json").read_text(encoding="utf-8")), notu) for ad, kod, notu in (
-        ("Tek kat panel", "tek_kat_panel", None),
+        ("Sandviç panel", "sandvic_panel", None),
         ("OSB + nem bariyeri + kiremit desen sac", "osb_kiremit", "Motordaki adı: OSB + membran + metal kiremit"),
         ("OSB + nem bariyeri + trapez sac", "osb_trapez", "Gerçek listeyle karşılaştırılmadı"),
         ("Trapez sac", "trapez_sac", "Gerçek listeyle karşılaştırılmadı"),
@@ -38,6 +41,7 @@ def e(s):
 
 # Sayfa bağlantıyla paylaşılabildiği için kişi adı taşımaz: hesap çıktısındaki notlarda geçen adlar okura hitaba ("siz") ya da role çevrilir.
 SAYFA_DILI = (
+    ("(Lokman, 4 Ekim düzeltmesi)", "(4 Ekim düzeltmeniz)"),
     ("Lokman makas ve kirişleri bir makas ölçüsünden ayrıca verecek", "makas ve kirişleri bir makas ölçüsünden ayrıca vereceksiniz"),
     ("Lokman'ın kuralı", "sizin kuralınız"), ("Lokman'ın", "sizin"), ("Lokman,", "siz,"), ("Lokman", "siz"),
     ("Ubeydullah'ın", "mühendisin"), ("Ubeydullah", "mühendis"),
@@ -50,8 +54,8 @@ def sayfa_dili(s):
     return s
 
 DURUM = {
-    "lokman": ("Sizin kuralınız", "ok", "Kuralı siz söylediniz"),
-    "muhendis": ("Mühendisin kuralı", "ok", "Kuralı ya da değeri inşaat mühendisi verdi (3 Ekim)"),
+    "lokman": ("Sizin kuralınız", "ok", "Kuralı ya da değeri siz verdiniz"),
+    "muhendis": ("Mühendisin kuralı", "ok", "Kuralı ya da değeri inşaat mühendisi verdi (3 ve 4 Ekim cevapları)"),
     "excel": ("Liste formülü", "kaynak", "Gerçek yükleme listelerinin çalışma kitabındaki formül"),
     "motor": ("Excel motoru", "kaynak", "CTKBF V1.1'deki formül ya da proje ortalaması"),
     "model": ("Modelden", "kaynak", "Çizimdeki açıklıklardan sayıldı"),
@@ -132,12 +136,27 @@ for g in gruplar:
 def kap(v):
     return [s for s in v["satirlar"] if s["grup"] == "Çatı kaplamaları" or (s["grup"] == "Vida" and ("5,5 × 60" in s["kalem"] or "panel)" in s["kalem"] or "OSB ve yalıpan" in s["kalem"]))]
 
-def kap_tablo(ad, v, notu):
-    r = "".join(f'<tr><td>{e(s["kalem"])}</td><td class="boyut">{e(s["boyut"])}</td><td class="say">{s["adet"]}</td></tr>' for s in kap(v))
-    alt = f'<p class="secenek-not">{e(notu)}</p>' if notu else ""
-    return f'<div class="secenek"><h3>{e(ad)}</h3><table><tbody>{r}</tbody></table>{alt}</div>'
+def dizilim_notu(v, cati):
+    """Kırma çatıda dizilimin hassas olduğu yerler (hesap çıktısından): dar pay, başlangıç yeri, artan parçanın kullanılmaması."""
+    dz = v["ara"].get("kirma_dizilim")
+    if not dz:
+        return None
+    parca, den = [], dz["baslangic_kosesine_gore"]
+    if dz["bir_cm_kesim_payiyla"] != dz["adet"]:
+        parca.append(f"En dar kesimde pay {round(dz['en_dar_pay_cm'] * 10)} mm; 1 cm kesim payıyla {dz['bir_cm_kesim_payiyla']}")
+    if len(set(den.values())) > 1:
+        parca.append(f"Dizilimin başladığı yere göre {min(den.values())}–{max(den.values())}")
+    if not dz["artan_parca_karsi_yuzde"]:
+        n = dizilim(cati["plan_m"][0], cati["plan_m"][1], cati["egim"], dz["kapatma_m"], cati["panel_boyu_m"], True)["adet"]
+        parca.append(f"Desen yönlü olduğu için artan parça kullanılmadı (varsayım); kullanılırsa {n}")
+    return ". ".join(parca) or None
 
-kaplama = "".join(kap_tablo(ad, v, notu) for ad, v, notu in KAPLAMALAR)
+
+def kap_tablo(ad, v, notu, cati):
+    r = "".join(f'<tr><td>{e(s["kalem"])}</td><td class="boyut">{e(s["boyut"])}</td><td class="say">{s["adet"]}</td></tr>' for s in kap(v))
+    notlar = [x for x in (notu, dizilim_notu(v, cati)) if x]
+    alt = f'<p class="secenek-not">{e(". ".join(notlar))}</p>' if notlar else ""
+    return f'<div class="secenek"><h3>{e(ad)}</h3><table><tbody>{r}</tbody></table>{alt}</div>'
 
 def kg(v, kalem):
     return next(s["kg"] for s in v["satirlar"] if s["kalem"] == kalem)
@@ -153,37 +172,70 @@ bekleyen_sayisi = sum(1 for s in baz["satirlar"] if bekleyen(s))
 def satir(v, kalem):
     return next(s for s in v["satirlar"] if s["kalem"] == kalem)
 
-# Mühendisin 3 Ekim cevaplarıyla değişenler: "önce" değerleri 14:50 sürümünden (sabit), "sonra" değerleri hesap çıktısından.
+# 4 Ekim düzeltmeleri (01:24 ve 01:42) ve mühendisin ikinci cevaplarıyla değişenler.
+# "Önce" değerleri yayımlanmış son sürümden (3 Ekim 19:12; commit 345cd26; sabit), "sonra" değerleri hesap çıktısından.
+ONCE = {"tavan_kg": 353, "cati_kg": 461, "toplam_kg": 2716, "toplam_140_kg": 2511}
+K = json.loads((S.parent / "kurallar.json").read_text(encoding="utf-8"))
+G = json.loads((S / "C8201_girdi.json").read_text(encoding="utf-8"))
+G140 = json.loads((S / "C8201_dis_karkas_140_girdi.json").read_text(encoding="utf-8"))
+kaplama = "".join(kap_tablo(ad, v, notu, G["cati"]) for ad, v, notu in KAPLAMALAR)
+assert baz["cati_kaplamasi_anahtar"] == K["baz_paket_cati_kaplamasi"]["deger"] == "tek_kat_panel", "sayfa metinleri baz kaplama tek kat panel diye yazıldı"
+pk_t, pk_c = K["celik"]["tavan_paneli"]["deger"], K["celik"]["cati_paneli"]["deger"]
+oturum = G["celik"]["cati"]["oturum_m2"]
 osb_s, kose_s = satir(baz, "OSB (TV ve mutfak dolabı arkası takviyesi)"), satir(baz, "Köşebent")
+tp, cp = satir(baz, "Tavan paneli (makas arası)"), satir(baz, "Çatı paneli (makas üstü, sırt 80 mm)")
+kap_s, bant_s = satir(baz, "Tek kat panel"), satir(baz, "Mahya bandı")
+dz = baz["ara"]["kirma_dizilim"]
+kap_cm, boy_mm = round(dz["kapatma_m"] * 100), round(G["cati"]["panel_boyu_m"] * 1000)
+k62 = json.loads((S / "ornek_62m2_karsilastirma.json").read_text(encoding="utf-8"))["karsilastirma"]["Sandviç panel"]
+assert len(set(dz["baslangic_kosesine_gore"].values())) == 1 and dz["bir_cm_kesim_payiyla"] == kap_s["adet"], "sayfa 'adet sağlam' diyor; hesap artık öyle demiyor"
+for _kod in ("sandvic_panel", "trapez_sac"):     # "sandviç panelde ve trapez sacda 2 panel değişiyor" sözü
+    _d = json.loads((S / f"C8201_kaplama_{_kod}.json").read_text(encoding="utf-8"))["ara"]["kirma_dizilim"]["baslangic_kosesine_gore"]
+    assert max(_d.values()) - min(_d.values()) == 2, (_kod, _d)
 degisenler = [
-    ("Çelik", f"Tavan paneli {tr(kg(baz, 'Tavan paneli (makas arası)'))} kg ve çatı paneli {tr(kg(baz, 'Çatı paneli (makas üstü, sırt 80 mm)'))} kg eklendi "
-              f"(100 m² bina için verilen değerler alana oranlandı). Toplam 1902 → {tr(toplam_baz)} kg."),
-    ("Köşebent", f"33 → {kose_s['adet']}. Yeni formül: (odaların tavan çevresi + iç köşeler × 2,7 m) ÷ 2,5. m² ÷ 2,5 kuralınızın yerine geçti."),
-    ("OSB takviyesi", f"15 → {osb_s['adet']} levha. Bütün oda değil, yalnız dolap ve TV ünitesi duvarları ({tr(osb_s['olcu'], 1)} m²)."),
-    ("Elektrik", f"Sayılar artık oda başına kuraldan (doğruluk payı yaklaşık %75): duy {adet(baz, 'Tijli duy')}, glop {adet(baz, 'Yuvarlak glop')}, "
-                 f"anahtar {adet(baz, 'Tekli anahtar')} + {adet(baz, 'Çiftli anahtar')}, priz {adet(baz, 'Tekli priz')} + {adet(baz, 'Çiftli priz')}, sigorta {adet(baz, 'W otomat (sigorta)')}; "
-                 f"kablo {adet(baz, 'NYM kablo (3 × 2,5)')} ve {adet(baz, 'NYM kablo (2 × 1,5)')} m."),
-    ("Saçak", "Saçak omegası gerekmiyor: satır kalktı. Saçak yüzünün Boardex olduğu teyit edildi."),
-    ("Çatı kaplaması", "Üç yerine altı seçenek hesaplanıyor (Excel motorundaki liste)."),
-    ("Dere inişi", f"Sayı aynı ({adet(baz, 'Dere iniş borusu')}). İniş plana bakarak yerleştirilir; elle yerleştirilirse o sayı kullanılır."),
+    ("Çatı kaplaması", f"Baz pakette tek kat panel (düzeltmeniz). Listede artık tek kat panel var: {kap_s['adet']} adet L {boy_mm}, {kap_cm} cm kapatır. Sandviç panel seçenek olarak duruyor."),
+    ("Kaplama adedi çatı açılımından", "AutoCAD yok: çatı eğimiyle çizildi, dört yüzü açıldı, paneller yüzlere dizildi. Çapraz kesimden artan parça karşı yüzdeki aynı açılı yere kullanılıyor. "
+                                       f"{dz['tam_boy']} panel tam boy, {dz['kesilen']} panel kesilerek: toplam {kap_s['adet']}. Çizim listenin altında."),
+    ("Tavan ve çatı paneli", f"100 m² için verdiğiniz yeni ağırlıklar ({tr(pk_t['kg_100m2'], 2)} ve {tr(pk_c['kg_100m2'], 2)} kg) {tr(oturum, 2)} m²'lik oturum alanına oranlandı: "
+                             f"tavan paneli {ONCE['tavan_kg']} → {tr(tp['kg'])} kg, çatı paneli {ONCE['cati_kg']} → {tr(cp['kg'])} kg. Çelik toplamı {ONCE['toplam_kg']} → {tr(toplam_baz)} kg."),
+    ("Et kalınlığı", "Mühendisin kuralı: tek katta ve zemin katta duvarlar 1,2 mm; iki katlının üst katında 0,8 mm, orada 200 cm ve daha geniş pencereli duvar 1,2 mm. "
+                     f"Baz paket değişmedi (zaten 1,2 mm). Dış 140 seçeneğinde çelik {ONCE['toplam_140_kg']} → {tr(toplam_140)} kg: artık baz paketten {tr(toplam_140 - toplam_baz)} kg ağır."),
+    ("Mahya bandı", f"Listeye eklendi: {bant_s['adet']} rulo ({tr(bant_s['olcu'], 1)} m mahya ÷ 10 m). Çatı müdahale kapağı standart pakette yok; müşteri isterse eklenir."),
+    ("Teyit edilenler", "OSB takviyesi için seçilen üç duvar; Yaşam Alanı'nda salon ve mutfak elektrik kurallarının birlikte uygulanması; "
+                        "makas ölçüsü gelene kadar çatı çeliğinin Excel motorunun ortalamasıyla hesaplanması."),
+    ("Önceki tur (3 Ekim)", f"Değişmedi: köşebent {kose_s['adet']} (plandan hesaplayan formül), OSB takviyesi {osb_s['adet']} levha (yalnız dolap ve TV duvarları), "
+                            "elektrikte oda başına kural, saçak yüzü Boardex, altı kaplama seçeneği."),
 ]
 degisen_html = "".join(f"<li><b>{e(b)}.</b> {e(m)}</li>" for b, m in degisenler)
 
-_kgm = json.loads((S.parent / "kurallar.json").read_text(encoding="utf-8"))["celik"]["duvar_kg_m"]["deger"]
-_g140 = json.loads((S / "C8201_dis_karkas_140_girdi.json").read_text(encoding="utf-8"))["celik"]
-# dış 140'ta duvarlar 1,2 mm alınırsa toplam: dış 140 × 1,2 ve iç 80 × 1,2 birim ağırlıklarıyla
-toplam_140_kalin = (toplam_140 + _g140["dis"]["boy_m"] * (_kgm["dis"]["140x45x1,2"] - _kgm["dis"]["140x45x0,8"])
-                    + _g140["ic"]["boy_m"] * (_kgm["ic"]["80x45x1,2"] - _kgm["ic"]["80x45x0,8"]))
+_kgm = K["celik"]["duvar_kg_m"]["deger"]
+# dış 140'ta kural (1,2 mm) ile 2025 listelerindeki uygulama (0,8 mm) arasındaki fark
+fark_kural = (G140["celik"]["dis"]["boy_m"] * (_kgm["dis"]["140x45x1,2"] - _kgm["dis"]["140x45x0,8"])
+              + G140["celik"]["ic"]["boy_m"] * (_kgm["ic"]["80x45x1,2"] - _kgm["ic"]["80x45x0,8"]))
+# Excel motorunun mahya bandı formülü: mahya parçası adedi × parça boyu ÷ rulo boyu
+motor_bant = math.ceil(adet(baz, "Metal kiremit mahyası") * K["parca_boyu_m"]["mahya"]["deger"] / K["mahya_bandi"]["deger"]["rulo_m"] - 1e-9)
+dis_kose = sum(o["dis_kose"] for o in G["odalar"])
 sorular = [
-    ("Çatı kaplaması", "Baz pakette altı seçenekten hangisi var? Mühendis seçenekleri saydı, baz paketi yazmadı."),
-    ("Dış 140'ta et kalınlığı", f"0,8 mm aldım: çelik toplamı {tr(toplam_140)} kg, baz paketten hafif. 1,2 mm olursa {tr(toplam_140_kalin)} kg. Excel motorundaki tek katlı 140'lık örnekte "
-                                "duvarlar 1,2 mm; 0,8 mm örnekleri iki katlıların üst katı; 2025'teki iki tek katlı listede 0,8 mm. Tek katta hangisi?"),
-    ("OSB takviyesi duvarları", "Katalog görselinden üç duvarı aldım: banyo ile mutfak arası, üst dış duvar (tezgâh ve eviye), hol ile yaşam alanı arası (TV). Planda turuncu çizgili. Doğru mu?"),
-    ("Elektrik", "Yaşam Alanı'nda salon ve mutfak kurallarını birlikte uyguladım. Doğru mu?"),
-    ("Makas ve kiriş", "Bir makas ölçüsünden verecektiniz; o zamana kadar çatı çeliği motorun ortalamasıyla (geçici). Tavan ve çatı panelinin adedi de alana oranlandı."),
-    ("Kırma çatıda kaplama adedi", f"Yüzeyin %10 fazlasını alıyorum ({adet(baz, 'Sandviç panel')} panel); yerleşim hesabı {baz['ara']['kirma_kaplama_yerlesim_adedi']} veriyor. "
-                                    "Mühendisin 10 × 10 m metrajında pay daha yüksek. Adedi yerleşimle mi bulalım?"),
-    ("Motorda olup listede olmayanlar", "Çatı müdahale kapağı ve mahya bandı Excel motorunda var, okuduğum listelerde yok. Listeye girsin mi?"),
+    ("Makas ve kiriş ölçüsü", f"Bir makas ölçüsünden verecektiniz. O zamana kadar makaslar {tr(kg(baz, 'Çatı makas panelleri'))} kg, veranda dikmeleri {tr(kg(baz, 'Veranda dikmeleri (kolon paneli)'))} kg, "
+                              f"veranda kirişleri {tr(kg(baz, 'Veranda kirişleri (kiriş paneli)'))} kg: Excel motorunun ortalamasıyla (geçici)."),
+    ("Tek katta et kalınlığı", "Mühendisin kuralına göre tek katta duvarlar 1,2 mm. 2025'te hazırlanan iki tek katlı 140'lık listede ise dış duvarların çoğu ve iç duvarlar 0,8 mm'ydi "
+                               f"(dış duvar 19,9 kg/m; kuralla 29,04 kg/m). Bundan sonra kural mı geçerli, o listelerdeki uygulama mı? Ç8201 dış 140'ta fark {tr(fark_kural)} kg."),
+    ("Çatı açılımı", "Dizilim hangi köşeden başlar? Tek kat panelde fark etmiyor; sandviç panelde ve trapez sacda 2 panel değişiyor. Kesim payı bırakılır mı? "
+                     f"Dizilimden çıkan adede yedek eklenir mi: 62 m² gerçek listede (kırma çatı, sandviç panel) {k62['liste']} adet var, aynı yöntem {k62['hesap']} veriyor. "
+                     "Kiremit desen sacda artan parça karşı yüzde kullanılır mı (desen ters gelir diye kullanmadım)?"),
+    ("Tavan ve çatı panelinin adedi", f"Yeni ağırlıklarla 100 m²'de tavan paneli yine {pk_t['adet_100m2']}, çatı paneli yine {pk_c['adet_100m2']} adet mi? "
+                                      f"Ç8201'de alana oranla {tp['adet']} ve {cp['adet']} adet çıkıyor. Bu değerler hangi çatı tipi için (kırma, beşik)?"),
+    ("OSB takviyesi", "Mühendis, yerin plandaki mutfak tezgâhı ve TV ünitesinden \"o kısımlar alınarak\" bulunacağını yazdı. Duvarın tamamını mı alalım "
+                      f"(şimdi öyle: {osb_s['adet']} levha), yalnız tezgâhın ve TV ünitesinin arkasını mı? Klima duvarı da sayılır mı?"),
+    ("Köşebent", f"Odaya doğru çıkıntı yapan köşeler (Ç8201'de {dis_kose} tane) ve veranda tavanının çevresi sayılır mı? Şimdi sayılmıyor: {kose_s['adet']} adet."),
+    ("Elektrik", f"Buat kasada \"oda sayısı\" hangi odalar (şimdi {G['oda_sayisi']} mahal; veranda sayılmadı)? Yatak odası ve banyodaki prizler tekli mi?"),
+    ("Mahya bandı", f"Mahya uzunluğundan hesapladım: {bant_s['adet']} rulo. Excel motorundaki formül (mahya parçası adedi × parça boyu ÷ 10) {motor_bant} veriyor. Hangisi?"),
+    ("Dış kapı", "Katalog çiziminde 100 cm; gerçek listelerde boşluk 95 × 210, kapı 90 × 210. Hangisi?"),
+    ("Boardex ve OSB", "Boardex 8 mm mi (listeler ve Excel motoru), 12,5 mm mi (2 Ekim'de söylenen)? OSB 9 mm mi (listeler), 11 mm mi (Excel motoru)? "
+                       "Boardex zayiatı %15 mi (listelerdeki adetler buna uyuyor), %8 mi (Excel motoru)?"),
+    ("Excel motorundaki trapez sac formülü", "Çatı yüzeyi ÷ sac boyu × 0,8 yazıyor: kapatma genişliğine bölmesi gerekirken çarpıyor görünüyor "
+                                             "(10 × 10 m beşik çatıda motor 16 verir; mühendisin kendi metrajında 28 var). Mühendis bakabilir mi? Trapez sac seçeneklerinde motorun formülünü kullanmadım."),
+    ("Bayi standartları", "Hangi bayide hangi gruplar (vida, boya, elektrik, tesisat), hangi çatı yöntemi ve kaplaması standart?"),
 ]
 soru_html = "".join(f"<li><b>{e(b)}.</b> {e(m)}</li>" for b, m in sorular)
 
@@ -194,6 +246,28 @@ if _plan.is_file():
     plan_html = ('<section><h2>Plan</h2><p class="aciklama" style="margin-bottom:10px">OSB takviyesi gelen duvarlar turuncu çizgiyle işaretli; '
                  'kesik çizgi veranda kirişi, siyah kutular dikmeler.</p><div class="plan"><img alt="Ç8201 planı: beş mahal ve veranda; OSB takviyesi gelen üç duvar turuncu çizgiyle işaretli" '
                  f'src="data:image/png;base64,{base64.b64encode(_plan.read_bytes()).decode("ascii")}"></div></section>')
+
+def gorsel(yol: Path, alt: str) -> str:
+    return f'<div class="plan"><img alt="{e(alt)}" src="data:image/png;base64,{base64.b64encode(yol.read_bytes()).decode("ascii")}"></div>'
+
+
+_acilim, _kesim = S / "C8201_cati_acilim.png", S / "C8201_cati_kesim.png"
+acilim_html = ""
+if _acilim.is_file() and _kesim.is_file():
+    acilim_notlari = [
+        f"Tek kat panel: {kap_s['adet']} adet ({dz['tam_boy']} tam boy + {dz['kesilen']} kesilen). Dizilim hangi köşeden başlarsa başlasın {kap_s['adet']}; 1 cm kesim payıyla da {kap_s['adet']}. "
+        f"Çatı yüzeyi alan olarak en az {dz['alan_alt_siniri']} panel ediyor.",
+        "Aynı kuralı ayrı bir hesapla da denetledim: aynı adet çıktı; bu dizilimde daha az panelle olmuyor.",
+        f"Varsayımlarım: dizilim her yüzde sol köşeden başlıyor; kesim payı ve boy bindirmesi yok; panel tek boyda (L {boy_mm}).",
+        f"62 m² gerçek listede (kırma çatı, sandviç panel) {k62['liste']} adet L 3200 var; aynı yöntem {k62['hesap']} veriyor.",
+    ]
+    acilim_html = ('<section><h2>Çatı açılımı ve kaplama dizilimi</h2>'
+                   f'<p class="aciklama" style="margin-bottom:10px">Çatı mahyadan dışarı doğru açıldı; dört yüz gerçek boyutunda. Paneller saçaktan mahyaya, {kap_cm} cm\'lik şeritler halinde. '
+                   'Sayı panel numarası: aynı numara iki yüzde görünüyorsa iki parça aynı panelden çıkıyor.</p>'
+                   + gorsel(_acilim, f"Ç8201 çatı açılımı: iki yamuk ve iki üçgen yüz, {kap_cm} cm'lik şeritlere bölünmüş; her parçada panel numarası; toplam {kap_s['adet']} panel")
+                   + '<p class="aciklama" style="margin-block:14px 10px">Kesim planı: her dikdörtgen bir panel. Yeşil parça olduğu gibi kullanılır; turuncu parça, düz ucu saçağa gelecek biçimde karşı yüze konur.</p>'
+                   + gorsel(_kesim, f"Ç8201 kesim planı: {kap_s['adet']} panelin her biri; {dz['tam_boy']} panel tam boy, {dz['kesilen']} panel çapraz kesilip iki yüze paylaştırılıyor")
+                   + '<ul class="degisen" style="margin-top:12px">' + "".join(f"<li>{e(x)}</li>" for x in acilim_notlari) + "</ul></section>")
 
 kullanilan = {s["durum"] for s in baz["satirlar"]}
 lejant = "".join(f'<li><span class="rozet {v[1]}">{v[0]}</span><span>{e(v[2])}</span></li>' for k, v in DURUM.items() if k in kullanilan)
@@ -262,7 +336,7 @@ td.say {{ font-size: 15px; font-weight: 500; }}
 .degisen {{ margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; max-width: 76ch; }}
 .plan {{ background: var(--cizim-z); border: 1px solid var(--cizgi); padding: 8px; }}
 .plan img {{ display: block; width: 100%; height: auto; }}
-.sorular {{ margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; max-width: 76ch; }}
+.sorular {{ margin: 0; padding-left: 28px; display: flex; flex-direction: column; gap: 8px; max-width: 76ch; }}
 .dip {{ font-size: 12.5px; color: var(--soluk); max-width: 76ch; }}
 [data-gizli] {{ display: none; }}
 @media (max-width: 560px) {{ .ozet {{ grid-template-columns: 1fr 1fr; }} .ozet div:last-child {{ grid-column: 1 / -1; }} }}
@@ -271,20 +345,20 @@ td.say {{ font-size: 15px; font-weight: 500; }}
 <header>
   <div class="kunye">PortatifEv · Portman · İE-05 · {e(A.zaman)}</div>
   <h1>Ç8201 yükleme listesi</h1>
-  <p class="aciklama">Tek kat çelik, 2+1, 82 m². Çatı: kırma, çatı ve tavan panelli yöntem; kaplama örnek olarak sandviç panel. Her sayının yanında nereden geldiği yazıyor.</p>
+  <p class="aciklama">Tek kat çelik, 2+1, 82 m². Çatı: kırma, çatı ve tavan panelli yöntem; kaplama baz paketteki tek kat panel. Her sayının yanında nereden geldiği yazıyor.</p>
   <div><span class="taslak">TASLAK · ÜRETİM LİSTESİ DEĞİLDİR</span></div>
 </header>
 
 <div class="ozet">
   <div><b>{tr(toplam_baz)} kg</b><span>Çelik, baz paket (tavan ve çatı paneli dahil)</span></div>
-  <div><b>{tr(toplam_140)} kg</b><span>Çelik, dış 140 (et kalınlığı varsayımıyla)</span></div>
+  <div><b>{tr(toplam_140)} kg</b><span>Çelik, dış 140 (duvarlar 1,2 mm: mühendisin kuralı)</span></div>
   <div><b>{adet(baz, "Dış cephe Boardex")} + {adet(baz, "Saçaklar için Boardex")} + {adet(baz, "Saçak yüzü için Boardex")}</b><span>Boardex: cephe, saçak altı, saçak yüzü</span></div>
   <div><b>{adet(baz, "Duvar alçıpan beyaz") + adet(baz, "Tavan alçıpan beyaz")} + {adet(baz, "Duvar alçıpan yeşil") + adet(baz, "Tavan alçıpan yeşil")}</b><span>Alçıpan: beyaz + yeşil</span></div>
   <div><b>{bekleyen_sayisi} / {toplam_satir}</b><span>Teyit ya da değer bekleyen satır</span></div>
 </div>
 
 <section>
-  <h2>Mühendisin cevaplarıyla değişenler</h2>
+  <h2>4 Ekim düzeltmeleriniz ve mühendisin ikinci cevaplarıyla değişenler</h2>
   <ul class="degisen">{degisen_html}</ul>
 </section>
 
@@ -300,9 +374,11 @@ td.say {{ font-size: 15px; font-weight: 500; }}
 
 {chr(10).join(bolumler)}
 
+{acilim_html}
+
 <section>
   <h2>Çatı kaplaması seçenekleri</h2>
-  <p class="aciklama" style="margin-bottom:10px">Baz paketin kaplaması henüz belli değil. Altı seçenek Excel motorundaki listeden; seçeneğe göre değişen kalemler:</p>
+  <p class="aciklama" style="margin-bottom:10px">Baz pakette tek kat panel var (4 Ekim düzeltmeniz). Altı seçenek Excel motorundaki listeden; seçeneğe göre değişen kalemler:</p>
   <div class="secenekler">{kaplama}</div>
 </section>
 
@@ -313,7 +389,7 @@ td.say {{ font-size: 15px; font-weight: 500; }}
   <ol class="sorular">{soru_html}</ol>
 </section>
 
-<p class="dip">Kaynaklar: 3 Ekim 13:27 cevaplarınız; inşaat mühendisinin 3 Ekim cevapları (18:14'te ilettiniz); üç gerçek yükleme listesinin çalışma kitapları (62, 90 ve 105 m²); Excel hesaplama motoru (CTKBF V1.1). Bu modelin kendi gerçek listesi yok: sayılar yalnız kurallardan çıkıyor. Üç gerçek listeyle karşılaştırmada {kars_toplam} kalemin {kars_ayni} tanesinde adet aynı; bu bir sınama değil, çünkü katsayıların bir kısmı o listelere bakılarak seçildi. Ayrıntı depoda: docs/sartname/yukleme_listesi_yontemi.md.</p>
+<p class="dip">Kaynaklar: 3 Ekim 13:27 cevaplarınız, 4 Ekim 01:24 ve 01:42 düzeltmeleriniz; inşaat mühendisinin iki tur cevabı (3 Ekim 18:14 ve 4 Ekim 01:24'te ilettiniz); üç gerçek yükleme listesinin çalışma kitapları (62, 90 ve 105 m²); Excel hesaplama motoru (CTKBF V1.1). Bu modelin kendi gerçek listesi yok: sayılar yalnız kurallardan çıkıyor. Üç gerçek listeyle karşılaştırmada {kars_toplam} kalemin {kars_ayni} tanesinde adet aynı; bu bir sınama değil, çünkü katsayıların bir kısmı o listelere bakılarak seçildi. Ayrıntı depoda: docs/sartname/yukleme_listesi_yontemi.md.</p>
 </div>
 <script>
 (function () {{

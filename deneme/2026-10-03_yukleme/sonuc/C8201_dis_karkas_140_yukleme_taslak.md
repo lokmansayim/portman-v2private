@@ -1,19 +1,19 @@
 # Ç8201 · Tek kat çelik, 2+1, 82 m² · paket: dış 140
 
-Çatı yöntemi: A · çatı ve tavan paneli (çelik konstrüksiyon standardı). Çatı kaplaması (seçenek): sandviç panel.
+Çatı yöntemi: A · çatı ve tavan paneli (çelik konstrüksiyon standardı). Çatı kaplaması (seçenek): tek kat panel (baz paket).
 
 | Grup | Kalem | Boyut | Adet | Ölçü | kg | Kural | Durum | Not |
 |---|---|---|---|---|---|---|---|---|
-| Çelik panel | Dış cephe duvar panelleri | 140 × 45 × 0,8 | 8 | 32,0 m | 582 | duvar boyu × 18,20 kg/m (motorun proje ortalaması) | motor | et kalınlığı ve panel adedi tahmin; teyit bekliyor |
-| Çelik panel | İç cephe duvar panelleri | 80 × 45 × 0,8 | 6 | 19,4 m | 252 | duvar boyu × 13,00 kg/m (motorun proje ortalaması) | motor | et kalınlığı ve panel adedi tahmin; teyit bekliyor |
+| Çelik panel | Dış cephe duvar panelleri | 140 × 45 × 1,2 | 8 | 32,0 m | 929 | duvar boyu × 29,04 kg/m (motorun proje ortalaması) | motor | panel adedi tahmin; gerçek adet karkas yerleşiminden gelir |
+| Çelik panel | İç cephe duvar panelleri | 80 × 45 × 1,2 | 6 | 19,4 m | 383 | duvar boyu × 19,75 kg/m (motorun proje ortalaması) | motor | panel adedi tahmin; gerçek adet karkas yerleşiminden gelir |
 | Çelik panel | Veranda dikmeleri (kolon paneli) | 80 × 45 × 1,2 | 3 | 7,2 m | 46 | adet × 2,40 m × 6,42 kg/m | motor | dikme sayısı ve yeri katalog görsellerinden |
 | Çelik panel | Veranda kirişleri (kiriş paneli) | 80 × 45 × 1,2 | 4 | 12,4 m | 81 | kiriş boyu × 6,55 kg/m; adet = boy ÷ 4 | motor |  |
-| Çelik panel | Çatı makas panelleri | 80 × 45 × 0,8 | 25 | 93,5 m² | 706 | saçak dahil çatı planı × 7,55 kg/m² (motorun proje ortalaması); adet çatı tipine göre sabit | motor | geçici: Lokman makas ve kirişleri bir makas ölçüsünden ayrıca verecek |
-| Çelik panel | Tavan paneli (makas arası) | roll form çelik | 7 | 82,0 m² | 353 | çatının örttüğü oturum alanı ÷ 100 × 429,83 kg; adet: ÷ 100 × 8, yukarı (tavan alanı 74,8 m²) | muhendis | kg ve adet 10 × 10 m (100 m²) bina için verildi; oturum alanına oranlandı (tahmin) |
-| Çelik panel | Çatı paneli (makas üstü, sırt 80 mm) | roll form çelik | 10 | 82,0 m² | 461 | çatının örttüğü oturum alanı ÷ 100 × 561,60 kg; adet: ÷ 100 × 12, yukarı (çatı yüzeyi 98,4 m²) | muhendis | kg ve adet 10 × 10 m (100 m²) bina için verildi; oturum alanına oranlandı (tahmin) |
+| Çelik panel | Çatı makas panelleri | 80 × 45 × 0,8 | 25 | 93,5 m² | 706 | saçak dahil çatı planı × 7,55 kg/m² (motorun proje ortalaması); adet çatı tipine göre sabit | motor | geçici: Lokman makas ve kirişleri bir makas ölçüsünden ayrıca verecek; o zamana kadar motorun ortalaması (mühendis, 4 Ekim: tamam) |
+| Çelik panel | Tavan paneli (makas arası) | roll form çelik | 7 | 82,0 m² | 291 | çatının örttüğü oturum alanı ÷ 100 × 354,84 kg; adet: ÷ 100 × 8, yukarı (tavan alanı 74,8 m²) | lokman | 100 m² için verilen ağırlık oturum alanına oranlandı (Lokman, 4 Ekim düzeltmesi). Adet tahmin: alana oranlandı (mühendis, 4 Ekim: tamam); kesin adet panel yerleşiminden gelir |
+| Çelik panel | Çatı paneli (makas üstü, sırt 80 mm) | roll form çelik | 10 | 82,0 m² | 361 | çatının örttüğü oturum alanı ÷ 100 × 440,32 kg; adet: ÷ 100 × 12, yukarı (çatı yüzeyi 98,4 m²) | lokman | 100 m² için verilen ağırlık oturum alanına oranlandı (Lokman, 4 Ekim düzeltmesi). Adet tahmin: alana oranlandı (mühendis, 4 Ekim: tamam); kesin adet panel yerleşiminden gelir |
 | Çelik panel | Boy C profil | 80 × 45 × 0,8 | 3 |  | 15 | motorda sabit | motor |  |
 | Çelik panel | Boy C profil | 80 × 45 × 1,2 | 3 |  | 15 | motorda sabit | motor |  |
-| Çelik panel | Toplam (adedi ve kg'ı bilinenler) |  | 69 |  | 2511 | tavan ve çatı panelleri dahil | motor |  |
+| Çelik panel | Toplam (adedi ve kg'ı bilinenler) |  | 69 |  | 2828 | tavan ve çatı panelleri dahil | motor |  |
 | Metal aksam | Saçaklar için Boardex | 1200 × 2400 | 5 | 11,8 m² |  | saçak boyu × saçak eni × 1,15 ÷ 2,88 | uydurma | saçak altının Boardex olduğu: Lokman, 3 Ekim 13:27; formül 62 m² listeden |
 | Metal aksam | Saçak yüzü için Boardex | 1200 × 2400 | 3 | 7,2 m² |  | saçak ucu çevresi × saçak yüzü yüksekliği (topuk + panelin düşey ölçüsü) × 1,15 ÷ 2,88 | muhendis | saçak yüzü Boardex'le kaplanır: mühendis, 3 Ekim; kaplandığı: Lokman, 2 Ekim 22:05. Alan geometriden |
 | Metal aksam | Köşebent | L 2500 | 51 | 125,3 m |  | (oda tavan çevreleri 68,64 m + 21 iç köşe × 2,7 m) ÷ 2,5 | muhendis | odaya doğru çıkıntı yapan 1 köşe ve veranda tavanı sayılmadı |
@@ -22,11 +22,12 @@
 | İç cephe kaplama | Duvar alçıpan yeşil | 1200 × 2500 | 8 | 20,1 m² |  | oda oda: (iç çevre × yükseklik − o odadaki boşluklar) toplamı × 1,05 ÷ 3,0; yeşil = ıslak hacimler | excel |  |
 | İç cephe kaplama | Tavan alçıpan beyaz | 1200 × 2500 | 19 | 52,4 m² |  | tavan alanı × 1,05 ÷ 3,0 | motor |  |
 | İç cephe kaplama | Tavan alçıpan yeşil | 1200 × 2500 | 8 | 22,5 m² |  | tavan alanı × 1,05 ÷ 3,0; yeşil = ıslak hacim + veranda tavanı | lokman |  |
-| İç cephe kaplama | OSB (TV ve mutfak dolabı arkası takviyesi) | 1220 × 2440 | 9 | 24,1 m² |  | dolap ve TV ünitesi gelen duvarlar: (duvar yüzünün boyu × yükseklik − boşluklar) × 1,05 ÷ 2,98 | muhendis | banyo ile mutfak arası duvar 2,43 m (mutfak dolabı); üst dış duvar 2,90 m (mutfak dolabı ve eviye); hol ile yaşam alanı arası duvar 4,74 m (TV ünitesi). Duvarların seçimi katalog görselinden; teyit bekliyor |
+| İç cephe kaplama | OSB (TV ve mutfak dolabı arkası takviyesi) | 1220 × 2440 | 9 | 24,1 m² |  | dolap ve TV ünitesi gelen duvarlar: (duvar yüzünün boyu × yükseklik − boşluklar) × 1,05 ÷ 2,98 | muhendis | banyo ile mutfak arası duvar 2,43 m (mutfak dolabı); üst dış duvar 2,90 m (mutfak dolabı ve eviye); hol ile yaşam alanı arası duvar 4,74 m (TV ünitesi). Duvarların seçimi katalog görselinden; mühendis doğruladı (4 Ekim) |
 | İç cephe kaplama | Duvar izolasyonu | paket 8,64 m² | 23 | 197,8 m² |  | dış duvar × kat sayısı (80 mm karkasta 1, 140 mm'de 2) + iç duvar − boşluklar; ÷ 8,64 | uydurma | dış duvar 2 kat |
-| Çatı kaplamaları | Sandviç panel | L 4300 · 100 cm kapatır | 26 | 98,4 m² |  | çatı yüzeyi × 1,10 ÷ (panel boyu × 1,00); panel boyu = eğimli boy | uydurma | gerçek adet panel yerleşiminden bulunur. Sağlama: şerit şerit yerleşimle (parçalar dikdörtgen kesilir, artıklar yüzler arasında paylaşılmazsa) 30 adet |
+| Çatı kaplamaları | Tek kat panel | L 4300 · 87 cm kapatır | 28 | 98,4 m² |  | çatı açılımı: yüzler şerit şerit dizilir; çapraz kesimden artan parça karşı yüzde kullanılır; panel boyu = eğimli boy | lokman | 12 panel tam boy, 16 panel kesilerek; alan olarak en az 27. Dizilim her yüzde sol köşeden başlar (varsayım); kesim payı yok |
 | Çatı kaplamaları | Metal kiremit mahyası | L 2800 | 11 | 27,0 m |  | mahya hattı (tepe + kırmalar) ÷ (2,8 − 0,30 bindirme) | lokman |  |
-| Çatı kaplamaları | Sandviç panel kapaması | L 2500 | 18 | 39,3 m |  | her saçak kenarı ÷ 2,5, ayrı ayrı yukarı | uydurma |  |
+| Çatı kaplamaları | Tek kat panel kapaması | L 2500 | 18 | 39,3 m |  | her saçak kenarı ÷ 2,5, ayrı ayrı yukarı | uydurma |  |
+| Çatı kaplamaları | Mahya bandı | rulo / 10 m | 3 | 27,0 m |  | düz ve ters mahya gelen yerlerin uzunlukları toplamı ÷ 10 m | excel | listeye girmesi: mühendis, 4 Ekim. Excel motorunda parça adedi × parça boyu ÷ 10 |
 | Çatı kaplamaları | Çatı şiltesi 80 mm | 9,6 m²/adet | 10 | 88,9 m² |  | çatı boyu × (bina eni + 0,20) ÷ 9,6 | uydurma |  |
 | Dere | Metal dere | L 4000 | 11 | 39,3 m |  | saçak boyu ÷ (4,0 − 0,20 bindirme) | motor |  |
 | Dere | Dere iniş borusu | L 3000 | 6 |  |  | 4 köşe + 2 orta (10 m ve üzeri cepheler) | lokman | iniş plana bakarak yerleştirilir; düz saçakta ortalama 5 m'de bir (mühendis, 3 Ekim). Planda elle yerleştirilmediği için Lokman'ın kuralı kullanıldı |
@@ -41,7 +42,7 @@
 | Kapı ve pencere | PVC vasistas | 60/40 | 1 |  |  | modeldeki açıklıklardan | model |  |
 | Kapı ve pencere | PVC pencere | 120/100 | 1 |  |  | modeldeki açıklıklardan | model |  |
 | Kapı ve pencere | PVC pencere | 180/180 | 3 |  |  | modeldeki açıklıklardan | model |  |
-| Elektrik | Tijli duy | adet | 6 |  |  | yatak odası 2 × 1 + salon 2 + mutfak 1 + hol 1 | muhendis | oda başına kural; doğruluk payı yaklaşık %75 (mühendis, 3 Ekim). Kesin sayı elektrik paftasından gelir. Birden çok işlevi olan mahalde kurallar birlikte uygulandı: Yaşam Alanı (salon + mutfak) |
+| Elektrik | Tijli duy | adet | 6 |  |  | yatak odası 2 × 1 + salon 2 + mutfak 1 + hol 1 | muhendis | oda başına kural; doğruluk payı yaklaşık %75 (mühendis, 3 Ekim). Kesin sayı elektrik paftasından gelir. Salon ile mutfak aynı mahaldeyse iki kural birlikte uygulanır (mühendis, 4 Ekim): Yaşam Alanı (salon + mutfak) |
 | Elektrik | Yuvarlak glop | adet | 3 |  |  | banyo 1 + veranda 2 | muhendis |  |
 | Elektrik | Ampul | adet | 9 |  |  | duy + glop | motor |  |
 | Elektrik | Tekli anahtar | adet | 5 |  |  | yatak odası 2 × 1 + banyo 1 + mutfak 1 + hol 1 | muhendis |  |
@@ -66,7 +67,7 @@
 | Vida | Pencere vidası (4,8 × 70) | adet | 160 | 8,0 pencere |  | pencere sayısı × 20 | excel |  |
 | Vida | Trapez vida (5,5 × 25) | adet | 1000 | 996,0 vida |  | aşık × 10 + tavan omegası × 10 + saçak omegası × 6 + çelik panel × 10 + köşebent × 6; 250'ye yuvarlandı | excel | çelik panel adedi tahmin |
 | Vida | Trapez vida (5,5 × 60) | adet | 250 | 205,0 vida |  | bina m² × 2,5; 250'ye yuvarlandı | motor |  |
-| Vida | Trapez vida (5,5 × 110; sandviç panel) | adet | 750 | 559,0 vida |  | panel boyu (mm) ÷ 200 × panel adedi; 250'ye yuvarlandı | motor | 62 m² gerçek listede 750 var; bu formül o listede 500 veriyor |
+| Vida | Trapez vida (5,5 × 76; tek kat panel) | adet | 750 | 602,0 vida |  | panel boyu (mm) ÷ 200 × panel adedi; 250'ye yuvarlandı | motor |  |
 | Vida | Çelik dübel (klipsli) | adet | 28 | 14,0 panel |  | duvar paneli adedi × 2 | motor | duvar paneli adedi tahmin |
 | Vida | Şase pul | adet | 28 | 14,0 panel |  | çelik dübel adedi kadar | motor | duvar paneli adedi tahmin |
 | Vida | 8'lik trapez uç | adet | 6 | 82,0 m² |  | bina m² ÷ 15 | motor |  |

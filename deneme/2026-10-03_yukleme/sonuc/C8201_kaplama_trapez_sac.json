@@ -3,6 +3,7 @@
  "yontem": "panel",
  "yontem_adi": "A · çatı ve tavan paneli (çelik konstrüksiyon standardı)",
  "cati_kaplamasi": "trapez sac",
+ "cati_kaplamasi_anahtar": "trapez_sac",
  "kapali_gruplar": [],
  "satirlar": [
   {
@@ -16,7 +17,7 @@
    "kg": 650.56,
    "formul": "duvar boyu × 20,33 kg/m (motorun proje ortalaması)",
    "durum": "motor",
-   "not": "et kalınlığı ve panel adedi tahmin; teyit bekliyor"
+   "not": "panel adedi tahmin; gerçek adet karkas yerleşiminden gelir"
   },
   {
    "grup": "Çelik panel",
@@ -29,7 +30,7 @@
    "kg": 389.07,
    "formul": "duvar boyu × 19,75 kg/m (motorun proje ortalaması)",
    "durum": "motor",
-   "not": "et kalınlığı ve panel adedi tahmin; teyit bekliyor"
+   "not": "panel adedi tahmin; gerçek adet karkas yerleşiminden gelir"
   },
   {
    "grup": "Çelik panel",
@@ -68,7 +69,7 @@
    "kg": 705.7,
    "formul": "saçak dahil çatı planı × 7,55 kg/m² (motorun proje ortalaması); adet çatı tipine göre sabit",
    "durum": "motor",
-   "not": "geçici: Lokman makas ve kirişleri bir makas ölçüsünden ayrıca verecek"
+   "not": "geçici: Lokman makas ve kirişleri bir makas ölçüsünden ayrıca verecek; o zamana kadar motorun ortalaması (mühendis, 4 Ekim: tamam)"
   },
   {
    "grup": "Çelik panel",
@@ -78,10 +79,10 @@
    "olcu": 82.05,
    "brut": null,
    "birim": "m²",
-   "kg": 352.68,
-   "formul": "çatının örttüğü oturum alanı ÷ 100 × 429,83 kg; adet: ÷ 100 × 8, yukarı (tavan alanı 76,7 m²)",
-   "durum": "muhendis",
-   "not": "kg ve adet 10 × 10 m (100 m²) bina için verildi; oturum alanına oranlandı (tahmin)"
+   "kg": 291.15,
+   "formul": "çatının örttüğü oturum alanı ÷ 100 × 354,84 kg; adet: ÷ 100 × 8, yukarı (tavan alanı 76,7 m²)",
+   "durum": "lokman",
+   "not": "100 m² için verilen ağırlık oturum alanına oranlandı (Lokman, 4 Ekim düzeltmesi). Adet tahmin: alana oranlandı (mühendis, 4 Ekim: tamam); kesin adet panel yerleşiminden gelir"
   },
   {
    "grup": "Çelik panel",
@@ -91,10 +92,10 @@
    "olcu": 82.05,
    "brut": null,
    "birim": "m²",
-   "kg": 460.79,
-   "formul": "çatının örttüğü oturum alanı ÷ 100 × 561,60 kg; adet: ÷ 100 × 12, yukarı (çatı yüzeyi 98,4 m²)",
-   "durum": "muhendis",
-   "not": "kg ve adet 10 × 10 m (100 m²) bina için verildi; oturum alanına oranlandı (tahmin)"
+   "kg": 361.28,
+   "formul": "çatının örttüğü oturum alanı ÷ 100 × 440,32 kg; adet: ÷ 100 × 12, yukarı (çatı yüzeyi 98,4 m²)",
+   "durum": "lokman",
+   "not": "100 m² için verilen ağırlık oturum alanına oranlandı (Lokman, 4 Ekim düzeltmesi). Adet tahmin: alana oranlandı (mühendis, 4 Ekim: tamam); kesin adet panel yerleşiminden gelir"
   },
   {
    "grup": "Çelik panel",
@@ -130,7 +131,7 @@
    "olcu": null,
    "brut": null,
    "birim": "",
-   "kg": 2716.11,
+   "kg": 2555.07,
    "formul": "tavan ve çatı panelleri dahil",
    "durum": "motor",
    "not": null
@@ -250,7 +251,7 @@
    "kg": null,
    "formul": "dolap ve TV ünitesi gelen duvarlar: (duvar yüzünün boyu × yükseklik − boşluklar) × 1,05 ÷ 2,98",
    "durum": "muhendis",
-   "not": "banyo ile mutfak arası duvar 2,49 m (mutfak dolabı); üst dış duvar 2,96 m (mutfak dolabı ve eviye); hol ile yaşam alanı arası duvar 4,80 m (TV ünitesi). Duvarların seçimi katalog görselinden; teyit bekliyor"
+   "not": "banyo ile mutfak arası duvar 2,49 m (mutfak dolabı); üst dış duvar 2,96 m (mutfak dolabı ve eviye); hol ile yaşam alanı arası duvar 4,80 m (TV ünitesi). Duvarların seçimi katalog görselinden; mühendis doğruladı (4 Ekim)"
   },
   {
    "grup": "İç cephe kaplama",
@@ -269,14 +270,14 @@
    "grup": "Çatı kaplamaları",
    "kalem": "Trapez sac",
    "boyut": "L 4300 · 80 cm kapatır",
-   "adet": 32,
+   "adet": 30,
    "olcu": 98.43,
    "brut": null,
    "birim": "m²",
    "kg": null,
-   "formul": "çatı yüzeyi × 1,10 ÷ (sac boyu × 0,80)",
-   "durum": "uydurma",
-   "not": "gerçek listeyle karşılaştırılmadı; gerçek adet yerleşimden bulunur. Excel motorundaki formül kapatma genişliğiyle çarpıyor (× 0,8); mühendisin 10 × 10 m beşik çatı metrajındaki 28 adedi ÷ 0,8 veriyor, o yüzden motorun formülü kullanılmadı. Sağlama: şerit şerit yerleşimle (parçalar dikdörtgen kesilir, artıklar yüzler arasında paylaşılmazsa) 36 adet"
+   "formul": "çatı açılımı: yüzler şerit şerit dizilir; çapraz kesimden artan parça karşı yüzde kullanılır",
+   "durum": "lokman",
+   "not": "12 panel tam boy, 18 panel kesilerek; alan olarak en az 29. Dizilim her yüzde sol köşeden başlar (varsayım); kesim payı yok. Başlangıç köşesi değişirse 30–32. Gerçek listeyle karşılaştırılmadı. Excel motorundaki formül kapatma genişliğiyle çarpıyor (× 0,8); mühendisin 10 × 10 m beşik çatı metrajındaki 28 adedi ÷ 0,8 veriyor, o yüzden motorun formülü kullanılmadı"
   },
   {
    "grup": "Çatı kaplamaları",
@@ -290,6 +291,19 @@
    "formul": "mahya hattı (tepe + kırmalar) ÷ (0,8 − 0,20 bindirme)",
    "durum": "motor",
    "not": "bindirme motordaki 20 cm; Lokman'ın 30 cm kuralı uygulanırsa ÷ 0,5. Gerçek listeyle karşılaştırılmadı"
+  },
+  {
+   "grup": "Çatı kaplamaları",
+   "kalem": "Mahya bandı",
+   "boyut": "rulo / 10 m",
+   "adet": 3,
+   "olcu": 26.97,
+   "brut": null,
+   "birim": "m",
+   "kg": null,
+   "formul": "düz ve ters mahya gelen yerlerin uzunlukları toplamı ÷ 10 m",
+   "durum": "excel",
+   "not": "listeye girmesi: mühendis, 4 Ekim. Excel motorunda parça adedi × parça boyu ÷ 10"
   },
   {
    "grup": "Çatı kaplamaları",
@@ -484,7 +498,7 @@
    "kg": null,
    "formul": "yatak odası 2 × 1 + salon 2 + mutfak 1 + hol 1",
    "durum": "muhendis",
-   "not": "oda başına kural; doğruluk payı yaklaşık %75 (mühendis, 3 Ekim). Kesin sayı elektrik paftasından gelir. Birden çok işlevi olan mahalde kurallar birlikte uygulandı: Yaşam Alanı (salon + mutfak)"
+   "not": "oda başına kural; doğruluk payı yaklaşık %75 (mühendis, 3 Ekim). Kesin sayı elektrik paftasından gelir. Salon ile mutfak aynı mahaldeyse iki kural birlikte uygulanır (mühendis, 4 Ekim): Yaşam Alanı (salon + mutfak)"
   },
   {
    "grup": "Elektrik",
@@ -790,7 +804,7 @@
    "kalem": "Trapez vida (5,5 × 60)",
    "boyut": "adet",
    "adet": 1000,
-   "olcu": 893.0,
+   "olcu": 850.0,
    "brut": null,
    "birim": "vida",
    "kg": null,
@@ -1152,6 +1166,22 @@
    "uydu_prizi": 1,
    "sigorta": 9
   },
-  "kirma_kaplama_yerlesim_adedi": 36
+  "kirma_dizilim": {
+   "adet": 30,
+   "tam_boy": 12,
+   "kesilen": 18,
+   "alan_alt_siniri": 29,
+   "artan_parca_karsi_yuzde": true,
+   "baslangic": "sol",
+   "baslangic_kosesine_gore": {
+    "sol": 30,
+    "sag": 30,
+    "orta": 32,
+    "plan_yonu": 32
+   },
+   "kapatma_m": 0.8,
+   "en_dar_pay_cm": 8.8,
+   "bir_cm_kesim_payiyla": 30
+  }
  }
 }

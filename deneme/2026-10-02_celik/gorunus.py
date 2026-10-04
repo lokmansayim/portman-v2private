@@ -262,7 +262,7 @@ def pafta(tanim: dict, s: dict, c: dict, cikti: Path):
     if s.get("osb_takviye"):
         sol.append(osb_takviye_satiri(s["osb_takviye"], kisa=True))
     sag = [
-        f"Çatı: kırma (dört omuz) · eğim %{ct['egim_yuzde']} · saçak {ct['sacak']} cm, altı ve yüzü Boardex · çatı ve tavan panelli (çelik) · kaplama seçenek: {kap}",
+        f"Çatı: kırma (dört omuz) · eğim %{ct['egim_yuzde']} · saçak {ct['sacak']} cm, altı ve yüzü Boardex · çatı ve tavan panelli (çelik) · kaplama: {kap}",
         f"Çatı planı {tr(c['plan'][0]).replace(',0', '')} × {tr(c['plan'][1]).replace(',0', '')} cm · mahya kotu {tr(c['z_mahya'], 0)} cm (makas üstü {tr(c['z_makas_mahya'], 0)})",
         f"Mahya (tepe ve kırmalar, aynı malzeme): {tr(c['mahya_uzunlugu']).replace(',0', '')} + {c['kirma_adedi']} × {tr(c['kirma_boyu'], 0)} = {tr(c['mahya_hatti_toplam'], 0)} cm"
         + (f" · {tr(c['mahya_parca_boyu'] / 100)} m'lik parça, {c['mahya_bindirme']} cm bindirmeyle {c['mahya_parca_adedi']} adet" if c["mahya_parca_boyu"] else ""),

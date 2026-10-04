@@ -3,6 +3,7 @@
  "yontem": "omega_asik",
  "yontem_adi": "B · tavan omegası, aşık, alın sacı, saçak sacı (prefabrik yöntemi)",
  "cati_kaplamasi": "sandviç panel",
+ "cati_kaplamasi_anahtar": "sandvic_panel",
  "kapali_gruplar": [],
  "satirlar": [
   {
@@ -68,7 +69,7 @@
    "kg": 555.45,
    "formul": "saçak dahil çatı planı × 7,55 kg/m² (motorun proje ortalaması); adet çatı tipine göre sabit",
    "durum": "motor",
-   "not": "geçici: Lokman makas ve kirişleri bir makas ölçüsünden ayrıca verecek"
+   "not": "geçici: Lokman makas ve kirişleri bir makas ölçüsünden ayrıca verecek; o zamana kadar motorun ortalaması (mühendis, 4 Ekim: tamam)"
   },
   {
    "grup": "Çelik panel",
@@ -295,14 +296,14 @@
    "grup": "Çatı kaplamaları",
    "kalem": "Sandviç panel",
    "boyut": "L 3200 · 100 cm kapatır",
-   "adet": 27,
+   "adet": 26,
    "olcu": 76.82,
    "brut": null,
    "birim": "m²",
    "kg": null,
-   "formul": "çatı yüzeyi × 1,10 ÷ (panel boyu × 1,00); panel boyu = eğimli boy",
-   "durum": "uydurma",
-   "not": "gerçek adet panel yerleşiminden bulunur. Sağlama: şerit şerit yerleşimle (parçalar dikdörtgen kesilir, artıklar yüzler arasında paylaşılmazsa) 30 adet"
+   "formul": "çatı açılımı: yüzler şerit şerit dizilir; çapraz kesimden artan parça karşı yüzde kullanılır; panel boyu = eğimli boy",
+   "durum": "lokman",
+   "not": "16 panel tam boy, 10 panel kesilerek; alan olarak en az 25. Dizilim her yüzde sol köşeden başlar (varsayım); kesim payı yok. Başlangıç köşesi değişirse 26–27"
   },
   {
    "grup": "Çatı kaplamaları",
@@ -329,6 +330,19 @@
    "formul": "her saçak kenarı ÷ 2,5, ayrı ayrı yukarı",
    "durum": "uydurma",
    "not": null
+  },
+  {
+   "grup": "Çatı kaplamaları",
+   "kalem": "Mahya bandı",
+   "boyut": "rulo / 10 m",
+   "adet": 3,
+   "olcu": 26.43,
+   "brut": null,
+   "birim": "m",
+   "kg": null,
+   "formul": "düz ve ters mahya gelen yerlerin uzunlukları toplamı ÷ 10 m",
+   "durum": "excel",
+   "not": "listeye girmesi: mühendis, 4 Ekim. Excel motorunda parça adedi × parça boyu ÷ 10"
   },
   {
    "grup": "Çatı kaplamaları",
@@ -621,7 +635,7 @@
    "kalem": "Trapez vida (5,5 × 110; sandviç panel)",
    "boyut": "adet",
    "adet": 500,
-   "olcu": 432.0,
+   "olcu": 416.0,
    "brut": null,
    "birim": "vida",
    "kg": null,
@@ -870,7 +884,23 @@
   },
   "elektrik_kaynagi": null,
   "elektrik_kural": null,
-  "kirma_kaplama_yerlesim_adedi": 30
+  "kirma_dizilim": {
+   "adet": 26,
+   "tam_boy": 16,
+   "kesilen": 10,
+   "alan_alt_siniri": 25,
+   "artan_parca_karsi_yuzde": true,
+   "baslangic": "sol",
+   "baslangic_kosesine_gore": {
+    "sol": 26,
+    "sag": 26,
+    "orta": 26,
+    "plan_yonu": 27
+   },
+   "kapatma_m": 1.0,
+   "en_dar_pay_cm": 0.8,
+   "bir_cm_kesim_payiyla": 26
+  }
  },
  "karsilastirma": {
   "Saçak sacı (30'luk)": {
@@ -944,9 +974,9 @@
    "durum": "uydurma"
   },
   "Sandviç panel": {
-   "hesap": 27,
+   "hesap": 26,
    "liste": 27,
-   "durum": "uydurma"
+   "durum": "lokman"
   },
   "Metal kiremit mahyası": {
    "hesap": 11,
@@ -1081,7 +1111,7 @@
  },
  "karsilastirma_ozeti": {
   "karsilastirilan": 41,
-  "ayni": 30
+  "ayni": 29
  },
  "celik_kg_karsilastirma": {
   "dis": {
