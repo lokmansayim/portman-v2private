@@ -2,6 +2,12 @@
 
 **Son güncelleme: 29 Eylül 2026 22:50 (İE-02 kapandı ve `main`'e birleştirildi; İE-03 yalnız plan aşamasında).** Her oturumun son adımı bu dosyayı güncellemektir.
 
+**4 Ekim 2026 eki (dal `claude/dreamy-ride-pz40kq`, BK-03 kayıt bakımı; `docs/is_emirleri/BK-03.md`):**
+- **BK-01 ve BK-02 `main`'de.** BK-01 (PR #1) 15:35'te `0ed6b96` ile, BK-02 (PR #2) 15:37'de `c816b6f` ile birleşti. Alttaki iki ekte geçen "`main`'e birleştirme Lokman'ın onayını bekliyor" satırları bu tarihle kapandı. Ekler tarihli kayıt olduğu için değiştirilmedi.
+- **K17 kapandı olarak işaretlendi.** Sızan eşleşme anahtarı 28.09'da kapı C'de yenilenmişti (aşağıda "Kapananlar"), ama `KARARLAR/README.md` K17'yi hâlâ açık karar gösteriyordu. README'ye ve `KARARLAR/K17.md`'ye uygulanış notu eklendi; 22.09 karar metni değişmedi. Claude anahtarının 29.10 son kullanma tarihi ayrı bir risktir ve açık kalıyor.
+- **Bu dosya hâlâ geride.** Güncel durum `ie-05` dalındaki DURUM'dadır. `ie-04` ya da `ie-05` birleşirken bu ek ve alttaki iki ek elle taşınır.
+- **Sınırlar:** Yalnız belge değişti. Canlıya, veriye ve sunucuya dokunulmadı; ücretli çağrı ve silme yok. Gerileme sonucu `BK-03.md` › Kanıt'ta.
+
 **4 Ekim 2026 13:45 eki (dal `bk-02-depo-iskeleti`, BK-02; BK-01'in üstüne):**
 - **Depo iskeleti kuruldu** (`docs/is_emirleri/BK-02.md`): `AGENTS.md` (Claude ve Codex için ortak değişmez kurallar), kısaltılmış `CLAUDE.md` (`@AGENTS.md` içe alır), `.claude/rules/` (test politikası her oturumda; motor, beyin, kanal kuralları ilgili dosya açılınca), komutlar `/is-emri` `/kapanis` `/sahip-ozeti`, hakemler `geometri-hakemi` ve `kvkk-denetcisi`, üç hook (sır/dondurulmuş dosya koruması, komut freni, sözdizimi denetimi) ve izin listesi (`.claude/settings.json`).
 - **Gerileme** (`dogrula.py --hizli`, 13:41–13:43): harness 22/22, parmak izleri AYNI, yalnız bilinen sır taraması farkı (BK-01 ile aynı sayılar); ürün koduna dokunulmadı.
