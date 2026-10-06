@@ -1,10 +1,12 @@
-# 6 Ekim 2026 · duvar kalınlığı (dış 160 / iç 100 mm), ölçüye kesim ve el çiziminden 3+1
+# 6 Ekim 2026 · el çiziminden 3+1: duvar kalınlığı (dış 160 / iç 100 mm), ölçüye kesim, görünüşler, pano pano IFC ve yükleme listesi
 
 Deneme kodu; canlıda değil, Motor'un yerine geçmez. Canlı `motor/` değişmedi.
 
 İstekler (Lokman, 6 Ekim):
 - 18:28 — el çizimi 3+1 plan prefabrik standardında, P6001 mantığında çizilecek; dış duvar 160 mm, iç duvar 100 mm, yükseklik 2800 mm.
 - 18:50 — dış ölçüler 10,50 × 11,50 m, veranda yok. Çizim kuralı: her pano 1255 mm; dizilim yapının bitiş noktasına geldiğinde son parça kesilir, özel ölçülü olur.
+- 18:58 — Ç8201'deki gibi görünüşler; Blender / IFC çizimlerindeki gibi pano pano.
+- 19:11 — Astra dönemindeki yükleme listesi (Mac'te `AI Çizim Dosyaları`) örnek alınarak, daha iyisi olacak şekilde BOM listesi.
 
 | Dosya | İçerik |
 |---|---|
@@ -12,6 +14,11 @@ Deneme kodu; canlıda değil, Motor'un yerine geçmez. Canlı `motor/` değişme
 | `is_emri_3arti1_1150x1050.json` | Geçerli İş Emri: dış ölçü 1150 × 1050 cm, verandasız; varsayımlar dosyanın içinde |
 | `is_emri_3arti1_9x10.json` | İlk deneme (18:28): tam panoya yuvarlanmış, verandalı 9 × 10 pano. 18:50 isteğiyle geçersiz; kalınlık seçeneğinin ikinci örneği olarak koşuyor |
 | `kos.py` | Sağlama (yeni alanlar yokken deneme kopyası = canlı Motor) ve iki çizim |
+| `gorunus.py` | Dört görünüş paftası: her dış pano ayrı dikdörtgen, cephedeki sıra koduyla (Ö1…, A1…, SL1…, SĞ1…); kesilmiş panolar mor |
+| `ifc_3b.py` | Pano pano IFC4 modeli (her pano bir IfcWall) ve tek dosyalık 3D sayfası; dosyayı yeniden açıp plan, Motor BOM'u ve görünüş paftasıyla karşılaştırır |
+| `ifc_gorsel.py` | IFC'den Blender (bpy, Cycles) görselleri; pano hacmini modeldeki metrajla karşılaştırır. Ayrı sanal ortam ister (Python 3.13, `pip install bpy ifcopenshell`) |
+| `yukleme_listesi.py` | Yükleme listesi (Excel): Sayım, YÜKLEME, Metraj ve Açık konular sayfaları; bütün adetler formül |
+| `hepsini_kos.sh` | Hepsini sırayla koşar, kanıtları `sonuc/` altına kopyalar |
 | `sonuc/<iş emri no>/` | Son koşunun kanıtları: PDF, DXF, önizleme, BOM, doğrulama. `sonuc/motor_k.diff` Motor'a göre fark |
 | `cikti/` | Koşu çıktıları (depoya girmez) |
 
@@ -30,7 +37,7 @@ Deneme kodu; canlıda değil, Motor'un yerine geçmez. Canlı `motor/` değişme
 python deneme/2026-10-06_kalinlik_160_100/kos.py --sonuc
 ```
 
-## Sonuç (6 Ekim 2026 18:57)
+## Sonuç · plan (6 Ekim 2026 18:57)
 
 - Sağlama: P6001, 6×8 ve Yan Verandalı 6×8,5 İş Emri'lerinde deneme kopyası canlı Motor'la aynı geometriyi, doğrulamayı ve BOM'u verdi (36, 41 ve 52 pano).
 - 1150 × 1050: doğrulama geçti. 66 pano (36 dış, 30 iç), 8 pencere, 6 kapı, 6 köşe parçası, 4 üçlü H. Kapalı net 110,75 m².
@@ -50,6 +57,20 @@ python deneme/2026-10-06_kalinlik_160_100/kos.py --sonuc
 
 El çiziminde duvarlar 25 / 15 cm; burada 16 / 10 cm olduğu için iç net ölçü 11,00 × 10,00'dan 11,18 × 10,18 m'ye çıkıyor.
 
+## Sonuç · görünüşler, IFC ve yükleme listesi (6 Ekim 2026 19:30)
+
+- Görünüş paftası: dört cephe, cephe başına 9 pano (36 dış pano; 4'ü kesilmiş: 114 cm × 2, 30 cm × 2). Duvar 280, mahya kotu 473,1 (makas üstü), çatı üstü 487,1 cm.
+- Çatı yönü: makaslar kısa kenarı (derinlik, 1050 cm) geçiyor, mahya ön cepheye paralel (`cati.makas_ekseni: "y"`). Ön ve arka görünüşte saçak, yan görünüşlerde kalkan görünür. Plan paftasındaki ön görünüş ve çatı profili Motor'un sabit yönüyle çizildiği için bununla çelişir; geçerli olan görünüş paftasıdır.
+- IFC: 66 IfcWall (tipler PE-DIS-160 ve PE-IC-100), 8 pencere, 6 kapı, 7 mahal, 10 makas (pano akslarında), şema hatası 0. Yeniden açılan dosyada pano adedi, boy / kalınlık / yükseklik dağılımı, pano kodları (Motor BOM'u) ve dış pano boyları (görünüş paftası) aynı; mahya kotu aynı (473,1).
+- Geometri: duvarların kutusu 11,50 × 10,50 × 2,80 m; panoların boşluk kesilmiş hacmi modeldeki metrajla aynı (24,9084 m³).
+- Yükleme listesi: 44 kalem, 117 formül, hata yok. Sayılan kodlar Motor BOM'uyla aynı. Türetilen 14 kuralın 13'ü P6001'in gerçek yükleme listesindeki adedi veriyor; mahya parçası vermiyor (kural 4, liste 3).
+
+| Astra listesi (Cumbalı 6×5, 7 Eylül) | Bu liste |
+|---|---|
+| Yalnız çizilmiş bloklar: pano, doğrama, köşe, üçlü H, veranda profili | Bunlara ek: pano eki H'ları, alt çerçeve, kör kasa, makas, çatı kaplaması, mahya, saçak ve alın sacı, aşık, şilte, tavan alçıpanı, dere |
+| Sayım satırı: blok adı ve merkez koordinatı | Sayım satırı: cephe, pafta kodu (Ö1…), boy, kalınlık, yükseklik, açıklık, IFC adı |
+| Çatı, profil ve tavan "çizimde tanımlı değil" diye dışarıda | Kuralı bilinenler formülle içeride; her kuralın dayanağı ve P6001 sağlaması Metraj sayfasında; kuralı bilinmeyenler Açık konular sayfasında |
+
 ## Çıkarımlar (teyit edilene kadar kural değil)
 
 - Dizilimin başlangıç ucu: soldan ve önden. Kesilen parça sağ ve arka uçta.
@@ -57,6 +78,10 @@ El çiziminde duvarlar 25 / 15 cm; burada 16 / 10 cm olduğu için iç net ölç
 - Bağlantılar: dış köşe parçası 160 × 80, iç köşe 100 × 50 (katalogdaki B02 ile aynı ölçüye düştü), üçlü H 100.
 - Pencere üst kotu 200 cm sabit; 280 cm duvarda lento 80 cm.
 - Yeni pano kodları çalışma kopyasında; ana kataloğa yazılmadı.
+- Makaslar pano akslarında: iki baş makas kalkan duvarların ekseninde, orta makaslar pano eklerinde (P6001 gerçek listesinde 6 pano boyunca 2 baş + 5 orta).
+- Yükleme listesindeki "liste kuralı" kalemleri tek bir gerçek listeden (P6001, 60 m², 2021–2022) çıkarıldı; o listede tutmaları teyit değildir.
+- Dere kalemleri çelik listelerinin kuralıyla hesaplandı; prefabrik pakette dere olup olmadığı bilinmiyor.
+- IFC'de 160 mm panonun katmanları 8 + 144 + 8 mm yazıldı (100 mm panodaki 8 + 84 + 8'den); teyit bekliyor.
 
 ## Motor'da görülenler
 
@@ -69,6 +94,8 @@ El çiziminde duvarlar 25 / 15 cm; burada 16 / 10 cm olduğu için iç net ölç
 - Katalog dışı pencere ölçüsü Motor'da yok; standart ölçülere çevrildi.
 
 ## Lokman'dan beklenenler
+
+Yükleme listesinin "Açık konular" sayfasında on üç madde var; öne çıkanlar:
 
 1. Kesilen parça çok dar çıkınca (arkada 30 cm, iç duvarda 22 cm) ne yapılır: böyle mi kalır, bir önceki panoyla mı paylaştırılır? En az pano boyu var mı?
 2. Çatı yönü: makaslar 10,50 m'lik kenarı mı geçecek?

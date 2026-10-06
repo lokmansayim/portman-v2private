@@ -1,0 +1,50 @@
+{
+ "pano": 66,
+ "qto_net_hacim_m3": 24.9084,
+ "geometri_net_hacim_m3": 24.9084,
+ "fark_yuzde": -0.0,
+ "en_buyuk_fark": {
+  "pano": "PANO_D_OZEL_30.0_65",
+  "qto": 0.1344,
+  "geometri": 0.1344
+ },
+ "duvar_kutusu_m": [
+  [
+   0.0,
+   0.0,
+   0.0
+  ],
+  [
+   11.5,
+   10.5,
+   2.8
+  ]
+ ],
+ "model_kutusu_m": [
+  [
+   -0.3,
+   -0.3,
+   -0.15
+  ],
+  [
+   11.8,
+   10.8,
+   4.8715
+  ]
+ ],
+ "geometri_uretilen_nesne": {
+  "IfcWall": 66,
+  "IfcOpeningElement": 14,
+  "IfcWindow": 8,
+  "IfcDoor": 6,
+  "IfcMember": 90,
+  "IfcSpace": 7,
+  "IfcSlab": 3,
+  "IfcPlate": 2
+ },
+ "gorseller": [
+  "3b_01_on_sag.png",
+  "3b_02_arka_sol.png",
+  "3b_03_catisiz_on_sol.png"
+ ]
+}
