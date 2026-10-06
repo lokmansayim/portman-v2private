@@ -1,5 +1,5 @@
 {
-  "sema": "portman.yukleme_kurallari/0.8-taslak",
+  "sema": "portman.yukleme_kurallari/0.9-taslak",
   "aciklama": "Çelik (A1) ve çatı (A5) yükleme listesi için katsayılar. Her değerin kaynağı ve durumu yanında. durum: lokman = Lokman'ın söylediği kural (tarih ve saat kaynakta); muhendis = PortatifEv'in inşaat mühendisi Ubeydullah'ın verdiği kural ya da değer (cevaplarını Lokman 3 Ekim 2026 18:14'te ve 4 Ekim 2026 01:24'te iletti); excel = PortatifEv'in yükleme listesi çalışma kitaplarındaki formül ya da not; motor = PortatifEv'in Excel hesaplama motorundaki (CTKBF V1.1) formül, not ya da ortalama; liste = gerçek listedeki boyut bilgisi; uydurma = gerçek listelerdeki adetleri tutturan kural, teyit bekliyor; varsayim = Claude'un varsayımı, teyit bekliyor. Lokman'ın söylediği ile mühendisin söylediği çelişirse Lokman'ınki geçerlidir (4 Ekim 2026 15:18: en iyi bilgiyi kendisinin vereceğini söyledi).",
   "zayiat": {
     "boardex": {
@@ -684,5 +684,65 @@
     },
     "durum": "lokman",
     "kaynak": "Lokman, 4 Ekim 2026 16:18 (\"Sac kapama: o da çıksın mı?\" sorusuna): \"evet tek kat panel kapasınıda çıkar aynısı geçerli\". Tek kat panel kapaması (L 2500; 2025 listelerinden) listeden çıkarıldı: damlalıkla aynı gerekçe (15:18: montajcılar kullanmıyor; plastik kapama aparatı sipariş verilirse listeye girer). Sandviç panel kapaması: Lokman, 4 Ekim 2026 17:46 (\"Sandviç panel kapaması: o da çıksın mı?\" sorusuna): \"o kalsın şimdilik\". Sandviç panel seçeneğinde sac kapama duruyor; adedi 2025 listelerinden çıkarılan formülle (her saçak kenarı ÷ 2,5; uydurma). Bir çift kat çelik projenin çatı kaplaması paftasındaki metrajda da kalem var: \"Sandviç Panel Kapak L saç: 20 m\" (iki ana yüzde onar şerit × 100 cm: kapama saçak boyunca). Girdide `cati.panel_kapamasi` yazıyorsa o kullanılır: kapaması olan gerçek liste örnekleri (2025 uygulaması) öyle hesaplanır."
+  },
+  "elektrik_oda_ek": {
+    "deger": {
+      "depo": {
+        "tijli_duy": 1,
+        "tekli_anahtar": 1,
+        "tekli_priz": 1
+      }
+    },
+    "durum": "varsayim",
+    "kaynak": "Mühendisin oda başına kuralında (`elektrik_oda`) depo ya da müştemilat yok. Kör test projesinde (6 Ekim 2026) müştemilat için hol kuralına bir priz eklenerek 1 duy, 1 tekli anahtar, 1 tekli priz sayıldı. Yalnız girdide işlevi 'depo' olan mahal varsa devreye girer. Teyit bekliyor."
+  },
+  "cok_duzlemli_cati": {
+    "deger": {
+      "boy_birlestirme_m": 0.1,
+      "mahya_asigi_payi_m": 0.2,
+      "es": [
+        "alt_ust",
+        "karsi_yuz"
+      ],
+      "ust_pay_m": 0.07
+    },
+    "durum": "varsayim",
+    "kaynak": "Kör test projesi (6 Ekim 2026): beşik + cumba çatı, veranda sundurması ve ek yapı çatısı. Kırma çatı için kurulan dizilimin (`kirma_cati_dizilim`; Lokman, 4 Ekim 2026 01:42, 15:18 ve 16:18) çok düzlemli çatıya genellemesi (`deneme/2026-10-06_kor_test/cati_genel.py`): her yüz gerçek boyutuyla açılır, saçağa dik şeritlere bölünür, dışarıdan bakışla saçağın sol ucundan başlanır. Panel boyları tam boy şeritlerin boylarıdır (eğimli boy + taşma; mm'ye yukarı); birbirine 10 cm'den yakın boylar uzun olanda birleşir. Çapraz kesilen parçalar eşlenir: aynı açıyla kesilmiş bir alt parça (düz ucu saçakta) ile bir üst parça (düz ucu mahyada ya da duvar dibinde) çevrilmeden tek dikdörtgenden çıkar (`alt_ust`); aynı türden parça karşı yüzdeyse kırma çatıdaki gibi çevrilerek eş olur (`karsi_yuz`). Dikdörtgenler büyükten küçüğe, sığdığı ilk panele; yeni panel sığdığı en kısa boydan açılır. Aşık: yüz yüz, saçaktan itibaren 60 cm aralıkla sıralar ve her üst yatay kenarın (mahya, duvar dibi) 20 cm altında bir mahya aşığı; sıranın boyu yüzün o yükseklikteki genişliği. Genel dizilim dikdörtgen kırma çatıda eski dizilimle aynı adedi veriyor (720 denemede fark yok). Gerçek listeyle karşılaştırma kör testin kendisidir. Teyit bekliyor."
+  },
+  "duvar_dibi": {
+    "deger": {
+      "parca_boyu_m": 2.8,
+      "bindirme_m": 0.3
+    },
+    "durum": "soru",
+    "kaynak": "Alçak bir çatının (veranda sundurması, ek yapı çatısı) bina duvarına ya da kalkana dayandığı kenar. Okunan üç gerçek listede böyle bir kalem yok; 90 m² listede 'özel mahya (geniş)' ana bina ile veranda çıkıntısının çatısı arasındaki birleşim içindi. Kör test projesinde (6 Ekim 2026) satır 'duvar dibi sacı' adıyla, mahya parçası gibi (boy ÷ 2,5) sayıldı; hangi parçanın gittiği sorulacak."
+  },
+  "ek_yapi_ve_korkuluk": {
+    "deger": {
+      "ek_yapi_dis_duvar_birim": "ic:80x45x0,8",
+      "korkuluk_birim": "dis:80x45x1,2",
+      "baca_birim": "dis:80x45x1,2",
+      "yukseklige_oranla": true
+    },
+    "durum": "varsayim",
+    "kaynak": "Kör test projesi (6 Ekim 2026): müştemilat dış duvarları 80 × 45 × 0,8 (projenin notu); motorda dış 80 × 0,8 için birim ağırlık yok, iç duvarın 80 × 45 × 0,8 değeri (13,0 kg/m) kullanıldı. Veranda korkuluğu (70 cm), giriş çerçevesi ve baca karkası için kural yok: dış duvarın birim ağırlığı (2,70 m için) yüksekliğe oranlandı. Ek yapının çatısı çatı paneliyse `celik.cati_paneli` (100 m² için 440,32 kg) mahal alanına oranlandı; o mahalde tavan omegası ve aşık sayılmadı. Korkuluğun iki yüzü de Boardex sayıldı; üst yüzü sayılmadı. Teyit bekliyor."
+  },
+  "kapsam_alici": {
+    "deger": {
+      "pencere_aliciya_aitse": {
+        "pencere_vidasi": false,
+        "silikonize_mastik": false
+      }
+    },
+    "durum": "varsayim",
+    "kaynak": "Projenin teknik özelliklerinde 'alıcıya ait' yazan kalemler listeye girmez (dış kapı, pencere, boya, vitrifiye, tesisat). Pencereler alıcıya aitse pencere sayısına bağlı iki kalem de (pencere vidası, silikonize mastik) listeye girmedi: kural yok, varsayım. Kör test projesi (6 Ekim 2026)."
+  },
+  "nem_bariyeri_dis_cephe": {
+    "deger": {
+      "birim": "m²",
+      "alan": "boardex_net"
+    },
+    "durum": "varsayim",
+    "kaynak": "Kör test projesinin (6 Ekim 2026) notunda dış cephe paneli 'Boardex + nem bariyeri + çelik karkas + OSB + alçıpan'. Okunan üç gerçek listede dış cephe için nem bariyeri kalemi yok (kural yok); satır Boardex'in net alanıyla (m², fire hariç) yazıldı. `nem_bariyeri` kuralı çatı içindir."
   }
 }
