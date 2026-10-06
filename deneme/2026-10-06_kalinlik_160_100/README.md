@@ -7,6 +7,7 @@ Deneme kodu; canlıda değil, Motor'un yerine geçmez. Canlı `motor/` değişme
 - 18:50 — dış ölçüler 10,50 × 11,50 m, veranda yok. Çizim kuralı: her pano 1255 mm; dizilim yapının bitiş noktasına geldiğinde son parça kesilir, özel ölçülü olur.
 - 18:58 — Ç8201'deki gibi görünüşler; Blender / IFC çizimlerindeki gibi pano pano.
 - 19:11 — Astra dönemindeki yükleme listesi (Mac'te `AI Çizim Dosyaları`) örnek alınarak, daha iyisi olacak şekilde BOM listesi.
+- 21:00 — plan çok iyi; 3D sayfası yine beğenilmedi, örnek olarak Astra'nın sunum sayfası gösterildi (Mac'te `~/Documents/Codex/2026-09-30/…/outputs/Uc_Model_Sunum/Incele.html`).
 - 19:46 — geri bildirim: plan paftası bundan sonra ekteki "Örnek Şablon"un aynısı olacak; görünüşler her seferinde üretilecek; pano pano çizim kural. IFC Blender'da açılmadı; HTML'de fareyle çevirme ve çatı kaldırma çalışmadı. Kurallar: `docs/sartname/plan_paftasi_sablonu.md`.
 
 | Dosya | İçerik |
@@ -18,7 +19,7 @@ Deneme kodu; canlıda değil, Motor'un yerine geçmez. Canlı `motor/` değişme
 | `sablon_pafta.py` | Plan paftası, "Örnek Şablon" düzeninde (A4 yatay): plan, sol yan ve ön görünüş, bina özellikleri, özel istekler, antet. Yazı tipleri `font/` altında |
 | `gorunus.py` | Dört görünüş paftası: her dış pano ayrı dikdörtgen, cephedeki sıra koduyla (Ö1…, A1…, SL1…, SĞ1…); kesilmiş panolar mor |
 | `ifc_3b.py` | Pano pano IFC4 modeli (her pano bir IfcWall) ve tek dosyalık 3D sayfası; dosyayı yeniden açıp plan, Motor BOM'u ve görünüş paftasıyla karşılaştırır |
-| `sayfa_3b.py` | IFC'den 3D sayfası (tek dosya, three.js gömülü): fareyle ya da parmakla çevirme, tekerlekle yakınlaştırma, ekranda görünüş düğmeleri; çatı, makas ve iç duvar aç / kapa; panoya tıklayınca pafta kodu ve ölçüsü. Yayın için kısa kopyasını da yazar |
+| `sayfa_3b.py` | IFC'den 3D sunum sayfası (tek dosya, three.js gömülü), Astra'nın 30 Eylül sunum sayfasının düzeninde: başlık bandı, çerçeveli sahne, yan pano ve plan; "Dış görünüş / Üstten bak / Çatıyı aç / Çatı iskeleti / Pano renkleri / Oda adları / Döndür"; parçaların sırayla belirdiği "Oluşumu oynat" ve sürgüsü; malzemeli görünüş (ışık, gölge, trapez sac çatı); panoya tıklayınca pafta kodu ve ölçüsü. Yayın için kısa kopyasını da yazar |
 | `ifc_gorsel.py` | IFC'den Blender (bpy, Cycles) görselleri; pano hacmini modeldeki metrajla karşılaştırır. `--blend` ile Blender'da doğrudan açılan `.blend` ve `.glb` dosyalarını yazar, dosyayı yeniden açıp denetler. Ayrı sanal ortam ister (Python 3.13, `pip install bpy ifcopenshell`) |
 | `yukleme_listesi.py` | Yükleme listesi (Excel): Sayım, YÜKLEME, Metraj ve Açık konular sayfaları; bütün adetler formül |
 | `hepsini_kos.sh` | Hepsini sırayla koşar, kanıtları `sonuc/` altına kopyalar |
@@ -87,6 +88,15 @@ El çiziminde duvarlar 25 / 15 cm; burada 16 / 10 cm olduğu için iç net ölç
 - 3D sayfası yeniden yazıldı. Eski sayfada çatı örtüsü "çatı" listesinde olmadığı için düğme onu gizlemiyordu. Tarayıcı sınaması (Chromium; masaüstü 1280 × 800 ve telefon 400 × 760): sürükleyince döndü, tekerlekle yakınlaştı, çatı düğmesi dört parçayı gizledi, makaslar gizlendi, yedi oda adı göründü, panoya tıklayınca kodu ve ölçüsü geldi, konsolda hata yok.
 - Blender, IFC'yi Bonsai eklentisi olmadan açmaz. `.blend` dosyası Blender 5.2.2 ile yazıldı, yeniden açılıp denetlendi: 66 pano, hepsi pafta kodlu, kutu 11,50 × 10,50 × 2,80 m; on katman (çatıyı kaldırmak için 05 ve 06 kapatılır).
 - Lokman'ın ortamında eski sayfada çevirmenin neden çalışmadığı bilinmiyor; Chromium'da çalışıyordu. Astra'nın sayfası görülmedi.
+
+## Sonuç · 3D sunum sayfası, ikinci tur (6 Ekim 2026 21:30)
+
+- Lokman 21:00'de sayfayı yine beğenmedi ve Astra'nın sayfasını gösterdi. Dosya Mac'te bulundu ve okundu (yalnız okundu; depoya kopyalanmadı): üç modelin SketchUp kaynağından aktarıldığı bir sunum sayfası. Farkı yapan üç şey: düzen (başlık bandı, çerçeveli sahne, yanında bilgi ve plan), malzemeli görünüş (ışık, ton eşleme, dokulu çatı) ve parçaların sırayla belirdiği oluşum sürgüsü.
+- `sayfa_3b.py` bu düzende yeniden yazıldı. Model yine İş Emri'nden üretilen IFC'den gelir; Astra'nın modelindeki gibi SKP'den değil. Bu yüzden her pano ayrı parçadır ve pafta kodunu taşır; buna karşılık SKP'deki mobilya, perde, kaplama dokusu gibi ayrıntılar yoktur.
+- Duvar yüzeyleri düz gölgeleniyor (önceki sayfada köşelerde parlama vardı: köşe normalleri ortaklanıyordu). Çatı trapez sac dokusuyla, hadveler mahyadan saçağa.
+- "Çatıyı aç" örtüyü, alınları ve makasları kaldırır, kamerayı yukarı alır ve oda adlarını gösterir (adlar plan paftasındakiyle aynı). "Çatı iskeleti" yalnız örtüyü kaldırır.
+- Tarayıcı sınaması (Chromium; masaüstü 1440 × 900 açık tema, telefon 400 × 800 koyu tema): sürükleyince döndü, tekerlekle yakınlaştı, çatı açıldı (örtü 0, makas 0, yedi oda adı), iskelet (makas 80 parça), pano renkleri, sürgü %45'te 36 dış + 30 iç pano ve çatı yok, oluşum oynadı, panoya tıklayınca kodu geldi, "Döndür" çevirdi, plan büyüyüp kapandı, yatay kaydırma yok, sayfa hatası yok.
+- Çatı rengi bilinmediği için gri. Renkler sunum içindir.
 
 ## Çıkarımlar (teyit edilene kadar kural değil)
 
