@@ -95,12 +95,12 @@ def model_json(ifc_yolu: Path, etiket: dict) -> dict:
 
 STIL = """
 /* yerleşim (Astra'nın 30 Eylül sunum sayfası örnek alındı): başlık bandı, düğme sırası, solda çerçeveli sahne ve oluşum sürgüsü, sağda bilgi ve plan */
-:root{--zemin:#edf0ed;--yuzey:#ffffff;--yazi:#203333;--soluk:#5f716a;--cizgi:#c1cac3;--vurgu:#215549;--vurgu-yazi:#ffffff;--uzerinde:#e6ece7;--bant:#163733;--bant-yazi:#f5f4ed;
+:root{--zemin:#edf0ed;--yuzey:#ffffff;--yazi:#203333;--soluk:#5f716a;--cizgi:#c1cac3;--vurgu:#215549;--vurgu-yazi:#ffffff;--uzerinde:#e6ece7;--secili:#e2efe8;--bant:#163733;--bant-yazi:#f5f4ed;
   --sahne:#dce4df;--yer:#b4c1b6;--rozet:rgba(255,255,255,.88);--uyari:#c48a3c;--kesik:#b285d4;--standart:#ded6c2;--ic:#f0ede3;
   --govde:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--zemin:#121816;--yuzey:#1b2421;--yazi:#e6ece8;--soluk:#9db0a8;--cizgi:#34423d;--vurgu:#62b59e;--vurgu-yazi:#0d1a16;--uzerinde:#24302c;--bant:#0f2622;--bant-yazi:#f5f4ed;
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--zemin:#121816;--yuzey:#1b2421;--yazi:#e6ece8;--soluk:#9db0a8;--cizgi:#34423d;--vurgu:#62b59e;--vurgu-yazi:#0d1a16;--uzerinde:#24302c;--secili:#20362e;--bant:#0f2622;--bant-yazi:#f5f4ed;
   --sahne:#27322e;--yer:#323d38;--rozet:rgba(27,36,33,.9);--uyari:#d9a45c;--kesik:#b285d4;--standart:#ded6c2;--ic:#f0ede3;color-scheme:dark}}
-:root[data-theme="dark"]{--zemin:#121816;--yuzey:#1b2421;--yazi:#e6ece8;--soluk:#9db0a8;--cizgi:#34423d;--vurgu:#62b59e;--vurgu-yazi:#0d1a16;--uzerinde:#24302c;--bant:#0f2622;--bant-yazi:#f5f4ed;
+:root[data-theme="dark"]{--zemin:#121816;--yuzey:#1b2421;--yazi:#e6ece8;--soluk:#9db0a8;--cizgi:#34423d;--vurgu:#62b59e;--vurgu-yazi:#0d1a16;--uzerinde:#24302c;--secili:#20362e;--bant:#0f2622;--bant-yazi:#f5f4ed;
   --sahne:#27322e;--yer:#323d38;--rozet:rgba(27,36,33,.9);--uyari:#d9a45c;--kesik:#b285d4;--standart:#ded6c2;--ic:#f0ede3;color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--zemin);color:var(--yazi);font-family:var(--govde);font-size:15px;line-height:1.4}
@@ -124,6 +124,14 @@ main{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:18px}main>div{mi
 #etiket div{position:absolute;transform:translate(-50%,-50%);background:var(--rozet);border-radius:5px;padding:3px 8px;font-size:12px;white-space:nowrap;text-align:center;font-weight:600}
 #etiket small{display:block;color:var(--soluk);font-weight:400;font-variant-numeric:tabular-nums}
 #hata{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--soluk)}
+.kartlar{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:12px}
+.kart{display:flex;flex-direction:column;align-items:stretch;gap:2px;padding:0 0 10px;text-align:left;overflow:hidden;border-width:2px}
+.kart .res{display:block;width:100%;aspect-ratio:14/9;background:var(--sahne) center/cover no-repeat}
+.kart b{padding:8px 10px 0;font-size:14px;line-height:1.25}.kart span{padding:0 10px;font-size:12px;color:var(--soluk);line-height:1.35}
+.kart[aria-pressed="true"]{background:var(--secili);color:var(--yazi);border-color:var(--vurgu)}
+.et{display:inline-block;font-style:normal;font-size:11px;color:var(--soluk);margin:6px 10px 0}
+.et::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;background:var(--vurgu)}.et.o::before{background:var(--uyari)}
+.cs h2{margin-top:20px}.cs .et{margin:0 0 6px}.cs p{margin:6px 0}
 .olusum{display:flex;align-items:center;flex-wrap:wrap;gap:12px;padding:14px 2px 6px}
 .olusum label{font-size:13px;color:var(--soluk)}
 input[type=range]{flex:1;min-width:160px;accent-color:var(--vurgu)}
@@ -170,10 +178,11 @@ GOVDE = """
         <div id="tuval"><canvas id="c" tabindex="0" aria-label="Fareyle döndürülebilen üç boyutlu pano modeli"></canvas></div>
         <div id="etiket" hidden></div>
         <div class="rozet" id="kip">Malzemeli dış görünüş</div>
-        <div class="ipucu"><span>Sürükle: döndür · Tekerlek: yakınlaştır · Panoya tıkla: kodu ve ölçüsü</span></div>
+        <div class="ipucu"><span>Sürükle: döndür · Tekerlek: yakınlaştır · Alttaki kartlar: çatı seç</span></div>
         <div class="yakin"><button id="g-yakin" aria-label="Yakınlaştır">+</button><button id="g-uzak" aria-label="Uzaklaştır">−</button></div>
         <div id="hata" hidden>Bu tarayıcı 3D çizimi (WebGL) açamadı. Sayfayı Safari ya da Chrome'da açın.</div>
       </div>
+      <div class="kartlar" role="group" aria-label="Çatı seçenekleri">__KARTLAR__</div>
       <div class="olusum"><button id="oynat">Oluşumu oynat</button><label for="surgu">Parçalar</label><input id="surgu" type="range" min="0" max="100" value="100" aria-label="Parçaların oluşum yüzdesi"><span id="ilerleme" aria-live="polite">%100</span></div>
       <div class="not">Oluşum, parçaların sunum sırasıdır (zemin, bağlantılar, dış panolar, iç panolar, doğramalar, makaslar, çatı); montaj talimatı değildir.</div>
       <div class="secim" aria-live="polite"><b id="b1">Bir panoya tıklayın</b><span id="b2">Pafta kodu, malzeme kodu ve ölçüsü burada görünür.</span></div>
@@ -208,27 +217,31 @@ function trapez(hex){var c=document.createElement('canvas');c.width=64;c.height=
   x.fillStyle=ton(1);x.fillRect(0,0,64,4);x.fillStyle=ton(0.86);x.fillRect(0,0,5,4);x.fillStyle=ton(1.2);x.fillRect(5,0,13,4);x.fillStyle=ton(0.68);x.fillRect(18,0,5,4);
   var d=new THREE.CanvasTexture(c);d.wrapS=d.wrapT=THREE.RepeatWrapping;d.encoding=THREE.sRGBEncoding;d.anisotropy=r.capabilities.getMaxAnisotropy();return d;}
 var R={dis:'#efebe1',ic:'#f7f5ef',makas:'#9ea5ab',baglanti:'#8a9095',zemin:'#aba598',cati:M.cati_rengi||'#5f666e'};
-var catiDoku=trapez(R.cati),sirtX=M.mahya!=='z';
+var catiDoku=trapez(R.cati);
 
-var parca=[],secilebilir=[],kutu=new THREE.Box3(),tum=new THREE.Box3();
-M.el.forEach(function(e){
+var parca=[],secilebilir=[],kutu=new THREE.Box3(),tum=new THREE.Box3(),dokular={};
+function ekle(e,cs){
   var g0=new THREE.BufferGeometry();g0.setAttribute('position',new THREE.Float32BufferAttribute(e.v,3));g0.setIndex(e.i);
   var g=g0.toNonIndexed();g.computeVertexNormals();g.computeBoundingBox();
   var saydam=e.o<0.95,ayar={side:THREE.DoubleSide,polygonOffset:true,polygonOffsetFactor:1,polygonOffsetUnits:1,roughness:0.85,metalness:0};
-  if(e.g==='cati'){var p=g.attributes.position,uv=new Float32Array(p.count*2);
-    for(var i=0;i<p.count;i++){uv[2*i]=(sirtX?p.getX(i):p.getZ(i))/0.2;uv[2*i+1]=(sirtX?p.getZ(i):p.getX(i))/0.2;}
+  if(e.g==='cati'&&!e.duz){var p=g.attributes.position,uv=new Float32Array(p.count*2),hx=e.h!=='z';
+    for(var i=0;i<p.count;i++){uv[2*i]=(hx?p.getX(i):p.getZ(i))/0.2;uv[2*i+1]=(hx?p.getZ(i):p.getX(i))/0.2;}
     g.setAttribute('uv',new THREE.BufferAttribute(uv,2));ayar.map=catiDoku;ayar.roughness=0.66;ayar.metalness=0.1;}
-  else if(e.g==='dis_pano'||e.g==='alin')ayar.color=renk(R.dis);
+  else if(e.g==='cati'){ayar.color=renk('#8b9093');ayar.roughness=0.9;}
+  else if(e.g==='dis_pano'||e.g==='alin')ayar.color=renk(e.kapak?'#b9b6ad':R.dis);
   else if(e.g==='ic_pano')ayar.color=renk(R.ic);
   else if(e.g==='makas'){ayar.color=renk(R.makas);ayar.roughness=0.45;ayar.metalness=0.55;}
   else if(e.g==='baglanti'){ayar.color=renk(R.baglanti);ayar.roughness=0.5;ayar.metalness=0.4;}
   else if(e.g==='zemin')ayar.color=renk(R.zemin);
   else{ayar.color=renk3(e.r);if(saydam){ayar.transparent=true;ayar.opacity=Math.max(e.o,0.4);ayar.roughness=0.08;ayar.depthWrite=false;ayar.color=renk('#bcd6e2');}else ayar.roughness=0.6;}
-  var m=new THREE.Mesh(g,new THREE.MeshStandardMaterial(ayar));m.castShadow=!saydam;m.receiveShadow=!saydam;m.userData=e;sc.add(m);
+  var m=new THREE.Mesh(g,new THREE.MeshStandardMaterial(ayar));m.castShadow=!saydam;m.receiveShadow=!saydam;m.userData=e;m.cs=cs||null;sc.add(m);
   if(e.g!=='makas'&&e.g!=='zemin'&&e.g!=='cati'&&e.g!=='baglanti'){m.add(new THREE.LineSegments(new THREE.EdgesGeometry(g,25),new THREE.LineBasicMaterial({color:0x2b3336,transparent:true,opacity:0.55})));}
   parca.push(m);if(e.g!=='zemin')secilebilir.push(m);
-  if(e.g==='dis_pano'||e.g==='ic_pano')kutu.union(g.boundingBox);tum.union(g.boundingBox);
-});
+  if(e.g==='dis_pano'||e.g==='ic_pano')kutu.union(g.boundingBox);if(!cs)tum.union(g.boundingBox);
+}
+M.el.forEach(function(e){ekle(e,null);});
+var CS={};M.catilar.forEach(function(c){CS[c.kod]=c;c.el.forEach(function(e){ekle(e,c.kod);});});
+var secim=M.catilar[0].kod;
 var mrk=kutu.getCenter(new THREE.Vector3()),byt=kutu.getSize(new THREE.Vector3()),cap=Math.max(byt.x,byt.z);
 var yer=new THREE.Mesh(new THREE.PlaneGeometry(cap*14,cap*14),new THREE.MeshStandardMaterial({roughness:0.95}));yer.rotation.x=-Math.PI/2;yer.position.set(mrk.x,tum.min.y-0.01,mrk.z);yer.receiveShadow=true;sc.add(yer);
 gunes.position.set(mrk.x+cap*0.75,cap*1.7,mrk.z+cap*1.15);gunes.target.position.copy(mrk);dolgu.position.set(mrk.x-cap,cap*0.7,mrk.z-cap*1.2);
@@ -236,25 +249,29 @@ var gk=gunes.shadow.camera;gk.left=-cap*1.25;gk.right=cap*1.25;gk.top=cap*1.25;g
 gunes.shadow.mapSize.set(2048,2048);gunes.shadow.bias=-0.0004;gunes.shadow.normalBias=0.03;
 
 /* oluşum sırası: zemin, bağlantılar, dış panolar (yapının çevresinde sırayla), iç panolar, doğramalar, makaslar, çatı */
-var asama={zemin:0,baglanti:1,dis_pano:2,ic_pano:3,pencere:4,kapi:4,makas:5,cati:6,alin:6},anahtar={};
-parca.forEach(function(m){var e=m.userData;if(anahtar[e.ad]!=null)return;var c=m.geometry.boundingBox.getCenter(new THREE.Vector3()),k;
-  if(e.g==='dis_pano'){k=Math.atan2(c.x-mrk.x,c.z-mrk.z);k=(k+Math.PI*2+Math.PI*0.75)%(Math.PI*2);}
-  else if(e.g==='makas')k=(sirtX?c.x:c.z)+c.y*0.001;
-  else k=(c.x-kutu.min.x)+(kutu.max.z-c.z)*0.01;
-  anahtar[e.ad]=asama[e.g]*1000+k;});
-var sirali=parca.map(function(m,i){return [anahtar[m.userData.ad],i,m];}).sort(function(a,b){return a[0]-b[0]||a[1]-b[1];}).map(function(a){return a[2];});
+var asama={zemin:0,baglanti:1,dis_pano:2,ic_pano:3,pencere:4,kapi:4,makas:5,cati:6,alin:6},sirali=[];
+function sirala(){var anahtar={},mahyaX=(CS[secim].mahya||'x')==='x';
+  var secili_=parca.filter(function(m){return !m.cs||m.cs===secim;});
+  secili_.forEach(function(m){var e=m.userData;if(anahtar[e.ad]!=null)return;var c=m.geometry.boundingBox.getCenter(new THREE.Vector3()),k;
+    if(e.g==='dis_pano'){k=Math.atan2(c.x-mrk.x,c.z-mrk.z);k=(k+Math.PI*2+Math.PI*0.75)%(Math.PI*2);}
+    else if(e.g==='makas')k=(mahyaX?c.x:(kutu.max.z-c.z));
+    else k=(c.x-kutu.min.x)+(kutu.max.z-c.z)*0.01;
+    anahtar[e.ad]=asama[e.g]*1000+k;});
+  var makasAd={};secili_.forEach(function(m){var e=m.userData;if(e.g==='makas'){var kok=e.ad.replace(/_\d+$/,'');if(makasAd[kok]==null)makasAd[kok]=anahtar[e.ad];anahtar[e.ad]=makasAd[kok];}});
+  sirali=secili_.map(function(m,i){return [anahtar[m.userData.ad],i,m];}).sort(function(a,b){return a[0]-b[0]||a[1]-b[1];}).map(function(a){return a[2];});}
 
 /* durum */
-var cati='kapali',renkli=false,yuzde=100,oynuyor=false,don=false,kirli=true,secili=null;
+var cati='kapali',renkli=false,yuzde=100,oynuyor=false,don=false,kirli=true,secili=null,hazir=false;
 function dugme(id,acik){var b=$(id);if(b.hasAttribute('aria-pressed'))b.setAttribute('aria-pressed',acik?'true':'false');}
 function gorunur(){var sinir=Math.ceil(sirali.length*yuzde/100),gorulen={},n=0;
+  parca.forEach(function(m){if(m.cs&&m.cs!==secim)m.visible=false;});
   sirali.forEach(function(m,i){var e=m.userData,v=i<sinir;
     if(v&&(e.g==='cati'||e.g==='alin'))v=cati==='kapali';
     if(v&&e.g==='makas')v=cati!=='acik';
     m.visible=v;if(v&&!gorulen[e.ad]){gorulen[e.ad]=1;n++;}});
   if(secili&&!secili.visible)birakSecim();
   $('surgu').value=yuzde;$('ilerleme').textContent='%'+Math.round(yuzde)+' · '+n+' parça';
-  $('kip').textContent=(oynuyor?'Parçaların oluşumu':cati==='acik'?'Çatı açık · iç bölmeler':cati==='iskelet'?'Çatı iskeleti · makaslar':'Malzemeli dış görünüş')+(renkli?' · pano renkleri':'');
+  $('kip').textContent=secim+' · '+CS[secim].ad+' — '+(oynuyor?'parçaların oluşumu':cati==='acik'?'çatı açık, iç bölmeler':cati==='iskelet'?'çatı iskeleti':'dış görünüş')+(renkli?' · pano renkleri':'');
   $('k-cati').textContent=cati==='acik'?'Çatıyı kapat':'Çatıyı aç';dugme('k-cati',cati==='acik');dugme('k-iskelet',cati==='iskelet');kirli=true;}
 function boya(){parca.forEach(function(m){var e=m.userData;if(e.g==='dis_pano')m.material.color.copy(renkli?renk3(e.r):renk(R.dis));else if(e.g==='ic_pano')m.material.color.copy(renkli?renk3(e.r):renk(R.ic));});
   dugme('k-renk',renkli);var g=$('gosterge');if(g)g.hidden=!renkli;gorunur();}
@@ -263,7 +280,7 @@ function boya(){parca.forEach(function(m){var e=m.userData;if(e.g==='dis_pano')m
 var ilk={az:0.62,el:0.5,uz:cap*2.05,hx:mrk.x,hy:byt.y*0.42,hz:mrk.z};
 var K={az:ilk.az,el:ilk.el,uz:ilk.uz,h:new THREE.Vector3(ilk.hx,ilk.hy,ilk.hz)};
 function tema(){var s=getComputedStyle(document.documentElement),a=(s.getPropertyValue('--sahne').trim()||'#dce4df'),b=(s.getPropertyValue('--yer').trim()||'#b4c1b6');
-  sc.background=new THREE.Color(a);sc.fog=new THREE.Fog(new THREE.Color(a),cap*3.2,cap*7.5);yer.material.color.copy(renk(b));kirli=true;}
+  sc.background=new THREE.Color(a);sc.fog=new THREE.Fog(new THREE.Color(a),cap*3.2,cap*7.5);yer.material.color.copy(renk(b));kirli=true;if(hazir)kartGorselleri();}
 function ciz(){
   K.el=Math.max(-0.03,Math.min(1.5607,K.el));K.uz=Math.max(cap*0.3,Math.min(cap*5,K.uz));
   var u=K.uz*Math.max(1,1.3/cam.aspect);
@@ -337,6 +354,20 @@ $('g-don').addEventListener('click',function(){don=!don;dugme('g-don',don);$('g-
 $('oynat').addEventListener('click',function(){oynuyor=!oynuyor;if(oynuyor&&yuzde>=100)yuzde=0;$('oynat').textContent=oynuyor?'Duraklat':'Oluşumu oynat';gorunur();});
 $('surgu').addEventListener('input',function(e){durOlusum();yuzde=Number(e.target.value);gorunur();});
 
+/* çatı seçenekleri: kart seçilince örtü, kalkan ve makaslar değişir; gövde aynı kalır */
+var kartlar=[].slice.call(document.querySelectorAll('.kart')),bolumler=[].slice.call(document.querySelectorAll('.cs'));
+function catiSec(kod){if(!CS[kod])return;secim=kod;sirala();
+  kartlar.forEach(function(k){k.setAttribute('aria-pressed',k.getAttribute('data-kod')===kod?'true':'false');});
+  bolumler.forEach(function(b){b.hidden=b.getAttribute('data-kod')!==kod;});gorunur();}
+kartlar.forEach(function(k){k.addEventListener('click',function(){catiSec(k.getAttribute('data-kod'));});});
+function kartGorselleri(){var eski={secim:secim,cati:cati,yuzde:yuzde,az:K.az,el:K.el,uz:K.uz,h:K.h.clone(),etk:etk.hidden};
+  cati='kapali';yuzde=100;etk.hidden=true;K.az=ilk.az;K.el=0.46;K.uz=ilk.uz*0.98;K.h.set(ilk.hx,ilk.hy+0.5,ilk.hz);
+  r.setSize(336,216,false);cam.aspect=336/216;cam.updateProjectionMatrix();
+  kartlar.forEach(function(k){secim=k.getAttribute('data-kod');sirala();
+    var sinir=sirali.length;parca.forEach(function(m){m.visible=!m.cs||m.cs===secim;});
+    ciz();try{k.querySelector('.res').style.backgroundImage='url('+cv.toDataURL('image/jpeg',0.86)+')';}catch(_){}});
+  secim=eski.secim;cati=eski.cati;yuzde=eski.yuzde;K.az=eski.az;K.el=eski.el;K.uz=eski.uz;K.h.copy(eski.h);etk.hidden=eski.etk;sirala();boyut();gorunur();}
+
 /* plan: tıklayınca sayfanın içinde büyür */
 var plan=$('plan'),buyuk=$('buyuk');
 function kapat(){buyuk.hidden=true;}
@@ -348,9 +379,11 @@ function dongu(t){var dt=Math.min(0.05,(t-sonT)/1000);sonT=t;
   if(don){K.az+=dt*(azalt?0.08:0.2);kirli=true;}
   if(oynuyor){yuzde=Math.min(100,yuzde+dt*(azalt?40:9));if(yuzde>=100){oynuyor=false;$('oynat').textContent='Yeniden oynat';}gorunur();}
   if(kirli)ciz();requestAnimationFrame(dongu);}
-tema();boyut();boya();requestAnimationFrame(dongu);
+tema();boyut();sirala();boya();catiSec(secim);kartGorselleri();hazir=true;requestAnimationFrame(dongu);
 window.__portman3b={K:K,get cati(){return cati;},get yuzde(){return yuzde;},get renkli(){return renkli;},
-  say:function(g){return parca.filter(function(m){return m.visible&&m.userData.g===g;}).length;},toplam:parca.length,ciz:ciz};
+  say:function(g){return parca.filter(function(m){return m.visible&&m.userData.g===g;}).length;},toplam:parca.length,ciz:ciz,
+  get secim(){return secim;},sec:catiSec,kodlar:M.catilar.map(function(c){return c.kod;}),
+  kutu:function(){var b=new THREE.Box3();parca.forEach(function(m){if(m.visible)b.union(m.geometry.boundingBox);});return [b.min.x,b.min.y,b.min.z,b.max.x,b.max.y,b.max.z].map(function(v){return Math.round(v*1000)/1000;});}};
 })();
 """
 
@@ -390,7 +423,6 @@ def yan_pano(ie: dict, m: dict, ozet: dict, plan_uri: str | None) -> str:
     satir = [("Dış pano", len(dis), f"{len(tam)} tam (125,5 cm)" + (f" · {sum(kesik.values())} kesilmiş ({kesik_yazi})" if kesik else "")),
              ("İç pano", len(ic), f"{ic_tam} tam · {len(ic) - ic_tam} özel boy"),
              ("Pencere", ozet.get("pencere", ""), ""), ("Kapı", ozet.get("kapi", ""), ""),
-             ("Makas", ozet.get("cati", {}).get("makas", ""), "pano akslarında"),
              ("Duvar", f"{k['dis'] * 10:g} / {k['ic'] * 10:g}", "dış / iç, mm")]
     tablo = "".join(f"<tr><td>{html.escape(a)}</td><td>{html.escape(str(b))}</td><td>{html.escape(c)}</td></tr>" for a, b, c in satir)
     no = f"{ie['is_emri_no']} r{int(ie.get('revizyon', 1)):02d}"
@@ -399,17 +431,34 @@ def yan_pano(ie: dict, m: dict, ozet: dict, plan_uri: str | None) -> str:
             '<p class="not">Plana tıklayınca büyür. Plan ve model aynı İş Emri\'nden üretilir.</p></div>') if plan_uri else ""
     return (f'<div><h1>3+1 · {brut:.0f} m²</h1><div class="kucuk">{tr(x_cm / 100, 2)} × {tr(y_cm / 100, 2)} m · tek kat prefabrik · duvar yüksekliği {float(y.get("duvar_yuksekligi_cm", 250)):g} cm</div>'
             '<div class="durum">El çiziminden kurulan pano pano model. Taslaktır; üretim ve statik projesi değildir.</div>'
-            f'<table class="sayim"><tbody>{tablo}</tbody></table>'
+            + cati_bolumleri(m["catilar"]) +
+            f'<h2>Gövde</h2><table class="sayim"><tbody>{tablo}</tbody></table>'
             '<div class="gosterge" id="gosterge" hidden><span><i style="background:var(--standart)"></i>Tam pano 125,5</span><span><i style="background:var(--kesik)"></i>Kesilmiş pano</span><span><i style="background:var(--ic)"></i>İç pano</span></div>'
             f'<details><summary>Kaynak ve sınırlar</summary><p>Model {html.escape(no)} İş Emri\'nden üretilen IFC dosyasından gelir; her pano ayrı parçadır ve pafta kodunu taşır.</p>'
             '<p>Renkler ve malzeme görünümü sunum içindir. Çatı kaplama rengi bilinmediği için gri çizildi; duvar, doğrama ve çatı renkleri nihai ürün kararı değildir.</p>'
             '<p>Köşe ve H bağlantı ölçüleri, dar kalan son panolar ve makas yönü teyit bekliyor.</p></details></div>' + plan)
 
 
+def kart_html(catilar: list[dict]) -> str:
+    return "".join(f'<button class="kart" data-kod="{c["kod"]}" aria-pressed="false"><i class="res"></i><b>{c["kod"]} · {html.escape(c["ad"])}</b>'
+                   f'<span>{html.escape(c["alt"])}</span><i class="et {"k" if c["kurali"] else "o"}">{html.escape(c["durum"].split(" · ")[0])}</i></button>' for c in catilar)
+
+
+def cati_bolumleri(catilar: list[dict]) -> str:
+    out = []
+    for c in catilar:
+        satir = "".join(f"<tr><td>{html.escape(a)}</td><td></td><td>{html.escape(b)}</td></tr>" for a, b in c["olcu"])
+        out.append(f'<section class="cs" data-kod="{c["kod"]}" hidden><h2>Çatı · {c["kod"]} · {html.escape(c["ad"])}</h2>'
+                   f'<i class="et {"k" if c["kurali"] else "o"}">{html.escape(c["durum"])}</i><p class="kucuk">{html.escape(c["aciklama"])}</p>'
+                   f'<table class="sayim"><tbody>{satir}</tbody></table><p class="not">{html.escape(c["not"])}</p></section>')
+    return "".join(out)
+
+
 def sayfalar(m: dict, alt: str, yan: str, kisa_ad: str) -> tuple[str, str]:
     """(kendi başına açılan HTML, yayımlanacak sayfa parçası)."""
-    govde = GOVDE.replace("__ALT__", html.escape(alt)).replace("__YAN__", yan)
+    govde = GOVDE.replace("__ALT__", html.escape(alt)).replace("__YAN__", yan).replace("__KARTLAR__", kart_html(m["catilar"]))
     veri = {k: v for k, v in m.items() if k != "sayim"}
+    veri["catilar"] = [{"kod": c["kod"], "ad": c["ad"], "mahya": c.get("mahya", "x"), "el": c["el"]} for c in m["catilar"]]
     kod = KOD.replace("__MODEL__", json.dumps(veri, separators=(",", ":"), ensure_ascii=False).replace("</", "<\\/"))
     bas = f"<title>{html.escape(kisa_ad)}</title>\n<style>{STIL}</style>\n"
     three = (KOK / "motor" / "vendor" / "three.min.js").read_text(encoding="utf-8").replace("</script", "<\\/script")
@@ -431,7 +480,20 @@ def uret(is_emri_yolu: Path) -> dict:
     etiket = {s["ifc"]: {"kod": s["kod"], "sira": s["sira"], "duvar": s["duvar"], "boy_mm": s["boy"]} for s in md["satirlar"] if s["ifc"]}
     (hedef / "pano_etiketleri.json").write_text(json.dumps(etiket, ensure_ascii=False, indent=1), encoding="utf-8")
     m = model_json(ifc, etiket)
-    m["mahya"] = "x" if ie.get("cati", {}).get("makas_ekseni") == "y" else "z"     # mahyanın sayfadaki ekseni (three.js: x, z = −y)
+    # çatı seçenekleri: IFC'deki bugünkü çatı A; ötekiler kuraldan hesaplanır (cati_secenekleri.py). Gövde hepsinde aynıdır.
+    import cati_secenekleri
+    yp = ie["yapi"]; ct = ie.get("cati", {})
+    ana_mahya = "x" if ct.get("makas_ekseni") == "y" else "y"
+    ana = [e for e in m["el"] if e["g"] in ("cati", "alin", "makas")]
+    m["el"] = [e for e in m["el"] if e["g"] not in ("cati", "alin", "makas")]
+    for e in ana:
+        if e["g"] == "cati":
+            e["h"] = "x" if ana_mahya == "x" else "z"
+    m["catilar"] = cati_secenekleri.uret(float(yp["dis_olcu_cm"]["x"]), float(yp["dis_olcu_cm"]["y"]), float(yp.get("duvar_yuksekligi_cm", 250)),
+                                         float(yp.get("duvar_kalinligi_cm", {}).get("dis", 10)), float(ct.get("egim_yuzde", 33)) / 100.0,
+                                         float(ct.get("sacak_cm", 30)), float(ct.get("topuk_cm", 10)), ana, ana_mahya)
+    for c in m["catilar"]:
+        c["mahya"] = {"A": "x", "B": "z", "C": "x", "D": "x", "E": "x", "F": "z"}.get(c["kod"], "x")   # makasların dizildiği sayfa ekseni
     renk_adi = str(ie.get("pafta", {}).get("ozellikler", {}).get("Çatı Kaplama Rengi", "")).strip().lower()
     m["cati_rengi"] = CATI_RENGI.get(renk_adi, CATI_RENGI["gri"])
     ozet_yolu = hedef / "ifc_ozet.json"
@@ -447,6 +509,7 @@ def uret(is_emri_yolu: Path) -> dict:
     y1.write_text(tek, encoding="utf-8"); y2.write_text(parca, encoding="utf-8")
     from collections import Counter
     return {"html": str(y1), "yayin": str(y2), "bayt": [y1.stat().st_size, y2.stat().st_size], "parca": dict(Counter(e["g"] for e in m["el"])), "mahal": len(m["mahal"]),
+            "catilar": {c["kod"]: {"ad": c["ad"], "durum": c["durum"], "parca": dict(Counter(e["g"] for e in c["el"])), "olcu": dict(c["olcu"])} for c in m["catilar"]},
             "plan_gomulu": plan_uri is not None, "pano_sayimi": {"dis": sum(1 for s in m["sayim"] if s["dis"]), "ic": sum(1 for s in m["sayim"] if not s["dis"])},
             "etiketli_pano": sum(1 for e in m["el"] if e["g"] in ("dis_pano", "ic_pano") and e["b"].split(" · ")[0])}
 
