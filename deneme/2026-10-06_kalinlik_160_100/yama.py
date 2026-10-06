@@ -6,6 +6,9 @@ Her değişiklik kaynakta tam olarak beklenen sayıda bulunmak zorundadır; Moto
 yanlış yama uygulamaz. Alan verilmezse kalınlıklar 10 / 6 cm kalır ve çıktı canlı Motor'unkiyle aynıdır
 (`kos.py` bunu P6001 ile sınar).
 
+İkinci seçenek (6 Ekim 18:50): `yapi.dis_olcu_cm` verilirse akslar baştan 125,5 cm ilerler, yapının bitiş noktasında
+son aks kesilir; her duvar koşusunun son panosu özel ölçülü olur. Verandasız yapıda dış kapı `"__DIS__"` ile yazılır.
+
 Kalınlığa bağlanan yerler:
   geometry  aks başlangıcı (X, Y), dış ölçü (W, H), duvar yarı kalınlıkları, katman adları
   katalog   pano kodunun anahtarına kalınlık ve yükseklik; köşe ve üçlü H bağlantı ölçüleri
@@ -29,9 +32,24 @@ def _degistir(src: str, eski: str, yeni: str, adet: int = 1, ad: str = "") -> st
 
 def _geometry(s: str) -> str:
     ad = "geometry.py"
-    s = _degistir(s, "    return 10.0 + MOD * i\n", "    return T_DIS + MOD * i\n", ad=ad)
-    s = _degistir(s, "    return 5.0 + MOD * j\n", "    return T_DIS / 2.0 + MOD * j\n", ad=ad)
-    s = _degistir(s, "W, H = MOD * nx + 20.0, MOD * ny + 10.0", "W, H = MOD * nx + 2.0 * T_DIS, MOD * ny + T_DIS", ad=ad)
+    # Ölçüye kesim (Lokman, 6 Ekim 18:50): akslar baştan 125,5 cm ilerler; yapının bitiş noktasında son aks kesilir (X_SON, Y_SON).
+    s = _degistir(s, "    return 10.0 + MOD * i\n", "    v = T_DIS + MOD * i\n    return v if X_SON is None else min(v, X_SON)\n", ad=ad)
+    s = _degistir(s, "    return 5.0 + MOD * j\n", "    v = T_DIS / 2.0 + MOD * j\n    return v if Y_SON is None else min(v, Y_SON)\n", ad=ad)
+    s = _degistir(s, "W, H = MOD * nx + 20.0, MOD * ny + 10.0",
+                  "W, H = (MOD * nx + 2.0 * T_DIS, MOD * ny + T_DIS) if X_SON is None else (X_SON + T_DIS, Y_SON + T_DIS / 2.0)", ad=ad)
+    s = _degistir(s, '        raise IsEmriHatasi("Grid yarım pano adımında ve en az 2×2 olmalı")\n',
+                  '        raise IsEmriHatasi("Grid yarım pano adımında ve en az 2×2 olmalı")\n'
+                  '    olcu_ayarla(yapi.get("dis_olcu_cm"), nx, ny)\n', ad=ad)
+    s = _degistir(s, "                if n not in mahaller:\n                    raise IsEmriHatasi(f\"Açıklık için bilinmeyen mahal: {n}\")\n",
+                  "                if n not in mahaller and n != OUT:   # verandasız yapıda dış kapı doğrudan dışarı açılır\n"
+                  "                    raise IsEmriHatasi(f\"Açıklık için bilinmeyen mahal: {n}\")\n", ad=ad)
+    s = _degistir(s, "            cand = _edges_between(duvarlar, a, b)\n",
+                  "            cand = _edges_between(duvarlar, a, b)\n"
+                  "            if OUT in (a, b):   # dışarı açılan kapı: cephe İş Emri'nde yazılır (\"duvar\": on | arka | sol | sag)\n"
+                  "                if ac.get(\"duvar\") not in NORMAL:\n"
+                  "                    raise IsEmriHatasi(f\"Dışarı açılan kapıda cephe (duvar) yazılmalı: {ac}\")\n"
+                  "                cand = _edges_of_room_side(duvarlar, b if a == OUT else a, NORMAL[ac[\"duvar\"]])\n", ad=ad)
+    s = _degistir(s, 'OUT = "__DIS__"      # bina dışı\n', 'OUT = "__DIS__"      # bina dışı\nX_SON = Y_SON = None  # ölçüye kesimde son aksın yeri (cm); yoksa None\n', ad=ad)
     s = _degistir(s, '    yapi = is_emri["yapi"]\n    if yapi.get("sistem", "prefabrik") != "prefabrik":',
                   '    yapi = is_emri["yapi"]\n    _k = yapi.get("duvar_kalinligi_cm") or {}\n'
                   '    kalinlik_ayarla(float(_k.get("dis", 10.0)), float(_k.get("ic", 6.0)))\n'
@@ -46,6 +64,17 @@ def _geometry(s: str) -> str:
                   "    if dis_cm == ic_cm:\n"
                   '        raise IsEmriHatasi("Dış ve iç duvar aynı kalınlıkta: katman adları ayrışmıyor (deneme sınırı)")\n'
                   "    T_DIS, T_IC = float(dis_cm), float(ic_cm)\n\n\n"
+                  "def olcu_ayarla(dis_olcu, nx: float, ny: float) -> None:\n"
+                  '    """Deneme: dış ölçü verilirse (cm) son aks yapının bitişine çekilir; son pano özel ölçülü olur. Verilmezse akslar tam modüldür."""\n'
+                  "    global X_SON, Y_SON\n"
+                  "    X_SON = Y_SON = None\n"
+                  "    if not dis_olcu:\n"
+                  "        return\n"
+                  '    xs, ys = float(dis_olcu["x"]) - T_DIS, float(dis_olcu["y"]) - T_DIS / 2.0\n'
+                  '    for ad_, son, bas, n in (("x", xs, T_DIS, nx), ("y", ys, T_DIS / 2.0, ny)):\n'
+                  "        if not (bas + MOD * (n - 0.5) < son - 1e-9 and son <= bas + MOD * n + 1e-9):\n"
+                  '            raise IsEmriHatasi(f"Dış ölçü ile grid uyuşmuyor ({ad_}): son aks {son} cm, grid {n} pano; son yarım pano 0–62,75 cm aralığında olmalı")\n'
+                  "    X_SON, Y_SON = xs, ys\n\n\n"
                   "def _mm(cm: float) -> str:\n"
                   '    return f"{cm * 10:g}"\n\n\n'
                   "def katman(ad: str) -> str:\n"
@@ -114,6 +143,19 @@ def _dxf_out(s: str) -> str:
                   "    plan = G.kur(is_emri)\n    plan.uyarilar[:0] = list(is_emri.get(\"pafta_uyarilari\", []))\n    t0 = time.time()\n", ad=ad)
     s = _degistir(s, '"Pencereler pano ortasında. Pencere üstünden duvar üstüne (lento): 50 cm."',
                   'f"Pencereler pano ortasında. Pencere üstünden duvar üstüne (lento): {fmt(float(yapi.get(\'duvar_yuksekligi_cm\', 250)) - PENCERE_UST_KOTU)} cm."', ad=ad)
+    s = _degistir(s, "{fmt(float(yapi['grid']['x_pano']))} x {fmt(float(yapi['grid']['y_pano']))} PANO", "{_grid_yazi(yapi, ' x ', ' PANO')}", ad=ad)
+    s = _degistir(s, "{fmt(float(yapi['grid']['x_pano']))} × {fmt(float(yapi['grid']['y_pano']))} pano", "{_grid_yazi(yapi, ' × ', ' pano')}", ad=ad)
+    s = _degistir(s, "\n\nclass Cizici:\n",
+                  "\n\ndef _grid_yazi(yapi, ayrac, ek) -> str:\n"
+                  '    """Pano grid yazısı. Ölçüye kesimde: tam pano sayısı + kesilen son parçanın boyu."""\n'
+                  "    nx, ny = float(yapi['grid']['x_pano']), float(yapi['grid']['y_pano'])\n"
+                  "    if G.X_SON is None:\n"
+                  '        return f"{fmt(nx)}{ayrac}{fmt(ny)}{ek}"\n'
+                  "    def bir(boy):\n"
+                  "        tam = int((boy + 1e-9) // G.MOD); kalan = boy - tam * G.MOD\n"
+                  '        return f"{tam}{ek}" + (f" + {fmt(kalan)} cm" if kalan > 1e-6 else "")\n'
+                  '    return f"{bir(G.X(nx) - G.X(0))}{ayrac}{bir(G.Y(ny) - G.Y(0))}"\n'
+                  "\n\nclass Cizici:\n", ad=ad)
     s = _degistir(s, '("Dış duvar / iç duvar", "100 mm / 60 mm")', '("Dış duvar / iç duvar", f"{G._mm(G.T_DIS)} mm / {G._mm(G.T_IC)} mm")', ad=ad)
     s = _degistir(s, 'c.text(f"Duvar: 10 / 6 cm | ', 'c.text(f"Duvar: {fmt(G.T_DIS)} / {fmt(G.T_IC)} cm | ', ad=ad)
     # pafta yerleşimi: çatı yükseldikçe ve duvar uzadıkça alt sıra aşağı kayar (773 cm genişlik ve 250 cm duvarda kayma 0)

@@ -1,12 +1,12 @@
 {
   "is_emri_no": "PM-DENEME-3ARTI1-9x10",
   "revizyon": 1,
-  "generated_at": 1791301533,
-  "duration_s": 16.07,
+  "generated_at": 1791302255,
+  "duration_s": 17.09,
   "dxf": "Portman_PM-DENEME-3ARTI1-9x10_r01.dxf",
   "pdf": "Portman_PM-DENEME-3ARTI1-9x10_r01.pdf",
-  "dxf_sha256": "938756c4d75a24c61a69a677b078a2d7fe481e669e87f68e052ac28e61382ff5",
-  "pdf_sha256": "c576b3a1cdc4b14f611bb4b39d9082191a850819ebbd51554e5b20b6042d4bdf",
+  "dxf_sha256": "d21aa791a78c375e90c14c51b1ef182ab2e29eae7dbade1829ea7b07a7cb62f1",
+  "pdf_sha256": "0c701aeddebdcca971c65457f6f80b54d2025301399e5c2420db52a40ef7dd00",
   "tani_pdf": null,
   "pdf_skipped_reason": null,
   "validation_passed": true,
@@ -15,8 +15,8 @@
   ],
   "generator": "portman-motor-v1.1+deneme-kalinlik-2026-10-06",
   "generator_sha256": {
-    "geometry.py": "3aede5ba0f73f9cf26e949d26d3172a062a8686ebb36dfc209b1f64d6d7eee39",
-    "dxf_out.py": "6f35aeb302f6f2ee9de95cd382e9fb8e9476133d176ada5d90a1f3a6578e78e9",
+    "geometry.py": "295ad9d53a5cab821c3671f8f095fb66ad41f46b90e72898c2c7242d6055dc55",
+    "dxf_out.py": "a0ca7df085b2b2ad7fd8fd899a532e20bc1ff7e5c703e950ab1c118b495970d0",
     "validate.py": "54ac028d2475e3aa2d1a2fd30a2e44cd85ceb656d53800f4eef0fe92b0fe4a05",
     "katalog.py": "5f40a3e0c956728c4af41303fdede48cecae6ddd3370572e5ab50fee93c86a21"
   },

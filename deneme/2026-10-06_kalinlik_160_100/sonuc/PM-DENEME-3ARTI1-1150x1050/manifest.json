@@ -1,0 +1,46 @@
+{
+  "is_emri_no": "PM-DENEME-3ARTI1-1150x1050",
+  "revizyon": 1,
+  "generated_at": 1791302238,
+  "duration_s": 16.66,
+  "dxf": "Portman_PM-DENEME-3ARTI1-1150x1050_r01.dxf",
+  "pdf": "Portman_PM-DENEME-3ARTI1-1150x1050_r01.pdf",
+  "dxf_sha256": "7825b4904224bd23dc0608a06e6fec1c249e46f11321fd80a20807619b5588c4",
+  "pdf_sha256": "f96478a7a96b59839e85655ea165855e1855264d53c47d213063062c01ed3b49",
+  "tani_pdf": null,
+  "pdf_skipped_reason": null,
+  "validation_passed": true,
+  "warnings": [
+    "DENEME: dış 160 / iç 100 mm. Köşe (160×80, 100×50) ve üçlü H (100) bağlantı ölçüleri çıkarımdır; mühendis teyidi bekliyor.",
+    "Ölçüye kesim: dış ölçü 1150 × 1050 cm. Panolar soldan ve önden 125,5 cm ilerler; son parça sağda 114 cm, arkada 30 cm'ye kesilir."
+  ],
+  "generator": "portman-motor-v1.1+deneme-kalinlik-2026-10-06",
+  "generator_sha256": {
+    "geometry.py": "295ad9d53a5cab821c3671f8f095fb66ad41f46b90e72898c2c7242d6055dc55",
+    "dxf_out.py": "a0ca7df085b2b2ad7fd8fd899a532e20bc1ff7e5c703e950ab1c118b495970d0",
+    "validate.py": "54ac028d2475e3aa2d1a2fd30a2e44cd85ceb656d53800f4eef0fe92b0fe4a05",
+    "katalog.py": "5f40a3e0c956728c4af41303fdede48cecae6ddd3370572e5ab50fee93c86a21"
+  },
+  "reference_dxf_sha256": "22cc9304106725f555afc59223433b8383fbe3a19ba8ff4a3b40eb23b61fab66",
+  "pdf_generated_from_reopened_dxf": true,
+  "yeni_kodlar": [
+    "B05",
+    "D09",
+    "D10",
+    "D11",
+    "K03",
+    "D12",
+    "I12",
+    "I13",
+    "I14",
+    "I15",
+    "I16",
+    "I17",
+    "D13",
+    "D14",
+    "I18",
+    "I19",
+    "D15",
+    "B06"
+  ]
+}

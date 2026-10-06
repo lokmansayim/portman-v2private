@@ -75,6 +75,12 @@ def ciz(is_emri_yolu: Path) -> dict:
         x0, y0, x1, y1 = plan.mahaller[ad].poly.bounds
         print(f"  {ad:18s} {a:6.2f} m²   net {x1 - x0:7.2f} × {y1 - y0:7.2f} cm")
         kapali += 0.0 if ad == "VERANDA" else a
+    ozel = {}
+    for d in plan.duvarlar:
+        for pn in d.panolar:
+            if abs(pn.boy - G.MOD) > 1e-6:
+                k = (d.tur, round(pn.boy, 2)); ozel[k] = ozel.get(k, 0) + 1
+    print("  özel panolar:", ", ".join(f"{t} {b:g} cm × {n}" for (t, b), n in sorted(ozel.items())))
     print(f"  {'kapalı net toplam':18s} {kapali:6.2f} m²")
     print("  yeni malzeme kodları:", ", ".join(m["yeni_kodlar"]) or "yok")
     return {"manifest": m, "dogrulama": v, "hedef": hedef}
@@ -83,12 +89,15 @@ def ciz(is_emri_yolu: Path) -> dict:
 if __name__ == "__main__":
     ok = saglama()
     print("SAĞLAMA:", "GEÇTİ" if ok else "GEÇMEDİ")
-    s = ciz(BURASI / "is_emri_3arti1_9x10.json")
-    if "--sonuc" in sys.argv and ok and s["manifest"]["validation_passed"]:
-        son = BURASI / "sonuc"; son.mkdir(exist_ok=True)
-        for f in sorted(s["hedef"].iterdir()):
-            if f.name != "is_emri.json":
-                shutil.copy2(f, son / f.name)
-        shutil.copy2(CIKTI / "motor_k.diff", son / "motor_k.diff")
-        print("kanıtlar:", son)
-    sys.exit(0 if ok and s["manifest"]["validation_passed"] else 1)
+    for ad in ("is_emri_3arti1_1150x1050.json", "is_emri_3arti1_9x10.json"):
+        s = ciz(BURASI / ad)
+        ok &= bool(s["manifest"]["validation_passed"])
+        if "--sonuc" in sys.argv and ok:
+            son = BURASI / "sonuc" / s["manifest"]["is_emri_no"]; son.mkdir(parents=True, exist_ok=True)
+            for f in sorted(s["hedef"].iterdir()):
+                if f.name != "is_emri.json":
+                    shutil.copy2(f, son / f.name)
+            print("kanıtlar:", son)
+    if "--sonuc" in sys.argv and ok:
+        shutil.copy2(CIKTI / "motor_k.diff", BURASI / "sonuc" / "motor_k.diff")
+    sys.exit(0 if ok else 1)
