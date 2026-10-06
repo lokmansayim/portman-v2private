@@ -7,6 +7,7 @@ Deneme kodu; canlıda değil, Motor'un yerine geçmez. Canlı `motor/` değişme
 - 18:50 — dış ölçüler 10,50 × 11,50 m, veranda yok. Çizim kuralı: her pano 1255 mm; dizilim yapının bitiş noktasına geldiğinde son parça kesilir, özel ölçülü olur.
 - 18:58 — Ç8201'deki gibi görünüşler; Blender / IFC çizimlerindeki gibi pano pano.
 - 19:11 — Astra dönemindeki yükleme listesi (Mac'te `AI Çizim Dosyaları`) örnek alınarak, daha iyisi olacak şekilde BOM listesi.
+- 19:46 — geri bildirim: plan paftası bundan sonra ekteki "Örnek Şablon"un aynısı olacak; görünüşler her seferinde üretilecek; pano pano çizim kural. IFC Blender'da açılmadı; HTML'de fareyle çevirme ve çatı kaldırma çalışmadı. Kurallar: `docs/sartname/plan_paftasi_sablonu.md`.
 
 | Dosya | İçerik |
 |---|---|
@@ -14,9 +15,11 @@ Deneme kodu; canlıda değil, Motor'un yerine geçmez. Canlı `motor/` değişme
 | `is_emri_3arti1_1150x1050.json` | Geçerli İş Emri: dış ölçü 1150 × 1050 cm, verandasız; varsayımlar dosyanın içinde |
 | `is_emri_3arti1_9x10.json` | İlk deneme (18:28): tam panoya yuvarlanmış, verandalı 9 × 10 pano. 18:50 isteğiyle geçersiz; kalınlık seçeneğinin ikinci örneği olarak koşuyor |
 | `kos.py` | Sağlama (yeni alanlar yokken deneme kopyası = canlı Motor) ve iki çizim |
+| `sablon_pafta.py` | Plan paftası, "Örnek Şablon" düzeninde (A4 yatay): plan, sol yan ve ön görünüş, bina özellikleri, özel istekler, antet. Yazı tipleri `font/` altında |
 | `gorunus.py` | Dört görünüş paftası: her dış pano ayrı dikdörtgen, cephedeki sıra koduyla (Ö1…, A1…, SL1…, SĞ1…); kesilmiş panolar mor |
 | `ifc_3b.py` | Pano pano IFC4 modeli (her pano bir IfcWall) ve tek dosyalık 3D sayfası; dosyayı yeniden açıp plan, Motor BOM'u ve görünüş paftasıyla karşılaştırır |
-| `ifc_gorsel.py` | IFC'den Blender (bpy, Cycles) görselleri; pano hacmini modeldeki metrajla karşılaştırır. Ayrı sanal ortam ister (Python 3.13, `pip install bpy ifcopenshell`) |
+| `sayfa_3b.py` | IFC'den 3D sayfası (tek dosya, three.js gömülü): fareyle ya da parmakla çevirme, tekerlekle yakınlaştırma, ekranda görünüş düğmeleri; çatı, makas ve iç duvar aç / kapa; panoya tıklayınca pafta kodu ve ölçüsü. Yayın için kısa kopyasını da yazar |
+| `ifc_gorsel.py` | IFC'den Blender (bpy, Cycles) görselleri; pano hacmini modeldeki metrajla karşılaştırır. `--blend` ile Blender'da doğrudan açılan `.blend` ve `.glb` dosyalarını yazar, dosyayı yeniden açıp denetler. Ayrı sanal ortam ister (Python 3.13, `pip install bpy ifcopenshell`) |
 | `yukleme_listesi.py` | Yükleme listesi (Excel): Sayım, YÜKLEME, Metraj ve Açık konular sayfaları; bütün adetler formül |
 | `hepsini_kos.sh` | Hepsini sırayla koşar, kanıtları `sonuc/` altına kopyalar |
 | `sonuc/<iş emri no>/` | Son koşunun kanıtları: PDF, DXF, önizleme, BOM, doğrulama. `sonuc/motor_k.diff` Motor'a göre fark |
@@ -30,12 +33,17 @@ Deneme kodu; canlıda değil, Motor'un yerine geçmez. Canlı `motor/` değişme
 | `yapi.dis_olcu_cm` `{x, y}` | Dış ölçü; son aks yapının bitişine çekilir, son pano kesilir | Tam modül |
 | dış kapıda `arasi: ["__DIS__", mahal]` ve `duvar` | Verandasız yapıda doğrudan dışarı açılan kapı ve cephesi | — |
 | `pafta_uyarilari` | Paftanın altına yazılan uyarılar | Yok |
+| `pafta` | Şablon paftasının antet ve tablo bilgileri, özel istekler, mahal adı karşılıkları, etiket yerleri | Bilinmeyen "..." |
+| `tefris` | Şematik tefriş (tezgah, eviye, ocak, klozet, lavabo, duş); ölçü taşımaz | Yok |
 
 ## Çalıştırma
 
 ```
 python deneme/2026-10-06_kalinlik_160_100/kos.py --sonuc
+bash deneme/2026-10-06_kalinlik_160_100/hepsini_kos.sh [python] [bpy'li python]
 ```
+
+`kos.py`, `cikti/<iş emri no>/` klasörünü baştan yazar; öteki çıktılar ondan sonra üretilmelidir (`hepsini_kos.sh` sırayı tutar).
 
 ## Sonuç · plan (6 Ekim 2026 18:57)
 
@@ -70,6 +78,15 @@ El çiziminde duvarlar 25 / 15 cm; burada 16 / 10 cm olduğu için iç net ölç
 | Yalnız çizilmiş bloklar: pano, doğrama, köşe, üçlü H, veranda profili | Bunlara ek: pano eki H'ları, alt çerçeve, kör kasa, makas, çatı kaplaması, mahya, saçak ve alın sacı, aşık, şilte, tavan alçıpanı, dere |
 | Sayım satırı: blok adı ve merkez koordinatı | Sayım satırı: cephe, pafta kodu (Ö1…), boy, kalınlık, yükseklik, açıklık, IFC adı |
 | Çatı, profil ve tavan "çizimde tanımlı değil" diye dışarıda | Kuralı bilinenler formülle içeride; her kuralın dayanağı ve P6001 sağlaması Metraj sayfasında; kuralı bilinmeyenler Açık konular sayfasında |
+
+## Sonuç · şablon paftası, 3D sayfası ve Blender dosyası (6 Ekim 2026 20:15)
+
+- Plan paftası şablonun çerçeveleriyle çizildi (A4 yatay, 842 × 595 pt; ölçüler şablon PDF'inden okundu). Ölçek 0,238 pt/cm (yaklaşık 1:119); şablonda 0,2975 (yaklaşık 1:95). Zincirler: arka 518 + 314 + 318, ön 518 + 439 + 193, sağ 322 + 314 + 414; her biri dış ölçüye eşit (1150, 1050). Mahal alanları tam sayı m².
+- Ön görünüş bu paftada doğru yönde: saçak önde, kalkan sol yanda (makaslar 10,50 m'lik kenarı geçiyor). Motor'un eski plan paftasındaki çelişki bu paftada yok.
+- Şablon PDF'i kişi adı ve gerçek proje kodu taşıdığı için depoya alınmadı. Antette Çizen "Portman", Kontrol ve Onay "...".
+- 3D sayfası yeniden yazıldı. Eski sayfada çatı örtüsü "çatı" listesinde olmadığı için düğme onu gizlemiyordu. Tarayıcı sınaması (Chromium; masaüstü 1280 × 800 ve telefon 400 × 760): sürükleyince döndü, tekerlekle yakınlaştı, çatı düğmesi dört parçayı gizledi, makaslar gizlendi, yedi oda adı göründü, panoya tıklayınca kodu ve ölçüsü geldi, konsolda hata yok.
+- Blender, IFC'yi Bonsai eklentisi olmadan açmaz. `.blend` dosyası Blender 5.2.2 ile yazıldı, yeniden açılıp denetlendi: 66 pano, hepsi pafta kodlu, kutu 11,50 × 10,50 × 2,80 m; on katman (çatıyı kaldırmak için 05 ve 06 kapatılır).
+- Lokman'ın ortamında eski sayfada çevirmenin neden çalışmadığı bilinmiyor; Chromium'da çalışıyordu. Astra'nın sayfası görülmedi.
 
 ## Çıkarımlar (teyit edilene kadar kural değil)
 
