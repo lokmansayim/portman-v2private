@@ -32,6 +32,7 @@ D_BASLIK = PatternFill("solid", fgColor="2F3B4C"); D_GRUP = PatternFill("solid",
 D_LISTE = PatternFill("solid", fgColor="FFF2CC"); D_CIKARIM = PatternFill("solid", fgColor="FCE4D6"); D_TOPLAM = PatternFill("solid", fgColor="D9E1F2")
 INCE = Side(style="thin", color="BFBFBF"); KENAR = Border(left=INCE, right=INCE, top=INCE, bottom=INCE)
 ORTA = Alignment(horizontal="center", vertical="center"); SOL = Alignment(horizontal="left", vertical="center", wrap_text=True)
+DUZ = Alignment(horizontal="left", vertical="center")   # başlık ve not satırları: sarmadan, yandaki boş hücrelere taşar
 
 # P6001'in gerçek yükleme listesindeki adetler ve Motor'un P6001 planından ölçülenler (21 Eylül analizi; 6 Ekim'de yeniden ölçüldü)
 P6001 = {"x": 773, "y": 763, "aciklik": 773, "bina_boyu": 763, "dis_pano": 25, "dis_kosu": 6, "ic_pano": 11, "ic_kosu": 4, "uclu_h": 2,
@@ -112,7 +113,7 @@ def model(ie: dict) -> dict:
 def _yaz(ws, r, c, v, font=YAZI, fill=None, hiza=None, fmt=None, kenar=True):
     h = ws.cell(row=r, column=c, value=v); h.font = font
     if fill is not None: h.fill = fill
-    h.alignment = hiza or (SOL if isinstance(v, str) and not str(v).startswith("=") else ORTA)
+    h.alignment = hiza or (DUZ if not kenar else (SOL if isinstance(v, str) and not str(v).startswith("=") else ORTA))
     if fmt: h.number_format = fmt
     if kenar: h.border = KENAR
     return h
@@ -156,7 +157,7 @@ def kitap(ie: dict, m: dict) -> tuple[Workbook, dict]:
     def grup(ad):
         nonlocal r
         for j in range(1, 7):
-            _yaz(wm, r, j, ad if j == 1 else None, KALIN, D_GRUP)
+            _yaz(wm, r, j, ad if j == 1 else None, KALIN, D_GRUP, DUZ)
         r += 1
 
     def girdi(anahtar, ad, b, c_, kaynak, fmt=None, formul_b=False):
@@ -256,7 +257,7 @@ def kitap(ie: dict, m: dict) -> tuple[Workbook, dict]:
     def ygrup(ad):
         nonlocal r
         for j in range(1, 9):
-            _yaz(wy, r, j, ad if j == 1 else None, KALIN, D_GRUP)
+            _yaz(wy, r, j, ad if j == 1 else None, KALIN, D_GRUP, DUZ)
         r += 1
 
     def ysatir(kod, malzeme, olcu, adet, birim, dayanak, aciklama, tur=None):
@@ -313,7 +314,7 @@ def kitap(ie: dict, m: dict) -> tuple[Workbook, dict]:
     ysatir("—", f"Alt çerçeve, iç duvar ({m['t_ic'] * 10:g}'lük)", "L 3750", M("alt_ic"), "adet", "Liste kuralı", "İç duvar boyu ÷ 3,75 m. P6001 gerçek listesinde tutuyor (3).")
     ygrup("Çatı (beşik, %33; makaslar kısa kenarı geçer)")
     ysatir("—", "Baş makas", f"açıklık {g['aciklik'] * 10:g}", M("makas_bas"), "adet", "Liste kuralı", "Kalkan duvarların üstünde. Makas boyu ve kesiti mühendisten.")
-    ysatir("—", "Orta makas", f"açıklık {g['aciklik'] * 10:g}", M("makas_orta"), "adet", "Liste kuralı", "Pano akslarında; son aralık 114 cm. P6001 gerçek listesinde tutuyor (5).")
+    ysatir("—", "Orta makas", f"açıklık {g['aciklik'] * 10:g}", M("makas_orta"), "adet", "Liste kuralı", "Pano akslarında (kesilen panoda aralık kısalır). P6001 gerçek listesinde tutuyor (5).")
     ysatir("—", "Çatı kaplaması, tek kat panel", f'=CONCATENATE("L ",ROUNDUP(Metraj!B{A["kaplama_boy"]}*100,0)*10)', M("kaplama"), "adet", "Kural", "Kapatma 100 cm (Lokman, 4 Ekim); boy eğimli boy + 5 cm taşma. Her yüzde mahya boyu ÷ kapatma genişliği.")
     ysatir("—", "Mahya", "L 2800", M("mahya"), "adet", "Kural", "30 cm bindirme (Lokman, 3 Ekim). P6001 gerçek listesinde bu kural 4 verir, liste 3: bindirme teyit edilmeli.")
     ysatir("—", "Saçak sacı", "L 2800", M("sacak_saci"), "adet", "Kural", "İki saçak kenarı, 30 cm bindirme. P6001 gerçek listesinde tutuyor (7).")
@@ -333,7 +334,7 @@ def kitap(ie: dict, m: dict) -> tuple[Workbook, dict]:
     r += 1
     for j in range(1, 9):
         _yaz(wy, r, j, None, KALIN, D_TOPLAM)
-    _yaz(wy, r, 1, "TOPLAM DUVAR PANOSU", KALIN, D_TOPLAM)
+    _yaz(wy, r, 1, "TOPLAM DUVAR PANOSU", KALIN, D_TOPLAM, DUZ)
     toplam_r = r
     _yaz(wy, r, 5, "=" + "+".join(adet_hucreleri["Dış pano"] + adet_hucreleri["İç pano"]), KALIN, D_TOPLAM, ORTA, "0")
     _yaz(wy, r, 6, "adet", KALIN, D_TOPLAM, ORTA)
@@ -379,6 +380,9 @@ def kitap(ie: dict, m: dict) -> tuple[Workbook, dict]:
     for j, w in enumerate([5, 42, 62, 52, 58], 1):
         wa.column_dimensions[get_column_letter(j)].width = w
     wa.freeze_panes = "A4"
+    for w_ in (wy, ws, wm, wa):      # yazdırma: yatay, sayfa genişliğine sığdır
+        w_.page_setup.orientation = "landscape"; w_.page_setup.fitToWidth = 1; w_.page_setup.fitToHeight = 0
+        w_.sheet_properties.pageSetUpPr.fitToPage = True
     return wb, {"metraj_satir": A, "yukleme_toplam_satir": toplam_r, "sayim_ilk": r0, "sayim_son": r1}
 
 
