@@ -51,6 +51,8 @@ import math
 import sys
 from pathlib import Path
 
+import kural
+
 from cati_acilim import BASLANGIC_ADI, kapatma_genisligi, kural_dizilimi
 
 BURADA = Path(__file__).resolve().parent
@@ -96,6 +98,13 @@ def inis_sayisi(c: dict, k: dict) -> tuple[int | None, str]:
     if "cephe_kenarlari_m" not in c:
         return None, "cephe ölçüleri girdide yok"
     kose = c.get("kose_adedi", 4)
+    if kr.get("olcu") == "dere":
+        # Lokman, 7 Ekim 2026 07:45: "her saçak köşesine ve çok uzun dere boylarında ortaya 1 tane daha". Eşik dere hattının boyuyla ölçülür
+        # (kuraldaki değer öneridir; dört paftaya ve 82 m² örneğine uyar): boyu eşiği geçen her hattın ortasına bir iniş, hat başına en çok bir.
+        dere_hatlari = (c.get("dere") or {}).get("hatlar_m")      # boş liste: dere hattı yok (saçak kenarlarına dönülmez)
+        hatlar = c["sacak_kenarlari_m"] if dere_hatlari is None else dere_hatlari
+        orta = sum(min(kr["cephe_basina_en_cok_orta"], 1) for x in hatlar if x > kr["orta_inis_esigi_m"] + 1e-9)
+        return kose * kr["kose_basina"] + orta, f"{kose} köşe + {orta} orta (boyu {tr(kr['orta_inis_esigi_m'], 0)} m'yi geçen dere hatları)"
     orta = sum(min(kr["cephe_basina_en_cok_orta"], 1) for x in c.get("cephe_kenarlari_m", []) if x >= kr["orta_inis_esigi_m"] - 1e-9)
     return kose * kr["kose_basina"] + orta, f"{kose} köşe + {orta} orta ({tr(kr['orta_inis_esigi_m'], 0)} m ve üzeri cepheler)"
 
@@ -178,11 +187,17 @@ def _hesapla(g: dict, k: dict) -> dict:
     def adet_of(kalem):
         return next((s["adet"] or 0 for s in S if s["kalem"] == kalem), 0)
 
+    def kural_degeri(ad: str):
+        """Kural dosyasında bu anahtar varsa değeri, yoksa None. Yeni anahtarlar eski kural setlerinde yoktur: o zaman eski davranış sürer."""
+        return (k.get(ad) or {}).get("deger")
+
     c = g["cati"]
+    # Çelikte çatı yöntemi kesinleştiyse (Lokman, 7 Ekim 2026 07:45: hangi çatı tipi olursa olsun çatı ve tavan paneli) yöntem B yalnız prefabrik içindir
+    celik_yontemi = kural_degeri("celik_cati_yontemi")
     # Eylül 2026 şablonunun, bugünkü kurallardan farklı formülleri (yalnız girdide `sablon: "2026"` varsa; varsayılan değil)
     sb = deg(k, "sablon_2026") if g.get("sablon") == "2026" else {}
     sbv = sb.get("vida") or {}
-    yontem = c.get("yontem", "omega_asik")
+    yontem = c.get("yontem") or celik_yontemi or "omega_asik"     # girdide yazmıyorsa: çelik standardı kuralda yazıyorsa o, yoksa eski varsayılan
     kaplama = c.get("kaplama") or c.get("ortu")
     kirma = c["tip"] == "kirma"
     m2 = g["bina_m2"]
@@ -321,11 +336,14 @@ def _hesapla(g: dict, k: dict) -> dict:
         ekle("Dış cephe kaplama", "Dış duvar OSB 9 mm", "1220 × 2440", tavan(dis_net * (1 + zdo) / deg(k, "levha_m2", "osb")), dis_net,
              formul=f"Boardex ile aynı alan (× {tr(1 + zdo)}) ÷ 2,98; üst paket", durum="excel")
     # Eylül 2026 şablonu: veranda tavanı Boardex (Lokman'ın kuralında yeşil alçıpan)
-    veranda_boardex = (g.get("veranda_m2") or {}).get("brut") if sb.get("veranda_tavani") == "boardex" else None
+    # Kural (Lokman, 7 Ekim 2026 07:45): çelik konstrüksiyon binalarda veranda tavanı her zaman Boardex; prefabrikte yeşil alçıpan.
+    vt_kural = (kural_degeri("veranda_tavani") or {}).get("celik") == "boardex"
+    veranda_boardex = (g.get("veranda_m2") or {}).get("brut") if (sb.get("veranda_tavani") == "boardex" or vt_kural) else None
+    vt_notu = (k.get("veranda_tavani") or {}).get("satir_notu") or "çelik konstrüksiyon binalarda veranda tavanı Boardex (Lokman, 7 Ekim 07:45)"
     if veranda_boardex:
         ekle("Dış cephe kaplama", "Veranda tavanı (Boardex)", boardex_boyut, tavan(veranda_boardex * (1 + zb) / deg(k, "levha_m2", "boardex")), veranda_boardex,
-             formul=f"veranda tavanı (dış ölçüyle) × {zb_carpan} ÷ 2,88", durum=SABLON,
-             not_="Eylül 2026 şablonu: veranda tavanı Boardex. Bugünkü kuralda yeşil alçıpan (Lokman)")
+             formul=f"veranda tavanı (dış ölçüyle) × {zb_carpan} ÷ 2,88", durum=k["veranda_tavani"]["durum"] if vt_kural else SABLON,
+             not_=vt_notu if vt_kural else "Eylül 2026 şablonu: veranda tavanı Boardex. Bugünkü kuralda yeşil alçıpan (Lokman)")
     if d.get("nem_bariyeri_m2"):   # yalnız duvarlar; bina ve ek yapı ayrı (kör test projesinin gerçek listesi)
         nk = deg(k, "nem_bariyeri_dis_cephe")
         for x in d["nem_bariyeri_m2"]:
@@ -367,6 +385,9 @@ def _hesapla(g: dict, k: dict) -> dict:
     for tur, ad in (("beyaz", "beyaz"), ("yesil", "yeşil")):
         a = g["tavan_m2"].get(tur)
         if a and tur == "yesil" and veranda_boardex:      # şablonda veranda tavanı Boardex: yeşil alçıpandan düşülür
+            if veranda_boardex > a + 1e-9:
+                raise SystemExit(f"Girdide yeşil tavan alanı ({tr(a, 2)} m²) veranda tavanından ({tr(veranda_boardex, 2)} m²) küçük: `tavan_m2.yesil` ıslak hacimlerle "
+                                 "birlikte veranda tavanını (brüt) içermeli; girdi düzeltilmeli.")
             a = round(a - veranda_boardex, 2)
         if a and kiris_m2[tur]:
             a = round(a + kiris_m2[tur], 2)
@@ -375,8 +396,12 @@ def _hesapla(g: dict, k: dict) -> dict:
                  tavan(a * (1 + deg(k, "zayiat", "tavan_alcipan")) / deg(k, "levha_m2", "alcipan")), a,
                  formul="tavan alanı × 1,05 ÷ 3,0" + ("; yeşil = ıslak hacim + veranda tavanı" if tur == "yesil" and not veranda_boardex else "")
                         + ("; yeşil = ıslak hacim" if tur == "yesil" and veranda_boardex else "") + ("; kiriş kaplaması dahil" if kiris_m2[tur] else ""),
-                 durum=SABLON if tur == "yesil" and veranda_boardex else ("lokman" if tur == "yesil" else "motor"),
-                 not_=f"odanın içinden geçen kirişin kaplaması ({tr(kiris_m2[tur])} m²) tavanda sayıldı (gerçek listedeki gibi)" if kiris_m2[tur] else None)
+                 durum=SABLON if tur == "yesil" and veranda_boardex and not vt_kural else ("lokman" if tur == "yesil" else "motor"),
+                 not_=". ".join(x for x in (
+                     f"odanın içinden geçen kirişin kaplaması ({tr(kiris_m2[tur])} m²) tavanda sayıldı (gerçek listedeki gibi)" if kiris_m2[tur] else None,
+                     # kural veranda tavanını Boardex'e ayırıyor ama girdi veranda tavanını ayrı vermiyor: satırda yazsın (sessizce yeşilde kalmasın)
+                     "veranda tavanı girdide ayrı yazmıyor: varsa yeşil alçıpanın içinde kaldı (çelikte Boardex olmalı: Lokman, 7 Ekim 07:45)"
+                     if tur == "yesil" and vt_kural and not veranda_boardex else None) if x) or None)
     for x in g.get("tavan_m2_ek") or []:                  # ek yapının tavanı ayrı satır
         ad = {"beyaz": "beyaz", "yesil": "yeşil"}[x["tur"]]
         ek_alan = x["alan_m2"] + ek_kiris.get((x["yapi"], x["tur"]), 0.0)
@@ -430,9 +455,11 @@ def _hesapla(g: dict, k: dict) -> dict:
         yal_brut = kat_sayisi * g["yalitim"]["dis_brut_m2"] + g["yalitim"]["ic_brut_m2"]
         yal_net = yal_brut - g["yalitim"]["bosluk_m2"]
     yz = sb.get("yalitim_zayiat", 0.0)                    # Eylül 2026 şablonunda × 1,05; bugünkü kuralda zayiat yok
-    ekle("İç cephe kaplama", "Duvar izolasyonu", "paket 8,64 m²", tavan(yal_net * (1 + yz) / deg(k, "yalitim_paket_m2")), yal_net, yal_brut,
-         formul="dış duvar × kat sayısı (80 mm karkasta 1, 140 mm'de 2) + iç duvar − boşluklar; " + (f"× {tr(1 + yz)} " if yz else "") + "÷ 8,64",
-         durum=SABLON if yz else "uydurma", not_=f"dış duvar {kat_sayisi} kat")
+    # Kural (Lokman, 7 Ekim 2026 07:45): duvar izolasyonu gönderilmiyor; listede yok. Şablon katmanında (o listenin uygulaması) satır durur.
+    if (kural_degeri("duvar_izolasyonu") or {}).get("listede", True) or yz:
+        ekle("İç cephe kaplama", "Duvar izolasyonu", "paket 8,64 m²", tavan(yal_net * (1 + yz) / deg(k, "yalitim_paket_m2")), yal_net, yal_brut,
+             formul="dış duvar × kat sayısı (80 mm karkasta 1, 140 mm'de 2) + iç duvar − boşluklar; " + (f"× {tr(1 + yz)} " if yz else "") + "÷ 8,64",
+             durum=SABLON if yz else "uydurma", not_=f"dış duvar {kat_sayisi} kat")
 
     # ── Çatı kaplaması (seçenek) ────────────────────────────────────────────
     sacak = c["sacak_boyu_toplam_m"]
@@ -473,7 +500,13 @@ def _hesapla(g: dict, k: dict) -> dict:
         if d["tasma_m"] + 1e-9 < d["tasma_kural_m"]:
             n += f" (kural {tr(d['tasma_kural_m'] * 100, 0)} cm; listedeki panel boyu o kadarına yetiyor)"
         n += f"; kesim payı {tr(d['kesim_payi_m'] * 1000, 0)} mm; yedek panel yok: kesim planı montajcıya verilir (Lokman, 4 Ekim 15:18)"
-        if d["uzatma"]:            # panel boyu kuralla uzatıldı (Lokman, 4 Ekim 16:18): adet düşüyorsa en çok 3 cm
+        if d["uzatma"] and d["uzatma"].get("neden") == "pay":      # adet aynı; taban boyda pay inceydi (kuralda `taban_icin_de`; 7 Ekim 2026)
+            u = d["uzatma"]
+            n += (f". Panel boyu {tr((d['boy_m'] - d['taban_boy_m']) * 100, 0)} cm uzatıldı (pay kalsın diye; 4 Ekim 16:18 kuralındaki pay koşulu taban boya da uygulandı, teyit bekliyor): "
+                  f"L {u['taban_boy_mm']} ile de {u['taban_adet']} çıkıyor ama pay ince, kesim payı {tr(u['taban_pay_siniri_mm'], 1)} mm'yi geçerse {u['taban_saglamlik_adet']} gerekir; "
+                  f"L {u['boy_mm']} ile kesim payı 1 cm olsa " + (f"da {u['adet']}. " if u["saglamlik_adet"] == u["adet"] else f"{u['saglamlik_adet']}. ")
+                  + f"Tam boy giden {d['tam_boy_adedi']} panelde fazlalık mahya ucunda kalır; taşma {tr(d['tasma_m'] * 100, 1).replace(',0', '')} cm")
+        elif d["uzatma"]:          # panel boyu kuralla uzatıldı (Lokman, 4 Ekim 16:18): adet düşüyorsa en çok 3 cm
             u = d["uzatma"]
             n += (f". Panel boyu {tr((d['boy_m'] - d['taban_boy_m']) * 100, 0)} cm uzatıldı (Lokman, 4 Ekim 16:18: adet düşüyorsa en çok 3 cm): "
                   f"L {u['taban_boy_mm']} ile {u['taban_adet']} gerekiyordu, L {u['boy_mm']} ile {u['adet']} yetiyor. "
@@ -496,7 +529,10 @@ def _hesapla(g: dict, k: dict) -> dict:
         return dz.get("panel_boyu_m") or c["panel_boyu_m"]
 
     def boy_formulu() -> str:
-        return "; panel boyu = eğimli boy + taşma" + (f" + {tr((dz['panel_boyu_m'] - dz['taban_boy_m']) * 100, 0)} cm (adet düşüyor)" if dz.get("uzatma") else "")
+        yv_mm = kural_degeri("panel_boyu_yuvarlama_mm")    # Lokman, 7 Ekim 2026 07:45: panel boyu yukarı yuvarlanır
+        return ("; panel boyu = eğimli boy + taşma" + (f", {yv_mm} mm'ye yukarı" if yv_mm and c.get("panel_boyu_kaynak") == "kural" else "")
+                + (f" + {tr((dz['panel_boyu_m'] - dz['taban_boy_m']) * 100, 0)} cm ({'pay kalsın diye' if dz['uzatma'].get('neden') == 'pay' else 'adet düşüyor'})"
+                   if dz.get("uzatma") else ""))
 
     def kaplama_adedi(kapatma: float, parca: str):
         """Panel ya da sac adedi: kırma çatıda açılım dizilimi; çatı planı yoksa yüzey + %10. Dönen: (adet, formül, durum, not)."""
@@ -521,7 +557,13 @@ def _hesapla(g: dict, k: dict) -> dict:
                      durum="varsayim" if len(dg["satirlar"]) > 1 else k["kirma_cati_dizilim"]["durum"],
                      not_=(f"toplam {dg['adet']} panel ({tr(dg['panel_m2'], 1)} m²; çatı yüzeyi {tr(c['yuzey_m2'], 1)} m²): {dg['tam_boy']} şerit tam boy, {dg['karma']} köşesi kesilen, "
                            f"{dg['cift']} çift ve {dg['tek']} tek kesik parça. Kırma çatı kuralının (Lokman, 4 Ekim 01:42 ve 15:18) çok düzlemli çatıya genellemesi: "
-                           f"saçaktan {tr(dg['tasma_cm'], 0)} cm taşma, kesim payı {tr(dg['kesim_payi_mm'], 0)} mm, yedek panel yok; teyit bekliyor") if i == 0 else None)
+                           f"saçaktan {tr(dg['tasma_cm'], 0)} cm taşma, kesim payı {tr(dg['kesim_payi_mm'], 0)} mm, yedek panel yok; teyit bekliyor"
+                           # panel boyu uzatma kuralının uyguladığı değişiklik (yalnız nedeni yazılı girdide: `taban_icin_de` kuralı, 7 Ekim 2026)
+                           + "".join(f". Panel boyu L {round(u['taban_boy_cm'] * 10)} → L {round(u['boy_cm'] * 10)} ("
+                                     + (f"pay kalsın diye: adet aynı ({u['adet']}); kısa boyla kesim payı 1 cm olsa {u['taban_saglamlik_adet']} gerekirdi"
+                                        + (f", bu boyla {u['saglamlik_adet']}" if u.get("saglamlik_adet", u["adet"]) != u["adet"] else "") + "; teyit bekliyor"
+                                        if u["neden"] == "pay" else f"adet {u['taban_adet']} → {u['adet']}; Lokman, 4 Ekim 16:18") + ")"
+                                     for u in dg.get("uzatma") or [] if "neden" in u)) if i == 0 else None)
         elif c.get("yuzey_m2") and c.get("panel_boyu_m"):
             n_, f_, d_, not__ = kaplama_adedi(kap, "panel")
             ekle("Çatı kaplamaları", ad, f"L {round(panel_boyu() * 1000)} · {round(kap * 100)} cm kapatır", n_, c["yuzey_m2"],
@@ -530,11 +572,20 @@ def _hesapla(g: dict, k: dict) -> dict:
         # Sac panel kapaması (2025 listelerinden). Tek kat panelde listeden çıktı (Lokman, 4 Ekim 2026 16:18: damlalıkla aynı gerekçe);
         # sandviç panelde şimdilik kalıyor (Lokman, 4 Ekim 2026 17:46). Girdide `cati.panel_kapamasi` yazıyorsa o: kapaması olan gerçek liste örnekleri öyle hesaplanır.
         if c.get("panel_kapamasi", deg(k, "panel_kapamasi")[kaplama]):
-            sk_ = sb.get("sandvic_kapama") if sandvic else None
-            if sk_:     # Eylül 2026 şablonu: L 2800, bütün saçakların toplamı ÷ (2,8 − 0,20)
+            sk_k = kural_degeri("sandvic_kapama") if sandvic else None      # Lokman, 7 Ekim 2026 07:45: kapama dere boyunca gider
+            sk_ = sb.get("sandvic_kapama") if sandvic else None       # Eylül 2026 şablonu (yalnız `--sablon 2026`)
+            if sk_k and not sk_:    # kural: boy = saçak kenarlarının toplamı (dere boyu; çatı panelli ek yapının saçağı dahil); adet = boy ÷ (parça boyu − bindirme)
+                ekle("Çatı kaplamaları", f"{ad} kapaması", f"L {round(sk_k['parca_boyu_m'] * 1000)}", tavan(sacak / (sk_k["parca_boyu_m"] - sk_k["bindirme_m"])), sacak, birim="m",
+                     formul=(f"saçak boyu toplamı (dere hatları {tr((c.get('dere') or {})['boy_m'])} m + deresiz saçak {tr(sacak - (c.get('dere') or {})['boy_m'])} m)"
+                             if (c.get("dere") or {}).get("boy_m") and sacak - c["dere"]["boy_m"] > 0.005 else "saçak (dere) boyu toplamı")
+                            + f" ÷ ({tr(sk_k['parca_boyu_m'], 1)} − {tr(sk_k['bindirme_m'])} bindirme)", durum=k["sandvic_kapama"]["durum"],
+                     not_=k["sandvic_kapama"].get("satir_notu"))
+            elif sk_:   # Eylül 2026 şablonu: L 2800, bütün saçakların toplamı ÷ (2,8 − 0,20)
                 ekle("Çatı kaplamaları", f"{ad} kapaması", f"L {round(sk_['parca_boyu_m'] * 1000)}", tavan(sacak / (sk_["parca_boyu_m"] - sk_["bindirme_m"])), sacak, birim="m",
                      formul=f"saçak boyu toplamı ÷ ({tr(sk_['parca_boyu_m'], 1)} − {tr(sk_['bindirme_m'])} bindirme)", durum=SABLON,
-                     not_="Eylül 2026 şablonu: L 2800, toplamdan. Bugünkü kuralda L 2500, her saçak kenarı ayrı ayrı yukarı (2025 listelerinden)")
+                     not_="Eylül 2026 şablonu: L 2800, toplamdan. Bugünkü kuralda " + (
+                         f"L {round(sk_k['parca_boyu_m'] * 1000)}, saçak (dere) boyu toplamı ÷ ({tr(sk_k['parca_boyu_m'], 1)} − {tr(sk_k['bindirme_m'])}) (Lokman, 7 Ekim 07:45)"
+                         if sk_k else "L 2500, her saçak kenarı ayrı ayrı yukarı (2025 listelerinden)"))
             else:
                 ekle("Çatı kaplamaları", f"{ad} kapaması", "L 2500", kenar_kenar(kenarlar, deg(k, "parca_boyu_m", "sandvic_kapama")), sacak, birim="m",
                      formul="her saçak kenarı ÷ 2,5, ayrı ayrı yukarı", durum="uydurma",
@@ -597,8 +648,11 @@ def _hesapla(g: dict, k: dict) -> dict:
     if c.get("ters_mahya_m"):
         ekle("Çatı kaplamaları", "Ters mahya", "L 2800", tavan(c["ters_mahya_m"] / (pm - bm)), c["ters_mahya_m"], birim="m",
              formul=f"cumbalı çatıda çatıların birleştiği vadi boyu ÷ (2,8 − {tr(bm)})", durum=mahya_durum, not_=mahya_notu)
-        if sb.get("ters_mahya_kenar_kutusu"):   # Eylül 2026 listesi ve Excel motoru: ters mahyanın iki yanına kenar kutusu. 2025 listelerinde yok; soruldu
-            tk_ = deg(k, "ters_mahya_kenar_kutusu")
+        tk_ = kural_degeri("ters_mahya_kenar_kutusu") or {}
+        if tk_.get("varsayilan"):               # Lokman, 7 Ekim 2026 08:02: cumbalı çatılarda olmazsa olmaz; adet çatıya göre değişir (ters mahyaya bağlı)
+            ekle("Çatı kaplamaları", "Ters mahya kenar kutusu", tk_["boyut"], adet_of("Ters mahya") * tk_["ters_mahya_basina"], birim="",
+                 formul=f"ters mahya adedi × {tk_['ters_mahya_basina']}", durum=k["ters_mahya_kenar_kutusu"]["durum"], not_=k["ters_mahya_kenar_kutusu"].get("satir_notu"))
+        elif sb.get("ters_mahya_kenar_kutusu"):   # Eylül 2026 listesi ve Excel motoru: ters mahyanın iki yanına kenar kutusu. 2025 listelerinde yok; soruldu
             ekle("Çatı kaplamaları", "Ters mahya kenar kutusu", tk_["boyut"], adet_of("Ters mahya") * tk_["ters_mahya_basina"], birim="",
                  formul=f"ters mahya adedi × {tk_['ters_mahya_basina']}", durum=SABLON,
                  not_="Eylül 2026 listesinde ve Excel motorunda var; 2025 tarihli cumbalı listede yoktu")
@@ -644,8 +698,12 @@ def _hesapla(g: dict, k: dict) -> dict:
                    "formül: mühendis, 4 Ekim 12:14 (Excel motorundaki gibi). Damlalık terimi yok (Lokman, 4 Ekim 15:18); bacanın çatıdaki çevresi eklendi (gerçek listedeki gibi)" if baca_cevresi else
                    "formül: mühendis, 4 Ekim 12:14 (Excel motorundaki gibi). Damlalık kullanılmıyor: listede yok, formüldeki terimi de çıkarıldı (Lokman, 4 Ekim 15:18)"))
     # çatı müdahale kapağı: standart pakette gönderilmez; müşteri isterse eklenir (mühendis, 4 Ekim 2026)
-    if g.get("cati_mudahale_kapagi"):
-        ekle("Çatı kaplamaları", "Çatı müdahale kapağı", "adet", g.get("kat_adedi", 1) * deg(k, "cati_mudahale_kapagi")["kat_basina"], birim="",
+    mkp = deg(k, "cati_mudahale_kapagi")
+    if mkp.get("standart_pakette"):    # Lokman, 7 Ekim 2026 07:45: dış kapı gibi her yapıya 1 adet, standart
+        ekle("Çatı kaplamaları", mkp["ad"], "adet", mkp["yapi_basina"], birim="", formul=f"her yapıya {mkp['yapi_basina']} adet (standart)",
+             durum=k["cati_mudahale_kapagi"]["durum"], not_=k["cati_mudahale_kapagi"].get("satir_notu"))
+    elif g.get("cati_mudahale_kapagi"):
+        ekle("Çatı kaplamaları", "Çatı müdahale kapağı", "adet", g.get("kat_adedi", 1) * mkp["kat_basina"], birim="",
              formul="müşteri isterse: kat adedi × 1", durum=k["cati_mudahale_kapagi"]["durum"])
     if c.get("cati_boyu_m") and c.get("bina_eni_m"):
         silte = c["cati_boyu_m"] * (c["bina_eni_m"] + deg(k, "silte_en_payi_m"))
@@ -673,14 +731,17 @@ def _hesapla(g: dict, k: dict) -> dict:
         n_formul = f"plana yerleştirilen iniş sayısı ({n}); " + (f"kural {n_kural} verir" if n_kural is not None else "kural hesaplanmadı")
     else:
         n, n_durum, n_formul = n_kural, "lokman", n_not
+    inis_kuraldan = n_durum == "lokman"
+    inis_notu = ("iniş plana bakarak yerleştirilir; düz saçakta ortalama 5 m'de bir (mühendis, 3 Ekim). Planda elle yerleştirilmediği için Lokman'ın kuralı kullanıldı")
+    if inis_kuraldan and deg(k, "inis").get("olcu") == "dere":     # 7 Ekim 2026: eşik öneridir; durum ve not kural dosyasından
+        n_durum, inis_notu = k["inis"]["durum"], k["inis"].get("satir_notu", inis_notu)
     ib = deg(k, "inis_basina")
     for ad, anahtar in (("Dere iniş borusu", "inis_borusu"), ("Dere iniş aparatı", "inis_aparati"), ("Açık dirsek", "acik_dirsek"),
                         ("Kapalı dirsek", "kapali_dirsek"), ("İniş kelepçesi", "inis_kelepcesi")):
         ekle("Dere", ad, "L 3000" if anahtar == "inis_borusu" else "adet", n * ib[anahtar], birim="",
              formul=(n_formul if anahtar == "inis_borusu" else f"iniş sayısı × {ib[anahtar]}"),
              durum=n_durum if (anahtar == "inis_borusu" or n_durum == "liste") else "motor",
-             not_=("iniş plana bakarak yerleştirilir; düz saçakta ortalama 5 m'de bir (mühendis, 3 Ekim). Planda elle yerleştirilmediği için Lokman'ın kuralı kullanıldı"
-                   if anahtar == "inis_borusu" and n_durum == "lokman" else None))
+             not_=inis_notu if anahtar == "inis_borusu" and inis_kuraldan else None)
     if c.get("dere_kapagi") is not None:
         ekle("Dere", "Dere kapağı", "adet", c["dere_kapagi"], birim="", formul="listedeki sayı; motorda çatı tipine göre sabit", durum="liste")
     elif dr and deg(k, "dere_kapagi_serbest_uc"):          # genel model: kapak, başka bir dere hattıyla buluşmayan uçlara gelir
@@ -704,7 +765,8 @@ def _hesapla(g: dict, k: dict) -> dict:
         panelsiz = (f"çatı panelli ek yapının saçağı ({tr(sacak - sacli_boy)} m) hariç" if sacak - sacli_boy > 0.005 else None)
         ekle("Metal aksam", "Saçak sacı (30'luk)", "L 2500", tavan(sacli_boy / (ps - bs)), sacli_boy, birim="m",
              formul=f"saçak boyu ÷ (2,5 − {tr(bs)} bindirme)", durum=SABLON if "sacak_saci" in sbb else "lokman",
-             not_=(sablon_notu if "sacak_saci" in sbb else "30 cm bindirme Lokman'dan; parça boyu L 2500 listelerden (Lokman'ın örneğinde L 2800 ÷ 2,5)")
+             not_=(sablon_notu if "sacak_saci" in sbb else
+                   k["bindirme_m"]["sacak_saci"].get("satir_notu", "30 cm bindirme Lokman'dan; parça boyu L 2500 listelerden (Lokman'ın örneğinde L 2800 ÷ 2,5)"))
                   + (f"; {panelsiz}" if panelsiz else ""))
         so = sb.get("sacak_omegasi") or {}
         if so.get("olcu") == "cephe" and c.get("sacak_omegasi_cephe_m"):   # Eylül 2026 şablonu: saçaksız cephe boyunun toplamı ÷ 2,5
@@ -719,7 +781,7 @@ def _hesapla(g: dict, k: dict) -> dict:
             pa, ba = deg(k, "parca_boyu_m", "alin_saci"), sbb.get("alin_saci", deg(k, "bindirme_m", "alin_saci"))
             ekle("Metal aksam", "Alın sacı (30'luk)", "300 × 2500", tavan(c["alin_saci_m"] / (pa - ba)), c["alin_saci_m"], birim="m",
                  formul=f"alın boyu ÷ (2,5 − {tr(ba)} bindirme)", durum=SABLON if "alin_saci" in sbb else "lokman",
-                 not_=(sablon_notu if "alin_saci" in sbb else "30 cm bindirme Lokman'dan; parça boyu L 2500 listelerden")
+                 not_=(sablon_notu if "alin_saci" in sbb else k["bindirme_m"]["alin_saci"].get("satir_notu", "30 cm bindirme Lokman'dan; parça boyu L 2500 listelerden"))
                       + ("; çatı panelli ek yapının alınları hariç" if c.get("ek_cati") else ""))
             if c.get("alin_saci_kenarlari_m"):   # genel model: baş makasın (kalkan makası) alnı boyunca Z profil (105 m² ve kör test listeleri)
                 bz = deg(k, "bas_makas_z")
@@ -756,7 +818,8 @@ def _hesapla(g: dict, k: dict) -> dict:
         else:
             ekle("Metal aksam", "Tavan omegası (60'lık)", "L 3750", tavan(om / po), om, birim="m", formul=f"{alan_formulu} ÷ 3,75", durum="uydurma",
                  not_=(f"Eylül 2026 projesinin paftasındaki dizilimle (her gözde ilk hat duvar yüzünde) toplam {tr(to['boy_m'], 1)} m; şablondaki formülle "
-                       f"{tavan(to['boy_m'] / (po - s26_om['bindirme_m']) + s26_om['yedek_adet'])} adet. Hangisinin kural olduğu soruldu") if to and s26_om else None)
+                       f"{tavan(to['boy_m'] / (po - s26_om['bindirme_m']) + s26_om['yedek_adet'])} adet. Hangisinin kural olduğu soruldu")
+                 if to and s26_om and not celik_yontemi else None)
         # Aşık. Adet formülü bugünkü kuralla toplam boy × 1,05 ÷ 4,2 (2025 listelerine uydurma); Eylül 2026 şablonunda × 1,15 ÷ (4,2 − 0,10 bindirme).
         sa_ = sb.get("asik") or {}
         az, ab, pas = sa_.get("zayiat", deg(k, "asik", "zayiat")), sa_.get("bindirme_m", 0.0), deg(k, "parca_boyu_m", "asik")
@@ -776,7 +839,7 @@ def _hesapla(g: dict, k: dict) -> dict:
                         f"{round(c['asik'].get('ust_sira_esigi_m', cdk['ust_sira_esigi_m']) * 100)} cm'den fazla boşluk varsa kenara bir sıra daha; "
                         f"sıranın boyu yüzün o yükseklikteki genişliği; {asik_bolu}",
                  durum=asik_durum,
-                 not_=(c["asik"].get("not") or "") + ("" if sa_ or not s26_as else
+                 not_=(c["asik"].get("not") or "") + ("" if sa_ or not s26_as or celik_yontemi else
                        f". Eylül 2026 şablonundaki formülle (× {tr(1 + s26_as['zayiat'])} ÷ {tr(pas - s26_as['bindirme_m'], 1)}) "
                        f"{tavan(boy * (1 + s26_as['zayiat']) / (pas - s26_as['bindirme_m']))} adet; hangisinin kural olduğu soruldu"))
         elif c.get("asik_boyu_m"):   # 6 Ekim'de dondurulan listenin girdisi: sıralar yüz yüz çıkarılmıştır
@@ -793,7 +856,9 @@ def _hesapla(g: dict, k: dict) -> dict:
     else:
         boy = 0.0   # yöntem A'da saçak omegası gerekmez (Ubeydullah, 3 Ekim 2026)
     if c.get("sacak_alti") == "boardex":
-        sa = sacak * c.get("sacak_alti_eni_m", deg(k, "sacak_alti_boardex_eni_m"))
+        # genel modelde çatı panelli ek yapının saçağı hariç: onun saçak ve alın kaplaması ek yapının Boardex satırındadır (`ek_yapi_ve_korkuluk`)
+        sacak_altli = sum(c["sacak_saci_kenarlari_m"]) if celik_yontemi and c.get("ek_cati") and "sacak_saci_kenarlari_m" in c else sacak
+        sa = sacak_altli * c.get("sacak_alti_eni_m", deg(k, "sacak_alti_boardex_eni_m"))
         ekle("Metal aksam", "Saçaklar için Boardex", boardex_boyut, tavan(sa * (1 + zb) / deg(k, "levha_m2", "boardex")), sa,
              formul=f"saçak boyu × saçak eni × {zb_carpan} ÷ 2,88", durum="uydurma",
              not_="saçak altının Boardex olduğu: Lokman, 3 Ekim 13:27; formül 62 m² listeden" if yontem == "panel" else None)
@@ -801,6 +866,15 @@ def _hesapla(g: dict, k: dict) -> dict:
         ekle("Metal aksam", "Saçak yüzü için Boardex", boardex_boyut, tavan(c["sacak_yuzu_m2"] * (1 + zb) / deg(k, "levha_m2", "boardex")), c["sacak_yuzu_m2"],
              formul=f"saçak ucu çevresi × saçak yüzü yüksekliği (topuk + panelin düşey ölçüsü) × {zb_carpan} ÷ 2,88", durum="muhendis",
              not_="saçak yüzü Boardex'le kaplanır: mühendis, 3 Ekim; kaplandığı: Lokman, 2 Ekim 22:05. Alan geometriden")
+    # Yöntem A'da beşik çatının kalkan kenarı (alın): alın sacı yok; neyle kapandığı bilinmiyor (kurallar: `yontem_a_alin_kaplamasi`, soru).
+    # Geçici: saçak gibi Boardex (alt + yüz). Kırma çatıda alın yoktur.
+    if yontem == "panel" and kural_degeri("yontem_a_alin_kaplamasi") and c.get("alin_saci_m") and c.get("sacak_alti") == "boardex":
+        sacak_eni = c.get("sacak_alti_eni_m", deg(k, "sacak_alti_boardex_eni_m"))
+        yuz_h = c["sacak_yuzu_m2"] / sacak_altli if c.get("sacak_yuzu_m2") and sacak_altli else 0.0
+        alin_alan = c["alin_saci_m"] * (sacak_eni + yuz_h)
+        ekle("Metal aksam", "Alın (kalkan kenarı) için Boardex", boardex_boyut, tavan(alin_alan * (1 + zb) / deg(k, "levha_m2", "boardex")), alin_alan,
+             formul=f"alın kenarlarının boyu {tr(c['alin_saci_m'])} m × (saçak eni {tr(sacak_eni)} + saçak yüzü yüksekliği {tr(yuz_h)} m) × {zb_carpan} ÷ 2,88",
+             durum=k["yontem_a_alin_kaplamasi"]["durum"], not_=k["yontem_a_alin_kaplamasi"]["satir_notu"])
     # köşebent (Ubeydullah, 3 Ekim 2026): (bütün odaların tavan çevresi + iç köşeler × 2,7 m) ÷ 2,5
     kr = deg(k, "kosebent")
     cevre_top = sum(o["cevre_m"] for o in g["odalar"])
@@ -848,9 +922,13 @@ def _hesapla(g: dict, k: dict) -> dict:
         anahtar = es["tekli_anahtar"] + es["cift_anahtar"]
         olcu_k = g.get("kapali_olcu_m") or g.get("dis_olcu_m")
         kosegen = math.hypot(*olcu_k) if olcu_k else None
-        uzak_adi, kablo_durum = "kapalı kısmın köşegeni", "motor"
-        if sb.get("kablo_en_uzak_mesafe") == "sigortadan" and g.get("elektrik_en_uzak_m"):   # Eylül 2026 şablonu: "sigortadan eve en uzun uzaklık"
-            kosegen, uzak_adi, kablo_durum = g["elektrik_en_uzak_m"], "sigorta kutusundan (girişte) kapalı kısmın en uzak köşesine", SABLON
+        uzak_adi, kablo_durum, kablo_notu = "kapalı kısmın köşegeni", "motor", None
+        kablo_kurali = kural_degeri("kablo_en_uzak_mesafe") == "sigortadan"     # Lokman, 7 Ekim 2026 07:45: sigorta × sigortadan en uzak mesafe
+        if (sb.get("kablo_en_uzak_mesafe") == "sigortadan" or kablo_kurali) and g.get("elektrik_en_uzak_m"):   # şablonda: "sigortadan eve en uzun uzaklık"
+            kosegen, uzak_adi = g["elektrik_en_uzak_m"], "sigorta kutusundan (girişte) kapalı kısmın en uzak köşesine"
+            kablo_durum, kablo_notu = (k["kablo_en_uzak_mesafe"]["durum"], k["kablo_en_uzak_mesafe"].get("satir_notu")) if kablo_kurali else (SABLON, None)
+        elif kablo_kurali:
+            kablo_notu = "sigorta kutusunun yeri girdide yok: en uzak mesafe yerine kapalı kısmın köşegeni alındı (Excel motorundaki gibi)"
         kural_notu = "oda başına kural; doğruluk payı yaklaşık %75 (mühendis, 3 Ekim). Kesin sayı elektrik paftasından gelir"
         cok_islevli = [f"{o['ad']} ({' + '.join(ISLEV_ADI[i] for i in o['islev'])})" for o in (g.get("elektrik_odalar") or []) if len(o["islev"]) > 1]
         if cok_islevli and not es_pafta:
@@ -866,9 +944,11 @@ def _hesapla(g: dict, k: dict) -> dict:
                      durum="muhendis", not_=kural_notu if kalem == "tijli_duy" else None)
         if kosegen:
             ekle("Elektrik", "NYM kablo (3 × 2,5)", "metre", tavan(es["sigorta"] * kosegen + (es["tekli_priz"] + 2 * es["cift_priz"] + es["uydu_prizi"]) * 2), birim="",
-                 formul=f"sigorta adedi × sigortadan en uzak mesafe ({uzak_adi}, {tr(kosegen)} m) + (tekli priz + çiftli priz × 2 + uydu prizi) × 2 m", durum=kablo_durum)
+                 formul=f"sigorta adedi × sigortadan en uzak mesafe ({uzak_adi}, {tr(kosegen)} m) + (tekli priz + çiftli priz × 2 + uydu prizi) × 2 m", durum=kablo_durum,
+                 not_=kablo_notu)
             ekle("Elektrik", "NYM kablo (2 × 1,5)", "metre", tavan(es["sigorta"] * kosegen + (es["tekli_anahtar"] + 2 * es["cift_anahtar"]) * 2), birim="",
-                 formul=f"sigorta adedi × sigortadan en uzak mesafe ({uzak_adi}, {tr(kosegen)} m) + (tekli anahtar + çiftli anahtar × 2) × 2 m", durum=kablo_durum)
+                 formul=f"sigorta adedi × sigortadan en uzak mesafe ({uzak_adi}, {tr(kosegen)} m) + (tekli anahtar + çiftli anahtar × 2) × 2 m", durum=kablo_durum,
+                 not_=kablo_notu)
         ekle("Elektrik", "Buat kasa", "adet", anahtar + priz + g.get("oda_sayisi", len(g["odalar"])), birim="", formul="anahtar + priz + oda sayısı (veranda hariç)", durum="motor")
     else:
         ekle("Elektrik", "Duy, glop, ampul, anahtar, priz, sigorta, buat ve NYM kablolar", "adet / metre", None, birim="",
@@ -888,7 +968,7 @@ def _hesapla(g: dict, k: dict) -> dict:
     ekle("Vida", "RYSB pul başlı (3,9 × 32)", "adet", tavan(m2 * v["rysb_m2_basina"]), m2, formul="bina m² × 7,5", durum="motor",
          not_="gerçek listelerde daha az (62 m²'de 400, 105 m²'de 500)")
     alcipan_levha = sum(s["adet"] or 0 for s in S if s["kalem"].startswith(("Duvar alçıpan", "Tavan alçıpan", "Dış cephe Boardex"))
-                        or s["kalem"] in ("Saçaklar için Boardex", "Saçak yüzü için Boardex", "Veranda tavanı (Boardex)"))
+                        or s["kalem"] in ("Saçaklar için Boardex", "Saçak yüzü için Boardex", "Veranda tavanı (Boardex)", "Alın (kalkan kenarı) için Boardex"))
     va = sbv.get("alcipan_vidasi_levha_basina", v["alcipan_vidasi_levha_basina"])      # Eylül 2026 şablonunda 50; 2025 çalışma kitabının notunda 40
     ekle("Vida", "Alçıpan vidası (3,5 × 35)", "adet", kat(alcipan_levha * va, 250), alcipan_levha, birim="levha",
          formul=f"alçıpan ve Boardex levha sayısı × {va}; 250'ye yuvarlandı", **({"durum": SABLON} if "alcipan_vidasi_levha_basina" in sbv else {}))
@@ -906,14 +986,31 @@ def _hesapla(g: dict, k: dict) -> dict:
     panel_adedi = g.get("celik_panel_adedi", celik_toplam_adet)
     if panel_adedi:
         t = {**v["trapez_5_5x25"], **{x: sbv[x] for x in ("omega_375", "omega_240") if x in sbv}}      # Eylül 2026 şablonu: omega × 6; saçak omegası formülde yok
-        # şablonda çelik panel sayısına parça C profiller de dahil (52); genel modelde `celik_panel_adedi` C profilsizdir
-        panel_vida = panel_adedi + (sum(s["adet"] or 0 for s in S if s["kalem"] == "Boy C profil") if sbv.get("celik_panel_c_profil_dahil") and "celik_panel_adedi" in g else 0)
+        # Parça C profiller: şablonda (Eylül 2026) çelik panel sayısına dahildir; 0.4 hattında toplam (`celik_toplam_adet`) onları zaten içerir. Genel modelde
+        # `celik_panel_adedi` C profilsizdir. Kural (`vida.trapez_5_5x25_c_profil_dahil`; 7 Ekim 2026) iki hattı da yönetir: sayılacaksa genel modelde eklenir,
+        # sayılmayacaksa 0.4 hattında toplamdan düşülür. Anahtar kuralda yoksa eski davranış: 0.4 hattı sayar, genel model saymaz (şablon isterse sayar).
+        c_profil = sum(s["adet"] or 0 for s in S if s["kalem"] == "Boy C profil")
+        c_kural = v.get("trapez_5_5x25_c_profil_dahil")
+        genel_model = "celik_panel_adedi" in g
+        c_dahil = bool(sbv.get("celik_panel_c_profil_dahil") or (c_kural if c_kural is not None else not genel_model))
+        panel_vida = panel_adedi + (c_profil if c_dahil and genel_model else 0) - (c_profil if not c_dahil and not genel_model else 0)
+        panel_ustu = 0     # yöntem A'da modelden sayılan panellere tavan ve çatı panelleri eklenir (0.4 hattında toplam zaten onları içerir)
+        if celik_yontemi and yontem == "panel" and "celik_panel_adedi" in g:
+            panel_ustu = sum(s["adet"] or 0 for s in S if s["kalem"] in ("Tavan paneli (makas arası)", "Çatı paneli (makas üstü, sırt 80 mm)"))
+            panel_vida += panel_ustu
         say = (adet_of("Aşık") * t["asik"] + adet_of("Tavan omegası (60'lık)") * t["omega_375"]
                + (adet_of(c.get("sacak_omegasi", "Saçak omegası")) if yontem == "omega_asik" else 0) * t["omega_240"]
                + panel_vida * t["celik_panel"] + (g.get("kosebent_adedi") or adet_of("Köşebent")) * t["kosebent"])
-        panel_adi = f"çelik panel ve parça C profil ({panel_vida})" if panel_vida != panel_adedi else "çelik panel"
+        c_sayildi = bool(c_profil) and c_dahil and (genel_model or c_kural is not None)      # anahtar yokken 0.4 hattının metni eskisi gibi kalır
+        c_dusuldu = bool(c_profil) and not c_dahil and not genel_model
+        panel_adi = ("çelik panel ve parça C profil" if c_sayildi else "çelik panel") + (
+            f" (tavan ve çatı panelleri dahil: {panel_vida})" if panel_ustu else f" ({panel_vida})" if c_sayildi
+            else f" (parça C profiller hariç: {panel_vida})" if c_dusuldu else "")
         ekle("Vida", "Trapez vida (5,5 × 25)", "adet", kat(say, yv), say, birim="vida",
-             formul=f"aşık × {t['asik']} + tavan omegası × {t['omega_375']} + saçak omegası × {t['omega_240']} + {panel_adi} × {t['celik_panel']} + köşebent × {t['kosebent']}; 250'ye yuvarlandı",
+             # kuralda çarpanı sıfır olan terim (7 Ekim 2026: aşık ve omega için vida konmaz) formülde yazılmaz
+             formul=" + ".join(f"{ad} × {carpan}" for ad, carpan in (("aşık", t["asik"]), ("tavan omegası", t["omega_375"]), ("saçak omegası", t["omega_240"]),
+                                                                    (panel_adi, t["celik_panel"]), ("köşebent", t["kosebent"]))
+                               if carpan or all(v["trapez_5_5x25"].values())) + "; 250'ye yuvarlandı",
              **({"durum": SABLON} if sbv else {}),
              not_=((("tavan ve çatı panellerinin vidası hariç; " if panel_eksik else "") + "çelik panel adedi tahmin")
                    if yontem == "panel" and "celik_panel_adedi" not in g else None))
@@ -985,6 +1082,16 @@ def _hesapla(g: dict, k: dict) -> dict:
                 s["durum"] = SABLON
                 s["not"] = (s["not"] + ". " if s["not"] else "") + bx_notu
 
+    # Kararla durumu ya da notu değişen kalemler (kurallar: `satir_notlari`; ör. Lokman'ın 7 Ekim 2026 cevapları). Adet ve formül burada değişmez.
+    for s in S:
+        o = (kural_degeri("satir_notlari") or {}).get(s["kalem"])
+        if o and s["durum"] != SABLON:
+            s["durum"] = o.get("durum", s["durum"])
+            if "not" in o:
+                s["not"] = o["not"]
+            if "not_eki" in o:
+                s["not"] = (s["not"] + ". " if s["not"] else "") + o["not_eki"]
+
     # Renk (genel model: projenin teknik özelliklerinden). Gerçek listede renk kalemin adında yazar; hangi kalemlerde yazdığı `renkli_kalemler` kuralında.
     if g.get("renk"):
         bilinmeyen = sorted(set(g["renk"]) - set(deg(k, "renkli_kalemler"))) if isinstance(g["renk"], dict) else ["(sözlük değil)"]
@@ -1003,6 +1110,7 @@ def _hesapla(g: dict, k: dict) -> dict:
     S.sort(key=lambda s: GRUP_SIRASI.index(s["grup"]))
     kaplama_adi = KAPLAMA_ADI.get(kaplama, kaplama) + (" (baz paket)" if kaplama == deg(k, "baz_paket_cati_kaplamasi") else "")
     return {"yontem": yontem, "yontem_adi": YONTEM_ADI[yontem], "cati_kaplamasi": kaplama_adi, "cati_kaplamasi_anahtar": kaplama, "kapali_gruplar": kapali,
+            **({"yontem_notu": k["celik_cati_yontemi"]["yontem_b_notu"]} if celik_yontemi and yontem != celik_yontemi else {}),
             **({"sablon": g["sablon"]} if sb else {}),
             "satirlar": S,
             "ara": {"dis_net_m2": round(dis_net, 3), "beyaz_net_m2": round(ozet["beyaz"][0], 3), "yesil_net_m2": round(ozet["yesil"][0], 3),
@@ -1060,7 +1168,7 @@ def yaz(sonuc: dict, gercek: dict | None = None) -> str:
 
 def md_yaz(sonuc: dict, ad: str) -> str:
     satir = [f"# {ad}", "",
-             f"Çatı yöntemi: {sonuc['yontem_adi']}. Çatı kaplaması (seçenek): {sonuc['cati_kaplamasi']}."
+             f"Çatı yöntemi: {sonuc['yontem_adi']}." + (f" {sonuc['yontem_notu']}" if sonuc.get("yontem_notu") else "") + f" Çatı kaplaması (seçenek): {sonuc['cati_kaplamasi']}."
              + (f" Kapalı gruplar (bayi kuralı ya da proje kapsamı): {', '.join(sonuc['kapali_gruplar'])}." if sonuc["kapali_gruplar"] else "")
              + (" Kural seti: bugünkü kurallar + Eylül 2026 uygulaması (o listenin şablonundaki formüller ve paftalarındaki dizilim; deneme, karar bekliyor)."
                 if sonuc.get("sablon") else ""), "",
@@ -1080,7 +1188,7 @@ def main() -> int:
     ap.add_argument("--cikti", type=Path)
     ap.add_argument("--md", type=Path, help="tabloyu Markdown olarak yaz")
     ap.add_argument("--kaplama", choices=list(KAPLAMA_ADI), help="çatı kaplaması seçeneğini girdidekinin yerine kullan")
-    ap.add_argument("--mudahale-kapagi", action="store_true", help="çatı müdahale kapağını ekle (standart pakette yok; müşteri isterse)")
+    ap.add_argument("--mudahale-kapagi", action="store_true", help="çatı müdahale kapağını ekle (kural standart pakette saymıyorsa; 7 Ekim 2026'dan beri her yapıda 1 adet standart)")
     ap.add_argument("--bayi", help="bayi kuralı anahtarı (canlıda bayinin telefon numarası); bayi_kurallari_ornek.json içinden okunur")
     ap.add_argument("--bayi-kurallari", type=Path, default=BURADA / "bayi_kurallari_ornek.json")
     ap.add_argument("--sablon", choices=["2026"], help="Eylül 2026 şablonunun bugünkü kurallardan farklı formüllerini de uygula (deneme; kurallar: sablon_2026)")
@@ -1108,7 +1216,7 @@ def main() -> int:
         if a.bayi not in bk["bayiler"]:
             raise SystemExit(f"Bayi kuralı bulunamadı: {a.bayi}")
         bayi_uygula(g, a.bayi, bk)
-    k = json.loads((BURADA / "kurallar.json").read_text(encoding="utf-8"))
+    k = kural.oku()
     gercek_tum = json.loads(a.karsilastir.read_text(encoding="utf-8")) if a.karsilastir else None
     gercek = gercek_tum["kalemler"] if gercek_tum else None
     sonuc = hesapla(g, k)

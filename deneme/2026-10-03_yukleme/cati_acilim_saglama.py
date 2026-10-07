@@ -23,6 +23,8 @@ import random
 from collections import defaultdict
 from pathlib import Path
 
+import kural
+
 from shapely.affinity import rotate, translate
 from shapely.geometry import Polygon, box
 from shapely.ops import unary_union
@@ -99,7 +101,7 @@ def dizilim_hatalari(d: dict) -> list[str]:
 
 
 def main() -> int:
-    kr = json.loads((BURADA / "kurallar.json").read_text(encoding="utf-8"))
+    kr = kural.oku()
     c = json.loads((BURADA / "sonuc" / "C8201_girdi.json").read_text(encoding="utf-8"))["cati"]
     g62 = json.loads((BURADA / "ornek_62m2_girdi.json").read_text(encoding="utf-8"))["cati"]
     sorun = 0
@@ -130,13 +132,14 @@ def main() -> int:
     # 3) panel boyu uzatma kuralı (Lokman, 4 Ekim 2026 16:18) rastgele kırma çatılarda: geometri; adet ve toplam boy artmıyor;
     #    uzatma en çok kuraldaki kadar; uzatılan boyda adet kesim payı 1 cm olsa da aynı; uzatılmadıysa hiçbir aday koşulu sağlamıyor
     uz, kd = kr["panel_boyu_uzatma"]["deger"], kr["kirma_cati_dizilim"]["deger"]
-    tasma_k, m, uzatilan = kr["cati_kaplama_tasma_m"]["deger"], 0, 0
+    tasma_k, m, uzatilan, payli, tam_saglam = kr["cati_kaplama_tasma_m"]["deger"], 0, 0, 0, 0
+    yv_mm = (kr.get("panel_boyu_yuvarlama_mm") or {}).get("deger") or 1
     random.seed(4325)
     for _ in range(150):
         px = round(random.uniform(5, 16), random.choice((1, 2, 3)))
         py = round(random.uniform(4, px), random.choice((1, 2, 3)))
         egim = random.choice((0.25, 0.30, 0.33, 0.40))
-        taban = math.ceil((min(px, py) / 2 * math.sqrt(1 + egim ** 2) + tasma_k) * 1000 - 1e-9) / 1000
+        taban = math.ceil((min(px, py) / 2 * math.sqrt(1 + egim ** 2) + tasma_k) * 1000 / yv_mm - 1e-9) * yv_mm / 1000     # kuraldaki adıma yukarı
         for kaplama in ("tek_kat_panel", "trapez_sac", "osb_kiremit"):
             m += 1
             cati = {"plan_m": [max(px, py), min(px, py)], "egim": egim, "panel_boyu_m": taban, "panel_boyu_kaynak": "kural"}
@@ -146,20 +149,39 @@ def main() -> int:
             def adet(b: float, pay: float) -> int:
                 return dizilim(d["plan_m"][0], d["plan_m"][1], egim, d["kapatma_m"], b, d["paylas"], kd["baslangic"], pay, d["tasma_m"])["adet"]
 
-            adaylar = [round(taban + i * uz["adim_m"], 6) for i in range(1, round(uz["en_cok_m"] / uz["adim_m"]) + 1)]
-            uygun = [b for b in adaylar if adet(b, kd["kesim_payi_m"]) < d["taban_adet"] and adet(b, uz["saglamlik_kesim_payi_m"]) == adet(b, kd["kesim_payi_m"])]
+            # Kuralın seçimi burada ayrıca kurulur (kuralın sözüyle; `kural_dizilimi`nin içine bakmadan) ve onun seçimiyle karşılaştırılır:
+            # adet düşüren ve 1 cm kesim payıyla da aynı kalan boy; pay koşulu taban boy için de aranıyorsa (`taban_icin_de`) ve taban boyda pay inceyse
+            # adedi aynı bırakıp 1 cm kesim payıyla gereken adedi düşüren boy. En az adet, sonra 1 cm payla en az adet, sonra en kısa boy.
+            pay, sp = kd["kesim_payi_m"], uz["saglamlik_kesim_payi_m"]
+            n0, n0_sp = adet(taban, pay), adet(taban, sp)
+            ince = bool(uz.get("taban_icin_de")) and n0_sp > n0
+            secenekler = []
+            for i in range(1, round(uz["en_cok_m"] / uz["adim_m"]) + 1):
+                b = round(taban + i * uz["adim_m"], 6)
+                nb, nb_sp = adet(b, pay), adet(b, sp)
+                if (nb < n0 and nb_sp == nb) or (ince and nb == n0 and nb_sp < n0_sp):
+                    secenekler.append((nb, nb_sp, b))
+            beklenen = min(secenekler) if secenekler else None
+            if d["taban_adet"] != n0 or d["adet"] > n0 or d["boy_m"] - taban > uz["en_cok_m"] + 1e-9:
+                hata.append("taban adedi tutmuyor, adet arttı ya da uzatma sınırı aşıldı")
             if d["uzatma"]:
                 uzatilan += 1
-                if not (d["adet"] < d["taban_adet"] and d["boy_m"] - taban <= uz["en_cok_m"] + 1e-9 and d["bir_cm_payla_adet"] == d["adet"]
-                        and d["adet"] * d["boy_m"] < d["taban_adet"] * taban and d["boy_m"] in uygun
-                        and d["adet"] == min(adet(b, kd["kesim_payi_m"]) for b in uygun)):
+                paydan = d["uzatma"].get("neden") == "pay"
+                payli += paydan
+                tam_saglam += d["bir_cm_payla_adet"] == d["adet"]
+                if beklenen is None or (d["adet"], d["bir_cm_payla_adet"]) != beklenen[:2] or abs(d["boy_m"] - beklenen[2]) > 1e-9 \
+                        or (uz.get("taban_icin_de") and paydan != (d["adet"] == n0)) or (not paydan and d["adet"] * d["boy_m"] >= n0 * taban):
                     hata.append("uzatma kuralı koşulları sağlanmıyor")
-            elif uygun or d["adet"] != d["taban_adet"] or abs(d["boy_m"] - taban) > 1e-9:
+            elif beklenen or d["adet"] != d["taban_adet"] or abs(d["boy_m"] - taban) > 1e-9:
                 hata.append("uzatma uygulanmalıydı ya da taban boy değişmiş")
             if hata:
                 sorun += 1
                 print("SORUN (uzatma)", px, py, egim, kaplama, taban, d["boy_m"], hata[:3])
-    print(f"rastgele kırma çatılar: {n} dizilim denendi; panel boyu uzatma kuralı {m} çatı ve kaplamada denendi ({uzatilan} tanesinde boy uzadı); toplam sorun {sorun}")
+    print(f"rastgele kırma çatılar: {n} dizilim denendi; panel boyu uzatma kuralı {m} çatı ve kaplamada denendi ({uzatilan} tanesinde boy uzadı" + (f", {payli} tanesinde pay koşulundan" if uz.get("taban_icin_de") else "") + f"); toplam sorun {sorun}")
+    # özet (belge bu dosyadan okur; elle yazılmasın diye): hangi kural setiyle, kaç deneme, kaç uzatma
+    ozet = {"kural_seti": kr.get("sema"), "dizilim": n, "kural_denemesi": m, "uzatilan": uzatilan, "pay_kosulundan": payli if uz.get("taban_icin_de") else None,
+            "uzatilanlarda_tam_saglam": tam_saglam, "sorun": sorun}
+    (BURADA / "sonuc" / "cati_acilim_saglama.json").write_text(json.dumps(ozet, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     return 1 if sorun else 0
 
 

@@ -1,0 +1,29 @@
+{
+ "sema": "portman.cizim_seti/0.1",
+ "durum": "lokman",
+ "kaynak": "Lokman, 7 Ekim 2026 07:45: \"Çizimlerin bu halini çok beğendim burada kalalım sadece açıklamalar kısmını düzelteceğiz\"; \"çizimler persfektifler çok güzel olmuş bunları kurala ekle paftadaki açıklamaları düzelteceğiz\". Set, 6–7 Ekim 2026 kör testinde (KT-01) üretilen çizimlerdir; Lokman'ın isteği (6 Ekim 21:22): model \"plan, görünüşler, IFC persfektifler şeklinde\" çizilir.",
+ "kural": "Model verilince bu set aynı Yapı Tanımı'ndan, aynı betiklerle üretilir; çizimde LLM yoktur, aynı tanım aynı çizimi verir. Setin biçimi (görünüşler, bakış açıları, renkler, ölçü zincirleri) Lokman'ın onayı olmadan değiştirilmez. Paftadaki açıklama satırları bu onayın dışındadır: Lokman'la birlikte düzeltilecek.",
+ "ciktilar": [
+  {"dosya": "{kod}_plan.png", "ad": "Plan", "betik": "ciz_genel.py",
+   "icerik": "Kat planı: duvarlar (dış koyu, iç açık), mahal adı ve alanı (kaplanmış yüzler arası), pencere ve kapı etiketleri (en/yükseklik), kapı açılımları, veranda taraması, giriş oku, dıştan ölçü zincirleri (cm)"},
+  {"dosya": "{kod}_gorunusler.png", "ad": "Dört görünüş", "betik": "ciz_genel.py",
+   "icerik": "Ön (giriş), arka, sol ve sağ görünüş: duvarlar, doğramalar, çatı, baca; genişlik, duvar ve mahya yükseklikleri (cm)"},
+  {"dosya": "{kod}_pafta.png", "ad": "Pafta", "betik": "ciz_genel.py",
+   "icerik": "Tek sayfa: başlık (kod, ad, TASLAK ibaresi), plan, çatı planı (düzlemler, eğim okları ve yüzdeleri, mahya, kırma ve vadi boyları, dere inişleri sarı nokta, duvara dayanan kenar turuncu, saçak ve cephe çizgisi), dört görünüş, altta iki sütun açıklama"},
+  {"dosya": "{kod}.ifc", "ad": "IFC4 modeli", "betik": "ifc_genel.py",
+   "icerik": "IfcProject → IfcSite → IfcBuilding → kat. Duvar panelleri IfcWall, boşluklar ve doğramalar (IfcWindow, IfcDoor), mahaller IfcSpace, tavan IfcCovering, çatı IfcRoof ve düzlemleri, makaslar (sadeleştirilmiş), veranda dikme ve kirişleri, baca. Şema doğrulamasından geçer: şema hatası 0 olmalı"},
+  {"dosya": "{kod}.ozet.json", "ad": "IFC özeti", "betik": "ifc_genel.py", "icerik": "Şema, şema hatası sayısı, ürün sayıları"},
+  {"dosya": "{kod}_perspektif_on_sag.png", "ad": "Perspektif: ön sağ", "betik": "perspektif.py", "icerik": "IFC'den görüntü; kamera güneydoğuda (azimut 300°, yükseklik açısı 24°)"},
+  {"dosya": "{kod}_perspektif_on_sol.png", "ad": "Perspektif: ön sol", "betik": "perspektif.py", "icerik": "Kamera güneybatıda (azimut 238°, 24°)"},
+  {"dosya": "{kod}_perspektif_arka_sol.png", "ad": "Perspektif: arka sol", "betik": "perspektif.py", "icerik": "Kamera kuzeybatıda (azimut 128°, 24°)"},
+  {"dosya": "{kod}_perspektif_arka_sag.png", "ad": "Perspektif: arka sağ", "betik": "perspektif.py", "icerik": "Kamera kuzeydoğuda (azimut 52°, 24°)"},
+  {"dosya": "{kod}_catisiz.png", "ad": "Çatısız görünüm", "betik": "perspektif.py", "icerik": "Çatı, tavan ve makaslar gizli; mahaller renkli ve etiketli (azimut 262°, 58°)"},
+  {"dosya": "{kod}_makasli.png", "ad": "Makaslı görünüm", "betik": "perspektif.py", "icerik": "Çatı kaplaması, tavan ve alın bantları gizli; makaslar görünür (azimut 300°, 38°)"},
+  {"dosya": "{kod}_geometri.json", "ad": "Geometri denetimi", "betik": "perspektif.py", "icerik": "IFC'den üçgenlenen nesne ve üçgen sayıları, sınıf sınıf hacim"}
+ ],
+ "aciklamalar": {
+  "durum": "duzeltilecek",
+  "not": "Paftanın altındaki açıklama satırları (sol sütun: dış ölçü, mahaller, duvar, doğramalar, dış kaplama; sağ sütun: çatı, yöntem ve kaplama, çatı yüzeyi, kenar boyları, kaplama dizilimi, kalkanlar, dere inişi) Lokman'la birlikte düzeltilecek (7 Ekim 2026 07:45). Satırlar `girdi_genel.py`'deki `bilgi_satirlari`ndan gelir; sayılar yükleme listesinin girdisiyle aynı hesaptandır."
+ },
+ "sinirlar": "Subasman ve merdiven çizilmez. Çizimler taslaktır: üretim projesi değildir. Müşteri projelerinin tanımı ve çizimleri depoya ayrı onayla girer (İE-05)."
+}

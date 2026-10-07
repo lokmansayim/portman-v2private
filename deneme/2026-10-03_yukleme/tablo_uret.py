@@ -11,6 +11,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import kural
+
 BURADA = Path(__file__).resolve().parent
 S = BURADA / "sonuc"
 ORNEKLER = (("90 m²", "ornek_90m2"), ("62 m²", "ornek_62m2"), ("105 m²", "ornek_105m2"))
@@ -106,7 +108,7 @@ ISLEV_ADI = {"yatak_odasi": "yatak odası", "banyo": "banyo", "salon": "salon", 
 
 def kaplama_tablosu() -> list[str]:
     cik = ["| Seçenek | Kalem | Boyut | Adet | Durum |", "|---|---|---|---|---|"]
-    baz_kaplama = json.loads((BURADA / "kurallar.json").read_text(encoding="utf-8"))["baz_paket_cati_kaplamasi"]["deger"]
+    baz_kaplama = kural.oku()["baz_paket_cati_kaplamasi"]["deger"]
     assert oku("C8201_yukleme_taslak.json")["cati_kaplamasi_anahtar"] == baz_kaplama, "Ç8201 taslağı baz paketin kaplamasıyla hesaplanmalı"
     for anahtar, ad in sorted(KAPLAMALAR, key=lambda x: x[0] != baz_kaplama):
         v = oku(f"C8201_kaplama_{anahtar}.json")
@@ -125,7 +127,7 @@ def dizilim_tablosu() -> list[str]:
     Ç8201'de şerit dizilen kaplamalar (güncel ürün genişlikleriyle ve Lokman'ın andığı öteki ürünlerle), 62 m² gerçek liste
     ve mühendisin 10 × 10 m dört omuz metrajı."""
     from cati_acilim import BASLANGIC_ADI, dizilim, kural_dizilimi
-    kr = json.loads((BURADA / "kurallar.json").read_text(encoding="utf-8"))
+    kr = kural.oku()
     kd = kr["kirma_cati_dizilim"]["deger"]
     baz_kaplama = kr["baz_paket_cati_kaplamasi"]["deger"]
     c = oku("C8201_girdi.json")["cati"]
@@ -142,7 +144,11 @@ def dizilim_tablosu() -> list[str]:
         kullanmadan = dizilim(px, py, cati["egim"], d["kapatma_m"], d["boy_m"], False, d["baslangic"], kd["kesim_payi_m"], d["tasma_m"])["adet"]
         aralik = str(min(den.values())) if len(set(den.values())) == 1 else f"{min(den.values())}–{max(den.values())}"
         # panel boyu: kuraldan geliyorsa (Ç8201) adedi düşürdüğü yerde uzatılmıştır; taban boyla adet yanında
-        taban = f"{d['taban_adet']} (L {round(d['taban_boy_m'] * 1000)})" if d["uzatma"] else ("uzatma adedi düşürmüyor" if cati.get("panel_boyu_kaynak") == "kural" else "boy listeden")
+        # (7 Ekim 2026: adet aynı kalsa da taban boyda pay inceyse uzatılır; o zaman taban boyda 1 cm kesim payıyla adet de yazılır)
+        if d["uzatma"] and d["uzatma"].get("neden") == "pay":
+            taban = f"{d['taban_adet']} (L {round(d['taban_boy_m'] * 1000)}; pay ince: kesim payı 1 cm olsa {d['uzatma']['taban_saglamlik_adet']})"
+        else:
+            taban = f"{d['taban_adet']} (L {round(d['taban_boy_m'] * 1000)})" if d["uzatma"] else ("uzatma adedi düşürmüyor" if cati.get("panel_boyu_kaynak") == "kural" else "boy listeden")
         return (f"| {cati_adi} | {ad} | {round(d['kapatma_m'] * 100)} cm | L {round(d['boy_m'] * 1000)} | {d['adet']} ({d['tam_boy_adedi']} tam boy + {d['adet'] - d['tam_boy_adedi']} kesilen) | "
                 f"{taban} | {d['en_az_adet']} | {aralik} | {kullanmadan}{'' if d['paylas'] else ' (listeye giren)'} | {d['alan_alt_siniri']} | "
                 f"{d['paysiz_adet']} / {d['bir_cm_payla_adet']} | {tr(d['tasma_m'] * 100, 1)} cm |")
@@ -168,7 +174,7 @@ def dizilim_tablosu() -> list[str]:
 
 def kosebent_tablosu() -> list[str]:
     """Köşebent kuralı (Ubeydullah): üç gerçek listede oda çevreleri bilinir, iç köşe sayısı bilinmez."""
-    k = json.loads((BURADA / "kurallar.json").read_text(encoding="utf-8"))["kosebent"]["deger"]
+    k = kural.oku()["kosebent"]["deger"]
     cik = ["| Liste | Oda çevreleri (m) | Oda sayısı | Hesap (oda başına 4 iç köşe) | Listede | Listedeki adedin denk geldiği iç köşe |", "|---|---|---|---|---|---|"]
     for ad, dosya in ORNEKLER:
         v = oku(f"{dosya}_karsilastirma.json")
@@ -202,7 +208,7 @@ def elektrik_sinama_tablosu() -> list[str]:
 
 def elektrik_oda_tablosu() -> list[str]:
     """Ç8201: elektrik kuralının oda oda dökümü."""
-    k = json.loads((BURADA / "kurallar.json").read_text(encoding="utf-8"))["elektrik_oda"]["deger"]["odalar"]
+    k = kural.oku()["elektrik_oda"]["deger"]["odalar"]
     g = oku("C8201_girdi.json")
     cik = ["| Mahal | Kural | " + " | ".join(ad for ad, _ in ELEKTRIK) + " |", "|---|---|" + "---|" * len(ELEKTRIK)]
     top = {a: 0 for _, a in ELEKTRIK}

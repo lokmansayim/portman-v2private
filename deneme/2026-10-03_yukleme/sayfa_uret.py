@@ -7,7 +7,7 @@ Sayfa Claude'un artefakt biçimindedir (doctype, html, head, body etiketleri yok
 Sayfa Lokman'ın özel artefaktıdır ama paylaşılabilir; o yüzden kişi adı yazılmaz (mühendis "mühendis" diye geçer).
 
 Kullanım:
-    python sayfa_uret.py --cikti /tmp/C8201_yukleme_listesi.html --zaman "4 Ekim 2026 17:00"
+    python sayfa_uret.py --cikti /tmp/C8201_yukleme_listesi.html --zaman "7 Ekim 2026 10:00"
 """
 import argparse
 import base64
@@ -15,12 +15,15 @@ import html
 import json
 from pathlib import Path
 
+import kural
+
 from motor_formul import BESIK_10, SABLON, motor_kaplama
 
 S = Path(__file__).resolve().parent / "sonuc"
 ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
 ap.add_argument("--cikti", type=Path, required=True)
 ap.add_argument("--zaman", required=True, help="künyede görünecek tarih ve saat")
+ap.add_argument("--dosya", action="store_true", help="tek başına açılan dosya üret (belge iskeleti ve karakter kümesi eklenir); varsayılan çıktı artefakt içindir (iskeleti yayın ekler)")
 A = ap.parse_args()
 baz = json.loads((S / "C8201_yukleme_taslak.json").read_text(encoding="utf-8"))
 d140 = json.loads((S / "C8201_dis_karkas_140_yukleme_taslak.json").read_text(encoding="utf-8"))
@@ -42,6 +45,7 @@ def e(s):
 SAYFA_DILI = (
     ("(Lokman, 4 Ekim düzeltmesi)", "(4 Ekim düzeltmeniz)"),
     ("Lokman makas ve kirişleri bir makas ölçüsünden ayrıca verecek", "makas ve kirişleri bir makas ölçüsünden ayrıca vereceksiniz"),
+    ("Lokman'ın tarifinden", "tarifinizden"), ("Lokman'ın kararıyla", "kararınızla"),
     ("Lokman'ın kuralı", "sizin kuralınız"), ("Lokman'ın", "sizin"), ("Lokman,", "siz,"), ("Lokman", "siz"),
     ("Ubeydullah'ın", "mühendisin"), ("Ubeydullah", "mühendis"),
 )
@@ -141,7 +145,10 @@ def dizilim_notu(v):
     if not z:
         return None
     parca = []
-    if z.get("uzatma"):
+    if z.get("uzatma") and z["uzatma"].get("neden") == "pay":
+        parca.append(f"Panel boyu L {z['uzatma']['taban_boy_mm']} → L {z['uzatma']['boy_mm']}: pay kalsın diye (adet aynı; L {z['uzatma']['taban_boy_mm']} ile kesim payı "
+                     f"{tr(z['uzatma']['taban_pay_siniri_mm'], 1)} mm'yi geçerse {z['uzatma']['taban_saglamlik_adet']} gerekir)")
+    elif z.get("uzatma"):
         parca.append(f"Panel boyu L {z['uzatma']['taban_boy_mm']} → L {z['uzatma']['boy_mm']}: taban boyla {z['uzatma']['taban_adet']} gerekiyordu")
     elif z.get("uzun_panelle"):
         parca.append(f"Panel L {z['uzun_panelle']['boy_mm']} ve daha uzun olsaydı {z['uzun_panelle']['adet']} yeterdi")
@@ -172,10 +179,11 @@ bekleyen_sayisi = sum(1 for s in baz["satirlar"] if bekleyen(s))
 def satir(v, kalem):
     return next(s for s in v["satirlar"] if s["kalem"] == kalem)
 
-# 4 Ekim 17:46 cevaplarıyla değişenler: bu turda sayı değişmedi. Sayfadaki açılım ve seçenek metinleri 16:18 turundaki değişikliğe dayanıyor:
-# "önce" değerleri 16:13 sürümünden (commit 21ed582; sabit), "sonra" değerleri hesap çıktısından. 16:54 sürümü (commit 4e1e8c5) ile sayılar aynı.
-ONCE = {"tek_kat": 27, "panel_boyu_mm": 4315, "sandvic": 27, "trapez": 32, "kiremit": 30, "mahya_bandi": 4, "boardex": 31, "osb": 9, "kapama": 18, "satir": 89}
-K = json.loads((S.parent / "kurallar.json").read_text(encoding="utf-8"))
+# 7 Ekim 07:45 cevapları ve 08:02 düzeltmeleriyle değişenler. "Önce" değerleri 7 Ekim 03:46 sürümünden (commit eff6a74; kural seti 0.12; sabit),
+# "sonra" değerleri hesap çıktısından.
+ONCE = {"tek_kat": 25, "panel_boyu_mm": 4325, "taban_mm": 4315, "sandvic": 25, "trapez": 30, "kiremit": 28, "mahya_bandi": 4, "boardex": 31, "osb": 9, "kapama": 18, "satir": 88,
+        "nym": (145, 121), "tavan_yesil": 8, "duvar_izolasyonu": 13, "trapez_vida_B": 2000}
+K = kural.oku()
 G = json.loads((S / "C8201_girdi.json").read_text(encoding="utf-8"))
 assert baz["cati_kaplamasi_anahtar"] == K["baz_paket_cati_kaplamasi"]["deger"] == "tek_kat_panel", "sayfa metinleri baz kaplama tek kat panel diye yazıldı"
 pk_t, pk_c = K["celik"]["tavan_paneli"]["deger"], K["celik"]["cati_paneli"]["deger"]
@@ -201,22 +209,29 @@ def dz_oku(kod):
 
 
 dz_s, dz_t, dz_k = dz_oku("sandvic_panel"), dz_oku("trapez_sac"), dz_oku("osb_kiremit")
-EK_NOT = {"Sandviç panel": f"80 cm kapatan ürün gelirse {dz_t['adet']} (trapez sacla aynı dizilim). Sac kapama bu seçenekte şimdilik kalıyor (17:46 cevabınız)"}
+# Bağımsız denetimin 7 Ekim sonucu (bu koda ve çıktılara bakmayan ayrı bir oturum): L 4330 × 25; bu dizilim ve kesim kuralıyla en az 25 (belge_uret.py'deki BAGIMSIZ ile aynı kayıt).
+BAGIMSIZ = {"boy_mm": 4330, "adet": 25}
+assert (round(dz["panel_boyu_m"] * 1000), dz["adet"]) == (BAGIMSIZ["boy_mm"], BAGIMSIZ["adet"]), "sayfa: bağımsız hesap aynı boyu ve adedi buldu diyor"
+BAGIMSIZ_NOTU: list[str] = ["Aynı kuralı, bu koda bakmayan ayrı bir hesaba da yaptırdım: aynı boy ve aynı adetler çıktı; bu dizilimde ve bu kesim kuralıyla "
+                            f"{BAGIMSIZ['adet']}'ten az panelle olmuyor."]
+EK_NOT = {"Sandviç panel": f"80 cm kapatan ürün gelirse {dz_t['adet']} (trapez sacla aynı dizilim). Sac kapama dere boyunca: L 2500, 20 cm bindirme (7 Ekim cevabınız; hesap teyit bekliyor)"}
 kaplama = "".join(kap_tablo(ad, v, ". ".join(x for x in (notu, EK_NOT.get(ad)) if x) or None) for ad, v, notu in KAPLAMALAR)
 # Sayfadaki sabit cümlelerin dayandığı durumlar; hesap değişirse sayfa üretilmez, metin gözden geçirilir.
 assert kap_s["adet"] == dz["adet"] and dz["baslangic"] == "sol" == K["kirma_cati_dizilim"]["deger"]["baslangic"], "sayfa: dizilim her yüzde sol köşeden başlıyor diyor"
 assert kap_cm == 100 and K["kiremit_kapatma_m"]["deger"] == K["sandvic_panel_kapatma_m"]["deger"] == 1.0, "sayfa: tek kat panel, kiremit desen sac ve sandviç panel 100 cm kapatıyor diyor"
 assert dz["tasma_cm"] == tasma_cm == 5 and dz["kesim_payi_mm"] == kesim_mm == 5, "sayfa: taşma 5 cm, kesim payı 5 mm diyor"
 assert not dz_k["artan_parca_karsi_yuzde"], "sayfa: kiremit desen sacda artan parça kullanılmıyor diyor"
-assert uz and (uz["taban_boy_mm"], uz["taban_adet"], uz["boy_mm"], uz["adet"]) == (taban_mm, ONCE["tek_kat"], boy_mm, kap_s["adet"]) and taban_mm == ONCE["panel_boyu_mm"] \
-    and boy_mm == taban_mm + 10 and dz["tek"] == 0, "sayfa: panel boyu 1 cm uzadı, adet önceki sürümdekinden düştü, tek parça için harcanan panel kalmadı diyor"
-assert dz["bir_cm_payla_adet"] == dz["adet"] == dz["en_az_adet"], "sayfa: adet kesim payı 1 cm olsa da aynı; öteki başlangıçlar daha azını vermiyor diyor"
-assert all(z["uzatma"] and z["uzatma"]["boy_mm"] == boy_mm for z in (dz_s, dz_t, dz_k)) \
-    and (dz_s["uzatma"]["taban_adet"], dz_t["uzatma"]["taban_adet"], dz_k["uzatma"]["taban_adet"]) == (ONCE["sandvic"], ONCE["trapez"], ONCE["kiremit"]), \
-    "sayfa: öteki kaplamalarda da boy aynı boya uzuyor; taban adetleri önceki sürümdekiler diyor"
+assert uz and uz.get("neden") == "pay" and (uz["taban_boy_mm"], uz["taban_adet"], uz["boy_mm"], uz["adet"]) == (taban_mm, kap_s["adet"], boy_mm, kap_s["adet"]) \
+    and (taban_mm, boy_mm) == (4320, 4330) and kap_s["adet"] == ONCE["tek_kat"] and dz["tek"] == 0, \
+    "sayfa: taban L 4320; pay kalsın diye L 4330; adet önceki sürümdekiyle aynı; tek parça için harcanan panel yok diyor"
+assert dz["bir_cm_payla_adet"] == dz["adet"] == dz["en_az_adet"] and uz["taban_saglamlik_adet"] > dz["adet"], "sayfa: listedeki boyda adet kesim payı 1 cm olsa da aynı; taban boyda artardı diyor"
+assert all(z["uzatma"] and z["uzatma"]["boy_mm"] == boy_mm and z["uzatma"].get("neden") == "pay" for z in (dz_s, dz_t, dz_k)) \
+    and (dz_s["adet"], dz_t["adet"], dz_k["adet"]) == (ONCE["sandvic"], ONCE["trapez"], ONCE["kiremit"]), \
+    "sayfa: öteki kaplamalarda da boy aynı boya uzuyor; adetler önceki sürümdekiler diyor"
 assert bant_s["adet"] == ONCE["mahya_bandi"] and boardex_s["adet"] == ONCE["boardex"] and osb_s["adet"] == ONCE["osb"] == osb_iki["duvarlar_adet"] < osb_iki["butun_oda_adet"] \
     and K["osb_takviye"]["deger"]["baz"] == "duvarlar", "sayfa: mahya bandı, Boardex ve OSB takviyesi adedi değişmedi; OSB'de geçerli kural dolap ve TV duvarları diyor"
-assert not any(x["kalem"] == "Tek kat panel kapaması" for x in baz["satirlar"]) and toplam_satir == ONCE["satir"] - 1, "sayfa: tek kat panel kapaması çıktı, liste bir satır kısaldı diyor"
+assert not any(x["kalem"] in ("Tek kat panel kapaması", "Duvar izolasyonu") for x in baz["satirlar"]) and toplam_satir == ONCE["satir"] + 1 == 89, \
+    "sayfa: duvar izolasyonu çıktı; veranda tavanı Boardex'i ve acil müdahale kapağı girdi; liste 88 → 89 satır diyor"
 sandvic_kapama = next(x for x in json.loads((S / "C8201_kaplama_sandvic_panel.json").read_text(encoding="utf-8"))["satirlar"] if x["kalem"] == "Sandviç panel kapaması")
 
 # Montaj paftalarından okunanlar (üç gerçek listenin projeleri; paftalar depoda değil). Sayılar `belge_uret.py`'deki PAFTA sabitiyle aynı.
@@ -228,16 +243,42 @@ assert all(omega[n]["liste"] == PAFTA["omega_en_az"][n] + 1 for n in (62, 90, 10
 assert _kars[62]["Dere iniş borusu"]["liste"] == PAFTA["inis"][62] == 7 and inis_hesap == 6 and adet(baz, "Dere iniş borusu") == 6, \
     "sayfa: 62 m² projede paftada ve listede 7 iniş, kuralda 6; Ç8201'de 6 diyor"
 assert K["panel_kapamasi"]["deger"]["sandvic_panel"] and sandvic_kapama["adet"] > 0, "sayfa: sandviç panel kapaması şimdilik kalıyor diyor"
-assert toplam_satir == ONCE["satir"] - 1 == 88 and kap_s["adet"] == 25 and boy_mm == 4325, "sayfa: bu turda sayı değişmedi diyor (16:54 sürümü: 88 satır, L 4325 × 25)"
+yb = json.loads((S / "C8201_yontem_B.json").read_text(encoding="utf-8"))
+KESME_TASI = "230'luk kesme taşı"
+# trapez vida (5,5 × 25): parça C profiller panel gibi sayılıyor (soruldu); sayılmazsa ne olurdu
+tv_s = satir(baz, "Trapez vida (5,5 × 25)")
+c_profil_adedi = sum(s["adet"] for s in baz["satirlar"] if s["kalem"] == "Boy C profil")
+tv_c_siz = tv_s["olcu"] - c_profil_adedi * K["vida"]["deger"]["trapez_5_5x25"]["celik_panel"]
+tv_c_siz_adet = -(-tv_c_siz // K["vida"]["deger"]["trapez_yuvarlama"]) * K["vida"]["deger"]["trapez_yuvarlama"]
+assert K["vida"]["deger"]["trapez_5_5x25_c_profil_dahil"] and c_profil_adedi == 6 and "parça C profil" in tv_s["formul"], "sayfa: trapez vidada parça C profiller panel gibi sayılıyor diyor"
+assert (_kars[62]["Sandviç panel kapaması"]["liste"], _kars[62]["Sandviç panel kapaması"]["hesap"]) == (16, 17), "sayfa: 62 m² listede kapama 16, hesap 17 diyor"
+vt_s = satir(baz, "Veranda tavanı (Boardex)")
+kosegen = (G["kapali_olcu_m"][0] ** 2 + G["kapali_olcu_m"][1] ** 2) ** 0.5
+IN_KR, SK_KR = K["inis"]["deger"], K["sandvic_kapama"]["deger"]
+assert (adet(baz, "NYM kablo (3 × 2,5)"), adet(baz, "NYM kablo (2 × 1,5)")) == (120, 96) and adet(baz, "Tavan alçıpan yeşil") == 2 and vt_s["adet"] == 7 \
+    and adet(baz, "Acil müdahale kapağı") == 1 and adet(yb, "Trapez vida (5,5 × 25)") == 1000 and adet(baz, "Metal kiremit mahyası") == 11, \
+    "sayfa: NYM 120 ve 96 m; yeşil tavan 2; veranda tavanı Boardex 7; acil müdahale kapağı 1; yöntem B'de trapez vida 1000; mahya 11 diyor"
+assert (IN_KR["olcu"], IN_KR["orta_inis_esigi_m"]) == ("dere", 9.0) and (SK_KR["parca_boyu_m"], SK_KR["bindirme_m"]) == (2.5, 0.2) and sandvic_kapama["adet"] == ONCE["kapama"], \
+    "sayfa: iniş eşiği 9 m dere boyu; sandviç panel kapaması L 2500, 20 cm bindirme, adet önceki sürümle aynı diyor"
+assert K["bindirme_m"]["mahya"]["deger"] == 0.2 and K["celik_cati_yontemi"]["deger"] == "panel" and K["panel_boyu_yuvarlama_mm"]["deger"] == 10, "sayfa: bindirme 20 cm; çelikte yöntem A; panel boyu 10 mm'ye yukarı diyor"
 
 degisenler = [
-    ("Sayılar değişmedi", f"Liste {toplam_satir} satır; tek kat panel L {boy_mm} × {kap_s['adet']}. Bu turda iki kararınızı ve paftalardan çıkan kaynak notlarını işledim."),
-    ("Sandviç panel kapaması kalıyor", f"\"O kalsın şimdilik\" dediniz: sandviç panel seçeneğinde sac kapama duruyor (L 2500, {sandvic_kapama['adet']} adet). "
-                                       "Tek kat panelde kapama yok."),
-    ("Kesim planı paftası montaj paftası işinde", "Şimdi ayrı bir pafta hazırlamıyorum. Açılım ve kesim planı, yükleme listesinden sonra yapacağımız montaj paftası çalışmasında "
-                                                  "\"çatı kaplaması yerleşim planı\" paftası olacak."),
-    ("Montaj paftalarını buldum", f"{PAFTA['klasor']} klasörde {PAFTA['pdf']} PDF ve proje başına bir ana DWG. Ne anladığımı aşağıda, "
-                                  "\"Montaj paftası: klasörlerde bulduklarım\" bölümünde yazdım; yanlışım varsa düzeltin."),
+    ("Veranda tavanı Boardex", f"Çelik yapıda veranda tavanı her zaman Boardex dediniz: {tr(vt_s['olcu'], 1)} m² → {vt_s['adet']} levha, ayrı satır. "
+                               f"Yeşil tavan alçıpanı {ONCE['tavan_yesil']} → {adet(baz, 'Tavan alçıpan yeşil')}."),
+    ("Duvar izolasyonu çıktı", f"\"Göndermiyoruz yok say\" dediniz: {ONCE['duvar_izolasyonu']} paketlik satır listeden çıktı."),
+    ("Acil müdahale kapağı girdi", "Her yapıya 1 adet, standart."),
+    ("Kabloda mesafe sigortadan", f"Sigorta kutusunu giriş kapısında saydım: kapalı kısmın en uzak köşesi {tr(G['elektrik_en_uzak_m'], 2)} m (önce köşegen alınıyordu: {tr(kosegen, 2)} m). "
+                                  f"NYM 3 × 2,5: {ONCE['nym'][0]} → {adet(baz, 'NYM kablo (3 × 2,5)')} m; 2 × 1,5: {ONCE['nym'][1]} → {adet(baz, 'NYM kablo (2 × 1,5)')} m."),
+    ("Panel boyu L 4330", f"\"Yukarı yuvarla\" dediniz: taban L {ONCE['taban_mm']} → L {taban_mm}. L {taban_mm} ile de {kap_s['adet']} panel çıkıyor ama pay ince: "
+                          f"kesim payı {tr(uz['taban_pay_siniri_mm'], 1)} mm'yi geçerse {uz['taban_saglamlik_adet']} gerekir. Pay kalsın diye L {boy_mm} yazdım; adet aynı ({kap_s['adet']}). "
+                          "Aşağıda soruyorum."),
+    ("Bindirme 20 cm", f"Mahya ÷ 2,6: yine {adet(baz, 'Metal kiremit mahyası')}. Sandviç panel seçeneğinde kapama dere boyunca, L 2500: yine {sandvic_kapama['adet']}."),
+    ("Çelikte omega ve aşık yok", "Bu liste zaten çatı ve tavan paneliyle. Omega ve aşıklı liste yalnız karşılaştırma için duruyor; "
+                                  f"orada trapez vida (5,5 × 25) {ONCE['trapez_vida_B']} → {adet(yb, 'Trapez vida (5,5 × 25)')}."),
+    ("Adedi değişmeyenler", f"Köşebent {kose_s['adet']}, iniş {adet(baz, 'Dere iniş borusu')}, alçıpan vidası {adet(baz, 'Alçıpan vidası (3,5 × 35)')}, "
+                            f"trapez vida (5,5 × 25) {adet(baz, 'Trapez vida (5,5 × 25)')}, kesme taşı {adet(baz, KESME_TASI)}, "
+                            f"dayson {adet(baz, 'Dayson')}, mastik {adet(baz, 'Silikonize mastik')}. Bu satırlarda kararınız mevcut hesabı teyit etti."),
+    ("Liste", f"{ONCE['satir']} → {toplam_satir} satır."),
 ]
 
 
@@ -249,15 +290,27 @@ def baslikli(b, m):
 degisen_html = "".join(baslikli(b, m) for b, m in degisenler)
 
 sorular = [
-    ("Dere inişi: giriş saçağının köşeleri de sayılsın mı?",
-     f"Montaj paftalarındaki iniş işaretlerini saydım. 62 m² projede {PAFTA['inis'][62]} işaret var: dört köşe, arka cephede bir tane ve giriş saçağının iki ön köşesi; ön cephenin ortasında yok; "
-     f"liste de {PAFTA['inis'][62]}. Kuralınızı dört köşe ve iki orta diye uyguladığım için hesap {inis_hesap} veriyor. \"Her köşe\" derken saçak çizgisinin bütün dış köşelerini mi "
-     f"sayayım (giriş saçağı, verandadaki kademe)? Evet derseniz köşeleri modelin saçak çizgisinden sayarım; giriş saçağının böldüğü cepheye orta iniş koymam. "
-     f"Ç8201'de sayı değişmiyor ({adet(baz, 'Dere iniş borusu')})."),
+    ("İniş: \"çok uzun\" kaç metre?",
+     f"Kuralınızı şöyle yazdım: her dere hattının iki ucuna birer iniş; boyu {tr(IN_KR['orta_inis_esigi_m'])} m'yi geçen hattın ortasına bir tane daha. "
+     "Paftalarda ve sizin 82 m² örneğinizde orta inişi olan hatlar 9,64 · 11,54 · 12,15 · 15,98 m; olmayanlar 5,18 · 6,06 · 8,10 m. "
+     f"Eşik 8,10 ile 9,64 m arasında bir yerde; {tr(IN_KR['orta_inis_esigi_m'])} m aldım. Uygun mu? Ç8201'de {adet(baz, 'Dere iniş borusu')} veriyor."),
+    ("Sandviç panel kapaması: hesap uygun mu?",
+     f"Kapama boyu = saçak (dere) kenarlarının toplamı; adet = boy ÷ (2,5 − 0,20). Ç8201'de {tr(sandvic_kapama['olcu'], 2)} ÷ 2,3 → {sandvic_kapama['adet']}. "
+     "62 m² gerçek listede 16 var; bu hesap orada 17 veriyor."),
+    ("Panel boyu: L 4320 mi, L 4330 mu?",
+     f"L {taban_mm} ile {kap_s['adet']} panel ancak kesim payı {tr(uz['taban_pay_siniri_mm'], 1)} mm'yi geçmezse ve panel tam boyunda gelirse çıkıyor. "
+     f"L {boy_mm} ile panel 1 cm kısa gelse de {kap_s['adet']} yetiyor; bedeli {kap_s['adet']} panelde birer cm. L {boy_mm} yazdım; istemezseniz L {taban_mm}'ye döner."),
+    ("Beşik çatıda kalkan kenarı (alın)",
+     "Çatı ve tavan paneliyle alın sacı yok. Kalkan kenarının altı ve yüzü neyle kapanıyor? Şimdilik saçak gibi Boardex saydım. Ç8201'de böyle kenar yok."),
+    ("Mastik", "Pencereler alıcıya aitse mastik yine yazılsın mı? Şimdi yazılıyor."),
+    ("Sigorta kutusunun yeri",
+     f"Tanımda yeri yazmıyorsa kutuyu giriş kapısında sayıyorum; kablo boyundaki en uzak mesafe oradan ölçülüyor (Ç8201'de {tr(G['elektrik_en_uzak_m'], 2)} m). Uygun mu?"),
+    ("Trapez vidada parça C profil",
+     f"Trapez vida (5,5 × 25) hesabında parça C profilleri de panel gibi sayıyorum (Eylül 2026 şablonu öyle sayıyor). \"Kaç panel varsa\" dediniz: sayılsınlar mı? "
+     f"Bu listede {c_profil_adedi} parça C profille {tr(tv_s['olcu'])} → {tv_s['adet']}; sayılmazsa {tr(tv_c_siz)} → {tv_c_siz_adet}."),
+    ("Boardex adı", "Listede \"Boardex\" yazıyor; üreticinin belgelerinde ürünün adı başka (dış cephe levhası, 12,5 mm). Listeye hangi adı yazayım?"),
     ("Excel motorundaki formül", "Sayfanın sonundaki \"Excel motorundaki kaplama formülü\" bölümünü mühendise iletir misiniz? "
                                  "Kiremit desen sac 100 cm kapatıyorsa motordaki 1,05 katsayısının da 1 olması gerekir."),
-    ("Makas ve kiriş ölçüsü", f"Motoru inceleyeceğinizi yazdınız. O zamana kadar motor kıstas: makaslar {tr(kg(baz, 'Çatı makas panelleri'))} kg, "
-                              f"veranda dikmeleri {tr(kg(baz, 'Veranda dikmeleri (kolon paneli)'))} kg, veranda kirişleri {tr(kg(baz, 'Veranda kirişleri (kiriş paneli)'))} kg."),
 ]
 soru_html = "".join(baslikli(b, m) for b, m in sorular)
 
@@ -310,7 +363,7 @@ pafta_html = (
 # Excel motorundaki kaplama formülü (mühendisin isteği: hangi hücreden ne geliyor, formül nasıl işliyor). Sayılar `motor_formul.py`'den.
 uzun, kisa = G["kapali_olcu_m"]
 mk_c = motor_kaplama(uzun, kisa, G["dis_olcu_m"][0] - uzun, "kirma")
-assert mk_c["sac_boyu_mm"] == taban_mm, "sayfa: motorun sac boyu listedeki panel boyunun tabanıyla aynı diyor"
+assert mk_c["sac_boyu_mm"] == ONCE["taban_mm"], "sayfa: motorun sac boyu eğimli boy + taşma (mm'ye yukarı, 4315 mm) diyor"
 HUCRELER = (("K10", "Bina dış uzun kenar (m)"), ("K11", "Bina dış kısa kenar (m)"), ("K13, K14", "Sundurma dış uzun ve kısa kenar"),
             ("K17", "Oturum dışı veranda dış kısa kenar"), ("K23", "Çatı tipi"), ("K24", "Çatı kaplama"))
 hucre_html = "".join(f"<tr><td class='boyut'>{e(h)}</td><td>{e(a)}</td></tr>" for h, a in HUCRELER)
@@ -356,7 +409,7 @@ motor_html = f'''<section>
   </div>
   <h3 style="margin-top:16px">Örnekler: formül yazıldığı gibi → parantez düzeltilince</h3>
   <div class="kaydir"><table class="dar"><thead><tr><th>Örnek</th><th class="say">Trapez sac</th><th class="say">Metal kiremit</th></tr></thead><tbody>{motor_ornek_html}</tbody></table></div>
-  <p class="aciklama" style="margin-top:10px">Bu liste kaplama adedini motorun formülünden almıyor; çatı açılımından alıyor. Motorun sac boyu Ç8201'de {mk_c["sac_boyu_mm"]} mm: listedeki panel boyunun tabanıyla aynı; liste, adet düştüğü için L {boy_mm} yazıyor.</p>
+  <p class="aciklama" style="margin-top:10px">Bu liste kaplama adedini motorun formülünden almıyor; çatı açılımından alıyor. Motorun sac boyu Ç8201'de {mk_c["sac_boyu_mm"]} mm. Liste bunu 10 mm'ye yukarı yuvarlıyor (L {taban_mm}) ve pay kalsın diye L {boy_mm} yazıyor.</p>
 </section>'''
 
 # Plan görseli (OSB takviyesi gelen duvarlar turuncu çizgili): çizim denemesinin son çıktısı, sayfanın içine gömülür.
@@ -377,13 +430,13 @@ if _acilim.is_file() and _kesim.is_file():
     acilim_notlari = [
         f"Tek kat panel: {kap_s['adet']} adet L {boy_mm} ({dz['tam_boy']} tam boy + {dz['kesilen']} kesilen). Çatı yüzeyi alan olarak en az {dz['alan_alt_siniri']} panel ediyor.",
         "Dizilim her yüzde, dışarıdan bakışla sol köşeden başlıyor (kararınız).",
-        f"Kaplama saçaktan {tr(tasma_cm)} cm taşıyor. Panel boyunun tabanı eğimli boy {tr(dz['egimli_boy_m'] * 100, 1)} cm + {tr(tasma_cm)} cm (L {taban_mm}); "
-        f"kuralla {tr((boy_mm - taban_mm) / 10)} cm uzatıldı (L {boy_mm}).",
+        f"Kaplama saçaktan {tr(tasma_cm)} cm taşıyor. Panel boyunun tabanı eğimli boy {tr(dz['egimli_boy_m'] * 100, 1)} cm + {tr(tasma_cm)} cm, 10 mm'ye yukarı: L {taban_mm}. "
+        f"Pay kalsın diye {tr((boy_mm - taban_mm) / 10)} cm uzatıldı: L {boy_mm}.",
         f"Kesim payı {tr(kesim_mm)} mm; yedek panel yok (onayınızla).",
-        f"Taban boyda her yüzün 4. şeridi bir paneli tek başına harcıyordu: artanı köşe parçasına 2 mm ile yetmiyordu. Şimdi 1. ve 4., 2. ve 3. şeritler aynı panelden çıkıyor; "
-        f"en sıkı panelde {tr(dz['en_dar_pay_cm'], 1)} cm pay kalıyor.",
-        f"Tam boy giden {dz['tam_boy']} panelde {tr((boy_mm - taban_mm) / 10)} cm fazlalık panelin üst ucunda, mahya ucunda kalır.",
-        "Aynı kuralı ayrı bir hesapla da denetledim: aynı boy ve aynı adetler çıktı; bu dizilimde daha az panelle olmuyor.",
+        f"1. ve 4., 2. ve 3. şeritler aynı panelden çıkıyor. L {taban_mm} ile en uzun kesik parça ve köşe parçası aynı panele {tr(uz['taban_pay_siniri_mm'] - kesim_mm, 1)} mm payla sığıyordu; "
+        f"L {boy_mm} ile en sıkı panelde {tr(dz['en_dar_pay_cm'], 1)} cm pay kalıyor.",
+        f"Tam boy giden {dz['tam_boy']} panelde {tr((boy_mm - (dz['egimli_boy_m'] * 1000 + tasma_cm * 10)) / 10, 1)} cm fazlalık panelin üst ucunda, mahya ucunda kalır.",
+        *BAGIMSIZ_NOTU,
         f"62 m² gerçek listede (kırma çatı, sandviç panel) {k62['liste']} adet L 3200 ve 2 adet L 1000 var; aynı yöntem {k62['hesap']} veriyor.",
         "Bu çizim ve ölçüler, montaj paftası çalışmasında \"çatı kaplaması yerleşim planı\" paftası olacak; kısa yüzlerdeki 10 cm'lik son şerit orada ayrıca işaretlenecek.",
     ]
@@ -541,7 +594,7 @@ table.pafta td:first-child {{ font-weight: 500; min-width: 150px; }}
 </div>
 
 <section>
-  <h2>4 Ekim 17:46 cevaplarınızla değişenler</h2>
+  <h2>7 Ekim cevaplarınızla değişenler</h2>
   <ul class="degisen">{degisen_html}</ul>
 </section>
 
@@ -576,7 +629,7 @@ table.pafta td:first-child {{ font-weight: 500; min-width: 150px; }}
 
 {motor_html}
 
-<p class="dip">Kaynaklar: 3 Ekim 13:27, 4 Ekim 15:18, 16:18 ve 17:46 cevaplarınız, 4 Ekim 01:24 ve 01:42 düzeltmeleriniz; inşaat mühendisinin üç tur cevabı (3 Ekim 18:14, 4 Ekim 01:24 ve 12:14'te ilettiniz); üç gerçek yükleme listesinin çalışma kitapları (62, 90 ve 105 m²); Excel hesaplama motoru (CTKBF V1.1); klasörlerinizdeki montaj paftaları. Bu modelin kendi gerçek listesi yok: sayılar yalnız kurallardan çıkıyor. Üç gerçek listeyle karşılaştırmada {kars_toplam} kalemin {kars_ayni} tanesinde adet aynı; bu bir sınama değil, çünkü katsayıların bir kısmı o listelere bakılarak seçildi. Ayrıntı depoda: docs/sartname/yukleme_listesi_yontemi.md ve docs/sartname/montaj_paftasi.md.</p>
+<p class="dip">Kaynaklar: 3 Ekim 13:27, 4 Ekim 15:18, 16:18 ve 17:46, 7 Ekim 07:45 ve 08:02 cevaplarınız, 4 Ekim 01:24 ve 01:42 düzeltmeleriniz; inşaat mühendisinin üç tur cevabı (3 Ekim 18:14, 4 Ekim 01:24 ve 12:14'te ilettiniz); üç gerçek yükleme listesinin çalışma kitapları (62, 90 ve 105 m²); Excel hesaplama motoru (CTKBF V1.1); klasörlerinizdeki montaj paftaları. Bu modelin kendi gerçek listesi yok: sayılar yalnız kurallardan çıkıyor. Üç gerçek listeyle karşılaştırmada {kars_toplam} kalemin {kars_ayni} tanesinde adet aynı; bu bir sınama değil, çünkü katsayıların bir kısmı o listelere bakılarak seçildi. Ayrıntı depoda: docs/sartname/yukleme_listesi_yontemi.md ve docs/sartname/montaj_paftasi.md.</p>
 </div>
 <script>
 (function () {{
@@ -601,5 +654,8 @@ table.pafta td:first-child {{ font-weight: 500; min-width: 150px; }}
 for ad in ("Lokman", "Ubeydullah"):   # sayfada kişi adı kalmamalı
     if ad in sayfa:
         raise SystemExit(f"Sayfada kişi adı kaldı: {ad}")
+if A.dosya:   # dosya olarak verilecekse: tarayıcı karakter kümesini ve ekran genişliğini bilsin
+    sayfa = ('<!doctype html>\n<html lang="tr">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n'
+             + sayfa.replace("</style>\n", "</style>\n</head>\n<body>\n", 1) + "</body>\n</html>\n")
 A.cikti.write_text(sayfa, encoding="utf-8")
 print("yazıldı:", A.cikti, "·", toplam_satir, "satır; teyit ya da değer bekleyen", bekleyen_sayisi)

@@ -56,18 +56,21 @@ KAPLAMA_ADI = {"sandvic_panel": "sandviç panel", "tek_kat_panel": "tek kat pane
 INIS_ORTA_ESIK_CM = 1000   # bu boydan kısa cepheye orta iniş konmaz (Lokman, 3 Ekim 13:27)
 
 
-def inis_noktalari(L: float, H: float, s: float, esik: float = INIS_ORTA_ESIK_CM) -> list[tuple[float, float, str]]:
-    """Kırma çatıda dere inişleri: saçak köşelerine birer tane; cephesi `esik` ve üzeri olan kenarın ortasına bir tane.
+def inis_noktalari(L: float, H: float, s: float, esik: float = INIS_ORTA_ESIK_CM, olcu: str = "cephe") -> list[tuple[float, float, str]]:
+    """Kırma çatıda dere inişleri: saçak köşelerine birer tane; uzun kenarın ortasına bir tane.
+    Uzun kenar: `olcu` "cephe" ise cephesi `esik` ve üzeri olan (Lokman, 3 Ekim 2026); "dere" ise dere hattının boyu (cephe + iki saçak) `esik`i
+    geçen (Lokman, 7 Ekim 2026: "çok uzun dere boylarında ortaya 1 tane daha"; eşik kural dosyasında).
     Dönen: (x, y, 'kose' | 'orta'); başlangıç ayak izinin sol-alt köşesi."""
+    uzun = (lambda x: x + 2 * s > esik + 1e-9) if olcu == "dere" else (lambda x: x >= esik)
     n = [(-s, -s, "kose"), (L + s, -s, "kose"), (L + s, H + s, "kose"), (-s, H + s, "kose")]
-    if L >= esik:
+    if uzun(L):
         n += [(L / 2, -s, "orta"), (L / 2, H + s, "orta")]
-    if H >= esik:
+    if uzun(H):
         n += [(-s, H / 2, "orta"), (L + s, H / 2, "orta")]
     return n
 
 
-def cati_hesapla(tanim: dict, inis_esik_cm: float = INIS_ORTA_ESIK_CM) -> dict:
+def cati_hesapla(tanim: dict, inis_esik_cm: float = INIS_ORTA_ESIK_CM, inis_olcu: str = "cephe", mahya_bindirme_cm: float | None = None) -> dict:
     c = tanim["cati"]
     if c["tip"] != "kirma":
         raise SystemExit("Bu deneme yalnız kırma (dört omuz) çatıyı hesaplar.")
@@ -92,12 +95,18 @@ def cati_hesapla(tanim: dict, inis_esik_cm: float = INIS_ORTA_ESIK_CM) -> dict:
     kirma = math.hypot(kirma_plan, (kisa / 2) * e)               # eğimli gerçek boy
     mahya_hatti = (uzun - kisa) + 4 * kirma
     parca = c.get("mahya_parca_boyu")
+    # bindirme kural dosyasından verilirse o (`bindirme_m.mahya`; tek kaynak); verilmezse tanımdaki değer
     bindirme = c.get("mahya_bindirme", 0)
+    if mahya_bindirme_cm is not None:
+        b = round(mahya_bindirme_cm, 6)
+        if c.get("mahya_bindirme") not in (None, b):     # tanımdaki değer bilgi içindir; kural dosyasındaki geçerlidir (eski kural setiyle koşunca ayrışır)
+            print(f"not: tanımda mahya bindirmesi {c['mahya_bindirme']} cm, kural dosyasında {b:g} cm; kuraldaki kullanıldı", file=sys.stderr)
+        bindirme = int(b) if b == int(b) else b
     plan_m2 = px * py / 1e4
     if c.get("inis_noktalari"):                                  # plana bakarak elle yerleştirilmiş inişler (Ubeydullah, 3 Ekim 2026)
         inis = [(float(x), float(y), "plan") for x, y in c["inis_noktalari"]]
     else:
-        inis = inis_noktalari(L, H, s, inis_esik_cm)
+        inis = inis_noktalari(L, H, s, inis_esik_cm, inis_olcu)
     return {
         "ayak_izi": (L, H), "plan": (px, py), "mahya_uzunlugu": uzun - kisa, "mahya_yonu": "x" if px >= py else "y",
         "z_sacak": z_sacak, "z_mahya": z_mahya, "plan_m2": plan_m2, "yuzey_m2": plan_m2 * math.sqrt(1 + e * e),
@@ -109,6 +118,7 @@ def cati_hesapla(tanim: dict, inis_esik_cm: float = INIS_ORTA_ESIK_CM) -> dict:
         "mahya_parca_boyu": parca, "mahya_parca_adedi_bindirmesiz": math.ceil(mahya_hatti / parca - 1e-9) if parca else None,
         "mahya_bindirme": bindirme, "mahya_parca_adedi": math.ceil(mahya_hatti / (parca - bindirme) - 1e-9) if parca else None,
         "inis_noktalari": inis, "inis_adedi": len(inis), "inis_kaynagi": "plan" if c.get("inis_noktalari") else "kural", "cephe": (L, H),
+        **({"inis_kurali": f"köşeler; boyu {tr(inis_esik_cm / 100, 0)} m'yi geçen dere hatlarının ortası"} if inis_olcu == "dere" else {}),
         "oturum_m2": L * H / 1e4,
         "yontem": c.get("yontem"), "kaplama": c.get("kaplama"),
     }
@@ -270,7 +280,7 @@ def pafta(tanim: dict, s: dict, c: dict, cikti: Path):
         f"Saçak yüzü {tr(c['alin_yuksekligi'])} cm = topuk {ct.get('topuk', 0)} + {ct.get('panel_kalinligi', 0)} cm çatı panelinin eğimdeki düşey ölçüsü {tr(c['panel_dusey'])} · kaplaması {tr(c['alin_cevre_m'])} m × {tr(c['alin_yuksekligi'])} cm = {tr(c['alin_m2'])} m²",
         (f"Veranda çerçevesi: sırt {vc['sirt']}, genişlik {vc['genislik']} cm · kiriş {tr(vc['kiris_boyu'] / 100, 2)} m (yanlar ve karşı) · dikme {vc['dikme_adedi']} × {vc['dikme_boyu']} cm "
          f"(yerleri katalog görsellerinden)" if vc else "Veranda yok"),
-        f"Dere inişi {c['inis_adedi']} adet (" + ("plana yerleştirildi" if c["inis_kaynagi"] == "plan" else "köşeler; 10 m ve daha uzun cephelerin ortası")
+        f"Dere inişi {c['inis_adedi']} adet (" + ("plana yerleştirildi" if c["inis_kaynagi"] == "plan" else c.get("inis_kurali", "köşeler; 10 m ve daha uzun cephelerin ortası"))
         + ") · subasman, merdiven ve cephe kaplaması çizilmedi · ölçüler cm",
     ]
     ax.text(0.0, 0.95, "\n".join(sol), ha="left", va="top", fontsize=9.2, linespacing=1.55, transform=ax.transAxes)
@@ -291,7 +301,12 @@ def main() -> int:
     tanim, sek = secenek_uygula(tanim, a.secenek)
     tipler = json.loads((BURADA / "duvar_tipleri.json").read_text(encoding="utf-8"))
     s = hesapla(tanim, tipler, False)
-    c = cati_hesapla(tanim)
+    # iniş kuralı ve mahya bindirmesi kural dosyasından (yükleme listesiyle aynı kaynak: `../2026-10-03_yukleme/kural.py`)
+    sys.path.append(str(BURADA.parent / "2026-10-03_yukleme"))
+    import kural
+    kur = kural.oku()
+    c = cati_hesapla(tanim, kur["inis"]["deger"]["orta_inis_esigi_m"] * 100, kur["inis"]["deger"].get("olcu", "cephe"),
+                     mahya_bindirme_cm=kur["bindirme_m"]["mahya"]["deger"] * 100)
     a.cikti.mkdir(parents=True, exist_ok=True)
     kod = tanim["kod"].replace("Ç", "C") + sek
     pafta(tanim, s, c, a.cikti / f"{kod}_pafta.png")

@@ -1,8 +1,8 @@
-# Ç8201 · kesim planının ölçüleri · tek kat panel · 100 cm kapatır · L 4325 · 25 adet
+# Ç8201 · kesim planının ölçüleri · tek kat panel · 100 cm kapatır · L 4330 · 25 adet
 
 Hesap çıktısıdır; elle düzeltilmez (`cati_acilim.py --olcu-md`). Dizilim her yüzde sol köşeden başlar; kaplama saçaktan 5,0 cm taşar; kesim payı 5 mm. Ölçüler cm. Boylar saçak ucundan (taşma dahil) ölçülür; sol ve sağ, çatıya dışarıdan bakışla.
 
-Panel boyu kuralla uzatıldı (Lokman, 4 Ekim 16:18): taban boy L 4315 (eğimli boy + taşma) ile 27 panel gerekiyordu; L 4325 ile 25 panel yetiyor. Taşma değişmez: tam boy giden panellerde fazla 1,0 cm panelin üst ucunda (mahya ucunda) kalır.
+Panel boyu pay kalsın diye uzatıldı (4 Ekim 16:18 kuralındaki pay koşulu, taban boya da uygulandı; 7 Ekim 2026): taban boy L 4320 (eğimli boy + taşma, yukarı yuvarlanmış) ile de 25 panel çıkıyor, ama pay ince: kesim payı 7,8 mm'yi geçerse 27 panel gerekir. L 4330 ile kesim payı 1 cm olsa da 25 panel yetiyor. Taşma değişmez: tam boy giden panellerde fazla 1,5 cm panelin üst ucunda (mahya ucunda) kalır.
 
 ## Parçalar (yüz yüz, soldan sağa)
 
@@ -104,28 +104,28 @@ Her satır bir parçanın paneldeki yeridir: panelin sol ve sağ kenarında, alt
 
 | Panel | Parçalar | Kullanılmayan boy |
 |---|---|---|
-| 1 | ön 1 + arka 4 | 0,8 |
-| 2 | ön 2 + arka 3 | 0,8 |
-| 3 | ön 3 + arka 2 | 0,8 |
-| 4 | ön 4 + arka 1 | 0,8 |
-| 5 | ön 5 | 1,0 |
-| 6 | ön 6 | 1,0 |
-| 7 | ön 7 | 1,0 |
-| 8 | ön 8 | 1,0 |
-| 9 | ön 9 + arka 12 · sol 9 + sağ 9 | 38,7 |
-| 10 | ön 10 + arka 11 | 97,7 |
-| 11 | ön 11 + arka 10 | 97,7 |
-| 12 | ön 12 + arka 9 | 54,7 |
-| 13 | sol 1 + sağ 4 | 0,8 |
-| 14 | sol 2 + sağ 3 | 0,8 |
-| 15 | sol 3 + sağ 2 | 0,8 |
-| 16 | sol 4 + sağ 1 | 0,8 |
-| 17 | sol 5 | 1,0 |
-| 18 | sol 6 + sağ 8 | 85,0 |
-| 19 | sol 7 + sağ 7 | 85,0 |
-| 20 | sol 8 + sağ 6 | 85,0 |
-| 21 | arka 5 | 1,0 |
-| 22 | arka 6 | 1,0 |
-| 23 | arka 7 | 1,0 |
-| 24 | arka 8 | 1,0 |
-| 25 | sağ 5 | 1,0 |
+| 1 | ön 1 + arka 4 | 1,3 |
+| 2 | ön 2 + arka 3 | 1,3 |
+| 3 | ön 3 + arka 2 | 1,3 |
+| 4 | ön 4 + arka 1 | 1,3 |
+| 5 | ön 5 | 1,5 |
+| 6 | ön 6 | 1,5 |
+| 7 | ön 7 | 1,5 |
+| 8 | ön 8 | 1,5 |
+| 9 | ön 9 + arka 12 · sol 9 + sağ 9 | 39,2 |
+| 10 | ön 10 + arka 11 | 98,2 |
+| 11 | ön 11 + arka 10 | 98,2 |
+| 12 | ön 12 + arka 9 | 55,2 |
+| 13 | sol 1 + sağ 4 | 1,3 |
+| 14 | sol 2 + sağ 3 | 1,3 |
+| 15 | sol 3 + sağ 2 | 1,3 |
+| 16 | sol 4 + sağ 1 | 1,3 |
+| 17 | sol 5 | 1,5 |
+| 18 | sol 6 + sağ 8 | 85,5 |
+| 19 | sol 7 + sağ 7 | 85,5 |
+| 20 | sol 8 + sağ 6 | 85,5 |
+| 21 | arka 5 | 1,5 |
+| 22 | arka 6 | 1,5 |
+| 23 | arka 7 | 1,5 |
+| 24 | arka 8 | 1,5 |
+| 25 | sağ 5 | 1,5 |

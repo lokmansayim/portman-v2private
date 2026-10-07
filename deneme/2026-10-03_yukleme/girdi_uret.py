@@ -17,6 +17,8 @@ import math
 import sys
 from pathlib import Path
 
+import kural
+
 BURADA = Path(__file__).resolve().parent
 CELIK = BURADA.parent / "2026-10-02_celik"
 sys.path.insert(0, str(CELIK))
@@ -35,9 +37,10 @@ def main() -> int:
     tanim = json.loads(a.tanim.read_text(encoding="utf-8"))
     tanim, sek = secenek_uygula(tanim, a.secenek)
     tipler = json.loads((CELIK / "duvar_tipleri.json").read_text(encoding="utf-8"))
-    kur = json.loads((BURADA / "kurallar.json").read_text(encoding="utf-8"))
+    kur = kural.oku()
     s = hesapla(tanim, tipler, False)
-    c = cati_hesapla(tanim, kur["inis"]["deger"]["orta_inis_esigi_m"] * 100)
+    c = cati_hesapla(tanim, kur["inis"]["deger"]["orta_inis_esigi_m"] * 100, kur["inis"]["deger"].get("olcu", "cephe"),
+                     mahya_bindirme_cm=kur["bindirme_m"]["mahya"]["deger"] * 100)
     td, ti = s["td"], s["ti"]
     W, H = tanim["kapali"]["en"], tanim["kapali"]["boy"]
     dk = kur["kapi_boslugu_m"]["dis"]["deger"]
@@ -79,6 +82,21 @@ def main() -> int:
     if vc and (vc["sirt"] * 10 != vk["sirt_mm"] or vc["genislik"] != vk["genislik_cm"] or vc["dikme_boyu"] != vk["dikme_boyu_cm"]):
         raise SystemExit("Veranda çerçevesi kuraldaki ölçülerden farklı.")
     veranda_m2 = v["en"] * v["boy"] / 1e4 if v else 0.0
+    # panel boyu yukarı yuvarlanır (Lokman, 7 Ekim 2026: sandviç panelde tolerans var; 10 mm'ye). Kural yoksa mm'ye (Excel motorundaki gibi).
+    boy_adimi_mm = (kur.get("panel_boyu_yuvarlama_mm") or {}).get("deger") or 1
+    # sigorta kutusundan kapalı kısmın en uzak köşesine kuş uçuşu mesafe (kablo kuralı; Lokman, 7 Ekim 2026). Kutu, tanımda yeri yazmıyorsa
+    # giriş kapısında sayılır. Ölçü genel modeldeki gibi karkas üzerinden: kapının ortası duvar ekseninde, köşeler karkasın dış köşeleri.
+    en_uzak_m = None
+    giris = next((ac for ac in tanim["acikliklar"] if ac["tur"] == "dis_kapi"), None)
+    if (kur.get("kablo_en_uzak_mesafe") or {}).get("deger") == "sigortadan" and giris:
+        karkas_cm = karkas_mm(tipler, tanim["dis_duvar_tipi"]) / 10
+        kd = (td - karkas_cm) / 2                             # dış kaplamanın kalınlığı
+        eksen = kd + karkas_cm / 2
+        orta = giris["bas"] + giris["en"] / 2
+        kutu = {"dis:alt": (orta, eksen), "dis:ust": (orta, H - eksen), "dis:sol": (eksen, orta), "dis:sag": (W - eksen, orta)}.get(giris["duvar"])
+        if kutu is None:
+            raise SystemExit(f"Giriş kapısının duvarı bilinmiyor: {giris['duvar']}")
+        en_uzak_m = max(math.hypot(x - kutu[0], y - kutu[1]) for x in (kd, W - kd) for y in (kd, H - kd)) / 100
     px, py = c["plan"][0] / 100, c["plan"][1] / 100
     L, Hc = c["cephe"][0] / 100, c["cephe"][1] / 100
     kok = math.sqrt(1 + c["egim"] ** 2)
@@ -111,7 +129,8 @@ def main() -> int:
         elektrik_odalar = None
     ic_kapi = [ac for ac in tanim["acikliklar"] if ac["tur"] == "ic_kapi"]
     kanat = ic_kapi[0]["kanat"] if ic_kapi else [80, 200]
-    yontem = ct.get("yontem", "omega_asik")
+    # tanımda yazmıyorsa: çelik standardı kuralda yazıyorsa o (Lokman, 7 Ekim 2026), yoksa eski varsayılan
+    yontem = ct.get("yontem") or (kur.get("celik_cati_yontemi") or {}).get("deger") or "omega_asik"
     girdi = {
         "sema": "portman.yukleme_girdisi/0.4-taslak",
         "ad": f"{tanim['kod']} · {tanim['ad']} · paket: {tanim['paket']}",
@@ -150,6 +169,9 @@ def main() -> int:
         "elektrik_odalar": elektrik_odalar,
         "tavan_m2": {"beyaz": round(sum(o["alan_m2"] for o in odalar if o["tur"] == "beyaz"), 2),
                      "yesil": round(sum(o["alan_m2"] for o in odalar if o["tur"] == "yesil") + veranda_m2, 2)},
+        # veranda tavanı ayrı (çelikte Boardex: Lokman, 7 Ekim 2026; kural `veranda_tavani`). Brüt = dış ölçüyle; `tavan_m2.yesil` bu alanı içerir.
+        **({"veranda_m2": {"brut": round(veranda_m2, 2)}} if v and kur.get("veranda_tavani") else {}),
+        **({"elektrik_en_uzak_m": round(en_uzak_m, 2)} if en_uzak_m else {}),
         "cati": {
             "tip": ct["tip"], "yontem": yontem, "kaplama": ct.get("kaplama", kur["baz_paket_cati_kaplamasi"]["deger"]), "egim": c["egim"], "plan_m": [px, py],
             "yuzey_m2": round(c["yuzey_m2"], 2), "sacak_kenarlari_m": [px, py, px, py], "sacak_boyu_toplam_m": round(2 * (px + py), 2),
@@ -157,7 +179,7 @@ def main() -> int:
             "mahya_hatti_m": round(c["mahya_hatti_toplam"] / 100, 2),
             # panel boyunun tabanı = eğimli boy + taşma (mühendis, 4 Ekim 2026 12:14: 5 cm; Excel motorundaki gibi mm'ye yukarı).
             # Kaynağı "kural": adedi düşürüyorsa hesap bu boyu en çok 3 cm uzatır (Lokman, 4 Ekim 2026 16:18; `panel_boyu_uzatma`).
-            "panel_boyu_m": math.ceil((min(px, py) / 2 * kok + kur["cati_kaplama_tasma_m"]["deger"]) * 1000 - 1e-9) / 1000,
+            "panel_boyu_m": math.ceil((min(px, py) / 2 * kok + kur["cati_kaplama_tasma_m"]["deger"]) * 1000 / boy_adimi_mm - 1e-9) * boy_adimi_mm / 1000,
             "panel_boyu_kaynak": "kural",
             "bina_eni_m": min(c["ayak_izi"]) / 100, "cati_boyu_m": max(px, py),
             "sacak_alti": ct.get("sacak_alti", "boardex"), "sacak_alti_eni_m": ct["sacak"] / 100,
@@ -172,7 +194,9 @@ def main() -> int:
             + [{"kalem": ("PVC vasistas" if x["ad"] == "60/40" else "PVC pencere"), "boyut": x["ad"], "adet": x["adet"], "durum": "model"} for x in dis.values() if x["ad"] != "dış kapı"]
         ),
         "varsayimlar": [
-            "Çatı kaplaması seçenektir; baz pakette tek kat panel (Lokman, 4 Ekim 01:42). `--kaplama` ile öteki beş seçenek hesaplanır. Panel boyunun tabanı = eğimli boy + 5 cm taşma (mühendis, 4 Ekim 12:14), mm'ye yukarı; adedi düşürüyorsa boy en çok 3 cm uzatılır (Lokman, 4 Ekim 16:18). "
+            "Çatı kaplaması seçenektir; baz pakette tek kat panel (Lokman, 4 Ekim 01:42). `--kaplama` ile öteki beş seçenek hesaplanır. Panel boyunun tabanı = eğimli boy + 5 cm taşma (mühendis, 4 Ekim 12:14), " + (
+                f"{boy_adimi_mm} mm'ye yukarı (Lokman, 7 Ekim 07:45); adedi düşürüyorsa ya da pay inceyse boy en çok 3 cm uzatılır (Lokman, 4 Ekim 16:18; pay koşulu tabanda: teyit bekliyor). "
+                if boy_adimi_mm > 1 else "mm'ye yukarı; adedi düşürüyorsa boy en çok 3 cm uzatılır (Lokman, 4 Ekim 16:18). ") +
             "Kapatma genişliği ürüne göre değişir (Lokman, 4 Ekim 15:18): güncel değerler kurallarda (tek kat panel, kiremit desen sac ve sandviç panel 100 cm); bu girdiye `cati.kapatma_m` yazılırsa o kullanılır.",
             "Kırma çatıda kaplama adedi çatı açılımından: yüzler şerit şerit dizilir, çapraz kesimden artan parça karşı yüzde kullanılır (Lokman, 4 Ekim 01:42; `cati_acilim.py`). "
             "Dizilim her yüzde köşeden başlar; kesim payı 5 mm; yedek panel yok, kesim planı montajcıya verilir (Lokman, 4 Ekim 15:18). Kiremit desen sacda artan parça kullanılmaz (mühendis, 4 Ekim 12:14).",
@@ -182,7 +206,9 @@ def main() -> int:
             "OSB takviyesi: dolap ve TV ünitesi gelen duvarlar katalog görselinden seçildi (mühendis doğruladı); her duvarın o odaya bakan yüzünün tamamı alındı (mühendis, 4 Ekim 12:14). "
             "Geçerli kural bu (Lokman, 4 Ekim 16:18); odanın bütün yüzeyi yalnız bilgi olarak satırın notunda durur. Klima duvarı sayılmaz.",
             "Elektrik: pafta yok; sayılar mühendisin oda başına kuralından (doğruluk payı yaklaşık %75). Salon ile mutfağın aynı mahalde olduğu yerde ikisinin kuralı birlikte uygulandı (mühendis doğruladı).",
-            "Kablo boyunda 'sigortadan evin en uzak mesafesi' kapalı kısmın köşegeni alındı (Excel motorundaki gibi).",
+            ("Kablo boyunda 'sigortadan evin en uzak mesafesi': sigorta kutusu giriş kapısında sayıldı; oradan kapalı kısmın en uzak köşesine, karkas üzerinden "
+             f"{str(en_uzak_m).replace('.', ',')} m (Lokman, 7 Ekim 07:45; kutunun yeri varsayım)." if en_uzak_m is not None else
+             "Kablo boyunda 'sigortadan evin en uzak mesafesi' kapalı kısmın köşegeni alındı (Excel motorundaki gibi)."),
             "Köşebent: yalnız iç köşeler sayıldı; odaya doğru çıkıntı yapan köşeler sayılmaz, veranda tavanının çevresi sayılır (mühendis, 4 Ekim 12:14). Veranda çevresi brüt ölçüyle.",
             "Dış kapı boşluğu 0,95 × 2,10 m (mühendis, 4 Ekim 12:14); katalog çiziminde kapı 100 cm'di.",
             "Boardex zayiatı %8, Boardex 12,5 mm, OSB 11 mm (mühendis, 4 Ekim 12:14; zayiat için Lokman, 4 Ekim 15:18: devam).",

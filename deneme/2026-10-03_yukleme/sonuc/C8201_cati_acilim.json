@@ -5,7 +5,7 @@
  ],
  "egim": 0.33,
  "kapatma_m": 1.0,
- "panel_boyu_m": 4.325,
+ "panel_boyu_m": 4.33,
  "artan_parca_karsi_yuzde": true,
  "baslangic": "sol",
  "baslangic_adi": "her yüzde sol köşeden",
@@ -21,7 +21,7 @@
  "artigi_kullanilmayan_parca": 0,
  "parca_adedi": 42,
  "kesim_payi_m": 0.005,
- "en_dar_pay_m": 0.008,
+ "en_dar_pay_m": 0.013,
  "yuzler": {
   "ön": [
    {
@@ -653,7 +653,7 @@
  "paneller": [
   {
    "no": 1,
-   "artan_boy_m": 0.008,
+   "artan_boy_m": 0.013,
    "kesimler": [
     {
      "boy_m": 4.317,
@@ -666,7 +666,7 @@
   },
   {
    "no": 2,
-   "artan_boy_m": 0.008,
+   "artan_boy_m": 0.013,
    "kesimler": [
     {
      "boy_m": 4.317,
@@ -679,7 +679,7 @@
   },
   {
    "no": 3,
-   "artan_boy_m": 0.008,
+   "artan_boy_m": 0.013,
    "kesimler": [
     {
      "boy_m": 4.317,
@@ -692,7 +692,7 @@
   },
   {
    "no": 4,
-   "artan_boy_m": 0.008,
+   "artan_boy_m": 0.013,
    "kesimler": [
     {
      "boy_m": 4.317,
@@ -705,7 +705,7 @@
   },
   {
    "no": 5,
-   "artan_boy_m": 0.01,
+   "artan_boy_m": 0.015,
    "kesimler": [
     {
      "boy_m": 4.315,
@@ -717,7 +717,7 @@
   },
   {
    "no": 6,
-   "artan_boy_m": 0.01,
+   "artan_boy_m": 0.015,
    "kesimler": [
     {
      "boy_m": 4.315,
@@ -729,7 +729,7 @@
   },
   {
    "no": 7,
-   "artan_boy_m": 0.01,
+   "artan_boy_m": 0.015,
    "kesimler": [
     {
      "boy_m": 4.315,
@@ -741,7 +741,7 @@
   },
   {
    "no": 8,
-   "artan_boy_m": 0.01,
+   "artan_boy_m": 0.015,
    "kesimler": [
     {
      "boy_m": 4.315,
@@ -753,7 +753,7 @@
   },
   {
    "no": 9,
-   "artan_boy_m": 0.387,
+   "artan_boy_m": 0.392,
    "kesimler": [
     {
      "boy_m": 3.778,
@@ -773,7 +773,7 @@
   },
   {
    "no": 10,
-   "artan_boy_m": 0.977,
+   "artan_boy_m": 0.982,
    "kesimler": [
     {
      "boy_m": 3.348,
@@ -786,7 +786,7 @@
   },
   {
    "no": 11,
-   "artan_boy_m": 0.977,
+   "artan_boy_m": 0.982,
    "kesimler": [
     {
      "boy_m": 3.348,
@@ -799,7 +799,7 @@
   },
   {
    "no": 12,
-   "artan_boy_m": 0.547,
+   "artan_boy_m": 0.552,
    "kesimler": [
     {
      "boy_m": 3.778,
@@ -812,7 +812,7 @@
   },
   {
    "no": 13,
-   "artan_boy_m": 0.008,
+   "artan_boy_m": 0.013,
    "kesimler": [
     {
      "boy_m": 4.317,
@@ -825,7 +825,7 @@
   },
   {
    "no": 14,
-   "artan_boy_m": 0.008,
+   "artan_boy_m": 0.013,
    "kesimler": [
     {
      "boy_m": 4.317,
@@ -838,7 +838,7 @@
   },
   {
    "no": 15,
-   "artan_boy_m": 0.008,
+   "artan_boy_m": 0.013,
    "kesimler": [
     {
      "boy_m": 4.317,
@@ -851,7 +851,7 @@
   },
   {
    "no": 16,
-   "artan_boy_m": 0.008,
+   "artan_boy_m": 0.013,
    "kesimler": [
     {
      "boy_m": 4.317,
@@ -864,7 +864,7 @@
   },
   {
    "no": 17,
-   "artan_boy_m": 0.01,
+   "artan_boy_m": 0.015,
    "kesimler": [
     {
      "boy_m": 4.315,
@@ -876,7 +876,7 @@
   },
   {
    "no": 18,
-   "artan_boy_m": 0.85,
+   "artan_boy_m": 0.855,
    "kesimler": [
     {
      "boy_m": 3.475,
@@ -889,7 +889,7 @@
   },
   {
    "no": 19,
-   "artan_boy_m": 0.85,
+   "artan_boy_m": 0.855,
    "kesimler": [
     {
      "boy_m": 3.475,
@@ -902,7 +902,7 @@
   },
   {
    "no": 20,
-   "artan_boy_m": 0.85,
+   "artan_boy_m": 0.855,
    "kesimler": [
     {
      "boy_m": 3.475,
@@ -915,7 +915,7 @@
   },
   {
    "no": 21,
-   "artan_boy_m": 0.01,
+   "artan_boy_m": 0.015,
    "kesimler": [
     {
      "boy_m": 4.315,
@@ -927,7 +927,7 @@
   },
   {
    "no": 22,
-   "artan_boy_m": 0.01,
+   "artan_boy_m": 0.015,
    "kesimler": [
     {
      "boy_m": 4.315,
@@ -939,7 +939,7 @@
   },
   {
    "no": 23,
-   "artan_boy_m": 0.01,
+   "artan_boy_m": 0.015,
    "kesimler": [
     {
      "boy_m": 4.315,
@@ -951,7 +951,7 @@
   },
   {
    "no": 24,
-   "artan_boy_m": 0.01,
+   "artan_boy_m": 0.015,
    "kesimler": [
     {
      "boy_m": 4.315,
@@ -963,7 +963,7 @@
   },
   {
    "no": 25,
-   "artan_boy_m": 0.01,
+   "artan_boy_m": 0.015,
    "kesimler": [
     {
      "boy_m": 4.315,
@@ -986,14 +986,18 @@
  },
  "kesim_payisiz_adet": 25,
  "bir_cm_kesim_payiyla_adet": 25,
- "taban_boy_m": 4.315,
- "taban_adet": 27,
+ "taban_boy_m": 4.32,
+ "taban_adet": 25,
  "uzatma": {
-  "taban_boy_mm": 4315,
-  "taban_adet": 27,
-  "boy_mm": 4325,
+  "taban_boy_mm": 4320,
+  "taban_adet": 25,
+  "boy_mm": 4330,
   "adet": 25,
-  "esik_boy_mm": 4318
+  "esik_boy_mm": null,
+  "neden": "pay",
+  "taban_saglamlik_adet": 27,
+  "saglamlik_adet": 25,
+  "taban_pay_siniri_mm": 7.8
  },
  "uzun_panelle": null
 }

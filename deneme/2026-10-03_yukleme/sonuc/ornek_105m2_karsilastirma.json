@@ -5,6 +5,7 @@
  "cati_kaplamasi": "tek kat panel (baz paket)",
  "cati_kaplamasi_anahtar": "tek_kat_panel",
  "kapali_gruplar": [],
+ "yontem_notu": "Çelikte bu yöntem kullanılmıyor (Lokman, 7 Ekim 2026: çelik yapılarda her çatı tipinde çatı ve tavan paneli); liste yalnız karşılaştırma içindir, yöntemin kuralları prefabrik çalışılınca kesinleşecek.",
  "satirlar": [
   {
    "grup": "Çelik panel",
@@ -54,9 +55,9 @@
    "brut": null,
    "birim": "m",
    "kg": null,
-   "formul": "saçak boyu ÷ (2,5 − 0,30 bindirme)",
+   "formul": "saçak boyu ÷ (2,5 − 0,20 bindirme)",
    "durum": "lokman",
-   "not": "30 cm bindirme Lokman'dan; parça boyu L 2500 listelerden (Lokman'ın örneğinde L 2800 ÷ 2,5)"
+   "not": "20 cm bindirme: Lokman, 7 Ekim 07:45 (önce 30 cm); parça boyu L 2500 listelerden"
   },
   {
    "grup": "Metal aksam",
@@ -80,9 +81,9 @@
    "brut": null,
    "birim": "m",
    "kg": null,
-   "formul": "alın boyu ÷ (2,5 − 0,30 bindirme)",
+   "formul": "alın boyu ÷ (2,5 − 0,20 bindirme)",
    "durum": "lokman",
-   "not": "30 cm bindirme Lokman'dan; parça boyu L 2500 listelerden"
+   "not": "20 cm bindirme: Lokman, 7 Ekim 07:45 (önce 30 cm); parça boyu L 2500 listelerden"
   },
   {
    "grup": "Metal aksam",
@@ -121,7 +122,7 @@
    "kg": null,
    "formul": "(oda tavan çevreleri 109,81 m + 24 iç köşe × 2,7 m) ÷ 2,5",
    "durum": "muhendis",
-   "not": "planı yok: oda başına 4 iç köşe sayıldı (alt sınır)"
+   "not": "planı yok: oda başına 4 iç köşe sayıldı (alt sınır). Önemli bir detay değil; mevcut kural uygulanır (Lokman, 7 Ekim 07:45 ve 08:02)"
   },
   {
    "grup": "Dış cephe kaplama",
@@ -134,7 +135,7 @@
    "kg": null,
    "formul": "(çevre × yükseklik + kolon/kiriş kaplaması + çatı alnı (kalkan) − boşluklar) × 1,08 ÷ 2,88",
    "durum": "excel",
-   "not": "zayiat %8: mühendis, 4 Ekim 12:14; Lokman, 4 Ekim 15:18: bununla devam. 2025 listelerindeki adetler %15'e uyuyor; %15 ile 52 levha"
+   "not": "zayiat %8: mühendis, 4 Ekim 12:14; Lokman, 4 Ekim 15:18: bununla devam. 2025 listelerindeki adetler %15'e uyuyor; %15 ile 52 levha. Kalınlık 12,5 mm: Lokman, 7 Ekim 07:45 (listelerdeki 8 mm hatalı girilmiş; üreticinin belgelerinde 12,5 mm)"
   },
   {
    "grup": "İç cephe kaplama",
@@ -186,7 +187,7 @@
    "kg": null,
    "formul": "tavan alanı × 1,05 ÷ 3,0; yeşil = ıslak hacim + veranda tavanı",
    "durum": "lokman",
-   "not": null
+   "not": "veranda tavanı girdide ayrı yazmıyor: varsa yeşil alçıpanın içinde kaldı (çelikte Boardex olmalı: Lokman, 7 Ekim 07:45)"
   },
   {
    "grup": "İç cephe kaplama",
@@ -202,19 +203,6 @@
    "not": null
   },
   {
-   "grup": "İç cephe kaplama",
-   "kalem": "Duvar izolasyonu",
-   "boyut": "paket 8,64 m²",
-   "adet": 39,
-   "olcu": 335.58,
-   "brut": 365.69,
-   "birim": "m²",
-   "kg": null,
-   "formul": "dış duvar × kat sayısı (80 mm karkasta 1, 140 mm'de 2) + iç duvar − boşluklar; ÷ 8,64",
-   "durum": "uydurma",
-   "not": "dış duvar 2 kat"
-  },
-  {
    "grup": "Çatı kaplamaları",
    "kalem": "Metal kiremit mahyası",
    "boyut": "L 2800",
@@ -223,9 +211,9 @@
    "brut": null,
    "birim": "m",
    "kg": null,
-   "formul": "mahya hattı (tepe + kırmalar) ÷ (2,8 − 0,30 bindirme)",
+   "formul": "mahya hattı (tepe + kırmalar) ÷ (2,8 − 0,20 bindirme)",
    "durum": "lokman",
-   "not": null
+   "not": "20 cm bindirme: Lokman, 7 Ekim 07:45 (önce 30 cm)"
   },
   {
    "grup": "Çatı kaplamaları",
@@ -249,9 +237,22 @@
    "brut": null,
    "birim": "m",
    "kg": null,
-   "formul": "cumbalı çatıda çatıların birleştiği vadi boyu ÷ (2,8 − 0,30)",
+   "formul": "cumbalı çatıda çatıların birleştiği vadi boyu ÷ (2,8 − 0,20)",
    "durum": "lokman",
-   "not": null
+   "not": "20 cm bindirme: Lokman, 7 Ekim 07:45 (önce 30 cm)"
+  },
+  {
+   "grup": "Çatı kaplamaları",
+   "kalem": "Ters mahya kenar kutusu",
+   "boyut": "L 21 × 40 × 21 × 2800",
+   "adet": 6,
+   "olcu": null,
+   "brut": null,
+   "birim": "",
+   "kg": null,
+   "formul": "ters mahya adedi × 2",
+   "durum": "lokman",
+   "not": "cumbalı çatılarda olmazsa olmaz (Lokman, 7 Ekim 08:02); adet ters mahyaya bağlı: ters mahya × 2 (Excel motoru ve Eylül 2026 listesi)"
   },
   {
    "grup": "Çatı kaplamaları",
@@ -265,6 +266,19 @@
    "formul": "(metal kiremit mahyası 10 × 2,8 m + ters mahya 3 × 2,8 m) ÷ 10",
    "durum": "muhendis",
    "not": "formül: mühendis, 4 Ekim 12:14 (Excel motorundaki gibi). Damlalık kullanılmıyor: listede yok, formüldeki terimi de çıkarıldı (Lokman, 4 Ekim 15:18)"
+  },
+  {
+   "grup": "Çatı kaplamaları",
+   "kalem": "Acil müdahale kapağı",
+   "boyut": "adet",
+   "adet": 1,
+   "olcu": null,
+   "brut": null,
+   "birim": "",
+   "kg": null,
+   "formul": "her yapıya 1 adet (standart)",
+   "durum": "lokman",
+   "not": "her yapıya 1 adet, standart (Lokman, 7 Ekim 07:45). Mühendis 4 Ekim'de 'müşteri isterse' demişti"
   },
   {
    "grup": "Dere",
@@ -615,7 +629,7 @@
    "kg": null,
    "formul": "alçıpan ve Boardex levha sayısı × 40; 250'ye yuvarlandı",
    "durum": "excel",
-   "not": null
+   "not": "levha başına 40 yeterli (Lokman, 7 Ekim 07:45)"
   },
   {
    "grup": "Vida",
@@ -647,14 +661,14 @@
    "grup": "Vida",
    "kalem": "Trapez vida (5,5 × 25)",
    "boyut": "adet",
-   "adet": 1750,
-   "olcu": 1596,
+   "adet": 1250,
+   "olcu": 1080,
    "brut": null,
    "birim": "vida",
    "kg": null,
-   "formul": "aşık × 10 + tavan omegası × 10 + saçak omegası × 6 + çelik panel × 10 + köşebent × 6; 250'ye yuvarlandı",
+   "formul": "çelik panel × 10 + köşebent × 6; 250'ye yuvarlandı",
    "durum": "excel",
-   "not": null
+   "not": "Yalnız çelik birleşim yerleri: panel başına sağına soluna 5'er; omega ve aşık için konmaz (Lokman, 7 Ekim 07:45). Köşebent terimi duruyor (08:02)"
   },
   {
    "grup": "Vida",
@@ -731,8 +745,8 @@
    "birim": "m²",
    "kg": null,
    "formul": "bina m² ÷ 15",
-   "durum": "uydurma",
-   "not": "motorda m² × 0,02; iki gerçek listede m² ÷ 15'e denk (5 ve 7)"
+   "durum": "lokman",
+   "not": "önemli değil; formül ne veriyorsa yeterli (Lokman, 7 Ekim 07:45). Formül iki 2025 listesinden; Excel motorunda m² × 0,02"
   },
   {
    "grup": "Vida",
@@ -861,8 +875,8 @@
    "birim": "pencere",
    "kg": null,
    "formul": "pencere adedi",
-   "durum": "uydurma",
-   "not": "motorda mantolamasız cephede + m² × 2/3 var ('ayrıca eklenir'); üç gerçek listede de 8"
+   "durum": "lokman",
+   "not": "pencere başına 1 adet, boyu ne olursa olsun (Lokman, 7 Ekim 07:45)"
   },
   {
    "grup": "Boya",
@@ -874,8 +888,8 @@
    "birim": "m²",
    "kg": null,
    "formul": "bina m² × 0,06",
-   "durum": "motor",
-   "not": null
+   "durum": "lokman",
+   "not": "Excel motorundaki formül (Lokman, 7 Ekim 07:45: motora uy)"
   },
   {
    "grup": "Boya",
@@ -983,11 +997,6 @@
    "hesap": 14,
    "liste": 15,
    "durum": "excel"
-  },
-  "Duvar izolasyonu": {
-   "hesap": 39,
-   "liste": 38,
-   "durum": "uydurma"
   },
   "Metal kiremit mahyası": {
    "hesap": 10,
@@ -1107,7 +1116,7 @@
   "230'luk kesme taşı": {
    "hesap": 7,
    "liste": 7,
-   "durum": "uydurma"
+   "durum": "lokman"
   },
   "İnox taş": {
    "hesap": 11,
@@ -1157,12 +1166,12 @@
   "Silikonize mastik": {
    "hesap": 8,
    "liste": 8,
-   "durum": "uydurma"
+   "durum": "lokman"
   },
   "Dayson": {
    "hesap": 7,
    "liste": 6,
-   "durum": "motor"
+   "durum": "lokman"
   },
   "Poliüretan köpük": {
    "hesap": 2,
@@ -1171,7 +1180,7 @@
   }
  },
  "karsilastirma_ozeti": {
-  "karsilastirilan": 49,
+  "karsilastirilan": 48,
   "ayni": 31
  },
  "celik_kg_karsilastirma": {

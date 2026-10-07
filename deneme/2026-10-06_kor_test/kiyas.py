@@ -129,7 +129,7 @@ BIRIMLER: list[tuple[str, list[int], list]] = [
     ("230'luk kesme taşı", [112], [r"^230'luk kesme taşı$"]),
     ("İnox taş", [113], [r"^İnox taş$"]),
     ("Çırpı ipi", [114], [r"^Çırpı ipi$"]),
-    ("Acil müdahale kapağı", [115], [r"^Çatı müdahale kapağı$"]),
+    ("Acil müdahale kapağı", [115], [r"^Çatı müdahale kapağı$|^Acil müdahale kapağı$"]),
     ("Tavan boyası", [121], [r"^Tavan boyası$"]),
     ("Astar", [122], [r"^Astar$"]),
     ("Silikonize mastik", [123], [r"^Silikonize mastik$"]),

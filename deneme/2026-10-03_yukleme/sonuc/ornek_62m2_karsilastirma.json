@@ -5,6 +5,7 @@
  "cati_kaplamasi": "sandviç panel",
  "cati_kaplamasi_anahtar": "sandvic_panel",
  "kapali_gruplar": [],
+ "yontem_notu": "Çelikte bu yöntem kullanılmıyor (Lokman, 7 Ekim 2026: çelik yapılarda her çatı tipinde çatı ve tavan paneli); liste yalnız karşılaştırma içindir, yöntemin kuralları prefabrik çalışılınca kesinleşecek.",
  "satirlar": [
   {
    "grup": "Çelik panel",
@@ -114,14 +115,14 @@
    "grup": "Metal aksam",
    "kalem": "Saçak sacı (30'luk)",
    "boyut": "L 2500",
-   "adet": 18,
+   "adet": 17,
    "olcu": 37.92,
    "brut": null,
    "birim": "m",
    "kg": null,
-   "formul": "saçak boyu ÷ (2,5 − 0,30 bindirme)",
+   "formul": "saçak boyu ÷ (2,5 − 0,20 bindirme)",
    "durum": "lokman",
-   "not": "30 cm bindirme Lokman'dan; parça boyu L 2500 listelerden (Lokman'ın örneğinde L 2800 ÷ 2,5)"
+   "not": "20 cm bindirme: Lokman, 7 Ekim 07:45 (önce 30 cm); parça boyu L 2500 listelerden"
   },
   {
    "grup": "Metal aksam",
@@ -186,7 +187,7 @@
    "kg": null,
    "formul": "(oda tavan çevreleri 51,83 m + 16 iç köşe × 2,7 m) ÷ 2,5",
    "durum": "muhendis",
-   "not": "planı yok: oda başına 4 iç köşe sayıldı (alt sınır)"
+   "not": "planı yok: oda başına 4 iç köşe sayıldı (alt sınır). Önemli bir detay değil; mevcut kural uygulanır (Lokman, 7 Ekim 07:45 ve 08:02)"
   },
   {
    "grup": "Dış cephe kaplama",
@@ -199,7 +200,7 @@
    "kg": null,
    "formul": "(çevre × yükseklik + kolon/kiriş kaplaması + çatı alnı (kalkan) − boşluklar) × 1,08 ÷ 2,88",
    "durum": "excel",
-   "not": "zayiat %8: mühendis, 4 Ekim 12:14; Lokman, 4 Ekim 15:18: bununla devam. 2025 listelerindeki adetler %15'e uyuyor; %15 ile 32 levha"
+   "not": "zayiat %8: mühendis, 4 Ekim 12:14; Lokman, 4 Ekim 15:18: bununla devam. 2025 listelerindeki adetler %15'e uyuyor; %15 ile 32 levha. Kalınlık 12,5 mm: Lokman, 7 Ekim 07:45 (listelerdeki 8 mm hatalı girilmiş; üreticinin belgelerinde 12,5 mm)"
   },
   {
    "grup": "Dış cephe kaplama",
@@ -264,7 +265,7 @@
    "kg": null,
    "formul": "tavan alanı × 1,05 ÷ 3,0; yeşil = ıslak hacim + veranda tavanı",
    "durum": "lokman",
-   "not": null
+   "not": "veranda tavanı girdide ayrı yazmıyor: varsa yeşil alçıpanın içinde kaldı (çelikte Boardex olmalı: Lokman, 7 Ekim 07:45)"
   },
   {
    "grup": "İç cephe kaplama",
@@ -278,19 +279,6 @@
    "formul": "bütün iç yüzler (beyaz + yeşil net) × 1,05 ÷ 2,98; üst paket",
    "durum": "excel",
    "not": null
-  },
-  {
-   "grup": "İç cephe kaplama",
-   "kalem": "Duvar izolasyonu",
-   "boyut": "paket 8,64 m²",
-   "adet": 19,
-   "olcu": 163.8,
-   "brut": 189.12,
-   "birim": "m²",
-   "kg": null,
-   "formul": "dış duvar × kat sayısı (80 mm karkasta 1, 140 mm'de 2) + iç duvar − boşluklar; ÷ 8,64",
-   "durum": "uydurma",
-   "not": "dış duvar 2 kat"
   },
   {
    "grup": "Çatı kaplamaları",
@@ -314,22 +302,22 @@
    "brut": null,
    "birim": "m",
    "kg": null,
-   "formul": "mahya hattı (tepe + kırmalar) ÷ (2,8 − 0,30 bindirme)",
+   "formul": "mahya hattı (tepe + kırmalar) ÷ (2,8 − 0,20 bindirme)",
    "durum": "lokman",
-   "not": null
+   "not": "20 cm bindirme: Lokman, 7 Ekim 07:45 (önce 30 cm)"
   },
   {
    "grup": "Çatı kaplamaları",
    "kalem": "Sandviç panel kapaması",
    "boyut": "L 2500",
-   "adet": 16,
+   "adet": 17,
    "olcu": 37.92,
    "brut": null,
    "birim": "m",
    "kg": null,
-   "formul": "her saçak kenarı ÷ 2,5, ayrı ayrı yukarı",
-   "durum": "uydurma",
-   "not": "2025 listelerindeki sac kapama. Tek kat panel kapaması listeden çıktı (Lokman, 4 Ekim 16:18); sandviç panelde şimdilik kalıyor (Lokman, 4 Ekim 17:46). Adet formülü 2025 listelerinden çıkarıldı"
+   "formul": "saçak (dere) boyu toplamı ÷ (2,5 − 0,20 bindirme)",
+   "durum": "varsayim",
+   "not": "kapama dere boyunca gider (Lokman, 7 Ekim 07:45); parça L 2500 (08:02), 20 cm bindirme. Adet hesabı Lokman'ın tarifinden geliştirildi; teyit bekliyor"
   },
   {
    "grup": "Çatı kaplamaları",
@@ -346,6 +334,19 @@
   },
   {
    "grup": "Çatı kaplamaları",
+   "kalem": "Acil müdahale kapağı",
+   "boyut": "adet",
+   "adet": 1,
+   "olcu": null,
+   "brut": null,
+   "birim": "",
+   "kg": null,
+   "formul": "her yapıya 1 adet (standart)",
+   "durum": "lokman",
+   "not": "her yapıya 1 adet, standart (Lokman, 7 Ekim 07:45). Mühendis 4 Ekim'de 'müşteri isterse' demişti"
+  },
+  {
+   "grup": "Çatı kaplamaları",
    "kalem": "Çatı şiltesi 80 mm",
    "boyut": "9,6 m²/adet",
    "adet": 8,
@@ -355,7 +356,7 @@
    "kg": null,
    "formul": "çatı boyu × (bina eni + 0,20) ÷ 9,6",
    "durum": "uydurma",
-   "not": null
+   "not": "80 mm: Lokman, 7 Ekim 07:45 (listelerdeki 100 mm hatalı girilmiş)"
   },
   {
    "grup": "Dere",
@@ -379,9 +380,9 @@
    "brut": null,
    "birim": "",
    "kg": null,
-   "formul": "4 köşe + 2 orta (10 m ve üzeri cepheler)",
-   "durum": "lokman",
-   "not": "iniş plana bakarak yerleştirilir; düz saçakta ortalama 5 m'de bir (mühendis, 3 Ekim). Planda elle yerleştirilmediği için Lokman'ın kuralı kullanıldı"
+   "formul": "4 köşe + 2 orta (boyu 9 m'yi geçen dere hatları)",
+   "durum": "uydurma",
+   "not": "her saçak köşesine bir; çok uzun dere hattının ortasına bir tane daha (Lokman, 7 Ekim 07:45). 'Çok uzun' için 9 m eşiği öneridir: dört projenin paftasına ve 82 m² örneğine uyuyor; teyit bekliyor. İniş plana elle yerleştirilirse o sayı kullanılır"
   },
   {
    "grup": "Dere",
@@ -576,14 +577,14 @@
    "kg": null,
    "formul": "alçıpan ve Boardex levha sayısı × 40; 250'ye yuvarlandı",
    "durum": "excel",
-   "not": null
+   "not": "levha başına 40 yeterli (Lokman, 7 Ekim 07:45)"
   },
   {
    "grup": "Vida",
    "kalem": "OSB ve yalıpan vidası (3,9 × 32)",
    "boyut": "adet",
    "adet": 3500,
-   "olcu": 3112,
+   "olcu": 3108,
    "brut": null,
    "birim": "vida",
    "kg": null,
@@ -608,14 +609,14 @@
    "grup": "Vida",
    "kalem": "Trapez vida (5,5 × 25)",
    "boyut": "adet",
-   "adet": 1750,
-   "olcu": 1696,
+   "adet": 1000,
+   "olcu": 990,
    "brut": null,
    "birim": "vida",
    "kg": null,
-   "formul": "aşık × 10 + tavan omegası × 10 + saçak omegası × 6 + çelik panel × 10 + köşebent × 6; 250'ye yuvarlandı",
+   "formul": "çelik panel ve parça C profil (69) × 10 + köşebent × 6; 250'ye yuvarlandı",
    "durum": "excel",
-   "not": null
+   "not": "Yalnız çelik birleşim yerleri: panel başına sağına soluna 5'er; omega ve aşık için konmaz (Lokman, 7 Ekim 07:45). Köşebent terimi duruyor (08:02)"
   },
   {
    "grup": "Vida",
@@ -705,8 +706,8 @@
    "birim": "m²",
    "kg": null,
    "formul": "bina m² ÷ 15",
-   "durum": "uydurma",
-   "not": "motorda m² × 0,02; iki gerçek listede m² ÷ 15'e denk (5 ve 7)"
+   "durum": "lokman",
+   "not": "önemli değil; formül ne veriyorsa yeterli (Lokman, 7 Ekim 07:45). Formül iki 2025 listesinden; Excel motorunda m² × 0,02"
   },
   {
    "grup": "Vida",
@@ -835,8 +836,8 @@
    "birim": "pencere",
    "kg": null,
    "formul": "pencere adedi",
-   "durum": "uydurma",
-   "not": "motorda mantolamasız cephede + m² × 2/3 var ('ayrıca eklenir'); üç gerçek listede de 8"
+   "durum": "lokman",
+   "not": "pencere başına 1 adet, boyu ne olursa olsun (Lokman, 7 Ekim 07:45)"
   },
   {
    "grup": "Boya",
@@ -848,8 +849,8 @@
    "birim": "m²",
    "kg": null,
    "formul": "bina m² × 0,06",
-   "durum": "motor",
-   "not": null
+   "durum": "lokman",
+   "not": "Excel motorundaki formül (Lokman, 7 Ekim 07:45: motora uy)"
   },
   {
    "grup": "Boya",
@@ -875,7 +876,7 @@
   "yalitim_net_m2": 163.8,
   "asik_boyu_m": 161.7,
   "inis_kural": 6,
-  "inis_kural_aciklama": "4 köşe + 2 orta (10 m ve üzeri cepheler)",
+  "inis_kural_aciklama": "4 köşe + 2 orta (boyu 9 m'yi geçen dere hatları)",
   "celik_panel_adedi": 63,
   "kosebent": {
    "tavan_cevresi_m": 51.83,
@@ -926,7 +927,7 @@
  },
  "karsilastirma": {
   "Saçak sacı (30'luk)": {
-   "hesap": 18,
+   "hesap": 17,
    "liste": 17,
    "durum": "lokman"
   },
@@ -990,11 +991,6 @@
    "liste": 39,
    "durum": "excel"
   },
-  "Duvar izolasyonu": {
-   "hesap": 19,
-   "liste": 19,
-   "durum": "uydurma"
-  },
   "Sandviç panel": {
    "hesap": 28,
    "liste": 27,
@@ -1006,9 +1002,9 @@
    "durum": "lokman"
   },
   "Sandviç panel kapaması": {
-   "hesap": 16,
+   "hesap": 17,
    "liste": 16,
-   "durum": "uydurma"
+   "durum": "varsayim"
   },
   "Çatı şiltesi 80 mm": {
    "hesap": 8,
@@ -1023,7 +1019,7 @@
   "Dere iniş borusu": {
    "hesap": 6,
    "liste": 7,
-   "durum": "lokman"
+   "durum": "uydurma"
   },
   "Dere iniş aparatı": {
    "hesap": 6,
@@ -1071,7 +1067,7 @@
    "durum": "excel"
   },
   "Trapez vida (5,5 × 25)": {
-   "hesap": 1750,
+   "hesap": 1000,
    "liste": 1750,
    "durum": "excel"
   },
@@ -1108,7 +1104,7 @@
   "230'luk kesme taşı": {
    "hesap": 5,
    "liste": 5,
-   "durum": "uydurma"
+   "durum": "lokman"
   },
   "İnox taş": {
    "hesap": 7,
@@ -1118,12 +1114,12 @@
   "Silikonize mastik": {
    "hesap": 6,
    "liste": 8,
-   "durum": "uydurma"
+   "durum": "lokman"
   },
   "Dayson": {
    "hesap": 4,
    "liste": 4,
-   "durum": "motor"
+   "durum": "lokman"
   },
   "Poliüretan köpük": {
    "hesap": 2,
@@ -1132,8 +1128,8 @@
   }
  },
  "karsilastirma_ozeti": {
-  "karsilastirilan": 41,
-  "ayni": 28
+  "karsilastirilan": 40,
+  "ayni": 26
  },
  "celik_kg_karsilastirma": {
   "dis": {

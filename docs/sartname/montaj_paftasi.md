@@ -125,7 +125,7 @@ Pafta çalışmasının neyi düzelteceğini gösterdiği için kaydedildi:
 |---|---|---|
 | Müşteri onay paftası | Plan, odalar, doğramalar, tefriş, seçenekler | Plan ve görünüşler tanım dosyasından çiziliyor (`deneme/2026-10-02_celik/`); canlıdaki Motor bayiye giden planı çiziyor. Tefriş ve bu çerçeve yok |
 | Duvar panelleri | Karkas panel bölümlemesi (panel adı, boyu, yeri), birleşim detayları | Bölümleme yok. Karkas modeli (SKP) verilmişse panellerin üye boyları ve et kalınlığı okunuyor; çelik kg oradan (7 Ekim). Model yoksa duvar boyu × birim ağırlık |
-| Tavan omega | Odalar, omega aralığı (60 cm), parça boyu (365) | Genel modelde dizilim var (Eylül 2026 paftasındaki gibi, ilk hat duvar yüzünde; 7 Ekim); varsayılan hesapta adet alan formülüyle. Hangi dizilimin kural olduğu soruldu (yalnız yöntem B) |
+| Tavan omega | Odalar, omega aralığı (60 cm), parça boyu (365) | Genel modelde dizilim var (Eylül 2026 paftasındaki gibi, ilk hat duvar yüzünde; 7 Ekim); varsayılan hesapta adet alan formülüyle. Lokman, 7 Ekim 07:45: duvar yüzünde tavan omegası hattı yok; çelikte tavan omegası hiç yok, dizilim prefabrik çalışılınca kurulacak |
 | Makas ve dere | Makas dizilimi (ad, aralık), saçak çizgisi, iniş yerleri | İniş kuralı ve çatı planı var; makas dizilimi yok (makas ve kiriş ölçüsü açık) |
 | Aşık | Çatı açılımı, aşık aralığı (60 cm; mahya aşığı 20 cm), parça boyu (410) | Genel modelde sıralar yüz yüz kuruluyor (çok düzlemli çatı; 7 Ekim); parçalara bölme yok (yalnız yöntem B) |
 | Çatı kaplaması | Çatı açılımı, dizilim, kesim planı | Kırma çatıda açılım, kesim planı ve kesim ölçüleri var. Çok düzlemli çatıda (beşik, cumba, sundurma) dizilim ve adet var; kesim planı çizimi yok |
@@ -137,6 +137,12 @@ Pafta çalışmasının neyi düzelteceğini gösterdiği için kaydedildi:
 
 Bulunan paftaların hepsi tavan omegası ve aşıkla hazırlanmış (yöntem B). Baz alınan yöntemde (A: çatı ve tavan paneli; Lokman, 3 Ekim 13:27) tavan omegası ve aşık yok. Çıkarım: A yönteminde bu iki paftanın yerini tavan paneli ve çatı paneli yerleşimi alır; klasörlerde örneği yok, Lokman'a sorulacak.
 
+Lokman, 7 Ekim 07:45: çelik konstrüksiyon yapılarda hangi çatı tipi olursa olsun çatı ve tavan paneli kullanılır; omega ve aşık olmaz. Tavan omega ve aşık paftaları bundan sonra yalnız prefabrik setlerde; prefabriğin kuralları sırası gelince birlikte çalışılacak.
+
+## Çizim seti ve paftadaki açıklamalar (7 Ekim)
+
+Kör testte üretilen çizim setini (plan, dört görünüş, pafta, IFC4, perspektifler) Lokman bu haliyle onayladı ve kural olarak kaydedilmesini istedi: "Çizimlerin bu halini çok beğendim burada kalalım sadece açıklamalar kısmını düzelteceğiz"; "bunları kurala ekle paftadaki açıklamaları düzelteceğiz". Kayıt: `cizim_seti.md`. Paftanın altındaki açıklama satırları birlikte düzeltilecek; montaj paftası seti bu çizim setinin üzerine kurulur.
+
 ## Pafta işi başlarken sorulacaklar
 
 1. Duvar ve makas panellerinin bölümlemesi (D01…, MK01…) çelik detay yazılımından mı alınacak, Portman mı üretecek?
@@ -147,7 +153,8 @@ Bulunan paftaların hepsi tavan omegası ve aşıkla hazırlanmış (yöntem B).
 6. Beton planı ve özel büküm sac paftaları sete dahil mi?
 7. Kırma çatıda kaplama paftası: açılım ve kesim planı tek paftada mı, iki paftada mı; kısa yüzlerdeki 10 cm'lik son şerit nasıl gösterilecek?
 8. Aşık: üst kenara (mahya, duvar dibi) ek sıra hangi boşluktan sonra konur; cumba mahyasının yanına sıra konur mu; kırma köşesindeki eğik parçalar kural mı? (7 Ekim, kör test.)
-9. Tavan omegası: duvar yüzünde hat var mı (Eylül 2026 paftası), yok mu (2025 paftaları)? (7 Ekim, kör test.)
+9. Tavan omegası: duvar yüzünde hat var mı (Eylül 2026 paftası), yok mu (2025 paftaları)? (7 Ekim, kör test.) Cevaplandı (Lokman, 7 Ekim 07:45): "Duvar yüzünde tavan omegası yok". 8. ve 9. sorular artık yalnız prefabriği ilgilendiriyor: çelikte aşık ve tavan omegası yok.
+10. Paftadaki açıklamalardan hangileri, nasıl düzeltilecek? (Lokman, 7 Ekim 07:45: birlikte.)
 
 ## Sınırlar
 

@@ -17,6 +17,7 @@ Kullanım:
 """
 from __future__ import annotations
 
+import argparse
 import json
 import math
 import sys
@@ -29,6 +30,7 @@ from ifcopenshell.util.shape_builder import ShapeBuilder
 from shapely.geometry import Polygon
 
 import cati_genel
+import kurallar_oku
 import yapi
 
 BURADA = Path(__file__).resolve().parent
@@ -51,6 +53,7 @@ def _m(v):
 class Uretici:
     def __init__(self, tanim: dict, kur: dict, baslik: str):
         self.t = tanim
+        self.kur = kur
         self.y = yapi.kur(tanim)
         self.c = cati_genel.cati_kur(tanim["cati"], kur)
         f = self.f = ifcopenshell.file(schema="IFC4")
@@ -265,7 +268,10 @@ class Uretici:
     def cati(self):
         c, ct = self.c, self.t["cati"]
         roof = self.urun("IfcRoof", "CATI", "FREEFORM")
-        self.pset(roof, "PortatifEv_Cati", {"Tip": ct["tip"], "Yontem": ct.get("yontem", ""), "Kaplama": ct.get("kaplama", ""), "Yuzey_m2": round(c["yuzey_m2"], 2),
+        celik_yontemi = (self.kur.get("celik_cati_yontemi") or {}).get("deger")      # çelik standardı (Lokman, 7 Ekim 2026); eski kural setinde yok
+        yontem = ct.get("yontem") or celik_yontemi or "omega_asik"
+        self.pset(roof, "PortatifEv_Cati", {"Tip": ct["tip"], "Yontem": ct.get("yontem") or celik_yontemi or "",
+                                            "Kaplama": ct.get("kaplama", ""), "Yuzey_m2": round(c["yuzey_m2"], 2),
                                             "Sacak_m": round(c["kenar_toplam_cm"].get("sacak", 0) / 100, 2), "Mahya_m": round(c["kenar_toplam_cm"].get("mahya", 0) / 100, 2),
                                             "Kirma_m": round(c["kenar_toplam_cm"].get("kirma", 0) / 100, 2), "Vadi_m": round(c["kenar_toplam_cm"].get("vadi", 0) / 100, 2),
                                             "Alin_m": round(c["kenar_toplam_cm"].get("alin", 0) / 100, 2)})
@@ -277,7 +283,8 @@ class Uretici:
             sl = self.urun("IfcSlab", f"CATI_{dz['ad']}", "ROOF", kapsa=False)
             self.temsil(sl, self.levha(ust3, 4.0), "cati")
             self.pset(sl, "PortatifEv_Cati", {"Duzlem": dz["ad"], "Egim_yuzde": round(dz["egim"] * 100, 2), "Yuzey_m2": round(dz["yuzey_m2"], 3), "Plan_m2": round(dz["plan_m2"], 3),
-                                              "UstYapi": dz.get("ust_yapi", "makas + aşık")})
+                                              # makasların üstü: yöntem A'da çatı paneli, yöntem B'de aşık (çelik standardı kuralı yoksa eski metin)
+                                              "UstYapi": dz.get("ust_yapi", "makas + çatı paneli" if celik_yontemi and yontem == "panel" else "makas + aşık")})
             self.qto(sl, "Qto_SlabBaseQuantities", {"GrossArea": round(dz["yuzey_m2"], 3)})
             parcalar.append(sl)
             for e in c["kenarlar"]:                          # serbest kenarlarda alın bandı
@@ -380,9 +387,16 @@ def dogrula(yol: Path) -> dict:
 
 
 def main() -> int:
-    tanim_yolu, cikti = Path(sys.argv[1]), Path(sys.argv[2])
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("tanim", type=Path)
+    ap.add_argument("cikti", type=Path, help="yazılacak IFC dosyası")
+    ap.add_argument("--yontem", choices=("panel", "omega_asik"), help="tanımdaki çatı yöntemi yerine: panel (A; çelik standardı) ya da omega_asik (B; prefabrik yöntemi)")
+    a = ap.parse_args()
+    tanim_yolu, cikti = a.tanim, a.cikti
     t = json.loads(tanim_yolu.read_text(encoding="utf-8"))
-    kur = json.loads((BURADA.parent / "2026-10-03_yukleme" / "kurallar.json").read_text(encoding="utf-8"))
+    if a.yontem:
+        t["cati"]["yontem"] = a.yontem
+    kur = kurallar_oku.oku()
     u = Uretici(t, kur, f"Portman — {t['kod']} · {t['ad']}")
     cikti.parent.mkdir(parents=True, exist_ok=True)
     u.calistir(cikti)

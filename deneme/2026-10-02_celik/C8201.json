@@ -299,7 +299,7 @@
     "mahya_kirmalarda": true,
     "mahya_kaynak": "Lokman, 3 Ekim 2026 11:57: tepeye konan mahya çatının kırmalarına da konur; aynı malzeme",
     "mahya_parca_boyu": 280,
-    "mahya_parca_kaynak": "Parça boyu L 2800: gerçek yükleme listeleri. Bindirme 30 cm (fire dahil): Lokman, 3 Ekim 2026 13:27; L 2800 parçada uzunluk ÷ 2,5.",
+    "mahya_parca_kaynak": "Parça boyu L 2800: gerçek yükleme listeleri. Bindirme 20 cm: Lokman, 7 Ekim 2026 07:45 (\"Bindirmeleri 20 cm yap\"); L 2800 parçada uzunluk ÷ 2,6. Önce 30 cm idi (Lokman, 3 Ekim 2026 13:27). Çizim ve liste bindirmeyi kural dosyasından alır (`bindirme_m.mahya`); buradaki değer onunla aynı tutulur.",
     "kapsam": "kapali+veranda",
     "kaynak": "Lokman, 2 Ekim 2026 20:40 (kırma/dört omuz, %33, saçak 30 cm kaplamalı); kapsam katalog görsellerinden",
     "yontem": "panel",
@@ -307,7 +307,7 @@
     "kaplama": "tek_kat_panel",
     "kaplama_kaynak": "Baz paketin çatı kaplaması tek kat panel: Lokman, 4 Ekim 2026 01:42: \"çatıda baz model Tek Kat panel olarak geçiyor\" (mühendisin ikinci cevabındaki \"Baz paket sandviç panel olarak al\" sözünü düzeltti). Lokman, 3 Ekim 2026 13:27: 'çatı kaplaması' seçenektir: tek kat panel, sandviç panel ya da OSB + nem bariyeri + kiremit desen sac vb. Mühendisin ilk cevapları (3 Ekim): Excel motorundaki (CTKBF V1.1) kaplamalar altı tane; altısı da seçenek olarak hesaplanıyor.",
     "sacak_alti": "boardex",
-    "mahya_bindirme": 30,
+    "mahya_bindirme": 20,
     "sacak_yuzu": "boardex",
     "sacak_yuzu_kaynak": "Lokman, 2 Ekim 2026 22:05: saçak yüzü (topuk + panelin eğimdeki ölçüsü) kaplanır. Ubeydullah, 3 Ekim 2026: \"Saçak omegası gerekmiyor. Saçak yüzü de boardex ile kaplanıyor.\"",
     "inis_kaynak": "Lokman, 3 Ekim 2026 13:27: her köşeye bir iniş, 10 metrelik cephelerin ortasına birer tane; bu modelde toplam 6. Ubeydullah, 3 Ekim 2026: iniş plana bakarak yerleştirilir; düz bir saçakta ortalama 5 metrede bir yazılır. Planda elle yerleştirilmiş iniş yok; yerler kuraldan. Elle yerleştirilirse `inis_noktalari` alanına [x, y] listesi yazılır."

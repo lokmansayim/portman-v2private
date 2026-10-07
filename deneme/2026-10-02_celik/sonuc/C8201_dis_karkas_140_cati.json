@@ -32,7 +32,7 @@
  "mahya_hatti_toplam": 2696.572,
  "mahya_parca_boyu": 280,
  "mahya_parca_adedi_bindirmesiz": 10,
- "mahya_bindirme": 30,
+ "mahya_bindirme": 20,
  "mahya_parca_adedi": 11,
  "inis_noktalari": [
   [
@@ -72,6 +72,7 @@
   1094,
   750
  ],
+ "inis_kurali": "köşeler; boyu 9 m'yi geçen dere hatlarının ortası",
  "oturum_m2": 82.05,
  "yontem": "panel",
  "kaplama": "tek_kat_panel"

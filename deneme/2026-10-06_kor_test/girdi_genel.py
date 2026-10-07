@@ -26,6 +26,7 @@ from shapely.ops import unary_union
 
 import cati_genel
 import tavan_genel
+import kurallar_oku
 import yapi
 
 BURADA = Path(__file__).resolve().parent
@@ -40,6 +41,12 @@ def tr(v: float, n: int = 1) -> str:
 
 def sade(v: float) -> str:
     return tr(v).replace(",0", "")
+
+
+def cati_yontemi(ct: dict, kur: dict) -> str:
+    """Çatı yöntemi: tanımda yazıyorsa o; yazmıyorsa çelik standardı kuralda yazıyorsa o (Lokman, 7 Ekim 2026 07:45: çelikte her zaman çatı ve
+    tavan paneli), kural yoksa eski varsayılan (B: tavan omegası ve aşık)."""
+    return ct.get("yontem") or (kur.get("celik_cati_yontemi") or {}).get("deger") or "omega_asik"
 
 
 def _dizilim(c: dict, kur: dict, kaplama: str, uzat: bool = True) -> dict:
@@ -61,22 +68,38 @@ def _dizilim(c: dict, kur: dict, kaplama: str, uzat: bool = True) -> dict:
         return cati_genel.dizilim(dz, kn, kapatma, tasma, p, paylas, boylar, boy_birlestirme=birlestirme)
 
     d = kos()
+    yv_mm = (kur.get("panel_boyu_yuvarlama_mm") or {}).get("deger")
+    if yv_mm and yv_mm > 1:     # Lokman, 7 Ekim 2026 07:45: panel boyu yukarı yuvarlanır (kuraldaki adıma; 10 mm). Kural yoksa mm'ye yukarı.
+        adim = yv_mm / 10
+        yuvarlanmamis = d["adet"]
+        d = kos(sorted({round(math.ceil(b / adim - 1e-6) * adim, 4) for b in d["boylar_cm"]}))
+        if d["adet"] > yuvarlanmamis:     # boy uzayınca adet artmamalı; artıyorsa dizilim gözden geçirilmeli (sessizce fazla panel yazılmasın)
+            raise SystemExit(f"Panel boyları {yv_mm} mm'ye yukarı yuvarlanınca adet arttı ({yuvarlanmamis} → {d['adet']}); dizilim gözden geçirilmeli.")
     taban = dict(boylar=list(d["boylar_cm"]), adet=d["adet"], boy_adet=dict(d["boy_adet"]))
     uzatma = []
     uz = (kur.get("panel_boyu_uzatma") or {}).get("deger") or {}
     if uzat and uz.get("uygula"):
         boylar = list(d["boylar_cm"])
+        sp = uz["saglamlik_kesim_payi_m"] * 100
+        # Pay koşulu taban boylar için de aranır (kuralda `taban_icin_de`; 7 Ekim 2026): bu boylarla adet, kesim payı 1 cm'ye çıkınca artıyorsa
+        # (pay ince) adedi artırmadan o artışı azaltan boy da adaydır. Anahtar kuralda yoksa eski davranış: yalnız adet düşüyorsa uzatılır.
+        taban_icin_de = bool(uz.get("taban_icin_de"))
         for i in sorted(range(len(boylar)), key=lambda j: -boylar[j]):
+            simdi_sp = kos(boylar, sp)["adet"] if taban_icin_de else d["adet"]
+            ince = simdi_sp > d["adet"]        # yalnız `taban_icin_de` açıkken doğru olabilir
             adaylar = []
             for s in range(1, round(uz["en_cok_m"] / uz["adim_m"]) + 1):
                 b2 = list(boylar)
                 b2[i] = round(boylar[i] + s * uz["adim_m"] * 100, 4)
                 n = kos(b2)["adet"]
-                if n < d["adet"] and kos(b2, uz["saglamlik_kesim_payi_m"] * 100)["adet"] == n:
-                    adaylar.append((n, b2[i]))
+                n_sp = kos(b2, sp)["adet"]
+                if (n < d["adet"] and n_sp == n) or (ince and n == d["adet"] and n_sp < simdi_sp):
+                    adaylar.append((n, n_sp, b2[i]))
             if adaylar:
-                n, yeni = min(adaylar)
-                uzatma.append({"taban_boy_cm": boylar[i], "boy_cm": yeni, "taban_adet": d["adet"], "adet": n})
+                n, n_sp, yeni = min(adaylar)
+                uzatma.append({"taban_boy_cm": boylar[i], "boy_cm": yeni, "taban_adet": d["adet"], "adet": n,
+                               **({"neden": "adet" if n < d["adet"] else "pay", **({"taban_saglamlik_adet": simdi_sp, "saglamlik_adet": n_sp} if n == d["adet"] else {})}
+                                  if taban_icin_de else {})})
                 boylar[i] = yeni
                 d = kos(boylar)
     d["taban"] = taban
@@ -94,6 +117,7 @@ def _renk(renk, kur: dict) -> dict:
 
 
 def metraj(y: dict, c: dict, kur: dict) -> dict:
+    celik_a = bool(kur.get("celik_cati_yontemi"))      # yöntem A'nın genel modeldeki düzeltmeleri bu kuralla birlikte gelir (bkz. `girdi`)
     t = y["tanim"]
     F = y["yuzler"]
     sinif = t["duvar_siniflari"]
@@ -262,7 +286,7 @@ def metraj(y: dict, c: dict, kur: dict) -> dict:
     makasli = unary_union([dz["cokgen"] for dz in asik_dz]) if asik_dz else None
     panelli = [dz for dz in c["duzlemler"] if dz.get("ust_yapi") == "cati_paneli"]
     import ciz_genel
-    inis = ciz_genel.inis_noktalari(c, kur["inis"]["deger"]["orta_inis_esigi_m"] * 100, ct.get("sacak", 30))
+    inis = ciz_genel.inis_noktalari(c, kur["inis"]["deger"]["orta_inis_esigi_m"] * 100, ct.get("sacak", 30), kur["inis"]["deger"].get("olcu", "cephe"))
     # çatı panelli çatının (ek yapı) kenarları: dere, saçak sacı, saçak omegası ve alın sacı yok; saçağı ve alınları Boardex ile kaplanır (gerçek liste)
     ep = kur["ek_yapi_ve_korkuluk"]["deger"]["cati_panelli_cati"]
     adli_dz = {dz["ad"]: dz for dz in c["duzlemler"]}
@@ -300,7 +324,8 @@ def metraj(y: dict, c: dict, kur: dict) -> dict:
         "duvar_dibi": [{"yapi": ad, "boy_m": round(boy, 4)} for ad, boy in dibi.items()],
         "baca_cevresi_m": round(sum(b["cevre_m"] for b in baca if b["catiyi_deler"]), 4),
         # saçak yüzü (yöntem A): saçak kenarı × (topuk + çatı panelinin eğimdeki düşey ölçüsü)
-        "sacak_yuzu_m2": sum(e["boy"] / 100 * (ct.get("topuk", 10) + ct.get("panel_kalinligi", 8) * next(d for d in c["duzlemler"] if d["ad"] == e["duzlemler"][0])["kok"]) / 100 for e in sacaklar),
+        "sacak_yuzu_m2": sum(e["boy"] / 100 * (ct.get("topuk", 10) + ct.get("panel_kalinligi", 8) * next(d for d in c["duzlemler"] if d["ad"] == e["duzlemler"][0])["kok"]) / 100
+                             for e in sacaklar if not (celik_a and panelli_mi(e))),      # çatı panelli ek yapının saçağı ek yapının satırındadır
         "mahya_m": top.get("mahya", 0) / 100, "kirma_m": top.get("kirma", 0) / 100, "vadi_m": top.get("vadi", 0) / 100,
         "alin_m": top.get("alin", 0) / 100, "duvar_dibi_m": top.get("duvar_dibi", 0) / 100, "ust_kenar_m": top.get("ust", 0) / 100,
         "kenarlar": [{"tur": e["tur"], "duzlemler": e["duzlemler"], "boy_m": round(e["boy"] / 100, 4)} for e in c["kenarlar"]],
@@ -330,7 +355,7 @@ def metraj(y: dict, c: dict, kur: dict) -> dict:
     m["dizilim"] = _dizilim(c, kur, kaplama)
     # tavan omegası dizilimi (yöntem B): tavan gözlerinde makaslara dik hatlar
     m["tavan_omegasi"], m["tavan_omegasi_uyarisi"] = None, None
-    if ct.get("yontem", "omega_asik") == "omega_asik":
+    if cati_yontemi(ct, kur) == "omega_asik":
         try:
             m["tavan_omegasi"] = tavan_genel.omega_dizilimi(y, c, kur, m["veranda_brut_geo"])
         except ValueError as e:      # dizilim yalnız `--sablon 2026` ile kullanılır; kurulamaması varsayılan hesabı (alan kuralı) engellemez
@@ -385,12 +410,14 @@ def bilgi_satirlari(y: dict, c: dict, m: dict, kur: dict) -> tuple[list[str], li
     dz = m["dizilim"]
     sag = [
         f"Çatı: {ct.get('tip_adi') or ct['tip'].replace('besik_cumba', 'beşik + cumba').replace('kirma', 'kırma (dört omuz)')} · {len(mc['duzlemler'])} düzlem ({egimler})",
-        f"Yöntem: {'B · tavan omegası ve aşık' if ct.get('yontem') == 'omega_asik' else 'A · çatı ve tavan paneli'} · kaplama: {KAPLAMA_ADI.get(ct.get('kaplama'), '—')} · saçak {ct.get('sacak', 30)} cm · topuk {ct.get('topuk', 10)} cm",
+        f"Yöntem: {'B · tavan omegası ve aşık' if cati_yontemi(ct, kur) == 'omega_asik' else 'A · çatı ve tavan paneli'} · kaplama: {KAPLAMA_ADI.get(ct.get('kaplama'), '—')} · saçak {ct.get('sacak', 30)} cm · topuk {ct.get('topuk', 10)} cm",
         f"Çatı yüzeyi {tr(mc['yuzey_m2'])} m² (plan {tr(mc['plan_m2'])} m²) · mahya kotu {tr(max(k[2] for d in c['duzlemler'] for k in d['ucboyut']), 0)} cm (makas üstü)",
         f"Saçak {tr(mc['sacak_m'], 2)} m · mahya {tr(mc['mahya_m'], 2)} m · kırma {tr(mc['kirma_m'], 2)} m · vadi {tr(mc['vadi_m'], 2)} m · alın (kalkan kenarı) {tr(mc['alin_m'], 2)} m · duvar dibi {tr(mc['duvar_dibi_m'], 2)} m",
         "Kaplama dizilimi: " + " · ".join(f"L {round(b * 10)}: {n}" for b, n in dz["boy_adet"].items()) + f" = {dz['adet']} panel ({sade(dz['kapatma_cm'])} cm kapatır)",
         "Kalkanlar: " + " · ".join(f"{k['ad']} {tr(k['alan_m2'], 2)} m²" for k in m["kalkanlar"]) if m["kalkanlar"] else "Kalkan yok",
-        f"Dere inişi {len(mc['inis_noktalari'])} adet (dere hatlarının uçları; {sade(kur['inis']['deger']['orta_inis_esigi_m'])} m ve daha uzun cephenin ortası) · subasman ve merdiven çizilmedi · ölçüler cm",
+        f"Dere inişi {len(mc['inis_noktalari'])} adet (dere hatlarının uçları; "
+        + (f"boyu {sade(kur['inis']['deger']['orta_inis_esigi_m'])} m'yi geçen dere hattının ortası" if kur["inis"]["deger"].get("olcu") == "dere" else
+           f"{sade(kur['inis']['deger']['orta_inis_esigi_m'])} m ve daha uzun cephenin ortası") + ") · subasman ve merdiven çizilmedi · ölçüler cm",
     ]
     return sol, sag
 
@@ -406,7 +433,10 @@ def girdi(y: dict, c: dict, m: dict, kur: dict, kaynak: str) -> dict:
     dk = kur["kapi_boslugu_m"]["dis"]["deger"]
     ik = kur["kapi_boslugu_m"]["ic"]["deger"]
     ev = kur["celik"]["et_kalinligi_varsayilan"]["deger"]
-    yontem = ct.get("yontem", "omega_asik")
+    yontem = cati_yontemi(ct, kur)
+    # Yöntem A'nın genel modeldeki hesabı (çatı panelli ek yapı tavan ve çatı paneline, saçak yüzüne girmez) çelik standardı kuralıyla birlikte gelir
+    # (`celik_cati_yontemi`; 7 Ekim 2026). Kural yoksa önceki hesap: eski kural setiyle eski çıktı.
+    celik_a = bool(kur.get("celik_cati_yontemi"))
     kaplama = ct.get("kaplama", kur["baz_paket_cati_kaplamasi"]["deger"])
     gr = m["duvar_gruplari"]
     tahmin = t.get("duvar_panelleri") == "tahmin"          # duvarlar üretim paneli değil (katalog modeli): panel adedi kuraldan tahmin edilir
@@ -528,11 +558,13 @@ def girdi(y: dict, c: dict, m: dict, kur: dict, kaynak: str) -> dict:
         "kiris": ({"profil": kiris_prof, "boy_m": round(sum(max(k["kutu"][2] - k["kutu"][0], k["kutu"][3] - k["kutu"][1]) for k in kirisler) / 100, 2),
                    **({} if tahmin else {"adet": len(kirisler), "not": "kiriş boyu ve adedi modelden (" + ", ".join(k["ad"] for k in kirisler) + ")"}),
                    **kiris_pb} if kirisler else None),
-        "cati": {"tip": ct["tip"], "profil": makas_prof, "plan_m2": round(mc["makasli_plan_m2"], 2), "oturum_m2": round(m["oturum_m2"], 2),
+        "cati": {"tip": ct["tip"], "profil": makas_prof, "plan_m2": round(mc["makasli_plan_m2"], 2),
+                 "oturum_m2": round(m["oturum_m2"] - (m["ek_oturum_m2"] if celik_a and yontem == "panel" and mc["panelli_plan_m2"] else 0.0), 2),
                  **({"panel_adedi": makas_adedi, "not": f"plan: makaslı çatının saçak dahil planı; adet modelden ({makas_adedi} makas)"} if makas_adedi else {}),
                  **makas_pb},
-        "tavan_paneli_m2": round(sum(o["alan_m2"] for o in m["odalar"]) + m["veranda_brut_m2"], 2) if yontem == "panel" else None,
-        "cati_paneli_m2": round(mc["yuzey_m2"], 2) if yontem == "panel" else None,
+        "tavan_paneli_m2": round(sum(o["alan_m2"] for o in m["odalar"] if not (celik_a and o["cati_paneli_altinda"])) + m["veranda_brut_m2"], 2) if yontem == "panel" else None,
+        "cati_paneli_m2": (round(sum(dz["yuzey_m2"] for dz in mc["duzlemler"] if dz["ust_yapi"] != "cati_paneli") if celik_a else mc["yuzey_m2"], 2)
+                           if yontem == "panel" else None),
         "ek_cati_paneli": ({"oturum_m2": round(m["ek_oturum_m2"], 2), "plan_m2": round(mc["panelli_plan_m2"], 2), "adet": 1, "profil": cp_prof,
                             "not": ("ek yapının çatısı çatı paneliyle kapatılır (proje notu); adet modelden" + cp_mn) if cm else
                                    "ek yapının çatısı çatı paneliyle kapatılır (proje notu); 100 m² için verilen ağırlık ek yapının oturum alanına oranlandı; adet modelden",
@@ -656,9 +688,12 @@ def main() -> int:
     hedef_grubu.add_argument("--dosya", type=Path, help="çıktı dosyası (adıyla)")
     ap.add_argument("--kaynak", default=None)
     ap.add_argument("--uzerine-yaz", action="store_true", help="aynı adlı, içeriği farklı bir girdi varsa üstüne yaz")
+    ap.add_argument("--yontem", choices=("panel", "omega_asik"), help="tanımdaki çatı yöntemi yerine: panel (A; çelik standardı) ya da omega_asik (B; prefabrik yöntemi)")
     a = ap.parse_args()
     t = json.loads(a.tanim.read_text(encoding="utf-8"))
-    kur = json.loads((YUKLEME / "kurallar.json").read_text(encoding="utf-8"))
+    if a.yontem:
+        t["cati"]["yontem"] = a.yontem
+    kur = kurallar_oku.oku()
     y = yapi.kur(t)
     c = cati_genel.cati_kur(t["cati"], kur)
     m = metraj(y, c, kur)

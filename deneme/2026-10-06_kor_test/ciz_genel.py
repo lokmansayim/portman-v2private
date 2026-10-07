@@ -27,6 +27,7 @@ from shapely.ops import unary_union
 
 import cati_genel
 import sahne as sahne_m
+import kurallar_oku
 import yapi
 
 BURADA = Path(__file__).resolve().parent
@@ -232,8 +233,9 @@ def plan_eksen(ax, y: dict, baslik: str | None = None, bilgi: list[str] | None =
     ax.axis("off")
 
 
-def inis_noktalari(c: dict, esik_cm: float = 1000.0, sacak_cm: float = 30.0) -> list[tuple[float, float, str]]:
+def inis_noktalari(c: dict, esik_cm: float = 1000.0, sacak_cm: float = 30.0, olcu: str = "cephe") -> list[tuple[float, float, str]]:
     """Dere inişleri (Lokman, 3 Ekim 13:27): dere hattının her ucuna (köşe) bir; 10 m ve daha uzun cephenin ortasına bir.
+    `olcu` "dere" ise (Lokman, 7 Ekim 2026 07:45: "çok uzun dere boylarında ortaya 1 tane daha") orta iniş, boyu eşiği geçen dere hattına konur.
     Dere hattı dereli saçak kenarlarıdır (`cati_genel.dere_hatlari`; çatı panelli ek yapıda dere yok); iki hattın buluştuğu köşe tek iniş sayılır.
     Cephe boyu: saçak kenarı − çatının dış köşesinde biten uçlardaki saçak payı."""
     uc: list[tuple[float, float]] = []
@@ -245,7 +247,7 @@ def inis_noktalari(c: dict, esik_cm: float = 1000.0, sacak_cm: float = 30.0) -> 
         for p in (e["p"], e["q"]):
             if not any(math.hypot(p[0] - u[0], p[1] - u[1]) < 1.0 for u in uc):
                 uc.append(p)
-        if e["cephe"] >= esik_cm - 1e-6:
+        if (e["boy"] > esik_cm + 1e-6) if olcu == "dere" else (e["cephe"] >= esik_cm - 1e-6):
             orta.append(((e["p"][0] + e["q"][0]) / 2, (e["p"][1] + e["q"][1]) / 2))
     return [(p[0], p[1], "kose") for p in uc] + [(p[0], p[1], "orta") for p in orta]
 
@@ -397,10 +399,13 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("tanim", type=Path)
     ap.add_argument("--cikti", type=Path, default=BURADA / "cikti")
+    ap.add_argument("--yontem", choices=("panel", "omega_asik"), help="tanımdaki çatı yöntemi yerine: panel (A; çelik standardı) ya da omega_asik (B; prefabrik yöntemi)")
     a = ap.parse_args()
     import girdi_genel
     t = json.loads(a.tanim.read_text(encoding="utf-8"))
-    kur = json.loads((BURADA.parent / "2026-10-03_yukleme" / "kurallar.json").read_text(encoding="utf-8"))
+    if a.yontem:
+        t["cati"]["yontem"] = a.yontem
+    kur = kurallar_oku.oku()
     y = yapi.kur(t)
     c = cati_genel.cati_kur(t["cati"], kur)
     S = sahne_m.sahne_kur(y, c)
@@ -408,7 +413,7 @@ def main() -> int:
     sol, sag = girdi_genel.bilgi_satirlari(y, c, m, kur)
     a.cikti.mkdir(parents=True, exist_ok=True)
     kod = t["kod"].replace("Ç", "C").replace("-", "")
-    inis = inis_noktalari(c, kur["inis"]["deger"]["orta_inis_esigi_m"] * 100, t["cati"].get("sacak", 30))
+    inis = inis_noktalari(c, kur["inis"]["deger"]["orta_inis_esigi_m"] * 100, t["cati"].get("sacak", 30), kur["inis"]["deger"].get("olcu", "cephe"))
     fig, ax = plt.subplots(figsize=(13.5, 11.5), dpi=140)
     plan_eksen(ax, y, baslik=f"{t['kod']} · {t['ad']}\nTASLAK · modelden okunan ölçülerle kuruldu · üretim projesi değildir", bilgi=sol + ["Ölçü zinciri: dış yüzler ve iç duvar aksları · ölçüler cm"])
     fig.savefig(a.cikti / f"{kod}_plan.png", bbox_inches="tight", facecolor="white")

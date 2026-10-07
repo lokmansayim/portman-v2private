@@ -22,6 +22,7 @@ from pathlib import Path
 BURADA = Path(__file__).resolve().parent
 YUKLEME = BURADA.parent / "2026-10-03_yukleme"
 sys.path.insert(0, str(YUKLEME))
+import kurallar_oku  # noqa: E402
 import yukleme  # noqa: E402
 
 ORNEKLER = [("90 m² (Eylül 2025; beşik)", "ornek_90m2"), ("62 m² (Eylül 2025; kırma)", "ornek_62m2"), ("105 m² (Kasım 2025; beşik + cumba)", "ornek_105m2")]
@@ -54,7 +55,7 @@ def main() -> int:
     ap.add_argument("--md", type=Path)
     ap.add_argument("--ozet", action="store_true", help="satırları tek tek yazdırma")
     a = ap.parse_args()
-    kurallar = json.loads((YUKLEME / "kurallar.json").read_text(encoding="utf-8"))
+    kurallar = kurallar_oku.oku()
     cik = ["# Eylül 2026 uygulaması, 2025 tarihli üç gerçek listede", "",
            "`sablon_eski_listeler.py` ile üretilir; elle düzeltilmez. Aynı satır / karşılaştırılan satır: gerçek listede adı aynı olan ve adedi hesaplanan kalemler.", "",
            NOT, "", "| Liste | Bugünkü kurallar | + Eylül 2026 uygulaması |", "|---|---|---|"]

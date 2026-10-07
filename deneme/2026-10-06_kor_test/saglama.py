@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 """Genel motorun sağlaması: Ç8201, Yapı Tanımı 0.5 ile (`C8201_05.json`) genel hattan geçirilir ve 0.4 hattının kayıtlı sonuçlarıyla
 (`../2026-10-02_celik/sonuc`, `../2026-10-03_yukleme/sonuc`) karşılaştırılır. Ayrıca genel kaplama dizilimi, rastgele dikdörtgen kırma
-çatılarda eski dizilimle (`cati_acilim.dizilim`) karşılaştırılır. Fark varsa çıkış kodu 1.
+çatılarda eski dizilimle (`cati_acilim.dizilim`) karşılaştırılır. Panel boyu kuralı (yukarı yuvarlama, uzatma ve pay koşulu) iki motorda ayrı ayrı
+kuruludur; rastgele kırma çatılarda genel motorun seçtiği boy, adet ve uzatmanın nedeni kırma motorununkiyle (`cati_acilim.kural_dizilimi`)
+karşılaştırılır. Fark varsa çıkış kodu 1.
 
 Eylül 2026 katmanının (`yukleme.py --sablon 2026`) değişmezleri de burada denetlenir (bütün örnek girdilerde, Ç8201'de ve kör test girdilerinde):
 varsayılan hesapta `sablon` durumlu satır yoktur ve varsayılan hesap katman kurallardan silinse de aynı listeyi verir; katmanla hesaplanan listede
-varsayılandan farklı olan her satır `sablon`dur, `sablon` olan her satır da gerçekten farklıdır. Geçici dosya yazılmaz.
+varsayılandan farklı olan her satır `sablon`dur, `sablon` olan her satır da gerçekten farklıdır. Geçici dosya yazılmaz; komutla koşulunca özet
+`sonuc/saglama.json`a yazılır (şartname belgesi deneme sayılarını oradan okur).
 
 Karşılaştırılanlar: mahal alanı, çevresi, köşeleri ve boşlukları; dış çevre ve boşluklar; iç duvar boyu; çatı yüzeyi, saçak, mahya hattı,
 aşık sıraları, kaplama adedi ve boyu; yükleme listesinin bütün satırları (kalem, boyut, adet, kg). Bilinen fark: genel motor mahyanın iki yanına
@@ -20,6 +23,7 @@ import copy
 import itertools
 import json
 import math
+import random
 import sys
 from pathlib import Path
 
@@ -30,6 +34,7 @@ import cati_acilim  # noqa: E402
 import yukleme  # noqa: E402
 import cati_genel  # noqa: E402
 import girdi_genel  # noqa: E402
+import kurallar_oku  # noqa: E402
 import yapi  # noqa: E402
 
 
@@ -37,9 +42,9 @@ def yakin(a, b, tol=0.006):
     return abs(a - b) <= tol
 
 
-def main() -> int:
+def main(ozet_yolu: Path | None = None) -> int:
     sorun: list[str] = []
-    kur = json.loads((YUKLEME / "kurallar.json").read_text(encoding="utf-8"))
+    kur = kurallar_oku.oku()
     t = json.loads((BURADA / "C8201_05.json").read_text(encoding="utf-8"))
     y = yapi.kur(t)
     c = cati_genel.cati_kur(t["cati"], kur)
@@ -142,6 +147,36 @@ def main() -> int:
                 fark += 1
                 if fark <= 5:
                     sorun.append(f"dizilim farkı: plan {px} × {py}, eğim {egim}, kapatma {kap}, boy {boy}, paylaş {paylas}: genel {a} / kırma {b}")
+    # 3b) panel boyu kuralı iki motorda aynı mı: yukarı yuvarlama, uzatma (Lokman, 4 Ekim 2026 16:18) ve pay koşulu. Rastgele kırma çatılarda
+    #     genel motorun (`girdi_genel._dizilim`) seçtiği boy, adet ve uzatmanın nedeni ↔ kırma motorununki (`cati_acilim.kural_dizilimi`).
+    #     Kırma motoru dizilime kuraldaki yerden başlar; genel motor soldan. Kural `sol` değilse karşılaştırma yapılmaz (o gün yeniden kurulur).
+    kural_deneme = kural_uzayan = kural_paydan = kural_fark = 0
+    if kur["kirma_cati_dizilim"]["deger"]["baslangic"] == "sol":
+        rnd = random.Random(20261007)
+        yv_mm = (kur.get("panel_boyu_yuvarlama_mm") or {}).get("deger") or 1
+        tasma_m = kur["cati_kaplama_tasma_m"]["deger"]
+        for _ in range(50):
+            px = round(rnd.uniform(6, 16), rnd.choice((1, 2)))
+            py = round(rnd.uniform(4, px), rnd.choice((1, 2)))
+            egim = rnd.choice((0.25, 0.30, 0.33, 0.40))
+            dz = [cati_genel.duzlem_kur(d) for d in kirma(round(px * 100), round(py * 100), egim)]
+            kn = cati_genel.kenarlari_bul(dz)
+            taban = math.ceil((py / 2 * math.sqrt(1 + egim ** 2) + tasma_m) * 1000 / yv_mm - 1e-9) * yv_mm / 1000
+            for kaplama in ("tek_kat_panel", "trapez_sac", "osb_kiremit"):
+                kural_deneme += 1
+                gn = girdi_genel._dizilim({"duzlemler": dz, "kenarlar": kn}, kur, kaplama)
+                kr_ = cati_acilim.kural_dizilimi(kur, {"plan_m": [px, py], "egim": egim, "panel_boyu_m": taban, "panel_boyu_kaynak": "kural"}, kaplama)
+                genel = (gn["adet"], [round(x * 10) for x in gn["boylar_cm"]], [u.get("neden", "var") for u in gn["uzatma"]],
+                         gn["taban"]["adet"], [round(x * 10) for x in gn["taban"]["boylar"]])
+                kirma_ = (kr_["adet"], [round(kr_["boy_m"] * 1000)], [kr_["uzatma"].get("neden", "var")] if kr_["uzatma"] else [],
+                          kr_["taban_adet"], [round(kr_["taban_boy_m"] * 1000)])
+                kural_uzayan += bool(kr_["uzatma"])
+                kural_paydan += bool(kr_["uzatma"]) and kr_["uzatma"].get("neden") == "pay"
+                if genel != kirma_:
+                    kural_fark += 1
+                    if kural_fark <= 5:
+                        sorun.append(f"panel boyu kuralı iki motorda farklı: plan {px} × {py} m, eğim {egim}, {kaplama}: "
+                                     f"genel (adet, boy mm, neden, taban adet, taban boy) {genel} / kırma {kirma_}")
     # 4) Eylül 2026 katmanının değişmezleri
     katmansiz = {a: v for a, v in kur.items() if a != "sablon_2026"}
     girdiler = [("genel Ç8201", g)]
@@ -170,12 +205,17 @@ def main() -> int:
             if farkli != (x["durum"] == yukleme.SABLON):
                 sorun.append(f"katman ({ad}): {x['kalem']} {'farklı ama `sablon` değil' if farkli else '`sablon` ama varsayılandakiyle aynı'}")
     print(f"Ç8201 (0.5) ↔ 0.4: metraj, iki yükleme listesi satır satır; genel dizilim ↔ kırma dizilimi {deneme} deneme; "
+          f"panel boyu kuralı iki motorda {kural_deneme} çatı ve kaplamada ({kural_uzayan} tanesinde boy uzadı); "
           f"Eylül 2026 katmanının değişmezleri {len(girdiler)} girdide")
     for s in sorun:
         print("  SORUN:", s)
     print("toplam sorun", len(sorun))
+    if ozet_yolu:       # belge bu dosyadan okur (elle yazılmasın diye): hangi kural setiyle, kaç deneme, kaç uzatma
+        ozet = {"kural_seti": kur.get("sema"), "dizilim_denemesi": deneme, "kural_denemesi": kural_deneme, "kural_uzayan": kural_uzayan,
+                "kural_pay_kosulundan": kural_paydan, "katman_girdisi": len(girdiler), "sorun": len(sorun)}
+        ozet_yolu.write_text(json.dumps(ozet, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     return 1 if sorun else 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(main(BURADA / "sonuc" / "saglama.json"))

@@ -10,7 +10,7 @@ Kaynak: Lokman'ın anlattıkları (1–4 Ekim 2026; 4 Ekim 15:18 ve 16:18 cevapl
 | Bir üst paket | Dış duvar karkası 140 mm | — |
 | Onun üstü | — | İç duvarlarda 11 mm OSB gibi eklemeler |
 
-- Boardex 12,5 mm; alçıpan 12,5 mm. (2 Ekim 20:24) Mühendis teyit etti: "Boardex 12.5 mm. OSB 11 mm." (4 Ekim 12:14) 2025 tarihli listelerde Boardex 8 mm, OSB 9 mm yazıyor; Excel motorunda Boardex 8 mm.
+- Boardex 12,5 mm; alçıpan 12,5 mm. (2 Ekim 20:24) Mühendis teyit etti: "Boardex 12.5 mm. OSB 11 mm." (4 Ekim 12:14) 2025 tarihli listelerde Boardex 8 mm, OSB 9 mm yazıyor; Excel motorunda Boardex 8 mm. Lokman, 7 Ekim 07:45: doğrusu 12,5 mm; 8 mm hatalı girilmiş, "resmi belgelerinde yazıyor". Kontrol edildi: üreticinin dış cephe levhasının performans beyanında kalınlık 12,5 mm (sistem kitabında 12,5 ve 15 mm; 8 mm yok).
 - Boardex zayiatı %8. (Mühendis, 4 Ekim 12:14) 2025 listelerinin çalışma kitabında %15'ti; o listelerdeki adetler %15'e uyuyor. Fark soruldu; Lokman: "devam et" (4 Ekim 15:18).
 - Baz pakette duvar kalınlığı katmanların toplamıdır: 12,5 + 80 + 12,5 = 105 mm, yani dış duvar da iç duvar da 10,5 cm. (2 Ekim 20:24)
 - Arşivdeki çizimlerde dış duvar 12, iç duvar 11 cm çizilmiş. Fark, çelikteki birleşimlerde vida kabarması ya da içlerde ince sıyırma sıva payıdır. Hesapta kullanılmaz: duvar "sıfır hatalı ve sıvasız" kabul edilir. (2 Ekim 20:24)
@@ -147,3 +147,5 @@ Kapananlar (mühendis, 4 Ekim 12:14): Boardex 12,5 mm ve OSB 11 mm; dış kapı 
 Kapananlar (Lokman, 4 Ekim 15:18): Boardex zayiatı %8 ile devam (2025 listelerinden 2–3 levha az çıkıyor; `yukleme_listesi_yontemi.md`); klima duvarı baz hesapta sayılmaz; makas ve kirişte Excel motoru kıstas.
 
 Kapananlar (Lokman, 4 Ekim 16:18): OSB takviyesinde geçerli kural yalnız dolap ve TV ünitesi gelen duvarlar.
+
+Kapananlar (Lokman, 7 Ekim 07:45 ve 08:02): Boardex 12,5 mm (teyit); duvar izolasyonu gönderilmiyor, yükleme listesinde satırı yok ("Duvar izolasyonu göndermiyoruz yok say"); veranda tavanı çelik yapıda Boardex, prefabrikte yeşil alçıpan; köşebent önemli bir detay değil, mevcut kural uygulanır; çevre ve alan kaplanmış yüzden alınır ("bizdekini al"); alçıpan vidası levha başına 40; mastik pencere başına 1. Ayrıntı: `yukleme_listesi_yontemi.md`.
