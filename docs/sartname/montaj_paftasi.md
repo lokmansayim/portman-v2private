@@ -97,6 +97,19 @@ Yedi proje klasöründe aynı alt klasörler var: `ALPHA`, `Arkitech`, `DXF`, `F
 - **Elektrik.** Excel motorunun notu: sayılar "montaj paftasından sayılır".
 - **Öteki izler.** Dış duvarda çift kat izolasyon (140 mm karkaslı projede); "saçak çıkması: 30 cm / saçak sacı üzerinde boardex" (62 m²); çatı izolasyonunda "çift serim" (105 m²); çift kat projede "Sandviç Panel Kapak L saç: 20 m" (iki ana yüzde onar şerit × 100 cm: kapama saçak boyunca).
 
+## Eylül 2026 projesinin paftaları (kör test KT-01, 6–7 Ekim 2026)
+
+98,7 m², beşik + cumba çatılı, veranda sundurmalı ve müştemilatlı çelik proje. Paftalar, kendi listemiz depoya dondurulduktan sonra okundu; ölçüler iki ayrı oturumda bağımsız ölçüldü. Rapor: `docs/raporlar/2026-10-07_Kor_Test_KT01.md`.
+
+- **Aşık paftası.** 60 ölçü, 189,76 m: 28 sıra (batı 9, doğu 9, cumbanın doğu yüzü 4, veranda 6) ve verandanın kırma köşesinde eğim yönünde duran iki parça (2,82 + 1,70 m). Sıralar saçaktan 60 cm aralıkla. Batı yüzünde üst sıralar cumba mahyasının hizasından (229 cm) yeniden başlıyor. Sundurmada sıralar duvar dibinden aşağı doğru dizili. Üst kenarda ek sıra: doğuda mahyaya 22 cm kalıyor, sıra yok; batıda 33 cm, yok; cumba mahyasında 49 cm, yok. 2025 paftalarıyla birlikte: 90 m² projede boşluk 41 cm ve mahyanın 20 cm altında bir sıra daha var; 62 m² projede bir yüzde 13 cm (sıra yok), ötekinde son sıra 291 cm'de. Yani üst sıranın konduğu boşluk paftalardan kesin çıkmıyor.
+- **Tavan omega paftası.** 55 ölçü, 150,34 m: 39 hat ve verandada 2,32 m'lik tek bir parça. Her tavan gözünde ilk hat duvar yüzünde; karşı yüz 60'ın katına denk geliyorsa orada da hat var (180 cm'lik banyoda 4 hat). Odanın içinden geçen kirişin iki yüzünde birer hat. Verandada hatlar 510 cm (iç yüzler arası). 2025 tarihli 62 ve 90 m² paftalarında duvar yüzünde hat yok: hatlar bir duvar yüzünden yaklaşık 60 cm içeride başlıyor, karşı yüzde 9–57 cm kalıyor.
+- **Dere paftası.** Üç dere hattı (9,64 · 9,64 · 5,18 m); müştemilatın çatı panelli çatısında dere yok. Yedi iniş işareti: hatların beş ucu ve 9,64 m'lik iki saçağın ortasına yakın birer işaret (güney uçtan 528 cm). Dere kapağı, başka bir hatla buluşmayan dört uçta.
+- **Elektrik paftası.** 7 duy, 5 glop, 4 tekli ve 4 çiftli anahtar, 16 tekli, 3 çiftli ve 1 uydu prizi; müştemilatta 2 glop ve kapıda 1 çiftli anahtar, priz yok. Sigorta kutusu ana giriş kapısının yanında.
+- **Çatı kaplaması paftası.** 33 panel: 17 · 6 · 6 · 4; boylar 507,04 · 341,99 · 287,38 · 234,48 cm (listede 10 mm'ye yuvarlanmış). Çapraz kesilen parçalar eşlenmemiş.
+- **Karkas modeli (SKP).** 46 panel, 1223 üye, 1 369,80 m profil. Panellerin üye boyları ve et kalınlığı modelden okunuyor (`deneme/2026-10-06_kor_test/skp_profil.py`); listedeki çelik ağırlıkları bu boylardan çıkıyor.
+
+Bu paftalardaki dizilimler koda şu kadarıyla girdi (`deneme/2026-10-06_kor_test/`): aşık sıraları (`cati_genel.asik_siralari`; paftadan farkı: cumba mahyasının iki yanında iki kısa sıra fazla, kırma köşesindeki iki eğik parça yok), tavan omegası dizilimi (`tavan_genel.py`; 39 hat, 148,06 m; yalnız `--sablon 2026` ile kullanılıyor), dere hatları ve serbest uçlar, kaplama dizilimi (toplam aynı, boylara dağılım farklı).
+
 ## Şablondan kalan yazılar ve elle düzeltmeler
 
 Pafta çalışmasının neyi düzelteceğini gösterdiği için kaydedildi:
@@ -111,11 +124,11 @@ Pafta çalışmasının neyi düzelteceğini gösterdiği için kaydedildi:
 | Pafta | Gereken veri | Bugün elimizde |
 |---|---|---|
 | Müşteri onay paftası | Plan, odalar, doğramalar, tefriş, seçenekler | Plan ve görünüşler tanım dosyasından çiziliyor (`deneme/2026-10-02_celik/`); canlıdaki Motor bayiye giden planı çiziyor. Tefriş ve bu çerçeve yok |
-| Duvar panelleri | Karkas panel bölümlemesi (panel adı, boyu, yeri), birleşim detayları | Yok. Çelik kg duvar boyu × birim ağırlıkla hesaplanıyor |
-| Tavan omega | Odalar, omega aralığı (60 cm), parça boyu (365) | Dizilim yok; adet alan formülüyle (yalnız yöntem B) |
+| Duvar panelleri | Karkas panel bölümlemesi (panel adı, boyu, yeri), birleşim detayları | Bölümleme yok. Karkas modeli (SKP) verilmişse panellerin üye boyları ve et kalınlığı okunuyor; çelik kg oradan (7 Ekim). Model yoksa duvar boyu × birim ağırlık |
+| Tavan omega | Odalar, omega aralığı (60 cm), parça boyu (365) | Genel modelde dizilim var (Eylül 2026 paftasındaki gibi, ilk hat duvar yüzünde; 7 Ekim); varsayılan hesapta adet alan formülüyle. Hangi dizilimin kural olduğu soruldu (yalnız yöntem B) |
 | Makas ve dere | Makas dizilimi (ad, aralık), saçak çizgisi, iniş yerleri | İniş kuralı ve çatı planı var; makas dizilimi yok (makas ve kiriş ölçüsü açık) |
-| Aşık | Çatı açılımı, aşık aralığı (60 cm; mahya aşığı 20 cm), parça boyu (410) | Kırma çatının açılımı var; aşık dizilimi yok (yalnız yöntem B) |
-| Çatı kaplaması | Çatı açılımı, dizilim, kesim planı | Var (kırma çatı): açılım, kesim planı, kesim ölçüleri. Beşik çatı ve cumbalı çatı yok |
+| Aşık | Çatı açılımı, aşık aralığı (60 cm; mahya aşığı 20 cm), parça boyu (410) | Genel modelde sıralar yüz yüz kuruluyor (çok düzlemli çatı; 7 Ekim); parçalara bölme yok (yalnız yöntem B) |
+| Çatı kaplaması | Çatı açılımı, dizilim, kesim planı | Kırma çatıda açılım, kesim planı ve kesim ölçüleri var. Çok düzlemli çatıda (beşik, cumba, sundurma) dizilim ve adet var; kesim planı çizimi yok |
 | Duvar kaplamaları (OSB) | Dolap ve TV ünitesi gelen duvarlar | Var: kural ve modelin tanımındaki duvarlar |
 | Elektrik | Odaların işlevi, işaretlerin yeri | Sayım var (oda başına kural); işaretlerin plandaki yeri yok |
 | Çerçeve | Proje ek detayları, notlar, detay çizimleri | Seçeneklerin çoğu tanımda ve kurallarda; çerçeve ve detay çizimleri şablonda |
@@ -133,6 +146,8 @@ Bulunan paftaların hepsi tavan omegası ve aşıkla hazırlanmış (yöntem B).
 5. Elektrik işaretlerinin yeri kuraldan mı çıkacak, elle mi yerleştirilecek?
 6. Beton planı ve özel büküm sac paftaları sete dahil mi?
 7. Kırma çatıda kaplama paftası: açılım ve kesim planı tek paftada mı, iki paftada mı; kısa yüzlerdeki 10 cm'lik son şerit nasıl gösterilecek?
+8. Aşık: üst kenara (mahya, duvar dibi) ek sıra hangi boşluktan sonra konur; cumba mahyasının yanına sıra konur mu; kırma köşesindeki eğik parçalar kural mı? (7 Ekim, kör test.)
+9. Tavan omegası: duvar yüzünde hat var mı (Eylül 2026 paftası), yok mu (2025 paftaları)? (7 Ekim, kör test.)
 
 ## Sınırlar
 
@@ -140,4 +155,5 @@ Bulunan paftaların hepsi tavan omegası ve aşıkla hazırlanmış (yöntem B).
 - Ana DWG'ler bulutta açık kaynak LibreDWG ile DXF'e çevrilip okundu; Lokman'ın Mac'ine bir şey kurulmadı, dosyalar değişmedi.
 - Parça boyları 62 ve 90 m² projelerde "Omega ve Aşık" ölçü stiliyle yazılmış ölçülerden, 105 m² projede PDF'teki ölçü yazılarından alındı. "En iyi yerleşim" kesim payı sayılmadan hesaplandı; 105 m² aşık paftasında boydan uzun iki ölçü tam boy ve artan parça diye bölündü, saçak sırasındaki iki ölçü parça sayıldı (sayılmazsa en az boy 71 yerine 69).
 - Bağımsız denetim (4 Ekim): sayım, bu hesabı ve sonuçlarını görmeyen ayrı bir Claude oturumuna yeniden yaptırıldı. Parça sayıları, toplam boylar, en az boy sayıları (alt sınırla kanıtlı), iniş işaretlerinin sayısı ve yeri, kaplama yazıları ve hat aralıkları aynı çıktı. Klasör sayımı (13 klasör, 84 PDF) ayrıca denetlenmedi; sayım betiği iki kez koşuldu.
+- Eylül 2026 projesinin (KT-01) DWG'si ve SKP modeli de bulutta okundu (7 Ekim); paftalardaki ölçüler ölçü nesnelerinden, işaretler blok sayımından alındı ve işi görmeyen iki ayrı oturumda yeniden ölçüldü.
 - Müşteri, bayi, çizen ve satış temsilcisi adları alınmadı. Paftalar ve DWG'ler Lokman'ın Mac'inde; çevrilmiş DXF'ler ve onlardan üretilen görüntüler yalnız bu oturumun geçici alanında. Hiçbiri depoda değil.

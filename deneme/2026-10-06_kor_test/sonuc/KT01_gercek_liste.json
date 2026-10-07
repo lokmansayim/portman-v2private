@@ -1,0 +1,1274 @@
+{
+ "sema": "portman.gercek_liste/0.1",
+ "ad": "KT-01 · gerçek yükleme listesi (98,7 m², tek kat çelik; Eylül 2026 şablonu). Ad, iletişim ve hazırlayan satırları alınmadı; listede fiyat yok",
+ "kaynak": {
+  "dosya": "… YUKLEME LISTESI.xlsx (adın başı maskelendi)",
+  "sha256": "a7ff25e64bbee1c7a39961761bc4e11c0d82a8db0e251d4172029243d93a232b",
+  "sayfalar": [
+   "1 KATLI",
+   "PENCERE KAPI"
+  ],
+  "not": "Dondurma commit'inden (6 Ekim 2026 22:47:02 +03) sonra açıldı: 22:47:34 +03"
+ },
+ "bina": {
+  "m2": 98.7,
+  "kat_adedi": 1,
+  "kat_yuksekligi_m": 2.7
+ },
+ "sutunlar": {
+  "adet": "C",
+  "kg": "D (çelik panel grubunda ağırlık)",
+  "kaba_hesap": "F (yuvarlanmamış hesap)",
+  "aciklama": "G (şablondaki formül ve açıklama)"
+ },
+ "satirlar": [
+  {
+   "satir": 11,
+   "grup": "ÇELİK PANEL GRUBU",
+   "kalem": "ZEMİN KAT DIŞ CEPHE DUVAR PANELLERİ",
+   "boyut": "80X45X10X1,2",
+   "adet": 9,
+   "kg": 731.46,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": null
+  },
+  {
+   "satir": 12,
+   "grup": "ÇELİK PANEL GRUBU",
+   "kalem": "ZEMİN KAT İÇ CEPHE DUVAR PANELLERİ",
+   "boyut": "80X45X10X1,2",
+   "adet": 6,
+   "kg": 317.14,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": null
+  },
+  {
+   "satir": 13,
+   "grup": "ÇELİK PANEL GRUBU",
+   "kalem": "KOLON",
+   "boyut": "80X45X10X1,2",
+   "adet": 1,
+   "kg": 14.82,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": null
+  },
+  {
+   "satir": 14,
+   "grup": "ÇELİK PANEL GRUBU",
+   "kalem": "KİRİŞ",
+   "boyut": "80X45X10X1,2",
+   "adet": 3,
+   "kg": 78.72,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": null
+  },
+  {
+   "satir": 15,
+   "grup": "ÇELİK PANEL GRUBU",
+   "kalem": "VEANDA DUVAR",
+   "boyut": "80X45X10X1,2",
+   "adet": 1,
+   "kg": 24.15,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": null
+  },
+  {
+   "satir": 16,
+   "grup": "ÇELİK PANEL GRUBU",
+   "kalem": "VERANDA KORKULUK",
+   "boyut": "80X45X10X0,8",
+   "adet": 2,
+   "kg": 22.29,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": null
+  },
+  {
+   "satir": 17,
+   "grup": "ÇELİK PANEL GRUBU",
+   "kalem": "ÇATI MAKAS PANELLERİ",
+   "boyut": "80X45X10X0,8",
+   "adet": 16,
+   "kg": 471.3,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": null
+  },
+  {
+   "satir": 18,
+   "grup": "ÇELİK PANEL GRUBU",
+   "kalem": "BACA",
+   "boyut": "80X45X10X0,8",
+   "adet": 4,
+   "kg": 44.8,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": null
+  },
+  {
+   "satir": 19,
+   "grup": "ÇELİK PANEL GRUBU",
+   "kalem": "MÜŞTEMİLAT DUVAR",
+   "boyut": "80X45X10X0,8",
+   "adet": 3,
+   "kg": 125.72,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": null
+  },
+  {
+   "satir": 20,
+   "grup": "ÇELİK PANEL GRUBU",
+   "kalem": "MÜŞTEMİLAT ÇATI PANELİ",
+   "boyut": "80X45X10X0,8",
+   "adet": 1,
+   "kg": 76.47,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": null
+  },
+  {
+   "satir": 21,
+   "grup": "ÇELİK PANEL GRUBU",
+   "kalem": "PARÇA C PROFİL",
+   "boyut": "80X45X10X1,2",
+   "adet": 3,
+   "kg": 15,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": null
+  },
+  {
+   "satir": 22,
+   "grup": "ÇELİK PANEL GRUBU",
+   "kalem": "PARÇA C PROFİL",
+   "boyut": "80X45X10X0,8",
+   "adet": 3,
+   "kg": 15,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": null
+  },
+  {
+   "satir": 23,
+   "grup": "ÇELİK PANEL GRUBU",
+   "kalem": "ÇELİK PANEL TOPLAM",
+   "boyut": null,
+   "adet": 52,
+   "kg": 1936.87,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": null
+  },
+  {
+   "satir": 25,
+   "grup": "METAL AKSAM GRUBU",
+   "kalem": "60 LIK TAVAN OMEGASI ( TERS TAVAN )",
+   "boyut": "L: 3750 mm",
+   "adet": 47,
+   "kg": null,
+   "kaba_hesap": 46.189,
+   "hucre_formulu": "=150.34/3.65+5",
+   "aciklama": "Formül: (Toplam 60lık Omega Ölçüsü(m) / 3,65(m)) + 5 Açıklama: 3,65 (m) = 3,75 (m) lik Omegadan 10 cm lik bindirme payı düşülür."
+  },
+  {
+   "satir": 26,
+   "grup": "METAL AKSAM GRUBU",
+   "kalem": "KÖŞEBENT",
+   "boyut": "L: 2500 mm",
+   "adet": 76,
+   "kg": null,
+   "kaba_hesap": 75.496,
+   "hucre_formulu": "=181.24/2.5+3",
+   "aciklama": "Formül: (Toplam Köşebent Uzunluğu (m) / 2,50 (m)) +3"
+  },
+  {
+   "satir": 27,
+   "grup": "METAL AKSAM GRUBU",
+   "kalem": "AŞIK",
+   "boyut": "L: 4200 mm",
+   "adet": 54,
+   "kg": null,
+   "kaba_hesap": 53.228,
+   "hucre_formulu": "=189.77*1.15/4.1",
+   "aciklama": "Formül: ((Toplam Aşık Ölçü Toplamı (m) * 1,15 (Zayiat payı)) / 4,1 (m) Açıklama: 4,1 (m) = 4,2 (m) lik aşık uzunluğundan 10 cm lik bindirme payı düşülür."
+  },
+  {
+   "satir": 28,
+   "grup": "METAL AKSAM GRUBU",
+   "kalem": "( ANTRASİT ) ALIN SACI (30 CMLİK)",
+   "boyut": "L: 300*2500 (mm)",
+   "adet": 10,
+   "kg": null,
+   "kaba_hesap": 9.73,
+   "hucre_formulu": "=22.38/2.3",
+   "aciklama": "Formül: Alın Eğik Kenar Uzunlukları Toplamı (m) / 2,3 (m) Açıklama: 2,3 (m) = 2,5 (m) lik sac uzunluğundan 20 cm lik bindirme payı düşülür."
+  },
+  {
+   "satir": 29,
+   "grup": "METAL AKSAM GRUBU",
+   "kalem": "BAŞ MAKAS Z Sİ",
+   "boyut": "L:2800 mm",
+   "adet": 9,
+   "kg": null,
+   "kaba_hesap": 7.993,
+   "hucre_formulu": "=22.38/2.8",
+   "aciklama": "Formül: (Alın Eğik Kenar Uzunlukları Toplamı (m) / 2,80 (m))"
+  },
+  {
+   "satir": 30,
+   "grup": "METAL AKSAM GRUBU",
+   "kalem": "( ANTRASİT ) SAÇAK SACI (30 CM'LİK) (4 ADET MENFEZLİ)",
+   "boyut": "300*2500 mm",
+   "adet": 11,
+   "kg": null,
+   "kaba_hesap": 10.635,
+   "hucre_formulu": "=24.46/2.3",
+   "aciklama": "Formül: (Çatı Sacak Kenar Uzunlukları Toplamı (m) / 2,3 (m)) Açıklama: 2,3 (m) = 2,5 (m) lik sac uzunluğundan 20 cm lik bindirme payı düşülür."
+  },
+  {
+   "satir": 31,
+   "grup": "METAL AKSAM GRUBU",
+   "kalem": "SAÇAK OMEGASI",
+   "boyut": "L: 100*2500 mm",
+   "adet": 10,
+   "kg": null,
+   "kaba_hesap": 9.184,
+   "hucre_formulu": "=22.96/2.5",
+   "aciklama": "Formül: Çatı Sacak Kenar Uzunlukları Toplamı (m) / 2,5 (m)"
+  },
+  {
+   "satir": 33,
+   "grup": "DIŞ CEPHE KAPLAMA GRUBU",
+   "kalem": "BİNA DIŞ CEPHE BOARDEX",
+   "boyut": "L: 8*1200*2400 mm",
+   "adet": 35,
+   "kg": null,
+   "kaba_hesap": 34.085,
+   "hucre_formulu": "=(43.54*2.7-('PENCERE KAPI'!A8+'PENCERE KAPI'!B8+'PENCERE KAPI'!C8))*1.08/(1.2*2.4)",
+   "aciklama": "Formül: (Dış Cephe Alanı (m2) - (Dış Kapı Alanı (m2)+Pencere Alanı (m2))*1,08) / (1,2*2,4) Açıklama: 1,08 zayiat payıdır. (1,2*2,4) ise boardex alanıdır."
+  },
+  {
+   "satir": 34,
+   "grup": "DIŞ CEPHE KAPLAMA GRUBU",
+   "kalem": "MÜŞTEMİLAT DIŞ CEPHE BOARDEX",
+   "boyut": "L: 8*1200*2400 mm",
+   "adet": 11,
+   "kg": null,
+   "kaba_hesap": 10.887,
+   "hucre_formulu": "=(11.58*2.7-'PENCERE KAPI'!D8)*1.08/(1.2*2.4)",
+   "aciklama": null
+  },
+  {
+   "satir": 35,
+   "grup": "DIŞ CEPHE KAPLAMA GRUBU",
+   "kalem": "BİNA DIŞ CEPHE NEM BARİYERİ",
+   "boyut": "M2",
+   "adet": 89,
+   "kg": null,
+   "kaba_hesap": 88.838,
+   "hucre_formulu": "=(35.96*2.7-('PENCERE KAPI'!A8+'PENCERE KAPI'!B8))*1.08",
+   "aciklama": null
+  },
+  {
+   "satir": 36,
+   "grup": "DIŞ CEPHE KAPLAMA GRUBU",
+   "kalem": "MÜŞTEMİLAT DIŞ CEPHE NEM BARİYERİ",
+   "boyut": "M2",
+   "adet": 32,
+   "kg": null,
+   "kaba_hesap": 31.353,
+   "hucre_formulu": "=(11.58*2.7-'PENCERE KAPI'!D8)*1.08",
+   "aciklama": null
+  },
+  {
+   "satir": 37,
+   "grup": "DIŞ CEPHE KAPLAMA GRUBU",
+   "kalem": "VERANDA BALKON TAVAN BOARDEX",
+   "boyut": "8*1200*2400",
+   "adet": 5,
+   "kg": null,
+   "kaba_hesap": 4.894,
+   "hucre_formulu": "=13.05*1.08/(1.2*2.4)",
+   "aciklama": null
+  },
+  {
+   "satir": 38,
+   "grup": "DIŞ CEPHE KAPLAMA GRUBU",
+   "kalem": "VERANDA İÇ KISIM BOARDEX",
+   "boyut": "8*1200*2400",
+   "adet": 4,
+   "kg": null,
+   "kaba_hesap": 3.635,
+   "hucre_formulu": "=(7.42*2.7+(0.08*2*(3.58+1.7+2.32+1.7))-('PENCERE KAPI'!C8))*1.08/(1.2*2.4)",
+   "aciklama": null
+  },
+  {
+   "satir": 39,
+   "grup": "DIŞ CEPHE KAPLAMA GRUBU",
+   "kalem": "MAKAS ALNI KAPLAMA BOARDEX",
+   "boyut": "8*1200*2400",
+   "adet": 7,
+   "kg": null,
+   "kaba_hesap": 6.326,
+   "hucre_formulu": "=16.87*1.08/(1.2*2.4)",
+   "aciklama": null
+  },
+  {
+   "satir": 40,
+   "grup": "DIŞ CEPHE KAPLAMA GRUBU",
+   "kalem": "BACA KAPLAMA BOARDEX (ÇATI ÜSTÜ)",
+   "boyut": "8*1200*2400",
+   "adet": 1,
+   "kg": null,
+   "kaba_hesap": 0.829,
+   "hucre_formulu": "=(0.52*4+0.13)*1.08/(1.2*2.4)",
+   "aciklama": null
+  },
+  {
+   "satir": 41,
+   "grup": "DIŞ CEPHE KAPLAMA GRUBU",
+   "kalem": "MÜŞTEMİLAT ÇATI PANEL SACAK KAPLAMA BOARDEX",
+   "boyut": "8*1200*2400",
+   "adet": 2,
+   "kg": null,
+   "kaba_hesap": 1.144,
+   "hucre_formulu": "=((3.37*2+5.46)*(0.1+0.15)*1.08)/(1.2*2.4)",
+   "aciklama": null
+  },
+  {
+   "satir": 43,
+   "grup": "İÇ CEPHE KAPLAMA GRUBU",
+   "kalem": "TAVAN BEYAZ ALÇIPAN",
+   "boyut": "L: 1200*2500 mm",
+   "adet": 22,
+   "kg": null,
+   "kaba_hesap": 21.714,
+   "hucre_formulu": "=(60+0.68*3)*1.05/(1.2*2.5)",
+   "aciklama": "Formül: (Tavan Toplam Alan (m2) * 1,05 / (Alçıpan Alanı (m2)) Açıklama: Islak zemin hariç kullanılır."
+  },
+  {
+   "satir": 44,
+   "grup": "İÇ CEPHE KAPLAMA GRUBU",
+   "kalem": "TAVAN YEŞİL ALÇIPAN",
+   "boyut": "L: 1200*2500 mm",
+   "adet": 2,
+   "kg": null,
+   "kaba_hesap": 1.4,
+   "hucre_formulu": "=4*1.05/(1.2*2.5)",
+   "aciklama": "Formül: (WC Tavan Toplam Alan (m2) / ( Alçıpan Alanı (m2)) Açıklama: Islak zeminde kullanılır."
+  },
+  {
+   "satir": 45,
+   "grup": "İÇ CEPHE KAPLAMA GRUBU",
+   "kalem": "MÜŞTEMİLAT TAVAN YEŞİL ALÇIPAN",
+   "boyut": "L: 1200*2500 mm",
+   "adet": 6,
+   "kg": null,
+   "kaba_hesap": 5.478,
+   "hucre_formulu": "=15.65*1.05/(1.2*2.5)",
+   "aciklama": null
+  },
+  {
+   "satir": 46,
+   "grup": "İÇ CEPHE KAPLAMA GRUBU",
+   "kalem": "DUVAR ALÇIPAN BEYAZ",
+   "boyut": "L: 1200*2500 mm",
+   "adet": 48,
+   "kg": null,
+   "kaba_hesap": 47.502,
+   "hucre_formulu": "=(59.16*2.7-('PENCERE KAPI'!A8+'PENCERE KAPI'!F10))*1.05/(1.2*2.5)",
+   "aciklama": "Formül: ((İç Duvar Uzunluklar Toplamı (m) * Kat Yüksekliği (m)) - (İç Duvarların Geldiği Kapı ve Pencere Alanı (m2)) * 1,05 / (Alçıpan Alanı (m2))"
+  },
+  {
+   "satir": 47,
+   "grup": "İÇ CEPHE KAPLAMA GRUBU",
+   "kalem": "DUVAR ALÇIPAN YEŞİL",
+   "boyut": "L: 1200*2500 mm",
+   "adet": 7,
+   "kg": null,
+   "kaba_hesap": 6.915,
+   "hucre_formulu": "=(8.04*2.7-('PENCERE KAPI'!B8+'PENCERE KAPI'!G8))*1.05/(1.2*2.5)",
+   "aciklama": "Formül: ((WC İç Duvar Uzunluklar Toplamı (m) * Kat Yüksekliği (m)) - (WC İç Duvarların Geldiği Kapı ve Pencere Alanı (m2)) * 1,05 / (Alçıpan Alanı (m2))"
+  },
+  {
+   "satir": 48,
+   "grup": "İÇ CEPHE KAPLAMA GRUBU",
+   "kalem": "MÜŞTEMİLAT DUVAR ALÇIPAN YEŞİL",
+   "boyut": "L: 1200*2500 mm",
+   "adet": 10,
+   "kg": null,
+   "kaba_hesap": 9.858,
+   "hucre_formulu": "=(11.26*2.7-('PENCERE KAPI'!D8))*1.05/(1.2*2.5)",
+   "aciklama": null
+  },
+  {
+   "satir": 49,
+   "grup": "İÇ CEPHE KAPLAMA GRUBU",
+   "kalem": "İÇ DUVAR OSB",
+   "boyut": "L: 1220*2440 mm t: 11 mm",
+   "adet": 55,
+   "kg": null,
+   "kaba_hesap": 54.841,
+   "hucre_formulu": "=(67.2*2.7-('PENCERE KAPI'!A8+'PENCERE KAPI'!B8+'PENCERE KAPI'!F10+'PENCERE KAPI'!G8))*1.05/(1.22*2.44)",
+   "aciklama": "Formül: ((Toplam İç Duvar Uzunluğu (m) * Kat Yüksekliği (m)) - (İç Duvarların geldiği Bütün Pencere ve Kapı Alanları Toplamı (m2))) / (OSB Alanı (m2)) Açıklama: Islak zemin de dahil edilir. TV, Klima ve mutfak dolabı arkası dahildir."
+  },
+  {
+   "satir": 50,
+   "grup": "İÇ CEPHE KAPLAMA GRUBU",
+   "kalem": "MÜŞTEMİLAT İÇ DUVAR OSB",
+   "boyut": "L: 1220*2440 mm t: 11 mm",
+   "adet": 10,
+   "kg": null,
+   "kaba_hesap": 9.935,
+   "hucre_formulu": "=(11.26*2.7-('PENCERE KAPI'!D8))*1.05/(1.22*2.44)",
+   "aciklama": null
+  },
+  {
+   "satir": 51,
+   "grup": "İÇ CEPHE KAPLAMA GRUBU",
+   "kalem": "DUVAR İZOLASYONU (KNAUF IBP037)",
+   "boyut": "Paket / 8,64 m²",
+   "adet": 15,
+   "kg": null,
+   "kaba_hesap": 14.708,
+   "hucre_formulu": "=(52.38*2.7-('PENCERE KAPI'!A8+'PENCERE KAPI'!B8+'PENCERE KAPI'!F8+'PENCERE KAPI'!G8))*1.05/8.64",
+   "aciklama": "Formül: ((Dış ve iç duvar uzunlukları toplamı (m) * kat yüksekliği (m)) - (Kapı ve pencere alanı (m2)) / (Paket Alanı (m2)) Açıklama: Çelik panelin içinde kullanılıyor."
+  },
+  {
+   "satir": 53,
+   "grup": "ÇATI KAPLAMALARI GRUBU",
+   "kalem": "(ANTRASİT) SANDVİÇ PANEL ( 100 CM KAPATIR )",
+   "boyut": "5070",
+   "adet": 17,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Açıklama: Autocadde yerleşim yapılarak aded bulunur."
+  },
+  {
+   "satir": 54,
+   "grup": "ÇATI KAPLAMALARI GRUBU",
+   "kalem": "(ANTRASİT) SANDVİÇ PANEL ( 100 CM KAPATIR )",
+   "boyut": "3420",
+   "adet": 6,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": null
+  },
+  {
+   "satir": 55,
+   "grup": "ÇATI KAPLAMALARI GRUBU",
+   "kalem": "(ANTRASİT) SANDVİÇ PANEL ( 100 CM KAPATIR )",
+   "boyut": "2870",
+   "adet": 6,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": null
+  },
+  {
+   "satir": 56,
+   "grup": "ÇATI KAPLAMALARI GRUBU",
+   "kalem": "(ANTRASİT) SANDVİÇ PANEL ( 100 CM KAPATIR )",
+   "boyut": "2340",
+   "adet": 4,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": null
+  },
+  {
+   "satir": 57,
+   "grup": "ÇATI KAPLAMALARI GRUBU",
+   "kalem": "(ANTRASİT) METAL KİREMİT MAHYASI",
+   "boyut": "L: 2800",
+   "adet": 5,
+   "kg": null,
+   "kaba_hesap": 4.942,
+   "hucre_formulu": "=12.85/2.6",
+   "aciklama": "Formül: Çatı yüzeyleri kesişim uzunlukları toplamı (cm) / 260 (cm) Açıklama: 2,6 (m) mahyaların üstüne 20 cm bindirme payları çıkarılmıştır."
+  },
+  {
+   "satir": 58,
+   "grup": "ÇATI KAPLAMALARI GRUBU",
+   "kalem": "(ANTRASİT) SANDVİÇ PANEL KAPAMASI",
+   "boyut": "L: 2800",
+   "adet": 9,
+   "kg": null,
+   "kaba_hesap": 11.738,
+   "hucre_formulu": "=30.52/2.6",
+   "aciklama": "Formül: Çatı sacak uzunlukları toplamı (cm) / 2,5 (m) Açıklama: Panellerin alt açık tarafların kapaması"
+  },
+  {
+   "satir": 59,
+   "grup": "ÇATI KAPLAMALARI GRUBU",
+   "kalem": "(ANTRASİT) MÜŞTEAMİLAT SANDVİÇ PANEL KAPAMASI",
+   "boyut": "L: 2800",
+   "adet": 3,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": null
+  },
+  {
+   "satir": 60,
+   "grup": "ÇATI KAPLAMALARI GRUBU",
+   "kalem": "(ANTRASİT) TERS MAHYA",
+   "boyut": "L: 2800 mm",
+   "adet": 2,
+   "kg": null,
+   "kaba_hesap": 1.231,
+   "hucre_formulu": "=3.2/2.6",
+   "aciklama": "Formül: Ters mahya gelen yerlerin uzunlukları (m) / 2,6 (m) 2,6 (m) mahyaların üstüne 20 cm bindirme payları çıkarılmıştır."
+  },
+  {
+   "satir": 61,
+   "grup": "ÇATI KAPLAMALARI GRUBU",
+   "kalem": "TERS MAHYA KENAR KUTULARI",
+   "boyut": "L: 21*40*21*2800 mm",
+   "adet": 4,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": null
+  },
+  {
+   "satir": 62,
+   "grup": "ÇATI KAPLAMALARI GRUBU",
+   "kalem": "DAMLALIK",
+   "boyut": "L: 2500 mm",
+   "adet": 3,
+   "kg": null,
+   "kaba_hesap": 2.561,
+   "hucre_formulu": "=(0.71+5.18)/2.3",
+   "aciklama": null
+  },
+  {
+   "satir": 63,
+   "grup": "ÇATI KAPLAMALARI GRUBU",
+   "kalem": "MÜŞTAMİLAT DAMLALIK",
+   "boyut": "L: 2500 mm",
+   "adet": 3,
+   "kg": null,
+   "kaba_hesap": 2.374,
+   "hucre_formulu": "=5.46/2.3",
+   "aciklama": null
+  },
+  {
+   "satir": 64,
+   "grup": "ÇATI KAPLAMALARI GRUBU",
+   "kalem": "MAHYA BANDI",
+   "boyut": "Rulo / 10 m",
+   "adet": 4,
+   "kg": null,
+   "kaba_hesap": 3.608,
+   "hucre_formulu": "=(C57*2.8+C60*2.8+C62*2.5+C63*2.5+0.38*2+0.36*2)/10",
+   "aciklama": null
+  },
+  {
+   "satir": 65,
+   "grup": "ÇATI KAPLAMALARI GRUBU",
+   "kalem": "ÇATI İZOLASYONU (IZOCAM-KNAUF) 100 mm",
+   "boyut": "9,6 m² / Paket",
+   "adet": 10,
+   "kg": null,
+   "kaba_hesap": 9.157,
+   "hucre_formulu": "=87.91/9.6",
+   "aciklama": "Formül: Çatı taban alanı (30 cm saçak payı da alınır.) (m2) / 9,6 Açıklama: İki kat yapılırsa şilteden 2 kat yapılır."
+  },
+  {
+   "satir": 67,
+   "grup": "DERE GRUBU",
+   "kalem": "(ANTRASİT) METAL DERE",
+   "boyut": "L: 4000 mm",
+   "adet": 7,
+   "kg": null,
+   "kaba_hesap": 6.437,
+   "hucre_formulu": "=24.46/3.8",
+   "aciklama": "Formül: Toplam dere uzunluğu (m) / 3,8 (m) Açıklama: 3,8 (m) derelerin üstüne 20 cm bindirme payları çıkarılmıştır."
+  },
+  {
+   "satir": 68,
+   "grup": "DERE GRUBU",
+   "kalem": "(ANTRASİT) METAL DERE İNİŞ BORUSU",
+   "boyut": "L: 3000 mm",
+   "adet": 7,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Autocad montaj paftasından sayılır."
+  },
+  {
+   "satir": 69,
+   "grup": "DERE GRUBU",
+   "kalem": "METAL DERE İNİŞİ APARATI",
+   "boyut": "Adet",
+   "adet": 7,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Açıklama: Dere iniş borusu adedi kadardır."
+  },
+  {
+   "satir": 70,
+   "grup": "DERE GRUBU",
+   "kalem": "(ANTRASİT) DERE KAPAĞI",
+   "boyut": "Adet",
+   "adet": 4,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Autocad montaj paftasından sayılır."
+  },
+  {
+   "satir": 71,
+   "grup": "DERE GRUBU",
+   "kalem": "AÇIK DİRSEK",
+   "boyut": "Adet",
+   "adet": 14,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Formül: Dere iniş borusu adedi * 2"
+  },
+  {
+   "satir": 72,
+   "grup": "DERE GRUBU",
+   "kalem": "KAPALI DİRSEK",
+   "boyut": "Adet",
+   "adet": 7,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Formül: Dere iniş borusu adedi * 1"
+  },
+  {
+   "satir": 73,
+   "grup": "DERE GRUBU",
+   "kalem": "METAL İNİŞ KELEPÇESİ",
+   "boyut": "Adet",
+   "adet": 14,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Formül: Dere iniş borusu adedi * 2"
+  },
+  {
+   "satir": 74,
+   "grup": "DERE GRUBU",
+   "kalem": "DERE KELEPÇESİ",
+   "boyut": "Adet",
+   "adet": 56,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Formül: Metal dere adedi * 8"
+  },
+  {
+   "satir": 76,
+   "grup": "KAPI VE PENCERE GRUBU",
+   "kalem": "MELAMİN KAPI ( 80 LİK KANAT )",
+   "boyut": "90X214",
+   "adet": 2,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Autocad montaj paftasından sayılır. OSB + Alçıpan olursa geniş kulak pervaz diye belirt yoksa bişi yazma."
+  },
+  {
+   "satir": 77,
+   "grup": "KAPI VE PENCERE GRUBU",
+   "kalem": "MELAMİN KAPI ( 70 LİK KANAT )",
+   "boyut": "80X214",
+   "adet": 1,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": null
+  },
+  {
+   "satir": 78,
+   "grup": "KAPI VE PENCERE GRUBU",
+   "kalem": "KOMPOZİT ÇELİK KAPI ( SOL )",
+   "boyut": "ALICIYA AİT",
+   "adet": null,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Autocad montaj paftasından sayılır."
+  },
+  {
+   "satir": 79,
+   "grup": "KAPI VE PENCERE GRUBU",
+   "kalem": "MÜŞTEMİLAT KOMPOZİT ÇELİK KAPI ( SOL )",
+   "boyut": "ALICIYA AİT",
+   "adet": null,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": null
+  },
+  {
+   "satir": 80,
+   "grup": "KAPI VE PENCERE GRUBU",
+   "kalem": "PENCERELER",
+   "boyut": "ALICIYA AİT",
+   "adet": null,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Autocad montaj paftasından sayılır."
+  },
+  {
+   "satir": 82,
+   "grup": "ELEKTRİK GRUBU",
+   "kalem": "TİJLİ DUY",
+   "boyut": "Adet",
+   "adet": 7,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Autocad montaj paftasından sayılır."
+  },
+  {
+   "satir": 83,
+   "grup": "ELEKTRİK GRUBU",
+   "kalem": "YUVARLAK GLOP",
+   "boyut": "Adet",
+   "adet": 5,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Autocad montaj paftasından sayılır."
+  },
+  {
+   "satir": 84,
+   "grup": "ELEKTRİK GRUBU",
+   "kalem": "AMPUL",
+   "boyut": "Adet",
+   "adet": 12,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Formül: Tijli Duy Adedi + Yuvarlak Glop Adedi"
+  },
+  {
+   "satir": 85,
+   "grup": "ELEKTRİK GRUBU",
+   "kalem": "NYM KABLO (3 x 2.5)",
+   "boyut": "Metre",
+   "adet": 140,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Formül: (Sigorta adedi * sigortadan eve en uzun uzaklık yaklaşık (m)) + (Priz adedi * 2)"
+  },
+  {
+   "satir": 86,
+   "grup": "ELEKTRİK GRUBU",
+   "kalem": "NYM KABLO (2 x 1.5)",
+   "boyut": "Metre",
+   "adet": 120,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Formül: (Sigorta adedi * sigortadan eve en uzun uzaklık yaklaşık (m)) + (Anahtar adedi * 2)"
+  },
+  {
+   "satir": 87,
+   "grup": "ELEKTRİK GRUBU",
+   "kalem": "UYDU KABLO",
+   "boyut": "Metre",
+   "adet": 25,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Formül: Uydu priz adedi * 25 (m)"
+  },
+  {
+   "satir": 88,
+   "grup": "ELEKTRİK GRUBU",
+   "kalem": "BESLEME KABLOSU ( SİGORTA KUTULARI ARASI )",
+   "boyut": "Metre",
+   "adet": 5,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Formül: Kat adedi * 5 (m)"
+  },
+  {
+   "satir": 89,
+   "grup": "ELEKTRİK GRUBU",
+   "kalem": "BESLEME KABLO BORUSU",
+   "boyut": "Metre",
+   "adet": 5,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Formül: Kat adedi * 5 (m)"
+  },
+  {
+   "satir": 90,
+   "grup": "ELEKTRİK GRUBU",
+   "kalem": "TEKLİ ANAHTAR ( TAKIM )",
+   "boyut": "Adet",
+   "adet": 4,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Autocad montaj paftasından sayılır."
+  },
+  {
+   "satir": 91,
+   "grup": "ELEKTRİK GRUBU",
+   "kalem": "ÇİFTLİ ANAHTAR ( TAKIM )",
+   "boyut": "Adet",
+   "adet": 4,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Autocad montaj paftasından sayılır."
+  },
+  {
+   "satir": 92,
+   "grup": "ELEKTRİK GRUBU",
+   "kalem": "TEKLİ PRİZ ( TAKIM )",
+   "boyut": "Adet",
+   "adet": 16,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Autocad montaj paftasından sayılır."
+  },
+  {
+   "satir": 93,
+   "grup": "ELEKTRİK GRUBU",
+   "kalem": "ÇİFTLİ PRİZ (TAKIM)",
+   "boyut": "Adet",
+   "adet": 3,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Autocad montaj paftasından sayılır."
+  },
+  {
+   "satir": 94,
+   "grup": "ELEKTRİK GRUBU",
+   "kalem": "UYDU PRİZİ ( TAKIM )",
+   "boyut": "Adet",
+   "adet": 1,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Autocad montaj paftasından sayılır."
+  },
+  {
+   "satir": 95,
+   "grup": "ELEKTRİK GRUBU",
+   "kalem": "ZİL",
+   "boyut": "Adet",
+   "adet": 1,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Autocad montaj paftasından sayılır."
+  },
+  {
+   "satir": 96,
+   "grup": "ELEKTRİK GRUBU",
+   "kalem": "BUAT KASA",
+   "boyut": "Adet",
+   "adet": 35,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Formül: Anahtar adedi + priz adedi + oda sayısı Açıklama: Buat, anahtar ve prizlerin kasalarıdır."
+  },
+  {
+   "satir": 97,
+   "grup": "ELEKTRİK GRUBU",
+   "kalem": "W OTOMAT (SİGORTA)",
+   "boyut": "16 Amper",
+   "adet": 9,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Açıklama: Oda Sayısı + ekstra yüksek voltajlı noktalar"
+  },
+  {
+   "satir": 98,
+   "grup": "ELEKTRİK GRUBU",
+   "kalem": "SİGORTA KUTUSU",
+   "boyut": "12 Lİ",
+   "adet": 1,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Formül: Kat adedi"
+  },
+  {
+   "satir": 99,
+   "grup": "ELEKTRİK GRUBU",
+   "kalem": "İZOLE BANT",
+   "boyut": "Adet",
+   "adet": 5,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Formül: Ev m2 * (6/100) Açıklama: 100 m2 evde 5-6 adet kullanılıyor."
+  },
+  {
+   "satir": 100,
+   "grup": "ELEKTRİK GRUBU",
+   "kalem": "KAÇAK AKIM RÖLESİ (İKİLİ)",
+   "boyut": "Adet",
+   "adet": 1,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Açıklama: Tek kat 1 adet ikili, çift katlı ise dörtlü kullanılır."
+  },
+  {
+   "satir": 102,
+   "grup": "VİDA GRUBU",
+   "kalem": "RYSB PUL BAŞLI ( 3.9 x 32 )",
+   "boyut": "Adet",
+   "adet": 750,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Formül: Bina alanı (m2) * (7,5) Açıklama: 100 m2 de 750 adet kullanılır. (750/100=7,5)"
+  },
+  {
+   "satir": 103,
+   "grup": "VİDA GRUBU",
+   "kalem": "ALÇIPAN VİDASI ( 3.5 x 35 )",
+   "boyut": "Adet",
+   "adet": 8000,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Formül: ( Alçıpan + Boardex adedi ) * 50 adet"
+  },
+  {
+   "satir": 104,
+   "grup": "VİDA GRUBU",
+   "kalem": "OSB VE YALIPAN ( 3.9 x 32)",
+   "boyut": "Adet",
+   "adet": 3550,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Formül: (OSB adedi * 50) + (Yalıpan adedi * 8) + (Priz adedi * 4) + (Sacak Sacı * 4) + (Dere Kelepçesi Adedi * 3)"
+  },
+  {
+   "satir": 105,
+   "grup": "VİDA GRUBU",
+   "kalem": "( 5.5 x 25 ) TRAPEZ VİDA (ÇELİK PANEL + AŞIK + OMEGA + KÖŞEBENT)",
+   "boyut": "Adet",
+   "adet": 1800,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Formül: (Çelik Panel * 10) + (Omega * 6) + (Köşebent * 6) + (Aşık * 10) Açıklama: 250 katları genelde gönderiliyor."
+  },
+  {
+   "satir": 106,
+   "grup": "VİDA GRUBU",
+   "kalem": "( 5.5 x 60 ) TRAPEZ VİDA (TRAPEZ SAC / METAL KİREMİT)",
+   "boyut": "Adet",
+   "adet": 250,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Formül: Bina Alan (m2) * 2,5 Açıklama: 100 m2 için 250 adet yeterli. (250/100=2,5) 250 katları genelde gönderiliyor."
+  },
+  {
+   "satir": 107,
+   "grup": "VİDA GRUBU",
+   "kalem": "( 5.5x 110) TRAPEZ VİDA ( SANDVİÇ PANEL)",
+   "boyut": "Adet",
+   "adet": 750,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Formül: (Sandviç panel/200)*adet Açıklama: 250 katları genelde gönderiliyor."
+  },
+  {
+   "satir": 108,
+   "grup": "VİDA GRUBU",
+   "kalem": "ÇELİK DÜBEL ( KLİPSLİ )",
+   "boyut": "Adet",
+   "adet": 42,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Formül: Dış ve İç Cephe Duvar Panel Adedi * 2"
+  },
+  {
+   "satir": 109,
+   "grup": "VİDA GRUBU",
+   "kalem": "ŞASE PUL",
+   "boyut": "Adet",
+   "adet": 42,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Formül: Çelik dübel adedi kadardır."
+  },
+  {
+   "satir": 110,
+   "grup": "VİDA GRUBU",
+   "kalem": "8 LİK TRAPEZ UÇ",
+   "boyut": "Adet",
+   "adet": 7,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Formül: Bina alanı (m2) / 15 Açıklama: 15m2 de 1 adet kullanılır."
+  },
+  {
+   "satir": 111,
+   "grup": "VİDA GRUBU",
+   "kalem": "PH2 UÇ",
+   "boyut": "Adet",
+   "adet": 7,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Formül: Bina alanı (m2) / 15 Açıklama: 15m2 de 1 adet kullanılır."
+  },
+  {
+   "satir": 112,
+   "grup": "VİDA GRUBU",
+   "kalem": "230 LUK KESME TAŞI",
+   "boyut": "Adet",
+   "adet": 2,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Formül: Bina alanı (m2) * 0,02 Açıklama: 100 m2 binada 230'luk kesme taşı 2 adet"
+  },
+  {
+   "satir": 113,
+   "grup": "VİDA GRUBU",
+   "kalem": "İNOX TAŞ",
+   "boyut": "Adet",
+   "adet": 10,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Formül: Bina alanı (m2) / 10 Açıklama: Normal binada inox taş m2 bölü 10"
+  },
+  {
+   "satir": 114,
+   "grup": "VİDA GRUBU",
+   "kalem": "ÇIRPI İPİ",
+   "boyut": "Adet",
+   "adet": 1,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Açıklama: 1 tane yeterli."
+  },
+  {
+   "satir": 115,
+   "grup": "VİDA GRUBU",
+   "kalem": "ACİL MÜDAHELE KAPAĞI",
+   "boyut": "Adet",
+   "adet": 1,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": null
+  },
+  {
+   "satir": 117,
+   "grup": "SIHHİ TESİSAT GRUBU",
+   "kalem": "Tesisat Grubu",
+   "boyut": "ALICIYA AİT",
+   "adet": null,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Açıklama: WC adedi * 6"
+  },
+  {
+   "satir": 119,
+   "grup": "BOYA GRUBU",
+   "kalem": "Dış Cephe Boya",
+   "boyut": "ALICIYA AİT",
+   "adet": null,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Formül: Bina Alanı (m2) * (2/100) Açıklama: 100 m2 ye 2 kova (17,5 kg). 120 m2 de 3 kova(17,5 kg) gider."
+  },
+  {
+   "satir": 120,
+   "grup": "BOYA GRUBU",
+   "kalem": "İç Cephe Boya",
+   "boyut": "ALICIYA AİT",
+   "adet": null,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Formül: Bina Alanı (m2) * (2/100) Açıklama: 100 m2 ye 2 kova (17,5 kg). 120 m2 de 3 kova(17,5 kg) gider."
+  },
+  {
+   "satir": 121,
+   "grup": "BOYA GRUBU",
+   "kalem": "Tavan Boya",
+   "boyut": "Kova (17,5 KG)",
+   "adet": 1,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Formül: Bina Alanı (m2) * (1/100) Açıklama: 100 m2 ye 1 kova (17,5 kg). 120 m2 de 2 kova(17,5 kg) gider."
+  },
+  {
+   "satir": 122,
+   "grup": "BOYA GRUBU",
+   "kalem": "Astar",
+   "boyut": "Kova (17,5 KG)",
+   "adet": 1,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Formül: Bina Alanı (m2) * (1/100) Açıklama: 100 m2 ye 1 kova (17,5 kg). 120 m2 de 2 kova(17,5 kg) gider."
+  },
+  {
+   "satir": 123,
+   "grup": "BOYA GRUBU",
+   "kalem": "Silikonize Mastik (ANTRASİT)",
+   "boyut": "Adet",
+   "adet": 3,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": null
+  },
+  {
+   "satir": 124,
+   "grup": "BOYA GRUBU",
+   "kalem": "Dayson (ANTRASİT)",
+   "boyut": "Adet",
+   "adet": 4,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Formül: Kırma Çatı > Bina Alanı (m2) * 0,06 / Beşik Çatı > Bina Alanı (m2) * 0,03 Açıklama: 100 m2 binada kırma çatıda dayson 6 adet binada beşik çatıda dayson 3 adet (Çatı renginde olacak.)"
+  },
+  {
+   "satir": 125,
+   "grup": "BOYA GRUBU",
+   "kalem": "Poliüretan Köpük",
+   "boyut": "Adet",
+   "adet": 2,
+   "kg": null,
+   "kaba_hesap": null,
+   "hucre_formulu": null,
+   "aciklama": "Köpük standart 2 adet"
+  }
+ ],
+ "pencere_kapi": {
+  "basliklar": {
+   "A1": "DIŞ CEPHE - PENCERE VE DIŞ KAPI",
+   "F1": "İÇ CEPHE - İÇ ODA KAPISI",
+   "A2": "Bina Kuru Zemin",
+   "B2": "Bina Islak Zemin",
+   "C2": "Veranda",
+   "D2": "Müştemilat (Islak Zemin)",
+   "F2": "Bina Kuru Zemin",
+   "G2": "Bina Islak Zemin",
+   "H2": "Müştemilat (Islak Zemin)"
+  },
+  "satirlar": [
+   {
+    "hucre": "A3",
+    "yazi": "2 adet 120x120"
+   },
+   {
+    "hucre": "B3",
+    "yazi": "1 adet 60x40"
+   },
+   {
+    "hucre": "C3",
+    "yazi": "1 adet 358x170"
+   },
+   {
+    "hucre": "D3",
+    "yazi": "1 adet 60x40"
+   },
+   {
+    "hucre": "F3",
+    "yazi": "2 adet 90X214"
+   },
+   {
+    "hucre": "G3",
+    "yazi": "1 adet 80x214"
+   },
+   {
+    "hucre": "A4",
+    "yazi": "3 adet 180x180"
+   },
+   {
+    "hucre": "C4",
+    "yazi": "1 adet 232x170"
+   },
+   {
+    "hucre": "D4",
+    "yazi": "1 adet 95*210"
+   },
+   {
+    "hucre": "A5",
+    "yazi": "1 adet 95*210"
+   },
+   {
+    "hucre": "C5",
+    "yazi": "1 adet 90x200"
+   },
+   {
+    "hucre": "E10",
+    "yazi": "İç oda kuru zemin kapı alanı"
+   }
+  ],
+  "alanlar_m2": {
+   "A8": {
+    "formul": "=2*1.2*1.2+3*1.8*1.8+1*0.95*2.1",
+    "deger": 14.595
+   },
+   "B8": {
+    "formul": "=1*0.6*0.4",
+    "deger": 0.24
+   },
+   "C8": {
+    "formul": "=3.58*1.7+2.32*1.7+0.9*2",
+    "deger": 11.83
+   },
+   "D8": {
+    "formul": "=1*0.6*0.4+1*0.95*2.1",
+    "deger": 2.235
+   },
+   "F8": {
+    "formul": "=2*0.9*2.14",
+    "deger": 3.852
+   },
+   "G8": {
+    "formul": "=1*0.8*2.14",
+    "deger": 1.712
+   },
+   "F10": {
+    "formul": "=F8*2+G8",
+    "deger": 9.416
+   }
+  }
+ }
+}

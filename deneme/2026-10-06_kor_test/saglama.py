@@ -3,26 +3,31 @@
 (`../2026-10-02_celik/sonuc`, `../2026-10-03_yukleme/sonuc`) karşılaştırılır. Ayrıca genel kaplama dizilimi, rastgele dikdörtgen kırma
 çatılarda eski dizilimle (`cati_acilim.dizilim`) karşılaştırılır. Fark varsa çıkış kodu 1.
 
+Eylül 2026 katmanının (`yukleme.py --sablon 2026`) değişmezleri de burada denetlenir (bütün örnek girdilerde, Ç8201'de ve kör test girdilerinde):
+varsayılan hesapta `sablon` durumlu satır yoktur ve varsayılan hesap katman kurallardan silinse de aynı listeyi verir; katmanla hesaplanan listede
+varsayılandan farklı olan her satır `sablon`dur, `sablon` olan her satır da gerçekten farklıdır. Geçici dosya yazılmaz.
+
 Karşılaştırılanlar: mahal alanı, çevresi, köşeleri ve boşlukları; dış çevre ve boşluklar; iç duvar boyu; çatı yüzeyi, saçak, mahya hattı,
-aşık boyu, kaplama adedi ve boyu; yükleme listesinin bütün satırları (kalem, boyut, adet, kg). Bilinen fark: yok.
+aşık sıraları, kaplama adedi ve boyu; yükleme listesinin bütün satırları (kalem, boyut, adet, kg). Bilinen fark: genel motor mahyanın iki yanına
+ayrıca mahya aşığı eklemez (6 Ekim 2026 kıyası; aşık yalnız yöntem B'dedir, karşılaştırılan iki liste yöntem A).
 
 Kullanım:
     python saglama.py
 """
 from __future__ import annotations
 
+import copy
 import itertools
 import json
 import math
-import subprocess
 import sys
-import tempfile
 from pathlib import Path
 
 BURADA = Path(__file__).resolve().parent
 YUKLEME = BURADA.parent / "2026-10-03_yukleme"
 sys.path.insert(0, str(YUKLEME))
 import cati_acilim  # noqa: E402
+import yukleme  # noqa: E402
 import cati_genel  # noqa: E402
 import girdi_genel  # noqa: E402
 import yapi  # noqa: E402
@@ -89,34 +94,34 @@ def main() -> int:
     if not no or [(x["mahal"], x["boy_m"], x["bosluk_m2"]) for x in eo["duvarlar"]] != [(x["mahal"], x["boy_m"], x["bosluk_m2"]) for x in no["duvarlar"]] \
             or (eo["brut_m2"], eo["net_m2"]) != (no["brut_m2"], no["net_m2"]):
         sorun.append(f"osb_takviye: {eo} / {no}")
-    # aşık boyu (yöntem B'de kullanılır): eski kural halkalarla, genel motor yüz yüz sıralarla
-    eski_asik = sum(2 * ((11.54 - 2 * i * 0.6 / math.sqrt(1 + 0.33 ** 2)) + (8.10 - 2 * i * 0.6 / math.sqrt(1 + 0.33 ** 2))) for i in range(8)) + 2 * (11.54 - 8.10)
-    if not yakin(eski_asik, m["cati"]["asik_boyu_m"], 0.02):
-        sorun.append(f"aşık boyu: {eski_asik:.2f} / {m['cati']['asik_boyu_m']:.2f}")
+    # aşık boyu (yöntem B'de kullanılır): eski kural halkalarla, genel motor yüz yüz sıralarla. Sıralar aynıdır (8 halka = her yüzde 8 sıra).
+    # Bilinen fark: eski kural mahyanın iki yanına ayrıca birer mahya aşığı ekler (2 × 3,44 m); genel motor, kör test projesinin aşık paftasındaki
+    # gibi, son sıra ile mahya arasında 30 cm'den fazla boşluk yoksa eklemez (Ç8201'de boşluk 6,5 cm).
+    halkalar = sum(2 * ((11.54 - 2 * i * 0.6 / math.sqrt(1 + 0.33 ** 2)) + (8.10 - 2 * i * 0.6 / math.sqrt(1 + 0.33 ** 2))) for i in range(8))
+    if not yakin(halkalar, m["cati"]["asik_boyu_m"], 0.02):
+        sorun.append(f"aşık boyu (halkalar): {halkalar:.2f} / {m['cati']['asik_boyu_m']:.2f}")
     # 2) yükleme listesi: baz (yöntem A) ve öteki panel kaplaması; satır satır
-    with tempfile.TemporaryDirectory() as td:
-        gy = Path(td) / "girdi.json"
-        gy.write_text(json.dumps(g, ensure_ascii=False), encoding="utf-8")
-        for kaplama, eski_ad in ((None, "C8201_yukleme_taslak.json"), ("sandvic_panel", "C8201_kaplama_sandvic_panel.json")):
-            cy = Path(td) / "cikti.json"
-            komut = [sys.executable, str(YUKLEME / "yukleme.py"), str(gy), "--cikti", str(cy)] + (["--kaplama", kaplama] if kaplama else [])
-            r = subprocess.run(komut, capture_output=True, text=True)
-            if r.returncode != 0:
-                sorun.append(f"yukleme.py koşmadı ({kaplama}): {r.stderr[-300:]}")
-                continue
-            yeni = json.loads(cy.read_text(encoding="utf-8"))["satirlar"]
-            esk = json.loads((YUKLEME / "sonuc" / eski_ad).read_text(encoding="utf-8"))["satirlar"]
-            anahtar = lambda s: (s["grup"], s["kalem"], s["boyut"], s["adet"], None if s["kg"] is None else round(s["kg"]))
-            if [anahtar(s) for s in esk] != [anahtar(s) for s in yeni]:
-                a, b = [anahtar(s) for s in esk], [anahtar(s) for s in yeni]
-                for x in a:
-                    if x not in b:
-                        sorun.append(f"liste ({eski_ad}) 0.4'te var, genelde yok ya da farklı: {x}")
-                for x in b:
-                    if x not in a:
-                        sorun.append(f"liste ({eski_ad}) genelde var, 0.4'te yok ya da farklı: {x}")
-                if sorted(map(str, a)) == sorted(map(str, b)):
-                    sorun.append(f"liste ({eski_ad}): satırlar aynı, sıra farklı")
+    for kaplama, eski_ad in ((None, "C8201_yukleme_taslak.json"), ("sandvic_panel", "C8201_kaplama_sandvic_panel.json")):
+        gk = copy.deepcopy(g)
+        if kaplama:
+            gk["cati"]["kaplama"] = kaplama
+        try:
+            yeni = yukleme.hesapla(gk, kur)["satirlar"]
+        except SystemExit as e:
+            sorun.append(f"yükleme listesi hesaplanamadı ({kaplama}): {e}")
+            continue
+        esk = json.loads((YUKLEME / "sonuc" / eski_ad).read_text(encoding="utf-8"))["satirlar"]
+        anahtar = lambda s: (s["grup"], s["kalem"], s["boyut"], s["adet"], None if s["kg"] is None else round(s["kg"]))
+        if [anahtar(s) for s in esk] != [anahtar(s) for s in yeni]:
+            a, b = [anahtar(s) for s in esk], [anahtar(s) for s in yeni]
+            for x in a:
+                if x not in b:
+                    sorun.append(f"liste ({eski_ad}) 0.4'te var, genelde yok ya da farklı: {x}")
+            for x in b:
+                if x not in a:
+                    sorun.append(f"liste ({eski_ad}) genelde var, 0.4'te yok ya da farklı: {x}")
+            if sorted(map(str, a)) == sorted(map(str, b)):
+                sorun.append(f"liste ({eski_ad}): satırlar aynı, sıra farklı")
     # 3) genel dizilim ↔ eski kırma dizilimi
     def kirma(px, py, egim):
         y0 = py / 2
@@ -137,7 +142,35 @@ def main() -> int:
                 fark += 1
                 if fark <= 5:
                     sorun.append(f"dizilim farkı: plan {px} × {py}, eğim {egim}, kapatma {kap}, boy {boy}, paylaş {paylas}: genel {a} / kırma {b}")
-    print(f"Ç8201 (0.5) ↔ 0.4: metraj, iki yükleme listesi satır satır; genel dizilim ↔ kırma dizilimi {deneme} deneme")
+    # 4) Eylül 2026 katmanının değişmezleri
+    katmansiz = {a: v for a, v in kur.items() if a != "sablon_2026"}
+    girdiler = [("genel Ç8201", g)]
+    for yol in [YUKLEME / f"ornek_{n}m2_girdi.json" for n in (90, 62, 105)] + [YUKLEME / "sonuc" / "C8201_girdi.json", BURADA / "sonuc" / "KT01_girdi.json",
+                                                                              BURADA / "sonuc" / "KT01_duzeltilmis_girdi.json"]:
+        if yol.exists():
+            girdiler.append((yol.name, json.loads(yol.read_text(encoding="utf-8"))))
+    oz = lambda x: (x["grup"], x["kalem"], x["boyut"], x["adet"], x["olcu"], x["brut"], x["birim"], x["kg"], x["formul"])
+    for ad, gi in girdiler:
+        v = yukleme.hesapla(copy.deepcopy(gi), kur)
+        if any(x["durum"] == yukleme.SABLON for x in v["satirlar"]):
+            sorun.append(f"katman ({ad}): varsayılan hesapta `sablon` durumlu satır var")
+        try:
+            v0 = yukleme.hesapla(copy.deepcopy(gi), katmansiz)
+            fark = [(x["kalem"], y_["kalem"]) for x, y_ in zip(v["satirlar"], v0["satirlar"]) if (oz(x), x["durum"]) != (oz(y_), y_["durum"])]
+            if fark or len(v["satirlar"]) != len(v0["satirlar"]):
+                sorun.append(f"katman ({ad}): varsayılan hesap, katman kurallardan silinince değişiyor: {fark[:3]}")
+        except (KeyError, SystemExit) as e:
+            sorun.append(f"katman ({ad}): varsayılan hesap katman olmadan çalışmıyor: {e!r}")
+        gs = copy.deepcopy(gi)
+        gs["sablon"] = "2026"
+        k_ = yukleme.hesapla(gs, kur)
+        taban = [oz(x) for x in v["satirlar"]]
+        for x in k_["satirlar"]:
+            farkli = oz(x) not in taban
+            if farkli != (x["durum"] == yukleme.SABLON):
+                sorun.append(f"katman ({ad}): {x['kalem']} {'farklı ama `sablon` değil' if farkli else '`sablon` ama varsayılandakiyle aynı'}")
+    print(f"Ç8201 (0.5) ↔ 0.4: metraj, iki yükleme listesi satır satır; genel dizilim ↔ kırma dizilimi {deneme} deneme; "
+          f"Eylül 2026 katmanının değişmezleri {len(girdiler)} girdide")
     for s in sorun:
         print("  SORUN:", s)
     print("toplam sorun", len(sorun))

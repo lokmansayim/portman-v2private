@@ -61,9 +61,11 @@ def duzlem_kur(d: dict) -> dict:
     if cokgen.exterior.is_ccw is False:
         plan = plan[::-1]
         cokgen = Polygon(plan)
+    # karkas: düzlemin makaslarla taşınan kısmı, görünen kısımdan büyükse (alçak bir çatının altına giren yüz); aşık sıraları buna göre
+    karkas = Polygon([yuz(tuple(p)) for p in d["karkas"]]) if d.get("karkas") else None
     return dict(d, yukari=(yx, yy), sag=sag, kok=kok, kot=kot, yatay=yatay, yuz=yuz, plan=plan, cokgen=cokgen,
                 plan_m2=cokgen.area / 1e4, yuzey_m2=cokgen.area * kok / 1e4,
-                ucboyut=[(p[0], p[1], kot(p)) for p in plan], acilim=Polygon([yuz(p) for p in plan]))
+                ucboyut=[(p[0], p[1], kot(p)) for p in plan], acilim=Polygon([yuz(p) for p in plan]), acilim_karkas=karkas)
 
 
 def _ortusme(a0, a1, b0, b1):
@@ -207,10 +209,19 @@ def kalkan(duzlemler: list[dict], k: dict, duvar_ustu: float, adim: float = 1.0)
 
 
 # ───────────────────────────────────────────────────────────────── aşık ──
-def asik_siralari(dz: dict, kenarlar: list[dict], aralik: float, mahya_payi: float = 20.0) -> list[dict]:
-    """Bir yüzdeki aşık sıraları: saçaktan itibaren `aralik` (cm) aralıkla; her üst yatay kenarın (mahya, üst kenar, duvar dibi)
-    `mahya_payi` kadar altında bir sıra daha (mahya aşığı). Sıranın boyu, yüzün o yükseklikteki genişliğidir."""
-    ac = dz["acilim"]
+def asik_siralari(dz: dict, aralik: float, ust_esik: float = 30.0) -> list[dict]:
+    """Bir yüzdeki aşık sıraları. Sıralar düzlemin saçak çizgisinden (açılımda t = 0) itibaren `aralik` (cm) aralıkla dizilir; ilk sıra saçak
+    çizgisinin üstündedir. Sıranın boyu, yüzün o yükseklikteki genişliğidir. Yüzün bir üst yatay kenarının (mahya, duvar dibi) altındaki son
+    sıra ile kenar arasında `ust_esik`ten fazla boşluk kalıyorsa kenara, o kenarın boyunda bir sıra daha konur.
+    Yüzün alt kenarı saçak çizgisinin üstünde başlıyorsa o kenara ayrıca sıra konmaz; sıralar yine saçak çizgisinden sayılır.
+    Yüz: düzlemin makaslarla taşınan kısmı (`karkas`; verilmemişse görünen kısmı). Alçak bir çatının altına giren yüzde (cumbanın doğu yüzü)
+    makaslar ve aşıklar görünen kısımdan uzundur.
+    Dayanak (paftalar; ayrıntı `kurallar.json` → `cok_duzlemli_cati`): 90 m² projede son sıra ile mahya arasında 41 cm var, mahyanın 20 cm altında
+    bir sıra daha çizili; 62 m² projede boşluk 13 cm, ek sıra yok. Kör test projesinin paftasında ana yüzlerde ek sıra yok (boşluk 22 ve 33 cm),
+    sundurmanın duvar dibinde bir sıra var; cumba mahyasının iki yanında ise boşluk 49 cm olduğu halde sıra yok: bu kural oraya birer sıra koyar
+    (2,48 + 2,78 m). Paftadaki, verandanın kırma köşesinde eğim yönünde duran iki parça (2,82 + 1,70 m) bu kuralda yoktur.
+    6 Ekim'de dondurulan listede kural başkaydı: boşluğa bakılmadan her üst kenarın 20 cm altına bir mahya aşığı (commit 0658a1d)."""
+    ac = dz.get("acilim_karkas") or dz["acilim"]
     u0, t0, u1, t1 = ac.bounds
     siralar = []
     k = 0
@@ -221,16 +232,19 @@ def asik_siralari(dz: dict, kenarlar: list[dict], aralik: float, mahya_payi: flo
         if boy > 1.0:
             siralar.append({"t": t, "boy": boy, "tur": "sira"})
         k += 1
-    for e in kenarlar:                                # üst yatay kenarlar
-        if dz["ad"] not in e["duzlemler"] or e["tur"] not in ("mahya", "ust", "duvar_dibi"):
+    # üst yatay kenarlar: açılımın, yüzün içi altında kalan yatay kenarları
+    govde = ac.buffer(0.05)
+    pts = list(ac.exterior.coords)[:-1]
+    for (ua, ta), (ub, tb) in zip(pts, pts[1:] + pts[:1]):
+        if abs(ta - tb) > 0.05 or abs(ub - ua) < 1.0:
             continue
-        ta, tb = dz["yuz"](e["p"])[1], dz["yuz"](e["q"])[1]
-        if abs(ta - tb) > 0.5:                        # eğimli duvar dibi: sıra yok
-            continue
-        t = ta - mahya_payi
-        if any(abs(s["t"] - t) < 1.0 and abs(s["boy"] - e["plan_boy"]) < 1.0 for s in siralar):
-            continue
-        siralar.append({"t": t, "boy": e["plan_boy"], "tur": "mahya_asigi"})
+        um = (ua + ub) / 2
+        if not ac.contains(Point(um, ta - 0.5)) or ac.contains(Point(um, ta + 0.5)):
+            continue                                  # alt kenar (saçak) ya da çokgenin içinden geçen çizgi
+        alttaki = [s["t"] for s in siralar if s["tur"] == "sira" and s["t"] < ta - TOL and govde.contains(Point(um, s["t"]))]
+        bosluk = ta - max(alttaki) if alttaki else ta - t0
+        if bosluk > ust_esik + TOL:
+            siralar.append({"t": ta, "boy": abs(ub - ua), "tur": "ust_sira"})
     return siralar
 
 
@@ -436,5 +450,39 @@ def cati_kur(cati: dict, kurallar: dict | None = None) -> dict:
            "yuzey_m2": sum(d["yuzey_m2"] for d in dzl), "plan_m2": unary_union([d["cokgen"] for d in dzl]).area / 1e4}
     if kurallar:
         ar = kurallar["asik"]["aralik_m"]["deger"] * 100
-        cik["asik"] = {d["ad"]: asik_siralari(d, kn, ar) for d in dzl}
+        cd = kurallar["cok_duzlemli_cati"]["deger"]
+        cik["asik"] = {d["ad"]: asik_siralari(d, ar, ust_esik=cd["ust_sira_esigi_m"] * 100) for d in dzl}
+        cik["dere"] = dere_hatlari(dzl, kn, kurallar, cati.get("sacak", 30.0))
     return cik
+
+
+# ───────────────────────────────────────────────────────────────── dere ──
+def sacak_cephesi(e: dict, kenarlar: list[dict], sacak: float) -> float:
+    """Bir saçak kenarının altındaki cephenin boyu: kenarın, çatının dış köşesinde biten her ucundan saçak payı düşülür.
+    Vadide biten uçta pay yoktur (saçak orada duvar hizasında biter). Dikdörtgen kırma çatıda cephenin kendisidir."""
+    boy = e["boy"]
+    for p in (e["p"], e["q"]):
+        komsu = {o["tur"] for o in kenarlar if o is not e and any(math.hypot(p[0] - r[0], p[1] - r[1]) < 1.0 for r in (o["p"], o["q"]))}
+        if "vadi" not in komsu:
+            boy -= sacak
+    return max(0.0, boy)
+
+
+def dere_hatlari(duzlemler: list[dict], kenarlar: list[dict], kurallar: dict, sacak: float = 30.0) -> dict:
+    """Dere hatları: dereli düzlemlerin saçak kenarları. Çatı panelli çatıda (ek yapı) dere yoktur (kör test projesinin listesi ve dere paftası).
+    Uç: bir hattın ucu; iki hattın buluştuğu köşe tek uçtur. Serbest uç: başka bir hatla buluşmayan uç (dere kapağı oraya gelir)."""
+    panelli_dere = kurallar["ek_yapi_ve_korkuluk"]["deger"]["cati_panelli_cati"]["dere"]
+    adli = {d["ad"]: d for d in duzlemler}
+    hatlar = [e for e in kenarlar if e["tur"] == "sacak" and (panelli_dere or adli[e["duzlemler"][0]].get("ust_yapi") != "cati_paneli")]
+    uclar: list[list] = []                            # [x, y, kaç hattın ucu]
+    for e in hatlar:
+        for p in (e["p"], e["q"]):
+            for u in uclar:
+                if math.hypot(u[0] - p[0], u[1] - p[1]) < 1.0:
+                    u[2] += 1
+                    break
+            else:
+                uclar.append([p[0], p[1], 1])
+    return {"hatlar": [{"duzlem": e["duzlemler"][0], "p": e["p"], "q": e["q"], "boy": e["boy"], "cephe": sacak_cephesi(e, kenarlar, sacak)} for e in hatlar],
+            "boy": sum(e["boy"] for e in hatlar), "uclar": uclar,
+            "uc": len(uclar), "serbest_uc": sum(1 for u in uclar if u[2] == 1)}

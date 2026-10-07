@@ -9,7 +9,7 @@ Yöntem, kaynaklar ve bulgular: `docs/sartname/yukleme_listesi_yontemi.md`.
 | Dosya | İçerik |
 |---|---|
 | `kurallar.json` | Katsayılar: zayiat, levha ölçüleri ve kalınlıkları, parça ölçüleri, bindirme, iniş kuralı, çelik birim ağırlıkları ve et kalınlığı kuralı, tavan ve çatı paneli, köşebent, oda başına elektrik kuralı, çatı kaplaması seçenekleri ve baz kaplama, kaplamaların kapatma genişliği (ürüne göre; Lokman, 4 Ekim 15:18), kırma çatıda dizilim kuralı (taşma, kesim payı, dizilimin başladığı yer, yedek), panel boyu uzatma kuralı ve panel kapaması (Lokman, 4 Ekim 16:18), mahya bandı, OSB takviyesinde geçerli kural, vida, boya, tesisat. Her birinin kaynağı ve durumu yanında |
-| `yukleme.py` | Hesap: metraj girdisinden on bir grubun kalemleri; `--karsilastir` gerçek listeyle karşılaştırır; `--kaplama` çatı kaplaması seçeneğini değiştirir (altı seçenek); `--bayi` bayi kuralını uygular |
+| `yukleme.py` | Hesap: metraj girdisinden on bir grubun kalemleri; `--karsilastir` gerçek listeyle karşılaştırır; `--kaplama` çatı kaplaması seçeneğini değiştirir (altı seçenek); `--bayi` bayi kuralını uygular; `--sablon 2026` Eylül 2026 listesinin uygulamasını da uygular (varsayılan değil; satırların durumu `sablon`); `--elektrik-sayimi` ve `--inis-plan` paftadan sayılan elektrik ve iniş sayılarını alır |
 | `cati_acilim.py` | Kırma çatının açılımı ve kaplama dizilimi (Lokman, 4 Ekim 01:42): dört yüz gerçek boyutuyla açılır, şeritlere bölünür; çapraz kesimden artan parça karşı yüzde kullanılır. Kaplama saçaktan 5 cm taşar (mühendis, 4 Ekim 12:14); dizilim her yüzde sol köşeden başlar, kesim payı 5 mm, yedek yok (Lokman, 4 Ekim 15:18); öteki beş başlangıç bilgi için denenir. Kaplama adedini verir; açılım ve kesim planı çizimlerini, kesim ölçüleri dökümünü (`--olcu-md`) üretir; panel boyunu, adedi düşürüyorsa en çok 3 cm uzatır (Lokman, 4 Ekim 16:18) |
 | `cati_acilim_saglama.py` | Dizilimin geometrik sağlaması (çokgenlerle): parçalar yüzü tam örtüyor mu, panele sığıyor mu, üst üste biniyor mu, yüzdeki yerine oturuyor mu; rastgele kırma çatılarda da dener. Çizim ve ölçü dökümüyle aynı yerleşimi (`panel_yerlesimi`) kullanır. Panel boyu uzatma kuralını da sınar (adet ve toplam boy artmıyor; uzatılan boyda adet kesim payı 1 cm olsa da aynı) |
 | `motor_formul.py` | Excel motorundaki (CTKBF V1.1) kaplama adedi formülü: yazıldığı gibi ve payda parantezi düzeltilince. Liste bu formülü kullanmaz; belge ve sayfa örnekleri buradan yazar |
@@ -44,6 +44,15 @@ python belge_uret.py --zaman "4 Ekim 2026 19:19"
 3. Gerçek yükleme listelerinin çalışma kitaplarındaki formüller: `excel`.
 4. Excel hesaplama motoru (CTKBF V1.1): çelik birim ağırlıkları, vida, boya ve tesisat formülleri: `motor`.
 5. Gerçek listelere uydurulan kurallar (`uydurma`) ve varsayımlar (`varsayim`); teyit bekler.
+
+## Kör testten sonra (7 Ekim 2026)
+
+Bir başka projenin (KT-01) gerçek listesiyle kör kıyas yapıldı: `../2026-10-06_kor_test/` ve `docs/raporlar/2026-10-07_Kor_Test_KT01.md`. Bu klasörde değişenler:
+
+- **Kurallar** (şema 0.12). Yeni kurallar durumu `liste` ya da `uydurma` olarak eklendi: `celik.profil_kg_m` (model verilmişse ağırlık profil boyundan), `cok_duzlemli_cati`, `ek_yapi_ve_korkuluk`, `nem_bariyeri_dis_cephe`, `dere_kapagi_serbest_uc`, `bas_makas_z`, `elektrik_oda_ek`, `kapsam_alici`, `renkli_kalemler`, `duvar_dibi` (soru), `tavan_omegasi_dizilim`. 4 Ekim'deki 82 kuralın değeri değişmedi; yalnız `mahya_bandi`'na bacanın çatıdaki çevresi eklendi (girdide baca varsa) ve damlalığın parça boyu yazıldı (yalnız katmanla kullanılır).
+- **`sablon_2026` katmanı.** Eylül 2026 listesinin, mevcut kurallardan farklı yaptığı her şey burada; yalnız `--sablon 2026` ile uygulanır. Liste satırının `sablon` durumu varsayılan hesapla karşılaştırılarak konur: farklı olan her satır işaretlidir, işaretli her satır farklıdır; farklı satırda `bugunku_adet` alanı varsayılan hesaptaki adedi taşır. Varsayılan hesap, katman kurallardan silinse de aynı listeyi verir.
+- **Eski çıktılar değişmedi.** `hepsini_kos.sh` çıktıları bayt bayt aynı; üç gerçek listeyle karşılaştırma 15 / 29, 28 / 41 ve 31 / 49. Aynı listelerde katmanla 14 / 29, 22 / 41 ve 31 / 49 (`../2026-10-06_kor_test/sonuc/sablon_2026_eski_listeler.md`).
+- **Girdi denetimleri.** Bilinmeyen şablon, eksik ya da hatalı elektrik sayımı, negatif iniş sayısı ve bilinmeyen renk anahtarı hesabı durdurur. Genel modelden üretilen girdide panel dışındaki kaplamalar ve yöntem değişikliği reddedilir (girdi yeniden üretilmeli). Bayi kuralı, projenin kapsamında kapalı olan grubu geri açmaz.
 
 ## Sonuç (4 Ekim 2026 19:19)
 

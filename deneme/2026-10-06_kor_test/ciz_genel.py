@@ -234,16 +234,18 @@ def plan_eksen(ax, y: dict, baslik: str | None = None, bilgi: list[str] | None =
 
 def inis_noktalari(c: dict, esik_cm: float = 1000.0, sacak_cm: float = 30.0) -> list[tuple[float, float, str]]:
     """Dere inişleri (Lokman, 3 Ekim 13:27): dere hattının her ucuna (köşe) bir; 10 m ve daha uzun cephenin ortasına bir.
-    Dere hattı saçak kenarlarıdır; iki saçağın buluştuğu köşe tek iniş sayılır. Cephe boyu: saçak kenarı − iki uçtaki saçak payı."""
+    Dere hattı dereli saçak kenarlarıdır (`cati_genel.dere_hatlari`; çatı panelli ek yapıda dere yok); iki hattın buluştuğu köşe tek iniş sayılır.
+    Cephe boyu: saçak kenarı − çatının dış köşesinde biten uçlardaki saçak payı."""
     uc: list[tuple[float, float]] = []
     orta = []
-    for e in c["kenarlar"]:
-        if e["tur"] != "sacak":
-            continue
+    hatlar = (c.get("dere") or {}).get("hatlar")
+    if hatlar is None:
+        hatlar = [dict(e, cephe=e["boy"] - 2 * sacak_cm) for e in c["kenarlar"] if e["tur"] == "sacak"]
+    for e in hatlar:
         for p in (e["p"], e["q"]):
             if not any(math.hypot(p[0] - u[0], p[1] - u[1]) < 1.0 for u in uc):
                 uc.append(p)
-        if e["boy"] - 2 * sacak_cm >= esik_cm - 1e-6:
+        if e["cephe"] >= esik_cm - 1e-6:
             orta.append(((e["p"][0] + e["q"][0]) / 2, (e["p"][1] + e["q"][1]) / 2))
     return [(p[0], p[1], "kose") for p in uc] + [(p[0], p[1], "orta") for p in orta]
 

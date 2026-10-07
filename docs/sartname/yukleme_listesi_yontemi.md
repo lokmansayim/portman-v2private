@@ -1,6 +1,6 @@
 # Çelik yükleme listesi: yöntem ve taslak (3–4 Ekim 2026)
 
-Son güncelleme: 4 Ekim 2026 19:19. Lokman, 3 Ekim 12:03: yükleme listesi sistemi kurulacak. Bundan sonraki çelik modellerde model verilecek, liste aynı sistemle dönecek. Kapsam: tek kat çelik, çift katın üst katı ve çatı ailesi. Canlıya alınacak.
+Son güncelleme: 7 Ekim 2026 03:37. Lokman, 3 Ekim 12:03: yükleme listesi sistemi kurulacak. Bundan sonraki çelik modellerde model verilecek, liste aynı sistemle dönecek. Kapsam: tek kat çelik, çift katın üst katı ve çatı ailesi. Canlıya alınacak.
 
 Deneme kodu: `deneme/2026-10-03_yukleme/`. Hesapta LLM yok: aynı girdi her zaman aynı listeyi verir. Buradaki tablolar ve sayılar hesap çıktılarından üretilir (`belge_uret.py`; tablolar `sonuc/tablolar.md`).
 
@@ -631,6 +631,15 @@ Bayi kuralı çatıyı yöntem B'ye çevirirse (`--bayi ORNEK-BAYI-3`; çıktı 
 - **İniş borusu.** Motorda dere adedi ÷ 5 + 6; mühendisin 10 × 10 m metrajındaki sayıları (8 ve 6) vermiyor (9 ve 8 verir).
 - **Motorda olup listede olmayan kalemler.** Mühendisin ikinci cevaplarıyla: mahya bandı listeye eklendi; çatı müdahale kapağı standart pakette yok, müşteri isterse eklenir. Ters mahya kenar kutuları (ters mahya × 2) cumbalı çatı çalışılınca sorulacak; hesapta yok. Damlalık (L 2500; motorda 78. satır, adedi elle, şablonda 0): Lokman listeden tamamen çıkardı (4 Ekim 15:18); yerine düşünülen plastik kapama aparatı sipariş verilirse listeye girecek. Motorda panel kapamaları damlalıktan ayrı kalemler: tek kat panel kapaması (66. satır, L 2500, adedi elle) ve sandviç panel kapaması (69. satır, L 2800; saçak boyu × çatı katsayısı ÷ 2,6). Listedeki kapama 2025 listelerinden (L 2500, her saçak kenarı ÷ 2,5): tek kat panel kapaması Lokman'ın 4 Ekim 16:18 cevabıyla çıktı; sandviç panel kapaması şimdilik kalıyor (4 Ekim 17:46).
 
+## Kör test: KT-01 (6–7 Ekim 2026)
+
+Lokman, 6 Ekim 21:22: bir başka çelik projenin (98,7 m², beşik + cumba çatı, müştemilatlı; Eylül 2026) DWG'sinden bizim çizimlerimiz ve bu kurallarla kendi listemiz çıkarıldı; liste depoya dondurulduktan sonra gerçek listeyle satır satır kıyaslandı. Rapor: `docs/raporlar/2026-10-07_Kor_Test_KT01.md`; kod ve tablolar: `deneme/2026-10-06_kor_test/`.
+
+- **Sonuç.** Gerçek listenin 98 satırından kör listede 42'si, yalnız bizim hatalarımız düzeltilince 48'i, Eylül 2026 listesinin uygulaması da kural olursa 61'i, elektrik ve iniş sayıları paftadan alınırsa 71'i aynı. Kör listedeki 56 farkın 29'u bizim hatamızdı (girdi 2, kural 27).
+- **Varsayılan hesaba girenler** (bizim hatalarımız; `kurallar.json`'da durumu `liste`): model verilmişse çelik ağırlığı modeldeki profil boyundan ve okunan et kalınlığından (`celik.profil_kg_m`); çok düzlemli çatıda aşık sıraları (`cok_duzlemli_cati`); ek yapının kalemleri ayrı satır, çatı panelli çatıda dere, saçak sacı ve alın sacı yok (`ek_yapi_ve_korkuluk`); dış cephe nem bariyeri yalnız duvarlar × 1,08 (`nem_bariyeri_dis_cephe`); dere kapağı dere hatlarının serbest uçlarından (`dere_kapagi_serbest_uc`); baş makas Z'si (`bas_makas_z`; uydurma); depo için elektrik (`elektrik_oda_ek`); alıcıya ait kalemler kalem kalem (`kapsam_alici`); renk (`renkli_kalemler`).
+- **Varsayılan hesaba girmeyenler.** Eylül 2026 listesinin, yukarıdaki kurallardan farklı yaptığı on yedi şey ayrı bir katmandadır (`sablon_2026`; `yukleme.py --sablon 2026`; satırların durumu `sablon`): bindirme 20 cm, köşebentte + 3, saçak omegasının ölçüsü, tavan omegasının dizilimi ve formülü, aşık formülü, ters mahya kenar kutusu, damlalık, duvar izolasyonunda × 1,05, sandviç panel kapaması, veranda tavanı Boardex, Boardex 8 mm, çatı izolasyonu 100 mm, vida katsayıları, kesme taşı, dayson, kablo mesafesi. Aynı katman 2025 tarihli üç listede bugünkü kurallardan daha az satır tutuyor; hangi maddelerin kural olacağına Lokman karar verecek.
+- Bu belgedeki Ç8201 tabloları ve üç gerçek listeyle karşılaştırma değişmedi: eski girdilerin çıktıları bayt bayt aynı.
+
 ## Açık sorular
 
 1. **Dere inişi: saçak çizgisinin köşeleri.** Kural "her köşeye iniş" diyor; hesap dört köşe sayıyor. Paftalarda giriş saçağının köşelerine ve verandanın kademeli saçağının uçlarına da iniş konmuş (62 m²: 7; 90 m²: 8, listede 7). Köşe, saçak çizgisinin bütün dış köşeleri mi sayılsın? Öyleyse modelin tanımına saçak çizgisi (ya da köşe sayısı) yazılır; giriş saçağının böldüğü cepheye orta iniş konmaz. Ç8201'de sayı değişmez (6).
@@ -645,6 +654,7 @@ Bayi kuralı çatıyı yöntem B'ye çevirirse (`--bayi ORNEK-BAYI-3`; çıktı 
 10. **Bayi standartları.** Henüz oturmadı (mühendis, 4 Ekim 12:14). Netleşince hangi bayide hangi gruplar, hangi çatı yöntemi ve kaplaması standart: bayi kuralı tablosuna yazılacak.
 11. **Montaj paftası** (BOM'dan sonra, ayrı iş; Lokman, 4 Ekim 17:46). Kesim planı o setin içinde pafta olur. O işin soruları `docs/sartname/montaj_paftasi.md`'de.
 12. **Sırası gelince.** Çift kat modeli: üst katta 200 cm ve daha geniş pencereli duvarın 1,2 mm alınması (kural kayıtlı, uygulanmadı). Cumbalı çatı: ters mahya kenar kutuları ve cumbalı çatının açılımı.
+13. **Kör testin soruları** (7 Ekim; on iki madde, `docs/raporlar/2026-10-07_Kor_Test_KT01.md`): Eylül 2026 uygulamasının hangi maddeleri kural; tavan omegasında duvar yüzündeki hat; müştemilatın ıslak hacim sayılması ve çatı panelli çatının kenarları; orta inişin eşiği; baş makas Z'si; kuralı bilinmeyen kalemler (mastik, acil müdahale kapağı, menfezli saçak sacı, buat için oda sayısı); köşebentte çıkıntı köşeleri ve baca; ölçünün karkas yüzünden mi kaplanmış yüzden mi alınacağı; sandviç panel boyunun yuvarlanması; dere ve mastiğin rengi; profil birim ağırlıkları; KT-01 tanımının ve çizimlerinin depoya eklenmesi. Bu belgedeki 1., 5. ve 9. sorular bunlarla birlikte cevaplanır (iniş, bindirme, yöntem B dizilimi).
 
 Kapananlar:
 
