@@ -2,9 +2,9 @@
 # KT-01, Lokman'ın 7 ve 8 Ekim 2026 kararlarından sonra: güncel kural setiyle iki liste ve durum tablosu (`sonuc/KT01_kararlar_*`).
 #   B: projenin yapıldığı yöntemle (tavan omegası ve aşık)   A: çelik standardıyla (çatı ve tavan paneli)
 # Elektrik sayıları projenin paftasından (`sonuc/KT01_pafta_sayimi.json`); iniş sayısı kuraldan.
-# Tanım depoda değil (müşteri projesinin geometrisi): yolu verilir; düzeltilmiş tanım olmalı. Geçici dosya yazmaz, hiçbir dosyayı silmez.
+# Tanım: `tanim/KT01_duzeltilmis.json` (8 Ekim 2026'dan beri depoda); yolu verilir, düzeltilmiş tanım olmalı. Geçici dosya yazmaz, hiçbir dosyayı silmez.
 # 7 Ekim 03:46 kıyasının kendisi kiyas_kos.sh ile, o günkü kural setiyle (0.12) üretilir.
-# Kullanım: bash kararlar_kos.sh <KT01_duzeltilmis.json> [python] [kural seti]      Çıkış kodu kararlar_kiyas.py'ninkidir: denetim sorunu varsa 1.
+# Kullanım: bash kararlar_kos.sh tanim/KT01_duzeltilmis.json [python] [kural seti]      Çıkış kodu kararlar_kiyas.py'ninkidir: denetim sorunu varsa 1.
 # Kural seti verilirse (ör. 0.13) o günkü tablo yeniden üretilir: kurallar `../2026-10-03_yukleme/kural_setleri/<set>.json`dan, satır açıklamaları
 # `kararlar_notlari_setleri/<set>.json`dan okunur (açıklamalar adetlerle birlikte denetlendiği için her setin kendi açıklamaları vardır).
 # Çıktılar yine `sonuc/KT01_kararlar_*` üzerine yazılır: eski setle koşulduktan sonra güncel setle yeniden koşulmalıdır.

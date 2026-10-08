@@ -1,6 +1,6 @@
 # 6–7 Ekim 2026 · kör test (KT-01) ve genel model motoru
 
-Deneme kodu; canlıda değil, Motor'un yerine geçmez. İE-05 taslağının (`docs/is_emirleri/IE-05.md`) devamı. Kıyasın raporu: `docs/raporlar/2026-10-07_Kor_Test_KT01.md`. Lokman'ın 7 Ekim 07:45 kararlarından sonraki durum aşağıda ("Kararlardan sonra"); 8 Ekim 00:45 cevaplarından sonraki güncel durum onun altında.
+Deneme kodu; canlıda değil, Motor'un yerine geçmez. İE-05 taslağının (`docs/is_emirleri/IE-05.md`) devamı. Kıyasın raporu: `docs/raporlar/2026-10-07_Kor_Test_KT01.md`. Lokman'ın 7 Ekim 07:45 kararlarından sonraki durum aşağıda ("Kararlardan sonra"); 8 Ekim 00:45 ve 07:23 cevaplarından sonraki durum onların altında.
 
 Lokman, 6 Ekim 2026 21:22: klasördeki DWG bizim plan, görünüş, IFC ve perspektiflerimize çevrilecek; kurallarımızla kendi yükleme listemiz çıkarılacak; en son klasördeki gerçek listeyle kıyaslanacak, hata varsa düzeltilecek.
 
@@ -18,6 +18,8 @@ Proje (KT-01): tek kat çelik, 2+1, müştemilatlı, 98,65 m²; çatı beşik + 
 | `sahne.py`, `ciz_genel.py` | Dıştan görünen yüzeyler; plan, çatı planı, dört görünüş, pafta |
 | `ifc_genel.py`, `perspektif.py` | IFC4 modeli (şema doğrulamasıyla) ve IFC'den perspektif görüntüler (VTK, ekransız) |
 | `C8201_05.json` | Ç8201'in aynı modeli, 0.5 şemasıyla (elle çevrildi): genel motorun sağlaması için |
+| `tanim/` | KT-01'in tanımı: kör (`KT01.json`) ve düzeltilmiş (`KT01_duzeltilmis.json`), ikisini üreten betikler, SKP'den okunan profil boyları. 8 Ekim 2026'dan beri depoda (Lokman'ın onayıyla) |
+| `cizimler/` | KT-01'in çizim seti, iki yöntemle (`KT01_B`: yapıldığı gibi; `KT01_A`: çelik standardı); `cizim_seti_kos.sh` çıktısı (8 Ekim 2026) |
 | `saglama.py` | Genel hat Ç8201'de 0.4 hattıyla aynı metrajı ve aynı iki listeyi (satır satır) veriyor mu; genel dizilim eski kırma dizilimiyle aynı adedi veriyor mu; panel boyu kuralı (yuvarlama, uzatma, pay) iki motorda aynı boyu ve adedi seçiyor mu; özet `sonuc/saglama.json` |
 | `kurallar_oku.py` | Kural setini `../2026-10-03_yukleme/kural.py` üzerinden okur (güncel set ya da `PORTMAN_KURALLAR` ile seçilen eski set) |
 | `tavan_genel.py` | Tavan omegası dizilimi (Eylül 2026 paftasındaki gibi: her gözde ilk hat duvar yüzünde); yalnız `--sablon 2026` ile kullanılır |
@@ -43,16 +45,16 @@ python ciz_genel.py tanim.json --cikti cikti    # plan, pafta, görünüşler
 python ifc_genel.py tanim.json cikti/KT01.ifc   # IFC4 + şema doğrulaması
 python perspektif.py cikti/KT01.ifc cikti KT01  # perspektifler
 python skp_profil.py model.pkl --json boylar.json   # karkas modelinden üye boyları ve et kalınlığı (model.pkl: ../2026-10-02_skp/kaydet.py)
-bash kiyas_kos.sh KT01_duzeltilmis.json         # düzeltilmiş girdi, üç liste ve kıyas tabloları (sonuc/); 0.12 kural setiyle (7 Ekim 03:46 kaydı)
-bash kararlar_kos.sh KT01_duzeltilmis.json      # kararlardan sonra: güncel kural setiyle A ve B listeleri, durum tablosu (sonuc/KT01_kararlar_*)
-bash kararlar_kos.sh KT01_duzeltilmis.json python3 0.13   # 7 Ekim 10:55 tablosu, o günkü kural seti ve açıklamalarla (sonra güncel setle yeniden koşulmalı)
+bash kiyas_kos.sh tanim/KT01_duzeltilmis.json   # düzeltilmiş girdi, üç liste ve kıyas tabloları (sonuc/); 0.12 kural setiyle (7 Ekim 03:46 kaydı)
+bash kararlar_kos.sh tanim/KT01_duzeltilmis.json   # kararlardan sonra: güncel kural setiyle A ve B listeleri, durum tablosu (sonuc/KT01_kararlar_*)
+bash kararlar_kos.sh tanim/KT01_duzeltilmis.json python3 0.13   # 7 Ekim 10:55 tablosu, o günkü kural seti ve açıklamalarla (sonra güncel setle yeniden koşulmalı)
 python kararlar_sayfa.py --cikti KT01_kararlardan_sonra.html --zaman "8 Ekim 2026 02:00"   # kararlardan sonraki durumun sayfası (depo dışına)
 bash cizim_seti_kos.sh tanim.json cikti [python] [--yontem panel|omega_asik]   # çizim seti: on iki çıktı ve denetimi
 python kiyas_sayfa.py --cikti KT01_kiyas.html --zaman "7 Ekim 2026 03:30"   # kıyasın okunur sayfası (depo dışına)
 python saglama.py                               # genel motorun, panel boyu kuralının ve Eylül 2026 katmanının sağlaması (yaklaşık bir dakika)
 ```
 
-KT-01'in tanımı (`KT01.json`) ve ondan üretilen çizimler depoda değil: müşteri projesinin geometrisi, İE-05 gereği ayrı onayla eklenir. Çizimler, IFC ve perspektifler Lokman'a dosya olarak verildi.
+KT-01'in tanımı ve ondan üretilen çizimler 8 Ekim 2026'dan beri depoda: `tanim/`, `cizimler/` (Lokman, 07:23: "Evet ekle"). Kaynak dosyalar (DWG, SKP, gerçek liste) depoda değil.
 
 ## Kör test protokolü
 
@@ -125,7 +127,7 @@ Lokman raporun on iki sorusunu 7 Ekim 07:45'te cevapladı, 08:02'de beş okumay�
 - **Kural setleri.** 03:46 kıyası 0.12 setiyle, kararlardan sonraki tablo güncel setle üretilir; ikisi de yeniden üretilebilir. Yeni davranışlar kuraldaki anahtarlara bağlı: bugünkü kod 0.12 setiyle 03:46 çıktılarını bayt bayt aynı veriyor.
 - **Liste öncesi kararların son durumu.** Orta inişin eşiği: öneri 9 m dere boyu; 5 köşe + 2 orta = 7 iniş (pafta ve liste 7). Kablo mesafesi: sigortadan (10,06 m; NYM 137 ve 115 m, listede elle 140 ve 120). Mastik: pencere başına 1, 7 adet (listede 3; karar farkı). Ölçü: kaplanmış yüz (bizdeki). Duvar dibi: damlalık listeden çıkık; o kenara ne konacağı soru. Müştemilat: Lokman "göz ardı et" dedi; mevcut hesap duruyor.
 
-## 8 Ekim cevaplarından sonra (kural seti 0.14)
+## 8 Ekim 00:45 cevaplarından sonra (kural seti 0.14)
 
 Lokman, 7 Ekim'de açık kalan dokuz soruyu 8 Ekim 00:45'te cevapladı (cevaplar ve uygulanışı: `docs/sartname/yukleme_listesi_yontemi.md`). KT-01 güncel setle yeniden hesaplandı; `sonuc/KT01_kararlar_*` dosyaları bu durumu gösterir.
 
@@ -142,6 +144,17 @@ Lokman, 7 Ekim'de açık kalan dokuz soruyu 8 Ekim 00:45'te cevapladı (cevaplar
 - **Değişmezler.** Bugünkü kod 0.12 setiyle 7 Ekim 03:46 çıktılarını (kıyas tabloları ve çizimler dahil; `kiyas_kos.sh`), 0.13 setiyle 7 Ekim 10:55 çıktılarını (`kararlar_kos.sh <tanım> <python> 0.13`) bayt bayt aynı veriyor (`../2026-10-03_yukleme/kural_setleri/`, `kararlar_notlari_setleri/`).
 - **Denetim (8 Ekim).** Cevaplarla ilgili satırlar (iniş, kapama, özel mahya, kalkan kenarı, mastik, trapez vida, yazılan adlar) hesap koduna bakmayan ayrı bir oturumda yeniden hesaplandı: A ve B listelerinde hepsi aynı. Kod ayrı bir oturumda incelendi; bulguları işlendi (ayrıntı: `docs/sartname/yukleme_listesi_yontemi.md`, "Denetim (8 Ekim)").
 - **Liste öncesi kararların son durumu (8 Ekim).** Orta inişin eşiği: onaylandı. Kablo mesafesi: sigortadan; kutu girişte (onaylandı). Mastik: pencereler alıcıya ait, yazılmaz. Duvar dibi: özel mahya. Ölçü: kaplanmış yüz. Kalkan kenarı: Boardex; üstüne gelecek malzeme soru.
+
+## 8 Ekim 07:23 cevaplarından sonra (kural seti 0.15)
+
+Lokman 00:45'ten sonra açık kalan üç soruyu 07:23'te cevapladı; 1. cevabın okunuşunu 07:41'de onayladı ("evet 1. cevabı doğru anlamışsın"). Cevaplar ve uygulanışı: `docs/sartname/yukleme_listesi_yontemi.md`, "Lokman'ın cevapları (8 Ekim 07:23 ve 07:41)". Bu projede değişenler (`sonuc/KT01_kararlar_*`):
+
+- **Kalkan kenarı** ("Alın kapama saçak değil sadece makasın eğimli kenarı kadar kapanıyor 4 omuz veya kırma çatılarda yok"). Çelik standardı listesinde adetsiz "kalkan kenarı üst kapaması" satırının yerine **alın kapama** geldi: boyu makasın eğimli kenarı kadar (20,97 m; çatı panelli müştemilatın alınları hariç), parça L 2500, 20 cm bindirme → 10 adet, saçak ve alın renginde (antrasit gri). Kalkan kenarının Boardex'i saçak gibi değil, yalnız makasın eğimli kenarının yüzü: 4 → 2 levha.
+- **Trapez vida (5,5 × 25)** ("C profiller hiç önemli değil öylesine gönderiyoruz göz ardı et"). Parça C profiller sayılmıyor: B 922 → 862 vida, A 1092 → 1032; pakete yuvarlanınca adet değişmedi (B 1000, A 1250; gerçek listede 1800).
+- **Özel mahya** ("Özel mahya çok nadir kullanılıyor sadece bina yanında ek veranda varsa (yani tasarıma bağlı) veya müştemilat gibi ek bir çıkıntı yada bazı cumbalı çatılarda (çatı içinden küçük bir çatı daha çıkıyor) varsa kullanılır mahya bandıyla alakası yok"). Kural değişmedi: çatının duvara dayandığı kenarlar bu projede veranda sundurması ve müştemilattan doğuyor; 5 adet. Mahya bandına girmiyor (3 rulo).
+- **Gerçek listeyle aynı satır:** değişmedi: B 63 / 98, A 60 / 98; farklı kalan 35 satırın türleri aynı (karar 14, yöntem 3, elle 16, ölçü 2). A listesinde gerçek listede olmayan satır yine 6; alın kapama artık adetli.
+- **Değişmezler.** Bugünkü kod 0.12, 0.13 ve 0.14 setleriyle kendi günlerindeki çıktıları bayt bayt aynı veriyor (`kararlar_kos.sh tanim/KT01_duzeltilmis.json <python> 0.14` 8 Ekim 03:13 tablosunu üretir; açıklamaları `kararlar_notlari_setleri/0.14.json`da).
+- **Tanım ve çizimler depoda** (Lokman, 8 Ekim 07:23: "Evet ekle"): `tanim/KT01.json` (kör liste bununla çıkarıldı), `tanim/KT01_duzeltilmis.json` (kıyastan sonra düzeltilmiş), ikisini üreten betikler (`kt01_tanim_uret.py`, `kt01_tanim_duzeltilmis.py`) ve SKP'den okunan profil boyları (`KT01_profil_boylari.json`); iki tanım betiklerden bayt bayt aynı yeniden üretiliyor. Çizim seti iki yöntemle `cizimler/KT01_B` (yapıldığı gibi) ve `cizimler/KT01_A` (çelik standardı) altında: plan, dört görünüş, pafta, IFC4, dört perspektif, çatısız ve makaslı görünüm. Plan, görünüşler, pafta, çatısız görünüm ve arka perspektifler her üretimde bayt bayt aynı; IFC'de kimlikler ve zaman damgası her üretimde değişir (içerik aynı), ön perspektiflerde ve makaslı görünümde üst üste binen yüzlerin çizim sırası yüzünden pikselin binde üçünden azı değişebilir.
 
 ## Sağlama
 
@@ -166,4 +179,4 @@ Lokman, 7 Ekim'de açık kalan dokuz soruyu 8 Ekim 00:45'te cevapladı (cevaplar
 
 ## Kişisel veri
 
-Depodaki dosyalarda müşteri, bayi ve çalışan adı, telefon ve fiyat yok. Kaynak dosyalar (DWG, SKP, liste) depoya alınmadı. Gerçek listenin dökümü (`sonuc/KT01_gercek_liste.json`) kalem, boyut, adet, ağırlık, hücre formülü ve açıklama sütunlarını içerir; ad, iletişim ve hazırlayan satırları alınmadı, dosya adının başı maskelendi. Düzeltilmiş tanım (`KT01_duzeltilmis.json`) müşteri projesinin geometrisidir; depoda değil.
+Depodaki dosyalarda müşteri, bayi ve çalışan adı, telefon ve fiyat yok. Kaynak dosyalar (DWG, SKP, liste) depoya alınmadı. Gerçek listenin dökümü (`sonuc/KT01_gercek_liste.json`) kalem, boyut, adet, ağırlık, hücre formülü ve açıklama sütunlarını içerir; ad, iletişim ve hazırlayan satırları alınmadı, dosya adının başı maskelendi. Tanımlar (`tanim/`) müşteri projesinin geometrisidir; Lokman'ın onayıyla depoda (8 Ekim 2026); ad, telefon ve fiyat içermez.

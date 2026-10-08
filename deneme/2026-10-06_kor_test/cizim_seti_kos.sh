@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Çizim setini (plan, dört görünüş, pafta, IFC4, perspektifler) bir Yapı Tanımı'ndan üretir ve setin tam olduğunu denetler.
 # Setin içeriği `cizim_seti.json`dadır (Lokman onayladı, 7 Ekim 2026 07:45); ayrıntı: docs/sartname/cizim_seti.md.
-# Çıktı klasörü depo dışında olmalı (müşteri projelerinin çizimleri depoya ayrı onayla girer). Geçici dosya yazmaz, hiçbir dosyayı silmez.
+# Çıktı klasörü depo dışında olmalı: müşteri projelerinin çizimleri depoya ayrı onayla girer (KT-01'in onaylı seti `cizimler/` altında; Lokman, 8 Ekim 2026 07:23).
+# Plan, görünüşler ve pafta her üretimde bayt bayt aynıdır; IFC'de kimlikler ve zaman damgası her üretimde değişir. Geçici dosya yazmaz, hiçbir dosyayı silmez.
 # Kullanım: bash cizim_seti_kos.sh <tanım.json> <çıktı klasörü> [python] [--yontem panel|omega_asik]
 #   Çıkış kodu: eksik ya da boş çıktı varsa ya da IFC şema hatası varsa 1.
 set -euo pipefail

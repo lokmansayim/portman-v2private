@@ -846,14 +846,14 @@
    "grup": "Vida",
    "kalem": "Trapez vida (5,5 × 25)",
    "boyut": "adet",
-   "adet": 1250,
-   "olcu": 1044,
+   "adet": 1000,
+   "olcu": 984,
    "brut": null,
    "birim": "vida",
    "kg": null,
-   "formul": "çelik panel ve parça C profil (69) × 10 + köşebent × 6; 250'ye yuvarlandı",
+   "formul": "çelik panel (parça C profiller hariç: 63) × 10 + köşebent × 6; 250'ye yuvarlandı",
    "durum": "excel",
-   "not": "çelik panel adedi tahmin. Yalnız çelik birleşim yerleri: panel başına sağına soluna 5'er; omega ve aşık için konmaz (Lokman, 7 Ekim 07:45). Köşebent terimi duruyor (08:02)"
+   "not": "çelik panel adedi tahmin. Yalnız çelik birleşim yerleri: panel başına sağına soluna 5'er; omega ve aşık için konmaz (Lokman, 7 Ekim 07:45). Köşebent terimi duruyor (08:02). Parça C profiller sayılmaz (8 Ekim 07:23)"
   },
   {
    "grup": "Vida",

@@ -25,5 +25,5 @@
   "durum": "duzeltilecek",
   "not": "Paftanın altındaki açıklama satırları (sol sütun: dış ölçü, mahaller, duvar, doğramalar, dış kaplama; sağ sütun: çatı, yöntem ve kaplama, çatı yüzeyi, kenar boyları, kaplama dizilimi, kalkanlar, dere inişi) Lokman'la birlikte düzeltilecek (7 Ekim 2026 07:45). Satırlar `girdi_genel.py`'deki `bilgi_satirlari`ndan gelir; sayılar yükleme listesinin girdisiyle aynı hesaptandır."
  },
- "sinirlar": "Subasman ve merdiven çizilmez. Çizimler taslaktır: üretim projesi değildir. Müşteri projelerinin tanımı ve çizimleri depoya ayrı onayla girer (İE-05)."
+ "sinirlar": "Subasman ve merdiven çizilmez. Çizimler taslaktır: üretim projesi değildir. Müşteri projelerinin tanımı ve çizimleri depoya ayrı onayla girer (İE-05; KT-01'inkiler 8 Ekim 2026'da eklendi: `tanim/`, `cizimler/`)."
 }

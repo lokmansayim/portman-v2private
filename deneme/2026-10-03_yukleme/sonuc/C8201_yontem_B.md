@@ -65,7 +65,7 @@
 | Vida | Alçıpan vidası (3,5 × 35) | adet | 4750 | 114,0 levha |  | alçıpan ve Boardex levha sayısı × 40; 250'ye yuvarlandı | excel | levha başına 40 yeterli (Lokman, 7 Ekim 07:45) |
 | Vida | OSB ve yalıpan vidası (3,9 × 32) | adet | 1000 | 772,0 vida |  | OSB levha × 40 + priz × 4 + saçak sacı × 4 + dere kelepçesi × 3; 500'e yuvarlandı | motor |  |
 | Vida | Pencere vidası (4,8 × 70) | adet | 160 | 8,0 pencere |  | pencere sayısı × 20 | excel |  |
-| Vida | Trapez vida (5,5 × 25) | adet | 1000 | 874,0 vida |  | çelik panel ve parça C profil (52) × 10 + köşebent × 6; 250'ye yuvarlandı | excel | Yalnız çelik birleşim yerleri: panel başına sağına soluna 5'er; omega ve aşık için konmaz (Lokman, 7 Ekim 07:45). Köşebent terimi duruyor (08:02) |
+| Vida | Trapez vida (5,5 × 25) | adet | 1000 | 814,0 vida |  | çelik panel (parça C profiller hariç: 46) × 10 + köşebent × 6; 250'ye yuvarlandı | excel | Yalnız çelik birleşim yerleri: panel başına sağına soluna 5'er; omega ve aşık için konmaz (Lokman, 7 Ekim 07:45). Köşebent terimi duruyor (08:02). Parça C profiller sayılmaz (8 Ekim 07:23) |
 | Vida | Trapez vida (5,5 × 60) | adet | 250 | 205,0 vida |  | bina m² × 2,5; 250'ye yuvarlandı | motor |  |
 | Vida | Trapez vida (5,5 × 76; tek kat panel) | adet | 750 | 541,2 vida |  | panel boyu (mm) ÷ 200 × panel adedi; 250'ye yuvarlandı | motor |  |
 | Vida | Çelik dübel (klipsli) | adet | 28 | 14,0 panel |  | duvar paneli adedi × 2 | motor | duvar paneli adedi tahmin |

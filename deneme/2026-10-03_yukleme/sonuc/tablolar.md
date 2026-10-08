@@ -44,7 +44,7 @@
 | Vida | Alçıpan vidası (3,5 × 35) | alçıpan ve Boardex levha sayısı × 40; 250'ye yuvarlandı | excel | — | 4000 / 4000 | 7250 / 8500 ✗ |
 | Vida | OSB ve yalıpan vidası (3,9 × 32) | OSB levha × 40 + priz × 4 + saçak sacı × 4 + dere kelepçesi × 3; 500'e yuvarlandı | motor | — | 3500 / 3500 | 1000 / 1500 ✗ |
 | Vida | Pencere vidası (4,8 × 70) | pencere sayısı × 20 | excel | — | 120 / 120 | 160 / 180 ✗ |
-| Vida | Trapez vida (5,5 × 25) | çelik panel ve parça C profil (69) × 10 + köşebent × 6; 250'ye yuvarlandı | excel | — | 1000 / 1750 ✗ | — |
+| Vida | Trapez vida (5,5 × 25) | çelik panel × 10 + köşebent × 6; 250'ye yuvarlandı | excel | — | 1000 / 1750 ✗ | — |
 | Vida | Trapez vida (5,5 × 60) | bina m² × 2,5; 250'ye yuvarlandı | motor | — | 250 / 250 | 500 / 500 |
 | Vida | Trapez vida (5,5 × 110; sandviç panel) | panel boyu (mm) ÷ 200 × panel adedi; 250'ye yuvarlandı | motor | — | 500 / 750 ✗ | — |
 | Vida | Çelik dübel (klipsli) | duvar paneli adedi × 2 | motor | — | 32 / 32 | 72 / 80 ✗ |
@@ -109,7 +109,7 @@
 | Vida | Alçıpan vidası (3,5 × 35) | alçıpan ve Boardex levha sayısı × 40; 250'ye yuvarlandı | excel | — | 4000 / 4000 | 7250 / 8500 ✗ |
 | Vida | OSB ve yalıpan vidası (3,9 × 32) | OSB levha × 40 + priz × 4 + saçak sacı × 4 + dere kelepçesi × 3; 500'e yuvarlandı | motor | — | 3500 / 3500 | 1000 / 1500 ✗ |
 | Vida | Pencere vidası (4,8 × 70) | pencere sayısı × 20 | excel | — | 120 / 120 | 160 / 180 ✗ |
-| Vida | Trapez vida (5,5 × 25) | çelik panel ve parça C profil (69) × 10 + köşebent × 6; 250'ye yuvarlandı | excel | — | 1000 / 1750 ✗ | — |
+| Vida | Trapez vida (5,5 × 25) | çelik panel × 10 + köşebent × 6; 250'ye yuvarlandı | excel | — | 1000 / 1750 ✗ | — |
 | Vida | Trapez vida (5,5 × 110; sandviç panel) | panel boyu (mm) ÷ 200 × panel adedi; 250'ye yuvarlandı | motor | — | 500 / 750 ✗ | — |
 | Vida | Çelik dübel (klipsli) | duvar paneli adedi × 2 | motor | — | 32 / 32 | 72 / 80 ✗ |
 | Vida | Şase pul | çelik dübel adedi kadar | motor | — | 32 / 32 | 72 / 80 ✗ |
@@ -182,7 +182,7 @@
 | Vida | Alçıpan vidası (3,5 × 35) | adet | 5000 | aynı | 122,0 levha |  | excel |
 | Vida | OSB ve yalıpan vidası (3,9 × 32) | adet | 1000 | aynı | 700,0 vida |  | motor |
 | Vida | Pencere vidası (4,8 × 70) | adet | 160 | aynı | 8,0 pencere |  | excel |
-| Vida | Trapez vida (5,5 × 25) | adet | 1250 | aynı | 1044,0 vida |  | excel |
+| Vida | Trapez vida (5,5 × 25) | adet | 1000 | aynı | 984,0 vida |  | excel |
 | Vida | Trapez vida (5,5 × 60) | adet | 250 | aynı | 205,0 vida |  | motor |
 | Vida | Trapez vida (5,5 × 76; tek kat panel) | adet | 750 | aynı | 541,2 vida |  | motor |
 | Vida | Çelik dübel (klipsli) | adet | 28 | aynı | 14,0 panel |  | motor |

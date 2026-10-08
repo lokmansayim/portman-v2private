@@ -6,7 +6,7 @@ Standardın kendisi veridir: `deneme/2026-10-06_kor_test/cizim_seti.json`. Bu be
 
 ## Kural
 
-- Model verilince set, tek bir Yapı Tanımı'ndan (0.5) aynı betiklerle üretilir. Çizimde LLM yoktur: aynı tanım aynı çizimi verir (K05).
+- Model verilince set, tek bir Yapı Tanımı'ndan (0.5) aynı betiklerle üretilir. Çizimde LLM yoktur: aynı tanım aynı çizimi verir (K05). Plan, görünüşler, pafta, çatısız görünüm ve arka perspektifler her üretimde bayt bayt aynıdır. IFC'de kimlikler ve zaman damgası her üretimde değişir (içerik aynı); ön perspektiflerde ve makaslı görünümde üst üste binen yüzlerin çizim sırası yüzünden pikselin binde üçünden azı değişebilir.
 - Setin biçimi (görünüşler, bakış açıları, renkler, ölçü zincirleri) Lokman'ın onayı olmadan değiştirilmez.
 - Paftadaki açıklama satırları bu onayın dışındadır: Lokman'la birlikte düzeltilecek.
 - Çizimlerdeki sayılar yükleme listesinin girdisiyle aynı hesaptan gelir: paftada yazan çatı yüzeyi, kaplama dizilimi ve iniş sayısı listedekilerle aynıdır.
@@ -61,7 +61,7 @@ Paftanın kendisi bu cevaplarla değişmedi: 8 Ekim'de çizim betiklerinde çık
 
 ## Denenenler
 
-- KT-01 (98,65 m², beşik + cumba çatı, müştemilatlı): set 7 Ekim 03:46'da Lokman'a dosya olarak verildi; onaylanan çizimler bunlar. Tanımı ve çizimleri depoda değil (müşteri projesi; İE-05 gereği ayrı onayla eklenir).
+- KT-01 (98,65 m², beşik + cumba çatı, müştemilatlı): set 7 Ekim 03:46'da Lokman'a dosya olarak verildi; onaylanan çizimler bunlar. Tanımı ve çizimleri 8 Ekim 2026'dan beri depoda (Lokman, 07:23: "Evet ekle"): tanım `deneme/2026-10-06_kor_test/tanim/`, set iki yöntemle `deneme/2026-10-06_kor_test/cizimler/KT01_B` (yapıldığı gibi) ve `KT01_A` (çelik standardı).
 - Ç8201 (82 m², kırma çatı): aynı komut `C8201_05.json` tanımıyla on iki çıktının on ikisini üretiyor; IFC4, şema hatası 0 (7 Ekim).
 
 ## Sınırlar

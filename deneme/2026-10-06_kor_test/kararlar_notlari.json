@@ -1,5 +1,5 @@
 {
- "aciklama": "KT-01: Lokman'ın 7 Ekim 2026 07:45 cevapları, 08:02 düzeltmeleri ve 8 Ekim 00:45 cevaplarından sonra durum (kural seti 0.14). `karar`: adedi 7 Ekim 03:46'daki düzeltilmiş listeden farklı olan birimde, farkı doğuran karar. `fark`: gerçek listeden hâlâ farklı olan birimde nedeni; türüyle başlar: `karar:` (Lokman'ın kararı o listeden farklı), `yöntem:` (liste omega ve aşıklı yöntemle hazırlanmış; çelikte artık yok), `elle:` (listenin elle hesabı ya da yuvarlaması), `ölçü:` (ölçünün alındığı yüz), `soru:` (kural bekliyor). `kararlar_kiyas.py` sayımla denetler. `karar` \"Karar değil:\" diye başlıyorsa adet bir karardan değil, elektrik sayılarının paftadan alınmasından değişmiştir.",
+ "aciklama": "KT-01: Lokman'ın 7 Ekim 2026 07:45 cevapları, 08:02 düzeltmeleri, 8 Ekim 00:45 ve 07:23 cevaplarından sonra durum (kural seti 0.15). `karar`: adedi 7 Ekim 03:46'daki düzeltilmiş listeden farklı olan birimde, farkı doğuran karar. `fark`: gerçek listeden hâlâ farklı olan birimde nedeni; türüyle başlar: `karar:` (Lokman'ın kararı o listeden farklı), `yöntem:` (liste omega ve aşıklı yöntemle hazırlanmış; çelikte artık yok), `elle:` (listenin elle hesabı ya da yuvarlaması), `ölçü:` (ölçünün alındığı yüz), `soru:` (kural bekliyor). `kararlar_kiyas.py` sayımla denetler. `karar` \"Karar değil:\" diye başlıyorsa adet bir karardan değil, elektrik sayılarının paftadan alınmasından değişmiştir.",
  "birimler": {
   "Tavan omegası": {
    "fark": "yöntem: çelikte tavan omegası yok (C2). Kural prefabrik çalışılınca; duvar yüzünde omega hattı olmadığı da söylendi: listedeki 47 o paftanın dizilimi."
@@ -123,7 +123,7 @@
    "fark": "karar: levha başına 40 (C1 m). Listede 50 ve elle yuvarlama."
   },
   "Trapez vida (5,5 × 25)": {
-   "karar": "Yalnız çelik birleşim yerleri: panel başına 10, köşebent terimi duruyor (C1 n; 08:02): (46 panel + 6 parça C profil) × 10 + 67 × 6 = 922 → 1000. Parça C profiller şablondaki gibi sayıldı; sayılıp sayılmayacağı soruldu (8 Ekim'de örnekle yeniden).",
+   "karar": "Yalnız çelik birleşim yerleri: panel başına 10, köşebent terimi duruyor (C1 n; 08:02); parça C profiller sayılmaz (8 Ekim 07:23: \"göz ardı et\"): 46 panel × 10 + 67 × 6 = 862 → 1000.",
    "fark": "karar: omega ve aşık için vida konmaz. Listede onlar için de var (1800)."
   },
   "230'luk kesme taşı": {
@@ -139,5 +139,5 @@
    "fark": "karar: Excel motoruna uyulur (C1 p): m² × 0,06 → 6. Listede 4."
   }
  },
- "giris": "Lokman'ın 7 Ekim 2026 07:45 cevapları, 08:02 düzeltmeleri ve 8 Ekim 00:45 cevapları işlendikten sonra, gerçek listenin adetli her satırı güncel kural setinin (0.14) verdiği iki listeyle."
+ "giris": "Lokman'ın 7 Ekim 2026 07:45 cevapları, 08:02 düzeltmeleri, 8 Ekim 00:45 ve 07:23 cevapları işlendikten sonra, gerçek listenin adetli her satırı güncel kural setinin (0.15) verdiği iki listeyle."
 }

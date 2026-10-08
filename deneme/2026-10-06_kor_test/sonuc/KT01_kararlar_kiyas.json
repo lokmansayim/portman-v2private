@@ -73,18 +73,16 @@
    "kalem": "Alın (kalkan kenarı) için Boardex",
    "liste_adi": "Alın (kalkan kenarı) için OUTWEAR Dış Cephe Levhası",
    "boyut": "12,5 × 1200 × 2400",
-   "adet": 4,
+   "adet": 2,
    "kg": null,
    "durum": "lokman"
   },
   {
-   "kalem": "Kalkan kenarı üst kapaması",
-   "boyut": "",
-   "adet": null,
-   "olcu": 20.97,
-   "birim": "m",
+   "kalem": "Alın kapama",
+   "boyut": "L 2500",
+   "adet": 10,
    "kg": null,
-   "durum": "soru"
+   "durum": "lokman"
   }
  ],
  "denetim_sorunlari": [],
@@ -2370,7 +2368,7 @@
    "duzeltilmis": 1750,
    "duzeltilmis_ayni": false,
    "onceki_pafta": 2000,
-   "karar": "Yalnız çelik birleşim yerleri: panel başına 10, köşebent terimi duruyor (C1 n; 08:02): (46 panel + 6 parça C profil) × 10 + 67 × 6 = 922 → 1000. Parça C profiller şablondaki gibi sayıldı; sayılıp sayılmayacağı soruldu (8 Ekim'de örnekle yeniden).",
+   "karar": "Yalnız çelik birleşim yerleri: panel başına 10, köşebent terimi duruyor (C1 n; 08:02); parça C profiller sayılmaz (8 Ekim 07:23: \"göz ardı et\"): 46 panel × 10 + 67 × 6 = 862 → 1000.",
    "fark": "karar: omega ve aşık için vida konmaz. Listede onlar için de var (1800).",
    "fark_turu": "karar",
    "karar_turu": "karar"

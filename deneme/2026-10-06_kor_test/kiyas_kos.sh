@@ -2,12 +2,12 @@
 # KT-01 kıyası: düzeltilmiş tanımdan metraj girdisi, üç liste ve kıyas tablosu (`sonuc/`).
 #   bugünkü kurallar · + Eylül 2026 uygulaması (--sablon 2026) · + pafta sayımı (elektrik, iniş)
 # Ayrıca Eylül 2026 uygulamasının 2025 tarihli üç örnek listedeki sonucu.
-# Tanım depoda değil (müşteri projesinin geometrisi; İE-05 gereği ayrı onayla eklenir): yolu verilir. Düzeltilmiş tanım olmalı (`duzeltmeler` alanı):
+# Tanım: `tanim/KT01_duzeltilmis.json` (8 Ekim 2026'dan beri depoda; Lokman'ın onayıyla). Yolu verilir. Düzeltilmiş tanım olmalı (`duzeltmeler` alanı):
 # dondurulan tanımla koşulursa "düzeltilmiş" listeler yanlış adla üretilir.
 # Geçici dosya yazmaz, hiçbir dosyayı silmez; yalnız `sonuc/` altındaki kendi çıktılarını yeniden yazar.
 # Kıyas 7 Ekim 2026 03:46'daki kural setiyle (0.12) üretilir: Lokman'ın 07:45 kararlarından önceki durumun kaydıdır ve o setle bayt bayt aynı çıkar.
 # Kararlardan sonraki listeler ve durum tablosu: kararlar_kos.sh (güncel kural seti).
-# Kullanım: bash kiyas_kos.sh <KT01_duzeltilmis.json> [python]
+# Kullanım: bash kiyas_kos.sh tanim/KT01_duzeltilmis.json [python]
 # Çıkış kodu kiyas.py'ninkidir: sınıflama sorunu varsa 1.
 set -euo pipefail
 T=$(realpath "${1:?Kullanım: bash kiyas_kos.sh <tanım.json> [python]}")

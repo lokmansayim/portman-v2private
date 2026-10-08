@@ -1,6 +1,6 @@
 # A5 · Çatı
 
-Kaynak: Lokman'ın anlattıkları (2–8 Ekim 2026; 4 Ekim 01:24 ve 01:42 düzeltmeleri, 15:18, 16:18 ve 17:46 cevapları, 7 Ekim 07:45 cevapları ve 08:02 düzeltmeleri, 8 Ekim 00:45 cevapları dahil) ve inşaat mühendisi Ubeydullah'ın üç tur cevabı (Lokman 3 Ekim 18:14'te, 4 Ekim 01:24'te ve 4 Ekim 12:14'te iletti). Lokman'ın söylediği ile mühendisin söylediği çelişirse Lokman'ınki geçerlidir (4 Ekim 15:18). Madde sonundaki saat, söylendiği anı gösterir; tarih yazmayan saatler 2 Ekim'dir.
+Kaynak: Lokman'ın anlattıkları (2–8 Ekim 2026; 4 Ekim 01:24 ve 01:42 düzeltmeleri, 15:18, 16:18 ve 17:46 cevapları, 7 Ekim 07:45 cevapları ve 08:02 düzeltmeleri, 8 Ekim 00:45, 07:23 ve 07:41 cevapları dahil) ve inşaat mühendisi Ubeydullah'ın üç tur cevabı (Lokman 3 Ekim 18:14'te, 4 Ekim 01:24'te ve 4 Ekim 12:14'te iletti). Lokman'ın söylediği ile mühendisin söylediği çelişirse Lokman'ınki geçerlidir (4 Ekim 15:18). Madde sonundaki saat, söylendiği anı gösterir; tarih yazmayan saatler 2 Ekim'dir.
 
 ## Kurallar
 
@@ -102,8 +102,13 @@ Kör testin (KT-01) on iki sorusuna verildi; hepsi ve uygulanışı `yukleme_lis
 - Dere inişi: 9 m eşiği ve köşe sayımı onaylandı ("evet uygundur"). Kural kesin: her dere hattının iki ucuna birer iniş; boyu 9 m'yi geçen hattın ortasına bir tane daha.
 - Sandviç panel kapaması: hesap onaylandı ("evet uygun"): kapama boyu = saçak (dere) kenarlarının toplamı; adet = boy ÷ (2,5 − 0,20); parça L 2500.
 - Panel boyu: "3 cm'e kadar +- tolere edilebilir artık sandviç panel hesabını sonlandır". Hesap bu haliyle kapandı: eğimli boy + taşma, 10 mm'ye yukarı; adedi düşürüyorsa ya da taban boyda pay inceyse en çok 3 cm uzatma. Bu konuda yeni soru sorulmaz.
-- Kalkan kenarı (çatı ve tavan panelli beşik çatı): "beşik çatıda da boardex kaplama yapılıyor ama çatı kaplamasının üstüne bir malzeme gelmesi lazım". Kalkan kenarı Boardex kaplanır. Ölçü saçağınki gibi alındı (kenar boyu × (saçak eni + saçak yüzü); soruda "saçak gibi Boardex" denmişti): kalkan kenarının çıkıntısı için ayrı bir ölçü yok. Çatı kaplamasının üstüne gelecek malzemenin adı ve parça boyu soruldu; satırı adetsiz yazılıyor (saçak altının malzemesine bağlı değil; çatı panelli ek yapının alınları ölçüde yok).
-- Çatının bir duvara dayandığı kenar: "özel mahya". O kenarların boyu özel mahya satırına yazılır: L 2800, boy ÷ (2,8 − 0,20). Geçici "duvar dibi sacı" satırı kalktı. Cevap malzemeyi söylüyor; üç ayrıntı Claude'un uygulaması ve soruldu: adet mahyadaki gibi toplam boydan (kör test projesinde 11,35 m → 5; her yapının kenarı ayrı yuvarlansa 6); özel mahya mahya bandı hesabına girmiyor (Excel motorundaki formülde yok; kör test projesinde 3 rulo, girerse 4); satıra renk yazılmıyor.
+- Kalkan kenarı (çatı ve tavan panelli beşik çatı): "beşik çatıda da boardex kaplama yapılıyor ama çatı kaplamasının üstüne bir malzeme gelmesi lazım". Kalkan kenarı Boardex kaplanır. Ölçü saçağınki gibi alındı (kenar boyu × (saçak eni + saçak yüzü); soruda "saçak gibi Boardex" denmişti): kalkan kenarının çıkıntısı için ayrı bir ölçü yok. Çatı kaplamasının üstüne gelecek malzemenin adı ve parça boyu soruldu; satırı adetsiz yazılıyordu (saçak altının malzemesine bağlı değil; çatı panelli ek yapının alınları ölçüde yok). 07:23'te kesinleşti: alın kapama; Boardex yalnız yüz (aşağıda).
+- Çatının bir duvara dayandığı kenar: "özel mahya". O kenarların boyu özel mahya satırına yazılır: L 2800, boy ÷ (2,8 − 0,20). Geçici "duvar dibi sacı" satırı kalktı. Cevap malzemeyi söylüyor; üç ayrıntı Claude'un uygulaması ve soruldu: adet mahyadaki gibi toplam boydan (kör test projesinde 11,35 m → 5; her yapının kenarı ayrı yuvarlansa 6); özel mahya mahya bandı hesabına girmiyor (Excel motorundaki formülde yok; kör test projesinde 3 rulo, girerse 4); satıra renk yazılmıyor. 07:23: mahya bandıyla ilgisi yok; öteki ikisi değişmedi.
+
+### Lokman'ın cevapları (8 Ekim 07:23 ve 07:41)
+
+- Kalkan kenarı: "Alın kapama saçak değil sadece makasın eğimli kenarı kadar kapanıyor 4 omuz veya kırma çatılarda yok". Okuma Lokman'a yazıldı, 07:41'de onayladı ("evet 1. cevabı doğru anlamışsın"). Çatı ve tavan panelli beşik çatıda kalkan kenarının üstüne **alın kapama** gelir: boyu makasın eğimli kenarı kadar (kalkan kenarlarının boyu), saçak boyunca gitmez; parça L 2500, 20 cm bindirme (sandviç panel kapamasındaki gibi); projenin "saçak ve alın rengi"yle yazılır. Kalkan kenarı saçak değildir: saçaktaki gibi 30 cm alt kaplama yoktur; Boardex yalnız makasın eğimli kenarının yüzüne gelir (kenar boyu × saçak yüzü yüksekliği). Kırma (dört omuz) çatıda kalkan kenarı yoktur; ikisi de yazılmaz.
+- Özel mahya: "Özel mahya çok nadir kullanılıyor sadece bina yanında ek veranda varsa (yani tasarıma bağlı) veya müştemilat gibi ek bir çıkıntı yada bazı cumbalı çatılarda (çatı içinden küçük bir çatı daha çıkıyor) varsa kullanılır mahya bandıyla alakası yok". Tasarıma bağlıdır: bina yanında ek veranda (ana çatı ile veranda çatısının birleşimi ya da veranda çatısının duvara dayandığı kenar), müştemilat gibi ek çıkıntı, bazı cumbalı çatılar (çatı içinden küçük bir çatı çıkan). Mahya bandı hesabına girmez. Adedin toplam boydan hesaplanması ve renk yazılmaması değişmedi (itiraz gelmedi).
 
 ### Bindirme, mahya çeşitleri, dere inişi (3 Ekim 13:27)
 
@@ -237,13 +242,16 @@ Katalog görsellerine göre tek bir kırma çatı, kapalı kısmı ve verandayı
 - Çatı ve tavan panelli beşik çatıda kalkan kenarı Boardex kaplanır.
 - Çatının bir duvara dayandığı kenara özel mahya konur.
 
+8 Ekim 07:23 ve 07:41 (Lokman):
+
+- Beşik çatıda kalkan kenarının üstüne alın kapama (makasın eğimli kenarı boyunca, L 2500); Boardex yalnız o kenarın yüzü, saçaktaki gibi alt kaplama yok.
+- Özel mahya tasarıma bağlı (ek veranda, müştemilat gibi çıkıntı, bazı cumbalı çatılar); mahya bandına girmez.
+
 ## Açık sorular
 
 - Lokman kiriş ve makasları "yaklaşık bir makasın ölçüsünden" verecek; o zamana kadar çatı çeliği motorun ortalamasıyla (mühendis, 4 Ekim 12:14: "şimdilik Excel hesaplama motoruna uy"; Lokman, 4 Ekim 15:18: "şimdilik motoru kastas al", motoru inceleyecek).
 - Kesim planının ölçüleri kaplamanın kapattığı genişliğe göre; panelin yan bindirme payı, kırma hattındaki yan pay ve boyuna kesimin payı ayrıca düşünülmedi. Kısa yüzlerde son şerit 10 cm kalıyor. Montajcıya verilecek pafta için gözden geçirilmeli; pafta, montaj paftası çalışmasında hazırlanacak (yükleme listesinden sonra; Lokman, 4 Ekim 17:46).
 - Cumbalı çatıda (ters mahya) açılım ve dizilim henüz yok.
-- Çatı ve tavan panelli beşik çatıda kalkan kenarı: çatı kaplamasının üstüne gelecek malzeme hangisi (adı, parça boyu)? Lokman, 8 Ekim 00:45: "bir malzeme gelmesi lazım". Satırı şimdilik adetsiz. Kalkan kenarının Boardex'i saçağın ölçüsüyle hesaplanıyor (30 cm alt + saçak yüzü): çıkıntı saçaktan farklıysa söylenmeli.
-- Özel mahyanın ayrıntıları (çatının duvara dayandığı kenarda): adet toplam boydan mı, her kenar ayrı mı; mahya bandı hesabına girsin mi; çatı renginde mi yazılsın? Şimdilik: toplam boydan, banda girmiyor, renk yazılmıyor.
 - Excel motorundaki kaplama formülü: 0,8 ve 1,05 paydanın parantezi dışında (kapatma genişliğine bölmek yerine çarpıyor); uzun kenara saçak eklenmemiş. Güncel ürünle (kiremit desen sac 100 cm) metal kiremit katsayısının 1,05 yerine 1 olması gerekir. Bulgular mühendise iletilecek (`yukleme_listesi_yontemi.md`).
 - Kapatma genişlikleri ürün değiştikçe güncellenecek: sandviç panelin 80 cm kapatanı var, şimdilik 100 alınıyor (Lokman, 4 Ekim 15:18).
 - Prefabrik çalışılınca (Lokman, 7 Ekim: birlikte): yöntem B'nin kuralları ve dizilimi; saçak sacının boyu (örnekte L 2800, listelerde L 2500); 62 ve 105 m² listelerde hem saçak sacı hem saçaklar için Boardex olması (62 m² projenin paftasında "saçak çıkması: 30 cm / saçak sacı üzerinde boardex" yazıyor).

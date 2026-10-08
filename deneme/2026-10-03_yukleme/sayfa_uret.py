@@ -249,9 +249,10 @@ KESME_TASI = "230'luk kesme taşı"
 tv_s = satir(baz, "Trapez vida (5,5 × 25)")
 c_profil_adedi = sum(s["adet"] for s in baz["satirlar"] if s["kalem"] == "Boy C profil")
 assert [(s["boyut"], s["adet"]) for s in baz["satirlar"] if s["kalem"] == "Boy C profil"] == [("80 × 45 × 0,8", 3), ("80 × 45 × 1,2", 3)], "sayfa: Boy C profil 0,8'den 3 ve 1,2'den 3 diyor"
-tv_c_siz = tv_s["olcu"] - c_profil_adedi * K["vida"]["deger"]["trapez_5_5x25"]["celik_panel"]
-tv_c_siz_adet = -(-tv_c_siz // K["vida"]["deger"]["trapez_yuvarlama"]) * K["vida"]["deger"]["trapez_yuvarlama"]
-assert K["vida"]["deger"]["trapez_5_5x25_c_profil_dahil"] and c_profil_adedi == 6 and "parça C profil" in tv_s["formul"], "sayfa: trapez vidada parça C profiller panel gibi sayılıyor diyor"
+tv_c_ile = tv_s["olcu"] + c_profil_adedi * K["vida"]["deger"]["trapez_5_5x25"]["celik_panel"]
+tv_c_ile_adet = -(-tv_c_ile // K["vida"]["deger"]["trapez_yuvarlama"]) * K["vida"]["deger"]["trapez_yuvarlama"]
+assert K["vida"]["deger"]["trapez_5_5x25_c_profil_dahil"] is False and c_profil_adedi == 6 and "parça C profiller hariç" in tv_s["formul"] \
+    and (tv_s["olcu"], tv_s["adet"], tv_c_ile, tv_c_ile_adet) == (984, 1000, 1044, 1250), "sayfa: trapez vidada parça C profiller sayılmıyor: 984 → 1000 (7 Ekim'de 1044 → 1250) diyor"
 assert (_kars[62]["Sandviç panel kapaması"]["liste"], _kars[62]["Sandviç panel kapaması"]["hesap"]) == (16, 17), "sayfa: 62 m² listede kapama 16, hesap 17 diyor"
 vt_s = satir(baz, "Veranda tavanı (Boardex)")
 kosegen = (G["kapali_olcu_m"][0] ** 2 + G["kapali_olcu_m"][1] ** 2) ** 0.5
@@ -262,7 +263,8 @@ assert (adet(baz, "NYM kablo (3 × 2,5)"), adet(baz, "NYM kablo (2 × 1,5)")) ==
 assert (IN_KR["olcu"], IN_KR["orta_inis_esigi_m"]) == ("dere", 9.0) and (SK_KR["parca_boyu_m"], SK_KR["bindirme_m"]) == (2.5, 0.2) and sandvic_kapama["adet"] == ONCE["kapama"], \
     "sayfa: iniş eşiği 9 m dere boyu; sandviç panel kapaması L 2500, 20 cm bindirme, adet önceki sürümle aynı diyor"
 assert K["bindirme_m"]["mahya"]["deger"] == 0.2 and K["celik_cati_yontemi"]["deger"] == "panel" and K["panel_boyu_yuvarlama_mm"]["deger"] == 10, "sayfa: bindirme 20 cm; çelikte yöntem A; panel boyu 10 mm'ye yukarı diyor"
-# 8 Ekim 00:45 cevapları: iniş eşiği ve kapama hesabı onaylandı; panel boyu kapandı; levhanın adı üreticinin adı; duvara dayanan kenara özel mahya; alıcıya ait pencerede mastik yok
+# 8 Ekim 00:45 cevapları: iniş eşiği ve kapama hesabı onaylandı; panel boyu kapandı; levhanın adı üreticinin adı; duvara dayanan kenara özel mahya; alıcıya ait pencerede mastik yok.
+# 07:23 ve 07:41: kalkan kenarına alın kapama, Boardex yalnız yüz (bu modelde kalkan kenarı yok); trapez vidada parça C profil sayılmaz; özel mahya bant hesabına girmez
 LEVHA_ADI = K["urun_adlari"]["deger"]["degistir"][0][1]
 levha_satirlari = [x for x in baz["satirlar"] if x.get("liste_adi")]
 assert K["inis"]["durum"] == K["sandvic_kapama"]["durum"] == "lokman" == satir(baz, "Dere iniş borusu")["durum"] == sandvic_kapama["durum"], \
@@ -271,12 +273,16 @@ assert K["panel_boyu_uzatma"].get("satir_notu_pay") and "teyit bekliyor" not in 
 assert LEVHA_ADI == "OUTWEAR Dış Cephe Levhası" and len(levha_satirlari) == 4 and all(LEVHA_ADI in x["liste_adi"] and "Boardex" in x["kalem"] for x in levha_satirlari) \
     and satir(baz, "Dış cephe Boardex")["liste_adi"] == LEVHA_ADI, "sayfa: dört satırda levha üreticinin adıyla yazıyor diyor"
 assert K["duvar_dibi"]["deger"].get("malzeme") == "ozel_mahya" and K["kapsam_alici"]["deger"]["pencere_aliciya_aitse"]["silikonize_mastik"] is False \
-    and K["yontem_a_alin_kaplamasi"]["durum"] == "lokman" and K["yontem_a_kalkan_ust_kapamasi"]["durum"] == "soru" \
-    and not any(x["kalem"] in ("Özel mahya (geniş)", "Kalkan kenarı üst kapaması", "Alın (kalkan kenarı) için Boardex") for x in baz["satirlar"]), \
+    and K["yontem_a_alin_kaplamasi"]["durum"] == "lokman" and K["yontem_a_kalkan_ust_kapamasi"]["durum"] == "lokman" \
+    and K["yontem_a_kalkan_ust_kapamasi"]["deger"]["ad"] == "Alın kapama" and K["yontem_a_alin_kaplamasi"]["deger"]["olcu"] == "yalniz_yuz" \
+    and not any(x["kalem"] in ("Özel mahya (geniş)", "Alın kapama", "Alın (kalkan kenarı) için Boardex") for x in baz["satirlar"]), \
     "sayfa: özel mahya, mastik ve kalkan kenarı kararlarının bu modelde (kırma çatı, pencereler dahil) karşılığı yok diyor"
 
 degisenler_8 = [
-    ("Sayılar değişmedi", f"Liste yine {toplam_satir} satır. Bu turda cevaplarınız kurala bağlandı; teyit ya da değer bekleyen satır sayısı {bekleyen_sayisi} (7 Ekim'de 10'du)."),
+    ("Bir sayı değişti", f"Trapez vida (5,5 × 25) {tv_c_ile_adet} → {tv_s['adet']}; öteki satırların adedi aynı. Liste yine {toplam_satir} satır; "
+                         f"teyit ya da değer bekleyen satır sayısı {bekleyen_sayisi} (7 Ekim'de 10'du)."),
+    ("Trapez vidada C profil yok", f"\"C profiller hiç önemli değil öylesine gönderiyoruz göz ardı et\" dediniz: {c_profil_adedi} adet \"Boy C profil\" vida hesabında "
+                                   f"sayılmıyor, satırları listede duruyor. {tr(tv_c_ile)} → {tr(tv_s['olcu'])} vida; pakete yuvarlanınca {tv_c_ile_adet} → {tv_s['adet']}."),
     ("İniş kuralı kesinleşti", f"9 m eşiğini onayladınız: her dere hattının iki ucuna birer iniş, boyu 9 m'yi geçen hattın ortasına bir tane daha. Bu modelde {adet(baz, 'Dere iniş borusu')}."),
     ("Sandviç panel kapaması kesinleşti", f"Dere boyu ÷ (2,5 − 0,20): sandviç panel seçeneğinde {sandvic_kapama['adet']}."),
     ("Panel boyu kapandı", f"\"3 cm'e kadar +- tolere edilebilir\" dediniz: liste L {boy_mm} × {kap_s['adet']} ile kalıyor. Kural: eğimli boy + taşma, 10 mm'ye yukarı; "
@@ -284,8 +290,10 @@ degisenler_8 = [
     ("Levhanın adı", f"\"üreticide ne yazıyorsa onu yaz\" dediniz: listede artık {LEVHA_ADI} yazıyor ({len(levha_satirlari)} satır). Şirkette Boardex denen levha bu; "
                      "notlarda ve formüllerde Boardex adı geçebilir."),
     ("Sigorta kutusu", "Tanımda yeri yazmıyorsa giriş kapısında sayılmasını onayladınız."),
-    ("Bu modelde karşılığı olmayanlar", "Çatının duvara dayandığı kenara özel mahya; pencereler alıcıya aitse mastik yazılmaz; beşik çatıda kalkan kenarı da Boardex. "
-                                        "Bu model kırma çatılı ve pencereleri dahil: listede bir şey değişmedi."),
+    ("Bu modelde karşılığı olmayanlar", "Çatının duvara dayandığı kenara özel mahya (yalnız ek veranda, müştemilat gibi çıkıntı ya da bazı cumbalı çatılarda; "
+                                        "mahya bandına girmez); pencereler alıcıya aitse mastik yazılmaz; beşik çatıda kalkan kenarının üstüne alın kapama "
+                                        "(makasın eğimli kenarı boyunca, L 2500), Boardex yalnız o kenarın yüzüne. Bu model kırma çatılı ve pencereleri dahil: "
+                                        "bu kalemlerin hiçbiri bu listede yok."),
 ]
 
 degisenler = [
@@ -301,7 +309,7 @@ degisenler = [
     ("Çelikte omega ve aşık yok", "Bu liste zaten çatı ve tavan paneliyle. Omega ve aşıklı liste yalnız karşılaştırma için duruyor; "
                                   f"orada trapez vida (5,5 × 25) {ONCE['trapez_vida_B']} → {adet(yb, 'Trapez vida (5,5 × 25)')}."),
     ("Adedi değişmeyenler", f"Köşebent {kose_s['adet']}, iniş {adet(baz, 'Dere iniş borusu')}, alçıpan vidası {adet(baz, 'Alçıpan vidası (3,5 × 35)')}, "
-                            f"trapez vida (5,5 × 25) {adet(baz, 'Trapez vida (5,5 × 25)')}, kesme taşı {adet(baz, KESME_TASI)}, "
+                            f"trapez vida (5,5 × 25) {tv_c_ile_adet}, kesme taşı {adet(baz, KESME_TASI)}, "
                             f"dayson {adet(baz, 'Dayson')}, mastik {adet(baz, 'Silikonize mastik')}. Bu satırlarda kararınız mevcut hesabı teyit etti."),
     ("Liste", f"{ONCE['satir']} → {toplam_satir} satır."),
 ]
@@ -316,15 +324,6 @@ degisen_html = "".join(baslikli(b, m) for b, m in degisenler)
 degisen8_html = "".join(baslikli(b, m) for b, m in degisenler_8)
 
 sorular = [
-    ("Kalkan kenarında çatı kaplamasının üstüne gelecek malzeme hangisi?",
-     "\"beşik çatıda da boardex kaplama yapılıyor ama çatı kaplamasının üstüne bir malzeme gelmesi lazım\" dediniz. Bu malzemenin adı ve parça boyu ne? "
-     "Örneğin omega ve aşıklı yöntemdeki alın sacı mı (30'luk, L 2500), özel mahya mı (L 2800), başka bir parça mı? Söyleyince adedi kalkan kenarının boyundan hesaplarım. "
-     "Bu model kırma çatılı; burada böyle kenar yok."),
-    (f"Trapez vida: {c_profil_adedi} adet \"Boy C profil\" için de vida sayılsın mı?",
-     f"Bunu önce anlaşılır soramamışım; örnekle soruyorum. Listenin çelik panel grubunun sonunda, panellerden ayrı {c_profil_adedi} adet \"Boy C profil\" var "
-     f"(80 × 45 × 0,8'den 3, 1,2'den 3; panel değil, tek tek profil). Trapez vidayı (5,5 × 25) tarifinizle sayıyorum: her panele 10 vida (\"sağına soluna 5\"). "
-     f"Bu {c_profil_adedi} profile de 10'ar vida yazayım mı? Yazarsam bu modelde {tv_s['adet']} vida gider ({tr(tv_s['olcu'])}, pakete yuvarlanınca); "
-     f"yazmazsam {tv_c_siz_adet} ({tr(tv_c_siz)}). Şimdi yazıyorum, çünkü Eylül 2026 listesindeki 1800 de öyle çıkıyor. \"Yaz\" ya da \"yazma\" demeniz yeter."),
     ("Excel motorundaki formül", "Sayfanın sonundaki \"Excel motorundaki kaplama formülü\" bölümünü mühendise iletir misiniz? "
                                  "Kiremit desen sac 100 cm kapatıyorsa motordaki 1,05 katsayısının da 1 olması gerekir."),
 ]
@@ -650,7 +649,7 @@ table.pafta td:first-child {{ font-weight: 500; min-width: 150px; }}
 
 {motor_html}
 
-<p class="dip">Kaynaklar: 3 Ekim 13:27, 4 Ekim 15:18, 16:18 ve 17:46, 7 Ekim 07:45 ve 08:02, 8 Ekim 00:45 cevaplarınız, 4 Ekim 01:24 ve 01:42 düzeltmeleriniz; inşaat mühendisinin üç tur cevabı (3 Ekim 18:14, 4 Ekim 01:24 ve 12:14'te ilettiniz); üç gerçek yükleme listesinin çalışma kitapları (62, 90 ve 105 m²); Excel hesaplama motoru (CTKBF V1.1); klasörlerinizdeki montaj paftaları. Bu modelin kendi gerçek listesi yok: sayılar yalnız kurallardan çıkıyor. Üç gerçek listeyle karşılaştırmada {kars_toplam} kalemin {kars_ayni} tanesinde adet aynı; bu bir sınama değil, çünkü katsayıların bir kısmı o listelere bakılarak seçildi. Ayrıntı depoda: docs/sartname/yukleme_listesi_yontemi.md ve docs/sartname/montaj_paftasi.md.</p>
+<p class="dip">Kaynaklar: 3 Ekim 13:27, 4 Ekim 15:18, 16:18 ve 17:46, 7 Ekim 07:45 ve 08:02, 8 Ekim 00:45, 07:23 ve 07:41 cevaplarınız, 4 Ekim 01:24 ve 01:42 düzeltmeleriniz; inşaat mühendisinin üç tur cevabı (3 Ekim 18:14, 4 Ekim 01:24 ve 12:14'te ilettiniz); üç gerçek yükleme listesinin çalışma kitapları (62, 90 ve 105 m²); Excel hesaplama motoru (CTKBF V1.1); klasörlerinizdeki montaj paftaları. Bu modelin kendi gerçek listesi yok: sayılar yalnız kurallardan çıkıyor. Üç gerçek listeyle karşılaştırmada {kars_toplam} kalemin {kars_ayni} tanesinde adet aynı; bu bir sınama değil, çünkü katsayıların bir kısmı o listelere bakılarak seçildi. Ayrıntı depoda: docs/sartname/yukleme_listesi_yontemi.md ve docs/sartname/montaj_paftasi.md.</p>
 </div>
 <script>
 (function () {{

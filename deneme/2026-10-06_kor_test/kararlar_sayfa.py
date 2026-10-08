@@ -18,13 +18,14 @@ from pathlib import Path
 
 BURADA = Path(__file__).resolve().parent
 BELGE = BURADA.parents[1] / "docs" / "sartname" / "yukleme_listesi_yontemi.md"
-SORU_ADEDI = 3          # açık soruların başındaki, Lokman'dan cevap beklenen maddeler (kalkan kenarı üst kapaması; parça C profil; özel mahyanın ayrıntıları)
+SORU_ADEDI = 0          # açık soruların başındaki, Lokman'dan cevap beklenen maddeler (8 Ekim 07:23'ten beri yok: kalkan kenarı, parça C profil ve özel mahya kapandı)
 TUR = {"karar": ("kararınız farklı", "ok", "kararınız o listeden farklı"), "yöntem": ("yöntem", "kaynak", "liste omega ve aşıklı yöntemle hazırlanmış; çelikte artık yok"),
        "elle": ("elle (liste)", "kaynak", "listenin elle hesabı, yuvarlaması ya da elle dizilimi"), "ölçü": ("ölçünün yeri", "kaynak", "ölçünün alındığı yüz; kararınız: bizdeki"),
        "soru": ("soru", "bekle", "kural bekliyor")}
 # Sayfa kişi adı taşımaz: açıklamalardaki adlar okura hitaba çevrilir.
 SAYFA_DILI = (("Lokman'ın kararı", "kararınız"), ("Lokman'ın", "sizin"), ("Lokman,", "siz,"), ("Lokman", "siz"))
-DURUM = {"lokman": "sizin kuralınız", "muhendis": "mühendisin kuralı", "uydurma": "listeye uyduruldu; teyit bekliyor", "soru": "soru: cevabınızı bekliyor"}
+DURUM = {"lokman": "sizin kuralınız", "muhendis": "mühendisin kuralı", "uydurma": "listeye uyduruldu; teyit bekliyor", "varsayim": "varsayım; teyit bekliyor",
+         "soru": "soru: cevabınızı bekliyor"}
 
 
 def e(s) -> str:
@@ -68,9 +69,9 @@ def main() -> int:
     satir = lambda bb: sum(len(b["gercek_satirlar"]) for b in bb)
     toplam = oz["b"]["gercek_satir"]
     sorular = acik_sorular(a.belge.read_text(encoding="utf-8"))[:SORU_ADEDI]
-    if (len(sorular) != SORU_ADEDI or not sorular[0].startswith("**Kalkan kenarında") or not sorular[1].startswith("**Trapez vidada parça C profil")
-            or not sorular[2].startswith("**Özel mahyanın ayrıntıları")):
-        raise SystemExit("Yöntem belgesindeki açık soruların başı beklenen sırada değil (kalkan kenarı, trapez vidada parça C profil, özel mahyanın ayrıntıları); önce belge_uret.py, sonra SORU_ADEDI.")
+    if len(sorular) != SORU_ADEDI or any(x.startswith(("**Kalkan kenarında", "**Trapez vidada parça C profil", "**Özel mahyanın ayrıntıları"))
+                                         for x in acik_sorular(a.belge.read_text(encoding="utf-8"))):
+        raise SystemExit("Yöntem belgesinin açık soruları beklenen durumda değil (8 Ekim 07:23'te kapanan sorular hâlâ duruyor); önce belge_uret.py, sonra SORU_ADEDI.")
 
     ozet = (f'<div><b>{on["duzeltilmis"]}<small> / {toplam}</small></b><span>Kararlardan önce (7 Ekim 03:46): yalnız bizim hatalarımız düzeltilmişti</span></div>'
             f'<div><b>{oz["b"]["ayni"]}<small> / {toplam}</small></b><span>Kararlarınızdan sonra, projenin yapıldığı yöntemle (tavan omegası ve aşık)</span></div>'
@@ -190,7 +191,7 @@ footer {{ font-size: 12.5px; color: var(--soluk); max-width: 86ch; }}
 <header>
   <div class="kunye">KT-01 · kör test · kararlardan sonra · {e(a.zaman)} · deneme, canlıda değil</div>
   <h1>Kararlarınızdan sonra: kendi listemiz ile gerçek liste</h1>
-  <p class="aciklama">98,7 m² tek kat çelik proje (beşik + cumba çatı, müştemilat, sandviç panel; Eylül 2026 listesi). 7 Ekim 07:45 cevaplarınız, 08:02 düzeltmeleriniz ve 8 Ekim 00:45 cevaplarınız kurallara işlendi; aynı proje güncel kurallarla iki kez hesaplandı ve gerçek listenin adedi yazılı {toplam} satırıyla tek tek kıyaslandı. "Aynı" yalnız adedin aynı olmasıdır. Elektrik sayıları projenin paftasından. Kişi, bayi ve firma adı, fiyat yoktur.</p>
+  <p class="aciklama">98,7 m² tek kat çelik proje (beşik + cumba çatı, müştemilat, sandviç panel; Eylül 2026 listesi). 7 Ekim 07:45 cevaplarınız, 08:02 düzeltmeleriniz, 8 Ekim 00:45 ve 07:23 cevaplarınız kurallara işlendi; aynı proje güncel kurallarla iki kez hesaplandı ve gerçek listenin adedi yazılı {toplam} satırıyla tek tek kıyaslandı. "Aynı" yalnız adedin aynı olmasıdır. Elektrik sayıları projenin paftasından. Kişi, bayi ve firma adı, fiyat yoktur.</p>
 </header>
 <div class="ozet">{ozet}</div>
 <section>
@@ -200,7 +201,7 @@ footer {{ font-size: 12.5px; color: var(--soluk); max-width: 86ch; }}
 </section>
 <section>
   <h2>Sizden beklenenler</h2>
-  <ol class="sorular">{"".join(f"<li>{md(x)}</li>" for x in sorular)}</ol>
+  {(f'<ol class="sorular">{"".join(f"<li>{md(x)}</li>" for x in sorular)}</ol>') if sorular else '<p>Bu proje için sizden beklenen bir cevap kalmadı. Kalkan kenarı, trapez vidadaki C profiller ve özel mahya 8 Ekim 07:23 cevaplarınızla kapandı.</p>'}
 </section>
 <section>
   <h2>Çelik standardıyla gelen, gerçek listede olmayan satırlar</h2>

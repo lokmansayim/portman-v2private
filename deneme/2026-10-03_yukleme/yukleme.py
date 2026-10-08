@@ -895,25 +895,35 @@ def _hesapla(g: dict, k: dict) -> dict:
         ekle("Metal aksam", "Saçak yüzü için Boardex", boardex_boyut, tavan(c["sacak_yuzu_m2"] * (1 + zb) / deg(k, "levha_m2", "boardex")), c["sacak_yuzu_m2"],
              formul=f"saçak ucu çevresi × saçak yüzü yüksekliği (topuk + panelin düşey ölçüsü) × {zb_carpan} ÷ 2,88", durum="muhendis",
              not_="saçak yüzü Boardex'le kaplanır: mühendis, 3 Ekim; kaplandığı: Lokman, 2 Ekim 22:05. Alan geometriden")
-    # Yöntem A'da beşik çatının kalkan kenarı (alın): alın sacı yok. Kalkan kenarı da saçak gibi Boardex kaplanır (alt + yüz; kurallar:
-    # `yontem_a_alin_kaplamasi`; Lokman, 8 Ekim 2026 00:45; 0.13'te geçiciydi, soru). Kırma çatıda alın yoktur.
+    # Yöntem A'da beşik çatının kalkan kenarı (alın): alın sacı yok. Kalkan kenarı Boardex kaplanır (kurallar: `yontem_a_alin_kaplamasi`; Lokman,
+    # 8 Ekim 2026 00:45; 0.13'te geçiciydi, soru). 0.14'te saçak gibi (alt + yüz); 0.15'ten beri yalnız makasın eğimli kenarının yüzü (8 Ekim 07:23:
+    # "Alın kapama saçak değil sadece makasın eğimli kenarı kadar kapanıyor"). Kırma çatıda alın yoktur.
     if yontem == "panel" and kural_degeri("yontem_a_alin_kaplamasi") and c.get("alin_saci_m") and c.get("sacak_alti") == "boardex":
         sacak_eni = c.get("sacak_alti_eni_m", deg(k, "sacak_alti_boardex_eni_m"))
         yuz_h = c["sacak_yuzu_m2"] / sacak_altli if c.get("sacak_yuzu_m2") and sacak_altli else 0.0
-        alin_alan = c["alin_saci_m"] * (sacak_eni + yuz_h)
-        ekle("Metal aksam", "Alın (kalkan kenarı) için Boardex", boardex_boyut, tavan(alin_alan * (1 + zb) / deg(k, "levha_m2", "boardex")), alin_alan,
-             formul=f"alın kenarlarının boyu {tr(c['alin_saci_m'])} m × (saçak eni {tr(sacak_eni)} + saçak yüzü yüksekliği {tr(yuz_h)} m) × {zb_carpan} ÷ 2,88",
-             durum=k["yontem_a_alin_kaplamasi"]["durum"], not_=k["yontem_a_alin_kaplamasi"]["satir_notu"])
-    # Lokman, 8 Ekim 2026 00:45: kalkan kenarında "çatı kaplamasının üstüne bir malzeme gelmesi lazım"; malzemesi soruldu: satır boyla ve adetsiz yazılır.
-    # Saçak altının malzemesine bağlı değildir: yöntem A'da kalkan kenarı olan her çatıda yazılır.
+        yalniz_yuz = deg(k, "yontem_a_alin_kaplamasi").get("olcu") == "yalniz_yuz"      # Lokman, 8 Ekim 2026 07:23: kalkan kenarı saçak değil
+        alin_alan = c["alin_saci_m"] * ((0.0 if yalniz_yuz else sacak_eni) + yuz_h)
+        if alin_alan > 0 or not yalniz_yuz:
+            ekle("Metal aksam", "Alın (kalkan kenarı) için Boardex", boardex_boyut, tavan(alin_alan * (1 + zb) / deg(k, "levha_m2", "boardex")), alin_alan,
+                 formul=(f"makasın eğimli kenarı (kalkan kenarlarının boyu) {tr(c['alin_saci_m'])} m × saçak yüzü yüksekliği {tr(yuz_h)} m × {zb_carpan} ÷ 2,88"
+                         if yalniz_yuz else
+                         f"alın kenarlarının boyu {tr(c['alin_saci_m'])} m × (saçak eni {tr(sacak_eni)} + saçak yüzü yüksekliği {tr(yuz_h)} m) × {zb_carpan} ÷ 2,88"),
+                 durum=k["yontem_a_alin_kaplamasi"]["durum"], not_=k["yontem_a_alin_kaplamasi"]["satir_notu"])
+    # Lokman, 8 Ekim 2026 00:45: kalkan kenarında "çatı kaplamasının üstüne bir malzeme gelmesi lazım" (0.14: adı bilinmediği için adetsiz satır).
+    # 07:23: malzeme alın kapama, boyu makasın eğimli kenarı kadar (0.15: parça boyu kuralda). Saçak altının malzemesine bağlı değildir.
     uk = kural_degeri("yontem_a_kalkan_ust_kapamasi")
     if yontem == "panel" and uk and c.get("alin_saci_m"):
-        bilgi_adet = tavan(c["alin_saci_m"] / (uk["bilgi_parca_boyu_m"] - uk["bilgi_bindirme_m"]))
-        ekle("Metal aksam", uk["ad"], "", None, c["alin_saci_m"], birim="m",
-             formul="kalkan kenarlarının boyu" + (" (çatı panelli ek yapının alınları hariç)" if c.get("ek_cati") else "") + "; malzeme ve parça boyu bilinmiyor",
-             durum=k["yontem_a_kalkan_ust_kapamasi"]["durum"],
-             not_=k["yontem_a_kalkan_ust_kapamasi"]["satir_notu"]
-                  + f". Bilgi: alın sacının ölçüsüyle (L {round(uk['bilgi_parca_boyu_m'] * 1000)}, {tr(uk['bilgi_bindirme_m'] * 100, 0)} cm bindirme) {bilgi_adet} adet ederdi")
+        kenar = "kalkan kenarlarının boyu" + (" (çatı panelli ek yapının alınları hariç)" if c.get("ek_cati") else "")
+        if uk.get("parca_boyu_m"):      # Lokman, 8 Ekim 2026 07:23: alın kapama, makasın eğimli kenarı kadar; parça boyu kuralda (varsayım)
+            ekle("Metal aksam", uk["ad"], f"L {round(uk['parca_boyu_m'] * 1000)}", tavan(c["alin_saci_m"] / (uk["parca_boyu_m"] - uk["bindirme_m"])), c["alin_saci_m"], birim="m",
+                 formul=f"makasın eğimli kenarı boyunca: {kenar} {tr(c['alin_saci_m'])} m ÷ ({tr(uk['parca_boyu_m'], 1)} − {tr(uk['bindirme_m'])} bindirme)",
+                 durum=k["yontem_a_kalkan_ust_kapamasi"]["durum"], not_=k["yontem_a_kalkan_ust_kapamasi"]["satir_notu"])
+        else:
+            bilgi_adet = tavan(c["alin_saci_m"] / (uk["bilgi_parca_boyu_m"] - uk["bilgi_bindirme_m"]))
+            ekle("Metal aksam", uk["ad"], "", None, c["alin_saci_m"], birim="m", formul=kenar + "; malzeme ve parça boyu bilinmiyor",
+                 durum=k["yontem_a_kalkan_ust_kapamasi"]["durum"],
+                 not_=k["yontem_a_kalkan_ust_kapamasi"]["satir_notu"]
+                      + f". Bilgi: alın sacının ölçüsüyle (L {round(uk['bilgi_parca_boyu_m'] * 1000)}, {tr(uk['bilgi_bindirme_m'] * 100, 0)} cm bindirme) {bilgi_adet} adet ederdi")
     # köşebent (Ubeydullah, 3 Ekim 2026): (bütün odaların tavan çevresi + iç köşeler × 2,7 m) ÷ 2,5
     kr = deg(k, "kosebent")
     cevre_top = sum(o["cevre_m"] for o in g["odalar"])

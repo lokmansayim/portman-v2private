@@ -1,6 +1,6 @@
 # KT-01 · kararlardan sonra durum
 
-Lokman'ın 7 Ekim 2026 07:45 cevapları, 08:02 düzeltmeleri ve 8 Ekim 00:45 cevapları işlendikten sonra, gerçek listenin adetli her satırı güncel kural setinin (0.14) verdiği iki listeyle. Tablo `kararlar_kiyas.py` ile üretilir; elle düzeltilmez. Açıklamalar `kararlar_notlari.json`dan.
+Lokman'ın 7 Ekim 2026 07:45 cevapları, 08:02 düzeltmeleri, 8 Ekim 00:45 ve 07:23 cevapları işlendikten sonra, gerçek listenin adetli her satırı güncel kural setinin (0.15) verdiği iki listeyle. Tablo `kararlar_kiyas.py` ile üretilir; elle düzeltilmez. Açıklamalar `kararlar_notlari.json`dan.
 
 | Liste | Aynı satır | Ne demek |
 |---|---|---|
@@ -28,8 +28,8 @@ Aynı yöntemle farklı kalan 35 satır:
 | Çatı paneli (makas üstü, sırt 80 mm) | roll form çelik | 10 | 361 | lokman |
 | Saçaklar için OUTWEAR Dış Cephe Levhası | 12,5 × 1200 × 2400 | 3 |  | uydurma |
 | Saçak yüzü için OUTWEAR Dış Cephe Levhası | 12,5 × 1200 × 2400 | 2 |  | muhendis |
-| Alın (kalkan kenarı) için OUTWEAR Dış Cephe Levhası | 12,5 × 1200 × 2400 | 4 |  | lokman |
-| Kalkan kenarı üst kapaması |  | — (20,97 m) |  | soru |
+| Alın (kalkan kenarı) için OUTWEAR Dış Cephe Levhası | 12,5 × 1200 × 2400 | 2 |  | lokman |
+| Alın kapama | L 2500 | 10 |  | lokman |
 
 ## Satır satır
 
@@ -119,7 +119,7 @@ Aynı yöntemle farklı kalan 35 satır:
 | RYSB pul başlı | 750 | 743 | 743 ✗ | 743 ✗ |  | elle: listede 750'ye yuvarlanmış; bizde 743. |
 | Alçıpan vidası | 8 000 | 6 250 | 6 250 ✗ | 6 500 ✗ |  | karar: levha başına 40 yeterli (C1 m). Listede levha başına 50 ve elle yuvarlama. |
 | OSB ve yalıpan vidası | 3 550 | 3 000 | 3 000 ✗ | 3 000 ✗ |  | karar: levha başına 40 (C1 m). Listede 50 ve elle yuvarlama. |
-| Trapez vida (5,5 × 25) | 1 800 | 1 750 | 1 000 ✗ | 1 250 ✗ | Yalnız çelik birleşim yerleri: panel başına 10, köşebent terimi duruyor (C1 n; 08:02): (46 panel + 6 parça C profil) × 10 + 67 × 6 = 922 → 1000. Parça C profiller şablondaki gibi sayıldı; sayılıp sayılmayacağı soruldu (8 Ekim'de örnekle yeniden). | karar: omega ve aşık için vida konmaz. Listede onlar için de var (1800). |
+| Trapez vida (5,5 × 25) | 1 800 | 1 750 | 1 000 ✗ | 1 250 ✗ | Yalnız çelik birleşim yerleri: panel başına 10, köşebent terimi duruyor (C1 n; 08:02); parça C profiller sayılmaz (8 Ekim 07:23: "göz ardı et"): 46 panel × 10 + 67 × 6 = 862 → 1000. | karar: omega ve aşık için vida konmaz. Listede onlar için de var (1800). |
 | Trapez vida (5,5 × 60) | 250 | 250 | 250 | 250 |  |  |
 | Trapez vida (5,5 × 110) | 750 | 750 | 750 | 750 |  |  |
 | Çelik dübel | 42 | 42 | 42 | 42 |  |  |
