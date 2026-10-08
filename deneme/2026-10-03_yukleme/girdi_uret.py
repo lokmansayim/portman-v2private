@@ -195,7 +195,8 @@ def main() -> int:
         ),
         "varsayimlar": [
             "Çatı kaplaması seçenektir; baz pakette tek kat panel (Lokman, 4 Ekim 01:42). `--kaplama` ile öteki beş seçenek hesaplanır. Panel boyunun tabanı = eğimli boy + 5 cm taşma (mühendis, 4 Ekim 12:14), " + (
-                f"{boy_adimi_mm} mm'ye yukarı (Lokman, 7 Ekim 07:45); adedi düşürüyorsa ya da pay inceyse boy en çok 3 cm uzatılır (Lokman, 4 Ekim 16:18; pay koşulu tabanda: teyit bekliyor). "
+                f"{boy_adimi_mm} mm'ye yukarı (Lokman, 7 Ekim 07:45); adedi düşürüyorsa ya da pay inceyse boy en çok 3 cm uzatılır (Lokman, 4 Ekim 16:18; "
+                + ("3 cm'e kadar fark tolere edilebilir: 8 Ekim 00:45). " if kur["panel_boyu_uzatma"].get("satir_notu_pay") else "pay koşulu tabanda: teyit bekliyor). ")
                 if boy_adimi_mm > 1 else "mm'ye yukarı; adedi düşürüyorsa boy en çok 3 cm uzatılır (Lokman, 4 Ekim 16:18). ") +
             "Kapatma genişliği ürüne göre değişir (Lokman, 4 Ekim 15:18): güncel değerler kurallarda (tek kat panel, kiremit desen sac ve sandviç panel 100 cm); bu girdiye `cati.kapatma_m` yazılırsa o kullanılır.",
             "Kırma çatıda kaplama adedi çatı açılımından: yüzler şerit şerit dizilir, çapraz kesimden artan parça karşı yüzde kullanılır (Lokman, 4 Ekim 01:42; `cati_acilim.py`). "
@@ -207,7 +208,7 @@ def main() -> int:
             "Geçerli kural bu (Lokman, 4 Ekim 16:18); odanın bütün yüzeyi yalnız bilgi olarak satırın notunda durur. Klima duvarı sayılmaz.",
             "Elektrik: pafta yok; sayılar mühendisin oda başına kuralından (doğruluk payı yaklaşık %75). Salon ile mutfağın aynı mahalde olduğu yerde ikisinin kuralı birlikte uygulandı (mühendis doğruladı).",
             ("Kablo boyunda 'sigortadan evin en uzak mesafesi': sigorta kutusu giriş kapısında sayıldı; oradan kapalı kısmın en uzak köşesine, karkas üzerinden "
-             f"{str(en_uzak_m).replace('.', ',')} m (Lokman, 7 Ekim 07:45; kutunun yeri varsayım)." if en_uzak_m is not None else
+             f"{str(en_uzak_m).replace('.', ',')} m (Lokman, 7 Ekim 07:45; {(kur.get('kablo_en_uzak_mesafe') or {}).get('kutu_yeri_notu') or 'kutunun yeri varsayım'})." if en_uzak_m is not None else
              "Kablo boyunda 'sigortadan evin en uzak mesafesi' kapalı kısmın köşegeni alındı (Excel motorundaki gibi)."),
             "Köşebent: yalnız iç köşeler sayıldı; odaya doğru çıkıntı yapan köşeler sayılmaz, veranda tavanının çevresi sayılır (mühendis, 4 Ekim 12:14). Veranda çevresi brüt ölçüyle.",
             "Dış kapı boşluğu 0,95 × 2,10 m (mühendis, 4 Ekim 12:14); katalog çiziminde kapı 100 cm'di.",

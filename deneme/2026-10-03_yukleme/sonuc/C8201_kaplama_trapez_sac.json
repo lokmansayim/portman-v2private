@@ -147,7 +147,8 @@
    "kg": null,
    "formul": "saçak boyu × saçak eni × 1,08 ÷ 2,88",
    "durum": "uydurma",
-   "not": "saçak altının Boardex olduğu: Lokman, 3 Ekim 13:27; formül 62 m² listeden"
+   "not": "saçak altının Boardex olduğu: Lokman, 3 Ekim 13:27; formül 62 m² listeden",
+   "liste_adi": "Saçaklar için OUTWEAR Dış Cephe Levhası"
   },
   {
    "grup": "Metal aksam",
@@ -160,7 +161,8 @@
    "kg": null,
    "formul": "saçak ucu çevresi × saçak yüzü yüksekliği (topuk + panelin düşey ölçüsü) × 1,08 ÷ 2,88",
    "durum": "muhendis",
-   "not": "saçak yüzü Boardex'le kaplanır: mühendis, 3 Ekim; kaplandığı: Lokman, 2 Ekim 22:05. Alan geometriden"
+   "not": "saçak yüzü Boardex'le kaplanır: mühendis, 3 Ekim; kaplandığı: Lokman, 2 Ekim 22:05. Alan geometriden",
+   "liste_adi": "Saçak yüzü için OUTWEAR Dış Cephe Levhası"
   },
   {
    "grup": "Metal aksam",
@@ -186,7 +188,8 @@
    "kg": null,
    "formul": "(çevre × yükseklik + kolon/kiriş kaplaması + çatı alnı (kalkan) − boşluklar) × 1,08 ÷ 2,88",
    "durum": "excel",
-   "not": "zayiat %8: mühendis, 4 Ekim 12:14; Lokman, 4 Ekim 15:18: bununla devam. 2025 listelerindeki adetler %15'e uyuyor; %15 ile 33 levha. Kalınlık 12,5 mm: Lokman, 7 Ekim 07:45 (listelerdeki 8 mm hatalı girilmiş; üreticinin belgelerinde 12,5 mm)"
+   "not": "zayiat %8: mühendis, 4 Ekim 12:14; Lokman, 4 Ekim 15:18: bununla devam. 2025 listelerindeki adetler %15'e uyuyor; %15 ile 33 levha. Kalınlık 12,5 mm: Lokman, 7 Ekim 07:45 (listelerdeki 8 mm hatalı girilmiş; üreticinin belgelerinde 12,5 mm)",
+   "liste_adi": "OUTWEAR Dış Cephe Levhası"
   },
   {
    "grup": "Dış cephe kaplama",
@@ -199,7 +202,8 @@
    "kg": null,
    "formul": "veranda tavanı (dış ölçüyle) × 1,08 ÷ 2,88",
    "durum": "lokman",
-   "not": "çelik konstrüksiyon binalarda veranda tavanı her zaman Boardex, prefabrikte yeşil alçıpan (Lokman, 7 Ekim 07:45). Önceki kuralda yeşil alçıpandı"
+   "not": "çelik konstrüksiyon binalarda veranda tavanı her zaman Boardex, prefabrikte yeşil alçıpan (Lokman, 7 Ekim 07:45). Önceki kuralda yeşil alçıpandı",
+   "liste_adi": "Veranda tavanı (OUTWEAR Dış Cephe Levhası)"
   },
   {
    "grup": "İç cephe kaplama",
@@ -277,7 +281,7 @@
    "kg": null,
    "formul": "çatı açılımı: yüzler şerit şerit dizilir; çapraz kesimden artan parça karşı yüzde kullanılır; panel boyu = eğimli boy + taşma, 10 mm'ye yukarı + 1 cm (pay kalsın diye)",
    "durum": "lokman",
-   "not": "12 panel tam boy, 18 panel kesilerek; alan olarak en az 29. Dizilim her yüzde sol köşeden başlar (Lokman, 4 Ekim 15:18). Kaplama saçaktan 5 cm taşar; kesim payı 5 mm; yedek panel yok: kesim planı montajcıya verilir (Lokman, 4 Ekim 15:18). Panel boyu 1 cm uzatıldı (pay kalsın diye; 4 Ekim 16:18 kuralındaki pay koşulu taban boya da uygulandı, teyit bekliyor): L 4320 ile de 30 çıkıyor ama pay ince, kesim payı 7,8 mm'yi geçerse 32 gerekir; L 4330 ile kesim payı 1 cm olsa da 30. Tam boy giden 12 panelde fazlalık mahya ucunda kalır; taşma 5 cm. Gerçek listeyle karşılaştırılmadı. Excel motorundaki formül yüzey ÷ sac boyu × 0,8 yapıyor: 0,8 paydanın parantezi dışında kaldığı için kapatma genişliğine bölmek yerine çarpıyor (4 Ekim'de yeniden okundu); mühendisin 10 × 10 m beşik çatı metrajındaki 28 adedi ÷ 0,8 veriyor, o yüzden motorun formülü kullanılmadı"
+   "not": "12 panel tam boy, 18 panel kesilerek; alan olarak en az 29. Dizilim her yüzde sol köşeden başlar (Lokman, 4 Ekim 15:18). Kaplama saçaktan 5 cm taşar; kesim payı 5 mm; yedek panel yok: kesim planı montajcıya verilir (Lokman, 4 Ekim 15:18). Panel boyu 1 cm uzatıldı (pay kalsın diye; 4 Ekim 16:18 kuralındaki pay koşulu taban boya da uygulanır; boyda 3 cm'e kadar fark tolere edilebilir (Lokman, 8 Ekim 00:45)): L 4320 ile de 30 çıkıyor ama pay ince, kesim payı 7,8 mm'yi geçerse 32 gerekir; L 4330 ile kesim payı 1 cm olsa da 30. Tam boy giden 12 panelde fazlalık mahya ucunda kalır; taşma 5 cm. Gerçek listeyle karşılaştırılmadı. Excel motorundaki formül yüzey ÷ sac boyu × 0,8 yapıyor: 0,8 paydanın parantezi dışında kaldığı için kapatma genişliğine bölmek yerine çarpıyor (4 Ekim'de yeniden okundu); mühendisin 10 × 10 m beşik çatı metrajındaki 28 adedi ÷ 0,8 veriyor, o yüzden motorun formülü kullanılmadı"
   },
   {
    "grup": "Çatı kaplamaları",
@@ -354,8 +358,8 @@
    "birim": "",
    "kg": null,
    "formul": "4 köşe + 2 orta (boyu 9 m'yi geçen dere hatları)",
-   "durum": "uydurma",
-   "not": "her saçak köşesine bir; çok uzun dere hattının ortasına bir tane daha (Lokman, 7 Ekim 07:45). 'Çok uzun' için 9 m eşiği öneridir: dört projenin paftasına ve 82 m² örneğine uyuyor; teyit bekliyor. İniş plana elle yerleştirilirse o sayı kullanılır"
+   "durum": "lokman",
+   "not": "her saçak köşesine bir; boyu 9 m'yi geçen dere hattının ortasına bir tane daha (Lokman, 7 Ekim 07:45; 9 m eşiği onaylandı: 8 Ekim 00:45). İniş plana elle yerleştirilirse o sayı kullanılır"
   },
   {
    "grup": "Dere",
@@ -628,7 +632,7 @@
    "kg": null,
    "formul": "sigorta adedi × sigortadan en uzak mesafe (sigorta kutusundan (girişte) kapalı kısmın en uzak köşesine, 8,60 m) + (tekli priz + çiftli priz × 2 + uydu prizi) × 2 m",
    "durum": "lokman",
-   "not": "en uzak mesafe sigorta kutusundan (Lokman, 7 Ekim 07:45); kutu, tanımda yeri yazmıyorsa giriş kapısında sayılır. Excel motorunda kapalı kısmın köşegeniydi"
+   "not": "en uzak mesafe sigorta kutusundan (Lokman, 7 Ekim 07:45); kutu, tanımda yeri yazmıyorsa giriş kapısında sayılır (8 Ekim 00:45: uygun). Excel motorunda kapalı kısmın köşegeniydi"
   },
   {
    "grup": "Elektrik",
@@ -641,7 +645,7 @@
    "kg": null,
    "formul": "sigorta adedi × sigortadan en uzak mesafe (sigorta kutusundan (girişte) kapalı kısmın en uzak köşesine, 8,60 m) + (tekli anahtar + çiftli anahtar × 2) × 2 m",
    "durum": "lokman",
-   "not": "en uzak mesafe sigorta kutusundan (Lokman, 7 Ekim 07:45); kutu, tanımda yeri yazmıyorsa giriş kapısında sayılır. Excel motorunda kapalı kısmın köşegeniydi"
+   "not": "en uzak mesafe sigorta kutusundan (Lokman, 7 Ekim 07:45); kutu, tanımda yeri yazmıyorsa giriş kapısında sayılır (8 Ekim 00:45: uygun). Excel motorunda kapalı kısmın köşegeniydi"
   },
   {
    "grup": "Elektrik",

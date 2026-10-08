@@ -14,11 +14,11 @@
 | Çelik panel | Boy C profil | 80 × 45 × 0,8 | 3 |  | 15 | motorda sabit | motor |  |
 | Çelik panel | Boy C profil | 80 × 45 × 1,2 | 3 |  | 15 | motorda sabit | motor |  |
 | Çelik panel | Toplam (adedi ve kg'ı bilinenler) |  | 69 |  | 2555 | tavan ve çatı panelleri dahil | motor |  |
-| Metal aksam | Saçaklar için Boardex | 12,5 × 1200 × 2400 | 5 | 11,8 m² |  | saçak boyu × saçak eni × 1,08 ÷ 2,88 | uydurma | saçak altının Boardex olduğu: Lokman, 3 Ekim 13:27; formül 62 m² listeden |
-| Metal aksam | Saçak yüzü için Boardex | 12,5 × 1200 × 2400 | 3 | 7,2 m² |  | saçak ucu çevresi × saçak yüzü yüksekliği (topuk + panelin düşey ölçüsü) × 1,08 ÷ 2,88 | muhendis | saçak yüzü Boardex'le kaplanır: mühendis, 3 Ekim; kaplandığı: Lokman, 2 Ekim 22:05. Alan geometriden |
+| Metal aksam | Saçaklar için OUTWEAR Dış Cephe Levhası | 12,5 × 1200 × 2400 | 5 | 11,8 m² |  | saçak boyu × saçak eni × 1,08 ÷ 2,88 | uydurma | saçak altının Boardex olduğu: Lokman, 3 Ekim 13:27; formül 62 m² listeden |
+| Metal aksam | Saçak yüzü için OUTWEAR Dış Cephe Levhası | 12,5 × 1200 × 2400 | 3 | 7,2 m² |  | saçak ucu çevresi × saçak yüzü yüksekliği (topuk + panelin düşey ölçüsü) × 1,08 ÷ 2,88 | muhendis | saçak yüzü Boardex'le kaplanır: mühendis, 3 Ekim; kaplandığı: Lokman, 2 Ekim 22:05. Alan geometriden |
 | Metal aksam | Köşebent | L 2500 | 59 | 146,3 m |  | (oda tavan çevreleri 69,72 m + veranda tavanı çevresi 19,88 m + 21 iç köşe × 2,7 m) ÷ 2,5 | muhendis | odaya doğru çıkıntı yapan 1 köşe sayılmaz (mühendis, 4 Ekim 12:14); veranda tavanının çevresi sayıldı (mühendis, 4 Ekim 12:14). Önemli bir detay değil; mevcut kural uygulanır (Lokman, 7 Ekim 07:45 ve 08:02) |
-| Dış cephe kaplama | Dış cephe Boardex | 12,5 × 1200 × 2400 | 31 | 80,7 m² |  | (çevre × yükseklik + kolon/kiriş kaplaması + çatı alnı (kalkan) − boşluklar) × 1,08 ÷ 2,88 | excel | zayiat %8: mühendis, 4 Ekim 12:14; Lokman, 4 Ekim 15:18: bununla devam. 2025 listelerindeki adetler %15'e uyuyor; %15 ile 33 levha. Kalınlık 12,5 mm: Lokman, 7 Ekim 07:45 (listelerdeki 8 mm hatalı girilmiş; üreticinin belgelerinde 12,5 mm) |
-| Dış cephe kaplama | Veranda tavanı (Boardex) | 12,5 × 1200 × 2400 | 7 | 18,3 m² |  | veranda tavanı (dış ölçüyle) × 1,08 ÷ 2,88 | lokman | çelik konstrüksiyon binalarda veranda tavanı her zaman Boardex, prefabrikte yeşil alçıpan (Lokman, 7 Ekim 07:45). Önceki kuralda yeşil alçıpandı |
+| Dış cephe kaplama | OUTWEAR Dış Cephe Levhası | 12,5 × 1200 × 2400 | 31 | 80,7 m² |  | (çevre × yükseklik + kolon/kiriş kaplaması + çatı alnı (kalkan) − boşluklar) × 1,08 ÷ 2,88 | excel | zayiat %8: mühendis, 4 Ekim 12:14; Lokman, 4 Ekim 15:18: bununla devam. 2025 listelerindeki adetler %15'e uyuyor; %15 ile 33 levha. Kalınlık 12,5 mm: Lokman, 7 Ekim 07:45 (listelerdeki 8 mm hatalı girilmiş; üreticinin belgelerinde 12,5 mm) |
+| Dış cephe kaplama | Veranda tavanı (OUTWEAR Dış Cephe Levhası) | 12,5 × 1200 × 2400 | 7 | 18,3 m² |  | veranda tavanı (dış ölçüyle) × 1,08 ÷ 2,88 | lokman | çelik konstrüksiyon binalarda veranda tavanı her zaman Boardex, prefabrikte yeşil alçıpan (Lokman, 7 Ekim 07:45). Önceki kuralda yeşil alçıpandı |
 | İç cephe kaplama | Duvar alçıpan beyaz | 1200 × 2500 | 47 | 132,8 m² |  | oda oda: (iç çevre × yükseklik − o odadaki boşluklar) toplamı × 1,05 ÷ 3,0 | excel |  |
 | İç cephe kaplama | Duvar alçıpan yeşil | 1200 × 2500 | 8 | 20,4 m² |  | oda oda: (iç çevre × yükseklik − o odadaki boşluklar) toplamı × 1,05 ÷ 3,0; yeşil = ıslak hacimler | excel |  |
 | İç cephe kaplama | Tavan alçıpan beyaz | 1200 × 2500 | 19 | 54,1 m² |  | tavan alanı × 1,05 ÷ 3,0 | motor |  |
@@ -32,7 +32,7 @@
 | Çatı kaplamaları | Acil müdahale kapağı | adet | 1 |  |  | her yapıya 1 adet (standart) | lokman | her yapıya 1 adet, standart (Lokman, 7 Ekim 07:45). Mühendis 4 Ekim'de 'müşteri isterse' demişti |
 | Çatı kaplamaları | Çatı şiltesi 80 mm | 9,6 m²/adet | 10 | 88,9 m² |  | çatı boyu × (bina eni + 0,20) ÷ 9,6 | uydurma | 80 mm: Lokman, 7 Ekim 07:45 (listelerdeki 100 mm hatalı girilmiş) |
 | Dere | Metal dere | L 4000 | 11 | 39,3 m |  | saçak boyu ÷ (4,0 − 0,20 bindirme) | motor |  |
-| Dere | Dere iniş borusu | L 3000 | 6 |  |  | 4 köşe + 2 orta (boyu 9 m'yi geçen dere hatları) | uydurma | her saçak köşesine bir; çok uzun dere hattının ortasına bir tane daha (Lokman, 7 Ekim 07:45). 'Çok uzun' için 9 m eşiği öneridir: dört projenin paftasına ve 82 m² örneğine uyuyor; teyit bekliyor. İniş plana elle yerleştirilirse o sayı kullanılır |
+| Dere | Dere iniş borusu | L 3000 | 6 |  |  | 4 köşe + 2 orta (boyu 9 m'yi geçen dere hatları) | lokman | her saçak köşesine bir; boyu 9 m'yi geçen dere hattının ortasına bir tane daha (Lokman, 7 Ekim 07:45; 9 m eşiği onaylandı: 8 Ekim 00:45). İniş plana elle yerleştirilirse o sayı kullanılır |
 | Dere | Dere iniş aparatı | adet | 6 |  |  | iniş sayısı × 1 | motor |  |
 | Dere | Açık dirsek | adet | 12 |  |  | iniş sayısı × 2 | motor |  |
 | Dere | Kapalı dirsek | adet | 6 |  |  | iniş sayısı × 1 | motor |  |
@@ -53,8 +53,8 @@
 | Elektrik | Çiftli priz | adet | 2 |  |  | salon 1 + mutfak 1 | muhendis |  |
 | Elektrik | Uydu prizi | adet | 1 |  |  | salon 1 | muhendis |  |
 | Elektrik | W otomat (sigorta) | adet | 9 |  |  | bina başına 9 | muhendis |  |
-| Elektrik | NYM kablo (3 × 2,5) | metre | 120 |  |  | sigorta adedi × sigortadan en uzak mesafe (sigorta kutusundan (girişte) kapalı kısmın en uzak köşesine, 8,60 m) + (tekli priz + çiftli priz × 2 + uydu prizi) × 2 m | lokman | en uzak mesafe sigorta kutusundan (Lokman, 7 Ekim 07:45); kutu, tanımda yeri yazmıyorsa giriş kapısında sayılır. Excel motorunda kapalı kısmın köşegeniydi |
-| Elektrik | NYM kablo (2 × 1,5) | metre | 96 |  |  | sigorta adedi × sigortadan en uzak mesafe (sigorta kutusundan (girişte) kapalı kısmın en uzak köşesine, 8,60 m) + (tekli anahtar + çiftli anahtar × 2) × 2 m | lokman | en uzak mesafe sigorta kutusundan (Lokman, 7 Ekim 07:45); kutu, tanımda yeri yazmıyorsa giriş kapısında sayılır. Excel motorunda kapalı kısmın köşegeniydi |
+| Elektrik | NYM kablo (3 × 2,5) | metre | 120 |  |  | sigorta adedi × sigortadan en uzak mesafe (sigorta kutusundan (girişte) kapalı kısmın en uzak köşesine, 8,60 m) + (tekli priz + çiftli priz × 2 + uydu prizi) × 2 m | lokman | en uzak mesafe sigorta kutusundan (Lokman, 7 Ekim 07:45); kutu, tanımda yeri yazmıyorsa giriş kapısında sayılır (8 Ekim 00:45: uygun). Excel motorunda kapalı kısmın köşegeniydi |
+| Elektrik | NYM kablo (2 × 1,5) | metre | 96 |  |  | sigorta adedi × sigortadan en uzak mesafe (sigorta kutusundan (girişte) kapalı kısmın en uzak köşesine, 8,60 m) + (tekli anahtar + çiftli anahtar × 2) × 2 m | lokman | en uzak mesafe sigorta kutusundan (Lokman, 7 Ekim 07:45); kutu, tanımda yeri yazmıyorsa giriş kapısında sayılır (8 Ekim 00:45: uygun). Excel motorunda kapalı kısmın köşegeniydi |
 | Elektrik | Buat kasa | adet | 31 |  |  | anahtar + priz + oda sayısı (veranda hariç) | motor |  |
 | Elektrik | Uydu kablo | metre | 25 |  |  | uydu prizi (1) × 25 m | motor |  |
 | Elektrik | Besleme kablosu (sigorta kutuları arası) | metre | 5 |  |  | kat adedi × 5 m | motor |  |

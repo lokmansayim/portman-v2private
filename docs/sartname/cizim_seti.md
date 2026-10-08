@@ -50,7 +50,14 @@ Paftanın altında iki sütun var. Satırlar `girdi_genel.py`'deki `bilgi_satirl
 | Sağ | Kalkanlar | Kalkan alanları |
 | Sağ | Dere inişi | Adet ve kural; çizilmeyenler; birim |
 
-Lokman hangi satırların nasıl düzeltileceğini söyleyecek (7 Ekim 07:45: "paftadaki açıklamaları düzelteceğiz"). 7 Ekim kararlarıyla kendiliğinden değişenler: yöntem satırı çelikte "A · çatı ve tavan paneli"; kaplama diziliminde boylar 10 mm'ye yukarı; dere inişinde kural "boyu 9 m'yi geçen dere hattının ortası" (eşik öneri).
+Lokman hangi satırların nasıl düzeltileceğini söyleyecek (7 Ekim 07:45: "paftadaki açıklamaları düzelteceğiz"). 7 Ekim kararlarıyla kendiliğinden değişenler: yöntem satırı çelikte "A · çatı ve tavan paneli"; kaplama diziliminde boylar 10 mm'ye yukarı; dere inişinde kural "boyu 9 m'yi geçen dere hattının ortası" (eşik onaylandı: Lokman, 8 Ekim 00:45).
+
+8 Ekim 00:45 cevaplarından sonra paftada yazanla listede yazan iki yerde ayrışıyor; ikisi de açıklamalar birlikte düzeltilirken ele alınacak (biçim onaylı olduğu için pafta metnine dokunulmadı):
+
+- **"Dış kaplama (Boardex)" satırı.** Listede levha artık üreticinin adıyla yazılıyor (OUTWEAR Dış Cephe Levhası; "üreticide ne yazıyorsa onu yaz"). Paftada şirketteki ad duruyor.
+- **"Duvar dibi" kenarı.** Çatının bir duvara dayandığı kenar (çatı planında turuncu) listede özel mahya olarak sayılıyor ("özel mahya"). Paftanın "Kenarlar" satırında ad "duvar dibi" olarak duruyor.
+
+Paftanın kendisi bu cevaplarla değişmedi: 8 Ekim'de çizim betiklerinde çıktıyı değiştiren bir değişiklik yok (`girdi_genel.py`de yalnız bir yorum satırı); KT-01'in planı, paftası ve dört görünüşü iki yöntemde de güncel kural setiyle (0.14) yeniden üretildi ve 7 Ekim'dekilerle bayt bayt aynı çıktı.
 
 ## Denenenler
 

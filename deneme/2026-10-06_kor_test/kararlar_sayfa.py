@@ -2,7 +2,7 @@
 """KT-01'in kararlardan sonraki durumunu okunur tek bir sayfaya (kendi başına HTML dosyası) çevirir.
 
 Sayılar ve satır açıklamaları `sonuc/KT01_kararlar_kiyas.json`'dan (`kararlar_kiyas.py` çıktısı), "sizden beklenenler" yöntem belgesinin
-açık sorularından (`docs/sartname/yukleme_listesi_yontemi.md`; ilk sekiz madde) okunur; elle yazılmaz. Önce `kararlar_kos.sh` koşulmalı.
+açık sorularından (`docs/sartname/yukleme_listesi_yontemi.md`; baştaki `SORU_ADEDI` madde) okunur; elle yazılmaz. Önce `kararlar_kos.sh` koşulmalı.
 Sayfada kişi, bayi ve firma adı, telefon ve fiyat yoktur. Çıktı depoya yazılmaz; Lokman'a dosya olarak verilir.
 
 Kullanım:
@@ -18,13 +18,13 @@ from pathlib import Path
 
 BURADA = Path(__file__).resolve().parent
 BELGE = BURADA.parents[1] / "docs" / "sartname" / "yukleme_listesi_yontemi.md"
-SORU_ADEDI = 9          # açık soruların başındaki, bu turun kararlarından doğan maddeler (ilk: dere inişi; son: parça C profil)
+SORU_ADEDI = 3          # açık soruların başındaki, Lokman'dan cevap beklenen maddeler (kalkan kenarı üst kapaması; parça C profil; özel mahyanın ayrıntıları)
 TUR = {"karar": ("kararınız farklı", "ok", "kararınız o listeden farklı"), "yöntem": ("yöntem", "kaynak", "liste omega ve aşıklı yöntemle hazırlanmış; çelikte artık yok"),
        "elle": ("elle (liste)", "kaynak", "listenin elle hesabı, yuvarlaması ya da elle dizilimi"), "ölçü": ("ölçünün yeri", "kaynak", "ölçünün alındığı yüz; kararınız: bizdeki"),
        "soru": ("soru", "bekle", "kural bekliyor")}
 # Sayfa kişi adı taşımaz: açıklamalardaki adlar okura hitaba çevrilir.
 SAYFA_DILI = (("Lokman'ın kararı", "kararınız"), ("Lokman'ın", "sizin"), ("Lokman,", "siz,"), ("Lokman", "siz"))
-DURUM = {"lokman": "sizin kuralınız", "muhendis": "mühendisin kuralı", "uydurma": "listeye uyduruldu; teyit bekliyor", "soru": "kural yok; adet geçici"}
+DURUM = {"lokman": "sizin kuralınız", "muhendis": "mühendisin kuralı", "uydurma": "listeye uyduruldu; teyit bekliyor", "soru": "soru: cevabınızı bekliyor"}
 
 
 def e(s) -> str:
@@ -68,15 +68,16 @@ def main() -> int:
     satir = lambda bb: sum(len(b["gercek_satirlar"]) for b in bb)
     toplam = oz["b"]["gercek_satir"]
     sorular = acik_sorular(a.belge.read_text(encoding="utf-8"))[:SORU_ADEDI]
-    if len(sorular) != SORU_ADEDI or not sorular[0].startswith("**Dere inişi") or not sorular[-1].startswith("**Trapez vidada parça C profil"):
-        raise SystemExit("Yöntem belgesindeki açık soruların başı beklenen sırada değil (ilk soru dere inişi, sonuncusu trapez vidada parça C profil); önce belge_uret.py, sonra SORU_ADEDI.")
+    if (len(sorular) != SORU_ADEDI or not sorular[0].startswith("**Kalkan kenarında") or not sorular[1].startswith("**Trapez vidada parça C profil")
+            or not sorular[2].startswith("**Özel mahyanın ayrıntıları")):
+        raise SystemExit("Yöntem belgesindeki açık soruların başı beklenen sırada değil (kalkan kenarı, trapez vidada parça C profil, özel mahyanın ayrıntıları); önce belge_uret.py, sonra SORU_ADEDI.")
 
     ozet = (f'<div><b>{on["duzeltilmis"]}<small> / {toplam}</small></b><span>Kararlardan önce (7 Ekim 03:46): yalnız bizim hatalarımız düzeltilmişti</span></div>'
             f'<div><b>{oz["b"]["ayni"]}<small> / {toplam}</small></b><span>Kararlarınızdan sonra, projenin yapıldığı yöntemle (tavan omegası ve aşık)</span></div>'
             f'<div><b>{oz["a"]["ayni"]}<small> / {toplam}</small></b><span>Kararlarınızdan sonra, çelik standardıyla (çatı ve tavan paneli)</span></div>'
             f'<div><b>{n(round(ck["a"]))}<small> / {n(round(ck["gercek"]))} kg</small></b><span>Çelik: çelik standardıyla / gerçek liste (tavan ve çatı panelleri eklenir)</span></div>')
     kalan = toplam - oz["b"]["ayni"]
-    lejant = "".join(f'<li><span class="rozet {TUR[t][1]}">{e(TUR[t][0])}</span> {ft[t]} satır: {e(TUR[t][2])}</li>' for t in TUR)
+    lejant = "".join(f'<li><span class="rozet {TUR[t][1]}">{e(TUR[t][0])}</span> {ft[t]} satır: {e(TUR[t][2])}</li>' for t in TUR if ft[t])
 
     paftadan = lambda b: b["karar_turu"] == "pafta"
     degisen_karar, degisen_pafta = k["degisen"]["karar"], k["degisen"]["pafta"]
@@ -111,7 +112,9 @@ def main() -> int:
         raise SystemExit(f"Sayfadaki sayım kıyasın özetiyle tutmuyor: {say} / {oz} / {ft}")
     suzgec = "".join(f'<button type="button" data-suz="{anahtar}" aria-pressed="{"true" if anahtar == "hepsi" else "false"}">{e(ad)} <span>{say[anahtar]}</span></button>'
                      for anahtar, ad in (("hepsi", "Hepsi"), ("degisen", "Adedi değişen"), ("kalan", "Hâlâ farklı"), ("tutan", "Tutuyor")))
-    ek = "".join(f'<tr><td>{e(s["kalem"])}</td><td class="boyut">{e(s["boyut"])}</td><td class="say">{n(s["adet"])}</td><td class="say">{"" if s["kg"] is None else n(round(s["kg"]))}</td>'
+    ek = "".join(f'<tr><td>{e(s.get("liste_adi") or s["kalem"])}</td><td class="boyut">{e(s["boyut"])}</td>'
+                 f'<td class="say">{n(s["adet"]) if s["adet"] is not None or s.get("olcu") is None else "— (" + n(s["olcu"]) + " " + e(s["birim"]) + ")"}</td>'
+                 f'<td class="say">{"" if s["kg"] is None else n(round(s["kg"]))}</td>'
                  f'<td>{e(DURUM.get(s["durum"], s["durum"]))}</td></tr>' for s in k["a_listesinde_gercek_listede_olmayan"])
 
     sayfa = f"""<!doctype html>
@@ -187,13 +190,13 @@ footer {{ font-size: 12.5px; color: var(--soluk); max-width: 86ch; }}
 <header>
   <div class="kunye">KT-01 · kör test · kararlardan sonra · {e(a.zaman)} · deneme, canlıda değil</div>
   <h1>Kararlarınızdan sonra: kendi listemiz ile gerçek liste</h1>
-  <p class="aciklama">98,7 m² tek kat çelik proje (beşik + cumba çatı, müştemilat, sandviç panel; Eylül 2026 listesi). 7 Ekim 07:45 cevaplarınız ve 08:02 düzeltmeleriniz kurallara işlendi; aynı proje güncel kurallarla iki kez hesaplandı ve gerçek listenin adedi yazılı {toplam} satırıyla tek tek kıyaslandı. "Aynı" yalnız adedin aynı olmasıdır. Elektrik sayıları projenin paftasından. Kişi, bayi ve firma adı, fiyat yoktur.</p>
+  <p class="aciklama">98,7 m² tek kat çelik proje (beşik + cumba çatı, müştemilat, sandviç panel; Eylül 2026 listesi). 7 Ekim 07:45 cevaplarınız, 08:02 düzeltmeleriniz ve 8 Ekim 00:45 cevaplarınız kurallara işlendi; aynı proje güncel kurallarla iki kez hesaplandı ve gerçek listenin adedi yazılı {toplam} satırıyla tek tek kıyaslandı. "Aynı" yalnız adedin aynı olmasıdır. Elektrik sayıları projenin paftasından. Kişi, bayi ve firma adı, fiyat yoktur.</p>
 </header>
 <div class="ozet">{ozet}</div>
 <section>
   <h2>Yapıldığı yöntemle farklı kalan {kalan} satır</h2>
   <ul class="lejant">{lejant}</ul>
-  <p>{k["karardan_degisen_satir"]} satırın adedi değişti: {degisen_karar} satır kararlarınızla, {degisen_pafta} satır elektrik sayıları projenin paftasından alındığı için. Yeni tutan {kazanc_toplam} satırın {kazanc_toplam - kazanc_pafta}'u kararlarınızdan ({kazanc_inis}'i iniş kuralından; eşiği önerimdir, teyidinizi bekliyor), {kazanc_pafta}'i pafta sayımından; önce tutan hiçbir satır bozulmadı. Aynı satır sayısı kuralların o listeye ne kadar benzediğini gösterir, doğruluğunu değil: kararlarınızın bir kısmı o listeyi düzeltiyor (Boardex kalınlığı, çatı şiltesi, duvar izolasyonu, vida katsayıları).</p>
+  <p>{k["karardan_degisen_satir"]} satırın adedi değişti: {degisen_karar} satır kararlarınızla, {degisen_pafta} satır elektrik sayıları projenin paftasından alındığı için. Yeni tutan {kazanc_toplam} satırın {kazanc_toplam - kazanc_pafta}'u kararlarınızdan ({kazanc_inis}'i iniş kuralından{"" if k.get("inis_onayli") else "; eşiği önerimdir, teyidinizi bekliyor"}), {kazanc_pafta}'i pafta sayımından; önce tutan hiçbir satır bozulmadı. Aynı satır sayısı kuralların o listeye ne kadar benzediğini gösterir, doğruluğunu değil: kararlarınızın bir kısmı o listeyi düzeltiyor (Boardex kalınlığı, çatı şiltesi, duvar izolasyonu, vida katsayıları).</p>
 </section>
 <section>
   <h2>Sizden beklenenler</h2>

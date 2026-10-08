@@ -23,10 +23,11 @@ import sys
 from pathlib import Path
 
 import kiyas
+import kurallar_oku
 
 BURADA = Path(__file__).resolve().parent
 PAFTADAN = "Karar değil:"       # `karar` notu böyle başlıyorsa adet bir karardan değil, elektrik sayılarının paftadan alınmasından değişmiştir
-INIS_BIRIMLERI = ("Dere iniş borusu", "Dere iniş aparatı", "Açık dirsek", "Kapalı dirsek", "İniş kelepçesi")      # iniş sayısına bağlı birimler (eşiği öneri olan kural)
+INIS_BIRIMLERI = ("Dere iniş borusu", "Dere iniş aparatı", "Açık dirsek", "Kapalı dirsek", "İniş kelepçesi")      # iniş sayısına bağlı birimler (eşik 7 Ekim'de öneriydi; 8 Ekim'de onaylandı)
 FARK_TURU = {"karar": "Lokman'ın kararı o listeden farklı", "yöntem": "liste omega ve aşıklı yöntemle hazırlanmış; çelikte artık yok",
              "elle": "listenin elle hesabı, yuvarlaması ya da elle dizilimi", "ölçü": "ölçünün alındığı yüz (karar: bizdeki)", "soru": "kural bekliyor"}
 
@@ -57,7 +58,8 @@ def main() -> int:
             sorun.append(f"{x} listesinde elektrik sayıları paftadan değil")
     B = kiyas.karsilastir(oku(a.gercek), L)
     onceki = {b["ad"]: b for b in oku(a.onceki)["birimler"]}
-    notlar = oku(a.notlar)["birimler"]
+    notlar_dosyasi = oku(a.notlar)
+    notlar = notlar_dosyasi["birimler"]
     satir = lambda bb: sum(len(b["gercek_satirlar"]) for b in bb)
     for b in B:
         o, nt = onceki[b["ad"]], notlar.get(b["ad"], {})
@@ -97,11 +99,22 @@ def main() -> int:
         if not any(b["ad"] == ad for b in B):
             sorun.append(f"iniş birimi kıyasta yok: {ad}")
     kg = lambda liste: next((s["kg"] for s in liste["satirlar"] if s["kalem"].startswith("Toplam (")), None)
+    inis_kurali = kurallar_oku.oku().get("inis") or {}
+    inis_onayli = inis_kurali.get("durum") == "lokman" and (inis_kurali.get("deger") or {}).get("olcu") == "dere"
+    # "Damlalık" birimi özel mahya satırını da alır (8 Ekim 2026: çatının duvara dayandığı kenara özel mahya). Satırda birleşim boyu da varsa
+    # (ana bina ile veranda çıkıntısı; bu projede yok) adet o kenarın adedi değildir: karşılaştırma yanıltır.
+    for x in ("a", "b"):
+        if any(s["kalem"] == "Özel mahya (geniş)" and "birleşim" in (s.get("formul") or "") for s in L[x]["satirlar"]):
+            sorun.append(f"{x} listesinde özel mahya satırında birleşim boyu da var; 'Damlalık (bina ve müştemilat)' birimiyle karşılaştırılamaz")
     sonuc = {"ozet": ozet, "onceki": {x: onceki_ozet[x]["ayni"] for x in ("kor", "duzeltilmis", "sablon", "pafta")}, "fark_turleri": fark_sayimi,
              "karardan_degisen_satir": degisen, "degisen": {"karar": satir([b for b in B if b["karar_turu"] == "karar"]), "pafta": satir([b for b in B if b["karar_turu"] == "pafta"])},
              "yeni_tutan": kazanc, "celik_kg": {"gercek": oku(a.onceki)["celik_kg"]["gercek"], "b": kg(L["b"]), "a": kg(L["a"])},
-             "a_listesinde_gercek_listede_olmayan": [{"kalem": s["kalem"], "boyut": s["boyut"], "adet": s["adet"], "kg": s["kg"], "durum": s["durum"]} for s in a_ek],
+             "a_listesinde_gercek_listede_olmayan": [{"kalem": s["kalem"], **({"liste_adi": s["liste_adi"]} if s.get("liste_adi") else {}), "boyut": s["boyut"], "adet": s["adet"],
+                                                      **({"olcu": s["olcu"], "birim": s["birim"]} if s["adet"] is None and s["olcu"] is not None and s["durum"] == "soru" else {}),
+                                                      "kg": s["kg"], "durum": s["durum"]} for s in a_ek],
              "denetim_sorunlari": sorun, "birimler": B}
+    if inis_onayli:      # 8 Ekim 2026: iniş eşiği onaylandı; sayfa "eşiği öneri" demesin
+        sonuc["inis_onayli"] = True
     print(f"gerçek listenin adetli satırı: {satir(B)} | birim: {len(B)}")
     print(f"  önceki (7 Ekim 03:46): kör {sonuc['onceki']['kor']} · düzeltilmiş {sonuc['onceki']['duzeltilmis']} · + Eylül 2026 {sonuc['onceki']['sablon']} · + pafta {sonuc['onceki']['pafta']}")
     print(f"  kararlardan sonra, aynı yöntemle (B): aynı {ozet['b']['ayni']} / {ozet['b']['gercek_satir']} | çelik standardıyla (A): {ozet['a']['ayni']}")
@@ -113,7 +126,7 @@ def main() -> int:
         a.json.write_text(json.dumps(sonuc, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     if a.md:
         cik = ["# KT-01 · kararlardan sonra durum", "",
-               "Lokman'ın 7 Ekim 2026 07:45 cevapları ve 08:02 düzeltmeleri işlendikten sonra, gerçek listenin adetli her satırı güncel kural setinin verdiği iki listeyle. "
+               (notlar_dosyasi.get("giris") or "Lokman'ın 7 Ekim 2026 07:45 cevapları ve 08:02 düzeltmeleri işlendikten sonra, gerçek listenin adetli her satırı güncel kural setinin verdiği iki listeyle.") + " "
                "Tablo `kararlar_kiyas.py` ile üretilir; elle düzeltilmez. Açıklamalar `kararlar_notlari.json`dan.", "",
                "| Liste | Aynı satır | Ne demek |", "|---|---|---|",
                f"| Düzeltilmiş (7 Ekim 03:46) | {sonuc['onceki']['duzeltilmis']} / {satir(B)} | kararlardan önce: yalnız bizim hatalarımız düzeltilmişti |",
@@ -124,7 +137,9 @@ def main() -> int:
         cik += ["", f"Çelik ağırlığı (kg): gerçek liste {n(round(sonuc['celik_kg']['gercek']))} · B {n(round(sonuc['celik_kg']['b']))} · "
                 f"A {n(round(sonuc['celik_kg']['a']))} (A'da tavan ve çatı panelleri eklenir).", "",
                 "## Çelik standardıyla (A) gelen, gerçek listede olmayan satırlar", "", "| Kalem | Boyut | Adet | kg | Durum |", "|---|---|---|---|---|"]
-        cik += [f"| {s['kalem']} | {s['boyut']} | {n(s['adet'])} | {'' if s['kg'] is None else n(round(s['kg']))} | {s['durum']} |" for s in a_ek]
+        cik += [f"| {s.get('liste_adi') or s['kalem']} | {s['boyut']} | "
+                + (n(s['adet']) if s['adet'] is not None or s['olcu'] is None or s['durum'] != "soru" else f"— ({n(s['olcu'])} {s['birim']})")
+                + f" | {'' if s['kg'] is None else n(round(s['kg']))} | {s['durum']} |" for s in a_ek]
         cik += ["", "## Satır satır", "",
                 "| Kalem (gerçek liste) | Gerçek | Düzeltilmiş (03:46) | Kararlardan sonra (B) | Çelik standardı (A) | Değişikliği doğuran karar | Hâlâ farklıysa nedeni |",
                 "|---|---|---|---|---|---|---|"]

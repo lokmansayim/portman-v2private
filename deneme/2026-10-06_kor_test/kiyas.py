@@ -84,7 +84,7 @@ BIRIMLER: list[tuple[str, list[int], list]] = [
     ("Sandviç panel kapaması (bina ve müştemilat)", [58, 59], [r"^Sandviç panel kapaması$"]),
     ("Ters mahya", [60], [r"^Ters mahya$"]),
     ("Ters mahya kenar kutuları", [61], [r"^Ters mahya kenar kutusu$"]),
-    ("Damlalık (bina ve müştemilat)", [62, 63], [r"^Damlalık|^Duvar dibi sacı"]),
+    ("Damlalık (bina ve müştemilat)", [62, 63], [r"^Damlalık|^Duvar dibi sacı|^Özel mahya \(geniş\)"]),      # 8 Ekim 2026: bu kenara özel mahya (Lokman)
     ("Mahya bandı", [64], [r"^Mahya bandı$"]),
     ("Çatı izolasyonu", [65], [r"^Çatı şiltesi|^Çatı izolasyonu"]),
     ("Metal dere", [67], [r"^Metal dere$"]),

@@ -1,6 +1,6 @@
 # A1 · Çelik (LGF) duvar sistemi
 
-Kaynak: Lokman'ın anlattıkları (1–4 Ekim 2026; 4 Ekim 15:18 ve 16:18 cevapları dahil) ve inşaat mühendisi Ubeydullah'ın üç tur cevabı (Lokman 3 Ekim 18:14'te, 4 Ekim 01:24'te ve 4 Ekim 12:14'te iletti). Lokman'ın söylediği ile mühendisin söylediği çelişirse Lokman'ınki geçerlidir (4 Ekim 15:18). Madde sonundaki tarih, söylendiği günü gösterir.
+Kaynak: Lokman'ın anlattıkları (1–8 Ekim 2026; 4 Ekim 15:18 ve 16:18, 7 Ekim 07:45 ve 08:02, 8 Ekim 00:45 cevapları dahil) ve inşaat mühendisi Ubeydullah'ın üç tur cevabı (Lokman 3 Ekim 18:14'te, 4 Ekim 01:24'te ve 4 Ekim 12:14'te iletti). Lokman'ın söylediği ile mühendisin söylediği çelişirse Lokman'ınki geçerlidir (4 Ekim 15:18). Madde sonundaki tarih, söylendiği günü gösterir.
 
 ## Paketler ve katmanlar
 
@@ -12,6 +12,7 @@ Kaynak: Lokman'ın anlattıkları (1–4 Ekim 2026; 4 Ekim 15:18 ve 16:18 cevapl
 
 - Boardex 12,5 mm; alçıpan 12,5 mm. (2 Ekim 20:24) Mühendis teyit etti: "Boardex 12.5 mm. OSB 11 mm." (4 Ekim 12:14) 2025 tarihli listelerde Boardex 8 mm, OSB 9 mm yazıyor; Excel motorunda Boardex 8 mm. Lokman, 7 Ekim 07:45: doğrusu 12,5 mm; 8 mm hatalı girilmiş, "resmi belgelerinde yazıyor". Kontrol edildi: üreticinin dış cephe levhasının performans beyanında kalınlık 12,5 mm (sistem kitabında 12,5 ve 15 mm; 8 mm yok).
 - Boardex zayiatı %8. (Mühendis, 4 Ekim 12:14) 2025 listelerinin çalışma kitabında %15'ti; o listelerdeki adetler %15'e uyuyor. Fark soruldu; Lokman: "devam et" (4 Ekim 15:18).
+- Listedeki ad. "Boardex" şirkette dış cephe levhasına verilen addır. Yükleme listesinde satır üreticinin adıyla yazılır: OUTWEAR Dış Cephe Levhası (Lokman, 8 Ekim 00:45: "üreticide ne yazıyorsa onu yaz"; ad üreticinin ürün sayfasından okundu). Bu belgede, hesap notlarında ve gerçek listelerle karşılaştırmada şirketteki ad kullanılmaya devam eder. Kural: `urun_adlari`; üretici ya da ürün değişirse yalnız o kural değişir.
 - Baz pakette duvar kalınlığı katmanların toplamıdır: 12,5 + 80 + 12,5 = 105 mm, yani dış duvar da iç duvar da 10,5 cm. (2 Ekim 20:24)
 - Arşivdeki çizimlerde dış duvar 12, iç duvar 11 cm çizilmiş. Fark, çelikteki birleşimlerde vida kabarması ya da içlerde ince sıyırma sıva payıdır. Hesapta kullanılmaz: duvar "sıfır hatalı ve sıvasız" kabul edilir. (2 Ekim 20:24)
 - Sıva grubu genelde verilmez. (2 Ekim 20:24)
@@ -149,3 +150,5 @@ Kapananlar (Lokman, 4 Ekim 15:18): Boardex zayiatı %8 ile devam (2025 listeleri
 Kapananlar (Lokman, 4 Ekim 16:18): OSB takviyesinde geçerli kural yalnız dolap ve TV ünitesi gelen duvarlar.
 
 Kapananlar (Lokman, 7 Ekim 07:45 ve 08:02): Boardex 12,5 mm (teyit); duvar izolasyonu gönderilmiyor, yükleme listesinde satırı yok ("Duvar izolasyonu göndermiyoruz yok say"); veranda tavanı çelik yapıda Boardex, prefabrikte yeşil alçıpan; köşebent önemli bir detay değil, mevcut kural uygulanır; çevre ve alan kaplanmış yüzden alınır ("bizdekini al"); alçıpan vidası levha başına 40; mastik pencere başına 1. Ayrıntı: `yukleme_listesi_yontemi.md`.
+
+Kapananlar (Lokman, 8 Ekim 00:45): listede dış cephe levhası üreticinin adıyla yazılır; pencereler alıcıya aitse mastik de yazılmaz ("hayır yazılmasın"; pencereler listedeyse pencere başına 1 kuralı geçerli); sigorta kutusu, tanımda yeri yazmıyorsa giriş kapısında sayılır ("evet uygun"). Ayrıntı: `yukleme_listesi_yontemi.md`.

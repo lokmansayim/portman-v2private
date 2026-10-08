@@ -650,7 +650,8 @@ def girdi(y: dict, c: dict, m: dict, kur: dict, kaynak: str) -> dict:
             "sacak_saci_kenarlari_m": mc["sacak_saci_kenarlari_m"], "sacak_omegasi_cephe_m": mc["sacak_omegasi_cephe_m"],
             "dere": mc["dere"],
             "ek_cati": mc["ek_cati"],
-            # çatının bir duvara dayandığı kenarlar, yapı yapı (kural yok: varsayılan hesapta `soru` satırı; Eylül 2026 listesinde damlalık)
+            # çatının bir duvara dayandığı kenarlar, yapı yapı (kural seti 0.14'ten beri özel mahya satırına yazılır; öncesinde `soru` satırı;
+            # Eylül 2026 listesinde damlalık)
             "duvar_dibi": [{"yapi": (ek_adi.lower() if x["yapi"] == "ek yapı" and ek_adi else x["yapi"]), "boy_m": x["boy_m"]} for x in mc["duvar_dibi"]] or None,
             "baca_cevresi_m": mc["baca_cevresi_m"] or None,
             "asik": ({"boy_m": round(mc["asik_boyu_m"], 2), "sira": {ad: len(sr) for ad, sr in mc["asik_siralari"].items()},

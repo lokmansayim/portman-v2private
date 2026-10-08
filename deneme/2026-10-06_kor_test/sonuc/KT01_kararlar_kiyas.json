@@ -16,15 +16,15 @@
   "pafta": 71
  },
  "fark_turleri": {
-  "karar": 12,
+  "karar": 14,
   "yöntem": 3,
   "elle": 16,
   "ölçü": 2,
-  "soru": 2
+  "soru": 0
  },
- "karardan_degisen_satir": 21,
+ "karardan_degisen_satir": 20,
  "degisen": {
-  "karar": 15,
+  "karar": 14,
   "pafta": 6
  },
  "yeni_tutan": {
@@ -55,6 +55,7 @@
   },
   {
    "kalem": "Saçaklar için Boardex",
+   "liste_adi": "Saçaklar için OUTWEAR Dış Cephe Levhası",
    "boyut": "12,5 × 1200 × 2400",
    "adet": 3,
    "kg": null,
@@ -62,6 +63,7 @@
   },
   {
    "kalem": "Saçak yüzü için Boardex",
+   "liste_adi": "Saçak yüzü için OUTWEAR Dış Cephe Levhası",
    "boyut": "12,5 × 1200 × 2400",
    "adet": 2,
    "kg": null,
@@ -69,8 +71,18 @@
   },
   {
    "kalem": "Alın (kalkan kenarı) için Boardex",
+   "liste_adi": "Alın (kalkan kenarı) için OUTWEAR Dış Cephe Levhası",
    "boyut": "12,5 × 1200 × 2400",
    "adet": 4,
+   "kg": null,
+   "durum": "lokman"
+  },
+  {
+   "kalem": "Kalkan kenarı üst kapaması",
+   "boyut": "",
+   "adet": null,
+   "olcu": 20.97,
+   "birim": "m",
    "kg": null,
    "durum": "soru"
   }
@@ -1243,7 +1255,7 @@
    "duzeltilmis_ayni": false,
    "onceki_pafta": 12,
    "karar": null,
-   "fark": "karar: kapama dere boyunca; parça L 2500, 20 cm bindirme (C1 i; 08:02): 29,92 m ÷ 2,3 = 13,01 → 14 (14. parça 2 cm'den doğuyor). Listede L 2800 ile 12.",
+   "fark": "karar: kapama dere boyunca; parça L 2500, 20 cm bindirme (C1 i; 08:02; hesap 8 Ekim 00:45'te onaylandı): 29,92 m ÷ 2,3 = 13,01 → 14 (14. parça 2 cm'den doğuyor). Listede L 2800 ile 12.",
    "fark_turu": "karar",
    "karar_turu": null
   },
@@ -1338,8 +1350,8 @@
    "duzeltilmis_ayni": false,
    "onceki_pafta": 6,
    "karar": null,
-   "fark": "soru: damlalık listeden çıkık (C1 g). Bizdeki 5 adet, çatının duvara dayandığı kenar için geçici 'duvar dibi sacı' satırı; o kenara ne konacağı soruldu.",
-   "fark_turu": "soru",
+   "fark": "karar: çatının duvara dayandığı kenara özel mahya konur (8 Ekim 00:45): 11,35 m ÷ (2,8 − 0,20) → 5, L 2800. Listede o kenarda damlalık var (L 2500; 3 + 3 = 6); damlalık listeden çıkık (C1 g).",
+   "fark_turu": "karar",
    "karar_turu": null
   },
   {
@@ -1459,7 +1471,7 @@
    "duzeltilmis": 5,
    "duzeltilmis_ayni": false,
    "onceki_pafta": 7,
-   "karar": "İniş kuralı (C4; eşik öneri): her saçak köşesine bir, boyu 9 m'yi geçen dere hattının ortasına bir: 5 köşe + 2 orta = 7.",
+   "karar": "İniş kuralı (C4; 9 m eşiği 8 Ekim 00:45'te onaylandı): her saçak köşesine bir, boyu 9 m'yi geçen dere hattının ortasına bir: 5 köşe + 2 orta = 7.",
    "fark": null,
    "fark_turu": null,
    "karar_turu": "karar"
@@ -2358,7 +2370,7 @@
    "duzeltilmis": 1750,
    "duzeltilmis_ayni": false,
    "onceki_pafta": 2000,
-   "karar": "Yalnız çelik birleşim yerleri: panel başına 10, köşebent terimi duruyor (C1 n; 08:02): (46 panel + 6 parça C profil) × 10 + 67 × 6 = 922 → 1000. Parça C profiller şablondaki gibi sayıldı; sayılıp sayılmayacağı soruldu.",
+   "karar": "Yalnız çelik birleşim yerleri: panel başına 10, köşebent terimi duruyor (C1 n; 08:02): (46 panel + 6 parça C profil) × 10 + 67 × 6 = 922 → 1000. Parça C profiller şablondaki gibi sayıldı; sayılıp sayılmayacağı soruldu (8 Ekim'de örnekle yeniden).",
    "fark": "karar: omega ve aşık için vida konmaz. Listede onlar için de var (1800).",
    "fark_turu": "karar",
    "karar_turu": "karar"
@@ -2726,19 +2738,19 @@
    "gercek": 3,
    "gercek_kg": null,
    "gercek_kaba": [],
-   "b": 7,
+   "b": null,
    "b_kg": null,
    "b_ayni": false,
-   "a": 7,
+   "a": null,
    "a_kg": null,
    "a_ayni": false,
    "duzeltilmis": null,
    "duzeltilmis_ayni": false,
    "onceki_pafta": null,
-   "karar": "Pencere başına 1 adet (C6): 7 pencere → 7.",
-   "fark": "karar: pencere başına 1. Listede 3.",
+   "karar": null,
+   "fark": "karar: pencereler alıcıya aitse mastik yazılmaz (8 Ekim 00:45: \"hayır yazılmasın\"); pencere varsa pencere başına 1 (C6). Listede 3.",
    "fark_turu": "karar",
-   "karar_turu": "karar"
+   "karar_turu": null
   },
   {
    "ad": "Dayson",
@@ -2798,5 +2810,6 @@
    "fark_turu": null,
    "karar_turu": null
   }
- ]
+ ],
+ "inis_onayli": true
 }

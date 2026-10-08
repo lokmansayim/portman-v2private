@@ -1,6 +1,6 @@
 # KT-01 · kararlardan sonra durum
 
-Lokman'ın 7 Ekim 2026 07:45 cevapları ve 08:02 düzeltmeleri işlendikten sonra, gerçek listenin adetli her satırı güncel kural setinin verdiği iki listeyle. Tablo `kararlar_kiyas.py` ile üretilir; elle düzeltilmez. Açıklamalar `kararlar_notlari.json`dan.
+Lokman'ın 7 Ekim 2026 07:45 cevapları, 08:02 düzeltmeleri ve 8 Ekim 00:45 cevapları işlendikten sonra, gerçek listenin adetli her satırı güncel kural setinin (0.14) verdiği iki listeyle. Tablo `kararlar_kiyas.py` ile üretilir; elle düzeltilmez. Açıklamalar `kararlar_notlari.json`dan.
 
 | Liste | Aynı satır | Ne demek |
 |---|---|---|
@@ -12,11 +12,11 @@ Aynı yöntemle farklı kalan 35 satır:
 
 | Tür | Satır | Anlamı |
 |---|---|---|
-| karar | 12 | Lokman'ın kararı o listeden farklı |
+| karar | 14 | Lokman'ın kararı o listeden farklı |
 | yöntem | 3 | liste omega ve aşıklı yöntemle hazırlanmış; çelikte artık yok |
 | elle | 16 | listenin elle hesabı, yuvarlaması ya da elle dizilimi |
 | ölçü | 2 | ölçünün alındığı yüz (karar: bizdeki) |
-| soru | 2 | kural bekliyor |
+| soru | 0 | kural bekliyor |
 
 Çelik ağırlığı (kg): gerçek liste 1 937 · B 1 937 · A 2 588 (A'da tavan ve çatı panelleri eklenir).
 
@@ -26,9 +26,10 @@ Aynı yöntemle farklı kalan 35 satır:
 |---|---|---|---|---|
 | Tavan paneli (makas arası) | roll form çelik | 7 | 291 | lokman |
 | Çatı paneli (makas üstü, sırt 80 mm) | roll form çelik | 10 | 361 | lokman |
-| Saçaklar için Boardex | 12,5 × 1200 × 2400 | 3 |  | uydurma |
-| Saçak yüzü için Boardex | 12,5 × 1200 × 2400 | 2 |  | muhendis |
-| Alın (kalkan kenarı) için Boardex | 12,5 × 1200 × 2400 | 4 |  | soru |
+| Saçaklar için OUTWEAR Dış Cephe Levhası | 12,5 × 1200 × 2400 | 3 |  | uydurma |
+| Saçak yüzü için OUTWEAR Dış Cephe Levhası | 12,5 × 1200 × 2400 | 2 |  | muhendis |
+| Alın (kalkan kenarı) için OUTWEAR Dış Cephe Levhası | 12,5 × 1200 × 2400 | 4 |  | lokman |
+| Kalkan kenarı üst kapaması |  | — (20,97 m) |  | soru |
 
 ## Satır satır
 
@@ -76,15 +77,15 @@ Aynı yöntemle farklı kalan 35 satır:
 | Sandviç panel L 2870 | 6 | 5 | 5 ✗ | 5 ✗ |  | elle: listedeki dizilim; toplam aynı (33). Bizde L 2880 (C9). |
 | Sandviç panel L 2340 | 4 | 6 | 6 ✗ | 6 ✗ |  | elle: listedeki dizilim; toplam aynı (33). Bizde L 2350 (C9). |
 | Metal kiremit mahyası | 5 | 5 | 5 | 5 |  |  |
-| Sandviç panel kapaması (bina ve müştemilat) | 12 | 14 | 14 ✗ | 14 ✗ |  | karar: kapama dere boyunca; parça L 2500, 20 cm bindirme (C1 i; 08:02): 29,92 m ÷ 2,3 = 13,01 → 14 (14. parça 2 cm'den doğuyor). Listede L 2800 ile 12. |
+| Sandviç panel kapaması (bina ve müştemilat) | 12 | 14 | 14 ✗ | 14 ✗ |  | karar: kapama dere boyunca; parça L 2500, 20 cm bindirme (C1 i; 08:02; hesap 8 Ekim 00:45'te onaylandı): 29,92 m ÷ 2,3 = 13,01 → 14 (14. parça 2 cm'den doğuyor). Listede L 2800 ile 12. |
 | Ters mahya | 2 | 2 | 2 | 2 |  |  |
 | Ters mahya kenar kutuları | 4 | — | 4 | 4 | Listeye girdi: cumbalı çatılarda olmazsa olmaz (08:02); ters mahya 2 × 2 = 4. |  |
-| Damlalık (bina ve müştemilat) | 6 | 5 | 5 ✗ | 5 ✗ |  | soru: damlalık listeden çıkık (C1 g). Bizdeki 5 adet, çatının duvara dayandığı kenar için geçici 'duvar dibi sacı' satırı; o kenara ne konacağı soruldu. |
+| Damlalık (bina ve müştemilat) | 6 | 5 | 5 ✗ | 5 ✗ |  | karar: çatının duvara dayandığı kenara özel mahya konur (8 Ekim 00:45): 11,35 m ÷ (2,8 − 0,20) → 5, L 2800. Listede o kenarda damlalık var (L 2500; 3 + 3 = 6); damlalık listeden çıkık (C1 g). |
 | Mahya bandı | 4 | 3 | 3 ✗ | 3 ✗ |  | karar: damlalık olmadığı için formülde terimi de yok (C1 g): 3. Listede damlalık terimiyle 4. |
 | Çatı izolasyonu | 10 | 10 | 10 | 10 |  |  |
 | **Dere** | | | | | | |
 | Metal dere | 7 | 7 | 7 | 7 |  |  |
-| Dere iniş borusu | 7 | 5 | 7 | 7 | İniş kuralı (C4; eşik öneri): her saçak köşesine bir, boyu 9 m'yi geçen dere hattının ortasına bir: 5 köşe + 2 orta = 7. |  |
+| Dere iniş borusu | 7 | 5 | 7 | 7 | İniş kuralı (C4; 9 m eşiği 8 Ekim 00:45'te onaylandı): her saçak köşesine bir, boyu 9 m'yi geçen dere hattının ortasına bir: 5 köşe + 2 orta = 7. |  |
 | Dere iniş aparatı | 7 | 5 | 7 | 7 | İniş sayısına bağlı (7). |  |
 | Dere kapağı | 4 | 4 | 4 | 4 |  |  |
 | Açık dirsek | 14 | 10 | 14 | 14 | İniş sayısına bağlı (7 × 2). |  |
@@ -118,7 +119,7 @@ Aynı yöntemle farklı kalan 35 satır:
 | RYSB pul başlı | 750 | 743 | 743 ✗ | 743 ✗ |  | elle: listede 750'ye yuvarlanmış; bizde 743. |
 | Alçıpan vidası | 8 000 | 6 250 | 6 250 ✗ | 6 500 ✗ |  | karar: levha başına 40 yeterli (C1 m). Listede levha başına 50 ve elle yuvarlama. |
 | OSB ve yalıpan vidası | 3 550 | 3 000 | 3 000 ✗ | 3 000 ✗ |  | karar: levha başına 40 (C1 m). Listede 50 ve elle yuvarlama. |
-| Trapez vida (5,5 × 25) | 1 800 | 1 750 | 1 000 ✗ | 1 250 ✗ | Yalnız çelik birleşim yerleri: panel başına 10, köşebent terimi duruyor (C1 n; 08:02): (46 panel + 6 parça C profil) × 10 + 67 × 6 = 922 → 1000. Parça C profiller şablondaki gibi sayıldı; sayılıp sayılmayacağı soruldu. | karar: omega ve aşık için vida konmaz. Listede onlar için de var (1800). |
+| Trapez vida (5,5 × 25) | 1 800 | 1 750 | 1 000 ✗ | 1 250 ✗ | Yalnız çelik birleşim yerleri: panel başına 10, köşebent terimi duruyor (C1 n; 08:02): (46 panel + 6 parça C profil) × 10 + 67 × 6 = 922 → 1000. Parça C profiller şablondaki gibi sayıldı; sayılıp sayılmayacağı soruldu (8 Ekim'de örnekle yeniden). | karar: omega ve aşık için vida konmaz. Listede onlar için de var (1800). |
 | Trapez vida (5,5 × 60) | 250 | 250 | 250 | 250 |  |  |
 | Trapez vida (5,5 × 110) | 750 | 750 | 750 | 750 |  |  |
 | Çelik dübel | 42 | 42 | 42 | 42 |  |  |
@@ -132,6 +133,6 @@ Aynı yöntemle farklı kalan 35 satır:
 | **Boya** | | | | | | |
 | Tavan boyası | 1 | 1 | 1 | 1 |  |  |
 | Astar | 1 | 1 | 1 | 1 |  |  |
-| Silikonize mastik | 3 | — | 7 ✗ | 7 ✗ | Pencere başına 1 adet (C6): 7 pencere → 7. | karar: pencere başına 1. Listede 3. |
+| Silikonize mastik | 3 | — | — ✗ | — |  | karar: pencereler alıcıya aitse mastik yazılmaz (8 Ekim 00:45: "hayır yazılmasın"); pencere varsa pencere başına 1 (C6). Listede 3. |
 | Dayson | 4 | 6 | 6 ✗ | 6 ✗ |  | karar: Excel motoruna uyulur (C1 p): m² × 0,06 → 6. Listede 4. |
 | Poliüretan köpük | 2 | 2 | 2 | 2 |  |  |

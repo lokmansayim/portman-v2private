@@ -27,11 +27,11 @@
 | Çatı kaplamaları | Özel mahya (geniş) | ana bina ile veranda çıkıntısının çatısı arasındaki birleşim boyu ÷ (2,8 − 0,20) | lokman | 2 / 2 | — | — |
 | Çatı kaplamaları | Çatı şiltesi 80 mm | çatı boyu × (bina eni + 0,20) ÷ 9,6 | uydurma | 11 / 11 | 8 / 8 | — |
 | Çatı kaplamaları | Sandviç panel | çatı açılımı: yüzler şerit şerit dizilir; çapraz kesimden artan parça karşı yüzde kullanılır; panel boyu = eğimli boy + taşma | lokman | — | 28 / 27 ✗ | — |
-| Çatı kaplamaları | Sandviç panel kapaması | saçak (dere) boyu toplamı ÷ (2,5 − 0,20 bindirme) | varsayim | — | 17 / 16 ✗ | — |
+| Çatı kaplamaları | Sandviç panel kapaması | saçak (dere) boyu toplamı ÷ (2,5 − 0,20 bindirme) | lokman | — | 17 / 16 ✗ | — |
 | Çatı kaplamaları | Tek kat panel kapaması | her saçak kenarı ÷ 2,5, ayrı ayrı yukarı | uydurma | — | — | 16 / 16 |
 | Çatı kaplamaları | Ters mahya | cumbalı çatıda çatıların birleştiği vadi boyu ÷ (2,8 − 0,20) | lokman | — | — | 3 / 3 |
 | Dere | Metal dere | saçak boyu ÷ (4,0 − 0,20 bindirme) | motor | 9 / 9 | 10 / 10 | 11 / 11 |
-| Dere | Dere iniş borusu | 4 köşe + 2 orta (boyu 9 m'yi geçen dere hatları) | uydurma | 6 / 7 ✗ | 6 / 7 ✗ | — |
+| Dere | Dere iniş borusu | 4 köşe + 2 orta (boyu 9 m'yi geçen dere hatları) | lokman | 6 / 7 ✗ | 6 / 7 ✗ | — |
 | Dere | Dere iniş aparatı | iniş sayısı × 1 | motor | 6 / 7 ✗ | 6 / 7 ✗ | — |
 | Dere | Açık dirsek | iniş sayısı × 2 | motor | 12 / 14 ✗ | 12 / 14 ✗ | — |
 | Dere | Kapalı dirsek | iniş sayısı × 1 | motor | 6 / 7 ✗ | 6 / 7 ✗ | — |
@@ -97,8 +97,8 @@
 | İç cephe kaplama | Tavan alçıpan yeşil | tavan alanı × 1,05 ÷ 3,0; yeşil = ıslak hacim + veranda tavanı | lokman | 5 / 6 ✗ | 7 / 7 | 3 / 3 |
 | İç cephe kaplama | OSB 9 mm (duvar) | listede yazan alan × 1,05 ÷ 2,98; alanın nasıl seçildiği listede yazmıyor | excel | 13 / 13 | — | 14 / 15 ✗ |
 | Çatı kaplamaları | Sandviç panel | çatı açılımı: yüzler şerit şerit dizilir; çapraz kesimden artan parça karşı yüzde kullanılır; panel boyu = eğimli boy + taşma | lokman | — | 28 / 27 ✗ | — |
-| Çatı kaplamaları | Sandviç panel kapaması | saçak (dere) boyu toplamı ÷ (2,5 − 0,20 bindirme) | varsayim | — | 17 / 16 ✗ | — |
-| Dere | Dere iniş borusu | 4 köşe + 2 orta (boyu 9 m'yi geçen dere hatları) | uydurma | 6 / 7 ✗ | 6 / 7 ✗ | — |
+| Çatı kaplamaları | Sandviç panel kapaması | saçak (dere) boyu toplamı ÷ (2,5 − 0,20 bindirme) | lokman | — | 17 / 16 ✗ | — |
+| Dere | Dere iniş borusu | 4 köşe + 2 orta (boyu 9 m'yi geçen dere hatları) | lokman | 6 / 7 ✗ | 6 / 7 ✗ | — |
 | Dere | Dere iniş aparatı | iniş sayısı × 1 | motor | 6 / 7 ✗ | 6 / 7 ✗ | — |
 | Dere | Açık dirsek | iniş sayısı × 2 | motor | 12 / 14 ✗ | 12 / 14 ✗ | — |
 | Dere | Kapalı dirsek | iniş sayısı × 1 | motor | 6 / 7 ✗ | 6 / 7 ✗ | — |
@@ -131,11 +131,11 @@
 | Çelik panel | Boy C profil | 80 × 45 × 0,8 | 3 | aynı |  | 15 | motor |
 | Çelik panel | Boy C profil | 80 × 45 × 1,2 | 3 | aynı |  | 15 | motor |
 | Çelik panel | Toplam (adedi ve kg'ı bilinenler) |  | 69 | 2828 kg |  | 2555 | motor |
-| Metal aksam | Saçaklar için Boardex | 12,5 × 1200 × 2400 | 5 | aynı | 11,8 m² |  | uydurma |
-| Metal aksam | Saçak yüzü için Boardex | 12,5 × 1200 × 2400 | 3 | aynı | 7,2 m² |  | muhendis |
+| Metal aksam | Saçaklar için OUTWEAR Dış Cephe Levhası | 12,5 × 1200 × 2400 | 5 | aynı | 11,8 m² |  | uydurma |
+| Metal aksam | Saçak yüzü için OUTWEAR Dış Cephe Levhası | 12,5 × 1200 × 2400 | 3 | aynı | 7,2 m² |  | muhendis |
 | Metal aksam | Köşebent | L 2500 | 59 | aynı | 146,3 m |  | muhendis |
-| Dış cephe kaplama | Dış cephe Boardex | 12,5 × 1200 × 2400 | 31 | aynı | 80,7 m² |  | excel |
-| Dış cephe kaplama | Veranda tavanı (Boardex) | 12,5 × 1200 × 2400 | 7 | aynı | 18,3 m² |  | lokman |
+| Dış cephe kaplama | OUTWEAR Dış Cephe Levhası | 12,5 × 1200 × 2400 | 31 | aynı | 80,7 m² |  | excel |
+| Dış cephe kaplama | Veranda tavanı (OUTWEAR Dış Cephe Levhası) | 12,5 × 1200 × 2400 | 7 | aynı | 18,3 m² |  | lokman |
 | İç cephe kaplama | Duvar alçıpan beyaz | 1200 × 2500 | 47 | 46 | 132,8 m² |  | excel |
 | İç cephe kaplama | Duvar alçıpan yeşil | 1200 × 2500 | 8 | aynı | 20,4 m² |  | excel |
 | İç cephe kaplama | Tavan alçıpan beyaz | 1200 × 2500 | 19 | aynı | 54,1 m² |  | motor |
@@ -147,7 +147,7 @@
 | Çatı kaplamaları | Acil müdahale kapağı | adet | 1 | aynı |  |  | lokman |
 | Çatı kaplamaları | Çatı şiltesi 80 mm | 9,6 m²/adet | 10 | aynı | 88,9 m² |  | uydurma |
 | Dere | Metal dere | L 4000 | 11 | aynı | 39,3 m |  | motor |
-| Dere | Dere iniş borusu | L 3000 | 6 | aynı |  |  | uydurma |
+| Dere | Dere iniş borusu | L 3000 | 6 | aynı |  |  | lokman |
 | Dere | Dere iniş aparatı | adet | 6 | aynı |  |  | motor |
 | Dere | Açık dirsek | adet | 12 | aynı |  |  | motor |
 | Dere | Kapalı dirsek | adet | 6 | aynı |  |  | motor |
@@ -225,7 +225,7 @@
 | Tek kat panel (baz paket) | Trapez vida (5,5 × 76; tek kat panel) | adet | 750 | motor |
 | Sandviç panel | Sandviç panel | L 4330 · 100 cm kapatır | 25 | lokman |
 | Sandviç panel | Metal kiremit mahyası | L 2800 | 11 | lokman |
-| Sandviç panel | Sandviç panel kapaması | L 2500 | 18 | varsayim |
+| Sandviç panel | Sandviç panel kapaması | L 2500 | 18 | lokman |
 | Sandviç panel | Mahya bandı | rulo / 10 m | 4 | muhendis |
 | Sandviç panel | Acil müdahale kapağı | adet | 1 | lokman |
 | Sandviç panel | Çatı şiltesi 80 mm | 9,6 m²/adet | 10 | uydurma |

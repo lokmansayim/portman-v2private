@@ -1,6 +1,6 @@
 # 6–7 Ekim 2026 · kör test (KT-01) ve genel model motoru
 
-Deneme kodu; canlıda değil, Motor'un yerine geçmez. İE-05 taslağının (`docs/is_emirleri/IE-05.md`) devamı. Kıyasın raporu: `docs/raporlar/2026-10-07_Kor_Test_KT01.md`. Lokman'ın 7 Ekim 07:45 kararlarından sonraki durum aşağıda ("Kararlardan sonra").
+Deneme kodu; canlıda değil, Motor'un yerine geçmez. İE-05 taslağının (`docs/is_emirleri/IE-05.md`) devamı. Kıyasın raporu: `docs/raporlar/2026-10-07_Kor_Test_KT01.md`. Lokman'ın 7 Ekim 07:45 kararlarından sonraki durum aşağıda ("Kararlardan sonra"); 8 Ekim 00:45 cevaplarından sonraki güncel durum onun altında.
 
 Lokman, 6 Ekim 2026 21:22: klasördeki DWG bizim plan, görünüş, IFC ve perspektiflerimize çevrilecek; kurallarımızla kendi yükleme listemiz çıkarılacak; en son klasördeki gerçek listeyle kıyaslanacak, hata varsa düzeltilecek.
 
@@ -23,14 +23,14 @@ Proje (KT-01): tek kat çelik, 2+1, müştemilatlı, 98,65 m²; çatı beşik + 
 | `tavan_genel.py` | Tavan omegası dizilimi (Eylül 2026 paftasındaki gibi: her gözde ilk hat duvar yüzünde); yalnız `--sablon 2026` ile kullanılır |
 | `skp_profil.py` | Karkas modelinden (SKP) panel panel üye boyları ve et kalınlığı: çelik ağırlığının girdisi |
 | `kiyas.py`, `kiyas_farklar.json`, `kiyas_kos.sh` | Gerçek liste ile dört listemizin satır satır kıyası; her farkın elle yazılmış sınıfı ve nedeni (kod sayımla denetler). 7 Ekim 03:46'daki durumun kaydıdır: `kiyas_kos.sh` o günkü kural setine (0.12) sabittir ve çıktıları bayt bayt aynı üretir |
-| `kararlar_kos.sh`, `kararlar_kiyas.py`, `kararlar_notlari.json` | Lokman'ın 7 Ekim kararlarından sonra: güncel kural setiyle iki liste (B: yapıldığı yöntem; A: çelik standardı) ve gerçek listeyle durum tablosu (`sonuc/KT01_kararlar_*`). Her fark satırının türü ve nedeni elle yazılıdır; kod adetlerle denetler |
+| `kararlar_kos.sh`, `kararlar_kiyas.py`, `kararlar_notlari.json` | Lokman'ın 7 ve 8 Ekim kararlarından sonra: güncel kural setiyle iki liste (B: yapıldığı yöntem; A: çelik standardı) ve gerçek listeyle durum tablosu (`sonuc/KT01_kararlar_*`). Her fark satırının türü ve nedeni elle yazılıdır; kod adetlerle denetler. Betiğe üçüncü argüman olarak eski bir set verilirse (0.13) o günkü tablo üretilir: açıklamalar `kararlar_notlari_setleri/<set>.json`dan |
 | `kararlar_sayfa.py` | Kararlardan sonraki durumu tek bir okunur sayfaya (HTML) çevirir; çıktısı depoya yazılmaz |
 | `cizim_seti.json`, `cizim_seti_kos.sh` | Çizim seti standardı (Lokman, 7 Ekim 07:45: "bunları kurala ekle") ve seti tek komutla üreten, tam olduğunu denetleyen betik; anlatımı `docs/sartname/cizim_seti.md` |
 | `sablon_eski_listeler.py` | Eylül 2026 katmanı 2025 tarihli üç gerçek listede ne veriyor |
 | `kiyas_sayfa.py` | Kıyası ve rapordaki karar, hata ve soru tablolarını tek bir okunur sayfaya (HTML) çevirir; çıktısı depoya yazılmaz |
 | `sonuc/` | KT-01'in dondurulan girdisi ve listesi, dondurma kaydı, gerçek listenin adsız ve fiyatsız dökümü, düzeltilmiş girdi ve üç liste, kıyas tabloları; kararlardan sonraki iki girdi, iki liste ve durum tablosu (`KT01_kararlar_*`) |
 
-Hesap `../2026-10-03_yukleme/yukleme.py`'de kaldı; genel model için eklenen alanlar geriye dönük uyumlu (eski girdilerin çıktıları bayt bayt aynı). Yeni varsayımlar `kurallar.json`'da (`cok_duzlemli_cati`, `duvar_dibi`, `ek_yapi_ve_korkuluk`, `kapsam_alici`, `nem_bariyeri_dis_cephe`, `elektrik_oda_ek`).
+Hesap `../2026-10-03_yukleme/yukleme.py`'de kaldı; genel model için eklenen alanlar geriye dönük uyumlu (eski girdilerin çıktıları bayt bayt aynı). Kör testle gelen kurallar `kurallar.json`'da (`cok_duzlemli_cati`, `duvar_dibi`, `ek_yapi_ve_korkuluk`, `kapsam_alici`, `nem_bariyeri_dis_cephe`, `elektrik_oda_ek`); o gün hepsi varsayımdı, `duvar_dibi` 8 Ekim'de karara bağlandı (özel mahya).
 
 ## Çalıştırma
 
@@ -45,7 +45,8 @@ python perspektif.py cikti/KT01.ifc cikti KT01  # perspektifler
 python skp_profil.py model.pkl --json boylar.json   # karkas modelinden üye boyları ve et kalınlığı (model.pkl: ../2026-10-02_skp/kaydet.py)
 bash kiyas_kos.sh KT01_duzeltilmis.json         # düzeltilmiş girdi, üç liste ve kıyas tabloları (sonuc/); 0.12 kural setiyle (7 Ekim 03:46 kaydı)
 bash kararlar_kos.sh KT01_duzeltilmis.json      # kararlardan sonra: güncel kural setiyle A ve B listeleri, durum tablosu (sonuc/KT01_kararlar_*)
-python kararlar_sayfa.py --cikti KT01_kararlardan_sonra.html --zaman "7 Ekim 2026 12:00"   # kararlardan sonraki durumun sayfası (depo dışına)
+bash kararlar_kos.sh KT01_duzeltilmis.json python3 0.13   # 7 Ekim 10:55 tablosu, o günkü kural seti ve açıklamalarla (sonra güncel setle yeniden koşulmalı)
+python kararlar_sayfa.py --cikti KT01_kararlardan_sonra.html --zaman "8 Ekim 2026 02:00"   # kararlardan sonraki durumun sayfası (depo dışına)
 bash cizim_seti_kos.sh tanim.json cikti [python] [--yontem panel|omega_asik]   # çizim seti: on iki çıktı ve denetimi
 python kiyas_sayfa.py --cikti KT01_kiyas.html --zaman "7 Ekim 2026 03:30"   # kıyasın okunur sayfası (depo dışına)
 python saglama.py                               # genel motorun, panel boyu kuralının ve Eylül 2026 katmanının sağlaması (yaklaşık bir dakika)
@@ -62,7 +63,7 @@ KT-01'in tanımı (`KT01.json`) ve ondan üretilen çizimler depoda değil: mü�
 
 ## Liste çıkmadan önce verilen kararlar
 
-Kuralların söylemediği, projeden doğan durumlar. Hepsi `varsayim` ya da `soru` durumunda; teyit bekliyor.
+Kuralların söylemediği, projeden doğan durumlar. Liste çıkarılırken (6 Ekim) hepsi `varsayim` ya da `soru` durumundaydı; sonraki durumları bu bölümün sonunda ve 7–8 Ekim bölümlerinde.
 
 1. **Müştemilatın iç yüzleri.** Proje notu yalnız "80x45x08, mineral yün olmayacak" diyor; iç kaplama yazmıyor. Dış cephe paneli tarifine göre (OSB + alçıpan) sayıldı: 23,6 m² duvar, 15,3 m² tavan. Binanın müştemilata bakan duvarı notta yazdığı gibi Boardex.
 2. **Müştemilat çatısı.** Çatı paneli + sandviç panel (proje notu). Çatı panelinin ağırlığı 100 m² için verilen değerden oturuma oranlandı; bu mahalde tavan omegası ve aşık sayılmadı.
@@ -109,7 +110,7 @@ Gerçek liste, kendi listemiz depoya kaydedildikten (commit `0658a1d`, 22:47:02)
 
 ## Kararlardan sonra (7 Ekim 2026; kural seti 0.13)
 
-Lokman raporun on iki sorusunu 7 Ekim 07:45'te cevapladı, 08:02'de beş okumayı düzeltti (cevaplar ve uygulanışı: `docs/sartname/yukleme_listesi_yontemi.md`). KT-01 güncel kurallarla iki kez hesaplandı (`kararlar_kos.sh`; tablo `sonuc/KT01_kararlar_kiyas.md`):
+Lokman raporun on iki sorusunu 7 Ekim 07:45'te cevapladı, 08:02'de beş okumayı düzeltti (cevaplar ve uygulanışı: `docs/sartname/yukleme_listesi_yontemi.md`). KT-01 güncel kurallarla iki kez hesaplandı (`kararlar_kos.sh`; tablo `sonuc/KT01_kararlar_kiyas.md`). Bu bölüm 7 Ekim'deki durumun kaydıdır (0.13); depodaki tablo güncel setle (0.14) üretilir, aradaki fark bir sonraki bölümde:
 
 | Liste | Aynı satır | Dosya |
 |---|---|---|
@@ -123,6 +124,24 @@ Lokman raporun on iki sorusunu 7 Ekim 07:45'te cevapladı, 08:02'de beş okumay�
 - **Okuma.** Aynı satır sayısı kuralların o listeye benzerliğini gösterir, doğruluğunu değil: kararların bir kısmı o listeyi düzeltiyor (Boardex kalınlığı, çatı şiltesi, duvar izolasyonu, vida katsayıları).
 - **Kural setleri.** 03:46 kıyası 0.12 setiyle, kararlardan sonraki tablo güncel setle üretilir; ikisi de yeniden üretilebilir. Yeni davranışlar kuraldaki anahtarlara bağlı: bugünkü kod 0.12 setiyle 03:46 çıktılarını bayt bayt aynı veriyor.
 - **Liste öncesi kararların son durumu.** Orta inişin eşiği: öneri 9 m dere boyu; 5 köşe + 2 orta = 7 iniş (pafta ve liste 7). Kablo mesafesi: sigortadan (10,06 m; NYM 137 ve 115 m, listede elle 140 ve 120). Mastik: pencere başına 1, 7 adet (listede 3; karar farkı). Ölçü: kaplanmış yüz (bizdeki). Duvar dibi: damlalık listeden çıkık; o kenara ne konacağı soru. Müştemilat: Lokman "göz ardı et" dedi; mevcut hesap duruyor.
+
+## 8 Ekim cevaplarından sonra (kural seti 0.14)
+
+Lokman, 7 Ekim'de açık kalan dokuz soruyu 8 Ekim 00:45'te cevapladı (cevaplar ve uygulanışı: `docs/sartname/yukleme_listesi_yontemi.md`). KT-01 güncel setle yeniden hesaplandı; `sonuc/KT01_kararlar_*` dosyaları bu durumu gösterir.
+
+- **Aynı satır sayısı değişmedi:** B 63 / 98, A 60 / 98. Yeni tutan 15 satır aynı (10'u kararlardan, 5'i pafta sayımından); önce tutan hiçbir satır bozulmadı.
+- **B'de farklı kalan 35 satırın türü:** karar 14 (önce 12), yöntem 3, elle 16, ölçü 2, soru 0 (önce 2). İki soru satırı, gerçek listedeki iki damlalık satırıydı (bina ve müştemilat); ikisi de karar farkı oldu. Mastik 7 Ekim'de de karar farkıydı; yalnız adedi değişti:
+  - *Damlalık (bina ve müştemilat).* Çatının duvara dayandığı kenara özel mahya konur: 11,35 m ÷ (2,8 − 0,20) → 5 adet, L 2800. Geçici "duvar dibi sacı" satırı kalktı; adet aynı. Gerçek listede o kenarda damlalık var (3 + 3 = 6); bizim listemizde damlalık yok (Lokman çıkardı). Adet mahyadaki gibi toplam boydan hesaplanıyor (Claude'un uygulaması; soruldu): her yapının kenarı ayrı yuvarlansa 3 + 3 = 6 olurdu. Özel mahya mahya bandına sayılmıyor (3 rulo; listede damlalıkla 4) ve satıra renk yazılmıyor: ikisi de soruldu.
+  - *Silikonize mastik.* Pencereler alıcıya aitse mastik yazılmaz: bizim listemizde satır yok (7 Ekim'de 7 adetti). Gerçek listede 3.
+- **03:46'ya göre adedi değişen satır 20** (14'ü kararlarla, 6'sı pafta sayımıyla). 7 Ekim'de 21'di: mastik satırı yeniden 03:46'daki gibi yok.
+- **Onaylananlar; adet değişmedi:** iniş eşiği 9 m dere boyu (7 iniş; pafta ve liste 7); sandviç panel kapamasının hesabı (14; listede L 2800 ile 12); sigorta kutusunun yeri (giriş).
+- **A listesi.** Gerçek listede olmayan satır 6 oldu (önce 5). Kalkan kenarının Boardex'i onaylandı (4 levha; durumu `lokman`). Yeni satır "Kalkan kenarı üst kapaması" adetsiz ve `soru` durumunda: ölçüsü ana çatının kalkan kenarlarının boyu (20,97 m; çatı panelli müştemilatın 6,74 m'lik alınları hariç); hangi malzeme olduğu soruldu. Notundaki "alın sacının ölçüsüyle 10 adet ederdi" yalnız bilgidir. Levha satırları listede üreticinin adıyla yazılıyor.
+- **Trapez vida (5,5 × 25).** Davranış değişmedi (B 1000, A 1250; listede 1800); parça C profillerin sayımı örnekle yeniden soruldu.
+- **Çelik.** Değişmedi: gerçek liste 1 937 kg, B 1 937 kg, A 2 588 kg.
+- **Çizimler.** Plan, pafta ve dört görünüş iki yöntemde de 7 Ekim'dekilerle bayt bayt aynı; çizim betiklerine dokunulmadı.
+- **Değişmezler.** Bugünkü kod 0.12 setiyle 7 Ekim 03:46 çıktılarını (kıyas tabloları ve çizimler dahil; `kiyas_kos.sh`), 0.13 setiyle 7 Ekim 10:55 çıktılarını (`kararlar_kos.sh <tanım> <python> 0.13`) bayt bayt aynı veriyor (`../2026-10-03_yukleme/kural_setleri/`, `kararlar_notlari_setleri/`).
+- **Denetim (8 Ekim).** Cevaplarla ilgili satırlar (iniş, kapama, özel mahya, kalkan kenarı, mastik, trapez vida, yazılan adlar) hesap koduna bakmayan ayrı bir oturumda yeniden hesaplandı: A ve B listelerinde hepsi aynı. Kod ayrı bir oturumda incelendi; bulguları işlendi (ayrıntı: `docs/sartname/yukleme_listesi_yontemi.md`, "Denetim (8 Ekim)").
+- **Liste öncesi kararların son durumu (8 Ekim).** Orta inişin eşiği: onaylandı. Kablo mesafesi: sigortadan; kutu girişte (onaylandı). Mastik: pencereler alıcıya ait, yazılmaz. Duvar dibi: özel mahya. Ölçü: kaplanmış yüz. Kalkan kenarı: Boardex; üstüne gelecek malzeme soru.
 
 ## Sağlama
 

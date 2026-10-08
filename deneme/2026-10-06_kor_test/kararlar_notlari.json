@@ -1,5 +1,5 @@
 {
- "aciklama": "KT-01: Lokman'ın 7 Ekim 2026 07:45 cevapları ve 08:02 düzeltmelerinden sonra durum. `karar`: adedi 7 Ekim 03:46'daki düzeltilmiş listeden farklı olan birimde, farkı doğuran karar. `fark`: gerçek listeden hâlâ farklı olan birimde nedeni; türüyle başlar: `karar:` (Lokman'ın kararı o listeden farklı), `yöntem:` (liste omega ve aşıklı yöntemle hazırlanmış; çelikte artık yok), `elle:` (listenin elle hesabı ya da yuvarlaması), `ölçü:` (ölçünün alındığı yüz), `soru:` (kural bekliyor). `kararlar_kiyas.py` sayımla denetler. `karar` \"Karar değil:\" diye başlıyorsa adet bir karardan değil, elektrik sayılarının paftadan alınmasından değişmiştir.",
+ "aciklama": "KT-01: Lokman'ın 7 Ekim 2026 07:45 cevapları, 08:02 düzeltmeleri ve 8 Ekim 00:45 cevaplarından sonra durum (kural seti 0.14). `karar`: adedi 7 Ekim 03:46'daki düzeltilmiş listeden farklı olan birimde, farkı doğuran karar. `fark`: gerçek listeden hâlâ farklı olan birimde nedeni; türüyle başlar: `karar:` (Lokman'ın kararı o listeden farklı), `yöntem:` (liste omega ve aşıklı yöntemle hazırlanmış; çelikte artık yok), `elle:` (listenin elle hesabı ya da yuvarlaması), `ölçü:` (ölçünün alındığı yüz), `soru:` (kural bekliyor). `kararlar_kiyas.py` sayımla denetler. `karar` \"Karar değil:\" diye başlıyorsa adet bir karardan değil, elektrik sayılarının paftadan alınmasından değişmiştir.",
  "birimler": {
   "Tavan omegası": {
    "fark": "yöntem: çelikte tavan omegası yok (C2). Kural prefabrik çalışılınca; duvar yüzünde omega hattı olmadığı da söylendi: listedeki 47 o paftanın dizilimi."
@@ -57,19 +57,19 @@
    "fark": "elle: listedeki dizilim; toplam aynı (33). Bizde L 2350 (C9)."
   },
   "Sandviç panel kapaması (bina ve müştemilat)": {
-   "fark": "karar: kapama dere boyunca; parça L 2500, 20 cm bindirme (C1 i; 08:02): 29,92 m ÷ 2,3 = 13,01 → 14 (14. parça 2 cm'den doğuyor). Listede L 2800 ile 12."
+   "fark": "karar: kapama dere boyunca; parça L 2500, 20 cm bindirme (C1 i; 08:02; hesap 8 Ekim 00:45'te onaylandı): 29,92 m ÷ 2,3 = 13,01 → 14 (14. parça 2 cm'den doğuyor). Listede L 2800 ile 12."
   },
   "Ters mahya kenar kutuları": {
    "karar": "Listeye girdi: cumbalı çatılarda olmazsa olmaz (08:02); ters mahya 2 × 2 = 4."
   },
   "Damlalık (bina ve müştemilat)": {
-   "fark": "soru: damlalık listeden çıkık (C1 g). Bizdeki 5 adet, çatının duvara dayandığı kenar için geçici 'duvar dibi sacı' satırı; o kenara ne konacağı soruldu."
+   "fark": "karar: çatının duvara dayandığı kenara özel mahya konur (8 Ekim 00:45): 11,35 m ÷ (2,8 − 0,20) → 5, L 2800. Listede o kenarda damlalık var (L 2500; 3 + 3 = 6); damlalık listeden çıkık (C1 g)."
   },
   "Mahya bandı": {
    "fark": "karar: damlalık olmadığı için formülde terimi de yok (C1 g): 3. Listede damlalık terimiyle 4."
   },
   "Dere iniş borusu": {
-   "karar": "İniş kuralı (C4; eşik öneri): her saçak köşesine bir, boyu 9 m'yi geçen dere hattının ortasına bir: 5 köşe + 2 orta = 7."
+   "karar": "İniş kuralı (C4; 9 m eşiği 8 Ekim 00:45'te onaylandı): her saçak köşesine bir, boyu 9 m'yi geçen dere hattının ortasına bir: 5 köşe + 2 orta = 7."
   },
   "Dere iniş aparatı": {
    "karar": "İniş sayısına bağlı (7)."
@@ -123,7 +123,7 @@
    "fark": "karar: levha başına 40 (C1 m). Listede 50 ve elle yuvarlama."
   },
   "Trapez vida (5,5 × 25)": {
-   "karar": "Yalnız çelik birleşim yerleri: panel başına 10, köşebent terimi duruyor (C1 n; 08:02): (46 panel + 6 parça C profil) × 10 + 67 × 6 = 922 → 1000. Parça C profiller şablondaki gibi sayıldı; sayılıp sayılmayacağı soruldu.",
+   "karar": "Yalnız çelik birleşim yerleri: panel başına 10, köşebent terimi duruyor (C1 n; 08:02): (46 panel + 6 parça C profil) × 10 + 67 × 6 = 922 → 1000. Parça C profiller şablondaki gibi sayıldı; sayılıp sayılmayacağı soruldu (8 Ekim'de örnekle yeniden).",
    "fark": "karar: omega ve aşık için vida konmaz. Listede onlar için de var (1800)."
   },
   "230'luk kesme taşı": {
@@ -133,11 +133,11 @@
    "karar": "Her yapıya 1 adet, standart (C6)."
   },
   "Silikonize mastik": {
-   "karar": "Pencere başına 1 adet (C6): 7 pencere → 7.",
-   "fark": "karar: pencere başına 1. Listede 3."
+   "fark": "karar: pencereler alıcıya aitse mastik yazılmaz (8 Ekim 00:45: \"hayır yazılmasın\"); pencere varsa pencere başına 1 (C6). Listede 3."
   },
   "Dayson": {
    "fark": "karar: Excel motoruna uyulur (C1 p): m² × 0,06 → 6. Listede 4."
   }
- }
+ },
+ "giris": "Lokman'ın 7 Ekim 2026 07:45 cevapları, 08:02 düzeltmeleri ve 8 Ekim 00:45 cevapları işlendikten sonra, gerçek listenin adetli her satırı güncel kural setinin (0.14) verdiği iki listeyle."
 }

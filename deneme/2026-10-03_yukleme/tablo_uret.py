@@ -93,7 +93,7 @@ def taslak_tablosu() -> list[str]:
         else:
             oteki = adet(o["adet"])
         olcu = "" if s["olcu"] is None else f"{tr(s['olcu'], 1)} {s['birim']}"
-        cik.append(f"| {s['grup']} | {s['kalem']} | {s['boyut']} | {adet(s['adet'])} | {oteki} | {olcu} | {'' if s['kg'] is None else tr(s['kg'])} | {s['durum']} |")
+        cik.append(f"| {s['grup']} | {s.get('liste_adi') or s['kalem']} | {s['boyut']} | {adet(s['adet'])} | {oteki} | {olcu} | {'' if s['kg'] is None else tr(s['kg'])} | {s['durum']} |")
     return cik
 
 
@@ -117,7 +117,7 @@ def kaplama_tablosu() -> list[str]:
             ad += " (baz paket)"
         satirlar = [s for s in v["satirlar"] if s["grup"] == "Çatı kaplamaları" or (s["grup"] == "Vida" and ("Trapez vida (5,5 × 60)" in s["kalem"] or "panel)" in s["kalem"] or "OSB ve yalıpan" in s["kalem"]))]
         for s in satirlar:
-            cik.append(f"| {ad} | {s['kalem']} | {s['boyut']} | {adet(s['adet'])} | {s['durum']} |")
+            cik.append(f"| {ad} | {s.get('liste_adi') or s['kalem']} | {s['boyut']} | {adet(s['adet'])} | {s['durum']} |")
     return cik
 
 
