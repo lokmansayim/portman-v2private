@@ -691,6 +691,15 @@ class Depo:
             return c.execute("INSERT INTO webhook_olaylar (anahtar, tur) VALUES (%s, %s) ON CONFLICT (anahtar) DO NOTHING RETURNING anahtar",
                              (str(anahtar)[:200], tur)).fetchone() is not None
 
+    def olay_var(self, anahtar: str) -> bool:
+        with self.baglan() as c:
+            return c.execute("SELECT 1 FROM webhook_olaylar WHERE anahtar = %s", (str(anahtar)[:200],)).fetchone() is not None
+
+    def teslim_hatasi_yaz(self, satir_id_: str, hata: str) -> None:
+        """Meta 'failed' bildirimi: hata metni yazılır, durum değişmez (feature.php pm_kanal_status ile aynı)."""
+        with self.baglan() as c, c.transaction():
+            c.execute("UPDATE giden SET hata = %s WHERE id = %s", (hata[:300], satir_id_))
+
     def son_gelen_zamani(self, numara) -> float | None:
         """Numaradan gelen son mesajın WhatsApp zamanı (epoch): Patron bildirimlerinde 24 saat penceresi için."""
         with self.baglan() as c:
