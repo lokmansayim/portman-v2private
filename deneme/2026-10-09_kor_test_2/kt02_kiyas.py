@@ -143,6 +143,8 @@ def main() -> int:
     ap.add_argument("--ne-olur-b", type=Path, help="düzeltilmiş B, iki kural sorusu listedeki gibi cevaplanırsa (kt02_ne_olur.py; yalnız bilgi)")
     ap.add_argument("--gercek", type=Path, default=BURADA / "sonuc" / "KT02_gercek_liste.json")
     ap.add_argument("--farklar", type=Path, default=BURADA / "kt02_farklar.json")
+    ap.add_argument("--ek-notlar", type=Path, help="cevaplardan sonraki notlar (kt02_cevaplar_notlari.json): birim alanları, giriş, başlık, etiketler ve "
+                                                    "adet dışı farklar `--farklar`ın üstüne yazılır; kör listenin sınıfları değişmez")
     ap.add_argument("--md", type=Path)
     ap.add_argument("--json", type=Path)
     a = ap.parse_args()
@@ -154,6 +156,13 @@ def main() -> int:
             L[x] = oku(yol)
     F = oku(a.farklar) if a.farklar.exists() else {"birimler": {}, "fazla": {}, "adet_disi": []}
     sorun = []
+    E = oku(a.ek_notlar) if a.ek_notlar else None
+    if E:
+        for ad, alanlar in E.get("birimler", {}).items():
+            if "sinif" in alanlar or "neden" in alanlar:
+                sorun.append(f"ek notlar kör listenin sınıfını ya da nedenini değiştiremez: {ad}")
+            F["birimler"].setdefault(ad, {}).update(alanlar)
+        F.update({x: E[x] for x in ("giris", "adet_disi") if x in E})
     if "ne_olur_b" in L and "duz_b" not in L:
         sorun.append("--ne-olur-b düzeltilmiş B ile birlikte verilir")
     for x, beklenen in (("kor_b", "omega_asik"), ("kor_a", "panel"), ("duz_b", "omega_asik"), ("duz_a", "panel"), ("sablon_b", "omega_asik"), ("ne_olur_b", "omega_asik")):
@@ -199,7 +208,7 @@ def main() -> int:
             # düzeltme yalnız girdi hatalarıdır: adedi değişen birimin sınıfı girdi olmalı ya da `pay`ı yazılmalı
             if b["kor_b"] != b["duz_b"] and b["sinif"] != "girdi" and not b["pay"]:
                 sorun.append(f"{ad}: düzeltmeyle adet değişti ({b['kor_b']} → {b['duz_b']}) ama sınıfı girdi değil ve `pay` yazılmamış")
-            if b["pay"] and b["kor_b"] == b["duz_b"] and not b["pay"].startswith("kural"):
+            if b["pay"] and b["kor_b"] == b["duz_b"] and not b["pay"].startswith(("kural", "karar")):
                 sorun.append(f"{ad}: `pay` yazılmış ama düzeltmeyle adet değişmemiş")
         B.append(b)
     for ad in set(F["birimler"]) - {b["ad"] for b in B}:
@@ -239,6 +248,8 @@ def main() -> int:
              "celik": {"gercek": {"adet": toplam_g["adet"], "kg": toplam_g["kg"]}, **{x: {"adet": adet(L[x]), "kg": round(kg(L[x]), 2)} for x in L}},
              "adetsiz_gercek_satirlar": list(ADETSIZ.values()), "fazla": Z, "adet_disi": F.get("adet_disi", []), "giris": F.get("giris", ""),
              "denetim_sorunlari": sorun, "birimler": B}
+    if E:   # cevaplardan sonraki tablo: başlık ve etiketler (22:05 kıyasının JSON'u bu anahtarlar olmadan, olduğu gibi kalır)
+        sonuc.update({"baslik": E.get("baslik"), "etiketler": E.get("etiketler", {})})
     print(f"gerçek listenin adetli satırı: {satir(B)} | birim: {len(B)} | " + " · ".join(f"{x} {ozet[x]['ayni']}" for x in L))
     print(f"  kör B'de farklı {satir(B) - ozet['kor_b']['ayni']} satır: {sinif_say} · bizim hatamız {sonuc['bizim_hatamiz']}")
     if kalan_say:
@@ -256,14 +267,21 @@ def main() -> int:
     return 1 if sorun else 0
 
 
+ETIKET_VARSAYILAN = {"duz_b": "Düzeltilmiş (B)", "duz_b_aciklama": "yalnız girdi hatamız düzeltildi (sundurmanın çatısı); kurallar aynı",
+                     "duz_a": "Düzeltilmiş (A)", "duz_a_aciklama": "bilgi", "duz_kisa": "düzeltilmiş", "duz_sutun": "Düzeltilmiş B",
+                     "kalan_basligi": "Düzeltilmiş listede (B) farklı kalan", "kalan_sutun": "Düzeltilmiş listede kalan",
+                     "kaynak_notu": "Sınıflar ve nedenler `kt02_farklar.json`dan."}
+
+
 def md(s: dict, L: dict) -> str:
     B, o = s["birimler"], s["ozet"]
     toplam = o["kor_b"]["gercek_satir"]
-    cik = ["# KT-02 · kıyas", "", s["giris"], "", "Tablo `kt02_kiyas.py` ile üretilir; elle düzeltilmez. Sınıflar ve nedenler `kt02_farklar.json`dan.", "",
+    et = {**ETIKET_VARSAYILAN, **(s.get("etiketler") or {})}
+    cik = [f"# {s.get('baslik') or 'KT-02 · kıyas'}", "", s["giris"], "", f"Tablo `kt02_kiyas.py` ile üretilir; elle düzeltilmez. {et['kaynak_notu']}", "",
            "| Liste | Aynı satır | Ne demek |", "|---|---|---|",
            f"| Kör liste, yapıldığı yöntemle (B) | {o['kor_b']['ayni']} / {toplam} | dondurulan liste (commit 59602ef); kural seti 0.15; elektrik sayıları paftadan |"]
     if "duz_b" in o:
-        cik.append(f"| Düzeltilmiş (B) | {o['duz_b']['ayni']} / {toplam} | yalnız girdi hatamız düzeltildi (sundurmanın çatısı); kurallar aynı |")
+        cik.append(f"| {et['duz_b']} | {o['duz_b']['ayni']} / {toplam} | {et['duz_b_aciklama']} |")
     if "sablon_b" in o:
         cik.append(f"| Düzeltilmiş + Eylül 2026 uygulaması (B) | {o['sablon_b']['ayni']} / {toplam} | yalnız bilgi: `--sablon 2026` katmanı (KT-01'in Eylül 2026 listesinin uygulaması; Lokman 7 Ekim'de cevapladı, varsayılan hesapta değil) |")
     if "ne_olur_b" in o:
@@ -271,22 +289,29 @@ def md(s: dict, L: dict) -> str:
                    "korkuluk dış cephe Boardex'ine girmez; Betopan satırı motorda yok (listede 3 levha) |")
     cik.append(f"| Kör liste, çelik standardıyla (A) | {o['kor_a']['ayni']} / {toplam} | çatı ve tavan paneli: bu proje bugün sipariş edilse çıkacak liste (bilgi) |")
     if "duz_a" in o:
-        cik.append(f"| Düzeltilmiş (A) | {o['duz_a']['ayni']} / {toplam} | bilgi |")
+        cik.append(f"| {et['duz_a']} | {o['duz_a']['ayni']} / {toplam} | {et['duz_a_aciklama']} |")
     cik += ["", f"Kör listede (B) farklı {toplam - o['kor_b']['ayni']} satırın asıl nedeni:", "", "| Sınıf | Satır | Anlamı |", "|---|---|---|"]
     cik += [f"| {k} | {v} | {SINIF[k]} |" for k, v in s["siniflar"].items()]
     cik += ["", f"Bizim hatamız (girdi + kural): {s['bizim_hatamiz']} satır; ayrıca kör listede gerçek listede olmayan {len(s['fazla']['kor_b'])} satır (aşağıda)."]
     if s["kalan_siniflar"]:
-        cik += ["", f"Düzeltilmiş listede (B) farklı kalan {toplam - o['duz_b']['ayni']} satır:", "", "| Tür | Satır |", "|---|---|"]
+        cik += ["", f"{et['kalan_basligi']} {toplam - o['duz_b']['ayni']} satır:", "", "| Tür | Satır |", "|---|---|"]
         cik += [f"| {k} | {v} |" for k, v in s["kalan_siniflar"].items() if v]
     if s.get("ne_olur"):
         cik += ["", "İki kural sorusu listedeki gibi cevaplanırsa (yalnız bilgi) değişen satırlar: "
                 + "; ".join(f"{x['ad']} {n(x['duz_b'])} → {n(x['ne_olur_b'])}" + (" (aynı)" if x["ayni"] else f" (gerçek {n(x['gercek'])})") for x in s["ne_olur"])
                 + ". Tutan hiçbir satır bozulmadı (denetlenir)."]
     c = s["celik"]
-    ETIKET = {"kor_b": "kör B", "kor_a": "kör A", "duz_b": "düzeltilmiş B", "duz_a": "düzeltilmiş A", "sablon_b": "+ Eylül 2026 (B)", "ne_olur_b": "ne olur (B)"}
+    ETIKET = {"kor_b": "kör B", "kor_a": "kör A", "duz_b": f"{et['duz_kisa']} B", "duz_a": f"{et['duz_kisa']} A", "sablon_b": "+ Eylül 2026 (B)", "ne_olur_b": "ne olur (B)"}
+    k15 = next((b for b in B if b["ad"] == "Kiriş (1,5)"), None)
+    kgsiz = [x for x in L if k15 is not None and k15.get(x + "_kg") is None]
+    if k15 is None or len(kgsiz) == len(L):
+        k15_cumle = "Bizim listelerde 1,5 mm kiriş kg'sız (birim ağırlığı kuralda yoktu)"
+    else:
+        k15_cumle = ("1,5 mm kiriş " + ", ".join(ETIKET[x] for x in kgsiz) + " listelerinde kg'sız (birim ağırlığı o gün kuralda yoktu), "
+                     + ", ".join(f"{ETIKET[x]} listesinde {n(k15[x + '_kg'])} kg" for x in L if x not in kgsiz) + f" (gerçek listede {n(k15['gercek_kg'])})")
     cik += ["", "Çelik (adet, kg): gerçek liste " + f"{c['gercek']['adet']} · {n(round(c['gercek']['kg'], 1))}"
             + "".join(f" — {ETIKET[x]} {c[x]['adet']} · {n(round(c[x]['kg'], 1))}" for x in L if x in c)
-            + ". Bizim listelerde 1,5 mm kiriş kg'sız (birim ağırlığı kuralda yoktu); A'da tavan ve çatı panelleri eklenir.", "",
+            + f". {k15_cumle}; A'da tavan ve çatı panelleri eklenir.", "",
             "Gerçek listede adedi yazılmayan satırlar (bizim listede de yok): " + ", ".join(s["adetsiz_gercek_satirlar"]) + ".", "",
             "## Kör listede (B) olup gerçek listede olmayan satırlar", "", "| Kalem | Boyut | Adet | Sınıf | Neden |", "|---|---|---|---|---|"]
     cik += [f"| {z['kalem']} | {z['boyut']} | {n(z['adet'])} | {z.get('sinif') or ''} | {z.get('neden') or ''} |" for z in s["fazla"]["kor_b"]]
@@ -295,7 +320,7 @@ def md(s: dict, L: dict) -> str:
                 + ", ".join(f"{z['kalem']} ({n(z['adet'])})" for z in s["fazla"].get("duz_a", s["fazla"]["kor_a"])) + "."]
     if s["adet_disi"]:
         cik += ["", "## Adet dışı farklar (sayıma girmez)", ""] + [f"- {x}" for x in s["adet_disi"]]
-    cik += ["", "## Satır satır", "", "| Kalem (gerçek liste) | Gerçek | Kör B | Düzeltilmiş B | Kör A | Sınıf | Neden | Düzeltilmiş listede kalan |",
+    cik += ["", "## Satır satır", "", f"| Kalem (gerçek liste) | Gerçek | Kör B | {et['duz_sutun']} | Kör A | Sınıf | Neden | {et['kalan_sutun']} |",
             "|---|---|---|---|---|---|---|---|"]
     grup = None
     for b in B:

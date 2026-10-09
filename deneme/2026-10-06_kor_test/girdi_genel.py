@@ -139,7 +139,7 @@ def metraj(y: dict, c: dict, kur: dict) -> dict:
     cevre = unary_union([Polygon(h.coords) for h in hat])
     x0, y0, x1, y1 = cevre.bounds
     m["dis_olcu_cm"] = [x1 - x0, y1 - y0]
-    m["oturum_m2"] = cevre.area / 1e4
+    m["oturum_m2"] = cevre.area / 1e4                    # bina alanı: kapalı kısım + veranda + açık sundurma (Lokman, 9 Ekim 2026 22:22: "evet girsin")
     kapali = [d for d in y["duvarlar"] if d["sinif"] in ("dis", "ic", "ek")]
     kd = t["yuz_kaplamalari"]["dis"]["kalinlik"]
     kx0, ky0 = min(d["kutu"][0] for d in kapali) - kd, min(d["kutu"][1] for d in kapali) - kd

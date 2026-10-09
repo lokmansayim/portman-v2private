@@ -15,7 +15,7 @@ Proje (KT-02): tek kat çelik, 2+1, 90 m² (paftadaki toplam brüt alan; veranda
 
 ## Girdi
 
-- **Tanım** (`KT02.json`, Yapı Tanımı 0.5; `kt02_tanim_uret.py` üretir; müşteri projesinin geometrisi olduğu için depoya Lokman'ın onayıyla girer, şimdilik depo dışında; özeti dondurma kaydında). Duvarlar, kirişler ve kolonlar üretim dosyasındaki çerçeve boylarıyla, duvar paneli paftasındaki yerlerinde (paftanın vektör çizgileri duvarlarla ölçeklenerek okundu). Açıklıklar çerçevelerdeki dikme ve başlıklardan: 120/180 iki, 120/120, 120/100, 60/40, 300/200 (pencere ve doğramalar alıcıya ait); dış kapı 95 × 210; dört iç kapı 90 × 214 (banyo dahil). Mahallerin karkas yüzleri arası alanları paftadaki etiketlerle aynı: yatak odaları 14,32 / 14,26 · hol 7,09 / 7,08 · banyo 4,34 / 4,33 · yaşama mekânı 26,43 / 26,42 · sundurma 2,24 / 2,25 m².
+- **Tanım** (`tanim/KT02.json`, Yapı Tanımı 0.5; `tanim/kt02_tanim_uret.py` üretir; özeti dondurma kaydında). Müşteri projesinin geometrisidir; 9 Ekim 2026 22:22'den beri depoda (Lokman: "Evet ekle"); ad, telefon ve fiyat içermez. Duvarlar, kirişler ve kolonlar üretim dosyasındaki çerçeve boylarıyla, duvar paneli paftasındaki yerlerinde (paftanın vektör çizgileri duvarlarla ölçeklenerek okundu). Açıklıklar çerçevelerdeki dikme ve başlıklardan: 120/180 iki, 120/120, 120/100, 60/40, 300/200 (pencere ve doğramalar alıcıya ait); dış kapı 95 × 210; dört iç kapı 90 × 214 (banyo dahil). Mahallerin karkas yüzleri arası alanları paftadaki etiketlerle aynı: yatak odaları 14,32 / 14,26 · hol 7,09 / 7,08 · banyo 4,34 / 4,33 · yaşama mekânı 26,43 / 26,42 · sundurma 2,24 / 2,25 m².
 - **Çatı:** dört omuz, saçak 30 cm (makas 8240 = karkas 764 + 2 × 30), eğim 0,32878 (makasların üst başlığı), saçak kotu 280. Plan 824 × 1224 cm, mahya 400 cm. Sundurmanın çatısı: üç yüzlü (güney, kuzey, batı kırma ucu), 210 cm geniş; doğu ucu ana çatının saçak ucunda biter, ana saçağın üstünde kalan üçgen kalkan sayıldı.
 - **Çelik:** üretim dosyasından (`../2026-10-06_kor_test/uretim_profil.py`): 101 çerçeve, 1 577 üye, 1 421,37 m; 0,8 mm 650,14 m, 1,2 mm 748,57 m, 1,5 mm 22,65 m (tek kiriş, KRS06).
 - **Elektrik** (`sonuc/KT02_pafta_sayimi.json`; elektrik yerleşim paftasından): 5 tijli duy, 4 glop, 5 tekli ve 2 çiftli anahtar, 16 tekli ve 2 çiftli priz, 1 uydu prizi.
@@ -62,25 +62,38 @@ Kıyasın dosyaları:
 
 - `kt02_kiyas.py`: kıyas ve mekanik denetimler.
 - `kt02_farklar.json`: sınıflar ve nedenler; elle yazılır, kıyas denetler.
-- `kt02_kiyas_kos.sh`: düzeltilmiş tanımdan iki liste, Eylül 2026 katmanı, ne olur ve tablo.
+- `kt02_kiyas_kos.sh`: düzeltilmiş tanımdan iki liste, Eylül 2026 katmanı, ne olur ve tablo. Kural seti 0.15'e sabit: 22:05 kıyası bayt bayt aynı üretilir. `kt02_kos.sh` da 0.15'e sabit (dondurulan listeler).
 - `kt02_ne_olur.py`: iki kural sorusunun etkisi; yalnız bilgi.
 - `kt02_sayfa.py`: Lokman'a verilen tek sayfa; depoya yazılmaz.
 - `sonuc/KT02_duzeltilmis_*`, `sonuc/KT02_ne_olur_*`, `sonuc/KT02_kiyas.{md,json}`.
 
-Düzeltilmiş tanımı `kt02_tanim_duzeltilmis.py` üretir. Bu betik dondurulan tanımı okur ve yalnız sundurmanın çatısını değiştirir. Tanımla birlikte depo dışındadır.
+Düzeltilmiş tanımı `tanim/kt02_tanim_duzeltilmis.py` üretir. Bu betik dondurulan tanımı okur ve yalnız sundurmanın çatısını değiştirir.
+
+## Lokman'ın cevapları (9 Ekim 2026 22:22)
+
+Yazıldığı gibi:
+
+1. Korkuluk: "Veranda korkuluğunun her tarafı kaplanıyor iç yüzde kaplanıyor". İki yüz de kaplanır; kuralımızın iki yüzü sayması doğru. Malzeme (Betopan mı, dış cephe levhası mı) ve korkuluğun üstü cevapta yok: yeniden soruldu, kural değişmedi.
+2. 1,5 mm profil: "evet yaz". Kural seti 0.16: 80 × 45 × 1,5 = 2,07 kg/m. KT-02'de 1,5 mm kiriş 46,89 kg; listede de 46,89.
+3. Açık sundurma: "evet girsin". Bina alanına girer; hesap zaten böyleydi (92 m²). Uç, PH2 ucu ve inox taştaki fark artık karar farkı (listede 90).
+4. Tanım ve çizimler: "Evet ekle". `tanim/`: kör ve düzeltilmiş tanım, onları üreten betikler, üretim dosyasından profil boyları; ikisi betiklerden, profil boyları üretim dosyasından bayt bayt aynı üretiliyor. `cizimler/KT02_B` ve `cizimler/KT02_A`: düzeltilmiş tanımdan, iki yöntemle çizim seti. Plan, görünüşler, pafta, çatısız görünüm ve özet her üretimde bayt bayt aynı. IFC kimlikleri ve geometri özetindeki duvar sırası her üretimde değişir. Perspektiflerde ve makaslı görünümde pikselin binde üçünden azı değişebilir (KT-01'deki gibi).
+
+Cevaplardan sonraki tablo: `kt02_cevaplar_kos.sh` (güncel kural seti) → `sonuc/KT02_cevaplar_*`. Satır notları `kt02_farklar.json`, üstüne `kt02_cevaplar_notlari.json`. Kör listenin sınıfları 22:05 kaydındaki gibi kalır. 57 / 85 satır aynı (adetler değişmedi). Farklı kalanlar: kural 2 (korkuluk; malzeme soruldu), karar 16, elle 7, pafta 3. Çelik panel grubunun dokuz satırının hepsinde adet de kg da aynı. Çelik toplamı 2 041,2 kg, listede 2 051,3; fark C profillerde.
 
 ## Çalıştırma
 
 ```
-python ../2026-10-06_kor_test/uretim_profil.py <üretim klasörü> --json KT02_profil_boylari.json
-python kt02_tanim_uret.py KT02.json KT02_profil_boylari.json          # tanım (depo dışında; Lokman'ın onayıyla depoya girer)
-bash kt02_kos.sh KT02.json [python]                                   # iki girdi ve iki liste (sonuc/)
-bash ../2026-10-06_kor_test/cizim_seti_kos.sh KT02.json <çıktı> [python] [--yontem panel]   # çizim seti (depo dışına)
-python kt02_tanim_duzeltilmis.py KT02_duzeltilmis.json KT02.json     # kıyastan sonra: girdi hatası düzeltilmiş tanım (depo dışında)
-bash kt02_kiyas_kos.sh KT02_duzeltilmis.json [python]                 # düzeltilmiş listeler ve kıyas (sonuc/)
-python kt02_sayfa.py --cikti KT02_kiyas.html --zaman "9 Ekim 2026 22:30"   # kıyas sayfası (depo dışına)
+python ../2026-10-06_kor_test/uretim_profil.py <üretim klasörü> --json tanim/KT02_profil_boylari.json   # üretim dosyası depoda değil
+python tanim/kt02_tanim_uret.py tanim/KT02.json tanim/KT02_profil_boylari.json        # dondurulan tanım
+bash kt02_kos.sh tanim/KT02.json [python]                             # dondurulan iki girdi ve iki liste (sonuc/; kural seti 0.15)
+python tanim/kt02_tanim_duzeltilmis.py tanim/KT02_duzeltilmis.json tanim/KT02.json   # kıyastan sonra: girdi hatası düzeltilmiş tanım
+bash kt02_kiyas_kos.sh tanim/KT02_duzeltilmis.json [python]           # 22:05 kıyası (sonuc/; kural seti 0.15)
+bash kt02_cevaplar_kos.sh tanim/KT02_duzeltilmis.json [python]        # cevaplardan sonra: güncel kural setiyle listeler ve kıyas (sonuc/KT02_cevaplar_*)
+bash ../2026-10-06_kor_test/cizim_seti_kos.sh tanim/KT02_duzeltilmis.json cizimler/KT02_B [python]                # çizim seti, yöntem B
+bash ../2026-10-06_kor_test/cizim_seti_kos.sh tanim/KT02_duzeltilmis.json cizimler/KT02_A [python] --yontem panel  # çizim seti, yöntem A
+python kt02_sayfa.py --cikti KT02_kiyas.html --zaman "9 Ekim 2026 22:30"   # 22:05 kıyasının sayfası (depo dışına)
 ```
 
 ## Kişisel veri
 
-Depodaki dosyalarda müşteri, bayi ve çalışan adı, telefon ve fiyat yok. Gerçek listenin dökümü adsız ve fiyatsız; hazırlayan ve müşteri satırları alınmadı. Kaynak dosyalar (paftalar, üretim dosyası, liste) depoya alınmadı. Tanım, düzeltilmiş tanım ve çizimler şimdilik depo dışında.
+Depodaki dosyalarda müşteri, bayi ve çalışan adı, telefon ve fiyat yok. Gerçek listenin dökümü adsız ve fiyatsız; hazırlayan ve müşteri satırları alınmadı. Kaynak dosyalar (paftalar, üretim dosyası, liste) depoya alınmadı. Tanımlar ve çizimler müşteri projesinin geometrisidir; Lokman'ın onayıyla depoda (9 Ekim 2026 22:22); ad, telefon ve fiyat içermez.

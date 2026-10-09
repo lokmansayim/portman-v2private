@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
 # KT-02 kıyası: düzeltilmiş tanımla (yalnız girdi hatamız düzeltildi) iki liste, Eylül 2026 katmanıyla B (bilgi), iki kural sorusunun
 # "ne olur" listesi (bilgi) ve gerçek listeyle tablo.
-# Dondurulan listeler (sonuc/KT02_{A,B}_yukleme.json) değişmez; bu betik onlara yazmaz. Tanım depo dışında (Lokman'ın onayıyla girer); yolu verilir.
-# Geçici dosya yazmaz, hiçbir dosyayı silmez. Kullanım: bash kt02_kiyas_kos.sh <KT02_duzeltilmis.json> [python]   Çıkış kodu: denetim sorunu varsa 1.
+# Dondurulan listeler (sonuc/KT02_{A,B}_yukleme.json) değişmez; bu betik onlara yazmaz. Tanım: `tanim/KT02_duzeltilmis.json` (depoda); yolu verilir.
+# Bu, Lokman'ın 9 Ekim 22:22 cevaplarından önceki kıyasın kaydıdır (kural seti 0.15). Cevaplardan sonrası: kt02_cevaplar_kos.sh (güncel set).
+# Geçici dosya yazmaz, hiçbir dosyayı silmez. Kullanım: bash kt02_kiyas_kos.sh tanim/KT02_duzeltilmis.json [python]   Çıkış kodu: denetim sorunu varsa 1.
 set -euo pipefail
 T=$(realpath "${1:?Kullanım: bash kt02_kiyas_kos.sh <KT02_duzeltilmis.json> [python]}")
 PY=${2:-python3}
 cd "$(dirname "$0")"
-unset PORTMAN_KURALLAR      # güncel kural seti (kurallar.json)
+export PORTMAN_KURALLAR="$(cd ../2026-10-03_yukleme && pwd)/kural_setleri/0.15.json"   # 9 Ekim 2026 22:05 kıyası 0.15 kural setiyle (o günkü set) bayt bayt aynı çıkar
+"$PY" -c 'import json, os, sys; s = json.load(open(os.environ["PORTMAN_KURALLAR"], encoding="utf-8"))["sema"]; sys.exit(0 if "/0.15" in s else f"kt02_kiyas_kos.sh 0.15 kural setiyle koşar; seçilen dosya: {s}")'
 "$PY" -c 'import json, sys; t = json.load(open(sys.argv[1], encoding="utf-8")); sys.exit(0 if t.get("duzeltmeler") else "Bu tanımda `duzeltmeler` alanı yok: düzeltilmiş tanımla koşulur.")' "$T"
 G=../2026-10-06_kor_test/girdi_genel.py
 Y=../2026-10-03_yukleme/yukleme.py

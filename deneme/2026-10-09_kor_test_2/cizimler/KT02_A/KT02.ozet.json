@@ -1,0 +1,23 @@
+{
+ "sema": "IFC4",
+ "sema_hatasi": 0,
+ "urunler": {
+  "IfcBeam": 9,
+  "IfcBuilding": 1,
+  "IfcBuildingStorey": 1,
+  "IfcColumn": 6,
+  "IfcCovering": 7,
+  "IfcDoor": 5,
+  "IfcElementAssembly": 4,
+  "IfcMember": 24,
+  "IfcOpeningElement": 11,
+  "IfcPlate": 8,
+  "IfcRoof": 1,
+  "IfcSite": 1,
+  "IfcSlab": 8,
+  "IfcSpace": 7,
+  "IfcWall": 18,
+  "IfcWindow": 6
+ },
+ "ilk_hatalar": []
+}
