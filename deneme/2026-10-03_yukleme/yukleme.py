@@ -193,6 +193,8 @@ def _hesapla(g: dict, k: dict) -> dict:
         return (k.get(ad) or {}).get("deger")
 
     c = g["cati"]
+    # çatı panelli çatının satır notlarındaki adı: ek yapı (KT-01) ya da ek yapı yokken örttüğü açık alanlar (KT-03: veranda ve sundurma)
+    pc_ad = f"çatı panelli {c['panelli_cati_adi']} çatılarının" if c.get("panelli_cati_adi") else "çatı panelli ek yapının"
     # Çelikte çatı yöntemi kesinleştiyse (Lokman, 7 Ekim 2026 07:45: hangi çatı tipi olursa olsun çatı ve tavan paneli) yöntem B yalnız prefabrik içindir
     celik_yontemi = kural_degeri("celik_cati_yontemi")
     # Eylül 2026 şablonunun, bugünkü kurallardan farklı formülleri (yalnız girdide `sablon: "2026"` varsa; varsayılan değil)
@@ -274,7 +276,7 @@ def _hesapla(g: dict, k: dict) -> dict:
         if x:   # ek yapının çatısı çatı paneliyle kapatılıyorsa (yöntem B'de de): model yoksa 100 m² için verilen ağırlık alana oranlanır
             pk = deg(ck, "cati_paneli")
             mk = model_kg(x)
-            ekle("Çelik panel", "Çatı paneli (ek yapının çatısı)", x["profil"].replace("x", " × ") if mk else "roll form çelik",
+            ekle("Çelik panel", x.get("ad", "Çatı paneli (ek yapının çatısı)"), x["profil"].replace("x", " × ") if mk else "roll form çelik",
                  x.get("adet") or tavan(x["oturum_m2"] / 100 * pk["adet_100m2"]), x["oturum_m2"], birim="m²",
                  kg=mk[0] if mk else x["oturum_m2"] / 100 * pk["kg_100m2"],
                  formul=mk[1] if mk else f"çatı panelinin örttüğü mahal alanı ÷ 100 × {tr(pk['kg_100m2'])} kg", durum=mk[2] if mk else "varsayim", not_=x.get("not"))
@@ -758,7 +760,8 @@ def _hesapla(g: dict, k: dict) -> dict:
     deresiz = bool(dr) and sacak - dere_boyu > 0.005
     dere = tavan(dere_boyu / (pd - bd))
     ekle("Dere", "Metal dere", "L 4000", dere, dere_boyu, birim="m", formul=("dere hatlarının boyu" if deresiz else "saçak boyu") + f" ÷ (4,0 − {tr(bd)} bindirme)", durum="motor",
-         not_=f"çatı panelli ek yapının saçağında ({tr(sacak - dere_boyu)} m) dere yok (gerçek liste ve dere paftası)" if deresiz else None)
+         not_=(f"{pc_ad} saçağında ({tr(sacak - dere_boyu)} m) dere yok "
+               + ("(kural `ek_yapi_ve_korkuluk`: KT-01'in gerçek listesi ve dere paftası)" if c.get("panelli_cati_adi") else "(gerçek liste ve dere paftası)")) if deresiz else None)
     n_kural, n_not = inis_sayisi(c, k)
     if "inis_adedi" in c:
         n, n_durum = c["inis_adedi"], "liste"
@@ -799,7 +802,7 @@ def _hesapla(g: dict, k: dict) -> dict:
         sacli = c.get("sacak_saci_kenarlari_m", kenarlar)
         sacli_boy = sum(sacli) if "sacak_saci_kenarlari_m" in c else sacak
         bs = sbb.get("sacak_saci", deg(k, "bindirme_m", "sacak_saci"))
-        panelsiz = (f"çatı panelli ek yapının saçağı ({tr(sacak - sacli_boy)} m) hariç" if sacak - sacli_boy > 0.005 else None)
+        panelsiz = (f"{pc_ad} saçağı ({tr(sacak - sacli_boy)} m) hariç" if sacak - sacli_boy > 0.005 else None)
         ekle("Metal aksam", "Saçak sacı (30'luk)", "L 2500", tavan(sacli_boy / (ps - bs)), sacli_boy, birim="m",
              formul=f"saçak boyu ÷ (2,5 − {tr(bs)} bindirme)", durum=SABLON if "sacak_saci" in sbb else "lokman",
              not_=(sablon_notu if "sacak_saci" in sbb else
@@ -819,7 +822,7 @@ def _hesapla(g: dict, k: dict) -> dict:
             ekle("Metal aksam", "Alın sacı (30'luk)", "300 × 2500", tavan(c["alin_saci_m"] / (pa - ba)), c["alin_saci_m"], birim="m",
                  formul=f"alın boyu ÷ (2,5 − {tr(ba)} bindirme)", durum=SABLON if "alin_saci" in sbb else "lokman",
                  not_=(sablon_notu if "alin_saci" in sbb else k["bindirme_m"]["alin_saci"].get("satir_notu", "30 cm bindirme Lokman'dan; parça boyu L 2500 listelerden"))
-                      + ("; çatı panelli ek yapının alınları hariç" if c.get("ek_cati") else ""))
+                      + (f"; {pc_ad} alınları hariç" if c.get("ek_cati") else ""))
             if c.get("alin_saci_kenarlari_m"):   # genel model: baş makasın (kalkan makası) alnı boyunca Z profil (105 m² ve kör test listeleri)
                 bz = deg(k, "bas_makas_z")
                 pz = bz["parca_boyu_m"]
@@ -839,7 +842,8 @@ def _hesapla(g: dict, k: dict) -> dict:
         so_ = sb.get("tavan_omegasi") or {}
         po = deg(k, "parca_boyu_m", "tavan_omegasi")
         om = g.get("tavan_omegasi_m2", tavan_toplam) / deg(k, "tavan_omegasi_aralik_m")
-        alan_formulu = "tavan alanı ÷ 0,60" if "tavan_omegasi_m2" not in g else "makasların altındaki tavan alanı (çatı paneli olan ek yapı hariç) ÷ 0,60"
+        alan_formulu = ("tavan alanı ÷ 0,60" if "tavan_omegasi_m2" not in g else
+                        f"makasların altındaki tavan alanı ({g.get('tavan_omegasi_haric', 'çatı paneli olan ek yapı')} hariç) ÷ 0,60")
         if to and so_.get("dizilim"):
             td = deg(k, "tavan_omegasi_dizilim")
             ekle("Metal aksam", "Tavan omegası (60'lık)", "L 3750", tavan(to["boy_m"] / (po - so_["bindirme_m"]) + so_["yedek_adet"]), to["boy_m"], birim="m",
@@ -921,7 +925,7 @@ def _hesapla(g: dict, k: dict) -> dict:
     # 07:23: malzeme alın kapama, boyu makasın eğimli kenarı kadar (0.15: parça boyu kuralda). Saçak altının malzemesine bağlı değildir.
     uk = kural_degeri("yontem_a_kalkan_ust_kapamasi")
     if yontem == "panel" and uk and c.get("alin_saci_m"):
-        kenar = "kalkan kenarlarının boyu" + (" (çatı panelli ek yapının alınları hariç)" if c.get("ek_cati") else "")
+        kenar = "kalkan kenarlarının boyu" + (f" ({pc_ad} alınları hariç)" if c.get("ek_cati") else "")
         if uk.get("parca_boyu_m"):      # Lokman, 8 Ekim 2026 07:23: alın kapama, makasın eğimli kenarı kadar; parça boyu kuralda (varsayım)
             ekle("Metal aksam", uk["ad"], f"L {round(uk['parca_boyu_m'] * 1000)}", tavan(c["alin_saci_m"] / (uk["parca_boyu_m"] - uk["bindirme_m"])), c["alin_saci_m"], birim="m",
                  formul=f"makasın eğimli kenarı boyunca: {kenar} {tr(c['alin_saci_m'])} m ÷ ({tr(uk['parca_boyu_m'], 1)} − {tr(uk['bindirme_m'])} bindirme)",

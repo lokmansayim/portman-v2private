@@ -356,6 +356,10 @@ def metraj(y: dict, c: dict, kur: dict) -> dict:
         "panelli_oturum_m2": sum(sum(b["alan_m2"] for b in y["bolgeler"].values() if b["sinif"] != "dis" and dz["cokgen"].contains(b["net"].representative_point())) for dz in panelli),
         "panelli_plan_m2": sum(dz["plan_m2"] for dz in panelli),
     }
+    # çatı panelli çatının örttüğü açık alanlar (veranda, sundurma), dış ölçüyle. KT-03 (9 Ekim 2026; proje notu 7: "Veranda ve sundurma
+    # çatıları tek eğimli panel olacak"): ek yapı yokken bu alanlar çatı panelinin satırına yazılır, kenar kaplaması bina Boardex'ine girer (`girdi`).
+    m["panelli_veranda"] = [{"ad": ad, "alan_m2": round(geo.area / 1e4, 4)} for ad, geo in m["veranda_brut_geo"].items()
+                            if any(dz["cokgen"].contains(geo.representative_point()) for dz in panelli)]
     # çatının bağlı olduğu ölçüler (şilte kuralı): makaslı çatının boyu ve binanın eni
     if makasli is not None:
         mx0, my0, mx1, my1 = makasli.bounds
@@ -479,9 +483,11 @@ def girdi(y: dict, c: dict, m: dict, kur: dict, kaynak: str) -> dict:
     for a in dis_kapi:
         if [a["en"] / 100, a["yuk"] / 100] != dk:
             uyari.append(f"{a['ad']}: dış kapı boşluğu {a['en']} × {a['yuk']}; kural {round(dk[0] * 100)} × {round(dk[1] * 100)} (modeldeki ölçü kullanıldı)")
-    # kapı ve pencere kalemleri (kapsama göre)
+    # kapı ve pencere kalemleri (kapsama göre). İç kapılar alıcıya aitse (`kapsam.ic_kapi`; KT-03, 9 Ekim 2026: teknik özellikler ve
+    # açıklama 5) Melamin kapı satırı yazılmaz; boşluklar geometride kalır.
     kp = []
-    for en, yuk, kanat in sorted({(a["en"], a["yuk"], tuple(a.get("kanat", [a["en"] - 10, 200]))) for a in ic_kapi}, reverse=True):
+    for en, yuk, kanat in (sorted({(a["en"], a["yuk"], tuple(a.get("kanat", [a["en"] - 10, 200]))) for a in ic_kapi}, reverse=True)
+                           if kapsam.get("ic_kapi", True) else []):
         n = sum(1 for a in ic_kapi if (a["en"], a["yuk"]) == (en, yuk))
         kp.append({"kalem": f"Melamin kapı ({kanat[0]}'lik kanat)", "boyut": f"{en} × {yuk}", "adet": n, "durum": "model",
                    "formul": "iç kapı sayısı; boşluk modeldeki çerçeveden" + ("" if [en / 100, yuk / 100] == ik else f" (kural {round(ik[0] * 100)} × {round(ik[1] * 100)} der)")})
@@ -551,6 +557,13 @@ def girdi(y: dict, c: dict, m: dict, kur: dict, kaynak: str) -> dict:
         ek_duvarlar.append({"ad": "Baca karkası", "profil": prof, "birim_taraf": "dis" if prof in dis_birim else "ic", "boy_m": round(cevre, 2),
                             "yukseklik_m": round(sum(b["cevre_m"] * b["boy_m"] for b in m["baca"]) / cevre, 3), "panel_adedi": 4 * nb,
                             "not": ("dört dar panel" if nb == 1 else f"{nb} baca, dörder dar panel") + mn, **pbx})
+    elif len(m["baca"]) > 1:   # modelsiz, birden çok baca (KT-03, 9 Ekim 2026): tek satır, modelli hesaptaki gibi
+        nb = len(m["baca"])
+        prof = sinif["baca"]["profil"]
+        cevre = sum(b["cevre_m"] for b in m["baca"])
+        ek_duvarlar.append({"ad": "Baca karkası", "profil": prof, "birim_taraf": "dis" if prof in dis_birim else "ic", "boy_m": round(cevre, 2),
+                            "yukseklik_m": round(sum(b["cevre_m"] * b["boy_m"] for b in m["baca"]) / cevre, 3), "panel_adedi": 4 * nb,
+                            "not": f"kural yok: duvarın birim ağırlığı bacaların çevresi ve boyuyla (varsayım); {nb} baca, dörder dar panel"})
     else:
         for b in m["baca"]:
             prof = sinif["baca"]["profil"]
@@ -568,7 +581,15 @@ def girdi(y: dict, c: dict, m: dict, kur: dict, kaynak: str) -> dict:
     dikme_prof, dikme_pb, _ = model("kolon", len(dikmeler), None, f"80x45x{ev['dikme']}") if dikmeler else (None, {}, "")
     kiris_prof, kiris_pb, _ = model("kiris", len(kirisler), None, f"80x45x{ev['kiris']}") if kirisler else (None, {}, "")
     makas_prof, makas_pb, _ = model("makas", makas_adedi, None, f"80x45x{ev['cati']}")
-    cp_prof, cp_pb, cp_mn = model("cati_paneli", 1, None, f"80x45x{ev['cati']}") if mc["panelli_plan_m2"] else (None, {}, "")
+    # çatı panelli çatı: panel adedi düzlem düzlem (`cati_paneli_adedi`; yazmıyorsa düzlem başına 1). Ek yapı yokken (KT-03, 9 Ekim 2026) çatı paneli
+    # açık alanları (veranda, sundurma) örter: satırın alanı onların dış ölçüyle alanı, kenar kaplaması bina Boardex'inde, tavan omegası onlarda yok
+    # (KT-01'deki çatı panelli ek yapı gibi). Ek yapı varken hesap öncekiyle aynı.
+    ek_adi = next((o["ad"] for o in m["odalar"] if o["sinif"] == "ek"), None)
+    cp_adet = sum(dz.get("cati_paneli_adedi", 1) for dz in ct["duzlemler"] if dz.get("ust_yapi") == "cati_paneli")
+    pv = [] if ek_adi else m["panelli_veranda"]
+    pv_adi = " ve ".join(v["ad"].lower() for v in pv)
+    pv_m2 = sum(v["alan_m2"] for v in pv)
+    cp_prof, cp_pb, cp_mn = model("cati_paneli", cp_adet, None, f"80x45x{ev['cati']}") if mc["panelli_plan_m2"] else (None, {}, "")
     # modeldeki öteki gruplar (`celik_modeli.ek_satirlar`: {grup, ad, not}): her biri ayrı satır, profil ve boy modelden (KT-02, 9 Ekim 2026:
     # kırma uçlarının çatı panelleri, veranda destekleri, 1,5 mm kiriş). Bir kiriş bu gruplardan birine yazılmışsa grubun panel adedi o kirişlerin sayısıdır.
     ek_satirlar = []
@@ -595,23 +616,29 @@ def girdi(y: dict, c: dict, m: dict, kur: dict, kaynak: str) -> dict:
                    **({} if tahmin else {"adet": len(kirisler), "not": "kiriş boyu ve adedi modelden (" + ", ".join(k["ad"] for k in kirisler) + ")"}),
                    **kiris_pb} if kirisler else None),
         "cati": {"tip": ct["tip"], "profil": makas_prof, "plan_m2": round(mc["makasli_plan_m2"], 2),
-                 "oturum_m2": round(m["oturum_m2"] - (m["ek_oturum_m2"] if celik_a and yontem == "panel" and mc["panelli_plan_m2"] else 0.0), 2),
+                 "oturum_m2": round(m["oturum_m2"] - ((pv_m2 if pv else m["ek_oturum_m2"]) if celik_a and yontem == "panel" and mc["panelli_plan_m2"] else 0.0), 2),
                  **({"panel_adedi": makas_adedi, "not": f"plan: makaslı çatının saçak dahil planı; adet modelden ({makas_adedi} makas)"} if makas_adedi else {}),
                  **makas_pb},
-        "tavan_paneli_m2": round(sum(o["alan_m2"] for o in m["odalar"] if not (celik_a and o["cati_paneli_altinda"])) + m["veranda_brut_m2"], 2) if yontem == "panel" else None,
+        "tavan_paneli_m2": (round(sum(o["alan_m2"] for o in m["odalar"] if not (celik_a and o["cati_paneli_altinda"])) + m["veranda_brut_m2"]
+                                  - (pv_m2 if celik_a else 0.0), 2) if yontem == "panel" else None),
         "cati_paneli_m2": (round(sum(dz["yuzey_m2"] for dz in mc["duzlemler"] if dz["ust_yapi"] != "cati_paneli") if celik_a else mc["yuzey_m2"], 2)
                            if yontem == "panel" else None),
-        "ek_cati_paneli": ({"oturum_m2": round(m["ek_oturum_m2"], 2), "plan_m2": round(mc["panelli_plan_m2"], 2), "adet": 1, "profil": cp_prof,
-                            "not": ("ek yapının çatısı çatı paneliyle kapatılır (proje notu); adet modelden" + cp_mn) if cm else
-                                   "ek yapının çatısı çatı paneliyle kapatılır (proje notu); 100 m² için verilen ağırlık ek yapının oturum alanına oranlandı; adet modelden",
-                            **cp_pb} if mc["panelli_plan_m2"] else None),
+        "ek_cati_paneli": (({"ad": f"Çatı paneli ({pv_adi} çatıları)", "oturum_m2": round(pv_m2, 2), "plan_m2": round(mc["panelli_plan_m2"], 2), "adet": cp_adet,
+                             "profil": cp_prof,
+                             "not": (f"{pv_adi} çatıları tek eğimli, çatı paneliyle (proje notu); adet modelden" + cp_mn) if cm else
+                                    (f"{pv_adi} çatıları tek eğimli, çatı paneliyle (proje notu); 100 m² için verilen ağırlık örttükleri alana (dış ölçüyle) "
+                                     f"oranlandı; adet tanımdaki çatı paneli yerleşiminden"),
+                             **cp_pb} if pv else
+                            {"oturum_m2": round(m["ek_oturum_m2"], 2), "plan_m2": round(mc["panelli_plan_m2"], 2), "adet": cp_adet, "profil": cp_prof,
+                             "not": ("ek yapının çatısı çatı paneliyle kapatılır (proje notu); adet modelden" + cp_mn) if cm else
+                                    "ek yapının çatısı çatı paneliyle kapatılır (proje notu); 100 m² için verilen ağırlık ek yapının oturum alanına oranlandı; adet modelden",
+                             **cp_pb}) if mc["panelli_plan_m2"] else None),
         **({"ek_satirlar": ek_satirlar} if ek_satirlar else {}),
     }
     if cm and set(cm) - kullanilan:
         raise SystemExit("Karkas modelinde tanımda karşılığı olmayan grup var: " + ", ".join(sorted(set(cm) - kullanilan)) + " (`celik_modeli.gruplar`).")
-    ek_adi = next((o["ad"] for o in m["odalar"] if o["sinif"] == "ek"), None)
     panel_toplam = (gr["dis"]["adet"] + (gr.get("ic") or {}).get("adet", 0) + sum(x["panel_adedi"] for x in ek_duvarlar) + len(dikmeler) + len(kirisler)
-                    + (makas_adedi or 0) + (1 if mc["panelli_plan_m2"] else 0) + sum(x["panel_adedi"] for x in ek_satirlar))
+                    + (makas_adedi or 0) + (cp_adet if mc["panelli_plan_m2"] else 0) + sum(x["panel_adedi"] for x in ek_satirlar))
     duvar_paneli = sum(gr[s]["adet"] for s in ("dis", "ic", "ek", "korkuluk") if gr.get(s))
     g = {
         "sema": "portman.yukleme_girdisi/0.5-taslak",
@@ -632,7 +659,11 @@ def girdi(y: dict, c: dict, m: dict, kur: dict, kaynak: str) -> dict:
             "alin_m2": [k["alan_m2"] for k in m["kalkanlar"]],
             "ek_m2": [{"ad": f"baca (çatının üstünde kalan {tr(b['cati_ustu_m'], 2)} m" + (" ve üst kapağı" if b["ust_kapak_m2"] else "") + ")", "alan_m2": b["alan_m2"]} for b in m["baca"]]
                      + ([{"ad": f"korkuluk üstü ({tr(m['korkuluk_ustu']['boy_m'], 2)} m × {sade(m['korkuluk_ustu']['en_m'] * 100)} cm)",
-                          "alan_m2": m["korkuluk_ustu"]["alan_m2"]}] if m.get("korkuluk_ustu") else []),
+                          "alan_m2": m["korkuluk_ustu"]["alan_m2"]}] if m.get("korkuluk_ustu") else [])
+                     # ek yapı yokken çatı panelli çatının (veranda, sundurma) saçak ve alın kaplaması bina Boardex'ine girer (KT-03, 9 Ekim 2026)
+                     + ([{"ad": f"çatı panelinin saçak ve alın kaplaması ({tr(mc['ek_cati']['sacak_m'] + mc['ek_cati']['alin_m'], 2)} m × "
+                                f"({tr(mc['ek_cati']['kaplama_eni_m'][0], 2)} + {tr(mc['ek_cati']['kaplama_eni_m'][1], 2)}) m)",
+                          "alan_m2": mc["ek_cati"]["kaplama_m2"]}] if mc["ek_cati"] and not ek_adi else []),
             # ek yapının (müştemilat) dış kaplaması ayrı satır: duvarlarının dışa bakan net yüzleri + çatı panelinin saçak ve alın kaplaması
             **({"ek_yapi": {"ad": ek_adi, "net_m2": round(sum(f["net_m2"] for f in m["dis_yuzler"] if f["sinif"] == "ek"), 3),
                             "brut_m2": round(sum(f["brut_m2"] for f in m["dis_yuzler"] if f["sinif"] == "ek"), 3),
@@ -666,8 +697,10 @@ def girdi(y: dict, c: dict, m: dict, kur: dict, kaynak: str) -> dict:
         **({"veranda_m2": {"brut": round(m["veranda_brut_m2"], 2), "net": round(m["veranda_m2"], 2), "not": "tavan ve köşebent hesabında brüt (dış ölçüyle) alınır; 0.4'teki gibi"}} if veranda else {}),
         # tavan omegasının alanı: makasların altındaki bütün mahaller (ek yapı dahil) + veranda; çatı paneli altındaki mahal hariç.
         # `tavan_m2` ek yapıyı içermediği için, ek yapı ya da çatı panelli mahal varsa ayrıca yazılır.
-        **({"tavan_omegasi_m2": round(sum(o["alan_m2"] for o in m["odalar"] if not o["cati_paneli_altinda"]) + m["veranda_brut_m2"], 2)}
-           if any(o["cati_paneli_altinda"] or o["sinif"] == "ek" for o in m["odalar"]) else {}),
+        # Çatı panelli veranda ve sundurma da (ek yapı yokken; KT-03) tavan omegasının alanına girmez.
+        **({"tavan_omegasi_m2": round(sum(o["alan_m2"] for o in m["odalar"] if not o["cati_paneli_altinda"]) + m["veranda_brut_m2"] - pv_m2, 2)}
+           if any(o["cati_paneli_altinda"] or o["sinif"] == "ek" for o in m["odalar"]) or pv else {}),
+        **({"tavan_omegasi_haric": f"çatı panelli {pv_adi}"} if pv else {}),
         # tavan omegası dizilimi (yöntem B; Eylül 2026 projesinin paftasındaki gibi, her gözde ilk hat duvar yüzünde): hatların toplam boyu.
         # Varsayılan hesap alan kuralıdır; dizilim yalnız `yukleme.py --sablon 2026` ile kullanılır (kurallar: `tavan_omegasi_dizilim`, `sablon_2026`)
         **({"tavan_omegasi": {"boy_m": round(m["tavan_omegasi"]["boy_cm"] / 100, 2), "hat": m["tavan_omegasi"]["hat"], "aralik_m": m["tavan_omegasi"]["aralik_cm"] / 100,
@@ -689,9 +722,11 @@ def girdi(y: dict, c: dict, m: dict, kur: dict, kaynak: str) -> dict:
             "sacak_saci_kenarlari_m": mc["sacak_saci_kenarlari_m"], "sacak_omegasi_cephe_m": mc["sacak_omegasi_cephe_m"],
             "dere": mc["dere"],
             "ek_cati": mc["ek_cati"],
+            **({"panelli_cati_adi": pv_adi} if pv else {}),       # ek yapı yokken çatı panelli çatının örttüğü alanlar (satır notlarında ad)
             # çatının bir duvara dayandığı kenarlar, yapı yapı (kural seti 0.14'ten beri özel mahya satırına yazılır; öncesinde `soru` satırı;
             # Eylül 2026 listesinde damlalık)
-            "duvar_dibi": [{"yapi": (ek_adi.lower() if x["yapi"] == "ek yapı" and ek_adi else x["yapi"]), "boy_m": x["boy_m"]} for x in mc["duvar_dibi"]] or None,
+            "duvar_dibi": [{"yapi": (ek_adi.lower() if x["yapi"] == "ek yapı" and ek_adi else (pv_adi if x["yapi"] == "ek yapı" and pv_adi else x["yapi"])),
+                            "boy_m": x["boy_m"]} for x in mc["duvar_dibi"]] or None,
             "baca_cevresi_m": mc["baca_cevresi_m"] or None,
             "asik": ({"boy_m": round(mc["asik_boyu_m"], 2), "sira": {ad: len(sr) for ad, sr in mc["asik_siralari"].items()},
                       "aralik_m": kur["asik"]["aralik_m"]["deger"], "ust_sira_esigi_m": kur["cok_duzlemli_cati"]["deger"]["ust_sira_esigi_m"],

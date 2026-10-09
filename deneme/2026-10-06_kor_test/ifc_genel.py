@@ -249,11 +249,16 @@ class Uretici:
             api("aggregate.assign_object", self.f, relating_object=self.kat, products=[s])
             poligonlar = [b["net"]] if b["net"].geom_type == "Polygon" else list(b["net"].geoms)
             h = t["kat_yuksekligi"] if b["sinif"] != "ek" else min(yapi._yukseklik(d, d["_bas"]) for d in y["duvarlar"] if d["sinif"] == "ek")
+            # çatı panelli açık alan (KT-03: veranda ve sundurma; tek eğimli çatı paneli): mahal panelin en alçak kotuna kadar, tavanı panelin altı
+            pdz = (next((d for d in self.c["duzlemler"] if d.get("ust_yapi") == "cati_paneli" and d["cokgen"].contains(b["net"].representative_point())), None)
+                   if b["sinif"] == "veranda" else None)
+            if pdz:
+                h = min(pdz["kot"](q) for p in poligonlar for q in p.exterior.coords)
             self.temsil(s, [self.prizma_xy(list(p.exterior.coords)[:-1], 0, h) for p in poligonlar], "mahal")
             self.qto(s, "Qto_SpaceBaseQuantities", {"NetFloorArea": round(b["alan_m2"], 3), "NetPerimeter": round(b["cevre_m"], 3), "Height": _m(h)})
             self.pset(s, "PortatifEv_Mahal", {"Islev": ", ".join(b.get("islev", [])), "Islak": bool(b.get("islak")), "KarkasYuzleriArasi_m2": round(b["ham_alan_m2"], 3),
                                               "CizimEtiketi_m2": float(b.get("etiket_m2") or 0.0), "IcKose": b["ic_kose"], "DisKose": b["dis_kose"]})
-            if b["sinif"] != "ek":                          # tavan (ek yapıda çatı panelinin altı)
+            if b["sinif"] != "ek" and not pdz:              # tavan (ek yapıda ve çatı panelli açık alanda çatı panelinin altı)
                 tv = self.urun("IfcCovering", f"TAVAN_{b['ad']}", "CEILING")
                 self.temsil(tv, [self.prizma_xy(list(p.exterior.coords)[:-1], h - 1.25, h) for p in poligonlar], "tavan")
                 self.qto(tv, "Qto_CoveringBaseQuantities", {"NetArea": round(b["alan_m2"], 3)})
@@ -364,6 +369,33 @@ class Uretici:
             for xx in mk["veranda"]["x"]:
                 no += 1
                 ekle(f"MAKAS_{no:02d}", "y", xx, mk["veranda"]["kalinlik"], [(y0, adli["veranda"]["kot"]((xx, y0))), (y1, adli["veranda"]["kot"]((xx, y1)))])
+        # Genel grup (KT-03, 9 Ekim 2026): {"eksen": "x" | "y", <eksen>: [baş, son], <öteki eksen>: [konumlar], "kalinlik"}. Makas eksen boyunca uzanır;
+        # üst yüzü makaslı düzlemlerin kotundan, makasın ortasından örneklenir (kırma uçlarında üstü kesik makas). Adlı gruplar (tam, cumba, veranda) yukarıda.
+        from shapely.geometry import Point
+        makasli = [d for d in self.c["duzlemler"] if d.get("ust_yapi") != "cati_paneli"]
+        for grup_adi, g in mk.items():
+            if grup_adi in ("tam", "cumba", "veranda") or "eksen" not in g:
+                continue
+            eksen, oteki = g["eksen"], ("y" if g["eksen"] == "x" else "x")
+            s0, s1 = g[eksen]
+            for a in g[oteki]:
+                cizgi = []
+                for s in np.linspace(s0, s1, int(abs(s1 - s0) // 5) + 2):
+                    p = (float(s), a + g["kalinlik"] / 2) if eksen == "x" else (a + g["kalinlik"] / 2, float(s))
+                    kotlar = [d["kot"](p) for d in makasli if d["cokgen"].buffer(0.5).contains(Point(p))]
+                    if kotlar:
+                        cizgi.append((float(s), max(kotlar)))
+                if len(cizgi) < 2:
+                    raise SystemExit(f"Makas grubu '{grup_adi}': {oteki} = {a} konumundaki makas makaslı çatının altında değil.")
+                # doğrusal parçaların ara noktaları atılır
+                sade_cizgi = [cizgi[0]]
+                for i in range(1, len(cizgi) - 1):
+                    (sa, za), (sb_, zb), (sc, zc) = sade_cizgi[-1], cizgi[i], cizgi[i + 1]
+                    if abs((zb - za) * (sc - sa) - (zc - za) * (sb_ - sa)) > 1e-3 * abs(sc - sa):
+                        sade_cizgi.append(cizgi[i])
+                sade_cizgi.append(cizgi[-1])
+                no += 1
+                ekle(f"MAKAS_{no:02d}", eksen, a, g["kalinlik"], sade_cizgi)
 
     def calistir(self, yol: Path):
         self.duvarlar()
