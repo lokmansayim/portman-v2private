@@ -1,0 +1,7 @@
+[Unit]
+Description=Portman nabız denetimi (servisler, Postgres, sertifika, disk, yedek yaşı; sorunda Patron'a uyarı)
+ConditionPathExists=/opt/portman/guncel/vps/nabiz.sh
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /opt/portman/guncel/vps/nabiz.sh

@@ -1,0 +1,28 @@
+[Unit]
+Description=Portman ajanı (Beyin + Motor; Postgres kuyruğu)
+After=network-online.target postgresql.service
+Wants=network-online.target
+ConditionPathExists=/opt/portman/guncel/SURUM
+
+[Service]
+Type=simple
+User=portman
+Group=portman
+WorkingDirectory=/opt/portman/guncel
+EnvironmentFile=-/etc/portman/llm.env
+Environment=PORTMAN_PG_DSN=dbname=portman PORTMAN_KANAL_DIR=/opt/portman/data PYTHONUNBUFFERED=1 HOME=/opt/portman/data MPLCONFIGDIR=/opt/portman/data/.mpl
+ExecStart=/opt/portman/guncel/venv/bin/python /opt/portman/guncel/vps/agent.py
+Restart=always
+RestartSec=5
+TimeoutStopSec=900
+KillMode=mixed
+MemoryMax=6G
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/portman/data
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

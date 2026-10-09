@@ -281,6 +281,15 @@ def test_saglik(app, kanal, depo):
     kanal.ayar_sozlugu["enabled"] = False
     (kanal.veri / "nabiz" / "agent.json").unlink()
     assert istek(app, "GET", "/saglik")[0] == 200                                                     # kapalıyken nabız aranmaz
+    # vps/nabiz.sh'nin dosyası: sorun listesi 503'e sayılır (kanal kapalıyken de); eski dosya da sorundur
+    NB.yaz(kanal.veri, "nabiz", sorunlar=["sertifika: 9 gün kaldı (certbot renew)"])
+    kod, govde = istek(app, "GET", "/saglik")
+    assert kod == 503 and "nabiz: sertifika: 9 gün kaldı (certbot renew)" in json.loads(govde)["sorunlar"]
+    NB.yaz(kanal.veri, "nabiz", sorunlar=[])
+    assert istek(app, "GET", "/saglik")[0] == 200
+    (kanal.veri / "nabiz" / "nabiz.json").write_text(json.dumps({"zaman": int(time.time()) - 1000, "ad": "nabiz", "sorunlar": []}))
+    kod, govde = istek(app, "GET", "/saglik")
+    assert kod == 503 and any(s.startswith("nabiz.sh:") for s in json.loads(govde)["sorunlar"])
 
 
 def test_islenemeyen_olay_503_meta_yeniden_dener(app, depo, monkeypatch):

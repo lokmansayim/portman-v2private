@@ -35,6 +35,7 @@ SURUM = "kanal-v2.0"
 ESKI_SN = 900                       # feature.php: 15 dakikadan eski (geç tekrar teslim) mesaj kuyruğa alınmaz
 GELECEK_SN = 60
 NABIZ_SINIR_SN = 180                # ajan ve gönderici nabzı bundan eskiyse /saglik 503
+NABIZ_SH_SINIR_SN = 900             # nabiz.sh'nin dosyası bundan eskiyse /saglik 503 (zamanlayıcı 5 dk)
 SURUM_DOSYASI = KOD.parent / "SURUM"
 
 
@@ -188,6 +189,12 @@ def saglik(k: Kanal) -> tuple[int, dict]:
         for ad, y in yaslar.items():
             if y is None or y > NABIZ_SINIR_SN:
                 sorunlar.append(f"{ad}: nabız {'yok' if y is None else f'{int(y)} sn eski'}")
+    nb = NB.oku(k.veri, "nabiz")                              # vps/nabiz.sh (5 dk): servisler, sertifika, disk, yedek yaşı
+    if nb:
+        y = NB.yas(k.veri, "nabiz")
+        if y is not None and y > NABIZ_SH_SINIR_SN:
+            sorunlar.append(f"nabiz.sh: {int(y)} sn eski (zamanlayıcı durmuş olabilir)")
+        sorunlar += ["nabiz: " + s[:120] for s in (nb.get("sorunlar") or [])[:10] if isinstance(s, str)]
     govde = {"ok": not sorunlar, "surum": surum_etiketi(), "zaman": int(time.time()), "postgres": pg, "enabled": ayar.get("enabled") is True,
              "dry_run": ayar.get("dry_run") is True, "mode": ayar.get("mode"), "ajan_sn": None if yaslar["agent"] is None else int(yaslar["agent"]),
              "gonderici_sn": None if yaslar["gonderici"] is None else int(yaslar["gonderici"]), "sayimlar": sayim, "sorunlar": sorunlar}

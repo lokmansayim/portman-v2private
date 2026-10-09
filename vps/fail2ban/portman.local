@@ -1,0 +1,13 @@
+# Portman · fail2ban jail'leri (İE-06). sshd: parola kapalı olsa da anahtar denemeleri; nginx-limit-req: hız sınırını aşan IP'ler.
+[DEFAULT]
+bantime = 1h
+findtime = 10m
+
+[sshd]
+enabled = true
+maxretry = 5
+
+[nginx-limit-req]
+enabled = true
+logpath = /var/log/nginx/error.log
+maxretry = 10

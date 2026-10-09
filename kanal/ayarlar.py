@@ -67,3 +67,43 @@ def deger_coz(metin: str):
         return json.loads(metin)
     except ValueError:
         return metin
+
+
+MODLAR = ("patron", "kayitli", "hepsi")
+MANTIKSAL = ("enabled", "dry_run", "patron_teknik_not", "mesaj_katmani")
+
+
+def main(argv=None) -> int:
+    """Komut satırı (vps/ayar.sh): `ayarlar.py [--veri DIZIN] oku` · `ayarlar.py [--veri DIZIN] yaz <anahtar> <değer>`.
+    'enabled true' yazılınca enabled_at da şimdi olur (eski mesajlar sahiplenilmesin). Sır içermez."""
+    import argparse
+    import sys
+    import time
+    ap = argparse.ArgumentParser(description="Portman kanal ayarları (settings.json)")
+    ap.add_argument("--veri", default=os.environ.get("PORTMAN_KANAL_DIR") or "/opt/portman/data")
+    alt = ap.add_subparsers(dest="komut", required=True)
+    alt.add_parser("oku")
+    y = alt.add_parser("yaz"); y.add_argument("anahtar"); y.add_argument("deger")
+    ns = ap.parse_args(argv)
+    if ns.komut == "yaz":
+        llm_alt = ns.anahtar[4:] if ns.anahtar.startswith("llm.") else None
+        if ns.anahtar not in ANAHTARLAR and llm_alt not in VARSAYILAN["llm"]:
+            print(f"DUR: bilinmeyen anahtar '{ns.anahtar}'. Geçerli: {', '.join(ANAHTARLAR)}, " + ", ".join("llm." + k for k in VARSAYILAN["llm"]), file=sys.stderr)
+            return 1
+        deger = deger_coz(ns.deger)
+        if ns.anahtar in MANTIKSAL and not isinstance(deger, bool):
+            print(f"DUR: {ns.anahtar} için değer true ya da false olmalı", file=sys.stderr); return 1
+        if ns.anahtar == "mode" and deger not in MODLAR:
+            print(f"DUR: mode şunlardan biri olmalı: {', '.join(MODLAR)}", file=sys.stderr); return 1
+        if ns.anahtar == "enabled_at" and not isinstance(deger, int):
+            print("DUR: enabled_at tam sayı (epoch) olmalı", file=sys.stderr); return 1
+        yaz(ns.veri, ns.anahtar, deger)
+        if ns.anahtar == "enabled" and deger is True:
+            yaz(ns.veri, "enabled_at", int(time.time()))
+        print(f"yazıldı: {ns.anahtar} = {json.dumps(deger, ensure_ascii=False)}" + (" (enabled_at = şimdi)" if ns.anahtar == "enabled" and deger is True else ""))
+    print(json.dumps(oku(ns.veri), ensure_ascii=False, indent=1))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -1,0 +1,10 @@
+[Unit]
+Description=Portman yedek zamanlayıcısı (her gece 03:40)
+
+[Timer]
+OnCalendar=*-*-* 03:40:00
+Persistent=true
+RandomizedDelaySec=600
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,10 @@
+[Unit]
+Description=Portman günlük şifreli yedek (pg_dump + data → age → Drive)
+After=postgresql.service
+ConditionPathExists=/opt/portman/guncel/vps/yedek.sh
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /opt/portman/guncel/vps/yedek.sh
+Nice=10
+IOSchedulingClass=idle
