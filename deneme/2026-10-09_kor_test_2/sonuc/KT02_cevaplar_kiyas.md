@@ -1,13 +1,13 @@
-# KT-02 · Lokman'ın 9 Ekim 22:22 cevaplarından sonra
+# KT-02 · Lokman'ın 9 Ekim 22:22 ve 22:44 cevaplarından sonra
 
-İkinci kör test (KT-02), Lokman'ın 9 Ekim 2026 22:22 cevaplarından sonra. Gerçek listenin adetli her satırı, dondurulan iki listemizle (commit 59602ef) ve düzeltilmiş tanımdan güncel kural setiyle (0.16) çıkan listelerle. Cevaplar yazıldığı gibi: (1) "Veranda korkuluğunun her tarafı kaplanıyor iç yüzde kaplanıyor" (malzeme soruldu; kural değişmedi); (2) "evet yaz": 80 × 45 × 1,5 için 2,07 kg/m; (3) "evet girsin": açık sundurma bina alanına girer (hesap zaten öyleydi); (4) "Evet ekle": KT-02'nin tanımı ve çizimleri depoda. Kör listenin sınıfları 22:05 kıyasındaki gibidir (o anın kaydı); "kalan" sütunu cevaplardan sonraki durumu yazar.
+İkinci kör test (KT-02), Lokman'ın 9 Ekim 2026 22:22 ve 22:44 cevaplarından sonra. Gerçek listenin adetli her satırı, dondurulan iki listemizle (commit 59602ef) ve düzeltilmiş tanımdan güncel kural setiyle (0.17) çıkan listelerle. Cevaplar yazıldığı gibi: (1) 22:22 "Veranda korkuluğunun her tarafı kaplanıyor iç yüzde kaplanıyor"; 22:44 "var sayılan Boardex yap korkuluk çok önemli değil binde bir çıkar sen var sayılan olarak üst 8 cm iç ve dış ölçüsüne göre şeklinde kurala işle" (kural seti 0.17: korkuluk Boardex; iç ve dış yüz kendi ölçüleriyle, üstü 8 cm); (2) "evet yaz": 80 × 45 × 1,5 için 2,07 kg/m (0.16); (3) "evet girsin": açık sundurma bina alanına girer (hesap zaten öyleydi); (4) "Evet ekle": KT-02'nin tanımı ve çizimleri depoda. Kör listenin sınıfları 22:05 kıyasındaki gibidir (o anın kaydı); "kalan" sütunu cevaplardan sonraki durumu yazar.
 
 Tablo `kt02_kiyas.py` ile üretilir; elle düzeltilmez. Sınıflar ve nedenler `kt02_farklar.json`dan; cevaplardan sonraki notlar `kt02_cevaplar_notlari.json`dan (üstüne yazar).
 
 | Liste | Aynı satır | Ne demek |
 |---|---|---|
 | Kör liste, yapıldığı yöntemle (B) | 46 / 85 | dondurulan liste (commit 59602ef); kural seti 0.15; elektrik sayıları paftadan |
-| Cevaplardan sonra (B) | 57 / 85 | düzeltilmiş tanım, kural seti 0.16; adetler 22:05'teki düzeltilmiş listeyle aynı, 1,5 mm kirişin kg'ı yazılı |
+| Cevaplardan sonra (B) | 57 / 85 | düzeltilmiş tanım, güncel kural seti (0.17); adetler 22:05'teki düzeltilmiş listeyle aynı, 1,5 mm kirişin kg'ı yazılı |
 | Kör liste, çelik standardıyla (A) | 46 / 85 | çatı ve tavan paneli: bu proje bugün sipariş edilse çıkacak liste (bilgi) |
 | Cevaplardan sonra (A) | 56 / 85 | bilgi |
 
@@ -27,8 +27,7 @@ Cevaplardan sonraki listede (B) farklı kalan 28 satır:
 
 | Tür | Satır |
 |---|---|
-| kural | 2 |
-| karar | 16 |
+| karar | 18 |
 | elle | 7 |
 | pafta | 3 |
 
@@ -82,14 +81,14 @@ Gerçek listede adedi yazılmayan satırlar (bizim listede de yok): Pencereler (
 | Saçak sacı | 20 | 21 ✗ | 20 | — | girdi | sundurmanın çatısı yanlış okundu: ana saçak sundurmanın önünde 2,1 m kesilir. Saçak 46,12 → 44,01 m (listede 44,1): 21 → 20. |  |
 | Saçak omegası | 17 | 21 ✗ | 21 ✗ | — | karar | yöntem B kalemi. Kural her saçak kenarını ayrı yukarı yuvarlıyor (2025 listelerinden; 21); liste toplam boydan: 41,62 ÷ 2,5 = 17 (Eylül 2026 katmanı da 17 veriyor). | karar: yöntem B kalemi; formül. |
 | **Dış cephe kaplama** | | | | | | | |
-| Dış cephe Boardex (veranda tavanı dahil) | 46 | 51 ✗ | 51 ✗ | 51 ✗ | kural | veranda korkuluğunun iki yüzü Boardex sayıldı (13,35 m²); bu listede korkuluk Betopan (ayrı satır). Korkuluk çıkarılınca bizim hesap 38 + 8 (veranda tavanı) = 46: listedeki adet. | kural: korkuluğun her yüzü kaplanıyor, iç yüzü de (Lokman, 9 Ekim 22:22); malzemesi soruldu (Betopan mı, dış cephe levhası mı). Bugünkü kural iki yüzü dış cephe levhasına katıyor: 51. Korkuluk Betopan olursa 46: listedeki adet. |
+| Dış cephe Boardex (veranda tavanı dahil) | 46 | 51 ✗ | 51 ✗ | 51 ✗ | kural | veranda korkuluğunun iki yüzü Boardex sayıldı (13,35 m²); bu listede korkuluk Betopan (ayrı satır). Korkuluk çıkarılınca bizim hesap 38 + 8 (veranda tavanı) = 46: listedeki adet. | karar: korkuluk varsayılan Boardex: iç ve dış yüz kendi ölçüleriyle, üstü 8 cm (Lokman, 9 Ekim 22:44; kural seti 0.17). Bizde 43 + veranda tavanı 8 = 51; listede korkuluk Betopan, dış cephe levhası 46. |
 | **İç cephe kaplama** | | | | | | | |
 | Tavan alçıpan beyaz | 22 | 22 | 22 | 22 |  |  |  |
 | Tavan alçıpan yeşil | 2 | 2 | 2 | 2 |  |  |  |
 | Duvar alçıpan beyaz | 53 | 52 ✗ | 52 ✗ | 52 ✗ | karar | liste oda çevrelerini karkas yüzünden alıyor (65,42 m) ve zayiatı boşluklar düşülmeden uyguluyor; kural kaplanmış yüz (Lokman, 7 Ekim C8: bizdeki). | karar: ölçünün alındığı yüz. |
 | Duvar alçıpan yeşil | 8 | 8 | 8 | 8 |  |  |  |
 | İç duvar OSB | 61 | 59 ✗ | 59 ✗ | 59 ✗ | karar | aynı: liste karkas yüzünden (73,83 m), zayiat boşluklardan önce; kural kaplanmış yüz. | karar: ölçünün alındığı yüz. |
-| Betopan (veranda korkuluk kaplaması) | 3 | — ✗ | — ✗ | — | kural | veranda korkuluğu bu listede 8 mm Betopanla kaplanmış (3 levha, 1250 × 2500); kuralımız yoktu, korkuluğu Boardex saydık (KT-01'de korkuluk Boardex'ti). | kural: malzeme soruldu. Betopansa iki yüzü 13,35 m² → 5 levha; listedeki 3 yalnız bir yüze uyuyor (Lokman: iç yüz de kaplanır). |
+| Betopan (veranda korkuluk kaplaması) | 3 | — ✗ | — ✗ | — | kural | veranda korkuluğu bu listede 8 mm Betopanla kaplanmış (3 levha, 1250 × 2500); kuralımız yoktu, korkuluğu Boardex saydık (KT-01'de korkuluk Boardex'ti). | karar: korkuluk varsayılan Boardex (Lokman, 9 Ekim 22:44: "korkuluk çok önemli değil binde bir çıkar"); listede 3 Betopan (bir yüzü kadar). |
 | Duvar izolasyonu | 16 | — ✗ | — ✗ | — | karar | Lokman, 7 Ekim 07:45: duvar izolasyonu gönderilmiyor; listede 16 paket. | karar: gönderilmiyor. |
 | **Çatı kaplamaları** | | | | | | | |
 | Sandviç panel (uzun) | 28 | 26 ✗ | 26 ✗ | 26 ✗ | pafta | liste adedi AutoCAD yerleşiminden alıyor: her şerit bir tam panel (28 × L 4400). Bizim dizilim çapraz kesilen parçaları eşliyor: 26 × L 4390. | pafta: yerleşimde parçalar eşlenmiyor. |
@@ -133,7 +132,7 @@ Gerçek listede adedi yazılmayan satırlar (bizim listede de yok): Pencereler (
 | Kaçak akım rölesi | 1 | 1 | 1 | 1 |  |  |  |
 | **Vida** | | | | | | | |
 | RYSB pul başlı | 700 | 690 ✗ | 690 ✗ | 690 ✗ | elle | listede 700: 90 × 7,5 = 675 yukarı yuvarlanmış. Bizde 92 × 7,5 = 690. Payı: karar: bina alanı 92 (açık sundurma dahil; Lokman, 9 Ekim 22:22), projede 90. | elle: listenin yuvarlaması. |
-| Alçıpan vidası | 5 000 | 5 500 ✗ | 5 500 ✗ | 6 000 ✗ | elle | listenin formülü (levha × 40) 131 × 40 = 5240 verir; listede 5000 (aşağı yuvarlanmış). Bizde 135 × 40 = 5400 → 5500 (250'ye yukarı). Payı: kural: korkuluğun Boardex'i 5 levha. | elle: listenin yuvarlaması. |
+| Alçıpan vidası | 5 000 | 5 500 ✗ | 5 500 ✗ | 6 000 ✗ | elle | listenin formülü (levha × 40) 131 × 40 = 5240 verir; listede 5000 (aşağı yuvarlanmış). Bizde 135 × 40 = 5400 → 5500 (250'ye yukarı). Payı: karar: korkuluğun Boardex'i (Lokman, 9 Ekim 22:44: varsayılan Boardex). | elle: listenin yuvarlaması. |
 | OSB ve yalıpan vidası | 2 900 | 3 000 ✗ | 3 000 ✗ | 3 000 ✗ | elle | listenin formülü 2884 verir, 2900'e yuvarlanmış; bizde 2832, kural 500'e yukarı yuvarlıyor (3000). | elle: listenin yuvarlaması. |
 | Trapez vida (5,5 × 25) | 2 275 | 1 500 ✗ | 1 500 ✗ | 1 750 ✗ | karar | Lokman, 7 Ekim 07:45: omega ve aşık için trapez vida konmaz (panel × 10 + köşebent × 6 = 1388 → 1500); liste omega ve aşık için de sayıyor (2275). | karar: omega ve aşık vidası. |
 | Trapez vida (5,5 × 60) | 250 | 250 | 250 | 250 |  |  |  |

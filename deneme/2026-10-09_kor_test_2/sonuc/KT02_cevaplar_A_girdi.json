@@ -1,7 +1,7 @@
 {
  "sema": "portman.yukleme_girdisi/0.5-taslak",
  "ad": "KT-02 · Tek kat çelik, 2+1, verandalı ve sundurmalı, dört omuz çatı, 90 m² (ikinci kör test projesi)",
- "kaynak": "Yapı Tanımı 0.5 (ikinci kör test projesi; montaj paftası ve üretim dosyasından; kıyastan sonra düzeltildi; Lokman'ın 9 Ekim 22:22 cevaplarından sonra); yöntem A (çelik standardı)",
+ "kaynak": "Yapı Tanımı 0.5 (ikinci kör test projesi; montaj paftası ve üretim dosyasından; kıyastan sonra düzeltildi; Lokman'ın 9 Ekim 22:22 ve 22:44 cevaplarından sonra); yöntem A (çelik standardı)",
  "bina_m2": 92,
  "oturum_m2": 92.27,
  "dis_olcu_m": [
@@ -115,7 +115,12 @@
   ],
   "kolon_kiris_varsayim": false,
   "alin_m2": [],
-  "ek_m2": [],
+  "ek_m2": [
+   {
+    "ad": "korkuluk üstü (7,96 m × 8 cm)",
+    "alan_m2": 0.6368
+   }
+  ],
   "bosluklar": [
    {
     "ad": "300/200",

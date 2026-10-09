@@ -26,8 +26,8 @@
  },
  "kalan_siniflar": {
   "girdi": 0,
-  "kural": 2,
-  "karar": 16,
+  "kural": 0,
+  "karar": 18,
   "elle": 7,
   "pafta": 3
  },
@@ -199,7 +199,7 @@
   "Kapılar listede sağ ve sol ayrı: melamin kapı 1 sağ + 3 sol, kompozit çelik kapı sağ. Bizde yön yok; toplam aynı.",
   "Boya ve silikonize mastik listede \"alıcıya ait\" (adetsiz): liste öncesi kararımızla aynı (açıklama 5)."
  ],
- "giris": "İkinci kör test (KT-02), Lokman'ın 9 Ekim 2026 22:22 cevaplarından sonra. Gerçek listenin adetli her satırı, dondurulan iki listemizle (commit 59602ef) ve düzeltilmiş tanımdan güncel kural setiyle (0.16) çıkan listelerle. Cevaplar yazıldığı gibi: (1) \"Veranda korkuluğunun her tarafı kaplanıyor iç yüzde kaplanıyor\" (malzeme soruldu; kural değişmedi); (2) \"evet yaz\": 80 × 45 × 1,5 için 2,07 kg/m; (3) \"evet girsin\": açık sundurma bina alanına girer (hesap zaten öyleydi); (4) \"Evet ekle\": KT-02'nin tanımı ve çizimleri depoda. Kör listenin sınıfları 22:05 kıyasındaki gibidir (o anın kaydı); \"kalan\" sütunu cevaplardan sonraki durumu yazar.",
+ "giris": "İkinci kör test (KT-02), Lokman'ın 9 Ekim 2026 22:22 ve 22:44 cevaplarından sonra. Gerçek listenin adetli her satırı, dondurulan iki listemizle (commit 59602ef) ve düzeltilmiş tanımdan güncel kural setiyle (0.17) çıkan listelerle. Cevaplar yazıldığı gibi: (1) 22:22 \"Veranda korkuluğunun her tarafı kaplanıyor iç yüzde kaplanıyor\"; 22:44 \"var sayılan Boardex yap korkuluk çok önemli değil binde bir çıkar sen var sayılan olarak üst 8 cm iç ve dış ölçüsüne göre şeklinde kurala işle\" (kural seti 0.17: korkuluk Boardex; iç ve dış yüz kendi ölçüleriyle, üstü 8 cm); (2) \"evet yaz\": 80 × 45 × 1,5 için 2,07 kg/m (0.16); (3) \"evet girsin\": açık sundurma bina alanına girer (hesap zaten öyleydi); (4) \"Evet ekle\": KT-02'nin tanımı ve çizimleri depoda. Kör listenin sınıfları 22:05 kıyasındaki gibidir (o anın kaydı); \"kalan\" sütunu cevaplardan sonraki durumu yazar.",
  "denetim_sorunlari": [],
  "birimler": [
   {
@@ -790,7 +790,7 @@
    "sinif": "kural",
    "neden": "veranda korkuluğunun iki yüzü Boardex sayıldı (13,35 m²); bu listede korkuluk Betopan (ayrı satır). Korkuluk çıkarılınca bizim hesap 38 + 8 (veranda tavanı) = 46: listedeki adet.",
    "pay": null,
-   "kalan": "kural: korkuluğun her yüzü kaplanıyor, iç yüzü de (Lokman, 9 Ekim 22:22); malzemesi soruldu (Betopan mı, dış cephe levhası mı). Bugünkü kural iki yüzü dış cephe levhasına katıyor: 51. Korkuluk Betopan olursa 46: listedeki adet.",
+   "kalan": "karar: korkuluk varsayılan Boardex: iç ve dış yüz kendi ölçüleriyle, üstü 8 cm (Lokman, 9 Ekim 22:44; kural seti 0.17). Bizde 43 + veranda tavanı 8 = 51; listede korkuluk Betopan, dış cephe levhası 46.",
    "not": null
   },
   {
@@ -998,7 +998,7 @@
    "sinif": "kural",
    "neden": "veranda korkuluğu bu listede 8 mm Betopanla kaplanmış (3 levha, 1250 × 2500); kuralımız yoktu, korkuluğu Boardex saydık (KT-01'de korkuluk Boardex'ti).",
    "pay": null,
-   "kalan": "kural: malzeme soruldu. Betopansa iki yüzü 13,35 m² → 5 levha; listedeki 3 yalnız bir yüze uyuyor (Lokman: iç yüz de kaplanır).",
+   "kalan": "karar: korkuluk varsayılan Boardex (Lokman, 9 Ekim 22:44: \"korkuluk çok önemli değil binde bir çıkar\"); listede 3 Betopan (bir yüzü kadar).",
    "not": null
   },
   {
@@ -2304,7 +2304,7 @@
    "duz_a_ayni": false,
    "sinif": "elle",
    "neden": "listenin formülü (levha × 40) 131 × 40 = 5240 verir; listede 5000 (aşağı yuvarlanmış). Bizde 135 × 40 = 5400 → 5500 (250'ye yukarı).",
-   "pay": "kural: korkuluğun Boardex'i 5 levha.",
+   "pay": "karar: korkuluğun Boardex'i (Lokman, 9 Ekim 22:44: varsayılan Boardex).",
    "kalan": "elle: listenin yuvarlaması.",
    "not": null
   },
@@ -3002,10 +3002,10 @@
    "not": null
   }
  ],
- "baslik": "KT-02 · Lokman'ın 9 Ekim 22:22 cevaplarından sonra",
+ "baslik": "KT-02 · Lokman'ın 9 Ekim 22:22 ve 22:44 cevaplarından sonra",
  "etiketler": {
   "duz_b": "Cevaplardan sonra (B)",
-  "duz_b_aciklama": "düzeltilmiş tanım, kural seti 0.16; adetler 22:05'teki düzeltilmiş listeyle aynı, 1,5 mm kirişin kg'ı yazılı",
+  "duz_b_aciklama": "düzeltilmiş tanım, güncel kural seti (0.17); adetler 22:05'teki düzeltilmiş listeyle aynı, 1,5 mm kirişin kg'ı yazılı",
   "duz_a": "Cevaplardan sonra (A)",
   "duz_a_aciklama": "bilgi",
   "duz_kisa": "cevaplardan sonra",

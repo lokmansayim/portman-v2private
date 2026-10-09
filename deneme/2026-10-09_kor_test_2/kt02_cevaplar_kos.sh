@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# KT-02, Lokman'ın 9 Ekim 2026 22:22 cevaplarından sonra: güncel kural setiyle (kurallar.json; 0.16 ve sonrası) düzeltilmiş tanımdan iki liste ve
-# gerçek listeyle tablo (`sonuc/KT02_cevaplar_*`). Cevaplar: 1,5 mm profil 2,07 kg/m (kural seti 0.16); açık sundurma bina alanına girer (hesap zaten
-# öyleydi); veranda korkuluğunun iç yüzü de kaplanır (malzemesi soruldu; kural değişmedi); tanım ve çizimler depoda (`tanim/`, `cizimler/`).
+# KT-02, Lokman'ın 9 Ekim 2026 22:22 ve 22:44 cevaplarından sonra: güncel kural setiyle (kurallar.json; 0.17 ve sonrası) düzeltilmiş tanımdan iki liste ve
+# gerçek listeyle tablo (`sonuc/KT02_cevaplar_*`). Cevaplar: 1,5 mm profil 2,07 kg/m (0.16); korkuluk Boardex, iki yüz ve üstü 8 cm (0.17); açık sundurma bina alanına girer (hesap zaten
+# öyleydi); tanım ve çizimler depoda (`tanim/`, `cizimler/`).
 # Satır notları: `kt02_farklar.json` + `kt02_cevaplar_notlari.json` (üstüne yazar; kör listenin sınıfları değişmez).
 # 22:05 kıyasının kendisi kt02_kiyas_kos.sh ile (kural seti 0.15). Geçici dosya yazmaz, hiçbir dosyayı silmez.
 # Kullanım: bash kt02_cevaplar_kos.sh tanim/KT02_duzeltilmis.json [python]   Çıkış kodu: denetim sorunu varsa 1.
@@ -13,7 +13,7 @@ unset PORTMAN_KURALLAR      # güncel kural seti (kurallar.json): ortamda başka
 "$PY" -c 'import json, sys; t = json.load(open(sys.argv[1], encoding="utf-8")); sys.exit(0 if t.get("duzeltmeler") else "Bu tanımda `duzeltmeler` alanı yok: düzeltilmiş tanımla koşulur.")' "$T"
 G=../2026-10-06_kor_test/girdi_genel.py
 Y=../2026-10-03_yukleme/yukleme.py
-K="Yapı Tanımı 0.5 (ikinci kör test projesi; montaj paftası ve üretim dosyasından; kıyastan sonra düzeltildi; Lokman'ın 9 Ekim 22:22 cevaplarından sonra)"
+K="Yapı Tanımı 0.5 (ikinci kör test projesi; montaj paftası ve üretim dosyasından; kıyastan sonra düzeltildi; Lokman'ın 9 Ekim 22:22 ve 22:44 cevaplarından sonra)"
 "$PY" "$G" "$T" --dosya sonuc/KT02_cevaplar_B_girdi.json --uzerine-yaz --kaynak "$K; yöntem B (yapıldığı gibi)" > /dev/null
 "$PY" "$G" "$T" --yontem panel --dosya sonuc/KT02_cevaplar_A_girdi.json --uzerine-yaz --kaynak "$K; yöntem A (çelik standardı)" > /dev/null
 for X in B A; do

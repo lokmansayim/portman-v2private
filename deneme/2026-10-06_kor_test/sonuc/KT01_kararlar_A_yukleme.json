@@ -277,13 +277,13 @@
    "kalem": "Dış cephe Boardex",
    "boyut": "12,5 × 1200 × 2400",
    "adet": 44,
-   "olcu": 114.81,
-   "brut": 133.24,
+   "olcu": 115.28,
+   "brut": 133.71,
    "birim": "m²",
    "kg": null,
-   "formul": "(bina duvarlarının dışa bakan yüzleri, her biri kendi yüksekliğiyle + kolon/kiriş kaplaması + çatı alnı (kalkan) + baca (çatının üstünde kalan 1,38 m ve üst kapağı) − boşluklar) × 1,08 ÷ 2,88; ek yapı ayrı satırda",
+   "formul": "(bina duvarlarının dışa bakan yüzleri, her biri kendi yüksekliğiyle + kolon/kiriş kaplaması + çatı alnı (kalkan) + baca (çatının üstünde kalan 1,38 m ve üst kapağı), korkuluk üstü (5,90 m × 8 cm) − boşluklar) × 1,08 ÷ 2,88; ek yapı ayrı satırda",
    "durum": "excel",
-   "not": "zayiat %8: mühendis, 4 Ekim 12:14; Lokman, 4 Ekim 15:18: bununla devam. 2025 listelerindeki adetler %15'e uyuyor; %15 ile 46 levha. Kalınlık 12,5 mm: Lokman, 7 Ekim 07:45 (listelerdeki 8 mm hatalı girilmiş; üreticinin belgelerinde 12,5 mm)",
+   "not": "zayiat %8: mühendis, 4 Ekim 12:14; Lokman, 4 Ekim 15:18: bununla devam. 2025 listelerindeki adetler %15'e uyuyor; %15 ile 47 levha. Kalınlık 12,5 mm: Lokman, 7 Ekim 07:45 (listelerdeki 8 mm hatalı girilmiş; üreticinin belgelerinde 12,5 mm)",
    "liste_adi": "OUTWEAR Dış Cephe Levhası"
   },
   {
@@ -1211,7 +1211,7 @@
   }
  ],
  "ara": {
-  "dis_net_m2": 139.64,
+  "dis_net_m2": 140.112,
   "beyaz_net_m2": 134.197,
   "yesil_net_m2": 19.248,
   "ic_duvar_boyu_m": 16.04,

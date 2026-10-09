@@ -73,12 +73,12 @@ Düzeltilmiş tanımı `tanim/kt02_tanim_duzeltilmis.py` üretir. Bu betik dondu
 
 Yazıldığı gibi:
 
-1. Korkuluk: "Veranda korkuluğunun her tarafı kaplanıyor iç yüzde kaplanıyor". İki yüz de kaplanır; kuralımızın iki yüzü sayması doğru. Malzeme (Betopan mı, dış cephe levhası mı) ve korkuluğun üstü cevapta yok: yeniden soruldu, kural değişmedi.
+1. Korkuluk: "Veranda korkuluğunun her tarafı kaplanıyor iç yüzde kaplanıyor". İki yüz de kaplanır; kuralımızın iki yüzü sayması doğru. Malzeme ve üst yüz 22:44'te: "var sayılan Boardex yap korkuluk çok önemli değil binde bir çıkar sen var sayılan olarak üst 8 cm iç ve dış ölçüsüne göre şeklinde kurala işle". Kural seti 0.17: korkuluk Boardex; iç ve dış yüz kendi ölçüleriyle, üstü 8 cm (KT-02'de 0,64 m²; levha adedi değişmedi).
 2. 1,5 mm profil: "evet yaz". Kural seti 0.16: 80 × 45 × 1,5 = 2,07 kg/m. KT-02'de 1,5 mm kiriş 46,89 kg; listede de 46,89.
 3. Açık sundurma: "evet girsin". Bina alanına girer; hesap zaten böyleydi (92 m²). Uç, PH2 ucu ve inox taştaki fark artık karar farkı (listede 90).
 4. Tanım ve çizimler: "Evet ekle". `tanim/`: kör ve düzeltilmiş tanım, onları üreten betikler, üretim dosyasından profil boyları; ikisi betiklerden, profil boyları üretim dosyasından bayt bayt aynı üretiliyor. `cizimler/KT02_B` ve `cizimler/KT02_A`: düzeltilmiş tanımdan, iki yöntemle çizim seti. Plan, görünüşler, pafta, çatısız görünüm ve özet her üretimde bayt bayt aynı. IFC kimlikleri ve geometri özetindeki duvar sırası her üretimde değişir. Perspektiflerde ve makaslı görünümde pikselin binde üçünden azı değişebilir (KT-01'deki gibi).
 
-Cevaplardan sonraki tablo: `kt02_cevaplar_kos.sh` (güncel kural seti) → `sonuc/KT02_cevaplar_*`. Satır notları `kt02_farklar.json`, üstüne `kt02_cevaplar_notlari.json`. Kör listenin sınıfları 22:05 kaydındaki gibi kalır. 57 / 85 satır aynı (adetler değişmedi). Farklı kalanlar: kural 2 (korkuluk; malzeme soruldu), karar 16, elle 7, pafta 3. Çelik panel grubunun dokuz satırının hepsinde adet de kg da aynı. Çelik toplamı 2 041,2 kg, listede 2 051,3; fark C profillerde.
+Cevaplardan sonraki tablo: `kt02_cevaplar_kos.sh` (güncel kural seti) → `sonuc/KT02_cevaplar_*`. Satır notları `kt02_farklar.json`, üstüne `kt02_cevaplar_notlari.json`. Kör listenin sınıfları 22:05 kaydındaki gibi kalır. 57 / 85 satır aynı (adetler değişmedi). Farklı kalanlar (22:44 cevabından sonra, kural seti 0.17): karar 18, elle 7, pafta 3; kural eksiği kalmadı. Çelik panel grubunun dokuz satırının hepsinde adet de kg da aynı. Çelik toplamı 2 041,2 kg, listede 2 051,3; fark C profillerde.
 
 ## Çalıştırma
 

@@ -1,10 +1,10 @@
 {
- "aciklama": "KT-02, Lokman'ın 9 Ekim 2026 22:22 cevaplarından sonraki notlar. `kt02_kiyas.py --ek-notlar` ile `kt02_farklar.json`ın üstüne yazılır: birimlerin `kalan`, `pay` ve `not` alanları, giriş, başlık, etiketler ve adet dışı farklar. Kör listenin sınıfları ve nedenleri (22:05 kaydı) değişmez.",
- "baslik": "KT-02 · Lokman'ın 9 Ekim 22:22 cevaplarından sonra",
- "giris": "İkinci kör test (KT-02), Lokman'ın 9 Ekim 2026 22:22 cevaplarından sonra. Gerçek listenin adetli her satırı, dondurulan iki listemizle (commit 59602ef) ve düzeltilmiş tanımdan güncel kural setiyle (0.16) çıkan listelerle. Cevaplar yazıldığı gibi: (1) \"Veranda korkuluğunun her tarafı kaplanıyor iç yüzde kaplanıyor\" (malzeme soruldu; kural değişmedi); (2) \"evet yaz\": 80 × 45 × 1,5 için 2,07 kg/m; (3) \"evet girsin\": açık sundurma bina alanına girer (hesap zaten öyleydi); (4) \"Evet ekle\": KT-02'nin tanımı ve çizimleri depoda. Kör listenin sınıfları 22:05 kıyasındaki gibidir (o anın kaydı); \"kalan\" sütunu cevaplardan sonraki durumu yazar.",
+ "aciklama": "KT-02, Lokman'ın 9 Ekim 2026 22:22 ve 22:44 cevaplarından sonraki notlar. `kt02_kiyas.py --ek-notlar` ile `kt02_farklar.json`ın üstüne yazılır: birimlerin `kalan`, `pay` ve `not` alanları, giriş, başlık, etiketler ve adet dışı farklar. Kör listenin sınıfları ve nedenleri (22:05 kaydı) değişmez.",
+ "baslik": "KT-02 · Lokman'ın 9 Ekim 22:22 ve 22:44 cevaplarından sonra",
+ "giris": "İkinci kör test (KT-02), Lokman'ın 9 Ekim 2026 22:22 ve 22:44 cevaplarından sonra. Gerçek listenin adetli her satırı, dondurulan iki listemizle (commit 59602ef) ve düzeltilmiş tanımdan güncel kural setiyle (0.17) çıkan listelerle. Cevaplar yazıldığı gibi: (1) 22:22 \"Veranda korkuluğunun her tarafı kaplanıyor iç yüzde kaplanıyor\"; 22:44 \"var sayılan Boardex yap korkuluk çok önemli değil binde bir çıkar sen var sayılan olarak üst 8 cm iç ve dış ölçüsüne göre şeklinde kurala işle\" (kural seti 0.17: korkuluk Boardex; iç ve dış yüz kendi ölçüleriyle, üstü 8 cm); (2) \"evet yaz\": 80 × 45 × 1,5 için 2,07 kg/m (0.16); (3) \"evet girsin\": açık sundurma bina alanına girer (hesap zaten öyleydi); (4) \"Evet ekle\": KT-02'nin tanımı ve çizimleri depoda. Kör listenin sınıfları 22:05 kıyasındaki gibidir (o anın kaydı); \"kalan\" sütunu cevaplardan sonraki durumu yazar.",
  "etiketler": {
   "duz_b": "Cevaplardan sonra (B)",
-  "duz_b_aciklama": "düzeltilmiş tanım, kural seti 0.16; adetler 22:05'teki düzeltilmiş listeyle aynı, 1,5 mm kirişin kg'ı yazılı",
+  "duz_b_aciklama": "düzeltilmiş tanım, güncel kural seti (0.17); adetler 22:05'teki düzeltilmiş listeyle aynı, 1,5 mm kirişin kg'ı yazılı",
   "duz_a": "Cevaplardan sonra (A)",
   "duz_a_aciklama": "bilgi",
   "duz_kisa": "cevaplardan sonra",
@@ -15,10 +15,10 @@
  },
  "birimler": {
   "Dış cephe Boardex (veranda tavanı dahil)": {
-   "kalan": "kural: korkuluğun her yüzü kaplanıyor, iç yüzü de (Lokman, 9 Ekim 22:22); malzemesi soruldu (Betopan mı, dış cephe levhası mı). Bugünkü kural iki yüzü dış cephe levhasına katıyor: 51. Korkuluk Betopan olursa 46: listedeki adet."
+   "kalan": "karar: korkuluk varsayılan Boardex: iç ve dış yüz kendi ölçüleriyle, üstü 8 cm (Lokman, 9 Ekim 22:44; kural seti 0.17). Bizde 43 + veranda tavanı 8 = 51; listede korkuluk Betopan, dış cephe levhası 46."
   },
   "Betopan (veranda korkuluk kaplaması)": {
-   "kalan": "kural: malzeme soruldu. Betopansa iki yüzü 13,35 m² → 5 levha; listedeki 3 yalnız bir yüze uyuyor (Lokman: iç yüz de kaplanır)."
+   "kalan": "karar: korkuluk varsayılan Boardex (Lokman, 9 Ekim 22:44: \"korkuluk çok önemli değil binde bir çıkar\"); listede 3 Betopan (bir yüzü kadar)."
   },
   "8'lik trapez uç": {
    "kalan": "karar: açık sundurma bina alanına girer (Lokman, 9 Ekim 22:22: \"evet girsin\"): 92 m² ÷ 15 → 7; listede 90 ile 6."
@@ -34,6 +34,9 @@
   },
   "Kiriş (1,5)": {
    "not": "kg: kural seti 0.16 ile 22,65 m × 2,07 kg/m (Lokman, 9 Ekim 22:22: \"evet yaz\"); gerçek listede 46,89."
+  },
+  "Alçıpan vidası": {
+   "pay": "karar: korkuluğun Boardex'i (Lokman, 9 Ekim 22:44: varsayılan Boardex)."
   }
  },
  "adet_disi": [

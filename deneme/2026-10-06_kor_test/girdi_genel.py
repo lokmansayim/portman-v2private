@@ -185,6 +185,17 @@ def metraj(y: dict, c: dict, kur: dict) -> dict:
                          "alan_m2": round(cev * (d["ust_kot"] - cati_kotu) / 100 + kapak, 3), "ust_kapak_m2": round(kapak, 4), "boy_m": d["ust_kot"] / 100,
                          "catiyi_deler": bool(dz and dz.get("ust_yapi") != "cati_paneli")})
     m["baca"] = baca
+    # veranda korkuluğunun üstü (kural `korkuluk_kaplamasi`, 0.17'den; önceki setlerde yok): alçak korkuluğun boyu × üst genişlik, dış cephe Boardex'ine eklenir.
+    # İç ve dış yüzleri zaten dış cephe yüzlerinin içinde (kendi ölçüleriyle).
+    kk = (kur.get("korkuluk_kaplamasi") or {}).get("deger")
+    m["korkuluk_ustu"] = None
+    if kk:
+        if kk.get("malzeme") != "boardex":
+            raise SystemExit(f"Kural `korkuluk_kaplamasi`: korkuluk kaplaması yalnız Boardex olarak hesaplanıyor; kuraldaki malzeme: {kk.get('malzeme')}")
+        alcak = [d for d in y["duvarlar"] if d["sinif"] == "korkuluk" and yapi._yukseklik(d) < kk["alcak_korkuluk_en_cok_cm"]]
+        if alcak and kk.get("ust_m"):
+            kboy = sum(d["boy"] for d in alcak) / 100
+            m["korkuluk_ustu"] = {"boy_m": round(kboy, 3), "en_m": kk["ust_m"], "alan_m2": round(kboy * kk["ust_m"], 4)}
     # mahaller
     odalar = []
     for b in y["bolgeler"].values():
@@ -400,6 +411,7 @@ def bilgi_satirlari(y: dict, c: dict, m: dict, kur: dict) -> tuple[list[str], li
     levha = kur["levha_m2"]["boardex"]["deger"]
     ek = sum(x["adet"] * x["cevre_m"] * x["boy_m"] for x in m["kolon_kiris"]) + sum(k["alan_m2"] for k in m["kalkanlar"]) + sum(b["alan_m2"] for b in m["baca"])
     ek_cati = (m["cati"].get("ek_cati") or {}).get("kaplama_m2", 0.0)        # çatı panelli çatının saçak ve alın kaplaması (listede Boardex satırında)
+    ku = (m.get("korkuluk_ustu") or {}).get("alan_m2", 0.0)                   # korkuluğun üstü (kural `korkuluk_kaplamasi`)
     sol = [
         f"Dış ölçü: {sade(m['dis_olcu_cm'][0])} × {sade(m['dis_olcu_cm'][1])} cm · oturum {tr(m['oturum_m2'], 2)} m² (veranda"
         + (" ve müştemilat" if any(o["sinif"] == "ek" for o in m["odalar"]) else "") + " dahil)",
@@ -410,8 +422,9 @@ def bilgi_satirlari(y: dict, c: dict, m: dict, kur: dict) -> tuple[list[str], li
         + (" · iç kapı boşlukları " + ", ".join(sorted({f"{a['en']} × {a['yuk']}" for a in ik})) if ik else "")
         + (" · dış kapı boşluğu " + ", ".join(sorted({f"{a['en']} × {a['yuk']}" for a in dk})) if dk else ""),
         f"Dış kaplama (Boardex): duvar yüzleri {tr(m['dis_brut_m2'])} − boşluk {tr(m['dis_brut_m2'] - m['dis_net_m2'])} + dikme, kiriş, kalkan ve baca {tr(ek)}"
+        + (f" + korkuluk üstü {tr(ku)}" if ku else "")
         + (f" + çatı panelinin saçağı ve alnı {tr(ek_cati)}" if ek_cati else "") + " = "
-        f"{tr(m['dis_net_m2'] + ek + ek_cati)} m² (fire hariç {math.ceil((m['dis_net_m2'] + ek + ek_cati) / levha - 1e-9)} levha)",
+        f"{tr(m['dis_net_m2'] + ek + ek_cati + ku)} m² (fire hariç {math.ceil((m['dis_net_m2'] + ek + ek_cati + ku) / levha - 1e-9)} levha)",
     ]
     mc = m["cati"]
     egimler = " · ".join(f"{d['ad']} %{tr(d['egim'] * 100)}" for d in mc["duzlemler"])
@@ -617,7 +630,9 @@ def girdi(y: dict, c: dict, m: dict, kur: dict, kaynak: str) -> dict:
             "cevre_m": round(m["bina_cevre_m"], 3), "duvar_m2": round(m["dis_brut_m2"], 3), "duvar_kalinligi_m": None, "karkas_mm": int(round(next(d for d in y["duvarlar"] if d["sinif"] == "dis")["kalinlik"] * 10)),
             "kolon_kiris": m["kolon_kiris"], "kolon_kiris_varsayim": False,
             "alin_m2": [k["alan_m2"] for k in m["kalkanlar"]],
-            "ek_m2": [{"ad": f"baca (çatının üstünde kalan {tr(b['cati_ustu_m'], 2)} m" + (" ve üst kapağı" if b["ust_kapak_m2"] else "") + ")", "alan_m2": b["alan_m2"]} for b in m["baca"]],
+            "ek_m2": [{"ad": f"baca (çatının üstünde kalan {tr(b['cati_ustu_m'], 2)} m" + (" ve üst kapağı" if b["ust_kapak_m2"] else "") + ")", "alan_m2": b["alan_m2"]} for b in m["baca"]]
+                     + ([{"ad": f"korkuluk üstü ({tr(m['korkuluk_ustu']['boy_m'], 2)} m × {sade(m['korkuluk_ustu']['en_m'] * 100)} cm)",
+                          "alan_m2": m["korkuluk_ustu"]["alan_m2"]}] if m.get("korkuluk_ustu") else []),
             # ek yapının (müştemilat) dış kaplaması ayrı satır: duvarlarının dışa bakan net yüzleri + çatı panelinin saçak ve alın kaplaması
             **({"ek_yapi": {"ad": ek_adi, "net_m2": round(sum(f["net_m2"] for f in m["dis_yuzler"] if f["sinif"] == "ek"), 3),
                             "brut_m2": round(sum(f["brut_m2"] for f in m["dis_yuzler"] if f["sinif"] == "ek"), 3),
