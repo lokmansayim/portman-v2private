@@ -103,7 +103,7 @@ class Panel:
         """İmzası doğru, süresi dolmamış ve türü uyan çerez yükü; değilse None."""
         try:
             yuk, imza = str(belirtec or "").split(".", 1)
-            if not hmac.compare_digest(hmac.new(self.sir, yuk.encode("ascii"), hashlib.sha256).hexdigest(), imza):
+            if not hmac.compare_digest(hmac.new(self.sir, yuk.encode("ascii"), hashlib.sha256).hexdigest().encode("ascii"), imza.encode("utf-8")):
                 return None
             v = json.loads(base64.urlsafe_b64decode(yuk + "=" * (-len(yuk) % 4)).decode("utf-8"))
         except (ValueError, TypeError, UnicodeError):
@@ -309,7 +309,7 @@ def giris(p: Panel, i: Istek) -> tuple:
             f = i.form()
         except Buyuk:
             return 413, b"govde", "text/plain; charset=utf-8", []
-        if on is None or not hmac.compare_digest(f.get("csrf", ""), p.csrf(on["n"])):
+        if on is None or not hmac.compare_digest(str(f.get("csrf", "")).encode("utf-8"), p.csrf(on["n"]).encode("utf-8")):
             on = None
             kod, hata = 403, "Giriş sayfasının süresi doldu ya da doğrulama uyuşmadı; yeniden deneyin."
         elif p.depo.panel_basarisiz_sayisi(KILIT_DK, i.ip_ozeti) >= KILIT_DENEME or p.depo.panel_basarisiz_sayisi(KILIT_DK) >= KILIT_DENEME:
@@ -390,7 +390,7 @@ def isle(p: Panel, i: Istek) -> tuple:
             f = i.form()
         except Buyuk:
             return 413, b"govde", "text/plain; charset=utf-8", []
-        if not hmac.compare_digest(f.get("csrf", ""), p.csrf(oturum["n"])):
+        if not hmac.compare_digest(str(f.get("csrf", "")).encode("utf-8"), p.csrf(oturum["n"]).encode("utf-8")):
             return _html(403, sayfa("Reddedildi", '<p class="hata">Form doğrulaması uyuşmadı (CSRF). Sayfayı yeniden açıp tekrar deneyin.</p>', p, oturum))
     elif i.metod != "GET":
         return 405, b"method", "text/plain; charset=utf-8", []

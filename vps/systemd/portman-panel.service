@@ -11,7 +11,7 @@ Group=portman
 WorkingDirectory=/opt/portman/guncel
 EnvironmentFile=-/etc/portman/panel.env
 Environment=PORTMAN_PG_DSN=dbname=portman PORTMAN_KANAL_DIR=/opt/portman/data PYTHONUNBUFFERED=1 HOME=/opt/portman/data
-ExecStart=/opt/portman/guncel/venv/bin/gunicorn --chdir /opt/portman/guncel/kanal --bind 127.0.0.1:8082 --workers 1 --timeout 60 --access-logfile - --access-logformat "%%(h)s %%(m)s %%(U)s %%(s)s %%(B)s %%(M)sms" panel:uygulama
+ExecStart=/opt/portman/guncel/venv/bin/gunicorn --chdir /opt/portman/guncel/kanal --bind 127.0.0.1:8082 --workers 1 --timeout 60 panel:uygulama
 Restart=always
 RestartSec=5
 NoNewPrivileges=true

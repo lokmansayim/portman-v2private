@@ -43,8 +43,8 @@ def _sahte(bin_: Path, ad: str, icerik: str) -> str:
 class _SahteSunucu:
     """Yerel HTTP sunucusu: istekleri kaydeder, kod ve gövdeyi test belirler."""
 
-    def __init__(self, cevaplar=None, kod=200):
-        self.istekler = []; self.kod = kod; self.cevaplar = cevaplar or {}
+    def __init__(self, cevaplar=None, kod=200, uret=None):
+        self.istekler = []; self.kod = kod; self.cevaplar = cevaplar or {}; self.uret = uret
         sunucu = self
 
         class H(http.server.BaseHTTPRequestHandler):
@@ -53,6 +53,8 @@ class _SahteSunucu:
                 govde = self.rfile.read(n) if n else b""
                 sunucu.istekler.append({"method": self.command, "path": self.path, "headers": dict(self.headers), "body": govde})
                 kod, veri = sunucu.kod, None
+                if sunucu.uret is not None:
+                    kod, veri = sunucu.uret(self.path)
                 for yol, (k, v) in sunucu.cevaplar.items():
                     if self.path.startswith(yol):
                         kod, veri = k, v
@@ -105,8 +107,12 @@ def surum_ortam(tmp_path, kaynak):
     bin_ = tmp_path / "bin"; bin_.mkdir()
     log = tmp_path / "systemctl.log"
     systemctl = _sahte(bin_, "systemctl", '#!/usr/bin/env bash\necho "$@" >> "$PM_SYSTEMCTL_LOG"\n[ "$1" = is-active ] && echo active\nexit 0\n')
-    saglik = _SahteSunucu(kod=200)
     kok = tmp_path / "opt"; (kok / "data" / "nabiz").mkdir(parents=True); etc = tmp_path / "etc"; etc.mkdir()
+    saglik = _SahteSunucu(kod=200)
+    saglik.bozuk = False                                   # True → postgres: false (sürüm kapısı düşer); kod 503 tek başına düşürmez (nabiz.sh sorunları)
+    surum_dosyasi = kok / "guncel" / "SURUM"
+    saglik.uret = lambda yol: (saglik.kod, {"ok": saglik.kod == 200, "postgres": not saglik.bozuk,
+                                            "surum": surum_dosyasi.read_text().strip() if surum_dosyasi.exists() else None})
     env = {"PM_KOK": str(kok), "PM_ETC": str(etc), "PM_GIT_URL": str(kaynak), "PM_PYTHON": sys.executable, "PM_VENV_ATLA": "1", "PM_SYSTEMCTL": systemctl,
            "PM_SYSTEMCTL_LOG": str(log), "PM_OLARAK": "", "PM_PG_DSN": dsn(ad), "PM_SAGLIK_URL": saglik.url + "/saglik", "PM_SAGLIK_BEKLE": "4", "PM_TEST": "1"}
     yield {"env": env, "kok": kok, "log": log, "saglik": saglik, "db": ad}
@@ -124,14 +130,16 @@ def test_guncelle_ikinci_surum_ve_geri_don(surum_ortam):
     assert (s9 / "SURUM").read_text().strip() == "v2026.10.09" and (s9 / "KURULDU").exists() and not (s9 / ".git").exists()
     assert (s9 / "venv" / "bin" / "python").exists() and (s9 / "kanal" / "webhook.py").exists() and not (kok / "kaynak" / "kanal").exists()
     assert os.readlink(kok / "guncel") == str(s9) and not (kok / "onceki").exists()
-    assert "içe aktarma tamam" in out and "uygulanan göçler: [1, 2, 3, 4]" in out and "sağlık 200" in out and "etkin" in out
+    assert "içe aktarma tamam" in out and "uygulanan göçler: [1, 2, 3, 4]" in out and "sağlık: sürüm v2026.10.09, Postgres bağlı" in out and "etkin" in out
     assert "stop portman-webhook portman-gonderici portman-agent portman-panel" in log.read_text() and "start portman-webhook" in log.read_text()
     assert sorgu(__import__("depo").Depo(dsn(surum_ortam["db"])), "SELECT max(surum) AS s FROM sema_surumu")[0]["s"] == 4
     assert surum_ortam["saglik"].istekler and surum_ortam["saglik"].istekler[0]["path"] == "/saglik"
-    # ikinci sürüm: onceki ← 09, guncel ← 12; göç yok
+    # ikinci sürüm: onceki ← 09, guncel ← 12; göç yok. /saglik 503 (nabiz.sh'de duran bir sorun) ama sürüm ve Postgres doğru → kapı geçer
+    surum_ortam["saglik"].kod = 503
     r = _kos("guncelle.sh", env, "v2026.10.12")
     out = r.stdout + r.stderr
     assert r.returncode == 0, out[-3000:]
+    surum_ortam["saglik"].kod = 200
     s12 = kok / "surumler" / "v2026.10.12"
     assert os.readlink(kok / "guncel") == str(s12) and os.readlink(kok / "onceki") == str(s9) and (s12 / "IKINCI").exists()
     assert "uygulanan göçler: yok (güncel)" in out
@@ -158,17 +166,17 @@ def test_etiket_denetimleri_hicbir_sey_kurmaz(surum_ortam):
 def test_saglik_dusunce_kendiliginden_geri_doner(surum_ortam):
     env, kok, saglik = surum_ortam["env"], surum_ortam["kok"], surum_ortam["saglik"]
     assert _kos("guncelle.sh", env, "v2026.10.09").returncode == 0
-    saglik.kod = 503
+    saglik.bozuk = True                                     # postgres: false → yeni sürüm sağlıklı sayılmaz
     r = _kos("guncelle.sh", env, "v2026.10.12")
     out = r.stdout + r.stderr
-    assert r.returncode == 1 and "Önceki sürüme dönülüyor" in out and "DUR: sağlık" in out
+    assert r.returncode == 1 and "Önceki sürüme dönülüyor" in out and "DUR: sağlık" in out and '"postgres": false' in out
     assert os.readlink(kok / "guncel") == str(kok / "surumler" / "v2026.10.09") and os.readlink(kok / "onceki") == str(kok / "surumler" / "v2026.10.12")
     assert (kok / "surumler" / "v2026.10.12" / "KURULDU").exists()                 # dizin durur, silinmez
 
 
 def test_ilk_kurulumda_saglik_dusunce_onceki_yok(surum_ortam):
     env, kok, saglik = surum_ortam["env"], surum_ortam["kok"], surum_ortam["saglik"]
-    saglik.kod = 503
+    saglik.bozuk = True
     r = _kos("guncelle.sh", env, "v2026.10.09")
     assert r.returncode == 1 and "önceki sürüm yok (ilk kurulum)" in r.stderr and os.readlink(kok / "guncel") == str(kok / "surumler" / "v2026.10.09")
     r = _kos("geri_don.sh", env)
@@ -181,13 +189,14 @@ def test_surum_temizle_onaysiz_silmez(tmp_path):
     for i, ad in enumerate(("v2026.10.01", "v2026.10.02", "v2026.10.03", "v2026.10.04", "v2026.10.05")):
         (s / ad).mkdir(); (s / ad / "SURUM").write_text(ad); os.utime(s / ad, (t - 1000 + i * 100, t - 1000 + i * 100))
     os.symlink(s / "v2026.10.05", kok / "guncel"); os.symlink(s / "v2026.10.01", kok / "onceki")
+    (s / ".yarim-v2026.10.06-x").mkdir()                       # yarım kalmış dizin: "en yeni 3" sayımına girmez, her zaman aday
     env = {"PM_KOK": str(kok)}
     r = _kos("surum_temizle.sh", env)
-    assert r.returncode == 0 and "silinecek: v2026.10.02" in r.stdout and "PM_ONAY=evet verilmedi" in r.stdout
-    assert all((s / f"v2026.10.0{i}").exists() for i in range(1, 6))
+    assert r.returncode == 0 and "silinecek: v2026.10.02" in r.stdout and "silinecek: .yarim-v2026.10.06-x" in r.stdout and "PM_ONAY=evet verilmedi" in r.stdout
+    assert all((s / f"v2026.10.0{i}").exists() for i in range(1, 6)) and (s / ".yarim-v2026.10.06-x").exists()
     r = _kos("surum_temizle.sh", {**env, "PM_ONAY": "evet"})
     assert r.returncode == 0 and "silindi: v2026.10.02" in r.stdout
-    assert not (s / "v2026.10.02").exists() and all((s / f"v2026.10.0{i}").exists() for i in (1, 3, 4, 5))
+    assert not (s / "v2026.10.02").exists() and not (s / ".yarim-v2026.10.06-x").exists() and all((s / f"v2026.10.0{i}").exists() for i in (1, 3, 4, 5))
 
 
 # ───────────────────────── sırlar: sir_koy.py, panel_parola.py ─────────────────────────
@@ -347,9 +356,9 @@ def test_nabiz_sorunlari_toplar_ve_uyarir(tmp_path):
     (etc / "alan").write_text("portman.ornek.invalid\n")
     systemctl = _sahte(bin_, "systemctl", '#!/usr/bin/env bash\nif [ "$1" = is-active ]; then [ "$2" = "$PM_INAKTIF" ] && echo inactive || echo active; fi\nexit 0\n')
     psql = _sahte(bin_, "psql", '#!/usr/bin/env bash\nexit "${PM_PSQL_RC:-0}"\n')
-    uyari = _sahte(bin_, "uyari", '#!/usr/bin/env bash\nprintf "%s\\n" "$1" >> "$PM_UYARI_LOG"\necho "uyarı: gonderildi"\n')
+    uyari = _sahte(bin_, "uyari", '#!/usr/bin/env bash\nprintf "%s\\n%s\\n" "$1" "$2" >> "$PM_UYARI_LOG"\necho "uyarı: gonderildi"\n')
     env = {"PM_KOK": str(kok), "PM_ETC": str(etc), "PM_SYSTEMCTL": systemctl, "PM_PSQL": psql, "PM_LE_DIR": str(le), "PM_UYARI": uyari,
-           "PM_UYARI_LOG": str(tmp_path / "uyari.log"), "PM_INAKTIF": "", "PM_DISK_ESIK": "101"}
+           "PM_UYARI_LOG": str(tmp_path / "uyari.log"), "PM_INAKTIF": "", "PM_DISK_ESIK": "101", "PM_OLARAK": ""}
     _sertifika(le / "live" / "portman.ornek.invalid" / "fullchain.pem", 90)
     r = _kos("nabiz.sh", env)
     assert r.returncode == 0 and "sorun yok" in r.stdout and not (tmp_path / "uyari.log").exists()
@@ -364,8 +373,9 @@ def test_nabiz_sorunlari_toplar_ve_uyarir(tmp_path):
     sorunlar = json.loads((kok / "data" / "nabiz" / "nabiz.json").read_text())["sorunlar"]
     assert "portman-agent: inactive" in sorunlar and "postgres: bağlanılamadı" in sorunlar and "yedek: hiç alınmadı" in sorunlar and "agent: nabız yok" in sorunlar
     assert any(s.startswith("sertifika: ") and "gün kaldı" in s for s in sorunlar) and any(s.startswith("gonderici: nabız") and "sn eski" in s for s in sorunlar)
-    metin = (tmp_path / "uyari.log").read_text()
+    metin, anahtar = (tmp_path / "uyari.log").read_text().splitlines()[:2]
     assert metin.startswith("Portman uyarı") and "portman-agent: inactive" in metin and "sorun" in r.stdout
+    assert anahtar == "agent;gonderici;portman-agent;postgres;sertifika;yedek;"       # sıklık anahtarı: yalnız sorun adları, sıralı
     # yedek yeni, nabızlar taze, sertifika uzun → sorun yok
     _sertifika(le / "live" / "portman.ornek.invalid" / "fullchain.pem", 90)
     for ad in ("agent", "gonderici", "yedek"):
@@ -395,6 +405,10 @@ def test_uyari_gonder_pencere_ve_siklik(depo, kanal_dizini):
     assert UG.uyari(depo, istemci, kanal_dizini, "başka uyarı") == "gonderildi" and len(meta.gidenler()) == 2
     assert UG.uyari(depo, istemci, kanal_dizini, "deneme uyarısı", simdi=time.time() + 7 * 3600) == "gonderildi"
     assert NUMARA_P not in (kanal_dizini / "nabiz" / "uyari_son.json").read_text()
+    # sıklık anahtarı verilince metin değişse de (zaman damgası, sayılar) aynı sorun 6 saat içinde yeniden gitmez
+    assert UG.uyari(depo, istemci, kanal_dizini, "Portman uyarı (09.10 19:20): sertifika: 9 gün kaldı", anahtar="sertifika;") == "gonderildi"
+    assert UG.uyari(depo, istemci, kanal_dizini, "Portman uyarı (09.10 19:25): sertifika: 8 gün kaldı", anahtar="sertifika;") == "yakin zamanda gonderildi"
+    assert UG.uyari(depo, istemci, kanal_dizini, "Portman uyarı (09.10 19:30): disk: %91 dolu", anahtar="disk;") == "gonderildi"
 
 
 # ───────────────────────── ayar.sh, oz_test.sh, kuru_kosu.sh, arsiv_al.sh, durum.sh ─────────────────────────
@@ -434,7 +448,7 @@ def test_kuru_kosu_imzali_istek_ve_dry_run_kosulu(tmp_path):
     (etc / "whatsapp.env").write_text(f"WA_APP_SECRET={sir}\nWA_PHONE_NUMBER_ID=106000000000001\n"); (etc / "alan").write_text("portman.ornek.invalid\n")
     (data / "settings.json").write_text(json.dumps({"enabled": False, "dry_run": True, "mode": "patron"}))
     psql = _sahte(bin_, "psql", '#!/usr/bin/env bash\nSQL="${@: -1}"\ncase "$SQL" in *"FROM bayiler"*) echo 900000000909 ;; *"durum FROM isler"*) echo bitti ;; '
-                                '*"count(*) FROM mesajlar"*) echo 1 ;; *string_agg*) echo "text:gonderilmedi, document:gonderilmedi" ;; esac\n')
+                                '*"durum = \'bekliyor\'"*) echo 0 ;; *"count(*) FROM mesajlar"*) echo 1 ;; *string_agg*) echo "text:gonderilmedi, document:gonderilmedi" ;; esac\n')
     webhook = _SahteSunucu(cevaplar={"/webhook": (200, {"ok": True, "mesaj": {"sahiplenildi": 1}, "durum": {}})})
     env = {"PM_ETC": str(etc), "PM_DATA": str(data), "PM_KOK": str(tmp_path / "yok"), "PM_PSQL": psql, "PM_WEBHOOK_URL": webhook.url + "/webhook", "PM_BEKLE": "1"}
     try:
@@ -481,7 +495,7 @@ def test_durum_sh_salt_okunur_ve_maskeli(tmp_path):
            "PM_SYSTEMCTL": _sahte(bin_, "systemctl", '#!/usr/bin/env bash\necho active\n'),
            "PM_SSHD": _sahte(bin_, "sshd", '#!/usr/bin/env bash\necho "passwordauthentication no"\necho "permitrootlogin prohibit-password"\necho "port 22"\n'),
            "PM_UFW": _sahte(bin_, "ufw", '#!/usr/bin/env bash\necho "Status: active"\necho "22/tcp ALLOW Anywhere"\n'),
-           "PM_JOURNALCTL": _sahte(bin_, "journalctl", '#!/usr/bin/env bash\necho "mesaj wamid.HBgLOTA1MzIxMjM0NTY3FQIAERgSNzY3 kimden 900000000101 tamam"\n'),
+           "PM_JOURNALCTL": _sahte(bin_, "journalctl", '#!/usr/bin/env bash\necho "mesaj wamid.HBgLOTAwMDAwMDAwMTY3FQIAERgSNzY3 kimden 900000000101 tamam"\n'),
            "PM_PSQL": _sahte(bin_, "psql", '#!/usr/bin/env bash\necho "bayi(aktif) 1 · mesaj 2"\n')}
     r = _kos("durum.sh", env)
     assert r.returncode == 0, r.stdout + r.stderr

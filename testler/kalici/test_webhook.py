@@ -292,6 +292,25 @@ def test_saglik(app, kanal, depo):
     assert kod == 503 and any(s.startswith("nabiz.sh:") for s in json.loads(govde)["sorunlar"])
 
 
+def test_medya_yalniz_gorsel_ve_belge_kayitsizda_gunluk_sinir(app, kanal, depo):
+    """İnceleme bulgusu: hattı bilen herkes dosya yollayabilir → yalnız image/document kaydedilir; kayıtsız gönderen için 24 saatte
+    en çok KAYITSIZ_MEDYA_SINIRI dosya indirilir, ötekiler yalnız mesaj olarak kalır."""
+    def medya(tur, mid, mime):
+        return {"id": mid, "from": NUMARA_X, "timestamp": str(int(time.time())), "type": tur, tur: {"id": mid[-4:], "mime_type": mime}}
+    kod, govde = post(app, yuk([medya("video", "wamid.VID1", "video/mp4"), medya("audio", "wamid.AUD1", "audio/ogg"), medya("sticker", "wamid.STK1", "image/webp")]))
+    assert kod == 200 and json.loads(govde)["mesaj"] == {"kayitsiz+cevap": 1, "kayitsiz": 2}
+    assert sorgu(depo, "SELECT count(*) AS n FROM gelen_dosyalar")[0]["n"] == 0 and sorgu(depo, "SELECT count(*) AS n FROM mesajlar")[0]["n"] == 3
+    gorseller = [medya("image", f"wamid.IMG{i}", "image/jpeg") for i in range(1, 5)]
+    kod, govde = post(app, yuk(gorseller))
+    assert kod == 200 and json.loads(govde)["mesaj"] == {"kayitsiz": 3, "kayitsiz+medya_siniri": 1}
+    assert [r["mesaj_id"] for r in sorgu(depo, "SELECT mesaj_id FROM gelen_dosyalar ORDER BY id")] == ["wamid.IMG1", "wamid.IMG2", "wamid.IMG3"]
+    # sahiplenilen gönderen için sınır yok
+    depo.bayi_yaz(NUMARA_P, ad="Patron", rol="patron")
+    gorseller = [{**medya("document", f"wamid.PDOC{i}", "application/pdf"), "from": NUMARA_P} for i in range(1, 6)]
+    kod, govde = post(app, yuk(gorseller))
+    assert kod == 200 and json.loads(govde)["mesaj"] == {"sahiplenildi": 5} and sorgu(depo, "SELECT count(*) AS n FROM gelen_dosyalar")[0]["n"] == 8
+
+
 def test_islenemeyen_olay_503_meta_yeniden_dener(app, depo, monkeypatch):
     depo.bayi_yaz(NUMARA_P, ad="Patron", rol="patron")
 

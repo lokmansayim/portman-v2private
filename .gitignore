@@ -13,6 +13,15 @@ kanal/install-report.json
 kanal/self-test-result.json
 kanal/lib.snapshot.php
 *.env
+# İE-06: VPS sırları ve yedek dosyaları (yalnız sunucuda ve Mac'te; depoya girmez)
+deploy_key
+deploy_key.pub
+rclone.conf
+yedek.pub
+yedek.key
+*.age
+*.dump
+portman-arsiv-*.tgz
 # üretilen çıktılar
 cikti/
 beyin/durum/

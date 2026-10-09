@@ -29,7 +29,11 @@ if [ -z "$TEST" ]; then [ "$(id -u)" = "0" ] || dur "root olarak çalıştırıl
 cd /tmp
 umask 022
 if [ -f "$ETC/deploy_key" ] && [[ "$GIT_URL" != /* ]]; then
-  export GIT_SSH_COMMAND="ssh -i $ETC/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
+  if [ -s "$ETC/known_hosts" ]; then    # kurulum.sh GitHub'ın yayımlanmış ed25519 anahtarını yazar; uymuyorsa: ssh-keyscan -t ed25519 github.com > /etc/portman/known_hosts
+    export GIT_SSH_COMMAND="ssh -i $ETC/deploy_key -o IdentitiesOnly=yes -o UserKnownHostsFile=$ETC/known_hosts -o StrictHostKeyChecking=yes"
+  else
+    export GIT_SSH_COMMAND="ssh -i $ETC/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
+  fi
 fi
 
 echo "-- [1/6] kaynak: $GIT_URL"
@@ -95,22 +99,27 @@ $SYSTEMCTL daemon-reload >/dev/null 2>&1 || true
 $SYSTEMCTL start $SERVISLER || dur "servisler başlatılamadı (journalctl -u portman-webhook)"
 echo "   guncel → $(readlink "$KOK/guncel") · onceki → $( [ -L "$KOK/onceki" ] && readlink "$KOK/onceki" || echo yok)"
 
-echo "-- [6/6] sağlık: $SAGLIK_URL (en çok $SAGLIK_BEKLE sn)"
-OK=""
+echo "-- [6/6] sağlık: $SAGLIK_URL (en çok $SAGLIK_BEKLE sn; ölçüt: cevapta surum=$ETIKET ve postgres=true — nabiz.sh'nin eski sorunları bu kapıyı düşürmez)"
+OK=""; SON=""
 for ((i = 0; i < SAGLIK_BEKLE; i++)); do
-  KOD="$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 "$SAGLIK_URL" 2>/dev/null || echo 000)"
-  if [ "$KOD" = "200" ]; then OK=1; break; fi
+  SON="$(curl -s --max-time 5 "$SAGLIK_URL" 2>/dev/null || true)"
+  if printf '%s' "$SON" | PM_ETIKET="$ETIKET" python3 -c 'import json, os, sys
+try:
+    d = json.load(sys.stdin)
+except Exception:
+    sys.exit(1)
+sys.exit(0 if isinstance(d, dict) and d.get("surum") == os.environ["PM_ETIKET"] and d.get("postgres") is True else 1)'; then OK=1; break; fi
   sleep 1
 done
 if [ -z "$OK" ]; then
-  echo "   sağlık gelmedi (son kod: $KOD). Önceki sürüme dönülüyor." >&2
+  echo "   sağlık ölçütü sağlanmadı (son cevap: ${SON:0:200}). Önceki sürüme dönülüyor." >&2
   if [ -L "$KOK/onceki" ]; then
     PM_KOK="$KOK" PM_SYSTEMCTL="$SYSTEMCTL" PM_TEST="$TEST" bash "$HEDEF/vps/geri_don.sh" || true
   else
     echo "   önceki sürüm yok (ilk kurulum): servisler bu sürümde kaldı; journalctl -u portman-webhook -n 50" >&2
   fi
-  dur "sağlık $SAGLIK_BEKLE sn içinde 200 dönmedi"
+  dur "sağlık $SAGLIK_BEKLE sn içinde yeni sürümle ve Postgres bağlantısıyla cevap vermedi"
 fi
-echo "   sağlık 200 · $(curl -s --max-time 5 "$SAGLIK_URL" 2>/dev/null | head -c 300)"
+echo "   sağlık: sürüm $ETIKET, Postgres bağlı · ${SON:0:300}"
 if [ -z "$TEST" ] && [ -f "$HEDEF/vps/durum.sh" ]; then bash "$HEDEF/vps/durum.sh" || true; fi
 echo "== bitti: $ETIKET etkin ($(date '+%Y-%m-%d %H:%M:%S %Z'))"

@@ -11,6 +11,8 @@ SYSTEMCTL="${PM_SYSTEMCTL:-systemctl}"; PSQL="${PM_PSQL:-sudo -u postgres psql -
 LE_DIR="${PM_LE_DIR:-/etc/letsencrypt}"; ALAN="${PM_ALAN:-$(cat "$ETC/alan" 2>/dev/null || true)}"
 DISK_ESIK="${PM_DISK_ESIK:-90}"; YEDEK_SAAT="${PM_YEDEK_SAAT:-26}"; NABIZ_SN="${PM_NABIZ_SN:-180}"; SERT_GUN="${PM_SERT_GUN:-14}"
 UYARI="${PM_UYARI:-$KOK/guncel/venv/bin/python $KOK/guncel/vps/uyari_gonder.py}"
+if [ -n "${PM_OLARAK+x}" ]; then read -r -a OLARAK <<< "$PM_OLARAK"; else OLARAK=(runuser -u portman --); fi   # uyarı portman olarak (peer: root rolü yok)
+SAHIP=""; id -u portman >/dev/null 2>&1 && SAHIP="-o portman -g portman"
 SIMDI="$(date +%s)"
 SORUN=()
 cd /tmp
@@ -50,7 +52,7 @@ if [ "$ACIK" = "1" ]; then
   done
 fi
 
-install -d -m 755 "$DATA/nabiz" 2>/dev/null || true
+install -d -m 755 $SAHIP "$DATA/nabiz" 2>/dev/null || true
 python3 - "$DATA/nabiz/nabiz.json" "$SIMDI" "${SORUN[@]+"${SORUN[@]}"}" <<'PY' || true
 import json, os, sys
 yol, simdi, sorunlar = sys.argv[1], int(sys.argv[2]), sys.argv[3:]
@@ -65,8 +67,10 @@ else
   echo "nabız $(date '+%Y-%m-%d %H:%M:%S'): ${#SORUN[@]} sorun: $(IFS='; '; echo "${SORUN[*]}")"
   if [ -n "$UYARI" ]; then
     METIN="Portman uyarı ($(date '+%d.%m %H:%M')): $(IFS='; '; echo "${SORUN[*]}")"
-    if [ -s "$ETC/whatsapp.env" ]; then set -a; . "$ETC/whatsapp.env"; set +a; fi
-    PORTMAN_PG_DSN="${PORTMAN_PG_DSN:-dbname=portman}" PORTMAN_KANAL_DIR="$DATA" $UYARI "$METIN" 2>&1 | sed 's/^/   /' || echo "   uyarı gönderilemedi"
+    # Sıklık anahtarı yalnız sorun ADLARINDAN (':' öncesi; sıralı): zaman damgası ve sayılar değişse de aynı sorun 6 saatte bir gider
+    ANAHTAR="$(printf '%s\n' "${SORUN[@]}" | cut -d: -f1 | sort -u | tr '\n' ';')"
+    if [ -s "$ETC/whatsapp.env" ]; then set -a; . "$ETC/whatsapp.env"; set +a; fi      # WA_* ortamdan geçer; komut satırına çıkmaz
+    "${OLARAK[@]}" env PORTMAN_PG_DSN="${PORTMAN_PG_DSN:-dbname=portman}" PORTMAN_KANAL_DIR="$DATA" $UYARI "$METIN" "$ANAHTAR" 2>&1 | sed 's/^/   /' || echo "   uyarı gönderilemedi"
   fi
 fi
 exit 0

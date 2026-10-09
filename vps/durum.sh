@@ -33,7 +33,7 @@ echo "-- sshd etkin değerler"
 echo "-- disk"
 df -h "$KOK" 2>/dev/null | awk 'NR==2 {printf "   %s kullanılan %s / %s (%s)\n", $6, $3, $2, $5}'
 echo "-- Postgres (portman) sayımlar"
-SQL="SELECT 'bayi(aktif) '||(SELECT count(*) FROM bayiler WHERE aktif)||' · mesaj '||(SELECT count(*) FROM mesajlar)||' · iş '||(SELECT count(*) FROM isler)||' · açık iş '||(SELECT count(*) FROM isler WHERE durum IN ('sirada','isleniyor'))||' · giden '||(SELECT count(*) FROM giden)||' · bekleyen giden '||(SELECT count(*) FROM giden WHERE durum = 'bekliyor')||' · son 24 saat gelen '||(SELECT count(*) FROM mesajlar WHERE alindi >= now() - interval '24 hours')||' · şema '||(SELECT max(surum) FROM sema_surumu)"
+SQL="SELECT 'bayi(aktif) '||(SELECT count(*) FROM bayiler WHERE aktif)||' · mesaj '||(SELECT count(*) FROM mesajlar)||' · iş '||(SELECT count(*) FROM isler)||' · açık iş '||(SELECT count(*) FROM isler WHERE durum IN ('sirada','isleniyor'))||' · giden '||(SELECT count(*) FROM giden)||' · bekleyen giden '||(SELECT count(*) FROM giden WHERE durum = 'bekliyor')||' · son 24 saat gelen '||(SELECT count(*) FROM mesajlar WHERE alindi >= now() - interval '24 hours')||' · panel kilit (24 saat) '||(SELECT count(*) FROM panel_girisler WHERE sonuc = 'kilitli' AND zaman >= now() - interval '24 hours')||' · şema '||(SELECT max(surum) FROM sema_surumu)"
 OUT="$($PSQL -c "$SQL" 2>&1)" && echo "   $OUT" || echo "   sorgu başarısız: $(echo "$OUT" | head -1 | cut -c1-120)"
 echo "-- nabız dosyaları ($DATA/nabiz)"
 for f in agent gonderici yedek nabiz; do

@@ -37,7 +37,9 @@ $RCLONE --config "$CONF" delete --min-age "${SAKLA}d" --include 'portman-*.tar.a
   && echo "   Drive: $SAKLA günden eski portman-*.tar.age dosyaları silindi" || echo "   UYARI: Drive'daki eski yedekler silinemedi (sonraki koşuda yeniden)"
 ESKI="$(ls -1t "$YEDEK_DIR"/portman-*.tar.age 2>/dev/null | tail -n +$((TUT + 1)) || true)"
 if [ -n "$ESKI" ]; then echo "$ESKI" | xargs -r rm -f; echo "   yerelde en yeni $TUT dosya kaldı ($(echo "$ESKI" | wc -l) eski silindi)"; fi
-install -d -m 755 "$DATA/nabiz"
+SAHIP=""; id -u portman >/dev/null 2>&1 && SAHIP="-o portman -g portman"
+install -d -m 755 $SAHIP "$DATA/nabiz"
 printf '{"zaman": %s, "ad": "yedek", "dosya": "%s", "boyut": %s, "sha256": "%s", "uzak": "%s"}\n' "$(date +%s)" "$AD" "$BOYUT" "$SHA" "$UZAK" > "$DATA/nabiz/yedek.json.tmp"
-chmod 644 "$DATA/nabiz/yedek.json.tmp"; mv -f "$DATA/nabiz/yedek.json.tmp" "$DATA/nabiz/yedek.json"
+chmod 644 "$DATA/nabiz/yedek.json.tmp"; [ -n "$SAHIP" ] && chown portman:portman "$DATA/nabiz/yedek.json.tmp"
+mv -f "$DATA/nabiz/yedek.json.tmp" "$DATA/nabiz/yedek.json"
 echo "== bitti ($(date '+%H:%M:%S'))"

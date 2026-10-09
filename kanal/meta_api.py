@@ -70,7 +70,7 @@ def imza_gecerli(govde: bytes, baslik: str | None, app_secret: str) -> bool:
     if not app_secret or not baslik or not str(baslik).startswith("sha256="):
         return False
     beklenen = hmac.new(app_secret.encode("utf-8"), govde, hashlib.sha256).hexdigest()
-    return hmac.compare_digest(str(baslik)[7:].strip().lower(), beklenen)
+    return hmac.compare_digest(str(baslik)[7:].strip().lower().encode("utf-8"), beklenen.encode("ascii"))   # bayt: ASCII dışı başlık TypeError vermesin
 
 
 def imzala(govde: bytes, app_secret: str) -> str:
@@ -82,7 +82,7 @@ def hub_cevabi(sorgu: dict, verify_token: str) -> str | None:
     """Meta'nın webhook kaydı: GET ?hub.mode=subscribe&hub.verify_token=…&hub.challenge=…  → challenge metni; değilse None."""
     if not verify_token or str(sorgu.get("hub.mode") or "") != "subscribe":
         return None
-    if not hmac.compare_digest(str(sorgu.get("hub.verify_token") or ""), verify_token):
+    if not hmac.compare_digest(str(sorgu.get("hub.verify_token") or "").encode("utf-8"), str(verify_token).encode("utf-8")):
         return None
     return str(sorgu.get("hub.challenge") or "")
 
@@ -156,7 +156,7 @@ def dosya_denetle(yol, izinli: tuple[str, ...], kok: Path, sha256: str | None = 
     if kok_r not in gercek.parents or not gercek.is_file() or gercek.stat().st_size < 1:
         raise DosyaGecersiz("local_file_invalid")
     veri = gercek.read_bytes()
-    if sha256 and not hmac.compare_digest(str(sha256), hashlib.sha256(veri).hexdigest()):
+    if sha256 and not hmac.compare_digest(str(sha256).encode("utf-8"), hashlib.sha256(veri).hexdigest().encode("ascii")):
         raise DosyaGecersiz("local_file_changed")
     bas = veri[:8]
     mime = "application/pdf" if bas.startswith(b"%PDF-") else ("image/png" if bas.startswith(b"\x89PNG\r\n\x1a\n")

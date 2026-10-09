@@ -41,9 +41,9 @@ def test_hub_cevabi():
 
 
 def test_numara_ve_wamid():
-    assert M.numara_gecerli("905551112233") and M.numara_gecerli("4915123456789")
-    assert not M.numara_gecerli("0555") and not M.numara_gecerli("+905551112233") and not M.numara_gecerli("905551112233x")
-    assert M.wamid_gecerli("wamid.HBgLOTA1NTUxMTEyMjMzFQIAEhgUM0E5") and not M.wamid_gecerli("12345") and not M.wamid_gecerli("wamid." + "x" * 300)
+    assert M.numara_gecerli("900000000133") and M.numara_gecerli("490000000001")
+    assert not M.numara_gecerli("0555") and not M.numara_gecerli("+900000000133") and not M.numara_gecerli("900000000133x")
+    assert M.wamid_gecerli("wamid.HBgLOTAwMDAwMDAwMTMzFQIAEhgUM0E5") and not M.wamid_gecerli("12345") and not M.wamid_gecerli("wamid." + "x" * 300)
 
 
 # ───────────────────────── gelen olay ─────────────────────────
@@ -177,32 +177,32 @@ def test_etkilesim_liste_ve_cta():
 
 
 def test_mesaj_yuku_turleri():
-    m = M.mesaj_yuku({"id": "out_1", "kind": "text", "body": "x" * 5000}, "905551112233")
+    m = M.mesaj_yuku({"id": "out_1", "kind": "text", "body": "x" * 5000}, "900000000133")
     assert m["type"] == "text" and len(m["text"]["body"]) == 4000 and m["text"]["preview_url"] is False
-    assert m["biz_opaque_callback_data"] == "out_1" and m["to"] == "905551112233" and m["recipient_type"] == "individual"
+    assert m["biz_opaque_callback_data"] == "out_1" and m["to"] == "900000000133" and m["recipient_type"] == "individual"
     with pytest.raises(ValueError, match="empty_text"):
-        M.mesaj_yuku({"id": "out_1", "kind": "text", "body": "  "}, "905551112233")
-    d = M.mesaj_yuku({"id": "out_2", "kind": "document", "body": "a" * 1500, "filename": "plan.pdf"}, "905551112233", medya_id="9")
+        M.mesaj_yuku({"id": "out_1", "kind": "text", "body": "  "}, "900000000133")
+    d = M.mesaj_yuku({"id": "out_2", "kind": "document", "body": "a" * 1500, "filename": "plan.pdf"}, "900000000133", medya_id="9")
     assert d["document"] == {"id": "9", "filename": "plan.pdf", "caption": "a" * 1000}
     with pytest.raises(ValueError, match="media_id"):
-        M.mesaj_yuku({"id": "out_2", "kind": "document", "filename": "plan.pdf"}, "905551112233")
-    g = M.mesaj_yuku({"id": "out_3", "kind": "image", "body": "b" * 1100}, "905551112233", medya_id="8")
+        M.mesaj_yuku({"id": "out_2", "kind": "document", "filename": "plan.pdf"}, "900000000133")
+    g = M.mesaj_yuku({"id": "out_3", "kind": "image", "body": "b" * 1100}, "900000000133", medya_id="8")
     assert g["image"] == {"id": "8", "caption": "b" * 1024}
-    g2 = M.mesaj_yuku({"id": "out_3", "kind": "image", "body": " "}, "905551112233", medya_id="8")
+    g2 = M.mesaj_yuku({"id": "out_3", "kind": "image", "body": " "}, "900000000133", medya_id="8")
     assert "caption" not in g2["image"]
-    e = M.mesaj_yuku(_buton_satiri([("b1", "A")], header={"type": "image", "file": "/x.png"}), "905551112233", baslik_medya_id="4")
+    e = M.mesaj_yuku(_buton_satiri([("b1", "A")], header={"type": "image", "file": "/x.png"}), "900000000133", baslik_medya_id="4")
     assert e["type"] == "interactive" and e["interactive"]["header"]["image"]["id"] == "4"
 
 
 def test_kabul_edilen_wamid():
-    ok = {"messaging_product": "whatsapp", "contacts": [{"input": "905551112233", "wa_id": "905551112233"}], "messages": [{"id": "wamid.OUT1"}]}
-    assert M.kabul_edilen_wamid(ok, "905551112233") == "wamid.OUT1"
+    ok = {"messaging_product": "whatsapp", "contacts": [{"input": "900000000133", "wa_id": "900000000133"}], "messages": [{"id": "wamid.OUT1"}]}
+    assert M.kabul_edilen_wamid(ok, "900000000133") == "wamid.OUT1"
     with pytest.raises(M.MetaHatasi, match="send_response_uncertain"):
-        M.kabul_edilen_wamid({**ok, "contacts": [{"input": "905559999999", "wa_id": "905559999999"}]}, "905551112233")
+        M.kabul_edilen_wamid({**ok, "contacts": [{"input": "900000000199", "wa_id": "900000000199"}]}, "900000000133")
     with pytest.raises(M.MetaHatasi, match="send_response_uncertain"):
-        M.kabul_edilen_wamid({**ok, "messages": [{"id": "12345"}]}, "905551112233")
+        M.kabul_edilen_wamid({**ok, "messages": [{"id": "12345"}]}, "900000000133")
     with pytest.raises(M.MetaHatasi, match="send_response_uncertain"):
-        M.kabul_edilen_wamid({}, "905551112233")
+        M.kabul_edilen_wamid({}, "900000000133")
 
 
 def test_maskele():
@@ -222,17 +222,17 @@ class SahteHttp:
 
 
 def test_gonder_ve_hata_maskeli():
-    http = SahteHttp([(200, {"messages": [{"id": "wamid.OUT1"}], "contacts": [{"input": "905551112233", "wa_id": "905551112233"}]}),
+    http = SahteHttp([(200, {"messages": [{"id": "wamid.OUT1"}], "contacts": [{"input": "900000000133", "wa_id": "900000000133"}]}),
                       (401, {"error": {"message": "Invalid OAuth access token " + SAHTE_TOKEN, "type": "OAuthException", "code": 190}})])
     g = M.GraphIstemci(AYAR, http=http)
-    c = g.gonder({"to": "905551112233"})
+    c = g.gonder({"to": "900000000133"})
     assert c["messages"][0]["id"] == "wamid.OUT1"
     i = http.istekler[0]
     assert i["method"] == "POST" and i["url"] == "https://graph.facebook.com/v23.0/106000000000001/messages"
     assert i["headers"]["Authorization"] == "Bearer " + AYAR.access_token and i["headers"]["Content-Type"] == "application/json"
-    assert json.loads(i["data"]) == {"to": "905551112233"}
+    assert json.loads(i["data"]) == {"to": "900000000133"}
     with pytest.raises(M.MetaHatasi) as ei:
-        g.gonder({"to": "905551112233"})
+        g.gonder({"to": "900000000133"})
     assert ei.value.kod == 401 and "OAuthException" in str(ei.value) and AYAR.access_token not in str(ei.value) and "EAA" not in str(ei.value)
 
 

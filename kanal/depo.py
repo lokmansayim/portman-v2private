@@ -194,8 +194,9 @@ class Depo:
         bayi = gelen.get("bayi") or None
         with self.baglan() as c, c.transaction():
             if isinstance(bayi, dict):          # kimlik numaradır; kod yalnız etiket (benzersiz değil, bkz. goc/001)
-                c.execute("INSERT INTO bayiler (numara, kod, ad, rol) VALUES (%s, %s, %s, %s) ON CONFLICT (numara) DO UPDATE "
-                          "SET kod = EXCLUDED.kod, ad = EXCLUDED.ad, rol = EXCLUDED.rol, guncellendi = now()",
+                # İE-06: kimlik kartının kaynağı bayiler tablosudur (panel). Satır yoksa açılır (eski testler ve içe aktarma);
+                # varsa kod/ad/rol'e DOKUNULMAZ (mesajdaki bayi alanı zaten tablodan türetilir; muhendis → bayi ezilmesin).
+                c.execute("INSERT INTO bayiler (numara, kod, ad, rol) VALUES (%s, %s, %s, %s) ON CONFLICT (numara) DO NOTHING",
                           (str(gelen["sender"]), bayi.get("kod"), bayi.get("ad") or "",
                            "patron" if (gelen.get("role") or bayi.get("rol")) == "patron" else "bayi"))
             r = c.execute(
@@ -743,6 +744,12 @@ class Depo:
         with self.baglan() as c, c.transaction():
             c.execute("INSERT INTO gelen_dosyalar (mesaj_id, medya_id, dosya_adi, mime) VALUES (%s, %s, %s, %s) ON CONFLICT (mesaj_id, medya_id) DO NOTHING",
                       (mesaj_id, str(medya_id)[:64], (dosya_adi or None) and str(dosya_adi)[:200], (mime or None) and str(mime)[:100]))
+
+    def gelen_dosya_sayisi(self, gonderen, saat: int = 24) -> int:
+        """Gönderenin son 'saat' saatte kaydedilen gelen dosyası (kayıtsız gönderen için indirme tavanı; webhook)."""
+        with self.baglan() as c:
+            return c.execute("SELECT count(*) AS n FROM gelen_dosyalar d JOIN mesajlar m ON m.id = d.mesaj_id WHERE m.gonderen = %s "
+                             "AND d.olusturuldu > now() - make_interval(hours => %s)", (str(gonderen), saat)).fetchone()["n"]
 
     def bekleyen_gelen_dosyalar(self, en_fazla: int = 20) -> list[dict]:
         with self.baglan() as c:

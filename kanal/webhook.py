@@ -36,6 +36,8 @@ ESKI_SN = 900                       # feature.php: 15 dakikadan eski (geç tekra
 GELECEK_SN = 60
 NABIZ_SINIR_SN = 180                # ajan ve gönderici nabzı bundan eskiyse /saglik 503
 NABIZ_SH_SINIR_SN = 900             # nabiz.sh'nin dosyası bundan eskiyse /saglik 503 (zamanlayıcı 5 dk)
+MEDYA_INDIRILEN = ("image", "document")   # indirilen gelen medya türleri (IE-06: görsel ve belge)
+KAYITSIZ_MEDYA_SINIRI = 3           # kayıtsız gönderen başına 24 saatte indirilen dosya tavanı
 SURUM_DOSYASI = KOD.parent / "SURUM"
 
 
@@ -108,8 +110,13 @@ def mesaj_isle(k: Kanal, m: dict, adlar: dict, ayar: dict, simdi: int) -> str:
         satir["neden"] = "kayıtsız gönderen" if bayi is None else f"mod {mode}: bu gönderen işlenmiyor"
         r = k.depo.kayitsiz_mesaj_kaydet(satir, None if eski else ayar.get("kayitsiz_cevap"))
         sonuc = ("kayitsiz" + ("+cevap" if r["cevap"] else "")) if r["yeni"] else "tekrar"
-    if sonuc != "tekrar" and medya_id:
-        k.depo.gelen_dosya_ekle(mid, medya_id, dosya_adi, mime)
+    # Medya: yalnız görsel ve belge indirilir (video, ses, çıkartma yalnız kayıt). Kayıtsız gönderen için 24 saatte en çok
+    # KAYITSIZ_MEDYA_SINIRI dosya (disk ve Meta indirme kotası; hattı bilen herkes dosya yollayabilir).
+    if sonuc != "tekrar" and medya_id and tur in MEDYA_INDIRILEN:
+        if sonuc == "sahiplenildi" or k.depo.gelen_dosya_sayisi(gonderen, 24) < KAYITSIZ_MEDYA_SINIRI:
+            k.depo.gelen_dosya_ekle(mid, medya_id, dosya_adi, mime)
+        else:
+            sonuc += "+medya_siniri"
     log("mesaj", kimlik_izi(mid), "kimden", maske(gonderen), "tür", tur, "→", sonuc)
     return sonuc
 

@@ -22,7 +22,7 @@ DENEME="portman_geri_deneme_${CALISMA}"; kimlik "$DENEME"
 ISARET="portman-geri-yukleme-denemesi:${CALISMA}"
 [ "$(psql_su -tAc "SELECT count(*) FROM pg_database WHERE datname = '$DENEME'")" = "0" ] || dur "'$DENEME' zaten var; dokunulmadı"
 psql_su -c "CREATE DATABASE $DENEME" -c "COMMENT ON DATABASE $DENEME IS '$ISARET'"
-if ! "${SU[@]}" pg_restore --exit-on-error "${PG[@]}" -d "$DENEME" "$DOSYA"; then
+if ! "${SU[@]}" pg_restore --exit-on-error "${PG[@]}" -d "$DENEME" < "$DOSYA"; then     # stdin: postgres kullanıcısı /root'u okuyamaz
   dur "geri yükleme başarısız; '$DENEME' incelenmek üzere bırakıldı (dump bozuk ya da sürüm uyumsuz)"
 fi
 echo "-- tablolar (canlı $DB | deneme): satır sayıları"

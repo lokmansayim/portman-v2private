@@ -17,7 +17,12 @@ while IFS= read -r d; do
   n=$((n + 1))
   tam="$(readlink -f "$d")"
   if [ $n -le "$TUT" ] || [[ " $KORU " == *" $tam "* ]]; then echo "   kalır: $(basename "$d")"; else ADAYLAR+=("$d"); fi
-done < <(ls -1dt "$KOK/surumler"/*/ "$KOK/surumler"/.yarim-*/ 2>/dev/null | sed 's:/$::' || true)
+done < <(ls -1dt "$KOK/surumler"/v*/ 2>/dev/null | sed 's:/$::' || true)
+for d in "$KOK/surumler"/.yarim-*/; do                   # yarım kalmış dizinler "en yeni N" sayımına girmez; bağlı değilse her zaman aday
+  [ -d "$d" ] || continue
+  d="${d%/}"; tam="$(readlink -f "$d")"
+  if [[ " $KORU " == *" $tam "* ]]; then echo "   kalır: $(basename "$d")"; else ADAYLAR+=("$d"); fi
+done
 if [ ${#ADAYLAR[@]} -eq 0 ]; then echo "   silinecek sürüm yok"; echo "== bitti"; exit 0; fi
 for d in "${ADAYLAR[@]}"; do echo "   silinecek: $(basename "$d") ($(du -sh "$d" 2>/dev/null | cut -f1))"; done
 if [ "$ONAY" != "evet" ]; then echo "   PM_ONAY=evet verilmedi: hiçbir şey silinmedi (liste yukarıda)"; echo "== bitti"; exit 0; fi

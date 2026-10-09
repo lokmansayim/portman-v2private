@@ -61,6 +61,13 @@ for ((i = 0; i < BEKLE; i++)); do
   if [ "$D" = "bitti" ] || [ "$D" = "basarisiz" ]; then break; fi
   sleep 2
 done
+# Gönderici (3 sn tur) bekleyen satırları dry_run ile 'gonderilmedi' yapmadan kanal kapatılmasın: Kapı 8'de enabled/dry_run
+# değişince bekleyen satır gerçek gönderime dönüşmesin.
+for ((i = 0; i < 30; i++)); do
+  B="$($PSQL -c "SELECT count(*) FROM giden g JOIN isler i ON i.id = g.is_id WHERE i.mesaj_id = '$MID' AND g.durum = 'bekliyor'" 2>/dev/null | head -1)"
+  [ "${B:-0}" = "0" ] && break
+  sleep 1
+done
 echo "   mesajlar: $($PSQL -c "SELECT count(*) FROM mesajlar WHERE id = '$MID'" 2>/dev/null) · iş: ${D:-yok} · giden: $($PSQL -c "SELECT string_agg(kind || ':' || durum, ', ' ORDER BY sira) FROM giden g JOIN isler i ON i.id = g.is_id WHERE i.mesaj_id = '$MID'" 2>/dev/null)"
 echo "   panel: https://$(cat "$ETC/alan" 2>/dev/null || echo '<alan>')/panel/konusma/…${PATRON: -2}"
 echo "== bitti"

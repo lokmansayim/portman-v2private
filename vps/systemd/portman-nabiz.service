@@ -1,5 +1,6 @@
 [Unit]
 Description=Portman nabız denetimi (servisler, Postgres, sertifika, disk, yedek yaşı; sorunda Patron'a uyarı)
+After=postgresql.service network-online.target
 ConditionPathExists=/opt/portman/guncel/vps/nabiz.sh
 
 [Service]

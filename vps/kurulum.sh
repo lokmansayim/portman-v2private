@@ -69,7 +69,8 @@ yerel_soketler() {
 nginx_sablon() { cat <<'EOF'
 # Portman · nginx sitesi (İE-06). kurulum.sh __ALAN__ yerine alan adını yazar; sertifika yoksa 443 bloğunu (BASLA..BITIS) çıkarır.
 # Dışa açık yollar yalnız: /webhook (Meta), /saglik (dış izleyici), /panel/ (yönetici). Gerisi 404. Erişim günlüğünde sorgu dizesi yok
-# (hub.verify_token GET sorgusunda gelir; $uri onu içermez).
+# (hub.verify_token GET sorgusunda gelir; $uri onu içermez); /panel/ yolları günlüğe hiç yazılmaz (URL'de numara var; K09).
+# Ubuntu 24.04'ün nginx'i 1.24: "http2 on;" yönergesi yok, http2 listen parametresiyle verilir.
 log_format pm_kisa '$remote_addr $request_method $uri $status $body_bytes_sent $request_time';
 limit_req_zone $binary_remote_addr zone=pm_giris:1m rate=10r/m;
 limit_req_zone $binary_remote_addr zone=pm_genel:10m rate=30r/s;
@@ -86,9 +87,8 @@ server {
 
 # --443-BASLA--
 server {
-    listen 443 ssl;
-    listen [::]:443 ssl;
-    http2 on;
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
     server_name __ALAN__;
     server_tokens off;
     access_log /var/log/nginx/portman.access.log pm_kisa;
@@ -114,8 +114,8 @@ server {
 
     location = /webhook { limit_req zone=pm_genel burst=50 nodelay; proxy_pass http://127.0.0.1:8081; }
     location = /saglik { limit_req zone=pm_genel burst=20 nodelay; proxy_pass http://127.0.0.1:8081; }
-    location = /panel/giris { limit_req zone=pm_giris burst=5 nodelay; proxy_pass http://127.0.0.1:8082; }
-    location /panel/ { limit_req zone=pm_genel burst=50 nodelay; proxy_pass http://127.0.0.1:8082; }
+    location = /panel/giris { limit_req zone=pm_giris burst=5 nodelay; access_log off; proxy_pass http://127.0.0.1:8082; }
+    location /panel/ { limit_req zone=pm_genel burst=50 nodelay; access_log off; proxy_pass http://127.0.0.1:8082; }
     location = /panel { return 301 /panel/; }
     location / { return 404; }
 }
@@ -141,6 +141,7 @@ findtime = 10m
 
 [sshd]
 enabled = true
+backend = systemd
 maxretry = 5
 
 [nginx-limit-req]
@@ -207,7 +208,7 @@ Group=portman
 WorkingDirectory=/opt/portman/guncel
 EnvironmentFile=-/etc/portman/panel.env
 Environment=PORTMAN_PG_DSN=dbname=portman PORTMAN_KANAL_DIR=/opt/portman/data PYTHONUNBUFFERED=1 HOME=/opt/portman/data
-ExecStart=/opt/portman/guncel/venv/bin/gunicorn --chdir /opt/portman/guncel/kanal --bind 127.0.0.1:8082 --workers 1 --timeout 60 --access-logfile - --access-logformat "%%(h)s %%(m)s %%(U)s %%(s)s %%(B)s %%(M)sms" panel:uygulama
+ExecStart=/opt/portman/guncel/venv/bin/gunicorn --chdir /opt/portman/guncel/kanal --bind 127.0.0.1:8082 --workers 1 --timeout 60 panel:uygulama
 Restart=always
 RestartSec=5
 NoNewPrivileges=true
@@ -310,6 +311,7 @@ EOF
   portman-nabiz.service) cat <<'EOF'
 [Unit]
 Description=Portman nabız denetimi (servisler, Postgres, sertifika, disk, yedek yaşı; sorunda Patron'a uyarı)
+After=postgresql.service network-online.target
 ConditionPathExists=/opt/portman/guncel/vps/nabiz.sh
 
 [Service]
@@ -375,6 +377,12 @@ fi
 chmod 600 "$ETC/deploy_key"; chmod 644 "$ETC/deploy_key.pub"
 echo "   GitHub → depo → Settings → Deploy keys → Add deploy key (Allow write access İŞARETSİZ). Açık anahtar:"
 echo "   $(cat "$ETC/deploy_key.pub")"
+# GitHub'ın yayımlanmış SSH sunucu anahtarı (ed25519; docs.github.com "GitHub's SSH key fingerprints"): guncelle.sh ilk çekişte
+# sunucuyu buna göre doğrular (TOFU değil). Uymazsa: ssh-keyscan -t ed25519 github.com > /etc/portman/known_hosts
+if [ ! -s "$ETC/known_hosts" ]; then
+  echo "github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl" > "$ETC/known_hosts"
+  chmod 644 "$ETC/known_hosts"; echo "   GitHub sunucu anahtarı sabitlendi: $ETC/known_hosts"
+fi
 
 echo "== [4/9] Postgres: yalnız yerel bağlantı, '$KULLANICI' rolü (peer, parolasız), '$DB' veritabanı"
 if [ -z "$TEST" ]; then systemctl enable --now postgresql >/dev/null; fi
@@ -404,16 +412,21 @@ echo "   tamam: listen_addresses='$LISTEN', pg_hba yalnız yerel, $PORT dışar�
 echo "== [5/9] nginx ve sertifika"
 install -d -m 755 "$NGINX_DIR/sites-available" "$NGINX_DIR/sites-enabled"
 SERT="$LE_DIR/live/$ALAN/fullchain.pem"
-nginx_yaz() {   # $1: 1 → 443 bloğu dahil
+nginx_yaz() {   # $1: 1 → 443 bloğu dahil; önceki dosya .onceki olarak saklanır (nginx -t düşerse geri konur)
   local hedef="$NGINX_DIR/sites-available/portman.conf"
   if [ "$1" = "1" ]; then nginx_sablon | sed "s/__ALAN__/$ALAN/g" > "$hedef.yeni"
   else nginx_sablon | sed '/# --443-BASLA--/,/# --443-BITIS--/d' | sed "s/__ALAN__/$ALAN/g" > "$hedef.yeni"; fi
+  [ -f "$hedef" ] && cp -p "$hedef" "$hedef.onceki"
   mv -f "$hedef.yeni" "$hedef"
   ln -sfn "$hedef" "$NGINX_DIR/sites-enabled/portman.conf"
 }
 nginx_yenile() {
+  local hedef="$NGINX_DIR/sites-available/portman.conf"
   if [ -z "$TEST" ]; then
-    nginx -t >/dev/null 2>&1 || dur "nginx yapılandırması geçersiz (nginx -t çıktısına bakın)"
+    if ! nginx -t >/dev/null 2>&1; then
+      if [ -f "$hedef.onceki" ]; then mv -f "$hedef.onceki" "$hedef"; else rm -f "$hedef" "$NGINX_DIR/sites-enabled/portman.conf"; fi
+      dur "nginx yapılandırması geçersiz (nginx -t çıktısına bakın); önceki dosya geri kondu, nginx'e dokunulmadı"
+    fi
     $SYSTEMCTL enable --now nginx >/dev/null 2>&1 || true
     $SYSTEMCTL reload nginx
   fi

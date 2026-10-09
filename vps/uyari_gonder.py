@@ -25,8 +25,9 @@ PENCERE_SN = 24 * 3600
 SIKLIK_SN = 6 * 3600
 
 
-def uyari(depo: Depo, istemci: M.GraphIstemci, veri: Path | str, metin: str, simdi: float | None = None) -> str:
-    """Dönen: gonderildi | patron yok | pencere kapali | yakin zamanda gonderildi"""
+def uyari(depo: Depo, istemci: M.GraphIstemci, veri: Path | str, metin: str, simdi: float | None = None, anahtar: str | None = None) -> str:
+    """Dönen: gonderildi | patron yok | pencere kapali | yakin zamanda gonderildi. 'anahtar' sıklık anahtarıdır (nabiz.sh sorun
+    adlarını verir); yoksa metnin kendisi. Aynı anahtar 6 saatte bir gider."""
     simdi = simdi or time.time()
     patron = depo.patron_numarasi()
     if not patron:
@@ -39,7 +40,7 @@ def uyari(depo: Depo, istemci: M.GraphIstemci, veri: Path | str, metin: str, sim
         kayit = json.loads(p.read_text(encoding="utf-8"))
     except Exception:
         kayit = {}
-    anahtar = hashlib.sha256(metin.encode("utf-8")).hexdigest()[:16]
+    anahtar = hashlib.sha256((anahtar or metin).encode("utf-8")).hexdigest()[:16]
     if simdi - float(kayit.get(anahtar) or 0) < SIKLIK_SN:
         return "yakin zamanda gonderildi"
     cevap = istemci.gonder({"messaging_product": "whatsapp", "recipient_type": "individual", "to": patron, "type": "text",
@@ -55,7 +56,9 @@ def uyari(depo: Depo, istemci: M.GraphIstemci, veri: Path | str, metin: str, sim
 
 
 def main(argv: list[str]) -> int:
-    metin = " ".join(argv[1:]).strip() or sys.stdin.read().strip()
+    """uyari_gonder.py "<metin>" ["<sıklık anahtarı>"]"""
+    metin = (argv[1] if len(argv) > 1 else "").strip() or sys.stdin.read().strip()
+    anahtar = argv[2].strip() if len(argv) > 2 and argv[2].strip() else None
     if not metin:
         print("uyarı: metin yok"); return 0
     meta = M.MetaAyar.ortamdan()
@@ -64,7 +67,7 @@ def main(argv: list[str]) -> int:
     veri = os.environ.get("PORTMAN_KANAL_DIR") or "/opt/portman/data"
     try:
         depo = Depo()
-        sonuc = uyari(depo, M.GraphIstemci(meta), veri, metin)
+        sonuc = uyari(depo, M.GraphIstemci(meta), veri, metin, anahtar=anahtar)
         patron = depo.patron_numarasi()
     except Exception as e:
         print("uyarı: gönderilemedi:", type(e).__name__, M.maskele(str(e), meta.access_token)[:160]); return 0
