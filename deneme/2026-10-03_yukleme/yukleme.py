@@ -278,6 +278,14 @@ def _hesapla(g: dict, k: dict) -> dict:
                  x.get("adet") or tavan(x["oturum_m2"] / 100 * pk["adet_100m2"]), x["oturum_m2"], birim="m²",
                  kg=mk[0] if mk else x["oturum_m2"] / 100 * pk["kg_100m2"],
                  formul=mk[1] if mk else f"çatı panelinin örttüğü mahal alanı ÷ 100 × {tr(pk['kg_100m2'])} kg", durum=mk[2] if mk else "varsayim", not_=x.get("not"))
+        # karkas modelindeki öteki gruplar (genel model; KT-02, 9 Ekim 2026): her grup ayrı satır, ağırlık modeldeki profil boyundan.
+        # Profilin birim ağırlığı kuralda yoksa ağırlık yazılmaz (soru); toplama girmez.
+        for x in ce.get("ek_satirlar") or []:
+            mk = model_kg(x)
+            ekle("Çelik panel", x["ad"], x["profil"].replace("x", " × "), x["panel_adedi"], x["profil_boyu_m"], birim="m",
+                 kg=mk[0] if mk else None,
+                 formul=mk[1] if mk else f"modeldeki profil boyu {tr(x['profil_boyu_m'])} m; {x['profil'].replace('x', ' × ')} profilin birim ağırlığı kuralda yok",
+                 durum=mk[2] if mk else "soru", not_=x.get("not"))
         if yontem == "panel":   # yöntem A: tavan paneli ve çatı paneli (100 m² için kg: Lokman'ın 4 Ekim düzeltmesi; adet: mühendisin 3 Ekim cevabı)
             oturum = (ce.get("cati") or {}).get("oturum_m2")
             for ad, anahtar, kural, aciklama in (("Tavan paneli (makas arası)", "tavan_paneli_m2", "tavan_paneli", "tavan alanı"),

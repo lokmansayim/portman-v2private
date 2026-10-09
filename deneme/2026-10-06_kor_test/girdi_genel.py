@@ -43,6 +43,15 @@ def sade(v: float) -> str:
     return tr(v).replace(",0", "")
 
 
+def _acik_parcalar(k: dict) -> list[tuple[float, float, str | None]]:
+    """Kirişin açık (duvarın içinde kalmayan) parçaları ve her parçanın bölgesi. `acik_bolgeler` verilmişse parça parça (bir kiriş hem
+    verandada hem bir mahalin içinde olabilir: KT-02'de veranda kenarından mahale geçen kiriş), verilmemişse kirişin `bolge`si (eski tanımlar)."""
+    bolgeler = k.get("acik_bolgeler") or [k.get("bolge")] * len(k["acik"])
+    if len(bolgeler) != len(k["acik"]):
+        raise SystemExit(f"Kirişin açık parçalarıyla bölgeleri uyuşmuyor: {k['ad']}")
+    return [(lo, hi, b) for (lo, hi), b in zip(k["acik"], bolgeler)]
+
+
 def cati_yontemi(ct: dict, kur: dict) -> str:
     """Çatı yöntemi: tanımda yazıyorsa o; yazmıyorsa çelik standardı kuralda yazıyorsa o (Lokman, 7 Ekim 2026 07:45: çelikte her zaman çatı ve
     tavan paneli), kural yoksa eski varsayılan (B: tavan omegası ve aşık)."""
@@ -155,13 +164,13 @@ def metraj(y: dict, c: dict, kur: dict) -> dict:
     m["bina_cevre_m"] = sum(f["boy"] for f in dis_yuz if f["sinif"] == "dis") / 100
     # dikme ve kiriş kaplaması (kuraldaki çevrelerle), kalkanlar, bacanın çatı üstü
     dikmeler = [d for d in y["duvarlar"] if d["sinif"] == "kolon"]
-    kiris_v = [k for k in t.get("kirisler", []) if k.get("bolge") == "veranda"]
+    kiris_v = [k for k in t.get("kirisler", []) if any(b == "veranda" for _, _, b in _acik_parcalar(k))]
     m["kolon_kiris"] = []
     if dikmeler:
         m["kolon_kiris"].append({"ad": "veranda dikmesi", "adet": len(dikmeler), "cevre_m": vk["dikme_kaplama_cevresi_m"], "boy_m": dikmeler[0]["yukseklik"] / 100})
     if kiris_v:
         m["kolon_kiris"].append({"ad": "veranda kirişi", "adet": 1, "cevre_m": vk["kiris_kaplama_cevresi_m"],
-                                 "boy_m": round(sum(hi - lo for k in kiris_v for lo, hi in k["acik"]) / 100, 3)})
+                                 "boy_m": round(sum(hi - lo for k in kiris_v for lo, hi, b in _acik_parcalar(k) if b == "veranda") / 100, 3)})
     m["kalkanlar"] = [{"ad": k["ad"], "alan_m2": round(k["alan_m2"], 3)} for k in c["kalkanlar"]]
     baca = []
     for d in y["duvarlar"]:
@@ -182,8 +191,7 @@ def metraj(y: dict, c: dict, kur: dict) -> dict:
         if b["sinif"] not in ("ic", "ek"):
             continue
         yz = [f for f in F if f["bolge"] == b["ad"] and f["kaplama"] == "ic"]
-        kiris = [k for k in t.get("kirisler", []) if k.get("bolge") == b["ad"]]
-        kiris_m2 = sum((hi - lo) / 100 * vk["kiris_kaplama_cevresi_m"] for k in kiris for lo, hi in k["acik"])
+        kiris_m2 = sum((hi - lo) / 100 * vk["kiris_kaplama_cevresi_m"] for k in t.get("kirisler", []) for lo, hi, kb in _acik_parcalar(k) if kb == b["ad"])
         bosluk = []
         for f in yz:
             for bb in f["bosluklar"]:
@@ -536,7 +544,9 @@ def girdi(y: dict, c: dict, m: dict, kur: dict, kaynak: str) -> dict:
             ek_duvarlar.append({"ad": "Baca karkası", "profil": prof, "birim_taraf": "dis" if prof in dis_birim else "ic", "boy_m": round(b["cevre_m"], 2), "yukseklik_m": round(b["boy_m"], 3),
                                 "panel_adedi": 4, "not": "kural yok: duvarın birim ağırlığı bacanın çevresi ve boyuyla (varsayım); dört dar panel"})
     dikmeler = [d for d in y["duvarlar"] if d["sinif"] == "kolon"]
-    kirisler = t.get("kirisler", [])
+    # Kiriş satırı modeldeki "kiris" grubudur. Başka bir gruba yazılan kiriş (`celik_grubu`; ör. farklı et kalınlığındaki kiriş) o grubun
+    # satırındadır (`celik_modeli.ek_satirlar`; KT-02, 9 Ekim 2026). Eski tanımlarda bütün kirişler "kiris" grubundadır.
+    kirisler = [k for k in t.get("kirisler", []) if k.get("celik_grubu", "kiris") == "kiris"]
     makas = ct.get("makaslar") or {}
     makas_adedi = sum(v.get("adet", 0) for v in makas.values()) or None
     dis_prof, dis_pb, dis_mn = model("dis", None if tahmin else gr["dis"]["adet"], sinif["dis"]["profil"])
@@ -546,6 +556,19 @@ def girdi(y: dict, c: dict, m: dict, kur: dict, kaynak: str) -> dict:
     kiris_prof, kiris_pb, _ = model("kiris", len(kirisler), None, f"80x45x{ev['kiris']}") if kirisler else (None, {}, "")
     makas_prof, makas_pb, _ = model("makas", makas_adedi, None, f"80x45x{ev['cati']}")
     cp_prof, cp_pb, cp_mn = model("cati_paneli", 1, None, f"80x45x{ev['cati']}") if mc["panelli_plan_m2"] else (None, {}, "")
+    # modeldeki öteki gruplar (`celik_modeli.ek_satirlar`: {grup, ad, not}): her biri ayrı satır, profil ve boy modelden (KT-02, 9 Ekim 2026:
+    # kırma uçlarının çatı panelleri, veranda destekleri, 1,5 mm kiriş). Bir kiriş bu gruplardan birine yazılmışsa grubun panel adedi o kirişlerin sayısıdır.
+    ek_satirlar = []
+    for es in (t.get("celik_modeli") or {}).get("ek_satirlar", []):
+        kg_kiris = [k for k in t.get("kirisler", []) if k.get("celik_grubu") == es["grup"]]
+        prof, pbx, mn = model(es["grup"], len(kg_kiris) or None, None)
+        ek_satirlar.append({"ad": es["ad"], "profil": prof, "panel_adedi": cm[es["grup"]]["adet"],
+                            "not": (es.get("not") or "panel adedi ve profil boyu modelden") + (" (" + ", ".join(k["ad"] for k in kg_kiris) + ")" if kg_kiris else "") + mn,
+                            **pbx})
+    kayip = sorted({k.get("celik_grubu") for k in t.get("kirisler", []) if k.get("celik_grubu", "kiris") != "kiris"}
+                   - {es["grup"] for es in (t.get("celik_modeli") or {}).get("ek_satirlar", [])})
+    if kayip:
+        raise SystemExit("Kirişin çelik grubu `celik_modeli.ek_satirlar`da yok: " + ", ".join(kayip))
     celik = {
         "dis": {"profil": dis_prof, "boy_m": round(m["bina_cevre_m"], 2), "panel_adedi": panel_tahmini("dis") if tahmin else gr["dis"]["adet"],
                 "not": et_notu if tahmin else "panel adedi modelden (duvar panelleri)" + dis_mn, **dis_pb},
@@ -569,12 +592,13 @@ def girdi(y: dict, c: dict, m: dict, kur: dict, kaynak: str) -> dict:
                             "not": ("ek yapının çatısı çatı paneliyle kapatılır (proje notu); adet modelden" + cp_mn) if cm else
                                    "ek yapının çatısı çatı paneliyle kapatılır (proje notu); 100 m² için verilen ağırlık ek yapının oturum alanına oranlandı; adet modelden",
                             **cp_pb} if mc["panelli_plan_m2"] else None),
+        **({"ek_satirlar": ek_satirlar} if ek_satirlar else {}),
     }
     if cm and set(cm) - kullanilan:
         raise SystemExit("Karkas modelinde tanımda karşılığı olmayan grup var: " + ", ".join(sorted(set(cm) - kullanilan)) + " (`celik_modeli.gruplar`).")
     ek_adi = next((o["ad"] for o in m["odalar"] if o["sinif"] == "ek"), None)
     panel_toplam = (gr["dis"]["adet"] + (gr.get("ic") or {}).get("adet", 0) + sum(x["panel_adedi"] for x in ek_duvarlar) + len(dikmeler) + len(kirisler)
-                    + (makas_adedi or 0) + (1 if mc["panelli_plan_m2"] else 0))
+                    + (makas_adedi or 0) + (1 if mc["panelli_plan_m2"] else 0) + sum(x["panel_adedi"] for x in ek_satirlar))
     duvar_paneli = sum(gr[s]["adet"] for s in ("dis", "ic", "ek", "korkuluk") if gr.get(s))
     g = {
         "sema": "portman.yukleme_girdisi/0.5-taslak",
