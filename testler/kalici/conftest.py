@@ -165,21 +165,13 @@ def tek(depo, sql: str, *arg):
 
 
 @pytest.fixture
-def ajan(depo, tmp_path, monkeypatch):
-    """vps/agent.py kalıcı modda, sahte hosting API'sine (sahte_hosting.py) bağlı. Gerçek PHP hattı değildir."""
+def ajan(depo, monkeypatch):
+    """vps/agent.py (İE-06, yerel kuyruk): veri dizini testin kanal dizini; tur(depo, ayar, sahip) doğrudan çağrılır."""
     import sys
     import worker
-    from sahte_hosting import SahteHosting
-    sys.path.insert(0, str(KOK / "vps"))
+    if str(KOK / "vps") not in sys.path:
+        sys.path.insert(0, str(KOK / "vps"))
     import agent as A
-    tok = os.urandom(32).hex()
-    h = SahteHosting(tmp_path / "hosting", tok)
-    url = h.basla()
-    for ad, deger in {"API": url, "TOKEN": tok, "DATA": worker.KANAL, "APP": KOK / "kanal", "LOGS": tmp_path / "logs",
-                      "PKG": tmp_path / "pkg", "PG_DSN": depo.dsn}.items():
-        monkeypatch.setattr(A, ad, deger)
-    A._kalici.update(depo=None, K=None, son_esitleme=0.0, son_uyari=0.0, devir={}, son_claim=0.0)
-    ayar = A.yerel_ayarlar(h.settings())
-    yield A, h, ayar
-    h.dur()
-    A._kalici.update(depo=None, K=None, devir={}, son_claim=0.0)
+    monkeypatch.setattr(A, "DATA", worker.KANAL)
+    A._sayac.update(bitti=0, basarisiz=0, son=None)
+    return A

@@ -1,26 +1,27 @@
-"""PORTMAN KANAL v1 — Python üretici (hosting cron'u, dakikada bir; task2/venv Python'u ile).
+"""PORTMAN KANAL — işleme çekirdeği (İE-06'dan beri yalnız Postgres akışı; kanal/kalici.py::bir_is çağırır).
 
-Kuyruktaki gelen WhatsApp mesajı (state.json → inbound, PHP webhook yazar)
+Gelen WhatsApp mesajı (webhook → Postgres)
   → Beyin: LLM çıkarım (yalnız "bayi ne dedi?") + deterministik kural katmanı
-  → giden METİN satırı (state.json → outbound; PHP tick gönderir)
-  → İş Emri çıktıysa Motor (DXF → yeniden aç → doğrula → PDF) → giden BELGE satırı
+  → giden METİN satırı (Postgres giden; kanal/gonderici.py gönderir)
+  → İş Emri çıktıysa Motor (DXF → yeniden aç → doğrula → PDF) → giden BELGE satırı (+ İE-04: görsel, etkileşim, 3D)
   → yönlendirme / hata → Patron'a bildirim satırı.
 
-Bu dosya WhatsApp'a, OpenAI dışında hiçbir yere bağlanmaz ve HİÇBİR ŞEY GÖNDERMEZ. Gönderim yalnız feature.php::pm_kanal_tick.
-Kurulum öz-testi (self-test-request.json) state.json'a dokunmaz; çıktıları checks/ altına yazar.
+Bu dosya WhatsApp'a bağlanmaz ve HİÇBİR ŞEY GÖNDERMEZ; dışarı yalnız LLM çağrısı çıkar. Kurulum öz-testi (self-test-request.json)
+çıktıları checks/ altına yazar. Hosting dosya modu (state.json, cron, pip kurulumu) İE-06 ile kaldırıldı.
 """
 from __future__ import annotations
-import fcntl, hashlib, importlib, json, os, subprocess, sys, time, traceback, warnings
+import hashlib, json, os, sys, time, traceback, warnings
 from pathlib import Path
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-KOD = Path(__file__).resolve().parent                                   # kod (beyin/, motor/, is_emri/ …)
-KANAL = Path(os.environ.get("PORTMAN_KANAL_DIR") or KOD).resolve()     # veri (settings/state/durum/projects); hostingte kodla aynı dizin
-sys.path.insert(0, str(KOD))
+KOD = Path(__file__).resolve().parent                                   # kod (kanal/); beyin/, motor/, is_emri/ bir üstte
+KANAL = Path(os.environ.get("PORTMAN_KANAL_DIR") or KOD).resolve()     # veri (settings.json, projects/, checks/)
+for _yol in (KOD.parent, KOD):
+    if str(_yol) not in sys.path:
+        sys.path.insert(0, str(_yol))
 os.umask(0o077)
-SURUM = "kanal-v1.3"    # İE-04 mesaj katmanı: image ve interactive satırlar, buton cevaplarının kimlikle çözümü
-STALE_S = 600           # 'processing' bu kadar süre ilerlemezse başarısız sayılır (otomatik tekrar yok)
+SURUM = "kanal-v2.0"    # İE-06: tek sunucu; v1.3 mesaj katmanı (image, interactive, buton kimlikleri) aynen
 GELEN_YAZILI = ("text", "button", "interactive")
 # Kısa cevaplı sorular buton taşır (kimlik dilbilgisi: kanal/etkilesim.py). Metinle cevap yolu her zaman açık kalır.
 SORU_BUTONLARI = {"pencere_islem": [("q:pencere_islem:degistir", "Değiştir"), ("q:pencere_islem:ekle", "Ekle")],
@@ -43,35 +44,6 @@ def yaz(p: Path, veri) -> None:
     os.replace(tmp, p)
 
 
-def ayarlar() -> dict:
-    return oku(KANAL / "settings.json", {}) or {}
-
-
-def state_change(fn):
-    """state.json'u PHP ile paylaşılan state.lock altında değiştir (flock; PHP tarafı aynı dosyayı kilitler)."""
-    with (KANAL / "state.lock").open("a") as f:
-        fcntl.flock(f, fcntl.LOCK_EX)
-        try:
-            p = KANAL / "state.json"
-            state = _normal(oku(p))
-            sonuc = fn(state)
-            yaz(p, state)
-            return sonuc
-        finally:
-            fcntl.flock(f, fcntl.LOCK_UN)
-
-
-def _normal(state) -> dict:
-    """PHP boş diziyi [] yazar; Python tarafında sözlük bekleriz."""
-    if not isinstance(state, dict):
-        state = {}
-    state.setdefault("version", 1)
-    for k in ("inbound", "outbound"):
-        if not isinstance(state.get(k), dict):
-            state[k] = {}
-    return state
-
-
 def log(*parca) -> None:
     print(time.strftime("%Y-%m-%d %H:%M:%S"), *parca, flush=True)
 
@@ -80,76 +52,9 @@ def maske(numara: str) -> str:
     return "…" + str(numara)[-4:] if numara else "-"
 
 
-# ───────────────────────── bağımlılıklar ─────────────────────────
-GEREKLI = {"shapely": "shapely", "pydantic": "pydantic", "ezdxf": "ezdxf", "fitz": "pymupdf", "numpy": "numpy"}
-# İE-04 mesaj katmanı ekleri (bayi plan görseli: matplotlib + pillow; IFC ve 3D sayfası: ifcopenshell). Kurulmaya çalışılır; kurulamazsa
-# ekler üretilmez (ekler_uret her birini ayrı dener), üretim ve öz-test DURMAZ. Sürümler yerel ortamla aynı (araclar/gereksinimler.txt).
-ISTEGE_BAGLI = {"matplotlib": "matplotlib==3.11.2", "PIL": "pillow", "ifcopenshell": "ifcopenshell==0.8.5"}
-
-
-def _eksik_moduller(modlar: dict) -> list[str]:
-    eksik = []
-    for mod in modlar:
-        try:
-            importlib.import_module(mod)
-        except Exception:
-            eksik.append(mod)
-    return eksik
-
-
-def bagimliliklar_hazir() -> bool:
-    """Eksik paket varsa venv pip'iyle kurmayı dener (en çok 3 deneme; install-report.json). Kurulum bitince aynı süreçte yeniden
-    denetler: zorunlular tamamsa True (öz-test ve üretim bu tikte sürer). İsteğe bağlılar eksik kalsa da True döner."""
-    eksik = _eksik_moduller(GEREKLI)
-    eksik_ib = _eksik_moduller(ISTEGE_BAGLI)
-    if not eksik and not eksik_ib:
-        return True
-    rapor_p = KANAL / "install-report.json"
-    rapor = oku(rapor_p, {}) or {}
-    if rapor.get("attempts", 0) >= 3:
-        if eksik:
-            log("bağımlılık eksik, kurulum 3 kez denendi; elle müdahale gerekli:", eksik)
-            return False
-        if rapor.get("bildirildi") is not True:
-            log("isteğe bağlı paket eksik (ekler üretilmez), kurulum 3 kez denendi:", eksik_ib)
-            yaz(rapor_p, {**rapor, "bildirildi": True})
-        return True
-    paketler = [GEREKLI[m] for m in eksik] + [ISTEGE_BAGLI[m] for m in eksik_ib]
-    log("eksik paket kuruluyor:", paketler)
-    try:
-        r = subprocess.run([sys.executable, "-m", "pip", "install", "--disable-pip-version-check", "--no-input", *paketler],
-                           capture_output=True, text=True, timeout=900)
-        sonuc = {"returncode": r.returncode, "stdout": r.stdout[-3000:], "stderr": r.stderr[-3000:]}
-    except Exception as e:
-        sonuc = {"returncode": -1, "stdout": "", "stderr": str(e)[:500]}
-    importlib.invalidate_caches()
-    kalan, kalan_ib = _eksik_moduller(GEREKLI), _eksik_moduller(ISTEGE_BAGLI)
-    rapor = {"attempts": rapor.get("attempts", 0) + 1, "at": int(time.time()), "python": sys.executable, "packages": paketler,
-             "kalan_zorunlu": kalan, "kalan_istege_bagli": kalan_ib, **sonuc}
-    yaz(rapor_p, rapor)
-    if kalan:
-        return False
-    if kalan_ib:
-        log("isteğe bağlı paket kurulamadı (ekler üretilmez; yeniden denenecek):", kalan_ib)
-    return True
-
-
-# ───────────────────────── sağlık ─────────────────────────
-def saglik(ek: dict | None = None) -> None:
-    st = _normal(oku(KANAL / "state.json", {}))
-    sayim = {}
-    for r in (st.get("inbound") or {}).values():
-        sayim[r.get("state", "?")] = sayim.get(r.get("state", "?"), 0) + 1
-    cikis = {}
-    for r in (st.get("outbound") or {}).values():
-        cikis[r.get("state", "?")] = cikis.get(r.get("state", "?"), 0) + 1
-    yaz(KANAL / "worker-health.json", {"checked_at": int(time.time()), "surum": SURUM, "python": sys.version.split()[0],
-                                       "enabled": ayarlar().get("enabled") is True, "inbound": sayim, "outbound": cikis, **(ek or {})})
-
-
 # ───────────────────────── öz-test ─────────────────────────
 def oz_test(settings: dict) -> None:
-    """self-test-request.json varsa ve sonucu yoksa bir kez koşar. state.json'a dokunmaz, hiçbir şey göndermez."""
+    """self-test-request.json varsa ve sonucu yoksa bir kez koşar (sürüm başına; vps/agent.py). Hiçbir şey göndermez."""
     istek_p = KANAL / "self-test-request.json"
     if not istek_p.exists():
         istek_p = KOD / "self-test-request.json"     # VPS: istek paketle gelir, sonuç veri dizinine yazılır
@@ -210,28 +115,12 @@ def oz_test(settings: dict) -> None:
     except Exception:
         sonuc["state"] = "failed"; sonuc["traceback"] = traceback.format_exc()[-4000:]
     sonuc["finished_at"] = int(time.time()); sonuc["sure_s"] = round(time.time() - baslangic, 1)
-    sonuc["not"] = "Öz-test hiçbir WhatsApp mesajı göndermez; state.json'a satır yazmaz."
+    sonuc["not"] = "Öz-test hiçbir WhatsApp mesajı göndermez; giden satırı yazmaz."
     yaz(sonuc_p, sonuc)
     log("öz-test", sonuc["state"], f"{sonuc['sure_s']} s")
 
 
 # ───────────────────────── üretim ─────────────────────────
-def is_al():
-    """En eski 'queued' gelen mesajı 'processing' yap; takılı kalanları (STALE_S) başarısız say."""
-    def fn(state):
-        simdi = int(time.time())
-        for r in state["inbound"].values():
-            if r.get("state") == "processing" and r.get("updated_at", 0) < simdi - STALE_S:
-                r.update(state="failed", error="İşlem teyit edilmeden bitti; otomatik tekrar yok.", updated_at=simdi)
-        adaylar = [r for r in state["inbound"].values() if r.get("state") == "queued" and not r.get("self_test")]
-        if not adaylar:
-            return None
-        r = min(adaylar, key=lambda x: (x.get("timestamp", 0), x.get("received_at", 0)))
-        r.update(state="processing", attempts=r.get("attempts", 0) + 1, started_at=simdi, updated_at=simdi)
-        return dict(r)
-    return state_change(fn)
-
-
 def satir_id(gelen_id: str, sira: int) -> str:
     return "out_" + hashlib.sha256(f"{gelen_id}|{sira}".encode()).hexdigest()[:24]
 
@@ -301,15 +190,6 @@ def _sha(p: Path) -> str:
     return hashlib.sha256(p.read_bytes()).hexdigest()
 
 
-def giden_bul_dosya(context_id: str) -> dict | None:
-    """Dosya modu: state.json'daki giden satırlardan WhatsApp kimliği eşleşen (cevaplanan mesaj)."""
-    st = _normal(oku(KANAL / "state.json", {}))
-    for r in (st.get("outbound") or {}).values():
-        if r.get("wamid") == context_id:
-            return r
-    return None
-
-
 def baglam_ozeti(k) -> str:
     d = k.d
     if d.get("asama") == "topluyor" and d.get("taslak"):
@@ -345,13 +225,13 @@ def katalog_nesnesi(settings: dict, kabul_edilmis: set | None = None):
 
 def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje_koku: Path | None = None, giden_bul=None,
          katalog=None) -> dict:
-    """Bir gelen mesajı işler; giden satırlarını ve sonucu döndürür (state.json'a yazmaz — çağıran yazar).
-    İE-02 (kalıcı akış, kanal/kalici.py): k verilirse konuşma dosyadan değil o nesneden okunur; cikarim verilirse
-    ({"talep": …, "meta": …} ya da {"hata": …}) LLM çağrılmaz; proje_koku verilirse Motor çıktısı projects/ yerine oraya
-    yazılır (kalıcı akış önce hazırlık klasörüne yazar, kayıtla birlikte yerine taşır). Hiçbiri verilmezse davranış
-    v1.1.1 ile aynı.
+    """Bir gelen mesajı işler; giden satırlarını ve sonucu döndürür (kayda yazmaz — çağıran yazar: kanal/kalici.py).
+    k verilirse konuşma o nesneden okunur (Postgres); verilmezse Beyin'in dosya tabanlı Konusma'sı (yalnız yerel koşum ve
+    testler). cikarim verilirse ({"talep": …, "meta": …} ya da {"hata": …}) LLM çağrılmaz; proje_koku verilirse Motor çıktısı
+    projects/ yerine oraya yazılır (kalıcı akış önce hazırlık klasörüne yazar, kayıtla birlikte yerine taşır).
     İE-04: gelen satırda reply_id varsa (buton ya da liste cevabı) LLM çağrılmaz; kimlik kanal/etkilesim.py ile çözülür
-    (cikarim["etkilesim"] verilmişse o kullanılır). giden_bul(context_id) cevaplanan giden satırı verir (doğrulama için)."""
+    (cikarim["etkilesim"] verilmişse o kullanılır). giden_bul(context_id) cevaplanan giden satırı verir (doğrulama için);
+    None ise bu doğrulama yapılmaz."""
     from beyin.konusma import Konusma
     from beyin.karar import karar_ver
     from motor import dxf_out
@@ -390,7 +270,7 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
     metin_kural = gelen.get("text") or ""
     etk = None
     if gelen.get("reply_id"):
-        etk = (cikarim or {}).get("etkilesim") or ET.coz(gelen, k.d, giden_bul if giden_bul is not None else giden_bul_dosya)
+        etk = (cikarim or {}).get("etkilesim") or ET.coz(gelen, k.d, giden_bul)
         if not etk.get("gecerli"):
             # Eski ya da tanınmayan buton: hiçbir durum değişmez; bayiye güncel durum söylenir. (LLM çağrılmaz.)
             k.not_dus("gelen", f"buton {etk.get('kimlik')}", {"niyet": "buton", "guven": "yuksek"})
@@ -574,58 +454,3 @@ def cikar(gelen: dict, settings: dict, k):
                              ayarlar_json=settings.get("ayarlar_json"), timeout=int(llm_ayar.get("timeout_s", 60)))
 
 
-def kaydet(gelen: dict, cikti: dict) -> None:
-    def fn(state):
-        simdi = int(time.time())
-        for s in cikti["satirlar"]:
-            if s["id"] not in state["outbound"]:
-                state["outbound"][s["id"]] = s
-        r = state["inbound"].get(gelen["id"])
-        if r is not None:
-            r.update(state="failed" if cikti.get("hata") else "done", result=cikti["sonuc"], outbound_ids=[s["id"] for s in cikti["satirlar"]],
-                     error=cikti.get("hata"), finished_at=simdi, updated_at=simdi)
-    state_change(fn)
-
-
-def main() -> None:
-    with (KANAL / "worker.lock").open("a") as kilit:
-        try:
-            fcntl.flock(kilit, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        except BlockingIOError:
-            return
-        settings = ayarlar()
-        if settings.get("worker", "hosting") != "hosting":
-            # Üretim bu makinede kapalı: bağımlılık kurulumu (pip), öz-test (gerçek LLM çağrısı olabilir) ve iş alma YAPILMAZ; yalnız sağlık yazılır.
-            # (Denetim bulgusu F09: önceki sıra worker=vps iken de pip/öz-test yan etkisine izin veriyordu.)
-            saglik({"worker": settings.get("worker"), "note": "üretim bu makinede kapalı (settings.worker); pip/öz-test atlandı"}); return
-        if not bagimliliklar_hazir():
-            saglik({"deps": "eksik; install-report.json"}); return
-        try:
-            oz_test(settings)
-        except Exception:
-            log("öz-test çalıştırılamadı:", traceback.format_exc()[-800:])
-        if settings.get("enabled") is not True:
-            saglik(); return
-        butce = time.time() + float(settings.get("budget_s", 45))
-        en_fazla = int(settings.get("max_is_per_tick", 2)); n = 0; son = None
-        while n < en_fazla and time.time() < butce:
-            gelen = is_al()
-            if not gelen:
-                break
-            n += 1; t0 = time.time()
-            try:
-                cikti = isle(gelen, settings)
-            except Exception:
-                hata = traceback.format_exc()[-2500:]
-                cikti = {"satirlar": [giden_metin(gelen, "Mesajınızı şu an işleyemedim; Lokman Bey'e iletiyorum, en kısa sürede dönüş yapılacak.", 1)]
-                         + ([] if gelen.get("role") == "patron" else [giden_metin(gelen, f"Portman: {maske(gelen['sender'])} mesajı işlenirken hata oluştu; state.json/worker.log'a bakın.", 2, "PATRON", "bildirim")]),
-                         "sonuc": {"eylem": "hata", "gerekce": "beklenmeyen hata"}, "hata": hata}
-            kaydet(gelen, cikti)
-            son = {"id": gelen["id"][:24], "eylem": cikti["sonuc"].get("eylem"), "sure_s": round(time.time() - t0, 1)}
-            log("gelen", gelen["id"][:20], "kimden", maske(gelen["sender"]), "→", cikti["sonuc"].get("eylem"), f"({cikti['sonuc'].get('gerekce')})",
-                f"{son['sure_s']} s", "giden:", len(cikti["satirlar"]), ("HATA: " + cikti["hata"].splitlines()[-1][:160]) if cikti.get("hata") else "")
-        saglik({"last_job": son} if son else None)
-
-
-if __name__ == "__main__":
-    main()
