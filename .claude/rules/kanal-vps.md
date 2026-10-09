@@ -2,17 +2,17 @@
 paths:
   - "kanal/**"
   - "vps/**"
-  - "hosting/**"
 ---
 
-# Kanal, VPS ve hosting kuralları (K06, K07, K09, K12–K14, D-03, D-04)
+# Kanal ve VPS kuralları (İE-06 / D-05; K07, K09, D-03 değişmedi)
 
-- Hibrit mimari: hosting = kontrol düzlemi (Meta webhook, kuyruk, gönderim, WhatsApp anahtarı); VPS = üretici; ajan yalnız dışarıdan bağlanır, WhatsApp'a kendisi göndermez (K12, `vps/agent.py`).
-- Buradaki her değişiklik canlıya gidebilir: paket sha'sı değişir, ajan kendini günceller (K14). Bu yüzden `kanal/`, `vps/` ve paket dosyalarında değişiklik = **canlı değişiklik adayı**; Lokman'ın ayrı onayı olmadan paket üretilmez, hosting'e dosya yazılmaz.
-- `hosting/` canlı dosyaların kayıt kopyasıdır; düzenlenmez, yalnız karşılaştırma için okunur.
-- Öz-test asla WhatsApp'a göndermez; Patron modu ve kill switch korunur (K07, K09). Gerçek mesajla deneme ücretli denemedir, önceden bildirilir.
-- Eşleşme anahtarı `hash_equals` ile kontrol edilir; yanlışsa 401 + 1 sn bekleme (K13). Komut kanalı (`vps_komut`) kapalı başlar ve açılmaz (K14).
-- Kalıcı akış: asıl kayıt Postgres, tek etkin işleyici `settings.worker` (D-04); yarım iş en çok 3 kez alınır, yalnız geçici teknik hatada (D-03). Veritabanı eski yedekle ezilmez.
-- Numaralar günlüğe ve kanıta yalnız maskeli ya da özetiyle yazılır (`maske()`; K09). WhatsApp kimliği numarayı içerir: ham haliyle yazılmaz.
-- PHP tarafı testleri (`php kanal/tests/offline_test.php <lib.php>`) hosting'in gerçek `lib.php`'sini ister; o dosya depoda yoktur, temiz kopyası Lokman'ın Mac'indedir.
-- Bilinen açık riskler: imzasız paket (K25), root parolayla SSH (kapatılması canlı değişikliktir), anahtar son kullanma tarihi (DURUM.md). Bunlara dokunan iş önce DURUM'daki riski günceller.
+- Tek sunucu: Meta webhook (`kanal/webhook.py`), ajan (`vps/agent.py` → `kanal/kalici.py`, `worker.py`), gönderici (`kanal/gonderici.py`), panel (`kanal/panel.py`) VPS'te; asıl kayıt Postgres (`kanal/depo.py`, göçler `kanal/goc/`). Hosting'te yalnız web sitesi; PHP, paket, eşleşme anahtarı ve komut kanalı yok (K06, K12, K13, K14 D-05 ile kapandı).
+- Canlıya gidiş yalnız `main`'deki açıklamalı etiketle: Lokman `vps/guncelle.sh <etiket>` koşar; `main`'e birleştirme ve etiket Lokman'ın onayıyla (Kapı M). `kanal/`, `vps/`, `beyin/`, `motor/` değişikliği = **canlı değişiklik adayı**. Asistan sunucuya bağlanmaz; betikleri Lokman `ssh portman-vps 'bash -s' < betik` ile koşar.
+- Göçler yalnız ekler: `IF NOT EXISTS`; DROP, RENAME, daraltma, varsayılansız NOT NULL yok (`testler/kalici/test_goc_eklemeli.py`). N sürümünün kodu N+1 şemasında çalışır; `geri_don.sh` şemaya dokunmaz. Silme ve yeniden adlandırma en az bir sürüm sonra, ayrı göçle ve ayrı kararla.
+- Sırlar `/etc/portman/{llm,whatsapp,panel}.env` (root 0600; systemd `EnvironmentFile`, yalnız ilgili birim), `deploy_key`, `rclone.conf`, `yedek.pub`. Değerler sohbete, depoya, günlüğe, dosya adına girmez; betikler yalnız 12 haneli parmak izi basar (`vps/sir_koy.py`). Yeni betik yazarken: değeri stdin'den oku, atomik yaz, ekrana ve komut satırına çıkarma.
+- Ayarlar `data/settings.json` (`kanal/ayarlar.py`; `vps/ayar.sh`): `enabled`, `enabled_at`, `dry_run`, `mode` (patron | kayitli | hepsi), `kayitsiz_cevap`, `mesaj_katmani`, `ucb_taban_url`. Kill switch'ler: `enabled: false` → sahiplenme, iş alma ve gönderim durur; `dry_run: true` → giden satırlar gönderilmez (`gonderilmedi`, sonradan da gönderilmez). Öz-test asla WhatsApp'a göndermez (K07, K09); gerçek mesajla deneme ücretli denemedir, önceden bildirilir.
+- Webhook kuralları eski `feature.php` ile aynı sayılarla: imza sabit zamanlı, `phone_number_id` denetimi, 15 dakikadan eski mesaj alınmaz, tekilleştirme (`mesajlar.id`, `webhook_olaylar`), kayıtsız gönderene sabit cevap gönderen başına 24 saatte bir, her gelen mesaj panelde. Cloud API sınırları `kanal/meta_api.py`'de. Yarım iş en çok 3 kez alınır, yalnız geçici teknik hatada (D-03). Veritabanı eski yedekle ezilmez.
+- Numaralar günlüğe ve kanıta yalnız maskeli (`maske()`, `kimlik_izi()`; K09); nginx erişim günlüğünde sorgu dizesi yok; panel ham IP saklamaz (özet). Mesaj metni günlüğe yazılmaz.
+- Dışa açık yalnız 443 (+80 ACME): `/webhook`, `/saglik`, `/panel/`; gerisi 404 (`vps/nginx/portman.conf`). ufw 22/80/443; parolalı SSH kapalı (`vps/sshd/00-portman.conf`); fail2ban. `kurulum.sh`'nin gömülü kopyaları `vps/systemd`, `nginx`, `sshd`, `fail2ban`, `logrotate` dosyalarıyla birebir aynı tutulur (`test_kurulum.py` denetler).
+- Testler: `testler/kalici/` (gerçek Postgres; sahte Graph API `sahte_meta.py`; betikler `PM_*` ile sahte dizinlerde), `kanal/tests/e2e_vps_kanal.py` (uçtan uca, gerçek Motor). Gerçek Meta ve LLM yalnız canlı kapılarda, ayrı onayla.
+- Tarihli kayıt olarak duran, koşmayan betikler: `vps/kapi_*`, `pg_kurulum.sh`, `anthropic_anahtar.py`, `canli_kontrol.sh`, `api_denetim.py`, `anahtar_yenile.py`, `kanal/depo_aktar.py`. `dogrula.py`'nin bilinen tek farkı `vps/kapi_d_dogrula.sh:25`'e bağlıdır; bu dosyalara dokunulmaz.

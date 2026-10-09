@@ -1,6 +1,6 @@
-# Kalıcı akış testleri (İE-02)
+# Kalıcı akış ve kanal testleri (İE-02, İE-04, İE-06)
 
-Postgres üzerinde kalıcı konuşma ve iş akışının kabul testleri. İş emri: `docs/is_emirleri/IE-02.md`. Kod: `kanal/depo.py`, `kanal/kalici.py`, `kanal/depo_aktar.py`, `kanal/goc/`.
+Postgres üzerinde kalıcı konuşma ve iş akışının kabul testleri (İE-02) ile tek sunuculu kanalın (İE-06) birim ve betik testleri. İş emirleri: `docs/is_emirleri/IE-02.md`, `IE-06.md`. Kod: `kanal/depo.py`, `kanal/kalici.py`, `kanal/webhook.py`, `kanal/gonderici.py`, `kanal/panel.py`, `kanal/meta_api.py`, `kanal/goc/`, `vps/`.
 
 ## Koşum
 
@@ -15,9 +15,9 @@ PORTMAN_TEST_PG="…" python testler/kalici/kabul_gosterimi.py --rapor kabul.md
 
 | Gerçek | Simülasyon |
 |---|---|
-| Postgres 16; göçler; işlemler; kilitler | Gelen WhatsApp mesajı: `feature.php`'nin kuyruğa yazdığı satır elle üretilir (imza ve Meta yok) |
-| Beyin kural katmanı (`karar_ver`), `worker.isle` | LLM çıkarımı kayıtlıdır (manuel arka uç) |
-| Motor: `test_yeniden_baslatma.py` ve `kabul_gosterimi.py`'de gerçek; öteki testlerde hızlı sahte üretici | Gönderim sahte bir WhatsApp göndericisiyle yapılır; hosting PHP tarafı yok (`portman/lib.php` depoda değil) |
+| Postgres 16; göçler; işlemler; kilitler | Gelen WhatsApp mesajı: kuyruk satırı elle üretilir (`conftest.mesaj`; İE-06 testlerinde imzalı sahte Meta olayı, `test_webhook.py`) |
+| Beyin kural katmanı (`karar_ver`), `worker.isle`; webhook, gönderici ve panel WSGI uygulamaları doğrudan | LLM çıkarımı kayıtlıdır (manuel arka uç) |
+| Motor: `test_yeniden_baslatma.py`, `kabul_gosterimi.py` ve `kanal/tests/e2e_vps_kanal.py`'de gerçek; öteki testlerde hızlı sahte üretici | Gönderim sahte göndericiyle (`SahteWhatsApp`) ya da sahte Graph API ile (`sahte_meta.py`); betikler `PM_*` değişkenleriyle sahte dizin ve sahte komutlarla (systemctl, rclone, age, sshd) |
 | Ayrı işleyici süreçleri; süreç öldürme (SIGKILL) ve yeniden başlatma (SIGTERM) | Zamanın geçmesi, konuşmadaki zamanlar geriye alınarak taklit edilir (D-01'in 2 saati) |
 
 Gerçek WhatsApp ve gerçek LLM ile denenmedi. Bu testler canlı doğrulama değildir.
@@ -38,34 +38,26 @@ Gerçek WhatsApp ve gerçek LLM ile denenmedi. Bu testler canlı doğrulama değ
 | T10 | Kabul gösterimi (aşağıda) | `kabul_gosterimi.py`, `test_kabul.py` |
 | İnceleme | Bağımsız incelemenin (28.09) bulguları ve yakalanmayan mutasyonlar. İşin bitişi yazılamazsa hiçbir sonuç kalmaz; mesaj ve iş birlikte yazılır (ikisi de tetikleyiciyle sınanır). İlk yazmada da sessiz ezme olmaz. Kirası devredilen işin eski sahibi yazamaz. Süresi dolan D-01 sorusundan sonra gelen onay da denetlenir. Soru kaydı cevaplandı, düştü ya da devredildi diye doğru kapanır. Aynı bayi kodlu iki numara birbirinin kaydını göremez ve aynı İş Emri numarası üretilse de dosya ezilmez. Değişmiş PDF gönderilmez. Geç gelen gönderim teyidi kaybolmaz. İşlenmekte olan mesaj varken geçiş yapılmaz. SIGTERM'de eldeki iş bitirilir. İkinci tur: PDF yolu kayıtta ve satırda yerinde, hazırlık klasörü temiz; çakışmada taşınan dosya silinir; kayıt yazıldıktan sonra bağlantı koparsa PDF yerinde kalır; hiçbir şey sorulmadıysa soru kaydı açılmaz. | `test_inceleme.py` |
 
-## Bağlantı turu (`test_baglanti.py`)
+## Tarihli kapı testleri (İE-02, İE-04)
 
-- **Göç 002:** 001'den yükseltme; API kabulü ile Meta teslimi ayrı alanlarda.
-- **Onay zinciri:** gönderilen PDF'in mesaj kimliği → revizyon → proje → gelen cevap ve alıntısı. Eski revizyona verilen onayın reddi ve güncel revizyonun doğru onayının kabulü aynı akışta gösterilir. Kabul edilmiş ama teslim edilmemiş plana yazılan onay reddedilir; Meta "failed" bildirdiyse onay kaydedilmez.
-- **D-03 kapsamı:** yetkisiz numara, soru, geçersiz ya da hatalı LLM çıktısı, yazısız mesaj ve beklenmeyen hata bir kez yazılır, tekrar edilmez. Belirsiz gönderim işi yeniden açmaz.
-- **Ajan kalıcı modu** (`vps/agent.py`), **sahte hosting** ile (`sahte_hosting.py`): claim → Postgres → hosting'e devir → durum eşitleme. Ayrıca şunlar sınanır:
-  - cevabı kaybolan devir yeniden denenir;
-  - aynı kanal mesajı ikinci iş açmaz;
-  - yeniden başlayan ajan ölü sürecin işini hemen alır;
-  - hosting satırı bırakmışsa satırlar "gönderilmedi" olur;
-  - eski API ya da eksik göçle ajan çalışmaz;
-  - canlı kabul gösteriminin yedi adımı provadan geçer.
-- **Sahte hosting PHP değildir.** Gerçek PHP hattı `kanal/tests/baglanti_test.php` ve `kanal/tests/e2e_kalici.py` ile sınanır; ikisi de `portman/lib.php` ister (`docs/is_emirleri/IE-02-canli.md`, kapı B). Sahte hostingin neyi taklit ettiği ve etmediği `sahte_hosting.py`'nin başında yazılı.
+- `test_lib_tara.py` (kapı B): `denetim/lib_tara.py` sahte sırları (anahtar, telefon, e-posta, sır adlı değer, kodda uzun sayı) bulur ve değerlerin hiçbirini ya da 8 karakterlik bir parçasını yazdırmaz; temiz kopya yalnız değerleri değiştirir; özgünün üzerine yazmaz.
+- `test_kapi_c.py` (kapı C): `vps/kapi_c.py` sahte hosting, sahte OpenAI ve sahte systemctl ile uçtan uca: adım sırası zorunlu, eski anahtar iptal edilmeden bitmez; hiçbir çıktıda anahtar parçası yok.
+- `test_kapi_m.py` (İE-04 kapı M): `vps/kapi_m_goc.sh` göç 003'ü yalnız ön koşullar tutunca uygular; fikstür 30.09'daki paket düzenini (göç 001–003) kopyalar.
+- İE-06 ile kaldırılanlar (sınadıkları kod artık yok): `sahte_hosting.py`, `test_hosting_devri.py`, `test_baglanti.py`, `test_kapi_f.py`, `test_kapi_g.py`, `test_vps_betikleri.py`, `test_bagimliliklar.py`, `test_llm_opus.py`, `test_pg_kurulum.py` (`pg_kurulum.sh`'nin yerel bağlantı, sahiplik ve geçici küme denetimleri `test_kurulum.py`'ye taşındı). Git geçmişinde `bc2bdc0`'da dururlar.
 
-## Hosting'e devir (`test_hosting_devri.py`, dördüncü inceleme)
+## Tek sunuculu kanal (İE-06)
 
-- **Postgres kesintisi:** Postgres'e ulaşılamıyorsa hosting'ten mesaj alınmaz; alınıp yazılamayan mesaj diske alınır, Postgres dönünce yazılır ve işlenir.
-- **Hosting'in 600 sn'si:** uzun bir kesintiden sonra bekleyen cevap claim'den (süpürmeden) önce verilir. D-03'ün üç denemesi (3 × 120 sn) `feature.php`'deki `PM_KANAL_STALE`'e sığar; tükenen işin ve başarısız işin bildirimi hosting'e verilir.
-- **Hata sınıfları:** hosting'e ulaşılamıyorsa (bütün isteklerde 401, 403, 429, 5xx) sonraki turda beklemeden yeniden denenir; hosting ulaşılabilir ama bu işin sonucunu almıyorsa (403, 500, geçici 422, bad_result, bağlantı kopması) iş aralıkla yeniden denenir, her turda değil, ve öteki işler beklemez; mesaj alınalı 480 sn olduysa aralık yok sayılır; uzasa da vazgeçilmez (uyarıya düşer). Bilinen kesin retler (yol, PDF biçimi, satır uyuşmazlığı, 413) hemen "gönderilmedi" olur; hosting mesajı hiç bilmiyorsa ya da satırı süpürmüşse `giden_durum` ile mutabakat yapılır (sonuç oraya ulaşmışsa "hostingte"). Uzun süre sonra yeniden kuyruğa konan mesajın cevabı süpürülmüş sayılmaz.
-- **Tek etkin işleyici ve boşaltma:** `worker=off` iken ajanın ana döngüsü claim çağırmaz, açık işi bitirip hosting'e verir; `worker=hosting` iken hiçbir şey yapmaz. İçe aktarma yalnız boş veritabanına; canlı geçişte kuyruktakiler iş olmaz. Ölü kira yalnız bu makinedeki süreçler için düşer.
-- **Eşitleme ve onay sınırı:** belirsiz satır sonradan kabul görürse işlenir ve onay kabul edilir; iş işlenmeden önce durum okunur; en yeni 200 satır önce, metin satırlarının teslimi beklenmez; Meta'nın "sent" anı hosting saatinden önce gelir; aynı saniyede yazılan onay reddedilir, bir saniye sonrası kabul edilir; hosting durumlarının her biri; teslim durumu geri gitmez, ilk teslim anı kalır.
-- **Tekrar gelen mesaj:** ilk işin hosting'e verilemeyen ya da bekleyen cevabı bu alımla verilir; hosting'in tuttuğu satır yeniden verilmez; kayıttan sonra değişen PDF hosting'e verilmez.
-- **Beşinci inceleme:** NUL karakterli mesaj yazılır; Postgres'e yazılamayan mesaj `hatali/`'ye ayrılır, ajan sürer; diskte bekleyen tekrar mesajın kapanışı reddedilse de sürer; Postgres'te açık iş varken yeni mesaj alınmaz; Meta'nın iletemediği metin satırı uyarıya düşer; tekrar gelen mesaj başarısız işin bildirimini yeniden verir; ana döngü `worker=hosting` ya da `enabled=false` iken hiçbir şey yapmaz; içe aktarma komutu dolu veritabanına aktarmaz.
-- `test_vps_betikleri.py`: anahtar yenileme ve API denetimi betikleri anahtar değerini yazdırmaz, dosya iznini korur; Claude anahtarı betiği aynı saniyede ikinci kez koşunca da ayrı yedek alır.
-- `test_llm_opus.py` (29.09 Opus 5.5 geçişi, API çağrısı yok): `claude-opus-5-5` isteği `tool_choice: auto` + tek araç + `effort: low` + 4096 token ile gider; `max_tokens`, düz metin, ret, yanlış araç ya da iki araç çağrısı `LLMHatasi` olur; öteki Claude modellerinin zorunlu araç yolu değişmedi; bayi botunun PHP adaptörü (`hosting/tests/claude_api_test.php`) PHP 8.2.30 ve 8.4'te geçer.
-- `test_lib_tara.py` (kapı B): `denetim/lib_tara.py` sahte sırları (anahtar, telefon, e-posta, sır adlı değer, kodda uzun sayı) bulur ve değerlerin hiçbirini ya da 8 karakterlik bir parçasını yazdırmaz; temiz kopya yalnız değerleri değiştirir (kod iskeleti ve satır sayısı aynı, yeniden tarama temiz, PHP 8.2.30 ve 8.4'te `php -l` geçer, davranış aynı); özgünün üzerine yazmaz.
-- `test_kapi_c.py` (kapı C): `vps/kapi_c.py` sahte hosting, sahte OpenAI ve sahte systemctl ile uçtan uca: adım sırası zorunlu, hosting yeni anahtarı almadan servis yeniden başlatılmaz, eski OpenAI anahtarı iptal edilmeden bitmez ve eski anahtarların geçici klasörü ancak her şey doğrulanınca silinir; hiçbir çıktıda anahtar parçası ya da OpenAI hata mesajı yok.
-- `test_pg_kurulum.py` (kapı D): yedeklerin otomatik silinmesi varsayılan olarak kapalı, açmak ayrı tercih (`PM_YEDEK_SAKLA_GUN`); geri yükleme denemesi yalnız kendi açıp işaretlediği veritabanını siler, aynı adda başkası varsa ve `portman` veritabanının sahibi başkaysa dokunmadan durur; yerel bağlantı şartı sağlanmıyorsa (`listen_addresses`, `pg_hba`) uyarıp geçmez, durur ve hiçbir şey oluşturmaz. Durdurma koşulları ayrı, geçici Postgres kümelerinde uçtan uca sınanır (`initdb` ve `pgtest` kullanıcısı gerekir; yoksa atlanır).
+| Test | Ne sınar |
+|---|---|
+| `test_meta_api.py` | İmza (HMAC-SHA256, sabit zamanlı), hub doğrulaması, gelen olay çözümü (metin, buton, liste, medya, konum), dosya denetimi (yol, imza, boyut), yük kurucuları ve Cloud API sınırları (`feature.php` ile aynı sayılar), Graph istemcisi (gönderim, medya yükleme/indirme), anahtar maskeleme |
+| `test_webhook.py` | `GET /webhook` hub, `POST /webhook` imza/413/400, yakalama kuralları (`enabled`, `enabled_at`, 15 dk, `phone_number_id`), tekilleştirme (`mesajlar.id`, `webhook_olaylar`), `mode` kararları, kayıtsız gönderen ve sabit cevap sıklığı, durum bildirimleri (`biz_opaque_callback_data`, sıra, failed), medya kaydı, `/saglik` (nabız yaşı, `nabiz.sh` sorunları → 503), işlenemeyen olayda 503 |
+| `test_gonderici.py` | `pm_kanal_send` kuralları: metin/belge/görsel/etkileşim yükleri, medya yükleme ve yeniden deneme (`YenidenDene`), belirsiz cevap, `dry_run` ve kapalı kanal, PATRON bildirimi ve 24 saat penceresi, gelen medya indirme (`gelen_medya/`), nabız |
+| `test_panel.py` | Giriş (scrypt, ön çerez + CSRF), 5 başarısız girişte 15 dk kilit (IP özeti ve hesap), imzalı oturum çerezi (sahte/süresi dolmuş ret), CSRF'siz POST 403, bayi ekle/düzenle (numara değişmez, aktif kapatılır, HTML kaçışı), gelen kutusu, konuşma sayfası, dosya indirme yalnız `gelen_medya` altından, güvenlik başlıkları, çıkış |
+| `test_bayi.py` | Bayi kimlik kartı alanları, kod türetme (`PATRON`, `B` + son 4), `gelen_bayisi` (pasif → None), olay tekilleştirme, durum satırı eşleşmesi |
+| `test_goc_eklemeli.py` | Göçlerde DROP/RENAME/daraltma/varsayılansız NOT NULL yok; her göç tekrar koşulabilir; eski sürüm kodu yeni şemada çalışır |
+| `test_kurulum.py` | `vps/kurulum.sh` sahte dizinlerde ve yerel Postgres'te: dizinler, dağıtım anahtarı (yalnız açık anahtar ekrana), `settings.json` varsayılanı `ayarlar.VARSAYILAN` ile aynı, `panel.env` oturum anahtarı (yazdırılmaz), gömülü systemd/nginx/sshd/fail2ban/logrotate dosyaları depodakilerle birebir, sshd drop-in yalnız `authorized_keys` doluyken ve bozuk sözdiziminde geri alınır, sertifika/DNS kararı, ikinci koşu korur; Postgres: yalnız yerel dinleme, sahiplik, yerel olmayan kümede durur ve hiçbir şey oluşturmaz |
+| `test_surum.py` | `guncelle.sh` (yerel çıplak git deposu; açıklamalı etiket ve `origin/main` denetimi; `git archive`; içe aktarma denetimi; göçler; bağlantı değişimi; sağlık 503'te kendiliğinden geri dönüş), `geri_don.sh`, `surum_temizle.sh` (onaysız silmez), `sir_koy.py` (biçim, atomik 0600, parmak izi, doğrulama yerel sahte sunucuya), `panel_parola.py`, `yedek_kur.sh`, `yedek.sh` (sahte rclone/age/pg_dump; `nabiz/` ve `checks/` yedeğe girmez; yerelde 3), `yedek_geri_dene.sh` (işaretli deneme veritabanı), `nabiz.sh` + `uyari_gonder.py` (pencere, sıklık), `ayar.sh`, `oz_test.sh`, `kuru_kosu.sh` (imza), `arsiv_al.sh`, `durum.sh` (maskeli) |
+| `test_e2e_vps_kanal.py` | `kanal/tests/e2e_vps_kanal.py`'yi koşturur: sahte Meta → webhook → Postgres → ajan (ayrı süreç, gerçek Motor) → gönderici → durum bildirimi → buton cevabı/onay zinciri; katman kapalı; kayıtsız numara; gelen görsel; panel; `/saglik` (42 vaka) |
 
 ## Kabul gösterimi
 

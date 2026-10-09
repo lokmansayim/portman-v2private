@@ -9,6 +9,12 @@ Yeni pencere için hazırlıklar:
 - Dış çizim denetimi: `deneme/2026-09-30_asama2/kos.py --dxf`.
 - Mac'te `24_Astra_Cizimler/`.
 
+**9 Ekim 2026 eki (dal `ie-06-kanal-vps`, İE-06 Aşama A; `docs/is_emirleri/IE-06.md`, karar `KARARLAR/D-05.md`):**
+- **Kanal tek sunucuya taşınıyor.** Yerel kod bitti: Meta webhook (`kanal/webhook.py`), gönderici (`kanal/gonderici.py`), Meta istemcisi (`kanal/meta_api.py`), panel (`kanal/panel.py`), göç 004 (bayi kimlik kartı, gelen dosyalar, webhook olayları), ajan yerel kuyrukta (`vps/agent.py` v2.0), VPS betikleri (`vps/kurulum.sh`, `guncelle.sh`, `geri_don.sh`, `sir_koy.py`, `panel_parola.py`, `yedek*.sh`, `nabiz.sh`, `durum.sh`, `kuru_kosu.sh` …) ve systemd/nginx/sshd/fail2ban dosyaları. Eski mimari depodan çıktı: `kanal/feature.php`, `api.php`, `install/`, PHP testleri ve `e2e_*.py`, `vps/paketle.py`, `bootstrap_template.sh`, `hosting/` (29.09 kayıt kopyası git geçmişinde: `bc2bdc0`). Kullanıcı adımı B1 **Yerelde çalışıyor**; B2–B11 Çalışmıyor (canlı kapılar). BK-04 İE-06 içinde kapandı (`docs/is_emirleri/BK-04.md`).
+- **Gerileme (9 Ekim):** `bash araclar/ortam_kur.sh --dogrula`: harness 22/22, DXF ve PDF parmak izleri AYNI, yalnız bilinen sır taraması farkı; pytest ve `kanal/tests/e2e_vps_kanal.py` (42/42) sonuçları `IE-06.md › Kanıt`'ta.
+- **Sınırlar:** Canlıya, veriye, sunucuya, LLM'e ve WhatsApp'a dokunulmadı; ücretli çağrı yok; silme yalnız depodan (PR'da görünür). Canlı akış hâlâ eski yol (hosting PHP + eski VPS, v1.3); Kapı 1–13 Lokman'ın onayı ve eliyle.
+- **Bekleyen onay:** Kapı M — birinci PR (`ie-06-kanal-vps` → `main`, İE-04 kodu içinde) ve `main`'de açıklamalı etiket. Bu dosya `main`'de geride; `ie-06` birleşirken bu ek elle taşınır.
+
 **4 Ekim 2026 eki (dal `claude/dreamy-ride-pz40kq`, BK-03 kayıt bakımı; `docs/is_emirleri/BK-03.md`):**
 - **BK-01 ve BK-02 `main`'de.** BK-01 (PR #1) 15:35'te `0ed6b96` ile, BK-02 (PR #2) 15:37'de `c816b6f` ile birleşti. Alttaki iki ekte geçen "`main`'e birleştirme Lokman'ın onayını bekliyor" satırları bu tarihle kapandı. Ekler tarihli kayıt olduğu için değiştirilmedi.
 - **K17 kapandı olarak işaretlendi.** Sızan eşleşme anahtarı 28.09'da kapı C'de yenilenmişti (aşağıda "Kapananlar"), ama `KARARLAR/README.md` K17'yi hâlâ açık karar gösteriyordu. README'ye ve `KARARLAR/K17.md`'ye uygulanış notu eklendi; 22.09 karar metni değişmedi. Claude anahtarının 29.10 son kullanma tarihi ayrı bir risktir ve açık kalıyor.
