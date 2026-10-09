@@ -747,6 +747,15 @@ Onaylar (07:23): paylaşılan Ç8201 sayfası güncellendi ("Güncelle"); KT-01'
 
 Denetim (07:23'ten sonra): bugünkü kod 0.12, 0.13 ve 0.14 setleriyle kendi günlerindeki çıktıları bayt bayt aynı veriyor. Değişen üç satır elle yeniden hesaplandı: alın kapama 20,97 ÷ 2,3 = 9,12 → 10; kalkan Boardex'i 20,97 × 0,184 = 3,85 m² × 1,08 ÷ 2,88 = 1,44 → 2; Ç8201 trapez vida 63 × 10 + 59 × 6 = 984 → 1000.
 
+## Kör test: KT-02 (9 Ekim 2026)
+
+Lokman, 9 Ekim 21:07: "bir test daha yapalım". Proje 90 m², tek kat çelik; dört omuz çatı, korkuluklu veranda, girişte kendi çatısı olan açık sundurma; Ağustos 2026. Model montaj paftasından ve üretim dosyasından (rulo form makinesinin CSV'leri) kuruldu. Liste kural seti 0.15 ile çıkarıldı ve gerçek liste açılmadan depoya donduruldu (commit `59602ef`). Rapor: `docs/raporlar/2026-10-09_Kor_Test_KT02.md`; kod ve tablolar: `deneme/2026-10-09_kor_test_2/`.
+
+- **Sonuç.** 85 satırın kör listede 46'sı, girdi hatamız düzeltilince 57'si aynı. Kör listedeki 39 farkın 16'sı bizim hatamız: girdi 11 (tek okuma hatası: sundurmanın çatısı), kural 5. Ötekiler: karar 13, elle 7, pafta 3.
+- **Kurallara girmedi.** Kural ve karar farkları kurala işlenmedi; üç kural sorusu aşağıda ("Açık sorular", 10).
+- **Çelik.** Ağırlık üretim dosyasındaki profil boyundan hesaplandı. Dokuz panel satırının hepsinde adet aynı; sekizinde kg 0,1 kg içinde. Dokuzuncunun (1,5 mm kiriş) birim ağırlığı kuralda yok.
+- **Öneri (yapılmadı).** Ek bir çatının kalkanı ana çatının saçağının üstünde kalıyorsa motor uyarsın: o birleşimde vadi beklenir. KT-02'nin girdi hatası böyle bir birleşimdi.
+
 ## Açık sorular
 
 1. **Kapatma genişlikleri.** Şimdilik tek kat panel, sandviç panel ve kiremit desen sac 100 cm; sandviç panelin 80 cm kapatanı da var. Ürün değiştikçe güncellenecek (Lokman, 4 Ekim 15:18).
@@ -758,6 +767,7 @@ Denetim (07:23'ten sonra): bugünkü kod 0.12, 0.13 ve 0.14 setleriyle kendi gü
 7. **Bayi standartları.** Henüz oturmadı (mühendis, 4 Ekim 12:14). Netleşince hangi bayide hangi gruplar ve hangi çatı kaplaması standart: bayi kuralı tablosuna yazılacak.
 8. **Montaj paftası** (BOM'dan sonra, ayrı iş; Lokman, 4 Ekim 17:46). Kesim planı o setin içinde pafta olur; paftadaki açıklamalar birlikte düzeltilecek (7 Ekim 07:45). O işin soruları `docs/sartname/montaj_paftasi.md`'de.
 9. **Sırası gelince.** Çift kat modeli: üst katta 200 cm ve daha geniş pencereli duvarın 1,2 mm alınması (kural kayıtlı, uygulanmadı). Cumbalı çatının açılımı. Kuralların çizimden ve doğrulama motorundan yeniden optimize edilmesi (Lokman, 7 Ekim 07:45: birlikte).
+10. **KT-02'nin soruları (9 Ekim).** (a) Veranda korkuluğunun kaplaması: listede 8 mm Betopan (3 levha; bir yüze uyuyor) ve dış cephe levhasının dışında; kuralımız iki yüzü dış cephe levhasına katıyor (KT-01'de öyleydi). Standart hangisi, bir yüz mü iki yüz mü? (b) 80 × 45 × 1,5 profilin birim ağırlığı: listede 2,07 kg/m (46,89 kg ÷ 22,65 m); kurala yazılsın mı? (c) Açık sundurma ve giriş saçağı bina alanına girsin mi? Projede 90 m² (sundurma hariç); bizim oturum 92,27 m²; uç, inox taş ve RYSB alana bağlı.
 
 Kapananlar:
 

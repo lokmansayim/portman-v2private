@@ -38,6 +38,37 @@ Proje (KT-02): tek kat çelik, 2+1, 90 m² (paftadaki toplam brüt alan; veranda
 - `uretim_profil.py` (yeni): üretim dosyasından çerçeve çerçeve profil boyu ve et kalınlığı.
 - Değişmezler denendi: bugünkü kod 0.12, 0.13 ve 0.14 setleriyle kendi günlerinin çıktılarını, 0.15 setiyle 8 Ekim 08:17'deki (`602fdc1`) çıktıları bayt bayt aynı veriyor; `saglama.py` ve çokgen sınaması toplam sorun 0.
 
+## Kıyas (9 Ekim 2026; gerçek liste dondurmadan sonra açıldı)
+
+Rapor: `docs/raporlar/2026-10-09_Kor_Test_KT02.md`. Satır satır tablo: `sonuc/KT02_kiyas.md`.
+
+Gerçek liste 21:40:35'te açıldı (dondurma commit'i `59602ef`, 21:40:05). Açılmayan iki dosyanın özeti kıyastan sonra yeniden alındı: dondurma kaydındakiyle aynı. Liste adsız ve fiyatsız olarak döküldü (`sonuc/KT02_gercek_liste.json`; tek sayfa, 6 Ağustos 2026).
+
+| Liste | Aynı satır (85 satırda) |
+|---|---|
+| Kör liste, yöntem B (dondurulan) | **46** |
+| Düzeltilmiş, yöntem B (yalnız girdi hatamız düzeltildi; kurallar aynı) | **57** |
+| + Eylül 2026 uygulaması (bilgi) | 59 |
+| İki kural sorusu listedeki gibi cevaplanırsa (bilgi; Betopan satırıyla 62) | 61 |
+| Kör ve düzeltilmiş, çelik standardı (A; bilgi) | 46 ve 56 |
+
+Kör listedeki 39 farkın asıl nedeni: girdi 11 · kural 5 · karar 13 · elle 7 · pafta 3. Bizim hatamız 16 satır.
+
+- **Girdi hatası (tek).** Sundurmanın çatısı ana çatıya iki vadiyle bağlanıyor; liste öncesi karar 5'teki okuma yanlıştı. Kanıtlar: çatı kaplaması paftasındaki çentik, dere paftasında ana saçağın kesilmesi, listede ters mahya 3,05 m. Düzeltilince 11 satırın hepsi tuttu; fazladan yazılan 3 satır (alın sacı, baş makas Z'si, dere kapağı) düştü.
+- **Kural eksikleri.** Veranda korkuluğunun kaplaması: listede Betopan, bizde dış cephe levhası. Açık sundurmanın bina alanına girmesi: 92 / 90. 1,5 mm profilin birim ağırlığı. Üçü Lokman'a soruldu (raporun 11. bölümü).
+- **Çelik.** Dokuz panel satırında adet aynı; sekizinde kg 0,1 kg içinde. Ağırlık üretim dosyasındaki profil boyundan.
+
+Kıyasın dosyaları:
+
+- `kt02_kiyas.py`: kıyas ve mekanik denetimler.
+- `kt02_farklar.json`: sınıflar ve nedenler; elle yazılır, kıyas denetler.
+- `kt02_kiyas_kos.sh`: düzeltilmiş tanımdan iki liste, Eylül 2026 katmanı, ne olur ve tablo.
+- `kt02_ne_olur.py`: iki kural sorusunun etkisi; yalnız bilgi.
+- `kt02_sayfa.py`: Lokman'a verilen tek sayfa; depoya yazılmaz.
+- `sonuc/KT02_duzeltilmis_*`, `sonuc/KT02_ne_olur_*`, `sonuc/KT02_kiyas.{md,json}`.
+
+Düzeltilmiş tanımı `kt02_tanim_duzeltilmis.py` üretir. Bu betik dondurulan tanımı okur ve yalnız sundurmanın çatısını değiştirir. Tanımla birlikte depo dışındadır.
+
 ## Çalıştırma
 
 ```
@@ -45,8 +76,11 @@ python ../2026-10-06_kor_test/uretim_profil.py <üretim klasörü> --json KT02_p
 python kt02_tanim_uret.py KT02.json KT02_profil_boylari.json          # tanım (depo dışında; Lokman'ın onayıyla depoya girer)
 bash kt02_kos.sh KT02.json [python]                                   # iki girdi ve iki liste (sonuc/)
 bash ../2026-10-06_kor_test/cizim_seti_kos.sh KT02.json <çıktı> [python] [--yontem panel]   # çizim seti (depo dışına)
+python kt02_tanim_duzeltilmis.py KT02_duzeltilmis.json KT02.json     # kıyastan sonra: girdi hatası düzeltilmiş tanım (depo dışında)
+bash kt02_kiyas_kos.sh KT02_duzeltilmis.json [python]                 # düzeltilmiş listeler ve kıyas (sonuc/)
+python kt02_sayfa.py --cikti KT02_kiyas.html --zaman "9 Ekim 2026 22:30"   # kıyas sayfası (depo dışına)
 ```
 
 ## Kişisel veri
 
-Depodaki dosyalarda müşteri, bayi ve çalışan adı, telefon ve fiyat yok. Kaynak dosyalar (paftalar, üretim dosyası, liste) depoya alınmadı; tanım ve çizimler şimdilik depo dışında.
+Depodaki dosyalarda müşteri, bayi ve çalışan adı, telefon ve fiyat yok. Gerçek listenin dökümü adsız ve fiyatsız; hazırlayan ve müşteri satırları alınmadı. Kaynak dosyalar (paftalar, üretim dosyası, liste) depoya alınmadı. Tanım, düzeltilmiş tanım ve çizimler şimdilik depo dışında.
