@@ -41,8 +41,8 @@ def test_goc_001den_002ye_yukseltme_kabul_zamani_korunur(sablon):
             c.execute("INSERT INTO isler (mesaj_id, gonderen, durum) VALUES ('wamid.E1', %s, 'bitti')", (NUMARA_A,))
             c.execute("INSERT INTO giden (id, is_id, mesaj_id, sira, alici, tur, kind, govde, durum, dis_id, iletildi) "
                       "VALUES ('out_eski', 1, 'wamid.E1', 1, %s, 'cevap', 'text', 'x', 'iletildi', 'wamid.G1', '2026-09-28 10:00+00')", (NUMARA_A,))
-        assert d.eksik_goc() == [2]
-        assert d.goc_uygula() == [2] and d.eksik_goc() == []
+        assert d.eksik_goc() == [2, 3]              # 003 (İE-04) yalnız ekler; bu test 001→002 geçişini denetler
+        assert d.goc_uygula() == [2, 3] and d.eksik_goc() == []
         r = tek(d, "SELECT durum, dis_id, kabul_zamani, teslim_durumu FROM giden")
         assert (r["durum"], r["dis_id"], r["teslim_durumu"]) == ("kabul_edildi", "wamid.G1", None)
         import datetime

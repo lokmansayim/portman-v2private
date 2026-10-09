@@ -131,5 +131,62 @@ $GLOBALS['pm_test_remote'] = function () use (&$CALLS) { $CALLS[] = 'KAPALIYKEN 
 pm_kanal_tick();
 ok(pm_kanal_store(fn(&$s) => $s['outbound']['out_k1']['state']) === 'pending' && !in_array('KAPALIYKEN ÇAĞRI', $CALLS, true), 'enabled=false → tick hiçbir şey göndermez (kill switch)');
 
+echo "4) İE-04 mesaj katmanı (v1.3) — gelen kimlik, görsel, buton, liste, bağlantı, sınırlar\n";
+settings();
+// gelen: buton cevabı (kimlik + context), liste cevabı, metin (kimlik yok)
+$btn = ['from' => $PATRON, 'id' => 'wamid.IB1', 'timestamp' => (string)time(), 'type' => 'interactive', 'context' => ['from' => '4448056', 'id' => 'wamid.OUT7'],
+        'interactive' => ['type' => 'button_reply', 'button_reply' => ['id' => 'o:PM-TEST:1', 'title' => 'Onayla']]];
+$lst = ['from' => $PATRON, 'id' => 'wamid.IL1', 'timestamp' => (string)time(), 'type' => 'interactive', 'context' => ['from' => '4448056', 'id' => 'wamid.OUT8'],
+        'interactive' => ['type' => 'list_reply', 'list_reply' => ['id' => 's:ss_abc:TEST02', 'title' => 'TEST02 · 92 m²', 'description' => '3+1']]];
+$rawI = payload([$btn, $lst, msg('wamid.IT1', $PATRON, 'düz metin')]);
+pm_kanal_capture($rawI, sig($rawI));
+$in = pm_kanal_store(fn(&$s) => $s['inbound']);
+ok(($in['wamid.IB1']['reply_id'] ?? null) === 'o:PM-TEST:1' && $in['wamid.IB1']['reply_kind'] === 'button_reply' && $in['wamid.IB1']['context_id'] === 'wamid.OUT7' && $in['wamid.IB1']['text'] === 'Onayla', 'buton cevabı: reply_id + context_id kuyrukta, başlık text\'te');
+ok(($in['wamid.IL1']['reply_id'] ?? null) === 's:ss_abc:TEST02' && $in['wamid.IL1']['reply_kind'] === 'list_reply', 'liste cevabı: reply_id kuyrukta');
+ok(array_key_exists('reply_id', $in['wamid.IT1']) && $in['wamid.IT1']['reply_id'] === null, 'metin mesajında reply_id null');
+// giden: görsel, başlık görselli butonlar, liste, bağlantı butonu, sınır aşımı
+$png = "\x89PNG\r\n\x1a\n".str_repeat("\x00", 64); $pngPath = PM_KANAL_DIR.'/projects/PM-TEST/r01/plan_bayi.png'; file_put_contents($pngPath, $png);
+$ic = fn($tip, $act, $ek = []) => ['type' => $tip, 'body' => ['text' => 'Gövde'], 'action' => $act] + $ek;
+$CALLS = []; $GLOBALS['pm_test_remote'] = function ($url, $token, $method, $body, $contentType, $binary) use (&$CALLS) {
+    $CALLS[] = [$url, $method, is_string($body) ? json_decode($body, true) : (is_array($body) ? array_map(fn($v) => $v instanceof CURLFile ? 'CURLFile:'.$v->getMimeType() : $v, $body) : null)];
+    if (str_ends_with($url, '/media')) return ['id' => '918800000000002'];
+    $to = json_decode($body, true)['to']; return ['messaging_product' => 'whatsapp', 'contacts' => [['input' => $to, 'wa_id' => $to]], 'messages' => [['id' => 'wamid.OUTI'.count($CALLS)]]];
+};
+$t = time(); $ortak = ['to' => $PATRON, 'tur' => 'cevap', 'inbound_id' => 'wamid.P1', 'state' => 'pending', 'wamid' => null, 'media_id' => null, 'attempts' => 0, 'error' => null, 'updated_at' => $t];
+$rows4 = [
+    'out_i1' => ['id' => 'out_i1', 'kind' => 'image', 'body' => 'Plan görseli', 'seq' => 21, 'file' => $pngPath, 'filename' => 'plan_bayi.png', 'mime' => 'image/png', 'sha256' => hash('sha256', $png), 'created_at' => $t + 21] + $ortak,
+    'out_b1' => ['id' => 'out_b1', 'kind' => 'interactive', 'body' => 'Gövde', 'seq' => 22, 'file' => $pngPath, 'filename' => 'plan_bayi.png', 'mime' => 'image/png', 'sha256' => hash('sha256', $png), 'created_at' => $t + 22,
+                 'interactive' => $ic('button', ['buttons' => [['type' => 'reply', 'reply' => ['id' => 'o:PM-TEST:1', 'title' => 'Onayla']], ['type' => 'reply', 'reply' => ['id' => 'r:PM-TEST:1', 'title' => 'Revize et']]]],
+                                      ['header' => ['type' => 'image', 'file' => $pngPath], 'footer' => ['text' => 'PM-TEST r01']])] + $ortak,
+    'out_l1' => ['id' => 'out_l1', 'kind' => 'interactive', 'body' => 'Liste', 'seq' => 23, 'created_at' => $t + 23,
+                 'interactive' => $ic('list', ['button' => 'Tüm seçenekler', 'sections' => [['title' => 'Puana göre', 'rows' => [['id' => 's:ss_abc:TEST02', 'title' => 'TEST02 · 92 m²', 'description' => '3+1 · puan 100'], ['id' => 's:ss_abc:TEST01', 'title' => 'TEST01 · 94 m²', 'description' => '']]]]])] + $ortak,
+    'out_c1' => ['id' => 'out_c1', 'kind' => 'interactive', 'body' => '3D', 'seq' => 24, 'created_at' => $t + 24,
+                 'interactive' => $ic('cta_url', ['name' => 'cta_url', 'parameters' => ['display_text' => "3D'de gez", 'url' => 'https://ornek.invalid/3d/PM-TEST/r01/']])] + $ortak,
+    'out_h1' => ['id' => 'out_h1', 'kind' => 'interactive', 'body' => 'Fazla buton', 'seq' => 25, 'created_at' => $t + 25,
+                 'interactive' => $ic('button', ['buttons' => array_map(fn($i) => ['type' => 'reply', 'reply' => ['id' => "q:x:$i", 'title' => "B$i"]], [1, 2, 3, 4])])] + $ortak,
+    'out_h2' => ['id' => 'out_h2', 'kind' => 'interactive', 'body' => 'Uzun başlık', 'seq' => 26, 'created_at' => $t + 26,
+                 'interactive' => $ic('button', ['buttons' => [['type' => 'reply', 'reply' => ['id' => 'q:x:1', 'title' => 'Bu başlık yirmi karakteri aşıyor']]]])] + $ortak,
+];
+pm_kanal_store(function (&$s) use ($rows4) { foreach ($s['outbound'] as &$x) if (($x['state'] ?? '') === 'pending') $x['state'] = 'held'; unset($x); foreach ($rows4 as $id => $r) $s['outbound'][$id] = $r; });
+pm_kanal_tick();
+$o = pm_kanal_store(fn(&$s) => $s['outbound']);
+$tipler = array_map(fn($c) => str_ends_with($c[0], '/media') ? 'media('.($c[2]['type'] ?? '').')' : ($c[2]['type'] ?? '?').(isset($c[2]['interactive']['type']) ? '/'.$c[2]['interactive']['type'] : ''), $CALLS);
+ok($o['out_i1']['state'] === 'accepted' && $o['out_i1']['media_id'] === '918800000000002', 'görsel: medya yüklendi + image mesajı → accepted');
+ok($tipler === ['media(image/png)', 'image', 'media(image/png)', 'interactive/button', 'interactive/list', 'interactive/cta_url'], 'Meta çağrı sırası: '.implode(', ', $tipler));
+ok(($CALLS[1][2]['image']['caption'] ?? '') === 'Plan görseli' && ($CALLS[0][2]['file'] ?? '') === 'CURLFile:image/png', 'görsel yükü: PNG mime, altyazı');
+$b = $CALLS[3][2]['interactive'] ?? [];
+ok(($b['header']['image']['id'] ?? '') === '918800000000002' && count($b['action']['buttons']) === 2 && $b['action']['buttons'][0]['reply']['id'] === 'o:PM-TEST:1' && $b['footer']['text'] === 'PM-TEST r01', 'buton mesajı: başlık görseli medya kimliği, 2 buton, altbilgi');
+$l = $CALLS[4][2]['interactive'] ?? [];
+ok($l['action']['button'] === 'Tüm seçenekler' && count($l['action']['sections'][0]['rows']) === 2 && !isset($l['action']['sections'][0]['rows'][1]['description']), 'liste mesajı: düğme, 2 satır, boş açıklama yazılmaz');
+$c = $CALLS[5][2]['interactive'] ?? [];
+ok($c['type'] === 'cta_url' && $c['action']['parameters']['url'] === 'https://ornek.invalid/3d/PM-TEST/r01/', 'bağlantı butonu: cta_url payload');
+ok($o['out_h1']['state'] === 'upload_failed' && str_contains((string)$o['out_h1']['error'], 'interactive_invalid: buttons'), '4 buton → gönderilmez (interactive_invalid)');
+ok($o['out_h2']['state'] === 'upload_failed' && str_contains((string)$o['out_h2']['error'], 'interactive_invalid: button'), '20 karakteri aşan başlık → gönderilmez');
+$n = count($CALLS); pm_kanal_tick();
+ok(count($CALLS) === $n && pm_kanal_store(fn(&$s) => $s['outbound']['out_h1']['state']) === 'upload_failed', 'sınır aşan satır ikinci tikte de denenmez');
+$out = pm_store(fn(&$d) => $d['outgoing']);
+ok(($out['out_i1']['kind'] ?? '') === 'document' && $out['out_i1']['transport'] === 'media' && ($out['out_b1']['kanal_kind'] ?? '') === 'interactive' && str_contains($out['out_b1']['body'], '[Onayla | Revize et]') && ($out['out_l1']['kind'] ?? '') === 'text', 'panele yayın: görsel medya, etkileşimli mesajın metni buton başlıklarıyla (kimlik yok)');
+ok(!str_contains((string)json_encode($out), 'o:PM-TEST'), 'panel kaydında buton kimliği yok');
+
 echo "\nSONUÇ: $pass geçti, $fail kaldı  (geçici dizin: $tmp)\n";
 exit($fail ? 1 : 0);

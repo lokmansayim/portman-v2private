@@ -15,9 +15,11 @@ declare(strict_types=1);
  WhatsApp erişim anahtarı VPS'e hiçbir zaman gitmez; gönderim yalnız feature.php::pm_kanal_tick.
 */
 if (!defined('PM_KANAL_DIR')) define('PM_KANAL_DIR', __DIR__);
-const PM_KANAL_API_SURUM = 'kanal-api-v1.2';
+const PM_KANAL_API_SURUM = 'kanal-api-v1.3';   // v1.3 (İE-04): image/interactive satırları, PNG/JPEG dosyaları, mesaj katmanı ayarları
 const PM_KANAL_API_MAX_PDF = 25 * 1024 * 1024;
+const PM_KANAL_API_MAX_IMAGE = 5 * 1024 * 1024;
 const PM_KANAL_API_MAX_FILE = 40 * 1024 * 1024;
+const PM_KANAL_API_KINDS = ['text', 'document', 'image', 'interactive'];
 
 function pm_kanal_api_token(): ?string {
     $p = PM_KANAL_DIR.'/api_token.txt';
@@ -62,6 +64,9 @@ function pm_kanal_api_settings_out(array $settings): array {
             'llm' => array_intersect_key(is_array($settings['llm'] ?? null) ? $settings['llm'] : [], array_flip(['backend', 'model', 'timeout_s'])),
             'patron_teknik_not' => ($settings['patron_teknik_not'] ?? true) === true, 'poll_s' => (int)($settings['vps_poll_s'] ?? 4),
             'vps_komut' => ($settings['vps_komut'] ?? false) === true,
+            // İE-04 mesaj katmanı: kapalıyken ajan v1.2 satırlarını üretir; ucb_taban_url 3D bağlantı butonunun kökü (yoksa buton yok)
+            'mesaj_katmani' => ($settings['mesaj_katmani'] ?? false) === true,
+            'ucb_taban_url' => is_string($settings['ucb_taban_url'] ?? null) && preg_match('#^https://[^\s"\'<>]{4,300}$#', $settings['ucb_taban_url']) ? $settings['ucb_taban_url'] : null,
             'package' => pm_kanal_api_paket()];
     if (($settings['vps_llm_key_from_hosting'] ?? true) === true) {
         $key = '';
@@ -121,19 +126,28 @@ function pm_kanal_api_result(array $post, array $files): array {
         if (($f['size'] ?? 0) < 1 || ($f['size'] ?? 0) > PM_KANAL_API_MAX_FILE) throw new RuntimeException('file_size');
         $tam = PM_KANAL_DIR.'/'.$hedef;
         if (!is_dir(dirname($tam))) @mkdir(dirname($tam), 0700, true);
-        if (str_ends_with(strtolower($hedef), '.pdf')) {
-            if (($f['size'] ?? 0) > PM_KANAL_API_MAX_PDF || !str_starts_with((string)file_get_contents($f['tmp_name'], false, null, 0, 5), '%PDF-')) throw new RuntimeException('pdf_invalid');
+        $ad = strtolower($hedef); $bas = (string)file_get_contents($f['tmp_name'], false, null, 0, 8);
+        if (str_ends_with($ad, '.pdf')) {
+            if (($f['size'] ?? 0) > PM_KANAL_API_MAX_PDF || !str_starts_with($bas, '%PDF-')) throw new RuntimeException('pdf_invalid');
+        } elseif (str_ends_with($ad, '.png')) {                          // İE-04: plan görselleri
+            if (($f['size'] ?? 0) > PM_KANAL_API_MAX_IMAGE || !str_starts_with($bas, "\x89PNG\r\n\x1a\n")) throw new RuntimeException('png_invalid');
+        } elseif (str_ends_with($ad, '.jpg') || str_ends_with($ad, '.jpeg')) {
+            if (($f['size'] ?? 0) > PM_KANAL_API_MAX_IMAGE || !str_starts_with($bas, "\xFF\xD8\xFF")) throw new RuntimeException('jpeg_invalid');
         }
         if (!move_uploaded_file($f['tmp_name'], $tam) && !@rename($f['tmp_name'], $tam)) throw new RuntimeException('file_write');
         @chmod($tam, 0600);
         $yazilan[$hedef] = $tam;
     }
     foreach ($cikti['satirlar'] as &$r) {
-        if (($r['kind'] ?? 'text') === 'document') {
+        $kind = (string)($r['kind'] ?? 'text');
+        if (!in_array($kind, PM_KANAL_API_KINDS, true)) throw new RuntimeException('bad_kind');
+        if ($kind === 'interactive' && !is_array($r['interactive'] ?? null)) throw new RuntimeException('interactive_missing');
+        if ($kind === 'document' || $kind === 'image' || !empty($r['file'])) {          // dosyalı satır: PDF, görsel, başlık görselli etkileşim
             $rel = (string)($r['file'] ?? '');
             if (!isset($yazilan[$rel])) throw new RuntimeException('document_file_missing');
             if (!empty($r['sha256']) && !hash_equals((string)$r['sha256'], hash_file('sha256', $yazilan[$rel]))) throw new RuntimeException('document_sha_mismatch');
             $r['file'] = $yazilan[$rel];
+            if ($kind === 'interactive' && isset($r['interactive']['header']['file'])) $r['interactive']['header']['file'] = $yazilan[$rel];
         }
         if (($r['inbound_id'] ?? '') !== $inboundId) throw new RuntimeException('row_inbound_mismatch');
         $r['worker'] = 'vps';

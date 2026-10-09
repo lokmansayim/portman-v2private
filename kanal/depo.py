@@ -31,7 +31,8 @@ HATA_BAYIYE = "Mesajınızı şu an işleyemedim; Lokman Bey'e iletiyorum, en k�
 
 # Eksik bilgi sorusu → cevabın düşeceği taslak alanları (beyin/karar.py::_soru çağrıları)
 SORU_ALANLARI = {"oda_programi": ("oda_programi",), "katalog_kodu": ("katalog_kodu",), "dis_olcu": ("dis_olcu", "alan_m2", "pano"),
-                 "model_veya_olcu": ("katalog_kodu", "dis_olcu", "pano"), "pencere_olcu": ("pencereler",), "pencere_mahal": ("pencereler",)}
+                 "model_veya_olcu": ("katalog_kodu", "dis_olcu", "pano"), "pencere_olcu": ("pencereler",), "pencere_mahal": ("pencereler",),
+                 "secenek": ("katalog_kodu",)}          # İE-04: seçenek setinden seçim (buton ya da metin) katalog_kodu'nu doldurur
 
 
 def _cevap_mi(alan: str, d_eski: dict, d_yeni: dict, sonuc: dict, ozet: dict) -> bool:
@@ -41,6 +42,8 @@ def _cevap_mi(alan: str, d_eski: dict, d_yeni: dict, sonuc: dict, ozet: dict) ->
         return bool(ozet.get("d01_cevap"))
     if alan == "pencere_islem":
         return bool(ozet.get("pencere_cevap"))
+    if alan == "oncelik":
+        return bool(ozet.get("oncelik_cevap"))     # İE-04: cevap olmayan mesaj öncelik sorusunu düşürür ("yok"), cevap saymaz
     if sonuc.get("gerekce") == "iptal":
         return False
     te, ty = (d_eski or {}).get("taslak") or {}, (d_yeni or {}).get("taslak") or {}
@@ -301,11 +304,12 @@ class Depo:
                 cizim = sonuc.get("cizim") or {}
                 gecti = bool(cizim.get("passed"))
                 c.execute("UPDATE revizyonlar SET durum = 'yerini_aldi' WHERE proje_id = %s AND durum = 'onay_bekliyor'", (proje_id,))
+                ekler = {k: v for k, v in (cizim.get("ekler") or {}).items()}          # İE-04: aynı İş Emri'nden görsel, IFC, 3D (yol + özet)
                 revizyon_id = c.execute(
                     "INSERT INTO revizyonlar (proje_id, rev, is_emri_no, gonderen, bayi_kod, kaynak_mesaj_id, is_emri, pdf_yolu, pdf_sha256, "
-                    "dxf_sha256, dogrulandi, durum) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id",
+                    "dxf_sha256, dogrulandi, durum, ekler) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id",
                     (proje_id, rev, sonuc["is_emri_no"], gelen["sender"], bayi_kod, gelen["id"], Jsonb(ie), cizim.get("pdf"),
-                     cizim.get("pdf_sha256"), cizim.get("dxf_sha256"), gecti, "onay_bekliyor" if gecti else "dogrulanmadi")).fetchone()["id"]
+                     cizim.get("pdf_sha256"), cizim.get("dxf_sha256"), gecti, "onay_bekliyor" if gecti else "dogrulanmadi", Jsonb(ekler))).fetchone()["id"]
             if karar_ozeti.get("onaylanan_is_emri_no"):
                 c.execute("UPDATE revizyonlar SET durum = 'onaylandi', onay_mesaj_id = %s, onaylandi = now() "
                           "WHERE is_emri_no = %s AND rev = %s AND gonderen = %s AND durum = 'onay_bekliyor'",
@@ -316,12 +320,15 @@ class Depo:
                 d_yeni.pop("proje_id", None)
             self.konusma_yaz(c, gelen["sender"], bayi_kod, d_yeni, surum)
             self._soru_kaydi(c, gelen, d_eski or {}, d_yeni, sonuc, karar_ozeti)
+            self._set_kaydi(c, gelen, d_eski or {}, d_yeni, proje_id)
             for s in cikti.get("satirlar") or []:
+                # Revizyona bağlı satırlar: PDF ve aynı İş Emri'nin görsel/etkileşim satırları (onay butonu → revizyon; alıntı → revizyon)
+                bagli = revizyon_id if (s.get("kind") == "document" or (s.get("is_emri_no") and s.get("is_emri_no") == sonuc.get("is_emri_no"))) else None
                 c.execute(
                     "INSERT INTO giden (id, is_id, mesaj_id, sira, alici, tur, kind, govde, dosya, sha256, revizyon_id, satir) "
                     "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
                     (s["id"], j["id"], gelen["id"], s["seq"], s["to"], s.get("tur") or "cevap", s.get("kind") or "text", s.get("body") or "",
-                     s.get("file"), s.get("sha256"), revizyon_id if s.get("kind") == "document" else None, Jsonb(s)))
+                     s.get("file"), s.get("sha256"), bagli, Jsonb(s)))
             c.execute("UPDATE isler SET durum = %s, sonuc = %s, hata = %s, bitti = now(), sahip = NULL, kira_bitis = NULL WHERE id = %s",
                       ("basarisiz" if cikti.get("hata") else "bitti", Jsonb(sonuc), cikti.get("hata"), j["id"]))
         return {"proje_id": proje_id, "revizyon_id": revizyon_id}
@@ -362,6 +369,48 @@ class Depo:
             "soruldu, son_soruldu, gecerlilik_sonu) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, to_timestamp(%s), to_timestamp(%s), %s)",
             (gelen["sender"], d_yeni.get("proje_id"), alan, gelen["id"], *soru_ayrintisi(d_yeni, alan), simdi, simdi,
              self._gecerlilik(d_yeni, alan)))
+
+    def _set_kaydi(self, c, gelen: dict, d_eski: dict, d_yeni: dict, proje_id) -> None:
+        """İE-04: konuşmadaki seçenek setini secenek_setleri tablosuna işler (aynı işlemde). Bir göndericinin tek açık seti olur;
+        yeni set açılınca eskisi 'eskidi', seçimle 'secildi', sıfırlanma ve devirle 'dustu'."""
+        acik = c.execute("SELECT * FROM secenek_setleri WHERE gonderen = %s AND durum = 'acik' FOR UPDATE", (gelen["sender"],)).fetchone()
+        yeni = d_yeni.get("secenek_seti") or None
+        if acik is not None and (yeni is None or yeni.get("id") != acik["id"] or yeni.get("durum") != "acik"):
+            if yeni is not None and yeni.get("id") == acik["id"] and yeni.get("durum") in ("secildi", "dustu", "eskidi"):
+                kapanis = yeni["durum"]
+            elif yeni is not None and yeni.get("id") != acik["id"] and yeni.get("durum") == "acik":
+                kapanis = "eskidi"
+            else:
+                kapanis = "dustu"
+            c.execute("UPDATE secenek_setleri SET durum = %s, secilen_kod = %s, secim_mesaj_id = %s, kapandi = now() WHERE id = %s",
+                      (kapanis, (yeni or {}).get("secilen_kod") if kapanis == "secildi" else None, gelen["id"] if kapanis == "secildi" else None, acik["id"]))
+            acik = None
+        if yeni is not None and yeni.get("durum") == "acik" and acik is None:
+            c.execute("INSERT INTO secenek_setleri (id, gonderen, proje_id, kaynak_mesaj_id, adaylar, agirliklar) VALUES (%s, %s, %s, %s, %s, %s) "
+                      "ON CONFLICT (id) DO UPDATE SET durum = 'acik', adaylar = EXCLUDED.adaylar, kapandi = NULL",
+                      (yeni["id"], gelen["sender"], proje_id, gelen["id"], Jsonb(yeni.get("adaylar") or []), Jsonb(yeni.get("agirliklar"))))
+
+    def giden_satiri(self, dis_id: str | None) -> dict | None:
+        """WhatsApp kimliği (wamid) verilen giden satırın hosting biçimi (satir). Buton cevabının hangi mesaja verildiğini doğrulamak için."""
+        if not dis_id:
+            return None
+        with self.baglan() as c:
+            r = c.execute("SELECT satir FROM giden WHERE dis_id = %s ORDER BY olusturuldu DESC LIMIT 1", (dis_id,)).fetchone()
+        return r["satir"] if r else None
+
+    def kabul_edilmis_adaylar(self) -> set[str]:
+        """K-A10: mühendis kabulü kayıtlı 'gecerli' adaylar; yalnız bunlar bayiye sunulur (test adayları ayarla, kalıcı modda yok)."""
+        with self.baglan() as c:
+            return {r["kod"] for r in c.execute("SELECT kod FROM adaylar WHERE durum = 'gecerli' AND muhendis_kabulu IS NOT NULL")}
+
+    def aday_yaz(self, kod: str, durum: str, referans_model: str | None = None, kaynak: dict | None = None, ozet: dict | None = None,
+                 denetim: dict | None = None, muhendis_kabulu: dict | None = None, not_: str | None = None) -> None:
+        with self.baglan() as c, c.transaction():
+            c.execute("INSERT INTO adaylar (kod, durum, referans_model, kaynak, ozet, denetim, muhendis_kabulu, not_) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) "
+                      "ON CONFLICT (kod) DO UPDATE SET durum = EXCLUDED.durum, referans_model = EXCLUDED.referans_model, kaynak = EXCLUDED.kaynak, "
+                      "ozet = EXCLUDED.ozet, denetim = EXCLUDED.denetim, muhendis_kabulu = EXCLUDED.muhendis_kabulu, not_ = EXCLUDED.not_, guncellendi = now()",
+                      (kod, durum, referans_model, Jsonb(kaynak) if kaynak is not None else None, Jsonb(ozet) if ozet is not None else None,
+                       Jsonb(denetim) if denetim is not None else None, Jsonb(muhendis_kabulu) if muhendis_kabulu is not None else None, not_))
 
     @staticmethod
     def _gecerlilik(d: dict, alan: str):
