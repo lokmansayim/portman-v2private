@@ -86,6 +86,9 @@ def kaynak(tmp_path_factory):
     for d in ("kanal", "beyin", "motor", "is_emri", "vps", "araclar"):
         shutil.copytree(KOK / d, calisma / d, ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "durum", "cikti", "build"))
     (calisma / "SHA256SUMS").write_text("deneme\n")
+    shutil.copy(KOK / ".gitattributes", calisma / ".gitattributes")                 # testler/ ve deneme/ export-ignore (Lokman 9.10)
+    (calisma / "testler" / "kalici").mkdir(parents=True); (calisma / "testler" / "kalici" / "test_x.py").write_text("# sürüme girmez\n")
+    (calisma / "deneme" / "2026-01-01").mkdir(parents=True); (calisma / "deneme" / "2026-01-01" / "x.txt").write_text("sürüme girmez\n")
 
     def g(*a):
         return subprocess.run(["git", "-C", str(calisma), *a], check=True, capture_output=True, text=True, env={**os.environ, **GIT_ENV})
@@ -129,6 +132,9 @@ def test_guncelle_ikinci_surum_ve_geri_don(surum_ortam):
     s9 = kok / "surumler" / "v2026.10.09"
     assert (s9 / "SURUM").read_text().strip() == "v2026.10.09" and (s9 / "KURULDU").exists() and not (s9 / ".git").exists()
     assert (s9 / "venv" / "bin" / "python").exists() and (s9 / "kanal" / "webhook.py").exists() and not (kok / "kaynak" / "kanal").exists()
+    # .gitattributes export-ignore: testler/ ve deneme/ sürüm ağacında yok; beyin/testler/ (öz-testin okuduğu harness vakaları) var
+    assert not (s9 / "testler").exists() and not (s9 / "deneme").exists()
+    assert (s9 / "beyin" / "testler" / "mesajlar.json").exists() and list((s9 / "beyin" / "testler").glob("cikarim_*.json"))
     assert os.readlink(kok / "guncel") == str(s9) and not (kok / "onceki").exists()
     assert "içe aktarma tamam" in out and "uygulanan göçler: [1, 2, 3, 4]" in out and "sağlık: sürüm v2026.10.09, Postgres bağlı" in out and "etkin" in out
     assert "stop portman-webhook portman-gonderici portman-agent portman-panel" in log.read_text() and "start portman-webhook" in log.read_text()

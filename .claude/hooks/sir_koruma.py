@@ -53,6 +53,10 @@ KORUNAN = [
     (r"(^|/)kanal/lib\.snapshot\.php$", "hosting lib kopyası"),
     (r"\.(pem|key|p12|pfx)$", "anahtar dosyası"),
     (r"(^|/)id_(rsa|ed25519|ecdsa)(\.pub)?$", "SSH anahtarı"),
+    # İE-06 VPS sırları (Lokman onayı 9.10)
+    (r"(^|/)deploy_key(\.pub)?$", "VPS dağıtım anahtarı"),
+    (r"(^|/)rclone\.conf$", "Drive bağlantısı (rclone)"),
+    (r"(^|/)yedek\.(pub|key)$", "yedek şifre anahtarı (age)"),
     # dondurulmuş kayıtlar
     (r"^SHA256SUMS$", "v1.1.1 özet kaydı (dondurulmuş)"),
     (r"^KARARLAR\.md$", "karar günlüğü (dondurulmuş; yeni karar KARARLAR/ altına yeni dosya)"),

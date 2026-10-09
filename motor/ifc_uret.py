@@ -146,7 +146,7 @@ class IfcUretici:
         model = api("context.add_context", f, context_type="Model")
         self.body = api("context.add_context", f, context_type="Model", context_identifier="Body", target_view="MODEL_VIEW", parent=model)
         self.site = api("root.create_entity", f, ifc_class="IfcSite", name="Parsel")
-        self.bina = api("root.create_entity", f, ifc_class="IfcBuilding", name=G["bina"].get("ad", "Tatar 80 m² prefabrik konut"))
+        self.bina = api("root.create_entity", f, ifc_class="IfcBuilding", name=G["bina"].get("ad", "Prefabrik konut"))
         self.kat = api("root.create_entity", f, ifc_class="IfcBuildingStorey", name="Zemin Kat")
         api("aggregate.assign_object", f, relating_object=self.proje, products=[self.site])
         api("aggregate.assign_object", f, relating_object=self.site, products=[self.bina])

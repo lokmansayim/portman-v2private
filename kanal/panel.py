@@ -1,7 +1,7 @@
 """İE-06 · Yönetim paneli (WSGI). nginx (443, TLS) → gunicorn → bu uygulama; yalnız /panel/ altındaki yollar (hosting'teki PHP
 panelin yerine; karar 4). Sunucu tarafı HTML, JavaScript yok.
 
-  GET/POST /panel/giris               tek yönetici; parola scrypt özeti (panel.env); ön çerez + CSRF; 5 başarısız girişte 15 dk kilit (IP ve hesap)
+  GET/POST /panel/giris               tek yönetici; parola scrypt özeti (panel.env); ön çerez + CSRF; 5 başarısız girişte 15 dk kilit (IP özeti başına)
   POST     /panel/cikis
   GET      /panel/                    gelen kutusu: bütün konuşmalar (sahiplenilen ve kayıtsız), son mesaj, bayi kartı, kanal durumu
   GET      /panel/konusma/<numara>    gelen ve giden mesajlar, gönderim ve teslim durumu, gelen dosyalar
@@ -12,7 +12,8 @@ panelin yerine; karar 4). Sunucu tarafı HTML, JavaScript yok.
   GET      /panel/stil.css
 
 Güvenlik: yalnız HTTPS (nginx); imzalı oturum çerezi (HMAC-SHA256, 12 saat; HttpOnly, Secure, SameSite=Strict); her POST'ta CSRF
-belirteci; CSP default-src 'self'; kilit hem IP özeti (sha256 kısaltması, ham IP saklanmaz) hem hesap için. Sır tutmaz: PANEL_SIR
+belirteci; CSP default-src 'self'; kilit IP özeti başına (sha256 kısaltması, ham IP saklanmaz); hesap geneli kilit yok (Lokman, 9.10;
+nginx limit_req, fail2ban ve en az 12 karakterlik parola kalır). Sır tutmaz: PANEL_SIR
 (çerez imza anahtarı) ve PANEL_PAROLA (scrypt özeti) /etc/portman/panel.env'den (systemd EnvironmentFile) gelir; ikisi yoksa panel
 503 verir ve giriş kabul etmez. Günlüğe parola, maskesiz numara ve mesaj metni yazılmaz.
 Komut satırı: gunicorn --chdir /opt/portman/guncel/kanal --bind 127.0.0.1:8082 panel:uygulama
@@ -312,7 +313,7 @@ def giris(p: Panel, i: Istek) -> tuple:
         if on is None or not hmac.compare_digest(str(f.get("csrf", "")).encode("utf-8"), p.csrf(on["n"]).encode("utf-8")):
             on = None
             kod, hata = 403, "Giriş sayfasının süresi doldu ya da doğrulama uyuşmadı; yeniden deneyin."
-        elif p.depo.panel_basarisiz_sayisi(KILIT_DK, i.ip_ozeti) >= KILIT_DENEME or p.depo.panel_basarisiz_sayisi(KILIT_DK) >= KILIT_DENEME:
+        elif p.depo.panel_basarisiz_sayisi(KILIT_DK, i.ip_ozeti) >= KILIT_DENEME:    # yalnız IP özeti başına (hesap geneli kilit yok; Lokman 9.10)
             p.depo.panel_giris_kaydet("kilitli", i.ip_ozeti)
             log("giriş kilitli", i.ip_ozeti[:6])
             return _html(429, sayfa("Kilitli", f'<p class="hata">Çok fazla başarısız deneme. {KILIT_DK} dakika bekleyin.</p>', p),

@@ -126,18 +126,20 @@ def test_csrf_ya_da_on_cerez_olmadan_giris_403_ve_sayilmaz(pn, depo):
     assert sorgu(depo, "SELECT count(*) AS n FROM panel_girisler")[0]["n"] == 0 and "pm_oturum" not in c.cerez
 
 
-def test_bes_basarisiz_giris_kilitler_dogru_parolayla_ve_baska_ipden_de(pn, depo):
+def test_bes_basarisiz_giris_ipyi_kilitler_baska_ip_girer(pn, depo):
+    """Kilit IP özeti başına; hesap geneli kilit yok (Lokman, 9.10): başka IP'den doğru parola kilitliyken de girer."""
     c = Istemci(pn)
     for n in range(5):
         assert c.giris("yanlis-" + str(n) * 10)[0] == 401
     kod, h, b = c.giris(DOGRU)
     assert kod == 429 and c.baslik(b, "Retry-After") == ["900"] and "15 dakika".encode() in h and "pm_oturum" not in c.cerez
     baska = Istemci(pn, ip="10.0.0.2")
-    assert baska.giris(DOGRU)[0] == 429                                                                # hesap kilidi: IP'den bağımsız
-    assert [r["sonuc"] for r in sorgu(depo, "SELECT sonuc FROM panel_girisler ORDER BY id")] == ["basarisiz"] * 5 + ["kilitli"] * 2
+    assert baska.giris(DOGRU)[0] == 302 and "pm_oturum" in baska.cerez                                  # başka IP kilitli değil
+    assert c.giris(DOGRU)[0] == 429                                                                     # kilitli IP hâlâ kilitli
+    assert [r["sonuc"] for r in sorgu(depo, "SELECT sonuc FROM panel_girisler ORDER BY id")] == ["basarisiz"] * 5 + ["kilitli", "basarili", "kilitli"]
     with depo.baglan() as k, k.transaction():                                                           # 16 dakika geçti
         k.execute("UPDATE panel_girisler SET zaman = zaman - interval '16 minutes'")
-    assert baska.giris(DOGRU)[0] == 302
+    assert c.giris(DOGRU)[0] == 302
 
 
 def test_ip_kilidi_tek_ipden_bes_deneme(pn, depo):

@@ -208,6 +208,24 @@ def saglik(k: Kanal) -> tuple[int, dict]:
     return (200 if govde["ok"] else 503), govde
 
 
+_LOOPBACK = {"127.0.0.1", "::1", "::ffff:127.0.0.1"}
+
+
+def _yerel_mi(environ) -> bool:
+    """/saglik ayrıntısı yalnız 127.0.0.1'den (Lokman, 9 Ekim). gunicorn loopback'e bağlı olduğundan REMOTE_ADDR hep yereldir;
+    dışarıdan gelen istek nginx'ten X-Forwarded-For ($remote_addr; istemcinin gönderdiğini ezer) ile gelir. guncelle.sh ve
+    durum.sh doğrudan 127.0.0.1:8081'e bakar: başlık yok → ayrıntı görünür."""
+    if (environ.get("REMOTE_ADDR") or "").strip() not in _LOOPBACK:
+        return False
+    xff = (environ.get("HTTP_X_FORWARDED_FOR") or "").split(",")[0].strip()
+    return not xff or xff in _LOOPBACK
+
+
+def saglik_kisa(govde: dict) -> dict:
+    """Dışarıya (izleyici, herkes) yalnız durum: sayım, sürüm ve sorun adı yok."""
+    return {"ok": bool(govde.get("ok")), "durum": "ok" if govde.get("ok") else "sorun"}
+
+
 # ───────────────────────── WSGI ─────────────────────────
 def _cevap(start_response, kod: int, govde, ctype: str = "application/json; charset=utf-8"):
     metin = {200: "OK", 400: "Bad Request", 401: "Unauthorized", 403: "Forbidden", 404: "Not Found", 405: "Method Not Allowed",
@@ -225,7 +243,7 @@ def uygulama_olustur(k: Kanal):
             if metod != "GET":
                 return _cevap(start_response, 405, {"hata": "method"})
             kod, govde = saglik(k)
-            return _cevap(start_response, kod, govde)
+            return _cevap(start_response, kod, govde if _yerel_mi(environ) else saglik_kisa(govde))
         if yol != "/webhook":
             return _cevap(start_response, 404, {"hata": "yok"})
         if metod == "GET":

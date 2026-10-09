@@ -38,8 +38,10 @@ def app(kanal):
     return WH.uygulama_olustur(kanal)
 
 
-def istek(app, metod, yol, govde: bytes = b"", sorgu: str = "", basliklar: dict | None = None):
+def istek(app, metod, yol, govde: bytes = b"", sorgu: str = "", basliklar: dict | None = None, adres: str | None = "127.0.0.1"):
     env = {"REQUEST_METHOD": metod, "PATH_INFO": yol, "QUERY_STRING": sorgu, "CONTENT_LENGTH": str(len(govde)), "wsgi.input": BytesIO(govde)}
+    if adres is not None:
+        env["REMOTE_ADDR"] = adres                          # gunicorn loopback'e bağlı; dış istek nginx'ten X-Forwarded-For ile gelir
     for a, v in (basliklar or {}).items():
         env["HTTP_" + a.upper().replace("-", "_")] = v
     out = {}
@@ -118,14 +120,14 @@ BEKLENEN_ALANLAR = {"id", "context_id", "reply_id", "reply_kind", "sender", "nam
 def test_patron_mesaji_is_acar_satir_feature_php_bicimindedir(app, depo):
     depo.bayi_yaz(NUMARA_P, ad="Patron", rol="patron", firma="PortatifEv")
     m = metin(NUMARA_P, "P6001 aynalı olsun", context={"id": "wamid.ONCEKI1"})
-    kod, govde = post(app, yuk([m], adlar={NUMARA_P: "Lokman"}))
+    kod, govde = post(app, yuk([m], adlar={NUMARA_P: "Deneme Patron"}))
     assert kod == 200 and json.loads(govde)["mesaj"] == {"sahiplenildi": 1}
     r = tek(depo, "SELECT gonderen, bayi_kod, tur, metin, alinti_id, sahiplenildi, kaynak, ham FROM mesajlar")
     assert (r["gonderen"], r["bayi_kod"], r["tur"], r["metin"], r["alinti_id"], r["sahiplenildi"], r["kaynak"]) == (NUMARA_P, "PATRON", "text", "P6001 aynalı olsun", "wamid.ONCEKI1", True, "vps")
     ham = r["ham"]
     assert set(ham) == BEKLENEN_ALANLAR
     assert ham["role"] == "patron" and ham["bayi"] == {"kod": "PATRON", "ad": "Patron", "firma": "PortatifEv", "rol": "patron"}
-    assert ham["name"] == "Lokman" and ham["source"] == "Meta imzalı webhook" and ham["phone_number_id"] == PNID and ham["mode"] == "patron"
+    assert ham["name"] == "Deneme Patron" and ham["source"] == "Meta imzalı webhook" and ham["phone_number_id"] == PNID and ham["mode"] == "patron"
     assert ham["state"] == "queued" and ham["reply_id"] is None and ham["media_id"] is None
     assert tek(depo, "SELECT durum FROM isler")["durum"] == "sirada" and depo.acik_is_sayisi() == 1
     assert tek(depo, "SELECT count(*) AS n FROM giden")["n"] == 0                                   # sabit cevap yalnız sahiplenilmeyene
@@ -290,6 +292,25 @@ def test_saglik(app, kanal, depo):
     (kanal.veri / "nabiz" / "nabiz.json").write_text(json.dumps({"zaman": int(time.time()) - 1000, "ad": "nabiz", "sorunlar": []}))
     kod, govde = istek(app, "GET", "/saglik")
     assert kod == 503 and any(s.startswith("nabiz.sh:") for s in json.loads(govde)["sorunlar"])
+
+
+def test_saglik_disariya_yalniz_durum(app, kanal):
+    """Lokman 9.10: sayımlar, sürüm ve sorun adları yalnız 127.0.0.1'den; dışarıya durum kodu ve kısa durum."""
+    NB.yaz(kanal.veri, "nabiz", sorunlar=["sertifika: 9 gün kaldı (certbot renew)"])
+    dis = {"X-Forwarded-For": "203.0.113.5"}
+    kod, govde = istek(app, "GET", "/saglik", basliklar=dis)                       # nginx üzerinden gelen dış istek
+    j = json.loads(govde)
+    assert kod == 503 and j == {"ok": False, "durum": "sorun"}
+    assert "sertifika" not in govde.decode() and "surum" not in j and "sayimlar" not in j and "sorunlar" not in j
+    kod, govde = istek(app, "GET", "/saglik")                                       # loopback, başlıksız (guncelle.sh, durum.sh)
+    assert kod == 503 and "nabiz: sertifika: 9 gün kaldı (certbot renew)" in json.loads(govde)["sorunlar"]
+    kod, govde = istek(app, "GET", "/saglik", basliklar={"X-Forwarded-For": "127.0.0.1"})     # nginx'ten, ama sunucunun kendisinden
+    assert kod == 503 and "sorunlar" in json.loads(govde)
+    assert json.loads(istek(app, "GET", "/saglik", adres=None)[1]) == {"ok": False, "durum": "sorun"}   # adres bilinmiyorsa dış sayılır
+    assert json.loads(istek(app, "GET", "/saglik", adres="203.0.113.9")[1]) == {"ok": False, "durum": "sorun"}
+    NB.yaz(kanal.veri, "nabiz", sorunlar=[]); kanal.ayar_sozlugu["enabled"] = False
+    kod, govde = istek(app, "GET", "/saglik", basliklar=dis)
+    assert kod == 200 and json.loads(govde) == {"ok": True, "durum": "ok"}
 
 
 def test_medya_yalniz_gorsel_ve_belge_kayitsizda_gunluk_sinir(app, kanal, depo):
