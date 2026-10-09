@@ -1,0 +1,819 @@
+{
+ "sema": "portman.yukleme_girdisi/0.5-taslak",
+ "ad": "KT-03 · Tek kat çelik, 2+1, verandalı ve sundurmalı, kırma çatı, 80 m² (üçüncü kör test projesi)",
+ "kaynak": "Yapı Tanımı 0.5 (üçüncü kör test projesi; montaj paftasından; kıyastan sonra düzeltildi); yöntem B (yapıldığı gibi); NE OLUR (yalnız bilgi): veranda ve sundurma çatısında dere, iniş ve alın sacı var, Boardex şeridi yok, tavanı saçağıyla; kırma uçlarının çatı panelleri paftadaki adetle",
+ "bina_m2": 94,
+ "oturum_m2": 93.81,
+ "dis_olcu_m": [
+  10.451,
+  9.705
+ ],
+ "kapali_olcu_m": [
+  9.977,
+  9.705
+ ],
+ "kat_adedi": 1,
+ "oda_sayisi": 6,
+ "kat_yuksekligi_m": 2.7,
+ "celik": {
+  "dis": {
+   "profil": "140x45x1,2",
+   "boy_m": 39.27,
+   "panel_adedi": 15,
+   "not": "panel adedi modelden (duvar panelleri)"
+  },
+  "ic": {
+   "profil": "80x45x1,2",
+   "boy_m": 23.66,
+   "panel_adedi": 11,
+   "not": "boy: kaplanmış yüzler arasında (karkas boyu 24,17 m); panel adedi modelden"
+  },
+  "ek_duvarlar": [
+   {
+    "ad": "Baca karkası",
+    "profil": "80x45x0,8",
+    "birim_taraf": "ic",
+    "boy_m": 3.04,
+    "yukseklik_m": 3.814,
+    "panel_adedi": 8,
+    "not": "kural yok: duvarın birim ağırlığı bacaların çevresi ve boyuyla (varsayım); 2 baca, dörder dar panel"
+   }
+  ],
+  "dikme": {
+   "profil": "80x45x1,2",
+   "adet": 4,
+   "boy_m": 2.246,
+   "not": "modelden"
+  },
+  "kiris": {
+   "profil": "80x45x1,2",
+   "boy_m": 8.92,
+   "adet": 3,
+   "not": "kiriş boyu ve adedi modelden (K01, K04, K05)"
+  },
+  "cati": {
+   "tip": "kirma",
+   "profil": "80x45x0,8",
+   "plan_m2": 90.24,
+   "oturum_m2": 93.81,
+   "panel_adedi": 34,
+   "not": "plan: makaslı çatının saçak dahil planı; adet modelden (34 makas)"
+  },
+  "tavan_paneli_m2": null,
+  "cati_paneli_m2": null,
+  "ek_cati_paneli": {
+   "ad": "Çatı panelleri (kırma uçları, veranda ve sundurma)",
+   "oturum_m2": 14.73,
+   "plan_m2": 17.52,
+   "adet": 17,
+   "profil": "80x45x0,8",
+   "not": "veranda ve sundurma çatıları tek eğimli, çatı paneliyle (proje notu); 100 m² için verilen ağırlık örttükleri alana (dış ölçüyle) oranlandı; adet tanımdaki çatı paneli yerleşiminden"
+  }
+ },
+ "celik_panel_adedi": 92,
+ "duvar_paneli_adedi": 26,
+ "dis": {
+  "cevre_m": 39.274,
+  "duvar_m2": 106.04,
+  "duvar_kalinligi_m": null,
+  "karkas_mm": 140,
+  "kolon_kiris": [
+   {
+    "ad": "veranda dikmesi",
+    "adet": 4,
+    "cevre_m": 0.76,
+    "boy_m": 2.246
+   },
+   {
+    "ad": "veranda kirişi",
+    "adet": 1,
+    "cevre_m": 0.68,
+    "boy_m": 7.302
+   }
+  ],
+  "kolon_kiris_varsayim": false,
+  "alin_m2": [],
+  "ek_m2": [
+   {
+    "ad": "baca (çatının üstünde kalan 0,81 m ve üst kapağı)",
+    "alan_m2": 1.37
+   },
+   {
+    "ad": "baca (çatının üstünde kalan 0,81 m ve üst kapağı)",
+    "alan_m2": 1.37
+   }
+  ],
+  "bosluklar": [
+   {
+    "ad": "200/220",
+    "adet": 2,
+    "en": 2.0,
+    "boy": 2.2
+   },
+   {
+    "ad": "dış kapı",
+    "adet": 1,
+    "en": 0.95,
+    "boy": 2.1
+   },
+   {
+    "ad": "100/70",
+    "adet": 1,
+    "en": 1.0,
+    "boy": 0.7
+   },
+   {
+    "ad": "50/50",
+    "adet": 1,
+    "en": 0.5,
+    "boy": 0.5
+   },
+   {
+    "ad": "150/130",
+    "adet": 3,
+    "en": 1.5,
+    "boy": 1.3
+   }
+  ],
+  "dis_osb": false,
+  "nem_bariyeri": false,
+  "yuzler": [
+   {
+    "duvar": "D03",
+    "sinif": "dis",
+    "bolge": "Veranda",
+    "boy_m": 2.624,
+    "brut_m2": 7.0848,
+    "net_m2": 7.0848,
+    "bosluklar": []
+   },
+   {
+    "duvar": "D15",
+    "sinif": "dis",
+    "bolge": "Veranda",
+    "boy_m": 0.14,
+    "brut_m2": 0.378,
+    "net_m2": 0.378,
+    "bosluklar": []
+   },
+   {
+    "duvar": "D01",
+    "sinif": "dis",
+    "bolge": "Veranda",
+    "boy_m": 1.2,
+    "brut_m2": 3.24,
+    "net_m2": 3.24,
+    "bosluklar": []
+   },
+   {
+    "duvar": "D02",
+    "sinif": "dis",
+    "bolge": "Veranda",
+    "boy_m": 2.731,
+    "brut_m2": 7.3737,
+    "net_m2": 2.9737,
+    "bosluklar": [
+     "P5"
+    ]
+   },
+   {
+    "duvar": "D12",
+    "sinif": "dis",
+    "bolge": "Sundurma",
+    "boy_m": 1.591,
+    "brut_m2": 4.2957,
+    "net_m2": 2.3007,
+    "bosluklar": [
+     "K1"
+    ]
+   },
+   {
+    "duvar": "D11",
+    "sinif": "dis",
+    "bolge": "Sundurma",
+    "boy_m": 1.079,
+    "brut_m2": 2.9133,
+    "net_m2": 2.9133,
+    "bosluklar": []
+   },
+   {
+    "duvar": "D10",
+    "sinif": "dis",
+    "bolge": "Sundurma",
+    "boy_m": 0.14,
+    "brut_m2": 0.378,
+    "net_m2": 0.378,
+    "bosluklar": []
+   },
+   {
+    "duvar": "D15",
+    "sinif": "dis",
+    "bolge": "(dış)",
+    "boy_m": 3.043,
+    "brut_m2": 8.2161,
+    "net_m2": 7.5161,
+    "bosluklar": [
+     "P6"
+    ]
+   },
+   {
+    "duvar": "D14",
+    "sinif": "dis",
+    "bolge": "(dış)",
+    "boy_m": 3.061,
+    "brut_m2": 8.2647,
+    "net_m2": 8.2647,
+    "bosluklar": []
+   },
+   {
+    "duvar": "D14",
+    "sinif": "dis",
+    "bolge": "(dış)",
+    "boy_m": 0.17,
+    "brut_m2": 0.459,
+    "net_m2": 0.459,
+    "bosluklar": []
+   },
+   {
+    "duvar": "D13",
+    "sinif": "dis",
+    "bolge": "(dış)",
+    "boy_m": 2.419,
+    "brut_m2": 6.5313,
+    "net_m2": 6.2813,
+    "bosluklar": [
+     "P7"
+    ]
+   },
+   {
+    "duvar": "D12",
+    "sinif": "dis",
+    "bolge": "(dış)",
+    "boy_m": 1.223,
+    "brut_m2": 3.3021,
+    "net_m2": 3.3021,
+    "bosluklar": []
+   },
+   {
+    "duvar": "D10",
+    "sinif": "dis",
+    "bolge": "(dış)",
+    "boy_m": 2.323,
+    "brut_m2": 6.2721,
+    "net_m2": 6.2721,
+    "bosluklar": []
+   },
+   {
+    "duvar": "D09",
+    "sinif": "dis",
+    "bolge": "(dış)",
+    "boy_m": 1.809,
+    "brut_m2": 4.8843,
+    "net_m2": 4.8843,
+    "bosluklar": []
+   },
+   {
+    "duvar": "D08",
+    "sinif": "dis",
+    "bolge": "(dış)",
+    "boy_m": 0.17,
+    "brut_m2": 0.459,
+    "net_m2": 0.459,
+    "bosluklar": []
+   },
+   {
+    "duvar": "D06",
+    "sinif": "dis",
+    "bolge": "(dış)",
+    "boy_m": 3.254,
+    "brut_m2": 8.7858,
+    "net_m2": 6.8358,
+    "bosluklar": [
+     "P1"
+    ]
+   },
+   {
+    "duvar": "D07",
+    "sinif": "dis",
+    "bolge": "(dış)",
+    "boy_m": 3.66,
+    "brut_m2": 9.882,
+    "net_m2": 7.932,
+    "bosluklar": [
+     "P2"
+    ]
+   },
+   {
+    "duvar": "D08",
+    "sinif": "dis",
+    "bolge": "(dış)",
+    "boy_m": 3.063,
+    "brut_m2": 8.2701,
+    "net_m2": 6.3201,
+    "bosluklar": [
+     "P3"
+    ]
+   },
+   {
+    "duvar": "D03",
+    "sinif": "dis",
+    "bolge": "(dış)",
+    "boy_m": 0.14,
+    "brut_m2": 0.378,
+    "net_m2": 0.378,
+    "bosluklar": []
+   },
+   {
+    "duvar": "D04",
+    "sinif": "dis",
+    "bolge": "(dış)",
+    "boy_m": 1.199,
+    "brut_m2": 3.2373,
+    "net_m2": 3.2373,
+    "bosluklar": []
+   },
+   {
+    "duvar": "D05",
+    "sinif": "dis",
+    "bolge": "(dış)",
+    "boy_m": 4.065,
+    "brut_m2": 10.9755,
+    "net_m2": 6.5755,
+    "bosluklar": [
+     "P4"
+    ]
+   },
+   {
+    "duvar": "D06",
+    "sinif": "dis",
+    "bolge": "(dış)",
+    "boy_m": 0.17,
+    "brut_m2": 0.459,
+    "net_m2": 0.459,
+    "bosluklar": []
+   }
+  ]
+ },
+ "odalar": [
+  {
+   "ad": "Salon",
+   "tur": "beyaz",
+   "cevre_m": 16.79,
+   "alan_m2": 16.294,
+   "duvar_brut_m2": 45.333,
+   "bosluk_m2": [
+    1.95,
+    1.926,
+    4.4
+   ],
+   "ic_kose": 6,
+   "dis_kose": 2,
+   "islev": [
+    "salon"
+   ]
+  },
+  {
+   "ad": "Yatak Odası",
+   "tur": "beyaz",
+   "cevre_m": 14.198,
+   "alan_m2": 12.282,
+   "duvar_brut_m2": 38.335,
+   "bosluk_m2": [
+    1.95,
+    1.926
+   ],
+   "ic_kose": 5,
+   "dis_kose": 1,
+   "islev": [
+    "yatak_odasi"
+   ]
+  },
+  {
+   "ad": "Çocuk Odası",
+   "tur": "beyaz",
+   "cevre_m": 14.038,
+   "alan_m2": 12.047,
+   "duvar_brut_m2": 37.903,
+   "bosluk_m2": [
+    1.926,
+    1.95
+   ],
+   "ic_kose": 5,
+   "dis_kose": 1,
+   "islev": [
+    "yatak_odasi"
+   ]
+  },
+  {
+   "ad": "Hol",
+   "tur": "beyaz",
+   "cevre_m": 13.922,
+   "alan_m2": 7.394,
+   "duvar_brut_m2": 38.407,
+   "bosluk_m2": [
+    1.926,
+    1.926,
+    1.926,
+    1.995,
+    1.712,
+    1.926
+   ],
+   "ic_kose": 5,
+   "dis_kose": 1,
+   "islev": [
+    "hol"
+   ],
+   "kiris_kaplamasi_m2": 0.817
+  },
+  {
+   "ad": "Mutfak",
+   "tur": "beyaz",
+   "cevre_m": 14.898,
+   "alan_m2": 13.824,
+   "duvar_brut_m2": 40.225,
+   "bosluk_m2": [
+    0.7,
+    4.4,
+    1.926
+   ],
+   "ic_kose": 4,
+   "dis_kose": 0,
+   "islev": [
+    "mutfak"
+   ]
+  },
+  {
+   "ad": "Banyo",
+   "tur": "yesil",
+   "cevre_m": 10.578,
+   "alan_m2": 6.68,
+   "duvar_brut_m2": 28.561,
+   "bosluk_m2": [
+    1.712,
+    0.25
+   ],
+   "ic_kose": 4,
+   "dis_kose": 0,
+   "islev": [
+    "banyo"
+   ]
+  }
+ ],
+ "ic_kapi_adedi": 5,
+ "islak_hacim_sayisi": 1,
+ "ic_duvar_boyu_m": 23.66,
+ "ic_osb_tum_duvarlar": true,
+ "ic_osb_kalinlik_mm": 11,
+ "yalitim": {
+  "dis_brut_m2": 106.04,
+  "ic_brut_m2": 63.876,
+  "bosluk_m2": 27.011
+ },
+ "veranda_tavan_cevresi_m": 20.14,
+ "elektrik_odalar": [
+  {
+   "ad": "Salon",
+   "islev": [
+    "salon"
+   ]
+  },
+  {
+   "ad": "Yatak Odası",
+   "islev": [
+    "yatak_odasi"
+   ]
+  },
+  {
+   "ad": "Çocuk Odası",
+   "islev": [
+    "yatak_odasi"
+   ]
+  },
+  {
+   "ad": "Hol",
+   "islev": [
+    "hol"
+   ]
+  },
+  {
+   "ad": "Mutfak",
+   "islev": [
+    "mutfak"
+   ]
+  },
+  {
+   "ad": "Banyo",
+   "islev": [
+    "banyo"
+   ]
+  },
+  {
+   "ad": "Veranda",
+   "islev": [
+    "veranda"
+   ]
+  },
+  {
+   "ad": "Sundurma",
+   "islev": [
+    "veranda"
+   ]
+  }
+ ],
+ "tavan_m2": {
+  "beyaz": 61.84,
+  "yesil": 24.2
+ },
+ "veranda_m2": {
+  "brut": 17.52,
+  "net": 14.29,
+  "not": "tavan ve köşebent hesabında brüt (dış ölçüyle) alınır; 0.4'teki gibi"
+ },
+ "tavan_omegasi_m2": 68.52,
+ "tavan_omegasi_haric": "çatı panelli veranda ve sundurma",
+ "tavan_omegasi": {
+  "boy_m": 124.69,
+  "hat": 39,
+  "aralik_m": 0.6,
+  "gozler": [
+   {
+    "mahal": "Salon",
+    "yon": "y",
+    "hat": 6,
+    "boy_m": 31.23
+   },
+   {
+    "mahal": "Yatak Odası",
+    "yon": "x",
+    "hat": 7,
+    "boy_m": 22.27
+   },
+   {
+    "mahal": "Çocuk Odası",
+    "yon": "x",
+    "hat": 7,
+    "boy_m": 20.46
+   },
+   {
+    "mahal": "Hol",
+    "yon": "y",
+    "hat": 4,
+    "boy_m": 7.77
+   },
+   {
+    "mahal": "Hol",
+    "yon": "y",
+    "hat": 5,
+    "boy_m": 6.01
+   },
+   {
+    "mahal": "Mutfak",
+    "yon": "y",
+    "hat": 6,
+    "boy_m": 23.95
+   },
+   {
+    "mahal": "Banyo",
+    "yon": "y",
+    "hat": 4,
+    "boy_m": 13.0
+   }
+  ]
+ },
+ "elektrik_en_uzak_m": 9.88,
+ "cati": {
+  "tip": "kirma",
+  "yontem": "omega_asik",
+  "kaplama": "sandvic_panel",
+  "egim": 0.33,
+  "yuzey_m2": 112.64,
+  "sacak_kenarlari_m": [
+   10.517,
+   6.144,
+   2.624,
+   4.101,
+   6.644,
+   5.403,
+   1.249,
+   4.842,
+   4.101,
+   1.621
+  ],
+  "sacak_boyu_toplam_m": 47.25,
+  "cephe_kenarlari_m": [
+   9.917,
+   5.544,
+   2.324,
+   3.801,
+   6.044,
+   5.103,
+   0.949,
+   4.242
+  ],
+  "kose_adedi": 12,
+  "kose_kaynak": "dere hatlarının (saçakların) uçları; iki saçağın buluştuğu köşe tek sayılır",
+  "mahya_hatti_m": 34.75,
+  "mahya_dokumu_m": {
+   "mahya": 7.47,
+   "kirma": 27.27
+  },
+  "ters_mahya_m": 7.98,
+  "alin_saci_m": 6.0847,
+  "sacak_saci_kenarlari_m": [
+   10.517,
+   6.144,
+   2.624,
+   4.101,
+   6.644,
+   5.403,
+   1.249,
+   4.842
+  ],
+  "sacak_omegasi_cephe_m": [
+   9.917,
+   5.544,
+   2.324,
+   3.801,
+   6.044,
+   5.103,
+   0.949,
+   4.242
+  ],
+  "dere": {
+   "boy_m": 47.246,
+   "hatlar_m": [
+    10.517,
+    6.144,
+    2.624,
+    4.101,
+    6.644,
+    5.403,
+    1.249,
+    4.842,
+    4.101,
+    1.621
+   ],
+   "uc": 12,
+   "serbest_uc": 4
+  },
+  "ek_cati": {
+   "sacak_m": 5.722,
+   "alin_m": 6.0847,
+   "kaplama_m2": 2.9517,
+   "kaplama_eni_m": [
+    0.1,
+    0.15
+   ]
+  },
+  "panelli_cati_adi": "veranda ve sundurma",
+  "duvar_dibi": [
+   {
+    "yapi": "veranda ve sundurma",
+    "boy_m": 9.6233
+   }
+  ],
+  "baca_cevresi_m": 3.04,
+  "asik": {
+   "boy_m": 185.47,
+   "sira": {
+    "kuzey": 6,
+    "batı": 6,
+    "batı güney": 6,
+    "kanat batı": 7,
+    "kanat güney": 6,
+    "kanat doğu": 7,
+    "doğu güney": 5,
+    "doğu": 5
+   },
+   "aralik_m": 0.6,
+   "ust_sira_esigi_m": 0.3,
+   "not": "kuzey 6 sıra, batı 6 sıra, batı güney 6 sıra, kanat batı 7 sıra, kanat güney 6 sıra, kanat doğu 7 sıra, doğu güney 5 sıra, doğu 5 sıra"
+  },
+  "dizilim": {
+   "satirlar": [
+    {
+     "boy_m": 3.7,
+     "adet": 5
+    },
+    {
+     "boy_m": 3.55,
+     "adet": 8
+    },
+    {
+     "boy_m": 3.29,
+     "adet": 7
+    },
+    {
+     "boy_m": 3.16,
+     "adet": 6
+    },
+    {
+     "boy_m": 2.62,
+     "adet": 3
+    },
+    {
+     "boy_m": 2.37,
+     "adet": 13
+    },
+    {
+     "boy_m": 1.71,
+     "adet": 5
+    }
+   ],
+   "adet": 47,
+   "kapatma_m": 1.0,
+   "tasma_cm": 5.0,
+   "kesim_payi_mm": 5.0,
+   "tam_boy": 10,
+   "cift": 14,
+   "tek": 9,
+   "karma": 18,
+   "panel_m2": 136.11,
+   "uzatma": [
+    {
+     "taban_boy_cm": 260.0,
+     "boy_cm": 262.0,
+     "taban_adet": 48,
+     "adet": 47,
+     "neden": "adet"
+    }
+   ],
+   "taban": {
+    "boylar": [
+     171.0,
+     237.0,
+     260.0,
+     316.0,
+     329.0,
+     355.0,
+     370.0
+    ],
+    "adet": 48,
+    "boy_adet": {
+     "370.0": 5,
+     "355.0": 8,
+     "329.0": 7,
+     "316.0": 6,
+     "260.0": 3,
+     "237.0": 13,
+     "171.0": 6
+    }
+   }
+  },
+  "cati_boyu_m": 10.517,
+  "bina_eni_m": 9.705,
+  "sacak_alti": "sac",
+  "sacak_omegasi": "Saçak omegası"
+ },
+ "kapi_pencere": [
+  {
+   "kalem": "Kompozit çelik kapı",
+   "boyut": "90 × 210",
+   "adet": 1,
+   "durum": "model",
+   "formul": "dış kapı sayısı; ölçü gerçek listelerden"
+  },
+  {
+   "kalem": "PVC pencere",
+   "boyut": "150/130",
+   "adet": 3,
+   "durum": "model"
+  },
+  {
+   "kalem": "PVC pencere",
+   "boyut": "200/220",
+   "adet": 2,
+   "durum": "model"
+  },
+  {
+   "kalem": "PVC pencere",
+   "boyut": "100/70",
+   "adet": 1,
+   "durum": "model"
+  },
+  {
+   "kalem": "PVC pencere",
+   "boyut": "50/50",
+   "adet": 1,
+   "durum": "model"
+  }
+ ],
+ "pencere_dahil": true,
+ "boya_dahil": true,
+ "vitrifiye_dahil": false,
+ "renk": {
+  "cati": "antrasit gri",
+  "sacak_alin": "antrasit gri"
+ },
+ "bayi": {
+  "gruplar": {
+   "Sıhhi tesisat": true,
+   "Elektrik": true
+  },
+  "not": "kapsam: projenin teknik özellikleri ve açıklama notları (alıcıya ait olanlar listeye girmez)"
+ },
+ "uyarilar": [
+  "K6: iç kapı boşluğu 80 × 214; kural 90 × 214 (modeldeki ölçü kullanıldı)",
+  "Ne olur girdisi: iki kural sorusu gerçek listedeki gibi cevaplanmış sayıldı; kural değil (kt03_ne_olur.py)"
+ ]
+}

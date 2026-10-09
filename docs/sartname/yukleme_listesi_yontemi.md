@@ -1,6 +1,6 @@
-# Çelik yükleme listesi: yöntem ve taslak (3–9 Ekim 2026)
+# Çelik yükleme listesi: yöntem ve taslak (3–10 Ekim 2026)
 
-Son güncelleme: 9 Ekim 2026 22:59. Lokman, 3 Ekim 12:03: yükleme listesi sistemi kurulacak. Bundan sonraki çelik modellerde model verilecek, liste aynı sistemle dönecek. Kapsam: tek kat çelik, çift katın üst katı ve çatı ailesi. Canlıya alınacak.
+Son güncelleme: 10 Ekim 2026 00:25. Lokman, 3 Ekim 12:03: yükleme listesi sistemi kurulacak. Bundan sonraki çelik modellerde model verilecek, liste aynı sistemle dönecek. Kapsam: tek kat çelik, çift katın üst katı ve çatı ailesi. Canlıya alınacak.
 
 Deneme kodu: `deneme/2026-10-03_yukleme/`. Hesapta LLM yok: aynı girdi her zaman aynı listeyi verir. Buradaki tablolar ve sayılar hesap çıktılarından üretilir (`belge_uret.py`; tablolar `sonuc/tablolar.md`).
 
@@ -14,6 +14,7 @@ Deneme kodu: `deneme/2026-10-03_yukleme/`. Hesapta LLM yok: aynı girdi her zama
    - **105 m²**, beşik + cumba çatı, tek kat panel, dış karkas 140 mm (dosya tarihi 26 Kasım 2025; 11 Kasım tarihli önceki sürümüne de bakıldı).
    - **98,7 m²**, beşik + cumba çatı, sandviç panel, müştemilatlı (Eylül 2026). Kör testte kullanıldı (KT-01): bu belgedeki kurallarla kendi listemiz çıkarıldıktan sonra açıldı. O da yöntem B ile hazırlanmış. Aşağıda "Kör test" bölümü.
    - **90 m²** (ikinci kör test, KT-02), dört omuz çatı, sandviç panel, korkuluklu veranda ve girişte kendi çatısı olan açık sundurma (Ağustos 2026). Model montaj paftasından ve üretim dosyasından (rulo form makinesinin CSV'leri) kuruldu; liste, kendi listemiz donduruluncaya kadar açılmadı. Yöntem B. Aşağıda "Kör test: KT-02" bölümü.
+   - **80 m²** (üçüncü kör test, KT-03), kanatlı kırma çatı, sandviç panel, tek eğimli panel çatılı veranda ve giriş sundurması, iki baca (Eylül 2026; yeni şablon). Üretim dosyası yoktu: model yalnız montaj paftasından kuruldu; liste, kendi listemiz donduruluncaya kadar açılmadı. Yöntem B. Aşağıda "Kör test: KT-03" bölümü.
 4. **Excel hesaplama motoru** (`CTKBF V1.1`). Lokman, 13:27: "biz Excel'de hesaplama motoru kullanırken…". Sayfaları: müşteri talebi (girdiler), proje detayları, dış ve iç duvar tonajı, çatı tonajı, çatı kaplama malzemesi, pencere, malzemeler (formüller), notlar. Buradan çelik birim ağırlıkları ile listede elle yazılan kalemlerin formülleri alındı. Fiyatlar alınmadı.
 5. **Mühendisin 10 × 10 m çatı metrajı** (aynı klasörde; beşik ve dört omuz, yöntem B). Kuralları sınamak için kullanıldı; fiyatlar alınmadı.
 6. **Montaj paftaları** (aynı klasörlerde). Lokman'ın 4 Ekim 17:46 mesajı üzerine bulundu ve incelendi: 13 klasörde 84 PDF, proje başına bir ana DWG. Üç gerçek listenin projelerinin paftaları listelerle karşılaştırıldı (aşağıda, 17:46 bölümü). Ayrıntı: `docs/sartname/montaj_paftasi.md`.
@@ -773,6 +774,17 @@ Cevaplardan sonra (kural seti 0.17, düzeltilmiş tanım): 57 / 85 satır aynı 
 
 Denetim (22:44'ten sonra): bugünkü kod 0.12, 0.13, 0.14, 0.15 ve 0.16 setleriyle kendi günlerindeki çıktıların hepsini bayt bayt aynı veriyor (üç `sonuc/` klasörü; 0.15 ile KT-02'nin dondurulan listeleri ve 22:05 kıyası). 0.17 ile değişenler: KT-01 ve KT-02 listelerinde dış cephe levhasının alanı (adet aynı), KT-02'nin cevaplardan sonraki listeleri, iki sağlama dosyasındaki kural seti adı, KT-01 ve KT-02'nin plan ve paftasındaki dış kaplama satırı ("+ korkuluk üstü"). Çizimlerin öteki dosyaları içerikçe aynı (IFC'de kimlik ve zaman, geometri özetinde sıra hariç).
 
+## Kör test: KT-03 (9–10 Ekim 2026)
+
+Lokman, 9 Ekim 22:47: "sonra bunu test et". Proje 80 m², tek kat çelik: kanatlı kırma çatı (sandviç panel), korkuluksuz veranda ve giriş sundurması (ikisinin de tek eğimli panel çatısı var), iki baca. Gerçek liste Eylül 2026 tarihli, yeni bir şablonla hazırlanmış. Bu kez üretim dosyası yoktu: model yalnız montaj paftasından kuruldu, çelik ağırlığı motorun proje ortalamalarından hesaplandı. Liste kural seti 0.17 ile çıkarıldı ve gerçek liste açılmadan depoya donduruldu (commit `1f7ba6c`). Rapor: `docs/raporlar/2026-10-10_Kor_Test_KT03.md`; kod ve tablolar: `deneme/2026-10-09_kor_test_3/`.
+
+- **Sonuç.** Gerçek listenin 102 satırından kör listede 46, girdi hatamız düzeltilince 48 satır aynı. Kör listedeki farkların asıl nedeni: girdi 2 (makas adedi: paftada iki numara atlanıyor; 36 değil 34), kural 21, karar 18, elle 9, pafta 6. Bizim hatamız (girdi ve kural) 23 satır.
+- **Kural eksikleri.** Beş konu: veranda ve sundurmanın panel çatısının kenarları (12 satır: dere ve iniş, saçak ve alın sacı, Boardex), üretim dosyası yokken kırma uçlarının çatı panelleri (2), çatı çıkış kapağı (1), bacanın içi (5), taharet musluğu (1). Kurala işlenmedi; sorular aşağıda ("Açık sorular", 10).
+- **Çelik.** Paftadan sayılan panel adetleri (duvar, makas, baca, kolon ve kiriş) makas dışında tuttu; kırma uçlarının çatı panelleri katalog yolunda ayrı satır değil (kural eksiği). Ağırlık ortalamadan: bizde 2556 kg, gerçek listede 2847 kg (yüzde 10 az). Farkın çoğu çatıda: makas ve çatı panelleri listede 979 kg, bizde 746 kg; bu çatının çeliği metrekare başına kırma ortalamasından yüksek. KT-02'de üretim dosyasından okununca kg satır satır tutmuştu.
+- **Bilgi (kurallar değişmedi).** İlk iki konu listedeki gibi cevaplansa 55 / 102; Eylül 2026 uygulamasıyla (`--sablon 2026`) 54 / 102; çelik standardıyla (A) kör liste 45 / 102.
+- **Öneri (yapılmadı).** Paftadan sayılan numaralı elemanlarda (makas, çatı paneli) adet numaraların aralığından değil, etiketlerin sayımından alınsın; eksik numara uyarı versin.
+- **Kayıt.** Kıyas `kt03_kiyas_kos.sh` ile 0.17 setinden üretilir (`sonuc/KT03_kiyas.md`). Tanım, düzeltilmiş tanım ve çizimler depo dışında; eklenmesi Lokman'a soruldu.
+
 ## Açık sorular
 
 1. **Kapatma genişlikleri.** Şimdilik tek kat panel, sandviç panel ve kiremit desen sac 100 cm; sandviç panelin 80 cm kapatanı da var. Ürün değiştikçe güncellenecek (Lokman, 4 Ekim 15:18).
@@ -784,6 +796,7 @@ Denetim (22:44'ten sonra): bugünkü kod 0.12, 0.13, 0.14, 0.15 ve 0.16 setleriy
 7. **Bayi standartları.** Henüz oturmadı (mühendis, 4 Ekim 12:14). Netleşince hangi bayide hangi gruplar ve hangi çatı kaplaması standart: bayi kuralı tablosuna yazılacak.
 8. **Montaj paftası** (BOM'dan sonra, ayrı iş; Lokman, 4 Ekim 17:46). Kesim planı o setin içinde pafta olur; paftadaki açıklamalar birlikte düzeltilecek (7 Ekim 07:45). O işin soruları `docs/sartname/montaj_paftasi.md`'de.
 9. **Sırası gelince.** Çift kat modeli: üst katta 200 cm ve daha geniş pencereli duvarın 1,2 mm alınması (kural kayıtlı, uygulanmadı). Cumbalı çatının açılımı. Kuralların çizimden ve doğrulama motorundan yeniden optimize edilmesi (Lokman, 7 Ekim 07:45: birlikte).
+10. **KT-03'ün soruları (10 Ekim).** (a) Veranda ve sundurmanın tek eğimli panel çatısının kenarları KT-03 listesindeki gibi mi olsun: saçakta dere ve iniş, özel büküm saçak sacı; eğik kenarda sıfır alın sacı; Boardex şeridi yok; tavan saçağıyla Boardex? Müştemilatın panel çatısı (KT-01) bugünkü kuralla kalsın mı? İnişte: alçak bir çatının üstüne düşen köşeye iniş konmasın, kısa derede tek iniş olsun mu? (b) Üretim dosyası yokken kırma uçlarının çatı panelleri paftadaki numaralardan sayılsın mı (KT-03'te 17)? (c) Planda çatı çıkış kapağı varsa listeye 1 adet yazılsın mı (acil müdahale kapağından ayrı)? (d) Bacanın içi bizdeyse baca başına baca borusu, T, kör tapa, maşon ve şapka mı; borunun boyu sabit mi (4,3 m), bacanın boyundan mı? (e) Taharet musluğu kaç tane, neye göre (KT-03 listesinde 4; bir banyo)? (f) Dış duvar 140 mm ise saçak omegası "180'lik geniş saçak omegası" mı yazılsın?
 
 Kapananlar:
 

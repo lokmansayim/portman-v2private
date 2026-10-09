@@ -41,10 +41,41 @@ Proje (KT-03): tek kat çelik, 2+1 (salon, iki yatak odası; ayrı mutfak, banyo
 - `ifc_genel.py` (çizim): genel makas grubu (`eksen`; üstü makaslı düzlemlerin kotundan, kırma uçlarında kesik); çatı panelli açık alanın tavanı panelin altı.
 - Değişmezler denendi: bugünkü kod 0.12–0.16 setleriyle kendi günlerinin çıktılarını, 0.17 setiyle bu commit'ten önceki (`033572a`) çıktıları bayt bayt aynı veriyor; KT-01 ve KT-02'nin betikleri ve çizim setleri (plan, görünüşler, pafta, çatısız görünüm, özet) aynı çıktıyı veriyor; `saglama.py` toplam sorun 0.
 
+## Kıyas (10 Ekim 2026; gerçek liste dondurmadan sonra açıldı)
+
+Rapor: `docs/raporlar/2026-10-10_Kor_Test_KT03.md`. Satır satır tablo: `sonuc/KT03_kiyas.md`.
+
+Dondurma commit'i `1f7ba6c` (9 Ekim 23:55:13). Açılmayan iki dosyanın özeti 23:55:42'de yeniden alındı (dondurma kaydındakiyle aynı); liste 23:56'da açıldı. Liste adsız ve fiyatsız döküldü (`sonuc/KT03_gercek_liste.json`; birinci sayfanın malzeme satırları, 23 Eylül 2026). Excel'in ikinci sayfası (adı bir kişinin adı) okunmadı. Liste yeni şablonla: grup başlıkları, çelikte rulo form makinesi sütunu, depo ve mekanik tesisat grupları; bina alanı 80 m².
+
+| Liste | Aynı satır (102 satırda) |
+|---|---|
+| Kör liste, yöntem B (dondurulan) | **46** |
+| Düzeltilmiş, yöntem B (yalnız girdi hatalarımız düzeltildi; kurallar aynı) | **48** |
+| + Eylül 2026 uygulaması (bilgi) | 54 |
+| İki kural sorusu listedeki gibi cevaplanırsa (bilgi) | 55 |
+| Kör ve düzeltilmiş, çelik standardı (A; bilgi) | 45 ve 47 |
+
+Kör listedeki 56 farkın asıl nedeni: girdi 2 · kural 21 · karar 18 · elle 9 · pafta 6. Bizim hatamız 23 satır.
+
+- **Girdi hatası.** Makas ve dere paftasında makas numaraları MK01 ve MK14'ü atlıyor: 34 makas. Numaraları kesintisiz sayıp 36 yazmışım; listede de 34. Ayrıca veranda ve sundurma çatısının saçak çizgisini paftadaki çizim yerine kesit detayından okumuşum (sundurma 8 cm kısa); adede etkisi yok. Düzeltilmiş tanımı `kt03_tanim_duzeltilmis.py` üretir (depo dışında).
+- **Kural eksikleri** (raporun 4. bölümü; Lokman'a soruldu, 11. bölüm). Veranda ve sundurmanın tek eğimli panel çatısının kenarları (12 satır): listede saçaklarda dere ve iniş, özel büküm saçak sacı, eğik kenarlarda sıfır alın sacı var, Boardex şeridi yok, tavan saçağıyla; kuralımız KT-01'in müştemilatından. Üretim dosyası yokken kırma uçlarının çatı panelleri satır olmuyor (2 satır). Çatı çıkış kapağı (1). Bacanın içi: baca borusu, T, kör tapa, maşon, şapka (5). Taharet musluğu (1).
+- **Karar farkları.** Bina alanı (liste 80, kural 94: uçlar, inox taş, RYSB), vida kararları (alçıpan vidası × 40, trapez vidanın omega ve aşıkta olmaması), duvar izolasyonu gönderilmiyor, yöntem B kalemlerinin formülleri, ölçünün alındığı yüz.
+- **Çelik.** Panel adetleri dış ve iç duvar, baca, kolon-kiriş ve C profillerde aynı; makas düzeltilince aynı. Ağırlık üretim dosyası olmadığı için motorun ortalaması: toplam 2 556 / 2 847 kg (C profiller hariç listede).
+- Elektrik paftasındaki sayılar (yeniden sayıldı) listeyle aynı; yalnız tekli priz listede bir fazla (14 / 13).
+
+Kıyasın dosyaları:
+
+- `kt03_kiyas.py`: kıyas ve mekanik denetimler.
+- `kt03_farklar.json`: sınıflar ve nedenler; elle yazılır, kıyas denetler.
+- `kt03_kiyas_kos.sh`: düzeltilmiş tanımdan iki liste, Eylül 2026 katmanı, ne olur ve tablo; kural seti 0.17'ye sabit.
+- `kt03_ne_olur.py`: iki kural sorusunun (panel çatının kenarları, kırma uçlarının çatı panelleri) etkisi; yalnız bilgi.
+- `kt03_sayfa.py`: Lokman'a verilen tek sayfa; depoya yazılmaz.
+- `sonuc/KT03_gercek_liste.json`, `sonuc/KT03_duzeltilmis_*`, `sonuc/KT03_ne_olur_*`, `sonuc/KT03_kiyas.{md,json}`.
+
 ## Dosyalar
 
 - `kt03_kos.sh`: tanımdan iki liste (B ve A); kural seti 0.17'ye sabit.
 - `sonuc/KT03_pafta_sayimi.json`: elektrik sayımı.
 - `sonuc/KT03_{B,A}_girdi.json`, `sonuc/KT03_{B,A}_yukleme.{json,md}`: dondurulan listeler (96'şar satır).
 - `sonuc/KT03_dondurma.md`: dondurma kaydı.
-- Depo dışında (Lokman'ın onayıyla girer): `KT03.json`, `kt03_tanim_uret.py`, çizim seti (12 çıktı, iki yöntemle).
+- Depo dışında (Lokman'ın onayıyla girer): `KT03.json`, `KT03_duzeltilmis.json`, `kt03_tanim_uret.py`, `kt03_tanim_duzeltilmis.py`, çizim seti (düzeltilmiş tanımdan, iki yöntemle, 12'şer çıktı).

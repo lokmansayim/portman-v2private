@@ -256,6 +256,30 @@ assert not k2["denetim_sorunlari"] and not k2c["denetim_sorunlari"] and (k2_n, k
     and k2_s == {"girdi": 11, "kural": 5, "karar": 13, "elle": 7, "pafta": 3} and k2c_k["kural"] == 0 and k2c_k["karar"] == 18 and k2c_k["girdi"] == 0 and k2_bx == 51 \
     and k2_k15["duz_b_kg"] == k2_k15["gercek_kg"] == 46.89 and k2_k15["kor_b_kg"] is None, \
     "belge: KT-02'de 85 satırın kör 46'sı, düzeltilmiş 57'si aynı; sınıflar 11/5/13/7/3; cevaplardan sonra kural eksiği yok (karar 18), dış cephe levhası 51, 1,5 mm kiriş 46,89 kg diyor"
+# Üçüncü kör test (KT-03, 9–10 Ekim 2026): 10 Ekim kıyası (kural seti 0.17; `kt03_kiyas_kos.sh`). Üretim dosyası yoktu: çelik ağırlığı motorun ortalamasından.
+KT3 = BURADA.parent / "2026-10-09_kor_test_3" / "sonuc"
+k3 = json.loads((KT3 / "KT03_kiyas.json").read_text(encoding="utf-8"))
+k3_n, k3_kor, k3_duz = k3["ozet"]["kor_b"]["gercek_satir"], k3["ozet"]["kor_b"]["ayni"], k3["ozet"]["duz_b"]["ayni"]
+k3_s, k3_c = k3["siniflar"], k3["celik"]
+k3_birim = lambda ad: next(b for b in k3["birimler"] if b["ad"] == ad)
+# kural eksikleri konu konu (her konunun gerçek listedeki satırları); sorular "Açık sorular"da (10)
+K3_KONU = {"panel_cati": ["Alın sacı (veranda ve sundurma)", "Özel büküm saçak sacı", "Dış cephe Boardex", "Veranda ve sundurma tavanı (Boardex)", "Metal dere",
+                          "Dere kapağı", "Dere iniş aparatı", "Dere iniş borusu", "Açık dirsek", "Kapalı dirsek", "İniş kelepçesi", "Dere kelepçesi"],
+           "cati_paneli": ["Çatı panelleri (1,2 ve 0,8)"], "cikis_kapagi": ["Çatı çıkış kapağı"],
+           "baca_ici": ["Baca borusu", "Baca T'si", "Baca kör tapa", "Baca maşonu", "Baca şapkası"], "taharet": ["Taharet musluğu 20 mm"]}
+k3_kural = {b["ad"]: len(b["gercek_satirlar"]) for b in k3["birimler"] if b["sinif"] == "kural"}
+k3_konu = {konu: sum(k3_kural[a] for a in adlar) for konu, adlar in K3_KONU.items() if all(a in k3_kural for a in adlar)}
+k3_cati = [k3_birim("Çatı makas panelleri (1,2 ve 0,8)"), k3_birim("Çatı panelleri (1,2 ve 0,8)")]
+k3_cati_kg = (sum(b["gercek_kg"] for b in k3_cati), sum(b["duz_b_kg"] for b in k3_cati))
+k3_yuzde = round(100 * (k3_c["gercek"]["kg"] - k3_c["duz_b"]["kg"]) / k3_c["gercek"]["kg"])
+assert not k3["denetim_sorunlari"] and (k3_n, k3_kor, k3_duz) == (102, 46, 48) and k3_s == {"girdi": 2, "kural": 21, "karar": 18, "elle": 9, "pafta": 6} \
+    and k3["bizim_hatamiz"] == 23 and set(k3_kural) == {a for adlar in K3_KONU.values() for a in adlar} and list(k3_konu.values()) == [12, 2, 1, 5, 1] \
+    and [b["ad"] for b in k3["birimler"] if b["sinif"] == "girdi"] == [k3_cati[0]["ad"]] and k3_cati[0]["duz_b_ayni"] and (k3_cati[0]["gercek"], k3_cati[0]["kor_b"]) == (34, 36) \
+    and (k3["ozet"]["kor_a"]["ayni"], k3["ozet"]["sablon_b"]["ayni"], k3["ozet"]["ne_olur_b"]["ayni"]) == (45, 54, 55) \
+    and (k3_c["gercek"]["kg"], round(k3_c["duz_b"]["kg"]), k3_yuzde) == (2847, 2556, 10) and k3_c["kor_b"]["kg"] == k3_c["duz_b"]["kg"] \
+    and (k3_cati_kg[0], round(k3_cati_kg[1])) == (979, 746), \
+    "belge: KT-03'te 102 satırın kör 46'sı, düzeltilmiş 48'i aynı; sınıflar 2/21/18/9/6 (girdi: makas 36 → 34); kural eksikleri 12/2/1/5/1; A 45, Eylül 2026 54, " \
+    "ne olur 55; çelik 2847 / 2556 kg (yüzde 10), çatının çeliği 979 / 746 kg diyor"
 kt_fark = KT["fark_turleri"]
 # adedi 03:46'daki düzeltilmiş listeden farklı olan satırlar: kararla değişenler ve yalnız elektrik sayıları paftadan alındığı için değişenler
 kt_kararla, kt_paftadan = KT["degisen"]["karar"], KT["degisen"]["pafta"]
@@ -395,7 +419,7 @@ pafta_tablosu = "\n".join([
   + [f"| Aşık | {n} m² | {_parca(PAFTA['asik'][n])} | {asik[n]['liste']} | {asik[n]['hesap']} |" for n in (62, 90)]
   + [f"| Aşık | 105 m² | {_parca(PAFTA['asik'][105])} | {PAFTA['asik_liste_105']} | karşılaştırmada yok |"])
 
-D = f"""# Çelik yükleme listesi: yöntem ve taslak (3–9 Ekim 2026)
+D = f"""# Çelik yükleme listesi: yöntem ve taslak (3–10 Ekim 2026)
 
 Son güncelleme: {A.zaman}. Lokman, 3 Ekim 12:03: yükleme listesi sistemi kurulacak. Bundan sonraki çelik modellerde model verilecek, liste aynı sistemle dönecek. Kapsam: tek kat çelik, çift katın üst katı ve çatı ailesi. Canlıya alınacak.
 
@@ -411,6 +435,7 @@ Deneme kodu: `deneme/2026-10-03_yukleme/`. Hesapta LLM yok: aynı girdi her zama
    - **105 m²**, beşik + cumba çatı, tek kat panel, dış karkas 140 mm (dosya tarihi 26 Kasım 2025; 11 Kasım tarihli önceki sürümüne de bakıldı).
    - **98,7 m²**, beşik + cumba çatı, sandviç panel, müştemilatlı (Eylül 2026). Kör testte kullanıldı (KT-01): bu belgedeki kurallarla kendi listemiz çıkarıldıktan sonra açıldı. O da yöntem B ile hazırlanmış. Aşağıda "Kör test" bölümü.
    - **90 m²** (ikinci kör test, KT-02), dört omuz çatı, sandviç panel, korkuluklu veranda ve girişte kendi çatısı olan açık sundurma (Ağustos 2026). Model montaj paftasından ve üretim dosyasından (rulo form makinesinin CSV'leri) kuruldu; liste, kendi listemiz donduruluncaya kadar açılmadı. Yöntem B. Aşağıda "Kör test: KT-02" bölümü.
+   - **80 m²** (üçüncü kör test, KT-03), kanatlı kırma çatı, sandviç panel, tek eğimli panel çatılı veranda ve giriş sundurması, iki baca (Eylül 2026; yeni şablon). Üretim dosyası yoktu: model yalnız montaj paftasından kuruldu; liste, kendi listemiz donduruluncaya kadar açılmadı. Yöntem B. Aşağıda "Kör test: KT-03" bölümü.
 4. **Excel hesaplama motoru** (`CTKBF V1.1`). Lokman, 13:27: "biz Excel'de hesaplama motoru kullanırken…". Sayfaları: müşteri talebi (girdiler), proje detayları, dış ve iç duvar tonajı, çatı tonajı, çatı kaplama malzemesi, pencere, malzemeler (formüller), notlar. Buradan çelik birim ağırlıkları ile listede elle yazılan kalemlerin formülleri alındı. Fiyatlar alınmadı.
 5. **Mühendisin 10 × 10 m çatı metrajı** (aynı klasörde; beşik ve dört omuz, yöntem B). Kuralları sınamak için kullanıldı; fiyatlar alınmadı.
 6. **Montaj paftaları** (aynı klasörlerde). Lokman'ın 4 Ekim 17:46 mesajı üzerine bulundu ve incelendi: 13 klasörde 84 PDF, proje başına bir ana DWG. Üç gerçek listenin projelerinin paftaları listelerle karşılaştırıldı (aşağıda, 17:46 bölümü). Ayrıntı: `docs/sartname/montaj_paftasi.md`.
@@ -942,6 +967,17 @@ Cevaplardan sonra (kural seti 0.17, düzeltilmiş tanım): {k2c["ozet"]["duz_b"]
 
 Denetim (22:44'ten sonra): bugünkü kod 0.12, 0.13, 0.14, 0.15 ve 0.16 setleriyle kendi günlerindeki çıktıların hepsini bayt bayt aynı veriyor (üç `sonuc/` klasörü; 0.15 ile KT-02'nin dondurulan listeleri ve 22:05 kıyası). 0.17 ile değişenler: KT-01 ve KT-02 listelerinde dış cephe levhasının alanı (adet aynı), KT-02'nin cevaplardan sonraki listeleri, iki sağlama dosyasındaki kural seti adı, KT-01 ve KT-02'nin plan ve paftasındaki dış kaplama satırı ("+ korkuluk üstü"). Çizimlerin öteki dosyaları içerikçe aynı (IFC'de kimlik ve zaman, geometri özetinde sıra hariç).
 
+## Kör test: KT-03 (9–10 Ekim 2026)
+
+Lokman, 9 Ekim 22:47: "sonra bunu test et". Proje 80 m², tek kat çelik: kanatlı kırma çatı (sandviç panel), korkuluksuz veranda ve giriş sundurması (ikisinin de tek eğimli panel çatısı var), iki baca. Gerçek liste Eylül 2026 tarihli, yeni bir şablonla hazırlanmış. Bu kez üretim dosyası yoktu: model yalnız montaj paftasından kuruldu, çelik ağırlığı motorun proje ortalamalarından hesaplandı. Liste kural seti 0.17 ile çıkarıldı ve gerçek liste açılmadan depoya donduruldu (commit `1f7ba6c`). Rapor: `docs/raporlar/2026-10-10_Kor_Test_KT03.md`; kod ve tablolar: `deneme/2026-10-09_kor_test_3/`.
+
+- **Sonuç.** Gerçek listenin {k3_n} satırından kör listede {k3_kor}, girdi hatamız düzeltilince {k3_duz} satır aynı. Kör listedeki farkların asıl nedeni: girdi {k3_s["girdi"]} (makas adedi: paftada iki numara atlanıyor; {k3_cati[0]["kor_b"]} değil {k3_cati[0]["gercek"]}), kural {k3_s["kural"]}, karar {k3_s["karar"]}, elle {k3_s["elle"]}, pafta {k3_s["pafta"]}. Bizim hatamız (girdi ve kural) {k3["bizim_hatamiz"]} satır.
+- **Kural eksikleri.** Beş konu: veranda ve sundurmanın panel çatısının kenarları ({k3_konu["panel_cati"]} satır: dere ve iniş, saçak ve alın sacı, Boardex), üretim dosyası yokken kırma uçlarının çatı panelleri ({k3_konu["cati_paneli"]}), çatı çıkış kapağı ({k3_konu["cikis_kapagi"]}), bacanın içi ({k3_konu["baca_ici"]}), taharet musluğu ({k3_konu["taharet"]}). Kurala işlenmedi; sorular aşağıda ("Açık sorular", 10).
+- **Çelik.** Paftadan sayılan panel adetleri (duvar, makas, baca, kolon ve kiriş) makas dışında tuttu; kırma uçlarının çatı panelleri katalog yolunda ayrı satır değil (kural eksiği). Ağırlık ortalamadan: bizde {tr(k3_c["duz_b"]["kg"])} kg, gerçek listede {tr(k3_c["gercek"]["kg"])} kg (yüzde {k3_yuzde} az). Farkın çoğu çatıda: makas ve çatı panelleri listede {tr(k3_cati_kg[0])} kg, bizde {tr(k3_cati_kg[1])} kg; bu çatının çeliği metrekare başına kırma ortalamasından yüksek. KT-02'de üretim dosyasından okununca kg satır satır tutmuştu.
+- **Bilgi (kurallar değişmedi).** İlk iki konu listedeki gibi cevaplansa {k3["ozet"]["ne_olur_b"]["ayni"]} / {k3_n}; Eylül 2026 uygulamasıyla (`--sablon 2026`) {k3["ozet"]["sablon_b"]["ayni"]} / {k3_n}; çelik standardıyla (A) kör liste {k3["ozet"]["kor_a"]["ayni"]} / {k3_n}.
+- **Öneri (yapılmadı).** Paftadan sayılan numaralı elemanlarda (makas, çatı paneli) adet numaraların aralığından değil, etiketlerin sayımından alınsın; eksik numara uyarı versin.
+- **Kayıt.** Kıyas `kt03_kiyas_kos.sh` ile 0.17 setinden üretilir (`sonuc/KT03_kiyas.md`). Tanım, düzeltilmiş tanım ve çizimler depo dışında; eklenmesi Lokman'a soruldu.
+
 ## Açık sorular
 
 1. **Kapatma genişlikleri.** Şimdilik tek kat panel, sandviç panel ve kiremit desen sac 100 cm; sandviç panelin 80 cm kapatanı da var. Ürün değiştikçe güncellenecek (Lokman, 4 Ekim 15:18).
@@ -953,6 +989,7 @@ Denetim (22:44'ten sonra): bugünkü kod 0.12, 0.13, 0.14, 0.15 ve 0.16 setleriy
 7. **Bayi standartları.** Henüz oturmadı (mühendis, 4 Ekim 12:14). Netleşince hangi bayide hangi gruplar ve hangi çatı kaplaması standart: bayi kuralı tablosuna yazılacak.
 8. **Montaj paftası** (BOM'dan sonra, ayrı iş; Lokman, 4 Ekim 17:46). Kesim planı o setin içinde pafta olur; paftadaki açıklamalar birlikte düzeltilecek (7 Ekim 07:45). O işin soruları `docs/sartname/montaj_paftasi.md`'de.
 9. **Sırası gelince.** Çift kat modeli: üst katta 200 cm ve daha geniş pencereli duvarın 1,2 mm alınması (kural kayıtlı, uygulanmadı). Cumbalı çatının açılımı. Kuralların çizimden ve doğrulama motorundan yeniden optimize edilmesi (Lokman, 7 Ekim 07:45: birlikte).
+10. **KT-03'ün soruları (10 Ekim).** (a) Veranda ve sundurmanın tek eğimli panel çatısının kenarları KT-03 listesindeki gibi mi olsun: saçakta dere ve iniş, özel büküm saçak sacı; eğik kenarda sıfır alın sacı; Boardex şeridi yok; tavan saçağıyla Boardex? Müştemilatın panel çatısı (KT-01) bugünkü kuralla kalsın mı? İnişte: alçak bir çatının üstüne düşen köşeye iniş konmasın, kısa derede tek iniş olsun mu? (b) Üretim dosyası yokken kırma uçlarının çatı panelleri paftadaki numaralardan sayılsın mı (KT-03'te 17)? (c) Planda çatı çıkış kapağı varsa listeye 1 adet yazılsın mı (acil müdahale kapağından ayrı)? (d) Bacanın içi bizdeyse baca başına baca borusu, T, kör tapa, maşon ve şapka mı; borunun boyu sabit mi (4,3 m), bacanın boyundan mı? (e) Taharet musluğu kaç tane, neye göre (KT-03 listesinde 4; bir banyo)? (f) Dış duvar 140 mm ise saçak omegası "180'lik geniş saçak omegası" mı yazılsın?
 
 Kapananlar:
 
