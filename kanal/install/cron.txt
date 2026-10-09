@@ -1,7 +1,0 @@
-DirectAdmin > Cron Jobs > Create Cron Job — YENİ SATIR (mevcut iki satıra dokunulmaz):
-
-Dakika: *   Saat: *   Gün: *   Ay: *   Haftanın günü: *
-Komut:
-/home/portatifevcom/portman_app/task2/venv/bin/python /home/portatifevcom/portman_app/kanal/worker.py >> /home/portatifevcom/portman_app/kanal/worker.log 2>&1
-
-Not: Görev 2'nin Python'u (venv) kullanılır; ilk çalışmada eksik paketler (shapely, pydantic) venv'e kurulur (kanal/install-report.json), ikinci dakikadan itibaren normal çalışır.

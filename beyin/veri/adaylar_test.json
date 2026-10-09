@@ -1,0 +1,120 @@
+[
+ {
+  "kod": "TEST01",
+  "durum": "test",
+  "sablon": "adaylar/TEST01.json",
+  "gorsel": "adaylar/TEST01.png",
+  "referans_model": "P9401",
+  "yapi_turu": "prefabrik",
+  "oda_programi": "3+1",
+  "katalog_m2": 94.0,
+  "kapali_m2": 83.1,
+  "veranda_m2": 7.88,
+  "ozet": {
+   "grid": {
+    "x_pano": 8.0,
+    "y_pano": 7.0
+   },
+   "dis_olcu_cm": [
+    1024.0,
+    888.5
+   ],
+   "pano": 49,
+   "pencere": 7,
+   "kapi": 5,
+   "odalar": {
+    "YATAK ODASI 1": 11.45,
+    "YATAK ODASI 2": 11.34,
+    "YATAK ODASI 3": 9.11,
+    "BANYO": 4.54,
+    "YASAM ALANI": 41.61,
+    "VERANDA": 7.88
+   }
+  },
+  "kaynak": {
+   "metin": "TEST: katalog P9401 çıkarımı (30.09)",
+   "dosya": "deneme/2026-09-30_asama2/sonuc/P9401/is_emri.json",
+   "ayna": null
+  },
+  "not": ""
+ },
+ {
+  "kod": "TEST02",
+  "durum": "test",
+  "sablon": "adaylar/TEST02.json",
+  "gorsel": "adaylar/TEST02.png",
+  "referans_model": "P9201",
+  "yapi_turu": "prefabrik",
+  "oda_programi": "3+1",
+  "katalog_m2": 92.0,
+  "kapali_m2": 76.3,
+  "veranda_m2": 18.9,
+  "ozet": {
+   "grid": {
+    "x_pano": 6.5,
+    "y_pano": 9.0
+   },
+   "dis_olcu_cm": [
+    835.75,
+    1139.5
+   ],
+   "pano": 48,
+   "pencere": 6,
+   "kapi": 5,
+   "odalar": {
+    "YATAK ODASI 1": 12.2,
+    "YATAK ODASI 2": 11.45,
+    "YATAK ODASI 3": 9.08,
+    "HOL": 6.6,
+    "SALON": 27.55,
+    "BANYO": 4.43,
+    "VERANDA": 18.9
+   }
+  },
+  "kaynak": {
+   "metin": "TEST: katalog P9201 çıkarımı (30.09)",
+   "dosya": "deneme/2026-09-30_asama2/sonuc/P9201/is_emri.json",
+   "ayna": null
+  },
+  "not": ""
+ },
+ {
+  "kod": "TEST03",
+  "durum": "test",
+  "sablon": "adaylar/TEST03.json",
+  "gorsel": "adaylar/TEST03.png",
+  "referans_model": "P9401",
+  "yapi_turu": "prefabrik",
+  "oda_programi": "3+1",
+  "katalog_m2": 94.0,
+  "kapali_m2": 83.1,
+  "veranda_m2": 7.88,
+  "ozet": {
+   "grid": {
+    "x_pano": 8.0,
+    "y_pano": 7.0
+   },
+   "dis_olcu_cm": [
+    1024.0,
+    888.5
+   ],
+   "pano": 49,
+   "pencere": 7,
+   "kapi": 5,
+   "odalar": {
+    "YATAK ODASI 1": 11.45,
+    "YATAK ODASI 2": 11.34,
+    "YATAK ODASI 3": 9.11,
+    "BANYO": 4.54,
+    "YASAM ALANI": 41.61,
+    "VERANDA": 7.88
+   }
+  },
+  "kaynak": {
+   "metin": "TEST: katalog P9401 çıkarımı, sol-sağ aynalı (30.09)",
+   "dosya": "deneme/2026-09-30_asama2/sonuc/P9401/is_emri.json",
+   "ayna": "x"
+  },
+  "not": ""
+ }
+]

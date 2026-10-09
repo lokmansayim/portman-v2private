@@ -14,7 +14,7 @@ Sen Portman'ın KVKK ve sır denetçisisin. Kurallar: sırlar koda, belgeye, com
    - Türkiye cep numarası kalıbı (5xx xxx xx xx, +90 …) ve WhatsApp kimlikleri (wa_id, 90 ile başlayan 12 hane);
    - kişi ve bayi adları: büyük harfle başlayan ad-soyad çiftleri, "Hanım/Bey" ekleri, `beyin/veri/` ve test verilerinde gerçek görünen adlar;
    - `.env`, `settings.json`, `api_token.txt`, `agent.env`, `claude_api.json` içeriklerinin kopyaları.
-3. Sahte sabitleri ayır: `kanal/tests/` içindeki bilinen sahte anahtarlar ve `testler/referans/README.md`'de beklenen bulgular (4 bulgu) bilinen yanlış pozitiftir; yine de listele, "bilinen" diye işaretle.
+3. Sahte sabitleri ayır: `kanal/tests/` içindeki bilinen sahte anahtarlar ve `testler/referans/README.md`'de beklenen bulgular (4 bulgu) bilinen yanlış pozitiftir; yine de listele, "bilinen" diye işaretle. Kurumsal hat `444 80 56` kişisel veri değildir ve belgelerde açık kalır (Lokman, 9.10); bulgu sayma.
 4. Hiçbir bulguyu ham haliyle yazma: ilk 4 ve son 2 karakter, arası `…` (ör. `sk-a…9f`); numaralar `05xx xxx xx 12` biçiminde.
 
 ## Çıktı (Türkçe)

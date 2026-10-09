@@ -85,13 +85,17 @@ class Talep(BaseModel):
 
 
 class Karar(BaseModel):
-    eylem: Literal["sor", "is_emri", "yonlendir", "cevapla", "yoksay"]
+    eylem: Literal["sor", "is_emri", "yonlendir", "cevapla", "yoksay", "secenek"]
     mesaj: str = Field("", description="Bayiye gidecek WhatsApp metni")
     soru_alani: Optional[str] = None
     is_emri: Optional[dict] = None
     revizyon: int = 0
     gerekce: str = ""
     kullanilan_talep: Optional[dict] = Field(None, description="Kural katmanı bu mesaj yerine bekletilen bir mesajı işlediyse o talep (D-01)")
+    # İE-04 mesaj katmanı: eylem 'secenek' → sunulan set ({"id", "adaylar": [...], "agirliklar", "hesap"}); butonlar isteğe bağlı
+    # kısa cevaplar ([{"id", "baslik"}]; kimlik dilbilgisi docs/is_emirleri/IE-04-mesaj-katmani.md). Metin yolu değişmez.
+    secenek_seti: Optional[dict] = None
+    butonlar: Optional[list[dict]] = None
 
 
 def json_schema() -> dict:

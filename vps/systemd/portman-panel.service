@@ -1,0 +1,25 @@
+[Unit]
+Description=Portman yönetim paneli (gunicorn, 127.0.0.1:8082)
+After=network-online.target postgresql.service
+Wants=network-online.target
+ConditionPathExists=/opt/portman/guncel/SURUM
+
+[Service]
+Type=simple
+User=portman
+Group=portman
+WorkingDirectory=/opt/portman/guncel
+EnvironmentFile=-/etc/portman/panel.env
+Environment=PORTMAN_PG_DSN=dbname=portman PORTMAN_KANAL_DIR=/opt/portman/data PYTHONUNBUFFERED=1 HOME=/opt/portman/data
+ExecStart=/opt/portman/guncel/venv/bin/gunicorn --chdir /opt/portman/guncel/kanal --bind 127.0.0.1:8082 --workers 1 --timeout 60 panel:uygulama
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/portman/data
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,6 @@
+# İE-06 (Lokman, 9 Ekim 2026): sunucuya giden sürüm ağacına testler ve denemeler girmez.
+# vps/guncelle.sh sürüm dizinini `git archive` ile açar; export-ignore orada geçerlidir.
+# Baştaki / köke sabitler: beyin/testler/ KALIR, çünkü sunucudaki öz-test (vps/agent.py → kanal/worker.py →
+# beyin/harness.py) oradaki mesajlar.json ve cikarim_*.json dosyalarını okur.
+/testler/ export-ignore
+/deneme/ export-ignore

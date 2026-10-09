@@ -32,12 +32,18 @@ if str(KOD) not in sys.path:
     sys.path.insert(0, str(KOD))
 
 import worker as W                                   # noqa: E402  (kanal/worker.py; paket düzeninde kökte)
+import etkilesim as ET                               # noqa: E402  (İE-04: buton ve liste cevaplarının çözümü)
 from depo import HATA_BAYIYE, Cakisma, Depo, KiraKaybi, maske     # noqa: E402
 from beyin.konusma import BellekKonusma              # noqa: E402
 
 
 class Gonderilmedi(Exception):
     """Gönderici dış çağrı yapmadan vazgeçti (ör. dosya doğrulaması): satır kesin olarak gönderilmedi."""
+
+
+class YenidenDene(Exception):
+    """İE-06: dış çağrı (messages POST) yapılmadan vazgeçildi ve satır bir kez daha denenecek (ör. medya yüklenemedi):
+    satır 'bekliyor'a döner, deneme sayısı artmış kalır; gönderici bir sonraki turda yeniden alır (feature.php upload_failed)."""
 
 
 def isleyici_adi() -> str:
@@ -116,6 +122,7 @@ def _karar_ozeti(d_eski: dict | None, k: BellekKonusma, cikti: dict) -> dict:
     return {"sifirlandi": k.sifirlandi,
             "d01_cevap": any(n.startswith("eski taslak sorusunun cevabı") for n in kural),
             "pencere_cevap": any(n.startswith("pencere_islem cevabı") for n in kural),
+            "oncelik_cevap": any(n.startswith("öncelik cevabı") for n in kural),
             "onaylanan_is_emri_no": ie.get("is_emri_no") if onay else None,
             "onaylanan_rev": int(ie.get("revizyon") or 1) if onay else None}
 
@@ -132,19 +139,24 @@ def bir_is(depo: Depo, settings: dict, sahip: str | None = None) -> dict | None:
     d, surum = depo.konusma_oku(gelen["sender"])
     k = BellekKonusma(gelen["sender"], d)
     d_eski = _kopya(d)
-    yazili = gelen.get("type") in W.GELEN_YAZILI and bool((gelen.get("text") or "").strip())
+    yazili = gelen.get("type") in W.GELEN_YAZILI and (bool((gelen.get("text") or "").strip()) or bool(gelen.get("reply_id")))
     cikarim = j.get("cikarim")
     if yazili and cikarim is None:
-        try:
-            talep, meta = W.cikar(gelen, settings, k)
-            cikarim = {"talep": talep.model_dump(mode="json"), "meta": meta}
-        except Exception as e:                       # hata da kaydedilir: yeniden alınan iş LLM'i yeniden çağırmaz
-            cikarim = {"hata": f"{type(e).__name__}: {str(e)[:300]}"}
+        if gelen.get("reply_id"):                    # İE-04: buton/liste cevabı; LLM çağrılmaz, kimlik kayıtla doğrulanır
+            etk = ET.coz(gelen, d, depo.giden_satiri)
+            cikarim = {"etkilesim": etk, "talep": etk.get("talep"), "meta": {"backend": "etkilesim", "kimlik": etk.get("kimlik"), "gecerli": etk.get("gecerli")}}
+        else:
+            try:
+                talep, meta = W.cikar(gelen, settings, k)
+                cikarim = {"talep": talep.model_dump(mode="json"), "meta": meta}
+            except Exception as e:                       # hata da kaydedilir: yeniden alınan iş LLM'i yeniden çağırmaz
+                cikarim = {"hata": f"{type(e).__name__}: {str(e)[:300]}"}
         if not depo.cikarim_kaydet(j["id"], sahip, cikarim):
             return {"durum": "atildi", "is_id": j["id"], "neden": "kira kaybedildi (çıkarım kaydı)"}
     hazirlik = W.KANAL / "projects" / ".hazirlik" / f"is{j['id']}-{uuid.uuid4().hex[:8]}"      # her deneme kendi klasöründe
     try:
-        cikti = W.isle(gelen, settings, k=k, cikarim=cikarim if yazili else None, proje_koku=hazirlik)
+        katalog = W.katalog_nesnesi(settings, kabul_edilmis=depo.kabul_edilmis_adaylar())      # K-A10: kabul kaydı olmayan 'gecerli' aday sunulmaz
+        cikti = W.isle(gelen, settings, k=k, cikarim=cikarim if yazili else None, proje_koku=hazirlik, giden_bul=depo.giden_satiri, katalog=katalog)
         # Onay denetimi kuralın sonucuna bakar: hangi yoldan olursa olsun (ör. süresi dolan D-01 sorusundan sonra) bir onay
         # kaydedildiyse, onay bayinin gördüğü revizyona bağlanabiliyor mu diye sınanır; bağlanamıyorsa onay yazılmaz.
         if (cikti.get("sonuc") or {}).get("gerekce") == "plan onaylandı":
@@ -179,56 +191,65 @@ def bir_is(depo: Depo, settings: dict, sahip: str | None = None) -> dict | None:
             "eylem": cikti["sonuc"].get("eylem"), "gerekce": cikti["sonuc"].get("gerekce"), "giden": len(cikti["satirlar"]), **kayit}
 
 
+def _yol_degistir(x, eski: str, yeni: str):
+    """cikti içindeki (satırlar, cizim, ekler) hazırlık yollarını yerine taşınan yollarla değiştirir (yerinde)."""
+    if isinstance(x, dict):
+        for k, v in list(x.items()):
+            x[k] = _yol_degistir(v, eski, yeni)
+        return x
+    if isinstance(x, list):
+        return [_yol_degistir(v, eski, yeni) for v in x]
+    if isinstance(x, str) and x.startswith(eski):
+        return yeni + x[len(eski):]
+    return x
+
+
 def _yerlestir(cikti: dict, hazirlik: Path):
-    """Motor çıktısını hazırlık klasöründen projects/<no>/rNN'e taşır. Hedef klasör yalnız yoksa açılır (os.mkdir, süreçler
-    arası da tek); varsa başka bir iş aynı numarayı üretmiştir: üzerine yazılmaz, Cakisma. Satırlardaki yollar güncellenir."""
-    s = cikti.get("sonuc") or {}
-    if not s.get("is_emri_no"):
+    """Hazırlık klasöründeki her <ad>/rNN çıktısını (Motor: İş Emri numarası; İE-04: SECENEK-<set> görseli) projects/<ad>/rNN'e
+    taşır. Hedef klasör yalnız yoksa açılır (os.mkdir, süreçler arası da tek); varsa başka bir iş aynı adı üretmiştir: üzerine
+    yazılmaz, Cakisma. Satırlardaki ve çizim kaydındaki yollar güncellenir. Dönen: [(kaynak, hedef), …] ya da None."""
+    if not hazirlik.is_dir():
         return None
-    rev_ad = f"r{int(s.get('revizyon') or 1):02d}"
-    kaynak = hazirlik / s["is_emri_no"] / rev_ad
-    if not kaynak.is_dir():
-        return None
-    hedef = W.KANAL / "projects" / s["is_emri_no"] / rev_ad
-    hedef.parent.mkdir(parents=True, exist_ok=True)
-    try:
-        os.mkdir(hedef)
-    except FileExistsError:
-        raise Cakisma(f"projects/{s['is_emri_no']}/{rev_ad} başka bir işe ait; üzerine yazılmaz") from None
-    for f in kaynak.iterdir():
-        os.replace(f, hedef / f.name)
-    eski, yeni = str(kaynak), str(hedef)
-    for r in cikti.get("satirlar") or []:
-        if r.get("file"):
-            r["file"] = r["file"].replace(eski, yeni, 1)
-    cz = s.get("cizim") or {}
-    for a in ("pdf", "dxf"):
-        if cz.get(a):
-            cz[a] = cz[a].replace(eski, yeni, 1)
-    return kaynak, hedef
+    ciftler = []
+    for ad_dir in sorted(p for p in hazirlik.iterdir() if p.is_dir()):
+        for kaynak in sorted(p for p in ad_dir.iterdir() if p.is_dir() and p.name.startswith("r")):
+            hedef = W.KANAL / "projects" / ad_dir.name / kaynak.name
+            hedef.parent.mkdir(parents=True, exist_ok=True)
+            try:
+                os.mkdir(hedef)
+            except FileExistsError:
+                for k_, h_ in ciftler:                       # bu işte daha önce açılanlar geri alınır
+                    shutil.rmtree(h_, ignore_errors=True)
+                raise Cakisma(f"projects/{ad_dir.name}/{kaynak.name} başka bir işe ait; üzerine yazılmaz") from None
+            for f in kaynak.iterdir():
+                os.replace(f, hedef / f.name)
+            ciftler.append((kaynak, hedef))
+            _yol_degistir(cikti, str(kaynak), str(hedef))
+    return ciftler or None
 
 
 def _dosyalari_sil(yer, hazirlik: Path) -> None:
-    """Kaydı kesin yazılmayan işin Motor dosyaları: bu işin açtığı projects/<no>/rNN (os.mkdir ile yalnız bu iş açtı) ve
+    """Kaydı kesin yazılmayan işin dosyaları: bu işin açtığı projects/<ad>/rNN klasörleri (os.mkdir ile yalnız bu iş açtı) ve
     hazırlık klasörü. Numara başka bir işi engellemez; eski dosya hazırlıkta birikmez."""
-    if yer:
-        shutil.rmtree(yer[1], ignore_errors=True)
+    for _k, h in (yer or []):
+        shutil.rmtree(h, ignore_errors=True)
     shutil.rmtree(hazirlik, ignore_errors=True)
 
 
 # ───────────────────────── gönderim ─────────────────────────
 def gonder(depo: Depo, gonderici, en_fazla: int = 100) -> dict:
-    """Bekleyen giden satırlarını sırayla doğrudan gönderir (testler ve doğrudan gönderici; canlıda gönderimi hosting yapar, bkz. vps/agent.py). gonderici(satir) WhatsApp API kabul ederse giden mesaj kimliğini döner; Gonderilmedi → kesin
-    gönderilmedi; başka her hata → belirsiz (otomatik yeniden gönderilmez)."""
-    say = {"kabul_edildi": 0, "belirsiz": 0, "gonderilmedi": 0, "yarim_belirsiz": depo.yarim_gonderimleri_belirsiz_say()}
+    """Bekleyen giden satırlarını sırayla doğrudan gönderir (canlıda kanal/gonderici.py'nin Meta göndericisi; testlerde sahte).
+    gonderici(satir) WhatsApp API kabul ederse giden mesaj kimliğini döner; Gonderilmedi → kesin gönderilmedi; YenidenDene →
+    satır bekliyor'a döner ve tur biter (sonraki turda yeniden); başka her hata → belirsiz (otomatik yeniden gönderilmez)."""
+    say = {"kabul_edildi": 0, "belirsiz": 0, "gonderilmedi": 0, "yeniden": 0, "yarim_belirsiz": depo.yarim_gonderimleri_belirsiz_say()}
     for _ in range(en_fazla):
         r = depo.gonderime_al()
         if r is None:
             break
-        if r["kind"] == "document":         # feature.php gibi: dosya yoksa ya da kayıttaki özetle uyuşmuyorsa gönderilmez
+        if r["dosya"]:                      # feature.php gibi: dosya (PDF, görsel) yoksa ya da kayıttaki özetle uyuşmuyorsa gönderilmez
             p = Path(r["dosya"] or "")
             if not p.is_file() or (r["sha256"] and hashlib.sha256(p.read_bytes()).hexdigest() != r["sha256"]):
-                depo.gonderim_sonucu(r["id"], "gonderilmedi", hata="PDF dosyası yok ya da kayıttan sonra değişmiş; gönderilmedi")
+                depo.gonderim_sonucu(r["id"], "gonderilmedi", hata="Dosya yok ya da kayıttan sonra değişmiş; gönderilmedi")
                 say["gonderilmedi"] += 1
                 continue
         try:
@@ -236,6 +257,9 @@ def gonder(depo: Depo, gonderici, en_fazla: int = 100) -> dict:
             depo.gonderim_sonucu(r["id"], "kabul_edildi", dis_id=dis_id); say["kabul_edildi"] += 1
         except Gonderilmedi as e:
             depo.gonderim_sonucu(r["id"], "gonderilmedi", hata=str(e)[:300]); say["gonderilmedi"] += 1
+        except YenidenDene as e:
+            depo.gonderim_geri_birak(r["id"], str(e)[:300]); say["yeniden"] += 1
+            break
         except Exception as e:
             depo.gonderim_sonucu(r["id"], "belirsiz", hata=f"Gönderim sonucu belirsiz; otomatik tekrar yok. {type(e).__name__}: {str(e)[:200]}")
             say["belirsiz"] += 1
