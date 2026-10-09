@@ -1,0 +1,182 @@
+"""İE-06 · Gönderici servisi (systemd portman-gonderici): Postgres'teki giden satırlarını Meta'ya gönderir, gelen medyayı indirir,
+nabız yazar. Hosting'teki worker.php cron tiki + feature.php pm_kanal_tick / pm_kanal_send / pm_kanal_medya'nın yerine.
+
+Kurallar (feature.php ile aynı; docs/is_emirleri/IE-06.md):
+  - öz-test satırı ya da imzalı webhook'tan gelmeyen ebeveyn asla gönderilmez; alıcı = gelen mesajın göndereni (PATRON bildirimi hariç);
+  - 24 saatlik serbest cevap penceresi dışına gönderilmez (held → 'gonderilmedi: reply_window_closed');
+  - dry_run: satırlar gönderilmez, sonradan da gönderilmez; enabled değilse hiçbir şey gönderilmez;
+  - messages POST'u başladıktan sonra her hata 'belirsiz' sayılır ve otomatik tekrar edilmez; medya yükleme/doğrulama hatası
+    POST'tan önce olduğu için bir kez daha denenir (document/image/interactive), etkileşim sınırı hatası denenmez;
+  - yüklenen medyanın kimliği satırda saklanır, yeniden denemede yeniden yüklenmez.
+Sırlar /etc/portman/whatsapp.env'den (systemd EnvironmentFile); günlüğe anahtar, numara ve metin yazılmaz.
+Komut satırı: python kanal/gonderici.py [--tek] (PORTMAN_PG_DSN, PORTMAN_KANAL_DIR, WA_* ortam değişkenleri)
+"""
+from __future__ import annotations
+
+import hashlib
+import os
+import re
+import signal
+import sys
+import time
+import traceback
+from pathlib import Path
+
+KOD = Path(__file__).resolve().parent
+for _yol in (KOD.parent, KOD):
+    if str(_yol) not in sys.path:
+        sys.path.insert(0, str(_yol))
+
+import ayarlar as AY                                                       # noqa: E402
+import kalici as K                                                         # noqa: E402
+import meta_api as M                                                       # noqa: E402
+import nabiz as NB                                                         # noqa: E402
+from depo import Depo, kimlik_izi, maske                                   # noqa: E402
+
+SURUM = "gonderici-v2.0"
+PENCERE_SN = 86400
+MEDYA_YENIDEN = 2                   # feature.php: upload_failed satır en çok 2 deneme
+TUR_BEKLEME_SN = 3
+_dur = {"istendi": False}
+
+
+def log(*p) -> None:
+    print(time.strftime("%Y-%m-%d %H:%M:%S"), "gonderici", *p, flush=True)
+
+
+class GonderenMeta:
+    """kalici.gonder'in gönderici işlevi: satır → Meta messages POST → wamid. Hatalar: Gonderilmedi (kesin), YenidenDene (bir kez daha),
+    öteki (belirsiz)."""
+
+    def __init__(self, depo: Depo, istemci: M.GraphIstemci, veri: Path | str, ayar_oku=None):
+        self.depo = depo; self.istemci = istemci; self.veri = Path(veri)
+        self.ayar_oku = ayar_oku or (lambda: AY.oku(self.veri))
+
+    def __call__(self, r: dict) -> str:
+        gelen = r.get("gelen") or {}
+        if not str(r.get("mesaj_id") or "").startswith("wamid."):
+            raise K.Gonderilmedi("Gönderilmedi: test_cannot_send")
+        if gelen.get("source") != "Meta imzalı webhook" or str(gelen.get("phone_number_id") or "") != self.istemci.ayar.phone_number_id:
+            raise K.Gonderilmedi("Gönderilmedi: inbox_not_verified")
+        bildirim = r["alici"] == "PATRON"
+        alici = self.depo.patron_numarasi() if bildirim else str(r["alici"])
+        if not alici or not M.numara_gecerli(alici):
+            raise K.Gonderilmedi("Gönderilmedi: recipient_unknown")
+        if not bildirim and alici != str(gelen.get("sender") or ""):
+            raise K.Gonderilmedi("Gönderilmedi: recipient_mismatch")
+        son = self.depo.son_gelen_zamani(alici) if bildirim else float(gelen.get("timestamp") or 0)
+        if not son or time.time() - float(son) >= PENCERE_SN:
+            raise K.Gonderilmedi("Gönderilmedi: reply_window_closed")
+        self.depo.alici_cozuldu_kaydet(r["id"], alici)
+        satir = dict(r.get("satir") or {}); satir.update(id=r["id"], kind=r["kind"], body=r["govde"])
+        medya_id = None; baslik_medya = None
+        try:
+            if r["kind"] in ("document", "image") or (r["kind"] == "interactive" and M.baslik_gorseli_var(satir)):
+                izinli = ("application/pdf",) if r["kind"] == "document" else ("image/png", "image/jpeg")
+                gercek, mime = M.dosya_denetle(r.get("dosya"), izinli, self.veri, r.get("sha256"))
+                medya = str(r.get("medya_id") or "")
+                if not re.fullmatch(r"[0-9]{1,40}", medya):
+                    medya = self.istemci.medya_yukle(gercek, mime, str(satir.get("filename") or gercek.name))
+                    self.depo.medya_id_kaydet(r["id"], medya)
+                if r["kind"] == "interactive":
+                    baslik_medya = medya
+                else:
+                    medya_id = medya
+            yuk = M.mesaj_yuku(satir, alici, medya_id=medya_id, baslik_medya_id=baslik_medya)
+        except M.DosyaGecersiz as e:
+            raise K.Gonderilmedi(f"Yükleme/doğrulama başarısız; gönderilmedi. {e}") from None
+        except (M.EtkilesimGecersiz, ValueError) as e:
+            raise K.Gonderilmedi(f"Yükleme/doğrulama başarısız; gönderilmedi. {e}") from None
+        except M.MetaHatasi as e:                                   # medya yüklenemedi: POST başlamadı
+            if int(r.get("deneme") or 0) < MEDYA_YENIDEN:
+                raise K.YenidenDene(f"Medya yüklenemedi; bir kez daha denenecek. {str(e)[:160]}") from None
+            raise K.Gonderilmedi(f"Yükleme/doğrulama başarısız; gönderilmedi. {str(e)[:160]}") from None
+        if self.ayar_oku().get("enabled") is not True:
+            raise K.YenidenDene("Gönderilmedi: disabled_before_send")
+        cevap = self.istemci.gonder(yuk)                            # buradan sonra her hata belirsizdir (kalici.gonder)
+        return M.kabul_edilen_wamid(cevap, alici)
+
+
+# ───────────────────────── gelen medya ─────────────────────────
+_AD = re.compile(r"[^A-Za-z0-9._-]+")
+_UZANTI = {"image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp", "application/pdf": ".pdf", "audio/ogg": ".ogg", "audio/mpeg": ".mp3",
+           "video/mp4": ".mp4", "application/msword": ".doc", "application/vnd.openxmlformats-officedocument.wordprocessingml.document": ".docx",
+           "application/vnd.ms-excel": ".xls", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": ".xlsx", "text/plain": ".txt"}
+
+
+def guvenli_ad(dosya_adi: str | None, mime: str, medya_id: str) -> str:
+    ad = _AD.sub("_", Path(str(dosya_adi or "")).name).strip("._")[:80]
+    if not ad or ad.startswith("."):
+        ad = f"medya_{medya_id}" + _UZANTI.get((mime or "").split(";")[0].strip(), "")
+    return ad
+
+
+def medya_indir(depo: Depo, istemci: M.GraphIstemci, veri: Path | str, en_fazla: int = 5) -> dict:
+    say = {"indirildi": 0, "hata": 0}
+    for row in depo.bekleyen_gelen_dosyalar(en_fazla):
+        try:
+            icerik, mime = istemci.medya_indir(row["medya_id"])
+            mime = row.get("mime") or mime
+            hedef_dir = Path(veri) / "gelen_medya" / kimlik_izi(row["mesaj_id"])
+            hedef_dir.mkdir(parents=True, exist_ok=True)
+            hedef = hedef_dir / guvenli_ad(row.get("dosya_adi"), mime, row["medya_id"])
+            gecici = hedef.with_name(hedef.name + ".tmp"); gecici.write_bytes(icerik); os.replace(gecici, hedef)
+            try:
+                os.chmod(hedef, 0o600)
+            except OSError:
+                pass
+            depo.gelen_dosya_indirildi(row["id"], str(hedef), mime, len(icerik), hashlib.sha256(icerik).hexdigest())
+            say["indirildi"] += 1
+        except Exception as e:
+            depo.gelen_dosya_hatasi(row["id"], f"{type(e).__name__}: {M.maskele(str(e), istemci.ayar.access_token)[:200]}")
+            say["hata"] += 1
+            log("medya indirilemedi:", kimlik_izi(row["mesaj_id"]), type(e).__name__)
+    return say
+
+
+# ───────────────────────── tur ve döngü ─────────────────────────
+def tur(depo: Depo, gonderen: GonderenMeta, istemci: M.GraphIstemci, veri: Path | str, ayar: dict | None = None) -> dict:
+    ayar = ayar if ayar is not None else AY.oku(veri)
+    say: dict = {"enabled": ayar.get("enabled") is True, "dry_run": ayar.get("dry_run") is True}
+    if say["enabled"]:
+        if say["dry_run"]:
+            say["tutuldu"] = depo.dry_run_tut()
+        else:
+            say.update(K.gonder(depo, gonderen, en_fazla=20))
+    if istemci.ayar.access_token:
+        say["medya"] = medya_indir(depo, istemci, veri)
+    NB.yaz(veri, "gonderici", surum=SURUM, **{k: v for k, v in say.items() if k != "medya"}, medya=say.get("medya"))
+    return say
+
+
+def main(argv=None) -> int:
+    import argparse
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--tek", action="store_true", help="bir tur ve çık")
+    ns = ap.parse_args(argv)
+    veri = Path(os.environ.get("PORTMAN_KANAL_DIR") or "/opt/portman/data")
+    depo = Depo(); meta = M.MetaAyar.ortamdan(); istemci = M.GraphIstemci(meta)
+    gonderen = GonderenMeta(depo, istemci, veri)
+    signal.signal(signal.SIGTERM, lambda *_: _dur.__setitem__("istendi", True))
+    log("başladı", SURUM, "veri", veri, "WhatsApp ayarı", "tam" if meta.tam_mi() else "EKSİK (whatsapp.env)")
+    while not _dur["istendi"]:
+        try:
+            say = tur(depo, gonderen, istemci, veri)
+            if say.get("kabul_edildi") or say.get("gonderilmedi") or say.get("belirsiz") or say.get("yeniden"):
+                log("tur:", {k: v for k, v in say.items() if k in ("kabul_edildi", "gonderilmedi", "belirsiz", "yeniden", "tutuldu")})
+        except Exception as e:
+            log("tur hatası:", type(e).__name__, M.maskele(str(e), meta.access_token)[:160])
+            if ns.tek:
+                print(traceback.format_exc()[-800:]); return 1
+            time.sleep(15); continue
+        if ns.tek:
+            return 0
+        bitis = time.time() + TUR_BEKLEME_SN
+        while time.time() < bitis and not _dur["istendi"]:
+            time.sleep(0.2)
+    log("durduruldu (SIGTERM)")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

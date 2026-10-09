@@ -505,7 +505,8 @@ class Depo:
                           "ORDER BY g.olusturuldu, g.mesaj_id, g.sira LIMIT 1 FOR UPDATE OF g SKIP LOCKED").fetchone()
             if r is None:
                 return None
-            c.execute("UPDATE giden SET durum = 'gonderiliyor', deneme = deneme + 1, gonderim_basladi = now() WHERE id = %s", (r["id"],))
+            r.update(c.execute("UPDATE giden SET durum = 'gonderiliyor', deneme = deneme + 1, gonderim_basladi = now() WHERE id = %s "
+                               "RETURNING durum, deneme, gonderim_basladi", (r["id"],)).fetchone())
             return r
 
     def gonderim_sonucu(self, satir_id_: str, durum: str, dis_id: str | None = None, hata: str | None = None,

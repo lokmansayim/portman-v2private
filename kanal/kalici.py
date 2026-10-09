@@ -41,6 +41,11 @@ class Gonderilmedi(Exception):
     """Gönderici dış çağrı yapmadan vazgeçti (ör. dosya doğrulaması): satır kesin olarak gönderilmedi."""
 
 
+class YenidenDene(Exception):
+    """İE-06: dış çağrı (messages POST) yapılmadan vazgeçildi ve satır bir kez daha denenecek (ör. medya yüklenemedi):
+    satır 'bekliyor'a döner, deneme sayısı artmış kalır; gönderici bir sonraki turda yeniden alır (feature.php upload_failed)."""
+
+
 def isleyici_adi() -> str:
     return f"{socket.gethostname()}:{os.getpid()}"
 
@@ -233,9 +238,10 @@ def _dosyalari_sil(yer, hazirlik: Path) -> None:
 
 # ───────────────────────── gönderim ─────────────────────────
 def gonder(depo: Depo, gonderici, en_fazla: int = 100) -> dict:
-    """Bekleyen giden satırlarını sırayla doğrudan gönderir (testler ve doğrudan gönderici; canlıda gönderimi hosting yapar, bkz. vps/agent.py). gonderici(satir) WhatsApp API kabul ederse giden mesaj kimliğini döner; Gonderilmedi → kesin
-    gönderilmedi; başka her hata → belirsiz (otomatik yeniden gönderilmez)."""
-    say = {"kabul_edildi": 0, "belirsiz": 0, "gonderilmedi": 0, "yarim_belirsiz": depo.yarim_gonderimleri_belirsiz_say()}
+    """Bekleyen giden satırlarını sırayla doğrudan gönderir (canlıda kanal/gonderici.py'nin Meta göndericisi; testlerde sahte).
+    gonderici(satir) WhatsApp API kabul ederse giden mesaj kimliğini döner; Gonderilmedi → kesin gönderilmedi; YenidenDene →
+    satır bekliyor'a döner ve tur biter (sonraki turda yeniden); başka her hata → belirsiz (otomatik yeniden gönderilmez)."""
+    say = {"kabul_edildi": 0, "belirsiz": 0, "gonderilmedi": 0, "yeniden": 0, "yarim_belirsiz": depo.yarim_gonderimleri_belirsiz_say()}
     for _ in range(en_fazla):
         r = depo.gonderime_al()
         if r is None:
@@ -251,6 +257,9 @@ def gonder(depo: Depo, gonderici, en_fazla: int = 100) -> dict:
             depo.gonderim_sonucu(r["id"], "kabul_edildi", dis_id=dis_id); say["kabul_edildi"] += 1
         except Gonderilmedi as e:
             depo.gonderim_sonucu(r["id"], "gonderilmedi", hata=str(e)[:300]); say["gonderilmedi"] += 1
+        except YenidenDene as e:
+            depo.gonderim_geri_birak(r["id"], str(e)[:300]); say["yeniden"] += 1
+            break
         except Exception as e:
             depo.gonderim_sonucu(r["id"], "belirsiz", hata=f"Gönderim sonucu belirsiz; otomatik tekrar yok. {type(e).__name__}: {str(e)[:200]}")
             say["belirsiz"] += 1
