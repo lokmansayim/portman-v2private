@@ -61,7 +61,7 @@ Aynı kurallarla Ç8201'in listesiyle yan yana: `sonuc/C8801_C8201_yan_yana.md`.
 | Mahya · ters mahya | 6 · 3 | 8 · 2 | 7 · 4 |
 | Alın kapama · dış cephe Boardex | 9 · 37 | 6 · 35 | 8 · 37 |
 
-Katalog çatısı kaplamada, derede, inişte ve mahyada en az malzemeyi istiyor; kalkanı fazla (alın kapama, Boardex). Lokman'ın "maliyet açısından" notuyla uyumlu. Çatı çeliği üçünde aynı: motor ortalamayla hesaplıyor (makas yerleşimi yok); makas kuralları gelince çatıya göre ayrışır.
+Katalog çatısı kaplamada, derede, inişte ve mahyada en az malzemeyi istiyor; kalkanı fazla (alın kapama, Boardex). Lokman'ın sorusu buydu: "asıl katalogdaki model 2. versiyon neden böyle bir sonuç var maliyet açısından". Çatı çeliği üçünde aynı: motor ortalamayla hesaplıyor (makas yerleşimi yok); makas kuralları gelince çatıya göre ayrışır.
 
 ## Bulgular
 
