@@ -328,7 +328,8 @@ assert not k3c["denetim_sorunlari"] and (k3c["ozet"]["duz_b"]["gercek_satir"], k
     and k3c_birim("Taharet musluğu 20 mm")["duz_b"] is None, \
     "belge: KT-03'te cevaplardan sonra 59 / 102 (A 58); kalan kural 2 (çatı panelleri), karar 25, elle 10, pafta 6; panel çatı konusunun 12 satırından 11'i tutuyor " \
     "(dere kelepçesi 104 / 110); iniş 11; taharet satırı yok (vitrifiye alıcıya ait) diyor"
-# Ç8801 (katalog modeli; kural kitabının yeni bir modelde sınanması, 10 Ekim 2026; `deneme/2026-10-10_c8801/c8801_kos.sh`; gerçek liste yok)
+# Ç8801 (katalog modeli; kural kitabının yeni bir modelde sınanması, 10 Ekim 2026; `deneme/2026-10-10_c8801/c8801_kos.sh`; gerçek liste yok).
+# Çatı: Lokman 14:46, katalogdaki model "2. versiyon"; üç çatı da olur: katalog (C8801), K (doğu ucu kırma), L (ilk varsayım) saklanıyor.
 C88 = BURADA.parent / "2026-10-10_c8801"
 c88 = json.loads((C88 / "sonuc" / "C8801_yukleme.json").read_text(encoding="utf-8"))
 c88_g = json.loads((C88 / "sonuc" / "C8801_girdi.json").read_text(encoding="utf-8"))
@@ -336,13 +337,28 @@ c88_t = json.loads((C88 / "tanim" / "C8801.json").read_text(encoding="utf-8"))
 c88_tk = [s for s in c88["satirlar"] if s["kalem"] == "Tek kat panel"]
 c88_kg = satir(c88, "Toplam (adedi ve kg'ı bilinenler)")["kg"]
 c88_dere = c88_g["cati"]["dere"]
-assert len(c88["satirlar"]) == 93 and round(c88_kg) == 2332 and [(s["boyut"].split(" ·")[0], s["adet"]) for s in c88_tk] == [("L 3740", 15), ("L 2630", 21)] \
-    and sorted({d["egim"] for d in c88_t["cati"]["duzlemler"]}) == [0.33, 0.50217] and c88_g["veranda_m2"]["catisiz"] == ["Veranda"] \
+c88_v = {k: (json.loads((C88 / "sonuc" / f"{k}_yukleme.json").read_text(encoding="utf-8")), json.loads((C88 / "sonuc" / f"{k}_girdi.json").read_text(encoding="utf-8")))
+         for k in ("C8801", "C8801K", "C8801L")}
+
+
+def c88_ozet(k):
+    """(tek kat panel adedi, panel dizilimi, dere m, dere parça, iniş, mahya, ters mahya, alın kapama, dış cephe Boardex)"""
+    L, G = c88_v[k]
+    tk = [s for s in L["satirlar"] if s["kalem"] == "Tek kat panel"]
+    return (sum(s["adet"] for s in tk), " + ".join(f'{s["adet"]} × {s["boyut"].split(" ·")[0]}' for s in tk), G["cati"]["dere"]["boy_m"], adet(L, "Metal dere"),
+            adet(L, "Dere iniş borusu"), adet(L, "Metal kiremit mahyası"), adet(L, "Ters mahya"), adet(L, "Alın kapama"), adet(L, "Dış cephe Boardex"))
+
+
+assert len(c88["satirlar"]) == 93 and round(c88_kg) == 2332 and [(s["boyut"].split(" ·")[0], s["adet"]) for s in c88_tk] == [("L 3740", 21), ("L 2480", 10)] \
+    and sorted({d["egim"] for d in c88_t["cati"]["duzlemler"]}) == [0.33] and c88_g["veranda_m2"]["catisiz"] == ["Veranda"] \
     and not any(s["kalem"].startswith("Veranda tavanı") for s in c88["satirlar"]) and c88_g["celik"]["cati"]["oturum_m2"] == 74.34 \
-    and (adet(c88, "Dere iniş borusu"), adet(c88, "Dere kapağı"), adet(c88, "Metal dere"), c88_dere["boy_m"]) == (7, 6, 7, 23.88) \
-    and (adet(c88, "Dış cephe Boardex"), adet(c88, "Çatı şiltesi 80 mm"), adet(c88, "Ters mahya")) == (37, 9, 4), \
-    "belge: Ç8801'de 93 satır, çelik 2332 kg, tek kat panel 15 × L 3740 + 21 × L 2630, eğimler %33 ve %50,2, veranda çatısız (tavanı yok, çatı oturumu 74,34), " \
-    "dere 23,88 m (7), iniş 7, kapak 6, dış cephe Boardex 37, şilte 9, ters mahya 4 diyor"
+    and (adet(c88, "Dere iniş borusu"), adet(c88, "Dere kapağı"), adet(c88, "Metal dere"), c88_dere["boy_m"]) == (6, 6, 6, 21.48) \
+    and (adet(c88, "Dış cephe Boardex"), adet(c88, "Çatı şiltesi 80 mm"), adet(c88, "Ters mahya")) == (37, 9, 3) \
+    and [c88_ozet(k)[0] for k in c88_v] == [31, 32, 36] and [c88_ozet(k)[2] for k in c88_v] == [21.48, 28.48, 23.88] \
+    and [c88_ozet(k)[4] for k in c88_v] == [6, 7, 7] and len({round(satir(L, "Toplam (adedi ve kg'ı bilinenler)")["kg"]) for L, _ in c88_v.values()}) == 1, \
+    "belge: Ç8801'de (katalog çatısı) 93 satır, çelik 2332 kg, tek kat panel 21 × L 3740 + 10 × L 2480, bütün yüzler %33, veranda çatısız (tavanı yok, " \
+    "çatı oturumu 74,34), dere 21,48 m (6), iniş 6, kapak 6, dış cephe Boardex 37, şilte 9, ters mahya 3; varyantlarda panel 32 ve 36, dere 28,48 ve 23,88, " \
+    "iniş 7 ve 7, çelik üçünde aynı diyor"
 kt_fark = KT["fark_turleri"]
 # adedi 03:46'daki düzeltilmiş listeden farklı olan satırlar: kararla değişenler ve yalnız elektrik sayıları paftadan alındığı için değişenler
 kt_kararla, kt_paftadan = KT["degisen"]["karar"], KT["degisen"]["pafta"]
@@ -1096,13 +1112,15 @@ Denetim (11:39'dan sonra): bugünkü kod 0.12'den 0.18'e yedi setle kendi günle
 
 Lokman, 10 Ekim 11:39: "seninle yazdığımız kurallar bu kadar farklı model bence kafi istersen testini bir sonraki model olan ç8801 de yap". Ç8801 katalogdaki tek kat çelik, 2+1, 88 m² modeldir (veranda dahil). Kör test değil: arşivde bu modelin yükleme listesi, montaj paftası ve karkas modeli yok. Sınav, kural kitabının, kuralları yazılırken görülmemiş bir modelden elle düzeltme yapmadan liste ve çizim çıkarıp çıkaramadığıdır; liste Lokman'ın incelemesi içindir. Tanım, liste ve çizimler: `deneme/2026-10-10_c8801/` (README).
 
-- **Girdi.** Plan arşivdeki planlar DWG'sinden ve katalog paftasından; mahaller etiketlerle 0,34 m² içinde. Çatı ve veranda katalog görsellerinden. Çatı varsayımdır (Lokman'a soruldu): L biçimli beşik; kanadın mahyası boydan boya (güneyde ve kuzeyde kalkan), batı bloğun mahyası ona aynı kotta bağlanır. Açıklıklar farklı (640 ve 400 cm): iki kısım da %33 olursa mahyalar aynı kotta buluşmaz; varsayım batı blok %33, kanat %50,2. Veranda çatısız: görsellerde ahşap pergola ve ahşap korkuluk var; ikisi de modelde ve listede yok (soruldu).
-- **Liste** (kural seti 0.19, yöntem A): {len(c88["satirlar"])} satır. Çelik {tr(c88_kg)} kg; tek kat panel {c88_tk[0]["adet"]} × {c88_tk[0]["boyut"].split(" ·")[0]} + {c88_tk[1]["adet"]} × {c88_tk[1]["boyut"].split(" ·")[0]} = {c88_tk[0]["adet"] + c88_tk[1]["adet"]} (vadinin kestiği şeritlerden artan üçgenler başka yerde kullanılamıyor); metal dere {tr(c88_dere["boy_m"], 2)} m ({adet(c88, "Metal dere")} parça), iniş {adet(c88, "Dere iniş borusu")}, dere kapağı {adet(c88, "Dere kapağı")}; dış cephe Boardex {adet(c88, "Dış cephe Boardex")} levha (kalkanlar dahil); veranda tavanı satırı yok.
-- **Bulgu.** Yeni kural gerekmedi. Kısa derede tek iniş (verandanın üstündeki 2,2 m'lik derede), kalkan kenarı (Boardex ve alın kapama), ters mahya ve kenar kutusu, serbest uçta dere kapağı ilk kez görülen bir çatıda kuraldan çıktı. Kuralın kapsamadığı tek şey çatısız veranda.
+- **Girdi.** Plan arşivdeki planlar DWG'sinden ve katalog paftasından; mahaller etiketlerle 0,34 m² içinde. Veranda katalog görsellerinden: çatısız; ahşap pergola ve ahşap korkuluk var, ikisi de modelde ve listede yok (soruldu).
+- **Çatı (Lokman).** İlk varsayım (L biçimli beşik, kanadın mahyası boydan boya, kanat %50,2) 13:33'te düzeltildi: "cumba arkaya doğru uzanmıyor uzun kenardaki çatıya girip kalıyor yani kısa kenardaki çatı devam ediyor". İki okuma numaralı çizilip soruldu; 14:46: "3 modelin de gayet güzel hatta çatı olarak 3'üde olur ... ben 1. versiyonu beğendim ama asıl katalogdaki model 2. versiyon". Katalog çatısı: ana çatı doğu–batı, iki ucunda kalkan; cumba ana çatının güney yüzüne girip biter; bütün yüzler %33. Öteki ikisi varyant olarak saklanıyor: K (doğu ucu kırma, doğu cephede saçak boydan boya) ve L (ilk varsayım). Katalog görseli 2'deki kesintisiz doğu saçağı K'ya benziyor; tanım Lokman'ın cevabına göre (görsel ile ürün ayrışabiliyor).
+- **Liste** (kural seti 0.19, yöntem A; katalog çatısı): {len(c88["satirlar"])} satır. Çelik {tr(c88_kg)} kg; tek kat panel {c88_tk[0]["adet"]} × {c88_tk[0]["boyut"].split(" ·")[0]} + {c88_tk[1]["adet"]} × {c88_tk[1]["boyut"].split(" ·")[0]} = {c88_tk[0]["adet"] + c88_tk[1]["adet"]} (vadinin kestiği şeritlerden artan üçgenler başka yerde kullanılamıyor); metal dere {tr(c88_dere["boy_m"], 2)} m ({adet(c88, "Metal dere")} parça), iniş {adet(c88, "Dere iniş borusu")}, dere kapağı {adet(c88, "Dere kapağı")}; dış cephe Boardex {adet(c88, "Dış cephe Boardex")} levha (kalkanlar dahil); veranda tavanı satırı yok.
+- **Üç çatının listesi** (`sonuc/C8801_cati_varyantlari.md`; aynı plan ve kurallar, fark yalnız çatı satırlarında). Tek kat panel katalogda {c88_ozet("C8801")[0]}, K'da {c88_ozet("C8801K")[0]}, L'de {c88_ozet("C8801L")[0]}; metal dere {tr(c88_ozet("C8801")[2], 2)} / {tr(c88_ozet("C8801K")[2], 2)} / {tr(c88_ozet("C8801L")[2], 2)} m; iniş {c88_ozet("C8801")[4]} / {c88_ozet("C8801K")[4]} / {c88_ozet("C8801L")[4]}; mahya {c88_ozet("C8801")[5]} / {c88_ozet("C8801K")[5]} / {c88_ozet("C8801L")[5]}; alın kapama {c88_ozet("C8801")[7]} / {c88_ozet("C8801K")[7]} / {c88_ozet("C8801L")[7]}; dış cephe Boardex {c88_ozet("C8801")[8]} / {c88_ozet("C8801K")[8]} / {c88_ozet("C8801L")[8]}. Katalog çatısı kaplamada, derede, inişte ve mahyada en az malzemeyi istiyor, kalkanı fazla (Lokman: "maliyet açısından"). Çatı çeliği üçünde aynı: motorun "beşik + cumba" ortalaması (makas yerleşimi yok).
+- **Bulgu.** Yeni kural gerekmedi. Kısa derede tek iniş (cumbanın iki yanındaki 2,2 m'lik derelerde), kalkan kenarı (Boardex ve alın kapama), ters mahya ve kenar kutusu, serbest uçta dere kapağı ilk kez görülen çatılarda kuraldan çıktı. Kuralın kapsamadığı tek şey çatısız veranda.
 - **Motor (kural değil, modelin anlatılabilmesi için).** Tanımda verandanın örtüsü yazılır (`ortu: pergola`). Çatısız verandanın tavanı yok: veranda tavanı, tavan paneli, köşebentteki veranda çevresi, tavan omegası ve şilte onu saymaz; çatı çeliğinin oturumundan düşülür; bina alanına girer. Eski tanımlarda bu alan yok, hesapları değişmedi. Pafta bilgi satırı, tanımda çatı kaplaması yazmıyorsa kural kitabındaki baz paket kaplamasını yazar.
 - **Sağlama.** Aynı kurallarla Ç8201'in listesiyle yan yana: `deneme/2026-10-10_c8801/sonuc/C8801_C8201_yan_yana.md`. Farklar modelden: Ç8801'de veranda dikmesi, kirişi ve tavanı yok (çatısız); kalkan, alın kapama ve ters mahya var (beşik + cumba; Ç8201 dört omuz); dere kısa (kalkan kenarlarında dere yok).
 
-Denetim (Ç8801'den sonra): bugünkü kod 0.12'den 0.18'e yedi setle kendi günlerindeki çıktıların hepsini, 0.19 setiyle 11:39 cevaplarından sonraki çıktıları (commit `4d3999b`) bayt bayt aynı veriyor; KT-01 ve KT-02'nin çizim setleri içerikçe aynı (makaslı görünümde ve perspektiflerde görüntü işleme gürültüsü hariç).
+Denetim (Ç8801'den sonra): bugünkü kod 0.12'den 0.18'e yedi setle kendi günlerindeki çıktıların hepsini, 0.19 setiyle 11:39 cevaplarından sonraki çıktıları (commit `4d3999b`) bayt bayt aynı veriyor; KT-01 ve KT-02'nin çizim setleri içerikçe aynı (makaslı görünümde ve perspektiflerde görüntü işleme gürültüsü hariç). Çatı cevabından (14:46) sonra motor kodu değişmedi; değişen yalnız Ç8801'in tanımı ve çıktıları. L varyantının listesi önceki Ç8801 listesiyle (commit `0a22366`) satır satır aynı.
 
 ## Açık sorular
 
@@ -1117,8 +1135,7 @@ Denetim (Ç8801'den sonra): bugünkü kod 0.12'den 0.18'e yedi setle kendi günl
 9. **Sırası gelince.** Çift kat modeli: üst katta 200 cm ve daha geniş pencereli duvarın 1,2 mm alınması (kural kayıtlı, uygulanmadı). Cumbalı çatının açılımı. Kuralların çizimden ve doğrulama motorundan yeniden optimize edilmesi (Lokman, 7 Ekim 07:45: birlikte).
 10. **İnişte alçak çatının ayrımı (okuma, 10 Ekim 11:39).** Alçak çatının üstüne düşen köşede iniş var (veranda); yalnız tek inişli küçük bir çatıda (sundurma) yok. Ayrım iki cevaptan ve KT-03'ün paftasından çıkarıldı; yanlışsa yalnız `inis.alcak_cati_ustundeki_kose` değişir.
 11. **Pafta kuralları (sıradaki iş; Lokman, 10 Ekim).** Üretim dosyası verilmeyecek, paftayı biz oluşturacağız: makas, çatı paneli, dere ve iniş yerleşiminin kuralları `kurallar/cizim/` altına yazılacak; KT-03'te kırma uçlarının çatı panelleri (paftada 17, bizde 4) o kurallarla sayılacak. Örnek paftalar (KT-01, KT-02, KT-03) kuralları çıkarmak ve sınamak için.
-12. **Ç8801'in çatısı.** Biçim (kanadın mahyası boydan boya mı, kuzeyde kalkan var mı) ve eğim. İki kısım da %33 olursa mahyalar aynı kotta buluşmaz (doğuda bir kalkan gerekir; görsellerde yok); varsayım batı blok %33, kanat %50,2. Cevap gelince yalnız tanımın çatı sabitleri değişir.
-13. **Pergola ve veranda korkuluğu (Ç8801).** Katalog görsellerinde ahşap; listede olacak mı, malzemesi ne?
+12. **Pergola ve veranda korkuluğu (Ç8801).** Katalog görsellerinde ahşap; listede olacak mı, malzemesi ne?
 
 Kapananlar:
 
@@ -1135,12 +1152,14 @@ Kapananlar:
 - **Lokman'ın 9 Ekim 22:44 cevabıyla:** veranda korkuluğunun kaplaması (varsayılan Boardex; iç ve dış yüz kendi ölçüleriyle, üstü 8 cm).
 - **Lokman'ın 10 Ekim 2026 cevaplarıyla (10:18, 10:29 fotoğrafları, 10:39):** tek eğimli çatı panelli çatının kenarları (saçakta dere ve özel büküm saçak sacı, yanlarda sundurma kapama, kenarda Boardex şeridi yok, veranda ve sundurmanın tavanı saçağıyla; müştemilat da böyle); alçak bir çatının üstüne düşen köşede iniş (konmaz; 11:39'da yalnız küçük çatıya daraldı); üretim dosyası (verilmeyecek; paftayı biz oluşturacağız); çatı çıkış kapağı (listede yok); bacanın içi (göz ardı; yalnız karkas); taharet musluğu (vitrifiye dahilse ıslak hacim başına 4); saçak omegası (çatı ve tavan panelli sistemlerde yok); KT-03 tanımının ve çizimlerinin depoya eklenmesi; kural kitabının çağrı sırasına göre klasörlenmesi (`kurallar/`).
 - **Lokman'ın 10 Ekim 11:39 cevaplarıyla:** kısa derede tek iniş (4 m'yi geçmeyen hatta); verandanın üstüne düşen köşede iniş (var: dere 15 cm içeride biter, su verandaya iner); müştemilatın panel çatısının okuması (teyit).
+- **Lokman'ın 10 Ekim 13:33 ve 14:46 cevaplarıyla:** Ç8801'in çatısı (katalogdaki model 2. versiyon: ana çatı iki ucunda kalkan, cumba ana çatıya girip biter, bütün yüzler %33; öteki iki çatı varyant olarak saklanıyor: "çatı olarak 3'üde olur").
 
 ## Canlıya alırken (öneri; ayrı onay gerekir)
 
 - Kurallar veridir: kural kitabındaki (`kurallar/`; çağrı sırası `kurallar/README.md`'de) her değer kaynağı ve durumuyla bir PostgreSQL tablosuna taşınır; kural değişince kod değişmez.
 - Kural setleri sürümlüdür: her set olduğu gibi saklanır, liste hangi setle üretildiyse o setle yeniden üretilebilir (7–10 Ekim'de denendi: 0.12'den 0.18'e yedi set kendi günlerindeki çıktıların hepsini bayt bayt aynı veriyor). Tek istisna: 0.13 kopyasında bir kaynak notundaki ifade sadeleştirildi; değerler, durumlar ve çıktılar aynı.
 - Model bankası (Lokman'ın 10 Ekim 11:39 sorusu: "bu modelleri nerede biriktireceğiz yani bayiden bize gelen modellerde veri tabınana girmeli hem daha çok seçenek birikmeli hemde hangi model daha çok satılıyor görmeliyiz"; öneri): katalog modelleri ve bayi taleplerinden türeyen modeller sürümleriyle, talepler, teklifler ve satışlar Portman'ın veritabanında birikir; çizim ve liste dosyaları dosya deposunda, veritabanında yolları ve özetleri. Hangi modelin ve hangi değişikliğin ne kadar istendiği, teklif edildiği ve satıldığı oradan okunur; aynı değişiklik tekrar tekrar gelirse kataloğa yeni model adayı olur. Ayrı bir iş emriyle, önce yerelde.
+- Portman'ın iki işi (Lokman, 10 Ekim 14:46): "1 devamlı modelde üreteceksin 2. bayilerede bu modelleri sunacaksın". Ürün sınırlı: tek kat ve çift kat çatılar belli biçimlerde, alan en çok 250 m² gibi sınırlar var ("buda elimizi güçlendiriyor"). Aynı plana birden çok çatı (Ç8801: katalog, K, L) bunun ilk örneği: varyantlar model bankasına aday, bayiye numaralı seçenek olarak sunulur.
 - Bayi kuralı: bayinin telefon numarası birincil anahtar; karşısında standardı (listeye giren gruplar, çatı yöntemi, çatı kaplaması, paket). Liste, mesajı atan bayinin standardına göre kurulur.
 - Modelin tanımı listenin girdisidir: odaların işlevi (elektrik kuralı), dolap ve TV duvarları (OSB takviyesi), elle yerleştirilmiş iniş yerleri tanımda durur.
 - Hesap deterministik bir modüldür; LLM yalnız talebi anlar (K05). Çatı açılımı da öyle: aynı çatı ve kaplama her zaman aynı dizilimi verir.

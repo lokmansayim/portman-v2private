@@ -1,7 +1,7 @@
 {
  "sema": "portman.yukleme_girdisi/0.5-taslak",
  "ad": "Ç8801 · Tek kat çelik, 2+1, 88 m² (katalog)",
- "kaynak": "Yapı Tanımı 0.5 (Ç8801 katalog modeli: plan arşivdeki DWG'den, çatı katalog görsellerinden; çatı varsayım)",
+ "kaynak": "Yapı Tanımı 0.5 (Ç8801 katalog modeli: plan arşivdeki DWG'den; katalog çatısı (Lokman, 10 Ekim 2026: 2. versiyon))",
  "bina_m2": 88,
  "oturum_m2": 88.06,
  "dis_olcu_m": [
@@ -38,7 +38,7 @@
    "oturum_m2": 74.34
   },
   "tavan_paneli_m2": 67.98,
-  "cati_paneli_m2": 92.82,
+  "cati_paneli_m2": 90.56,
   "ek_cati_paneli": null
  },
  "dis": {
@@ -50,8 +50,8 @@
   "kolon_kiris_varsayim": false,
   "alin_m2": [
    4.653,
-   3.011,
-   3.033
+   4.652,
+   2.116
   ],
   "ek_m2": [],
   "bosluklar": [
@@ -406,49 +406,49 @@
   "tip": "besik_cumba",
   "yontem": "panel",
   "kaplama": "tek_kat_panel",
-  "egim": 0.50217,
-  "yuzey_m2": 92.82,
+  "egim": 0.33,
+  "yuzey_m2": 90.56,
   "sacak_kenarlari_m": [
    6.24,
-   6.24,
+   10.84,
    2.2,
-   9.2
+   2.2
   ],
-  "sacak_boyu_toplam_m": 23.88,
+  "sacak_boyu_toplam_m": 21.48,
   "cephe_kenarlari_m": [
    5.94,
-   5.94,
+   10.24,
    1.9,
-   8.6
+   1.9
   ],
-  "kose_adedi": 6,
+  "kose_adedi": 5,
   "kose_kaynak": "dere hatlarının (saçakların) uçları; iki saçağın buluştuğu köşe tek sayılır",
-  "mahya_hatti_m": 17.74,
+  "mahya_hatti_m": 15.34,
   "mahya_dokumu_m": {
-   "mahya": 17.74,
+   "mahya": 15.34,
    "kirma": 0.0
   },
-  "ters_mahya_m": 8.69,
-  "alin_saci_m": 17.67,
+  "ters_mahya_m": 6.68,
+  "alin_saci_m": 19.59,
   "sacak_saci_kenarlari_m": [
    6.24,
-   6.24,
+   10.84,
    2.2,
-   9.2
+   2.2
   ],
   "sacak_omegasi_cephe_m": [
    5.94,
-   5.94,
+   10.24,
    1.9,
-   8.6
+   1.9
   ],
   "dere": {
-   "boy_m": 23.88,
+   "boy_m": 21.48,
    "hatlar_m": [
     6.24,
-    6.24,
+    10.84,
     2.2,
-    9.2
+    2.2
    ],
    "uc": 7,
    "serbest_uc": 6
@@ -461,32 +461,32 @@
    "satirlar": [
     {
      "boy_m": 3.74,
-     "adet": 15
+     "adet": 21
     },
     {
-     "boy_m": 2.63,
-     "adet": 21
+     "boy_m": 2.48,
+     "adet": 10
     }
    ],
-   "adet": 36,
+   "adet": 31,
    "kapatma_m": 1.0,
    "tasma_cm": 5.0,
    "kesim_payi_mm": 5.0,
-   "tam_boy": 26,
+   "tam_boy": 22,
    "cift": 0,
-   "tek": 13,
-   "karma": 1,
-   "panel_m2": 111.33,
+   "tek": 8,
+   "karma": 3,
+   "panel_m2": 103.34,
    "uzatma": [],
    "taban": {
     "boylar": [
-     263.0,
+     248.0,
      374.0
     ],
-    "adet": 36,
+    "adet": 31,
     "boy_adet": {
-     "374.0": 15,
-     "263.0": 21
+     "374.0": 21,
+     "248.0": 10
     }
    }
   },
@@ -495,7 +495,7 @@
   "silte_dusulen_m2": 13.73,
   "sacak_alti": "boardex",
   "sacak_alti_eni_m": 0.3,
-  "sacak_yuzu_m2": 4.46
+  "sacak_yuzu_m2": 3.96
  },
  "kapi_pencere": [
   {

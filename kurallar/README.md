@@ -13,7 +13,7 @@ Lokman, 10 Ekim 2026 10:18: "artık bu çizim kurallarına her seferinde nasıl 
 Bugün modeller deneme klasörlerinde duruyor:
 - Ç8201: `deneme/2026-10-02_celik/C8201.json`; aynı modelin 0.5 sürümü `deneme/2026-10-06_kor_test/C8201_05.json`.
 - Kör test projeleri: `deneme/2026-10-0x_kor_test*/tanim/`.
-- Ç8801 (katalog; kural kitabının yeni bir modelde sınanması, 10 Ekim 2026): `deneme/2026-10-10_c8801/tanim/`. Çatısı görsellerden, varsayım.
+- Ç8801 (katalog; kural kitabının yeni bir modelde sınanması, 10 Ekim 2026): `deneme/2026-10-10_c8801/tanim/`. Katalog çatısı (Lokman, 10 Ekim 14:46: "2. versiyon") ve aynı plana iki çatı varyantı (K, L; "çatı olarak 3'üde olur").
 
 Tanımda o projenin teknik özelliklerinden gelen birkaç seçim de yazılıdır: duvar profili, kaplama kalınlığı, saçak. Hedef şu: tanım yalnız standarttan farklı olanı yazsın, standart bu kitaptan okunsun.
 

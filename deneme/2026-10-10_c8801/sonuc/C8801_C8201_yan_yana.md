@@ -15,28 +15,28 @@
 | Çelik panel | Çatı paneli (makas üstü, sırt 80 mm) | 10 × roll form çelik (82,05 m²), 361 kg | 9 × roll form çelik (74,34 m²), 327 kg |
 | Çelik panel | Boy C profil | 3 × 80 × 45 × 0,8, 15 kg<br>3 × 80 × 45 × 1,2, 15 kg | 3 × 80 × 45 × 0,8, 15 kg<br>3 × 80 × 45 × 1,2, 15 kg |
 | Çelik panel | Toplam (adedi ve kg'ı bilinenler) | 69, 2.555 kg | 59, 2.332 kg |
-| Metal aksam | Saçaklar için OUTWEAR Dış Cephe Levhası | 5 × 12,5 × 1200 × 2400 (11,78 m²) | 3 × 12,5 × 1200 × 2400 (7,16 m²) |
-| Metal aksam | Saçak yüzü için OUTWEAR Dış Cephe Levhası | 3 × 12,5 × 1200 × 2400 (7,24 m²) | 2 × 12,5 × 1200 × 2400 (4,46 m²) |
+| Metal aksam | Saçaklar için OUTWEAR Dış Cephe Levhası | 5 × 12,5 × 1200 × 2400 (11,78 m²) | 3 × 12,5 × 1200 × 2400 (6,44 m²) |
+| Metal aksam | Saçak yüzü için OUTWEAR Dış Cephe Levhası | 3 × 12,5 × 1200 × 2400 (7,24 m²) | 2 × 12,5 × 1200 × 2400 (3,96 m²) |
 | Metal aksam | Köşebent | 59 × L 2500 (146,31 m) | 63 × L 2500 (155,18 m) |
-| Dış cephe kaplama | OUTWEAR Dış Cephe Levhası | 31 × 12,5 × 1200 × 2400 (80,66 m²) | 37 × 12,5 × 1200 × 2400 (96,52 m²) |
+| Dış cephe kaplama | OUTWEAR Dış Cephe Levhası | 31 × 12,5 × 1200 × 2400 (80,66 m²) | 37 × 12,5 × 1200 × 2400 (97,24 m²) |
 | Dış cephe kaplama | Veranda tavanı (OUTWEAR Dış Cephe Levhası) | 7 × 12,5 × 1200 × 2400 (18,3 m²) | — |
 | İç cephe kaplama | Duvar alçıpan beyaz | 47 × 1200 × 2500 (132,77 m²) | 58 × 1200 × 2500 (165,58 m²) |
 | İç cephe kaplama | Duvar alçıpan yeşil | 8 × 1200 × 2500 (20,45 m²) | 8 × 1200 × 2500 (21,39 m²) |
 | İç cephe kaplama | Tavan alçıpan beyaz | 19 × 1200 × 2500 (54,06 m²) | 23 × 1200 × 2500 (63,3 m²) |
 | İç cephe kaplama | Tavan alçıpan yeşil | 2 × 1200 × 2500 (4,3 m²) | 2 × 1200 × 2500 (4,68 m²) |
 | İç cephe kaplama | OSB (TV ve mutfak dolabı arkası takviyesi) | 9 × 11 × 1220 × 2440 (24,54 m²) | 9 × 11 × 1220 × 2440 (25,2 m²) |
-| Çatı kaplamaları | Tek kat panel | 25 × L 4330 · 100 cm kapatır (98,43 m²) | 15 × L 3740 · 100 cm kapatır (92,82 m²)<br>21 × L 2630 · 100 cm kapatır |
-| Çatı kaplamaları | Metal kiremit mahyası | 11 × L 2800 (26,97 m) | 7 × L 2800 (17,74 m) |
-| Çatı kaplamaları | Mahya bandı | 4 × rulo / 10 m (30,8 m) | 4 × rulo / 10 m (30,8 m) |
+| Çatı kaplamaları | Tek kat panel | 25 × L 4330 · 100 cm kapatır (98,43 m²) | 21 × L 3740 · 100 cm kapatır (90,56 m²)<br>10 × L 2480 · 100 cm kapatır |
+| Çatı kaplamaları | Metal kiremit mahyası | 11 × L 2800 (26,97 m) | 6 × L 2800 (15,34 m) |
+| Çatı kaplamaları | Mahya bandı | 4 × rulo / 10 m (30,8 m) | 3 × rulo / 10 m (25,2 m) |
 | Çatı kaplamaları | Acil müdahale kapağı | 1 × adet | 1 × adet |
 | Çatı kaplamaları | Çatı şiltesi 80 mm | 10 × 9,6 m²/adet (88,86 m²) | 9 × 9,6 m²/adet (81,66 m²) |
-| Dere | Metal dere | 11 × L 4000 (39,28 m) | 7 × L 4000 (23,88 m) |
-| Dere | Dere iniş borusu | 6 × L 3000 | 7 × L 3000 |
-| Dere | Dere iniş aparatı | 6 × adet | 7 × adet |
-| Dere | Açık dirsek | 12 × adet | 14 × adet |
-| Dere | Kapalı dirsek | 6 × adet | 7 × adet |
-| Dere | İniş kelepçesi | 12 × adet | 14 × adet |
-| Dere | Dere kelepçesi | 88 × adet | 56 × adet |
+| Dere | Metal dere | 11 × L 4000 (39,28 m) | 6 × L 4000 (21,48 m) |
+| Dere | Dere iniş borusu | 6 × L 3000 | 6 × L 3000 |
+| Dere | Dere iniş aparatı | 6 × adet | 6 × adet |
+| Dere | Açık dirsek | 12 × adet | 12 × adet |
+| Dere | Kapalı dirsek | 6 × adet | 6 × adet |
+| Dere | İniş kelepçesi | 12 × adet | 12 × adet |
+| Dere | Dere kelepçesi | 88 × adet | 48 × adet |
 | Kapı ve pencere | Melamin kapı (80'lik kanat) | 4 × 90 × 214 | 5 × 90 × 214 |
 | Kapı ve pencere | Kompozit çelik kapı | 1 × 90 × 210 | 1 × 90 × 210 |
 | Kapı ve pencere | PVC pencere | 3 × 120/180<br>1 × 120/100<br>3 × 180/180 | 3 × 120/180<br>1 × 80/180<br>4 × 120/120 |
@@ -62,11 +62,11 @@
 | Elektrik | Kaçak akım rölesi | 1 × adet | 1 × adet |
 | Vida | RYSB pul başlı (3,9 × 32) | 615 × adet (82 m²) | 660 × adet (88 m²) |
 | Vida | Alçıpan vidası (3,5 × 35) | 5000 × adet (122 levha) | 5500 × adet (135 levha) |
-| Vida | OSB ve yalıpan vidası (3,9 × 32) | 1000 × adet (700 vida) | 1000 × adet (604 vida) |
+| Vida | OSB ve yalıpan vidası (3,9 × 32) | 1000 × adet (700 vida) | 1000 × adet (580 vida) |
 | Vida | Pencere vidası (4,8 × 70) | 160 × adet (8 pencere) | 180 × adet (9 pencere) |
 | Vida | Trapez vida (5,5 × 25) | 1000 × adet (984 vida) | 1000 × adet (908 vida) |
 | Vida | Trapez vida (5,5 × 60) | 250 × adet (205 vida) | 250 × adet (220 vida) |
-| Vida | Trapez vida (5,5 × 76; tek kat panel) | 750 × adet (541,25 vida) | 750 × adet (556,65 vida) |
+| Vida | Trapez vida (5,5 × 76; tek kat panel) | 750 × adet (541,25 vida) | 750 × adet (516,7 vida) |
 | Vida | Çelik dübel (klipsli) | 28 × adet (14 panel) | 36 × adet (18 panel) |
 | Vida | Şase pul | 28 × adet (14 panel) | 36 × adet (18 panel) |
 | Vida | 8'lik trapez uç | 6 × adet (82 m²) | 6 × adet (88 m²) |
@@ -93,8 +93,8 @@
 | Boya | Silikonize mastik | 8 × adet (8 pencere) | 9 × adet (9 pencere) |
 | Boya | Dayson | 5 × adet (82 m²) | 6 × adet (88 m²) |
 | Boya | Poliüretan köpük | 2 × adet | 2 × adet |
-| Metal aksam | Alın (kalkan kenarı) için OUTWEAR Dış Cephe Levhası | — | 2 × 12,5 × 1200 × 2400 (3,3 m²) |
-| Metal aksam | Alın kapama | — | 8 × L 2500 (17,67 m) |
-| Çatı kaplamaları | Ters mahya | — | 4 × L 2800 (8,69 m) |
-| Çatı kaplamaları | Ters mahya kenar kutusu | — | 8 × L 21 × 40 × 21 × 2800 |
+| Metal aksam | Alın (kalkan kenarı) için OUTWEAR Dış Cephe Levhası | — | 2 × 12,5 × 1200 × 2400 (3,61 m²) |
+| Metal aksam | Alın kapama | — | 9 × L 2500 (19,59 m) |
+| Çatı kaplamaları | Ters mahya | — | 3 × L 2800 (6,68 m) |
+| Çatı kaplamaları | Ters mahya kenar kutusu | — | 6 × L 21 × 40 × 21 × 2800 |
 | Dere | Dere kapağı | — | 6 × adet |

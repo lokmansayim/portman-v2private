@@ -9,7 +9,7 @@
  "kaynak": {
   "cizim": "PortatifEv arşivi: TEK KAT ÇELİK planlar DWG'sindeki Ç8801 planı ve katalog paftası PORT-Ç8801.jpg; çatı ve veranda üstü katalog görsellerinden (ç_8801_1_R_Photo 1, 2, 5). Karkas modeli, montaj paftası ve yükleme listesi arşivde yok.",
   "koordinat": "Köken binanın sol-alt dış köşesi (verandanın güneybatı köşesi); +x doğu, +y kuzey; DWG'den (60, 29) düşülür.",
-  "cati": "VARSAYIM (Lokman'a soruldu, 10 Ekim 2026): kanadın mahyası boydan boya (güneyde ve kuzeyde kalkan), batı bloğun mahyası ona aynı kotta bağlanır; batı blok %33, kanat %50,2 (mahyalar aynı kotta)."
+  "cati": "Lokman, 10 Ekim 2026 14:46: katalogdaki model 2. versiyon: ana çatı doğu–batı, iki ucunda kalkan; cumba ana çatıya girip biter; bütün yüzler %33."
  },
  "kat_yuksekligi": 270,
  "duvar_panelleri": "tahmin",
@@ -530,15 +530,15 @@
  },
  "cati": {
   "tip": "besik_cumba",
-  "tip_adi": "L beşik (beşik + cumba): batıda kalkan, doğu kanatta güneyde ve kuzeyde kalkan",
-  "tip_kaynak": "katalog görselleri; Excel hesaplama motorunun çatı tiplerinden 'beşik + cumba' (bir beşiğe dik bağlanan ikinci beşik). Biçim ve eğimler varsayım (Lokman'a soruldu)",
+  "tip_adi": "beşik + cumba: ana çatı doğu–batı, iki ucunda kalkan; cumba (doğu kanadın güney ucu) ana çatıya girip biter",
+  "tip_kaynak": "Lokman, 10 Ekim 2026: cumba ana çatıya girip biter (13:33); katalogdaki model 2. versiyon (14:46). Excel hesaplama motorunun çatı tiplerinden 'beşik + cumba' (bir beşiğe dik bağlanan ikinci beşik)",
   "sacak": 30,
   "topuk": 10,
   "duvar_ustu": 270,
   "panel_kalinligi": 8,
   "duzlemler": [
    {
-    "ad": "batı blok güney",
+    "ad": "ana güney",
     "plan": [
      [
       -30.0,
@@ -550,6 +550,14 @@
      ],
      [
       824.0,
+      420.0
+     ],
+     [
+      1054.0,
+      190.0
+     ],
+     [
+      1054.0,
       540.0
      ],
      [
@@ -567,21 +575,21 @@
      "y": 190.0
     },
     "ust_pay": 8.424,
-    "not": "batı bloğun güney yüzü; saçağı verandanın üstünde; doğuda kanadın batı yüzüyle vadi"
+    "not": "ana çatının güney yüzü; saçağı batıda verandanın, doğuda cumbanın arkasında; cumbayla iki vadi"
    },
    {
-    "ad": "batı blok kuzey",
+    "ad": "ana kuzey",
     "plan": [
      [
       -30.0,
       540.0
      ],
      [
-      824.0,
+      1054.0,
       540.0
      ],
      [
-      594.0,
+      1054.0,
       890.0
      ],
      [
@@ -599,10 +607,42 @@
      "y": 890.0
     },
     "ust_pay": 8.424,
-    "not": "batı bloğun kuzey yüzü; doğuda kanadın batı yüzüyle vadi"
+    "not": "ana çatının kuzey yüzü; kuzey cephede saçak boydan boya"
    },
    {
-    "ad": "kanat batı güney",
+    "ad": "cumba doğu",
+    "plan": [
+     [
+      824.0,
+      -30.0
+     ],
+     [
+      1054.0,
+      -30.0
+     ],
+     [
+      1054.0,
+      190.0
+     ],
+     [
+      824.0,
+      420.0
+     ]
+    ],
+    "yukari": [
+     -1,
+     0
+    ],
+    "egim": 0.33,
+    "sacak_kotu": 280.0,
+    "sacak": {
+     "x": 1054.0
+    },
+    "ust_pay": 8.424,
+    "not": "cumbanın doğu yüzü; doğu cephede kısa saçak; ana çatının güney yüzüyle vadi"
+   },
+   {
+    "ad": "cumba batı",
     "plan": [
      [
       594.0,
@@ -614,7 +654,7 @@
      ],
      [
       824.0,
-      540.0
+      420.0
      ],
      [
       594.0,
@@ -625,73 +665,13 @@
      1,
      0
     ],
-    "egim": 0.50217,
+    "egim": 0.33,
     "sacak_kotu": 280.0,
     "sacak": {
      "x": 594.0
     },
-    "ust_pay": 8.952,
-    "not": "kanadın batı yüzünün güney parçası; saçağı verandanın üstünde"
-   },
-   {
-    "ad": "kanat batı kuzey",
-    "plan": [
-     [
-      824.0,
-      540.0
-     ],
-     [
-      824.0,
-      890.0
-     ],
-     [
-      594.0,
-      890.0
-     ]
-    ],
-    "yukari": [
-     1,
-     0
-    ],
-    "egim": 0.50217,
-    "sacak_kotu": 280.0,
-    "sacak": {
-     "x": 594.0
-    },
-    "ust_pay": 8.952,
-    "not": "kanadın batı yüzünün kuzey parçası (güney parçasıyla aynı düzlem; batı bloğun kuzey yüzüyle vadi)"
-   },
-   {
-    "ad": "kanat doğu",
-    "plan": [
-     [
-      824.0,
-      -30.0
-     ],
-     [
-      1054.0,
-      -30.0
-     ],
-     [
-      1054.0,
-      890.0
-     ],
-     [
-      824.0,
-      890.0
-     ]
-    ],
-    "yukari": [
-     -1,
-     0
-    ],
-    "egim": 0.50217,
-    "sacak_kotu": 280.0,
-    "sacak": {
-     "x": 1054.0
-    },
-    "ust_pay": 8.952,
-    "not": "kanadın doğu yüzü; doğu cephede boydan boya saçak"
+    "ust_pay": 8.424,
+    "not": "cumbanın batı yüzü; saçağı verandanın üstünde; ana çatının güney yüzüyle vadi"
    }
   ],
   "kalkanlar": [
@@ -705,13 +685,28 @@
     ],
     "ic": "dogu",
     "ust": [
-     "batı blok güney",
-     "batı blok kuzey"
+     "ana güney",
+     "ana kuzey"
     ],
-    "not": "batı bloğun batı alnı"
+    "not": "batı bloğun (ana çatının) batı alnı"
    },
    {
-    "ad": "kanadın güney kalkanı",
+    "ad": "doğu kalkanı",
+    "eksen": "x",
+    "konum": 1024.0,
+    "aralik": [
+     0.0,
+     860.0
+    ],
+    "ic": "bati",
+    "ust": [
+     "ana güney",
+     "ana kuzey"
+    ],
+    "not": "ana çatının doğu alnı; doğu duvarı boydan boya, kalkan cumbanın saçağının arkasından başlar"
+   },
+   {
+    "ad": "cumbanın güney kalkanı",
     "eksen": "y",
     "konum": 0.0,
     "aralik": [
@@ -720,25 +715,10 @@
     ],
     "ic": "kuzey",
     "ust": [
-     "kanat batı güney",
-     "kanat doğu"
+     "cumba batı",
+     "cumba doğu"
     ],
-    "not": "doğu kanadın güney alnı"
-   },
-   {
-    "ad": "kanadın kuzey kalkanı",
-    "eksen": "y",
-    "konum": 860.0,
-    "aralik": [
-     0.0,
-     1024.0
-    ],
-    "ic": "guney",
-    "ust": [
-     "kanat batı kuzey",
-     "kanat doğu"
-    ],
-    "not": "doğu kanadın kuzey alnı (görsellerde görünmüyor; kanadın mahyası boydan boya varsayıldı). Kuzey duvarı boydan boya: kalkan, vadinin duvar çizgisini kestiği yerden (x ≈ 614) başlar"
+    "not": "doğu kanadın (cumbanın) güney alnı"
    }
   ]
  }

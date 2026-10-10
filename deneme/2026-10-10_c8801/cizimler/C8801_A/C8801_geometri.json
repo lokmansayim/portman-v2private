@@ -6,7 +6,7 @@
   "IfcDoor": 6,
   "IfcSpace": 7,
   "IfcCovering": 6,
-  "IfcSlab": 6,
+  "IfcSlab": 5,
   "IfcPlate": 13
  },
  "ucgen": 2196,
@@ -19,18 +19,18 @@
    "beklenen_m3": 2.6692
   },
   {
-   "ad": "DB",
-   "geometri_m3": 1.4596,
-   "net_yuz_m2": 13.9005,
-   "kalinlik_m": 0.105,
-   "beklenen_m3": 1.4596
-  },
-  {
    "ad": "DG",
    "geometri_m3": 1.1851,
    "net_yuz_m2": 11.253,
    "kalinlik_m": 0.105,
    "beklenen_m3": 1.1816
+  },
+  {
+   "ad": "DB",
+   "geometri_m3": 1.4596,
+   "net_yuz_m2": 13.9005,
+   "kalinlik_m": 0.105,
+   "beklenen_m3": 1.4596
   },
   {
    "ad": "DKB",
