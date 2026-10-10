@@ -2,17 +2,17 @@
 """Çelik (A1) deneme çizicisi: Yapı Tanımı taslağından plan, alanlar ve Boardex metrajı.
 
 Deneme kodudur; canlıda değildir ve Motor'un yerine geçmez.
-Duvar kalınlığı duvar tipinin katmanlarından hesaplanır (duvar_tipleri.json).
+Duvar kalınlığı duvar tipinin katmanlarından hesaplanır (kural kitabında `kurallar/model/duvar_tipleri.json`).
 `--cizim-kalinligi` ile arşivdeki çizimin kalınlıkları (12 / 11 cm) kullanılır ve
 hesaplanan mahal alanları çizimdeki etiketlerle karşılaştırılır (okuma denetimi).
 
-Seçenek (değişiklik operatörü): `--secenek secenekler/<kod>.json` tanımın alanlarını değiştirir;
+Seçenek (değişiklik operatörü): `--secenek ../../kurallar/model/secenekler/<kod>.json` tanımın alanlarını değiştirir;
 çıktı adlarına seçeneğin kodu eklenir. Örnek: dış duvar karkası 140 mm.
 
 Kullanım:
     python ciz.py C8201.json                    # katmanlardan: plan + rapor
     python ciz.py C8201.json --cizim-kalinligi  # çizimle karşılaştırma; fark varsa çıkış kodu 1
-    python ciz.py C8201.json --secenek secenekler/dis_karkas_140.json
+    python ciz.py C8201.json --secenek ../../kurallar/model/secenekler/dis_karkas_140.json
 """
 from __future__ import annotations
 
@@ -454,7 +454,7 @@ def main() -> int:
         raise SystemExit("--cizim-kalinligi arşiv çizimiyle karşılaştırma içindir; seçenekle birlikte kullanılmaz.")
     tanim = json.loads(a.tanim.read_text(encoding="utf-8"))
     tanim, sek = secenek_uygula(tanim, a.secenek)
-    tipler = json.loads((BURADA / "duvar_tipleri.json").read_text(encoding="utf-8"))
+    tipler = json.loads((BURADA.parents[1] / "kurallar" / "model" / "duvar_tipleri.json").read_text(encoding="utf-8"))
     s = hesapla(tanim, tipler, a.cizim_kalinligi)
     a.cikti.mkdir(parents=True, exist_ok=True)
     ek = "_cizim_kalinligi" if a.cizim_kalinligi else ""

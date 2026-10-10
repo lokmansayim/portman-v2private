@@ -117,7 +117,7 @@ YAYIMLANAN = {"kosebent": 51, "boardex": 33, "mahya_bandi": 3, "panel_boyu_mm": 
 S1322 = {"tek_kat": 28, "sandvic": 26, "trapez": 32, "kiremit": 26}
 # 4 Ekim 16:13 sürümü (commit 21ed582): her yüzde sol köşeden, kapatma 100 cm, panel boyu eğimli boy + taşma (L 4315); liste 89 satır
 S1613 = {"tek_kat": 27, "sandvic": 27, "trapez": 32, "kiremit": 30, "sandvic_80": 32, "kapama": 18, "satir": 89}
-# 7 Ekim 03:46 sürümü (commit eff6a74; kural seti 0.12, `kural_setleri/0.12.json`): panel boyu mm'ye yukarı (taban L 4315), uzatma kuralıyla L 4325;
+# 7 Ekim 03:46 sürümü (commit eff6a74; kural seti 0.12, `kurallar/liste/setler/0.12.json`): panel boyu mm'ye yukarı (taban L 4315), uzatma kuralıyla L 4325;
 # bindirmeler 30 cm; veranda tavanı yeşil alçıpan; duvar izolasyonu listede; liste 88 satır; üç gerçek listeyle karşılaştırma 74 / 119
 S0346 = {"taban_mm": 4315, "boy_mm": 4325, "esik_mm": 4318, "tek_kat": 25, "sandvic": 25, "trapez": 30, "kiremit": 28, "d87": ("L 4345", 28, 29), "d110": ("L 4315", 26),
          "satir": 88, "kars": (74, 119), "nym": (145, 121), "tavan_yesil": 8, "duvar_izolasyonu": 13, "trapez_vida_B": 2000, "uzatilan": 34}
@@ -709,7 +709,7 @@ Okuma:
 105 m² listedeki ve Excel motorundaki sırayla: Çelik panel · Metal aksam · Dış cephe kaplama · İç cephe kaplama · Çatı kaplamaları · Dere · Kapı ve pencere · Elektrik · Vida · Sıhhi tesisat · Boya.
 
 - Bir grubun listeye girip girmeyeceği bayinin standardına bağlıdır. Örnek: 90 m² gerçek listede vida, elektrik ve sıhhi tesisat yok; 62 ve 105 m² listelerde var.
-- Denemede: `bayi_kurallari_ornek.json` ve `yukleme.py --bayi <anahtar>`. Anahtar canlıda bayinin telefon numarası olacak; dosyada gerçek numara ya da ad yok. Kural grupları açıp kapatır; boya kovası ve vitrifiyeyi dahil eder ya da etmez; çatı yöntemini ve kaplamasını bayinin standardına çevirir.
+- Denemede: kural kitabında `kurallar/bayi/ornek.json` ve `yukleme.py --bayi <anahtar>`. Anahtar canlıda bayinin telefon numarası olacak; dosyada gerçek numara ya da ad yok. Kural grupları açıp kapatır; boya kovası ve vitrifiyeyi dahil eder ya da etmez; çatı yöntemini ve kaplamasını bayinin standardına çevirir.
 - Hangi bayinin standardının ne olduğu soruldu. Mühendis (4 Ekim 12:14): standartlar henüz oturmadı; tek tük bayinin standardı var, ileride netleşecek. O zamana kadar bütün gruplar listede.
 
 ## Çelik: birim ağırlıklar (Excel motorundan)
@@ -859,7 +859,7 @@ Lokman, 6 Ekim 21:22: bir başka çelik projenin (98,7 m², beşik + cumba çat�
 
 Sorular, kör test raporunun on iki sorusuydu (raporun 12. bölümü); birincisi Eylül 2026 listesinin farklı yaptığı on yedi şeydi (a–q). Cevaplar tırnak içinde, yazıldığı gibi. 08:02'de beş okuma soruldu; düzeltmeleri ilgili satırda. Lokman ayrıca: "bazı kuralları yeniden optimize edeceğiz hem çizimden hem doğrulama motorundan … tüm optimizasyonu beraber yapacağız".
 
-Kurallar bu cevaplarla 0.13 sürümü oldu. Önceki set olduğu gibi saklanıyor (`deneme/2026-10-03_yukleme/kural_setleri/0.12.json`); `PORTMAN_KURALLAR` ile seçilince 7 Ekim 03:46'daki bütün çıktılar bayt bayt aynı üretiliyor. Yeni davranışların hepsi kurallardaki bir anahtara bağlı: kod değişmeden kural değişir.
+Kurallar bu cevaplarla 0.13 sürümü oldu. Önceki set olduğu gibi saklanıyor (`kurallar/liste/setler/0.12.json`); `PORTMAN_KURALLAR` ile seçilince 7 Ekim 03:46'daki bütün çıktılar bayt bayt aynı üretiliyor. Yeni davranışların hepsi kurallardaki bir anahtara bağlı: kod değişmeden kural değişir.
 
 | # | Konu | Cevap | Uygulama |
 |---|---|---|---|
@@ -898,7 +898,7 @@ Panel boyu kuralı iki motorda ayrı ayrı kurulu olduğu için birbirine bağla
 
 ## Lokman'ın cevapları (8 Ekim 00:45) ve uygulanışı
 
-7 Ekim'de sorulan dokuz soruya verildi. Cevaplar tırnak içinde, yazıldığı gibi. Kurallar bu cevaplarla 0.14 sürümü oldu; 0.13 seti saklanıyor (`deneme/2026-10-03_yukleme/kural_setleri/0.13.json`) ve onunla 7 Ekim'deki çıktılar bayt bayt aynı üretiliyor.
+7 Ekim'de sorulan dokuz soruya verildi. Cevaplar tırnak içinde, yazıldığı gibi. Kurallar bu cevaplarla 0.14 sürümü oldu; 0.13 seti saklanıyor (`kurallar/liste/setler/0.13.json`) ve onunla 7 Ekim'deki çıktılar bayt bayt aynı üretiliyor.
 
 | # | Soru | Cevap | Uygulama |
 |---|---|---|---|
@@ -928,7 +928,7 @@ Denetim (8 Ekim):
 
 ## Lokman'ın cevapları (8 Ekim 07:23 ve 07:41) ve uygulanışı
 
-00:45'ten sonra açık kalan üç soruya ve üç onaya verildi. Cevaplar tırnak içinde, yazıldığı gibi. Kurallar bu cevaplarla 0.15 sürümü oldu; 0.14 seti saklanıyor (`deneme/2026-10-03_yukleme/kural_setleri/0.14.json`, KT-01 tablosunun açıklamaları `deneme/2026-10-06_kor_test/kararlar_notlari_setleri/0.14.json`) ve onunla 8 Ekim 03:13'teki çıktılar bayt bayt aynı üretiliyor.
+00:45'ten sonra açık kalan üç soruya ve üç onaya verildi. Cevaplar tırnak içinde, yazıldığı gibi. Kurallar bu cevaplarla 0.15 sürümü oldu; 0.14 seti saklanıyor (`kurallar/liste/setler/0.14.json`, KT-01 tablosunun açıklamaları `deneme/2026-10-06_kor_test/kararlar_notlari_setleri/0.14.json`) ve onunla 8 Ekim 03:13'teki çıktılar bayt bayt aynı üretiliyor.
 
 | # | Soru | Cevap | Uygulama |
 |---|---|---|---|
@@ -953,7 +953,7 @@ Lokman, 9 Ekim 21:07: "bir test daha yapalım". Proje 90 m², tek kat çelik: d�
 
 ## Lokman'ın cevapları (9 Ekim 22:22 ve 22:44) ve uygulanışı
 
-KT-02 kıyasının dört sorusuna (22:22) ve korkuluğun malzemesine (22:44) verildi. Cevaplar tırnak içinde, yazıldığı gibi. Kurallar 22:22 cevaplarıyla 0.16, 22:44 cevabıyla 0.17 sürümü oldu. 0.15 ve 0.16 setleri saklanıyor (`deneme/2026-10-03_yukleme/kural_setleri/`, KT-01 tablosunun açıklamaları `deneme/2026-10-06_kor_test/kararlar_notlari_setleri/`); onlarla 9 Ekim 22:05'teki (commit `b5ff4cf`) ve 22:40'taki (`6b265c8`) çıktılar bayt bayt aynı üretiliyor.
+KT-02 kıyasının dört sorusuna (22:22) ve korkuluğun malzemesine (22:44) verildi. Cevaplar tırnak içinde, yazıldığı gibi. Kurallar 22:22 cevaplarıyla 0.16, 22:44 cevabıyla 0.17 sürümü oldu. 0.15 ve 0.16 setleri saklanıyor (`kurallar/liste/setler/`, KT-01 tablosunun açıklamaları `deneme/2026-10-06_kor_test/kararlar_notlari_setleri/`); onlarla 9 Ekim 22:05'teki (commit `b5ff4cf`) ve 22:40'taki (`6b265c8`) çıktılar bayt bayt aynı üretiliyor.
 
 | # | Soru | Cevap | Uygulama |
 |---|---|---|---|
@@ -1007,7 +1007,7 @@ Kapananlar:
 
 ## Canlıya alırken (öneri; ayrı onay gerekir)
 
-- Kurallar veridir: `kurallar.json`'daki her değer kaynağı ve durumuyla bir PostgreSQL tablosuna taşınır; kural değişince kod değişmez.
+- Kurallar veridir: kural kitabındaki (`kurallar/`; çağrı sırası `kurallar/README.md`'de) her değer kaynağı ve durumuyla bir PostgreSQL tablosuna taşınır; kural değişince kod değişmez.
 - Kural setleri sürümlüdür: her set olduğu gibi saklanır, liste hangi setle üretildiyse o setle yeniden üretilebilir (7–9 Ekim'de denendi: 0.12, 0.13, 0.14, 0.15 ve 0.16 setleri kendi günlerindeki çıktıların hepsini bayt bayt aynı veriyor). Tek istisna: 0.13 kopyasında bir kaynak notundaki ifade sadeleştirildi; değerler, durumlar ve çıktılar aynı.
 - Bayi kuralı: bayinin telefon numarası birincil anahtar; karşısında standardı (listeye giren gruplar, çatı yöntemi, çatı kaplaması, paket). Liste, mesajı atan bayinin standardına göre kurulur.
 - Modelin tanımı listenin girdisidir: odaların işlevi (elektrik kuralı), dolap ve TV duvarları (OSB takviyesi), elle yerleştirilmiş iniş yerleri tanımda durur.

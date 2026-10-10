@@ -10,7 +10,7 @@ T=$(realpath "${1:?Kullanım: bash kt03_kiyas_kos.sh <KT03_duzeltilmis.json> [py
 PY=${2:-python3}
 cd "$(dirname "$0")"
 unset PORTMAN_KURALLAR
-"$PY" -c 'import json, sys; s = json.load(open("../2026-10-03_yukleme/kurallar.json", encoding="utf-8"))["sema"]; sys.exit(0 if "/0.17" in s else f"kt03_kiyas_kos.sh 0.17 kural setiyle koşar; kurallar.json: {s}")'
+"$PY" -c 'import json, sys; s = json.load(open("../../kurallar/liste/kurallar.json", encoding="utf-8"))["sema"]; sys.exit(0 if "/0.17" in s else f"kt03_kiyas_kos.sh 0.17 kural setiyle koşar; kurallar.json: {s}")'
 "$PY" -c 'import json, sys; t = json.load(open(sys.argv[1], encoding="utf-8")); sys.exit(0 if t.get("duzeltmeler") else "Bu tanımda `duzeltmeler` alanı yok: düzeltilmiş tanımla koşulur.")' "$T"
 G=../2026-10-06_kor_test/girdi_genel.py
 Y=../2026-10-03_yukleme/yukleme.py

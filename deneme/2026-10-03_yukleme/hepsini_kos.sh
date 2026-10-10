@@ -20,7 +20,7 @@ for kp in sandvic_panel osb_kiremit trapez_sac; do
   "$PY" cati_acilim.py sonuc/C8201_girdi.json --kaplama $kp --cikti sonuc/C8201_cati_acilim_$kp.json | sed -n 3,4p
 done
 "$PY" yukleme.py sonuc/C8201_girdi.json --bayi ORNEK-BAYI-3 --cikti sonuc/C8201_yontem_B.json --md sonuc/C8201_yontem_B.md > /dev/null
-"$PY" girdi_uret.py $C/C8201.json --secenek $C/secenekler/dis_karkas_140.json > /dev/null
+"$PY" girdi_uret.py $C/C8201.json --secenek ../../kurallar/model/secenekler/dis_karkas_140.json > /dev/null
 "$PY" yukleme.py sonuc/C8201_dis_karkas_140_girdi.json --cikti sonuc/C8201_dis_karkas_140_yukleme_taslak.json --md sonuc/C8201_dis_karkas_140_yukleme_taslak.md > /dev/null
 "$PY" tablo_uret.py
 # çatı açılımının geometrik sağlaması (çokgenlerle; panel boyu uzatma kuralı dahil; yaklaşık bir dakika). Sorun varsa çıkış kodu 1.

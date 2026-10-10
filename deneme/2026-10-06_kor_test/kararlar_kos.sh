@@ -5,7 +5,7 @@
 # Tanım: `tanim/KT01_duzeltilmis.json` (8 Ekim 2026'dan beri depoda); yolu verilir, düzeltilmiş tanım olmalı. Geçici dosya yazmaz, hiçbir dosyayı silmez.
 # 7 Ekim 03:46 kıyasının kendisi kiyas_kos.sh ile, o günkü kural setiyle (0.12) üretilir.
 # Kullanım: bash kararlar_kos.sh tanim/KT01_duzeltilmis.json [python] [kural seti]      Çıkış kodu kararlar_kiyas.py'ninkidir: denetim sorunu varsa 1.
-# Kural seti verilirse (ör. 0.13) o günkü tablo yeniden üretilir: kurallar `../2026-10-03_yukleme/kural_setleri/<set>.json`dan, satır açıklamaları
+# Kural seti verilirse (ör. 0.13) o günkü tablo yeniden üretilir: kurallar `../../kurallar/liste/setler/<set>.json`dan, satır açıklamaları
 # `kararlar_notlari_setleri/<set>.json`dan okunur (açıklamalar adetlerle birlikte denetlendiği için her setin kendi açıklamaları vardır).
 # Çıktılar yine `sonuc/KT01_kararlar_*` üzerine yazılır: eski setle koşulduktan sonra güncel setle yeniden koşulmalıdır.
 set -euo pipefail
@@ -14,11 +14,11 @@ PY=${2:-python3}
 SET=${3:-}
 cd "$(dirname "$0")"
 if [ -n "$SET" ]; then
-  export PORTMAN_KURALLAR="$(realpath "../2026-10-03_yukleme/kural_setleri/$SET.json")"
+  export PORTMAN_KURALLAR="$(realpath "../../kurallar/liste/setler/$SET.json")"
   NOTLAR="kararlar_notlari_setleri/$SET.json"
   [ -f "$NOTLAR" ] || { echo "Bu kural seti için açıklama dosyası yok: $NOTLAR" >&2; exit 2; }
 else
-  unset PORTMAN_KURALLAR      # güncel kural seti (kurallar.json): ortamda başka bir set seçili kalmış olmasın
+  unset PORTMAN_KURALLAR      # güncel kural seti (kurallar/liste/kurallar.json): ortamda başka bir set seçili kalmış olmasın
   NOTLAR=kararlar_notlari.json
 fi
 "$PY" -c 'import json, sys; t = json.load(open(sys.argv[1], encoding="utf-8")); sys.exit(0 if t.get("duzeltmeler") else "Bu tanımda `duzeltmeler` alanı yok: düzeltilmiş tanımla koşulur.")' "$T"

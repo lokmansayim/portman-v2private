@@ -48,6 +48,7 @@ Sahibi Lokman'dır; geliştirici değildir. Kodu asistan yazar. Kayıt, ödeme, 
 | `KARARLAR/` | K01–K25, Z-01–Z-10; açık kararlar `KARARLAR/README.md`'de |
 | `testler/` | Referans, kalıcı akış (Postgres) ve bilinen hata testleri |
 | `deneme/` | Tarihli denemeler; canlıda değil |
+| `kurallar/` | Kural kitabı (İE-05 taslağı; canlıda değil): bütün modeller için tek; model, çizim, liste ve bayi kuralları. Her talepte çağrı sırası `kurallar/README.md`'de |
 | `araclar/` | Yerel ortam kurulumu |
 
 ## Commit ve dal

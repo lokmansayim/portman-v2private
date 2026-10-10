@@ -7,7 +7,7 @@ Varsayımlar girdinin içinde `varsayimlar` altında yazılıdır.
 
 Kullanım:
     python girdi_uret.py ../2026-10-02_celik/C8201.json
-    python girdi_uret.py ../2026-10-02_celik/C8201.json --secenek ../2026-10-02_celik/secenekler/dis_karkas_140.json
+    python girdi_uret.py ../2026-10-02_celik/C8201.json --secenek ../../kurallar/model/secenekler/dis_karkas_140.json
 """
 from __future__ import annotations
 
@@ -36,7 +36,7 @@ def main() -> int:
     a = ap.parse_args()
     tanim = json.loads(a.tanim.read_text(encoding="utf-8"))
     tanim, sek = secenek_uygula(tanim, a.secenek)
-    tipler = json.loads((CELIK / "duvar_tipleri.json").read_text(encoding="utf-8"))
+    tipler = json.loads((BURADA.parents[1] / "kurallar" / "model" / "duvar_tipleri.json").read_text(encoding="utf-8"))
     kur = kural.oku()
     s = hesapla(tanim, tipler, False)
     c = cati_hesapla(tanim, kur["inis"]["deger"]["orta_inis_esigi_m"] * 100, kur["inis"]["deger"].get("olcu", "cephe"),

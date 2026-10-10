@@ -25,7 +25,7 @@ Mahya malzemesi tepe mahyasına ve dört kırma hattına konur; aynı malzeme (L
 
 Kullanım:
     python gorunus.py C8201.json
-    python gorunus.py C8201.json --secenek secenekler/dis_karkas_140.json
+    python gorunus.py C8201.json --secenek ../../kurallar/model/secenekler/dis_karkas_140.json
 """
 from __future__ import annotations
 
@@ -299,7 +299,7 @@ def main() -> int:
     a = ap.parse_args()
     tanim = json.loads(a.tanim.read_text(encoding="utf-8"))
     tanim, sek = secenek_uygula(tanim, a.secenek)
-    tipler = json.loads((BURADA / "duvar_tipleri.json").read_text(encoding="utf-8"))
+    tipler = json.loads((BURADA.parents[1] / "kurallar" / "model" / "duvar_tipleri.json").read_text(encoding="utf-8"))
     s = hesapla(tanim, tipler, False)
     # iniş kuralı ve mahya bindirmesi kural dosyasından (yükleme listesiyle aynı kaynak: `../2026-10-03_yukleme/kural.py`)
     sys.path.append(str(BURADA.parent / "2026-10-03_yukleme"))

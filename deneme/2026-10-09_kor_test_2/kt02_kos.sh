@@ -8,7 +8,7 @@ set -euo pipefail
 T=$(realpath "${1:?Kullanım: bash kt02_kos.sh <KT02.json> [python]}")
 PY=${2:-python3}
 cd "$(dirname "$0")"
-export PORTMAN_KURALLAR="$(cd ../2026-10-03_yukleme && pwd)/kural_setleri/0.15.json"   # dondurulan listeler (9 Ekim 2026 21:40) 0.15 kural setiyle (o günkü set) bayt bayt aynı çıkar
+export PORTMAN_KURALLAR="$(cd ../../kurallar/liste && pwd)/setler/0.15.json"   # dondurulan listeler (9 Ekim 2026 21:40) 0.15 kural setiyle (o günkü set) bayt bayt aynı çıkar
 "$PY" -c 'import json, os, sys; s = json.load(open(os.environ["PORTMAN_KURALLAR"], encoding="utf-8"))["sema"]; sys.exit(0 if "/0.15" in s else f"kt02_kos.sh 0.15 kural setiyle koşar; seçilen dosya: {s}")'
 G=../2026-10-06_kor_test/girdi_genel.py
 Y=../2026-10-03_yukleme/yukleme.py

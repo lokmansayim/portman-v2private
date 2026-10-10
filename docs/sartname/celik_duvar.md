@@ -116,7 +116,7 @@ Kaynak: Lokman'ın anlattıkları (1–8 Ekim 2026; 4 Ekim 15:18 ve 16:18, 7 Eki
 
 ## Seçenek: dış duvar karkası 140 mm (3 Ekim 2026)
 
-Tanım dosyası: `deneme/2026-10-02_celik/secenekler/dis_karkas_140.json`. Model tanımı değişmez; seçenek yalnız dış duvar tipini `DIS-140` yapar.
+Tanım dosyası: kural kitabında `kurallar/model/secenekler/dis_karkas_140.json` (10 Ekim 2026'ya kadar `deneme/2026-10-02_celik/secenekler/`). Model tanımı değişmez; seçenek yalnız dış duvar tipini `DIS-140` yapar.
 
 - Dış duvar kalınlığı katmanlardan: 12,5 + 140 + 12,5 = 165 mm (16,5 cm). İç duvarlar 10,5 cm kalır.
 - Dış ölçü değişmez (dış duvarlar dıştan ölçülür); duvar içeri doğru kalınlaşır, dış duvara komşu mahaller küçülür.

@@ -4,13 +4,13 @@ Deneme kodu; canlıda değil, Motor'un yerine geçmez. İE-05 taslağının (`do
 
 Amaç: tek kat çelik bir modeli, pano ızgarası olmadan, bir tanım dosyasından ve duvar tiplerinden kurmak; alanları ve Boardex metrajını hesaplamak; planı çizmek.
 
+Duvar tipleri (`duvar_tipleri.json`) ve seçenekler (`secenekler/`, ilk örnek `dis_karkas_140.json`) 10 Ekim 2026'da kural kitabına taşındı: `../../kurallar/model/` (anlatımı `../../kurallar/README.md`). İçerikleri değişmedi.
+
 | Dosya | İçerik |
 |---|---|
-| `duvar_tipleri.json` | Baz paket duvar tipleri (katman listesi). Duvar kalınlığı katmanların toplamıdır |
 | `C8201.json` | Ç8201'in tanımı: dış kutu, iç duvar aksları, mahaller ve işlevleri, açıklıklar (arşivdeki çizimden); veranda çerçevesi, çatı yöntemi ve kaplaması; OSB takviyesi gelen duvarlar |
 | `ciz.py` | Hesap ve plan çizimi |
 | `gorunus.py` | Çatı hesabı, çatı planı, dört görünüş ve tek pafta |
-| `secenekler/` | Seçenekler (değişiklik operatörleri): model tanımını değiştirmeden paket farkını uygular. İlk örnek: `dis_karkas_140.json` |
 | `cikti/` | Koşu çıktıları (depoya girmez) |
 | `sonuc/` | Son koşunun kanıtları (4 Ekim 2026 13:22): plan, pafta, raporlar; `C8201_plan_cizim_kalinligi.png` arşiv çiziminin duvar kalınlıklarıyla (12 / 11 cm) çizilen karşılaştırma planı |
 
@@ -20,8 +20,8 @@ Amaç: tek kat çelik bir modeli, pano ızgarası olmadan, bir tanım dosyasınd
 python ciz.py C8201.json                    # baz paketin katmanlarıyla (10,5 cm duvar)
 python ciz.py C8201.json --cizim-kalinligi  # arşiv çiziminin kalınlıklarıyla (12 / 11 cm); etiketlerle karşılaştırır
 python gorunus.py C8201.json                # çatı + görünüşler + pafta
-python ciz.py C8201.json --secenek secenekler/dis_karkas_140.json      # dış duvar karkası 140 mm
-python gorunus.py C8201.json --secenek secenekler/dis_karkas_140.json
+python ciz.py C8201.json --secenek ../../kurallar/model/secenekler/dis_karkas_140.json      # dış duvar karkası 140 mm
+python gorunus.py C8201.json --secenek ../../kurallar/model/secenekler/dis_karkas_140.json
 ```
 
 ## Sonuç (2–3 Ekim 2026)

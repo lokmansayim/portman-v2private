@@ -13,7 +13,7 @@ set -euo pipefail
 T=$(realpath "${1:?Kullanım: bash kiyas_kos.sh <tanım.json> [python]}")
 PY=${2:-python3}
 cd "$(dirname "$0")"
-export PORTMAN_KURALLAR="$(cd ../2026-10-03_yukleme && pwd)/kural_setleri/0.12.json"
+export PORTMAN_KURALLAR="$(cd ../../kurallar/liste && pwd)/setler/0.12.json"
 "$PY" -c 'import json, os, sys; s = json.load(open(os.environ["PORTMAN_KURALLAR"], encoding="utf-8"))["sema"]; sys.exit(0 if "/0.12" in s else f"kiyas_kos.sh 0.12 kural setiyle koşar; seçilen dosya: {s}")'
 "$PY" -c 'import json, sys; t = json.load(open(sys.argv[1], encoding="utf-8")); sys.exit(0 if t.get("duzeltmeler") else "Bu tanımda `duzeltmeler` alanı yok: kıyas düzeltilmiş tanımla koşulur.")' "$T"
 Y=../2026-10-03_yukleme/yukleme.py

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Çizim setini (plan, dört görünüş, pafta, IFC4, perspektifler) bir Yapı Tanımı'ndan üretir ve setin tam olduğunu denetler.
-# Setin içeriği `cizim_seti.json`dadır (Lokman onayladı, 7 Ekim 2026 07:45); ayrıntı: docs/sartname/cizim_seti.md.
+# Setin içeriği kural kitabındaki `kurallar/cizim/cizim_seti.json`dadır (Lokman onayladı, 7 Ekim 2026 07:45); ayrıntı: docs/sartname/cizim_seti.md.
 # Çıktı klasörü depo dışında olmalı: müşteri projelerinin çizimleri depoya ayrı onayla girer (KT-01'in onaylı seti `cizimler/` altında; Lokman, 8 Ekim 2026 07:23).
 # Plan, görünüşler ve pafta her üretimde bayt bayt aynıdır; IFC'de kimlikler ve zaman damgası her üretimde değişir. Geçici dosya yazmaz, hiçbir dosyayı silmez.
 # Kullanım: bash cizim_seti_kos.sh <tanım.json> <çıktı klasörü> [python] [--yontem panel|omega_asik]
@@ -22,7 +22,7 @@ KOD=$("$PY" -c 'import json, sys; print(json.load(open(sys.argv[1], encoding="ut
 import json, sys
 from pathlib import Path
 cikti, kod = Path(sys.argv[1]), sys.argv[2]
-seti = json.loads(Path("cizim_seti.json").read_text(encoding="utf-8"))
+seti = json.loads(Path("../../kurallar/cizim/cizim_seti.json").read_text(encoding="utf-8"))
 eksik = [c["dosya"].format(kod=kod) for c in seti["ciktilar"] if not (cikti / c["dosya"].format(kod=kod)).is_file() or (cikti / c["dosya"].format(kod=kod)).stat().st_size == 0]
 ozet = json.loads((cikti / f"{kod}.ozet.json").read_text(encoding="utf-8")) if not eksik else {}
 print(f"çizim seti: {len(seti['ciktilar']) - len(eksik)} / {len(seti['ciktilar'])} çıktı" + (f" · eksik: {', '.join(eksik)}" if eksik else f" · IFC {ozet['sema']}, şema hatası {ozet['sema_hatasi']}"))

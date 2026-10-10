@@ -2,7 +2,7 @@
 
 Kaynak: Lokman, 7 Ekim 2026 07:45. "Çizimlerin bu halini çok beğendim burada kalalım sadece açıklamalar kısmını düzelteceğiz"; "çizimler persfektifler çok güzel olmuş bunları kurala ekle paftadaki açıklamaları düzelteceğiz". Onaylanan set, 6–7 Ekim kör testinde (KT-01) bir çelik projenin DWG ve SKP'sinden üretilen çizimlerdir (Lokman, 6 Ekim 21:22: "plan, görünüşler, IFC persfektifler şeklinde").
 
-Standardın kendisi veridir: `deneme/2026-10-06_kor_test/cizim_seti.json`. Bu belge onu anlatır.
+Standardın kendisi veridir: kural kitabında `kurallar/cizim/cizim_seti.json` (10 Ekim 2026'ya kadar `deneme/2026-10-06_kor_test/cizim_seti.json`). Bu belge onu anlatır.
 
 ## Kural
 

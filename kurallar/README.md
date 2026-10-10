@@ -1,0 +1,71 @@
+# Kural kitabı
+
+Portman'ın kural kitabı tektir; bütün modeller için geçerlidir. Kurallar veridir: kod onları okur ve uygular. LLM kural uygulamaz, saymaz, çizmez (K05: LLM anlar, kod karar verir). Her kuralın yanında kaynağı (Lokman'ın cümlesi ve tarihi; mühendis; gerçek liste; Excel motoru) ve durumu yazar. Kural değişince sürüm artar. Eski sürümler `liste/setler/` altında durur ve o günkü listeyi bayt bayt yeniden üretir.
+
+Lokman, 10 Ekim 2026 10:18: "artık bu çizim kurallarına her seferinde nasıl çağıracaksan ona göre klasörle". Klasörler bu yüzden, her talepte okundukları sıraya göre ayrıldı (10 Ekim 2026). Kurallar önce deneme klasörlerinde duruyordu (`deneme/2026-10-03_yukleme/kurallar.json` ve öteki üç dosya). İçerikleri değişmeden buraya taşındılar; taşımadan sonra bütün çıktılar bayt bayt aynı.
+
+## Kural kitabı ve model
+
+**Kural**, her modelde aynı geçerli olan cümledir. Örnekler: "çelikte veranda tavanı Boardex", "her saçak köşesine bir iniş".
+
+**Model** (Yapı Tanımı) ise bir projenin kendisidir: duvarlar, mahaller, kapı ve pencereler, çatı düzlemleri. Her model ayrı bir dosyadır. Kod, aynı kural kitabını hangi tanıma uygularsa o modelin çizimini ve listesini çıkarır.
+
+Bugün modeller deneme klasörlerinde duruyor:
+- Ç8201: `deneme/2026-10-02_celik/C8201.json`; aynı modelin 0.5 sürümü `deneme/2026-10-06_kor_test/C8201_05.json`.
+- Kör test projeleri: `deneme/2026-10-0x_kor_test*/tanim/`.
+
+Tanımda o projenin teknik özelliklerinden gelen birkaç seçim de yazılıdır: duvar profili, kaplama kalınlığı, saçak. Hedef şu: tanım yalnız standarttan farklı olanı yazsın, standart bu kitaptan okunsun.
+
+## Her talepte çağrı sırası
+
+| # | Adım | Kim | Okunan | Çıktı |
+|---|---|---|---|---|
+| 1 | Bayinin mesajını anlamak | Beyin (LLM) | konuşma ve katalog | iş emri: model, seçenekler, değişiklikler; anlaşılmayan yer bayiye sorulur |
+| 2 | Modeli kurmak | Motor (kod) | model tanımı, `model/duvar_tipleri.json`, `model/secenekler/` | duvarlar, kaplamalar, açıklıklar, çatı |
+| 3 | Çizim seti | Motor | `cizim/cizim_seti.json` | plan, çatı planı, dört görünüş, pafta, IFC, perspektifler |
+| 4 | Metraj ve yükleme listesi | Motor | `liste/kurallar.json` | yükleme listesi (çelikte yöntem A, prefabrikte yöntem B) |
+| 5 | Bayinin standardı | Motor | `bayi/<bayi>.json` | bayinin standardına göre süzülmüş liste |
+| 6 | Bayiye cevap | Beyin (LLM) | 2–5'in çıktıları | mesaj ve dosyalar; sayılar koddan |
+
+`model/duvar_tipleri.json` bugün Ç8201'in çiziminde ve metrajında okunuyor (`deneme/2026-10-02_celik/`, `deneme/2026-10-03_yukleme/girdi_uret.py`). Genel motor (`deneme/2026-10-06_kor_test/`) duvar sınıflarını şimdilik tanımdan okuyor.
+
+## Klasörler
+
+| Klasör | İçerik |
+|---|---|
+| `model/duvar_tipleri.json` | Baz paketin duvar tipleri: katmanlar, karkas 80 ve 140 mm, kaplamalar. Duvar kalınlığı katmanların toplamı |
+| `model/secenekler/` | Değişiklik operatörleri: model tanımı değişmeden paket farkını uygular. Örnek `dis_karkas_140.json` (Lokman, 3 Ekim 2026 11:49: "dışlar 140'lık") |
+| `cizim/cizim_seti.json` | Çizim setinin içeriği (Lokman onayladı, 7 Ekim 2026 07:45). Anlatımı `docs/sartname/cizim_seti.md` |
+| `liste/kurallar.json` | Metraj ve yükleme listesi kuralları; her anahtarda `deger`, `durum`, `kaynak`. Sürümü `sema` alanında |
+| `liste/setler/` | Eski sürümler (0.12–). Bir set `PORTMAN_KURALLAR` ortam değişkeniyle seçilir (`deneme/2026-10-03_yukleme/kural.py`) |
+| `bayi/ornek.json` | Bayi standardı örneği: listeye giren gruplar, çatı yöntemi. Gerçek bayi, numara ya da ad yok |
+
+**Sıradaki:** pafta kuralları `cizim/` altına girecek: makas, dere ve panel yerleşimi, kesim planı. Lokman, 10 Ekim 2026: "Zaten üretim dosyası vermeyeceğiz sen kendin oluşturacaksın paftayı bunları sana örnek olarak eğitimin için atıyorum". Kurallar örnek projelerden çıkarılacak; o projelerin paftaları kuralların sınavı olacak.
+
+## Kural nasıl eklenir
+
+1. **Kaynak:** Lokman'ın cevabı, ya da kör testte gerçek listeyle çıkan bir fark.
+2. **Yazım:** Kural dosyasına bir anahtar olarak yazılır: değer, durum ve kaynak. Kaynakta cevap yazıldığı gibi, tarih ve saatiyle durur.
+3. **Kod:** Yeni davranış o anahtara bağlanır. Anahtar yoksa eski davranış sürer; böylece eski setler eski çıktıları verir.
+4. **Sürüm:** Sürüm artar; önceki set `liste/setler/` altına dondurulur.
+5. **Sınav:** Kör test projeleri yeniden çözülür. Önce tutan satır bozulmamalıdır. Eski setler eski çıktıları bayt bayt vermelidir.
+
+Örnek projeler LLM'i eğitmez. LLM sohbetten sonra hiçbir şey hatırlamaz. Kalıcı olan bu kitaptır ve testlerdir: her örnekten kural çıkar, örnek de teste dönüşür.
+
+**Durum değerleri:**
+- `lokman`: Lokman söyledi.
+- `muhendis`: mühendis söyledi.
+- `excel`: yükleme listesi çalışma kitabındaki formül.
+- `motor`: Excel hesaplama motorundaki formül.
+- `liste`: gerçek listeden okundu.
+- `uydurma`: listeye uyduruldu; teyit bekliyor.
+- `varsayim`: varsayım.
+- `soru`: cevap bekliyor.
+
+Ayrıntısı ve bütün cevaplar `docs/sartname/yukleme_listesi_yontemi.md`'dedir.
+
+## Canlıya alınırken (ayrı onay gerekir)
+
+Kurallar sunucudaki veritabanında bir tabloya taşınacak; her değer kaynağı ve durumuyla gidecek. Sunucu kendi kopyasını okur, her talepte GitHub'dan kural çekmez. GitHub kitabın deposu ve geçmişidir.
+
+Kural değişince kod değişmez; yeni sürüm kurulur. Bugün hiçbiri canlıda değil.

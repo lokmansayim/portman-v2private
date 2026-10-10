@@ -3,14 +3,14 @@
 # A: çelik standardıyla (çatı ve tavan paneli). Elektrik sayıları projenin elektrik paftasından (`sonuc/KT03_pafta_sayimi.json`); iniş sayısı kuraldan.
 # Üretim dosyası yok: çelik ağırlığı motorun proje ortalamalarından, panel adetleri paftadaki yerleşimden (tanımda).
 # Tanım (`KT03.json`, `kt03_tanim_uret.py` ile üretilir) müşteri projesinin geometrisidir; depoya Lokman'ın onayıyla girer. Yolu verilir.
-# Kural seti 0.17'ye sabit: başka bir setle koşulursa durur (0.18 gelince 0.17 `kural_setleri/`e dondurulup buraya yazılır).
+# Kural seti 0.17'ye sabit: başka bir setle koşulursa durur (0.18 gelince 0.17 `kurallar/liste/setler/`e dondurulup buraya yazılır).
 # Geçici dosya yazmaz, hiçbir dosyayı silmez. Kullanım: bash kt03_kos.sh <KT03.json> [python]
 set -euo pipefail
 T=$(realpath "${1:?Kullanım: bash kt03_kos.sh <KT03.json> [python]}")
 PY=${2:-python3}
 cd "$(dirname "$0")"
-unset PORTMAN_KURALLAR      # güncel kural seti (kurallar.json; 9 Ekim 2026'da 0.17)
-"$PY" -c 'import json, sys; s = json.load(open("../2026-10-03_yukleme/kurallar.json", encoding="utf-8"))["sema"]; sys.exit(0 if "/0.17" in s else f"kt03_kos.sh 0.17 kural setiyle koşar; kurallar.json: {s}")'
+unset PORTMAN_KURALLAR      # güncel kural seti (kurallar/liste/kurallar.json; 9 Ekim 2026'da 0.17)
+"$PY" -c 'import json, sys; s = json.load(open("../../kurallar/liste/kurallar.json", encoding="utf-8"))["sema"]; sys.exit(0 if "/0.17" in s else f"kt03_kos.sh 0.17 kural setiyle koşar; kurallar.json: {s}")'
 G=../2026-10-06_kor_test/girdi_genel.py
 Y=../2026-10-03_yukleme/yukleme.py
 K="Yapı Tanımı 0.5 (üçüncü kör test projesi; montaj paftasından, üretim dosyası yok)"
