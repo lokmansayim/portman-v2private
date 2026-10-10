@@ -15,6 +15,8 @@ Lokman, 10 Ekim 2026 11:39: "seninle yazdığımız kurallar bu kadar farklı mo
 
 ## Çatı: varsayım (Lokman'a soruldu)
 
+**Düzeltme (Lokman, 10 Ekim 2026 13:33):** "cumba arkaya doğru uzanmıyor uzun kenardaki çatıya girip kalıyor yani kısa kenardaki çatı devam ediyor". Aşağıdaki varsayım geçersiz. Bu klasördeki liste ve çizim seti yenilenene kadar eski çatıyla. Düzeltmenin iki okuması çizildi ve Lokman'a soruldu. İkisinde de cumba ana çatının güney yüzüne girip biter; bütün yüzler %33 (cumbanın mahyası ana mahyadan 40 cm alçak). (1) Ana çatının doğu ucu kırma, doğu saçağı boydan boya (katalog görseli 2'deki gibi; öneri). (2) Ana çatı doğuda da kalkanla biter.
+
 Görsellerde: L biçimli beşik; batı blokta batıya bakan kalkan, doğu kanatta güneye bakan kalkan; doğu cephede saçak boydan boya (doğuda kalkan yok); iki mahya aynı yükseklikte birleşiyor. Kuzey cephe görsellerde yok.
 
 Varsayım: kanadın mahyası kuzey–güney boydan boya (güneyde ve kuzeyde kalkan); batı bloğun mahyası doğu–batı, kanadın mahyasına aynı kotta bağlanır, iki yanında birer vadi. Saçak 30 cm, saçak kotu 280 (makas üstü). Standart eğim %33'tür (Excel hesaplama motoru, Ç8201, kör test projeleri). Ama batı bloğun açıklığı (640 cm) kanadınkinden (400 cm) büyük: iki yüz de %33 olursa batı bloğun mahyası kanadınkinden 40 cm yüksek kalır ve doğuda bir kalkan gerekir; görsellerde yok. Mahyalar aynı kotta ancak eğimler farklıysa buluşur. Varsayım: batı blok %33, kanat %50,2 (mahya kotu 395,5). Görsellerde de kanadın kalkanı dik görünüyor. Öteki seçenek (kanat %33, batı blok %21,7; mahya 355,9) üreticideki `STANDART` sabitiyle denenir.
