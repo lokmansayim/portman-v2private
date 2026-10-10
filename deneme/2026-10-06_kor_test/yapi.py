@@ -27,6 +27,15 @@ KAPAT = 0.02      # cm; birbirine değen kutuların arasındaki kıl payı aral�
 TOL = 1e-3
 KENARLAR = ("alt", "sag", "ust", "sol")          # kutunun dört kenarı; dış normalleri (0,-1), (1,0), (0,1), (-1,0)
 NORMAL = {"alt": (0.0, -1.0), "sag": (1.0, 0.0), "ust": (0.0, 1.0), "sol": (-1.0, 0.0)}
+# Açık alanın örtüsü (mahalin `ortu` alanı; Ç8801, 10 Ekim 2026): "cati" çatının altında (alan yazılmamışsa da öyle: eski tanımlar);
+# "pergola" ya da "acik" çatısız. Çatısız alanın tavanı yoktur: tavan, tavan paneli, köşebent ve tavan omegası onu saymaz.
+ORTULER = ("cati", "pergola", "acik")
+ORTU_ADI = {"cati": "çatının altında", "pergola": "pergola", "acik": "üstü açık"}
+
+
+def catisiz(m: dict) -> bool:
+    """Mahal (ya da bölge) çatısız bir açık alan mı (tanımda `ortu: pergola | acik`)."""
+    return m.get("ortu") in ("pergola", "acik")
 
 
 def _kenar(kutu, ad):
@@ -140,6 +149,8 @@ def kur(tanim: dict) -> dict:
     dis_ham = next(p for p in ham if p.contains(uzak))
     bolgeler: dict[str, dict] = {}
     for m in tanim["mahaller"]:
+        if "ortu" in m and (m["ortu"] not in ORTULER or m["sinif"] != "veranda"):
+            raise SystemExit(f"Mahalin örtüsü ({m['ad']}): `ortu` yalnız verandada ve {', '.join(ORTULER)} olabilir; tanımda {m['ortu']}.")
         if m.get("poligon"):        # duvarla çevrili olmayan açık alan (ör. dikmeli açık veranda): dış bölgeden ayrılır
             g = Polygon(m["poligon"]).difference(kutle)
             dis_ham = dis_ham.difference(g)

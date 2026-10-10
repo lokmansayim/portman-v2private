@@ -167,6 +167,8 @@ Lokman, KT-03'ün sorularına 10 Ekim 10:18'de verdiği cevaplarla tek eğimli �
 
 **Kural seti 0.19 (10 Ekim 11:39):** kısa derede tek iniş ve alçak çatı köşesinin ayrımı (yalnız tek inişli küçük çatıda iniş yok). Bu projede böyle bir hat ya da köşe yok: listeler ve çizimler aynı, yalnız iniş satırının notu değişti. `kararlar_kos.sh tanim/KT01_duzeltilmis.json <python> 0.18` 11:21 tablosunu üretir (açıklamaları `kararlar_notlari_setleri/0.18.json`da).
 
+**Çatısız veranda (10 Ekim 2026; ilk örnek katalog modeli Ç8801, `../2026-10-10_c8801/`):** tanımda verandanın örtüsü yazılabilir (`ortu`: `cati`, `pergola` ya da `acik`; yazılmamışsa çatının altında; `yapi.py`). Çatısız verandanın tavanı yoktur: `girdi_genel.py` veranda tavanını, tavan panelini, köşebentteki veranda çevresini, tavan omegasını ve şilteyi onsuz hesaplar, çatı çeliğinin oturumundan düşer (bina alanına girer); `ifc_genel.py` tavan koymaz; `yukleme.py` yeşil tavan satırının formülünü ve notunu buna göre yazar. Kural değil, modelin anlatılabilmesi için. Alan yoksa hesap öncekiyle aynı (eski bütün çıktılar bayt bayt aynı). Pafta bilgi satırı, tanımda çatı kaplaması yazmıyorsa kural kitabındaki baz paket kaplamasını yazar (önceden "—"; eski tanımların hepsinde kaplama yazılı).
+
 ## Sağlama
 
 - `saglama.py`: Ç8201 genel hattan geçirildi; mahal alanı, çevresi, köşeleri, boşlukları, dış çevre, iç duvar boyu, çatı ölçüleri, OSB takviyesi ve iki yükleme listesinin (baz ve sandviç panel) bütün satırları 0.4 hattıyla aynı. Genel dizilim 840 kırma çatı denemesinde eski dizilimle aynı adedi verdi. Bu sağlama, KT-01 listesi dondurulmadan önce genel motorda üç hata buldurdu (köşe payının yazıldığı duvar, iç duvar boyunun ölçüsü, L birleşimde duvar yüzü); düzeltildi.

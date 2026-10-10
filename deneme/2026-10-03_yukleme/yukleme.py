@@ -351,6 +351,9 @@ def _hesapla(g: dict, k: dict) -> dict:
     vt_kural = (kural_degeri("veranda_tavani") or {}).get("celik") == "boardex"
     veranda_boardex = (g.get("veranda_m2") or {}).get("brut") if (sb.get("veranda_tavani") == "boardex" or vt_kural) else None
     vt_notu = (k.get("veranda_tavani") or {}).get("satir_notu") or "çelik konstrüksiyon binalarda veranda tavanı Boardex (Lokman, 7 Ekim 07:45)"
+    # çatısız veranda (genel model; Ç8801, 10 Ekim 2026): girdide `veranda_m2.catisiz`. Bütün verandalar çatısızsa tavan yok: yeşil tavan
+    # yalnız ıslak hacimdir ve "veranda tavanı ayrı yazmıyor" notu yazılmaz. Eski girdilerde alan yok: eski metin.
+    catisiz_v = bool((g.get("veranda_m2") or {}).get("catisiz")) and not veranda_boardex
     if veranda_boardex:
         ekle("Dış cephe kaplama", "Veranda tavanı (Boardex)", boardex_boyut, tavan(veranda_boardex * (1 + zb) / deg(k, "levha_m2", "boardex")), veranda_boardex,
              formul=f"veranda tavanı (dış ölçüyle) × {zb_carpan} ÷ 2,88", durum=k["veranda_tavani"]["durum"] if vt_kural else SABLON,
@@ -405,14 +408,15 @@ def _hesapla(g: dict, k: dict) -> dict:
         if a:
             ekle("İç cephe kaplama", f"Tavan alçıpan {ad}", "1200 × 2500",
                  tavan(a * (1 + deg(k, "zayiat", "tavan_alcipan")) / deg(k, "levha_m2", "alcipan")), a,
-                 formul="tavan alanı × 1,05 ÷ 3,0" + ("; yeşil = ıslak hacim + veranda tavanı" if tur == "yesil" and not veranda_boardex else "")
-                        + ("; yeşil = ıslak hacim" if tur == "yesil" and veranda_boardex else "") + ("; kiriş kaplaması dahil" if kiris_m2[tur] else ""),
+                 formul="tavan alanı × 1,05 ÷ 3,0" + ("; yeşil = ıslak hacim + veranda tavanı" if tur == "yesil" and not veranda_boardex and not catisiz_v else "")
+                        + ("; yeşil = ıslak hacim" if tur == "yesil" and (veranda_boardex or catisiz_v) else "") + ("; kiriş kaplaması dahil" if kiris_m2[tur] else ""),
                  durum=SABLON if tur == "yesil" and veranda_boardex and not vt_kural else ("lokman" if tur == "yesil" else "motor"),
                  not_=". ".join(x for x in (
                      f"odanın içinden geçen kirişin kaplaması ({tr(kiris_m2[tur])} m²) tavanda sayıldı (gerçek listedeki gibi)" if kiris_m2[tur] else None,
                      # kural veranda tavanını Boardex'e ayırıyor ama girdi veranda tavanını ayrı vermiyor: satırda yazsın (sessizce yeşilde kalmasın)
                      "veranda tavanı girdide ayrı yazmıyor: varsa yeşil alçıpanın içinde kaldı (çelikte Boardex olmalı: Lokman, 7 Ekim 07:45)"
-                     if tur == "yesil" and vt_kural and not veranda_boardex else None) if x) or None)
+                     if tur == "yesil" and vt_kural and not veranda_boardex and not catisiz_v else None,
+                     g["veranda_m2"]["not"] if tur == "yesil" and catisiz_v else None) if x) or None)
     for x in g.get("tavan_m2_ek") or []:                  # ek yapının tavanı ayrı satır
         ad = {"beyaz": "beyaz", "yesil": "yeşil"}[x["tur"]]
         ek_alan = x["alan_m2"] + ek_kiris.get((x["yapi"], x["tur"]), 0.0)
@@ -746,10 +750,14 @@ def _hesapla(g: dict, k: dict) -> dict:
              formul="müşteri isterse: kat adedi × 1", durum=k["cati_mudahale_kapagi"]["durum"])
     if c.get("cati_boyu_m") and c.get("bina_eni_m"):
         silte = c["cati_boyu_m"] * (c["bina_eni_m"] + deg(k, "silte_en_payi_m"))
+        sd = c.get("silte_dusulen_m2")                         # genel model: dikdörtgenin içinde kalan çatısız veranda (Ç8801); tavanı yok
+        if sd:
+            silte -= sd
         silte_kat = c.get("silte_kat", 1)
         si_mm = sb.get("cati_izolasyonu_kalinligi_mm")       # Eylül 2026 şablonu: "çatı izolasyonu 100 mm"; 2025 listelerinde "çatı şiltesi 80 mm"
         ekle("Çatı kaplamaları", f"Çatı izolasyonu {si_mm} mm" if si_mm else "Çatı şiltesi 80 mm", "9,6 m²/adet", silte_kat * tavan(silte / deg(k, "silte_adet_m2")), silte,
-             formul="çatı boyu × (bina eni + 0,20) ÷ 9,6" + (f" × {silte_kat} kat" if silte_kat > 1 else ""), durum=SABLON if si_mm else "uydurma",
+             formul=(f"(çatı boyu × (bina eni + 0,20) − çatısız veranda {tr(sd, 2)} m²) ÷ 9,6" if sd else "çatı boyu × (bina eni + 0,20) ÷ 9,6")
+                    + (f" × {silte_kat} kat" if silte_kat > 1 else ""), durum=SABLON if si_mm else "uydurma",
              not_=(f"Eylül 2026 şablonu: kalem 'çatı izolasyonu {si_mm} mm'; 2025 listelerinde 'çatı şiltesi 80 mm'. Adet formülü aynı "
                    "(şablonda: çatı taban alanı, 30 cm saçak payıyla, ÷ 9,6)") if si_mm else None)
 

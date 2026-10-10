@@ -258,7 +258,8 @@ class Uretici:
             self.qto(s, "Qto_SpaceBaseQuantities", {"NetFloorArea": round(b["alan_m2"], 3), "NetPerimeter": round(b["cevre_m"], 3), "Height": _m(h)})
             self.pset(s, "PortatifEv_Mahal", {"Islev": ", ".join(b.get("islev", [])), "Islak": bool(b.get("islak")), "KarkasYuzleriArasi_m2": round(b["ham_alan_m2"], 3),
                                               "CizimEtiketi_m2": float(b.get("etiket_m2") or 0.0), "IcKose": b["ic_kose"], "DisKose": b["dis_kose"]})
-            if b["sinif"] != "ek" and not pdz:              # tavan (ek yapıda ve çatı panelli açık alanda çatı panelinin altı)
+            # tavan (ek yapıda ve çatı panelli açık alanda çatı panelinin altı; çatısız verandada tavan yok: Ç8801, `ortu: pergola`)
+            if b["sinif"] != "ek" and not pdz and not yapi.catisiz(b):
                 tv = self.urun("IfcCovering", f"TAVAN_{b['ad']}", "CEILING")
                 self.temsil(tv, [self.prizma_xy(list(p.exterior.coords)[:-1], h - 1.25, h) for p in poligonlar], "tavan")
                 self.qto(tv, "Qto_CoveringBaseQuantities", {"NetArea": round(b["alan_m2"], 3)})

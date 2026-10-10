@@ -231,6 +231,10 @@ def metraj(y: dict, c: dict, kur: dict) -> dict:
         m["veranda_brut_m2"] += brut.area / 1e4
         m["veranda_brut_cevre_m"] += brut.length / 100
         m["veranda_brut_geo"][b["ad"]] = brut
+    # çatısız veranda (tanımda `ortu: pergola | acik`; Ç8801, 10 Ekim 2026: görsellerde verandanın üstünde çatı yok, ahşap pergola var): tavanı
+    # yoktur. Brüt ölçüsü ayrıca tutulur; tavan, tavan paneli, köşebent, tavan omegası ve çatı çeliğinin oturumu onu saymaz (`girdi`).
+    # Bina alanına (oturum) girer: katalogdaki 88 m² verandayı içerir. Tanımda alan yoksa sözlük boş: eski hesap.
+    m["catisiz_veranda"] = {ad: geo for ad, geo in m["veranda_brut_geo"].items() if yapi.catisiz(y["bolgeler"][ad])}
     # duvar boyları (karkas) ve panel adetleri
     grup = {}
     for d in y["duvarlar"]:
@@ -387,6 +391,10 @@ def metraj(y: dict, c: dict, kur: dict) -> dict:
         bx1, by1 = max(d["kutu"][2] for d in bina) + kd, max(d["kutu"][3] for d in bina) + kd
         m["cati"]["bina_eni_m"] = ((bx1 - bx0) if mahya_y else (by1 - by0)) / 100
         m["bina_olcu_cm"] = [bx1 - bx0, by1 - by0]
+        # şilte formülünün (çatı boyu × bina eni) dikdörtgeninde kalan çatısız veranda (Ç8801): orada tavan yok, şilte de yok
+        if m["catisiz_veranda"]:
+            from shapely.geometry import box as _box
+            m["cati"]["silte_dusulen_m2"] = sum(geo.intersection(_box(bx0, by0, bx1, by1)).area for geo in m["catisiz_veranda"].values()) / 1e4
     kaplama = ct.get("kaplama", kur["baz_paket_cati_kaplamasi"]["deger"])
     if kaplama not in ("sandvic_panel", "tek_kat_panel"):
         raise SystemExit(f"Genel model şimdilik yalnız sandviç panel ve tek kat panel kaplamasını hesaplar (tanımda: {KAPLAMA_ADI.get(kaplama, kaplama)}). "
@@ -396,7 +404,7 @@ def metraj(y: dict, c: dict, kur: dict) -> dict:
     m["tavan_omegasi"], m["tavan_omegasi_uyarisi"] = None, None
     if cati_yontemi(ct, kur) == "omega_asik":
         try:
-            m["tavan_omegasi"] = tavan_genel.omega_dizilimi(y, c, kur, m["veranda_brut_geo"])
+            m["tavan_omegasi"] = tavan_genel.omega_dizilimi(y, c, kur, {ad: geo for ad, geo in m["veranda_brut_geo"].items() if ad not in m["catisiz_veranda"]})
         except ValueError as e:      # dizilim yalnız `--sablon 2026` ile kullanılır; kurulamaması varsayılan hesabı (alan kuralı) engellemez
             m["tavan_omegasi_uyarisi"] = f"Tavan omegası dizilimi kurulamadı ({e}); alan kuralı kullanılır."
     # karkas modelindeki profil boyları (model verilmişse): grup grup toplam
@@ -438,7 +446,9 @@ def bilgi_satirlari(y: dict, c: dict, m: dict, kur: dict) -> tuple[list[str], li
     sol = [
         f"Dış ölçü: {sade(m['dis_olcu_cm'][0])} × {sade(m['dis_olcu_cm'][1])} cm · oturum {tr(m['oturum_m2'], 2)} m² (veranda"
         + (" ve müştemilat" if any(o["sinif"] == "ek" for o in m["odalar"]) else "") + " dahil)",
-        "Mahaller (kaplanmış yüzler arası): " + " · ".join(f"{o['ad']} {tr(o['alan_m2'])}" for o in m["odalar"]) + f" · veranda {tr(m['veranda_m2'])} m² · kapalı net {tr(kapali_net)} m²",
+        "Mahaller (kaplanmış yüzler arası): " + " · ".join(f"{o['ad']} {tr(o['alan_m2'])}" for o in m["odalar"]) + f" · veranda {tr(m['veranda_m2'])} m²"
+        + (" (çatısız: " + ", ".join(sorted({yapi.ORTU_ADI[y["bolgeler"][ad]["ortu"]] for ad in m["catisiz_veranda"]})) + ")" if m["catisiz_veranda"] else "")
+        + f" · kapalı net {tr(kapali_net)} m²",
         f"Duvar: karkas {sade(dis_d[0]['kalinlik'] * 10)} mm · dışta {sade(kap['dis']['kalinlik'])} cm, içte {tr(kap['ic']['kalinlik'], 2)} cm kaplama · yükseklik {t['kat_yuksekligi']} cm"
         + (" · " + ", ".join(f"{sinif_ad}: {v['adet']} panel" for sinif_ad, v in (("dış", m["duvar_gruplari"].get("dis")), ("iç", m["duvar_gruplari"].get("ic"))) if v)),
         (f"Pencereler: üst kot {sade(max(a['z1'] for a in pencere))} cm" if pencere else "Pencere yok")
@@ -454,7 +464,7 @@ def bilgi_satirlari(y: dict, c: dict, m: dict, kur: dict) -> tuple[list[str], li
     dz = m["dizilim"]
     sag = [
         f"Çatı: {ct.get('tip_adi') or ct['tip'].replace('besik_cumba', 'beşik + cumba').replace('kirma', 'kırma (dört omuz)')} · {len(mc['duzlemler'])} düzlem ({egimler})",
-        f"Yöntem: {'B · tavan omegası ve aşık' if cati_yontemi(ct, kur) == 'omega_asik' else 'A · çatı ve tavan paneli'} · kaplama: {KAPLAMA_ADI.get(ct.get('kaplama'), '—')} · saçak {ct.get('sacak', 30)} cm · topuk {ct.get('topuk', 10)} cm",
+        f"Yöntem: {'B · tavan omegası ve aşık' if cati_yontemi(ct, kur) == 'omega_asik' else 'A · çatı ve tavan paneli'} · kaplama: {KAPLAMA_ADI.get(ct.get('kaplama', kur['baz_paket_cati_kaplamasi']['deger']), '—') + ('' if 'kaplama' in ct else ' (baz paket)')} · saçak {ct.get('sacak', 30)} cm · topuk {ct.get('topuk', 10)} cm",
         f"Çatı yüzeyi {tr(mc['yuzey_m2'])} m² (plan {tr(mc['plan_m2'])} m²) · mahya kotu {tr(max(k[2] for d in c['duzlemler'] for k in d['ucboyut']), 0)} cm (makas üstü)",
         f"Saçak {tr(mc['sacak_m'], 2)} m · mahya {tr(mc['mahya_m'], 2)} m · kırma {tr(mc['kirma_m'], 2)} m · vadi {tr(mc['vadi_m'], 2)} m · alın (kalkan kenarı) {tr(mc['alin_m'], 2)} m · duvar dibi {tr(mc['duvar_dibi_m'], 2)} m",
         "Kaplama dizilimi: " + " · ".join(f"L {round(b * 10)}: {n}" for b, n in dz["boy_adet"].items()) + f" = {dz['adet']} panel ({sade(dz['kapatma_cm'])} cm kapatır)",
@@ -614,6 +624,12 @@ def girdi(y: dict, c: dict, m: dict, kur: dict, kaynak: str) -> dict:
     # veranda tavanı (Boardex ya da yeşil alçıpan): 0.18'de çatı panelli veranda ve sundurmanın tavanı çatının planıyla, saçağıyla (Lokman, 10 Ekim 2026)
     pk_ = (kur.get("panel_cati_kenarlari") or {}).get("deger")
     veranda_tavani = (m["veranda_brut_m2"] - pv_m2 + mc["panelli_plan_m2"]) if pk_ and pv and pk_["acik_alan"]["tavan"] == "cati_plani" else m["veranda_brut_m2"]
+    # çatısız veranda (Ç8801): tavanı yok; tavan, tavan paneli, köşebent, tavan omegası ve çatı çeliğinin oturumundan düşülür (eski tanımlarda 0)
+    cv = m["catisiz_veranda"]
+    cv_m2 = sum(geo.area for geo in cv.values()) / 1e4
+    cv_cevre = sum(geo.length for geo in cv.values()) / 100
+    if cv:
+        veranda_tavani -= cv_m2
     cp_prof, cp_pb, cp_mn = model("cati_paneli", cp_adet, None, f"80x45x{ev['cati']}") if mc["panelli_plan_m2"] else (None, {}, "")
     # modeldeki öteki gruplar (`celik_modeli.ek_satirlar`: {grup, ad, not}): her biri ayrı satır, profil ve boy modelden (KT-02, 9 Ekim 2026:
     # kırma uçlarının çatı panelleri, veranda destekleri, 1,5 mm kiriş). Bir kiriş bu gruplardan birine yazılmışsa grubun panel adedi o kirişlerin sayısıdır.
@@ -641,11 +657,12 @@ def girdi(y: dict, c: dict, m: dict, kur: dict, kaynak: str) -> dict:
                    **({} if tahmin else {"adet": len(kirisler), "not": "kiriş boyu ve adedi modelden (" + ", ".join(k["ad"] for k in kirisler) + ")"}),
                    **kiris_pb} if kirisler else None),
         "cati": {"tip": ct["tip"], "profil": makas_prof, "plan_m2": round(mc["makasli_plan_m2"], 2),
-                 "oturum_m2": round(m["oturum_m2"] - ((pv_m2 if pv else m["ek_oturum_m2"]) if celik_a and yontem == "panel" and mc["panelli_plan_m2"] else 0.0), 2),
+                 "oturum_m2": round(m["oturum_m2"] - ((pv_m2 if pv else m["ek_oturum_m2"]) if celik_a and yontem == "panel" and mc["panelli_plan_m2"] else 0.0)
+                                    - (cv_m2 if cv else 0.0), 2),
                  **({"panel_adedi": makas_adedi, "not": f"plan: makaslı çatının saçak dahil planı; adet modelden ({makas_adedi} makas)"} if makas_adedi else {}),
                  **makas_pb},
         "tavan_paneli_m2": (round(sum(o["alan_m2"] for o in m["odalar"] if not (celik_a and o["cati_paneli_altinda"])) + m["veranda_brut_m2"]
-                                  - (pv_m2 if celik_a else 0.0), 2) if yontem == "panel" else None),
+                                  - (pv_m2 if celik_a else 0.0) - (cv_m2 if cv else 0.0), 2) if yontem == "panel" else None),
         "cati_paneli_m2": (round(sum(dz["yuzey_m2"] for dz in mc["duzlemler"] if dz["ust_yapi"] != "cati_paneli") if celik_a else mc["yuzey_m2"], 2)
                            if yontem == "panel" else None),
         "ek_cati_paneli": (({"ad": f"Çatı paneli ({pv_adi} çatıları)", "oturum_m2": round(pv_m2, 2), "plan_m2": round(mc["panelli_plan_m2"], 2), "adet": cp_adet,
@@ -717,7 +734,8 @@ def girdi(y: dict, c: dict, m: dict, kur: dict, kaynak: str) -> dict:
                             "brut_m2": round(m["osb_takviye"]["brut_m2"], 2), "bosluk_m2": round(m["osb_takviye"]["bosluk_m2"], 3), "net_m2": round(m["osb_takviye"]["net_m2"], 2)},
             "osb_takviye_teyit": t["osb_takviye"].get("teyit")} if m.get("osb_takviye") else {}),
         "yalitim": {k: round(v, 3) for k, v in m["yalitim"].items()},
-        "veranda_tavan_cevresi_m": round(m["veranda_brut_cevre_m"], 2) if veranda else None,
+        "veranda_tavan_cevresi_m": ((round(m["veranda_brut_cevre_m"] - cv_cevre, 2) if m["veranda_brut_cevre_m"] - cv_cevre > 1e-6 else None) if cv else
+                                    round(m["veranda_brut_cevre_m"], 2)) if veranda else None,
         "elektrik_odalar": elektrik_odalar if all(o["islev"] for o in elektrik_odalar) else None,
         "tavan_m2": {"beyaz": round(sum(o["alan_m2"] for o in odalar if o["tur"] == "beyaz" and "yapi" not in o), 2),
                      "yesil": round(sum(o["alan_m2"] for o in odalar if o["tur"] == "yesil" and "yapi" not in o) + veranda_tavani, 2)},
@@ -725,11 +743,19 @@ def girdi(y: dict, c: dict, m: dict, kur: dict, kaynak: str) -> dict:
         **({"veranda_m2": {"brut": round(veranda_tavani, 2), "net": round(m["veranda_m2"], 2),
                            "not": ("tavan ve köşebent hesabında brüt (dış ölçüyle) alınır; 0.4'teki gibi" if veranda_tavani == m["veranda_brut_m2"] else
                                    f"tavan: çatı panelli {pv_adi} çatının planıyla, saçağıyla ({tr(mc['panelli_plan_m2'], 2)} m²; Lokman, 10 Ekim 2026); öteki veranda "
-                                   f"alanları dış ölçüyle. Dış ölçüyle {tr(m['veranda_brut_m2'], 2)} m²")}} if veranda else {}),
+                                   f"alanları dış ölçüyle. Dış ölçüyle {tr(m['veranda_brut_m2'], 2)} m²")}} if veranda and not cv else {}),
+        # çatısız veranda (Ç8801): tavanı yok; bina alanına girer
+        **({"veranda_m2": {"brut": round(veranda_tavani, 2) if abs(veranda_tavani) > 1e-9 else 0.0, "net": round(m["veranda_m2"], 2), "catisiz": sorted(cv),
+                           "not": (" ve ".join(sorted(cv)) + f" çatısız ({', '.join(sorted({yapi.ORTU_ADI[y['bolgeler'][ad]['ortu']] for ad in cv}))}): tavanı yok; "
+                                   f"tavan, köşebent, tavan paneli ve tavan omegası hesabına girmez, çatı çeliğinin oturumundan düşülür "
+                                   f"(dış ölçüyle {tr(cv_m2, 2)} m²); bina alanına girer")
+                                  + (f". Çatının altındaki veranda tavanı dış ölçüyle {tr(veranda_tavani, 2)} m²" if abs(veranda_tavani) > 1e-9 else "")}}
+           if veranda and cv else {}),
         # tavan omegasının alanı: makasların altındaki bütün mahaller (ek yapı dahil) + veranda; çatı paneli altındaki mahal hariç.
         # `tavan_m2` ek yapıyı içermediği için, ek yapı ya da çatı panelli mahal varsa ayrıca yazılır.
         # Çatı panelli veranda ve sundurma da (ek yapı yokken; KT-03) tavan omegasının alanına girmez.
-        **({"tavan_omegasi_m2": round(sum(o["alan_m2"] for o in m["odalar"] if not o["cati_paneli_altinda"]) + m["veranda_brut_m2"] - pv_m2, 2)}
+        **({"tavan_omegasi_m2": round(sum(o["alan_m2"] for o in m["odalar"] if not o["cati_paneli_altinda"]) + m["veranda_brut_m2"] - pv_m2
+                                      - (cv_m2 if cv else 0.0), 2)}
            if any(o["cati_paneli_altinda"] or o["sinif"] == "ek" for o in m["odalar"]) or pv else {}),
         **({"tavan_omegasi_haric": f"çatı panelli {pv_adi}"} if pv else {}),
         # tavan omegası dizilimi (yöntem B; Eylül 2026 projesinin paftasındaki gibi, her gözde ilk hat duvar yüzünde): hatların toplam boyu.
@@ -767,6 +793,7 @@ def girdi(y: dict, c: dict, m: dict, kur: dict, kaynak: str) -> dict:
                         "tasma_cm": dz["tasma_cm"], "kesim_payi_mm": dz["kesim_payi_cm"] * 10, "tam_boy": dz["tam_boy"], "cift": dz["cift"], "tek": dz["tek"], "karma": dz["karma"],
                         "panel_m2": round(dz["panel_m2"], 2), "uzatma": dz["uzatma"], "taban": dz["taban"]},
             "cati_boyu_m": round(mc.get("cati_boyu_m", 0), 3) or None, "bina_eni_m": round(mc.get("bina_eni_m", 0), 3) or None,
+            **({"silte_dusulen_m2": round(mc["silte_dusulen_m2"], 2)} if mc.get("silte_dusulen_m2") else {}),      # çatısız veranda (Ç8801)
             "sacak_alti": "sac" if yontem == "omega_asik" else ct.get("sacak_alti", "boardex"),
             **({"sacak_alti_eni_m": ct.get("sacak", 30) / 100} if yontem == "panel" else {"sacak_omegasi": "Saçak omegası"}),
             **({"sacak_yuzu_m2": round(mc["sacak_yuzu_m2"], 2)} if yontem == "panel" and ct.get("sacak_yuzu", "boardex") == "boardex" else {}),
