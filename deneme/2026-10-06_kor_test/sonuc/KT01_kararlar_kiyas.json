@@ -2,11 +2,11 @@
  "ozet": {
   "b": {
    "gercek_satir": 98,
-   "ayni": 63
+   "ayni": 55
   },
   "a": {
    "gercek_satir": 98,
-   "ayni": 60
+   "ayni": 52
   }
  },
  "onceki": {
@@ -16,22 +16,22 @@
   "pafta": 71
  },
  "fark_turleri": {
-  "karar": 14,
+  "karar": 22,
   "yöntem": 3,
   "elle": 16,
   "ölçü": 2,
   "soru": 0
  },
- "karardan_degisen_satir": 20,
+ "karardan_degisen_satir": 25,
  "degisen": {
-  "karar": 14,
+  "karar": 19,
   "pafta": 6
  },
  "yeni_tutan": {
-  "toplam": 15,
+  "toplam": 10,
   "pafta": 5,
-  "inis": 5,
-  "bozulan": 0
+  "inis": 0,
+  "bozulan": 3
  },
  "celik_kg": {
   "gercek": 1936.87,
@@ -81,6 +81,20 @@
    "kalem": "Alın kapama",
    "boyut": "L 2500",
    "adet": 10,
+   "kg": null,
+   "durum": "lokman"
+  },
+  {
+   "kalem": "Özel büküm saçak sacı",
+   "boyut": "L 2500",
+   "adet": 3,
+   "kg": null,
+   "durum": "lokman"
+  },
+  {
+   "kalem": "Sundurma kapama",
+   "boyut": "L 2500",
+   "adet": 3,
    "kg": null,
    "durum": "lokman"
   }
@@ -690,19 +704,19 @@
     10.887,
     1.144
    ],
-   "b": 11,
+   "b": 10,
    "b_kg": null,
    "b_ayni": false,
-   "a": 11,
+   "a": 10,
    "a_kg": null,
    "a_ayni": false,
    "duzeltilmis": 11,
    "duzeltilmis_ayni": false,
    "onceki_pafta": 11,
-   "karar": null,
+   "karar": "Tek eğimli çatı panelli çatı beş fotoğraftaki gibi (Lokman, 10 Ekim 2026): müştemilatın çatı panelinin saçak ve alın yüzü kapamayla kapanır, Boardex şeridinden yalnız alt payı kalır: 12,20 m × (0,10 + 0,15) → 12,20 m × 0,15; 11 → 10.",
    "fark": "elle: listede müştemilat duvarları 2,70 m ile çarpılmış; modelde 2,25–2,50 m. Müştemilat göz ardı edilecek (C3).",
    "fark_turu": "elle",
-   "karar_turu": null
+   "karar_turu": "karar"
   },
   {
    "ad": "Veranda tavanı (Boardex)",
@@ -1431,19 +1445,19 @@
    "gercek_kaba": [
     6.437
    ],
-   "b": 7,
+   "b": 8,
    "b_kg": null,
-   "b_ayni": true,
-   "a": 7,
+   "b_ayni": false,
+   "a": 8,
    "a_kg": null,
-   "a_ayni": true,
+   "a_ayni": false,
    "duzeltilmis": 7,
    "duzeltilmis_ayni": true,
    "onceki_pafta": 7,
-   "karar": null,
-   "fark": null,
-   "fark_turu": null,
-   "karar_turu": null
+   "karar": "Müştemilatın panel çatısının saçağında da dere (Lokman, 10 Ekim 2026: beş fotoğraftaki gibi; KT-01'in yapılmış halinde de müştemilatın saçağında dere var): 24,46 + 5,46 = 29,92 m ÷ 3,8 → 8.",
+   "fark": "karar: listede ve dere paftasında müştemilatta dere yok (7); Lokman'ın 10 Ekim kararıyla var.",
+   "fark_turu": "karar",
+   "karar_turu": "karar"
   },
   {
    "ad": "Dere iniş borusu",
@@ -1460,18 +1474,18 @@
    "gercek": 7,
    "gercek_kg": null,
    "gercek_kaba": [],
-   "b": 7,
+   "b": 9,
    "b_kg": null,
-   "b_ayni": true,
-   "a": 7,
+   "b_ayni": false,
+   "a": 9,
    "a_kg": null,
-   "a_ayni": true,
+   "a_ayni": false,
    "duzeltilmis": 5,
    "duzeltilmis_ayni": false,
    "onceki_pafta": 7,
-   "karar": "İniş kuralı (C4; 9 m eşiği 8 Ekim 00:45'te onaylandı): her saçak köşesine bir, boyu 9 m'yi geçen dere hattının ortasına bir: 5 köşe + 2 orta = 7.",
-   "fark": null,
-   "fark_turu": null,
+   "karar": "İniş kuralı (C4; 9 m eşiği 8 Ekim 00:45'te onaylandı): her saçak köşesine bir, boyu 9 m'yi geçen dere hattının ortasına bir; 10 Ekim 2026'dan beri müştemilatın saçağında da dere: 7 köşe + 2 orta = 9.",
+   "fark": "karar: listede ve paftada 7 (müştemilatta dere yok); Lokman'ın 10 Ekim kararıyla müştemilatın deresine iki iniş.",
+   "fark_turu": "karar",
    "karar_turu": "karar"
   },
   {
@@ -1489,18 +1503,18 @@
    "gercek": 7,
    "gercek_kg": null,
    "gercek_kaba": [],
-   "b": 7,
+   "b": 9,
    "b_kg": null,
-   "b_ayni": true,
-   "a": 7,
+   "b_ayni": false,
+   "a": 9,
    "a_kg": null,
-   "a_ayni": true,
+   "a_ayni": false,
    "duzeltilmis": 5,
    "duzeltilmis_ayni": false,
    "onceki_pafta": 7,
-   "karar": "İniş sayısına bağlı (7).",
-   "fark": null,
-   "fark_turu": null,
+   "karar": "İniş sayısına bağlı (9).",
+   "fark": "karar: listede 7 (müştemilatta dere ve iniş yok).",
+   "fark_turu": "karar",
    "karar_turu": "karar"
   },
   {
@@ -1518,19 +1532,19 @@
    "gercek": 4,
    "gercek_kg": null,
    "gercek_kaba": [],
-   "b": 4,
+   "b": 6,
    "b_kg": null,
-   "b_ayni": true,
-   "a": 4,
+   "b_ayni": false,
+   "a": 6,
    "a_kg": null,
-   "a_ayni": true,
+   "a_ayni": false,
    "duzeltilmis": 4,
    "duzeltilmis_ayni": true,
    "onceki_pafta": 4,
-   "karar": null,
-   "fark": null,
-   "fark_turu": null,
-   "karar_turu": null
+   "karar": "Müştemilatın deresinin iki serbest ucu (Lokman, 10 Ekim 2026): 4 → 6.",
+   "fark": "karar: listede 4 (müştemilatta dere yok).",
+   "fark_turu": "karar",
+   "karar_turu": "karar"
   },
   {
    "ad": "Açık dirsek",
@@ -1547,18 +1561,18 @@
    "gercek": 14,
    "gercek_kg": null,
    "gercek_kaba": [],
-   "b": 14,
+   "b": 18,
    "b_kg": null,
-   "b_ayni": true,
-   "a": 14,
+   "b_ayni": false,
+   "a": 18,
    "a_kg": null,
-   "a_ayni": true,
+   "a_ayni": false,
    "duzeltilmis": 10,
    "duzeltilmis_ayni": false,
    "onceki_pafta": 14,
-   "karar": "İniş sayısına bağlı (7 × 2).",
-   "fark": null,
-   "fark_turu": null,
+   "karar": "İniş sayısına bağlı (9 × 2).",
+   "fark": "karar: listede 14 (müştemilatta dere ve iniş yok).",
+   "fark_turu": "karar",
    "karar_turu": "karar"
   },
   {
@@ -1576,18 +1590,18 @@
    "gercek": 7,
    "gercek_kg": null,
    "gercek_kaba": [],
-   "b": 7,
+   "b": 9,
    "b_kg": null,
-   "b_ayni": true,
-   "a": 7,
+   "b_ayni": false,
+   "a": 9,
    "a_kg": null,
-   "a_ayni": true,
+   "a_ayni": false,
    "duzeltilmis": 5,
    "duzeltilmis_ayni": false,
    "onceki_pafta": 7,
-   "karar": "İniş sayısına bağlı (7).",
-   "fark": null,
-   "fark_turu": null,
+   "karar": "İniş sayısına bağlı (9).",
+   "fark": "karar: listede 7 (müştemilatta dere ve iniş yok).",
+   "fark_turu": "karar",
    "karar_turu": "karar"
   },
   {
@@ -1605,18 +1619,18 @@
    "gercek": 14,
    "gercek_kg": null,
    "gercek_kaba": [],
-   "b": 14,
+   "b": 18,
    "b_kg": null,
-   "b_ayni": true,
-   "a": 14,
+   "b_ayni": false,
+   "a": 18,
    "a_kg": null,
-   "a_ayni": true,
+   "a_ayni": false,
    "duzeltilmis": 10,
    "duzeltilmis_ayni": false,
    "onceki_pafta": 14,
-   "karar": "İniş sayısına bağlı (7 × 2).",
-   "fark": null,
-   "fark_turu": null,
+   "karar": "İniş sayısına bağlı (9 × 2).",
+   "fark": "karar: listede 14 (müştemilatta dere ve iniş yok).",
+   "fark_turu": "karar",
    "karar_turu": "karar"
   },
   {
@@ -1634,19 +1648,19 @@
    "gercek": 56,
    "gercek_kg": null,
    "gercek_kaba": [],
-   "b": 56,
+   "b": 64,
    "b_kg": null,
-   "b_ayni": true,
-   "a": 56,
+   "b_ayni": false,
+   "a": 64,
    "a_kg": null,
-   "a_ayni": true,
+   "a_ayni": false,
    "duzeltilmis": 56,
    "duzeltilmis_ayni": true,
    "onceki_pafta": 56,
-   "karar": null,
-   "fark": null,
-   "fark_turu": null,
-   "karar_turu": null
+   "karar": "Dere adedi × 8: müştemilatın deresiyle 8 × 8 = 64 (Lokman, 10 Ekim 2026).",
+   "fark": "karar: listede 56 (7 × 8; müştemilatta dere yok).",
+   "fark_turu": "karar",
+   "karar_turu": "karar"
   },
   {
    "ad": "Melamin kapı (80'lik kanat)",
@@ -2807,6 +2821,22 @@
    "fark": null,
    "fark_turu": null,
    "karar_turu": null
+  }
+ ],
+ "b_listesinde_gercek_listede_olmayan": [
+  {
+   "kalem": "Özel büküm saçak sacı",
+   "boyut": "L 2500",
+   "adet": 3,
+   "durum": "lokman",
+   "neden": "karar: müştemilatın panel çatısının saçağında, derenin altında (Lokman, 10 Ekim 2026: beş fotoğraftaki gibi): 5,46 m ÷ (2,5 − 0,20) → 3. KT-01'in listesinde yok."
+  },
+  {
+   "kalem": "Sundurma kapama",
+   "boyut": "L 2500",
+   "adet": 3,
+   "durum": "lokman",
+   "neden": "karar: müştemilatın panel çatısının eğik kenarlarında, sandviç panelin kenarını örter (Lokman, 10 Ekim 2026: \"adını sundurma kapama diyelim\"): 6,74 m ÷ (2,5 − 0,20) → 3. KT-01'in listesinde yok."
   }
  ],
  "inis_onayli": true

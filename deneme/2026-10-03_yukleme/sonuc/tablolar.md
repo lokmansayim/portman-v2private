@@ -203,6 +203,7 @@
 | Sıhhi tesisat | Klozet | takım | 1 | aynı | 1,0 ıslak hacim |  | motor |
 | Sıhhi tesisat | Banyo dolabı | takım | 1 | aynı | 1,0 ıslak hacim |  | motor |
 | Sıhhi tesisat | Banyo batarya grubu | takım | 1 | aynı | 1,0 ıslak hacim |  | motor |
+| Sıhhi tesisat | Taharet musluğu 20 mm | adet | 4 | aynı | 1,0 ıslak hacim |  | lokman |
 | Boya | Dış cephe boyası | kova 17,5 kg | 2 | aynı | 82,0 m² |  | motor |
 | Boya | İç cephe boyası | kova 17,5 kg | 2 | aynı | 82,0 m² |  | motor |
 | Boya | Tavan boyası | kova 17,5 kg | 1 | aynı | 82,0 m² |  | motor |

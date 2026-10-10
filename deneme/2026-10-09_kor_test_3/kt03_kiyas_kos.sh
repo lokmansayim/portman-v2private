@@ -1,16 +1,17 @@
 #!/usr/bin/env bash
 # KT-03 kıyası: düzeltilmiş tanımla (yalnız girdi hatalarımız düzeltildi) iki liste, Eylül 2026 katmanıyla B (bilgi), kural sorularının
 # "ne olur" listesi (bilgi) ve gerçek listeyle tablo.
-# Dondurulan listeler (sonuc/KT03_{A,B}_yukleme.json) değişmez; bu betik onlara yazmaz. Tanım: `KT03_duzeltilmis.json` (`kt03_tanim_duzeltilmis.py`
-# üretir; müşteri projesinin geometrisi, depoya Lokman'ın onayıyla girer); yolu verilir.
-# Kural seti 0.17'ye sabit (dondurulan listelerin seti). Geçici dosya yazmaz, hiçbir dosyayı silmez.
-# Kullanım: bash kt03_kiyas_kos.sh <KT03_duzeltilmis.json> [python]   Çıkış kodu: denetim sorunu varsa 1.
+# Dondurulan listeler (sonuc/KT03_{A,B}_yukleme.json) değişmez; bu betik onlara yazmaz. Tanım: `tanim/KT03_duzeltilmis.json` (`tanim/kt03_tanim_duzeltilmis.py`
+# üretir; 10 Ekim 2026'dan beri depoda, Lokman'ın onayıyla); yolu verilir.
+# Kural seti 0.17'ye sabit (dondurulan listelerin seti; `kurallar/liste/setler/0.17.json`): 10 Ekim 00:24 kıyası bayt bayt aynı çıkar.
+# Cevaplardan sonraki tablo güncel setle: kt03_cevaplar_kos.sh. Geçici dosya yazmaz, hiçbir dosyayı silmez.
+# Kullanım: bash kt03_kiyas_kos.sh tanim/KT03_duzeltilmis.json [python]   Çıkış kodu: denetim sorunu varsa 1.
 set -euo pipefail
-T=$(realpath "${1:?Kullanım: bash kt03_kiyas_kos.sh <KT03_duzeltilmis.json> [python]}")
+T=$(realpath "${1:?Kullanım: bash kt03_kiyas_kos.sh tanim/KT03_duzeltilmis.json [python]}")
 PY=${2:-python3}
 cd "$(dirname "$0")"
-unset PORTMAN_KURALLAR
-"$PY" -c 'import json, sys; s = json.load(open("../../kurallar/liste/kurallar.json", encoding="utf-8"))["sema"]; sys.exit(0 if "/0.17" in s else f"kt03_kiyas_kos.sh 0.17 kural setiyle koşar; kurallar.json: {s}")'
+export PORTMAN_KURALLAR="$(cd ../../kurallar/liste && pwd)/setler/0.17.json"   # 10 Ekim 2026 00:24 kıyası 0.17 kural setiyle (o günkü set)
+"$PY" -c 'import json, os, sys; s = json.load(open(os.environ["PORTMAN_KURALLAR"], encoding="utf-8"))["sema"]; sys.exit(0 if "/0.17" in s else f"kt03_kiyas_kos.sh 0.17 kural setiyle koşar; seçilen dosya: {s}")'
 "$PY" -c 'import json, sys; t = json.load(open(sys.argv[1], encoding="utf-8")); sys.exit(0 if t.get("duzeltmeler") else "Bu tanımda `duzeltmeler` alanı yok: düzeltilmiş tanımla koşulur.")' "$T"
 G=../2026-10-06_kor_test/girdi_genel.py
 Y=../2026-10-03_yukleme/yukleme.py

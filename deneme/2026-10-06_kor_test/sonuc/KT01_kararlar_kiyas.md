@@ -1,18 +1,18 @@
 # KT-01 · kararlardan sonra durum
 
-Lokman'ın 7 Ekim 2026 07:45 cevapları, 08:02 düzeltmeleri, 8 Ekim 00:45 ve 07:23 cevapları işlendikten sonra, gerçek listenin adetli her satırı güncel kural setinin (0.15) verdiği iki listeyle. Tablo `kararlar_kiyas.py` ile üretilir; elle düzeltilmez. Açıklamalar `kararlar_notlari.json`dan.
+Lokman'ın 7 Ekim 2026 07:45 cevapları, 08:02 düzeltmeleri, 8 Ekim 00:45 ve 07:23 cevapları ve 10 Ekim 2026 cevapları (tek eğimli çatı panelli çatılar "o 5 görseldeki gibi": müştemilatın panel çatısında da saçakta dere ve özel büküm saçak sacı, yanlarda sundurma kapama) işlendikten sonra, gerçek listenin adetli her satırı güncel kural setinin (0.18) verdiği iki listeyle. Tablo `kararlar_kiyas.py` ile üretilir; elle düzeltilmez. Açıklamalar `kararlar_notlari.json`dan.
 
 | Liste | Aynı satır | Ne demek |
 |---|---|---|
 | Düzeltilmiş (7 Ekim 03:46) | 48 / 98 | kararlardan önce: yalnız bizim hatalarımız düzeltilmişti |
-| Kararlardan sonra, aynı yöntemle (B) | 63 / 98 | güncel kurallar; proje yapıldığı gibi tavan omegası ve aşıkla; elektrik sayıları paftadan |
-| Kararlardan sonra, çelik standardıyla (A) | 60 / 98 | güncel kurallar; çatı ve tavan paneliyle: bu proje bugün sipariş edilse çıkacak liste |
+| Kararlardan sonra, aynı yöntemle (B) | 55 / 98 | güncel kurallar; proje yapıldığı gibi tavan omegası ve aşıkla; elektrik sayıları paftadan |
+| Kararlardan sonra, çelik standardıyla (A) | 52 / 98 | güncel kurallar; çatı ve tavan paneliyle: bu proje bugün sipariş edilse çıkacak liste |
 
-Aynı yöntemle farklı kalan 35 satır:
+Aynı yöntemle farklı kalan 43 satır:
 
 | Tür | Satır | Anlamı |
 |---|---|---|
-| karar | 14 | Lokman'ın kararı o listeden farklı |
+| karar | 22 | Lokman'ın kararı o listeden farklı |
 | yöntem | 3 | liste omega ve aşıklı yöntemle hazırlanmış; çelikte artık yok |
 | elle | 16 | listenin elle hesabı, yuvarlaması ya da elle dizilimi |
 | ölçü | 2 | ölçünün alındığı yüz (karar: bizdeki) |
@@ -30,6 +30,15 @@ Aynı yöntemle farklı kalan 35 satır:
 | Saçak yüzü için OUTWEAR Dış Cephe Levhası | 12,5 × 1200 × 2400 | 2 |  | muhendis |
 | Alın (kalkan kenarı) için OUTWEAR Dış Cephe Levhası | 12,5 × 1200 × 2400 | 2 |  | lokman |
 | Alın kapama | L 2500 | 10 |  | lokman |
+| Özel büküm saçak sacı | L 2500 | 3 |  | lokman |
+| Sundurma kapama | L 2500 | 3 |  | lokman |
+
+## Kararlardan sonra (B) gelen, gerçek listede olmayan satırlar
+
+| Kalem | Boyut | Adet | Durum | Neden |
+|---|---|---|---|---|
+| Özel büküm saçak sacı | L 2500 | 3 | lokman | karar: müştemilatın panel çatısının saçağında, derenin altında (Lokman, 10 Ekim 2026: beş fotoğraftaki gibi): 5,46 m ÷ (2,5 − 0,20) → 3. KT-01'in listesinde yok. |
+| Sundurma kapama | L 2500 | 3 | lokman | karar: müştemilatın panel çatısının eğik kenarlarında, sandviç panelin kenarını örter (Lokman, 10 Ekim 2026: "adını sundurma kapama diyelim"): 6,74 m ÷ (2,5 − 0,20) → 3. KT-01'in listesinde yok. |
 
 ## Satır satır
 
@@ -57,7 +66,7 @@ Aynı yöntemle farklı kalan 35 satır:
 | Saçak omegası | 10 | 11 | 11 ✗ | — |  | yöntem: çatı ve tavan paneli varsa saçak omegası kullanılmaz (C1 c). Kural prefabrik çalışılınca. |
 | **Dış cephe kaplama** | | | | | | |
 | Dış cephe Boardex: bina (duvarlar, veranda içi, makas alnı, baca) | 47 | 44 | 44 ✗ | 44 ✗ |  | elle: listede makas alnı için iki tam kalkan alınmış, dört satır ayrı ayrı yukarı yuvarlanmış (değişmedi). |
-| Dış cephe Boardex: müştemilat (duvarlar, çatı panelinin saçağı) | 13 | 11 | 11 ✗ | 11 ✗ |  | elle: listede müştemilat duvarları 2,70 m ile çarpılmış; modelde 2,25–2,50 m. Müştemilat göz ardı edilecek (C3). |
+| Dış cephe Boardex: müştemilat (duvarlar, çatı panelinin saçağı) | 13 | 11 | 10 ✗ | 10 ✗ | Tek eğimli çatı panelli çatı beş fotoğraftaki gibi (Lokman, 10 Ekim 2026): müştemilatın çatı panelinin saçak ve alın yüzü kapamayla kapanır, Boardex şeridinden yalnız alt payı kalır: 12,20 m × (0,10 + 0,15) → 12,20 m × 0,15; 11 → 10. | elle: listede müştemilat duvarları 2,70 m ile çarpılmış; modelde 2,25–2,50 m. Müştemilat göz ardı edilecek (C3). |
 | Veranda tavanı (Boardex) | 5 | — | 5 | 5 | Çelikte veranda tavanı her zaman Boardex (C1 j): 12,4 m² → 5 levha. |  |
 | Nem bariyeri: bina | 89 | 88 | 88 ✗ | 88 ✗ |  | ölçü: liste dış çevreyi karkas yüzünden alıyor; karar: bizdeki, kaplanmış yüz (C8). |
 | Nem bariyeri: müştemilat | 32 | 27 | 27 ✗ | 27 ✗ |  | elle: listede müştemilat duvarları 2,70 m ile çarpılmış. Müştemilat göz ardı edilecek (C3). |
@@ -84,14 +93,14 @@ Aynı yöntemle farklı kalan 35 satır:
 | Mahya bandı | 4 | 3 | 3 ✗ | 3 ✗ |  | karar: damlalık olmadığı için formülde terimi de yok (C1 g): 3. Listede damlalık terimiyle 4. |
 | Çatı izolasyonu | 10 | 10 | 10 | 10 |  |  |
 | **Dere** | | | | | | |
-| Metal dere | 7 | 7 | 7 | 7 |  |  |
-| Dere iniş borusu | 7 | 5 | 7 | 7 | İniş kuralı (C4; 9 m eşiği 8 Ekim 00:45'te onaylandı): her saçak köşesine bir, boyu 9 m'yi geçen dere hattının ortasına bir: 5 köşe + 2 orta = 7. |  |
-| Dere iniş aparatı | 7 | 5 | 7 | 7 | İniş sayısına bağlı (7). |  |
-| Dere kapağı | 4 | 4 | 4 | 4 |  |  |
-| Açık dirsek | 14 | 10 | 14 | 14 | İniş sayısına bağlı (7 × 2). |  |
-| Kapalı dirsek | 7 | 5 | 7 | 7 | İniş sayısına bağlı (7). |  |
-| İniş kelepçesi | 14 | 10 | 14 | 14 | İniş sayısına bağlı (7 × 2). |  |
-| Dere kelepçesi | 56 | 56 | 56 | 56 |  |  |
+| Metal dere | 7 | 7 | 8 ✗ | 8 ✗ | Müştemilatın panel çatısının saçağında da dere (Lokman, 10 Ekim 2026: beş fotoğraftaki gibi; KT-01'in yapılmış halinde de müştemilatın saçağında dere var): 24,46 + 5,46 = 29,92 m ÷ 3,8 → 8. | karar: listede ve dere paftasında müştemilatta dere yok (7); Lokman'ın 10 Ekim kararıyla var. |
+| Dere iniş borusu | 7 | 5 | 9 ✗ | 9 ✗ | İniş kuralı (C4; 9 m eşiği 8 Ekim 00:45'te onaylandı): her saçak köşesine bir, boyu 9 m'yi geçen dere hattının ortasına bir; 10 Ekim 2026'dan beri müştemilatın saçağında da dere: 7 köşe + 2 orta = 9. | karar: listede ve paftada 7 (müştemilatta dere yok); Lokman'ın 10 Ekim kararıyla müştemilatın deresine iki iniş. |
+| Dere iniş aparatı | 7 | 5 | 9 ✗ | 9 ✗ | İniş sayısına bağlı (9). | karar: listede 7 (müştemilatta dere ve iniş yok). |
+| Dere kapağı | 4 | 4 | 6 ✗ | 6 ✗ | Müştemilatın deresinin iki serbest ucu (Lokman, 10 Ekim 2026): 4 → 6. | karar: listede 4 (müştemilatta dere yok). |
+| Açık dirsek | 14 | 10 | 18 ✗ | 18 ✗ | İniş sayısına bağlı (9 × 2). | karar: listede 14 (müştemilatta dere ve iniş yok). |
+| Kapalı dirsek | 7 | 5 | 9 ✗ | 9 ✗ | İniş sayısına bağlı (9). | karar: listede 7 (müştemilatta dere ve iniş yok). |
+| İniş kelepçesi | 14 | 10 | 18 ✗ | 18 ✗ | İniş sayısına bağlı (9 × 2). | karar: listede 14 (müştemilatta dere ve iniş yok). |
+| Dere kelepçesi | 56 | 56 | 64 ✗ | 64 ✗ | Dere adedi × 8: müştemilatın deresiyle 8 × 8 = 64 (Lokman, 10 Ekim 2026). | karar: listede 56 (7 × 8; müştemilatta dere yok). |
 | **Kapı ve pencere** | | | | | | |
 | Melamin kapı (80'lik kanat) | 2 | 2 | 2 | 2 |  |  |
 | Melamin kapı (70'lik kanat) | 1 | 1 | 1 | 1 |  |  |

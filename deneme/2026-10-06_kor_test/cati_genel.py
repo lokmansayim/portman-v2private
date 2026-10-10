@@ -470,8 +470,11 @@ def sacak_cephesi(e: dict, kenarlar: list[dict], sacak: float) -> float:
 
 def dere_hatlari(duzlemler: list[dict], kenarlar: list[dict], kurallar: dict, sacak: float = 30.0) -> dict:
     """Dere hatları: dereli düzlemlerin saçak kenarları. Çatı panelli çatıda (ek yapı) dere yoktur (kör test projesinin listesi ve dere paftası).
+    Kural seti 0.18'den beri (`panel_cati_kenarlari`; Lokman, 10 Ekim 2026: veranda, sundurma ve müştemilat "o 5 görseldeki gibi") tek eğimli
+    çatı panelli bütün çatıların saçağında da dere vardır; anahtar yoksa eski davranış.
     Uç: bir hattın ucu; iki hattın buluştuğu köşe tek uçtur. Serbest uç: başka bir hatla buluşmayan uç (dere kapağı oraya gelir)."""
-    panelli_dere = kurallar["ek_yapi_ve_korkuluk"]["deger"]["cati_panelli_cati"]["dere"]
+    pk = (kurallar.get("panel_cati_kenarlari") or {}).get("deger")
+    panelli_dere = pk["dere"] if pk else kurallar["ek_yapi_ve_korkuluk"]["deger"]["cati_panelli_cati"]["dere"]
     adli = {d["ad"]: d for d in duzlemler}
     hatlar = [e for e in kenarlar if e["tur"] == "sacak" and (panelli_dere or adli[e["duzlemler"][0]].get("ust_yapi") != "cati_paneli")]
     uclar: list[list] = []                            # [x, y, kaç hattın ucu]

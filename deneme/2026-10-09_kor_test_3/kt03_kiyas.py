@@ -53,7 +53,7 @@ BIRIMLER: list[tuple[str, list[int], list]] = [
     ("Tavan omegası", [24], [r"^Tavan omegası"]),
     ("Köşebent", [25], [r"^Köşebent$"]),
     ("Aşık", [26], [r"^Aşık$"]),
-    ("Alın sacı (veranda ve sundurma)", [27], [r"^Alın sacı"]),
+    ("Alın sacı (veranda ve sundurma)", [27], [r"^Alın sacı", r"^Sundurma kapama"]),      # 0.18: Lokman, 10 Ekim 2026: "adını sundurma kapama diyelim"
     ("Saçak sacı", [28], [r"^Saçak sacı"]),
     ("Özel büküm saçak sacı", [29], [r"^Özel büküm saçak sacı"]),
     ("Saçak omegası (geniş, 140'lık duvar)", [30], [r"^Saçak omegası$"]),

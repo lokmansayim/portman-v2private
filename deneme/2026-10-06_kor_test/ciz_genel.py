@@ -233,23 +233,58 @@ def plan_eksen(ax, y: dict, baslik: str | None = None, bilgi: list[str] | None =
     ax.axis("off")
 
 
-def inis_noktalari(c: dict, esik_cm: float = 1000.0, sacak_cm: float = 30.0, olcu: str = "cephe") -> list[tuple[float, float, str]]:
+def inis_noktalari(c: dict, esik_cm: float = 1000.0, sacak_cm: float = 30.0, olcu: str = "cephe", alcak_kose: bool = True) -> list[tuple[float, float, str]]:
     """Dere inişleri (Lokman, 3 Ekim 13:27): dere hattının her ucuna (köşe) bir; 10 m ve daha uzun cephenin ortasına bir.
     `olcu` "dere" ise (Lokman, 7 Ekim 2026 07:45: "çok uzun dere boylarında ortaya 1 tane daha") orta iniş, boyu eşiği geçen dere hattına konur.
     Dere hattı dereli saçak kenarlarıdır (`cati_genel.dere_hatlari`; çatı panelli ek yapıda dere yok); iki hattın buluştuğu köşe tek iniş sayılır.
-    Cephe boyu: saçak kenarı − çatının dış köşesinde biten uçlardaki saçak payı."""
+    Cephe boyu: saçak kenarı − çatının dış köşesinde biten uçlardaki saçak payı.
+    `alcak_kose` False ise (kural `inis.alcak_cati_ustundeki_kose`; Lokman, 10 Ekim 2026: "İniş olmasın") alçak bir çatının üstüne düşen uca iniş konmaz
+    (`alcak_koseleri_dusur`)."""
     uc: list[tuple[float, float]] = []
     orta = []
+    orta_hat: set[int] = set()
     hatlar = (c.get("dere") or {}).get("hatlar")
     if hatlar is None:
         hatlar = [dict(e, cephe=e["boy"] - 2 * sacak_cm) for e in c["kenarlar"] if e["tur"] == "sacak"]
-    for e in hatlar:
+    for i, e in enumerate(hatlar):
         for p in (e["p"], e["q"]):
             if not any(math.hypot(p[0] - u[0], p[1] - u[1]) < 1.0 for u in uc):
                 uc.append(p)
         if (e["boy"] > esik_cm + 1e-6) if olcu == "dere" else (e["cephe"] >= esik_cm - 1e-6):
             orta.append(((e["p"][0] + e["q"][0]) / 2, (e["p"][1] + e["q"][1]) / 2))
+            orta_hat.add(i)
+    if not alcak_kose:
+        uc = alcak_koseleri_dusur(c, hatlar, uc, orta_hat)
     return [(p[0], p[1], "kose") for p in uc] + [(p[0], p[1], "orta") for p in orta]
+
+
+def alcak_koseleri_dusur(c: dict, hatlar: list[dict], uc: list, orta_hat: set) -> list:
+    """Alçak bir çatının üstüne düşen dere ucuna iniş konmaz (Lokman, 10 Ekim 2026: "İniş olmasın"; KT-03'ün dere paftasında ana çatının sundurmanın
+    üstüne düşen iç köşesinde iniş yok). Aday: uç, ucun bağlı olduğu dere hatlarının düzlemlerinden başka, o noktada daha alçak bir düzlemin planı
+    içinde kalıyor. En derindeki aday önce düşer; ama her dere hattının en az bir ucunda (ya da ortasında) iniş kalır (Claude'un uygulaması: suyun bir
+    çıkışı olmalı). Bir hattın iki ucu da alçak çatının üstündeyse alçak çatının kenarına en yakın uç kalır."""
+    from shapely.geometry import Point
+    adli = {d["ad"]: d for d in c["duzlemler"]}
+
+    def yakin(a, b) -> bool:
+        return math.hypot(a[0] - b[0], a[1] - b[1]) < 1.0
+
+    hat_uclari = [[j for j, u in enumerate(uc) if yakin(u, e["p"]) or yakin(u, e["q"])] for e in hatlar]
+    aday = []
+    for j, u in enumerate(uc):
+        dz_adlari = {hatlar[i].get("duzlem") or hatlar[i]["duzlemler"][0] for i, ue in enumerate(hat_uclari) if j in ue}
+        ust = max(adli[a]["kot"](u) for a in dz_adlari)
+        nokta = Point(u)
+        for d in c["duzlemler"]:
+            if d["ad"] in dz_adlari or not d["cokgen"].contains(nokta) or d["kot"](u) > ust - 1.0:
+                continue
+            aday.append((d["cokgen"].exterior.distance(nokta), j))
+            break
+    dusen: set[int] = set()
+    for _, j in sorted(aday, key=lambda x: (-x[0], x[1])):
+        if all(i in orta_hat or any(u2 != j and u2 not in dusen for u2 in ue) for i, ue in enumerate(hat_uclari) if j in ue):
+            dusen.add(j)
+    return [u for j, u in enumerate(uc) if j not in dusen]
 
 
 def cati_plani_eksen(ax, y: dict, c: dict, inisler=None):
@@ -413,7 +448,8 @@ def main() -> int:
     sol, sag = girdi_genel.bilgi_satirlari(y, c, m, kur)
     a.cikti.mkdir(parents=True, exist_ok=True)
     kod = t["kod"].replace("Ç", "C").replace("-", "")
-    inis = inis_noktalari(c, kur["inis"]["deger"]["orta_inis_esigi_m"] * 100, t["cati"].get("sacak", 30), kur["inis"]["deger"].get("olcu", "cephe"))
+    inis = inis_noktalari(c, kur["inis"]["deger"]["orta_inis_esigi_m"] * 100, t["cati"].get("sacak", 30), kur["inis"]["deger"].get("olcu", "cephe"),
+                          kur["inis"]["deger"].get("alcak_cati_ustundeki_kose", True))
     fig, ax = plt.subplots(figsize=(13.5, 11.5), dpi=140)
     plan_eksen(ax, y, baslik=f"{t['kod']} · {t['ad']}\nTASLAK · modelden okunan ölçülerle kuruldu · üretim projesi değildir", bilgi=sol + ["Ölçü zinciri: dış yüzler ve iç duvar aksları · ölçüler cm"])
     fig.savefig(a.cikti / f"{kod}_plan.png", bbox_inches="tight", facecolor="white")

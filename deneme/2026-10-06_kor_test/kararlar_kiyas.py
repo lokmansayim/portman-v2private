@@ -84,8 +84,20 @@ def main() -> int:
             if not any(re.search(d if isinstance(d, str) else d[0], s["kalem"]) and (isinstance(d, str) or re.search(d[1], s["boyut"])) for _, _, ds in kiyas.BIRIMLER for d in ds):
                 cik.append(s)
         return cik
+    # Lokman'ın yeni bir kararıyla gelen, gerçek listede olmayan satırlar (0.18: müştemilatın panel çatısının kenarları; Lokman, 10 Ekim 2026):
+    # notlarda `listede_olmayan` altında nedeniyle yazılı olmalı; yazılı değilse sorun
+    listede_olmayan = notlar_dosyasi.get("listede_olmayan") or {}
+    b_ek = []
     for s in disarida(L["b"]):
-        sorun.append(f"b listesinde hiçbir birime girmeyen satır: {s['kalem']} ({s['adet']})")
+        if s["kalem"] in listede_olmayan:
+            b_ek.append(s)
+        else:
+            sorun.append(f"b listesinde hiçbir birime girmeyen satır: {s['kalem']} ({s['adet']})")
+    for ad in sorted(set(listede_olmayan) - {s["kalem"] for s in b_ek}):
+        sorun.append(f"notlarda gerçek listede olmayan satır olarak yazılı ama b listesinde yok: {ad}")
+    for s in b_ek:
+        if listede_olmayan[s["kalem"]].split(":")[0] not in FARK_TURU:
+            sorun.append(f"{s['kalem']}: `listede_olmayan` nedeni türüyle başlamıyor ({', '.join(FARK_TURU)})")
     a_ek = disarida(L["a"])
     ozet = {x: {"gercek_satir": satir(B), "ayni": satir([b for b in B if b[x + "_ayni"]])} for x in ("b", "a")}
     onceki_ozet = oku(a.onceki)["ozet"]
@@ -113,6 +125,9 @@ def main() -> int:
                                                       **({"olcu": s["olcu"], "birim": s["birim"]} if s["adet"] is None and s["olcu"] is not None and s["durum"] == "soru" else {}),
                                                       "kg": s["kg"], "durum": s["durum"]} for s in a_ek],
              "denetim_sorunlari": sorun, "birimler": B}
+    if b_ek:
+        sonuc["b_listesinde_gercek_listede_olmayan"] = [{"kalem": s["kalem"], "boyut": s["boyut"], "adet": s["adet"], "durum": s["durum"],
+                                                         "neden": listede_olmayan[s["kalem"]]} for s in b_ek]
     if inis_onayli:      # 8 Ekim 2026: iniş eşiği onaylandı; sayfa "eşiği öneri" demesin
         sonuc["inis_onayli"] = True
     print(f"gerçek listenin adetli satırı: {satir(B)} | birim: {len(B)}")
@@ -140,6 +155,9 @@ def main() -> int:
         cik += [f"| {s.get('liste_adi') or s['kalem']} | {s['boyut']} | "
                 + (n(s['adet']) if s['adet'] is not None or s['olcu'] is None or s['durum'] != "soru" else f"— ({n(s['olcu'])} {s['birim']})")
                 + f" | {'' if s['kg'] is None else n(round(s['kg']))} | {s['durum']} |" for s in a_ek]
+        if b_ek:
+            cik += ["", "## Kararlardan sonra (B) gelen, gerçek listede olmayan satırlar", "", "| Kalem | Boyut | Adet | Durum | Neden |", "|---|---|---|---|---|"]
+            cik += [f"| {s['kalem']} | {s['boyut']} | {n(s['adet'])} | {s['durum']} | {listede_olmayan[s['kalem']]} |" for s in b_ek]
         cik += ["", "## Satır satır", "",
                 "| Kalem (gerçek liste) | Gerçek | Düzeltilmiş (03:46) | Kararlardan sonra (B) | Çelik standardı (A) | Değişikliği doğuran karar | Hâlâ farklıysa nedeni |",
                 "|---|---|---|---|---|---|---|"]

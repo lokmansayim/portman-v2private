@@ -372,7 +372,7 @@
    "kg": null,
    "formul": "4 köşe + 2 orta (boyu 9 m'yi geçen dere hatları)",
    "durum": "lokman",
-   "not": "her saçak köşesine bir; boyu 9 m'yi geçen dere hattının ortasına bir tane daha (Lokman, 7 Ekim 07:45; 9 m eşiği onaylandı: 8 Ekim 00:45). İniş plana elle yerleştirilirse o sayı kullanılır"
+   "not": "her saçak köşesine bir; boyu 9 m'yi geçen dere hattının ortasına bir tane daha (Lokman, 7 Ekim 07:45; 9 m eşiği onaylandı: 8 Ekim 00:45). İniş plana elle yerleştirilirse o sayı kullanılır; alçak bir çatının üstüne düşen köşeye iniş konmaz (Lokman, 10 Ekim 2026)"
   },
   {
    "grup": "Dere",
@@ -1088,6 +1088,19 @@
    "formul": "ıslak hacim sayısı × 1; 'vitrifiye dahil' ise",
    "durum": "motor",
    "not": null
+  },
+  {
+   "grup": "Sıhhi tesisat",
+   "kalem": "Taharet musluğu 20 mm",
+   "boyut": "adet",
+   "adet": 4,
+   "olcu": 1,
+   "brut": null,
+   "birim": "ıslak hacim",
+   "kg": null,
+   "formul": "ıslak hacim (WC, banyo) sayısı × 4; 'vitrifiye dahil' ise",
+   "durum": "lokman",
+   "not": "vitrifiye dahilse ıslak hacim (WC, banyo) başına 4 (Lokman, 10 Ekim 2026)"
   },
   {
    "grup": "Boya",

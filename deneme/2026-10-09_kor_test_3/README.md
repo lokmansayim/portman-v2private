@@ -15,7 +15,7 @@ Proje (KT-03): tek kat çelik, 2+1 (salon, iki yatak odası; ayrı mutfak, banyo
 
 ## Girdi
 
-- **Tanım** (`KT03.json`, Yapı Tanımı 0.5; `kt03_tanim_uret.py` üretir; özeti dondurma kaydında). Müşteri projesinin geometrisidir; depoya Lokman'ın onayıyla girer. Duvarlar duvar paneli paftasındaki 26 panel (D01–D26: 15 dış, 11 iç), yerleri paftanın vektör çizgilerinden; boyları paftadaki ölçü zincirleriyle ±0,5 cm içinde. Dış duvar 14 cm, iç duvar 8 cm. Açıklıklar paftadaki dikme ve başlıklardan: 150/130 üç, 200/220 sürgülü iki (salon ve mutfak, verandaya), 100/70, 50/50 (pencereler Winsa, antrasit); dış kapı 95 × 210; beş iç kapı (dördü 90, banyo 80; iç kapılar alıcıya ait).
+- **Tanım** (`tanim/KT03.json`, Yapı Tanımı 0.5; `tanim/kt03_tanim_uret.py` üretir; özeti dondurma kaydında). Müşteri projesinin geometrisidir; Lokman'ın onayıyla depoda (10 Ekim 2026: "Eklensin"). Duvarlar duvar paneli paftasındaki 26 panel (D01–D26: 15 dış, 11 iç), yerleri paftanın vektör çizgilerinden; boyları paftadaki ölçü zincirleriyle ±0,5 cm içinde. Dış duvar 14 cm, iç duvar 8 cm. Açıklıklar paftadaki dikme ve başlıklardan: 150/130 üç, 200/220 sürgülü iki (salon ve mutfak, verandaya), 100/70, 50/50 (pencereler Winsa, antrasit); dış kapı 95 × 210; beş iç kapı (dördü 90, banyo 80; iç kapılar alıcıya ait).
 - **Mahaller** (karkas yüzleri arası; paftanın iç ölçüleriyle aynı): salon 16,69 · yatak odası 12,62 · çocuk odası 12,38 · hol 7,72 · mutfak 14,18 · banyo 6,93 m². Müşteri onay paftasındaki etiketler 0,0–0,44 m² büyük (17,13 · 12,84 · 12,6 · 7,73 · 14,39 · 7,08); etiket alanının neyle ölçüldüğü bilinmiyor, hesaba girmez. Verandanın etiketi (14,84) çatının saçağıyla (362 × 410).
 - **Çatı:** kırma; saçak çizgileri karkasın dış yüzünden 30 cm (makas paftası: "Saçaklar ve alın çıkmaları 30 cm"); eğim 0,33, saçak kotu 280. Yüzler saçak çizgilerinin düz iskeleti: sekiz yüz, üç mahya (7,47 m), sekiz kırma (27,27 m), iki vadi (7,98 m). Veranda çatısı tek eğimli çatı paneli, eğim 0,08835 (kesit: kolonda 224,6, orta kolonda 238,32, bina duvarında 251,97), saçak dış kolondan 51,92 (eğik); sundurma çatısı eğim 0,17094 (bina duvarında 260, kolonda 240, açıklık 117), saçak kolonun dış yüzünden 30.
 - **Çelik:** üretim dosyası yok. Panel adetleri paftadaki yerleşimden: dış duvar 15, iç 11, kolon 4 (K02, K03, K06, K07), kiriş 3 (K01, K04, K05), makas 36 (MK01–MK36), veranda ve sundurma çatı paneli 4 (Ç13–Ç16), baca 2 × 4. Ağırlık motorun proje ortalamalarından (katalog yolu; kural seti `celik`).
@@ -57,7 +57,7 @@ Dondurma commit'i `1f7ba6c` (9 Ekim 23:55:13). Açılmayan iki dosyanın özeti 
 
 Kör listedeki 56 farkın asıl nedeni: girdi 2 · kural 21 · karar 18 · elle 9 · pafta 6. Bizim hatamız 23 satır.
 
-- **Girdi hatası.** Makas ve dere paftasında makas numaraları MK01 ve MK14'ü atlıyor: 34 makas. Numaraları kesintisiz sayıp 36 yazmışım; listede de 34. Ayrıca veranda ve sundurma çatısının saçak çizgisini paftadaki çizim yerine kesit detayından okumuşum (sundurma 8 cm kısa); adede etkisi yok. Düzeltilmiş tanımı `kt03_tanim_duzeltilmis.py` üretir (depo dışında).
+- **Girdi hatası.** Makas ve dere paftasında makas numaraları MK01 ve MK14'ü atlıyor: 34 makas. Numaraları kesintisiz sayıp 36 yazmışım; listede de 34. Ayrıca veranda ve sundurma çatısının saçak çizgisini paftadaki çizim yerine kesit detayından okumuşum (sundurma 8 cm kısa); adede etkisi yok. Düzeltilmiş tanımı `tanim/kt03_tanim_duzeltilmis.py` üretir (`tanim/KT03_duzeltilmis.json`).
 - **Kural eksikleri** (raporun 4. bölümü; Lokman'a soruldu, 11. bölüm). Veranda ve sundurmanın tek eğimli panel çatısının kenarları (12 satır): listede saçaklarda dere ve iniş, özel büküm saçak sacı, eğik kenarlarda sıfır alın sacı var, Boardex şeridi yok, tavan saçağıyla; kuralımız KT-01'in müştemilatından. Üretim dosyası yokken kırma uçlarının çatı panelleri satır olmuyor (2 satır). Çatı çıkış kapağı (1). Bacanın içi: baca borusu, T, kör tapa, maşon, şapka (5). Taharet musluğu (1).
 - **Karar farkları.** Bina alanı (liste 80, kural 94: uçlar, inox taş, RYSB), vida kararları (alçıpan vidası × 40, trapez vidanın omega ve aşıkta olmaması), duvar izolasyonu gönderilmiyor, yöntem B kalemlerinin formülleri, ölçünün alındığı yüz.
 - **Çelik.** Panel adetleri dış ve iç duvar, baca, kolon-kiriş ve C profillerde aynı; makas düzeltilince aynı. Ağırlık üretim dosyası olmadığı için motorun ortalaması: toplam 2 556 / 2 847 kg (C profiller hariç listede).
@@ -78,4 +78,28 @@ Kıyasın dosyaları:
 - `sonuc/KT03_pafta_sayimi.json`: elektrik sayımı.
 - `sonuc/KT03_{B,A}_girdi.json`, `sonuc/KT03_{B,A}_yukleme.{json,md}`: dondurulan listeler (96'şar satır).
 - `sonuc/KT03_dondurma.md`: dondurma kaydı.
-- Depo dışında (Lokman'ın onayıyla girer): `KT03.json`, `KT03_duzeltilmis.json`, `kt03_tanim_uret.py`, `kt03_tanim_duzeltilmis.py`, çizim seti (düzeltilmiş tanımdan, iki yöntemle, 12'şer çıktı).
+- `tanim/`: kör ve düzeltilmiş tanım (`KT03.json`, `KT03_duzeltilmis.json`) ve onları üreten betikler; betikler tanımları bayt bayt aynı üretir (Lokman, 10 Ekim 2026: "Eklensin").
+- `cizimler/KT03_A`, `cizimler/KT03_B`: düzeltilmiş tanımdan, kural seti 0.18 ile çizim seti (12'şer çıktı; `../2026-10-06_kor_test/cizim_seti_kos.sh`, A `--yontem panel`, B `--yontem omega_asik`). Plan, görünüşler, pafta, çatısız görünüm ve özet her üretimde bayt bayt aynı; IFC'de kimlikler ve zaman, geometri özetinde sıra, makaslı görünümde ve perspektiflerde görüntü işleme gürültüsü (eşiği aşan piksel farkı yok) değişir.
+- `kt03_cevaplar_kos.sh`, `kt03_cevaplar_notlari.json`, `sonuc/KT03_cevaplar_*`: Lokman'ın 10 Ekim cevaplarından sonra (aşağıda).
+
+## Lokman'ın cevaplarından sonra (10 Ekim 2026)
+
+Lokman 10:18'de raporun yedi sorusunu cevapladı; 10:29'da tek eğimli panel çatının nasıl bittiğini gösteren beş fotoğraf, 10:37'de KT-01'in yapılmış halinin üç fotoğrafını gönderdi; 10:39'da müştemilat için "hayır istediğim o 5 görseldeki gibi olması çok güzel duruyor". Cevaplar yazıldığı gibi ve uygulanışları: `docs/sartname/yukleme_listesi_yontemi.md`, "Lokman'ın cevapları (10 Ekim 2026) ve uygulanışı". Kural seti 0.18:
+
+- **Tek eğimli çatı panelli çatının kenarları** (`panel_cati_kenarlari`; veranda, sundurma ve müştemilat): saçakta dere ve derenin altında özel büküm saçak sacı; eğik kenarlarda sundurma kapama (adı Lokman'ın); ikisi de L 2500, 20 cm bindirme. Kenarda Boardex şeridi yok; veranda ve sundurmanın tavanı çatının planıyla (saçağıyla) Boardex. Müştemilatta saçağın ve yanların altı Boardex (15 cm), yüzü kapamayla (Claude'un okuması; Lokman'a yazıldı).
+- **İniş** (`inis.alcak_cati_ustundeki_kose: false`): alçak bir çatının üstüne düşen köşeye iniş konmaz ("İniş olmasın"); her dere hattının en az bir ucunda iniş kalır. Kısa derede tek iniş: açık soru.
+- **Listeye girmeyenler:** çatı çıkış kapağı ("Çatı çıkış kapağı yok"), bacanın içi ("sadece karkasını yapıyoruz göz ardı et").
+- **Taharet musluğu:** vitrifiye dahilse ıslak hacim başına 4. Bu projede vitrifiye alıcıya ait: satır yok.
+- **Saçak omegası:** çatı ve tavan panelli sistemlerde yok (öyleydi).
+- **Kırma uçlarının çatı panelleri:** "Zaten üretim dosyası vermeyeceğiz sen kendin oluşturacaksın paftayı": bizim paftamızdan sayılacak; pafta kuralları sıradaki iş (`../../kurallar/cizim/`).
+
+| Liste | Aynı satır (102 satırda) |
+|---|---|
+| Düzeltilmiş, yöntem B (0.17; 00:24 kıyası) | 48 |
+| Cevaplardan sonra, yöntem B (0.18) | **59** |
+| Cevaplardan sonra, çelik standardı (A; bilgi) | 58 |
+
+Cevaplardan sonra farklı kalan 43 satır: kural 2 (kırma uçlarının çatı panelleri) · karar 25 · elle 10 · pafta 6. Panel çatının kenarları konusunun 12 satırından 11'i tutuyor; dere kelepçesi kuraldan 104 (13 dere × 8), listede 110 (formülsüz). İniş 11 (listede 11) ama dağılım farklı: paftada ana çatı 8, veranda 2, sundurma 1; bizde 7, 2, 2 (ana çatının verandanın üstüne düşen iki köşesinden biri düşüyor; sundurmanın 1,62 m'lik deresinin iki ucunda iniş). Tablo: `sonuc/KT03_cevaplar_kiyas.md`.
+
+- `kt03_cevaplar_kos.sh tanim/KT03_duzeltilmis.json [python]`: düzeltilmiş tanımdan güncel kural setiyle (0.18 ve sonrası) iki liste ve tablo. Satır notları `kt03_farklar.json` + `kt03_cevaplar_notlari.json` (üstüne yazar: `kalan`, `pay`, giriş, adet dışı farklar); kör listenin sınıfları değişmez.
+- 00:24 kıyası ve dondurulan listeler 0.17 setine sabit (`kt03_kiyas_kos.sh`, `kt03_kos.sh`); 0.18'le yeniden üretildiklerinde de bayt bayt aynı çıkıyor (betikler seti kendileri seçer).

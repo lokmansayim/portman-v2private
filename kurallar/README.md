@@ -36,11 +36,23 @@ Tanımda o projenin teknik özelliklerinden gelen birkaç seçim de yazılıdır
 | `model/duvar_tipleri.json` | Baz paketin duvar tipleri: katmanlar, karkas 80 ve 140 mm, kaplamalar. Duvar kalınlığı katmanların toplamı |
 | `model/secenekler/` | Değişiklik operatörleri: model tanımı değişmeden paket farkını uygular. Örnek `dis_karkas_140.json` (Lokman, 3 Ekim 2026 11:49: "dışlar 140'lık") |
 | `cizim/cizim_seti.json` | Çizim setinin içeriği (Lokman onayladı, 7 Ekim 2026 07:45). Anlatımı `docs/sartname/cizim_seti.md` |
-| `liste/kurallar.json` | Metraj ve yükleme listesi kuralları; her anahtarda `deger`, `durum`, `kaynak`. Sürümü `sema` alanında |
-| `liste/setler/` | Eski sürümler (0.12–). Bir set `PORTMAN_KURALLAR` ortam değişkeniyle seçilir (`deneme/2026-10-03_yukleme/kural.py`) |
+| `liste/kurallar.json` | Metraj ve yükleme listesi kuralları; her anahtarda `deger`, `durum`, `kaynak`. Sürümü `sema` alanında (bugün 0.18-taslak) |
+| `liste/setler/` | Eski sürümler (0.12–0.17; aşağıda). Bir set `PORTMAN_KURALLAR` ortam değişkeniyle seçilir (`deneme/2026-10-03_yukleme/kural.py`) |
 | `bayi/ornek.json` | Bayi standardı örneği: listeye giren gruplar, çatı yöntemi. Gerçek bayi, numara ya da ad yok |
 
 **Sıradaki:** pafta kuralları `cizim/` altına girecek: makas, dere ve panel yerleşimi, kesim planı. Lokman, 10 Ekim 2026: "Zaten üretim dosyası vermeyeceğiz sen kendin oluşturacaksın paftayı bunları sana örnek olarak eğitimin için atıyorum". Kurallar örnek projelerden çıkarılacak; o projelerin paftaları kuralların sınavı olacak.
+
+## Sürümler
+
+| Sürüm | Hangi cevaplarla | O günkü çıktıları bayt bayt veren commit |
+|---|---|---|
+| 0.12 | Kör test KT-01'den önceki kurallar | `eff6a74` (7 Ekim 03:46) |
+| 0.13 | Lokman, 7 Ekim 07:45 ve 08:02 (KT-01'in on iki sorusu) | `021c277` (7 Ekim 10:55) |
+| 0.14 | Lokman, 8 Ekim 00:45 | `4251345` (8 Ekim 03:15) |
+| 0.15 | Lokman, 8 Ekim 07:23 ve 07:41 | `b5ff4cf` (9 Ekim 22:10) |
+| 0.16 | Lokman, 9 Ekim 22:22 (KT-02) | `6b265c8` (9 Ekim 22:40) |
+| 0.17 | Lokman, 9 Ekim 22:44 (korkuluk) | `c939fe2` (10 Ekim 10:47) |
+| 0.18 (güncel) | Lokman, 10 Ekim 10:18–10:39 (KT-03; beş fotoğraf): tek eğimli çatı panelli çatının kenarları (`panel_cati_kenarlari`), alçak çatının üstüne düşen köşede iniş yok, taharet musluğu, çatı çıkış kapağı ve bacanın içi listede yok | `ie-05` dalı |
 
 ## Kural nasıl eklenir
 
@@ -48,7 +60,7 @@ Tanımda o projenin teknik özelliklerinden gelen birkaç seçim de yazılıdır
 2. **Yazım:** Kural dosyasına bir anahtar olarak yazılır: değer, durum ve kaynak. Kaynakta cevap yazıldığı gibi, tarih ve saatiyle durur.
 3. **Kod:** Yeni davranış o anahtara bağlanır. Anahtar yoksa eski davranış sürer; böylece eski setler eski çıktıları verir.
 4. **Sürüm:** Sürüm artar; önceki set `liste/setler/` altına dondurulur.
-5. **Sınav:** Kör test projeleri yeniden çözülür. Önce tutan satır bozulmamalıdır. Eski setler eski çıktıları bayt bayt vermelidir.
+5. **Sınav:** Kör test projeleri yeniden çözülür. Önce tutan satır bozulmamalıdır; bozuluyorsa nedeni Lokman'ın bir kararıdır ve satırın notunda yazar (0.18'de KT-01'in müştemilatına gelen dere: gerçek listede yoktu). Eski setler eski çıktıları bayt bayt vermelidir.
 
 Örnek projeler LLM'i eğitmez. LLM sohbetten sonra hiçbir şey hatırlamaz. Kalıcı olan bu kitaptır ve testlerdir: her örnekten kural çıkar, örnek de teste dönüşür.
 

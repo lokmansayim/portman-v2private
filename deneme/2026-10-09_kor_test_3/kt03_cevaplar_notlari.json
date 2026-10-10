@@ -1,0 +1,106 @@
+{
+ "aciklama": "KT-03, Lokman'ın 10 Ekim 2026 cevaplarından sonraki notlar (10:18 cevaplar; 10:29 beş fotoğraf; 10:37 KT-01'in yapılmış hali; 10:39 \"hayır istediğim o 5 görseldeki gibi olması\"). `kt03_kiyas.py --ek-notlar` ile `kt03_farklar.json`ın üstüne yazılır: birimlerin `kalan` ve `pay` alanları, giriş, başlık, etiketler ve adet dışı farklar. Kör listenin sınıfları ve nedenleri (10 Ekim 00:24 kaydı) değişmez.",
+ "baslik": "KT-03 · Lokman'ın 10 Ekim cevaplarından sonra",
+ "giris": "Üçüncü kör test (KT-03), Lokman'ın 10 Ekim 2026 cevaplarından sonra. Gerçek listenin adetli her satırı, dondurulan iki listemizle (commit 1f7ba6c) ve düzeltilmiş tanımdan güncel kural setiyle (0.18) çıkan listelerle. Cevaplar yazıldığı gibi: (1) \"Yüklediğim görsellere bak aslında yanlarda boardex kaplanacak ama yandan sandviç panel kötü görünmesin diye biz orayı özel bükümlü kapama yapıyoruz\"; saçak için \"Saçakta yüklediğim görsellere bak\"; eğik kenar için \"Eğik kenar dediğim gibi adını sundurma kapama diyelim\"; Boardex şeridi ve tavan için \"Evet\"; iniş için \"İniş olmasın\"; müştemilat için \"hayır istediğim o 5 görseldeki gibi olması çok güzel duruyor\" (tek eğimli çatı panelli bütün çatılar beş fotoğraftaki gibi: saçakta dere ve özel büküm saçak sacı, yanlarda sundurma kapama, kenarda Boardex şeridi yok, veranda ve sundurmanın tavanı saçağıyla); (2) \"Zaten üretim dosyası vermeyeceğiz sen kendin oluşturacaksın paftayı\" (kırma uçlarının çatı panelleri bizim paftamızdan sayılacak; pafta kuralları sıradaki iş); (3) \"Çatı çıkış kapağı yok\"; (4) bacanın içi: \"sadece karkasını yapıyoruz göz ardı et\"; (5) taharet musluğu: \"Önemli değil es geç vitrifiye malzemesi varsa wc + banyo başı 4 adet\"; (6) \"Saçak omegası kullanılmayacak çatı ve tavan panelli sistemlerde\"; (7) tanım ve çizimler: \"Eklensin\" (depoda: `tanim/`, `cizimler/`). Kör listenin sınıfları 10 Ekim 00:24 kıyasındaki gibidir (o anın kaydı); \"kalan\" sütunu cevaplardan sonraki durumu yazar.",
+ "etiketler": {
+  "duz_b": "Cevaplardan sonra (B)",
+  "duz_b_aciklama": "düzeltilmiş tanım, güncel kural seti (0.18): panel çatıların kenarları, iniş, taharet musluğu",
+  "duz_a": "Cevaplardan sonra (A)",
+  "duz_a_aciklama": "bilgi",
+  "duz_kisa": "cevaplardan sonra",
+  "duz_sutun": "Cevaplardan sonra B",
+  "kalan_basligi": "Cevaplardan sonraki listede (B) farklı kalan",
+  "kalan_sutun": "Cevaplardan sonra kalan",
+  "kaynak_notu": "Sınıflar ve nedenler `kt03_farklar.json`dan; cevaplardan sonraki notlar `kt03_cevaplar_notlari.json`dan (üstüne yazar)."
+ },
+ "birimler": {
+  "Çatı panelleri (1,2 ve 0,8)": {
+   "kalan": "kural: kırma uçlarının çatı panelleri bizim paftamızdan sayılacak (Lokman, 10 Ekim 2026: \"sen kendin oluşturacaksın paftayı\"); makas, dere ve panel yerleşiminin kuralları sıradaki iş. Bugün bizde yalnız veranda ve sundurmanın 4 paneli."
+  },
+  "Alın sacı (veranda ve sundurma)": {
+   "kalan": null,
+   "pay": "kural: eğik kenarlarda sundurma kapama (Lokman, 10 Ekim 2026: \"adını sundurma kapama diyelim\"): 6,08 m ÷ (2,5 − 0,20) → 3"
+  },
+  "Özel büküm saçak sacı": {
+   "kalan": null,
+   "pay": "kural: çatı panelli çatının saçağında, derenin altında (Lokman, 10 Ekim 2026: beş fotoğraf): 5,72 m ÷ (2,5 − 0,20) → 3"
+  },
+  "Dış cephe Boardex": {
+   "kalan": null,
+   "pay": "kural: kenarda Boardex şeridi yok (Lokman, 10 Ekim 2026: \"Evet\"): şerit (3,0 m²) çıktı, 40 → 39"
+  },
+  "Veranda ve sundurma tavanı (Boardex)": {
+   "kalan": null,
+   "pay": "kural: tavan çatının planıyla, saçağıyla (Lokman, 10 Ekim 2026: \"Evet\"): 14,73 → 17,52 m², 6 → 7"
+  },
+  "Metal dere": {
+   "kalan": null,
+   "pay": "kural: çatı panelli çatıların saçağında dere (Lokman, 10 Ekim 2026: beş fotoğraf): 41,52 + 5,72 = 47,25 m, 11 → 13"
+  },
+  "Dere kapağı": {
+   "kalan": null,
+   "pay": "kural: veranda ve sundurmanın derelerinin dört serbest ucu (Lokman, 10 Ekim 2026): 0 → 4"
+  },
+  "Dere iniş aparatı": {
+   "kalan": null,
+   "pay": "kural: çatı panelli çatıların (veranda, sundurma) saçağında dere ve alçak çatının üstüne düşen köşede iniş yok (Lokman, 10 Ekim 2026; kural seti 0.18): iniş ana çatı 9 → 7, veranda 2, sundurma 2 = 11"
+  },
+  "Dere iniş borusu": {
+   "kalan": null,
+   "pay": "kural: çatı panelli çatıların (veranda, sundurma) saçağında dere ve alçak çatının üstüne düşen köşede iniş yok (Lokman, 10 Ekim 2026; kural seti 0.18): iniş ana çatı 9 → 7, veranda 2, sundurma 2 = 11"
+  },
+  "Açık dirsek": {
+   "kalan": null,
+   "pay": "kural: çatı panelli çatıların (veranda, sundurma) saçağında dere ve alçak çatının üstüne düşen köşede iniş yok (Lokman, 10 Ekim 2026; kural seti 0.18): iniş ana çatı 9 → 7, veranda 2, sundurma 2 = 11 (× 2)"
+  },
+  "Kapalı dirsek": {
+   "kalan": null,
+   "pay": "kural: çatı panelli çatıların (veranda, sundurma) saçağında dere ve alçak çatının üstüne düşen köşede iniş yok (Lokman, 10 Ekim 2026; kural seti 0.18): iniş ana çatı 9 → 7, veranda 2, sundurma 2 = 11"
+  },
+  "İniş kelepçesi": {
+   "kalan": null,
+   "pay": "kural: çatı panelli çatıların (veranda, sundurma) saçağında dere ve alçak çatının üstüne düşen köşede iniş yok (Lokman, 10 Ekim 2026; kural seti 0.18): iniş ana çatı 9 → 7, veranda 2, sundurma 2 = 11 (× 2)"
+  },
+  "Dere kelepçesi": {
+   "kalan": "elle: listede 110, formülsüz; kural dere adedi × 8 = 13 × 8 = 104",
+   "pay": "kural: dere adedi 11 → 13 (çatı panelli çatıların deresi; Lokman, 10 Ekim 2026): 88 → 104"
+  },
+  "Çatı çıkış kapağı": {
+   "kalan": "karar: Lokman, 10 Ekim 2026: \"Çatı çıkış kapağı yok\". Acil müdahale kapağı ayrı (her yapıya 1; tuttu)."
+  },
+  "Baca borusu": {
+   "kalan": "karar: bacanın yalnız karkası (Lokman, 10 Ekim 2026: \"Bunu çok yapmıyoruz sadece karkasını yapıyoruz göz ardı et\")."
+  },
+  "Baca T'si": {
+   "kalan": "karar: bacanın yalnız karkası (Lokman, 10 Ekim 2026)."
+  },
+  "Baca kör tapa": {
+   "kalan": "karar: bacanın yalnız karkası (Lokman, 10 Ekim 2026)."
+  },
+  "Baca maşonu": {
+   "kalan": "karar: bacanın yalnız karkası (Lokman, 10 Ekim 2026)."
+  },
+  "Baca şapkası": {
+   "kalan": "karar: bacanın yalnız karkası (Lokman, 10 Ekim 2026)."
+  },
+  "Taharet musluğu 20 mm": {
+   "kalan": "karar: vitrifiye dahilse ıslak hacim başına 4 (Lokman, 10 Ekim 2026: \"Önemli değil es geç vitrifiye malzemesi varsa wc + banyo başı 4 adet\"); bu projede vitrifiye alıcıya ait (açıklama 5)."
+  }
+ },
+ "adet_disi": [
+  "Çelik ağırlığı (üretim dosyası yok; bizde motorun proje ortalamaları). Listede / bizde: dış duvar 1 103 / 1 140,4 (39,27 m; listede 28,1 kg/m, kural ortalaması 29,04); iç duvar 536 / 467,3 (23,66 m; listede 22,7 kg/m, kural 19,75); makas 667 / 681,3; çatı panelleri 312 / 64,9 (bizde yalnız veranda ve sundurma; kırma uçlarınınki makas satırında); baca 98 / 55,8; kolon ve kiriş 131 / 116,1; toplam 2 847 / 2 555,8 kg (listede C profiller kg'sız).",
+  "Listenin çelik toplamı 92 adet C profilleri saymıyor (onlar 3 + 3, kg'sız); bizim toplamımız sayıyor (düzeltilmiş B'de 85 = 79 panel + 6 C profil).",
+  "Et kalınlığı: listede makasların 4'ü ve çatı panellerinin 5'i 80 × 1,2; kuralda çatı çeliği 0,8. Dış duvar 140 × 1,2, iç duvar 80 × 1,2, baca 80 × 0,8 (bizimle aynı).",
+  "Listenin yeni sütunu: çelik panelin üretildiği rulo form makinesi (140'lık duvar büyük makinede, öbürleri 1,2 ve 0,8 ayarlı küçük makinede).",
+  "Saçak omegası listede \"180'lik geniş saçak omegası (140'lık duvarlar için)\" (L 2500); bizde \"saçak omegası\". Lokman, 10 Ekim 2026: \"Saçak omegası kullanılmayacak çatı ve tavan panelli sistemlerde\": çelik standardında (A) yok (öyleydi); prefabrikteki 140'lık duvar için ürün ve ölçü prefabrik kurallarıyla birlikte ele alınacak.",
+  "Sandviç panel boyları: listede 3660, 3500, 3250, 3000, 2500, 1750 (paftadaki yerleşim); bizde 3680, 3550, 3290, 3160, 2620, 2370, 1630. Paftadaki çatı alanı 112 m² (bizde 112,45 m²).",
+  "Sandviç panel kapaması listede \"tek kat panel ve sandviç panel uç kapaması\" L 2800; kuralda L 2500.",
+  "Dış cephe levhası listede 12 mm Boardex; kural 12,5 mm. Veranda tavanı satırının adı listede \"veranda, sundurma, balkon, tavan\".",
+  "Çatı izolasyonu listede Knauf mineral yünü (paket 8,64 m²); bizde çatı şiltesi 80 mm (9,6 m²/adet). Adet aynı (11).",
+  "Pencereler listede pervaz, matik, çift açılım ya da sürgülü, antrasit, Winsa yazılı; 50/50 \"vasistas\" (bizim kural yalnız 60/40'ı vasistas sayıyor). Adetler aynı.",
+  "Elektrik: listede \"duylu armatür\" ve \"LED ampul\" (bizde tijli duy ve ampul); adet aynı. Kompozit çelik kapı listede \"(sağ)\".",
+  "Bina alanı: liste 80 m² (kapalı kısım); bizde 94 (oturum 93,81 m²: veranda ve açık sundurma dahil; Lokman, 9 Ekim 22:22). Boya kovaları ikisinde de aynı çıktı (80 × 0,02 ve 94 × 0,02 → 2).",
+  "İniş: listede 11 (paftada ana çatı 8, veranda 2, sundurma 1); cevaplardan sonra bizde de 11, dağılım farklı: ana çatı 7, veranda 2, sundurma 2. Alçak bir çatının üstüne düşen köşeye iniş konmaz (Lokman, 10 Ekim 2026: \"İniş olmasın\"): ana çatının sundurmanın üstüne düşen iç köşesi (paftada da yok) ve verandanın üstüne düşen iki köşesinden biri düşüyor (paftada ikisinde de iniş var; ikincisi saçağın tek çıkışı olarak kalıyor). Sundurmanın 1,62 m'lik deresinde paftada tek iniş var: kısa dere sorusu açık.",
+  "Sundurma kapama (eğik kenarlar) gerçek listedeki \"SIFIR ALIN SACI (SUNDURMA VE VERANDA)\" satırıyla kıyaslandı: adı Lokman'ın (10 Ekim 2026). Listede 5,2 m ÷ 2,5 → 3; bizde 6,08 m ÷ (2,5 − 0,20) → 3."
+ ]
+}

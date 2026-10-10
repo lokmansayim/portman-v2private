@@ -149,8 +149,8 @@
    "brut_m2": 27.07,
    "ek_m2": [
     {
-     "ad": "çatı panelinin saçak ve alın kaplaması (12,20 m × (0,10 + 0,15) m)",
-     "alan_m2": 3.0502
+     "ad": "çatı panelinin saçak ve alın altı (12,20 m × 0,15 m; yüzü kapamayla)",
+     "alan_m2": 1.8301
     }
    ]
   },
@@ -604,9 +604,10 @@
   "cephe_kenarlari_m": [
    9.04,
    9.04,
-   4.88
+   4.88,
+   4.86
   ],
-  "kose_adedi": 5,
+  "kose_adedi": 7,
   "kose_kaynak": "dere hatlarının (saçakların) uçları; iki saçağın buluştuğu köşe tek sayılır",
   "mahya_hatti_m": 12.49,
   "mahya_dokumu_m": {
@@ -626,23 +627,28 @@
    4.88
   ],
   "dere": {
-   "boy_m": 24.46,
+   "boy_m": 29.92,
    "hatlar_m": [
     9.64,
     9.64,
-    5.18
+    5.18,
+    5.46
    ],
-   "uc": 5,
-   "serbest_uc": 4
+   "uc": 7,
+   "serbest_uc": 6
   },
   "ek_cati": {
    "sacak_m": 5.46,
    "alin_m": 6.7409,
-   "kaplama_m2": 3.0502,
+   "kaplama_m2": 1.8301,
    "kaplama_eni_m": [
-    0.1,
     0.15
    ]
+  },
+  "panel_kenari": {
+   "sacak_m": 5.46,
+   "yan_m": 6.7409,
+   "yapi": "ek_yapi"
   },
   "duvar_dibi": [
    {

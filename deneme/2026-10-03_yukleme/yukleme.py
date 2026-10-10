@@ -761,7 +761,8 @@ def _hesapla(g: dict, k: dict) -> dict:
     dere = tavan(dere_boyu / (pd - bd))
     ekle("Dere", "Metal dere", "L 4000", dere, dere_boyu, birim="m", formul=("dere hatlarının boyu" if deresiz else "saçak boyu") + f" ÷ (4,0 − {tr(bd)} bindirme)", durum="motor",
          not_=(f"{pc_ad} saçağında ({tr(sacak - dere_boyu)} m) dere yok "
-               + ("(kural `ek_yapi_ve_korkuluk`: KT-01'in gerçek listesi ve dere paftası)" if c.get("panelli_cati_adi") else "(gerçek liste ve dere paftası)")) if deresiz else None)
+               + ("(kural `ek_yapi_ve_korkuluk`: KT-01'in gerçek listesi ve dere paftası)" if c.get("panelli_cati_adi") else "(gerçek liste ve dere paftası)")) if deresiz else
+              (f"{pc_ad} saçağı dahil ({tr(c['panel_kenari']['sacak_m'])} m; Lokman, 10 Ekim 2026)" if kural_degeri("panel_cati_kenarlari") and c.get("panel_kenari") else None))
     n_kural, n_not = inis_sayisi(c, k)
     if "inis_adedi" in c:
         n, n_durum = c["inis_adedi"], "liste"
@@ -936,6 +937,16 @@ def _hesapla(g: dict, k: dict) -> dict:
                  durum=k["yontem_a_kalkan_ust_kapamasi"]["durum"],
                  not_=k["yontem_a_kalkan_ust_kapamasi"]["satir_notu"]
                       + f". Bilgi: alın sacının ölçüsüyle (L {round(uk['bilgi_parca_boyu_m'] * 1000)}, {tr(uk['bilgi_bindirme_m'] * 100, 0)} cm bindirme) {bilgi_adet} adet ederdi")
+    # Tek eğimli çatı panelli çatıların (veranda, sundurma, müştemilat) kenarları (Lokman, 10 Ekim 2026: "o 5 görseldeki gibi"; kural `panel_cati_kenarlari`):
+    # saçakta derenin altında özel büküm saçak sacı, yanlarda (eğik kenarlar) sundurma kapama. İki yöntemde de.
+    pkk = kural_degeri("panel_cati_kenarlari")
+    if pkk and c.get("panel_kenari"):
+        for anahtar, boy_anahtari, kenar_adi in (("sacak", "sacak_m", "saçakları"), ("yan", "yan_m", "eğik kenarları (yanları)")):
+            pr, boy_k = pkk[anahtar], c["panel_kenari"][boy_anahtari]
+            if boy_k > 0:
+                ekle("Metal aksam", pr["ad"], f"L {round(pr['parca_boyu_m'] * 1000)}", tavan(boy_k / (pr["parca_boyu_m"] - pr["bindirme_m"])), boy_k, birim="m",
+                     formul=f"{pc_ad} {kenar_adi} {tr(boy_k)} m ÷ ({tr(pr['parca_boyu_m'], 1)} − {tr(pr['bindirme_m'])} bindirme)",
+                     durum=k["panel_cati_kenarlari"]["durum"], not_=k["panel_cati_kenarlari"].get(f"satir_notu_{anahtar}"))
     # köşebent (Ubeydullah, 3 Ekim 2026): (bütün odaların tavan çevresi + iç köşeler × 2,7 m) ÷ 2,5
     kr = deg(k, "kosebent")
     cevre_top = sum(o["cevre_m"] for o in g["odalar"])
@@ -1118,6 +1129,11 @@ def _hesapla(g: dict, k: dict) -> dict:
     if g.get("vitrifiye_dahil", True):
         for ad, anahtar in (("Duşakabin (90 × 90)", "dusakabin_90x90"), ("Klozet", "klozet"), ("Banyo dolabı", "banyo_dolabi"), ("Banyo batarya grubu", "batarya_grubu")):
             ekle("Sıhhi tesisat", ad, "takım", islak * ts["vitrifiye"][anahtar], islak, birim="ıslak hacim", formul="ıslak hacim sayısı × 1; 'vitrifiye dahil' ise", durum="motor")
+        th = kural_degeri("taharet_muslugu")
+        if th:      # Lokman, 10 Ekim 2026: "vitrifiye malzemesi varsa wc + banyo başı 4 adet"
+            ekle("Sıhhi tesisat", "Taharet musluğu 20 mm", "adet", islak * th["islak_hacim_basina"], islak, birim="ıslak hacim",
+                 formul=f"ıslak hacim (WC, banyo) sayısı × {th['islak_hacim_basina']}; 'vitrifiye dahil' ise", durum=k["taharet_muslugu"]["durum"],
+                 not_=k["taharet_muslugu"].get("satir_notu"))
 
     # ── Boya ────────────────────────────────────────────────────────────────
     by = deg(k, "boya")
