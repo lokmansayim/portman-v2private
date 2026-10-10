@@ -305,10 +305,8 @@ def metraj(y: dict, c: dict, kur: dict) -> dict:
     makasli = unary_union([dz["cokgen"] for dz in asik_dz]) if asik_dz else None
     panelli = [dz for dz in c["duzlemler"] if dz.get("ust_yapi") == "cati_paneli"]
     import ciz_genel
-    inis = ciz_genel.inis_noktalari(c, kur["inis"]["deger"]["orta_inis_esigi_m"] * 100, ct.get("sacak", 30), kur["inis"]["deger"].get("olcu", "cephe"),
-                                    kur["inis"]["deger"].get("alcak_cati_ustundeki_kose", True))
-    dusen = (len(ciz_genel.inis_noktalari(c, kur["inis"]["deger"]["orta_inis_esigi_m"] * 100, ct.get("sacak", 30), kur["inis"]["deger"].get("olcu", "cephe")))
-             - len(inis)) if not kur["inis"]["deger"].get("alcak_cati_ustundeki_kose", True) else 0
+    inis, inis_sayim = ciz_genel.inis_kurali(c, kur, ct.get("sacak", 30))
+    dusen = inis_sayim.get("alcak", 0)          # 0.18: alçak bir çatının üstüne düşen köşe; 0.19: yalnız küçük (tek inişli) alçak çatının üstündeki
     # çatı panelli çatının (ek yapı) kenarları: dere, saçak sacı, saçak omegası ve alın sacı yok; saçağı ve alınları Boardex ile kaplanır (gerçek liste)
     ep = kur["ek_yapi_ve_korkuluk"]["deger"]["cati_panelli_cati"]
     # 0.18 (`panel_cati_kenarlari`; Lokman, 10 Ekim 2026: veranda, sundurma ve müştemilat "o 5 görseldeki gibi"): saçakta dere (`cati_genel.dere_hatlari`)
@@ -368,6 +366,8 @@ def metraj(y: dict, c: dict, kur: dict) -> dict:
         "kose_adedi": sum(1 for p in inis if p[2] == "kose"),
         # 0.18: alçak bir çatının üstüne düşen, iniş konmayan köşe sayısı (paftanın notunda yazar)
         **({"inis_dusen": dusen} if dusen else {}),
+        # 0.19: kısa derede tek iniş (Lokman, 10 Ekim 2026 11:39); kuralla düşen uç sayısı
+        **({"inis_kisa_dere": inis_sayim["kisa_dere"]} if inis_sayim.get("kisa_dere") else {}),
         "dere_ucu_acik": None,
         "panelli_oturum_m2": sum(sum(b["alan_m2"] for b in y["bolgeler"].values() if b["sinif"] != "dis" and dz["cokgen"].contains(b["net"].representative_point())) for dz in panelli),
         "panelli_plan_m2": sum(dz["plan_m2"] for dz in panelli),
@@ -462,7 +462,9 @@ def bilgi_satirlari(y: dict, c: dict, m: dict, kur: dict) -> tuple[list[str], li
         f"Dere inişi {len(mc['inis_noktalari'])} adet (dere hatlarının uçları; "
         + (f"boyu {sade(kur['inis']['deger']['orta_inis_esigi_m'])} m'yi geçen dere hattının ortası" if kur["inis"]["deger"].get("olcu") == "dere" else
            f"{sade(kur['inis']['deger']['orta_inis_esigi_m'])} m ve daha uzun cephenin ortası")
-        + (f"; alçak bir çatının üstüne düşen {mc['inis_dusen']} köşe hariç" if mc.get("inis_dusen") else "") + ") · subasman ve merdiven çizilmedi · ölçüler cm",
+        + (f"; boyu {sade(kur['inis']['deger']['kisa_dere_tek_inis_m'])} m'yi geçmeyen derede tek iniş ({mc['inis_kisa_dere']} uç hariç)" if mc.get("inis_kisa_dere") else "")
+        + ((f"; tek inişli küçük bir alçak çatının üstüne düşen {mc['inis_dusen']} köşe hariç" if kur["inis"]["deger"].get("alcak_cati_ustundeki_kose") == "kucuk_catida_yok"
+            else f"; alçak bir çatının üstüne düşen {mc['inis_dusen']} köşe hariç") if mc.get("inis_dusen") else "") + ") · subasman ve merdiven çizilmedi · ölçüler cm",
     ]
     return sol, sag
 

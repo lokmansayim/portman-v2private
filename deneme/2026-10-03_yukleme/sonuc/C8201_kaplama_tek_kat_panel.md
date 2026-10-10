@@ -30,7 +30,7 @@
 | Çatı kaplamaları | Acil müdahale kapağı | adet | 1 |  |  | her yapıya 1 adet (standart) | lokman | her yapıya 1 adet, standart (Lokman, 7 Ekim 07:45). Mühendis 4 Ekim'de 'müşteri isterse' demişti |
 | Çatı kaplamaları | Çatı şiltesi 80 mm | 9,6 m²/adet | 10 | 88,9 m² |  | çatı boyu × (bina eni + 0,20) ÷ 9,6 | uydurma | 80 mm: Lokman, 7 Ekim 07:45 (listelerdeki 100 mm hatalı girilmiş) |
 | Dere | Metal dere | L 4000 | 11 | 39,3 m |  | saçak boyu ÷ (4,0 − 0,20 bindirme) | motor |  |
-| Dere | Dere iniş borusu | L 3000 | 6 |  |  | 4 köşe + 2 orta (boyu 9 m'yi geçen dere hatları) | lokman | her saçak köşesine bir; boyu 9 m'yi geçen dere hattının ortasına bir tane daha (Lokman, 7 Ekim 07:45; 9 m eşiği onaylandı: 8 Ekim 00:45). İniş plana elle yerleştirilirse o sayı kullanılır; alçak bir çatının üstüne düşen köşeye iniş konmaz (Lokman, 10 Ekim 2026) |
+| Dere | Dere iniş borusu | L 3000 | 6 |  |  | 4 köşe + 2 orta (boyu 9 m'yi geçen dere hatları) | lokman | her saçak köşesine bir; boyu 9 m'yi geçen dere hattının ortasına bir tane daha (Lokman, 7 Ekim 07:45; 9 m eşiği onaylandı: 8 Ekim 00:45); boyu 4 m'yi geçmeyen derede tek iniş; alçak çatının üstüne düşen köşede de iniş var (dere 15 cm içeride biter, su o çatıya iner), yalnız tek inişli küçük bir çatının (sundurma gibi) üstüne düşen köşede yok (Lokman, 10 Ekim 2026). İniş plana elle yerleştirilirse o sayı kullanılır |
 | Dere | Dere iniş aparatı | adet | 6 |  |  | iniş sayısı × 1 | motor |  |
 | Dere | Açık dirsek | adet | 12 |  |  | iniş sayısı × 2 | motor |  |
 | Dere | Kapalı dirsek | adet | 6 |  |  | iniş sayısı × 1 | motor |  |

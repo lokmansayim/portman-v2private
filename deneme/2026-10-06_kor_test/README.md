@@ -160,10 +160,12 @@ Lokman 00:45'ten sonra açık kalan üç soruyu 07:23'te cevapladı; 1. cevabın
 
 Lokman, KT-03'ün sorularına 10 Ekim 10:18'de verdiği cevaplarla tek eğimli çatı panelli çatıların nasıl bittiğini beş fotoğrafla gösterdi (10:29); müştemilat için 10:39: "hayır istediğim o 5 görseldeki gibi olması çok güzel duruyor". Bu projede değişenler (`sonuc/KT01_kararlar_*`):
 
-- **Müştemilatın panel çatısı** beş fotoğraftaki gibi: saçakta dere (dere 7 → 8, dere kapağı 4 → 6, dere kelepçesi 56 → 64, iniş 7 → 9 ve ona bağlı dört satır) ve özel büküm saçak sacı (3, yeni satır); eğik kenarlarda sundurma kapama (3, yeni satır). Müştemilatın Boardex şeridinden yalnız alt payı kalır (12,20 m × 0,15 m; 11 → 10 levha); yüzü kapamayla kapanır (okuma; Lokman'a yazıldı).
+- **Müştemilatın panel çatısı** beş fotoğraftaki gibi: saçakta dere (dere 7 → 8, dere kapağı 4 → 6, dere kelepçesi 56 → 64, iniş 7 → 9 ve ona bağlı dört satır) ve özel büküm saçak sacı (3, yeni satır); eğik kenarlarda sundurma kapama (3, yeni satır). Müştemilatın Boardex şeridinden yalnız alt payı kalır (12,20 m × 0,15 m; 11 → 10 levha); yüzü kapamayla kapanır (okuma; Lokman, 10 Ekim 11:39: "evet doğru anladın").
 - **Gerçek listeyle aynı satır:** B 63 → 55 / 98, A 60 → 52 / 98. KT-01'in gerçek listesinde ve dere paftasında müştemilatta dere yok: dere, dere kapağı, dere kelepçesi ve beş iniş satırı karar farkı olarak yazıldı (`kararlar_notlari.json`). 03:46'da tutup bozulan satır 3 (dere, kapak, kelepçe). Yeni iki satır gerçek listede yok; nedenleri `kararlar_notlari.json`ın `listede_olmayan` alanında, `kararlar_kiyas.py` denetler.
 - **Çizimler.** Planın ve paftanın yeni hali `cizimler/KT01_{A,B}/` altında: çatı planında müştemilatın saçağında iki iniş daha (9); dış kaplama satırında "çatı panelinin saçak ve alın altı". Öteki çizimler içerikçe aynı (IFC'de kimlik ve zaman, geometri özetinde sıra, makaslı görünümde ve perspektiflerde görüntü işleme gürültüsü hariç).
 - **Değişmezler.** Bugünkü kod 0.12–0.17 setleriyle kendi günlerinin çıktılarını bayt bayt aynı veriyor (`kararlar_kos.sh tanim/KT01_duzeltilmis.json <python> 0.17` 10 Ekim 10:47 tablosunu üretir; açıklamaları `kararlar_notlari_setleri/0.17.json`da); 0.12 ve 0.17 ile planı, paftayı ve görünüşleri de.
+
+**Kural seti 0.19 (10 Ekim 11:39):** kısa derede tek iniş ve alçak çatı köşesinin ayrımı (yalnız tek inişli küçük çatıda iniş yok). Bu projede böyle bir hat ya da köşe yok: listeler ve çizimler aynı, yalnız iniş satırının notu değişti. `kararlar_kos.sh tanim/KT01_duzeltilmis.json <python> 0.18` 11:21 tablosunu üretir (açıklamaları `kararlar_notlari_setleri/0.18.json`da).
 
 ## Sağlama
 

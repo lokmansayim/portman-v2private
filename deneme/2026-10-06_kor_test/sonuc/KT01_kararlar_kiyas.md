@@ -1,6 +1,6 @@
 # KT-01 · kararlardan sonra durum
 
-Lokman'ın 7 Ekim 2026 07:45 cevapları, 08:02 düzeltmeleri, 8 Ekim 00:45 ve 07:23 cevapları ve 10 Ekim 2026 cevapları (tek eğimli çatı panelli çatılar "o 5 görseldeki gibi": müştemilatın panel çatısında da saçakta dere ve özel büküm saçak sacı, yanlarda sundurma kapama) işlendikten sonra, gerçek listenin adetli her satırı güncel kural setinin (0.18) verdiği iki listeyle. Tablo `kararlar_kiyas.py` ile üretilir; elle düzeltilmez. Açıklamalar `kararlar_notlari.json`dan.
+Lokman'ın 7 Ekim 2026 07:45 cevapları, 08:02 düzeltmeleri, 8 Ekim 00:45 ve 07:23 cevapları ve 10 Ekim 2026 cevapları (tek eğimli çatı panelli çatılar "o 5 görseldeki gibi": müştemilatın panel çatısında da saçakta dere ve özel büküm saçak sacı, yanlarda sundurma kapama) işlendikten sonra, gerçek listenin adetli her satırı güncel kural setinin (0.19) verdiği iki listeyle. Tablo `kararlar_kiyas.py` ile üretilir; elle düzeltilmez. Açıklamalar `kararlar_notlari.json`dan.
 
 | Liste | Aynı satır | Ne demek |
 |---|---|---|

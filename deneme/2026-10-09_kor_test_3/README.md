@@ -79,15 +79,15 @@ Kıyasın dosyaları:
 - `sonuc/KT03_{B,A}_girdi.json`, `sonuc/KT03_{B,A}_yukleme.{json,md}`: dondurulan listeler (96'şar satır).
 - `sonuc/KT03_dondurma.md`: dondurma kaydı.
 - `tanim/`: kör ve düzeltilmiş tanım (`KT03.json`, `KT03_duzeltilmis.json`) ve onları üreten betikler; betikler tanımları bayt bayt aynı üretir (Lokman, 10 Ekim 2026: "Eklensin").
-- `cizimler/KT03_A`, `cizimler/KT03_B`: düzeltilmiş tanımdan, kural seti 0.18 ile çizim seti (12'şer çıktı; `../2026-10-06_kor_test/cizim_seti_kos.sh`, A `--yontem panel`, B `--yontem omega_asik`). Plan, görünüşler, pafta, çatısız görünüm ve özet her üretimde bayt bayt aynı; IFC'de kimlikler ve zaman, geometri özetinde sıra, makaslı görünümde ve perspektiflerde görüntü işleme gürültüsü (eşiği aşan piksel farkı yok) değişir.
+- `cizimler/KT03_A`, `cizimler/KT03_B`: düzeltilmiş tanımdan, kural seti 0.19 ile çizim seti (12'şer çıktı; `../2026-10-06_kor_test/cizim_seti_kos.sh`, A `--yontem panel`, B `--yontem omega_asik`). Plan, görünüşler, pafta, çatısız görünüm ve özet her üretimde bayt bayt aynı; IFC'de kimlikler ve zaman, geometri özetinde sıra, makaslı görünümde ve perspektiflerde görüntü işleme gürültüsü (eşiği aşan piksel farkı yok) değişir.
 - `kt03_cevaplar_kos.sh`, `kt03_cevaplar_notlari.json`, `sonuc/KT03_cevaplar_*`: Lokman'ın 10 Ekim cevaplarından sonra (aşağıda).
 
 ## Lokman'ın cevaplarından sonra (10 Ekim 2026)
 
-Lokman 10:18'de raporun yedi sorusunu cevapladı; 10:29'da tek eğimli panel çatının nasıl bittiğini gösteren beş fotoğraf, 10:37'de KT-01'in yapılmış halinin üç fotoğrafını gönderdi; 10:39'da müştemilat için "hayır istediğim o 5 görseldeki gibi olması çok güzel duruyor". Cevaplar yazıldığı gibi ve uygulanışları: `docs/sartname/yukleme_listesi_yontemi.md`, "Lokman'ın cevapları (10 Ekim 2026) ve uygulanışı". Kural seti 0.18:
+Lokman 10:18'de raporun yedi sorusunu cevapladı; 10:29'da tek eğimli panel çatının nasıl bittiğini gösteren beş fotoğraf, 10:37'de KT-01'in yapılmış halinin üç fotoğrafını gönderdi; 10:39'da müştemilat için "hayır istediğim o 5 görseldeki gibi olması çok güzel duruyor"; 11:39'da iki iniş sorusunu cevapladı ve müştemilatın okumasını onayladı ("evet doğru anladın"). Cevaplar yazıldığı gibi ve uygulanışları: `docs/sartname/yukleme_listesi_yontemi.md`, "Lokman'ın cevapları (10 Ekim 2026)" ve "(10 Ekim 11:39)". Kural setleri 0.18 ve 0.19:
 
-- **Tek eğimli çatı panelli çatının kenarları** (`panel_cati_kenarlari`; veranda, sundurma ve müştemilat): saçakta dere ve derenin altında özel büküm saçak sacı; eğik kenarlarda sundurma kapama (adı Lokman'ın); ikisi de L 2500, 20 cm bindirme. Kenarda Boardex şeridi yok; veranda ve sundurmanın tavanı çatının planıyla (saçağıyla) Boardex. Müştemilatta saçağın ve yanların altı Boardex (15 cm), yüzü kapamayla (Claude'un okuması; Lokman'a yazıldı).
-- **İniş** (`inis.alcak_cati_ustundeki_kose: false`): alçak bir çatının üstüne düşen köşeye iniş konmaz ("İniş olmasın"); her dere hattının en az bir ucunda iniş kalır. Kısa derede tek iniş: açık soru.
+- **Tek eğimli çatı panelli çatının kenarları** (`panel_cati_kenarlari`; veranda, sundurma ve müştemilat): saçakta dere ve derenin altında özel büküm saçak sacı; eğik kenarlarda sundurma kapama (adı Lokman'ın); ikisi de L 2500, 20 cm bindirme. Kenarda Boardex şeridi yok; veranda ve sundurmanın tavanı çatının planıyla (saçağıyla) Boardex. Müştemilatta saçağın ve yanların altı Boardex (15 cm), yüzü kapamayla (Claude'un okuması; Lokman, 11:39: "evet doğru anladın").
+- **İniş** (0.19): kısa derede (4 m'ye kadar) tek iniş ("olsun önerine uyalım"); alçak çatının üstüne düşen köşede iniş var ("veranda çatısının üstüne iniş oluyor ama dere veranda çatısının hemen üstünde 15 cm içerde bitiyor akan su dereden verandaya iniyor"), yalnız tek inişli küçük bir çatının (sundurma) üstüne düşen köşede yok (10:18: "İniş olmasın"); her dere hattının en az bir ucunda iniş kalır. 0.18'de alçak çatının üstündeki her köşe düşüyordu.
 - **Listeye girmeyenler:** çatı çıkış kapağı ("Çatı çıkış kapağı yok"), bacanın içi ("sadece karkasını yapıyoruz göz ardı et").
 - **Taharet musluğu:** vitrifiye dahilse ıslak hacim başına 4. Bu projede vitrifiye alıcıya ait: satır yok.
 - **Saçak omegası:** çatı ve tavan panelli sistemlerde yok (öyleydi).
@@ -96,10 +96,10 @@ Lokman 10:18'de raporun yedi sorusunu cevapladı; 10:29'da tek eğimli panel ça
 | Liste | Aynı satır (102 satırda) |
 |---|---|
 | Düzeltilmiş, yöntem B (0.17; 00:24 kıyası) | 48 |
-| Cevaplardan sonra, yöntem B (0.18) | **59** |
+| Cevaplardan sonra, yöntem B (0.18 ve 0.19) | **59** |
 | Cevaplardan sonra, çelik standardı (A; bilgi) | 58 |
 
-Cevaplardan sonra farklı kalan 43 satır: kural 2 (kırma uçlarının çatı panelleri) · karar 25 · elle 10 · pafta 6. Panel çatının kenarları konusunun 12 satırından 11'i tutuyor; dere kelepçesi kuraldan 104 (13 dere × 8), listede 110 (formülsüz). İniş 11 (listede 11) ama dağılım farklı: paftada ana çatı 8, veranda 2, sundurma 1; bizde 7, 2, 2 (ana çatının verandanın üstüne düşen iki köşesinden biri düşüyor; sundurmanın 1,62 m'lik deresinin iki ucunda iniş). Tablo: `sonuc/KT03_cevaplar_kiyas.md`.
+Cevaplardan sonra farklı kalan 43 satır: kural 2 (kırma uçlarının çatı panelleri) · karar 25 · elle 10 · pafta 6. Panel çatının kenarları konusunun 12 satırından 11'i tutuyor; dere kelepçesi kuraldan 104 (13 dere × 8), listede 110 (formülsüz). İniş 11 (listede 11); 0.19'la dağılım ve yerler de paftadaki gibi: ana çatı 8, veranda 2, sundurma 1 (0.18'de 7, 2, 2'ydi). Tablo: `sonuc/KT03_cevaplar_kiyas.md`.
 
-- `kt03_cevaplar_kos.sh tanim/KT03_duzeltilmis.json [python]`: düzeltilmiş tanımdan güncel kural setiyle (0.18 ve sonrası) iki liste ve tablo. Satır notları `kt03_farklar.json` + `kt03_cevaplar_notlari.json` (üstüne yazar: `kalan`, `pay`, giriş, adet dışı farklar); kör listenin sınıfları değişmez.
+- `kt03_cevaplar_kos.sh tanim/KT03_duzeltilmis.json [python]`: düzeltilmiş tanımdan güncel kural setiyle (0.19) iki liste ve tablo. Satır notları `kt03_farklar.json` + `kt03_cevaplar_notlari.json` (üstüne yazar: `kalan`, `pay`, giriş, adet dışı farklar); kör listenin sınıfları değişmez.
 - 00:24 kıyası ve dondurulan listeler 0.17 setine sabit (`kt03_kiyas_kos.sh`, `kt03_kos.sh`); 0.18'le yeniden üretildiklerinde de bayt bayt aynı çıkıyor (betikler seti kendileri seçer).

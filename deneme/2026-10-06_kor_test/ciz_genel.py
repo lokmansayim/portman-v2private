@@ -233,13 +233,16 @@ def plan_eksen(ax, y: dict, baslik: str | None = None, bilgi: list[str] | None =
     ax.axis("off")
 
 
-def inis_noktalari(c: dict, esik_cm: float = 1000.0, sacak_cm: float = 30.0, olcu: str = "cephe", alcak_kose: bool = True) -> list[tuple[float, float, str]]:
+def inis_noktalari(c: dict, esik_cm: float = 1000.0, sacak_cm: float = 30.0, olcu: str = "cephe", alcak_kose: bool | str = True,
+                   kisa_dere_m: float | None = None, sayim: dict | None = None) -> list[tuple[float, float, str]]:
     """Dere inişleri (Lokman, 3 Ekim 13:27): dere hattının her ucuna (köşe) bir; 10 m ve daha uzun cephenin ortasına bir.
     `olcu` "dere" ise (Lokman, 7 Ekim 2026 07:45: "çok uzun dere boylarında ortaya 1 tane daha") orta iniş, boyu eşiği geçen dere hattına konur.
     Dere hattı dereli saçak kenarlarıdır (`cati_genel.dere_hatlari`; çatı panelli ek yapıda dere yok); iki hattın buluştuğu köşe tek iniş sayılır.
     Cephe boyu: saçak kenarı − çatının dış köşesinde biten uçlardaki saçak payı.
-    `alcak_kose` False ise (kural `inis.alcak_cati_ustundeki_kose`; Lokman, 10 Ekim 2026: "İniş olmasın") alçak bir çatının üstüne düşen uca iniş konmaz
-    (`alcak_koseleri_dusur`)."""
+    `kisa_dere_m` verilmişse (kural `inis.kisa_dere_tek_inis_m`; Lokman, 10 Ekim 2026 11:39) boyu onu geçmeyen dere hattında tek iniş (`kisa_dere_tek_inis`).
+    `alcak_kose` (kural `inis.alcak_cati_ustundeki_kose`): True ise her uca iniş; False ise (0.18; Lokman, 10 Ekim 2026 10:18: "İniş olmasın") alçak bir
+    çatının üstüne düşen uca iniş konmaz; "kucuk_catida_yok" ise (0.19; Lokman, 11:39: "veranda çatısının üstüne iniş oluyor") yalnız alçak çatı küçükse,
+    yani kendi deresinde tek iniş varsa (giriş sundurması gibi) konmaz (`alcak_koseleri_dusur`). `sayim` verilirse düşen uçların sayısı ona yazılır."""
     uc: list[tuple[float, float]] = []
     orta = []
     orta_hat: set[int] = set()
@@ -253,16 +256,55 @@ def inis_noktalari(c: dict, esik_cm: float = 1000.0, sacak_cm: float = 30.0, olc
         if (e["boy"] > esik_cm + 1e-6) if olcu == "dere" else (e["cephe"] >= esik_cm - 1e-6):
             orta.append(((e["p"][0] + e["q"][0]) / 2, (e["p"][1] + e["q"][1]) / 2))
             orta_hat.add(i)
-    if not alcak_kose:
-        uc = alcak_koseleri_dusur(c, hatlar, uc, orta_hat)
+    if kisa_dere_m:
+        n0 = len(uc)
+        uc = kisa_dere_tek_inis(hatlar, uc, orta, orta_hat, kisa_dere_m * 100)
+        if sayim is not None:
+            sayim["kisa_dere"] = n0 - len(uc)
+    if alcak_kose is not True:
+        n0 = len(uc)
+        uc = alcak_koseleri_dusur(c, hatlar, uc, orta_hat, yalniz_kucuk=(alcak_kose == "kucuk_catida_yok"))
+        if sayim is not None:
+            sayim["alcak"] = n0 - len(uc)
     return [(p[0], p[1], "kose") for p in uc] + [(p[0], p[1], "orta") for p in orta]
 
 
-def alcak_koseleri_dusur(c: dict, hatlar: list[dict], uc: list, orta_hat: set) -> list:
+def kisa_dere_tek_inis(hatlar: list[dict], uc: list, orta: list, orta_hat: set, esik_cm: float) -> list:
+    """Kısa derede tek iniş (Lokman, 10 Ekim 2026 11:39: "olsun önerine uyalım"; öneri: boyu bir dere parçasını, 4 m, geçmeyen hatta tek iniş).
+    Kısa hattın iki ucu da başka bir dere hattına bağlıysa iki köşe de kalır: köşedeki iniş öteki hattın da inişidir (KT-03'te ana çatının verandanın
+    üstündeki 2,6 m'lik saçağı: paftada iki uçta da iniş). Bir ucu bağlı, öteki serbestse serbest uç düşer (su bağlı köşedeki inişe gider). İki ucu da
+    serbestse (tek başına duran dere: KT-03'te sundurmanınki, 1,62 m) başka bir inişe en yakın uç kalır, eşitlikte hattın ilk ucu (inişler bir köşede
+    toplanır; Claude'un seçimi, yalnız çizimdeki yeri etkiler)."""
+    def yakin(a, b) -> bool:
+        return math.hypot(a[0] - b[0], a[1] - b[1]) < 1.0
+
+    def bagli(p, i) -> bool:
+        return any(yakin(p, e["p"]) or yakin(p, e["q"]) for k, e in enumerate(hatlar) if k != i)
+
+    dusen = []
+    for i, e in enumerate(hatlar):
+        if i in orta_hat or e["boy"] > esik_cm + 1e-6:
+            continue
+        bp, bq = bagli(e["p"], i), bagli(e["q"], i)
+        if bp and bq:
+            continue
+        if bp != bq:
+            dusen.append(e["q"] if bp else e["p"])
+            continue
+        oteki = [u for u in uc if not yakin(u, e["p"]) and not yakin(u, e["q"]) and not any(yakin(u, g) for g in dusen)] + list(orta)
+        mesafe = lambda p: min((math.hypot(p[0] - u[0], p[1] - u[1]) for u in oteki), default=math.inf)
+        dusen.append(e["q"] if mesafe(e["p"]) <= mesafe(e["q"]) else e["p"])
+    return [u for u in uc if not any(yakin(u, g) for g in dusen)]
+
+
+def alcak_koseleri_dusur(c: dict, hatlar: list[dict], uc: list, orta_hat: set, yalniz_kucuk: bool = False) -> list:
     """Alçak bir çatının üstüne düşen dere ucuna iniş konmaz (Lokman, 10 Ekim 2026: "İniş olmasın"; KT-03'ün dere paftasında ana çatının sundurmanın
     üstüne düşen iç köşesinde iniş yok). Aday: uç, ucun bağlı olduğu dere hatlarının düzlemlerinden başka, o noktada daha alçak bir düzlemin planı
     içinde kalıyor. En derindeki aday önce düşer; ama her dere hattının en az bir ucunda (ya da ortasında) iniş kalır (Claude'un uygulaması: suyun bir
-    çıkışı olmalı). Bir hattın iki ucu da alçak çatının üstündeyse alçak çatının kenarına en yakın uç kalır."""
+    çıkışı olmalı). Bir hattın iki ucu da alçak çatının üstündeyse alçak çatının kenarına en yakın uç kalır.
+    `yalniz_kucuk` (0.19): Lokman, 10 Ekim 2026 11:39: "veranda çatısının üstüne iniş oluyor ama dere veranda çatısının hemen üstünde 15 cm içerde bitiyor
+    akan su dereden verandaya iniyor". Aday yalnız alçak çatı küçükse sayılır: kendi dere hatlarında en çok bir iniş var (KT-03'ün sundurması: tek
+    inişli 1,62 m'lik dere). Verandanın deresinde iki iniş var: verandanın üstüne düşen köşeler kalır (paftadaki gibi). Okuma Claude'un; Lokman'a yazıldı."""
     from shapely.geometry import Point
     adli = {d["ad"]: d for d in c["duzlemler"]}
 
@@ -270,21 +312,36 @@ def alcak_koseleri_dusur(c: dict, hatlar: list[dict], uc: list, orta_hat: set) -
         return math.hypot(a[0] - b[0], a[1] - b[1]) < 1.0
 
     hat_uclari = [[j for j, u in enumerate(uc) if yakin(u, e["p"]) or yakin(u, e["q"])] for e in hatlar]
+    hat_duzlemi = [e.get("duzlem") or e["duzlemler"][0] for e in hatlar]
+
+    def kucuk(d) -> bool:          # alçak çatının kendi dere hatlarındaki iniş sayısı (uç ve orta) en çok bir
+        return len({j for i, ue in enumerate(hat_uclari) if hat_duzlemi[i] == d["ad"] for j in ue}) + sum(1 for i in orta_hat if hat_duzlemi[i] == d["ad"]) <= 1
+
     aday = []
     for j, u in enumerate(uc):
-        dz_adlari = {hatlar[i].get("duzlem") or hatlar[i]["duzlemler"][0] for i, ue in enumerate(hat_uclari) if j in ue}
+        dz_adlari = {hat_duzlemi[i] for i, ue in enumerate(hat_uclari) if j in ue}
         ust = max(adli[a]["kot"](u) for a in dz_adlari)
         nokta = Point(u)
         for d in c["duzlemler"]:
             if d["ad"] in dz_adlari or not d["cokgen"].contains(nokta) or d["kot"](u) > ust - 1.0:
                 continue
-            aday.append((d["cokgen"].exterior.distance(nokta), j))
+            if not yalniz_kucuk or kucuk(d):
+                aday.append((d["cokgen"].exterior.distance(nokta), j))
             break
     dusen: set[int] = set()
     for _, j in sorted(aday, key=lambda x: (-x[0], x[1])):
         if all(i in orta_hat or any(u2 != j and u2 not in dusen for u2 in ue) for i, ue in enumerate(hat_uclari) if j in ue):
             dusen.add(j)
     return [u for j, u in enumerate(uc) if j not in dusen]
+
+
+def inis_kurali(c: dict, kur: dict, sacak_cm: float) -> tuple[list[tuple[float, float, str]], dict]:
+    """Kural setindeki iniş kuralıyla iniş noktaları ve kurala göre düşen uçların sayısı (`kisa_dere`, `alcak`). Eski setlerde anahtar yoksa eski davranış."""
+    ii = kur["inis"]["deger"]
+    sayim: dict = {}
+    nok = inis_noktalari(c, ii["orta_inis_esigi_m"] * 100, sacak_cm, ii.get("olcu", "cephe"), ii.get("alcak_cati_ustundeki_kose", True),
+                         ii.get("kisa_dere_tek_inis_m"), sayim)
+    return nok, sayim
 
 
 def cati_plani_eksen(ax, y: dict, c: dict, inisler=None):
@@ -448,8 +505,7 @@ def main() -> int:
     sol, sag = girdi_genel.bilgi_satirlari(y, c, m, kur)
     a.cikti.mkdir(parents=True, exist_ok=True)
     kod = t["kod"].replace("Ç", "C").replace("-", "")
-    inis = inis_noktalari(c, kur["inis"]["deger"]["orta_inis_esigi_m"] * 100, t["cati"].get("sacak", 30), kur["inis"]["deger"].get("olcu", "cephe"),
-                          kur["inis"]["deger"].get("alcak_cati_ustundeki_kose", True))
+    inis, _ = inis_kurali(c, kur, t["cati"].get("sacak", 30))
     fig, ax = plt.subplots(figsize=(13.5, 11.5), dpi=140)
     plan_eksen(ax, y, baslik=f"{t['kod']} · {t['ad']}\nTASLAK · modelden okunan ölçülerle kuruldu · üretim projesi değildir", bilgi=sol + ["Ölçü zinciri: dış yüzler ve iç duvar aksları · ölçüler cm"])
     fig.savefig(a.cikti / f"{kod}_plan.png", bbox_inches="tight", facecolor="white")
