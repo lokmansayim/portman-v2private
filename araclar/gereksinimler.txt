@@ -1,5 +1,6 @@
-# Yerel geliştirme ve test ortamı (bulut çalışma alanı). 30.09.2026'da bu sürümlerle sınandı; Python 3.11.
-# Canlı VPS'in kendi sanal ortamı vardır; bu dosya onu değiştirmez.
+# Yerel geliştirme ve test ortamı (bulut çalışma alanı; araclar/ortam_kur.sh bunu kurar). 30.09.2026'da bu sürümlerle sınandı; Python 3.11.
+# Sunucu sürümünün paketleri AYRI dosyadadır: vps/gereksinimler.txt (tam sabit; numpy 1.x, K19). vps/guncelle.sh yalnız onu kurar;
+# bu dosya sunucuya gitmez. İkisi 10.10.2026'da aynı sürümlerdir, yalnız numpy (yerel 2.4.6, sunucu 1.26.4) ve pytest (yalnız yerel) ayrılır.
 ezdxf==1.4.4
 matplotlib==3.11.2
 numpy==2.4.6

@@ -28,7 +28,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [K16](K16.md) | Katalog planları çıkarıcıyla okunur, elle kodlanmaz; artıklar raporlanır, sessiz yuvarlama yok (22.09) |
 | [K17](K17.md) | Sızan eşleşme anahtarı yenilenecek: `rm /etc/portman/agent.env` + bootstrap tekrar + yeni anahtar `api_token.txt`'e (22.09, **uygulanmadı**) · **28.09'da kapı C'de başka yoldan uygulandı** (eşleşme ve OpenAI anahtarı yenilendi, eskileri 401; bkz. K17 › Uygulanış) |
 | [K18](K18.md) | Beyin kuralı (22.09, iki adım): odada tek pencere varken "penceresi 120x180" ölçü değişikliğidir; ölçüt **bayinin kendi mesajı**, LLM özeti değil |
-| [K19](K19.md) | NumPy < 2 sabitlemesi (VPS) (22.09) |
+| [K19](K19.md) | NumPy < 2 sabitlemesi (VPS) (22.09) · **10.10'da yeni sunucuda yeniden doğrulandı:** sunucu paketleri `vps/gereksinimler.txt` ile tam sabit (numpy 1.26.4); işlemci x86-64-v2 sunana kadar numpy 1.x (K19 › Uygulanış) |
 | [K20](K20.md) | Yol haritası kabul ölçütleriyle ilerler, takvim tahmindir; Lokman'ın açık kararları: pilot planlar, pafta örneği, K16(a/b), K3 (22.09) |
 | [K21](K21.md) | Kural belirsizlikte sessizce değiştirmez, sorar (22.09 20:00, denetim F03 üzerine) |
 | [K22](K22.md) | Harness eylemin yanında İş Emri içeriğini sınar (22.09 20:05) |

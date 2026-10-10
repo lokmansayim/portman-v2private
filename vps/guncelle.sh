@@ -68,17 +68,24 @@ else
   else
     "$PY" -m venv "$HEDEF/venv" || dur "venv açılamadı (python3-venv kurulu mu?)"
     "$HEDEF/venv/bin/pip" install -q --upgrade pip >/dev/null 2>&1 || true
-    "$HEDEF/venv/bin/pip" install -q --no-cache-dir -r "$HEDEF/araclar/gereksinimler.txt" "gunicorn==23.0.0" \
-      || dur "paketler kurulamadı (araclar/gereksinimler.txt + gunicorn); ağ ve pip çıktısı yukarıda"
+    [ -f "$HEDEF/vps/gereksinimler.txt" ] || dur "vps/gereksinimler.txt yok (sunucu paket listesi; v2026.10.10 ve sonrası etiketlerde var)"
+    "$HEDEF/venv/bin/pip" install -q --no-cache-dir -r "$HEDEF/vps/gereksinimler.txt" \
+      || dur "paketler kurulamadı (vps/gereksinimler.txt; tam sabit, numpy 1.x: K19); ağ ve pip çıktısı yukarıda"
     [ -x "$HEDEF/venv/bin/gunicorn" ] || dur "gunicorn kurulmadı"
   fi
   VPY="$HEDEF/venv/bin/python"
-  "$VPY" - "$HEDEF" <<'PY' || dur "içe aktarma denetimi düştü; sürüm etkinleştirilmedi (K19 numpy notu: docs/is_emirleri/IE-06.md › Riskler)"
+  "$VPY" - "$HEDEF" <<'PY' || dur "içe aktarma denetimi düştü; sürüm etkinleştirilmedi (K19 numpy notu: vps/gereksinimler.txt başı, docs/is_emirleri/IE-06.md › Riskler)"
 import sys
 kok = sys.argv[1]; sys.path[:0] = [kok, kok + "/kanal"]
 import numpy, ezdxf, fitz, shapely, psycopg, matplotlib, PIL, ifcopenshell, pydantic   # noqa
+# K19: içe aktarma yetmez, NumPy'nin derlenmiş çekirdeği bu işlemcide gerçekten çalışmalı (X86_V2 hatası ilk işlemde çıkar)
+a = numpy.arange(12, dtype=float).reshape(3, 4)
+iz = float((a @ a.T).trace()); kok2 = float(numpy.sqrt(numpy.array([16.0]))[0])
+assert abs(iz - 506.0) < 1e-9 and abs(kok2 - 4.0) < 1e-12, (iz, kok2)
 import beyin.karar, motor.dxf_out, kalici, webhook, panel, gonderici, ayarlar, nabiz, meta_api   # noqa
-print(f"   içe aktarma tamam: python {sys.version.split()[0]} · numpy {numpy.__version__} · ezdxf {ezdxf.__version__} · psycopg {psycopg.__version__} · ifcopenshell {ifcopenshell.version}")
+print(f"   içe aktarma tamam: python {sys.version.split()[0]} · numpy {numpy.__version__} (hesap tamam) · ezdxf {ezdxf.__version__} · matplotlib {matplotlib.__version__}"
+      f" · pillow {PIL.__version__} · PyMuPDF {getattr(fitz, 'VersionBind', '?')} · shapely {shapely.__version__}"
+      f" · psycopg {psycopg.__version__} · pydantic {pydantic.__version__} · ifcopenshell {ifcopenshell.version}")
 PY
   date '+%Y-%m-%d %H:%M:%S' > "$HEDEF/KURULDU"
 fi
