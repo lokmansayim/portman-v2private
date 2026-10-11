@@ -265,3 +265,38 @@ def test_ayar_ortamdan_ve_telefon():
     http = SahteHttp([(200, {"display_phone_number": "+90 555", "verified_name": "PortatifEv"})])
     assert M.GraphIstemci(a, http=http).telefon()["verified_name"] == "PortatifEv"
     assert http.istekler[0]["url"].startswith("https://graph.facebook.com/v23.0/1?fields=")
+
+
+# ───────────────────────── İE-07: şablon mesajı ─────────────────────────
+def _sablon_satiri(**ek) -> dict:
+    s = {"id": "out_s1", "kind": "template", "body": "Portman: B1234 kodlu bayinin PM-1 numaralı talebi sizi bekliyor.",
+         "sablon": {"ad": "portman_patron_bekliyor_v1", "dil": "tr", "govde": ["B1234", "PM-B1234-20261011-1"],
+                    "dugmeler": [{"sub_type": "url", "index": 0, "text": "konusma/900000000133"}]}}
+    s["sablon"] = {**s["sablon"], **ek}
+    return s
+
+
+def test_sablon_yuku_ve_mesaj_yuku_template():
+    y = M.mesaj_yuku(_sablon_satiri(), "900000000909")
+    assert y["type"] == "template" and y["to"] == "900000000909" and y["biz_opaque_callback_data"] == "out_s1"
+    assert y["template"] == {"name": "portman_patron_bekliyor_v1", "language": {"code": "tr"}, "components": [
+        {"type": "body", "parameters": [{"type": "text", "text": "B1234"}, {"type": "text", "text": "PM-B1234-20261011-1"}]},
+        {"type": "button", "sub_type": "url", "index": "0", "parameters": [{"type": "text", "text": "konusma/900000000133"}]}]}
+    q = M.sablon_yuku(_sablon_satiri(dugmeler=[{"sub_type": "quick_reply", "index": 0, "payload": "dosya:PM-B1234-20261011-1"}]))
+    assert q["components"][1] == {"type": "button", "sub_type": "quick_reply", "index": "0", "parameters": [{"type": "payload", "payload": "dosya:PM-B1234-20261011-1"}]}
+    assert "components" not in M.sablon_yuku({"sablon": {"ad": "x_1", "dil": "tr"}})            # değişkensiz şablon
+    assert M.sablon_metni("Merhaba {{1}}, {{2}} hazır.", ["Ahmet Bey", "PM-1"]) == "Merhaba Ahmet Bey, PM-1 hazır."
+
+
+@pytest.mark.parametrize("ek, alan", [
+    ({"ad": ""}, "name"), ({"ad": "Büyük-Ad"}, "name"), ({"dil": "türkçe"}, "language"),
+    ({"govde": ["B1234", ""]}, "body 2"), ({"govde": ["B1234", "satır\nsonu"]}, "body 2"), ({"govde": ["çok    boşluk", "PM-1"]}, "body 1"),
+    ({"govde": ["x" * 1025, "PM-1"]}, "body 1"), ({"dugmeler": [{"sub_type": "url", "index": 0, "text": ""}]}, "button url"),
+    ({"dugmeler": [{"sub_type": "url", "index": 0, "text": "a b"}]}, "button url"), ({"dugmeler": [{"sub_type": "quick_reply", "index": 0, "payload": ""}]}, "button payload"),
+    ({"dugmeler": [{"sub_type": "copy_code", "index": 0}]}, "button type"), ({"dugmeler": [{"sub_type": "url", "index": "0", "text": "k"}]}, "button index"),
+])
+def test_sablon_yuku_gecersiz(ek, alan):
+    with pytest.raises(M.SablonGecersiz, match="template_invalid: " + alan):
+        M.sablon_yuku(_sablon_satiri(**ek))
+    with pytest.raises(ValueError):                                     # gonderici: ValueError → Gonderilmedi
+        M.mesaj_yuku(_sablon_satiri(**ek), "900000000909")

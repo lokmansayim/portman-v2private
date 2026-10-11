@@ -56,6 +56,10 @@ class DosyaGecersiz(ValueError):
     """Satırın dosyası yok, değişmiş, türü izinli değil ya da çok büyük (feature.php pm_kanal_dosya hata adları)."""
 
 
+class SablonGecersiz(ValueError):
+    """Şablon satırı Meta kurallarına uymuyor (template_invalid: <alan>): ad, dil, boş ya da satır sonlu değişken, düğme. Gönderilmez."""
+
+
 # ───────────────────────── imza, doğrulama, numara ─────────────────────────
 def numara_gecerli(numara) -> bool:
     return bool(_NUMARA.match(str(numara or "")))
@@ -249,13 +253,81 @@ def etkilesim_yuku(satir: dict, baslik_medya_id: str | None) -> dict:
     return out
 
 
+_SABLON_AD = re.compile(r"^[a-z0-9_]{1,512}$")
+_SABLON_DIL = re.compile(r"^[a-z]{2,3}(_[A-Z]{2})?$")
+_SABLON_BOSLUK = re.compile(r"\s{4,}")
+SABLON_DEGISKEN_EN_COK = 1024
+SABLON_DUGME_EN_COK = 10
+SABLON_URL_SONEK_EN_COK = 1000
+SABLON_YUK_EN_COK = 128                       # quick_reply payload
+
+
+def sablon_metni(kalip: str, parametreler: list) -> str:
+    """{{1}}, {{2}} … yer tutucularını sırayla doldurur (panelde ve günlük kaydında okunan düz metin; Meta'ya kalıp gitmez)."""
+    out = kalip
+    for i, p in enumerate(parametreler, 1):
+        out = out.replace("{{%d}}" % i, str(p))
+    return out
+
+
+def sablon_yuku(satir: dict) -> dict:
+    """İE-07: giden satırının `sablon` alanından Meta `template` nesnesi. satir["sablon"] = {"ad": <Meta şablon adı>, "dil": "tr",
+    "govde": ["değişken 1", …], "dugmeler": [{"sub_type": "url" | "quick_reply", "index": 0, "text" | "payload": …}]}.
+    Meta kuralları: ad [a-z0-9_]; her gövde değişkeni dolu, ≤1024, satır sonu ve 4+ ardışık boşluk yok; url düğmesi dinamik
+    sonek (text), quick_reply düğmesi payload. İhlal → SablonGecersiz (Gonderilmedi; yeniden denenmez)."""
+    s = satir.get("sablon") if isinstance(satir.get("sablon"), dict) else {}
+    ad = str(s.get("ad") or "")
+    if not _SABLON_AD.match(ad):
+        raise SablonGecersiz("template_invalid: name")
+    dil = str(s.get("dil") or "tr")
+    if not _SABLON_DIL.match(dil):
+        raise SablonGecersiz("template_invalid: language")
+    govde = s.get("govde") if isinstance(s.get("govde"), list) else []
+    parametreler = []
+    for i, p in enumerate(govde, 1):
+        p = str(p if p is not None else "")
+        if p.strip() == "" or len(p) > SABLON_DEGISKEN_EN_COK or "\n" in p or "\t" in p or _SABLON_BOSLUK.search(p):
+            raise SablonGecersiz(f"template_invalid: body {i}")
+        parametreler.append({"type": "text", "text": p})
+    bilesenler: list[dict] = []
+    if parametreler:
+        bilesenler.append({"type": "body", "parameters": parametreler})
+    dugmeler = s.get("dugmeler") if isinstance(s.get("dugmeler"), list) else []
+    if len(dugmeler) > SABLON_DUGME_EN_COK:
+        raise SablonGecersiz("template_invalid: buttons")
+    for d in dugmeler:
+        d = d if isinstance(d, dict) else {}
+        tur = str(d.get("sub_type") or ""); idx = d.get("index", 0)
+        if type(idx) is not int or not 0 <= idx < SABLON_DUGME_EN_COK:
+            raise SablonGecersiz("template_invalid: button index")
+        if tur == "url":
+            sonek = str(d.get("text") or "")
+            if sonek == "" or len(sonek) > SABLON_URL_SONEK_EN_COK or re.search(r"[\s\"'<>]", sonek):
+                raise SablonGecersiz("template_invalid: button url")
+            bilesenler.append({"type": "button", "sub_type": "url", "index": str(idx), "parameters": [{"type": "text", "text": sonek}]})
+        elif tur == "quick_reply":
+            yuk_ = str(d.get("payload") or "")
+            if yuk_ == "" or len(yuk_) > SABLON_YUK_EN_COK or "\n" in yuk_:
+                raise SablonGecersiz("template_invalid: button payload")
+            bilesenler.append({"type": "button", "sub_type": "quick_reply", "index": str(idx), "parameters": [{"type": "payload", "payload": yuk_}]})
+        else:
+            raise SablonGecersiz("template_invalid: button type")
+    out: dict = {"name": ad, "language": {"code": dil}}
+    if bilesenler:
+        out["components"] = bilesenler
+    return out
+
+
 def mesaj_yuku(satir: dict, alici: str, medya_id: str | None = None, baslik_medya_id: str | None = None) -> dict:
     """Giden satırın (hosting biçimi: kind, body, filename, interactive) Meta messages yükü. biz_opaque_callback_data = satır id:
-    Meta durum bildiriminde geri gelir, wamid yazılamamış satır bununla eşlenir."""
+    Meta durum bildiriminde geri gelir, wamid yazılamamış satır bununla eşlenir. kind 'template' (İE-07): Meta onaylı şablon,
+    24 saat penceresi dışında da gider (utility; ücretli)."""
     kind = str(satir.get("kind") or "text")
     yuk: dict = {"messaging_product": "whatsapp", "recipient_type": "individual", "to": alici, "biz_opaque_callback_data": satir["id"]}
     govde = str(satir.get("body") or "")
-    if kind == "document":
+    if kind == "template":
+        yuk["type"] = "template"; yuk["template"] = sablon_yuku(satir)
+    elif kind == "document":
         if not medya_id:
             raise ValueError("media_id")
         yuk["type"] = "document"; yuk["document"] = {"id": medya_id, "filename": str(satir.get("filename") or "belge.pdf")}
