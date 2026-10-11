@@ -44,7 +44,7 @@ def test_004_tekrar_kosulabilir(depo):
         with c.transaction():
             c.execute(sql)
         assert sutunlar(c) == once
-        assert c.execute("SELECT surum FROM sema_surumu ORDER BY surum").fetchall() == [{"surum": 1}, {"surum": 2}, {"surum": 3}, {"surum": 4}]
+        assert c.execute("SELECT surum FROM sema_surumu ORDER BY surum").fetchall() == [{"surum": 1}, {"surum": 2}, {"surum": 3}, {"surum": 4}, {"surum": 5}]
 
 
 def test_eski_surumun_insertleri_yeni_semada_calisir(depo):
@@ -55,3 +55,32 @@ def test_eski_surumun_insertleri_yeni_semada_calisir(depo):
         r = c.execute("SELECT hitap, firma, bolge, aktif, kaynak FROM bayiler WHERE numara = '900000000111'").fetchone()
         assert r == {"hitap": "", "firma": "", "bolge": "", "aktif": True, "kaynak": "kanal"}
         assert c.execute("SELECT kaynak, sahiplenildi FROM mesajlar WHERE id = 'wamid.ESKI'").fetchone() == {"kaynak": "vps", "sahiplenildi": True}
+
+
+def test_005_kind_template_kaynak_ve_rol_test(depo):
+    """İE-07 göç 005: giden.kind 'template' kabul, giden.kaynak varsayılanı 'ajan', bayiler.rol 'test' kabul; 004 biçimli INSERT'ler
+    (kaynak vermeden) çalışır; dosya ikinci kez koşunca şema aynı kalır."""
+    sql = (GOC / "005_sablon_ve_kaynak.sql").read_text(encoding="utf-8")
+    with depo.baglan() as c, c.transaction():
+        c.execute("INSERT INTO bayiler (numara, kod, ad, rol) VALUES ('900000000905', 'TEST', 'Kuru Koşu', 'test')")
+        c.execute("INSERT INTO mesajlar (id, gonderen, tur, metin, wa_zamani, ham) VALUES ('wamid.G005', '900000000905', 'text', 'x', now(), '{}')")
+        is_id = c.execute("INSERT INTO isler (mesaj_id, gonderen, durum) VALUES ('wamid.G005', '900000000905', 'bitti') RETURNING id").fetchone()["id"]
+        c.execute("INSERT INTO giden (id, is_id, mesaj_id, sira, alici, tur, kind, govde, durum) "
+                  "VALUES ('out_g005_1', %s, 'wamid.G005', 1, 'PATRON', 'bildirim', 'template', 'şablon', 'bekliyor')", (is_id,))
+        c.execute("INSERT INTO giden (id, is_id, mesaj_id, sira, alici, tur, kind, govde, durum, kaynak) "
+                  "VALUES ('out_g005_2', %s, 'wamid.G005', 2, '900000000905', 'cevap', 'text', 'panel metni', 'bekliyor', 'panel')", (is_id,))
+        r = c.execute("SELECT id, kaynak FROM giden WHERE is_id = %s ORDER BY sira", (is_id,)).fetchall()
+        assert r == [{"id": "out_g005_1", "kaynak": "ajan"}, {"id": "out_g005_2", "kaynak": "panel"}]
+        with pytest.raises(Exception):
+            with c.transaction():
+                c.execute("INSERT INTO giden (id, is_id, mesaj_id, sira, alici, tur, kind, govde, durum) "
+                          "VALUES ('out_g005_3', %s, 'wamid.G005', 3, 'PATRON', 'bildirim', 'sticker', 'x', 'bekliyor')", (is_id,))
+        with pytest.raises(Exception):
+            with c.transaction():
+                c.execute("INSERT INTO bayiler (numara, kod, ad, rol) VALUES ('900000000906', 'X', 'x', 'robot')")
+    with depo.baglan() as c:
+        once = c.execute("SELECT table_name, column_name FROM information_schema.columns WHERE table_schema = 'public' ORDER BY 1, 2").fetchall()
+        with c.transaction():
+            c.execute(sql)
+        assert c.execute("SELECT table_name, column_name FROM information_schema.columns WHERE table_schema = 'public' ORDER BY 1, 2").fetchall() == once
+        assert c.execute("SELECT kaynak FROM giden WHERE id = 'out_g005_2'").fetchone() == {"kaynak": "panel"}
