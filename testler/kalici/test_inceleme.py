@@ -306,7 +306,8 @@ def test_beklenmeyen_hatada_yarim_durum_yazilmaz(depo, monkeypatch):
     assert r["durum"] == "basarisiz" and degisti == [1]          # durum gerçekten yarıda değişti, sonra hata
     d, _ = depo.konusma_oku(NUMARA_A)
     assert d["asama"] == "bos" and d["taslak"] == {}
-    assert [x["alici"] for x in sorgu(depo, "SELECT alici FROM giden ORDER BY sira")] == [NUMARA_A, "PATRON"]
+    # İE-07: Patron'a metin + şablon satırı (pencere kapalıysa şablon gider)
+    assert [(x["alici"], x["kind"]) for x in sorgu(depo, "SELECT alici, kind FROM giden ORDER BY sira")] == [(NUMARA_A, "text"), ("PATRON", "text"), ("PATRON", "template")]
     monkeypatch.setattr(W, "isle", asil)
 
 

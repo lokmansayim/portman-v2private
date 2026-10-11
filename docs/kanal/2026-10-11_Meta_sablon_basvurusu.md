@@ -19,7 +19,7 @@ Her iki şablon için ortak alanlar: **Kategori: Utility** · **Dil: Turkish (tr
 | Gövde (aynen) | `Portman: {{1}} kodlu bayinin {{2}} numaralı talebi sizi bekliyor. Ayrıntıyı panelden görebilirsiniz.` |
 | `{{1}}` örnek | `B1234` (bayi kodu) |
 | `{{2}}` örnek | `PM-B1234-20261011-1` (İş Emri no; yoksa `T-1A2B3C4D` biçiminde talep kimliği; asla boş) |
-| Düğme | **Call to action → Visit website**, metin `Panele git`, URL türü **Dynamic**: `https://portman.portatifev.com/panel/{{1}}`; örnek sonek `konusma/905000000000` (kod `konusma/<bayi numarası>` gönderir; sayfa doğrudan konuşma) |
+| Düğme | **Call to action → Visit website**, metin `Panele git`, URL türü **Dynamic**: `https://portman.portatifev.com/panel/{{1}}`; örnek sonek `konusma/900000000101` (deneme numarası; kod `konusma/<bayi numarası>` gönderir, sayfa doğrudan konuşma) |
 | Ne zaman gider | Portman bir talebi çizemeyince (yönlendirme), çıkarım ya da beklenmeyen hata olunca, bayi "Dosyaları gönder"e basınca. Yalnız Patron'un 24 saat penceresi kapalıysa; pencere açıksa metin gider, şablon gitmez (ücret boşa gitmez). |
 
 ## 2 · Bayiye "dosyalarınız hazır" — `portman_dosyalar_hazir_v1`

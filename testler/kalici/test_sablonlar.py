@@ -30,7 +30,7 @@ def test_talep_kimligi_hic_bos_gitmez():
 
 def test_hitap_sirasi():
     assert S.hitap_metni({"hitap": "Ahmet Bey", "ad": "Ahmet"}) == "Ahmet Bey"
-    assert S.hitap_metni({"hitap": "", "ad": "Deneme Bayi B"}) == "Ayşe Yılmaz"
+    assert S.hitap_metni({"hitap": "", "ad": "Deneme Bayi B"}) == "Deneme Bayi B"
     assert S.hitap_metni({"hitap": " ", "ad": ""}) == "Sayın Bayimiz" and S.hitap_metni(None) == "Sayın Bayimiz"
 
 
