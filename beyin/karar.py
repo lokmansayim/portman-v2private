@@ -256,7 +256,7 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
         secenek = _secenekler(k, katalog, ts)
         if secenek is not None:
             return secenek
-        adaylar = katalog.yakin_modeller(float(ts["alan_m2"]), ts["oda_programi"], ts.get("yapi_turu"))
+        adaylar = katalog.yakin_modeller(float(ts["alan_m2"]), ts["oda_programi"], ts.get("yapi_turu"), kat=ts.get("kat_sayisi"))
         if adaylar:
             liste = ", ".join(Katalog.kisa(m) for m in adaylar)
             return _soru(k, "model_veya_olcu", f"{ts['alan_m2']:g} m² {ts['oda_programi']} için katalog önerilerim: {liste}. Birini seçin ya da dış ölçü verin (örn. 8x7,5 m).")

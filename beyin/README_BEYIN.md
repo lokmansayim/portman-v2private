@@ -21,7 +21,7 @@ WhatsApp mesajı ──► llm.cikar()  ──Talep──►  karar.karar_ver() 
 | `sema.py` | `Talep` (LLM çıktı şeması, 21 alan) ve `Karar` (pydantic) — JSON Schema dışa aktarımı |
 | `prompt.md` | Çıkarım talimatı (model bağımsız; Türkçe; "olmayanı doldurma") |
 | `llm.py` | Adaptör: `openai_chat` (Chat Completions json_schema — hosting varsayılanı), `openai` (Responses), `anthropic` (araç çağrısı), `manuel` (test). Anahtar: parametre → ortam değişkeni → panel ayar dosyası; hiçbir yere yazılmaz. Token/süre ölçümü döner; şema hatasında tek tekrar. **Canlı anahtarla denenmedi (kanal öz-testi dener).** |
-| `katalog.py` | 37 model (`veri/katalog_37_proje.json`), kod normalizasyonu (6001 → P6001, C8201 → Ç8201), m²'ye yakın model önerisi, kodlanmış şablonlar (`SABLONLAR`) |
+| `katalog.py` | 37 model (`veri/katalog_37_proje_v2.json`; kat, kaynak ve doğrulama alanlarıyla, D-07; dondurulmuş `katalog_37_proje.json` referans girdi olarak kalır), kod normalizasyonu (6001 → P6001, C8201 → Ç8201), m²'ye yakın model önerisi (bayi kat söylediyse yalnız o kat), kodlanmış şablonlar (`SABLONLAR`) |
 | `varyant.py` | Deterministik varyantlar: `ayna(x|y)` (mahal dikdörtgenleri, pencere duvarı, menteşe, pano indeksi motordan aday sayısıyla), `pencere_degistir` |
 | `konusma.py` | Gönderen başına durum (JSON dosyası; canlıda DB tablosu) |
 | `karar.py` | Kural katmanı; İş Emri montajı (`talep`, `kunye`, `bina_ozellikleri`, `ozel_istekler`) |

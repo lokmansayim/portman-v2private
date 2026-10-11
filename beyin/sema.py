@@ -64,7 +64,8 @@ class Talep(BaseModel):
     katalog_kodu: Optional[str] = Field(None, description="P6001, Ç8201 gibi katalog kodu; sadece mesajda geçiyorsa. "
                                                           "'6001' gibi eksik yazımı P6001'e tamamla, ancak emin değilsen belirsizliklere yaz")
     yapi_turu: Optional[Literal["prefabrik", "celik"]] = Field(None, description="Sadece açıkça söylendiyse")
-    kat_sayisi: Optional[int] = None
+    kat_sayisi: Optional[int] = Field(None, description="Sadece söylendiyse: 'tek kat', 'tek katlı' → 1; 'çift kat', 'iki katlı', "
+                                                        "'dubleks' → 2; söylenmediyse null")
     oda_programi: Optional[str] = Field(None, description="'2+1', '3+1', '1+1', 'tek oda' → '1+0'")
     alan_m2: Optional[float] = None
     dis_olcu: Optional[DisOlcu] = None

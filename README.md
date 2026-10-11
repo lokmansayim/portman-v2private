@@ -9,7 +9,7 @@ Uzlaşılan mimari (22 Eylül 2026): **LLM anlar → kod karar verir → Motor �
 | Dizin | İçerik |
 |---|---|
 | `motor/` | Geometri çekirdeği (`geometry.py`: 125,5 cm pano aksı, duvar/pano/açıklık), çizim (`dxf_out.py`), doğrulama (`validate.py`), katalog/BOM, **`cikarici.py`** (katalog DXF → İş Emri) |
-| `beyin/` | LLM çıkarım (`llm.py`), şema (`sema.py`), görüşme durumu (`konusma.py`), kural/karar katmanı (`karar.py`), varyantlar (`varyant.py`), katalog (`veri/katalog_37_proje.json`), test koşumu (`harness.py`, `testler/`) |
+| `beyin/` | LLM çıkarım (`llm.py`), şema (`sema.py`), görüşme durumu (`konusma.py`), kural/karar katmanı (`karar.py`), varyantlar (`varyant.py`), katalog (`veri/katalog_37_proje_v2.json`; dondurulmuş `katalog_37_proje.json` referans girdi), test koşumu (`harness.py`, `testler/`) |
 | `is_emri/` | Elle kodlanmış İş Emri şablonları (P6001, ALTIN 6×8, Yan Verandalı 6×8,5) |
 | `kanal/` | Kanal (VPS, Python): `webhook.py` (Meta webhook, `/saglik`), `meta_api.py` (imza, Graph API), `gonderici.py` (gönderim, medya), `panel.py` (yönetim paneli), `worker.py` + `kalici.py` (işleme, Postgres kuyruğu), `depo.py`, `goc/` (yalnız ekleyen göçler), `ayarlar.py`, `tests/e2e_vps_kanal.py` |
 | `vps/` | Sunucu betikleri: `kurulum.sh`, `guncelle.sh`/`geri_don.sh` (etiketli sürüm, geri dönüş), `agent.py`, `sir_koy.py`, `panel_parola.py`, `yedek*.sh`, `nabiz.sh`, `durum.sh`, `kuru_kosu.sh`, `ayar.sh`; `systemd/`, `nginx/`, `sshd/`, `fail2ban/`. `kapi_*` ve `pg_kurulum.sh` tarihli kayıttır |

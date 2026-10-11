@@ -405,6 +405,7 @@
     }
    ],
    "default": null,
+   "description": "Sadece söylendiyse: 'tek kat', 'tek katlı' → 1; 'çift kat', 'iki katlı', 'dubleks' → 2; söylenmediyse null",
    "title": "Kat Sayisi"
   },
   "oda_programi": {
