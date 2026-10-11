@@ -8,7 +8,10 @@ yazılmaz: gönderici (kanal/gonderici.py) gönderim anında ayardan çözer; ad
 from __future__ import annotations
 
 import hashlib
+import re
 import time
+
+from meta_api import sablon_metni               # {{n}} yerleşimi tek yerde (kanal/meta_api.py); noqa: F401
 
 PATRON_BILDIRIM = {
     "anahtar": "sablon_patron_bildirim",
@@ -32,20 +35,21 @@ def satir_id(gelen_id: str, sira: int) -> str:
     return "out_" + hashlib.sha256(f"{gelen_id}|{sira}".encode()).hexdigest()[:24]
 
 
-def sablon_metni(kalip: str, parametreler: list) -> str:
-    out = kalip
-    for i, p in enumerate(parametreler, 1):
-        out = out.replace("{{%d}}" % i, str(p))
-    return out
+_IS_EMRI_NO = re.compile(r"[A-Za-z0-9][A-Za-z0-9_\-]{0,59}")
+
+
+def is_emri_no_gecerli(no) -> bool:
+    """Düğme payload'undan ya da kayıttan gelen İş Emri no: yalnız harf, rakam, tire, alt çizgi; en çok 60 karakter (Meta değişkeni güvenli)."""
+    return bool(no) and _IS_EMRI_NO.fullmatch(str(no)) is not None
 
 
 def talep_kimligi(is_emri_no: str | None, son_is_emri_no: str | None, mesaj_id: str) -> str:
     """Patron şablonunun {{2}} değişkeni hiçbir zaman boş gitmez: işin İş Emri no'su; yoksa taslağın son İş Emri no'su; o da yoksa
-    'T-' + mesajın kısa kimlik izi (günlükteki kimlik_izi ile aynı 8 hane; panelde mesaj bununla bulunur)."""
+    'T-' + mesajın kimlik izinin ilk 8 hanesi (depo.kimlik_izi = md5[:10] ile aynı önek; günlükte ve kanıt çıktısında bu izle aranır)."""
     for aday in (is_emri_no, son_is_emri_no):
-        if aday and str(aday).strip():
-            return str(aday).strip()[:60]
-    return "T-" + hashlib.md5(str(mesaj_id).encode()).hexdigest()[:8].upper()
+        if aday and is_emri_no_gecerli(str(aday).strip()):
+            return str(aday).strip()
+    return "T-" + hashlib.md5(str(mesaj_id).encode()).hexdigest()[:8]
 
 
 def bayi_kodu(bayi: dict | None, sender: str) -> str:
@@ -63,9 +67,9 @@ def hitap_metni(bayi: dict | None) -> str:
 
 
 def sablon_satiri(gelen_id: str, sira: int, to: str, tur: str, sablon: dict, govde: list, dugme_degeri: str,
-                  pencere_kapaliysa: bool, kaynak: str = "ajan", dil: str = "tr") -> dict:
-    """Giden satırı (worker.giden_metin biçimi; kind 'template'). Meta adı satıra yazılmaz (gönderim anında ayardan).
-    govde: değişkenler sırayla ({{1}}, {{2}}); dugme_degeri: url soneki ya da quick_reply payload'u."""
+                  pencere_kapaliysa: bool, kaynak: str = "ajan") -> dict:
+    """Giden satırı (worker.giden_metin biçimi; kind 'template'). Meta adı ve dil satıra yazılmaz (gönderim anında ayardan:
+    sablon_* ve sablon_dil). govde: değişkenler sırayla ({{1}}, {{2}}); dugme_degeri: url soneki ya da quick_reply payload'u."""
     simdi = int(time.time())
     govde = [str(g) for g in govde]
     dugme = {"sub_type": sablon["dugme"], "index": 0}
@@ -73,7 +77,7 @@ def sablon_satiri(gelen_id: str, sira: int, to: str, tur: str, sablon: dict, gov
     return {"id": satir_id(gelen_id, sira), "kind": "template", "to": to, "body": sablon_metni(sablon["metin"], govde)[:4000], "tur": tur,
             "inbound_id": gelen_id, "seq": sira, "state": "pending", "wamid": None, "media_id": None, "attempts": 0, "error": None,
             "delivery_state": None, "created_at": simdi, "updated_at": simdi, "kaynak": kaynak,
-            "sablon_anahtari": sablon["anahtar"], "sablon": {"dil": dil, "govde": govde, "dugmeler": [dugme]},
+            "sablon_anahtari": sablon["anahtar"], "sablon": {"govde": govde, "dugmeler": [dugme]},
             "pencere_kapaliysa": bool(pencere_kapaliysa)}
 
 

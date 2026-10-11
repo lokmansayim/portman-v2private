@@ -425,3 +425,28 @@ def test_konusma_post_yalniz_gonder_ve_sablon_csrf_coklu_parcada(pn, depo):
     assert c.git("POST", f"/panel/konusma/{NUMARA_A}", {"csrf": csrf, "metin": "x"})[0] == 405
     assert c.git("POST", "/panel/konusma/abc/gonder", {"csrf": csrf, "metin": "x"})[0] == 404
     assert tek(depo, "SELECT count(*) AS n FROM giden WHERE kaynak = 'panel'")["n"] == 0
+
+
+def test_sablon_dugmesi_test_karti_pasif_bayi_ve_dogrulanmamis_plan_icin_kapali(pn, depo, hizli_motor, monkeypatch):
+    """İnceleme düzeltmesi: 'dosyalar hazır' yalnız kayıtlı, aktif, gerçek bayiye ve doğrulanmış revizyona."""
+    c = Istemci(pn); c.giris(DOGRU); csrf = _csrf_oturum(c)
+    # test kartı: İş Emri olsa da düğme kapalı, POST 400
+    depo.bayi_yaz("900000000905", ad="Kuru Koşu", kod="TEST", rol="test")
+    assert depo.mesaj_kaydet(mesaj("P6001 aynalı", T_P6001, numara="900000000905", bayi=depo.gelen_bayisi("900000000905")))
+    assert kalici.bir_is(depo, AYAR, "t")["eylem"] == "is_emri"
+    kod, h, _ = c.git("GET", "/panel/konusma/900000000905")
+    assert kod == 200 and "test kartı".encode() in h and b'/sablon"' not in h
+    assert c.git("POST", "/panel/konusma/900000000905/sablon", {"csrf": csrf})[0] == 400
+    # pasif bayi
+    depo.bayi_yaz(NUMARA_A, ad=BAYI_A["ad"], kod=BAYI_A["kod"], rol="bayi")
+    assert depo.mesaj_kaydet(mesaj("P6001 aynalı", T_P6001)); assert kalici.bir_is(depo, AYAR, "t")["eylem"] == "is_emri"
+    depo.bayi_yaz(NUMARA_A, ad=BAYI_A["ad"], kod=BAYI_A["kod"], rol="bayi", aktif=False)
+    kod, h, _ = c.git("GET", f"/panel/konusma/{NUMARA_A}")
+    assert "bayi pasif".encode() in h and c.git("POST", f"/panel/konusma/{NUMARA_A}/sablon", {"csrf": csrf})[0] == 400
+    # doğrulanmamış revizyon: düğme kapalı
+    depo.bayi_yaz(NUMARA_A, ad=BAYI_A["ad"], kod=BAYI_A["kod"], rol="bayi", aktif=True)
+    with depo.baglan() as cc, cc.transaction():
+        cc.execute("UPDATE revizyonlar SET dogrulandi = false, durum = 'dogrulanmadi' WHERE gonderen = %s", (NUMARA_A,))
+    kod, h, _ = c.git("GET", f"/panel/konusma/{NUMARA_A}")
+    assert "doğrulanmış İş Emri kaydı yok".encode() in h and c.git("POST", f"/panel/konusma/{NUMARA_A}/sablon", {"csrf": csrf})[0] == 400
+    assert tek(depo, "SELECT count(*) AS n FROM giden WHERE kind = 'template'")["n"] == 0

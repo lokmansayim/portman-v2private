@@ -265,7 +265,8 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
         baslangic["son_no"] = (k.d.get("son_is_emri") or {}).get("is_emri_no")
     kim = f"{(bayi or {}).get('ad') or gelen.get('name') or ''} ({maske(sender)})"
     reply_id = str(gelen.get("reply_id") or "")
-    if gelen.get("type") in GELEN_YAZILI and reply_id.startswith("dosya:"):
+    import sablonlar as S0
+    if gelen.get("type") in GELEN_YAZILI and reply_id.startswith("dosya:") and S0.is_emri_no_gecerli(reply_id[len("dosya:"):]):
         # İE-07 P5: bayi "dosyalarınız hazır" şablonunun hızlı yanıt düğmesine bastı → Meta tarafında 24 saat penceresi açıldı.
         # LLM çağrılmaz, konuşma durumu değişmez; bayiye onaylı sabit cevap, Patron'a bildirim (metin + şablon, ekleme A).
         import sablonlar as S

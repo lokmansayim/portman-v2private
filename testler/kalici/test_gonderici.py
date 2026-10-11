@@ -361,3 +361,25 @@ def test_dry_run_sablonu_da_tutar(depo, meta):
     gonderen = _gonderen_sablon(depo, meta)
     say = G.tur(depo, gonderen, gonderen.istemci, W.KANAL, {**AYAR_SABLON, "dry_run": True})
     assert say["tutuldu"] >= 2 and tek(depo, "SELECT hata FROM giden WHERE id = %s", sab_id)["hata"].startswith("dry_run") and meta.gidenler() == []
+
+
+def test_sablon_metin_dustuyse_pencere_acik_olsa_da_gider_ve_dil_ayardan(depo, meta):
+    """İnceleme düzeltmesi: 'sablon_gereksiz' yalnız eşlik eden metin satırı gerçekten gittiyse; metin belirsiz/gonderilmedi ise şablon gider. Dil ayardan."""
+    depo.bayi_yaz(NUMARA_P, ad="Patron", rol="patron")
+    depo.mesaj_kaydet(patron_mesaji("buradayım", talep("selam", "selam"), ts=time.time() - 60)); isle_hepsi(depo)    # pencere açık
+    g, metin_id, sab_id = _yonlendirme_satirlari(depo)
+    with depo.baglan() as c, c.transaction():
+        c.execute("UPDATE giden SET durum = 'belirsiz', hata = 'test: POST sonrası hata' WHERE id = %s", (metin_id,))
+    ayar = {**AYAR_SABLON, "sablon_dil": "tr_TR"}
+    gonderen = _gonderen_sablon(depo, meta, ayar=ayar)
+    G.tur(depo, gonderen, gonderen.istemci, W.KANAL, ayar)
+    assert tek(depo, "SELECT durum FROM giden WHERE id = %s", sab_id)["durum"] == "kabul_edildi"
+    [y] = [y for y in meta.gidenler() if y["type"] == "template"]
+    assert y["template"]["language"] == {"code": "tr_TR"} and y["template"]["name"] == "portman_patron_bekliyor_v1"
+    # metin satırı hâlâ sıradaysa şablon bekler (YenidenDene), gönderilmez
+    g2, metin2, sab2 = _yonlendirme_satirlari(depo)
+    with depo.baglan() as c, c.transaction():
+        c.execute("UPDATE giden SET durum = 'gonderiliyor', gonderim_basladi = now() WHERE id = %s", (metin2,))
+    say = G.tur(depo, gonderen, gonderen.istemci, W.KANAL, ayar)
+    assert tek(depo, "SELECT durum, hata FROM giden WHERE id = %s", sab2)["durum"] == "bekliyor" and say.get("yeniden") == 1
+    assert len([y for y in meta.gidenler() if y["type"] == "template"]) == 1

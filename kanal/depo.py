@@ -269,7 +269,8 @@ class Depo:
         c.execute("UPDATE isler SET durum = 'basarisiz', hata = %s, bitti = now(), sahip = NULL, kira_bitis = NULL WHERE id = %s",
                   (neden, j["id"]))
         satirlar = [(1, gelen["sender"], "cevap", HATA_BAYIYE)]
-        if (gelen.get("role") or "bayi") != "patron":
+        patrona = (gelen.get("role") or "bayi") != "patron"
+        if patrona:
             satirlar.append((2, "PATRON", "bildirim",
                              f"Portman: {maske(gelen['sender'])} mesajı işlenemedi ({neden}). Panelden bakabilirsiniz."))
         for sira, alici, tur, govde in satirlar:
@@ -277,7 +278,7 @@ class Depo:
                       "VALUES (%s, %s, %s, %s, %s, %s, 'text', %s, %s) ON CONFLICT (id) DO NOTHING",
                       (satir_id(gelen["id"], sira), j["id"], gelen["id"], sira, alici, tur, govde,
                        Jsonb(metin_satiri(gelen, govde, sira, alici, tur))))
-        if len(satirlar) == 2:                       # İE-07 P4: Patron'un penceresi kapalıysa şablonla ulaşır (talep kimliği T-<iz>)
+        if patrona:                                  # İE-07 P4: Patron'un penceresi kapalıysa şablonla ulaşır (talep kimliği T-<iz>)
             import sablonlar as S
             s = S.patron_bildirim_satiri(gelen, 3, gelen.get("bayi") if isinstance(gelen.get("bayi"), dict) else None, None, None)
             c.execute("INSERT INTO giden (id, is_id, mesaj_id, sira, alici, tur, kind, govde, satir) "
@@ -825,10 +826,17 @@ class Depo:
             return s["id"]
 
     def son_is_emri_no(self, numara: str) -> str | None:
-        """Bayinin son İş Emri numarası (revizyonlar); 'dosyalarınız hazır' şablonunun {{2}} değişkeni. Yoksa None."""
+        """Bayinin son DOĞRULANMIŞ revizyonunun İş Emri numarası; 'dosyalarınız hazır' şablonunun {{2}} değişkeni. Yoksa None."""
         with self.baglan() as c:
-            r = c.execute("SELECT is_emri_no FROM revizyonlar WHERE gonderen = %s ORDER BY id DESC LIMIT 1", (str(numara),)).fetchone()
+            r = c.execute("SELECT is_emri_no FROM revizyonlar WHERE gonderen = %s AND dogrulandi ORDER BY id DESC LIMIT 1", (str(numara),)).fetchone()
         return str(r["is_emri_no"]) if r and r.get("is_emri_no") else None
+
+    def kardes_metin_durumu(self, mesaj_id: str, alici: str, sira: int) -> str | None:
+        """Şablon satırına eşlik eden metin satırının durumu (aynı mesaj ve alıcı, daha küçük sıra, en yakını). Yoksa None."""
+        with self.baglan() as c:
+            r = c.execute("SELECT durum FROM giden WHERE mesaj_id = %s AND alici = %s AND kind = 'text' AND sira < %s ORDER BY sira DESC LIMIT 1",
+                          (mesaj_id, alici, sira)).fetchone()
+        return r["durum"] if r else None
 
     def gelen_dosyalari(self, numara: str) -> list[dict]:
         with self.baglan() as c:

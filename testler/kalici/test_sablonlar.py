@@ -23,13 +23,14 @@ def test_talep_kimligi_hic_bos_gitmez():
     assert S.talep_kimligi("PM-B1-20261011-3", None, "wamid.A") == "PM-B1-20261011-3"
     assert S.talep_kimligi(None, "PM-B1-20261011-2", "wamid.A") == "PM-B1-20261011-2"
     assert S.talep_kimligi("  ", "", "wamid.A").startswith("T-") and len(S.talep_kimligi(None, None, "wamid.A")) == 10
-    assert S.talep_kimligi(None, None, "wamid.A") == "T-" + D.kimlik_izi("wamid.A")[:8].upper()   # günlükteki izle aynı
+    assert S.talep_kimligi(None, None, "wamid.A") == "T-" + D.kimlik_izi("wamid.A")[:8]           # günlükteki izle aynı önek
+    assert S.talep_kimligi("kötü değer\n", None, "wamid.A").startswith("T-") and S.is_emri_no_gecerli("PM-B1-20261011-3") and not S.is_emri_no_gecerli("a b")
     assert S.bayi_kodu({"kod": "B0101"}, "900000000101") == "B0101" and S.bayi_kodu(None, "900000000101") == "B0101"
 
 
 def test_hitap_sirasi():
     assert S.hitap_metni({"hitap": "Ahmet Bey", "ad": "Ahmet"}) == "Ahmet Bey"
-    assert S.hitap_metni({"hitap": "", "ad": "Ayşe Yılmaz"}) == "Ayşe Yılmaz"
+    assert S.hitap_metni({"hitap": "", "ad": "Deneme Bayi B"}) == "Ayşe Yılmaz"
     assert S.hitap_metni({"hitap": " ", "ad": ""}) == "Sayın Bayimiz" and S.hitap_metni(None) == "Sayın Bayimiz"
 
 
@@ -38,9 +39,9 @@ def test_patron_ve_bayi_satirlari():
     p = S.patron_bildirim_satiri(gelen, 3, {"kod": "B0101"}, None, None)
     assert p["id"] == W.satir_id("wamid.G1", 3) and p["kind"] == "template" and p["to"] == "PATRON" and p["tur"] == "bildirim"
     assert p["sablon_anahtari"] == "sablon_patron_bildirim" and p["pencere_kapaliysa"] is True and p["kaynak"] == "ajan"
-    assert p["sablon"] == {"dil": "tr", "govde": ["B0101", "T-" + D.kimlik_izi("wamid.G1")[:8].upper()],
+    assert p["sablon"] == {"govde": ["B0101", "T-" + D.kimlik_izi("wamid.G1")[:8]],
                            "dugmeler": [{"sub_type": "url", "index": 0, "text": "konusma/900000000101"}]}
-    assert "ad" not in p["sablon"]                                  # Meta adı gönderim anında ayardan
+    assert "ad" not in p["sablon"] and "dil" not in p["sablon"]     # Meta adı ve dil gönderim anında ayardan
     assert p["body"].startswith("Portman: B0101 kodlu bayinin T-") and p["body"].endswith("panelden görebilirsiniz.")
     b = S.bayi_dosyalar_hazir_satiri("wamid.G1", 101, "900000000101", {"hitap": "Ahmet Bey"}, "PM-B0101-20261011-1")
     assert b["seq"] == 101 and b["to"] == "900000000101" and b["kaynak"] == "panel" and b["pencere_kapaliysa"] is False

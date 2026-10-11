@@ -36,7 +36,7 @@ def test_yonlendirme_metin_ve_sablon_satiri_talep_kimligi_bos_gitmez(depo):
     assert [(x["alici"], x["kind"], x["kaynak"]) for x in s] == [(NUMARA_A, "text", "ajan"), ("PATRON", "text", "ajan"), ("PATRON", "template", "ajan")]
     sab = s[2]["satir"]
     assert sab["sablon_anahtari"] == "sablon_patron_bildirim" and sab["pencere_kapaliysa"] is True and "ad" not in sab["sablon"]
-    assert sab["sablon"]["govde"] == ["TSTA", "T-" + kimlik_izi(g["id"])[:8].upper()]        # İş Emri yok → T-<iz>, asla boş
+    assert sab["sablon"]["govde"] == ["TSTA", "T-" + kimlik_izi(g["id"])[:8]]                # İş Emri yok → T-<iz>, asla boş
     assert sab["sablon"]["dugmeler"] == [{"sub_type": "url", "index": 0, "text": f"konusma/{NUMARA_A}"}]
     assert s[2]["govde"] == S.sablon_metni(S.PATRON_BILDIRIM["metin"], sab["sablon"]["govde"])
     assert s[1]["govde"].startswith("Portman yönlendirme:") and "Katalog notu" not in s[1]["govde"]

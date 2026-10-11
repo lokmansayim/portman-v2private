@@ -67,7 +67,7 @@ class GonderenMeta:
         alici = self.depo.patron_numarasi() if bildirim else str(r["alici"])
         if not alici or not M.numara_gecerli(alici):
             raise K.Gonderilmedi("Gönderilmedi: recipient_unknown")
-        if not bildirim and not sablon and alici != str(gelen.get("sender") or ""):
+        if not bildirim and alici != str(gelen.get("sender") or ""):
             raise K.Gonderilmedi("Gönderilmedi: recipient_mismatch")
         self.depo.alici_cozuldu_kaydet(r["id"], alici)              # düşen satır da (pencere kapalı, sablon_yok) panelde alıcının sayfasında görünsün
         son = self.depo.son_gelen_zamani(alici) if (bildirim or panel) else float(gelen.get("timestamp") or 0)
@@ -76,15 +76,21 @@ class GonderenMeta:
         if not sablon and not acik:
             raise K.Gonderilmedi("Gönderilmedi: reply_window_closed")
         if sablon:
-            if satir.get("pencere_kapaliysa") and acik:         # metin satırı gitti; şablona (ücretli) gerek yok
-                raise K.Gonderilmedi("Gönderilmedi: sablon_gereksiz (pencere açık, metin satırı gitti)")
+            if satir.get("pencere_kapaliysa") and acik:
+                # Eşlik eden metin satırı (aynı mesaj, aynı alıcı, daha küçük sıra) gerçekten gittiyse ücretli şablona gerek yok;
+                # metin düştüyse (belirsiz, gönderilmedi) şablon gider; metin hâlâ sıradaysa bu satır bekler.
+                metin_durumu = self.depo.kardes_metin_durumu(r["mesaj_id"], r["alici"], int(r.get("sira") or 0))
+                if metin_durumu == "kabul_edildi":
+                    raise K.Gonderilmedi("Gönderilmedi: sablon_gereksiz (pencere açık, metin satırı gitti)")
+                if metin_durumu in ("bekliyor", "gonderiliyor"):
+                    raise K.YenidenDene("Şablon bekliyor: metin satırı henüz sonuçlanmadı")
             ayar = self.ayar_oku(); anahtar = str(satir.get("sablon_anahtari") or "")
             ad = ayar.get(anahtar) if anahtar else None
             if not isinstance(ad, str) or not ad:
                 log("şablon tanımsız:", anahtar or "-", r["id"])
                 raise K.Gonderilmedi(f"Gönderilmedi: sablon_yok ({anahtar or '-'}): ayar.sh ile Meta şablon adı girilmeli")
             s = dict(satir.get("sablon") or {})
-            satir["sablon"] = {**s, "ad": ad, "dil": s.get("dil") or ayar.get("sablon_dil") or "tr"}
+            satir["sablon"] = {**s, "ad": ad, "dil": str(ayar.get("sablon_dil") or "tr")}
         medya_id = None; baslik_medya = None
         try:
             if r["kind"] in ("document", "image") or (r["kind"] == "interactive" and M.baslik_gorseli_var(satir)):

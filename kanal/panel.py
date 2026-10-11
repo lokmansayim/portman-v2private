@@ -271,8 +271,7 @@ def cevap_formu(p: Panel, oturum: dict, numara: str, b: dict | None, hata: str |
     govde = (f'<p class="hata">{e(hata)}</p>' if hata else "") + (f'<p class="bilgi">{e(bilgi)}</p>' if bilgi else "")
     if son is None:
         return govde + '<p class="durum">Bu numaradan hiç mesaj gelmedi; panelden gönderim yapılamaz (bayi önce yazmalı ya da şablon için kaydı olmalı).</p>'
-    son_t = p.depo.son_gelen_zamani(numara) or 0
-    kalan = PENCERE_SN - (time.time() - float(son_t))
+    kalan = PENCERE_SN - (time.time() - float(son.get("zaman") or 0))        # gönderici de bayinin son mesajından ölçer
     if kalan > 0:
         pencere = f'<p class="durum">24 saat penceresi <b>açık</b>; kalan yaklaşık {int(kalan // 3600)} saat {int(kalan % 3600 // 60)} dk. Metin ve PDF gönderilebilir.</p>'
     else:
@@ -284,14 +283,30 @@ def cevap_formu(p: Panel, oturum: dict, numara: str, b: dict | None, hata: str |
             f'<label>PDF (en çok 10 MB)<input type="file" name="pdf" accept="application/pdf"></label>'
             f'<label>PDF açıklaması<input type="text" name="aciklama" maxlength="1000"></label>'
             f'<button>Gönder</button></form>')
-    no = p.depo.son_is_emri_no(numara)
-    if no:
+    neden = sablon_engeli(p, numara, b)
+    if neden is None:
+        no = p.depo.son_is_emri_no(numara)
         sablon = (f'<form class="kart" method="post" action="/panel/konusma/{e(numara)}/sablon"><input type="hidden" name="csrf" value="{csrf}">'
                   f'<button>"Dosyalar hazır" şablonu gönder ({e(no)})</button> <span class="durum">Meta onaylı şablon; pencere kapalıyken de gider (ücretli). '
                   f'Bayi "Dosyaları gönder"e basınca pencere açılır.</span></form>')
     else:
-        sablon = '<p class="durum">"Dosyalar hazır" şablonu: bu bayinin İş Emri kaydı yok (proje yok), düğme kapalı.</p>'
+        sablon = f'<p class="durum">"Dosyalar hazır" şablonu: {e(neden)}; düğme kapalı.</p>'
     return govde + pencere + form + sablon
+
+
+def sablon_engeli(p: Panel, numara: str, b: dict | None) -> str | None:
+    """'Dosyalar hazır' şablonu kime gidebilir: kayıtlı ve aktif bayi (test kartı, Patron değil) ve doğrulanmış bir revizyonu var. Engel metni ya da None."""
+    if not b:
+        return "kayıtsız numara"
+    if b.get("rol") == "test":
+        return "test kartı (gerçek numara değil)"
+    if b.get("rol") == "patron":
+        return "Patron kartı"
+    if not b.get("aktif"):
+        return "bayi pasif"
+    if not p.depo.son_is_emri_no(numara):
+        return "bu bayinin doğrulanmış İş Emri kaydı yok (proje yok)"
+    return None
 
 
 def konusma_sayfasi(p: Panel, oturum: dict, numara: str, hata: str | None = None, bilgi: str | None = None) -> str:
@@ -470,25 +485,39 @@ def _pdf_kaydet(p: Panel, numara: str, dosya_adi: str, icerik: bytes) -> tuple[P
 
 
 def konusma_gonder(p: Panel, oturum: dict, i: Istek, numara: str) -> tuple:
-    """İE-07 P3: POST /panel/konusma/<numara>/gonder — metin ve/veya PDF satırı (giden.kaynak 'panel'); gönderici kuralları aynen."""
-    import sablonlar as S                                   # noqa: F401  (modül yolu; satır üretimi aşağıda)
+    """İE-07 P3: POST /panel/konusma/<numara>/gonder — metin ve/veya PDF satırı (giden.kaynak 'panel'); gönderici kuralları aynen.
+    Önce PDF doğrulanıp yazılır, sonra satırlar; bir satır yazılamazsa yazılan PDF dosyası kaldırılır (yarım gönderim olmaz)."""
     f = i.form()
     metin = str(f.get("metin") or "").strip()
     aciklama = str(f.get("aciklama") or "").strip()
     pdf = i.dosyalar.get("pdf")
     if not metin and not pdf:
         return _html(400, konusma_sayfasi(p, oturum, numara, hata="Metin ya da PDF gerekli."))
-    yazilan = []
+    if p.depo.son_gelen_mesaj(numara) is None:
+        return _html(400, konusma_sayfasi(p, oturum, numara, hata="Bu numaradan hiç mesaj gelmedi; panelden gönderim yapılamaz."))
+    yol = None
+    try:
+        if pdf:
+            yol, ad, sha = _pdf_kaydet(p, numara, pdf[0], pdf[1])
+    except ValueError as hata:
+        return _html(400, konusma_sayfasi(p, oturum, numara, hata=str(hata)))
+    yazilan = []; pdf_yazildi = False
     try:
         if metin:
             yazilan.append(p.depo.panel_giden_ekle(numara, lambda g, n: _panel_metin(g, metin, n, numara)))
         if pdf:
-            yol, ad, sha = _pdf_kaydet(p, numara, pdf[0], pdf[1])
             yazilan.append(p.depo.panel_giden_ekle(numara, lambda g, n: _panel_belge(g, yol, ad, aciklama, n, numara, sha)))
-    except ValueError as hata:
-        if str(hata) == "gelen_yok":
+            pdf_yazildi = True
+    except Exception as hata:
+        if yol is not None and not pdf_yazildi:
+            try:
+                os.unlink(yol)                                        # satır yazılamadı: kendi yazdığımız dosya kalmasın
+            except OSError:
+                pass
+        if isinstance(hata, ValueError) and str(hata) == "gelen_yok":
             return _html(400, konusma_sayfasi(p, oturum, numara, hata="Bu numaradan hiç mesaj gelmedi; panelden gönderim yapılamaz."))
-        return _html(400, konusma_sayfasi(p, oturum, numara, hata=str(hata)))
+        log("panel giden yazılamadı", maske(numara), type(hata).__name__)
+        return _html(500, konusma_sayfasi(p, oturum, numara, hata="Satır yazılamadı; günlüğe bakın." + (" Metin satırı yazıldı." if (metin and yazilan) else "")))
     log("panel giden", maske(numara), "metin" if metin else "", "pdf" if pdf else "", *yazilan)
     return _yonlendir(f"/panel/konusma/{numara}")
 
@@ -506,12 +535,14 @@ def _panel_belge(gelen: dict, yol: Path, ad: str, aciklama: str, sira: int, numa
 
 
 def konusma_sablon(p: Panel, oturum: dict, i: Istek, numara: str) -> tuple:
-    """İE-07 P5: POST /panel/konusma/<numara>/sablon — bayiye 'dosyalarınız hazır' Meta şablonu ({{1}} hitap, {{2}} son İş Emri no)."""
+    """İE-07 P5: POST /panel/konusma/<numara>/sablon — bayiye 'dosyalarınız hazır' Meta şablonu ({{1}} hitap, {{2}} son doğrulanmış İş Emri no).
+    Yalnız kayıtlı, aktif, gerçek bayiye (test kartı ve Patron değil)."""
     import sablonlar as S
-    no = p.depo.son_is_emri_no(numara)
-    if not no:
-        return _html(400, konusma_sayfasi(p, oturum, numara, hata="Bu bayinin İş Emri kaydı yok; şablon gönderilemez."))
     b = p.depo.bayi_oku(numara)
+    neden = sablon_engeli(p, numara, b)
+    if neden is not None:
+        return _html(400, konusma_sayfasi(p, oturum, numara, hata=f"Şablon gönderilemez: {neden}."))
+    no = p.depo.son_is_emri_no(numara)
     try:
         kimlik = p.depo.panel_giden_ekle(numara, lambda g, n: S.bayi_dosyalar_hazir_satiri(g["id"], n, numara, b, no))
     except ValueError:

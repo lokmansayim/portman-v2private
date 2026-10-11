@@ -253,8 +253,9 @@ def etkilesim_yuku(satir: dict, baslik_medya_id: str | None) -> dict:
     return out
 
 
-_SABLON_AD = re.compile(r"^[a-z0-9_]{1,512}$")
-_SABLON_DIL = re.compile(r"^[a-z]{2,3}(_[A-Z]{2})?$")
+SABLON_AD_KALIBI = re.compile(r"^[a-z0-9_]{1,512}$")       # Meta şablon adı (kanal/ayarlar.py de bununla denetler)
+SABLON_DIL_KALIBI = re.compile(r"^[a-z]{2,3}(_[A-Z]{2})?$")
+_SABLON_AD, _SABLON_DIL = SABLON_AD_KALIBI, SABLON_DIL_KALIBI
 _SABLON_BOSLUK = re.compile(r"\s{4,}")
 SABLON_DEGISKEN_EN_COK = 1024
 SABLON_DUGME_EN_COK = 10
