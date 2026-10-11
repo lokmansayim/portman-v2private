@@ -168,9 +168,12 @@ def bir_is(depo: Depo, settings: dict, sahip: str | None = None) -> dict | None:
     except Exception:
         hata = traceback.format_exc()[-2500:]
         k = BellekKonusma(gelen["sender"], d)       # yarım kalan durum değişikliği yazılmaz
+        import sablonlar as S
         cikti = {"satirlar": [W.giden_metin(gelen, HATA_BAYIYE, 1)]
                  + ([] if gelen.get("role") == "patron" else
-                    [W.giden_metin(gelen, f"Portman: {maske(gelen['sender'])} mesajı işlenirken hata oluştu; günlüğe bakın.", 2, "PATRON", "bildirim")]),
+                    [W.giden_metin(gelen, f"Portman: {maske(gelen['sender'])} mesajı işlenirken hata oluştu; günlüğe bakın.", 2, "PATRON", "bildirim"),
+                     # İE-07 P4: Patron'un penceresi kapalıysa şablonla ulaşır (talep kimliği boş gitmez: T-<iz>)
+                     S.patron_bildirim_satiri(gelen, 3, gelen.get("bayi"), None, ((d or {}).get("son_is_emri") or {}).get("is_emri_no"))]),
                  "sonuc": {"eylem": "hata", "gerekce": "beklenmeyen hata"}, "hata": hata}
     cikti["sonuc"]["worker"] = "kalici"; cikti["sonuc"]["sure_s"] = round(time.time() - t0, 1)
     yer = None

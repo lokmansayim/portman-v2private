@@ -1,10 +1,16 @@
-"""Katalog erişimi: 37 model (kod, aile, m², oda programı) + motor için hazır İş Emri şablonları."""
+"""Katalog erişimi: 37 model (kod, aile, m², oda programı, kat) + motor için hazır İş Emri şablonları.
+
+Kayıt dosyası `veri/katalog_37_proje_v2.json` (İE-07, D-07): dondurulmuş `katalog_37_proje.json`'un (referans girdi, değişmez)
+yeni sürümü. Her kayıtta `kat` (1 | 2), `kaynak` (katalog_pdf | cizim_etiketi | cizim_seti) ve `dogrulama` (yok | etiket_okundu |
+cizim_seti_ile_dogrulandi) var; doğru kaynak doğrulanmış çizimdir, katalog PDF'i yalnız fikir kaynağıdır. 13 çift katlı modelin
+`family` değeri "… çift kat"; Ç8201, Ç1031, Ç1151 çizimden düzeltildi (`not` alanı)."""
 from __future__ import annotations
 import json, re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-KATALOG_JSON = Path(__file__).resolve().parent / "veri" / "katalog_37_proje.json"
+KATALOG_JSON = Path(__file__).resolve().parent / "veri" / "katalog_37_proje_v2.json"
+KATALOG_DONDURULMUS_JSON = Path(__file__).resolve().parent / "veri" / "katalog_37_proje.json"   # referans girdi; okunmaz, değişmez
 ADAYLAR_JSON = Path(__file__).resolve().parent / "veri" / "adaylar.json"      # İE-04 aday kaydı (şablonlar is_emri/adaylar/)
 ADAYLAR_TEST_JSON = Path(__file__).resolve().parent / "veri" / "adaylar_test.json"   # yalnız test_adaylari=True iken yüklenir
 SABLON_DIR = ROOT / "is_emri"
@@ -81,12 +87,16 @@ class Katalog:
             return SABLON_DIR / f
         return self.aday_sablon_yolu(kod)
 
-    def yakin_modeller(self, alan_m2: float, oda: str | None = None, yapi: str | None = None, n: int = 3) -> list[dict]:
+    def yakin_modeller(self, alan_m2: float, oda: str | None = None, yapi: str | None = None, n: int = 3,
+                       kat: int | None = None) -> list[dict]:
+        """m²'ye en yakın n model. `kat` verilmişse (bayi "tek kat"/"çift kat" dediyse) yalnız o kattakiler; verilmediyse süzgeç
+        yok, etiket (`kisa`) katı doğru söyler (Lokman, 11.10.2026, karar 2)."""
         adaylar = []
         for m in self.modeller.values():
             if yapi == "celik" and not m["code"].startswith("Ç"): continue
             if yapi in (None, "prefabrik") and yapi is not None and not m["code"].startswith("P"): continue
             if oda and m["type"] != oda: continue
+            if kat is not None and int(m.get("kat") or 1) != int(kat): continue
             a = _m2(m["total_m2"])
             if a is None: continue
             adaylar.append((abs(a - alan_m2), m))

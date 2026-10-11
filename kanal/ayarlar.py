@@ -17,8 +17,13 @@ VARSAYILAN = {
     "mesaj_katmani": True,
     "ucb_taban_url": None,
     "kayitsiz_cevap": "Bu hat PortatifEv bayileri için Portman planlama hattıdır. Kayıtlı bayi değilseniz lütfen PortatifEv ofisiyle görüşün.",
+    # İE-07: Meta onaylı şablon adları (WhatsApp Manager'da onaylanınca Lokman ayar.sh ile girer; None = tanımsız → satır 'sablon_yok')
+    "sablon_patron_bildirim": None,       # Patron'a: "[bayi kodu] kodlu bayinin [iş no] numaralı talebi sizi bekliyor" (url düğmesi)
+    "sablon_bayi_dosyalar_hazir": None,   # bayiye: "Merhaba [hitap], [iş no] numaralı projenizin dosyaları hazır" (hızlı yanıt)
+    "sablon_dil": "tr",                   # şablonların Meta'daki dil kodu
 }
 ANAHTARLAR = tuple(VARSAYILAN)
+SABLON_ANAHTARLARI = ("sablon_patron_bildirim", "sablon_bayi_dosyalar_hazir")
 
 
 def dosya(veri) -> Path:
@@ -70,6 +75,16 @@ def deger_coz(metin: str):
 
 
 MODLAR = ("patron", "kayitli", "hepsi")
+
+
+def _sablon_kaliplari():
+    """Şablon adı ve dil kalıpları kanal/meta_api.py ile aynı (gönderim anında da aynı kuralla denetlenir)."""
+    import sys as _sys
+    kok = str(Path(__file__).resolve().parent)
+    if kok not in _sys.path:
+        _sys.path.insert(0, kok)
+    import meta_api as _M
+    return _M.SABLON_AD_KALIBI, _M.SABLON_DIL_KALIBI
 MANTIKSAL = ("enabled", "dry_run", "patron_teknik_not", "mesaj_katmani")
 
 
@@ -97,6 +112,11 @@ def main(argv=None) -> int:
             print(f"DUR: mode şunlardan biri olmalı: {', '.join(MODLAR)}", file=sys.stderr); return 1
         if ns.anahtar == "enabled_at" and not isinstance(deger, int):
             print("DUR: enabled_at tam sayı (epoch) olmalı", file=sys.stderr); return 1
+        ad_kalibi, dil_kalibi = _sablon_kaliplari()
+        if ns.anahtar in SABLON_ANAHTARLARI and deger is not None and not (isinstance(deger, str) and ad_kalibi.match(deger)):
+            print(f"DUR: {ns.anahtar} Meta şablon adı olmalı (küçük harf, rakam, alt çizgi) ya da null", file=sys.stderr); return 1
+        if ns.anahtar == "sablon_dil" and not (isinstance(deger, str) and dil_kalibi.match(deger)):
+            print("DUR: sablon_dil 'tr' gibi bir dil kodu olmalı", file=sys.stderr); return 1
         yaz(ns.veri, ns.anahtar, deger)
         if ns.anahtar == "enabled" and deger is True:
             yaz(ns.veri, "enabled_at", int(time.time()))

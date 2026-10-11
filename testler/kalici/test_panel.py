@@ -34,11 +34,13 @@ class Istemci:
     def __init__(self, p: PN.Panel, ip: str = "10.0.0.1"):
         self.app = PN.uygulama_olustur(p); self.cerez = {}; self.ip = ip
 
-    def git(self, metod: str, yol: str, form: dict | None = None, sorgu: str = "", cerezsiz: bool = False):
-        govde = urllib.parse.urlencode(form).encode() if form is not None else b""
+    def git(self, metod: str, yol: str, form: dict | None = None, sorgu: str = "", cerezsiz: bool = False, ham: bytes | None = None, ctype: str | None = None):
+        govde = ham if ham is not None else (urllib.parse.urlencode(form).encode() if form is not None else b"")
         env = {"REQUEST_METHOD": metod, "PATH_INFO": yol, "QUERY_STRING": sorgu, "CONTENT_LENGTH": str(len(govde)), "wsgi.input": BytesIO(govde),
                "REMOTE_ADDR": self.ip}
-        if form is not None:
+        if ctype is not None:
+            env["CONTENT_TYPE"] = ctype
+        elif form is not None:
             env["CONTENT_TYPE"] = "application/x-www-form-urlencoded"
         if self.cerez and not cerezsiz:
             env["HTTP_COOKIE"] = "; ".join(f"{a}={v}" for a, v in self.cerez.items())
@@ -55,6 +57,16 @@ class Istemci:
                 else:
                     self.cerez[ad] = deger
         return out["status"], govde, out["headers"]
+
+    def coklu(self, yol: str, alanlar: dict, dosyalar: dict | None = None):
+        """İE-07: multipart/form-data gönderimi (tarayıcının PDF formu gibi)."""
+        import uuid
+        sinir = "----pmSinir" + uuid.uuid4().hex
+        parcalar = [f'--{sinir}\r\nContent-Disposition: form-data; name="{a}"\r\n\r\n{v}\r\n'.encode("utf-8") for a, v in alanlar.items()]
+        for a, (ad, icerik) in (dosyalar or {}).items():
+            parcalar.append(f'--{sinir}\r\nContent-Disposition: form-data; name="{a}"; filename="{ad}"\r\nContent-Type: application/pdf\r\n\r\n'.encode("utf-8") + icerik + b"\r\n")
+        govde = b"".join(parcalar) + f"--{sinir}--\r\n".encode()
+        return self.git("POST", yol, ham=govde, ctype=f"multipart/form-data; boundary={sinir}")
 
     @staticmethod
     def csrf(metin: bytes) -> str:
@@ -282,3 +294,159 @@ def test_parola_ozeti_birimi():
     assert o.startswith("scrypt$16384$8$1$") and PN.parola_dogru(DOGRU, o) and not PN.parola_dogru(DOGRU + "x", o)
     assert PN.parola_ozeti(DOGRU) != o                                                                   # tuz rastgele
     assert not PN.parola_dogru(DOGRU, "") and not PN.parola_dogru(DOGRU, "md5$x") and not PN.parola_dogru("", o)
+
+
+# ───────────────────────── İE-07 P3/P5: panelden cevap ve şablon ─────────────────────────
+import time as _time  # noqa: E402
+from pathlib import Path  # noqa: E402
+
+import gonderici as G  # noqa: E402
+import meta_api as M  # noqa: E402
+import worker as W  # noqa: E402
+from sahte_meta import SahteMeta  # noqa: E402
+
+T_P6001 = talep(ozet="P6001 aynalı", katalog_kodu="P6001", varyantlar=[{"tur": "ayna_x", "aciklama": "aynalı"}])
+PDF = b"%PDF-1.4\n1 0 obj << /Type /Catalog >> endobj\ntrailer << /Root 1 0 R >>\n%%EOF\n"
+AYAR_SABLON = {**AYAR, "enabled": True, "dry_run": False, "sablon_bayi_dosyalar_hazir": "portman_dosyalar_hazir_v1"}
+
+
+def _gonderen(depo, meta, ayar):
+    a = M.MetaAyar(phone_number_id="106000000000001", access_token="t" * 40, app_secret="s" * 20, verify_token="v")
+    return G.GonderenMeta(depo, M.GraphIstemci(a, http=meta), W.KANAL, ayar_oku=lambda: ayar)
+
+
+def test_konusma_cevap_formu_metin_ve_pdf(pn, depo, kanal_dizini, hizli_motor):
+    depo.bayi_yaz(NUMARA_A, ad=BAYI_A["ad"], kod=BAYI_A["kod"], hitap="Ahmet Bey", rol="bayi")
+    assert depo.mesaj_kaydet(mesaj("P6001 aynalı", T_P6001, ts=_time.time() - 600))
+    assert kalici.bir_is(depo, AYAR, "t")["eylem"] == "is_emri"
+    c = Istemci(pn); c.giris(DOGRU)
+    kod, h, _ = c.git("GET", f"/panel/konusma/{NUMARA_A}")
+    assert kod == 200 and "24 saat penceresi <b>açık</b>".encode() in h and f'action="/panel/konusma/{NUMARA_A}/gonder"'.encode() in h
+    assert b'enctype="multipart/form-data"' in h and b'name="pdf"' in h
+    csrf = c.csrf(h)
+    # metin (düz form)
+    kod, _, b = c.git("POST", f"/panel/konusma/{NUMARA_A}/gonder", {"csrf": csrf, "metin": "Merhaba, ölçüleri aldım; yarın dönerim."})
+    assert (kod, c.baslik(b, "Location")) == (302, [f"/panel/konusma/{NUMARA_A}"])
+    r = tek(depo, "SELECT sira, alici, tur, kind, govde, durum, kaynak, satir FROM giden WHERE kaynak = 'panel'")
+    assert r["sira"] >= 101 and r["alici"] == NUMARA_A and (r["tur"], r["kind"], r["durum"]) == ("cevap", "text", "bekliyor")
+    assert r["govde"] == "Merhaba, ölçüleri aldım; yarın dönerim." and r["satir"]["kaynak"] == "panel" and r["satir"]["id"] == r["satir"]["id"]
+    assert r["satir"]["inbound_id"] == tek(depo, "SELECT id FROM mesajlar")["id"]                 # bayinin son mesajına bağlı
+    # PDF (çok parçalı)
+    kod, h, b = c.coklu(f"/panel/konusma/{NUMARA_A}/gonder", {"csrf": csrf, "metin": "", "aciklama": "Çelik çizim seti"}, {"pdf": ("Ç8201 çizim seti.pdf", PDF)})
+    assert kod == 302, h[:300]
+    d = tek(depo, "SELECT sira, kind, govde, dosya, sha256, satir FROM giden WHERE kaynak = 'panel' AND kind = 'document'")
+    assert d["sira"] == 102 and d["govde"] == "Çelik çizim seti" and d["satir"]["filename"].endswith(".pdf") and "Ç" not in d["satir"]["filename"]
+    yol = Path(d["dosya"]); assert yol.is_file() and yol.parent == kanal_dizini / "projects" / "panel" / NUMARA_A and yol.read_bytes() == PDF
+    assert d["sha256"] == hashlib.sha256(PDF).hexdigest()
+    # sayfada panel etiketi ve metin; gönderici gerçekten gönderir (pencere açık; PDF yüklenir)
+    kod, h, _ = c.git("GET", f"/panel/konusma/{NUMARA_A}")
+    assert kod == 200 and b"<b>panel</b>" in h and "ölçüleri aldım".encode() in h and "Çelik çizim seti".encode() in h
+    meta = SahteMeta(); g = _gonderen(depo, meta, {**AYAR, "enabled": True, "dry_run": False})
+    G.tur(depo, g, g.istemci, W.KANAL, {**AYAR, "enabled": True, "dry_run": False})
+    assert [x["durum"] for x in sorgu(depo, "SELECT durum FROM giden WHERE kaynak = 'panel' ORDER BY sira")] == ["kabul_edildi", "kabul_edildi"]
+    tipler = [y["type"] for y in meta.gidenler()]
+    assert tipler.count("text") >= 1 and "document" in tipler and all(y["to"] == NUMARA_A for y in meta.gidenler())
+    kod, h, _ = c.git("GET", f"/panel/konusma/{NUMARA_A}")
+    assert b"kabul_edildi" in h
+
+
+def test_konusma_pdf_gecersiz_buyuk_ve_bos_form(pn, depo, kanal_dizini):
+    depo.bayi_yaz(NUMARA_A, ad=BAYI_A["ad"], kod=BAYI_A["kod"], rol="bayi")
+    assert depo.mesaj_kaydet(mesaj("merhaba", talep("selam", "selam")))
+    kalici.bir_is(depo, AYAR, "t")
+    c = Istemci(pn); c.giris(DOGRU)
+    csrf = _csrf_oturum(c)
+    kod, h, _ = c.coklu(f"/panel/konusma/{NUMARA_A}/gonder", {"csrf": csrf, "metin": ""}, {"pdf": ("x.pdf", b"<html>degil</html>")})
+    assert kod == 400 and "PDF değil".encode() in h and tek(depo, "SELECT count(*) AS n FROM giden WHERE kaynak = 'panel'")["n"] == 0
+    assert not (kanal_dizini / "projects" / "panel").exists()
+    kod, h, _ = c.coklu(f"/panel/konusma/{NUMARA_A}/gonder", {"csrf": csrf, "metin": ""}, {"pdf": ("b.pdf", PDF + b"0" * (PN.DOSYA_EN_COK + 70 * 1024))})
+    assert kod == 413
+    kod, h, _ = c.git("POST", f"/panel/konusma/{NUMARA_A}/gonder", {"csrf": csrf, "metin": "   "})
+    assert kod == 400 and "Metin ya da PDF gerekli".encode() in h
+
+
+def test_konusma_gelen_yoksa_gonderim_yok(pn, depo):
+    depo.bayi_yaz(NUMARA_Y, ad="Hiç Yazmamış", kod="HY", rol="bayi")
+    c = Istemci(pn); c.giris(DOGRU)
+    kod, h, _ = c.git("GET", f"/panel/konusma/{NUMARA_Y}")
+    assert kod == 200 and "hiç mesaj gelmedi".encode() in h and b'name="pdf"' not in h
+    csrf = _csrf_oturum(c)
+    kod, h, _ = c.git("POST", f"/panel/konusma/{NUMARA_Y}/gonder", {"csrf": csrf, "metin": "selam"})
+    assert kod == 400 and "hiç mesaj gelmedi".encode() in h
+    kod, h, _ = c.git("POST", f"/panel/konusma/{NUMARA_Y}/sablon", {"csrf": csrf})
+    assert kod == 400 and "İş Emri kaydı yok".encode() in h
+    assert tek(depo, "SELECT count(*) AS n FROM giden")["n"] == 0
+
+
+def test_pencere_kapali_uyarisi_ve_dosyalar_hazir_sablonu(pn, depo, hizli_motor):
+    depo.bayi_yaz(NUMARA_A, ad=BAYI_A["ad"], kod=BAYI_A["kod"], hitap="", rol="bayi")
+    assert depo.mesaj_kaydet(mesaj("P6001 aynalı", T_P6001, ts=_time.time() - 90000))            # 25 saat önce
+    assert kalici.bir_is(depo, AYAR, "t")["eylem"] == "is_emri"
+    no = tek(depo, "SELECT is_emri_no FROM revizyonlar")["is_emri_no"]
+    c = Istemci(pn); c.giris(DOGRU)
+    kod, h, _ = c.git("GET", f"/panel/konusma/{NUMARA_A}")
+    assert kod == 200 and "24 saat penceresi <b>kapalı</b>".encode() in h and f"şablonu gönder ({no})".encode() in h
+    csrf = c.csrf(h)
+    kod, _, b = c.git("POST", f"/panel/konusma/{NUMARA_A}/sablon", {"csrf": csrf})
+    assert (kod, c.baslik(b, "Location")) == (302, [f"/panel/konusma/{NUMARA_A}"])
+    r = tek(depo, "SELECT sira, alici, tur, kind, govde, kaynak, satir FROM giden WHERE kind = 'template'")
+    assert r["sira"] == 101 and r["alici"] == NUMARA_A and r["tur"] == "bildirim" and r["kaynak"] == "panel"
+    assert r["satir"]["sablon"]["govde"] == [BAYI_A["ad"], no]                                 # hitap boş → ad (D-06)
+    assert r["satir"]["sablon"]["dugmeler"] == [{"sub_type": "quick_reply", "index": 0, "payload": f"dosya:{no}"}]
+    assert r["satir"]["pencere_kapaliysa"] is False and r["govde"].startswith(f"Merhaba {BAYI_A['ad']}, {no} numaralı projenizin dosyaları hazır.")
+    # pencere kapalı: metin düşer, şablon gider (ayar adı tanımlı)
+    kod, _, _ = c.git("POST", f"/panel/konusma/{NUMARA_A}/gonder", {"csrf": csrf, "metin": "dosyalar ekte"})
+    assert kod == 302
+    meta = SahteMeta(); g = _gonderen(depo, meta, AYAR_SABLON)
+    G.tur(depo, g, g.istemci, W.KANAL, AYAR_SABLON)
+    rows = {x["kind"]: x for x in sorgu(depo, "SELECT kind, durum, hata FROM giden WHERE kaynak = 'panel'")}
+    assert rows["text"]["hata"] == "Gönderilmedi: reply_window_closed" and rows["template"]["durum"] == "kabul_edildi"
+    [y] = [y for y in meta.gidenler() if y["type"] == "template"]
+    assert y["template"]["name"] == "portman_dosyalar_hazir_v1" and y["to"] == NUMARA_A
+    kod, h, _ = c.git("GET", f"/panel/konusma/{NUMARA_A}")
+    assert "pencere kapalı (24 saat)".encode() in h and b"template" in h and b"<b>panel</b>" in h
+    # hitap doluysa {{1}} hitap
+    depo.bayi_yaz(NUMARA_A, ad=BAYI_A["ad"], kod=BAYI_A["kod"], hitap="Ahmet Bey", rol="bayi")
+    c.git("POST", f"/panel/konusma/{NUMARA_A}/sablon", {"csrf": csrf})
+    assert tek(depo, "SELECT satir FROM giden WHERE kind = 'template' ORDER BY sira DESC LIMIT 1")["satir"]["sablon"]["govde"] == ["Ahmet Bey", no]
+
+
+def test_konusma_post_yalniz_gonder_ve_sablon_csrf_coklu_parcada(pn, depo):
+    depo.bayi_yaz(NUMARA_A, ad=BAYI_A["ad"], kod=BAYI_A["kod"], rol="bayi")
+    assert depo.mesaj_kaydet(mesaj("merhaba", talep("selam", "selam"))); kalici.bir_is(depo, AYAR, "t")
+    c = Istemci(pn); c.giris(DOGRU)
+    kod, h, _ = c.coklu(f"/panel/konusma/{NUMARA_A}/gonder", {"metin": "csrf yok"}, {"pdf": ("a.pdf", PDF)})
+    assert kod == 403 and b"CSRF" in h
+    kod, h, _ = c.coklu(f"/panel/konusma/{NUMARA_A}/gonder", {"metin": "csrf yanlış", "csrf": "0" * 40})
+    assert kod == 403
+    csrf = _csrf_oturum(c)
+    assert c.git("GET", f"/panel/konusma/{NUMARA_A}/gonder")[0] == 405 and c.git("GET", f"/panel/konusma/{NUMARA_A}/sablon")[0] == 405
+    assert c.git("POST", f"/panel/konusma/{NUMARA_A}/baska", {"csrf": csrf})[0] == 405
+    assert c.git("POST", f"/panel/konusma/{NUMARA_A}", {"csrf": csrf, "metin": "x"})[0] == 405
+    assert c.git("POST", "/panel/konusma/abc/gonder", {"csrf": csrf, "metin": "x"})[0] == 404
+    assert tek(depo, "SELECT count(*) AS n FROM giden WHERE kaynak = 'panel'")["n"] == 0
+
+
+def test_sablon_dugmesi_test_karti_pasif_bayi_ve_dogrulanmamis_plan_icin_kapali(pn, depo, hizli_motor, monkeypatch):
+    """İnceleme düzeltmesi: 'dosyalar hazır' yalnız kayıtlı, aktif, gerçek bayiye ve doğrulanmış revizyona."""
+    c = Istemci(pn); c.giris(DOGRU); csrf = _csrf_oturum(c)
+    # test kartı: İş Emri olsa da düğme kapalı, POST 400
+    depo.bayi_yaz("900000000905", ad="Kuru Koşu", kod="TEST", rol="test")
+    assert depo.mesaj_kaydet(mesaj("P6001 aynalı", T_P6001, numara="900000000905", bayi=depo.gelen_bayisi("900000000905")))
+    assert kalici.bir_is(depo, AYAR, "t")["eylem"] == "is_emri"
+    kod, h, _ = c.git("GET", "/panel/konusma/900000000905")
+    assert kod == 200 and "test kartı".encode() in h and b'/sablon"' not in h
+    assert c.git("POST", "/panel/konusma/900000000905/sablon", {"csrf": csrf})[0] == 400
+    # pasif bayi
+    depo.bayi_yaz(NUMARA_A, ad=BAYI_A["ad"], kod=BAYI_A["kod"], rol="bayi")
+    assert depo.mesaj_kaydet(mesaj("P6001 aynalı", T_P6001)); assert kalici.bir_is(depo, AYAR, "t")["eylem"] == "is_emri"
+    depo.bayi_yaz(NUMARA_A, ad=BAYI_A["ad"], kod=BAYI_A["kod"], rol="bayi", aktif=False)
+    kod, h, _ = c.git("GET", f"/panel/konusma/{NUMARA_A}")
+    assert "bayi pasif".encode() in h and c.git("POST", f"/panel/konusma/{NUMARA_A}/sablon", {"csrf": csrf})[0] == 400
+    # doğrulanmamış revizyon: düğme kapalı
+    depo.bayi_yaz(NUMARA_A, ad=BAYI_A["ad"], kod=BAYI_A["kod"], rol="bayi", aktif=True)
+    with depo.baglan() as cc, cc.transaction():
+        cc.execute("UPDATE revizyonlar SET dogrulandi = false, durum = 'dogrulanmadi' WHERE gonderen = %s", (NUMARA_A,))
+    kod, h, _ = c.git("GET", f"/panel/konusma/{NUMARA_A}")
+    assert "doğrulanmış İş Emri kaydı yok".encode() in h and c.git("POST", f"/panel/konusma/{NUMARA_A}/sablon", {"csrf": csrf})[0] == 400
+    assert tek(depo, "SELECT count(*) AS n FROM giden WHERE kind = 'template'")["n"] == 0

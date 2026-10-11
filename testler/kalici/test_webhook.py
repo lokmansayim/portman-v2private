@@ -339,3 +339,19 @@ def test_islenemeyen_olay_503_meta_yeniden_dener(app, depo, monkeypatch):
         raise RuntimeError("postgres gitti")
     monkeypatch.setattr(depo, "mesaj_kaydet", patlat)
     assert post(app, yuk([metin(NUMARA_P, "x")]))[0] == 503
+
+
+def test_rol_test_patron_modunda_sahiplenilir_bayi_reddedilir(app, kanal, depo):
+    """İE-07: kuru koşunun rol='test' kartı patron modunda sahiplenilir (Patron konuşmasına iz kalmasın); rol='bayi' hâlâ reddedilir."""
+    depo.bayi_yaz("900000000905", ad="Kuru Koşu", kod="TEST", rol="test")
+    depo.bayi_yaz(NUMARA_A, ad="Deneme Bayi A", kod="TSTA", rol="bayi")
+    assert kanal.ayar_sozlugu["mode"] == "patron"
+    kod, govde = post(app, yuk([metin("900000000905", "P6001 aynalı (kuru koşu)")]))
+    assert json.loads(govde)["mesaj"] == {"sahiplenildi": 1} and depo.acik_is_sayisi() == 1
+    ham = tek(depo, "SELECT ham FROM mesajlar WHERE sahiplenildi")["ham"]
+    assert ham["role"] == "test" and ham["bayi"]["kod"] == "TEST"
+    kod, govde = post(app, yuk([metin(NUMARA_A, "P6001 olsun")]))
+    assert json.loads(govde)["mesaj"] == {"kayitsiz+cevap": 1} and depo.acik_is_sayisi() == 1
+    assert tek(depo, "SELECT count(*) AS n FROM mesajlar WHERE gonderen = %s", "900000000909")["n"] == 0
+    from webhook import izinli_mi
+    assert izinli_mi({"rol": "test"}, "patron") and izinli_mi({"rol": "test"}, "kayitli") and not izinli_mi({"rol": "bayi"}, "patron")

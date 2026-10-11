@@ -254,8 +254,9 @@ def test_t3_deneme_hakki_bitince_basarisiz_ve_bildirim(depo, monkeypatch):
     assert kalici.bir_is(depo, AYAR, "isleyici-4") is None
     j = tek(depo, "SELECT * FROM isler")
     assert j["durum"] == "basarisiz" and j["deneme"] == 3 and "3 denemede" in j["hata"]
-    satirlar = sorgu(depo, "SELECT alici, tur FROM giden ORDER BY sira")
-    assert [(s["alici"], s["tur"]) for s in satirlar] == [(NUMARA_A, "cevap"), ("PATRON", "bildirim")]
+    satirlar = sorgu(depo, "SELECT alici, tur, kind FROM giden ORDER BY sira")
+    # İE-07: Patron bildirimi metin + şablon (pencere kapalıysa şablon gider)
+    assert [(s["alici"], s["tur"], s["kind"]) for s in satirlar] == [(NUMARA_A, "cevap", "text"), ("PATRON", "bildirim", "text"), ("PATRON", "bildirim", "template")]
 
 
 # ───────────────────────── T4 sessiz ezme yok ─────────────────────────

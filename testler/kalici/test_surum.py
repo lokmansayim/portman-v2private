@@ -136,9 +136,9 @@ def test_guncelle_ikinci_surum_ve_geri_don(surum_ortam):
     assert not (s9 / "testler").exists() and not (s9 / "deneme").exists()
     assert (s9 / "beyin" / "testler" / "mesajlar.json").exists() and list((s9 / "beyin" / "testler").glob("cikarim_*.json"))
     assert os.readlink(kok / "guncel") == str(s9) and not (kok / "onceki").exists()
-    assert "içe aktarma tamam" in out and "uygulanan göçler: [1, 2, 3, 4]" in out and "sağlık: sürüm v2026.10.09, Postgres bağlı" in out and "etkin" in out
+    assert "içe aktarma tamam" in out and "uygulanan göçler: [1, 2, 3, 4, 5]" in out and "sağlık: sürüm v2026.10.09, Postgres bağlı" in out and "etkin" in out
     assert "stop portman-webhook portman-gonderici portman-agent portman-panel" in log.read_text() and "start portman-webhook" in log.read_text()
-    assert sorgu(__import__("depo").Depo(dsn(surum_ortam["db"])), "SELECT max(surum) AS s FROM sema_surumu")[0]["s"] == 4
+    assert sorgu(__import__("depo").Depo(dsn(surum_ortam["db"])), "SELECT max(surum) AS s FROM sema_surumu")[0]["s"] == 5
     assert surum_ortam["saglik"].istekler and surum_ortam["saglik"].istekler[0]["path"] == "/saglik"
     # ikinci sürüm: onceki ← 09, guncel ← 12; göç yok. /saglik 503 (nabiz.sh'de duran bir sorun) ama sürüm ve Postgres doğru → kapı geçer
     surum_ortam["saglik"].kod = 503
@@ -453,8 +453,10 @@ def test_kuru_kosu_imzali_istek_ve_dry_run_kosulu(tmp_path):
     sir = "0123456789abcdef" * 2
     (etc / "whatsapp.env").write_text(f"WA_APP_SECRET={sir}\nWA_PHONE_NUMBER_ID=106000000000001\n"); (etc / "alan").write_text("portman.ornek.invalid\n")
     (data / "settings.json").write_text(json.dumps({"enabled": False, "dry_run": True, "mode": "patron"}))
-    psql = _sahte(bin_, "psql", '#!/usr/bin/env bash\nSQL="${@: -1}"\ncase "$SQL" in *"FROM bayiler"*) echo 900000000909 ;; *"durum FROM isler"*) echo bitti ;; '
-                                '*"durum = \'bekliyor\'"*) echo 0 ;; *"count(*) FROM mesajlar"*) echo 1 ;; *string_agg*) echo "text:gonderilmedi, document:gonderilmedi" ;; esac\n')
+    # İE-07: gönderen Patron değil rol='test' kartı; rapor sorgusu g. önekli (giden ve isler'de aynı adlı 'durum' sütunu)
+    psql = _sahte(bin_, "psql", '#!/usr/bin/env bash\nSQL="${@: -1}"\ncase "$SQL" in *"rol = \'patron\'"*) echo 900000000909 ;; *"rol = \'test\'"*) echo 900000000905 ;; '
+                                '*"durum FROM isler"*) echo bitti ;; *"g.durum = \'bekliyor\'"*) echo 0 ;; *"count(*) FROM mesajlar"*) echo 1 ;; '
+                                '*"string_agg(g.kind"*) echo "interactive:gonderilmedi, document:gonderilmedi" ;; *string_agg*) echo "ESKI-SORGU" ;; esac\n')
     webhook = _SahteSunucu(cevaplar={"/webhook": (200, {"ok": True, "mesaj": {"sahiplenildi": 1}, "durum": {}})})
     env = {"PM_ETC": str(etc), "PM_DATA": str(data), "PM_KOK": str(tmp_path / "yok"), "PM_PSQL": psql, "PM_WEBHOOK_URL": webhook.url + "/webhook", "PM_BEKLE": "1"}
     try:
@@ -463,9 +465,12 @@ def test_kuru_kosu_imzali_istek_ve_dry_run_kosulu(tmp_path):
         istek = webhook.istekler[0]
         assert istek["headers"]["X-Hub-Signature-256"] == "sha256=" + hmac.new(sir.encode(), istek["body"], hashlib.sha256).hexdigest()
         yuk = json.loads(istek["body"]); m = yuk["entry"][0]["changes"][0]["value"]["messages"][0]
-        assert m["from"] == "900000000909" and m["text"]["body"] == "P6001 aynalı (kuru koşu)" and m["id"].startswith("wamid.KURU")
+        assert m["from"] == "900000000905" and m["text"]["body"] == "P6001 aynalı (kuru koşu)" and m["id"].startswith("wamid.KURU")
+        assert yuk["entry"][0]["changes"][0]["value"]["contacts"][0]["profile"]["name"] == "Kuru Koşu"
         assert yuk["entry"][0]["changes"][0]["value"]["metadata"]["phone_number_id"] == "106000000000001"
-        assert "900000000909" not in r.stdout and sir not in r.stdout and "…09" in r.stdout and "iş: bitti" in r.stdout
+        assert "900000000905" not in r.stdout and "900000000909" not in r.stdout and sir not in r.stdout and "…05" in r.stdout and "iş: bitti" in r.stdout
+        assert "giden: interactive:gonderilmedi, document:gonderilmedi" in r.stdout and "ESKI-SORGU" not in r.stdout   # rapor satırı dolu (g. öneki)
+        assert "test kartı" in r.stdout and "Patron konuşmasında satır yok" in r.stdout
         assert "kanal yeniden kapatıldı" in r.stdout and json.loads((data / "settings.json").read_text())["enabled"] is False
         (data / "settings.json").write_text(json.dumps({"enabled": True, "dry_run": False}))
         r = _kos("kuru_kosu.sh", env)
@@ -474,6 +479,10 @@ def test_kuru_kosu_imzali_istek_ve_dry_run_kosulu(tmp_path):
         webhook.cevaplar = {"/webhook": (200, {"ok": True, "mesaj": {"kayitsiz": 1}})}
         r = _kos("kuru_kosu.sh", env)
         assert r.returncode == 1 and "sahiplenilmedi" in r.stderr
+        # test kartı yoksa DUR (Patron'un numarasına düşmez)
+        psql2 = _sahte(bin_, "psql2", '#!/usr/bin/env bash\nSQL="${@: -1}"\ncase "$SQL" in *"rol = \'patron\'"*) echo 900000000909 ;; *"rol = \'test\'"*) echo "" ;; esac\n')
+        r = _kos("kuru_kosu.sh", {**env, "PM_PSQL": psql2})
+        assert r.returncode == 1 and "test göndericisi yok" in r.stderr and len(webhook.istekler) == 2
     finally:
         webhook.kapat()
 

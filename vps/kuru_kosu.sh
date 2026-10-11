@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
-# PORTMAN · kuru koşu (İE-06, Kapı 7; root). App secret ile imzalanmış SAHTE bir Patron metnini 127.0.0.1'deki webhook'a verir;
-# Meta'ya dokunmaz. settings.json'da dry_run true değilse DURUR (gerçek gönderim olmasın). Kanal kapalıysa (enabled false) yalnız
-# bu koşu için açar (enabled_at = şimdi) ve sonunda kapatır. Ajan işi işler (1 LLM çağrısı; ücretli, Lokman'ın ayrı onayı),
-# giden satırlar 'gonderilmedi' (dry_run) kalır; panelde görünür. Sonra sayımları yazar. Çıktıda numara maskeli, sır yok.
-#   ssh portman-vps 'bash /opt/portman/guncel/vps/kuru_kosu.sh' > ie06_7_kuru.txt 2>&1
-# Sınama: PM_ETC, PM_DATA, PM_KOK, PM_PSQL, PM_WEBHOOK_URL, PM_BEKLE, PM_METIN, PM_PATRON (psql yerine numara).
+# PORTMAN · kuru koşu (İE-06 Kapı 7; İE-07 P1 düzeltmesi; root). App secret ile imzalanmış SAHTE bir metni 127.0.0.1'deki
+# webhook'a verir; Meta'ya dokunmaz. Gönderen Patron DEĞİL, panelden girilen rol='test' sahte kartıdır (kod TEST; gerçek numara
+# değil): Patron konuşmasına iz kalmaz, Patron'un 24 saat penceresi kirlenmez, İş Emri numarası test kartının kendi projesinde kalır
+# (10 Ekim'de sahte Patron mesajı r01 üretmiş, ilk gerçek mesaj r02 olmuştu). settings.json'da dry_run true değilse DURUR (gerçek
+# gönderim olmasın). Kanal kapalıysa (enabled false) yalnız bu koşu için açar (enabled_at = şimdi) ve sonunda kapatır. Ajan işi
+# işler (1 LLM çağrısı; ücretli, Lokman'ın ayrı onayı), giden satırlar 'gonderilmedi' (dry_run) kalır; panelde test kartının
+# konuşmasında görünür. Sonra sayımları yazar (rapor sorgusunda sütunlar g. önekli: giden ve isler'de aynı adlı 'durum' var).
+# Çıktıda numara maskeli, sır yok.
+#   ssh portman-vps 'bash /opt/portman/guncel/vps/kuru_kosu.sh' > ie07_kuru.txt 2>&1
+# Sınama: PM_ETC, PM_DATA, PM_KOK, PM_PSQL, PM_WEBHOOK_URL, PM_BEKLE, PM_METIN, PM_TEST (psql yerine numara).
 set -uo pipefail
 ETC="${PM_ETC:-/etc/portman}"; KOK="${PM_KOK:-/opt/portman}"; DATA="${PM_DATA:-$KOK/data}"
 PSQL="${PM_PSQL:-sudo -u postgres psql -X -q -tA -d portman}"; URL="${PM_WEBHOOK_URL:-http://127.0.0.1:8081/webhook}"
@@ -17,16 +21,16 @@ echo "== Portman kuru koşu · $(date '+%Y-%m-%d %H:%M:%S %Z')"
 DRY="$(python3 -c 'import json,sys; print("1" if json.load(open(sys.argv[1])).get("dry_run") is True else "0")' "$DATA/settings.json" 2>/dev/null || echo 0)"
 [ "$DRY" = "1" ] || dur "settings.json'da dry_run true değil; kuru koşu gerçek gönderime dönüşmesin diye durdu (ayar.sh dry_run true)"
 ACIK="$(python3 -c 'import json,sys; print("1" if json.load(open(sys.argv[1])).get("enabled") is True else "0")' "$DATA/settings.json" 2>/dev/null || echo 0)"
-PATRON="${PM_PATRON:-$($PSQL -c "SELECT numara FROM bayiler WHERE rol = 'patron' AND aktif ORDER BY olusturuldu LIMIT 1" 2>/dev/null | head -1)}"
-[[ "$PATRON" =~ ^[0-9]{8,15}$ ]] || dur "Patron kaydı yok (Kapı 6: panelden rol=patron bayi girilir)"
-echo "   patron …${PATRON: -2} · dry_run açık · kanal: $([ "$ACIK" = 1 ] && echo açık || echo 'kapalı (bu koşu için açılacak)')"
+TEST="${PM_TEST:-$($PSQL -c "SELECT numara FROM bayiler WHERE rol = 'test' AND aktif ORDER BY olusturuldu LIMIT 1" 2>/dev/null | head -1)}"
+[[ "$TEST" =~ ^[0-9]{8,15}$ ]] || dur "test göndericisi yok: panelden rol=test, kod TEST, gerçek olmayan bir numarayla kart girin (İE-07; Patron'un numarası kullanılmaz)"
+echo "   test kartı …${TEST: -2} · dry_run açık · kanal: $([ "$ACIK" = 1 ] && echo açık || echo 'kapalı (bu koşu için açılacak)')"
 GERI=""
 if [ "$ACIK" != "1" ]; then
   python3 "$AYARLAR" --veri "$DATA" yaz enabled true >/dev/null || dur "ayar yazılamadı"; GERI=1
   trap 'python3 "$AYARLAR" --veri "$DATA" yaz enabled false >/dev/null && echo "   kanal yeniden kapatıldı (enabled false)"' EXIT
 fi
 MID="wamid.KURU$(date +%Y%m%d%H%M%S)"
-SONUC="$(PM_ETC="$ETC" PM_PATRON="$PATRON" PM_MID="$MID" PM_METIN="$METIN" PM_URL="$URL" python3 - <<'PY'
+SONUC="$(PM_ETC="$ETC" PM_TEST="$TEST" PM_MID="$MID" PM_METIN="$METIN" PM_URL="$URL" python3 - <<'PY'
 import hashlib, hmac, json, os, time, urllib.error, urllib.request
 env = {}
 with open(os.path.join(os.environ["PM_ETC"], "whatsapp.env"), encoding="utf-8") as f:
@@ -36,11 +40,11 @@ with open(os.path.join(os.environ["PM_ETC"], "whatsapp.env"), encoding="utf-8") 
 secret, pnid = env.get("WA_APP_SECRET", ""), env.get("WA_PHONE_NUMBER_ID", "")
 if not secret or not pnid:
     raise SystemExit("DUR: whatsapp.env'de WA_APP_SECRET ya da WA_PHONE_NUMBER_ID yok")
-patron = os.environ["PM_PATRON"]; ts = int(time.time())
+test = os.environ["PM_TEST"]; ts = int(time.time())
 yuk = {"object": "whatsapp_business_account", "entry": [{"id": "KURU", "changes": [{"field": "messages", "value": {
     "messaging_product": "whatsapp", "metadata": {"display_phone_number": "0", "phone_number_id": pnid},
-    "contacts": [{"wa_id": patron, "profile": {"name": "Patron"}}],
-    "messages": [{"from": patron, "id": os.environ["PM_MID"], "timestamp": str(ts), "type": "text", "text": {"body": os.environ["PM_METIN"]}}]}}]}]}
+    "contacts": [{"wa_id": test, "profile": {"name": "Kuru Koşu"}}],
+    "messages": [{"from": test, "id": os.environ["PM_MID"], "timestamp": str(ts), "type": "text", "text": {"body": os.environ["PM_METIN"]}}]}}]}]}
 govde = json.dumps(yuk).encode("utf-8")
 imza = "sha256=" + hmac.new(secret.encode("utf-8"), govde, hashlib.sha256).hexdigest()
 req = urllib.request.Request(os.environ["PM_URL"], data=govde, method="POST", headers={"Content-Type": "application/json", "X-Hub-Signature-256": imza})
@@ -54,7 +58,7 @@ except OSError as e:
 PY
 )" || dur "$SONUC"
 echo "   webhook: $SONUC"
-echo "$SONUC" | grep -q '"sahiplenildi": 1' || dur "mesaj sahiplenilmedi (cevap yukarıda: imza, phone_number_id, mode ya da Patron kaydı)"
+echo "$SONUC" | grep -q '"sahiplenildi": 1' || dur "mesaj sahiplenilmedi (cevap yukarıda: imza, phone_number_id ya da test kartı pasif/yok; rol=test patron modunda da sahiplenilir)"
 echo "-- bekleniyor (en çok $BEKLE sn): ajan işi işler, gönderici dry_run ile tutar"
 for ((i = 0; i < BEKLE; i++)); do
   D="$($PSQL -c "SELECT durum FROM isler WHERE mesaj_id = '$MID'" 2>/dev/null | head -1)"
@@ -68,6 +72,6 @@ for ((i = 0; i < 30; i++)); do
   [ "${B:-0}" = "0" ] && break
   sleep 1
 done
-echo "   mesajlar: $($PSQL -c "SELECT count(*) FROM mesajlar WHERE id = '$MID'" 2>/dev/null) · iş: ${D:-yok} · giden: $($PSQL -c "SELECT string_agg(kind || ':' || durum, ', ' ORDER BY sira) FROM giden g JOIN isler i ON i.id = g.is_id WHERE i.mesaj_id = '$MID'" 2>/dev/null)"
-echo "   panel: https://$(cat "$ETC/alan" 2>/dev/null || echo '<alan>')/panel/konusma/…${PATRON: -2}"
+echo "   mesajlar: $($PSQL -c "SELECT count(*) FROM mesajlar WHERE id = '$MID'" 2>/dev/null) · iş: ${D:-yok} · giden: $($PSQL -c "SELECT string_agg(g.kind || ':' || g.durum, ', ' ORDER BY g.sira) FROM giden g JOIN isler i ON i.id = g.is_id WHERE i.mesaj_id = '$MID'" 2>/dev/null)"
+echo "   panel: https://$(cat "$ETC/alan" 2>/dev/null || echo '<alan>')/panel/konusma/…${TEST: -2} (test kartı; Patron konuşmasında satır yok)"
 echo "== bitti"

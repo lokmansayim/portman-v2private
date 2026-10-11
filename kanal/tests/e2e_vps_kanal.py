@@ -83,6 +83,8 @@ def q(sql, *a):
 def istek(app, metod, yol, govde: bytes = b"", basliklar=None, cerez=None, sorgu=""):
     env = {"REQUEST_METHOD": metod, "PATH_INFO": yol, "QUERY_STRING": sorgu, "CONTENT_LENGTH": str(len(govde)), "wsgi.input": BytesIO(govde), "REMOTE_ADDR": "127.0.0.1"}
     for a, v in (basliklar or {}).items():
+        if a.lower() == "content-type":
+            env["CONTENT_TYPE"] = v                       # WSGI: Content-Type HTTP_ öneksizdir (panel çok parçalı gövdeyi bundan tanır)
         env["HTTP_" + a.upper().replace("-", "_")] = v
     if cerez:
         env["HTTP_COOKIE"] = "; ".join(f"{a}={v}" for a, v in cerez.items())
@@ -272,6 +274,85 @@ try:
     s = json.loads(body)
     ok(kod == 200 and s["ok"] and s["postgres"] and s["sayimlar"]["aktif_bayi"] == 2 and s["sayimlar"]["acik_is"] == 0, f"/saglik 200 ({s['sorunlar']})")
     ok(PATRON not in body.decode() and SIR not in body.decode(), "/saglik: numara ve sır yok")
+
+    print("8) İE-07: panelden metin + PDF, 24 saat penceresi, 'dosyalar hazır' şablonu, bayinin düğme cevabı, Patron şablonu")
+    import sablonlar as S
+
+    def coklu(yol, alanlar, dosyalar=None):
+        sinir = "----pmE2E" + uuid.uuid4().hex
+        parcalar = [f'--{sinir}\r\nContent-Disposition: form-data; name="{a}"\r\n\r\n{v}\r\n'.encode("utf-8") for a, v in alanlar.items()]
+        for a, (ad, icerik) in (dosyalar or {}).items():
+            parcalar.append(f'--{sinir}\r\nContent-Disposition: form-data; name="{a}"; filename="{ad}"\r\nContent-Type: application/pdf\r\n\r\n'.encode("utf-8") + icerik + b"\r\n")
+        govde = b"".join(parcalar) + f"--{sinir}--\r\n".encode()
+        return istek(app_pn, "POST", yol, govde, {"Content-Type": f"multipart/form-data; boundary={sinir}"}, cerez=cerez)
+
+    no_b = q("SELECT is_emri_no FROM revizyonlar WHERE gonderen = %s", BAYI)[0]["is_emri_no"]
+    kod, body, _ = istek(app_pn, "GET", f"/panel/konusma/{BAYI}", cerez=cerez)
+    csrf = re.search(rb'name="csrf" value="([0-9a-f]+)"', body).group(1).decode()
+    ok(kod == 200 and "24 saat penceresi <b>açık</b>".encode() in body and f"şablonu gönder ({no_b})".encode() in body, "konuşma sayfası: cevap formu, pencere açık, şablon düğmesi")
+    pdf_icerik = Path(pdf_yol).read_bytes()
+    kod, body, basliklar = coklu(f"/panel/konusma/{BAYI}/gonder", {"csrf": csrf, "metin": "Panelden: çelik çizim seti ekte", "aciklama": "Ç8201 çizim seti"}, {"pdf": ("Ç8201 çizim seti.pdf", pdf_icerik)})
+    pr = q("SELECT kind, durum, kaynak, sira, dosya FROM giden WHERE kaynak = 'panel' ORDER BY sira")
+    ok(kod == 302 and [r["kind"] for r in pr] == ["text", "document"] and pr[0]["sira"] == 101 and pr[1]["dosya"].startswith(str(VERI / "projects" / "panel" / BAYI)),
+       f"panel satırları: metin + PDF (kaynak panel, sıra 101–102; PDF projects/panel altında)")
+    onceki = len(sahte.gidenler())
+    say = gonder()
+    g8 = sahte.gidenler()[onceki:]
+    ok(say.get("kabul_edildi") == 2 and [x["type"] for x in g8] == ["text", "document"] and all(x["to"] == BAYI for x in g8), f"gönderici: panel metni ve PDF bayiye gitti ({[x['type'] for x in g8]})")
+    kod, body, _ = istek(app_pn, "GET", f"/panel/konusma/{BAYI}", cerez=cerez)
+    ok(b"<b>panel</b>" in body and "Panelden: çelik çizim seti ekte".encode() in body and b"kabul_edildi" in body, "sayfada panel etiketi ve durum")
+    with depo.baglan() as c, c.transaction():
+        c.execute("UPDATE mesajlar SET wa_zamani = now() - interval '25 hours' WHERE gonderen = %s", (BAYI,))
+    kod, body, _ = istek(app_pn, "GET", f"/panel/konusma/{BAYI}", cerez=cerez)
+    ok("24 saat penceresi <b>kapalı</b>".encode() in body, "bayinin son mesajı 25 saat önce: sayfa 'pencere kapalı' der")
+    kod, body, _ = istek(app_pn, "POST", f"/panel/konusma/{BAYI}/gonder", urllib.parse.urlencode({"csrf": csrf, "metin": "pencere kapalıyken"}).encode(),
+                         {"Content-Type": "application/x-www-form-urlencoded"}, cerez=cerez)
+    say = gonder()
+    kapali = q("SELECT durum, hata FROM giden WHERE kaynak = 'panel' ORDER BY sira DESC LIMIT 1")[0]
+    ok(kod == 302 and say.get("gonderilmedi") == 1 and kapali["hata"] == "Gönderilmedi: reply_window_closed", "pencere kapalı: panel metni gönderilmedi (reply_window_closed)")
+    AY.yaz(VERI, "sablon_bayi_dosyalar_hazir", "portman_dosyalar_hazir_v1"); AY.yaz(VERI, "sablon_patron_bildirim", "portman_patron_bekliyor_v1")
+    kod, body, _ = istek(app_pn, "POST", f"/panel/konusma/{BAYI}/sablon", urllib.parse.urlencode({"csrf": csrf}).encode(),
+                         {"Content-Type": "application/x-www-form-urlencoded"}, cerez=cerez)
+    say = gonder()
+    son = sahte.gidenler()[-1]
+    ok(kod == 302 and say.get("kabul_edildi") == 1 and son["type"] == "template" and son["to"] == BAYI and son["template"]["name"] == "portman_dosyalar_hazir_v1"
+       and son["template"]["language"] == {"code": "tr"}, "'dosyalar hazır' şablonu pencere kapalıyken gitti (Meta template yükü)")
+    ok(son["template"]["components"][0]["parameters"][0]["text"] == "Deneme Bayi A" and son["template"]["components"][0]["parameters"][1]["text"] == no_b
+       and son["template"]["components"][1]["parameters"] == [{"type": "payload", "payload": f"dosya:{no_b}"}], "şablon değişkenleri: ad (hitap boş), İş Emri no; hızlı yanıt payload")
+    dugme = {"from": BAYI, "id": "wamid.E2ED1", "timestamp": str(int(time.time())), "type": "button", "button": {"text": "Dosyaları gönder", "payload": f"dosya:{no_b}"}}
+    kod, c = webhook(yuk([dugme]))
+    ok(kod == 200 and c.get("mesaj") == {"sahiplenildi": 1} and q("SELECT ham FROM mesajlar WHERE id = 'wamid.E2ED1'")[0]["ham"]["reply_id"] == f"dosya:{no_b}", "bayinin hızlı yanıtı (type=button, payload dosya:) kuyrukta")
+    ok(ajan() == 0, "ajan: düğme cevabı işlendi")
+    r8 = q("SELECT sonuc, cikarim FROM isler WHERE mesaj_id = 'wamid.E2ED1'")[0]
+    k8 = q("SELECT alici, kind, govde FROM giden WHERE mesaj_id = 'wamid.E2ED1' ORDER BY sira")
+    ok(r8["sonuc"]["eylem"] == "cevapla" and r8["sonuc"]["gerekce"] == "şablon cevabı: dosya penceresi açıldı" and (r8["cikarim"] or {}).get("meta", {}).get("backend") == "etkilesim",
+       "düğme cevabı LLM'siz (çıkarım kaynağı etkileşim)")
+    ok([(x["alici"], x["kind"]) for x in k8] == [(BAYI, "text"), ("PATRON", "text"), ("PATRON", "template")] and k8[0]["govde"] == S.BAYI_DOSYA_CEVABI,
+       "satırlar: bayiye onaylı sabit cevap, Patron'a metin + şablon")
+    say = gonder()
+    ps = q("SELECT kind, durum, hata FROM giden WHERE mesaj_id = 'wamid.E2ED1' AND alici = 'PATRON' ORDER BY sira")
+    ok(say.get("kabul_edildi") == 2 and ps[0]["durum"] == "kabul_edildi" and ps[1]["durum"] == "gonderilmedi" and ps[1]["hata"].startswith("Gönderilmedi: sablon_gereksiz"),
+       "Patron penceresi açık: metin gitti, şablon 'sablon_gereksiz' (ücretli şablon boşa gitmez)")
+    kod, body, _ = istek(app_pn, "POST", f"/panel/konusma/{BAYI}/gonder", urllib.parse.urlencode({"csrf": csrf, "metin": "pencere açıldı, dosyalar geliyor"}).encode(),
+                         {"Content-Type": "application/x-www-form-urlencoded"}, cerez=cerez)
+    say = gonder()
+    ok(kod == 302 and say.get("kabul_edildi") == 1 and sahte.gidenler()[-1]["to"] == BAYI and sahte.gidenler()[-1]["type"] == "text", "bayinin cevabı pencereyi açtı: panel metni gitti")
+    with depo.baglan() as c, c.transaction():
+        c.execute("UPDATE mesajlar SET wa_zamani = now() - interval '25 hours' WHERE gonderen = %s", (PATRON,))
+    kod, c = webhook(yuk([metin(BAYI, "P8501 olsun", mid="wamid.E2EY1")]))
+    hazir_ekle("wamid.E2EY1", {"niyet": "yeni_talep", "guven": "yuksek", "ozet": "P8501", "katalog_kodu": "P8501"})
+    ok(c.get("mesaj") == {"sahiplenildi": 1} and ajan() == 0 and q("SELECT sonuc FROM isler WHERE mesaj_id = 'wamid.E2EY1'")[0]["sonuc"]["eylem"] == "yonlendir",
+       "bayi çizilemeyen model istedi: yönlendirme")
+    say = gonder()
+    py = q("SELECT kind, durum, hata FROM giden WHERE mesaj_id = 'wamid.E2EY1' AND alici = 'PATRON' ORDER BY sira")
+    son = sahte.gidenler()[-1]
+    ok(py[0]["hata"] == "Gönderilmedi: reply_window_closed" and py[1]["durum"] == "kabul_edildi" and son["type"] == "template" and son["to"] == PATRON
+       and son["template"]["name"] == "portman_patron_bekliyor_v1", "Patron penceresi kapalı: metin düştü, Patron şablonu gitti (24 saat kuralına takılmadan)")
+    ok(son["template"]["components"][0]["parameters"] == [{"type": "text", "text": "TSTA"}, {"type": "text", "text": no_b}]
+       and son["template"]["components"][1] == {"type": "button", "sub_type": "url", "index": "0", "parameters": [{"type": "text", "text": f"konusma/{BAYI}"}]},
+       "Patron şablonu: bayi kodu, talep kimliği (taslağın son İş Emri no'su), panel konuşma bağlantısı")
+    kod, body, _ = istek(app_pn, "GET", f"/panel/konusma/{PATRON}", cerez=cerez)
+    ok(b"template" in body and "pencere kapalı (24 saat)".encode() in body and "şablon gereksiz".encode() in body, "Patron konuşma sayfası: şablon satırı ve hata etiketleri")
 finally:
     with psycopg.connect(ADMIN + " dbname=postgres", autocommit=True) as c:
         c.execute(f"DROP DATABASE IF EXISTS {dbad} WITH (FORCE)")

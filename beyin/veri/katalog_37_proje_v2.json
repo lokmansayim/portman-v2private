@@ -1,0 +1,1369 @@
+[
+ {
+  "page": 4,
+  "code": "P6001",
+  "family": "Prefabrik tek kat",
+  "total_m2": "60",
+  "type": "2+1",
+  "storey_plans": [],
+  "rooms": [
+   [
+    "Mahal Listesi\nVeranda",
+    "11,5"
+   ],
+   [
+    "2 Yatak Odası",
+    "17,5"
+   ],
+   [
+    "Banyo",
+    "3,5"
+   ],
+   [
+    "Antre & Hol",
+    "2,3"
+   ],
+   [
+    "Mutfak + Salon",
+    "21,5"
+   ]
+  ],
+  "kat": 1,
+  "kaynak": "katalog_pdf",
+  "dogrulama": "yok"
+ },
+ {
+  "page": 6,
+  "code": "P6501",
+  "family": "Prefabrik tek kat",
+  "total_m2": "65,6",
+  "type": "2+1",
+  "storey_plans": [],
+  "rooms": [
+   [
+    "Mahal Listesi\nVeranda",
+    "8"
+   ],
+   [
+    "2 Yatak Odası",
+    "22"
+   ],
+   [
+    "Banyo",
+    "3,3"
+   ],
+   [
+    "Antre & Hol",
+    "6"
+   ],
+   [
+    "Mutfak + Salon",
+    "22,3"
+   ]
+  ],
+  "kat": 1,
+  "kaynak": "katalog_pdf",
+  "dogrulama": "yok"
+ },
+ {
+  "page": 8,
+  "code": "P6701",
+  "family": "Prefabrik tek kat",
+  "total_m2": "67",
+  "type": "2+1",
+  "storey_plans": [],
+  "rooms": [
+   [
+    "Mahal Listesi\nVeranda",
+    "13,8"
+   ],
+   [
+    "2 Yatak Odası",
+    "20,7"
+   ],
+   [
+    "Banyo",
+    "3,4"
+   ],
+   [
+    "Antre & Hol",
+    "4,5"
+   ],
+   [
+    "Mutfak + Salon",
+    "19,6"
+   ],
+   [
+    "Sundurma",
+    "1,5"
+   ]
+  ],
+  "kat": 1,
+  "kaynak": "katalog_pdf",
+  "dogrulama": "yok"
+ },
+ {
+  "page": 10,
+  "code": "P7001",
+  "family": "Prefabrik tek kat",
+  "total_m2": "70",
+  "type": "2+1",
+  "storey_plans": [],
+  "rooms": [
+   [
+    "Mahal Listesi\nVeranda",
+    "9,63"
+   ],
+   [
+    "2 Yatak Odası",
+    "18,8"
+   ],
+   [
+    "Banyo",
+    "3"
+   ],
+   [
+    "Antre & Hol",
+    "6,5"
+   ],
+   [
+    "Mutfak",
+    "7,8"
+   ],
+   [
+    "Salon",
+    "19"
+   ]
+  ],
+  "kat": 1,
+  "kaynak": "katalog_pdf",
+  "dogrulama": "yok"
+ },
+ {
+  "page": 12,
+  "code": "P7401",
+  "family": "Prefabrik tek kat",
+  "total_m2": "74",
+  "type": "2+1",
+  "storey_plans": [],
+  "rooms": [
+   [
+    "Mahal Listesi\nVeranda",
+    "11,5"
+   ],
+   [
+    "2 Yatak Odası",
+    "22,8"
+   ],
+   [
+    "Banyo",
+    "3,3"
+   ],
+   [
+    "Antre & Hol",
+    "5,7"
+   ],
+   [
+    "Mutfak + Salon",
+    "21,7"
+   ]
+  ],
+  "kat": 1,
+  "kaynak": "katalog_pdf",
+  "dogrulama": "yok"
+ },
+ {
+  "page": 14,
+  "code": "P7601",
+  "family": "Prefabrik tek kat",
+  "total_m2": "76",
+  "type": "2+1",
+  "storey_plans": [],
+  "rooms": [
+   [
+    "Mahal Listesi\nVeranda",
+    "12,5"
+   ],
+   [
+    "2 Yatak Odası",
+    "30"
+   ],
+   [
+    "Banyo",
+    "4,4"
+   ],
+   [
+    "Antre & Hol",
+    "5,5"
+   ],
+   [
+    "Mutfak + Salon",
+    "19"
+   ]
+  ],
+  "kat": 1,
+  "kaynak": "katalog_pdf",
+  "dogrulama": "yok"
+ },
+ {
+  "page": 16,
+  "code": "P8201",
+  "family": "Prefabrik tek kat",
+  "total_m2": "82",
+  "type": "2+1",
+  "storey_plans": [],
+  "rooms": [
+   [
+    "Mahal Listesi\nVeranda",
+    "9,3"
+   ],
+   [
+    "2 Yatak Odası",
+    "22,1"
+   ],
+   [
+    "Banyo",
+    "4,3"
+   ],
+   [
+    "Mutfak + Salon",
+    "37,7"
+   ]
+  ],
+  "kat": 1,
+  "kaynak": "katalog_pdf",
+  "dogrulama": "yok"
+ },
+ {
+  "page": 18,
+  "code": "P8501",
+  "family": "Prefabrik tek kat",
+  "total_m2": "85",
+  "type": "2+1",
+  "storey_plans": [],
+  "rooms": [
+   [
+    "Mahal Listesi\nVeranda",
+    "10,9"
+   ],
+   [
+    "2 Yatak Odası",
+    "22,4"
+   ],
+   [
+    "Banyo",
+    "5"
+   ],
+   [
+    "Antre & Hol",
+    "6,3"
+   ],
+   [
+    "Mutfak",
+    "11,2"
+   ],
+   [
+    "Salon",
+    "23"
+   ]
+  ],
+  "kat": 1,
+  "kaynak": "katalog_pdf",
+  "dogrulama": "yok"
+ },
+ {
+  "page": 20,
+  "code": "P9201",
+  "family": "Prefabrik tek kat",
+  "total_m2": "92",
+  "type": "3+1",
+  "storey_plans": [],
+  "rooms": [
+   [
+    "Mahal Listesi\nVeranda",
+    "15,7"
+   ],
+   [
+    "2 Yatak Odası",
+    "23,5"
+   ],
+   [
+    "Çocuk Odası",
+    "9"
+   ],
+   [
+    "Banyo",
+    "4,5"
+   ],
+   [
+    "Antre & Hol",
+    "1,5"
+   ]
+  ],
+  "kat": 1,
+  "kaynak": "katalog_pdf",
+  "dogrulama": "yok"
+ },
+ {
+  "page": 22,
+  "code": "P9401",
+  "family": "Prefabrik tek kat",
+  "total_m2": "94",
+  "type": "3+1",
+  "storey_plans": [],
+  "rooms": [
+   [
+    "Mahal Listesi\nVeranda",
+    "12"
+   ],
+   [
+    "3 Yatak Odası",
+    "31,7"
+   ],
+   [
+    "Banyo",
+    "4,5"
+   ],
+   [
+    "Salon + Mutfak",
+    "41,6"
+   ]
+  ],
+  "kat": 1,
+  "kaynak": "katalog_pdf",
+  "dogrulama": "yok"
+ },
+ {
+  "page": 24,
+  "code": "P9501",
+  "family": "Prefabrik tek kat",
+  "total_m2": "95",
+  "type": "3+1",
+  "storey_plans": [],
+  "rooms": [
+   [
+    "Mahal Listesi\nVeranda",
+    "15,4"
+   ],
+   [
+    "3 Yatak Odası",
+    "29,2"
+   ],
+   [
+    "Banyo",
+    "5,1"
+   ],
+   [
+    "Antre & Hol",
+    "9,8"
+   ],
+   [
+    "Mutfak",
+    "9,4"
+   ],
+   [
+    "Salon",
+    "20,3"
+   ]
+  ],
+  "kat": 1,
+  "kaynak": "katalog_pdf",
+  "dogrulama": "yok"
+ },
+ {
+  "page": 26,
+  "code": "P9901",
+  "family": "Prefabrik tek kat",
+  "total_m2": "99",
+  "type": "2+1",
+  "storey_plans": [],
+  "rooms": [
+   [
+    "Mahal Listesi\nVeranda",
+    "10,5"
+   ],
+   [
+    "2 Yatak Odası",
+    "29,8"
+   ],
+   [
+    "Banyo",
+    "3"
+   ],
+   [
+    "Antre & Hol",
+    "7,5"
+   ],
+   [
+    "Mutfak",
+    "13,8"
+   ],
+   [
+    "Salon",
+    "23,4"
+   ]
+  ],
+  "kat": 1,
+  "kaynak": "katalog_pdf",
+  "dogrulama": "yok"
+ },
+ {
+  "page": 28,
+  "code": "P1051",
+  "family": "Prefabrik tek kat",
+  "total_m2": "105,6",
+  "type": "3+1",
+  "storey_plans": [],
+  "rooms": [
+   [
+    "Mahal Listesi\nVeranda",
+    "19,1"
+   ],
+   [
+    "3 Yatak Odası",
+    "32,6"
+   ],
+   [
+    "Banyo",
+    "4,5"
+   ],
+   [
+    "Antre & Hol",
+    "3,5"
+   ],
+   [
+    "Salon + Mutfak",
+    "38,1"
+   ],
+   [
+    "Sundurma",
+    "1,6"
+   ]
+  ],
+  "kat": 1,
+  "kaynak": "katalog_pdf",
+  "dogrulama": "yok"
+ },
+ {
+  "page": 30,
+  "code": "P1121",
+  "family": "Prefabrik tek kat",
+  "total_m2": "112",
+  "type": "3+1",
+  "storey_plans": [],
+  "rooms": [
+   [
+    "Mahal Listesi\nVeranda",
+    "17"
+   ],
+   [
+    "3 Yatak Odası",
+    "38,4"
+   ],
+   [
+    "Banyo",
+    "5,2"
+   ],
+   [
+    "Antre & Hol",
+    "11,7"
+   ],
+   [
+    "Salon + Mutfak",
+    "34"
+   ]
+  ],
+  "kat": 1,
+  "kaynak": "katalog_pdf",
+  "dogrulama": "yok"
+ },
+ {
+  "page": 34,
+  "code": "P1142",
+  "family": "Prefabrik çift kat",
+  "total_m2": "114",
+  "type": "3+1",
+  "storey_plans": [
+   "Zemin Kat Planı 57m²",
+   "1.Kat Plan 57m²"
+  ],
+  "rooms": [
+   [
+    "Mahal Listesi\nVeranda + Balkon",
+    "14,6"
+   ],
+   [
+    "3 Yatak Odası",
+    "34,3"
+   ],
+   [
+    "2 Banyo",
+    "5,7"
+   ],
+   [
+    "2 Antre & Hol",
+    "9,8"
+   ],
+   [
+    "Mutfak + Kiler",
+    "10,9"
+   ],
+   [
+    "Salon",
+    "24"
+   ]
+  ],
+  "kat": 2,
+  "kaynak": "katalog_pdf",
+  "dogrulama": "yok"
+ },
+ {
+  "page": 36,
+  "code": "P1202",
+  "family": "Prefabrik çift kat",
+  "total_m2": "120",
+  "type": "2+1",
+  "storey_plans": [
+   "Zemin Kat Planı 61m²",
+   "1.Kat Plan 59m²"
+  ],
+  "rooms": [
+   [
+    "Mahal Listesi\nVeranda + Balkon",
+    "17,4"
+   ],
+   [
+    "2 Yatak Odası",
+    "28,5"
+   ],
+   [
+    "2 Banyo",
+    "8,7"
+   ],
+   [
+    "Hol",
+    "7,5"
+   ],
+   [
+    "Mutfak",
+    "14,9"
+   ],
+   [
+    "Salon",
+    "18,9"
+   ]
+  ],
+  "kat": 2,
+  "kaynak": "katalog_pdf",
+  "dogrulama": "yok"
+ },
+ {
+  "page": 38,
+  "code": "P1322",
+  "family": "Prefabrik çift kat",
+  "total_m2": "132",
+  "type": "3+1",
+  "storey_plans": [
+   "Zemin Kat Planı 76m²",
+   "1.Kat Plan 56m²"
+  ],
+  "rooms": [
+   [
+    "Mahal Listesi\nVeranda",
+    "20"
+   ],
+   [
+    "3 Yatak Odası",
+    "37,5"
+   ],
+   [
+    "2 Banyo",
+    "6,8"
+   ],
+   [
+    "Hol",
+    "14,2"
+   ],
+   [
+    "Mutfak",
+    "8,6"
+   ],
+   [
+    "Salon",
+    "29"
+   ]
+  ],
+  "kat": 2,
+  "kaynak": "katalog_pdf",
+  "dogrulama": "yok"
+ },
+ {
+  "page": 40,
+  "code": "P1422",
+  "family": "Prefabrik çift kat",
+  "total_m2": "142",
+  "type": "3+1",
+  "storey_plans": [
+   "Zemin Kat Planı 75m²",
+   "1.Kat Plan 67m²"
+  ],
+  "rooms": [
+   [
+    "Mahal Listesi\nVeranda + Balkon",
+    "14,7"
+   ],
+   [
+    "3 Yatak Odası",
+    "36,8"
+   ],
+   [
+    "2 Banyo",
+    "10,4"
+   ],
+   [
+    "Antre & Hol",
+    "16,6"
+   ],
+   [
+    "Mutfak",
+    "12"
+   ],
+   [
+    "Salon",
+    "25,5"
+   ]
+  ],
+  "kat": 2,
+  "kaynak": "katalog_pdf",
+  "dogrulama": "yok"
+ },
+ {
+  "page": 42,
+  "code": "P1552",
+  "family": "Prefabrik çift kat",
+  "total_m2": "155",
+  "type": "3+1",
+  "storey_plans": [
+   "Zemin Kat Planı 85,5m²",
+   "1.Kat Plan 69,50m²"
+  ],
+  "rooms": [
+   [
+    "Mahal Listesi\n2 Veranda",
+    "19,8"
+   ],
+   [
+    "2 Balkon",
+    "10,9"
+   ],
+   [
+    "3 Yatak Odası",
+    "38,6"
+   ],
+   [
+    "2 Banyo",
+    "10,8"
+   ],
+   [
+    "2 Antre & Hol",
+    "9,2"
+   ],
+   [
+    "Mutfak",
+    "9,5"
+   ],
+   [
+    "Salon",
+    "30"
+   ],
+   [
+    "Sundurma",
+    "1,5"
+   ]
+  ],
+  "kat": 2,
+  "kaynak": "katalog_pdf",
+  "dogrulama": "yok"
+ },
+ {
+  "page": 46,
+  "code": "Ç8201",
+  "family": "Çelik tek kat",
+  "total_m2": "82",
+  "type": "2+1",
+  "storey_plans": [],
+  "rooms": [
+   [
+    "Mahal Listesi\nVeranda",
+    "18,4"
+   ],
+   [
+    "2 Yatak Odası",
+    "23,6"
+   ],
+   [
+    "Banyo",
+    "4,3"
+   ],
+   [
+    "Hol",
+    "6,7"
+   ],
+   [
+    "Yaşam Alanı",
+    "23,3"
+   ]
+  ],
+  "kat": 1,
+  "kaynak": "cizim_seti",
+  "dogrulama": "cizim_seti_ile_dogrulandi",
+  "not": "Katalog paftasındaki mahal etiketleri Ç1001'indir; mahaller çizim setinden (İE-05, 2 Ekim 2026)"
+ },
+ {
+  "page": 48,
+  "code": "Ç8801",
+  "family": "Çelik tek kat",
+  "total_m2": "88",
+  "type": "2+1",
+  "storey_plans": [],
+  "rooms": [
+   [
+    "Mahal Listesi\nVeranda",
+    "13,8"
+   ],
+   [
+    "2 Yatak Odası",
+    "24,2"
+   ],
+   [
+    "Banyo",
+    "4,7"
+   ],
+   [
+    "Hol",
+    "7,3"
+   ],
+   [
+    "Salon",
+    "21"
+   ],
+   [
+    "Mutfak",
+    "10"
+   ]
+  ],
+  "kat": 1,
+  "kaynak": "katalog_pdf",
+  "dogrulama": "yok"
+ },
+ {
+  "page": 50,
+  "code": "Ç9201",
+  "family": "Çelik tek kat",
+  "total_m2": "92",
+  "type": "2+1",
+  "storey_plans": [],
+  "rooms": [
+   [
+    "Mahal Listesi\nVeranda",
+    "12,2"
+   ],
+   [
+    "2 Yatak Odası",
+    "28,1"
+   ],
+   [
+    "Banyo",
+    "3,8"
+   ],
+   [
+    "Hol",
+    "9,2"
+   ],
+   [
+    "Salon",
+    "20,8"
+   ],
+   [
+    "Mutfak",
+    "10,7"
+   ]
+  ],
+  "kat": 1,
+  "kaynak": "katalog_pdf",
+  "dogrulama": "yok"
+ },
+ {
+  "page": 52,
+  "code": "Ç9501",
+  "family": "Çelik tek kat",
+  "total_m2": "95",
+  "type": "2+1",
+  "storey_plans": [],
+  "rooms": [
+   [
+    "Mahal Listesi\nVeranda",
+    "14,6"
+   ],
+   [
+    "2 Yatak Odası",
+    "27,6"
+   ],
+   [
+    "Banyo",
+    "4,5"
+   ],
+   [
+    "Hol",
+    "5,3"
+   ],
+   [
+    "Salon",
+    "24,3"
+   ],
+   [
+    "Mutfak",
+    "12"
+   ]
+  ],
+  "kat": 1,
+  "kaynak": "katalog_pdf",
+  "dogrulama": "yok"
+ },
+ {
+  "page": 54,
+  "code": "Ç1001",
+  "family": "Çelik tek kat",
+  "total_m2": "100",
+  "type": "2+1",
+  "storey_plans": [],
+  "rooms": [
+   [
+    "Mahal Listesi\nVeranda",
+    "22,5"
+   ],
+   [
+    "2 Yatak Odası",
+    "20"
+   ],
+   [
+    "Banyo",
+    "5,5"
+   ],
+   [
+    "Salon + Mutfak",
+    "37,3"
+   ],
+   [
+    "Hol",
+    "7,3"
+   ]
+  ],
+  "kat": 1,
+  "kaynak": "katalog_pdf",
+  "dogrulama": "yok"
+ },
+ {
+  "page": 56,
+  "code": "Ç1021",
+  "family": "Çelik tek kat",
+  "total_m2": "102",
+  "type": "2+1",
+  "storey_plans": [],
+  "rooms": [
+   [
+    "Mahal Listesi\nVeranda",
+    "13"
+   ],
+   [
+    "2 Yatak Odası",
+    "27,8"
+   ],
+   [
+    "Banyo",
+    "4,3"
+   ],
+   [
+    "Hol",
+    "1,8"
+   ],
+   [
+    "Mutfak + Salon",
+    "49"
+   ]
+  ],
+  "kat": 1,
+  "kaynak": "katalog_pdf",
+  "dogrulama": "yok"
+ },
+ {
+  "page": 58,
+  "code": "Ç1031",
+  "family": "Çelik tek kat",
+  "total_m2": "103",
+  "type": "2+1",
+  "storey_plans": [],
+  "rooms": [
+   [
+    "Mahal Listesi\nVeranda",
+    "16,8"
+   ],
+   [
+    "2 Yatak Odası",
+    "36,6"
+   ],
+   [
+    "Banyo",
+    "4,7"
+   ],
+   [
+    "Hol",
+    "5,8"
+   ],
+   [
+    "Yaşama Mekanı",
+    "32,8"
+   ]
+  ],
+  "kat": 1,
+  "kaynak": "cizim_etiketi",
+  "dogrulama": "etiket_okundu",
+  "not": "Katalog paftası Ç1151'in planını (115 m², 3+1) gösteriyor; değerler çizim etiketlerinden (DWG, 2 Ekim 2026)"
+ },
+ {
+  "page": 60,
+  "code": "Ç1151",
+  "family": "Çelik tek kat",
+  "total_m2": "115",
+  "type": "3+1",
+  "storey_plans": [],
+  "rooms": [
+   [
+    "Mahal Listesi\nVeranda",
+    "16,5"
+   ],
+   [
+    "3 Yatak Odası",
+    "38,6"
+   ],
+   [
+    "2 Banyo",
+    "9"
+   ],
+   [
+    "Salon + Mutfak",
+    "30,4"
+   ],
+   [
+    "Hol",
+    "12"
+   ]
+  ],
+  "kat": 1,
+  "kaynak": "cizim_etiketi",
+  "dogrulama": "etiket_okundu",
+  "not": "Veranda katalogda 22,5; çizim etiketinde 16,5 (DWG, 2 Ekim 2026)"
+ },
+ {
+  "page": 62,
+  "code": "Ç1241",
+  "family": "Çelik tek kat",
+  "total_m2": "124",
+  "type": "3+1",
+  "storey_plans": [],
+  "rooms": [
+   [
+    "Mahal Listesi\nVeranda",
+    "19,9"
+   ],
+   [
+    "3 Yatak Odası",
+    "39,6"
+   ],
+   [
+    "2 Banyo",
+    "6,1"
+   ],
+   [
+    "Salon",
+    "25,1"
+   ],
+   [
+    "Mutfak",
+    "15,2"
+   ],
+   [
+    "Hol",
+    "8,7"
+   ]
+  ],
+  "kat": 1,
+  "kaynak": "katalog_pdf",
+  "dogrulama": "yok"
+ },
+ {
+  "page": 64,
+  "code": "Ç1351",
+  "family": "Çelik tek kat",
+  "total_m2": "135",
+  "type": "4+1",
+  "storey_plans": [],
+  "rooms": [
+   [
+    "Mahal Listesi\nVeranda",
+    "18,9"
+   ],
+   [
+    "4 Yatak Odası",
+    "53,4"
+   ],
+   [
+    "Banyo",
+    "4,7"
+   ],
+   [
+    "Hol",
+    "6,2"
+   ],
+   [
+    "Mutfak + Salon",
+    "43"
+   ]
+  ],
+  "kat": 1,
+  "kaynak": "katalog_pdf",
+  "dogrulama": "yok"
+ },
+ {
+  "page": 68,
+  "code": "Ç1142",
+  "family": "Çelik çift kat",
+  "total_m2": "114",
+  "type": "3+1",
+  "storey_plans": [
+   "Zemin Kat Planı 57m²",
+   "1.Kat Plan 57m²"
+  ],
+  "rooms": [
+   [
+    "Mahal Listesi\nVeranda",
+    "7,3"
+   ],
+   [
+    "Balkon",
+    "7,3"
+   ],
+   [
+    "3 Yatak Odası",
+    "32,2"
+   ],
+   [
+    "2 Banyo",
+    "6,8"
+   ],
+   [
+    "Mutfak",
+    "9,5"
+   ],
+   [
+    "Salon",
+    "23"
+   ],
+   [
+    "Antre & Hol",
+    "10"
+   ],
+   [
+    "Sundurma",
+    "1,5"
+   ]
+  ],
+  "kat": 2,
+  "kaynak": "katalog_pdf",
+  "dogrulama": "yok"
+ },
+ {
+  "page": 70,
+  "code": "Ç1202",
+  "family": "Çelik çift kat",
+  "total_m2": "120",
+  "type": "2+1",
+  "storey_plans": [
+   "Zemin Kat Planı 64,7m²",
+   "1.Kat Plan 56m²"
+  ],
+  "rooms": [
+   [
+    "Mahal Listesi\n2 Balkon",
+    "13,8"
+   ],
+   [
+    "2 Yatak Odası",
+    "21,2"
+   ],
+   [
+    "2 Banyo",
+    "6,8"
+   ],
+   [
+    "Salon + Mutfak",
+    "37,3"
+   ],
+   [
+    "Antre & Holl",
+    "8"
+   ]
+  ],
+  "kat": 2,
+  "kaynak": "katalog_pdf",
+  "dogrulama": "yok"
+ },
+ {
+  "page": 72,
+  "code": "Ç1302",
+  "family": "Çelik çift kat",
+  "total_m2": "130",
+  "type": "2+1",
+  "storey_plans": [
+   "Zemin Kat Planı 65,3m²",
+   "1.Kat Plan 65,3m²"
+  ],
+  "rooms": [
+   [
+    "Mahal Listesi\n2 Balkon",
+    "45,6"
+   ],
+   [
+    "2 Yatak Odası",
+    "32,2"
+   ],
+   [
+    "2 Banyo",
+    "8,3"
+   ],
+   [
+    "Salon + Mutfak",
+    "29,1"
+   ],
+   [
+    "Antre & Holl",
+    "5,7"
+   ]
+  ],
+  "kat": 2,
+  "kaynak": "katalog_pdf",
+  "dogrulama": "yok"
+ },
+ {
+  "page": 74,
+  "code": "Ç1322",
+  "family": "Çelik çift kat",
+  "total_m2": "130",
+  "type": "2+1",
+  "storey_plans": [
+   "Zemin Kat Planı 81m²",
+   "1.Kat Plan 41m²"
+  ],
+  "rooms": [
+   [
+    "Mahal Listesi\n2 Yatak Odası",
+    "32"
+   ],
+   [
+    "Banyo",
+    "6,4"
+   ],
+   [
+    "Salon + Mutfak",
+    "63,4"
+   ],
+   [
+    "Galeri Boşluğu",
+    "28,75"
+   ],
+   [
+    "Sundurma",
+    "2,2"
+   ],
+   [
+    "Hol",
+    "6,8"
+   ]
+  ],
+  "kat": 2,
+  "kaynak": "katalog_pdf",
+  "dogrulama": "yok"
+ },
+ {
+  "page": 76,
+  "code": "Ç1352",
+  "family": "Çelik çift kat",
+  "total_m2": "135",
+  "type": "4+1",
+  "storey_plans": [
+   "Zemin Kat Planı 71,25m²",
+   "1.Kat Plan 64m²"
+  ],
+  "rooms": [
+   [
+    "Mahal Listesi\nVeranda",
+    "7"
+   ],
+   [
+    "4 Yatak Odası",
+    "54"
+   ],
+   [
+    "2 Banyo",
+    "7,2"
+   ],
+   [
+    "Salon + Mutfak",
+    "34"
+   ],
+   [
+    "Antre & Holl",
+    "11,1"
+   ]
+  ],
+  "kat": 2,
+  "kaynak": "katalog_pdf",
+  "dogrulama": "yok"
+ },
+ {
+  "page": 78,
+  "code": "Ç1402",
+  "family": "Çelik çift kat",
+  "total_m2": "140",
+  "type": "3+1",
+  "storey_plans": [
+   "Zemin Kat Planı 70m²",
+   "1.Kat Plan 70m²"
+  ],
+  "rooms": [
+   [
+    "Mahal Listesi\nVeranda",
+    "9,25"
+   ],
+   [
+    "Balkon",
+    "9,25"
+   ],
+   [
+    "2 Yatak Odası",
+    "29,7"
+   ],
+   [
+    "1 Çocuk Odası",
+    "7,86"
+   ],
+   [
+    "2 Banyo",
+    "9,2"
+   ],
+   [
+    "Salon + Mutfak",
+    "41,12"
+   ],
+   [
+    "Antre & Holl",
+    "10,2"
+   ]
+  ],
+  "kat": 2,
+  "kaynak": "katalog_pdf",
+  "dogrulama": "yok"
+ },
+ {
+  "page": 80,
+  "code": "Ç1552",
+  "family": "Çelik çift kat",
+  "total_m2": "155",
+  "type": "3+1",
+  "storey_plans": [
+   "Zemin Kat Planı 90m²",
+   "1.Kat Plan 65,55m²"
+  ],
+  "rooms": [
+   [
+    "Mahal Listesi\nVeranda",
+    "18,9"
+   ],
+   [
+    "3 Yatak Odası",
+    "39,2"
+   ],
+   [
+    "3 Banyo",
+    "14,7"
+   ],
+   [
+    "Salon + Mutfak",
+    "42,7"
+   ],
+   [
+    "Antre & Holl",
+    "6,1"
+   ],
+   [
+    "Sundurma",
+    "2,4"
+   ]
+  ],
+  "kat": 2,
+  "kaynak": "katalog_pdf",
+  "dogrulama": "yok"
+ },
+ {
+  "page": 82,
+  "code": "Ç2226",
+  "family": "Çelik çift kat",
+  "total_m2": "226",
+  "type": "4+1",
+  "storey_plans": [
+   "Zemin Kat Planı 113m²",
+   "1.Kat Plan 113m²"
+  ],
+  "rooms": [
+   [
+    "Mahal Listesi\n2 Veranda",
+    "14,94"
+   ],
+   [
+    "Balkon",
+    "5"
+   ],
+   [
+    "4 Yatak Odası",
+    "58,4"
+   ],
+   [
+    "3 Banyo + 1 WC",
+    "16,3"
+   ],
+   [
+    "Salon + Mutfak",
+    "53,6"
+   ],
+   [
+    "Galeri Boşluğu",
+    "29,5"
+   ],
+   [
+    "Giyinme Alanı",
+    "3,8"
+   ],
+   [
+    "Kiler",
+    "2,3"
+   ],
+   [
+    "Antre & Hol",
+    "10,3"
+   ]
+  ],
+  "kat": 2,
+  "kaynak": "katalog_pdf",
+  "dogrulama": "yok"
+ }
+]
