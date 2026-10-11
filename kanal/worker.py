@@ -258,9 +258,11 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
         ekle(metin, "PATRON", "bildirim")
         if sablon:
             import sablonlar as S
-            son_no = ((k.d.get("son_is_emri") or {}) if k is not None and isinstance(getattr(k, "d", None), dict) else {}).get("is_emri_no")
-            ekle_satir(S.patron_bildirim_satiri(gelen, sira + 1, bayi, is_emri_no, son_no))
+            ekle_satir(S.patron_bildirim_satiri(gelen, sira + 1, bayi, is_emri_no, baslangic.get("son_no")))
 
+    baslangic: dict = {}                          # mesaj işlenmeden önceki taslağın son İş Emri no'su (yönlendirme taslağı siler)
+    if k is not None and isinstance(getattr(k, "d", None), dict):
+        baslangic["son_no"] = (k.d.get("son_is_emri") or {}).get("is_emri_no")
     kim = f"{(bayi or {}).get('ad') or gelen.get('name') or ''} ({maske(sender)})"
     reply_id = str(gelen.get("reply_id") or "")
     if gelen.get("type") in GELEN_YAZILI and reply_id.startswith("dosya:"):

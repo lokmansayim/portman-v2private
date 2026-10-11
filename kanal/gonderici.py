@@ -69,6 +69,7 @@ class GonderenMeta:
             raise K.Gonderilmedi("Gönderilmedi: recipient_unknown")
         if not bildirim and not sablon and alici != str(gelen.get("sender") or ""):
             raise K.Gonderilmedi("Gönderilmedi: recipient_mismatch")
+        self.depo.alici_cozuldu_kaydet(r["id"], alici)              # düşen satır da (pencere kapalı, sablon_yok) panelde alıcının sayfasında görünsün
         son = self.depo.son_gelen_zamani(alici) if (bildirim or panel) else float(gelen.get("timestamp") or 0)
         acik = bool(son) and time.time() - float(son) < PENCERE_SN
         satir = dict(r.get("satir") or {}); satir.update(id=r["id"], kind=r["kind"], body=r["govde"])
@@ -84,7 +85,6 @@ class GonderenMeta:
                 raise K.Gonderilmedi(f"Gönderilmedi: sablon_yok ({anahtar or '-'}): ayar.sh ile Meta şablon adı girilmeli")
             s = dict(satir.get("sablon") or {})
             satir["sablon"] = {**s, "ad": ad, "dil": s.get("dil") or ayar.get("sablon_dil") or "tr"}
-        self.depo.alici_cozuldu_kaydet(r["id"], alici)
         medya_id = None; baslik_medya = None
         try:
             if r["kind"] in ("document", "image") or (r["kind"] == "interactive" and M.baslik_gorseli_var(satir)):
