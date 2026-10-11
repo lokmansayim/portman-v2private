@@ -250,11 +250,28 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
         nonlocal sira
         sira += 1; r["seq"] = sira; r["id"] = satir_id(gelen["id"], sira); satirlar.append(r)
 
-    def patrona(metin: str):
-        if not patron_mu:
-            ekle(metin, "PATRON", "bildirim")
+    def patrona(metin: str, sablon: bool = False, is_emri_no: str | None = None):
+        """Patron'a bildirim: metin satırı (pencere açıkken gider). İE-07: sablon=True ise ek bir Meta şablon satırı yazılır
+        (yönlendirme, hata, dosya penceresi); gönderici pencere kapalıysa onu gönderir, açıksa 'sablon_gereksiz' yapar (P4)."""
+        if patron_mu:
+            return
+        ekle(metin, "PATRON", "bildirim")
+        if sablon:
+            import sablonlar as S
+            son_no = ((k.d.get("son_is_emri") or {}) if k is not None and isinstance(getattr(k, "d", None), dict) else {}).get("is_emri_no")
+            ekle_satir(S.patron_bildirim_satiri(gelen, sira + 1, bayi, is_emri_no, son_no))
 
     kim = f"{(bayi or {}).get('ad') or gelen.get('name') or ''} ({maske(sender)})"
+    reply_id = str(gelen.get("reply_id") or "")
+    if gelen.get("type") in GELEN_YAZILI and reply_id.startswith("dosya:"):
+        # İE-07 P5: bayi "dosyalarınız hazır" şablonunun hızlı yanıt düğmesine bastı → Meta tarafında 24 saat penceresi açıldı.
+        # LLM çağrılmaz, konuşma durumu değişmez; bayiye onaylı sabit cevap, Patron'a bildirim (metin + şablon, ekleme A).
+        import sablonlar as S
+        no = reply_id[len("dosya:"):][:60]
+        ekle(S.BAYI_DOSYA_CEVABI)
+        patrona(f"Portman: {kim} dosya penceresini açtı ({no}). Panelden dosyaları gönderebilirsiniz.", sablon=True, is_emri_no=no)
+        sonuc.update(eylem="cevapla", gerekce="şablon cevabı: dosya penceresi açıldı", buton=reply_id, is_emri_no=no)
+        return {"satirlar": satirlar, "sonuc": sonuc}
     if gelen.get("type") not in GELEN_YAZILI or not ((gelen.get("text") or "").strip() or gelen.get("reply_id")):
         ekle("Şu an yalnız yazılı talepleri işleyebiliyorum. Talebinizi yazıyla iletirseniz (örn. \"P6001 aynalı\" ya da \"7x4 m, 2+1, ön verandalı\") ön onay planını hazırlarım."
              + ("" if patron_mu else " Gönderdiğiniz dosyayı Lokman Bey'e ilettim."))
@@ -299,7 +316,7 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
     except Exception as e:
         hata = str(e)[:320] if isinstance(e, CikarimHatasi) else f"{type(e).__name__}: {str(e)[:300]}"
         ekle("Mesajınızı şu an işleyemedim; Lokman Bey'e iletiyorum, en kısa sürede dönüş yapılacak.")
-        patrona(f"Portman: {kim} mesajı işlenemedi (çıkarım hatası). Mesaj: \"{gelen['text'][:300]}\"")
+        patrona(f"Portman: {kim} mesajı işlenemedi (çıkarım hatası). Mesaj: \"{gelen['text'][:300]}\"", sablon=True)
         sonuc.update(eylem="hata", gerekce="çıkarım hatası", hata=hata)
         return {"satirlar": satirlar, "sonuc": sonuc, "hata": hata}
 
@@ -377,7 +394,10 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
         ekle("Ön onay planı otomatik doğrulamadan geçmedi; Lokman Bey'e iletiyorum, en kısa sürede dönüş yapılacak.")
         patrona(f"Portman: {kim} için {sonuc['is_emri_no']} çizimi doğrulamadan geçmedi: {'; '.join(cizim['errors'])[:400]}")
     if karar.eylem == "yonlendir":
-        patrona(f"Portman yönlendirme: {kim} — {karar.gerekce}. Mesaj: \"{(gelen.get('text') or '')[:300]}\"")
+        model = katalog.bul(talep.katalog_kodu) if talep.katalog_kodu else None
+        model_notu = f" Katalog notu ({model['code']}): {model['not']}" if model and model.get("not") else ""   # D-07: yalnız Patron'a
+        patrona(f"Portman yönlendirme: {kim} — {karar.gerekce}.{model_notu} Mesaj: \"{(gelen.get('text') or '')[:300]}\"",
+                sablon=True, is_emri_no=sonuc.get("is_emri_no"))
     return {"satirlar": satirlar, "sonuc": sonuc}
 
 

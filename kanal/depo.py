@@ -277,6 +277,12 @@ class Depo:
                       "VALUES (%s, %s, %s, %s, %s, %s, 'text', %s, %s) ON CONFLICT (id) DO NOTHING",
                       (satir_id(gelen["id"], sira), j["id"], gelen["id"], sira, alici, tur, govde,
                        Jsonb(metin_satiri(gelen, govde, sira, alici, tur))))
+        if len(satirlar) == 2:                       # İE-07 P4: Patron'un penceresi kapalıysa şablonla ulaşır (talep kimliği T-<iz>)
+            import sablonlar as S
+            s = S.patron_bildirim_satiri(gelen, 3, gelen.get("bayi") if isinstance(gelen.get("bayi"), dict) else None, None, None)
+            c.execute("INSERT INTO giden (id, is_id, mesaj_id, sira, alici, tur, kind, govde, satir) "
+                      "VALUES (%s, %s, %s, %s, %s, %s, 'template', %s, %s) ON CONFLICT (id) DO NOTHING",
+                      (s["id"], j["id"], gelen["id"], 3, "PATRON", "bildirim", s["body"], Jsonb(s)))
 
     def cikarim_kaydet(self, is_id: int, sahip: str, cikarim: dict) -> bool:
         with self.baglan() as c, c.transaction():
@@ -360,10 +366,10 @@ class Depo:
                 # Revizyona bağlı satırlar: PDF ve aynı İş Emri'nin görsel/etkileşim satırları (onay butonu → revizyon; alıntı → revizyon)
                 bagli = revizyon_id if (s.get("kind") == "document" or (s.get("is_emri_no") and s.get("is_emri_no") == sonuc.get("is_emri_no"))) else None
                 c.execute(
-                    "INSERT INTO giden (id, is_id, mesaj_id, sira, alici, tur, kind, govde, dosya, sha256, revizyon_id, satir) "
-                    "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                    "INSERT INTO giden (id, is_id, mesaj_id, sira, alici, tur, kind, govde, dosya, sha256, revizyon_id, satir, kaynak) "
+                    "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
                     (s["id"], j["id"], gelen["id"], s["seq"], s["to"], s.get("tur") or "cevap", s.get("kind") or "text", s.get("body") or "",
-                     s.get("file"), s.get("sha256"), bagli, Jsonb(s)))
+                     s.get("file"), s.get("sha256"), bagli, Jsonb(s), str(s.get("kaynak") or "ajan")))
             c.execute("UPDATE isler SET durum = %s, sonuc = %s, hata = %s, bitti = now(), sahip = NULL, kira_bitis = NULL WHERE id = %s",
                       ("basarisiz" if cikti.get("hata") else "bitti", Jsonb(sonuc), cikti.get("hata"), j["id"]))
         return {"proje_id": proje_id, "revizyon_id": revizyon_id}
@@ -780,16 +786,49 @@ class Depo:
                 "LEFT JOIN bayiler b ON b.numara = g.gonderen ORDER BY g.son DESC LIMIT %s", (en_fazla,)).fetchall()
 
     def konusma_mesajlari(self, numara: str, en_fazla: int = 300) -> list[dict]:
-        """Bir numaranın gelen ve giden mesajları, zaman sırasıyla (giden: durum ve teslim durumu ile)."""
+        """Bir numaranın gelen ve giden mesajları, zaman sırasıyla (giden: durum, teslim durumu, kaynak (ajan | panel) ve hata ile)."""
         with self.baglan() as c:
             return c.execute(
                 "SELECT * FROM ("
                 " SELECT 'gelen' AS yon, id, tur AS kind, metin AS govde, extract(epoch FROM wa_zamani)::float8 AS zaman, NULL::text AS durum, "
-                "        NULL::text AS teslim, sahiplenildi, ham->>'reply_id' AS reply_id, NULL::text AS dosya_adi FROM mesajlar WHERE gonderen = %s "
+                "        NULL::text AS teslim, sahiplenildi, ham->>'reply_id' AS reply_id, NULL::text AS dosya_adi, NULL::text AS kaynak, NULL::text AS hata "
+                "        FROM mesajlar WHERE gonderen = %s "
                 " UNION ALL "
-                " SELECT 'giden', id, kind, govde, extract(epoch FROM olusturuldu)::float8, durum, teslim_durumu, true, NULL, (satir->>'filename') "
+                " SELECT 'giden', id, kind, govde, extract(epoch FROM olusturuldu)::float8, durum, teslim_durumu, true, NULL, (satir->>'filename'), kaynak, hata "
                 "        FROM giden WHERE alici = %s OR alici_cozuldu = %s"
                 ") x ORDER BY zaman DESC, id LIMIT %s", (numara, numara, numara, en_fazla)).fetchall()[::-1]
+
+    # ───────────────────────── İE-07: panelden gönderim ─────────────────────────
+    PANEL_SIRA_BASI = 101           # ajan satırları 1..n; panel satırları 101'den (açık işin isi_bitir'iyle UNIQUE çakışmasın)
+
+    def son_gelen_mesaj(self, numara: str) -> dict | None:
+        """Numaranın son gelen mesajı (ham) ve iş kimliği: panel satırının ebeveyni. Hiç mesaj yoksa None."""
+        with self.baglan() as c:
+            return c.execute("SELECT m.id, m.ham, j.id AS is_id, extract(epoch FROM m.wa_zamani)::float8 AS zaman FROM mesajlar m "
+                             "JOIN isler j ON j.mesaj_id = m.id WHERE m.gonderen = %s ORDER BY m.wa_zamani DESC, j.id DESC LIMIT 1", (str(numara),)).fetchone()
+
+    def panel_giden_ekle(self, numara: str, satir_uret) -> str:
+        """Panelden yazılan satırı (metin, PDF, şablon) bayinin SON gelen mesajına ve onun işine bağlı olarak yazar; giden.kaynak = 'panel'.
+        satir_uret(gelen_ham, sira) → worker.giden_metin biçiminde satır. Gönderici kuralları aynen uygulanır; penceresi bayinin son
+        mesajından ölçülür (kanal/gonderici.py). Hiç mesaj yoksa ValueError('gelen_yok')."""
+        with self.baglan() as c, c.transaction():
+            r = c.execute("SELECT m.id, m.ham, j.id AS is_id FROM mesajlar m JOIN isler j ON j.mesaj_id = m.id WHERE m.gonderen = %s "
+                          "ORDER BY m.wa_zamani DESC, j.id DESC LIMIT 1 FOR UPDATE OF m", (str(numara),)).fetchone()
+            if r is None:
+                raise ValueError("gelen_yok")
+            n = c.execute("SELECT greatest(coalesce(max(sira), 0) + 1, %s) AS n FROM giden WHERE mesaj_id = %s", (self.PANEL_SIRA_BASI, r["id"])).fetchone()["n"]
+            s = dict(satir_uret(r["ham"], int(n))); s["kaynak"] = "panel"; s["id"] = satir_id(r["id"], int(n)); s["seq"] = int(n)
+            c.execute("INSERT INTO giden (id, is_id, mesaj_id, sira, alici, tur, kind, govde, dosya, sha256, satir, kaynak) "
+                      "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'panel')",
+                      (s["id"], r["is_id"], r["id"], int(n), str(numara), s.get("tur") or "cevap", s.get("kind") or "text", s.get("body") or "",
+                       s.get("file"), s.get("sha256"), Jsonb(s)))
+            return s["id"]
+
+    def son_is_emri_no(self, numara: str) -> str | None:
+        """Bayinin son İş Emri numarası (revizyonlar); 'dosyalarınız hazır' şablonunun {{2}} değişkeni. Yoksa None."""
+        with self.baglan() as c:
+            r = c.execute("SELECT is_emri_no FROM revizyonlar WHERE gonderen = %s ORDER BY id DESC LIMIT 1", (str(numara),)).fetchone()
+        return str(r["is_emri_no"]) if r and r.get("is_emri_no") else None
 
     def gelen_dosyalari(self, numara: str) -> list[dict]:
         with self.baglan() as c:

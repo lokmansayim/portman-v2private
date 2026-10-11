@@ -250,15 +250,13 @@ def _gonderen_sablon(depo, meta, ayar=None):
 
 
 def _yonlendirme_satirlari(depo, bayi_msg_ts=None):
-    """Bayi mesajı + metin bildirimi (sira 2) + Patron şablonu (sira 3); işin kendi satırı (sira 1) bayiye gider."""
+    """Bayi mesajı → yönlendirme (P8501 şablonu kodlanmamış): worker bayiye metin (1), Patron'a metin (2) ve Patron şablonu (3) yazar."""
     depo.bayi_yaz(NUMARA_A, ad="Deneme Bayi A", kod="TSTA")
     g = mesaj("P8501 olsun", talep(ozet="P8501", katalog_kodu="P8501"), bayi=depo.gelen_bayisi(NUMARA_A), ts=bayi_msg_ts)
     depo.mesaj_kaydet(g); isle_hepsi(depo)
-    with depo.baglan() as c, c.transaction():          # işin kendi satırlarını temizlemeden: Patron satırlarını ek olarak yazıyoruz
-        n = c.execute("SELECT max(sira) AS n FROM giden WHERE mesaj_id = %s", (g["id"],)).fetchone()["n"] or 0
-    metin = W.giden_metin(g, "Portman yönlendirme: deneme", n + 1, "PATRON", "bildirim")
-    sab = S.patron_bildirim_satiri(g, n + 2, depo.gelen_bayisi(NUMARA_A), None, None)
-    return g, _satir_ekle(depo, g["id"], metin), _satir_ekle(depo, g["id"], sab)
+    rows = sorgu(depo, "SELECT id, kind FROM giden WHERE mesaj_id = %s AND alici = 'PATRON' ORDER BY sira", g["id"])
+    assert [r["kind"] for r in rows] == ["text", "template"]
+    return g, rows[0]["id"], rows[1]["id"]
 
 
 def test_sablon_pencere_kapaliyken_gider_metin_duser(depo, meta):
