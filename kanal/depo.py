@@ -649,7 +649,7 @@ class Depo:
         return r["kind"] if r else None
 
     # ───────────────────────── İE-06: bayi kimlik kartı (kaynak bu tablodur) ─────────────────────────
-    ROLLER = ("bayi", "patron", "muhendis")
+    ROLLER = ("bayi", "patron", "muhendis", "test")     # test: kuru koşunun sahte kartı (İE-07; göç 005)
     _BAYI_SUTUNLAR = "numara, kod, ad, hitap, firma, bolge, rol, aktif, kaynak, olusturuldu, guncellendi"
 
     def bayi_oku(self, numara) -> dict | None:

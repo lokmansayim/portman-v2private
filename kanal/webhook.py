@@ -79,12 +79,13 @@ def kuyruk_satiri(m: dict, mid: str, gonderen: str, tur: str, ts: int, adlar: di
 
 
 def izinli_mi(bayi: dict | None, mode: str) -> bool:
-    """feature.php::pm_kanal_allowed: hepsi → herkes; kayitli → kayıtlı ve aktif; başka her değer (patron) → yalnız rol=patron."""
+    """feature.php::pm_kanal_allowed: hepsi → herkes; kayitli → kayıtlı ve aktif; başka her değer (patron) → yalnız rol=patron.
+    İE-07: rol='test' (kuru koşunun sahte kartı; vps/kuru_kosu.sh) patron modunda da sahiplenilir — Patron konuşmasına iz kalmasın."""
     if mode == "hepsi":
         return True
     if mode == "kayitli":
         return bayi is not None
-    return bayi is not None and bayi.get("rol") == "patron"
+    return bayi is not None and bayi.get("rol") in ("patron", "test")
 
 
 def mesaj_isle(k: Kanal, m: dict, adlar: dict, ayar: dict, simdi: int) -> str:
