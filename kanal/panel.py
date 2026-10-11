@@ -48,6 +48,8 @@ ON_SN = 15 * 60                     # giriş sayfasının ön çerezi (CSRF içi
 KILIT_DENEME = 5
 KILIT_DK = 15
 GOVDE_EN_COK = 64 * 1024
+DOSYA_EN_COK = 10 * 1024 * 1024    # İE-07: panelden gönderilen PDF (nginx /panel/ client_max_body_size 12m; Lokman 11.10 karar 5)
+PENCERE_SN = 86400                 # Meta 24 saat serbest cevap penceresi (kanal/gonderici.py ile aynı)
 SCRYPT_N, SCRYPT_R, SCRYPT_P = 16384, 8, 1
 ROLLER = ("bayi", "patron", "muhendis")
 _NUMARA = re.compile(r"[1-9][0-9]{7,14}")
@@ -141,6 +143,7 @@ class Istek:
         ip = (environ.get("HTTP_X_FORWARDED_FOR") or environ.get("REMOTE_ADDR") or "?").split(",")[0].strip()
         self.ip_ozeti = hashlib.sha256(ip.encode("utf-8")).hexdigest()[:16]        # ham IP saklanmaz
         self._form: dict | None = None
+        self.dosyalar: dict[str, tuple[str, bytes]] = {}                          # İE-07: çok parçalı gövdedeki dosyalar (ad, içerik)
 
     def form(self) -> dict:
         if self._form is None:
@@ -148,11 +151,38 @@ class Istek:
                 n = int(self.environ.get("CONTENT_LENGTH") or 0)
             except ValueError:
                 n = 0
-            if n > GOVDE_EN_COK:
+            ctype = str(self.environ.get("CONTENT_TYPE") or "")
+            coklu = ctype.lower().startswith("multipart/form-data")
+            if n > (DOSYA_EN_COK + GOVDE_EN_COK if coklu else GOVDE_EN_COK):
                 raise Buyuk()
             govde = self.environ["wsgi.input"].read(n) if n > 0 else b""
-            self._form = {a: v[0] for a, v in urllib.parse.parse_qs(govde.decode("utf-8", "replace"), keep_blank_values=True).items()}
+            if coklu:
+                self._form, self.dosyalar = _coklu_parca(ctype, govde)
+            else:
+                self._form = {a: v[0] for a, v in urllib.parse.parse_qs(govde.decode("utf-8", "replace"), keep_blank_values=True).items()}
         return self._form
+
+
+def _coklu_parca(ctype: str, govde: bytes) -> tuple[dict, dict]:
+    """multipart/form-data gövdesi (stdlib email; cgi modülü 3.13'te yok): alanlar → {ad: değer}, dosyalar → {ad: (dosya adı, içerik)}."""
+    import email.parser
+    import email.policy
+    msg = email.parser.BytesParser(policy=email.policy.HTTP).parsebytes(b"Content-Type: " + ctype.encode("latin-1", "replace") + b"\r\nMIME-Version: 1.0\r\n\r\n" + govde)
+    alanlar: dict = {}; dosyalar: dict = {}
+    if not msg.is_multipart():
+        return alanlar, dosyalar
+    for part in msg.iter_parts():
+        ad = part.get_param("name", header="content-disposition")
+        if not ad:
+            continue
+        icerik = part.get_payload(decode=True) or b""
+        dosya_adi = part.get_filename()
+        if dosya_adi is not None:
+            if icerik:
+                dosyalar[str(ad)] = (str(dosya_adi), icerik)
+        else:
+            alanlar[str(ad)] = icerik.decode("utf-8", "replace")
+    return alanlar, dosyalar
 
 
 # ───────────────────────── HTML ─────────────────────────
@@ -221,7 +251,50 @@ def gelen_kutusu(p: Panel, oturum: dict) -> str:
     return sayfa("Gelen kutusu", durum + tablo, p, oturum)
 
 
-def konusma_sayfasi(p: Panel, oturum: dict, numara: str) -> str:
+_HATA_METNI = (("reply_window_closed", "pencere kapalı (24 saat)"), ("sablon_gereksiz", "şablon gereksiz (pencere açıktı, metin gitti)"),
+               ("sablon_yok", "şablon tanımsız (ayar.sh ile Meta şablon adı girilmeli)"), ("dry_run", "dry_run: gönderilmedi"),
+               ("recipient_unknown", "alıcı bilinmiyor"), ("template_invalid", "şablon değişkeni geçersiz"))
+
+
+def _hata_kisa(hata: str | None) -> str:
+    h = str(hata or "")
+    for anahtar, metin in _HATA_METNI:
+        if anahtar in h:
+            return metin
+    return h[:80]
+
+
+def cevap_formu(p: Panel, oturum: dict, numara: str, b: dict | None, hata: str | None = None, bilgi: str | None = None) -> str:
+    """İE-07 P3/P5: metin + PDF formu, pencere durumu, 'dosyalar hazır' şablon düğmesi."""
+    csrf = p.csrf(oturum["n"])
+    son = p.depo.son_gelen_mesaj(numara)
+    govde = (f'<p class="hata">{e(hata)}</p>' if hata else "") + (f'<p class="bilgi">{e(bilgi)}</p>' if bilgi else "")
+    if son is None:
+        return govde + '<p class="durum">Bu numaradan hiç mesaj gelmedi; panelden gönderim yapılamaz (bayi önce yazmalı ya da şablon için kaydı olmalı).</p>'
+    son_t = p.depo.son_gelen_zamani(numara) or 0
+    kalan = PENCERE_SN - (time.time() - float(son_t))
+    if kalan > 0:
+        pencere = f'<p class="durum">24 saat penceresi <b>açık</b>; kalan yaklaşık {int(kalan // 3600)} saat {int(kalan % 3600 // 60)} dk. Metin ve PDF gönderilebilir.</p>'
+    else:
+        pencere = ('<p class="hata">24 saat penceresi <b>kapalı</b>: metin ve PDF gönderilmez (gönderici "pencere kapalı" der). '
+                   'Bayiye "dosyalar hazır" şablonu gönderin; cevap verirse pencere açılır.</p>')
+    form = (f'<form class="kart" method="post" action="/panel/konusma/{e(numara)}/gonder" enctype="multipart/form-data">'
+            f'<input type="hidden" name="csrf" value="{csrf}">'
+            f'<label>Metin<textarea name="metin" rows="3" maxlength="4000"></textarea></label>'
+            f'<label>PDF (en çok 10 MB)<input type="file" name="pdf" accept="application/pdf"></label>'
+            f'<label>PDF açıklaması<input type="text" name="aciklama" maxlength="1000"></label>'
+            f'<button>Gönder</button></form>')
+    no = p.depo.son_is_emri_no(numara)
+    if no:
+        sablon = (f'<form class="kart" method="post" action="/panel/konusma/{e(numara)}/sablon"><input type="hidden" name="csrf" value="{csrf}">'
+                  f'<button>"Dosyalar hazır" şablonu gönder ({e(no)})</button> <span class="durum">Meta onaylı şablon; pencere kapalıyken de gider (ücretli). '
+                  f'Bayi "Dosyaları gönder"e basınca pencere açılır.</span></form>')
+    else:
+        sablon = '<p class="durum">"Dosyalar hazır" şablonu: bu bayinin İş Emri kaydı yok (proje yok), düğme kapalı.</p>'
+    return govde + pencere + form + sablon
+
+
+def konusma_sayfasi(p: Panel, oturum: dict, numara: str, hata: str | None = None, bilgi: str | None = None) -> str:
     b = p.depo.bayi_oku(numara)
     if b:
         kart = (f'<p class="durum">Bayi: <b>{e(b["ad"] or "-")}</b> · kod {e(b["kod"] or "-")} · {e(b["rol"])} · {e(b["firma"] or "-")}'
@@ -234,6 +307,10 @@ def konusma_sayfasi(p: Panel, oturum: dict, numara: str) -> str:
         ust = f'{zaman(m["zaman"])} · {e(m["kind"] or "")}'
         if giden:
             ust += f' · {e(m["durum"] or "")}' + (f' · teslim: {e(m["teslim"])}' if m.get("teslim") else "")
+            if m.get("kaynak") == "panel":
+                ust += " · <b>panel</b>"
+            if m.get("hata") and m.get("durum") in ("gonderilmedi", "belirsiz"):
+                ust += f' · {e(_hata_kisa(m["hata"]))}'
         elif not m.get("sahiplenildi"):
             ust += " · alınmadı (kayıtsız ya da eski)"
         if m.get("dosya_adi"):
@@ -242,6 +319,7 @@ def konusma_sayfasi(p: Panel, oturum: dict, numara: str) -> str:
             ust += f' · cevap: {e(m["reply_id"])}'
         ogeler.append(f'<li class="{"giden" if giden else "gelen"}"><div class="ust">{ust}</div>{e(m["govde"] or "")}</li>')
     liste = '<ul class="mesajlar">' + "".join(ogeler) + "</ul>" if ogeler else "<p>Mesaj yok.</p>"
+    liste += "<h2>Cevap yaz</h2>" + cevap_formu(p, oturum, numara, b, hata, bilgi)
     dosyalar = []
     for d in p.depo.gelen_dosyalari(numara):
         if d["indirildi"]:
@@ -371,6 +449,77 @@ def bayi_kaydet(p: Panel, oturum: dict, i: Istek, numara: str | None) -> tuple:
     return _yonlendir("/panel/bayiler")
 
 
+def _pdf_kaydet(p: Panel, numara: str, dosya_adi: str, icerik: bytes) -> tuple[Path, str, str]:
+    """Panelden yüklenen PDF: <veri>/projects/panel/<numara>/<zaman>_<ad>.pdf (gönderici dosya_denetle kökü projects/); sha256 döner."""
+    if not icerik.startswith(b"%PDF-"):
+        raise ValueError("dosya PDF değil (ilk baytlar %PDF- olmalı)")
+    if len(icerik) > DOSYA_EN_COK:
+        raise ValueError("PDF 10 MB'tan büyük")
+    ad = _DOSYA_ADI.sub("_", Path(dosya_adi).name).strip("._")[:60] or "belge.pdf"
+    if not ad.lower().endswith(".pdf"):
+        ad += ".pdf"
+    klasor = p.veri / "projects" / "panel" / numara
+    klasor.mkdir(parents=True, exist_ok=True)
+    yol = klasor / f"{time.strftime('%Y%m%d%H%M%S')}_{secrets.token_hex(3)}_{ad}"
+    gecici = yol.with_name(yol.name + ".tmp"); gecici.write_bytes(icerik); os.replace(gecici, yol)
+    try:
+        os.chmod(yol, 0o600)
+    except OSError:
+        pass
+    return yol, ad, hashlib.sha256(icerik).hexdigest()
+
+
+def konusma_gonder(p: Panel, oturum: dict, i: Istek, numara: str) -> tuple:
+    """İE-07 P3: POST /panel/konusma/<numara>/gonder — metin ve/veya PDF satırı (giden.kaynak 'panel'); gönderici kuralları aynen."""
+    import sablonlar as S                                   # noqa: F401  (modül yolu; satır üretimi aşağıda)
+    f = i.form()
+    metin = str(f.get("metin") or "").strip()
+    aciklama = str(f.get("aciklama") or "").strip()
+    pdf = i.dosyalar.get("pdf")
+    if not metin and not pdf:
+        return _html(400, konusma_sayfasi(p, oturum, numara, hata="Metin ya da PDF gerekli."))
+    yazilan = []
+    try:
+        if metin:
+            yazilan.append(p.depo.panel_giden_ekle(numara, lambda g, n: _panel_metin(g, metin, n, numara)))
+        if pdf:
+            yol, ad, sha = _pdf_kaydet(p, numara, pdf[0], pdf[1])
+            yazilan.append(p.depo.panel_giden_ekle(numara, lambda g, n: _panel_belge(g, yol, ad, aciklama, n, numara, sha)))
+    except ValueError as hata:
+        if str(hata) == "gelen_yok":
+            return _html(400, konusma_sayfasi(p, oturum, numara, hata="Bu numaradan hiç mesaj gelmedi; panelden gönderim yapılamaz."))
+        return _html(400, konusma_sayfasi(p, oturum, numara, hata=str(hata)))
+    log("panel giden", maske(numara), "metin" if metin else "", "pdf" if pdf else "", *yazilan)
+    return _yonlendir(f"/panel/konusma/{numara}")
+
+
+def _panel_metin(gelen: dict, metin: str, sira: int, numara: str) -> dict:
+    from depo import metin_satiri
+    return dict(metin_satiri(gelen, metin, sira, numara, "cevap"), kaynak="panel")
+
+
+def _panel_belge(gelen: dict, yol: Path, ad: str, aciklama: str, sira: int, numara: str, sha: str) -> dict:
+    from depo import metin_satiri
+    r = dict(metin_satiri(gelen, aciklama[:1000], sira, numara, "belge"), kaynak="panel")
+    r.update(kind="document", file=str(yol), filename=ad, mime="application/pdf", sha256=sha)
+    return r
+
+
+def konusma_sablon(p: Panel, oturum: dict, i: Istek, numara: str) -> tuple:
+    """İE-07 P5: POST /panel/konusma/<numara>/sablon — bayiye 'dosyalarınız hazır' Meta şablonu ({{1}} hitap, {{2}} son İş Emri no)."""
+    import sablonlar as S
+    no = p.depo.son_is_emri_no(numara)
+    if not no:
+        return _html(400, konusma_sayfasi(p, oturum, numara, hata="Bu bayinin İş Emri kaydı yok; şablon gönderilemez."))
+    b = p.depo.bayi_oku(numara)
+    try:
+        kimlik = p.depo.panel_giden_ekle(numara, lambda g, n: S.bayi_dosyalar_hazir_satiri(g["id"], n, numara, b, no))
+    except ValueError:
+        return _html(400, konusma_sayfasi(p, oturum, numara, hata="Bu numaradan hiç mesaj gelmedi; şablon satırı bağlanamadı."))
+    log("panel şablon", maske(numara), S.BAYI_DOSYALAR_HAZIR["anahtar"], kimlik)
+    return _yonlendir(f"/panel/konusma/{numara}")
+
+
 def isle(p: Panel, i: Istek) -> tuple:
     """(kod, gövde, içerik türü, ek başlıklar)"""
     if i.yol == "/panel":
@@ -399,7 +548,8 @@ def isle(p: Panel, i: Istek) -> tuple:
         if i.metod != "POST":
             return 405, b"method", "text/plain; charset=utf-8", []
         return _yonlendir("/panel/giris", [_cerez_sil("pm_oturum")])
-    if i.metod == "POST" and i.yol not in ("/panel/bayi/yeni",) and not i.yol.startswith("/panel/bayi/"):
+    konusma_post = i.yol.startswith("/panel/konusma/") and (i.yol.endswith("/gonder") or i.yol.endswith("/sablon"))   # İE-07
+    if i.metod == "POST" and i.yol not in ("/panel/bayi/yeni",) and not i.yol.startswith("/panel/bayi/") and not konusma_post:
         return 405, b"method", "text/plain; charset=utf-8", []
     if i.yol == "/panel/":
         return _html(200, gelen_kutusu(p, oturum))
@@ -421,8 +571,15 @@ def isle(p: Panel, i: Istek) -> tuple:
         return _html(200, bayi_formu(p, oturum, dict(b), False))
     if i.yol.startswith("/panel/konusma/"):
         numara = i.yol[len("/panel/konusma/"):]
+        islem = None
+        if konusma_post:
+            numara, islem = numara.rsplit("/", 1)
         if not _NUMARA.fullmatch(numara):
             return 404, b"yok", "text/plain; charset=utf-8", []
+        if islem == "gonder":
+            return konusma_gonder(p, oturum, i, numara) if i.metod == "POST" else (405, b"method", "text/plain; charset=utf-8", [])
+        if islem == "sablon":
+            return konusma_sablon(p, oturum, i, numara) if i.metod == "POST" else (405, b"method", "text/plain; charset=utf-8", [])
         return _html(200, konusma_sayfasi(p, oturum, numara))
     if i.yol.startswith("/panel/dosya/"):
         kimlik = i.yol[len("/panel/dosya/"):]

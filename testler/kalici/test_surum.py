@@ -136,7 +136,7 @@ def test_guncelle_ikinci_surum_ve_geri_don(surum_ortam):
     assert not (s9 / "testler").exists() and not (s9 / "deneme").exists()
     assert (s9 / "beyin" / "testler" / "mesajlar.json").exists() and list((s9 / "beyin" / "testler").glob("cikarim_*.json"))
     assert os.readlink(kok / "guncel") == str(s9) and not (kok / "onceki").exists()
-    assert "içe aktarma tamam" in out and "uygulanan göçler: [1, 2, 3, 4]" in out and "sağlık: sürüm v2026.10.09, Postgres bağlı" in out and "etkin" in out
+    assert "içe aktarma tamam" in out and "uygulanan göçler: [1, 2, 3, 4, 5]" in out and "sağlık: sürüm v2026.10.09, Postgres bağlı" in out and "etkin" in out
     assert "stop portman-webhook portman-gonderici portman-agent portman-panel" in log.read_text() and "start portman-webhook" in log.read_text()
     assert sorgu(__import__("depo").Depo(dsn(surum_ortam["db"])), "SELECT max(surum) AS s FROM sema_surumu")[0]["s"] == 4
     assert surum_ortam["saglik"].istekler and surum_ortam["saglik"].istekler[0]["path"] == "/saglik"

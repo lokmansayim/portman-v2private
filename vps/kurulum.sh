@@ -115,7 +115,7 @@ server {
     location = /webhook { limit_req zone=pm_genel burst=50 nodelay; proxy_pass http://127.0.0.1:8081; }
     location = /saglik { limit_req zone=pm_genel burst=20 nodelay; proxy_pass http://127.0.0.1:8081; }
     location = /panel/giris { limit_req zone=pm_giris burst=5 nodelay; access_log off; proxy_pass http://127.0.0.1:8082; }
-    location /panel/ { limit_req zone=pm_genel burst=50 nodelay; access_log off; proxy_pass http://127.0.0.1:8082; }
+    location /panel/ { limit_req zone=pm_genel burst=50 nodelay; access_log off; client_max_body_size 12m; proxy_pass http://127.0.0.1:8082; }   # İE-07: panelden PDF (10 MiB)
     location = /panel { return 301 /panel/; }
     location / { return 404; }
 }
@@ -518,7 +518,10 @@ if [ ! -f "$KOK/data/settings.json" ]; then
  "patron_teknik_not": false,
  "mesaj_katmani": true,
  "ucb_taban_url": null,
- "kayitsiz_cevap": "Bu hat PortatifEv bayileri için Portman planlama hattıdır. Kayıtlı bayi değilseniz lütfen PortatifEv ofisiyle görüşün."
+ "kayitsiz_cevap": "Bu hat PortatifEv bayileri için Portman planlama hattıdır. Kayıtlı bayi değilseniz lütfen PortatifEv ofisiyle görüşün.",
+ "sablon_patron_bildirim": null,
+ "sablon_bayi_dosyalar_hazir": null,
+ "sablon_dil": "tr"
 }
 EOF
   chmod 640 "$KOK/data/settings.json"
