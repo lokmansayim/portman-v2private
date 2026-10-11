@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 from pathlib import Path
 
 DOSYA = "settings.json"
@@ -17,8 +18,13 @@ VARSAYILAN = {
     "mesaj_katmani": True,
     "ucb_taban_url": None,
     "kayitsiz_cevap": "Bu hat PortatifEv bayileri için Portman planlama hattıdır. Kayıtlı bayi değilseniz lütfen PortatifEv ofisiyle görüşün.",
+    # İE-07: Meta onaylı şablon adları (WhatsApp Manager'da onaylanınca Lokman ayar.sh ile girer; None = tanımsız → satır 'sablon_yok')
+    "sablon_patron_bildirim": None,       # Patron'a: "[bayi kodu] kodlu bayinin [iş no] numaralı talebi sizi bekliyor" (url düğmesi)
+    "sablon_bayi_dosyalar_hazir": None,   # bayiye: "Merhaba [hitap], [iş no] numaralı projenizin dosyaları hazır" (hızlı yanıt)
+    "sablon_dil": "tr",                   # şablonların Meta'daki dil kodu
 }
 ANAHTARLAR = tuple(VARSAYILAN)
+SABLON_ANAHTARLARI = ("sablon_patron_bildirim", "sablon_bayi_dosyalar_hazir")
 
 
 def dosya(veri) -> Path:
@@ -97,6 +103,10 @@ def main(argv=None) -> int:
             print(f"DUR: mode şunlardan biri olmalı: {', '.join(MODLAR)}", file=sys.stderr); return 1
         if ns.anahtar == "enabled_at" and not isinstance(deger, int):
             print("DUR: enabled_at tam sayı (epoch) olmalı", file=sys.stderr); return 1
+        if ns.anahtar in SABLON_ANAHTARLARI and deger is not None and not (isinstance(deger, str) and re.fullmatch(r"[a-z0-9_]{1,512}", deger)):
+            print(f"DUR: {ns.anahtar} Meta şablon adı olmalı (küçük harf, rakam, alt çizgi) ya da null", file=sys.stderr); return 1
+        if ns.anahtar == "sablon_dil" and not (isinstance(deger, str) and re.fullmatch(r"[a-z]{2,3}(_[A-Z]{2})?", deger)):
+            print("DUR: sablon_dil 'tr' gibi bir dil kodu olmalı", file=sys.stderr); return 1
         yaz(ns.veri, ns.anahtar, deger)
         if ns.anahtar == "enabled" and deger is True:
             yaz(ns.veri, "enabled_at", int(time.time()))
