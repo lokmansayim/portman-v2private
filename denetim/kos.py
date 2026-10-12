@@ -120,25 +120,39 @@ def planlar_16() -> dict:
             "not": "motor_passed = kural doğrulaması; mimari doğruluk/insan kabulü değildir. kapisiz_plan: kaynakta kapı olup çıkarımda düşenler (rapor: P1051)."}
 
 
-def sir_taramasi() -> dict:
-    desenler = [r"(?<![A-Za-z0-9])sk-[A-Za-z0-9]{10,}", r"EAA[A-Za-z0-9]{20,}", r"PORTMAN_API_TOKEN=[0-9a-f]{20,}", r"905[0-9]{9}", r"Bearer [A-Za-z0-9._-]{16,}",
-                r"(?:[Pp]assword|[Pp]arola|[Ss]ifre|[Şş]ifre)\s*[:=]\s*['\"][^'\"]{4,}", r"-----BEGIN [A-Z ]*PRIVATE KEY-----"]
-    rx = re.compile("|".join(f"(?:{d})" for d in desenler))
+# Sır desenleri. Telefon deseni (İE-08, 12.10.2026): önünde rakam, nokta ya da virgül olan ya da arkasında rakam ya da ondalık devamı
+# (".5", ",5") gelen "905…" dizileri numara sayılmaz; IFC ve JSON'daki ondalıklar (ör. 6.9050000000000002, 19050000000.5) böyle elenir.
+# Gerçek numara (tek başına, parantezli, cümle sonunda noktayla, "wa_id=…;" içinde) yakalanmaya devam eder (testler/test_sir_taramasi.py).
+SIR_DESENLERI = [r"(?<![A-Za-z0-9])sk-[A-Za-z0-9]{10,}", r"EAA[A-Za-z0-9]{20,}", r"PORTMAN_API_TOKEN=[0-9a-f]{20,}", r"(?<![\d.,])905\d{9}(?!\d|[.,]\d)",
+                 r"Bearer [A-Za-z0-9._-]{16,}", r"(?:[Pp]assword|[Pp]arola|[Ss]ifre|[Şş]ifre)\s*[:=]\s*['\"][^'\"]{4,}", r"-----BEGIN [A-Z ]*PRIVATE KEY-----"]
+SIR_RX = re.compile("|".join(f"(?:{d})" for d in SIR_DESENLERI))
+TARANMAYAN_UZANTI = (".dxf", ".png", ".jpg", ".jpeg", ".ttf", ".pdf", ".zip", ".xlsx", ".pyc")
+
+
+def beklenen_bulgu(b: dict) -> bool:
+    """Bilinen, sır olmayan bulgular: kanal/tests içindeki sahte sabitler ('test-app-secret'), bu betiğin kendi metni ve
+    vps/kapi_d_dogrula.sh'deki parola deseni yanlış pozitifi (rolün parolası olup olmadığını yazdıran SQL; dosya tarihli kayıttır,
+    dokunulmaz — İE-08, 12.10.2026; önce 'bilinen tek fark' olarak dogrula.py'de taşınıyordu)."""
+    d, o = b["dosya"], b["ornek"]
+    return (d.startswith("kanal/tests/") and "test-app-sec" in o) or d == "denetim/kos.py" or (d == "vps/kapi_d_dogrula.sh" and b["satir"] == 25)
+
+
+def sir_taramasi(root: Path | None = None) -> dict:
+    kok = root or ROOT
     bulgular = []
-    for p in ROOT.rglob("*"):
-        if not p.is_file() or p.suffix.lower() in (".dxf", ".png", ".jpg", ".jpeg", ".ttf", ".pdf", ".zip", ".xlsx", ".pyc") or "cikti" in p.parts or ".git" in p.parts:
+    for p in kok.rglob("*"):
+        if not p.is_file() or p.suffix.lower() in TARANMAYAN_UZANTI or "cikti" in p.parts or ".git" in p.parts:
             continue
         try:
             metin = p.read_text(encoding="utf-8", errors="ignore")
         except Exception:
             continue
         for i, satir in enumerate(metin.splitlines(), 1):
-            if rx.search(satir):
-                bulgular.append({"dosya": str(p.relative_to(ROOT)), "satir": i, "ornek": re.sub(r"[0-9A-Za-z]{6,}", lambda m_: m_.group(0)[:3] + "…", satir.strip())[:120]})
-    # bilinen sahte test değerleri (kanal/tests/*.php: 905000000001…, 'test-app-secret') ve bu betiğin kendi metni beklenen bulgulardır
-    beklenen = [b for b in bulgular if (b["dosya"].startswith("kanal/tests/") and "test-app-sec" in b["ornek"]) or b["dosya"] == "denetim/kos.py"]
+            if SIR_RX.search(satir):
+                bulgular.append({"dosya": str(p.relative_to(kok)), "satir": i, "ornek": re.sub(r"[0-9A-Za-z]{6,}", lambda m_: m_.group(0)[:3] + "…", satir.strip())[:120]})
+    beklenen = [b for b in bulgular if beklenen_bulgu(b)]
     return {"passed": len(bulgular) == len(beklenen), "sayilar": {"bulgu": len(bulgular), "beklenen_sahte": len(beklenen)}, "bulgular": bulgular[:50],
-            "not": "Beklenen: kanal/tests içindeki sahte numara/sır sabitleri ve bu betik. Başka her bulgu incelenmeli."}
+            "not": "Beklenen: kanal/tests içindeki sahte numara/sır sabitleri, bu betik ve vps/kapi_d_dogrula.sh:25 (parola deseni yanlış pozitifi). Başka her bulgu incelenmeli."}
 
 
 def main() -> int:

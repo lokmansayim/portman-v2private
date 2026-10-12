@@ -49,7 +49,7 @@ Bu dosya her ajanın okuduğu ortak kuraldır. Claude'a özgü oturum akışı `
 - **Hızlı gerileme:** `python3 testler/referans/dogrula.py --hizli` (~45 sn; 16 katalog planı hariç). Tam: aynı komut `--hizli` olmadan (~4,5 dk).
 - **Harness:** `python -m beyin.harness` — 22 vaka, kayıtlı LLM çıkarımlarıyla; LLM çağrısı yok.
 - **Testler:** `pytest -q testler` (Postgres yoksa kalıcı akış testleri atlanır).
-- **Bilinen referans farkı:** `dogrula.py`'nin sır taraması `vps/kapi_d_dogrula.sh:25`'i işaretler; yanlış pozitiftir (rolün parolası olup olmadığını yazdıran SQL). "2 kontrolde fark" beklenir, öteki satırlar AYNI olmalı.
+- **Referans farkı beklenmez.** `dogrula.py` "SONUÇ: fark yok" demeli. (12 Ekim 2026, İE-08'e kadar sır taraması `vps/kapi_d_dogrula.sh:25`'i işaretliyordu ve "2 kontrolde fark" beklenirdi; o yanlış pozitif artık `denetim/kos.py`'de beklenen bulgu, telefon deseni ondalık sayıları numara sanmıyor.) Herhangi bir FARKLI satırı incelenir.
 
 ## Değişiklik disiplini
 
