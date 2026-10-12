@@ -5,9 +5,10 @@
  "aile": "A2",
  "kaynak": "Lokman, 6 Ekim 2026 18:28: el çizimi 3+1 için dış duvar 160 mm, iç duvar 100 mm, yükseklik 2800 mm istendi. Lokman, 12 Ekim 2026 23:10: \"160/100 bizim standardımız değil, binde bir gelir; o müşterimizden gelen spesifik bir örnekti; kurallar ilk başta girmesin\" (D-10). Standart 100 / 60 (`duvar_tipleri.json` PE-DIS-100, PE-IC-60).",
  "kapsam": "Yalnız bu seçenek açıkça istendiğinde. Varsayılan pakete girmez; bayi mesajından tahmin edilmez.",
+ "motor": "pano",
+ "motor_notu": "Prefabrik seçeneğidir (D-10): pano motorunun İş Emri alanını değiştirir (`yapi.duvar_kalinligi_cm`, 6 Ekim denemesinin alanı; canlı pano motorunda henüz yok — genişletme işi). Genel motorun `secenek_uygula`'sı (Yapı Tanımı; `dis_duvar_tipi` anahtarı) bu dosyayı uygulamaz; `motor` alanı `pano` değilse uygulayıcı durmalı.",
  "degisiklik": {
-  "dis_duvar_kalinligi_mm": 160,
-  "ic_duvar_kalinligi_mm": 100,
+  "is_emri": {"yapi.duvar_kalinligi_cm": {"dis": 16, "ic": 10}},
   "paket": "müşteri: 160 / 100"
  },
  "bayi_ifadeleri": {

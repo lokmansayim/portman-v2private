@@ -43,6 +43,7 @@ Kaynak: Lokman'ın anlattıkları (1–2, 6 ve 12 Ekim 2026). Astra dönemindeki
 
 ## Açık sorular
 
+- Standart dış panonun katmanları 8 + 80 + 8 = 96 mm, anma kalınlığı 100 mm (pano motoru 10 cm; Astra 100 mm): 4 mm fark nerede — levha 10 mm mi, EPS 84 mm mi? (6 Ekim denemesi 100 mm panoyu 8 + 84 + 8 almıştı.) Pano motoru ileride `duvar_tipleri.json`'a katman toplamıyla bağlanırsa P6001'in dış ölçüsü 773'ten 772,2'ye kayar; bu yüzden bağlanmadan önce cevap gerekir.
 - 100 × 100 köşe dikmesiyle köşedeki panel dizilimi nasıl değişiyor?
 - Alt kat karkasının profilleri ve aralıkları.
 - İç duvar (6 cm) neyden oluşuyor?

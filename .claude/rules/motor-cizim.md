@@ -20,4 +20,5 @@ paths:
 - Motor'un `passed` demesi kaynağa (katalog çizimi, mühendis kabulü) uygunluk değildir; insan kabulü ayrı yazılır.
 - Kapı genişlikleri çalışma kabulüdür (dış 90, iç 82; K04 açık). Blok adları Astra v1.4.3 şeması; Güncel Şablon 2024'e geçiş beklemede (K03).
 - Çıktılar Yapı Tanımı'ndan türetilir (Z-02); BIM çıktısı IFC4 (Z-07). IFC şema doğrulaması üretim doğruluğu değildir.
-- `is_emri/`, `ref_katalog/`, `ref_yan/` dondurulmuş girdidir: var olan dosya değiştirilmez; yeni dosya eklenirse iş emrinde yazılır.
+- `is_emri/`, `ref_katalog/`, `ref_yan/`, `ref_prefabrik/` dondurulmuş girdidir: var olan dosya değiştirilmez; yeni dosya eklenirse iş emrinde yazılır.
+- **Prefabrik ayrı motordadır (D-10, 12.10.2026):** pano birimli Motor, 125,5 aks; genel motor prefabrik çizmez. Standart duvar dış 100 / iç 60 mm (`kurallar/model/duvar_tipleri.json` PE-DIS-100, PE-IC-60); 160 / 100 yalnız `secenekler/duvar_kalinligi_160_100.json` müşteri seçeneği, varsayılan pakete girmez. P6001 gerileme çapasıdır, doğruluk kanıtı değil; bilinen hata (veranda, salon penceresi) `docs/sartname/modeller/P6001.md`; düzeltme yeni dosyayla (`is_emri/P6001_r03.json`). Prefabrik referansları gerçek projelerden kör testle (`docs/sartname/prefabrik_kor_test.md`, PK-NN; tanımlar `is_emri/`, `modeller/` değil).

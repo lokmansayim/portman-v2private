@@ -32,8 +32,9 @@ Dosyalar depoya alınabilir (D-11: ad sorun değil; telefon ve T.C. kimlik numar
 | 6 | Rapor: nasıl yapıldı, sonuç (kaç satır aynı), hatalar ve düzeltmeler, karar bekleyenler, sorular | `docs/raporlar/<tarih>_Kor_Test_PK<NN>.md` | Claude |
 | 7 | Önceki PK'lar yeni kuralla **yeniden çözülür**; tutan satır bozulmamalı (kural kitabı "Kural nasıl eklenir" §5) | `dogrula.py` | Claude |
 
-Bir PK, tanımı ve çıktıları kıyastan sonra düzeltilmiş haliyle `modeller/` altına referans olarak girer (D-07 ile kaynak ve doğrulama durumu);
-kör tanım `deneme/` altında tarih kaydı olarak kalır.
+Bir PK, kıyastan sonra düzeltilmiş İş Emri'yle **`is_emri/PK<NN>.json`** olarak referans girdisine girer (pano motorunun girdileri `is_emri/`dedir;
+`modeller/` genel motorun Yapı Tanımı klasörüdür, karıştırılmaz — D-10); kaynak ve doğrulama durumu dosyada yazar (D-07). Kör tanım `deneme/` altında
+tarih kaydı olarak kalır.
 
 ## Çelik KT'den farklar
 

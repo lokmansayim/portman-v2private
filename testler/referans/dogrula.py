@@ -56,7 +56,9 @@ HIZLI = {"altin_6x8", "altin_yan", "p6001"}  # --hizli koşuda üretilen çıkt�
 GIRDI_KALIPLARI = ["is_emri/*.json", "ref_katalog/*", "ref_yan/*", "kanal/ref_*", "beyin/veri/*.json",
                    # İE-08: genel motorun girdileri (model tanımları, dondurulmuş kural setleri, çizim seti, seçenekler, bayi örneği);
                    # güncel set kurallar/liste/kurallar.json girdi sayılmaz: altın adımlar setler/0.19.json pimiyle koşar
-                   "modeller/*.json", "kurallar/liste/setler/*.json", "kurallar/cizim/*.json", "kurallar/model/secenekler/*.json", "kurallar/bayi/*.json"]
+                   "modeller/*.json", "kurallar/liste/setler/*.json", "kurallar/cizim/*.json", "kurallar/model/secenekler/*.json", "kurallar/bayi/*.json",
+                   # İE-10: prefabrik referans girdileri (Astra kural seti v1.4.3, Cumbalı 6×5 listesi, çift kat R02); D-10
+                   "ref_prefabrik/*/*"]
 REF_AD = re.compile(r"\d{4}-\d{2}-\d{2}[a-z]?")  # referans klasörü: tarih, aynı gün ikincisi için sonda bir harf
 KOK_DISI = {".git", "cikti", "deneme", "testler", "venv", "SHA256SUMS", "KARARLAR", "DURUM.md"}  # kökte v1.1.1 dışı
 SAYILAR = {
