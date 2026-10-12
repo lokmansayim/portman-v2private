@@ -136,6 +136,8 @@ with sync_playwright() as p:
 with zipfile.ZipFile(T / f"{KOD}_muhendis.zip", "w", zipfile.ZIP_DEFLATED) as z:
     for yol, ad in ((C / f"{KOD}.ifc", f"{KOD}.ifc"), (T / f"{KOD}_yukleme.pdf", f"{KOD}_yukleme_listesi.pdf"), (md, f"{KOD}_yukleme_listesi.md"),
                     (C / f"{KOD}_pafta.png", f"{KOD}_pafta.png"), (C / f"{KOD}_makasli.png", f"{KOD}_makasli.png"),
-                    (C / f"{KOD}_catisiz.png", f"{KOD}_catisiz.png")):
+                    (C / f"{KOD}_catisiz.png", f"{KOD}_catisiz.png"), (C / f"{KOD}.dxf", f"{KOD}.dxf")):
+        if yol.suffix == ".dxf" and not yol.is_file():               # DXF (dxf_genel.py) varsa pakete girer (Lokman, 12 Ekim 15:52)
+            continue
         z.write(yol, ad)
 print("yazıldı:", ", ".join(p.name for p in sorted(T.iterdir())))

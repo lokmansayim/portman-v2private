@@ -38,7 +38,7 @@ Bayiye Lokman iletir.
   1. Sunum: plan, iki ön perspektif, ön ve sol görünüş, kısa not.
   2. Pafta.
   3. Dört perspektif.
-- **`teslim/T1012CV_muhendis.zip`:** IFC4, yükleme listesi (PDF ve md), pafta, makaslı ve çatısız görünüm.
+- **`teslim/T1012CV_muhendis.zip`:** IFC4, DXF, yükleme listesi (PDF ve md), pafta, makaslı ve çatısız görünüm.
   - Liste bayiye gitmez (CIO kararı).
   - Kesit yok; istenirse çizilir.
 
@@ -49,7 +49,7 @@ Bayiye Lokman iletir.
 | `tanim/t1012_tanim_uret.py` | Yapı Tanımı üretici. Seçenek `--cati besik`, `cumba` ya da `cifte`; bu iş `cifte`. Ölçüler plan fotoğrafından perspektif düzeltmesiyle okundu (±5 cm) |
 | `tanim/T1012CV.json` | Yapı Tanımı 0.5 |
 | `motor_farki.patch` | Genel motorun (`deneme/2026-10-06_kor_test`) bu iş için genişletilmiş hali. Ayrıntısı aşağıda. Depodaki motor değişmedi; eklentiler İE-08'e taşınacak |
-| `cizimler/T1012CV_A/` | Çizim seti (12 çıktı) |
+| `cizimler/T1012CV_A/` | Çizim seti (12 çıktı) ve DXF (`T1012CV.dxf`) |
 | `sonuc/` | Liste girdisi ve yükleme listesi (json, md) |
 | `teslim/` | Bayi PDF'i ve mühendis zip'i, gönderildiği gibi |
 | `teslim_paketi.py` | Teslim paketlerini dizer |
@@ -62,7 +62,15 @@ Bayiye Lokman iletir.
 - alın bandı payı (3 mm; yüzler çakışınca perspektifte noktalı desen oluşuyordu);
 - ölçü zinciri: örtülü kenarlar ve 1 cm'den yakın noktalar atılır, art arda kısa ölçüler iki yana yazılır;
 - dikme yüzleri;
-- antetsiz sayfalar.
+- antetsiz sayfalar;
+- DXF (`dxf_genel.py`, yeni dosya).
+
+**DXF.** Lokman 15:52'de sordu: "DXF üretimi P6001'de vardı, aynı şekilde çelik de üretebilir miyiz?" `dxf_genel.py` genel motorun modelinden DXF yazar.
+- P6001'in kuralları: R2018, birim cm, `PORTMAN` yazı ve ölçü stili.
+- Model alanında plan, çatı planı, dört görünüş ve açıklamalar; Türkçe katmanlar; ölçüler gerçek DXF ölçüsü.
+- Görünüşlerde arkada kalan çizgiler atılır; yüz dolguları ayrı katmanda (`GORUNUS_DOLGU`) ve kapatılabilir.
+- Dosya yazıldıktan sonra yeniden açılıp denetlenir: bu işte ve KT-01'de denetim hatası 0.
+- P6001'deki pano blokları ve BOM verisi yok, çünkü çelikte duvar serbest akslı ve liste ayrı üretiliyor. Antet yok.
 
 ## Yeniden üretme
 
@@ -75,15 +83,16 @@ ln -s $D/kurallar $K/kurallar; ln -s $D/deneme/2026-10-03_yukleme $K/deneme/2026
 (cd $K && patch -p1 < $D/deneme/2026-10-12_ilk_is/motor_farki.patch)
 python deneme/2026-10-12_ilk_is/tanim/t1012_tanim_uret.py $K/T1012CV.json --cati cifte
 bash $K/deneme/2026-10-06_kor_test/cizim_seti_kos.sh $K/T1012CV.json $K/T1012CV_A python
+(cd $K/deneme/2026-10-06_kor_test && python dxf_genel.py $K/T1012CV.json $K/T1012CV_A/T1012CV.dxf)
 ```
 
-**Kanıt:** Depodaki dosyalardan yeniden üretim 12 Ekim 2026'da denendi. Tanım, plan, pafta, görünüşler ve liste girdisi bayt bayt aynı çıktı.
+**Kanıt:** Depodaki dosyalardan yeniden üretim 12 Ekim 2026'da denendi. Tanım, plan, pafta, görünüşler ve liste girdisi bayt bayt aynı çıktı. DXF'in varlıkları da aynı çıktı; başlıktaki tarih her üretimde değişir.
 
 ## Açık konular
 
 - Liste düz tavana göre. Eğimli tavanın taşıyıcısını ve malzemesini mühendis belirleyecek; statik proje de mühendisin.
 - Salonla yatak odaları arasındaki duvarın 270 cm üstündeki üçgen IFC'de yok.
 - IFC'de veranda tavanı yok; liste kuralında var (Boardex, saçağın ucuna kadar).
-- Belediyedeki mimar DWG ya da DXF isteyebilir. Genel motor bunları üretmiyor.
+- DWG yok; DXF var (R2018). Daha eski bir AutoCAD sürümü gerekirse DXF o sürümde de yazılabilir.
 
 Ad, telefon ve fiyat yok. Bayinin fotoğrafları ve mesajları depoya girmedi.

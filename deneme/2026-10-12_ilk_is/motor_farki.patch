@@ -370,3 +370,435 @@
          if k.get("alt"):
              za = kotu(k["alt"], s, -0.5 * ic_yon)
              za = None if za is None else max(za, duvar_ustu)
+--- /dev/null
++++ b/deneme/2026-10-06_kor_test/dxf_genel.py
+@@ -0,0 +1,429 @@
++#!/usr/bin/env python3
++"""Genel motordan DXF: çelik hattı (bayi talebi denemesi, 12 Ekim 2026; Lokman 15:52: "DXF üretimi P6001'de vardı, çelik de üretebilir miyiz?").
++
++P6001'in DXF'iyle (`motor/dxf_out.py`) aynı kurallar: R2018, birim cm, `PORTMAN` yazı ve ölçü stili (ARCHTICK, virgüllü ondalık), Türkçe katmanlar.
++Çizim, PNG'lerin geldiği aynı modelden çıkar (`yapi.kur`, `cati_genel.cati_kur`, `sahne.sahne_kur`): aynı tanım aynı DXF'i verir; LLM yok.
++Antet yok (Lokman, 12 Ekim 2026 15:30). P6001'deki pano blokları ve BOM XData'sı yok: çelikte duvar serbest akslıdır, liste ayrı üretilir.
++
++Model alanında (cm):
++  plan            (0, 0)'da: duvarlar kaplamasıyla (dış, iç, dikme ayrı katman), kapı ve pencere boşlukları, kapı açılımları, pencere
++                  simgeleri ve etiketleri, mahal adları ve alanları, veranda taraması, kirişler (kesik), ölçü zincirleri (gerçek DXF ölçüsü)
++  çatı planı      planın sağında: saçak ve alın, mahya ve kırma, vadi (kesik), duvar dibi (turuncu), üstteki çatının örttüğü yerler gizli
++                  çizgiyle, eğim okları, dere inişleri, cephe çizgisi
++  dört görünüş    altta iki sıra: arkada kalan çizgiler atılmış; yüzlerin renkli dolgusu ayrı katmanda (`GORUNUS_DOLGU`, kapatılabilir); ölçüler
++  açıklamalar     en altta, paftadaki satırlar
++Dosya kaydedilir, yeniden açılır ve denetlenir (audit); hata varsa çıkış kodu 1. İstenirse önizleme PNG'si çizilir.
++
++Kullanım: python dxf_genel.py tanim.json cikti.dxf [--onizleme onizleme.png]
++"""
++from __future__ import annotations
++
++import argparse
++import json
++import math
++import sys
++from pathlib import Path
++
++import ezdxf
++from ezdxf import colors, units
++from ezdxf.enums import TextEntityAlignment
++from shapely.geometry import LineString, Point, Polygon, box
++from shapely.geometry.polygon import orient
++from shapely.ops import unary_union
++
++import cati_genel
++import girdi_genel
++import kurallar_oku
++import sahne as sahne_m
++import yapi
++from ciz_genel import (CAM, CATI, CERCEVE, DUVAR, DUVAR_GERI, DUVAR_GIBI, KAPI, KOLON, RENK, TARAF_ADI, aciklik_kutusu, dis_hat, inis_kurali, sade, tr,
++                       zincirler)
++
++KATMANLAR = [   # ad, ACI rengi, çizgi tipi, çizgi kalınlığı (1/100 mm; 0 = katman varsayılanı)
++    ("DIS_DUVAR", 30, "Continuous", 35), ("IC_DUVAR", 30, "Continuous", 25), ("DUVAR_TARAMA", 8, "Continuous", 0), ("DIKME", 1, "Continuous", 35),
++    ("KIRIS", 8, "KESIK", 25), ("PENCERE", 4, "Continuous", 18), ("KAPI", 7, "Continuous", 18), ("ODA_ADLARI", 7, "Continuous", 0),
++    ("VERANDA", 3, "Continuous", 0), ("OLCULER", 7, "Continuous", 0), ("YAZI", 7, "Continuous", 0),
++    ("CATI_KENAR", 7, "Continuous", 25), ("CATI_MAHYA", 7, "Continuous", 50), ("CATI_VADI", 7, "KESIK", 25), ("CATI_DUVAR_DIBI", 30, "Continuous", 50),
++    ("CATI_GIZLI", 8, "GIZLI", 13), ("CATI_EGIM", 7, "Continuous", 0), ("CATI_INIS", 2, "Continuous", 25), ("CEPHE_CIZGISI", 8, "KESIK", 13),
++    ("GORUNUS", 7, "Continuous", 25), ("GORUNUS_DOGRAMA", 5, "Continuous", 18), ("GORUNUS_DOLGU", 8, "Continuous", 0), ("ZEMIN", 7, "Continuous", 50),
++    ("NOTLAR", 7, "Continuous", 0),
++]
++DUVAR_KATMANI = {"dis": "DIS_DUVAR", "ek": "DIS_DUVAR", "baca": "DIS_DUVAR", "ic": "IC_DUVAR", "korkuluk": "IC_DUVAR", "kolon": "DIKME"}
++DUVAR_DOLGU = {"dis": "#3a3a3a", "ek": "#3a3a3a", "baca": "#555555", "ic": "#6b6b6b", "korkuluk": "#9a9a9a", "kolon": "#1f1f1f"}
++KENAR_KATMANI = {"mahya": "CATI_MAHYA", "kirma": "CATI_MAHYA", "vadi": "CATI_VADI", "duvar_dibi": "CATI_DUVAR_DIBI", "sacak": "CATI_KENAR",
++                 "alin": "CATI_KENAR", "ust": "CATI_KENAR", "gizli": "CATI_GIZLI"}
++ORTA = TextEntityAlignment.MIDDLE_CENTER
++
++
++def _rgb(h: str) -> int:
++    h = h.lstrip("#")
++    return colors.rgb2int(tuple(int(h[i:i + 2], 16) for i in (0, 2, 4)))
++
++
++def _parcalar(g):
++    """Shapely geometrisinden çokgenler / çizgiler (boş ya da karışık topluluklar dahil)."""
++    if g is None or g.is_empty:
++        return []
++    if hasattr(g, "geoms"):
++        return [p for x in g.geoms for p in _parcalar(x)]
++    return [g]
++
++
++class Yazici:
++    def __init__(self):
++        doc = ezdxf.new("R2018", setup=True)
++        doc.units = units.CM
++        doc.header["$MEASUREMENT"] = 1
++        doc.header["$LWDISPLAY"] = 1
++        # çizgi tipleri cm cinsinden (P6001'deki VERANDA_KESIK gibi); hazır DASHED'in aralıkları cm çiziminde görünmeyecek kadar küçük
++        doc.linetypes.add("KESIK", pattern=[30.0, 20.0, -10.0], description="Kesik: 20 cm çizgi, 10 cm boşluk")
++        doc.linetypes.add("GIZLI", pattern=[15.0, 8.0, -7.0], description="Gizli: 8 cm çizgi, 7 cm boşluk")
++        for ad, renk, cizgi, kalinlik in KATMANLAR:
++            k = doc.layers.add(ad, color=renk, linetype=cizgi)
++            if kalinlik:
++                k.dxf.lineweight = kalinlik
++        doc.styles.add("PORTMAN", font="DejaVuSans.ttf")
++        ds = doc.dimstyles.duplicate_entry("EZDXF", "PORTMAN")      # P6001'in ölçü stili
++        ds.dxf.dimtxt = 14; ds.dxf.dimasz = 9; ds.dxf.dimexe = 6; ds.dxf.dimexo = 5; ds.dxf.dimtad = 1
++        ds.dxf.dimgap = 4; ds.dxf.dimdec = 1; ds.dxf.dimzin = 8; ds.dxf.dimdsep = ord(","); ds.dxf.dimtxsty = "PORTMAN"
++        ds.dxf.dimblk = "ARCHTICK"; ds.dxf.dimlfac = 1.0; ds.dxf.dimtih = 0; ds.dxf.dimtoh = 0
++        self.doc, self.msp = doc, doc.modelspace()
++
++    def halka(self, koordinatlar, katman, ox=0.0, oy=0.0, kapali=True):
++        pts = [(x + ox, y + oy) for x, y in koordinatlar]
++        if kapali and len(pts) > 1 and pts[0] == pts[-1]:
++            pts = pts[:-1]
++        if len(pts) >= 2:
++            self.msp.add_lwpolyline(pts, close=kapali, dxfattribs={"layer": katman})
++
++    def cokgen(self, g, katman, ox=0.0, oy=0.0):
++        for p in _parcalar(g):
++            if p.geom_type != "Polygon" or p.area < 0.01:
++                continue
++            self.halka(list(p.exterior.coords), katman, ox, oy)
++            for ic in p.interiors:
++                self.halka(list(ic.coords), katman, ox, oy)
++
++    def dolgu(self, g, katman, renk: str | None = None, desen: str = "SOLID", olcek: float = 1.0, aci: float = 0.0, ox=0.0, oy=0.0):
++        for p in _parcalar(g):
++            if p.geom_type != "Polygon" or p.area < 0.5:
++                continue
++            h = self.msp.add_hatch(dxfattribs={"layer": katman, "hatch_style": 0})   # 0: iç içe (tek-çift); deliklerde dolgu olmaz
++            if desen == "SOLID":
++                h.set_solid_fill()
++            else:
++                h.set_pattern_fill(desen, scale=olcek, angle=aci)
++            if renk:
++                h.dxf.true_color = _rgb(renk)
++            p = orient(p, sign=1.0)                                    # dış halka saat yönünün tersine, delikler saat yönünde: çizicilerde delik delik kalır
++            h.paths.add_polyline_path([(x + ox, y + oy) for x, y in list(p.exterior.coords)[:-1]], is_closed=True, flags=1)
++            for ic in p.interiors:
++                h.paths.add_polyline_path([(x + ox, y + oy) for x, y in list(ic.coords)[:-1]], is_closed=True, flags=16)   # en dıştaki ada: delik
++
++    def cizgi(self, g, katman, ox=0.0, oy=0.0):
++        for p in _parcalar(g):
++            if p.geom_type == "LineString" and p.length > 0.05:
++                pts = [(x + ox, y + oy) for x, y in p.coords]
++                if len(pts) == 2:
++                    self.msp.add_line(pts[0], pts[1], dxfattribs={"layer": katman})
++                else:
++                    self.msp.add_lwpolyline(pts, dxfattribs={"layer": katman})
++            elif p.geom_type == "Polygon":
++                self.cizgi(p.boundary, katman, ox, oy)
++
++    def yazi(self, s, konum, h, katman, hiza=ORTA, aci=0.0):
++        self.msp.add_text(s, dxfattribs={"height": h, "layer": katman, "style": "PORTMAN", "rotation": aci}).set_placement(konum, align=hiza)
++
++    def olcu(self, p1, p2, taban, aci, katman="OLCULER"):
++        d = self.msp.add_linear_dim(base=taban, p1=p1, p2=p2, angle=aci, dimstyle="PORTMAN", dxfattribs={"layer": katman})
++        d.render()
++
++    def ok(self, bas, uc, katman, boy=14.0):
++        """Düz ok: bastan uca çizgi ve uçta dolu üçgen."""
++        self.msp.add_line(bas, uc, dxfattribs={"layer": katman})
++        dx, dy = uc[0] - bas[0], uc[1] - bas[1]
++        L = math.hypot(dx, dy) or 1.0
++        ux, uy = dx / L, dy / L
++        nx, ny = -uy, ux
++        a = (uc[0] - ux * boy + nx * boy * 0.35, uc[1] - uy * boy + ny * boy * 0.35)
++        b = (uc[0] - ux * boy - nx * boy * 0.35, uc[1] - uy * boy - ny * boy * 0.35)
++        self.msp.add_solid([uc, a, b], dxfattribs={"layer": katman})
++
++
++# ──────────────────────────────────────────────────────────────────────── plan ──
++def plan_ciz(Y: Yazici, y: dict):
++    t = y["tanim"]
++    kd = t["yuz_kaplamalari"]["dis"]["kalinlik"]
++    for b in y["bolgeler"].values():                                    # mahaller
++        if b["sinif"] == "dis":
++            continue
++        if b["sinif"] == "veranda":
++            Y.dolgu(b["net"], "VERANDA", desen="ANSI31", olcek=3.0)         # ANSI31 aralığı 3,175 birim: 3 kat → yaklaşık 10 cm
++            Y.cokgen(b["net"], "VERANDA")
++        c = b["net"].representative_point()
++        cx, cy = b.get("etiket_yeri", (c.x, c.y))
++        Y.yazi(b["ad"].upper(), (cx, cy + 11), 15, "ODA_ADLARI")
++        Y.yazi(f"{tr(b['alan_m2'])} m²", (cx, cy - 12), 13, "ODA_ADLARI")
++    delik = unary_union([aciklik_kutusu(y, a, pay=kd + 0.05) for a in y["acikliklar"]] or [box(0, 0, 0, 0)])
++    duvar_g = {}
++    for sinif in ("korkuluk", "ic", "ek", "dis", "baca", "kolon"):    # duvarlar: sınıf sınıf birleşik; açıklıklarda kesik; önce dolgular, sonra çizgiler
++        g = unary_union([unary_union([d["geo"]] + d.get("_serit", [])) for d in y["duvarlar"] if d["sinif"] == sinif] or [box(0, 0, 0, 0)])
++        duvar_g[sinif] = g.difference(delik)
++        Y.dolgu(duvar_g[sinif], "DUVAR_TARAMA", renk=DUVAR_DOLGU[sinif])
++    for sinif, g in duvar_g.items():
++        Y.cokgen(g, DUVAR_KATMANI[sinif])
++    for kr in t.get("kirisler", []):                                    # kirişler: eksenleri kesik
++        x0, y0, x1, y1 = kr["kutu"]
++        for lo, hi in kr["acik"]:
++            if (x1 - x0) >= (y1 - y0):
++                Y.msp.add_line((lo, (y0 + y1) / 2), (hi, (y0 + y1) / 2), dxfattribs={"layer": "KIRIS"})
++            else:
++                Y.msp.add_line(((x0 + x1) / 2, lo), ((x0 + x1) / 2, hi), dxfattribs={"layer": "KIRIS"})
++    for a in y["acikliklar"]:
++        d = y["adli"][a["duvar"]]
++        x0, y0, x1, y1 = d["kutu"]
++        if a["tur"] == "pencere":
++            k = aciklik_kutusu(y, a, pay=kd)
++            bx1, by1, bx2, by2 = k.bounds
++            Y.cokgen(k, "PENCERE")
++            if d["yon"] == "x":
++                for cy in ((by1 + by2) / 2 - 0.8, (by1 + by2) / 2 + 0.8):
++                    Y.msp.add_line((bx1, cy), (bx2, cy), dxfattribs={"layer": "PENCERE"})
++            else:
++                for cx in ((bx1 + bx2) / 2 - 0.8, (bx1 + bx2) / 2 + 0.8):
++                    Y.msp.add_line((cx, by1), (cx, by2), dxfattribs={"layer": "PENCERE"})
++            if a.get("etiket_gizle"):
++                continue
++            et = a.get("plan_etiketi") or a.get("etiket") or f"{a['en']}/{a['yuk']}"
++            yuz = next((f for f in y["yuzler"] if f["duvar"] == d["ad"] and f["uzun"] and f["bolge_sinifi"] in ("dis", "veranda")), None)
++            kn = yuz["kenar"] if yuz else ("alt" if d["yon"] == "x" else "sol")
++            if kn == "alt":
++                Y.yazi(et, ((bx1 + bx2) / 2, by1 - 9), 10, "PENCERE", TextEntityAlignment.TOP_CENTER)
++            elif kn == "ust":
++                Y.yazi(et, ((bx1 + bx2) / 2, by2 + 9), 10, "PENCERE", TextEntityAlignment.BOTTOM_CENTER)
++            elif kn == "sag":
++                Y.yazi(et, (bx2 + 9, (by1 + by2) / 2), 10, "PENCERE", TextEntityAlignment.TOP_CENTER, aci=90)
++            else:
++                Y.yazi(et, (bx1 - 9, (by1 + by2) / 2), 10, "PENCERE", TextEntityAlignment.BOTTOM_CENTER, aci=90)
++        elif a["tur"] in ("ic_kapi", "dis_kapi"):                     # kapı kanadı açık konumda ve açılım yayı (ciz_genel.kapi_ciz gibi)
++            r = a["en"]
++            mh = a["a0"] if a.get("mentese", "bas") == "bas" else a["a1"]
++            yon = 1 if a.get("acilim", "ust") in ("ust", "sag") else -1
++            if d["yon"] == "x":
++                hx, hy = mh, (y1 if yon == 1 else y0)
++                Y.msp.add_line((hx, hy), (hx, hy + yon * r), dxfattribs={"layer": "KAPI"})
++                kapali, acik = (0 if mh == a["a0"] else 180), (90 if yon == 1 else 270)
++            else:
++                hx, hy = (x1 if yon == 1 else x0), mh
++                Y.msp.add_line((hx, hy), (hx + yon * r, hy), dxfattribs={"layer": "KAPI"})
++                kapali, acik = (90 if mh == a["a0"] else 270), (0 if yon == 1 else 180)
++            t1, t2 = sorted([kapali % 360, acik % 360])
++            if t2 - t1 > 180:
++                t1, t2 = t2, t1 + 360
++            Y.msp.add_arc((hx, hy), r, t1, t2 % 360 if t2 > 360 else t2, dxfattribs={"layer": "KAPI"})
++        if a["tur"] in ("dis_kapi", "gecit") and a.get("giris") and d["yon"] == "x":
++            xm = (a["a0"] + a["a1"]) / 2
++            Y.ok((xm, y0 - 44), (xm, y0 - 6), "YAZI", boy=10)
++            Y.yazi("GİRİŞ", (xm, y0 - 50), 11, "YAZI", TextEntityAlignment.TOP_CENTER)
++    hat = dis_hat(y)                                                    # ölçü zincirleri (ciz_genel.plan_eksen ile aynı yerler)
++    bx0, by0 = min(p[0] for h in hat for p in h), min(p[1] for h in hat for p in h)
++    bx1, by1 = max(p[0] for h in hat for p in h), max(p[1] for h in hat for p in h)
++    z = zincirler(y)
++    for yan, sabit, yatay in (("alt", by0 - 66, True), ("ust", by1 + 50, True), ("sol", bx0 - 50, False), ("sag", bx1 + 50, False)):
++        nk = z[yan]
++        for a, b in zip(nk, nk[1:]):
++            if yatay:
++                Y.olcu((a, by0 if yan == "alt" else by1), (b, by0 if yan == "alt" else by1), (a, sabit), 0)
++            else:
++                Y.olcu((bx0 if yan == "sol" else bx1, a), (bx0 if yan == "sol" else bx1, b), (sabit, a), 90)
++    Y.olcu((bx0, by0), (bx1, by0), (bx0, by0 - 102), 0)
++    Y.olcu((bx0, by0), (bx0, by1), (bx0 - 86, by0), 90)
++    Y.yazi("PLAN", ((bx0 + bx1) / 2, by1 + 120), 24, "YAZI")
++    return bx0, by0, bx1, by1
++
++
++# ────────────────────────────────────────────────────────────────── çatı planı ──
++def cati_ciz(Y: Yazici, y: dict, c: dict, inisler, ox: float, oy: float):
++    dz = c["duzlemler"]
++    ortu = {}                                                          # her düzlemin, üstünden başka bir düzlemin geçtiği yer
++    for P in dz:
++        parca = []
++        for Q in dz:
++            if Q is P:
++                continue
++            R = P["cokgen"].intersection(Q["cokgen"])
++            if R.is_empty or R.area < 1.0:
++                continue
++            rp = R.representative_point()
++            if Q["kot"]((rp.x, rp.y)) > P["kot"]((rp.x, rp.y)) + 1.0:
++                parca.append(Q["cokgen"].buffer(-0.05))
++        ortu[P["ad"]] = unary_union(parca) if parca else None
++    for e in c["kenarlar"]:
++        if e["tur"] == "duzlem_ici":
++            continue
++        L = LineString([tuple(e["p"]), tuple(e["q"])])
++        gizli = [ortu[a] for a in e["duzlemler"] if ortu.get(a) is not None]
++        katman = KENAR_KATMANI.get(e["tur"], "CATI_KENAR")
++        if gizli and len(gizli) == len(e["duzlemler"]):                # kenarın bütün düzlemleri örtülüyse örtülen kısmı gizli çizgi
++            g = gizli[0] if len(gizli) == 1 else gizli[0].intersection(gizli[1])
++            Y.cizgi(L.difference(g), katman, ox, oy)
++            Y.cizgi(L.intersection(g), "CATI_GIZLI", ox, oy)
++        else:
++            Y.cizgi(L, katman, ox, oy)
++    for P in dz:                                                       # eğim okları ve yüzdeleri, düzlemin görünen yerinde
++        gor = P["cokgen"] if ortu[P["ad"]] is None else P["cokgen"].difference(ortu[P["ad"]])
++        if gor.is_empty or gor.area < 400:
++            continue
++        m = gor.representative_point()
++        ux, uy = P["yukari"]
++        boy = min(60.0, max(20.0, math.sqrt(gor.area) / 4))
++        Y.ok((m.x + ux * boy / 2 + ox, m.y + uy * boy / 2 + oy), (m.x - ux * boy / 2 + ox, m.y - uy * boy / 2 + oy), "CATI_EGIM", boy=9)
++        Y.yazi(f"%{tr(P['egim'] * 100)}", (m.x + ox + abs(uy) * 32, m.y + oy + abs(ux) * 16), 11, "CATI_EGIM")
++    for h in dis_hat(y):                                               # cephe çizgisi (duvarların dış yüzü)
++        Y.halka(h, "CEPHE_CIZGISI", ox, oy)
++    for ix, iy, _tur in (inisler or []):
++        Y.msp.add_circle((ix + ox, iy + oy), 6, dxfattribs={"layer": "CATI_INIS"})
++    xs = [p[0] for P in dz for p in P["plan"]]
++    ys = [p[1] for P in dz for p in P["plan"]]
++    Y.olcu((min(xs) + ox, min(ys) + oy), (max(xs) + ox, min(ys) + oy), (min(xs) + ox, min(ys) + oy - 40), 0)
++    Y.olcu((min(xs) + ox, min(ys) + oy), (min(xs) + ox, max(ys) + oy), (min(xs) + ox - 40, min(ys) + oy), 90)
++    ek = f" · dere inişi {len(inisler)} adet" if inisler else ""
++    Y.yazi("ÇATI PLANI" + ek, ((min(xs) + max(xs)) / 2 + ox, max(ys) + oy + 90), 24, "YAZI")
++
++
++# ──────────────────────────────────────────────────────────────────── görünüş ──
++def gorunus_ciz(Y: Yazici, S: list[dict], taraf: str, duvar_h: float, ox: float, oy: float) -> float:
++    """Bir görünüş; sol alt köşesi (ox, oy) olur. Döner: çizimin genişliği."""
++    yz = sahne_m.izdusum(S, taraf)
++    gecitler = [s for s in yz if s["tur"] == "gecit"]
++    en_yakin = min(s["derinlik"] for s in yz if s["tur"] in ("duvar", "korkuluk"))
++    ogeler = []                                                        # (geometri, tür, dolgu rengi, yüzey) uzaktan yakına
++    i = 0
++    while i < len(yz):
++        s = yz[i]
++        if s["tur"] == "gecit":
++            i += 1
++            continue
++        if s["tur"] in DUVAR_GIBI:                                     # aynı düzlemdeki duvar yüzleri birleşir (panel ekleri çizilmez)
++            grup, j = [s], i + 1
++            while j < len(yz) and (yz[j]["tur"] in DUVAR_GIBI or yz[j]["tur"] == "gecit") and abs(yz[j]["derinlik"] - s["derinlik"]) < 0.6:
++                if yz[j]["tur"] != "gecit":
++                    grup.append(yz[j])
++                j += 1
++            g = unary_union([Polygon(x["k2"]).buffer(0.01, join_style=2) for x in grup]).buffer(-0.01, join_style=2)
++            delik = [Polygon(x["k2"]) for x in gecitler if abs(x["derinlik"] - s["derinlik"]) < 1.0]
++            if delik:
++                g = g.difference(unary_union(delik))
++            ogeler.append((g, "duvar", DUVAR_GERI if s["derinlik"] > en_yakin + 60 else DUVAR, s))
++            i = j
++            continue
++        ogeler.append((Polygon(s["k2"]).buffer(0), s["tur"], RENK[s["tur"]][0], s))
++        i += 1
++    us = [p[0] for s in yz for p in s["k2"]]
++    zs = [p[1] for s in yz for p in s["k2"]]
++    umin = min(us)
++    dx = ox - umin
++    onde = None                                                        # yakındakilerin birleşimi; yakından uzağa gidilir
++    sonra = []                                                         # çizgiler dolgulardan sonra yazılır: dolgu çizginin üstüne binmesin
++    for g, tur, renk, s in reversed(ogeler):
++        if g.is_empty:
++            continue
++        perde = None if onde is None else onde.buffer(-0.05)
++        gor = g if perde is None else g.difference(perde)
++        Y.dolgu(gor, "GORUNUS_DOLGU", renk=renk, ox=dx, oy=oy)
++        katman = "GORUNUS_DOGRAMA" if tur in ("pencere", "kapi") else "GORUNUS"
++        for p in _parcalar(g):
++            if p.geom_type == "Polygon":
++                sonra.append((p.boundary if perde is None else p.boundary.difference(perde), katman))
++        if tur == "pencere":                                           # kayıtlar (ciz_genel.gorunus_eksen gibi): tanımdakiler, yoksa geniş pencerede ortada dikey
++            ku = [p[0] for p in s["k2"]]
++            kz = [p[1] for p in s["k2"]]
++            cizgiler = []
++            if s.get("kayit"):
++                for zk in s["kayit"].get("yatay", []):
++                    cizgiler.append(LineString([(min(ku), zk), (max(ku), zk)]))
++            elif s.get("en", 0) >= 100:
++                um = (min(ku) + max(ku)) / 2
++                sol_ust = max(p[1] for p in s["k2"] if abs(p[0] - min(ku)) < 0.5)
++                sag_ust = max(p[1] for p in s["k2"] if abs(p[0] - max(ku)) < 0.5)
++                cizgiler.append(LineString([(um, min(kz)), (um, (sol_ust + sag_ust) / 2)]))
++            for L in cizgiler:
++                L = L.intersection(g)
++                sonra.append((L if perde is None else L.difference(perde), "GORUNUS_DOGRAMA"))
++        onde = g if onde is None else unary_union([onde, g])
++    for L, katman in sonra:
++        Y.cizgi(L, katman, dx, oy)
++    Y.msp.add_line((min(us) - 40 + dx, oy), (max(us) + 40 + dx, oy), dxfattribs={"layer": "ZEMIN"})
++    duvar_us = [p[0] for s in yz if s["tur"] in ("duvar", "korkuluk", "kolon") for p in s["k2"]]
++    u0, u1 = min(duvar_us), max(duvar_us)
++    tepe = max(z for s in yz if s["tur"] in ("cati", "alin", "kalkan") for _, z in s["k2"])
++    Y.olcu((max(us) + 30 + dx, oy), (max(us) + 30 + dx, oy + duvar_h), (max(us) + 30 + dx, oy), 90)
++    Y.olcu((max(us) + 66 + dx, oy), (max(us) + 66 + dx, oy + tepe), (max(us) + 66 + dx, oy), 90)
++    Y.olcu((u0 + dx, oy), (u1 + dx, oy), (u0 + dx, oy - 34), 0)
++    Y.yazi(TARAF_ADI[taraf], ((min(us) + max(us)) / 2 + dx, oy + max(zs) + 50), 22, "YAZI")
++    return max(us) - umin
++
++
++# ─────────────────────────────────────────────────────────────────────── ana ──
++def uret(tanim: Path, cikti: Path, onizleme: Path | None = None) -> dict:
++    t = json.loads(tanim.read_text(encoding="utf-8"))
++    kur = kurallar_oku.oku()
++    y = yapi.kur(t)
++    c = cati_genel.cati_kur(t["cati"], kur)
++    S = sahne_m.sahne_kur(y, c)
++    m = girdi_genel.metraj(y, c, kur)
++    sol, sag = girdi_genel.bilgi_satirlari(y, c, m, kur)
++    inisler, _ = inis_kurali(c, kur, t["cati"].get("sacak", 30))
++    Y = Yazici()
++    bx0, by0, bx1, by1 = plan_ciz(Y, y)
++    cx0 = min(p[0] for P in c["duzlemler"] for p in P["plan"])
++    cati_ciz(Y, y, c, inisler, ox=bx1 + 520 - cx0, oy=0.0)
++    h = t["kat_yuksekligi"]
++    sira1, sira2 = by0 - 900, by0 - 1700
++    w = gorunus_ciz(Y, S, "on", h, bx0 - 60, sira1)
++    gorunus_ciz(Y, S, "arka", h, bx0 - 60 + w + 420, sira1)
++    w = gorunus_ciz(Y, S, "sol", h, bx0 - 60, sira2)
++    gorunus_ciz(Y, S, "sag", h, bx0 - 60 + w + 420, sira2)
++    for i, (satirlar, x) in enumerate(((sol, bx0 - 60), (sag, bx0 + 1500))):
++        mt = Y.msp.add_mtext("\\P".join(satirlar), dxfattribs={"layer": "NOTLAR", "style": "PORTMAN", "char_height": 13, "width": 1350})
++        mt.set_location((x, sira2 - 200), attachment_point=1)
++    cikti.parent.mkdir(parents=True, exist_ok=True)
++    Y.doc.saveas(cikti)
++    geri = ezdxf.readfile(cikti)                                       # yeniden aç ve denetle (P6001'deki gibi)
++    denetim = geri.audit()
++    sayim: dict = {}
++    for e in geri.modelspace():
++        sayim[e.dxf.layer] = sayim.get(e.dxf.layer, 0) + 1
++    ozet = {"dxf": cikti.name, "surum": geri.dxfversion, "birim": "cm", "denetim_hata": len(denetim.errors), "denetim_duzeltme": len(denetim.fixes),
++            "katman_varlik": dict(sorted(sayim.items()))}
++    if onizleme:
++        import matplotlib
++        matplotlib.use("Agg")
++        import matplotlib.pyplot as plt
++        from ezdxf.addons.drawing import Frontend, RenderContext
++        from ezdxf.addons.drawing.config import BackgroundPolicy, ColorPolicy, Configuration
++        from ezdxf.addons.drawing.matplotlib import MatplotlibBackend
++        fig = plt.figure(figsize=(30, 30), dpi=100)
++        ax = fig.add_axes([0, 0, 1, 1])
++        Frontend(RenderContext(geri), MatplotlibBackend(ax, adjust_figure=False),
++                 config=Configuration(background_policy=BackgroundPolicy.WHITE, color_policy=ColorPolicy.COLOR, min_lineweight=0.1)).draw_layout(geri.modelspace())
++        ax.set_aspect("equal")
++        fig.savefig(onizleme, facecolor="white", dpi=100)
++        plt.close(fig)
++        ozet["onizleme"] = onizleme.name
++    return ozet
++
++
++def main() -> int:
++    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
++    ap.add_argument("tanim", type=Path)
++    ap.add_argument("cikti", type=Path)
++    ap.add_argument("--onizleme", type=Path)
++    a = ap.parse_args()
++    ozet = uret(a.tanim, a.cikti, a.onizleme)
++    print(json.dumps(ozet, ensure_ascii=False))
++    return 1 if ozet["denetim_hata"] else 0
++
++
++if __name__ == "__main__":
++    sys.exit(main())

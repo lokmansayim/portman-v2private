@@ -155,6 +155,20 @@ Depoda yalnız DURUM değişti.
 - **Değişmeyenler:** Depodaki genel motor (`deneme/2026-10-06_kor_test`) değişmedi; KT setleri bayt bayt aynı kalır. Antetsiz hal ve bugünkü öteki eklentiler patch'te; İE-08'e taşınacak. İE-08 sohbetine verilecek metin Lokman'a verildi.
 - Canlıya dokunulmadı.
 
+**12 Ekim 2026 16:10 eki (dal `ie-05`):** Lokman 15:52'de sordu: "DXF üretimi P6001'de vardı, aynı şekilde çelik de üretebilir miyiz? Ya da sıfırdan bu projenin DXF'ini verir misin?" İkisi de yapıldı.
+- **Yeni modül `dxf_genel.py`:** Genel motorun modelinden (yapi, cati_genel, sahne) DXF yazar.
+  - P6001'in (`motor/dxf_out.py`) kuralları: R2018, birim cm, `PORTMAN` yazı ve ölçü stili.
+  - İçerik: plan, çatı planı, dört görünüş ve açıklamalar; Türkçe katmanlar; ölçüler gerçek DXF ölçüsü.
+  - Görünüşlerde arkada kalan çizgiler atılır, yüz dolguları ayrı katmanda. Çatı planında üstteki çatının örttüğü kenarlar gizli çizgiyle çizilir.
+  - Antet yok. P6001'deki pano blokları ve BOM verisi yok, çünkü çelikte duvar serbest akslı.
+- **Kanıt:**
+  - `T1012CV.dxf` ve KT-01'in DXF'i yazıldı, yeniden açıldı; denetim hatası 0.
+  - Önizlemesi çizilip PNG çizimlerle karşılaştırıldı: plan, çatı planı ve görünüşler aynı.
+  - Yamadan yeniden üretimde varlıklar aynı.
+- **Paket:** DXF mühendis zip'ine girdi; bayi PDF'i aynı.
+- **Kayıt:** `deneme/2026-10-12_ilk_is/` (DXF, güncel zip); `dxf_genel.py` `motor_farki.patch`'te yeni dosya olarak duruyor, İE-08'e taşınacak; kural kitabında `teslim_paketi` › `muhendis`'e DXF eklendi.
+- **Açık:** DXF'in çizim setine 13. çıktı olarak girmesi Lokman'ın onayını bekliyor. Set kuralı onaysız değişmez.
+
 **Oturum devri:** `docs/devir/2026-09-30_Aksam_Devri.md` (30.09 akşamı, Kapı M sonrası; sıra ve bakım listesi) ve `docs/devir/2026-09-30_Oturum_Devri.md` (30.09 01:10; kurallar, K-A kararları, Astra ölçütleri). 28–30 Eylül penceresi kapandı. Yeni pencere bu ikisiyle başlar: kurallar, yapılanlar, bekleyen kararlar, sıradaki işler, Astra'ya çizim işi için ölçütler.
 
 Yeni pencere için hazırlıklar:
