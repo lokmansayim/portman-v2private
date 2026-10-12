@@ -753,8 +753,9 @@
    ]
   ],
   "kat": 1,
-  "kaynak": "katalog_pdf",
-  "dogrulama": "yok"
+  "kaynak": "cizim_seti",
+  "dogrulama": "cizim_seti_ile_dogrulandi",
+  "not": "Çizim seti ve yükleme listesi modeller/C8801.json tanımından (İE-05 10 Ekim, İE-08 12 Ekim 2026; D-07, D-08); katalog çatısı Lokman'ın 10 Ekim 14:46 kararı (2. versiyon), varyantlar K ve L ayrı aday"
  },
  {
   "page": 50,

@@ -42,7 +42,7 @@ def test_c8801_altin_degerlerle_ayni(c8801):
 
 def test_c8801_cizim_seti_tam_perspektif_haric(c8801):
     hedef, m, v = c8801
-    assert v["ciktilar"]["beklenen"] == 14 and v["ciktilar"]["var"] == 7 and v["ciktilar"]["zorunlu_eksik"] == []
+    assert v["ciktilar"]["beklenen"] == 15 and v["ciktilar"]["var"] == 8 and v["ciktilar"]["zorunlu_eksik"] == []     # 15: bayi görseli (PR-2a)
     assert sorted(v["ciktilar"]["eksik"]) == sorted(PERSPEKTIF)
     assert v["perspektif"]["durum"] == "ATLANDI"
     for ad in ("C8801_plan.png", "C8801_gorunusler.png", "C8801_pafta.png", "C8801.ifc", "C8801.ozet.json", "C8801_yukleme.json", "C8801_yukleme.md"):
@@ -60,7 +60,18 @@ def test_c8801_bayi_ciktilari(c8801):
         sozcukler = [w[4] for p in d for w in p.get_text("words")]
     assert sozcukler.count("Portman") == 3                       # Çizen, Kontrol, Onay (Lokman 12.10.2026 14:53)
     assert "..." in sozcukler and "ÇATI" in sozcukler            # ilgili kişi-telefon katalogda "..."; 2. sayfa çatı planı
+    assert sozcukler.count("TASLAK") == 2                        # 1. sayfa antet üstü (D-10, Soru 25) + 2. sayfa başlığı
+    with fitz.open(pdf) as d:
+        assert "TASLAK" in [w[4] for w in d[0].get_text("words")] and "TASLAK" in [w[4] for w in d[1].get_text("words")]
     assert (hedef / "C8801_pafta_sablon.png").exists() and (hedef / "C8801_pafta_ozet.json").exists()
+    # bayi görseli: plan + çatı planı + iki görünüş (altın koşuda perspektif yok) tek PNG, ≤ 5 MB, plan görselinden uzun
+    kart = hedef / "C8801_bayi_gorsel.png"
+    assert kart.exists() and kart.stat().st_size <= 5 * 1024 * 1024 and m["bayi_gorsel"] == kart.name and m["bilgi_var"] is False
+    from PIL import Image
+    with Image.open(kart) as k, Image.open(bayi) as p:
+        assert k.width == p.width and k.height > p.height * 1.2
+    o = json.loads((hedef / "C8801_pafta_ozet.json").read_text(encoding="utf-8"))
+    assert o["kontrol_notlari"] == [] and o["mahal_etiket_cm"]["Yaşam Alanı"][0] > 0     # Ç8801'de 15 cm altı parça yok (rehber, 12.10)
 
 
 def test_c8801_pafta_olculeri_dis_yuzden_ve_zincir_toplami(c8801):
@@ -84,6 +95,26 @@ def test_kt03_pafta_yuvarlama_iki_yanda_ayni(tmp_path):
     with fitz.open(tmp_path / "KT03_pafta.pdf") as d:
         metin = " ".join(w[4] for p in d for w in p.get_text("words"))
     assert "94" in metin and "kör" not in metin.lower() and "üçüncü" not in metin.lower()
+
+
+def test_kisa_parcalar_komsusuna_katilir_ve_muhendise_not_duser(tmp_path):
+    # D-10 (Lokman 12.10.2026 20:01: "Çelikte 15 cm parça çıkmaz"): Ç8201'in 8 cm (arka/ön, 1094'te) ve 15 cm (sol, 375'te) parçaları
+    # zincirde görünmez, kontrol_notlari'na yazılır (rehberin denetimiyle aynı: Ç8201 8 ve 15+15); zincir toplamları genel ölçü
+    from motor.genel import sablon_pafta
+    t = json.loads((KOK / "modeller" / "C8201.json").read_text(encoding="utf-8"))
+    o = sablon_pafta.pafta_pdf(t, tmp_path, "C8201", is_emri_no="TEST", revizyon=1, set_yolu=SET, yontem="panel")
+    notlar = {(n["zincir"], n["konum_cm"], n["parca_cm"]) for n in o["kontrol_notlari"]}
+    assert notlar == {("arka", 1094.0, 8.0), ("on", 1094.0, 8.0), ("sol", 375.0, 15.0)}, notlar
+    assert all("kontrol" in n["not"] for n in o["kontrol_notlari"])
+    assert o["zincirler_cm"]["sol"] == [30, 330, 30, 330, 30] and all(p >= 15 for ad in o["zincirler_cm"] for p in o["zincirler_cm"][ad])
+
+
+def test_kt01_mahal_etiketi_tanimdaki_yerde(tmp_path):
+    # Rehberin göz denetimi (12.10): "SALON - MUTFAK" yazısı kapı simgesine biniyordu; tanımdaki etiket_yeri [980, 420] kullanılır
+    from motor.genel import sablon_pafta
+    t = json.loads((KOK / "modeller" / "KT01.json").read_text(encoding="utf-8"))
+    o = sablon_pafta.pafta_pdf(t, tmp_path, "KT01", is_emri_no="TEST", revizyon=1, set_yolu=SET, yontem="panel")
+    assert o["mahal_etiket_cm"]["Salon - Mutfak"] == [980.0, 420.0] and o["kontrol_notlari"] == []
 
 
 def test_ozellik_degeri_once_kuculur_sonra_iki_satir_en_son_uc():

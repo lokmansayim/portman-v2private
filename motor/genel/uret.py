@@ -46,6 +46,14 @@ def kod_govde(t: dict) -> str:
     return t["kod"].replace("Ç", "C").replace("-", "")
 
 
+def _bilgisiz(metin: str, bilgi: dict | None) -> str:
+    """Hata iletisinde zarfın `bilgi` değerleri (bayi adı, kart numarası) geçmesin (D-09, K09): geçen her değer `[bilgi]` olur."""
+    for v in (bilgi or {}).values():
+        if isinstance(v, str) and len(v) >= 4 and v in metin:
+            metin = metin.replace(v, "[bilgi]")
+    return metin
+
+
 def _main(mod, argv: list[str], gunluk: io.StringIO) -> int:
     """Modülün main()'ini argv ile, stdout'u günlüğe yönlendirerek çağırır; SystemExit kodunu döner."""
     eski = sys.argv
@@ -107,11 +115,13 @@ def matplotlib_sabitle() -> None:
 
 def uret(tanim_yolu: Path, hedef: Path, is_emri_no: str | None = None, revizyon: int = 1, set_yolu: Path | None = None,
          yontem: str | None = None, perspektif: bool = True, bayi: bool = True, kaynak: str | None = None,
-         elektrik_sayimi: Path | None = None, yalniz_liste: bool = False) -> dict:
+         elektrik_sayimi: Path | None = None, yalniz_liste: bool = False, bilgi: dict | None = None) -> dict:
     """Bir Yapı Tanımı'ndan çizim setini, IFC'yi, yükleme listesini ve bayi çıktılarını üretir; manifest döner.
     `elektrik_sayimi`: elektrik paftasından sayım (JSON); verilirse listede priz/anahtar/duy satırları oda kuralı yerine sayımdan gelir
     (kör testlerin listeleri böyle üretildi: `sonuc/KT0x_pafta_sayimi.json`). Katalog modellerinde yok.
-    `yalniz_liste`: yalnız girdi ve yükleme listesi (çizim, IFC, perspektif ve bayi çıktıları yok; eski kural setleriyle altın liste matrisi)."""
+    `yalniz_liste`: yalnız girdi ve yükleme listesi (çizim, IFC, perspektif ve bayi çıktıları yok; eski kural setleriyle altın liste matrisi).
+    `bilgi`: bayi paftasının antet, özellik ve özel istek alanları (İş Emri zarfından: `bayi_adi`, `bayi_telefonu` (D-09), `sevk_adresi`,
+    `ozellikler`, `ozel_istekler`); verilmezse "..." (katalog ve altın üretim). Değerleri manifest'e ve günlüğe yazılmaz (yalnız `bilgi_var`)."""
     matplotlib_sabitle()
     from . import ciz_genel, girdi_genel, ifc_genel, yukleme
     t0 = time.time()
@@ -148,8 +158,8 @@ def uret(tanim_yolu: Path, hedef: Path, is_emri_no: str | None = None, revizyon:
     pers = perspektif_kos(ifc, hedef, kod) if (perspektif and not yalniz_liste and ifc.exists()) else {"durum": "ATLANDI"}
     if pers["durum"] != "TAMAM":
         uyarilar.append(f"perspektif: {pers['durum']}" + (f" ({pers.get('neden', '')})" if pers.get("neden") else ""))
-    # 5) bayiye gidenler (etiketli plan görseli, Örnek Şablon paftası) — modüller varsa
-    bayi_png = hedef / f"{kod}_plan_bayi.png"; pafta_pdf = hedef / f"{kod}_pafta.pdf"
+    # 5) bayiye gidenler (etiketli plan görseli, Örnek Şablon paftası, bayi görseli) — modüller varsa
+    bayi_png = hedef / f"{kod}_plan_bayi.png"; pafta_pdf = hedef / f"{kod}_pafta.pdf"; bayi_gorsel = hedef / f"{kod}_bayi_gorsel.png"
     bayi = bayi and not yalniz_liste
     if bayi:
         try:
@@ -161,11 +171,18 @@ def uret(tanim_yolu: Path, hedef: Path, is_emri_no: str | None = None, revizyon:
             hatalar.append(f"bayi görseli: {type(e).__name__}: {str(e)[:200]}")
         try:
             from . import sablon_pafta
-            sablon_pafta.pafta_pdf(t, hedef, kod, is_emri_no=is_emri_no, revizyon=revizyon, set_yolu=set_yolu, yontem=yontem)
+            # antet, özellik ve özel istek alanları zarftan (`bilgi`; D-09 ad + kart numarası); hata iletisine `bilgi` değerleri girmez
+            sablon_pafta.pafta_pdf(t, hedef, kod, is_emri_no=is_emri_no, revizyon=revizyon, set_yolu=set_yolu, yontem=yontem, bilgi=bilgi)
         except ImportError:
             uyarilar.append("şablon pafta modülü yok")
         except (Exception, SystemExit) as e:
-            hatalar.append(f"şablon pafta: {type(e).__name__}: {str(e)[:200]}")
+            hatalar.append(f"şablon pafta: {type(e).__name__}: {_bilgisiz(str(e), bilgi)[:200]}")
+        if bayi_png.exists():                        # bayi görseli: plan + çatı planı + iki perspektif (yoksa iki görünüş) tek görselde
+            try:
+                from . import bayi_gorseli
+                bayi_gorseli.bayi_gorsel(t, hedef, kod, set_yolu=set_yolu, yontem=yontem)
+            except (Exception, SystemExit) as e:    # kart üretilemezse iş düşmez: worker plan görseline döner (uyarı)
+                uyarilar.append(f"bayi görseli (kart): {type(e).__name__}: {str(e)[:200]}")
     # 6) çizim seti denetimi (kurallar/cizim/cizim_seti.json) ve kayıtlar
     seti = json.loads((KOK / "kurallar" / "cizim" / "cizim_seti.json").read_text(encoding="utf-8"))
     beklenen = [c["dosya"].format(kod=kod) for c in seti["ciktilar"]] if not yalniz_liste else [girdi.name, liste.name]
@@ -182,7 +199,7 @@ def uret(tanim_yolu: Path, hedef: Path, is_emri_no: str | None = None, revizyon:
     if not passed:                                   # K23: doğrulama geçmezse bayiye giden hiçbir dosya teslim adıyla kalmaz; tanı için .HATALI.*
         if pafta_pdf.exists():
             pafta_pdf.replace(hatali_pdf)
-        for p in (bayi_png, hedef / f"{kod}_pafta_sablon.png"):
+        for p in (bayi_png, hedef / f"{kod}_pafta_sablon.png", bayi_gorsel):
             if p.exists():
                 p.replace(p.with_name(p.stem + ".HATALI" + p.suffix))
     validation = {"passed": passed, "errors": hatalar, "warnings": uyarilar, "kod": t["kod"], "set": set_kullanilan, "yontem": yontem or t.get("cati", {}).get("yontem"),
@@ -196,6 +213,7 @@ def uret(tanim_yolu: Path, hedef: Path, is_emri_no: str | None = None, revizyon:
                 "hatali_pdf": hatali_pdf.name if hatali_pdf.exists() else None,
                 "ifc": ifc.name if ifc.exists() else None, "ifc_sha256": sha256(ifc) if ifc.exists() else None,
                 "preview": f"{kod}_plan.png" if (hedef / f"{kod}_plan.png").exists() else None, "plan_bayi": bayi_png.name if bayi_png.exists() else None,
+                "bayi_gorsel": bayi_gorsel.name if bayi_gorsel.exists() else None, "bilgi_var": bool(bilgi),
                 "yukleme_json": liste.name if liste.exists() else None, "ciktilar": {d: v for d, v in var.items()}, "set": set_kullanilan}
     (hedef / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     return manifest

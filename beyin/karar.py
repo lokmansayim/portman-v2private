@@ -11,6 +11,7 @@ from .katalog import Katalog
 from .konusma import Konusma, MAX_REVIZYON, MAX_SORU, ESKI_TASLAK_SN
 from . import varyant
 from . import secenek as SC
+from . import celik                      # İE-08: çelik aday zarfı, D-09 antet bilgisi, çatı seçimi okuması
 
 MOD = 125.5
 ROOT = Path(__file__).resolve().parent.parent
@@ -186,8 +187,9 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
     if eski_taslak_cevabi is None and t.niyet in ("yeni_talep", "revizyon") and k.d["taslak"] and _acik_yeni_talep(metin):
         k.sifirla(); k.not_dus("kural", "açık yeni talep sözü: önceki taslak kapandı")
         t = t.model_copy(update={"niyet": "yeni_talep"}); kapanmis = False
+    # İE-08: aynı tabandaki varyant (Ç8801 → Ç8801K, çatı seçeneği) başka model değildir; seçenek setinden seçim konuşmayı sıfırlamaz
     baska_model = bool(t.niyet == "yeni_talep" and t.katalog_kodu and k.d["taslak"].get("katalog_kodu")
-                       and Katalog.kod_normalize(t.katalog_kodu) != Katalog.kod_normalize(k.d["taslak"]["katalog_kodu"]))
+                       and Katalog.taban_kod(t.katalog_kodu) != Katalog.taban_kod(k.d["taslak"]["katalog_kodu"]))
     # D-01: mesaj eski bir taslağa eklenecekse ve taslak ESKI_TASLAK_SN'den eskiyse, model koduyla başlayan mesajda tahmin
     # edilmez, sorulur (22.09: 3,5 saat sonra gelen "P6001 …" eski aynalı taslağın revizyonu sayılmıştı).
     if eski_taslak_cevabi is None and t.niyet in ("yeni_talep", "revizyon") and k.d["taslak"] and not kapanmis \
@@ -234,6 +236,8 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
         model = katalog.bul(ts["katalog_kodu"])
         if aday is None and model is None:
             return _soru(k, "katalog_kodu", f"Katalogda \"{ts['katalog_kodu']}\" kodlu model bulamadım. Kodu kontrol eder misiniz? (örn. P6001, P7401, Ç8201)")
+        if aday is not None and aday.get("motor") == "genel":      # İE-08 A2/A3: çelik aday (genel motor): çatı seçenekleri ya da r01
+            return _celik_dali(k, bayi, katalog, aday, ts)
         kod = aday["kod"] if aday else model["code"]
         yol = katalog.sablon_yolu(kod)
         if yol is None:
@@ -246,6 +250,23 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
     if not ts.get("oda_programi"):
         return _soru(k, "oda_programi", "Kaç oda istiyorsunuz? (örn. 2+1, 3+1, tek oda)")
     nx = ny = None
+    if ts.get("yapi_turu") == "celik":
+        # İE-08 A2: çelikte pano ızgarası ve GRID_SABLON yok (serbest aks, D-08); dış ölçü verildiyse alana çevrilir, aday kaydından
+        # (yedi çelik model; kat süzgeci) seçenek seti; uyan yoksa bugünkü davranış (katalog önerisi metinle)
+        alan = ts.get("alan_m2")
+        if alan is None and ts.get("dis_olcu") and ts["dis_olcu"].get("en_m") and ts["dis_olcu"].get("boy_m"):
+            alan = round(float(ts["dis_olcu"]["en_m"]) * float(ts["dis_olcu"]["boy_m"]), 1)
+        if alan is None:
+            return _soru(k, "dis_olcu", "Dış ölçü (kısa x uzun, metre) ya da yaklaşık m² verir misiniz?")
+        secenek = _secenekler(k, katalog, {**ts, "alan_m2": alan, "pano": None})
+        if secenek is not None:
+            return secenek
+        adaylar = katalog.yakin_modeller(float(alan), ts["oda_programi"], "celik", kat=ts.get("kat_sayisi"))
+        if adaylar:
+            liste = ", ".join(Katalog.kisa(m) for m in adaylar)
+            return _soru(k, "model_veya_olcu", f"{alan:g} m² {ts['oda_programi']} çelik için katalog önerilerim: {liste}. Birini seçin ya da dış ölçü verin (örn. 8x7,5 m).")
+        return _bitir(k, Karar(eylem="yonlendir", gerekce="çelikte uyan aday ve katalog modeli yok",
+                                mesaj=f"Anladım: {ts['oda_programi']}, yaklaşık {alan:g} m² çelik. Bu tanıma uyan hazır model bulamadım; " + YONLENDIRME))
     if ts.get("pano") and ts["pano"].get("nx") and ts["pano"].get("ny"):
         nx, ny = float(ts["pano"]["nx"]), float(ts["pano"]["ny"])
     elif ts.get("dis_olcu") and ts["dis_olcu"].get("en_m") and ts["dis_olcu"].get("boy_m"):
@@ -277,6 +298,57 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
     # yerleşim üretici henüz yok → dürüst yönlendirme, ölçü teyidiyle
     return _bitir(k, Karar(eylem="yonlendir", gerekce="serbest yerleşim üretici v0.1'de yok",
                             mesaj=f"Anladım: {ts['oda_programi']}, dış ölçü {fmt_m(W)} x {fmt_m(H)} ({nx:g}x{ny:g} pano). Bu ölçüde hazır yerleşim şablonu yok; " + YONLENDIRME))
+
+
+def _celik_dali(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts: dict) -> Karar:
+    """İE-08 A2/A3 · çelik aday (genel motor). Açık seçenek setinden seçim ya da bayinin metninde çatı seçimi → r01; katalog modelinin
+    çatı varyantları varsa ve çatı seçilmemişse numaralı çatı seti (katalog çatısı, K, L; tek görsel, 3 düğme; öncelik sorusu yok)."""
+    st = k.d.get("secenek_seti")
+    kod = str(aday["kod"]).upper()
+    if st and st.get("durum") == "acik" and kod in {str(a.get("kod")).upper() for a in st.get("adaylar") or []}:
+        _seti_kapat(k, kod)                                    # setten seçim (düğme ya da kod yazarak)
+        return _celik_is_emri_uret(k, bayi, katalog, aday, ts)
+    secim = celik.cati_secimi(k.d.get("son_metin"), aday, katalog) if aday.get("varyantlar") else None
+    if secim and secim != kod:
+        secilen = katalog.aday(secim)
+        if secilen is not None:
+            k.d["taslak"]["katalog_kodu"] = secilen["kod"]
+            k.not_dus("kural", f"bayinin sözünden çatı seçimi: {secilen['kod']}")
+            _seti_kapat(k, secilen["kod"])
+            return _celik_is_emri_uret(k, bayi, katalog, secilen, ts)
+    if aday.get("varyantlar") and not secim:
+        varyantlar = [katalog.aday(v) for v in aday["varyantlar"]]
+        uygun = [aday] + [v for v in varyantlar if v is not None]
+        if len(uygun) >= 2:
+            return _secenekler(k, katalog, ts, uygun=SC.cati_seti(uygun), tur="cati_varyanti", referans=aday)
+    _seti_kapat(k, kod)
+    return _celik_is_emri_uret(k, bayi, katalog, aday, ts)
+
+
+def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts: dict, degisiklikler: list[dict] | None = None) -> Karar:
+    """İE-08 A3 · çelik İş Emri zarfı (`beyin/celik.zarf`): tanım gömülmez (yol + sha256), antet bilgisi bayi kartından (D-09).
+    Pencere/ayna varyantları çelikte PR-2b'ye kadar otomatik uygulanmaz (yönlendirme, bugünkü metin)."""
+    for v in ts.get("varyantlar") or []:
+        if v.get("tur") in ("ayna_x", "ayna_y", "pencere_degistir", "pencere_ekle", "pencere_kaldir", "olcu_degistir", "oda_ekle", "oda_kaldir"):
+            return _bitir(k, Karar(eylem="yonlendir", gerekce=f"çelikte varyant henüz desteklenmiyor: {v.get('tur')}",
+                                    mesaj=f"\"{v.get('aciklama', '')}\" değişikliği çelik modelde henüz otomatik yapılamıyor. " + YONLENDIRME))
+    if any(p.get("olcu") for p in ts.get("pencereler") or []):
+        return _bitir(k, Karar(eylem="yonlendir", gerekce="çelikte pencere değişikliği henüz desteklenmiyor",
+                                mesaj="Pencere değişikliği çelik modelde henüz otomatik yapılamıyor. " + YONLENDIRME))
+    yol = celik.tanim_yolu(aday)
+    if not yol.is_file() or (aday.get("tanim_sha256") and celik.tanim_sha(yol) != aday["tanim_sha256"]):
+        return _bitir(k, Karar(eylem="yonlendir", gerekce=f"model tanımı yok ya da değişmiş: {aday.get('tanim')}",
+                                mesaj=f"{celik.kaynak_notu(aday)} modelinin tanımı sistemde doğrulanamadı. " + YONLENDIRME))
+    ie = celik.zarf(aday, bayi, k.gonderen, ts, k.d.get("son_is_emri"), degisiklikler, kaynak=f"aday {aday['kod']}")
+    k.d["revizyon"] = ie["revizyon"] - 1                       # G-2: sayaç plan sayısıyla eşitlenir (prefabrikle aynı kural)
+    k.d["son_is_emri"] = ie
+    k.d["asama"] = "is_emri_hazir"
+    ozet = (ts.get("ozet") or "").strip()
+    if ozet and ozet[-1] not in ".!?":
+        ozet += "."
+    on_bilgi = f"{celik.kaynak_notu(aday)}" + (f" · {aday.get('katalog_m2'):g} m², {aday.get('oda_programi')}" if isinstance(aday.get("katalog_m2"), (int, float)) else "") + ". "
+    return _bitir(k, Karar(eylem="is_emri", is_emri=ie, revizyon=ie["revizyon"], gerekce=f"çelik aday {aday['kod']} (genel motor)",
+                            mesaj=f"{on_bilgi}{ozet} Ön onay planını hazırlıyorum; birkaç dakika içinde plan görseli ve PDF olarak göndereceğim.".replace("  ", " ")))
 
 
 def _is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, sablon: dict, kaynak: str, ts: dict, on_bilgi: str = "") -> Karar:
@@ -540,8 +612,14 @@ def _sozcukler(metin: str | None, katalog: Katalog) -> list[tuple[int, str, str 
             i += 1; continue
         if a.upper() in ("P", "Ç", "C") and i + 1 < len(toks) and re.fullmatch(r"\d{4}", toks[i + 1]):
             a = a + toks[i + 1]; i += 1
+        elif a.upper() == "KT" and i + 1 < len(toks) and re.fullmatch(r"\d{2}", toks[i + 1]):        # İE-08: "KT-01", "KT 01"
+            a = a + toks[i + 1]; i += 1
+        # İE-08: varyant harfi ayrı belirteçse ("Ç8801-K", "Ç8801 K") ve o aday kayıtlıysa birleşir; LLM'siz, yalnız kayıtlı kodlar
+        if re.fullmatch(r"[PÇC]\d{4}", a.upper()) and i + 1 < len(toks) and re.fullmatch(r"[A-Za-z]", toks[i + 1]) and katalog.aday(a + toks[i + 1].upper()):
+            a = a + toks[i + 1].upper(); i += 1
         m = katalog.bul(a)
-        out.append((sira, a, m["code"] if m else None))
+        ad = katalog.aday(a) if m is None else None
+        out.append((sira, a, m["code"] if m else (ad["kod"] if ad else None)))
         sira += 1; i += 1
     return out
 
@@ -655,20 +733,23 @@ def _seti_kapat(k: Konusma, kod: str) -> None:
         k.not_dus("kural", f"seçenek setinden seçim: {kod}" + (" (set dışı)" if st["set_disi"] else ""))
 
 
-def _secenekler(k: Konusma, katalog: Katalog, ts: dict) -> Karar | None:
+def _secenekler(k: Konusma, katalog: Katalog, ts: dict, uygun: list[dict] | None = None, tur: str = "alan", referans: dict | None = None) -> Karar | None:
     """İE-04: aday kaydından uyan aday varsa seçenek seti. Önce (bir kez) öncelik sorulur; sonra set sunulur. Hiç aday yoksa None
-    (çağıran bugünkü davranışa döner). Set kaydı konuşmadadır; kimlikler s:<set>:<kod>; eski set 'eskidi' olur."""
-    uygun = SC.uygun_adaylar(katalog, ts)
+    (çağıran bugünkü davranışa döner). Set kaydı konuşmadadır; kimlikler s:<set>:<kod>; eski set 'eskidi' olur.
+    İE-08: `uygun` verilirse (çatı seti, tur 'cati_varyanti') sıra hazırdır, puanlanmaz; çelikte öncelik sorusu hiç sorulmaz (Lokman, 12.10.2026)."""
+    hazir = uygun is not None
+    uygun = SC.uygun_adaylar(katalog, ts) if uygun is None else uygun
     if not uygun:
         return None
-    if ts.get("oncelik") is None and len(uygun) >= 2:
+    celik_mi = ts.get("yapi_turu") == "celik" or SC.celik_seti_mi(uygun)
+    if ts.get("oncelik") is None and len(uygun) >= 2 and not celik_mi:
         k.d["taslak"]["oncelik_soruldu"] = True
         return _soru(k, "oncelik", "Sıralamada ne öne çıksın: bütçe mi, yaşam alanı mı, kısa montaj mı? Fark etmezse \"fark etmez\" yazın.",
                      butonlar=[{"id": "q:oncelik:butce", "baslik": "Bütçe önce"}, {"id": "q:oncelik:yasam", "baslik": "Yaşam alanı önce"},
                                {"id": "q:oncelik:montaj", "baslik": "Kısa montaj"}])
-    sirali = SC.puanla(uygun, ts)
+    sirali = uygun if hazir else SC.puanla(uygun, ts)
     kaynak_id = getattr(k, "son_mesaj_id", None) or f"{k.gonderen}:{int(time.time())}"   # worker.isle verir: aynı mesaj → aynı set kimliği
-    st = SC.set_kaydi(kaynak_id, sirali, ts)
+    st = SC.set_kaydi(kaynak_id, sirali, ts, tur=tur)
     eski = k.d.get("secenek_seti")
     if eski and eski.get("durum") == "acik" and eski.get("id") != st["id"]:
         eski["durum"] = "eskidi"
@@ -676,10 +757,10 @@ def _secenekler(k: Konusma, katalog: Katalog, ts: dict) -> Karar | None:
         k.d["eski_setler"] = k.d["eski_setler"][-5:]
     k.d["secenek_seti"] = st
     test_var = any(a.get("durum") == "test" for a in st["adaylar"])
-    mesaj = SC.mesaj_metni(sirali, ts)
+    mesaj = SC.cati_mesaji(sirali, referans or sirali[0]) if tur == "cati_varyanti" else SC.mesaj_metni(sirali, ts)
     if test_var:
         mesaj = "[TEST VERİSİ — gerçek seçenek değildir] " + mesaj
-    butonlar = [{"id": f"s:{st['id']}:{a['kod']}", "baslik": f"{a['sira']}. {a['kod']}"[:20]} for a in sirali[:SC.EN_COK_GORSEL]]
+    butonlar = [{"id": f"s:{st['id']}:{a['kod']}", "baslik": f"{a['sira']}. {SC.gosterim(a)}"[:20]} for a in sirali[:SC.EN_COK_GORSEL]]
     k.d["soru_sayisi"] += 1
     k.d["son_soru_alani"] = "secenek"
     if k.d["soru_sayisi"] > MAX_SORU:

@@ -10,7 +10,7 @@ Bu dosya WhatsApp'a bağlanmaz ve HİÇBİR ŞEY GÖNDERMEZ; dışarı yalnız L
 çıktıları checks/ altına yazar. Hosting dosya modu (state.json, cron, pip kurulumu) İE-06 ile kaldırıldı.
 """
 from __future__ import annotations
-import hashlib, json, os, sys, time, traceback, warnings
+import hashlib, json, os, re, sys, time, traceback, warnings
 from pathlib import Path
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -200,7 +200,9 @@ def baglam_ozeti(k) -> str:
         if d.get("son_soru_alani"): parca.append(f"bayiye sorulan son soru alanı: {d['son_soru_alani']}")
         return "; ".join(parca)
     if d.get("asama") in ("onay_bekliyor", "uretildi") and d.get("son_is_emri"):
-        return f"aşama: ön onay planı gönderildi ({d['son_is_emri'].get('is_emri_no')}), bayinin onay/revizyon cevabı bekleniyor"
+        ie = d["son_is_emri"]; y = ie.get("yapi") or {}
+        celik = f", çelik model {y.get('gosterim') or y.get('kod')}" if y.get("sistem") == "celik" else ""      # İE-08: model kodu; numara ve ad yok (Z-08)
+        return f"aşama: ön onay planı gönderildi ({ie.get('is_emri_no')}{celik}), bayinin onay/revizyon cevabı bekleniyor"
     return ""
 
 
@@ -209,7 +211,7 @@ def teknik_not(karar, talep, meta: dict, cizim: dict | None) -> str:
     if meta.get("backend") != "manuel":
         p.append(f"LLM {meta.get('model')} {meta.get('girdi_token')}+{meta.get('cikti_token')} token {meta.get('sure_ms')} ms" + (" (tekrar)" if meta.get("tekrar") else ""))
     if cizim:
-        p.append(f"çizim {cizim.get('sure_s')} s, doğrulama {'geçti' if cizim.get('passed') else 'GEÇMEDİ'}")
+        p.append(f"çizim {cizim.get('sure_s')} s{' (genel motor' + (', perspektif ' + str(cizim.get('perspektif'))) + ')' if cizim.get('motor') == 'genel' else ''}, doğrulama {'geçti' if cizim.get('passed') else 'GEÇMEDİ'}")
         ek = cizim.get("ekler")
         if ek is not None:      # İE-04: aynı revizyondan türeyen ekler (görsel, IFC, 3D sayfası); üretilemeyen 'yok'
             p.append("ekler görsel " + ("var" if ek.get("gorsel") else "yok") + ", IFC " + ("var" if ek.get("ifc") else "yok")
@@ -335,18 +337,23 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
         ie = karar.is_emri; no = ie["is_emri_no"]; rev = int(ie.get("revizyon", 1))
         hedef = (Path(proje_koku) if proje_koku else KANAL / "projects") / no / f"r{rev:02d}"
         t0 = time.time()
+        motor_adi, uret_fn = motor_sec(ie)                      # İE-08 (D-08): zarfın yapi.sistem'i motoru seçer; çağrı anında
         try:
-            m = dxf_out.uret(ie, hedef)
+            m = uret_fn(ie, hedef)
             v = oku(hedef / "validation.json", {}) or {}
-            cizim = {"sure_s": round(time.time() - t0, 1), "passed": v.get("passed") is True and bool(m.get("pdf")), "errors": (v.get("errors") or [])[:5],
-                     "pdf": str(hedef / m["pdf"]) if m.get("pdf") else None, "dxf": str(hedef / m["dxf"]), "pdf_sha256": m.get("pdf_sha256"),
-                     "dxf_sha256": m["dxf_sha256"], "warnings": m.get("warnings")}
+            cizim = {"motor": motor_adi, "sure_s": round(time.time() - t0, 1), "passed": v.get("passed") is True and bool(m.get("pdf")),
+                     "errors": [maske_numaralar(str(x)) for x in (v.get("errors") or [])[:5]],
+                     "pdf": str(hedef / m["pdf"]) if m.get("pdf") else None, "dxf": str(hedef / m["dxf"]) if m.get("dxf") else None,
+                     "pdf_sha256": m.get("pdf_sha256"), "dxf_sha256": m.get("dxf_sha256"), "warnings": m.get("warnings")}
+            if motor_adi == "genel":                            # bayiye giden PDF adı prefabrikle aynı biçimde; kural seti ve perspektif kayda
+                cizim["pdf_ad"] = f"Portman_{no}_r{rev:02d}.pdf"; cizim["set"] = Path(str(m.get("set") or "")).name or None
+                cizim["perspektif"] = (v.get("perspektif") or {}).get("durum")
             if cizim["passed"] and settings.get("mesaj_katmani"):
-                cizim["ekler"] = ekler_uret(ie, hedef, v, settings)      # İE-04: aynı İş Emri'nden bayi görseli, IFC ve 3D sayfası
+                cizim["ekler"] = ekler_uret(ie, hedef, v, settings, m)   # İE-04: aynı İş Emri'nden bayi görseli, IFC ve 3D sayfası
         except Exception as e:
             hedef.mkdir(parents=True, exist_ok=True)
-            yaz(hedef / "failure.json", {"traceback": traceback.format_exc()[-6000:], "failed_at": int(time.time())})
-            cizim = {"sure_s": round(time.time() - t0, 1), "passed": False, "errors": [f"{type(e).__name__}: {str(e)[:300]}"]}
+            yaz(hedef / "failure.json", {"traceback": maske_numaralar(traceback.format_exc()[-6000:]), "failed_at": int(time.time())})
+            cizim = {"motor": motor_adi, "sure_s": round(time.time() - t0, 1), "passed": False, "errors": [maske_numaralar(f"{type(e).__name__}: {str(e)[:300]}")]}
         sonuc["is_emri_no"] = no; sonuc["revizyon"] = rev; sonuc["cizim"] = cizim
     metin = karar.mesaj
     if patron_mu:
@@ -370,7 +377,7 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
         sonuc["secenek_seti"] = {"id": karar.secenek_seti["id"], "adaylar": [a["kod"] for a in karar.secenek_seti["adaylar"]]}
     elif cizim and cizim["passed"] and not katman:
         ekle(metin)
-        ad = Path(cizim["pdf"]).name
+        ad = cizim.get("pdf_ad") or Path(cizim["pdf"]).name
         ekle_satir(giden_belge(gelen, Path(cizim["pdf"]), ad, f"{sonuc['is_emri_no']} r{sonuc['revizyon']:02d} · ÖN ONAYA SUNULAN TASLAK · {talep.ozet or ''}".strip(),
                                0, sonuc["is_emri_no"], sonuc["revizyon"], cizim["pdf_sha256"]))
     elif cizim and cizim["passed"]:
@@ -379,7 +386,7 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
         gorsel = ekler.get("gorsel")
         ekle_satir(giden_etkilesim(gelen, metin, 0, butonlar=[(f"o:{no}:{rev}", "Onayla"), (f"r:{no}:{rev}", "Revize et")],
                                    gorsel=gorsel, altbilgi=f"{no} r{rev:02d}", is_emri_no=no, revizyon=rev))
-        ad = Path(cizim["pdf"]).name
+        ad = cizim.get("pdf_ad") or Path(cizim["pdf"]).name
         ekle_satir(giden_belge(gelen, Path(cizim["pdf"]), ad, f"{no} r{rev:02d} · ÖN ONAYA SUNULAN TASLAK · {talep.ozet or ''}".strip(),
                                0, no, rev, cizim["pdf_sha256"]))
         ucb = ekler.get("ucb")
@@ -415,8 +422,9 @@ def secenek_satirlari(gelen: dict, karar, katalog, metin: str, proje_koku: Path 
         from motor import bayi_gorseli as BG
         kok = (Path(proje_koku) if proje_koku else KANAL / "projects") / f"SECENEK-{st['id']}" / "r01"
         kok.mkdir(parents=True, exist_ok=True)
+        celik = any(a.get("motor") == "genel" for a in adaylar)      # İE-08: çelik kartı (plan + çatı planı + perspektif) daha geniş panelde okunur
         yol = BG.bilesik_gorsel([{**a, "gorsel_yolu": (KT_KOK() / a["gorsel"]) if a.get("gorsel") else None} for a in adaylar[:SC.EN_COK_GORSEL]],
-                                kok / "secenekler.png", baslik=f"{gelen.get('text') or ''}"[:60])
+                                kok / "secenekler.png", baslik=f"{gelen.get('text') or ''}"[:60], panel_px=600 if celik else 460)
         if yol:
             gorsel = {"file": str(yol), "filename": yol.name, "sha256": _sha(yol), "mime": "image/png"}
     except Exception as e:      # görsel üretilemezse metinli buton mesajı gider; akış durmaz
@@ -435,11 +443,73 @@ def KT_KOK() -> Path:
     return KT.SABLON_DIR
 
 
-def ekler_uret(ie: dict, hedef: Path, v: dict, settings: dict) -> dict:
+def motor_sec(ie: dict):
+    """İE-08 (D-08): zarfın `yapi.sistem`i motoru seçer: 'celik' → genel motor (`cizim_genel`), yoksa pano birimli Motor (`dxf_out.uret`).
+    Çağrı anında bakılır: testler `dxf_out.uret`'i sahte üreticiyle değiştirir. Dönen: (ad, uret(ie, hedef) → manifest)."""
+    if (ie.get("yapi") or {}).get("sistem") == "celik":
+        return "genel", cizim_genel
+    from motor import dxf_out
+    return "pano", dxf_out.uret
+
+
+def cizim_genel(ie: dict, hedef: Path) -> dict:
+    """Çelik İş Emri → genel motor (İE-08 A3). Tanım zarfta gömülü değildir: `modeller/<kod>.json` yüklenir, sha256 doğrulanır,
+    `yapi.degisiklikler` sırayla uygulanır (A4, PR-2b: `beyin/varyant.tanim_uygula`), tanım `hedef/tanim.json`'a yazılır ve
+    `motor.genel.uret` (perspektifli; VTK yoksa görsel perspektifsiz, iş düşmez) güncel kural kitabıyla (sürümle gider) koşar.
+    Antet bilgisi zarfın `bilgi`sinden (D-09). Manifest prefabrik Motor'unkiyle aynı anahtarları taşır (`pdf`, `pdf_sha256`, `warnings`)."""
+    from motor.genel import uret as U
+    y = ie.get("yapi") or {}
+    tanim_yolu = KOD.parent / str(y.get("tanim") or "")
+    if not y.get("tanim") or not tanim_yolu.is_file():
+        raise FileNotFoundError(f"model tanımı yok: {y.get('tanim')}")
+    if y.get("tanim_sha256") and hashlib.sha256(tanim_yolu.read_bytes()).hexdigest() != y["tanim_sha256"]:
+        raise ValueError(f"model tanımı zarftaki sha ile uyuşmuyor: {y.get('tanim')}")
+    t = json.loads(tanim_yolu.read_text(encoding="utf-8"))
+    for d in y.get("degisiklikler") or []:
+        from beyin import varyant
+        if not hasattr(varyant, "tanim_uygula"):
+            raise ValueError(f"değişiklik uygulanamıyor (PR-2b): {d.get('op')}")
+        t = varyant.tanim_uygula(t, d)
+    hedef = Path(hedef); hedef.mkdir(parents=True, exist_ok=True)
+    calisma = hedef / "tanim.json"
+    calisma.write_text(json.dumps(t, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    no, rev = ie.get("is_emri_no"), int(ie.get("revizyon") or 1)
+    return U.uret(calisma, hedef, is_emri_no=no, revizyon=rev, set_yolu=None, yontem=y.get("yontem") or "panel", perspektif=True, bayi=True,
+                  kaynak=f"İş Emri {no} r{rev:02d} ({y.get('referans_model') or y.get('kod')})", bilgi=ie.get("bilgi"))
+
+
+_NUMARA = re.compile(r"(?<!\d)(\d{10,15})(?!\d)")
+
+
+def maske_numaralar(metin: str) -> str:
+    """Günlük, hata iletisi ve kayıt kopyası için: 10–15 haneli rakam dizileri (telefon numarası olabilir) maskelenir (K09, D-09)."""
+    return _NUMARA.sub(lambda m: "…" + m.group(1)[-4:], metin or "")
+
+
+def ekler_uret(ie: dict, hedef: Path, v: dict, settings: dict, m: dict | None = None) -> dict:
     """Aynı İş Emri revizyonundan türetilen ekler: {"gorsel": {...}, "ifc": {...}, "ucb": {...}}. Her biri ayrı denenir; üretilemeyen
-    ek akışı durdurmaz (satır metinle gider) ve 'hata' ile kaydedilir. Motor'un DXF/PDF'ine dokunulmaz."""
+    ek akışı durdurmaz (satır metinle gider) ve 'hata' ile kaydedilir. Motor'un DXF/PDF'ine dokunulmaz.
+    İE-08 çelik (manifest `m`, motor genel): görsel = `<kod>_bayi_gorsel.png` (plan + çatı planı + perspektifler; yoksa `plan_bayi.png`),
+    IFC genel motorun IFC'si; 3D sayfası yok (kapsam dışı). Yükleme listesi klasörde kalır, bayiye gitmez."""
     ekler: dict = {}
     no, rev = ie.get("is_emri_no", ""), int(ie.get("revizyon") or 1)
+    if (ie.get("yapi") or {}).get("sistem") == "celik" and m is not None:
+        for anahtar in ("bayi_gorsel", "plan_bayi"):
+            yol = hedef / str(m.get(anahtar) or "")
+            if m.get(anahtar) and yol.is_file():
+                ekler["gorsel"] = {"file": str(yol), "filename": yol.name, "sha256": _sha(yol), "mime": "image/png", "kaynak": anahtar}
+                break
+        else:
+            ekler["gorsel_hata"] = "bayi görseli üretilmedi"
+        if m.get("ifc") and (hedef / m["ifc"]).is_file():
+            oz = (v.get("ifc") or {})
+            ekler["ifc"] = {"dosya": str(hedef / m["ifc"]), "sha256": m.get("ifc_sha256") or _sha(hedef / m["ifc"]), "sema_hatasi": oz.get("sema_hatasi"),
+                            **{k: (oz.get("urunler") or {}).get(x) for k, x in (("duvar", "IfcWall"), ("pencere", "IfcWindow"), ("kapi", "IfcDoor"), ("mahal", "IfcSpace"))}}
+        else:
+            ekler["ifc_hata"] = "IFC üretilmedi"
+        if m.get("yukleme_json"):
+            ekler["yukleme_listesi"] = {"dosya": str(hedef / m["yukleme_json"]), "bayiye_gider": False}
+        return ekler
     try:
         from motor import bayi_gorseli as BG
         yol = BG.plan_gorseli(ie, hedef / "plan_bayi.png", v)

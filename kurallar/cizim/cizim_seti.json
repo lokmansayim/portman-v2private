@@ -24,7 +24,9 @@
   {"dosya": "{kod}_plan_bayi.png", "ad": "Bayi plan görseli", "betik": "bayi_gorseli.py", "bayiye_gider": true,
    "icerik": "Plan (aynı çizim), çevresinde ÖN (GİRİŞ) / ARKA / SOL / SAĞ etiketleri, başlıkta kod · m² · oda programı (İE-05 devir §3.1 kural 1; İE-08). WhatsApp görsel başlığı: en çok 5 MB"},
   {"dosya": "{kod}_pafta.pdf", "ad": "Bayi paftası (Örnek Şablon)", "betik": "sablon_pafta.py", "bayiye_gider": true,
-   "icerik": "A4 yatay, 2 sayfa. Sayfa 1 'Örnek Şablon'un aynısı (Lokman, 6 Ekim 2026 19:46; docs/sartname/plan_paftasi_sablonu.md): plan, sol yan ve ön görünüş, BİNA ÖZELLİKLERİ, ÖZEL İSTEKLER, antet; bilinmeyen değer '...'. Sayfa 2: dört görünüş ve çatı planı (bu setin kendi çizimleri). Çelikte pano eki çizilmez (kural yok). Önizlemesi {kod}_pafta_sablon.png"}
+   "icerik": "A4 yatay, 2 sayfa. Sayfa 1 'Örnek Şablon'un aynısı (Lokman, 6 Ekim 2026 19:46; docs/sartname/plan_paftasi_sablonu.md): plan, sol yan ve ön görünüş, BİNA ÖZELLİKLERİ, ÖZEL İSTEKLER, antet; antetin üstünde küçük TASLAK (8b mühendis kabulüne kadar; pafta_sablonu.json › taslak_ibaresi); bilinmeyen değer '...'. Sayfa 2: dört görünüş ve çatı planı (bu setin kendi çizimleri). Çelikte pano eki çizilmez (kural yok). Önizlemesi {kod}_pafta_sablon.png (antetle birlikte bayinin numarasını taşır: yalnız bayiye gider)"},
+  {"dosya": "{kod}_bayi_gorsel.png", "ad": "Bayi görseli (aday kartı / r0N başlık görseli)", "betik": "bayi_gorseli.py", "bayiye_gider": true,
+   "icerik": "Tek görsel: üstte etiketli plan ({kod}_plan_bayi.png), altta çatı planı ile ön-sağ ve arka-sağ perspektif (VTK yoksa ön ve sağ görünüş; İE-05 devir §3.1 kural 1, Lokman 12 Ekim 2026: perspektifler aynı görselin içinde, ayrı mesaj yok; VTK düşerse görsel perspektifsiz gider). Seçenek setinin bileşik görseli ve Onayla/Revize et mesajının başlık görseli budur. En çok 5 MB"}
  ],
  "aciklamalar": {
   "durum": "duzeltilecek",

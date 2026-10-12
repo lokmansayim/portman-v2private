@@ -129,8 +129,12 @@ def bilesik_gorsel(adaylar: list[dict], yol: Path, baslik: str = "", panel_px: i
         except Exception:
             d.rectangle([x, y, x + panel_px, y + panel_px], outline="#cccccc")
         d.rectangle([x, y, x + panel_px, y + panel_px], outline="#bbbbbb", width=2)
-        d.text((x + 8, y + panel_px + 8), f"{a.get('sira', i + 1)}. {a.get('kod', '')}", font=f_b, fill="#1f1f1f")
-        satir = f"{a.get('katalog_m2')} m² katalog" + (f" · kapalı {a.get('kapali_m2')}" if a.get("kapali_m2") is not None else "")
+        d.text((x + 8, y + panel_px + 8), f"{a.get('sira', i + 1)}. {a.get('gosterim') or a.get('kod', '')}", font=f_b, fill="#1f1f1f")
+        cati = (a.get("sunum") or {}).get("cati_adi") if isinstance(a.get("sunum"), dict) else None     # İE-08 çelik: çatı adı (K/L farkı)
+        m2 = a.get("katalog_m2")
+        satir = (f"{m2:g}" if isinstance(m2, (int, float)) else f"{m2}") + " m² katalog" + (f" · kapalı {a.get('kapali_m2')}" if a.get("kapali_m2") is not None else "")
+        if cati:
+            satir = f"{cati} · {satir}"
         d.text((x + 8, y + panel_px + 42), satir[:44], font=f_s, fill="#444444")
         puan = a.get("puan")
         if puan is not None:

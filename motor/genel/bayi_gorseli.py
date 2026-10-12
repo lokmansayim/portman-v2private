@@ -2,7 +2,10 @@
 etiketleri, başlıkta kod · m² · oda. Yön kuralı `sahne.py`: +y kuzey, ön cephe güneyde (planda altta).
 
 Çizim seti baytlarına dokunmaz: plan `ciz_genel.plan_eksen` ile **yeni** bir figüre çizilir. Çıktı `<kod>_plan_bayi.png` (≤ 5 MB;
-WhatsApp görsel sınırı). Seçenek bileşik görseli (`motor/bayi_gorseli.bilesik_gorsel`) bu PNG'yi okur.
+WhatsApp görsel sınırı). `bayi_gorsel()` bunun altına çatı planı ile ön-sağ ve arka-sağ perspektifi (VTK yoksa ön ve sağ görünüşü)
+ekler: `<kod>_bayi_gorsel.png` — aday kartı ve Onayla/Revize et mesajının başlık görseli (Lokman, 12 Ekim 2026: perspektifler aynı
+görselin içinde, ayrı mesaj yok; VTK düşerse görsel perspektifsiz gider). Seçenek bileşik görseli (`motor/bayi_gorseli.bilesik_gorsel`)
+bu PNG'yi okur.
 
     python -m motor.genel.bayi_gorseli modeller/C8801.json <çıktı klasörü> [--yontem panel|omega_asik] [--set <kural seti>]
 """
@@ -66,6 +69,59 @@ def plan_bayi(t: dict, hedef: Path, kod: str, is_emri_no: str | None = None, rev
     ciz(130)
     if yol.stat().st_size > 5 * 1024 * 1024:            # WhatsApp görsel sınırı: 5 MB
         ciz(90)
+    return yol
+
+
+PERSPEKTIF_PANEL = (("perspektif_on_sag", "ÖN-SAĞ PERSPEKTİF", "on"), ("perspektif_arka_sag", "ARKA-SAĞ PERSPEKTİF", "sag"))
+
+
+def bayi_gorsel(t: dict, hedef: Path, kod: str, set_yolu: Path | None = None, yontem: str | None = None) -> Path:
+    """`<kod>_bayi_gorsel.png`: üstte `<kod>_plan_bayi.png` (olduğu gibi), altta tek sırada çatı planı, ön-sağ ve arka-sağ perspektif
+    (`<kod>_perspektif_on_sag.png`, `<kod>_perspektif_arka_sag.png`; yoksa ön ve sağ görünüş `ciz_genel.gorunus_eksen`). Altın koşuda
+    perspektif yoktur, görsel deterministiktir (matplotlib varsayılanları + PIL). ≤ 5 MB (aşarsa alt sıra düşük çözünürlükle)."""
+    from . import cati_genel, ciz_genel, kural, sahne as sahne_m, yapi
+    import matplotlib.pyplot as plt
+    from PIL import Image
+    hedef = Path(hedef)
+    plan = hedef / f"{kod}_plan_bayi.png"
+    if not plan.is_file():
+        raise FileNotFoundError(plan.name)
+    t = json.loads(json.dumps(t))
+    if yontem:
+        t["cati"]["yontem"] = yontem
+    with kural.secili(set_yolu):
+        kur = kural.oku()
+    y = yapi.kur(t); c = cati_genel.cati_kur(t["cati"], kur); S = sahne_m.sahne_kur(y, c)
+    inis, _ = ciz_genel.inis_kurali(c, kur, t["cati"].get("sacak", 30))
+    pers = {ad: hedef / f"{kod}_{ad}.png" for ad, _, _ in PERSPEKTIF_PANEL}
+    perspektifli = all(p.is_file() and p.stat().st_size > 0 for p in pers.values())
+    alt = hedef / f"{kod}_bayi_gorsel_alt.png"
+    yol = hedef / f"{kod}_bayi_gorsel.png"
+
+    def alt_sira(dpi: int) -> None:
+        fig, axs = plt.subplots(1, 3, figsize=(11.0, 3.9), dpi=dpi)
+        ciz_genel.cati_plani_eksen(axs[0], y, c, inis, baslik="ÇATI PLANI", yazi_ayir=True)
+        for ax, (ad, baslik, taraf) in zip(axs[1:], PERSPEKTIF_PANEL):
+            if perspektifli:
+                ax.imshow(Image.open(pers[ad]).convert("RGB")); ax.set_title(baslik, fontsize=9.5, weight="bold"); ax.axis("off")
+            else:                                        # VTK yok ya da düştü: aynı yerde görünüş (iş durmaz; Lokman 12.10.2026)
+                ciz_genel.gorunus_eksen(ax, S, taraf, t["kat_yuksekligi"])
+        fig.savefig(alt, bbox_inches="tight", facecolor="white")
+        plt.close(fig)
+
+    def birlestir() -> None:
+        ust = Image.open(plan).convert("RGB"); alt_img = Image.open(alt).convert("RGB")
+        if alt_img.width != ust.width:                   # alt sıra plan genişliğine ölçeklenir
+            alt_img = alt_img.resize((ust.width, max(1, round(alt_img.height * ust.width / alt_img.width))), Image.LANCZOS)
+        ara = 12
+        img = Image.new("RGB", (ust.width, ust.height + ara + alt_img.height), "white")
+        img.paste(ust, (0, 0)); img.paste(alt_img, (0, ust.height + ara))
+        img.save(str(yol), "PNG", optimize=True)
+
+    alt_sira(130); birlestir()
+    if yol.stat().st_size > 5 * 1024 * 1024:            # WhatsApp görsel sınırı
+        alt_sira(80); birlestir()
+    alt.unlink(missing_ok=True)
     return yol
 
 

@@ -691,12 +691,13 @@ class Depo:
         return r["numara"] if r else None
 
     def gelen_bayisi(self, numara) -> dict | None:
-        """Gelen satırın 'bayi' alanı (feature.php pm_kanal_bayi biçimi: kod, ad, firma, rol); kayıtlı ve aktif değilse None."""
+        """Gelen satırın 'bayi' alanı (feature.php pm_kanal_bayi biçimi: kod, ad, firma, rol; İE-08: numara = bayi kartının anahtarı,
+        D-09 antet numarası yalnız buradan okunur); kayıtlı ve aktif değilse None."""
         b = self.bayi_oku(numara)
         if not b or not b["aktif"]:
             return None
         return {"kod": b["kod"] or ("PATRON" if b["rol"] == "patron" else "B" + str(numara)[-4:]), "ad": b["ad"] or str(numara),
-                "firma": b["firma"] or "", "rol": b["rol"]}
+                "firma": b["firma"] or "", "rol": b["rol"], "numara": str(b["numara"])}
 
     # ───────────────────────── İE-06: webhook olayları, durum bildirimi, gönderim yardımcıları ─────────────────────────
     def olay_kaydet(self, anahtar: str, tur: str) -> bool:

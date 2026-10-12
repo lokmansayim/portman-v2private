@@ -6,8 +6,12 @@ görünüşler `sahne.izdusum`'dan (çok düzlemli çatı dahil), çatı ölçü
 Soru 19). Sayfa 1 şablonun aynısı: plan ortada, solunda 90° döndürülmüş sol yan görünüş, altında ön görünüş; sağda BİNA ÖZELLİKLERİ
 ve ÖZEL İSTEKLER; altta antet. Sayfa 2: dört görünüş ve çatı planı (genel motorun kendi çizimleri; İE-08 Soru 18).
 
-Bilinmeyen değerler "..." yazılır (şablonda da öyle). Antette ad ve telefon alanı: yalnız bayi adı/firması, telefon "..." (Soru 21).
-Çıktı: `<kod>_pafta.pdf` (2 sayfa) ve `<kod>_pafta_sablon.png` (1. sayfanın önizlemesi). Üretim tarihi `time.gmtime()`den gelir
+Bilinmeyen değerler "..." yazılır (şablonda da öyle). Antette İLGİLİ KİŞİ-TELEFON: yalnız bayinin adı ve bayi kartındaki telefonu
+(`bilgi["bayi_adi"]`, `bilgi["bayi_telefonu"]`; D-09); zarf vermezse "...". 8b mühendis kabulüne kadar 1. sayfada antetin üstünde de
+küçük "TASLAK" yazar (`pafta_sablonu.json › taslak_ibaresi`; Lokman, Soru 25, 12 Ekim 2026). Ölçü zincirinde 15 cm ve daha kısa
+parçalar komşusuna katılır ve `pafta_ozet.json › kontrol_notlari`'na mühendis için not düşülür (Lokman, 12 Ekim 2026: "Çelikte 15 cm
+parça çıkmaz"). Çıktı: `<kod>_pafta.pdf` (2 sayfa), `<kod>_pafta_sablon.png` (1. sayfanın önizlemesi; antetle birlikte bayinin
+numarasını taşır: yalnız bayiye gider, kanıta ve referansa girmez) ve `<kod>_pafta_ozet.json`. Üretim tarihi `time.gmtime()`den gelir
 (testte TEST_SABIT_ZAMAN ile sabit; D-02). PDF üst verisinde zaman yoktur.
 
     python -m motor.genel.sablon_pafta modeller/C8801.json <çıktı klasörü> [--yontem panel|omega_asik] [--set <kural seti>]
@@ -256,6 +260,11 @@ def cerceveler(sf: Sayfa, t: dict, oz: dict, bilgi: dict, oturum_m2: float):
             sf.yazi(699.0 if j == 0 else 711.0, yy, (f"{i}. " if j == 0 else "") + s_, 7.6, renk=KOYU_KIRMIZI)
             yy += 9.2
         yy += 2.0
+    # TASLAK ibaresi: 8b mühendis kabulüne kadar 1. sayfada da, antetin üstünde küçük (Lokman, Soru 25, 12.10.2026; kural anahtarı
+    # `taslak_ibaresi`; anahtar yoksa ya da sayfa1 false ise yazılmaz). Ana çerçeve ile antet arasındaki boşluğa, antetin orta kutusu hizasında.
+    ti = (sablon_kurallari().get("taslak_ibaresi") or {}).get("deger") or {}
+    if ti.get("sayfa1") and ti.get("metin"):
+        sf.yazi(ANTET_ORTA[0], (ANA[3] + ANTET_ORTA[1]) / 2 + 0.3, str(ti["metin"]), 5.4, renk=KOYU_KIRMIZI)
     sf.yuvarlak_kutu(ANTET_SOL)                            # şablonda boş (firma alanı / logo; Soru 20a)
     sf.yuvarlak_kutu(ANTET_ORTA)
     for ys in ANTET_ORTA_SATIR:
@@ -319,20 +328,25 @@ def dis_yuz_sinirlari(y: dict) -> tuple[float, float, float, float]:
     return min(xs), min(ys), max(xs), max(ys)
 
 
-def _birlestir(noktalar, uclar: tuple[float, float], tol: float) -> list[float]:
+def _birlestir(noktalar, uclar: tuple[float, float], tol: float) -> tuple[list[float], list[dict]]:
     """Sıralı zincir noktaları; birbirine `tol` cm'den yakın olanlar tek nokta sayılır (kısa parça komşusuna katılır), uçlar (genel ölçü)
-    her zaman korunur. Bayi paftasında 15 cm'den kısa parçalar (veranda dikmesi, korkuluk, kaplama sıçraması) okunmaz; mühendis planı
-    tam zinciri taşır (`kurallar/cizim/pafta_sablonu.json` › zincir_en_kisa_parca_cm)."""
-    cik: list[float] = []
-    for v in sorted(noktalar):
+    her zaman korunur. Bayi paftasında 15 cm ve daha kısa parçalar (veranda dikmesi, korkuluk, kaplama sıçraması, tanımda 1–2 cm kayma)
+    okunmaz (Lokman, 12.10.2026: "Çelikte 15 cm parça çıkmaz"); mühendis planı tam zinciri taşır (`pafta_sablonu.json` ›
+    zincir_en_kisa_parca_cm). Dönen: (noktalar, katılan parçalar [{konum_cm: zincir başından, parca_cm}]) — katılanlar mühendise
+    kontrol notu olur (`pafta_ozet.json › kontrol_notlari`)."""
+    cik: list[float] = []; katilan: list[dict] = []
+    for v in sorted(set(noktalar)):                    # aynı nokta bir kez (uçlar zincirde de var)
         if not cik or v - cik[-1] > tol:               # `tol` ve daha kısa parçalar komşusuna katılır (iki yanda simetri için); tol 0 → birleştirme yok
             cik.append(v)
+        elif v - cik[-1] > 0.05:                       # aynı nokta (uçlar zincirde de var) parça değildir; not düşülmez
+            katilan.append({"konum_cm": round(v - uclar[0], 1), "parca_cm": round(v - cik[-1], 1)})
     cik[0], cik[-1] = uclar
-    return cik if cik[-1] > cik[0] else list(uclar)
+    return (cik if cik[-1] > cik[0] else list(uclar)), katilan
 
 
-def plan_ciz(sf: Sayfa, y: dict, t: dict, px0: float, py0: float, s: float) -> tuple[dict, dict]:
-    """px0, py0: planın sol-ön dış köşesinin (dış yüz) sayfadaki yeri (pt; y aşağı). s: pt/cm. Dönen: ölçü zincirleri, mahal yazı boyları."""
+def plan_ciz(sf: Sayfa, y: dict, t: dict, px0: float, py0: float, s: float) -> tuple[dict, dict, list[dict], dict]:
+    """px0, py0: planın sol-ön dış köşesinin (dış yüz) sayfadaki yeri (pt; y aşağı). s: pt/cm.
+    Dönen: ölçü zincirleri, mahal yazı boyları, kontrol notları (komşusuna katılan kısa parçalar), mahal etiket yerleri (cm)."""
     bx0, by0, bx1, by1 = dis_yuz_sinirlari(y)
     W, H = bx1 - bx0, by1 - by0
     X = lambda x: px0 + s * (x - bx0)
@@ -399,18 +413,20 @@ def plan_ciz(sf: Sayfa, y: dict, t: dict, px0: float, py0: float, s: float) -> t
             sf.yazi(X(ex), Y(ey), tr(w), 3.6, renk=GRI_YAZI, ha="center")
             if ac["tur"] == "dis_kapi":
                 sf.yazi(X(ex), Y(ey) + 4.4, "ÇELİK", 3.3, renk=GRI_YAZI, ha="center")
-    # mahal adları ve m²
-    etiket = {}
+    # mahal adları ve m²: tanım `etiket_yeri` veriyorsa oraya (mühendis planı `ciz_genel.plan_eksen` gibi; KT-01 "Salon - Mutfak" yazısı
+    # kapı simgesine biniyordu — rehberin göz denetimi, 12.10.2026), yoksa mahalin temsil noktasına
+    etiket = {}; etiket_yeri = {}
     for ad, b in y["bolgeler"].items():
         if b.get("sinif") == "dis":
             continue
         p = b["net"].representative_point(); mx0, my0, mx1, my1 = b["net"].bounds
+        ex, ey = (float(b["etiket_yeri"][0]), float(b["etiket_yeri"][1])) if b.get("etiket_yeri") else (p.x, p.y)
         metin = ad.upper()
         ic_en = (mx1 - mx0) * s - 7.0
         pt = max(3.5, min(8.4, 8.4 * ic_en / max(yazi_eni(metin, 8.4), 1e-6)))
-        sf.yazi(X(p.x), Y(p.y) - 4.6 * pt / 8.4, metin, pt, ARIAL, renk=GRI_YAZI, ha="center")
-        sf.yazi(X(p.x), Y(p.y) + 5.4 * pt / 8.4, f"{b['alan_m2']:.0f} m²", pt + 0.2, ARIAL, renk=GRI_YAZI, ha="center")
-        etiket[ad] = round(pt, 2)
+        sf.yazi(X(ex), Y(ey) - 4.6 * pt / 8.4, metin, pt, ARIAL, renk=GRI_YAZI, ha="center")
+        sf.yazi(X(ex), Y(ey) + 5.4 * pt / 8.4, f"{b['alan_m2']:.0f} m²", pt + 0.2, ARIAL, renk=GRI_YAZI, ha="center")
+        etiket[ad] = round(pt, 2); etiket_yeri[ad] = [round(ex, 1), round(ey, 1)]
         for eks, sabit, lo, hi in b.get("_acik", []):      # açık mahal (veranda) kenarı: kırmızı kesik çizgi
             if eks == "x":
                 sf.cizgi(X(lo), Y(sabit), X(hi), Y(sabit), KIRMIZI, 0.9, ls=(0, (4, 3)), z=4)
@@ -423,12 +439,14 @@ def plan_ciz(sf: Sayfa, y: dict, t: dict, px0: float, py0: float, s: float) -> t
     esle = {"arka": "ust", "on": "alt", "sol": "sol", "sag": "sag"}
     ic_, dis_ = 16.0, 32.0
     ek = {"arka": 0.0, "sol": 0.0, "on": 8.0, "sag": 8.0}
-    kayit = {}
+    kayit = {}; notlar: list[dict] = []
     _deger = (sablon_kurallari().get("zincir_en_kisa_parca_cm") or {}).get("deger")
     en_kisa = 15.0 if _deger is None else float(_deger)       # anahtar yoksa 15; 0 verilirse birleştirme kapanır
     for ad, yon in (("arka", "x"), ("on", "x"), ("sol", "y"), ("sag", "y")):
         uclar = (bx0, bx1) if yon == "x" else (by0, by1)
-        nk = _birlestir(list(zin.get(esle[ad], [])) + list(uclar), uclar, en_kisa)
+        nk, katilan = _birlestir(list(zin.get(esle[ad], [])) + list(uclar), uclar, en_kisa)
+        for k in katilan:                                        # mühendise: komşusuna katılan kısa parça, zincir başından konumu (cm)
+            notlar.append({"zincir": ad, **k, "not": f"{en_kisa:g} cm ve daha kısa parça komşusuna katıldı; ölçüyü kontrol edin (mühendis planında tam zincir)"})
         genel = yarim_yukari(W if yon == "x" else H)             # genel ölçü ve parçaların toplamı aynı sayı (şablon kuralı)
         parca = tam_bol([b - a for a, b in zip(nk, nk[1:])], genel); kayit[ad] = parca
         # dar parçanın yazısı komşusuna binmesin: sığmayan yazı bir sıra dışarı alınır (dönüşümlü)
@@ -455,7 +473,7 @@ def plan_ciz(sf: Sayfa, y: dict, t: dict, px0: float, py0: float, s: float) -> t
             else:
                 xg = xx
             sf.olcu(xg, Y(by1), xg, Y(by0), str(genel), "sol")
-    return kayit, etiket
+    return kayit, etiket, notlar, etiket_yeri
 
 
 # ----------------------------------------------------------------------------- görünüşler (sahne izdüşümünden)
@@ -557,7 +575,12 @@ def gorunus_ciz(sf: Sayfa, P, S: list[dict], taraf: str, renk: str, u_kaydir: fl
         elif s["tur"] in ("alin", "kiris"):
             sf.cokgen([P(u, z) for u, z in pts], fc=GRI_YAZI, ec="black", lw=0.72, z=4 if s["tur"] == "alin" else 3)
         elif s["tur"] == "baca":
-            sf.cokgen([P(u, z) for u, z in pts], fc="white", ec="black", lw=0.6, z=5)
+            # Baca, önündeki (daha yakın: `derinlik` küçük) bir çatı düzleminin arkasında kalıyorsa çatının altına çizilir; eğimin
+            # üstünde, düzlemin önündeyse (KT-01 sol yan: baca batı eğiminde, çizim setindeki SOL GÖRÜNÜŞ ile aynı) üstte kalır.
+            # Sol yan görünüş gözden geçirildi (rehber, 12.10.2026): KT-01'de çizim setiyle tutarlı; bu sıralama yalnız arkada kalan baca için.
+            bp = SPolygon(pts)
+            onde_cati = any(x["tur"] == "cati" and x["derinlik"] < s["derinlik"] and SPolygon(k2(x)).intersects(bp) for x in yz)
+            sf.cokgen([P(u, z) for u, z in pts], fc="white", ec="black", lw=0.6, z=3.5 if onde_cati else 5)
         else:
             sf.cokgen([P(u, z) for u, z in pts], fc="white", ec="black", lw=0.6, z=3)
         i += 1
@@ -610,7 +633,7 @@ def pafta_pdf(t: dict, hedef: Path, kod: str, is_emri_no: str | None = None, rev
     py_ust = yb + olcu_pay                                 # planın arka (üst) dış yüzü
     py0 = py_ust + H * s                                   # planın ön (alt) dış yüzü
     on_zemin = py0 + olcu_pay + bosluk + tepe * s          # ön görünüşte zemin çizgisinin y'si
-    zincirler, etiket_pt = plan_ciz(sf, y, t, px0, py0, s)
+    zincirler, etiket_pt, kontrol_notlari, etiket_yeri = plan_ciz(sf, y, t, px0, py0, s)
     # ön görünüş: planla aynı x hizasında (izdüşümde u = x)
     P_on = lambda u, z: (px0 + s * u, on_zemin - s * z)
     u0, u1, _ = gorunus_ciz(sf, P_on, S, "on", renk, u_kaydir=bx0)
@@ -643,7 +666,9 @@ def pafta_pdf(t: dict, hedef: Path, kod: str, is_emri_no: str | None = None, rev
     fig1.savefig(png, dpi=200)
     plt.close(fig1); plt.close(fig2)
     ozet = {"kod": t["kod"], "sayfa_pt": [EN, BOY], "olcek_pt_cm": round(s, 4), "olcek_1e": round(1 / (s / 72 * 2.54)), "zincirler_cm": zincirler,
-            "mahal_yazi_pt": etiket_pt, "dis_olcu_cm": [round(W, 1), round(H, 1)], "oturum_m2": round(oturum_m2, 2), "tepe_cm": round(tepe, 1), "ozellikler": oz,
+            "mahal_yazi_pt": etiket_pt, "mahal_etiket_cm": etiket_yeri, "dis_olcu_cm": [round(W, 1), round(H, 1)], "oturum_m2": round(oturum_m2, 2),
+            "tepe_cm": round(tepe, 1), "ozellikler": oz,
+            "kontrol_notlari": kontrol_notlari,                 # mühendise: komşusuna katılan kısa parçalar (Lokman 12.10.2026; 8b'de gösterilir)
             "dosyalar": [pdf.name, png.name]}
     (hedef / f"{kod}_pafta_ozet.json").write_text(json.dumps(ozet, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     return ozet

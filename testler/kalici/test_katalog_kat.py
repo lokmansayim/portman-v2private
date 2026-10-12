@@ -26,9 +26,13 @@ def test_dondurulmus_dosya_degismedi_ve_kod_v2_okur():
         assert m["dogrulama"] in ("yok", "etiket_okundu", "cizim_seti_ile_dogrulandi")
         assert (m["kat"] == 2) == bool(m["storey_plans"]) == (kod in CIFT)
         assert ("çift kat" in m["family"]) == (m["kat"] == 2)
-        if kod not in ("Ç8201", "Ç1031", "Ç1151"):     # öteki 34 kayıt dondurulmuş dosyayla aynı (family/kat dışında)
+        if kod not in ("Ç8201", "Ç1031", "Ç1151", "Ç8801"):     # öteki 33 kayıt dondurulmuş dosyayla aynı (family/kat dışında)
             assert {k: v for k, v in m.items() if k not in ("family", "kat", "kaynak", "dogrulama")} == {k: v for k, v in eski[kod].items() if k != "family"}
             assert m["kaynak"] == "katalog_pdf" and m["dogrulama"] == "yok"
+    # İE-08 (12.10.2026, D-08/D-10): Ç8801 çizim setiyle doğrulandı (modeller/C8801.json); sayılar dondurulmuş kayıtla aynı, yalnız kaynak/doğrulama/not değişti
+    c8801 = yeni["Ç8801"]
+    assert c8801["kaynak"] == "cizim_seti" and c8801["dogrulama"] == "cizim_seti_ile_dogrulandi" and c8801["kat"] == 1
+    assert {k: v for k, v in c8801.items() if k not in ("family", "kat", "kaynak", "dogrulama", "not")} == {k: v for k, v in eski["Ç8801"].items() if k != "family"}
     assert sum(m["kat"] == 2 for m in yeni.values()) == 13
 
 
