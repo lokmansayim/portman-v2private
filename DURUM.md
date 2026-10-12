@@ -116,6 +116,24 @@ Depoda yalnız kural kitabı değişti; motor, liste kuralları ve canlı deği�
 
 Depoda yalnız DURUM değişti; motor, kural kitabı ve canlı değişmedi.
 
+**12 Ekim 2026 15:20 eki (dal `ie-05`; depo dışı iş):** Lokman 15:10'da görünüşlerde dikmenin olmadığını söyledi; 15:11'de veranda derinliğini 100 cm'den 50 cm'e indirtti.
+- **Dikme:** Tanımda dikmenin yüz kaplaması boştu; bu yüzden görünüşlerde çizilmiyordu. KT-01'deki gibi yapıldı:
+  - dış yüzleri dış kaplamalı;
+  - 30 × 8, ön cepheye paralel; kaplaması ön çizgide ve doğu çizgisinde (747) bitiyor;
+  - kirişler dikmenin üstünden köşeye kadar uzanıyor.
+
+  Liste dikme kaplamasını eskisi gibi kuraldaki çevreyle sayıyor; dış duvar toplamı değişmedi.
+- **Veranda 50 cm:** Verandanın önü cumbayla aynı hatta kaldı (14:46). Ana ön duvar, kapı ve sürgülü pencere 50 cm öne geldi (y 130'dan 80'e). Ana çatının güney kalkanı da onunla öne geldi.
+  - Salon 33,5'ten 35,6 m²'ye, veranda 4,3'ten 2,1 m²'ye değişti; oturum 74,11 m² (değişmedi).
+  - Planda veranda yazısı dar şeridin dışına alındı. Art arda kısa ölçü sınırı 40'tan 55 cm'e çıktı ("30 50" ayrı yazılıyor).
+- **Kanıt:**
+  - Çizim setinde 12 çıktının 12'si üretildi, IFC4 şema hatası 0.
+  - Köşelerin yakın plan görüntülerinde delik yok.
+  - Liste: veranda tavanı 4,3'ten 2,1 m²'ye, tavan alçıpanı 59,9'dan 62,0 m²'ye, veranda kirişi 5,5'ten 4,9 m'ye, dış cephe Boardex 93,3'ten 93,1 m²'ye değişti.
+- **Paket:** Bayi PDF'i 3 sayfa, mühendis zip'i kesitsiz; yeniden üretildi.
+
+Depoda yalnız DURUM değişti.
+
 **Oturum devri:** `docs/devir/2026-09-30_Aksam_Devri.md` (30.09 akşamı, Kapı M sonrası; sıra ve bakım listesi) ve `docs/devir/2026-09-30_Oturum_Devri.md` (30.09 01:10; kurallar, K-A kararları, Astra ölçütleri). 28–30 Eylül penceresi kapandı. Yeni pencere bu ikisiyle başlar: kurallar, yapılanlar, bekleyen kararlar, sıradaki işler, Astra'ya çizim işi için ölçütler.
 
 Yeni pencere için hazırlıklar:
