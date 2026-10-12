@@ -50,7 +50,7 @@
 
 **12 Ekim 2026 10:07 eki (dal `ie-05`):** Lokman sordu: İE-08 brifini hazırlayan sohbet "bazı çizim kurallarını bulamadım" diyor, eksik nerede? Kontrol: eksik İE-05 devir notundaydı. Lokman'ın 6 Ekim akşamı başka bir Code oturumunda verdiği çizim kuralları `deneme-2026-10-06-kalinlik-160-100` dalında kalmış, `ie-05`'e birleşmemiş: plan paftası "Örnek Şablon"un aynısı (`docs/sartname/plan_paftasi_sablonu.md`, `sablon_pafta.py`), görünüşler her seferinde, pano pano çizim, prefabrikte ölçüye kesim ve 160/100 duvar, altı çatı seçeneği denemesi, 3D sunum sayfası. Dal yalnız deneme ve şartname dosyalarına dokunuyor; `ie-05`'e deneme birleştirmesinde yalnız `docs/sartname/README.md` çakışıyor. Ayrıca: Ç8201'in 0.5 çizim seti depoda değildi (bugünkü kodla yeniden üretildi: 12 / 12, IFC şema hatası 0; depoya eklenmedi); KT setlerinde A = çelik standardı, B = yapıldığı gibi, çizimler düzeltilmiş tanımdan (KT-01 A seti bugünkü kodla bayt bayt aynı üretildi). Devir notuna "Ek · 12 Ekim" yazıldı; İE-08 sohbetine düzeltme metni Lokman'a verildi. Kod, kural ve çıktı değişmedi; canlıya dokunulmadı.
 
-**12 Ekim 2026 13:15 eki (dal `ie-05`; depo dışı iş):** Lokman bir bayinin talebini iletti (12:41). Talep tek kat bir ev: plan fotoğrafı 747 × 1012 (75,6 m²), imarlı oturum 76 m², görseldeki ön şekil verandasız isteniyor. Görsel başka bir firmanın 86 m²'lik modeli (veranda 11,2 m²). Lokman 12:49'da "yapı çelik olarak çizilecek" dedi; 13:05'te görseldeki çatının KT-01'inkiyle aynı olduğunu söyledi. Canlı Portman bu talebi alamıyor: mod `kayitli` ve genel motor canlıda değil. Bu yüzden çizim İE-05'in genel motoruyla Code'da yapıldı; CIO planına göre çelik talepleri motor canlıya alınana kadar bu yolla çizilip panelden gönderilebilir. Plan fotoğraftan perspektif düzeltmesiyle okundu (±5 cm). İki çatı çizildi:
+**12 Ekim 2026 13:15 eki (dal `ie-05`; depo dışı iş):** Lokman bir bayinin talebini iletti (12:41). Talep tek kat bir ev: plan fotoğrafı 747 × 1012 (75,6 m²), imarlı oturum 76 m², görseldeki ön şekil verandasız isteniyor. Görsel, ortak firmanın kataloğundaki 86 m²'lik model (veranda 11,2 m²). Lokman 12:49'da "yapı çelik olarak çizilecek" dedi; 13:05'te görseldeki çatının KT-01'inkiyle aynı olduğunu söyledi. Canlı Portman bu talebi alamıyor: mod `kayitli` ve genel motor canlıda değil. Bu yüzden çizim İE-05'in genel motoruyla Code'da yapıldı; CIO planına göre çelik talepleri motor canlıya alınana kadar bu yolla çizilip panelden gönderilebilir. Plan fotoğraftan perspektif düzeltmesiyle okundu (±5 cm). İki çatı çizildi:
 - Seçenek 1, `T1012`: sade beşik.
 - Seçenek 2, `T1012-C`: beşik + cumba, KT-01'in çatı biçiminde, ön cephe düz.
 
@@ -61,6 +61,12 @@
 - Paftalar 6 Ekim "Örnek Şablon" düzeninde değil.
 
 Kod, kural ve canlı değişmedi.
+
+**12 Ekim 2026 13:25 eki (dal `ie-05`; depo dışı iş):** Lokman 13:17'de Seçenek 2'yi (beşik + cumba) seçti ve ayrılmasını istedi. `T1012-C` son adla yeniden üretildi: "beşik + cumba (verandasız)"; çizim seti 12 / 12, IFC4 şema hatası 0. Ayrı iki paket Lokman'a verildi:
+- Bayi için `T1012C_bayi.pdf`, üç sayfa: sunum (plan, iki ön perspektif, ön ve sol görünüş), pafta, dört perspektif. Yükleme listesi içinde yok.
+- Mühendis için `T1012C_muhendis.zip`: IFC, yükleme listesi (PDF ve md), pafta, makaslı ve çatısız görünüş.
+
+Dosyalar oturumun geçici klasöründe; depoya kaydı Lokman'ın onayına bağlı.
 
 **Oturum devri:** `docs/devir/2026-09-30_Aksam_Devri.md` (30.09 akşamı, Kapı M sonrası; sıra ve bakım listesi) ve `docs/devir/2026-09-30_Oturum_Devri.md` (30.09 01:10; kurallar, K-A kararları, Astra ölçütleri). 28–30 Eylül penceresi kapandı. Yeni pencere bu ikisiyle başlar: kurallar, yapılanlar, bekleyen kararlar, sıradaki işler, Astra'ya çizim işi için ölçütler.
 
