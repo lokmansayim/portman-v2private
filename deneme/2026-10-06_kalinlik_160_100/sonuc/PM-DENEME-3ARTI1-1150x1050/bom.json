@@ -1,0 +1,524 @@
+{
+  "is_emri_no": "PM-DENEME-3ARTI1-1150x1050",
+  "sayim_kapsami": "yalnız ANA rolündeki üst BOM_ blokları + içlerindeki doğrama INSERT'leri",
+  "birim": "adet; ölçüler mm",
+  "kalemler": [
+    {
+      "kod": "B02",
+      "grup": "Bağlantı ve veranda",
+      "malzeme": "100×50 köşe bağlantısı",
+      "olcu_mm": [
+        50,
+        100,
+        null
+      ],
+      "adet": 2,
+      "birim": "adet",
+      "not": "5 dış köşe + 1 veranda iç köşesi. Profil kesim boyu tanımlı değil."
+    },
+    {
+      "kod": "B05",
+      "grup": "Bağlantı ve veranda",
+      "malzeme": "Üçlü H bağlantı 100",
+      "olcu_mm": [
+        100.0,
+        null,
+        null
+      ],
+      "adet": 4,
+      "birim": "adet",
+      "not": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli."
+    },
+    {
+      "kod": "B06",
+      "grup": "Bağlantı ve veranda",
+      "malzeme": "160×80 köşe bağlantısı",
+      "olcu_mm": [
+        80.0,
+        160.0,
+        null
+      ],
+      "adet": 4,
+      "birim": "adet",
+      "not": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli."
+    },
+    {
+      "kod": "D09",
+      "grup": "Dış duvar panoları",
+      "malzeme": "Dolu pano",
+      "olcu_mm": [
+        1255.0,
+        160,
+        2800
+      ],
+      "adet": 23,
+      "birim": "adet",
+      "not": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli."
+    },
+    {
+      "kod": "D10",
+      "grup": "Dış duvar panoları",
+      "malzeme": "120×180 pencereli pano",
+      "olcu_mm": [
+        1255.0,
+        160,
+        2800
+      ],
+      "adet": 3,
+      "birim": "adet",
+      "not": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli."
+    },
+    {
+      "kod": "D11",
+      "grup": "Dış duvar panoları",
+      "malzeme": "Dış kapılı pano",
+      "olcu_mm": [
+        1255.0,
+        160,
+        2800
+      ],
+      "adet": 1,
+      "birim": "adet",
+      "not": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli."
+    },
+    {
+      "kod": "D12",
+      "grup": "Dış duvar panoları",
+      "malzeme": "Özel dolu pano",
+      "olcu_mm": [
+        1140.0,
+        160,
+        2800
+      ],
+      "adet": 2,
+      "birim": "adet",
+      "not": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli."
+    },
+    {
+      "kod": "D13",
+      "grup": "Dış duvar panoları",
+      "malzeme": "120×120 pencereli pano",
+      "olcu_mm": [
+        1255.0,
+        160,
+        2800
+      ],
+      "adet": 3,
+      "birim": "adet",
+      "not": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli."
+    },
+    {
+      "kod": "D14",
+      "grup": "Dış duvar panoları",
+      "malzeme": "Özel dolu pano",
+      "olcu_mm": [
+        300.0,
+        160,
+        2800
+      ],
+      "adet": 2,
+      "birim": "adet",
+      "not": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli."
+    },
+    {
+      "kod": "D15",
+      "grup": "Dış duvar panoları",
+      "malzeme": "60×40 vasistaslı pano",
+      "olcu_mm": [
+        1255.0,
+        160,
+        2800
+      ],
+      "adet": 2,
+      "birim": "adet",
+      "not": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli."
+    },
+    {
+      "kod": "I12",
+      "grup": "İç duvar panoları",
+      "malzeme": "Özel dolu pano",
+      "olcu_mm": [
+        1205.0,
+        100,
+        2800
+      ],
+      "adet": 3,
+      "birim": "adet",
+      "not": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli."
+    },
+    {
+      "kod": "I13",
+      "grup": "İç duvar panoları",
+      "malzeme": "Özel dolu pano",
+      "olcu_mm": [
+        512.5,
+        100,
+        2800
+      ],
+      "adet": 2,
+      "birim": "adet",
+      "not": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli."
+    },
+    {
+      "kod": "I14",
+      "grup": "İç duvar panoları",
+      "malzeme": "Dolu pano",
+      "olcu_mm": [
+        1255.0,
+        100,
+        2800
+      ],
+      "adet": 11,
+      "birim": "adet",
+      "not": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli."
+    },
+    {
+      "kod": "I15",
+      "grup": "İç duvar panoları",
+      "malzeme": "İç kapılı pano",
+      "olcu_mm": [
+        1255.0,
+        100,
+        2800
+      ],
+      "adet": 5,
+      "birim": "adet",
+      "not": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli."
+    },
+    {
+      "kod": "I16",
+      "grup": "İç duvar panoları",
+      "malzeme": "Özel dolu pano",
+      "olcu_mm": [
+        577.5,
+        100,
+        2800
+      ],
+      "adet": 3,
+      "birim": "adet",
+      "not": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli."
+    },
+    {
+      "kod": "I17",
+      "grup": "İç duvar panoları",
+      "malzeme": "Özel dolu pano",
+      "olcu_mm": [
+        627.5,
+        100,
+        2800
+      ],
+      "adet": 2,
+      "birim": "adet",
+      "not": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli."
+    },
+    {
+      "kod": "I18",
+      "grup": "İç duvar panoları",
+      "malzeme": "Özel dolu pano",
+      "olcu_mm": [
+        1175.0,
+        100,
+        2800
+      ],
+      "adet": 2,
+      "birim": "adet",
+      "not": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli."
+    },
+    {
+      "kod": "I19",
+      "grup": "İç duvar panoları",
+      "malzeme": "Özel dolu pano",
+      "olcu_mm": [
+        220.0,
+        100,
+        2800
+      ],
+      "adet": 2,
+      "birim": "adet",
+      "not": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli."
+    },
+    {
+      "kod": "K01",
+      "grup": "Kapı ve pencereler",
+      "malzeme": "İç kapı",
+      "olcu_mm": [
+        820,
+        null,
+        null
+      ],
+      "adet": 5,
+      "birim": "adet",
+      "not": "820 mm plandaki açıklıktır; ürün eni/boyu ve açılış yönü siparişte teyit edilmeli."
+    },
+    {
+      "kod": "K03",
+      "grup": "Kapı ve pencereler",
+      "malzeme": "Dış kapı 90",
+      "olcu_mm": [
+        900.0,
+        null,
+        null
+      ],
+      "adet": 1,
+      "birim": "adet",
+      "not": "900 mm plandaki açıklıktır; ürün ölçüsü siparişte teyit edilmeli."
+    },
+    {
+      "kod": "P01",
+      "grup": "Kapı ve pencereler",
+      "malzeme": "Pencere 120×120",
+      "olcu_mm": [
+        1200,
+        1200,
+        null
+      ],
+      "adet": 3,
+      "birim": "adet",
+      "not": "Ölçü en × yükseklik; eşik 800 mm."
+    },
+    {
+      "kod": "P02",
+      "grup": "Kapı ve pencereler",
+      "malzeme": "Pencere 120×180",
+      "olcu_mm": [
+        1200,
+        1800,
+        null
+      ],
+      "adet": 3,
+      "birim": "adet",
+      "not": "Ölçü en × yükseklik; eşik 200 mm."
+    },
+    {
+      "kod": "P03",
+      "grup": "Kapı ve pencereler",
+      "malzeme": "Vasistas 60×40",
+      "olcu_mm": [
+        600,
+        400,
+        null
+      ],
+      "adet": 2,
+      "birim": "adet",
+      "not": "Ölçü en × yükseklik; eşik 1600 mm."
+    }
+  ],
+  "yeni_kodlar": [
+    {
+      "code": "B05",
+      "group": "Bağlantı ve veranda",
+      "label": "Üçlü H bağlantı 100",
+      "dimensions_mm": [
+        100.0,
+        null,
+        null
+      ],
+      "note": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli.",
+      "unit": "adet"
+    },
+    {
+      "code": "D09",
+      "group": "Dış duvar panoları",
+      "label": "Dolu pano",
+      "dimensions_mm": [
+        1255.0,
+        160,
+        2800
+      ],
+      "note": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli.",
+      "unit": "adet"
+    },
+    {
+      "code": "D10",
+      "group": "Dış duvar panoları",
+      "label": "120×180 pencereli pano",
+      "dimensions_mm": [
+        1255.0,
+        160,
+        2800
+      ],
+      "note": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli.",
+      "unit": "adet"
+    },
+    {
+      "code": "D11",
+      "group": "Dış duvar panoları",
+      "label": "Dış kapılı pano",
+      "dimensions_mm": [
+        1255.0,
+        160,
+        2800
+      ],
+      "note": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli.",
+      "unit": "adet"
+    },
+    {
+      "code": "K03",
+      "group": "Kapı ve pencereler",
+      "label": "Dış kapı 90",
+      "dimensions_mm": [
+        900.0,
+        null,
+        null
+      ],
+      "note": "900 mm plandaki açıklıktır; ürün ölçüsü siparişte teyit edilmeli.",
+      "unit": "adet"
+    },
+    {
+      "code": "D12",
+      "group": "Dış duvar panoları",
+      "label": "Özel dolu pano",
+      "dimensions_mm": [
+        1140.0,
+        160,
+        2800
+      ],
+      "note": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli.",
+      "unit": "adet"
+    },
+    {
+      "code": "I12",
+      "group": "İç duvar panoları",
+      "label": "Özel dolu pano",
+      "dimensions_mm": [
+        1205.0,
+        100,
+        2800
+      ],
+      "note": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli.",
+      "unit": "adet"
+    },
+    {
+      "code": "I13",
+      "group": "İç duvar panoları",
+      "label": "Özel dolu pano",
+      "dimensions_mm": [
+        512.5,
+        100,
+        2800
+      ],
+      "note": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli.",
+      "unit": "adet"
+    },
+    {
+      "code": "I14",
+      "group": "İç duvar panoları",
+      "label": "Dolu pano",
+      "dimensions_mm": [
+        1255.0,
+        100,
+        2800
+      ],
+      "note": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli.",
+      "unit": "adet"
+    },
+    {
+      "code": "I15",
+      "group": "İç duvar panoları",
+      "label": "İç kapılı pano",
+      "dimensions_mm": [
+        1255.0,
+        100,
+        2800
+      ],
+      "note": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli.",
+      "unit": "adet"
+    },
+    {
+      "code": "I16",
+      "group": "İç duvar panoları",
+      "label": "Özel dolu pano",
+      "dimensions_mm": [
+        577.5,
+        100,
+        2800
+      ],
+      "note": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli.",
+      "unit": "adet"
+    },
+    {
+      "code": "I17",
+      "group": "İç duvar panoları",
+      "label": "Özel dolu pano",
+      "dimensions_mm": [
+        627.5,
+        100,
+        2800
+      ],
+      "note": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli.",
+      "unit": "adet"
+    },
+    {
+      "code": "D13",
+      "group": "Dış duvar panoları",
+      "label": "120×120 pencereli pano",
+      "dimensions_mm": [
+        1255.0,
+        160,
+        2800
+      ],
+      "note": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli.",
+      "unit": "adet"
+    },
+    {
+      "code": "D14",
+      "group": "Dış duvar panoları",
+      "label": "Özel dolu pano",
+      "dimensions_mm": [
+        300.0,
+        160,
+        2800
+      ],
+      "note": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli.",
+      "unit": "adet"
+    },
+    {
+      "code": "I18",
+      "group": "İç duvar panoları",
+      "label": "Özel dolu pano",
+      "dimensions_mm": [
+        1175.0,
+        100,
+        2800
+      ],
+      "note": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli.",
+      "unit": "adet"
+    },
+    {
+      "code": "I19",
+      "group": "İç duvar panoları",
+      "label": "Özel dolu pano",
+      "dimensions_mm": [
+        220.0,
+        100,
+        2800
+      ],
+      "note": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli.",
+      "unit": "adet"
+    },
+    {
+      "code": "D15",
+      "group": "Dış duvar panoları",
+      "label": "60×40 vasistaslı pano",
+      "dimensions_mm": [
+        1255.0,
+        160,
+        2800
+      ],
+      "note": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli.",
+      "unit": "adet"
+    },
+    {
+      "code": "B06",
+      "group": "Bağlantı ve veranda",
+      "label": "160×80 köşe bağlantısı",
+      "dimensions_mm": [
+        80.0,
+        160.0,
+        null
+      ],
+      "note": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli.",
+      "unit": "adet"
+    }
+  ]
+}

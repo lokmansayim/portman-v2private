@@ -1,0 +1,200 @@
+{
+  "ad": "Örnek proje (105 m², beşik + cumba, tek kat panel) gerçek yükleme listesi; kişi ve firma adları alınmadı",
+  "kalemler": {
+    "Dış cephe Boardex": {
+      "adet": 51,
+      "net": 128
+    },
+    "Tavan alçıpan beyaz": {
+      "adet": 31,
+      "net": 86.74
+    },
+    "Tavan alçıpan yeşil": {
+      "adet": 3,
+      "net": 6.72
+    },
+    "Duvar alçıpan beyaz": {
+      "adet": 79,
+      "net": 223.3
+    },
+    "Duvar alçıpan yeşil": {
+      "adet": 14,
+      "net": 35.3
+    },
+    "OSB 9 mm (duvar)": {
+      "adet": 15,
+      "net": 39.3
+    },
+    "Duvar izolasyonu": {
+      "adet": 38,
+      "net": 333
+    },
+    "Metal kiremit mahyası": {
+      "adet": 10,
+      "net": 24.6
+    },
+    "Tek kat panel kapaması": {
+      "adet": 16,
+      "net": 39.12
+    },
+    "Ters mahya": {
+      "adet": 3,
+      "net": 7.28
+    },
+    "Metal dere": {
+      "adet": 11,
+      "net": 39.2
+    },
+    "Dere iniş borusu": {
+      "adet": 10
+    },
+    "Dere iniş aparatı": {
+      "adet": 10
+    },
+    "Dere kapağı": {
+      "adet": 6
+    },
+    "Açık dirsek": {
+      "adet": 20
+    },
+    "Kapalı dirsek": {
+      "adet": 10
+    },
+    "İniş kelepçesi": {
+      "adet": 20
+    },
+    "Dere kelepçesi": {
+      "adet": 88
+    },
+    "Tavan omegası (60'lık)": {
+      "adet": 44
+    },
+    "Köşebent": {
+      "adet": 85
+    },
+    "Alın sacı (30'luk)": {
+      "adet": 8,
+      "net": 17
+    },
+    "Saçak sacı (30'luk)": {
+      "adet": 18,
+      "net": 39.2
+    },
+    "Saçaklar için Boardex": {
+      "adet": 7,
+      "net": 19.6
+    },
+    "Geniş saçak omegası (180 × 2500)": {
+      "adet": 16,
+      "net": 39.2
+    },
+    "Ampul": {
+      "adet": 14
+    },
+    "Buat kasa": {
+      "adet": 37
+    },
+    "Uydu kablo": {
+      "adet": 25
+    },
+    "Besleme kablosu (sigorta kutuları arası)": {
+      "adet": 5
+    },
+    "Besleme kablo borusu": {
+      "adet": 5
+    },
+    "Zil": {
+      "adet": 1
+    },
+    "Sigorta kutusu (12'li)": {
+      "adet": 1
+    },
+    "İzole bant": {
+      "adet": 3
+    },
+    "Kaçak akım rölesi": {
+      "adet": 1
+    },
+    "RYSB pul başlı (3,9 × 32)": {
+      "adet": 500
+    },
+    "Alçıpan vidası (3,5 × 35)": {
+      "adet": 8500
+    },
+    "OSB ve yalıpan vidası (3,9 × 32)": {
+      "adet": 1500
+    },
+    "Pencere vidası (4,8 × 70)": {
+      "adet": 180
+    },
+    "Trapez vida (5,5 × 60)": {
+      "adet": 500
+    },
+    "Çelik dübel (klipsli)": {
+      "adet": 80
+    },
+    "Şase pul": {
+      "adet": 80
+    },
+    "8'lik trapez uç": {
+      "adet": 7
+    },
+    "PH2 uç": {
+      "adet": 7
+    },
+    "230'luk kesme taşı": {
+      "adet": 7
+    },
+    "İnox taş": {
+      "adet": 10
+    },
+    "Çırpı ipi": {
+      "adet": 1
+    },
+    "Temiz su borusu": {
+      "adet": 12
+    },
+    "Normal dirsek 20 mm": {
+      "adet": 30
+    },
+    "Kulaklı dirsek 20 mm": {
+      "adet": 24
+    },
+    "Düz T 20 mm": {
+      "adet": 12
+    },
+    "Maşon 20 mm": {
+      "adet": 30
+    },
+    "İç dişli T 20 mm": {
+      "adet": 12
+    },
+    "Atlama parçası (yarım parmak)": {
+      "adet": 6
+    },
+    "Silikonize mastik": {
+      "adet": 8
+    },
+    "Dayson": {
+      "adet": 6
+    },
+    "Poliüretan köpük": {
+      "adet": 2
+    }
+  },
+  "celik_kg": {
+    "dis": 1055,
+    "ic": 410,
+    "duvar": 1465,
+    "kiris_kolon": 10,
+    "cati": 595,
+    "toplam": 2070
+  },
+  "listedeki_oteki_bilgiler": {
+    "Çelik panel grubu": "Duvar paneli 140×45×10×1,2: 3 adet 220 kg; 140×45×10×0,8: 20 adet 835 kg; 80×45×10×0,8: 13 adet 410 kg; çatı makas paneli 80×45×10×0,8: 12 adet 295 kg ve ×1,2: 8 adet 300 kg; kiriş paneli 1 adet 10 kg; parça C profil 3 + 3; toplam 57 panel 2070 kg",
+    "Çatı": "Tek kat panel (10 mm, 87 cm kapatır) L 3000: 24 adet ve L 2800: 30 adet; çatı şiltesi 22 adet (çift kat serim); aşık 71; baş makas Z'si L 2800: 8 adet (16,32 m)",
+    "Elektrik sayımı": "Tijli duy 10, glop 4, tekli anahtar 4, çiftli anahtar 5, tekli priz 20, çiftli priz 4, uydu prizi 1, sigorta 9 (girdide kullanıldı); NYM kablo 3 × 2,5: 250 m, 2 × 1,5: 230 m",
+    "Vida": "Trapez vida 5,5 × 25: 2250 (aşık hesaplanmadığı için karşılaştırılmadı); 5,5 × 76 (tek kat panel): 1000",
+    "Kapı ve pencere": "Melamin kapı (80'lik kanat) 90×214 beş adet; kompozit çelik kapı 90×210 bir adet; PVC pencere 120/180 iki, 160/180 bir, 200/180 üç; vasistas 60/40 iki"
+  }
+}

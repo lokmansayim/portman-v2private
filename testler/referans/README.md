@@ -31,9 +31,24 @@ Betik bugünün tarihiyle yeni bir klasör açar (`--ad` ile geçmiş bir tarih 
 
 Referans dosyaları elle değiştirilmez. `dogrula.py` her koşuda `GEREKCE.md`'deki özetleri sınar ve her referansı bir öncekine göre denetler: izinsiz kaldırma, önceki referansla aynı gerekçe ya da ileri tarih varsa "REFERANS BOZUK" yazar ve 2 ile çıkar. Bu denetim kazara ya da yarım kalmış değişikliği yakalar; özetleri de yeniden hesaplanmış, kasıtlı olarak elle yazılmış bir referansı yakalamaz. Onu inceleme yakalar: yeni klasör `git diff`'te görünür ve `dogrula.py` her koşuda hangi referansla, hangi gerekçeyle karşılaştırdığını ve önceki referansa göre neyin değiştiğini en üstte yazar. Bir vakanın değişmesi (örneğin beklenen eylemin genişletilmesi ya da içerik kontrolünün silinmesi) izin istemez, yalnız bu listede görünür; incelemede özellikle bakılacak yer burasıdır.
 
-**Dikkat:** `denetim/kos.py`'yi depo kökünde doğrudan koşmayın. Sır taraması `deneme/` altındaki IFC dosyasındaki ondalık koordinatları telefon numarası sanıyor ve adım "failed" dönüyor (9 yanlış bulgu). `kos.py`'yi `dogrula.py` üzerinden koşun; o, `deneme/` olmadan geçici bir kopyada koşar. Kalıbın düzeltilmesi İE-02'de.
+**Dikkat:** `denetim/kos.py`'yi depo kökünde doğrudan koşmayın; `dogrula.py` üzerinden koşun (o, `deneme/` ve `testler/` olmadan geçici bir kopyada koşar). 12 Ekim 2026'ya (İE-08) kadar sır taraması `deneme/` altındaki IFC ondalıklarını telefon numarası sanıyordu ve `vps/kapi_d_dogrula.sh:25` "bilinen tek fark"tı; İE-08'de telefon deseni rakam/nokta/virgül bitişikliğini eliyor ve `kapi_d:25` beklenen bulgu sayılıyor (`testler/test_sir_taramasi.py`; satır taranmadan önce ondalık sayı belirteçleri boşluğa çevrilir, tam kısmı 12 haneli olanlar — numara listeleri — kalır). O tarihten sonraki referanslarda `dogrula.py` fark bildirmemeli.
 
 Ortam (28.09, pip ile kurulan sürümler): Python 3.11.15, ezdxf 1.4.4, pymupdf 1.26.0, shapely 2.1.2, pydantic 2.13.5, numpy 2.4.6. `kos.py`'nin kaydı pymupdf için sürüm yerine "(64-bit)." yazıyor.
+
+## 12 Ekim 2026 (İE-08) · genel motor izleri
+
+`2026-10-12/` klasörü (karar D-08) genel motorun (serbest aks, `motor/genel/`) altın çıktılarını da dondurur. `kos.py` iki yeni adım koşar:
+`genel_c8801` (her koşuda; Ç8801 katalog modeli kural seti 0.19 pimiyle: plan/görünüşler/pafta PNG, IFC, yükleme listesi, bayi görseli ve
+Örnek Şablon paftası; `modeller/altin.json` ile karşılaştırma) ve `genel_matris` (yalnız tam koşuda; 0.19 ile yedi modelin çizim setleri ve A/B
+listeleri, 0.12–0.18 ile yalnız listeler: 12 Ekim'de o setin commit'indeki listeyi bayt bayt veren birleşimler). İzler beşinci dosyada,
+`genel_parmak_izleri.txt`: PNG bayt bayt (sha256), PDF içerikçe (`parmak_izi.genel_pdf_ozet`: sayfa ölçüleri, bütün çizimler ve sözcükler
+yerleriyle; bayt özeti değil, çünkü matplotlib gömülü yazı tiplerini dosya adına göre sıralar ve o sıra depo yoluna bağlıdır — `2026-10-12/`
+PDF'leri bayt özetiyle dondurulmuştu, `2026-10-12b/` içerik özetiyle), JSON kanonik, IFC içerikçe (`motor/genel/iz.py`: başlık zamanı,
+GlobalId, kayıt numarası ve küme sırası maskeli). Dosya isteğe bağlıdır: eski klasörlerde yoktur, `dogrula.py` o zaman yalnız dört dosyayı
+okur; `GEREKCE.md` özetini taşıyorsa dosya da olmalıdır (silinirse "REFERANS BOZUK").
+`--hizli` koşuda yalnız `genel_c8801/` altındaki izler karşılaştırılır. Girdi kalıplarına `modeller/*.json` ve `kurallar/` (setler, cizim,
+secenekler, bayi) eklendi; güncel set `kurallar/liste/kurallar.json` girdi sayılmaz (altın adımlar 0.19 pimiyle koşar, kural değişince
+referans değişmez). Üretim zamanı `TEST_SABIT_ZAMAN` ile sabit (şablon paftasındaki tarih de). Perspektifler altın değildir (VTK; sunucuda `[3b]`).
 
 ## Dondurulan sonuç
 
@@ -56,6 +71,7 @@ Dosyalar, `2026-09-28/` altında:
 - `denetim_kosum.json`: `kos.py --planlar` sonucu.
 - `dxf_parmak_izleri.txt`: 18 DXF'in içerik parmak izi.
 - `pdf_parmak_izleri.txt`: 18 PDF'in sayfa ölçüsü ve bütün çizimlerinin özeti (`2026-09-28b/`'de; `2026-09-28/`'de yalnız sayfa ölçüsü).
+- `genel_parmak_izleri.txt` (`2026-10-12/`'den beri, isteğe bağlı): genel motor çıktılarının izleri (yukarıda).
 
 Araçlar, bu klasörde:
 - `dogrula.py`: referansa karşı doğrulama ve yeniden dondurma (`--girdi-dokumu` bugünkü girdi özetini yalnız yazdırır).

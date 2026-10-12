@@ -1,0 +1,1205 @@
+{
+ "ad": "Örnek proje: 105 m², tek kat, çelik, beşik + cumba çatı, tek kat panel, dış karkas 140 mm (dosya tarihi 26 Kasım 2025)",
+ "yontem": "omega_asik",
+ "yontem_adi": "B · tavan omegası, aşık, alın sacı, saçak sacı (prefabrik yöntemi)",
+ "cati_kaplamasi": "tek kat panel (baz paket)",
+ "cati_kaplamasi_anahtar": "tek_kat_panel",
+ "kapali_gruplar": [],
+ "yontem_notu": "Çelikte bu yöntem kullanılmıyor (Lokman, 7 Ekim 2026: çelik yapılarda her çatı tipinde çatı ve tavan paneli); liste yalnız karşılaştırma içindir, yöntemin kuralları prefabrik çalışılınca kesinleşecek.",
+ "satirlar": [
+  {
+   "grup": "Çelik panel",
+   "kalem": "Dış cephe duvar panelleri",
+   "boyut": "140 × 45 × 0,8",
+   "adet": null,
+   "olcu": 53.04,
+   "brut": null,
+   "birim": "m",
+   "kg": 965.33,
+   "formul": "duvar boyu × 18,20 kg/m (motorun proje ortalaması)",
+   "durum": "motor",
+   "not": null
+  },
+  {
+   "grup": "Çelik panel",
+   "kalem": "İç cephe duvar panelleri",
+   "boyut": "80 × 45 × 0,8",
+   "adet": null,
+   "olcu": 29.36,
+   "brut": null,
+   "birim": "m",
+   "kg": 381.68,
+   "formul": "duvar boyu × 13,00 kg/m (motorun proje ortalaması)",
+   "durum": "motor",
+   "not": null
+  },
+  {
+   "grup": "Çelik panel",
+   "kalem": "Toplam (adedi ve kg'ı bilinenler)",
+   "boyut": "",
+   "adet": null,
+   "olcu": null,
+   "brut": null,
+   "birim": "",
+   "kg": 1347.01,
+   "formul": "",
+   "durum": "motor",
+   "not": null
+  },
+  {
+   "grup": "Metal aksam",
+   "kalem": "Saçak sacı (30'luk)",
+   "boyut": "L 2500",
+   "adet": 18,
+   "olcu": 39.2,
+   "brut": null,
+   "birim": "m",
+   "kg": null,
+   "formul": "saçak boyu ÷ (2,5 − 0,20 bindirme)",
+   "durum": "lokman",
+   "not": "20 cm bindirme: Lokman, 7 Ekim 07:45 (önce 30 cm); parça boyu L 2500 listelerden"
+  },
+  {
+   "grup": "Metal aksam",
+   "kalem": "Geniş saçak omegası (180 × 2500)",
+   "boyut": "L 2500",
+   "adet": 16,
+   "olcu": 39.2,
+   "brut": null,
+   "birim": "m",
+   "kg": null,
+   "formul": "her saçak kenarı ÷ 2,5, ayrı ayrı yukarı",
+   "durum": "uydurma",
+   "not": null
+  },
+  {
+   "grup": "Metal aksam",
+   "kalem": "Alın sacı (30'luk)",
+   "boyut": "300 × 2500",
+   "adet": 8,
+   "olcu": 17.0,
+   "brut": null,
+   "birim": "m",
+   "kg": null,
+   "formul": "alın boyu ÷ (2,5 − 0,20 bindirme)",
+   "durum": "lokman",
+   "not": "20 cm bindirme: Lokman, 7 Ekim 07:45 (önce 30 cm); parça boyu L 2500 listelerden"
+  },
+  {
+   "grup": "Metal aksam",
+   "kalem": "Tavan omegası (60'lık)",
+   "boyut": "L 3750",
+   "adet": 42,
+   "olcu": 155.72,
+   "brut": null,
+   "birim": "m",
+   "kg": null,
+   "formul": "tavan alanı ÷ 0,60 ÷ 3,75",
+   "durum": "uydurma",
+   "not": null
+  },
+  {
+   "grup": "Metal aksam",
+   "kalem": "Saçaklar için Boardex",
+   "boyut": "12,5 × 1200 × 2400",
+   "adet": 8,
+   "olcu": 19.6,
+   "brut": null,
+   "birim": "m²",
+   "kg": null,
+   "formul": "saçak boyu × saçak eni × 1,08 ÷ 2,88",
+   "durum": "uydurma",
+   "not": null,
+   "liste_adi": "Saçaklar için OUTWEAR Dış Cephe Levhası"
+  },
+  {
+   "grup": "Metal aksam",
+   "kalem": "Köşebent",
+   "boyut": "L 2500",
+   "adet": 70,
+   "olcu": 174.61,
+   "brut": null,
+   "birim": "m",
+   "kg": null,
+   "formul": "(oda tavan çevreleri 109,81 m + 24 iç köşe × 2,7 m) ÷ 2,5",
+   "durum": "muhendis",
+   "not": "planı yok: oda başına 4 iç köşe sayıldı (alt sınır). Önemli bir detay değil; mevcut kural uygulanır (Lokman, 7 Ekim 07:45 ve 08:02)"
+  },
+  {
+   "grup": "Dış cephe kaplama",
+   "kalem": "Dış cephe Boardex",
+   "boyut": "12,5 × 1200 × 2400",
+   "adet": 48,
+   "olcu": 127.94,
+   "brut": 148.42,
+   "birim": "m²",
+   "kg": null,
+   "formul": "(çevre × yükseklik + kolon/kiriş kaplaması + çatı alnı (kalkan) − boşluklar) × 1,08 ÷ 2,88",
+   "durum": "excel",
+   "not": "zayiat %8: mühendis, 4 Ekim 12:14; Lokman, 4 Ekim 15:18: bununla devam. 2025 listelerindeki adetler %15'e uyuyor; %15 ile 52 levha. Kalınlık 12,5 mm: Lokman, 7 Ekim 07:45 (listelerdeki 8 mm hatalı girilmiş; üreticinin belgelerinde 12,5 mm)",
+   "liste_adi": "OUTWEAR Dış Cephe Levhası"
+  },
+  {
+   "grup": "İç cephe kaplama",
+   "kalem": "Duvar alçıpan beyaz",
+   "boyut": "1200 × 2500",
+   "adet": 78,
+   "olcu": 221.45,
+   "brut": 256.85,
+   "birim": "m²",
+   "kg": null,
+   "formul": "oda oda: (iç çevre × yükseklik − o odadaki boşluklar) toplamı × 1,05 ÷ 3,0",
+   "durum": "excel",
+   "not": null
+  },
+  {
+   "grup": "İç cephe kaplama",
+   "kalem": "Duvar alçıpan yeşil",
+   "boyut": "1200 × 2500",
+   "adet": 13,
+   "olcu": 35.3,
+   "brut": 39.64,
+   "birim": "m²",
+   "kg": null,
+   "formul": "oda oda: (iç çevre × yükseklik − o odadaki boşluklar) toplamı × 1,05 ÷ 3,0; yeşil = ıslak hacimler",
+   "durum": "excel",
+   "not": null
+  },
+  {
+   "grup": "İç cephe kaplama",
+   "kalem": "Tavan alçıpan beyaz",
+   "boyut": "1200 × 2500",
+   "adet": 31,
+   "olcu": 86.71,
+   "brut": null,
+   "birim": "m²",
+   "kg": null,
+   "formul": "tavan alanı × 1,05 ÷ 3,0",
+   "durum": "motor",
+   "not": null
+  },
+  {
+   "grup": "İç cephe kaplama",
+   "kalem": "Tavan alçıpan yeşil",
+   "boyut": "1200 × 2500",
+   "adet": 3,
+   "olcu": 6.72,
+   "brut": null,
+   "birim": "m²",
+   "kg": null,
+   "formul": "tavan alanı × 1,05 ÷ 3,0; yeşil = ıslak hacim + veranda tavanı",
+   "durum": "lokman",
+   "not": "veranda tavanı girdide ayrı yazmıyor: varsa yeşil alçıpanın içinde kaldı (çelikte Boardex olmalı: Lokman, 7 Ekim 07:45)"
+  },
+  {
+   "grup": "İç cephe kaplama",
+   "kalem": "OSB 9 mm (duvar)",
+   "boyut": "1220 × 2440",
+   "adet": 14,
+   "olcu": 39.3,
+   "brut": null,
+   "birim": "m²",
+   "kg": null,
+   "formul": "listede yazan alan × 1,05 ÷ 2,98; alanın nasıl seçildiği listede yazmıyor",
+   "durum": "excel",
+   "not": null
+  },
+  {
+   "grup": "Çatı kaplamaları",
+   "kalem": "Metal kiremit mahyası",
+   "boyut": "L 2800",
+   "adet": 10,
+   "olcu": 24.6,
+   "brut": null,
+   "birim": "m",
+   "kg": null,
+   "formul": "mahya hattı (tepe + kırmalar) ÷ (2,8 − 0,20 bindirme)",
+   "durum": "lokman",
+   "not": "20 cm bindirme: Lokman, 7 Ekim 07:45 (önce 30 cm)"
+  },
+  {
+   "grup": "Çatı kaplamaları",
+   "kalem": "Tek kat panel kapaması",
+   "boyut": "L 2500",
+   "adet": 16,
+   "olcu": 39.2,
+   "brut": null,
+   "birim": "m",
+   "kg": null,
+   "formul": "her saçak kenarı ÷ 2,5, ayrı ayrı yukarı",
+   "durum": "uydurma",
+   "not": "listedeki uygulama (2025): sac kapama"
+  },
+  {
+   "grup": "Çatı kaplamaları",
+   "kalem": "Ters mahya",
+   "boyut": "L 2800",
+   "adet": 3,
+   "olcu": 7.28,
+   "brut": null,
+   "birim": "m",
+   "kg": null,
+   "formul": "cumbalı çatıda çatıların birleştiği vadi boyu ÷ (2,8 − 0,20)",
+   "durum": "lokman",
+   "not": "20 cm bindirme: Lokman, 7 Ekim 07:45 (önce 30 cm)"
+  },
+  {
+   "grup": "Çatı kaplamaları",
+   "kalem": "Ters mahya kenar kutusu",
+   "boyut": "L 21 × 40 × 21 × 2800",
+   "adet": 6,
+   "olcu": null,
+   "brut": null,
+   "birim": "",
+   "kg": null,
+   "formul": "ters mahya adedi × 2",
+   "durum": "lokman",
+   "not": "cumbalı çatılarda olmazsa olmaz (Lokman, 7 Ekim 08:02); adet ters mahyaya bağlı: ters mahya × 2 (Excel motoru ve Eylül 2026 listesi)"
+  },
+  {
+   "grup": "Çatı kaplamaları",
+   "kalem": "Mahya bandı",
+   "boyut": "rulo / 10 m",
+   "adet": 4,
+   "olcu": 36.4,
+   "brut": null,
+   "birim": "m",
+   "kg": null,
+   "formul": "(metal kiremit mahyası 10 × 2,8 m + ters mahya 3 × 2,8 m) ÷ 10",
+   "durum": "muhendis",
+   "not": "formül: mühendis, 4 Ekim 12:14 (Excel motorundaki gibi). Damlalık kullanılmıyor: listede yok, formüldeki terimi de çıkarıldı (Lokman, 4 Ekim 15:18)"
+  },
+  {
+   "grup": "Çatı kaplamaları",
+   "kalem": "Acil müdahale kapağı",
+   "boyut": "adet",
+   "adet": 1,
+   "olcu": null,
+   "brut": null,
+   "birim": "",
+   "kg": null,
+   "formul": "her yapıya 1 adet (standart)",
+   "durum": "lokman",
+   "not": "her yapıya 1 adet, standart (Lokman, 7 Ekim 07:45). Mühendis 4 Ekim'de 'müşteri isterse' demişti"
+  },
+  {
+   "grup": "Dere",
+   "kalem": "Metal dere",
+   "boyut": "L 4000",
+   "adet": 11,
+   "olcu": 39.2,
+   "brut": null,
+   "birim": "m",
+   "kg": null,
+   "formul": "saçak boyu ÷ (4,0 − 0,20 bindirme)",
+   "durum": "motor",
+   "not": null
+  },
+  {
+   "grup": "Dere",
+   "kalem": "Dere iniş borusu",
+   "boyut": "L 3000",
+   "adet": 10,
+   "olcu": null,
+   "brut": null,
+   "birim": "",
+   "kg": null,
+   "formul": "listedeki iniş sayısı (10); kural hesaplanmadı: cephe ölçüleri yok",
+   "durum": "liste",
+   "not": null
+  },
+  {
+   "grup": "Dere",
+   "kalem": "Dere iniş aparatı",
+   "boyut": "adet",
+   "adet": 10,
+   "olcu": null,
+   "brut": null,
+   "birim": "",
+   "kg": null,
+   "formul": "iniş sayısı × 1",
+   "durum": "liste",
+   "not": null
+  },
+  {
+   "grup": "Dere",
+   "kalem": "Açık dirsek",
+   "boyut": "adet",
+   "adet": 20,
+   "olcu": null,
+   "brut": null,
+   "birim": "",
+   "kg": null,
+   "formul": "iniş sayısı × 2",
+   "durum": "liste",
+   "not": null
+  },
+  {
+   "grup": "Dere",
+   "kalem": "Kapalı dirsek",
+   "boyut": "adet",
+   "adet": 10,
+   "olcu": null,
+   "brut": null,
+   "birim": "",
+   "kg": null,
+   "formul": "iniş sayısı × 1",
+   "durum": "liste",
+   "not": null
+  },
+  {
+   "grup": "Dere",
+   "kalem": "İniş kelepçesi",
+   "boyut": "adet",
+   "adet": 20,
+   "olcu": null,
+   "brut": null,
+   "birim": "",
+   "kg": null,
+   "formul": "iniş sayısı × 2",
+   "durum": "liste",
+   "not": null
+  },
+  {
+   "grup": "Dere",
+   "kalem": "Dere kapağı",
+   "boyut": "adet",
+   "adet": 6,
+   "olcu": null,
+   "brut": null,
+   "birim": "",
+   "kg": null,
+   "formul": "listedeki sayı; motorda çatı tipine göre sabit",
+   "durum": "liste",
+   "not": null
+  },
+  {
+   "grup": "Dere",
+   "kalem": "Dere kelepçesi",
+   "boyut": "adet",
+   "adet": 88,
+   "olcu": null,
+   "brut": null,
+   "birim": "",
+   "kg": null,
+   "formul": "dere adedi × 8",
+   "durum": "motor",
+   "not": null
+  },
+  {
+   "grup": "Elektrik",
+   "kalem": "Tijli duy",
+   "boyut": "adet",
+   "adet": 10,
+   "olcu": null,
+   "brut": null,
+   "birim": "",
+   "kg": null,
+   "formul": "pafta sayımı",
+   "durum": "liste",
+   "not": null
+  },
+  {
+   "grup": "Elektrik",
+   "kalem": "Yuvarlak glop",
+   "boyut": "adet",
+   "adet": 4,
+   "olcu": null,
+   "brut": null,
+   "birim": "",
+   "kg": null,
+   "formul": "pafta sayımı",
+   "durum": "liste",
+   "not": null
+  },
+  {
+   "grup": "Elektrik",
+   "kalem": "Ampul",
+   "boyut": "adet",
+   "adet": 14,
+   "olcu": null,
+   "brut": null,
+   "birim": "",
+   "kg": null,
+   "formul": "duy + glop",
+   "durum": "motor",
+   "not": null
+  },
+  {
+   "grup": "Elektrik",
+   "kalem": "Tekli anahtar",
+   "boyut": "adet",
+   "adet": 4,
+   "olcu": null,
+   "brut": null,
+   "birim": "",
+   "kg": null,
+   "formul": "pafta sayımı",
+   "durum": "liste",
+   "not": null
+  },
+  {
+   "grup": "Elektrik",
+   "kalem": "Çiftli anahtar",
+   "boyut": "adet",
+   "adet": 5,
+   "olcu": null,
+   "brut": null,
+   "birim": "",
+   "kg": null,
+   "formul": "pafta sayımı",
+   "durum": "liste",
+   "not": null
+  },
+  {
+   "grup": "Elektrik",
+   "kalem": "Tekli priz",
+   "boyut": "adet",
+   "adet": 20,
+   "olcu": null,
+   "brut": null,
+   "birim": "",
+   "kg": null,
+   "formul": "pafta sayımı",
+   "durum": "liste",
+   "not": null
+  },
+  {
+   "grup": "Elektrik",
+   "kalem": "Çiftli priz",
+   "boyut": "adet",
+   "adet": 4,
+   "olcu": null,
+   "brut": null,
+   "birim": "",
+   "kg": null,
+   "formul": "pafta sayımı",
+   "durum": "liste",
+   "not": null
+  },
+  {
+   "grup": "Elektrik",
+   "kalem": "Uydu prizi",
+   "boyut": "adet",
+   "adet": 1,
+   "olcu": null,
+   "brut": null,
+   "birim": "",
+   "kg": null,
+   "formul": "pafta sayımı",
+   "durum": "liste",
+   "not": null
+  },
+  {
+   "grup": "Elektrik",
+   "kalem": "W otomat (sigorta)",
+   "boyut": "adet",
+   "adet": 9,
+   "olcu": null,
+   "brut": null,
+   "birim": "",
+   "kg": null,
+   "formul": "pafta sayımı",
+   "durum": "liste",
+   "not": null
+  },
+  {
+   "grup": "Elektrik",
+   "kalem": "Buat kasa",
+   "boyut": "adet",
+   "adet": 40,
+   "olcu": null,
+   "brut": null,
+   "birim": "",
+   "kg": null,
+   "formul": "anahtar + priz + oda sayısı (veranda hariç)",
+   "durum": "motor",
+   "not": null
+  },
+  {
+   "grup": "Elektrik",
+   "kalem": "Uydu kablo",
+   "boyut": "metre",
+   "adet": 25,
+   "olcu": null,
+   "brut": null,
+   "birim": "",
+   "kg": null,
+   "formul": "uydu prizi (1) × 25 m",
+   "durum": "motor",
+   "not": null
+  },
+  {
+   "grup": "Elektrik",
+   "kalem": "Besleme kablosu (sigorta kutuları arası)",
+   "boyut": "metre",
+   "adet": 5,
+   "olcu": null,
+   "brut": null,
+   "birim": "",
+   "kg": null,
+   "formul": "kat adedi × 5 m",
+   "durum": "motor",
+   "not": null
+  },
+  {
+   "grup": "Elektrik",
+   "kalem": "Besleme kablo borusu",
+   "boyut": "metre",
+   "adet": 5,
+   "olcu": null,
+   "brut": null,
+   "birim": "",
+   "kg": null,
+   "formul": "kat adedi × 5 m",
+   "durum": "motor",
+   "not": null
+  },
+  {
+   "grup": "Elektrik",
+   "kalem": "Zil",
+   "boyut": "adet",
+   "adet": 1,
+   "olcu": null,
+   "brut": null,
+   "birim": "",
+   "kg": null,
+   "formul": "1",
+   "durum": "motor",
+   "not": null
+  },
+  {
+   "grup": "Elektrik",
+   "kalem": "Sigorta kutusu (12'li)",
+   "boyut": "adet",
+   "adet": 1,
+   "olcu": null,
+   "brut": null,
+   "birim": "",
+   "kg": null,
+   "formul": "kat adedi",
+   "durum": "motor",
+   "not": null
+  },
+  {
+   "grup": "Elektrik",
+   "kalem": "İzole bant",
+   "boyut": "adet",
+   "adet": 7,
+   "olcu": 105,
+   "brut": null,
+   "birim": "m²",
+   "kg": null,
+   "formul": "bina m² × 0,06",
+   "durum": "motor",
+   "not": null
+  },
+  {
+   "grup": "Elektrik",
+   "kalem": "Kaçak akım rölesi",
+   "boyut": "adet",
+   "adet": 1,
+   "olcu": null,
+   "brut": null,
+   "birim": "",
+   "kg": null,
+   "formul": "tek katta 1 (ikili)",
+   "durum": "motor",
+   "not": null
+  },
+  {
+   "grup": "Vida",
+   "kalem": "RYSB pul başlı (3,9 × 32)",
+   "boyut": "adet",
+   "adet": 788,
+   "olcu": 105,
+   "brut": null,
+   "birim": "m²",
+   "kg": null,
+   "formul": "bina m² × 7,5",
+   "durum": "motor",
+   "not": "gerçek listelerde daha az (62 m²'de 400, 105 m²'de 500)"
+  },
+  {
+   "grup": "Vida",
+   "kalem": "Alçıpan vidası (3,5 × 35)",
+   "boyut": "adet",
+   "adet": 7250,
+   "olcu": 181,
+   "brut": null,
+   "birim": "levha",
+   "kg": null,
+   "formul": "alçıpan ve Boardex levha sayısı × 40; 250'ye yuvarlandı",
+   "durum": "excel",
+   "not": "levha başına 40 yeterli (Lokman, 7 Ekim 07:45)"
+  },
+  {
+   "grup": "Vida",
+   "kalem": "OSB ve yalıpan vidası (3,9 × 32)",
+   "boyut": "adet",
+   "adet": 1000,
+   "olcu": 996,
+   "brut": null,
+   "birim": "vida",
+   "kg": null,
+   "formul": "OSB levha × 40 + priz × 4 + saçak sacı × 4 + dere kelepçesi × 3; 500'e yuvarlandı",
+   "durum": "motor",
+   "not": null
+  },
+  {
+   "grup": "Vida",
+   "kalem": "Pencere vidası (4,8 × 70)",
+   "boyut": "adet",
+   "adet": 160,
+   "olcu": 8,
+   "brut": null,
+   "birim": "pencere",
+   "kg": null,
+   "formul": "pencere sayısı × 20",
+   "durum": "excel",
+   "not": null
+  },
+  {
+   "grup": "Vida",
+   "kalem": "Trapez vida (5,5 × 25)",
+   "boyut": "adet",
+   "adet": 1250,
+   "olcu": 1080,
+   "brut": null,
+   "birim": "vida",
+   "kg": null,
+   "formul": "çelik panel × 10 + köşebent × 6; 250'ye yuvarlandı",
+   "durum": "excel",
+   "not": "Yalnız çelik birleşim yerleri: panel başına sağına soluna 5'er; omega ve aşık için konmaz (Lokman, 7 Ekim 07:45). Köşebent terimi duruyor (08:02). Parça C profiller sayılmaz (8 Ekim 07:23)"
+  },
+  {
+   "grup": "Vida",
+   "kalem": "Trapez vida (5,5 × 60)",
+   "boyut": "adet",
+   "adet": 500,
+   "olcu": 262.5,
+   "brut": null,
+   "birim": "vida",
+   "kg": null,
+   "formul": "bina m² × 2,5; 250'ye yuvarlandı",
+   "durum": "motor",
+   "not": null
+  },
+  {
+   "grup": "Vida",
+   "kalem": "Çelik dübel (klipsli)",
+   "boyut": "adet",
+   "adet": 72,
+   "olcu": 36,
+   "brut": null,
+   "birim": "panel",
+   "kg": null,
+   "formul": "duvar paneli adedi × 2",
+   "durum": "motor",
+   "not": null
+  },
+  {
+   "grup": "Vida",
+   "kalem": "Şase pul",
+   "boyut": "adet",
+   "adet": 72,
+   "olcu": 36,
+   "brut": null,
+   "birim": "panel",
+   "kg": null,
+   "formul": "çelik dübel adedi kadar",
+   "durum": "motor",
+   "not": null
+  },
+  {
+   "grup": "Vida",
+   "kalem": "8'lik trapez uç",
+   "boyut": "adet",
+   "adet": 7,
+   "olcu": 105,
+   "brut": null,
+   "birim": "m²",
+   "kg": null,
+   "formul": "bina m² ÷ 15",
+   "durum": "motor",
+   "not": null
+  },
+  {
+   "grup": "Vida",
+   "kalem": "PH2 uç",
+   "boyut": "adet",
+   "adet": 7,
+   "olcu": 105,
+   "brut": null,
+   "birim": "m²",
+   "kg": null,
+   "formul": "bina m² ÷ 15",
+   "durum": "motor",
+   "not": null
+  },
+  {
+   "grup": "Vida",
+   "kalem": "230'luk kesme taşı",
+   "boyut": "adet",
+   "adet": 7,
+   "olcu": 105,
+   "brut": null,
+   "birim": "m²",
+   "kg": null,
+   "formul": "bina m² ÷ 15",
+   "durum": "lokman",
+   "not": "önemli değil; formül ne veriyorsa yeterli (Lokman, 7 Ekim 07:45). Formül iki 2025 listesinden; Excel motorunda m² × 0,02"
+  },
+  {
+   "grup": "Vida",
+   "kalem": "İnox taş",
+   "boyut": "adet",
+   "adet": 11,
+   "olcu": 105,
+   "brut": null,
+   "birim": "m²",
+   "kg": null,
+   "formul": "bina m² ÷ 10",
+   "durum": "excel",
+   "not": null
+  },
+  {
+   "grup": "Vida",
+   "kalem": "Çırpı ipi",
+   "boyut": "adet",
+   "adet": 1,
+   "olcu": null,
+   "brut": null,
+   "birim": "",
+   "kg": null,
+   "formul": "1",
+   "durum": "motor",
+   "not": null
+  },
+  {
+   "grup": "Sıhhi tesisat",
+   "kalem": "Temiz su borusu",
+   "boyut": "L 4000",
+   "adet": 12,
+   "olcu": 2,
+   "brut": null,
+   "birim": "ıslak hacim",
+   "kg": null,
+   "formul": "ıslak hacim sayısı × 6",
+   "durum": "motor",
+   "not": null
+  },
+  {
+   "grup": "Sıhhi tesisat",
+   "kalem": "Normal dirsek 20 mm",
+   "boyut": "adet",
+   "adet": 30,
+   "olcu": 2,
+   "brut": null,
+   "birim": "ıslak hacim",
+   "kg": null,
+   "formul": "ıslak hacim sayısı × 15",
+   "durum": "motor",
+   "not": null
+  },
+  {
+   "grup": "Sıhhi tesisat",
+   "kalem": "Kulaklı dirsek 20 mm",
+   "boyut": "adet",
+   "adet": 24,
+   "olcu": 2,
+   "brut": null,
+   "birim": "ıslak hacim",
+   "kg": null,
+   "formul": "ıslak hacim sayısı × 12",
+   "durum": "motor",
+   "not": null
+  },
+  {
+   "grup": "Sıhhi tesisat",
+   "kalem": "Düz T 20 mm",
+   "boyut": "adet",
+   "adet": 12,
+   "olcu": 2,
+   "brut": null,
+   "birim": "ıslak hacim",
+   "kg": null,
+   "formul": "ıslak hacim sayısı × 6",
+   "durum": "motor",
+   "not": null
+  },
+  {
+   "grup": "Sıhhi tesisat",
+   "kalem": "Maşon 20 mm",
+   "boyut": "adet",
+   "adet": 30,
+   "olcu": 2,
+   "brut": null,
+   "birim": "ıslak hacim",
+   "kg": null,
+   "formul": "ıslak hacim sayısı × 15",
+   "durum": "motor",
+   "not": null
+  },
+  {
+   "grup": "Sıhhi tesisat",
+   "kalem": "İç dişli T 20 mm",
+   "boyut": "adet",
+   "adet": 12,
+   "olcu": 2,
+   "brut": null,
+   "birim": "ıslak hacim",
+   "kg": null,
+   "formul": "ıslak hacim sayısı × 6",
+   "durum": "motor",
+   "not": null
+  },
+  {
+   "grup": "Sıhhi tesisat",
+   "kalem": "Atlama parçası (yarım parmak)",
+   "boyut": "adet",
+   "adet": 6,
+   "olcu": 2,
+   "brut": null,
+   "birim": "ıslak hacim",
+   "kg": null,
+   "formul": "ıslak hacim sayısı × 3",
+   "durum": "motor",
+   "not": null
+  },
+  {
+   "grup": "Boya",
+   "kalem": "Silikonize mastik",
+   "boyut": "adet",
+   "adet": 8,
+   "olcu": 8,
+   "brut": null,
+   "birim": "pencere",
+   "kg": null,
+   "formul": "pencere adedi",
+   "durum": "lokman",
+   "not": "pencere başına 1 adet, boyu ne olursa olsun (Lokman, 7 Ekim 07:45)"
+  },
+  {
+   "grup": "Boya",
+   "kalem": "Dayson",
+   "boyut": "adet",
+   "adet": 7,
+   "olcu": 105,
+   "brut": null,
+   "birim": "m²",
+   "kg": null,
+   "formul": "bina m² × 0,06",
+   "durum": "lokman",
+   "not": "Excel motorundaki formül (Lokman, 7 Ekim 07:45: motora uy)"
+  },
+  {
+   "grup": "Boya",
+   "kalem": "Poliüretan köpük",
+   "boyut": "adet",
+   "adet": 2,
+   "olcu": null,
+   "brut": null,
+   "birim": "",
+   "kg": null,
+   "formul": "standart 2",
+   "durum": "motor",
+   "not": null
+  }
+ ],
+ "ara": {
+  "dis_net_m2": 127.943,
+  "beyaz_net_m2": 221.448,
+  "yesil_net_m2": 35.304,
+  "ic_duvar_boyu_m": 29.36,
+  "oda_cevreleri_m": 109.81,
+  "yalitim_brut_m2": 365.69,
+  "yalitim_net_m2": 335.58,
+  "asik_boyu_m": 0.0,
+  "inis_kural": null,
+  "inis_kural_aciklama": "cephe ölçüleri girdide yok",
+  "celik_panel_adedi": 57,
+  "kosebent": {
+   "tavan_cevresi_m": 109.81,
+   "veranda_tavan_cevresi_m": 0.0,
+   "ic_kose": 24,
+   "boy_m": 174.61
+  },
+  "elektrik_kaynagi": "pafta",
+  "elektrik_kural": {
+   "tijli_duy": 7,
+   "glop": 2,
+   "tekli_anahtar": 7,
+   "cift_anahtar": 1,
+   "tekli_priz": 21,
+   "cift_priz": 2,
+   "uydu_prizi": 1,
+   "sigorta": 9
+  },
+  "kirma_dizilim": null,
+  "osb_takviye": null
+ },
+ "karsilastirma": {
+  "Saçak sacı (30'luk)": {
+   "hesap": 18,
+   "liste": 18,
+   "durum": "lokman"
+  },
+  "Geniş saçak omegası (180 × 2500)": {
+   "hesap": 16,
+   "liste": 16,
+   "durum": "uydurma"
+  },
+  "Alın sacı (30'luk)": {
+   "hesap": 8,
+   "liste": 8,
+   "durum": "lokman"
+  },
+  "Tavan omegası (60'lık)": {
+   "hesap": 42,
+   "liste": 44,
+   "durum": "uydurma"
+  },
+  "Saçaklar için Boardex": {
+   "hesap": 8,
+   "liste": 7,
+   "durum": "uydurma"
+  },
+  "Köşebent": {
+   "hesap": 70,
+   "liste": 85,
+   "durum": "muhendis"
+  },
+  "Dış cephe Boardex": {
+   "hesap": 48,
+   "liste": 51,
+   "durum": "excel"
+  },
+  "Duvar alçıpan beyaz": {
+   "hesap": 78,
+   "liste": 79,
+   "durum": "excel"
+  },
+  "Duvar alçıpan yeşil": {
+   "hesap": 13,
+   "liste": 14,
+   "durum": "excel"
+  },
+  "Tavan alçıpan beyaz": {
+   "hesap": 31,
+   "liste": 31,
+   "durum": "motor"
+  },
+  "Tavan alçıpan yeşil": {
+   "hesap": 3,
+   "liste": 3,
+   "durum": "lokman"
+  },
+  "OSB 9 mm (duvar)": {
+   "hesap": 14,
+   "liste": 15,
+   "durum": "excel"
+  },
+  "Metal kiremit mahyası": {
+   "hesap": 10,
+   "liste": 10,
+   "durum": "lokman"
+  },
+  "Tek kat panel kapaması": {
+   "hesap": 16,
+   "liste": 16,
+   "durum": "uydurma"
+  },
+  "Ters mahya": {
+   "hesap": 3,
+   "liste": 3,
+   "durum": "lokman"
+  },
+  "Metal dere": {
+   "hesap": 11,
+   "liste": 11,
+   "durum": "motor"
+  },
+  "Dere kelepçesi": {
+   "hesap": 88,
+   "liste": 88,
+   "durum": "motor"
+  },
+  "Ampul": {
+   "hesap": 14,
+   "liste": 14,
+   "durum": "motor"
+  },
+  "Buat kasa": {
+   "hesap": 40,
+   "liste": 37,
+   "durum": "motor"
+  },
+  "Uydu kablo": {
+   "hesap": 25,
+   "liste": 25,
+   "durum": "motor"
+  },
+  "Besleme kablosu (sigorta kutuları arası)": {
+   "hesap": 5,
+   "liste": 5,
+   "durum": "motor"
+  },
+  "Besleme kablo borusu": {
+   "hesap": 5,
+   "liste": 5,
+   "durum": "motor"
+  },
+  "Zil": {
+   "hesap": 1,
+   "liste": 1,
+   "durum": "motor"
+  },
+  "Sigorta kutusu (12'li)": {
+   "hesap": 1,
+   "liste": 1,
+   "durum": "motor"
+  },
+  "İzole bant": {
+   "hesap": 7,
+   "liste": 3,
+   "durum": "motor"
+  },
+  "Kaçak akım rölesi": {
+   "hesap": 1,
+   "liste": 1,
+   "durum": "motor"
+  },
+  "RYSB pul başlı (3,9 × 32)": {
+   "hesap": 788,
+   "liste": 500,
+   "durum": "motor"
+  },
+  "Alçıpan vidası (3,5 × 35)": {
+   "hesap": 7250,
+   "liste": 8500,
+   "durum": "excel"
+  },
+  "OSB ve yalıpan vidası (3,9 × 32)": {
+   "hesap": 1000,
+   "liste": 1500,
+   "durum": "motor"
+  },
+  "Pencere vidası (4,8 × 70)": {
+   "hesap": 160,
+   "liste": 180,
+   "durum": "excel"
+  },
+  "Trapez vida (5,5 × 60)": {
+   "hesap": 500,
+   "liste": 500,
+   "durum": "motor"
+  },
+  "Çelik dübel (klipsli)": {
+   "hesap": 72,
+   "liste": 80,
+   "durum": "motor"
+  },
+  "Şase pul": {
+   "hesap": 72,
+   "liste": 80,
+   "durum": "motor"
+  },
+  "8'lik trapez uç": {
+   "hesap": 7,
+   "liste": 7,
+   "durum": "motor"
+  },
+  "PH2 uç": {
+   "hesap": 7,
+   "liste": 7,
+   "durum": "motor"
+  },
+  "230'luk kesme taşı": {
+   "hesap": 7,
+   "liste": 7,
+   "durum": "lokman"
+  },
+  "İnox taş": {
+   "hesap": 11,
+   "liste": 10,
+   "durum": "excel"
+  },
+  "Çırpı ipi": {
+   "hesap": 1,
+   "liste": 1,
+   "durum": "motor"
+  },
+  "Temiz su borusu": {
+   "hesap": 12,
+   "liste": 12,
+   "durum": "motor"
+  },
+  "Normal dirsek 20 mm": {
+   "hesap": 30,
+   "liste": 30,
+   "durum": "motor"
+  },
+  "Kulaklı dirsek 20 mm": {
+   "hesap": 24,
+   "liste": 24,
+   "durum": "motor"
+  },
+  "Düz T 20 mm": {
+   "hesap": 12,
+   "liste": 12,
+   "durum": "motor"
+  },
+  "Maşon 20 mm": {
+   "hesap": 30,
+   "liste": 30,
+   "durum": "motor"
+  },
+  "İç dişli T 20 mm": {
+   "hesap": 12,
+   "liste": 12,
+   "durum": "motor"
+  },
+  "Atlama parçası (yarım parmak)": {
+   "hesap": 6,
+   "liste": 6,
+   "durum": "motor"
+  },
+  "Silikonize mastik": {
+   "hesap": 8,
+   "liste": 8,
+   "durum": "lokman"
+  },
+  "Dayson": {
+   "hesap": 7,
+   "liste": 6,
+   "durum": "lokman"
+  },
+  "Poliüretan köpük": {
+   "hesap": 2,
+   "liste": 2,
+   "durum": "motor"
+  }
+ },
+ "karsilastirma_ozeti": {
+  "karsilastirilan": 48,
+  "ayni": 31
+ },
+ "celik_kg_karsilastirma": {
+  "dis": {
+   "hesap": 965,
+   "liste": 1055,
+   "fark_yuzde": -8.5
+  },
+  "ic": {
+   "hesap": 382,
+   "liste": 410,
+   "fark_yuzde": -6.9
+  },
+  "duvar": {
+   "hesap": 1347,
+   "liste": 1465,
+   "fark_yuzde": -8.1
+  }
+ }
+}

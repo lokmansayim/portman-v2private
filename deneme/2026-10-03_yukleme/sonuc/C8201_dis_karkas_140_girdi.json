@@ -1,0 +1,357 @@
+{
+ "sema": "portman.yukleme_girdisi/0.4-taslak",
+ "ad": "Ç8201 · Tek kat çelik, 2+1, 82 m² · paket: dış 140",
+ "kaynak": "deneme/2026-10-02_celik/C8201.json + dis_karkas_140.json",
+ "bina_m2": 82,
+ "dis_olcu_m": [
+  10.94,
+  7.5
+ ],
+ "kapali_olcu_m": [
+  8.5,
+  7.5
+ ],
+ "kat_adedi": 1,
+ "oda_sayisi": 5,
+ "kat_yuksekligi_m": 2.7,
+ "celik": {
+  "dis": {
+   "profil": "140x45x1,2",
+   "boy_m": 32.0,
+   "panel_adedi": 8,
+   "not": "panel adedi tahmin; gerçek adet karkas yerleşiminden gelir"
+  },
+  "ic": {
+   "profil": "80x45x1,2",
+   "boy_m": 19.4,
+   "panel_adedi": 6,
+   "not": "panel adedi tahmin; gerçek adet karkas yerleşiminden gelir"
+  },
+  "dikme": {
+   "profil": "80x45x1,2",
+   "adet": 3,
+   "boy_m": 2.4,
+   "not": "dikme sayısı ve yeri katalog görsellerinden"
+  },
+  "kiris": {
+   "profil": "80x45x1,2",
+   "boy_m": 12.38
+  },
+  "cati": {
+   "tip": "kirma",
+   "profil": "80x45x0,8",
+   "plan_m2": 93.47,
+   "oturum_m2": 82.05
+  },
+  "tavan_paneli_m2": 74.84,
+  "cati_paneli_m2": 98.43
+ },
+ "dis": {
+  "cevre_m": 32.0,
+  "duvar_kalinligi_m": 0.165,
+  "karkas_mm": 140,
+  "kolon_kiris": [
+   {
+    "ad": "veranda dikmesi",
+    "adet": 3,
+    "cevre_m": 0.76,
+    "boy_m": 2.4
+   },
+   {
+    "ad": "veranda kirişi",
+    "adet": 1,
+    "cevre_m": 0.68,
+    "boy_m": 12.38
+   }
+  ],
+  "kolon_kiris_varsayim": false,
+  "alin_m2": [],
+  "bosluklar": [
+   {
+    "ad": "120/180",
+    "adet": 3,
+    "en": 1.2,
+    "boy": 1.8
+   },
+   {
+    "ad": "60/40",
+    "adet": 1,
+    "en": 0.6,
+    "boy": 0.4
+   },
+   {
+    "ad": "120/100",
+    "adet": 1,
+    "en": 1.2,
+    "boy": 1.0
+   },
+   {
+    "ad": "180/180",
+    "adet": 3,
+    "en": 1.8,
+    "boy": 1.8
+   },
+   {
+    "ad": "dış kapı",
+    "adet": 1,
+    "en": 0.95,
+    "boy": 2.1
+   }
+  ]
+ },
+ "odalar": [
+  {
+   "ad": "Yatak Odası 1",
+   "tur": "beyaz",
+   "cevre_m": 13.58,
+   "alan_m2": 11.507,
+   "bosluk_m2": [
+    2.16,
+    1.926
+   ],
+   "ic_kose": 4,
+   "dis_kose": 0,
+   "islev": [
+    "yatak_odasi"
+   ]
+  },
+  {
+   "ad": "Yatak Odası 2",
+   "tur": "beyaz",
+   "cevre_m": 13.58,
+   "alan_m2": 11.507,
+   "bosluk_m2": [
+    2.16,
+    1.926
+   ],
+   "ic_kose": 4,
+   "dis_kose": 0,
+   "islev": [
+    "yatak_odasi"
+   ]
+  },
+  {
+   "ad": "Banyo",
+   "tur": "yesil",
+   "cevre_m": 8.255,
+   "alan_m2": 4.192,
+   "bosluk_m2": [
+    0.24,
+    1.926
+   ],
+   "ic_kose": 4,
+   "dis_kose": 0,
+   "islev": [
+    "banyo"
+   ]
+  },
+  {
+   "ad": "Hol",
+   "tur": "beyaz",
+   "cevre_m": 12.295,
+   "alan_m2": 6.663,
+   "bosluk_m2": [
+    1.995,
+    1.926,
+    1.926,
+    1.926,
+    1.926
+   ],
+   "ic_kose": 4,
+   "dis_kose": 0,
+   "islev": [
+    "hol"
+   ]
+  },
+  {
+   "ad": "Yaşam Alanı",
+   "tur": "beyaz",
+   "cevre_m": 20.935,
+   "alan_m2": 22.672,
+   "bosluk_m2": [
+    2.16,
+    1.2,
+    3.24,
+    3.24,
+    3.24,
+    1.926
+   ],
+   "ic_kose": 5,
+   "dis_kose": 1,
+   "islev": [
+    "salon",
+    "mutfak"
+   ]
+  }
+ ],
+ "ic_kapi_adedi": 4,
+ "ic_duvar_boyu_m": 19.4,
+ "veranda_tavan_cevresi_m": 19.88,
+ "osb_takviye": {
+  "duvarlar": [
+   {
+    "mahal": "Yaşam Alanı",
+    "duvar": "R",
+    "duvar_adi": "banyo ile mutfak arası duvar",
+    "neden": "mutfak dolabı",
+    "boy_m": 2.4275,
+    "bosluk_m2": 0
+   },
+   {
+    "mahal": "Yaşam Alanı",
+    "duvar": "dis:ust",
+    "duvar_adi": "üst dış duvar",
+    "neden": "mutfak dolabı ve eviye",
+    "boy_m": 2.8975,
+    "bosluk_m2": 1.2
+   },
+   {
+    "mahal": "Yaşam Alanı",
+    "duvar": "B",
+    "duvar_adi": "hol ile yaşam alanı arası duvar",
+    "neden": "TV ünitesi",
+    "boy_m": 4.7425,
+    "bosluk_m2": 1.926
+   }
+  ],
+  "brut_m2": 27.18,
+  "bosluk_m2": 3.126,
+  "net_m2": 24.06
+ },
+ "osb_takviye_teyit": "muhendis",
+ "elektrik_odalar": [
+  {
+   "ad": "Yatak Odası 1",
+   "islev": [
+    "yatak_odasi"
+   ]
+  },
+  {
+   "ad": "Yatak Odası 2",
+   "islev": [
+    "yatak_odasi"
+   ]
+  },
+  {
+   "ad": "Banyo",
+   "islev": [
+    "banyo"
+   ]
+  },
+  {
+   "ad": "Hol",
+   "islev": [
+    "hol"
+   ]
+  },
+  {
+   "ad": "Yaşam Alanı",
+   "islev": [
+    "salon",
+    "mutfak"
+   ]
+  },
+  {
+   "ad": "Veranda",
+   "islev": [
+    "veranda"
+   ]
+  }
+ ],
+ "tavan_m2": {
+  "beyaz": 52.35,
+  "yesil": 22.49
+ },
+ "veranda_m2": {
+  "brut": 18.3
+ },
+ "elektrik_en_uzak_m": 8.57,
+ "cati": {
+  "tip": "kirma",
+  "yontem": "panel",
+  "kaplama": "tek_kat_panel",
+  "egim": 0.33,
+  "plan_m": [
+   11.54,
+   8.1
+  ],
+  "yuzey_m2": 98.43,
+  "sacak_kenarlari_m": [
+   11.54,
+   8.1,
+   11.54,
+   8.1
+  ],
+  "sacak_boyu_toplam_m": 39.28,
+  "cephe_kenarlari_m": [
+   10.94,
+   7.5,
+   10.94,
+   7.5
+  ],
+  "kose_adedi": 4,
+  "mahya_hatti_m": 26.97,
+  "panel_boyu_m": 4.32,
+  "panel_boyu_kaynak": "kural",
+  "bina_eni_m": 7.5,
+  "cati_boyu_m": 11.54,
+  "sacak_alti": "boardex",
+  "sacak_alti_eni_m": 0.3,
+  "sacak_yuzu_m2": 7.24
+ },
+ "kapi_pencere": [
+  {
+   "kalem": "Melamin kapı (80'lik kanat)",
+   "boyut": "90 × 214",
+   "adet": 4,
+   "durum": "lokman",
+   "formul": "iç kapı sayısı; boşluk 90 × 214, kanat 200 cm: Lokman, 3 Ekim 13:27; kalemin adı ve 80'lik kanat listelerden"
+  },
+  {
+   "kalem": "Kompozit çelik kapı",
+   "boyut": "90 × 210",
+   "adet": 1,
+   "durum": "model",
+   "formul": "dış kapı sayısı; ölçü gerçek listelerden"
+  },
+  {
+   "kalem": "PVC pencere",
+   "boyut": "120/180",
+   "adet": 3,
+   "durum": "model"
+  },
+  {
+   "kalem": "PVC vasistas",
+   "boyut": "60/40",
+   "adet": 1,
+   "durum": "model"
+  },
+  {
+   "kalem": "PVC pencere",
+   "boyut": "120/100",
+   "adet": 1,
+   "durum": "model"
+  },
+  {
+   "kalem": "PVC pencere",
+   "boyut": "180/180",
+   "adet": 3,
+   "durum": "model"
+  }
+ ],
+ "varsayimlar": [
+  "Çatı kaplaması seçenektir; baz pakette tek kat panel (Lokman, 4 Ekim 01:42). `--kaplama` ile öteki beş seçenek hesaplanır. Panel boyunun tabanı = eğimli boy + 5 cm taşma (mühendis, 4 Ekim 12:14), 10 mm'ye yukarı (Lokman, 7 Ekim 07:45); adedi düşürüyorsa ya da pay inceyse boy en çok 3 cm uzatılır (Lokman, 4 Ekim 16:18; 3 cm'e kadar fark tolere edilebilir: 8 Ekim 00:45). Kapatma genişliği ürüne göre değişir (Lokman, 4 Ekim 15:18): güncel değerler kurallarda (tek kat panel, kiremit desen sac ve sandviç panel 100 cm); bu girdiye `cati.kapatma_m` yazılırsa o kullanılır.",
+  "Kırma çatıda kaplama adedi çatı açılımından: yüzler şerit şerit dizilir, çapraz kesimden artan parça karşı yüzde kullanılır (Lokman, 4 Ekim 01:42; `cati_acilim.py`). Dizilim her yüzde köşeden başlar; kesim payı 5 mm; yedek panel yok, kesim planı montajcıya verilir (Lokman, 4 Ekim 15:18). Kiremit desen sacda artan parça kullanılmaz (mühendis, 4 Ekim 12:14).",
+  "Duvar paneli adedi tahmin: her duvar hattı bir panel, 5,7 m'yi aşarsa bölünür. Gerçek adet karkas yerleşiminden gelir.",
+  "Tavan paneli ve çatı paneli: 100 m² bina için verilen kg (Lokman'ın 4 Ekim düzeltmesi) ve adet (mühendis: bu adetlerle ilerle), çatının örttüğü oturum alanına oranlandı.",
+  "Veranda dikmelerinin sayısı ve yeri katalog görsellerinden: dış kenarda iki köşe ve bir orta.",
+  "OSB takviyesi: dolap ve TV ünitesi gelen duvarlar katalog görselinden seçildi (mühendis doğruladı); her duvarın o odaya bakan yüzünün tamamı alındı (mühendis, 4 Ekim 12:14). Geçerli kural bu (Lokman, 4 Ekim 16:18); odanın bütün yüzeyi yalnız bilgi olarak satırın notunda durur. Klima duvarı sayılmaz.",
+  "Elektrik: pafta yok; sayılar mühendisin oda başına kuralından (doğruluk payı yaklaşık %75). Salon ile mutfağın aynı mahalde olduğu yerde ikisinin kuralı birlikte uygulandı (mühendis doğruladı).",
+  "Kablo boyunda 'sigortadan evin en uzak mesafesi': sigorta kutusu giriş kapısında sayıldı; oradan kapalı kısmın en uzak köşesine, karkas üzerinden 8,571746102749428 m (Lokman, 7 Ekim 07:45; kutunun yeri 8 Ekim 00:45'te onaylandı).",
+  "Köşebent: yalnız iç köşeler sayıldı; odaya doğru çıkıntı yapan köşeler sayılmaz, veranda tavanının çevresi sayılır (mühendis, 4 Ekim 12:14). Veranda çevresi brüt ölçüyle.",
+  "Dış kapı boşluğu 0,95 × 2,10 m (mühendis, 4 Ekim 12:14); katalog çiziminde kapı 100 cm'di.",
+  "Boardex zayiatı %8, Boardex 12,5 mm, OSB 11 mm (mühendis, 4 Ekim 12:14; zayiat için Lokman, 4 Ekim 15:18: devam).",
+  "Damlalık ve tek kat panel kapaması listede yok (Lokman, 4 Ekim 15:18 ve 16:18: montajcılar kullanmıyor; plastik kapama aparatı sipariş verilirse eklenir); mahya bandı yalnız mahyalardan.",
+  "Çatı çeliği, veranda dikmesi ve kirişi şimdilik Excel motorunun ortalamasıyla (Lokman, 4 Ekim 15:18: motor kıstas)."
+ ]
+}

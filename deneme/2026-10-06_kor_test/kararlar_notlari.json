@@ -1,0 +1,165 @@
+{
+ "aciklama": "KT-01: Lokman'ın 7 Ekim 2026 07:45 cevapları, 08:02 düzeltmeleri, 8 Ekim 00:45 ve 07:23 cevaplarından ve 10 Ekim 2026 cevaplarından sonra durum (kural seti 0.19). `karar`: adedi 7 Ekim 03:46'daki düzeltilmiş listeden farklı olan birimde, farkı doğuran karar. `fark`: gerçek listeden hâlâ farklı olan birimde nedeni; türüyle başlar: `karar:` (Lokman'ın kararı o listeden farklı), `yöntem:` (liste omega ve aşıklı yöntemle hazırlanmış; çelikte artık yok), `elle:` (listenin elle hesabı ya da yuvarlaması), `ölçü:` (ölçünün alındığı yüz), `soru:` (kural bekliyor). `kararlar_kiyas.py` sayımla denetler. `karar` \"Karar değil:\" diye başlıyorsa adet bir karardan değil, elektrik sayılarının paftadan alınmasından değişmiştir. `listede_olmayan`: Lokman'ın yeni bir kararıyla gelen, gerçek listede olmayan satırlar ve nedenleri (0.18: müştemilatın panel çatısının kenarları); yazılı değilse sorun.",
+ "birimler": {
+  "Tavan omegası": {
+   "fark": "yöntem: çelikte tavan omegası yok (C2). Kural prefabrik çalışılınca; duvar yüzünde omega hattı olmadığı da söylendi: listedeki 47 o paftanın dizilimi."
+  },
+  "Köşebent": {
+   "fark": "karar: önemli bir detay değil, mevcut kural uygulanır (C1 b, C7; 08:02). Listede 76."
+  },
+  "Aşık": {
+   "fark": "yöntem: çelikte aşık yok (C2). Kural prefabrik çalışılınca."
+  },
+  "Saçak sacı": {
+   "karar": "Bindirme 20 cm (C1 a): 24,46 m ÷ 2,3 → 11."
+  },
+  "Saçak omegası": {
+   "fark": "yöntem: çatı ve tavan paneli varsa saçak omegası kullanılmaz (C1 c). Kural prefabrik çalışılınca."
+  },
+  "Dış cephe Boardex: bina (duvarlar, veranda içi, makas alnı, baca)": {
+   "fark": "elle: listede makas alnı için iki tam kalkan alınmış, dört satır ayrı ayrı yukarı yuvarlanmış (değişmedi)."
+  },
+  "Dış cephe Boardex: müştemilat (duvarlar, çatı panelinin saçağı)": {
+   "fark": "elle: listede müştemilat duvarları 2,70 m ile çarpılmış; modelde 2,25–2,50 m. Müştemilat göz ardı edilecek (C3).",
+   "karar": "Tek eğimli çatı panelli çatı beş fotoğraftaki gibi (Lokman, 10 Ekim 2026): müştemilatın çatı panelinin saçak ve alın yüzü kapamayla kapanır, Boardex şeridinden yalnız alt payı kalır: 12,20 m × (0,10 + 0,15) → 12,20 m × 0,15; 11 → 10."
+  },
+  "Veranda tavanı (Boardex)": {
+   "karar": "Çelikte veranda tavanı her zaman Boardex (C1 j): 12,4 m² → 5 levha."
+  },
+  "Nem bariyeri: bina": {
+   "fark": "ölçü: liste dış çevreyi karkas yüzünden alıyor; karar: bizdeki, kaplanmış yüz (C8)."
+  },
+  "Nem bariyeri: müştemilat": {
+   "fark": "elle: listede müştemilat duvarları 2,70 m ile çarpılmış. Müştemilat göz ardı edilecek (C3)."
+  },
+  "Tavan alçıpan yeşil": {
+   "karar": "Veranda tavanı Boardex'e geçti (C1 j): yeşil tavan yalnız ıslak hacim, 6 → 2."
+  },
+  "Duvar alçıpan beyaz": {
+   "fark": "ölçü: liste oda çevresini karkas yüzünden alıyor; karar: bizdeki, kaplanmış yüz (C8)."
+  },
+  "Duvar alçıpan yeşil: müştemilat": {
+   "fark": "elle: listede müştemilat duvarları 2,70 m ile çarpılmış. Müştemilat göz ardı edilecek (C3)."
+  },
+  "İç duvar OSB: müştemilat": {
+   "fark": "elle: listede müştemilat duvarları 2,70 m ile çarpılmış. Müştemilat göz ardı edilecek (C3)."
+  },
+  "Duvar izolasyonu": {
+   "karar": "Listeden çıktı: \"göndermiyoruz yok say\" (C1 h); 08:02: \"evet çıkar\".",
+   "fark": "karar: gönderilmiyor. Listede 15 paket var."
+  },
+  "Sandviç panel L 5070": {
+   "fark": "elle: listede paneller elle dizilmiş, çapraz kesilen parçalar eşlenmemiş; toplam aynı (33). Bizde boy 10 mm'ye yukarı: L 5080 (C9)."
+  },
+  "Sandviç panel L 2870": {
+   "fark": "elle: listedeki dizilim; toplam aynı (33). Bizde L 2880 (C9)."
+  },
+  "Sandviç panel L 2340": {
+   "fark": "elle: listedeki dizilim; toplam aynı (33). Bizde L 2350 (C9)."
+  },
+  "Sandviç panel kapaması (bina ve müştemilat)": {
+   "fark": "karar: kapama dere boyunca; parça L 2500, 20 cm bindirme (C1 i; 08:02; hesap 8 Ekim 00:45'te onaylandı): 29,92 m ÷ 2,3 = 13,01 → 14 (14. parça 2 cm'den doğuyor). Listede L 2800 ile 12."
+  },
+  "Ters mahya kenar kutuları": {
+   "karar": "Listeye girdi: cumbalı çatılarda olmazsa olmaz (08:02); ters mahya 2 × 2 = 4."
+  },
+  "Damlalık (bina ve müştemilat)": {
+   "fark": "karar: çatının duvara dayandığı kenara özel mahya konur (8 Ekim 00:45): 11,35 m ÷ (2,8 − 0,20) → 5, L 2800. Listede o kenarda damlalık var (L 2500; 3 + 3 = 6); damlalık listeden çıkık (C1 g)."
+  },
+  "Mahya bandı": {
+   "fark": "karar: damlalık olmadığı için formülde terimi de yok (C1 g): 3. Listede damlalık terimiyle 4."
+  },
+  "Dere iniş borusu": {
+   "karar": "İniş kuralı (C4; 9 m eşiği 8 Ekim 00:45'te onaylandı): her saçak köşesine bir, boyu 9 m'yi geçen dere hattının ortasına bir; 10 Ekim 2026'dan beri müştemilatın saçağında da dere: 7 köşe + 2 orta = 9.",
+   "fark": "karar: listede ve paftada 7 (müştemilatta dere yok); Lokman'ın 10 Ekim kararıyla müştemilatın deresine iki iniş."
+  },
+  "Dere iniş aparatı": {
+   "karar": "İniş sayısına bağlı (9).",
+   "fark": "karar: listede 7 (müştemilatta dere ve iniş yok)."
+  },
+  "Açık dirsek": {
+   "karar": "İniş sayısına bağlı (9 × 2).",
+   "fark": "karar: listede 14 (müştemilatta dere ve iniş yok)."
+  },
+  "Kapalı dirsek": {
+   "karar": "İniş sayısına bağlı (9).",
+   "fark": "karar: listede 7 (müştemilatta dere ve iniş yok)."
+  },
+  "İniş kelepçesi": {
+   "karar": "İniş sayısına bağlı (9 × 2).",
+   "fark": "karar: listede 14 (müştemilatta dere ve iniş yok)."
+  },
+  "Tijli duy": {
+   "karar": "Karar değil: elektrik sayıları bu listede projenin paftasından alındı."
+  },
+  "Ampul": {
+   "karar": "Karar değil: elektrik sayıları paftadan (duy + glop)."
+  },
+  "NYM kablo (3 × 2,5)": {
+   "karar": "Kabloda en uzak mesafe sigortadan (C1 q): 10,06 m; sayılar paftadan: 9 × 10,06 + 23 × 2 → 137.",
+   "fark": "elle: listede 140 elle yazılmış (9 × 11 + 20 × 2 = 139 okuması uyuyor)."
+  },
+  "NYM kablo (2 × 1,5)": {
+   "karar": "Kabloda en uzak mesafe sigortadan (C1 q): 10,06 m; sayılar paftadan: 9 × 10,06 + 12 × 2 → 115.",
+   "fark": "elle: listede 120 elle yazılmış."
+  },
+  "Tekli anahtar": {
+   "karar": "Karar değil: elektrik sayıları paftadan."
+  },
+  "Çiftli anahtar": {
+   "karar": "Karar değil: elektrik sayıları paftadan."
+  },
+  "Çiftli priz": {
+   "karar": "Karar değil: elektrik sayıları paftadan."
+  },
+  "Buat kasa": {
+   "karar": "Karar değil: anahtar ve priz sayıları paftadan (28 + 5 oda = 33).",
+   "fark": "karar: oda sayısı bizdeki gibi (C6: \"bizdekine uy\"): 5 mahal. Listede 7 ile 35."
+  },
+  "İzole bant": {
+   "fark": "elle: listede aşağı yuvarlanmış (5,9 → 5)."
+  },
+  "RYSB pul başlı": {
+   "fark": "elle: listede 750'ye yuvarlanmış; bizde 743."
+  },
+  "Alçıpan vidası": {
+   "fark": "karar: levha başına 40 yeterli (C1 m). Listede levha başına 50 ve elle yuvarlama."
+  },
+  "OSB ve yalıpan vidası": {
+   "fark": "karar: levha başına 40 (C1 m). Listede 50 ve elle yuvarlama."
+  },
+  "Trapez vida (5,5 × 25)": {
+   "karar": "Yalnız çelik birleşim yerleri: panel başına 10, köşebent terimi duruyor (C1 n; 08:02); parça C profiller sayılmaz (8 Ekim 07:23: \"göz ardı et\"): 46 panel × 10 + 67 × 6 = 862 → 1000.",
+   "fark": "karar: omega ve aşık için vida konmaz. Listede onlar için de var (1800)."
+  },
+  "230'luk kesme taşı": {
+   "fark": "karar: önemli değil, formül ne veriyorsa (C1 o): 7. Listede 2."
+  },
+  "Acil müdahale kapağı": {
+   "karar": "Her yapıya 1 adet, standart (C6)."
+  },
+  "Silikonize mastik": {
+   "fark": "karar: pencereler alıcıya aitse mastik yazılmaz (8 Ekim 00:45: \"hayır yazılmasın\"); pencere varsa pencere başına 1 (C6). Listede 3."
+  },
+  "Dayson": {
+   "fark": "karar: Excel motoruna uyulur (C1 p): m² × 0,06 → 6. Listede 4."
+  },
+  "Metal dere": {
+   "karar": "Müştemilatın panel çatısının saçağında da dere (Lokman, 10 Ekim 2026: beş fotoğraftaki gibi; KT-01'in yapılmış halinde de müştemilatın saçağında dere var): 24,46 + 5,46 = 29,92 m ÷ 3,8 → 8.",
+   "fark": "karar: listede ve dere paftasında müştemilatta dere yok (7); Lokman'ın 10 Ekim kararıyla var."
+  },
+  "Dere kapağı": {
+   "karar": "Müştemilatın deresinin iki serbest ucu (Lokman, 10 Ekim 2026): 4 → 6.",
+   "fark": "karar: listede 4 (müştemilatta dere yok)."
+  },
+  "Dere kelepçesi": {
+   "karar": "Dere adedi × 8: müştemilatın deresiyle 8 × 8 = 64 (Lokman, 10 Ekim 2026).",
+   "fark": "karar: listede 56 (7 × 8; müştemilatta dere yok)."
+  }
+ },
+ "giris": "Lokman'ın 7 Ekim 2026 07:45 cevapları, 08:02 düzeltmeleri, 8 Ekim 00:45 ve 07:23 cevapları ve 10 Ekim 2026 cevapları (tek eğimli çatı panelli çatılar \"o 5 görseldeki gibi\": müştemilatın panel çatısında da saçakta dere ve özel büküm saçak sacı, yanlarda sundurma kapama) işlendikten sonra, gerçek listenin adetli her satırı güncel kural setinin (0.19) verdiği iki listeyle.",
+ "listede_olmayan": {
+  "Özel büküm saçak sacı": "karar: müştemilatın panel çatısının saçağında, derenin altında (Lokman, 10 Ekim 2026: beş fotoğraftaki gibi): 5,46 m ÷ (2,5 − 0,20) → 3. KT-01'in listesinde yok.",
+  "Sundurma kapama": "karar: müştemilatın panel çatısının eğik kenarlarında, sandviç panelin kenarını örter (Lokman, 10 Ekim 2026: \"adını sundurma kapama diyelim\"): 6,74 m ÷ (2,5 − 0,20) → 3. KT-01'in listesinde yok."
+ }
+}

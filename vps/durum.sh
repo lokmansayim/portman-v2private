@@ -15,6 +15,7 @@ echo "== Portman durum · salt okunur · $(date '+%Y-%m-%d %H:%M:%S %Z') · alan
 echo "-- sürüm"
 echo "   guncel: $( [ -L "$KOK/guncel" ] && cat "$KOK/guncel/SURUM" 2>/dev/null || echo yok ) · onceki: $( [ -L "$KOK/onceki" ] && cat "$KOK/onceki/SURUM" 2>/dev/null || echo yok ) · sürüm dizinleri: $(ls -1d "$KOK/surumler"/*/ 2>/dev/null | wc -l)"
 echo "   perspektif (VTK, BK-07): $(cat "$KOK/guncel/PERSPEKTIF" 2>/dev/null || echo 'kayıt yok (bu sürümde denenmedi)')"
+echo "   genel motor (İE-08): $(cat "$KOK/guncel/GENEL" 2>/dev/null || echo 'kayıt yok (bu sürümde denenmedi)')"
 echo "-- çekirdek (BK-07)"
 REBOOT_REQ="${PM_REBOOT_REQ:-/var/run/reboot-required}"; BOOT_DIR="${PM_BOOT_DIR:-/boot}"
 KURULU="$(ls -1 "$BOOT_DIR"/vmlinuz-* 2>/dev/null | sed 's/.*vmlinuz-//' | sort -V | tail -1 || true)"

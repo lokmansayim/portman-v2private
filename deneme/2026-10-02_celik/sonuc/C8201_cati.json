@@ -1,0 +1,79 @@
+{
+ "ayak_izi": [
+  1094,
+  750
+ ],
+ "plan": [
+  1154,
+  810
+ ],
+ "mahya_uzunlugu": 344,
+ "mahya_yonu": "x",
+ "z_sacak": 288.424,
+ "z_mahya": 422.074,
+ "plan_m2": 93.474,
+ "yuzey_m2": 98.432,
+ "sacak_alti_m2": 11.424,
+ "veranda_tavani_m2": 18.3,
+ "sacak": 30,
+ "egim": 0.33,
+ "z_sacak_alti": 270,
+ "z_makas_sacak": 280,
+ "z_makas_mahya": 413.65,
+ "panel_kalinligi": 8,
+ "panel_dusey": 8.424,
+ "alin_yuksekligi": 18.424,
+ "alin_gonye_kesimde": 17.597,
+ "alin_cevre_m": 39.28,
+ "alin_m2": 7.237,
+ "kirma_adedi": 4,
+ "kirma_plan_boyu": 572.756,
+ "kirma_boyu": 588.143,
+ "mahya_hatti_toplam": 2696.572,
+ "mahya_parca_boyu": 280,
+ "mahya_parca_adedi_bindirmesiz": 10,
+ "mahya_bindirme": 20,
+ "mahya_parca_adedi": 11,
+ "inis_noktalari": [
+  [
+   -30,
+   -30,
+   "kose"
+  ],
+  [
+   1124,
+   -30,
+   "kose"
+  ],
+  [
+   1124,
+   780,
+   "kose"
+  ],
+  [
+   -30,
+   780,
+   "kose"
+  ],
+  [
+   547.0,
+   -30,
+   "orta"
+  ],
+  [
+   547.0,
+   780,
+   "orta"
+  ]
+ ],
+ "inis_adedi": 6,
+ "inis_kaynagi": "kural",
+ "cephe": [
+  1094,
+  750
+ ],
+ "inis_kurali": "köşeler; boyu 9 m'yi geçen dere hatlarının ortası",
+ "oturum_m2": 82.05,
+ "yontem": "panel",
+ "kaplama": "tek_kat_panel"
+}

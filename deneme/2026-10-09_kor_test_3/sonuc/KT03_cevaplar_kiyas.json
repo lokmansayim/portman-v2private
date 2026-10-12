@@ -1,0 +1,3499 @@
+{
+ "ozet": {
+  "kor_b": {
+   "gercek_satir": 102,
+   "ayni": 46
+  },
+  "kor_a": {
+   "gercek_satir": 102,
+   "ayni": 45
+  },
+  "duz_b": {
+   "gercek_satir": 102,
+   "ayni": 59
+  },
+  "duz_a": {
+   "gercek_satir": 102,
+   "ayni": 58
+  }
+ },
+ "siniflar": {
+  "girdi": 2,
+  "kural": 21,
+  "karar": 18,
+  "elle": 9,
+  "pafta": 6
+ },
+ "kalan_siniflar": {
+  "girdi": 0,
+  "kural": 2,
+  "karar": 25,
+  "elle": 10,
+  "pafta": 6
+ },
+ "bizim_hatamiz": 23,
+ "ne_olur": null,
+ "celik": {
+  "gercek": {
+   "adet": 92,
+   "kg": 2847
+  },
+  "kor_b": {
+   "adet": 87,
+   "kg": 2555.8
+  },
+  "kor_a": {
+   "adet": 104,
+   "kg": 3184.62
+  },
+  "duz_b": {
+   "adet": 85,
+   "kg": 2555.8
+  },
+  "duz_a": {
+   "adet": 102,
+   "kg": 3184.62
+  }
+ },
+ "adetsiz_gercek_satirlar": [
+  "Melamin kapı (alıcıya ait)"
+ ],
+ "fazla": {
+  "kor_b": [
+   {
+    "kalem": "Ters mahya kenar kutusu",
+    "ic_ad": "Ters mahya kenar kutusu",
+    "boyut": "L 21 × 40 × 21 × 2800",
+    "adet": 8,
+    "kg": null,
+    "durum": "lokman",
+    "sinif": "karar",
+    "neden": "Lokman, 7 Ekim 08:02: cumbalı çatılarda olmazsa olmaz (ters mahya × 2 = 8); bu listede yok (KT-02'nin listesinde vardı)."
+   },
+   {
+    "kalem": "Besleme kablo borusu",
+    "ic_ad": "Besleme kablo borusu",
+    "boyut": "metre",
+    "adet": 5,
+    "kg": null,
+    "durum": "motor",
+    "sinif": "karar",
+    "neden": "motorun kalemi (kat × 5 m); bu listenin şablonunda yok (KT-02'nin listesinde vardı)."
+   },
+   {
+    "kalem": "Şase pul",
+    "ic_ad": "Şase pul",
+    "boyut": "adet",
+    "adet": 52,
+    "kg": null,
+    "durum": "motor",
+    "sinif": "karar",
+    "neden": "motorun kalemi (çelik dübel kadar); bu listenin şablonunda yok (KT-02'nin listesinde vardı)."
+   },
+   {
+    "kalem": "Çırpı ipi",
+    "ic_ad": "Çırpı ipi",
+    "boyut": "adet",
+    "adet": 1,
+    "kg": null,
+    "durum": "motor",
+    "sinif": "karar",
+    "neden": "motorun kalemi (1); bu listenin şablonunda yok (KT-02'nin listesinde vardı)."
+   }
+  ],
+  "kor_a": [
+   {
+    "kalem": "Tavan paneli (makas arası)",
+    "ic_ad": "Tavan paneli (makas arası)",
+    "boyut": "roll form çelik",
+    "adet": 7,
+    "kg": 280.61,
+    "durum": "lokman"
+   },
+   {
+    "kalem": "Çatı paneli (makas üstü, sırt 80 mm)",
+    "ic_ad": "Çatı paneli (makas üstü, sırt 80 mm)",
+    "boyut": "roll form çelik",
+    "adet": 10,
+    "kg": 348.21,
+    "durum": "lokman"
+   },
+   {
+    "kalem": "Saçaklar için OUTWEAR Dış Cephe Levhası",
+    "ic_ad": "Saçaklar için Boardex",
+    "boyut": "12,5 × 1200 × 2400",
+    "adet": 5,
+    "kg": null,
+    "durum": "uydurma"
+   },
+   {
+    "kalem": "Saçak yüzü için OUTWEAR Dış Cephe Levhası",
+    "ic_ad": "Saçak yüzü için Boardex",
+    "boyut": "12,5 × 1200 × 2400",
+    "adet": 3,
+    "kg": null,
+    "durum": "muhendis"
+   },
+   {
+    "kalem": "Ters mahya kenar kutusu",
+    "ic_ad": "Ters mahya kenar kutusu",
+    "boyut": "L 21 × 40 × 21 × 2800",
+    "adet": 8,
+    "kg": null,
+    "durum": "lokman"
+   },
+   {
+    "kalem": "Besleme kablo borusu",
+    "ic_ad": "Besleme kablo borusu",
+    "boyut": "metre",
+    "adet": 5,
+    "kg": null,
+    "durum": "motor"
+   },
+   {
+    "kalem": "Şase pul",
+    "ic_ad": "Şase pul",
+    "boyut": "adet",
+    "adet": 52,
+    "kg": null,
+    "durum": "motor"
+   },
+   {
+    "kalem": "Çırpı ipi",
+    "ic_ad": "Çırpı ipi",
+    "boyut": "adet",
+    "adet": 1,
+    "kg": null,
+    "durum": "motor"
+   }
+  ],
+  "duz_b": [
+   {
+    "kalem": "Ters mahya kenar kutusu",
+    "ic_ad": "Ters mahya kenar kutusu",
+    "boyut": "L 21 × 40 × 21 × 2800",
+    "adet": 8,
+    "kg": null,
+    "durum": "lokman"
+   },
+   {
+    "kalem": "Besleme kablo borusu",
+    "ic_ad": "Besleme kablo borusu",
+    "boyut": "metre",
+    "adet": 5,
+    "kg": null,
+    "durum": "motor"
+   },
+   {
+    "kalem": "Şase pul",
+    "ic_ad": "Şase pul",
+    "boyut": "adet",
+    "adet": 52,
+    "kg": null,
+    "durum": "motor"
+   },
+   {
+    "kalem": "Çırpı ipi",
+    "ic_ad": "Çırpı ipi",
+    "boyut": "adet",
+    "adet": 1,
+    "kg": null,
+    "durum": "motor"
+   }
+  ],
+  "duz_a": [
+   {
+    "kalem": "Tavan paneli (makas arası)",
+    "ic_ad": "Tavan paneli (makas arası)",
+    "boyut": "roll form çelik",
+    "adet": 7,
+    "kg": 280.61,
+    "durum": "lokman"
+   },
+   {
+    "kalem": "Çatı paneli (makas üstü, sırt 80 mm)",
+    "ic_ad": "Çatı paneli (makas üstü, sırt 80 mm)",
+    "boyut": "roll form çelik",
+    "adet": 10,
+    "kg": 348.21,
+    "durum": "lokman"
+   },
+   {
+    "kalem": "Saçaklar için OUTWEAR Dış Cephe Levhası",
+    "ic_ad": "Saçaklar için Boardex",
+    "boyut": "12,5 × 1200 × 2400",
+    "adet": 5,
+    "kg": null,
+    "durum": "uydurma"
+   },
+   {
+    "kalem": "Saçak yüzü için OUTWEAR Dış Cephe Levhası",
+    "ic_ad": "Saçak yüzü için Boardex",
+    "boyut": "12,5 × 1200 × 2400",
+    "adet": 3,
+    "kg": null,
+    "durum": "muhendis"
+   },
+   {
+    "kalem": "Ters mahya kenar kutusu",
+    "ic_ad": "Ters mahya kenar kutusu",
+    "boyut": "L 21 × 40 × 21 × 2800",
+    "adet": 8,
+    "kg": null,
+    "durum": "lokman"
+   },
+   {
+    "kalem": "Besleme kablo borusu",
+    "ic_ad": "Besleme kablo borusu",
+    "boyut": "metre",
+    "adet": 5,
+    "kg": null,
+    "durum": "motor"
+   },
+   {
+    "kalem": "Şase pul",
+    "ic_ad": "Şase pul",
+    "boyut": "adet",
+    "adet": 52,
+    "kg": null,
+    "durum": "motor"
+   },
+   {
+    "kalem": "Çırpı ipi",
+    "ic_ad": "Çırpı ipi",
+    "boyut": "adet",
+    "adet": 1,
+    "kg": null,
+    "durum": "motor"
+   }
+  ]
+ },
+ "adet_disi": [
+  "Çelik ağırlığı (üretim dosyası yok; bizde motorun proje ortalamaları). Listede / bizde: dış duvar 1 103 / 1 140,4 (39,27 m; listede 28,1 kg/m, kural ortalaması 29,04); iç duvar 536 / 467,3 (23,66 m; listede 22,7 kg/m, kural 19,75); makas 667 / 681,3; çatı panelleri 312 / 64,9 (bizde yalnız veranda ve sundurma; kırma uçlarınınki makas satırında); baca 98 / 55,8; kolon ve kiriş 131 / 116,1; toplam 2 847 / 2 555,8 kg (listede C profiller kg'sız).",
+  "Listenin çelik toplamı 92 adet C profilleri saymıyor (onlar 3 + 3, kg'sız); bizim toplamımız sayıyor (düzeltilmiş B'de 85 = 79 panel + 6 C profil).",
+  "Et kalınlığı: listede makasların 4'ü ve çatı panellerinin 5'i 80 × 1,2; kuralda çatı çeliği 0,8. Dış duvar 140 × 1,2, iç duvar 80 × 1,2, baca 80 × 0,8 (bizimle aynı).",
+  "Listenin yeni sütunu: çelik panelin üretildiği rulo form makinesi (140'lık duvar büyük makinede, öbürleri 1,2 ve 0,8 ayarlı küçük makinede).",
+  "Saçak omegası listede \"180'lik geniş saçak omegası (140'lık duvarlar için)\" (L 2500); bizde \"saçak omegası\". Lokman, 10 Ekim 2026: \"Saçak omegası kullanılmayacak çatı ve tavan panelli sistemlerde\": çelik standardında (A) yok (öyleydi); prefabrikteki 140'lık duvar için ürün ve ölçü prefabrik kurallarıyla birlikte ele alınacak.",
+  "Sandviç panel boyları: listede 3660, 3500, 3250, 3000, 2500, 1750 (paftadaki yerleşim); bizde 3680, 3550, 3290, 3160, 2620, 2370, 1630. Paftadaki çatı alanı 112 m² (bizde 112,45 m²).",
+  "Sandviç panel kapaması listede \"tek kat panel ve sandviç panel uç kapaması\" L 2800; kuralda L 2500.",
+  "Dış cephe levhası listede 12 mm Boardex; kural 12,5 mm. Veranda tavanı satırının adı listede \"veranda, sundurma, balkon, tavan\".",
+  "Çatı izolasyonu listede Knauf mineral yünü (paket 8,64 m²); bizde çatı şiltesi 80 mm (9,6 m²/adet). Adet aynı (11).",
+  "Pencereler listede pervaz, matik, çift açılım ya da sürgülü, antrasit, Winsa yazılı; 50/50 \"vasistas\" (bizim kural yalnız 60/40'ı vasistas sayıyor). Adetler aynı.",
+  "Elektrik: listede \"duylu armatür\" ve \"LED ampul\" (bizde tijli duy ve ampul); adet aynı. Kompozit çelik kapı listede \"(sağ)\".",
+  "Bina alanı: liste 80 m² (kapalı kısım); bizde 94 (oturum 93,81 m²: veranda ve açık sundurma dahil; Lokman, 9 Ekim 22:22). Boya kovaları ikisinde de aynı çıktı (80 × 0,02 ve 94 × 0,02 → 2).",
+  "İniş: listede 11 (paftada ana çatı 8, veranda 2, sundurma 1); cevaplardan sonra bizde de 11 ve dağılım da aynı: ana çatı 8, veranda 2, sundurma 1. Kural seti 0.19 (Lokman, 10 Ekim 2026 11:39): kısa derede tek iniş (\"olsun önerine uyalım\"; sundurmanın 1,62 m'lik deresi); alçak çatının üstüne düşen köşede iniş var (\"veranda çatısının üstüne iniş oluyor ama dere veranda çatısının hemen üstünde 15 cm içerde bitiyor akan su dereden verandaya iniyor\"), yalnız tek inişli küçük bir çatının (sundurma) üstüne düşen iç köşede yok (10:18: \"İniş olmasın\"). İnişlerin yerleri de paftadaki gibi.",
+  "Sundurma kapama (eğik kenarlar) gerçek listedeki \"SIFIR ALIN SACI (SUNDURMA VE VERANDA)\" satırıyla kıyaslandı: adı Lokman'ın (10 Ekim 2026). Listede 5,2 m ÷ 2,5 → 3; bizde 6,08 m ÷ (2,5 − 0,20) → 3."
+ ],
+ "giris": "Üçüncü kör test (KT-03), Lokman'ın 10 Ekim 2026 cevaplarından sonra. Gerçek listenin adetli her satırı, dondurulan iki listemizle (commit 1f7ba6c) ve düzeltilmiş tanımdan güncel kural setiyle (0.19) çıkan listelerle. Cevaplar yazıldığı gibi: (1) \"Yüklediğim görsellere bak aslında yanlarda boardex kaplanacak ama yandan sandviç panel kötü görünmesin diye biz orayı özel bükümlü kapama yapıyoruz\"; saçak için \"Saçakta yüklediğim görsellere bak\"; eğik kenar için \"Eğik kenar dediğim gibi adını sundurma kapama diyelim\"; Boardex şeridi ve tavan için \"Evet\"; iniş için \"İniş olmasın\" ve 11:39'da kısa dere için \"olsun önerine uyalım\", veranda için \"veranda çatısının üstüne iniş oluyor ama dere veranda çatısının hemen üstünde 15 cm içerde bitiyor akan su dereden verandaya iniyor\"; müştemilat için \"hayır istediğim o 5 görseldeki gibi olması çok güzel duruyor\" (tek eğimli çatı panelli bütün çatılar beş fotoğraftaki gibi: saçakta dere ve özel büküm saçak sacı, yanlarda sundurma kapama, kenarda Boardex şeridi yok, veranda ve sundurmanın tavanı saçağıyla); (2) \"Zaten üretim dosyası vermeyeceğiz sen kendin oluşturacaksın paftayı\" (kırma uçlarının çatı panelleri bizim paftamızdan sayılacak; pafta kuralları sıradaki iş); (3) \"Çatı çıkış kapağı yok\"; (4) bacanın içi: \"sadece karkasını yapıyoruz göz ardı et\"; (5) taharet musluğu: \"Önemli değil es geç vitrifiye malzemesi varsa wc + banyo başı 4 adet\"; (6) \"Saçak omegası kullanılmayacak çatı ve tavan panelli sistemlerde\"; (7) tanım ve çizimler: \"Eklensin\" (depoda: `tanim/`, `cizimler/`). Kör listenin sınıfları 10 Ekim 00:24 kıyasındaki gibidir (o anın kaydı); \"kalan\" sütunu cevaplardan sonraki durumu yazar.",
+ "denetim_sorunlari": [],
+ "birimler": [
+  {
+   "ad": "Dış cephe duvar panelleri",
+   "grup": "Çelik panel",
+   "gercek_satirlar": [
+    12
+   ],
+   "gercek_kalemler": [
+    "DIŞ CEPHE DUVAR PANELLERİ"
+   ],
+   "gercek_boyut": [
+    "140X1,2"
+   ],
+   "gercek": 15,
+   "gercek_kg": 1103,
+   "gercek_kaba": [],
+   "kor_b": 15,
+   "kor_b_kg": 1140.4,
+   "kor_b_ayni": true,
+   "kor_a": 15,
+   "kor_a_kg": 1140.4,
+   "kor_a_ayni": true,
+   "duz_b": 15,
+   "duz_b_kg": 1140.4,
+   "duz_b_ayni": true,
+   "duz_a": 15,
+   "duz_a_kg": 1140.4,
+   "duz_a_ayni": true,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "İç cephe duvar panelleri",
+   "grup": "Çelik panel",
+   "gercek_satirlar": [
+    13
+   ],
+   "gercek_kalemler": [
+    "İÇ CEPHE DUVAR PANELLERİ"
+   ],
+   "gercek_boyut": [
+    "80X1,2"
+   ],
+   "gercek": 11,
+   "gercek_kg": 536,
+   "gercek_kaba": [],
+   "kor_b": 11,
+   "kor_b_kg": 467.29,
+   "kor_b_ayni": true,
+   "kor_a": 11,
+   "kor_a_kg": 467.29,
+   "kor_a_ayni": true,
+   "duz_b": 11,
+   "duz_b_kg": 467.29,
+   "duz_b_ayni": true,
+   "duz_a": 11,
+   "duz_a_kg": 467.29,
+   "duz_a_ayni": true,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Çatı makas panelleri (1,2 ve 0,8)",
+   "grup": "Çelik panel",
+   "gercek_satirlar": [
+    14,
+    16
+   ],
+   "gercek_kalemler": [
+    "ÇATI MAKAS PANELLERİ",
+    "ÇATI MAKAS PANELLERİ"
+   ],
+   "gercek_boyut": [
+    "80X1,2",
+    "80X0,8"
+   ],
+   "gercek": 34,
+   "gercek_kg": 667,
+   "gercek_kaba": [],
+   "kor_b": 36,
+   "kor_b_kg": 681.31,
+   "kor_b_ayni": false,
+   "kor_a": 36,
+   "kor_a_kg": 681.31,
+   "kor_a_ayni": false,
+   "duz_b": 34,
+   "duz_b_kg": 681.31,
+   "duz_b_ayni": true,
+   "duz_a": 34,
+   "duz_a_kg": 681.31,
+   "duz_a_ayni": true,
+   "sinif": "girdi",
+   "neden": "makas ve dere paftasında makaslar MK02–MK13 ve MK15–MK36: 34 makas (MK01 ve MK14 numarası yok). Numaraların kesintisiz olduğunu varsayıp 36 saydık. Listede 4 × 1,2 mm + 30 × 0,8 mm = 34.",
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Çatı panelleri (1,2 ve 0,8)",
+   "grup": "Çelik panel",
+   "gercek_satirlar": [
+    15,
+    17
+   ],
+   "gercek_kalemler": [
+    "ÇATI PANELLERİ",
+    "ÇATI PANELLERİ"
+   ],
+   "gercek_boyut": [
+    "80X1,2",
+    "80X0,8"
+   ],
+   "gercek": 17,
+   "gercek_kg": 312,
+   "gercek_kaba": [],
+   "kor_b": 4,
+   "kor_b_kg": 64.86,
+   "kor_b_ayni": false,
+   "kor_a": 4,
+   "kor_a_kg": 64.86,
+   "kor_a_ayni": false,
+   "duz_b": 4,
+   "duz_b_kg": 64.86,
+   "duz_b_ayni": false,
+   "duz_a": 4,
+   "duz_a_kg": 64.86,
+   "duz_a_ayni": false,
+   "sinif": "kural",
+   "neden": "katalog yolunda (üretim dosyası yok) kırma uçlarının çatı panelleri ayrı satır değil; ağırlıkları makas satırındaki ortalamanın içinde (liste öncesi karar 1). Paftada Ç01–Ç18 (Ç10 yok) = 17 panel: kırma uçlarında 13, veranda ve sundurmada 4 (bizim satırımız). Listede 5 × 1,2 + 12 × 0,8 = 17.",
+   "pay": null,
+   "kalan": "kural: kırma uçlarının çatı panelleri bizim paftamızdan sayılacak (Lokman, 10 Ekim 2026: \"sen kendin oluşturacaksın paftayı\"); makas, dere ve panel yerleşiminin kuralları sıradaki iş. Bugün bizde yalnız veranda ve sundurmanın 4 paneli.",
+   "not": null
+  },
+  {
+   "ad": "Baca panelleri",
+   "grup": "Çelik panel",
+   "gercek_satirlar": [
+    18
+   ],
+   "gercek_kalemler": [
+    "BACA PANELLERİ"
+   ],
+   "gercek_boyut": [
+    "80X0,8"
+   ],
+   "gercek": 8,
+   "gercek_kg": 98,
+   "gercek_kaba": [],
+   "kor_b": 8,
+   "kor_b_kg": 55.83,
+   "kor_b_ayni": true,
+   "kor_a": 8,
+   "kor_a_kg": 55.83,
+   "kor_a_ayni": true,
+   "duz_b": 8,
+   "duz_b_kg": 55.83,
+   "duz_b_ayni": true,
+   "duz_a": 8,
+   "duz_a_kg": 55.83,
+   "duz_a_ayni": true,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Kolon ve kiriş panelleri",
+   "grup": "Çelik panel",
+   "gercek_satirlar": [
+    19
+   ],
+   "gercek_kalemler": [
+    "KOLON KİRİŞ PANELLERİ"
+   ],
+   "gercek_boyut": [
+    "80X1,2"
+   ],
+   "gercek": 7,
+   "gercek_kg": 131,
+   "gercek_kaba": [],
+   "kor_b": 7,
+   "kor_b_kg": 116.11,
+   "kor_b_ayni": true,
+   "kor_a": 7,
+   "kor_a_kg": 116.11,
+   "kor_a_ayni": true,
+   "duz_b": 7,
+   "duz_b_kg": 116.11,
+   "duz_b_ayni": true,
+   "duz_a": 7,
+   "duz_a_kg": 116.11,
+   "duz_a_ayni": true,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Parça C profil 1,2",
+   "grup": "Çelik panel",
+   "gercek_satirlar": [
+    20
+   ],
+   "gercek_kalemler": [
+    "Boy C Profil"
+   ],
+   "gercek_boyut": [
+    "80X1,2"
+   ],
+   "gercek": 3,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 3,
+   "kor_b_kg": 15,
+   "kor_b_ayni": true,
+   "kor_a": 3,
+   "kor_a_kg": 15,
+   "kor_a_ayni": true,
+   "duz_b": 3,
+   "duz_b_kg": 15,
+   "duz_b_ayni": true,
+   "duz_a": 3,
+   "duz_a_kg": 15,
+   "duz_a_ayni": true,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Parça C profil 0,8",
+   "grup": "Çelik panel",
+   "gercek_satirlar": [
+    21
+   ],
+   "gercek_kalemler": [
+    "Boy C Profil"
+   ],
+   "gercek_boyut": [
+    "80X0,8"
+   ],
+   "gercek": 3,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 3,
+   "kor_b_kg": 15,
+   "kor_b_ayni": true,
+   "kor_a": 3,
+   "kor_a_kg": 15,
+   "kor_a_ayni": true,
+   "duz_b": 3,
+   "duz_b_kg": 15,
+   "duz_b_ayni": true,
+   "duz_a": 3,
+   "duz_a_kg": 15,
+   "duz_a_ayni": true,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Tavan omegası",
+   "grup": "Metal aksam",
+   "gercek_satirlar": [
+    24
+   ],
+   "gercek_kalemler": [
+    "60'LÜ DUVAR OMEGASI (TAVAN)"
+   ],
+   "gercek_boyut": [
+    "L:3750"
+   ],
+   "gercek": 40,
+   "gercek_kg": null,
+   "gercek_kaba": [
+    35.00274
+   ],
+   "kor_b": 31,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": null,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": 31,
+   "duz_b_kg": null,
+   "duz_b_ayni": false,
+   "duz_a": null,
+   "duz_a_kg": null,
+   "duz_a_ayni": false,
+   "sinif": "karar",
+   "neden": "yöntem B kalemi; çelikte tavan omegası yok (Lokman, 7 Ekim 07:45). Kural tavan alanından (114,2 m ÷ 3,75 = 31); liste paftadaki toplam boydan: 127,76 ÷ 3,65 + 5 = 40 (Eylül 2026 uygulaması; katmanla 40).",
+   "pay": null,
+   "kalan": "karar: yöntem B kalemi; listede paftadaki boy + 5.",
+   "not": null
+  },
+  {
+   "ad": "Köşebent",
+   "grup": "Metal aksam",
+   "gercek_satirlar": [
+    25
+   ],
+   "gercek_kalemler": [
+    "KÖŞEBENT"
+   ],
+   "gercek_boyut": [
+    "30*30*2500"
+   ],
+   "gercek": 70,
+   "gercek_kg": null,
+   "gercek_kaba": [
+    69.348
+   ],
+   "kor_b": 74,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": 74,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": 74,
+   "duz_b_kg": null,
+   "duz_b_ayni": false,
+   "duz_a": 74,
+   "duz_a_kg": null,
+   "duz_a_ayni": false,
+   "sinif": "elle",
+   "neden": "listede toplam boy 173,37 m ÷ 2,5 = 70; boyun nasıl bulunduğu formülde yok. Bizde kural (mühendis, 4 Ekim): oda tavan çevreleri 84,42 + veranda tavanı çevresi 20,14 + 29 iç köşe × 2,7 = 182,86 m → 74.",
+   "pay": null,
+   "kalan": "elle: listenin toplam boyu formülsüz.",
+   "not": null
+  },
+  {
+   "ad": "Aşık",
+   "grup": "Metal aksam",
+   "gercek_satirlar": [
+    26
+   ],
+   "gercek_kalemler": [
+    "AŞIK"
+   ],
+   "gercek_boyut": [
+    "L:4200"
+   ],
+   "gercek": 52,
+   "gercek_kg": null,
+   "gercek_kaba": [
+    45.609756
+   ],
+   "kor_b": 47,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": null,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": 47,
+   "duz_b_kg": null,
+   "duz_b_ayni": false,
+   "duz_a": null,
+   "duz_a_kg": null,
+   "duz_a_ayni": false,
+   "sinif": "karar",
+   "neden": "yöntem B kalemi. Boy çok yakın (bizde 185,5 m, listede paftadan 187 m); formül farklı: kural × 1,05 ÷ 4,2 = 47, liste 187 ÷ 4,1 = 45,6 ve adet 52 (Eylül 2026 uygulaması × 1,15 ÷ 4,1 = 52,5; katmanla 53).",
+   "pay": null,
+   "kalan": "karar: yöntem B kalemi; formül.",
+   "not": null
+  },
+  {
+   "ad": "Alın sacı (veranda ve sundurma)",
+   "grup": "Metal aksam",
+   "gercek_satirlar": [
+    27
+   ],
+   "gercek_kalemler": [
+    "SIFIR ALIN SACI (SUNDURMA VE VERANDA)"
+   ],
+   "gercek_boyut": [
+    "L:2500"
+   ],
+   "gercek": 3,
+   "gercek_kg": null,
+   "gercek_kaba": [
+    2.08
+   ],
+   "kor_b": null,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": null,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": 3,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 3,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": "kural",
+   "neden": "listede veranda ve sundurmanın tek eğimli panel çatılarının eğik kenarlarında \"sıfır alın sacı\" var (5,2 m ÷ 2,5 → 3). Kuralımız (KT-01'in çatı panelli müştemilatından) çatı panelli çatıda alın sacı yazmıyor; kenarı Boardex şeridi sayıyor.",
+   "pay": "kural: eğik kenarlarda sundurma kapama (Lokman, 10 Ekim 2026: \"adını sundurma kapama diyelim\"): 6,08 m ÷ (2,5 − 0,20) → 3",
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Saçak sacı",
+   "grup": "Metal aksam",
+   "gercek_satirlar": [
+    28
+   ],
+   "gercek_kalemler": [
+    "SAÇAK SAÇI (30'LUK) (ANTRASİT)"
+   ],
+   "gercek_boyut": [
+    "L:2500"
+   ],
+   "gercek": 19,
+   "gercek_kg": null,
+   "gercek_kaba": [
+    18.532
+   ],
+   "kor_b": 19,
+   "kor_b_kg": null,
+   "kor_b_ayni": true,
+   "kor_a": null,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": 19,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": null,
+   "duz_a_kg": null,
+   "duz_a_ayni": false,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Özel büküm saçak sacı",
+   "grup": "Metal aksam",
+   "gercek_satirlar": [
+    29
+   ],
+   "gercek_kalemler": [
+    "ÖZEL BÜKÜM SAÇAK SAÇI"
+   ],
+   "gercek_boyut": [
+    "L:2500"
+   ],
+   "gercek": 3,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": null,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": null,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": 3,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 3,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": "kural",
+   "neden": "listede veranda ve sundurma çatısının saçaklarında özel büküm saçak sacı (3; iki saçak 5,7 m). Kuralımızda çatı panelli çatıda saçak sacı yok; böyle bir kalem de yok.",
+   "pay": "kural: çatı panelli çatının saçağında, derenin altında (Lokman, 10 Ekim 2026: beş fotoğraf): 5,72 m ÷ (2,5 − 0,20) → 3",
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Saçak omegası (geniş, 140'lık duvar)",
+   "grup": "Metal aksam",
+   "gercek_satirlar": [
+    30
+   ],
+   "gercek_kalemler": [
+    "180'LÜK GENİŞ SAÇAK OMEGASI (140'LIK DUVARLAR İÇİN)"
+   ],
+   "gercek_boyut": [
+    "180*2500"
+   ],
+   "gercek": 16,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 21,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": null,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": 21,
+   "duz_b_kg": null,
+   "duz_b_ayni": false,
+   "duz_a": null,
+   "duz_a_kg": null,
+   "duz_a_ayni": false,
+   "sinif": "karar",
+   "neden": "yöntem B kalemi. Kural her saçak kenarını ayrı yukarı yuvarlıyor (2025 listelerinden; 21); liste saçaksız cephe boyundan: 40 ÷ 2,5 = 16 (Eylül 2026 katmanı da 16 veriyor; bizim cephe boyu 37,9 m). Listede 140'lık duvar için 180'lik geniş saçak omegası (ürün adı ve ölçüsü: adet dışı farklarda).",
+   "pay": null,
+   "kalan": "karar: yöntem B kalemi; formül.",
+   "not": null
+  },
+  {
+   "ad": "Dış cephe Boardex",
+   "grup": "Dış cephe kaplama",
+   "gercek_satirlar": [
+    32
+   ],
+   "gercek_kalemler": [
+    "BOARDEX"
+   ],
+   "gercek_boyut": [
+    "12x1200x2400"
+   ],
+   "gercek": 39,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 40,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": 40,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": 39,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 39,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": "kural",
+   "neden": "çatı panelli veranda ve sundurmanın saçak ve alınlarına kuralımız Boardex şeridi ekledi (11,8 m × 0,25 m = 2,9 m²); listede bu kenarlar sacla (özel büküm saçak sacı, sıfır alın sacı). Şerit çıkınca 103,0 m² → 39 (listedeki adet).",
+   "pay": "kural: kenarda Boardex şeridi yok (Lokman, 10 Ekim 2026: \"Evet\"): şerit (3,0 m²) çıktı, 40 → 39",
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Veranda ve sundurma tavanı (Boardex)",
+   "grup": "Dış cephe kaplama",
+   "gercek_satirlar": [
+    33
+   ],
+   "gercek_kalemler": [
+    "BOARDEX (VERANDA-SUNDURMA-BALKON-TAVAN)"
+   ],
+   "gercek_boyut": [
+    "12x1200x2400"
+   ],
+   "gercek": 7,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 6,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": 6,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": 7,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 7,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": "kural",
+   "neden": "listede veranda ve sundurmanın tavanı çatılarının saçağıyla birlikte (veranda çatısı 14,84 m² paftada + sundurma; 16,8–17,5 m² → 7). Bizde dış ölçüyle 14,73 m² → 6; saçak altı için kuralımız (KT-01) 15 cm Boardex şeridi sayıyordu.",
+   "pay": "kural: tavan çatının planıyla, saçağıyla (Lokman, 10 Ekim 2026: \"Evet\"): 14,73 → 17,52 m², 6 → 7",
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Tavan alçıpan beyaz",
+   "grup": "İç cephe kaplama",
+   "gercek_satirlar": [
+    35
+   ],
+   "gercek_kalemler": [
+    "Beyaz Alçıpan (TAVAN)"
+   ],
+   "gercek_boyut": [
+    "12x1200x2500"
+   ],
+   "gercek": 23,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 22,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": 22,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": 22,
+   "duz_b_kg": null,
+   "duz_b_ayni": false,
+   "duz_a": 22,
+   "duz_a_kg": null,
+   "duz_a_ayni": false,
+   "sinif": "karar",
+   "neden": "liste tavanı karkas yüzlerinden ölçüyor görünüyor (beyaz mahaller 63,6 m² + kiriş 0,8 → 22,5 → 23); kural kaplanmış yüz (Lokman, 7 Ekim C8): 62,7 m² → 22.",
+   "pay": null,
+   "kalan": "karar: ölçünün alındığı yüz.",
+   "not": null
+  },
+  {
+   "ad": "Tavan alçıpan yeşil",
+   "grup": "İç cephe kaplama",
+   "gercek_satirlar": [
+    36
+   ],
+   "gercek_kalemler": [
+    "Yeşil Alçıpan (TAVAN)"
+   ],
+   "gercek_boyut": [
+    "12x1200x2500"
+   ],
+   "gercek": 3,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 3,
+   "kor_b_kg": null,
+   "kor_b_ayni": true,
+   "kor_a": 3,
+   "kor_a_kg": null,
+   "kor_a_ayni": true,
+   "duz_b": 3,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 3,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Duvar alçıpan beyaz",
+   "grup": "İç cephe kaplama",
+   "gercek_satirlar": [
+    37
+   ],
+   "gercek_kalemler": [
+    "Beyaz Alçıpan (DUVAR)"
+   ],
+   "gercek_boyut": [
+    "12x1200x2500"
+   ],
+   "gercek": 59,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 58,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": 58,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": 58,
+   "duz_b_kg": null,
+   "duz_b_ayni": false,
+   "duz_a": 58,
+   "duz_a_kg": null,
+   "duz_a_ayni": false,
+   "sinif": "karar",
+   "neden": "liste oda çevrelerini karkas yüzünden alıyor (KT-02'deki gibi); kural kaplanmış yüz (Lokman, 7 Ekim C8): 164,9 m² → 58.",
+   "pay": null,
+   "kalan": "karar: ölçünün alındığı yüz.",
+   "not": null
+  },
+  {
+   "ad": "Duvar alçıpan yeşil",
+   "grup": "İç cephe kaplama",
+   "gercek_satirlar": [
+    38
+   ],
+   "gercek_kalemler": [
+    "Yeşil Alçıpan (DUVAR)"
+   ],
+   "gercek_boyut": [
+    "12x1200x2500"
+   ],
+   "gercek": 10,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 10,
+   "kor_b_kg": null,
+   "kor_b_ayni": true,
+   "kor_a": 10,
+   "kor_a_kg": null,
+   "kor_a_ayni": true,
+   "duz_b": 10,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 10,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "İç duvar OSB",
+   "grup": "İç cephe kaplama",
+   "gercek_satirlar": [
+    39
+   ],
+   "gercek_kalemler": [
+    "Osb TAM"
+   ],
+   "gercek_boyut": [
+    "11x1220x2440"
+   ],
+   "gercek": 70,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 68,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": 68,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": 68,
+   "duz_b_kg": null,
+   "duz_b_ayni": false,
+   "duz_a": 68,
+   "duz_a_kg": null,
+   "duz_a_ayni": false,
+   "sinif": "karar",
+   "neden": "liste OSB'yi duvar alçıpanından çeviriyor görünüyor (59 + 10 levha × 3,0 ÷ 2,98 = 69,5 → 70); kural bütün iç yüzler × 1,05 ÷ 2,98 = 67,5 → 68.",
+   "pay": null,
+   "kalan": "karar: ölçünün alındığı yüz ve formül.",
+   "not": null
+  },
+  {
+   "ad": "Duvar izolasyonu",
+   "grup": "İç cephe kaplama",
+   "gercek_satirlar": [
+    40
+   ],
+   "gercek_kalemler": [
+    "Knauf Mineral Yünü (DUVAR)"
+   ],
+   "gercek_boyut": [
+    "Paket/8,64 M2"
+   ],
+   "gercek": 29,
+   "gercek_kg": null,
+   "gercek_kaba": [
+    28.935185
+   ],
+   "kor_b": null,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": null,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": null,
+   "duz_b_kg": null,
+   "duz_b_ayni": false,
+   "duz_a": null,
+   "duz_a_kg": null,
+   "duz_a_ayni": false,
+   "sinif": "karar",
+   "neden": "Lokman, 7 Ekim 07:45: duvar izolasyonu gönderilmiyor. Listede 250 m² ÷ 8,64 = 29 paket (dış duvar iki kat + iç duvar; bizim yalıtım alanımız 249 m², aynı).",
+   "pay": null,
+   "kalan": "karar: gönderilmiyor.",
+   "not": null
+  },
+  {
+   "ad": "Sandviç panel (altı boy, toplam)",
+   "grup": "Çatı kaplamaları",
+   "gercek_satirlar": [
+    42,
+    43,
+    44,
+    45,
+    46,
+    47
+   ],
+   "gercek_kalemler": [
+    "SANDVİÇ PANEL  (100 CM KAPATIR) (ANTRASİT)",
+    "SANDVİÇ PANEL  (100 CM KAPATIR) (ANTRASİT)",
+    "SANDVİÇ PANEL  (100 CM KAPATIR) (ANTRASİT)",
+    "SANDVİÇ PANEL  (100 CM KAPATIR) (ANTRASİT)",
+    "SANDVİÇ PANEL  (100 CM KAPATIR) (ANTRASİT)",
+    "SANDVİÇ PANEL  (100 CM KAPATIR) (ANTRASİT)"
+   ],
+   "gercek_boyut": [
+    3660,
+    3500,
+    3250,
+    3000,
+    2500,
+    1750
+   ],
+   "gercek": 43,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 47,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": 47,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": 47,
+   "duz_b_kg": null,
+   "duz_b_ayni": false,
+   "duz_a": 47,
+   "duz_a_kg": null,
+   "duz_a_ayni": false,
+   "sinif": "pafta",
+   "neden": "liste adedi çatı kaplaması yerleşim paftasından alıyor (366 × 6, 350 × 16, 325 × 14, 300 × 1, 250 × 4, 175 × 2 = 43; paftada çatı alanı 112 m², bizde 112,45 m²). Bizim dizilimimiz yedi boy, 47 panel.",
+   "pay": null,
+   "kalan": "pafta: yerleşim paftasındaki dizilim.",
+   "not": null
+  },
+  {
+   "ad": "Mahya sacı",
+   "grup": "Çatı kaplamaları",
+   "gercek_satirlar": [
+    48
+   ],
+   "gercek_kalemler": [
+    "MAHYA SAÇ (ANTRASİT)"
+   ],
+   "gercek_boyut": [
+    "L:2800"
+   ],
+   "gercek": 14,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 14,
+   "kor_b_kg": null,
+   "kor_b_ayni": true,
+   "kor_a": 14,
+   "kor_a_kg": null,
+   "kor_a_ayni": true,
+   "duz_b": 14,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 14,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Sandviç panel kapaması",
+   "grup": "Çatı kaplamaları",
+   "gercek_satirlar": [
+    49
+   ],
+   "gercek_kalemler": [
+    "TEK KAT PANEL VE SANDVİÇ PANEL UÇ KAPAMASI L:2800"
+   ],
+   "gercek_boyut": [
+    "L:2800"
+   ],
+   "gercek": 19,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 21,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": 21,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": 21,
+   "duz_b_kg": null,
+   "duz_b_ayni": false,
+   "duz_a": 21,
+   "duz_a_kg": null,
+   "duz_a_ayni": false,
+   "sinif": "karar",
+   "neden": "kural L 2500, saçak boyu ÷ 2,3 (Lokman, 7 Ekim 08:02; 8 Ekim 00:45 onay): 47,25 ÷ 2,3 → 21; listede L 2800 (÷ 2,6 → 19; KT-02'deki gibi).",
+   "pay": null,
+   "kalan": "karar: parça boyu L 2500 / L 2800.",
+   "not": null
+  },
+  {
+   "ad": "Ters mahya (vadi sacı)",
+   "grup": "Çatı kaplamaları",
+   "gercek_satirlar": [
+    50
+   ],
+   "gercek_kalemler": [
+    "VADİ SAÇ (TERS MAHYA) (ANTRASİT)"
+   ],
+   "gercek_boyut": [
+    "L:2800"
+   ],
+   "gercek": 4,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 4,
+   "kor_b_kg": null,
+   "kor_b_ayni": true,
+   "kor_a": 4,
+   "kor_a_kg": null,
+   "kor_a_ayni": true,
+   "duz_b": 4,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 4,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Damlalık (duvar dibi ve baca; bizde özel mahya)",
+   "grup": "Çatı kaplamaları",
+   "gercek_satirlar": [
+    51
+   ],
+   "gercek_kalemler": [
+    "DAMLALIK (ANTRASİT)"
+   ],
+   "gercek_boyut": [
+    "L:2800"
+   ],
+   "gercek": 6,
+   "gercek_kg": null,
+   "gercek_kaba": [
+    5.130769
+   ],
+   "kor_b": 4,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": 4,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": 4,
+   "duz_b_kg": null,
+   "duz_b_ayni": false,
+   "duz_a": 4,
+   "duz_a_kg": null,
+   "duz_a_ayni": false,
+   "sinif": "karar",
+   "neden": "çatının duvara dayandığı kenar kuralda özel mahya satırında (kural seti 0.14; damlalık listeden çıkarıldı, Lokman 4 Ekim 15:18): 9,62 m ÷ 2,6 → 4. Listede damlalık: (duvar dibi 10,9 m + bacanın çevresi 2 × (0,84 + 0,38)) ÷ 2,6 → 6.",
+   "pay": null,
+   "kalan": "karar: kalem ve bacanın çevresi.",
+   "not": null
+  },
+  {
+   "ad": "Çatı çıkış kapağı",
+   "grup": "Çatı kaplamaları",
+   "gercek_satirlar": [
+    52
+   ],
+   "gercek_kalemler": [
+    "ÇATI ÇIKIŞ KAPAĞI (ÇATI KAPLAMASIYL UYUMLU)"
+   ],
+   "gercek_boyut": [
+    "ÖZEL ÖLÇÜ"
+   ],
+   "gercek": 1,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": null,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": null,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": null,
+   "duz_b_kg": null,
+   "duz_b_ayni": false,
+   "duz_a": null,
+   "duz_a_kg": null,
+   "duz_a_ayni": false,
+   "sinif": "kural",
+   "neden": "planda holde \"çatı çıkış kapağı 90 × 60\" çizili; listede çatı kaplamalarında \"çatı çıkış kapağı (çatı kaplamasıyla uyumlu, özel ölçü)\" 1 adet, ayrıca depo grubunda acil müdahale kapağı 1 (bizde de 1). Çatı çıkış kapağı için kuralımız yok.",
+   "pay": null,
+   "kalan": "karar: Lokman, 10 Ekim 2026: \"Çatı çıkış kapağı yok\". Acil müdahale kapağı ayrı (her yapıya 1; tuttu).",
+   "not": null
+  },
+  {
+   "ad": "İzolasyon bandı (mahya, baca)",
+   "grup": "Çatı kaplamaları",
+   "gercek_satirlar": [
+    53
+   ],
+   "gercek_kalemler": [
+    "İZOLASYON BANDI (MAHYA,BACA VS.)"
+   ],
+   "gercek_boyut": [
+    "ADET"
+   ],
+   "gercek": 7,
+   "gercek_kg": null,
+   "gercek_kaba": [
+    6.964
+   ],
+   "kor_b": 6,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": 6,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": 6,
+   "duz_b_kg": null,
+   "duz_b_ayni": false,
+   "duz_a": 6,
+   "duz_a_kg": null,
+   "duz_a_ayni": false,
+   "sinif": "karar",
+   "neden": "liste formülü damlalığı da sayıyor: (mahya 14 + vadi 4 + damlalık 6) × 2,8 + baca 2,44 = 69,6 m → 7. Kural (mühendis, 4 Ekim; damlalık terimi yok: Lokman): (14 + 4) × 2,8 + baca çevresi 3,04 = 53,4 m → 6. Eylül 2026 katmanı 7.",
+   "pay": null,
+   "kalan": "karar: damlalık terimi.",
+   "not": null
+  },
+  {
+   "ad": "Çatı izolasyonu",
+   "grup": "Çatı kaplamaları",
+   "gercek_satirlar": [
+    54
+   ],
+   "gercek_kalemler": [
+    "KNAUF MİNERAL YÜNÜ (ÇATI)"
+   ],
+   "gercek_boyut": [
+    "PAKET/8,64 M2"
+   ],
+   "gercek": 11,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 11,
+   "kor_b_kg": null,
+   "kor_b_ayni": true,
+   "kor_a": 11,
+   "kor_a_kg": null,
+   "kor_a_ayni": true,
+   "duz_b": 11,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 11,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Metal dere",
+   "grup": "Dere",
+   "gercek_satirlar": [
+    56
+   ],
+   "gercek_kalemler": [
+    "METAL DERE (ANTRASİT)"
+   ],
+   "gercek_boyut": [
+    "L:4000"
+   ],
+   "gercek": 13,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 11,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": 11,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": 13,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 13,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": "kural",
+   "neden": "listede veranda ve sundurma çatısının saçaklarında da dere var (dere paftasında da): 41,52 + 5,72 = 47,24 m → 13. Kuralımız (KT-01'in çatı panelli müştemilatı) çatı panelli çatıda dere yazmıyor: 11.",
+   "pay": "kural: çatı panelli çatıların saçağında dere (Lokman, 10 Ekim 2026: beş fotoğraf): 41,52 + 5,72 = 47,25 m, 11 → 13",
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Dere kapağı",
+   "grup": "Dere",
+   "gercek_satirlar": [
+    57
+   ],
+   "gercek_kalemler": [
+    "DERE KAPAĞI (ANTRASİT)"
+   ],
+   "gercek_boyut": [
+    "ADET"
+   ],
+   "gercek": 4,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": null,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": null,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": 4,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 4,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": "kural",
+   "neden": "veranda ve sundurma derelerinin dört serbest ucu (aynı neden; kuralımızda dere yoktu).",
+   "pay": "kural: veranda ve sundurmanın derelerinin dört serbest ucu (Lokman, 10 Ekim 2026): 0 → 4",
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Dere iniş aparatı",
+   "grup": "Dere",
+   "gercek_satirlar": [
+    58
+   ],
+   "gercek_kalemler": [
+    "DERE İNİŞ APARATI (ZIVANA)"
+   ],
+   "gercek_boyut": [
+    "ADET"
+   ],
+   "gercek": 11,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 9,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": 9,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": 11,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 11,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": "kural",
+   "neden": "iniş sayısı: paftada 11 (ana çatı 8, veranda 2, sundurma 1); bizde 9 (8 köşe + 1 orta). Ana çatıda sundurmanın üstüne düşen iç köşede paftada iniş yok; veranda ve sundurmada dere olmadığı için inişleri yoktu.",
+   "pay": "kural: çatı panelli çatıların (veranda, sundurma) saçağında dere; kısa derede tek iniş; tek inişli küçük bir alçak çatının (sundurma) üstüne düşen köşede iniş yok, verandanın üstüne düşen köşelerde var (Lokman, 10 Ekim 2026; kural seti 0.19): iniş ana çatı 9 → 8, veranda 2, sundurma 1 = 11 (paftadaki gibi)",
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Dere iniş borusu",
+   "grup": "Dere",
+   "gercek_satirlar": [
+    59
+   ],
+   "gercek_kalemler": [
+    "METAL İNİŞ BORUSU (ANTRASİT)"
+   ],
+   "gercek_boyut": [
+    "L:3000"
+   ],
+   "gercek": 11,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 9,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": 9,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": 11,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 11,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": "kural",
+   "neden": "iniş sayısına bağlı (aynı neden): 9 / 11.",
+   "pay": "kural: çatı panelli çatıların (veranda, sundurma) saçağında dere; kısa derede tek iniş; tek inişli küçük bir alçak çatının (sundurma) üstüne düşen köşede iniş yok, verandanın üstüne düşen köşelerde var (Lokman, 10 Ekim 2026; kural seti 0.19): iniş ana çatı 9 → 8, veranda 2, sundurma 1 = 11 (paftadaki gibi)",
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Açık dirsek",
+   "grup": "Dere",
+   "gercek_satirlar": [
+    60
+   ],
+   "gercek_kalemler": [
+    "METAL AÇIK DİRSEK (ANTRASİT)"
+   ],
+   "gercek_boyut": [
+    "ADET"
+   ],
+   "gercek": 22,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 18,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": 18,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": 22,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 22,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": "kural",
+   "neden": "iniş sayısına bağlı (iniş × 2): 18 / 22.",
+   "pay": "kural: çatı panelli çatıların (veranda, sundurma) saçağında dere; kısa derede tek iniş; tek inişli küçük bir alçak çatının (sundurma) üstüne düşen köşede iniş yok, verandanın üstüne düşen köşelerde var (Lokman, 10 Ekim 2026; kural seti 0.19): iniş ana çatı 9 → 8, veranda 2, sundurma 1 = 11 (paftadaki gibi) (× 2)",
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Kapalı dirsek",
+   "grup": "Dere",
+   "gercek_satirlar": [
+    61
+   ],
+   "gercek_kalemler": [
+    "METAL KAPALI DİRSEK (ANTRASİT)"
+   ],
+   "gercek_boyut": [
+    "ADET"
+   ],
+   "gercek": 11,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 9,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": 9,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": 11,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 11,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": "kural",
+   "neden": "iniş sayısına bağlı: 9 / 11.",
+   "pay": "kural: çatı panelli çatıların (veranda, sundurma) saçağında dere; kısa derede tek iniş; tek inişli küçük bir alçak çatının (sundurma) üstüne düşen köşede iniş yok, verandanın üstüne düşen köşelerde var (Lokman, 10 Ekim 2026; kural seti 0.19): iniş ana çatı 9 → 8, veranda 2, sundurma 1 = 11 (paftadaki gibi)",
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "İniş kelepçesi",
+   "grup": "Dere",
+   "gercek_satirlar": [
+    62
+   ],
+   "gercek_kalemler": [
+    "METAL İNİŞ KELEPÇESİ (ANTRASİT)"
+   ],
+   "gercek_boyut": [
+    "ADET"
+   ],
+   "gercek": 22,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 18,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": 18,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": 22,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 22,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": "kural",
+   "neden": "iniş sayısına bağlı (iniş × 2): 18 / 22.",
+   "pay": "kural: çatı panelli çatıların (veranda, sundurma) saçağında dere; kısa derede tek iniş; tek inişli küçük bir alçak çatının (sundurma) üstüne düşen köşede iniş yok, verandanın üstüne düşen köşelerde var (Lokman, 10 Ekim 2026; kural seti 0.19): iniş ana çatı 9 → 8, veranda 2, sundurma 1 = 11 (paftadaki gibi) (× 2)",
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Dere kelepçesi",
+   "grup": "Dere",
+   "gercek_satirlar": [
+    63
+   ],
+   "gercek_kalemler": [
+    "DERE KELEPÇESİ"
+   ],
+   "gercek_boyut": [
+    "ADET"
+   ],
+   "gercek": 110,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 88,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": 88,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": 104,
+   "duz_b_kg": null,
+   "duz_b_ayni": false,
+   "duz_a": 104,
+   "duz_a_kg": null,
+   "duz_a_ayni": false,
+   "sinif": "kural",
+   "neden": "dere adedine bağlı (dere × 8): 11 dereyle 88. Listede 110 (13 dereyle kural 104 verir; 110 iniş × 10'a uyuyor).",
+   "pay": "kural: dere adedi 11 → 13 (çatı panelli çatıların deresi; Lokman, 10 Ekim 2026): 88 → 104",
+   "kalan": "elle: listede 110, formülsüz; kural dere adedi × 8 = 13 × 8 = 104",
+   "not": null
+  },
+  {
+   "ad": "PVC pencere 150/130",
+   "grup": "Kapı ve pencere",
+   "gercek_satirlar": [
+    65
+   ],
+   "gercek_kalemler": [
+    "PVC PENCERE+PERVAZ+MATİK+ÇİFT AÇILIM+ANTRASİT+WINSA MARKA"
+   ],
+   "gercek_boyut": [
+    "150X130"
+   ],
+   "gercek": 3,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 3,
+   "kor_b_kg": null,
+   "kor_b_ayni": true,
+   "kor_a": 3,
+   "kor_a_kg": null,
+   "kor_a_ayni": true,
+   "duz_b": 3,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 3,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "PVC pencere 200/220 (sürgülü)",
+   "grup": "Kapı ve pencere",
+   "gercek_satirlar": [
+    66
+   ],
+   "gercek_kalemler": [
+    "PVC PENCERE+PERVAZ+MATİK+SÜRGÜLÜ+ANTRASİT+WINSA MARKA"
+   ],
+   "gercek_boyut": [
+    "200X220"
+   ],
+   "gercek": 2,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 2,
+   "kor_b_kg": null,
+   "kor_b_ayni": true,
+   "kor_a": 2,
+   "kor_a_kg": null,
+   "kor_a_ayni": true,
+   "duz_b": 2,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 2,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "PVC pencere 100/70",
+   "grup": "Kapı ve pencere",
+   "gercek_satirlar": [
+    67
+   ],
+   "gercek_kalemler": [
+    "PVC PENCERE+PERVAZ+MATİK+ÇİFT AÇILIM+ANTRASİT+WINSA MARKA"
+   ],
+   "gercek_boyut": [
+    "100X70"
+   ],
+   "gercek": 1,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 1,
+   "kor_b_kg": null,
+   "kor_b_ayni": true,
+   "kor_a": 1,
+   "kor_a_kg": null,
+   "kor_a_ayni": true,
+   "duz_b": 1,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 1,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "PVC vasistas 50/50",
+   "grup": "Kapı ve pencere",
+   "gercek_satirlar": [
+    68
+   ],
+   "gercek_kalemler": [
+    "PVC VASİSTAS+ANTRASİT+WINSA MARKA"
+   ],
+   "gercek_boyut": [
+    "50X50"
+   ],
+   "gercek": 1,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 1,
+   "kor_b_kg": null,
+   "kor_b_ayni": true,
+   "kor_a": 1,
+   "kor_a_kg": null,
+   "kor_a_ayni": true,
+   "duz_b": 1,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 1,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Kompozit çelik kapı",
+   "grup": "Kapı ve pencere",
+   "gercek_satirlar": [
+    70
+   ],
+   "gercek_kalemler": [
+    "Kompozit Çelik Kapı (SAĞ)"
+   ],
+   "gercek_boyut": [
+    "90*210"
+   ],
+   "gercek": 1,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 1,
+   "kor_b_kg": null,
+   "kor_b_ayni": true,
+   "kor_a": 1,
+   "kor_a_kg": null,
+   "kor_a_ayni": true,
+   "duz_b": 1,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 1,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Duylu armatür (tijli duy)",
+   "grup": "Elektrik",
+   "gercek_satirlar": [
+    72
+   ],
+   "gercek_kalemler": [
+    "DUYLU ARMATÜR"
+   ],
+   "gercek_boyut": [
+    "STANDART"
+   ],
+   "gercek": 7,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 7,
+   "kor_b_kg": null,
+   "kor_b_ayni": true,
+   "kor_a": 7,
+   "kor_a_kg": null,
+   "kor_a_ayni": true,
+   "duz_b": 7,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 7,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Yuvarlak glop",
+   "grup": "Elektrik",
+   "gercek_satirlar": [
+    73
+   ],
+   "gercek_kalemler": [
+    "YUVARLAK GLOP"
+   ],
+   "gercek_boyut": [
+    "STANDART"
+   ],
+   "gercek": 4,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 4,
+   "kor_b_kg": null,
+   "kor_b_ayni": true,
+   "kor_a": 4,
+   "kor_a_kg": null,
+   "kor_a_ayni": true,
+   "duz_b": 4,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 4,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Ampul",
+   "grup": "Elektrik",
+   "gercek_satirlar": [
+    74
+   ],
+   "gercek_kalemler": [
+    "LED AMPUL"
+   ],
+   "gercek_boyut": [
+    "ADET"
+   ],
+   "gercek": 11,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 11,
+   "kor_b_kg": null,
+   "kor_b_ayni": true,
+   "kor_a": 11,
+   "kor_a_kg": null,
+   "kor_a_ayni": true,
+   "duz_b": 11,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 11,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "NYM kablo (3 × 2,5)",
+   "grup": "Elektrik",
+   "gercek_satirlar": [
+    75
+   ],
+   "gercek_kalemler": [
+    "NYM KABLO"
+   ],
+   "gercek_boyut": [
+    "3 X 2.5"
+   ],
+   "gercek": 140,
+   "gercek_kg": null,
+   "gercek_kaba": [
+    135.1
+   ],
+   "kor_b": 133,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": 133,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": 133,
+   "duz_b_kg": null,
+   "duz_b_ayni": false,
+   "duz_a": 133,
+   "duz_a_kg": null,
+   "duz_a_ayni": false,
+   "sinif": "elle",
+   "neden": "liste formülü 9 × 9,9 + (14 + 1 + 4 × 2) × 2 = 135,1, yazılan 140 (10'a yukarı). Bizde 9 × 9,88 + (13 + 1 + 4 × 2) × 2 = 132,9 → 133; uzaklık aynı (9,88 / 9,9), tekli priz bir eksik (paftada 13).",
+   "pay": null,
+   "kalan": "elle: listenin yuvarlaması.",
+   "not": null
+  },
+  {
+   "ad": "NYM kablo (2 × 1,5)",
+   "grup": "Elektrik",
+   "gercek_satirlar": [
+    76
+   ],
+   "gercek_kalemler": [
+    "NYM KABLO"
+   ],
+   "gercek_boyut": [
+    "2 X 1.5"
+   ],
+   "gercek": 120,
+   "gercek_kg": null,
+   "gercek_kaba": [
+    111.1
+   ],
+   "kor_b": 111,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": 111,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": 111,
+   "duz_b_kg": null,
+   "duz_b_ayni": false,
+   "duz_a": 111,
+   "duz_a_kg": null,
+   "duz_a_ayni": false,
+   "sinif": "elle",
+   "neden": "liste formülü 9 × 9,9 + (5 + 3 × 2) × 2 = 111,1, yazılan 120 (10'a yukarı); bizde 110,9 → 111.",
+   "pay": null,
+   "kalan": "elle: listenin yuvarlaması.",
+   "not": null
+  },
+  {
+   "ad": "Uydu kablo",
+   "grup": "Elektrik",
+   "gercek_satirlar": [
+    77
+   ],
+   "gercek_kalemler": [
+    "UYDU KABLO"
+   ],
+   "gercek_boyut": [
+    "METRE"
+   ],
+   "gercek": 25,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 25,
+   "kor_b_kg": null,
+   "kor_b_ayni": true,
+   "kor_a": 25,
+   "kor_a_kg": null,
+   "kor_a_ayni": true,
+   "duz_b": 25,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 25,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Besleme kablosu",
+   "grup": "Elektrik",
+   "gercek_satirlar": [
+    78
+   ],
+   "gercek_kalemler": [
+    "BESLEME KABLOSU"
+   ],
+   "gercek_boyut": [
+    "5 X 6"
+   ],
+   "gercek": 5,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 5,
+   "kor_b_kg": null,
+   "kor_b_ayni": true,
+   "kor_a": 5,
+   "kor_a_kg": null,
+   "kor_a_ayni": true,
+   "duz_b": 5,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 5,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Tekli anahtar",
+   "grup": "Elektrik",
+   "gercek_satirlar": [
+    79
+   ],
+   "gercek_kalemler": [
+    "TEKLİ ANAHTAR"
+   ],
+   "gercek_boyut": [
+    "ADET"
+   ],
+   "gercek": 5,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 5,
+   "kor_b_kg": null,
+   "kor_b_ayni": true,
+   "kor_a": 5,
+   "kor_a_kg": null,
+   "kor_a_ayni": true,
+   "duz_b": 5,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 5,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Çiftli anahtar",
+   "grup": "Elektrik",
+   "gercek_satirlar": [
+    80
+   ],
+   "gercek_kalemler": [
+    "ÇİFTLİ ANAHTAR"
+   ],
+   "gercek_boyut": [
+    "ADET"
+   ],
+   "gercek": 3,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 3,
+   "kor_b_kg": null,
+   "kor_b_ayni": true,
+   "kor_a": 3,
+   "kor_a_kg": null,
+   "kor_a_ayni": true,
+   "duz_b": 3,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 3,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Tekli priz",
+   "grup": "Elektrik",
+   "gercek_satirlar": [
+    81
+   ],
+   "gercek_kalemler": [
+    "TEKLİ PRİZ"
+   ],
+   "gercek_boyut": [
+    "ADET"
+   ],
+   "gercek": 14,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 13,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": 13,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": 13,
+   "duz_b_kg": null,
+   "duz_b_ayni": false,
+   "duz_a": 13,
+   "duz_a_kg": null,
+   "duz_a_ayni": false,
+   "sinif": "elle",
+   "neden": "elektrik paftasında 13 tekli priz (kıyastan sonra yeniden sayıldı: salon 3, yatak odası 3, çocuk odası 3, mutfak 3, banyo 1); listede 14.",
+   "pay": null,
+   "kalan": "elle: listede paftadakinden bir fazla.",
+   "not": null
+  },
+  {
+   "ad": "Çiftli priz",
+   "grup": "Elektrik",
+   "gercek_satirlar": [
+    82
+   ],
+   "gercek_kalemler": [
+    "ÇİFTLİ PRİZ"
+   ],
+   "gercek_boyut": [
+    "ADET"
+   ],
+   "gercek": 4,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 4,
+   "kor_b_kg": null,
+   "kor_b_ayni": true,
+   "kor_a": 4,
+   "kor_a_kg": null,
+   "kor_a_ayni": true,
+   "duz_b": 4,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 4,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Uydu prizi",
+   "grup": "Elektrik",
+   "gercek_satirlar": [
+    83
+   ],
+   "gercek_kalemler": [
+    "UYDU PRİZ"
+   ],
+   "gercek_boyut": [
+    "ADET"
+   ],
+   "gercek": 1,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 1,
+   "kor_b_kg": null,
+   "kor_b_ayni": true,
+   "kor_a": 1,
+   "kor_a_kg": null,
+   "kor_a_ayni": true,
+   "duz_b": 1,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 1,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Buat kasa",
+   "grup": "Elektrik",
+   "gercek_satirlar": [
+    84
+   ],
+   "gercek_kalemler": [
+    "BUAT KASA (ALÇIPAN İÇİN)"
+   ],
+   "gercek_boyut": [
+    "ADET"
+   ],
+   "gercek": 50,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 32,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": 32,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": 32,
+   "duz_b_kg": null,
+   "duz_b_ayni": false,
+   "duz_a": 32,
+   "duz_a_kg": null,
+   "duz_a_ayni": false,
+   "sinif": "karar",
+   "neden": "kural: anahtar + priz + veranda hariç oda sayısı = 8 + 18 + 6 = 32 (Lokman, 7 Ekim C6: bizdekine uy). Listede 50 (formül yok).",
+   "pay": null,
+   "kalan": "karar: formül.",
+   "not": null
+  },
+  {
+   "ad": "Sigorta kutusu",
+   "grup": "Elektrik",
+   "gercek_satirlar": [
+    85
+   ],
+   "gercek_kalemler": [
+    "SİGORTA KUTUSU"
+   ],
+   "gercek_boyut": [
+    "12 LI"
+   ],
+   "gercek": 1,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 1,
+   "kor_b_kg": null,
+   "kor_b_ayni": true,
+   "kor_a": 1,
+   "kor_a_kg": null,
+   "kor_a_ayni": true,
+   "duz_b": 1,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 1,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "W otomat (sigorta)",
+   "grup": "Elektrik",
+   "gercek_satirlar": [
+    86
+   ],
+   "gercek_kalemler": [
+    "W OTOMAT (SİGORTA)"
+   ],
+   "gercek_boyut": [
+    "25 AMPER"
+   ],
+   "gercek": 9,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 9,
+   "kor_b_kg": null,
+   "kor_b_ayni": true,
+   "kor_a": 9,
+   "kor_a_kg": null,
+   "kor_a_ayni": true,
+   "duz_b": 9,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 9,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Kaçak akım rölesi",
+   "grup": "Elektrik",
+   "gercek_satirlar": [
+    87
+   ],
+   "gercek_kalemler": [
+    "KAÇAK AKIM RÖLESİ"
+   ],
+   "gercek_boyut": [
+    "2'LÜ"
+   ],
+   "gercek": 1,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 1,
+   "kor_b_kg": null,
+   "kor_b_ayni": true,
+   "kor_a": 1,
+   "kor_a_kg": null,
+   "kor_a_ayni": true,
+   "duz_b": 1,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 1,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "İzole bant",
+   "grup": "Elektrik",
+   "gercek_satirlar": [
+    88
+   ],
+   "gercek_kalemler": [
+    "İZOLE BANT"
+   ],
+   "gercek_boyut": [
+    "ADET"
+   ],
+   "gercek": 4,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 6,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": 6,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": 6,
+   "duz_b_kg": null,
+   "duz_b_ayni": false,
+   "duz_a": 6,
+   "duz_a_kg": null,
+   "duz_a_ayni": false,
+   "sinif": "elle",
+   "neden": "kural bina m² × 0,06 (94 → 5,6 → 6; 80 ile 4,8 → 5); listede 4 (formül yok).",
+   "pay": null,
+   "kalan": "elle: listedeki sayı formülsüz.",
+   "not": null
+  },
+  {
+   "ad": "Zil",
+   "grup": "Elektrik",
+   "gercek_satirlar": [
+    89
+   ],
+   "gercek_kalemler": [
+    "ZİL"
+   ],
+   "gercek_boyut": [
+    "ADET"
+   ],
+   "gercek": 1,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 1,
+   "kor_b_kg": null,
+   "kor_b_ayni": true,
+   "kor_a": 1,
+   "kor_a_kg": null,
+   "kor_a_ayni": true,
+   "duz_b": 1,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 1,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "RYSB pul başlı",
+   "grup": "Vida",
+   "gercek_satirlar": [
+    91
+   ],
+   "gercek_kalemler": [
+    "RYSB PUL BAŞLI  ( 3.9 X 32 )"
+   ],
+   "gercek_boyut": [
+    "ADET"
+   ],
+   "gercek": 600,
+   "gercek_kg": null,
+   "gercek_kaba": [
+    600
+   ],
+   "kor_b": 705,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": 705,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": 705,
+   "duz_b_kg": null,
+   "duz_b_ayni": false,
+   "duz_a": 705,
+   "duz_a_kg": null,
+   "duz_a_ayni": false,
+   "sinif": "karar",
+   "neden": "bina alanı: kural kapalı kısım + veranda + açık sundurma = 94 m² (Lokman, 9 Ekim 22:22); liste 80 × 7,5 = 600.",
+   "pay": null,
+   "kalan": "karar: bina alanı.",
+   "not": null
+  },
+  {
+   "ad": "Alçıpan vidası",
+   "grup": "Vida",
+   "gercek_satirlar": [
+    92
+   ],
+   "gercek_kalemler": [
+    "ALÇIPAN VİDASI  ( 3.5 X 35 ) (AKILLI UÇLU)"
+   ],
+   "gercek_boyut": [
+    "ADET"
+   ],
+   "gercek": 7100,
+   "gercek_kg": null,
+   "gercek_kaba": [
+    7050
+   ],
+   "kor_b": 5750,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": 6000,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": 5750,
+   "duz_b_kg": null,
+   "duz_b_ayni": false,
+   "duz_a": 6000,
+   "duz_a_kg": null,
+   "duz_a_ayni": false,
+   "sinif": "karar",
+   "neden": "kural levha × 40 (Lokman, 7 Ekim 07:45: 40 yeterli): 139 × 40 → 5750; liste levha × 50: 141 × 50 = 7050 → 7100.",
+   "pay": null,
+   "kalan": "karar: levha başına vida.",
+   "not": null
+  },
+  {
+   "ad": "OSB ve yalıpan vidası",
+   "grup": "Vida",
+   "gercek_satirlar": [
+    93
+   ],
+   "gercek_kalemler": [
+    "OSB VE YALIPAN ( 3.9 X 32)"
+   ],
+   "gercek_boyut": [
+    "ADET"
+   ],
+   "gercek": 4000,
+   "gercek_kg": null,
+   "gercek_kaba": [
+    3500
+   ],
+   "kor_b": 3500,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": 3500,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": 3500,
+   "duz_b_kg": null,
+   "duz_b_ayni": false,
+   "duz_a": 3500,
+   "duz_a_kg": null,
+   "duz_a_ayni": false,
+   "sinif": "elle",
+   "neden": "listenin formülü OSB × 50 = 3500, yazılan 4000; bizde 3132 → 3500 (500'e yukarı).",
+   "pay": null,
+   "kalan": "elle: listenin yuvarlaması.",
+   "not": null
+  },
+  {
+   "ad": "Pencere vidası (4,8 × 70)",
+   "grup": "Vida",
+   "gercek_satirlar": [
+    94
+   ],
+   "gercek_kalemler": [
+    "PREFABRİK PENCERELER ( 4.8 X 70 )"
+   ],
+   "gercek_boyut": [
+    "ADET"
+   ],
+   "gercek": 140,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 140,
+   "kor_b_kg": null,
+   "kor_b_ayni": true,
+   "kor_a": 140,
+   "kor_a_kg": null,
+   "kor_a_ayni": true,
+   "duz_b": 140,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 140,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Trapez vida (5,5 × 25)",
+   "grup": "Vida",
+   "gercek_satirlar": [
+    95
+   ],
+   "gercek_kalemler": [
+    "( 5.5 X 25 ) TRAPEZ VİDA (AŞIK+OMEGA+KÖŞEBENT)"
+   ],
+   "gercek_boyut": [
+    "ADET"
+   ],
+   "gercek": 2100,
+   "gercek_kg": null,
+   "gercek_kaba": [
+    2100
+   ],
+   "kor_b": 1500,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": 1500,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": 1250,
+   "duz_b_kg": null,
+   "duz_b_ayni": false,
+   "duz_a": 1500,
+   "duz_a_kg": null,
+   "duz_a_ayni": false,
+   "sinif": "karar",
+   "neden": "Lokman, 7 Ekim 07:45: omega ve aşık için trapez vida konmaz (çelik panel × 10 + köşebent × 6 = 1254 → 1500); liste omega ve aşık için de sayıyor (92 × 10 + 52 × 10 + 40 × 6 + 70 × 6 = 2100).",
+   "pay": "girdi: makas 36 → 34 (çelik panel 81 → 79): 1254 → 1234, 1500 → 1250.",
+   "kalan": "karar: omega ve aşık vidası.",
+   "not": null
+  },
+  {
+   "ad": "Trapez vida (5,5 × 60)",
+   "grup": "Vida",
+   "gercek_satirlar": [
+    96
+   ],
+   "gercek_kalemler": [
+    "( 5.5 X 60 ) TRAPEZ VİDA (TRAPEZ SAC / METAL KİREMİT)"
+   ],
+   "gercek_boyut": [
+    "ADET"
+   ],
+   "gercek": 250,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 250,
+   "kor_b_kg": null,
+   "kor_b_ayni": true,
+   "kor_a": 250,
+   "kor_a_kg": null,
+   "kor_a_ayni": true,
+   "duz_b": 250,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 250,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Trapez vida (5,5 × 110)",
+   "grup": "Vida",
+   "gercek_satirlar": [
+    97
+   ],
+   "gercek_kalemler": [
+    "( 5.5X 110) TRAPEZ VİDA ( SANDVİÇ PANEL)"
+   ],
+   "gercek_boyut": [
+    "ADET"
+   ],
+   "gercek": 1000,
+   "gercek_kg": null,
+   "gercek_kaba": [
+    699.8
+   ],
+   "kor_b": 750,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": 750,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": 750,
+   "duz_b_kg": null,
+   "duz_b_ayni": false,
+   "duz_a": 750,
+   "duz_a_kg": null,
+   "duz_a_ayni": false,
+   "sinif": "elle",
+   "neden": "listenin formülü (panel boyu ÷ 200 × adet) 699,8 verir, yazılan 1000; bizde 681,8 → 750 (250'ye yukarı).",
+   "pay": null,
+   "kalan": "elle: listenin yuvarlaması.",
+   "not": null
+  },
+  {
+   "ad": "Çelik dübel",
+   "grup": "Depo",
+   "gercek_satirlar": [
+    99
+   ],
+   "gercek_kalemler": [
+    "ÇELİK DÜBEL ( KLİPSLİ )"
+   ],
+   "gercek_boyut": [
+    "ADET"
+   ],
+   "gercek": 76,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 52,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": 52,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": 52,
+   "duz_b_kg": null,
+   "duz_b_ayni": false,
+   "duz_a": 52,
+   "duz_a_kg": null,
+   "duz_a_ayni": false,
+   "sinif": "elle",
+   "neden": "kural duvar paneli × 2 = 26 × 2 = 52 (Excel motoru); listede 76 (formül yok; dış 15 + iç 11 + baca 8 + kolon 4 = 38 panel × 2 okuması uyuyor, KT-02'de bu okuma tutmuyordu).",
+   "pay": null,
+   "kalan": "elle: listedeki sayı formülsüz.",
+   "not": null
+  },
+  {
+   "ad": "8'lik trapez uç",
+   "grup": "Depo",
+   "gercek_satirlar": [
+    100
+   ],
+   "gercek_kalemler": [
+    "8 LİK TRAPEZ UÇ"
+   ],
+   "gercek_boyut": [
+    "ADET"
+   ],
+   "gercek": 6,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 7,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": 7,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": 7,
+   "duz_b_kg": null,
+   "duz_b_ayni": false,
+   "duz_a": 7,
+   "duz_a_kg": null,
+   "duz_a_ayni": false,
+   "sinif": "karar",
+   "neden": "bina alanı 94 (Lokman, 9 Ekim 22:22: açık sundurma da girer): 94 ÷ 15 → 7; listede 80 ÷ 15 → 6.",
+   "pay": null,
+   "kalan": "karar: bina alanı.",
+   "not": null
+  },
+  {
+   "ad": "PH2 uç",
+   "grup": "Depo",
+   "gercek_satirlar": [
+    101
+   ],
+   "gercek_kalemler": [
+    "PH2 UÇ"
+   ],
+   "gercek_boyut": [
+    "ADET"
+   ],
+   "gercek": 6,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 7,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": 7,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": 7,
+   "duz_b_kg": null,
+   "duz_b_ayni": false,
+   "duz_a": 7,
+   "duz_a_kg": null,
+   "duz_a_ayni": false,
+   "sinif": "karar",
+   "neden": "aynı: bina alanı 94 → 7; listede 80 → 6.",
+   "pay": null,
+   "kalan": "karar: bina alanı.",
+   "not": null
+  },
+  {
+   "ad": "230'luk kesme taşı",
+   "grup": "Depo",
+   "gercek_satirlar": [
+    102
+   ],
+   "gercek_kalemler": [
+    "230 LUK KESME TAŞI"
+   ],
+   "gercek_boyut": [
+    "ADET"
+   ],
+   "gercek": 2,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 7,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": 7,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": 7,
+   "duz_b_kg": null,
+   "duz_b_ayni": false,
+   "duz_a": 7,
+   "duz_a_kg": null,
+   "duz_a_ayni": false,
+   "sinif": "karar",
+   "neden": "Lokman, 7 Ekim 07:45: önemli değil, formül ne veriyorsa (bina ÷ 15 = 7); listede m² × 0,02 = 1,6 → 2 (Excel motoru; Eylül 2026 katmanı da 2).",
+   "pay": null,
+   "kalan": "karar: formül.",
+   "not": null
+  },
+  {
+   "ad": "İnox taş",
+   "grup": "Depo",
+   "gercek_satirlar": [
+    103
+   ],
+   "gercek_kalemler": [
+    "İNOX TAŞ"
+   ],
+   "gercek_boyut": [
+    "ADET"
+   ],
+   "gercek": 8,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 10,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": 10,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": 10,
+   "duz_b_kg": null,
+   "duz_b_ayni": false,
+   "duz_a": 10,
+   "duz_a_kg": null,
+   "duz_a_ayni": false,
+   "sinif": "karar",
+   "neden": "bina alanı 94 ÷ 10 → 10; listede 80 ÷ 10 = 8.",
+   "pay": null,
+   "kalan": "karar: bina alanı.",
+   "not": null
+  },
+  {
+   "ad": "Acil müdahale kapağı",
+   "grup": "Depo",
+   "gercek_satirlar": [
+    104
+   ],
+   "gercek_kalemler": [
+    "ACİL MÜDAHELE KAPAĞI"
+   ],
+   "gercek_boyut": [
+    "ADET"
+   ],
+   "gercek": 1,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 1,
+   "kor_b_kg": null,
+   "kor_b_ayni": true,
+   "kor_a": 1,
+   "kor_a_kg": null,
+   "kor_a_ayni": true,
+   "duz_b": 1,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 1,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Poliüretan köpük",
+   "grup": "Depo",
+   "gercek_satirlar": [
+    105
+   ],
+   "gercek_kalemler": [
+    "POLÜRETAN KÖPÜK"
+   ],
+   "gercek_boyut": [
+    "ADET"
+   ],
+   "gercek": 2,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 2,
+   "kor_b_kg": null,
+   "kor_b_ayni": true,
+   "kor_a": 2,
+   "kor_a_kg": null,
+   "kor_a_ayni": true,
+   "duz_b": 2,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 2,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Dayson",
+   "grup": "Depo",
+   "gercek_satirlar": [
+    106
+   ],
+   "gercek_kalemler": [
+    "DAYSON (ANTRASİT)"
+   ],
+   "gercek_boyut": [
+    "ADET"
+   ],
+   "gercek": 5,
+   "gercek_kg": null,
+   "gercek_kaba": [
+    3.2
+   ],
+   "kor_b": 6,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": 6,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": 6,
+   "duz_b_kg": null,
+   "duz_b_ayni": false,
+   "duz_a": 6,
+   "duz_a_kg": null,
+   "duz_a_ayni": false,
+   "sinif": "elle",
+   "neden": "listenin formülü 80 × 0,04 = 3,2, yazılan 5; kural bina m² × 0,06 (Excel motoru; Lokman, 7 Ekim: motora uy) = 5,6 → 6.",
+   "pay": null,
+   "kalan": "elle: listenin yuvarlaması.",
+   "not": null
+  },
+  {
+   "ad": "Mastik",
+   "grup": "Depo",
+   "gercek_satirlar": [
+    107
+   ],
+   "gercek_kalemler": [
+    "MASTİK (ANSTRASİT)"
+   ],
+   "gercek_boyut": [
+    "ADET"
+   ],
+   "gercek": 7,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 7,
+   "kor_b_kg": null,
+   "kor_b_ayni": true,
+   "kor_a": 7,
+   "kor_a_kg": null,
+   "kor_a_ayni": true,
+   "duz_b": 7,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 7,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Baca borusu",
+   "grup": "Depo",
+   "gercek_satirlar": [
+    108
+   ],
+   "gercek_kalemler": [
+    "BACA BORUSU"
+   ],
+   "gercek_boyut": [
+    "4,3 METRE"
+   ],
+   "gercek": 2,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": null,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": null,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": null,
+   "duz_b_kg": null,
+   "duz_b_ayni": false,
+   "duz_a": null,
+   "duz_a_kg": null,
+   "duz_a_ayni": false,
+   "sinif": "kural",
+   "neden": "açıklama 4: \"Baca olacak. (Karkas ve içi de olacak.)\" Bacanın içi için kuralımız yok (liste öncesi karar 6: soru). Listede iki bacaya birer takım: baca borusu 4,3 m, T, kör tapa, maşon, şapka (40 × 40).",
+   "pay": null,
+   "kalan": "karar: bacanın yalnız karkası (Lokman, 10 Ekim 2026: \"Bunu çok yapmıyoruz sadece karkasını yapıyoruz göz ardı et\").",
+   "not": null
+  },
+  {
+   "ad": "Baca T'si",
+   "grup": "Depo",
+   "gercek_satirlar": [
+    109
+   ],
+   "gercek_kalemler": [
+    "BACA T'Sİ"
+   ],
+   "gercek_boyut": [
+    "ADET"
+   ],
+   "gercek": 2,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": null,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": null,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": null,
+   "duz_b_kg": null,
+   "duz_b_ayni": false,
+   "duz_a": null,
+   "duz_a_kg": null,
+   "duz_a_ayni": false,
+   "sinif": "kural",
+   "neden": "bacanın içi (aynı): 2.",
+   "pay": null,
+   "kalan": "karar: bacanın yalnız karkası (Lokman, 10 Ekim 2026).",
+   "not": null
+  },
+  {
+   "ad": "Baca kör tapa",
+   "grup": "Depo",
+   "gercek_satirlar": [
+    110
+   ],
+   "gercek_kalemler": [
+    "BACA KÖR TAPA"
+   ],
+   "gercek_boyut": [
+    "ADET"
+   ],
+   "gercek": 2,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": null,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": null,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": null,
+   "duz_b_kg": null,
+   "duz_b_ayni": false,
+   "duz_a": null,
+   "duz_a_kg": null,
+   "duz_a_ayni": false,
+   "sinif": "kural",
+   "neden": "bacanın içi (aynı): 2.",
+   "pay": null,
+   "kalan": "karar: bacanın yalnız karkası (Lokman, 10 Ekim 2026).",
+   "not": null
+  },
+  {
+   "ad": "Baca maşonu",
+   "grup": "Depo",
+   "gercek_satirlar": [
+    111
+   ],
+   "gercek_kalemler": [
+    "BACA MAŞON"
+   ],
+   "gercek_boyut": [
+    "ADET"
+   ],
+   "gercek": 2,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": null,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": null,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": null,
+   "duz_b_kg": null,
+   "duz_b_ayni": false,
+   "duz_a": null,
+   "duz_a_kg": null,
+   "duz_a_ayni": false,
+   "sinif": "kural",
+   "neden": "bacanın içi (aynı): 2.",
+   "pay": null,
+   "kalan": "karar: bacanın yalnız karkası (Lokman, 10 Ekim 2026).",
+   "not": null
+  },
+  {
+   "ad": "Baca şapkası",
+   "grup": "Depo",
+   "gercek_satirlar": [
+    112
+   ],
+   "gercek_kalemler": [
+    "BACA ŞAPKA"
+   ],
+   "gercek_boyut": [
+    "40X40"
+   ],
+   "gercek": 2,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": null,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": null,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": null,
+   "duz_b_kg": null,
+   "duz_b_ayni": false,
+   "duz_a": null,
+   "duz_a_kg": null,
+   "duz_a_ayni": false,
+   "sinif": "kural",
+   "neden": "bacanın içi (aynı): 2 × 40 × 40.",
+   "pay": null,
+   "kalan": "karar: bacanın yalnız karkası (Lokman, 10 Ekim 2026).",
+   "not": null
+  },
+  {
+   "ad": "Temiz su borusu",
+   "grup": "Mekanik tesisat",
+   "gercek_satirlar": [
+    114
+   ],
+   "gercek_kalemler": [
+    "TEMİZ SU BORUSU"
+   ],
+   "gercek_boyut": [
+    "L : 4000"
+   ],
+   "gercek": 6,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 6,
+   "kor_b_kg": null,
+   "kor_b_ayni": true,
+   "kor_a": 6,
+   "kor_a_kg": null,
+   "kor_a_ayni": true,
+   "duz_b": 6,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 6,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Normal dirsek 20 mm",
+   "grup": "Mekanik tesisat",
+   "gercek_satirlar": [
+    115
+   ],
+   "gercek_kalemler": [
+    "NORMAL DİRSEK   20MM"
+   ],
+   "gercek_boyut": [
+    "ADET"
+   ],
+   "gercek": 15,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 15,
+   "kor_b_kg": null,
+   "kor_b_ayni": true,
+   "kor_a": 15,
+   "kor_a_kg": null,
+   "kor_a_ayni": true,
+   "duz_b": 15,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 15,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Kulaklı dirsek 20 mm",
+   "grup": "Mekanik tesisat",
+   "gercek_satirlar": [
+    116
+   ],
+   "gercek_kalemler": [
+    "KULAKLI DİRSEK   20MM"
+   ],
+   "gercek_boyut": [
+    "ADET"
+   ],
+   "gercek": 12,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 12,
+   "kor_b_kg": null,
+   "kor_b_ayni": true,
+   "kor_a": 12,
+   "kor_a_kg": null,
+   "kor_a_ayni": true,
+   "duz_b": 12,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 12,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Düz T 20 mm",
+   "grup": "Mekanik tesisat",
+   "gercek_satirlar": [
+    117
+   ],
+   "gercek_kalemler": [
+    "DÜZ T   20MM"
+   ],
+   "gercek_boyut": [
+    "ADET"
+   ],
+   "gercek": 6,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 6,
+   "kor_b_kg": null,
+   "kor_b_ayni": true,
+   "kor_a": 6,
+   "kor_a_kg": null,
+   "kor_a_ayni": true,
+   "duz_b": 6,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 6,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Maşon 20 mm",
+   "grup": "Mekanik tesisat",
+   "gercek_satirlar": [
+    118
+   ],
+   "gercek_kalemler": [
+    "MAŞON   20MM"
+   ],
+   "gercek_boyut": [
+    "ADET"
+   ],
+   "gercek": 15,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 15,
+   "kor_b_kg": null,
+   "kor_b_ayni": true,
+   "kor_a": 15,
+   "kor_a_kg": null,
+   "kor_a_ayni": true,
+   "duz_b": 15,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 15,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Taharet musluğu 20 mm",
+   "grup": "Mekanik tesisat",
+   "gercek_satirlar": [
+    119
+   ],
+   "gercek_kalemler": [
+    "TAHARET MUSLUĞU 20 MM"
+   ],
+   "gercek_boyut": [
+    "ADET"
+   ],
+   "gercek": 4,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": null,
+   "kor_b_kg": null,
+   "kor_b_ayni": false,
+   "kor_a": null,
+   "kor_a_kg": null,
+   "kor_a_ayni": false,
+   "duz_b": null,
+   "duz_b_kg": null,
+   "duz_b_ayni": false,
+   "duz_a": null,
+   "duz_a_kg": null,
+   "duz_a_ayni": false,
+   "sinif": "kural",
+   "neden": "listenin mekanik tesisat grubunda taharet musluğu 4; kuralımızın sıhhi tesisat takımında bu kalem yok (KT-01 ve KT-02 listelerinde de yoktu).",
+   "pay": null,
+   "kalan": "karar: vitrifiye dahilse ıslak hacim başına 4 (Lokman, 10 Ekim 2026: \"Önemli değil es geç vitrifiye malzemesi varsa wc + banyo başı 4 adet\"); bu projede vitrifiye alıcıya ait (açıklama 5).",
+   "not": null
+  },
+  {
+   "ad": "İç dişli T 20 mm",
+   "grup": "Mekanik tesisat",
+   "gercek_satirlar": [
+    120
+   ],
+   "gercek_kalemler": [
+    "İÇ DİŞLİ T   20MM"
+   ],
+   "gercek_boyut": [
+    "ADET"
+   ],
+   "gercek": 6,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 6,
+   "kor_b_kg": null,
+   "kor_b_ayni": true,
+   "kor_a": 6,
+   "kor_a_kg": null,
+   "kor_a_ayni": true,
+   "duz_b": 6,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 6,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Atlama parçası",
+   "grup": "Mekanik tesisat",
+   "gercek_satirlar": [
+    121
+   ],
+   "gercek_kalemler": [
+    "ATLAMA PARÇASI YARIM PARMAK"
+   ],
+   "gercek_boyut": [
+    "ADET"
+   ],
+   "gercek": 3,
+   "gercek_kg": null,
+   "gercek_kaba": [],
+   "kor_b": 3,
+   "kor_b_kg": null,
+   "kor_b_ayni": true,
+   "kor_a": 3,
+   "kor_a_kg": null,
+   "kor_a_ayni": true,
+   "duz_b": 3,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 3,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Dış cephe boyası",
+   "grup": "Boya",
+   "gercek_satirlar": [
+    123
+   ],
+   "gercek_kalemler": [
+    "Dış Cephe Boya (Renk Kodu)"
+   ],
+   "gercek_boyut": [
+    "Kova (17,5 KG)"
+   ],
+   "gercek": 2,
+   "gercek_kg": null,
+   "gercek_kaba": [
+    1.6
+   ],
+   "kor_b": 2,
+   "kor_b_kg": null,
+   "kor_b_ayni": true,
+   "kor_a": 2,
+   "kor_a_kg": null,
+   "kor_a_ayni": true,
+   "duz_b": 2,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 2,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "İç cephe boyası",
+   "grup": "Boya",
+   "gercek_satirlar": [
+    124
+   ],
+   "gercek_kalemler": [
+    "İç Cephe Boya (Renk Kodu)"
+   ],
+   "gercek_boyut": [
+    "Kova (17,5 KG)"
+   ],
+   "gercek": 2,
+   "gercek_kg": null,
+   "gercek_kaba": [
+    1.6
+   ],
+   "kor_b": 2,
+   "kor_b_kg": null,
+   "kor_b_ayni": true,
+   "kor_a": 2,
+   "kor_a_kg": null,
+   "kor_a_ayni": true,
+   "duz_b": 2,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 2,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Tavan boyası",
+   "grup": "Boya",
+   "gercek_satirlar": [
+    125
+   ],
+   "gercek_kalemler": [
+    "Tavan Boya"
+   ],
+   "gercek_boyut": [
+    "Kova (17,5 KG)"
+   ],
+   "gercek": 1,
+   "gercek_kg": null,
+   "gercek_kaba": [
+    0.8
+   ],
+   "kor_b": 1,
+   "kor_b_kg": null,
+   "kor_b_ayni": true,
+   "kor_a": 1,
+   "kor_a_kg": null,
+   "kor_a_ayni": true,
+   "duz_b": 1,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 1,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  },
+  {
+   "ad": "Astar",
+   "grup": "Boya",
+   "gercek_satirlar": [
+    126
+   ],
+   "gercek_kalemler": [
+    "Astar"
+   ],
+   "gercek_boyut": [
+    "Kova (17,5 KG)"
+   ],
+   "gercek": 1,
+   "gercek_kg": null,
+   "gercek_kaba": [
+    0.8
+   ],
+   "kor_b": 1,
+   "kor_b_kg": null,
+   "kor_b_ayni": true,
+   "kor_a": 1,
+   "kor_a_kg": null,
+   "kor_a_ayni": true,
+   "duz_b": 1,
+   "duz_b_kg": null,
+   "duz_b_ayni": true,
+   "duz_a": 1,
+   "duz_a_kg": null,
+   "duz_a_ayni": true,
+   "sinif": null,
+   "neden": null,
+   "pay": null,
+   "kalan": null,
+   "not": null
+  }
+ ],
+ "baslik": "KT-03 · Lokman'ın 10 Ekim cevaplarından sonra",
+ "etiketler": {
+  "duz_b": "Cevaplardan sonra (B)",
+  "duz_b_aciklama": "düzeltilmiş tanım, güncel kural seti (0.19): panel çatıların kenarları, iniş, taharet musluğu",
+  "duz_a": "Cevaplardan sonra (A)",
+  "duz_a_aciklama": "bilgi",
+  "duz_kisa": "cevaplardan sonra",
+  "duz_sutun": "Cevaplardan sonra B",
+  "kalan_basligi": "Cevaplardan sonraki listede (B) farklı kalan",
+  "kalan_sutun": "Cevaplardan sonra kalan",
+  "kaynak_notu": "Sınıflar ve nedenler `kt03_farklar.json`dan; cevaplardan sonraki notlar `kt03_cevaplar_notlari.json`dan (üstüne yazar)."
+ }
+}

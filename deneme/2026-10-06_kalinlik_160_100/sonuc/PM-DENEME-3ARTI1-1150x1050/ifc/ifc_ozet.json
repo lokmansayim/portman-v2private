@@ -1,0 +1,80 @@
+{
+ "is_emri_no": "PM-DENEME-3ARTI1-1150x1050",
+ "ifc": "Portman_PM-DENEME-3ARTI1-1150x1050_r01.ifc",
+ "html": "Portman_PM-DENEME-3ARTI1-1150x1050_r01_3B.html",
+ "ifc_bayt": 391734,
+ "html_bayt": 704677,
+ "ozet": {
+  "duvar": 66,
+  "pencere": 8,
+  "kapi": 6,
+  "mahal": 7,
+  "bosluk": 14,
+  "sema_hatasi": 0,
+  "cati": {
+   "mahya_cm": 473.1,
+   "makas": 10,
+   "cati_alan_m2": 141.43,
+   "makas_ekseni": "y",
+   "aciklik_cm": 1050.0,
+   "makas_x_cm": [
+    8.0,
+    141.5,
+    267.0,
+    392.5,
+    518.0,
+    643.5,
+    769.0,
+    894.5,
+    1020.0,
+    1142.0
+   ]
+  }
+ },
+ "siniflar": {
+  "IfcBuilding": 1,
+  "IfcBuildingStorey": 1,
+  "IfcDoor": 6,
+  "IfcElementAssembly": 10,
+  "IfcMember": 90,
+  "IfcOpeningElement": 14,
+  "IfcPlate": 2,
+  "IfcRoof": 1,
+  "IfcSite": 1,
+  "IfcSlab": 3,
+  "IfcSpace": 7,
+  "IfcWall": 66,
+  "IfcWindow": 8
+ },
+ "denetim": {
+  "pano_adedi": [
+   66,
+   66
+  ],
+  "pano_boy_kalinlik_yukseklik": true,
+  "pencere": [
+   8,
+   8
+  ],
+  "kapi": [
+   6,
+   6
+  ],
+  "mahal": [
+   7,
+   7
+  ],
+  "sema_hatasi": 0,
+  "pano_kodlari_motor_bom_ile_ayni": true,
+  "dis_pano_boylari_gorunus_ile_ayni": true,
+  "mahya_kotu_cm": [
+   473.1,
+   473.1
+  ],
+  "gecti": true
+ },
+ "pano_tipleri": [
+  "PE-DIS-160 Dış sandviç pano 160 mm",
+  "PE-IC-100 İç sandviç pano 100 mm"
+ ]
+}

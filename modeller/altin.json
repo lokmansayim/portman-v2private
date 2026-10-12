@@ -1,0 +1,9 @@
+{
+ "_not": "İE-08 (12 Ekim 2026): Ç8801 katalog modelinin altın değerleri; üç paket setiyle (ie-05 3.11, ana 3.11, sunucu 3.12) aynı. vps/genel_dene.py sunucuda bununla karşılaştırır; asıl referans testler/referans/ zinciridir (D-02, D-08).",
+ "kural_seti": "0.19",
+ "C8801": {
+  "plan_png_sha256": "dee7c72d54a5a1577cf75408e54ef5f55ac80dae83a7568b317e0d443ebcc4bb",
+  "yukleme_json_sha256": "0f39fe25f24bcb25f396e98efb536714b62e9706a6e7e5c7c2a260411fc0dacb",
+  "ifc_izi": "f9690fd6a0b8d6199af3f29e4d8a026fb84692cdf2946924482d7c203574c7ed"
+ }
+}

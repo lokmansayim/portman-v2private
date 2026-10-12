@@ -16,7 +16,7 @@ Kapanış, "çalışıyor" demenin kanıtını üretir. Sıra sabittir; bir adı
 ## 2. Doğrulama
 - `motor/`, `beyin/` ya da `kanal/` değiştiyse **tam**: `bash araclar/ortam_kur.sh --dogrula` (~9 dk; arka planda koşturup bekleyebilirsin).
 - Yalnız belge/ayar/`.claude/` değiştiyse **hızlı**: `python3 testler/referans/dogrula.py --hizli` (~45 sn) ve `bash -n` / `py_compile` zaten hook'ta.
-- Beklenen tek fark: sır taramasında `vps/kapi_d_dogrula.sh:25`. Başka FARKLI varsa iş kapanmaz; kaynağını bul.
+- Beklenen fark yok: `dogrula.py` "SONUÇ: fark yok" demeli (İE-08, 12.10'dan beri `kapi_d_dogrula.sh:25` yanlış pozitifi `kos.py`'de beklenen). Herhangi bir FARKLI varsa iş kapanmaz; kaynağını bul.
 - Harness sonucu (22/22), referans (AYNI), pytest (N geçti) sayılarını not et.
 
 ## 3. Bağımsız inceleme (iki hakem + hazır inceleme)

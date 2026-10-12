@@ -1,0 +1,398 @@
+{
+ "PANO_D_TAM_125.5_00": {
+  "kod": "D09",
+  "sira": "Ö1",
+  "duvar": "Ön cephe",
+  "boy_mm": 1255.0
+ },
+ "PANO_D_TAM_125.5_01": {
+  "kod": "D10",
+  "sira": "Ö2",
+  "duvar": "Ön cephe",
+  "boy_mm": 1255.0
+ },
+ "PANO_D_TAM_125.5_02": {
+  "kod": "D10",
+  "sira": "Ö3",
+  "duvar": "Ön cephe",
+  "boy_mm": 1255.0
+ },
+ "PANO_D_TAM_125.5_03": {
+  "kod": "D11",
+  "sira": "Ö4",
+  "duvar": "Ön cephe",
+  "boy_mm": 1255.0
+ },
+ "PANO_D_TAM_125.5_04": {
+  "kod": "D09",
+  "sira": "Ö5",
+  "duvar": "Ön cephe",
+  "boy_mm": 1255.0
+ },
+ "PANO_D_TAM_125.5_05": {
+  "kod": "D09",
+  "sira": "Ö6",
+  "duvar": "Ön cephe",
+  "boy_mm": 1255.0
+ },
+ "PANO_D_TAM_125.5_06": {
+  "kod": "D10",
+  "sira": "Ö7",
+  "duvar": "Ön cephe",
+  "boy_mm": 1255.0
+ },
+ "PANO_D_TAM_125.5_07": {
+  "kod": "D09",
+  "sira": "Ö8",
+  "duvar": "Ön cephe",
+  "boy_mm": 1255.0
+ },
+ "PANO_D_OZEL_114.0_08": {
+  "kod": "D12",
+  "sira": "Ö9",
+  "duvar": "Ön cephe",
+  "boy_mm": 1140.0
+ },
+ "PANO_I_OZEL_120.5_09": {
+  "kod": "I12",
+  "sira": "İ1-1",
+  "duvar": "İç duvar 1 (y = 321.75 cm, soldan sağa)",
+  "boy_mm": 1205.0
+ },
+ "PANO_I_OZEL_51.2_10": {
+  "kod": "I13",
+  "sira": "İ1-2",
+  "duvar": "İç duvar 1 (y = 321.75 cm, soldan sağa)",
+  "boy_mm": 512.5
+ },
+ "PANO_I_TAM_125.5_11": {
+  "kod": "I14",
+  "sira": "İ2-1",
+  "duvar": "İç duvar 2 (y = 447.25 cm, soldan sağa)",
+  "boy_mm": 1255.0
+ },
+ "PANO_I_TAM_125.5_12": {
+  "kod": "I15",
+  "sira": "İ2-2",
+  "duvar": "İç duvar 2 (y = 447.25 cm, soldan sağa)",
+  "boy_mm": 1255.0
+ },
+ "PANO_I_TAM_125.5_13": {
+  "kod": "I14",
+  "sira": "İ2-3",
+  "duvar": "İç duvar 2 (y = 447.25 cm, soldan sağa)",
+  "boy_mm": 1255.0
+ },
+ "PANO_I_OZEL_57.8_14": {
+  "kod": "I16",
+  "sira": "İ2-4",
+  "duvar": "İç duvar 2 (y = 447.25 cm, soldan sağa)",
+  "boy_mm": 577.5
+ },
+ "PANO_I_TAM_125.5_15": {
+  "kod": "I14",
+  "sira": "İ3-1",
+  "duvar": "İç duvar 3 (y = 635.5 cm, soldan sağa)",
+  "boy_mm": 1255.0
+ },
+ "PANO_I_TAM_125.5_16": {
+  "kod": "I15",
+  "sira": "İ3-2",
+  "duvar": "İç duvar 3 (y = 635.5 cm, soldan sağa)",
+  "boy_mm": 1255.0
+ },
+ "PANO_I_YARIM_62.8_17": {
+  "kod": "I17",
+  "sira": "İ3-3",
+  "duvar": "İç duvar 3 (y = 635.5 cm, soldan sağa)",
+  "boy_mm": 627.5
+ },
+ "PANO_I_TAM_125.5_18": {
+  "kod": "I15",
+  "sira": "İ3-4",
+  "duvar": "İç duvar 3 (y = 635.5 cm, soldan sağa)",
+  "boy_mm": 1255.0
+ },
+ "PANO_I_TAM_125.5_19": {
+  "kod": "I14",
+  "sira": "İ3-5",
+  "duvar": "İç duvar 3 (y = 635.5 cm, soldan sağa)",
+  "boy_mm": 1255.0
+ },
+ "PANO_I_OZEL_51.2_20": {
+  "kod": "I13",
+  "sira": "İ3-6",
+  "duvar": "İç duvar 3 (y = 635.5 cm, soldan sağa)",
+  "boy_mm": 512.5
+ },
+ "PANO_D_TAM_125.5_21": {
+  "kod": "D09",
+  "sira": "A9",
+  "duvar": "Arka cephe",
+  "boy_mm": 1255.0
+ },
+ "PANO_D_TAM_125.5_22": {
+  "kod": "D13",
+  "sira": "A8",
+  "duvar": "Arka cephe",
+  "boy_mm": 1255.0
+ },
+ "PANO_D_TAM_125.5_23": {
+  "kod": "D09",
+  "sira": "A7",
+  "duvar": "Arka cephe",
+  "boy_mm": 1255.0
+ },
+ "PANO_D_TAM_125.5_24": {
+  "kod": "D09",
+  "sira": "A6",
+  "duvar": "Arka cephe",
+  "boy_mm": 1255.0
+ },
+ "PANO_D_TAM_125.5_25": {
+  "kod": "D09",
+  "sira": "A5",
+  "duvar": "Arka cephe",
+  "boy_mm": 1255.0
+ },
+ "PANO_D_TAM_125.5_26": {
+  "kod": "D13",
+  "sira": "A4",
+  "duvar": "Arka cephe",
+  "boy_mm": 1255.0
+ },
+ "PANO_D_TAM_125.5_27": {
+  "kod": "D09",
+  "sira": "A3",
+  "duvar": "Arka cephe",
+  "boy_mm": 1255.0
+ },
+ "PANO_D_TAM_125.5_28": {
+  "kod": "D13",
+  "sira": "A2",
+  "duvar": "Arka cephe",
+  "boy_mm": 1255.0
+ },
+ "PANO_D_OZEL_114.0_29": {
+  "kod": "D12",
+  "sira": "A1",
+  "duvar": "Arka cephe",
+  "boy_mm": 1140.0
+ },
+ "PANO_D_TAM_125.5_30": {
+  "kod": "D09",
+  "sira": "SL9",
+  "duvar": "Sol cephe",
+  "boy_mm": 1255.0
+ },
+ "PANO_D_TAM_125.5_31": {
+  "kod": "D09",
+  "sira": "SL8",
+  "duvar": "Sol cephe",
+  "boy_mm": 1255.0
+ },
+ "PANO_D_TAM_125.5_32": {
+  "kod": "D09",
+  "sira": "SL7",
+  "duvar": "Sol cephe",
+  "boy_mm": 1255.0
+ },
+ "PANO_D_TAM_125.5_33": {
+  "kod": "D09",
+  "sira": "SL6",
+  "duvar": "Sol cephe",
+  "boy_mm": 1255.0
+ },
+ "PANO_D_TAM_125.5_34": {
+  "kod": "D09",
+  "sira": "SL5",
+  "duvar": "Sol cephe",
+  "boy_mm": 1255.0
+ },
+ "PANO_D_TAM_125.5_35": {
+  "kod": "D09",
+  "sira": "SL4",
+  "duvar": "Sol cephe",
+  "boy_mm": 1255.0
+ },
+ "PANO_D_TAM_125.5_36": {
+  "kod": "D09",
+  "sira": "SL3",
+  "duvar": "Sol cephe",
+  "boy_mm": 1255.0
+ },
+ "PANO_D_TAM_125.5_37": {
+  "kod": "D09",
+  "sira": "SL2",
+  "duvar": "Sol cephe",
+  "boy_mm": 1255.0
+ },
+ "PANO_D_OZEL_30.0_38": {
+  "kod": "D14",
+  "sira": "SL1",
+  "duvar": "Sol cephe",
+  "boy_mm": 300.0
+ },
+ "PANO_I_OZEL_117.5_39": {
+  "kod": "I18",
+  "sira": "İ4-1",
+  "duvar": "İç duvar 4 (x = 518 cm, önden arkaya)",
+  "boy_mm": 1175.0
+ },
+ "PANO_I_TAM_125.5_40": {
+  "kod": "I14",
+  "sira": "İ4-2",
+  "duvar": "İç duvar 4 (x = 518 cm, önden arkaya)",
+  "boy_mm": 1255.0
+ },
+ "PANO_I_TAM_125.5_41": {
+  "kod": "I14",
+  "sira": "İ4-3",
+  "duvar": "İç duvar 4 (x = 518 cm, önden arkaya)",
+  "boy_mm": 1255.0
+ },
+ "PANO_I_OZEL_57.8_42": {
+  "kod": "I16",
+  "sira": "İ4-4",
+  "duvar": "İç duvar 4 (x = 518 cm, önden arkaya)",
+  "boy_mm": 577.5
+ },
+ "PANO_I_OZEL_120.5_43": {
+  "kod": "I12",
+  "sira": "İ5-1",
+  "duvar": "İç duvar 5 (x = 518 cm, önden arkaya)",
+  "boy_mm": 1205.0
+ },
+ "PANO_I_TAM_125.5_44": {
+  "kod": "I14",
+  "sira": "İ5-2",
+  "duvar": "İç duvar 5 (x = 518 cm, önden arkaya)",
+  "boy_mm": 1255.0
+ },
+ "PANO_I_TAM_125.5_45": {
+  "kod": "I14",
+  "sira": "İ5-3",
+  "duvar": "İç duvar 5 (x = 518 cm, önden arkaya)",
+  "boy_mm": 1255.0
+ },
+ "PANO_I_OZEL_22.0_46": {
+  "kod": "I19",
+  "sira": "İ5-4",
+  "duvar": "İç duvar 5 (x = 518 cm, önden arkaya)",
+  "boy_mm": 220.0
+ },
+ "PANO_I_OZEL_120.5_47": {
+  "kod": "I12",
+  "sira": "İ6-1",
+  "duvar": "İç duvar 6 (x = 831.75 cm, önden arkaya)",
+  "boy_mm": 1205.0
+ },
+ "PANO_I_TAM_125.5_48": {
+  "kod": "I14",
+  "sira": "İ6-2",
+  "duvar": "İç duvar 6 (x = 831.75 cm, önden arkaya)",
+  "boy_mm": 1255.0
+ },
+ "PANO_I_TAM_125.5_49": {
+  "kod": "I14",
+  "sira": "İ6-3",
+  "duvar": "İç duvar 6 (x = 831.75 cm, önden arkaya)",
+  "boy_mm": 1255.0
+ },
+ "PANO_I_OZEL_22.0_50": {
+  "kod": "I19",
+  "sira": "İ6-4",
+  "duvar": "İç duvar 6 (x = 831.75 cm, önden arkaya)",
+  "boy_mm": 220.0
+ },
+ "PANO_I_OZEL_117.5_51": {
+  "kod": "I18",
+  "sira": "İ7-1",
+  "duvar": "İç duvar 7 (x = 957.25 cm, önden arkaya)",
+  "boy_mm": 1175.0
+ },
+ "PANO_I_TAM_125.5_52": {
+  "kod": "I15",
+  "sira": "İ7-2",
+  "duvar": "İç duvar 7 (x = 957.25 cm, önden arkaya)",
+  "boy_mm": 1255.0
+ },
+ "PANO_I_YARIM_62.8_53": {
+  "kod": "I17",
+  "sira": "İ7-3",
+  "duvar": "İç duvar 7 (x = 957.25 cm, önden arkaya)",
+  "boy_mm": 627.5
+ },
+ "PANO_I_TAM_125.5_54": {
+  "kod": "I14",
+  "sira": "İ7-4",
+  "duvar": "İç duvar 7 (x = 957.25 cm, önden arkaya)",
+  "boy_mm": 1255.0
+ },
+ "PANO_I_TAM_125.5_55": {
+  "kod": "I15",
+  "sira": "İ7-5",
+  "duvar": "İç duvar 7 (x = 957.25 cm, önden arkaya)",
+  "boy_mm": 1255.0
+ },
+ "PANO_I_OZEL_57.8_56": {
+  "kod": "I16",
+  "sira": "İ7-6",
+  "duvar": "İç duvar 7 (x = 957.25 cm, önden arkaya)",
+  "boy_mm": 577.5
+ },
+ "PANO_D_TAM_125.5_57": {
+  "kod": "D09",
+  "sira": "SĞ1",
+  "duvar": "Sağ cephe",
+  "boy_mm": 1255.0
+ },
+ "PANO_D_TAM_125.5_58": {
+  "kod": "D15",
+  "sira": "SĞ2",
+  "duvar": "Sağ cephe",
+  "boy_mm": 1255.0
+ },
+ "PANO_D_TAM_125.5_59": {
+  "kod": "D09",
+  "sira": "SĞ3",
+  "duvar": "Sağ cephe",
+  "boy_mm": 1255.0
+ },
+ "PANO_D_TAM_125.5_60": {
+  "kod": "D09",
+  "sira": "SĞ4",
+  "duvar": "Sağ cephe",
+  "boy_mm": 1255.0
+ },
+ "PANO_D_TAM_125.5_61": {
+  "kod": "D15",
+  "sira": "SĞ5",
+  "duvar": "Sağ cephe",
+  "boy_mm": 1255.0
+ },
+ "PANO_D_TAM_125.5_62": {
+  "kod": "D09",
+  "sira": "SĞ6",
+  "duvar": "Sağ cephe",
+  "boy_mm": 1255.0
+ },
+ "PANO_D_TAM_125.5_63": {
+  "kod": "D09",
+  "sira": "SĞ7",
+  "duvar": "Sağ cephe",
+  "boy_mm": 1255.0
+ },
+ "PANO_D_TAM_125.5_64": {
+  "kod": "D09",
+  "sira": "SĞ8",
+  "duvar": "Sağ cephe",
+  "boy_mm": 1255.0
+ },
+ "PANO_D_OZEL_30.0_65": {
+  "kod": "D14",
+  "sira": "SĞ9",
+  "duvar": "Sağ cephe",
+  "boy_mm": 300.0
+ }
+}

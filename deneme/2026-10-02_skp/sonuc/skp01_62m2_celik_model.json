@@ -1,0 +1,257 @@
+{
+ "sema": "portman.skp_aktarim/0.1",
+ "birim": "cm",
+ "kaynak": {
+  "no": 1,
+  "dosya_adindaki_alan_m2": 62,
+  "sketchup_surumu": "24.0.553",
+  "dosya_birimi": "Centimeter",
+  "okuyucu": "openskp 1.3.0"
+ },
+ "sayilar": {
+  "yuz": 3174,
+  "kenar": 10013,
+  "dugum": 3,
+  "bina_disi_cizim_yuzu": 0
+ },
+ "katmanlar": [
+  {
+   "ad": "LCAD_Truss",
+   "yuz": 1836,
+   "kutu": [
+    [
+     164.2,
+     220.1,
+     0.0
+    ],
+    [
+     1378.9,
+     913.4,
+     370.0
+    ]
+   ]
+  },
+  {
+   "ad": "LCAD_Wall",
+   "yuz": 1221,
+   "kutu": [
+    [
+     197.1,
+     338.5,
+     0.0
+    ],
+    [
+     1346.1,
+     882.6,
+     270.0
+    ]
+   ]
+  },
+  {
+   "ad": "LCAD_Roof",
+   "yuz": 102,
+   "kutu": [
+    [
+     246.6,
+     393.1,
+     296.2
+    ],
+    [
+     1296.5,
+     828.1,
+     370.0
+    ]
+   ]
+  },
+  {
+   "ad": "Layer0",
+   "yuz": 15,
+   "kutu": [
+    [
+     196.1,
+     636.6,
+     0.0
+    ],
+    [
+     1106.1,
+     880.6,
+     270.0
+    ]
+   ]
+  }
+ ],
+ "duvar": {
+  "kutu": [
+   [
+    197.1,
+    338.5,
+    0.0
+   ],
+   [
+    1346.1,
+    882.6,
+    270.0
+   ]
+  ],
+  "olcu": [
+   1149.0,
+   544.1,
+   270.0
+  ],
+  "taban_alani_m2": 62.51,
+  "yatay_yuz_kotlari_m": {
+   "0.0": 40.4,
+   "20.0": 6.14,
+   "90.0": 2.8,
+   "124.2": 20.39,
+   "180.0": 0.6,
+   "210.0": 0.95,
+   "214.0": 2.7,
+   "220.0": 0.6,
+   "240.0": 10.78,
+   "246.2": 20.39,
+   "255.0": 3.29,
+   "255.2": 2.65,
+   "270.0": 40.39
+  },
+  "karkas_derinlikleri_cm": {
+   "14.0": 63,
+   "8.0": 31,
+   "61.7": 4
+  }
+ },
+ "cati": {
+  "kutu": [
+   [
+    164.2,
+    220.1,
+    0.0
+   ],
+   [
+    1378.9,
+    913.4,
+    370.0
+   ]
+  ],
+  "olcu": [
+   1214.7,
+   693.4,
+   370.0
+  ],
+  "ust_kot": 370.0,
+  "duvar_kutusundan_tasma": {
+   "x-": 32.8,
+   "x+": 32.8,
+   "y-": 118.4,
+   "y+": 30.8
+  },
+  "egimli_duzlemler": [
+   {
+    "asagi_yon": [
+     -1.0,
+     0.0
+    ],
+    "egim_yuzde": 30.0,
+    "ust_basliklarin_alani_m2": 2.39,
+    "cati_kutusunun_ucunda_z": 279.3,
+    "duvar_dis_yuzunde_z": 289.1
+   },
+   {
+    "asagi_yon": [
+     1.0,
+     0.0
+    ],
+    "egim_yuzde": 30.0,
+    "ust_basliklarin_alani_m2": 2.39,
+    "cati_kutusunun_ucunda_z": 279.3,
+    "duvar_dis_yuzunde_z": 289.2
+   },
+   {
+    "asagi_yon": [
+     0.0,
+     -1.0
+    ],
+    "egim_yuzde": 30.0,
+    "ust_basliklarin_alani_m2": 1.92,
+    "cati_kutusunun_ucunda_z": 253.0,
+    "duvar_dis_yuzunde_z": 288.6
+   },
+   {
+    "asagi_yon": [
+     0.0,
+     1.0
+    ],
+    "egim_yuzde": 30.0,
+    "ust_basliklarin_alani_m2": 1.92,
+    "cati_kutusunun_ucunda_z": 279.0,
+    "duvar_dis_yuzunde_z": 288.2
+   },
+   {
+    "asagi_yon": [
+     0.0,
+     -1.0
+    ],
+    "egim_yuzde": 50.1,
+    "ust_basliklarin_alani_m2": 0.64,
+    "cati_kutusunun_ucunda_z": 203.3,
+    "duvar_dis_yuzunde_z": 262.6
+   },
+   {
+    "asagi_yon": [
+     -0.0,
+     1.0
+    ],
+    "egim_yuzde": 50.1,
+    "ust_basliklarin_alani_m2": 0.64,
+    "cati_kutusunun_ucunda_z": 180.4,
+    "duvar_dis_yuzunde_z": 195.8
+   }
+  ],
+  "mahya_adaylari": [
+   {
+    "mahyaya_dik_eksen": "x",
+    "z": 461.5,
+    "konum": 771.7,
+    "egim_yuzde": 30.0
+   },
+   {
+    "mahyaya_dik_eksen": "y",
+    "z": 370.0,
+    "konum": 610.0,
+    "egim_yuzde": 30.0
+   },
+   {
+    "mahyaya_dik_eksen": "y",
+    "z": 365.5,
+    "konum": 543.9,
+    "egim_yuzde": 50.1
+   }
+  ]
+ },
+ "makas_akslari": {
+  "eksen": "x",
+  "konum": [
+   221.2,
+   346.1,
+   471.1,
+   594.8,
+   721.1,
+   822.1,
+   947.1,
+   1072.1,
+   1192.0,
+   1320.4
+  ],
+  "aralik": [
+   124.9,
+   125.0,
+   123.7,
+   126.3,
+   101.0,
+   125.0,
+   125.0,
+   119.9,
+   128.4
+  ]
+ }
+}

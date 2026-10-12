@@ -1,0 +1,212 @@
+{
+  "sema": "portman.yukleme_girdisi/0.2-taslak",
+  "ad": "Örnek proje: 105 m², tek kat, çelik, beşik + cumba çatı, tek kat panel, dış karkas 140 mm (dosya tarihi 26 Kasım 2025)",
+  "kaynak": "PortatifEv'in yükleme listesi çalışma kitabının hesap sayfalarındaki girdiler. Kişi ve firma adları alınmadı. Çatının planı ve modeli yok: saçak, mahya, alın ve ters mahya boyları, iniş sayısı ve elektrik sayımı listede yazan değerlerdir; çatı paneli, aşık ve şilte hesaplanmadı.",
+  "bina_m2": 105,
+  "kat_adedi": 1,
+  "oda_sayisi": 6,
+  "kat_yuksekligi_m": 2.7,
+  "dis": {
+    "cevre_m": 53.04,
+    "duvar_kalinligi_m": 0.165,
+    "karkas_mm": 140,
+    "kolon_kiris": [],
+    "alin_m2": [
+      5.21
+    ],
+    "bosluklar": [
+      {
+        "ad": "60/40",
+        "adet": 2,
+        "en": 0.6,
+        "boy": 0.4
+      },
+      {
+        "ad": "120/180",
+        "adet": 2,
+        "en": 1.2,
+        "boy": 1.8
+      },
+      {
+        "ad": "160/180",
+        "adet": 1,
+        "en": 1.6,
+        "boy": 1.8
+      },
+      {
+        "ad": "200/180",
+        "adet": 3,
+        "en": 2.0,
+        "boy": 1.8
+      },
+      {
+        "ad": "dış kapı",
+        "adet": 1,
+        "en": 0.95,
+        "boy": 2.1
+      }
+    ]
+  },
+  "odalar": [
+    {
+      "ad": "oda 1",
+      "tur": "beyaz",
+      "cevre_m": 12.73,
+      "bosluk_m2": [
+        2.16,
+        1.926
+      ]
+    },
+    {
+      "ad": "oda 2",
+      "tur": "beyaz",
+      "cevre_m": 12.75,
+      "bosluk_m2": [
+        2.16,
+        1.926
+      ]
+    },
+    {
+      "ad": "oda 3",
+      "tur": "beyaz",
+      "cevre_m": 20.6,
+      "bosluk_m2": [
+        2.88,
+        1.926,
+        1.926
+      ]
+    },
+    {
+      "ad": "salon, mutfak ve hol",
+      "tur": "beyaz",
+      "cevre_m": 49.05,
+      "bosluk_m2": [
+        1.926,
+        1.926,
+        1.926,
+        1.926,
+        1.995,
+        10.8
+      ]
+    },
+    {
+      "ad": "banyo 1",
+      "tur": "yesil",
+      "cevre_m": 7.28,
+      "bosluk_m2": [
+        0.24,
+        1.926
+      ]
+    },
+    {
+      "ad": "banyo 2",
+      "tur": "yesil",
+      "cevre_m": 7.4,
+      "bosluk_m2": [
+        0.24,
+        1.926
+      ]
+    }
+  ],
+  "oda_bosluk_notu": "Oda 3'te çalışma kitabı iki iç kapı için 2 × 1,926 yerine 2 × 1 (adet hücresi) düşmüş: kitaptaki beyaz net alan 223,3 m², doğru boşluklarla 221,4 m².",
+  "ic_kapi_adedi": 5,
+  "ic_duvar_boyu_m": 29.36,
+  "tavan_m2": {
+    "beyaz": 86.71,
+    "yesil": 6.72
+  },
+  "osb_duvar_m2": 39.3,
+  "cati": {
+    "tip": "besik",
+    "yontem": "omega_asik",
+    "kaplama": "tek_kat_panel",
+    "egim": 0.33,
+    "sacak_boyu_toplam_m": 39.2,
+    "sacak_kenarlari_m": [
+      39.2
+    ],
+    "sacak_kenar_notu": "Saçak kenarlarının dökümü yok; toplam boy tek kenar gibi alındı.",
+    "mahya_hatti_m": 24.6,
+    "ters_mahya_m": 7.28,
+    "alin_saci_m": 17.0,
+    "inis_adedi": 10,
+    "dere_kapagi": 6,
+    "sacak_alti": "boardex",
+    "sacak_alti_eni_m": 0.5,
+    "sacak_alti_notu": "Listede saçaklar için Boardex 19,6 m² = 39,2 m × 0,50.",
+    "sacak_omegasi": "Geniş saçak omegası (180 × 2500)",
+    "kapatma_m": 0.87,
+    "kapatma_kaynak": "listedeki ürün: tek kat panel (87 cm kapatır)",
+    "panel_kapamasi": true,
+    "panel_kapamasi_kaynak": "listedeki uygulama (2025): tek kat panel kapaması var; güncel kuralda yok (Lokman, 4 Ekim 2026 16:18)"
+  },
+  "celik_panel_adedi": 57,
+  "kosebent_adedi": 85,
+  "duvar_paneli_adedi": 36,
+  "elektrik_sayim": {
+    "tijli_duy": 10,
+    "glop": 4,
+    "tekli_anahtar": 4,
+    "cift_anahtar": 5,
+    "tekli_priz": 20,
+    "cift_priz": 4,
+    "uydu_prizi": 1,
+    "sigorta": 9
+  },
+  "elektrik_odalar": [
+    {
+      "ad": "oda 1",
+      "islev": [
+        "yatak_odasi"
+      ]
+    },
+    {
+      "ad": "oda 2",
+      "islev": [
+        "yatak_odasi"
+      ]
+    },
+    {
+      "ad": "oda 3",
+      "islev": [
+        "yatak_odasi"
+      ]
+    },
+    {
+      "ad": "salon, mutfak ve hol",
+      "islev": [
+        "salon",
+        "mutfak",
+        "hol"
+      ]
+    },
+    {
+      "ad": "banyo 1",
+      "islev": [
+        "banyo"
+      ]
+    },
+    {
+      "ad": "banyo 2",
+      "islev": [
+        "banyo"
+      ]
+    }
+  ],
+  "elektrik_odalar_notu": "Oda başına elektrik kuralını (Ubeydullah, 3 Ekim 2026) pafta sayımıyla sınamak için. Odaların işlevi hesap sayfasındaki oda adlarından; 'oda' yatak odası sayıldı. Veranda bilgisi yok. Listede pafta sayımı olduğu için hesapta sayım kullanılır; kuralın verdiği sayılar çıktıda `ara.elektrik_kural` altındadır.",
+  "islak_hacim_sayisi": 2,
+  "vitrifiye_dahil": false,
+  "boya_dahil": false,
+  "celik": {
+    "dis": {
+      "profil": "140x45x0,8",
+      "boy_m": 53.04
+    },
+    "ic": {
+      "profil": "80x45x0,8",
+      "boy_m": 29.36
+    },
+    "kaynak": "Dış çevre ve iç duvar boyu hesap sayfasından. Listede dış duvar panellerinin 3'ü 1,2 mm, 20'si 0,8 mm; hesapta hepsi 0,8 alındı. Çatı planı yok: çatı çeliği hesaplanmadı."
+  },
+  "celik_ornek_notu": "Bu örnekte çatı, kiriş ve boy C profil kg'ları hesaplanmaz; toplam satırı eksiktir."
+}

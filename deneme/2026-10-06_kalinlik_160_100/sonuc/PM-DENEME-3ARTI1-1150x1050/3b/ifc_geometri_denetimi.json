@@ -1,0 +1,79 @@
+{
+ "pano": 66,
+ "qto_net_hacim_m3": 24.9084,
+ "geometri_net_hacim_m3": 24.9084,
+ "fark_yuzde": -0.0,
+ "en_buyuk_fark": {
+  "pano": "PANO_D_OZEL_30.0_65",
+  "qto": 0.1344,
+  "geometri": 0.1344
+ },
+ "duvar_kutusu_m": [
+  [
+   0.0,
+   0.0,
+   0.0
+  ],
+  [
+   11.5,
+   10.5,
+   2.8
+  ]
+ ],
+ "model_kutusu_m": [
+  [
+   -0.3,
+   -0.3,
+   -0.15
+  ],
+  [
+   11.8,
+   10.8,
+   4.8715
+  ]
+ ],
+ "geometri_uretilen_nesne": {
+  "IfcWall": 66,
+  "IfcOpeningElement": 14,
+  "IfcWindow": 8,
+  "IfcDoor": 6,
+  "IfcMember": 90,
+  "IfcSpace": 7,
+  "IfcSlab": 3,
+  "IfcPlate": 2
+ },
+ "gorseller": [
+  "3b_01_on_sag.png",
+  "3b_02_arka_sol.png",
+  "3b_03_catisiz_on_sol.png",
+  "Portman_PM-DENEME-3ARTI1-1150x1050_r01.blend",
+  "Portman_PM-DENEME-3ARTI1-1150x1050_r01.glb"
+ ],
+ "blend_denetimi": {
+  "blender_surumu": "5.2.2 LTS",
+  "dosya_surumu": "5.2.45",
+  "katman_nesne": {
+   "01 Dış panolar": 36,
+   "02 İç panolar": 30,
+   "03 Pencereler": 8,
+   "04 Kapılar": 6,
+   "05 Çatı örtüsü ve alın": 4,
+   "06 Makaslar": 80,
+   "07 Bağlantı profilleri": 10,
+   "08 Zemin": 1,
+   "09 Mahaller (gizli)": 7,
+   "10 Boşluklar (gizli)": 14
+  },
+  "pano": 66,
+  "pafta_kodlu_pano": 66,
+  "pano_kutusu_m": [
+   0.0,
+   0.0,
+   0.0,
+   11.5,
+   10.5,
+   2.8
+  ],
+  "kamera": true
+ }
+}

@@ -1,0 +1,282 @@
+{
+ "giris": "Üçüncü kör test (KT-03). Gerçek listenin adetli her satırı, dondurulan iki listemizle (commit 1f7ba6c, 9 Ekim 2026 23:55:13; liste 23:56'da açıldı) ve girdi hatalarımız düzeltildikten sonraki listeyle. Gerçek liste 23 Eylül 2026 tarihli, yeni şablonla (\"ÇELİK BİNA\"; bina alanı 80 m²), projenin yapıldığı yöntemle (B: tavan omegası ve aşık) hazırlanmış; \"aynı\" B listesinde sayılır. Üretim dosyası yoktu: çelikte adet karşılaştırılır, bizim kg motorun ortalamasıdır.",
+ "birimler": {
+  "Çatı makas panelleri (1,2 ve 0,8)": {
+   "sinif": "girdi",
+   "neden": "makas ve dere paftasında makaslar MK02–MK13 ve MK15–MK36: 34 makas (MK01 ve MK14 numarası yok). Numaraların kesintisiz olduğunu varsayıp 36 saydık. Listede 4 × 1,2 mm + 30 × 0,8 mm = 34."
+  },
+  "Çatı panelleri (1,2 ve 0,8)": {
+   "sinif": "kural",
+   "neden": "katalog yolunda (üretim dosyası yok) kırma uçlarının çatı panelleri ayrı satır değil; ağırlıkları makas satırındaki ortalamanın içinde (liste öncesi karar 1). Paftada Ç01–Ç18 (Ç10 yok) = 17 panel: kırma uçlarında 13, veranda ve sundurmada 4 (bizim satırımız). Listede 5 × 1,2 + 12 × 0,8 = 17.",
+   "kalan": "kural: kırma uçlarının çatı panelleri katalog yolunda satır değil."
+  },
+  "Tavan omegası": {
+   "sinif": "karar",
+   "neden": "yöntem B kalemi; çelikte tavan omegası yok (Lokman, 7 Ekim 07:45). Kural tavan alanından (114,2 m ÷ 3,75 = 31); liste paftadaki toplam boydan: 127,76 ÷ 3,65 + 5 = 40 (Eylül 2026 uygulaması; katmanla 40).",
+   "kalan": "karar: yöntem B kalemi; listede paftadaki boy + 5."
+  },
+  "Köşebent": {
+   "sinif": "elle",
+   "neden": "listede toplam boy 173,37 m ÷ 2,5 = 70; boyun nasıl bulunduğu formülde yok. Bizde kural (mühendis, 4 Ekim): oda tavan çevreleri 84,42 + veranda tavanı çevresi 20,14 + 29 iç köşe × 2,7 = 182,86 m → 74.",
+   "kalan": "elle: listenin toplam boyu formülsüz."
+  },
+  "Aşık": {
+   "sinif": "karar",
+   "neden": "yöntem B kalemi. Boy çok yakın (bizde 185,5 m, listede paftadan 187 m); formül farklı: kural × 1,05 ÷ 4,2 = 47, liste 187 ÷ 4,1 = 45,6 ve adet 52 (Eylül 2026 uygulaması × 1,15 ÷ 4,1 = 52,5; katmanla 53).",
+   "kalan": "karar: yöntem B kalemi; formül."
+  },
+  "Alın sacı (veranda ve sundurma)": {
+   "sinif": "kural",
+   "neden": "listede veranda ve sundurmanın tek eğimli panel çatılarının eğik kenarlarında \"sıfır alın sacı\" var (5,2 m ÷ 2,5 → 3). Kuralımız (KT-01'in çatı panelli müştemilatından) çatı panelli çatıda alın sacı yazmıyor; kenarı Boardex şeridi sayıyor.",
+   "kalan": "kural: çatı panelli çatının kenarları sorulacak."
+  },
+  "Özel büküm saçak sacı": {
+   "sinif": "kural",
+   "neden": "listede veranda ve sundurma çatısının saçaklarında özel büküm saçak sacı (3; iki saçak 5,7 m). Kuralımızda çatı panelli çatıda saçak sacı yok; böyle bir kalem de yok.",
+   "kalan": "kural: çatı panelli çatının kenarları sorulacak."
+  },
+  "Saçak omegası (geniş, 140'lık duvar)": {
+   "sinif": "karar",
+   "neden": "yöntem B kalemi. Kural her saçak kenarını ayrı yukarı yuvarlıyor (2025 listelerinden; 21); liste saçaksız cephe boyundan: 40 ÷ 2,5 = 16 (Eylül 2026 katmanı da 16 veriyor; bizim cephe boyu 37,9 m). Listede 140'lık duvar için 180'lik geniş saçak omegası (ürün adı ve ölçüsü: adet dışı farklarda).",
+   "kalan": "karar: yöntem B kalemi; formül."
+  },
+  "Dış cephe Boardex": {
+   "sinif": "kural",
+   "neden": "çatı panelli veranda ve sundurmanın saçak ve alınlarına kuralımız Boardex şeridi ekledi (11,8 m × 0,25 m = 2,9 m²); listede bu kenarlar sacla (özel büküm saçak sacı, sıfır alın sacı). Şerit çıkınca 103,0 m² → 39 (listedeki adet).",
+   "kalan": "kural: çatı panelli çatının kenarları sorulacak."
+  },
+  "Veranda ve sundurma tavanı (Boardex)": {
+   "sinif": "kural",
+   "neden": "listede veranda ve sundurmanın tavanı çatılarının saçağıyla birlikte (veranda çatısı 14,84 m² paftada + sundurma; 16,8–17,5 m² → 7). Bizde dış ölçüyle 14,73 m² → 6; saçak altı için kuralımız (KT-01) 15 cm Boardex şeridi sayıyordu.",
+   "kalan": "kural: çatı panelli çatının kenarları sorulacak."
+  },
+  "Tavan alçıpan beyaz": {
+   "sinif": "karar",
+   "neden": "liste tavanı karkas yüzlerinden ölçüyor görünüyor (beyaz mahaller 63,6 m² + kiriş 0,8 → 22,5 → 23); kural kaplanmış yüz (Lokman, 7 Ekim C8): 62,7 m² → 22.",
+   "kalan": "karar: ölçünün alındığı yüz."
+  },
+  "Duvar alçıpan beyaz": {
+   "sinif": "karar",
+   "neden": "liste oda çevrelerini karkas yüzünden alıyor (KT-02'deki gibi); kural kaplanmış yüz (Lokman, 7 Ekim C8): 164,9 m² → 58.",
+   "kalan": "karar: ölçünün alındığı yüz."
+  },
+  "İç duvar OSB": {
+   "sinif": "karar",
+   "neden": "liste OSB'yi duvar alçıpanından çeviriyor görünüyor (59 + 10 levha × 3,0 ÷ 2,98 = 69,5 → 70); kural bütün iç yüzler × 1,05 ÷ 2,98 = 67,5 → 68.",
+   "kalan": "karar: ölçünün alındığı yüz ve formül."
+  },
+  "Duvar izolasyonu": {
+   "sinif": "karar",
+   "neden": "Lokman, 7 Ekim 07:45: duvar izolasyonu gönderilmiyor. Listede 250 m² ÷ 8,64 = 29 paket (dış duvar iki kat + iç duvar; bizim yalıtım alanımız 249 m², aynı).",
+   "kalan": "karar: gönderilmiyor."
+  },
+  "Sandviç panel (altı boy, toplam)": {
+   "sinif": "pafta",
+   "neden": "liste adedi çatı kaplaması yerleşim paftasından alıyor (366 × 6, 350 × 16, 325 × 14, 300 × 1, 250 × 4, 175 × 2 = 43; paftada çatı alanı 112 m², bizde 112,45 m²). Bizim dizilimimiz yedi boy, 47 panel.",
+   "kalan": "pafta: yerleşim paftasındaki dizilim."
+  },
+  "Sandviç panel kapaması": {
+   "sinif": "karar",
+   "neden": "kural L 2500, saçak boyu ÷ 2,3 (Lokman, 7 Ekim 08:02; 8 Ekim 00:45 onay): 47,25 ÷ 2,3 → 21; listede L 2800 (÷ 2,6 → 19; KT-02'deki gibi).",
+   "kalan": "karar: parça boyu L 2500 / L 2800."
+  },
+  "Damlalık (duvar dibi ve baca; bizde özel mahya)": {
+   "sinif": "karar",
+   "neden": "çatının duvara dayandığı kenar kuralda özel mahya satırında (kural seti 0.14; damlalık listeden çıkarıldı, Lokman 4 Ekim 15:18): 9,62 m ÷ 2,6 → 4. Listede damlalık: (duvar dibi 10,9 m + bacanın çevresi 2 × (0,84 + 0,38)) ÷ 2,6 → 6.",
+   "kalan": "karar: kalem ve bacanın çevresi."
+  },
+  "Çatı çıkış kapağı": {
+   "sinif": "kural",
+   "neden": "planda holde \"çatı çıkış kapağı 90 × 60\" çizili; listede çatı kaplamalarında \"çatı çıkış kapağı (çatı kaplamasıyla uyumlu, özel ölçü)\" 1 adet, ayrıca depo grubunda acil müdahale kapağı 1 (bizde de 1). Çatı çıkış kapağı için kuralımız yok.",
+   "kalan": "kural: çatı çıkış kapağı sorulacak."
+  },
+  "İzolasyon bandı (mahya, baca)": {
+   "sinif": "karar",
+   "neden": "liste formülü damlalığı da sayıyor: (mahya 14 + vadi 4 + damlalık 6) × 2,8 + baca 2,44 = 69,6 m → 7. Kural (mühendis, 4 Ekim; damlalık terimi yok: Lokman): (14 + 4) × 2,8 + baca çevresi 3,04 = 53,4 m → 6. Eylül 2026 katmanı 7.",
+   "kalan": "karar: damlalık terimi."
+  },
+  "Metal dere": {
+   "sinif": "kural",
+   "neden": "listede veranda ve sundurma çatısının saçaklarında da dere var (dere paftasında da): 41,52 + 5,72 = 47,24 m → 13. Kuralımız (KT-01'in çatı panelli müştemilatı) çatı panelli çatıda dere yazmıyor: 11.",
+   "kalan": "kural: çatı panelli çatının deresi sorulacak."
+  },
+  "Dere kapağı": {
+   "sinif": "kural",
+   "neden": "veranda ve sundurma derelerinin dört serbest ucu (aynı neden; kuralımızda dere yoktu).",
+   "kalan": "kural: çatı panelli çatının deresi sorulacak."
+  },
+  "Dere iniş aparatı": {
+   "sinif": "kural",
+   "neden": "iniş sayısı: paftada 11 (ana çatı 8, veranda 2, sundurma 1); bizde 9 (8 köşe + 1 orta). Ana çatıda sundurmanın üstüne düşen iç köşede paftada iniş yok; veranda ve sundurmada dere olmadığı için inişleri yoktu.",
+   "kalan": "kural: çatı panelli çatının deresi ve alçak çatının üstündeki köşe sorulacak."
+  },
+  "Dere iniş borusu": {
+   "sinif": "kural",
+   "neden": "iniş sayısına bağlı (aynı neden): 9 / 11.",
+   "kalan": "kural: iniş sayısı (aynı)."
+  },
+  "Açık dirsek": {
+   "sinif": "kural",
+   "neden": "iniş sayısına bağlı (iniş × 2): 18 / 22.",
+   "kalan": "kural: iniş sayısı (aynı)."
+  },
+  "Kapalı dirsek": {
+   "sinif": "kural",
+   "neden": "iniş sayısına bağlı: 9 / 11.",
+   "kalan": "kural: iniş sayısı (aynı)."
+  },
+  "İniş kelepçesi": {
+   "sinif": "kural",
+   "neden": "iniş sayısına bağlı (iniş × 2): 18 / 22.",
+   "kalan": "kural: iniş sayısı (aynı)."
+  },
+  "Dere kelepçesi": {
+   "sinif": "kural",
+   "neden": "dere adedine bağlı (dere × 8): 11 dereyle 88. Listede 110 (13 dereyle kural 104 verir; 110 iniş × 10'a uyuyor).",
+   "kalan": "kural: dere adedi (aynı); kalanı elle."
+  },
+  "NYM kablo (3 × 2,5)": {
+   "sinif": "elle",
+   "neden": "liste formülü 9 × 9,9 + (14 + 1 + 4 × 2) × 2 = 135,1, yazılan 140 (10'a yukarı). Bizde 9 × 9,88 + (13 + 1 + 4 × 2) × 2 = 132,9 → 133; uzaklık aynı (9,88 / 9,9), tekli priz bir eksik (paftada 13).",
+   "kalan": "elle: listenin yuvarlaması."
+  },
+  "NYM kablo (2 × 1,5)": {
+   "sinif": "elle",
+   "neden": "liste formülü 9 × 9,9 + (5 + 3 × 2) × 2 = 111,1, yazılan 120 (10'a yukarı); bizde 110,9 → 111.",
+   "kalan": "elle: listenin yuvarlaması."
+  },
+  "Tekli priz": {
+   "sinif": "elle",
+   "neden": "elektrik paftasında 13 tekli priz (kıyastan sonra yeniden sayıldı: salon 3, yatak odası 3, çocuk odası 3, mutfak 3, banyo 1); listede 14.",
+   "kalan": "elle: listede paftadakinden bir fazla."
+  },
+  "Buat kasa": {
+   "sinif": "karar",
+   "neden": "kural: anahtar + priz + veranda hariç oda sayısı = 8 + 18 + 6 = 32 (Lokman, 7 Ekim C6: bizdekine uy). Listede 50 (formül yok).",
+   "kalan": "karar: formül."
+  },
+  "İzole bant": {
+   "sinif": "elle",
+   "neden": "kural bina m² × 0,06 (94 → 5,6 → 6; 80 ile 4,8 → 5); listede 4 (formül yok).",
+   "kalan": "elle: listedeki sayı formülsüz."
+  },
+  "RYSB pul başlı": {
+   "sinif": "karar",
+   "neden": "bina alanı: kural kapalı kısım + veranda + açık sundurma = 94 m² (Lokman, 9 Ekim 22:22); liste 80 × 7,5 = 600.",
+   "kalan": "karar: bina alanı."
+  },
+  "Alçıpan vidası": {
+   "sinif": "karar",
+   "neden": "kural levha × 40 (Lokman, 7 Ekim 07:45: 40 yeterli): 139 × 40 → 5750; liste levha × 50: 141 × 50 = 7050 → 7100.",
+   "kalan": "karar: levha başına vida."
+  },
+  "OSB ve yalıpan vidası": {
+   "sinif": "elle",
+   "neden": "listenin formülü OSB × 50 = 3500, yazılan 4000; bizde 3132 → 3500 (500'e yukarı).",
+   "kalan": "elle: listenin yuvarlaması."
+  },
+  "Trapez vida (5,5 × 25)": {
+   "sinif": "karar",
+   "neden": "Lokman, 7 Ekim 07:45: omega ve aşık için trapez vida konmaz (çelik panel × 10 + köşebent × 6 = 1254 → 1500); liste omega ve aşık için de sayıyor (92 × 10 + 52 × 10 + 40 × 6 + 70 × 6 = 2100).",
+   "pay": "girdi: makas 36 → 34 (çelik panel 81 → 79): 1254 → 1234, 1500 → 1250.",
+   "kalan": "karar: omega ve aşık vidası."
+  },
+  "Trapez vida (5,5 × 110)": {
+   "sinif": "elle",
+   "neden": "listenin formülü (panel boyu ÷ 200 × adet) 699,8 verir, yazılan 1000; bizde 681,8 → 750 (250'ye yukarı).",
+   "kalan": "elle: listenin yuvarlaması."
+  },
+  "Çelik dübel": {
+   "sinif": "elle",
+   "neden": "kural duvar paneli × 2 = 26 × 2 = 52 (Excel motoru); listede 76 (formül yok; dış 15 + iç 11 + baca 8 + kolon 4 = 38 panel × 2 okuması uyuyor, KT-02'de bu okuma tutmuyordu).",
+   "kalan": "elle: listedeki sayı formülsüz."
+  },
+  "8'lik trapez uç": {
+   "sinif": "karar",
+   "neden": "bina alanı 94 (Lokman, 9 Ekim 22:22: açık sundurma da girer): 94 ÷ 15 → 7; listede 80 ÷ 15 → 6.",
+   "kalan": "karar: bina alanı."
+  },
+  "PH2 uç": {
+   "sinif": "karar",
+   "neden": "aynı: bina alanı 94 → 7; listede 80 → 6.",
+   "kalan": "karar: bina alanı."
+  },
+  "230'luk kesme taşı": {
+   "sinif": "karar",
+   "neden": "Lokman, 7 Ekim 07:45: önemli değil, formül ne veriyorsa (bina ÷ 15 = 7); listede m² × 0,02 = 1,6 → 2 (Excel motoru; Eylül 2026 katmanı da 2).",
+   "kalan": "karar: formül."
+  },
+  "İnox taş": {
+   "sinif": "karar",
+   "neden": "bina alanı 94 ÷ 10 → 10; listede 80 ÷ 10 = 8.",
+   "kalan": "karar: bina alanı."
+  },
+  "Dayson": {
+   "sinif": "elle",
+   "neden": "listenin formülü 80 × 0,04 = 3,2, yazılan 5; kural bina m² × 0,06 (Excel motoru; Lokman, 7 Ekim: motora uy) = 5,6 → 6.",
+   "kalan": "elle: listenin yuvarlaması."
+  },
+  "Baca borusu": {
+   "sinif": "kural",
+   "neden": "açıklama 4: \"Baca olacak. (Karkas ve içi de olacak.)\" Bacanın içi için kuralımız yok (liste öncesi karar 6: soru). Listede iki bacaya birer takım: baca borusu 4,3 m, T, kör tapa, maşon, şapka (40 × 40).",
+   "kalan": "kural: bacanın içi sorulacak."
+  },
+  "Baca T'si": {
+   "sinif": "kural",
+   "neden": "bacanın içi (aynı): 2.",
+   "kalan": "kural: bacanın içi sorulacak."
+  },
+  "Baca kör tapa": {
+   "sinif": "kural",
+   "neden": "bacanın içi (aynı): 2.",
+   "kalan": "kural: bacanın içi sorulacak."
+  },
+  "Baca maşonu": {
+   "sinif": "kural",
+   "neden": "bacanın içi (aynı): 2.",
+   "kalan": "kural: bacanın içi sorulacak."
+  },
+  "Baca şapkası": {
+   "sinif": "kural",
+   "neden": "bacanın içi (aynı): 2 × 40 × 40.",
+   "kalan": "kural: bacanın içi sorulacak."
+  },
+  "Taharet musluğu 20 mm": {
+   "sinif": "kural",
+   "neden": "listenin mekanik tesisat grubunda taharet musluğu 4; kuralımızın sıhhi tesisat takımında bu kalem yok (KT-01 ve KT-02 listelerinde de yoktu).",
+   "kalan": "kural: taharet musluğu sorulacak."
+  }
+ },
+ "fazla": {
+  "Ters mahya kenar kutusu": {
+   "sinif": "karar",
+   "neden": "Lokman, 7 Ekim 08:02: cumbalı çatılarda olmazsa olmaz (ters mahya × 2 = 8); bu listede yok (KT-02'nin listesinde vardı)."
+  },
+  "Besleme kablo borusu": {
+   "sinif": "karar",
+   "neden": "motorun kalemi (kat × 5 m); bu listenin şablonunda yok (KT-02'nin listesinde vardı)."
+  },
+  "Şase pul": {
+   "sinif": "karar",
+   "neden": "motorun kalemi (çelik dübel kadar); bu listenin şablonunda yok (KT-02'nin listesinde vardı)."
+  },
+  "Çırpı ipi": {
+   "sinif": "karar",
+   "neden": "motorun kalemi (1); bu listenin şablonunda yok (KT-02'nin listesinde vardı)."
+  }
+ },
+ "adet_disi": [
+  "Çelik ağırlığı (üretim dosyası yok; bizde motorun proje ortalamaları). Listede / bizde: dış duvar 1 103 / 1 140,4 (39,27 m; listede 28,1 kg/m, kural ortalaması 29,04); iç duvar 536 / 467,3 (23,66 m; listede 22,7 kg/m, kural 19,75); makas 667 / 681,3; çatı panelleri 312 / 64,9 (bizde yalnız veranda ve sundurma; kırma uçlarınınki makas satırında); baca 98 / 55,8; kolon ve kiriş 131 / 116,1; toplam 2 847 / 2 555,8 kg (listede C profiller kg'sız).",
+  "Listenin çelik toplamı 92 adet C profilleri saymıyor (onlar 3 + 3, kg'sız); bizim toplamımız sayıyor (düzeltilmiş B'de 85 = 79 panel + 6 C profil).",
+  "Et kalınlığı: listede makasların 4'ü ve çatı panellerinin 5'i 80 × 1,2; kuralda çatı çeliği 0,8. Dış duvar 140 × 1,2, iç duvar 80 × 1,2, baca 80 × 0,8 (bizimle aynı).",
+  "Listenin yeni sütunu: çelik panelin üretildiği rulo form makinesi (140'lık duvar büyük makinede, öbürleri 1,2 ve 0,8 ayarlı küçük makinede).",
+  "Saçak omegası listede \"180'lik geniş saçak omegası (140'lık duvarlar için)\" (L 2500); bizde \"saçak omegası\": 140 mm duvarlı binada ürün ve ölçü kuralı yok.",
+  "Sandviç panel boyları: listede 3660, 3500, 3250, 3000, 2500, 1750 (paftadaki yerleşim); bizde 3680, 3550, 3290, 3160, 2620, 2370, 1630. Paftadaki çatı alanı 112 m² (bizde 112,45 m²).",
+  "Sandviç panel kapaması listede \"tek kat panel ve sandviç panel uç kapaması\" L 2800; kuralda L 2500.",
+  "Dış cephe levhası listede 12 mm Boardex; kural 12,5 mm. Veranda tavanı satırının adı listede \"veranda, sundurma, balkon, tavan\".",
+  "Çatı izolasyonu listede Knauf mineral yünü (paket 8,64 m²); bizde çatı şiltesi 80 mm (9,6 m²/adet). Adet aynı (11).",
+  "Pencereler listede pervaz, matik, çift açılım ya da sürgülü, antrasit, Winsa yazılı; 50/50 \"vasistas\" (bizim kural yalnız 60/40'ı vasistas sayıyor). Adetler aynı.",
+  "Elektrik: listede \"duylu armatür\" ve \"LED ampul\" (bizde tijli duy ve ampul); adet aynı. Kompozit çelik kapı listede \"(sağ)\".",
+  "Bina alanı: liste 80 m² (kapalı kısım); bizde 94 (oturum 93,81 m²: veranda ve açık sundurma dahil; Lokman, 9 Ekim 22:22). Boya kovaları ikisinde de aynı çıktı (80 × 0,02 ve 94 × 0,02 → 2)."
+ ]
+}

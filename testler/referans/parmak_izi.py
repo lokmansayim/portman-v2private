@@ -125,6 +125,32 @@ def ozet(yol: Path) -> str:
     raise SystemExit(f"desteklenmeyen dosya: {yol}")
 
 
+def genel_pdf_ozet(yol: Path) -> str:
+    """Genel motorun şablon paftası PDF'i: sayfa ölçüleri, bütün çizimler (pdf_ozet gibi) ve metin (sözcük + yeri, 0,1 pt). Bayt özeti değil:
+    matplotlib gömülü yazı tiplerini dosya adına göre sıralı yazar ve bu sıra depo yoluna bağlıdır (kod incelemesi, 12.10.2026); içerik ise yol
+    bağımsızdır. Yazılar Type 3 yazı tipiyle gömülür, PyMuPDF sözcükleri okur; bir etiket ya da değer değişince iz değişir."""
+    import fitz
+    sayfalar = []
+    with fitz.open(yol) as d:
+        for s in d:
+            cizimler = sorted(_cizim(x) for x in s.get_drawings())
+            sozcukler = sorted([round(w[0], 1), round(w[1], 1), round(w[2], 1), round(w[3], 1), w[4]] for w in s.get_text("words"))
+            sayfalar.append([round(s.rect.width, 1), round(s.rect.height, 1), len(cizimler), hashlib.sha256("\n".join(cizimler).encode()).hexdigest(), sozcukler])
+    return hashlib.sha256(json.dumps(sayfalar, ensure_ascii=False).encode("utf-8")).hexdigest()
+
+
+def genel_ozet(yol: Path) -> str:
+    """Genel motor çıktılarının izi (İE-08, `cikti/denetim/genel*/`): PNG bayt bayt (sha256; matplotlib Agg deterministik), PDF içerikçe
+    (`genel_pdf_ozet`), JSON kanonik, IFC içerikçe (`motor/genel/iz.py`: başlık zamanı, GlobalId, kayıt numarası ve küme sırası maskeli)."""
+    if yol.suffix.lower() == ".pdf":
+        return genel_pdf_ozet(yol)
+    kok = Path(__file__).resolve().parents[2]          # depo kökü (motor/genel/iz.py için)
+    if str(kok) not in sys.path:
+        sys.path.insert(0, str(kok))
+    from motor.genel import iz
+    return iz.dosya_izi(yol)
+
+
 if __name__ == "__main__":
     for a in sys.argv[1:]:
         print(f"{ozet(Path(a))}  {a}")

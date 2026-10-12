@@ -1,0 +1,609 @@
+{
+  "surum": "1.4.3",
+  "birim": "mm",
+  "malzemeler": {
+    "D01": {
+      "code": "D01",
+      "group": "Dış duvar panoları",
+      "label": "Dolu pano",
+      "dimensions_mm": [
+        1255,
+        100,
+        2500
+      ],
+      "note": "",
+      "unit": "adet"
+    },
+    "D02": {
+      "code": "D02",
+      "group": "Dış duvar panoları",
+      "label": "120×120 pencereli pano",
+      "dimensions_mm": [
+        1255,
+        100,
+        2500
+      ],
+      "note": "Pencere ayrı kalem; pano tek parça sayıldı.",
+      "unit": "adet"
+    },
+    "D03": {
+      "code": "D03",
+      "group": "Dış duvar panoları",
+      "label": "120×180 pencereli pano",
+      "dimensions_mm": [
+        1255,
+        100,
+        2500
+      ],
+      "note": "Pencere ayrı kalem; pano tek parça sayıldı.",
+      "unit": "adet"
+    },
+    "D04": {
+      "code": "D04",
+      "group": "Dış duvar panoları",
+      "label": "60×40 vasistaslı pano",
+      "dimensions_mm": [
+        1255,
+        100,
+        2500
+      ],
+      "note": "Pencere ayrı kalem; pano tek parça sayıldı.",
+      "unit": "adet"
+    },
+    "D05": {
+      "code": "D05",
+      "group": "Dış duvar panoları",
+      "label": "Dış kapılı özel pano",
+      "dimensions_mm": [
+        1155,
+        100,
+        2500
+      ],
+      "note": "Kapı açıklığı 970 mm; kapı ayrıca sayıldı.",
+      "unit": "adet"
+    },
+    "I01": {
+      "code": "I01",
+      "group": "İç duvar panoları",
+      "label": "Dolu pano",
+      "dimensions_mm": [
+        1255,
+        60,
+        2500
+      ],
+      "note": "",
+      "unit": "adet"
+    },
+    "I02": {
+      "code": "I02",
+      "group": "İç duvar panoları",
+      "label": "Özel dolu pano",
+      "dimensions_mm": [
+        1205,
+        60,
+        2500
+      ],
+      "note": "",
+      "unit": "adet"
+    },
+    "I03": {
+      "code": "I03",
+      "group": "İç duvar panoları",
+      "label": "Kademe dolu panosu",
+      "dimensions_mm": [
+        597.5,
+        60,
+        2500
+      ],
+      "note": "",
+      "unit": "adet"
+    },
+    "I04": {
+      "code": "I04",
+      "group": "İç duvar panoları",
+      "label": "İç kapılı özel pano",
+      "dimensions_mm": [
+        1225,
+        60,
+        2500
+      ],
+      "note": "Kapı açıklığı 820 mm; kapı ayrıca sayıldı.",
+      "unit": "adet"
+    },
+    "I05": {
+      "code": "I05",
+      "group": "İç duvar panoları",
+      "label": "İç kapılı özel pano",
+      "dimensions_mm": [
+        1195,
+        60,
+        2500
+      ],
+      "note": "Kapı açıklığı 820 mm; kapı ayrıca sayıldı.",
+      "unit": "adet"
+    },
+    "P01": {
+      "code": "P01",
+      "group": "Kapı ve pencereler",
+      "label": "Pencere 120×120",
+      "dimensions_mm": [
+        1200,
+        1200,
+        null
+      ],
+      "note": "Ölçü en × yükseklik; eşik 800 mm.",
+      "unit": "adet"
+    },
+    "P02": {
+      "code": "P02",
+      "group": "Kapı ve pencereler",
+      "label": "Pencere 120×180",
+      "dimensions_mm": [
+        1200,
+        1800,
+        null
+      ],
+      "note": "Ölçü en × yükseklik; eşik 200 mm.",
+      "unit": "adet"
+    },
+    "P03": {
+      "code": "P03",
+      "group": "Kapı ve pencereler",
+      "label": "Vasistas 60×40",
+      "dimensions_mm": [
+        600,
+        400,
+        null
+      ],
+      "note": "Ölçü en × yükseklik; eşik 1600 mm.",
+      "unit": "adet"
+    },
+    "K01": {
+      "code": "K01",
+      "group": "Kapı ve pencereler",
+      "label": "İç kapı",
+      "dimensions_mm": [
+        820,
+        null,
+        null
+      ],
+      "note": "820 mm plandaki açıklıktır; ürün eni/boyu ve açılış yönü siparişte teyit edilmeli.",
+      "unit": "adet"
+    },
+    "K02": {
+      "code": "K02",
+      "group": "Kapı ve pencereler",
+      "label": "Dış kapı",
+      "dimensions_mm": [
+        970,
+        null,
+        null
+      ],
+      "note": "970 mm plandaki açıklıktır; ürün eni/boyu siparişte teyit edilmeli.",
+      "unit": "adet"
+    },
+    "B01": {
+      "code": "B01",
+      "group": "Bağlantı ve veranda",
+      "label": "İç köşe bağlantısı",
+      "dimensions_mm": [
+        30,
+        60,
+        null
+      ],
+      "note": "Plandaki kesit. Profil türü ve kesim boyu tanımlı değil.",
+      "unit": "adet"
+    },
+    "B02": {
+      "code": "B02",
+      "group": "Bağlantı ve veranda",
+      "label": "100×50 köşe bağlantısı",
+      "dimensions_mm": [
+        50,
+        100,
+        null
+      ],
+      "note": "5 dış köşe + 1 veranda iç köşesi. Profil kesim boyu tanımlı değil.",
+      "unit": "adet"
+    },
+    "B03": {
+      "code": "B03",
+      "group": "Bağlantı ve veranda",
+      "label": "Üçlü H bağlantı",
+      "dimensions_mm": [
+        60,
+        null,
+        null
+      ],
+      "note": "60 mm iç duvar bağlantısı; kesim boyu tanımlı değil.",
+      "unit": "adet"
+    },
+    "V01": {
+      "code": "V01",
+      "group": "Bağlantı ve veranda",
+      "label": "Veranda yan profil gösterimi",
+      "dimensions_mm": [
+        1255,
+        100,
+        null
+      ],
+      "note": "1255 mm dış sınır boyu; gerçek kesim boyu ve profil kesiti teyit edilmeli.",
+      "unit": "adet"
+    },
+    "V02": {
+      "code": "V02",
+      "group": "Bağlantı ve veranda",
+      "label": "Veranda ön profil gösterimi",
+      "dimensions_mm": [
+        3815,
+        100,
+        null
+      ],
+      "note": "3815 mm dış sınır boyu; gerçek kesim boyu ve profil kesiti teyit edilmeli.",
+      "unit": "adet"
+    },
+    "D06": {
+      "code": "D06",
+      "group": "Dış duvar panoları",
+      "label": "Özel dolu pano",
+      "dimensions_mm": [
+        627.5,
+        100,
+        2500
+      ],
+      "note": "",
+      "unit": "adet"
+    },
+    "D07": {
+      "code": "D07",
+      "group": "Dış duvar panoları",
+      "label": "Dış kapılı özel pano",
+      "dimensions_mm": [
+        1205.0,
+        100,
+        2500
+      ],
+      "note": "Doğrama ayrıca sayılır; pano tek adet.",
+      "unit": "adet"
+    },
+    "I06": {
+      "code": "I06",
+      "group": "İç duvar panoları",
+      "label": "Özel dolu pano",
+      "dimensions_mm": [
+        627.5,
+        60,
+        2500
+      ],
+      "note": "",
+      "unit": "adet"
+    },
+    "I07": {
+      "code": "I07",
+      "group": "İç duvar panoları",
+      "label": "Özel dolu pano",
+      "dimensions_mm": [
+        1225.0,
+        60,
+        2500
+      ],
+      "note": "",
+      "unit": "adet"
+    },
+    "I08": {
+      "code": "I08",
+      "group": "İç duvar panoları",
+      "label": "Özel dolu pano",
+      "dimensions_mm": [
+        1195.0,
+        60,
+        2500
+      ],
+      "note": "",
+      "unit": "adet"
+    },
+    "I09": {
+      "code": "I09",
+      "group": "İç duvar panoları",
+      "label": "Özel dolu pano",
+      "dimensions_mm": [
+        577.5,
+        60,
+        2500
+      ],
+      "note": "",
+      "unit": "adet"
+    },
+    "I10": {
+      "code": "I10",
+      "group": "İç duvar panoları",
+      "label": "Kapısız geçişli pano",
+      "dimensions_mm": [
+        1255.0,
+        60,
+        2500
+      ],
+      "note": "820 mm kapısız geçiş; açıklık yüksekliği üretim için tanımlanmalı.",
+      "unit": "adet"
+    },
+    "V03": {
+      "code": "V03",
+      "group": "Bağlantı ve veranda",
+      "label": "Veranda yan profil gösterimi",
+      "dimensions_mm": [
+        5020,
+        100,
+        null
+      ],
+      "note": "Dış sınır boyu; gerçek profil kesiti/kesim boyu teyit edilmeli.",
+      "unit": "adet"
+    },
+    "V04": {
+      "code": "V04",
+      "group": "Bağlantı ve veranda",
+      "label": "Veranda ön profil gösterimi",
+      "dimensions_mm": [
+        1255.0,
+        100,
+        null
+      ],
+      "note": "Dış sınır boyu; gerçek profil kesiti/kesim boyu teyit edilmeli.",
+      "unit": "adet"
+    },
+    "B04": {
+      "code": "B04",
+      "group": "Bağlantı ve veranda",
+      "label": "Veranda dikmesi",
+      "dimensions_mm": [
+        100,
+        100,
+        null
+      ],
+      "note": "Şematik plan izi 100×100 mm; profil ürünü ve boyu teyit edilmeli.",
+      "unit": "adet"
+    },
+    "I11": {
+      "code": "I11",
+      "group": "İç duvar panoları",
+      "label": "İç kapılı pano",
+      "dimensions_mm": [
+        1255.0,
+        60,
+        2500
+      ],
+      "note": "Doğrama ayrıca sayılır; pano tek adet.",
+      "unit": "adet"
+    },
+    "D08": {
+      "code": "D08",
+      "group": "Dış duvar panoları",
+      "label": "Özel dolu pano",
+      "dimensions_mm": [
+        1205,
+        100,
+        2500
+      ],
+      "note": "",
+      "unit": "adet"
+    },
+    "B05": {
+      "code": "B05",
+      "group": "Bağlantı ve veranda",
+      "label": "Üçlü H bağlantı 100",
+      "dimensions_mm": [
+        100.0,
+        null,
+        null
+      ],
+      "note": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli.",
+      "unit": "adet"
+    },
+    "D09": {
+      "code": "D09",
+      "group": "Dış duvar panoları",
+      "label": "Dolu pano",
+      "dimensions_mm": [
+        1255.0,
+        160,
+        2800
+      ],
+      "note": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli.",
+      "unit": "adet"
+    },
+    "D10": {
+      "code": "D10",
+      "group": "Dış duvar panoları",
+      "label": "120×180 pencereli pano",
+      "dimensions_mm": [
+        1255.0,
+        160,
+        2800
+      ],
+      "note": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli.",
+      "unit": "adet"
+    },
+    "D11": {
+      "code": "D11",
+      "group": "Dış duvar panoları",
+      "label": "Dış kapılı pano",
+      "dimensions_mm": [
+        1255.0,
+        160,
+        2800
+      ],
+      "note": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli.",
+      "unit": "adet"
+    },
+    "K03": {
+      "code": "K03",
+      "group": "Kapı ve pencereler",
+      "label": "Dış kapı 90",
+      "dimensions_mm": [
+        900.0,
+        null,
+        null
+      ],
+      "note": "900 mm plandaki açıklıktır; ürün ölçüsü siparişte teyit edilmeli.",
+      "unit": "adet"
+    },
+    "D12": {
+      "code": "D12",
+      "group": "Dış duvar panoları",
+      "label": "Özel dolu pano",
+      "dimensions_mm": [
+        1140.0,
+        160,
+        2800
+      ],
+      "note": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli.",
+      "unit": "adet"
+    },
+    "I12": {
+      "code": "I12",
+      "group": "İç duvar panoları",
+      "label": "Özel dolu pano",
+      "dimensions_mm": [
+        1205.0,
+        100,
+        2800
+      ],
+      "note": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli.",
+      "unit": "adet"
+    },
+    "I13": {
+      "code": "I13",
+      "group": "İç duvar panoları",
+      "label": "Özel dolu pano",
+      "dimensions_mm": [
+        512.5,
+        100,
+        2800
+      ],
+      "note": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli.",
+      "unit": "adet"
+    },
+    "I14": {
+      "code": "I14",
+      "group": "İç duvar panoları",
+      "label": "Dolu pano",
+      "dimensions_mm": [
+        1255.0,
+        100,
+        2800
+      ],
+      "note": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli.",
+      "unit": "adet"
+    },
+    "I15": {
+      "code": "I15",
+      "group": "İç duvar panoları",
+      "label": "İç kapılı pano",
+      "dimensions_mm": [
+        1255.0,
+        100,
+        2800
+      ],
+      "note": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli.",
+      "unit": "adet"
+    },
+    "I16": {
+      "code": "I16",
+      "group": "İç duvar panoları",
+      "label": "Özel dolu pano",
+      "dimensions_mm": [
+        577.5,
+        100,
+        2800
+      ],
+      "note": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli.",
+      "unit": "adet"
+    },
+    "I17": {
+      "code": "I17",
+      "group": "İç duvar panoları",
+      "label": "Özel dolu pano",
+      "dimensions_mm": [
+        627.5,
+        100,
+        2800
+      ],
+      "note": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli.",
+      "unit": "adet"
+    },
+    "D13": {
+      "code": "D13",
+      "group": "Dış duvar panoları",
+      "label": "120×120 pencereli pano",
+      "dimensions_mm": [
+        1255.0,
+        160,
+        2800
+      ],
+      "note": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli.",
+      "unit": "adet"
+    },
+    "D14": {
+      "code": "D14",
+      "group": "Dış duvar panoları",
+      "label": "Özel dolu pano",
+      "dimensions_mm": [
+        300.0,
+        160,
+        2800
+      ],
+      "note": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli.",
+      "unit": "adet"
+    },
+    "I18": {
+      "code": "I18",
+      "group": "İç duvar panoları",
+      "label": "Özel dolu pano",
+      "dimensions_mm": [
+        1175.0,
+        100,
+        2800
+      ],
+      "note": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli.",
+      "unit": "adet"
+    },
+    "I19": {
+      "code": "I19",
+      "group": "İç duvar panoları",
+      "label": "Özel dolu pano",
+      "dimensions_mm": [
+        220.0,
+        100,
+        2800
+      ],
+      "note": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli.",
+      "unit": "adet"
+    },
+    "D15": {
+      "code": "D15",
+      "group": "Dış duvar panoları",
+      "label": "60×40 vasistaslı pano",
+      "dimensions_mm": [
+        1255.0,
+        160,
+        2800
+      ],
+      "note": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli.",
+      "unit": "adet"
+    },
+    "B06": {
+      "code": "B06",
+      "group": "Bağlantı ve veranda",
+      "label": "160×80 köşe bağlantısı",
+      "dimensions_mm": [
+        80.0,
+        160.0,
+        null
+      ],
+      "note": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli.",
+      "unit": "adet"
+    }
+  },
+  "guncellendi": "2026-09-07",
+  "aciklama": "Kodlar malzeme ailesi içinde kalıcıdır. Proje adetleri katalog değildir; her çizimden yeniden sayılır.",
+  "not": "Portman motor çalışma kopyası; yeni kodlar teyit edilmeden ana kataloğa yazılmaz."
+}

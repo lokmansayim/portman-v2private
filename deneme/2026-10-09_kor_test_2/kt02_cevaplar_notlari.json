@@ -1,0 +1,54 @@
+{
+ "aciklama": "KT-02, Lokman'ın 9 Ekim 2026 22:22 ve 22:44 cevaplarından sonraki notlar. `kt02_kiyas.py --ek-notlar` ile `kt02_farklar.json`ın üstüne yazılır: birimlerin `kalan`, `pay` ve `not` alanları, giriş, başlık, etiketler ve adet dışı farklar. Kör listenin sınıfları ve nedenleri (22:05 kaydı) değişmez.",
+ "baslik": "KT-02 · Lokman'ın 9 Ekim 22:22 ve 22:44 cevaplarından sonra",
+ "giris": "İkinci kör test (KT-02), Lokman'ın 9 Ekim 2026 22:22 ve 22:44 cevaplarından sonra. Gerçek listenin adetli her satırı, dondurulan iki listemizle (commit 59602ef) ve düzeltilmiş tanımdan güncel kural setiyle (0.17) çıkan listelerle. Cevaplar yazıldığı gibi: (1) 22:22 \"Veranda korkuluğunun her tarafı kaplanıyor iç yüzde kaplanıyor\"; 22:44 \"var sayılan Boardex yap korkuluk çok önemli değil binde bir çıkar sen var sayılan olarak üst 8 cm iç ve dış ölçüsüne göre şeklinde kurala işle\" (kural seti 0.17: korkuluk Boardex; iç ve dış yüz kendi ölçüleriyle, üstü 8 cm); (2) \"evet yaz\": 80 × 45 × 1,5 için 2,07 kg/m (0.16); (3) \"evet girsin\": açık sundurma bina alanına girer (hesap zaten öyleydi); (4) \"Evet ekle\": KT-02'nin tanımı ve çizimleri depoda. Kör listenin sınıfları 22:05 kıyasındaki gibidir (o anın kaydı); \"kalan\" sütunu cevaplardan sonraki durumu yazar.",
+ "etiketler": {
+  "duz_b": "Cevaplardan sonra (B)",
+  "duz_b_aciklama": "düzeltilmiş tanım, güncel kural seti (0.17); adetler 22:05'teki düzeltilmiş listeyle aynı, 1,5 mm kirişin kg'ı yazılı",
+  "duz_a": "Cevaplardan sonra (A)",
+  "duz_a_aciklama": "bilgi",
+  "duz_kisa": "cevaplardan sonra",
+  "duz_sutun": "Cevaplardan sonra B",
+  "kalan_basligi": "Cevaplardan sonraki listede (B) farklı kalan",
+  "kalan_sutun": "Cevaplardan sonra kalan",
+  "kaynak_notu": "Sınıflar ve nedenler `kt02_farklar.json`dan; cevaplardan sonraki notlar `kt02_cevaplar_notlari.json`dan (üstüne yazar)."
+ },
+ "birimler": {
+  "Dış cephe Boardex (veranda tavanı dahil)": {
+   "kalan": "karar: korkuluk varsayılan Boardex: iç ve dış yüz kendi ölçüleriyle, üstü 8 cm (Lokman, 9 Ekim 22:44; kural seti 0.17). Bizde 43 + veranda tavanı 8 = 51; listede korkuluk Betopan, dış cephe levhası 46."
+  },
+  "Betopan (veranda korkuluk kaplaması)": {
+   "kalan": "karar: korkuluk varsayılan Boardex (Lokman, 9 Ekim 22:44: \"korkuluk çok önemli değil binde bir çıkar\"); listede 3 Betopan (bir yüzü kadar)."
+  },
+  "8'lik trapez uç": {
+   "kalan": "karar: açık sundurma bina alanına girer (Lokman, 9 Ekim 22:22: \"evet girsin\"): 92 m² ÷ 15 → 7; listede 90 ile 6."
+  },
+  "PH2 uç": {
+   "kalan": "karar: bina alanı 92 (açık sundurma dahil; Lokman, 9 Ekim 22:22); listede 90 ile 6."
+  },
+  "İnox taş": {
+   "kalan": "karar: bina alanı 92 (açık sundurma dahil; Lokman, 9 Ekim 22:22); listede 90 ile 9."
+  },
+  "RYSB pul başlı": {
+   "pay": "karar: bina alanı 92 (açık sundurma dahil; Lokman, 9 Ekim 22:22), projede 90."
+  },
+  "Kiriş (1,5)": {
+   "not": "kg: kural seti 0.16 ile 22,65 m × 2,07 kg/m (Lokman, 9 Ekim 22:22: \"evet yaz\"); gerçek listede 46,89."
+  },
+  "Alçıpan vidası": {
+   "pay": "karar: korkuluğun Boardex'i (Lokman, 9 Ekim 22:44: varsayılan Boardex)."
+  }
+ },
+ "adet_disi": [
+  "Çelik panel grubunun dokuz satırının hepsinde adet de kg da aynı (fark 0,1 kg'dan az; üretim dosyasındaki profil boyu × kuraldaki birim ağırlık). Listede / cevaplardan sonra: dış duvar 656,64 / 656,63; iç duvar 387,55 / 387,52; kolon 88,92 / 88,92; kiriş 1,2 mm 109,56 / 109,55; kiriş 1,5 mm 46,89 / 46,89 (kural seti 0.16: 2,07 kg/m); makas 429,27 / 429,24; çatı panelleri 226,18 / 226,10; veranda duvarı 56,05 / 56,04; veranda desteği 10,24 / 10,28 kg.",
+  "Çelik toplamı: listede 105 adet, 2 051,3 kg; cevaplardan sonra 107 adet, 2 041,2 kg. Fark C profillerde: bizde 3 + 3 adet, 15 + 15 kg (motorun sabiti); listede 2 + 2 adet, 20 + 20 kg (Lokman, 8 Ekim: \"C profiller hiç önemli değil\").",
+  "Dış cephe levhası listede 8 mm (Boardex); kural 12,5 mm (Lokman, 7 Ekim: listelerdeki 8 mm hatalı giriş). Listede veranda tavanı da aynı satırda.",
+  "Çatı izolasyonu listede 100 mm; kural 80 mm (Lokman, 7 Ekim: listelerdeki 100 mm hatalı giriş). Adet aynı (11).",
+  "Sandviç panel boyları: listede L 4400 ve L 1150; bizde L 4390 ve L 1160 (eğimli boy + 5 cm taşma, 10 mm'ye yukarı).",
+  "Sandviç panel kapaması listede L 2800; kuralda L 2500.",
+  "Saçak sacı listede \"7 adet menfezli\"; menfezli saçak sacının kuralı yok (KT-01'de de vardı: 4 adet).",
+  "Elektrik: anahtar ve prizler listede \"(antrasit)\" yazılı (açıklama 6: prizler antrasit renk); bizim satırlarda renk yok. Tekli prizin 2'si listede \"kapaklı\" ayrı satır (muhtemelen veranda prizleri); toplam aynı (16).",
+  "Kapılar listede sağ ve sol ayrı: melamin kapı 1 sağ + 3 sol, kompozit çelik kapı sağ. Bizde yön yok; toplam aynı.",
+  "Boya ve silikonize mastik listede \"alıcıya ait\" (adetsiz): liste öncesi kararımızla aynı (açıklama 5)."
+ ]
+}

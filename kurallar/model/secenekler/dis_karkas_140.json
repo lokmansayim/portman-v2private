@@ -1,0 +1,29 @@
+{
+ "sema": "portman.secenek/0.1-taslak",
+ "kod": "dis_karkas_140",
+ "ad": "Dış duvar karkası 140 mm",
+ "kaynak": "Lokman, 2 Ekim 2026 20:15: bir üst pakette dış duvar karkası 140 mm. 3 Ekim 11:49: yalnız dış duvarlar; bayi \"dışlar 140'lık olsun\" dediğinde anlaşılmalı.",
+ "kapsam": "Yalnız dış duvarlar. İç duvarlar, çatı ve açıklıklar değişmez.",
+ "degisiklik": {
+  "dis_duvar_tipi": "DIS-140",
+  "paket": "dış 140"
+ },
+ "bayi_ifadeleri": {
+  "lokman_ornegi": [
+   "dışlar 140'lık olsun"
+  ],
+  "tahmin_teyit_bekliyor": [
+   "dış duvarlar 140 olsun",
+   "dış karkas 140'lık",
+   "dışlar 14'lük olsun"
+  ]
+ },
+ "etki": [
+  "Dış duvar kalınlığı katmanlardan: 12,5 + 140 + 12,5 = 165 mm.",
+  "Dış ölçü değişmez (dış duvarlar dıştan ölçülür); duvar içeri doğru kalınlaşır, dış duvara komşu mahaller küçülür.",
+  "İç duvar aksları değişmez (iç duvarlar tam ortadan ölçülür).",
+  "Dış Boardex metrajı değişmez (çevre × yükseklik − boşluklar).",
+  "Dış duvar yalıtımı çift kat olur (gerçek listelerden). Duvar çeliği Excel motorunun birim ağırlıklarıyla hesaplanır. Et kalınlığı mühendisin kuralıyla (ikinci cevaplar, 4 Ekim 2026): tek katta ve zemin katta dış duvar 140 × 45 × 1,2, iç duvar 80 × 45 × 1,2; üst katta 0,8 mm. Bu yüzden dış 140 seçeneği baz paketten ağırdır. (3 Ekim'deki 0,8 mm varsayımı kalktı; 2025 tarihli iki tek katlı listede dış duvarların çoğu 0,8 mm'di.) Yükleme listesi: deneme/2026-10-03_yukleme/.",
+  "Çatı yöntemi B'de (saçak sacı) dış duvar 14 cm olunca geniş saçak omegası (180 × 2500) kullanılır (Excel motorundaki not)."
+ ]
+}
