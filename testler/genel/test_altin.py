@@ -84,3 +84,18 @@ def test_kt03_pafta_yuvarlama_iki_yanda_ayni(tmp_path):
     with fitz.open(tmp_path / "KT03_pafta.pdf") as d:
         metin = " ".join(w[4] for p in d for w in p.get_text("words"))
     assert "94" in metin and "kör" not in metin.lower() and "üçüncü" not in metin.lower()
+
+
+def test_ozellik_degeri_once_kuculur_sonra_iki_satir_en_son_uc():
+    # Lokman 12.10 14:53: değer kesilmez. Az satır çok satırdan önce: Ç8801'in pencere satırı iki satıra sarılır (ilk satır virgülle biter),
+    # üç satır yalnız en küçük boyda da iki satıra sığmayan değerde (KT-02); satırlar hücreye sığar, iki satır satır yüksekliğine sığar
+    from motor.genel import sablon_pafta as sp
+    gen = sp.OZELLIK[2] - 765.0 - 2
+    yuk = (sp.OZELLIK[3] - sp.OZELLIK_BASLIK_ALT) / len(sp.OZELLIK_SIRASI) - 1.6
+    pt, sat = sp._sigdir("8 adet (4×120/120, 3×120/180, 1×80/180)", 7.3, 5.2, gen, yuk)
+    assert len(sat) == 2 and sat[0].endswith(",") and 5.2 <= pt <= yuk / 2 / 0.95, (pt, sat)
+    pt3, sat3 = sp._sigdir("9 adet (3×120/120, 2×100/120, 2×120/180, 1×80/180, 1×60/120)", 7.3, 5.2, gen, yuk)
+    assert len(sat3) == 3 and pt3 == 5.2 and sat3[0].endswith(",") and not sat3[-1].endswith(","), (pt3, sat3)
+    for p_, s_ in ((pt, sat), (pt3, sat3)):
+        assert all(sp.yazi_eni(x, p_, sp.COMIC) <= gen for x in s_)
+    assert sp._sigdir("1 adet (1×60/40)", 7.3, 5.2, gen, yuk) == (7.3, ["1 adet (1×60/40)"])

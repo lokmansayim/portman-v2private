@@ -145,32 +145,38 @@ class Sayfa:
 
 
 def _satirlara(v: str, pt: float, gen: float) -> list[str]:
-    """Değeri virgül (yoksa boşluk) sınırından, her satır `gen`'e sığacak biçimde açgözlü sarar; boş parça üretmez."""
+    """Değeri virgül (yoksa boşluk) sınırından, her satır `gen`'e sığacak biçimde açgözlü sarar; boş parça üretmez. Virgülle sarılan
+    satırların sonunda virgül kalır (liste sürüyor); sığma ölçümü o virgülü de sayar."""
     ayrac = ", " if ", " in v else " "
-    parcalar = [p for p in v.split(ayrac) if p.strip()]
+    kuyruk = "," if ayrac == ", " else ""
+    parcalar = [p.strip() for p in v.split(ayrac) if p.strip()]
     satirlar: list[str] = []
-    for p in parcalar:
-        aday = (satirlar[-1] + ayrac + p).strip() if satirlar else p.strip()
-        if satirlar and yazi_eni(aday, pt, COMIC) <= gen:
-            satirlar[-1] = aday
+    for i, p in enumerate(parcalar):
+        ek = "" if i == len(parcalar) - 1 else kuyruk
+        if satirlar and yazi_eni(satirlar[-1] + ayrac + p + ek, pt, COMIC) <= gen:
+            satirlar[-1] = satirlar[-1] + ayrac + p
         else:
-            satirlar.append(p.strip())
-    return satirlar or [v]
+            satirlar.append(p)
+    if not satirlar:
+        return [v]
+    return [s + kuyruk for s in satirlar[:-1]] + satirlar[-1:]
 
 
-def _sigdir(v: str, pt_bas: float, en_az: float, gen: float, en_cok_satir: int = 3) -> tuple[float, list[str]]:
-    """Bina özellikleri değeri: önce yazı küçülür (en_az'a kadar), sığmazsa en çok `en_cok_satir` satıra sarılır; hiç sığmıyorsa en küçük
-    boyda sarılı kalır (kesilmez, bilgi kaybolmaz — Lokman 12.10.2026). Dönen: (pt, satırlar)."""
+def _sigdir(v: str, pt_bas: float, en_az: float, gen: float, yuk: float | None = None) -> tuple[float, list[str]]:
+    """Bina özellikleri değeri: önce yazı küçülür (en_az'a kadar), sığmazsa **iki** satıra sarılır (en büyük boyda; iki satır `yuk`'a
+    sığacak boyda: satır arası ≥ 0,95 × pt), o da olmazsa en küçük boyda üç satıra kadar sarılı kalır (kesilmez, bilgi kaybolmaz — Lokman
+    12.10.2026; KT-02'nin pencere satırı). Az satır çok satırdan önce gelir: iki satırlık değer üç satıra bölünmez. Dönen: (pt, satırlar)."""
     if yazi_eni(v, pt_bas, COMIC) <= gen:
         return pt_bas, [v]
     pt = max(en_az, pt_bas * (gen - 2.0) / yazi_eni(v, pt_bas, COMIC))
     if yazi_eni(v, pt, COMIC) <= gen:
         return pt, [v]
-    for pt2 in [pt_bas - 0.3 * i for i in range(int((pt_bas - en_az) / 0.3) + 1)] + [en_az]:
+    ust = pt_bas if yuk is None else min(pt_bas, yuk / 2 / 0.95)
+    for pt2 in [ust - 0.3 * i for i in range(int((ust - en_az) / 0.3) + 1)] + [en_az]:
         if pt2 < en_az:
             break
         satirlar = _satirlara(v, pt2, gen)
-        if len(satirlar) <= en_cok_satir and all(yazi_eni(s_, pt2, COMIC) <= gen for s_ in satirlar):
+        if len(satirlar) <= 2 and all(yazi_eni(s_, pt2, COMIC) <= gen for s_ in satirlar):
             return pt2, satirlar
     return en_az, _satirlara(v, en_az, gen)
 
@@ -231,7 +237,7 @@ def cerceveler(sf: Sayfa, t: dict, oz: dict, bilgi: dict, oturum_m2: float):
         yt = OZELLIK_BASLIK_ALT + i * adim
         sf.cizgi(OZELLIK[0], yt, OZELLIK[2], yt)
         v = str(oz.get(ad, "..."))
-        pt, satirlar = (en_cok, [v]) if v == "..." else _sigdir(v, en_cok, en_az, gen)   # sığmazsa küçülür, sonra sarılır; kesilmez
+        pt, satirlar = (en_cok, [v]) if v == "..." else _sigdir(v, en_cok, en_az, gen, adim - 1.6)   # sığmazsa küçülür, sonra sarılır; kesilmez
         sf.yazi(695.0, yt + adim / 2 + 0.6, ad, 7.3)
         if len(satirlar) == 1:
             sf.yazi(765.0, yt + adim / 2 + (0.6 if v != "..." else -1.2), v, pt if v != "..." else 12.0)
