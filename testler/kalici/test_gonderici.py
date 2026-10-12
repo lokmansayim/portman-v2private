@@ -205,6 +205,38 @@ def test_dry_run_ve_kapali_kanal(depo, gonderen, meta):
     assert say["yeniden"] == 1 and tek(depo, "SELECT durum FROM giden WHERE durum = 'bekliyor'") and meta.gidenler() == []
 
 
+NUMARA_T = "900000000905"            # kuru koşu test kartı (rol=test; gerçek numara değil)
+
+
+def test_test_karti_satirlari_her_zaman_tutulur_gercek_bayi_gider(depo, gonderen, meta):
+    """BK-07 S3: dry_run kapalıyken bile test kartından doğan satırlar (bayi cevabı, PATRON metni ve şablonu) ve panelden karta
+    yazılan satır 'test_karti' ile tutulur; Meta'ya ne mesaj ne medya gider. Aynı turda gerçek bayinin satırı gider."""
+    depo.bayi_yaz(NUMARA_P, ad="Patron", rol="patron")
+    depo.bayi_yaz(NUMARA_T, ad="Kuru Koşu", kod="TEST", rol="test")
+    depo.bayi_yaz(NUMARA_A, ad="Deneme Bayi A", kod="TSTA")
+    depo.mesaj_kaydet(patron_mesaji("buradayım", talep("selam", "selam"), ts=time.time() - 60)); isle_hepsi(depo)
+    tur(depo, gonderen); meta.istekler.clear()
+    # test kartı: yönlendirme (P8501 kodlanmamış) → karta metin + PATRON metni + PATRON şablonu; hepsi tutulur
+    gt = mesaj("P8501 olsun", talep(ozet="P8501", katalog_kodu="P8501"), numara=NUMARA_T, bayi=depo.gelen_bayisi(NUMARA_T))
+    depo.mesaj_kaydet(gt); isle_hepsi(depo)
+    # panelden karta yazılan satır da tutulur
+    p = W.giden_metin(gt, "Panelden: deneme", 101); p["kaynak"] = "panel"
+    p_id = _satir_ekle(depo, gt["id"], p, kaynak="panel")
+    # gerçek bayi aynı turda: gider
+    ga = mesaj("merhaba", talep("selam", "selam"), bayi=depo.gelen_bayisi(NUMARA_A))
+    depo.mesaj_kaydet(ga); isle_hepsi(depo)
+    gonderen.ayar_oku = lambda: AYAR_SABLON                                                        # dry_run False, şablon adları tanımlı
+    say = G.tur(depo, gonderen, gonderen.istemci, W.KANAL, AYAR_SABLON)
+    assert "tutuldu" not in say and say["kabul_edildi"] == 1 and say["belirsiz"] == 0
+    t_rows = sorgu(depo, "SELECT alici, kind, durum, hata FROM giden WHERE mesaj_id = %s ORDER BY sira", gt["id"])
+    assert len(t_rows) >= 4 and {r["alici"] for r in t_rows} == {NUMARA_T, "PATRON"}
+    assert all(r["durum"] == "gonderilmedi" and r["hata"].startswith("Gönderilmedi: test_karti") for r in t_rows)
+    assert tek(depo, "SELECT durum, hata FROM giden WHERE id = %s", p_id)["hata"].startswith("Gönderilmedi: test_karti")
+    assert tek(depo, "SELECT durum FROM giden WHERE mesaj_id = %s", ga["id"])["durum"] == "kabul_edildi"
+    assert [y["to"] for y in meta.gidenler()] == [NUMARA_A]                                       # Patron'a ve karta hiçbir şey gitmedi
+    assert not any("/media" in i["url"] for i in meta.istekler)                                    # medya yüklemesi yok
+
+
 # ───────────────────────── gelen medya ─────────────────────────
 def test_gelen_medya_indirilir_ve_hata_sayilir(depo, gonderen, meta):
     depo.bayi_yaz(NUMARA_P, ad="Patron", rol="patron")

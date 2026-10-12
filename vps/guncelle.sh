@@ -2,6 +2,7 @@
 # PORTMAN · sürüm kurulumu (İE-06, Kapı 4 ve sonraki her güncelleme; root). Onaylı AÇIKLAMALI etiketi dağıtım anahtarıyla çeker,
 # /opt/portman/surumler/<etiket>/ altına kendi venv'iyle kurar, içe aktarma denetimini ve göçleri (yalnız ekler) koşar, 'onceki' ve
 # 'guncel' bağlantılarını değiştirir, servisleri başlatır ve /saglik'i bekler; sağlık gelmezse geri_don.sh ile önceki sürüme döner.
+# BK-07: sağlık geçince sürümdeki nginx yapılandırmasını uygular (vps/nginx_uygula.sh; nginx -t, yedek, reload; hata sürümü düşürmez).
 #   ssh portman-vps 'bash -s' < vps/guncelle.sh v2026.10.XX > ie06_4_surum.txt 2>&1      (ilk kez; depo sunucuda yokken)
 #   ssh portman-vps 'bash /opt/portman/guncel/vps/guncelle.sh v2026.10.XX'                 (sonrakiler)
 # DURUR: etiket biçimi (vYYYY.AA.GG[a-z]); etiket açıklamalı (annotated) değilse; etiket origin/main üzerinde değilse; içe aktarma
@@ -36,7 +37,7 @@ if [ -f "$ETC/deploy_key" ] && [[ "$GIT_URL" != /* ]]; then
   fi
 fi
 
-echo "-- [1/6] kaynak: $GIT_URL"
+echo "-- [1/7] kaynak: $GIT_URL"
 if [ ! -d "$KAYNAK/.git" ]; then
   git clone -q --no-checkout "$GIT_URL" "$KAYNAK" || dur "depo çekilemedi (dağıtım anahtarı GitHub'a eklendi mi?)"
 fi
@@ -48,7 +49,7 @@ COMMIT="$(git -C "$KAYNAK" rev-parse "refs/tags/$ETIKET^{commit}")"
 git -C "$KAYNAK" merge-base --is-ancestor "$COMMIT" refs/remotes/origin/main || dur "etiket origin/main üzerinde değil: $ETIKET → ${COMMIT:0:12}"
 echo "   etiket $ETIKET → ${COMMIT:0:12} · main üzerinde · $(git -C "$KAYNAK" tag -l --format='%(taggerdate:short) %(contents:subject)' "$ETIKET")"
 
-echo "-- [2/6] sürüm dizini: $HEDEF"
+echo "-- [2/7] sürüm dizini: $HEDEF"
 if [ -d "$HEDEF" ] && [ ! -f "$HEDEF/KURULDU" ]; then
   KENAR="$SURUMLER/.yarim-$ETIKET-$(date +%Y%m%d%H%M%S)"
   mv "$HEDEF" "$KENAR"; echo "   yarım kalmış dizin kenara alındı: $KENAR (silinmedi)"
@@ -60,7 +61,7 @@ else
   git -C "$KAYNAK" archive --format=tar "refs/tags/$ETIKET" | tar -x -C "$HEDEF"
   printf '%s\n' "$ETIKET" > "$HEDEF/SURUM"; printf '%s\n' "$COMMIT" > "$HEDEF/SURUM_COMMIT"
   echo "   dosyalar açıldı ($(find "$HEDEF" -type f | wc -l) dosya; .git yok)"
-  echo "-- [3/6] sanal ortam ve içe aktarma denetimi"
+  echo "-- [3/7] sanal ortam ve içe aktarma denetimi"
   if [ -n "${PM_VENV_ATLA:-}" ]; then
     install -d -m 755 "$HEDEF/venv/bin"
     printf '#!/bin/sh\nexec "%s" "$@"\n' "$(command -v "$PY")" > "$HEDEF/venv/bin/python"; chmod 755 "$HEDEF/venv/bin/python"
@@ -70,15 +71,16 @@ else
     "$HEDEF/venv/bin/pip" install -q --upgrade pip >/dev/null 2>&1 || true
     [ -f "$HEDEF/vps/gereksinimler.txt" ] || dur "vps/gereksinimler.txt yok (sunucu paket listesi; v2026.10.10 ve sonrası etiketlerde var)"
     "$HEDEF/venv/bin/pip" install -q --no-cache-dir -r "$HEDEF/vps/gereksinimler.txt" \
-      || dur "paketler kurulamadı (vps/gereksinimler.txt; tam sabit, numpy 1.x: K19); ağ ve pip çıktısı yukarıda"
+      || dur "paketler kurulamadı (vps/gereksinimler.txt; tam sabit; K19 › Uygulanış 2); ağ ve pip çıktısı yukarıda"
     [ -x "$HEDEF/venv/bin/gunicorn" ] || dur "gunicorn kurulmadı"
   fi
   VPY="$HEDEF/venv/bin/python"
-  "$VPY" - "$HEDEF" <<'PY' || dur "içe aktarma denetimi düştü; sürüm etkinleştirilmedi (K19 numpy notu: vps/gereksinimler.txt başı, docs/is_emirleri/IE-06.md › Riskler)"
+  "$VPY" - "$HEDEF" <<'PY' || dur "içe aktarma denetimi düştü; sürüm etkinleştirilmedi (numpy X86_V2 hatasıysa işlemci tipi değişmiş demektir: K19 › Uygulanış 2, geri dönüş numpy 1.26.4)"
 import sys
 kok = sys.argv[1]; sys.path[:0] = [kok, kok + "/kanal"]
 import numpy, ezdxf, fitz, shapely, psycopg, matplotlib, PIL, ifcopenshell, pydantic   # noqa
-# K19: içe aktarma yetmez, NumPy'nin derlenmiş çekirdeği bu işlemcide gerçekten çalışmalı (X86_V2 hatası ilk işlemde çıkar)
+# K19 (Uygulanış 2, BK-07): numpy 2.x; içe aktarma yetmez, derlenmiş çekirdek bu işlemcide gerçekten çalışmalı (X86_V2 hatası ilk
+# işlemde çıkar; işlemci tipi "host"tan geri alınırsa burada durur, sürüm etkinleşmez — güvenli duruş)
 a = numpy.arange(12, dtype=float).reshape(3, 4)
 iz = float((a @ a.T).trace()); kok2 = float(numpy.sqrt(numpy.array([16.0]))[0])
 assert abs(iz - 506.0) < 1e-9 and abs(kok2 - 4.0) < 1e-12, (iz, kok2)
@@ -87,15 +89,30 @@ print(f"   içe aktarma tamam: python {sys.version.split()[0]} · numpy {numpy._
       f" · pillow {PIL.__version__} · PyMuPDF {getattr(fitz, 'VersionBind', '?')} · shapely {shapely.__version__}"
       f" · psycopg {psycopg.__version__} · pydantic {pydantic.__version__} · ifcopenshell {ifcopenshell.version}")
 PY
+  echo "-- [3b/7] perspektif denemesi (BK-07: VTK ekransız çizebiliyor mu; AYRI süreç, en çok 60 sn; sonuç ne olursa olsun sürüm etkinleşir)"
+  # vtk kurulu mu: find_spec içe aktarmaz (import vtk, OSMesa/EGL yokken çökebilir; çökme "kurulu değil" sanılmasın)
+  if [ -f "$HEDEF/vps/perspektif_dene.py" ] && "$VPY" -c 'import importlib.util, sys; sys.exit(0 if importlib.util.find_spec("vtk") else 1)' >/dev/null 2>&1; then
+    PERS_DIR="$(mktemp -d)"; RC=0
+    timeout 60 "$VPY" "$HEDEF/vps/perspektif_dene.py" "$PERS_DIR" > "$PERS_DIR/cikti.txt" 2>/dev/null || RC=$?
+    PERS="$(tail -n 1 "$PERS_DIR/cikti.txt" 2>/dev/null || true)"; rm -rf "$PERS_DIR"     # deneme PNG'si ve çıktısı; kalıcı iz yok
+    if [ "$RC" = "124" ]; then PERS="ÇİZİLEMEDİ (60 sn içinde bitmedi)"
+    elif [ "$RC" -ge 128 ] 2>/dev/null; then PERS="ÇİZİLEMEDİ (süreç çöktü, sinyal $((RC - 128)); libOSMesa/EGL kurulu değil: apt-get install libosmesa6, Lokman'ın onayıyla)"
+    elif [ -z "$PERS" ]; then PERS="ÇİZİLEMEDİ (çıktı yok, çıkış kodu $RC)"; fi
+    case "$PERS" in TAMAM*) ;; *) PERS="$PERS → pilot perspektifsiz (Lokman 11.10)" ;; esac
+  else
+    PERS="VTK yok (denenmedi; vps/gereksinimler.txt'te vtk yoksa ya da kurulmadıysa) → pilot perspektifsiz"
+  fi
+  echo "   perspektif: $PERS"
+  printf '%s · %s\n' "$PERS" "$(date '+%Y-%m-%d %H:%M:%S')" > "$HEDEF/PERSPEKTIF"
   date '+%Y-%m-%d %H:%M:%S' > "$HEDEF/KURULDU"
 fi
 VPY="$HEDEF/venv/bin/python"
 
-echo "-- [4/6] göçler (kalici.py goc; yalnız eksikler, yalnız ekler)"
+echo "-- [4/7] göçler (kalici.py goc; yalnız eksikler, yalnız ekler)"
 GOC="$("${OLARAK[@]}" env PORTMAN_PG_DSN="$PG_DSN" PORTMAN_KANAL_DIR="$KOK/data" "$VPY" "$HEDEF/kanal/kalici.py" goc 2>&1)" || { echo "$GOC" | tail -5; dur "göç uygulanamadı; sürüm etkinleştirilmedi"; }
 echo "   $GOC"
 
-echo "-- [5/6] bağlantılar ve servisler"
+echo "-- [5/7] bağlantılar ve servisler"
 ESKI="$( [ -L "$KOK/guncel" ] && readlink -f "$KOK/guncel" || true )"
 $SYSTEMCTL stop $SERVISLER >/dev/null 2>&1 || true
 if [ -n "$ESKI" ] && [ "$ESKI" != "$(readlink -f "$HEDEF")" ]; then
@@ -106,7 +123,7 @@ $SYSTEMCTL daemon-reload >/dev/null 2>&1 || true
 $SYSTEMCTL start $SERVISLER || dur "servisler başlatılamadı (journalctl -u portman-webhook)"
 echo "   guncel → $(readlink "$KOK/guncel") · onceki → $( [ -L "$KOK/onceki" ] && readlink "$KOK/onceki" || echo yok)"
 
-echo "-- [6/6] sağlık: $SAGLIK_URL (en çok $SAGLIK_BEKLE sn; ölçüt: cevapta surum=$ETIKET ve postgres=true — nabiz.sh'nin eski sorunları bu kapıyı düşürmez)"
+echo "-- [6/7] sağlık: $SAGLIK_URL (en çok $SAGLIK_BEKLE sn; ölçüt: cevapta surum=$ETIKET ve postgres=true — nabiz.sh'nin eski sorunları bu kapıyı düşürmez)"
 OK=""; SON=""
 for ((i = 0; i < SAGLIK_BEKLE; i++)); do
   SON="$(curl -s --max-time 5 "$SAGLIK_URL" 2>/dev/null || true)"
@@ -128,5 +145,12 @@ if [ -z "$OK" ]; then
   dur "sağlık $SAGLIK_BEKLE sn içinde yeni sürümle ve Postgres bağlantısıyla cevap vermedi"
 fi
 echo "   sağlık: sürüm $ETIKET, Postgres bağlı · ${SON:0:300}"
+
+echo "-- [7/7] nginx yapılandırması (BK-07: sürümdeki vps/nginx/portman.conf; nginx -t, yedek, reload; hata sürümü düşürmez)"
+if [ -f "$HEDEF/vps/nginx_uygula.sh" ]; then
+  PM_ETC="$ETC" PM_SYSTEMCTL="$SYSTEMCTL" PM_TEST="$TEST" bash "$HEDEF/vps/nginx_uygula.sh" "$HEDEF" 2>&1 | sed 's/^/   /' || echo "   UYARI: nginx yapılandırması uygulanamadı; sürüm etkin, eski nginx yapılandırması duruyor (bash $HEDEF/vps/nginx_uygula.sh $HEDEF)" >&2
+else
+  echo "   nginx_uygula.sh bu sürümde yok; atlandı"
+fi
 if [ -z "$TEST" ] && [ -f "$HEDEF/vps/durum.sh" ]; then bash "$HEDEF/vps/durum.sh" || true; fi
 echo "== bitti: $ETIKET etkin ($(date '+%Y-%m-%d %H:%M:%S %Z'))"

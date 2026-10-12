@@ -1,16 +1,19 @@
-# Sunucu sürümünün paketleri (vps/guncelle.sh her sürümün venv'ine bunu kurar). TAM SABİT; yalnız kararla değişir.
-# K19 (22.09, 10.10'da yeniden doğrulandı): Natro vCPU x86-64-v2 sunmuyor ("Common KVM processor"; ssse3/sse4/popcnt yok),
-# NumPy 2.x tekerlekleri "RuntimeError: ... X86_V2" verir → işlemci x86-64-v2 sunana kadar numpy 1.x.
-# 10.10.2026 Lokman sunucuda geçici venv'de (Python 3.12.3) denedi: numpy, ezdxf, matplotlib, pillow, shapely, PyMuPDF, ifcopenshell
-# içe aktarıldı, numpy işlem yaptı. psycopg, pydantic ve gunicorn o denemede yoktu; guncelle.sh'nin içe aktarma denetimi yakalar.
-# Yerel test ortamı ayrı dosyadır: araclar/gereksinimler.txt (Python 3.11, numpy 2.x).
-numpy==1.26.4
+# Sunucu sürümünün paketleri (vps/guncelle.sh her sürümün venv'ine bunu kurar; Python 3.12.3). TAM SABİT; yalnız kararla değişir.
+# BK-07 (12.10.2026, Lokman'ın 11.10 15:01 kararı): paketler güncel ve tam sabit, numpy 2.x dahil. K19 › Uygulanış 2: Natro işlemci
+# tipi 10.10 14:00'ten beri "host" (Xeon Gold 6138; x86-64-v2/v3/v4), yeniden değerlendirme koşulu oluştu. guncelle.sh'nin içe
+# aktarma denetimi numpy hesabı yapar: işlemci tipi geri alınırsa X86_V2 hatasında durur, sürüm etkinleşmez; geri dönüş numpy 1.26.4.
+# Kural (Lokman, D-02): bir paket P6001 referansını (DXF/PDF parmak izi) değiştirirse yeniden dondurma yok; o paket eski sürümde kalır.
+# vtk: perspektif denemesi için (guncelle.sh [3b], vps/perspektif_dene.py); içe aktarma denetiminde zorunlu değil. Ekransız çizim
+# libOSMesa ister (apt: libosmesa6; ayrı onaylı adım); yoksa deneme ÇİZİLEMEDİ der, sürüm yine etkinleşir (pilot perspektifsiz).
+# Yerel test ortamı ayrı dosyadır: araclar/gereksinimler.txt (Python 3.11; aynı sürümler + pytest; numpy 2.4.6 çünkü 2.5.x Python ≥ 3.12 ister; vtk yok).
+numpy==2.5.4
 ezdxf==1.4.4
 matplotlib==3.11.2
 pillow==12.3.0
-shapely==2.1.2
-PyMuPDF==1.26.0
-ifcopenshell==0.8.5
+shapely==2.2.0
+PyMuPDF==1.28.2
+ifcopenshell==0.9.0
 psycopg[binary]==3.3.6
-pydantic==2.13.5
-gunicorn==23.0.0
+pydantic==2.14.1
+gunicorn==26.2.0
+vtk==9.7.1

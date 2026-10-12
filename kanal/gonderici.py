@@ -8,6 +8,7 @@ Kurallar (feature.php ile aynı; docs/is_emirleri/IE-06.md):
     satırı gitti); şablon adı ayarda yoksa 'sablon_yok'. Panelden yazılan satır (giden.kaynak = 'panel') bayinin son mesajına
     bağlıdır; penceresi o son mesajın zamanıyla ölçülür (Patron bildirimi gibi);
   - dry_run: satırlar gönderilmez, sonradan da gönderilmez; enabled değilse hiçbir şey gönderilmez;
+  - BK-07: rol='test' kartından (kuru koşu) doğan ya da ona giden satır dry_run'dan bağımsız her zaman tutulur ('test_karti');
   - messages POST'u başladıktan sonra her hata 'belirsiz' sayılır ve otomatik tekrar edilmez; medya yükleme/doğrulama hatası
     POST'tan önce olduğu için bir kez daha denenir (document/image/interactive), etkileşim sınırı hatası denenmez;
   - yüklenen medyanın kimliği satırda saklanır, yeniden denemede yeniden yüklenmez.
@@ -55,6 +56,17 @@ class GonderenMeta:
         self.depo = depo; self.istemci = istemci; self.veri = Path(veri)
         self.ayar_oku = ayar_oku or (lambda: AY.oku(self.veri))
 
+    _TEST_KARTI_TAZE_SN = 10                                      # test kartı kümesi 10 sn önbellekte: her satır için iki sorgu atılmasın
+
+    def _test_karti_mi(self, numara: str) -> bool:
+        if not numara or not M.numara_gecerli(numara):
+            return False
+        simdi = time.time()
+        z, kume = getattr(self, "_test_kartlari", (0.0, frozenset()))
+        if simdi - z > self._TEST_KARTI_TAZE_SN:
+            kume = frozenset(self.depo.test_kartlari()); self._test_kartlari = (simdi, kume)
+        return numara in kume
+
     def __call__(self, r: dict) -> str:
         gelen = r.get("gelen") or {}
         if not str(r.get("mesaj_id") or "").startswith("wamid."):
@@ -70,6 +82,12 @@ class GonderenMeta:
         if not bildirim and alici != str(gelen.get("sender") or ""):
             raise K.Gonderilmedi("Gönderilmedi: recipient_mismatch")
         self.depo.alici_cozuldu_kaydet(r["id"], alici)              # düşen satır da (pencere kapalı, sablon_yok) panelde alıcının sayfasında görünsün
+        # BK-07 (S3): rol='test' kartı (kuru koşu; vps/kuru_kosu.sh) her zaman tutulur, dry_run ayarından bağımsız: kartın kendi
+        # mesajından doğan her satır (bayi cevabı, PDF, PATRON metni ve şablonu) ve panelden karta yazılan satır. Meta'ya medya bile
+        # yüklenmez. Gerçek bayinin ve Patron'un satırları etkilenmez.
+        gonderen_numara = str(gelen.get("sender") or "")
+        if self._test_karti_mi(gonderen_numara) or (alici != gonderen_numara and self._test_karti_mi(alici)):
+            raise K.Gonderilmedi("Gönderilmedi: test_karti (kuru koşu kartı; satır her zaman tutulur, dry_run gerekmez)")
         son = self.depo.son_gelen_zamani(alici) if (bildirim or panel) else float(gelen.get("timestamp") or 0)
         acik = bool(son) and time.time() - float(son) < PENCERE_SN
         satir = dict(r.get("satir") or {}); satir.update(id=r["id"], kind=r["kind"], body=r["govde"])

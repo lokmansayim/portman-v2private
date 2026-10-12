@@ -111,14 +111,17 @@ def surum_ortam(tmp_path, kaynak):
     log = tmp_path / "systemctl.log"
     systemctl = _sahte(bin_, "systemctl", '#!/usr/bin/env bash\necho "$@" >> "$PM_SYSTEMCTL_LOG"\n[ "$1" = is-active ] && echo active\nexit 0\n')
     kok = tmp_path / "opt"; (kok / "data" / "nabiz").mkdir(parents=True); etc = tmp_path / "etc"; etc.mkdir()
+    (etc / "alan").write_text("portman.ornek.invalid\n")                                   # BK-07: guncelle.sh [7/7] nginx_uygula.sh
+    nginx_dir = tmp_path / "nginx"
     saglik = _SahteSunucu(kod=200)
     saglik.bozuk = False                                   # True → postgres: false (sürüm kapısı düşer); kod 503 tek başına düşürmez (nabiz.sh sorunları)
     surum_dosyasi = kok / "guncel" / "SURUM"
     saglik.uret = lambda yol: (saglik.kod, {"ok": saglik.kod == 200, "postgres": not saglik.bozuk,
                                             "surum": surum_dosyasi.read_text().strip() if surum_dosyasi.exists() else None})
     env = {"PM_KOK": str(kok), "PM_ETC": str(etc), "PM_GIT_URL": str(kaynak), "PM_PYTHON": sys.executable, "PM_VENV_ATLA": "1", "PM_SYSTEMCTL": systemctl,
-           "PM_SYSTEMCTL_LOG": str(log), "PM_OLARAK": "", "PM_PG_DSN": dsn(ad), "PM_SAGLIK_URL": saglik.url + "/saglik", "PM_SAGLIK_BEKLE": "4", "PM_TEST": "1"}
-    yield {"env": env, "kok": kok, "log": log, "saglik": saglik, "db": ad}
+           "PM_SYSTEMCTL_LOG": str(log), "PM_OLARAK": "", "PM_PG_DSN": dsn(ad), "PM_SAGLIK_URL": saglik.url + "/saglik", "PM_SAGLIK_BEKLE": "4", "PM_TEST": "1",
+           "PM_NGINX_DIR": str(nginx_dir), "PM_LE_DIR": str(tmp_path / "le")}
+    yield {"env": env, "kok": kok, "log": log, "saglik": saglik, "db": ad, "nginx": nginx_dir}
     saglik.kapat()
     with _admin() as c:
         c.execute(f"DROP DATABASE IF EXISTS {ad} WITH (FORCE)")
@@ -137,9 +140,20 @@ def test_guncelle_ikinci_surum_ve_geri_don(surum_ortam):
     assert (s9 / "beyin" / "testler" / "mesajlar.json").exists() and list((s9 / "beyin" / "testler").glob("cikarim_*.json"))
     assert os.readlink(kok / "guncel") == str(s9) and not (kok / "onceki").exists()
     assert "içe aktarma tamam" in out and "uygulanan göçler: [1, 2, 3, 4, 5]" in out and "sağlık: sürüm v2026.10.09, Postgres bağlı" in out and "etkin" in out
+    # BK-07 [3b]: sonuç ne olursa olsun sürüm etkin; PERSPEKTIF dosyasında (durum.sh okur). Test venv'inde vtk yoksa "denenmedi";
+    # vtk varsa ama OSMesa yoksa ayrı süreç çöker (sinyal 11) ve "ÇİZİLEMEDİ … pilot perspektifsiz" yazılır (bulut, 12.10).
+    pers = (s9 / "PERSPEKTIF").read_text()
+    assert "perspektif: " in out and (pers.startswith("VTK yok (denenmedi") or pers.startswith("ÇİZİLEMEDİ (") or pers.startswith("TAMAM (")), pers
+    if pers.startswith("ÇİZİLEMEDİ") or pers.startswith("VTK yok"):
+        assert "pilot perspektifsiz" in pers
     assert "stop portman-webhook portman-gonderici portman-agent portman-panel" in log.read_text() and "start portman-webhook" in log.read_text()
     assert sorgu(__import__("depo").Depo(dsn(surum_ortam["db"])), "SELECT max(surum) AS s FROM sema_surumu")[0]["s"] == 5
     assert surum_ortam["saglik"].istekler and surum_ortam["saglik"].istekler[0]["path"] == "/saglik"
+    # BK-07 [7/7]: nginx yapılandırması sürümden yazıldı (sertifika yok → yalnız 80 bloğu), alan adı işlendi, yedek yok (ilk yazım)
+    nginx_conf = surum_ortam["nginx"] / "sites-available" / "portman.conf"
+    assert "nginx: uygulandı (yalnız 80 (sertifika yok)" in out and "yedek: yok (ilk yazım)" in out
+    assert nginx_conf.exists() and "server_name portman.ornek.invalid;" in nginx_conf.read_text() and "listen 443" not in nginx_conf.read_text()
+    assert (surum_ortam["nginx"] / "sites-enabled" / "portman.conf").is_symlink() and not list(surum_ortam["nginx"].glob("sites-available/*.onceki-*"))
     # ikinci sürüm: onceki ← 09, guncel ← 12; göç yok. /saglik 503 (nabiz.sh'de duran bir sorun) ama sürüm ve Postgres doğru → kapı geçer
     surum_ortam["saglik"].kod = 503
     r = _kos("guncelle.sh", env, "v2026.10.12")
@@ -149,15 +163,48 @@ def test_guncelle_ikinci_surum_ve_geri_don(surum_ortam):
     s12 = kok / "surumler" / "v2026.10.12"
     assert os.readlink(kok / "guncel") == str(s12) and os.readlink(kok / "onceki") == str(s9) and (s12 / "IKINCI").exists()
     assert "uygulanan göçler: yok (güncel)" in out
+    assert "nginx: değişiklik yok" in out and not list(surum_ortam["nginx"].glob("sites-available/*.onceki-*"))   # aynı yapılandırma: dokunulmaz
     # geri dönüş ve yeniden ileri
     r = _kos("geri_don.sh", env)
     assert r.returncode == 0, r.stdout + r.stderr
     assert os.readlink(kok / "guncel") == str(s9) and os.readlink(kok / "onceki") == str(s12) and "v2026.10.12 → v2026.10.09" in r.stdout
+    assert "sağlık: sürüm v2026.10.09, Postgres bağlı" in r.stdout                                # BK-07: geri_don.sh sağlığı bekler
     r = _kos("geri_don.sh", env)
-    assert r.returncode == 0 and os.readlink(kok / "guncel") == str(s12)
+    assert r.returncode == 0 and os.readlink(kok / "guncel") == str(s12) and "sağlık: sürüm v2026.10.12, Postgres bağlı" in r.stdout
     # aynı etiket yeniden: dosyalar yeniden açılmaz
     r = _kos("guncelle.sh", env, "v2026.10.12")
     assert r.returncode == 0 and "sürüm zaten kurulu" in r.stdout and os.readlink(kok / "guncel") == str(s12)
+
+
+def test_nginx_uygula_yedekler_ve_sertifikaya_gore_blok(tmp_path):
+    """BK-07 S2: eski dosya farklıysa .onceki-<zaman> yedeğiyle değiştirilir; aynıysa dokunulmaz; sertifika varsa 443 bloğu girer;
+    alan adı yoksa UYARI ile durur ve hiçbir şey yazmaz. PM_TEST=1: nginx -t ve reload atlanır (sahte systemctl günlüğü boş kalır)."""
+    bin_ = tmp_path / "bin"; bin_.mkdir(); etc = tmp_path / "etc"; etc.mkdir(); nginx = tmp_path / "nginx"; le = tmp_path / "le"
+    log = tmp_path / "systemctl.log"
+    systemctl = _sahte(bin_, "systemctl", '#!/usr/bin/env bash\necho "$@" >> "$PM_SYSTEMCTL_LOG"\nexit 0\n')
+    env = {"PM_ETC": str(etc), "PM_NGINX_DIR": str(nginx), "PM_LE_DIR": str(le), "PM_SYSTEMCTL": systemctl, "PM_SYSTEMCTL_LOG": str(log), "PM_TEST": "1"}
+    r = _kos("nginx_uygula.sh", env, str(KOK))
+    assert r.returncode == 1 and "alan adı okunamadı" in r.stderr and not nginx.exists()
+    (etc / "alan").write_text("portman.ornek.invalid\n")
+    hedef = nginx / "sites-available" / "portman.conf"
+    hedef.parent.mkdir(parents=True); hedef.write_text("# eski (3m)\nclient_max_body_size 3m;\n")
+    r = _kos("nginx_uygula.sh", env, str(KOK))
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert "nginx: uygulandı (yalnız 80 (sertifika yok); /panel/ yok (443 bloğu yok); PM_TEST" in r.stdout and "yedek: " in r.stdout and ".onceki-" in r.stdout
+    [yedek] = list(hedef.parent.glob("portman.conf.onceki-*"))
+    assert yedek.read_text().startswith("# eski (3m)") and "listen 443" not in hedef.read_text() and "client_max_body_size" not in hedef.read_text()
+    assert "server_name portman.ornek.invalid;" in hedef.read_text() and "__ALAN__" not in hedef.read_text()
+    r = _kos("nginx_uygula.sh", env, str(KOK))
+    assert r.returncode == 0 and "nginx: değişiklik yok" in r.stdout and len(list(hedef.parent.glob("portman.conf.onceki-*"))) == 1
+    # sertifika gelince 443 bloğu da yazılır; yeni yedek alınır
+    (le / "live" / "portman.ornek.invalid").mkdir(parents=True); (le / "live" / "portman.ornek.invalid" / "fullchain.pem").write_text("x")
+    r = _kos("nginx_uygula.sh", env, str(KOK))
+    assert r.returncode == 0 and "nginx: uygulandı (80+443; /panel/ 12m" in r.stdout
+    assert "listen 443 ssl http2;" in hedef.read_text() and "client_max_body_size 12m" in hedef.read_text() and len(list(hedef.parent.glob("portman.conf.onceki-*"))) == 2
+    assert not log.exists()                                                                       # PM_TEST: reload çağrılmadı
+    # şablon yoksa UYARI
+    r = _kos("nginx_uygula.sh", env, str(tmp_path / "yok"))
+    assert r.returncode == 1 and "şablon yok" in r.stderr
 
 
 def test_etiket_denetimleri_hicbir_sey_kurmaz(surum_ortam):
@@ -178,6 +225,83 @@ def test_saglik_dusunce_kendiliginden_geri_doner(surum_ortam):
     assert r.returncode == 1 and "Önceki sürüme dönülüyor" in out and "DUR: sağlık" in out and '"postgres": false' in out
     assert os.readlink(kok / "guncel") == str(kok / "surumler" / "v2026.10.09") and os.readlink(kok / "onceki") == str(kok / "surumler" / "v2026.10.12")
     assert (kok / "surumler" / "v2026.10.12" / "KURULDU").exists()                 # dizin durur, silinmez
+
+
+def test_geri_don_saglik_gelmezse_uyari_ve_cikis_1(surum_ortam):
+    """BK-07: geri_don.sh bağlantıları değiştirir, servisleri başlatır, sağlığı bekler; gelmezse UYARI ve çıkış 1 (ileri alma yok)."""
+    env, kok, saglik = surum_ortam["env"], surum_ortam["kok"], surum_ortam["saglik"]
+    assert _kos("guncelle.sh", env, "v2026.10.09").returncode == 0 and _kos("guncelle.sh", env, "v2026.10.12").returncode == 0
+    saglik.bozuk = True
+    r = _kos("geri_don.sh", env)
+    assert r.returncode == 1 and "UYARI: sağlık" in r.stderr and "etkin (sağlık gelmedi)" in r.stdout
+    assert os.readlink(kok / "guncel") == str(kok / "surumler" / "v2026.10.09")                   # bağlantı değişti, geri alınmadı
+
+
+def _psql_sayac(bin_: Path, acik_is: int = 0, bekleyen: int = 0) -> str:
+    return _sahte(bin_, f"psql_{acik_is}_{bekleyen}", '#!/usr/bin/env bash\nSQL="${@: -1}"\ncase "$SQL" in *"FROM isler"*) echo ' + str(acik_is) +
+                  ' ;; *"kind = \'template\'"*) echo 0 ;; *"FROM giden"*) echo ' + str(bekleyen) + ' ;; *) echo 0 ;; esac\n')
+
+
+def test_kapi12_tatbikat_geri_ileri_nabiz_zamanlayicisi(surum_ortam, tmp_path):
+    """BK-07 S5 Kapı 12: ön kontrol → nabız zamanlayıcısı durur → geri_don.sh (sağlık) → guncelle.sh (sürüm zaten kurulu, sağlık) →
+    zamanlayıcı başlar. Ön kontrol geçmezse hiçbir şey değişmez; yanlış etiket DUR."""
+    env, kok, log = surum_ortam["env"], surum_ortam["kok"], surum_ortam["log"]
+    bin_ = tmp_path / "bin2"; bin_.mkdir()
+    assert _kos("guncelle.sh", env, "v2026.10.09").returncode == 0 and _kos("guncelle.sh", env, "v2026.10.12").returncode == 0
+    s9, s12 = kok / "surumler" / "v2026.10.09", kok / "surumler" / "v2026.10.12"
+    onceki_log = log.read_text()
+    # yanlış etiket ve dolu tablo: durur, zamanlayıcıya ve bağlantılara dokunmaz
+    r = _kos("kapi12_tatbikat.sh", {**env, "PM_PSQL": _psql_sayac(bin_)}, "v2026.10.09")
+    assert r.returncode == 1 and "güncel sürüm v2026.10.12, verilen etiket v2026.10.09" in r.stderr
+    r = _kos("kapi12_tatbikat.sh", {**env, "PM_PSQL": _psql_sayac(bin_, acik_is=1)}, "v2026.10.12")
+    assert r.returncode == 1 and "ön kontrol geçmedi" in r.stderr and "açık iş 1 · bekleyen giden 0" in r.stdout
+    r = _kos("kapi12_tatbikat.sh", {**env, "PM_PSQL": _psql_sayac(bin_, bekleyen=2)}, "v2026.10.12")
+    assert r.returncode == 1 and "bekleyen giden 2" in r.stdout
+    assert log.read_text() == onceki_log and os.readlink(kok / "guncel") == str(s12)
+    # tam tur
+    r = _kos("kapi12_tatbikat.sh", {**env, "PM_PSQL": _psql_sayac(bin_)}, "v2026.10.12")
+    out = r.stdout + r.stderr
+    assert r.returncode == 0, out[-3000:]
+    for parca in ("ön kontrol: açık iş 0 · bekleyen giden 0 (şablon 0) · sağlık HTTP 200", "nabız zamanlayıcısı durduruldu", "v2026.10.12 → v2026.10.09",
+                  "sağlık: sürüm v2026.10.09, Postgres bağlı", "sürüm zaten kurulu", "sağlık: sürüm v2026.10.12, Postgres bağlı", "nginx: değişiklik yok",
+                  "nabız zamanlayıcısı başlatıldı", "== bitti: v2026.10.12 etkin · onceki v2026.10.09"):
+        assert parca in out, parca
+    assert os.readlink(kok / "guncel") == str(s12) and os.readlink(kok / "onceki") == str(s9)
+    yeni = log.read_text()[len(onceki_log):].splitlines()
+    assert yeni[0] == "stop portman-nabiz.timer" and yeni[-1] == "start portman-nabiz.timer" and yeni.count("stop portman-nabiz.timer") == 1
+    assert yeni.index("stop portman-nabiz.timer") < yeni.index("stop portman-webhook portman-gonderici portman-agent portman-panel")
+    # geri dönüşte sağlık gelmezse: DUR, zamanlayıcı yine başlatılır (trap), servisler önceki sürümde
+    surum_ortam["saglik"].bozuk = True
+    r = _kos("kapi12_tatbikat.sh", {**env, "PM_PSQL": _psql_sayac(bin_), "PM_ZORLA": "1"}, "v2026.10.12")
+    assert r.returncode == 1 and "geri dönüşte sağlık gelmedi" in r.stderr and "nabız zamanlayıcısı başlatıldı" in r.stdout
+    assert os.readlink(kok / "guncel") == str(s9) and log.read_text().rstrip().splitlines()[-1] == "start portman-nabiz.timer"
+
+
+def test_yeniden_baslat_on_kontrol_ve_test_modu(tmp_path):
+    """BK-07 S5: çekirdek ve yeniden başlatma gerekliliği yazılır; açık iş ya da bekleyen giden varsa DUR (PM_ZORLA geçer);
+    PM_TEST=1'de systemctl reboot çağrılmaz."""
+    bin_ = tmp_path / "bin"; bin_.mkdir(); kok = tmp_path / "opt"; (kok / "data" / "nabiz").mkdir(parents=True)
+    (kok / "surumler" / "v2026.10.12").mkdir(parents=True); (kok / "surumler" / "v2026.10.12" / "SURUM").write_text("v2026.10.12\n")
+    os.symlink(kok / "surumler" / "v2026.10.12", kok / "guncel")
+    (kok / "data" / "nabiz" / "yedek.json").write_text(json.dumps({"zaman": int(time.time()) - 2 * 3600}))
+    boot = tmp_path / "boot"; boot.mkdir(); (boot / "vmlinuz-6.8.0-45-generic").write_text(""); (boot / "vmlinuz-6.8.0-47-generic").write_text("")
+    rr = tmp_path / "reboot-required"; rr.write_text("*** System restart required ***\n"); Path(str(rr) + ".pkgs").write_text("linux-image-6.8.0-47-generic\nlinux-base\n")
+    log = tmp_path / "systemctl.log"
+    env = {"PM_KOK": str(kok), "PM_SYSTEMCTL": _sahte(bin_, "systemctl", '#!/usr/bin/env bash\necho "$@" >> "$PM_SYSTEMCTL_LOG"\nexit 0\n'),
+           "PM_SYSTEMCTL_LOG": str(log), "PM_REBOOT_REQ": str(rr), "PM_BOOT_DIR": str(boot), "PM_TEST": "1"}
+    r = _kos("yeniden_baslat.sh", {**env, "PM_PSQL": _psql_sayac(bin_, acik_is=1)})
+    assert r.returncode == 1 and "DUR: açık iş ya da bekleyen giden var" in r.stderr and not log.exists()
+    r = _kos("yeniden_baslat.sh", {**env, "PM_PSQL": _psql_sayac(bin_)})
+    assert r.returncode == 0, r.stdout + r.stderr
+    for parca in ("kurulu en yeni 6.8.0-47-generic", "yeniden başlatma gerekli: evet", "paketler: linux-base linux-image-6.8.0-47-generic",
+                  "ön kontrol: açık iş 0 · bekleyen giden 0 (bekliyor + gonderiliyor) · son yedek 2 saat önce · guncel v2026.10.12", "PM_TEST: systemctl reboot çağrılmadı"):
+        assert parca in r.stdout, parca
+    assert not log.exists()
+    r = _kos("yeniden_baslat.sh", {**env, "PM_PSQL": _psql_sayac(bin_, bekleyen=1), "PM_ZORLA": "1"})
+    assert r.returncode == 0 and "PM_ZORLA" in r.stdout
+    rr.unlink()
+    r = _kos("yeniden_baslat.sh", {**env, "PM_PSQL": _psql_sayac(bin_)})
+    assert r.returncode == 0 and "yeniden başlatma gerekli: hayır" in r.stdout
 
 
 def test_ilk_kurulumda_saglik_dusunce_onceki_yok(surum_ortam):
@@ -448,7 +572,7 @@ def test_oz_test_sh_sonucu_ozetler(tmp_path):
     assert '"uyumlu": 22' in r.stdout and '"model": "claude-opus-5-5"' in r.stdout
 
 
-def test_kuru_kosu_imzali_istek_ve_dry_run_kosulu(tmp_path):
+def test_kuru_kosu_imzali_istek_dry_run_gerekmez(tmp_path):
     bin_ = tmp_path / "bin"; bin_.mkdir(); etc = tmp_path / "etc"; etc.mkdir(); data = tmp_path / "data"; data.mkdir()
     sir = "0123456789abcdef" * 2
     (etc / "whatsapp.env").write_text(f"WA_APP_SECRET={sir}\nWA_PHONE_NUMBER_ID=106000000000001\n"); (etc / "alan").write_text("portman.ornek.invalid\n")
@@ -470,19 +594,28 @@ def test_kuru_kosu_imzali_istek_ve_dry_run_kosulu(tmp_path):
         assert yuk["entry"][0]["changes"][0]["value"]["metadata"]["phone_number_id"] == "106000000000001"
         assert "900000000905" not in r.stdout and "900000000909" not in r.stdout and sir not in r.stdout and "…05" in r.stdout and "iş: bitti" in r.stdout
         assert "giden: interactive:gonderilmedi, document:gonderilmedi" in r.stdout and "ESKI-SORGU" not in r.stdout   # rapor satırı dolu (g. öneki)
-        assert "test kartı" in r.stdout and "Patron konuşmasında satır yok" in r.stdout
+        assert "test kartı" in r.stdout and "Patron konuşmasında satır yok" in r.stdout and "her zaman tutulur" in r.stdout
         assert "kanal yeniden kapatıldı" in r.stdout and json.loads((data / "settings.json").read_text())["enabled"] is False
+        # BK-07 S3: dry_run false iken de koşar (gönderici test kartının satırlarını zaten tutar); kanal açıksa kapatmaz
         (data / "settings.json").write_text(json.dumps({"enabled": True, "dry_run": False}))
         r = _kos("kuru_kosu.sh", env)
-        assert r.returncode == 1 and "dry_run true değil" in r.stderr and len(webhook.istekler) == 1
-        (data / "settings.json").write_text(json.dumps({"enabled": True, "dry_run": True}))
+        assert r.returncode == 0, r.stdout + r.stderr
+        assert len(webhook.istekler) == 2 and "dry_run kapalı, gerekmez" in r.stdout and "kanal yeniden kapatıldı" not in r.stdout
+        assert json.loads((data / "settings.json").read_text())["enabled"] is True
+        # kanal kapalı + dry_run kapalı + bekleyen gerçek satır: açılırsa gerçek gönderim olur → DUR, kanal açılmaz, webhook'a istek yok
+        (data / "settings.json").write_text(json.dumps({"enabled": False, "dry_run": False}))
+        psql_bekleyen = _sahte(bin_, "psql_b", '#!/usr/bin/env bash\nSQL="${@: -1}"\ncase "$SQL" in *"rol = \'test\'"*) echo 900000000905 ;; *"g.durum = \'bekliyor\'"*) echo 3 ;; *) echo 0 ;; esac\n')
+        r = _kos("kuru_kosu.sh", {**env, "PM_PSQL": psql_bekleyen})
+        assert r.returncode == 1 and "3 bekleyen giden satırı var" in r.stderr and len(webhook.istekler) == 2
+        assert json.loads((data / "settings.json").read_text())["enabled"] is False
+        (data / "settings.json").write_text(json.dumps({"enabled": True, "dry_run": False}))
         webhook.cevaplar = {"/webhook": (200, {"ok": True, "mesaj": {"kayitsiz": 1}})}
         r = _kos("kuru_kosu.sh", env)
         assert r.returncode == 1 and "sahiplenilmedi" in r.stderr
         # test kartı yoksa DUR (Patron'un numarasına düşmez)
         psql2 = _sahte(bin_, "psql2", '#!/usr/bin/env bash\nSQL="${@: -1}"\ncase "$SQL" in *"rol = \'patron\'"*) echo 900000000909 ;; *"rol = \'test\'"*) echo "" ;; esac\n')
         r = _kos("kuru_kosu.sh", {**env, "PM_PSQL": psql2})
-        assert r.returncode == 1 and "test göndericisi yok" in r.stderr and len(webhook.istekler) == 2
+        assert r.returncode == 1 and "test göndericisi yok" in r.stderr and len(webhook.istekler) == 3
     finally:
         webhook.kapat()
 
@@ -514,14 +647,32 @@ def test_durum_sh_salt_okunur_ve_maskeli(tmp_path):
            "PM_PSQL": _sahte(bin_, "psql", '#!/usr/bin/env bash\necho "bayi(aktif) 1 · mesaj 2"\n')}
     r = _kos("durum.sh", env)
     assert r.returncode == 0, r.stdout + r.stderr
-    for parca in ("guncel: v2026.10.09", "portman-webhook        active", "passwordauthentication no", "Status: active", "bayi(aktif) 1", "sertifika", "agent", "cevap yok"):
+    for parca in ("guncel: v2026.10.09", "portman-webhook        active", "passwordauthentication no", "Status: active", "bayi(aktif) 1", "sertifika", "agent", "cevap yok",
+                  "perspektif (VTK, BK-07): kayıt yok", "-- çekirdek (BK-07)", "yeniden başlatma gerekli: hayır"):
         assert parca in r.stdout, parca
+    (kok / "surumler" / "v2026.10.09" / "PERSPEKTIF").write_text("ÇİZİLEMEDİ (libOSMesa yok) → pilot perspektifsiz\n")
+    (tmp_path / "rr").write_text("x")
+    r = _kos("durum.sh", {**env, "PM_REBOOT_REQ": str(tmp_path / "rr"), "PM_BOOT_DIR": str(tmp_path / "bootyok")})
+    assert "kurulu en yeni: ? ·" in r.stdout
+    assert "perspektif (VTK, BK-07): ÇİZİLEMEDİ" in r.stdout and "yeniden başlatma gerekli: evet" in r.stdout
     assert "900000000101" not in r.stdout and "wamid.HBgL" not in r.stdout and "wamid.[…]" in r.stdout and "[…]" in r.stdout
+
+
+def test_perspektif_dene_vtk_yoksa_cizilemedi_kodu_2(tmp_path):
+    """BK-07: VTK yoksa tek satır 'ÇİZİLEMEDİ (VTK içe aktarılamadı …)' ve çıkış 2; guncelle.sh bunu ve çökmeyi (139) yorumlar.
+    VTK kuruluysa gerçek deneme burada koşturulmaz (OSMesa olmayan makinede segfault; bulut 12.10)."""
+    try:
+        import vtk  # noqa: F401
+        pytest.skip("vtk kurulu; deneme sunucuda guncelle.sh ile")
+    except ImportError:
+        pass
+    r = _kos("perspektif_dene.py", {}, str(tmp_path))
+    assert r.returncode == 2 and r.stdout.strip().startswith("ÇİZİLEMEDİ (VTK içe aktarılamadı") and not list(tmp_path.glob("*.png"))
 
 
 def test_betik_sozdizimi():
     for p in sorted(VPS.glob("*.sh")):
         r = subprocess.run(["bash", "-n", str(p)], capture_output=True, text=True)
         assert r.returncode == 0, (p.name, r.stderr)
-    for p in ("sir_koy.py", "panel_parola.py", "uyari_gonder.py"):
+    for p in ("sir_koy.py", "panel_parola.py", "uyari_gonder.py", "perspektif_dene.py"):
         assert subprocess.run([sys.executable, "-m", "py_compile", str(VPS / p)]).returncode == 0
