@@ -1,0 +1,66 @@
+{
+  "is_emri_no": "PM-PK01-HUMA-60M2",
+  "revizyon": 0,
+  "durum": "TASLAK — pano motoru bu tanımı bugün çizemez (bkz. eksikler); kör testin 1. adımı (okuma). Gerçek liste açılmadı.",
+  "talep": {"bayi": {"kod": "HUMA", "ad": "Huma Prefabrik"}, "musteri_adi": "PK-01", "metin": "Kör test 1 (D-10): gerçek uygulanmış 60 m² tek kat prefabrik; montaj paftasından okundu (13 Ekim 2026)."},
+  "yapi": {
+    "sistem": "prefabrik", "kat_sayisi": 1, "duvar_yuksekligi_cm": 250,
+    "duvar_kalinligi_cm": {"dis": 10, "ic": 6},
+    "olcu_kaynagi": "dis_olcu", "dis_olcu_cm": {"x": 600, "y": 1000},
+    "referans_model": "PK-01",
+    "grid": {"x_pano": 5, "y_pano": 8}, "kisa_kenar": "x", "giris_cephesi": "on",
+    "dis_dusey_duvar": "aks_disinda",
+    "dizilim": {"baslangic": "arka-sol", "kesim_ucu": {"x": "sag", "y": "on"}, "not": "Motor'da yok: deneme kesimi arkaya koyar; burada kesim önde (111,5)."}
+  },
+  "koordinat_notu": "konum_pano değerleri y'yi ARKA duvar ekseninden sayar (dizilim arka-soldan). Motor y'yi önden sayar; motor genişletilince ya bu alan çevrilir ya da Motor başlangıç köşesini alır.",
+  "mahaller": [
+    {"ad": "YATAK ODASI 1", "tur": "yatak_odasi", "konum_pano": [[0, 0, 1.5, 2], [0, 2, 2, 3]]},
+    {"ad": "BANYO",         "tur": "banyo",       "konum_pano": [[1.5, 0, 3, 2]]},
+    {"ad": "YATAK ODASI 2", "tur": "yatak_odasi", "konum_pano": [[3, 0, 5, 3]]},
+    {"ad": "HOL",           "tur": "antre_hol",   "konum_pano": [[2, 2, 3, 6.295]]},
+    {"ad": "MUTFAK",        "tur": "mutfak",      "konum_pano": [[0, 3, 2, 8]]},
+    {"ad": "SALON",         "tur": "salon",       "konum_pano": [[3, 3, 5, 6.295]]},
+    {"ad": "VERANDA",       "tur": "veranda",     "konum_pano": [[2.12, 6.295, 5, 8]]}
+  ],
+  "mahal_cm": {
+    "aciklama": "Pafta net ölçüleri (dış yüzler; cm). konum_pano aks dışı sınırları taşıyamadığı için asıl kaynak bu alandır.",
+    "YATAK ODASI 1": {"ust": [10, 195.25, 10, 253], "alt": [10, 258, 259, 378.5], "m2_pafta": 7.5},
+    "BANYO": [201.25, 383.5, 10, 253, 4.4],
+    "YATAK ODASI 2": [389.5, 590, 10, 378.5, 7.3],
+    "HOL": [264, 383.5, 259, 790, 6.3],
+    "MUTFAK": [10, 258, 384.5, 990, 14.9],
+    "SALON": [389.5, 590, 384.5, 790, 8.1],
+    "VERANDA": [276, 600, 800, 990, 6.6]
+  },
+  "acik_sinirlar": [],
+  "acikliklar": [
+    {"tur": "pencere",  "olcu": "120x120", "mahal": "YATAK ODASI 1", "duvar": "sol",  "pano": 1},
+    {"tur": "pencere",  "olcu": "120x120", "mahal": "YATAK ODASI 2", "duvar": "sag",  "pano": 1},
+    {"tur": "pencere",  "olcu": "120x120", "mahal": "SALON",         "duvar": "sag",  "pano": 1},
+    {"tur": "pencere",  "olcu": "60x40",   "mahal": "BANYO",         "duvar": "arka", "pano": 0},
+    {"tur": "pencere",  "olcu": "120x180", "mahal": "MUTFAK",        "duvar": "on",   "pano": 0, "not": "iki yanı 60,25; pano sınırı teyit"},
+    {"tur": "pencere",  "olcu": "120x180", "mahal": "SALON",         "duvar": "on",   "pano": 0, "not": "odada ortalı (40,5 / 37,5); 512 aksını geçiyor — Motor desteklemiyor"},
+    {"tur": "dis_kapi", "olcu": 90, "arasi": ["VERANDA", "HOL"], "mentese": "sol", "dograma": "alıcıya ait"},
+    {"tur": "ic_kapi",  "olcu": 82, "arasi": ["HOL", "BANYO"],         "mentese": "sag"},
+    {"tur": "ic_kapi",  "olcu": 82, "arasi": ["HOL", "YATAK ODASI 1"], "mentese": "sol"},
+    {"tur": "ic_kapi",  "olcu": 82, "arasi": ["HOL", "YATAK ODASI 2"], "mentese": "sag"},
+    {"tur": "ic_kapi",  "olcu": 82, "arasi": ["HOL", "MUTFAK"],        "mentese": "sol"},
+    {"tur": "ic_kapi",  "olcu": 82, "arasi": ["HOL", "SALON"],         "mentese": "sag"}
+  ],
+  "cati": {"tip": "besik", "egim_yuzde": 33, "egim_derece_pafta": 18.2, "sacak_cm": 30, "topuk_cm": 10, "makas_yonu": "kisa_kenar", "makas_ekseni": "x",
+           "makas": {"adet": 9, "aralik_cc_cm": 125.5, "genislik_cm": 8, "kaynak": "sayfa 7 (MK01–MK09)"},
+           "asik": {"sira_yari": 7, "parca_boylari_cm": [410, 410, 240], "toplam_boy_cm": 1060, "adet": 42, "kaynak": "sayfa 8"},
+           "kaplama": "sandviç panel", "renk": "antrasit gri", "mahya_kotu_cm": 118.5, "mertek_cm": 347.38},
+  "ozellikler": {"Panel Türü": "Pres Panel", "Çatı Şekli": "Beşik", "Çatı Kaplaması": "Sandviç Panel", "Çatı Kaplama Rengi": "Antrasit Gri", "Dış Kapı": "Alıcıya ait",
+                 "İç Kapılar": "Standart Amerikan", "Dış Cephe Boya": "Alıcıya ait", "İç Cephe Boya": "Alıcıya ait", "Pencere Rengi": "Alıcıya ait", "Tavan": "Düz", "Saçak ve Alın Rengi": "Antrasit Gri"},
+  "paftadan_sayilan": {"h_dis_kulakli": 12, "h_dis_dubelli": 7, "h_ic_standart": 10, "uclu_h_dis_kulakli": 2, "uclu_h_dis_dubelli": 3, "uclu_h_ic_standart": 5, "makas": 9, "asik": 42, "bas_makas_betopan_125x250": 4},
+  "varsayimlar": [
+    "Pano ızgarası 125,5; x aksları sol dış duvarın iç yüzünden, y aksları arka duvar ekseninden; kesim sağda 78, önde 111,5 (paftadaki özel boylarla doğrulandı).",
+    "Hol/salon ön duvarı 795'te (aks dışı); veranda 190 derin.",
+    "Yatak odası 1 L biçimli: banyonun altındaki şerit (x 201–258, y 259–378,5) odaya dahil."
+  ],
+  "eksikler": [
+    "Motor: aks dışı duvar (795), ön uçta kesim, panoyu aşan pencere, alıcıya ait kapı boşluğu, veranda sol duvarının 10 cm kayması — genişletme iş emri.",
+    "Mühendise: salon ön pencere panosu; mutfak ön pencere panosu; veranda duvarının hizası; tavan omega adetleri."
+  ]
+}

@@ -52,6 +52,6 @@ O zamana kadar her yeni proje kör testtir; sonra katalog modellerine geçilir (
 
 ## Bekleyen
 
-- İlk proje (PK-01): Lokman verecek.
+- **PK-01 geldi (12 Ekim 23:52): Huma 60 m² tek kat** (`deneme/2026-10-13_pk_01/`). Okuma yapıldı (`PK01_okuma.md`), İş Emri taslağı yazıldı; gerçek liste **mühürlü** (SHA kaydedildi, açılmadı). Pano motoru bu projeyi çizemiyor: aks dışı ön duvar (795), kesim önde (111,5), panoyu aşan pencere, alıcıya ait kapı → 2–3. adımlar motor genişletme işini bekliyor.
 - P6001'in yeniden çizimi: Lokman'ın vereceği doğru kaynakla (`docs/sartname/modeller/P6001.md`).
 - Pano motorunun genişletilmesi: ölçüye kesim, kalınlık seçeneği, çift kat — PK-01'in ihtiyacına göre ayrı iş emri.
