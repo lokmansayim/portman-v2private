@@ -1,0 +1,21 @@
+{
+ "sema": "portman.yerlesim_kurallari/0.1-taslak",
+ "aciklama": "Açıklık ve çıkıntı yerleşimi kuralları. Model kurulurken (çağrı sırası 2) uygulanır. Her değerin kaynağı ve durumu yanındadır; durum değerleri `kurallar/README.md`'de.",
+ "simetri": {
+  "deger": "Çelik yapılarda simetri önceliklidir. Pencere ve kapı, bulunduğu duvar parçasının ortasına ya da bağlı olduğu elemanın eksenine yerleşir; iki yandaki duvar payları eşit olur. Simetri bayinin istediği bir yerle çatışırsa Lokman'a sorulur.",
+  "durum": "lokman",
+  "kaynak": "Lokman, 12 Ekim 2026 14:07: \"çelik yapılarda simetri daha önemli bunu kural olarak ekle\".",
+  "ornekler": [
+   {
+    "ornek": "Cumbadaki pencere ve pencere çıkıntısı, cumba makasının ekseninde.",
+    "kaynak": "Lokman, 12 Ekim 2026 13:49: \"pencerenin tam orta noktasını cumba makasının tam orta noktasına getir\"."
+   },
+   {
+    "ornek": "Verandadaki pencere, çelik kapı ile sağ köşe arasında ortada.",
+    "kaynak": "Lokman, 12 Ekim 2026 14:07: \"verandadaki pencereyi sağ taraf ile çelik kapı arasında eşit olsun\"."
+   }
+  ],
+  "ilk_uygulama": "Bayi talebi, tek kat çelik 747 × 1012 (12 Ekim 2026). Cumba penceresi x 160'ta, sağ pencere kapının sağ kenarı (440) ile sağ köşe (747) arasında ortada. Yatak odası pencereleri odanın yan duvarının ortasına alındı; bayinin planında ±10 cm farkla öyleydi. Proje depo dışındadır.",
+  "kod": "Henüz koda bağlı değil. Tanımı kuran uygular: bugün Code'da elle, canlıda Beyin ile Motor. Genel motor yerleşimi denetlemez."
+ }
+}

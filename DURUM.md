@@ -68,6 +68,26 @@ Kod, kural ve canlı değişmedi.
 
 Dosyalar oturumun geçici klasöründe; depoya kaydı Lokman'ın onayına bağlı.
 
+**12 Ekim 2026 14:30 eki (dal `ie-05`):** Lokman 13:49–14:19 arasında bayi talebinin çizimini değiştirdi ve bir kural ekletti.
+- **Kural:** `kurallar/model/yerlesim.json` › `simetri`. Lokman, 14:07: "çelik yapılarda simetri daha önemli bunu kural olarak ekle". README'deki klasör tablosuna eklendi. Henüz koda bağlı değil.
+- **Çizim (`T1012-CV`, depo dışı):**
+  - 1 m veranda.
+  - Cumbada 30 cm pencere çıkıntısı ve küçük üçgen çatı (çift cumba). Çıkıntının makası cumba makasından 30 cm aşağıda.
+  - Pencere görseldeki gibi: üstü çıkıntı makasına paralel ve ondan 30 cm aşağıda; ortada dikey, yanlarda iki yatay kayıt; eşik 10 cm. Ortası cumba makasının ortasında. İki kanat, 100/240–273.
+  - Verandadaki pencere çelik kapı ile sağ köşe arasında ortada. Yatak odası pencereleri odanın ortasında.
+  - Salonda eğimli tavan.
+
+  Hepsi 747 × 1012'nin içinde: oturum veranda dahil 74,11 m², salon 39,2'den 33,5 m²'ye indi.
+- **Motor:** Eğimli pencere ve eğimli tavan genel motorda yoktu. Motorun depo dışı bir kopyasına eklendi (`yapi`, `sahne`, `ciz_genel`, `ifc_genel`, `girdi_genel`); depodaki motor değişmedi. Kesitler (A–A, B–B) ayrı bir betikle çizildi, çünkü genel motorun setinde kesit yok.
+- **Kanıt:** Çizim setinde 12 çıktının 12'si üretildi, IFC4 şema hatası 0. IFC'de salon tavanı 268,8–403,2 cm, eğimli pencere 10–282,7 cm.
+- **Açık konular:**
+  - Liste düz tavana göre; eğimli tavanın taşıyıcısını ve malzemesini mühendis belirleyecek.
+  - Salonla yatak odaları arasındaki duvarın 270 cm üstündeki üçgen IFC'de yok.
+  - Bu iki motor eklentisinin İE-08'e iş olarak taşınması gerekiyor.
+  - Projenin depoya kaydı Lokman'ın onayına bağlı.
+
+Depoda yalnız kural kitabı değişti; motor, liste kuralları ve canlı değişmedi.
+
 **Oturum devri:** `docs/devir/2026-09-30_Aksam_Devri.md` (30.09 akşamı, Kapı M sonrası; sıra ve bakım listesi) ve `docs/devir/2026-09-30_Oturum_Devri.md` (30.09 01:10; kurallar, K-A kararları, Astra ölçütleri). 28–30 Eylül penceresi kapandı. Yeni pencere bu ikisiyle başlar: kurallar, yapılanlar, bekleyen kararlar, sıradaki işler, Astra'ya çizim işi için ölçütler.
 
 Yeni pencere için hazırlıklar:
