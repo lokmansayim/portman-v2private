@@ -1,0 +1,1656 @@
+{
+  "source": "prefabrik-2plus1-cumbali-6x5.dwg",
+  "source_dxf_sha256": "93ca84e958a7bedc9875d5a0c7ac2951e796af725d254243f2db5ef6a85876d0",
+  "building_cm": [
+    773,
+    637.5,
+    250
+  ],
+  "date": "2026-09-07",
+  "catalog": [
+    {
+      "code": "D01",
+      "group": "Dış duvar panoları",
+      "label": "Dolu pano",
+      "dimensions_mm": [
+        1255,
+        100,
+        2500
+      ],
+      "note": "",
+      "unit": "adet"
+    },
+    {
+      "code": "D02",
+      "group": "Dış duvar panoları",
+      "label": "120×120 pencereli pano",
+      "dimensions_mm": [
+        1255,
+        100,
+        2500
+      ],
+      "note": "Pencere ayrı kalem; pano tek parça sayıldı.",
+      "unit": "adet"
+    },
+    {
+      "code": "D03",
+      "group": "Dış duvar panoları",
+      "label": "120×180 pencereli pano",
+      "dimensions_mm": [
+        1255,
+        100,
+        2500
+      ],
+      "note": "Pencere ayrı kalem; pano tek parça sayıldı.",
+      "unit": "adet"
+    },
+    {
+      "code": "D04",
+      "group": "Dış duvar panoları",
+      "label": "60×40 vasistaslı pano",
+      "dimensions_mm": [
+        1255,
+        100,
+        2500
+      ],
+      "note": "Pencere ayrı kalem; pano tek parça sayıldı.",
+      "unit": "adet"
+    },
+    {
+      "code": "D05",
+      "group": "Dış duvar panoları",
+      "label": "Dış kapılı özel pano",
+      "dimensions_mm": [
+        1155,
+        100,
+        2500
+      ],
+      "note": "Kapı açıklığı 970 mm; kapı ayrıca sayıldı.",
+      "unit": "adet"
+    },
+    {
+      "code": "I01",
+      "group": "İç duvar panoları",
+      "label": "Dolu pano",
+      "dimensions_mm": [
+        1255,
+        60,
+        2500
+      ],
+      "note": "",
+      "unit": "adet"
+    },
+    {
+      "code": "I02",
+      "group": "İç duvar panoları",
+      "label": "Özel dolu pano",
+      "dimensions_mm": [
+        1205,
+        60,
+        2500
+      ],
+      "note": "",
+      "unit": "adet"
+    },
+    {
+      "code": "I03",
+      "group": "İç duvar panoları",
+      "label": "Kademe dolu panosu",
+      "dimensions_mm": [
+        597.5,
+        60,
+        2500
+      ],
+      "note": "",
+      "unit": "adet"
+    },
+    {
+      "code": "I04",
+      "group": "İç duvar panoları",
+      "label": "İç kapılı özel pano",
+      "dimensions_mm": [
+        1225,
+        60,
+        2500
+      ],
+      "note": "Kapı açıklığı 820 mm; kapı ayrıca sayıldı.",
+      "unit": "adet"
+    },
+    {
+      "code": "I05",
+      "group": "İç duvar panoları",
+      "label": "İç kapılı özel pano",
+      "dimensions_mm": [
+        1195,
+        60,
+        2500
+      ],
+      "note": "Kapı açıklığı 820 mm; kapı ayrıca sayıldı.",
+      "unit": "adet"
+    },
+    {
+      "code": "P01",
+      "group": "Kapı ve pencereler",
+      "label": "Pencere 120×120",
+      "dimensions_mm": [
+        1200,
+        1200,
+        null
+      ],
+      "note": "Ölçü en × yükseklik; eşik 800 mm.",
+      "unit": "adet"
+    },
+    {
+      "code": "P02",
+      "group": "Kapı ve pencereler",
+      "label": "Pencere 120×180",
+      "dimensions_mm": [
+        1200,
+        1800,
+        null
+      ],
+      "note": "Ölçü en × yükseklik; eşik 200 mm.",
+      "unit": "adet"
+    },
+    {
+      "code": "P03",
+      "group": "Kapı ve pencereler",
+      "label": "Vasistas 60×40",
+      "dimensions_mm": [
+        600,
+        400,
+        null
+      ],
+      "note": "Ölçü en × yükseklik; eşik 1600 mm.",
+      "unit": "adet"
+    },
+    {
+      "code": "K01",
+      "group": "Kapı ve pencereler",
+      "label": "İç kapı",
+      "dimensions_mm": [
+        820,
+        null,
+        null
+      ],
+      "note": "820 mm plandaki açıklıktır; ürün eni/boyu ve açılış yönü siparişte teyit edilmeli.",
+      "unit": "adet"
+    },
+    {
+      "code": "K02",
+      "group": "Kapı ve pencereler",
+      "label": "Dış kapı",
+      "dimensions_mm": [
+        970,
+        null,
+        null
+      ],
+      "note": "970 mm plandaki açıklıktır; ürün eni/boyu siparişte teyit edilmeli.",
+      "unit": "adet"
+    },
+    {
+      "code": "B01",
+      "group": "Bağlantı ve veranda",
+      "label": "İç köşe bağlantısı",
+      "dimensions_mm": [
+        30,
+        60,
+        null
+      ],
+      "note": "Plandaki kesit. Profil türü ve kesim boyu tanımlı değil.",
+      "unit": "adet"
+    },
+    {
+      "code": "B02",
+      "group": "Bağlantı ve veranda",
+      "label": "Dış köşe bağlantısı",
+      "dimensions_mm": [
+        50,
+        100,
+        null
+      ],
+      "note": "Plandaki bağlantı gösterimi. Sipariş kesiti ve boyu teyit edilmeli.",
+      "unit": "adet"
+    },
+    {
+      "code": "B03",
+      "group": "Bağlantı ve veranda",
+      "label": "Üçlü H bağlantı",
+      "dimensions_mm": [
+        60,
+        null,
+        null
+      ],
+      "note": "60 mm iç duvar bağlantısı; kesim boyu tanımlı değil.",
+      "unit": "adet"
+    },
+    {
+      "code": "V01",
+      "group": "Bağlantı ve veranda",
+      "label": "Veranda yan profil gösterimi",
+      "dimensions_mm": [
+        1255,
+        100,
+        null
+      ],
+      "note": "1255 mm dış sınır boyu; gerçek kesim boyu ve profil kesiti teyit edilmeli.",
+      "unit": "adet"
+    },
+    {
+      "code": "V02",
+      "group": "Bağlantı ve veranda",
+      "label": "Veranda ön profil gösterimi",
+      "dimensions_mm": [
+        3815,
+        100,
+        null
+      ],
+      "note": "3815 mm dış sınır boyu; gerçek kesim boyu ve profil kesiti teyit edilmeli.",
+      "unit": "adet"
+    }
+  ],
+  "rows": [
+    {
+      "code": "D01",
+      "block": "BOM_D01_DIS_DOLU_1255_H",
+      "handle": "229A",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 72.75,
+      "y_cm": 632.5,
+      "qty": 1,
+      "layer": "DIS_DUVAR_100"
+    },
+    {
+      "code": "D01",
+      "block": "BOM_D01_DIS_DOLU_1255_H",
+      "handle": "229B",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 198.25,
+      "y_cm": 632.5,
+      "qty": 1,
+      "layer": "DIS_DUVAR_100"
+    },
+    {
+      "code": "D04",
+      "block": "BOM_D04_DIS_P6040_1255_H",
+      "handle": "229C",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 323.75,
+      "y_cm": 632.5,
+      "qty": 1,
+      "layer": "DIS_DUVAR_100"
+    },
+    {
+      "code": "P03",
+      "block": "BOM_P03_PENCERE_600x400",
+      "handle": "2292",
+      "parent": "229C",
+      "role": "ANA",
+      "x_cm": 323.75,
+      "y_cm": 632.5,
+      "qty": 1,
+      "layer": "0"
+    },
+    {
+      "code": "D01",
+      "block": "BOM_D01_DIS_DOLU_1255_H",
+      "handle": "229D",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 449.25,
+      "y_cm": 632.5,
+      "qty": 1,
+      "layer": "DIS_DUVAR_100"
+    },
+    {
+      "code": "D01",
+      "block": "BOM_D01_DIS_DOLU_1255_H",
+      "handle": "229E",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 574.75,
+      "y_cm": 632.5,
+      "qty": 1,
+      "layer": "DIS_DUVAR_100"
+    },
+    {
+      "code": "D01",
+      "block": "BOM_D01_DIS_DOLU_1255_H",
+      "handle": "229F",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 700.25,
+      "y_cm": 632.5,
+      "qty": 1,
+      "layer": "DIS_DUVAR_100"
+    },
+    {
+      "code": "D01",
+      "block": "BOM_D01_DIS_DOLU_1255_H",
+      "handle": "22A0",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 449.25,
+      "y_cm": 5.0,
+      "qty": 1,
+      "layer": "DIS_DUVAR_100"
+    },
+    {
+      "code": "D03",
+      "block": "BOM_D03_DIS_P120180_1255_H",
+      "handle": "22A1",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 574.75,
+      "y_cm": 5.0,
+      "qty": 1,
+      "layer": "DIS_DUVAR_100"
+    },
+    {
+      "code": "P02",
+      "block": "BOM_P02_PENCERE_1200x1800",
+      "handle": "1ACF",
+      "parent": "22A1",
+      "role": "ANA",
+      "x_cm": 574.75,
+      "y_cm": 5.0,
+      "qty": 1,
+      "layer": "0"
+    },
+    {
+      "code": "D01",
+      "block": "BOM_D01_DIS_DOLU_1255_H",
+      "handle": "22A2",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 700.25,
+      "y_cm": 5.0,
+      "qty": 1,
+      "layer": "DIS_DUVAR_100"
+    },
+    {
+      "code": "D01",
+      "block": "BOM_D01_DIS_DOLU_1255_V",
+      "handle": "22A3",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 5.0,
+      "y_cm": 193.25,
+      "qty": 1,
+      "layer": "DIS_DUVAR_100"
+    },
+    {
+      "code": "D01",
+      "block": "BOM_D01_DIS_DOLU_1255_V",
+      "handle": "22A4",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 5.0,
+      "y_cm": 318.75,
+      "qty": 1,
+      "layer": "DIS_DUVAR_100"
+    },
+    {
+      "code": "D02",
+      "block": "BOM_D02_DIS_P120120_1255_V",
+      "handle": "22A5",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 5.0,
+      "y_cm": 444.25,
+      "qty": 1,
+      "layer": "DIS_DUVAR_100"
+    },
+    {
+      "code": "P01",
+      "block": "BOM_P01_PENCERE_1200x1200",
+      "handle": "1AC9",
+      "parent": "22A5",
+      "role": "ANA",
+      "x_cm": 5.0,
+      "y_cm": 444.25,
+      "qty": 1,
+      "layer": "0"
+    },
+    {
+      "code": "D01",
+      "block": "BOM_D01_DIS_DOLU_1255_V",
+      "handle": "22A6",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 5.0,
+      "y_cm": 569.75,
+      "qty": 1,
+      "layer": "DIS_DUVAR_100"
+    },
+    {
+      "code": "D01",
+      "block": "BOM_D01_DIS_DOLU_1255_V",
+      "handle": "22A7",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 768.0,
+      "y_cm": 67.75,
+      "qty": 1,
+      "layer": "DIS_DUVAR_100"
+    },
+    {
+      "code": "D03",
+      "block": "BOM_D03_DIS_P120180_1255_V",
+      "handle": "22A8",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 768.0,
+      "y_cm": 193.25,
+      "qty": 1,
+      "layer": "DIS_DUVAR_100"
+    },
+    {
+      "code": "P02",
+      "block": "BOM_P02_PENCERE_1200x1800",
+      "handle": "2298",
+      "parent": "22A8",
+      "role": "ANA",
+      "x_cm": 768.0,
+      "y_cm": 193.25,
+      "qty": 1,
+      "layer": "0"
+    },
+    {
+      "code": "D01",
+      "block": "BOM_D01_DIS_DOLU_1255_V",
+      "handle": "22A9",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 768.0,
+      "y_cm": 318.75,
+      "qty": 1,
+      "layer": "DIS_DUVAR_100"
+    },
+    {
+      "code": "D02",
+      "block": "BOM_D02_DIS_P120120_1255_V",
+      "handle": "22AA",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 768.0,
+      "y_cm": 444.25,
+      "qty": 1,
+      "layer": "DIS_DUVAR_100"
+    },
+    {
+      "code": "P01",
+      "block": "BOM_P01_PENCERE_1200x1200",
+      "handle": "1AC9",
+      "parent": "22AA",
+      "role": "ANA",
+      "x_cm": 768.0,
+      "y_cm": 444.25,
+      "qty": 1,
+      "layer": "0"
+    },
+    {
+      "code": "D01",
+      "block": "BOM_D01_DIS_DOLU_1255_V",
+      "handle": "22AB",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 768.0,
+      "y_cm": 569.75,
+      "qty": 1,
+      "layer": "DIS_DUVAR_100"
+    },
+    {
+      "code": "B02",
+      "block": "BOM_B02_DIS_KOSE_100x50",
+      "handle": "22AC",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 5.0,
+      "y_cm": 635.0,
+      "qty": 1,
+      "layer": "KOSE_PROFIL_100"
+    },
+    {
+      "code": "B02",
+      "block": "BOM_B02_DIS_KOSE_100x50",
+      "handle": "22AD",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 768.0,
+      "y_cm": 635.0,
+      "qty": 1,
+      "layer": "KOSE_PROFIL_100"
+    },
+    {
+      "code": "B02",
+      "block": "BOM_B02_DIS_KOSE_100x50",
+      "handle": "22AE",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 768.0,
+      "y_cm": 2.5,
+      "qty": 1,
+      "layer": "KOSE_PROFIL_100"
+    },
+    {
+      "code": "B02",
+      "block": "BOM_B02_DIS_KOSE_100x50",
+      "handle": "22AF",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 5.0,
+      "y_cm": 128.0,
+      "qty": 1,
+      "layer": "KOSE_PROFIL_100"
+    },
+    {
+      "code": "D01",
+      "block": "BOM_D01_DIS_DOLU_1255_H",
+      "handle": "22B0",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 72.75,
+      "y_cm": 130.5,
+      "qty": 1,
+      "layer": "DIS_DUVAR_100"
+    },
+    {
+      "code": "D03",
+      "block": "BOM_D03_DIS_P120180_1255_H",
+      "handle": "22B1",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 198.25,
+      "y_cm": 130.5,
+      "qty": 1,
+      "layer": "DIS_DUVAR_100"
+    },
+    {
+      "code": "P02",
+      "block": "BOM_P02_PENCERE_1200x1800",
+      "handle": "1ACF",
+      "parent": "22B1",
+      "role": "ANA",
+      "x_cm": 198.25,
+      "y_cm": 130.5,
+      "qty": 1,
+      "layer": "0"
+    },
+    {
+      "code": "D01",
+      "block": "BOM_D01_DIS_DOLU_1255_H",
+      "handle": "22B2",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 323.75,
+      "y_cm": 130.5,
+      "qty": 1,
+      "layer": "DIS_DUVAR_100"
+    },
+    {
+      "code": "D05",
+      "block": "BOM_D05_DIS_K097_1155_V",
+      "handle": "22B3",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 428.0861,
+      "y_cm": 67.75,
+      "qty": 1,
+      "layer": "DIS_DUVAR_100"
+    },
+    {
+      "code": "K02",
+      "block": "BOM_K02_DIS_KAPI_ACIKLIK970",
+      "handle": "228C",
+      "parent": "22B3",
+      "role": "ANA",
+      "x_cm": 428.0861,
+      "y_cm": 67.75,
+      "qty": 1,
+      "layer": "0"
+    },
+    {
+      "code": "B02",
+      "block": "BOM_B02_DIS_KOSE_50x100",
+      "handle": "22B4",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 384.0,
+      "y_cm": 5.0,
+      "qty": 1,
+      "layer": "KOSE_PROFIL_100"
+    },
+    {
+      "code": "B02",
+      "block": "BOM_B02_DIS_KOSE_50x100",
+      "handle": "22B5",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 389.0,
+      "y_cm": 130.5,
+      "qty": 1,
+      "layer": "KOSE_PROFIL_100"
+    },
+    {
+      "code": "I01",
+      "block": "BOM_I01_IC_DOLU_1255_H",
+      "handle": "22B6",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 72.75,
+      "y_cm": 256.0,
+      "qty": 1,
+      "layer": "IC_DUVAR_60"
+    },
+    {
+      "code": "I01",
+      "block": "BOM_I01_IC_DOLU_1255_H",
+      "handle": "22B7",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 198.25,
+      "y_cm": 256.0,
+      "qty": 1,
+      "layer": "IC_DUVAR_60"
+    },
+    {
+      "code": "I01",
+      "block": "BOM_I01_IC_DOLU_1255_H",
+      "handle": "22B8",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 449.25,
+      "y_cm": 256.0,
+      "qty": 1,
+      "layer": "IC_DUVAR_60"
+    },
+    {
+      "code": "I01",
+      "block": "BOM_I01_IC_DOLU_1255_H",
+      "handle": "22B9",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 574.75,
+      "y_cm": 256.0,
+      "qty": 1,
+      "layer": "IC_DUVAR_60"
+    },
+    {
+      "code": "I01",
+      "block": "BOM_I01_IC_DOLU_1255_H",
+      "handle": "22BA",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 700.25,
+      "y_cm": 256.0,
+      "qty": 1,
+      "layer": "IC_DUVAR_60"
+    },
+    {
+      "code": "I04",
+      "block": "BOM_I04_IC_K082_1225_V",
+      "handle": "22BB",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 224.9117,
+      "y_cm": 320.25,
+      "qty": 1,
+      "layer": "IC_DUVAR_60"
+    },
+    {
+      "code": "K01",
+      "block": "BOM_K01_IC_KAPI_ACIKLIK820",
+      "handle": "2699",
+      "parent": "22BB",
+      "role": "ANA",
+      "x_cm": 224.9117,
+      "y_cm": 320.25,
+      "qty": 1,
+      "layer": "0"
+    },
+    {
+      "code": "I01",
+      "block": "BOM_I01_IC_DOLU_1255_V",
+      "handle": "22BC",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 261.0,
+      "y_cm": 444.25,
+      "qty": 1,
+      "layer": "IC_DUVAR_60"
+    },
+    {
+      "code": "I02",
+      "block": "BOM_I02_IC_DOLU_1205_V",
+      "handle": "22BD",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 261.0,
+      "y_cm": 567.25,
+      "qty": 1,
+      "layer": "IC_DUVAR_60"
+    },
+    {
+      "code": "I05",
+      "block": "BOM_I05_IC_K082_1195_V",
+      "handle": "22BE",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 422.5883,
+      "y_cm": 318.75,
+      "qty": 1,
+      "layer": "IC_DUVAR_60"
+    },
+    {
+      "code": "K01",
+      "block": "BOM_K01_IC_KAPI_ACIKLIK820",
+      "handle": "2831",
+      "parent": "22BE",
+      "role": "ANA",
+      "x_cm": 422.5883,
+      "y_cm": 318.75,
+      "qty": 1,
+      "layer": "0"
+    },
+    {
+      "code": "I01",
+      "block": "BOM_I01_IC_DOLU_1255_V",
+      "handle": "22BF",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 449.25,
+      "y_cm": 444.25,
+      "qty": 1,
+      "layer": "IC_DUVAR_60"
+    },
+    {
+      "code": "I02",
+      "block": "BOM_I02_IC_DOLU_1205_V",
+      "handle": "22C0",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 449.25,
+      "y_cm": 567.25,
+      "qty": 1,
+      "layer": "IC_DUVAR_60"
+    },
+    {
+      "code": "I04",
+      "block": "BOM_I04_IC_K082_1225_H",
+      "handle": "22C1",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 325.25,
+      "y_cm": 417.5883,
+      "qty": 1,
+      "layer": "IC_DUVAR_60"
+    },
+    {
+      "code": "K01",
+      "block": "BOM_K01_IC_KAPI_ACIKLIK820",
+      "handle": "282B",
+      "parent": "22C1",
+      "role": "ANA",
+      "x_cm": 325.25,
+      "y_cm": 417.5883,
+      "qty": 1,
+      "layer": "0"
+    },
+    {
+      "code": "D01",
+      "block": "BOM_D01_DIS_DOLU_1255_H",
+      "handle": "23FB",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1145.75,
+      "y_cm": 632.5,
+      "qty": 1,
+      "layer": "DIS_DUVAR_100"
+    },
+    {
+      "code": "D01",
+      "block": "BOM_D01_DIS_DOLU_1255_H",
+      "handle": "23FC",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1271.25,
+      "y_cm": 632.5,
+      "qty": 1,
+      "layer": "DIS_DUVAR_100"
+    },
+    {
+      "code": "D04",
+      "block": "BOM_D04_DIS_P6040_1255_H",
+      "handle": "23FD",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1396.75,
+      "y_cm": 632.5,
+      "qty": 1,
+      "layer": "DIS_DUVAR_100"
+    },
+    {
+      "code": "P03",
+      "block": "BOM_P03_PENCERE_600x400",
+      "handle": "2292",
+      "parent": "23FD",
+      "role": "KOPYA",
+      "x_cm": 1396.75,
+      "y_cm": 632.5,
+      "qty": 1,
+      "layer": "0"
+    },
+    {
+      "code": "D01",
+      "block": "BOM_D01_DIS_DOLU_1255_H",
+      "handle": "23FE",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1522.25,
+      "y_cm": 632.5,
+      "qty": 1,
+      "layer": "DIS_DUVAR_100"
+    },
+    {
+      "code": "D01",
+      "block": "BOM_D01_DIS_DOLU_1255_H",
+      "handle": "23FF",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1647.75,
+      "y_cm": 632.5,
+      "qty": 1,
+      "layer": "DIS_DUVAR_100"
+    },
+    {
+      "code": "D01",
+      "block": "BOM_D01_DIS_DOLU_1255_H",
+      "handle": "2400",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1773.25,
+      "y_cm": 632.5,
+      "qty": 1,
+      "layer": "DIS_DUVAR_100"
+    },
+    {
+      "code": "D01",
+      "block": "BOM_D01_DIS_DOLU_1255_H",
+      "handle": "2401",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1522.25,
+      "y_cm": 5.0,
+      "qty": 1,
+      "layer": "DIS_DUVAR_100"
+    },
+    {
+      "code": "D03",
+      "block": "BOM_D03_DIS_P120180_1255_H",
+      "handle": "2402",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1647.75,
+      "y_cm": 5.0,
+      "qty": 1,
+      "layer": "DIS_DUVAR_100"
+    },
+    {
+      "code": "P02",
+      "block": "BOM_P02_PENCERE_1200x1800",
+      "handle": "1ACF",
+      "parent": "2402",
+      "role": "KOPYA",
+      "x_cm": 1647.75,
+      "y_cm": 5.0,
+      "qty": 1,
+      "layer": "0"
+    },
+    {
+      "code": "D01",
+      "block": "BOM_D01_DIS_DOLU_1255_H",
+      "handle": "2403",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1773.25,
+      "y_cm": 5.0,
+      "qty": 1,
+      "layer": "DIS_DUVAR_100"
+    },
+    {
+      "code": "D01",
+      "block": "BOM_D01_DIS_DOLU_1255_V",
+      "handle": "2404",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1078.0,
+      "y_cm": 193.25,
+      "qty": 1,
+      "layer": "DIS_DUVAR_100"
+    },
+    {
+      "code": "D01",
+      "block": "BOM_D01_DIS_DOLU_1255_V",
+      "handle": "2405",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1078.0,
+      "y_cm": 318.75,
+      "qty": 1,
+      "layer": "DIS_DUVAR_100"
+    },
+    {
+      "code": "D02",
+      "block": "BOM_D02_DIS_P120120_1255_V",
+      "handle": "2406",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1078.0,
+      "y_cm": 444.25,
+      "qty": 1,
+      "layer": "DIS_DUVAR_100"
+    },
+    {
+      "code": "P01",
+      "block": "BOM_P01_PENCERE_1200x1200",
+      "handle": "1AC9",
+      "parent": "2406",
+      "role": "KOPYA",
+      "x_cm": 1078.0,
+      "y_cm": 444.25,
+      "qty": 1,
+      "layer": "0"
+    },
+    {
+      "code": "D01",
+      "block": "BOM_D01_DIS_DOLU_1255_V",
+      "handle": "2407",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1078.0,
+      "y_cm": 569.75,
+      "qty": 1,
+      "layer": "DIS_DUVAR_100"
+    },
+    {
+      "code": "D01",
+      "block": "BOM_D01_DIS_DOLU_1255_V",
+      "handle": "2408",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1841.0,
+      "y_cm": 67.75,
+      "qty": 1,
+      "layer": "DIS_DUVAR_100"
+    },
+    {
+      "code": "D03",
+      "block": "BOM_D03_DIS_P120180_1255_V",
+      "handle": "2409",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1841.0,
+      "y_cm": 193.25,
+      "qty": 1,
+      "layer": "DIS_DUVAR_100"
+    },
+    {
+      "code": "P02",
+      "block": "BOM_P02_PENCERE_1200x1800",
+      "handle": "2298",
+      "parent": "2409",
+      "role": "KOPYA",
+      "x_cm": 1841.0,
+      "y_cm": 193.25,
+      "qty": 1,
+      "layer": "0"
+    },
+    {
+      "code": "D01",
+      "block": "BOM_D01_DIS_DOLU_1255_V",
+      "handle": "240A",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1841.0,
+      "y_cm": 318.75,
+      "qty": 1,
+      "layer": "DIS_DUVAR_100"
+    },
+    {
+      "code": "D02",
+      "block": "BOM_D02_DIS_P120120_1255_V",
+      "handle": "240B",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1841.0,
+      "y_cm": 444.25,
+      "qty": 1,
+      "layer": "DIS_DUVAR_100"
+    },
+    {
+      "code": "P01",
+      "block": "BOM_P01_PENCERE_1200x1200",
+      "handle": "1AC9",
+      "parent": "240B",
+      "role": "KOPYA",
+      "x_cm": 1841.0,
+      "y_cm": 444.25,
+      "qty": 1,
+      "layer": "0"
+    },
+    {
+      "code": "D01",
+      "block": "BOM_D01_DIS_DOLU_1255_V",
+      "handle": "240C",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1841.0,
+      "y_cm": 569.75,
+      "qty": 1,
+      "layer": "DIS_DUVAR_100"
+    },
+    {
+      "code": "B02",
+      "block": "BOM_B02_DIS_KOSE_100x50",
+      "handle": "240D",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1078.0,
+      "y_cm": 635.0,
+      "qty": 1,
+      "layer": "KOSE_PROFIL_100"
+    },
+    {
+      "code": "B02",
+      "block": "BOM_B02_DIS_KOSE_100x50",
+      "handle": "240E",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1841.0,
+      "y_cm": 635.0,
+      "qty": 1,
+      "layer": "KOSE_PROFIL_100"
+    },
+    {
+      "code": "B02",
+      "block": "BOM_B02_DIS_KOSE_100x50",
+      "handle": "240F",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1841.0,
+      "y_cm": 2.5,
+      "qty": 1,
+      "layer": "KOSE_PROFIL_100"
+    },
+    {
+      "code": "B02",
+      "block": "BOM_B02_DIS_KOSE_100x50",
+      "handle": "2410",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1078.0,
+      "y_cm": 128.0,
+      "qty": 1,
+      "layer": "KOSE_PROFIL_100"
+    },
+    {
+      "code": "D01",
+      "block": "BOM_D01_DIS_DOLU_1255_H",
+      "handle": "2411",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1145.75,
+      "y_cm": 130.5,
+      "qty": 1,
+      "layer": "DIS_DUVAR_100"
+    },
+    {
+      "code": "D03",
+      "block": "BOM_D03_DIS_P120180_1255_H",
+      "handle": "2412",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1271.25,
+      "y_cm": 130.5,
+      "qty": 1,
+      "layer": "DIS_DUVAR_100"
+    },
+    {
+      "code": "P02",
+      "block": "BOM_P02_PENCERE_1200x1800",
+      "handle": "1ACF",
+      "parent": "2412",
+      "role": "KOPYA",
+      "x_cm": 1271.25,
+      "y_cm": 130.5,
+      "qty": 1,
+      "layer": "0"
+    },
+    {
+      "code": "D01",
+      "block": "BOM_D01_DIS_DOLU_1255_H",
+      "handle": "2413",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1396.75,
+      "y_cm": 130.5,
+      "qty": 1,
+      "layer": "DIS_DUVAR_100"
+    },
+    {
+      "code": "D05",
+      "block": "BOM_D05_DIS_K097_1155_V",
+      "handle": "2414",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1501.0861,
+      "y_cm": 67.75,
+      "qty": 1,
+      "layer": "DIS_DUVAR_100"
+    },
+    {
+      "code": "K02",
+      "block": "BOM_K02_DIS_KAPI_ACIKLIK970",
+      "handle": "228C",
+      "parent": "2414",
+      "role": "KOPYA",
+      "x_cm": 1501.0861,
+      "y_cm": 67.75,
+      "qty": 1,
+      "layer": "0"
+    },
+    {
+      "code": "B02",
+      "block": "BOM_B02_DIS_KOSE_50x100",
+      "handle": "2415",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1457.0,
+      "y_cm": 5.0,
+      "qty": 1,
+      "layer": "KOSE_PROFIL_100"
+    },
+    {
+      "code": "B02",
+      "block": "BOM_B02_DIS_KOSE_50x100",
+      "handle": "2416",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1462.0,
+      "y_cm": 130.5,
+      "qty": 1,
+      "layer": "KOSE_PROFIL_100"
+    },
+    {
+      "code": "I01",
+      "block": "BOM_I01_IC_DOLU_1255_H",
+      "handle": "2417",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1145.75,
+      "y_cm": 256.0,
+      "qty": 1,
+      "layer": "IC_DUVAR_60"
+    },
+    {
+      "code": "I01",
+      "block": "BOM_I01_IC_DOLU_1255_H",
+      "handle": "2418",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1271.25,
+      "y_cm": 256.0,
+      "qty": 1,
+      "layer": "IC_DUVAR_60"
+    },
+    {
+      "code": "I01",
+      "block": "BOM_I01_IC_DOLU_1255_H",
+      "handle": "2419",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1522.25,
+      "y_cm": 256.0,
+      "qty": 1,
+      "layer": "IC_DUVAR_60"
+    },
+    {
+      "code": "I01",
+      "block": "BOM_I01_IC_DOLU_1255_H",
+      "handle": "241A",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1647.75,
+      "y_cm": 256.0,
+      "qty": 1,
+      "layer": "IC_DUVAR_60"
+    },
+    {
+      "code": "I01",
+      "block": "BOM_I01_IC_DOLU_1255_H",
+      "handle": "241B",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1773.25,
+      "y_cm": 256.0,
+      "qty": 1,
+      "layer": "IC_DUVAR_60"
+    },
+    {
+      "code": "I04",
+      "block": "BOM_I04_IC_K082_1225_V",
+      "handle": "241C",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1297.9117,
+      "y_cm": 320.25,
+      "qty": 1,
+      "layer": "IC_DUVAR_60"
+    },
+    {
+      "code": "K01",
+      "block": "BOM_K01_IC_KAPI_ACIKLIK820",
+      "handle": "2699",
+      "parent": "241C",
+      "role": "KOPYA",
+      "x_cm": 1297.9117,
+      "y_cm": 320.25,
+      "qty": 1,
+      "layer": "0"
+    },
+    {
+      "code": "I01",
+      "block": "BOM_I01_IC_DOLU_1255_V",
+      "handle": "241D",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1334.0,
+      "y_cm": 444.25,
+      "qty": 1,
+      "layer": "IC_DUVAR_60"
+    },
+    {
+      "code": "I02",
+      "block": "BOM_I02_IC_DOLU_1205_V",
+      "handle": "241E",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1334.0,
+      "y_cm": 567.25,
+      "qty": 1,
+      "layer": "IC_DUVAR_60"
+    },
+    {
+      "code": "I05",
+      "block": "BOM_I05_IC_K082_1195_V",
+      "handle": "241F",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1495.5883,
+      "y_cm": 318.75,
+      "qty": 1,
+      "layer": "IC_DUVAR_60"
+    },
+    {
+      "code": "K01",
+      "block": "BOM_K01_IC_KAPI_ACIKLIK820",
+      "handle": "2831",
+      "parent": "241F",
+      "role": "KOPYA",
+      "x_cm": 1495.5883,
+      "y_cm": 318.75,
+      "qty": 1,
+      "layer": "0"
+    },
+    {
+      "code": "I01",
+      "block": "BOM_I01_IC_DOLU_1255_V",
+      "handle": "2420",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1522.25,
+      "y_cm": 444.25,
+      "qty": 1,
+      "layer": "IC_DUVAR_60"
+    },
+    {
+      "code": "I02",
+      "block": "BOM_I02_IC_DOLU_1205_V",
+      "handle": "2421",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1522.25,
+      "y_cm": 567.25,
+      "qty": 1,
+      "layer": "IC_DUVAR_60"
+    },
+    {
+      "code": "I04",
+      "block": "BOM_I04_IC_K082_1225_H",
+      "handle": "2422",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1398.25,
+      "y_cm": 417.5883,
+      "qty": 1,
+      "layer": "IC_DUVAR_60"
+    },
+    {
+      "code": "K01",
+      "block": "BOM_K01_IC_KAPI_ACIKLIK820",
+      "handle": "282B",
+      "parent": "2422",
+      "role": "KOPYA",
+      "x_cm": 1398.25,
+      "y_cm": 417.5883,
+      "qty": 1,
+      "layer": "0"
+    },
+    {
+      "code": "B01",
+      "block": "BOM_B01_IC_KOSE_30x60",
+      "handle": "254D",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 262.5,
+      "y_cm": 256.0,
+      "qty": 1,
+      "layer": "KOSE_PROFIL_60"
+    },
+    {
+      "code": "B01",
+      "block": "BOM_B01_IC_KOSE_30x60",
+      "handle": "254E",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 385.0,
+      "y_cm": 256.0,
+      "qty": 1,
+      "layer": "KOSE_PROFIL_60"
+    },
+    {
+      "code": "B01",
+      "block": "BOM_B01_IC_KOSE_30x60",
+      "handle": "254F",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1335.5,
+      "y_cm": 256.0,
+      "qty": 1,
+      "layer": "KOSE_PROFIL_60"
+    },
+    {
+      "code": "B01",
+      "block": "BOM_B01_IC_KOSE_30x60",
+      "handle": "2550",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1458.0,
+      "y_cm": 256.0,
+      "qty": 1,
+      "layer": "KOSE_PROFIL_60"
+    },
+    {
+      "code": "I03",
+      "block": "BOM_I03_IC_DOLU_597p5_H",
+      "handle": "26AA",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 416.375,
+      "y_cm": 381.5,
+      "qty": 1,
+      "layer": "IC_DUVAR_60"
+    },
+    {
+      "code": "B01",
+      "block": "BOM_B01_IC_KOSE_60x30",
+      "handle": "26AB",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 449.25,
+      "y_cm": 380.0,
+      "qty": 1,
+      "layer": "KOSE_PROFIL_60"
+    },
+    {
+      "code": "I03",
+      "block": "BOM_I03_IC_DOLU_597p5_H",
+      "handle": "273C",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1489.375,
+      "y_cm": 381.5,
+      "qty": 1,
+      "layer": "IC_DUVAR_60"
+    },
+    {
+      "code": "B01",
+      "block": "BOM_B01_IC_KOSE_60x30",
+      "handle": "273D",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1522.25,
+      "y_cm": 380.0,
+      "qty": 1,
+      "layer": "KOSE_PROFIL_60"
+    },
+    {
+      "code": "B03",
+      "block": "BOM_B03_UCLU_H_60",
+      "handle": "2837",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 262.25,
+      "y_cm": 381.5,
+      "qty": 1,
+      "layer": "IC_UCLU_H_60"
+    },
+    {
+      "code": "B03",
+      "block": "BOM_B03_UCLU_H_60",
+      "handle": "2838",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 386.5,
+      "y_cm": 380.25,
+      "qty": 1,
+      "layer": "IC_UCLU_H_60"
+    },
+    {
+      "code": "B03",
+      "block": "BOM_B03_UCLU_H_60",
+      "handle": "2894",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1335.25,
+      "y_cm": 381.5,
+      "qty": 1,
+      "layer": "IC_UCLU_H_60"
+    },
+    {
+      "code": "B03",
+      "block": "BOM_B03_UCLU_H_60",
+      "handle": "2895",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1459.5,
+      "y_cm": 380.25,
+      "qty": 1,
+      "layer": "IC_UCLU_H_60"
+    },
+    {
+      "code": "V01",
+      "block": "BOM_V01_VERANDA_YAN_1255",
+      "handle": "22C2",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 5.0,
+      "y_cm": 62.75,
+      "qty": 1,
+      "layer": "VERANDA_PROFIL_100"
+    },
+    {
+      "code": "V01",
+      "block": "BOM_V01_VERANDA_YAN_1255",
+      "handle": "2423",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1078.0,
+      "y_cm": 62.75,
+      "qty": 1,
+      "layer": "VERANDA_PROFIL_100"
+    },
+    {
+      "code": "V02",
+      "block": "BOM_V02_VERANDA_ON_3815",
+      "handle": "22C4",
+      "parent": "",
+      "role": "ANA",
+      "x_cm": 190.75,
+      "y_cm": 5.0,
+      "qty": 1,
+      "layer": "VERANDA_PROFIL_100"
+    },
+    {
+      "code": "V02",
+      "block": "BOM_V02_VERANDA_ON_3815",
+      "handle": "2425",
+      "parent": "",
+      "role": "KOPYA",
+      "x_cm": 1263.75,
+      "y_cm": 5.0,
+      "qty": 1,
+      "layer": "VERANDA_PROFIL_100"
+    }
+  ],
+  "counts": {
+    "D01": 15,
+    "D04": 1,
+    "P03": 1,
+    "D03": 3,
+    "P02": 3,
+    "D02": 2,
+    "P01": 2,
+    "B02": 6,
+    "D05": 1,
+    "K02": 1,
+    "I01": 7,
+    "I04": 2,
+    "K01": 3,
+    "I02": 2,
+    "I05": 1,
+    "B01": 3,
+    "I03": 1,
+    "B03": 2,
+    "V01": 1,
+    "V02": 1
+  },
+  "mapping": {
+    "DIS_H_1255_100": [
+      "D01",
+      "BOM_D01_DIS_DOLU_1255_H"
+    ],
+    "DIS_V_1255_100": [
+      "D01",
+      "BOM_D01_DIS_DOLU_1255_V"
+    ],
+    "KROKI_P120120_V_1255_100": [
+      "D02",
+      "BOM_D02_DIS_P120120_1255_V"
+    ],
+    "KROKI_P120180_H_1255_100": [
+      "D03",
+      "BOM_D03_DIS_P120180_1255_H"
+    ],
+    "CMB_P120180_V": [
+      "D03",
+      "BOM_D03_DIS_P120180_1255_V"
+    ],
+    "CMB_P6040_H": [
+      "D04",
+      "BOM_D04_DIS_P6040_1255_H"
+    ],
+    "CMB_DIS_KAPI_V1155": [
+      "D05",
+      "BOM_D05_DIS_K097_1155_V"
+    ],
+    "IC_H_1255_60": [
+      "I01",
+      "BOM_I01_IC_DOLU_1255_H"
+    ],
+    "IC_V_1255_60": [
+      "I01",
+      "BOM_I01_IC_DOLU_1255_V"
+    ],
+    "IC_V_1205_60": [
+      "I02",
+      "BOM_I02_IC_DOLU_1205_V"
+    ],
+    "CMB_KADEME_H5975": [
+      "I03",
+      "BOM_I03_IC_DOLU_597p5_H"
+    ],
+    "CMB_KORIDOR_SOL_1225": [
+      "I04",
+      "BOM_I04_IC_K082_1225_V"
+    ],
+    "CMB_BANYO_KAPI_1225_V13": [
+      "I04",
+      "BOM_I04_IC_K082_1225_H"
+    ],
+    "CMB_KORIDOR_SAG_1195_V13": [
+      "I05",
+      "BOM_I05_IC_K082_1195_V"
+    ],
+    "kaynak-pencere-120120": [
+      "P01",
+      "BOM_P01_PENCERE_1200x1200"
+    ],
+    "kaynak-pencere-120180": [
+      "P02",
+      "BOM_P02_PENCERE_1200x1800"
+    ],
+    "kaynak-pencere-6040": [
+      "P03",
+      "BOM_P03_PENCERE_600x400"
+    ],
+    "kaynak-ic-kapi": [
+      "K01",
+      "BOM_K01_IC_KAPI_ACIKLIK820"
+    ],
+    "kaynak-dis-kapi": [
+      "K02",
+      "BOM_K02_DIS_KAPI_ACIKLIK970"
+    ],
+    "SABLON_IC_KOSE_30_60": [
+      "B01",
+      "BOM_B01_IC_KOSE_30x60"
+    ],
+    "SABLON_IC_KOSE_60_30": [
+      "B01",
+      "BOM_B01_IC_KOSE_60x30"
+    ],
+    "VER_BAG_100_50": [
+      "B02",
+      "BOM_B02_DIS_KOSE_100x50"
+    ],
+    "VER_BAG_50_100": [
+      "B02",
+      "BOM_B02_DIS_KOSE_50x100"
+    ],
+    "SABLON_UCLU_H_60": [
+      "B03",
+      "BOM_B03_UCLU_H_60"
+    ]
+  },
+  "notes": [
+    "Sayım tek bina içindir. ANA plan sayıldı; KOPYA plan, ön görünüş ve makas gösterimleri hariç.",
+    "Pencere ve kapılı duvarlar bir pano sayılır; doğramalar ayrıca sayılır.",
+    "Panel ölçü sırası uzunluk × kalınlık × yükseklik, mm. Pencere ölçüsü en × yükseklik, mm.",
+    "Çatı makası adetleri ve üretim parçaları, çatı kaplaması, tesisat ve sarf malzemeleri çizimde tanımlı olmadığından bu sayımda yoktur."
+  ]
+}

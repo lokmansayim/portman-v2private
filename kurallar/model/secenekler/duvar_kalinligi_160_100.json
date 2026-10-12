@@ -1,0 +1,25 @@
+{
+ "sema": "portman.secenek/0.1-taslak",
+ "kod": "duvar_kalinligi_160_100",
+ "ad": "Prefabrik duvar kalınlığı dış 160 / iç 100 mm (müşteri seçeneği)",
+ "aile": "A2",
+ "kaynak": "Lokman, 6 Ekim 2026 18:28: el çizimi 3+1 için dış duvar 160 mm, iç duvar 100 mm, yükseklik 2800 mm istendi. Lokman, 12 Ekim 2026 23:10: \"160/100 bizim standardımız değil, binde bir gelir; o müşterimizden gelen spesifik bir örnekti; kurallar ilk başta girmesin\" (D-10). Standart 100 / 60 (`duvar_tipleri.json` PE-DIS-100, PE-IC-60).",
+ "kapsam": "Yalnız bu seçenek açıkça istendiğinde. Varsayılan pakete girmez; bayi mesajından tahmin edilmez.",
+ "degisiklik": {
+  "dis_duvar_kalinligi_mm": 160,
+  "ic_duvar_kalinligi_mm": 100,
+  "paket": "müşteri: 160 / 100"
+ },
+ "bayi_ifadeleri": {
+  "lokman_ornegi": [
+   "dış duvar 160 mm, iç duvar 100 mm"
+  ],
+  "tahmin_teyit_bekliyor": []
+ },
+ "etki": [
+  "Pano boyu değişmez (125,5 cm modül); akslar kalınlıkla birlikte kayar: düşey akslar dış duvarın iç yüzünden, yatay akslar duvar ekseninden başlar (çıkarım, 6 Ekim; teyit bekliyor).",
+  "Dış ölçü verildiyse yapı o ölçüde çizilir, son pano kesilir (ölçüye kesim; canlı pano motorunda yok — `deneme/2026-10-06_kalinlik_160_100/`).",
+  "Köşe ve H bağlantı profilleri 160 / 100 için mühendis teyidi bekliyor (çıkarım: dış köşe 160 × 80, iç köşe 100 × 50, üçlü H 100).",
+  "Tek örnek: PM-DENEME-3ARTI1-1150x1050 r01 (6 Ekim 2026; 66 pano; `deneme/2026-10-06_kalinlik_160_100/sonuc/`). Bu örnek standardı tanımlamaz."
+ ]
+}

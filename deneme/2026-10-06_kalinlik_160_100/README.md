@@ -2,6 +2,10 @@
 
 Deneme kodu; canlıda değil, Motor'un yerine geçmez. Canlı `motor/` değişmedi.
 
+> **12 Ekim 2026 notu (İE-10, D-10):** buradaki 160 / 100 mm duvar kalınlığı **standart değildir**; müşteriden gelen özel bir örnekti
+> (Lokman: "binde bir gelir"). Prefabrik standardı dış 100 / iç 60 mm'dir; 160 / 100 yalnız `kurallar/model/secenekler/duvar_kalinligi_160_100.json`
+> seçeneğidir. Bu klasördeki ölçüye kesim, görünüş, IFC, 3D sayfası ve yükleme listesi çalışmaları kalınlıktan bağımsız olarak geçerlidir.
+
 İstekler (Lokman, 6 Ekim):
 - 18:28 — el çizimi 3+1 plan prefabrik standardında, P6001 mantığında çizilecek; dış duvar 160 mm, iç duvar 100 mm, yükseklik 2800 mm.
 - 18:50 — dış ölçüler 10,50 × 11,50 m, veranda yok. Çizim kuralı: her pano 1255 mm; dizilim yapının bitiş noktasına geldiğinde son parça kesilir, özel ölçülü olur.

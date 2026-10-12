@@ -1,0 +1,28 @@
+{
+  "id": "onceki-2plus1-6x8",
+  "revision": "server-r01-h-approved-20260913",
+  "units": "cm",
+  "modules": [
+    6,
+    8
+  ],
+  "outer_cm": [
+    773,
+    1014
+  ],
+  "rule_version": "1.4.3",
+  "h_correction_authorized": true,
+  "h_authorization": "Evet, birleşimleri güncel kurala göre düzelt.",
+  "source_dwg_archive_sha256": "5075e5539522d1c302584323176d7c8715697956fe821dd3018d8bea9d8e9aec",
+  "source_dxf": "source-6x8.dxf",
+  "files": {
+    "DOSYA_DIZINI.json": "2c4cb78b3be06280c190bcba327814da346e57736a74fde4e7e65ae877e36fdb",
+    "source-6x8.dxf": "22cc9304106725f555afc59223433b8383fbe3a19ba8ff4a3b40eb23b61fab66",
+    "proje-kararlari.md": "c163e26df6ed12dc6d5331efa2392408d523cbcdf05e5362420a171310ad32d0",
+    "h-connector.json": "9cc058640cae5a0537c5770c52475abafb41940b02299bc66da69b4090b340f2",
+    "prefabrik-cizim-kurallari.md": "5fb4e5299b401226678b40d69eb0193c725bc677acea32c1264b9a61ef3d9d14",
+    "source-archive-manifest.json": "5386ff2f21aa1ea33cfe48ee6a0a29eb0268b0aeab002b6c8fe3443993281721",
+    "KURALLAR.json": "567b0f6964eacc1deeacd08589ebc8427424dcf595908912fc30d19c1980d757",
+    "CIZIM_VE_BOM_IS_AKISI.md": "3152d2cbfe66fb0fedfe95203ee986f7b177caf334be3b5308fb5ef8a02289bb"
+  }
+}

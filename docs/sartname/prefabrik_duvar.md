@@ -1,7 +1,13 @@
 # A2 ve A3 · Prefabrik duvar
 
-Kaynak: Lokman'ın anlattıkları (1–2 ve 6 Ekim 2026). Çalışma şimdilik çelik üzerine; burası yalnız kayıttır.
-Astra dönemindeki prefabrik çizim kuralları (v1.4.3) buraya henüz taşınmadı.
+Kaynak: Lokman'ın anlattıkları (1–2, 6 ve 12 Ekim 2026). Astra dönemindeki prefabrik çizim kuralları (v1.4.3) 12 Ekim'de
+`ref_prefabrik/astra_v1_4_3/` altına alındı (girdi; kural kitabına Lokman'ın teyidiyle girer). Prefabrik ayrı pano motorunda çizilir (D-10).
+
+## Standart duvar kalınlığı (12 Ekim 2026)
+
+- **Dış 100 mm / iç 60 mm** standarttır (Lokman, 12 Ekim 23:10: "evet kesinlikle"; D-10). Kayıt: `kurallar/model/duvar_tipleri.json` `PE-DIS-100`, `PE-IC-60`.
+- **160 / 100 mm standart değildir** ("binde bir gelir"); 6 Ekim'deki 3+1 1150 × 1050 işi müşteriden gelen özel bir örnekti. Kural kitabına girmez;
+  yalnız `kurallar/model/secenekler/duvar_kalinligi_160_100.json` seçeneği olarak durur. Aşağıdaki "Duvar kalınlığı seçeneği" bölümü bu seçeneğin kaydıdır.
 
 ## Panel (A2)
 
@@ -19,9 +25,9 @@ Astra dönemindeki prefabrik çizim kuralları (v1.4.3) buraya henüz taşınmad
 - Örnek (dış 160 mm): 1150 cm → 8 tam pano + 114 cm; 1050 cm → 8 tam pano + 30 cm.
 - Canlı Motor'da yok. Deneme: `deneme/2026-10-06_kalinlik_160_100/`.
 
-## Duvar kalınlığı seçeneği
+## Duvar kalınlığı seçeneği (müşteri örneği; standart değil)
 
-- Dış duvar 160 mm, iç duvar 100 mm, yükseklik 2800 mm istendi. (6 Ekim 18:28)
+- Dış duvar 160 mm, iç duvar 100 mm, yükseklik 2800 mm istendi. (6 Ekim 18:28) — **Tek bir müşterinin isteğiydi; standart 100 / 60'tır (12 Ekim 23:10, D-10).**
 - Çıkarım: akslar kalınlıkla birlikte kayar. Düşey akslar dış duvarın iç yüzünden, yatay akslar duvar ekseninden başlar; tam modülde dış ölçü = pano × 125,5 + iki dış duvar (x) ve + bir dış duvar (y).
 - Çıkarım: dış köşe parçası 160 × 80, iç köşe 100 × 50, üçlü H 100.
 

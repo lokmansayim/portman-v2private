@@ -10,7 +10,7 @@ Bu dosya her ajanın okuduğu ortak kuraldır. Claude'a özgü oturum akışı `
 ## Kurallar (Lokman; değişmez)
 
 - **Gizli bilgi yazdırılmaz.** Anahtar, token ve parola çıktıya, belgeye, commit'e ya da sohbete girmez.
-- **Kişisel veri maskelenir.** Telefon numaraları maskelenir. Dışarı aktarımlarda kişi adları da maskelenir, bayi adları dahil.
+- **Kişisel veri.** T.C. kimlik numarası hiçbir yere yazılmaz. Telefon numaraları sistemde (bayi kartı, bayi paftası D-09) durur; günlükte, kanıtta ve dışa aktarımda maskelenir, LLM'e gitmez. Kişi ve bayi adları yazılabilir (Lokman, 12 Ekim 2026 23:10; D-11; 28.09'daki "adlar da maskelenir" kuralı kalktı).
 - **Ayrı onay gerekenler.** Her biri için Lokman'ın açık onayı gerekir:
   - sunucu ya da canlı değişiklik;
   - ücretli deneme (LLM çağrısı, WhatsApp mesajı);

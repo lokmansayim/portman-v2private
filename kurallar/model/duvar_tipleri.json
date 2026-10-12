@@ -33,6 +33,31 @@
         {"malzeme": "Çelik karkas", "kalinlik": 80},
         {"malzeme": "Alçıpan", "kalinlik": 12.5}
       ]
+    },
+    "PE-DIS-100": {
+      "aile": "A2",
+      "paket": "baz",
+      "kullanim": "dis",
+      "durum": "lokman",
+      "kaynak": "Lokman, 12 Ekim 2026 23:10: prefabrik standart dış duvar 100 mm (\"evet kesinlikle\"; D-10). Katmanlar: Lokman, 1 Ekim 2026 (8 mm betopan ya da fibercement, arasında 80 mm 16 dansite EPS). Astra v1.4.3: dış duvar 100 mm; pano motoru varsayılanı 10 cm (K02). Katman toplamı 96 mm, anma kalınlığı 100 mm: 4 mm fark (levha 10 mm mi, EPS 84 mm mi?) soru. 160 mm standart değildir: `secenekler/duvar_kalinligi_160_100.json`.",
+      "anma_mm": 100,
+      "katmanlar": [
+        {"malzeme": "Betopan / fibercement", "kalinlik": 8, "yuz": "dis"},
+        {"malzeme": "EPS (16 dansite)", "kalinlik": 80, "dolgu": "EPS"},
+        {"malzeme": "Betopan / fibercement", "kalinlik": 8, "yuz": "ic"}
+      ],
+      "pano": {"modul_cm": 125.5, "yukseklik_cm": [250, 280, 300], "birlesim": "H profil (aksın 125,5 olmasının nedeni)"}
+    },
+    "PE-IC-60": {
+      "aile": "A2",
+      "paket": "baz",
+      "kullanim": "ic",
+      "durum": "lokman",
+      "kaynak": "Lokman, 12 Ekim 2026 23:10: prefabrik standart iç duvar 60 mm (D-10). Astra v1.4.3: iç duvar 60 mm; pano motoru varsayılanı 6 cm; iç köşe parçası 30 × 60. Katmanları açık soru (`docs/sartname/prefabrik_duvar.md`); uydurulmadı, tek katman olarak yazıldı.",
+      "anma_mm": 60,
+      "katmanlar": [
+        {"malzeme": "Prefabrik iç pano (katmanları soru)", "kalinlik": 60, "durum": "soru"}
+      ]
     }
   },
   "cizim_kalinliklari_kayit": {

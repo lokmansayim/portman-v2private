@@ -1,0 +1,33 @@
+{
+  "result": "PASS",
+  "unchanged_model_entities": 277,
+  "unchanged_block_definitions": 25,
+  "unchanged_veranda_edges": 8,
+  "material_codes": 20,
+  "active_block_variants": 26,
+  "primary_items": 58,
+  "copy_excluded_items": 58,
+  "counts": {
+    "D01": 15,
+    "D04": 1,
+    "P03": 1,
+    "D03": 3,
+    "P02": 3,
+    "D02": 2,
+    "P01": 2,
+    "B02": 6,
+    "D05": 1,
+    "K02": 1,
+    "I01": 7,
+    "I04": 2,
+    "K01": 3,
+    "I02": 2,
+    "I05": 1,
+    "V01": 1,
+    "V02": 1,
+    "B01": 3,
+    "I03": 1,
+    "B03": 2
+  },
+  "dwg_roundtrip_verified": true
+}

@@ -1,0 +1,103 @@
+{
+  "surum": "1.0",
+  "tarih": "2026-09-07",
+  "kapsam": "Mevcut prefabrik CAD → Blender aktarımı; ayrı çizim/aktarım kural kaydı",
+  "kayit_talimati": "Kullanıcı Blender için ayrıca çizim kuralı olarak kaydetmemi istedi.",
+  "oncelik": "Son kullanıcı talimatı ve ilgili projenin doğrulanmış kaynakları önceliklidir. AutoCAD/BOM v1.4.3 kurallarını değiştirmez.",
+  "uygulama": "Blender aktarımı/3D istendiğinde bu kurallar okunur; yalnız 2D/BOM isteklerine kendiliğinden Blender teslimi eklenmez.",
+  "kurallar": [
+    {
+      "kod": "B01",
+      "baslik": "Kaynağı doğrula",
+      "kural": "Güncel, kullanıcı tarafından kabul edilmiş DWG, aynı revizyonun yerel DXF/parametre verisi, kuralları ve varsa BOM birlikte doğrulanır. Dosya adı/tarihi tek başına yeterli değildir. Yalnız ilgili proje klasörleri incelenir."
+    },
+    {
+      "kod": "B02",
+      "baslik": "Mevcut yapıyı koru",
+      "kural": "Blender aktarımı yeni plan tasarımı değildir. Orijinal DWG, üretim kuralları ve BOM korunur; çıktılar ayrı aktarım/revizyon klasörüne yazılır. Başka projenin ölçüleri, oda yerleri veya sistemi taşınmaz."
+    },
+    {
+      "kod": "B03",
+      "baslik": "Gerçek CAD geometrisini kullan",
+      "kural": "Ekran görüntüsünden yeniden çizme. Doğrulanmış DWG/DXF nesnelerini oku; iç içe bloklarda taşıma, dönme, ölçek ve aynalamayı uygula. Dış referansları çözümle veya eksik olarak bildir."
+    },
+    {
+      "kod": "B04",
+      "baslik": "Birim ve koordinat",
+      "kural": "Kaynak birimini doğrula; Blender metre dönüşümünü yalnız bir kez uygula. X/Y ve yönlenmeyi koru, Z yönünü ve sıfır kotunu kaydet. Kaynağın cm olması durumunda metre katsayısı 0,01’dir; her dosyanın cm olduğunu varsayma."
+    },
+    {
+      "kod": "B05",
+      "baslik": "Panolar ve birleşimler",
+      "kural": "Her gerçek panel/modül ayrımı korunur. Kalınlık, toplam boy, uç ve birleşim geometrisi kaynaktan gelir. Üçlü H kanalları, gerçek dayama yüzleri ve veranda 100×50 mm iç köşe kuralı korunur; boşluğu sanal dolgu ile gizleme. Aktarım sırasında CAD hatasını sessizce düzeltme, bildir."
+    },
+    {
+      "kod": "B06",
+      "baslik": "Doğramalar ve açıklıklar",
+      "kural": "Kapı/pencere tipi, eni, konumu, yönü ve kotu kaynaktan alınır. Açıklık duvar mesh’inde gerçek boşluktur. Kapı açılım yayı, tarama, ölçü ve yazı yükseltilmez. Tanımsız 3D ürün/aksesuar detayı uydurulmaz; teknik temsil kapsamı belirtilir."
+    },
+    {
+      "kod": "B07",
+      "baslik": "Eksik bilgi",
+      "kural": "Geometriyi etkileyen eksik yüksekliği/kotu önce aynı projenin kayıtlarında ara, yoksa kullanıcıya sor. Bağımsız elemanlarda devam et. Gösterim yüksekliği üretim kesim veya sipariş boyu sayılmaz."
+    },
+    {
+      "kod": "B08",
+      "baslik": "Çatı ve veranda",
+      "kural": "İlk hedef çatısız 3D kat planıdır. Tanımlı çatı ayrı gizlenebilir koleksiyondadır. Yalnız profil/eğim varsa tam çatı montajı uydurma; referans olarak koru. Mevcut %33 eğim, iki yanda 30 cm yatay saçak ve 10 cm topuk kuralları kendi geçerli kapsamlarında uygulanır; eksik çıkma/taşıyıcı/kaplama bilgisi tamamlanmış sayılmaz."
+    },
+    {
+      "kod": "B09",
+      "baslik": "Kaynak kimliği",
+      "kural": "Her fiziksel elemanda kaynak dosya/revizyon, CAD kimliği, tip, ölçü, konum, kural ve ürün/BOM bağlantısı tutulur. Kimlik yoksa DWG’yi değiştirmeden yan eşleştirme dosyası oluştur. Alt mesh’ler ortak kaynak kimliği taşır; yeni revizyonda handle eşliği otomatik varsayılmaz."
+    },
+    {
+      "kod": "B10",
+      "baslik": "BOM ilişkisi",
+      "kural": "Mevcut ürün kodları, reçete ve miktar kuralları korunur. Yalnız ANA bina sayılır; KOPYA/MONTAJ, görünüş ve sunum alt mesh’leri adedi artırmaz. Kapılı/pencereli duvar tek pano, doğrama ayrıca sayılır. Bir mesh bir BOM satırı sayılmaz. Temsil edilmeyen kalemler kapsam farkıyla açıklanır."
+    },
+    {
+      "kod": "B11",
+      "baslik": "Kodla tekrar üret",
+      "kural": "Aynı doğrulanmış veri JSON’dan yerel kodla Blender modeli üretir. Koleksiyonlarda yapı ile ışık/kamera/sunum ayrılır. Yeniden çalıştırma yalnız bu aktarımın ürettiği nesneleri yeniler, çoğaltmaz. Yeni paket/eklenti ücretli servis için kullanıcı yetkisi gerekir."
+    },
+    {
+      "kod": "B12",
+      "baslik": "Gerçek geometriyi denetle",
+      "kural": "Kayıtlı Blender mesh’lerinden dış sınır, kalınlık, bölme yerleri, kapı/pencere konumu-yönü-ölçüsü, boşluklar ve kotlar ölçülür. Kaynakla sayım ve mümkünse hizalı yatay kesit karşılaştırılır. Yalnız beklenen değerleri okuyarak test geçti denmez. Tolerans kaynaktan alınır; yoksa seçilen sayısal tolerans açıkça yazılır ve imalat onayı sayılmaz."
+    },
+    {
+      "kod": "B13",
+      "baslik": "Tekrar ve teslim",
+      "kural": "Bir kez yeniden üretip nesne çoğalmadığını ve ölçülerin değişmediğini kontrol et. Aynı kayıtlı modelden üstten ortografik ve çatısız 3D perspektif üret. .blend, aktarım verisi, CAD–Blender eşleştirmesi, kod, iki PNG, doğrulama/eksikler ve tekrar çalıştırma notu teslim edilir. Hangi DWG ve kural/revizyondan geldiği açıkça belirtilir."
+    },
+    {
+      "kod": "B14",
+      "baslik": "Sunum sınırı",
+      "kural": "Nötr renk, ışık, etiket ve alt sunum düzlemi ürün özelliği veya döşeme reçetesi değildir. Kaynakta bulunmayan mobilya/dekor eklenmez. Tam duvar yüksekliğindeki üst görünüş ile açıklıkları gösteren yatay kesit farklıdır; görüntü türü doğru adlandırılır."
+    }
+  ],
+  "ornek_proje": {
+    "kapsam": "Yalnız yan verandalı 2+1 BLENDER-R01; yeni projeye otomatik kopyalanmaz",
+    "konum": "/Users/lokmansayim/Documents/Codex/2026-09-05/prefabrik-2-arti-1-6x8/outputs/blender-aktarim/yan-verandali-2plus1-R01",
+    "dwg": "yeni-2plus1-yan-verandali.dwg",
+    "kaynak_kural": "v1.4.3 + 7 Eylül pencere etiketleri",
+    "onaylar": {
+      "kapi_ve_kapisiz_gecis_yuksekligi_cm": 200,
+      "baglanti_ve_veranda_dikmesi_gosterim_yuksekligi_cm": 250,
+      "gosterim_yuksekligi_kesim_boyu_degil": true
+    },
+    "sayisal_kontrol_toleransi_mm": 1,
+    "imalat_onayi": false,
+    "sayim": {
+      "pano": 52,
+      "pencere": 7,
+      "kapi": 5,
+      "kapisiz_gecis": 1,
+      "bom_kod": 26,
+      "bom_adet": 79
+    },
+    "yeniden_kullanilacak_kod": "kod/run_transfer.py",
+    "sinir": "Kod bu doğrulanmış revizyona bağlıdır; yeni CAD’ye kaynak adaptasyonu ve kontrol gerekir."
+  }
+}
