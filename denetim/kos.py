@@ -194,9 +194,13 @@ _ONDALIK = re.compile(r"\d+[.,]\d+")
 
 
 def _ondaliksiz(satir: str) -> str:
-    """Ondalık sayı belirteçlerini aynı uzunlukta boşluğa çevirir (6.905…, 19050000000.5, 82,27, 0,905321234567). Tam kısmı ≥ 12 haneli
-    olan "a,b" / "a.b" ondalık sayılmaz, kalır: numara listesi ([905…,905…]) ve "905…,1" gibi ayrılmış alanlar yakalanır."""
-    return _ONDALIK.sub(lambda m: m.group(0) if len(re.split(r"[.,]", m.group(0))[0]) >= 12 else " " * len(m.group(0)), satir)
+    """Ondalık sayı belirteçlerini aynı uzunlukta boşluğa çevirir (6.9050000000000002, 19050000000.5, 82,27). Ondalık sayılmayıp kalanlar:
+    tam kısmı ≥ 12 haneli olanlar ([905…,905…] listesi, "905…,1" alanı) ve kesri tam 12 haneli bir 905… dizisi olanlar ("1,905…" CSV/JSON
+    alanı; IFC kesirleri 16–17 hanelidir, etkilenmez — KVKK denetçisi, 12.10)."""
+    def karar(m: re.Match) -> str:
+        tam, kesir = re.split(r"[.,]", m.group(0), maxsplit=1)
+        return m.group(0) if len(tam) >= 12 or re.fullmatch(r"905\d{9}", kesir) else " " * len(m.group(0))
+    return _ONDALIK.sub(karar, satir)
 TARANMAYAN_UZANTI = (".dxf", ".png", ".jpg", ".jpeg", ".ttf", ".pdf", ".zip", ".xlsx", ".pyc")
 
 

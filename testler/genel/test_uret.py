@@ -83,6 +83,9 @@ def test_dogrulama_gecmezse_teslim_pdfi_yok(tmp_path, monkeypatch):
     assert m["passed"] is False and "ifc_genel başarısız" in v["errors"]
     assert m["pdf"] is None and m["pdf_sha256"] is None and not (tmp_path / "C8201_pafta.pdf").exists()
     assert m["hatali_pdf"] == "C8201_pafta.HATALI.pdf" and (tmp_path / "C8201_pafta.HATALI.pdf").exists()
+    # bayiye giden görseller de teslim adıyla kalmaz (geometri hakemi, 2. tur)
+    assert m["plan_bayi"] is None and not (tmp_path / "C8201_plan_bayi.png").exists() and (tmp_path / "C8201_plan_bayi.HATALI.png").exists()
+    assert not (tmp_path / "C8201_pafta_sablon.png").exists() and (tmp_path / "C8201_pafta_sablon.HATALI.png").exists()
 
 
 def test_gecersiz_tanimda_kayit_yazilir(tmp_path):

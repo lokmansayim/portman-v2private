@@ -29,7 +29,7 @@ def _ara(satir: str):
 
 def test_telefon_deseni_ondalik_sayiyi_numara_sanmaz():
     for satir in ["#12= IFCCARTESIANPOINT((6.9050000000000002,3.8905000000000003,0.));", "x = 3.8905000000000003", "{\"alan\": 19050000000.5}",
-                  "1" + NUMARA + " (13 hane, numara değil)", "oda çevreleri 82,27 m; 0," + NUMARA + " oran"]:
+                  "1" + NUMARA + " (13 hane, numara değil)", "oda çevreleri 82,27 m; 0,9053212345678901 oran"]:
         assert _ara(satir) is None, satir
 
 
@@ -45,6 +45,9 @@ def test_telefon_deseni_virgullu_listeyi_yakalar():
     assert len(kos.SIR_RX.findall(kos._ondaliksiz("\"wa_ids\": [" + NUMARA + "," + ikinci + "]"))) == 2
     assert len(kos.SIR_RX.findall(kos._ondaliksiz(NUMARA + ",1,bayi"))) == 1
     assert len(kos.SIR_RX.findall(kos._ondaliksiz(NUMARA + ".5"))) == 1
+    # KVKK denetçisi (12.10): kısa sayı + ayraç + numara ("[1,905…]", "id,wa_id" CSV) de yakalanmalı; 16 haneli IFC kesri yakalanmaz
+    assert len(kos.SIR_RX.findall(kos._ondaliksiz("[1," + NUMARA + "]"))) == 1
+    assert len(kos.SIR_RX.findall(kos._ondaliksiz("7," + NUMARA + ",bayi"))) == 1
 
 
 def test_oteki_desenler_degismedi():

@@ -83,7 +83,8 @@ Antet ve tablolar İş Emri zarfından ve tanımdan: Proje Kodu = İş Emri no, 
 cümleleri, yoksa "...". Yazı tipleri `motor/genel/font/` (Comic Relief ve Arial'in ölçüdeş eşi Liberation Sans; ikisi de OFL, depodan okunur:
 çıktı makinedeki yazı tiplerine bağlı değil). M² brüt oturumdur (dış duvar dış yüzleri, veranda ve sundurma dahil; listedeki `bina_m2` ile
 aynı; sınır kutusu değil). Müşteri projeleri (KT) adsız: kod ve m². Koda bağlı seçimler (vasistas eşiği 60 cm, çatı tipi adları, özellik
-yazı boyu 7,3→5,2 pt küçülme) `kurallar/cizim/pafta_sablonu.json` anahtarlarında (`varsayim`; Lokman'ın onayı bekleniyor). Doğrulama
+yazı boyu 7,3→5,2 pt küçülme) `kurallar/cizim/pafta_sablonu.json` anahtarlarında (üçü Lokman'ın 12 Ekim 14:53 kabulüyle `lokman`;
+`zincir_en_kisa_parca_cm` 15 cm `varsayim`, onay bekliyor; `genel_olcu_yuvarlama` şablon kuralının kaydı). Doğrulama
 geçmeyen işte teslim adıyla PDF yazılmaz (`.HATALI.pdf`, K23). Genel motorun kendi `pafta.png`'si (mühendis paftası, açıklama satırlarıyla)
 çizim setinde kalır, baytları değişmedi.
 

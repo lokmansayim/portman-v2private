@@ -179,8 +179,12 @@ def uret(tanim_yolu: Path, hedef: Path, is_emri_no: str | None = None, revizyon:
         hatalar.append("bayi paftası (PDF) üretilmedi")
     passed = not hatalar
     hatali_pdf = hedef / f"{kod}_pafta.HATALI.pdf"
-    if not passed and pafta_pdf.exists():           # K23: doğrulama geçmezse teslim adıyla PDF yok; yalnız tanı için .HATALI.pdf
-        pafta_pdf.replace(hatali_pdf)
+    if not passed:                                   # K23: doğrulama geçmezse bayiye giden hiçbir dosya teslim adıyla kalmaz; tanı için .HATALI.*
+        if pafta_pdf.exists():
+            pafta_pdf.replace(hatali_pdf)
+        for p in (bayi_png, hedef / f"{kod}_pafta_sablon.png"):
+            if p.exists():
+                p.replace(p.with_name(p.stem + ".HATALI" + p.suffix))
     validation = {"passed": passed, "errors": hatalar, "warnings": uyarilar, "kod": t["kod"], "set": set_kullanilan, "yontem": yontem or t.get("cati", {}).get("yontem"),
                   "ciktilar": {"beklenen": len(beklenen), "var": sum(var.values()), "eksik": eksik, "zorunlu_eksik": zorunlu_eksik}, "ifc": ozet,
                   "liste_satir": liste_satir, "elektrik_sayimi": str(elektrik_sayimi) if elektrik_sayimi else None,

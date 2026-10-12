@@ -37,7 +37,7 @@ Tanımda o projenin teknik özelliklerinden gelen birkaç seçim de yazılıdır
 | `model/duvar_tipleri.json` | Baz paketin duvar tipleri: katmanlar, karkas 80 ve 140 mm, kaplamalar. Duvar kalınlığı katmanların toplamı |
 | `model/secenekler/` | Değişiklik operatörleri: model tanımı değişmeden paket farkını uygular. Örnek `dis_karkas_140.json` (Lokman, 3 Ekim 2026 11:49: "dışlar 140'lık") |
 | `cizim/cizim_seti.json` | Çizim setinin içeriği (Lokman onayladı, 7 Ekim 2026 07:45). Anlatımı `docs/sartname/cizim_seti.md` |
-| `cizim/pafta_sablonu.json` | Örnek Şablon paftasının koda bağlı seçimleri (İE-08, 12 Ekim 2026; durum `varsayim`, Lokman'ın onayı bekleniyor): vasistas eşiği, çatı tipi adları, özellik yazı boyu. `motor/genel/sablon_pafta.py` okur; anahtar yoksa koddaki varsayılan sürer |
+| `cizim/pafta_sablonu.json` | Örnek Şablon paftasının koda bağlı seçimleri (İE-08, 12 Ekim 2026): vasistas eşiği, çatı tipi adları, özellik yazı boyu (Lokman 14:53 kabul etti, `lokman`), genel ölçü yuvarlaması (şablon kuralı), zincirde en kısa parça 15 cm (`varsayim`, onay bekliyor). `motor/genel/sablon_pafta.py` okur; anahtar yoksa koddaki varsayılan sürer |
 | `liste/kurallar.json` | Metraj ve yükleme listesi kuralları; her anahtarda `deger`, `durum`, `kaynak`. Sürümü `sema` alanında (bugün 0.19-taslak) |
 | `liste/setler/` | Dondurulmuş sürümler (0.12–0.19; aşağıda). Bir set `PORTMAN_KURALLAR` ortam değişkeniyle ya da `python -m motor.genel.uret --set` ile seçilir (`motor/genel/kural.py`; deneme kopyası `deneme/2026-10-03_yukleme/kural.py`) |
 | `bayi/ornek.json` | Bayi standardı örneği: listeye giren gruplar, çatı yöntemi. Gerçek bayi, numara ya da ad yok |
