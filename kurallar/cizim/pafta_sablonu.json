@@ -1,11 +1,13 @@
 {
  "sema": "portman.pafta_sablonu/0.1",
- "durum": "varsayim",
- "kaynak": "İE-08 (12 Ekim 2026): Örnek Şablon paftasının (docs/sartname/plan_paftasi_sablonu.md; Lokman 6 Ekim 2026 19:46) koda bağlı seçimleri kural anahtarı olarak. Lokman'ın onayı bekleniyor (varsayim). Anahtar yoksa koddaki varsayılan sürer (motor/genel/sablon_pafta.py).",
- "vasistas_en_cok_yukseklik_cm": {"deger": 60, "durum": "varsayim",
+ "durum": "lokman",
+ "kaynak": "İE-08 (12 Ekim 2026): Örnek Şablon paftasının (docs/sartname/plan_paftasi_sablonu.md; Lokman 6 Ekim 2026 19:46) koda bağlı seçimleri kural anahtarı olarak. Üç varsayımı Lokman 12 Ekim 2026 14:53'te kabul etti (\"şimdilik kabul; gerekirse sonra düzeltilir\"). Anahtar yoksa koddaki varsayılan sürer (motor/genel/sablon_pafta.py).",
+ "vasistas_en_cok_yukseklik_cm": {"deger": 60, "durum": "lokman",
   "kaynak": "'Pencereler' ve 'Vasistaslar' satırlarının ayrımı: yüksekliği bu değere kadar olan pencere vasistastır. Bugünkü modellerde vasistaslar 60/40 ve 50/50, pencereler en az 100/70"},
  "cati_tipi_adi": {"deger": {"besik": "Beşik", "besik_cumba": "Beşik + cumba", "kirma": "Kırma", "dort_omuz": "Dört omuz", "kanatli_kirma": "Kanatlı kırma", "tek_egim": "Tek eğimli"},
-  "durum": "varsayim", "kaynak": "'Çatı Şekli' satırı: tanımda tip_adi varsa onun ilk parçası (':'e kadar), yoksa tip anahtarının buradaki okunur adı; o da yoksa '...'"},
- "ozellik_yazi_pt": {"deger": {"en_cok": 7.3, "en_az": 5.2}, "durum": "varsayim",
-  "kaynak": "Bina özellikleri değerleri sütuna sığmazsa yazı küçülür (en_az'a kadar), kesilmez; bilinmeyen değer '...' ile karışmasın"}
+  "durum": "lokman", "kaynak": "'Çatı Şekli' satırı: tanımda tip_adi varsa onun ilk parçası (':'e kadar), yoksa tip anahtarının buradaki okunur adı; o da yoksa '...'"},
+ "zincir_en_kisa_parca_cm": {"deger": 15, "durum": "varsayim",
+  "kaynak": "Bayi paftasının ölçü zincirinde bundan kısa parçalar (veranda dikmesi, korkuluk, kaplama sıçraması: 3–14 cm) komşu parçaya katılır; genel ölçü ve toplam değişmez. Mühendis planı (çizim seti) tam zinciri taşır. İE-08, 12 Ekim 2026 (göz denetimi: KT-02/KT-03/Ç8201'de 3 cm'lik parçaların yazıları üst üste biniyordu); Lokman'ın onayı bekleniyor"},
+ "ozellik_yazi_pt": {"deger": {"en_cok": 7.3, "en_az": 5.2}, "durum": "lokman",
+  "kaynak": "Bina özellikleri değerleri sütuna sığmazsa yazı küçülür (en_az'a kadar), en küçük boyda da sığmazsa iki satıra sarılır (Lokman, 12 Ekim 14:53: kesilmesin, bilgi kaybolmasın); bilinmeyen değer '...' ile karışmasın"}
 }

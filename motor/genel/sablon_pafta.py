@@ -86,9 +86,14 @@ def yazi_eni(metin: str, pt: float, font=None) -> float:
     return TextPath((0, 0), metin, size=pt, prop=font or ARIAL).get_extents().width
 
 
-def tam_bol(parcalar: list[float]) -> list[int]:
-    """Ölçü zincirini tam sayıya yuvarlar; toplam, genel ölçünün yuvarlağıyla aynı kalır (en büyük kalan yöntemi)."""
-    hedef = int(round(sum(parcalar))); taban = [math.floor(p) for p in parcalar]
+def yarim_yukari(v: float) -> int:
+    """Ölçü yuvarlaması: yarım yukarı (970,5 → 971; Python'un round'u çifte yuvarlar). Genel ölçü ve zincir parçaları aynı kuralla."""
+    return int(math.floor(v + 0.5))
+
+
+def tam_bol(parcalar: list[float], hedef: int | None = None) -> list[int]:
+    """Ölçü zincirini tam sayıya yuvarlar; toplam, genel ölçünün yuvarlağıyla (`hedef`) aynı kalır (en büyük kalan yöntemi)."""
+    hedef = yarim_yukari(sum(parcalar)) if hedef is None else hedef; taban = [math.floor(p) for p in parcalar]
     for i in sorted(range(len(parcalar)), key=lambda i: parcalar[i] - taban[i], reverse=True)[:hedef - sum(taban)]:
         taban[i] += 1
     return taban
@@ -124,16 +129,32 @@ class Sayfa:
     def yazi(self, x, yd, s, pt=7.3, font=None, renk="black", ha="left", va="center", rot=0, z=6, **kw):
         return self.ax.text(x, self.y(yd), s, fontsize=pt, fontproperties=font or COMIC, color=renk, ha=ha, va=va, rotation=rot, zorder=z, **kw)
 
-    def olcu(self, x0, y0, x1, y1, metin, taraf):
-        """Şablondaki ölçü: mavi çizgi, uçlarda kalın eğik çentik, siyah Arial yazı. taraf: yazının çizgiye göre yeri (ust | alt | sol | sag)."""
+    def olcu(self, x0, y0, x1, y1, metin, taraf, kaydir: float = 0.0):
+        """Şablondaki ölçü: mavi çizgi, uçlarda kalın eğik çentik, siyah Arial yazı. taraf: yazının çizgiye göre yeri (ust | alt | sol | sag);
+        kaydir: yazıyı çizgiden ek uzaklaştırma (pt; dar parçalarda yazılar binmesin)."""
         self.cizgi(x0 - (4 if y0 == y1 else 0), y0 - (4 if x0 == x1 else 0), x1 + (4 if y0 == y1 else 0), y1 + (4 if x0 == x1 else 0), MAVI, 0.72, z=5)
         for (x, y_) in ((x0, y0), (x1, y1)):
             self.cizgi(x - 4.2, y_ + 4.2, x + 4.2, y_ - 4.2, MAVI, 1.56, z=5)
         mx, my = (x0 + x1) / 2, (y0 + y1) / 2
         if y0 == y1:
-            self.yazi(mx, my + (-7.2 if taraf == "ust" else 7.6), metin, 10.7, ARIAL, ha="center")
+            self.yazi(mx, my + (-7.2 if taraf == "ust" else 7.6) + kaydir, metin, 10.7, ARIAL, ha="center")
         else:
-            self.yazi(mx + (-7.4 if taraf == "sol" else 7.4), my, metin, 10.7, ARIAL, ha="center", rot=90)
+            self.yazi(mx + (-7.4 if taraf == "sol" else 7.4) + kaydir, my, metin, 10.7, ARIAL, ha="center", rot=90)
+
+
+def _iki_satir(v: str, pt: float, gen: float) -> list[str]:
+    """Değeri virgül (yoksa boşluk) sınırından iki satıra böler; en dengeli bölme (en geniş satır en dar olan) seçilir."""
+    ayrac = ", " if ", " in v else " "
+    parcalar = v.split(ayrac)
+    if len(parcalar) < 2:
+        return [v]
+    en_iyi = None
+    for k in range(1, len(parcalar)):
+        a, b = ayrac.join(parcalar[:k]).rstrip(), ayrac.join(parcalar[k:]).strip()
+        en = max(yazi_eni(a, pt, COMIC), yazi_eni(b, pt, COMIC))
+        if en_iyi is None or en < en_iyi[0]:
+            en_iyi = (en, [a, b])
+    return en_iyi[1]
 
 
 def _sar(metin: str, genislik: int) -> list[str]:
@@ -187,15 +208,22 @@ def cerceveler(sf: Sayfa, t: dict, oz: dict, bilgi: dict, oturum_m2: float):
     adim = (OZELLIK[3] - OZELLIK_BASLIK_ALT) / len(OZELLIK_SIRASI)
     yp = (sablon_kurallari().get("ozellik_yazi_pt") or {}).get("deger") or {}
     en_cok, en_az = float(yp.get("en_cok", 7.3)), float(yp.get("en_az", 5.2))
+    gen = OZELLIK[2] - 765.0 - 2
     for i, ad in enumerate(OZELLIK_SIRASI):
         yt = OZELLIK_BASLIK_ALT + i * adim
         sf.cizgi(OZELLIK[0], yt, OZELLIK[2], yt)
         v = str(oz.get(ad, "..."))
-        pt = en_cok
-        if v != "..." and yazi_eni(v, pt, COMIC) > OZELLIK[2] - 765.0 - 2:     # sığmazsa yazı küçülür, kesilmez ("…" bilinmeyen "..." ile karışmasın)
-            pt = max(en_az, pt * (OZELLIK[2] - 767.0) / yazi_eni(v, pt, COMIC))
+        pt = en_cok; satirlar = [v]
+        if v != "..." and yazi_eni(v, pt, COMIC) > gen:            # sığmazsa yazı küçülür, kesilmez ("…" bilinmeyen "..." ile karışmasın)
+            pt = max(en_az, pt * (gen - 2.0) / yazi_eni(v, pt, COMIC))
+            if yazi_eni(v, pt, COMIC) > gen:                        # en küçük boyda da sığmıyorsa iki satıra sarılır; bilgi kaybolmaz (Lokman, 12.10)
+                satirlar = _iki_satir(v, pt, gen)
         sf.yazi(695.0, yt + adim / 2 + 0.6, ad, 7.3)
-        sf.yazi(765.0, yt + adim / 2 + (0.6 if v != "..." else -1.2), v, pt if v != "..." else 12.0)
+        if len(satirlar) == 1:
+            sf.yazi(765.0, yt + adim / 2 + (0.6 if v != "..." else -1.2), v, pt if v != "..." else 12.0)
+        else:
+            for k_, s_ in enumerate(satirlar):
+                sf.yazi(765.0, yt + adim / 2 - 2.6 + 6.4 * k_, s_, pt)
     sf.cizgi(OZELLIK_BOLME, OZELLIK_BASLIK_ALT, OZELLIK_BOLME, OZELLIK[3])
     sf.yuvarlak_kutu(ISTEK)
     sf.yazi(696.0, 272.0, "ÖZEL İSTEKLER;", 7.6, renk=KOYU_KIRMIZI)
@@ -215,7 +243,10 @@ def cerceveler(sf: Sayfa, t: dict, oz: dict, bilgi: dict, oturum_m2: float):
     sat = [ANTET_ORTA[1], *ANTET_ORTA_SATIR, ANTET_ORTA[3]]
     no = bilgi.get("is_emri_no") or t["kod"]; rev = int(bilgi.get("revizyon") or 1)
     tur = "ÇELİK" if t.get("aile", "").endswith("celik") else "PREFABRİK"
-    orta = [("PROJE KODU", f"{no} r{rev:02d}"), ("İLGİLİ KİŞİ-TELEFON", bilgi.get("ilgili_kisi") or "..."),
+    # İLGİLİ KİŞİ-TELEFON: bayinin adı ve bayi kartındaki kayıtlı telefonu (D-09, Lokman 12.10.2026 14:53); zarf vermezse "..."
+    # (katalog ve altın üretimde böyle). Başka hiç kimsenin numarası yazılmaz; PR-2'de yalnız o bayinin kartındaki numara kabul edilir.
+    ilgili = bilgi.get("ilgili_kisi") or " · ".join(str(x).strip() for x in (bilgi.get("bayi_adi"), bilgi.get("bayi_telefonu")) if x) or "..."
+    orta = [("PROJE KODU", f"{no} r{rev:02d}"), ("İLGİLİ KİŞİ-TELEFON", ilgili),
             ("SEVK ADRESİ", bilgi.get("sevk_adresi") or "..."), ("PROJE ADI & M²", bilgi.get("proje_adi") or f"{t['kod']} · {oturum_m2:.0f} M² {tur} KONUT")]
     for (ad, v), ya, yb in zip(orta, sat, sat[1:]):
         sf.yazi(287.0, (ya + yb) / 2 + 0.4, ad, 7.3)
@@ -226,7 +257,8 @@ def cerceveler(sf: Sayfa, t: dict, oz: dict, bilgi: dict, oturum_m2: float):
     sf.cizgi(ANTET_SAG_BOLME, ANTET_SAG[1], ANTET_SAG_BOLME, ANTET_SAG[3])
     sat = [ANTET_SAG[1], *ANTET_SAG_SATIR, ANTET_SAG[3]]
     tarih = bilgi.get("tarih") or time.strftime("%d.%m.%Y", time.gmtime())
-    for (ad, v), ya, yb in zip([("TARİH", tarih), ("ÇİZEN", bilgi.get("cizen") or "Portman"), ("KONTROL", bilgi.get("kontrol") or "..."), ("ONAY", bilgi.get("onay") or "...")], sat, sat[1:]):
+    # Çizen, Kontrol ve Onay: "Portman" (Lokman, 12.10.2026 14:53: "Portman her yerde geçsin"); zarf başka ad verirse o yazılır
+    for (ad, v), ya, yb in zip([("TARİH", tarih), ("ÇİZEN", bilgi.get("cizen") or "Portman"), ("KONTROL", bilgi.get("kontrol") or "Portman"), ("ONAY", bilgi.get("onay") or "Portman")], sat, sat[1:]):
         sf.yazi(698.0, (ya + yb) / 2 + 0.4, ad, 7.3)
         sf.yazi(765.0, (ya + yb) / 2 + (0.4 if v != "..." else -1.4), v, 7.3 if v != "..." else 12.0)
 
@@ -254,9 +286,32 @@ def _mahal_tarafi(y: dict, d: dict, mahal: str | None) -> tuple[float, float] | 
     return (1.0, 0.0) if p.x > (x0 + x1) / 2 else (-1.0, 0.0)
 
 
+def dis_yuz_sinirlari(y: dict) -> tuple[float, float, float, float]:
+    """Yapının kaplanmış dış yüzlerinin sınır kutusu (cm). Onaylı çizim seti kuralı: ölçüler dış yüzden (`ciz_genel.dis_hat`, mühendis
+    planı ve görünüşlerle aynı; `y["kutle"]` karkas kutusudur, dış kaplama kadar küçüktür — Lokman/rehber, 12 Ekim 2026)."""
+    from . import ciz_genel
+    pts = [p for h in ciz_genel.dis_hat(y) for p in h]
+    if not pts:
+        return y["kutle"].bounds
+    xs = [p[0] for p in pts]; ys = [p[1] for p in pts]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+def _birlestir(noktalar, uclar: tuple[float, float], tol: float) -> list[float]:
+    """Sıralı zincir noktaları; birbirine `tol` cm'den yakın olanlar tek nokta sayılır (kısa parça komşusuna katılır), uçlar (genel ölçü)
+    her zaman korunur. Bayi paftasında 15 cm'den kısa parçalar (veranda dikmesi, korkuluk, kaplama sıçraması) okunmaz; mühendis planı
+    tam zinciri taşır (`kurallar/cizim/pafta_sablonu.json` › zincir_en_kisa_parca_cm)."""
+    cik: list[float] = []
+    for v in sorted(noktalar):
+        if not cik or v - cik[-1] > tol:
+            cik.append(v)
+    cik[0], cik[-1] = uclar
+    return cik if cik[-1] > cik[0] else list(uclar)
+
+
 def plan_ciz(sf: Sayfa, y: dict, t: dict, px0: float, py0: float, s: float) -> tuple[dict, dict]:
-    """px0, py0: planın sol-ön dış köşesinin sayfadaki yeri (pt; y aşağı). s: pt/cm. Dönen: ölçü zincirleri, mahal yazı boyları."""
-    bx0, by0, bx1, by1 = y["kutle"].bounds
+    """px0, py0: planın sol-ön dış köşesinin (dış yüz) sayfadaki yeri (pt; y aşağı). s: pt/cm. Dönen: ölçü zincirleri, mahal yazı boyları."""
+    bx0, by0, bx1, by1 = dis_yuz_sinirlari(y)
     W, H = bx1 - bx0, by1 - by0
     X = lambda x: px0 + s * (x - bx0)
     Y = lambda yy: py0 - s * (yy - by0)
@@ -339,48 +394,44 @@ def plan_ciz(sf: Sayfa, y: dict, t: dict, px0: float, py0: float, s: float) -> t
                 sf.cizgi(X(lo), Y(sabit), X(hi), Y(sabit), KIRMIZI, 0.9, ls=(0, (4, 3)), z=4)
             else:
                 sf.cizgi(X(sabit), Y(lo), X(sabit), Y(hi), KIRMIZI, 0.9, ls=(0, (4, 3)), z=4)
-    # ölçü zincirleri: genel ölçü dışta; o cepheye değen iç duvar aksları içte
-    dis_t = max((d["kalinlik"] for d in y["duvarlar"] if d["sinif"] == "dis"), default=10.0)
-
-    def zincir(yon: str, cephe: str) -> list[float]:
-        noktalar = {bx0, bx1} if yon == "x" else {by0, by1}
-        for d in y["duvarlar"]:
-            if d["sinif"] != "ic":
-                continue
-            x0, y0, x1, y1 = d["kutu"]
-            if yon == "x" and d["yon"] == "y":
-                deger = (y0 <= by0 + dis_t + TOL) if cephe == "on" else (y1 >= by1 - dis_t - TOL)
-                if deger:
-                    noktalar.add((x0 + x1) / 2)
-            if yon == "y" and d["yon"] == "x":
-                deger = (x0 <= bx0 + dis_t + TOL) if cephe == "sol" else (x1 >= bx1 - dis_t - TOL)
-                if deger:
-                    noktalar.add((y0 + y1) / 2)
-        return sorted(noktalar)
-
+    # ölçü zincirleri: genel ölçü dışta (dış yüzden dış yüze); o cepheye ulaşan duvarlar içte (dış duvarda dış yüz, iç duvarda aks).
+    # Noktalar mühendis planıyla aynı (`ciz_genel.zincirler`); parçalar tam sayıya yuvarlanır, toplam genel ölçüyle aynı kalır (tam_bol).
+    from . import ciz_genel
+    zin = ciz_genel.zincirler(y)
+    esle = {"arka": "ust", "on": "alt", "sol": "sol", "sag": "sag"}
     ic_, dis_ = 16.0, 32.0
     ek = {"arka": 0.0, "sol": 0.0, "on": 8.0, "sag": 8.0}
     kayit = {}
+    en_kisa = float(((sablon_kurallari().get("zincir_en_kisa_parca_cm") or {}).get("deger")) or 15)
     for ad, yon in (("arka", "x"), ("on", "x"), ("sol", "y"), ("sag", "y")):
-        nk = zincir(yon, ad); parca = tam_bol([b - a for a, b in zip(nk, nk[1:])]); kayit[ad] = parca
+        uclar = (bx0, bx1) if yon == "x" else (by0, by1)
+        nk = _birlestir(list(zin.get(esle[ad], [])) + list(uclar), uclar, en_kisa)
+        genel = yarim_yukari(W if yon == "x" else H)             # genel ölçü ve parçaların toplamı aynı sayı (şablon kuralı)
+        parca = tam_bol([b - a for a, b in zip(nk, nk[1:])], genel); kayit[ad] = parca
+        # dar parçanın yazısı komşusuna binmesin: sığmayan yazı bir sıra dışarı alınır (dönüşümlü)
+        dar = [yazi_eni(str(v), 10.7, ARIAL) > s * (b - a) - 2 for (a, b), v in zip(zip(nk, nk[1:]), parca)]
+        kaydir = []; son = 0
+        for i, d in enumerate(dar):
+            son = (son + 1) if (d and i and dar[i - 1]) else (1 if d else 0)
+            kaydir.append(9.5 * (son % 2) if d else 0.0)
         if yon == "x":
             yy = Y(by1) - ic_ if ad == "arka" else Y(by0) + ic_ + ek[ad]
             yg = Y(by1) - dis_ if ad == "arka" else Y(by0) + dis_ + ek[ad]
             if len(nk) > 2:
-                for (a, b), v in zip(zip(nk, nk[1:]), parca):
-                    sf.olcu(X(a), yy, X(b), yy, str(v), "ust")
+                for (a, b), v, k_ in zip(zip(nk, nk[1:]), parca, kaydir):
+                    sf.olcu(X(a), yy, X(b), yy, str(v), "ust", kaydir=(-k_ if ad == "arka" else k_))
             else:
                 yg = yy
-            sf.olcu(X(bx0), yg, X(bx1), yg, tr(W), "ust")
+            sf.olcu(X(bx0), yg, X(bx1), yg, str(genel), "ust")
         else:
             xx = X(bx0) - ic_ if ad == "sol" else X(bx1) + ic_ + ek[ad]
             xg = X(bx0) - dis_ if ad == "sol" else X(bx1) + dis_ + ek[ad]
             if len(nk) > 2:
-                for (a, b), v in zip(zip(nk, nk[1:]), parca):
-                    sf.olcu(xx, Y(b), xx, Y(a), str(v), "sol")
+                for (a, b), v, k_ in zip(zip(nk, nk[1:]), parca, kaydir):
+                    sf.olcu(xx, Y(b), xx, Y(a), str(v), "sol", kaydir=(-k_ if ad == "sol" else k_))
             else:
                 xg = xx
-            sf.olcu(xg, Y(by1), xg, Y(by0), tr(H), "sol")
+            sf.olcu(xg, Y(by1), xg, Y(by0), str(genel), "sol")
     return kayit, etiket
 
 
@@ -509,7 +560,7 @@ def pafta_pdf(t: dict, hedef: Path, kod: str, is_emri_no: str | None = None, rev
         kur = kural.oku()
     y = yapi.kur(t); c = cati_genel.cati_kur(t["cati"], kur); S = sahne_m.sahne_kur(y, c)
     oturum_m2 = girdi_genel.metraj(y, c, kur)["oturum_m2"]    # brüt oturum (dış duvar dış yüzleri; veranda ve sundurma dahil) = listedeki bina_m2 (D-08 K-A1); sınır kutusu değil
-    bx0, by0, bx1, by1 = y["kutle"].bounds
+    bx0, by0, bx1, by1 = dis_yuz_sinirlari(y)                 # dış ölçüler dış yüzden (mühendis planı ve görünüşlerle aynı: Ç8801 1024 × 860)
     W, H = bx1 - bx0, by1 - by0
     H0 = float(t["kat_yuksekligi"]); sac = float(t["cati"].get("sacak", 30))
     tepe = max((z for s in S if s["tur"] in ("cati", "alin", "kalkan", "baca") for _, _, z in s["kose"]), default=H0)
@@ -555,7 +606,10 @@ def pafta_pdf(t: dict, hedef: Path, kod: str, is_emri_no: str | None = None, rev
     from matplotlib.gridspec import GridSpec
     gs = GridSpec(2, 3, figure=fig2, left=0.03, right=0.985, top=0.9, bottom=0.04, hspace=0.18, wspace=0.08)
     inis, _ = ciz_genel.inis_kurali(c, kur, t["cati"].get("sacak", 30))
-    ciz_genel.cati_plani_eksen(fig2.add_subplot(gs[:, 0]), y, c, inis)
+    # başlık kısa (uzun başlık dar sütundan sayfa dışına taşıyordu), açıklama sayfanın altında; üst üste binen eğim yazıları ayrılır (Lokman, 12.10)
+    ciz_genel.cati_plani_eksen(fig2.add_subplot(gs[:, 0]), y, c, inis, baslik="ÇATI PLANI", yazi_ayir=True)
+    fig2.text(0.03, 0.012, "Çatı planı: eğim okları ve yüzdeleri · sarı nokta: dere inişi" + (f" ({len(inis)} adet)" if inis else "") +
+              " · turuncu: duvara dayanan kenar · beyaz kesik çizgi: duvar dış yüzü · ölçüler cm", fontsize=7.2, ha="left", va="bottom", color="#333")
     for ax, taraf in zip((fig2.add_subplot(gs[0, 1]), fig2.add_subplot(gs[0, 2]), fig2.add_subplot(gs[1, 1]), fig2.add_subplot(gs[1, 2])), ("on", "arka", "sol", "sag")):
         ciz_genel.gorunus_eksen(ax, S, taraf, t["kat_yuksekligi"])
     no = bilgi.get("is_emri_no") or t["kod"]

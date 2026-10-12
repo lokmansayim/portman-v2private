@@ -56,7 +56,7 @@ Tanımda o projenin teknik özelliklerinden gelen birkaç seçim de yazılıdır
 | 0.17 | Lokman, 9 Ekim 22:44 (korkuluk) | `c939fe2` (10 Ekim 10:47) |
 | 0.18 | Lokman, 10 Ekim 10:18–10:39 (KT-03; beş fotoğraf): tek eğimli çatı panelli çatının kenarları (`panel_cati_kenarlari`), alçak çatının üstüne düşen köşede iniş yok, taharet musluğu, çatı çıkış kapağı ve bacanın içi listede yok | `8fca288` (10 Ekim 11:21) |
 | 0.19 | Lokman, 10 Ekim 11:39: kısa derede (4 m'ye kadar) tek iniş; alçak çatının üstüne düşen köşede iniş var (dere 15 cm içeride biter, su o çatıya iner), yalnız tek inişli küçük çatıda (sundurma) yok | `setler/0.19.json` (İE-08, 12 Ekim 2026; `kurallar.json`un o günkü bayt bayt kopyası). **Altın testin pimi:** `denetim/kos.py` genel adımları ve `modeller/altin.json` bu setle üretilir; ana koddaki paket `python -m motor.genel.uret --set kurallar/liste/setler/0.19.json` |
-| 0.20-taslak (güncel) | Henüz yeni cevap yok; 0.19'un aynısı, yalnız sürüm numarası | `liste/kurallar.json` (canlı akış bunu okur; yeni kural geldiğinde buraya yazılır, 0.20 dondurulunca `setler/`e kopyalanır) |
+| 0.20-taslak (güncel) | Henüz yeni cevap yok; 0.19'un aynısı, yalnız sürüm numarası. Lokman (12 Ekim 2026 14:53): 0.20'den itibaren `kaynak`/`aciklama` alanlarında mühendisin adı yerine yalnız "mühendis" yazılır; eski setlerdeki ad şirket içi kayıt olarak kalır | `liste/kurallar.json` (canlı akış bunu okur; yeni kural geldiğinde buraya yazılır, 0.20 dondurulunca `setler/`e kopyalanır) |
 
 ## Kural nasıl eklenir
 

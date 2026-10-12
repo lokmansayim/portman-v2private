@@ -57,4 +57,30 @@ def test_c8801_bayi_ciktilari(c8801):
     import fitz
     with fitz.open(pdf) as d:
         assert len(d) == 2 and (round(d[0].rect.width), round(d[0].rect.height)) == (842, 595)
+        sozcukler = [w[4] for p in d for w in p.get_text("words")]
+    assert sozcukler.count("Portman") == 3                       # Çizen, Kontrol, Onay (Lokman 12.10.2026 14:53)
+    assert "..." in sozcukler and "ÇATI" in sozcukler            # ilgili kişi-telefon katalogda "..."; 2. sayfa çatı planı
     assert (hedef / "C8801_pafta_sablon.png").exists() and (hedef / "C8801_pafta_ozet.json").exists()
+
+
+def test_c8801_pafta_olculeri_dis_yuzden_ve_zincir_toplami(c8801):
+    # Lokman/rehber 12.10: ölçüler dış yüzden (mühendis planıyla aynı: 1024 × 860, karkas kutusu 1022 × 858 değil); parçaların toplamı genel ölçü
+    hedef, m, v = c8801
+    o = json.loads((hedef / "C8801_pafta_ozet.json").read_text(encoding="utf-8"))
+    assert o["dis_olcu_cm"] == [1024.0, 860.0] and o["oturum_m2"] == 88.06
+    for ad, toplam in (("arka", 1024), ("on", 1024), ("sol", 860), ("sag", 860)):
+        assert sum(o["zincirler_cm"][ad]) == toplam, (ad, o["zincirler_cm"][ad])
+        assert all(p >= 15 for p in o["zincirler_cm"][ad]), (ad, o["zincirler_cm"][ad])   # kısa parçalar komşusuna katılır
+
+
+def test_kt03_pafta_yuvarlama_iki_yanda_ayni(tmp_path):
+    # KT-03 dış ölçü 970,5: yarım yukarı → 971, sol ve sağ zincir aynı toplamı verir; m² brüt oturum (93,81 → 94), ad basılmaz (müşteri projesi)
+    from motor.genel import sablon_pafta
+    t = json.loads((KOK / "modeller" / "KT03.json").read_text(encoding="utf-8"))
+    o = sablon_pafta.pafta_pdf(t, tmp_path, "KT03", is_emri_no="TEST", revizyon=1, set_yolu=SET, yontem="panel")
+    assert o["dis_olcu_cm"] == [1045.1, 970.5] and o["oturum_m2"] == 93.81
+    assert sum(o["zincirler_cm"]["sol"]) == sum(o["zincirler_cm"]["sag"]) == 971 and sum(o["zincirler_cm"]["on"]) == sum(o["zincirler_cm"]["arka"]) == 1045
+    import fitz
+    with fitz.open(tmp_path / "KT03_pafta.pdf") as d:
+        metin = " ".join(w[4] for p in d for w in p.get_text("words"))
+    assert "94" in metin and "kör" not in metin.lower() and "üçüncü" not in metin.lower()

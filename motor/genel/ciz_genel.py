@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from matplotlib.patches import Arc
 from matplotlib.patches import Polygon as MplPolygon
-from shapely.geometry import box
+from shapely.geometry import Point, box
 from shapely.ops import unary_union
 
 from . import cati_genel, yapi
@@ -345,12 +345,15 @@ def inis_kurali(c: dict, kur: dict, sacak_cm: float) -> tuple[list[tuple[float, 
     return nok, sayim
 
 
-def cati_plani_eksen(ax, y: dict, c: dict, inisler=None):
+def cati_plani_eksen(ax, y: dict, c: dict, inisler=None, baslik: str | None = None, yazi_ayir: bool = False):
+    """Çatı planı. `baslik` verilmezse uzun başlık (çizim setindeki pafta); `yazi_ayir` ile üst üste binen eğim yazıları kaydırılır
+    (İE-08 şablon paftası 2. sayfa; varsayılanlar çizim setinin baytlarını değiştirmez)."""
     for dz in sorted(c["duzlemler"], key=lambda d: max(k[2] for k in d["ucboyut"])):          # alçak düzlem önce
         ax.add_patch(MplPolygon(dz["plan"], closed=True, fc="#8a919c", ec="#2f343c", lw=1.0, zorder=1 + max(k[2] for k in dz["ucboyut"]) / 1000))
     for h in dis_hat(y):                                                                      # duvarların dış yüzü
         ax.plot([p[0] for p in h], [p[1] for p in h], color="white", lw=0.8, ls=(0, (5, 3)), zorder=3)
     yazi = {"mahya": "mahya", "kirma": "kırma", "vadi": "vadi"}
+    yerler: list[tuple[float, float, float, float]] = []                                       # yazı kutuları (x, y, yarı en, yarı boy; yazi_ayir)
     for e in c["kenarlar"]:
         (px, py), (qx, qy) = e["p"], e["q"]
         if e["tur"] in ("mahya", "kirma"):
@@ -366,11 +369,26 @@ def cati_plani_eksen(ax, y: dict, c: dict, inisler=None):
             nx, ny = -math.sin(math.radians(aci)), math.cos(math.radians(aci))
             ax.text((px + qx) / 2 + nx * 14, (py + qy) / 2 + ny * 14, f"{yazi[e['tur']]} {tr(e['boy'], 0)}", ha="center", va="center", fontsize=7.2, color="white",
                     rotation=aci, rotation_mode="anchor", zorder=6)
+            ca, sa = abs(math.cos(math.radians(aci))), abs(math.sin(math.radians(aci)))      # yazı kutusu ≈ 110 × 22 cm, döndürülmüş
+            yerler.append(((px + qx) / 2 + nx * 14, (py + qy) / 2 + ny * 14, 55 * ca + 11 * sa, 55 * sa + 11 * ca))
     for dz in c["duzlemler"]:                                                                  # eğim okları
         m = dz["cokgen"].representative_point()
         ux, uy = dz["yukari"]
         ax.annotate("", xy=(m.x - ux * 40, m.y - uy * 40), xytext=(m.x + ux * 20, m.y + uy * 20), arrowprops=dict(arrowstyle="->", color="white", lw=1.0), zorder=6)
-        ax.text(m.x + ux * 42 + abs(uy) * 36, m.y + uy * 42, f"%{tr(dz['egim'] * 100)}", ha="center", va="center", fontsize=7.2, color="white", zorder=6)
+        tx, ty = m.x + ux * 42 + abs(uy) * 36, m.y + uy * 42
+        if yazi_ayir:                                                                          # yazı kutusu (≈110 × 24 cm) düzlemin içinde ve başka yazıya binmeden
+            cakisir = lambda x, y_: any(abs(x - a) < rx + 55 and abs(y_ - b) < ry + 12 for a, b, rx, ry in yerler)   # sığmıyorsa yazı atlanır (ok kalır;
+            ic = dz["cokgen"].buffer(-18)                                                                              # eğim Bina Özellikleri'nde de yazar)
+            uygun = lambda x, y_: not cakisir(x, y_) and ic.contains(box(x - 55, y_ - 12, x + 55, y_ + 12))
+            cx, cy = dz["cokgen"].centroid.x, dz["cokgen"].centroid.y
+            denemeler = [(tx, ty), (m.x, m.y + uy * 42 + abs(ux) * 30), (cx, cy)] + [(tx - uy * d, ty + ux * d) for d in (32, -32, 64, -64, 96, -96)] \
+                + [(tx + ux * d, ty + uy * d) for d in (40, -40, 80, -80)] + [(cx - uy * d, cy + ux * d) for d in (40, -40)]
+            yer = next(((x, y_) for x, y_ in denemeler if uygun(x, y_)), None)
+            if yer is None:
+                continue
+            tx, ty = yer
+            yerler.append((tx, ty, 55, 12))
+        ax.text(tx, ty, f"%{tr(dz['egim'] * 100)}", ha="center", va="center", fontsize=7.2, color="white", zorder=6)
     for ix, iy, _tur in (inisler or []):
         ax.plot([ix], [iy], marker="o", ms=6.5, mfc="#f2c744", mec="#1c1f24", mew=1.0, zorder=8)
     xs = [p[0] for dz in c["duzlemler"] for p in dz["plan"]]
@@ -378,7 +396,7 @@ def cati_plani_eksen(ax, y: dict, c: dict, inisler=None):
     olcu(ax, (min(xs), min(ys) - 34), (max(xs), min(ys) - 34), sade(max(xs) - min(xs)), -3)
     olcu(ax, (min(xs) - 34, min(ys)), (min(xs) - 34, max(ys)), sade(max(ys) - min(ys)), -4, yatay=False)
     ek = f" · sarı nokta: dere inişi ({len(inisler)} adet)" if inisler else ""
-    ax.set_title("ÇATI PLANI" + ek + " · turuncu: duvara dayanan kenar", fontsize=9.5, weight="bold")
+    ax.set_title(baslik if baslik is not None else "ÇATI PLANI" + ek + " · turuncu: duvara dayanan kenar", fontsize=9.5, weight="bold")
     ax.set_xlim(min(xs) - 90, max(xs) + 40)
     ax.set_ylim(min(ys) - 80, max(ys) + 30)
     ax.set_aspect("equal")

@@ -96,13 +96,12 @@ geçmeyen işte teslim adıyla PDF yazılmaz (`.HATALI.pdf`, K23). Genel motorun
 - Dar mahalde (banyo) ad odaya sığmazsa yazı küçülür; yeri `pafta.etiket_yeri_cm` ile verilebilir.
 - Ön ve sağ zincirde ölçü yazısı duvarla çizgi arasına düştüğü için zincir 8 pt dışarı alındı; şablonda bu yazılar pencere etiketine değiyor.
 
-## Açık sorular
+## Kararlar (Lokman, 12 Ekim 2026 14:53; önce açık sorulardı)
 
-İE-08 planında (12 Ekim 2026, Soru 18–21) her biri için öneri yazıldı; plan onayıyla varsayılan karar sayıldı, Lokman itiraz ederse değişir:
-
-- Antetin sol kutusu şablonda boş. Oraya firma logosu mu gelecek? → *Öneri: firma logosu; dosyası verilince basılır, yoksa boş kalır (bugün boş).*
-- Çizen, Kontrol, Onay satırlarına kim yazılacak? → *Çizen "Portman", Kontrol "..." (8b'de mühendis adı), Onay "..." (Patron onayı sonraki iş).*
-- Şablonda bir ön ve bir sol yan görünüş var. Dört görünüş ayrı paftada kalıyor; öyle mi kalsın? → *Aynı PDF'in 2. sayfası: dört görünüş ve çatı planı (ayrı dosya WhatsApp'ta ikinci belge ve ikinci ücret olurdu).*
-- Panel Türü, Çatı Kaplama Rengi, boya renkleri, Köşe ve Söveler satırlarının değeri nereden gelecek (bayi talebi, model varsayılanı)? → *Panel Türü ve Çatı Kaplaması tanım + kural kitabı bazından; renkler ve Köşe/Söveler bayi söylediyse onunki, söylemediyse "..." (uydurulmaz, K21). Bayi standardı (`kurallar/bayi/<bayi>.json`) gelince oradan.*
-- "İLGİLİ KİŞİ-TELEFON" alanı (ek, 12 Ekim): bayiye giden belgeye ad ve numara koyar; D-06 bayi adını kapsar, numarayı kapsamaz (Z-08). → *Yalnız bayinin (ya da firmanın) adı yazılır, telefon "..."; bayi kendi işyeri hattını ayardan girerse yazılır (ayrı küçük iş).*
-- "Pano pano" kuralı çelikte duvar panelleriyle mi uygulansın? → *8a'da hayır: çelik duvar paneli bölme kuralı kural kitabında yok (`celik_duvar.md` yalnız dikme aralığını verir); kural yokken çizilen ek uydurma olur (K21). Prefabrikte (pano 1255) geçerli; çelikte pafta kuralları işinde.*
+- Antetin sol kutusu **şimdilik boş**; ileride her bayiye kendi logosuyla antet gider (sonraki iş).
+- Çizen, Kontrol, Onay satırlarının **üçünde de "Portman"** ("Portman her yerde geçsin").
+- Dört görünüş ve çatı planı **aynı PDF'in 2. sayfasında** kalır.
+- Panel Türü ve Çatı Kaplaması **modelden**; Çatı Kaplama Rengi, boya renkleri, Köşe ve Söveler bayi söylediyse onunki, söylemediyse "..."; uydurulmaz (K21).
+- "İLGİLİ KİŞİ-TELEFON": **bayinin adı ve bayi kartındaki kayıtlı telefonu** yazılır; numara belgeyle dolaşır (D-09; başka kimsenin numarası yazılmaz, LLM'e gitmez, günlükte maskeli). Uygulama PR-2'de; katalog ve altın üretimde "...".
+- "Pano pano" kuralı çelikte **uygulanmaz** (8a): kural kitabında ve bu klasörde çelik duvar panelini plana/görünüşe bölen bir kural yok (yalnız listenin panel adedi tahmini: en uzun panel 569 cm); Lokman'a bildirildi.
+- Ölçüler **dış yüzden** (mühendis planı ve görünüşlerle aynı), parçaların toplamı genel ölçüye eşit; 15 cm'den kısa parçalar bayi paftasında komşusuna katılır (`kurallar/cizim/pafta_sablonu.json`, `varsayim`). Bina özellikleri değeri sığmazsa küçülür, en küçük boyda da sığmazsa iki satıra sarılır; kesilmez.

@@ -68,6 +68,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-06](D-06.md) | Bayi adı ve hitabı bayiye giden mesajlarda kullanılır ve LLM'e gönderilebilir (Z-08'in bu iki alan için gevşetilmesi; numara ve öteki alanlar için Z-08 aynen). İE-07'de yalnız şablon hitabı; LLM bağlamı sonraki iş | 07/10.10, kayıt 11.10 |
 | [D-07](D-07.md) | Katalogda doğru kaynak doğrulanmış çizimdir; katalog PDF'i yalnız fikir kaynağı; her model kaydında kaynak ve doğrulama durumu yazar; dondurulmuş `katalog_37_proje.json` değişmez, düzeltme yeni sürüm dosyasıyla (D-02'ye uygun) | 11.10 |
 | [D-08](D-08.md) | K16 = (b): çelik ve modül dışı planlar serbest aksla genel motorda (`motor/genel/`, ana kodda); P6001 ve prefabrik katalog pano birimli Motor'da (K02); kural kitabı ve modeller sürümle dosya olarak; perspektif VTK ekransız; yedi aday (Ç8201, Ç8801, Ç8801-K/L, KT-01/02/03), KT'ler bayiye adsız; K-A1 ±%10 brüt oturum; bayi paftası "Örnek Şablon"; genel motor çıktıları altın test, referans bu kararla yeniden donduruldu (D-02); K16 kapandı | 11.10 (Lokman), kayıt 12.10 |
+| [D-09](D-09.md) | Bayi paftasının antetinde bayinin adı ve bayi kartındaki telefonu yazılır (D-06'nın genişletilmesi); başka kimsenin numarası yazılmaz; LLM'e gitmez (Z-08), günlükte maskeli (K09); PR-2'de yalnız o bayinin kartındaki numara kabul edilir | 12.10 14:53 |
 
 ## 27 Eylülde Lokman'ın verdiği kararlar
 
