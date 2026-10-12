@@ -32,8 +32,10 @@ def musteri_projesi(t: dict) -> bool:
     return bool(t.get("musteri_projesi")) or str(t.get("kod", "")).upper().startswith("KT")
 
 
-def plan_bayi(t: dict, hedef: Path, kod: str, is_emri_no: str | None = None, revizyon: int = 1, set_yolu: Path | None = None,
+def plan_bayi(t: dict, hedef: Path, kod: str, is_emri_no: str | None = None, revizyon: int | None = 1, set_yolu: Path | None = None,
               yontem: str | None = None, sunum: str | None = None) -> Path:
+    """`<kod>_plan_bayi.png`: ÖN/ARKA/SOL/SAĞ etiketli plan. Başlıkta "TASLAK · rNN [· İş Emri no]"; `revizyon=None` → yalnız "TASLAK"
+    (aday kartı: seçimden önce revizyon yoktur — Lokman, 12.10.2026; r01/r02 başlık görselinde numara kalır)."""
     from . import cati_genel, ciz_genel, girdi_genel, kural, yapi
     import matplotlib.pyplot as plt
     t = json.loads(json.dumps(t))
@@ -49,7 +51,7 @@ def plan_bayi(t: dict, hedef: Path, kod: str, is_emri_no: str | None = None, rev
     hedef = Path(hedef); hedef.mkdir(parents=True, exist_ok=True)
     baslik = sunum or f"{t['kod']} · {oturum:.0f} m² · {oda_programi(t)}"
     ad = "" if musteri_projesi(t) else t.get("ad", "")        # müşteri projeleri bayiye adsız (D-08)
-    taslak = f"TASLAK · r{int(revizyon):02d}" + (f" · {is_emri_no}" if is_emri_no else "")
+    taslak = "TASLAK" + (f" · r{int(revizyon):02d}" if revizyon is not None else "") + (f" · {is_emri_no}" if is_emri_no else "")
     yol = hedef / f"{kod}_plan_bayi.png"
 
     def ciz(dpi: int) -> None:                       # aynı çizim; 5 MB'ı aşarsa yalnız çözünürlük düşer, etiketler ve başlık korunur

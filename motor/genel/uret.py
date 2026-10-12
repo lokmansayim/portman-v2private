@@ -113,7 +113,7 @@ def matplotlib_sabitle() -> None:
     matplotlib.rcParams["text.hinting"] = "default"
 
 
-def uret(tanim_yolu: Path, hedef: Path, is_emri_no: str | None = None, revizyon: int = 1, set_yolu: Path | None = None,
+def uret(tanim_yolu: Path, hedef: Path, is_emri_no: str | None = None, revizyon: int | None = 1, set_yolu: Path | None = None,
          yontem: str | None = None, perspektif: bool = True, bayi: bool = True, kaynak: str | None = None,
          elektrik_sayimi: Path | None = None, yalniz_liste: bool = False, bilgi: dict | None = None) -> dict:
     """Bir Yapı Tanımı'ndan çizim setini, IFC'yi, yükleme listesini ve bayi çıktılarını üretir; manifest döner.

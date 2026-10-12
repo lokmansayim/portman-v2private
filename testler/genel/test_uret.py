@@ -104,6 +104,17 @@ def test_bilgi_antette_ad_ve_numara_manifestte_yok(tmp_path):
     assert uret._bilgisiz("hata: 900000000555 / Deneme Bayi", bilgi) == "hata: [bilgi] / [bilgi]"
 
 
+def test_aday_karti_revizyonsuz_taslak(tmp_path):
+    # Lokman (12.10): aday kartında (seçimden önce) "r01" yazmaz, yalnız "TASLAK"; revizyon verilince (r01/r02 başlık görseli) numara kalır.
+    from motor.genel import bayi_gorseli
+    t = json.loads(TANIM.read_text(encoding="utf-8"))
+    a = bayi_gorseli.plan_bayi(t, tmp_path / "aday", "C8201", revizyon=None, set_yolu=SET, yontem="panel")
+    b = bayi_gorseli.plan_bayi(t, tmp_path / "r01", "C8201", revizyon=1, set_yolu=SET, yontem="panel")
+    assert a.is_file() and b.is_file() and sha(a) != sha(b)
+    m = uret.uret(TANIM, tmp_path / "u", revizyon=None, set_yolu=SET, yontem="panel", perspektif=False, bayi=True)
+    assert m["passed"] and m["revizyon"] is None and sha(tmp_path / "u" / "C8201_plan_bayi.png") == sha(a)
+
+
 def test_gecersiz_tanimda_kayit_yazilir(tmp_path):
     # yapi.kur SystemExit fırlatsa da validation.json ve manifest yazılır (PR-2'de süreç içinden çağrı worker'ı düşürmesin)
     bozuk = tmp_path / "bozuk.json"

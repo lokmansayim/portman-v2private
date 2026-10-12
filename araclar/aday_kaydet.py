@@ -96,8 +96,8 @@ def genel(a) -> int:
     t = json.loads(tanim_yolu.read_text(encoding="utf-8"))
     kod = kod_normalize(a.kod or t["kod"])
     with tempfile.TemporaryDirectory() as tmp:
-        m = U.uret(tanim_yolu, Path(tmp), is_emri_no=None, revizyon=1, set_yolu=None, yontem="panel", perspektif=not a.perspektifsiz, bayi=True,
-                   kaynak=f"Yapı Tanımı 0.5 ({tanim_yolu.name})")
+        m = U.uret(tanim_yolu, Path(tmp), is_emri_no=None, revizyon=None, set_yolu=None, yontem="panel", perspektif=not a.perspektifsiz, bayi=True,
+                   kaynak=f"Yapı Tanımı 0.5 ({tanim_yolu.name})")          # revizyon None: aday kartında "TASLAK", r01 yok (Lokman 12.10)
         v = json.loads((Path(tmp) / "validation.json").read_text(encoding="utf-8"))
         if not m.get("passed"):
             print("DUR: genel motor doğrulaması geçmedi:", v.get("errors")); return 1

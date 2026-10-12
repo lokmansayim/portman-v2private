@@ -60,8 +60,8 @@ def main(argv: list[str] | None = None) -> int:
         if gecici.exists():
             shutil.rmtree(gecici)
         t0 = time.time()
-        m = U.uret(tanim, gecici, is_emri_no=None, revizyon=1, set_yolu=a.set, yontem="panel", perspektif=not a.perspektifsiz, bayi=True,
-                   kaynak=f"Yapı Tanımı 0.5 ({tanim.name})")
+        m = U.uret(tanim, gecici, is_emri_no=None, revizyon=None, set_yolu=a.set, yontem="panel", perspektif=not a.perspektifsiz, bayi=True,
+                   kaynak=f"Yapı Tanımı 0.5 ({tanim.name})")          # revizyon None: kartta "TASLAK" (seçimden önce r01 yok)
         v = json.loads((gecici / "validation.json").read_text(encoding="utf-8"))
         hedef = cikti / klasor; hedef.mkdir(parents=True, exist_ok=True)
         gk = U.kod_govde(json.loads(tanim.read_text(encoding="utf-8")))
