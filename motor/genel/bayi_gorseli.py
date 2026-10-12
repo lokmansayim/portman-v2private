@@ -24,44 +24,48 @@ def oda_programi(t: dict) -> str:
     return f"{yatak}+{salon}"
 
 
+def musteri_projesi(t: dict) -> bool:
+    """Müşteri projesi (kör test, KT-xx) mi: bayiye adsız sunulur (kod, m², oda programı; D-08). Katalog kodları `[PÇ]\\d{4}[A-Z]?`."""
+    return bool(t.get("musteri_projesi")) or str(t.get("kod", "")).upper().startswith("KT")
+
+
 def plan_bayi(t: dict, hedef: Path, kod: str, is_emri_no: str | None = None, revizyon: int = 1, set_yolu: Path | None = None,
               yontem: str | None = None, sunum: str | None = None) -> Path:
-    from . import ciz_genel, kural, yapi
+    from . import cati_genel, ciz_genel, girdi_genel, kural, yapi
     import matplotlib.pyplot as plt
     t = json.loads(json.dumps(t))
     if yontem:
         t["cati"]["yontem"] = yontem
-    eski = os.environ.get("PORTMAN_KURALLAR")
-    if set_yolu is not None:
-        os.environ["PORTMAN_KURALLAR"] = str(Path(set_yolu).resolve())
-    try:
-        kural.oku()                                  # set dosyası var mı (yoksa SystemExit)
-    finally:
-        if set_yolu is not None:
-            os.environ.pop("PORTMAN_KURALLAR", None) if eski is None else os.environ.__setitem__("PORTMAN_KURALLAR", eski)
+    with kural.secili(set_yolu):
+        kur = kural.oku()                            # set dosyası var mı (yoksa SystemExit)
     y = yapi.kur(t)
+    c = cati_genel.cati_kur(t["cati"], kur)
+    oturum = girdi_genel.metraj(y, c, kur)["oturum_m2"]      # brüt oturum (dış duvar dış yüzleri; veranda ve sundurma dahil) = listedeki bina_m2 (D-08 K-A1)
     bx0, by0, bx1, by1 = y["kutle"].bounds
     W, H = bx1 - bx0, by1 - by0
-    oturum = W * H / 1e4
     hedef = Path(hedef); hedef.mkdir(parents=True, exist_ok=True)
-    fig, ax = plt.subplots(figsize=(11.0, 9.0), dpi=130)
     baslik = sunum or f"{t['kod']} · {oturum:.0f} m² · {oda_programi(t)}"
-    ciz_genel.plan_eksen(ax, y, baslik=f"{baslik}\n{t.get('ad', '')}\nTASLAK · r{int(revizyon):02d}" + (f" · {is_emri_no}" if is_emri_no else ""), olcu_zinciri=True)
-    pay = 0.09 * max(W, H)
-    kutu = dict(boxstyle="round,pad=0.35", fc="#1f5f93", ec="none")
-    ax.text((bx0 + bx1) / 2, by0 - pay, ETIKET["on"], ha="center", va="top", fontsize=12, weight="bold", color="white", bbox=kutu, zorder=20)
-    ax.text((bx0 + bx1) / 2, by1 + pay, ETIKET["arka"], ha="center", va="bottom", fontsize=12, weight="bold", color="white", bbox=kutu, zorder=20)
-    ax.text(bx0 - pay, (by0 + by1) / 2, ETIKET["sol"], ha="right", va="center", fontsize=12, weight="bold", color="white", bbox=kutu, rotation=90, zorder=20)
-    ax.text(bx1 + pay, (by0 + by1) / 2, ETIKET["sag"], ha="left", va="center", fontsize=12, weight="bold", color="white", bbox=kutu, rotation=-90, zorder=20)
-    x0, x1 = ax.get_xlim(); y0, y1 = ax.get_ylim()
-    ax.set_xlim(min(x0, bx0 - 1.6 * pay), max(x1, bx1 + 1.6 * pay)); ax.set_ylim(min(y0, by0 - 1.6 * pay), max(y1, by1 + 1.6 * pay))
+    ad = "" if musteri_projesi(t) else t.get("ad", "")        # müşteri projeleri bayiye adsız (D-08)
+    taslak = f"TASLAK · r{int(revizyon):02d}" + (f" · {is_emri_no}" if is_emri_no else "")
     yol = hedef / f"{kod}_plan_bayi.png"
-    fig.savefig(yol, bbox_inches="tight", facecolor="white")
-    plt.close(fig)
-    if yol.stat().st_size > 5 * 1024 * 1024:            # WhatsApp sınırı: 5 MB
-        fig, ax = plt.subplots(figsize=(11.0, 9.0), dpi=90)
-        ciz_genel.plan_eksen(ax, y, baslik=baslik, olcu_zinciri=True)
-        fig.savefig(yol, bbox_inches="tight", facecolor="white"); plt.close(fig)
+
+    def ciz(dpi: int) -> None:                       # aynı çizim; 5 MB'ı aşarsa yalnız çözünürlük düşer, etiketler ve başlık korunur
+        fig, ax = plt.subplots(figsize=(11.0, 9.0), dpi=dpi)
+        ciz_genel.plan_eksen(ax, y, baslik="\n".join(s for s in (baslik, ad, taslak) if s), olcu_zinciri=True)
+        pay = 0.09 * max(W, H)
+        kutu = dict(boxstyle="round,pad=0.35", fc="#1f5f93", ec="none")
+        ax.text((bx0 + bx1) / 2, by0 - pay, ETIKET["on"], ha="center", va="top", fontsize=12, weight="bold", color="white", bbox=kutu, zorder=20)
+        ax.text((bx0 + bx1) / 2, by1 + pay, ETIKET["arka"], ha="center", va="bottom", fontsize=12, weight="bold", color="white", bbox=kutu, zorder=20)
+        ax.text(bx0 - pay, (by0 + by1) / 2, ETIKET["sol"], ha="right", va="center", fontsize=12, weight="bold", color="white", bbox=kutu, rotation=90, zorder=20)
+        ax.text(bx1 + pay, (by0 + by1) / 2, ETIKET["sag"], ha="left", va="center", fontsize=12, weight="bold", color="white", bbox=kutu, rotation=-90, zorder=20)
+        x0, x1 = ax.get_xlim(); y0, y1 = ax.get_ylim()
+        ax.set_xlim(min(x0, bx0 - 1.6 * pay), max(x1, bx1 + 1.6 * pay)); ax.set_ylim(min(y0, by0 - 1.6 * pay), max(y1, by1 + 1.6 * pay))
+        fig.savefig(yol, bbox_inches="tight", facecolor="white")
+        plt.close(fig)
+
+    ciz(130)
+    if yol.stat().st_size > 5 * 1024 * 1024:            # WhatsApp görsel sınırı: 5 MB
+        ciz(90)
     return yol
 
 

@@ -61,3 +61,34 @@ def test_toplam_311_davranisi():
     assert toplam.sum(sayilar) == naif and toplam.sum(sayilar, 0.0) == naif
     assert toplam.sum([1, 2, 3]) == 6 and toplam.sum([[1], [2]], []) == [1, 2] and toplam.sum([]) == 0
     assert uret.sum is toplam.sum
+
+
+def test_sum_kullanan_her_modul_toplami_ice_aktarir():
+    # kod incelemesi (12.10): yeni ya da unutulmuş bir modül 3.12'de altın listeden sessizce ayrışmasın
+    import re
+    eksik = []
+    for p in sorted((KOK / "motor" / "genel").glob("*.py")):
+        s = p.read_text(encoding="utf-8")
+        if p.name != "toplam.py" and re.search(r"(?<![\w.])sum\(", s) and "from .toplam import sum" not in s:
+            eksik.append(p.name)
+    assert eksik == [], eksik
+
+
+def test_dogrulama_gecmezse_teslim_pdfi_yok(tmp_path, monkeypatch):
+    # K23: IFC adımı düşünce (şema hatası ya da çıkış kodu) pafta PDF'i teslim adıyla kalmaz; yalnız tanı için .HATALI.pdf, manifest pdf=None
+    from motor.genel import ifc_genel
+    monkeypatch.setattr(ifc_genel, "main", lambda: (_ for _ in ()).throw(SystemExit(2)))
+    m = uret.uret(TANIM, tmp_path, set_yolu=SET, yontem="panel", perspektif=False, bayi=True)
+    v = json.loads((tmp_path / "validation.json").read_text(encoding="utf-8"))
+    assert m["passed"] is False and "ifc_genel başarısız" in v["errors"]
+    assert m["pdf"] is None and m["pdf_sha256"] is None and not (tmp_path / "C8201_pafta.pdf").exists()
+    assert m["hatali_pdf"] == "C8201_pafta.HATALI.pdf" and (tmp_path / "C8201_pafta.HATALI.pdf").exists()
+
+
+def test_gecersiz_tanimda_kayit_yazilir(tmp_path):
+    # yapi.kur SystemExit fırlatsa da validation.json ve manifest yazılır (PR-2'de süreç içinden çağrı worker'ı düşürmesin)
+    bozuk = tmp_path / "bozuk.json"
+    t = json.loads(TANIM.read_text(encoding="utf-8")); t["duvarlar"] = []
+    bozuk.write_text(json.dumps(t), encoding="utf-8")
+    m = uret.uret(bozuk, tmp_path / "cikti", set_yolu=SET, yontem="panel", perspektif=False, bayi=True)
+    assert m["passed"] is False and (tmp_path / "cikti" / "validation.json").exists() and m["pdf"] is None

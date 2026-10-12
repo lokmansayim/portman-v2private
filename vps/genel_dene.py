@@ -3,30 +3,20 @@
 çıktı altın değerle aynı mı? `vps/guncelle.sh [3c]` adımında AYRI SÜREÇTE ve timeout ile çağrılır; sonucu ne olursa olsun sürüm
 etkinleşir (bilgi amaçlı; Lokman karar verir — İE-08 Soru 17). Perspektif burada denenmez (`[3b]` perspektif_dene.py).
 
-Çıktı tek satır: "AYNI (…)", "FARKLI (…)" ya da "ÇİZİLEMEDİ (<neden>)". Çıkış kodu: 0 AYNI, 1 FARKLI, 2 içe aktarılamadı, 3 çizilemedi.
-Altın değerler `modeller/altin.json` (sürümle gider; `testler/referans/` sunucuya gitmez): {"C8801": {"plan_png_sha256": …,
-"yukleme_json_sha256": …, "ifc_izi": …}}.
+Çıktı tek satır: "AYNI (…)", "FARKLI (…)", "ÇİZİLDİ (altın değer yok …)" ya da "ÇİZİLEMEDİ (<neden>)". Çıkış kodu: 0 AYNI/ÇİZİLDİ,
+1 FARKLI, 2 içe aktarılamadı, 3 çizilemedi. Altın değerler `modeller/altin.json` (sürümle gider; `testler/referans/` sunucuya gitmez):
+{"kural_seti": "0.19", "C8801": {"plan_png_sha256": …, "yukleme_json_sha256": …, "ifc_izi": …}}; çizim o kural seti pimiyle yapılır.
     python vps/genel_dene.py [çıktı_dizini]
 """
 from __future__ import annotations
 
-import hashlib
 import json
-import os
 import sys
 import tempfile
 import time
 from pathlib import Path
 
 KOK = Path(__file__).resolve().parents[1]
-
-
-def sha256(p: Path) -> str:
-    h = hashlib.sha256()
-    with open(p, "rb") as f:
-        for b in iter(lambda: f.read(1 << 20), b""):
-            h.update(b)
-    return h.hexdigest()
 
 
 def main(argv: list[str]) -> int:
@@ -40,8 +30,13 @@ def main(argv: list[str]) -> int:
     tanim = KOK / "modeller" / "C8801.json"; altin_yolu = KOK / "modeller" / "altin.json"
     if not tanim.exists():
         print("ÇİZİLEMEDİ (modeller/C8801.json yok)"); return 3
+    altin_kayit = json.loads(altin_yolu.read_text(encoding="utf-8")) if altin_yolu.exists() else {}
+    # altın değerler hangi kural setiyle alındıysa o setle çizilir (pim; güncel kurallar.json ilerleyince kural değişikliği ortam farkı sanılmasın)
+    set_yolu = KOK / "kurallar" / "liste" / "setler" / f"{altin_kayit['kural_seti']}.json" if altin_kayit.get("kural_seti") else None
+    if set_yolu is not None and not set_yolu.exists():
+        print(f"ÇİZİLEMEDİ (altın kural seti yok: {set_yolu.relative_to(KOK)})"); return 3
     try:
-        m = U.uret(tanim, hedef, is_emri_no="DENEME", revizyon=1, yontem="panel", perspektif=False, bayi=True)
+        m = U.uret(tanim, hedef, is_emri_no="DENEME", revizyon=1, set_yolu=set_yolu, yontem="panel", perspektif=False, bayi=True)
     except BaseException as e:   # SystemExit dahil (kural dosyası yok vb.)
         print(f"ÇİZİLEMEDİ ({type(e).__name__}: {str(e)[:140]})"); return 3
     v = json.loads((hedef / "validation.json").read_text(encoding="utf-8"))
@@ -49,10 +44,10 @@ def main(argv: list[str]) -> int:
         print(f"ÇİZİLEMEDİ (doğrulama geçmedi: {'; '.join(v['errors'])[:160]})"); return 3
     plan = hedef / "C8801_plan.png"; liste = hedef / "C8801_yukleme.json"; ifc = hedef / "C8801.ifc"
     sure = round(time.time() - t0, 1)
-    if not altin_yolu.exists():
-        print(f"AYNI (altın değer yok; çizildi: plan {plan.stat().st_size} bayt, liste {v['liste_satir']} satır, IFC şema hatası {v['ifc'].get('sema_hatasi')}, pdf {'var' if m['pdf'] else 'yok'}; {sure} s)"); return 0
-    altin = json.loads(altin_yolu.read_text(encoding="utf-8")).get("C8801", {})
-    sonuc = {"plan_png_sha256": sha256(plan), "yukleme_json_sha256": sha256(liste), "ifc_izi": IZ.ifc_izi(ifc)}
+    if not altin_kayit.get("C8801"):
+        print(f"ÇİZİLDİ (altın değer yok, karşılaştırılmadı: plan {plan.stat().st_size} bayt, liste {v['liste_satir']} satır, IFC şema hatası {v['ifc'].get('sema_hatasi')}, pdf {'var' if m['pdf'] else 'yok'}; {sure} s)"); return 0
+    altin = altin_kayit["C8801"]
+    sonuc = {"plan_png_sha256": U.sha256(plan), "yukleme_json_sha256": U.sha256(liste), "ifc_izi": IZ.ifc_izi(ifc)}
     farkli = [k for k, vdeger in altin.items() if k in sonuc and sonuc[k] != vdeger]
     if farkli:
         print(f"FARKLI ({', '.join(farkli)} altın değerden farklı; liste {v['liste_satir']} satır, IFC şema hatası {v['ifc'].get('sema_hatasi')}; {sure} s)"); return 1

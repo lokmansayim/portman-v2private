@@ -7,6 +7,7 @@ Kodda yeni bir davranış her zaman kural dosyasındaki bir anahtara bağlanır;
 """
 from __future__ import annotations
 
+import contextlib
 import json
 import os
 from pathlib import Path
@@ -25,3 +26,20 @@ def oku() -> dict:
     if not y.is_file():
         raise SystemExit(f"Kural dosyası yok: {y} (PORTMAN_KURALLAR yanlış olabilir).")
     return json.loads(y.read_text(encoding="utf-8"))
+
+
+@contextlib.contextmanager
+def secili(set_yolu: Path | str | None):
+    """Blok boyunca kural setini seçer (`PORTMAN_KURALLAR`); çıkışta eski değeri geri koyar. `None` ise dokunmaz.
+    Tek yer: uret, bayi görseli ve şablon paftası aynı seçimi bununla yapar (İE-08)."""
+    eski = os.environ.get("PORTMAN_KURALLAR")
+    if set_yolu is not None:
+        os.environ["PORTMAN_KURALLAR"] = str(Path(set_yolu).expanduser().resolve())
+    try:
+        yield
+    finally:
+        if set_yolu is not None:
+            if eski is None:
+                os.environ.pop("PORTMAN_KURALLAR", None)
+            else:
+                os.environ["PORTMAN_KURALLAR"] = eski

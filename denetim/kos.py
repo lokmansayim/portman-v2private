@@ -155,7 +155,11 @@ def genel_c8801() -> dict:
     hedef = CIKTI / "genel_c8801"
     r = _genel_uret("C8801", hedef, ROOT / GENEL_SET)
     altin = json.loads((ROOT / "modeller" / "altin.json").read_text(encoding="utf-8"))["C8801"]
-    bugun = {"plan_png_sha256": sha(hedef / "C8801_plan.png"), "yukleme_json_sha256": sha(hedef / "C8801_yukleme.json"), "ifc_izi": IZ.ifc_izi(hedef / "C8801.ifc")}
+    dosyalar = {"plan_png_sha256": hedef / "C8801_plan.png", "yukleme_json_sha256": hedef / "C8801_yukleme.json", "ifc_izi": hedef / "C8801.ifc"}
+    if not all(p.is_file() for p in dosyalar.values()):          # çizim ya da liste üretilmediyse neden validation hatasında kalsın, çökmesin
+        return {"passed": False, "sayilar": {"liste_satir": r["liste_satir"], "sema_hatasi": r["sema_hatasi"], "ciktilar": r["ciktilar"], "altin": "ÜRETİLMEDİ"},
+                "hata": r["hata"] or [f"eksik: {[p.name for p in dosyalar.values() if not p.is_file()]}"]}
+    bugun = {"plan_png_sha256": sha(dosyalar["plan_png_sha256"]), "yukleme_json_sha256": sha(dosyalar["yukleme_json_sha256"]), "ifc_izi": IZ.ifc_izi(dosyalar["ifc_izi"])}
     farkli = sorted(k for k in altin if bugun.get(k) != altin[k])
     return {"passed": r["passed"] and not r["sema_hatasi"] and not farkli,
             "sayilar": {"liste_satir": r["liste_satir"], "sema_hatasi": r["sema_hatasi"], "ciktilar": r["ciktilar"], "altin": "AYNI" if not farkli else f"FARKLI {farkli}"},
@@ -179,12 +183,20 @@ def genel_matris() -> dict:
             "not": "altın liste matrisi; bayt bayt izler dogrula.py'de (genel_parmak_izleri.txt). Eski setlerin listeleri 12 Ekim 2026'da o setin commit'indekiyle aynı doğrulandı"}
 
 
-# Sır desenleri. Telefon deseni (İE-08, 12.10.2026): önünde rakam, nokta ya da virgül olan ya da arkasında rakam ya da ondalık devamı
-# (".5", ",5") gelen "905…" dizileri numara sayılmaz; IFC ve JSON'daki ondalıklar (ör. 6.9050000000000002, 19050000000.5) böyle elenir.
-# Gerçek numara (tek başına, parantezli, cümle sonunda noktayla, "wa_id=…;" içinde) yakalanmaya devam eder (testler/test_sir_taramasi.py).
-SIR_DESENLERI = [r"(?<![A-Za-z0-9])sk-[A-Za-z0-9]{10,}", r"EAA[A-Za-z0-9]{20,}", r"PORTMAN_API_TOKEN=[0-9a-f]{20,}", r"(?<![\d.,])905\d{9}(?!\d|[.,]\d)",
+# Sır desenleri. Telefon deseni (İE-08, 12.10.2026): satır taranmadan önce ondalık sayı belirteçleri (6.9050000000000002, 19050000000.5,
+# 82,27) boşluğa çevrilir (`_ondaliksiz`); böylece IFC ve JSON'daki ondalıklar numara sanılmaz, "905…" ise rakam bitişiği olmadan
+# bulunur. Tam kısmı en az 12 haneli olan "a,b" ondalık sayılmaz ([905…,905…] listeleri ve "905…,1" alanları yakalanır; kod incelemesi
+# 12.10). Gerçek numara (tek başına, parantezli, cümle sonunda noktayla, "wa_id=…;" içinde) yakalanır (testler/test_sir_taramasi.py).
+SIR_DESENLERI = [r"(?<![A-Za-z0-9])sk-[A-Za-z0-9]{10,}", r"EAA[A-Za-z0-9]{20,}", r"PORTMAN_API_TOKEN=[0-9a-f]{20,}", r"(?<!\d)905\d{9}(?!\d)",
                  r"Bearer [A-Za-z0-9._-]{16,}", r"(?:[Pp]assword|[Pp]arola|[Ss]ifre|[Şş]ifre)\s*[:=]\s*['\"][^'\"]{4,}", r"-----BEGIN [A-Z ]*PRIVATE KEY-----"]
 SIR_RX = re.compile("|".join(f"(?:{d})" for d in SIR_DESENLERI))
+_ONDALIK = re.compile(r"\d+[.,]\d+")
+
+
+def _ondaliksiz(satir: str) -> str:
+    """Ondalık sayı belirteçlerini aynı uzunlukta boşluğa çevirir (6.905…, 19050000000.5, 82,27, 0,905321234567). Tam kısmı ≥ 12 haneli
+    olan "a,b" / "a.b" ondalık sayılmaz, kalır: numara listesi ([905…,905…]) ve "905…,1" gibi ayrılmış alanlar yakalanır."""
+    return _ONDALIK.sub(lambda m: m.group(0) if len(re.split(r"[.,]", m.group(0))[0]) >= 12 else " " * len(m.group(0)), satir)
 TARANMAYAN_UZANTI = (".dxf", ".png", ".jpg", ".jpeg", ".ttf", ".pdf", ".zip", ".xlsx", ".pyc")
 
 
@@ -207,7 +219,7 @@ def sir_taramasi(root: Path | None = None) -> dict:
         except Exception:
             continue
         for i, satir in enumerate(metin.splitlines(), 1):
-            if SIR_RX.search(satir):
+            if SIR_RX.search(_ondaliksiz(satir)):
                 bulgular.append({"dosya": str(p.relative_to(kok)), "satir": i, "ornek": re.sub(r"[0-9A-Za-z]{6,}", lambda m_: m_.group(0)[:3] + "…", satir.strip())[:120]})
     beklenen = [b for b in bulgular if beklenen_bulgu(b)]
     return {"passed": len(bulgular) == len(beklenen), "sayilar": {"bulgu": len(bulgular), "beklenen_sahte": len(beklenen)}, "bulgular": bulgular[:50],

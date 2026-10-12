@@ -245,6 +245,8 @@ def referans_yukle(klasor: Path) -> dict:
     if not gerekce:
         raise ReferansHatasi(f"{klasor.name}: GEREKCE.md'de gerekçe yok")
     ozetler = dict(re.findall(r"^- `([^`]+)`: ([0-9a-f]{64})$", g, re.M))
+    if GENEL_DOSYA in ozetler and not (klasor / GENEL_DOSYA).is_file():
+        raise ReferansHatasi(f"{klasor.name}: GEREKCE.md {GENEL_DOSYA} özetini taşıyor ama dosya yok; referans dosyaları elle değiştirilmemeli")
     dosyalar = REF_DOSYALAR + ((GENEL_DOSYA,) if (klasor / GENEL_DOSYA).is_file() else ())
     bozuk = [f for f in dosyalar if ozetler.get(f) != _sha(klasor / f)]
     if bozuk:

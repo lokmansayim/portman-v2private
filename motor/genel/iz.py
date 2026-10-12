@@ -20,10 +20,19 @@ _KAYIT = re.compile(r"^#(\d+)\s*=\s*([A-Z0-9]+)\((.*)\);?$")
 _GUID = re.compile(r"^'[0-9A-Za-z_$]{22}'")
 _REF = re.compile(r"#(\d+)")
 _HASH_LISTESI = re.compile(r"\((<[0-9a-f]{10}>(?:,<[0-9a-f]{10}>)+)\)")
-_BASLIK = ("FILE_NAME(", "FILE_DESCRIPTION(")
+_DIZGE = re.compile(r"'(?:[^']|'')*'")          # STEP dizgesi ('' kaçışlı); içindeki sayılar ve '#n' metindir, dokunulmaz
 # Eleman listesi IFC şemasında küme olan kayıtlar: sıra anlam taşımaz, ifcopenshell her koşuda başka yazabilir → sıralanır.
 # (IfcRel*: RelatedElements/RelatedObjects; IfcUnitAssignment.Units; IfcPropertySet.HasProperties; IfcElementQuantity.Quantities)
 _SIRASIZ = ("IFCREL", "IFCUNITASSIGNMENT", "IFCPROPERTYSET", "IFCELEMENTQUANTITY")
+
+
+def _dizge_disi(govde: str, fn) -> str:
+    """`fn`'i yalnız dizge dışındaki parçalara uygular ('Panel #12' ya da 'DK 1.5' gibi adlar değişmez)."""
+    parcalar, son = [], 0
+    for m in _DIZGE.finditer(govde):
+        parcalar.append(fn(govde[son:m.start()])); parcalar.append(m.group(0)); son = m.end()
+    parcalar.append(fn(govde[son:]))
+    return "".join(parcalar)
 
 
 def _sayi_yuvarla(m: re.Match) -> str:
@@ -61,10 +70,10 @@ def ifc_kanonik(metin: str) -> list[str]:
             return "<dongu>"
         yol.add(n)
         tip, govde = kayit[n]
-        govde = _SAYI.sub(_sayi_yuvarla, govde)
-        if tip.startswith("IFC") and _GUID.match(govde):
+        govde = _dizge_disi(govde, lambda s: _SAYI.sub(_sayi_yuvarla, s))
+        if _GUID.match(govde):                      # ilk öznitelik 22 karakterlik GlobalId (IfcRoot alt tipleri; rastgele üretilir)
             govde = "'<guid>'" + govde[24:]
-        govde = _REF.sub(lambda m: "<" + hashlib.sha1(coz(int(m.group(1))).encode("utf-8")).hexdigest()[:10] + ">", govde)
+        govde = _dizge_disi(govde, lambda s: _REF.sub(lambda m: "<" + hashlib.sha1(coz(int(m.group(1))).encode("utf-8")).hexdigest()[:10] + ">", s))
         if tip.startswith(_SIRASIZ):
             govde = _HASH_LISTESI.sub(lambda m: "(" + ",".join(sorted(m.group(1).split(","))) + ")", govde)
         yol.discard(n)

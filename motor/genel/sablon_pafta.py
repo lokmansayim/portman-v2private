@@ -58,12 +58,24 @@ def fontlari_hazirla() -> None:
     global _FONT_HAZIR, COMIC, ARIAL
     if _FONT_HAZIR:
         return
-    for f in ("ComicRelief-Regular.ttf", "ComicRelief-Bold.ttf"):
+    for f in ("ComicRelief-Regular.ttf", "ComicRelief-Bold.ttf", "LiberationSans-Regular.ttf", "LiberationSans-Bold.ttf"):
         fm.fontManager.addfont(str(BURADA / "font" / f))
     COMIC = fm.FontProperties(fname=str(BURADA / "font" / "ComicRelief-Regular.ttf"))
-    adlar = {x.name for x in fm.fontManager.ttflist}
-    ARIAL = fm.FontProperties(family=next((f for f in ("Arial", "Liberation Sans", "Arimo", "DejaVu Sans") if f in adlar), "DejaVu Sans"))
+    # Arial'in ölçüdeş açık eşi Liberation Sans (OFL) depodan okunur: çıktı makinedeki yazı tiplerine bağlı değil (kod incelemesi, 12.10)
+    ARIAL = fm.FontProperties(fname=str(BURADA / "font" / "LiberationSans-Regular.ttf"))
     _FONT_HAZIR = True
+
+
+_SABLON_KURAL: dict | None = None
+
+
+def sablon_kurallari() -> dict:
+    """`kurallar/cizim/pafta_sablonu.json` (vasistas eşiği, çatı tipi adları, özellik yazı boyu); anahtar yoksa koddaki varsayılan sürer."""
+    global _SABLON_KURAL
+    if _SABLON_KURAL is None:
+        yol = BURADA.parents[1] / "kurallar" / "cizim" / "pafta_sablonu.json"
+        _SABLON_KURAL = json.loads(yol.read_text(encoding="utf-8")) if yol.is_file() else {}
+    return _SABLON_KURAL
 
 
 def tr(v: float, n: int = 0) -> str:
@@ -144,14 +156,17 @@ def ozellikler(t: dict, y: dict, c: dict, kur: dict, bilgi: dict) -> dict:
         s = sinif.get(k, {})
         oz[ad] = (s.get("profil", "...") + " çelik profil") if s.get("profil") else "..."
     oz["Panel Türü"] = "Çelik karkas (LGF)" if t.get("aile", "").endswith("celik") else "..."
-    oz["Çatı Şekli"] = t.get("cati", {}).get("tip_adi", t.get("cati", {}).get("tip", "...")).split(":")[0].strip().capitalize() if t.get("cati") else "..."
+    ks = sablon_kurallari(); ct = t.get("cati") or {}
+    tip_adi = (ct.get("tip_adi") or "").split(":")[0].strip()
+    oz["Çatı Şekli"] = tip_adi.capitalize() if tip_adi else ((ks.get("cati_tipi_adi") or {}).get("deger") or {}).get(ct.get("tip"), "...")   # iç anahtar basılmaz
     egimler = sorted({round(d["egim"] * 100) for d in c.get("duzlemler", [])})
     oz["Çatı Eğimi"] = " / ".join(f"%{e:g}" for e in egimler) if egimler else "..."
     kaplama = t.get("cati", {}).get("kaplama") or (kur.get("baz_paket_cati_kaplamasi") or {}).get("deger")
     oz["Çatı Kaplaması"] = ((kur.get("cati_kaplama") or {}).get("deger") or {}).get(kaplama, kaplama or "...") if kaplama else "..."
     acl = y["acikliklar"]
     dis = [a for a in acl if a["tur"] == "dis_kapi"]; ic = [a for a in acl if a["tur"] == "ic_kapi"]
-    pen = [a for a in acl if a["tur"] == "pencere" and a["yuk"] > 60]; vas = [a for a in acl if a["tur"] == "pencere" and a["yuk"] <= 60]
+    esik = ((ks.get("vasistas_en_cok_yukseklik_cm") or {}).get("deger") or 60)       # kural anahtarı (pafta_sablonu.json); yoksa 60 cm
+    pen = [a for a in acl if a["tur"] == "pencere" and a["yuk"] > esik]; vas = [a for a in acl if a["tur"] == "pencere" and a["yuk"] <= esik]
     olcu = lambda L: ", ".join(f"{n}×{k}" for k, n in sorted(__import__('collections').Counter(f"{int(a['en'])}/{int(a['yuk'])}" for a in L).items()))
     oz["Dış Kapı"] = (f"{len(dis)} adet ({olcu(dis)})" if dis else "...")
     oz["İç Kapılar"] = (f"{len(ic)} adet ({olcu(ic)})" if ic else "...")
@@ -170,14 +185,17 @@ def cerceveler(sf: Sayfa, t: dict, oz: dict, bilgi: dict, oturum_m2: float):
     sf.yuvarlak_kutu(OZELLIK)
     sf.yazi((OZELLIK[0] + OZELLIK[2]) / 2, 23.0, "BİNA ÖZELLİKLERİ", 10.9, renk=KOYU_KIRMIZI, ha="center")
     adim = (OZELLIK[3] - OZELLIK_BASLIK_ALT) / len(OZELLIK_SIRASI)
+    yp = (sablon_kurallari().get("ozellik_yazi_pt") or {}).get("deger") or {}
+    en_cok, en_az = float(yp.get("en_cok", 7.3)), float(yp.get("en_az", 5.2))
     for i, ad in enumerate(OZELLIK_SIRASI):
         yt = OZELLIK_BASLIK_ALT + i * adim
         sf.cizgi(OZELLIK[0], yt, OZELLIK[2], yt)
         v = str(oz.get(ad, "..."))
-        if v != "..." and yazi_eni(v, 7.3, COMIC) > OZELLIK[2] - 765.0 - 2:
-            v = v[:max(4, int(len(v) * (OZELLIK[2] - 767.0) / yazi_eni(v, 7.3, COMIC)))] + "…"
+        pt = en_cok
+        if v != "..." and yazi_eni(v, pt, COMIC) > OZELLIK[2] - 765.0 - 2:     # sığmazsa yazı küçülür, kesilmez ("…" bilinmeyen "..." ile karışmasın)
+            pt = max(en_az, pt * (OZELLIK[2] - 767.0) / yazi_eni(v, pt, COMIC))
         sf.yazi(695.0, yt + adim / 2 + 0.6, ad, 7.3)
-        sf.yazi(765.0, yt + adim / 2 + (0.6 if v != "..." else -1.2), v, 7.3 if v != "..." else 12.0)
+        sf.yazi(765.0, yt + adim / 2 + (0.6 if v != "..." else -1.2), v, pt if v != "..." else 12.0)
     sf.cizgi(OZELLIK_BOLME, OZELLIK_BASLIK_ALT, OZELLIK_BOLME, OZELLIK[3])
     sf.yuvarlak_kutu(ISTEK)
     sf.yazi(696.0, 272.0, "ÖZEL İSTEKLER;", 7.6, renk=KOYU_KIRMIZI)
@@ -479,23 +497,18 @@ def gorunus_ciz(sf: Sayfa, P, S: list[dict], taraf: str, renk: str, u_kaydir: fl
 def pafta_pdf(t: dict, hedef: Path, kod: str, is_emri_no: str | None = None, revizyon: int = 1, set_yolu: Path | None = None,
               yontem: str | None = None, bilgi: dict | None = None) -> dict:
     """Şablon paftası: `<kod>_pafta.pdf` (2 sayfa) ve `<kod>_pafta_sablon.png`. `bilgi`: antet, özellik ve özel istek alanları (zarftan)."""
-    from . import cati_genel, ciz_genel, kural, sahne as sahne_m, yapi
+    from . import cati_genel, ciz_genel, girdi_genel, kural, sahne as sahne_m, yapi
+    from .bayi_gorseli import musteri_projesi
     import matplotlib.pyplot as plt
     fontlari_hazirla()
     bilgi = dict(bilgi or {}); bilgi.setdefault("is_emri_no", is_emri_no); bilgi.setdefault("revizyon", revizyon)
     t = json.loads(json.dumps(t))
     if yontem:
         t["cati"]["yontem"] = yontem
-    import os
-    eski = os.environ.get("PORTMAN_KURALLAR")
-    if set_yolu is not None:
-        os.environ["PORTMAN_KURALLAR"] = str(Path(set_yolu).resolve())
-    try:
+    with kural.secili(set_yolu):
         kur = kural.oku()
-    finally:
-        if set_yolu is not None:
-            os.environ.pop("PORTMAN_KURALLAR", None) if eski is None else os.environ.__setitem__("PORTMAN_KURALLAR", eski)
     y = yapi.kur(t); c = cati_genel.cati_kur(t["cati"], kur); S = sahne_m.sahne_kur(y, c)
+    oturum_m2 = girdi_genel.metraj(y, c, kur)["oturum_m2"]    # brüt oturum (dış duvar dış yüzleri; veranda ve sundurma dahil) = listedeki bina_m2 (D-08 K-A1); sınır kutusu değil
     bx0, by0, bx1, by1 = y["kutle"].bounds
     W, H = bx1 - bx0, by1 - by0
     H0 = float(t["kat_yuksekligi"]); sac = float(t["cati"].get("sacak", 30))
@@ -507,7 +520,7 @@ def pafta_pdf(t: dict, hedef: Path, kod: str, is_emri_no: str | None = None, rev
 
     fig1 = plt.figure(figsize=(EN / 72, BOY / 72))
     sf = Sayfa(fig1)
-    cerceveler(sf, t, oz, bilgi, W * H / 1e4)
+    cerceveler(sf, t, oz, bilgi, oturum_m2)
     # yerleşim: [sol yan görünüş] [ölçü] [plan] [ölçü]; planın altında ön görünüş. Ölçek ana çerçeveye sığacak en büyük değer.
     yan_yuk = SUBASMAN + tepe
     olcu_pay = 46.0; bosluk = 12.0; baslik_pay = 18.0
@@ -546,13 +559,14 @@ def pafta_pdf(t: dict, hedef: Path, kod: str, is_emri_no: str | None = None, rev
     for ax, taraf in zip((fig2.add_subplot(gs[0, 1]), fig2.add_subplot(gs[0, 2]), fig2.add_subplot(gs[1, 1]), fig2.add_subplot(gs[1, 2])), ("on", "arka", "sol", "sag")):
         ciz_genel.gorunus_eksen(ax, S, taraf, t["kat_yuksekligi"])
     no = bilgi.get("is_emri_no") or t["kod"]
-    fig2.suptitle(f"{t['kod']} · {t['ad']}   —   {no} r{int(bilgi.get('revizyon') or 1):02d} · görünüşler ve çatı planı · TASLAK", fontsize=10.5, weight="bold", x=0.03, ha="left", y=0.965)
+    ad = f"{t['kod']} · {oturum_m2:.0f} m²" if musteri_projesi(t) else f"{t['kod']} · {t['ad']}"     # müşteri projeleri bayiye adsız (D-08)
+    fig2.suptitle(f"{ad}   —   {no} r{int(bilgi.get('revizyon') or 1):02d} · görünüşler ve çatı planı · TASLAK", fontsize=10.5, weight="bold", x=0.03, ha="left", y=0.965)
     with PdfPages(pdf, metadata={"Title": f"{t['kod']} plan paftası", "Creator": "Portman", "Producer": "Portman", "CreationDate": None, "ModDate": None}) as pp:
         pp.savefig(fig1); pp.savefig(fig2)
     fig1.savefig(png, dpi=200)
     plt.close(fig1); plt.close(fig2)
     ozet = {"kod": t["kod"], "sayfa_pt": [EN, BOY], "olcek_pt_cm": round(s, 4), "olcek_1e": round(1 / (s / 72 * 2.54)), "zincirler_cm": zincirler,
-            "mahal_yazi_pt": etiket_pt, "dis_olcu_cm": [round(W, 1), round(H, 1)], "tepe_cm": round(tepe, 1), "ozellikler": oz,
+            "mahal_yazi_pt": etiket_pt, "dis_olcu_cm": [round(W, 1), round(H, 1)], "oturum_m2": round(oturum_m2, 2), "tepe_cm": round(tepe, 1), "ozellikler": oz,
             "dosyalar": [pdf.name, png.name]}
     (hedef / f"{kod}_pafta_ozet.json").write_text(json.dumps(ozet, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     return ozet

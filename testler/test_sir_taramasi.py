@@ -22,17 +22,29 @@ def _kos():
     return mod
 
 
+def _ara(satir: str):
+    kos = _kos()
+    return kos.SIR_RX.search(kos._ondaliksiz(satir))
+
+
 def test_telefon_deseni_ondalik_sayiyi_numara_sanmaz():
-    rx = _kos().SIR_RX
     for satir in ["#12= IFCCARTESIANPOINT((6.9050000000000002,3.8905000000000003,0.));", "x = 3.8905000000000003", "{\"alan\": 19050000000.5}",
-                  "1" + NUMARA + " (13 hane, numara değil)", NUMARA + ",5", NUMARA + ".25"]:
-        assert rx.search(satir) is None, satir
+                  "1" + NUMARA + " (13 hane, numara değil)", "oda çevreleri 82,27 m; 0," + NUMARA + " oran"]:
+        assert _ara(satir) is None, satir
 
 
 def test_telefon_deseni_gercek_numarayi_yakalar():
-    rx = _kos().SIR_RX
     for satir in [NUMARA, "tel: " + NUMARA, "(" + NUMARA + ")", "numara " + NUMARA + ".", "wa_id=" + NUMARA + ";", NUMARA + " aradı"]:
-        assert rx.search(satir) is not None, satir
+        assert _ara(satir) is not None, satir
+
+
+def test_telefon_deseni_virgullu_listeyi_yakalar():
+    # kod incelemesi (12.10): "[905…,905…]" listesinde iki numara da, "905…,1,bayi" alanında numara bulunmalı (tam kısmı 12 haneli: ondalık değil)
+    kos = _kos()
+    ikinci = NUMARA[:-1] + "8"
+    assert len(kos.SIR_RX.findall(kos._ondaliksiz("\"wa_ids\": [" + NUMARA + "," + ikinci + "]"))) == 2
+    assert len(kos.SIR_RX.findall(kos._ondaliksiz(NUMARA + ",1,bayi"))) == 1
+    assert len(kos.SIR_RX.findall(kos._ondaliksiz(NUMARA + ".5"))) == 1
 
 
 def test_oteki_desenler_degismedi():

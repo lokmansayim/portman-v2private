@@ -58,24 +58,18 @@ def _main(mod, argv: list[str], gunluk: io.StringIO) -> int:
                 r = e.code if isinstance(e.code, int) else 1
                 if not isinstance(e.code, int) and e.code:
                     print(e.code, file=gunluk)
+            except Exception as e:                   # geçersiz tanım vb.: adım düşer, kayıt yine yazılır; uret() çağırana istisna fırlatmaz
+                print(f"{mod.__name__}: {type(e).__name__}: {str(e)[:300]}", file=gunluk)
+                r = 1
         return int(r or 0)
     finally:
         sys.argv = eski
 
 
-@contextlib.contextmanager
 def kural_seti(set_yolu: Path | None):
-    eski = os.environ.get("PORTMAN_KURALLAR")
-    if set_yolu is not None:
-        os.environ["PORTMAN_KURALLAR"] = str(Path(set_yolu).resolve())
-    try:
-        yield
-    finally:
-        if set_yolu is not None:
-            if eski is None:
-                os.environ.pop("PORTMAN_KURALLAR", None)
-            else:
-                os.environ["PORTMAN_KURALLAR"] = eski
+    """Kural seti seçimi; tek yer `kural.secili` (bayi görseli ve şablon paftası da onu kullanır)."""
+    from . import kural
+    return kural.secili(set_yolu)
 
 
 def perspektif_kos(ifc: Path, hedef: Path, kod: str, zaman_asimi: int = PERSPEKTIF_ZAMAN_ASIMI_S) -> dict:
@@ -103,7 +97,7 @@ def matplotlib_sabitle() -> None:
     görsel boyutu bile değişiyordu (İE-08 Adım 2 bulgusu, 12.10.2026); ie-05'in çizim setleri matplotlib varsayılanlarıyla üretildi."""
     import matplotlib
     matplotlib.use("Agg")
-    matplotlib.rc_file_defaults()
+    matplotlib.rcdefaults()                      # matplotlib'in KENDİ varsayılanları (rc_file_defaults ortamın rc dosyasını geri yüklerdi)
     matplotlib.rcParams["font.family"] = ["sans-serif"]
     matplotlib.rcParams["font.sans-serif"] = ["DejaVu Sans"] + [f for f in matplotlib.rcParamsDefault["font.sans-serif"] if f != "DejaVu Sans"]
     # ie-05'in depodaki çizim setleri FreeType'ın kendi hinting'iyle ("default"; "native" ile aynı sonuç) üretilmiş: ana set ve ie-05 setiyle
@@ -138,7 +132,7 @@ def uret(tanim_yolu: Path, hedef: Path, is_emri_no: str | None = None, revizyon:
             # 2) IFC + özet
             r = _main(ifc_genel, [tanim_yolu, ifc] + ek, gunluk)
             ozet = json.loads((hedef / f"{kod}.ozet.json").read_text(encoding="utf-8")) if (hedef / f"{kod}.ozet.json").exists() else {}
-            if r and not ozet:
+            if r:                                   # çıkış kodu sıfır değilse eski bir özet dosyası başarıyı maskelemesin
                 hatalar.append("ifc_genel başarısız")
             elif ozet.get("sema_hatasi"):
                 hatalar.append(f"IFC şema hatası {ozet['sema_hatasi']}")
@@ -163,14 +157,14 @@ def uret(tanim_yolu: Path, hedef: Path, is_emri_no: str | None = None, revizyon:
             bayi_gorseli.plan_bayi(t, hedef, kod, is_emri_no=is_emri_no, revizyon=revizyon, set_yolu=set_yolu, yontem=yontem)
         except ImportError:
             uyarilar.append("bayi görseli modülü yok")
-        except Exception as e:
+        except (Exception, SystemExit) as e:        # yapi.kur geçersiz tanımda SystemExit fırlatır; kayıt yine yazılsın
             hatalar.append(f"bayi görseli: {type(e).__name__}: {str(e)[:200]}")
         try:
             from . import sablon_pafta
             sablon_pafta.pafta_pdf(t, hedef, kod, is_emri_no=is_emri_no, revizyon=revizyon, set_yolu=set_yolu, yontem=yontem)
         except ImportError:
             uyarilar.append("şablon pafta modülü yok")
-        except Exception as e:
+        except (Exception, SystemExit) as e:
             hatalar.append(f"şablon pafta: {type(e).__name__}: {str(e)[:200]}")
     # 6) çizim seti denetimi (kurallar/cizim/cizim_seti.json) ve kayıtlar
     seti = json.loads((KOK / "kurallar" / "cizim" / "cizim_seti.json").read_text(encoding="utf-8"))
@@ -184,6 +178,9 @@ def uret(tanim_yolu: Path, hedef: Path, is_emri_no: str | None = None, revizyon:
     if bayi and not pafta_pdf.exists():
         hatalar.append("bayi paftası (PDF) üretilmedi")
     passed = not hatalar
+    hatali_pdf = hedef / f"{kod}_pafta.HATALI.pdf"
+    if not passed and pafta_pdf.exists():           # K23: doğrulama geçmezse teslim adıyla PDF yok; yalnız tanı için .HATALI.pdf
+        pafta_pdf.replace(hatali_pdf)
     validation = {"passed": passed, "errors": hatalar, "warnings": uyarilar, "kod": t["kod"], "set": set_kullanilan, "yontem": yontem or t.get("cati", {}).get("yontem"),
                   "ciktilar": {"beklenen": len(beklenen), "var": sum(var.values()), "eksik": eksik, "zorunlu_eksik": zorunlu_eksik}, "ifc": ozet,
                   "liste_satir": liste_satir, "elektrik_sayimi": str(elektrik_sayimi) if elektrik_sayimi else None,
@@ -192,6 +189,7 @@ def uret(tanim_yolu: Path, hedef: Path, is_emri_no: str | None = None, revizyon:
     (hedef / "uret.log").write_text(gunluk.getvalue(), encoding="utf-8")
     manifest = {"motor": "genel", "kod": t["kod"], "is_emri_no": is_emri_no, "revizyon": revizyon, "passed": passed, "warnings": uyarilar,
                 "pdf": pafta_pdf.name if pafta_pdf.exists() else None, "pdf_sha256": sha256(pafta_pdf) if pafta_pdf.exists() else None,
+                "hatali_pdf": hatali_pdf.name if hatali_pdf.exists() else None,
                 "ifc": ifc.name if ifc.exists() else None, "ifc_sha256": sha256(ifc) if ifc.exists() else None,
                 "preview": f"{kod}_plan.png" if (hedef / f"{kod}_plan.png").exists() else None, "plan_bayi": bayi_png.name if bayi_png.exists() else None,
                 "yukleme_json": liste.name if liste.exists() else None, "ciktilar": {d: v for d, v in var.items()}, "set": set_kullanilan}

@@ -80,8 +80,12 @@ cm, serbest aks: duvarlar, mahaller ve açıklıklar `yapi.kur`, sol yan ve ön 
 Antet ve tablolar İş Emri zarfından ve tanımdan: Proje Kodu = İş Emri no, Proje Adı & M² = model kodu ve m², Tarih = üretim günü
 (`time.gmtime`; referans koşusunda sabit), Çizen "Portman", Kontrol ve Onay "..."; Bina özellikleri tanım ve kural kitabından
 (yükseklik, duvarlar, çatı şekli/eğimi/kaplaması, kapı ve pencere sayım ve ölçüleri), gerisi "..."; Özel istekler = bayinin değişiklik
-cümleleri, yoksa "...". Yazı tipleri `motor/genel/font/` (Comic Relief, OFL). Genel motorun kendi `pafta.png`'si (mühendis paftası,
-açıklama satırlarıyla) çizim setinde kalır, baytları değişmedi.
+cümleleri, yoksa "...". Yazı tipleri `motor/genel/font/` (Comic Relief ve Arial'in ölçüdeş eşi Liberation Sans; ikisi de OFL, depodan okunur:
+çıktı makinedeki yazı tiplerine bağlı değil). M² brüt oturumdur (dış duvar dış yüzleri, veranda ve sundurma dahil; listedeki `bina_m2` ile
+aynı; sınır kutusu değil). Müşteri projeleri (KT) adsız: kod ve m². Koda bağlı seçimler (vasistas eşiği 60 cm, çatı tipi adları, özellik
+yazı boyu 7,3→5,2 pt küçülme) `kurallar/cizim/pafta_sablonu.json` anahtarlarında (`varsayim`; Lokman'ın onayı bekleniyor). Doğrulama
+geçmeyen işte teslim adıyla PDF yazılmaz (`.HATALI.pdf`, K23). Genel motorun kendi `pafta.png`'si (mühendis paftası, açıklama satırlarıyla)
+çizim setinde kalır, baytları değişmedi.
 
 ## Denemedeki karşılığı
 
