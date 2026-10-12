@@ -1,0 +1,129 @@
+{
+ "nesne": {
+  "IfcOpeningElement": 13,
+  "IfcWall": 16,
+  "IfcWindow": 8,
+  "IfcDoor": 5,
+  "IfcColumn": 1,
+  "IfcBeam": 2,
+  "IfcSpace": 6,
+  "IfcCovering": 6,
+  "IfcSlab": 7,
+  "IfcPlate": 21
+ },
+ "ucgen": 2556,
+ "duvar": [
+  {
+   "ad": "KBO1",
+   "geometri_m3": 0.1146,
+   "net_yuz_m2": 1.055,
+   "kalinlik_m": 0.105,
+   "beklenen_m3": 0.1108
+  },
+  {
+   "ad": "KBO2",
+   "geometri_m3": 0.1146,
+   "net_yuz_m2": 1.055,
+   "kalinlik_m": 0.105,
+   "beklenen_m3": 0.1108
+  },
+  {
+   "ad": "KBB",
+   "geometri_m3": 0.0892,
+   "net_yuz_m2": 0.8156,
+   "kalinlik_m": 0.105,
+   "beklenen_m3": 0.0856
+  },
+  {
+   "ad": "KBD",
+   "geometri_m3": 0.0892,
+   "net_yuz_m2": 0.8156,
+   "kalinlik_m": 0.105,
+   "beklenen_m3": 0.0856
+  },
+  {
+   "ad": "DGC1",
+   "geometri_m3": 0.1028,
+   "net_yuz_m2": 0.945,
+   "kalinlik_m": 0.105,
+   "beklenen_m3": 0.0992
+  },
+  {
+   "ad": "DGC2",
+   "geometri_m3": 0.1028,
+   "net_yuz_m2": 0.945,
+   "kalinlik_m": 0.105,
+   "beklenen_m3": 0.0992
+  },
+  {
+   "ad": "DCD",
+   "geometri_m3": 0.1453,
+   "net_yuz_m2": 1.35,
+   "kalinlik_m": 0.105,
+   "beklenen_m3": 0.1418
+  },
+  {
+   "ad": "DGS",
+   "geometri_m3": 0.5846,
+   "net_yuz_m2": 5.534,
+   "kalinlik_m": 0.105,
+   "beklenen_m3": 0.5811
+  },
+  {
+   "ad": "DB",
+   "geometri_m3": 2.2212,
+   "net_yuz_m2": 21.1545,
+   "kalinlik_m": 0.105,
+   "beklenen_m3": 2.2212
+  },
+  {
+   "ad": "DD",
+   "geometri_m3": 2.237,
+   "net_yuz_m2": 21.3045,
+   "kalinlik_m": 0.105,
+   "beklenen_m3": 2.237
+  },
+  {
+   "ad": "DK",
+   "geometri_m3": 2.0925,
+   "net_yuz_m2": 19.8615,
+   "kalinlik_m": 0.105,
+   "beklenen_m3": 2.0855
+  },
+  {
+   "ad": "I1",
+   "geometri_m3": 1.8631,
+   "net_yuz_m2": 17.7435,
+   "kalinlik_m": 0.105,
+   "beklenen_m3": 1.8631
+  },
+  {
+   "ad": "I3",
+   "geometri_m3": 0.7449,
+   "net_yuz_m2": 7.0942,
+   "kalinlik_m": 0.105,
+   "beklenen_m3": 0.7449
+  },
+  {
+   "ad": "I2",
+   "geometri_m3": 1.053,
+   "net_yuz_m2": 10.0282,
+   "kalinlik_m": 0.105,
+   "beklenen_m3": 1.053
+  },
+  {
+   "ad": "I4",
+   "geometri_m3": 0.3173,
+   "net_yuz_m2": 2.988,
+   "kalinlik_m": 0.105,
+   "beklenen_m3": 0.3137
+  },
+  {
+   "ad": "I5",
+   "geometri_m3": 0.2854,
+   "net_yuz_m2": 2.718,
+   "kalinlik_m": 0.105,
+   "beklenen_m3": 0.2854
+  }
+ ]
+}

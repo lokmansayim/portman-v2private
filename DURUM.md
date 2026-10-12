@@ -2,6 +2,8 @@
 
 **Son güncelleme: 30 Eylül 2026 22:05 (tek aktif teslim: Aşama 2 kabul vakası, İE-04; mesaj katmanı kanal v1.3 CANLIDA ve açık — Kapı M 30.09 akşamı geçti; kritik yol Astra'nın üç 3+1 adayı + Ubeydullah kabulü + K-A kararları; 3D bağlantısı M3 ayrı iş).** Her oturumun son adımı bu dosyayı güncellemektir. Aktif dal `ie-04`.
 
+**Milat · 12 Ekim 2026:** Portman ilk gerçek işini aldı (Lokman, 15:30: "Portman ilk işini aldı bunu milad olarak kaydet"). İş `T1012-CV`, tek kat çelik; kaydı `deneme/2026-10-12_ilk_is/`. Ayrıntı aşağıda, 12 Ekim 15:45 ekinde.
+
 **2 Ekim 2026 20:30 eki (dal `ie-05`):** İE-05 taslağı açıldı: ürün platformu şartnamesi, tek kat çelik 82 m² (Ç8201) ile başlar. İş emri `docs/is_emirleri/IE-05.md` (taslak; Lokman'ın onayını bekliyor), kayıtlar `docs/sartname/`. Yalnız belge eklendi; koda ve canlıya dokunulmadı; P6001 çıktıları etkilenmedi. İE-04 kapanmadı, olduğu yerde bekliyor. Bulgular: (1) tek kat çelik on modelin üçünde katalog kaydı çizimle tutmuyor (Ç8201, Ç1031, Ç1151; `docs/sartname/katalog_denetimi_tek_kat_celik.md`); (2) `beyin/veri/katalog_37_proje.json` 37 modelin hepsini "tek kat" sayıyor; 13'ü çift katlı (Lokman'ın arşiv klasörleriyle doğrulandı: çelik Ç1142, Ç1202, Ç1302, Ç1322, Ç1352, Ç1402, Ç1552, Ç2226; prefabrik P1142, P1202, P1322, P1422, P1552). Yakın model araması kat sayısına bakmıyor. İkisi de bayilere açılmadan önce düzeltilmeli; düzeltme yapılmadı.
 
 **2 Ekim 2026 22:00 eki (dal `ie-05`):** Üç çelik projenin SketchUp modeli (62, 81 ve 90 m²; SketchUp 2024) okundu ve ölçüldü. Yol: Lokman'ın Mac'indeki Blender 5.2.1'de SKP içe aktarıcı yok; dosyalar bulutta açık kaynak `openskp 1.3.0` ile çözüldü, Mac'e bir şey kurulmadı. Betikler ve adsız ölçü özetleri `deneme/2026-10-02_skp/`, bulgular `docs/sartname/skp_olcumleri.md`; GLB, yüz listesi ve görünüşler Lokman'ın Mac'inde `28_SKP_Aktarim/` (depoda değil). Doğrulama: 90 m² modelde okunan ölçüler aynı projenin montaj paftasındaki ölçü yazılarıyla aynı. Modellerin gösterdikleri: duvar 270, saçak 30, pencere üst kotu 200 (lento 70) kurallarla tutuyor; topuk saçak ucunda 10 cm (Ç8201'in makas üstü mahya kotu 404'ten 414'e düzeltildi; Lokman 22:05'te topuğu teyit etti ve makasların üzerine 8 cm çatı paneli geldiğini söyledi: alın 18,4 cm, çatı üst yüzünde mahya 422); iç kapı başlığı 214, dış kapı 210; 62 m² projede eğim %30; dikme 61 ve 62,5; makas aralığı 125; profil başlığı 45 ve 54 mm. Bunlar Lokman'ın teyidini bekliyor. Sınır: 2019 ve öncesi biçimdeki SKP'ler okunamıyor (75 tekil dosyanın 27'si; katalog modellerinin çoğu). Canlıya ve canlı koda dokunulmadı; P6001 çıktıları etkilenmedi.
@@ -133,6 +135,25 @@ Depoda yalnız DURUM değişti; motor, kural kitabı ve canlı değişmedi.
 - **Paket:** Bayi PDF'i 3 sayfa, mühendis zip'i kesitsiz; yeniden üretildi.
 
 Depoda yalnız DURUM değişti.
+
+**12 Ekim 2026 15:45 eki (dal `ie-05`) · MİLAT: Portman'ın ilk gerçek işi.** Lokman 15:30'da yazdı: "Portman ilk işini aldı bunu milad olarak kaydet"; "bu çizim kuralını ve şablonu kullanabiliriz anteti kaldıralım".
+- **İş:** `T1012-CV`. Tek kat çelik, 2+1; beşik + çift cumba; 50 cm veranda; oturum 74,11 m².
+  - Talep 12:41'de geldi. Son paket 15:16'da Lokman'a verildi; bayiye Lokman iletti.
+  - Canlı Portman bu talebi alamadı; çizimi İE-05'in genel motoruyla Code yaptı.
+- **Sorulup cevaplananlar (15:3x):**
+  - Antet: ikisi de kalkıyor. Sayfa başlığı ile "TASLAK … üretim projesi değildir" satırı ve 6 Ekim "Örnek Şablon"unun antet kutusu.
+  - Proje depoya: evet.
+- **Depo:** `deneme/2026-10-12_ilk_is/`: README, tanım ve üretici, motor farkı (`motor_farki.patch`), çizim seti, liste, teslim paketleri. Ad, telefon ve fiyat yok; bayinin fotoğrafları girmedi.
+- **Kural kitabı:**
+  - `kurallar/model/yerlesim.json` › `sacak_hizasi`.
+  - `kurallar/cizim/cizim_seti.json` 0.2 › `antet` ve `teslim_paketi`; pafta içeriği ve sınırlar güncellendi.
+  - Anlatımı `docs/sartname/cizim_seti.md`.
+- **Paketler:** Antetsiz yeniden üretildi. Liste PDF'inin üst satırı da kalktı; listenin kendi başlığı duruyor.
+- **Kanıt:**
+  - Çizim setinde 12 çıktının 12'si üretildi, IFC4 şema hatası 0.
+  - Depodaki dosyalardan yeniden üretim denendi: tanım, plan, pafta, görünüşler ve liste girdisi bayt bayt aynı.
+- **Değişmeyenler:** Depodaki genel motor (`deneme/2026-10-06_kor_test`) değişmedi; KT setleri bayt bayt aynı kalır. Antetsiz hal ve bugünkü öteki eklentiler patch'te; İE-08'e taşınacak. İE-08 sohbetine verilecek metin Lokman'a verildi.
+- Canlıya dokunulmadı.
 
 **Oturum devri:** `docs/devir/2026-09-30_Aksam_Devri.md` (30.09 akşamı, Kapı M sonrası; sıra ve bakım listesi) ve `docs/devir/2026-09-30_Oturum_Devri.md` (30.09 01:10; kurallar, K-A kararları, Astra ölçütleri). 28–30 Eylül penceresi kapandı. Yeni pencere bu ikisiyle başlar: kurallar, yapılanlar, bekleyen kararlar, sıradaki işler, Astra'ya çizim işi için ölçütler.
 

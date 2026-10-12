@@ -36,8 +36,8 @@ Tanımda o projenin teknik özelliklerinden gelen birkaç seçim de yazılıdır
 |---|---|
 | `model/duvar_tipleri.json` | Baz paketin duvar tipleri: katmanlar, karkas 80 ve 140 mm, kaplamalar. Duvar kalınlığı katmanların toplamı |
 | `model/secenekler/` | Değişiklik operatörleri: model tanımı değişmeden paket farkını uygular. Örnek `dis_karkas_140.json` (Lokman, 3 Ekim 2026 11:49: "dışlar 140'lık") |
-| `model/yerlesim.json` | Yerleşim kuralları. İlki simetri: çelik yapılarda pencere ve kapı duvar parçasının ortasına ya da bağlı olduğu elemanın eksenine yerleşir (Lokman, 12 Ekim 2026 14:07: "çelik yapılarda simetri daha önemli bunu kural olarak ekle"). Henüz koda bağlı değil |
-| `cizim/cizim_seti.json` | Çizim setinin içeriği (Lokman onayladı, 7 Ekim 2026 07:45). Anlatımı `docs/sartname/cizim_seti.md` |
+| `model/yerlesim.json` | Yerleşim kuralları. İlki simetri: çelik yapılarda pencere ve kapı duvar parçasının ortasına ya da bağlı olduğu elemanın eksenine yerleşir (Lokman, 12 Ekim 2026 14:07: "çelik yapılarda simetri daha önemli bunu kural olarak ekle"). İkincisi saçak hizası: aynı cephedeki çatıların saçakları aynı hizada, öne çıkan parça kendi 30 cm saçağıyla (14:46; 15:30'da "bu çizim kuralını ... kullanabiliriz"). İkisi de henüz koda bağlı değil |
+| `cizim/cizim_seti.json` | Çizim setinin içeriği (Lokman onayladı, 7 Ekim 2026 07:45). 12 Ekim 2026 15:30'dan beri antet yok ve teslim paketi tanımlı (`antet`, `teslim_paketi`; Portman'ın ilk gerçek işi, `deneme/2026-10-12_ilk_is/`). Anlatımı `docs/sartname/cizim_seti.md` |
 | `liste/kurallar.json` | Metraj ve yükleme listesi kuralları; her anahtarda `deger`, `durum`, `kaynak`. Sürümü `sema` alanında (bugün 0.19-taslak) |
 | `liste/setler/` | Eski sürümler (0.12–0.18; aşağıda). Bir set `PORTMAN_KURALLAR` ortam değişkeniyle seçilir (`deneme/2026-10-03_yukleme/kural.py`) |
 | `bayi/ornek.json` | Bayi standardı örneği: listeye giren gruplar, çatı yöntemi. Gerçek bayi, numara ya da ad yok |

@@ -17,5 +17,12 @@
   ],
   "ilk_uygulama": "Bayi talebi, tek kat çelik 747 × 1012 (12 Ekim 2026). Cumba penceresi x 160'ta, sağ pencere kapının sağ kenarı (440) ile sağ köşe (747) arasında ortada. Yatak odası pencereleri odanın yan duvarının ortasına alındı; bayinin planında ±10 cm farkla öyleydi. Proje depo dışındadır.",
   "kod": "Henüz koda bağlı değil. Tanımı kuran uygular: bugün Code'da elle, canlıda Beyin ile Motor. Genel motor yerleşimi denetlemez."
+ },
+ "sacak_hizasi": {
+  "deger": "Aynı cephe hattındaki çatıların saçakları aynı hizada ve aynı kotta olur. Öne çıkan parça (pencere çıkıntısı gibi) kendi saçağıyla öne taşar; saçağı 30 cm. Bir çatı parçası duvarında saçaksız bitmez.",
+  "durum": "lokman",
+  "kaynak": "Lokman, 12 Ekim 2026 14:46: \"teknik bir hata yapıyorsun veranda ve cumba aynı seviyede/hatta kalacak çıkıntı ileride kalacak yani veranda saçağı ile cumba saçağı aynı hizada çıkıntı önde 30 cm kendi 30 cm saçağı\". 15:30: \"bu çizim kuralını ve şablonu kullanabiliriz\".",
+  "ornek": "İlk gerçek iş (T1012-CV, `deneme/2026-10-12_ilk_is/`): cumbanın ön saçağı 30 cm, veranda saçağıyla aynı hatta ve kotta (280); pencere çıkıntısının saçağı önde ve yanlarda 30 cm. Hatalı çizimde cumba çatısı duvarda bitiyordu, çıkıntının saçağı 15 cm'di.",
+  "kod": "Henüz koda bağlı değil. Tanımı kuran uygular; genel motor saçak hizasını denetlemez."
  }
 }

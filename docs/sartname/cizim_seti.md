@@ -10,7 +10,9 @@ Standardın kendisi veridir: kural kitabında `kurallar/cizim/cizim_seti.json` (
 - Setin biçimi (görünüşler, bakış açıları, renkler, ölçü zincirleri) Lokman'ın onayı olmadan değiştirilmez.
 - Paftadaki açıklama satırları bu onayın dışındadır: Lokman'la birlikte düzeltilecek.
 - Çizimlerdeki sayılar yükleme listesinin girdisiyle aynı hesaptan gelir: paftada yazan çatı yüzeyi, kaplama dizilimi ve iniş sayısı listedekilerle aynıdır.
-- Çizimler taslaktır: her paftanın başlığında "TASLAK · üretim projesi değildir" yazar.
+- Antet yok (Lokman, 12 Ekim 2026 15:30, Portman'ın ilk gerçek işinden sonra: "anteti kaldıralım"). Sayfalarda başlık ve "TASLAK · üretim projesi değildir" satırı çizilmez. 6 Ekim "Örnek Şablon"unun antet kutusu da kullanılmaz. Çizimler yine de üretim projesi değildir; bu, sayfaya yazılmaz.
+- Teslim paketi (aynı gün): bayiye tek PDF (sunum, pafta, dört perspektif), mühendise zip (IFC4, yükleme listesi, pafta, makaslı ve çatısız görünüm). Kesit verilmez, istenirse çizilir; liste bayiye gitmez. Örnek: `deneme/2026-10-12_ilk_is/`.
+- Depodaki genel motor antetsiz hali henüz çizmiyor; o hali `deneme/2026-10-12_ilk_is/motor_farki.patch`'te ve İE-08'e taşınacak.
 
 ## Set
 
@@ -20,7 +22,7 @@ Tek komut: `bash deneme/2026-10-06_kor_test/cizim_seti_kos.sh <tanım.json> <ç�
 |---|---|---|
 | Plan | `<kod>_plan.png` | Duvarlar (dış koyu, iç açık), mahal adı ve alanı (kaplanmış yüzler arası), pencere ve kapı etiketleri, kapı açılımları, veranda taraması, giriş oku, dıştan ölçü zincirleri (cm) |
 | Dört görünüş | `<kod>_gorunusler.png` | Ön (giriş), arka, sol, sağ: duvarlar, doğramalar, çatı, baca; genişlik, duvar ve mahya yükseklikleri |
-| Pafta | `<kod>_pafta.png` | Tek sayfa: başlık, plan, çatı planı, dört görünüş, altta iki sütun açıklama |
+| Pafta | `<kod>_pafta.png` | Tek sayfa, antetsiz: plan, çatı planı, dört görünüş, altta iki sütun açıklama |
 | IFC4 modeli | `<kod>.ifc`, `<kod>.ozet.json` | Duvar panelleri, boşluklar ve doğramalar, mahaller, tavan, çatı ve düzlemleri, makaslar (sadeleştirilmiş), veranda dikme ve kirişleri, baca; şema hatası 0 olmalı |
 | Perspektifler | `<kod>_perspektif_on_sag.png`, `_on_sol`, `_arka_sol`, `_arka_sag` | IFC'den dört köşeden görüntü; kamera yükseklik açısı 24° |
 | Çatısız görünüm | `<kod>_catisiz.png` | Çatı, tavan ve makaslar gizli; mahaller renkli ve etiketli |

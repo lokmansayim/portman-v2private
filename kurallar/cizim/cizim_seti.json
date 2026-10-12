@@ -1,5 +1,5 @@
 {
- "sema": "portman.cizim_seti/0.1",
+ "sema": "portman.cizim_seti/0.2",
  "durum": "lokman",
  "kaynak": "Lokman, 7 Ekim 2026 07:45: \"Çizimlerin bu halini çok beğendim burada kalalım sadece açıklamalar kısmını düzelteceğiz\"; \"çizimler persfektifler çok güzel olmuş bunları kurala ekle paftadaki açıklamaları düzelteceğiz\". Set, 6–7 Ekim 2026 kör testinde (KT-01) üretilen çizimlerdir; Lokman'ın isteği (6 Ekim 21:22): model \"plan, görünüşler, IFC persfektifler şeklinde\" çizilir.",
  "kural": "Model verilince bu set aynı Yapı Tanımı'ndan, aynı betiklerle üretilir; çizimde LLM yoktur, aynı tanım aynı çizimi verir. Setin biçimi (görünüşler, bakış açıları, renkler, ölçü zincirleri) Lokman'ın onayı olmadan değiştirilmez. Paftadaki açıklama satırları bu onayın dışındadır: Lokman'la birlikte düzeltilecek.",
@@ -9,7 +9,7 @@
   {"dosya": "{kod}_gorunusler.png", "ad": "Dört görünüş", "betik": "ciz_genel.py",
    "icerik": "Ön (giriş), arka, sol ve sağ görünüş: duvarlar, doğramalar, çatı, baca; genişlik, duvar ve mahya yükseklikleri (cm)"},
   {"dosya": "{kod}_pafta.png", "ad": "Pafta", "betik": "ciz_genel.py",
-   "icerik": "Tek sayfa: başlık (kod, ad, TASLAK ibaresi), plan, çatı planı (düzlemler, eğim okları ve yüzdeleri, mahya, kırma ve vadi boyları, dere inişleri sarı nokta, duvara dayanan kenar turuncu, saçak ve cephe çizgisi), dört görünüş, altta iki sütun açıklama"},
+   "icerik": "Tek sayfa, antetsiz (başlık ve TASLAK satırı yok; 12 Ekim 2026 15:30): plan, çatı planı (düzlemler, eğim okları ve yüzdeleri, mahya, kırma ve vadi boyları, dere inişleri sarı nokta, duvara dayanan kenar turuncu, saçak ve cephe çizgisi), dört görünüş, altta iki sütun açıklama"},
   {"dosya": "{kod}.ifc", "ad": "IFC4 modeli", "betik": "ifc_genel.py",
    "icerik": "IfcProject → IfcSite → IfcBuilding → kat. Duvar panelleri IfcWall, boşluklar ve doğramalar (IfcWindow, IfcDoor), mahaller IfcSpace, tavan IfcCovering, çatı IfcRoof ve düzlemleri, makaslar (sadeleştirilmiş), veranda dikme ve kirişleri, baca. Şema doğrulamasından geçer: şema hatası 0 olmalı"},
   {"dosya": "{kod}.ozet.json", "ad": "IFC özeti", "betik": "ifc_genel.py", "icerik": "Şema, şema hatası sayısı, ürün sayıları"},
@@ -25,5 +25,7 @@
   "durum": "duzeltilecek",
   "not": "Paftanın altındaki açıklama satırları (sol sütun: dış ölçü, mahaller, duvar, doğramalar, dış kaplama; sağ sütun: çatı, yöntem ve kaplama, çatı yüzeyi, kenar boyları, kaplama dizilimi, kalkanlar, dere inişi) Lokman'la birlikte düzeltilecek (7 Ekim 2026 07:45). Satırlar `girdi_genel.py`'deki `bilgi_satirlari`ndan gelir; sayılar yükleme listesinin girdisiyle aynı hesaptandır."
  },
- "sinirlar": "Subasman ve merdiven çizilmez. Çizimler taslaktır: üretim projesi değildir. Müşteri projelerinin tanımı ve çizimleri depoya ayrı onayla girer (İE-05; KT-01'inkiler 8 Ekim 2026'da eklendi: `tanim/`, `cizimler/`)."
+ "antet": {"deger": "Antet yok. Sayfalarda başlık ve 'TASLAK … üretim projesi değildir' satırı çizilmez; 6 Ekim 2026 'Örnek Şablon'unun antet kutusu (proje kodu, ilgili kişi–telefon, sevk adresi, proje adı ve m²; tarih, çizen, kontrol, onay) kullanılmaz. Plan, çatı planı ve görünüş adları kalır.", "durum": "lokman", "kaynak": "Lokman, 12 Ekim 2026 15:30, Portman'ın ilk gerçek işinden sonra: \"bu çizim kuralını ve şablonu kullanabiliriz anteti kaldıralım\"; \"gerçek bir iş kaydı olduğu için bu minvalde gideceğiz anteti kaldırıyoruz\". Hangi antet olduğu sorulunca: ikisi de (sayfa başlığı ile TASLAK satırı ve Örnek Şablon'un antet kutusu).", "kod": "Depodaki genel motor (`deneme/2026-10-06_kor_test`) hâlâ başlık ve TASLAK satırı çiziyor. Antetsiz hali `deneme/2026-10-12_ilk_is/motor_farki.patch`'te (`ciz_genel.ANTET = False`); İE-08'e taşınacak."},
+ "teslim_paketi": {"deger": {"bayi": "Tek PDF, 3 sayfa: sunum (plan, iki ön perspektif, ön ve sol görünüş, kısa not), pafta, dört perspektif", "muhendis": "Zip: IFC4, yükleme listesi (PDF ve md), pafta, makaslı ve çatısız görünüm", "kesit": "Verilmez; istenirse çizilir", "liste": "Bayiye gitmez (CIO kararı)"}, "durum": "lokman", "kaynak": "Lokman, 12 Ekim 2026: 13:17 \"seçenek 2 olacak ayırabilir misin?\" (bayi ve mühendis paketleri ayrıldı); 14:31 \"kesit vermene gerek yok ben onu bilgi olsun diye verdim\"; 15:30 \"bu çizim kuralını ve şablonu kullanabiliriz\". Örnek: `deneme/2026-10-12_ilk_is/teslim/`.", "kod": "Paketleri `deneme/2026-10-12_ilk_is/teslim_paketi.py` dizer; genel motorun parçası değil."},
+ "sinirlar": "Subasman ve merdiven çizilmez. Çizimler üretim projesi değildir; bu, sayfalara yazılmaz (bkz. `antet`). Müşteri projelerinin tanımı ve çizimleri depoya ayrı onayla girer (İE-05; KT-01'inkiler 8 Ekim 2026'da eklendi: `tanim/`, `cizimler/`; ilk gerçek iş 12 Ekim 2026'da: `deneme/2026-10-12_ilk_is/`)."
 }
