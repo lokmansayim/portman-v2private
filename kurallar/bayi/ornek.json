@@ -1,0 +1,36 @@
+{
+  "sema": "portman.bayi_kurallari/0.1-taslak",
+  "aciklama": "Örnek dosya. Canlıda anahtar bayinin telefon numarası olacak (veritabanında birincil anahtar) ve liste, mesajı atan bayinin standardına göre kurulacak. Burada gerçek numara ya da ad yoktur.",
+  "kaynak": "Lokman, 3 Ekim 2026 13:27: vida, boya, elektrik ve tesisat bütün paketlerde var; hangisinin listeye gireceği bayi kuralıdır (her bayinin standardı ayrı).",
+  "varsayilan": {
+    "gruplar": {
+      "Vida": true,
+      "Boya": true,
+      "Elektrik": true,
+      "Sıhhi tesisat": true
+    }
+  },
+  "bayiler": {
+    "ORNEK-BAYI-1": {
+      "aciklama": "Bütün gruplar listede; boya ve vitrifiye dahil.",
+      "gruplar": {}
+    },
+    "ORNEK-BAYI-2": {
+      "aciklama": "Vida, elektrik ve sıhhi tesisatı kendisi temin eder; boya kovası gitmez (90 m² gerçek listedeki gibi).",
+      "gruplar": {
+        "Vida": false,
+        "Elektrik": false,
+        "Sıhhi tesisat": false
+      },
+      "boya_dahil": false
+    },
+    "ORNEK-BAYI-3": {
+      "aciklama": "Çatıyı prefabrik yöntemiyle (tavan omegası, aşık, saçak sacı) isteyen bayi; vitrifiye gitmez.",
+      "gruplar": {},
+      "vitrifiye_dahil": false,
+      "cati": {
+        "yontem": "omega_asik"
+      }
+    }
+  }
+}

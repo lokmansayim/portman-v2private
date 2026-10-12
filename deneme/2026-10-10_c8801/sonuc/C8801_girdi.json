@@ -1,0 +1,551 @@
+{
+ "sema": "portman.yukleme_girdisi/0.5-taslak",
+ "ad": "Ç8801 · Tek kat çelik, 2+1, 88 m² (katalog)",
+ "kaynak": "Yapı Tanımı 0.5 (Ç8801 katalog modeli: plan arşivdeki DWG'den; katalog çatısı (Lokman, 10 Ekim 2026: 2. versiyon))",
+ "bina_m2": 88,
+ "oturum_m2": 88.06,
+ "dis_olcu_m": [
+  10.24,
+  8.6
+ ],
+ "kapali_olcu_m": [
+  10.24,
+  8.6
+ ],
+ "kat_adedi": 1,
+ "oda_sayisi": 6,
+ "kat_yuksekligi_m": 2.7,
+ "celik": {
+  "dis": {
+   "profil": "80x45x1,2",
+   "boy_m": 37.68,
+   "panel_adedi": 10,
+   "not": "panel adedi tahmin; gerçek adet karkas yerleşiminden gelir"
+  },
+  "ic": {
+   "profil": "80x45x1,2",
+   "boy_m": 23.23,
+   "panel_adedi": 8,
+   "not": "panel adedi tahmin; gerçek adet karkas yerleşiminden gelir"
+  },
+  "ek_duvarlar": [],
+  "dikme": null,
+  "kiris": null,
+  "cati": {
+   "tip": "besik_cumba",
+   "profil": "80x45x0,8",
+   "plan_m2": 86.0,
+   "oturum_m2": 74.34
+  },
+  "tavan_paneli_m2": 67.98,
+  "cati_paneli_m2": 90.56,
+  "ek_cati_paneli": null
+ },
+ "dis": {
+  "cevre_m": 37.68,
+  "duvar_m2": 101.736,
+  "duvar_kalinligi_m": null,
+  "karkas_mm": 80,
+  "kolon_kiris": [],
+  "kolon_kiris_varsayim": false,
+  "alin_m2": [
+   4.653,
+   4.652,
+   2.116
+  ],
+  "ek_m2": [],
+  "bosluklar": [
+   {
+    "ad": "120/180",
+    "adet": 3,
+    "en": 1.2,
+    "boy": 1.8
+   },
+   {
+    "ad": "80/180",
+    "adet": 1,
+    "en": 0.8,
+    "boy": 1.8
+   },
+   {
+    "ad": "dış kapı",
+    "adet": 1,
+    "en": 0.95,
+    "boy": 2.1
+   },
+   {
+    "ad": "120/120",
+    "adet": 4,
+    "en": 1.2,
+    "boy": 1.2
+   },
+   {
+    "ad": "60/40",
+    "adet": 1,
+    "en": 0.6,
+    "boy": 0.4
+   }
+  ],
+  "dis_osb": false,
+  "nem_bariyeri": false,
+  "yuzler": [
+   {
+    "duvar": "DG",
+    "sinif": "dis",
+    "bolge": "Veranda",
+    "boy_m": 6.24,
+    "brut_m2": 16.848,
+    "net_m2": 11.253,
+    "bosluklar": [
+     "P1",
+     "P2",
+     "K1"
+    ]
+   },
+   {
+    "duvar": "DKG",
+    "sinif": "dis",
+    "bolge": "Veranda",
+    "boy_m": 0.0925,
+    "brut_m2": 0.2497,
+    "net_m2": 0.2497,
+    "bosluklar": []
+   },
+   {
+    "duvar": "DKB",
+    "sinif": "dis",
+    "bolge": "Veranda",
+    "boy_m": 2.1075,
+    "brut_m2": 5.6902,
+    "net_m2": 5.6902,
+    "bosluklar": []
+   },
+   {
+    "duvar": "DKG",
+    "sinif": "dis",
+    "bolge": "(dış)",
+    "boy_m": 0.0925,
+    "brut_m2": 0.2497,
+    "net_m2": 0.2497,
+    "bosluklar": []
+   },
+   {
+    "duvar": "DD",
+    "sinif": "dis",
+    "bolge": "(dış)",
+    "boy_m": 8.415,
+    "brut_m2": 22.7205,
+    "net_m2": 19.6005,
+    "bosluklar": [
+     "P6",
+     "P7",
+     "P8"
+    ]
+   },
+   {
+    "duvar": "DK",
+    "sinif": "dis",
+    "bolge": "(dış)",
+    "boy_m": 0.0925,
+    "brut_m2": 0.2497,
+    "net_m2": 0.2497,
+    "bosluklar": []
+   },
+   {
+    "duvar": "DK",
+    "sinif": "dis",
+    "bolge": "(dış)",
+    "boy_m": 10.24,
+    "brut_m2": 27.648,
+    "net_m2": 25.488,
+    "bosluklar": [
+     "P5"
+    ]
+   },
+   {
+    "duvar": "DG",
+    "sinif": "dis",
+    "bolge": "(dış)",
+    "boy_m": 0.0925,
+    "brut_m2": 0.2498,
+    "net_m2": 0.2498,
+    "bosluklar": []
+   },
+   {
+    "duvar": "DB",
+    "sinif": "dis",
+    "bolge": "(dış)",
+    "boy_m": 6.215,
+    "brut_m2": 16.7805,
+    "net_m2": 13.9005,
+    "bosluklar": [
+     "P3",
+     "P4"
+    ]
+   },
+   {
+    "duvar": "DK",
+    "sinif": "dis",
+    "bolge": "(dış)",
+    "boy_m": 0.0925,
+    "brut_m2": 0.2497,
+    "net_m2": 0.2497,
+    "bosluklar": []
+   },
+   {
+    "duvar": "DKG",
+    "sinif": "dis",
+    "bolge": "(dış)",
+    "boy_m": 4.0,
+    "brut_m2": 10.8,
+    "net_m2": 8.64,
+    "bosluklar": [
+     "P9"
+    ]
+   }
+  ]
+ },
+ "odalar": [
+  {
+   "ad": "Yaşam Alanı",
+   "tur": "beyaz",
+   "cevre_m": 19.275,
+   "alan_m2": 21.34,
+   "duvar_brut_m2": 52.043,
+   "bosluk_m2": [
+    1.926,
+    2.16,
+    1.44,
+    1.44
+   ],
+   "ic_kose": 4,
+   "dis_kose": 0,
+   "islev": [
+    "salon"
+   ]
+  },
+  {
+   "ad": "Mutfak",
+   "tur": "beyaz",
+   "cevre_m": 12.925,
+   "alan_m2": 10.049,
+   "duvar_brut_m2": 34.898,
+   "bosluk_m2": [
+    2.16,
+    1.926
+   ],
+   "ic_kose": 4,
+   "dis_kose": 0,
+   "islev": [
+    "mutfak"
+   ]
+  },
+  {
+   "ad": "Hol",
+   "tur": "beyaz",
+   "cevre_m": 12.285,
+   "alan_m2": 7.381,
+   "duvar_brut_m2": 33.169,
+   "bosluk_m2": [
+    1.926,
+    1.926,
+    1.926,
+    1.926,
+    1.926,
+    1.44,
+    1.995
+   ],
+   "ic_kose": 5,
+   "dis_kose": 1,
+   "islev": [
+    "hol"
+   ]
+  },
+  {
+   "ad": "Yatak Odası 1",
+   "tur": "beyaz",
+   "cevre_m": 15.25,
+   "alan_m2": 12.739,
+   "duvar_brut_m2": 41.175,
+   "bosluk_m2": [
+    1.44,
+    1.926
+   ],
+   "ic_kose": 5,
+   "dis_kose": 1,
+   "islev": [
+    "yatak_odasi"
+   ]
+  },
+  {
+   "ad": "Yatak Odası 2",
+   "tur": "beyaz",
+   "cevre_m": 13.815,
+   "alan_m2": 11.794,
+   "duvar_brut_m2": 37.3,
+   "bosluk_m2": [
+    1.926,
+    1.44,
+    2.16
+   ],
+   "ic_kose": 5,
+   "dis_kose": 1,
+   "islev": [
+    "yatak_odasi"
+   ]
+  },
+  {
+   "ad": "Banyo",
+   "tur": "yesil",
+   "cevre_m": 8.725,
+   "alan_m2": 4.682,
+   "duvar_brut_m2": 23.558,
+   "bosluk_m2": [
+    0.24,
+    1.926
+   ],
+   "ic_kose": 4,
+   "dis_kose": 0,
+   "islev": [
+    "banyo"
+   ]
+  }
+ ],
+ "ic_kapi_adedi": 5,
+ "islak_hacim_sayisi": 1,
+ "ic_duvar_boyu_m": 23.23,
+ "ic_osb_tum_duvarlar": false,
+ "osb_takviye": {
+  "duvarlar": [
+   {
+    "mahal": "Yaşam Alanı",
+    "duvar": "I1",
+    "duvar_adi": "yaşam alanı ile mutfak arası duvar",
+    "neden": "TV ünitesi",
+    "boy_m": 6.19,
+    "bosluk_m2": 1.926
+   },
+   {
+    "mahal": "Mutfak",
+    "duvar": "I1",
+    "duvar_adi": "yaşam alanı ile mutfak arası duvar",
+    "neden": "mutfak dolabı ve eviye",
+    "boy_m": 3.8575,
+    "bosluk_m2": 0
+   }
+  ],
+  "brut_m2": 27.13,
+  "bosluk_m2": 1.926,
+  "net_m2": 25.2
+ },
+ "osb_takviye_teyit": "plan (katalog paftasındaki TV ünitesi ve mutfak dolabı)",
+ "yalitim": {
+  "dis_brut_m2": 101.736,
+  "ic_brut_m2": 62.708,
+  "bosluk_m2": 25.545
+ },
+ "veranda_tavan_cevresi_m": null,
+ "elektrik_odalar": [
+  {
+   "ad": "Yaşam Alanı",
+   "islev": [
+    "salon"
+   ]
+  },
+  {
+   "ad": "Mutfak",
+   "islev": [
+    "mutfak"
+   ]
+  },
+  {
+   "ad": "Hol",
+   "islev": [
+    "hol"
+   ]
+  },
+  {
+   "ad": "Yatak Odası 1",
+   "islev": [
+    "yatak_odasi"
+   ]
+  },
+  {
+   "ad": "Yatak Odası 2",
+   "islev": [
+    "yatak_odasi"
+   ]
+  },
+  {
+   "ad": "Banyo",
+   "islev": [
+    "banyo"
+   ]
+  },
+  {
+   "ad": "Veranda",
+   "islev": [
+    "veranda"
+   ]
+  }
+ ],
+ "tavan_m2": {
+  "beyaz": 63.3,
+  "yesil": 4.68
+ },
+ "veranda_m2": {
+  "brut": 0.0,
+  "net": 13.73,
+  "catisiz": [
+   "Veranda"
+  ],
+  "not": "Veranda çatısız (pergola): tavanı yok; tavan, köşebent, tavan paneli ve tavan omegası hesabına girmez, çatı çeliğinin oturumundan düşülür (dış ölçüyle 13,73 m²); bina alanına girer"
+ },
+ "elektrik_en_uzak_m": 8.57,
+ "cati": {
+  "tip": "besik_cumba",
+  "yontem": "panel",
+  "kaplama": "tek_kat_panel",
+  "egim": 0.33,
+  "yuzey_m2": 90.56,
+  "sacak_kenarlari_m": [
+   6.24,
+   10.84,
+   2.2,
+   2.2
+  ],
+  "sacak_boyu_toplam_m": 21.48,
+  "cephe_kenarlari_m": [
+   5.94,
+   10.24,
+   1.9,
+   1.9
+  ],
+  "kose_adedi": 5,
+  "kose_kaynak": "dere hatlarının (saçakların) uçları; iki saçağın buluştuğu köşe tek sayılır",
+  "mahya_hatti_m": 15.34,
+  "mahya_dokumu_m": {
+   "mahya": 15.34,
+   "kirma": 0.0
+  },
+  "ters_mahya_m": 6.68,
+  "alin_saci_m": 19.59,
+  "sacak_saci_kenarlari_m": [
+   6.24,
+   10.84,
+   2.2,
+   2.2
+  ],
+  "sacak_omegasi_cephe_m": [
+   5.94,
+   10.24,
+   1.9,
+   1.9
+  ],
+  "dere": {
+   "boy_m": 21.48,
+   "hatlar_m": [
+    6.24,
+    10.84,
+    2.2,
+    2.2
+   ],
+   "uc": 7,
+   "serbest_uc": 6
+  },
+  "ek_cati": null,
+  "duvar_dibi": null,
+  "baca_cevresi_m": null,
+  "asik": null,
+  "dizilim": {
+   "satirlar": [
+    {
+     "boy_m": 3.74,
+     "adet": 21
+    },
+    {
+     "boy_m": 2.48,
+     "adet": 10
+    }
+   ],
+   "adet": 31,
+   "kapatma_m": 1.0,
+   "tasma_cm": 5.0,
+   "kesim_payi_mm": 5.0,
+   "tam_boy": 22,
+   "cift": 0,
+   "tek": 8,
+   "karma": 3,
+   "panel_m2": 103.34,
+   "uzatma": [],
+   "taban": {
+    "boylar": [
+     248.0,
+     374.0
+    ],
+    "adet": 31,
+    "boy_adet": {
+     "374.0": 21,
+     "248.0": 10
+    }
+   }
+  },
+  "cati_boyu_m": 10.84,
+  "bina_eni_m": 8.6,
+  "silte_dusulen_m2": 13.73,
+  "sacak_alti": "boardex",
+  "sacak_alti_eni_m": 0.3,
+  "sacak_yuzu_m2": 3.96
+ },
+ "kapi_pencere": [
+  {
+   "kalem": "Melamin kapı (80'lik kanat)",
+   "boyut": "90 × 214",
+   "adet": 5,
+   "durum": "model",
+   "formul": "iç kapı sayısı; boşluk modeldeki çerçeveden"
+  },
+  {
+   "kalem": "Kompozit çelik kapı",
+   "boyut": "90 × 210",
+   "adet": 1,
+   "durum": "model",
+   "formul": "dış kapı sayısı; ölçü gerçek listelerden"
+  },
+  {
+   "kalem": "PVC pencere",
+   "boyut": "120/180",
+   "adet": 3,
+   "durum": "model"
+  },
+  {
+   "kalem": "PVC pencere",
+   "boyut": "80/180",
+   "adet": 1,
+   "durum": "model"
+  },
+  {
+   "kalem": "PVC pencere",
+   "boyut": "120/120",
+   "adet": 4,
+   "durum": "model"
+  },
+  {
+   "kalem": "PVC vasistas",
+   "boyut": "60/40",
+   "adet": 1,
+   "durum": "model"
+  }
+ ],
+ "pencere_dahil": true,
+ "boya_dahil": true,
+ "vitrifiye_dahil": true,
+ "bayi": {
+  "gruplar": {
+   "Sıhhi tesisat": true,
+   "Elektrik": true
+  },
+  "not": "kapsam: projenin teknik özellikleri ve açıklama notları (alıcıya ait olanlar listeye girmez)"
+ },
+ "uyarilar": []
+}

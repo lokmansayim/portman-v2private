@@ -1,0 +1,43 @@
+{
+  "sema": "portman.duvar_tipleri/0.1-taslak",
+  "kaynak": "Lokman, 2 Ekim 2026 (20:15 katmanlar; 20:24 kalınlıklar). Duvar kalınlığı katmanların toplamıdır: sıfır hatalı ve sıvasız kabul edilir; sıva grubu verilmez.",
+  "birim": "mm",
+  "tipler": {
+    "DIS-80": {
+      "aile": "A1",
+      "paket": "baz",
+      "kullanim": "dis",
+      "katmanlar": [
+        {"malzeme": "Boardex", "kalinlik": 12.5, "levha": [1200, 2400], "yuz": "dis"},
+        {"malzeme": "Çelik karkas", "kalinlik": 80, "dolgu": "mineral yün"},
+        {"malzeme": "Alçıpan", "kalinlik": 12.5, "yuz": "ic"}
+      ]
+    },
+    "DIS-140": {
+      "aile": "A1",
+      "paket": "dış 140",
+      "kullanim": "dis",
+      "kaynak": "Lokman, 2 Ekim 2026 20:15 (bir üst paket: dış duvar karkası 140 mm); 3 Ekim 11:49 (yalnız dış duvarlar). 62 m² çelik SKP modelinde dış karkas 140 mm ölçüldü.",
+      "katmanlar": [
+        {"malzeme": "Boardex", "kalinlik": 12.5, "levha": [1200, 2400], "yuz": "dis"},
+        {"malzeme": "Çelik karkas", "kalinlik": 140, "dolgu": "mineral yün"},
+        {"malzeme": "Alçıpan", "kalinlik": 12.5, "yuz": "ic"}
+      ]
+    },
+    "IC-80": {
+      "aile": "A1",
+      "paket": "baz",
+      "kullanim": "ic",
+      "katmanlar": [
+        {"malzeme": "Alçıpan", "kalinlik": 12.5},
+        {"malzeme": "Çelik karkas", "kalinlik": 80},
+        {"malzeme": "Alçıpan", "kalinlik": 12.5}
+      ]
+    }
+  },
+  "cizim_kalinliklari_kayit": {
+    "not": "Arşivdeki çizimlerde dış duvar 12 cm, iç duvar 11 cm. Fark, vida kabarması ya da ince sıyırma sıva payıdır (Lokman, 2 Ekim 20:24). Hesapta kullanılmaz; yalnız çizimle karşılaştırma için tutulur.",
+    "dis_cm": 12,
+    "ic_cm": 11
+  }
+}

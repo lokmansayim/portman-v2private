@@ -1,0 +1,106 @@
+{
+ "nesne": {
+  "IfcOpeningElement": 15,
+  "IfcWall": 13,
+  "IfcWindow": 9,
+  "IfcDoor": 6,
+  "IfcSpace": 7,
+  "IfcCovering": 6,
+  "IfcSlab": 6,
+  "IfcPlate": 13
+ },
+ "ucgen": 2196,
+ "duvar": [
+  {
+   "ad": "DK",
+   "geometri_m3": 2.6762,
+   "net_yuz_m2": 25.4205,
+   "kalinlik_m": 0.105,
+   "beklenen_m3": 2.6692
+  },
+  {
+   "ad": "DB",
+   "geometri_m3": 1.4596,
+   "net_yuz_m2": 13.9005,
+   "kalinlik_m": 0.105,
+   "beklenen_m3": 1.4596
+  },
+  {
+   "ad": "DG",
+   "geometri_m3": 1.1851,
+   "net_yuz_m2": 11.253,
+   "kalinlik_m": 0.105,
+   "beklenen_m3": 1.1816
+  },
+  {
+   "ad": "DKB",
+   "geometri_m3": 0.6272,
+   "net_yuz_m2": 5.94,
+   "kalinlik_m": 0.105,
+   "beklenen_m3": 0.6237
+  },
+  {
+   "ad": "DKG",
+   "geometri_m3": 0.9072,
+   "net_yuz_m2": 8.5725,
+   "kalinlik_m": 0.105,
+   "beklenen_m3": 0.9001
+  },
+  {
+   "ad": "DD",
+   "geometri_m3": 2.0581,
+   "net_yuz_m2": 19.6005,
+   "kalinlik_m": 0.105,
+   "beklenen_m3": 2.0581
+  },
+  {
+   "ad": "I2",
+   "geometri_m3": 0.7125,
+   "net_yuz_m2": 6.786,
+   "kalinlik_m": 0.105,
+   "beklenen_m3": 0.7125
+  },
+  {
+   "ad": "I1",
+   "geometri_m3": 1.5597,
+   "net_yuz_m2": 14.8545,
+   "kalinlik_m": 0.105,
+   "beklenen_m3": 1.5597
+  },
+  {
+   "ad": "I3",
+   "geometri_m3": 1.1007,
+   "net_yuz_m2": 10.4827,
+   "kalinlik_m": 0.105,
+   "beklenen_m3": 1.1007
+  },
+  {
+   "ad": "I4",
+   "geometri_m3": 0.8729,
+   "net_yuz_m2": 8.3138,
+   "kalinlik_m": 0.105,
+   "beklenen_m3": 0.8729
+  },
+  {
+   "ad": "I6",
+   "geometri_m3": 0.297,
+   "net_yuz_m2": 2.7607,
+   "kalinlik_m": 0.105,
+   "beklenen_m3": 0.2899
+  },
+  {
+   "ad": "I7",
+   "geometri_m3": 0.7038,
+   "net_yuz_m2": 6.7027,
+   "kalinlik_m": 0.105,
+   "beklenen_m3": 0.7038
+  },
+  {
+   "ad": "I5",
+   "geometri_m3": 0.3711,
+   "net_yuz_m2": 3.501,
+   "kalinlik_m": 0.105,
+   "beklenen_m3": 0.3676
+  }
+ ]
+}

@@ -1,0 +1,339 @@
+{
+  "sema": "portman.yapi_tanimi/0.4-taslak",
+  "kod": "Ç8201",
+  "ad": "Tek kat çelik, 2+1, 82 m²",
+  "aile": "tek_kat_celik",
+  "paket": "baz",
+  "birim": "cm",
+  "kaynak": {
+    "cizim": "Arşiv/TEK KAT ÇELİK/PORTATİF EV TEK KAT ÇELİK PLANLAR.dwg (2 Ekim 2026'da okundu)",
+    "not": "Ölçüler ve açıklık yerleri çizimden. Başlangıç: kapalı kısmın sol-alt dış köşesi (0,0); +x sağa, +y yukarı. Dış kapı alt kenarda (y=0)."
+  },
+  "kapali": {
+    "en": 850,
+    "boy": 750
+  },
+  "veranda": {
+    "x": 850,
+    "y": 0,
+    "en": 244,
+    "boy": 750,
+    "islev": [
+      "veranda"
+    ],
+    "cerceve": {
+      "sirt": 8,
+      "genislik": 30,
+      "dikme_boyu": 240,
+      "dikme_adedi": 3,
+      "dikme_kenari": "sag",
+      "kiris_kenarlari": [
+        "alt",
+        "sag",
+        "ust"
+      ],
+      "kaynak": "Lokman, 3 Ekim 2026 13:27: kaplanır; her projede sırtı 80 mm (çelik karkas), genişliği 30 cm. Bu projede verandanın bütün çerçevesi böyle yapılır: kirişler yanlara ve karşıya konur; altlarına 240 cm, kiriş gibi dikme konur.",
+      "dikme_kaynak": "Dikme sayısı ve yeri katalog görsellerinden: dış kenarda iki köşe ve bir orta. Teyit bekliyor."
+    }
+  },
+  "duvar_yuksekligi": 270,
+  "dis_duvar_tipi": "DIS-80",
+  "ic_duvar_tipi": "IC-80",
+  "olcu_kurali": "Dış duvarlarda dış yüz sabittir; iç duvarlarda aks (duvar ortası) sabittir. Lokman, 2 Ekim 2026 20:40: \"dış duvarlar dıştan, iç duvarlar tam ortadan\".",
+  "ic_duvarlar": [
+    {
+      "ad": "A",
+      "yon": "dusey",
+      "aks": 347.5,
+      "bas": 0,
+      "son": 750,
+      "not": "yatak odaları ile hol ve banyo arası"
+    },
+    {
+      "ad": "P",
+      "yon": "yatay",
+      "aks": 375,
+      "bas": 0,
+      "son": 347.5,
+      "not": "iki yatak odası arası"
+    },
+    {
+      "ad": "Bb",
+      "yon": "yatay",
+      "aks": 496,
+      "bas": 347.5,
+      "son": 538.5,
+      "not": "banyonun alt duvarı"
+    },
+    {
+      "ad": "R",
+      "yon": "dusey",
+      "aks": 538.5,
+      "bas": 496,
+      "son": 750,
+      "not": "banyo ile mutfak arası"
+    },
+    {
+      "ad": "B",
+      "yon": "dusey",
+      "aks": 498.5,
+      "bas": 0,
+      "son": 496,
+      "not": "hol ile yaşam alanı arası"
+    }
+  ],
+  "mahaller": [
+    {
+      "ad": "Yatak Odası 1",
+      "nokta": [
+        170,
+        190
+      ],
+      "islev": [
+        "yatak_odasi"
+      ]
+    },
+    {
+      "ad": "Yatak Odası 2",
+      "nokta": [
+        170,
+        560
+      ],
+      "islev": [
+        "yatak_odasi"
+      ]
+    },
+    {
+      "ad": "Banyo",
+      "nokta": [
+        440,
+        620
+      ],
+      "islev": [
+        "banyo"
+      ]
+    },
+    {
+      "ad": "Hol",
+      "nokta": [
+        420,
+        250
+      ],
+      "islev": [
+        "hol"
+      ]
+    },
+    {
+      "ad": "Yaşam Alanı",
+      "nokta": [
+        680,
+        300
+      ],
+      "islev": [
+        "salon",
+        "mutfak"
+      ]
+    }
+  ],
+  "islev_kaynak": "Oda işlevleri mahal adlarından. Yaşam Alanı salon ile mutfağı birlikte içerir (katalog görseli: mutfak tezgâhı ve oturma grubu aynı mahalde). Elektrik kuralı (Ubeydullah, 3 Ekim 2026) oda işlevine göre uygulanır; Yaşam Alanı'nda salon + mutfak birlikte sayılır. Mühendis teyit etti (ikinci cevaplar; Lokman 4 Ekim 2026 01:24'te iletti): \"Evet doğru ikisini de uygulamamız gerekiyor. Çünkü mutfak eşyaları ayrı, salon eşyaları ayrı.\"",
+  "acikliklar": [
+    {
+      "tur": "pencere",
+      "duvar": "dis:alt",
+      "bas": 117,
+      "en": 120,
+      "yuk": 180,
+      "mahal": "Yatak Odası 1"
+    },
+    {
+      "tur": "pencere",
+      "duvar": "dis:alt",
+      "bas": 611,
+      "en": 120,
+      "yuk": 180,
+      "mahal": "Yaşam Alanı"
+    },
+    {
+      "tur": "pencere",
+      "duvar": "dis:ust",
+      "bas": 117,
+      "en": 120,
+      "yuk": 180,
+      "mahal": "Yatak Odası 2"
+    },
+    {
+      "tur": "pencere",
+      "duvar": "dis:ust",
+      "bas": 363,
+      "en": 60,
+      "yuk": 40,
+      "mahal": "Banyo"
+    },
+    {
+      "tur": "pencere",
+      "duvar": "dis:ust",
+      "bas": 631,
+      "en": 120,
+      "yuk": 100,
+      "mahal": "Yaşam Alanı"
+    },
+    {
+      "tur": "pencere",
+      "duvar": "dis:sag",
+      "bas": 105,
+      "en": 180,
+      "yuk": 180,
+      "mahal": "Yaşam Alanı"
+    },
+    {
+      "tur": "pencere",
+      "duvar": "dis:sag",
+      "bas": 285,
+      "en": 180,
+      "yuk": 180,
+      "mahal": "Yaşam Alanı"
+    },
+    {
+      "tur": "pencere",
+      "duvar": "dis:sag",
+      "bas": 465,
+      "en": 180,
+      "yuk": 180,
+      "mahal": "Yaşam Alanı"
+    },
+    {
+      "tur": "dis_kapi",
+      "duvar": "dis:alt",
+      "bas": 385.5,
+      "en": 95,
+      "yuk": 210,
+      "mentese": "son",
+      "acilim": "ic",
+      "bosluk": [
+        95,
+        210
+      ],
+      "kapi": [
+        90,
+        210
+      ],
+      "kaynak": "Boşluk 95 × 210: Ubeydullah (inşaat mühendisi), üçüncü cevaplar (Lokman 4 Ekim 2026 12:14'te iletti): \"Dış kapı boşluğu 95x210, iç oda kapı boşluğu 90x214 alınır.\" Katalog çiziminde genişlik 100'dü (383–483); boşluk 95'e indirildi, kapının ortası yerinde tutuldu. Kapı 90 × 210: yükleme listesi çalışma kitapları; üç çelik SKP modelinde dış kapı başlığı 210, net en 94."
+    },
+    {
+      "tur": "ic_kapi",
+      "duvar": "A",
+      "bas": 269.5,
+      "en": 90,
+      "mentese": "son",
+      "acilim": "sol",
+      "not": "Yatak Odası 1",
+      "yuk": 214,
+      "kanat": [
+        80,
+        200
+      ]
+    },
+    {
+      "tur": "ic_kapi",
+      "duvar": "A",
+      "bas": 390.5,
+      "en": 90,
+      "mentese": "bas",
+      "acilim": "sol",
+      "not": "Yatak Odası 2",
+      "yuk": 214,
+      "kanat": [
+        80,
+        200
+      ]
+    },
+    {
+      "tur": "ic_kapi",
+      "duvar": "Bb",
+      "bas": 363,
+      "en": 90,
+      "mentese": "bas",
+      "acilim": "ust",
+      "not": "Banyo",
+      "yuk": 214,
+      "cizimdeki_en": 80,
+      "kanat": [
+        80,
+        200
+      ]
+    },
+    {
+      "tur": "ic_kapi",
+      "duvar": "B",
+      "bas": 390.5,
+      "en": 90,
+      "mentese": "son",
+      "acilim": "sag",
+      "not": "Yaşam Alanı",
+      "yuk": 214,
+      "kanat": [
+        80,
+        200
+      ]
+    }
+  ],
+  "cizim_etiketleri_m2": {
+    "Yatak Odası 1": 11.8,
+    "Yatak Odası 2": 11.8,
+    "Banyo": 4.3,
+    "Hol": 6.7,
+    "Yaşam Alanı": 23.3,
+    "Veranda": 18.4
+  },
+  "lento": 70,
+  "cati": {
+    "tip": "kirma",
+    "egim_yuzde": 33,
+    "sacak": 30,
+    "sacak_alti_kaplama": true,
+    "topuk": 10,
+    "topuk_varsayim": false,
+    "topuk_kaynak": "SKP ölçümü, 2 Ekim 2026: 62, 81 ve 90 m² çelik modellerde makasın üst yüzü saçak ucunda 280 cm (duvar 270 + 10); saçak altı 270 cm. Lokman, 2 Ekim 22:05: makaslar %33 eğim ve 10 cm topukla çizilir",
+    "panel_kalinligi": 8,
+    "panel_kaynak": "Lokman, 2 Ekim 2026 22:05: makasların üzerine 8 cm çatı paneli gelir; saçak kaplaması 10 cm topuk + panelin eğimdeki ölçüsü kadar yapılır. 3 Ekim 13:27: makasların üzerine yine kendi malzemesinden çatı paneli konur. Çıkarım: ikisi aynı parça (sırt 80 mm); çatı kaplaması onun üzerine gelir.",
+    "mahya_kirmalarda": true,
+    "mahya_kaynak": "Lokman, 3 Ekim 2026 11:57: tepeye konan mahya çatının kırmalarına da konur; aynı malzeme",
+    "mahya_parca_boyu": 280,
+    "mahya_parca_kaynak": "Parça boyu L 2800: gerçek yükleme listeleri. Bindirme 20 cm: Lokman, 7 Ekim 2026 07:45 (\"Bindirmeleri 20 cm yap\"); L 2800 parçada uzunluk ÷ 2,6. Önce 30 cm idi (Lokman, 3 Ekim 2026 13:27). Çizim ve liste bindirmeyi kural dosyasından alır (`bindirme_m.mahya`); buradaki değer onunla aynı tutulur.",
+    "kapsam": "kapali+veranda",
+    "kaynak": "Lokman, 2 Ekim 2026 20:40 (kırma/dört omuz, %33, saçak 30 cm kaplamalı); kapsam katalog görsellerinden",
+    "yontem": "panel",
+    "yontem_kaynak": "Lokman, 3 Ekim 2026 13:27: çatı işlemede iki varyant var ve birlikte kullanılmaz. (A) hafif çelikte normal olan: makasların arasına tavan paneli, üzerine çatı paneli; ikisi de makasla aynı malzemeden, aynı roll form makinesinden. (B) PortatifEv'in uyguladığı, prefabrikte kullanılan yöntem: tavan omegası, aşık, alın sacı, saçak sacı. Şimdilik A baz alınır; Ç8201 çatı ve tavan panelli, saçak altı Boardex kaplamalı.",
+    "kaplama": "tek_kat_panel",
+    "kaplama_kaynak": "Baz paketin çatı kaplaması tek kat panel: Lokman, 4 Ekim 2026 01:42: \"çatıda baz model Tek Kat panel olarak geçiyor\" (mühendisin ikinci cevabındaki \"Baz paket sandviç panel olarak al\" sözünü düzeltti). Lokman, 3 Ekim 2026 13:27: 'çatı kaplaması' seçenektir: tek kat panel, sandviç panel ya da OSB + nem bariyeri + kiremit desen sac vb. Mühendisin ilk cevapları (3 Ekim): Excel motorundaki (CTKBF V1.1) kaplamalar altı tane; altısı da seçenek olarak hesaplanıyor.",
+    "sacak_alti": "boardex",
+    "mahya_bindirme": 20,
+    "sacak_yuzu": "boardex",
+    "sacak_yuzu_kaynak": "Lokman, 2 Ekim 2026 22:05: saçak yüzü (topuk + panelin eğimdeki ölçüsü) kaplanır. Ubeydullah, 3 Ekim 2026: \"Saçak omegası gerekmiyor. Saçak yüzü de boardex ile kaplanıyor.\"",
+    "inis_kaynak": "Lokman, 3 Ekim 2026 13:27: her köşeye bir iniş, 10 metrelik cephelerin ortasına birer tane; bu modelde toplam 6. Ubeydullah, 3 Ekim 2026: iniş plana bakarak yerleştirilir; düz bir saçakta ortalama 5 metrede bir yazılır. Planda elle yerleştirilmiş iniş yok; yerler kuraldan. Elle yerleştirilirse `inis_noktalari` alanına [x, y] listesi yazılır."
+  },
+  "lento_kapsam": "pencere",
+  "lento_kaynak": "Lokman, 2 Ekim 2026 20:40: lento her zaman 70 cm. 3 Ekim 13:27: iç kapı boşluğu 90 × 214. Çıkarım: lento 70 cm kuralı pencerelerde uygulanıyor; kapı boşlukları kendi yüksekliğinde.",
+  "ic_kapi_kurali": "Lokman, 3 Ekim 2026 13:27: çelik (LGF) yapılarda iç kapı için bırakılan boşluk en 90, yükseklik 214 cm. Kasa sağda, solda ve üstte 5'er cm; altta 5 cm şap ve 2–3 cm parke payı; kanat 200 cm'e düşer. Kanat eni 80: listelerdeki \"80'lik kanat\" adından ve 90 − 2 × 5'ten (çıkarım).",
+  "osb_takviye": {
+    "duvarlar": [
+      {
+        "mahal": "Yaşam Alanı",
+        "duvar": "R",
+        "neden": "mutfak dolabı"
+      },
+      {
+        "mahal": "Yaşam Alanı",
+        "duvar": "dis:ust",
+        "neden": "mutfak dolabı ve eviye"
+      },
+      {
+        "mahal": "Yaşam Alanı",
+        "duvar": "B",
+        "neden": "TV ünitesi"
+      }
+    ],
+    "kaynak": "Kural: Ubeydullah (inşaat mühendisi), 3 Ekim 2026: \"Bütün oda değil sadece dolap ve TV ünitesi gelen duvar metrajı alınır.\" Lokman, 3 Ekim 13:27: mutfak dolabı ve TV ünitesi takılırken mukavemet sağlasın diye; \"tüm yüzeyini hesapla\". Duvarların seçimi katalog görselinden (Arşiv/TEK KAT ÇELİK/Ç8201/PORT-Ç8201.jpg): mutfak tezgâhı L biçiminde, banyo–mutfak duvarı (R) ile üst dış duvar boyunca; TV ünitesi hol–yaşam alanı duvarında (B). Her duvarın Yaşam Alanı'na bakan yüzünün tamamı alındı. Mühendis seçimi doğruladı (ikinci cevaplar; Lokman 4 Ekim 2026 01:24'te iletti): \"Evet doğru yeri almışsın. Ancak bunun yeri en doğru şekilde genel mimari planda mutfak tezgahı ve TV ünitesi yeri gösterilirse o kısımlar alınarak bulunabilir.\" Üçüncü cevaplar (Lokman 4 Ekim 2026 12:14'te iletti): \"Duvarın tamamını al.\"",
+    "teyit": "muhendis"
+  }
+}

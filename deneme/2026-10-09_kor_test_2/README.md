@@ -1,0 +1,99 @@
+# 9 Ekim 2026 · ikinci kör test (KT-02)
+
+Deneme kodu; canlıda değil. İE-05 taslağının (`docs/is_emirleri/IE-05.md`) devamı. Genel model motoru ve hesap öteki klasörlerde: `../2026-10-06_kor_test/` (tanımdan girdi, çizim seti), `../2026-10-03_yukleme/` (yükleme listesi, kural seti).
+
+Lokman, 9 Ekim 2026 21:07: "bir test daha yapalım". Aynı gün Mac'teki bir klasörü bu oturuma bağladı: içinde 90 m²'lik bir çelik projenin montaj paftası (PDF), çatı kaplama malzemesi paftası (PDF), üretim dosyası (rulo form makinesinin CSV'leri, ZIP) ve yükleme listesi (PDF ve Excel) var. KT-01'deki gibi: modeli kur, çizim setini ve kurallarımızla kendi listemizi çıkar, listeyi gerçek liste açılmadan dondur, sonra kıyasla.
+
+Proje (KT-02): tek kat çelik, 2+1, 90 m² (paftadaki toplam brüt alan; veranda dahil); dört omuz çatı, sandviç panel; güneyde kolonlu ve korkuluklu veranda (ana çatının altında), batıda giriş kapısının önünde kendi küçük çatısı olan sundurma; yöntem B (tavan omegası ve aşık; paftada ikisinin de yerleşim planı var). Müşteri ve bayi adı kayıtlarda geçmez. Montaj paftasının tarihi Ağustos 2026.
+
+## Kör test protokolü (KT-01'deki gibi)
+
+1. Klasördeki yükleme listesi (PDF ve Excel), kendi listemiz üretilip depoya kaydedilene kadar açılmadı; yalnız boyutu, değiştirilme tarihi ve özeti (SHA-256) alındı (`sonuc/KT02_dondurma.md`).
+2. Girdi: montaj paftasındaki müşteri onay paftası (plan, teknik özellikler, açıklama notları), duvar paneli yerleşimi ile makas ve panel yerleşimi (yerler), elektrik yerleşimi (sayılar) ve üretim dosyası (çerçevelerin boyları, açıklıklar, et kalınlığı). Paftalardaki adetler (çatı kaplaması, tavan omegası, aşık, dere inişi) ve çatı kaplama malzemesi paftası girdi olarak kullanılmadı; dere paftasına yalnız sundurma çatısının biçimi için bakıldı.
+3. Kuralların kapsamadığı her yerde karar listeden önce verildi ve yazıldı (aşağıda).
+4. Kıyasta her fark sınıflanır: girdi hatası · kural hatası · karar farkı · listenin elle yuvarlaması · paftadan sayılan kalem. Yalnız ilk ikisi hata sayılır.
+
+## Girdi
+
+- **Tanım** (`tanim/KT02.json`, Yapı Tanımı 0.5; `tanim/kt02_tanim_uret.py` üretir; özeti dondurma kaydında). Müşteri projesinin geometrisidir; 9 Ekim 2026 22:22'den beri depoda (Lokman: "Evet ekle"); ad, telefon ve fiyat içermez. Duvarlar, kirişler ve kolonlar üretim dosyasındaki çerçeve boylarıyla, duvar paneli paftasındaki yerlerinde (paftanın vektör çizgileri duvarlarla ölçeklenerek okundu). Açıklıklar çerçevelerdeki dikme ve başlıklardan: 120/180 iki, 120/120, 120/100, 60/40, 300/200 (pencere ve doğramalar alıcıya ait); dış kapı 95 × 210; dört iç kapı 90 × 214 (banyo dahil). Mahallerin karkas yüzleri arası alanları paftadaki etiketlerle aynı: yatak odaları 14,32 / 14,26 · hol 7,09 / 7,08 · banyo 4,34 / 4,33 · yaşama mekânı 26,43 / 26,42 · sundurma 2,24 / 2,25 m².
+- **Çatı:** dört omuz, saçak 30 cm (makas 8240 = karkas 764 + 2 × 30), eğim 0,32878 (makasların üst başlığı), saçak kotu 280. Plan 824 × 1224 cm, mahya 400 cm. Sundurmanın çatısı: üç yüzlü (güney, kuzey, batı kırma ucu), 210 cm geniş; doğu ucu ana çatının saçak ucunda biter, ana saçağın üstünde kalan üçgen kalkan sayıldı.
+- **Çelik:** üretim dosyasından (`../2026-10-06_kor_test/uretim_profil.py`): 101 çerçeve, 1 577 üye, 1 421,37 m; 0,8 mm 650,14 m, 1,2 mm 748,57 m, 1,5 mm 22,65 m (tek kiriş, KRS06).
+- **Elektrik** (`sonuc/KT02_pafta_sayimi.json`; elektrik yerleşim paftasından): 5 tijli duy, 4 glop, 5 tekli ve 2 çiftli anahtar, 16 tekli ve 2 çiftli priz, 1 uydu prizi.
+
+## Liste çıkmadan önce verilen kararlar
+
+1. **Boya.** Açıklama 5 "Boya alıcıya ait" diyor: bütün boya (tavan boyası ve astar dahil) listeye yazılmadı. KT-01'de teknik özelliklerde yalnız dış ve iç cephe boyası yazıyordu ve gerçek listede tavan boyası ile astar vardı.
+2. **Tesisat.** Notlarda tesisat yok (KT-01'de "tesisat alıcıya ait" yazıyordu): sıhhi tesisat grubu listede. Vitrifiye ve pencere alıcıya ait.
+3. **Nem bariyeri.** Açıklama 1 (Boardex + çelik karkas + OSB + alçıpan) nem bariyeri yazmıyor: satır yok.
+4. **Elektrik işaretleri.** Tek tırnaklı anahtar tekli, çift tırnaklı (lejanttaki) çiftli sayıldı; aynı uçtan çıkan iki priz (TV duvarı, ocak) çiftli priz. Sigorta kutusu paftada giriş kapısının yanında: kural zaten girişi alıyor. "Prizler antrasit renk" listeye yazılmadı (elektrik satırlarında renk kuralı yok).
+5. **Sundurma.** Veranda gibi açık alan sayıldı (tavanı Boardex, köşebentte tavan çevresi). Çatısının ana saçağın üstünde kalan üçgeni kalkan (Boardex); o üçgenin iki eğik kenarı alın kenarı: yöntem B'de alın sacı ve baş makas Z'si, yöntem A'da alın kapama. Sundurmanın derelerinin ana saçakta biten iki ucu serbest uç (dere kapağı 2); iniş kuralı 8 köşe + 2 orta = 10.
+6. **Çelik grupları.** Makaslar (33: 10 ana, 18 saçak, 5 sundurma), çatı panelleri (31: kırma uçları, saçak, sundurma), veranda destekleri (4) ve 1,5 mm kiriş (1) ayrı satır; ağırlık modeldeki profil boyundan. 80 × 45 × 1,5 profilin birim ağırlığı kuralda yok: o satırda kg yazılmadı (soru), toplama girmedi.
+7. **Alan.** Oturum 92,27 m² (sundurma dahil); paftadaki toplam brüt alan 90 m². m²'ye bağlı satırlar 92 ile hesaplandı (kural böyle).
+8. **Yöntem.** B: projenin yapıldığı yöntem (paftada tavan omegası ve aşık). A: çelik standardı (Lokman, 7 Ekim 2026). İkisi de çıkarıldı.
+
+## Motor değişiklikleri (liste öncesi; kural değil, modelin anlatılabilmesi için)
+
+- `girdi_genel.py`: kirişin açık parçaları ayrı bölgelere yazılabilir (`acik_bolgeler`: KRS06 hem verandada hem yaşama mekânında); kiriş başka bir çelik grubuna yazılabilir (`celik_grubu`); modeldeki öteki gruplar ayrı satır olur (`celik_modeli.ek_satirlar`).
+- `yukleme.py`: `ek_satirlar` için çelik satırları (birim ağırlık kuralda yoksa kg yazılmaz, `soru`).
+- `uretim_profil.py` (yeni): üretim dosyasından çerçeve çerçeve profil boyu ve et kalınlığı.
+- Değişmezler denendi: bugünkü kod 0.12, 0.13 ve 0.14 setleriyle kendi günlerinin çıktılarını, 0.15 setiyle 8 Ekim 08:17'deki (`602fdc1`) çıktıları bayt bayt aynı veriyor; `saglama.py` ve çokgen sınaması toplam sorun 0.
+
+## Kıyas (9 Ekim 2026; gerçek liste dondurmadan sonra açıldı)
+
+Rapor: `docs/raporlar/2026-10-09_Kor_Test_KT02.md`. Satır satır tablo: `sonuc/KT02_kiyas.md`.
+
+Gerçek liste 21:40:35'te açıldı (dondurma commit'i `59602ef`, 21:40:05). Açılmayan iki dosyanın özeti kıyastan sonra yeniden alındı: dondurma kaydındakiyle aynı. Liste adsız ve fiyatsız olarak döküldü (`sonuc/KT02_gercek_liste.json`; tek sayfa, 6 Ağustos 2026).
+
+| Liste | Aynı satır (85 satırda) |
+|---|---|
+| Kör liste, yöntem B (dondurulan) | **46** |
+| Düzeltilmiş, yöntem B (yalnız girdi hatamız düzeltildi; kurallar aynı) | **57** |
+| + Eylül 2026 uygulaması (bilgi) | 59 |
+| İki kural sorusu listedeki gibi cevaplanırsa (bilgi; Betopan satırıyla 62) | 61 |
+| Kör ve düzeltilmiş, çelik standardı (A; bilgi) | 46 ve 56 |
+
+Kör listedeki 39 farkın asıl nedeni: girdi 11 · kural 5 · karar 13 · elle 7 · pafta 3. Bizim hatamız 16 satır.
+
+- **Girdi hatası (tek).** Sundurmanın çatısı ana çatıya iki vadiyle bağlanıyor; liste öncesi karar 5'teki okuma yanlıştı. Kanıtlar: çatı kaplaması paftasındaki çentik, dere paftasında ana saçağın kesilmesi, listede ters mahya 3,05 m. Düzeltilince 11 satırın hepsi tuttu; fazladan yazılan 3 satır (alın sacı, baş makas Z'si, dere kapağı) düştü.
+- **Kural eksikleri.** Veranda korkuluğunun kaplaması: listede Betopan, bizde dış cephe levhası. Açık sundurmanın bina alanına girmesi: 92 / 90. 1,5 mm profilin birim ağırlığı. Üçü Lokman'a soruldu (raporun 11. bölümü).
+- **Çelik.** Dokuz panel satırında adet aynı; sekizinde kg 0,1 kg içinde. Ağırlık üretim dosyasındaki profil boyundan.
+
+Kıyasın dosyaları:
+
+- `kt02_kiyas.py`: kıyas ve mekanik denetimler.
+- `kt02_farklar.json`: sınıflar ve nedenler; elle yazılır, kıyas denetler.
+- `kt02_kiyas_kos.sh`: düzeltilmiş tanımdan iki liste, Eylül 2026 katmanı, ne olur ve tablo. Kural seti 0.15'e sabit: 22:05 kıyası bayt bayt aynı üretilir. `kt02_kos.sh` da 0.15'e sabit (dondurulan listeler).
+- `kt02_ne_olur.py`: iki kural sorusunun etkisi; yalnız bilgi.
+- `kt02_sayfa.py`: Lokman'a verilen tek sayfa; depoya yazılmaz.
+- `sonuc/KT02_duzeltilmis_*`, `sonuc/KT02_ne_olur_*`, `sonuc/KT02_kiyas.{md,json}`.
+
+Düzeltilmiş tanımı `tanim/kt02_tanim_duzeltilmis.py` üretir. Bu betik dondurulan tanımı okur ve yalnız sundurmanın çatısını değiştirir.
+
+## Lokman'ın cevapları (9 Ekim 2026 22:22)
+
+Yazıldığı gibi:
+
+1. Korkuluk: "Veranda korkuluğunun her tarafı kaplanıyor iç yüzde kaplanıyor". İki yüz de kaplanır; kuralımızın iki yüzü sayması doğru. Malzeme ve üst yüz 22:44'te: "var sayılan Boardex yap korkuluk çok önemli değil binde bir çıkar sen var sayılan olarak üst 8 cm iç ve dış ölçüsüne göre şeklinde kurala işle". Kural seti 0.17: korkuluk Boardex; iç ve dış yüz kendi ölçüleriyle, üstü 8 cm (KT-02'de 0,64 m²; levha adedi değişmedi).
+2. 1,5 mm profil: "evet yaz". Kural seti 0.16: 80 × 45 × 1,5 = 2,07 kg/m. KT-02'de 1,5 mm kiriş 46,89 kg; listede de 46,89.
+3. Açık sundurma: "evet girsin". Bina alanına girer; hesap zaten böyleydi (92 m²). Uç, PH2 ucu ve inox taştaki fark artık karar farkı (listede 90).
+4. Tanım ve çizimler: "Evet ekle". `tanim/`: kör ve düzeltilmiş tanım, onları üreten betikler, üretim dosyasından profil boyları; ikisi betiklerden, profil boyları üretim dosyasından bayt bayt aynı üretiliyor. `cizimler/KT02_B` ve `cizimler/KT02_A`: düzeltilmiş tanımdan, iki yöntemle çizim seti. Plan, görünüşler, pafta, çatısız görünüm ve özet her üretimde bayt bayt aynı. IFC kimlikleri ve geometri özetindeki duvar sırası her üretimde değişir. Perspektiflerde ve makaslı görünümde pikselin binde üçünden azı değişebilir (KT-01'deki gibi).
+
+Cevaplardan sonraki tablo: `kt02_cevaplar_kos.sh` (güncel kural seti) → `sonuc/KT02_cevaplar_*`. Satır notları `kt02_farklar.json`, üstüne `kt02_cevaplar_notlari.json`. Kör listenin sınıfları 22:05 kaydındaki gibi kalır. 57 / 85 satır aynı (adetler değişmedi). Farklı kalanlar (22:44 cevabından sonra, kural seti 0.17): karar 18, elle 7, pafta 3; kural eksiği kalmadı. Çelik panel grubunun dokuz satırının hepsinde adet de kg da aynı. Çelik toplamı 2 041,2 kg, listede 2 051,3; fark C profillerde.
+
+## Çalıştırma
+
+```
+python ../2026-10-06_kor_test/uretim_profil.py <üretim klasörü> --json tanim/KT02_profil_boylari.json   # üretim dosyası depoda değil
+python tanim/kt02_tanim_uret.py tanim/KT02.json tanim/KT02_profil_boylari.json        # dondurulan tanım
+bash kt02_kos.sh tanim/KT02.json [python]                             # dondurulan iki girdi ve iki liste (sonuc/; kural seti 0.15)
+python tanim/kt02_tanim_duzeltilmis.py tanim/KT02_duzeltilmis.json tanim/KT02.json   # kıyastan sonra: girdi hatası düzeltilmiş tanım
+bash kt02_kiyas_kos.sh tanim/KT02_duzeltilmis.json [python]           # 22:05 kıyası (sonuc/; kural seti 0.15)
+bash kt02_cevaplar_kos.sh tanim/KT02_duzeltilmis.json [python]        # cevaplardan sonra: güncel kural setiyle listeler ve kıyas (sonuc/KT02_cevaplar_*)
+bash ../2026-10-06_kor_test/cizim_seti_kos.sh tanim/KT02_duzeltilmis.json cizimler/KT02_B [python]                # çizim seti, yöntem B
+bash ../2026-10-06_kor_test/cizim_seti_kos.sh tanim/KT02_duzeltilmis.json cizimler/KT02_A [python] --yontem panel  # çizim seti, yöntem A
+python kt02_sayfa.py --cikti KT02_kiyas.html --zaman "9 Ekim 2026 22:30"   # 22:05 kıyasının sayfası (depo dışına)
+```
+
+## Kişisel veri
+
+Depodaki dosyalarda müşteri, bayi ve çalışan adı, telefon ve fiyat yok. Gerçek listenin dökümü adsız ve fiyatsız; hazırlayan ve müşteri satırları alınmadı. Kaynak dosyalar (paftalar, üretim dosyası, liste) depoya alınmadı. Tanımlar ve çizimler müşteri projesinin geometrisidir; Lokman'ın onayıyla depoda (9 Ekim 2026 22:22); ad, telefon ve fiyat içermez.

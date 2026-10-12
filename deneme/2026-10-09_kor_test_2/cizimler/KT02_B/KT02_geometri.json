@@ -1,0 +1,144 @@
+{
+ "nesne": {
+  "IfcOpeningElement": 11,
+  "IfcWindow": 6,
+  "IfcWall": 18,
+  "IfcDoor": 5,
+  "IfcColumn": 6,
+  "IfcBeam": 9,
+  "IfcSpace": 7,
+  "IfcCovering": 7,
+  "IfcSlab": 8,
+  "IfcPlate": 8,
+  "IfcMember": 24
+ },
+ "ucgen": 2852,
+ "duvar": [
+  {
+   "ad": "D01",
+   "geometri_m3": 1.7902,
+   "net_yuz_m2": 13.41,
+   "kalinlik_m": 0.13350000000000023,
+   "beklenen_m3": 1.7902
+  },
+  {
+   "ad": "D02",
+   "geometri_m3": 1.1775,
+   "net_yuz_m2": 8.739,
+   "kalinlik_m": 0.13350000000000023,
+   "beklenen_m3": 1.1667
+  },
+  {
+   "ad": "D03",
+   "geometri_m3": 1.3463,
+   "net_yuz_m2": 10.0845,
+   "kalinlik_m": 0.1334999999999991,
+   "beklenen_m3": 1.3463
+  },
+  {
+   "ad": "D04",
+   "geometri_m3": 1.3895,
+   "net_yuz_m2": 10.3275,
+   "kalinlik_m": 0.1334999999999991,
+   "beklenen_m3": 1.3787
+  },
+  {
+   "ad": "D05",
+   "geometri_m3": 1.0453,
+   "net_yuz_m2": 7.83,
+   "kalinlik_m": 0.1335,
+   "beklenen_m3": 1.0453
+  },
+  {
+   "ad": "D06",
+   "geometri_m3": 1.4242,
+   "net_yuz_m2": 10.668,
+   "kalinlik_m": 0.1335,
+   "beklenen_m3": 1.4242
+  },
+  {
+   "ad": "D07",
+   "geometri_m3": 1.2644,
+   "net_yuz_m2": 9.471,
+   "kalinlik_m": 0.13349999999999995,
+   "beklenen_m3": 1.2644
+  },
+  {
+   "ad": "D08",
+   "geometri_m3": 0.6308,
+   "net_yuz_m2": 4.725,
+   "kalinlik_m": 0.13349999999999995,
+   "beklenen_m3": 0.6308
+  },
+  {
+   "ad": "D101",
+   "geometri_m3": 0.8195,
+   "net_yuz_m2": 6.453,
+   "kalinlik_m": 0.12700000000000045,
+   "beklenen_m3": 0.8195
+  },
+  {
+   "ad": "D103",
+   "geometri_m3": 1.0378,
+   "net_yuz_m2": 8.172,
+   "kalinlik_m": 0.12700000000000045,
+   "beklenen_m3": 1.0378
+  },
+  {
+   "ad": "D102",
+   "geometri_m3": 0.4133,
+   "net_yuz_m2": 3.1905,
+   "kalinlik_m": 0.12700000000000045,
+   "beklenen_m3": 0.4052
+  },
+  {
+   "ad": "D104",
+   "geometri_m3": 1.0378,
+   "net_yuz_m2": 8.172,
+   "kalinlik_m": 0.12700000000000045,
+   "beklenen_m3": 1.0378
+  },
+  {
+   "ad": "D105",
+   "geometri_m3": 1.327,
+   "net_yuz_m2": 10.449,
+   "kalinlik_m": 0.12700000000000045,
+   "beklenen_m3": 1.327
+  },
+  {
+   "ad": "A01",
+   "geometri_m3": 0.2709,
+   "net_yuz_m2": 1.935,
+   "kalinlik_m": 0.14,
+   "beklenen_m3": 0.2709
+  },
+  {
+   "ad": "D106",
+   "geometri_m3": 1.4733,
+   "net_yuz_m2": 11.601,
+   "kalinlik_m": 0.12700000000000045,
+   "beklenen_m3": 1.4733
+  },
+  {
+   "ad": "A03",
+   "geometri_m3": 0.1562,
+   "net_yuz_m2": 1.1154,
+   "kalinlik_m": 0.14,
+   "beklenen_m3": 0.1562
+  },
+  {
+   "ad": "A02",
+   "geometri_m3": 0.2437,
+   "net_yuz_m2": 1.7407,
+   "kalinlik_m": 0.14,
+   "beklenen_m3": 0.2437
+  },
+  {
+   "ad": "A04",
+   "geometri_m3": 0.2709,
+   "net_yuz_m2": 1.935,
+   "kalinlik_m": 0.14,
+   "beklenen_m3": 0.2709
+  }
+ ]
+}
