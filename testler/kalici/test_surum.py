@@ -448,7 +448,7 @@ def test_oz_test_sh_sonucu_ozetler(tmp_path):
     assert '"uyumlu": 22' in r.stdout and '"model": "claude-opus-5-5"' in r.stdout
 
 
-def test_kuru_kosu_imzali_istek_ve_dry_run_kosulu(tmp_path):
+def test_kuru_kosu_imzali_istek_dry_run_gerekmez(tmp_path):
     bin_ = tmp_path / "bin"; bin_.mkdir(); etc = tmp_path / "etc"; etc.mkdir(); data = tmp_path / "data"; data.mkdir()
     sir = "0123456789abcdef" * 2
     (etc / "whatsapp.env").write_text(f"WA_APP_SECRET={sir}\nWA_PHONE_NUMBER_ID=106000000000001\n"); (etc / "alan").write_text("portman.ornek.invalid\n")
@@ -470,19 +470,21 @@ def test_kuru_kosu_imzali_istek_ve_dry_run_kosulu(tmp_path):
         assert yuk["entry"][0]["changes"][0]["value"]["metadata"]["phone_number_id"] == "106000000000001"
         assert "900000000905" not in r.stdout and "900000000909" not in r.stdout and sir not in r.stdout and "…05" in r.stdout and "iş: bitti" in r.stdout
         assert "giden: interactive:gonderilmedi, document:gonderilmedi" in r.stdout and "ESKI-SORGU" not in r.stdout   # rapor satırı dolu (g. öneki)
-        assert "test kartı" in r.stdout and "Patron konuşmasında satır yok" in r.stdout
+        assert "test kartı" in r.stdout and "Patron konuşmasında satır yok" in r.stdout and "her zaman tutulur" in r.stdout
         assert "kanal yeniden kapatıldı" in r.stdout and json.loads((data / "settings.json").read_text())["enabled"] is False
+        # BK-07 S3: dry_run false iken de koşar (gönderici test kartının satırlarını zaten tutar); kanal açıksa kapatmaz
         (data / "settings.json").write_text(json.dumps({"enabled": True, "dry_run": False}))
         r = _kos("kuru_kosu.sh", env)
-        assert r.returncode == 1 and "dry_run true değil" in r.stderr and len(webhook.istekler) == 1
-        (data / "settings.json").write_text(json.dumps({"enabled": True, "dry_run": True}))
+        assert r.returncode == 0, r.stdout + r.stderr
+        assert len(webhook.istekler) == 2 and "dry_run kapalı, gerekmez" in r.stdout and "kanal yeniden kapatıldı" not in r.stdout
+        assert json.loads((data / "settings.json").read_text())["enabled"] is True
         webhook.cevaplar = {"/webhook": (200, {"ok": True, "mesaj": {"kayitsiz": 1}})}
         r = _kos("kuru_kosu.sh", env)
         assert r.returncode == 1 and "sahiplenilmedi" in r.stderr
         # test kartı yoksa DUR (Patron'un numarasına düşmez)
         psql2 = _sahte(bin_, "psql2", '#!/usr/bin/env bash\nSQL="${@: -1}"\ncase "$SQL" in *"rol = \'patron\'"*) echo 900000000909 ;; *"rol = \'test\'"*) echo "" ;; esac\n')
         r = _kos("kuru_kosu.sh", {**env, "PM_PSQL": psql2})
-        assert r.returncode == 1 and "test göndericisi yok" in r.stderr and len(webhook.istekler) == 2
+        assert r.returncode == 1 and "test göndericisi yok" in r.stderr and len(webhook.istekler) == 3
     finally:
         webhook.kapat()
 

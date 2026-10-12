@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
-# PORTMAN · kuru koşu (İE-06 Kapı 7; İE-07 P1 düzeltmesi; root). App secret ile imzalanmış SAHTE bir metni 127.0.0.1'deki
-# webhook'a verir; Meta'ya dokunmaz. Gönderen Patron DEĞİL, panelden girilen rol='test' sahte kartıdır (kod TEST; gerçek numara
-# değil): Patron konuşmasına iz kalmaz, Patron'un 24 saat penceresi kirlenmez, İş Emri numarası test kartının kendi projesinde kalır
-# (10 Ekim'de sahte Patron mesajı r01 üretmiş, ilk gerçek mesaj r02 olmuştu). settings.json'da dry_run true değilse DURUR (gerçek
-# gönderim olmasın). Kanal kapalıysa (enabled false) yalnız bu koşu için açar (enabled_at = şimdi) ve sonunda kapatır. Ajan işi
-# işler (1 LLM çağrısı; ücretli, Lokman'ın ayrı onayı), giden satırlar 'gonderilmedi' (dry_run) kalır; panelde test kartının
-# konuşmasında görünür. Sonra sayımları yazar (rapor sorgusunda sütunlar g. önekli: giden ve isler'de aynı adlı 'durum' var).
-# Çıktıda numara maskeli, sır yok.
+# PORTMAN · kuru koşu (İE-06 Kapı 7; İE-07 P1 düzeltmesi; BK-07 S3; root). App secret ile imzalanmış SAHTE bir metni
+# 127.0.0.1'deki webhook'a verir; Meta'ya dokunmaz. Gönderen Patron DEĞİL, panelden girilen rol='test' sahte kartıdır (kod TEST;
+# gerçek numara değil): Patron konuşmasına iz kalmaz, Patron'un 24 saat penceresi kirlenmez, İş Emri numarası test kartının kendi
+# projesinde kalır (10 Ekim'de sahte Patron mesajı r01 üretmiş, ilk gerçek mesaj r02 olmuştu). BK-07: dry_run GEREKMEZ — gönderici
+# (kanal/gonderici.py) test kartından doğan ya da ona giden her satırı dry_run ayarından bağımsız 'gonderilmedi: test_karti' ile
+# tutar (Patron bildirimi ve şablon dahil); canlıda dry_run false iken de güvenle koşar. Kanal kapalıysa (enabled false) yalnız bu
+# koşu için açar (enabled_at = şimdi) ve sonunda kapatır. Ajan işi işler (1 LLM çağrısı; ücretli, Lokman'ın ayrı onayı); satırlar
+# panelde test kartının konuşmasında görünür. Sonra sayımları yazar (rapor sorgusunda sütunlar g. önekli: giden ve isler'de aynı
+# adlı 'durum' var). Çıktıda numara maskeli, sır yok.
 #   ssh portman-vps 'bash /opt/portman/guncel/vps/kuru_kosu.sh' > ie07_kuru.txt 2>&1
 # Sınama: PM_ETC, PM_DATA, PM_KOK, PM_PSQL, PM_WEBHOOK_URL, PM_BEKLE, PM_METIN, PM_TEST (psql yerine numara).
 set -uo pipefail
@@ -19,11 +20,10 @@ cd /tmp
 echo "== Portman kuru koşu · $(date '+%Y-%m-%d %H:%M:%S %Z')"
 [ -s "$ETC/whatsapp.env" ] || dur "whatsapp.env yok ya da boş (Kapı 5: sir_koy.py wa_secret, wa_pnid)"
 DRY="$(python3 -c 'import json,sys; print("1" if json.load(open(sys.argv[1])).get("dry_run") is True else "0")' "$DATA/settings.json" 2>/dev/null || echo 0)"
-[ "$DRY" = "1" ] || dur "settings.json'da dry_run true değil; kuru koşu gerçek gönderime dönüşmesin diye durdu (ayar.sh dry_run true)"
 ACIK="$(python3 -c 'import json,sys; print("1" if json.load(open(sys.argv[1])).get("enabled") is True else "0")' "$DATA/settings.json" 2>/dev/null || echo 0)"
 TEST="${PM_TEST:-$($PSQL -c "SELECT numara FROM bayiler WHERE rol = 'test' AND aktif ORDER BY olusturuldu LIMIT 1" 2>/dev/null | head -1)}"
 [[ "$TEST" =~ ^[0-9]{8,15}$ ]] || dur "test göndericisi yok: panelden rol=test, kod TEST, gerçek olmayan bir numarayla kart girin (İE-07; Patron'un numarası kullanılmaz)"
-echo "   test kartı …${TEST: -2} · dry_run açık · kanal: $([ "$ACIK" = 1 ] && echo açık || echo 'kapalı (bu koşu için açılacak)')"
+echo "   test kartı …${TEST: -2} · satırlar her zaman tutulur (test_karti; dry_run $([ "$DRY" = 1 ] && echo açık || echo kapalı), gerekmez) · kanal: $([ "$ACIK" = 1 ] && echo açık || echo 'kapalı (bu koşu için açılacak)')"
 GERI=""
 if [ "$ACIK" != "1" ]; then
   python3 "$AYARLAR" --veri "$DATA" yaz enabled true >/dev/null || dur "ayar yazılamadı"; GERI=1
@@ -59,14 +59,13 @@ PY
 )" || dur "$SONUC"
 echo "   webhook: $SONUC"
 echo "$SONUC" | grep -q '"sahiplenildi": 1' || dur "mesaj sahiplenilmedi (cevap yukarıda: imza, phone_number_id ya da test kartı pasif/yok; rol=test patron modunda da sahiplenilir)"
-echo "-- bekleniyor (en çok $BEKLE sn): ajan işi işler, gönderici dry_run ile tutar"
+echo "-- bekleniyor (en çok $BEKLE sn): ajan işi işler, gönderici test kartının satırlarını tutar"
 for ((i = 0; i < BEKLE; i++)); do
   D="$($PSQL -c "SELECT durum FROM isler WHERE mesaj_id = '$MID'" 2>/dev/null | head -1)"
   if [ "$D" = "bitti" ] || [ "$D" = "basarisiz" ]; then break; fi
   sleep 2
 done
-# Gönderici (3 sn tur) bekleyen satırları dry_run ile 'gonderilmedi' yapmadan kanal kapatılmasın: Kapı 8'de enabled/dry_run
-# değişince bekleyen satır gerçek gönderime dönüşmesin.
+# Gönderici (3 sn tur) bekleyen satırları 'gonderilmedi: test_karti' yapmadan kanal kapatılmasın (satır bekliyor'da kalmasın).
 for ((i = 0; i < 30; i++)); do
   B="$($PSQL -c "SELECT count(*) FROM giden g JOIN isler i ON i.id = g.is_id WHERE i.mesaj_id = '$MID' AND g.durum = 'bekliyor'" 2>/dev/null | head -1)"
   [ "${B:-0}" = "0" ] && break
