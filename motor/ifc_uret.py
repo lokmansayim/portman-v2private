@@ -130,7 +130,7 @@ def hazirla(ie: dict) -> dict:
         "bina": {"ad": f"{ie.get('talep', {}).get('musteri_adi', '')} — {ie['yapi']['grid']['x_pano']}×{ie['yapi']['grid']['y_pano']} pano",
                  "W": _r(plan.W), "H": _r(plan.H), "duvar_h": float(ie["yapi"].get("duvar_yuksekligi_cm", DUVAR_H)), "lento": LENTO,
                  "cati": {"tip": cati.get("tip", "besik"), "egim": float(cati.get("egim_yuzde", 33)) / 100, "sacak": float(cati.get("sacak_cm", 30)),
-                          "topuk": float(cati.get("topuk_cm", 10)), "makas_yonu": "x (kısa kenar)", "renk": "antrasit"}},
+                          "topuk": float(cati.get("topuk_cm", 10)), "makas_yonu": "x (kısa kenar)", **({"makas_ekseni": cati["makas_ekseni"]} if "makas_ekseni" in cati else {}), "renk": "antrasit"}},
         "panolar": panolar, "acikliklar": acikliklar, "baglantilar": baglantilar, "odalar": odalar, "veranda": veranda, "tefris": [],
         "kanit": {"motor_uyarilari": plan.uyarilar}, "uyari": [],
     }
@@ -185,7 +185,9 @@ class IfcUretici:
         self._malzeme("mahal", "Mahal hacmi", (0.80, 0.86, 0.95), "space", saydam=0.85)
         # pano tipleri: katmanlı (8 + EPS + 8)
         self.tip = {}
-        for anahtar, ad, eps_mm in (("dis", "PE-DIS-100 Dış sandviç pano 100 mm", 84), ("ic", "PE-IC-60 İç sandviç pano 60 mm", 44)):
+        for anahtar, kal_mm in (("dis", round(G.T_DIS * 10)), ("ic", round(G.T_IC * 10))):
+            eps_mm = kal_mm - 16; standart = kal_mm in (100, 60)
+            ad = f"PE-{'DIS' if anahtar == 'dis' else 'IC'}-{kal_mm} {'Dış' if anahtar == 'dis' else 'İç'} sandviç pano {kal_mm} mm"
             t = api("root.create_entity", self.f, ifc_class="IfcWallType", name=ad, predefined_type="SOLIDWALL")
             ls = api("material.add_material_set", self.f, name=ad, set_type="IfcMaterialLayerSet")
             for mat, kal in ((self.malz["fiber"], 8), (self.malz["eps"], eps_mm), (self.malz["fiber"], 8)):
@@ -194,8 +196,9 @@ class IfcUretici:
             api("material.assign_material", self.f, products=[t], type="IfcMaterialLayerSet", material=ls)
             ps = api("pset.add_pset", self.f, product=t, name="PortatifEv_PanoTipi")
             api("pset.edit_pset", self.f, pset=ps, properties={
-                "Modul_cm": 125.5, "Kalinlik_mm": 100 if anahtar == "dis" else 60, "Yukseklik_cm": self.G["bina"]["duvar_h"],
-                "Kesit": f"8 mm fibercement + {eps_mm} mm EPS (16 kg/m³) + 8 mm fibercement", "Kaynak": "PortatifEv 9/2026 fiyat listesi teknik özellikleri"})
+                "Modul_cm": 125.5, "Kalinlik_mm": kal_mm, "Yukseklik_cm": self.G["bina"]["duvar_h"],
+                "Kesit": f"8 mm fibercement + {eps_mm} mm EPS (16 kg/m³) + 8 mm fibercement" + ("" if standart else " — katmanlar çıkarım, teyit edilecek"),
+                "Kaynak": "PortatifEv 9/2026 fiyat listesi teknik özellikleri" if standart else "Kalınlık: Lokman, 6 Ekim 2026; katmanlar teyit edilecek"})
             self.tip[anahtar] = t
 
     # ------------------------------------------------------------------ geometri yardımcıları
@@ -394,6 +397,8 @@ class IfcUretici:
 
     # ------------------------------------------------------------------ çatı, makas, veranda
     def cati(self):
+        if self.G["bina"]["cati"].get("makas_ekseni", "x") == "y":   # makaslar derinliği geçer (derinlik kısa kenar)
+            return self._cati_y()
         G = self.G; c = G["bina"]["cati"]; H0 = G["bina"]["duvar_h"]
         s, eg, top = c["sacak"], c["egim"], c["topuk"]
         Wd, Hd = self.Wd, self.Hd; xm = Wd / 2
@@ -441,6 +446,64 @@ class IfcUretici:
                 uyeler_e.append(m)
             api("aggregate.assign_object", self.f, relating_object=asm, products=uyeler_e)
         self.cati_ozet = {"mahya_cm": round(zm, 1), "makas": n, "cati_alan_m2": round(alan, 2)}
+
+    def _prizma_yz(self, pts_yz, x0, x1):
+        """Dünya y-z düzlemindeki kesit (cm), x0..x1 boyunca (dünya koordinatı)."""
+        prof = self.sb.profile(self.sb.polyline([np.array([_m(y), _m(z)]) for y, z in pts_yz], closed=True))
+        return self.sb.extrude(prof, magnitude=_m(x1 - x0), position=np.array([_m(x0), 0.0, 0.0]),
+                               position_z_axis=np.array([1.0, 0.0, 0.0]), position_x_axis=np.array([0.0, 1.0, 0.0]))
+
+    def _cati_y(self):
+        """Makaslar y yönünde (derinlik kısa kenar), mahya x boyunca. cati() ile aynı kesit; eksenler yer değiştirir."""
+        G = self.G; c = G["bina"]["cati"]; H0 = G["bina"]["duvar_h"]
+        s, eg, top = c["sacak"], c["egim"], c["topuk"]
+        Wd, Hd = self.Wd, self.Hd; ym = Hd / 2
+        td = max(p["kalinlik"] for p in G["panolar"])
+        zs = H0 + top; zm = zs + (ym + s) * eg; t = 4.0
+        roof = self._urun("IfcRoof", "ANA_CATI", predefined="GABLE_ROOF")
+        self._yerlestir(roof)
+        alan = 2 * math.hypot(ym + s, (ym + s) * eg) * (Wd + 2 * s) / 1e4
+        self._pset(roof, "PortatifEv_Cati", {"Egim_yuzde": eg * 100, "Sacak_cm": s, "Topuk_cm": top, "Mahya_cm": round(zm, 1),
+                                             "MakasYonu": "kısa kenar (y)", "Ortu": "trapez sac antrasit", "OrtuAlani_m2": round(alan, 2)})
+        parcalar = []
+        for ad, k in (("CATI_ON", [(-s, zs + 10), (ym, zm + 10), (ym, zm + 10 + t), (-s, zs + 10 + t)]),
+                      ("CATI_ARKA", [(ym, zm + 10), (Hd + s, zs + 10), (Hd + s, zs + 10 + t), (ym, zm + 10 + t)])):
+            sl = self._urun("IfcSlab", ad, predefined="ROOF", kapsa=False)
+            self._yerlestir(sl); self._temsil(sl, self._prizma_yz(k, -s, Wd + s), "sac")
+            self._pset(sl, "PortatifEv_Kapsam", {"BOMKalem": "Trapez çatı sacı (antrasit) — yüzey"})
+            parcalar.append(sl)
+        api("aggregate.assign_object", self.f, relating_object=roof, products=parcalar)
+        zt = lambda y: zs + (min(y, Hd - y) + s) * eg
+        alin = [(0, H0), (Hd, H0), (Hd, zt(Hd)), (ym, zt(ym)), (0, zt(0))]
+        for ad, xa, xb in (("ALIN_SOL", 0, td), ("ALIN_SAG", Wd - td, Wd)):
+            pl = self._urun("IfcPlate", ad, predefined="SHEET")
+            self._yerlestir(pl); self._temsil(pl, self._prizma_yz(alin, xa, xb), "fiber")
+            self._pset(pl, "PortatifEv_Kapsam", {"BOMKalem": "Çatı alın dolgusu (üçgen) — kural teyit edilecek"})
+        # makaslar pano akslarında: iki baş makas kalkan duvarların ekseninde, orta makaslar ön duvarın pano eklerinde
+        # (P6001'in gerçek yükleme listesinde 6 pano boyunca 2 baş + 5 orta makas; çıkarım, teyit bekliyor)
+        ekler = sorted({round(v, 3) for p in G["panolar"] if p["yon"] == "x" and p["tur"] == "dis" for v in (p["rect"][0], p["rect"][2])})
+        xs = [td / 2] + [x for x in ekler if td + 1e-6 < x < Wd - td - 1e-6] + [Wd - td / 2]
+        n = len(xs)
+        for i, x in enumerate(xs):
+            asm = self._urun("IfcElementAssembly", f"MAKAS_{i + 1:02d}", predefined="TRUSS")
+            self._yerlestir(asm)
+            self._pset(asm, "PortatifEv_Kapsam", {"BOMKalem": "Çatı makası (baş)" if i in (0, n - 1) else "Çatı makası (orta)", "Aciklik_cm": round(Hd, 1)})
+            q1, q3 = ym / 2, ym + ym / 2
+            uyeler = (("ALT_BASLIK", [(0, H0), (Hd, H0), (Hd, H0 + 10), (0, H0 + 10)]),
+                      ("UST_ON", [(-s, zs), (ym, zm), (ym, zm + 10), (-s, zs + 10)]),
+                      ("UST_ARKA", [(ym, zm), (Hd + s, zs), (Hd + s, zs + 10), (ym, zm + 10)]),
+                      ("DIKME_ORTA", [(ym - 3, H0 + 10), (ym + 3, H0 + 10), (ym + 3, zt(ym)), (ym - 3, zt(ym))]),
+                      ("DIKME_ON", [(q1 - 3, H0 + 10), (q1 + 3, H0 + 10), (q1 + 3, zt(q1)), (q1 - 3, zt(q1))]),
+                      ("DIKME_ARKA", [(q3 - 3, H0 + 10), (q3 + 3, H0 + 10), (q3 + 3, zt(q3)), (q3 - 3, zt(q3))]),
+                      ("CAPRAZ_ON", [(q1 - 3, H0 + 10), (q1 + 5, H0 + 10), (ym - 3, zt(ym) - 8), (ym - 11, zt(ym) - 8)]),
+                      ("CAPRAZ_ARKA", [(q3 - 5, H0 + 10), (q3 + 3, H0 + 10), (ym + 11, zt(ym) - 8), (ym + 3, zt(ym) - 8)]))
+            uyeler_e = []
+            for ad, k in uyeler:
+                m = self._urun("IfcMember", f"MAKAS_{i + 1:02d}_{ad}", predefined="CHORD" if "BASLIK" in ad or "UST" in ad else "MEMBER", kapsa=False)
+                self._yerlestir(m); self._temsil(m, self._prizma_yz(k, x - 2.5, x + 2.5), "galv")
+                uyeler_e.append(m)
+            api("aggregate.assign_object", self.f, relating_object=asm, products=uyeler_e)
+        self.cati_ozet = {"mahya_cm": round(zm, 1), "makas": n, "cati_alan_m2": round(alan, 2), "makas_ekseni": "y", "aciklik_cm": round(Hd, 1), "makas_x_cm": [round(x, 2) for x in xs]}
 
     def veranda(self):
         v = self.G["veranda"]
@@ -496,7 +559,7 @@ class IfcUretici:
             self._pset(e, "PortatifEv_Kapsam", {"BOMKalem": b["kalem"], "BOMKod": b["kod"], "Blok": b.get("blok", ""),
                                                 "Kot_cm": f"{z0:.0f}–{z1:.0f}", "KesimBoyuTanimli": False,
                                                 "Not": "Kot varsayım (profil kotu kaynakta tanımlı değil)" if b["tur"] == "veranda_profil"
-                                                       else "250 cm yalnız 3B gösterim; kesim boyu değil"})
+                                                       else f"{H0:.0f} cm yalnız 3B gösterim; kesim boyu değil"})
 
     def calistir(self, yol: Path):
         self.panolar(); self.baglantilar(); self.mahaller(); self.doseme(); self.cati(); self.veranda()

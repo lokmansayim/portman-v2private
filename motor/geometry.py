@@ -19,6 +19,7 @@ MOD = 125.5          # tam pano
 T_DIS = 10.0         # dış duvar kalınlığı
 T_IC = 6.0           # iç duvar kalınlığı
 OUT = "__DIS__"      # bina dışı
+X_SON = Y_SON = None  # ölçüye kesimde son aksın yeri (cm); yoksa None
 
 PENCERE_OLCULERI = {"120x120": (120, 120), "120x180": (120, 180), "60x40": (60, 40)}
 KAPI_GENISLIK = {"ic_kapi": 82.0, "dis_kapi": 97.0, "gecis": 82.0}
@@ -29,14 +30,60 @@ class IsEmriHatasi(ValueError):
     pass
 
 
+YENI_ANAHTARLAR = ("duvar_kalinligi_cm", "dis_olcu_cm", "dizilim", "ek_akslar_cm")   # İE-11 (6 Ekim denemesi + genişletme)
+
+
+def yeni_anahtar_var(is_emri: dict) -> bool:
+    """İE-11 anahtarlarından biri varsa True. Yoksa Motor eski İş Emri'nde bayt bayt aynı çıktıyı verir (altın testler)."""
+    yapi = is_emri.get("yapi", {})
+    return any(k in yapi for k in YENI_ANAHTARLAR) or any("konum_cm" in m for m in is_emri.get("mahaller", [])) \
+        or any(("konum_cm" in a) or ("hizalama" in a) or ("dograma" in a) for a in is_emri.get("acikliklar", []))
+
+
+def kalinlik_ayarla(dis_cm: float, ic_cm: float) -> None:
+    """Deneme: dış / iç duvar kalınlığı (cm). Verilmezse 10 / 6."""
+    global T_DIS, T_IC
+    if not (6.0 <= ic_cm <= dis_cm <= 30.0):
+        raise IsEmriHatasi(f"Duvar kalınlığı aralık dışı: dış {dis_cm} / iç {ic_cm} cm")
+    if dis_cm == ic_cm:
+        raise IsEmriHatasi("Dış ve iç duvar aynı kalınlıkta: katman adları ayrışmıyor (deneme sınırı)")
+    T_DIS, T_IC = float(dis_cm), float(ic_cm)
+
+
+def olcu_ayarla(dis_olcu, nx: float, ny: float) -> None:
+    """Deneme: dış ölçü verilirse (cm) son aks yapının bitişine çekilir; son pano özel ölçülü olur. Verilmezse akslar tam modüldür."""
+    global X_SON, Y_SON
+    X_SON = Y_SON = None
+    if not dis_olcu:
+        return
+    xs, ys = float(dis_olcu["x"]) - T_DIS, float(dis_olcu["y"]) - T_DIS / 2.0
+    for ad_, son, bas, n in (("x", xs, T_DIS, nx), ("y", ys, T_DIS / 2.0, ny)):
+        if not (bas + MOD * (n - 0.5) < son - 1e-9 and son <= bas + MOD * n + 1e-9):
+            raise IsEmriHatasi(f"Dış ölçü ile grid uyuşmuyor ({ad_}): son aks {son} cm, grid {n} pano; son yarım pano 0–62,75 cm aralığında olmalı")
+    X_SON, Y_SON = xs, ys
+
+
+def _mm(cm: float) -> str:
+    return f"{cm * 10:g}"
+
+
+def katman(ad: str) -> str:
+    """Kalınlık taşıyan katman adını geçerli kalınlığa çevirir (10 / 6 cm'de ad değişmez)."""
+    return {"DIS_DUVAR_100": f"DIS_DUVAR_{_mm(T_DIS)}", "IC_DUVAR_60": f"IC_DUVAR_{_mm(T_IC)}",
+            "KOSE_PROFIL_100": f"KOSE_PROFIL_{_mm(T_DIS)}", "KOSE_PROFIL_60": f"KOSE_PROFIL_{_mm(T_IC)}",
+            "IC_UCLU_H_60": f"IC_UCLU_H_{_mm(T_IC)}"}.get(ad, ad)
+
+
 def X(i: float) -> float:
     """Düşey aks: dış duvar iç yüzünden başlar (kısa kenar yönü, köşe 10 cm)."""
-    return 10.0 + MOD * i
+    v = T_DIS + MOD * i
+    return v if X_SON is None else min(v, X_SON)
 
 
 def Y(j: float) -> float:
     """Yatay aks: ön duvar orta eksenidir (uzun kenar yönü, köşe 5 cm)."""
-    return 5.0 + MOD * j
+    v = T_DIS / 2.0 + MOD * j
+    return v if Y_SON is None else min(v, Y_SON)
 
 
 @dataclass
@@ -181,6 +228,8 @@ def _cells_of_rect(rect):
 
 def kur(is_emri: dict) -> Plan:
     yapi = is_emri["yapi"]
+    _k = yapi.get("duvar_kalinligi_cm") or {}
+    kalinlik_ayarla(float(_k.get("dis", 10.0)), float(_k.get("ic", 6.0)))
     if yapi.get("sistem", "prefabrik") != "prefabrik":
         raise IsEmriHatasi("v1 yalnız prefabrik sistemi destekler")
     if int(yapi.get("kat_sayisi", 1)) != 1:
@@ -193,7 +242,8 @@ def kur(is_emri: dict) -> Plan:
     nx2, ny2 = int(round(nx * 2)), int(round(ny * 2))
     if abs(nx2 - nx * 2) > 1e-9 or abs(ny2 - ny * 2) > 1e-9 or nx < 2 or ny < 2:
         raise IsEmriHatasi("Grid yarım pano adımında ve en az 2×2 olmalı")
-    W, H = MOD * nx + 20.0, MOD * ny + 10.0
+    olcu_ayarla(yapi.get("dis_olcu_cm"), nx, ny)
+    W, H = (MOD * nx + 2.0 * T_DIS, MOD * ny + T_DIS) if X_SON is None else (X_SON + T_DIS, Y_SON + T_DIS / 2.0)
     dis_v_konum = yapi.get("dis_dusey_duvar", "aks_disinda")   # 'aks_disinda' (v1.4.3 son örnek) | 'eksende' (eski 6×8)
     uyarilar = []
 
@@ -439,10 +489,14 @@ def kur(is_emri: dict) -> Plan:
                 raise IsEmriHatasi(f"Bilinmeyen açıklık türü: {tur}")
             a, b = ac["arasi"]
             for n in (a, b):
-                if n not in mahaller:
+                if n not in mahaller and n != OUT:   # verandasız yapıda dış kapı doğrudan dışarı açılır
                     raise IsEmriHatasi(f"Açıklık için bilinmeyen mahal: {n}")
             w = float(ac.get("olcu", KAPI_GENISLIK[tur]))
             cand = _edges_between(duvarlar, a, b)
+            if OUT in (a, b):   # dışarı açılan kapı: cephe İş Emri'nde yazılır ("duvar": on | arka | sol | sag)
+                if ac.get("duvar") not in NORMAL:
+                    raise IsEmriHatasi(f"Dışarı açılan kapıda cephe (duvar) yazılmalı: {ac}")
+                cand = _edges_of_room_side(duvarlar, b if a == OUT else a, NORMAL[ac["duvar"]])
             if not cand:
                 raise IsEmriHatasi(f"{a}–{b} arasında duvar yok: {ac}")
             acl = Acilim(tur, str(int(w)) if w == int(w) else str(w), w, None, arasi=(a, b), mentese=ac.get("mentese", "sag"),

@@ -45,6 +45,7 @@ REF_H = _ref("ref_h-connector.json")
 FONT = "DejaVuSans.ttf"
 FONT_PATH = _ref(FONT)
 LABEL = "ÖN ONAYA SUNULAN TASLAK — ÜRETİM/STATİK PROJESİ DEĞİLDİR"
+PENCERE_UST_KOTU = 200.0   # 250 cm duvarda lento 50; yükseklik değişince üst kot sabit tutulur (çıkarım, teyit bekliyor)
 
 PENCERE_KAYNAK = {   # olcu: (kaynak blok, doğal yön, bbox)
     "120x120": ("kaynak-pencere-120120", "V", (53365.182, 8072.861, 53397.006, 8192.861)),
@@ -87,14 +88,27 @@ def mm_tag(boy_cm: float) -> str:
     return f"{int(mm)}p{int(round((mm - int(mm)) * 10))}"
 
 
+def _grid_yazi(yapi, ayrac, ek) -> str:
+    """Pano grid yazısı. Ölçüye kesimde: tam pano sayısı + kesilen son parçanın boyu."""
+    nx, ny = float(yapi['grid']['x_pano']), float(yapi['grid']['y_pano'])
+    if G.X_SON is None:
+        return f"{fmt(nx)}{ayrac}{fmt(ny)}{ek}"
+    def bir(boy):
+        tam = int((boy + 1e-9) // G.MOD); kalan = boy - tam * G.MOD
+        return f"{tam}{ek}" + (f" + {fmt(kalan)} cm" if kalan > 1e-6 else "")
+    return f"{bir(G.X(nx) - G.X(0))}{ayrac}{bir(G.Y(ny) - G.Y(0))}"
+
+
 class Cizici:
     def __init__(self, plan: G.Plan, katalog: Katalog):
         self.plan, self.kat = plan, katalog
+        katalog.t_dis_cm, katalog.t_ic_cm = G.T_DIS, G.T_IC
+        katalog.yukseklik_cm = float(plan.is_emri["yapi"].get("duvar_yuksekligi_cm", 250))
         self.doc = ezdxf.new("R2018", setup=True)
         doc = self.doc
         doc.units = units.CM
         doc.linetypes.add("VERANDA_KESIK", pattern=[30.0, 12.0, -18.0], description="Veranda profili 12 cizgi / 18 bosluk")
-        for name, color, lt in LAYERS:
+        for name, color, lt in [(G.katman(n), c, l) for n, c, l in LAYERS]:
             doc.layers.add(name, color=color, linetype=lt)
         doc.layers.get("NET_ALAN_GEOMETRISI").off()
         doc.layers.get("NET_ALAN_GEOMETRISI").dxf.plot = 0
@@ -143,11 +157,12 @@ class Cizici:
 
     def _h_blok(self):
         data = json.loads(REF_H.read_text()); ax, ay = 7546.678040288549, 806.98966762085
-        kod = self.kat.baglanti("uclu_h"); self.h_blok_adi = f"BOM_{kod}_UCLU_H_60"; self.h_kod = kod
+        kod = self.kat.baglanti("uclu_h"); self.h_blok_adi = f"BOM_{kod}_UCLU_H_{G._mm(G.T_IC)}"; self.h_kod = kod
         blk = self.doc.blocks.new(self.h_blok_adi)
         for tags in data["entities"]:
             d = dict(tags)
-            blk.add_line((float(d[10]) - ax, float(d[20]) - ay), (float(d[11]) - ax, float(d[21]) - ay), dxfattribs={"layer": "0", "color": 256})
+            kk = G.T_IC / 6.0   # kaynak blok 60 mm iç duvar içindir
+            blk.add_line(((float(d[10]) - ax) * kk, (float(d[20]) - ay) * kk), ((float(d[11]) - ax) * kk, (float(d[21]) - ay) * kk), dxfattribs={"layer": "0", "color": 256})
 
     def _rect(self, blk, x0, y0, x1, y1):
         blk.add_lwpolyline([(x0, y0), (x1, y0), (x1, y1), (x0, y1)], close=True, dxfattribs={"layer": "0", "color": 256})
@@ -173,12 +188,14 @@ class Cizici:
         if ac.tur == "pencere":
             src, nat, bb = PENCERE_KAYNAK[ac.olcu]; dname, _ = self.dograma[ac.olcu]
             self._rect(blk, 0, 0, t, s); self._rect(blk, 0, s + w, t, L)
-            if nat == "V": ins, rot = (t - bb[2], s - bb[1]), 0.0
-            else:          ins, rot = (t - bb[3], s + bb[2]), 270.0
+            orta = (t - 10.0) / 2.0
+            if nat == "V": ins, rot = (t - bb[2] - orta, s - bb[1]), 0.0
+            else:          ins, rot = (t - bb[3] - orta, s + bb[2]), 270.0
             blk.add_blockref(dname, ins, dxfattribs={"rotation": rot, "layer": "PENCERE"})
         elif ac.tur == "ic_kapi":
             self._rect(blk, 0, 0, t, s); self._rect(blk, 0, s + w, t, L)
             (ix, iy), rot, xs = IC_KAPI_VARYANT[var]; dname, _ = self.dograma["ic82"]
+            if var.startswith("SAG"): ix += t - 6.0   # kaynak yerleşim 60 mm duvarın +x yüzüne göredir
             if abs(w - 82) > 1e-6:
                 self.plan.uyarilar.append(f"İç kapı {w} cm: kaynak kapı sembolü 82 cm'lik; sembol ölçeklenmedi")
             blk.add_blockref(dname, (ix, iy + (L - 125.5) / 2.0), dxfattribs={"rotation": rot, "xscale": xs, "layer": "IC_KAPILAR"})
@@ -227,7 +244,7 @@ class Cizici:
                 name, frame, kod = self.pano_blok(p)
                 r = p.rect(); standart = abs(p.boy - G.MOD) < 1e-6
                 if montaj: layer = "MONTAJ_STANDART" if standart else "MONTAJ_OZEL_PANO"
-                else:      layer = "DIS_DUVAR_100" if d.tur == "dis" else "IC_DUVAR_60"
+                else:      layer = G.katman("DIS_DUVAR_100") if d.tur == "dis" else G.katman("IC_DUVAR_60")
                 if frame == "V":
                     ins, rot = ((r[0], r[1]), 0.0) if d.yon == "y" else ((r[0], r[3]), 270.0)
                     if p.acilim and p.acilim.tur == "pencere":
@@ -257,10 +274,10 @@ class Cizici:
                     self.text(f"{pk} {en}×{boy} cm", (cx + ox + offx, cy + oy + off), 11, "MONTAJ_YAZI", rot=(90.0 if d.yon == "y" else 0.0))
         for k in plan.koseler:
             name, kod = self.kose_blok(k)
-            layer = "MONTAJ_STANDART" if montaj else ("KOSE_PROFIL_100" if k.tur == "dis" else "KOSE_PROFIL_60")
+            layer = "MONTAJ_STANDART" if montaj else (G.katman("KOSE_PROFIL_100") if k.tur == "dis" else G.katman("KOSE_PROFIL_60"))
             self.yerlestir(name, kod, (k.rect[0], k.rect[1]), 0.0, layer, rol, ox, oy)
         for hb in plan.h_baglantilar:
-            self.yerlestir(self.h_blok_adi, self.h_kod, (hb.x, hb.y), hb.rot, "MONTAJ_STANDART" if montaj else "IC_UCLU_H_60", rol, ox, oy)
+            self.yerlestir(self.h_blok_adi, self.h_kod, (hb.x, hb.y), hb.rot, "MONTAJ_STANDART" if montaj else G.katman("IC_UCLU_H_60"), rol, ox, oy)
         # veranda dikmeleri
         if plan.dikmeler:
             kod = self.kat.baglanti("dikme"); name = f"BOM_{kod}_VERANDA_DIKME_100x100"
@@ -432,7 +449,7 @@ class Cizici:
     def ciz_on_gorunus(self, ox, top):
         plan, msp = self.plan, self.msp
         W = plan.W; hy = float(plan.is_emri["yapi"].get("duvar_yuksekligi_cm", 250)); cati = plan.is_emri.get("cati", {})
-        egim = float(cati.get("egim_yuzde", 33)) / 100.0; sacak = float(cati.get("sacak_cm", 30)); topuk = float(cati.get("topuk_cm", 10)); lento = 50.0
+        egim = float(cati.get("egim_yuzde", 33)) / 100.0; sacak = float(cati.get("sacak_cm", 30)); topuk = float(cati.get("topuk_cm", 10)); lento = hy - PENCERE_UST_KOTU
         bot = top - hy
         msp.add_lwpolyline([(ox, bot), (W + ox, bot), (W + ox, top), (ox, top)], close=True, dxfattribs={"layer": "ON_GORUNUS"})
         xs = set()
@@ -523,13 +540,14 @@ def uret(is_emri: dict, cikti_dir: Path, ad_govde: str | None = None, pdf_hatada
     from . import validate as V
     cikti_dir = Path(cikti_dir); cikti_dir.mkdir(parents=True, exist_ok=True)
     plan = G.kur(is_emri)
+    plan.uyarilar[:0] = list(is_emri.get("pafta_uyarilari", []))
     t0 = time.time()
     kat = Katalog()
     c = Cizici(plan, kat)
     W, H = plan.W, plan.H
     yapi = is_emri["yapi"]
     stem = ad_govde or f"Portman_{is_emri.get('is_emri_no','IS')}_r{int(is_emri.get('revizyon',1)):02d}"
-    baslik = f"{plan.is_emri.get('talep',{}).get('musteri_adi','')} | {fmt(float(yapi['grid']['x_pano']))} x {fmt(float(yapi['grid']['y_pano']))} PANO | {fmt(W)} × {fmt(H)} cm"
+    baslik = f"{plan.is_emri.get('talep',{}).get('musteri_adi','')} | {_grid_yazi(yapi, ' x ', ' PANO')} | {fmt(W)} × {fmt(H)} cm"
     icerik = is_emri.get("cikti", {}).get("icerik", [])
     gap = W + 300.0
     c.ciz_plan(0.0, 0.0, "ANA", "KAT PLANI — AKSLI", baslik + " | Model ve ölçüler: cm | 125,5 cm aks düzeni")
@@ -537,16 +555,20 @@ def uret(is_emri: dict, cikti_dir: Path, ad_govde: str | None = None, pdf_hatada
     montaj = ("montaj_kopyasi" in icerik) or True
     if montaj:
         c.ciz_plan(2 * gap, 0.0, "MONTAJ", "SAHA MONTAJ PLANI", baslik + " | Standart dışı panolar mor ve ölçülü")
-    notlar = ["Pencereler pano ortasında. Pencere üstünden duvar üstüne (lento): 50 cm.",
+    notlar = [f"Pencereler pano ortasında. Pencere üstünden duvar üstüne (lento): {fmt(float(yapi.get('duvar_yuksekligi_cm', 250)) - PENCERE_UST_KOTU)} cm.",
               "Net alanlar kapı eşikleri hariç; veranda alanı açık dış kenarlara kadardır.",
               "Açık mahal sınırları bitişik duvar yüzünün devamı kabul edildi."]
     for i, s in enumerate(notlar):
         c.text(s, (gap + W / 2, -145 - 30 * i), 13, "ODA_ADLARI")
-    c.ciz_on_gorunus(0.0, -600.0)
-    c.ciz_cati_profili(gap, -550.0)
+    _cati = is_emri.get("cati", {})
+    _rise = float(_cati.get("topuk_cm", 10)) + (W + 2 * float(_cati.get("sacak_cm", 30))) / 2 * float(_cati.get("egim_yuzde", 33)) / 100.0
+    kay = max(0.0, _rise - 147.445) if G.yeni_anahtar_var(is_emri) else 0.0   # İE-11: eski İş Emri'nde pafta yerleşimi değişmez
+    kay2 = kay + max(0.0, float(yapi.get("duvar_yuksekligi_cm", 250)) - 250.0)
+    c.ciz_on_gorunus(0.0, -600.0 - kay)
+    c.ciz_cati_profili(gap, -550.0 - kay)
     hy = yapi.get("duvar_yuksekligi_cm", 250); cati = is_emri.get("cati", {})
-    tab = [("Bina / pano grid", f"{fmt(float(yapi['grid']['x_pano']))} × {fmt(float(yapi['grid']['y_pano']))} pano — {fmt(W)} × {fmt(H)} cm"),
-           ("Sistem", "Prefabrik panel (8 mm fibercement)"), ("Duvar yüksekliği", f"{fmt(hy)} cm"), ("Dış duvar / iç duvar", "100 mm / 60 mm"),
+    tab = [("Bina / pano grid", f"{_grid_yazi(yapi, ' × ', ' pano')} — {fmt(W)} × {fmt(H)} cm"),
+           ("Sistem", "Prefabrik panel (8 mm fibercement)"), ("Duvar yüksekliği", f"{fmt(hy)} cm"), ("Dış duvar / iç duvar", f"{G._mm(G.T_DIS)} mm / {G._mm(G.T_IC)} mm"),
            ("Pano modülü", "125,5 cm (isteğe bağlı yarım pano 62,75 cm)"),
            ("Çatı", f"{cati.get('tip','besik').capitalize()} — %{fmt(float(cati.get('egim_yuzde',33)))} eğim, {fmt(float(cati.get('sacak_cm',30)))} cm saçak, {fmt(float(cati.get('topuk_cm',10)))} cm topuk"),
            ("Pencereler", "PVC doğrama; katalog 120×120 / 120×180 / 60×40"), ("Kapılar", "Dış: çelik kapı; iç: Amerikan panel kapı"),
@@ -555,11 +577,11 @@ def uret(is_emri: dict, cikti_dir: Path, ad_govde: str | None = None, pdf_hatada
     cx = ((3 if montaj else 2) * gap - 300) / 2
     c.text(LABEL, (cx, H + 320), 23, "PORTMAN_INFO")
     c.text(f"PORTMAN | {is_emri.get('talep',{}).get('bayi',{}).get('ad','')} / {is_emri.get('talep',{}).get('musteri_adi','')} | İş Emri {is_emri.get('is_emri_no','')} r{int(is_emri.get('revizyon',1)):02d}", (cx, H + 275), 20, "PORTMAN_INFO")
-    c.text(f"Duvar: 10 / 6 cm | Yükseklik: {fmt(hy)} cm | Pano: 125,5 cm | Çatı: %{fmt(float(cati.get('egim_yuzde',33)))}", (cx, -1090), 18, "PORTMAN_INFO")
-    c.text("Kural kaydı v1.4.3 ile üretildi. Yan görünüş ve üretim/statik hesabı bu taslağın kapsamında değildir.", (cx, -1130), 14, "PORTMAN_INFO")
-    c.text("Portman motor v1.1 | Üretim: " + time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()), (cx, -1165), 13, "PORTMAN_INFO")
+    c.text(f"Duvar: {fmt(G.T_DIS)} / {fmt(G.T_IC)} cm | Yükseklik: {fmt(hy)} cm | Pano: 125,5 cm | Çatı: %{fmt(float(cati.get('egim_yuzde',33)))}", (cx, -1090 - kay2), 18, "PORTMAN_INFO")
+    c.text("Kural kaydı v1.4.3 ile üretildi. Yan görünüş ve üretim/statik hesabı bu taslağın kapsamında değildir.", (cx, -1130 - kay2), 14, "PORTMAN_INFO")
+    c.text("Portman motor v1.1 | Üretim: " + time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()), (cx, -1165 - kay2), 13, "PORTMAN_INFO")
     for i, u in enumerate(plan.uyarilar[:4]):
-        c.text("UYARI: " + u, (cx, -1200 - 25 * i), 12, "PORTMAN_INFO")
+        c.text("UYARI: " + u, (cx, -1200 - kay2 - 25 * i), 12, "PORTMAN_INFO")
     dxf = cikti_dir / f"{stem}.dxf"; pdf = cikti_dir / f"{stem}.pdf"
     c.doc.saveas(dxf)
     bom_rows = c.bom()

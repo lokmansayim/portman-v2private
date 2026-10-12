@@ -25,6 +25,8 @@ def _rects_of_insert(e):
 
 def dogrula(doc, plan: G.Plan, is_emri: dict) -> dict:
     msp = doc.modelspace(); W, H = plan.W, plan.H
+    WALL_LAYERS = {G.katman("IC_DUVAR_60"), G.katman("DIS_DUVAR_100")}
+    KOSE_LAYERS = {G.katman("KOSE_PROFIL_60"), G.katman("KOSE_PROFIL_100")}
     limit = W + 150.0   # ana plan bölgesi (kopya sağda +300)
     hatalar = []
     panels, koseler, gaps = [], [], []
@@ -45,7 +47,7 @@ def dogrula(doc, plan: G.Plan, is_emri: dict) -> dict:
             for s in ("xscale", "yscale", "zscale"):
                 if abs(abs(e.dxf.get(s, 1)) - 1) > 1e-9:
                     hatalar.append(f"Ölçekli pano: {e.dxf.name}")
-            th = 6 if L == "IC_DUVAR_60" else 10
+            th = G.T_IC if L == G.katman("IC_DUVAR_60") else G.T_DIS
             if abs(min(outer[2] - outer[0], outer[3] - outer[1]) - th) > 1e-6:
                 hatalar.append(f"Duvar kalınlığı uyuşmuyor: {e.dxf.name} {outer}")
             panels.append({"name": e.dxf.name, "layer": L, "rect": outer, "rects": rs})
@@ -79,8 +81,11 @@ def dogrula(doc, plan: G.Plan, is_emri: dict) -> dict:
     if fp_diff > 1e-6:
         hatalar.append(f"Dosya ayak izi Plan ile uyuşmuyor (fark {fp_diff:.6f} cm²)")
     ext = _bbox([(r[0], r[1]) for r in rects] + [(r[2], r[3]) for r in rects])
-    if max(abs(a - b) for a, b in zip(ext, (0, 0, W, H))) > 1e-6:
-        hatalar.append(f"Dış ölçüler {ext} beklenen (0,0,{W},{H})")
+    if max(abs(a - b) for a, b in zip(ext, fp_plan.bounds)) > 1e-6:
+        hatalar.append(f"Duvarların kutusu {ext} Plan ayak izi {fp_plan.bounds} ile uyuşmuyor")
+    tum = unary_union([fp_plan] + [m.poly for m in plan.mahaller.values() if m.acik]).bounds
+    if max(abs(a - b) for a, b in zip(tum, (0, 0, W, H))) > 1e-6:
+        hatalar.append(f"Dış ölçüler {tum} beklenen (0,0,{W},{H})")
     # net alanlar (ana plan)
     areas = {}
     for e in msp.query('LWPOLYLINE[layer=="NET_ALAN_GEOMETRISI"]'):
@@ -110,7 +115,7 @@ def dogrula(doc, plan: G.Plan, is_emri: dict) -> dict:
         if round(need, 6) not in meas:
             hatalar.append(f"Gerçek dış ölçü nesnesi yok: {need}")
     # H bağlantıları
-    hs = [e for e in msp.query('INSERT[layer=="IC_UCLU_H_60"]') if e.dxf.insert.x < limit]
+    hs = [e for e in msp.query(f'INSERT[layer=="{G.katman("IC_UCLU_H_60")}"]') if e.dxf.insert.x < limit]
     if len(hs) != len(plan.h_baglantilar):
         hatalar.append(f"H bağlantı sayısı {len(hs)} / beklenen {len(plan.h_baglantilar)}")
     for e in hs:
