@@ -88,6 +88,34 @@ Dosyalar oturumun geçici klasöründe; depoya kaydı Lokman'ın onayına bağl�
 
 Depoda yalnız kural kitabı değişti; motor, liste kuralları ve canlı değişmedi.
 
+**12 Ekim 2026 15:10 eki (dal `ie-05`; depo dışı iş):** Lokman 14:31 ve 14:46'da `T1012-CV`'yi düzeltti.
+- **14:31:** "cumba ve çıkıntı olan yerde görünüşlerde boşluk oluşmuş". Kesit istemiyor, bilgi için vermiş; kesit pakete girmiyor.
+- **14:46:** "veranda saçağı ile cumba saçağı aynı hizada, çıkıntı önde 30 cm, kendi 30 cm saçağı". Hata şuydu: cumba çatısı duvarda bitiyordu (ön saçağı yoktu), çıkıntının saçağı 15 cm'di. Düzeltme:
+  - cumbanın ön saçağı 30 cm, veranda saçağıyla aynı hatta ve kotta (280);
+  - çıkıntının saçağı önde ve yanlarda 30 cm.
+
+  Pencere ile makaslar arasındaki 30'ar cm değişmedi.
+- **Boşluklar kapandı:**
+  - Cumba alnı üç parça: çıkıntı çatısının iki yanı ve üstü.
+  - Duvar üstü ile alçak çatı arası kalkan gibi kapatıldı (ana ön duvarın ve cumbanın doğu duvarının üstü; 270'ten 290–303'e kadar). Ön görünüşte cumbanın doğu saçağının altından içerisi görünüyordu.
+  - Alın sacı paneli 3 mm dıştan ve üstten sarıyor. Yüzler çakışınca perspektifte alın boyunca noktalı desen (boşluk gibi) görünüyordu.
+  - Plan ölçü zincirinde örtülü kenarlar ve 1 cm'den yakın noktalar atıldı; art arda kısa ölçüler çizginin iki yanına yazılıyor ("3030", "08" ve kuzeydeki "8" kalktı).
+- **Kanıt:**
+  - Çizim setinde 12 çıktının 12'si üretildi, IFC4 şema hatası 0.
+  - Cumba, çıkıntı ve veranda köşelerinin yakın plan görüntülerinde delik yok (pembe zeminle denetlendi).
+  - Oturum 74,11 m² (değişmedi).
+  - Liste: çatı yüzeyi 90,3'ten 92,0 m²'ye, dış cephe Boardex 91,7'den 93,3 m²'ye, vadi 1,1'den 1,5 m'ye, duvar dibi 8,48'den 8,80 m'ye çıktı.
+- **Motor kopyasına yeni eklentiler (depo dışı; İE-08'e taşınacaklara eklenir):**
+  - `cati_genel.kalkan`: `ust_disarida` (duvara dayanan alçak çatının altındaki dolgu).
+  - `ifc_genel`: alın bandı payı; girintili düzlemde bandın iç yönü.
+  - `ciz_genel`: ölçü zinciri.
+- **Paket:**
+  - Bayi PDF'i 3 sayfa: sunum, pafta, perspektifler.
+  - Mühendis zip'i kesitsiz: IFC, liste PDF ve md, pafta, makaslı, çatısız.
+- **Açık:** IFC'de veranda tavanı yok, oysa liste kuralında var (Boardex, saçağın ucuna kadar). Bu yüzden 3B'de verandanın çatı altı açık görünüyor.
+
+Depoda yalnız DURUM değişti; motor, kural kitabı ve canlı değişmedi.
+
 **Oturum devri:** `docs/devir/2026-09-30_Aksam_Devri.md` (30.09 akşamı, Kapı M sonrası; sıra ve bakım listesi) ve `docs/devir/2026-09-30_Oturum_Devri.md` (30.09 01:10; kurallar, K-A kararları, Astra ölçütleri). 28–30 Eylül penceresi kapandı. Yeni pencere bu ikisiyle başlar: kurallar, yapılanlar, bekleyen kararlar, sıradaki işler, Astra'ya çizim işi için ölçütler.
 
 Yeni pencere için hazırlıklar:
