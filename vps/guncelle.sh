@@ -85,6 +85,10 @@ a = numpy.arange(12, dtype=float).reshape(3, 4)
 iz = float((a @ a.T).trace()); kok2 = float(numpy.sqrt(numpy.array([16.0]))[0])
 assert abs(iz - 506.0) < 1e-9 and abs(kok2 - 4.0) < 1e-12, (iz, kok2)
 import beyin.karar, motor.dxf_out, kalici, webhook, panel, gonderici, ayarlar, nabiz, meta_api   # noqa
+import motor.genel.uret, motor.genel.iz   # noqa  (İE-08: genel motor paketi; kural kitabı ve modeller sürümle gider)
+import os
+for p in ("kurallar/liste/kurallar.json", "kurallar/cizim/cizim_seti.json", "modeller/C8801.json", "modeller/altin.json"):
+    assert os.path.exists(os.path.join(kok, p)), f"sürüm ağacında {p} yok (İE-08: kurallar/ ve modeller/ sürümle gider)"
 print(f"   içe aktarma tamam: python {sys.version.split()[0]} · numpy {numpy.__version__} (hesap tamam) · ezdxf {ezdxf.__version__} · matplotlib {matplotlib.__version__}"
       f" · pillow {PIL.__version__} · PyMuPDF {getattr(fitz, 'VersionBind', '?')} · shapely {shapely.__version__}"
       f" · psycopg {psycopg.__version__} · pydantic {pydantic.__version__} · ifcopenshell {ifcopenshell.version}")
@@ -104,6 +108,20 @@ PY
   fi
   echo "   perspektif: $PERS"
   printf '%s · %s\n' "$PERS" "$(date '+%Y-%m-%d %H:%M:%S')" > "$HEDEF/PERSPEKTIF"
+  echo "-- [3c/7] genel motor denemesi (İE-08: Ç8801 ana koddaki paketle çizilir, altın değerle karşılaştırılır; AYRI süreç, en çok 120 sn; bilgi amaçlı, sürüm etkinleşir)"
+  if [ -f "$HEDEF/vps/genel_dene.py" ]; then
+    GENEL_DIR="$(mktemp -d)"; RC=0
+    timeout 120 "$VPY" "$HEDEF/vps/genel_dene.py" "$GENEL_DIR" > "$GENEL_DIR/cikti.txt" 2>/dev/null || RC=$?
+    GENEL="$(tail -n 1 "$GENEL_DIR/cikti.txt" 2>/dev/null || true)"; rm -rf "$GENEL_DIR"     # deneme çıktıları; kalıcı iz yok
+    if [ "$RC" = "124" ]; then GENEL="ÇİZİLEMEDİ (120 sn içinde bitmedi)"
+    elif [ "$RC" -ge 128 ] 2>/dev/null; then GENEL="ÇİZİLEMEDİ (süreç çöktü, sinyal $((RC - 128)))"
+    elif [ -z "$GENEL" ]; then GENEL="ÇİZİLEMEDİ (çıktı yok, çıkış kodu $RC)"; fi
+    case "$GENEL" in AYNI*) ;; *) GENEL="$GENEL → Lokman karar verir (İE-08 Soru 17; çelik adaylar kosullu yapılabilir)" ;; esac
+  else
+    GENEL="yok (vps/genel_dene.py bu sürümde yok; İE-08 öncesi etiket)"
+  fi
+  echo "   genel motor: $GENEL"
+  printf '%s · %s\n' "$GENEL" "$(date '+%Y-%m-%d %H:%M:%S')" > "$HEDEF/GENEL"
   date '+%Y-%m-%d %H:%M:%S' > "$HEDEF/KURULDU"
 fi
 VPY="$HEDEF/venv/bin/python"

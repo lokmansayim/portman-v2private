@@ -48,6 +48,7 @@ def ucgenle(ifc_yol: Path):
                         "uzun": getattr(e, "LongName", None)})
             if not it.next():
                 break
+    cik.sort(key=lambda s: s["id"])      # İE-08: çok çekirdekli üçgenleme sırası rastgele; nesne sırası kayıt numarasıyla sabitlenir (geometri.json ve çizim deterministik)
     return f, cik
 
 

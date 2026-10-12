@@ -83,7 +83,7 @@ def kaynak(tmp_path_factory):
     bare = tmp / "kaynak.git"; calisma = tmp / "calisma"
     subprocess.run(["git", "init", "-q", "--bare", "-b", "main", str(bare)], check=True)
     subprocess.run(["git", "clone", "-q", str(bare), str(calisma)], check=True, capture_output=True)
-    for d in ("kanal", "beyin", "motor", "is_emri", "vps", "araclar"):
+    for d in ("kanal", "beyin", "motor", "is_emri", "vps", "araclar", "kurallar", "modeller"):      # İE-08: kurallar/ ve modeller/ sürümle gider
         shutil.copytree(KOK / d, calisma / d, ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "durum", "cikti", "build"))
     (calisma / "SHA256SUMS").write_text("deneme\n")
     shutil.copy(KOK / ".gitattributes", calisma / ".gitattributes")                 # testler/ ve deneme/ export-ignore (Lokman 9.10)
@@ -146,6 +146,11 @@ def test_guncelle_ikinci_surum_ve_geri_don(surum_ortam):
     assert "perspektif: " in out and (pers.startswith("VTK yok (denenmedi") or pers.startswith("ÇİZİLEMEDİ (") or pers.startswith("TAMAM (")), pers
     if pers.startswith("ÇİZİLEMEDİ") or pers.startswith("VTK yok"):
         assert "pilot perspektifsiz" in pers
+    # İE-08 [3c]: genel motor denemesi (Ç8801, ana koddaki paket, altın değer); sonuç GENEL dosyasında (durum.sh okur); sürüm etkin.
+    # Test venv'i tam paket setidir (araclar/gereksinimler.txt) → AYNI; kurallar/ ve modeller/ sürüm ağacında ([3] denetler)
+    genel = (s9 / "GENEL").read_text()
+    assert "genel motor: AYNI (" in out and genel.startswith("AYNI (plan PNG, liste JSON ve IFC izi altınla aynı"), genel
+    assert (s9 / "kurallar" / "liste" / "kurallar.json").exists() and (s9 / "modeller" / "altin.json").exists() and (s9 / "motor" / "genel" / "uret.py").exists()
     assert "stop portman-webhook portman-gonderici portman-agent portman-panel" in log.read_text() and "start portman-webhook" in log.read_text()
     assert sorgu(__import__("depo").Depo(dsn(surum_ortam["db"])), "SELECT max(surum) AS s FROM sema_surumu")[0]["s"] == 5
     assert surum_ortam["saglik"].istekler and surum_ortam["saglik"].istekler[0]["path"] == "/saglik"
