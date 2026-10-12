@@ -111,14 +111,17 @@ def surum_ortam(tmp_path, kaynak):
     log = tmp_path / "systemctl.log"
     systemctl = _sahte(bin_, "systemctl", '#!/usr/bin/env bash\necho "$@" >> "$PM_SYSTEMCTL_LOG"\n[ "$1" = is-active ] && echo active\nexit 0\n')
     kok = tmp_path / "opt"; (kok / "data" / "nabiz").mkdir(parents=True); etc = tmp_path / "etc"; etc.mkdir()
+    (etc / "alan").write_text("portman.ornek.invalid\n")                                   # BK-07: guncelle.sh [7/7] nginx_uygula.sh
+    nginx_dir = tmp_path / "nginx"
     saglik = _SahteSunucu(kod=200)
     saglik.bozuk = False                                   # True → postgres: false (sürüm kapısı düşer); kod 503 tek başına düşürmez (nabiz.sh sorunları)
     surum_dosyasi = kok / "guncel" / "SURUM"
     saglik.uret = lambda yol: (saglik.kod, {"ok": saglik.kod == 200, "postgres": not saglik.bozuk,
                                             "surum": surum_dosyasi.read_text().strip() if surum_dosyasi.exists() else None})
     env = {"PM_KOK": str(kok), "PM_ETC": str(etc), "PM_GIT_URL": str(kaynak), "PM_PYTHON": sys.executable, "PM_VENV_ATLA": "1", "PM_SYSTEMCTL": systemctl,
-           "PM_SYSTEMCTL_LOG": str(log), "PM_OLARAK": "", "PM_PG_DSN": dsn(ad), "PM_SAGLIK_URL": saglik.url + "/saglik", "PM_SAGLIK_BEKLE": "4", "PM_TEST": "1"}
-    yield {"env": env, "kok": kok, "log": log, "saglik": saglik, "db": ad}
+           "PM_SYSTEMCTL_LOG": str(log), "PM_OLARAK": "", "PM_PG_DSN": dsn(ad), "PM_SAGLIK_URL": saglik.url + "/saglik", "PM_SAGLIK_BEKLE": "4", "PM_TEST": "1",
+           "PM_NGINX_DIR": str(nginx_dir), "PM_LE_DIR": str(tmp_path / "le")}
+    yield {"env": env, "kok": kok, "log": log, "saglik": saglik, "db": ad, "nginx": nginx_dir}
     saglik.kapat()
     with _admin() as c:
         c.execute(f"DROP DATABASE IF EXISTS {ad} WITH (FORCE)")
@@ -140,6 +143,11 @@ def test_guncelle_ikinci_surum_ve_geri_don(surum_ortam):
     assert "stop portman-webhook portman-gonderici portman-agent portman-panel" in log.read_text() and "start portman-webhook" in log.read_text()
     assert sorgu(__import__("depo").Depo(dsn(surum_ortam["db"])), "SELECT max(surum) AS s FROM sema_surumu")[0]["s"] == 5
     assert surum_ortam["saglik"].istekler and surum_ortam["saglik"].istekler[0]["path"] == "/saglik"
+    # BK-07 [7/7]: nginx yapılandırması sürümden yazıldı (sertifika yok → yalnız 80 bloğu), alan adı işlendi, yedek yok (ilk yazım)
+    nginx_conf = surum_ortam["nginx"] / "sites-available" / "portman.conf"
+    assert "nginx: uygulandı (yalnız 80 (sertifika yok)" in out and "yedek: yok (ilk yazım)" in out
+    assert nginx_conf.exists() and "server_name portman.ornek.invalid;" in nginx_conf.read_text() and "listen 443" not in nginx_conf.read_text()
+    assert (surum_ortam["nginx"] / "sites-enabled" / "portman.conf").is_symlink() and not list(surum_ortam["nginx"].glob("sites-available/*.onceki-*"))
     # ikinci sürüm: onceki ← 09, guncel ← 12; göç yok. /saglik 503 (nabiz.sh'de duran bir sorun) ama sürüm ve Postgres doğru → kapı geçer
     surum_ortam["saglik"].kod = 503
     r = _kos("guncelle.sh", env, "v2026.10.12")
@@ -149,6 +157,7 @@ def test_guncelle_ikinci_surum_ve_geri_don(surum_ortam):
     s12 = kok / "surumler" / "v2026.10.12"
     assert os.readlink(kok / "guncel") == str(s12) and os.readlink(kok / "onceki") == str(s9) and (s12 / "IKINCI").exists()
     assert "uygulanan göçler: yok (güncel)" in out
+    assert "nginx: değişiklik yok" in out and not list(surum_ortam["nginx"].glob("sites-available/*.onceki-*"))   # aynı yapılandırma: dokunulmaz
     # geri dönüş ve yeniden ileri
     r = _kos("geri_don.sh", env)
     assert r.returncode == 0, r.stdout + r.stderr
@@ -158,6 +167,37 @@ def test_guncelle_ikinci_surum_ve_geri_don(surum_ortam):
     # aynı etiket yeniden: dosyalar yeniden açılmaz
     r = _kos("guncelle.sh", env, "v2026.10.12")
     assert r.returncode == 0 and "sürüm zaten kurulu" in r.stdout and os.readlink(kok / "guncel") == str(s12)
+
+
+def test_nginx_uygula_yedekler_ve_sertifikaya_gore_blok(tmp_path):
+    """BK-07 S2: eski dosya farklıysa .onceki-<zaman> yedeğiyle değiştirilir; aynıysa dokunulmaz; sertifika varsa 443 bloğu girer;
+    alan adı yoksa UYARI ile durur ve hiçbir şey yazmaz. PM_TEST=1: nginx -t ve reload atlanır (sahte systemctl günlüğü boş kalır)."""
+    bin_ = tmp_path / "bin"; bin_.mkdir(); etc = tmp_path / "etc"; etc.mkdir(); nginx = tmp_path / "nginx"; le = tmp_path / "le"
+    log = tmp_path / "systemctl.log"
+    systemctl = _sahte(bin_, "systemctl", '#!/usr/bin/env bash\necho "$@" >> "$PM_SYSTEMCTL_LOG"\nexit 0\n')
+    env = {"PM_ETC": str(etc), "PM_NGINX_DIR": str(nginx), "PM_LE_DIR": str(le), "PM_SYSTEMCTL": systemctl, "PM_SYSTEMCTL_LOG": str(log), "PM_TEST": "1"}
+    r = _kos("nginx_uygula.sh", env, str(KOK))
+    assert r.returncode == 1 and "alan adı okunamadı" in r.stderr and not nginx.exists()
+    (etc / "alan").write_text("portman.ornek.invalid\n")
+    hedef = nginx / "sites-available" / "portman.conf"
+    hedef.parent.mkdir(parents=True); hedef.write_text("# eski (3m)\nclient_max_body_size 3m;\n")
+    r = _kos("nginx_uygula.sh", env, str(KOK))
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert "nginx: uygulandı (yalnız 80 (sertifika yok); /panel/ yok (443 bloğu yok); PM_TEST" in r.stdout and "yedek: " in r.stdout and ".onceki-" in r.stdout
+    [yedek] = list(hedef.parent.glob("portman.conf.onceki-*"))
+    assert yedek.read_text().startswith("# eski (3m)") and "listen 443" not in hedef.read_text() and "client_max_body_size" not in hedef.read_text()
+    assert "server_name portman.ornek.invalid;" in hedef.read_text() and "__ALAN__" not in hedef.read_text()
+    r = _kos("nginx_uygula.sh", env, str(KOK))
+    assert r.returncode == 0 and "nginx: değişiklik yok" in r.stdout and len(list(hedef.parent.glob("portman.conf.onceki-*"))) == 1
+    # sertifika gelince 443 bloğu da yazılır; yeni yedek alınır
+    (le / "live" / "portman.ornek.invalid").mkdir(parents=True); (le / "live" / "portman.ornek.invalid" / "fullchain.pem").write_text("x")
+    r = _kos("nginx_uygula.sh", env, str(KOK))
+    assert r.returncode == 0 and "nginx: uygulandı (80+443; /panel/ 12m" in r.stdout
+    assert "listen 443 ssl http2;" in hedef.read_text() and "client_max_body_size 12m" in hedef.read_text() and len(list(hedef.parent.glob("portman.conf.onceki-*"))) == 2
+    assert not log.exists()                                                                       # PM_TEST: reload çağrılmadı
+    # şablon yoksa UYARI
+    r = _kos("nginx_uygula.sh", env, str(tmp_path / "yok"))
+    assert r.returncode == 1 and "şablon yok" in r.stderr
 
 
 def test_etiket_denetimleri_hicbir_sey_kurmaz(surum_ortam):

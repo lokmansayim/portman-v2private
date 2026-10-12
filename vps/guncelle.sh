@@ -2,6 +2,7 @@
 # PORTMAN · sürüm kurulumu (İE-06, Kapı 4 ve sonraki her güncelleme; root). Onaylı AÇIKLAMALI etiketi dağıtım anahtarıyla çeker,
 # /opt/portman/surumler/<etiket>/ altına kendi venv'iyle kurar, içe aktarma denetimini ve göçleri (yalnız ekler) koşar, 'onceki' ve
 # 'guncel' bağlantılarını değiştirir, servisleri başlatır ve /saglik'i bekler; sağlık gelmezse geri_don.sh ile önceki sürüme döner.
+# BK-07: sağlık geçince sürümdeki nginx yapılandırmasını uygular (vps/nginx_uygula.sh; nginx -t, yedek, reload; hata sürümü düşürmez).
 #   ssh portman-vps 'bash -s' < vps/guncelle.sh v2026.10.XX > ie06_4_surum.txt 2>&1      (ilk kez; depo sunucuda yokken)
 #   ssh portman-vps 'bash /opt/portman/guncel/vps/guncelle.sh v2026.10.XX'                 (sonrakiler)
 # DURUR: etiket biçimi (vYYYY.AA.GG[a-z]); etiket açıklamalı (annotated) değilse; etiket origin/main üzerinde değilse; içe aktarma
@@ -36,7 +37,7 @@ if [ -f "$ETC/deploy_key" ] && [[ "$GIT_URL" != /* ]]; then
   fi
 fi
 
-echo "-- [1/6] kaynak: $GIT_URL"
+echo "-- [1/7] kaynak: $GIT_URL"
 if [ ! -d "$KAYNAK/.git" ]; then
   git clone -q --no-checkout "$GIT_URL" "$KAYNAK" || dur "depo çekilemedi (dağıtım anahtarı GitHub'a eklendi mi?)"
 fi
@@ -48,7 +49,7 @@ COMMIT="$(git -C "$KAYNAK" rev-parse "refs/tags/$ETIKET^{commit}")"
 git -C "$KAYNAK" merge-base --is-ancestor "$COMMIT" refs/remotes/origin/main || dur "etiket origin/main üzerinde değil: $ETIKET → ${COMMIT:0:12}"
 echo "   etiket $ETIKET → ${COMMIT:0:12} · main üzerinde · $(git -C "$KAYNAK" tag -l --format='%(taggerdate:short) %(contents:subject)' "$ETIKET")"
 
-echo "-- [2/6] sürüm dizini: $HEDEF"
+echo "-- [2/7] sürüm dizini: $HEDEF"
 if [ -d "$HEDEF" ] && [ ! -f "$HEDEF/KURULDU" ]; then
   KENAR="$SURUMLER/.yarim-$ETIKET-$(date +%Y%m%d%H%M%S)"
   mv "$HEDEF" "$KENAR"; echo "   yarım kalmış dizin kenara alındı: $KENAR (silinmedi)"
@@ -60,7 +61,7 @@ else
   git -C "$KAYNAK" archive --format=tar "refs/tags/$ETIKET" | tar -x -C "$HEDEF"
   printf '%s\n' "$ETIKET" > "$HEDEF/SURUM"; printf '%s\n' "$COMMIT" > "$HEDEF/SURUM_COMMIT"
   echo "   dosyalar açıldı ($(find "$HEDEF" -type f | wc -l) dosya; .git yok)"
-  echo "-- [3/6] sanal ortam ve içe aktarma denetimi"
+  echo "-- [3/7] sanal ortam ve içe aktarma denetimi"
   if [ -n "${PM_VENV_ATLA:-}" ]; then
     install -d -m 755 "$HEDEF/venv/bin"
     printf '#!/bin/sh\nexec "%s" "$@"\n' "$(command -v "$PY")" > "$HEDEF/venv/bin/python"; chmod 755 "$HEDEF/venv/bin/python"
@@ -91,11 +92,11 @@ PY
 fi
 VPY="$HEDEF/venv/bin/python"
 
-echo "-- [4/6] göçler (kalici.py goc; yalnız eksikler, yalnız ekler)"
+echo "-- [4/7] göçler (kalici.py goc; yalnız eksikler, yalnız ekler)"
 GOC="$("${OLARAK[@]}" env PORTMAN_PG_DSN="$PG_DSN" PORTMAN_KANAL_DIR="$KOK/data" "$VPY" "$HEDEF/kanal/kalici.py" goc 2>&1)" || { echo "$GOC" | tail -5; dur "göç uygulanamadı; sürüm etkinleştirilmedi"; }
 echo "   $GOC"
 
-echo "-- [5/6] bağlantılar ve servisler"
+echo "-- [5/7] bağlantılar ve servisler"
 ESKI="$( [ -L "$KOK/guncel" ] && readlink -f "$KOK/guncel" || true )"
 $SYSTEMCTL stop $SERVISLER >/dev/null 2>&1 || true
 if [ -n "$ESKI" ] && [ "$ESKI" != "$(readlink -f "$HEDEF")" ]; then
@@ -106,7 +107,7 @@ $SYSTEMCTL daemon-reload >/dev/null 2>&1 || true
 $SYSTEMCTL start $SERVISLER || dur "servisler başlatılamadı (journalctl -u portman-webhook)"
 echo "   guncel → $(readlink "$KOK/guncel") · onceki → $( [ -L "$KOK/onceki" ] && readlink "$KOK/onceki" || echo yok)"
 
-echo "-- [6/6] sağlık: $SAGLIK_URL (en çok $SAGLIK_BEKLE sn; ölçüt: cevapta surum=$ETIKET ve postgres=true — nabiz.sh'nin eski sorunları bu kapıyı düşürmez)"
+echo "-- [6/7] sağlık: $SAGLIK_URL (en çok $SAGLIK_BEKLE sn; ölçüt: cevapta surum=$ETIKET ve postgres=true — nabiz.sh'nin eski sorunları bu kapıyı düşürmez)"
 OK=""; SON=""
 for ((i = 0; i < SAGLIK_BEKLE; i++)); do
   SON="$(curl -s --max-time 5 "$SAGLIK_URL" 2>/dev/null || true)"
@@ -128,5 +129,12 @@ if [ -z "$OK" ]; then
   dur "sağlık $SAGLIK_BEKLE sn içinde yeni sürümle ve Postgres bağlantısıyla cevap vermedi"
 fi
 echo "   sağlık: sürüm $ETIKET, Postgres bağlı · ${SON:0:300}"
+
+echo "-- [7/7] nginx yapılandırması (BK-07: sürümdeki vps/nginx/portman.conf; nginx -t, yedek, reload; hata sürümü düşürmez)"
+if [ -f "$HEDEF/vps/nginx_uygula.sh" ]; then
+  PM_ETC="$ETC" PM_SYSTEMCTL="$SYSTEMCTL" PM_TEST="$TEST" bash "$HEDEF/vps/nginx_uygula.sh" "$HEDEF" 2>&1 | sed 's/^/   /' || echo "   UYARI: nginx yapılandırması uygulanamadı; sürüm etkin, eski nginx yapılandırması duruyor (bash $HEDEF/vps/nginx_uygula.sh $HEDEF)" >&2
+else
+  echo "   nginx_uygula.sh bu sürümde yok; atlandı"
+fi
 if [ -z "$TEST" ] && [ -f "$HEDEF/vps/durum.sh" ]; then bash "$HEDEF/vps/durum.sh" || true; fi
 echo "== bitti: $ETIKET etkin ($(date '+%Y-%m-%d %H:%M:%S %Z'))"
