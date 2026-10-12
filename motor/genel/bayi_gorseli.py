@@ -54,17 +54,44 @@ def plan_bayi(t: dict, hedef: Path, kod: str, is_emri_no: str | None = None, rev
     taslak = "TASLAK" + (f" · r{int(revizyon):02d}" if revizyon is not None else "") + (f" · {is_emri_no}" if is_emri_no else "")
     yol = hedef / f"{kod}_plan_bayi.png"
 
+    # Bayi çizimi kuralları (Lokman, 12–13.10.2026): 15 cm ve daha kısa zincir parçaları komşusuna katılır (şablon paftasıyla aynı anahtar,
+    # D-10); yön etiketleri en dıştaki ölçü çizgisinin ve sayısının dışına, çizim yapıldıktan sonra ölçülen yerlere konur (ÖN etiketi
+    # 1024'ü, SOL etiketi 860'ı kapatıyordu); mahal adı ile m² yazısı ölçeğe göre açılır. `testler/genel/test_yazi_cakismasi.py` denetler.
+    from .sablon_pafta import sablon_kurallari
+    _d = (sablon_kurallari().get("zincir_en_kisa_parca_cm") or {}).get("deger")
+    en_kisa = 15.0 if _d is None else float(_d)
+    pts = [p for h in ciz_genel.dis_hat(y) for p in h]                       # plan_eksen'in zincirleriyle aynı sınır (dış yüz)
+    ex0, ey0, ex1, ey1 = (min(p[0] for p in pts), min(p[1] for p in pts), max(p[0] for p in pts), max(p[1] for p in pts)) if pts else (bx0, by0, bx1, by1)
+    cm_pt_tahmin = max((W + 440) / 614.0, (H + 440) / 499.0)               # 11×9 in figürde eksen ≈ 614 × 499 pt; kenar payları ≈ 220 cm
+    mahal_aralik = max(14.0, 8.5 * cm_pt_tahmin)                           # ad ve m² kutuları (≈ 11 pt) üst üste binmesin
+
     def ciz(dpi: int) -> None:                       # aynı çizim; 5 MB'ı aşarsa yalnız çözünürlük düşer, etiketler ve başlık korunur
+        from matplotlib.text import Annotation
         fig, ax = plt.subplots(figsize=(11.0, 9.0), dpi=dpi)
-        ciz_genel.plan_eksen(ax, y, baslik="\n".join(s for s in (baslik, ad, taslak) if s), olcu_zinciri=True)
-        pay = 0.09 * max(W, H)
+        ciz_genel.plan_eksen(ax, y, baslik="\n".join(s for s in (baslik, ad, taslak) if s), olcu_zinciri=True, en_kisa_parca=en_kisa,
+                             mahal_aralik=mahal_aralik, giris_yazi_dy=38.0)       # GİRİŞ yazısı alt zincirin sayısına değmesin (Ç8201)
+        # çizilen her şeyin (ölçü sayıları ve okları dahil) dış sınırı; etiket bunun dışına, 10 pt boşlukla
+        fig.canvas.draw(); r = fig.canvas.get_renderer(); inv = ax.transData.inverted()
+        kutular = []
+        for t in ax.texts:
+            bb = t.arrow_patch.get_window_extent(r) if isinstance(t, Annotation) and getattr(t, "arrow_patch", None) is not None else t.get_window_extent(r)
+            (dx0, dy0), (dx1, dy1) = inv.transform([[bb.x0, bb.y0], [bb.x1, bb.y1]])
+            kutular.append((min(dx0, dx1), min(dy0, dy1), max(dx0, dx1), max(dy0, dy1)))
+        cm_pt = abs(inv.transform([[0, 0], [72, 0]])[1][0] - inv.transform([[0, 0], [72, 0]])[0][0]) / 72 * fig.dpi / 72   # cm / pt
+        bosluk = 10 * cm_pt
+        yatayda = [k for k in kutular if ex0 <= (k[0] + k[2]) / 2 <= ex1]       # alt/üst zincirler (planın genişliğinde)
+        duseyde = [k for k in kutular if ey0 <= (k[1] + k[3]) / 2 <= ey1]       # sol/sağ zincirler
+        etiket_yeri = {"on": min([k[1] for k in yatayda] + [ey0 - 102]) - bosluk, "arka": max([k[3] for k in yatayda] + [ey1 + 50]) + bosluk,
+                       "sol": min([k[0] for k in duseyde] + [ex0 - 86]) - bosluk, "sag": max([k[2] for k in duseyde] + [ex1 + 50]) + bosluk}
         kutu = dict(boxstyle="round,pad=0.35", fc="#1f5f93", ec="none")
-        ax.text((bx0 + bx1) / 2, by0 - pay, ETIKET["on"], ha="center", va="top", fontsize=12, weight="bold", color="white", bbox=kutu, zorder=20)
-        ax.text((bx0 + bx1) / 2, by1 + pay, ETIKET["arka"], ha="center", va="bottom", fontsize=12, weight="bold", color="white", bbox=kutu, zorder=20)
-        ax.text(bx0 - pay, (by0 + by1) / 2, ETIKET["sol"], ha="right", va="center", fontsize=12, weight="bold", color="white", bbox=kutu, rotation=90, zorder=20)
-        ax.text(bx1 + pay, (by0 + by1) / 2, ETIKET["sag"], ha="left", va="center", fontsize=12, weight="bold", color="white", bbox=kutu, rotation=-90, zorder=20)
+        ax.text((ex0 + ex1) / 2, etiket_yeri["on"], ETIKET["on"], ha="center", va="top", fontsize=12, weight="bold", color="white", bbox=kutu, zorder=20)
+        ax.text((ex0 + ex1) / 2, etiket_yeri["arka"], ETIKET["arka"], ha="center", va="bottom", fontsize=12, weight="bold", color="white", bbox=kutu, zorder=20)
+        ax.text(etiket_yeri["sol"], (ey0 + ey1) / 2, ETIKET["sol"], ha="right", va="center", fontsize=12, weight="bold", color="white", bbox=kutu, rotation=90, zorder=20)
+        ax.text(etiket_yeri["sag"], (ey0 + ey1) / 2, ETIKET["sag"], ha="left", va="center", fontsize=12, weight="bold", color="white", bbox=kutu, rotation=-90, zorder=20)
         x0, x1 = ax.get_xlim(); y0, y1 = ax.get_ylim()
-        ax.set_xlim(min(x0, bx0 - 1.6 * pay), max(x1, bx1 + 1.6 * pay)); ax.set_ylim(min(y0, by0 - 1.6 * pay), max(y1, by1 + 1.6 * pay))
+        pay = 30 * cm_pt
+        ax.set_xlim(min(x0, etiket_yeri["sol"] - pay), max(x1, etiket_yeri["sag"] + pay))
+        ax.set_ylim(min(y0, etiket_yeri["on"] - pay), max(y1, etiket_yeri["arka"] + pay))
         fig.savefig(yol, bbox_inches="tight", facecolor="white")
         plt.close(fig)
 
@@ -105,12 +132,15 @@ def bayi_gorsel(t: dict, hedef: Path, kod: str, set_yolu: Path | None = None, yo
 
     def alt_sira(dpi: int) -> None:
         fig, axs = plt.subplots(1, 3, figsize=(11.0, 3.9), dpi=dpi)
-        ciz_genel.cati_plani_eksen(axs[0], y, c, inis, baslik="ÇATI PLANI", yazi_ayir=True)
+        # küçük panel (≈ 2,9 in): mahya/kırma/vadi boy yazıları yok, eğim yazıları ölçeğe göre büyütülmüş kutuyla sığdığı yere (13.10.2026)
+        xs = [p[0] for dz in c["duzlemler"] for p in dz["plan"]]
+        cm_pt = ((max(xs) - min(xs)) + 130) / (axs[0].get_position().width * 11.0 * 72)
+        ciz_genel.cati_plani_eksen(axs[0], y, c, inis, baslik="ÇATI PLANI", yazi_ayir=True, yalin=True, yazi_kutusu=(13 * cm_pt, 5.5 * cm_pt))
         for ax, (ad, baslik, taraf) in zip(axs[1:], PERSPEKTIF_PANEL):
             if perspektifli:
                 ax.imshow(Image.open(pers[ad]).convert("RGB")); ax.set_title(baslik, fontsize=9.5, weight="bold"); ax.axis("off")
-            else:                                        # VTK yok ya da düştü: aynı yerde görünüş (iş durmaz; Lokman 12.10.2026)
-                ciz_genel.gorunus_eksen(ax, S, taraf, t["kat_yuksekligi"])
+            else:                                        # VTK yok ya da düştü: aynı yerde görünüş, ölçüsüz (iş durmaz; Lokman 12.10.2026)
+                ciz_genel.gorunus_eksen(ax, S, taraf, t["kat_yuksekligi"], olculu=False)
         fig.savefig(alt, bbox_inches="tight", facecolor="white")
         plt.close(fig)
 

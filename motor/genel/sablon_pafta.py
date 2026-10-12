@@ -333,16 +333,9 @@ def _birlestir(noktalar, uclar: tuple[float, float], tol: float) -> tuple[list[f
     her zaman korunur. Bayi paftasında 15 cm ve daha kısa parçalar (veranda dikmesi, korkuluk, kaplama sıçraması, tanımda 1–2 cm kayma)
     okunmaz (Lokman, 12.10.2026: "Çelikte 15 cm parça çıkmaz"); mühendis planı tam zinciri taşır (`pafta_sablonu.json` ›
     zincir_en_kisa_parca_cm). Dönen: (noktalar, katılan parçalar [{konum_cm: zincir başından, parca_cm}]) — katılanlar mühendise
-    kontrol notu olur (`pafta_ozet.json › kontrol_notlari`)."""
-    cik: list[float] = []; katilan: list[dict] = []; son: float | None = None
-    for v in sorted(set(noktalar)):                    # aynı nokta bir kez (uçlar zincirde de var)
-        if not cik or v - cik[-1] > tol:               # `tol` ve daha kısa parçalar komşusuna katılır (iki yanda simetri için); tol 0 → birleştirme yok
-            cik.append(v)
-        elif v - cik[-1] > 0.05:                       # aynı nokta parça değildir; not düşülmez. Parça boyu bir önceki (tutulan ya da katılan) noktadan
-            katilan.append({"konum_cm": round(v - uclar[0], 1), "parca_cm": round(v - (son if son is not None else cik[-1]), 1)})
-        son = v
-    cik[0], cik[-1] = uclar
-    return (cik if cik[-1] > cik[0] else list(uclar)), katilan
+    kontrol notu olur (`pafta_ozet.json › kontrol_notlari`). Tek kaynak `ciz_genel.zincir_birlestir` (bayi plan görseli de kullanır)."""
+    from . import ciz_genel
+    return ciz_genel.zincir_birlestir(noktalar, uclar, tol)
 
 
 def plan_ciz(sf: Sayfa, y: dict, t: dict, px0: float, py0: float, s: float) -> tuple[dict, dict, list[dict], dict]:
