@@ -25,6 +25,7 @@ if [ -f "$SERT" ]; then sed "s/__ALAN__/$ALAN/g" "$SABLON" > "$YENI"; BLOK="80+4
 else sed '/# --443-BASLA--/,/# --443-BITIS--/d' "$SABLON" | sed "s/__ALAN__/$ALAN/g" > "$YENI"; BLOK="yalnız 80 (sertifika yok)"; fi
 if [ -f "$HEDEF" ] && cmp -s "$HEDEF" "$YENI"; then
   rm -f "$YENI"
+  [ -L "$NGINX_DIR/sites-enabled/portman.conf" ] || { ln -sfn "$HEDEF" "$NGINX_DIR/sites-enabled/portman.conf"; echo "nginx: sites-enabled bağı eksikti, yeniden kuruldu (reload gerekir: systemctl reload nginx)"; }
   echo "nginx: değişiklik yok ($HEDEF sürümdeki yapılandırmayla aynı; $BLOK)"
   exit 0
 fi
@@ -43,7 +44,10 @@ if [ -z "$TEST" ]; then
     dur "nginx -t geçmedi; önceki dosya geri kondu${YEDEK:+ ($YEDEK)}, nginx yeniden yüklenmedi"
   fi
   rm -f "$HEDEF.nginx_t"
-  $SYSTEMCTL reload nginx || dur "nginx yeniden yüklenemedi (systemctl status nginx); dosya yeni, yedek: ${YEDEK:-yok}"
+  if ! $SYSTEMCTL reload nginx; then
+    if [ -n "$YEDEK" ]; then cp -p "$YEDEK" "$HEDEF"; else rm -f "$HEDEF" "$NGINX_DIR/sites-enabled/portman.conf"; fi
+    dur "nginx yeniden yüklenemedi (systemctl status nginx); önceki dosya geri kondu${YEDEK:+ ($YEDEK)}, çalışan nginx değişmedi"
+  fi
 fi
 PANEL="$(grep -o 'location /panel/.*client_max_body_size [0-9]*m' "$HEDEF" | grep -o '[0-9]*m$' || true)"
 echo "nginx: uygulandı ($BLOK; /panel/ ${PANEL:-yok (443 bloğu yok)}$([ -n "$TEST" ] && echo '; PM_TEST: nginx -t ve reload atlandı' || echo '; nginx -t tamam, yeniden yüklendi')) · yedek: ${YEDEK:-yok (ilk yazım)}"

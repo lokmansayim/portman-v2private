@@ -17,7 +17,8 @@ echo "   guncel: $( [ -L "$KOK/guncel" ] && cat "$KOK/guncel/SURUM" 2>/dev/null 
 echo "   perspektif (VTK, BK-07): $(cat "$KOK/guncel/PERSPEKTIF" 2>/dev/null || echo 'kayıt yok (bu sürümde denenmedi)')"
 echo "-- çekirdek (BK-07)"
 REBOOT_REQ="${PM_REBOOT_REQ:-/var/run/reboot-required}"; BOOT_DIR="${PM_BOOT_DIR:-/boot}"
-echo "   çalışan: $(uname -r) · kurulu en yeni: $(ls -1 "$BOOT_DIR"/vmlinuz-* 2>/dev/null | sed 's/.*vmlinuz-//' | sort -V | tail -1 || echo '?') · yeniden başlatma gerekli: $([ -f "$REBOOT_REQ" ] && echo evet || echo hayır) · açılış: $(uptime -s 2>/dev/null || echo '?')"
+KURULU="$(ls -1 "$BOOT_DIR"/vmlinuz-* 2>/dev/null | sed 's/.*vmlinuz-//' | sort -V | tail -1 || true)"
+echo "   çalışan: $(uname -r) · kurulu en yeni: ${KURULU:-?} · yeniden başlatma gerekli: $([ -f "$REBOOT_REQ" ] && echo evet || echo hayır) · açılış: $(uptime -s 2>/dev/null || echo '?')"
 echo "-- servisler"
 for s in portman-webhook portman-gonderici portman-agent portman-panel portman-yedek.timer portman-nabiz.timer nginx postgresql fail2ban; do
   printf '   %-22s %s\n' "$s" "$($SYSTEMCTL is-active "$s" 2>/dev/null || echo '?')"

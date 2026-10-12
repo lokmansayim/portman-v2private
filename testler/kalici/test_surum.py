@@ -294,7 +294,7 @@ def test_yeniden_baslat_on_kontrol_ve_test_modu(tmp_path):
     r = _kos("yeniden_baslat.sh", {**env, "PM_PSQL": _psql_sayac(bin_)})
     assert r.returncode == 0, r.stdout + r.stderr
     for parca in ("kurulu en yeni 6.8.0-47-generic", "yeniden başlatma gerekli: evet", "paketler: linux-base linux-image-6.8.0-47-generic",
-                  "ön kontrol: açık iş 0 · bekleyen giden 0 · son yedek 2 saat önce · guncel v2026.10.12", "PM_TEST: systemctl reboot çağrılmadı"):
+                  "ön kontrol: açık iş 0 · bekleyen giden 0 (bekliyor + gonderiliyor) · son yedek 2 saat önce · guncel v2026.10.12", "PM_TEST: systemctl reboot çağrılmadı"):
         assert parca in r.stdout, parca
     assert not log.exists()
     r = _kos("yeniden_baslat.sh", {**env, "PM_PSQL": _psql_sayac(bin_, bekleyen=1), "PM_ZORLA": "1"})
@@ -602,6 +602,13 @@ def test_kuru_kosu_imzali_istek_dry_run_gerekmez(tmp_path):
         assert r.returncode == 0, r.stdout + r.stderr
         assert len(webhook.istekler) == 2 and "dry_run kapalı, gerekmez" in r.stdout and "kanal yeniden kapatıldı" not in r.stdout
         assert json.loads((data / "settings.json").read_text())["enabled"] is True
+        # kanal kapalı + dry_run kapalı + bekleyen gerçek satır: açılırsa gerçek gönderim olur → DUR, kanal açılmaz, webhook'a istek yok
+        (data / "settings.json").write_text(json.dumps({"enabled": False, "dry_run": False}))
+        psql_bekleyen = _sahte(bin_, "psql_b", '#!/usr/bin/env bash\nSQL="${@: -1}"\ncase "$SQL" in *"rol = \'test\'"*) echo 900000000905 ;; *"g.durum = \'bekliyor\'"*) echo 3 ;; *) echo 0 ;; esac\n')
+        r = _kos("kuru_kosu.sh", {**env, "PM_PSQL": psql_bekleyen})
+        assert r.returncode == 1 and "3 bekleyen giden satırı var" in r.stderr and len(webhook.istekler) == 2
+        assert json.loads((data / "settings.json").read_text())["enabled"] is False
+        (data / "settings.json").write_text(json.dumps({"enabled": True, "dry_run": False}))
         webhook.cevaplar = {"/webhook": (200, {"ok": True, "mesaj": {"kayitsiz": 1}})}
         r = _kos("kuru_kosu.sh", env)
         assert r.returncode == 1 and "sahiplenilmedi" in r.stderr
@@ -644,8 +651,9 @@ def test_durum_sh_salt_okunur_ve_maskeli(tmp_path):
                   "perspektif (VTK, BK-07): kayıt yok", "-- çekirdek (BK-07)", "yeniden başlatma gerekli: hayır"):
         assert parca in r.stdout, parca
     (kok / "surumler" / "v2026.10.09" / "PERSPEKTIF").write_text("ÇİZİLEMEDİ (libOSMesa yok) → pilot perspektifsiz\n")
-    r = _kos("durum.sh", {**env, "PM_REBOOT_REQ": str(tmp_path / "rr")}); (tmp_path / "rr").write_text("x")
-    r = _kos("durum.sh", {**env, "PM_REBOOT_REQ": str(tmp_path / "rr")})
+    (tmp_path / "rr").write_text("x")
+    r = _kos("durum.sh", {**env, "PM_REBOOT_REQ": str(tmp_path / "rr"), "PM_BOOT_DIR": str(tmp_path / "bootyok")})
+    assert "kurulu en yeni: ? ·" in r.stdout
     assert "perspektif (VTK, BK-07): ÇİZİLEMEDİ" in r.stdout and "yeniden başlatma gerekli: evet" in r.stdout
     assert "900000000101" not in r.stdout and "wamid.HBgL" not in r.stdout and "wamid.[…]" in r.stdout and "[…]" in r.stdout
 

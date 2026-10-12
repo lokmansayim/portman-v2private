@@ -5,7 +5,7 @@
 # Kural (Lokman, D-02): bir paket P6001 referansını (DXF/PDF parmak izi) değiştirirse yeniden dondurma yok; o paket eski sürümde kalır.
 # vtk: perspektif denemesi için (guncelle.sh [3b], vps/perspektif_dene.py); içe aktarma denetiminde zorunlu değil. Ekransız çizim
 # libOSMesa ister (apt: libosmesa6; ayrı onaylı adım); yoksa deneme ÇİZİLEMEDİ der, sürüm yine etkinleşir (pilot perspektifsiz).
-# Yerel test ortamı ayrı dosyadır: araclar/gereksinimler.txt (Python 3.11; aynı sürümler + pytest; vtk isteğe bağlı).
+# Yerel test ortamı ayrı dosyadır: araclar/gereksinimler.txt (Python 3.11; aynı sürümler + pytest; numpy 2.4.6 çünkü 2.5.x Python ≥ 3.12 ister; vtk yok).
 numpy==2.5.4
 ezdxf==1.4.4
 matplotlib==3.11.2

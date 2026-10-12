@@ -680,6 +680,11 @@ class Depo:
                 "bolge = EXCLUDED.bolge, rol = EXCLUDED.rol, aktif = EXCLUDED.aktif, kaynak = EXCLUDED.kaynak, guncellendi = now() "
                 f"RETURNING {self._BAYI_SUTUNLAR}", alanlar).fetchone()
 
+    def test_kartlari(self) -> list[str]:
+        """BK-07: rol='test' kartlarının numaraları (aktif ya da pasif; gönderici bunlardan doğan ya da bunlara giden satırı tutar)."""
+        with self.baglan() as c:
+            return [r["numara"] for r in c.execute("SELECT numara FROM bayiler WHERE rol = 'test'").fetchall()]
+
     def patron_numarasi(self) -> str | None:
         with self.baglan() as c:
             r = c.execute("SELECT numara FROM bayiler WHERE rol = 'patron' AND aktif ORDER BY olusturuldu, numara LIMIT 1").fetchone()

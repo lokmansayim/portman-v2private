@@ -21,9 +21,9 @@ echo "-- çekirdek: çalışan $(uname -r) · kurulu en yeni ${KURULU:-?} · yen
 [ -s "$REBOOT_REQ.pkgs" ] && echo "   paketler: $(sort -u "$REBOOT_REQ.pkgs" | tr '\n' ' ')"
 echo "-- açılış: $(uptime -s 2>/dev/null || echo '?') · $(uptime -p 2>/dev/null || echo '?')"
 ACIK_IS="$($PSQL -c "SELECT count(*) FROM isler WHERE durum IN ('sirada','isleniyor')" 2>/dev/null | head -1 || echo '?')"
-BEKLEYEN="$($PSQL -c "SELECT count(*) FROM giden WHERE durum = 'bekliyor'" 2>/dev/null | head -1 || echo '?')"
+BEKLEYEN="$($PSQL -c "SELECT count(*) FROM giden WHERE durum IN ('bekliyor', 'gonderiliyor')" 2>/dev/null | head -1 || echo '?')"   # gonderiliyor: Meta POST'u sürüyor
 YEDEK="$(python3 -c 'import json,sys,time; d=json.load(open(sys.argv[1])); z=int(d.get("zaman",0)); print(f"{(int(time.time())-z)//3600} saat önce" if z else "hiç")' "$KOK/data/nabiz/yedek.json" 2>/dev/null || echo 'kayıt yok')"
-echo "-- ön kontrol: açık iş ${ACIK_IS} · bekleyen giden ${BEKLEYEN} · son yedek $YEDEK · guncel $(cat "$KOK/guncel/SURUM" 2>/dev/null || echo '?')"
+echo "-- ön kontrol: açık iş ${ACIK_IS} · bekleyen giden ${BEKLEYEN} (bekliyor + gonderiliyor) · son yedek $YEDEK · guncel $(cat "$KOK/guncel/SURUM" 2>/dev/null || echo '?')"
 if [ "$ACIK_IS" != "0" ] || [ "$BEKLEYEN" != "0" ]; then
   [ -n "$ZORLA" ] || dur "açık iş ya da bekleyen giden var; bitmesini bekleyin ya da PM_ZORLA=1"
   echo "   PM_ZORLA: ön kontrol uyarısına rağmen devam"

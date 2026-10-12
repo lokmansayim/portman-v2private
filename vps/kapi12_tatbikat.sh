@@ -11,7 +11,7 @@ set -euo pipefail
 ETIKET="${1:-}"
 KOK="${PM_KOK:-/opt/portman}"; SYSTEMCTL="${PM_SYSTEMCTL:-systemctl}"; TEST="${PM_TEST:-}"; ZORLA="${PM_ZORLA:-}"
 PSQL="${PM_PSQL:-sudo -u postgres psql -X -q -tA -d portman}"; SAGLIK_URL="${PM_SAGLIK_URL:-http://127.0.0.1:8081/saglik}"
-BURASI="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BURASI="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"   # -P: fiziksel yol; 'guncel' bağı geri dönüşte değişir, bu sürümün betikleri kullanılmalı
 dur() { echo "DUR: $*" >&2; echo "== bitti (durdu)"; exit 1; }
 z() { date '+%H:%M:%S'; }
 echo "== Kapı 12 · sürüm geri dönüş tatbikatı · $(date '+%Y-%m-%d %H:%M:%S %Z') · etiket: ${ETIKET:-?}"
@@ -26,8 +26,8 @@ GUNCEL_SURUM="$(cat "$KOK/guncel/SURUM" 2>/dev/null || echo '?')"; ONCEKI_SURUM=
 
 echo "-- [0/2] ön kontrol (salt okunur) · $(z)"
 ACIK_IS="$($PSQL -c "SELECT count(*) FROM isler WHERE durum IN ('sirada','isleniyor')" 2>/dev/null | head -1 || echo '?')"
-BEKLEYEN="$($PSQL -c "SELECT count(*) FROM giden WHERE durum = 'bekliyor'" 2>/dev/null | head -1 || echo '?')"
-BEKLEYEN_SABLON="$($PSQL -c "SELECT count(*) FROM giden WHERE durum = 'bekliyor' AND kind = 'template'" 2>/dev/null | head -1 || echo '?')"
+BEKLEYEN="$($PSQL -c "SELECT count(*) FROM giden WHERE durum IN ('bekliyor', 'gonderiliyor')" 2>/dev/null | head -1 || echo '?')"   # gonderiliyor: Meta POST'u sürüyor
+BEKLEYEN_SABLON="$($PSQL -c "SELECT count(*) FROM giden WHERE durum IN ('bekliyor', 'gonderiliyor') AND kind = 'template'" 2>/dev/null | head -1 || echo '?')"
 KOD="$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 "$SAGLIK_URL" 2>/dev/null || echo 000)"
 echo "   ön kontrol: açık iş ${ACIK_IS} · bekleyen giden ${BEKLEYEN} (şablon ${BEKLEYEN_SABLON}) · sağlık HTTP $KOD · guncel $GUNCEL_SURUM · onceki $ONCEKI_SURUM"
 if [ "$ACIK_IS" != "0" ] || [ "$BEKLEYEN" != "0" ] || [ "$KOD" != "200" ]; then

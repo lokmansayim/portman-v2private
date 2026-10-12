@@ -56,11 +56,16 @@ class GonderenMeta:
         self.depo = depo; self.istemci = istemci; self.veri = Path(veri)
         self.ayar_oku = ayar_oku or (lambda: AY.oku(self.veri))
 
+    _TEST_KARTI_TAZE_SN = 10                                      # test kartı kümesi 10 sn önbellekte: her satır için iki sorgu atılmasın
+
     def _test_karti_mi(self, numara: str) -> bool:
         if not numara or not M.numara_gecerli(numara):
             return False
-        b = self.depo.bayi_oku(numara)
-        return bool(b) and b.get("rol") == "test"
+        simdi = time.time()
+        z, kume = getattr(self, "_test_kartlari", (0.0, frozenset()))
+        if simdi - z > self._TEST_KARTI_TAZE_SN:
+            kume = frozenset(self.depo.test_kartlari()); self._test_kartlari = (simdi, kume)
+        return numara in kume
 
     def __call__(self, r: dict) -> str:
         gelen = r.get("gelen") or {}

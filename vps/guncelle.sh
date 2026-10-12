@@ -90,9 +90,11 @@ print(f"   içe aktarma tamam: python {sys.version.split()[0]} · numpy {numpy._
       f" · psycopg {psycopg.__version__} · pydantic {pydantic.__version__} · ifcopenshell {ifcopenshell.version}")
 PY
   echo "-- [3b/7] perspektif denemesi (BK-07: VTK ekransız çizebiliyor mu; AYRI süreç, en çok 60 sn; sonuç ne olursa olsun sürüm etkinleşir)"
-  if [ -f "$HEDEF/vps/perspektif_dene.py" ] && "$VPY" -c 'import vtk' >/dev/null 2>&1; then
-    RC=0; timeout 60 "$VPY" "$HEDEF/vps/perspektif_dene.py" /tmp > "$HEDEF/.perspektif_cikti" 2>/dev/null || RC=$?
-    PERS="$(tail -n 1 "$HEDEF/.perspektif_cikti" 2>/dev/null || true)"; rm -f "$HEDEF/.perspektif_cikti"
+  # vtk kurulu mu: find_spec içe aktarmaz (import vtk, OSMesa/EGL yokken çökebilir; çökme "kurulu değil" sanılmasın)
+  if [ -f "$HEDEF/vps/perspektif_dene.py" ] && "$VPY" -c 'import importlib.util, sys; sys.exit(0 if importlib.util.find_spec("vtk") else 1)' >/dev/null 2>&1; then
+    PERS_DIR="$(mktemp -d)"; RC=0
+    timeout 60 "$VPY" "$HEDEF/vps/perspektif_dene.py" "$PERS_DIR" > "$PERS_DIR/cikti.txt" 2>/dev/null || RC=$?
+    PERS="$(tail -n 1 "$PERS_DIR/cikti.txt" 2>/dev/null || true)"; rm -rf "$PERS_DIR"     # deneme PNG'si ve çıktısı; kalıcı iz yok
     if [ "$RC" = "124" ]; then PERS="ÇİZİLEMEDİ (60 sn içinde bitmedi)"
     elif [ "$RC" -ge 128 ] 2>/dev/null; then PERS="ÇİZİLEMEDİ (süreç çöktü, sinyal $((RC - 128)); libOSMesa/EGL kurulu değil: apt-get install libosmesa6, Lokman'ın onayıyla)"
     elif [ -z "$PERS" ]; then PERS="ÇİZİLEMEDİ (çıktı yok, çıkış kodu $RC)"; fi

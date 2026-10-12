@@ -26,6 +26,12 @@ TEST="${PM_TEST:-$($PSQL -c "SELECT numara FROM bayiler WHERE rol = 'test' AND a
 echo "   test kartı …${TEST: -2} · satırlar her zaman tutulur (test_karti; dry_run $([ "$DRY" = 1 ] && echo açık || echo kapalı), gerekmez) · kanal: $([ "$ACIK" = 1 ] && echo açık || echo 'kapalı (bu koşu için açılacak)')"
 GERI=""
 if [ "$ACIK" != "1" ]; then
+  # Kapalı kanalı yalnız bu koşu için açmak, kill switch'ten önce bekleyen GERÇEK satırları da serbest bırakır (gönderici yalnız test
+  # kartının satırlarını tutar). dry_run kapalıysa ve bekleyen satır varsa DUR: önce o satırlar Lokman'ın kararıyla gitsin ya da düşsün.
+  BEKLEYEN="$($PSQL -c "SELECT count(*) FROM giden g WHERE g.durum = 'bekliyor'" 2>/dev/null | head -1)"
+  if [ "$DRY" != "1" ] && [ "${BEKLEYEN:-?}" != "0" ]; then
+    dur "kanal kapalı, dry_run kapalı ve ${BEKLEYEN:-?} bekleyen giden satırı var: kanal açılırsa gerçek satırlar gönderilir. Önce satırlara karar verin (ayar.sh dry_run true ya da kanalı elle açın)"
+  fi
   python3 "$AYARLAR" --veri "$DATA" yaz enabled true >/dev/null || dur "ayar yazılamadı"; GERI=1
   trap 'python3 "$AYARLAR" --veri "$DATA" yaz enabled false >/dev/null && echo "   kanal yeniden kapatıldı (enabled false)"' EXIT
 fi
