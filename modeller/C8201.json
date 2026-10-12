@@ -1,0 +1,671 @@
+{
+ "sema": "portman.yapi_tanimi/0.5-taslak",
+ "kod": "Ç8201",
+ "ad": "Tek kat çelik, 2+1, 82 m²",
+ "aile": "tek_kat_celik",
+ "paket": "baz",
+ "birim": "cm",
+ "kat": "zemin",
+ "kaynak": {
+  "cizim": "deneme/2026-10-02_celik/C8201.json (Yapı Tanımı 0.4) elle 0.5'e çevrildi: aynı model, karkas kutularıyla. Genel motorun 0.4 ile aynı sonucu verdiğini sınamak için.",
+  "koordinat": "Köken kapalı kısmın sol-alt dış köşesi; +x sağa, +y yukarı."
+ },
+ "kat_yuksekligi": 270,
+ "duvar_panelleri": "tahmin",
+ "yuz_kaplamalari": {
+  "dis": {
+   "kalinlik": 1.25,
+   "malzeme": [
+    "boardex"
+   ]
+  },
+  "ic": {
+   "kalinlik": 1.25,
+   "malzeme": [
+    "alcipan"
+   ]
+  }
+ },
+ "duvar_siniflari": {
+  "dis": {
+   "ad": "dış duvar (DIS-80)",
+   "profil": "80x45x1,2",
+   "yalitim": true,
+   "yuz": {
+    "ic": "ic",
+    "dis": "dis",
+    "veranda": "dis"
+   }
+  },
+  "ic": {
+   "ad": "iç duvar (IC-80)",
+   "profil": "80x45x1,2",
+   "yalitim": true,
+   "yuz": {
+    "ic": "ic"
+   }
+  },
+  "kolon": {
+   "ad": "veranda dikmesi",
+   "profil": "80x45x1,2",
+   "yalitim": false,
+   "yuz": {}
+  }
+ },
+ "duvarlar": [
+  {
+   "ad": "DA",
+   "sinif": "dis",
+   "kutu": [
+    1.25,
+    1.25,
+    848.75,
+    9.25
+   ],
+   "yukseklik": 270,
+   "not": "alt dış duvar (0.4: dis:alt)"
+  },
+  {
+   "ad": "DU",
+   "sinif": "dis",
+   "kutu": [
+    1.25,
+    740.75,
+    848.75,
+    748.75
+   ],
+   "yukseklik": 270,
+   "not": "üst dış duvar (0.4: dis:ust)"
+  },
+  {
+   "ad": "DL",
+   "sinif": "dis",
+   "kutu": [
+    1.25,
+    9.25,
+    9.25,
+    740.75
+   ],
+   "yukseklik": 270,
+   "not": "sol dış duvar"
+  },
+  {
+   "ad": "DR",
+   "sinif": "dis",
+   "kutu": [
+    840.75,
+    9.25,
+    848.75,
+    740.75
+   ],
+   "yukseklik": 270,
+   "not": "sağ dış duvar (verandaya bakar)"
+  },
+  {
+   "ad": "A",
+   "sinif": "ic",
+   "kutu": [
+    343.5,
+    9.25,
+    351.5,
+    740.75
+   ],
+   "yukseklik": 270,
+   "not": "yatak odaları ile hol ve banyo arası"
+  },
+  {
+   "ad": "P",
+   "sinif": "ic",
+   "kutu": [
+    9.25,
+    371,
+    343.5,
+    379
+   ],
+   "yukseklik": 270,
+   "not": "iki yatak odası arası"
+  },
+  {
+   "ad": "Bb",
+   "sinif": "ic",
+   "kutu": [
+    351.5,
+    492,
+    542.5,
+    500
+   ],
+   "yukseklik": 270,
+   "not": "banyonun alt duvarı"
+  },
+  {
+   "ad": "R",
+   "sinif": "ic",
+   "kutu": [
+    534.5,
+    500,
+    542.5,
+    740.75
+   ],
+   "yukseklik": 270,
+   "not": "banyo ile mutfak arası"
+  },
+  {
+   "ad": "B",
+   "sinif": "ic",
+   "kutu": [
+    494.5,
+    9.25,
+    502.5,
+    492
+   ],
+   "yukseklik": 270,
+   "not": "hol ile yaşam alanı arası"
+  },
+  {
+   "ad": "K1",
+   "sinif": "kolon",
+   "kutu": [
+    1086,
+    0,
+    1094,
+    30
+   ],
+   "yukseklik": 240,
+   "not": "veranda dikmesi"
+  },
+  {
+   "ad": "K2",
+   "sinif": "kolon",
+   "kutu": [
+    1086,
+    360,
+    1094,
+    390
+   ],
+   "yukseklik": 240,
+   "not": "veranda dikmesi"
+  },
+  {
+   "ad": "K3",
+   "sinif": "kolon",
+   "kutu": [
+    1086,
+    720,
+    1094,
+    750
+   ],
+   "yukseklik": 240,
+   "not": "veranda dikmesi"
+  }
+ ],
+ "mahaller": [
+  {
+   "ad": "Yatak Odası 1",
+   "nokta": [
+    170,
+    190
+   ],
+   "islev": [
+    "yatak_odasi"
+   ],
+   "sinif": "ic",
+   "etiket_m2": 11.8
+  },
+  {
+   "ad": "Yatak Odası 2",
+   "nokta": [
+    170,
+    560
+   ],
+   "islev": [
+    "yatak_odasi"
+   ],
+   "sinif": "ic",
+   "etiket_m2": 11.8
+  },
+  {
+   "ad": "Banyo",
+   "nokta": [
+    440,
+    620
+   ],
+   "islev": [
+    "banyo"
+   ],
+   "sinif": "ic",
+   "islak": true,
+   "etiket_m2": 4.3
+  },
+  {
+   "ad": "Hol",
+   "nokta": [
+    420,
+    250
+   ],
+   "islev": [
+    "hol"
+   ],
+   "sinif": "ic",
+   "etiket_m2": 6.7
+  },
+  {
+   "ad": "Yaşam Alanı",
+   "nokta": [
+    680,
+    300
+   ],
+   "islev": [
+    "salon",
+    "mutfak"
+   ],
+   "sinif": "ic",
+   "etiket_m2": 23.3
+  },
+  {
+   "ad": "Veranda",
+   "sinif": "veranda",
+   "islev": [
+    "veranda"
+   ],
+   "poligon": [
+    [
+     850,
+     0
+    ],
+    [
+     1094,
+     0
+    ],
+    [
+     1094,
+     750
+    ],
+    [
+     850,
+     750
+    ]
+   ],
+   "nokta": [
+    972.0,
+    375.0
+   ],
+   "etiket_m2": 18.4
+  }
+ ],
+ "acikliklar": [
+  {
+   "ad": "P1",
+   "tur": "pencere",
+   "duvar": "DA",
+   "bas": 117,
+   "en": 120,
+   "yuk": 180,
+   "alt": 20,
+   "etiket": "120/180",
+   "mahal": "Yatak Odası 1",
+   "acilim": "ust"
+  },
+  {
+   "ad": "P2",
+   "tur": "pencere",
+   "duvar": "DA",
+   "bas": 611,
+   "en": 120,
+   "yuk": 180,
+   "alt": 20,
+   "etiket": "120/180",
+   "mahal": "Yaşam Alanı",
+   "acilim": "ust"
+  },
+  {
+   "ad": "P3",
+   "tur": "pencere",
+   "duvar": "DU",
+   "bas": 117,
+   "en": 120,
+   "yuk": 180,
+   "alt": 20,
+   "etiket": "120/180",
+   "mahal": "Yatak Odası 2",
+   "acilim": "ust"
+  },
+  {
+   "ad": "P4",
+   "tur": "pencere",
+   "duvar": "DU",
+   "bas": 363,
+   "en": 60,
+   "yuk": 40,
+   "alt": 160,
+   "etiket": "60/40",
+   "mahal": "Banyo",
+   "acilim": "ust"
+  },
+  {
+   "ad": "P5",
+   "tur": "pencere",
+   "duvar": "DU",
+   "bas": 631,
+   "en": 120,
+   "yuk": 100,
+   "alt": 100,
+   "etiket": "120/100",
+   "mahal": "Yaşam Alanı",
+   "acilim": "ust"
+  },
+  {
+   "ad": "P6",
+   "tur": "pencere",
+   "duvar": "DR",
+   "bas": 105,
+   "en": 180,
+   "yuk": 180,
+   "alt": 20,
+   "etiket": "180/180",
+   "mahal": "Yaşam Alanı",
+   "acilim": "ust"
+  },
+  {
+   "ad": "P7",
+   "tur": "pencere",
+   "duvar": "DR",
+   "bas": 285,
+   "en": 180,
+   "yuk": 180,
+   "alt": 20,
+   "etiket": "180/180",
+   "mahal": "Yaşam Alanı",
+   "acilim": "ust"
+  },
+  {
+   "ad": "P8",
+   "tur": "pencere",
+   "duvar": "DR",
+   "bas": 465,
+   "en": 180,
+   "yuk": 180,
+   "alt": 20,
+   "etiket": "180/180",
+   "mahal": "Yaşam Alanı",
+   "acilim": "ust"
+  },
+  {
+   "ad": "K9",
+   "tur": "dis_kapi",
+   "duvar": "DA",
+   "bas": 385.5,
+   "en": 95,
+   "yuk": 210,
+   "giris": true,
+   "mentese": "son",
+   "acilim": "ust"
+  },
+  {
+   "ad": "K10",
+   "tur": "ic_kapi",
+   "duvar": "A",
+   "bas": 269.5,
+   "en": 90,
+   "yuk": 214,
+   "mentese": "son",
+   "kanat": [
+    80,
+    200
+   ],
+   "not": "Yatak Odası 1",
+   "acilim": "sol"
+  },
+  {
+   "ad": "K11",
+   "tur": "ic_kapi",
+   "duvar": "A",
+   "bas": 390.5,
+   "en": 90,
+   "yuk": 214,
+   "mentese": "bas",
+   "kanat": [
+    80,
+    200
+   ],
+   "not": "Yatak Odası 2",
+   "acilim": "sol"
+  },
+  {
+   "ad": "K12",
+   "tur": "ic_kapi",
+   "duvar": "Bb",
+   "bas": 363,
+   "en": 90,
+   "yuk": 214,
+   "mentese": "bas",
+   "kanat": [
+    80,
+    200
+   ],
+   "not": "Banyo",
+   "acilim": "ust"
+  },
+  {
+   "ad": "K13",
+   "tur": "ic_kapi",
+   "duvar": "B",
+   "bas": 390.5,
+   "en": 90,
+   "yuk": 214,
+   "mentese": "son",
+   "kanat": [
+    80,
+    200
+   ],
+   "not": "Yaşam Alanı",
+   "acilim": "sag"
+  }
+ ],
+ "kirisler": [
+  {
+   "ad": "KR-alt",
+   "kutu": [
+    850,
+    0,
+    1094,
+    8
+   ],
+   "alt": 240,
+   "ust": 270,
+   "acik": [
+    [
+     850,
+     1094
+    ]
+   ],
+   "bolge": "veranda"
+  },
+  {
+   "ad": "KR-sag",
+   "kutu": [
+    1086,
+    0,
+    1094,
+    750
+   ],
+   "alt": 240,
+   "ust": 270,
+   "acik": [
+    [
+     0,
+     750
+    ]
+   ],
+   "bolge": "veranda"
+  },
+  {
+   "ad": "KR-ust",
+   "kutu": [
+    850,
+    742,
+    1094,
+    750
+   ],
+   "alt": 240,
+   "ust": 270,
+   "acik": [
+    [
+     850,
+     1094
+    ]
+   ],
+   "bolge": "veranda"
+  }
+ ],
+ "lento": 70,
+ "osb_takviye": {
+  "duvarlar": [
+   {
+    "mahal": "Yaşam Alanı",
+    "duvar": "R",
+    "duvar_adi": "banyo ile mutfak arası duvar",
+    "neden": "mutfak dolabı"
+   },
+   {
+    "mahal": "Yaşam Alanı",
+    "duvar": "DU",
+    "duvar_adi": "üst dış duvar",
+    "neden": "mutfak dolabı ve eviye"
+   },
+   {
+    "mahal": "Yaşam Alanı",
+    "duvar": "B",
+    "duvar_adi": "hol ile yaşam alanı arası duvar",
+    "neden": "TV ünitesi"
+   }
+  ],
+  "teyit": "muhendis"
+ },
+ "cati": {
+  "tip": "kirma",
+  "yontem": "panel",
+  "kaplama": "tek_kat_panel",
+  "sacak": 30,
+  "topuk": 10,
+  "duvar_ustu": 270,
+  "panel_kalinligi": 8,
+  "ust_pay": 8.424,
+  "sacak_alti": "boardex",
+  "sacak_yuzu": "boardex",
+  "duzlemler": [
+   {
+    "ad": "ön",
+    "plan": [
+     [
+      -30,
+      -30
+     ],
+     [
+      1124,
+      -30
+     ],
+     [
+      719.0,
+      375.0
+     ],
+     [
+      375.0,
+      375.0
+     ]
+    ],
+    "yukari": [
+     0,
+     1
+    ],
+    "egim": 0.33,
+    "sacak_kotu": 280.0,
+    "sacak": {
+     "y": -30
+    }
+   },
+   {
+    "ad": "sol",
+    "plan": [
+     [
+      -30,
+      780
+     ],
+     [
+      -30,
+      -30
+     ],
+     [
+      375.0,
+      375.0
+     ]
+    ],
+    "yukari": [
+     1,
+     0
+    ],
+    "egim": 0.33,
+    "sacak_kotu": 280.0,
+    "sacak": {
+     "x": -30
+    }
+   },
+   {
+    "ad": "arka",
+    "plan": [
+     [
+      1124,
+      780
+     ],
+     [
+      -30,
+      780
+     ],
+     [
+      375.0,
+      375.0
+     ],
+     [
+      719.0,
+      375.0
+     ]
+    ],
+    "yukari": [
+     0,
+     -1
+    ],
+    "egim": 0.33,
+    "sacak_kotu": 280.0,
+    "sacak": {
+     "y": 780
+    }
+   },
+   {
+    "ad": "sağ",
+    "plan": [
+     [
+      1124,
+      -30
+     ],
+     [
+      1124,
+      780
+     ],
+     [
+      719.0,
+      375.0
+     ]
+    ],
+    "yukari": [
+     -1,
+     0
+    ],
+    "egim": 0.33,
+    "sacak_kotu": 280.0,
+    "sacak": {
+     "x": 1124
+    }
+   }
+  ],
+  "kalkanlar": []
+ }
+}

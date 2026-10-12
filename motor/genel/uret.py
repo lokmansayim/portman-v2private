@@ -1,0 +1,217 @@
+#!/usr/bin/env python3
+"""Genel motorun tek çağrısı (İE-08 GM1): Yapı Tanımı → çizim seti (plan, görünüşler, pafta PNG; IFC4 + özet; perspektifler) +
+yükleme listesi (girdi + liste JSON/MD) + bayiye gidenler (etiketli plan görseli, Örnek Şablon paftası PDF) + validation/manifest.
+
+    python -m motor.genel.uret modeller/C8801.json <çıktı klasörü> [--set kurallar/liste/setler/0.19.json] [--yontem panel|omega_asik]
+                               [--perspektifsiz] [--is-emri-no PM-…] [--revizyon 1]
+
+Deneme betiği `deneme/2026-10-06_kor_test/cizim_seti_kos.sh`'nin Python karşılığıdır: aynı modüller aynı argümanlarla çağrılır
+(`ciz_genel.main`, `ifc_genel.main`, `girdi_genel.main`, `yukleme.main`; argv ile), çıktı baytları değişmez. Perspektif ayrı süreçte
+koşar (VTK, OSMesa yokken çökebilir; çökmesi işi düşürmez: `validation.json › perspektif`). Kural seti `--set` ile (yoksa güncel
+`kurallar/liste/kurallar.json`; `PORTMAN_KURALLAR` ortam değişkeni de geçerlidir).
+
+Manifest, canlı Motor'un (`motor/dxf_out.uret`) worker'a verdiği anahtarları taşır: `pdf`, `pdf_sha256`, `warnings`; ek olarak
+`ifc`, `ifc_sha256`, `preview`, `plan_bayi`, `yukleme_json`, `ciktilar`. `validation.json`: `passed` (zorunlu çıktılar tam ve IFC şema
+hatası 0), `errors`, `eksik`, `ifc`, `liste_satir`, `perspektif`.
+"""
+from __future__ import annotations
+from .toplam import sum  # noqa: A001 — 3.11 toplama sırası her Python sürümünde (İE-08 GM2; toplam.py)
+import argparse
+import contextlib
+import hashlib
+import io
+import json
+import os
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+KOK = Path(__file__).resolve().parents[2]           # uret.py → parents[0] motor/genel, [1] motor, [2] depo kökü
+PERSPEKTIF_ZAMAN_ASIMI_S = 240
+ZORUNLU = ("{kod}_plan.png", "{kod}_gorunusler.png", "{kod}_pafta.png", "{kod}.ifc", "{kod}.ozet.json")
+PERSPEKTIFLER = ("{kod}_perspektif_on_sag.png", "{kod}_perspektif_on_sol.png", "{kod}_perspektif_arka_sol.png", "{kod}_perspektif_arka_sag.png",
+                 "{kod}_catisiz.png", "{kod}_makasli.png", "{kod}_geometri.json")
+
+
+def sha256(p: Path) -> str:
+    h = hashlib.sha256()
+    with open(p, "rb") as f:
+        for b in iter(lambda: f.read(1 << 20), b""):
+            h.update(b)
+    return h.hexdigest()
+
+
+def kod_govde(t: dict) -> str:
+    return t["kod"].replace("Ç", "C").replace("-", "")
+
+
+def _main(mod, argv: list[str], gunluk: io.StringIO) -> int:
+    """Modülün main()'ini argv ile, stdout'u günlüğe yönlendirerek çağırır; SystemExit kodunu döner."""
+    eski = sys.argv
+    sys.argv = [mod.__name__] + [str(a) for a in argv]
+    try:
+        with contextlib.redirect_stdout(gunluk):
+            try:
+                r = mod.main()
+            except SystemExit as e:
+                r = e.code if isinstance(e.code, int) else 1
+                if not isinstance(e.code, int) and e.code:
+                    print(e.code, file=gunluk)
+        return int(r or 0)
+    finally:
+        sys.argv = eski
+
+
+@contextlib.contextmanager
+def kural_seti(set_yolu: Path | None):
+    eski = os.environ.get("PORTMAN_KURALLAR")
+    if set_yolu is not None:
+        os.environ["PORTMAN_KURALLAR"] = str(Path(set_yolu).resolve())
+    try:
+        yield
+    finally:
+        if set_yolu is not None:
+            if eski is None:
+                os.environ.pop("PORTMAN_KURALLAR", None)
+            else:
+                os.environ["PORTMAN_KURALLAR"] = eski
+
+
+def perspektif_kos(ifc: Path, hedef: Path, kod: str, zaman_asimi: int = PERSPEKTIF_ZAMAN_ASIMI_S) -> dict:
+    """VTK çizimini ayrı süreçte koşar: çökme (sinyal), zaman aşımı ya da içe aktarma hatası işi düşürmez."""
+    try:
+        from importlib.util import find_spec
+        if find_spec("vtk") is None:
+            return {"durum": "ÇİZİLEMEDİ", "neden": "VTK kurulu değil"}
+    except Exception as e:  # pragma: no cover
+        return {"durum": "ÇİZİLEMEDİ", "neden": f"VTK denetlenemedi: {e}"}
+    t0 = time.time()
+    try:
+        r = subprocess.run([sys.executable, "-m", "motor.genel.perspektif", str(ifc), str(hedef), kod], cwd=str(KOK), capture_output=True, text=True, timeout=zaman_asimi)
+    except subprocess.TimeoutExpired:
+        return {"durum": "ÇİZİLEMEDİ", "neden": f"zaman aşımı ({zaman_asimi} s)", "sure_s": round(time.time() - t0, 1)}
+    if r.returncode == 0:
+        return {"durum": "TAMAM", "sure_s": round(time.time() - t0, 1)}
+    neden = f"süreç çöktü, sinyal {-r.returncode}" if r.returncode < 0 else f"çıkış {r.returncode}"
+    return {"durum": "ÇİZİLEMEDİ", "neden": f"{neden}: {(r.stderr or '').strip()[-300:]}", "sure_s": round(time.time() - t0, 1)}
+
+
+def matplotlib_sabitle() -> None:
+    """Çizim baytları ortamdan bağımsız olsun: matplotlib yalnız kendi varsayılanlarıyla (DejaVu Sans, varsayılan hinting) çizer.
+    Bulut çalışma alanında /etc/matplotlib/matplotlibrc (MATPLOTLIBRC) yazı tipini Inter yapıyor ve 'tight' kırpma yüzünden
+    görsel boyutu bile değişiyordu (İE-08 Adım 2 bulgusu, 12.10.2026); ie-05'in çizim setleri matplotlib varsayılanlarıyla üretildi."""
+    import matplotlib
+    matplotlib.use("Agg")
+    matplotlib.rc_file_defaults()
+    matplotlib.rcParams["font.family"] = ["sans-serif"]
+    matplotlib.rcParams["font.sans-serif"] = ["DejaVu Sans"] + [f for f in matplotlib.rcParamsDefault["font.sans-serif"] if f != "DejaVu Sans"]
+    # ie-05'in depodaki çizim setleri FreeType'ın kendi hinting'iyle ("default"; "native" ile aynı sonuç) üretilmiş: ana set ve ie-05 setiyle
+    # Ç8801'in plan, görünüşler ve pafta PNG'leri yalnız bu ayarla bayt bayt aynı çıkıyor (no_hinting, auto ve force_autohint farklı).
+    matplotlib.rcParams["text.hinting"] = "default"
+
+
+def uret(tanim_yolu: Path, hedef: Path, is_emri_no: str | None = None, revizyon: int = 1, set_yolu: Path | None = None,
+         yontem: str | None = None, perspektif: bool = True, bayi: bool = True, kaynak: str | None = None,
+         elektrik_sayimi: Path | None = None) -> dict:
+    """Bir Yapı Tanımı'ndan çizim setini, IFC'yi, yükleme listesini ve bayi çıktılarını üretir; manifest döner.
+    `elektrik_sayimi`: elektrik paftasından sayım (JSON); verilirse listede priz/anahtar/duy satırları oda kuralı yerine sayımdan gelir
+    (kör testlerin listeleri böyle üretildi: `sonuc/KT0x_pafta_sayimi.json`). Katalog modellerinde yok."""
+    matplotlib_sabitle()
+    from . import ciz_genel, girdi_genel, ifc_genel, yukleme
+    t0 = time.time()
+    tanim_yolu, hedef = Path(tanim_yolu), Path(hedef)
+    hedef.mkdir(parents=True, exist_ok=True)
+    t = json.loads(tanim_yolu.read_text(encoding="utf-8"))
+    kod = kod_govde(t)
+    gunluk = io.StringIO(); hatalar: list[str] = []; uyarilar: list[str] = []
+    ek = ["--yontem", yontem] if yontem else []
+    with kural_seti(set_yolu):
+        from . import kural
+        set_kullanilan = str(kural.yol())
+        # 1) çizimler (plan, pafta, görünüşler)
+        if _main(ciz_genel, [tanim_yolu, "--cikti", hedef] + ek, gunluk):
+            hatalar.append("ciz_genel başarısız")
+        # 2) IFC + özet
+        ifc = hedef / f"{kod}.ifc"
+        r = _main(ifc_genel, [tanim_yolu, ifc] + ek, gunluk)
+        ozet = json.loads((hedef / f"{kod}.ozet.json").read_text(encoding="utf-8")) if (hedef / f"{kod}.ozet.json").exists() else {}
+        if r and not ozet:
+            hatalar.append("ifc_genel başarısız")
+        elif ozet.get("sema_hatasi"):
+            hatalar.append(f"IFC şema hatası {ozet['sema_hatasi']}")
+        # 3) yükleme listesi (girdi + liste)
+        girdi = hedef / f"{kod}_girdi.json"; liste = hedef / f"{kod}_yukleme.json"
+        if _main(girdi_genel, [tanim_yolu, "--dosya", girdi, "--uzerine-yaz", "--kaynak", kaynak or f"Yapı Tanımı 0.5 ({tanim_yolu.name})"] + ek, gunluk):
+            hatalar.append("girdi_genel başarısız")
+        elif _main(yukleme, [girdi, "--cikti", liste, "--md", liste.with_suffix(".md")]
+                   + (["--elektrik-sayimi", Path(elektrik_sayimi)] if elektrik_sayimi else []), gunluk):
+            hatalar.append("yukleme başarısız")
+    liste_satir = len(json.loads(liste.read_text(encoding="utf-8")).get("satirlar", [])) if liste.exists() else 0
+    # 4) perspektifler (ayrı süreç; isteğe bağlı)
+    pers = perspektif_kos(ifc, hedef, kod) if (perspektif and ifc.exists()) else {"durum": "ATLANDI"}
+    if pers["durum"] != "TAMAM":
+        uyarilar.append(f"perspektif: {pers['durum']}" + (f" ({pers.get('neden', '')})" if pers.get("neden") else ""))
+    # 5) bayiye gidenler (etiketli plan görseli, Örnek Şablon paftası) — modüller varsa
+    bayi_png = hedef / f"{kod}_plan_bayi.png"; pafta_pdf = hedef / f"{kod}_pafta.pdf"
+    if bayi:
+        try:
+            from . import bayi_gorseli
+            bayi_gorseli.plan_bayi(t, hedef, kod, is_emri_no=is_emri_no, revizyon=revizyon, set_yolu=set_yolu, yontem=yontem)
+        except ImportError:
+            uyarilar.append("bayi görseli modülü yok")
+        except Exception as e:
+            hatalar.append(f"bayi görseli: {type(e).__name__}: {str(e)[:200]}")
+        try:
+            from . import sablon_pafta
+            sablon_pafta.pafta_pdf(t, hedef, kod, is_emri_no=is_emri_no, revizyon=revizyon, set_yolu=set_yolu, yontem=yontem)
+        except ImportError:
+            uyarilar.append("şablon pafta modülü yok")
+        except Exception as e:
+            hatalar.append(f"şablon pafta: {type(e).__name__}: {str(e)[:200]}")
+    # 6) çizim seti denetimi (kurallar/cizim/cizim_seti.json) ve kayıtlar
+    seti = json.loads((KOK / "kurallar" / "cizim" / "cizim_seti.json").read_text(encoding="utf-8"))
+    beklenen = [c["dosya"].format(kod=kod) for c in seti["ciktilar"]]
+    var = {d: (hedef / d).is_file() and (hedef / d).stat().st_size > 0 for d in beklenen}
+    eksik = [d for d, v in var.items() if not v]
+    zorunlu_eksik = [d.format(kod=kod) for d in ZORUNLU if not var.get(d.format(kod=kod), (hedef / d.format(kod=kod)).is_file())]
+    if zorunlu_eksik:
+        hatalar.append("zorunlu çıktı eksik: " + ", ".join(zorunlu_eksik))
+    if bayi and not pafta_pdf.exists():
+        hatalar.append("bayi paftası (PDF) üretilmedi")
+    passed = not hatalar
+    validation = {"passed": passed, "errors": hatalar, "warnings": uyarilar, "kod": t["kod"], "set": set_kullanilan, "yontem": yontem or t.get("cati", {}).get("yontem"),
+                  "ciktilar": {"beklenen": len(beklenen), "var": sum(var.values()), "eksik": eksik, "zorunlu_eksik": zorunlu_eksik}, "ifc": ozet,
+                  "liste_satir": liste_satir, "elektrik_sayimi": str(elektrik_sayimi) if elektrik_sayimi else None,
+                  "perspektif": pers, "sure_s": round(time.time() - t0, 1)}
+    (hedef / "validation.json").write_text(json.dumps(validation, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    (hedef / "uret.log").write_text(gunluk.getvalue(), encoding="utf-8")
+    manifest = {"motor": "genel", "kod": t["kod"], "is_emri_no": is_emri_no, "revizyon": revizyon, "passed": passed, "warnings": uyarilar,
+                "pdf": pafta_pdf.name if pafta_pdf.exists() else None, "pdf_sha256": sha256(pafta_pdf) if pafta_pdf.exists() else None,
+                "ifc": ifc.name if ifc.exists() else None, "ifc_sha256": sha256(ifc) if ifc.exists() else None,
+                "preview": f"{kod}_plan.png" if (hedef / f"{kod}_plan.png").exists() else None, "plan_bayi": bayi_png.name if bayi_png.exists() else None,
+                "yukleme_json": liste.name if liste.exists() else None, "ciktilar": {d: v for d, v in var.items()}, "set": set_kullanilan}
+    (hedef / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    return manifest
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("tanim", type=Path); ap.add_argument("cikti", type=Path)
+    ap.add_argument("--set", type=Path, default=None, help="kural seti dosyası (varsayılan: kurallar/liste/kurallar.json ya da PORTMAN_KURALLAR)")
+    ap.add_argument("--yontem", choices=("panel", "omega_asik"))
+    ap.add_argument("--perspektifsiz", action="store_true"); ap.add_argument("--bayisiz", action="store_true", help="bayi görseli ve şablon paftası üretme")
+    ap.add_argument("--is-emri-no", default=None); ap.add_argument("--revizyon", type=int, default=1)
+    ap.add_argument("--elektrik-sayimi", type=Path, default=None, help="elektrik paftasından sayım (JSON; kör testlerin listeleri için)")
+    a = ap.parse_args()
+    m = uret(a.tanim, a.cikti, is_emri_no=a.is_emri_no, revizyon=a.revizyon, set_yolu=a.set, yontem=a.yontem, perspektif=not a.perspektifsiz, bayi=not a.bayisiz,
+             elektrik_sayimi=a.elektrik_sayimi)
+    v = json.loads((a.cikti / "validation.json").read_text(encoding="utf-8"))
+    print(f"{m['kod']}: {'geçti' if m['passed'] else 'GEÇMEDİ'} · çıktılar {v['ciktilar']['var']}/{v['ciktilar']['beklenen']} · IFC şema hatası {v['ifc'].get('sema_hatasi', '?')} · "
+          f"liste {v['liste_satir']} satır · perspektif {v['perspektif']['durum']} · {v['sure_s']} s" + (f" · HATA: {'; '.join(m and v['errors'])}" if v["errors"] else "")
+          + (f" · uyarı: {'; '.join(v['warnings'])}" if v["warnings"] else ""))
+    return 0 if m["passed"] else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
