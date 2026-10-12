@@ -71,9 +71,21 @@ Görünüş çizimi:
 - Pencerede açılan kanat kırmızı kesik üçgenle, sabit cam eğik çizgilerle gösterilir. Dış kapı kahverengi, yatay çizgili.
 - Altta gri taş desenli subasman şeridi.
 
+## Ana koddaki karşılığı (İE-08, 12 Ekim 2026)
+
+`motor/genel/sablon_pafta.py`: aynı düzen ve kurallar (sayfa, tablolar, yazı ve renkler, ölçek), geometri genel motordan (Yapı Tanımı 0.5,
+cm, serbest aks: duvarlar, mahaller ve açıklıklar `yapi.kur`, sol yan ve ön görünüş `sahne` izdüşümü, çatı profili `cati_genel`).
+Çıktı `<kod>_pafta.pdf` (A4 yatay, 2 sayfa: 1. sayfa şablonun aynısı, 2. sayfa dört görünüş ve çatı planı) ve `<kod>_pafta_sablon.png`
+önizleme; `python -m motor.genel.uret` her modelde üretir, bayiye giden paftadır (A3). Çelikte pano eki çizilmez (kural yok; 8a dışı).
+Antet ve tablolar İş Emri zarfından ve tanımdan: Proje Kodu = İş Emri no, Proje Adı & M² = model kodu ve m², Tarih = üretim günü
+(`time.gmtime`; referans koşusunda sabit), Çizen "Portman", Kontrol ve Onay "..."; Bina özellikleri tanım ve kural kitabından
+(yükseklik, duvarlar, çatı şekli/eğimi/kaplaması, kapı ve pencere sayım ve ölçüleri), gerisi "..."; Özel istekler = bayinin değişiklik
+cümleleri, yoksa "...". Yazı tipleri `motor/genel/font/` (Comic Relief, OFL). Genel motorun kendi `pafta.png`'si (mühendis paftası,
+açıklama satırlarıyla) çizim setinde kalır, baytları değişmedi.
+
 ## Denemedeki karşılığı
 
-`deneme/2026-10-06_kalinlik_160_100/sablon_pafta.py`, İş Emri'nden bu düzende PDF ve PNG üretir. Canlı Motor'da yok.
+`deneme/2026-10-06_kalinlik_160_100/sablon_pafta.py`, İş Emri'nden bu düzende PDF ve PNG üretir (pano birimli Motor'un deneme kopyası; tarih kaydı).
 
 - Yazı tipi: Comic Sans MS lisanslı olduğu için eşi Comic Relief (SIL OFL; Türkçe harfleri tam) kullanıldı. Arial yerine Liberation Sans. Lokman aslını isterse yazı tipi dosyası gerekir.
 - Çizime girmeyen bilgiler İş Emri'nin `pafta` bloğundan gelir: proje adı, ilgili kişi, sevk adresi, tarih, çizen, kontrol, onay, özellik satırları, özel istekler, mahal adı karşılıkları. Tefriş `tefris` listesinden gelir ve şematiktir.
@@ -82,7 +94,11 @@ Görünüş çizimi:
 
 ## Açık sorular
 
-- Antetin sol kutusu şablonda boş. Oraya firma logosu mu gelecek?
-- Çizen, Kontrol, Onay satırlarına kim yazılacak? Denemede Çizen "Portman", ötekiler "...".
-- Şablonda bir ön ve bir sol yan görünüş var. Dört görünüş ayrı paftada kalıyor; öyle mi kalsın?
-- Panel Türü, Çatı Kaplama Rengi, boya renkleri, Köşe ve Söveler satırlarının değeri nereden gelecek (bayi talebi, model varsayılanı)?
+İE-08 planında (12 Ekim 2026, Soru 18–21) her biri için öneri yazıldı; plan onayıyla varsayılan karar sayıldı, Lokman itiraz ederse değişir:
+
+- Antetin sol kutusu şablonda boş. Oraya firma logosu mu gelecek? → *Öneri: firma logosu; dosyası verilince basılır, yoksa boş kalır (bugün boş).*
+- Çizen, Kontrol, Onay satırlarına kim yazılacak? → *Çizen "Portman", Kontrol "..." (8b'de mühendis adı), Onay "..." (Patron onayı sonraki iş).*
+- Şablonda bir ön ve bir sol yan görünüş var. Dört görünüş ayrı paftada kalıyor; öyle mi kalsın? → *Aynı PDF'in 2. sayfası: dört görünüş ve çatı planı (ayrı dosya WhatsApp'ta ikinci belge ve ikinci ücret olurdu).*
+- Panel Türü, Çatı Kaplama Rengi, boya renkleri, Köşe ve Söveler satırlarının değeri nereden gelecek (bayi talebi, model varsayılanı)? → *Panel Türü ve Çatı Kaplaması tanım + kural kitabı bazından; renkler ve Köşe/Söveler bayi söylediyse onunki, söylemediyse "..." (uydurulmaz, K21). Bayi standardı (`kurallar/bayi/<bayi>.json`) gelince oradan.*
+- "İLGİLİ KİŞİ-TELEFON" alanı (ek, 12 Ekim): bayiye giden belgeye ad ve numara koyar; D-06 bayi adını kapsar, numarayı kapsamaz (Z-08). → *Yalnız bayinin (ya da firmanın) adı yazılır, telefon "..."; bayi kendi işyeri hattını ayardan girerse yazılır (ayrı küçük iş).*
+- "Pano pano" kuralı çelikte duvar panelleriyle mi uygulansın? → *8a'da hayır: çelik duvar paneli bölme kuralı kural kitabında yok (`celik_duvar.md` yalnız dikme aralığını verir); kural yokken çizilen ek uydurma olur (K21). Prefabrikte (pano 1255) geçerli; çelikte pafta kuralları işinde.*

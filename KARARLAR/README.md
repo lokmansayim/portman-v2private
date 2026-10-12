@@ -25,7 +25,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [K13](K13.md) | Eşleşme anahtarı modeli: VPS'te üretilen 64-hex anahtar, hosting'te `api_token.txt`; `hash_equals`; OpenAI anahtarı hosting'ten HTTPS ile ajana gider, VPS diskine yazılmaz (22.09) · **D-05 ile kapandı (9.10): eşleşme anahtarı yok; anahtarlar VPS'te root 0600 dosyalarda, hepsi yeni** |
 | [K14](K14.md) | Paket dağıtımı hosting kanalıyla (`kanal/package/current.zip` sha değişince ajan kendini günceller, öz-test koşar); komut kanalı (`vps_komut`) kapalı başlar (22.09) · **D-05 ile kapandı (9.10): salt okunur dağıtım anahtarı ve onaylı etiket (`guncelle.sh`); komut kanalı kodu silindi** |
 | [K15](K15.md) | Tek depo: GitHub `lokmansayim/portman` (özel); kod, kural sürümü, şema, testler, KARARLAR.md (22.09) |
-| [K16](K16.md) | Katalog planları çıkarıcıyla okunur, elle kodlanmaz; artıklar raporlanır, sessiz yuvarlama yok (22.09) |
+| [K16](K16.md) | Katalog planları çıkarıcıyla okunur, elle kodlanmaz; artıklar raporlanır, sessiz yuvarlama yok (22.09) · **Açık (a/b) kararı D-08 ile kapandı (12.10): modül dışı ve çelik planlar serbest aksla genel motorda** |
 | [K17](K17.md) | Sızan eşleşme anahtarı yenilenecek: `rm /etc/portman/agent.env` + bootstrap tekrar + yeni anahtar `api_token.txt`'e (22.09, **uygulanmadı**) · **28.09'da kapı C'de başka yoldan uygulandı** (eşleşme ve OpenAI anahtarı yenilendi, eskileri 401; bkz. K17 › Uygulanış) |
 | [K18](K18.md) | Beyin kuralı (22.09, iki adım): odada tek pencere varken "penceresi 120x180" ölçü değişikliğidir; ölçüt **bayinin kendi mesajı**, LLM özeti değil |
 | [K19](K19.md) | NumPy < 2 sabitlemesi (VPS) (22.09) · **10.10'da yeni sunucuda yeniden doğrulandı:** sunucu paketleri `vps/gereksinimler.txt` ile tam sabit (numpy 1.26.4); işlemci x86-64-v2 sunana kadar numpy 1.x (K19 › Uygulanış) · **12.10 (BK-07, Lokman 11.10):** işlemci "host" oldu, koşul oluştu; numpy 2.x ve güncel paketler, tam sabit; `guncelle.sh` numpy hesabı güvenlik ağı (K19 › Uygulanış 2) |
@@ -67,6 +67,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-05](D-05.md) | Kanal tek sunucuda (VPS): hosting'ten taşınma, sıfırdan kurulum, boş veritabanı, bütün sırlar yeni, dışa açık yalnız 443, sürüm düzeni (`guncelle.sh`/`geri_don.sh`) ve yalnız ekleyen göçler, şifreli dış yedek (age + Drive), iki uyarı yolu, hosting'te yalnız web sitesi; K06, K12, K13, K14 kapandı | 09.10 |
 | [D-06](D-06.md) | Bayi adı ve hitabı bayiye giden mesajlarda kullanılır ve LLM'e gönderilebilir (Z-08'in bu iki alan için gevşetilmesi; numara ve öteki alanlar için Z-08 aynen). İE-07'de yalnız şablon hitabı; LLM bağlamı sonraki iş | 07/10.10, kayıt 11.10 |
 | [D-07](D-07.md) | Katalogda doğru kaynak doğrulanmış çizimdir; katalog PDF'i yalnız fikir kaynağı; her model kaydında kaynak ve doğrulama durumu yazar; dondurulmuş `katalog_37_proje.json` değişmez, düzeltme yeni sürüm dosyasıyla (D-02'ye uygun) | 11.10 |
+| [D-08](D-08.md) | K16 = (b): çelik ve modül dışı planlar serbest aksla genel motorda (`motor/genel/`, ana kodda); P6001 ve prefabrik katalog pano birimli Motor'da (K02); kural kitabı ve modeller sürümle dosya olarak; perspektif VTK ekransız; yedi aday (Ç8201, Ç8801, Ç8801-K/L, KT-01/02/03), KT'ler bayiye adsız; K-A1 ±%10 brüt oturum; bayi paftası "Örnek Şablon"; genel motor çıktıları altın test, referans bu kararla yeniden donduruldu (D-02); K16 kapandı | 11.10 (Lokman), kayıt 12.10 |
 
 ## 27 Eylülde Lokman'ın verdiği kararlar
 
@@ -78,7 +79,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 
 ## Açık kararlar (sahibi Lokman)
 
-- **K16:** Modül dışı katalog planları için (a) modüle uyarlama ya da (b) serbest aks. 23 Eylül önerisi: bayi planlarında (b).
+- ~~**K16:** Modül dışı katalog planları için (a) modüle uyarlama ya da (b) serbest aks. 23 Eylül önerisi: bayi planlarında (b).~~ **Kapandı:** Lokman 11.10 15:01, (b): çelik ve modül dışı planlar serbest aksla genel motorda; P6001 ve prefabrik katalog pano birimli Motor'da (D-08, İE-08).
 - **K3 ve K4:** Güncel Şablon 2024 blok adlarına geçiş; kapı genişlikleri.
 - **Z-03 ve Z-06 eşikleri:** %98 ve günde 50 talep öneridir.
 - ~~**Anahtar yenileme (K17):** 27 Eylülde yeniden ertelendi; bayilere açılmadan önce şart.~~ **Kapandı:** 28.09'da kapı C'de yapıldı (K17 › Uygulanış; 4 Ekim'de işaretlendi, BK-03). Claude anahtarının 29.10.2026 son kullanma tarihi ayrı bir risktir (`DURUM.md`).

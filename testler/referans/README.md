@@ -35,6 +35,18 @@ Referans dosyaları elle değiştirilmez. `dogrula.py` her koşuda `GEREKCE.md`'
 
 Ortam (28.09, pip ile kurulan sürümler): Python 3.11.15, ezdxf 1.4.4, pymupdf 1.26.0, shapely 2.1.2, pydantic 2.13.5, numpy 2.4.6. `kos.py`'nin kaydı pymupdf için sürüm yerine "(64-bit)." yazıyor.
 
+## 12 Ekim 2026 (İE-08) · genel motor izleri
+
+`2026-10-12/` klasörü (karar D-08) genel motorun (serbest aks, `motor/genel/`) altın çıktılarını da dondurur. `kos.py` iki yeni adım koşar:
+`genel_c8801` (her koşuda; Ç8801 katalog modeli kural seti 0.19 pimiyle: plan/görünüşler/pafta PNG, IFC, yükleme listesi, bayi görseli ve
+Örnek Şablon paftası; `modeller/altin.json` ile karşılaştırma) ve `genel_matris` (yalnız tam koşuda; 0.19 ile yedi modelin çizim setleri ve A/B
+listeleri, 0.12–0.18 ile yalnız listeler: 12 Ekim'de o setin commit'indeki listeyi bayt bayt veren birleşimler). İzler beşinci dosyada,
+`genel_parmak_izleri.txt`: PNG ve PDF bayt bayt (sha256), JSON kanonik, IFC içerikçe (`motor/genel/iz.py`: başlık zamanı, GlobalId, kayıt
+numarası ve küme sırası maskeli). Dosya isteğe bağlıdır: eski klasörlerde yoktur, `dogrula.py` o zaman yalnız dört dosyayı okur.
+`--hizli` koşuda yalnız `genel_c8801/` altındaki izler karşılaştırılır. Girdi kalıplarına `modeller/*.json` ve `kurallar/` (setler, cizim,
+secenekler, bayi) eklendi; güncel set `kurallar/liste/kurallar.json` girdi sayılmaz (altın adımlar 0.19 pimiyle koşar, kural değişince
+referans değişmez). Üretim zamanı `TEST_SABIT_ZAMAN` ile sabit (şablon paftasındaki tarih de). Perspektifler altın değildir (VTK; sunucuda `[3b]`).
+
 ## Dondurulan sonuç
 
 | Adım | Sonuç |
@@ -56,6 +68,7 @@ Dosyalar, `2026-09-28/` altında:
 - `denetim_kosum.json`: `kos.py --planlar` sonucu.
 - `dxf_parmak_izleri.txt`: 18 DXF'in içerik parmak izi.
 - `pdf_parmak_izleri.txt`: 18 PDF'in sayfa ölçüsü ve bütün çizimlerinin özeti (`2026-09-28b/`'de; `2026-09-28/`'de yalnız sayfa ölçüsü).
+- `genel_parmak_izleri.txt` (`2026-10-12/`'den beri, isteğe bağlı): genel motor çıktılarının izleri (yukarıda).
 
 Araçlar, bu klasörde:
 - `dogrula.py`: referansa karşı doğrulama ve yeniden dondurma (`--girdi-dokumu` bugünkü girdi özetini yalnız yazdırır).

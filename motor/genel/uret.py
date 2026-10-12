@@ -113,10 +113,11 @@ def matplotlib_sabitle() -> None:
 
 def uret(tanim_yolu: Path, hedef: Path, is_emri_no: str | None = None, revizyon: int = 1, set_yolu: Path | None = None,
          yontem: str | None = None, perspektif: bool = True, bayi: bool = True, kaynak: str | None = None,
-         elektrik_sayimi: Path | None = None) -> dict:
+         elektrik_sayimi: Path | None = None, yalniz_liste: bool = False) -> dict:
     """Bir Yapı Tanımı'ndan çizim setini, IFC'yi, yükleme listesini ve bayi çıktılarını üretir; manifest döner.
     `elektrik_sayimi`: elektrik paftasından sayım (JSON); verilirse listede priz/anahtar/duy satırları oda kuralı yerine sayımdan gelir
-    (kör testlerin listeleri böyle üretildi: `sonuc/KT0x_pafta_sayimi.json`). Katalog modellerinde yok."""
+    (kör testlerin listeleri böyle üretildi: `sonuc/KT0x_pafta_sayimi.json`). Katalog modellerinde yok.
+    `yalniz_liste`: yalnız girdi ve yükleme listesi (çizim, IFC, perspektif ve bayi çıktıları yok; eski kural setleriyle altın liste matrisi)."""
     matplotlib_sabitle()
     from . import ciz_genel, girdi_genel, ifc_genel, yukleme
     t0 = time.time()
@@ -129,17 +130,18 @@ def uret(tanim_yolu: Path, hedef: Path, is_emri_no: str | None = None, revizyon:
     with kural_seti(set_yolu):
         from . import kural
         set_kullanilan = str(kural.yol())
-        # 1) çizimler (plan, pafta, görünüşler)
-        if _main(ciz_genel, [tanim_yolu, "--cikti", hedef] + ek, gunluk):
-            hatalar.append("ciz_genel başarısız")
-        # 2) IFC + özet
-        ifc = hedef / f"{kod}.ifc"
-        r = _main(ifc_genel, [tanim_yolu, ifc] + ek, gunluk)
-        ozet = json.loads((hedef / f"{kod}.ozet.json").read_text(encoding="utf-8")) if (hedef / f"{kod}.ozet.json").exists() else {}
-        if r and not ozet:
-            hatalar.append("ifc_genel başarısız")
-        elif ozet.get("sema_hatasi"):
-            hatalar.append(f"IFC şema hatası {ozet['sema_hatasi']}")
+        ifc = hedef / f"{kod}.ifc"; ozet: dict = {}
+        if not yalniz_liste:
+            # 1) çizimler (plan, pafta, görünüşler)
+            if _main(ciz_genel, [tanim_yolu, "--cikti", hedef] + ek, gunluk):
+                hatalar.append("ciz_genel başarısız")
+            # 2) IFC + özet
+            r = _main(ifc_genel, [tanim_yolu, ifc] + ek, gunluk)
+            ozet = json.loads((hedef / f"{kod}.ozet.json").read_text(encoding="utf-8")) if (hedef / f"{kod}.ozet.json").exists() else {}
+            if r and not ozet:
+                hatalar.append("ifc_genel başarısız")
+            elif ozet.get("sema_hatasi"):
+                hatalar.append(f"IFC şema hatası {ozet['sema_hatasi']}")
         # 3) yükleme listesi (girdi + liste)
         girdi = hedef / f"{kod}_girdi.json"; liste = hedef / f"{kod}_yukleme.json"
         if _main(girdi_genel, [tanim_yolu, "--dosya", girdi, "--uzerine-yaz", "--kaynak", kaynak or f"Yapı Tanımı 0.5 ({tanim_yolu.name})"] + ek, gunluk):
@@ -149,11 +151,12 @@ def uret(tanim_yolu: Path, hedef: Path, is_emri_no: str | None = None, revizyon:
             hatalar.append("yukleme başarısız")
     liste_satir = len(json.loads(liste.read_text(encoding="utf-8")).get("satirlar", [])) if liste.exists() else 0
     # 4) perspektifler (ayrı süreç; isteğe bağlı)
-    pers = perspektif_kos(ifc, hedef, kod) if (perspektif and ifc.exists()) else {"durum": "ATLANDI"}
+    pers = perspektif_kos(ifc, hedef, kod) if (perspektif and not yalniz_liste and ifc.exists()) else {"durum": "ATLANDI"}
     if pers["durum"] != "TAMAM":
         uyarilar.append(f"perspektif: {pers['durum']}" + (f" ({pers.get('neden', '')})" if pers.get("neden") else ""))
     # 5) bayiye gidenler (etiketli plan görseli, Örnek Şablon paftası) — modüller varsa
     bayi_png = hedef / f"{kod}_plan_bayi.png"; pafta_pdf = hedef / f"{kod}_pafta.pdf"
+    bayi = bayi and not yalniz_liste
     if bayi:
         try:
             from . import bayi_gorseli
@@ -171,10 +174,11 @@ def uret(tanim_yolu: Path, hedef: Path, is_emri_no: str | None = None, revizyon:
             hatalar.append(f"şablon pafta: {type(e).__name__}: {str(e)[:200]}")
     # 6) çizim seti denetimi (kurallar/cizim/cizim_seti.json) ve kayıtlar
     seti = json.loads((KOK / "kurallar" / "cizim" / "cizim_seti.json").read_text(encoding="utf-8"))
-    beklenen = [c["dosya"].format(kod=kod) for c in seti["ciktilar"]]
+    beklenen = [c["dosya"].format(kod=kod) for c in seti["ciktilar"]] if not yalniz_liste else [girdi.name, liste.name]
     var = {d: (hedef / d).is_file() and (hedef / d).stat().st_size > 0 for d in beklenen}
     eksik = [d for d, v in var.items() if not v]
-    zorunlu_eksik = [d.format(kod=kod) for d in ZORUNLU if not var.get(d.format(kod=kod), (hedef / d.format(kod=kod)).is_file())]
+    zorunlu = ZORUNLU if not yalniz_liste else (f"{kod}_girdi.json", f"{kod}_yukleme.json")
+    zorunlu_eksik = [d.format(kod=kod) for d in zorunlu if not var.get(d.format(kod=kod), (hedef / d.format(kod=kod)).is_file())]
     if zorunlu_eksik:
         hatalar.append("zorunlu çıktı eksik: " + ", ".join(zorunlu_eksik))
     if bayi and not pafta_pdf.exists():

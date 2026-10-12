@@ -125,6 +125,27 @@ def ozet(yol: Path) -> str:
     raise SystemExit(f"desteklenmeyen dosya: {yol}")
 
 
+def genel_ozet(yol: Path) -> str:
+    """Genel motor çıktılarının izi (İE-08, `cikti/denetim/genel*/`): PNG ve PDF bayt bayt (sha256; matplotlib çıktıları deterministik,
+    PDF üst verisinde zaman yok), JSON kanonik (anahtar sırası ve boşluk önemsiz), IFC içerikçe (`motor/genel/iz.py`: başlık zamanı,
+    GlobalId, kayıt numarası ve küme sırası maskeli). Öteki uzantılar sha256."""
+    s = yol.suffix.lower()
+    if s == ".json":
+        return hashlib.sha256(json.dumps(json.loads(yol.read_text(encoding="utf-8")), sort_keys=True, ensure_ascii=False,
+                                         separators=(",", ":")).encode("utf-8")).hexdigest()
+    if s == ".ifc":
+        kok = Path(__file__).resolve().parents[2]      # depo kökü (motor/genel/iz.py için)
+        if str(kok) not in sys.path:
+            sys.path.insert(0, str(kok))
+        from motor.genel import iz
+        return iz.ifc_izi(yol)
+    h = hashlib.sha256()
+    with open(yol, "rb") as f:
+        for b in iter(lambda: f.read(1 << 20), b""):
+            h.update(b)
+    return h.hexdigest()
+
+
 if __name__ == "__main__":
     for a in sys.argv[1:]:
         print(f"{ozet(Path(a))}  {a}")

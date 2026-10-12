@@ -38,7 +38,7 @@ Tanımda o projenin teknik özelliklerinden gelen birkaç seçim de yazılıdır
 | `model/secenekler/` | Değişiklik operatörleri: model tanımı değişmeden paket farkını uygular. Örnek `dis_karkas_140.json` (Lokman, 3 Ekim 2026 11:49: "dışlar 140'lık") |
 | `cizim/cizim_seti.json` | Çizim setinin içeriği (Lokman onayladı, 7 Ekim 2026 07:45). Anlatımı `docs/sartname/cizim_seti.md` |
 | `liste/kurallar.json` | Metraj ve yükleme listesi kuralları; her anahtarda `deger`, `durum`, `kaynak`. Sürümü `sema` alanında (bugün 0.19-taslak) |
-| `liste/setler/` | Eski sürümler (0.12–0.18; aşağıda). Bir set `PORTMAN_KURALLAR` ortam değişkeniyle seçilir (`deneme/2026-10-03_yukleme/kural.py`) |
+| `liste/setler/` | Dondurulmuş sürümler (0.12–0.19; aşağıda). Bir set `PORTMAN_KURALLAR` ortam değişkeniyle ya da `python -m motor.genel.uret --set` ile seçilir (`motor/genel/kural.py`; deneme kopyası `deneme/2026-10-03_yukleme/kural.py`) |
 | `bayi/ornek.json` | Bayi standardı örneği: listeye giren gruplar, çatı yöntemi. Gerçek bayi, numara ya da ad yok |
 
 **Sıradaki:** pafta kuralları `cizim/` altına girecek: makas, dere ve panel yerleşimi, kesim planı. Lokman, 10 Ekim 2026: "Zaten üretim dosyası vermeyeceğiz sen kendin oluşturacaksın paftayı bunları sana örnek olarak eğitimin için atıyorum". Kurallar örnek projelerden çıkarılacak; o projelerin paftaları kuralların sınavı olacak.
@@ -54,7 +54,8 @@ Tanımda o projenin teknik özelliklerinden gelen birkaç seçim de yazılıdır
 | 0.16 | Lokman, 9 Ekim 22:22 (KT-02) | `6b265c8` (9 Ekim 22:40) |
 | 0.17 | Lokman, 9 Ekim 22:44 (korkuluk) | `c939fe2` (10 Ekim 10:47) |
 | 0.18 | Lokman, 10 Ekim 10:18–10:39 (KT-03; beş fotoğraf): tek eğimli çatı panelli çatının kenarları (`panel_cati_kenarlari`), alçak çatının üstüne düşen köşede iniş yok, taharet musluğu, çatı çıkış kapağı ve bacanın içi listede yok | `8fca288` (10 Ekim 11:21) |
-| 0.19 (güncel) | Lokman, 10 Ekim 11:39: kısa derede (4 m'ye kadar) tek iniş; alçak çatının üstüne düşen köşede iniş var (dere 15 cm içeride biter, su o çatıya iner), yalnız tek inişli küçük çatıda (sundurma) yok | `ie-05` dalı |
+| 0.19 | Lokman, 10 Ekim 11:39: kısa derede (4 m'ye kadar) tek iniş; alçak çatının üstüne düşen köşede iniş var (dere 15 cm içeride biter, su o çatıya iner), yalnız tek inişli küçük çatıda (sundurma) yok | `setler/0.19.json` (İE-08, 12 Ekim 2026; `kurallar.json`un o günkü bayt bayt kopyası). **Altın testin pimi:** `denetim/kos.py` genel adımları ve `modeller/altin.json` bu setle üretilir; ana koddaki paket `python -m motor.genel.uret --set kurallar/liste/setler/0.19.json` |
+| 0.20-taslak (güncel) | Henüz yeni cevap yok; 0.19'un aynısı, yalnız sürüm numarası | `liste/kurallar.json` (canlı akış bunu okur; yeni kural geldiğinde buraya yazılır, 0.20 dondurulunca `setler/`e kopyalanır) |
 
 ## Kural nasıl eklenir
 

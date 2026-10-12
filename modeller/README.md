@@ -17,6 +17,10 @@ Dosyalar ie-05 ve deneme klasörlerindeki tanımların **bayt bayt kopyasıdır*
 | `KT02.json` | KT-02 | Müşteri projesi (kör test 2), 90 m², dört omuz, korkuluklu veranda, sundurma | Montaj paftası ve üretim dosyasından; düzeltilmiş tanım (1 düzeltme) | Çizim seti 12/12; gerçek listeyle kıyas (`2026-10-09_Kor_Test_KT02.md`) | `deneme/2026-10-09_kor_test_2/tanim/KT02_duzeltilmis.json` |
 | `KT03.json` | KT-03 | Müşteri projesi (kör test 3), 80 m², kanatlı kırma, panel çatılı veranda ve sundurma, iki baca | Montaj paftasından (üretim dosyası yok); düzeltilmiş tanım (2 düzeltme) | Çizim seti 12/12; gerçek listeyle kıyas (`2026-10-10_Kor_Test_KT03.md`) | `deneme/2026-10-09_kor_test_3/tanim/KT03_duzeltilmis.json` |
 
+Öteki dosyalar: `altin.json` (Ç8801'in altın değerleri: plan PNG sha256, liste JSON sha256, IFC izi; `vps/genel_dene.py` ve `testler/genel/test_altin.py` okur),
+`KT0x_pafta_sayimi.json` (kör test projelerinin elektrik paftasından sayım: duy, anahtar, priz adetleri; KT listeleri bu girdiyle üretildi ve altın
+matriste de öyle üretilir: `python -m motor.genel.uret modeller/KT02.json <çıktı> --elektrik-sayimi modeller/KT02_pafta_sayimi.json`).
+
 Kurallar:
 - **Kör tanımlar** (`KT0x.json`, kıyastan önceki) ve A/B çizim setleri `deneme/` altında tarih kaydı olarak durur; canlıya düzeltilmiş tanım ve **yöntem A** (çatı ve tavan paneli; çelik standardı, Lokman 7 Ekim 07:45) gider. B (omega ve aşık; yapıldığı gibi) yalnız kıyas ve altın test içindir.
 - KT projeleri müşteri projesidir: bayiye **adsız** sunulur (kod, m², oda programı); kaynak dosyalar (DWG, SKP, gerçek liste) depoda yoktur.

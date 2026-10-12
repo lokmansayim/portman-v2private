@@ -120,6 +120,65 @@ def planlar_16() -> dict:
             "not": "motor_passed = kural doğrulaması; mimari doğruluk/insan kabulü değildir. kapisiz_plan: kaynakta kapı olup çıkarımda düşenler (rapor: P1051)."}
 
 
+# ── İE-08 · genel motor (serbest aks, motor/genel) altın adımları ──────────────────────────────────────────────────────────────────
+# Kural seti pimi 0.19: kurallar.json ilerlese de altın çıktılar aynı setle üretilir (kurallar/README.md › Sürümler; D-08).
+GENEL_SET = "kurallar/liste/setler/0.19.json"
+# ad → (tanım, yöntem, elektrik sayımı). Yöntem None = tanımın kendi çatı yöntemi (KT-01/02'de B); KT listeleri pafta sayımıyla
+# üretildi (modeller/README.md). Bu on çift, deneme klasöründeki çizim setlerini ve listeleri bayt bayt verir (IE-08.md › Kanıt, Adım 3).
+GENEL_MODELLER = {
+    "C8801": ("modeller/C8801.json", "panel", None), "C8801K": ("modeller/C8801K.json", "panel", None), "C8801L": ("modeller/C8801L.json", "panel", None),
+    "C8201": ("modeller/C8201.json", "panel", None),
+    "KT01_A": ("modeller/KT01.json", "panel", "modeller/KT01_pafta_sayimi.json"), "KT01_B": ("modeller/KT01.json", None, "modeller/KT01_pafta_sayimi.json"),
+    "KT02_A": ("modeller/KT02.json", "panel", "modeller/KT02_pafta_sayimi.json"), "KT02_B": ("modeller/KT02.json", None, "modeller/KT02_pafta_sayimi.json"),
+    "KT03_A": ("modeller/KT03.json", "panel", "modeller/KT03_pafta_sayimi.json"), "KT03_B": ("modeller/KT03.json", "omega_asik", "modeller/KT03_pafta_sayimi.json"),
+}
+# 0.12–0.18 ile yalnız liste: 12 Ekim 2026 taban kanıtında o setin commit'indeki listeyi bayt bayt veren birleşimler (IE-08.md › Kanıt, Adım 2).
+# Öteki birleşimler (KT-01 @0.12, KT-02 @0.16, KT-03 @0.18) o günün koduyla üretilmiş tarih kaydıdır, altın değil.
+GENEL_ESKI_SETLER = {"0.12": ["C8201"], "0.13": ["C8201", "KT01_A", "KT01_B"], "0.14": ["C8201", "KT01_A", "KT01_B"], "0.15": ["C8201", "KT02_A", "KT02_B"],
+                     "0.16": ["C8201"], "0.17": ["C8201", "KT03_A", "KT03_B"], "0.18": ["C8201"]}
+
+
+def _genel_uret(ad: str, hedef: Path, set_yolu: Path, yalniz_liste: bool = False) -> dict:
+    from motor.genel import uret as U
+    tanim, yontem, sayim = GENEL_MODELLER[ad]
+    m = U.uret(ROOT / tanim, hedef, is_emri_no=None, revizyon=1, set_yolu=set_yolu, yontem=yontem, perspektif=False, bayi=not yalniz_liste,
+               elektrik_sayimi=(ROOT / sayim) if sayim else None, yalniz_liste=yalniz_liste)
+    v = json.loads((hedef / "validation.json").read_text(encoding="utf-8"))
+    return {"passed": bool(m["passed"]), "liste_satir": v["liste_satir"], "sema_hatasi": (v.get("ifc") or {}).get("sema_hatasi"),
+            "ciktilar": f"{v['ciktilar']['var']}/{v['ciktilar']['beklenen']}", "hata": v["errors"][:3] if v["errors"] else None}
+
+
+def genel_c8801() -> dict:
+    """Ç8801 (katalog) @0.19: çizim seti, liste, IFC ve bayi çıktıları (perspektifsiz); altın değerle (modeller/altin.json) karşılaştırma.
+    Parmak izleri (PNG/PDF bayt, JSON kanonik, IFC içerik) dogrula.py'de referansla karşılaştırılır."""
+    from motor.genel import iz as IZ
+    hedef = CIKTI / "genel_c8801"
+    r = _genel_uret("C8801", hedef, ROOT / GENEL_SET)
+    altin = json.loads((ROOT / "modeller" / "altin.json").read_text(encoding="utf-8"))["C8801"]
+    bugun = {"plan_png_sha256": sha(hedef / "C8801_plan.png"), "yukleme_json_sha256": sha(hedef / "C8801_yukleme.json"), "ifc_izi": IZ.ifc_izi(hedef / "C8801.ifc")}
+    farkli = sorted(k for k in altin if bugun.get(k) != altin[k])
+    return {"passed": r["passed"] and not r["sema_hatasi"] and not farkli,
+            "sayilar": {"liste_satir": r["liste_satir"], "sema_hatasi": r["sema_hatasi"], "ciktilar": r["ciktilar"], "altin": "AYNI" if not farkli else f"FARKLI {farkli}"},
+            "izler": bugun, "hata": r["hata"], "not": "altın = modeller/altin.json (plan PNG, liste JSON, IFC izi); asıl referans testler/referans/ zinciri (D-02, D-08)"}
+
+
+def genel_matris() -> dict:
+    """--planlar: 0.19 ile on model-yöntem çifti (çizim seti + liste + bayi çıktıları, perspektifsiz); 0.12–0.18 ile yalnız listeler."""
+    ozet = {}; hepsi_ok = True
+    for ad in GENEL_MODELLER:
+        r = _genel_uret(ad, CIKTI / "genel_matris" / "0.19" / ad, ROOT / GENEL_SET)
+        ozet[f"0.19/{ad}"] = r; hepsi_ok = hepsi_ok and r["passed"] and not r["sema_hatasi"]
+        print(f"   0.19 {ad}: passed={r['passed']} şema hatası {r['sema_hatasi']} liste {r['liste_satir']} satır çıktılar {r['ciktilar']}")
+    for surum, adlar in GENEL_ESKI_SETLER.items():
+        for ad in adlar:
+            r = _genel_uret(ad, CIKTI / "genel_matris" / surum / ad, ROOT / "kurallar" / "liste" / "setler" / f"{surum}.json", yalniz_liste=True)
+            ozet[f"{surum}/{ad}"] = r; hepsi_ok = hepsi_ok and r["passed"]
+    print(f"   eski setler: {sum(len(v) for v in GENEL_ESKI_SETLER.values())} liste; geçen {sum(1 for o in ozet.values() if o['passed'])}/{len(ozet)}")
+    return {"passed": hepsi_ok, "sayilar": {"toplam": len(ozet), "gecen": sum(1 for o in ozet.values() if o["passed"]),
+                                           "liste_satirlari": {k: o["liste_satir"] for k, o in ozet.items()}}, "birlesimler": ozet,
+            "not": "altın liste matrisi; bayt bayt izler dogrula.py'de (genel_parmak_izleri.txt). Eski setlerin listeleri 12 Ekim 2026'da o setin commit'indekiyle aynı doğrulandı"}
+
+
 # Sır desenleri. Telefon deseni (İE-08, 12.10.2026): önünde rakam, nokta ya da virgül olan ya da arkasında rakam ya da ondalık devamı
 # (".5", ",5") gelen "905…" dizileri numara sayılmaz; IFC ve JSON'daki ondalıklar (ör. 6.9050000000000002, 19050000000.5) böyle elenir.
 # Gerçek numara (tek başına, parantezli, cümle sonunda noktayla, "wa_id=…;" içinde) yakalanmaya devam eder (testler/test_sir_taramasi.py).
@@ -169,6 +228,9 @@ def main() -> int:
     adim(sonuc, "cikarici_p6001_altin", cikarici_p6001)
     if a.planlar:
         adim(sonuc, "cikarici_16_plan", planlar_16)
+    adim(sonuc, "genel_c8801", genel_c8801)                       # İE-08: genel motor, Ç8801 @0.19 (her koşuda)
+    if a.planlar:
+        adim(sonuc, "genel_matris", genel_matris)                 # İE-08: yedi model ve 0.12–0.19 liste matrisi
     adim(sonuc, "sir_taramasi", sir_taramasi)
     sonuc["bitti"] = time.strftime("%Y-%m-%d %H:%M:%S")
     sonuc["ozet"] = {k: v["durum"] for k, v in sonuc["adimlar"].items()}

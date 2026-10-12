@@ -50,10 +50,13 @@ from pathlib import Path
 KOK = Path(__file__).resolve().parents[2]
 REF = Path(__file__).resolve().parent
 sys.path.insert(0, str(REF))
-from parmak_izi import ozet  # noqa: E402
+from parmak_izi import genel_ozet, ozet  # noqa: E402
 
-HIZLI = {"altin_6x8", "altin_yan", "p6001"}  # --hizli koşuda üretilen çıktılar (+ çıkarıcı P6001)
-GIRDI_KALIPLARI = ["is_emri/*.json", "ref_katalog/*", "ref_yan/*", "kanal/ref_*", "beyin/veri/*.json"]
+HIZLI = {"altin_6x8", "altin_yan", "p6001"}  # --hizli koşuda üretilen çıktılar (+ çıkarıcı P6001; genel motor: yalnız genel_c8801)
+GIRDI_KALIPLARI = ["is_emri/*.json", "ref_katalog/*", "ref_yan/*", "kanal/ref_*", "beyin/veri/*.json",
+                   # İE-08: genel motorun girdileri (model tanımları, dondurulmuş kural setleri, çizim seti, seçenekler, bayi örneği);
+                   # güncel set kurallar/liste/kurallar.json girdi sayılmaz: altın adımlar setler/0.19.json pimiyle koşar
+                   "modeller/*.json", "kurallar/liste/setler/*.json", "kurallar/cizim/*.json", "kurallar/model/secenekler/*.json", "kurallar/bayi/*.json"]
 REF_AD = re.compile(r"\d{4}-\d{2}-\d{2}[a-z]?")  # referans klasörü: tarih, aynı gün ikincisi için sonda bir harf
 KOK_DISI = {".git", "cikti", "deneme", "testler", "venv", "SHA256SUMS", "KARARLAR", "DURUM.md"}  # kökte v1.1.1 dışı
 SAYILAR = {
@@ -178,6 +181,13 @@ def _ozet_guvenli(yol: Path) -> str:
         return f"okunamadı: {type(e).__name__}"
 
 
+def _genel_ozet_guvenli(yol: Path) -> str:
+    try:
+        return genel_ozet(yol)
+    except Exception as e:
+        return f"okunamadı: {type(e).__name__}"
+
+
 def _kos(W: Path, hizli: bool) -> Path | None:
     """kos.py'yi kopyada koşar. PORTMAN_* (başka referans klasörü, bayi kaydı, durum dizini) ve LLM anahtarları
     alt sürece geçmez; test canlı ayarlardan etkilenmez ve ücretli bir çağrı yapamaz."""
@@ -195,6 +205,7 @@ def _kos(W: Path, hizli: bool) -> Path | None:
 
 
 REF_DOSYALAR = ("denetim_kosum.json", "dxf_parmak_izleri.txt", "pdf_parmak_izleri.txt", "referans_girdiler.json")
+GENEL_DOSYA = "genel_parmak_izleri.txt"   # İE-08: genel motor izleri (PNG/PDF bayt, JSON kanonik, IFC içerik); eski klasörlerde yok, isteğe bağlı
 IZIN_SATIRI = "Kaldırmaya izin: evet"
 
 
@@ -234,7 +245,8 @@ def referans_yukle(klasor: Path) -> dict:
     if not gerekce:
         raise ReferansHatasi(f"{klasor.name}: GEREKCE.md'de gerekçe yok")
     ozetler = dict(re.findall(r"^- `([^`]+)`: ([0-9a-f]{64})$", g, re.M))
-    bozuk = [f for f in REF_DOSYALAR if ozetler.get(f) != _sha(klasor / f)]
+    dosyalar = REF_DOSYALAR + ((GENEL_DOSYA,) if (klasor / GENEL_DOSYA).is_file() else ())
+    bozuk = [f for f in dosyalar if ozetler.get(f) != _sha(klasor / f)]
     if bozuk:
         raise ReferansHatasi(f"{klasor.name}: {bozuk} GEREKCE.md'deki özetle uyuşmuyor; referans dosyaları elle değiştirilmemeli (--dondur kullanın)")
     try:
@@ -242,7 +254,8 @@ def referans_yukle(klasor: Path) -> dict:
         return {"ad": klasor.name, "gerekce": gerekce, "izin": IZIN_SATIRI in g, "karar": karar,
                 "kosum": json.loads((klasor / "denetim_kosum.json").read_text(encoding="utf-8")),
                 "girdi": json.loads((klasor / "referans_girdiler.json").read_text(encoding="utf-8")),
-                "dxf": _izler(klasor / "dxf_parmak_izleri.txt"), "pdf": _izler(klasor / "pdf_parmak_izleri.txt")}
+                "dxf": _izler(klasor / "dxf_parmak_izleri.txt"), "pdf": _izler(klasor / "pdf_parmak_izleri.txt"),
+                "genel": _izler(klasor / GENEL_DOSYA) if (klasor / GENEL_DOSYA).is_file() else {}}
     except Exception as e:
         raise ReferansHatasi(f"{klasor.name}: okunamadı: {type(e).__name__}: {e}")
 
@@ -260,8 +273,8 @@ def referans_farki(eski: dict, yeni: dict) -> tuple[list[str], list[str]]:
     degis += [f"Beyin vakası eklendi: {k}" for k in ys if k not in ev]
     if [k for k in ys if k in ev] != [k for k in es if k in yv]:
         kaldir.append("Beyin vakalarının sırası değişti")
-    for tur in ("dxf", "pdf"):
-        e, y = eski[tur], yeni[tur]
+    for tur in ("dxf", "pdf", "genel"):
+        e, y = eski.get(tur) or {}, yeni.get(tur) or {}
         kaldir += [f"{tur.upper()} çıktısı kaldırıldı: {k}" for k in sorted(set(e) - set(y))]
         degis += [f"{tur.upper()} parmak izi değişti: {k}" for k in sorted(k for k in e if k in y and e[k] != y[k])]
         degis += [f"{tur.upper()} çıktısı eklendi: {k}" for k in sorted(set(y) - set(e))]
@@ -273,7 +286,7 @@ def referans_farki(eski: dict, yeni: dict) -> tuple[list[str], list[str]]:
     e16, y16 = (ea.get("cikarici_16_plan") or {}).get("planlar") or {}, (ya.get("cikarici_16_plan") or {}).get("planlar") or {}
     kaldir += [f"katalog planı Motor doğrulamasında geriledi: {k}" for k in sorted(e16)
                if e16[k].get("motor_passed") and not (y16.get(k) or {}).get("motor_passed")]
-    for a in [*SAYILAR, "cikarici_p6001_altin", "cikarici_16_plan", "sir_taramasi", "beyin_harness"]:
+    for a in [*SAYILAR, "cikarici_p6001_altin", "cikarici_16_plan", "sir_taramasi", "beyin_harness", "genel_c8801", "genel_matris"]:
         if a in ea and a in ya and (say(ea, a) != say(ya, a) or (ea[a].get("bom_sayim") != ya[a].get("bom_sayim"))):
             degis.append(f"{a}: sayılar değişti")
     return kaldir, degis
@@ -316,7 +329,7 @@ def kosulan_kod() -> str:
 
 
 def karsilastir(R: dict, bilgi: list[str], hizli: bool) -> int:
-    ref, ref_g, ref_pi, ref_pdf = R["kosum"], R["girdi"], R["dxf"], R["pdf"]
+    ref, ref_g, ref_pi, ref_pdf, ref_gen = R["kosum"], R["girdi"], R["dxf"], R["pdf"], R.get("genel") or {}
     satir, kotu = [], 0
 
     def yaz(ad, ok, ek=""):
@@ -339,7 +352,7 @@ def karsilastir(R: dict, bilgi: list[str], hizli: bool) -> int:
         yeni = json.loads(yol.read_text(encoding="utf-8"))
         ra, ya = ref["adimlar"], yeni["adimlar"]
         # hata veren ya da eksik adım burada FARKLI görünür; aşağıdaki karşılaştırmalar boş sayılarla sürer, çökmez
-        adimlar = [x for x in ra if not (hizli and x == "cikarici_16_plan")] + [x for x in ya if x not in ra]
+        adimlar = [x for x in ra if not (hizli and x in ("cikarici_16_plan", "genel_matris"))] + [x for x in ya if x not in ra]
         for adim in adimlar:
             v = ya.get(adim) or {}
             yaz(f"{adim}: durum", v.get("durum") == "passed", (v.get("durum") or "adım yok") + (f" · {v['hata'][:160]}" if v.get("hata") else ""))
@@ -363,6 +376,13 @@ def karsilastir(R: dict, bilgi: list[str], hizli: bool) -> int:
         bek = lambda s: (s.get("bulgu") or 0) - (s.get("beklenen_sahte") or 0)
         ys, rs = say("sir_taramasi"), ra["sir_taramasi"]["sayilar"]
         yaz("sir_taramasi", bool(ys) and bek(ys) == bek(rs) == 0, f"beklenmeyen {bek(ys)} · sahte test sabiti {ys.get('beklenen_sahte')}")
+        # İE-08: genel motor (serbest aks) adımları; eski referansta yoksa yalnız durum satırı (yukarıda) karşılaştırılır
+        if "genel_c8801" in ra:
+            ys, rs = say("genel_c8801"), ra["genel_c8801"]["sayilar"]
+            yaz("genel_c8801: sayılar", bool(ys) and ys == rs, f"liste {ys.get('liste_satir')} satır, IFC şema hatası {ys.get('sema_hatasi')}, altın {ys.get('altin')}")
+        if "genel_matris" in ra and not hizli:
+            ys, rs = say("genel_matris"), ra["genel_matris"]["sayilar"]
+            yaz("genel_matris: sayılar", bool(ys) and ys == rs, f"{ys.get('gecen')}/{ys.get('toplam')} birleşim")
         if not hizli:
             ys, rs = ya.get("cikarici_16_plan") or {}, ra["cikarici_16_plan"]
             yaz("cikarici_16_plan: özet", ys.get("sayilar") == rs["sayilar"],
@@ -377,6 +397,14 @@ def karsilastir(R: dict, bilgi: list[str], hizli: bool) -> int:
             if eksik: ek += f", eksik: {eksik}"
             if fark: ek += f", fark: {fark}"
             yaz(f"{tur} içerik parmak izleri", not eksik and not fark, ek)
+        if ref_gen:   # İE-08: genel motor izleri; --hizli yalnız genel_c8801 klasörü
+            beklenen = [k for k in ref_gen if not hizli or k.startswith("cikti/denetim/genel_c8801/")]
+            eksik = [k for k in beklenen if not (W / k).exists()]
+            fark = [k for k in beklenen if (W / k).exists() and _genel_ozet_guvenli(W / k) != ref_gen[k]]
+            ek = f"{len(beklenen) - len(eksik)}/{len(beklenen)} dosya"
+            if eksik: ek += f", eksik: {eksik[:LISTE_SINIRI]}"
+            if fark: ek += f", fark: {fark[:LISTE_SINIRI]}"
+            yaz("Genel motor izleri (PNG, PDF, JSON, IFC)", not eksik and not fark, ek)
 
     print(f"Koşulan kod: {kosulan_kod()}")
     print(f"Referans: testler/referans/{R['ad']} · {R['gerekce']}" + (f" · {bilgi[0]}" if bilgi else ""))
@@ -418,14 +446,19 @@ def dondur(gerekce: str, ad: str | None, kaldirmaya_izin: bool, karar: str | Non
         gecmeyen = [a for a, v in sonuc["adimlar"].items() if v.get("durum") != "passed"]
         if gecmeyen:
             print(f"dondurulmadı: geçmeyen adımlar: {gecmeyen}"); return 1
-        ciktilar = sorted(p for p in (W / "cikti/denetim").rglob("*") if p.is_file() and p.suffix.lower() in (".dxf", ".pdf"))
+        genel_mi = lambda p: p.relative_to(W).as_posix().startswith("cikti/denetim/genel")
+        ciktilar = sorted(p for p in (W / "cikti/denetim").rglob("*") if p.is_file() and p.suffix.lower() in (".dxf", ".pdf") and not genel_mi(p))
+        # İE-08: genel motor çıktıları ayrı kovada (PNG/PDF bayt, JSON kanonik, IFC içerik); süre ve yol taşıyan kayıtlar dışarıda
+        genel_ciktilar = sorted(p for p in (W / "cikti/denetim").rglob("*") if p.is_file() and genel_mi(p)
+                                and p.suffix.lower() in (".png", ".pdf", ".json", ".ifc") and p.name not in ("validation.json", "manifest.json"))
         try:
             izler = {p.relative_to(W).as_posix(): ozet(p) for p in ciktilar}
+            genel_izler = {p.relative_to(W).as_posix(): genel_ozet(p) for p in genel_ciktilar}
         except Exception as e:
             print(f"dondurulmadı: parmak izi alınamadı: {type(e).__name__}: {e}"); return 1
         yeni = {"girdi": girdi, "kosum": sonuc,
                 "dxf": {k: v for k, v in izler.items() if k.lower().endswith(".dxf")},
-                "pdf": {k: v for k, v in izler.items() if k.lower().endswith(".pdf")}}
+                "pdf": {k: v for k, v in izler.items() if k.lower().endswith(".pdf")}, "genel": genel_izler}
         kaldir, degis = referans_farki(onceki, yeni) if onceki else ([], [])
         if (kaldir or degis) and not _karar_var(karar):
             print("dondurulmadı: önceki referansa göre değişiklik var; beklenen davranışın hangi karara dayandığını --karar ile verin "
@@ -446,6 +479,8 @@ def dondur(gerekce: str, ad: str | None, kaldirmaya_izin: bool, karar: str | Non
         (hedef / "denetim_kosum.json").write_bytes(yol.read_bytes())
         (hedef / "dxf_parmak_izleri.txt").write_text(metin(yeni["dxf"]), encoding="utf-8")
         (hedef / "pdf_parmak_izleri.txt").write_text(metin(yeni["pdf"]), encoding="utf-8")
+        if genel_izler:
+            (hedef / GENEL_DOSYA).write_text(metin(genel_izler), encoding="utf-8")
         (hedef / "referans_girdiler.json").write_text(
             json.dumps({"tarih": ad, "kaliplar": GIRDI_KALIPLARI, **girdi}, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
         liste = lambda L: "".join(f"- {x}\n" for x in L[:60]) + (f"- … ve {len(L) - 60} satır daha\n" if len(L) > 60 else "")
@@ -456,12 +491,12 @@ def dondur(gerekce: str, ad: str | None, kaldirmaya_izin: bool, karar: str | Non
             f"numpy {o.get('numpy')}, PyMuPDF {_surum('pymupdf')}\n"
             f"- Önceki referans: {onceki['ad'] if onceki else 'yok'}\n"
             f"- İçerik: {len(girdi['dosyalar'])} girdi dosyası, {len(girdi['vakalar'])} Beyin vakası, {len(yeni['dxf'])} DXF, "
-            f"{len(yeni['pdf'])} PDF\n"
+            f"{len(yeni['pdf'])} PDF, {len(genel_izler)} genel motor izi\n"
             + (f"\nKarar: {karar}\n" if karar else "")
             + (f"\n{IZIN_SATIRI}\n" if kaldir else "")
             + (f"\n## Önceki referansa göre kaldırılan ya da azalan\n\n{liste(kaldir)}" if kaldir else "")
             + (f"\n## Önceki referansa göre değişen ya da eklenen\n\n{liste(degis)}" if degis else "")
-            + "\n## Dosya özetleri\n\n" + "".join(f"- `{f}`: {_sha(hedef / f)}\n" for f in REF_DOSYALAR), encoding="utf-8")
+            + "\n## Dosya özetleri\n\n" + "".join(f"- `{f}`: {_sha(hedef / f)}\n" for f in REF_DOSYALAR + ((GENEL_DOSYA,) if genel_izler else ())), encoding="utf-8")
     print(f"donduruldu: {hedef.relative_to(KOK)} (değişen {len(degis)}, izinli kaldırma {len(kaldir)})")
     return 0
 

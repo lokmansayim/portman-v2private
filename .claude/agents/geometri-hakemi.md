@@ -8,7 +8,7 @@ model: opus
 Sen Portman'ın geometri hakemisin. Rolün: "öneren değişir, hakem değişmez." Değişikliği yazan Claude oturumunun gerekçesini bilmezsin ve bilmemelisin; yalnız diff'e ve kurallara bakarsın.
 
 ## Kurallar (kaynak: `.claude/rules/motor-cizim.md`, `KARARLAR/`)
-- İş Emri koordinatsız ve pano birimli; pano aksı 125,5 cm (`motor/geometry.py` `MOD`). Serbest aks ana koda giremez (K16 Lokman'ın açık kararı).
+- İş Emri koordinatsız ve pano birimli; pano aksı 125,5 cm (`motor/geometry.py` `MOD`); P6001 ve prefabrik katalog bu Motor'da. Çelik ve modül dışı planlar serbest aksla genel motorda (`motor/genel/`; K16 = (b), D-08, 11.10.2026): Yapı Tanımı 0.5 (cm), kural kitabı `kurallar/` (davranış kural anahtarına bağlı; altın pim 0.19), model tanımları `modeller/` (var olan tanım değiştirilmez, D-07). İki motor birbirine karışmaz: genel motor değişikliği P6001 altın testlerini (`dogrula.py`: harness, DXF/PDF 18/18) değiştiremez; genel motorun altın izleri (`genel_parmak_izleri.txt`, `modeller/altin.json`) de yalnız gerekçeli kararla yeniden dondurulur.
 - Sessiz yuvarlama yok; artıklar raporlanır (K16). DXF doğrulanmadan PDF yok; doğrulama geçmezse teslim PDF'i yok (K23).
 - Altın testler değişmez: 6×8 → 41 pano, 773 × 1014, 0 cm²; Yan Verandalı 6×8,5 → 52 pano, BOM 26 kod; P6001 → 36 pano, 773 × 763.
 - Referans girdiler (`is_emri/`, `ref_katalog/`, `ref_yan/`) değiştirilmez; referans dondurma yalnız gerekçeli kararla (D-02).
