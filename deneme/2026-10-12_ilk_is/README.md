@@ -54,6 +54,7 @@ Bayiye Lokman iletir.
 | `teslim/` | Bayi PDF'i ve mühendis zip'i, gönderildiği gibi |
 | `teslim_paketi.py` | Teslim paketlerini dizer |
 | `yakin.py` | Yakın plan denetim görüntüsü: zemin pembe çizilir; boşluk varsa pembe görünür |
+| `ie08/` | İE-08'e taşıma: PR #11'in `motor/genel/` paketine iki yama ve kanıt çıktıları (aşağıda) |
 
 `motor_farki.patch` şu eklentileri içerir:
 - eğimli pencere;
@@ -87,6 +88,27 @@ bash $K/deneme/2026-10-06_kor_test/cizim_seti_kos.sh $K/T1012CV.json $K/T1012CV_
 ```
 
 **Kanıt:** Depodaki dosyalardan yeniden üretim 12 Ekim 2026'da denendi. Tanım, plan, pafta, görünüşler ve liste girdisi bayt bayt aynı çıktı. DXF'in varlıkları da aynı çıktı; başlıktaki tarih her üretimde değişir.
+
+## İE-08'e taşıma: DXF bozulmadan
+
+Lokman, 12 Ekim 16:37: "DXF üretimi varsa hiç bozmayalım". İE-08'in PR #11'i (`claude/trusting-ramanujan-6hmgdf`, uç `8717793`) genel motoru `motor/genel/` paketine taşıyor. Bu işin eklentileri o pakete `ie08/` altındaki iki yamayla geçer. İkisi de PR #11'in ucuna kaymadan uygulanır (depo kökünden `patch -p1`).
+
+| Yama | İçerik | Var olan çıktılara etkisi |
+|---|---|---|
+| `ie08_dxf.patch` | `motor/genel/dxf_genel.py`; yeni dosya, göreli içe aktarma. Kullanım: `python -m motor.genel.dxf_genel <tanım> <çıktı.dxf>` | Yok; başka modül onu çağırmıyor |
+| `ie08_motor_eklentileri.patch` | `motor_farki.patch`'in öteki parçaları: eğimli pencere ve tavan, `ust_disarida`, alın payı, ölçü zinciri, dikme yüzleri, antetsiz sayfalar | Plan PNG'si (antet ve zincir) ile IFC izi (alın payı) değişir; liste aynı kalır. Referans kararla yeniden dondurulur (antet: Lokman, 15:30) |
+
+Kanıt (12 Ekim 2026; çıktılar `ie08/kanit/` altında):
+- **P6001, bu dalda:** `dogrula.py` (`de2ddca`): DXF 18/18 ve PDF 18/18 aynı; `motor_p6001` aynı (36 pano, 773 × 763); harness 22/22. Fark yalnız bilinen sır taramasında (`ie05_dogrula.txt`).
+- **P6001, PR #11'de:** `motor/`, `kanal/` ve `beyin/` altında var olan hiçbir dosya değişmiyor; yalnız `motor/genel/` ekleniyor. P6001'in DXF izleri PR'ın yedi referans klasöründe, PDF izleri 2026-09-28b'den beri altısında aynı.
+- **Yalnız `ie08_dxf.patch`:** `pytest testler/genel` 25/25 geçti. `vps/genel_dene.py` Ç8801 için "AYNI" dedi. Yedi modelin DXF'i yazıldı, denetim hatası 0 (`pr11_dxf_denetim.txt`).
+  - PR'ın `dogrula.py`'si (tam koşu): P6001 DXF 18/18 ve PDF 18/18 aynı, genel motor izleri 151/151 aynı (`pr11_dogrula.txt`, `pr11_kontrol.txt`).
+  - Bu çalışma alanının venv'i ie-05'in sabitleriyle kurulu (PyMuPDF 1.26.0); PR #11 sabitleri yükseltiyor (PyMuPDF 1.28.2, shapely 2.2.0). Bayi paftasının PDF izi PyMuPDF'in sözcük okumasına dayandığından 11 pafta PDF'i ilk koşuda "farklı" göründü. Saf PR #11 ağacı da aynı farkı verdi; aynı PDF'ler PR'ın PyMuPDF'iyle izlenince 11'i de referansla aynı çıktı.
+- **İki yama birlikte:** T1012-CV'nin plan, görünüşler, pafta, IFC özeti, liste girdisi ve yükleme listesi teslim edilenlerle bayt bayt aynı; DXF içerik izi aynı. Ç8801'in altın değerinde plan PNG'si ve IFC izi değişir; bu beklenen.
+
+**Canlı zincir.** `kanal/worker.py` Motor'un çıktısından `dxf` ve `dxf_sha256` okur (PR #11'de 342–343. satırlar); `kanal/depo.py` `dxf_sha256`'yı kaydeder. İE-08 Adım 10'da bu okuma `m.get` olacak. Genel motorun manifestinde DXF yoksa çelik işlerinde DXF kaydı boş kalır. DXF'in bozulmaması için genel motor da `dxf` ve `dxf_sha256` vermeli; `dxf_genel.py` bunu sağlar.
+
+**Birleştirme.** Bu dal ile PR #11 birleşirken yalnız `DURUM.md` ve `kurallar/README.md` çakışıyor (`git merge-tree`); ikisi de belge.
 
 ## Açık konular
 

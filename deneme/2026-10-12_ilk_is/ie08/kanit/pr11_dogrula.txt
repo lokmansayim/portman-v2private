@@ -1,0 +1,47 @@
+Koşulan kod: git yok ()
+Referans: testler/referans/2026-10-12e · Gerekçe: İE-08 PR-1 (D-08, aynı karar): bayi paftasında bina özellikleri değeri önce iki satıra sarılır (satır sonunda virgül), üç satır yalnız son çare; ikinci hakem turunun üç satırlı sarması Ç8801'de üst üste biniyordu (göz denetimi 12 Ekim). Yalnız bayi paftası izleri (pafta.pdf, pafta_sablon.png) değişir; P6001 DXF/PDF 18/18 ve çizim seti aynı. · önceki referans 2026-10-12d; değişen 22, izinli kaldırma 0
+  değişen: GENEL parmak izi değişti: cikti/denetim/genel_c8801/C8801_pafta.pdf
+  değişen: GENEL parmak izi değişti: cikti/denetim/genel_c8801/C8801_pafta_sablon.png
+  değişen: GENEL parmak izi değişti: cikti/denetim/genel_matris/0.19/C8201/C8201_pafta.pdf
+  değişen: GENEL parmak izi değişti: cikti/denetim/genel_matris/0.19/C8201/C8201_pafta_sablon.png
+  değişen: GENEL parmak izi değişti: cikti/denetim/genel_matris/0.19/C8801/C8801_pafta.pdf
+  değişen: GENEL parmak izi değişti: cikti/denetim/genel_matris/0.19/C8801/C8801_pafta_sablon.png
+  değişen: GENEL parmak izi değişti: cikti/denetim/genel_matris/0.19/C8801K/C8801K_pafta.pdf
+  değişen: GENEL parmak izi değişti: cikti/denetim/genel_matris/0.19/C8801K/C8801K_pafta_sablon.png
+  değişen: GENEL parmak izi değişti: cikti/denetim/genel_matris/0.19/C8801L/C8801L_pafta.pdf
+  değişen: GENEL parmak izi değişti: cikti/denetim/genel_matris/0.19/C8801L/C8801L_pafta_sablon.png
+  değişen: GENEL parmak izi değişti: cikti/denetim/genel_matris/0.19/KT01_A/KT01_pafta.pdf
+  değişen: GENEL parmak izi değişti: cikti/denetim/genel_matris/0.19/KT01_A/KT01_pafta_sablon.png
+  … tam liste: testler/referans/2026-10-12e/GEREKCE.md
+ortam: durum                                              AYNI · passed
+girdi_hashleri: durum                                     AYNI · passed
+beyin_harness: durum                                      AYNI · passed
+motor_altin_6x8: durum                                    AYNI · passed
+motor_altin_yan_6x8p5_bom: durum                          AYNI · passed
+motor_p6001: durum                                        AYNI · passed
+cikarici_p6001_altin: durum                               AYNI · passed
+cikarici_16_plan: durum                                   AYNI · passed
+genel_c8801: durum                                        AYNI · passed
+genel_matris: durum                                       AYNI · passed
+sir_taramasi: durum                                       AYNI · passed
+referans girdiler (şablon, çizim, katalog verisi)         AYNI · 48/48 dosya aynı
+Beyin test vakaları (mesaj, kayıtlı çıkarım, grup kaydı)  AYNI · 22/22 vaka aynı
+v1.1.1 ağacı (bilgi)                                      değişti: .gitignore, README.md, beyin/README_BEYIN.md, beyin/karar.py, beyin/katalog.py, beyin/konusma.py, beyin/llm.py, beyin/sema.py, beyin/testler/talep_schema.json, denetim/kos.py, kanal/worker.py, vps/agent.py; eksik: kanal/README.txt, kanal/api.php, kanal/feature.php, kanal/install/GERI_ALMA.md, kanal/install/KURULUM.md, kanal/install/VPS_KURULUM.md, kanal/install/cron.txt, kanal/install/kanal_api.candidate.php, kanal/install/webhook.kanal.candidate.php, kanal/install/webhook.php.yama.txt, kanal/install/worker.kanal.candidate.php, kanal/install/worker.php.yama.txt … (+8); yeni: .claude/agents/geometri-hakemi.md, .claude/agents/kvkk-denetcisi.md, .claude/hooks/hizli_kontrol.py, .claude/hooks/komut_koruma.py, .claude/hooks/sir_koruma.py, .claude/rules/beyin.md, .claude/rules/kanal-vps.md, .claude/rules/motor-cizim.md, .claude/rules/test-politikasi.md, .claude/settings.json, .claude/skills/is-emri/SKILL.md, .claude/skills/kapanis/SKILL.md … (+203)
+beyin_harness                                             AYNI · 22/22 (referans 22 vaka)
+motor_altin_6x8: sayılar                                  AYNI · pano 41, dış ölçü [773.0, 1014.0]
+motor_altin_6x8: BOM sayımı                               AYNI
+motor_altin_yan_6x8p5_bom: sayılar                        AYNI · pano 52, dış ölçü [773.0, 1076.75]
+motor_altin_yan_6x8p5_bom: BOM sayımı                     AYNI
+motor_p6001: sayılar                                      AYNI · pano 36, dış ölçü [773.0, 763.0]
+motor_p6001: BOM sayımı                                   AYNI
+cikarici_p6001_altin: sayılar                             AYNI · mahal 5/5, açıklık 7/9
+sir_taramasi                                              AYNI · beklenmeyen 0 · sahte test sabiti 1
+genel_c8801: sayılar                                      AYNI · liste 93 satır, IFC şema hatası 0, altın AYNI
+genel_matris: sayılar                                     AYNI · 25/25 birleşim
+cikarici_16_plan: özet                                    AYNI · 15/16
+cikarici_16_plan: plan plan                               AYNI
+DXF içerik parmak izleri                                  AYNI · 18/18 dosya
+PDF içerik parmak izleri                                  AYNI · 18/18 dosya
+Genel motor izleri (PNG, PDF, JSON, IFC)                  FARKLI · 151/151 dosya, fark: ['cikti/denetim/genel_c8801/C8801_pafta.pdf', 'cikti/denetim/genel_matris/0.19/C8201/C8201_pafta.pdf', 'cikti/denetim/genel_matris/0.19/C8801/C8801_pafta.pdf', 'cikti/denetim/genel_matris/0.19/C8801K/C8801K_pafta.pdf', 'cikti/denetim/genel_matris/0.19/C8801L/C8801L_pafta.pdf', 'cikti/denetim/genel_matris/0.19/KT01_A/KT01_pafta.pdf', 'cikti/denetim/genel_matris/0.19/KT01_B/KT01_pafta.pdf', 'cikti/denetim/genel_matris/0.19/KT02_A/KT02_pafta.pdf', 'cikti/denetim/genel_matris/0.19/KT02_B/KT02_pafta.pdf', 'cikti/denetim/genel_matris/0.19/KT03_A/KT03_pafta.pdf', 'cikti/denetim/genel_matris/0.19/KT03_B/KT03_pafta.pdf']
+SONUÇ: 1 kontrolde fark var
+çıkış=1

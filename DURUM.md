@@ -169,6 +169,22 @@ Depoda yalnız DURUM değişti.
 - **Kayıt:** `deneme/2026-10-12_ilk_is/` (DXF, güncel zip); `dxf_genel.py` `motor_farki.patch`'te yeni dosya olarak duruyor, İE-08'e taşınacak; kural kitabında `teslim_paketi` › `muhendis`'e DXF eklendi.
 - **Açık:** DXF'in çizim setine 13. çıktı olarak girmesi Lokman'ın onayını bekliyor. Set kuralı onaysız değişmez.
 
+**12 Ekim 2026 17:05 eki (dal `ie-05`):** Lokman 16:37'de İE-08 sohbetinin PR #11 dökümünü iletti: "DXF üretimi varsa hiç bozmayalım". Bu, "DXF kalsın, hiçbir değişiklik onu bozmasın" diye okundu ve kanıtla denetlendi. Ayrıntı: `deneme/2026-10-12_ilk_is/README.md` › "İE-08'e taşıma".
+- **P6001'in DXF'i, bu dal:** `dogrula.py` (`de2ddca`): DXF 18/18 ve PDF 18/18 AYNI, `motor_p6001` AYNI (36 pano, 773 × 763), harness 22/22.
+  - Fark yalnız bilinen sır taramasında; iki yanlış pozitif var: `vps/kapi_d_dogrula.sh:25` ve 10 Ekim devir notundaki ondalık örnek (telefon deseni).
+  - Bu dal `main`'den ayrıldığından beri `motor/`, `kanal/`, `beyin/`, `vps/`, `testler/` ve `deneme/2026-09-23`'e dokunmadı.
+- **PR #11 (`8717793`):** Var olan motor, kanal ve beyin dosyalarına dokunmuyor; yalnız `motor/genel/` ekleniyor. P6001'in DXF izleri PR'ın yedi referans klasöründe, PDF izleri 2026-09-28b'den beri altısında aynı.
+- **Çelik DXF İE-08'e hazır:** `deneme/2026-10-12_ilk_is/ie08/`. İki yama PR #11'in ucuna kaymadan uygulanır.
+  - `ie08_dxf.patch`: `motor/genel/dxf_genel.py`. Hiçbir çıktıyı değiştirmiyor: `pytest testler/genel` 25/25, `vps/genel_dene.py` Ç8801 "AYNI". Yedi modelin DXF'i yazıldı, denetim hatası 0.
+  - PR'ın `dogrula.py`'si (PR ağacı + `ie08_dxf.patch`, tam koşu): P6001 DXF 18/18 ve PDF 18/18 AYNI, genel motor izleri 151/151 aynı. 11 pafta PDF'i önce "farklı" göründü; neden bu venv'in eski PyMuPDF'i (1.26.0; PR 1.28.2'ye yükseltiyor). Saf PR ağacı da aynı farkı verdi; PR'ın PyMuPDF'iyle 11'i de aynı (`ie08/kanit/pr11_kontrol.txt`).
+  - `ie08_motor_eklentileri.patch`: T1012-CV'nin eklentileri ve antetsiz sayfalar. İki yamayla T1012-CV teslim edilenle bayt bayt aynı, DXF içerik izi aynı. Ç8801'de plan PNG'si ve IFC izi değişiyor (antet kararı); yeniden dondurma İE-08'in işi.
+- **İE-08'e iletilecekler (metin Lokman'a verildi):**
+  - PR #11 antetli: Örnek Şablon'un antet kutusu, TASLAK satırı ve İLGİLİ KİŞİ-TELEFON alanı. Bu, 15:30 kararıyla çelişiyor; birleştirmeden önce ele alınmalı.
+  - `kanal/worker.py` Motor'dan `dxf` ve `dxf_sha256` okuyor. İE-08 Adım 10'da `m.get` olacak; genel motor DXF vermezse çelik işlerinde DXF kaydı boş kalır.
+- **Birleştirme:** Bu dal ile PR #11 arasında yalnız `DURUM.md` ve `kurallar/README.md` çakışıyor; ikisi de belge.
+- **Durum:** Çelik DXF yerelde çalışıyor (bu dalda ve PR #11 ağacında); canlıda değil. Canlıya, PR #11'e ve `main`'e yazılmadı.
+- **Açık:** DXF'in çizim setine standart çıktı olarak girmesi için Lokman'ın açık onayı gerekiyor.
+
 **Oturum devri:** `docs/devir/2026-09-30_Aksam_Devri.md` (30.09 akşamı, Kapı M sonrası; sıra ve bakım listesi) ve `docs/devir/2026-09-30_Oturum_Devri.md` (30.09 01:10; kurallar, K-A kararları, Astra ölçütleri). 28–30 Eylül penceresi kapandı. Yeni pencere bu ikisiyle başlar: kurallar, yapılanlar, bekleyen kararlar, sıradaki işler, Astra'ya çizim işi için ölçütler.
 
 Yeni pencere için hazırlıklar:

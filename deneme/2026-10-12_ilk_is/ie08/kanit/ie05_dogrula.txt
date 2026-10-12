@@ -1,0 +1,42 @@
+Koşulan kod: de2ddca (ie-05)
+Referans: testler/referans/2026-09-28b · Gerekçe: D-02: PDF parmak izi sayfa ölçüsüne ek olarak bütün çizimleri kapsıyor; referans koşularında üretim zamanı sabit. Beklenen davranış değişmedi. · önceki referans 2026-09-28; değişen 18, izinli kaldırma 0
+  değişen: PDF parmak izi değişti: cikti/denetim/altin_6x8/Portman_PM-ALTIN-6x8_r01.pdf
+  değişen: PDF parmak izi değişti: cikti/denetim/altin_yan/Portman_PM-ALTIN-YAN-6x8p5_r01.pdf
+  değişen: PDF parmak izi değişti: cikti/denetim/cikarici/P1051/motor/Portman_PM-KATALOG-P1051_r01.pdf
+  değişen: PDF parmak izi değişti: cikti/denetim/cikarici/P1081/motor/Portman_PM-KATALOG-P1081_r01.pdf
+  değişen: PDF parmak izi değişti: cikti/denetim/cikarici/P1121/motor/Portman_PM-KATALOG-P1121_r01.pdf
+  değişen: PDF parmak izi değişti: cikti/denetim/cikarici/P3701/motor/Portman_PM-KATALOG-P3701_r01.pdf
+  değişen: PDF parmak izi değişti: cikti/denetim/cikarici/P6001/motor/Portman_PM-KATALOG-P6001_r01.pdf
+  değişen: PDF parmak izi değişti: cikti/denetim/cikarici/P6501/motor/Portman_PM-KATALOG-P6501_r01.pdf
+  değişen: PDF parmak izi değişti: cikti/denetim/cikarici/P6701/motor/Portman_PM-KATALOG-P6701_r01.pdf
+  değişen: PDF parmak izi değişti: cikti/denetim/cikarici/P7001/motor/Portman_PM-KATALOG-P7001_r01.pdf
+  değişen: PDF parmak izi değişti: cikti/denetim/cikarici/P7401/motor/Portman_PM-KATALOG-P7401_r01.pdf
+  değişen: PDF parmak izi değişti: cikti/denetim/cikarici/P7601/motor/Portman_PM-KATALOG-P7601_r01.pdf
+  … tam liste: testler/referans/2026-09-28b/GEREKCE.md
+ortam: durum                                              AYNI · passed
+girdi_hashleri: durum                                     AYNI · passed
+beyin_harness: durum                                      AYNI · passed
+motor_altin_6x8: durum                                    AYNI · passed
+motor_altin_yan_6x8p5_bom: durum                          AYNI · passed
+motor_p6001: durum                                        AYNI · passed
+cikarici_p6001_altin: durum                               AYNI · passed
+cikarici_16_plan: durum                                   AYNI · passed
+sir_taramasi: durum                                       FARKLI · failed
+referans girdiler (şablon, çizim, katalog verisi)         AYNI · 23/23 dosya aynı, yeni (bilgi): ['beyin/veri/adaylar_test.json']
+Beyin test vakaları (mesaj, kayıtlı çıkarım, grup kaydı)  AYNI · 22/22 vaka aynı
+v1.1.1 ağacı (bilgi)                                      değişti: beyin/karar.py, beyin/katalog.py, beyin/konusma.py, beyin/llm.py, beyin/sema.py, kanal/api.php, kanal/feature.php, kanal/tests/e2e_steps.php, kanal/tests/offline_test.php, kanal/worker.py, vps/agent.py, vps/paketle.py; yeni: CLAUDE.md, araclar/aday_kaydet.py, araclar/gereksinimler.txt, araclar/ortam_kur.sh, beyin/durum/BAYI-TEST-1.json, beyin/durum/BAYI-TEST-2.json, beyin/durum/BAYI-TEST-3.json, beyin/durum/KAYITSIZ-555.json, beyin/secenek.py, beyin/veri/adaylar_test.json, denetim/lib_tara.py, docs/devir/2026-09-30_Aksam_Devri.md … (+101)
+beyin_harness                                             AYNI · 22/22 (referans 22 vaka)
+motor_altin_6x8: sayılar                                  AYNI · pano 41, dış ölçü [773.0, 1014.0]
+motor_altin_6x8: BOM sayımı                               AYNI
+motor_altin_yan_6x8p5_bom: sayılar                        AYNI · pano 52, dış ölçü [773.0, 1076.75]
+motor_altin_yan_6x8p5_bom: BOM sayımı                     AYNI
+motor_p6001: sayılar                                      AYNI · pano 36, dış ölçü [773.0, 763.0]
+motor_p6001: BOM sayımı                                   AYNI
+cikarici_p6001_altin: sayılar                             AYNI · mahal 5/5, açıklık 7/9
+sir_taramasi                                              FARKLI · beklenmeyen 2 · sahte test sabiti 5
+cikarici_16_plan: özet                                    AYNI · 15/16
+cikarici_16_plan: plan plan                               AYNI
+DXF içerik parmak izleri                                  AYNI · 18/18 dosya
+PDF içerik parmak izleri                                  AYNI · 18/18 dosya
+SONUÇ: 2 kontrolde fark var
+çıkış=1

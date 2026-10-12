@@ -1,0 +1,21 @@
+PR #11 ucu 8717793; 12 Ekim 2026; bu çalışma alanının venv'i (ie-05 sabitleri: PyMuPDF 1.26.0, shapely 2.1.2)
+
+1) dogrula.py --hizli, saf PR #11 ağacı:
+DXF içerik parmak izleri                                  AYNI · 4/4 dosya
+PDF içerik parmak izleri                                  AYNI · 4/4 dosya
+Genel motor izleri (PNG, PDF, JSON, IFC)                  FARKLI · 11/11 dosya, fark: ['cikti/denetim/genel_c8801/C8801_pafta.pdf']
+SONUÇ: 1 kontrolde fark var
+
+2) dogrula.py --hizli, PR #11 + ie08_dxf.patch:
+DXF içerik parmak izleri                                  AYNI · 4/4 dosya
+PDF içerik parmak izleri                                  AYNI · 4/4 dosya
+Genel motor izleri (PNG, PDF, JSON, IFC)                  FARKLI · 11/11 dosya, fark: ['cikti/denetim/genel_c8801/C8801_pafta.pdf']
+SONUÇ: 1 kontrolde fark var
+
+İkisi aynı: tek fark DXF yamasından gelmiyor. Neden: PR #11 sabitleri yükseltti (araclar/gereksinimler.txt: PyMuPDF 1.28.2, shapely 2.2.0).
+Paftanın PDF izi (parmak_izi.genel_pdf_ozet) PyMuPDF'in sözcük okumasına dayanıyor; aynı PDF iki sürümde iki ayrı iz veriyor:
+  Ç8801 paftası, PyMuPDF 1.26.0: 2b54c6031d35976f · PyMuPDF 1.28.2: 16d6c374326d5be1 · referans 2026-10-12e: 16d6c374326d5be1
+
+3) PR #11 + ie08_dxf.patch ile genel_c8801 ve genel_matris yeniden üretildi; 11 pafta PDF'i PyMuPDF 1.28.2 ile izlendi:
+  11 aynı, 0 farklı, 0 eksik (referans 2026-10-12e › genel_parmak_izleri.txt).
+  Tam koşunun (pr11_dogrula.txt) öteki 140 genel izi bu ortamda da aynıydı: 151/151.

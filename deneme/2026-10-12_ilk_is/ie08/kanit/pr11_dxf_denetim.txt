@@ -1,0 +1,13 @@
+PR #11 ucu 8717793 + ie08_dxf.patch (motor/genel değişmeden), 12 Ekim 2026; modeller/<kod>.json → python -m motor.genel.dxf_genel
+kod      sürüm   birim  varlık  katman  denetim_hata  içerik izi (parmak_izi.dxf_ozet)
+C8201    AC1032  cm     245     26      0             f39bbaa6dc429dd6
+C8801    AC1032  cm     240     26      0             354a7702cd2aed51
+C8801K   AC1032  cm     235     26      0             1888e1bb588ac4b1
+C8801L   AC1032  cm     249     26      0             a75babf04a81c83a
+KT01     AC1032  cm     310     26      0             d335f0e0567dd86c
+KT02     AC1032  cm     384     26      0             fbcafaf4ff4c5da7
+KT03     AC1032  cm     431     26      0             4dde6f9121a909de
+
+PR #11 ucu 8717793 + ie08_dxf.patch + ie08_motor_eklentileri.patch; T1012-CV (kural seti 0.19):
+T1012CV  AC1032  cm     305     26      0             076816cf830c496b
+teslim edilen (deneme/2026-10-12_ilk_is/cizimler/T1012CV_A/T1012CV.dxf): 076816cf830c496b

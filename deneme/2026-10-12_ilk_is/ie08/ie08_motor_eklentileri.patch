@@ -1,0 +1,378 @@
+diff -ruN a/motor/genel/cati_genel.py b/motor/genel/cati_genel.py
+--- a/motor/genel/cati_genel.py
++++ b/motor/genel/cati_genel.py
+@@ -168,7 +168,9 @@
+ # ─────────────────────────────────────────────────────────────── kalkan ──
+ def kalkan(duzlemler: list[dict], k: dict, duvar_ustu: float, adim: float = 1.0) -> dict:
+     """Kalkan (alın duvarı) çokgeni ve alanı. `ust`: kalkanın üst çizgisini veren düzlemler; `alt`: önünde duran alçak çatının düzlemleri
+-    (verilmişse kalkan yalnız onların üstünde kalan kısımdır; verilmemişse duvar üstünden başlar). Çizgi: eksen 'y' ise y = konum."""
++    (verilmişse kalkan yalnız onların üstünde kalan kısımdır; verilmemişse duvar üstünden başlar). Çizgi: eksen 'y' ise y = konum.
++    `ust_disarida`: üst düzlem kalkanın dış yanındadır (duvara dayanan alçak çatının altındaki dolgu: duvar üstünden çatıya kadar). Bayi talebi
++    denemesi, 12 Ekim 2026: duvar 270'te bitip veranda çatısı arkada 303'te kalınca arası boştu."""
+     adli = {d["ad"]: d for d in duzlemler}
+     x0, x1 = k["aralik"]
+     c = k["konum"]
+@@ -191,7 +193,7 @@
+     onceki = None
+     for i in range(n + 1):
+         s = x0 + (x1 - x0) * i / n
+-        zu = kotu(k["ust"], s, 0.5 * ic_yon)
++        zu = kotu(k["ust"], s, (-0.5 if k.get("ust_disarida") else 0.5) * ic_yon)
+         if k.get("alt"):
+             za = kotu(k["alt"], s, -0.5 * ic_yon)
+             za = None if za is None else max(za, duvar_ustu)
+diff -ruN a/motor/genel/ciz_genel.py b/motor/genel/ciz_genel.py
+--- a/motor/genel/ciz_genel.py
++++ b/motor/genel/ciz_genel.py
+@@ -23,7 +23,7 @@
+ from matplotlib.gridspec import GridSpec
+ from matplotlib.patches import Arc
+ from matplotlib.patches import Polygon as MplPolygon
+-from shapely.geometry import Point, box
++from shapely.geometry import LineString, Point, Polygon, box
+ from shapely.ops import unary_union
+ 
+ from . import cati_genel, yapi
+@@ -31,6 +31,9 @@
+ from . import kural as kurallar_oku
+ 
+ BURADA = Path(__file__).resolve().parent
++# Antet yok: sayfa başlığı ve "TASLAK … üretim projesi değildir" satırı çizilmez (Lokman, 12 Ekim 2026 15:30: "anteti kaldıralım";
++# Portman'ın ilk gerçek işi). Görünüş, plan ve çatı planı adları kalır.
++ANTET = False
+ KOK = BURADA.parents[1]                                  # depo kökü (BURADA = motor/genel; parents[0] = motor, parents[1] = kök)
+ DUVAR, DUVAR_GERI, CATI, CAM, CERCEVE, KAPI, KOLON = "#dcd7cb", "#c9c4b8", "#5d6470", "#cfe6f7", "#2a78b8", "#b08a5a", "#8f8f8f"
+ MAHAL_RENGI = {"yatak_odasi": "#e3ebf7", "banyo": "#dcefee", "salon": "#fdf1d6", "mutfak": "#fdf1d6", "hol": "#f3ead9", "depo": "#ece8e1"}
+@@ -74,12 +77,22 @@
+     t = y["tanim"]
+     kd = t["yuz_kaplamalari"]["dis"]["kalinlik"]
+     kenar = {"alt": [], "ust": [], "sol": [], "sag": []}          # (sabit, lo, hi)
+-    for h in dis_hat(y):
++    halkalar = dis_hat(y)
++    govdeler = [Polygon(h) for h in halkalar]
++    for h in halkalar:
+         pts = yapi._sade(h)
+         alan2 = sum(a[0] * b[1] - b[0] * a[1] for a, b in zip(pts, pts[1:] + pts[:1]))
+         for a, b in zip(pts, pts[1:] + pts[:1]):
+             ex, ey = b[0] - a[0], b[1] - a[1]
+             nx, ny = (ey, -ex) if alan2 > 0 else (-ey, ex)         # yapıdan dışarı
++            # o yandan bakınca görünmeyen kenar zincire girmez (ör. veranda dikmesinin arkası kuzey zincirinde "8" yazıyordu; bayi talebi denemesi,
++            # 12 Ekim 2026): kenarın ortasından dışarı giden çizgi yapının bir parçasına çarpıyorsa kenar örtülüdür
++            L = math.hypot(ex, ey)
++            if L > 1e-6:
++                ux, uy = nx / L, ny / L
++                mx, my = (a[0] + b[0]) / 2 + ux * 0.5, (a[1] + b[1]) / 2 + uy * 0.5
++                if any(g.intersects(LineString([(mx, my), (mx + ux * 1e4, my + uy * 1e4)])) for g in govdeler):
++                    continue
+             if abs(ey) < 1e-6:
+                 kenar["alt" if ny < 0 else "ust"].append((a[1], min(a[0], b[0]), max(a[0], b[0])))
+             else:
+@@ -106,7 +119,22 @@
+                 for f in yuz:
+                     c = {"sol": x0 - kd, "sag": x1 + kd, "alt": y0 - kd, "ust": y1 + kd}[f["kenar"]]
+                     nok.add(round(c, 2))
+-        cik[yan] = sorted(nok)
++        sirali = []
++        for v in sorted(nok):                    # 1 cm'den yakın noktalar teke iner: zincirde "0" yazan parça kalmasın (bayi talebi denemesi, 12 Ekim 2026)
++            if not sirali or v - sirali[-1] >= 1.0:
++                sirali.append(v)
++        cik[yan] = sirali
++    return cik
++
++
++def kisa_yazi_yanlari(boylar: list[float], sinir: float = 55.0) -> list[int]:
++    """Ölçü zincirinde yazının yanı (1: her zamanki, -1: çizginin öbür yanı). Art arda gelen kısa parçalardan her ikincisi öbür yana yazılır;
++    yan yana iki "30", "3030" diye okunmasın (bayi talebi denemesi, 12 Ekim 2026)."""
++    cik, onceki = [], 0
++    for b in boylar:
++        yan = (-onceki if onceki else 1) if b < sinir else 1
++        onceki = yan if b < sinir else 0
++        cik.append(yan)
+     return cik
+ 
+ 
+@@ -187,7 +215,9 @@
+         d = y["adli"][a["duvar"]]
+         if a["tur"] == "pencere":
+             ax.add_patch(MplPolygon([(x1, y1), (x2, y1), (x2, y2), (x1, y2)], closed=True, fc=CAM, ec=CERCEVE, lw=1.0, zorder=4))
+-            et = a.get("etiket") or f"{a['en']}/{a['yuk']}"
++            et = a.get("plan_etiketi") or a.get("etiket") or f"{a['en']}/{a['yuk']}"
++            if a.get("etiket_gizle"):                         # iki kanatlı eğimli pencerenin ikinci kanadı: etiket birincide (bayi talebi denemesi)
++                continue
+             # etiket: duvarın dışa bakan yanına
+             yuz = next((f for f in y["yuzler"] if f["duvar"] == d["ad"] and f["uzun"] and f["bolge_sinifi"] in ("dis", "veranda")), None)
+             kn = yuz["kenar"] if yuz else ("alt" if d["yon"] == "x" else "sol")
+@@ -204,16 +234,14 @@
+     # ölçü zincirleri
+     if olcu_zinciri:
+         z = zincirler(y)
+-        for i in range(len(z["alt"]) - 1):
+-            olcu(ax, (z["alt"][i], by0 - 66), (z["alt"][i + 1], by0 - 66), sade(z["alt"][i + 1] - z["alt"][i]), 3)
++        for yan_adi, sabit, kay, yatay in (("alt", by0 - 66, 3, True), ("ust", by1 + 50, 3, True), ("sol", bx0 - 50, -4, False), ("sag", bx1 + 50, 4, False)):
++            nk = z[yan_adi]
++            yanlar = kisa_yazi_yanlari([b - a for a, b in zip(nk, nk[1:])])
++            for i in range(len(nk) - 1):
++                p1, p2 = ((nk[i], sabit), (nk[i + 1], sabit)) if yatay else ((sabit, nk[i]), (sabit, nk[i + 1]))
++                olcu(ax, p1, p2, sade(nk[i + 1] - nk[i]), kay * yanlar[i], yatay=yatay)
+         olcu(ax, (bx0, by0 - 102), (bx1, by0 - 102), sade(bx1 - bx0), 3)
+-        for i in range(len(z["ust"]) - 1):
+-            olcu(ax, (z["ust"][i], by1 + 50), (z["ust"][i + 1], by1 + 50), sade(z["ust"][i + 1] - z["ust"][i]), 3)
+-        for i in range(len(z["sol"]) - 1):
+-            olcu(ax, (bx0 - 50, z["sol"][i]), (bx0 - 50, z["sol"][i + 1]), sade(z["sol"][i + 1] - z["sol"][i]), -4, yatay=False)
+         olcu(ax, (bx0 - 86, by0), (bx0 - 86, by1), sade(by1 - by0), -4, yatay=False)
+-        for i in range(len(z["sag"]) - 1):
+-            olcu(ax, (bx1 + 50, z["sag"][i]), (bx1 + 50, z["sag"][i + 1]), sade(z["sag"][i + 1] - z["sag"][i]), 4, yatay=False)
+     # giriş oku: dış kapılar
+     for a in y["acikliklar"]:
+         if a["tur"] in ("dis_kapi", "gecit") and a.get("giris"):
+@@ -454,10 +482,17 @@
+             continue
+         fc, ec = RENK[s["tur"]]
+         ax.add_patch(MplPolygon(s["k2"], closed=True, fc=fc, ec=ec, lw=0.8 if s["tur"] not in ("pencere", "kapi") else 1.0, zorder=2, joinstyle="round"))
+-        if s["tur"] == "pencere" and s.get("en", 0) >= 100:
++        if s["tur"] == "pencere" and s.get("kayit"):          # tanımdaki kayıtlar (bayi talebi denemesi: görseldeki pencere)
++            us = [p[0] for p in s["k2"]]
++            for zk in s["kayit"].get("yatay", []):
++                ax.plot([min(us), max(us)], [zk, zk], color=CERCEVE, lw=0.7, zorder=2)
++        elif s["tur"] == "pencere" and s.get("en", 0) >= 100:
+             us = [p[0] for p in s["k2"]]
+             zs = [p[1] for p in s["k2"]]
+-            ax.plot([(min(us) + max(us)) / 2] * 2, [min(zs), max(zs)], color=CERCEVE, lw=0.7, zorder=2)
++            um = (min(us) + max(us)) / 2
++            sol_ust = max(p[1] for p in s["k2"] if abs(p[0] - min(us)) < 0.5)
++            sag_ust = max(p[1] for p in s["k2"] if abs(p[0] - max(us)) < 0.5)
++            ax.plot([um] * 2, [min(zs), (sol_ust + sag_ust) / 2], color=CERCEVE, lw=0.7, zorder=2)
+         i += 1
+     us = [p[0] for s in yz for p in s["k2"]]
+     zs = [p[1] for s in yz for p in s["k2"]]
+@@ -491,7 +526,8 @@
+     sar = lambda satirlar: "\n".join("\n    ".join(textwrap.wrap(x, 118)) for x in satirlar)
+     ax.text(0.0, 0.98, sar(sol), ha="left", va="top", fontsize=8.8, linespacing=1.5, transform=ax.transAxes)
+     ax.text(0.51, 0.98, sar(sag), ha="left", va="top", fontsize=8.8, linespacing=1.5, transform=ax.transAxes)
+-    fig.suptitle(f"{t['kod']} · {t['ad']}   —   {alt_baslik}", fontsize=12.5, weight="bold", x=0.02, ha="left", y=0.965)
++    if ANTET:
++        fig.suptitle(f"{t['kod']} · {t['ad']}   —   {alt_baslik}", fontsize=12.5, weight="bold", x=0.02, ha="left", y=0.965)
+     fig.savefig(cikti, bbox_inches="tight", facecolor="white")
+     plt.close(fig)
+ 
+@@ -500,8 +536,9 @@
+     fig, axs = plt.subplots(2, 2, figsize=(17, 9.5), dpi=140)
+     for ax, taraf in zip(axs.ravel(), ("on", "arka", "sol", "sag")):
+         gorunus_eksen(ax, S, taraf, duvar_h)
+-    fig.suptitle(baslik, fontsize=12, weight="bold", x=0.02, ha="left")
+-    fig.tight_layout(rect=(0, 0, 1, 0.96))
++    if ANTET:
++        fig.suptitle(baslik, fontsize=12, weight="bold", x=0.02, ha="left")
++    fig.tight_layout(rect=(0, 0, 1, 0.96 if ANTET else 1.0))
+     fig.savefig(cikti, facecolor="white")
+     plt.close(fig)
+ 
+@@ -526,7 +563,8 @@
+     kod = t["kod"].replace("Ç", "C").replace("-", "")
+     inis, _ = inis_kurali(c, kur, t["cati"].get("sacak", 30))
+     fig, ax = plt.subplots(figsize=(13.5, 11.5), dpi=140)
+-    plan_eksen(ax, y, baslik=f"{t['kod']} · {t['ad']}\nTASLAK · modelden okunan ölçülerle kuruldu · üretim projesi değildir", bilgi=sol + ["Ölçü zinciri: dış yüzler ve iç duvar aksları · ölçüler cm"])
++    plan_eksen(ax, y, baslik=(f"{t['kod']} · {t['ad']}\nTASLAK · modelden okunan ölçülerle kuruldu · üretim projesi değildir" if ANTET else None),
++               bilgi=sol + ["Ölçü zinciri: dış yüzler ve iç duvar aksları · ölçüler cm"])
+     fig.savefig(a.cikti / f"{kod}_plan.png", bbox_inches="tight", facecolor="white")
+     plt.close(fig)
+     pafta(y, c, S, a.cikti / f"{kod}_pafta.png", sol, sag, inis)
+diff -ruN a/motor/genel/girdi_genel.py b/motor/genel/girdi_genel.py
+--- a/motor/genel/girdi_genel.py
++++ b/motor/genel/girdi_genel.py
+@@ -449,7 +449,10 @@
+         + f" · kapalı net {tr(kapali_net)} m²",
+         f"Duvar: karkas {sade(dis_d[0]['kalinlik'] * 10)} mm · dışta {sade(kap['dis']['kalinlik'])} cm, içte {tr(kap['ic']['kalinlik'], 2)} cm kaplama · yükseklik {t['kat_yuksekligi']} cm"
+         + (" · " + ", ".join(f"{sinif_ad}: {v['adet']} panel" for sinif_ad, v in (("dış", m["duvar_gruplari"].get("dis")), ("iç", m["duvar_gruplari"].get("ic"))) if v)),
+-        (f"Pencereler: üst kot {sade(max(a['z1'] for a in pencere))} cm" if pencere else "Pencere yok")
++        ((f"Pencereler: üst kot {sade(max(a['z1'] for a in pencere if a.get('z1a') is None))} cm"
++          + (f" (üstü eğimli pencere: {sade(min(min(a['z1a'], a['z1b']) for a in pencere if a.get('z1a') is not None))}–"
++             f"{sade(max(a['z1'] for a in pencere if a.get('z1a') is not None))})" if any(a.get('z1a') is not None for a in pencere) else ""))
++         if pencere else "Pencere yok")
+         + (" · iç kapı boşlukları " + ", ".join(sorted({f"{a['en']} × {a['yuk']}" for a in ik})) if ik else "")
+         + (" · dış kapı boşluğu " + ", ".join(sorted({f"{a['en']} × {a['yuk']}" for a in dk})) if dk else ""),
+         f"Dış kaplama (Boardex): duvar yüzleri {tr(m['dis_brut_m2'])} − boşluk {tr(m['dis_brut_m2'] - m['dis_net_m2'])} + dikme, kiriş, kalkan ve baca {tr(ek)}"
+diff -ruN a/motor/genel/ifc_genel.py b/motor/genel/ifc_genel.py
+--- a/motor/genel/ifc_genel.py
++++ b/motor/genel/ifc_genel.py
+@@ -28,7 +28,7 @@
+ import ifcopenshell.api
+ import numpy as np
+ from ifcopenshell.util.shape_builder import ShapeBuilder
+-from shapely.geometry import Polygon
++from shapely.geometry import Point, Polygon
+ 
+ from . import cati_genel, yapi
+ from . import kural as kurallar_oku
+@@ -185,11 +185,15 @@
+                 if a["duvar"] != d["ad"]:
+                     continue
+                 o = self.urun("IfcOpeningElement", f"BOSLUK_{a['ad']}", "OPENING", kapsa=False)
+-                if d["yon"] == "x":
+-                    kb = (a["a0"], gy0 - 2, a["z0"], a["a1"], gy1 + 2, a["z1"])
++                if a.get("z1a") is not None:                  # üstü eğimli açıklık (bayi talebi denemesi, 12 Ekim 2026)
++                    pts = [(a["a0"], a["z0"]), (a["a1"], a["z0"]), (a["a1"], a["z1b"]), (a["a0"], a["z1a"])]
++                    self.temsil(o, self.prizma_dusey("x", gy0 - 2, gy1 + 2, pts) if d["yon"] == "x" else self.prizma_dusey("y", gx0 - 2, gx1 + 2, pts))
+                 else:
+-                    kb = (gx0 - 2, a["a0"], a["z0"], gx1 + 2, a["a1"], a["z1"])
+-                self.temsil(o, self.kutu(*kb))
++                    if d["yon"] == "x":
++                        kb = (a["a0"], gy0 - 2, a["z0"], a["a1"], gy1 + 2, a["z1"])
++                    else:
++                        kb = (gx0 - 2, a["a0"], a["z0"], gx1 + 2, a["a1"], a["z1"])
++                    self.temsil(o, self.kutu(*kb))
+                 api("feature.add_feature", self.f, feature=o, element=e)
+                 dolgu = self.dograma(a, d, (gx0, gy0, gx1, gy1))
+                 if dolgu is not None:
+@@ -205,6 +209,28 @@
+             return self.kutu(s0, orta + d0, z0, s1, orta + d1, z1) if d["yon"] == "x" else self.kutu(orta + d0, s0, z0, orta + d1, s1, z1)
+ 
+         a0, a1, z0, z1 = a["a0"], a["a1"], a["z0"], a["z1"]
++        if a["tur"] == "pencere" and a.get("z1a") is not None:
++            fr = 6.0
++            ust = lambda s: a["z1a"] + (a["z1b"] - a["z1a"]) * (s - a0) / (a1 - a0)
++
++            def pr(s0, s1, d0, d1, alt0, alt1, ust0, ust1):  # düşey dörtgen prizma (duvar boyunca s, kalınlıkta orta ± d)
++                pts = [(s0, alt0), (s1, alt1), (s1, ust1), (s0, ust0)]
++                return self.prizma_dusey("x", orta + d0, orta + d1, pts) if d["yon"] == "x" else self.prizma_dusey("y", orta + d0, orta + d1, pts)
++            e = self.urun("IfcWindow", f"PENCERE_{a.get('etiket', '')}_{a['ad']}", "WINDOW", OverallWidth=_m(a1 - a0), OverallHeight=_m(z1 - z0))
++            kasa = [k(a0, a1, -3.5, 3.5, z0, z0 + fr), k(a0, a0 + fr, -3.5, 3.5, z0 + fr, ust(a0 + fr) - fr), k(a1 - fr, a1, -3.5, 3.5, z0 + fr, ust(a1 - fr) - fr),
++                    pr(a0, a1, -3.5, 3.5, ust(a0) - fr, ust(a1) - fr, ust(a0), ust(a1))]
++            if a.get("kayit"):                                # tanımdaki yatay kayıtlar
++                for zk in a["kayit"].get("yatay", []):
++                    kasa.append(k(a0 + fr, a1 - fr, -3.5, 3.5, zk - 3, zk + 3))
++            elif a1 - a0 >= 100:
++                m = (a0 + a1) / 2
++                kasa.append(k(m - 3, m + 3, -3.5, 3.5, z0 + fr, ust(m) - fr))
++            cam = pr(a0 + fr, a1 - fr, -0.6, 0.6, z0 + fr, z0 + fr, ust(a0 + fr) - fr, ust(a1 - fr) - fr)
++            self.temsil(e, kasa + [cam], stiller=["pvc"] * len(kasa) + ["cam"])
++            self.pset(e, "Pset_WindowCommon", {"IsExternal": True})
++            self.pset(e, "PortatifEv_Dograma", {"Olcu": a.get("etiket", f"{a['en']}/{a['yuk']}"), "Esik_cm": float(z0), "UstKot_cm": f"{a['z1a']:g}–{a['z1b']:g}",
++                                                "Kapsam": "listede" if kapsam.get("pencere", True) else "alıcıya ait"})
++            return e
+         if a["tur"] == "pencere":
+             fr = 6.0
+             e = self.urun("IfcWindow", f"PENCERE_{a.get('etiket', '')}_{a['ad']}", "WINDOW", OverallWidth=_m(a1 - a0), OverallHeight=_m(z1 - z0))
+@@ -261,8 +287,22 @@
+             # tavan (ek yapıda ve çatı panelli açık alanda çatı panelinin altı; çatısız verandada tavan yok: Ç8801, `ortu: pergola`)
+             if b["sinif"] != "ek" and not pdz and not yapi.catisiz(b):
+                 tv = self.urun("IfcCovering", f"TAVAN_{b['ad']}", "CEILING")
+-                self.temsil(tv, [self.prizma_xy(list(p.exterior.coords)[:-1], h - 1.25, h) for p in poligonlar], "tavan")
+-                self.qto(tv, "Qto_CoveringBaseQuantities", {"NetArea": round(b["alan_m2"], 3)})
++                if b.get("tavan") == "egimli":                 # eğimli tavan (bayi talebi denemesi, 12 Ekim 2026): makas üstünün 10 cm altında, çatı eğiminde
++                    parca, alan = [], 0.0
++                    for dz in self.c["duzlemler"]:
++                        kes = dz["cokgen"].intersection(b["net"])
++                        for pp in (getattr(kes, "geoms", None) or [kes]):
++                            if pp.geom_type != "Polygon" or pp.area < 1:
++                                continue
++                            ust3 = [(x, yy, max(h, dz["kot"]((x, yy)) - 10.0)) for x, yy in list(pp.exterior.coords)[:-1]]
++                            parca.append(self.levha(ust3, 1.25))
++                            alan += pp.area * math.sqrt(1 + dz["egim"] ** 2) / 1e4
++                    self.temsil(tv, parca, "tavan")
++                    self.pset(tv, "PortatifEv_Tavan", {"Tip": "eğimli (çatı eğiminde)", "Not": "taşıyıcı sistemi mühendis belirler"})
++                    self.qto(tv, "Qto_CoveringBaseQuantities", {"NetArea": round(alan, 3)})
++                else:
++                    self.temsil(tv, [self.prizma_xy(list(p.exterior.coords)[:-1], h - 1.25, h) for p in poligonlar], "tavan")
++                    self.qto(tv, "Qto_CoveringBaseQuantities", {"NetArea": round(b["alan_m2"], 3)})
+ 
+     def doseme(self):
+         for i, h in enumerate(self.y["bolgeler"]["(dış)"]["net"].interiors):
+@@ -299,22 +339,27 @@
+                 p, q = e["p"], e["q"]
+                 zp, zq = dz["kot"](p), dz["kot"](q)
+                 L = math.hypot(q[0] - p[0], q[1] - p[1])
+-                ic = dz["cokgen"].representative_point()
+                 nx, ny = -(q[1] - p[1]) / L, (q[0] - p[0]) / L
+-                if nx * (ic.x - p[0]) + ny * (ic.y - p[1]) < 0:
+-                    nx, ny = -nx, -ny                           # düzlemin içine doğru
++                orta = Point((p[0] + q[0]) / 2 + nx * 0.5, (p[1] + q[1]) / 2 + ny * 0.5)
++                if not dz["cokgen"].contains(orta):             # düzlemin içine doğru (girintili çokgende de doğru: kenarın ortasından denenir)
++                    nx, ny = -nx, -ny
+                 kal = 1.0
+-                u = [(p[0], p[1], zp + ust), (q[0], q[1], zq + ust), (q[0] + nx * kal, q[1] + ny * kal, zq + ust), (p[0] + nx * kal, p[1] + ny * kal, zp + ust)]
++                # bayi talebi denemesi (12 Ekim 2026): bant panelin ucunu 3 mm dıştan ve üstten sarar. Yüzler panelle çakışınca
++                # perspektiflerde alın boyunca noktalı desen (boşluk gibi) görünüyordu.
++                dis = 0.3
++                px, py, qx, qy = p[0] - nx * dis, p[1] - ny * dis, q[0] - nx * dis, q[1] - ny * dis
++                u = [(px, py, zp + ust + dis), (qx, qy, zq + ust + dis), (qx + nx * (kal + dis), qy + ny * (kal + dis), zq + ust + dis),
++                     (px + nx * (kal + dis), py + ny * (kal + dis), zp + ust + dis)]
+                 # saçak ucunda bant aşağı, makas üstünden topuk kadar iner; kapalı gövde
+                 pl = self.urun("IfcPlate", f"ALIN_{dz['ad']}_{e['tur']}", "SHEET", kapsa=False)
+-                self.temsil(pl, self.levha(u, ust + alt), "alin")
++                self.temsil(pl, self.levha(u, ust + alt + dis), "alin")
+                 parcalar.append(pl)
+         api("aggregate.assign_object", self.f, relating_object=roof, products=parcalar)
+         # kalkanlar
+         for k in c["kalkanlar"]:
+             if len(k["kose"]) < 3:
+                 continue
+-            pol = Polygon(k["kose"]).simplify(0.05)
++            pol = Polygon(k["kose"]).simplify(0.5)   # bayi talebi denemesi: 0,05 iken çıkıntı altındaki 1 cm kırıklar katıyı boş bırakıyordu
+             pts = list(pol.exterior.coords)[:-1]
+             ic_yon = {"kuzey": 1.0, "guney": -1.0, "dogu": 1.0, "bati": -1.0}[k["ic"]]
+             a, b = k["konum"], k["konum"] + ic_yon * 3.0
+diff -ruN a/motor/genel/sahne.py b/motor/genel/sahne.py
+--- a/motor/genel/sahne.py
++++ b/motor/genel/sahne.py
+@@ -13,7 +13,7 @@
+ from shapely.geometry import Point, box
+ from shapely.ops import unary_union
+ 
+-from .yapi import NORMAL, _kenar, _yukseklik
++from .yapi import NORMAL, _kenar, _ust, _yukseklik
+ 
+ DIS_SINIFLAR = ("dis", "veranda")
+ 
+@@ -79,7 +79,7 @@
+                 on = 0.4
+                 s2 = sabit + on * (n[1] if eks == "x" else n[0])
+                 tur_a = {"pencere": "pencere", "dis_kapi": "kapi", "ic_kapi": "kapi", "gecit": "gecit"}[ac["tur"]]
+-                ekle(_dikdortgen(eks, s2, b0, b1, ac["z0"], ac["z1"], None, None, n), tur_a, ac["ad"], 2, en=ac["en"], bolge=f["bolge"])
++                ekle(_dikdortgen(eks, s2, b0, b1, ac["z0"], _ust(ac, b0), None, _ust(ac, b1), n), tur_a, ac["ad"], 2, en=ac["en"], bolge=f["bolge"], kayit=ac.get("kayit"))
+ 
+     # ── kirişler (veranda): açıkta kalan kısımlarının yan yüzleri ────────────
+     kd = kap["dis"]["kalinlik"]
+diff -ruN a/motor/genel/yapi.py b/motor/genel/yapi.py
+--- a/motor/genel/yapi.py
++++ b/motor/genel/yapi.py
+@@ -113,6 +113,14 @@
+     return y["bas"] + (y["son"] - y["bas"]) * t
+ 
+ 
++def _ust(ac: dict, s: float) -> float:
++    """Açıklığın s konumundaki üst kotu. Bayi talebi denemesi (12 Ekim 2026; depo dışı kopya): üstü eğimli açıklık `tepe_kot` {bas, son}."""
++    if ac.get("z1a") is None:
++        return ac["z1"]
++    t = min(1.0, max(0.0, (s - ac["a0"]) / (ac["a1"] - ac["a0"])))
++    return ac["z1a"] + (ac["z1b"] - ac["z1a"]) * t
++
++
+ def _alan_altinda(d: dict, a: float, b: float, yuk: float | None = None) -> float:
+     """Duvarın [a, b] aralığında (uzun eksen boyunca) yüz alanı: üst kot boyunca integral. `yuk` verilirse sabit yükseklik."""
+     if yuk is not None:
+@@ -275,7 +283,12 @@
+         if a0 < d["_bas"] - TOL or a1 > d["_son"] + TOL:
+             raise SystemExit(f"Açıklık duvarın dışına taşıyor: {ac.get('ad')} ({a0}–{a1}; {d['ad']} {d['_bas']}–{d['_son']})")
+         z0 = ac.get("alt", 0.0)
+-        acikliklar.append(dict(ac, a0=a0, a1=a1, z0=z0, z1=z0 + ac["yuk"], alan_m2=ac["en"] * ac["yuk"] / 1e4))
++        tk = ac.get("tepe_kot")
++        if tk:
++            z1a, z1b = float(tk["bas"]), float(tk["son"])
++            acikliklar.append(dict(ac, a0=a0, a1=a1, z0=z0, z1=max(z1a, z1b), z1a=z1a, z1b=z1b, alan_m2=ac["en"] * ((z1a + z1b) / 2 - z0) / 1e4))
++        else:
++            acikliklar.append(dict(ac, a0=a0, a1=a1, z0=z0, z1=z0 + ac["yuk"], alan_m2=ac["en"] * ac["yuk"] / 1e4))
+ 
+     # ── yüz alanları ─────────────────────────────────────────────────────────
+     kat_h = tanim["kat_yuksekligi"]
+@@ -297,7 +310,9 @@
+                     continue
+                 ort = sum(max(0.0, min(hi, ac["a1"]) - max(lo, ac["a0"])) for lo, hi in y["araliklar"])
+                 if ort > TOL:
+-                    bos.append({"ad": ac["ad"], "tur": ac["tur"], "alan_m2": round(ort * (ac["z1"] - ac["z0"]) / 1e4, 4)})
++                    alan = sum(max(0.0, min(hi, ac["a1"]) - max(lo, ac["a0"])) * ((_ust(ac, max(lo, ac["a0"])) + _ust(ac, min(hi, ac["a1"]))) / 2 - ac["z0"])
++                               for lo, hi in y["araliklar"] if min(hi, ac["a1"]) > max(lo, ac["a0"]))
++                    bos.append({"ad": ac["ad"], "tur": ac["tur"], "alan_m2": round(alan / 1e4, 4)})
+         y["brut_m2"] = brut / 1e4
+         y["bosluklar"] = bos
+         y["net_m2"] = y["brut_m2"] - sum(x["alan_m2"] for x in bos)
