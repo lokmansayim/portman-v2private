@@ -162,8 +162,9 @@ def test_guncelle_ikinci_surum_ve_geri_don(surum_ortam):
     r = _kos("geri_don.sh", env)
     assert r.returncode == 0, r.stdout + r.stderr
     assert os.readlink(kok / "guncel") == str(s9) and os.readlink(kok / "onceki") == str(s12) and "v2026.10.12 → v2026.10.09" in r.stdout
+    assert "sağlık: sürüm v2026.10.09, Postgres bağlı" in r.stdout                                # BK-07: geri_don.sh sağlığı bekler
     r = _kos("geri_don.sh", env)
-    assert r.returncode == 0 and os.readlink(kok / "guncel") == str(s12)
+    assert r.returncode == 0 and os.readlink(kok / "guncel") == str(s12) and "sağlık: sürüm v2026.10.12, Postgres bağlı" in r.stdout
     # aynı etiket yeniden: dosyalar yeniden açılmaz
     r = _kos("guncelle.sh", env, "v2026.10.12")
     assert r.returncode == 0 and "sürüm zaten kurulu" in r.stdout and os.readlink(kok / "guncel") == str(s12)
@@ -218,6 +219,83 @@ def test_saglik_dusunce_kendiliginden_geri_doner(surum_ortam):
     assert r.returncode == 1 and "Önceki sürüme dönülüyor" in out and "DUR: sağlık" in out and '"postgres": false' in out
     assert os.readlink(kok / "guncel") == str(kok / "surumler" / "v2026.10.09") and os.readlink(kok / "onceki") == str(kok / "surumler" / "v2026.10.12")
     assert (kok / "surumler" / "v2026.10.12" / "KURULDU").exists()                 # dizin durur, silinmez
+
+
+def test_geri_don_saglik_gelmezse_uyari_ve_cikis_1(surum_ortam):
+    """BK-07: geri_don.sh bağlantıları değiştirir, servisleri başlatır, sağlığı bekler; gelmezse UYARI ve çıkış 1 (ileri alma yok)."""
+    env, kok, saglik = surum_ortam["env"], surum_ortam["kok"], surum_ortam["saglik"]
+    assert _kos("guncelle.sh", env, "v2026.10.09").returncode == 0 and _kos("guncelle.sh", env, "v2026.10.12").returncode == 0
+    saglik.bozuk = True
+    r = _kos("geri_don.sh", env)
+    assert r.returncode == 1 and "UYARI: sağlık" in r.stderr and "etkin (sağlık gelmedi)" in r.stdout
+    assert os.readlink(kok / "guncel") == str(kok / "surumler" / "v2026.10.09")                   # bağlantı değişti, geri alınmadı
+
+
+def _psql_sayac(bin_: Path, acik_is: int = 0, bekleyen: int = 0) -> str:
+    return _sahte(bin_, f"psql_{acik_is}_{bekleyen}", '#!/usr/bin/env bash\nSQL="${@: -1}"\ncase "$SQL" in *"FROM isler"*) echo ' + str(acik_is) +
+                  ' ;; *"kind = \'template\'"*) echo 0 ;; *"FROM giden"*) echo ' + str(bekleyen) + ' ;; *) echo 0 ;; esac\n')
+
+
+def test_kapi12_tatbikat_geri_ileri_nabiz_zamanlayicisi(surum_ortam, tmp_path):
+    """BK-07 S5 Kapı 12: ön kontrol → nabız zamanlayıcısı durur → geri_don.sh (sağlık) → guncelle.sh (sürüm zaten kurulu, sağlık) →
+    zamanlayıcı başlar. Ön kontrol geçmezse hiçbir şey değişmez; yanlış etiket DUR."""
+    env, kok, log = surum_ortam["env"], surum_ortam["kok"], surum_ortam["log"]
+    bin_ = tmp_path / "bin2"; bin_.mkdir()
+    assert _kos("guncelle.sh", env, "v2026.10.09").returncode == 0 and _kos("guncelle.sh", env, "v2026.10.12").returncode == 0
+    s9, s12 = kok / "surumler" / "v2026.10.09", kok / "surumler" / "v2026.10.12"
+    onceki_log = log.read_text()
+    # yanlış etiket ve dolu tablo: durur, zamanlayıcıya ve bağlantılara dokunmaz
+    r = _kos("kapi12_tatbikat.sh", {**env, "PM_PSQL": _psql_sayac(bin_)}, "v2026.10.09")
+    assert r.returncode == 1 and "güncel sürüm v2026.10.12, verilen etiket v2026.10.09" in r.stderr
+    r = _kos("kapi12_tatbikat.sh", {**env, "PM_PSQL": _psql_sayac(bin_, acik_is=1)}, "v2026.10.12")
+    assert r.returncode == 1 and "ön kontrol geçmedi" in r.stderr and "açık iş 1 · bekleyen giden 0" in r.stdout
+    r = _kos("kapi12_tatbikat.sh", {**env, "PM_PSQL": _psql_sayac(bin_, bekleyen=2)}, "v2026.10.12")
+    assert r.returncode == 1 and "bekleyen giden 2" in r.stdout
+    assert log.read_text() == onceki_log and os.readlink(kok / "guncel") == str(s12)
+    # tam tur
+    r = _kos("kapi12_tatbikat.sh", {**env, "PM_PSQL": _psql_sayac(bin_)}, "v2026.10.12")
+    out = r.stdout + r.stderr
+    assert r.returncode == 0, out[-3000:]
+    for parca in ("ön kontrol: açık iş 0 · bekleyen giden 0 (şablon 0) · sağlık HTTP 200", "nabız zamanlayıcısı durduruldu", "v2026.10.12 → v2026.10.09",
+                  "sağlık: sürüm v2026.10.09, Postgres bağlı", "sürüm zaten kurulu", "sağlık: sürüm v2026.10.12, Postgres bağlı", "nginx: değişiklik yok",
+                  "nabız zamanlayıcısı başlatıldı", "== bitti: v2026.10.12 etkin · onceki v2026.10.09"):
+        assert parca in out, parca
+    assert os.readlink(kok / "guncel") == str(s12) and os.readlink(kok / "onceki") == str(s9)
+    yeni = log.read_text()[len(onceki_log):].splitlines()
+    assert yeni[0] == "stop portman-nabiz.timer" and yeni[-1] == "start portman-nabiz.timer" and yeni.count("stop portman-nabiz.timer") == 1
+    assert yeni.index("stop portman-nabiz.timer") < yeni.index("stop portman-webhook portman-gonderici portman-agent portman-panel")
+    # geri dönüşte sağlık gelmezse: DUR, zamanlayıcı yine başlatılır (trap), servisler önceki sürümde
+    surum_ortam["saglik"].bozuk = True
+    r = _kos("kapi12_tatbikat.sh", {**env, "PM_PSQL": _psql_sayac(bin_), "PM_ZORLA": "1"}, "v2026.10.12")
+    assert r.returncode == 1 and "geri dönüşte sağlık gelmedi" in r.stderr and "nabız zamanlayıcısı başlatıldı" in r.stdout
+    assert os.readlink(kok / "guncel") == str(s9) and log.read_text().rstrip().splitlines()[-1] == "start portman-nabiz.timer"
+
+
+def test_yeniden_baslat_on_kontrol_ve_test_modu(tmp_path):
+    """BK-07 S5: çekirdek ve yeniden başlatma gerekliliği yazılır; açık iş ya da bekleyen giden varsa DUR (PM_ZORLA geçer);
+    PM_TEST=1'de systemctl reboot çağrılmaz."""
+    bin_ = tmp_path / "bin"; bin_.mkdir(); kok = tmp_path / "opt"; (kok / "data" / "nabiz").mkdir(parents=True)
+    (kok / "surumler" / "v2026.10.12").mkdir(parents=True); (kok / "surumler" / "v2026.10.12" / "SURUM").write_text("v2026.10.12\n")
+    os.symlink(kok / "surumler" / "v2026.10.12", kok / "guncel")
+    (kok / "data" / "nabiz" / "yedek.json").write_text(json.dumps({"zaman": int(time.time()) - 2 * 3600}))
+    boot = tmp_path / "boot"; boot.mkdir(); (boot / "vmlinuz-6.8.0-45-generic").write_text(""); (boot / "vmlinuz-6.8.0-47-generic").write_text("")
+    rr = tmp_path / "reboot-required"; rr.write_text("*** System restart required ***\n"); Path(str(rr) + ".pkgs").write_text("linux-image-6.8.0-47-generic\nlinux-base\n")
+    log = tmp_path / "systemctl.log"
+    env = {"PM_KOK": str(kok), "PM_SYSTEMCTL": _sahte(bin_, "systemctl", '#!/usr/bin/env bash\necho "$@" >> "$PM_SYSTEMCTL_LOG"\nexit 0\n'),
+           "PM_SYSTEMCTL_LOG": str(log), "PM_REBOOT_REQ": str(rr), "PM_BOOT_DIR": str(boot), "PM_TEST": "1"}
+    r = _kos("yeniden_baslat.sh", {**env, "PM_PSQL": _psql_sayac(bin_, acik_is=1)})
+    assert r.returncode == 1 and "DUR: açık iş ya da bekleyen giden var" in r.stderr and not log.exists()
+    r = _kos("yeniden_baslat.sh", {**env, "PM_PSQL": _psql_sayac(bin_)})
+    assert r.returncode == 0, r.stdout + r.stderr
+    for parca in ("kurulu en yeni 6.8.0-47-generic", "yeniden başlatma gerekli: evet", "paketler: linux-base linux-image-6.8.0-47-generic",
+                  "ön kontrol: açık iş 0 · bekleyen giden 0 · son yedek 2 saat önce · guncel v2026.10.12", "PM_TEST: systemctl reboot çağrılmadı"):
+        assert parca in r.stdout, parca
+    assert not log.exists()
+    r = _kos("yeniden_baslat.sh", {**env, "PM_PSQL": _psql_sayac(bin_, bekleyen=1), "PM_ZORLA": "1"})
+    assert r.returncode == 0 and "PM_ZORLA" in r.stdout
+    rr.unlink()
+    r = _kos("yeniden_baslat.sh", {**env, "PM_PSQL": _psql_sayac(bin_)})
+    assert r.returncode == 0 and "yeniden başlatma gerekli: hayır" in r.stdout
 
 
 def test_ilk_kurulumda_saglik_dusunce_onceki_yok(surum_ortam):
@@ -556,8 +634,13 @@ def test_durum_sh_salt_okunur_ve_maskeli(tmp_path):
            "PM_PSQL": _sahte(bin_, "psql", '#!/usr/bin/env bash\necho "bayi(aktif) 1 · mesaj 2"\n')}
     r = _kos("durum.sh", env)
     assert r.returncode == 0, r.stdout + r.stderr
-    for parca in ("guncel: v2026.10.09", "portman-webhook        active", "passwordauthentication no", "Status: active", "bayi(aktif) 1", "sertifika", "agent", "cevap yok"):
+    for parca in ("guncel: v2026.10.09", "portman-webhook        active", "passwordauthentication no", "Status: active", "bayi(aktif) 1", "sertifika", "agent", "cevap yok",
+                  "perspektif (VTK, BK-07): kayıt yok", "-- çekirdek (BK-07)", "yeniden başlatma gerekli: hayır"):
         assert parca in r.stdout, parca
+    (kok / "surumler" / "v2026.10.09" / "PERSPEKTIF").write_text("ÇİZİLEMEDİ (libOSMesa yok) → pilot perspektifsiz\n")
+    r = _kos("durum.sh", {**env, "PM_REBOOT_REQ": str(tmp_path / "rr")}); (tmp_path / "rr").write_text("x")
+    r = _kos("durum.sh", {**env, "PM_REBOOT_REQ": str(tmp_path / "rr")})
+    assert "perspektif (VTK, BK-07): ÇİZİLEMEDİ" in r.stdout and "yeniden başlatma gerekli: evet" in r.stdout
     assert "900000000101" not in r.stdout and "wamid.HBgL" not in r.stdout and "wamid.[…]" in r.stdout and "[…]" in r.stdout
 
 

@@ -14,6 +14,10 @@ maskele() { sed -E 's/[0-9]{7,}/[…]/g; s/wamid\.[A-Za-z0-9=._-]+/wamid.[…]/g
 echo "== Portman durum · salt okunur · $(date '+%Y-%m-%d %H:%M:%S %Z') · alan: ${ALAN:-?}"
 echo "-- sürüm"
 echo "   guncel: $( [ -L "$KOK/guncel" ] && cat "$KOK/guncel/SURUM" 2>/dev/null || echo yok ) · onceki: $( [ -L "$KOK/onceki" ] && cat "$KOK/onceki/SURUM" 2>/dev/null || echo yok ) · sürüm dizinleri: $(ls -1d "$KOK/surumler"/*/ 2>/dev/null | wc -l)"
+echo "   perspektif (VTK, BK-07): $(cat "$KOK/guncel/PERSPEKTIF" 2>/dev/null || echo 'kayıt yok (bu sürümde denenmedi)')"
+echo "-- çekirdek (BK-07)"
+REBOOT_REQ="${PM_REBOOT_REQ:-/var/run/reboot-required}"; BOOT_DIR="${PM_BOOT_DIR:-/boot}"
+echo "   çalışan: $(uname -r) · kurulu en yeni: $(ls -1 "$BOOT_DIR"/vmlinuz-* 2>/dev/null | sed 's/.*vmlinuz-//' | sort -V | tail -1 || echo '?') · yeniden başlatma gerekli: $([ -f "$REBOOT_REQ" ] && echo evet || echo hayır) · açılış: $(uptime -s 2>/dev/null || echo '?')"
 echo "-- servisler"
 for s in portman-webhook portman-gonderici portman-agent portman-panel portman-yedek.timer portman-nabiz.timer nginx postgresql fail2ban; do
   printf '   %-22s %s\n' "$s" "$($SYSTEMCTL is-active "$s" 2>/dev/null || echo '?')"
