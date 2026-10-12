@@ -1,13 +1,14 @@
-# Yerel geliştirme ve test ortamı (bulut çalışma alanı; araclar/ortam_kur.sh bunu kurar). 30.09.2026'da bu sürümlerle sınandı; Python 3.11.
-# Sunucu sürümünün paketleri AYRI dosyadadır: vps/gereksinimler.txt (tam sabit; numpy 1.x, K19). vps/guncelle.sh yalnız onu kurar;
-# bu dosya sunucuya gitmez. İkisi 10.10.2026'da aynı sürümlerdir, yalnız numpy (yerel 2.4.6, sunucu 1.26.4) ve pytest (yalnız yerel) ayrılır.
+# Yerel geliştirme ve test ortamı (bulut çalışma alanı; araclar/ortam_kur.sh bunu kurar). Python 3.11.
+# Sunucu sürümünün paketleri AYRI dosyadadır: vps/gereksinimler.txt (tam sabit; Python 3.12). vps/guncelle.sh yalnız onu kurar; bu dosya
+# sunucuya gitmez. BK-07 (12.10.2026): ikisi aynı sürümlerdir (numpy 2.x dahil; K19 › Uygulanış 2); yalnız pytest (yalnız yerel) ve vtk
+# (yalnız sunucu; perspektif denemesi) ayrılır. Sürümler yerelde sunucu setiyle de doğrulandı (BK-07.md › Kanıt).
 ezdxf==1.4.4
 matplotlib==3.11.2
-numpy==2.4.6
+numpy==2.5.4
 pillow==12.3.0
-shapely==2.1.2
-PyMuPDF==1.26.0
-pydantic==2.13.5
+shapely==2.2.0
+PyMuPDF==1.28.2
+pydantic==2.14.1
 psycopg[binary]==3.3.6
-ifcopenshell==0.8.5
+ifcopenshell==0.9.0
 pytest==9.1.1

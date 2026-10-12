@@ -140,6 +140,12 @@ def test_guncelle_ikinci_surum_ve_geri_don(surum_ortam):
     assert (s9 / "beyin" / "testler" / "mesajlar.json").exists() and list((s9 / "beyin" / "testler").glob("cikarim_*.json"))
     assert os.readlink(kok / "guncel") == str(s9) and not (kok / "onceki").exists()
     assert "içe aktarma tamam" in out and "uygulanan göçler: [1, 2, 3, 4, 5]" in out and "sağlık: sürüm v2026.10.09, Postgres bağlı" in out and "etkin" in out
+    # BK-07 [3b]: sonuç ne olursa olsun sürüm etkin; PERSPEKTIF dosyasında (durum.sh okur). Test venv'inde vtk yoksa "denenmedi";
+    # vtk varsa ama OSMesa yoksa ayrı süreç çöker (sinyal 11) ve "ÇİZİLEMEDİ … pilot perspektifsiz" yazılır (bulut, 12.10).
+    pers = (s9 / "PERSPEKTIF").read_text()
+    assert "perspektif: " in out and (pers.startswith("VTK yok (denenmedi") or pers.startswith("ÇİZİLEMEDİ (") or pers.startswith("TAMAM (")), pers
+    if pers.startswith("ÇİZİLEMEDİ") or pers.startswith("VTK yok"):
+        assert "pilot perspektifsiz" in pers
     assert "stop portman-webhook portman-gonderici portman-agent portman-panel" in log.read_text() and "start portman-webhook" in log.read_text()
     assert sorgu(__import__("depo").Depo(dsn(surum_ortam["db"])), "SELECT max(surum) AS s FROM sema_surumu")[0]["s"] == 5
     assert surum_ortam["saglik"].istekler and surum_ortam["saglik"].istekler[0]["path"] == "/saglik"
@@ -644,9 +650,21 @@ def test_durum_sh_salt_okunur_ve_maskeli(tmp_path):
     assert "900000000101" not in r.stdout and "wamid.HBgL" not in r.stdout and "wamid.[…]" in r.stdout and "[…]" in r.stdout
 
 
+def test_perspektif_dene_vtk_yoksa_cizilemedi_kodu_2(tmp_path):
+    """BK-07: VTK yoksa tek satır 'ÇİZİLEMEDİ (VTK içe aktarılamadı …)' ve çıkış 2; guncelle.sh bunu ve çökmeyi (139) yorumlar.
+    VTK kuruluysa gerçek deneme burada koşturulmaz (OSMesa olmayan makinede segfault; bulut 12.10)."""
+    try:
+        import vtk  # noqa: F401
+        pytest.skip("vtk kurulu; deneme sunucuda guncelle.sh ile")
+    except ImportError:
+        pass
+    r = _kos("perspektif_dene.py", {}, str(tmp_path))
+    assert r.returncode == 2 and r.stdout.strip().startswith("ÇİZİLEMEDİ (VTK içe aktarılamadı") and not list(tmp_path.glob("*.png"))
+
+
 def test_betik_sozdizimi():
     for p in sorted(VPS.glob("*.sh")):
         r = subprocess.run(["bash", "-n", str(p)], capture_output=True, text=True)
         assert r.returncode == 0, (p.name, r.stderr)
-    for p in ("sir_koy.py", "panel_parola.py", "uyari_gonder.py"):
+    for p in ("sir_koy.py", "panel_parola.py", "uyari_gonder.py", "perspektif_dene.py"):
         assert subprocess.run([sys.executable, "-m", "py_compile", str(VPS / p)]).returncode == 0

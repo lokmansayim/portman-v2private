@@ -71,15 +71,16 @@ else
     "$HEDEF/venv/bin/pip" install -q --upgrade pip >/dev/null 2>&1 || true
     [ -f "$HEDEF/vps/gereksinimler.txt" ] || dur "vps/gereksinimler.txt yok (sunucu paket listesi; v2026.10.10 ve sonrası etiketlerde var)"
     "$HEDEF/venv/bin/pip" install -q --no-cache-dir -r "$HEDEF/vps/gereksinimler.txt" \
-      || dur "paketler kurulamadı (vps/gereksinimler.txt; tam sabit, numpy 1.x: K19); ağ ve pip çıktısı yukarıda"
+      || dur "paketler kurulamadı (vps/gereksinimler.txt; tam sabit; K19 › Uygulanış 2); ağ ve pip çıktısı yukarıda"
     [ -x "$HEDEF/venv/bin/gunicorn" ] || dur "gunicorn kurulmadı"
   fi
   VPY="$HEDEF/venv/bin/python"
-  "$VPY" - "$HEDEF" <<'PY' || dur "içe aktarma denetimi düştü; sürüm etkinleştirilmedi (K19 numpy notu: vps/gereksinimler.txt başı, docs/is_emirleri/IE-06.md › Riskler)"
+  "$VPY" - "$HEDEF" <<'PY' || dur "içe aktarma denetimi düştü; sürüm etkinleştirilmedi (numpy X86_V2 hatasıysa işlemci tipi değişmiş demektir: K19 › Uygulanış 2, geri dönüş numpy 1.26.4)"
 import sys
 kok = sys.argv[1]; sys.path[:0] = [kok, kok + "/kanal"]
 import numpy, ezdxf, fitz, shapely, psycopg, matplotlib, PIL, ifcopenshell, pydantic   # noqa
-# K19: içe aktarma yetmez, NumPy'nin derlenmiş çekirdeği bu işlemcide gerçekten çalışmalı (X86_V2 hatası ilk işlemde çıkar)
+# K19 (Uygulanış 2, BK-07): numpy 2.x; içe aktarma yetmez, derlenmiş çekirdek bu işlemcide gerçekten çalışmalı (X86_V2 hatası ilk
+# işlemde çıkar; işlemci tipi "host"tan geri alınırsa burada durur, sürüm etkinleşmez — güvenli duruş)
 a = numpy.arange(12, dtype=float).reshape(3, 4)
 iz = float((a @ a.T).trace()); kok2 = float(numpy.sqrt(numpy.array([16.0]))[0])
 assert abs(iz - 506.0) < 1e-9 and abs(kok2 - 4.0) < 1e-12, (iz, kok2)
@@ -88,6 +89,19 @@ print(f"   içe aktarma tamam: python {sys.version.split()[0]} · numpy {numpy._
       f" · pillow {PIL.__version__} · PyMuPDF {getattr(fitz, 'VersionBind', '?')} · shapely {shapely.__version__}"
       f" · psycopg {psycopg.__version__} · pydantic {pydantic.__version__} · ifcopenshell {ifcopenshell.version}")
 PY
+  echo "-- [3b/7] perspektif denemesi (BK-07: VTK ekransız çizebiliyor mu; AYRI süreç, en çok 60 sn; sonuç ne olursa olsun sürüm etkinleşir)"
+  if [ -f "$HEDEF/vps/perspektif_dene.py" ] && "$VPY" -c 'import vtk' >/dev/null 2>&1; then
+    RC=0; timeout 60 "$VPY" "$HEDEF/vps/perspektif_dene.py" /tmp > "$HEDEF/.perspektif_cikti" 2>/dev/null || RC=$?
+    PERS="$(tail -n 1 "$HEDEF/.perspektif_cikti" 2>/dev/null || true)"; rm -f "$HEDEF/.perspektif_cikti"
+    if [ "$RC" = "124" ]; then PERS="ÇİZİLEMEDİ (60 sn içinde bitmedi)"
+    elif [ "$RC" -ge 128 ] 2>/dev/null; then PERS="ÇİZİLEMEDİ (süreç çöktü, sinyal $((RC - 128)); libOSMesa/EGL kurulu değil: apt-get install libosmesa6, Lokman'ın onayıyla)"
+    elif [ -z "$PERS" ]; then PERS="ÇİZİLEMEDİ (çıktı yok, çıkış kodu $RC)"; fi
+    case "$PERS" in TAMAM*) ;; *) PERS="$PERS → pilot perspektifsiz (Lokman 11.10)" ;; esac
+  else
+    PERS="VTK yok (denenmedi; vps/gereksinimler.txt'te vtk yoksa ya da kurulmadıysa) → pilot perspektifsiz"
+  fi
+  echo "   perspektif: $PERS"
+  printf '%s · %s\n' "$PERS" "$(date '+%Y-%m-%d %H:%M:%S')" > "$HEDEF/PERSPEKTIF"
   date '+%Y-%m-%d %H:%M:%S' > "$HEDEF/KURULDU"
 fi
 VPY="$HEDEF/venv/bin/python"
