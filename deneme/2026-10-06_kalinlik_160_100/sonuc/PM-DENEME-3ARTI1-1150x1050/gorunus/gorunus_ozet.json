@@ -1,0 +1,101 @@
+{
+ "is_emri_no": "PM-DENEME-3ARTI1-1150x1050",
+ "dis_olcu_cm": [
+  1150.0,
+  1050.0
+ ],
+ "cati": {
+  "H0": 280.0,
+  "egim": 0.33,
+  "sacak": 30.0,
+  "topuk": 10.0,
+  "makas_ekseni": "y",
+  "aciklik": 1050.0,
+  "mahya_boyu": 1210.0,
+  "zs": 290.0,
+  "zm": 473.15,
+  "ust": 487.15
+ },
+ "sayim": {
+  "on": {
+   "pano": 9,
+   "ozel": 1,
+   "pencere": 3,
+   "kapi": 1
+  },
+  "arka": {
+   "pano": 9,
+   "ozel": 1,
+   "pencere": 3,
+   "kapi": 0
+  },
+  "sol": {
+   "pano": 9,
+   "ozel": 1,
+   "pencere": 0,
+   "kapi": 0
+  },
+  "sag": {
+   "pano": 9,
+   "ozel": 1,
+   "pencere": 2,
+   "kapi": 0
+  }
+ },
+ "toplam": {
+  "pano": 36,
+  "ozel": 4,
+  "pencere": 8,
+  "kapi": 1
+ },
+ "cephe_pano_boylari_cm": {
+  "on": [
+   125.5,
+   125.5,
+   125.5,
+   125.5,
+   125.5,
+   125.5,
+   125.5,
+   125.5,
+   114.0
+  ],
+  "arka": [
+   114.0,
+   125.5,
+   125.5,
+   125.5,
+   125.5,
+   125.5,
+   125.5,
+   125.5,
+   125.5
+  ],
+  "sol": [
+   30.0,
+   125.5,
+   125.5,
+   125.5,
+   125.5,
+   125.5,
+   125.5,
+   125.5,
+   125.5
+  ],
+  "sag": [
+   125.5,
+   125.5,
+   125.5,
+   125.5,
+   125.5,
+   125.5,
+   125.5,
+   125.5,
+   30.0
+  ]
+ },
+ "dosyalar": [
+  "Portman_PM-DENEME-3ARTI1-1150x1050_r01_gorunusler.pdf",
+  "Portman_PM-DENEME-3ARTI1-1150x1050_r01_gorunusler.png"
+ ]
+}

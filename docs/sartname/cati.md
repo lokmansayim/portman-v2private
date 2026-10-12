@@ -249,6 +249,8 @@ Katalog görsellerine göre tek bir kırma çatı, kapalı kısmı ve verandayı
 
 ## Açık sorular
 
+- Çatı seçenekleri (6 Ekim 2026, `deneme/2026-10-06_kalinlik_160_100/cati_secenekleri.py`): prefabrikte kırma çatının makas dizilimi nasıl? Tek eğimli, parapetli düz ve çok mahyalı çatı ürün olacak mı; olacaksa eğimleri ve dere kuralları ne? Bugünkü kuralla (eğim değişmez, %33) bu üçü kural dışı öneri olarak duruyor.
+
 - Lokman kiriş ve makasları "yaklaşık bir makasın ölçüsünden" verecek; o zamana kadar çatı çeliği motorun ortalamasıyla (mühendis, 4 Ekim 12:14: "şimdilik Excel hesaplama motoruna uy"; Lokman, 4 Ekim 15:18: "şimdilik motoru kastas al", motoru inceleyecek).
 - Kesim planının ölçüleri kaplamanın kapattığı genişliğe göre; panelin yan bindirme payı, kırma hattındaki yan pay ve boyuna kesimin payı ayrıca düşünülmedi. Kısa yüzlerde son şerit 10 cm kalıyor. Montajcıya verilecek pafta için gözden geçirilmeli; pafta, montaj paftası çalışmasında hazırlanacak (yükleme listesinden sonra; Lokman, 4 Ekim 17:46).
 - Cumbalı çatıda (ters mahya) açılım ve dizilim henüz yok.

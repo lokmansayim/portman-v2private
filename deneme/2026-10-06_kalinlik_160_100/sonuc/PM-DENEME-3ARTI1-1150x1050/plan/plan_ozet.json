@@ -1,0 +1,55 @@
+{
+ "is_emri_no": "PM-DENEME-3ARTI1-1150x1050",
+ "sayfa_pt": [
+  842.0,
+  595.0
+ ],
+ "olcek_pt_cm": 0.2379,
+ "olcek_1e": 119,
+ "zincirler_cm": {
+  "arka": [
+   518,
+   314,
+   318
+  ],
+  "on": [
+   518,
+   439,
+   193
+  ],
+  "sol": [
+   1050
+  ],
+  "sag": [
+   322,
+   314,
+   414
+  ]
+ },
+ "mahal_yazi_pt": {
+  "YASAM ALANI": 8.4,
+  "YATAK ODASI 1": 8.4,
+  "HOL": 8.4,
+  "YATAK ODASI 2": 8.4,
+  "YATAK ODASI 3": 8.4,
+  "E. BANYO": 7.11,
+  "BANYO": 8.4
+ },
+ "dis_olcu_cm": [
+  1150.0,
+  1050.0
+ ],
+ "mahal_m2": {
+  "YASAM ALANI": 51,
+  "YATAK ODASI 1": 18,
+  "HOL": 8,
+  "YATAK ODASI 2": 12,
+  "YATAK ODASI 3": 12,
+  "E. BANYO": 5,
+  "BANYO": 5
+ },
+ "dosyalar": [
+  "Portman_PM-DENEME-3ARTI1-1150x1050_r01_plan.pdf",
+  "Portman_PM-DENEME-3ARTI1-1150x1050_r01_plan.png"
+ ]
+}
