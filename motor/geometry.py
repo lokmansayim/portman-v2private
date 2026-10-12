@@ -20,6 +20,8 @@ T_DIS = 10.0         # dış duvar kalınlığı
 T_IC = 6.0           # iç duvar kalınlığı
 OUT = "__DIS__"      # bina dışı
 X_SON = Y_SON = None  # ölçüye kesimde son aksın yeri (cm); yoksa None
+_AKS = {"x": None, "y": None}   # İE-11: aks tabloları (cm; dizin = yarım pano adımı). None → tekdüze ızgara (formül)
+_AKS_ANA = {"x": None, "y": None}   # İE-11: ana akslar (tam pano aksları + ek akslar + uç); çizimde aks çizgileri ve ölçü zinciri
 
 PENCERE_OLCULERI = {"120x120": (120, 120), "120x180": (120, 180), "60x40": (60, 40)}
 KAPI_GENISLIK = {"ic_kapi": 82.0, "dis_kapi": 97.0, "gecis": 82.0}
@@ -75,15 +77,68 @@ def katman(ad: str) -> str:
 
 
 def X(i: float) -> float:
-    """Düşey aks: dış duvar iç yüzünden başlar (kısa kenar yönü, köşe 10 cm)."""
+    """Düşey aks: dış duvar iç yüzünden başlar (kısa kenar yönü, köşe 10 cm). Aks tablosu varsa oradan (İE-11)."""
+    if _AKS["x"] is not None:
+        return _AKS["x"][int(round(i * 2))]
     v = T_DIS + MOD * i
     return v if X_SON is None else min(v, X_SON)
 
 
 def Y(j: float) -> float:
-    """Yatay aks: ön duvar orta eksenidir (uzun kenar yönü, köşe 5 cm)."""
+    """Yatay aks: ön duvar orta eksenidir (uzun kenar yönü, köşe 5 cm). Aks tablosu varsa oradan (İE-11)."""
+    if _AKS["y"] is not None:
+        return _AKS["y"][int(round(j * 2))]
     v = T_DIS / 2.0 + MOD * j
     return v if Y_SON is None else min(v, Y_SON)
+
+
+def aks_tablosu_kur(ek_akslar, nx2: int, ny2: int, zorunlu: bool = False) -> tuple[int, int]:
+    """İE-11: `ek_akslar_cm` verilince (ya da zorunluysa) yarım adım aksları + ek akslardan sıralı aks tablosu kurar.
+    Dönen (nx2, ny2) tablo uzunluğudur. Tablo yokken Motor eskisi gibi formülle çalışır."""
+    global _AKS, _AKS_ANA
+    _AKS = {"x": None, "y": None}; _AKS_ANA = {"x": None, "y": None}
+    if not ek_akslar and not zorunlu:
+        return nx2, ny2
+    ek = ek_akslar or {}
+    yeni = {}; ana = {}
+    for yon, n2, f in (("x", nx2, X), ("y", ny2, Y)):
+        taban = [f(k / 2) for k in range(n2 + 1)]          # tablo henüz yok: formül (kesim dahil)
+        lo, hi = taban[0], taban[-1]
+        tab = list(taban)
+        for v in ek.get(yon) or []:
+            v = float(v)
+            if not (lo + 1e-6 < v < hi - 1e-6):
+                raise IsEmriHatasi(f"Ek aks ({yon}) yapının içinde değil: {v} cm (aralık {lo:g}–{hi:g})")
+            if not any(abs(v - t) < 1e-6 for t in tab):
+                tab.append(v)
+        yeni[yon] = sorted(tab)
+        ana[yon] = sorted(set([taban[k] for k in range(0, n2 + 1, 2)] + [taban[-1]] + [float(v) for v in (ek.get(yon) or [])]))
+    _AKS = yeni; _AKS_ANA = ana
+    return len(yeni["x"]) - 1, len(yeni["y"]) - 1
+
+
+def ana_akslar(yon: str):
+    """Tablo modunda ana akslar (tam pano aksları + ek akslar + uç), cm; tablo yoksa None (eski çizim yolu)."""
+    return None if _AKS_ANA[yon] is None else list(_AKS_ANA[yon])
+
+
+def aks_dizini(v: float, yon: str) -> int:
+    """cm değerinin aks tablosundaki dizini; aks üstünde değilse hata (sessiz yuvarlama yok, K21)."""
+    tab = _AKS[yon]
+    for k, t in enumerate(tab):
+        if abs(t - float(v)) < 1e-6:
+            return k
+    raise IsEmriHatasi(f"Sınır aks üstünde değil ({yon} = {v} cm); `yapi.ek_akslar_cm` ile ekleyin. Akslar: {[round(t, 2) for t in tab]}")
+
+
+def _ayna_aciklik(ac: dict) -> dict:
+    """Dizilim arka-sol: İş Emri gerçek cepheleri yazar; Motor y'de aynalı kurar → ön ↔ arka ve menteşe sol ↔ sağ çevrilir."""
+    a = dict(ac)
+    if a.get("duvar") in ("on", "arka"):
+        a["duvar"] = "arka" if a["duvar"] == "on" else "on"
+    if a.get("mentese") in ("sol", "sag"):
+        a["mentese"] = "sag" if a["mentese"] == "sol" else "sol"
+    return a
 
 
 @dataclass
@@ -110,6 +165,7 @@ class Acilim:
     icine_normal: Optional[str] = None
     varyant: Optional[str] = None
     alan_kime: Optional[str] = None  # geçiş boşluğunun alanı hangi mahale yazılır
+    dograma: Optional[str] = None    # İE-11: None | "alıcıya ait"
 
 
 @dataclass
@@ -188,6 +244,7 @@ class HBaglanti:
     x: float
     y: float
     rot: float
+    tur: str = "ic"                  # İE-11: "ic" (60) | "dis" (dış duvardaki T; 100×60)
 
 
 @dataclass
@@ -243,7 +300,24 @@ def kur(is_emri: dict) -> Plan:
     if abs(nx2 - nx * 2) > 1e-9 or abs(ny2 - ny * 2) > 1e-9 or nx < 2 or ny < 2:
         raise IsEmriHatasi("Grid yarım pano adımında ve en az 2×2 olmalı")
     olcu_ayarla(yapi.get("dis_olcu_cm"), nx, ny)
-    W, H = (MOD * nx + 2.0 * T_DIS, MOD * ny + T_DIS) if X_SON is None else (X_SON + T_DIS, Y_SON + T_DIS / 2.0)
+    # İE-11: dizilim başlangıcı ve aks tablosu
+    dizilim = yapi.get("dizilim") or {}
+    baslangic = dizilim.get("baslangic", "on-sol")
+    if baslangic not in ("on-sol", "arka-sol"):
+        raise IsEmriHatasi(f"dizilim.baslangic bilinmiyor: {baslangic} (on-sol | arka-sol)")
+    ayna_y = baslangic == "arka-sol"
+    hiza = dizilim.get("hiza", "kosu")                     # İE-11: "kosu" (koşu başından 125,5; eski) | "izgara" (ızgara akslarına hizalı)
+    if hiza not in ("kosu", "izgara"):
+        raise IsEmriHatasi(f"dizilim.hiza bilinmiyor: {hiza} (kosu | izgara)")
+    dis_t_bolme = bool(dizilim.get("dis_duvar_t_bolme", False))   # İE-11: dış duvar iç T'de bölünür, oraya dış üçlü H
+    konum_cm_var = any("konum_cm" in m for m in is_emri["mahaller"])
+    nx2, ny2 = aks_tablosu_kur(yapi.get("ek_akslar_cm"), nx2, ny2, zorunlu=ayna_y or konum_cm_var)
+    tablo = _AKS["x"] is not None
+    if tablo:
+        nx, ny = nx2 / 2.0, ny2 / 2.0
+        W, H = X(nx) + T_DIS, Y(ny) + T_DIS / 2.0
+    else:
+        W, H = (MOD * nx + 2.0 * T_DIS, MOD * ny + T_DIS) if X_SON is None else (X_SON + T_DIS, Y_SON + T_DIS / 2.0)
     dis_v_konum = yapi.get("dis_dusey_duvar", "aks_disinda")   # 'aks_disinda' (v1.4.3 son örnek) | 'eksende' (eski 6×8)
     uyarilar = []
 
@@ -254,7 +328,18 @@ def kur(is_emri: dict) -> Plan:
         ad = m["ad"]
         if ad in mahaller:
             raise IsEmriHatasi(f"Mahal adı tekrar ediyor: {ad}")
-        mh = Mahal(ad=ad, tur=m["tur"], rects=[list(map(float, r)) for r in m["konum_pano"]], acik=(m["tur"] in ACIK_MAHAL_TURLERI))
+        if "konum_cm" in m:                                   # İE-11: cm sınırlar (akslar; dış yüzlerden)
+            rects = [[aks_dizini(r[0], "x") / 2, aks_dizini(r[1], "y") / 2, aks_dizini(r[2], "x") / 2, aks_dizini(r[3], "y") / 2] for r in m["konum_cm"]]
+        elif tablo:                                           # pano birimi → cm → tablo dizini
+            rects = []
+            for r in m["konum_pano"]:
+                cm = [T_DIS + MOD * float(r[0]), T_DIS / 2.0 + MOD * float(r[1]), T_DIS + MOD * float(r[2]), T_DIS / 2.0 + MOD * float(r[3])]
+                if X_SON is not None: cm[0], cm[2] = min(cm[0], X_SON), min(cm[2], X_SON)
+                if Y_SON is not None: cm[1], cm[3] = min(cm[1], Y_SON), min(cm[3], Y_SON)
+                rects.append([aks_dizini(cm[0], "x") / 2, aks_dizini(cm[1], "y") / 2, aks_dizini(cm[2], "x") / 2, aks_dizini(cm[3], "y") / 2])
+        else:
+            rects = [list(map(float, r)) for r in m["konum_pano"]]
+        mh = Mahal(ad=ad, tur=m["tur"], rects=rects, acik=(m["tur"] in ACIK_MAHAL_TURLERI))
         for rect in mh.rects:
             for cell in _cells_of_rect(rect):
                 u, v = cell
@@ -416,10 +501,10 @@ def kur(is_emri: dict) -> Plan:
                 stop_at_face(d, uc, o); d.uc_notu[uc] = f"T→{o.id}"
             t = thr[0]
             branches = [(d, uc) for d, uc in ends if d.tur == "ic" and d.yon != t.yon]
-            if t.tur == "ic" and len(branches) == 1 and len(thr) == 1:
+            if (t.tur == "ic" or dis_t_bolme) and len(branches) == 1 and len(thr) == 1:
                 d, uc = branches[0]
-                if d.yon == "x": h_bag.append(HBaglanti(d.a0 if uc == 0 else d.a1, d.c, 0.0 if uc == 0 else 180.0))
-                else:            h_bag.append(HBaglanti(d.c, d.a0 if uc == 0 else d.a1, 90.0 if uc == 0 else 270.0))
+                if d.yon == "x": h_bag.append(HBaglanti(d.a0 if uc == 0 else d.a1, d.c, 0.0 if uc == 0 else 180.0, t.tur))
+                else:            h_bag.append(HBaglanti(d.c, d.a0 if uc == 0 else d.a1, 90.0 if uc == 0 else 270.0, t.tur))
             continue
         ext = [(d, uc) for d, uc in ends if d.tur == "dis"]
         ic = [(d, uc) for d, uc in ends if d.tur == "ic"]
@@ -448,7 +533,7 @@ def kur(is_emri: dict) -> Plan:
     # ---------------- pano ayrıştırma
     for d in duvarlar:
         splits = []
-        if d.tur == "ic":
+        if d.tur == "ic" or dis_t_bolme:
             for (u, v), lst in ends_at.items():
                 if d.yon == "x" and v == d.hat and d.n0 < u < d.n1 and any(o.yon != d.yon for o, _ in lst):
                     splits.append(X(u / 2))
@@ -457,6 +542,17 @@ def kur(is_emri: dict) -> Plan:
         marks = sorted(set([d.a0, d.a1] + splits))
         sinirlar = []
         for s0, s1 in zip(marks, marks[1:]):
+            if hiza == "izgara":                                  # İE-11 (PK-01 paftası): segment başı yarım ızgaradaysa koşu başından
+                bas = T_DIS if d.yon == "x" else T_DIS / 2.0       # 125,5; değilse önce bir sonraki tam aksa kadar parça, sonra 125,5
+                yarim = (s0 - bas) / (MOD / 2.0)
+                if abs(yarim - round(yarim)) < 1e-6:
+                    k = math.ceil((s1 - s0) / MOD - 1e-9)
+                    sinirlar += [s0 + MOD * i for i in range(1, k)]
+                else:
+                    v = bas + MOD * (math.floor((s0 - bas) / MOD + 1e-9) + 1)
+                    while v < s1 - 1e-9:
+                        sinirlar.append(v); v += MOD
+                continue
             k = math.ceil((s1 - s0) / MOD - 1e-9)
             sinirlar += [s0 + MOD * i for i in range(1, k)]
         sinirlar += splits
@@ -470,7 +566,8 @@ def kur(is_emri: dict) -> Plan:
 
     # ---------------- açıklıklar
     NORMAL = {"sol": "-x", "sag": "+x", "on": "-y", "arka": "+y"}
-    for ac in is_emri.get("acikliklar", []):
+    acikliklar = [(_ayna_aciklik(a) if ayna_y else a) for a in is_emri.get("acikliklar", [])]
+    for ac in acikliklar:
         tur = ac["tur"]
         if tur == "pencere":
             if ac["olcu"] not in PENCERE_OLCULERI:
@@ -524,10 +621,13 @@ def kur(is_emri: dict) -> Plan:
             raise IsEmriHatasi(f"Açıklık panodan geniş: {ac} (pano {p.boy})")
         if tur != "pencere":
             acl.icine_normal = _normal_from_to(d, a, b)
+        acl.dograma = ac.get("dograma")           # İE-11: "alıcıya ait" → boşluk var, doğrama listeye girmez
         p.acilim = acl
 
     # ---------------- veranda dikmeleri (İş Emri'nde cm konum: sol-alt köşe, 10×10)
     dikmeler = [(float(x), float(y), float(x) + 10.0, float(y) + 10.0) for x, y in is_emri.get("dikmeler", [])]
+    if ayna_y:
+        dikmeler = [(x0, H - y1, x1, H - y0) for (x0, y0, x1, y1) in dikmeler]
 
     # ---------------- açık sınırlar ve net alanlar
     acik_sinir_cizgileri = []
@@ -589,7 +689,49 @@ def kur(is_emri: dict) -> Plan:
         m.alan_m2 = poly.area / 10000.0
 
     profil = [(x0, y0, x1, y1) for (x0, y0, x1, y1, *_r) in acik_kenarlar]
-    return Plan(nx, ny, W, H, mahaller, duvarlar, koseler, h_bag, dikmeler, profil, acik_sinir_cizgileri, uyarilar, is_emri)
+    plan = Plan(nx, ny, W, H, mahaller, duvarlar, koseler, h_bag, dikmeler, profil, acik_sinir_cizgileri, uyarilar, is_emri)
+    if ayna_y:
+        _aynala_y(plan)
+    return plan
+
+
+def _aynala_y(plan: "Plan") -> None:
+    """İE-11, dizilim arka-sol: Motor y'yi arka duvardan saydı; Plan gerçek yöne (ön altta) çevrilir. Pano boyları ve sayıları
+    değişmez; yalnız konumlar y → H − y, normaller ±y, H açıları 90 ↔ 270, aks tablosu tersine."""
+    global _AKS, _AKS_ANA
+    from shapely import affinity
+    H = plan.H; ny2 = int(round(plan.ny * 2))
+    def ny_(v):
+        return {"+y": "-y", "-y": "+y"}.get(v, v)
+    for d in plan.duvarlar:
+        if d.yon == "x":
+            d.c = H - d.c; d.hat = ny2 - d.hat
+            d.edges = [(k, b, a) for (k, a, b) in d.edges]
+            for p in d.panolar:
+                if p.acilim:
+                    p.acilim.disari_normal = ny_(p.acilim.disari_normal); p.acilim.icine_normal = ny_(p.acilim.icine_normal)
+        else:
+            d.p0, d.p1 = H - d.p1, H - d.p0
+            d.n0, d.n1 = ny2 - d.n1, ny2 - d.n0
+            d.edges = [(ny2 - 1 - k, a, b) for (k, a, b) in d.edges][::-1]
+            d.uc_notu = {1 - uc: n for uc, n in d.uc_notu.items()}
+            for p in d.panolar:
+                p.a0, p.a1 = H - p.a1, H - p.a0
+            d.panolar.reverse()
+    plan.koseler = [Kose((x0, H - y1, x1, H - y0), k.tur) for k in plan.koseler for (x0, y0, x1, y1) in [k.rect]]
+    plan.h_baglantilar = [HBaglanti(h.x, H - h.y, {90.0: 270.0, 270.0: 90.0}.get(h.rot, h.rot), h.tur) for h in plan.h_baglantilar]
+    plan.dikmeler = [(x0, H - y1, x1, H - y0) for (x0, y0, x1, y1) in plan.dikmeler]
+    plan.acik_kenarlar = [(x0, H - y0, x1, H - y1) for (x0, y0, x1, y1) in plan.acik_kenarlar]
+    plan.acik_sinir_cizgileri = [(x0, H - y0, x1, H - y1) for (x0, y0, x1, y1) in plan.acik_sinir_cizgileri]
+    for m in plan.mahaller.values():
+        if m.poly is not None and not m.poly.is_empty:
+            m.poly = affinity.scale(m.poly, xfact=1.0, yfact=-1.0, origin=(0.0, H / 2.0))
+        m.rects = [[x0, ny2 / 2.0 - y1, x1, ny2 / 2.0 - y0] for (x0, y0, x1, y1) in m.rects]
+        m.cells = {(u, ny2 - 1 - v) for (u, v) in m.cells}
+    if _AKS["y"] is not None:
+        _AKS["y"] = [H - v for v in reversed(_AKS["y"])]
+    if _AKS_ANA["y"] is not None:
+        _AKS_ANA["y"] = [H - v for v in reversed(_AKS_ANA["y"])]
 
 
 def _acik_strip(k, yon, hat, a, b, sahip, h, cizgiler, ekle, cikar):

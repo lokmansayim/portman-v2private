@@ -83,11 +83,13 @@ class Katalog:
     def baglanti(self, tur: str) -> str:
         """tur: 'ic_kose' (30×60) | 'dis_kose' (100×50) | 'uclu_h' | 'dikme'"""
         td, ti = round(self.t_dis_cm * 10, 1), round(self.t_ic_cm * 10, 1)
-        keys = {"ic_kose": ("B", (ti / 2, ti)), "dis_kose": ("B", (td / 2, td)), "uclu_h": ("B", (ti,)), "dikme": ("B", (100.0, 100.0))}
+        keys = {"ic_kose": ("B", (ti / 2, ti)), "dis_kose": ("B", (td / 2, td)), "uclu_h": ("B", (ti,)), "dikme": ("B", (100.0, 100.0)),
+                "uclu_h_dis": ("B", (td, ti))}   # İE-11: dış duvardaki T (3'lü H dış)
         key = keys[tur]
         if key in self._index: return self._index[key]
         labels = {"ic_kose": (f"{ti:g}×{ti / 2:g} iç köşe bağlantısı", [ti / 2, ti, None]), "dis_kose": (f"{td:g}×{td / 2:g} köşe bağlantısı", [td / 2, td, None]),
-                  "uclu_h": (f"Üçlü H bağlantı {ti:g}", [ti, None, None]), "dikme": ("Veranda dikmesi", [100, 100, None])}
+                  "uclu_h": (f"Üçlü H bağlantı {ti:g}", [ti, None, None]), "dikme": ("Veranda dikmesi", [100, 100, None]),
+                  "uclu_h_dis": (f"Üçlü H bağlantı dış {td:g}×{ti:g}", [td, ti, None])}
         lab, dims = labels[tur]
         return self._tahsis("B", key, lab, "Bağlantı ve veranda", dims)
 
