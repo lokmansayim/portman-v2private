@@ -126,7 +126,7 @@ def test_patron_mesaji_is_acar_satir_feature_php_bicimindedir(app, depo):
     assert (r["gonderen"], r["bayi_kod"], r["tur"], r["metin"], r["alinti_id"], r["sahiplenildi"], r["kaynak"]) == (NUMARA_P, "PATRON", "text", "P6001 aynalı olsun", "wamid.ONCEKI1", True, "vps")
     ham = r["ham"]
     assert set(ham) == BEKLENEN_ALANLAR
-    assert ham["role"] == "patron" and ham["bayi"] == {"kod": "PATRON", "ad": "Patron", "firma": "PortatifEv", "rol": "patron"}
+    assert ham["role"] == "patron" and ham["bayi"] == {"kod": "PATRON", "ad": "Patron", "firma": "PortatifEv", "rol": "patron", "numara": NUMARA_P}   # İE-08 D-09: kart numarası
     assert ham["name"] == "Deneme Patron" and ham["source"] == "Meta imzalı webhook" and ham["phone_number_id"] == PNID and ham["mode"] == "patron"
     assert ham["state"] == "queued" and ham["reply_id"] is None and ham["media_id"] is None
     assert tek(depo, "SELECT durum FROM isler")["durum"] == "sirada" and depo.acik_is_sayisi() == 1
