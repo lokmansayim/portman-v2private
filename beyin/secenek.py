@@ -42,6 +42,8 @@ def uygun_adaylar(katalog, ts: dict) -> list[dict]:
             continue
         if yapi == "celik" and a.get("yapi_turu", "prefabrik") != "celik":
             continue
+        if yapi != "celik" and a.get("yapi_turu", "prefabrik") == "celik":
+            continue                                                   # İE-08: yapı türü "çelik" denmedikçe çelik aday sunulmaz (prefabrik akışı değişmez; geometri hakemi 12.10)
         if yapi == "prefabrik" and a.get("yapi_turu", "prefabrik") != "prefabrik":
             continue
         if kat and a.get("kat") and int(a["kat"]) != int(kat):        # İE-08: "tek kat / çift kat" söylendiyse kat süzgeci (İE-07 kat kuralı gibi)

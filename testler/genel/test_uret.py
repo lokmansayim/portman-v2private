@@ -93,15 +93,15 @@ def test_bilgi_antette_ad_ve_numara_manifestte_yok(tmp_path):
     # D-09 (PR-2): zarfın `bilgi`si antete bayinin adı ve kart numarasını yazar; manifest ve validation değerleri taşımaz (yalnız bilgi_var);
     # hata iletisine `bilgi` değerleri girmez (_bilgisiz). Numara ve ad test verisidir.
     import fitz
-    bilgi = {"bayi_adi": "Deneme Bayi", "bayi_telefonu": "905000000001", "sevk_adresi": "Deneme İlçesi", "ozel_istekler": ["çatı antrasit"]}
+    bilgi = {"bayi_adi": "Deneme Bayi", "bayi_telefonu": "900000000555", "sevk_adresi": "Deneme İlçesi", "ozel_istekler": ["çatı antrasit"]}
     m = uret.uret(TANIM, tmp_path, is_emri_no="PM-TEST-1", revizyon=2, set_yolu=SET, yontem="panel", perspektif=False, bayi=True, bilgi=bilgi)
     assert m["passed"] and m["bilgi_var"] is True
     with fitz.open(tmp_path / "C8201_pafta.pdf") as d:
         s1 = [w[4] for w in d[0].get_text("words")]
-    assert "Deneme" in s1 and "Bayi" in s1 and "905000000001" in s1 and "r02" in s1 and "antrasit" in s1
+    assert "Deneme" in s1 and "Bayi" in s1 and "900000000555" in s1 and "r02" in s1 and "antrasit" in s1
     for dosya in ("manifest.json", "validation.json", "uret.log"):
-        assert "905000000001" not in (tmp_path / dosya).read_text(encoding="utf-8")
-    assert uret._bilgisiz("hata: 905000000001 / Deneme Bayi", bilgi) == "hata: [bilgi] / [bilgi]"
+        assert "900000000555" not in (tmp_path / dosya).read_text(encoding="utf-8")
+    assert uret._bilgisiz("hata: 900000000555 / Deneme Bayi", bilgi) == "hata: [bilgi] / [bilgi]"
 
 
 def test_gecersiz_tanimda_kayit_yazilir(tmp_path):

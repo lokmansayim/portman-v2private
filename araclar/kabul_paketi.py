@@ -29,7 +29,7 @@ def kisa_parcalar_md(kod: str, gosterim: str, ozet: dict) -> str:
     if not n:
         s.append("Bu modelde 15 cm ve daha kısa parça yok.")
     else:
-        s += ["| Zincir | Zincir başından konum (cm) | Parça (cm) |", "|---|---|---|"]
+        s += ["| Zincir | Parçanın bitiş konumu (zincir başından, cm) | Parça (cm) |", "|---|---|---|"]
         s += [f"| {x['zincir']} | {x['konum_cm']:g} | {x['parca_cm']:g} |" for x in n]
     s += ["", f"Bayi paftasındaki zincirler (cm): " + "; ".join(f"{k}: {v}" for k, v in (ozet.get("zincirler_cm") or {}).items()),
           f"Dış ölçü (dış yüzden): {ozet.get('dis_olcu_cm')} · brüt oturum {ozet.get('oturum_m2')} m²", ""]
@@ -44,7 +44,8 @@ def main(argv: list[str] | None = None) -> int:
     from motor.genel import uret as U
     adaylar_yolu = KOK / "beyin" / "veri" / "adaylar.json"
     adaylar = [x for x in json.loads(adaylar_yolu.read_text(encoding="utf-8")) if x.get("motor") == "genel"] if adaylar_yolu.exists() else []
-    istenen = {k.strip().upper().replace("-", "") for k in a.kodlar.split(",") if k.strip()}
+    from beyin.katalog import Katalog
+    istenen = {Katalog.kod_normalize(k) for k in a.kodlar.split(",") if k.strip()}
     if istenen:
         adaylar = [x for x in adaylar if str(x["kod"]).upper() in istenen]
     if not adaylar:
@@ -83,7 +84,7 @@ def main(argv: list[str] | None = None) -> int:
          "İE-08 8a (D-08 madde 4, D-10). Yedi model genel motorla (Yapı Tanımı 0.5, kural kitabı) çizildi. Her klasörde: bayi paftası PDF",
          "(`*_pafta.pdf`, 2 sayfa; 8b kabulüne kadar TASLAK), çizim seti (plan, görünüşler, pafta, perspektifler), bayi görseli (`*_bayi_gorsel.png`),",
          "yükleme listesi (`*_yukleme.md/.json`), IFC ve `KISA_PARCALAR.md` (bayi paftasında komşusuna katılan ≤ 15 cm parçalar; kontrol notu).",
-         "Çizimler taslaktır, üretim projesi değildir. Paket kişi adı taşımaz; mühendisin adı yalnız kabul betiğinin komut satırında.", "",
+         "Çizimler taslaktır, üretim projesi değildir. Paket bayi ve müşteri adı ya da numara taşımaz (antet \"...\"); mühendisin adı yalnız kabul betiğinin komut satırında.", "",
          "| Kod | Model | Oda | Brüt oturum (m²) | Kapalı (m²) | Veranda (m²) | Çatı | Liste satırı | Kısa parça notu | Doğrulama |", "|---|---|---|---|---|---|---|---|---|---|"]
     for kod, gosterim, x, v, n_kisa, sure, m in satirlar:
         ad = "" if x.get("musteri_projesi") else (x.get("sunum") or {}).get("ad", "")

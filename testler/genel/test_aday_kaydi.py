@@ -23,7 +23,9 @@ def test_yedi_aday_alanlari():
         assert Katalog.kod_normalize(json.loads(tanim.read_text(encoding="utf-8"))["kod"]) == kod == Katalog.kod_normalize(a["gosterim"])
         gorsel = KOK / "is_emri" / a["gorsel"]
         assert gorsel.exists() and 0 < gorsel.stat().st_size <= 5 * 1024 * 1024 and a["gorsel"] == f"adaylar/{kod.replace('Ç', 'C')}.png"   # dosya adı ASCII
-        assert a["katalog_m2"] > 0 and abs(a["katalog_m2"] - a["kapali_m2"] - a["veranda_m2"]) < 0.02
+        # katalog_m2 listedeki bina_m2 (tam sayıya yuvarlı brüt oturum); kapalı = yuvarlanmamış oturum − net veranda (K16; geometri hakemi 12.10)
+        assert a["katalog_m2"] > 0 and abs(a["ozet"]["oturum_m2"] - a["kapali_m2"] - a["veranda_m2"]) < 0.02
+        assert abs(a["katalog_m2"] - a["ozet"]["oturum_m2"]) <= 0.5 and a["katalog_m2"] == round(a["ozet"]["oturum_m2"])
         assert a["ozet"]["kural_seti"] == "kurallar.json" and a["ozet"]["liste_satir"] > 50
         assert a["kaynak"]["dogrulama"].startswith("çizim seti")
 
@@ -46,3 +48,11 @@ def test_katalogda_gorunurluk_kabul_kumesine_bagli():
     assert [a for a in hic.gorunur_adaylar() if a.get("motor") == "genel"] == [] and hic.aday("Ç8801") is None
     uc = Katalog(kabul_edilmis={"Ç8801", "Ç8801K", "Ç8801L"})
     assert {a["kod"] for a in uc.gorunur_adaylar()} == {"Ç8801", "Ç8801K", "Ç8801L"} and uc.aday("c8801-k")["kod"] == "Ç8801K"
+
+
+def test_kod_bicimi_celik_varyant_prefabrik_degismez():
+    # çelik varyant harfi ve KT kodu normalize olur; prefabrik kodda harf eki yoktur, bugünkü davranış aynen (geometri hakemi 12.10)
+    assert Katalog.kod_normalize("Ç8801-K") == "Ç8801K" == Katalog.kod_normalize("c8801 k") and Katalog.kod_normalize("KT-01") == "KT01"
+    assert Katalog.kod_normalize("6001") == "P6001" and Katalog.kod_normalize("P6001-A") == "P6001-A"
+    assert Katalog.taban_kod("Ç8801L") == "Ç8801" and Katalog.taban_kod("P6001") == "P6001" and Katalog.taban_kod("KT01") == "KT01"
+    assert Katalog.taban_kod("P6001") != Katalog.taban_kod("P7401")

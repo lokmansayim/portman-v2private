@@ -18,8 +18,9 @@ sys.path.insert(0, str(KOK)); sys.path.insert(0, str(KOK / "kanal"))
 
 
 def kod_normalize(s: str) -> str:
-    t = s.strip().upper().replace("-", "").replace(" ", "")
-    return t.replace("C", "Ç", 1) if re.fullmatch(r"C\d{4}[A-Z]?", t) else t
+    """Tek kaynak: `beyin.katalog.Katalog.kod_normalize` (Ç8801-K → Ç8801K, C8801K → Ç8801K, KT-01 → KT01)."""
+    from beyin.katalog import Katalog
+    return Katalog.kod_normalize(s) or s.strip().upper()
 
 
 def kabul_kayitlari(adaylar: list[dict], kodlar: list[str], kim: str, tarih: str, not_: str, paket: str) -> tuple[list[dict], list[str]]:

@@ -3,15 +3,17 @@
 # gördükten sonra, yalnız kabul ettiği kodlar Postgres `adaylar` tablosuna 'gecerli' + muhendis_kabulu{kim, tarih, not} ile yazılır;
 # kabul edilmeyen aday yazılmaz, bayiye sunulmaz. Mühendisin adı yalnız komut satırından gelir; depoya (git), günlüğe ve çıktıya girmez.
 # Canlı değişikliktir: Lokman'ın ayrı onayıyla, PR-2a birleşip sürüm güncellendikten sonra, canlı A2 denemesinden önce koşar.
-#   ssh portman-vps 'bash -s' -- "Ç8801,Ç8801K,Ç8801L,Ç8201,KT01,KT02,KT03" "<mühendisin adı>" "2026-10-13" "<notu>" "<paket tarihi>" < vps/ie08_adaylar.sh
+#   ssh portman-vps 'bash -s -- "Ç8801,Ç8801K,Ç8801L,Ç8201,KT01,KT02,KT03" "Ad Soyad" 2026-10-13 "mühendisin notu" "2026-10-13"' < vps/ie08_adaylar.sh
+#   (tırnaklar uzak kabuğun komut dizesinin İÇİNDE olmalı: ssh argümanları boşlukla birleştirir, iki sözcüklü ad bölünür.)
 #   ... "--kuru" ile başlayan ilk argüman: yazmadan ne yazılacağını söyler.
 # Sınama: PM_KOK, PM_ETC, PM_PYTHON (venv yerine), PM_PG_DSN (env dosyası yerine).
 set -uo pipefail
 KURU=""
 if [ "${1:-}" = "--kuru" ]; then KURU="--kuru"; shift; fi
 KODLAR="${1:-}"; KIM="${2:-}"; TARIH="${3:-$(date +%Y-%m-%d)}"; NOT="${4:-}"; PAKET="${5:-}"
-KOK="${PM_KOK:-/opt/portman}"; ETC="${PM_ETC:-/etc/portman}"
 dur() { echo "DUR: $*" >&2; exit 1; }
+[[ "$TARIH" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] || dur "3. argüman tarih değil (YYYY-AA-GG); ad iki sözcükse tırnaklar uzak komut dizesinin içinde olmalı (yukarıdaki örnek)"
+KOK="${PM_KOK:-/opt/portman}"; ETC="${PM_ETC:-/etc/portman}"
 [ -n "$KODLAR" ] || dur "kabul edilen kod listesi boş (örn. Ç8801,Ç8801K,Ç8801L)"
 [ -n "$KIM" ] || dur "mühendisin adı boş"
 GUNCEL="$KOK/guncel"; [ -d "$GUNCEL/araclar" ] || GUNCEL="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")/.." 2>/dev/null && pwd)"

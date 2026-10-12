@@ -12,7 +12,7 @@
   "kat": 1,
   "oda_programi": "2+1",
   "katalog_m2": 88.0,
-  "kapali_m2": 74.27,
+  "kapali_m2": 74.33,
   "veranda_m2": 13.73,
   "varyantlar": [
    "Ç8801K",
@@ -20,7 +20,7 @@
   ],
   "musteri_projesi": false,
   "sunum": {
-   "cati_adi": "beşik + cumba",
+   "cati_adi": "Beşik + cumba",
    "ad": "Tek kat çelik, 2+1, 88 m² (katalog)"
   },
   "ozet": {
@@ -28,7 +28,7 @@
     1024.0,
     860.0
    ],
-   "oturum_m2": 88.0,
+   "oturum_m2": 88.06,
    "odalar": {
     "Yaşam Alanı": 21.34,
     "Mutfak": 10.05,
@@ -66,12 +66,12 @@
   "kat": 1,
   "oda_programi": "2+1",
   "katalog_m2": 88.0,
-  "kapali_m2": 74.27,
+  "kapali_m2": 74.33,
   "veranda_m2": 13.73,
   "varyantlar": [],
   "musteri_projesi": false,
   "sunum": {
-   "cati_adi": "beşik + cumba, doğu ucu kırma",
+   "cati_adi": "Beşik + cumba, doğu ucu kırma",
    "ad": "Tek kat çelik, 2+1, 88 m² (Ç8801'in çatı varyantı K: doğu ucu kırma)"
   },
   "ozet": {
@@ -79,7 +79,7 @@
     1024.0,
     860.0
    ],
-   "oturum_m2": 88.0,
+   "oturum_m2": 88.06,
    "odalar": {
     "Yaşam Alanı": 21.34,
     "Mutfak": 10.05,
@@ -117,7 +117,7 @@
   "kat": 1,
   "oda_programi": "2+1",
   "katalog_m2": 88.0,
-  "kapali_m2": 74.27,
+  "kapali_m2": 74.33,
   "veranda_m2": 13.73,
   "varyantlar": [],
   "musteri_projesi": false,
@@ -130,7 +130,7 @@
     1024.0,
     860.0
    ],
-   "oturum_m2": 88.0,
+   "oturum_m2": 88.06,
    "odalar": {
     "Yaşam Alanı": 21.34,
     "Mutfak": 10.05,
@@ -168,12 +168,12 @@
   "kat": 1,
   "oda_programi": "2+1",
   "katalog_m2": 82.0,
-  "kapali_m2": 63.77,
+  "kapali_m2": 63.82,
   "veranda_m2": 18.23,
   "varyantlar": [],
   "musteri_projesi": false,
   "sunum": {
-   "cati_adi": "kirma",
+   "cati_adi": "Kırma",
    "ad": "Tek kat çelik, 2+1, 82 m²"
   },
   "ozet": {
@@ -181,7 +181,7 @@
     1094.0,
     750.0
    ],
-   "oturum_m2": 82.0,
+   "oturum_m2": 82.05,
    "odalar": {
     "Yatak Odası 1": 11.92,
     "Yatak Odası 2": 11.92,
@@ -218,12 +218,12 @@
   "kat": 1,
   "oda_programi": "2+1",
   "katalog_m2": 99.0,
-  "kapali_m2": 87.61,
+  "kapali_m2": 87.27,
   "veranda_m2": 11.39,
   "varyantlar": [],
   "musteri_projesi": true,
   "sunum": {
-   "cati_adi": "besik_cumba",
+   "cati_adi": "Beşik + cumba",
    "ad": ""
   },
   "ozet": {
@@ -231,7 +231,7 @@
     1221.0,
     910.0
    ],
-   "oturum_m2": 99.0,
+   "oturum_m2": 98.66,
    "odalar": {
     "Yatak Odası 1": 10.53,
     "Banyo": 3.81,
@@ -268,12 +268,12 @@
   "kat": 1,
   "oda_programi": "2+1",
   "katalog_m2": 92.0,
-  "kapali_m2": 72.95,
+  "kapali_m2": 73.22,
   "veranda_m2": 19.05,
   "varyantlar": [],
   "musteri_projesi": true,
   "sunum": {
-   "cati_adi": "kirma",
+   "cati_adi": "Kırma",
    "ad": ""
   },
   "ozet": {
@@ -281,7 +281,7 @@
     922.7,
     1170.0
    ],
-   "oturum_m2": 92.0,
+   "oturum_m2": 92.27,
    "odalar": {
     "Yatak Odası 1": 13.97,
     "Yatak Odası 2": 13.97,
@@ -319,12 +319,12 @@
   "kat": 1,
   "oda_programi": "2+1",
   "katalog_m2": 94.0,
-  "kapali_m2": 79.71,
+  "kapali_m2": 79.52,
   "veranda_m2": 14.29,
   "varyantlar": [],
   "musteri_projesi": true,
   "sunum": {
-   "cati_adi": "kirma",
+   "cati_adi": "Kırma",
    "ad": ""
   },
   "ozet": {
@@ -332,7 +332,7 @@
     1045.1,
     970.5
    ],
-   "oturum_m2": 94.0,
+   "oturum_m2": 93.81,
    "odalar": {
     "Salon": 16.29,
     "Yatak Odası": 12.28,

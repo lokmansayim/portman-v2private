@@ -118,6 +118,19 @@ def test_88_m2_2arti1_celik_soru_yok_gorselde_c8801_uclusu(depo, wa, hizli_genel
     assert kinds == ["interactive", "interactive"]                                 # görsel + 3 düğme, sonra tam liste (6 aday)
 
 
+def test_yapi_turu_soylenmeden_celik_aday_sunulmaz(depo, wa, hizli_genel):
+    # geometri hakemi (12.10): "88 m² 2+1" (yapı türü yok) prefabrik dalında kalır; kabul kaydı olsa da çelik aday seti açılmaz (prefabrik akışı değişmez)
+    kabul(depo, YEDI)
+    assert depo.mesaj_kaydet(mesaj("88 m² 2+1", talep(ozet="88 m² 2+1", alan_m2=88, oda_programi="2+1"), bayi=BAYI_KART))
+    [r] = isle_hepsi(depo)
+    assert r["eylem"] != "secenek" and sorgu(depo, "SELECT count(*) AS n FROM secenek_setleri")[0]["n"] == 0
+    d, _ = depo.konusma_oku(NUMARA_A)
+    assert not d.get("secenek_seti")
+    assert depo.mesaj_kaydet(mesaj("88 m² 2+1 prefabrik", talep(ozet="88 m² 2+1 prefabrik", alan_m2=88, oda_programi="2+1", yapi_turu="prefabrik"), bayi=BAYI_KART))
+    [r2] = isle_hepsi(depo)
+    assert r2["eylem"] != "secenek" and sorgu(depo, "SELECT count(*) AS n FROM secenek_setleri")[0]["n"] == 0
+
+
 def test_kat_suzgeci_ve_uyan_yoksa_bugunku_davranis(depo, wa, hizli_genel):
     kabul(depo, YEDI)
     assert depo.mesaj_kaydet(mesaj("95 m² 3+1 tek kat çelik", talep(ozet="95 m² 3+1 tek kat çelik", alan_m2=95, oda_programi="3+1", yapi_turu="celik", kat_sayisi=1), bayi=BAYI_KART))
@@ -200,10 +213,48 @@ def test_patron_ve_kart_disi_numara_antete_girmez(depo, wa, hizli_genel):
     # bayi kartındaki numara gönderenden farklıysa (olmamalı) numara yazılmaz; LLM'in müşteri telefonu asla kullanılmaz
     baska = {**BAYI_KART, "numara": "900000000999"}
     time.sleep(1.1)
-    assert depo.mesaj_kaydet(mesaj("Ç8801L", talep(ozet="Ç8801L", katalog_kodu="Ç8801L", musteri={"telefon": "905551112233"}), bayi=baska))
+    assert depo.mesaj_kaydet(mesaj("Ç8801L", talep(ozet="Ç8801L", katalog_kodu="Ç8801L", musteri={"telefon": "900000000777", "sevk_adresi": "Deneme Mah. tel 900000000777"},
+                                                   ozel_istekler=["müşteri 900000000777 aranacak"], bina_ozellikleri={"Dış boya rengi": "krem 900000000777"}), bayi=baska))
     [r2] = isle_hepsi(depo)
     ie2 = sorgu(depo, "SELECT is_emri FROM revizyonlar ORDER BY id DESC")[0]["is_emri"]
-    assert r2["eylem"] == "is_emri" and ie2["bilgi"]["bayi_telefonu"] is None and "905551112233" not in json.dumps(ie2)
+    assert r2["eylem"] == "is_emri" and ie2["bilgi"]["bayi_telefonu"] is None and "900000000777" not in json.dumps(ie2)   # başka numara reddedilir (D-09)
+    assert ie2["bilgi"]["sevk_adresi"] == "Deneme Mah. tel …" and ie2["bilgi"]["ozel_istekler"] == ["müşteri … aranacak"] and ie2["bilgi"]["ozellikler"]["Dış Boya Rengi"] == "krem …"
+    # adsız kart: depo numarayı ad olarak verir; antete ad olarak numara yazılmaz (KVKK denetçisi 12.10)
+    adsiz = {"kod": "PATRON", "ad": "900000000101", "rol": "patron", "numara": "900000000101"}
+    g2 = mesaj("Ç8801K", talep(ozet="Ç8801K", katalog_kodu="Ç8801K"), bayi=adsiz); g2["role"] = "patron"   # varyant kodu: set sorulmaz, doğrudan r01
+    time.sleep(1.1)
+    assert depo.mesaj_kaydet(g2)
+    [r3] = isle_hepsi(depo)
+    ie3 = sorgu(depo, "SELECT is_emri FROM revizyonlar ORDER BY id DESC")[0]["is_emri"]
+    assert r3["eylem"] == "is_emri", r3.get("gerekce")
+    assert ie3["bilgi"]["bayi_adi"] == "" and ie3["bilgi"]["bayi_telefonu"] is None
+
+
+def test_cati_secildikten_sonra_revizyon_seti_yeniden_sormaz(depo, wa, hizli_genel):
+    # kod incelemesi (12.10): katalog çatısı seçilip r01 gittikten sonra aynı kodla gelen revizyon üç çatıyı yeniden sormamalı
+    kabul(depo)
+    assert depo.mesaj_kaydet(mesaj("Ç8801 olsun", talep(ozet="Ç8801 istiyor", katalog_kodu="Ç8801"), bayi=BAYI_KART))
+    isle_hepsi(depo); kalici.gonder(depo, wa)
+    sid = sorgu(depo, "SELECT id FROM secenek_setleri")[0]["id"]
+    st = sorgu(depo, "SELECT dis_id FROM giden WHERE kind = 'interactive'")[0]
+    assert depo.mesaj_kaydet(buton(f"s:{sid}:Ç8801", context_id=st["dis_id"]))
+    [r1] = isle_hepsi(depo)
+    assert r1["eylem"] == "is_emri" and "Ç8801 " in r1["gerekce"] + " "
+    time.sleep(1.1)
+    assert depo.mesaj_kaydet(mesaj("sevk adresi Deneme İlçesi olsun", talep(ozet="sevk adresi", katalog_kodu="Ç8801", niyet="revizyon",
+                                                                           musteri={"sevk_adresi": "Deneme İlçesi"}), bayi=BAYI_KART))
+    [r2] = isle_hepsi(depo)
+    assert r2["eylem"] == "is_emri", r2
+    revs = sorgu(depo, "SELECT rev, durum, is_emri FROM revizyonlar ORDER BY rev")
+    assert [(x["rev"], x["durum"]) for x in revs] == [(1, "yerini_aldi"), (2, "onay_bekliyor")]
+    assert revs[1]["is_emri"]["yapi"]["kod"] == "Ç8801" and revs[1]["is_emri"]["bilgi"]["sevk_adresi"] == "Deneme İlçesi"
+    assert sorgu(depo, "SELECT count(*) AS n FROM secenek_setleri")[0]["n"] == 1                      # yeni set açılmadı
+    # desteklenmeyen varyant (çatı tarifi, kapı) → yönlendirme, sessizce düşmez (K21)
+    time.sleep(1.1)
+    assert depo.mesaj_kaydet(mesaj("çatıyı kırma yap", talep(ozet="çatı kırma", katalog_kodu="Ç8801", niyet="revizyon",
+                                                             varyantlar=[{"tur": "cati_degistir", "aciklama": "çatıyı kırma yap", "parametreler": {"tip": "kırma"}}]), bayi=BAYI_KART))
+    [r3] = isle_hepsi(depo)
+    assert r3["eylem"] == "yonlendir" and "cati_degistir" in r3["gerekce"]
 
 
 def test_cizim_dusunce_dogrulanmadi_ve_patron_maskeli(depo, wa, monkeypatch):

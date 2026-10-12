@@ -26,9 +26,9 @@ sys.path.insert(0, str(KOK))
 
 
 def kod_normalize(s: str) -> str:
-    """Aday kodu: tire ve boşluk yok, C→Ç (Ç8801-K → Ç8801K, KT-01 → KT01); beyin/katalog.kod_normalize ile aynı biçim."""
-    t = s.strip().upper().replace("-", "").replace(" ", "")
-    return t.replace("C", "Ç", 1) if re.fullmatch(r"C\d{4}[A-Z]?", t) else t
+    """Aday kodu (Ç8801-K → Ç8801K, KT-01 → KT01): tek kaynak `beyin.katalog.Katalog.kod_normalize`."""
+    from beyin.katalog import Katalog
+    return Katalog.kod_normalize(s) or s.strip().upper()
 
 
 def main() -> int:
@@ -110,21 +110,29 @@ def genel(a) -> int:
         y = yapi.kur(t); c = cati_genel.cati_kur(t["cati"], kur)
         odalar = {ad: round(b["alan_m2"], 2) for ad, b in y["bolgeler"].items() if b.get("sinif") != "dis"}
         acl = y["acikliklar"]
-        bina = round(float(girdi["bina_m2"]), 2)                               # listedeki bina_m2 (brüt oturum; K-A1, D-08 madde 5)
+        bina = round(float(girdi["bina_m2"]), 2)                               # listedeki bina_m2 (brüt oturum, tam sayıya yuvarlı; K-A1, D-08 madde 5) → katalog_m2
+        oturum = round(float(girdi.get("oturum_m2") or girdi["bina_m2"]), 2)   # yuvarlanmamış brüt oturum (K16: sessiz yuvarlama yok; geometri hakemi 12.10) → özet ve kapalı alan
         vm = girdi.get("veranda_m2") or 0                                       # girdi: {"brut", "net", ...} ya da sayı
         veranda = round(float(vm.get("net") or vm.get("brut") or 0) if isinstance(vm, dict) else float(vm), 2)
         sablon_dir = KOK / "is_emri" / "adaylar"; sablon_dir.mkdir(parents=True, exist_ok=True)
         dosya = kod.replace("Ç", "C")                                           # dosya adı ASCII (Mac/Linux/git uyumu); kayıt kodu Ç ile
         shutil.copyfile(Path(tmp) / m["bayi_gorsel"], sablon_dir / f"{dosya}.png")
         varyantlar = [kod_normalize(x) for x in a.varyantlar.split(",") if x.strip()]
+        try:                                                                   # çatı tipinin okunur adı (kural anahtarı; iç anahtar bayiye basılmaz)
+            cati_adlari = (json.loads((KOK / "kurallar" / "cizim" / "pafta_sablonu.json").read_text(encoding="utf-8")).get("cati_tipi_adi") or {}).get("deger") or {}
+        except Exception:
+            cati_adlari = {}
+        ct = t.get("cati") or {}
+        cati_adi = (ct.get("tip_adi") or "").split(":")[0].strip() or cati_adlari.get(ct.get("tip"), ct.get("tip") or "")
+        cati_adi = cati_adi[:1].upper() + cati_adi[1:]                         # "beşik + cumba" → "Beşik + cumba" (kural anahtarındaki adlarla aynı biçim)
         kayit = {"kod": kod, "gosterim": t["kod"], "durum": a.durum, "motor": "genel", "tanim": gorece,
                  "tanim_sha256": hashlib.sha256(tanim_yolu.read_bytes()).hexdigest(), "gorsel": f"adaylar/{dosya}.png",
-                 "referans_model": kod_normalize(a.referans) if a.referans else (kod if not varyantlar else kod),
+                 "referans_model": kod_normalize(a.referans) if a.referans else kod,
                  "yapi_turu": "celik", "kat": int(a.kat if a.kat is not None else (1 if str(t.get("kat", "zemin")) in ("zemin", "1") else 2)),
-                 "oda_programi": oda_programi(t), "katalog_m2": bina, "kapali_m2": round(bina - veranda, 2), "veranda_m2": veranda,
+                 "oda_programi": oda_programi(t), "katalog_m2": bina, "kapali_m2": round(oturum - veranda, 2), "veranda_m2": veranda,
                  "varyantlar": varyantlar, "musteri_projesi": bool(a.musteri_projesi or musteri_projesi(t)),
-                 "sunum": {"cati_adi": (t.get("cati", {}).get("tip_adi") or t.get("cati", {}).get("tip") or "").split(":")[0].strip(), "ad": "" if (a.musteri_projesi or musteri_projesi(t)) else t.get("ad", "")},
-                 "ozet": {"dis_olcu_cm": [round(x, 1) for x in girdi_genel.metraj(y, c, kur)["dis_olcu_cm"]], "oturum_m2": bina, "odalar": odalar,
+                 "sunum": {"cati_adi": cati_adi, "ad": "" if (a.musteri_projesi or musteri_projesi(t)) else t.get("ad", "")},
+                 "ozet": {"dis_olcu_cm": [round(x, 1) for x in girdi_genel.metraj(y, c, kur)["dis_olcu_cm"]], "oturum_m2": oturum, "odalar": odalar,
                           "pencere": sum(1 for x in acl if x["tur"] == "pencere"), "kapi": sum(1 for x in acl if x["tur"] in ("dis_kapi", "ic_kapi")),
                           "cati": t.get("cati", {}).get("tip"), "liste_satir": v.get("liste_satir"), "kural_seti": Path(v.get("set", "")).name,
                           "perspektif": v.get("perspektif", {}).get("durum")},

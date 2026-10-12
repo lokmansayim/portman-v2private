@@ -12,7 +12,6 @@
 """
 from __future__ import annotations
 import hashlib
-import json
 import re
 import time
 from pathlib import Path
@@ -56,6 +55,21 @@ def tanim_yolu(aday: dict) -> Path:
     return ROOT / aday["tanim"]
 
 
+_NUMARA = re.compile(r"(?<!\d)\d{10,15}(?!\d)")
+
+
+def numarasiz(metin: str) -> str:
+    """D-09 "başka numara reddedilir": serbest metin alanlarında (sevk adresi, özel istekler, özellikler) 10–15 haneli rakam dizileri
+    paftaya girmez; yerine "…" yazılır (bayi mesajında müşterinin numarası geçse de PDF'e basılmaz; KVKK denetçisi 12.10)."""
+    return _NUMARA.sub("…", metin or "")
+
+
+def bayi_adi(bayi: dict | None) -> str:
+    """Bayinin adı; kart adsızsa `depo.gelen_bayisi` numarayı ad olarak verir — o antete yazılmaz (D-09; KVKK denetçisi 12.10)."""
+    ad = str((bayi or {}).get("ad") or "").strip()
+    return "" if re.fullmatch(r"[\d\s+().-]{8,}", ad) else ad
+
+
 def bayi_telefonu(bayi: dict | None, gonderen: str | None) -> str | None:
     """D-09: yalnız `rol = bayi` kartının kendi numarası, gönderenle aynıysa; aksi hâlde None (antette '...')."""
     if not bayi or (bayi.get("rol") or "bayi") != "bayi":
@@ -80,25 +94,16 @@ def zarf(aday: dict, bayi: dict, gonderen: str | None, ts: dict, son_is_emri: di
                     "musteri_adi": (ts.get("musteri") or {}).get("ad") or "", "metin": ts.get("ozet", "")},
           "eksikler": []}
     oz, kalan = ozellikleri_esle(ts.get("bina_ozellikleri"))
-    ie["bilgi"] = {"bayi_adi": bayi.get("ad") or "", "bayi_telefonu": bayi_telefonu(bayi, gonderen),
-                   "sevk_adresi": (ts.get("musteri") or {}).get("sevk_adresi") or "", "ozellikler": oz,
-                   "ozel_istekler": list(ts.get("ozel_istekler") or []) + kalan, "cizen": "Portman", "kontrol": "Portman", "onay": "Portman"}
+    ie["bilgi"] = {"bayi_adi": bayi_adi(bayi), "bayi_telefonu": bayi_telefonu(bayi, gonderen),
+                   "sevk_adresi": numarasiz((ts.get("musteri") or {}).get("sevk_adresi") or ""), "ozellikler": {k: numarasiz(v) for k, v in oz.items()},
+                   "ozel_istekler": [numarasiz(str(x)) for x in list(ts.get("ozel_istekler") or []) + kalan], "cizen": "Portman", "kontrol": "Portman", "onay": "Portman"}
     return ie
 
 
-def zarfi_maskele(ie: dict) -> dict:
-    """Kayıt ve günlük kopyası: kart numarası maskeli (K09)."""
-    k = json.loads(json.dumps(ie))
-    b = k.get("bilgi") or {}
-    if b.get("bayi_telefonu"):
-        b["bayi_telefonu"] = "…" + str(b["bayi_telefonu"])[-4:]
-    return k
+_CATI_SOZ = re.compile(r"\b(?:cati|catisi|catili)\s*([kl])\b|\b([kl])\s*(?:cati|catisi|catili|versiyon|secenek|olsun)\b")
 
 
-_CATI_SOZ = re.compile(r"\b(?:cati|catisi|catili)\s*([kl])\b|\b([kl])\s*(?:cati|catisi|catili|versiyon|secenek|olsun)\b|\b(?:(\d)\.?\s*(?:secenek|versiyon|cati))\b")
-
-
-def cati_secimi(metin: str | None, aday: dict, katalog) -> str | None:
+def cati_secimi(metin: str | None, aday: dict) -> str | None:
     """Bayinin kendi metninde çatı seçimi var mı (K18)? Varyant kodu ("Ç8801K", "8801-L"), "çatı K/L", "katalog çatısı" → aday kodu; yoksa None."""
     q = " " + _norm(metin or "") + " "
     var = {str(v).upper(): v for v in (aday.get("varyantlar") or [])}
@@ -110,10 +115,9 @@ def cati_secimi(metin: str | None, aday: dict, katalog) -> str | None:
     m = _CATI_SOZ.search(q)
     if m:
         harf = (m.group(1) or m.group(2) or "").upper()
-        if harf:
-            for v in var:
-                if v.endswith(harf):
-                    return v
+        for v in var:
+            if harf and v.endswith(harf):
+                return v
     return None
 
 

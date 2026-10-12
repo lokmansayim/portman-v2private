@@ -75,10 +75,12 @@ def plan_bayi(t: dict, hedef: Path, kod: str, is_emri_no: str | None = None, rev
 PERSPEKTIF_PANEL = (("perspektif_on_sag", "ÖN-SAĞ PERSPEKTİF", "on"), ("perspektif_arka_sag", "ARKA-SAĞ PERSPEKTİF", "sag"))
 
 
-def bayi_gorsel(t: dict, hedef: Path, kod: str, set_yolu: Path | None = None, yontem: str | None = None) -> Path:
+def bayi_gorsel(t: dict, hedef: Path, kod: str, set_yolu: Path | None = None, yontem: str | None = None, perspektif: bool | None = None) -> Path:
     """`<kod>_bayi_gorsel.png`: üstte `<kod>_plan_bayi.png` (olduğu gibi), altta tek sırada çatı planı, ön-sağ ve arka-sağ perspektif
-    (`<kod>_perspektif_on_sag.png`, `<kod>_perspektif_arka_sag.png`; yoksa ön ve sağ görünüş `ciz_genel.gorunus_eksen`). Altın koşuda
-    perspektif yoktur, görsel deterministiktir (matplotlib varsayılanları + PIL). ≤ 5 MB (aşarsa alt sıra düşük çözünürlükle)."""
+    (`<kod>_perspektif_on_sag.png`, `<kod>_perspektif_arka_sag.png`; yoksa ön ve sağ görünüş `ciz_genel.gorunus_eksen`). `perspektif`:
+    False → dosya olsa da perspektif kullanılmaz (uret bu koşuda perspektif üretmediyse eski dosya karta girmesin; geometri hakemi 12.10);
+    None → dosya varsa. Altın koşuda perspektif yoktur, görsel deterministiktir (matplotlib varsayılanları + PIL). ≤ 5 MB (aşarsa alt
+    sıra düşük çözünürlükle)."""
     from . import cati_genel, ciz_genel, kural, sahne as sahne_m, yapi
     import matplotlib.pyplot as plt
     from PIL import Image
@@ -91,10 +93,11 @@ def bayi_gorsel(t: dict, hedef: Path, kod: str, set_yolu: Path | None = None, yo
         t["cati"]["yontem"] = yontem
     with kural.secili(set_yolu):
         kur = kural.oku()
-    y = yapi.kur(t); c = cati_genel.cati_kur(t["cati"], kur); S = sahne_m.sahne_kur(y, c)
+    y = yapi.kur(t); c = cati_genel.cati_kur(t["cati"], kur)
     inis, _ = ciz_genel.inis_kurali(c, kur, t["cati"].get("sacak", 30))
     pers = {ad: hedef / f"{kod}_{ad}.png" for ad, _, _ in PERSPEKTIF_PANEL}
-    perspektifli = all(p.is_file() and p.stat().st_size > 0 for p in pers.values())
+    perspektifli = perspektif is not False and all(p.is_file() and p.stat().st_size > 0 for p in pers.values())
+    S = None if perspektifli else sahne_m.sahne_kur(y, c)      # sahne yalnız görünüş çizilecekse kurulur (kod incelemesi 12.10)
     alt = hedef / f"{kod}_bayi_gorsel_alt.png"
     yol = hedef / f"{kod}_bayi_gorsel.png"
 
@@ -121,6 +124,12 @@ def bayi_gorsel(t: dict, hedef: Path, kod: str, set_yolu: Path | None = None, yo
     alt_sira(130); birlestir()
     if yol.stat().st_size > 5 * 1024 * 1024:            # WhatsApp görsel sınırı
         alt_sira(80); birlestir()
+    for _ in range(4):                                   # hâlâ büyükse bütün görsel küçültülür (plan görseli de; kod incelemesi 12.10)
+        if yol.stat().st_size <= 5 * 1024 * 1024:
+            break
+        with Image.open(yol) as img:
+            kucuk = img.convert("RGB").resize((max(1, int(img.width * 0.75)), max(1, int(img.height * 0.75))), Image.LANCZOS)
+        kucuk.save(str(yol), "PNG", optimize=True)
     alt.unlink(missing_ok=True)
     return yol
 

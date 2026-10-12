@@ -180,7 +180,7 @@ def uret(tanim_yolu: Path, hedef: Path, is_emri_no: str | None = None, revizyon:
         if bayi_png.exists():                        # bayi görseli: plan + çatı planı + iki perspektif (yoksa iki görünüş) tek görselde
             try:
                 from . import bayi_gorseli
-                bayi_gorseli.bayi_gorsel(t, hedef, kod, set_yolu=set_yolu, yontem=yontem)
+                bayi_gorseli.bayi_gorsel(t, hedef, kod, set_yolu=set_yolu, yontem=yontem, perspektif=pers["durum"] == "TAMAM")   # bu koşunun perspektifleri; eski dosya girmez
             except (Exception, SystemExit) as e:    # kart üretilemezse iş düşmez: worker plan görseline döner (uyarı)
                 uyarilar.append(f"bayi görseli (kart): {type(e).__name__}: {str(e)[:200]}")
     # 6) çizim seti denetimi (kurallar/cizim/cizim_seti.json) ve kayıtlar
