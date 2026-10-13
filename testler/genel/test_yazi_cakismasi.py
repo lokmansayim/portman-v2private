@@ -73,26 +73,33 @@ def test_plan_bayi_ve_kart_yazi_cakismaz(model):
 
 
 @pytest.mark.parametrize("model", MODELLER)
-@pytest.mark.xfail(strict=True, reason="Şablon paftasında bugünden kalma yazı çakışmaları var (özellik tablosunda sarılan satırlar ve '...' hücreleri, "
-                                        "antet, 2. sayfa çatı planı/görünüş yazıları, KT-02 sol zincirde 22 ⟂ 1170). Düzeltme pafta izlerini "
-                                        "değiştirir; Lokman'ın kararı bekleniyor (IE-08 › Kanıt, 13 Ekim). Düzelince bu işaret kaldırılır.")
 def test_pafta_yazi_cakismaz(model):
+    # şablon paftası iki sayfa (Lokman 13.10: şimdi, bu PR'da): özellik tablosunda sarılan satırlar mürekkep aralığıyla; dar parça sayıları
+    # içeri sırada; 2. sayfada görünüş ölçü şeritleri ölçeğe göre, çatı planı kenar/eğim yazıları çakışmadan. "..." hücreleri, antetteki
+    # "95"/"ÇELİK" ve ÖZEL İSTEKLER satırları yalnız yerleşim kutusuyla örtüşür (mürekkep ayrık): yanlış alarm, `yerlesim_cakisan`da bilgi
     h = _hatalar(raporlar(model), ["pafta_sayfa_1", "pafta_sayfa_2"])
     assert h == [], json.dumps(h, ensure_ascii=False, indent=1)
 
 
 def test_denetim_cakismayi_gorur():
-    # denetimin kendisi: üst üste iki yazı ve ölçü çizgisini kapatan kutulu etiket yakalanır; ayrık yazılar temiz
+    # denetimin kendisi: üst üste iki yazı (mürekkep) yakalanır; yalnız yerleşim kutusu örtüşen bitişik satırlar yanlış alarm sayılır
+    # (ayrı listede); ölçü okunu kapatan kutulu etiket ve ok ucuna binen sayı yakalanır; eğim oku (gid'siz annotate) ölçü değildir
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
+    from motor.genel import ciz_genel
     fig, ax = plt.subplots(figsize=(4, 3), dpi=100)
     ax.set_xlim(0, 100); ax.set_ylim(0, 100)
     ax.text(50, 50, "AAAA", ha="center", va="center"); ax.text(52, 50, "BBBB", ha="center", va="center")
     ax.text(10, 90, "uzak", ha="left", va="center")
-    ax.annotate("", xy=(80, 20), xytext=(20, 20), arrowprops=dict(arrowstyle="<->", color="#444", lw=0.7, shrinkA=0, shrinkB=0))
-    ax.text(50, 20, "ETİKET", ha="center", va="center", bbox=dict(boxstyle="round,pad=0.35", fc="#1f5f93", ec="none"), color="white")
+    ax.text(10, 80, "satır 1", ha="left", va="center", fontsize=8); ax.text(10, 76.4, "satır 2", ha="left", va="center", fontsize=8)   # bitişik: mürekkep ayrık
+    ciz_genel.olcu(ax, (20, 20), (80, 20), "600", 3)                                                   # ölçü oku + sayısı (gid olcu_ok)
+    ax.text(72, 20, "ETİKET", ha="center", va="center", bbox=dict(boxstyle="round,pad=0.35", fc="#1f5f93", ec="none"), color="white")   # oku kapatır, sayıya değmez
+    ciz_genel.olcu(ax, (20, 5), (26, 5), "22,4", 0.5)                                                  # dar parça: sayı ok uçlarına biner
+    ax.annotate("", xy=(60, 90), xytext=(90, 90), arrowprops=dict(arrowstyle="->", color="white", lw=1.0))   # eğim oku: ölçü değil
+    ax.text(75, 90, "%33,0", ha="center", va="center", fontsize=7.2)
     r = YC.denetle(fig, "deneme")
     plt.close(fig)
-    assert r["yazi"] == 4 and [(a, b) for a, b, _ in r["cakisan"]] == [("AAAA", "BBBB")]
-    assert [a for a, _ in r["cizgi_kapatan"]] == ["ETİKET"]
+    assert r["yazi"] == 9 and [(a, b) for a, b, _ in r["cakisan"]] == [("AAAA", "BBBB")]
+    assert [(a, b) for a, b, _ in r["yerlesim_cakisan"]] == [("satır 1", "satır 2")]
+    assert sorted(a for a, _, _ in r["cizgi_kapatan"]) == ["22,4", "ETİKET"]

@@ -32,6 +32,74 @@ def musteri_projesi(t: dict) -> bool:
     return bool(t.get("musteri_projesi")) or str(t.get("kod", "")).upper().startswith("KT")
 
 
+def _bayi_duzelt(fig, ax, y: dict, sinir: tuple[float, float, float, float]) -> None:
+    """Çizimden sonra ölçülerek (Lokman'ın göz denetimi, 13.10.2026; KT-02 "25,1" / "22,4", "SUNDURMA"):
+    (1) dar parçanın sayısı okun uçlarına biniyorsa bir sıra **içeri** (plana doğru) alınır; aynı yandaki ardışık dar parçalarda dönüşümlü
+    iki sıra (dışarı alınsa genel ölçünün sayısına binerdi); (2) mahal adı ya da m² yazısı mahalin eninden genişse küçülür (en az 5,5 pt)."""
+    from matplotlib.text import Annotation
+    from .ciz_genel import tr
+    ex0, ey0, ex1, ey1 = sinir
+    fig.canvas.draw(); r = fig.canvas.get_renderer(); inv = ax.transData.inverted()
+
+    def veri_kutu(bb):
+        (a, b), (c, d) = inv.transform([[bb.x0, bb.y0], [bb.x1, bb.y1]])
+        return min(a, c), min(b, d), max(a, c), max(b, d)
+
+    cm_pt = abs(inv.transform([[0, 0], [72, 0]])[1][0] - inv.transform([[0, 0], [72, 0]])[0][0]) / 72 * fig.dpi / 72
+    ok_ucu = 4.0 * cm_pt                                     # "<->" ok ucu ≈ 4 pt
+    oklar = [t for t in ax.texts if isinstance(t, Annotation) and t.get_gid() == "olcu_ok"]
+    sayilar = [t for t in ax.texts if not isinstance(t, Annotation) and abs(t.get_fontsize() - 7.5) < 1e-6 and t.get_color() == "#222"]
+
+    def yan(ok):
+        (x1, y1), (x2, y2) = ok.xyann, ok.xy
+        yatay = abs(y1 - y2) < 1e-6
+        mx, my = (x1 + x2) / 2, (y1 + y2) / 2
+        return (("alt" if my < ey0 else "ust") if yatay else ("sol" if mx < ex0 else "sag")), yatay, mx, my, (abs(x2 - x1) if yatay else abs(y2 - y1))
+
+    sira: dict[str, int] = {}
+    for ok in sorted(oklar, key=lambda o: (yan(o)[0], yan(o)[3] if not yan(o)[1] else yan(o)[2])):
+        taraf, yatay, mx, my, L = yan(ok)
+        def esi(s):
+            px, py = s.get_position()
+            return (abs(px - mx) < 0.5 and abs(py - my) < 8) if yatay else (abs(py - my) < 0.5 and abs(px - mx) < 8)
+        t = next((s for s in sayilar if esi(s)), None)
+        if t is None:
+            continue
+        k = veri_kutu(t.get_window_extent(r))
+        uz = (k[2] - k[0]) if yatay else (k[3] - k[1])        # sayının ok boyunca uzunluğu (cm)
+        kal = (k[3] - k[1]) if yatay else (k[2] - k[0])       # kalınlığı
+        if uz <= L - 2 * ok_ucu:
+            continue
+        n = sira.get(taraf, 0) + 1; sira[taraf] = n           # dönüşümlü: 1, 2, 1, 2 …
+        birim = kal + 4.0 * cm_pt
+        bas = max(4.0, 3.5 * cm_pt)                           # çizgiden ilk sıra: ok ucunun yarı genişliğinden (≈2,7 pt) uzak
+        x, y_ = t.get_position()
+        if taraf == "alt":                                    # sayı çizginin üstünde (içeri): bir ya da iki sıra daha içeri
+            t.set_position((x, y_ + birim * (1 if n % 2 else 2)))
+        elif taraf == "ust":                                  # sayı çizginin üstünde (dışarı): çizginin altına (içeri)
+            t.set_va("top"); t.set_position((x, my - bas - birim * (0 if n % 2 else 1)))
+        elif taraf == "sol":                                  # sayı çizginin solunda (dışarı): sağına (içeri)
+            t.set_ha("left"); t.set_position((mx + bas + birim * (0 if n % 2 else 1), y_))
+        else:                                                 # sağ zincir: sayı çizginin sağında (dışarı): soluna (içeri)
+            t.set_ha("right"); t.set_position((mx - bas - birim * (0 if n % 2 else 1), y_))
+    from shapely.geometry import LineString
+    for ad, b in y["bolgeler"].items():                       # dar mahalde ad / m² yazısı küçülür (yazının hizasındaki gerçek genişliğe göre)
+        if b.get("sinif") == "dis":
+            continue
+        mx0, my0, mx1, my1 = b["net"].bounds
+        for s in ax.texts:
+            if isinstance(s, Annotation) or s.get_text() not in (ad.upper(), f"{tr(b['alan_m2'])} m²"):
+                continue
+            px, py = s.get_position()
+            if not (mx0 - 1 <= px <= mx1 + 1 and my0 - 1 <= py <= my1 + 1):
+                continue
+            kesit = b["net"].intersection(LineString([(mx0 - 1, py), (mx1 + 1, py)]))      # mahalin yazı hizasındaki eni (L biçimi, dik duvar)
+            izin = (kesit.length if not kesit.is_empty else (mx1 - mx0)) - 6.0
+            k = veri_kutu(s.get_window_extent(r)); en = k[2] - k[0]
+            if en > izin > 0:
+                s.set_fontsize(max(5.5, s.get_fontsize() * izin / en))
+
+
 def plan_bayi(t: dict, hedef: Path, kod: str, is_emri_no: str | None = None, revizyon: int | None = 1, set_yolu: Path | None = None,
               yontem: str | None = None, sunum: str | None = None) -> Path:
     """`<kod>_plan_bayi.png`: ÖN/ARKA/SOL/SAĞ etiketli plan. Başlıkta "TASLAK · rNN [· İş Emri no]"; `revizyon=None` → yalnız "TASLAK"
@@ -92,6 +160,7 @@ def plan_bayi(t: dict, hedef: Path, kod: str, is_emri_no: str | None = None, rev
         pay = 30 * cm_pt
         ax.set_xlim(min(x0, etiket_yeri["sol"] - pay), max(x1, etiket_yeri["sag"] + pay))
         ax.set_ylim(min(y0, etiket_yeri["on"] - pay), max(y1, etiket_yeri["arka"] + pay))
+        _bayi_duzelt(fig, ax, y, (ex0, ey0, ex1, ey1))   # son ölçekle: dar parça sayıları içeri sıraya, dar mahalde yazı küçülür (13.10)
         fig.savefig(yol, bbox_inches="tight", facecolor="white")
         plt.close(fig)
 

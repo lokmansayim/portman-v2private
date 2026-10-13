@@ -114,10 +114,13 @@ class Sayfa:
     def y(yd):            # şablon koordinatı (aşağı) → çizim koordinatı (yukarı)
         return BOY - yd
 
-    def cizgi(self, x0, y0, x1, y1, renk="black", lw=0.72, ls="-", z=3, clip=None):
+    def cizgi(self, x0, y0, x1, y1, renk="black", lw=0.72, ls="-", z=3, clip=None, gid=None):
         (ln,) = self.ax.plot([x0, x1], [self.y(y0), self.y(y1)], color=renk, lw=lw, ls=ls, zorder=z, solid_capstyle="butt")
         if clip is not None:
             ln.set_clip_path(clip)
+        if gid:                                       # yalnız denetim etiketi (yazi_cakisma); PDF/PNG çıktısını değiştirmez
+            ln.set_gid(gid)
+        return ln
 
     def kutu(self, x0, y0, x1, y1, fc="none", ec="black", lw=0.72, z=2, ls="-"):
         self.ax.add_patch(Rectangle((x0, self.y(y1)), x1 - x0, y1 - y0, facecolor=fc, edgecolor=ec, linewidth=lw, zorder=z, linestyle=ls))
@@ -138,9 +141,10 @@ class Sayfa:
     def olcu(self, x0, y0, x1, y1, metin, taraf, kaydir: float = 0.0):
         """Şablondaki ölçü: mavi çizgi, uçlarda kalın eğik çentik, siyah Arial yazı. taraf: yazının çizgiye göre yeri (ust | alt | sol | sag);
         kaydir: yazıyı çizgiden ek uzaklaştırma (pt; dar parçalarda yazılar binmesin)."""
-        self.cizgi(x0 - (4 if y0 == y1 else 0), y0 - (4 if x0 == x1 else 0), x1 + (4 if y0 == y1 else 0), y1 + (4 if x0 == x1 else 0), MAVI, 0.72, z=5)
+        self.cizgi(x0 - (4 if y0 == y1 else 0), y0 - (4 if x0 == x1 else 0), x1 + (4 if y0 == y1 else 0), y1 + (4 if x0 == x1 else 0), MAVI, 0.72, z=5,
+                   gid="olcu_cizgi")
         for (x, y_) in ((x0, y0), (x1, y1)):
-            self.cizgi(x - 4.2, y_ + 4.2, x + 4.2, y_ - 4.2, MAVI, 1.56, z=5)
+            self.cizgi(x - 4.2, y_ + 4.2, x + 4.2, y_ - 4.2, MAVI, 1.56, z=5, gid="olcu_centik")
         mx, my = (x0 + x1) / 2, (y0 + y1) / 2
         if y0 == y1:
             self.yazi(mx, my + (-7.2 if taraf == "ust" else 7.6) + kaydir, metin, 10.7, ARIAL, ha="center")
@@ -166,23 +170,55 @@ def _satirlara(v: str, pt: float, gen: float) -> list[str]:
     return [s + kuyruk for s in satirlar[:-1]] + satirlar[-1:]
 
 
-def _sigdir(v: str, pt_bas: float, en_az: float, gen: float, yuk: float | None = None) -> tuple[float, list[str]]:
-    """Bina özellikleri değeri: önce yazı küçülür (en_az'a kadar), sığmazsa **iki** satıra sarılır (en büyük boyda; iki satır `yuk`'a
-    sığacak boyda: satır arası ≥ 0,95 × pt), o da olmazsa en küçük boyda üç satıra kadar sarılı kalır (kesilmez, bilgi kaybolmaz — Lokman
-    12.10.2026; KT-02'nin pencere satırı). Az satır çok satırdan önce gelir: iki satırlık değer üç satıra bölünmez. Dönen: (pt, satırlar)."""
+SATIR_BOSLUK_PT = 0.6            # sarılan satırlar arasında mürekkep boşluğu (pt; Agg metriklerinin piksel yuvarlamasından büyük)
+
+
+def _murekkep(s: str, pt: float, font=None) -> tuple[float, float]:
+    """Yazının taban çizgisine göre mürekkep çıkması ve alçalması (pt; TextPath): satır aralığı buna göre (yazı kutuları binmesin)."""
+    if not s:
+        return 0.0, 0.0
+    e = TextPath((0, 0), s, size=pt, prop=font or COMIC).get_extents()
+    return max(e.y1, 0.0), max(-e.y0, 0.0)
+
+
+def _blok(satirlar: list[str], pt: float) -> tuple[list[float], float]:
+    """Sarılı satırların taban çizgisi aralıkları (pt) ve bloğun toplam mürekkep yüksekliği: ardışık satırların mürekkebi örtüşmez
+    (alçalma + çıkma + SATIR_BOSLUK_PT). Dönen: (aralıklar, toplam)."""
+    olc = [_murekkep(s_, pt) for s_ in satirlar]
+    ara = [olc[i][1] + olc[i + 1][0] + SATIR_BOSLUK_PT for i in range(len(satirlar) - 1)]
+    return ara, (olc[0][0] + sum(ara) + olc[-1][1]) if satirlar else 0.0
+
+
+def _sigdir(v: str, pt_bas: float, en_az: float, gen: float, yuk: float | None = None, en_az_mutlak: float | None = None) -> tuple[float, list[str]]:
+    """Bina özellikleri değeri: önce yazı küçülür (en_az'a kadar), sığmazsa **iki** satıra sarılır (en büyük boyda), o da olmazsa üç
+    satır (kesilmez, bilgi kaybolmaz — Lokman 12.10.2026; KT-02'nin pencere satırı). Az satır çok satırdan önce gelir. Satır aralığı
+    mürekkep ölçüsüyledir (`_blok`; Lokman 13.10: yazı kutuları binmesin): blok `yuk`'a sığmalı. en_az'da hiçbir sarma sığmazsa yazı
+    `en_az_mutlak`'a kadar küçülür (kural anahtarı `ozellik_yazi_pt_mutlak`; KT-02 pencereler ≈ 4,4 pt) — bilgi kesilmez. Dönen: (pt, satırlar)."""
     if yazi_eni(v, pt_bas, COMIC) <= gen:
         return pt_bas, [v]
     pt = max(en_az, pt_bas * (gen - 2.0) / yazi_eni(v, pt_bas, COMIC))
     if yazi_eni(v, pt, COMIC) <= gen:
         return pt, [v]
-    ust = pt_bas if yuk is None else min(pt_bas, yuk / 2 / 0.95)
-    for pt2 in [ust - 0.3 * i for i in range(int((ust - en_az) / 0.3) + 1)] + [en_az]:
-        if pt2 < en_az:
-            break
-        satirlar = _satirlara(v, pt2, gen)
-        if len(satirlar) <= 2 and all(yazi_eni(s_, pt2, COMIC) <= gen for s_ in satirlar):
-            return pt2, satirlar
-    return en_az, _satirlara(v, en_az, gen)
+
+    def dene(n: int, taban: float) -> tuple[float, list[str]] | None:
+        for pt2 in [pt_bas - 0.1 * i for i in range(int((pt_bas - taban) / 0.1) + 1)] + [taban]:
+            if pt2 < taban - 1e-9:
+                break
+            satirlar = _satirlara(v, pt2, gen)
+            if len(satirlar) <= n and all(yazi_eni(s_, pt2, COMIC) <= gen for s_ in satirlar) and (yuk is None or _blok(satirlar, pt2)[1] <= yuk):
+                return pt2, satirlar
+        return None
+
+    for n in (2, 3):
+        r = dene(n, en_az)
+        if r:
+            return r
+    if en_az_mutlak is not None and en_az_mutlak < en_az:
+        for n in (2, 3):
+            r = dene(n, en_az_mutlak)
+            if r:
+                return r
+    return (en_az_mutlak or en_az), _satirlara(v, en_az_mutlak or en_az, gen)
 
 
 def _sar(metin: str, genislik: int) -> list[str]:
@@ -236,19 +272,25 @@ def cerceveler(sf: Sayfa, t: dict, oz: dict, bilgi: dict, oturum_m2: float):
     adim = (OZELLIK[3] - OZELLIK_BASLIK_ALT) / len(OZELLIK_SIRASI)
     yp = (sablon_kurallari().get("ozellik_yazi_pt") or {}).get("deger") or {}
     en_cok, en_az = float(yp.get("en_cok", 7.3)), float(yp.get("en_az", 5.2))
+    _m = (sablon_kurallari().get("ozellik_yazi_pt_mutlak") or {}).get("deger")
+    en_az_mutlak = float(_m) if _m is not None else None             # anahtar yoksa en_az'ın altına inilmez
     gen = OZELLIK[2] - 765.0 - 2
+    yuk = adim - 1.0                                                   # sarılı bloğun mürekkebi satır çizgilerinden ≥ 0,5 pt uzak
     for i, ad in enumerate(OZELLIK_SIRASI):
         yt = OZELLIK_BASLIK_ALT + i * adim
         sf.cizgi(OZELLIK[0], yt, OZELLIK[2], yt)
         v = str(oz.get(ad, "..."))
-        pt, satirlar = (en_cok, [v]) if v == "..." else _sigdir(v, en_cok, en_az, gen, adim - 1.6)   # sığmazsa küçülür, sonra sarılır; kesilmez
+        pt, satirlar = (en_cok, [v]) if v == "..." else _sigdir(v, en_cok, en_az, gen, yuk, en_az_mutlak)   # sığmazsa küçülür, sonra sarılır; kesilmez
         sf.yazi(695.0, yt + adim / 2 + 0.6, ad, 7.3)
         if len(satirlar) == 1:
             sf.yazi(765.0, yt + adim / 2 + (0.6 if v != "..." else -1.2), v, pt if v != "..." else 12.0)
-        else:
-            ara = min(6.4, (adim - 1.6) / len(satirlar))
+        else:                                                          # sarılı satırlar: mürekkep aralığıyla, satırda ortalı (13.10.2026)
+            ara, toplam = _blok(satirlar, pt)
+            yd = yt + adim / 2 - toplam / 2 + _murekkep(satirlar[0], pt)[0]        # ilk satırın taban çizgisi (şablon koordinatı, aşağı)
             for k_, s_ in enumerate(satirlar):
-                sf.yazi(765.0, yt + adim / 2 + 0.4 + (k_ - (len(satirlar) - 1) / 2) * ara, s_, pt)
+                sf.yazi(765.0, yd, s_, pt, va="baseline")
+                if k_ < len(ara):
+                    yd += ara[k_]
     sf.cizgi(OZELLIK_BOLME, OZELLIK_BASLIK_ALT, OZELLIK_BOLME, OZELLIK[3])
     sf.yuvarlak_kutu(ISTEK)
     sf.yazi(696.0, 272.0, "ÖZEL İSTEKLER;", 7.6, renk=KOYU_KIRMIZI)
@@ -443,18 +485,24 @@ def plan_ciz(sf: Sayfa, y: dict, t: dict, px0: float, py0: float, s: float) -> t
             notlar.append({"zincir": ad, **k, "not": f"{en_kisa:g} cm ve daha kısa parça komşusuna katıldı; ölçüyü kontrol edin (mühendis planında tam zincir)"})
         genel = yarim_yukari(W if yon == "x" else H)             # genel ölçü ve parçaların toplamı aynı sayı (şablon kuralı)
         parca = tam_bol([b - a for a, b in zip(nk, nk[1:])], genel); kayit[ad] = parca
-        # dar parçanın yazısı komşusuna binmesin: sığmayan yazı bir sıra dışarı alınır (dönüşümlü)
+        # dar parçanın yazısı komşusuna binmesin: sığmayan yazı bir sıra **içeri** (plana doğru) alınır, dönüşümlü. Dışarı alınınca genel
+        # ölçünün sayısına ve çizgisine biniyordu (KT-02 "22 ⟂ 1170", Ç8201 "30 ⟂ 750"; Lokman 13.10.2026). İçeri sıra: yazı zincir
+        # çizgisinin plan tarafında, dış yüzden ≈ 7–9 pt uzakta; o şeritte başka yazı yok.
         dar = [yazi_eni(str(v), 10.7, ARIAL) > s * (b - a) - 2 for (a, b), v in zip(zip(nk, nk[1:]), parca)]
         kaydir = []; son = 0
         for i, d in enumerate(dar):
             son = (son + 1) if (d and i and dar[i - 1]) else (1 if d else 0)
-            kaydir.append(9.5 * (son % 2) if d else 0.0)
+            kaydir.append((son % 2) if d else 0)
+        # şablon koordinatında (y aşağı) sayı normalde: on → çizginin üstünde (içeri), arka → üstünde (dışarı), sol → solunda (dışarı),
+        # sag → solunda (içeri). İçeri sıra: on −9.5, sag −9.5 (aynı yönde bir sıra daha), arka +14.4, sol +14.8 (çizginin öbür yanına)
+        ic_kaydir = {"on": -9.5, "sag": -9.5, "arka": 14.4, "sol": 14.8}[ad]
+        kaydir = [ic_kaydir * k for k in kaydir]
         if yon == "x":
             yy = Y(by1) - ic_ if ad == "arka" else Y(by0) + ic_ + ek[ad]
             yg = Y(by1) - dis_ if ad == "arka" else Y(by0) + dis_ + ek[ad]
             if len(nk) > 2:
                 for (a, b), v, k_ in zip(zip(nk, nk[1:]), parca, kaydir):
-                    sf.olcu(X(a), yy, X(b), yy, str(v), "ust", kaydir=(-k_ if ad == "arka" else k_))
+                    sf.olcu(X(a), yy, X(b), yy, str(v), "ust", kaydir=k_)
             else:
                 yg = yy
             sf.olcu(X(bx0), yg, X(bx1), yg, str(genel), "ust")
@@ -463,7 +511,7 @@ def plan_ciz(sf: Sayfa, y: dict, t: dict, px0: float, py0: float, s: float) -> t
             xg = X(bx0) - dis_ if ad == "sol" else X(bx1) + dis_ + ek[ad]
             if len(nk) > 2:
                 for (a, b), v, k_ in zip(zip(nk, nk[1:]), parca, kaydir):
-                    sf.olcu(xx, Y(b), xx, Y(a), str(v), "sol", kaydir=(-k_ if ad == "sol" else k_))
+                    sf.olcu(xx, Y(b), xx, Y(a), str(v), "sol", kaydir=k_)
             else:
                 xg = xx
             sf.olcu(xg, Y(by1), xg, Y(by0), str(genel), "sol")
@@ -651,7 +699,7 @@ def pafta_pdf(t: dict, hedef: Path, kod: str, is_emri_no: str | None = None, rev
     fig2.text(0.03, 0.012, "Çatı planı: eğim okları ve yüzdeleri · sarı nokta: dere inişi" + (f" ({len(inis)} adet)" if inis else "") +
               " · turuncu: duvara dayanan kenar · beyaz kesik çizgi: duvar dış yüzü · ölçüler cm", fontsize=7.2, ha="left", va="bottom", color="#333")
     for ax, taraf in zip((fig2.add_subplot(gs[0, 1]), fig2.add_subplot(gs[0, 2]), fig2.add_subplot(gs[1, 1]), fig2.add_subplot(gs[1, 2])), ("on", "arka", "sol", "sag")):
-        ciz_genel.gorunus_eksen(ax, S, taraf, t["kat_yuksekligi"])
+        ciz_genel.gorunus_eksen(ax, S, taraf, t["kat_yuksekligi"], sigdir=True)      # küçük panelde iki düşey ölçü şeridi ölçeğe göre açılır (13.10)
     no = bilgi.get("is_emri_no") or t["kod"]
     ad = f"{t['kod']} · {oturum_m2:.0f} m²" if musteri_projesi(t) else f"{t['kod']} · {t['ad']}"     # müşteri projeleri bayiye adsız (D-08)
     fig2.suptitle(f"{ad}   —   {no} r{int(bilgi.get('revizyon') or 1):02d} · görünüşler ve çatı planı · TASLAK", fontsize=10.5, weight="bold", x=0.03, ha="left", y=0.965)

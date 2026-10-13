@@ -13,5 +13,7 @@
  "taslak_ibaresi": {"deger": {"sayfa1": true, "metin": "TASLAK · üretim projesi değildir"}, "durum": "lokman",
   "kaynak": "Lokman, 12 Ekim 2026 (Soru 25: evet): 8b mühendis kabulüne kadar bayi paftasının 1. sayfasında da TASLAK yazar, antetin üstünde küçük (Kontrol/Onay 'Portman' yazınca onaylı gibi okunmasın). 2. sayfanın başlığındaki TASLAK her zaman kalır. 8b kabul adımı gelince sayfa1 false yapılır (yeni kural seti sürümü; altın çıktı değişeceği için yeniden dondurma kararıyla)"},
  "ozellik_yazi_pt": {"deger": {"en_cok": 7.3, "en_az": 5.2}, "durum": "lokman",
-  "kaynak": "Bina özellikleri değerleri sütuna sığmazsa yazı küçülür (en_az'a kadar), en küçük boyda da sığmazsa iki satıra sarılır (Lokman, 12 Ekim 14:53: kesilmesin, bilgi kaybolmasın); bilinmeyen değer '...' ile karışmasın"}
+  "kaynak": "Bina özellikleri değerleri sütuna sığmazsa yazı küçülür (en_az'a kadar), en küçük boyda da sığmazsa iki satıra sarılır (Lokman, 12 Ekim 14:53: kesilmesin, bilgi kaybolmasın); bilinmeyen değer '...' ile karışmasın"},
+ "ozellik_yazi_pt_mutlak": {"deger": 4.0, "durum": "varsayim",
+  "kaynak": "13 Ekim 2026 (Lokman'ın göz denetimi: yazı kutuları binmesin): sarılan satırların aralığı mürekkep ölçüsüyledir; en_az'da iki ya da üç satır bile satıra sığmazsa yazı bu boya kadar küçülür (KT-02 Pencereler ≈ 4,4 pt). Bilgi kesilmez. Lokman'ın kararına kadar varsayım; anahtar silinirse en_az'ın altına inilmez"}
 }
