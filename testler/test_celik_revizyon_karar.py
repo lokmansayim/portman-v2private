@@ -252,3 +252,35 @@ def test_bilgi_cumlesi_tum_bilinmeyenleri_kapsamali(s):
     r01_k(t)
     k = t.yaz("dış cephe rengi gri olsun", bina_ozellikleri={"Dış Cephe Rengi": "gri"})
     assert k.eylem == "is_emri" and k.revizyon == 2
+
+
+@pytest.mark.parametrize("metin, alan, eylem", [
+    ("Ç8801 çelik ev, çatı K ile L arasındaki fark nedir?", {"katalog_kodu": "Ç8801"}, "secenek"),      # kararsızlık: set (K seçilmez)
+    ("Ç8801 çelik, çatı K ve L'yi görelim", {"katalog_kodu": "Ç8801"}, "secenek"),
+    ("Ç8801K ve Ç8801L arasında kararsızım", {"katalog_kodu": "Ç8801K"}, "secenek"),
+    ("Ç8801K olsun. Salon, mutfak, 2 yatak odası, banyo.", {"katalog_kodu": "Ç8801K"}, "is_emri"),     # oda listesi: talep bilgisi
+    ("Ç8801K olur mu?", {"katalog_kodu": "Ç8801K"}, "is_emri"),
+    ("Ç8801K olsun, dış duvar kalınlığı ne kadar?", {"katalog_kodu": "Ç8801K"}, "is_emri"),          # bilgi sorusu, değişiklik değil
+    ("Ç8801K olsun, duvarlar 140 olsun", {"katalog_kodu": "Ç8801K"}, "sor"),                        # değişiklik ama "dış" yok: sorulur
+])
+def test_ilk_planda_soru_yalniz_gercek_degisiklikte(s, metin, alan, eylem):
+    """Geometri hakemi üçüncü tur: ilk planda oda listesi, "… olur mu?" ve çatı kararsızlığı plan ya da set alır; yalnız gerçek değişiklik
+    belirsizliği sorulur."""
+    k = s.yaz(metin, yapi_turu="celik", **alan)
+    assert k.eylem == eylem, (k.eylem, k.mesaj)
+
+
+def test_cati_sorusunda_set_notu_yok_secimde_soru_yok(s):
+    """"çatı nasıl olacak?" değişiklik isteği değildir: set mesajında "isteğinizi işleyeceğim" notu yok, seçim r01 verir."""
+    k = s.yaz("Ç8801 çelik ev, çatı nasıl olacak?", katalog_kodu="Ç8801", yapi_turu="celik")
+    assert k.eylem == "secenek" and K.CELIK_ISTEK_NOTU not in k.mesaj
+    k = s.yaz("2", niyet="diger")
+    assert k.eylem == "is_emri" and s.plan["yapi"]["kod"] == "Ç8801K"
+
+
+def test_degisiklik_yok_yonlendirilmez(s):
+    """"değişiklik yok" / "böyle kalsın" istek değildir: yönlendirilmez, aynı plan yeniden çizilmez (sorulur)."""
+    r01_k(s)
+    for metin in ("değişiklik yok", "böyle kalsın"):
+        k = s.yaz(metin)
+        assert k.eylem == "sor" and k.soru_alani == "okuma_metin" and s.plan["revizyon"] == 1, (metin, k.eylem)

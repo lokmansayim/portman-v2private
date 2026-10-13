@@ -168,3 +168,18 @@ def test_ve_ile_baglanan_istekler_ayrilir():
     for s in ("mutfak penceresi 120x120 dışlar 140", "yatak odası 1 ve 2 pencereleri 120x180", "2 tane pencere 120x120"):
         r = CO.oku(s, C8801, KATALOG)
         assert r["belirsiz"] and r["pencereler"] == [] and r["dis140"] is False, s
+
+
+def test_ucuncu_tur_cati_kararsizligi_ve_bagimsiz_parca():
+    """Geometri hakemi üçüncü tur (13.10): tek başına "K"/"L" çapa değil; çatı harfi taşıyan parça bağımsız değil; mesajda iki ayrı çatı
+    geçiyorsa seçim yok. Tanınmayan içerik taşıyan "ve" parçası ("dış cephe gri olsun") kendi cümlesidir."""
+    for s in ("çatı K ile L arasındaki fark nedir?", "çatı K ve L'yi görelim", "çatı K ile L arasında kaldım", "Ç8801K ve Ç8801L arasında kararsızım",
+              "K ve L seçeneklerini gönderin", "çatı K mı olur L mi?"):
+        assert CO.cati_okumasi(s, KATALOG) is None, s
+        assert CO.oku(s, C8801, KATALOG)["cati"] is None, s
+    assert CO._parcalar("çatı L ve dış cephe gri olsun") == ["çatı L", "dış cephe gri olsun"]
+    assert CO._parcalar("çatı K ile L arasındaki fark nedir?") == ["çatı K ile L arasındaki fark nedir?"]
+    assert CO.cati_okumasi("çatı L ve dış cephe gri olsun", KATALOG) == "Ç8801L"
+    oda = [p for p in CO.oku("Salon, mutfak, banyo.", C8801, KATALOG)["parcalar"]]
+    assert all(p["tur"] == "belirsiz" and p["neden"] == "oda" for p in oda)
+    assert CO.degisiklik_var("mutfak penceresi 120x120") and not CO.degisiklik_var("çatı nasıl olacak?")

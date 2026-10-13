@@ -69,7 +69,8 @@ _DOLGU_T = _S(r"olsun", r"olsa", r"olacak", r"olmali\w*", r"olabilir", r"olur", 
               r"eski\w*", r"yeni", r"simdiki\w*", r"suanki\w*", r"var", r"olan\w*", r"oldugu", r"bence", r"bizim", r"benim", r"musteri\w*",
               r"istegi", r"talep\w*", r"plan\w*", r"cizim\w*", r"pafta\w*", r"revize", r"revizyon\w*", r"sey\w*", r"hepsi\w*", r"tum\w*",
               r"butun", r"ayrica", r"ama", r"fakat", r"ancak", r"yine", r"tekrar", r"son", r"ilk", r"birinci", r"ikinci", r"ucuncu",
-              r"guzel\w*", r"harika", r"super", r"iyi", r"gayet", r"olmus", r"oldu", r"begen\w*")          # beğeni sözü istek değildir
+              r"guzel\w*", r"harika", r"super", r"iyi", r"gayet", r"olmus", r"oldu", r"begen\w*",          # beğeni sözü istek değildir
+              r"degisiklik\w*", r"aynen", r"aynisi", r"boyle", r"soyle")                                 # "değişiklik yok", "böyle kalsın"
 _ODA_GENEL = re.compile(r"\b(?:oda\w*|mahal\w*)\b")
 _SAYI_SOZ = {"bir": 1, "birinci": 1, "ilk": 1, "ilki": 1, "iki": 2, "ikinci": 2, "ikincisi": 2, "uc": 3, "ucuncu": 3, "dort": 4, "dorduncu": 4,
              "bes": 5, "besinci": 5, "alti": 6, "altinci": 6, "yedi": 7, "yedinci": 7, "sekiz": 8, "sekizinci": 8, "dokuz": 9, "dokuzuncu": 9}
@@ -89,7 +90,8 @@ def norm(s: str | None) -> str:
 
 
 def _capa(parca: str) -> bool:
-    """Parçada değişiklik çapası var mı: pencere ölçüsü, pencere sözü, "dış" + 140, çatı sözü/harfi/varyant kodu, ekleme/kaldırma sözü."""
+    """Parçada değişiklik çapası var mı: pencere ölçüsü, pencere sözü, "dış" + 140, çatı/katalog sözü ya da varyant kodu, ekleme/kaldırma
+    sözü. Tek başına "K"/"L" harfi çapa değildir (geometri hakemi üçüncü tur: "çatı K ve L'yi görelim" bölünüp K seçiliyordu)."""
     if olculer(parca):
         return True
     q = norm(_olcusuz(parca))
@@ -97,11 +99,23 @@ def _capa(parca: str) -> bool:
     soz = _KOD.sub(" ", q).split()
     return (any(_PENCERE_T.fullmatch(w) for w in soz) or any(_EKLE_T.fullmatch(w) for w in soz)
             or (any(w.startswith("dis") and _DIS_T.fullmatch(w) for w in soz) and any(w in ("140", "14") for w in soz))
-            or any(w.startswith(("cati", "katalog")) for w in soz) or any(_HARF_T.fullmatch(w) for w in soz)
+            or any(w.startswith(("cati", "katalog")) for w in soz)
             or any(re.search(r"[kl]$", re.sub(r"\s", "", k)) for k in kodlar))
 
 
-def _ve_bol(parca: str) -> list[str]:
+def _bagimsiz(parca: str, mahaller: list[dict] | None) -> bool:
+    """Çapasız ama tanınmayan içerik taşıyan parça ("dış cephe gri olsun", "banyoya havlupan koyalım") kendi cümlesidir: çapalı parçaya
+    eklenirse ondaki isteği bilgi ya da başka cümle içinde saklar (geometri hakemi üçüncü tur: "çatı L ve dış cephe gri olsun")."""
+    q0 = norm(_olcusuz(parca))
+    if _KOD.search(q0):
+        return False                                        # model kodu çatı işaretidir: parça bağımsız değil
+    q = _ODA_GENEL.sub(" ", _odalar(q0, mahaller or [])[1])
+    sinif = [_sinifla(w) for w in q.split()]
+    # çatı harfi taşıyan parça bağımsız değildir ("çatı K ile L arasındaki fark nedir?": "L arasındaki fark" çatı cümlesine aittir)
+    return "bilinmeyen" in sinif and "harf" not in sinif
+
+
+def _ve_bol(parca: str, mahaller: list[dict] | None = None) -> list[str]:
     """"ve"/"ile" ile bağlanmış istekler ayrı cümledir — ama yalnız iki yanında da çapa varsa ("mutfak penceresi 120x120 ve dışlar 140'lık
     olsun" iki istek; "mutfak ve salon pencereleri 120x120" tek istek, "120x120 ile değiştirelim" tek istek). Çapasız parça sonraki çapalı
     parçaya (sonda kalırsa öncekine) eklenir (geometri hakemi ikinci tur, 13.10: ikinci istek sessizce düşüyordu)."""
@@ -110,7 +124,7 @@ def _ve_bol(parca: str) -> list[str]:
     gruplar: list[list[int]] = []
     bas = 0
     for i, x in enumerate(parcalar):
-        if _capa(x):
+        if _capa(x) or _bagimsiz(x, mahaller):
             gruplar.append([bas, i]); bas = i + 1
     if not gruplar:
         return [parca]
@@ -124,14 +138,15 @@ def _ve_bol(parca: str) -> list[str]:
     return out
 
 
-def _parcalar(metin: str | None) -> list[str]:
-    """Cümleler: noktalama ve satır sonu; "ama", "fakat", "ayrıca" da ayırır; "ve"/"ile" yalnız iki yanında da istek çapası varsa (`_ve_bol`)."""
+def _parcalar(metin: str | None, mahaller: list[dict] | None = None) -> list[str]:
+    """Cümleler: noktalama ve satır sonu; "ama", "fakat", "ayrıca" da ayırır; "ve"/"ile" yalnız iki yanında da istek çapası (ya da tanınmayan
+    içerik) varsa (`_ve_bol`; `mahaller` modelin oda adlarını tanıtır)."""
     out = []
     metin = re.sub(r"(?<![\w/×*'])(\d{1,2})\.(?=\s)", r"\1 ", metin or "")      # sıra noktası ("1. yatak odası") cümle sonu değil
     for p in re.findall(r"[^;,.!?\n]+[;,.!?\n]*", metin):
         for x in re.split(r"\s+(?=(?:ama|fakat|ayrıca|ayrica)\s)", p):
             if x.strip():
-                out.extend(_ve_bol(x))
+                out.extend(_ve_bol(x, mahaller))
     return out
 
 
@@ -299,39 +314,50 @@ def parca_oku(parca: str, t: dict, katalog_aday: dict | None = None, y: dict | N
     has = lambda *a: any(sinif.get(x) for x in a)
     soru = "?" in parca or has("soru")
     olumsuz = has("olumsuz") or soru
-    r = {"metin": parca.strip(), "tur": "bos", "olumsuz": olumsuz, "bilinmeyen": sinif.get("bilinmeyen", []), "odalar": odalar, "olcu": None}
+    r = {"metin": parca.strip(), "tur": "bos", "olumsuz": olumsuz, "bilinmeyen": sinif.get("bilinmeyen", []), "odalar": odalar, "olcu": None,
+         "neden": None}
     sayilar = [int(s) for s in sinif.get("sayi", [])]
     pencere_soz = has("pencere")
+    d140 = [s for s in sinif.get("d140", []) if s not in ("lik", "luk", "mm")]
+    varyant_kodu = any(re.search(r"[kl]$", k) for k in kodlar)
+    cati_soz = any(s.startswith(("cati", "katalog")) for s in sinif.get("cati", []))
+    m_pencere = pencere_soz or bool(olc)
+    m_dis140 = has("dis") and bool(d140) and any(s.startswith("dis") for s in sinif.get("dis", []))
+    m_cati = cati_soz or has("harf")
+    m_ekle = has("ekle") or bool(_EKLE_IFADE.search(" " + q0 + " "))
+    r["isaret"] = {"pencere": m_pencere, "dis140": m_dis140, "cati": m_cati or varyant_kodu, "ekle": m_ekle}
     if sinif.get("bilinmeyen"):
         r["tur"] = "baska"
         return r
-    # dış 140: "dış" + 140/14 (ve yalnız duvar/karkas/kalınlık sözleri); pencere, oda, ölçü, başka sayı yok
-    d140 = [s for s in sinif.get("d140", []) if s not in ("lik", "luk", "mm")]
-    if has("dis") and d140 and any(s.startswith("dis") for s in sinif["dis"]) and not (pencere_soz or olc or odalar or genel_oda or has("ekle")) \
-            and not [n for n in sayilar if n not in (14, 140)]:
-        r["tur"] = "dis140"
-        return r
-    if (has("ekle") or _EKLE_IFADE.search(" " + q0 + " ")) and (pencere_soz or olc or odalar):
+    if m_ekle and (m_pencere or odalar):
         r["tur"] = "ekle_kaldir"
         return r
-    if has("olcu") and (sayilar or has("d140")) and not (pencere_soz or olc):
+    if m_pencere + m_dis140 + m_cati >= 2:                  # bölünemeyen iki istek ("dışlar 140 ve L olsun"): sorulur, düşmez
+        r["tur"] = "belirsiz"; r["neden"] = "karma"
+        return r
+    # dış 140: "dış" + 140/14 (ve yalnız duvar/karkas/kalınlık sözleri); oda ve başka sayı yok (model kodu olabilir: "Ç8801K dışlar 140")
+    if m_dis140 and not (odalar or genel_oda) and not [n for n in sayilar if n not in (14, 140)]:
+        r["tur"] = "dis140"
+        return r
+    if has("olcu") and (sayilar or has("d140")) and not m_pencere:
         r["tur"] = "baska"                                 # pencere dışı bir ölçü ("dış ölçü 14 x 8"): otomatik yapılamaz
         return r
-    # çatı: çatı/katalog sözü, tek harf (k/l) ya da varyant kodu; pencere ve oda yok ("model", "versiyon" tek başına çatı değil)
-    varyant_kodu = any(re.search(r"[kl]$", k) for k in kodlar)
-    cati_soz = any(s.startswith(("cati", "katalog")) for s in sinif.get("cati", []))
-    if (cati_soz or has("harf") or varyant_kodu) and not (pencere_soz or olc or odalar or genel_oda or has("dis", "d140", "ekle")):
-        kod = celik.cati_secimi(parca, katalog_aday) if katalog_aday and katalog_aday.get("varyantlar") else None
+    # çatı: çatı/katalog sözü, tek harf (k/l) ya da varyant kodu; pencere ve oda yok ("model", "versiyon" tek başına çatı değil). İki ayrı
+    # çatı harfi ("çatı K mı L mi") seçim değildir.
+    if (m_cati or varyant_kodu) and not (m_pencere or odalar or genel_oda or has("dis", "d140")):
+        harfler = set(sinif.get("harf", [])) | {k[-1] for k in kodlar if re.search(r"[kl]$", k)}
+        kod = celik.cati_secimi(parca, katalog_aday) if (katalog_aday and katalog_aday.get("varyantlar") and len(harfler) <= 1) else None
         r["tur"] = "cati"
         r["kod"] = kod
+        r["neden"] = "iki_cati" if len(harfler) > 1 else None
         r["olumsuz"] = has("olumsuz") or soru            # "katalog çatısı kalsın" seçimdir (kalsın olumsuz değil)
         return r
-    if pencere_soz or olc:
+    if m_pencere:
         if has("kalsin") and not olc:
             r["tur"] = "bos"                               # "mutfak penceresi kalsın": değişiklik yok
             return r
-        if (has("dis") and d140) or cati_soz or has("harf") or varyant_kodu or (olc and sayilar):
-            r["tur"] = "belirsiz"                          # bölünemeyen iki istek ya da ölçü dışı sayı ("1 ve 2 pencereleri"): sorulur, düşmez
+        if olc and sayilar:
+            r["tur"] = "belirsiz"; r["neden"] = "sayi"     # ölçü dışı sayı ("yatak odası 1 ve 2 pencereleri", "2 tane"): sorulur
             return r
         r["tur"] = "pencere"
         r["olumsuz"] = olumsuz or (has("kalsin") and bool(olc))
@@ -347,10 +373,15 @@ def parca_oku(parca: str, t: dict, katalog_aday: dict | None = None, y: dict | N
         elif has("harf", "sifat", "olcu", "cati", "dis", "d140") or sayilar:
             r["tur"] = "baska"                             # odanın kendisine istek ("veranda L olsun", "mutfak büyük olsun"): otomatik yapılamaz
         else:
-            r["tur"] = "belirsiz"
+            r["tur"] = "belirsiz"; r["neden"] = "oda"      # yalnız oda adı (oda listesi): ilk planda talep bilgisidir
         return r
-    if has("dis", "d140", "cati", "harf", "sifat", "olcu"):
-        r["tur"] = "bos" if (has("kalsin", "olumsuz") and not has("dis", "d140")) else "belirsiz"
+    if has("dis", "d140"):
+        r["tur"] = "bos" if (has("kalsin", "olumsuz") and not has("d140")) else "belirsiz"
+        r["neden"] = "dis" if r["tur"] == "belirsiz" else None      # "duvarlar 140 olsun", "dış duvarlar kalın olsun"
+        return r
+    if has("cati", "harf", "sifat", "olcu"):
+        r["tur"] = "bos" if has("kalsin", "olumsuz") else "belirsiz"
+        r["neden"] = "genel" if r["tur"] == "belirsiz" else None   # "büyük olsun", "modeli": revizyonda sorulur
         return r
     r["tur"] = "bos"
     return r
@@ -387,7 +418,7 @@ def _pencere_okumasi(p: dict, t: dict, y: dict | None, onceki_adaylar: list[dict
 def oku(metin: str | None, t: dict, katalog_aday: dict | None = None, ipucu: bool = False, y: dict | None = None) -> dict:
     """Bayinin mesajından çelik revizyon okumaları, cümle cümle. `katalog_aday`: çatı varyantları olan katalog modeli kaydı (`varyantlar`).
     `ipucu`: LLM pencere değişikliği gördü (yalnız bayrak; okuma yine bayinin sözünden). Dönen sözlükte `pencere` ilk pencere okumasıdır."""
-    parcalar = [parca_oku(p, t, katalog_aday, y) for p in _parcalar(metin)]
+    parcalar = [parca_oku(p, t, katalog_aday, y) for p in _parcalar(metin, t.get("mahaller"))]
     r = {"parcalar": parcalar, "pencereler": [], "pencere": None, "cati": None, "cati_belirsiz": False, "dis140": False,
          "baska": [], "belirsiz": [], "olumsuz": [], "ekle_kaldir": [], "ipucu": bool(ipucu), "istek": False}
     catilar = []
@@ -413,13 +444,14 @@ def oku(metin: str | None, t: dict, katalog_aday: dict | None = None, ipucu: boo
         elif p["tur"] == "pencere":
             po = _pencere_okumasi(p, t, y)
             if po["belirsiz"]:
+                p["tur"], p["neden"] = "belirsiz", "olcu"      # üç ve daha çok ölçü
                 r["belirsiz"].append(p["metin"])
             else:
                 r["pencereler"].append(po)
-    if len(set(catilar)) == 1:
+    if len(set(catilar)) == 1 and len(_cati_harfleri(metin)) <= 1:
         r["cati"] = catilar[0]
-    elif len(set(catilar)) > 1:
-        r["cati_belirsiz"] = True                               # iki ayrı çatı: hangisi, sorulur
+    elif catilar or len(_cati_harfleri(metin)) > 1:
+        r["cati_belirsiz"] = bool(catilar)                      # iki ayrı çatı ("Ç8801K ve Ç8801L arasında kararsızım"): seçim değil
     r["pencere"] = r["pencereler"][0] if r["pencereler"] else None
     r["istek"] = bool(r["pencereler"] or r["cati"] or r["dis140"] or r["ekle_kaldir"] or r["olumsuz"] or r["cati_belirsiz"])
     return r
@@ -428,10 +460,23 @@ def oku(metin: str | None, t: dict, katalog_aday: dict | None = None, ipucu: boo
 def cati_okumasi(metin: str | None, katalog_aday: dict | None) -> str | None:
     """Mesajda tek ve olumsuz olmayan bir çatı cümlesi varsa onun varyant kodu ("çatı L olsun", "Ç8801 L", "katalog çatısı"); "veranda L
     olsun" çatı değildir (tanınmayan sözcük). Model tanımı gerekmez (yalnız varyant listesi)."""
-    if not katalog_aday or not katalog_aday.get("varyantlar"):
-        return None
+    if not katalog_aday or not katalog_aday.get("varyantlar") or len(_cati_harfleri(metin)) > 1:
+        return None                                             # mesajda iki ayrı çatı geçiyor: seçim değil (sorulur ya da set sunulur)
     kodlar = {p.get("kod") for p in (parca_oku(x, {}, katalog_aday) for x in _parcalar(metin)) if p["tur"] == "cati" and p.get("kod") and not p["olumsuz"]}
     return next(iter(kodlar)) if len(kodlar) == 1 else None
+
+
+def _cati_harfleri(metin: str | None) -> set[str]:
+    """Mesajın tamamında geçen çatı harfleri: tek başına "k"/"l" ve varyant kodlarının son harfi ("Ç8801K", "8801 L")."""
+    q = norm(_olcusuz(metin or ""))
+    harf = {k_[-1] for k_ in (re.sub(r"\s", "", x) for x in _KOD.findall(q)) if re.search(r"[kl]$", k_)}
+    return harf | {w for w in _KOD.sub(" ", q).split() if _HARF_T.fullmatch(w)}
+
+
+def degisiklik_var(metin: str | None) -> bool:
+    """Metinde pencere, dış 140 ya da ekleme/kaldırma cümlesi var mı (çatı sorusu ya da seçimi değil)? Set sunulurken "isteğinizi seçtiğiniz
+    plana işleyeceğim" notu yalnız bunda yazılır (geometri hakemi üçüncü tur: "çatı nasıl olacak?" için de yazılıyordu)."""
+    return any(parca_oku(x, {}, None)["tur"] in ("pencere", "dis140", "ekle_kaldir") for x in _parcalar(metin))
 
 
 def hizli_istek(metin: str | None) -> bool:
