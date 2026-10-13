@@ -353,6 +353,55 @@ try:
        "Patron şablonu: bayi kodu, talep kimliği (taslağın son İş Emri no'su), panel konuşma bağlantısı")
     kod, body, _ = istek(app_pn, "GET", f"/panel/konusma/{PATRON}", cerez=cerez)
     ok(b"template" in body and "pencere kapalı (24 saat)".encode() in body and "şablon gereksiz".encode() in body, "Patron konuşma sayfası: şablon satırı ve hata etiketleri")
+
+    print("9) İE-08 çelik (A2–A3): kabul kaydı → 'Ç8801' → üç çatı seçeneği tek görselde → düğme → r01 genel motordan (perspektifli bayi görseli + pafta PDF)")
+    AY.yaz(VERI, "mesaj_katmani", True)
+    with depo.baglan() as c, c.transaction():
+        c.execute("UPDATE mesajlar SET wa_zamani = now() WHERE gonderen = %s", (BAYI,))        # bayinin penceresi açık
+    for kod9 in ("Ç8801", "Ç8801K", "Ç8801L"):                                                 # K-A10: mühendis kabulü (vps/ie08_adaylar.sh'nin yazdığı)
+        depo.aday_yaz(kod9, "gecerli", referans_model="Ç8801", muhendis_kabulu={"kim": "e2e", "tarih": "2026-10-13", "not": ""})
+    time.sleep(1.2)
+    kod, c = webhook(yuk([metin(BAYI, "Ç8801 olsun", mid="wamid.E2EC1")]))
+    hazir_ekle("wamid.E2EC1", {"niyet": "yeni_talep", "guven": "yuksek", "ozet": "Ç8801 istiyor", "katalog_kodu": "Ç8801"})
+    ok(c.get("mesaj") == {"sahiplenildi": 1} and ajan() == 0, "ajan: 'Ç8801' işlendi")
+    i9 = q("SELECT sonuc FROM isler WHERE mesaj_id = 'wamid.E2EC1'")[0]["sonuc"]
+    s9 = q("SELECT id, durum, adaylar FROM secenek_setleri ORDER BY olusturuldu DESC LIMIT 1")[0]
+    ok(i9["eylem"] == "secenek" and [a["kod"] for a in s9["adaylar"]] == ["Ç8801", "Ç8801K", "Ç8801L"] and s9["durum"] == "acik",
+       f"çatı seçenek seti: katalog, K, L ({i9.get('gerekce')})")
+    k9 = q("SELECT kind, satir FROM giden WHERE mesaj_id = 'wamid.E2EC1' ORDER BY sira")
+    ok([x["kind"] for x in k9] == ["interactive"] and [b["reply"]["title"] for b in k9[0]["satir"]["interactive"]["action"]["buttons"]] == ["1. Ç8801", "2. Ç8801-K", "3. Ç8801-L"]
+       and Path(k9[0]["satir"]["file"]).is_file(), "tek etkileşim satırı: bileşik görsel + 3 düğme; öncelik sorusu yok")
+    say = gonder()
+    g9 = sahte.gidenler()[-1]
+    ok(say.get("kabul_edildi") == 1 and g9["type"] == "interactive" and "image" in g9["interactive"]["header"] and len(g9["interactive"]["action"]["buttons"]) == 3,
+       "Meta: görsel başlıklı 3 düğmeli seçenek mesajı")
+    set_wamid = q("SELECT dis_id FROM giden WHERE mesaj_id = 'wamid.E2EC1'")[0]["dis_id"]
+    time.sleep(1.2)
+    kod, c = webhook(yuk([buton(BAYI, f"s:{s9['id']}:Ç8801K", "2. Ç8801-K", set_wamid, mid="wamid.E2EC2")]))
+    ok(c.get("mesaj") == {"sahiplenildi": 1} and ajan() == 0, "ajan: çatı K düğmesi işlendi (gerçek genel motor)")
+    i9b = q("SELECT sonuc, cikarim FROM isler WHERE mesaj_id = 'wamid.E2EC2'")[0]
+    r9 = q("SELECT is_emri_no, rev, is_emri, durum, pdf_yolu, ekler FROM revizyonlar WHERE gonderen = %s ORDER BY id DESC LIMIT 1", BAYI)[0]
+    ok(i9b["sonuc"]["eylem"] == "is_emri" and i9b["cikarim"]["meta"]["backend"] == "etkilesim" and i9b["sonuc"]["cizim"]["motor"] == "genel"
+       and i9b["sonuc"]["cizim"]["passed"] is True, f"iş: is_emri, genel motor geçti (perspektif {i9b['sonuc']['cizim'].get('perspektif')}, {i9b['sonuc']['cizim'].get('sure_s')} s)")
+    ok(r9["rev"] == 1 and r9["durum"] == "onay_bekliyor" and r9["is_emri"]["yapi"]["sistem"] == "celik" and r9["is_emri"]["yapi"]["tanim"] == "modeller/C8801K.json"
+       and "mahaller" not in r9["is_emri"] and r9["is_emri"]["bilgi"]["bayi_telefonu"] == BAYI and "kunye" not in r9["is_emri"],
+       "revizyon r01: zarf yapi.sistem celik, tanım gömülü değil, antet numarası bayi kartından (D-09)")
+    ok(Path(r9["pdf_yolu"]).is_file() and Path(r9["pdf_yolu"]).name == "C8801K_pafta.pdf" and str(VERI / "projects") in r9["pdf_yolu"]
+       and r9["ekler"]["gorsel"]["filename"] == "C8801K_bayi_gorsel.png" and r9["ekler"]["ifc"]["sema_hatasi"] == 0 and "ucb" not in r9["ekler"],
+       "pafta PDF ve bayi görseli data/projects altında; IFC şema 0; 3D yok")
+    import fitz
+    with fitz.open(r9["pdf_yolu"]) as d9:
+        s9w = [w[4] for w in d9[0].get_text("words")]
+        ok(len(d9) == 2 and "TASLAK" in s9w and BAYI in s9w and "Deneme" in s9w, "PDF 2 sayfa; 1. sayfada TASLAK, antette bayinin adı ve kart numarası")
+    k9b = q("SELECT kind, satir FROM giden WHERE mesaj_id = 'wamid.E2EC2' ORDER BY sira")
+    ok([x["kind"] for x in k9b][:2] == ["interactive", "document"] and k9b[1]["satir"]["filename"] == f"Portman_{r9['is_emri_no']}_r01.pdf"
+       and sorted(b["reply"]["id"] for b in k9b[0]["satir"]["interactive"]["action"]["buttons"]) == sorted([f"o:{r9['is_emri_no']}:1", f"r:{r9['is_emri_no']}:1"]),
+       "satırlar: Onayla/Revize et + bayi görseli, PDF Portman_<no>_r01.pdf adıyla")
+    say = gonder()
+    t9 = sahte.tipler()[-(say.get("kabul_edildi") or 0) * 2:]
+    ok(say.get("kabul_edildi") >= 2 and "interactive/button" in t9 and "document" in t9, f"Meta: bayi görseli + düğmeler ve PDF gitti ({t9})")
+    ok(BAYI not in json.dumps(i9b["sonuc"]) and q("SELECT durum, secilen_kod FROM secenek_setleri WHERE id = %s", s9["id"])[0]["secilen_kod"] == "Ç8801K",
+       "iş sonucunda ham numara yok; set seçildi olarak kapandı")
 finally:
     with psycopg.connect(ADMIN + " dbname=postgres", autocommit=True) as c:
         c.execute(f"DROP DATABASE IF EXISTS {dbad} WITH (FORCE)")

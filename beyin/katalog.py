@@ -68,13 +68,25 @@ class Katalog:
 
     @staticmethod
     def kod_normalize(s: str | None) -> str | None:
+        """P6001, Ç8201, 6001 → P6001, C8801 → Ç8801; İE-08: çelik varyant harfi ve müşteri projesi kodu da (Ç8801-K → Ç8801K, KT-01 → KT01).
+        Prefabrik kodda harf eki yoktur ("P6001-A" kod değildir; bugünkü davranış — geometri hakemi 12.10)."""
         if not s:
             return None
         t = s.strip().upper().replace("-", "").replace(" ", "")
-        t = t.replace("C", "Ç") if re.fullmatch(r"C\d{4}", t) else t
+        t = "Ç" + t[1:] if re.fullmatch(r"C\d{4}[A-Z]?", t) else t
         if re.fullmatch(r"\d{4}", t):
             t = "P" + t
-        return t if re.fullmatch(r"[PÇ]\d{4}", t) else s.strip().upper()
+        return t if re.fullmatch(r"Ç\d{4}[A-Z]?|P\d{4}|KT\d{2}", t) else s.strip().upper()
+
+    @staticmethod
+    def taban_kod(s: str | None) -> str | None:
+        """Çelik varyantın taban modeli: Ç8801K → Ç8801 (aynı tabandaki varyant başka model değildir; seçenek setinden seçim konuşmayı
+        sıfırlamaz). Prefabrik ve KT kodu olduğu gibi."""
+        k = Katalog.kod_normalize(s)
+        if not k:
+            return None
+        m = re.fullmatch(r"(Ç\d{4})[A-Z]?", k)
+        return m.group(1) if m else k
 
     def bul(self, kod: str | None) -> dict | None:
         k = self.kod_normalize(kod)

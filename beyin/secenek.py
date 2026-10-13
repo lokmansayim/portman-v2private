@@ -35,13 +35,18 @@ def uygun_adaylar(katalog, ts: dict) -> list[dict]:
     if ts.get("pano") and ts["pano"].get("nx") and ts["pano"].get("ny"):
         nx, ny = float(ts["pano"]["nx"]), float(ts["pano"]["ny"])
     yapi = ts.get("yapi_turu")
+    kat = ts.get("kat_sayisi")
     out = []
     for a in katalog.gorunur_adaylar():
         if oda and a.get("oda_programi") and a["oda_programi"] != oda:
             continue
         if yapi == "celik" and a.get("yapi_turu", "prefabrik") != "celik":
             continue
+        if yapi != "celik" and a.get("yapi_turu", "prefabrik") == "celik":
+            continue                                                   # İE-08: yapı türü "çelik" denmedikçe çelik aday sunulmaz (prefabrik akışı değişmez; geometri hakemi 12.10)
         if yapi == "prefabrik" and a.get("yapi_turu", "prefabrik") != "prefabrik":
+            continue
+        if kat and a.get("kat") and int(a["kat"]) != int(kat):        # İE-08: "tek kat / çift kat" söylendiyse kat süzgeci (İE-07 kat kuralı gibi)
             continue
         km2 = _f(a.get("katalog_m2"))
         if alan is not None:
@@ -95,18 +100,37 @@ def puanla(adaylar: list[dict], ts: dict) -> list[dict]:
     return sonuc
 
 
-def set_kaydi(kaynak_mesaj_id: str, siralanmis: list[dict], ts: dict) -> dict:
-    """Konuşma durumuna ve secenek_setleri tablosuna yazılan set (şablon yolu ve büyük alanlar hariç)."""
-    return {"id": set_id(kaynak_mesaj_id), "durum": "acik", "kaynak_mesaj_id": kaynak_mesaj_id,
+def celik_seti_mi(adaylar: list[dict]) -> bool:
+    """Adayların hepsi çelik mi (İE-08: çelikte öncelik sorusu hiç sorulmaz — Lokman, 12 Ekim 2026)."""
+    return bool(adaylar) and all(a.get("yapi_turu") == "celik" for a in adaylar)
+
+
+def cati_seti(adaylar: list[dict]) -> list[dict]:
+    """Katalog modelinin çatı seçenekleri (katalog çatısı, K, L …) numaralı, puansız (İE-05 devir §3.1 kural 5)."""
+    out = []
+    for i, a in enumerate(adaylar, 1):
+        out.append({**a, "sira": i, "puan": None, "hesap": ""})
+    return out
+
+
+def set_kaydi(kaynak_mesaj_id: str, siralanmis: list[dict], ts: dict, tur: str = "alan") -> dict:
+    """Konuşma durumuna ve secenek_setleri tablosuna yazılan set (şablon yolu ve büyük alanlar hariç). tur: alan | cati_varyanti."""
+    return {"id": set_id(kaynak_mesaj_id), "durum": "acik", "kaynak_mesaj_id": kaynak_mesaj_id, "tur": tur,
             "oncelik": ts.get("oncelik"), "agirliklar": dict(AGIRLIKLAR),
             "adaylar": [{k: a.get(k) for k in ("kod", "sira", "puan", "hesap", "referans_model", "oda_programi", "katalog_m2",
-                                                 "kapali_m2", "veranda_m2", "durum", "gorsel")} for a in siralanmis[:EN_COK_SUNUM]]}
+                                                 "kapali_m2", "veranda_m2", "durum", "gorsel", "motor", "tanim", "gosterim", "sunum", "yapi_turu", "kat")
+                         if k in a} for a in siralanmis[:EN_COK_SUNUM]]}
+
+
+def gosterim(a: dict) -> str:
+    return str(a.get("gosterim") or a["kod"])
 
 
 def kisa_ad(a: dict) -> str:
     """Liste satırı başlığı (≤24): 'P9401 · 94 m²'."""
     m2 = a.get("katalog_m2")
-    return f"{a['kod']} · {m2} m²"[:24] if m2 is not None else str(a["kod"])[:24]
+    g = gosterim(a)
+    return f"{g} · {m2:g} m²"[:24] if isinstance(m2, (int, float)) else (f"{g} · {m2} m²"[:24] if m2 is not None else g[:24])
 
 
 def aciklama(a: dict) -> str:
@@ -119,12 +143,27 @@ def aciklama(a: dict) -> str:
     return " · ".join(x for x in p if x)[:72]
 
 
+def cati_mesaji(siralanmis: list[dict], referans: dict) -> str:
+    """Çatı seçenek mesajı (tek görselde üç çatı; plan aynı): 'Ç8801 için üç çatı seçeneği: 1 katalog çatısı, 2 K, 3 L…'."""
+    g = gosterim(referans); m2 = referans.get("katalog_m2"); oda = referans.get("oda_programi") or ""
+    satirlar = []
+    for a in siralanmis:
+        ca = (a.get("sunum") or {}).get("cati_adi") or ""
+        etiket = "katalog çatısı" if str(a["kod"]).upper() == str(referans["kod"]).upper() else f"çatı {gosterim(a)[-1]}"
+        satirlar.append(f"{a['sira']}. {gosterim(a)} · {etiket}" + (f" ({ca})" if ca else ""))
+    govde = (f"{g} için {len(siralanmis)} çatı seçeneği. Plan {'üçünde' if len(siralanmis) == 3 else 'hepsinde'} aynı"
+             + (f" ({m2:g} m², {oda})" if isinstance(m2, (int, float)) else "") + "; fark çatıda.\n\n" + "\n".join(satirlar)
+             + "\n\nBirini seçin ya da yazın (örn. \"çatı K olsun\").")
+    return govde[:1024]
+
+
 def mesaj_metni(siralanmis: list[dict], ts: dict, gerekli: int = GEREKEN_ADAY) -> str:
     """Seçenek mesajının gövdesi: ilk üç aday puan ve hesabıyla; üçten az geçerli aday varsa durum açıkça yazılır."""
     n = len(siralanmis)
     satirlar = []
     for a in siralanmis[:EN_COK_GORSEL]:
-        satirlar.append(f"{a['sira']}. {a['kod']} · {a.get('katalog_m2')} m² katalog"
+        m2 = a.get("katalog_m2"); m2s = f"{m2:g}" if isinstance(m2, float) else f"{m2}"      # 88.0 → "88"; prefabrik tamsayı/metin aynen
+        satirlar.append(f"{a['sira']}. {gosterim(a)} · {m2s} m² katalog"
                         + (f", kapalı {a['kapali_m2']}" if a.get("kapali_m2") is not None else "")
                         + (f", veranda {a['veranda_m2']}" if (_f(a.get("veranda_m2")) or 0) > 0 else "")
                         + f" · puan {a['puan']} ({a['hesap']})")

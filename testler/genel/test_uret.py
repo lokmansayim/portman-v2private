@@ -86,6 +86,33 @@ def test_dogrulama_gecmezse_teslim_pdfi_yok(tmp_path, monkeypatch):
     # bayiye giden görseller de teslim adıyla kalmaz (geometri hakemi, 2. tur)
     assert m["plan_bayi"] is None and not (tmp_path / "C8201_plan_bayi.png").exists() and (tmp_path / "C8201_plan_bayi.HATALI.png").exists()
     assert not (tmp_path / "C8201_pafta_sablon.png").exists() and (tmp_path / "C8201_pafta_sablon.HATALI.png").exists()
+    assert m["bayi_gorsel"] is None and not (tmp_path / "C8201_bayi_gorsel.png").exists() and (tmp_path / "C8201_bayi_gorsel.HATALI.png").exists()
+
+
+def test_bilgi_antette_ad_ve_numara_manifestte_yok(tmp_path):
+    # D-09 (PR-2): zarfın `bilgi`si antete bayinin adı ve kart numarasını yazar; manifest ve validation değerleri taşımaz (yalnız bilgi_var);
+    # hata iletisine `bilgi` değerleri girmez (_bilgisiz). Numara ve ad test verisidir.
+    import fitz
+    bilgi = {"bayi_adi": "Deneme Bayi", "bayi_telefonu": "900000000555", "sevk_adresi": "Deneme İlçesi", "ozel_istekler": ["çatı antrasit"]}
+    m = uret.uret(TANIM, tmp_path, is_emri_no="PM-TEST-1", revizyon=2, set_yolu=SET, yontem="panel", perspektif=False, bayi=True, bilgi=bilgi)
+    assert m["passed"] and m["bilgi_var"] is True
+    with fitz.open(tmp_path / "C8201_pafta.pdf") as d:
+        s1 = [w[4] for w in d[0].get_text("words")]
+    assert "Deneme" in s1 and "Bayi" in s1 and "900000000555" in s1 and "r02" in s1 and "antrasit" in s1
+    for dosya in ("manifest.json", "validation.json", "uret.log"):
+        assert "900000000555" not in (tmp_path / dosya).read_text(encoding="utf-8")
+    assert uret._bilgisiz("hata: 900000000555 / Deneme Bayi", bilgi) == "hata: [bilgi] / [bilgi]"
+
+
+def test_aday_karti_revizyonsuz_taslak(tmp_path):
+    # Lokman (12.10): aday kartında (seçimden önce) "r01" yazmaz, yalnız "TASLAK"; revizyon verilince (r01/r02 başlık görseli) numara kalır.
+    from motor.genel import bayi_gorseli
+    t = json.loads(TANIM.read_text(encoding="utf-8"))
+    a = bayi_gorseli.plan_bayi(t, tmp_path / "aday", "C8201", revizyon=None, set_yolu=SET, yontem="panel")
+    b = bayi_gorseli.plan_bayi(t, tmp_path / "r01", "C8201", revizyon=1, set_yolu=SET, yontem="panel")
+    assert a.is_file() and b.is_file() and sha(a) != sha(b)
+    m = uret.uret(TANIM, tmp_path / "u", revizyon=None, set_yolu=SET, yontem="panel", perspektif=False, bayi=True)
+    assert m["passed"] and m["revizyon"] is None and sha(tmp_path / "u" / "C8201_plan_bayi.png") == sha(a)
 
 
 def test_gecersiz_tanimda_kayit_yazilir(tmp_path):

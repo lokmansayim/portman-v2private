@@ -201,7 +201,7 @@ def test_bayi_ekle_ve_duzenle(pn, depo):
     kod, _, b = c.git("POST", "/panel/bayi/yeni", {"csrf": csrf, "numara": NUMARA_Y, "ad": "Deneme Bayi Y", "hitap": "Bey", "firma": "Y Yapı",
                                                    "bolge": "Ege", "rol": "bayi", "kod": "", "aktif": "1"})
     assert (kod, c.baslik(b, "Location")) == (302, ["/panel/bayiler"])
-    assert depo.gelen_bayisi(NUMARA_Y) == {"kod": "B" + NUMARA_Y[-4:], "ad": "Deneme Bayi Y", "firma": "Y Yapı", "rol": "bayi"}
+    assert depo.gelen_bayisi(NUMARA_Y) == {"kod": "B" + NUMARA_Y[-4:], "ad": "Deneme Bayi Y", "firma": "Y Yapı", "rol": "bayi", "numara": NUMARA_Y}   # İE-08 D-09
     kod, h, _ = c.git("GET", "/panel/bayiler")
     assert kod == 200 and NUMARA_Y.encode() in h and b"Deneme Bayi Y" in h and b"Ege" in h
     # düzenleme: numara yoldan gelir, formdaki numara yok sayılır; aktif kapanır

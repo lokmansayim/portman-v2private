@@ -1,0 +1,361 @@
+[
+ {
+  "kod": "Ç8801",
+  "gosterim": "Ç8801",
+  "durum": "gecerli",
+  "motor": "genel",
+  "tanim": "modeller/C8801.json",
+  "tanim_sha256": "a8ca2f1910ee33b9de7af39c73b71914584f7703c240e4c10f8ab7c9b57f58ff",
+  "gorsel": "adaylar/C8801.png",
+  "referans_model": "Ç8801",
+  "yapi_turu": "celik",
+  "kat": 1,
+  "oda_programi": "2+1",
+  "katalog_m2": 88.0,
+  "kapali_m2": 74.33,
+  "veranda_m2": 13.73,
+  "varyantlar": [
+   "Ç8801K",
+   "Ç8801L"
+  ],
+  "musteri_projesi": false,
+  "sunum": {
+   "cati_adi": "Beşik + cumba",
+   "ad": "Tek kat çelik, 2+1, 88 m² (katalog)"
+  },
+  "ozet": {
+   "dis_olcu_cm": [
+    1024.0,
+    860.0
+   ],
+   "oturum_m2": 88.06,
+   "odalar": {
+    "Yaşam Alanı": 21.34,
+    "Mutfak": 10.05,
+    "Hol": 7.38,
+    "Yatak Odası 1": 12.74,
+    "Yatak Odası 2": 11.79,
+    "Banyo": 4.68,
+    "Veranda": 13.73
+   },
+   "pencere": 9,
+   "kapi": 6,
+   "cati": "besik_cumba",
+   "liste_satir": 93,
+   "kural_seti": "kurallar.json",
+   "perspektif": "TAMAM"
+  },
+  "kaynak": {
+   "metin": "PortatifEv katalog modeli; çatı Lokman 10 Ekim 2026 14:46 (2. versiyon)",
+   "dosya": "modeller/C8801.json",
+   "dogrulama": "çizim seti (İE-08, 12 Ekim 2026)",
+   "karar": "D-08 madde 4; D-10"
+  },
+  "not": "Katalog çatısı; K ve L aynı planın çatı varyantları"
+ },
+ {
+  "kod": "Ç8801K",
+  "gosterim": "Ç8801-K",
+  "durum": "gecerli",
+  "motor": "genel",
+  "tanim": "modeller/C8801K.json",
+  "tanim_sha256": "9a6fbf851f10bf0c01c7424fe9385e21e793144afdbd8b59ea9dcc1f0b1cbf64",
+  "gorsel": "adaylar/C8801K.png",
+  "referans_model": "Ç8801",
+  "yapi_turu": "celik",
+  "kat": 1,
+  "oda_programi": "2+1",
+  "katalog_m2": 88.0,
+  "kapali_m2": 74.33,
+  "veranda_m2": 13.73,
+  "varyantlar": [],
+  "musteri_projesi": false,
+  "sunum": {
+   "cati_adi": "Beşik + cumba, doğu ucu kırma",
+   "ad": "Tek kat çelik, 2+1, 88 m² (Ç8801'in çatı varyantı K: doğu ucu kırma)"
+  },
+  "ozet": {
+   "dis_olcu_cm": [
+    1024.0,
+    860.0
+   ],
+   "oturum_m2": 88.06,
+   "odalar": {
+    "Yaşam Alanı": 21.34,
+    "Mutfak": 10.05,
+    "Hol": 7.38,
+    "Yatak Odası 1": 12.74,
+    "Yatak Odası 2": 11.79,
+    "Banyo": 4.68,
+    "Veranda": 13.73
+   },
+   "pencere": 9,
+   "kapi": 6,
+   "cati": "besik_cumba",
+   "liste_satir": 93,
+   "kural_seti": "kurallar.json",
+   "perspektif": "TAMAM"
+  },
+  "kaynak": {
+   "metin": "Ç8801 çatı varyantı K (Lokman 10 Ekim 2026: 1. versiyon; doğu ucu kırma)",
+   "dosya": "modeller/C8801K.json",
+   "dogrulama": "çizim seti (İE-08, 12 Ekim 2026)",
+   "karar": "D-08 madde 4; D-10"
+  },
+  "not": ""
+ },
+ {
+  "kod": "Ç8801L",
+  "gosterim": "Ç8801-L",
+  "durum": "gecerli",
+  "motor": "genel",
+  "tanim": "modeller/C8801L.json",
+  "tanim_sha256": "5d7850745e6fe78aa24250ad00b7be41cf786ed6b0e4e6caffa3bc7926ccf2a5",
+  "gorsel": "adaylar/C8801L.png",
+  "referans_model": "Ç8801",
+  "yapi_turu": "celik",
+  "kat": 1,
+  "oda_programi": "2+1",
+  "katalog_m2": 88.0,
+  "kapali_m2": 74.33,
+  "veranda_m2": 13.73,
+  "varyantlar": [],
+  "musteri_projesi": false,
+  "sunum": {
+   "cati_adi": "L beşik (beşik + cumba)",
+   "ad": "Tek kat çelik, 2+1, 88 m² (Ç8801'in çatı varyantı L: kanadın mahyası boydan boya)"
+  },
+  "ozet": {
+   "dis_olcu_cm": [
+    1024.0,
+    860.0
+   ],
+   "oturum_m2": 88.06,
+   "odalar": {
+    "Yaşam Alanı": 21.34,
+    "Mutfak": 10.05,
+    "Hol": 7.38,
+    "Yatak Odası 1": 12.74,
+    "Yatak Odası 2": 11.79,
+    "Banyo": 4.68,
+    "Veranda": 13.73
+   },
+   "pencere": 9,
+   "kapi": 6,
+   "cati": "besik_cumba",
+   "liste_satir": 93,
+   "kural_seti": "kurallar.json",
+   "perspektif": "TAMAM"
+  },
+  "kaynak": {
+   "metin": "Ç8801 çatı varyantı L (kanadın mahyası boydan boya)",
+   "dosya": "modeller/C8801L.json",
+   "dogrulama": "çizim seti (İE-08, 12 Ekim 2026)",
+   "karar": "D-08 madde 4; D-10"
+  },
+  "not": ""
+ },
+ {
+  "kod": "Ç8201",
+  "gosterim": "Ç8201",
+  "durum": "gecerli",
+  "motor": "genel",
+  "tanim": "modeller/C8201.json",
+  "tanim_sha256": "cc1c4d9393d294072ca6a97327c86212d6eaef51ebf98cead31fbd37f09cb444",
+  "gorsel": "adaylar/C8201.png",
+  "referans_model": "Ç8201",
+  "yapi_turu": "celik",
+  "kat": 1,
+  "oda_programi": "2+1",
+  "katalog_m2": 82.0,
+  "kapali_m2": 63.82,
+  "veranda_m2": 18.23,
+  "varyantlar": [],
+  "musteri_projesi": false,
+  "sunum": {
+   "cati_adi": "Kırma",
+   "ad": "Tek kat çelik, 2+1, 82 m²"
+  },
+  "ozet": {
+   "dis_olcu_cm": [
+    1094.0,
+    750.0
+   ],
+   "oturum_m2": 82.05,
+   "odalar": {
+    "Yatak Odası 1": 11.92,
+    "Yatak Odası 2": 11.92,
+    "Banyo": 4.3,
+    "Hol": 6.75,
+    "Yaşam Alanı": 23.48,
+    "Veranda": 18.23
+   },
+   "pencere": 8,
+   "kapi": 5,
+   "cati": "kirma",
+   "liste_satir": 90,
+   "kural_seti": "kurallar.json",
+   "perspektif": "TAMAM"
+  },
+  "kaynak": {
+   "metin": "PortatifEv katalog modeli; şartnameden çizildi (İE-05); katalog paftası düzeltildi",
+   "dosya": "modeller/C8201.json",
+   "dogrulama": "çizim seti (İE-08, 12 Ekim 2026)",
+   "karar": "D-08 madde 4; D-10"
+  },
+  "not": ""
+ },
+ {
+  "kod": "KT01",
+  "gosterim": "KT-01",
+  "durum": "gecerli",
+  "motor": "genel",
+  "tanim": "modeller/KT01.json",
+  "tanim_sha256": "28340286ce25929a51acbb29f86fc53a7de702bfce2b4534ab0c42483c7766f2",
+  "gorsel": "adaylar/KT01.png",
+  "referans_model": "KT01",
+  "yapi_turu": "celik",
+  "kat": 1,
+  "oda_programi": "2+1",
+  "katalog_m2": 99.0,
+  "kapali_m2": 87.27,
+  "veranda_m2": 11.39,
+  "varyantlar": [],
+  "musteri_projesi": true,
+  "sunum": {
+   "cati_adi": "Beşik + cumba",
+   "ad": ""
+  },
+  "ozet": {
+   "dis_olcu_cm": [
+    1221.0,
+    910.0
+   ],
+   "oturum_m2": 98.66,
+   "odalar": {
+    "Yatak Odası 1": 10.53,
+    "Banyo": 3.81,
+    "Yatak Odası 2": 12.65,
+    "Salon - Mutfak": 35.55,
+    "Müştemilat": 15.32,
+    "Veranda": 11.39
+   },
+   "pencere": 7,
+   "kapi": 5,
+   "cati": "besik_cumba",
+   "liste_satir": 93,
+   "kural_seti": "kurallar.json",
+   "perspektif": "TAMAM"
+  },
+  "kaynak": {
+   "metin": "Kör test 1 (müşteri projesi; bayiye adsız); düzeltilmiş tanım, yöntem A",
+   "dosya": "modeller/KT01.json",
+   "dogrulama": "çizim seti (İE-08, 12 Ekim 2026)",
+   "karar": "D-08 madde 4; D-10"
+  },
+  "not": ""
+ },
+ {
+  "kod": "KT02",
+  "gosterim": "KT-02",
+  "durum": "gecerli",
+  "motor": "genel",
+  "tanim": "modeller/KT02.json",
+  "tanim_sha256": "88d7fa22b19c9f7d94f507f8fc97633d40d3ef99512fa9582ffb8bd4965a098a",
+  "gorsel": "adaylar/KT02.png",
+  "referans_model": "KT02",
+  "yapi_turu": "celik",
+  "kat": 1,
+  "oda_programi": "2+1",
+  "katalog_m2": 92.0,
+  "kapali_m2": 73.22,
+  "veranda_m2": 19.05,
+  "varyantlar": [],
+  "musteri_projesi": true,
+  "sunum": {
+   "cati_adi": "Kırma",
+   "ad": ""
+  },
+  "ozet": {
+   "dis_olcu_cm": [
+    922.7,
+    1170.0
+   ],
+   "oturum_m2": 92.27,
+   "odalar": {
+    "Yatak Odası 1": 13.97,
+    "Yatak Odası 2": 13.97,
+    "Hol": 6.79,
+    "Banyo": 4.14,
+    "Yaşama Mekanı": 25.9,
+    "Veranda": 16.88,
+    "Sundurma": 2.17
+   },
+   "pencere": 6,
+   "kapi": 5,
+   "cati": "kirma",
+   "liste_satir": 83,
+   "kural_seti": "kurallar.json",
+   "perspektif": "TAMAM"
+  },
+  "kaynak": {
+   "metin": "Kör test 2 (müşteri projesi; bayiye adsız); düzeltilmiş tanım, yöntem A",
+   "dosya": "modeller/KT02.json",
+   "dogrulama": "çizim seti (İE-08, 12 Ekim 2026)",
+   "karar": "D-08 madde 4; D-10"
+  },
+  "not": ""
+ },
+ {
+  "kod": "KT03",
+  "gosterim": "KT-03",
+  "durum": "gecerli",
+  "motor": "genel",
+  "tanim": "modeller/KT03.json",
+  "tanim_sha256": "b4f581e942cce527311b6598ad208ef79d662158dcddc03791e6ecce27b11cdd",
+  "gorsel": "adaylar/KT03.png",
+  "referans_model": "KT03",
+  "yapi_turu": "celik",
+  "kat": 1,
+  "oda_programi": "2+1",
+  "katalog_m2": 94.0,
+  "kapali_m2": 79.52,
+  "veranda_m2": 14.29,
+  "varyantlar": [],
+  "musteri_projesi": true,
+  "sunum": {
+   "cati_adi": "Kırma",
+   "ad": ""
+  },
+  "ozet": {
+   "dis_olcu_cm": [
+    1045.1,
+    970.5
+   ],
+   "oturum_m2": 93.81,
+   "odalar": {
+    "Salon": 16.29,
+    "Yatak Odası": 12.28,
+    "Çocuk Odası": 12.05,
+    "Hol": 7.39,
+    "Mutfak": 13.82,
+    "Banyo": 6.68,
+    "Veranda": 12.38,
+    "Sundurma": 1.9
+   },
+   "pencere": 7,
+   "kapi": 6,
+   "cati": "kirma",
+   "liste_satir": 99,
+   "kural_seti": "kurallar.json",
+   "perspektif": "TAMAM"
+  },
+  "kaynak": {
+   "metin": "Kör test 3 (müşteri projesi; bayiye adsız); düzeltilmiş tanım, yöntem A",
+   "dosya": "modeller/KT03.json",
+   "dogrulama": "çizim seti (İE-08, 12 Ekim 2026)",
+   "karar": "D-08 madde 4; D-10"
+  },
+  "not": ""
+ }
+]

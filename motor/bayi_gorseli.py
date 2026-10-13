@@ -106,8 +106,47 @@ def plan_gorseli(ie: dict, yol: Path, v: dict | None = None, genislik_px: int = 
     return yol
 
 
+def _tr(x) -> str:
+    """Türkçe sayı: 74.33 → "74,3", 88.0 → "88" (Lokman, 12.10.2026 göz denetimi: "74,3 m²")."""
+    try:
+        s = f"{float(x):.1f}".replace(".", ",")
+    except (TypeError, ValueError):
+        return str(x)
+    return s[:-2] if s.endswith(",0") else s
+
+
+def kart_altyazisi(a: dict) -> list[str]:
+    """Seçenek görselinde kartın alt yazı satırları. Prefabrik: bugünkü tek satır (değişmez). Çelik (`motor == genel`, İE-08): iki satır —
+    m² Türkçe biçimde ("88 m² katalog · kapalı 74,3 m²") ve çatı adı ("Çatı: Beşik + cumba, doğu ucu kırma"); kesilmez, çizimde sığdırılır."""
+    m2 = a.get("katalog_m2"); kapali = a.get("kapali_m2")
+    cati = (a.get("sunum") or {}).get("cati_adi") if isinstance(a.get("sunum"), dict) else None     # çelik: çatı adı (K/L farkı)
+    if a.get("motor") == "genel":
+        satirlar = [(f"{_tr(m2)} m² katalog" if m2 is not None else "") + (f" · kapalı {_tr(kapali)} m²" if kapali is not None else "")]
+        if cati:
+            satirlar.append(f"Çatı: {cati}")
+        return [s.strip(" ·") for s in satirlar if s.strip(" ·")]
+    satir = (f"{m2:g}" if isinstance(m2, (int, float)) else f"{m2}") + " m² katalog" + (f" · kapalı {kapali}" if kapali is not None else "")
+    if cati:
+        satir = f"{cati} · {satir}"
+    return [satir[:44]]
+
+
+def _sigdir(d, metin: str, font_yol: str, boy: int, genislik: int, en_kucuk: int = 12):
+    """Metni verilen genişliğe sığdırır: önce yazı boyu küçülür (en az `en_kucuk`), yine sığmazsa sonu "…" ile kısalır. (font, metin) döner."""
+    from PIL import ImageFont
+    for b in range(boy, en_kucuk - 1, -1):
+        f = ImageFont.truetype(font_yol, b)
+        if d.textlength(metin, font=f) <= genislik:
+            return f, metin
+    f = ImageFont.truetype(font_yol, en_kucuk); m = metin
+    while m and d.textlength(m + "…", font=f) > genislik:
+        m = m[:-1]
+    return f, (m.rstrip() + "…") if m != metin else metin
+
+
 def bilesik_gorsel(adaylar: list[dict], yol: Path, baslik: str = "", panel_px: int = 460) -> Path | None:
-    """Seçenek mesajı için en çok üç adayın plan görseli yan yana (sıra, kod, m², puan). Görseli olmayan aday atlanır; hiç yoksa None."""
+    """Seçenek mesajı için en çok üç adayın plan görseli yan yana (sıra, kod, m², puan). Görseli olmayan aday atlanır; hiç yoksa None.
+    Alt yazı `kart_altyazisi`: prefabrikte bugünkü tek satır (çizim değişmez); çelikte iki satır, kesilmeden sığdırılır (`_sigdir`)."""
     from PIL import Image, ImageDraw, ImageFont
     import matplotlib.font_manager as fm
     secili = [a for a in adaylar if a.get("gorsel_yolu") and Path(str(a["gorsel_yolu"])).is_file()][:3]
@@ -129,10 +168,16 @@ def bilesik_gorsel(adaylar: list[dict], yol: Path, baslik: str = "", panel_px: i
         except Exception:
             d.rectangle([x, y, x + panel_px, y + panel_px], outline="#cccccc")
         d.rectangle([x, y, x + panel_px, y + panel_px], outline="#bbbbbb", width=2)
-        d.text((x + 8, y + panel_px + 8), f"{a.get('sira', i + 1)}. {a.get('kod', '')}", font=f_b, fill="#1f1f1f")
-        satir = f"{a.get('katalog_m2')} m² katalog" + (f" · kapalı {a.get('kapali_m2')}" if a.get("kapali_m2") is not None else "")
-        d.text((x + 8, y + panel_px + 42), satir[:44], font=f_s, fill="#444444")
+        d.text((x + 8, y + panel_px + 8), f"{a.get('sira', i + 1)}. {a.get('gosterim') or a.get('kod', '')}", font=f_b, fill="#1f1f1f")
         puan = a.get("puan")
+        satirlar = kart_altyazisi(a)
+        if a.get("motor") == "genel":                                         # çelik: satırlar sığdırılır; 1. satır puanın solunda kalır
+            for j, s in enumerate(satirlar[:2]):
+                genislik = panel_px - 16 - (96 if (puan is not None and j == 0) else 0)
+                f, s2 = _sigdir(d, s, font_yol, 16, genislik)
+                d.text((x + 8, y + panel_px + 42 + 22 * j), s2, font=f, fill="#444444")
+        else:
+            d.text((x + 8, y + panel_px + 42), satirlar[0], font=f_s, fill="#444444")
         if puan is not None:
             d.text((x + panel_px - 8, y + panel_px + 8), f"{puan}", font=f_b, fill="#1d5fa8", anchor="ra")
             d.text((x + panel_px - 8, y + panel_px + 42), "/100 puan", font=f_s, fill="#1d5fa8", anchor="ra")
