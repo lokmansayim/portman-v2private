@@ -509,6 +509,7 @@ def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts
     k.d["son_is_emri"] = ie
     k.d["asama"] = "is_emri_hazir"
     k.d.pop("okuma_hicbiri", None)
+    k.d["soru_sayisi"] = 0                                     # A4: çelikte soru sınırı (MAX_SORU) revizyon başına; yeni plan bütçeyi açar (prefabrik aynen)
     ozet = (ts.get("ozet") or "").strip()
     if ozet and ozet[-1] not in ".!?":
         ozet += "."

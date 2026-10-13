@@ -92,8 +92,28 @@ def pencere_adaylari(t: dict, y: dict | None = None) -> list[dict]:
         et = a.get("etiket") or f"{a['en']}/{a['yuk']}"
         vas = a["yuk"] <= VASISTAS_ESIK
         mahal = a.get("mahal") or ""
-        out.append({"aciklik": a["ad"], "mahal": mahal, "en": a["en"], "yuk": a["yuk"], "etiket": et, "cephe": c, "vasistas": vas,
+        merkez = None
+        if d is not None:
+            x0, y0, x1, y1 = d["kutu"]
+            yatay = (x1 - x0) >= (y1 - y0)
+            merkez = (a["bas"] + a["en"] / 2, (y0 + y1) / 2) if yatay else ((x0 + x1) / 2, a["bas"] + a["en"] / 2)
+        out.append({"aciklik": a["ad"], "mahal": mahal, "en": a["en"], "yuk": a["yuk"], "etiket": et, "cephe": c, "vasistas": vas, "_merkez": merkez,
                     "aciklama": f"{mahal + ' ' if mahal else ''}{'vasistası' if vas else 'penceresi'} {et}" + (f" ({CEPHE_AD[c]} cephe)" if c else "")})
+    # aynı tarifli pencereler (aynı oda, ölçü ve cephe) konumla ayrılır: yan cephede öne/arkaya, ön ve arka cephede sola/sağa yakın (planda)
+    gruplar: dict[str, list[dict]] = {}
+    for p in out:
+        gruplar.setdefault(p["aciklama"], []).append(p)
+    for tarif, ps in gruplar.items():
+        if len(ps) < 2 or any(p["_merkez"] is None or p["cephe"] is None for p in ps):
+            continue
+        yan = ps[0]["cephe"] in ("sol", "sag")
+        ps = sorted(ps, key=lambda p: p["_merkez"][1] if yan else p["_merkez"][0])
+        adlar = (["öne yakın", "arkaya yakın"] if yan else ["sola yakın", "sağa yakın"]) if len(ps) == 2 else \
+                [f"{'önden' if yan else 'soldan'} {i}." for i in range(1, len(ps) + 1)]
+        for p, ek in zip(ps, adlar):
+            p["aciklama"] = tarif[:-1] + f", {ek})"
+    for p in out:
+        p.pop("_merkez", None)
     return out
 
 
