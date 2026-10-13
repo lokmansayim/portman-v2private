@@ -24,6 +24,10 @@ Adlar yazılabilir (D-11). Bulunan dosya adları yalnız dizin listesinden.
 | PK-06 | Sevim Güler 82 + 10 m² (Mehmet Yıldırım) | `Montaj Pafta ve Yükleme/1–8.pdf` (içerikleri henüz bilinmiyor: liste sayfası var mı açmadan denetlenecek) | `SEVİM GÜLER 82+10 M2 YÜKLEME LİSTESİ.XLSX` | `3cf217510de4c60f4c702ca4d1336b2b7cb649a2fb27f313149244012340e2fe` | 212.572 |
 | | | | aynı, PDF | `5874e5e764458e9bbeaecce6418b19a3aa7abc4149ece04e2d41b9fac5923555` | 148.166 |
 | PK-07 | Diamond 70 m² (Aziz Bey, Halil Bey) | `DIAMOND 70 M2 MONTAJ PAFTASI.pdf` | `DIAMOND 70 M2 YUKLEME LISTESI.pdf` | `985c3a209bd736eb68fe46cab9964569ca85b41ab7cb8cfb68fe29af7ce78086` | 240.638 |
+| | | | `70 m² Prefabrik - Halil Bey.xlsx` (açılmadı, içerik bilinmiyor; 13.10 12:58'de eklendi) | `36d5f1f353ad606fa972a309ccf620a774a40c708f966170dd45fe01caec3d76` | 148.179 |
+| | | | `… .pdf` | `105c6f87f57ebcc8c6ec57070ed8d461a8632c51c71b749e669c3c0906c5f722` | 340.178 |
+| | | | `… - Revize.xlsx` | `d25c68fc4cd2578095b0a698f212869ec2babd3bdb1187badb5e963ab18f5b97` | 148.249 |
+| | | | `… - Revize.pdf` | `3c448656a1cbaba830482f0bd68670474ec59f7a7646625b6598109b579ef5f6` | 340.146 |
 | PK-08 | Eren Bey 60 m² (Muhammed Uysal) | duvar ve omega yerleşim PDF'leri | `LOFTEV PREFABRİK YÜKLEME LİSTESİ.xlsx` | `dca060f8ff046f69f9466ba6d99d5fa0c2dbec16f5ff75bc4ffdb16f202d531c` | 50.134 |
 | | | | `M.Uysal Eren Bey 60 ㎡Yükleme Listeis.xlsx` | `a748c76bf2a1169dee87762aaa78fba37b92385ca020e7e84eb7bac5677441ea` | 48.456 |
 

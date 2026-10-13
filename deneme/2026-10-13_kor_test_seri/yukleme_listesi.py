@@ -49,6 +49,9 @@ Sürüm 6'da (PK-06 kıyası, `deneme/2026-10-13_pk_06/sonuc/PK06_kiyas.md`):
   N3. Aday sütununa: W otomat 9, PVC iniş borusu L 2000, profil vidalama kolon × 3 (Loftev), inox m² ÷ 10 aşağı ve uçlar inox ÷ 2
       (listenin "VİDA BİLGİ" sayfası; veri, kural kitabı adayı).
   Kulaklı H (makasın denk geldiği her dış ek) okuyucuda: `deneme/2026-10-13_pk_06/pafta_oku.py`.
+Sürüm 6.1 (PK-07 okumasıyla, gerçek liste açılmadan; model alanları ve ilk tahmin): iç duvar kalınlığı `kal_mm`'den (100'lük iç pano,
+  H standart 100, iç köşe 10'luk); çatı parçasında `kalkan_duvar_cm` (kalkanın altındaki duvar, paftadan); açıklamada "dış cephe … betopan"
+  varsa dış cephe betopanı ilk tahmini; H ve pencere karkası satırlarına pafta sütunu.
 LLM yok, ağ yok.
 """
 from __future__ import annotations
@@ -64,7 +67,7 @@ from pathlib import Path
 KOK = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(KOK))
 
-SURUM = "6 (13 Ekim 2026; Portatifev varsayılan, PK-02, PK-03, PK-05 ve PK-06 dersleri, pafta kipi)"
+SURUM = "6.1 (13 Ekim 2026; Portatifev varsayılan, PK-02, PK-03, PK-05 ve PK-06 dersleri, pafta kipi; iç duvar 100)"
 GRUPLAR = {"1001": "Panel", "1002": "Metal aksam", "1003": "Kapı ve pencere", "1004": "Tavan", "1005": "Makas", "1006": "Çatı",
            "1007": "Elektrik", "1008": "Vida", "1009": "Depo", "1010": "Sıhhi tesisat", "1011": "Dere", "1012": "Boya"}
 TAVAN = lambda x: int(math.ceil(x - 1e-9))
@@ -228,10 +231,11 @@ def liste(N: dict, k: dict, pafta: dict | None = None) -> dict:
     pen_k = [a for a in pen if pencere_olcusu(a["olcu"])[0] > 60 and id(a) not in cift]   # ayrı karkaslı pencereler (vasistas ve iki modüllük hariç)
 
     # ── 1001 Panel ──────────────────────────────────────────────────────────
+    ic_kal = Counter(p["kal_mm"] for p in N["panolar"] if p["duvar"] == "ic").most_common(1)[0][0] if any(p["duvar"] == "ic" for p in N["panolar"]) else 60
     sayac = Counter()
     for p in N["panolar"]:
-        kal = "100'lük" if p["duvar"] == "dis" else "60'lık"
         kal_mm = p["kal_mm"]
+        kal = "100'lük" if kal_mm >= 100 else "60'lık"          # 6.1: iç duvar 100 mm olabilir (PK-07 özellik tablosu)
         L = siparis(p["boy"]); a = p["aciklik"]
         if a is None:
             sayac[(f"{kal} yapıştırma dolu pano", f"{kal_mm} × {L} × {mm(H0)}", "Sayım", "sipariş boyu (PK-01 dersi 2)")] += 1
@@ -257,8 +261,12 @@ def liste(N: dict, k: dict, pafta: dict | None = None) -> dict:
 
     # ── 1002 Metal aksam ────────────────────────────────────────────────────
     kc = N["koseler"]
-    ekle("1002", "10'luk köşe direği 100 × 100", f"100 × 100 × {mm(H0)}", kc.get("dis", 0), "Sayım", "köşe parçası", "özel köşe B, C, D'nin kuralı yok (soru 2)")
-    ekle("1002", "6'lık köşe direği 60 × 60", f"60 × 60 × {mm(H0)}", kc.get("ic", 0), "Sayım", "iç köşe")
+    if ic_kal >= 100:                                          # 6.1: iç duvar 100 → iç köşe de 10'luk (PK-07)
+        ekle("1002", "10'luk köşe direği 100 × 100", f"100 × 100 × {mm(H0)}", kc.get("dis", 0) + kc.get("ic", 0), "Sayım",
+             f"köşe parçası (dış {kc.get('dis', 0)} + iç {kc.get('ic', 0)}; iç duvar 100)", "özel köşe B, C, D'nin kuralı yok (soru 2)")
+    else:
+        ekle("1002", "10'luk köşe direği 100 × 100", f"100 × 100 × {mm(H0)}", kc.get("dis", 0), "Sayım", "köşe parçası", "özel köşe B, C, D'nin kuralı yok (soru 2)")
+        ekle("1002", "6'lık köşe direği 60 × 60", f"60 × 60 × {mm(H0)}", kc.get("ic", 0), "Sayım", "iç köşe")
     ekle("1002", "Köşebent", "L 2500", 0, "Kural (Portatifev)", "PK-01'de 0", "", aday=3, aday_notu="Loftev (PK-02): 3; Portatifev şablon notu \"tek kat 7\"")
     if N["dikmeler"]:
         ekle("1002", "Özel kutu profil (kolon) 100 × 100", f"L {mm(H0)}", N["dikmeler"], "Sayım", "veranda dikmesi")
@@ -270,14 +278,15 @@ def liste(N: dict, k: dict, pafta: dict | None = None) -> dict:
     ek_s = Counter((e["duvar"], e["cins"]) for e in N["ekler"] if e["sacak"])
     ekle("1002", "H 100 (dış pano eki)", f"100 × 100 × {mm(H0)}", ec[("dis", "pano_eki")], "Sayım", "her dış ekte bir H", "kulaklı / dübelli ayrımı: aday",
          aday=f"kulaklı {ek_s[('dis', 'pano_eki')]} / dübelli {ec[('dis', 'pano_eki')] - ek_s[('dis', 'pano_eki')]}",
-         aday_notu="saçak duvarındaki (makas ayağı) ek kulaklı; PK-01 12 / 7 ve PK-02 8 / 9 tuttu (soru 3)")
-    ekle("1002", "H standart 60 (iç pano eki)", f"60 × 60 × {mm(H0)}", ec[("ic", "pano_eki")], "Sayım", "her iç ekte bir H")
-    ekle("1002", "3'lü H 100 × 100 × 60 (dış duvar T'si)", f"L {mm(H0)}", ec[("dis", "uclu")], "Sayım", "iç duvarın dış duvara geldiği T", "",
-         aday=f"kulaklı {ek_s[('dis', 'uclu')]} / dübelli {ec[('dis', 'uclu')] - ek_s[('dis', 'uclu')]}", aday_notu="aynı kural; PK-01 2 / 3, PK-02 2 / 3")
-    ekle("1002", "3'lü H standart 60 (iç T)", f"L {mm(H0)}", ec[("ic", "uclu")], "Sayım", "iç–iç T birleşimi")
+         aday_notu="makasın denk geldiği dış ek kulaklı; PK-01 12 / 7, PK-02 8 / 9, PK-06 13 / 6 tuttu", pafta=("h_plani", "dis"))
+    ekle("1002", f"H standart {ic_kal} (iç pano eki)", f"{ic_kal} × {ic_kal} × {mm(H0)}", ec[("ic", "pano_eki")], "Sayım", "her iç ekte bir H", pafta=("h_plani", "h_standart"))
+    ekle("1002", f"3'lü H 100 × 100 × {ic_kal} (dış duvar T'si)", f"L {mm(H0)}", ec[("dis", "uclu")], "Sayım", "iç duvarın dış duvara geldiği T", "",
+         aday=f"kulaklı {ek_s[('dis', 'uclu')]} / dübelli {ec[('dis', 'uclu')] - ek_s[('dis', 'uclu')]}", aday_notu="aynı kural; PK-01 2 / 3, PK-02 2 / 3",
+         pafta=("h_plani", "uclu_dis"))
+    ekle("1002", f"3'lü H standart {ic_kal} (iç T)", f"L {mm(H0)}", ec[("ic", "uclu")], "Sayım", "iç–iç T birleşimi", pafta=("h_plani", "uclu_standart"))
     dubelli = ec[("dis", "pano_eki")] + ec[("dis", "uclu")]
     if pencere_alici:
-        ekle("1002", "Çektirme U'su / pencere U'su / pencere karkası", "—", 0, "İş Emri", "pencere grubu alıcıya ait (PK-01 dersi 1)")
+        ekle("1002", "Çektirme U'su / pencere U'su / pencere karkası", "—", 0, "İş Emri", "pencere grubu alıcıya ait (PK-01 dersi 1)", pafta=("pencere_karkasi",))
     else:
         for olcu, n in sorted(Counter(a["olcu"] for a in pen_k).items()):
             en, boy = pencere_olcusu(olcu)
@@ -287,7 +296,7 @@ def liste(N: dict, k: dict, pafta: dict | None = None) -> dict:
              aday=TAVAN(sum(2 * pencere_olcusu(a["olcu"])[0] for a in pen_k) / 244 + 2), aday_notu="Loftev (PK-02 6 ✓): karkaslı pencerelerde (2 × en) ÷ 244 + 2")
         ekle("1002", "100'lük pencere U'su H geçen", "L 2500", 1, "Kural (Portatifev)", "PK-01'de 1",
              aday=2 * len(pen_k), aday_notu="Loftev (PK-02 8 ✓): karkaslı pencere × 2")
-    ekle("1002", "Çektirme U'su 60", "60 × 2440", 2, "Kural (Portatifev)", "PK-01 ve PK-02'de 2")
+    ekle("1002", f"Çektirme U'su {ic_kal} (iç duvar)" if ic_kal >= 100 else "Çektirme U'su 60", f"{ic_kal} × 2440", 2, "Kural (Portatifev)", "PK-01 ve PK-02'de 2")
     # tavan taşıyıcısı (H8)
     L_duvar = sum(p["boy"] for p in N["panolar"] if p["duvar"] == "ic") / 100
     tavan_tipi = oz.get("tavan", oz.get("tavan şekli", "asma"))
@@ -317,7 +326,7 @@ def liste(N: dict, k: dict, pafta: dict | None = None) -> dict:
     ekle("1002", "Alın sacı (30'luk)", "300 × 2500", TAVAN(alin / (_kural(k, "parca_boyu_m", "alin_saci") - _kural(k, "bindirme_m", "alin_saci"))), "Kural",
          f"alın eğik kenarları {alin:.2f} m ÷ 2,3", "PK-01 ve PK-02'de tuttu")
     kk = lambda c: 0 if c.get("acik") else c["kalkan"]          # N1: açık çatı parçasının kalkanının altında duvar yok (PK-06 veranda)
-    kalkan = sum(kk(c) * c["aciklik_cm"] / 100 for c, _o in C)
+    kalkan = sum((c["kalkan_duvar_cm"] / 100 if c.get("kalkan_duvar_cm") is not None else kk(c) * c["aciklik_cm"] / 100) for c, _o in C)   # 6.1: paftadaki kalkan duvarı
     kalkan_s = sum(kk(c) * (c["aciklik_cm"] / 100 + 2 * o["sac"]) for c, o in C)
     acik_not = " (açık çatı parçası sayılmaz, N1)" if any(c.get("acik") for c, _o in C) else ""
     ekle("1002", "Baş makas omegası", "L 2500", TAVAN(kalkan / 2.5), "Kural (Portatifev)", f"kalkan duvarları {kalkan:.2f} m ÷ 2,5 (PK-01 dersi 5)" + acik_not,
@@ -333,7 +342,7 @@ def liste(N: dict, k: dict, pafta: dict | None = None) -> dict:
     dis_boy = sum(p["boy"] for p in N["panolar"] if p["duvar"] == "dis") / 100
     ekle("1002", "100'lük alt çerçeve", "100 × 3750", TAVAN(N["dis_cevre_m"] / 3.75), "Şablon formülü (H4)", f"dış çevre {N['dis_cevre_m']:.2f} m ÷ 3,75",
          "PK-01 9, PK-02 9 tuttu")
-    ekle("1002", "60'lık alt çerçeve", "60 × 2500", TAVAN(L_duvar / 2.5), "Kural (PK-01)", f"iç duvarlar {L_duvar:.2f} m ÷ 2,5")
+    ekle("1002", "100'lük alt çerçeve (iç duvar)" if ic_kal >= 100 else "60'lık alt çerçeve", f"{ic_kal} × 2500", TAVAN(L_duvar / 2.5), "Kural (PK-01)", f"iç duvarlar {L_duvar:.2f} m ÷ 2,5")
 
     # ── 1003 Kapı ve pencere ────────────────────────────────────────────────
     for a in (a for a in acl if a["tur"] == "dis_kapi"):
@@ -369,6 +378,12 @@ def liste(N: dict, k: dict, pafta: dict | None = None) -> dict:
              "paftanın açıklaması \"iç cephede alçıpan kaplama\"; PK-03 toplam 61 (62 tahmin)")
         ekle("1004", "Duvar alçıpanı yeşil", "1200 × 2500", duvar_yesil, "Kural (J7)", f"ıslak hacim duvarları {islak_duvar:.1f} m² × 1,05 ÷ 3, aşağı", "PK-03 7 (banyo)")
         ekle("1004", "Alçıpan destek straforu", "paket / 60 m²", TAVAN(yuzey / 60), "Kural (J7)", f"duvar yüzeyi {yuzey:.1f} m² ÷ 60", "PK-03 3")
+    if "betopan" in oz.get("açıklama", "") and "dış cephe" in oz.get("açıklama", ""):   # 6.1 (PK-07 açıklaması; ilk tahmin, kural kitabında yok)
+        bosluk_d = sum(pencere_olcusu(a["olcu"])[0] * pencere_olcusu(a["olcu"])[1] / 1e4 for a in pen) + sum(0.9 * 2.0 for a in acl if a["tur"] == "dis_kapi")
+        yuzey_d = N["dis_cevre_m"] * H0 / 100 - bosluk_d
+        ekle("1004", "Dış cephe betopan (fugalı düz)", "1250 × 2500", TAVAN(yuzey_d * 1.08 / 3.125), "Kural (ilk tahmin)",
+             f"dış çevre {N['dis_cevre_m']:.2f} × {H0 / 100:g} − boşluklar {bosluk_d:.2f} = {yuzey_d:.1f} m² × 1,08 ÷ 3,125",
+             "paftanın açıklaması \"dış cephe fugalı düz betopan\"; şablonda %8 zayiat (PK-06 \"BATUHAN TINMAZ\" sayfası)")
     if N["acik"]:
         ver = sum(x["alan_m2"] for x in N["acik"])
         ekle("1004", "Veranda tavan Boardex", "8 × 1200 × 2400", 0, "Kural (Portatifev)", "PK-01'de 0 (veranda ters tavan)", aday=TAVAN(ver * 1.08 / 2.88),
