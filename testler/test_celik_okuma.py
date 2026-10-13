@@ -216,3 +216,32 @@ def test_dorduncu_tur_cati_secenekleri():
     assert (p["tur"], p["neden"], p["olumsuz"], p["d140"]) == ("belirsiz", "dis", True, True)
     p = CO.parca_oku("dış duvar kalınlığı ne kadar?", C8801, KATALOG)
     assert (p["tur"], p["neden"], p["d140"]) == ("belirsiz", "dis", False)
+
+
+def test_besinci_tur_olumsuz_cati_bagimsiz_parca_cati_sekli():
+    """Geometri hakemi beşinci tur (13.10): çatı seçeneği taşıyan olumsuz cümle kararsızlıktır ("yok"/"hayır" değil); kendi başına
+    "başka" olan "ve" parçası (oda sözü taşısa da) ayrı cümledir, yalın oda adı değildir; çatı şekli/eğimi değişiklik işaretidir, renk ve
+    malzeme değildir; odaya pencere yapmak eklemedir; oda dönüşümü başkadır."""
+    M = C8801["mahaller"]
+    for s in ("Ç8801L olmasın", "Ç8801K'dan Ç8801L'ye geçmeyelim", "Ç8801K'dan bir tane olsun, Ç8801L değil", "Ç8801 çelik, Ç8801L istemiyoruz",
+              "çatı L olmasın", "K'ya çevirmeyin"):
+        assert CO.cati_olumsuz(s, M) is True, s
+    for s in ("Ç8801K olsun başka değişiklik yok", "Ç8801K olsun, dışlar 140 olmasın", "çatı L olsun", "mutfak penceresi 120x120 olmasın"):
+        assert CO.cati_olumsuz(s, M) is False, s
+    assert CO._parcalar("dışlar 140'lık olsun ve oda kapıları beyaz olsun", M) == ["dışlar 140'lık olsun", "oda kapıları beyaz olsun"]
+    assert CO._parcalar("dışlar 140'lık olsun ve odalar geniş olsun", M) == ["dışlar 140'lık olsun", "odalar geniş olsun"]
+    assert CO._parcalar("mutfak penceresi 120x120 ve misafir odası büyük olsun", M) == ["mutfak penceresi 120x120", "misafir odası büyük olsun"]
+    assert CO._parcalar("çalışma odası ve mutfak pencereleri 120x120", M) == ["çalışma odası ve mutfak pencereleri 120x120"]   # dördüncü tur
+    r = CO.oku("dışlar 140'lık olsun ve oda kapıları beyaz olsun", C8801, KATALOG)
+    assert r["dis140"] is True and r["baska"] == ["oda kapıları beyaz olsun"]
+    for s in ("çatı eğimi dik olsun", "çatı şekli kırma olsun", "çatıyı tek yöne eğimli yapalım", "çatı düz olsun"):
+        p = CO.parca_oku(s, C8801, KATALOG)
+        assert p["tur"] == "baska" and p["isaret"]["cati"] is True, s
+    for s in ("çatı rengi kırmızı olsun", "çatı kaplaması shingle olsun"):
+        assert CO.parca_oku(s, C8801, KATALOG)["isaret"]["cati"] is False, s
+    for s in ("salona pencere yapabilir misiniz?", "mutfağa bir pencere yapalım", "yatak odasına pencere yapalım"):
+        assert CO.parca_oku(s, C8801, KATALOG)["tur"] == "ekle_kaldir", s
+    assert CO.parca_oku("salondaki pencereyi 120x120 yapalım", C8801, KATALOG)["tur"] == "pencere"
+    for s in ("salonu yatak odasına dönüştürelim", "mutfağı kilere çevirelim"):
+        assert CO.parca_oku(s, C8801, KATALOG)["tur"] == "baska", s
+    assert CO.cati_okumasi("çatıyı K'dan L'ye çevirelim", KATALOG, M) == "Ç8801L"

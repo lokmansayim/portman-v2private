@@ -354,6 +354,78 @@ def test_dorduncu_tur_cati_rengi_bilgidir(s, metin, ozellik):
     assert k.eylem == "is_emri" and k.revizyon == 2 and s.plan["yapi"]["kod"] == "Ç8801K" and s.degisiklikler(k) == [], (k.eylem, k.mesaj)
 
 
+@pytest.mark.parametrize("metin, alan, eylem, kod", [
+    ("Ç8801 çelik ev, Ç8801L olmasın", {"katalog_kodu": "Ç8801"}, "secenek", None),                  # olumsuz kod seçilmez (beşinci tur)
+    ("Ç8801L olmasın", {"katalog_kodu": "Ç8801L"}, "secenek", None),
+    ("Ç8801L istemiyoruz, Ç8801K olsun", {"katalog_kodu": "Ç8801K"}, "secenek", None),
+    ("Ç8801K'dan bir tane olsun, Ç8801L değil", {"katalog_kodu": "Ç8801L"}, "secenek", None),
+    ("Ç8801K'dan farklı bir çatı olsun", {"katalog_kodu": "Ç8801K"}, "secenek", None),               # LLM'in kodu değişimin kaynağı
+    ("Ç8801K olsun başka değişiklik yok", {"katalog_kodu": "Ç8801K"}, "is_emri", "Ç8801K"),          # "yok" çatıyı olumsuz yapmaz
+])
+def test_besinci_tur_olumsuz_cati_secilmez(s, metin, alan, eylem, kod):
+    """Geometri hakemi beşinci tur: çatı seçeneği taşıyan olumsuz cümlede kod seçilmez (ters çatı sorulmadan çiziliyordu); ilk planda
+    çatı seti sunulur."""
+    k = s.yaz(metin, yapi_turu="celik", **alan)
+    assert k.eylem == eylem, (k.eylem, k.mesaj)
+    if kod:
+        assert s.plan["yapi"]["kod"] == kod
+
+
+def test_besinci_tur_set_acikken_olumsuz_kod_secim_degil(s):
+    """Set açıkken "Ç8801K'dan Ç8801L'ye geçmeyelim" L'yi seçmez, set yeniden sunulur."""
+    assert s.yaz("Ç8801", katalog_kodu="Ç8801", yapi_turu="celik").eylem == "secenek"
+    k = s.yaz("Ç8801K'dan Ç8801L'ye geçmeyelim", katalog_kodu="Ç8801L")
+    assert k.eylem == "secenek" and not s.plan
+
+
+def test_besinci_tur_dis140_oda_cumlesiyle_dusmez(s):
+    """Beşinci tur: "dışlar 140'lık olsun ve oda kapıları beyaz olsun" birleşip dış 140 ilk planda sessizce düşüyordu; set yolunda da."""
+    k = s.yaz("Ç8801K olsun, dışlar 140'lık olsun ve oda kapıları beyaz olsun", katalog_kodu="Ç8801K", yapi_turu="celik")
+    assert k.eylem == "is_emri" and s.degisiklikler(k) == ["dis_karkas_140:"]
+    t = Sohbet(s.k.path.parent / "ikinci")
+    assert t.yaz("Ç8801 çelik, dışlar 140'lık olsun ve çalışma odası geniş olsun", katalog_kodu="Ç8801", yapi_turu="celik").eylem == "secenek"
+    k = t.yaz("2", niyet="diger")
+    assert k.eylem == "is_emri" and t.plan["yapi"]["kod"] == "Ç8801K" and t.degisiklikler(k) == ["dis_karkas_140:"]
+
+
+@pytest.mark.parametrize("metin, alan, cevap, degisiklik", [
+    ("çatıyı K'dan L'ye çevirelim, salon penceresi 160x180", {"pencereler": [pen("salon", "160x180")]}, "1",
+     ["pencere_olcu:P1", "cati_varyanti:Ç8801L"]),
+    ("çatı L olsun, mutfak penceresini değiştirelim", {"pencereler": [pen("mutfak")]}, "120x120", ["pencere_olcu:P5", "cati_varyanti:Ç8801L"]),
+    ("çatı L olsun, dışlar 140'lık olsun, salon penceresi 160x180", {"pencereler": [pen("salon", "160x180")]}, "1",
+     ["dis_karkas_140:", "pencere_olcu:P1", "cati_varyanti:Ç8801L"]),
+])
+def test_besinci_tur_cati_soruyla_bekler(s, metin, alan, cevap, degisiklik):
+    """Beşinci tur: revizyonda çatı, sorulan pencereyle birlikte bekler ("Not aldım: çatı Ç8801L") ve cevapta uygulanır (cevap turunda son
+    planın çatısına dönülüp çatı isteği sessizce düşüyordu)."""
+    r01_k(s)
+    k = s.yaz(metin, **alan)
+    assert k.eylem == "sor" and k.mesaj.startswith("Not aldım: çatı Ç8801L"), (k.eylem, k.mesaj)
+    k = s.yaz(cevap, niyet="diger")
+    assert k.eylem == "is_emri" and k.revizyon == 2 and s.plan["yapi"]["kod"] == "Ç8801L" and s.degisiklikler(k) == degisiklik, (k.eylem, k.mesaj)
+
+
+def test_besinci_tur_hicbiri_bekleyen_catiyi_soyler(s):
+    """"Hiçbiri" denince soruyla bekleyen çatı da uygulanmadı diye söylenir."""
+    r01_k(s)
+    assert s.yaz("çatı L olsun, salondaki sol taraftaki pencere 120x180", pencereler=[pen("salon", "120x180", duvar="sol")]).soru_alani == "okuma"
+    k = s.dugme("q:okuma:0")
+    assert k.soru_alani == "okuma_metin" and "öteki değişiklikleri de uygulamadım" in k.mesaj and s.plan["revizyon"] == 1
+
+
+@pytest.mark.parametrize("metin, alan", [
+    ("çatı eğimi dik olsun", {"bina_ozellikleri": {"Çatı Eğimi": "dik"}}),                  # şekil/eğim bilgi değil (tablo çizimle çelişirdi)
+    ("çatı şekli kırma olsun", {"bina_ozellikleri": {"Çatı Şekli": "kırma"}}),
+    ("çatı eğimi dik olsun, mutfak penceresi 120x120", {"bina_ozellikleri": {"Çatı Eğimi": "dik"}, "pencereler": [pen("mutfak", "120x120")]}),
+    ("salonu yatak odasına dönüştürelim", {}),                                               # oda dönüşümü: "Anlayamadım" değil, yönlendirme
+    ("salona pencere yapabilir misiniz?", {"pencereler": [pen("salon", islem="ekle")]}),    # odaya pencere yapmak eklemedir
+])
+def test_besinci_tur_yonlendirilir(s, metin, alan):
+    r01_k(s)
+    k = s.yaz(metin, **alan)
+    assert k.eylem == "yonlendir" and s.plan["revizyon"] == 1, (k.eylem, k.mesaj)
+
+
 def test_dorduncu_tur_set_acikken_kaynak_ve_kararsizlik(s):
     """Set açıkken iki kod seçim değildir (set yeniden sunulur; önce ilk kod seçiliyordu); "Ç8801K yerine Ç8801L" L'yi seçer."""
     assert s.yaz("Ç8801", katalog_kodu="Ç8801", yapi_turu="celik").eylem == "secenek"

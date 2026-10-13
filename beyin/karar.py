@@ -11,7 +11,7 @@ from .katalog import Katalog
 from .konusma import Konusma, MAX_REVIZYON, MAX_SORU, ESKI_TASLAK_SN
 from . import varyant
 from . import secenek as SC
-from . import celik                      # İE-08: çelik aday zarfı, D-09 antet bilgisi, çatı seçimi okuması
+from . import celik                      # İE-08: çelik aday zarfı, D-09 antet bilgisi
 from . import celik_okuma as CO          # İE-08 PR-2b: çelik revizyonunda bayinin sözünden pencere / çatı / dış 140 okuması (K18)
 
 MOD = 125.5
@@ -127,7 +127,9 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
         if cevap is None:
             if _icerikli(t) or len((metin or "").split()) > 6 or CO.hizli_istek(metin):
                 k.d.pop("okuma_bekleyen", None); k.d["son_soru_alani"] = None
-                k.bekleyen_not = "Önceki pencere sorumu cevaplamadığınız için o değişikliği uygulamadım; bu mesajınızı işliyorum. "
+                cok = bool(ob.get("hazir") or ob.get("kalan") or _bekleyen_cati(k, ob))
+                k.bekleyen_not = ("Önceki pencere sorumu cevaplamadığınız için " + ("o mesajdaki değişiklikleri" if cok else "o değişikliği")
+                                  + " uygulamadım; bu mesajınızı işliyorum. ")
                 k.not_dus("kural", "okuma sorusu cevaplanmadan yeni istek geldi: soru düştü")
             else:
                 return _okuma_sor(k, ob, yinele=True)
@@ -138,7 +140,8 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
             if n > 1:
                 return _bitir(k, Karar(eylem="yonlendir", gerekce="okuma sorusuna iki kez 'hiçbiri' (PR-2b)",
                                        mesaj="Değişikliği netleştiremedim. " + YONLENDIRME))
-            ek = " Bu mesajdaki öteki değişiklikleri de uygulamadım; hepsini birlikte yazabilirsiniz." if ob.get("hazir") or ob.get("kalan") else ""
+            ek = (" Bu mesajdaki öteki değişiklikleri de uygulamadım; hepsini birlikte yazabilirsiniz."
+                  if ob.get("hazir") or ob.get("kalan") or _bekleyen_cati(k, ob) else "")
             return _soru(k, "okuma_metin", "Neyi değiştirelim? Odayı ve pencere ölçüsünü yazın (örn. \"mutfak penceresi 120x120\"); "
                                            "çatı için \"çatı K\" ya da \"çatı L\", dış duvar için \"dışlar 140'lık olsun\" yazabilirsiniz." + ek)
         elif "olcu" in cevap:
@@ -388,12 +391,14 @@ def _celik_dali(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts: dict) 
     # kendi örneği "çatı K olsun" katalog çatısını seçiyordu. "veranda L olsun" çatı değildir (celik_okuma.cati_okumasi).
     # Geometri hakemi dördüncü tur: değişimin kaynağı olan kod ("Ç8801K yerine Ç8801L") seçim değildir; mesajda iki ayrı çatı seçeneği
     # (katalog çatısı dahil: "Ç8801K mi katalog çatısı mı?") ya da setten iki kod geçiyorsa seçim yoktur (kararsızlık; set yeniden sunulur).
+    # Beşinci tur: çatı seçeneği taşıyan olumsuz cümle ("Ç8801L olmasın", "Ç8801K'dan Ç8801L'ye geçmeyelim") ve LLM'in seçtiği kodun
+    # mesajda değişimin kaynağı olması ("Ç8801K'dan farklı bir çatı olsun") da kararsızlıktır: koddan çatı seçilmez.
     kaynak = {str(Katalog.kod_normalize(c) or "").upper() for c in CO.cati_kaynak_kodlari(metin)}
     mesaj_kodlari = [c for c in (str(Katalog.kod_normalize(x) or "").upper() for x in _model_kodlari_ve_kalan(metin, katalog)[0]) if c not in kaynak]
     mahaller = _aday_mahalleri(aday)
     secenekler = CO.cati_secenekleri(metin, mahaller, CO.norm(str(kat_aday.get("kod") or "")) or None)
-    kararsiz = len(secenekler) > 1
     cati = CO.cati_okumasi(metin, kat_aday, mahaller)
+    kararsiz = len(secenekler) > 1 or CO.cati_olumsuz(metin, mahaller) or (kod in kaynak and not cati)
     if st and st.get("durum") == "acik" and _celik_seti_acik(k):
         set_kodlari = {str(a.get("kod")).upper() for a in st.get("adaylar") or []}
         secimler = list(dict.fromkeys(c for c in mesaj_kodlari if c in set_kodlari))
@@ -420,10 +425,13 @@ def _celik_dali(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts: dict) 
     # mesajda iki ayrı çatı ("Ç8801K ve Ç8801L arasında kararsızım", "çatı K mı L mi", "Ç8801L mi Ç8801 mi?") seçim değildir (geometri
     # hakemi üçüncü ve dördüncü tur)
     sozdeki = [c for c in varyant_kodlari if c[-1].lower() in secenekler]
+    bekleyen = str((k.d.get("okuma_secilen") or {}).get("kod") or "").upper()
     if cati:
         hedef, sozden = cati.upper(), True
     elif sozdeki and not kararsiz:                             # yazılan varyant kodu ("Ç8801L") çatı seçimidir; taban kod ("Ç8801") değildir
         hedef, sozden = sozdeki[0], True
+    elif bekleyen and Katalog.taban_kod(bekleyen) == Katalog.taban_kod(kod):
+        hedef = bekleyen                                       # okuma sorusunun cevabı: soru turunda okunan çatı (son planınkine dönülmez; beşinci tur)
     elif ayni:
         hedef = str(son.get("kod")).upper()                    # revizyon: son planın çatısı (kapanmış setin eski seçimi değil; CR7)
     elif st and st.get("durum") == "secildi" and Katalog.taban_kod(st.get("secilen_kod")) == Katalog.taban_kod(kod):
@@ -486,8 +494,16 @@ def _celik_istek_sakla(k: Konusma) -> bool:
 
 
 def _bekleyen_devri(ob: dict) -> dict:
-    """Okuma sorusu cevaplanınca sorudan önce hazırlanan değişiklikler ve sorulmamış pencere cümleleri bir sonraki adıma geçer."""
-    return {"kalan": list(ob.get("kalan") or []), "okunan": list(ob.get("okunan") or [])}
+    """Okuma sorusu cevaplanınca sorudan önce hazırlanan değişiklikler, sorulmamış pencere cümleleri ve soru turunda okunan çatı (planın
+    kodu; beşinci tur: cevapta son planın çatısına dönülüyor, çatı isteği sessizce düşüyordu) bir sonraki adıma geçer."""
+    return {"kalan": list(ob.get("kalan") or []), "okunan": list(ob.get("okunan") or []), "kod": ob.get("kod")}
+
+
+def _bekleyen_cati(k: Konusma, ob: dict) -> str | None:
+    """Soru turunda okunup soruyla bekleyen çatı değişikliği (son planla aynı taban, başka varyant) varsa kodu."""
+    son = str(((k.d.get("son_is_emri") or {}).get("yapi") or {}).get("kod") or "").upper()
+    kod = str(ob.get("kod") or "").upper()
+    return kod if (son and kod and kod != son and Katalog.taban_kod(kod) == Katalog.taban_kod(son)) else None
 
 
 def _pencere_op(a: dict, en: int, yuk: int) -> dict:
@@ -506,7 +522,8 @@ def _okuma_sor(k: Konusma, ob: dict, yinele: bool = False) -> Karar:
     adaylar = list(ob.get("adaylar") or [])[:CO.EN_COK_ADAY]
     ob = {**ob, "adaylar": adaylar}
     k.d["okuma_bekleyen"] = ob
-    bas = ("Anlayamadım. " if yinele else "") + _hazir_notu(ob.get("hazir") or [])
+    cati = _bekleyen_cati(k, ob)
+    bas = ("Anlayamadım. " if yinele else "") + _hazir_notu(([{"op": "cati_varyanti", "kod": cati}] if cati else []) + list(ob.get("hazir") or []))
     if ob.get("tur") == "olcu":
         odalar = {a.get("mahal") for a in adaylar}
         tarif = adaylar[0]["aciklama"] if len(adaylar) == 1 else (f"{next(iter(odalar))} penceresini" if len(odalar) == 1 and None not in odalar and "" not in odalar

@@ -46,9 +46,12 @@ _HARF_T = _S(r"k", r"l")
 _DIS_T = _S(r"dis", r"dislar\w*", r"disi", r"disin\w*", r"disini", r"distaki\w*", r"karkas\w*", r"profil\w*", r"cerceve\w*", r"kalinlig\w*",
             r"kalin\w*", r"duvar\w*")
 _140_T = _S(r"140", r"14", r"140lik", r"140luk", r"14luk", r"14luk", r"lik", r"luk", r"mm")
-_OLUMSUZ_T = _S(r"olmasin\w*", r"olmayacak\w*", r"olmaz", r"istemiyor\w*", r"istemem\w*", r"istemeyiz", r"degil\w*", r"yok", r"hayir",
-                r"degistirme(?:yin|yiniz|yelim|sin|sen)?", r"yapma(?:yin|yiniz|yalim|sin)?", r"ekleme(?:yin|yiniz|yelim|sin)?",
-                r"koyma(?:yin|yiniz|yalim|sin)?", r"dokunma\w*", r"vazgec\w*", r"iptal")
+_OLUMSUZ_FIIL = (r"olmasin\w*", r"olmayacak\w*", r"olmaz", r"istemiyor\w*", r"istemem\w*", r"istemeyiz", r"degil\w*",
+                 r"degistirme(?:yin|yiniz|yelim|sin|sen)?", r"yapma(?:yin|yiniz|yalim|sin)?", r"ekleme(?:yin|yiniz|yelim|sin)?",
+                 r"koyma(?:yin|yiniz|yalim|sin)?", r"dokunma\w*", r"vazgec\w*", r"iptal",
+                 r"\w+m(?:e|a)(?:yelim|yalim|yin|yiniz|sin|sinler|sinlar)")   # "geçmeyelim", "çevirmeyin", "gelmesin" (beşinci tur)
+_OLUMSUZ_T = _S(*_OLUMSUZ_FIIL, r"yok", r"hayir")
+_OLUMSUZ_FIIL_T = _S(*_OLUMSUZ_FIIL)          # çatı seçimini engelleyen olumsuzluk ("yok"/"hayır" değil: "Ç8801K olsun başka değişiklik yok")
 _KALSIN_T = _S(r"kalsin", r"kalabilir", r"kalacak", r"dursun")
 _SORU_T = _S(r"mi", r"mu", r"misiniz", r"musunuz", r"miyiz", r"muyuz", r"midir", r"mudur", r"mismiz", r"musun", r"misin", r"nasil", r"neden",
              r"niye", r"hangisi", r"ne", r"kac")
@@ -78,6 +81,18 @@ _SAYI_SOZ = {"bir": 1, "birinci": 1, "ilk": 1, "ilki": 1, "iki": 2, "ikinci": 2,
 _ODA_SAYI = {k: v for k, v in _SAYI_SOZ.items() if re.search(r"(inci|nci|uncu|unci|ncisi|incisi)$", k) or k in ("ilk", "ilki")}
 _EKLE_IFADE = re.compile(r"\bbir\s+(?:tane\s+)?(?:(?:pencere|vasistas)\w*\s+)?daha\b|\byeni\s+(?:bir\s+)?(?:pencere|vasistas)\w*"
                          r"|\bfazla(?:dan)?\s+(?:bir\s+)?(?:pencere|vasistas)\w*")
+# "salona pencere yapabilir misiniz?", "mutfağa bir pencere yapalım": odaya pencere yapmak eklemedir (beşinci tur; ölçü değişikliği sanılıyordu)
+_EKLE_ODA = re.compile(r"(?:^|\s)(\w+[ae])\s+(?:bir\s+)?(?:pencere|vasistas)\w*\s+(?:yap|koy)\w*")
+# çatı cümlesi bilgi mi: renk ve malzeme sözü bilgi ("çatı rengi kırmızı", "çatı kaplaması shingle"); şekil, eğim, yön sözü değişiklik
+# isteğidir ("çatı şekli kırma olsun", "çatı eğimi dik olsun", "çatı düz olsun"; beşinci tur: bilgi sayılıp tablo çizimle çelişiyordu)
+_RENK_T = _S(r"renk\w*", r"rengi\w*", r"kaplama\w*", r"malzeme\w*", r"kiremit\w*", r"shingle\w*", r"membran\w*", r"boya\w*", r"ton\w*",
+             r"kirmizi\w*", r"gri\w*", r"beyaz\w*", r"siyah\w*", r"antrasit\w*", r"kahve\w*", r"yesil\w*", r"mavi\w*", r"bordo\w*", r"krem\w*",
+             r"lacivert\w*", r"bej\w*", r"turuncu\w*", r"sari\w*", r"mat", r"parlak\w*", r"metalik\w*", r"sandvic\w*", r"trapez\w*", r"sac",
+             r"eternit\w*", r"onduline\w*")
+_CATI_GEO_T = _S(r"sekl\w*", r"sekil\w*", r"egim\w*", r"egik\w*", r"kirma\w*", r"besik\w*", r"duz", r"duzlem\w*", r"tek", r"yon\w*",
+                 r"mahya\w*", r"sundurma\w*", r"dik\w*", r"yatik\w*", r"aci\w*", r"yuksek\w*", r"alcak\w*", r"sacak\w*", r"teras\w*",
+                 r"cumba\w*", r"kot\w*", r"yuksel\w*")
+_DONUSUM_T = _S(r"donustur\w*", r"cevir\w*")           # odayla birlikte: oda dönüşümü ("salonu yatak odasına çevirelim") otomatik yapılamaz
 _HICBIRI = re.compile(r"\b(?:hicbiri\w*|hic biri\w*|hicbirini|ikisi de degil|ikiside degil|hicbir\w*|baska)\b")
 _HEPSI = re.compile(r"\b(?:ikisi de|ikiside|ikisini de|her ikisi\w*|hepsi\w*|tumu|tamami)\b")
 _CEVAP_DOLGU = {"olsun", "pencere", "penceresi", "numara", "numarali", "nolu", "no", "tane", "olan", "o", "su", "bu", "ve", "ile", "sorun",
@@ -105,18 +120,18 @@ def _capa(parca: str) -> bool:
 
 
 def _bagimsiz(parca: str, mahaller: list[dict] | None) -> bool:
-    """Çapasız ama tanınmayan içerik taşıyan parça ("dış cephe gri olsun", "banyoya havlupan koyalım") kendi cümlesidir: çapalı parçaya
-    eklenirse ondaki isteği bilgi ya da başka cümle içinde saklar (geometri hakemi üçüncü tur: "çatı L ve dış cephe gri olsun")."""
+    """Çapasız ama kendi başına "başka" bir istek olan parça ("dış cephe gri olsun", "banyoya havlupan koyalım", "odalar geniş olsun",
+    "oda kapıları beyaz olsun") kendi cümlesidir: çapalı parçaya eklenirse ondaki isteği bilgi ya da başka cümle içinde saklar (geometri
+    hakemi üçüncü tur: "çatı L ve dış cephe gri olsun"; beşinci tur: "dışlar 140'lık olsun ve oda kapıları beyaz olsun" birleşip dış 140
+    ilk planda sessizce düşüyordu). Yalın oda adı ("çalışma odası ve mutfak pencereleri 120x120"; dördüncü tur) ve çatı harfi ya da model
+    kodu taşıyan parça ("çatı K ile L arasındaki fark nedir?": "L arasındaki fark" çatı cümlesine aittir) bağımsız değildir."""
     q0 = norm(_olcusuz(parca))
-    if _KOD.search(q0):
-        return False                                        # model kodu çatı işaretidir: parça bağımsız değil
-    q1 = _odalar(q0, mahaller or [])[1]
-    if _ODA_GENEL.search(q1):
-        return False                                        # tanınmayan oda adı ("çalışma odası ve mutfak pencereleri"): oda listesinin parçası
-    q = _ODA_GENEL.sub(" ", q1)
-    sinif = [_sinifla(w) for w in q.split()]
-    # çatı harfi taşıyan parça bağımsız değildir ("çatı K ile L arasındaki fark nedir?": "L arasındaki fark" çatı cümlesine aittir)
-    return "bilinmeyen" in sinif and "harf" not in sinif
+    if _KOD.search(q0) or any(_HARF_T.fullmatch(w) for w in q0.split()):
+        return False
+    soz = [w for w in q0.split() if w not in ("ve", "ile", "de", "da")]
+    if re.fullmatch(r"(?:\w+ ){0,2}(?:oda\w*|mahal\w*)", " ".join(soz)):
+        return False                                        # yalın oda adı: oda listesinin parçası
+    return parca_oku(parca, {"mahaller": mahaller or []})["tur"] == "baska"
 
 
 def _ve_bol(parca: str, mahaller: list[dict] | None = None) -> list[str]:
@@ -370,6 +385,18 @@ def cati_kaynak_kodlari(metin: str | None) -> set[str]:
     return out
 
 
+def cati_olumsuz(metin: str | None, mahaller: list[dict] | None = None) -> bool:
+    """Çatı seçeneği (harf, model kodu, katalog sözü) taşıyan bir cümle olumsuz mu ("Ç8801L olmasın", "Ç8801L istemiyoruz", "Ç8801K'dan
+    Ç8801L'ye geçmeyelim", "… Ç8801L değil")? Öyleyse mesajdaki koddan çatı seçilmez, kararsızlık gibi sorulur ya da set sunulur (geometri
+    hakemi beşinci tur: ters çatı sorulmadan seçiliyordu). "yok"/"hayır" sayılmaz ("Ç8801K olsun başka değişiklik yok")."""
+    for p in _parcalar(metin, mahaller):
+        soz = _KOD.sub(lambda m: re.sub(r"\s", "", m.group(0)) + " ", norm(_olcusuz(p))).split()
+        if any(re.fullmatch(r"(?:c\d{4}|\d{4})[kl]?", w) or w in ("k", "l") or w.startswith("katalog") for w in soz) \
+                and any(_OLUMSUZ_FIIL_T.fullmatch(w) for w in soz):
+            return True
+    return False
+
+
 def _secenek_kodu(s: str, katalog_aday: dict | None) -> str | None:
     """Tek çatı seçeneğinin aday kodu: "katalog" → katalog modeli, "k"/"l" → o harfle biten varyant."""
     if not katalog_aday or not katalog_aday.get("varyantlar"):
@@ -406,11 +433,16 @@ def parca_oku(parca: str, t: dict, katalog_aday: dict | None = None, y: dict | N
     m_pencere = pencere_soz or bool(olc)
     m_dis140 = has("dis") and bool(d140) and any(s.startswith("dis") for s in sinif.get("dis", []))
     m_cati = cati_soz or has("harf")
-    m_ekle = has("ekle") or bool(_EKLE_IFADE.search(" " + q0 + " "))
-    # bilgi cümlesi denetimi için çatı işareti: harf, varyant kodu ya da katalog sözü; harfsiz "çatı" sözü değil ("çatı rengi kırmızı olsun"
-    # bilgi cümlesidir; geometri hakemi dördüncü tur)
+    ekle_oda = next((m for m in _EKLE_ODA.finditer(q1) if _ODA_GENEL.fullmatch(m.group(1))
+                     or _odalar(m.group(1), t.get("mahaller", []))[1].split() != [m.group(1)]), None)
+    m_ekle = has("ekle") or bool(_EKLE_IFADE.search(" " + q0 + " ")) or ekle_oda is not None
+    # bilgi cümlesi denetimi için çatı işareti: harf, varyant kodu, katalog sözü ya da renk/malzeme sözü olmayan "çatı" sözü. "çatı rengi
+    # kırmızı olsun" bilgi cümlesidir (dördüncü tur); "çatı şekli kırma olsun", "çatı eğimi dik olsun" değildir (beşinci tur)
+    tum = q0.split()
+    renk = any(_RENK_T.fullmatch(w) for w in tum) and not any(_CATI_GEO_T.fullmatch(w) for w in tum)
     r["isaret"] = {"pencere": m_pencere, "dis140": m_dis140, "ekle": m_ekle,
-                   "cati": has("harf") or varyant_kodu or any(s.startswith("katalog") for s in sinif.get("cati", []))}
+                   "cati": has("harf") or varyant_kodu or any(s.startswith("katalog") for s in sinif.get("cati", []))
+                   or (any(s.startswith("cati") for s in sinif.get("cati", [])) and not renk)}
     r["d140"] = bool(d140)
     if sinif.get("bilinmeyen"):
         r["tur"] = "baska"
@@ -455,7 +487,9 @@ def parca_oku(parca: str, t: dict, katalog_aday: dict | None = None, y: dict | N
         r["genel_oda"] = genel_oda
         return r
     if odalar or genel_oda:
-        if has("kalsin", "olumsuz") and not (has("harf", "sifat", "olcu", "cati", "dis", "d140") or sayilar):
+        if any(_DONUSUM_T.fullmatch(w) for w in soz):
+            r["tur"] = "baska"                             # oda dönüşümü ("salonu yatak odasına çevirelim"): otomatik yapılamaz (beşinci tur)
+        elif has("kalsin", "olumsuz") and not (has("harf", "sifat", "olcu", "cati", "dis", "d140") or sayilar):
             r["tur"] = "bos"                               # "banyo kalsın": değişiklik yok
         elif has("harf", "sifat", "olcu", "cati", "dis", "d140") or sayilar:
             r["tur"] = "baska"                             # odanın kendisine istek ("veranda L olsun", "mutfak büyük olsun"): otomatik yapılamaz
