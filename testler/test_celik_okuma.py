@@ -151,3 +151,20 @@ def test_olcu_cevabi_baska_oda_yeni_istektir():
     assert C.okuma_cevabi("mutfak penceresi 120x120 olsun", ob) == {"olcu": (120, 120)}
     assert C.okuma_cevabi("120x180 yerine 120x120", ob) == {"olcu": (120, 120)}
     assert C.okuma_cevabi("büyük olsun", ob) is None
+
+
+def test_ve_ile_baglanan_istekler_ayrilir():
+    """Geometri hakemi ikinci tur (13.10): "ve"/"ile" iki yanında da istek çapası varsa ayrı cümle; değilse tek cümle. Bölünemeyen iki
+    istek ya da ölçü dışı sayı belirsizdir (sorulur), sessizce düşmez."""
+    assert CO._parcalar("mutfak penceresi 120x120 ve dışlar 140'lık olsun") == ["mutfak penceresi 120x120", "dışlar 140'lık olsun"]
+    assert CO._parcalar("dış duvarlar 140'lık olsun ve çatı L olsun") == ["dış duvarlar 140'lık olsun", "çatı L olsun"]
+    assert CO._parcalar("mutfak ve salon pencereleri 120x120") == ["mutfak ve salon pencereleri 120x120"]
+    assert CO._parcalar("mutfak penceresini 120x120 ile değiştirelim") == ["mutfak penceresini 120x120 ile değiştirelim"]
+    assert CO._parcalar("salon ve mutfak pencereleri 120x120 ve dışlar 140") == ["salon ve mutfak pencereleri 120x120", "dışlar 140"]
+    r = CO.oku("mutfak penceresi 120x120 ve dışlar 140'lık olsun", C8801, KATALOG)
+    assert adlar(r) == ["P5"] and r["dis140"] is True
+    r = CO.oku("dış duvarlar 140'lık olsun ve çatı L olsun", C8801, KATALOG)
+    assert r["dis140"] is True and r["cati"] == "Ç8801L" and CO.cati_okumasi("dış duvarlar 140'lık olsun ve çatı L olsun", KATALOG) == "Ç8801L"
+    for s in ("mutfak penceresi 120x120 dışlar 140", "yatak odası 1 ve 2 pencereleri 120x180", "2 tane pencere 120x120"):
+        r = CO.oku(s, C8801, KATALOG)
+        assert r["belirsiz"] and r["pencereler"] == [] and r["dis140"] is False, s

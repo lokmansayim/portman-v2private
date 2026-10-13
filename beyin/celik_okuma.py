@@ -88,12 +88,50 @@ def norm(s: str | None) -> str:
     return re.sub(r"\s+", " ", re.sub(r"[^a-z0-9]+", " ", (s or "").translate(_TR).lower())).strip()
 
 
+def _capa(parca: str) -> bool:
+    """Parçada değişiklik çapası var mı: pencere ölçüsü, pencere sözü, "dış" + 140, çatı sözü/harfi/varyant kodu, ekleme/kaldırma sözü."""
+    if olculer(parca):
+        return True
+    q = norm(_olcusuz(parca))
+    kodlar = _KOD.findall(q)
+    soz = _KOD.sub(" ", q).split()
+    return (any(_PENCERE_T.fullmatch(w) for w in soz) or any(_EKLE_T.fullmatch(w) for w in soz)
+            or (any(w.startswith("dis") and _DIS_T.fullmatch(w) for w in soz) and any(w in ("140", "14") for w in soz))
+            or any(w.startswith(("cati", "katalog")) for w in soz) or any(_HARF_T.fullmatch(w) for w in soz)
+            or any(re.search(r"[kl]$", re.sub(r"\s", "", k)) for k in kodlar))
+
+
+def _ve_bol(parca: str) -> list[str]:
+    """"ve"/"ile" ile bağlanmış istekler ayrı cümledir — ama yalnız iki yanında da çapa varsa ("mutfak penceresi 120x120 ve dışlar 140'lık
+    olsun" iki istek; "mutfak ve salon pencereleri 120x120" tek istek, "120x120 ile değiştirelim" tek istek). Çapasız parça sonraki çapalı
+    parçaya (sonda kalırsa öncekine) eklenir (geometri hakemi ikinci tur, 13.10: ikinci istek sessizce düşüyordu)."""
+    bolum = re.split(r"(\s+(?:ve|ile)\s+)", parca)
+    parcalar, ayraclar = bolum[0::2], bolum[1::2]
+    gruplar: list[list[int]] = []
+    bas = 0
+    for i, x in enumerate(parcalar):
+        if _capa(x):
+            gruplar.append([bas, i]); bas = i + 1
+    if not gruplar:
+        return [parca]
+    gruplar[-1][1] = len(parcalar) - 1                       # sondaki çapasız parça son gruba
+    out = []
+    for g0, g1 in gruplar:
+        t = parcalar[g0]
+        for j in range(g0 + 1, g1 + 1):
+            t += ayraclar[j - 1] + parcalar[j]
+        out.append(t)
+    return out
+
+
 def _parcalar(metin: str | None) -> list[str]:
-    """Cümleler: noktalama ve satır sonu; "ama", "fakat", "ayrıca" da ayırır. "ve" ayırmaz ("mutfak ve salon pencereleri 120x120")."""
+    """Cümleler: noktalama ve satır sonu; "ama", "fakat", "ayrıca" da ayırır; "ve"/"ile" yalnız iki yanında da istek çapası varsa (`_ve_bol`)."""
     out = []
     metin = re.sub(r"(?<![\w/×*'])(\d{1,2})\.(?=\s)", r"\1 ", metin or "")      # sıra noktası ("1. yatak odası") cümle sonu değil
     for p in re.findall(r"[^;,.!?\n]+[;,.!?\n]*", metin):
-        out.extend(x for x in re.split(r"\s+(?=(?:ama|fakat|ayrıca|ayrica)\s)", p) if x.strip())
+        for x in re.split(r"\s+(?=(?:ama|fakat|ayrıca|ayrica)\s)", p):
+            if x.strip():
+                out.extend(_ve_bol(x))
     return out
 
 
@@ -291,6 +329,9 @@ def parca_oku(parca: str, t: dict, katalog_aday: dict | None = None, y: dict | N
     if pencere_soz or olc:
         if has("kalsin") and not olc:
             r["tur"] = "bos"                               # "mutfak penceresi kalsın": değişiklik yok
+            return r
+        if (has("dis") and d140) or cati_soz or has("harf") or varyant_kodu or (olc and sayilar):
+            r["tur"] = "belirsiz"                          # bölünemeyen iki istek ya da ölçü dışı sayı ("1 ve 2 pencereleri"): sorulur, düşmez
             return r
         r["tur"] = "pencere"
         r["olumsuz"] = olumsuz or (has("kalsin") and bool(olc))

@@ -222,3 +222,33 @@ def test_alan_seti_istegi_secilen_modele_islenir(s):
     assert k.eylem == "secenek" and K.CELIK_ISTEK_NOTU in k.mesaj
     k = s.yaz("KT-02 olsun", katalog_kodu="KT02")
     assert k.eylem == "sor" and k.soru_alani == "okuma" and "120x120" in k.mesaj
+
+
+def test_ve_ile_iki_istek_ikisi_de_uygulanir(s):
+    """Geometri hakemi ikinci tur: "ve" ile bağlanan ikinci istek düşmez (önce yalnız pencere uygulanıyor, dış 140 sessizce kalıyordu)."""
+    r01_k(s)
+    k = s.yaz("mutfak penceresi 120x120 ve dışlar 140'lık olsun", pencereler=[pen("mutfak", "120x120")])
+    assert k.eylem == "is_emri" and s.degisiklikler(k) == ["dis_karkas_140:", "pencere_olcu:P5"]
+    k = s.yaz("dış duvarlar 140'lık olsun ve çatı L olsun", varyantlar=[var("cati_degistir", "çatı L")])
+    assert k.eylem == "is_emri" and s.plan["yapi"]["kod"] == "Ç8801L"
+    assert s.degisiklikler(k) == ["dis_karkas_140:", "pencere_olcu:P5", "cati_varyanti:Ç8801L"]       # dış 140 zaten vardı: yinelenmedi
+
+
+def test_ilk_planda_soru_bicimli_istek_sorulur(s):
+    """Geometri hakemi ikinci tur: ilk planda "… olabilir mi?" sorulmadan değişikliksiz r01 çizilmez."""
+    k = s.yaz("Ç8801K olsun, mutfak penceresi 120x120 olabilir mi?", katalog_kodu="Ç8801K", yapi_turu="celik", pencereler=[pen("mutfak", "120x120")])
+    assert k.eylem == "sor" and k.soru_alani == "okuma_metin" and not s.plan
+    k = s.yaz("mutfak penceresi 120x120 olsun", pencereler=[pen("mutfak", "120x120")])
+    assert k.eylem == "is_emri" and k.revizyon == 1 and s.degisiklikler(k) == ["pencere_olcu:P5"]
+
+
+def test_bilgi_cumlesi_tum_bilinmeyenleri_kapsamali(s):
+    """Tek sözcüğü bilgi alanıyla örtüşen cümle bütünüyle bilgi sayılmaz: "salonu biraz büyütelim dış cephe gri olsun" yönlendirilir;
+    yalnız renk söyleyen cümle bilgi revizyonudur (r02)."""
+    r01_k(s)
+    k = s.yaz("salonu biraz büyütelim dış cephe gri olsun", bina_ozellikleri={"Dış Cephe Rengi": "gri"})
+    assert k.eylem == "yonlendir" and s.plan["revizyon"] == 1
+    t = Sohbet(s.k.path.parent / "ikinci")
+    r01_k(t)
+    k = t.yaz("dış cephe rengi gri olsun", bina_ozellikleri={"Dış Cephe Rengi": "gri"})
+    assert k.eylem == "is_emri" and k.revizyon == 2

@@ -503,16 +503,23 @@ def _okuma_sor(k: Konusma, ob: dict, yinele: bool = False) -> Karar:
                              "ya da \"hiçbiri\").")
 
 
-def _bilgi_cumlesi(parca: str, llm: dict) -> bool:
+_BILGI_ETIKET = {"ad": "müşteri adı ismi isim", "sevk_adresi": "sevk adresi adres teslimat teslim"}
+
+
+def _bilgi_cumlesi(p: dict, llm: dict) -> bool:
     """Revizyonda tanınmayan cümle antet ya da bina özellikleri bilgisi mi (renk, malzeme, müşteri adı, sevk adresi; LLM `bina_ozellikleri`,
-    `musteri`)? Sayı taşımayan cümlenin sözcükleri bu mesajın bilgi alanlarının adında ya da değerinde geçiyorsa evet: bilgi zarfa ve
-    paftaya gider (sessiz düşme yok). Sayılı cümle ("dış kapı 140 cm") bilgi sayılmaz: çizimle çelişen bir değer tabloya yazılmasın."""
-    if re.search(r"\d", parca or ""):
+    `musteri`)? Evet, ancak cümlenin tanınmayan **bütün** sözcükleri bu mesajın bilgi alanlarının adında ya da değerinde geçiyorsa ve
+    cümle oda, ölçü ya da sayı taşımıyorsa (geometri hakemi ikinci tur: tek sözcük örtüşmesi "salonu büyütelim dış cephe gri olsun"u bütünüyle
+    bilgi sayıp büyütmeyi düşürüyordu). Bilgi zarfa ve paftaya gider (sessiz düşme yok); sayılı cümle ("dış kapı 140 cm") bilgi değildir:
+    çizimle çelişen bir değer tabloya yazılmasın."""
+    metin = p.get("metin") or ""
+    if re.search(r"\d", metin) or p.get("odalar"):
         return False
     havuz: set[str] = set()
     for a, d in (llm.get("bilgi") or {}).items():
-        havuz |= {w for w in CO.norm(f"{a} {d}").split() if len(w) >= 3}
-    return bool({w for w in CO.norm(parca).split() if len(w) >= 3} & havuz)
+        havuz |= set(CO.norm(f"{_BILGI_ETIKET.get(a, a)} {d}").split())
+    bilinmeyen = [w for w in p.get("bilinmeyen") or [] if len(w) >= 3]
+    return bool(bilinmeyen) and all(w in havuz for w in bilinmeyen)
 
 
 _NEYI_DEGISTIRELIM = ("Neyi değiştirelim? Odayı ve pencere ölçüsünü yazın (örn. \"mutfak penceresi 120x120\"); çatı için \"çatı K\" ya da "
@@ -557,7 +564,7 @@ def _celik_degisiklikler(k: Konusma, katalog: Katalog, aday: dict, t: dict, once
                                 mesaj=f"\"{v.get('aciklama', '')}\" değişikliği çelik modelde henüz otomatik yapılamıyor. " + YONLENDIRME))
     # 2) revizyonda tanınmayan içerik: bina özelliği (renk, malzeme) değilse yönlendirme (K21: yanlış uygulanmaz, sessizce düşmez)
     if ayni_proje:
-        baska = [p for p in r["baska"] if not _bilgi_cumlesi(p, llm)]
+        baska = [p["metin"] for p in r["parcalar"] if p["tur"] == "baska" and not _bilgi_cumlesi(p, llm)]
         if baska:
             # gerekçe günlüğe yazılır (vps/agent.py): bayinin cümlesi yalnız bayiye giden mesajda (mesaj metni günlüğe yazılmaz)
             return _bitir(k, Karar(eylem="yonlendir", gerekce="çelik revizyonunda otomatik yapılamayan istek (cümle bayiye söylendi)",
@@ -567,8 +574,9 @@ def _celik_degisiklikler(k: Konusma, katalog: Katalog, aday: dict, t: dict, once
     if r["ekle_kaldir"]:
         return _bitir(k, Karar(eylem="yonlendir", gerekce="çelikte pencere ekleme/kaldırma otomatik yapılamıyor (8a: yalnız ölçü)",
                                 mesaj="Pencere ekleme ya da kaldırma çelik modelde otomatik yapılamıyor; mevcut pencerenin ölçüsünü değiştirebilirim. " + YONLENDIRME))
-    # 4) revizyonda olumsuz/soru biçimli ya da belirsiz cümle, okunamayan çatı isteği → sor (K21)
-    if ayni_proje and (r["olumsuz"] or r["belirsiz"] or r["cati_belirsiz"]):
+    # 4) olumsuz/soru biçimli ya da belirsiz cümle, okunamayan çatı isteği → sor (K21; ilk planda da: "… olabilir mi?" sorulmadan
+    #    çizilmez — geometri hakemi ikinci tur)
+    if r["olumsuz"] or r["belirsiz"] or r["cati_belirsiz"]:
         return _soru(k, "okuma_metin", "Anlayamadım. " + _NEYI_DEGISTIRELIM)
     if llm.get("pencere") and not r["pencereler"]:
         return _soru(k, "okuma_metin", "Hangi odanın penceresini hangi ölçüye değiştirelim? (örn. \"mutfak penceresi 120x120\")")
