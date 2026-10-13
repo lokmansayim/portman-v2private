@@ -426,6 +426,66 @@ def test_besinci_tur_yonlendirilir(s, metin, alan):
     assert k.eylem == "yonlendir" and s.plan["revizyon"] == 1, (k.eylem, k.mesaj)
 
 
+@pytest.mark.parametrize("metin, alan, eylem", [
+    ("Ç8801L'ye gerek yok", {"katalog_kodu": "Ç8801L"}, "secenek"),                     # altıncı tur: olumsuz biçimler (ters çatı çiziliyordu)
+    ("Ç8801 çelik ev, Ç8801L hariç", {"katalog_kodu": "Ç8801"}, "secenek"),
+    ("Ç8801L yok", {"katalog_kodu": "Ç8801L"}, "secenek"),
+    ("Ç8801 olsun ama L çatıyı beğenmedik", {"katalog_kodu": "Ç8801L"}, "secenek"),
+    ("Ç8801K olsun, salonun sol duvarı ve arka duvarındaki pencereler 120x120 olsun", {"katalog_kodu": "Ç8801K"}, "sor"),   # yanlış oda değil
+    ("Ç8801K olsun, mutfak penceresinin eni 120 ve boyu 180 olsun", {"katalog_kodu": "Ç8801K"}, "sor"),
+    ("Ç8801K olsun, mutfakta pencereyi 120x120 yapalım", {"katalog_kodu": "Ç8801K"}, "is_emri"),       # bulunma eki ekleme değil
+])
+def test_altinci_tur_ilk_plan(s, metin, alan, eylem):
+    k = s.yaz(metin, yapi_turu="celik", **alan)
+    assert k.eylem == eylem, (k.eylem, k.mesaj)
+    if eylem == "is_emri":
+        assert s.degisiklikler(k) == ["pencere_olcu:P5"]
+
+
+@pytest.mark.parametrize("metin, alan, eylem, degisiklik", [
+    ("L çatıyı beğenmiyoruz", {}, "sor", None),                                           # r2 L çiziliyordu
+    ("katalog çatısını beğenmedik", {}, "sor", None),
+    ("çatı rengi kırmızı ve şekli kırma olsun", {"bina_ozellikleri": {"Çatı Kaplama Rengi": "kırmızı", "Çatı Şekli": "kırma"}}, "yonlendir", None),
+    ("çatı gri olsun, eğimi dik olsun", {"bina_ozellikleri": {"Çatı Kaplama Rengi": "gri", "Çatı Eğimi": "dik"}}, "yonlendir", None),
+    ("mutfakta pencereyi 120x120 yapalım", {"pencereler": [pen("mutfak", "120x120")]}, "is_emri", ["pencere_olcu:P5"]),
+    ("salon aynı kalsın ve mutfak penceresi 120x120 olsun", {"pencereler": [pen("mutfak", "120x120")]}, "is_emri", ["pencere_olcu:P5"]),
+    ("çatı tek renk olsun", {"bina_ozellikleri": {"Çatı Kaplama Rengi": "tek renk"}}, "is_emri", []),
+])
+def test_altinci_tur_revizyon(s, metin, alan, eylem, degisiklik):
+    """Altıncı tur: olumsuz biçimlerde çatı seçilmez; çatı şekli/eğimi ayrı cümlede de bilgi değil; "mutfakta pencereyi …" ölçü değişikliği;
+    "salon aynı kalsın" ayrı cümle; "tek renk" şekil değil."""
+    r01_k(s)
+    k = s.yaz(metin, **alan)
+    assert k.eylem == eylem, (k.eylem, k.mesaj)
+    if degisiklik is not None:
+        assert s.plan["revizyon"] == 2 and s.plan["yapi"]["kod"] == "Ç8801K" and s.degisiklikler(k) == degisiklik
+    else:
+        assert s.plan["revizyon"] == 1
+
+
+def test_altinci_tur_hesaplanan_satir_ezilmez(s):
+    """Çizimden hesaplanan tablo satırı (çatı eğimi, kapı sayısı) bayinin değeriyle ezilmez, özel isteğe yazılır; renk satırı yazılır."""
+    k = s.yaz("Ç8801K olsun, çatı eğimi dik olsun, dış boya krem", katalog_kodu="Ç8801K", yapi_turu="celik",
+              bina_ozellikleri={"Çatı Eğimi": "dik", "Dış Boya Rengi": "krem"})
+    assert k.eylem == "is_emri"
+    b = s.plan["bilgi"]
+    assert "Çatı Eğimi" not in b["ozellikler"] and b["ozellikler"]["Dış Boya Rengi"] == "krem" and "Çatı Eğimi: dik" in b["ozel_istekler"]
+
+
+def test_altinci_tur_cati_secenegi_olmayan_model(s):
+    """Ç8201'in çatı varyantı yok: ilk planda "çatı L" isteği söylenir (sessizce düşüyordu), revizyonda yönlendirilir."""
+    k = s.yaz("Ç8201 olsun, çatı L", katalog_kodu="Ç8201", yapi_turu="celik")
+    assert k.eylem == "is_emri" and k.mesaj.startswith("Ç8201 modelinin çatı seçeneği yok") and s.plan["yapi"]["kod"] == "Ç8201"
+    k = s.yaz("çatı L olsun")
+    assert k.eylem == "yonlendir" and "çatı seçeneği yok" in k.mesaj and s.plan["revizyon"] == 1
+
+
+def test_altinci_tur_set_acikken_olumsuz_bicim(s):
+    assert s.yaz("Ç8801", katalog_kodu="Ç8801", yapi_turu="celik").eylem == "secenek"
+    k = s.yaz("L çatıyı beğenmedik", katalog_kodu="Ç8801L")
+    assert k.eylem == "secenek" and not s.plan
+
+
 def test_dorduncu_tur_set_acikken_kaynak_ve_kararsizlik(s):
     """Set açıkken iki kod seçim değildir (set yeniden sunulur; önce ilk kod seçiliyordu); "Ç8801K yerine Ç8801L" L'yi seçer."""
     assert s.yaz("Ç8801", katalog_kodu="Ç8801", yapi_turu="celik").eylem == "secenek"

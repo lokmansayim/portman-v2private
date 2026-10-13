@@ -555,6 +555,8 @@ def _bilgi_cumlesi(p: dict, llm: dict) -> bool:
         return False                                           # değişiklik işareti (çatı, pencere, dış 140, ekleme) taşıyan cümle bilgi değildir
     havuz: set[str] = set()
     for a, d in (llm.get("bilgi") or {}).items():
+        if celik.satir_adi(a) in celik.GEOMETRI_SATIRLARI:
+            continue                                           # çizimin geometrisi ya da sayısı ("Çatı Eğimi", "Dış Kapı"): değişiklik isteğidir (altıncı tur)
         havuz |= set(CO.norm(f"{_BILGI_ETIKET.get(a, a)} {d}").split())
     bilinmeyen = [w for w in p.get("bilinmeyen") or [] if len(w) >= 3]
     return bool(bilinmeyen) and all(w in havuz for w in bilinmeyen)
@@ -587,6 +589,15 @@ def _celik_degisiklikler(k: Konusma, katalog: Katalog, aday: dict, t: dict, once
     except varyant.VaryantHatasi:
         y = None
     r = CO.oku(metin, t, kat_aday, ipucu=bool(llm.get("pencere")), y=y)
+    # 0) çatı seçeneği olmayan modele (Ç8201, KT'ler) K/L çatı isteği sessizce düşmez (altıncı tur; PR-2a'dan kalma): revizyonda
+    #    yönlendirilir, ilk planda plan katalog çatısıyla çizilir ve bu söylenir
+    if not kat_aday.get("varyantlar") and any(p["tur"] == "cati" and not p["olumsuz"] and CO.cati_secenekleri(p["metin"]) & {"k", "l"}
+                                              for p in r["parcalar"]):
+        ad = aday.get("gosterim") or aday["kod"]
+        if ayni_proje:
+            return _bitir(k, Karar(eylem="yonlendir", gerekce="çatı seçeneği olmayan modelde çatı isteği",
+                                    mesaj=f"{ad} modelinin çatı seçeneği yok (yalnız katalog çatısı); çatı değişikliği otomatik yapılamıyor. " + YONLENDIRME))
+        k.bekleyen_not = (k.bekleyen_not or "") + f"{ad} modelinin çatı seçeneği yok; plan katalog çatısıyla çizildi. "
     # 1) desteklenmeyen LLM varyantı (ayna, oda, kapı, veranda …): soru sormadan yönlendirme. Pencere ve "diger" metinden okunur.
     for v in llm.get("varyantlar") or []:
         tur = str(v.get("tur") or "")

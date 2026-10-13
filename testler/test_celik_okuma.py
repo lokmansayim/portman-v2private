@@ -232,6 +232,10 @@ def test_besinci_tur_olumsuz_cati_bagimsiz_parca_cati_sekli():
     assert CO._parcalar("dışlar 140'lık olsun ve odalar geniş olsun", M) == ["dışlar 140'lık olsun", "odalar geniş olsun"]
     assert CO._parcalar("mutfak penceresi 120x120 ve misafir odası büyük olsun", M) == ["mutfak penceresi 120x120", "misafir odası büyük olsun"]
     assert CO._parcalar("çalışma odası ve mutfak pencereleri 120x120", M) == ["çalışma odası ve mutfak pencereleri 120x120"]   # dördüncü tur
+    for s in ("büyük banyo ve mutfak pencereleri 120x120", "geniş salon ve mutfak pencereleri 120x120", "küçük hol ve banyo vasistası 60x60"):
+        assert CO._parcalar(s, M) == [s], s                                  # yüklemsiz oda tarifi pencere cümlesine aittir
+    assert CO._parcalar("mutfak penceresi 120x120 ve salonu büyütelim", M) == ["mutfak penceresi 120x120", "salonu büyütelim"]
+    assert sorted(adlar(CO.oku("büyük banyo ve mutfak pencereleri 120x120", C8801, KATALOG))) == ["P5", "P7"]
     r = CO.oku("dışlar 140'lık olsun ve oda kapıları beyaz olsun", C8801, KATALOG)
     assert r["dis140"] is True and r["baska"] == ["oda kapıları beyaz olsun"]
     for s in ("çatı eğimi dik olsun", "çatı şekli kırma olsun", "çatıyı tek yöne eğimli yapalım", "çatı düz olsun"):
@@ -245,3 +249,30 @@ def test_besinci_tur_olumsuz_cati_bagimsiz_parca_cati_sekli():
     for s in ("salonu yatak odasına dönüştürelim", "mutfağı kilere çevirelim"):
         assert CO.parca_oku(s, C8801, KATALOG)["tur"] == "baska", s
     assert CO.cati_okumasi("çatıyı K'dan L'ye çevirelim", KATALOG, M) == "Ç8801L"
+
+
+def test_altinci_tur_olumsuz_bicimler_tarif_cumleleri_cati_sekli():
+    """Geometri hakemi altıncı tur (13.10): listede olmayan olumsuz biçimler ("beğenmiyoruz", "beğenmedik", "gereksiz", "gerek yok",
+    "hariç", "olmadı", "istemedik", "… yok") çatıyı olumsuz yapar; yüklemsiz tarif ("salonun sol duvarı", "salondaki büyük", "boyu 180")
+    pencere cümlesinden bölünmez; "kalsın"lı cümle ayrıdır; bulunma eki ve "pencereyi" ekleme değildir; çatıya özgü şekil sözü ayrı
+    cümlede de işarettir."""
+    M = C8801["mahaller"]
+    for s in ("L çatıyı beğenmiyoruz", "L çatıyı beğenmedim", "L çatı gereksiz", "katalog çatısını beğenmedik", "Ç8801L'ye gerek yok",
+              "Ç8801 çelik ev, Ç8801L hariç", "Ç8801L olmadı", "Ç8801L yok", "Ç8801L'yi istemedik"):
+        assert CO.cati_olumsuz(s, M) is True and CO.cati_okumasi(s, KATALOG, M) is None, s
+    assert CO.cati_olumsuz("çatı L olsun, beğendik", M) is False and CO.cati_okumasi("çatı L olsun, beğendik", KATALOG, M) == "Ç8801L"
+    for s in ("salonun sol duvarı ve arka duvarındaki pencereler 120x120 olsun", "salondaki büyük ve mutfaktaki küçük pencereler 120x120 olsun",
+              "salonun ön duvarındaki ve mutfağın arka duvarındaki pencereler 120x120 olsun", "mutfak penceresinin eni 120 ve boyu 180 olsun",
+              "küçük misafir yatak odası ve mutfak pencereleri 120x120 olsun", "mutfak penceresini 120x120 ile değiştirelim"):
+        assert CO._parcalar(s, M) == [s], s
+    assert CO._parcalar("salon aynı kalsın ve mutfak penceresi 120x120 olsun", M) == ["salon aynı kalsın", "mutfak penceresi 120x120 olsun"]
+    assert CO._parcalar("mutfak penceresi 120x120 ve gerisi aynı kalsın", M) == ["mutfak penceresi 120x120", "gerisi aynı kalsın"]
+    assert [p["tur"] for p in CO.oku("salon aynı kalsın ve mutfak penceresi 120x120 olsun", C8801, KATALOG)["parcalar"]] == ["bos", "pencere"]
+    for s in ("mutfakta pencereyi 120x120 yapalım", "1. yatak odasında pencereyi 120x180 yapalım", "antre penceresini 120x180 yapalım"):
+        assert CO.parca_oku(s, C8801, KATALOG)["tur"] == "pencere", s
+    for s in ("şekli kırma olsun", "eğimi dik olsun", "mahya yüksek olsun", "çatı kiremit kaplı piramit olsun", "çatı kırmızı mansard olsun"):
+        assert CO.parca_oku(s, C8801, KATALOG)["isaret"]["cati"] is True, s
+    assert CO.parca_oku("çatı tek renk olsun", C8801, KATALOG)["isaret"]["cati"] is False
+    from beyin import celik
+    assert celik.ozellikleri_esle({"Çatı Eğimi": "dik", "Dış Kapı": "çelik", "Dış Boya Rengi": "krem", "Kapı Rengi": "beyaz"}) == \
+        ({"Dış Boya Rengi": "krem"}, ["Çatı Eğimi: dik", "Dış Kapı: çelik", "Kapı Rengi: beyaz"])   # hesaplanan satır ezilmez

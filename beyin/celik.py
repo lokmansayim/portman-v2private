@@ -35,14 +35,29 @@ _ESLE.update({"dis boya": "Dış Boya Rengi", "ic boya": "İç Boya Rengi", "cat
               "dis kapi": "Dış Kapı", "ic kapi": "İç Kapılar", "ic kapilar": "İç Kapılar", "pencere": "Pencereler"})
 
 
+# Tanımdan ve kural kitabından hesaplanan tablo satırları (`motor.genel.sablon_pafta.ozellikler`): bayinin değeri bunları ezmez, özel
+# isteğe yazılır (geometri hakemi altıncı tur: "çatı eğimi dik olsun" tabloya "Çatı Eğimi: dik", "dış kapı çelik olsun" "Dış Kapı: çelik"
+# yazdırıyor, çizimle çelişiyordu). Bayinin yazdığı satırlar: renkler ve "Köşe ve Söveler".
+HESAPLANAN_SATIRLAR = {"Bina Yüksekliği", "Dış Duvarlar", "İç Duvarlar", "Panel Türü", "Çatı Şekli", "Çatı Eğimi", "Çatı Kaplaması", "Dış Kapı",
+                       "İç Kapılar", "Pencereler", "Vasistaslar"}
+# revizyonda "bilgi" sayılmayan alanlar: çizimin geometrisi ve sayıları (malzeme, "Çatı Kaplaması", bilgidir: özel isteğe gider)
+GEOMETRI_SATIRLARI = HESAPLANAN_SATIRLAR - {"Çatı Kaplaması"}
+
+
+def satir_adi(anahtar: str | None) -> str | None:
+    """Bayinin/LLM'in alan adının şablon satırı (eşleşmezse None)."""
+    return _ESLE.get(_norm(str(anahtar or "")))
+
+
 def ozellikleri_esle(bina_ozellikleri: dict | None) -> tuple[dict, list[str]]:
-    """Bayinin pafta tablosu alanları → (şablon satırına yazılacaklar, eşleşmeyenler "Anahtar: değer")."""
+    """Bayinin pafta tablosu alanları → (şablon satırına yazılacaklar, özel isteğe gidenler "Anahtar: değer": eşleşmeyenler ve tanımdan
+    hesaplanan satırlar)."""
     oz, kalan = {}, []
     for k, v in (bina_ozellikleri or {}).items():
         if v in (None, ""):
             continue
-        ad = _ESLE.get(_norm(str(k)))
-        if ad:
+        ad = satir_adi(k)
+        if ad and ad not in HESAPLANAN_SATIRLAR:
             oz[ad] = str(v)
         else:
             kalan.append(f"{k}: {v}")
