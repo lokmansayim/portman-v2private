@@ -402,6 +402,52 @@ try:
     ok(say.get("kabul_edildi") >= 2 and "interactive/button" in t9 and "document" in t9, f"Meta: bayi görseli + düğmeler ve PDF gitti ({t9})")
     ok(BAYI not in json.dumps(i9b["sonuc"]) and q("SELECT durum, secilen_kod FROM secenek_setleri WHERE id = %s", s9["id"])[0]["secilen_kod"] == "Ç8801K",
        "iş sonucunda ham numara yok; set seçildi olarak kapandı")
+
+    print("10) İE-08 A4: serbest metin revizyon → r02 aynı projede (önce–sonra görseli) → belirsiz cümle → görselli '1 / 2 / Hiçbiri' → düğme 2 → r03")
+    time.sleep(1.2)
+    kod, c = webhook(yuk([metin(BAYI, "mutfak penceresi 120x120 olsun", mid="wamid.E2ER1")]))
+    hazir_ekle("wamid.E2ER1", {"niyet": "revizyon", "guven": "yuksek", "ozet": "mutfak penceresi 120x120",
+                               "pencereler": [{"mahal": "mutfak", "olcu": "120x120", "islem": "degistir"}]})
+    ok(c.get("mesaj") == {"sahiplenildi": 1} and ajan() == 0, "ajan: serbest metin revizyonu işlendi (gerçek genel motor)")
+    i10 = q("SELECT sonuc FROM isler WHERE mesaj_id = 'wamid.E2ER1'")[0]["sonuc"]
+    rv = q("SELECT proje_id, rev, durum, is_emri, ekler, is_emri_no FROM revizyonlar WHERE gonderen = %s ORDER BY id DESC LIMIT 2", BAYI)
+    y10 = rv[0]["is_emri"]["yapi"]
+    ok(i10["eylem"] == "is_emri" and rv[0]["rev"] == 2 and rv[0]["proje_id"] == rv[1]["proje_id"] and rv[1]["durum"] == "yerini_aldi"
+       and [(d["op"], d["aciklik"], d["en"], d["yuk"]) for d in y10["degisiklikler"]] == [("pencere_olcu", "P5", 120, 120)],
+       f"r02 aynı projede; değişiklik zarfta ({i10.get('gerekce')})")
+    g10 = rv[0]["ekler"].get("gorsel") or {}
+    t10 = json.loads((Path(g10.get("file", "/yok")).parent / "tanim.json").read_text(encoding="utf-8")) if g10.get("file") else {}
+    ok(g10.get("kaynak") == "once_sonra" and Path(g10["file"]).is_file() and Path(g10["file"]).stat().st_size <= 5 * 1024 * 1024
+       and next((a["etiket"] for a in t10.get("acikliklar", []) if a["ad"] == "P5"), None) == "120/120",
+       f"başlık görseli önce–sonra (perspektif {i10['cizim'].get('perspektif')}); çizilen tanımda P5 120/120")
+    k10 = q("SELECT kind, satir FROM giden WHERE mesaj_id = 'wamid.E2ER1' ORDER BY sira")
+    ok([x["kind"] for x in k10][:2] == ["interactive", "document"] and k10[0]["satir"]["file"].endswith("_once_sonra.png")
+       and k10[1]["satir"]["filename"] == f"Portman_{rv[0]['is_emri_no']}_r02.pdf", "satırlar: önce–sonra görselli Onayla/Revize et + PDF r02")
+    say = gonder()
+    t10 = sahte.tipler()[-(say.get("kabul_edildi") or 0) * 2:]                    # her dosyalı satır önce medya yükler
+    ok(say.get("kabul_edildi", 0) >= 2 and "interactive/button" in t10 and "document" in t10, f"Meta: önce–sonra görseli + düğmeler ve PDF gitti ({t10})")
+    time.sleep(1.2)
+    kod, c = webhook(yuk([metin(BAYI, "salondaki sol taraftaki pencere 120x180 olsun", mid="wamid.E2ER2")]))
+    hazir_ekle("wamid.E2ER2", {"niyet": "revizyon", "guven": "yuksek", "ozet": "salonun sol penceresi 120x180",
+                               "pencereler": [{"mahal": "salon", "olcu": "120x180", "duvar": "sol", "islem": "degistir"}]})
+    ok(c.get("mesaj") == {"sahiplenildi": 1} and ajan() == 0 and q("SELECT sonuc FROM isler WHERE mesaj_id = 'wamid.E2ER2'")[0]["sonuc"]["eylem"] == "sor",
+       "belirsiz cümle: soru (okuma), çizim yok")
+    k11 = q("SELECT satir FROM giden WHERE mesaj_id = 'wamid.E2ER2' ORDER BY sira")[0]["satir"]
+    ok([b["reply"]["id"] for b in k11["interactive"]["action"]["buttons"]] == ["q:okuma:1", "q:okuma:2", "q:okuma:0"] and k11["file"].endswith("_okuma.png")
+       and Path(k11["file"]).is_file(), "görselli '1 / 2 / Hiçbiri' (iki okuma numaralı tek görselde)")
+    say = gonder()
+    okuma_wamid = q("SELECT dis_id FROM giden WHERE mesaj_id = 'wamid.E2ER2' ORDER BY sira")[0]["dis_id"]
+    time.sleep(1.2)
+    kod, c = webhook(yuk([buton(BAYI, "q:okuma:2", "2", okuma_wamid, mid="wamid.E2ER3")]))
+    ok(c.get("mesaj") == {"sahiplenildi": 1} and ajan() == 0, "ajan: '2' düğmesi işlendi (LLM'siz)")
+    i12 = q("SELECT sonuc, cikarim FROM isler WHERE mesaj_id = 'wamid.E2ER3'")[0]
+    r12 = q("SELECT rev, is_emri FROM revizyonlar WHERE gonderen = %s ORDER BY id DESC LIMIT 1", BAYI)[0]
+    ok(i12["sonuc"]["eylem"] == "is_emri" and i12["cikarim"]["meta"]["backend"] == "etkilesim" and r12["rev"] == 3
+       and [(d["aciklik"], d["en"], d["yuk"]) for d in r12["is_emri"]["yapi"]["degisiklikler"]] == [("P5", 120, 120), ("P4", 120, 180)],
+       "r03: seçilen okuma (P4 120/180) önceki değişikliğin üstüne birikti")
+    d12, _ = depo.konusma_oku(BAYI)
+    ok(d12["revizyon"] == 2 and BAYI not in json.dumps(i12["sonuc"]) and q("SELECT durum FROM sorular WHERE gonderen = %s ORDER BY id DESC LIMIT 1", BAYI)[0]["durum"] == "cevaplandi",
+       "sayaç 2 (r03), soru cevaplandı, iş sonucunda ham numara yok")
 finally:
     with psycopg.connect(ADMIN + " dbname=postgres", autocommit=True) as c:
         c.execute(f"DROP DATABASE IF EXISTS {dbad} WITH (FORCE)")
