@@ -183,3 +183,36 @@ def test_ucuncu_tur_cati_kararsizligi_ve_bagimsiz_parca():
     oda = [p for p in CO.oku("Salon, mutfak, banyo.", C8801, KATALOG)["parcalar"]]
     assert all(p["tur"] == "belirsiz" and p["neden"] == "oda" for p in oda)
     assert CO.degisiklik_var("mutfak penceresi 120x120") and not CO.degisiklik_var("çatı nasıl olacak?")
+
+
+def test_dorduncu_tur_cati_secenekleri():
+    """Geometri hakemi dördüncü tur (13.10): çatı seçenekleri cümle cümle; değişimin kaynağı seçenek değildir ("K'dan L'ye", "K yerine L",
+    "Ç8801'den …"); katalog çatısı seçenektir; iki seçenekli çatı cümlesinin belirsizliği başka bir değişiklikle birlikte de kalır (önce
+    okumanın sonunda siliniyordu: K-1); şekil sözlü tek harf ("L tipi mutfak") çatı değildir."""
+    M = C8801["mahaller"]
+    for s, kod in (("çatıyı K'dan L'ye çevirelim", "Ç8801L"), ("Ç8801K yerine Ç8801L olsun", "Ç8801L"), ("çatıyı K yerine L yapalım", "Ç8801L"),
+                   ("L yerine K olsun", "Ç8801K"), ("Ç8801'den Ç8801K'ya geçelim", "Ç8801K"), ("çatıyı L yapalım", "Ç8801L"),
+                   ("Ç8801 katalog çatısı", "Ç8801"), ("Ç8801 çelik ev, çatı L olsun", "Ç8801L")):
+        assert CO.cati_okumasi(s, KATALOG, M) == kod, s
+    assert CO.cati_kaynak_kodlari("Ç8801K yerine Ç8801L olsun") == {"c8801k"} and CO.cati_kaynak_kodlari("Ç8801'den Ç8801K'ya") == {"c8801"}
+    for s in ("Ç8801K mi katalog çatısı mı olsun?", "Ç8801L mi Ç8801 mi olsun?", "Ç8801K olsun ama çatısı katalogdaki gibi olsun",
+              "Ç8801K ile katalog çatısı arasında kaldım", "çatı K ya da L olsun"):
+        assert len(CO.cati_secenekleri(s, M, "c8801")) == 2 and CO.cati_okumasi(s, KATALOG, M) is None, s
+    assert CO.cati_secenekleri("Ç8801K olsun, L tipi mutfak olsun", M) == {"k"} and CO.cati_secenekleri("katalogdaki Ç8801K olsun") == {"k"}
+    assert CO.cati_secenekleri("çatı L tipi olsun") == {"l"}                                          # çatı sözüyle şekil: çatı L
+    r = CO.oku("çatıyı K'dan L'ye çevirelim, mutfak penceresi de 120x120 olsun", C8801, KATALOG)
+    assert r["cati"] == "Ç8801L" and adlar(r) == ["P5"] and not r["cati_belirsiz"]
+    for s in ("mutfak penceresi 120x120 olsun, çatı K ve L olsun", "çatı K ya da L olsun, dışlar 140'lık olsun", "K ve L"):
+        r = CO.oku(s, C8801, KATALOG)
+        assert r["cati"] is None and r["cati_belirsiz"] is True, s
+    # harfsiz "çatı" sözü bilgi cümlesini engellemez (İ-1); tanınmayan oda adı ayrı cümle değildir (İ-3); duvar sorusunda 140 işareti (Ö-2)
+    p = CO.parca_oku("çatı rengi kırmızı olsun", C8801, KATALOG)
+    assert p["tur"] == "baska" and not any(p["isaret"].values())
+    assert CO.parca_oku("çatı rengi L olsun", C8801, KATALOG)["isaret"]["cati"] is True
+    assert CO._parcalar("çatı ve dış cephe gri olsun", M) == ["çatı ve dış cephe gri olsun"]
+    assert CO._parcalar("çalışma odası ve mutfak pencereleri 120x120", M) == ["çalışma odası ve mutfak pencereleri 120x120"]
+    assert CO._parcalar("mutfak penceresi 120x120 ve banyo fayansı beyaz olsun", M) == ["mutfak penceresi 120x120", "banyo fayansı beyaz olsun"]
+    p = CO.parca_oku("duvarlar 140 olabilir mi?", C8801, KATALOG)
+    assert (p["tur"], p["neden"], p["olumsuz"], p["d140"]) == ("belirsiz", "dis", True, True)
+    p = CO.parca_oku("dış duvar kalınlığı ne kadar?", C8801, KATALOG)
+    assert (p["tur"], p["neden"], p["d140"]) == ("belirsiz", "dis", False)

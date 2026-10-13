@@ -386,18 +386,26 @@ def _celik_dali(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts: dict) 
     # Kapanış incelemesi (13.10): seçim ve çatı yalnız BU mesajın sözünden (bayinin yazdığı kod, düğme metni, çatı cümlesi). Taslakta kalan
     # eski kod ("Ç8801" set açılırken yazılmıştı) ya da LLM'in bağlamdan yinelediği kod seçim sayılmaz: set açıkken "L olsun" ya da setin
     # kendi örneği "çatı K olsun" katalog çatısını seçiyordu. "veranda L olsun" çatı değildir (celik_okuma.cati_okumasi).
-    mesaj_kodlari = [str(Katalog.kod_normalize(c) or "").upper() for c in _model_kodlari_ve_kalan(metin, katalog)[0]]
-    cati = CO.cati_okumasi(metin, kat_aday)
+    # Geometri hakemi dördüncü tur: değişimin kaynağı olan kod ("Ç8801K yerine Ç8801L") seçim değildir; mesajda iki ayrı çatı seçeneği
+    # (katalog çatısı dahil: "Ç8801K mi katalog çatısı mı?") ya da setten iki kod geçiyorsa seçim yoktur (kararsızlık; set yeniden sunulur).
+    kaynak = {str(Katalog.kod_normalize(c) or "").upper() for c in CO.cati_kaynak_kodlari(metin)}
+    mesaj_kodlari = [c for c in (str(Katalog.kod_normalize(x) or "").upper() for x in _model_kodlari_ve_kalan(metin, katalog)[0]) if c not in kaynak]
+    mahaller = _aday_mahalleri(aday)
+    secenekler = CO.cati_secenekleri(metin, mahaller, CO.norm(str(kat_aday.get("kod") or "")) or None)
+    kararsiz = len(secenekler) > 1
+    cati = CO.cati_okumasi(metin, kat_aday, mahaller)
     if st and st.get("durum") == "acik" and _celik_seti_acik(k):
         set_kodlari = {str(a.get("kod")).upper() for a in st.get("adaylar") or []}
-        secim = next((c for c in mesaj_kodlari if c in set_kodlari), None) or (cati.upper() if cati and cati.upper() in set_kodlari else None)
+        secimler = list(dict.fromkeys(c for c in mesaj_kodlari if c in set_kodlari))
+        secim = None if (kararsiz or len(secimler) > 1) else \
+            (cati.upper() if cati and cati.upper() in set_kodlari else None) or next(iter(secimler), None)
         if secim:
             secilen = aday if secim == kod else katalog.aday(secim)
             if secilen is not None:
                 k.d["taslak"]["katalog_kodu"] = secilen["kod"]
                 _seti_kapat(k, secilen["kod"])                 # setten seçim (düğme, kod, çatı sözü ya da numara)
                 return _celik_is_emri_uret(k, bayi, katalog, secilen, ts)
-        if not mesaj_kodlari:                                  # seçim yok: istek saklanır, set yeniden sunulur
+        if not mesaj_kodlari or kararsiz or len(secimler) > 1:  # seçim yok ya da kararsız: istek saklanır, set yeniden sunulur
             saklandi = _celik_istek_sakla(k)
             uygun = [{**x, **{kk: a.get(kk) for kk in ("sira", "puan", "hesap")}}
                      for a in sorted(st.get("adaylar") or [], key=lambda a: a.get("sira") or 0) for x in [katalog.aday(a.get("kod"))] if x]
@@ -409,12 +417,13 @@ def _celik_dali(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts: dict) 
     ayni = son.get("sistem") == "celik" and Katalog.taban_kod(son.get("kod")) == Katalog.taban_kod(kod)
     hedef, sozden = None, False
     varyant_kodlari = [c for c in mesaj_kodlari if c != Katalog.taban_kod(c) and Katalog.taban_kod(c) == Katalog.taban_kod(kod)]
-    # mesajda iki ayrı çatı ("Ç8801K ve Ç8801L arasında kararsızım", "çatı K mı L mi") seçim değildir (geometri hakemi üçüncü tur)
-    kararsiz = len(set(varyant_kodlari)) > 1 or len(CO._cati_harfleri(metin)) > 1
+    # mesajda iki ayrı çatı ("Ç8801K ve Ç8801L arasında kararsızım", "çatı K mı L mi", "Ç8801L mi Ç8801 mi?") seçim değildir (geometri
+    # hakemi üçüncü ve dördüncü tur)
+    sozdeki = [c for c in varyant_kodlari if c[-1].lower() in secenekler]
     if cati:
         hedef, sozden = cati.upper(), True
-    elif varyant_kodlari and not kararsiz:                     # yazılan varyant kodu ("Ç8801L") çatı seçimidir; taban kod ("Ç8801") değildir
-        hedef, sozden = varyant_kodlari[0], True
+    elif sozdeki and not kararsiz:                             # yazılan varyant kodu ("Ç8801L") çatı seçimidir; taban kod ("Ç8801") değildir
+        hedef, sozden = sozdeki[0], True
     elif ayni:
         hedef = str(son.get("kod")).upper()                    # revizyon: son planın çatısı (kapanmış setin eski seçimi değil; CR7)
     elif st and st.get("durum") == "secildi" and Katalog.taban_kod(st.get("secilen_kod")) == Katalog.taban_kod(kod):
@@ -442,6 +451,14 @@ def _celik_dali(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts: dict) 
 
 
 CELIK_ISTEK_NOTU = "Mesajınızdaki değişiklik isteğini seçtiğiniz plana işleyeceğim."
+
+
+def _aday_mahalleri(aday: dict) -> list[dict]:
+    """Çelik adayın oda adları (cümle bölme oda adlarını tanısın); tanım okunamazsa boş (zarf aşaması tanımı ayrıca doğrular)."""
+    try:
+        return list(json.loads(celik.tanim_yolu(aday).read_text(encoding="utf-8")).get("mahaller") or [])
+    except (KeyError, OSError, ValueError):
+        return []
 
 
 def _celik_seti_acik(k: Konusma) -> bool:
@@ -581,12 +598,13 @@ def _celik_degisiklikler(k: Konusma, katalog: Katalog, aday: dict, t: dict, once
     # 4) olumsuz/soru biçimli ya da belirsiz cümle, okunamayan çatı isteği → sor (K21). İlk planda yalnız gerçek değişiklik soruları:
     #    pencere/dış 140 cümlesi olumsuz ya da soru biçimliyse ("… olabilir mi?") ve belirsizlik bir değişiklikten geliyorsa (karma, ölçü
     #    dışı sayı, üç ölçü, "duvarlar 140"); oda listesi, çatı sorusu ("Ç8801K olur mu?", "çatı K mı L mi?") ilk planda talep
-    #    bilgisidir — çatıyı set ya da kod belirler (geometri hakemi ikinci ve üçüncü tur).
+    #    bilgisidir — çatıyı set ya da kod belirler (geometri hakemi ikinci ve üçüncü tur). Duvar cümlesi soru biçimliyse yalnız 140 değeri
+    #    taşıyorsa sorulur ("duvarlar 140 olabilir mi?" değişiklik isteğidir; "dış duvar kalınlığı ne kadar?" bilgi sorusudur; dördüncü tur).
     if ayni_proje:
         sor = bool(r["olumsuz"] or r["belirsiz"] or r["cati_belirsiz"])
     else:
         sor = any((p["olumsuz"] and p["tur"] in ("pencere", "dis140")) or (p["tur"] == "belirsiz" and p.get("neden") in ("karma", "sayi", "olcu"))
-                  or (p["tur"] == "belirsiz" and p.get("neden") == "dis" and not p["olumsuz"])      # "dış duvar kalınlığı ne kadar?" bilgi sorusu
+                  or (p["tur"] == "belirsiz" and p.get("neden") == "dis" and (not p["olumsuz"] or p.get("d140")))
                   for p in r["parcalar"])
     if sor:
         return _soru(k, "okuma_metin", "Anlayamadım. " + _NEYI_DEGISTIRELIM)

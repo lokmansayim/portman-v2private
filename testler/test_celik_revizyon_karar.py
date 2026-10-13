@@ -284,3 +284,80 @@ def test_degisiklik_yok_yonlendirilmez(s):
     for metin in ("değişiklik yok", "böyle kalsın"):
         k = s.yaz(metin)
         assert k.eylem == "sor" and k.soru_alani == "okuma_metin" and s.plan["revizyon"] == 1, (metin, k.eylem)
+
+
+@pytest.mark.parametrize("metin, alan, degisiklik", [
+    ("çatıyı K'dan L'ye çevirelim, mutfak penceresi de 120x120 olsun", {"pencereler": [pen("mutfak", "120x120")]},
+     ["pencere_olcu:P5", "cati_varyanti:Ç8801L"]),
+    ("Ç8801K yerine Ç8801L olsun, mutfak penceresi 120x120", {"pencereler": [pen("mutfak", "120x120")]},
+     ["pencere_olcu:P5", "cati_varyanti:Ç8801L"]),
+    ("çatıyı K yerine L yapalım", {}, ["cati_varyanti:Ç8801L"]),
+])
+def test_dorduncu_tur_degisimin_kaynagi_secim_degil(s, metin, alan, degisiklik):
+    """Geometri hakemi dördüncü tur (K-1): "K'dan L'ye", "K yerine L" çatıyı L yapar; değişimin kaynağı (K) seçenek sayılmaz. Önce iki
+    harfli çatı cümlesinin belirsizliği okumanın sonunda siliniyor, çatı isteği pencereyle birlikte gelince sessizce düşüyordu (r02 K)."""
+    r01_k(s)
+    k = s.yaz(metin, **alan)
+    assert k.eylem == "is_emri" and k.revizyon == 2 and s.plan["yapi"]["kod"] == "Ç8801L", (k.eylem, k.mesaj)
+    assert s.degisiklikler(k) == degisiklik
+
+
+@pytest.mark.parametrize("ilk, metin, alan", [
+    ("Ç8801K", "mutfak penceresi 120x120 olsun, çatı K ve L olsun", {"pencereler": [pen("mutfak", "120x120")]}),
+    ("Ç8801", "çatı K ya da L olsun, dışlar 140'lık olsun", {}),
+])
+def test_dorduncu_tur_iki_catili_cumle_baska_istekle_sorulur(s, ilk, metin, alan):
+    """K-1: iki seçenekli çatı cümlesi başka bir değişiklikle birlikte gelse de sorulur (yalnız öteki değişiklik uygulanmaz)."""
+    assert s.yaz(ilk + (" katalog çatısı" if ilk == "Ç8801" else ""), katalog_kodu=ilk, yapi_turu="celik").eylem == "is_emri"
+    k = s.yaz(metin, **alan)
+    assert k.eylem == "sor" and k.soru_alani == "okuma_metin" and s.plan["revizyon"] == 1, (k.eylem, k.mesaj)
+
+
+@pytest.mark.parametrize("metin, alan, eylem, kod", [
+    ("Ç8801K mi katalog çatısı mı olsun?", {"katalog_kodu": "Ç8801K"}, "secenek", None),          # Ö-1: katalog çatısı da seçenektir
+    ("Ç8801 çelik ev, Ç8801K mi katalog çatısı mı olsun?", {"katalog_kodu": "Ç8801"}, "secenek", None),
+    ("Ç8801L mi Ç8801 mi olsun?", {"katalog_kodu": "Ç8801L"}, "secenek", None),
+    ("Ç8801K olsun ama çatısı katalogdaki gibi olsun", {"katalog_kodu": "Ç8801K"}, "secenek", None),
+    ("Ç8801K ile katalog çatısı arasında kaldım", {"katalog_kodu": "Ç8801K"}, "secenek", None),
+    ("Ç8801K olsun, duvarlar 140 olabilir mi?", {"katalog_kodu": "Ç8801K"}, "sor", None),            # Ö-2: 140 değerli soru değişikliktir
+    ("Ç8801K olsun, duvarları 140'lık yapabilir miyiz?", {"katalog_kodu": "Ç8801K"}, "sor", None),
+    ("Ç8801K olsun, L tipi mutfak olsun", {"katalog_kodu": "Ç8801K"}, "is_emri", "Ç8801K"),        # İ-2: şekil sözü çatı değil
+    ("Ç8801 çelik ev, çatı L olsun", {"katalog_kodu": "Ç8801"}, "is_emri", "Ç8801L"),              # taban kod seçim sorusu dışında seçenek değil
+    ("Ç8801 katalog çatısı", {"katalog_kodu": "Ç8801"}, "is_emri", "Ç8801"),
+])
+def test_dorduncu_tur_ilk_plan(s, metin, alan, eylem, kod):
+    """Geometri hakemi dördüncü tur: ilk planda katalog çatısıyla kararsızlık set alır (mesajdaki kod seçilmez); "duvarlar 140 … mi?"
+    sorulmadan çizilmez; çatı dışındaki tek harf ve taban kod kararsızlık sayılmaz."""
+    k = s.yaz(metin, yapi_turu="celik", **alan)
+    assert k.eylem == eylem, (k.eylem, k.mesaj)
+    if kod:
+        assert s.plan["yapi"]["kod"] == kod
+
+
+def test_dorduncu_tur_taninmayan_oda_pencere_istegiyle_kalir(s):
+    """İ-3: "çalışma odası ve mutfak pencereleri 120x120" — tanınmayan oda adı ayrı cümleye bölünüp düşmez; yalnız mutfak sessizce
+    uygulanmaz, istek sorulur."""
+    k = s.yaz("Ç8801K olsun, çalışma odası ve mutfak pencereleri 120x120", katalog_kodu="Ç8801K", yapi_turu="celik",
+              pencereler=[pen("mutfak", "120x120")])
+    assert k.eylem == "sor" and not s.plan, (k.eylem, k.mesaj)
+
+
+@pytest.mark.parametrize("metin, ozellik", [
+    ("çatı rengi kırmızı olsun", {"Çatı Kaplama Rengi": "kırmızı"}),
+    ("çatı ve dış cephe gri olsun", {"Çatı Rengi": "gri", "Dış Cephe Rengi": "gri"}),
+])
+def test_dorduncu_tur_cati_rengi_bilgidir(s, metin, ozellik):
+    """İ-1: harfsiz "çatı" sözü değişiklik işareti değildir: çatı rengi bilgi revizyonudur (r02, çatı aynı; önce yönlendiriliyor ya da
+    "Anlayamadım" alıyordu)."""
+    r01_k(s)
+    k = s.yaz(metin, bina_ozellikleri=ozellik)
+    assert k.eylem == "is_emri" and k.revizyon == 2 and s.plan["yapi"]["kod"] == "Ç8801K" and s.degisiklikler(k) == [], (k.eylem, k.mesaj)
+
+
+def test_dorduncu_tur_set_acikken_kaynak_ve_kararsizlik(s):
+    """Set açıkken iki kod seçim değildir (set yeniden sunulur; önce ilk kod seçiliyordu); "Ç8801K yerine Ç8801L" L'yi seçer."""
+    assert s.yaz("Ç8801", katalog_kodu="Ç8801", yapi_turu="celik").eylem == "secenek"
+    k = s.yaz("Ç8801K mi Ç8801L mi olsun?", katalog_kodu="Ç8801K")
+    assert k.eylem == "secenek" and "Önce listeden seçin" in k.mesaj and not s.plan
+    k = s.yaz("Ç8801K yerine Ç8801L olsun", katalog_kodu="Ç8801K")
+    assert k.eylem == "is_emri" and s.plan["yapi"]["kod"] == "Ç8801L"

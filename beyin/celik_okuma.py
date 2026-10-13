@@ -15,9 +15,7 @@ kural katmanı onu yönlendirir (K21: sessizce düşmez, yanlış uygulanmaz). P
 from __future__ import annotations
 import re
 
-from . import celik
-
-_TR = str.maketrans("ıİşŞğĞüÜöÖçÇâÂîÎûÛ", "iissgguuooccaaiiuu")
+_TR =str.maketrans("ıİşŞğĞüÜöÖçÇâÂîÎûÛ", "iissgguuooccaaiiuu")
 PENCERE_EN = (30, 400)
 PENCERE_YUK = (30, 250)
 VASISTAS_ESIK = 60          # kurallar/cizim/pafta_sablonu.json › vasistas_en_cok_yukseklik_cm ile aynı (motor içe aktarılmasın diye kopya; test denetler)
@@ -70,7 +68,8 @@ _DOLGU_T = _S(r"olsun", r"olsa", r"olacak", r"olmali\w*", r"olabilir", r"olur", 
               r"istegi", r"talep\w*", r"plan\w*", r"cizim\w*", r"pafta\w*", r"revize", r"revizyon\w*", r"sey\w*", r"hepsi\w*", r"tum\w*",
               r"butun", r"ayrica", r"ama", r"fakat", r"ancak", r"yine", r"tekrar", r"son", r"ilk", r"birinci", r"ikinci", r"ucuncu",
               r"guzel\w*", r"harika", r"super", r"iyi", r"gayet", r"olmus", r"oldu", r"begen\w*",          # beğeni sözü istek değildir
-              r"degisiklik\w*", r"aynen", r"aynisi", r"boyle", r"soyle")                                 # "değişiklik yok", "böyle kalsın"
+              r"degisiklik\w*", r"aynen", r"aynisi", r"boyle", r"soyle",                                 # "değişiklik yok", "böyle kalsın"
+              r"yapabil\w*", r"donustur\w*", r"gec(?:elim|sin|in|iniz|ilsin|ebilir\w*)")                # "140'lık yapabilir miyiz?", "L'ye geçelim"
 _ODA_GENEL = re.compile(r"\b(?:oda\w*|mahal\w*)\b")
 _SAYI_SOZ = {"bir": 1, "birinci": 1, "ilk": 1, "ilki": 1, "iki": 2, "ikinci": 2, "ikincisi": 2, "uc": 3, "ucuncu": 3, "dort": 4, "dorduncu": 4,
              "bes": 5, "besinci": 5, "alti": 6, "altinci": 6, "yedi": 7, "yedinci": 7, "sekiz": 8, "sekizinci": 8, "dokuz": 9, "dokuzuncu": 9}
@@ -90,8 +89,9 @@ def norm(s: str | None) -> str:
 
 
 def _capa(parca: str) -> bool:
-    """Parçada değişiklik çapası var mı: pencere ölçüsü, pencere sözü, "dış" + 140, çatı/katalog sözü ya da varyant kodu, ekleme/kaldırma
-    sözü. Tek başına "K"/"L" harfi çapa değildir (geometri hakemi üçüncü tur: "çatı K ve L'yi görelim" bölünüp K seçiliyordu)."""
+    """Parçada değişiklik çapası var mı: pencere ölçüsü, pencere sözü, "dış" + 140, katalog sözü, çatı sözüyle çatı harfi ("çatı L") ya da
+    varyant kodu, ekleme/kaldırma sözü. Tek başına "K"/"L" harfi çapa değildir (geometri hakemi üçüncü tur: "çatı K ve L'yi görelim"
+    bölünüp K seçiliyordu); harfsiz "çatı" sözü de değildir (dördüncü tur: "çatı ve dış cephe gri olsun" bir bilgi cümlesidir)."""
     if olculer(parca):
         return True
     q = norm(_olcusuz(parca))
@@ -99,7 +99,8 @@ def _capa(parca: str) -> bool:
     soz = _KOD.sub(" ", q).split()
     return (any(_PENCERE_T.fullmatch(w) for w in soz) or any(_EKLE_T.fullmatch(w) for w in soz)
             or (any(w.startswith("dis") and _DIS_T.fullmatch(w) for w in soz) and any(w in ("140", "14") for w in soz))
-            or any(w.startswith(("cati", "katalog")) for w in soz)
+            or any(w.startswith("katalog") for w in soz)
+            or (any(w.startswith("cati") for w in soz) and any(_HARF_T.fullmatch(w) for w in soz))
             or any(re.search(r"[kl]$", re.sub(r"\s", "", k)) for k in kodlar))
 
 
@@ -109,7 +110,10 @@ def _bagimsiz(parca: str, mahaller: list[dict] | None) -> bool:
     q0 = norm(_olcusuz(parca))
     if _KOD.search(q0):
         return False                                        # model kodu çatı işaretidir: parça bağımsız değil
-    q = _ODA_GENEL.sub(" ", _odalar(q0, mahaller or [])[1])
+    q1 = _odalar(q0, mahaller or [])[1]
+    if _ODA_GENEL.search(q1):
+        return False                                        # tanınmayan oda adı ("çalışma odası ve mutfak pencereleri"): oda listesinin parçası
+    q = _ODA_GENEL.sub(" ", q1)
     sinif = [_sinifla(w) for w in q.split()]
     # çatı harfi taşıyan parça bağımsız değildir ("çatı K ile L arasındaki fark nedir?": "L arasındaki fark" çatı cümlesine aittir)
     return "bilinmeyen" in sinif and "harf" not in sinif
@@ -297,6 +301,84 @@ def _sinifla(sozcuk: str) -> str:
     return "bilinmeyen"
 
 
+# ── çatı seçenekleri (geometri hakemi dördüncü tur, 13.10) ─────────────────────────────────────────────────────────────────────────────
+# Seçenek: "k", "l" (tek harf ya da varyant kodunun harfi) ve "katalog" (katalog çatısı). Değişimin kaynağı ("K'dan L'ye", "Ç8801K yerine
+# Ç8801L", "katalogdan K'ya") seçenek değildir; kalan tek seçenek seçimdir, iki ve daha çok seçenek kararsızlıktır (sorulur ya da set sunulur).
+_SECIM_SOZ = re.compile(r"\b(?:mi|mu|ya da|yada|veya|yoksa|hangisi\w*|arasinda\w*|kararsiz\w*)\b")
+_SEKIL_T = re.compile(r"(?:tip\w*|sekl\w*|sekil\w*|bicim\w*)")
+_AYRILMA = ("dan", "den", "tan", "ten")
+
+
+def _parca_secenekleri(q: str, taban: str | None = None) -> tuple[set[str], set[str]]:
+    """Bir cümlenin (normalize, ölçüsüz) çatı seçenekleri ve değişim kaynağı olan kodlar ("c8801k", "c8801"). "katalog" sözü yalnız çatı
+    sözüyle ya da seçim sorusunda seçenektir ("katalog çatısı", "K mı katalog mu?"; "katalogdaki Ç8801K" değil); taban kod yalnız seçim
+    sorusunda başka bir seçenekle ("Ç8801L mi Ç8801 mi?"; "Ç8801 çelik ev" değil). Şekil sözlü tek harf çatı sözü yoksa seçenek değildir
+    ("L tipi mutfak"). `taban` ("c8801") verilirse başka modelin varyant kodu seçenek sayılmaz."""
+    soz = _KOD.sub(lambda m: re.sub(r"\s", "", m.group(0)) + " ", q).split()     # "c8801 k" → "c8801k" (kod sonundaki boşluk korunur)
+    cati = any(w.startswith("cati") for w in soz)
+    secim = bool(_SECIM_SOZ.search(" " + " ".join(soz) + " "))
+    sec: set[str] = set()
+    kaynak_kod: set[str] = set()
+    taban_var = False
+    for i, w in enumerate(soz):
+        ard = soz[i + 1:i + 3]
+        if re.fullmatch(r"(?:c\d{4}|\d{4})[kl]", w):
+            if taban and re.sub(r"[kl]$", "", w).lstrip("c") != taban.lstrip("c"):
+                continue
+            s = w[-1]
+        elif w in ("k", "l"):
+            s = w
+        elif re.fullmatch(r"c\d{4}", w):
+            s = "taban"
+        elif w.startswith("katalog"):
+            s = "katalog"
+        else:
+            continue
+        kaynak = ((s == "katalog" and w.endswith(_AYRILMA)) or (bool(ard) and (ard[0] in _AYRILMA or ard[0] == "yerine"))
+                  or (bool(ard) and ard[0] in ("nin", "nun", "in", "un") and ard[1:2] == ["yerine"])
+                  or (bool(ard) and ard[0].startswith("cati") and (ard[0].endswith(_AYRILMA) or ard[1:2] == ["yerine"])))
+        if kaynak:
+            if re.fullmatch(r"(?:c\d{4}|\d{4})[kl]?", w):
+                kaynak_kod.add(w)                           # karar katmanı bu kodu seçim saymaz
+            continue
+        if s in ("k", "l") and w in ("k", "l") and ard and _SEKIL_T.fullmatch(ard[0]) and not cati:
+            continue                                        # "L tipi mutfak": şekil sözü, çatı değil
+        if s == "katalog" and not (cati or secim):
+            continue
+        if s == "taban":
+            taban_var = True
+            continue
+        sec.add(s)
+    if taban_var and secim and sec:
+        sec.add("katalog")
+    return sec, kaynak_kod
+
+
+def cati_secenekleri(metin: str | None, mahaller: list[dict] | None = None, taban: str | None = None) -> set[str]:
+    """Mesajda cümle cümle geçen çatı seçenekleri ({"k", "l", "katalog"}); kaynaklar düşülmüş. İkiden çoksa seçim değil kararsızlıktır."""
+    out: set[str] = set()
+    for p in _parcalar(metin, mahaller):
+        out |= _parca_secenekleri(norm(_olcusuz(p)), taban)[0]
+    return out
+
+
+def cati_kaynak_kodlari(metin: str | None) -> set[str]:
+    """Değişimin kaynağı olarak geçen model kodları ("Ç8801K yerine …", "Ç8801'den …"; normalize: "c8801k", "c8801"). Seçim sayılmaz."""
+    out: set[str] = set()
+    for p in _parcalar(metin):
+        out |= _parca_secenekleri(norm(_olcusuz(p)))[1]
+    return out
+
+
+def _secenek_kodu(s: str, katalog_aday: dict | None) -> str | None:
+    """Tek çatı seçeneğinin aday kodu: "katalog" → katalog modeli, "k"/"l" → o harfle biten varyant."""
+    if not katalog_aday or not katalog_aday.get("varyantlar"):
+        return None
+    if s == "katalog":
+        return str(katalog_aday["kod"]).upper()
+    return next((str(v).upper() for v in katalog_aday["varyantlar"] if str(v).upper().endswith(s.upper())), None)
+
+
 def parca_oku(parca: str, t: dict, katalog_aday: dict | None = None, y: dict | None = None) -> dict:
     """Tek cümlenin okuması: {"metin", "tur", "olumsuz", "bilinmeyen", ...}; tur pencere ise pencere okuması alanları da."""
     olc = olculer(parca)
@@ -325,7 +407,11 @@ def parca_oku(parca: str, t: dict, katalog_aday: dict | None = None, y: dict | N
     m_dis140 = has("dis") and bool(d140) and any(s.startswith("dis") for s in sinif.get("dis", []))
     m_cati = cati_soz or has("harf")
     m_ekle = has("ekle") or bool(_EKLE_IFADE.search(" " + q0 + " "))
-    r["isaret"] = {"pencere": m_pencere, "dis140": m_dis140, "cati": m_cati or varyant_kodu, "ekle": m_ekle}
+    # bilgi cümlesi denetimi için çatı işareti: harf, varyant kodu ya da katalog sözü; harfsiz "çatı" sözü değil ("çatı rengi kırmızı olsun"
+    # bilgi cümlesidir; geometri hakemi dördüncü tur)
+    r["isaret"] = {"pencere": m_pencere, "dis140": m_dis140, "ekle": m_ekle,
+                   "cati": has("harf") or varyant_kodu or any(s.startswith("katalog") for s in sinif.get("cati", []))}
+    r["d140"] = bool(d140)
     if sinif.get("bilinmeyen"):
         r["tur"] = "baska"
         return r
@@ -342,14 +428,15 @@ def parca_oku(parca: str, t: dict, katalog_aday: dict | None = None, y: dict | N
     if has("olcu") and (sayilar or has("d140")) and not m_pencere:
         r["tur"] = "baska"                                 # pencere dışı bir ölçü ("dış ölçü 14 x 8"): otomatik yapılamaz
         return r
-    # çatı: çatı/katalog sözü, tek harf (k/l) ya da varyant kodu; pencere ve oda yok ("model", "versiyon" tek başına çatı değil). İki ayrı
-    # çatı harfi ("çatı K mı L mi") seçim değildir.
+    # çatı: çatı/katalog sözü, tek harf (k/l) ya da varyant kodu; pencere ve oda yok ("model", "versiyon" tek başına çatı değil). Seçim
+    # cümlenin çatı seçeneklerinden: tek seçenek seçimdir ("çatıyı K'dan L'ye çevirelim" → L), iki seçenek ("çatı K mı L mi", "Ç8801K mi
+    # katalog çatısı mı") seçim değildir.
     if (m_cati or varyant_kodu) and not (m_pencere or odalar or genel_oda or has("dis", "d140")):
-        harfler = set(sinif.get("harf", [])) | {k[-1] for k in kodlar if re.search(r"[kl]$", k)}
-        kod = celik.cati_secimi(parca, katalog_aday) if (katalog_aday and katalog_aday.get("varyantlar") and len(harfler) <= 1) else None
+        taban = norm(str(katalog_aday["kod"])) if katalog_aday and katalog_aday.get("kod") else None
+        sec = _parca_secenekleri(q0, taban)[0]
         r["tur"] = "cati"
-        r["kod"] = kod
-        r["neden"] = "iki_cati" if len(harfler) > 1 else None
+        r["kod"] = _secenek_kodu(next(iter(sec)), katalog_aday) if len(sec) == 1 else None
+        r["neden"] = "iki_cati" if len(sec) > 1 else None
         r["olumsuz"] = has("olumsuz") or soru            # "katalog çatısı kalsın" seçimdir (kalsın olumsuz değil)
         return r
     if m_pencere:
@@ -448,29 +535,30 @@ def oku(metin: str | None, t: dict, katalog_aday: dict | None = None, ipucu: boo
                 r["belirsiz"].append(p["metin"])
             else:
                 r["pencereler"].append(po)
-    if len(set(catilar)) == 1 and len(_cati_harfleri(metin)) <= 1:
+    taban = norm(str(katalog_aday["kod"])) if katalog_aday and katalog_aday.get("kod") else None
+    if len(set(catilar)) == 1 and len(cati_secenekleri(metin, t.get("mahaller"), taban)) <= 1:
         r["cati"] = catilar[0]
-    elif catilar or len(_cati_harfleri(metin)) > 1:
-        r["cati_belirsiz"] = bool(catilar)                      # iki ayrı çatı ("Ç8801K ve Ç8801L arasında kararsızım"): seçim değil
+    elif catilar:
+        r["cati_belirsiz"] = True                               # iki ayrı çatı ("çatı L olsun, katalog çatısı mı olsa?"): seçim değil
+    # (geometri hakemi dördüncü tur: burada `cati_belirsiz` yeniden False yazılıyordu; iki harfli çatı cümlesi başka bir değişiklikle
+    # birlikte gelince sessizce düşüyordu. Döngünün koyduğu belirsizlik silinmez.)
     r["pencere"] = r["pencereler"][0] if r["pencereler"] else None
     r["istek"] = bool(r["pencereler"] or r["cati"] or r["dis140"] or r["ekle_kaldir"] or r["olumsuz"] or r["cati_belirsiz"])
     return r
 
 
-def cati_okumasi(metin: str | None, katalog_aday: dict | None) -> str | None:
-    """Mesajda tek ve olumsuz olmayan bir çatı cümlesi varsa onun varyant kodu ("çatı L olsun", "Ç8801 L", "katalog çatısı"); "veranda L
-    olsun" çatı değildir (tanınmayan sözcük). Model tanımı gerekmez (yalnız varyant listesi)."""
-    if not katalog_aday or not katalog_aday.get("varyantlar") or len(_cati_harfleri(metin)) > 1:
+def cati_okumasi(metin: str | None, katalog_aday: dict | None, mahaller: list[dict] | None = None) -> str | None:
+    """Mesajda tek ve olumsuz olmayan bir çatı cümlesi varsa onun varyant kodu ("çatı L olsun", "Ç8801 L", "katalog çatısı", "çatıyı K'dan
+    L'ye çevirelim"); "veranda L olsun" çatı değildir (tanınmayan sözcük). Mesajda iki ayrı çatı seçeneği geçiyorsa seçim yok (katalog
+    çatısı da seçenektir: "Ç8801K mi katalog çatısı mı?"). Model tanımı gerekmez (yalnız varyant listesi; `mahaller` cümle bölmeyi tanıtır)."""
+    if not katalog_aday or not katalog_aday.get("varyantlar"):
+        return None
+    if len(cati_secenekleri(metin, mahaller, norm(str(katalog_aday.get("kod") or "")) or None)) > 1:
         return None                                             # mesajda iki ayrı çatı geçiyor: seçim değil (sorulur ya da set sunulur)
-    kodlar = {p.get("kod") for p in (parca_oku(x, {}, katalog_aday) for x in _parcalar(metin)) if p["tur"] == "cati" and p.get("kod") and not p["olumsuz"]}
+    t = {"mahaller": mahaller or []}
+    kodlar = {p.get("kod") for p in (parca_oku(x, t, katalog_aday) for x in _parcalar(metin, mahaller))
+              if p["tur"] == "cati" and p.get("kod") and not p["olumsuz"]}
     return next(iter(kodlar)) if len(kodlar) == 1 else None
-
-
-def _cati_harfleri(metin: str | None) -> set[str]:
-    """Mesajın tamamında geçen çatı harfleri: tek başına "k"/"l" ve varyant kodlarının son harfi ("Ç8801K", "8801 L")."""
-    q = norm(_olcusuz(metin or ""))
-    harf = {k_[-1] for k_ in (re.sub(r"\s", "", x) for x in _KOD.findall(q)) if re.search(r"[kl]$", k_)}
-    return harf | {w for w in _KOD.sub(" ", q).split() if _HARF_T.fullmatch(w)}
 
 
 def degisiklik_var(metin: str | None) -> bool:
