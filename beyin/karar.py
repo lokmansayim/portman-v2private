@@ -601,7 +601,7 @@ def _celik_degisiklikler(k: Konusma, katalog: Katalog, aday: dict, t: dict, once
     # 0b) "uygulayamadım" güvenlik ağı (Lokman, 13.10: ilk planda da revizyonda da değişiklik isteği taşıyan hiçbir cümle sessizce düşmez;
     #     okunamayan istek bayiye açıkça yazılır ya da yönlendirilir). Revizyonda okunamayan cümle aşağıda yönlendirilir; ilk planda
     #     pencere, dış 140, ekleme, çatı şekli ya da oda isteği taşıyan okunamayan cümle bayiye yazılır (cümle bölme yanılsa da istek görünür
-    #     kalır). Çatı seçimi (kod, K/L, katalog) sayılmaz: onu kod ya da set belirler ("Ç8801L Mehmet Bey için" çatıyı uygular). Soru ve
+    #     kalır). Çatı seçimi (kod, K/L, katalog) sayılmaz: onu kod ya da set belirler ("Ç8801L müşterimiz için" çatıyı uygular). Soru ve
     #     olumsuz cümlede uygulanacak bir şey yoktur (olumsuz pencere/dış 140 aşağıda sorulur).
     if not ayni_proje:
         def _istek(p: dict) -> bool:
