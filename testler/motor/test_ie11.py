@@ -499,3 +499,20 @@ def test_aciklik_konum_cm_desteklenmiyor_hata():
     ie["acikliklar"][4]["konum_cm"] = 120.0
     with pytest.raises(G.IsEmriHatasi, match="konum_cm"):
         G.kur(ie)
+
+
+def test_bayi_gorseli_mentese_dxf_ile_ayni(tmp_path):
+    """Hakem Ö4 (13.10.2026): bayi görselinin kapı kanadı DXF'teki menteşe ucuyla aynı (`G.mentese_ucu`). Eski kural ("sol" = a0) −y ve +x yönüne
+    açılan kapılarda tersti; test eski kuralın gerçekten farklı olduğu kapıları da sayar (ayırt edici)."""
+    from motor import bayi_gorseli as BG
+    farkli = 0
+    for yol in (P6001, PK01):
+        plan = G.kur(_oku(yol))
+        for p in plan.panolar:
+            a = p.acilim
+            if a is None or a.tur not in ("ic_kapi", "dis_kapi") or not a.icine_normal:
+                continue
+            assert BG._mentese_a0_ucunda(a) == (G.mentese_ucu(a) == 0), (yol.name, a.arasi)
+            farkli += ((a.mentese or "sag") == "sol") != BG._mentese_a0_ucunda(a)
+    assert farkli >= 3                      # P6001 YAŞAM–BANYO; PK-01 HOL–SALON ve HOL–YATAK ODASI 2
+    assert BG.plan_gorseli(_oku(PK01), tmp_path / "pk01.png").is_file()
