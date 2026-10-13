@@ -15,7 +15,7 @@ Adlar yazılabilir (D-11). Bulunan dosya adları yalnız dizin listesinden.
 | | | | üst klasördeki PDF | `588c111a140f9aa501e4cf1e5412a6e3b5bc69d54346c77049de4e807e4f2c29` | 360.341 |
 | PK-03 | Doğan Prefabrik 81 m² (Nimet Bey) | PDF tam set + plan DXF | `…/Malzeme Listesi/DOĞAN PREFABRİK YÜKLEME LİSTESİ.XLSX` | `1a42996f551190b96396cd2adf4dd63608c4c6340ed997872e9eac014978ad67` | 171.083 |
 | | | | `Montaj Paftaları/DOĞAN PREFABRİK YÜKLEME LİSTESİ.XLSX` (başka sürüm) | `fe5948f5dcbcfb3cdd870d69751758f4b333d54a3d587871d35b3033d97c3f04` | 172.141 |
-| PK-04 | İsmail Ürün (Aziz Bey, satıldı) | PDF tam set (zemin kat duvar panelleri, aşık, çatı, makas, tavan omega, elektrik) | `Yükleme ve Montaj/İsmail Ürün Yükleme Listesi.pdf` | `0a3ef4ccdf45f52f5bd67c538aa75457ed77b15a6bc4391480f3f92329765e0a` | 481.765 |
+| PK-04 | İsmail Ürün (Aziz Bey, satıldı) — **çelik karkas, prefabrik pano değil; seriden çıkarıldı (13.10 11:40), genel motor kör testine** | PDF tam set (zemin kat duvar panelleri, aşık, çatı, makas, tavan omega, elektrik) | `Yükleme ve Montaj/İsmail Ürün Yükleme Listesi.pdf` | `0a3ef4ccdf45f52f5bd67c538aa75457ed77b15a6bc4391480f3f92329765e0a` | 481.765 |
 | | | | `…-Yazıcı.pdf` | `4edb8d3d10e4bac7bfd8be0c4ad92932751177a3e017266e991d5eaf964adcab` | 512.970 |
 | | | | `…-Yazıcı2.pdf` | `ed1a24dbeaa1c17733d335d26b8856d673b373376063f6d617b771b3622b6193` | 513.395 |
 | PK-05 | Abdullah Yavuz 60 m² (Mehmet Yıldırım) | panel yerleşimi PDF + DXF | `…/Malzeme Listesi/ABDULLAH YAVUZ YÜKLEME LİSTESİ.XLSX` | `561ad34a90ffee815f73e6013a37a8b7536a118ca5292bb6cf29be2a3c70a779` | 217.461 |
@@ -44,5 +44,6 @@ Adlar yazılabilir (D-11). Bulunan dosya adları yalnız dizin listesinden.
 |---|---|---|---|---|
 | PK-01 | `aebcfca` 10:48:50 | `17e43b88…d106` aynı | 10:49:17 | `deneme/2026-10-13_pk_01/sonuc/PK01_kiyas.md` |
 | PK-02 | `d31c35c` 11:20:47 | `9081e5e1…961f28` aynı (Mac, 11:21:08) | 11:21:21 | `deneme/2026-10-13_pk_02/sonuc/PK02_kiyas.md` |
+| PK-03 | `022b0d3` 12:09:37 | `fe5948f5…3f04` ve `1a42996f…ad67` aynı (Mac, 12:09:43) | 12:10:02 | `deneme/2026-10-13_pk_03/sonuc/PK03_kiyas.md` |
 
 PK-02 klasöründe mühür tablosunda olmayan bir xlsx daha var (`Mehmet Balaban 58 m² .xlsx`, 7 Kasım 2025, `7327bef1…93bd9`); açılmadı, kıyasa girmedi.
