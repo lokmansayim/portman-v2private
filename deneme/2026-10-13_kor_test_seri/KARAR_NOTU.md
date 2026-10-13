@@ -20,5 +20,8 @@ Seri sürerken alınan kararlar burada; `main`'e birleşirken `KARARLAR/` altın
 | 14:42 | **Kubbeli cumba takımı = Abdulselam takımı** (E2 − E3: kubbe makası 3, membran 1, kubbe saçak sacı 3 dahil). | Lokman, soru kartı 9 |
 | 14:42 | **İE-13'ten önce test setinde kör test** (mevcut üreteçle). | Lokman, soru kartı 10 |
 | 14:42 | **Tek şablon Portatifev;** yeni Loftev şablonu (çelik panel grubu) varsayılan olmaz, Loftev farkları aday sütununda kalır. | Lokman, soru kartı 11 |
+| 15:10 | **Amaç paftayı bizim oluşturmamız;** AIPrefabrik dosyaları sistemin öğrenmesi içindir. Pafta kipi (mühendisin paftasını okuyup liste çıkarmak) yalnız ölçüm aracı. Lokman: "istersen RAG yapalım dedim, sen önce kurallar dedin … LLM'siz zor gibi". | Lokman, soru kartı (TS-01 sonrası) |
+| 15:10 | **60'lık alt çerçeve 3750 doğru, listeler eski** (R1 kalır; TS-01 listesindeki 60 × 2500 × 5 eski uygulama). | Lokman, soru kartı |
+| 15:10 | **Orta iniş uzunluğa bağlı** (eşik verilmedi). Kanıt tek eşiğe uymuyor: 7,6 m'de var (E5), 8,1 / 9 / 11 m'de yok (TS-01, E2, E1), 12 / 15 m'de var (E4, E1). | Lokman, soru kartı |
 
 Not: PK-04 (İsmail Ürün) prefabrik pano değil, çelik karkas (D01–D21 panelleri, 2800 yükseklik, dış 140 / iç 80 mm); bu seriden çıkarıldı, genel motorun kör testine ayrıldı (Lokman'a 11:40'ta bildirildi).
