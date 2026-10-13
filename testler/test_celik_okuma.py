@@ -276,3 +276,27 @@ def test_altinci_tur_olumsuz_bicimler_tarif_cumleleri_cati_sekli():
     from beyin import celik
     assert celik.ozellikleri_esle({"Çatı Eğimi": "dik", "Dış Kapı": "çelik", "Dış Boya Rengi": "krem", "Kapı Rengi": "beyaz"}) == \
         ({"Dış Boya Rengi": "krem"}, ["Çatı Eğimi: dik", "Dış Kapı: çelik", "Kapı Rengi: beyaz"])   # hesaplanan satır ezilmez
+
+
+def test_yedinci_tur_eksiltili_istek_sifat_yonelme():
+    """Geometri hakemi yedinci tur (13.10): oda sözünden sonra gelen sıfat eksiltili istektir ("odalar geniş ve mutfak penceresi 120x120
+    olsun": ayrı cümle; önce pencere cümlesine katılıp düşüyordu), önce gelen sıfat ve "-daki" eki tariftir; ölçü devamı ("yüksekliği 300
+    olsun") ayrı cümle değildir; "-maz/-mez" sıfatı ("su geçirmez") olumsuz değildir, yeterlik olumsuzu ("olamaz") olumsuzdur; sonu t/d
+    ile biten odanın yönelme hâli ("tuvalete") ve çoğul "pencereler" eklemedir; "gerek yok" yalnız çatı sözüne bağlıysa çatıyı olumsuz yapar."""
+    M = C8801["mahaller"]
+    for s, n in (("odalar geniş ve mutfak penceresi 120x120 olsun", 2), ("mutfak büyük ve penceresi 120x120 olsun", 2),
+                 ("banyo daha büyük ve mutfak penceresi 120x120 olsun", 2), ("dış duvarlar kalın olsun ve mutfak penceresi 120x120 olsun", 2),
+                 ("salon aynı kalacak ve mutfak penceresi 120x120 olsun", 2), ("odalar geniş ve dışlar 140'lık olsun", 2),
+                 ("salondaki büyük ve mutfaktaki küçük pencereler 120x120 olsun", 1), ("büyük banyo ve mutfak pencereleri 120x120", 1),
+                 ("dışlar 140'lık olsun ve yüksekliği 300 olsun", 1)):
+        assert len(CO._parcalar(s, M)) == n, s
+    for w, sinif in (("gecirmez", "bilinmeyen"), ("paslanmaz", "bilinmeyen"), ("kirilmaz", "bilinmeyen"), ("olamaz", "olumsuz"),
+                     ("yapilamaz", "olumsuz"), ("begenmez", "olumsuz")):
+        assert CO._sinifla(w) == sinif, w
+    assert CO.parca_oku("dış cephe su geçirmez olsun", C8801, KATALOG)["tur"] == "baska"
+    for s in ("tuvalete 80x50 pencere yapalım", "müştemilata pencere yapalım", "salona pencereler yapalım", "WC'ye 80x50 pencere yapalım",
+              "salona iki pencere daha yapalım"):
+        assert CO.parca_oku(s, C8801, KATALOG)["tur"] == "ekle_kaldir", s
+    assert CO.parca_oku("tuvalette pencereyi 60x60 yapalım", C8801, KATALOG)["tur"] == "pencere"
+    for s, beklenen in (("Ç8801L olsun başka bir şeye gerek yok", False), ("Ç8801K olsun harici tuvalet olsun", False), ("L çatı olamaz", True)):
+        assert CO.cati_olumsuz(s, M) is beklenen, s

@@ -48,10 +48,11 @@ _DIS_T = _S(r"dis", r"dislar\w*", r"disi", r"disin\w*", r"disini", r"distaki\w*"
 _140_T = _S(r"140", r"14", r"140lik", r"140luk", r"14luk", r"14luk", r"lik", r"luk", r"mm")
 _OLUMSUZ_FIIL = (r"olmasin\w*", r"olmayacak\w*", r"olmaz", r"istemiyor\w*", r"istemem\w*", r"istemeyiz", r"degil\w*",
                  r"degistirme(?:yin|yiniz|yelim|sin|sen)?", r"yapma(?:yin|yiniz|yalim|sin)?", r"ekleme(?:yin|yiniz|yelim|sin)?",
-                 r"koyma(?:yin|yiniz|yalim|sin)?", r"dokunma\w*", r"vazgec\w*", r"iptal", r"haric\w*", r"gereksiz\w*",
+                 r"koyma(?:yin|yiniz|yalim|sin)?", r"dokunma\w*", r"vazgec\w*", r"iptal", r"haric(?:tir|te|ten)?", r"gereksiz\w*",
                  r"\w+m(?:e|a)(?:yelim|yalim|yin|yiniz|sin|sinler|sinlar)",   # "geçmeyelim", "çevirmeyin", "gelmesin" (beşinci tur)
-                 r"\w+m(?:e|a)d(?:i|ik|im|in|iniz|iler|ilar)", r"\w+m(?:i|u)yor\w*", r"\w+m(?:e|a)z")   # "beğenmedik", "istemiyoruz",
-                                                                                                    # "gerekmez" (altıncı tur)
+                 r"\w+m(?:e|a)d(?:i|ik|im|in|iniz|iler|ilar)", r"\w+m(?:i|u)yor\w*",   # "beğenmedik", "istemiyoruz" (altıncı tur)
+                 r"gerekmez\w*", r"istemez\w*", r"begenmez\w*", r"uymaz\w*", r"yetmez\w*", r"\w+(?:a|e)m(?:a|e)z\w*")   # yeterlik: "olamaz"   # geniş zaman yalnız fiille: "su geçirmez",
+                                                                                                # "paslanmaz" sıfattır (yedinci tur)
 _OLUMSUZ_T = _S(*_OLUMSUZ_FIIL, r"yok", r"hayir")
 _OLUMSUZ_FIIL_T = _S(*_OLUMSUZ_FIIL)          # çatı seçimini engelleyen olumsuzluk ("yok"/"hayır" değil: "Ç8801K olsun başka değişiklik yok")
 _KALSIN_T = _S(r"kalsin", r"kalabilir", r"kalacak", r"dursun")
@@ -75,17 +76,18 @@ _DOLGU_T = _S(r"olsun", r"olsa", r"olacak", r"olmali\w*", r"olabilir", r"olur", 
               r"guzel\w*", r"harika", r"super", r"iyi", r"gayet", r"olmus", r"oldu", r"begen\w*",          # beğeni sözü istek değildir
               r"degisiklik\w*", r"aynen", r"aynisi", r"boyle", r"soyle",                                 # "değişiklik yok", "böyle kalsın"
               r"yapabil\w*", r"donustur\w*", r"gec(?:elim|sin|in|iniz|ilsin|ebilir\w*)",                # "140'lık yapabilir miyiz?", "L'ye geçelim"
-              r"geri", r"gerisi", r"kalan\w*", r"diger\w*", r"oteki\w*", r"oyle")                     # "gerisi aynı kalsın" (altıncı tur)
+              r"geri", r"gerisi", r"kalan\w*", r"diger\w*", r"oteki\w*", r"oyle", r"baska")                     # "gerisi aynı kalsın" (altıncı tur)
 _ODA_GENEL = re.compile(r"\b(?:oda\w*|mahal\w*)\b")
 _SAYI_SOZ = {"bir": 1, "birinci": 1, "ilk": 1, "ilki": 1, "iki": 2, "ikinci": 2, "ikincisi": 2, "uc": 3, "ucuncu": 3, "dort": 4, "dorduncu": 4,
              "bes": 5, "besinci": 5, "alti": 6, "altinci": 6, "yedi": 7, "yedinci": 7, "sekiz": 8, "sekizinci": 8, "dokuz": 9, "dokuzuncu": 9}
 # numaralı oda sözü yalnız sıra sayısıyla: "bir yatak odasının penceresi" (herhangi biri; kapanış incelemesi) ve "iki yatak odası" (iki oda)
 # numara değildir
 _ODA_SAYI = {k: v for k, v in _SAYI_SOZ.items() if re.search(r"(inci|nci|uncu|unci|ncisi|incisi)$", k) or k in ("ilk", "ilki")}
-_EKLE_IFADE = re.compile(r"\bbir\s+(?:tane\s+)?(?:(?:pencere|vasistas)\w*\s+)?daha\b|\byeni\s+(?:bir\s+)?(?:pencere|vasistas)\w*"
+_EKLE_IFADE = re.compile(r"\b(?:bir|iki|uc|dort|\d)\s+(?:tane\s+)?(?:(?:pencere|vasistas)\w*\s+)?daha\b|\byeni\s+(?:bir\s+)?(?:pencere|vasistas)\w*"
                          r"|\bfazla(?:dan)?\s+(?:bir\s+)?(?:pencere|vasistas)\w*")
 # "salona pencere yapabilir misiniz?", "mutfağa bir pencere yapalım": odaya pencere yapmak eklemedir (beşinci tur; ölçü değişikliği sanılıyordu)
-_EKLE_ODA = re.compile(r"(?:^|\s)(\w+[ae])\s+(?:bir\s+)?(?:pencere|vasistas)\s+(?:yap|koy)\w*")     # yalın "pencere": "pencereyi" var olandır
+# yalın ya da çoğul "pencere" ("pencereyi" var olandır); oda sözünün eki ayrı yazılabilir ("wc ye"; yedinci tur)
+_EKLE_ODA = re.compile(r"(?:^|\s)(\w+)(?:\s+(ye|ya|e|a|ne|na))?\s+(?:(?:bir|iki|uc|\d)\s+)?(?:pencere|vasistas)(?:ler|lar)?\s+(?:yap|koy)\w*")
 # çatı cümlesi bilgi mi: renk ve malzeme sözü bilgi ("çatı rengi kırmızı", "çatı kaplaması shingle"); şekil, eğim, yön sözü değişiklik
 # isteğidir ("çatı şekli kırma olsun", "çatı eğimi dik olsun", "çatı düz olsun"; beşinci tur: bilgi sayılıp tablo çizimle çelişiyordu)
 _RENK_T = _S(r"renk\w*", r"rengi\w*", r"kaplama\w*", r"malzeme\w*", r"kiremit\w*", r"shingle\w*", r"membran\w*", r"boya\w*", r"ton\w*",
@@ -95,13 +97,14 @@ _RENK_T = _S(r"renk\w*", r"rengi\w*", r"kaplama\w*", r"malzeme\w*", r"kiremit\w*
 _CATI_GEO_OZEL = (r"sekl\w*", r"sekil\w*", r"egim\w*", r"egik\w*", r"kirma\w*", r"besik\w*", r"mahya\w*", r"sundurma\w*", r"sacak\w*",
                   r"cumba\w*", r"piramit\w*", r"mansard\w*", r"tonoz\w*", r"kubbe\w*", r"kelebek\w*")
 _CATI_GEO_OZEL_T = _S(*_CATI_GEO_OZEL)        # çatıya özgü şekil sözü: "çatı" sözü ayrı cümlede kalsa da işarettir ("çatı gri olsun, eğimi dik olsun")
-_CATI_GEO_T = _S(*_CATI_GEO_OZEL, r"duz", r"duzlem\w*", r"yon\w*", r"dik\w*", r"yatik\w*", r"aci\w*", r"yuksek\w*", r"alcak\w*",
+_CATI_GEO_T = _S(*_CATI_GEO_OZEL, r"duz", r"duzlem\w*", r"yon\w*", r"dik\w*", r"yatik\w*", r"aci", r"acisi", r"acili", r"yuksek\w*", r"alcak\w*",
                  r"teras\w*", r"kot\w*", r"yuksel\w*")
 _DONUSUM_T = _S(r"donustur\w*", r"cevir\w*")           # odayla birlikte: oda dönüşümü ("salonu yatak odasına çevirelim") otomatik yapılamaz
 # yüklem (istek fiili): "ve" parçasını kendi cümlesi yapar ("odalar geniş olsun"); yüklemsiz "büyük banyo" oda tarifidir
 _YUKLEM_T = _S(r"ol(?:sun\w*|sa\w*|acak\w*|mali\w*|abilir\w*|ur|ursa)", r"yap\w*", r"degis\w*", r"cevir\w*", r"donustur\w*", r"getir\w*",
                r"ed(?:elim|in|iniz|ilsin|ilmeli|ebilir\w*)", r"et(?:sin)?", r"iste\w*", r"buyut\w*", r"buyusun\w*", r"kucult\w*", r"genislet\w*",
-               r"daralt\w*", r"yukselt\w*", r"alcalt\w*", r"uzat\w*", r"kisalt\w*", r"kalsin\w*", r"lazim", r"gerek\w*")
+               r"daralt\w*", r"yukselt\w*", r"alcalt\w*", r"uzat\w*", r"kisalt\w*", r"kalsin\w*", r"kalacak\w*", r"kalabilir\w*",
+               r"dursun\w*", r"lazim", r"gerek\w*")
 _HICBIRI = re.compile(r"\b(?:hicbiri\w*|hic biri\w*|hicbirini|ikisi de degil|ikiside degil|hicbir\w*|baska)\b")
 _HEPSI = re.compile(r"\b(?:ikisi de|ikiside|ikisini de|her ikisi\w*|hepsi\w*|tumu|tamami)\b")
 _CEVAP_DOLGU = {"olsun", "pencere", "penceresi", "numara", "numarali", "nolu", "no", "tane", "olan", "o", "su", "bu", "ve", "ile", "sorun",
@@ -144,17 +147,25 @@ def _bagimsiz(parca: str, mahaller: list[dict] | None) -> bool:
     q1 = _odalar(q0, mahaller or [])[1]
     if any(_sinifla(w) == "bilinmeyen" for w in _ODA_GENEL.sub(" ", q1).split()):
         return True                                         # tanınmayan içerik
-    # tanınan sözlerle "başka": yalnız oda + yüklem ("odalar geniş olsun", "salonu büyütelim"); oda ya da yüklem yoksa tarif ya da ölçü
-    # devamıdır ("salonun sol duvarı ve arka duvarındaki pencereler", "eni 120 ve boyu 180 olsun"; altıncı tur: bölünüp yanlış odaya
-    # uygulanıyor ya da düşüyordu)
-    if not any(_YUKLEM_T.fullmatch(w) or _OLUMSUZ_FIIL_T.fullmatch(w) for w in q0.split()):
-        return False
-    oda = q1.split() != q0.split() or bool(_ODA_GENEL.search(q0))
-    tur = parca_oku(parca, {"mahaller": mahaller or []})["tur"]
-    # "kalsın"/olumsuz yüklemli, değişiklik bildirmeyen cümle de kendi cümlesidir ("salon aynı kalsın ve mutfak penceresi 120x120 olsun",
-    # "… ve gerisi aynı kalsın"): pencere cümlesine eklenirse onu "kalsın"lı (olumsuz) yapar. "… 120x120 ile değiştirelim" tek cümledir.
-    sabit = any(_KALSIN_T.fullmatch(w) or _OLUMSUZ_T.fullmatch(w) for w in q0.split())
-    return (tur == "bos" and sabit) or (oda and tur == "baska")
+    sozler = q0.split()
+    oda_yeri = [i for i, w in enumerate(sozler) if _ODA_GENEL.fullmatch(w) or _odalar(w, mahaller or [])[1].split() != [w]]
+    # eksiltili istek: oda sözünden SONRA gelen sıfat yüklemdir ("odalar geniş ve mutfak penceresi 120x120 olsun", "banyo daha büyük ve …";
+    # yedinci tur: pencere cümlesine katılıp düşüyordu); önce gelen sıfat ("büyük banyo") ve "-daki" eki ("salondaki büyük") tariftir
+    if oda_yeri and not re.search(r"(?:da|de|ta|te)ki$", sozler[oda_yeri[-1]]) \
+            and any(_SIFAT_T.fullmatch(w) for w in sozler[oda_yeri[-1] + 1:]):
+        return True
+    if not any(_YUKLEM_T.fullmatch(w) or _OLUMSUZ_FIIL_T.fullmatch(w) for w in sozler):
+        return False                                        # yüklemsiz tarif: "salonun sol duvarı", "büyük banyo" (altıncı tur)
+    p = parca_oku(parca, {"mahaller": mahaller or []})
+    if p["tur"] == "bos":
+        # "kalsın"/olumsuz yüklemli, değişiklik bildirmeyen cümle kendi cümlesidir ("salon aynı kalsın ve mutfak penceresi 120x120 olsun",
+        # "… ve gerisi aynı kalsın"): pencere cümlesine eklenirse onu "kalsın"lı yapar. "… 120x120 ile değiştirelim" tek cümledir.
+        return any(_KALSIN_T.fullmatch(w) or _OLUMSUZ_T.fullmatch(w) for w in sozler)
+    if not oda_yeri and any(_OLCU_T.fullmatch(w) for w in sozler) and any(re.fullmatch(r"\d+", w) for w in sozler):
+        return False                                        # ölçü devamı: "eni 120 ve boyu 180 olsun", "… ve yüksekliği 300 olsun"
+    # yüklemli istek: odayla "başka" ("odalar geniş olsun", "salonu büyütelim"), duvar isteği ("dış duvarlar kalın olsun"); oda adıyla
+    # yalnız "olsun" ("salon da olsun") pencere cümlesinin eksiltisidir
+    return p["tur"] == "baska" or (p["tur"] == "belirsiz" and p.get("neden") == "dis")
 
 
 def _ve_bol(parca: str, mahaller: list[dict] | None = None) -> list[str]:
@@ -328,15 +339,16 @@ def _cepheler(metin_n: str) -> list[str]:
     return sorted({(m.group(1) or m.group(2)) for m in _CEPHE.finditer(q)})
 
 
-def _yonelme_odasi(w: str, mahaller: list[dict] | None) -> bool:
-    """`w` bir odanın yönelme hâli mi ("salona", "mutfağa", "banyoya", "odasına")? Bulunma hâli ("mutfakta", "odasında") ve yalın oda adı
-    ("antre", "oda") değildir (altıncı tur: "mutfakta pencereyi 120x120 yapalım" ekleme sanılıyordu)."""
-    if re.search(r"[dt][ae]$", w):
-        return False
-    yalin = {x for m in mahaller or [] for x in norm(m.get("ad")).split()} | {x for ss in ISLEV_SOZ.values() for s in ss for x in s.split()} | {"oda"}
-    if w in yalin:
-        return False
-    return bool(_ODA_GENEL.fullmatch(w)) or _odalar(w, mahaller or [])[1].split() != [w]
+def _yonelme_odasi(w: str, ek: str | None, mahaller: list[dict] | None) -> bool:
+    """`w` (ya da ayrı yazılmış ekiyle "wc ye") bir odanın yönelme hâli mi ("salona", "mutfağa", "tuvalete", "müştemilata", "odasına")?
+    Ekten önceki gövde oda sözü olmalı (ünsüz yumuşaması: "mutfağ" → "mutfak"); bulunma hâli ("mutfakta", "tuvalette") ve yalın oda adı
+    ("antre") değildir (altıncı tur: "mutfakta pencereyi …" ekleme sanılıyordu; yedinci tur: "tuvalete" bulunma sanılıyordu)."""
+    kokler = ({x for m in mahaller or [] for x in norm(m.get("ad")).split()} | {x for ss in ISLEV_SOZ.values() for s in ss for x in s.split()}
+              | {"oda", "odasi", "mahal", "mahali"})
+    oda_mi = lambda k: k in kokler or (k[-1:] in ("g", "b", "d") and k[:-1] + {"g": "k", "b": "p", "d": "t"}[k[-1]] in kokler)
+    if ek:
+        return oda_mi(w)
+    return any(w.endswith(son) and len(w) > len(son) + 1 and oda_mi(w[:-len(son)]) for son in ("ya", "ye", "na", "ne", "a", "e"))
 
 
 def _sinifla(sozcuk: str) -> str:
@@ -432,8 +444,13 @@ def cati_olumsuz(metin: str | None, mahaller: list[dict] | None = None) -> bool:
         if any(_OLUMSUZ_FIIL_T.fullmatch(w) for w in soz):
             return True
         for i, w in enumerate(soz):
-            if w == "yok" and i > 0 and (i - 1 in secenek or i - 2 in secenek and soz[i - 1] in ("ye", "ya", "e", "a", "ne", "na")
-                                       or soz[i - 1].startswith(("gerek", "ihtiyac", "lazim"))):
+            if w != "yok" or i == 0:
+                continue
+            if i - 1 in secenek:
+                return True                                 # "Ç8801L yok"
+            j = i - 2                                       # "Ç8801L'ye gerek yok": "gerek"in önünde çatı sözü (ayrı ekiyle de);
+            if soz[i - 1].startswith(("gerek", "ihtiyac", "lazim")) and j >= 0 and (   # "başka bir şeye gerek yok" değil (yedinci tur)
+                    j in secenek or (soz[j] in ("ye", "ya", "e", "a", "ne", "na") and j - 1 in secenek)):
                 return True
     return False
 
@@ -474,7 +491,7 @@ def parca_oku(parca: str, t: dict, katalog_aday: dict | None = None, y: dict | N
     m_pencere = pencere_soz or bool(olc)
     m_dis140 = has("dis") and bool(d140) and any(s.startswith("dis") for s in sinif.get("dis", []))
     m_cati = cati_soz or has("harf")
-    ekle_oda = next((m for m in _EKLE_ODA.finditer(q1) if _yonelme_odasi(m.group(1), t.get("mahaller", []))), None)
+    ekle_oda = next((m for m in _EKLE_ODA.finditer(q1) if _yonelme_odasi(m.group(1), m.group(2), t.get("mahaller", []))), None)
     m_ekle = has("ekle") or bool(_EKLE_IFADE.search(" " + q0 + " ")) or ekle_oda is not None
     # bilgi cümlesi denetimi için çatı işareti: harf, varyant kodu, katalog sözü ya da renk/malzeme sözü olmayan "çatı" sözü. "çatı rengi
     # kırmızı olsun" bilgi cümlesidir (dördüncü tur); "çatı şekli kırma olsun", "çatı eğimi dik olsun" değildir (beşinci tur)

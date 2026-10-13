@@ -486,6 +486,43 @@ def test_altinci_tur_set_acikken_olumsuz_bicim(s):
     assert k.eylem == "secenek" and not s.plan
 
 
+@pytest.mark.parametrize("metin, alan, eylem", [
+    ("odalar geniş ve mutfak penceresi 120x120 olsun", {"pencereler": [pen("mutfak", "120x120")]}, "yonlendir"),   # yedinci tur: düşüyordu
+    ("banyo daha büyük ve mutfak penceresi 120x120 olsun", {"pencereler": [pen("mutfak", "120x120")]}, "yonlendir"),
+    ("mutfak penceresi 120x120 olsun, dış cephe su geçirmez olsun", {"pencereler": [pen("mutfak", "120x120")]}, "yonlendir"),
+    ("tuvalete 80x50 pencere yapalım", {"pencereler": [pen("banyo", islem="ekle")]}, "yonlendir"),  # vasistas değişiyordu
+    ("salona pencereler yapalım", {}, "yonlendir"),
+    ("salon aynı kalacak ve mutfak penceresi 120x120 olsun", {"pencereler": [pen("mutfak", "120x120")]}, "is_emri"),
+])
+def test_yedinci_tur_revizyon(s, metin, alan, eylem):
+    r01_k(s)
+    k = s.yaz(metin, **alan)
+    assert k.eylem == eylem, (k.eylem, k.mesaj)
+    if eylem == "is_emri":
+        assert s.degisiklikler(k) == ["pencere_olcu:P5"]
+    else:
+        assert s.plan["revizyon"] == 1
+
+
+@pytest.mark.parametrize("metin, alan, eylem, degisiklik, not_var", [
+    ("Ç8801K olsun, odalar geniş ve dışlar 140'lık olsun", {"katalog_kodu": "Ç8801K"}, "is_emri", ["dis_karkas_140:"], False),
+    ("Ç8801K olsun, dış duvarlar kalın olsun ve mutfak penceresi 120x120 olsun", {"katalog_kodu": "Ç8801K"}, "sor", None, False),
+    ("Ç8801K olsun, dışlar 140'lık sandviç panel olsun", {"katalog_kodu": "Ç8801K"}, "is_emri", [], True),        # güvenlik ağı: söylenir
+    ("Ç8801K olsun, dışlar 140'lık olsun ve yüksekliği 300 olsun", {"katalog_kodu": "Ç8801K"}, "is_emri", [], True),
+    ("Ç8801L olsun başka bir şeye gerek yok", {"katalog_kodu": "Ç8801L"}, "is_emri", [], False),               # set açılmıyor
+    ("Ç8801K olsun harici tuvalet olsun", {"katalog_kodu": "Ç8801K"}, "is_emri", [], False),
+    ("Ç8801K olsun, pencereler PVC olsun", {"katalog_kodu": "Ç8801K"}, "is_emri", [], False),                   # malzeme bilgisi: not yok
+])
+def test_yedinci_tur_ilk_plan(s, metin, alan, eylem, degisiklik, not_var):
+    """Yedinci tur: ilk planda okunamayan değişiklik cümlesi (ölçü, dış 140, ekleme) bayiye söylenir ("… cümlesini tam okuyamadım");
+    eksiltili oda isteği dış 140'ı düşürmez; "gerek yok" ve "harici" çatı seti açtırmaz."""
+    k = s.yaz(metin, yapi_turu="celik", **alan)
+    assert k.eylem == eylem, (k.eylem, k.mesaj)
+    if degisiklik is not None:
+        assert s.degisiklikler(k) == degisiklik
+    assert ("tam okuyamadım" in k.mesaj) is not_var, k.mesaj
+
+
 def test_dorduncu_tur_set_acikken_kaynak_ve_kararsizlik(s):
     """Set açıkken iki kod seçim değildir (set yeniden sunulur; önce ilk kod seçiliyordu); "Ç8801K yerine Ç8801L" L'yi seçer."""
     assert s.yaz("Ç8801", katalog_kodu="Ç8801", yapi_turu="celik").eylem == "secenek"
