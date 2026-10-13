@@ -505,22 +505,28 @@ def test_yedinci_tur_revizyon(s, metin, alan, eylem):
 
 
 @pytest.mark.parametrize("metin, alan, eylem, degisiklik, not_var", [
-    ("Ç8801K olsun, odalar geniş ve dışlar 140'lık olsun", {"katalog_kodu": "Ç8801K"}, "is_emri", ["dis_karkas_140:"], False),
+    ("Ç8801K olsun, odalar geniş ve dışlar 140'lık olsun", {"katalog_kodu": "Ç8801K"}, "is_emri", ["dis_karkas_140:"], True),   # oda isteği söylenir
     ("Ç8801K olsun, dış duvarlar kalın olsun ve mutfak penceresi 120x120 olsun", {"katalog_kodu": "Ç8801K"}, "sor", None, False),
     ("Ç8801K olsun, dışlar 140'lık sandviç panel olsun", {"katalog_kodu": "Ç8801K"}, "is_emri", [], True),        # güvenlik ağı: söylenir
     ("Ç8801K olsun, dışlar 140'lık olsun ve yüksekliği 300 olsun", {"katalog_kodu": "Ç8801K"}, "is_emri", [], True),
     ("Ç8801L olsun başka bir şeye gerek yok", {"katalog_kodu": "Ç8801L"}, "is_emri", [], False),               # set açılmıyor
     ("Ç8801K olsun harici tuvalet olsun", {"katalog_kodu": "Ç8801K"}, "is_emri", [], False),
-    ("Ç8801K olsun, pencereler PVC olsun", {"katalog_kodu": "Ç8801K"}, "is_emri", [], False),                   # malzeme bilgisi: not yok
+    ("Ç8801K olsun, pencereler PVC olsun", {"katalog_kodu": "Ç8801K"}, "is_emri", [], True),                    # pencere isteği: söylenir
+    ("Ç8801K olsun, pencereler PVC mi alüminyum mu?", {"katalog_kodu": "Ç8801K"}, "is_emri", [], False),       # soru: not yok
+    ("Ç8801K olsun, odalar geniş olsun", {"katalog_kodu": "Ç8801K"}, "is_emri", [], True),                      # oda isteği: söylenir
+    ("Ç8801K olsun, çatı şekli kırma olsun", {"katalog_kodu": "Ç8801K"}, "is_emri", [], True),                  # çatı şekli: söylenir
+    ("Ç8801 çelik ev, dış cephe gri olsun", {"katalog_kodu": "Ç8801K", "bina_ozellikleri": {"Dış Cephe Rengi": "gri"}}, "is_emri", [], False),
+    ("Ç8801K olsun, mutfak penceresi 120x120 ve oda sayısı aynı kalsın", {"katalog_kodu": "Ç8801K"}, "is_emri", ["pencere_olcu:P5"], False),
 ])
 def test_yedinci_tur_ilk_plan(s, metin, alan, eylem, degisiklik, not_var):
-    """Yedinci tur: ilk planda okunamayan değişiklik cümlesi (ölçü, dış 140, ekleme) bayiye söylenir ("… cümlesini tam okuyamadım");
-    eksiltili oda isteği dış 140'ı düşürmez; "gerek yok" ve "harici" çatı seti açtırmaz."""
+    """Yedinci tur ve Lokman'ın kuralı (13.10): ilk planda değişiklik isteği taşıyan okunamayan cümle (pencere, dış 140, ekleme, çatı şekli,
+    oda isteği) bayiye söylenir ("… isteğini otomatik uygulayamadım"); bilgi (renk) ve soru söylenmez; eksiltili oda isteği dış 140'ı
+    düşürmez; "gerek yok" ve "harici" çatı seti açtırmaz."""
     k = s.yaz(metin, yapi_turu="celik", **alan)
     assert k.eylem == eylem, (k.eylem, k.mesaj)
     if degisiklik is not None:
         assert s.degisiklikler(k) == degisiklik
-    assert ("tam okuyamadım" in k.mesaj) is not_var, k.mesaj
+    assert ("otomatik uygulayamadım" in k.mesaj) is not_var, k.mesaj
 
 
 def test_dorduncu_tur_set_acikken_kaynak_ve_kararsizlik(s):

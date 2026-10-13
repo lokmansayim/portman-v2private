@@ -498,10 +498,16 @@ def parca_oku(parca: str, t: dict, katalog_aday: dict | None = None, y: dict | N
     tum = q0.split()
     geo_ozel = any(_CATI_GEO_OZEL_T.fullmatch(w) for w in tum)
     renk = any(_RENK_T.fullmatch(w) for w in tum) and not any(_CATI_GEO_T.fullmatch(w) for w in tum)
+    cati_sekil = geo_ozel or (any(s.startswith("cati") for s in sinif.get("cati", [])) and not renk)
     r["isaret"] = {"pencere": m_pencere, "dis140": m_dis140, "ekle": m_ekle,
-                   "cati": has("harf") or varyant_kodu or geo_ozel or any(s.startswith("katalog") for s in sinif.get("cati", []))
-                   or (any(s.startswith("cati") for s in sinif.get("cati", [])) and not renk)}
+                   "cati": has("harf") or varyant_kodu or cati_sekil or any(s.startswith("katalog") for s in sinif.get("cati", [])),
+                   "cati_sekil": cati_sekil}           # çatı şekli/eğimi isteği (seçim değil): ilk planda uygulanamadığı söylenir
     r["d140"] = bool(d140)
+    # oda isteği (sıfat ya da dönüşüm: "odalar geniş olsun", "salonu büyütelim"): ilk planda uygulanamadığı söylenir (Lokman, 13.10: değişiklik
+    # isteği taşıyan hiçbir cümle sessizce düşmez)
+    r["oda_istegi"] = bool((odalar or genel_oda) and (has("sifat") or any(_DONUSUM_T.fullmatch(w) for w in soz))
+                           and not has("kalsin", "olumsuz"))   # "oda sayısı aynı kalsın" istek değildir
+    r["sifat"] = has("sifat")
     if sinif.get("bilinmeyen"):
         r["tur"] = "baska"
         return r

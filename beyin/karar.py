@@ -598,16 +598,21 @@ def _celik_degisiklikler(k: Konusma, katalog: Katalog, aday: dict, t: dict, once
             return _bitir(k, Karar(eylem="yonlendir", gerekce="çatı seçeneği olmayan modelde çatı isteği",
                                     mesaj=f"{ad} modelinin çatı seçeneği yok (yalnız katalog çatısı); çatı değişikliği otomatik yapılamıyor. " + YONLENDIRME))
         k.bekleyen_not = (k.bekleyen_not or "") + f"{ad} modelinin çatı seçeneği yok; plan katalog çatısıyla çizilir. "
-    # 0b) ilk planda pencere, dış 140 ya da ekleme işareti taşıyan ama okunamayan cümle sessizce talep bilgisine düşmez: bayiye söylenir
-    #     (yedinci tur güvenlik ağı: cümle bölme yanılsa da istek görünür kalır; revizyonda bu cümle zaten yönlendirilir). Çatı işareti
-    #     sayılmaz: çatıyı kod ya da set belirler ("Ç8801L Mehmet Bey için" çatıyı uygular, ad talep bilgisidir).
+    # 0b) "uygulayamadım" güvenlik ağı (Lokman, 13.10: ilk planda da revizyonda da değişiklik isteği taşıyan hiçbir cümle sessizce düşmez;
+    #     okunamayan istek bayiye açıkça yazılır ya da yönlendirilir). Revizyonda okunamayan cümle aşağıda yönlendirilir; ilk planda
+    #     pencere, dış 140, ekleme, çatı şekli ya da oda isteği taşıyan okunamayan cümle bayiye yazılır (cümle bölme yanılsa da istek görünür
+    #     kalır). Çatı seçimi (kod, K/L, katalog) sayılmaz: onu kod ya da set belirler ("Ç8801L Mehmet Bey için" çatıyı uygular). Soru ve
+    #     olumsuz cümlede uygulanacak bir şey yoktur (olumsuz pencere/dış 140 aşağıda sorulur).
     if not ayni_proje:
-        okunamayan = [p["metin"].strip(" ,.;") for p in r["parcalar"] if p["tur"] == "baska" and not p["olumsuz"]
-                      and ((p.get("isaret") or {}).get("dis140") or (p.get("isaret") or {}).get("ekle") or CO.olculer(p["metin"]))]
-        #     (ölçüsüz pencere cümlesi — "pencereler PVC olsun" — malzeme bilgisidir; soru ve olumsuz cümlede uygulanacak bir şey yoktur)
+        def _istek(p: dict) -> bool:
+            i = p.get("isaret") or {}
+            degisiklik = i.get("pencere") or i.get("dis140") or i.get("ekle") or i.get("cati_sekil") or p.get("oda_istegi")
+            return not p["olumsuz"] and ((p["tur"] == "baska" and bool(degisiklik))
+                                         or (p["tur"] == "belirsiz" and p.get("neden") == "genel" and bool(p.get("sifat"))))
+        okunamayan = [p["metin"].strip(" ,.;") for p in r["parcalar"] if _istek(p)]
         if okunamayan:
             k.bekleyen_not = (k.bekleyen_not or "") + "".join(
-                f"\"{_kisalt(m)}\" cümlesini tam okuyamadım; plan okuyabildiklerimle çizilir. " for m in okunamayan[:2])
+                f"\"{_kisalt(m)}\" isteğini otomatik uygulayamadım; plan okuyabildiklerimle çizilir. " for m in okunamayan[:3])
     # 1) desteklenmeyen LLM varyantı (ayna, oda, kapı, veranda …): soru sormadan yönlendirme. Pencere ve "diger" metinden okunur.
     for v in llm.get("varyantlar") or []:
         tur = str(v.get("tur") or "")
