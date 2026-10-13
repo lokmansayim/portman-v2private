@@ -7,8 +7,10 @@
   yazılmaz ("..."); yalnız `rol = bayi` kartı numara yazdırır (Patron ve test kartı yazdırmaz).
 - Bina özellikleri: bayinin söyledikleri şablon satırlarıyla eşleşirse o satıra, eşleşmeyen "Anahtar: değer" olarak özel isteklere (K21:
   uydurulmaz, sessizce düşmez).
-- Çatı seçimi: katalog modelinin çatı varyantları numaralı seçenek olarak gider (İE-05 devir §3.1 kural 5); bayinin kendi metninde varyant
-  harfi ya da "katalog çatısı" geçiyorsa set sorulmaz (K18: kural bayinin sözünü okur).
+- Çatı seçimi: katalog modelinin çatı varyantları numaralı seçenek olarak gider (İE-05 devir §3.1 kural 5); bayinin kendi metninde tek
+  bir çatı seçimi (varyant harfi ya da kodu, "katalog çatısı") geçiyorsa set sorulmaz (K18: kural bayinin sözünü okur). Okuma
+  `celik_okuma.cati_okumasi` / `cati_secenekleri`'nde (PR-2b; buradaki eski `cati_secimi` değişimin kaynağını ve olumsuzluğu ayırmıyordu,
+  geometri hakemi beşinci turda kaldırıldı).
 """
 from __future__ import annotations
 import hashlib
@@ -33,14 +35,29 @@ _ESLE.update({"dis boya": "Dış Boya Rengi", "ic boya": "İç Boya Rengi", "cat
               "dis kapi": "Dış Kapı", "ic kapi": "İç Kapılar", "ic kapilar": "İç Kapılar", "pencere": "Pencereler"})
 
 
+# Tanımdan ve kural kitabından hesaplanan tablo satırları (`motor.genel.sablon_pafta.ozellikler`): bayinin değeri bunları ezmez, özel
+# isteğe yazılır (geometri hakemi altıncı tur: "çatı eğimi dik olsun" tabloya "Çatı Eğimi: dik", "dış kapı çelik olsun" "Dış Kapı: çelik"
+# yazdırıyor, çizimle çelişiyordu). Bayinin yazdığı satırlar: renkler ve "Köşe ve Söveler".
+HESAPLANAN_SATIRLAR = {"Bina Yüksekliği", "Dış Duvarlar", "İç Duvarlar", "Panel Türü", "Çatı Şekli", "Çatı Eğimi", "Çatı Kaplaması", "Dış Kapı",
+                       "İç Kapılar", "Pencereler", "Vasistaslar"}
+# revizyonda "bilgi" sayılmayan alanlar: çizimin geometrisi ve sayıları (malzeme, "Çatı Kaplaması", bilgidir: özel isteğe gider)
+GEOMETRI_SATIRLARI = HESAPLANAN_SATIRLAR - {"Çatı Kaplaması"}
+
+
+def satir_adi(anahtar: str | None) -> str | None:
+    """Bayinin/LLM'in alan adının şablon satırı (eşleşmezse None)."""
+    return _ESLE.get(_norm(str(anahtar or "")))
+
+
 def ozellikleri_esle(bina_ozellikleri: dict | None) -> tuple[dict, list[str]]:
-    """Bayinin pafta tablosu alanları → (şablon satırına yazılacaklar, eşleşmeyenler "Anahtar: değer")."""
+    """Bayinin pafta tablosu alanları → (şablon satırına yazılacaklar, özel isteğe gidenler "Anahtar: değer": eşleşmeyenler ve tanımdan
+    hesaplanan satırlar)."""
     oz, kalan = {}, []
     for k, v in (bina_ozellikleri or {}).items():
         if v in (None, ""):
             continue
-        ad = _ESLE.get(_norm(str(k)))
-        if ad:
+        ad = satir_adi(k)
+        if ad and ad not in HESAPLANAN_SATIRLAR:
             oz[ad] = str(v)
         else:
             kalan.append(f"{k}: {v}")
@@ -98,27 +115,6 @@ def zarf(aday: dict, bayi: dict, gonderen: str | None, ts: dict, son_is_emri: di
                    "sevk_adresi": numarasiz((ts.get("musteri") or {}).get("sevk_adresi") or ""), "ozellikler": {k: numarasiz(v) for k, v in oz.items()},
                    "ozel_istekler": [numarasiz(str(x)) for x in list(ts.get("ozel_istekler") or []) + kalan], "cizen": "Portman", "kontrol": "Portman", "onay": "Portman"}
     return ie
-
-
-_CATI_SOZ = re.compile(r"\b(?:cati|catisi|catili)\s*([kl])\b|\b([kl])\s*(?:cati|catisi|catili|versiyon|secenek|olsun)\b")
-
-
-def cati_secimi(metin: str | None, aday: dict) -> str | None:
-    """Bayinin kendi metninde çatı seçimi var mı (K18)? Varyant kodu ("Ç8801K", "8801-L"), "çatı K/L", "katalog çatısı" → aday kodu; yoksa None."""
-    q = " " + _norm(metin or "") + " "
-    var = {str(v).upper(): v for v in (aday.get("varyantlar") or [])}
-    for v in var:
-        if re.search(r"(?<![a-z0-9])" + re.escape(_norm(v)) + r"(?![a-z0-9])", q) or re.search(r"(?<![a-z0-9])" + re.escape(_norm(v[:-1]) + " " + _norm(v[-1])) + r"(?![a-z0-9])", q):
-            return v
-    if re.search(r"\bkatalog\w*\s+cati", q) or re.search(r"\bcati\w*\s+katalog", q):
-        return str(aday["kod"]).upper()
-    m = _CATI_SOZ.search(q)
-    if m:
-        harf = (m.group(1) or m.group(2) or "").upper()
-        for v in var:
-            if harf and v.endswith(harf):
-                return v
-    return None
 
 
 def kaynak_notu(aday: dict) -> str:

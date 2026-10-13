@@ -198,10 +198,15 @@ def baglam_ozeti(k) -> str:
         if t.get("katalog_kodu"): parca.append(f"katalog kodu: {t['katalog_kodu']}")
         if t.get("oda_programi"): parca.append(f"oda programı: {t['oda_programi']}")
         if d.get("son_soru_alani"): parca.append(f"bayiye sorulan son soru alanı: {d['son_soru_alani']}")
+        y = (d.get("son_is_emri") or {}).get("yapi") or {}
+        if y.get("sistem") == "celik":                                     # İE-08 A4: açık çelik plan ve uygulanmış değişiklikler (numara ve ad yok)
+            parca.append(f"açık plan: çelik model {y.get('gosterim') or y.get('kod')}" + (f", uygulanan: {'; '.join(y['uygulanan'])}" if y.get("uygulanan") else ""))
         return "; ".join(parca)
     if d.get("asama") in ("onay_bekliyor", "uretildi") and d.get("son_is_emri"):
         ie = d["son_is_emri"]; y = ie.get("yapi") or {}
         celik = f", çelik model {y.get('gosterim') or y.get('kod')}" if y.get("sistem") == "celik" else ""      # İE-08: model kodu; numara ve ad yok (Z-08)
+        if y.get("sistem") == "celik" and y.get("uygulanan"):            # A4: aynı projede birikmiş değişiklikler (LLM revizyonu doğru okusun)
+            celik += f", uygulanan: {'; '.join(y['uygulanan'])}"
         return f"aşama: ön onay planı gönderildi ({ie.get('is_emri_no')}{celik}), bayinin onay/revizyon cevabı bekleniyor"
     return ""
 
@@ -325,6 +330,7 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
         sonuc.update(eylem="hata", gerekce="çıkarım hatası", hata=hata)
         return {"satirlar": satirlar, "sonuc": sonuc, "hata": hata}
 
+    d0 = _anlik(k.d)                               # İE-08 A4 "hak düşmez": çelik çizim düşerse konuşma bu duruma döner
     karar = karar_ver(talep, k, bayi, katalog, metin=metin_kural)
     if etk is not None:
         sonuc["buton"] = etk["kimlik"]
@@ -355,7 +361,11 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
             yaz(hedef / "failure.json", {"traceback": maske_numaralar(traceback.format_exc()[-6000:]), "failed_at": int(time.time())})
             cizim = {"motor": motor_adi, "sure_s": round(time.time() - t0, 1), "passed": False, "errors": [maske_numaralar(f"{type(e).__name__}: {str(e)[:300]}")]}
         sonuc["is_emri_no"] = no; sonuc["revizyon"] = rev; sonuc["cizim"] = cizim
+        if motor_adi == "genel" and not cizim["passed"]:
+            return _cizim_hatasi(k, d0, karar, talep, meta, cizim, ie, settings, sonuc, satirlar, ekle, patrona, kim, patron_mu)
     metin = karar.mesaj
+    # PDF başlığındaki özet: soru düğmesinin cevabıysa ("kısa cevap: 2") talebin özeti (kapanış incelemesi 13.10)
+    ozet_baslik = ((k.d.get("taslak") or {}).get("ozet") or "") if meta.get("tur") == "soru" else (talep.ozet or "")
     if patron_mu:
         metin = metin.replace("Bu konuyu Lokman Bey'e iletiyorum; en kısa sürede dönüş yapılacak.", "Bu talep şu an otomatik karşılanamıyor (Patron modu: ayrıca bildirim gönderilmez).")
     teknik = teknik_not(karar, talep, meta, cizim) if (patron_mu and settings.get("patron_teknik_not", True)) else ""
@@ -378,7 +388,7 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
     elif cizim and cizim["passed"] and not katman:
         ekle(metin)
         ad = cizim.get("pdf_ad") or Path(cizim["pdf"]).name
-        ekle_satir(giden_belge(gelen, Path(cizim["pdf"]), ad, f"{sonuc['is_emri_no']} r{sonuc['revizyon']:02d} · ÖN ONAYA SUNULAN TASLAK · {talep.ozet or ''}".strip(),
+        ekle_satir(giden_belge(gelen, Path(cizim["pdf"]), ad, f"{sonuc['is_emri_no']} r{sonuc['revizyon']:02d} · ÖN ONAYA SUNULAN TASLAK · {ozet_baslik}".strip(),
                                0, sonuc["is_emri_no"], sonuc["revizyon"], cizim["pdf_sha256"]))
     elif cizim and cizim["passed"]:
         ekler = cizim.get("ekler") or {}
@@ -387,13 +397,19 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
         ekle_satir(giden_etkilesim(gelen, metin, 0, butonlar=[(f"o:{no}:{rev}", "Onayla"), (f"r:{no}:{rev}", "Revize et")],
                                    gorsel=gorsel, altbilgi=f"{no} r{rev:02d}", is_emri_no=no, revizyon=rev))
         ad = cizim.get("pdf_ad") or Path(cizim["pdf"]).name
-        ekle_satir(giden_belge(gelen, Path(cizim["pdf"]), ad, f"{no} r{rev:02d} · ÖN ONAYA SUNULAN TASLAK · {talep.ozet or ''}".strip(),
+        ekle_satir(giden_belge(gelen, Path(cizim["pdf"]), ad, f"{no} r{rev:02d} · ÖN ONAYA SUNULAN TASLAK · {ozet_baslik}".strip(),
                                0, no, rev, cizim["pdf_sha256"]))
         ucb = ekler.get("ucb")
         if ucb and ucb.get("url"):
             ekle_satir(giden_etkilesim(gelen, f"{no} r{rev:02d} planının basit 3D modeli. Tarayıcıda açılır; odalara dokunarak gezebilirsiniz.", 0,
                                        baglanti={"metin": "3D'de gez", "url": ucb["url"]}, tur="cevap", is_emri_no=no, revizyon=rev))
         # ucb_taban_url yoksa 3D sayfası yalnız kayıtta (revizyonlar.ekler) durur; bayiye söz veren bir mesaj gönderilmez (barınak kararı ayrı)
+    elif butonlar and karar.soru_alani == "okuma" and len((k.d.get("okuma_bekleyen") or {}).get("adaylar") or []) == 2:
+        # İE-08 A4: "1 / 2 / Hiçbiri" — iki okuma tek görselde numaralı (görsel üretilemezse düğmeler metinle gider; akış durmaz).
+        # "Görselde işaretledim" cümlesi yalnız görsel gerçekten giderse (kapanış incelemesi 13.10)
+        g = okuma_gorseli(gelen, k.d["okuma_bekleyen"], proje_koku)
+        ekle_satir(giden_etkilesim(gelen, metin + (" Görselde 1 ve 2 ile işaretledim." if g else ""), 0, butonlar=butonlar, gorsel=g,
+                                   altbilgi="1, 2 ya da Hiçbiri"))
     elif butonlar:
         ekle_satir(giden_etkilesim(gelen, metin, 0, butonlar=butonlar))
     else:
@@ -409,6 +425,79 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
         patrona(f"Portman yönlendirme: {kim} — {karar.gerekce}.{model_notu} Mesaj: \"{(gelen.get('text') or '')[:300]}\"",
                 sablon=True, is_emri_no=sonuc.get("is_emri_no"))
     return {"satirlar": satirlar, "sonuc": sonuc}
+
+
+def _cizim_hatasi(k, d0: dict, karar, talep, meta: dict, cizim: dict, ie: dict, settings: dict, sonuc: dict, satirlar: list, ekle, patrona,
+                  kim: str, patron_mu: bool) -> dict:
+    """İE-08 A4 · "hak düşmez" (Lokman, 12.10.2026): çelik çizim üretilemezse (istisna ya da doğrulama) konuşma karar öncesine döner
+    (revizyon sayacı, taslak, askıdaki soru, seçenek seti); `revizyonlar`'a satır yazılmaz (`eylem cizim_hatasi`; `depo._isi_bitir` yalnız
+    `is_emri`de yazar), eski planın Onayla/Revize et düğmeleri geçerli kalır. Bayiye önceki planın geçerli olduğu söylenir, Patron'a metin +
+    şablon. `isler.sonuc`'a zarfın yalnız yapısı yazılır (antet `bilgi` yok: D-09). Prefabrik (pano Motor'u) bugünkü davranışta kalır (A5)."""
+    no, rev = ie.get("is_emri_no"), int(ie.get("revizyon") or 1)
+    k.d = _geri_al(d0, k.d)
+    if hasattr(k, "yeni_notlar"):                   # bu işin notları geri alınan değişikliğe aitti (soru kaydı onları okumasın)
+        k.yeni_notlar = []; k.sifirlandi = False
+    onceki = k.d.get("son_is_emri") or {}
+    if onceki.get("is_emri_no") and k.d.get("asama") == "topluyor":
+        # mesaj bir soruyu cevaplıyordu (aşama "topluyor"): bayiye "önceki planınız geçerli" denir, o planın düğmeleri de çalışmalı
+        # (kapanış incelemesi 13.10: Onayla "onay beklenmiyor" diyordu). Askıdaki soru ve saklanan istek kapanır.
+        k.d["asama"] = "onay_bekliyor"; k.d["son_soru_alani"] = None; k.d["bekleyen_onay"] = onceki["is_emri_no"]
+        for a in ("okuma_bekleyen", "okuma_secilen", "celik_istek"):
+            k.d.pop(a, None)
+    k.not_dus("kural", f"çelik çizim üretilemedi ({no} r{rev:02d}); konuşma önceki duruma döndü, revizyon hakkı düşmedi")
+    k.kaydet()
+    if onceki.get("is_emri_no"):
+        mesaj = (f"Çizimi şu an üretemedim; önceki planınız ({onceki['is_emri_no']} r{int(onceki.get('revizyon') or 1):02d}) geçerli: onaylayabilir "
+                 "ya da değişikliği yeniden isteyebilirsiniz, revizyon hakkınız düşmedi. Lokman Bey'e iletiyorum, en kısa sürede dönüş yapılacak.")
+    else:
+        mesaj = "Çizimi şu an üretemedim; talebiniz duruyor, revizyon hakkınız düşmedi. Lokman Bey'e iletiyorum, en kısa sürede dönüş yapılacak."
+    if patron_mu:
+        mesaj = mesaj.replace(" Lokman Bey'e iletiyorum, en kısa sürede dönüş yapılacak.", " (Patron modu: ayrıca bildirim gönderilmez.)")
+    ekle(mesaj)
+    if patron_mu and settings.get("patron_teknik_not", True):
+        ekle(teknik_not(karar, talep, meta, cizim).strip())
+    patrona(f"Portman: {kim} için {no} r{rev:02d} çelik çizimi üretilemedi; konuşma önceki planda, revizyon hakkı düşmedi: "
+            f"{'; '.join(cizim.get('errors') or [])[:300]}", sablon=True, is_emri_no=no)
+    y = ie.get("yapi") or {}
+    sonuc.update(eylem="cizim_hatasi", gerekce="çelik çizim üretilemedi; hak düşmez (konuşma önceki duruma döndü)", asama=k.d.get("asama"),
+                 denenen={"is_emri_no": no, "revizyon": rev, "yapi": {a: y.get(a) for a in ("kod", "tanim", "tanim_sha256", "degisiklikler", "bu_revizyon")}})
+    return {"satirlar": satirlar, "sonuc": sonuc}
+
+
+def _anlik(d: dict) -> dict:
+    """Konuşmanın karar öncesi anlık görüntüsü ("hak düşmez" için). Geçmiş (en çok 40 not, `Konusma.not_dus`) yalnız sığ kopyalanır: notlar
+    sonradan değişmez, yalnız eklenir (kod incelemesi 13.10: her mesajda bütün durumu JSON'la çoğaltmak gereksizdi). Sığ kopya geri almada
+    geçmişi tam verir (KVKK ikinci tur: uzunlukla kesmek, 40'ta dolu geçmişte bu işin notlarını değil en eskileri düşürüyordu)."""
+    return {"_gecmis": list(d.get("gecmis") or []), **json.loads(json.dumps({a: b for a, b in d.items() if a != "gecmis"}))}
+
+
+def _geri_al(anlik: dict, simdiki: dict) -> dict:
+    d = {a: b for a, b in anlik.items() if a != "_gecmis"}
+    d["gecmis"] = list(anlik.get("_gecmis") or [])
+    return d
+
+
+def _cizim_tanimi(yol_veya_tanim: str, degisiklikler: list[dict] | None) -> dict:
+    """Model tanımı (`modeller/<kod>.json`) + sırayla uygulanmış değişiklikler (`beyin/varyant.tanim_uygula`)."""
+    from beyin import varyant
+    t = json.loads((KOD.parent / str(yol_veya_tanim)).read_text(encoding="utf-8"))
+    for d in degisiklikler or []:
+        t = varyant.tanim_uygula(t, d)
+    return t
+
+
+def okuma_gorseli(gelen: dict, ob: dict, proje_koku: Path | None) -> dict | None:
+    """İE-08 A4: iki okumalı "1 / 2 / Hiçbiri" sorusunun başlık görseli (`motor/genel/okuma_gorseli.okumalar`); üretilemezse None."""
+    try:
+        from motor.genel import okuma_gorseli as OG
+        t = _cizim_tanimi(ob["tanim"], ob.get("degisiklikler"))
+        kok = (Path(proje_koku) if proje_koku else KANAL / "projects") / f"OKUMA-{satir_id(gelen['id'], 0)[4:16]}" / "r01"
+        from motor.genel.uret import kod_govde
+        yol = OG.okumalar(t, ob["adaylar"], kok, kod_govde(t), olcu=ob.get("olcu"))
+        return {"file": str(yol), "filename": yol.name, "sha256": _sha(yol), "mime": "image/png"}
+    except Exception as e:
+        log("okuma görseli üretilemedi:", maske_numaralar(f"{type(e).__name__}: {str(e)[:160]}"))
+        return None
 
 
 def secenek_satirlari(gelen: dict, karar, katalog, metin: str, proje_koku: Path | None) -> list[dict]:
@@ -464,12 +553,7 @@ def cizim_genel(ie: dict, hedef: Path) -> dict:
         raise FileNotFoundError(f"model tanımı yok: {y.get('tanim')}")
     if y.get("tanim_sha256") and hashlib.sha256(tanim_yolu.read_bytes()).hexdigest() != y["tanim_sha256"]:
         raise ValueError(f"model tanımı zarftaki sha ile uyuşmuyor: {y.get('tanim')}")
-    t = json.loads(tanim_yolu.read_text(encoding="utf-8"))
-    for d in y.get("degisiklikler") or []:
-        from beyin import varyant
-        if not hasattr(varyant, "tanim_uygula"):
-            raise ValueError(f"değişiklik uygulanamıyor (PR-2b): {d.get('op')}")
-        t = varyant.tanim_uygula(t, d)
+    t = _cizim_tanimi(y["tanim"], y.get("degisiklikler"))
     hedef = Path(hedef); hedef.mkdir(parents=True, exist_ok=True)
     calisma = hedef / "tanim.json"
     calisma.write_text(json.dumps(t, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
@@ -509,6 +593,27 @@ def ekler_uret(ie: dict, hedef: Path, v: dict, settings: dict, m: dict | None = 
             ekler["ifc_hata"] = "IFC üretilmedi"
         if m.get("yukleme_json"):
             ekler["yukleme_listesi"] = {"dosya": str(hedef / m["yukleme_json"]), "bayiye_gider": False}
+        if m.get("duzenlenebilir_dxf") and (hedef / m["duzenlenebilir_dxf"]).is_file():      # D-11: düzenlenebilir DXF (plan + görünüşler); kayıtta, bayiye gitmez
+            ekler["dxf"] = {"dosya": str(hedef / m["duzenlenebilir_dxf"]), "sha256": _sha(hedef / m["duzenlenebilir_dxf"]), "bayiye_gider": False}
+        y = ie.get("yapi") or {}
+        if y.get("onceki") and rev >= 2 and (hedef / "tanim.json").is_file():
+            # İE-08 A4: r02 ve sonrasında başlık görseli önce–sonra (önceki plan | bu plan; altta çatı planı ve iki perspektif, aynı görselde)
+            try:
+                from motor.genel import okuma_gorseli as OG, uret as U
+                o = y["onceki"]
+                yol_o = KOD.parent / str(o.get("tanim") or "")
+                if o.get("tanim_sha256") and hashlib.sha256(yol_o.read_bytes()).hexdigest() != o["tanim_sha256"]:
+                    raise ValueError("önceki planın tanımı değişmiş")
+                t0 = _cizim_tanimi(o["tanim"], o.get("degisiklikler"))
+                t1 = json.loads((hedef / "tanim.json").read_text(encoding="utf-8"))
+                yol = OG.once_sonra(t0, t1, hedef, U.kod_govde(t1), y.get("bu_revizyon") or [],
+                                    int(o.get("revizyon") or rev - 1), rev, yontem=y.get("yontem") or "panel",
+                                    perspektif=((v or {}).get("perspektif") or {}).get("durum") == "TAMAM")
+                if ekler.get("gorsel"):
+                    ekler["kart"] = ekler["gorsel"]                 # bu planın bayi görseli (kart) kayıtta kalır
+                ekler["gorsel"] = {"file": str(yol), "filename": yol.name, "sha256": _sha(yol), "mime": "image/png", "kaynak": "once_sonra"}
+            except Exception as e:                                  # görsel üretilemezse kart başlık olur; akış durmaz
+                ekler["once_sonra_hata"] = maske_numaralar(f"{type(e).__name__}: {str(e)[:200]}")
         return ekler
     try:
         from motor import bayi_gorseli as BG

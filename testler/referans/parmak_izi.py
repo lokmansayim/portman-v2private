@@ -141,9 +141,12 @@ def genel_pdf_ozet(yol: Path) -> str:
 
 def genel_ozet(yol: Path) -> str:
     """Genel motor çıktılarının izi (İE-08, `cikti/denetim/genel*/`): PNG bayt bayt (sha256; matplotlib Agg deterministik), PDF içerikçe
-    (`genel_pdf_ozet`), JSON kanonik, IFC içerikçe (`motor/genel/iz.py`: başlık zamanı, GlobalId, kayıt numarası ve küme sırası maskeli)."""
+    (`genel_pdf_ozet`), JSON kanonik, IFC içerikçe (`motor/genel/iz.py`: başlık zamanı, GlobalId, kayıt numarası ve küme sırası maskeli),
+    DXF içerikçe (`dxf_ozet`; D-11, 13.10.2026: düzenlenebilir DXF — tutamaç, zaman ve rastgele kimlik dışarıda, varlıklar sıralı)."""
     if yol.suffix.lower() == ".pdf":
         return genel_pdf_ozet(yol)
+    if yol.suffix.lower() == ".dxf":
+        return dxf_ozet(yol)
     kok = Path(__file__).resolve().parents[2]          # depo kökü (motor/genel/iz.py için)
     if str(kok) not in sys.path:
         sys.path.insert(0, str(kok))

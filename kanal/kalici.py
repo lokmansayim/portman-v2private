@@ -123,6 +123,7 @@ def _karar_ozeti(d_eski: dict | None, k: BellekKonusma, cikti: dict) -> dict:
             "d01_cevap": any(n.startswith("eski taslak sorusunun cevabı") for n in kural),
             "pencere_cevap": any(n.startswith("pencere_islem cevabı") for n in kural),
             "oncelik_cevap": any(n.startswith("öncelik cevabı") for n in kural),
+            "okuma_cevap": any(n.startswith("okuma cevabı") for n in kural),          # İE-08 PR-2b
             "onaylanan_is_emri_no": ie.get("is_emri_no") if onay else None,
             "onaylanan_rev": int(ie.get("revizyon") or 1) if onay else None}
 

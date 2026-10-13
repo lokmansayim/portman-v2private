@@ -16,6 +16,7 @@ KISA_CEVAP = {  # q:<alan>:<deger> → kural katmanının okuyacağı metin
     "pencere_islem": {"degistir": "değiştir", "ekle": "ekle"},
     "yeni_mi_degisiklik": {"yeni": "yeni", "degisiklik": "değişiklik"},
     "oncelik": {"butce": "bütçe", "yasam": "yaşam alanı", "montaj": "kısa montaj", "yok": "fark etmez"},
+    "okuma": {"1": "1", "2": "2", "0": "hiçbiri"},        # İE-08 PR-2b: çelik pencere okuması "1 / 2 / Hiçbiri"
 }
 
 

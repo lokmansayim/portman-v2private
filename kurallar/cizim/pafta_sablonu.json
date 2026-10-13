@@ -14,6 +14,10 @@
   "kaynak": "Lokman, 12 Ekim 2026 (Soru 25: evet): 8b mühendis kabulüne kadar bayi paftasının 1. sayfasında da TASLAK yazar, antetin üstünde küçük (Kontrol/Onay 'Portman' yazınca onaylı gibi okunmasın). 2. sayfanın başlığındaki TASLAK her zaman kalır. 8b kabul adımı gelince sayfa1 false yapılır (yeni kural seti sürümü; altın çıktı değişeceği için yeniden dondurma kararıyla)"},
  "ozellik_yazi_pt": {"deger": {"en_cok": 7.3, "en_az": 5.2}, "durum": "lokman",
   "kaynak": "Bina özellikleri değerleri sütuna sığmazsa yazı küçülür (en_az'a kadar), en küçük boyda da sığmazsa iki satıra sarılır (Lokman, 12 Ekim 14:53: kesilmesin, bilgi kaybolmasın); bilinmeyen değer '...' ile karışmasın"},
- "ozellik_yazi_pt_mutlak": {"deger": 4.0, "durum": "varsayim",
-  "kaynak": "13 Ekim 2026 (Lokman'ın göz denetimi: yazı kutuları binmesin): sarılan satırların aralığı mürekkep ölçüsüyledir; en_az'da iki ya da üç satır bile satıra sığmazsa yazı bu boya kadar küçülür (KT-02 Pencereler ≈ 4,4 pt). Bilgi kesilmez. Lokman'ın kararına kadar varsayım; anahtar silinirse en_az'ın altına inilmez"}
+ "ozellik_yazi_pt_mutlak": {"deger": 5.0, "durum": "lokman",
+  "kaynak": "Lokman, 13 Ekim 2026: 'yazı 5 puntanın altına inmez'. Sarılan satırların aralığı mürekkep ölçüsüyledir (yazı kutuları binmesin); en_az'da (5,2) sığmayan değer önce sadeleşir (aşağıdaki iki anahtar), sonra iki/üç satıra sarılır, en çok bu boya kadar küçülür. Anahtar silinirse en_az'ın altına inilmez"},
+ "ozellik_bir_carpani_kalkar": {"deger": true, "durum": "lokman",
+  "kaynak": "Lokman, 13 Ekim 2026: Pencereler/kapılar satırı sığmıyorsa önce '1×' önekleri kalkar ('1×80/180' → '80/180'; N adet içinde tek adet zaten bellidir), sonra iki satıra sarılır. pafta_ozet.json tam değeri taşır"},
+ "ozellik_adet_sozcugu_kalkar": {"deger": true, "durum": "varsayim",
+  "kaynak": "13 Ekim 2026 (varsayım, Lokman'ın kararına kadar): '1×' kalktıktan sonra da 5 pt'de iki ya da üç satır satıra (14,7 pt) sığmıyorsa 'adet' sözcüğü de kalkar ('5 adet (…)' → '5 (…)'; sayı ve liste aynen). KT-02 Pencereler: 5 pt'de 3 satır 15,5 pt istiyordu; adetsiz iki satır 5,2 pt'de sığar. Kapatmak için false"}
 }

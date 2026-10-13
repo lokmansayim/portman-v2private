@@ -4,7 +4,11 @@ A2: "Ç8801" → tek görselde üç çatı seçeneği (katalog, K, L; öncelik s
 (soru yok; görselde Ç8801 üçlüsü); "95 m² 3+1 tek kat çelik" → bugünkü davranış (katalog önerisi); dış ölçü → alan yolu (GRID yok);
 kabul kaydı yokken aday sunulmaz (K-A10). A3: seçim düğmesi → r01 genel motordan (zarf yapi.sistem celik, tanım gömülmez, sha; satırlar
 etkileşim + belge; PDF adı Portman_<no>_rNN.pdf; CTA yok); gerçek motor: PDF 2 sayfa, 1. sayfada TASLAK, antette bayinin adı ve kart
-numarası (D-09); Patron kartı numara yazdırmaz; LLM bağlamı ve iş sonucu ham numara taşımaz; çizim düşerse "doğrulamadan geçmedi" + Patron.
+numarası (D-09); Patron kartı numara yazdırmaz; LLM bağlamı ve iş sonucu ham numara taşımaz.
+A4 (PR-2b): bayinin sözünden okunan değişiklik aynı projede r02 (pencere ölçüsü, çatı varyantı, dış 140); başlık görseli önce–sonra;
+belirsiz cümlede "1 / 2 / Hiçbiri" (görselli, q:okuma); "Hiçbiri" bir kez "Neyi değiştirelim?"; çelik çizim düşerse hak düşmez
+(cizim_hatasi: konuşma önceki planda, revizyon satırı yok; PR-2a'daki "doğrulamadan geçmedi" vakası bu kararla değişti); 4 revizyondan
+sonra "plan mühendis incelemesine alındı"; prefabrik çizim hatası bugünkü davranışta (A5).
 Çoğu test hızlı sahte genel motorla (`sahte_genel`), bir test gerçek motorla (perspektif VTK yoksa atlanır, iş düşmez).
 
 Koşum: PORTMAN_TEST_PG="host=127.0.0.1 port=55432 user=postgres" python -m pytest testler/kalici/test_celik_akisi.py -q
@@ -257,26 +261,6 @@ def test_cati_secildikten_sonra_revizyon_seti_yeniden_sormaz(depo, wa, hizli_gen
     assert r3["eylem"] == "yonlendir" and "cati_degistir" in r3["gerekce"]
 
 
-def test_cizim_dusunce_dogrulanmadi_ve_patron_maskeli(depo, wa, monkeypatch):
-    kabul(depo)
-    from motor.genel import uret
-
-    def kirik(tanim_yolu, hedef, **k):
-        raise RuntimeError("sahte çökme; iletide numara 900000000101 geçiyor")
-    monkeypatch.setattr(uret, "uret", kirik)
-    assert depo.mesaj_kaydet(mesaj("Ç8801K", talep(ozet="Ç8801K", katalog_kodu="Ç8801K"), bayi=BAYI_KART))
-    [r] = isle_hepsi(depo)
-    assert r["eylem"] == "is_emri"
-    rev = sorgu(depo, "SELECT durum, pdf_yolu FROM revizyonlar")[0]
-    assert rev["durum"] == "dogrulanmadi" and rev["pdf_yolu"] is None
-    satirlar = sorgu(depo, "SELECT alici, kind, govde FROM giden ORDER BY sira")
-    assert any("doğrulamadan geçmedi" in s["govde"] for s in satirlar if s["alici"] == NUMARA_A)
-    patron = [s["govde"] for s in satirlar if s["alici"] == "PATRON"]
-    assert patron and "900000000101" not in " ".join(patron) and "…0101" in " ".join(patron)      # K09: hata iletisinde numara maskeli
-    sonuc = sorgu(depo, "SELECT sonuc FROM isler")[0]["sonuc"]
-    assert "900000000101" not in json.dumps(sonuc) and sonuc["cizim"]["passed"] is False
-
-
 @pytest.mark.skipif(not (KOK / "modeller" / "C8801K.json").exists(), reason="model tanımı yok")
 def test_gercek_genel_motor_r01_pdf_antet_taslak(depo, wa):
     """Gerçek genel motor (perspektif VTK varsa çizilir, yoksa iş düşmez): PDF 2 sayfa A4 yatay, 1. sayfada TASLAK, antette ad + kart numarası."""
@@ -304,3 +288,227 @@ def test_ozellik_alanlari_sablonla_ayni():
     from beyin import celik
     from motor.genel import sablon_pafta
     assert celik.OZELLIK_ALANLARI == sablon_pafta.OZELLIK_SIRASI
+
+
+# ───────────────────────── A4 (PR-2b) ─────────────────────────
+def r01(depo, kod: str = "Ç8801K") -> dict:
+    """Çelik r01 (varyant ya da KT kodu: set sorulmaz) ve gönderim; dönen: revizyon satırı."""
+    assert depo.mesaj_kaydet(mesaj(f"{kod} olsun", talep(ozet=f"{kod} istiyor", katalog_kodu=kod), bayi=BAYI_KART))
+    [r] = isle_hepsi(depo)
+    assert r["eylem"] == "is_emri", r
+    return sorgu(depo, "SELECT id, proje_id, is_emri_no, rev, is_emri, durum, ekler FROM revizyonlar ORDER BY id DESC")[0]
+
+
+def revize(depo, metin: str, **alan) -> dict:
+    time.sleep(1.1)                                           # İş Emri numarası saniyeye bağlı (bugünkü kural)
+    assert depo.mesaj_kaydet(mesaj(metin, talep("revizyon", ozet=metin, **alan), bayi=BAYI_KART))
+    [r] = isle_hepsi(depo)
+    return r
+
+
+def son_rev(depo) -> dict:
+    return sorgu(depo, "SELECT id, proje_id, is_emri_no, rev, is_emri, durum, ekler FROM revizyonlar ORDER BY id DESC")[0]
+
+
+def test_r02_pencere_olcusu_ayni_proje_once_sonra(depo, wa, hizli_genel):
+    kabul(depo)
+    ilk = r01(depo)
+    r = revize(depo, "mutfak penceresi 120x120 olsun", pencereler=[{"mahal": "mutfak", "olcu": "120x120", "islem": "degistir"}])
+    assert r["eylem"] == "is_emri" and "pencere_olcu" in r["gerekce"], r
+    rev = son_rev(depo)
+    y = rev["is_emri"]["yapi"]
+    assert rev["rev"] == 2 and rev["proje_id"] == ilk["proje_id"] and rev["durum"] == "onay_bekliyor"
+    assert [(d["op"], d["aciklik"], d["en"], d["yuk"]) for d in y["degisiklikler"]] == [("pencere_olcu", "P5", 120, 120)]
+    assert y["onceki"]["kod"] == "Ç8801K" and y["onceki"]["revizyon"] == 1 and y["tanim"] == "modeller/C8801K.json"
+    assert sorgu(depo, "SELECT durum FROM revizyonlar WHERE id = %s", ilk["id"])[0]["durum"] == "yerini_aldi"
+    assert rev["ekler"]["gorsel"]["kaynak"] == "once_sonra" and rev["ekler"]["gorsel"]["filename"] == "C8801K_once_sonra.png"
+    assert Path(rev["ekler"]["gorsel"]["file"]).is_file() and rev["ekler"]["kart"]["filename"] == "C8801K_bayi_gorsel.png"
+    tanim = json.loads((Path(rev["ekler"]["gorsel"]["file"]).parent / "tanim.json").read_text(encoding="utf-8"))
+    p5 = next(a for a in tanim["acikliklar"] if a["ad"] == "P5")
+    assert (p5["en"], p5["yuk"], p5["alt"], p5["etiket"]) == (120, 120, 80, "120/120")            # çizilen tanımda uygulandı
+    satir = sorgu(depo, "SELECT satir, govde FROM giden WHERE kind = 'interactive' ORDER BY olusturuldu DESC, sira DESC")[0]
+    assert satir["satir"]["file"].endswith("C8801K_once_sonra.png") and "Uygulanan: Mutfak penceresi" in satir["govde"]
+    d, _ = depo.konusma_oku(NUMARA_A)
+    assert d["revizyon"] == 1 and d["son_is_emri"]["revizyon"] == 2
+    oz = W.baglam_ozeti(type("K", (), {"d": d})())
+    assert "uygulanan: Mutfak penceresi" in oz and NUMARA_A not in oz
+    # r03: önceki değişiklik birikir (aynı proje)
+    r3 = revize(depo, "dışlar 140'lık olsun")
+    rev3 = son_rev(depo)
+    assert r3["eylem"] == "is_emri" and rev3["rev"] == 3 and rev3["proje_id"] == ilk["proje_id"]
+    assert [d["op"] for d in rev3["is_emri"]["yapi"]["degisiklikler"]] == ["pencere_olcu", "dis_karkas_140"]
+    t3 = json.loads((Path(rev3["ekler"]["gorsel"]["file"]).parent / "tanim.json").read_text(encoding="utf-8"))
+    assert t3["duvar_siniflari"]["dis"]["profil"] == "140x45x1,2" and next(a for a in t3["acikliklar"] if a["ad"] == "P5")["etiket"] == "120/120"
+
+
+def test_okuma_iki_aday_gorselli_soru_ve_dugme_2(depo, wa, hizli_genel):
+    kabul(depo)
+    r01(depo); kalici.gonder(depo, wa)
+    r = revize(depo, "salondaki sol taraftaki pencere 120x180 olsun", pencereler=[{"mahal": "salon", "olcu": "120x180", "duvar": "sol", "islem": "degistir"}])
+    assert r["eylem"] == "sor" and "okuma" in r["gerekce"], r
+    soru = sorgu(depo, "SELECT satir, govde, dis_id FROM giden WHERE kind = 'interactive' ORDER BY olusturuldu DESC, sira DESC")[0]
+    assert [b["reply"]["id"] for b in soru["satir"]["interactive"]["action"]["buttons"]] == ["q:okuma:1", "q:okuma:2", "q:okuma:0"]
+    assert soru["satir"]["file"].endswith("_okuma.png") and Path(soru["satir"]["file"]).is_file()
+    assert "öne yakın" in soru["govde"] and "arkaya yakın" in soru["govde"]
+    assert soru["govde"].endswith("Görselde 1 ve 2 ile işaretledim.")                 # görsel gittiği için (CR18: görselsiz bu cümle yok)
+    d, _ = depo.konusma_oku(NUMARA_A)
+    assert d["son_soru_alani"] == "okuma" and d["revizyon"] == 0 and [a["aciklik"] for a in d["okuma_bekleyen"]["adaylar"]] == ["P3", "P4"]
+    assert sorgu(depo, "SELECT alan, durum FROM sorular ORDER BY id DESC")[0] == {"alan": "okuma", "durum": "acik"}
+    kalici.gonder(depo, wa)
+    dis = sorgu(depo, "SELECT dis_id FROM giden WHERE kind = 'interactive' ORDER BY olusturuldu DESC, sira DESC")[0]["dis_id"]
+    time.sleep(1.1)
+    assert depo.mesaj_kaydet(buton("q:okuma:2", context_id=dis))
+    [r2] = isle_hepsi(depo)
+    assert r2["eylem"] == "is_emri", r2
+    rev = son_rev(depo)
+    assert rev["rev"] == 2 and [(d_["aciklik"], d_["en"], d_["yuk"]) for d_ in rev["is_emri"]["yapi"]["degisiklikler"]] == [("P4", 120, 180)]
+    d, _ = depo.konusma_oku(NUMARA_A)
+    assert d["revizyon"] == 1 and "okuma_bekleyen" not in d and d.get("son_soru_alani") is None
+    assert sorgu(depo, "SELECT alan, durum FROM sorular ORDER BY id DESC")[0] == {"alan": "okuma", "durum": "cevaplandi"}
+    belge = sorgu(depo, "SELECT govde FROM giden WHERE kind = 'document' ORDER BY olusturuldu DESC, sira DESC")[0]["govde"]
+    assert "kısa cevap" not in belge and "salondaki sol taraftaki pencere" in belge             # CR17: PDF başlığında talebin özeti
+
+
+def test_okuma_hicbiri_once_soru_sonra_yonlendirme(depo, wa, hizli_genel):
+    kabul(depo)
+    r01(depo); kalici.gonder(depo, wa)
+    assert revize(depo, "yaşam alanı penceresi 160x120")["eylem"] == "sor"           # 3 aday: numaralı metin sorusu (görselsiz)
+    d, _ = depo.konusma_oku(NUMARA_A)
+    assert len(d["okuma_bekleyen"]["adaylar"]) == 3 and d["son_soru_alani"] == "okuma"
+    r = revize(depo, "hiçbiri")
+    assert r["eylem"] == "sor" and "okuma_metin" in r["gerekce"]
+    assert "Neyi değiştirelim?" in sorgu(depo, "SELECT govde FROM giden ORDER BY olusturuldu DESC, sira DESC")[0]["govde"]
+    # bayi açıkça söyler: r02
+    r = revize(depo, "yaşam alanının ön cephedeki penceresi 160x180 olsun")
+    assert r["eylem"] == "is_emri", r
+    assert [(x["aciklik"], x["en"], x["yuk"]) for x in son_rev(depo)["is_emri"]["yapi"]["degisiklikler"]] == [("P1", 160, 180)]
+    # ikinci kez "hiçbiri": yönlendirme (insan)
+    assert revize(depo, "salondaki sol taraftaki pencere 120x180")["eylem"] == "sor"
+    r = revize(depo, "hiçbiri")
+    assert r["eylem"] == "sor"
+    assert revize(depo, "salondaki sol taraftaki pencere 120x180")["eylem"] == "sor"
+    r = revize(depo, "ikisi de değil")
+    assert r["eylem"] == "yonlendir" and "hiçbiri" in r["gerekce"]
+
+
+def test_cati_degisikligi_ayni_proje_r02_tanim_L(depo, wa, hizli_genel):
+    kabul(depo)
+    ilk = r01(depo)
+    r = revize(depo, "çatı L olsun", varyantlar=[{"tur": "cati_degistir", "aciklama": "çatı L olsun", "parametreler": {}}])
+    assert r["eylem"] == "is_emri" and "Ç8801L" in r["gerekce"], r
+    rev = son_rev(depo)
+    y = rev["is_emri"]["yapi"]
+    assert rev["rev"] == 2 and rev["proje_id"] == ilk["proje_id"] and y["tanim"] == "modeller/C8801L.json" and y["kod"] == "Ç8801L"
+    assert [(d["op"], d["kod"]) for d in y["degisiklikler"]] == [("cati_varyanti", "Ç8801L")] and y["onceki"]["kod"] == "Ç8801K"
+    assert rev["ekler"]["gorsel"]["kaynak"] == "once_sonra"
+    assert sorgu(depo, "SELECT count(*) AS n FROM secenek_setleri")[0]["n"] == 0                     # çatı seti yeniden sorulmadı
+    # r03 pencere: çatı değişikliği tanım dosyasında, listede birikmez; pencere eklenir
+    revize(depo, "mutfak penceresi 120x120 olsun")
+    y3 = son_rev(depo)["is_emri"]["yapi"]
+    assert y3["tanim"] == "modeller/C8801L.json" and [d["op"] for d in y3["degisiklikler"]] == ["pencere_olcu"]
+
+
+def test_dis_140_c8801_ve_karkas_modelli_kt_yonlendirme(depo, wa, hizli_genel):
+    kabul(depo, YEDI)
+    r01(depo)
+    r = revize(depo, "dışlar 140'lık olsun")
+    assert r["eylem"] == "is_emri" and [d["op"] for d in son_rev(depo)["is_emri"]["yapi"]["degisiklikler"]] == ["dis_karkas_140"]
+    time.sleep(1.1)
+    assert depo.mesaj_kaydet(mesaj("KT-01 yeni talep", talep(ozet="KT-01", katalog_kodu="KT-01"), bayi=BAYI_KART))
+    [r] = isle_hepsi(depo)
+    assert r["eylem"] == "is_emri" and "KT01" in r["gerekce"]
+    r = revize(depo, "dışlar 140'lık olsun")
+    assert r["eylem"] == "yonlendir" and "celik_modeli" in r["gerekce"]                              # karkas modeli olan KT: mühendise
+
+
+def test_celik_cizim_dusunce_hak_dusmez_ve_patron_maskeli(depo, wa, monkeypatch, hizli_genel):
+    """A4 "hak düşmez" (PR-2a'daki "doğrulamadan geçmedi" vakasının yerine): çelik çizim düşerse konuşma önceki planda kalır, revizyon
+    satırı yazılmaz, eski planın düğmeleri geçerli; bayiye önceki planın geçerli olduğu, Patron'a maskeli hata; sonra aynı istek r02 olur."""
+    kabul(depo)
+    ilk = r01(depo); kalici.gonder(depo, wa)
+    d_once, _ = depo.konusma_oku(NUMARA_A)
+    from motor.genel import uret
+
+    def kirik(tanim_yolu, hedef, **k):
+        raise RuntimeError("sahte çökme; iletide numara 900000000101 geçiyor")
+    monkeypatch.setattr(uret, "uret", kirik)
+    r = revize(depo, "mutfak penceresi 120x120 olsun")
+    assert r["eylem"] == "cizim_hatasi" and "hak düşmez" in r["gerekce"], r
+    assert [(x["rev"], x["durum"]) for x in sorgu(depo, "SELECT rev, durum FROM revizyonlar ORDER BY id")] == [(1, "onay_bekliyor")]
+    d, _ = depo.konusma_oku(NUMARA_A)
+    assert d["revizyon"] == d_once["revizyon"] == 0 and d["son_is_emri"]["is_emri_no"] == ilk["is_emri_no"] and d["asama"] == "onay_bekliyor"
+    satirlar = sorgu(depo, "SELECT alici, kind, govde FROM giden WHERE mesaj_id = (SELECT mesaj_id FROM isler ORDER BY id DESC LIMIT 1) ORDER BY sira")
+    bayiye = [s["govde"] for s in satirlar if s["alici"] == NUMARA_A]
+    # kapanış incelemesi (13.10): cümle "onaylayabilir ya da değişikliği yeniden isteyebilirsiniz" ile genişledi (eski düğmeler gerçekten geçerli)
+    assert len(bayiye) == 1 and f"önceki planınız ({ilk['is_emri_no']} r01) geçerli: onaylayabilir" in bayiye[0] and "revizyon hakkınız düşmedi" in bayiye[0]
+    patron = [s for s in satirlar if s["alici"] == "PATRON"]
+    assert [s["kind"] for s in patron] == ["text", "template"] and "900000000101" not in patron[0]["govde"] and "…0101" in patron[0]["govde"]
+    sonuc = sorgu(depo, "SELECT sonuc FROM isler ORDER BY id DESC")[0]["sonuc"]
+    assert "900000000101" not in json.dumps(sonuc) and sonuc["cizim"]["passed"] is False and "bilgi" not in json.dumps(sonuc["denenen"])
+    # eski planın onay düğmesi hâlâ geçerli (onay beklenen plan r01)
+    assert ET_coz_gecerli(d, f"o:{ilk['is_emri_no']}:1")
+    monkeypatch.setattr(uret, "uret", sahte_genel)
+    r = revize(depo, "mutfak penceresi 120x120 olsun")
+    assert r["eylem"] == "is_emri" and son_rev(depo)["rev"] == 2
+
+
+def test_soru_ortasinda_cizim_dusunce_onceki_plan_onaylanabilir(depo, wa, monkeypatch, hizli_genel):
+    """Kapanış incelemesi (13.10, CR16): okuma sorusunun cevabıyla çizim düşerse bayiye "önceki planınız geçerli" denir; konuşma soru
+    ortasında ("topluyor") kalmaz, önceki planın Onayla düğmesi çalışır, askıdaki soru kapanır."""
+    kabul(depo)
+    ilk = r01(depo); kalici.gonder(depo, wa)
+    assert revize(depo, "salondaki sol taraftaki pencere 120x180 olsun")["eylem"] == "sor"
+    kalici.gonder(depo, wa)
+    dis = sorgu(depo, "SELECT dis_id FROM giden WHERE kind = 'interactive' ORDER BY olusturuldu DESC, sira DESC")[0]["dis_id"]
+    from motor.genel import uret
+    monkeypatch.setattr(uret, "uret", lambda tanim_yolu, hedef, **k: (_ for _ in ()).throw(RuntimeError("çöktü")))
+    time.sleep(1.1)
+    assert depo.mesaj_kaydet(buton("q:okuma:2", context_id=dis))
+    [r] = isle_hepsi(depo)
+    assert r["eylem"] == "cizim_hatasi", r
+    d, _ = depo.konusma_oku(NUMARA_A)
+    assert d["asama"] == "onay_bekliyor" and d.get("son_soru_alani") is None and "okuma_bekleyen" not in d and d["revizyon"] == 0
+    assert ET_coz_gecerli(d, f"o:{ilk['is_emri_no']}:1")
+
+
+def ET_coz_gecerli(d: dict, kimlik: str) -> bool:
+    import etkilesim as ET
+    return ET.coz({"reply_id": kimlik}, d, None).get("gecerli") is True
+
+
+def test_celik_r01_cizim_dusunce_talep_durur(depo, wa, monkeypatch):
+    kabul(depo)
+    from motor.genel import uret
+    monkeypatch.setattr(uret, "uret", lambda tanim_yolu, hedef, **k: (_ for _ in ()).throw(RuntimeError("çöktü")))
+    assert depo.mesaj_kaydet(mesaj("Ç8801K", talep(ozet="Ç8801K", katalog_kodu="Ç8801K"), bayi=BAYI_KART))
+    [r] = isle_hepsi(depo)
+    assert r["eylem"] == "cizim_hatasi" and sorgu(depo, "SELECT count(*) AS n FROM revizyonlar")[0]["n"] == 0
+    assert "talebiniz duruyor, revizyon hakkınız düşmedi" in sorgu(depo, "SELECT govde FROM giden WHERE alici = %s", NUMARA_A)[0]["govde"]
+    d, _ = depo.konusma_oku(NUMARA_A)
+    assert not d.get("son_is_emri") and d.get("revizyon", 0) == 0
+
+
+def test_dorduncu_revizyondan_sonra_muhendis_incelemesi(depo, wa, hizli_genel):
+    kabul(depo)
+    r01(depo)
+    for i, olcu in enumerate(("120x120", "120x180", "120x120", "120x180"), 2):
+        r = revize(depo, f"mutfak penceresi {olcu} olsun")
+        assert r["eylem"] == "is_emri" and son_rev(depo)["rev"] == i, (i, r)
+    r = revize(depo, "mutfak penceresi 120x120 olsun")
+    assert r["eylem"] == "yonlendir" and r["gerekce"] == "revizyon sınırı"
+    govde = sorgu(depo, "SELECT govde FROM giden WHERE alici = %s ORDER BY olusturuldu DESC, sira DESC", NUMARA_A)[0]["govde"]
+    assert "4 revizyon hakkı doldu; plan mühendis incelemesine alındı." in govde
+
+
+def test_prefabrik_cizim_dusunce_bugunku_davranis(depo, wa, monkeypatch):
+    """A5: pano Motor'u düşerse bugünkü yol (revizyon 'dogrulanmadi', bayiye "doğrulamadan geçmedi"); hak düşmez yalnız çelikte."""
+    from motor import dxf_out
+
+    def kirik(ie, hedef, *a, **k):
+        raise RuntimeError("pano motoru çöktü")
+    monkeypatch.setattr(dxf_out, "uret", kirik)
+    assert depo.mesaj_kaydet(mesaj("P6001 olsun", talep(ozet="P6001", katalog_kodu="P6001"), bayi=BAYI_KART))
+    [r] = isle_hepsi(depo)
+    assert r["eylem"] == "is_emri"
+    assert sorgu(depo, "SELECT durum FROM revizyonlar")[0]["durum"] == "dogrulanmadi"
+    assert any("doğrulamadan geçmedi" in s["govde"] for s in sorgu(depo, "SELECT govde FROM giden WHERE alici = %s", NUMARA_A))
