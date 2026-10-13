@@ -1,0 +1,41 @@
+{
+  "is_emri_no": "PM-PK01-HUMA-60M2",
+  "revizyon": 1,
+  "generated_at": 1791870462,
+  "duration_s": 23.11,
+  "dxf": "Portman_PM-PK01-HUMA-60M2_r01.dxf",
+  "pdf": "Portman_PM-PK01-HUMA-60M2_r01.pdf",
+  "dxf_sha256": "3df740ae9b1e1c149a7d8993e52ae6c4467c2e2244c5341c80cd7aea6f7f2ac3",
+  "pdf_sha256": "6123dec8fa4f6af6f52b21d8abcb9bd31671d770b3af4a0fdfdcd10d48d09ded",
+  "tani_pdf": null,
+  "pdf_skipped_reason": null,
+  "validation_passed": true,
+  "warnings": [
+    "PK-01 kör test (İE-11): ön pencereler panoda ortalı çizildi; paftada odada ortalı (salon 40,5/37,5, mutfak 60,25/60,25) — mühendis cevabı bekleniyor.",
+    "Veranda sol duvarı hol aksında (261–271); paftadaki 266–276 hizası mühendis sorusu.",
+    "Banyo 60/40 penceresi 198,25–323,75 panosunda; paftada 204,25–326,75 (dış duvar iç T'de 122,5'e kısalıyor) — Motor dış panoyu T'de kısaltmıyor, PR-2 kıyasına.",
+    "Üçlü H: Motor 4 iç + 5 dış = 9; paftada 10 (5 iç). Dış pano eki H: Motor 17; paftada 19. Fark PR-2 raporunda sınıflanır.",
+    "Okumadaki 59,75'lik parça (62,75 − 3) Motor'da yok: banyo alt duvarı hol duvarının T'sinde 261'de bölünüyor (62,75 + 122,5); paftadaki yeri PR-2 kıyasında doğrulanır."
+  ],
+  "generator": "portman-motor-v1.1",
+  "generator_sha256": {
+    "geometry.py": "630aa8f0fa2f7eb1eb8b39a8d6a6808b08932e6418fe5ce2dac4d724cd0f4311",
+    "dxf_out.py": "a0cbd8915ab6d36a862f0462d2c841ff98bf2fe61928a92b73c7d47174248ffa",
+    "validate.py": "a40fafefce6514485b5cfcf70d835de29d5496f842ee9727bbd323824f432685",
+    "katalog.py": "6ee3068d53f7dd0130b5991c3a0ec1cb3a0e2b0a974c23ebebcee70b6a988955"
+  },
+  "reference_dxf_sha256": "22cc9304106725f555afc59223433b8383fbe3a19ba8ff4a3b40eb23b61fab66",
+  "pdf_generated_from_reopened_dxf": true,
+  "yeni_kodlar": [
+    "D09",
+    "I12",
+    "K03",
+    "D10",
+    "D11",
+    "I13",
+    "D12",
+    "B05",
+    "V05",
+    "V06"
+  ]
+}

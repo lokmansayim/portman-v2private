@@ -1,0 +1,290 @@
+{
+  "is_emri_no": "PM-PK01-HUMA-60M2",
+  "revizyon": 1,
+  "talep": {
+    "bayi": {
+      "kod": "HUMA",
+      "ad": "Huma Prefabrik"
+    },
+    "musteri_adi": "PK-01",
+    "metin": "Kör test 1 (D-10, İE-11): gerçek uygulanmış 60 m² tek kat prefabrik; montaj paftasından okundu (13 Ekim 2026). Konumlar cm, akslar; y arka duvardan (dizilim arka-sol)."
+  },
+  "yapi": {
+    "sistem": "prefabrik",
+    "kat_sayisi": 1,
+    "duvar_yuksekligi_cm": 250,
+    "duvar_kalinligi_cm": {
+      "dis": 10,
+      "ic": 6
+    },
+    "olcu_kaynagi": "dis_olcu",
+    "dis_olcu_cm": {
+      "x": 600,
+      "y": 1000
+    },
+    "referans_model": "PK-01",
+    "grid": {
+      "x_pano": 5,
+      "y_pano": 8
+    },
+    "kisa_kenar": "x",
+    "giris_cephesi": "on",
+    "dis_dusey_duvar": "aks_disinda",
+    "dizilim": {
+      "baslangic": "arka-sol",
+      "hiza": "izgara",
+      "dis_duvar_t_bolme": true
+    },
+    "ek_akslar_cm": {
+      "x": [],
+      "y": [
+        795
+      ]
+    }
+  },
+  "mahaller": [
+    {
+      "ad": "YATAK ODASI 1",
+      "tur": "yatak_odasi",
+      "konum_cm": [
+        [
+          10,
+          5,
+          198.25,
+          256
+        ],
+        [
+          10,
+          256,
+          261,
+          381.5
+        ]
+      ]
+    },
+    {
+      "ad": "BANYO",
+      "tur": "banyo",
+      "konum_cm": [
+        [
+          198.25,
+          5,
+          386.5,
+          256
+        ]
+      ]
+    },
+    {
+      "ad": "YATAK ODASI 2",
+      "tur": "yatak_odasi",
+      "konum_cm": [
+        [
+          386.5,
+          5,
+          590,
+          381.5
+        ]
+      ]
+    },
+    {
+      "ad": "HOL",
+      "tur": "antre_hol",
+      "konum_cm": [
+        [
+          261,
+          256,
+          386.5,
+          795
+        ]
+      ]
+    },
+    {
+      "ad": "MUTFAK",
+      "tur": "mutfak",
+      "konum_cm": [
+        [
+          10,
+          381.5,
+          261,
+          995
+        ]
+      ]
+    },
+    {
+      "ad": "SALON",
+      "tur": "salon",
+      "konum_cm": [
+        [
+          386.5,
+          381.5,
+          590,
+          795
+        ]
+      ]
+    },
+    {
+      "ad": "VERANDA",
+      "tur": "veranda",
+      "konum_cm": [
+        [
+          261,
+          795,
+          590,
+          995
+        ]
+      ]
+    }
+  ],
+  "acik_sinirlar": [],
+  "acikliklar": [
+    {
+      "tur": "pencere",
+      "olcu": "120x120",
+      "mahal": "YATAK ODASI 1",
+      "duvar": "sol",
+      "pano": 1
+    },
+    {
+      "tur": "pencere",
+      "olcu": "120x120",
+      "mahal": "YATAK ODASI 2",
+      "duvar": "sag",
+      "pano": 1
+    },
+    {
+      "tur": "pencere",
+      "olcu": "120x120",
+      "mahal": "SALON",
+      "duvar": "sag",
+      "pano": 1
+    },
+    {
+      "tur": "pencere",
+      "olcu": "60x40",
+      "mahal": "BANYO",
+      "duvar": "arka",
+      "pano": 0
+    },
+    {
+      "tur": "pencere",
+      "olcu": "120x180",
+      "mahal": "MUTFAK",
+      "duvar": "on",
+      "pano": 0
+    },
+    {
+      "tur": "pencere",
+      "olcu": "120x180",
+      "mahal": "SALON",
+      "duvar": "on",
+      "pano": 0
+    },
+    {
+      "tur": "dis_kapi",
+      "olcu": 90,
+      "arasi": [
+        "VERANDA",
+        "HOL"
+      ],
+      "mentese": "sol",
+      "dograma": "alıcıya ait"
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "HOL",
+        "BANYO"
+      ],
+      "mentese": "sag"
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "HOL",
+        "YATAK ODASI 1"
+      ],
+      "mentese": "sol"
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "HOL",
+        "YATAK ODASI 2"
+      ],
+      "mentese": "sag"
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "HOL",
+        "MUTFAK"
+      ],
+      "mentese": "sol",
+      "pano": 0
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "HOL",
+        "SALON"
+      ],
+      "mentese": "sag",
+      "pano": 0
+    }
+  ],
+  "cati": {
+    "tip": "besik",
+    "egim_yuzde": 33,
+    "sacak_cm": 30,
+    "topuk_cm": 10,
+    "makas_yonu": "kisa_kenar",
+    "makas_ekseni": "x"
+  },
+  "cikti": {
+    "pdf": true,
+    "dxf": true,
+    "pafta": "A2",
+    "icerik": [
+      "aksli_plan",
+      "alanli_kopya",
+      "montaj_kopyasi",
+      "on_gorunus",
+      "cati_profili",
+      "ozellik_tablosu"
+    ]
+  },
+  "ozellikler": {
+    "Panel Türü": "Pres Panel",
+    "Çatı Şekli": "Beşik",
+    "Çatı Kaplaması": "Sandviç Panel",
+    "Çatı Kaplama Rengi": "Antrasit Gri",
+    "Dış Kapı": "Alıcıya ait",
+    "İç Kapılar": "Standart Amerikan",
+    "Dış Cephe Boya": "Alıcıya ait",
+    "İç Cephe Boya": "Alıcıya ait",
+    "Pencere Rengi": "Alıcıya ait",
+    "Tavan": "Düz",
+    "Saçak ve Alın Rengi": "Antrasit Gri"
+  },
+  "pafta_uyarilari": [
+    "PK-01 kör test (İE-11): ön pencereler panoda ortalı çizildi; paftada odada ortalı (salon 40,5/37,5, mutfak 60,25/60,25) — mühendis cevabı bekleniyor.",
+    "Veranda sol duvarı hol aksında (261–271); paftadaki 266–276 hizası mühendis sorusu.",
+    "Banyo 60/40 penceresi 198,25–323,75 panosunda; paftada 204,25–326,75 (dış duvar iç T'de 122,5'e kısalıyor) — Motor dış panoyu T'de kısaltmıyor, PR-2 kıyasına.",
+    "Üçlü H: Motor 4 iç + 5 dış = 9; paftada 10 (5 iç). Dış pano eki H: Motor 17; paftada 19. Fark PR-2 raporunda sınıflanır.",
+    "Okumadaki 59,75'lik parça (62,75 − 3) Motor'da yok: banyo alt duvarı hol duvarının T'sinde 261'de bölünüyor (62,75 + 122,5); paftadaki yeri PR-2 kıyasında doğrulanır."
+  ],
+  "varsayimlar": [
+    "Pano ızgarası 125,5; dizilim arka-soldan, ekler ızgara akslarında (hiza izgara; kesim sağda 78, önde 111,5); dış duvarlar iç T'lerde bölünür ve oraya dış üçlü H konur (paftanın H planı); hol/salon ön duvarı ek aks 795.",
+    "Yatak odası 1 L biçimli (banyonun altındaki şerit odaya dahil).",
+    "Ön pencereler panoda ortalı (Motor kuralı); paftadaki yerler iki panoya yayılıyor — açık soru.",
+    "Çerçeve kuralı (dizilim arka-sol): konum_cm, ek_akslar_cm, konum_pano ve sol/sağ duvardaki pano dizinleri ARKADAN sayılır; cephe adları (on/arka/sol/sag) ve menteşe gerçek yöndedir; dikmeler gerçek çerçevede cm.",
+    "Hol↔mutfak ve hol↔salon kapıları paftadaki panoya (arkadan 1., y 381,5–507) `pano: 0` ile sabitlendi; öteki iç kapılarda tek aday var."
+  ],
+  "eksikler": [
+    "Mühendis: salon ve mutfak ön pencere panoları, veranda duvar hizası, tavan omega adetleri."
+  ]
+}
