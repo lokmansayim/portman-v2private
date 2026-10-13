@@ -45,6 +45,8 @@ def _cevap_mi(alan: str, d_eski: dict, d_yeni: dict, sonuc: dict, ozet: dict) ->
         return bool(ozet.get("pencere_cevap"))
     if alan == "oncelik":
         return bool(ozet.get("oncelik_cevap"))     # İE-04: cevap olmayan mesaj öncelik sorusunu düşürür ("yok"), cevap saymaz
+    if alan in ("okuma", "okuma_olcu"):
+        return bool(ozet.get("okuma_cevap"))       # İE-08 PR-2b: "1 / 2 / Hiçbiri" ya da ölçü cevabı kural notundan
     if sonuc.get("gerekce") == "iptal":
         return False
     te, ty = (d_eski or {}).get("taslak") or {}, (d_yeni or {}).get("taslak") or {}
