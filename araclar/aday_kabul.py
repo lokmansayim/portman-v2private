@@ -1,20 +1,24 @@
-"""İE-08 Adım 8 · Mühendis kabul kaydı (K-A10): `beyin/veri/adaylar.json`'daki adaylardan yalnız komut satırında verilen kodlar Postgres
-`adaylar` tablosuna `durum = gecerli` ve `muhendis_kabulu = {kim, tarih, not}` ile yazılır. Kalıcı akış (`kanal/kalici.py`) yalnız bu
-kayıtları bayiye sunar (`depo.kabul_edilmis_adaylar`): kabul edilmeyen aday yazılmaz, sunulmaz.
+"""İE-08 Adım 8 · Aday kabul kaydı (K-A10): `beyin/veri/adaylar.json`'daki adaylardan yalnız komut satırında verilen kodlar Postgres
+`adaylar` tablosuna `durum = gecerli` ve kabul kaydıyla `{kim, tarih, not, karar}` yazılır (sütun adı `muhendis_kabulu` kalır: göçler
+yalnız ekler). Kalıcı akış (`kanal/kalici.py`) yalnız bu kayıtları bayiye sunar (`depo.kabul_edilmis_adaylar`): kabul edilmeyen aday
+yazılmaz, sunulmaz.
 
-    PORTMAN_PG_DSN="dbname=portman" python3 araclar/aday_kabul.py --kodlar Ç8801,Ç8801K,Ç8801L --kim "<mühendisin adı>" \
-        --tarih 2026-10-13 [--not "<mühendisin notu>"] [--paket "<kabul paketi tarihi/klasörü>"] [--kuru]
+    PORTMAN_PG_DSN="dbname=portman" python3 araclar/aday_kabul.py --kodlar Ç8801,Ç8801K,Ç8801L [--kim Lokman] \
+        --tarih 2026-10-13 [--not "<kabul edenin notu>"] [--paket "<kabul paketi tarihi/klasörü>"] [--kuru]
 
-Kurallar (Lokman, 12 Ekim 2026): mühendis yedi modeli tek oturumda kabul paketiyle görür (`araclar/kabul_paketi.py`); betik ondan sonra,
-yalnız kabul edilen kodlarla koşar; ad yalnız komut satırından gelir, depoya (git) ve çıktıya girmez (çıktıda yalnız ilk harf);
-yeniden koşulabilir (upsert, `depo.aday_yaz`). Sunucuda `vps/ie08_adaylar.sh` ile Lokman koşar (ayrı onay). `--kuru`: yazmaz, ne
-yazacağını söyler."""
+Kurallar: kabul eden yedi modeli kabul paketiyle görür (`araclar/kabul_paketi.py`); betik ondan sonra, yalnız kabul edilen kodlarla
+koşar. Geliştirme döneminde kabul eden Lokman'dır (D-11; Lokman, 13 Ekim 2026: `--kim` varsayılanı "Lokman", kayıtta dayanak
+`karar: D-11`); bayi onayından sonraki teknik kontrol (8b mühendis adımı) ayrıdır ve aynen kalır. Çıktıda adın yalnız ilk harfi
+yazılır; yeniden koşulabilir (upsert, `depo.aday_yaz`). Sunucuda `vps/ie08_adaylar.sh` ile Lokman koşar (ayrı onay). `--kuru`: yazmaz,
+ne yazacağını söyler."""
 from __future__ import annotations
 import argparse, json, os, re, sys
 from pathlib import Path
 
 KOK = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(KOK)); sys.path.insert(0, str(KOK / "kanal"))
+KABUL_EDEN = "Lokman"          # D-11 (Lokman, 13 Ekim 2026 08:25): geliştirme döneminde aday kabulünü Lokman verir; 8b mühendis adımı ayrı
+KABUL_KARARI = "D-11"
 
 
 def kod_normalize(s: str) -> str:
@@ -36,16 +40,16 @@ def kabul_kayitlari(adaylar: list[dict], kodlar: list[str], kim: str, tarih: str
                     "ozet": {"katalog_m2": a.get("katalog_m2"), "kapali_m2": a.get("kapali_m2"), "veranda_m2": a.get("veranda_m2"),
                              "oda_programi": a.get("oda_programi"), "kat": a.get("kat"), "varyantlar": a.get("varyantlar"), **(a.get("ozet") or {})},
                     "denetim": {"kabul_paketi": paket, "dogrulama": (a.get("kaynak") or {}).get("dogrulama")},
-                    "muhendis_kabulu": {"kim": kim, "tarih": tarih, "not": not_}, "not_": a.get("not") or None})
+                    "muhendis_kabulu": {"kim": kim, "tarih": tarih, "not": not_, "karar": KABUL_KARARI}, "not_": a.get("not") or None})
     return out, yok
 
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--kodlar", required=True, help="mühendisin kabul ettiği kodlar, virgülle (Ç8801,Ç8801K,…)")
-    ap.add_argument("--kim", required=True, help="mühendisin adı (yalnız Postgres'e yazılır)")
+    ap.add_argument("--kodlar", required=True, help="kabul edilen kodlar, virgülle (Ç8801,Ç8801K,…)")
+    ap.add_argument("--kim", default=KABUL_EDEN, help=f"kabul edenin adı (geliştirme döneminde {KABUL_EDEN}; D-11); çıktıda yalnız ilk harf")
     ap.add_argument("--tarih", required=True, help="kabul tarihi (YYYY-AA-GG)")
-    ap.add_argument("--not", dest="not_", default="", help="mühendisin notu")
+    ap.add_argument("--not", dest="not_", default="", help="kabul edenin notu")
     ap.add_argument("--paket", default="", help="kabul paketinin tarihi ya da klasörü (denetim alanına)")
     ap.add_argument("--adaylar", default=str(KOK / "beyin" / "veri" / "adaylar.json"))
     ap.add_argument("--kuru", action="store_true", help="yazma; ne yazılacağını söyle")
@@ -53,7 +57,7 @@ def main(argv: list[str] | None = None) -> int:
     if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", a.tarih):
         print("DUR: tarih YYYY-AA-GG biçiminde olmalı"); return 2
     if not a.kim.strip():
-        print("DUR: mühendisin adı boş"); return 2
+        print("DUR: kabul edenin adı boş"); return 2
     kodlar = [kod_normalize(k) for k in a.kodlar.split(",") if k.strip()]
     adaylar = json.loads(Path(a.adaylar).read_text(encoding="utf-8"))
     kayitlar, yok = kabul_kayitlari(adaylar, kodlar, a.kim.strip(), a.tarih, a.not_.strip(), a.paket.strip())

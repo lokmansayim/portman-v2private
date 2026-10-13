@@ -358,7 +358,7 @@ try:
     AY.yaz(VERI, "mesaj_katmani", True)
     with depo.baglan() as c, c.transaction():
         c.execute("UPDATE mesajlar SET wa_zamani = now() WHERE gonderen = %s", (BAYI,))        # bayinin penceresi açık
-    for kod9 in ("Ç8801", "Ç8801K", "Ç8801L"):                                                 # K-A10: mühendis kabulü (vps/ie08_adaylar.sh'nin yazdığı)
+    for kod9 in ("Ç8801", "Ç8801K", "Ç8801L"):                                                 # K-A10: kabul kaydı (vps/ie08_adaylar.sh'nin yazdığı; D-11)
         depo.aday_yaz(kod9, "gecerli", referans_model="Ç8801", muhendis_kabulu={"kim": "e2e", "tarih": "2026-10-13", "not": ""})
     time.sleep(1.2)
     kod, c = webhook(yuk([metin(BAYI, "Ç8801 olsun", mid="wamid.E2EC1")]))

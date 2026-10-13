@@ -1,5 +1,6 @@
-"""İE-08 Adım 8 · Mühendis kabul paketi (Lokman, 12 Ekim 2026): mühendis yedi modeli tek oturumda görür, sonra yalnız kabul ettiği
-kodlar `araclar/aday_kabul.py` ile Postgres'e yazılır. Paket depoya girmez; Lokman'ın Mac'ine gider (33_IE08/).
+"""İE-08 Adım 8 · Kabul paketi (Lokman, 12 Ekim 2026; D-11, 13 Ekim): kabul eden yedi modeli tek oturumda görür, sonra yalnız kabul
+ettiği kodlar `araclar/aday_kabul.py` ile Postgres'e yazılır. Geliştirme döneminde kabul eden Lokman'dır (D-11); bayi onayından sonraki
+teknik kontrol (8b mühendis adımı) ayrıdır. Paket depoya girmez; Lokman'ın Mac'ine gider (33_IE08/).
 
     python3 araclar/kabul_paketi.py <çıktı klasörü> [--kodlar Ç8801,…] [--perspektifsiz] [--set <kural seti>]
 
@@ -24,7 +25,7 @@ def kisa_parcalar_md(kod: str, gosterim: str, ozet: dict) -> str:
     n = ozet.get("kontrol_notlari") or []
     s = [f"# {gosterim} · bayi paftasında komşusuna katılan kısa parçalar", "",
          "Kural (Lokman, 12 Ekim 2026): \"Çelikte 15 cm parça çıkmaz.\" Bayi paftasının ölçü zincirinde 15 cm ve daha kısa parçalar komşusuna",
-         "katılır; mühendis planı (çizim setindeki plan ve pafta) tam zinciri taşır. Aşağıdakiler gerçek parça değil, dış yüz–aks farkı, kaplama",
+         "katılır; çizim seti (plan ve pafta PNG'si, DXF) tam zinciri taşır. Aşağıdakiler gerçek parça değil, dış yüz–aks farkı, kaplama",
          "ya da tanımdaki 1–2 cm kayma olabilir: lütfen ölçüyü kontrol edin.", ""]
     if not n:
         s.append("Bu modelde 15 cm ve daha kısa parça yok.")
@@ -80,11 +81,12 @@ def main(argv: list[str] | None = None) -> int:
         cati_adi = (json.loads((KOK / "kurallar" / "cizim" / "pafta_sablonu.json").read_text(encoding="utf-8")).get("cati_tipi_adi") or {}).get("deger") or {}
     except Exception:
         cati_adi = {}
-    r = [f"# Çelik model bankası · mühendis kabul paketi ({tarih})", "",
+    r = [f"# Çelik model bankası · kabul paketi ({tarih})", "",
          "İE-08 8a (D-08 madde 4, D-10). Yedi model genel motorla (Yapı Tanımı 0.5, kural kitabı) çizildi. Her klasörde: bayi paftası PDF",
          "(`*_pafta.pdf`, 2 sayfa; 8b kabulüne kadar TASLAK), çizim seti (plan, görünüşler, pafta, perspektifler), bayi görseli (`*_bayi_gorsel.png`),",
          "yükleme listesi (`*_yukleme.md/.json`), IFC ve `KISA_PARCALAR.md` (bayi paftasında komşusuna katılan ≤ 15 cm parçalar; kontrol notu).",
-         "Çizimler taslaktır, üretim projesi değildir. Paket bayi ve müşteri adı ya da numara taşımaz (antet \"...\"); mühendisin adı yalnız kabul betiğinin komut satırında.", "",
+         "Çizimler taslaktır, üretim projesi değildir. Paket bayi ve müşteri adı ya da numara taşımaz (antet \"...\").",
+         "Kabul eden: geliştirme döneminde Lokman (D-11, 13 Ekim 2026); bayi onayından sonraki teknik kontrol (8b mühendis adımı) ayrıdır, bu paket onun yerine geçmez.", "",
          "| Kod | Model | Oda | Brüt oturum (m²) | Kapalı (m²) | Veranda (m²) | Çatı | Liste satırı | Kısa parça notu | Doğrulama |", "|---|---|---|---|---|---|---|---|---|---|"]
     for kod, gosterim, x, v, n_kisa, sure, m in satirlar:
         ad = "" if x.get("musteri_projesi") else (x.get("sunum") or {}).get("ad", "")
