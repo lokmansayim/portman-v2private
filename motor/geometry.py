@@ -22,6 +22,7 @@ OUT = "__DIS__"      # bina dışı
 X_SON = Y_SON = None  # ölçüye kesimde son aksın yeri (cm); yoksa None
 _AKS = {"x": None, "y": None}   # İE-11: aks tabloları (cm; dizin = yarım pano adımı). None → tekdüze ızgara (formül)
 _AKS_ANA = {"x": None, "y": None}   # İE-11: ana akslar (tam pano aksları + ek akslar + uç); çizimde aks çizgileri ve ölçü zinciri
+_AKS_EK = {"x": [], "y": []}   # İE-11: ek aks değerleri (etiket için)
 
 PENCERE_OLCULERI = {"120x120": (120, 120), "120x180": (120, 180), "60x40": (60, 40)}
 KAPI_GENISLIK = {"ic_kapi": 82.0, "dis_kapi": 97.0, "gecis": 82.0}
@@ -73,7 +74,7 @@ def katman(ad: str) -> str:
     """Kalınlık taşıyan katman adını geçerli kalınlığa çevirir (10 / 6 cm'de ad değişmez)."""
     return {"DIS_DUVAR_100": f"DIS_DUVAR_{_mm(T_DIS)}", "IC_DUVAR_60": f"IC_DUVAR_{_mm(T_IC)}",
             "KOSE_PROFIL_100": f"KOSE_PROFIL_{_mm(T_DIS)}", "KOSE_PROFIL_60": f"KOSE_PROFIL_{_mm(T_IC)}",
-            "IC_UCLU_H_60": f"IC_UCLU_H_{_mm(T_IC)}"}.get(ad, ad)
+            "IC_UCLU_H_60": f"IC_UCLU_H_{_mm(T_IC)}", "DIS_UCLU_H_100": f"DIS_UCLU_H_{_mm(T_DIS)}"}.get(ad, ad)
 
 
 def X(i: float) -> float:
@@ -95,12 +96,12 @@ def Y(j: float) -> float:
 def aks_tablosu_kur(ek_akslar, nx2: int, ny2: int, zorunlu: bool = False) -> tuple[int, int]:
     """İE-11: `ek_akslar_cm` verilince (ya da zorunluysa) yarım adım aksları + ek akslardan sıralı aks tablosu kurar.
     Dönen (nx2, ny2) tablo uzunluğudur. Tablo yokken Motor eskisi gibi formülle çalışır."""
-    global _AKS, _AKS_ANA
-    _AKS = {"x": None, "y": None}; _AKS_ANA = {"x": None, "y": None}
+    global _AKS, _AKS_ANA, _AKS_EK
+    _AKS = {"x": None, "y": None}; _AKS_ANA = {"x": None, "y": None}; _AKS_EK = {"x": [], "y": []}
     if not ek_akslar and not zorunlu:
         return nx2, ny2
     ek = ek_akslar or {}
-    yeni = {}; ana = {}
+    yeni = {}; ana = {}; ekler = {}
     for yon, n2, f in (("x", nx2, X), ("y", ny2, Y)):
         taban = [f(k / 2) for k in range(n2 + 1)]          # tablo henüz yok: formül (kesim dahil)
         lo, hi = taban[0], taban[-1]
@@ -112,14 +113,38 @@ def aks_tablosu_kur(ek_akslar, nx2: int, ny2: int, zorunlu: bool = False) -> tup
             if not any(abs(v - t) < 1e-6 for t in tab):
                 tab.append(v)
         yeni[yon] = sorted(tab)
-        ana[yon] = sorted(set([taban[k] for k in range(0, n2 + 1, 2)] + [taban[-1]] + [float(v) for v in (ek.get(yon) or [])]))
-    _AKS = yeni; _AKS_ANA = ana
+        ekler[yon] = sorted(float(v) for v in (ek.get(yon) or []))
+        ana[yon] = sorted(set([taban[k] for k in range(0, n2 + 1, 2)] + [taban[-1]] + ekler[yon]))
+    _AKS = yeni; _AKS_ANA = ana; _AKS_EK = ekler
     return len(yeni["x"]) - 1, len(yeni["y"]) - 1
+
+
+def aks_durumu_sifirla() -> None:
+    """Aks tablosu ve kesim durumunu temizler. `kur()` başında çağrılır: hatayla düşen bir kurulumdan sonraki çağrı eski tabloyu
+    ya da kesimi görmez (`olcu_ayarla` ve `aks_tablosu_kur` kendi değerlerini sonra yeniden kurar)."""
+    global _AKS, _AKS_ANA, _AKS_EK, X_SON, Y_SON
+    _AKS = {"x": None, "y": None}; _AKS_ANA = {"x": None, "y": None}; _AKS_EK = {"x": [], "y": []}
+    X_SON = Y_SON = None
 
 
 def ana_akslar(yon: str):
     """Tablo modunda ana akslar (tam pano aksları + ek akslar + uç), cm; tablo yoksa None (eski çizim yolu)."""
     return None if _AKS_ANA[yon] is None else list(_AKS_ANA[yon])
+
+
+def ana_aks_etiketleri(yon: str):
+    """Tablo modunda ana aks adları: ızgara aksları sırayla (x: A, B, …; y: 1, 2, …), ek aks önceki ızgara aksının adı + ′
+    (örn. PK-01'de 205 → "2′"); böylece ek aks numaralandırmayı kaydırmaz. Tablo yoksa None."""
+    vals = ana_akslar(yon)
+    if vals is None:
+        return None
+    out, n = [], 0
+    for v in vals:
+        if any(abs(v - e) < 1e-6 for e in _AKS_EK[yon]):
+            out.append((out[-1] if out else "0") + "′")
+        else:
+            out.append(chr(ord("A") + n) if yon == "x" else str(n + 1)); n += 1
+    return out
 
 
 def aks_dizini(v: float, yon: str) -> int:
@@ -132,12 +157,12 @@ def aks_dizini(v: float, yon: str) -> int:
 
 
 def _ayna_aciklik(ac: dict) -> dict:
-    """Dizilim arka-sol: İş Emri gerçek cepheleri yazar; Motor y'de aynalı kurar → ön ↔ arka ve menteşe sol ↔ sağ çevrilir."""
+    """Dizilim arka-sol: İş Emri gerçek cepheleri yazar; Motor y'de aynalı kurar → ön ↔ arka çevrilir.
+    Menteşe çevrilmez: kapı varyantı (`kapi_varyanti`) çizim anında, `_aynala_y` sonrası gerçek çerçevede, gerçek normalle hesaplanır;
+    İş Emri'nin menteşesi de gerçek çerçevededir (geometri hakemi, 13.10.2026: takas menteşeyi ters çiziyordu)."""
     a = dict(ac)
     if a.get("duvar") in ("on", "arka"):
         a["duvar"] = "arka" if a["duvar"] == "on" else "on"
-    if a.get("mentese") in ("sol", "sag"):
-        a["mentese"] = "sag" if a["mentese"] == "sol" else "sol"
     return a
 
 
@@ -284,6 +309,7 @@ def _cells_of_rect(rect):
 
 
 def kur(is_emri: dict) -> Plan:
+    aks_durumu_sifirla()                                   # önceki (hatalı bitmiş) kurulumun tablosu ve kesimi sızmasın
     yapi = is_emri["yapi"]
     _k = yapi.get("duvar_kalinligi_cm") or {}
     kalinlik_ayarla(float(_k.get("dis", 10.0)), float(_k.get("ic", 6.0)))
@@ -313,8 +339,9 @@ def kur(is_emri: dict) -> Plan:
     konum_cm_var = any("konum_cm" in m for m in is_emri["mahaller"])
     nx2, ny2 = aks_tablosu_kur(yapi.get("ek_akslar_cm"), nx2, ny2, zorunlu=ayna_y or konum_cm_var)
     tablo = _AKS["x"] is not None
+    grid_nx, grid_ny = nx, ny                                 # İş Emri ızgarası (Plan.nx/ny, pafta yazısı, bayi görseli): ek akslarla değişmez
     if tablo:
-        nx, ny = nx2 / 2.0, ny2 / 2.0
+        nx, ny = nx2 / 2.0, ny2 / 2.0                         # son aks dizini (tablo); hücre sayısı nx2 × ny2
         W, H = X(nx) + T_DIS, Y(ny) + T_DIS / 2.0
     else:
         W, H = (MOD * nx + 2.0 * T_DIS, MOD * ny + T_DIS) if X_SON is None else (X_SON + T_DIS, Y_SON + T_DIS / 2.0)
@@ -569,6 +596,8 @@ def kur(is_emri: dict) -> Plan:
     acikliklar = [(_ayna_aciklik(a) if ayna_y else a) for a in is_emri.get("acikliklar", [])]
     for ac in acikliklar:
         tur = ac["tur"]
+        if "konum_cm" in ac or "hizalama" in ac:               # İE-11 madde 4 (cm konumlu / odada ortalı açıklık) PR-2'ye ertelendi; sessizce yutulmaz (K21)
+            raise IsEmriHatasi(f"Açıklıkta konum_cm / hizalama henüz desteklenmiyor (İE-11 PR-2); pano dizini kullanın: {ac}")
         if tur == "pencere":
             if ac["olcu"] not in PENCERE_OLCULERI:
                 raise IsEmriHatasi(f"Katalog dışı pencere ölçüsü: {ac['olcu']}")
@@ -689,18 +718,19 @@ def kur(is_emri: dict) -> Plan:
         m.alan_m2 = poly.area / 10000.0
 
     profil = [(x0, y0, x1, y1) for (x0, y0, x1, y1, *_r) in acik_kenarlar]
-    plan = Plan(nx, ny, W, H, mahaller, duvarlar, koseler, h_bag, dikmeler, profil, acik_sinir_cizgileri, uyarilar, is_emri)
+    plan = Plan(grid_nx, grid_ny, W, H, mahaller, duvarlar, koseler, h_bag, dikmeler, profil, acik_sinir_cizgileri, uyarilar, is_emri)
     if ayna_y:
-        _aynala_y(plan)
+        _aynala_y(plan, ny2)
     return plan
 
 
-def _aynala_y(plan: "Plan") -> None:
+def _aynala_y(plan: "Plan", ny2: int) -> None:
     """İE-11, dizilim arka-sol: Motor y'yi arka duvardan saydı; Plan gerçek yöne (ön altta) çevrilir. Pano boyları ve sayıları
-    değişmez; yalnız konumlar y → H − y, normaller ±y, H açıları 90 ↔ 270, aks tablosu tersine."""
+    değişmez; yalnız konumlar y → H − y, normaller ±y, H açıları 90 ↔ 270, aks tablosu tersine. `ny2` hücre sayısıdır (aks tablosu
+    uzunluğu − 1; ek aks varsa İş Emri ızgarasından çok). Menteşe çevrilmez (varyant gerçek çerçevede hesaplanır)."""
     global _AKS, _AKS_ANA
     from shapely import affinity
-    H = plan.H; ny2 = int(round(plan.ny * 2))
+    H = plan.H
     def ny_(v):
         return {"+y": "-y", "-y": "+y"}.get(v, v)
     for d in plan.duvarlar:
@@ -732,6 +762,7 @@ def _aynala_y(plan: "Plan") -> None:
         _AKS["y"] = [H - v for v in reversed(_AKS["y"])]
     if _AKS_ANA["y"] is not None:
         _AKS_ANA["y"] = [H - v for v in reversed(_AKS_ANA["y"])]
+    _AKS_EK["y"] = [H - v for v in reversed(_AKS_EK["y"])]
 
 
 def _acik_strip(k, yon, hat, a, b, sahip, h, cizgiler, ekle, cikar):

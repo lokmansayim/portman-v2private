@@ -128,7 +128,9 @@ def hazirla(ie: dict) -> dict:
                    "not": "Motor'un kurallı planı (G.kur). Kodlar Motor DXF'indeki BOM bloklarıyla aynı."},
         "kapsam": {"ic_kapi": True, "gecis_malzeme_degil": True},
         "bina": {"ad": f"{ie.get('talep', {}).get('musteri_adi', '')} — {ie['yapi']['grid']['x_pano']}×{ie['yapi']['grid']['y_pano']} pano",
-                 "W": _r(plan.W), "H": _r(plan.H), "duvar_h": float(ie["yapi"].get("duvar_yuksekligi_cm", DUVAR_H)), "lento": LENTO,
+                 "W": _r(plan.W), "H": _r(plan.H), "duvar_h": float(ie["yapi"].get("duvar_yuksekligi_cm", DUVAR_H)),
+                 # İE-11: yeni anahtarlı İş Emri'nde pencere/kapı üst kotu sabit (200), lento = yükseklik − 200 (DXF ile aynı); eski İş Emri'nde 50
+                 "lento": (float(ie["yapi"].get("duvar_yuksekligi_cm", DUVAR_H)) - KAPI_UST) if G.yeni_anahtar_var(ie) else LENTO,
                  "cati": {"tip": cati.get("tip", "besik"), "egim": float(cati.get("egim_yuzde", 33)) / 100, "sacak": float(cati.get("sacak_cm", 30)),
                           "topuk": float(cati.get("topuk_cm", 10)), "makas_yonu": "x (kısa kenar)", **({"makas_ekseni": cati["makas_ekseni"]} if "makas_ekseni" in cati else {}), "renk": "antrasit"}},
         "panolar": panolar, "acikliklar": acikliklar, "baglantilar": baglantilar, "odalar": odalar, "veranda": veranda, "tefris": [],

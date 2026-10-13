@@ -27,6 +27,7 @@ Kaynak: Lokman'ın anlattıkları (1–2, 6 ve 12 Ekim 2026). Astra dönemindeki
   Kesim ucu **parametredir**: `yapi.dizilim.baslangic` `on-sol` (eski; kesilen parça sağ ve arka uçta) ya da `arka-sol` (PK-01 paftası: y arkadan sayılır, kesilen parça sağ ve **ön** uçta).
   `yapi.dizilim.hiza` `kosu` (eski: her koşu kendi başından 125,5) ya da `izgara` (PK-01 paftası: ekler ızgara akslarında; ızgara dışı başlayan segment önce bir sonraki tam aksa kadar parça alır).
   Anahtar yoksa eski davranış sürer (P6001 bayt bayt aynı).
+  **Çerçeve kuralı (arka-sol):** konumlar (`konum_cm`, `ek_akslar_cm`, `konum_pano`, sol/sağ duvardaki pano dizini) arkadan sayılır; cephe adları, menteşe ve dikmeler gerçek yöndedir. Yanlış çerçevede girilen değer hata vermez, başka yere çizer — İş Emri yazarken (ve Beyin'e bağlanırken) bu kural uygulanır.
 
 ## Aks dışı duvar ve dış duvar T bölmesi (PK-01; İE-11)
 

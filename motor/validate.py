@@ -81,11 +81,15 @@ def dogrula(doc, plan: G.Plan, is_emri: dict) -> dict:
     if fp_diff > 1e-6:
         hatalar.append(f"Dosya ayak izi Plan ile uyuşmuyor (fark {fp_diff:.6f} cm²)")
     ext = _bbox([(r[0], r[1]) for r in rects] + [(r[2], r[3]) for r in rects])
-    if max(abs(a - b) for a, b in zip(ext, fp_plan.bounds)) > 1e-6:
-        hatalar.append(f"Duvarların kutusu {ext} Plan ayak izi {fp_plan.bounds} ile uyuşmuyor")
-    tum = unary_union([fp_plan] + [m.poly for m in plan.mahaller.values() if m.acik]).bounds
-    if max(abs(a - b) for a, b in zip(tum, (0, 0, W, H))) > 1e-6:
-        hatalar.append(f"Dış ölçüler {tum} beklenen (0,0,{W},{H})")
+    if G.yeni_anahtar_var(is_emri):
+        # İE-11: açık mahal (veranda) dış duvarsız kenara dayanabilir; duvar kutusu Plan ayak iziyle, ayak izi ∪ açık mahaller (0,0,W,H) ile denetlenir
+        if max(abs(a - b) for a, b in zip(ext, fp_plan.bounds)) > 1e-6:
+            hatalar.append(f"Duvarların kutusu {ext} Plan ayak izi {fp_plan.bounds} ile uyuşmuyor")
+        tum = unary_union([fp_plan] + [m.poly for m in plan.mahaller.values() if m.acik]).bounds
+        if max(abs(a - b) for a, b in zip(tum, (0, 0, W, H))) > 1e-6:
+            hatalar.append(f"Dış ölçüler {tum} beklenen (0,0,{W},{H})")
+    elif max(abs(a - b) for a, b in zip(ext, (0, 0, W, H))) > 1e-6:                   # eski kural (anahtarsız İş Emri; bayt bayt)
+        hatalar.append(f"Dış ölçüler {ext} beklenen (0,0,{W},{H})")
     # net alanlar (ana plan)
     areas = {}
     for e in msp.query('LWPOLYLINE[layer=="NET_ALAN_GEOMETRISI"]'):
@@ -116,13 +120,17 @@ def dogrula(doc, plan: G.Plan, is_emri: dict) -> dict:
             hatalar.append(f"Gerçek dış ölçü nesnesi yok: {need}")
     # H bağlantıları
     hs = [e for e in msp.query(f'INSERT[layer=="{G.katman("IC_UCLU_H_60")}"]') if e.dxf.insert.x < limit]
-    if len(hs) != len(plan.h_baglantilar):
-        hatalar.append(f"H bağlantı sayısı {len(hs)} / beklenen {len(plan.h_baglantilar)}")
-    for e in hs:
+    hs_dis = [e for e in msp.query(f'INSERT[layer=="{G.katman("DIS_UCLU_H_100")}"]') if e.dxf.insert.x < limit]   # İE-11
+    if len(hs) + len(hs_dis) != len(plan.h_baglantilar):
+        hatalar.append(f"H bağlantı sayısı {len(hs)} iç + {len(hs_dis)} dış / beklenen {len(plan.h_baglantilar)}")
+    if len(hs_dis) != sum(1 for h in plan.h_baglantilar if getattr(h, "tur", "ic") == "dis"):
+        hatalar.append(f"Dış üçlü H sayısı {len(hs_dis)} / beklenen {sum(1 for h in plan.h_baglantilar if getattr(h, 'tur', 'ic') == 'dis')}")
+    for e, dis in [(e, False) for e in hs] + [(e, True) for e in hs_dis]:
         x, y, rot = e.dxf.insert.x, e.dxf.insert.y, e.dxf.rotation
         dx, dy = {0.0: (1, 0), 90.0: (0, 1), 180.0: (-1, 0), 270.0: (0, -1)}[rot % 360]
-        # üç kanalda gerçek pano: gövde iki yanı ve kol yönünde
-        probes = [(x + dy, y - dx), (x - dy, y + dx), (x + 4 * dx, y + 4 * dy)]
+        # üç kanalda gerçek pano: gövde iki yanı ve kol yönünde; dış H'de kol sondası dış duvar gövdesini (T_DIS/2) aşar, gövde arkası da sınanır
+        kol = (G.T_DIS / 2.0 + 1.0) if dis else 4.0
+        probes = [(x + dy, y - dx), (x - dy, y + dx), (x + kol * dx, y + kol * dy)] + ([(x - dx, y - dy)] if dis else [])
         ok = [any(r[0] - 1e-7 <= px <= r[2] + 1e-7 and r[1] - 1e-7 <= py <= r[3] + 1e-7 for r in rects) for px, py in probes]
         if not all(ok):
             hatalar.append(f"H bağlantısı ({x},{y}) kanallarında pano yok: {ok}")
