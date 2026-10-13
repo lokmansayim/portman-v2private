@@ -77,6 +77,9 @@ Sürüm 7.2 (Lokman'ın 13.10 öğleden sonra cevapları, AIPrefabrik inceleme s
   R5. Fugalı cephede H latası = dış 100'lük duvar H'ları + 3 yedek (Lokman; PK-07 27 + 3 = 30).
   R6. Kubbeli cumba (`kubbe: true` çatı parçası): genel çatı satırlarına girmez; Abdulselam takımı (E2 − E3) eklenir (Lokman).
   Islak hacim yalnız banyo ve WC (Lokman; ISLAK zaten böyle). Dörtomuz çatıda baş makas Z'si yok (Lokman; kalkan 0 → Z, omega, betopan 0).
+Sürüm 7.3 (TS-01 okumasıyla, gerçek liste açılmadan; model anlamı ve ilk tahmin): "metal kiremit" kaplama 105 cm kapatır (TS-01 kaplama
+  paftası), kaplama vidası 5,5 × 60 (O16 satırı yinelenmez); kaplamada "OSB" ve "nem bariyeri" varsa OSB levhası çatı alanı × 1,10 ÷ 2,977
+  ve nem bariyeri çatı alanı 10 m²'ye yukarı (ilk tahmin; E2 / E3 listelerinde OSB 29, nem bariyeri 80).
 LLM yok, ağ yok.
 """
 from __future__ import annotations
@@ -92,7 +95,7 @@ from pathlib import Path
 KOK = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(KOK))
 
-SURUM = "7.2 (13 Ekim 2026; Portatifev varsayılan, PK-02, PK-03, PK-05, PK-06 ve PK-07 dersleri, pafta kipi; pencere sınıfları; Lokman cevapları R1–R6)"
+SURUM = "7.3 (13 Ekim 2026; Portatifev varsayılan, PK-02, PK-03, PK-05, PK-06 ve PK-07 dersleri, pafta kipi; pencere sınıfları; Lokman cevapları R1–R6; metal kiremit + OSB)"
 GRUPLAR = {"1001": "Panel", "1002": "Metal aksam", "1003": "Kapı ve pencere", "1004": "Tavan", "1005": "Makas", "1006": "Çatı",
            "1007": "Elektrik", "1008": "Vida", "1009": "Depo", "1010": "Sıhhi tesisat", "1011": "Dere", "1012": "Boya"}
 TAVAN = lambda x: int(math.ceil(x - 1e-9))
@@ -510,7 +513,8 @@ def liste(N: dict, k: dict, pafta: dict | None = None) -> dict:
     kap = oz.get("çatı kaplaması", "")
     sandvic = "sandvi" in kap
     trapez = "trapez" in kap
-    kap_m = _kural(k, "sandvic_panel_kapatma_m") if sandvic else (_kural(k, "trapez_sac_kapatma_m") if trapez else TEK_KAT_KAPATMA_M)
+    kiremit = "kiremit" in kap and not (sandvic or trapez)          # 7.3: metal kiremit (TS-01 kaplama paftası "Kapatır: 105 cm")
+    kap_m = _kural(k, "sandvic_panel_kapatma_m") if sandvic else (_kural(k, "trapez_sac_kapatma_m") if trapez else (1.05 if kiremit else TEK_KAT_KAPATMA_M))
     yuvarla_mm = 100 if (sandvic or trapez) else 50
     boy_mm = lambda e_: int(math.ceil(e_ * 1000 / yuvarla_mm - 1e-9) * yuvarla_mm)
     n_pan = 0
@@ -518,7 +522,7 @@ def liste(N: dict, k: dict, pafta: dict | None = None) -> dict:
         L_pan = boy_mm(o["egik"])
         n = o["yuz"] * TAVAN(o["mahya_boy"] / kap_m - 1e-9) if c is ana else TAVAN(o["yuz"] * o["mahya_boy"] / kap_m)   # O9: ana çatı yüz başına
         n_pan += n
-        ad = "Sandviç panel (100 cm kapatır)" if sandvic else ("Trapez sac" if trapez else "Tek kat çatı paneli")
+        ad = "Sandviç panel (100 cm kapatır)" if sandvic else ("Trapez sac" if trapez else ("Metal kiremit (105 cm kapatır)" if kiremit else "Tek kat çatı paneli"))
         ekle("1006", f"{ad} · {c.get('ad', 'çatı')}", f"L {L_pan}", n, "Kural (P3, O9)",
              (f"{o['yuz']} yüz × ⌈{o['mahya_boy']:.2f} m ÷ {kap_m:g}⌉" if c is ana else f"⌈{o['yuz']} yüz × {o['mahya_boy']:.2f} m ÷ {kap_m:g}⌉") + f"; boy eğik {o['egik']:.3f} m yukarı",
              "PK-01 22, PK-07 18 (yüz başına) tuttu", pafta=("sandvic_panel",) if c is ana else None,
@@ -543,6 +547,12 @@ def liste(N: dict, k: dict, pafta: dict | None = None) -> dict:
     else:
         ekle("1006", "Panel kapaması", "L 2500", None, "Kural yok", "—", "PK-05 tek kat 6 (alın ÷ 2,5), PK-06 16", aday=TAVAN(sacak_m / 2.5), aday_notu="saçak ÷ 2,5")
     ekle("1006", "Mahya bandı", "rulo 10 m", TAVAN(mahya * 2.8 / 10), "Şablon formülü (Portatifev)", f"mahya {mahya} × 2,8 ÷ 10", "PK-01 2 tuttu; Loftev'de yok")
+    cati_alani = sum(o["yuz"] * o["egik"] * o["mahya_boy"] for c, o in C)
+    if "osb" in kap:                                                # 7.3: OSB + nem bariyeri kaplaması (TS-01; E2 / E3)
+        ekle("1006", "OSB 11 mm (çatı)", "1220 × 2440", TAVAN(cati_alani * 1.10 / (1.22 * 2.44)), "Kural (ilk tahmin, 7.3)",
+             f"çatı alanı {cati_alani:.1f} m² × 1,10 ÷ 2,977", "E2 / E3 29", pafta=("osb",))
+    if "nem" in kap:
+        ekle("1006", "Nem bariyeri", "m²", int(math.ceil(cati_alani / 10 - 1e-9) * 10), "Kural (ilk tahmin, 7.3)", f"çatı alanı {cati_alani:.1f} m², 10'a yukarı", "E2 / E3 80")
 
     if kubbeler:
         kubbe_takimi("1006")
@@ -576,13 +586,14 @@ def liste(N: dict, k: dict, pafta: dict | None = None) -> dict:
     # ── 1008 Vida ───────────────────────────────────────────────────────────
     ekle("1008", "16 mm betopan ve kapı kolu vidası (3,9 × 32)", "adet", 500, "Kural (O16)", "sabit 500", "PK-07 ve Loftev 500 tuttu; PK-01 250")
     L_vida = sum(boy_mm(o["egik"]) / 200 * TAVAN(o["yuz"] * o["mahya_boy"] / kap_m) for c, o in C)
-    ekle("1008", "Trapez vida 5,5 × 110 (sandviç panel)" if sandvic else ("Trapez vida 5,5 × 60 (trapez sac)" if trapez else "Trapez vida 5,5 × 76 (tek kat panel)"),
+    ekle("1008", "Trapez vida 5,5 × 110 (sandviç panel)" if sandvic else ("Trapez vida 5,5 × 60 (trapez sac)" if trapez else
+                                                                         ("Trapez vida 5,5 × 60 (metal kiremit)" if kiremit else "Trapez vida 5,5 × 76 (tek kat panel)")),
          "adet", int(math.ceil(L_vida / 100 - 1e-9) * 100),
          "Şablon formülü (Portatifev)", f"panel boyu ÷ 200 × panel adedi = {L_vida:.0f}, 100'e yukarı", "PK-01 385 → 400",
          aday=int(math.ceil(L_vida / 250 - 1e-9) * 250), aday_notu="Loftev (PK-02 500 ✓): 250'nin katına yukarı")
     if pen:                                                     # O12: pencere alıcıya ait olsa da montaj vidası bizde (PK-07 120)
         ekle("1008", "Prefabrik pencere vidası (4,8 × 70)", "adet", 20 * len(pen), "Kural (H2, O12)", "pencere × 20", "PK-02 100, PK-07 120 tuttu; PK-01'de 0")
-    if not trapez:                                              # 7.1: trapez çatıda 5,5 × 60 zaten kaplama vidası satırında
+    if not (trapez or kiremit):                                 # 7.1 / 7.3: trapez ve metal kiremitte 5,5 × 60 zaten kaplama vidası satırında
         ekle("1008", "Trapez vida 5,5 × 60 (trapez sac / metal kiremit)", "adet", int(math.ceil(bina_m2 * 2.5 / 100 - 1e-9) * 100), "Kural (O16)",
              "m² × 2,5, 100'e yukarı (kural kitabı: Excel motoru)", "PK-07 200 tuttu", aday=int(math.ceil(bina_m2 * 2.5 / 250 - 1e-9) * 250), aday_notu="Loftev: 250'nin katı")
     ekle("1008", "230'luk kesme taşı", "adet", TAVAN(bina_m2 * 0.02), "Kural (O16)", "m² × 0,02 (kural kitabı)", "PK-06 2, PK-07 2 tuttu")
