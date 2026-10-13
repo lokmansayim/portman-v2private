@@ -9,6 +9,25 @@ Yeni pencere için hazırlıklar:
 - Dış çizim denetimi: `deneme/2026-09-30_asama2/kos.py --dxf`.
 - Mac'te `24_Astra_Cizimler/`.
 
+**13 Ekim 2026 14:45 eki (dal `ie-11-pr2-kor-test`, yalnız yerel; AIPrefabrik inceleme seti ve Lokman'ın cevapları):**
+- **AIPrefabrik:** Lokman 14:11'de 28 doğrulanmış, üretilmiş proje verdi (Mac `~/Desktop/AIPrefabrik/`).
+  - İlk beşi (E1–E5) incelendi: `deneme/2026-10-13_aiprefabrik/INCELEME.md`.
+  - Kalan 23 klasör açılmadı. SHA-256 ile mühürlendi: `deneme/2026-10-13_aiprefabrik/test_seti/MUHUR.md`.
+  - Kör sayılmayanlar: Huma 60 = PK-01, Diamond 70 = PK-07. Doğan 80 m2 muhtemelen PK-03.
+- **Lokman'ın 11 cevabı** (soru kartları, 14:35–14:42) `deneme/2026-10-13_kor_test_seri/KARAR_NOTU.md`'de. Üreteç sürüm **7.2**:
+  - R1: alt çerçeve her zaman L 3750;
+  - R2: PVC iniş L 2000;
+  - R3: iniş 4 köşe + iki saçak ortası;
+  - R4: W otomat Portatifev 8;
+  - R5: fugalı H latası dış H + 3;
+  - R6: kubbe takımı.
+- **Kullanıcı adımı:** liste üreteci **Yerelde çalışıyor (deneme)**. Geri uygulama:
+  - PK-07 iniş 8 ve H latası 30 tuttu;
+  - 2025 listelerinde iniş farklı.
+- **Sıradaki (Lokman 14:42):** İE-13'ten önce test setinde kör test.
+  - Push, PR ve birleştirme yok.
+  - Canlıya, LLM'e, WhatsApp'a dokunulmadı; silme yok.
+
 **13 Ekim 2026 öğleden sonra eki (dal `ie-11-pr2-kor-test`, yalnız yerel; İE-11 PR-2 · prefabrik kör test serisi; Lokman 10:37 / 10:41 / 11:45):**
 - **Yapılan:** tek kat prefabrik kör test serisi **PK-01…PK-08** bitti (PK-04 çelik karkas, seriden çıktı). Her projede kendi listemiz önce commit'lendi, sonra mühür (SHA) Mac'te denetlenip gerçek liste açıldı (`deneme/2026-10-13_kor_test_seri/MUHUR.md`).
   - Özet ve açık sorular: `deneme/2026-10-13_kor_test_seri/SERI_OZETI.md`. Proje raporları: `deneme/2026-10-13_pk_0N/sonuc/PK0N_kiyas.md`.

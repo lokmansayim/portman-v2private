@@ -52,3 +52,11 @@
 1. Muhammed Uysal'ın listelerinde kesik panolar tam boy mu yazılıyor (sahada kesim)?
 2. Bu bayinin listesinde vida, elektrik ve tesisat neden boş? Bayi kendisi mi alıyor?
 3. Kubbeli cumba takımı (yukarıdaki 8 kalem) her açılı cumbada aynı mı?
+
+## Lokman'ın cevabı ve model alanı (13.10 14:42, kıyastan sonra)
+
+- **"Eski şablon, eksik doldurulmuş":** kesik panoların tam boy yazılması ve boş vida, elektrik ve tesisat grupları bayinin kuralı değil. Bizim kesikleri kendi boyunda yazmamız doğru.
+- **Kubbe takımı = Abdulselam takımı** (AIPrefabrik E2 − E3).
+  - `yapi_pafta.json`'daki "cumba kubbesi" parçasına `kubbe: true` eklendi. Kıyastan sonra eklenen bir model alanıdır.
+  - Kör liste (`PK08_liste.json`, sürüm 7.1) değişmedi.
+  - Sürüm 7.2'de kubbe genel çatı satırlarına girmiyor ve takım ayrıca ekleniyor. Takım: kubbe özel pano 1, kubbe üstü H 2, açılı köşe direği 4, kubbe saçak sacı 3, kubbe makası 3, OSB 1, membran 1, shingle 1.

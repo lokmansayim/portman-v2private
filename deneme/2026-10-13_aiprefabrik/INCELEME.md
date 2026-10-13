@@ -173,3 +173,18 @@ Onay bekliyor.
 **15. Tavan alçıpanı (H6).**
 - E1 36 / 5 ve E5 15 / 2 tuttu.
 - E2 ve E3'te beyaz 18 (formül 19; holün 2,23 m²'si sayılmamış gibi).
+
+## Lokman'ın cevapları (13.10 14:35–14:42, soru kartları)
+
+Kayıt `deneme/2026-10-13_kor_test_seri/KARAR_NOTU.md`; üreteç sürüm 7.2 (R1–R6).
+1. Standart pakette köşebent, Z, dübel, RYSB ve vidalar her zaman var. Dörtomuz çatıda baş makas Z'si olmaz; E1'de baş makas satırlarının hiçbiri yok. Pencere karkası projeye bağlı.
+2. Saçak ve alın sacı 2500 ya da 2800: sac durumuna göre, en güncel liste esas. **Alt çerçeve her zaman L 3750**, 60'lık da. İniş borusu L 2000; bina yüksekliği 2500.
+3. Islak hacim yalnız banyo ve WC.
+4. İniş: 4 köşe + iki saçak ortası; ek çatı parçası +2.
+5. Makas listeden düşemez; PK-06'da mühendis atlamış. Pencere ve tavan alçıpanı müşteri tercihi olabilir; alçıpan %95 standart.
+6. H latası = dış 100'lük duvar H'ları + 3 yedek.
+7. W otomat Portatifev 8, Loftev 9.
+8. PK-08 eski şablon, eksik doldurulmuş.
+9. Kubbe takımı = Abdulselam takımı.
+10. İE-13'ten önce test setinde kör test.
+11. Tek şablon Portatifev.

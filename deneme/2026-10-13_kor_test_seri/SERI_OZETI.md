@@ -43,22 +43,45 @@ Protokol `docs/sartname/prefabrik_kor_test.md`; mühürler ve açılışlar `MUH
   kanopi deresiz, şablon formüllerinden köşebent 7 / Z / kapama / Boardex / vidalar / dübel / karkas, tesisat takımı, boya, buat).
 - **v7.1 (PK-08 okuması):** pencere sınıfları (120 genişlik standart, vasistas en ve boy ≤ 60), `dere_yok`, vitrifiye alıcıya ait.
 
-## Açık sorular (Lokman)
+## Sorular → Lokman'ın cevapları (13.10 14:35–14:42)
 
-1. **PK-01'in sıfırları:** `#REF!` hücreleri ve doldurulmamış kalemler mi? Sürüm 7, şablonun formül sütununa ve PK-07'ye göre dolduruyor.
-2. **Loftev ↔ Portatifev farkları,** Loftev aday sütununda: baş makas Z'si, saçak ve alın L 2800, 60'lık alt çerçeve L 3750, PVC iniş L 2000, şase pul.
-3. **Islak hacim:** mutfak (PK-03) ve çamaşır odası (PK-06) sayılır mı?
-4. **Orta iniş:** 9 m'yi geçen saçakta konur mu? (PK-01 var, PK-03 yok, PK-06 ve PK-07 belirsiz)
-5. **PK-06 listesinde makas, tavan alçıpanı ve pencere yok:** ayrı liste mi, alıcıya mı ait?
-6. **Fugalı cephede H latası 30:** dış ek 27, kalan 3 neye göre?
-7. **W otomat:** Portatifev'de 8, Loftev'de 9; kuralı?
-8. **PK-08 bayisi:** kesik panolar tam boy mu yazılıyor? Vida, elektrik ve tesisat neden boş?
-9. **Kubbeli (açılı) cumba takımı** her projede aynı mı?
-10. **İE-13 (Motor genişletmesi) onayı.**
+Soru kartlarıyla alındı. Kanıt: AIPrefabrik inceleme seti E1–E5 (`deneme/2026-10-13_aiprefabrik/INCELEME.md`). Kayıt: `KARAR_NOTU.md`.
+
+| # | Soru | Cevap | Sürüm 7.2'de |
+|---|---|---|---|
+| 1 | PK-01'in sıfırları | Standart pakette köşebent, Z, dübel, RYSB ve vidalar her zaman var; sıfırlar boş hücre. Dörtomuz çatıda baş makas Z'si olmaz. Pencere karkası projeye bağlı. | değişiklik yok (7 zaten dolduruyor); dörtomuzda kalkan 0 |
+| 2 | Loftev ↔ Portatifev | Saçak ve alın 2500 / 2800 sac durumuna göre, en güncel liste esas (2500). Alt çerçeve her zaman L 3750, 60'lık da. İniş borusu L 2000. | R1, R2 |
+| 3 | Islak hacim | Yalnız banyo ve WC | `ISLAK` zaten böyle |
+| 4 | Orta iniş | 4 köşe + iki saçak ortası; ek çatı parçası +2 | R3 |
+| 5 | PK-06 eksik gruplar | Makas düşemez (mühendisin atlaması). Pencere ve alçıpanı müşteri istemeyebilir (alçıpan %95 standart). | kıyasta "liste hatası" |
+| 6 | Fugalı H latası | Dış 100'lük duvar H'ları + 3 yedek | R5 (PK-07 30 ✓) |
+| 7 | W otomat | Portatifev 8, Loftev 9 | R4 |
+| 8 | PK-08 bayisi | Eski şablon, eksik doldurulmuş | kural değil |
+| 9 | Kubbeli cumba | Abdulselam takımı | R6 (`kubbe: true`) |
+| 10 | İE-13 | Önce test setinde kör test | sırada |
+| 11 | Yeni Loftev şablonu (yeni soru) | Tek şablon Portatifev | değişiklik yok |
+
+**Sürüm 7.2'nin PK-01…08'e geri uygulanışı** (karalama klasöründe; kör listeler yerinde, yeniden yazılmadı):
+
+| Proje | İniş | Gerçek | Not |
+|---|---|---|---|
+| PK-07 | 7 → 8 | 8 | ✓; H latası 27 → 30 ✓ |
+| PK-01 | 6 | 6 | değişmedi ✓ |
+| PK-02 | 4 → 6 | 4 | 2025 listesi |
+| PK-03 | 7 → 8 | 6 | 2025 listesi |
+| PK-05 | 4 → 5 | 4 | 2025 listesi |
+| PK-08 | 4 → 6 | 4 | 2025 listesi |
+
+Ayrıca:
+- **PK-08:** kubbe takımı 8 satır geldi; kubbe trapez satırı düştü. Kubbenin saçak hattı sayılmayınca saçak omegası 8 → 7 oldu (gerçek 8).
+- **60'lık alt çerçeve:** her projede ÷ 3,75 oldu. Gerçek listeler ÷ 2,5 yazıyordu; Lokman'a göre 3750 doğru.
+- **W otomat:** artık 8; Loftev için 9 aday sütununda.
 
 ## Sıradaki
 
-- İE-13 onayı gelirse madde 1–3 (PK-02 tam eşleşme), sonra pencereler ve iki modüllük pano, L plan, çatı parçaları.
-- Kural adaylarının `kurallar/liste/kurallar.json`'a ayrı katman olarak taşınması. Lokman'ın sorulara cevabıyla; yeni kural seti sürümü, altın çıktı değişmez.
+- **Test setinde kör test** (Lokman 14:42, İE-13'ten önce). Test seti: AIPrefabrik'in kalan 23 klasörü, mühür `deneme/2026-10-13_aiprefabrik/test_seti/MUHUR.md`.
+  Huma 60 ve Diamond 70 görülmüş, kör değil. Doğan 80 m2 muhtemelen PK-03.
+- İE-13 (madde 1–3, PK-02 tam eşleşme) kör test sonuçlarından sonra.
+- Kural adaylarının `kurallar/liste/kurallar.json`'a ayrı katman olarak taşınması (yeni kural seti sürümü, altın çıktı değişmez).
 - Montajı DWG olan projeler PDF'e çevrilirse seriye eklenir (Doğan 61 / 60, Kenan Karabiber 74, Altan Bey 135, Sibel Akar 87).
 - KT-03 Örnek Şablon'un prefabriğe uyarlanması (öteki sohbetin entegrasyon talimatından sonra).

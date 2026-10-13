@@ -513,7 +513,8 @@
    "sacak_hatlari_m": [
     3.6
    ],
-   "not": "açılı cumbanın küçük kubbe çatısı (teklif); ölçüsü paftada yok, ana saçağın 32 cm önüne taşan kısım"
+   "not": "açılı cumbanın küçük kubbe çatısı (teklif); ölçüsü paftada yok, ana saçağın 32 cm önüne taşan kısım; 13.10 kıyas sonrası model alanı `kubbe: true` (Lokman: Abdulselam takımı, sürüm 7.2 R6)",
+   "kubbe": true
   }
  ],
  "ozellikler": {
