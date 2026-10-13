@@ -89,3 +89,11 @@ d5918f3916e587d26900982a34057226e33817a3d44592ef65638fa54466af88  AhmetSayim92/A
 5ef593d3e43e32cbed349f7cf173564a3c4964b1983c37b687c0a38c37fbdd40  Aykut 49/AYKUT PREFABRIK-KUBRA TOP-49M2-MONTAJ PAFTALARI.pdf
 2f037a78e30fdca9e5b99ad3f607a700f04b25e208aee46de0d3427d2121c6ae  Aykut 49/EREN AYKUT-KUBRA TOP-49 M2 YUKLEME LISTESI.pdf
 ```
+
+## Açılışlar
+
+| Test | Klasör | Kendi listemiz (commit) | Mac'te mühür denetimi | Açılış | Sonuç |
+|---|---|---|---|---|---|
+| TS-01 | Diamond 45 | `f12cdd6` 13.10 14:57:39 | 14:57:42, `dcfd289b…0b4` aynı | 14:57:49 | 103 / 137 doğru toplam (`deneme/2026-10-13_ts_01/sonuc/TS01_kiyas.md`) |
+
+Montaj paftası (`63197621…6b7`) 14:46'da mühürle karşılaştırılıp açıldı; liste açılışa kadar kapalı kaldı.
