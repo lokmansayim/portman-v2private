@@ -465,14 +465,15 @@ def _cizim_hatasi(k, d0: dict, karar, talep, meta: dict, cizim: dict, ie: dict, 
 
 
 def _anlik(d: dict) -> dict:
-    """Konuşmanın karar öncesi anlık görüntüsü ("hak düşmez" için). Geçmiş listesi kopyalanmaz, yalnız uzunluğu tutulur: geri alırken
-    bu işin notları kesilir (kod incelemesi 13.10: her mesajda bütün geçmişi kopyalamak gereksizdi)."""
-    return {"_gecmis_n": len(d.get("gecmis") or []), **json.loads(json.dumps({a: b for a, b in d.items() if a != "gecmis"}))}
+    """Konuşmanın karar öncesi anlık görüntüsü ("hak düşmez" için). Geçmiş (en çok 40 not, `Konusma.not_dus`) yalnız sığ kopyalanır: notlar
+    sonradan değişmez, yalnız eklenir (kod incelemesi 13.10: her mesajda bütün durumu JSON'la çoğaltmak gereksizdi). Sığ kopya geri almada
+    geçmişi tam verir (KVKK ikinci tur: uzunlukla kesmek, 40'ta dolu geçmişte bu işin notlarını değil en eskileri düşürüyordu)."""
+    return {"_gecmis": list(d.get("gecmis") or []), **json.loads(json.dumps({a: b for a, b in d.items() if a != "gecmis"}))}
 
 
 def _geri_al(anlik: dict, simdiki: dict) -> dict:
-    d = {a: b for a, b in anlik.items() if a != "_gecmis_n"}
-    d["gecmis"] = list((simdiki.get("gecmis") or [])[:anlik.get("_gecmis_n", 0)])
+    d = {a: b for a, b in anlik.items() if a != "_gecmis"}
+    d["gecmis"] = list(anlik.get("_gecmis") or [])
     return d
 
 

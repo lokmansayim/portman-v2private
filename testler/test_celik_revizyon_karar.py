@@ -9,7 +9,7 @@ import pytest
 
 KOK = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(KOK))
-from beyin import karar as K  # noqa: E402
+from beyin import celik_okuma as CO, karar as K  # noqa: E402
 from beyin.katalog import Katalog  # noqa: E402
 from beyin.konusma import Konusma  # noqa: E402
 from beyin.sema import Talep  # noqa: E402
@@ -159,6 +159,7 @@ def test_okunamayan_istek_yonlendirilir_plan_degismez(s, metin, alan):
     no = s.plan["is_emri_no"]
     k = s.yaz(metin, **alan)
     assert k.eylem == "yonlendir" and k.is_emri is None, (k.eylem, k.mesaj)
+    assert CO.norm(metin) not in CO.norm(k.gerekce)                         # gerekçe günlüğe gider: bayinin cümlesi orada yok (KVKK)
     assert s.plan["is_emri_no"] == no and s.plan["revizyon"] == 1 and s.degisiklikler() == []
 
 

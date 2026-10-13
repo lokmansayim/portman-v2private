@@ -457,7 +457,7 @@ def _celik_istek_sakla(k: Konusma) -> bool:
         return False
     eski = k.d.get("celik_istek") or {}
     eski_llm = eski.get("llm") or {}
-    k.d["celik_istek"] = {"metin": "\n".join(x for x in (eski.get("metin"), m) if x),
+    k.d["celik_istek"] = {"metin": "\n".join(x for x in (eski.get("metin"), m) if x)[-1000:],      # üst sınır (KVKK ikinci tur): son 1000 karakter
                           "llm": {"pencere": bool(eski_llm.get("pencere") or llm.get("pencere")),
                                   "varyantlar": list(eski_llm.get("varyantlar") or []) + list(llm.get("varyantlar") or [])}}
     k.not_dus("kural", "set sunulurken çelik değişiklik isteği saklandı")
