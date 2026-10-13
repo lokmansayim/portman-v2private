@@ -44,7 +44,8 @@ def geometri_anahtari_var(is_emri: dict) -> bool:
     yükseklik planın geometrisini ve dolayısıyla hangi geometrinin kabul edileceğini değiştirmez (geometri hakemi 2. tur, önemli 1)."""
     yapi = is_emri.get("yapi", {})
     return any(k in yapi for k in YENI_ANAHTARLAR) or any("konum_cm" in m for m in is_emri.get("mahaller", [])) \
-        or any(("konum_cm" in a) or ("hizalama" in a) or ("dograma" in a) for a in is_emri.get("acikliklar", []))
+        or any(("konum_cm" in a) or ("hizalama" in a) for a in is_emri.get("acikliklar", []))
+    # `acikliklar[].dograma` geometri anahtarı değildir (kod incelemesi D1): yalnız BOM işaretini etkiler, kendi varlığıyla çalışır
 
 
 def yeni_anahtar_var(is_emri: dict) -> bool:
@@ -75,7 +76,8 @@ def olcu_ayarla(dis_olcu, nx: float, ny: float) -> None:
     xs, ys = float(dis_olcu["x"]) - T_DIS, float(dis_olcu["y"]) - T_DIS / 2.0
     for ad_, son, bas, n in (("x", xs, T_DIS, nx), ("y", ys, T_DIS / 2.0, ny)):
         if not (bas + MOD * (n - 0.5) < son - 1e-9 and son <= bas + MOD * n + 1e-9):
-            raise IsEmriHatasi(f"Dış ölçü ile grid uyuşmuyor ({ad_}): son aks {son} cm, grid {n} pano; son yarım pano 0–62,75 cm aralığında olmalı")
+            raise IsEmriHatasi(f"Dış ölçü ile grid uyuşmuyor ({ad_}): son aks {son:g} cm, grid {n:g} pano → son pano {son - bas - MOD * (n - 1):g} cm; "
+                               f"kesilmiş son pano 62,75'ten büyük ve 125,5'ten küçük ya da eşit olmalı (tam yarım pano için grid'i yarım adımla yazın: {n - 0.5:g})")
     X_SON, Y_SON = xs, ys
 
 
@@ -389,8 +391,9 @@ def _kur(is_emri: dict) -> Plan:
             rects = []
             for r in m["konum_pano"]:
                 cm = [T_DIS + MOD * float(r[0]), T_DIS / 2.0 + MOD * float(r[1]), T_DIS + MOD * float(r[2]), T_DIS / 2.0 + MOD * float(r[3])]
-                if X_SON is not None: cm[0], cm[2] = min(cm[0], X_SON), min(cm[2], X_SON)
-                if Y_SON is not None: cm[1], cm[3] = min(cm[1], Y_SON), min(cm[3], Y_SON)
+                # ölçüye kesimde yalnız ızgaranın SON aksı (r = nx / ny) kesilmiş yere eşlenir; grid dışı değer kırpılmaz, aks_dizini hata verir (K21)
+                for i, (son, n) in ((0, (X_SON, grid_nx)), (2, (X_SON, grid_nx)), (1, (Y_SON, grid_ny)), (3, (Y_SON, grid_ny))):
+                    if son is not None and abs(float(r[i]) - n) < 1e-9: cm[i] = son
                 rects.append([aks_dizini(cm[0], "x") / 2, aks_dizini(cm[1], "y") / 2, aks_dizini(cm[2], "x") / 2, aks_dizini(cm[3], "y") / 2])
         else:
             rects = [list(map(float, r)) for r in m["konum_pano"]]
@@ -558,13 +561,9 @@ def _kur(is_emri: dict) -> Plan:
             branches = [(d, uc) for d, uc in ends if d.tur == "ic" and d.yon != t.yon]
             if (t.tur == "ic" or dis_t_bolme) and len(branches) == 1 and len(thr) == 1:
                 d, uc = branches[0]
-                if d.yon == "x":
-                    hx = d.a0 if uc == 0 else d.a1
-                    if t.tur == "dis" and dis_v_konum == "aks_disinda":   # yan dış duvarın gövdesi aksın dışında: simge gövde ortasında (İE-11, hakem 2. tur 6)
-                        hx += -T_DIS / 2.0 if uc == 0 else T_DIS / 2.0
-                    h_bag.append(HBaglanti(hx, d.c, 0.0 if uc == 0 else 180.0, t.tur))
-                else:
-                    h_bag.append(HBaglanti(d.c, d.a0 if uc == 0 else d.a1, 90.0 if uc == 0 else 270.0, t.tur))
+                # simge geçen duvarın merkezinde (t.c): eksendeki duvarda aks, gövdesi aks dışındaki yan dış duvarda gövde ortası (hakem 2. tur 6)
+                if d.yon == "x": h_bag.append(HBaglanti(t.c, d.c, 0.0 if uc == 0 else 180.0, t.tur))
+                else:            h_bag.append(HBaglanti(d.c, t.c, 90.0 if uc == 0 else 270.0, t.tur))
             continue
         ext = [(d, uc) for d, uc in ends if d.tur == "dis"]
         ic = [(d, uc) for d, uc in ends if d.tur == "ic"]
@@ -683,13 +682,14 @@ def _kur(is_emri: dict) -> Plan:
             raise IsEmriHatasi(f"Açıklık panodan geniş: {ac} (pano {p.boy})")
         if tur != "pencere":
             acl.icine_normal = _normal_from_to(d, a, b)
-        acl.dograma = ac.get("dograma")           # İE-11: "alıcıya ait" → boşluk var, doğrama listeye girmez
+        if ac.get("dograma") not in (None, "alıcıya ait"):    # K21: bilinmeyen değer sessizce yutulmaz
+            raise IsEmriHatasi(f"Açıklıkta dograma yalnız \"alıcıya ait\" olabilir: {ac}")
+        acl.dograma = ac.get("dograma")           # İE-11: "alıcıya ait" → boşluk var, doğrama blok olarak çizilir, BOM satırı işaretli (listeye girmez)
         p.acilim = acl
 
     # ---------------- veranda dikmeleri (İş Emri'nde cm konum: sol-alt köşe, 10×10)
     dikmeler = [(float(x), float(y), float(x) + 10.0, float(y) + 10.0) for x, y in is_emri.get("dikmeler", [])]
-    if ayna_y:
-        dikmeler = [(x0, H - y1, x1, H - y0) for (x0, y0, x1, y1) in dikmeler]
+    # arka-solda da aynalanmaz: dikmeler İş Emri'nde gerçek çerçevede (cm) ve yalnız çizimde kullanılır (alandan düşülmez)
 
     # ---------------- açık sınırlar ve net alanlar
     acik_sinir_cizgileri = []
@@ -783,7 +783,6 @@ def _aynala_y(plan: "Plan", ny2: int) -> None:
             d.panolar.reverse()
     plan.koseler = [Kose((x0, H - y1, x1, H - y0), k.tur) for k in plan.koseler for (x0, y0, x1, y1) in [k.rect]]
     plan.h_baglantilar = [HBaglanti(h.x, H - h.y, {90.0: 270.0, 270.0: 90.0}.get(h.rot, h.rot), h.tur) for h in plan.h_baglantilar]
-    plan.dikmeler = [(x0, H - y1, x1, H - y0) for (x0, y0, x1, y1) in plan.dikmeler]
     plan.acik_kenarlar = [(x0, H - y0, x1, H - y1) for (x0, y0, x1, y1) in plan.acik_kenarlar]
     plan.acik_sinir_cizgileri = [(x0, H - y0, x1, H - y1) for (x0, y0, x1, y1) in plan.acik_sinir_cizgileri]
     for m in plan.mahaller.values():

@@ -19,8 +19,10 @@ KOK = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(KOK))
 from motor import geometry as G  # noqa: E402
 
-PK01 = KOK / "deneme" / "2026-10-13_pk_01" / "tanim" / "PK01.json"
+PK01 = KOK / "deneme" / "2026-10-13_pk_01" / "tanim" / "PK01.json"       # kör test tanımı deneme/ altında (D-10: is_emri/'ye liste kıyasından sonra)
 P6001 = KOK / "is_emri" / "P6001_2plus1_6x6.json"
+M2_3ARTI1 = KOK / "deneme" / "2026-10-06_kalinlik_160_100" / "is_emri_3arti1_1150x1050.json"
+assert PK01.exists(), f"PK-01 tanımı yok: {PK01} (deneme/2026-10-13_pk_01 silinmiş ya da taşınmış olabilir)"
 
 
 def _oku(p: Path) -> dict:
@@ -132,6 +134,48 @@ def test_ek_aks_etiketi_kenar_durumlari():
     assert G.ana_akslar("x") == [10.0, 135.5, 198.25, 261.0, 386.5, 512.0, 590.0]
 
 
+def test_dograma_geometri_anahtari_degil(tmp_path):
+    """Kod incelemesi D1: `acikliklar[].dograma` yalnız BOM işaretidir; dış ölçü / açık kenar doğrulama kuralını açmaz ve değeri doğrulanır (K21)."""
+    from motor import dxf_out
+    ie = _p6001_on_veranda_tam_genislik()
+    ie["acikliklar"][0]["dograma"] = "alıcıya ait"
+    assert not G.geometri_anahtari_var(ie) and not G.yeni_anahtar_var(ie)
+    m = dxf_out.uret(ie, tmp_path, pdf_hatada=False)
+    assert m["validation_passed"] is False
+    kotu = _oku(PK01); kotu["acikliklar"][0]["dograma"] = "bize ait"
+    with pytest.raises(G.IsEmriHatasi, match="dograma"):
+        G.kur(kotu)
+
+
+def test_m2_3arti1_160_100_kilidi(tmp_path):
+    """M2: 6 Ekim 3+1 (1150 × 1050, dış 160 / iç 100) canlı Motor'la yamasız — pano ve BOM sayıları 6 Ekim sonucuyla aynı (kalınlık yolu kilidi)."""
+    from motor import dxf_out
+    ie = _oku(M2_3ARTI1)
+    m = dxf_out.uret(ie, tmp_path, pdf_hatada=False)
+    assert m["validation_passed"] is True
+    plan = G.kur(_oku(M2_3ARTI1))
+    assert (plan.W, plan.H) == (1150.0, 1050.0) and (G.T_DIS, G.T_IC) == (16.0, 10.0)
+    assert (sum(len(d.panolar) for d in plan.duvarlar if d.tur == "dis"), sum(len(d.panolar) for d in plan.duvarlar if d.tur == "ic")) == (36, 30)
+    bom = json.loads((tmp_path / "bom.json").read_text(encoding="utf-8"))["kalemler"]
+    eski = json.loads((KOK / "deneme" / "2026-10-06_kalinlik_160_100" / "sonuc" / "PM-DENEME-3ARTI1-1150x1050" / "bom.json").read_text(encoding="utf-8"))["kalemler"]
+    anahtar = lambda r: (r["kod"], r["malzeme"], tuple(r["olcu_mm"]) if isinstance(r["olcu_mm"], list) else r["olcu_mm"], r["adet"])
+    assert sorted(map(anahtar, bom)) == sorted(map(anahtar, eski)) and len(bom) == 23
+    # IFC: makas_ekseni "y" dalı (`_cati_y`) duman testi — şema hatası 0, çatı özeti y ekseninde
+    from motor import ifc_uret
+    oz = ifc_uret.uret(ie, tmp_path / "m2.ifc")
+    assert oz["sema_hatasi"] == 0 and oz["duvar"] >= 66 and oz["cati"]["makas_ekseni"] == "y" and oz["cati"]["makas"] >= 2
+    assert ifc_uret.hazirla(ie)["bina"]["cati"]["makas_yonu"].startswith("y")
+
+
+def test_hiza_izgara_tek_basina_p6001_ayni():
+    """`dizilim.hiza: izgara` tek başına: bütün koşular ızgarada başlayan P6001'de pano bölmesi eski kuralla aynı."""
+    ref = G.kur(_oku(P6001))
+    ie = _oku(P6001); ie["yapi"]["dizilim"] = {"hiza": "izgara"}
+    plan = G.kur(ie)
+    izi = lambda p: sorted((d.tur, d.yon, round(d.c, 3), round(pn.a0, 3), round(pn.a1, 3)) for d in p.duvarlar for pn in d.panolar)
+    assert izi(plan) == izi(ref)
+
+
 # --------------------------------------------------------------------------- PK-01 · Motor kilidi (paftaya uygunluk kanıtı değil)
 
 def test_pk01_motor_kilidi():
@@ -189,27 +233,27 @@ def test_pk01_paftadan_sayilanlar():
     assert len(plan.koseler) == 7
 
 
-@pytest.mark.xfail(strict=True, reason="PK-01 paftası: üçlü H 10 (5 iç); Motor 9 (4 iç + 5 dış) — İE-11 Kanıt 3, PR-2 kıyas raporu")
+@pytest.mark.xfail(strict=True, raises=AssertionError, reason="PK-01 paftası: üçlü H 10 (5 iç); Motor 9 (4 iç + 5 dış) — İE-11 Kanıt 3, PR-2 kıyas raporu")
 def test_pk01_sapma_uclu_h():
     plan = G.kur(_oku(PK01))
     assert Counter(h.tur for h in plan.h_baglantilar) == {"ic": 5, "dis": 5}
 
 
-@pytest.mark.xfail(strict=True, reason="PK-01 paftası: dış pano eki H 19 (12 kulaklı + 7 dübelli); Motor 17 — İE-11 Kanıt 3, PR-2")
+@pytest.mark.xfail(strict=True, raises=AssertionError, reason="PK-01 paftası: dış pano eki H 19 (12 kulaklı + 7 dübelli); Motor 17 — İE-11 Kanıt 3, PR-2")
 def test_pk01_sapma_dis_pano_eki_h():
     plan = G.kur(_oku(PK01))
     dis = [d for d in plan.duvarlar if d.tur == "dis"]
     assert sum(len(d.panolar) - 1 for d in dis) - sum(1 for h in plan.h_baglantilar if h.tur == "dis") == 19
 
 
-@pytest.mark.xfail(strict=True, reason="PK-01 paftası: banyo 60/40 penceresinin panosu 122,5 (x 204,25–326,75: dış pano iç T'de kısalıyor); Motor 125,5 (198,25–323,75) — PR-2")
+@pytest.mark.xfail(strict=True, raises=AssertionError, reason="PK-01 paftası: banyo 60/40 penceresinin panosu 122,5 (x 204,25–326,75: dış pano iç T'de kısalıyor); Motor 125,5 (198,25–323,75) — PR-2")
 def test_pk01_sapma_banyo_penceresi_panosu():
     plan = G.kur(_oku(PK01))
     p = next(p for p in plan.panolar if p.acilim and p.acilim.olcu == "60x40")
     assert (round(p.a0, 2), round(p.a1, 2)) == (204.25, 326.75)
 
 
-@pytest.mark.xfail(strict=True, reason="PK-01 okuması (PK01_okuma.md:32): 59,75'lik parça var (62,75 − 3); Motor üretmiyor (banyo alt duvarı 261'de bölünüyor: 62,75 + 122,5) — paftada yeri PR-2'de doğrulanır")
+@pytest.mark.xfail(strict=True, raises=AssertionError, reason="PK-01 okuması (PK01_okuma.md:32): 59,75'lik parça var (62,75 − 3); Motor üretmiyor (banyo alt duvarı 261'de bölünüyor: 62,75 + 122,5) — paftada yeri PR-2'de doğrulanır")
 def test_pk01_sapma_59_75():
     plan = G.kur(_oku(PK01))
     assert 59.75 in {round(p.boy, 2) for p in plan.panolar}
@@ -252,7 +296,8 @@ def test_alici_karisik_kod_satiri_isaretlenmez(tmp_path):
 # --------------------------------------------------------------------------- dizilim arka-sol (ayna)
 
 def _aday_dizini_arkadan(plan, ac: dict, hedef_duvar, hedef_pano, W, H):
-    """kur()'un aday sıralamasını yeniden kurar: adaylar aynalı çerçevede a0'a göre sıralıdır (y duvarda a0' = H − a1).
+    """kur()'un aday sıralamasını yeniden kurar (geometry.py açıklık bloğu: `panolar.sort(key=a0)` aynalı çerçevede; o sıralama değişirse
+    burası da değişmeli): adaylar aynalı çerçevede a0'a göre sıralıdır (y duvarda a0' = H − a1).
     Hedef duvarda, gerçek çerçevede hedef panoyla en çok örtüşen adayın dizinini verir."""
     NORMAL = {"sol": "-x", "sag": "+x", "on": "-y", "arka": "+y"}
     if ac["tur"] == "pencere":

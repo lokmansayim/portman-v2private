@@ -10,8 +10,6 @@ from shapely.ops import unary_union
 
 from . import geometry as G
 
-WALL_LAYERS = {"IC_DUVAR_60", "DIS_DUVAR_100"}
-KOSE_LAYERS = {"KOSE_PROFIL_60", "KOSE_PROFIL_100"}
 
 
 def _bbox(pts):
@@ -124,8 +122,8 @@ def dogrula(doc, plan: G.Plan, is_emri: dict) -> dict:
     hs_dis = [e for e in msp.query(f'INSERT[layer=="{G.katman("DIS_UCLU_H_100")}"]') if e.dxf.insert.x < limit]   # İE-11
     if len(hs) + len(hs_dis) != len(plan.h_baglantilar):
         hatalar.append(f"H bağlantı sayısı {len(hs)} iç + {len(hs_dis)} dış / beklenen {len(plan.h_baglantilar)}")
-    if len(hs_dis) != sum(1 for h in plan.h_baglantilar if getattr(h, "tur", "ic") == "dis"):
-        hatalar.append(f"Dış üçlü H sayısı {len(hs_dis)} / beklenen {sum(1 for h in plan.h_baglantilar if getattr(h, 'tur', 'ic') == 'dis')}")
+    if len(hs_dis) != sum(1 for h in plan.h_baglantilar if h.tur == "dis"):
+        hatalar.append(f"Dış üçlü H sayısı {len(hs_dis)} / beklenen {sum(1 for h in plan.h_baglantilar if h.tur == 'dis')}")
     for e, dis in [(e, False) for e in hs] + [(e, True) for e in hs_dis]:
         x, y, rot = e.dxf.insert.x, e.dxf.insert.y, e.dxf.rotation
         dx, dy = {0.0: (1, 0), 90.0: (0, 1), 180.0: (-1, 0), 270.0: (0, -1)}[rot % 360]
@@ -178,7 +176,7 @@ def dogrula(doc, plan: G.Plan, is_emri: dict) -> dict:
                 hatalar.append(f"ALTIN TEST başarısız: {k}")
     return {"passed": not hatalar, "errors": hatalar, "outer_cm": [W, H], "panel_grid": [plan.nx, plan.ny], "units": "cm",
             "panel_count": len(panels), "corner_count": len(koseler), "windows": kinds["pencere"], "doors": kinds["kapi"],
-            "openings": gaps, "rooms_m2": {k: round(v, 6) for k, v in areas.items()}, "h_connectors": len(hs),
+            "openings": gaps, "rooms_m2": {k: round(v, 6) for k, v in areas.items()}, "h_connectors": len(hs) + len(hs_dis), **({"h_connectors_dis": len(hs_dis)} if hs_dis else {}),
             "footprint_diff_cm2": round(fp_diff, 6), "wall_overlap": not any("çakışması" in h for h in hatalar),
             "altin": altin_sonuc, "warnings": plan.uyarilar,
             "scope": "Ön onay taslağı; statik, üretim, BOM veya yeni oda tasarımı değildir"}

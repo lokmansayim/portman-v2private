@@ -106,8 +106,8 @@ class Cizici:
     def __init__(self, plan: G.Plan, katalog: Katalog):
         self.plan, self.kat = plan, katalog
         katalog.t_dis_cm, katalog.t_ic_cm = G.T_DIS, G.T_IC
-        # yükseklik anahtarsız (eski) İş Emri'nde pano koduna girmez: eski yol 250 dışı yükseklikte de 2500 kodunu veriyordu (bayt bayt; açık karar İE-11)
-        katalog.yukseklik_cm = float(plan.is_emri["yapi"].get("duvar_yuksekligi_cm", 250)) if G.yeni_anahtar_var(plan.is_emri) else 250.0
+        katalog.yukseklik_cm = float(plan.is_emri["yapi"].get("duvar_yuksekligi_cm", 250))   # 250 / 280 / 300 (D-12; kur() başkasını reddeder)
+        self.h_blok_adi_dis = None
         self.doc = ezdxf.new("R2018", setup=True)
         doc = self.doc
         doc.units = units.CM
@@ -161,7 +161,7 @@ class Cizici:
 
     def _h_blok_dis(self):
         """İE-11: dış duvardaki T birleşimi (3'lü H dış). Kaynak blok yok; şematik gövde (dış kalınlık × iç kalınlık)."""
-        if getattr(self, "h_blok_adi_dis", None):
+        if self.h_blok_adi_dis:
             return
         kod = self.kat.baglanti("uclu_h_dis"); self.h_blok_adi_dis = f"BOM_{kod}_UCLU_H_DIS_{G._mm(G.T_DIS)}x{G._mm(G.T_IC)}"; self.h_kod_dis = kod
         blk = self.doc.blocks.new(self.h_blok_adi_dis)
@@ -291,7 +291,7 @@ class Cizici:
             layer = "MONTAJ_STANDART" if montaj else (G.katman("KOSE_PROFIL_100") if k.tur == "dis" else G.katman("KOSE_PROFIL_60"))
             self.yerlestir(name, kod, (k.rect[0], k.rect[1]), 0.0, layer, rol, ox, oy)
         for hb in plan.h_baglantilar:
-            if getattr(hb, "tur", "ic") == "dis":                   # İE-11
+            if hb.tur == "dis":                                     # İE-11
                 self._h_blok_dis()
                 self.yerlestir(self.h_blok_adi_dis, self.h_kod_dis, (hb.x, hb.y), hb.rot, "MONTAJ_STANDART" if montaj else G.katman("DIS_UCLU_H_100"), rol, ox, oy)
                 continue
@@ -482,7 +482,7 @@ class Cizici:
         plan, msp = self.plan, self.msp
         W = plan.W; hy = float(plan.is_emri["yapi"].get("duvar_yuksekligi_cm", 250)); cati = plan.is_emri.get("cati", {})
         egim = float(cati.get("egim_yuzde", 33)) / 100.0; sacak = float(cati.get("sacak_cm", 30)); topuk = float(cati.get("topuk_cm", 10))
-        lento = (hy - PENCERE_UST_KOTU) if G.yeni_anahtar_var(plan.is_emri) else 50.0     # eski İş Emri: lento 50 sabit (bayt bayt)
+        lento = hy - PENCERE_UST_KOTU                        # 250 → 50 (eski değer); 280 / 300 → 80 / 100 (D-12; üst kot 200 çıkarım)
         bot = top - hy
         msp.add_lwpolyline([(ox, bot), (W + ox, bot), (W + ox, top), (ox, top)], close=True, dxfattribs={"layer": "ON_GORUNUS"})
         xs = set()
@@ -589,7 +589,7 @@ def uret(is_emri: dict, cikti_dir: Path, ad_govde: str | None = None, pdf_hatada
     if montaj:
         c.ciz_plan(2 * gap, 0.0, "MONTAJ", "SAHA MONTAJ PLANI", baslik + " | Standart dışı panolar mor ve ölçülü")
     _yeni = G.yeni_anahtar_var(is_emri)
-    _lento = (float(yapi.get("duvar_yuksekligi_cm", 250)) - PENCERE_UST_KOTU) if _yeni else 50.0
+    _lento = float(yapi.get("duvar_yuksekligi_cm", 250)) - PENCERE_UST_KOTU
     notlar = [f"Pencereler pano ortasında. Pencere üstünden duvar üstüne (lento): {fmt(_lento)} cm.",
               "Net alanlar kapı eşikleri hariç; veranda alanı açık dış kenarlara kadardır.",
               "Açık mahal sınırları bitişik duvar yüzünün devamı kabul edildi."]
@@ -598,7 +598,7 @@ def uret(is_emri: dict, cikti_dir: Path, ad_govde: str | None = None, pdf_hatada
     _cati = is_emri.get("cati", {})
     _rise = float(_cati.get("topuk_cm", 10)) + (W + 2 * float(_cati.get("sacak_cm", 30))) / 2 * float(_cati.get("egim_yuzde", 33)) / 100.0
     kay = max(0.0, _rise - 147.445) if _yeni else 0.0   # İE-11: eski İş Emri'nde pafta yerleşimi değişmez
-    kay2 = kay + (max(0.0, float(yapi.get("duvar_yuksekligi_cm", 250)) - 250.0) if _yeni else 0.0)
+    kay2 = kay + max(0.0, float(yapi.get("duvar_yuksekligi_cm", 250)) - 250.0)     # 280 / 300'de ön görünüş uzar, alt yazılar iner
     c.ciz_on_gorunus(0.0, -600.0 - kay)
     c.ciz_cati_profili(gap, -550.0 - kay)
     hy = yapi.get("duvar_yuksekligi_cm", 250); cati = is_emri.get("cati", {})
@@ -624,11 +624,9 @@ def uret(is_emri: dict, cikti_dir: Path, ad_govde: str | None = None, pdf_hatada
     c.doc.saveas(dxf)
     bom_rows = c.bom()
     if any(p.acilim and p.acilim.dograma == "alıcıya ait" for p in plan.panolar):       # İE-11: alıcıya ait doğrama
-        def _dograma_kodu(acl):
-            if acl.tur == "dis_kapi": return c._dis_kapi_blok(acl.genislik)[1]
-            if acl.tur == "pencere":  return c.dograma[acl.olcu][1]
-            if acl.tur == "ic_kapi":  return c.dograma["ic82"][1]
-            return None
+        def _dograma_kodu(acl):                           # saf arama: bloklar çizimde zaten tanımlandı, burada yeni tahsis yapılmaz
+            k = {"dis_kapi": f"dis{int(acl.genislik)}", "pencere": acl.olcu, "ic_kapi": "ic82"}.get(acl.tur)
+            return c.dograma[k][1] if k in c.dograma else None
         toplam, alici = Counter(), Counter()
         for p in plan.panolar:
             if p.acilim and _dograma_kodu(p.acilim):
@@ -643,7 +641,7 @@ def uret(is_emri: dict, cikti_dir: Path, ad_govde: str | None = None, pdf_hatada
                 r["not"] = (r["not"] + " " if r["not"] else "") + "Alıcıya ait: doğrama yükleme listesine girmez (İş Emri)."
             else:                                            # aynı koddan bize ait doğrama da var → satır kalır, yalnız adet düşülür
                 r["alici"] = False
-                r["not"] = (r["not"] + " " if r["not"] else "") + f"{k} adedi alıcıya ait: yükleme listesine {r['adet'] - k} adet girer (İş Emri)." 
+                r["not"] = (r["not"] + " " if r["not"] else "") + f"{k} adedi alıcıya ait: yükleme listesine {r['adet'] - k} adet girer (İş Emri)."
     (cikti_dir / "bom.json").write_text(json.dumps({"is_emri_no": is_emri.get("is_emri_no"), "sayim_kapsami": "yalnız ANA rolündeki üst BOM_ blokları + içlerindeki doğrama INSERT'leri",
                                                      "birim": "adet; ölçüler mm", "kalemler": bom_rows, "yeni_kodlar": kat.yeni}, ensure_ascii=False, indent=2), encoding="utf-8")
     with open(cikti_dir / "bom.csv", "w", newline="", encoding="utf-8-sig") as f:
