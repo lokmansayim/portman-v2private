@@ -76,13 +76,22 @@
   - Sandviç yüz başına PK-02'de 18 oldu (Loftev 17, aday sütununda).
   - Aşık sırası en yakın tamsayıya yuvarlanınca PK-06 ve PK-07 paftasıyla aynı. PK-01'de 38 → 32 (gerçek 36, elle), PK-05'te 27 → 25 (gerçek 30).
 
-## PK-01 ↔ PK-07 (iki Portatifev listesi çelişiyor)
+## PK-01 ↔ PK-07 (iki Portatifev listesi çelişir gibi)
 
 PK-01 (Huma 60) şu kalemlerde 0 ya da boş: köşebent, baş makas Z'si, sandviç kapaması, alçıpan vidası, RYSB, çelik dübel, veranda Boardex,
 pencere vidası, pencere karkası. PK-07 bunların hepsini dolduruyor.
 
-PK-07 şablonun sahibinin (Ubeydullah) Ağustos 2026 listesi; şablon notu da "köşebent tek kat 7" diyor. PK-01'deki sıfırlar "doldurulmamış"
-gibi duruyor. Sürüm 7'de varsayılan PK-07'ye geçiyor, PK-01 notta kalıyor (soru).
+**Düzeltme (13.10 13:30):** PK-01 de Ubeydullah'ın listesi ve 1 Ekim 2026 tarihli, yani daha yeni. Ama PK-01'in kendi formül sütunları
+("KABA HESAP", "KESİN HESAP", "AÇIKLAMA") bu kalemlerde PK-07'nin değerlerini veriyor:
+- köşebent "tek kat için 7 adet yazılır";
+- çelik dübel 24 / 24 ("dübelli H adedi kadar");
+- RYSB 450 ("m² × 7,5");
+- veranda Boardex 2,5 / 2,6;
+- köpük 2 ("standart");
+- Z'de "alın eğik kenarları ÷ 280 + 2" formülü yazıyor.
+
+Adet sütununda ise 0 var; birçoğunun "kesin" hücresi `#REF!`. Yani PK-01'deki sıfırlar bilinçli bir kural değil, doldurulmamış hücre.
+Sürüm 7'nin PK-07'ye geçmesi şablonun kendi formülleriyle de uyumlu.
 
 ## Kural adayları (tek örnek; varsayılan değil ya da ilk tahmin)
 
@@ -107,6 +116,6 @@ gibi duruyor. Sürüm 7'de varsayılan PK-07'ye geçiyor, PK-01 notta kalıyor (
 
 ## Sorular (Lokman)
 
-1. PK-01 (Huma) listesi mi güncel, PK-07 (Diamond, Ubeydullah) mi? Sürüm 7 PK-07'yi esas alıyor.
+1. PK-01'deki sıfırlar (`#REF!` hücreleri) doldurulmamış mı? Sürüm 7, şablonun formül sütununa ve PK-07'ye göre dolduruyor.
 2. Fugalı cephede H latası 30: dış ek 27, + 3 neye göre?
 3. W otomat Portatifev'de 8, Loftev'de hep 9; kuralı nedir?

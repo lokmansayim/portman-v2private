@@ -9,6 +9,21 @@ Yeni pencere için hazırlıklar:
 - Dış çizim denetimi: `deneme/2026-09-30_asama2/kos.py --dxf`.
 - Mac'te `24_Astra_Cizimler/`.
 
+**13 Ekim 2026 öğleden sonra eki (dal `ie-11-pr2-kor-test`, yalnız yerel; İE-11 PR-2 · prefabrik kör test serisi; Lokman 10:37 / 10:41 / 11:45):**
+- **Yapılan:** tek kat prefabrik kör test serisi **PK-01…PK-08** bitti (PK-04 çelik karkas, seriden çıktı). Her projede kendi listemiz önce commit'lendi, sonra mühür (SHA) Mac'te denetlenip gerçek liste açıldı (`deneme/2026-10-13_kor_test_seri/MUHUR.md`).
+  - Özet ve açık sorular: `deneme/2026-10-13_kor_test_seri/SERI_OZETI.md`. Proje raporları: `deneme/2026-10-13_pk_0N/sonuc/PK0N_kiyas.md`.
+  - PK-03…08 **pafta kipinde** (pano geometrisi paftanın vektörlerinden; Motor bu planları çizemiyor).
+  - Liste üreteci `deneme/2026-10-13_kor_test_seri/yukleme_listesi.py` sürüm 1 → **7.1**. Varsayılan Portatifev; Loftev aday sütununda.
+- **Sonuç:** panolar (pafta kipinde boy boy), kapı menteşeleri, kulaklı H (makasa denk gelen dış ek), köşe, saçak omegası, betopan, dere tutuyor.
+  - PK-07 (Ubeydullah'ın Portatifev listesi): 134 satırın 68'inde toplam doğru, H planı ve panolar birebir.
+  - PK-08 (bayi, 2025, montaj DWG): tavan ve pencere varsayımları yanlış çıktı.
+- **Kullanıcı adımı:** liste üreteci **Yerelde çalışıyor (deneme)**; canlıya ve kural kitabına (`kurallar/`) girmedi. Motor (`motor/`) değişmedi.
+  - Motor genişletmesi `docs/is_emirleri/IE-13.md` **taslak, onay bekliyor**.
+- **Lokman'dan beklenen:** İE-13 onayı ve `SERI_OZETI.md`'deki 10 soru (PK-01'in sıfırları, ıslak hacim, orta iniş, W otomat, bayinin kesik pano uygulaması, kubbeli cumba takımı …).
+  - GitHub'a itme, PR ve birleştirme **yok** (Lokman 10:24: öteki sohbetten talimat gelince).
+- **Sınırlar:** canlıya, sunucuya, LLM'e, WhatsApp'a dokunulmadı; ücretli çağrı yok; silme yok.
+  - Mac'ten yalnız okuma ve kopya (paftalar ve mühürlü listeler açılış anında). Her commit'ten önce `dogrula.py --hizli`: "referansla aynı".
+
 **13 Ekim 2026 eki (dal `ie-11-pano-motoru-genisletme`, İE-11 Pano motorunun genişletilmesi · PR-1; `docs/is_emirleri/IE-11.md`; plan onayı Lokman 13 Ekim 00:12 "tamam 3 öneriye de uyuyorum"):**
 - **Aktif iş İE-11 (PR-1 kapanışta).** PK-01'in (Huma 60 m² tek kat, kör test) gösterdiği altı eksik pano Motor'una **yeni İş Emri anahtarlarıyla** eklendi; anahtar yoksa eski kod yolu bayt bayt aynı. Anahtarlar: `yapi.duvar_kalinligi_cm`, `yapi.dis_olcu_cm` (ölçüye kesim; 6 Ekim yaması canlı Motor'da, `yama.py` artık gerekmez), `yapi.dizilim` {`baslangic` on-sol | **arka-sol** (y arkadan sayılır, plan sonda aynalanır), `hiza` kosu | **izgara**, `dis_duvar_t_bolme`}, `yapi.ek_akslar_cm` (ızgara dışı aks; aks tablosu kipi), `mahaller[].konum_cm`, `acikliklar[].dograma` "alıcıya ait" (BOM işaretli), `ozellikler`, `pafta_uyarilari`. Katalog: "Üçlü H bağlantı dış" (B05). Belgeler: `.claude/rules/motor-cizim.md`, `docs/sartname/prefabrik_duvar.md` (kesim ucu **parametre**; aks dışı duvar; dış T bölme), 6 Ekim README notu.
 - **Kullanıcı adımları (güncel, D-13 sonrası):** M1 eski çizimler **Yerelde çalışıyor** (son tam `--dogrula` `8b0cb26`, 13.10 09:38: çıkış 0, harness 22/22, **DXF/PDF 18/18 AYNI**, pytest **409 passed**); M2 6 Ekim 3+1 yamasız **Yerelde çalışıyor** (66 pano, BOM 23 satır bire bir); **M3 PK-01 çiziliyor — Yerelde çalışıyor** (600 × 1000, 30 dış / 20 iç pano, köşe 7 + dikme 1, üçlü H 4 iç + 5 dış, pencere 6, kapı 5 + 1 alıcıya ait, doğrulama geçti, alanlar paftayla ±0,2 m²); **M4 paftayla — Yerelde çalışıyor** (50/50 pano, 38/38 H, 6 pencere, 6 kapı menteşesi; xfail kalmadı; ilk elle okumadaki "üçlü H 10" vektör okumasıyla 9 çıktı); M5–M7 (görünüş/IFC/3D, kendi listemiz, mühür) **PR-2**. Testler `testler/motor/test_ie11.py` (21; Motor kilidi ↔ pafta karşılaştırması ayrı). KVKK **Temiz**. **Geometri hakemi 1. tur "kapanmaz"** (3 kritik: anahtarsız doğrulama kuralı değişmişti, arka-solda menteşe ters, PK-01 testi Motor'u sabitliyordu; 6 önemli, 6 isteğe bağlı) → **hepsi düzeltildi** (`a00c4f7`; `IE-11.md › Kanıt 4`); 2. tur sonucu `IE-11.md`.
