@@ -97,14 +97,39 @@ def test_yukseklik_280_pano_kodlari_ve_lento(tmp_path):
 
 
 def test_hata_sonrasi_durum_sifirlanir():
-    """Geometri hakemi isteğe bağlı 10: hatayla düşen kurulumun aks tablosu / kesimi sonraki kur()'a sızmaz."""
+    """Geometri hakemi isteğe bağlı 10 (2. tur 4): hatayla düşen kurulumun kesimi, tablosu ve kalınlığı `kur()` DIŞINDAN okunan
+    modül durumuna sızmaz. Hata `olcu_ayarla`'dan sonra (dizilim denetimi) ve 160/100 kalınlıkla düşürülür; reset olmasa X_SON=590, T_DIS=16 kalır."""
     ie = _oku(PK01)
-    ie["mahaller"][3]["konum_cm"] = [[261, 256, 386.5, 800]]
+    ie["yapi"]["duvar_kalinligi_cm"] = {"dis": 16, "ic": 10}
+    ie["yapi"]["dizilim"] = {"baslangic": "sag-on"}
     with pytest.raises(G.IsEmriHatasi):
         G.kur(ie)
+    assert G.X_SON is None and G.Y_SON is None and G._AKS == {"x": None, "y": None}
+    assert (G.T_DIS, G.T_IC) == (10.0, 6.0)
+    assert G.X(5) == 10.0 + 5 * G.MOD                       # kesim kalıntısı yok (590'a kırpılmaz)
     ref = G.kur(_oku(P6001))
-    assert G._AKS == {"x": None, "y": None} and G.X_SON is None
     assert (ref.W, ref.H, len(ref.panolar)) == (773.0, 763.0, 36)
+
+
+def test_yukseklik_dogrulama_kuralini_degistirmez(tmp_path):
+    """Geometri hakemi 2. tur, önemli 1: 280 cm tek başına yeni dış ölçü / açık kenar kuralını açmaz; aynı geometri 250'de reddediliyorsa
+    280'de de reddedilir (doğrulama kuralı `geometri_anahtari_var`'a bağlı, yüksekliğe değil)."""
+    from motor import dxf_out
+    ie = _p6001_on_veranda_tam_genislik(); ie["yapi"]["duvar_yuksekligi_cm"] = 280
+    assert G.yeni_anahtar_var(ie) and not G.geometri_anahtari_var(ie)
+    m = dxf_out.uret(ie, tmp_path, pdf_hatada=False)
+    assert m["validation_passed"] is False and m["pdf"] is None
+    v = json.loads((tmp_path / "validation.json").read_text(encoding="utf-8"))
+    assert any(e.startswith("Dış ölçüler") for e in v["errors"]), v["errors"]
+
+
+def test_ek_aks_etiketi_kenar_durumlari():
+    """Geometri hakemi 2. tur 7: tam ızgara aksıyla çakışan ek aks numarayı kaydırmaz; yarım aksa düşen ek aks ′ alır."""
+    ie = _oku(PK01)
+    ie["yapi"]["ek_akslar_cm"] = {"x": [261.0, 198.25], "y": [795]}       # 261 = C (tam aks), 198,25 = yarım aks
+    G.kur(ie)
+    assert G.ana_aks_etiketleri("x") == ["A", "B", "B′", "C", "D", "E", "F"]
+    assert G.ana_akslar("x") == [10.0, 135.5, 198.25, 261.0, 386.5, 512.0, 590.0]
 
 
 # --------------------------------------------------------------------------- PK-01 · Motor kilidi (paftaya uygunluk kanıtı değil)
@@ -138,6 +163,16 @@ def test_pk01_motor_kilidi():
     assert G.ana_aks_etiketleri("y") == ["1", "2", "2′", "3", "4", "5", "6", "7", "8", "9"]
     assert G.ana_akslar("y")[2] == 205.0
     assert plan.uyarilar == []
+    # yan dış duvarlardaki dış üçlü H gövde ortasında (x = 5 / 595), ön-arka duvardakiler eksende (hakem 2. tur 6)
+    dis_h = sorted((round(h.x, 2), round(h.y, 2), h.rot) for h in plan.h_baglantilar if h.tur == "dis")
+    assert {x for x, _, rot in dis_h if rot in (0.0, 180.0)} <= {5.0, 595.0}, dis_h
+    # ayna sonrası hücreler doğru sırada: her kapalı mahalin poligonu hücre kutularının içinde (hakem 2. tur 5; `_aynala_y(plan, ny2)` kilidi)
+    from shapely.geometry import box
+    from shapely.ops import unary_union
+    for ad, mh in plan.mahaller.items():
+        hucreler = unary_union([box(G.X(u / 2), G.Y(v / 2), G.X((u + 1) / 2), G.Y((v + 1) / 2)) for (u, v) in mh.cells])
+        if not mh.acik:
+            assert mh.poly.difference(hucreler).area < 1e-6, ad
 
 
 def test_pk01_paftadan_sayilanlar():
@@ -154,12 +189,30 @@ def test_pk01_paftadan_sayilanlar():
     assert len(plan.koseler) == 7
 
 
-@pytest.mark.xfail(strict=True, reason="PK-01 paftası: üçlü H 10 (5 iç) ve dış pano eki H 19; Motor 9 (4 iç + 5 dış) ve 17 — İE-11 Kanıt 3, PR-2 kıyas raporu")
-def test_pk01_pafta_sapmalari():
+@pytest.mark.xfail(strict=True, reason="PK-01 paftası: üçlü H 10 (5 iç); Motor 9 (4 iç + 5 dış) — İE-11 Kanıt 3, PR-2 kıyas raporu")
+def test_pk01_sapma_uclu_h():
+    plan = G.kur(_oku(PK01))
+    assert Counter(h.tur for h in plan.h_baglantilar) == {"ic": 5, "dis": 5}
+
+
+@pytest.mark.xfail(strict=True, reason="PK-01 paftası: dış pano eki H 19 (12 kulaklı + 7 dübelli); Motor 17 — İE-11 Kanıt 3, PR-2")
+def test_pk01_sapma_dis_pano_eki_h():
     plan = G.kur(_oku(PK01))
     dis = [d for d in plan.duvarlar if d.tur == "dis"]
-    dis_eki = sum(len(d.panolar) - 1 for d in dis) - sum(1 for h in plan.h_baglantilar if h.tur == "dis")
-    assert len(plan.h_baglantilar) == 10 and dis_eki == 19
+    assert sum(len(d.panolar) - 1 for d in dis) - sum(1 for h in plan.h_baglantilar if h.tur == "dis") == 19
+
+
+@pytest.mark.xfail(strict=True, reason="PK-01 paftası: banyo 60/40 penceresinin panosu 122,5 (x 204,25–326,75: dış pano iç T'de kısalıyor); Motor 125,5 (198,25–323,75) — PR-2")
+def test_pk01_sapma_banyo_penceresi_panosu():
+    plan = G.kur(_oku(PK01))
+    p = next(p for p in plan.panolar if p.acilim and p.acilim.olcu == "60x40")
+    assert (round(p.a0, 2), round(p.a1, 2)) == (204.25, 326.75)
+
+
+@pytest.mark.xfail(strict=True, reason="PK-01 okuması (PK01_okuma.md:32): 59,75'lik parça var (62,75 − 3); Motor üretmiyor (banyo alt duvarı 261'de bölünüyor: 62,75 + 122,5) — paftada yeri PR-2'de doğrulanır")
+def test_pk01_sapma_59_75():
+    plan = G.kur(_oku(PK01))
+    assert 59.75 in {round(p.boy, 2) for p in plan.panolar}
 
 
 def test_pk01_uret_dogrulama(tmp_path):
@@ -179,7 +232,7 @@ def test_pk01_uret_dogrulama(tmp_path):
     v = json.loads((tmp_path / "validation.json").read_text(encoding="utf-8"))
     assert v["panel_grid"] == [5.0, 8.0]
     # Motor uyarısı yok; İş Emri'nin pafta uyarıları validation.json'da
-    assert len(v["warnings"]) == 4 and all("PK-01" in w or "Veranda" in w or "Banyo" in w or "Üçlü H" in w for w in v["warnings"])
+    assert len(v["warnings"]) == 5 and all(w.startswith(("PK-01", "Veranda", "Banyo", "Üçlü H", "Okumadaki")) for w in v["warnings"])
 
 
 def test_alici_karisik_kod_satiri_isaretlenmez(tmp_path):

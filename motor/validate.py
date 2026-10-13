@@ -81,8 +81,9 @@ def dogrula(doc, plan: G.Plan, is_emri: dict) -> dict:
     if fp_diff > 1e-6:
         hatalar.append(f"Dosya ayak izi Plan ile uyuşmuyor (fark {fp_diff:.6f} cm²)")
     ext = _bbox([(r[0], r[1]) for r in rects] + [(r[2], r[3]) for r in rects])
-    if G.yeni_anahtar_var(is_emri):
+    if G.geometri_anahtari_var(is_emri):
         # İE-11: açık mahal (veranda) dış duvarsız kenara dayanabilir; duvar kutusu Plan ayak iziyle, ayak izi ∪ açık mahaller (0,0,W,H) ile denetlenir
+        # (yalnız geometri anahtarıyla; 250 dışı yükseklik tek başına bu kuralı değiştirmez — hakem 2. tur, önemli 1)
         if max(abs(a - b) for a, b in zip(ext, fp_plan.bounds)) > 1e-6:
             hatalar.append(f"Duvarların kutusu {ext} Plan ayak izi {fp_plan.bounds} ile uyuşmuyor")
         tum = unary_union([fp_plan] + [m.poly for m in plan.mahaller.values() if m.acik]).bounds

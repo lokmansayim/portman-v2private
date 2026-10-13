@@ -71,6 +71,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-09](D-09.md) | Bayi paftasının antetinde bayinin adı ve bayi kartındaki telefonu yazılır (D-06'nın genişletilmesi); başka kimsenin numarası yazılmaz; LLM'e gitmez (Z-08), günlükte maskeli (K09); PR-2'de yalnız o bayinin kartındaki numara kabul edilir | 12.10 14:53 |
 | [D-10](D-10.md) | Prefabrik hattı: çelikten ayrı pano motoru (125,5 aks; genişletilecek olan bu), standart duvar 100 / 60 mm (160 / 100 yalnız müşteri seçeneği), P6001 gerileme çapasıdır doğruluk kanıtı değil (bilinen hata: veranda ve salon penceresi; doğru kaynakla yeni dosyada yeniden çizilir), referanslar gerçek yükleme listeli projelerden kör testle, Astra R02 referans model değil | 12.10 22:49 / 23:10 |
 | [D-11](D-11.md) | Kişisel veri esnetildi: kişi ve bayi adları depoda yazılabilir; T.C. kimlik numarası asla; telefon sistemde durur, günlükte ve dışa aktarımda maskeli (K09), LLM'e gitmez (Z-08); sırlar aynen | 12.10 23:10 |
+| [D-12](D-12.md) | Prefabrik pano yüksekliği yalnız 250 / 280 / 300 cm (%80 / %19 / %1); Motor başka değeri reddeder (K21); 250 dışı yükseklik yeni kod yolundan (pano kodu 2800/3000, lento h − 200 çıkarımı), 250'lik çıktılar bayt bayt aynı; doğrulama kuralını değiştirmez | 13.10 07:28 |
 
 ## 27 Eylülde Lokman'ın verdiği kararlar
 

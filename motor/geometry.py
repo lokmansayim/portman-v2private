@@ -39,14 +39,21 @@ YENI_ANAHTARLAR = ("duvar_kalinligi_cm", "dis_olcu_cm", "dizilim", "ek_akslar_cm
 PANO_YUKSEKLIKLERI_CM = (250.0, 280.0, 300.0)   # Lokman 13.10.2026 07:28: %80 / %19 / %1; başka ölçü yok (kurallar/model/duvar_tipleri.json PE-DIS-100.pano)
 
 
+def geometri_anahtari_var(is_emri: dict) -> bool:
+    """İE-11 geometri anahtarlarından biri varsa True (yükseklik hariç). Doğrulamanın dış ölçü / açık kenar kuralı buna bağlıdır:
+    yükseklik planın geometrisini ve dolayısıyla hangi geometrinin kabul edileceğini değiştirmez (geometri hakemi 2. tur, önemli 1)."""
+    yapi = is_emri.get("yapi", {})
+    return any(k in yapi for k in YENI_ANAHTARLAR) or any("konum_cm" in m for m in is_emri.get("mahaller", [])) \
+        or any(("konum_cm" in a) or ("hizalama" in a) or ("dograma" in a) for a in is_emri.get("acikliklar", []))
+
+
 def yeni_anahtar_var(is_emri: dict) -> bool:
     """İE-11 anahtarlarından biri varsa True. Yoksa Motor eski İş Emri'nde bayt bayt aynı çıktıyı verir (altın testler).
     250 dışı pano yüksekliği (280 / 300) de yeni anahtar sayılır: eski yol her yüksekliğe 2500 kodunu ve 50 lentoyu veriyordu;
     canlıdaki ve altın İş Emri'lerin hepsi 250 (Lokman 13.10.2026 07:28; İE-11 › Lokman'ın kararları)."""
     yapi = is_emri.get("yapi", {})
     yukseklik_farkli = "duvar_yuksekligi_cm" in yapi and abs(float(yapi["duvar_yuksekligi_cm"]) - 250.0) > 1e-9
-    return any(k in yapi for k in YENI_ANAHTARLAR) or yukseklik_farkli or any("konum_cm" in m for m in is_emri.get("mahaller", [])) \
-        or any(("konum_cm" in a) or ("hizalama" in a) or ("dograma" in a) for a in is_emri.get("acikliklar", []))
+    return geometri_anahtari_var(is_emri) or yukseklik_farkli
 
 
 def kalinlik_ayarla(dis_cm: float, ic_cm: float) -> None:
@@ -119,8 +126,10 @@ def aks_tablosu_kur(ek_akslar, nx2: int, ny2: int, zorunlu: bool = False) -> tup
             if not any(abs(v - t) < 1e-6 for t in tab):
                 tab.append(v)
         yeni[yon] = sorted(tab)
-        ekler[yon] = sorted(float(v) for v in (ek.get(yon) or []))
-        ana[yon] = sorted(set([taban[k] for k in range(0, n2 + 1, 2)] + [taban[-1]] + ekler[yon]))
+        tam = [taban[k] for k in range(0, n2 + 1, 2)] + [taban[-1]]
+        ekler[yon] = sorted({float(v) for v in (ek.get(yon) or [])
+                             if not any(abs(float(v) - t) < 1e-6 for t in tam)})   # tam ızgara aksıyla çakışan ek aks o aksın adını taşır
+        ana[yon] = sorted(set(tam + ekler[yon]))
     _AKS = yeni; _AKS_ANA = ana; _AKS_EK = ekler
     return len(yeni["x"]) - 1, len(yeni["y"]) - 1
 
@@ -315,6 +324,16 @@ def _cells_of_rect(rect):
 
 
 def kur(is_emri: dict) -> Plan:
+    """İş Emri → Plan. Hatayla düşerse modül durumu (aks tablosu, kesim, kalınlık) varsayılana döner: `kur()` dışından
+    `X()/Y()/T_DIS` okuyan kod (`cikarici`) yarım kalmış kurulumun değerlerini görmez."""
+    try:
+        return _kur(is_emri)
+    except BaseException:
+        aks_durumu_sifirla(); kalinlik_ayarla(10.0, 6.0)
+        raise
+
+
+def _kur(is_emri: dict) -> Plan:
     aks_durumu_sifirla()                                   # önceki (hatalı bitmiş) kurulumun tablosu ve kesimi sızmasın
     yapi = is_emri["yapi"]
     _k = yapi.get("duvar_kalinligi_cm") or {}
@@ -539,8 +558,13 @@ def kur(is_emri: dict) -> Plan:
             branches = [(d, uc) for d, uc in ends if d.tur == "ic" and d.yon != t.yon]
             if (t.tur == "ic" or dis_t_bolme) and len(branches) == 1 and len(thr) == 1:
                 d, uc = branches[0]
-                if d.yon == "x": h_bag.append(HBaglanti(d.a0 if uc == 0 else d.a1, d.c, 0.0 if uc == 0 else 180.0, t.tur))
-                else:            h_bag.append(HBaglanti(d.c, d.a0 if uc == 0 else d.a1, 90.0 if uc == 0 else 270.0, t.tur))
+                if d.yon == "x":
+                    hx = d.a0 if uc == 0 else d.a1
+                    if t.tur == "dis" and dis_v_konum == "aks_disinda":   # yan dış duvarın gövdesi aksın dışında: simge gövde ortasında (İE-11, hakem 2. tur 6)
+                        hx += -T_DIS / 2.0 if uc == 0 else T_DIS / 2.0
+                    h_bag.append(HBaglanti(hx, d.c, 0.0 if uc == 0 else 180.0, t.tur))
+                else:
+                    h_bag.append(HBaglanti(d.c, d.a0 if uc == 0 else d.a1, 90.0 if uc == 0 else 270.0, t.tur))
             continue
         ext = [(d, uc) for d, uc in ends if d.tur == "dis"]
         ic = [(d, uc) for d, uc in ends if d.tur == "ic"]
