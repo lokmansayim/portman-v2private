@@ -159,6 +159,9 @@ def uret(tanim_yolu: Path, hedef: Path, is_emri_no: str | None = None, revizyon:
                 dxf_yol = hedef / dxf_genel.dosya_adi(dxf_kural, kod)
                 if _main(dxf_genel, [tanim_yolu, "--cikti", hedef] + ek, gunluk):
                     uyarilar.append("düzenlenebilir DXF üretilemedi ya da denetimden geçmedi (dxf_genel; uret.log)")
+                    if dxf_yol.exists():                     # denetimden geçmeyen DXF teslim adıyla kalmaz (K23'ün amacı; kod incelemesi 13.10)
+                        dxf_yol.replace(dxf_yol.with_name(dxf_yol.stem + ".HATALI.dxf"))
+                    dxf_yol = None
         # 3) yükleme listesi (girdi + liste)
         girdi = hedef / f"{kod}_girdi.json"; liste = hedef / f"{kod}_yukleme.json"
         if _main(girdi_genel, [tanim_yolu, "--dosya", girdi, "--uzerine-yaz", "--kaynak", kaynak or f"Yapı Tanımı 0.5 ({tanim_yolu.name})"] + ek, gunluk):

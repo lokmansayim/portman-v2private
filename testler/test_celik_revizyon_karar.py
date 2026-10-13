@@ -1,0 +1,223 @@
+"""İE-08 8a PR-2b (A4) · kapanış incelemesi (13.10) bulgularının karar katmanında sınanması: çelik seçenek seti, okuma soruları ve
+revizyon (bayinin sözünden, cümle cümle; K18, K21). LLM yok, Postgres yok, çizim yok: `karar_ver` elle kurulmuş `Talep`lerle sürülür,
+düğmeler `kanal/etkilesim.coz` ile çözülür (worker'daki gibi). Katalog kabul kümesiz kurulur (harness gibi: yedi çelik aday görünür)."""
+from __future__ import annotations
+import sys
+from pathlib import Path
+
+import pytest
+
+KOK = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(KOK))
+from beyin import karar as K  # noqa: E402
+from beyin.katalog import Katalog  # noqa: E402
+from beyin.konusma import Konusma  # noqa: E402
+from beyin.sema import Talep  # noqa: E402
+from kanal import etkilesim as ET  # noqa: E402
+
+BAYI = {"kod": "B01", "ad": "Deneme Bayi A", "rol": "bayi", "numara": "900000000101"}
+
+
+class Sohbet:
+    def __init__(self, kok: Path, kabul=None):
+        self.k = Konusma("900000000101", kok=kok)
+        self.kat = Katalog(kabul_edilmis=kabul)
+
+    def yaz(self, metin: str, **alan):
+        alan.setdefault("niyet", "revizyon" if self.k.d.get("son_is_emri") else "yeni_talep")
+        t = Talep(guven="yuksek", ozet=alan.pop("ozet", metin[:80]), **alan)
+        return K.karar_ver(t, self.k, BAYI, self.kat, metin)
+
+    def dugme(self, kimlik: str):
+        if "{set}" in kimlik:
+            kimlik = kimlik.replace("{set}", str((self.k.d.get("secenek_seti") or {}).get("id")))
+        etk = ET.coz({"reply_id": kimlik, "type": "interactive"}, self.k.d)
+        assert etk.get("gecerli"), etk
+        return K.karar_ver(Talep.model_validate(etk["talep"]), self.k, BAYI, self.kat, etk["metin"])
+
+    @property
+    def plan(self) -> dict:
+        return self.k.d.get("son_is_emri") or {}
+
+    def degisiklikler(self, karar=None) -> list[str]:
+        ie = (karar.is_emri if karar is not None else self.plan) or {}
+        return [d.get("op") + ":" + str(d.get("aciklik") or d.get("kod") or "") for d in (ie.get("yapi") or {}).get("degisiklikler") or []]
+
+
+def pen(mahal=None, olcu=None, islem="degistir", duvar=None) -> dict:
+    p = {"mahal": mahal, "islem": islem}
+    if olcu:
+        p["olcu"] = olcu
+    if duvar:
+        p["duvar"] = duvar
+    return p
+
+
+def var(tur: str, aciklama: str) -> dict:
+    return {"tur": tur, "aciklama": aciklama, "parametreler": {}}
+
+
+@pytest.fixture
+def s(tmp_path) -> Sohbet:
+    return Sohbet(tmp_path)
+
+
+def r01_k(s: Sohbet):
+    k = s.yaz("Ç8801K", katalog_kodu="Ç8801K", yapi_turu="celik")
+    assert k.eylem == "is_emri" and s.plan["revizyon"] == 1
+    return k
+
+
+def test_ilk_planda_okuma_sorusu_cevaplanir(s):
+    """CR1: soru r01 hazırlanırken de sorulur; cevap son plan olmadan işlenir (önce "Anlayamadım" dönüyordu)."""
+    k = s.yaz("Ç8801K olsun, salondaki sol taraftaki pencere 120x180 olsun", katalog_kodu="Ç8801K", yapi_turu="celik",
+              pencereler=[pen("salon", "120x180", duvar="sol")])
+    assert k.eylem == "sor" and k.soru_alani == "okuma" and [b["id"] for b in k.butonlar] == ["q:okuma:1", "q:okuma:2", "q:okuma:0"]
+    assert "Görselde" not in k.mesaj                                       # CR18: görsel cümlesini worker, görsel gidiyorsa ekler
+    k = s.dugme("q:okuma:2")
+    assert k.eylem == "is_emri" and k.revizyon == 1 and s.degisiklikler(k) == ["pencere_olcu:P4"]
+    assert "kısa cevap" not in k.mesaj                                       # CR17: düğme özeti plan mesajına sızmaz
+
+
+def test_set_sunulurken_istek_saklanir_secimde_uygulanir(s):
+    """CR1b: "Ç8801, mutfak penceresi 120x120" → çatı seti (istek saklanır, mesajda söylenir) → K düğmesi → r01 K + mutfak 120/120.
+    Önce düğmeden sonra LLM ipucuyla bütün pencereler soruluyordu ("Yaşam Alanı penceresini hangi ölçüye")."""
+    k = s.yaz("Ç8801, mutfak penceresi 120x120 olsun", katalog_kodu="Ç8801", yapi_turu="celik", pencereler=[pen("mutfak", "120x120")])
+    assert k.eylem == "secenek" and K.CELIK_ISTEK_NOTU in k.mesaj
+    k = s.dugme("s:{set}:Ç8801K")
+    assert k.eylem == "is_emri" and s.plan["yapi"]["kod"] == "Ç8801K" and s.degisiklikler(k) == ["pencere_olcu:P5"]
+
+
+@pytest.mark.parametrize("cevap, alan, beklenen", [
+    ("L olsun", {"niyet": "yeni_talep"}, "Ç8801L"),
+    ("çatı K olsun", {"niyet": "yeni_talep", "katalog_kodu": "Ç8801"}, "Ç8801K"),      # LLM bağlamdan taban kodu yinelese de
+    ("3", {"niyet": "diger"}, "Ç8801L"),
+])
+def test_cati_seti_yazili_cevap(s, cevap, alan, beklenen):
+    """Çatı seti açıkken yazılı cevap: setin kendi örneği ("çatı K olsun"), harf ve numara. Önce taslakta kalan "Ç8801" katalog çatısını
+    seçiyor, "3" "Anlayamadım" diyordu (PR-2a'dan kalma; kapanış incelemesinde bulundu)."""
+    assert s.yaz("Ç8801", katalog_kodu="Ç8801", yapi_turu="celik").eylem == "secenek"
+    k = s.yaz(cevap, **alan)
+    assert k.eylem == "is_emri" and s.plan["yapi"]["kod"] == beklenen
+
+
+def test_set_acikken_secim_olmayan_istek_set_yeniden_sunulur(s):
+    s.yaz("Ç8801", katalog_kodu="Ç8801", yapi_turu="celik")
+    k = s.yaz("mutfak penceresi 120x120 olsun", pencereler=[pen("mutfak", "120x120")])
+    assert k.eylem == "secenek" and "Önce listeden seçin" in k.mesaj and K.CELIK_ISTEK_NOTU in k.mesaj
+    k = s.yaz("2", niyet="diger")
+    assert k.eylem == "is_emri" and s.plan["yapi"]["kod"] == "Ç8801K" and s.degisiklikler(k) == ["pencere_olcu:P5"]
+
+
+def test_olcu_sorusu_ayni_turde_yinelenir(s):
+    """CR2: ölçü sorusu yinelenince seçim sorusuna dönmez; ölçü gelince iki adayda seçim sorusu, sonra r02."""
+    r01_k(s)
+    k = s.yaz("yatak odası 2 penceresini değiştirelim", pencereler=[pen("yatak odası 2")])
+    assert k.soru_alani == "okuma_olcu"
+    k = s.yaz("büyük olsun", niyet="diger")
+    assert k.soru_alani == "okuma_olcu" and k.mesaj.startswith("Anlayamadım.") and not k.butonlar
+    k = s.yaz("120x180", niyet="diger")
+    assert k.soru_alani == "okuma" and "120x180" in k.mesaj
+    k = s.dugme("q:okuma:1")
+    assert k.eylem == "is_emri" and k.revizyon == 2 and s.degisiklikler(k) == ["pencere_olcu:P8"]
+
+
+def test_eski_ipucu_sonraki_istegi_yonlendirmez(s):
+    """CR3: "hiçbiri" denen pencere isteğinin LLM satırı taslakta kalsa da sonraki "dışlar 140" ve "çatı L" doğrudan uygulanır."""
+    r01_k(s)
+    assert s.yaz("salondaki sol taraftaki pencere 120x180", pencereler=[pen("salon", "120x180", duvar="sol")]).soru_alani == "okuma"
+    assert s.dugme("q:okuma:0").soru_alani == "okuma_metin"
+    k = s.yaz("dışlar 140'lık olsun", varyantlar=[var("diger", "dış duvarlar 140'lık")])
+    assert k.eylem == "is_emri" and s.degisiklikler(k) == ["dis_karkas_140:"]
+    k = s.yaz("çatı L olsun", varyantlar=[var("cati_degistir", "çatı L")])
+    assert k.eylem == "is_emri" and s.plan["yapi"]["kod"] == "Ç8801L" and s.degisiklikler(k) == ["dis_karkas_140:", "cati_varyanti:Ç8801L"]
+
+
+def test_iki_pencere_tek_mesajda(s):
+    """CR4: "mutfak penceresi 120x120, banyo vasistası 60x60" — iki değişiklik (önce mutfak 60/60 oluyor, banyo düşüyordu)."""
+    r01_k(s)
+    k = s.yaz("mutfak penceresi 120x120, banyo vasistası 60x60 olsun", pencereler=[pen("mutfak", "120x120"), pen("banyo")])
+    assert k.eylem == "is_emri" and s.degisiklikler(k) == ["pencere_olcu:P5", "pencere_olcu:P7"]
+    yeni = {d["aciklik"]: (d["en"], d["yuk"]) for d in s.plan["yapi"]["degisiklikler"]}
+    assert yeni == {"P5": (120, 120), "P7": (60, 60)}
+
+
+@pytest.mark.parametrize("metin, alan", [
+    ("dış kapı 140 cm olsun", {"varyantlar": [var("diger", "dış kapı 140 cm")]}),                      # CR5/CR9: dış 140 değil
+    ("iç duvarlar 140, dış duvarlar 80 kalsın", {}),                                                    # CR5
+    ("dış ölçü 14 x 8 olsun", {"dis_olcu": {"en_m": 8, "boy_m": 14}}),                                  # CR5
+    ("dış cepheye 14 cm yalıtım", {"ozel_istekler": ["dış cepheye 14 cm yalıtım"]}),                    # CR5
+    ("mutfak kapısı 90x200 olsun", {"varyantlar": [var("diger", "mutfak kapısı 90x200")]}),             # G3: pencereye yazılmaz
+    ("mutfak dolabı 60x90 olsun", {}),                                                                 # G3
+    ("veranda L olsun", {"varyantlar": [var("diger", "veranda L şeklinde")]}),                         # CR12: çatı L değil
+    ("dışlar 140 olsun, mutfağa kapı ekleyin", {"varyantlar": [var("diger", "mutfağa kapı ekle")]}),   # CR9: kapı sessizce düşmez
+    ("hol penceresi 120x120 olsun, banyoya havlupan koyalım", {"pencereler": [pen("hol", "120x120")]}),   # CR4: havlupan düşmez
+    ("mutfağa bir pencere daha ekleyin 120x120", {"pencereler": [pen("mutfak", "120x120", islem="ekle")]}),   # CR6
+])
+def test_okunamayan_istek_yonlendirilir_plan_degismez(s, metin, alan):
+    r01_k(s)
+    no = s.plan["is_emri_no"]
+    k = s.yaz(metin, **alan)
+    assert k.eylem == "yonlendir" and k.is_emri is None, (k.eylem, k.mesaj)
+    assert s.plan["is_emri_no"] == no and s.plan["revizyon"] == 1 and s.degisiklikler() == []
+
+
+def test_katalog_catisina_donus_sonra_pencere(s):
+    """CR7: K seçilip katalog çatısına dönülünce sonraki revizyon kapanmış setin eski seçimine (K) geri dönmez."""
+    s.yaz("Ç8801", katalog_kodu="Ç8801", yapi_turu="celik")
+    assert s.dugme("s:{set}:Ç8801K").eylem == "is_emri"
+    k = s.yaz("katalog çatısı olsun", varyantlar=[var("cati_degistir", "katalog çatısı")])
+    assert k.eylem == "is_emri" and s.plan["yapi"]["kod"] == "Ç8801"
+    k = s.yaz("mutfak penceresi 120x120 olsun", pencereler=[pen("mutfak", "120x120")])
+    assert k.eylem == "is_emri" and s.plan["yapi"]["kod"] == "Ç8801" and s.degisiklikler(k) == ["pencere_olcu:P5"]
+
+
+def test_soruyla_bekleyen_dis140_cevapta_uygulanir(s):
+    """CR8: aynı mesajdaki "dışlar 140" pencere sorusuyla bekler (soruda söylenir), cevapta ikisi birlikte uygulanır."""
+    r01_k(s)
+    k = s.yaz("dışlar 140'lık olsun, salondaki sol taraftaki pencere 120x180 olsun", pencereler=[pen("salon", "120x180", duvar="sol")])
+    assert k.soru_alani == "okuma" and k.mesaj.startswith("Not aldım: dış duvarlar 140'lık karkas")
+    k = s.dugme("q:okuma:2")
+    assert k.eylem == "is_emri" and s.degisiklikler(k) == ["dis_karkas_140:", "pencere_olcu:P4"]
+
+
+def test_olcu_sorusunda_baska_oda_yeni_istektir(s):
+    """CR10: mutfak için ölçü sorulmuşken "yok yok, banyo penceresi 120x50" mutfağa yazılmaz; soru düşer (söylenir), istek işlenir."""
+    r01_k(s)
+    assert s.yaz("mutfak penceresini değiştirelim", pencereler=[pen("mutfak")]).soru_alani == "okuma_olcu"
+    k = s.yaz("yok yok, banyo penceresi 60x50 olsun", pencereler=[pen("banyo", None)])
+    assert k.eylem == "is_emri" and "Önceki pencere sorumu cevaplamadığınız" in k.mesaj and s.degisiklikler(k) == ["pencere_olcu:P7"]
+
+
+def test_gorunmeyen_cati_varyanti_soylenir(tmp_path):
+    """CR11: kabul kaydı olmayan çatı istenince eski çatıyla aynı plan çizilmez; yönlendirilir."""
+    s = Sohbet(tmp_path, kabul={"Ç8801", "Ç8801K"})
+    r01_k(s)
+    k = s.yaz("çatı L olsun", varyantlar=[var("cati_degistir", "çatı L")])
+    assert k.eylem == "yonlendir" and "sunulamıyor" in k.mesaj and s.plan["revizyon"] == 1
+
+
+def test_ikisi_de_iki_pencere(s):
+    """CR14: "ikisi de olsun" hiçbiri değil, iki pencere."""
+    r01_k(s)
+    s.yaz("salondaki sol taraftaki pencere 120x180", pencereler=[pen("salon", "120x180", duvar="sol")])
+    k = s.yaz("ikisi de olsun", niyet="diger")
+    assert k.eylem == "is_emri" and s.degisiklikler(k) == ["pencere_olcu:P3", "pencere_olcu:P4"]
+
+
+def test_degisiklik_yoksa_ayni_plan_cizilmez_bilgi_degisikligi_cizilir(s):
+    """Revizyon niyetinde hiçbir şey okunmadıysa aynı plan yeniden çizilip hak harcanmaz (sorulur); bina özelliği (renk) revizyondur."""
+    r01_k(s)
+    k = s.yaz("tamam güzel olmuş", niyet="revizyon")
+    assert k.eylem == "sor" and k.soru_alani == "okuma_metin" and s.plan["revizyon"] == 1
+    k = s.yaz("dış boya rengi beyaz olsun", bina_ozellikleri={"Dış Boya Rengi": "beyaz"})
+    assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["bilgi"]["ozellikler"].get("Dış Boya Rengi") == "beyaz"
+
+
+def test_alan_seti_istegi_secilen_modele_islenir(s):
+    """A2 alan seti: "88 m² 2+1 çelik, mutfak penceresi 120x120" — istek saklanır; KT-02 seçilince KT-02'nin mutfağına (açık mutfak:
+    yaşama mekânı pencereleri) sorulur."""
+    k = s.yaz("88 m2 2+1 çelik, mutfak penceresi 120x120", alan_m2=88, oda_programi="2+1", yapi_turu="celik", pencereler=[pen("mutfak", "120x120")])
+    assert k.eylem == "secenek" and K.CELIK_ISTEK_NOTU in k.mesaj
+    k = s.yaz("KT-02 olsun", katalog_kodu="KT02")
+    assert k.eylem == "sor" and k.soru_alani == "okuma" and "120x120" in k.mesaj

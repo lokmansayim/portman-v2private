@@ -350,6 +350,7 @@ def test_okuma_iki_aday_gorselli_soru_ve_dugme_2(depo, wa, hizli_genel):
     assert [b["reply"]["id"] for b in soru["satir"]["interactive"]["action"]["buttons"]] == ["q:okuma:1", "q:okuma:2", "q:okuma:0"]
     assert soru["satir"]["file"].endswith("_okuma.png") and Path(soru["satir"]["file"]).is_file()
     assert "öne yakın" in soru["govde"] and "arkaya yakın" in soru["govde"]
+    assert soru["govde"].endswith("Görselde 1 ve 2 ile işaretledim.")                 # görsel gittiği için (CR18: görselsiz bu cümle yok)
     d, _ = depo.konusma_oku(NUMARA_A)
     assert d["son_soru_alani"] == "okuma" and d["revizyon"] == 0 and [a["aciklik"] for a in d["okuma_bekleyen"]["adaylar"]] == ["P3", "P4"]
     assert sorgu(depo, "SELECT alan, durum FROM sorular ORDER BY id DESC")[0] == {"alan": "okuma", "durum": "acik"}
@@ -364,6 +365,8 @@ def test_okuma_iki_aday_gorselli_soru_ve_dugme_2(depo, wa, hizli_genel):
     d, _ = depo.konusma_oku(NUMARA_A)
     assert d["revizyon"] == 1 and "okuma_bekleyen" not in d and d.get("son_soru_alani") is None
     assert sorgu(depo, "SELECT alan, durum FROM sorular ORDER BY id DESC")[0] == {"alan": "okuma", "durum": "cevaplandi"}
+    belge = sorgu(depo, "SELECT govde FROM giden WHERE kind = 'document' ORDER BY olusturuldu DESC, sira DESC")[0]["govde"]
+    assert "kısa cevap" not in belge and "salondaki sol taraftaki pencere" in belge             # CR17: PDF başlığında talebin özeti
 
 
 def test_okuma_hicbiri_once_soru_sonra_yonlendirme(depo, wa, hizli_genel):
@@ -436,7 +439,8 @@ def test_celik_cizim_dusunce_hak_dusmez_ve_patron_maskeli(depo, wa, monkeypatch,
     assert d["revizyon"] == d_once["revizyon"] == 0 and d["son_is_emri"]["is_emri_no"] == ilk["is_emri_no"] and d["asama"] == "onay_bekliyor"
     satirlar = sorgu(depo, "SELECT alici, kind, govde FROM giden WHERE mesaj_id = (SELECT mesaj_id FROM isler ORDER BY id DESC LIMIT 1) ORDER BY sira")
     bayiye = [s["govde"] for s in satirlar if s["alici"] == NUMARA_A]
-    assert len(bayiye) == 1 and f"önceki planınız ({ilk['is_emri_no']} r01) geçerli, revizyon hakkınız düşmedi" in bayiye[0]
+    # kapanış incelemesi (13.10): cümle "onaylayabilir ya da değişikliği yeniden isteyebilirsiniz" ile genişledi (eski düğmeler gerçekten geçerli)
+    assert len(bayiye) == 1 and f"önceki planınız ({ilk['is_emri_no']} r01) geçerli: onaylayabilir" in bayiye[0] and "revizyon hakkınız düşmedi" in bayiye[0]
     patron = [s for s in satirlar if s["alici"] == "PATRON"]
     assert [s["kind"] for s in patron] == ["text", "template"] and "900000000101" not in patron[0]["govde"] and "…0101" in patron[0]["govde"]
     sonuc = sorgu(depo, "SELECT sonuc FROM isler ORDER BY id DESC")[0]["sonuc"]
@@ -446,6 +450,25 @@ def test_celik_cizim_dusunce_hak_dusmez_ve_patron_maskeli(depo, wa, monkeypatch,
     monkeypatch.setattr(uret, "uret", sahte_genel)
     r = revize(depo, "mutfak penceresi 120x120 olsun")
     assert r["eylem"] == "is_emri" and son_rev(depo)["rev"] == 2
+
+
+def test_soru_ortasinda_cizim_dusunce_onceki_plan_onaylanabilir(depo, wa, monkeypatch, hizli_genel):
+    """Kapanış incelemesi (13.10, CR16): okuma sorusunun cevabıyla çizim düşerse bayiye "önceki planınız geçerli" denir; konuşma soru
+    ortasında ("topluyor") kalmaz, önceki planın Onayla düğmesi çalışır, askıdaki soru kapanır."""
+    kabul(depo)
+    ilk = r01(depo); kalici.gonder(depo, wa)
+    assert revize(depo, "salondaki sol taraftaki pencere 120x180 olsun")["eylem"] == "sor"
+    kalici.gonder(depo, wa)
+    dis = sorgu(depo, "SELECT dis_id FROM giden WHERE kind = 'interactive' ORDER BY olusturuldu DESC, sira DESC")[0]["dis_id"]
+    from motor.genel import uret
+    monkeypatch.setattr(uret, "uret", lambda tanim_yolu, hedef, **k: (_ for _ in ()).throw(RuntimeError("çöktü")))
+    time.sleep(1.1)
+    assert depo.mesaj_kaydet(buton("q:okuma:2", context_id=dis))
+    [r] = isle_hepsi(depo)
+    assert r["eylem"] == "cizim_hatasi", r
+    d, _ = depo.konusma_oku(NUMARA_A)
+    assert d["asama"] == "onay_bekliyor" and d.get("son_soru_alani") is None and "okuma_bekleyen" not in d and d["revizyon"] == 0
+    assert ET_coz_gecerli(d, f"o:{ilk['is_emri_no']}:1")
 
 
 def ET_coz_gecerli(d: dict, kimlik: str) -> bool:

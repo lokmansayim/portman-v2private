@@ -95,6 +95,7 @@ def test_dis_140_karkas_modeli_ve_zaten_140_hata(kod, neden):
 # ───────────────────────── pencere ölçüsü ─────────────────────────
 @pytest.mark.parametrize("aciklik, en, yuk, bas, alt", [("P5", 120, 120, 436, 80), ("P7", 60, 60, 343, 140), ("P2", 120, 180, 501, 20), ("P1", 160, 180, 104, 20)])
 def test_pencere_olcu_merkez_korunur_alt_lentodan(aciklik, en, yuk, bas, alt):
+    # Ç8801'de bütün pencerelerin üstü 200 (270 − lento 70): "üst kot korunur" kuralı (geometri hakemi 13.10) burada aynı alt kotu verir
     t = tanim("C8801"); t0 = copy.deepcopy(t)
     t2 = V.tanim_uygula(t, {"op": "pencere_olcu", "aciklik": aciklik, "en": en, "yuk": yuk})
     assert t == t0
@@ -164,3 +165,59 @@ def test_degismis_tanim_uret_gecer(tmp_path, kod, liste):
     oz = json.loads((tmp_path / "cikti" / m["pafta_ozet"]).read_text(encoding="utf-8")) if m.get("pafta_ozet") else {}
     if oz:
         assert "140" in oz["ozellikler"]["Dış Duvarlar"]                                  # paftada "140x45x1,2 çelik profil"
+
+
+# ── Geometri hakemi (13.10) bulguları: sıra bağımsızlığı, üst kot, iki yanlı açıklık denetimi, ikinci derece birleşim ──────────────────
+@pytest.mark.parametrize("kod", ["C8201", "C8801", "C8801K", "C8801L", "KT01", "KT02", "KT03"])
+def test_ozgun_modeller_acik_denetiminden_gecer_pencere_ayni_olcuyle_degismez(kod):
+    """Yeni iki yanlı denetim yedi modelin bütün açıklıklarını kabul eder; pencereyi kendi ölçüsüyle yeniden uygulamak hiçbir şeyi
+    değiştirmez (bas, alt, en, yük aynı)."""
+    t = tanim(kod)
+    V.aciklik_denetimi(t, yapi.kur(t))
+    for a in [x for x in t["acikliklar"] if x["tur"] == "pencere"]:
+        t2 = V.tanim_uygula(t, {"op": "pencere_olcu", "aciklik": a["ad"], "en": a["en"], "yuk": a["yuk"]})
+        b = next(x for x in t2["acikliklar"] if x["ad"] == a["ad"])
+        assert (b["bas"], b["alt"], b["en"], b["yuk"]) == (a["bas"], a.get("alt", 0), a["en"], a["yuk"]), a["ad"]
+
+
+def test_genis_pencere_ve_dis_140_sira_bagimsiz():
+    """Önce genişleyen pencere sonra dış 140, köşe karkasına giriyor ve geçiyordu; ters sırada reddediliyordu. İkisi de reddedilir."""
+    t = tanim("C8201")
+    t1 = V.tanim_uygula(t, {"op": "pencere_olcu", "aciklik": "P1", "en": 330, "yuk": 180})
+    with pytest.raises(V.VaryantHatasi):
+        V.tanim_uygula(t1, {"op": "dis_karkas_140"})
+    with pytest.raises(V.VaryantHatasi):
+        V.tanim_uygula(V.tanim_uygula(t, {"op": "dis_karkas_140"}), {"op": "pencere_olcu", "aciklik": "P1", "en": 330, "yuk": 180})
+    c = tanim("C8801")
+    for p, en in (("P1", 340), ("P9", 375)):
+        with pytest.raises(V.VaryantHatasi):
+            V.tanim_uygula(V.tanim_uygula(c, {"op": "pencere_olcu", "aciklik": p, "en": en, "yuk": 180}), {"op": "dis_karkas_140"})
+
+
+def test_pencere_ust_kotu_korunur_kt():
+    """Üst kot korunur: KT-02 P6 (300/200, alt 20) yalnız en değişince denizlik 20'de kalır; KT-03 P4/P5 kendi 220'siyle kabul edilir
+    (önce "kat − lento − yük" denizliği 0'a indiriyor ve 220'yi reddediyordu)."""
+    k2 = V.tanim_uygula(tanim("KT02"), {"op": "pencere_olcu", "aciklik": "P6", "en": 250, "yuk": 200})
+    assert next(a for a in k2["acikliklar"] if a["ad"] == "P6")["alt"] == 20
+    for p in ("P4", "P5"):
+        k3 = V.tanim_uygula(tanim("KT03"), {"op": "pencere_olcu", "aciklik": p, "en": 200, "yuk": 220})
+        assert next(a for a in k3["acikliklar"] if a["ad"] == p)["alt"] == 0
+
+
+def test_pencere_dis_yanda_dayanan_duvari_kesmez():
+    """KT-01 P1 346 cm: oda yanında sığsa da dışarıdan dayanan MD1'e biner (önce yalnız oda yanı denetleniyordu)."""
+    with pytest.raises(V.VaryantHatasi):
+        V.tanim_uygula(tanim("KT01"), {"op": "pencere_olcu", "aciklik": "P1", "en": 346, "yuk": 120})
+
+
+@pytest.mark.parametrize("kod", ["C8201", "C8801", "C8801K", "C8801L"])
+def test_dis_140_sonrasi_duvarlar_ortusmez(kod):
+    """İkinci derece birleşim: Ç8801'de uzayan DKB'nin üstüne oturan I6 kısalır (önce 8 × 6 cm üst üste biniyordu: IFC'de iki duvar)."""
+    t2 = V.tanim_uygula(tanim(kod), {"op": "dis_karkas_140"})
+    d = t2["duvarlar"]
+    for i in range(len(d)):
+        for j in range(i + 1, len(d)):
+            a, b = d[i]["kutu"], d[j]["kutu"]
+            assert not (min(a[2], b[2]) - max(a[0], b[0]) > 0.01 and min(a[3], b[3]) - max(a[1], b[1]) > 0.01), (d[i]["ad"], d[j]["ad"])
+    if kod.startswith("C8801"):
+        assert next(w for w in t2["duvarlar"] if w["ad"] == "I6")["kutu"] == [627.5, 235.25, 635.5, 331.5]

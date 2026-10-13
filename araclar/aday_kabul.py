@@ -40,7 +40,9 @@ def kabul_kayitlari(adaylar: list[dict], kodlar: list[str], kim: str, tarih: str
                     "ozet": {"katalog_m2": a.get("katalog_m2"), "kapali_m2": a.get("kapali_m2"), "veranda_m2": a.get("veranda_m2"),
                              "oda_programi": a.get("oda_programi"), "kat": a.get("kat"), "varyantlar": a.get("varyantlar"), **(a.get("ozet") or {})},
                     "denetim": {"kabul_paketi": paket, "dogrulama": (a.get("kaynak") or {}).get("dogrulama")},
-                    "muhendis_kabulu": {"kim": kim, "tarih": tarih, "not": not_, "karar": KABUL_KARARI}, "not_": a.get("not") or None})
+                    # dayanak D-11 yalnız geliştirme dönemi kabul edeni (Lokman) için; başka biri kabul ederse dayanak yazılmaz (kod incelemesi 13.10)
+                    "muhendis_kabulu": {"kim": kim, "tarih": tarih, "not": not_, "karar": KABUL_KARARI if kim == KABUL_EDEN else None},
+                    "not_": a.get("not") or None})
     return out, yok
 
 

@@ -362,7 +362,8 @@ def main() -> int:
     t = json.loads(a.tanim.read_text(encoding="utf-8"))
     if a.yontem:
         t["cati"]["yontem"] = a.yontem
-    kod = t["kod"].replace("Ç", "C").replace("-", "")
+    from .uret import kod_govde                              # dosya adı genel motorun öteki çıktılarıyla aynı kuralla
+    kod = kod_govde(t)
     oz = ciz(t, kural.oku(), a.cikti / dosya_adi(kd, kod), katmanlar(kd))
     print("yazıldı:", oz["dosya"], f"(denetim hatası {oz['denetim_hatasi']}, ölçü {oz['olcu']}, katmanlar {oz['katmanlar']})")
     return 0 if oz["denetim_hatasi"] == 0 else 1

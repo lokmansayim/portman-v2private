@@ -56,9 +56,13 @@ def test_olumsuz_ve_soru_belirsiz():
     assert CO.oku("mutfak penceresi 120x120 olmasın", C8801, KATALOG)["pencere"]["olumsuz"] is True
     assert CO.oku("mutfak penceresi 120x120 olur mu?", C8801, KATALOG)["pencere"]["olumsuz"] is True
     assert CO.oku("mutfak penceresi 120x120 olsun", C8801, KATALOG)["pencere"]["olumsuz"] is False
-    r = CO.oku("mutfağa bir pencere daha ekleyin 120x120", C8801, KATALOG)
-    assert r["pencere"]["ekle_kaldir"] is False and r["pencere"]["olcu"] == (120, 120)     # ölçü varken ekleme sözü kural katmanına kalır (B1 gibi sorulmaz; tek pencere değişir)
-    assert CO.oku("mutfağa bir pencere daha ekleyin", C8801, KATALOG)["pencere"]["ekle_kaldir"] is True
+    # Kapanış incelemesi (13.10, CR6): ölçü yazılmış olsa da ekleme sözü eklemedir — mevcut pencere değiştirilmez, kural katmanı yönlendirir.
+    # (Önceki vaka "ölçü varken ekleme sözü kural katmanına kalır; tek pencere değişir" idi: açık ekleme isteği var olan pencereyi
+    # küçültüyordu. Davranış inceleme bulgusuyla değişti, gevşetme değil; IE-08 › Kapanış incelemesi düzeltmeleri (PR-2b).)
+    for s in ("mutfağa bir pencere daha ekleyin 120x120", "mutfağa bir pencere daha ekleyin", "mutfağa bir pencere daha 120x120 olsun",
+              "salona yeni pencere 120x180", "banyodaki vasistası kaldırın"):
+        r = CO.oku(s, C8801, KATALOG)
+        assert r["ekle_kaldir"] and r["pencere"]["ekle_kaldir"] is True, s
 
 
 def test_cati_ve_dis140():
@@ -83,13 +87,21 @@ def test_cephe_yuzlerden_ve_c8201():
     assert adlar(r) == ["P6", "P7", "P8"]
 
 
+# Cevap biçimi {"secimler": [...]} (kapanış incelemesi 13.10: "ikisi de", "1 ve 3" çoklu seçim; tek seçim tek elemanlı liste)
 @pytest.mark.parametrize("metin, bekleyen, cevap", [
-    ("1", {"tur": "secim", "adaylar": [1, 2]}, {"secim": 0}), ("2", {"tur": "secim", "adaylar": [1, 2]}, {"secim": 1}),
-    ("ikinci", {"tur": "secim", "adaylar": [1, 2]}, {"secim": 1}), ("1 olsun", {"tur": "secim", "adaylar": [1, 2]}, {"secim": 0}),
+    ("1", {"tur": "secim", "adaylar": [1, 2]}, {"secimler": [0]}), ("2", {"tur": "secim", "adaylar": [1, 2]}, {"secimler": [1]}),
+    ("ikinci", {"tur": "secim", "adaylar": [1, 2]}, {"secimler": [1]}), ("1 olsun", {"tur": "secim", "adaylar": [1, 2]}, {"secimler": [0]}),
     ("3", {"tur": "secim", "adaylar": [1, 2]}, None), ("hiçbiri", {"tur": "secim", "adaylar": [1, 2]}, {"hicbiri": True}),
     ("ikisi de değil", {"tur": "secim", "adaylar": [1, 2]}, {"hicbiri": True}), ("mutfak penceresi 120x120 olsun", {"tur": "secim", "adaylar": [1, 2]}, None),
     ("120x120", {"tur": "olcu", "adaylar": [1]}, {"olcu": (120, 120)}), ("vazgeçtim, yok", {"tur": "olcu", "adaylar": [1]}, {"hicbiri": True}),
-    ("3. pencere", {"tur": "secim", "adaylar": [1, 2, 3]}, {"secim": 2}),
+    ("3. pencere", {"tur": "secim", "adaylar": [1, 2, 3]}, {"secimler": [2]}),
+    # CR14: "ikisi de" ikisi; sayı "yok/hayır"dan önce okunur
+    ("ikisi de olsun", {"tur": "secim", "adaylar": [1, 2]}, {"secimler": [0, 1]}), ("2 olsun sorun yok", {"tur": "secim", "adaylar": [1, 2]}, {"secimler": [1]}),
+    ("hayır 2", {"tur": "secim", "adaylar": [1, 2]}, {"secimler": [1]}), ("1 ve 3", {"tur": "secim", "adaylar": [1, 2, 3]}, {"secimler": [0, 2]}),
+    ("hepsi", {"tur": "secim", "adaylar": [1, 2, 3]}, {"secimler": [0, 1, 2]}), ("hepsi 120x180 olsun", {"tur": "secim", "adaylar": [1, 2, 3]}, None),
+    ("ikisi de", {"tur": "secim", "adaylar": [1, 2, 3]}, None), ("hayır", {"tur": "secim", "adaylar": [1, 2]}, {"hicbiri": True}),
+    # CR13: "120'ye 120"
+    ("120'ye 120", {"tur": "olcu", "adaylar": [1]}, {"olcu": (120, 120)}),
 ])
 def test_okuma_cevabi(metin, bekleyen, cevap):
     assert CO.okuma_cevabi(metin, bekleyen) == cevap
@@ -98,3 +110,44 @@ def test_okuma_cevabi(metin, bekleyen, cevap):
 def test_vasistas_esigi_kuralla_ayni():
     from motor.genel.sablon_pafta import sablon_kurallari
     assert CO.VASISTAS_ESIK == ((sablon_kurallari().get("vasistas_en_cok_yukseklik_cm") or {}).get("deger") or 60)
+
+
+def test_kapanis_incelemesi_cumle_cumle_okuma():
+    """Kapanış incelemesi (13.10): mesaj cümle cümle okunur; tanınmayan sözcük taşıyan cümle hiçbir türe zorlanmaz (başka)."""
+    r = CO.oku("mutfak penceresi 120x120, banyo vasistası 60x60 olsun", C8801, KATALOG)                  # CR4: iki pencere
+    assert [(adlar({"pencere": p}), p["olcu"]) for p in r["pencereler"]] == [(["P5"], (120, 120)), (["P7"], (60, 60))]
+    r = CO.oku("hol penceresi 120x120 olsun, banyoya havlupan koyalım", C8801, KATALOG)                  # CR4: hol, havlupan başka
+    assert adlar(r) == ["P2"] and r["baska"] == ["banyoya havlupan koyalım"]
+    r = CO.oku("mutfak ve salon pencereleri 120x120", C8801, KATALOG)                                    # CR4: iki oda tek cümlede
+    assert sorted(adlar(r)) == ["P1", "P3", "P4", "P5"]
+    for s in ("iç duvarlar 140, dış duvarlar 80 kalsın", "dış kapı 140 cm olsun", "dış ölçü 14 x 8 olsun", "dış cepheye 14 cm yalıtım"):   # CR5
+        r = CO.oku(s, C8801, KATALOG)
+        assert r["dis140"] is False and r["baska"], s
+    for s in ("mutfak kapısı 90x200 olsun", "mutfak dolabı 60x90 olsun", "çift kanatlı pencere 120x120 olsun"):   # G3: kapı/dolap/tür değişikliği
+        r = CO.oku(s, C8801, KATALOG)
+        assert r["pencereler"] == [] and r["baska"], s
+    r = CO.oku("veranda L olsun", C8801, KATALOG)                                                        # CR12: çatı değil
+    assert r["cati"] is None and r["baska"] and CO.cati_okumasi("veranda L olsun", KATALOG) is None
+    assert CO.cati_okumasi("L olsun", KATALOG) == "Ç8801L" and CO.cati_okumasi("çatı K olsun", KATALOG) == "Ç8801K"
+    assert CO.cati_okumasi("Ç8801 L", KATALOG) == "Ç8801L" and CO.cati_okumasi("çatı L olmasın", KATALOG) is None
+    assert CO.olculer("120'ye 120") == [(120, 120)] and CO.olculer("80'e 80") == [(80, 80)] and CO.olculer("60'a 40") == [(60, 40)]   # CR13
+    for s in ("bir yatak odasının penceresi 120x180 olsun", "iki yatak odasının penceresi 120x180"):    # CR15: "bir"/"iki" numara değil
+        assert adlar(CO.oku(s, C8801, KATALOG)) == ["P6", "P8", "P9"], s
+    assert adlar(CO.oku("ikinci yatak odasının sağ cephedeki penceresi 120x180", C8801, KATALOG)) == ["P8"]
+    r = CO.oku("Merhaba, mutfak penceresi 120x120 olsun lütfen. Teşekkürler", C8801, KATALOG)           # selam ve teşekkür boş cümle
+    assert adlar(r) == ["P5"] and r["baska"] == [] and r["belirsiz"] == []
+    assert CO.oku("mutfak büyük olsun", C8801, KATALOG)["baska"] and CO.oku("banyo kalsın", C8801, KATALOG)["istek"] is False
+    assert CO.oku("dış duvarlar kalın olsun", C8801, KATALOG)["belirsiz"]                                # dış ama 140 yok: sorulur
+    assert CO.hizli_istek("L olsun") and CO.hizli_istek("dışlar 140'lık olsun") and not CO.hizli_istek("veranda L olsun")
+    assert not CO.hizli_istek("büyük olsun") and not CO.hizli_istek("teşekkürler")
+
+
+def test_olcu_cevabi_baska_oda_yeni_istektir():
+    """CR10: ölçü sorusu askıdayken başka odanın adı geçen mesaj cevap değildir (yeni istek); aynı oda ya da yalnız ölçü cevaptır."""
+    from beyin import celik_okuma as C
+    a = [p for p in C.pencere_adaylari(C8801) if p["aciklik"] == "P5"]
+    ob = {"tur": "olcu", "adaylar": a, "mahaller_t": [{"ad": m["ad"], "islev": m.get("islev") or []} for m in C8801["mahaller"]]}
+    assert C.okuma_cevabi("yok yok, banyo penceresi 120x50 olsun", ob) is None
+    assert C.okuma_cevabi("mutfak penceresi 120x120 olsun", ob) == {"olcu": (120, 120)}
+    assert C.okuma_cevabi("120x180 yerine 120x120", ob) == {"olcu": (120, 120)}
+    assert C.okuma_cevabi("büyük olsun", ob) is None

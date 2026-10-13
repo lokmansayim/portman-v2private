@@ -330,7 +330,7 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
         sonuc.update(eylem="hata", gerekce="çıkarım hatası", hata=hata)
         return {"satirlar": satirlar, "sonuc": sonuc, "hata": hata}
 
-    d0 = json.loads(json.dumps(k.d))              # İE-08 A4 "hak düşmez": çelik çizim düşerse konuşma bu duruma döner
+    d0 = _anlik(k.d)                               # İE-08 A4 "hak düşmez": çelik çizim düşerse konuşma bu duruma döner
     karar = karar_ver(talep, k, bayi, katalog, metin=metin_kural)
     if etk is not None:
         sonuc["buton"] = etk["kimlik"]
@@ -364,6 +364,8 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
         if motor_adi == "genel" and not cizim["passed"]:
             return _cizim_hatasi(k, d0, karar, talep, meta, cizim, ie, settings, sonuc, satirlar, ekle, patrona, kim, patron_mu)
     metin = karar.mesaj
+    # PDF başlığındaki özet: soru düğmesinin cevabıysa ("kısa cevap: 2") talebin özeti (kapanış incelemesi 13.10)
+    ozet_baslik = ((k.d.get("taslak") or {}).get("ozet") or "") if meta.get("tur") == "soru" else (talep.ozet or "")
     if patron_mu:
         metin = metin.replace("Bu konuyu Lokman Bey'e iletiyorum; en kısa sürede dönüş yapılacak.", "Bu talep şu an otomatik karşılanamıyor (Patron modu: ayrıca bildirim gönderilmez).")
     teknik = teknik_not(karar, talep, meta, cizim) if (patron_mu and settings.get("patron_teknik_not", True)) else ""
@@ -386,7 +388,7 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
     elif cizim and cizim["passed"] and not katman:
         ekle(metin)
         ad = cizim.get("pdf_ad") or Path(cizim["pdf"]).name
-        ekle_satir(giden_belge(gelen, Path(cizim["pdf"]), ad, f"{sonuc['is_emri_no']} r{sonuc['revizyon']:02d} · ÖN ONAYA SUNULAN TASLAK · {talep.ozet or ''}".strip(),
+        ekle_satir(giden_belge(gelen, Path(cizim["pdf"]), ad, f"{sonuc['is_emri_no']} r{sonuc['revizyon']:02d} · ÖN ONAYA SUNULAN TASLAK · {ozet_baslik}".strip(),
                                0, sonuc["is_emri_no"], sonuc["revizyon"], cizim["pdf_sha256"]))
     elif cizim and cizim["passed"]:
         ekler = cizim.get("ekler") or {}
@@ -395,7 +397,7 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
         ekle_satir(giden_etkilesim(gelen, metin, 0, butonlar=[(f"o:{no}:{rev}", "Onayla"), (f"r:{no}:{rev}", "Revize et")],
                                    gorsel=gorsel, altbilgi=f"{no} r{rev:02d}", is_emri_no=no, revizyon=rev))
         ad = cizim.get("pdf_ad") or Path(cizim["pdf"]).name
-        ekle_satir(giden_belge(gelen, Path(cizim["pdf"]), ad, f"{no} r{rev:02d} · ÖN ONAYA SUNULAN TASLAK · {talep.ozet or ''}".strip(),
+        ekle_satir(giden_belge(gelen, Path(cizim["pdf"]), ad, f"{no} r{rev:02d} · ÖN ONAYA SUNULAN TASLAK · {ozet_baslik}".strip(),
                                0, no, rev, cizim["pdf_sha256"]))
         ucb = ekler.get("ucb")
         if ucb and ucb.get("url"):
@@ -403,8 +405,10 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
                                        baglanti={"metin": "3D'de gez", "url": ucb["url"]}, tur="cevap", is_emri_no=no, revizyon=rev))
         # ucb_taban_url yoksa 3D sayfası yalnız kayıtta (revizyonlar.ekler) durur; bayiye söz veren bir mesaj gönderilmez (barınak kararı ayrı)
     elif butonlar and karar.soru_alani == "okuma" and len((k.d.get("okuma_bekleyen") or {}).get("adaylar") or []) == 2:
-        # İE-08 A4: "1 / 2 / Hiçbiri" — iki okuma tek görselde numaralı (görsel üretilemezse düğmeler metinle gider; akış durmaz)
-        ekle_satir(giden_etkilesim(gelen, metin, 0, butonlar=butonlar, gorsel=okuma_gorseli(gelen, k.d["okuma_bekleyen"], proje_koku),
+        # İE-08 A4: "1 / 2 / Hiçbiri" — iki okuma tek görselde numaralı (görsel üretilemezse düğmeler metinle gider; akış durmaz).
+        # "Görselde işaretledim" cümlesi yalnız görsel gerçekten giderse (kapanış incelemesi 13.10)
+        g = okuma_gorseli(gelen, k.d["okuma_bekleyen"], proje_koku)
+        ekle_satir(giden_etkilesim(gelen, metin + (" Görselde 1 ve 2 ile işaretledim." if g else ""), 0, butonlar=butonlar, gorsel=g,
                                    altbilgi="1, 2 ya da Hiçbiri"))
     elif butonlar:
         ekle_satir(giden_etkilesim(gelen, metin, 0, butonlar=butonlar))
@@ -430,15 +434,21 @@ def _cizim_hatasi(k, d0: dict, karar, talep, meta: dict, cizim: dict, ie: dict, 
     `is_emri`de yazar), eski planın Onayla/Revize et düğmeleri geçerli kalır. Bayiye önceki planın geçerli olduğu söylenir, Patron'a metin +
     şablon. `isler.sonuc`'a zarfın yalnız yapısı yazılır (antet `bilgi` yok: D-09). Prefabrik (pano Motor'u) bugünkü davranışta kalır (A5)."""
     no, rev = ie.get("is_emri_no"), int(ie.get("revizyon") or 1)
-    k.d = d0
+    k.d = _geri_al(d0, k.d)
     if hasattr(k, "yeni_notlar"):                   # bu işin notları geri alınan değişikliğe aitti (soru kaydı onları okumasın)
         k.yeni_notlar = []; k.sifirlandi = False
+    onceki = k.d.get("son_is_emri") or {}
+    if onceki.get("is_emri_no") and k.d.get("asama") == "topluyor":
+        # mesaj bir soruyu cevaplıyordu (aşama "topluyor"): bayiye "önceki planınız geçerli" denir, o planın düğmeleri de çalışmalı
+        # (kapanış incelemesi 13.10: Onayla "onay beklenmiyor" diyordu). Askıdaki soru ve saklanan istek kapanır.
+        k.d["asama"] = "onay_bekliyor"; k.d["son_soru_alani"] = None; k.d["bekleyen_onay"] = onceki["is_emri_no"]
+        for a in ("okuma_bekleyen", "okuma_secilen", "celik_istek"):
+            k.d.pop(a, None)
     k.not_dus("kural", f"çelik çizim üretilemedi ({no} r{rev:02d}); konuşma önceki duruma döndü, revizyon hakkı düşmedi")
     k.kaydet()
-    onceki = d0.get("son_is_emri") or {}
     if onceki.get("is_emri_no"):
-        mesaj = (f"Çizimi şu an üretemedim; önceki planınız ({onceki['is_emri_no']} r{int(onceki.get('revizyon') or 1):02d}) geçerli, revizyon hakkınız "
-                 "düşmedi. Lokman Bey'e iletiyorum, en kısa sürede dönüş yapılacak.")
+        mesaj = (f"Çizimi şu an üretemedim; önceki planınız ({onceki['is_emri_no']} r{int(onceki.get('revizyon') or 1):02d}) geçerli: onaylayabilir "
+                 "ya da değişikliği yeniden isteyebilirsiniz, revizyon hakkınız düşmedi. Lokman Bey'e iletiyorum, en kısa sürede dönüş yapılacak.")
     else:
         mesaj = "Çizimi şu an üretemedim; talebiniz duruyor, revizyon hakkınız düşmedi. Lokman Bey'e iletiyorum, en kısa sürede dönüş yapılacak."
     if patron_mu:
@@ -452,6 +462,18 @@ def _cizim_hatasi(k, d0: dict, karar, talep, meta: dict, cizim: dict, ie: dict, 
     sonuc.update(eylem="cizim_hatasi", gerekce="çelik çizim üretilemedi; hak düşmez (konuşma önceki duruma döndü)", asama=k.d.get("asama"),
                  denenen={"is_emri_no": no, "revizyon": rev, "yapi": {a: y.get(a) for a in ("kod", "tanim", "tanim_sha256", "degisiklikler", "bu_revizyon")}})
     return {"satirlar": satirlar, "sonuc": sonuc}
+
+
+def _anlik(d: dict) -> dict:
+    """Konuşmanın karar öncesi anlık görüntüsü ("hak düşmez" için). Geçmiş listesi kopyalanmaz, yalnız uzunluğu tutulur: geri alırken
+    bu işin notları kesilir (kod incelemesi 13.10: her mesajda bütün geçmişi kopyalamak gereksizdi)."""
+    return {"_gecmis_n": len(d.get("gecmis") or []), **json.loads(json.dumps({a: b for a, b in d.items() if a != "gecmis"}))}
+
+
+def _geri_al(anlik: dict, simdiki: dict) -> dict:
+    d = {a: b for a, b in anlik.items() if a != "_gecmis_n"}
+    d["gecmis"] = list((simdiki.get("gecmis") or [])[:anlik.get("_gecmis_n", 0)])
+    return d
 
 
 def _cizim_tanimi(yol_veya_tanim: str, degisiklikler: list[dict] | None) -> dict:
@@ -469,7 +491,8 @@ def okuma_gorseli(gelen: dict, ob: dict, proje_koku: Path | None) -> dict | None
         from motor.genel import okuma_gorseli as OG
         t = _cizim_tanimi(ob["tanim"], ob.get("degisiklikler"))
         kok = (Path(proje_koku) if proje_koku else KANAL / "projects") / f"OKUMA-{satir_id(gelen['id'], 0)[4:16]}" / "r01"
-        yol = OG.okumalar(t, ob["adaylar"], kok, str(t["kod"]).replace("Ç", "C").replace("-", ""), olcu=ob.get("olcu"))
+        from motor.genel.uret import kod_govde
+        yol = OG.okumalar(t, ob["adaylar"], kok, kod_govde(t), olcu=ob.get("olcu"))
         return {"file": str(yol), "filename": yol.name, "sha256": _sha(yol), "mime": "image/png"}
     except Exception as e:
         log("okuma görseli üretilemedi:", maske_numaralar(f"{type(e).__name__}: {str(e)[:160]}"))
@@ -529,12 +552,7 @@ def cizim_genel(ie: dict, hedef: Path) -> dict:
         raise FileNotFoundError(f"model tanımı yok: {y.get('tanim')}")
     if y.get("tanim_sha256") and hashlib.sha256(tanim_yolu.read_bytes()).hexdigest() != y["tanim_sha256"]:
         raise ValueError(f"model tanımı zarftaki sha ile uyuşmuyor: {y.get('tanim')}")
-    t = json.loads(tanim_yolu.read_text(encoding="utf-8"))
-    for d in y.get("degisiklikler") or []:
-        from beyin import varyant
-        if not hasattr(varyant, "tanim_uygula"):
-            raise ValueError(f"değişiklik uygulanamıyor (PR-2b): {d.get('op')}")
-        t = varyant.tanim_uygula(t, d)
+    t = _cizim_tanimi(y["tanim"], y.get("degisiklikler"))
     hedef = Path(hedef); hedef.mkdir(parents=True, exist_ok=True)
     calisma = hedef / "tanim.json"
     calisma.write_text(json.dumps(t, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
@@ -580,14 +598,14 @@ def ekler_uret(ie: dict, hedef: Path, v: dict, settings: dict, m: dict | None = 
         if y.get("onceki") and rev >= 2 and (hedef / "tanim.json").is_file():
             # İE-08 A4: r02 ve sonrasında başlık görseli önce–sonra (önceki plan | bu plan; altta çatı planı ve iki perspektif, aynı görselde)
             try:
-                from motor.genel import okuma_gorseli as OG
+                from motor.genel import okuma_gorseli as OG, uret as U
                 o = y["onceki"]
                 yol_o = KOD.parent / str(o.get("tanim") or "")
                 if o.get("tanim_sha256") and hashlib.sha256(yol_o.read_bytes()).hexdigest() != o["tanim_sha256"]:
                     raise ValueError("önceki planın tanımı değişmiş")
                 t0 = _cizim_tanimi(o["tanim"], o.get("degisiklikler"))
                 t1 = json.loads((hedef / "tanim.json").read_text(encoding="utf-8"))
-                yol = OG.once_sonra(t0, t1, hedef, str(t1["kod"]).replace("Ç", "C").replace("-", ""), y.get("bu_revizyon") or [],
+                yol = OG.once_sonra(t0, t1, hedef, U.kod_govde(t1), y.get("bu_revizyon") or [],
                                     int(o.get("revizyon") or rev - 1), rev, yontem=y.get("yontem") or "panel",
                                     perspektif=((v or {}).get("perspektif") or {}).get("durum") == "TAMAM")
                 if ekler.get("gorsel"):

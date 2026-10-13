@@ -136,6 +136,23 @@ def test_kural_anahtari_yoksa_dxf_uretilmez(tmp_path, monkeypatch):
     assert m["passed"] and m["duzenlenebilir_dxf"] is None and not list((tmp_path / "c").glob("*.dxf"))
 
 
+def test_denetimden_gecmeyen_dxf_teslim_adiyla_kalmaz(tmp_path, monkeypatch):
+    """Kod incelemesi (13.10, CR19): yeniden açılıp denetlenen DXF'te hata varsa dosya `.HATALI.dxf` olur, manifest ve ekler onu taşımaz
+    (önce uyarıya rağmen `duzenlenebilir_dxf` yazılıyor, kabul paketi "DXF var" diyordu). Öteki çıktılar ve `passed` etkilenmez."""
+    from motor.genel import uret as U
+    gercek = dxf_genel.ciz
+
+    def hatali(*a, **k):
+        oz = gercek(*a, **k)
+        return {**oz, "denetim_hatasi": 1}
+    monkeypatch.setattr(dxf_genel, "ciz", hatali)
+    m = U.uret(KOK / "modeller" / "C8201.json", tmp_path, is_emri_no=None, revizyon=1, set_yolu=SET, perspektif=False, bayi=False)
+    assert m["passed"] and m["duzenlenebilir_dxf"] is None
+    assert not (tmp_path / "C8201_cizim.dxf").exists() and (tmp_path / "C8201_cizim.HATALI.dxf").is_file()
+    v = json.loads((tmp_path / "validation.json").read_text(encoding="utf-8"))
+    assert any("DXF" in u for u in v["warnings"])
+
+
 @pytest.fixture(scope="module")
 def liste(tmp_path_factory):
     from motor.genel import uret as U

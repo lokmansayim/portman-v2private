@@ -23,6 +23,15 @@ def test_adaylar_json_yedi_celik_aday():
     assert all(a["durum"] == "gecerli" and a["motor"] == "genel" and a["yapi_turu"] == "celik" for a in d)
 
 
+def test_d11_dayanagi_yalniz_gelistirme_donemi_kabul_edenine():
+    """Kod incelemesi (13.10, CR21): `karar: D-11` yalnız kabul eden Lokman'sa yazılır; başka biri kabul ederse dayanak boş kalır."""
+    adaylar = json.loads(ADAYLAR.read_text(encoding="utf-8"))
+    kayit, _ = AK.kabul_kayitlari(adaylar, ["Ç8801"], AK.KABUL_EDEN, "2026-10-13", "", "p")
+    assert kayit[0]["muhendis_kabulu"]["karar"] == "D-11"
+    kayit, _ = AK.kabul_kayitlari(adaylar, ["Ç8801"], "Deneme Kabul", "2026-10-13", "", "p")
+    assert kayit[0]["muhendis_kabulu"]["karar"] is None
+
+
 def test_yalniz_verilen_kodlar_kabul_kaydi_olur(depo, monkeypatch, capsys):
     monkeypatch.setenv("PORTMAN_PG_DSN", depo.dsn)
     assert depo.kabul_edilmis_adaylar() == set()
