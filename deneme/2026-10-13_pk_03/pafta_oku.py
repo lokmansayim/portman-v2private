@@ -204,7 +204,9 @@ def main() -> int:
                        "aciklik": None if not p.get("aciklik") else {k_: v for k_, v in p["aciklik"].items() if k_ in ("tur", "olcu", "genislik", "mentese")}}
                       for p in M["panolar"]],
           "ekler": [{k_: e[k_] for k_ in ("duvar", "cins", "sacak")} for e in M["ekler"]],
-          "koseler": dict(kos), "dikmeler": 2, "veranda_kirisleri_cm": [502.1 - 10, 251.1 - 10, 125.5 - 10],
+          "koseler": dict(kos), "dikmeler": 2,
+          "ic_kalan_dis_duvar_m": round((502.1 + (251.1 - 135.5)) / 100, 3),  # salon önü (ana çatı altında) + mutfağın veranda yanı
+          "veranda_kirisleri_cm": [502.1 - 10, 251.1 - 10, 125.5 - 10],
           "kapali": [{k_: v for k_, v in o.items() if k_ != "rect"} for o in kapali], "acik": [ver],
           "cati": [{"ad": "ana çatı", "tip": "besik", "aciklik_cm": 773.2, "boy_cm": 951.5, "egim_yuzde": 30.0, "sacak_cm": 30.0, "kalkan": 2,
                     "sacak_hatlari_m": [10.115, 4.46], "not": "makas ve dere planı: 1011 × 833, 9 makas (MK01–MK09); eğim paftada yok, trapez boyundan (440 − 5 taşma) %30"},
