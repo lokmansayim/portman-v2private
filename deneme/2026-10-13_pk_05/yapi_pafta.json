@@ -408,17 +408,17 @@
   {
    "duvar": "dis",
    "cins": "pano_eki",
-   "sacak": true
+   "sacak": false
   },
   {
    "duvar": "dis",
    "cins": "uclu",
-   "sacak": true
+   "sacak": false
   },
   {
    "duvar": "dis",
    "cins": "pano_eki",
-   "sacak": true
+   "sacak": false
   },
   {
    "duvar": "dis",
@@ -453,17 +453,17 @@
   {
    "duvar": "dis",
    "cins": "pano_eki",
-   "sacak": true
+   "sacak": false
   },
   {
    "duvar": "dis",
    "cins": "uclu",
-   "sacak": true
+   "sacak": false
   },
   {
    "duvar": "dis",
    "cins": "pano_eki",
-   "sacak": true
+   "sacak": false
   },
   {
    "duvar": "ic",

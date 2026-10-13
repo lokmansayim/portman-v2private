@@ -123,8 +123,7 @@ def main() -> int:
     for e in M["ekler"]:
         x, y = e["yer"]
         ana_yan = e["duvar"] == "dis" and (x < 10.5 or (619 < x < 631 and y > 200))        # ana bölümün sol ve sağ dış duvarı
-        ek_on_arka = e["duvar"] == "dis" and x > 630 and (y < 10.5 or 197 < y < 209)       # ek bölümün ön ve arka dış duvarı
-        e["sacak"] = ana_yan or ek_on_arka
+        e["sacak"] = ana_yan          # ek bölümde makas yok (çatı paneli): kulaklı H yalnız makas ayağında (PK-05 kıyası: 9)
     kos = Counter(k_["tur"] for k_ in M["koseler"])
     (BURASI / "pafta_montaj.json").write_text(json.dumps({"kaynak": "PK05_PANEL_YERLESIMI.pdf (17 Eylül 2025)", "montaj_plani": M}, ensure_ascii=False, indent=1) + "\n",
                                               encoding="utf-8")
