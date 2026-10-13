@@ -173,19 +173,12 @@ def plan_bayi(t: dict, hedef: Path, kod: str, is_emri_no: str | None = None, rev
 PERSPEKTIF_PANEL = (("perspektif_on_sag", "ÖN-SAĞ PERSPEKTİF", "on"), ("perspektif_arka_sag", "ARKA-SAĞ PERSPEKTİF", "sag"))
 
 
-def bayi_gorsel(t: dict, hedef: Path, kod: str, set_yolu: Path | None = None, yontem: str | None = None, perspektif: bool | None = None) -> Path:
-    """`<kod>_bayi_gorsel.png`: üstte `<kod>_plan_bayi.png` (olduğu gibi), altta tek sırada çatı planı, ön-sağ ve arka-sağ perspektif
-    (`<kod>_perspektif_on_sag.png`, `<kod>_perspektif_arka_sag.png`; yoksa ön ve sağ görünüş `ciz_genel.gorunus_eksen`). `perspektif`:
-    False → dosya olsa da perspektif kullanılmaz (uret bu koşuda perspektif üretmediyse eski dosya karta girmesin; geometri hakemi 12.10);
-    None → dosya varsa. Altın koşuda perspektif yoktur, görsel deterministiktir (matplotlib varsayılanları + PIL). ≤ 5 MB (aşarsa alt
-    sıra düşük çözünürlükle)."""
+def alt_sira_hazirla(t: dict, hedef: Path, kod: str, set_yolu: Path | None = None, yontem: str | None = None, perspektif: bool | None = None) -> dict:
+    """Alt sıranın (çatı planı + iki perspektif ya da iki görünüş) girdileri; `bayi_gorsel` ve önce–sonra görseli (`okuma_gorseli`, PR-2b)
+    aynı sırayı çizer. `perspektif`: False → dosya olsa da perspektif kullanılmaz (uret bu koşuda perspektif üretmediyse eski dosya karta
+    girmesin; geometri hakemi 12.10); None → dosya varsa."""
     from . import cati_genel, ciz_genel, kural, sahne as sahne_m, yapi
-    import matplotlib.pyplot as plt
-    from PIL import Image
     hedef = Path(hedef)
-    plan = hedef / f"{kod}_plan_bayi.png"
-    if not plan.is_file():
-        raise FileNotFoundError(plan.name)
     t = json.loads(json.dumps(t))
     if yontem:
         t["cati"]["yontem"] = yontem
@@ -196,41 +189,67 @@ def bayi_gorsel(t: dict, hedef: Path, kod: str, set_yolu: Path | None = None, yo
     pers = {ad: hedef / f"{kod}_{ad}.png" for ad, _, _ in PERSPEKTIF_PANEL}
     perspektifli = perspektif is not False and all(p.is_file() and p.stat().st_size > 0 for p in pers.values())
     S = None if perspektifli else sahne_m.sahne_kur(y, c)      # sahne yalnız görünüş çizilecekse kurulur (kod incelemesi 12.10)
-    alt = hedef / f"{kod}_bayi_gorsel_alt.png"
-    yol = hedef / f"{kod}_bayi_gorsel.png"
+    return {"t": t, "y": y, "c": c, "inis": inis, "pers": pers, "perspektifli": perspektifli, "S": S}
 
-    def alt_sira(dpi: int) -> None:
-        fig, axs = plt.subplots(1, 3, figsize=(11.0, 3.9), dpi=dpi)
-        # küçük panel (≈ 2,9 in): mahya/kırma/vadi boy yazıları yok, eğim yazıları ölçeğe göre büyütülmüş kutuyla sığdığı yere (13.10.2026)
-        xs = [p[0] for dz in c["duzlemler"] for p in dz["plan"]]
-        cm_pt = ((max(xs) - min(xs)) + 130) / (axs[0].get_position().width * 11.0 * 72)
-        ciz_genel.cati_plani_eksen(axs[0], y, c, inis, baslik="ÇATI PLANI", yazi_ayir=True, yalin=True, yazi_kutusu=(13 * cm_pt, 5.5 * cm_pt))
-        for ax, (ad, baslik, taraf) in zip(axs[1:], PERSPEKTIF_PANEL):
-            if perspektifli:
-                ax.imshow(Image.open(pers[ad]).convert("RGB")); ax.set_title(baslik, fontsize=9.5, weight="bold"); ax.axis("off")
-            else:                                        # VTK yok ya da düştü: aynı yerde görünüş, ölçüsüz (iş durmaz; Lokman 12.10.2026)
-                ciz_genel.gorunus_eksen(ax, S, taraf, t["kat_yuksekligi"], olculu=False)
-        fig.savefig(alt, bbox_inches="tight", facecolor="white")
-        plt.close(fig)
 
-    def birlestir() -> None:
-        ust = Image.open(plan).convert("RGB"); alt_img = Image.open(alt).convert("RGB")
-        if alt_img.width != ust.width:                   # alt sıra plan genişliğine ölçeklenir
-            alt_img = alt_img.resize((ust.width, max(1, round(alt_img.height * ust.width / alt_img.width))), Image.LANCZOS)
-        ara = 12
-        img = Image.new("RGB", (ust.width, ust.height + ara + alt_img.height), "white")
-        img.paste(ust, (0, 0)); img.paste(alt_img, (0, ust.height + ara))
-        img.save(str(yol), "PNG", optimize=True)
+def alt_sira_ciz(h: dict, alt: Path, dpi: int) -> None:
+    """Tek sırada çatı planı, ön-sağ ve arka-sağ perspektif (`<kod>_perspektif_on_sag.png`, `<kod>_perspektif_arka_sag.png`; yoksa ön ve sağ
+    görünüş `ciz_genel.gorunus_eksen`)."""
+    from . import ciz_genel
+    import matplotlib.pyplot as plt
+    from PIL import Image
+    t, y, c, inis, pers, perspektifli, S = (h[k] for k in ("t", "y", "c", "inis", "pers", "perspektifli", "S"))
+    fig, axs = plt.subplots(1, 3, figsize=(11.0, 3.9), dpi=dpi)
+    # küçük panel (≈ 2,9 in): mahya/kırma/vadi boy yazıları yok, eğim yazıları ölçeğe göre büyütülmüş kutuyla sığdığı yere (13.10.2026)
+    xs = [p[0] for dz in c["duzlemler"] for p in dz["plan"]]
+    cm_pt = ((max(xs) - min(xs)) + 130) / (axs[0].get_position().width * 11.0 * 72)
+    ciz_genel.cati_plani_eksen(axs[0], y, c, inis, baslik="ÇATI PLANI", yazi_ayir=True, yalin=True, yazi_kutusu=(13 * cm_pt, 5.5 * cm_pt))
+    for ax, (ad, baslik, taraf) in zip(axs[1:], PERSPEKTIF_PANEL):
+        if perspektifli:
+            ax.imshow(Image.open(pers[ad]).convert("RGB")); ax.set_title(baslik, fontsize=9.5, weight="bold"); ax.axis("off")
+        else:                                        # VTK yok ya da düştü: aynı yerde görünüş, ölçüsüz (iş durmaz; Lokman 12.10.2026)
+            ciz_genel.gorunus_eksen(ax, S, taraf, t["kat_yuksekligi"], olculu=False)
+    fig.savefig(alt, bbox_inches="tight", facecolor="white")
+    plt.close(fig)
 
-    alt_sira(130); birlestir()
-    if yol.stat().st_size > 5 * 1024 * 1024:            # WhatsApp görsel sınırı
-        alt_sira(80); birlestir()
-    for _ in range(4):                                   # hâlâ büyükse bütün görsel küçültülür (plan görseli de; kod incelemesi 12.10)
+
+def ust_alt_birlestir(ust_yol: Path, alt: Path, yol: Path, ara: int = 12) -> None:
+    """Üst görselin altına alt sırayı (genişliğe ölçekleyerek) ekler; PNG."""
+    from PIL import Image
+    ust = Image.open(ust_yol).convert("RGB"); alt_img = Image.open(alt).convert("RGB")
+    if alt_img.width != ust.width:                   # alt sıra plan genişliğine ölçeklenir
+        alt_img = alt_img.resize((ust.width, max(1, round(alt_img.height * ust.width / alt_img.width))), Image.LANCZOS)
+    img = Image.new("RGB", (ust.width, ust.height + ara + alt_img.height), "white")
+    img.paste(ust, (0, 0)); img.paste(alt_img, (0, ust.height + ara))
+    img.save(str(yol), "PNG", optimize=True)
+
+
+def bes_mb_sinirla(yol: Path) -> None:
+    """Hâlâ 5 MB'ı aşıyorsa bütün görsel küçültülür (plan görseli de; kod incelemesi 12.10)."""
+    from PIL import Image
+    for _ in range(4):
         if yol.stat().st_size <= 5 * 1024 * 1024:
             break
         with Image.open(yol) as img:
             kucuk = img.convert("RGB").resize((max(1, int(img.width * 0.75)), max(1, int(img.height * 0.75))), Image.LANCZOS)
         kucuk.save(str(yol), "PNG", optimize=True)
+
+
+def bayi_gorsel(t: dict, hedef: Path, kod: str, set_yolu: Path | None = None, yontem: str | None = None, perspektif: bool | None = None) -> Path:
+    """`<kod>_bayi_gorsel.png`: üstte `<kod>_plan_bayi.png` (olduğu gibi), altta tek sırada çatı planı, ön-sağ ve arka-sağ perspektif
+    (yoksa ön ve sağ görünüş; `alt_sira_ciz`). Altın koşuda perspektif yoktur, görsel deterministiktir (matplotlib varsayılanları + PIL).
+    ≤ 5 MB (aşarsa alt sıra düşük çözünürlükle)."""
+    hedef = Path(hedef)
+    plan = hedef / f"{kod}_plan_bayi.png"
+    if not plan.is_file():
+        raise FileNotFoundError(plan.name)
+    h = alt_sira_hazirla(t, hedef, kod, set_yolu=set_yolu, yontem=yontem, perspektif=perspektif)
+    alt = hedef / f"{kod}_bayi_gorsel_alt.png"
+    yol = hedef / f"{kod}_bayi_gorsel.png"
+    alt_sira_ciz(h, alt, 130); ust_alt_birlestir(plan, alt, yol)
+    if yol.stat().st_size > 5 * 1024 * 1024:            # WhatsApp görsel sınırı
+        alt_sira_ciz(h, alt, 80); ust_alt_birlestir(plan, alt, yol)
+    bes_mb_sinirla(yol)
     alt.unlink(missing_ok=True)
     return yol
 
