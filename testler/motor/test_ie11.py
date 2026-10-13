@@ -69,16 +69,31 @@ def test_anahtarsiz_dogrulama_kurali_eski(tmp_path):
     assert any(e.startswith("Dış ölçüler") for e in v["errors"]), v["errors"]
 
 
-def test_anahtarsiz_yukseklik_250_disi_eski_kodlar(tmp_path):
-    """Geometri hakemi önemli 7: anahtarsız İş Emri'nde yükseklik 250 dışıysa pano kodları, lento ve yerleşim eski yolda kalır
-    (eski Motor 260 cm panoya 2500 kodunu veriyordu; düzeltmesi yeni anahtarla ya da ayrı kararla — İE-11 › Lokman'ın kararını bekleyen)."""
+def test_yukseklik_kumesi_250_280_300():
+    """Lokman 13.10.2026 07:28: prefabrikte 260 yoktur; yalnız 250 / 280 / 300 (%80 / %19 / %1). Başka yükseklik açık hata (K21);
+    250 dışı yükseklik yeni kod yolundan geçer (eski yol 2500 kodu + 50 lento veriyordu — geometri hakemi önemli 7)."""
+    ie = _oku(P6001); ie["yapi"]["duvar_yuksekligi_cm"] = 260
+    with pytest.raises(G.IsEmriHatasi, match="250 / 280 / 300"):
+        G.kur(ie)
+    for h in (280, 300):
+        ie = _oku(P6001); ie["yapi"]["duvar_yuksekligi_cm"] = h
+        assert G.yeni_anahtar_var(ie)
+        plan = G.kur(ie); assert (plan.W, plan.H, len(plan.panolar)) == (773.0, 763.0, 36)   # yükseklik plan geometrisini değiştirmez
+    assert not G.yeni_anahtar_var(_oku(P6001))                                               # 250: eski yol
+
+
+def test_yukseklik_280_pano_kodlari_ve_lento(tmp_path):
+    import ezdxf
     from motor import dxf_out
-    a = _oku(P6001); b = _oku(P6001); b["yapi"]["duvar_yuksekligi_cm"] = 260
-    ma = dxf_out.uret(a, tmp_path / "250", pdf_hatada=False); mb = dxf_out.uret(b, tmp_path / "260", pdf_hatada=False)
-    assert ma["validation_passed"] and mb["validation_passed"]
-    ba = json.loads((tmp_path / "250" / "bom.json").read_text(encoding="utf-8")); bb = json.loads((tmp_path / "260" / "bom.json").read_text(encoding="utf-8"))
-    assert [(r["kod"], r["adet"]) for r in ba["kalemler"]] == [(r["kod"], r["adet"]) for r in bb["kalemler"]]
-    assert len(ba["yeni_kodlar"]) == len(bb["yeni_kodlar"])
+    ie = _oku(P6001); ie["yapi"]["duvar_yuksekligi_cm"] = 280
+    m = dxf_out.uret(ie, tmp_path, pdf_hatada=False)
+    assert m["validation_passed"]
+    bom = json.loads((tmp_path / "bom.json").read_text(encoding="utf-8"))
+    panolar = [r for r in bom["kalemler"] if r["kod"][0] in "DI"]
+    assert panolar and all(r["olcu_mm"][2] == 2800 for r in panolar), [(r["kod"], r["olcu_mm"]) for r in panolar]
+    doc = ezdxf.readfile(tmp_path / Path(m["dxf"]).name)
+    yazilar = [t.dxf.text for t in doc.modelspace().query("TEXT")]
+    assert any("Lento 80 cm" in t and "Bina yüksekliği 280 cm" in t for t in yazilar), [t for t in yazilar if "Lento" in t]
 
 
 def test_hata_sonrasi_durum_sifirlanir():

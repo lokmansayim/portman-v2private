@@ -36,10 +36,16 @@ class IsEmriHatasi(ValueError):
 YENI_ANAHTARLAR = ("duvar_kalinligi_cm", "dis_olcu_cm", "dizilim", "ek_akslar_cm")   # İE-11 (6 Ekim denemesi + genişletme)
 
 
+PANO_YUKSEKLIKLERI_CM = (250.0, 280.0, 300.0)   # Lokman 13.10.2026 07:28: %80 / %19 / %1; başka ölçü yok (kurallar/model/duvar_tipleri.json PE-DIS-100.pano)
+
+
 def yeni_anahtar_var(is_emri: dict) -> bool:
-    """İE-11 anahtarlarından biri varsa True. Yoksa Motor eski İş Emri'nde bayt bayt aynı çıktıyı verir (altın testler)."""
+    """İE-11 anahtarlarından biri varsa True. Yoksa Motor eski İş Emri'nde bayt bayt aynı çıktıyı verir (altın testler).
+    250 dışı pano yüksekliği (280 / 300) de yeni anahtar sayılır: eski yol her yüksekliğe 2500 kodunu ve 50 lentoyu veriyordu;
+    canlıdaki ve altın İş Emri'lerin hepsi 250 (Lokman 13.10.2026 07:28; İE-11 › Lokman'ın kararları)."""
     yapi = is_emri.get("yapi", {})
-    return any(k in yapi for k in YENI_ANAHTARLAR) or any("konum_cm" in m for m in is_emri.get("mahaller", [])) \
+    yukseklik_farkli = "duvar_yuksekligi_cm" in yapi and abs(float(yapi["duvar_yuksekligi_cm"]) - 250.0) > 1e-9
+    return any(k in yapi for k in YENI_ANAHTARLAR) or yukseklik_farkli or any("konum_cm" in m for m in is_emri.get("mahaller", [])) \
         or any(("konum_cm" in a) or ("hizalama" in a) or ("dograma" in a) for a in is_emri.get("acikliklar", []))
 
 
@@ -315,6 +321,9 @@ def kur(is_emri: dict) -> Plan:
     kalinlik_ayarla(float(_k.get("dis", 10.0)), float(_k.get("ic", 6.0)))
     if yapi.get("sistem", "prefabrik") != "prefabrik":
         raise IsEmriHatasi("v1 yalnız prefabrik sistemi destekler")
+    _hy = float(yapi.get("duvar_yuksekligi_cm", 250))
+    if not any(abs(_hy - h) < 1e-9 for h in PANO_YUKSEKLIKLERI_CM):   # K21: sessizce 2500 koduna düşmez
+        raise IsEmriHatasi(f"Prefabrik pano yüksekliği {_hy:g} cm tanımlı değil; yalnız 250 / 280 / 300 cm (Lokman 13.10.2026)")
     if int(yapi.get("kat_sayisi", 1)) != 1:
         raise IsEmriHatasi("v1 yalnız tek kat destekler")
     if yapi.get("kisa_kenar", "x") != "x":

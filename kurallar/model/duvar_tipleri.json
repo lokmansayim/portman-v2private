@@ -46,7 +46,9 @@
         {"malzeme": "EPS (16 dansite)", "kalinlik": 80, "dolgu": "EPS"},
         {"malzeme": "Betopan / fibercement", "kalinlik": 8, "yuz": "ic"}
       ],
-      "pano": {"modul_cm": 125.5, "yukseklik_cm": [250, 280, 300], "birlesim": "H profil (aksın 125,5 olmasının nedeni)"}
+      "pano": {"modul_cm": 125.5, "yukseklik_cm": [250, 280, 300], "yukseklik_dagilimi": {"250": 0.80, "280": 0.19, "300": 0.01},
+               "yukseklik_kaynak": "Lokman, 13 Ekim 2026 07:28: prefabrikte 260 cm yoktur; %80 H 2500, %19 H 2800, %1 H 3000 mm, bunların dışında ölçü yok. Motor başka yüksekliği reddeder (İE-11).",
+               "birlesim": "H profil (aksın 125,5 olmasının nedeni)"}
     },
     "PE-IC-60": {
       "aile": "A2",

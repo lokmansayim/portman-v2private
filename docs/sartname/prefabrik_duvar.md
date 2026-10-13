@@ -13,6 +13,7 @@ Kaynak: Lokman'ın anlattıkları (1–2, 6 ve 12 Ekim 2026). Astra dönemindeki
 
 - Türkiye'deki prefabrik uygulaması dünyadakinden farklı: 8 mm betopan ya da fibercement iki levha arasında 80 mm, 16 dansite strafor (EPS). (1 Ekim)
 - Panel ölçüsü 125 × 250, 280 ya da 300 cm. (1 Ekim)
+- **Yükseklik dağılımı (13 Ekim 07:28): %80 H 2500, %19 H 2800, %1 H 3000 mm; "bunların dışında başka ölçü yok", 260 diye bir yükseklik yok.** Kayıt: `kurallar/model/duvar_tipleri.json` `PE-DIS-100.pano.yukseklik_dagilimi`. Motor başka yüksekliği açık hatayla reddeder; 280 / 300 yeni kod yolundan geçer (pano kodu 2800 / 3000, lento = yükseklik − 200; pencere üst kotu 200 sabit **çıkarımdır, teyit bekler**).
 - Aksların 125,5 olmasının nedeni: birleşim elemanı olarak H profil kullanılıyor. (1 Ekim)
 - Astra'nın prefabrik aks mantığı doğru. (1 Ekim)
 
