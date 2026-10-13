@@ -72,8 +72,8 @@ def montaj() -> dict:
             elif r == "KOSE" and abs(t - 9.9) < 0.4 and abs(L - 9.9) < 0.4:
                 kolonlar.append([x0, y0, x1, y1])                        # A (salonun ön sağ köşesi) ve B (veranda dikmesi)
             elif r == "KOSE":
-                koseler.append({"tur": "dis" if (x0 < 10 or x1 > 775 or y0 < 10 or y1 > 890 or (380 < x0 < 390 and 115 < y0 < 125)) else "ic",
-                                "rect": [x0, y0, x1, y1]})
+                ozel = 380 < x0 < 390 and 115 < y0 < 125                      # D: L'nin iç köşesi (sayfa 4, "10'luk dış köşe direği + çektirme U'su")
+                koseler.append({"tur": "ozel" if ozel else ("dis" if (x0 < 10 or x1 > 775 or y0 < 10 or y1 > 890) else "ic"), "rect": [x0, y0, x1, y1]})
             elif r == "KANAT" and 80 < L < 84:
                 kanatlar.append([x0, y0, x1, y1])
     olculer = sorted({float(w[4]) for w in pg.get_text("words") if re.fullmatch(r"\d+(\.\d+)?", w[4]) and 30 < float(w[4]) < 260} | {125.5})
@@ -204,6 +204,8 @@ def main() -> int:
                       for p in M["panolar"]],
           "ekler": [{k_: e[k_] for k_ in ("duvar", "cins", "sacak")} for e in M["ekler"]],
           "koseler": dict(kos), "dikmeler": len(M["kolonlar"]),
+          "kolon_boylari_cm": [250.0, 209.8],                            # sayfa 4: A 2500 (salonun köşesi), B 2098 (veranda dikmesi, kirişin altında)
+          "ozel_bukum": {"sacak": 2, "alin": 2},                         # sayfa 7: özel büküm bordo saçak ve alın sacı L 2500 × 2'şer
           "ic_kalan_dis_duvar_m": 0.0,                                   # bütün dış duvarlar saçak ya da kalkan altında (salon–veranda duvarı cumbanın saçağında)
           "veranda_kirisleri_cm": [393.5],                               # E: 10'luk kutu profil 393,5 (sayfa 4); yan kenarda kiriş yok
           "kapali": kapali, "acik": [ver],

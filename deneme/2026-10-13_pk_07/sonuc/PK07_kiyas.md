@@ -55,6 +55,27 @@
 12. **Pencere alıcıya ait olsa da pencere vidası (× 20 = 120 ✓) ve 120/120 karkasları (C × 4) bizde.**
     - Montaj bizde. PK-01 dersi 1 ve 9 burada tutmadı.
 
+## Sürüm 7'ye geçenler (kalibrasyon, kör değil; üreteç başlığında O1–O19)
+
+- **PK-07 sürüm 7 ile:** fugalı pano satırları ve latalar, özel köşe D, köşebent 7, kolon B 2098, 60'lık omega 36, 100'lük omega 10,
+  saçak / alın 9 + özel 2, Z 8, alt çerçeve 16, sandviç 18, mahya 4, kapama 10, dere 6, kapak 6, kelepçe 48, Boardex 2, alçıpan vidası 1000,
+  RYSB 550, pencere vidası 120, karkas C 4, çelik dübel 27, 5,5 × 60 200, kesme taşı 2, çırpı ipi 1, çatı müdahale kapağı 1,
+  tesisat takımı (7 satır), boya 5 satır, dayson 3, köpük 2 tutuyor.
+- **Hâlâ tutmayanlar:**
+  - aşık 38 (39);
+  - saçak omegası 10 (9);
+  - çektirme U'su 2 (5);
+  - iniş 7 (8) ve borusu (metal 3000);
+  - H latası 27 (30);
+  - buat 30 (31; paftada zil yok);
+  - W otomat, damlalık, 5,5 × 25 vida.
+- **Kör okumada bir hata:** dış kapının veranda yanındaki anahtar iki tırnaklı (çift). Kıyastan sonra büyütülüp `pafta_katmani.json`'da düzeltildi (6 + 1).
+- **Geri test (sürüm 6.1 → 7), öteki projeler:**
+  - PK-01'in boş bıraktığı kalemlerde artık PK-07'ye uyuyoruz: köşebent, Z, kapama, Boardex, vidalar, dübel, karkas. PK-01'le farkı bilerek büyüttük (soru 1).
+  - Loftev listelerinde (PK-02, -03, -05, -06) tesisat takımı ve köpük 2 tuttu.
+  - Sandviç yüz başına PK-02'de 18 oldu (Loftev 17, aday sütununda).
+  - Aşık sırası en yakın tamsayıya yuvarlanınca PK-06 ve PK-07 paftasıyla aynı. PK-01'de 38 → 32 (gerçek 36, elle), PK-05'te 27 → 25 (gerçek 30).
+
 ## PK-01 ↔ PK-07 (iki Portatifev listesi çelişiyor)
 
 PK-01 (Huma 60) şu kalemlerde 0 ya da boş: köşebent, baş makas Z'si, sandviç kapaması, alçıpan vidası, RYSB, çelik dübel, veranda Boardex,

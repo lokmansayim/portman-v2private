@@ -633,10 +633,19 @@
   }
  ],
  "koseler": {
-  "dis": 5,
-  "ic": 1
+  "dis": 4,
+  "ic": 1,
+  "ozel": 1
  },
  "dikmeler": 2,
+ "kolon_boylari_cm": [
+  250.0,
+  209.8
+ ],
+ "ozel_bukum": {
+  "sacak": 2,
+  "alin": 2
+ },
  "ic_kalan_dis_duvar_m": 0.0,
  "veranda_kirisleri_cm": [
   393.5
