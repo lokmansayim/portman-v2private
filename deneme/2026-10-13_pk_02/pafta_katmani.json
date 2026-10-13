@@ -1,0 +1,24 @@
+{
+ "kaynak": "PK-02 montaj paftası seti (Loftev; 13 Ekim 2026 okuması). Sayılar `pafta_montaj.json`'dan (vektör) ya da göz sayımından; her satırda yazılı. Varsayılan hesabı değiştirmez (protokol §5).",
+ "makas_bas": {"adet": 2, "not": "makas ve dere planı: 7 makas hattı (vektör), uçtaki ikisi kalkan duvarda"},
+ "makas_orta": {"adet": 5, "not": "7 − 2 baş; hatlar ön ve arka duvarın pano eklerinde (135,5 … 637,5)"},
+ "asik": {"adet": 33, "not": "aşık planı: 16 sıra (yüz başına 8) × (410 + 410 + 13 cm) — 32 tam 4200'lük boy + 16 × 13 cm parça (bir boydan); paftanın notu: aşık 60 cm'de bir, mahya aşığı 20 cm'de"},
+ "sandvic_panel": {"adet": 17, "not": "çatı kaplaması planı: \"430 100 17 ADET\" (iki yüz, bir panel kesilip paylaşılmış: 33 / 67); boy 4300"},
+ "duvar_omegasi_asma": {"adet": 19, "not": "tavan omega planı: 18 parça, toplam 55,55 m (13 oda içi hat: banyo 2 × 248, yatak 2 × (365 + 134), hol 373,5, mutfak 2 × 373,5, salon 3 × 365; 5 duvar üstü: 365 + 388, 373,5, 282, 72); 3750'lik boyla parça başına bir boy, 388 iki boy → 19. Fabrikanın kaba formülüyle 55,55 ÷ 3,65 + 5 = 20,2"},
+ "inis": {"adet": 4, "not": "makas ve dere planı: köşelerde dört iniş dairesi (göz)"},
+ "dere_hatti_m": {"adet": 16.66, "not": "iki saçak kenarı × 833 cm (mahya boyu saçakla)"},
+ "kapi": {"adet": 5, "not": "kanat yayları (vektör): dış kapı r 100, salon kapısı r 100, banyo / yatak / mutfak r 80"},
+ "pencere_karkasi": {"adet": 4, "not": "120'lik dört pencere (2 × 120/180 ön, 2 × 120/120 sağ); 60/40 vasistasın da uç işaretleri var (PK-01'de de vardı, listede karkas yoktu)"},
+ "elektrik": {
+  "tavan_armaturu": {"adet": 4, "not": "kırmızı çerçeveli X: yatak, hol, mutfak, salon (göz)"},
+  "glop": {"adet": 1, "not": "banyo, daire içinde X (göz)"},
+  "dis_aplik": {"adet": 7, "not": "dış duvarlarda yarım dolu daireli simge: sol 2, sağ 2, ön 3 (göz)"},
+  "anahtar_tekli": {"adet": 5, "not": "banyo (holde), yatak, hol, mutfak, salon (göz)"},
+  "anahtar_cift": {"adet": 1, "not": "\"dış aplik kontrolü\" iki daire yan yana (göz; iki tekli de olabilir)"},
+  "priz_tekli": {"adet": 14, "not": "banyo 2 (biri çamaşır makinesi h:50), yatak 3, hol 1, mutfak 4 (h:80, h:110, h:200, sağ duvar), salon 4 (TV duvarı 2, h:80 × 2) (göz)"},
+  "priz_cift": {"adet": 1, "not": "mutfak h:40 üst üste iki simge (göz; iki tekli de olabilir)"},
+  "uydu_prizi": {"adet": 1, "not": "salon TV duvarı \"UYDU\""},
+  "zil": {"adet": 1, "not": "sol duvar, dış kapı yanında \"ZİL\""},
+  "sigorta_kutusu": {"adet": 1, "not": "holde \"8 Lİ / 12 Lİ / 16 LI\""}
+ }
+}

@@ -1,0 +1,181 @@
+{
+  "passed": true,
+  "errors": [],
+  "outer_cm": [
+    773.0,
+    739.25
+  ],
+  "panel_grid": [
+    6.0,
+    6.0
+  ],
+  "units": "cm",
+  "panel_count": 43,
+  "corner_count": 4,
+  "windows": 5,
+  "doors": 5,
+  "openings": [
+    {
+      "kind": "pencere",
+      "name": "BOM_D04_1255p0_DIS_P03",
+      "gap": [
+        42.75,
+        729.25,
+        102.75,
+        739.25
+      ],
+      "length": 60.0
+    },
+    {
+      "kind": "kapi",
+      "name": "BOM_I11_1255p0_IC_K01_SOL_UST_KAYP102p5",
+      "gap": [
+        167.5,
+        441.25,
+        249.5,
+        447.25
+      ],
+      "length": 82.0
+    },
+    {
+      "kind": "kapi",
+      "name": "BOM_I11_1255p0_IC_K01_SOL_ALT_KAYM102p5",
+      "gap": [
+        272.5,
+        441.25,
+        354.5,
+        447.25
+      ],
+      "length": 82.0
+    },
+    {
+      "kind": "kapi",
+      "name": "BOM_I04_1225p0_IC_K01_SAG_UST_KAYP87p5",
+      "gap": [
+        290.0,
+        315.75,
+        372.0,
+        321.75
+      ],
+      "length": 82.0
+    },
+    {
+      "kind": "pencere",
+      "name": "BOM_D03_1255p0_DIS_P02",
+      "gap": [
+        138.25,
+        0.0,
+        258.25,
+        10.000000000000007
+      ],
+      "length": 120.0
+    },
+    {
+      "kind": "pencere",
+      "name": "BOM_D03_1255p0_DIS_P02",
+      "gap": [
+        514.75,
+        0.0,
+        634.75,
+        10.000000000000007
+      ],
+      "length": 120.0
+    },
+    {
+      "kind": "kapi",
+      "name": "BOM_D09_1255p0_DIS_K02_SOL",
+      "gap": [
+        -2.3053975993948923e-14,
+        331.5,
+        10.0,
+        431.5
+      ],
+      "length": 100.0
+    },
+    {
+      "kind": "kapi",
+      "name": "BOM_I04_1225p0_IC_K01_SAG_UST",
+      "gap": [
+        383.5,
+        330.0,
+        389.5,
+        430.0
+      ],
+      "length": 100.0
+    },
+    {
+      "kind": "pencere",
+      "name": "BOM_D02_1255p0_DIS_P01",
+      "gap": [
+        763.0,
+        196.0,
+        773.0,
+        316.0
+      ],
+      "length": 120.0
+    },
+    {
+      "kind": "pencere",
+      "name": "BOM_D02_1255p0_DIS_P01",
+      "gap": [
+        763.0,
+        528.25,
+        773.0,
+        648.25
+      ],
+      "length": 120.0
+    }
+  ],
+  "rooms_m2": {
+    "BANYO": 6.9936,
+    "YATAK ODASI": 14.0718,
+    "HOL": 4.463325,
+    "MUTFAK": 11.419762,
+    "SALON": 16.107187
+  },
+  "h_connectors": 8,
+  "h_connectors_dis": 5,
+  "footprint_diff_cm2": 0.0,
+  "wall_overlap": true,
+  "altin": null,
+  "warnings": [
+    "Kapı __DIS__–HOL: İş Emri menteşesi 'sol', kapı mantığı 'sag' diyor; İş Emri uygulandı",
+    "İç kapı 100.0 cm: kaynak kapı sembolü 82 cm'lik; sembol ölçeklenmedi",
+    "PK-02 kör test (İE-11): paftadaki 745 derinlik ölçüsü panolarla uyuşmuyor; pano geometrisi 739,25 (6 × 125,5 ön/arka sıra, yan duvarlar 4,94 + 62,73 + 3 × 125,5 + … ; oda alanları yatak 499 × 282 = 14,07 m², banyo 7 m² ile doğrulandı). İş Emri 739,25 ile kuruldu.",
+    "x 261 iç duvarı (banyo | yatak) paftada arka duvarın iç yüzünden 2 tam pano ve T ucunda 31 cm; x 386,5 duvarı T'lerde bölünmüş (arkada 122,45, 420,5'ten öne 2 tam + önde 57,7).",
+    "Banyo 60/40 vasistası paftada arka duvarın 1. panosunda, odaya ortalı değil (duşun üstü); İş Emri'nde pano: 0 ile sabitlendi.",
+    "Salon sağ 120/120 penceresi ızgara panosunda (oda ortasından 31,35 cm; ¼ pano eşiği 31,375 cm): eşiğe çok yakın.",
+    "Müşteri onay paftası montajdan önceki sürüm (68,5 / 66,5 / 119,5 parçaları); montaj paftası esas (Lokman 13.10 10:41). 111.pdf daha eski bir plan, kullanılmadı.",
+    "Kapılar paftadan (kanat yayları vektörden): dış kapı 100 cm (K04 çalışma kabulü 90), menteşe holün arka ucunda (y 431,4; İş Emri 'mentese: sol'); salon kapısı 100 cm, öteki iç kapılar 80'lik kanat (82 boşluk).",
+    "Banyo kapısı paftada hol duvarının 2. panosunda (135,5–261), menteşe 261 ucunda, panoda ortalı; mutfak kapısı 3. panoda (261–383,5), menteşe 386,5 ucunda. İş Emri'nde pano: 1 ve pano: 2 ile sabitlendi; D-13 kapı mantığı kendi başına ikisini de 1. panoya koyuyordu (aday panoların ilki).",
+    "Oda kapısı yaslama paftada 13–15 cm (yatak 15,4, mutfak 14 aks ucundan); Motor 11,5."
+  ],
+  "scope": "Ön onay taslağı; statik, üretim, BOM veya yeni oda tasarımı değildir",
+  "saved_dxf_audit_errors": 0,
+  "saved_dxf_audit_fixes": 0,
+  "bom_counts_from_file": {
+    "B02": 4,
+    "B03": 3,
+    "B05": 5,
+    "D01": 15,
+    "D02": 2,
+    "D03": 2,
+    "D04": 1,
+    "D06": 2,
+    "D09": 1,
+    "D10": 2,
+    "D11": 1,
+    "D12": 1,
+    "I01": 9,
+    "I02": 1,
+    "I04": 2,
+    "I09": 1,
+    "I11": 2,
+    "I12": 1,
+    "K01": 4,
+    "K03": 1,
+    "P01": 2,
+    "P02": 2,
+    "P03": 1
+  }
+}

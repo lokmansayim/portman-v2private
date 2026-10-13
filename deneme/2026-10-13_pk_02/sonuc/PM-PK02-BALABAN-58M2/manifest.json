@@ -1,0 +1,43 @@
+{
+  "is_emri_no": "PM-PK02-BALABAN-58M2",
+  "revizyon": 1,
+  "generated_at": 1791879605,
+  "duration_s": 13.56,
+  "dxf": "Portman_PM-PK02-BALABAN-58M2_r01.dxf",
+  "pdf": "Portman_PM-PK02-BALABAN-58M2_r01.pdf",
+  "dxf_sha256": "4793593d9e685be4f1a5c053079001e837cab0cc5e2a13296636be67d9124f0c",
+  "pdf_sha256": "6e442613531e899a3bb539061de70f9e61c664fe0e4aa5fd99b003b374d44fbb",
+  "tani_pdf": null,
+  "pdf_skipped_reason": null,
+  "validation_passed": true,
+  "warnings": [
+    "Kapı __DIS__–HOL: İş Emri menteşesi 'sol', kapı mantığı 'sag' diyor; İş Emri uygulandı",
+    "İç kapı 100.0 cm: kaynak kapı sembolü 82 cm'lik; sembol ölçeklenmedi",
+    "PK-02 kör test (İE-11): paftadaki 745 derinlik ölçüsü panolarla uyuşmuyor; pano geometrisi 739,25 (6 × 125,5 ön/arka sıra, yan duvarlar 4,94 + 62,73 + 3 × 125,5 + … ; oda alanları yatak 499 × 282 = 14,07 m², banyo 7 m² ile doğrulandı). İş Emri 739,25 ile kuruldu.",
+    "x 261 iç duvarı (banyo | yatak) paftada arka duvarın iç yüzünden 2 tam pano ve T ucunda 31 cm; x 386,5 duvarı T'lerde bölünmüş (arkada 122,45, 420,5'ten öne 2 tam + önde 57,7).",
+    "Banyo 60/40 vasistası paftada arka duvarın 1. panosunda, odaya ortalı değil (duşun üstü); İş Emri'nde pano: 0 ile sabitlendi.",
+    "Salon sağ 120/120 penceresi ızgara panosunda (oda ortasından 31,35 cm; ¼ pano eşiği 31,375 cm): eşiğe çok yakın.",
+    "Müşteri onay paftası montajdan önceki sürüm (68,5 / 66,5 / 119,5 parçaları); montaj paftası esas (Lokman 13.10 10:41). 111.pdf daha eski bir plan, kullanılmadı.",
+    "Kapılar paftadan (kanat yayları vektörden): dış kapı 100 cm (K04 çalışma kabulü 90), menteşe holün arka ucunda (y 431,4; İş Emri 'mentese: sol'); salon kapısı 100 cm, öteki iç kapılar 80'lik kanat (82 boşluk).",
+    "Banyo kapısı paftada hol duvarının 2. panosunda (135,5–261), menteşe 261 ucunda, panoda ortalı; mutfak kapısı 3. panoda (261–383,5), menteşe 386,5 ucunda. İş Emri'nde pano: 1 ve pano: 2 ile sabitlendi; D-13 kapı mantığı kendi başına ikisini de 1. panoya koyuyordu (aday panoların ilki).",
+    "Oda kapısı yaslama paftada 13–15 cm (yatak 15,4, mutfak 14 aks ucundan); Motor 11,5."
+  ],
+  "generator": "portman-motor-v1.1",
+  "generator_sha256": {
+    "geometry.py": "3e446f5b37086f78b1cb54bf7e27974eca85ff611d55af5dd767636428a1d276",
+    "dxf_out.py": "7f00c40cc0b54b342657c7a1a0c04f75ebddba5ee072a6500977f3023358e344",
+    "validate.py": "92997144dbcab8a506336887c371d2dc4a37f133f4fc97bad5c6eb8588fa4c77",
+    "katalog.py": "6ee3068d53f7dd0130b5991c3a0ec1cb3a0e2b0a974c23ebebcee70b6a988955"
+  },
+  "reference_dxf_sha256": "22cc9304106725f555afc59223433b8383fbe3a19ba8ff4a3b40eb23b61fab66",
+  "pdf_generated_from_reopened_dxf": true,
+  "yeni_kodlar": [
+    "D09",
+    "K03",
+    "D10",
+    "I12",
+    "D11",
+    "D12",
+    "B05"
+  ]
+}

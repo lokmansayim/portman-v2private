@@ -1,0 +1,249 @@
+{
+  "is_emri_no": "PM-PK02-BALABAN-58M2",
+  "revizyon": 1,
+  "talep": {
+    "bayi": {
+      "kod": "LOFTEV",
+      "ad": "Loftev"
+    },
+    "musteri_adi": "PK-02",
+    "metin": "Kör test 2 (D-10, İE-11): gerçek uygulanmış 58 m² tek kat prefabrik (Mehmet Balaban); montaj ve elektrik planından okundu (13 Ekim 2026). Konumlar cm, akslar; y arka duvardan (dizilim arka-sol)."
+  },
+  "yapi": {
+    "sistem": "prefabrik",
+    "kat_sayisi": 1,
+    "duvar_yuksekligi_cm": 250,
+    "duvar_kalinligi_cm": {
+      "dis": 10,
+      "ic": 6
+    },
+    "olcu_kaynagi": "dis_olcu",
+    "dis_olcu_cm": {
+      "x": 773,
+      "y": 739.25
+    },
+    "referans_model": "PK-02",
+    "grid": {
+      "x_pano": 6,
+      "y_pano": 6
+    },
+    "kisa_kenar": "x",
+    "giris_cephesi": "sol",
+    "dis_dusey_duvar": "cevre_aks_disinda",
+    "dizilim": {
+      "baslangic": "arka-sol",
+      "hiza": "kosu",
+      "dis_duvar_t_bolme": true,
+      "pencere": "oda_ortasi",
+      "kapi": "mantik",
+      "kose": "oda"
+    },
+    "ek_akslar_cm": {
+      "x": [],
+      "y": [
+        295,
+        420.5
+      ]
+    }
+  },
+  "mahaller": [
+    {
+      "ad": "BANYO",
+      "tur": "banyo",
+      "konum_cm": [
+        [
+          10,
+          5,
+          261,
+          295
+        ]
+      ]
+    },
+    {
+      "ad": "YATAK ODASI",
+      "tur": "yatak_odasi",
+      "konum_cm": [
+        [
+          261,
+          5,
+          763,
+          295
+        ]
+      ]
+    },
+    {
+      "ad": "HOL",
+      "tur": "antre_hol",
+      "konum_cm": [
+        [
+          10,
+          295,
+          386.5,
+          420.5
+        ]
+      ]
+    },
+    {
+      "ad": "MUTFAK",
+      "tur": "mutfak",
+      "konum_cm": [
+        [
+          10,
+          420.5,
+          386.5,
+          734.25
+        ]
+      ]
+    },
+    {
+      "ad": "SALON",
+      "tur": "salon",
+      "konum_cm": [
+        [
+          386.5,
+          295,
+          763,
+          734.25
+        ]
+      ]
+    }
+  ],
+  "acik_sinirlar": [],
+  "acikliklar": [
+    {
+      "tur": "pencere",
+      "olcu": "60x40",
+      "mahal": "BANYO",
+      "duvar": "arka",
+      "pano": 0
+    },
+    {
+      "tur": "pencere",
+      "olcu": "120x120",
+      "mahal": "YATAK ODASI",
+      "duvar": "sag"
+    },
+    {
+      "tur": "pencere",
+      "olcu": "120x120",
+      "mahal": "SALON",
+      "duvar": "sag"
+    },
+    {
+      "tur": "pencere",
+      "olcu": "120x180",
+      "mahal": "MUTFAK",
+      "duvar": "on"
+    },
+    {
+      "tur": "pencere",
+      "olcu": "120x180",
+      "mahal": "SALON",
+      "duvar": "on"
+    },
+    {
+      "tur": "dis_kapi",
+      "olcu": 100,
+      "arasi": [
+        "__DIS__",
+        "HOL"
+      ],
+      "duvar": "sol",
+      "mentese": "sol"
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "HOL",
+        "BANYO"
+      ],
+      "pano": 1
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "HOL",
+        "YATAK ODASI"
+      ]
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 100,
+      "arasi": [
+        "HOL",
+        "SALON"
+      ]
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "HOL",
+        "MUTFAK"
+      ],
+      "pano": 2
+    }
+  ],
+  "cati": {
+    "tip": "besik",
+    "egim_yuzde": 35.5,
+    "sacak_cm": 30,
+    "topuk_cm": 10,
+    "makas_yonu": "kisa_kenar",
+    "makas_ekseni": "y"
+  },
+  "cikti": {
+    "pdf": true,
+    "dxf": true,
+    "pafta": "A2",
+    "icerik": [
+      "aksli_plan",
+      "alanli_kopya",
+      "montaj_kopyasi",
+      "on_gorunus",
+      "cati_profili",
+      "ozellik_tablosu"
+    ]
+  },
+  "ozellikler": {
+    "Panel Türü": "Press Panel",
+    "Çatı Şekli": "Beşik",
+    "Çatı Kaplaması": "Sandviç Panel (4 cm)",
+    "Çatı Kaplama Rengi": "Antrasit",
+    "Dış Kapı": "Çelik",
+    "İç Kapılar": "Amerikan Panel",
+    "Dış Cephe Boya": "Sandeco",
+    "İç Cephe Boya": "Sandeco",
+    "Tavan": "Asma tavan",
+    "Saçak Rengi": "Antrasit",
+    "Saçak Çıkması": "30 cm",
+    "Yağmur Oluğu": "Metal, antrasit",
+    "Yağmur İniş Borusu": "Metal, antrasit"
+  },
+  "alici_ait": {
+    "kalemler": [],
+    "kaynak": "PK-02 müşteri onay paftası özellik tablosu: alıcıya ait kalem yazılmamış (boya Sandeco, dış kapı çelik, pencereler 1 + 2 + 2 adet görünüşlü); Motor okumaz, yalnız yükleme listesi"
+  },
+  "pafta_uyarilari": [
+    "PK-02 kör test (İE-11): paftadaki 745 derinlik ölçüsü panolarla uyuşmuyor; pano geometrisi 739,25 (6 × 125,5 ön/arka sıra, yan duvarlar 4,94 + 62,73 + 3 × 125,5 + … ; oda alanları yatak 499 × 282 = 14,07 m², banyo 7 m² ile doğrulandı). İş Emri 739,25 ile kuruldu.",
+    "x 261 iç duvarı (banyo | yatak) paftada arka duvarın iç yüzünden 2 tam pano ve T ucunda 31 cm; x 386,5 duvarı T'lerde bölünmüş (arkada 122,45, 420,5'ten öne 2 tam + önde 57,7).",
+    "Banyo 60/40 vasistası paftada arka duvarın 1. panosunda, odaya ortalı değil (duşun üstü); İş Emri'nde pano: 0 ile sabitlendi.",
+    "Salon sağ 120/120 penceresi ızgara panosunda (oda ortasından 31,35 cm; ¼ pano eşiği 31,375 cm): eşiğe çok yakın.",
+    "Müşteri onay paftası montajdan önceki sürüm (68,5 / 66,5 / 119,5 parçaları); montaj paftası esas (Lokman 13.10 10:41). 111.pdf daha eski bir plan, kullanılmadı.",
+    "Kapılar paftadan (kanat yayları vektörden): dış kapı 100 cm (K04 çalışma kabulü 90), menteşe holün arka ucunda (y 431,4; İş Emri 'mentese: sol'); salon kapısı 100 cm, öteki iç kapılar 80'lik kanat (82 boşluk).",
+    "Banyo kapısı paftada hol duvarının 2. panosunda (135,5–261), menteşe 261 ucunda, panoda ortalı; mutfak kapısı 3. panoda (261–383,5), menteşe 386,5 ucunda. İş Emri'nde pano: 1 ve pano: 2 ile sabitlendi; D-13 kapı mantığı kendi başına ikisini de 1. panoya koyuyordu (aday panoların ilki).",
+    "Oda kapısı yaslama paftada 13–15 cm (yatak 15,4, mutfak 14 aks ucundan); Motor 11,5."
+  ],
+  "varsayimlar": [
+    "Pano ızgarası 125,5; dizilim arka-soldan, koşu hizası (her duvar koşusu arka/sol ucundan tam pano, artık ön/sağ uçta); dış duvarlar iç T'lerde bölünür; ek akslar y 295 (banyo-yatak | hol-salon) ve 420,5 (hol | mutfak).",
+    "Çevre düşey duvarları aksın dışında (dis_dusey_duvar: cevre_aks_disinda); köşe parçaları 10 × 5 yan duvar hattında.",
+    "Pencere odaya ortalanır; ızgara panosu oda ortasından en çok ¼ pano kaçıyorsa ızgara kalır (D-13).",
+    "Kapı mantığı D-13 (dizilim.kapi: mantik); banyo ve mutfak kapısının panosu ile dış kapının menteşesi paftadan İş Emri'ne yazıldı (kural farklı seçiyor; bulgu). Dış kapı sol duvarda, hol panosunda ortalı.",
+    "Çatı: makaslar derinliği (y) geçer, mahya x yönünde; eğim %35,5 makas ve dere planından (yükselme 143 / 402,5)."
+  ],
+  "eksikler": [
+    "Mühendis: tavan omega ve aşık adetleri (pafta katmanından okunur, kural değil)."
+  ]
+}

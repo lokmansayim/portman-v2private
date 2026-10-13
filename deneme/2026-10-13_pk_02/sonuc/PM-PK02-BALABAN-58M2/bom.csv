@@ -1,0 +1,24 @@
+﻿Kod;Grup;Malzeme;Ölçü (mm);Adet;Birim;Not
+B02;Bağlantı ve veranda;100×50 köşe bağlantısı;50×100;4;adet;5 dış köşe + 1 veranda iç köşesi. Profil kesim boyu tanımlı değil.
+B03;Bağlantı ve veranda;Üçlü H bağlantı;60;3;adet;"60 mm iç duvar bağlantısı; kesim boyu tanımlı değil."
+B05;Bağlantı ve veranda;Üçlü H bağlantı dış 100×60;100.0×60.0;5;adet;"Portman motor tarafından otomatik tahsis edildi; teyit edilmeli."
+D01;Dış duvar panoları;Dolu pano;1255×100×2500;15;adet;
+D02;Dış duvar panoları;120×120 pencereli pano;1255×100×2500;2;adet;"Pencere ayrı kalem; pano tek parça sayıldı."
+D03;Dış duvar panoları;120×180 pencereli pano;1255×100×2500;2;adet;"Pencere ayrı kalem; pano tek parça sayıldı."
+D04;Dış duvar panoları;60×40 vasistaslı pano;1255×100×2500;1;adet;"Pencere ayrı kalem; pano tek parça sayıldı."
+D06;Dış duvar panoları;Özel dolu pano;627.5×100×2500;2;adet;
+D09;Dış duvar panoları;Dış kapılı pano;1255.0×100×2500;1;adet;"Portman motor tarafından otomatik tahsis edildi; teyit edilmeli."
+D10;Dış duvar panoları;Özel dolu pano;390.0×100×2500;2;adet;"Portman motor tarafından otomatik tahsis edildi; teyit edilmeli."
+D11;Dış duvar panoları;Özel dolu pano;422.5×100×2500;1;adet;"Portman motor tarafından otomatik tahsis edildi; teyit edilmeli."
+D12;Dış duvar panoları;Özel dolu pano;832.5×100×2500;1;adet;"Portman motor tarafından otomatik tahsis edildi; teyit edilmeli."
+I01;İç duvar panoları;Dolu pano;1255×60×2500;9;adet;
+I02;İç duvar panoları;Özel dolu pano;1205×60×2500;1;adet;
+I04;İç duvar panoları;İç kapılı özel pano;1225×60×2500;2;adet;"Kapı açıklığı 820 mm; kapı ayrıca sayıldı."
+I09;İç duvar panoları;Özel dolu pano;577.5×60×2500;1;adet;
+I11;İç duvar panoları;İç kapılı pano;1255.0×60×2500;2;adet;"Doğrama ayrıca sayılır; pano tek adet."
+I12;İç duvar panoları;Özel dolu pano;360.0×60×2500;1;adet;"Portman motor tarafından otomatik tahsis edildi; teyit edilmeli."
+K01;Kapı ve pencereler;İç kapı;820;4;adet;"820 mm plandaki açıklıktır; ürün eni/boyu ve açılış yönü siparişte teyit edilmeli."
+K03;Kapı ve pencereler;Dış kapı 100;1000.0;1;adet;"1000 mm plandaki açıklıktır; ürün ölçüsü siparişte teyit edilmeli."
+P01;Kapı ve pencereler;Pencere 120×120;1200×1200;2;adet;"Ölçü en × yükseklik; eşik 800 mm."
+P02;Kapı ve pencereler;Pencere 120×180;1200×1800;2;adet;"Ölçü en × yükseklik; eşik 200 mm."
+P03;Kapı ve pencereler;Vasistas 60×40;600×400;1;adet;"Ölçü en × yükseklik; eşik 1600 mm."
