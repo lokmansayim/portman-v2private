@@ -1,0 +1,13 @@
+{
+ "sema": "portman.duzenlenebilir/0.1",
+ "durum": "lokman",
+ "kaynak": "Lokman, 13 Ekim 2026 08:25–08:33 (D-11): düzenlenebilir iki biçim, genel motor çıktısına ve kabul paketine. Anahtar yoksa eski davranış sürer (DXF üretilmez). motor/genel/dxf_genel.py, motor/genel/excel_liste.py, araclar/kabul_paketi.py okur.",
+ "kural": "DXF ve Excel çıktıdır, kaynak değil. Bu dosyalardaki düzeltme dosyada kalmaz: tanıma (modeller/*.json; var olan tanım değiştirilmez, yeni dosya ya da sürüm, D-07) ya da kural kitabına (kurallar/) geri işlenir, sonra bütün çıktılar (çizim seti, pafta, liste, DXF, Excel) yeniden üretilir. Bir sonraki üretim dosyadaki elle düzeltmeyi ezer.",
+ "dxf": {"deger": {"dosya": "{kod}_cizim.dxf", "surum": "R2018", "birim": "cm", "icerik": ["plan", "on", "arka", "sol", "sag"],
+   "katmanlar": {"duvar": "DUVAR", "aciklik": "ACIKLIK", "olcu": "OLCU", "yazi": "YAZI"}}, "durum": "lokman",
+  "kaynak": "Plan ve dört görünüş, ezdxf ile, katmanlı (duvar, açıklık, ölçü, yazı), cm; AutoCAD'de açılır. Çizim setinin (cizim_seti.json) düzenlenebilir kopyasıdır, setin dosya listesine girmez. Plan tam ölçü zinciriyle (dış yüzler ve iç duvar aksları; bayi paftasındaki 15 cm birleştirmesi yok); ölçüler DIMENSION varlığı; görünüşlerde gizli çizgi yok"},
+ "dxf_cati_katmani": {"deger": "CATI", "durum": "varsayim",
+  "kaynak": "13 Ekim 2026 (varsayım, Lokman'ın kararına kadar): görünüşlerde çatı ve alın bandı çizgileri ayrı katmanda, duvara karışmasın. Duvar katmanında istenirse \"DUVAR\""},
+ "excel": {"deger": {"dosya": "{kod}_yukleme.xlsx", "yer": "kabul_paketi"}, "durum": "lokman",
+  "kaynak": "Yükleme listesi .xlsx (openpyxl; örnek düzen deneme/2026-10-06_kalinlik_160_100/yukleme_listesi.py). openpyxl sunucu paket listesinde yok, bayiye liste gitmediği için sunucuda gerekmiyor: Excel yalnız kabul paketinde (araclar/kabul_paketi.py). Sunucuya girmesi canlı değişiklik, ayrı onay"}
+}

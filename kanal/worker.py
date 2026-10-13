@@ -509,6 +509,8 @@ def ekler_uret(ie: dict, hedef: Path, v: dict, settings: dict, m: dict | None = 
             ekler["ifc_hata"] = "IFC üretilmedi"
         if m.get("yukleme_json"):
             ekler["yukleme_listesi"] = {"dosya": str(hedef / m["yukleme_json"]), "bayiye_gider": False}
+        if m.get("duzenlenebilir_dxf") and (hedef / m["duzenlenebilir_dxf"]).is_file():      # D-11: düzenlenebilir DXF (plan + görünüşler); kayıtta, bayiye gitmez
+            ekler["dxf"] = {"dosya": str(hedef / m["duzenlenebilir_dxf"]), "sha256": _sha(hedef / m["duzenlenebilir_dxf"]), "bayiye_gider": False}
         return ekler
     try:
         from motor import bayi_gorseli as BG

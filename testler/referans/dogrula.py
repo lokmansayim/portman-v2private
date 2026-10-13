@@ -450,9 +450,10 @@ def dondur(gerekce: str, ad: str | None, kaldirmaya_izin: bool, karar: str | Non
             print(f"dondurulmadı: geçmeyen adımlar: {gecmeyen}"); return 1
         genel_mi = lambda p: p.relative_to(W).as_posix().startswith("cikti/denetim/genel")
         ciktilar = sorted(p for p in (W / "cikti/denetim").rglob("*") if p.is_file() and p.suffix.lower() in (".dxf", ".pdf") and not genel_mi(p))
-        # İE-08: genel motor çıktıları ayrı kovada (PNG/PDF bayt, JSON kanonik, IFC içerik); süre ve yol taşıyan kayıtlar dışarıda
+        # İE-08: genel motor çıktıları ayrı kovada (PNG/PDF bayt, JSON kanonik, IFC içerik); süre ve yol taşıyan kayıtlar dışarıda.
+        # D-11 (13.10.2026): düzenlenebilir DXF de bu kovada, içerik iziyle (parmak_izi.dxf_ozet); önceki referanslarda yoktu → "eklendi"
         genel_ciktilar = sorted(p for p in (W / "cikti/denetim").rglob("*") if p.is_file() and genel_mi(p)
-                                and p.suffix.lower() in (".png", ".pdf", ".json", ".ifc") and p.name not in ("validation.json", "manifest.json"))
+                                and p.suffix.lower() in (".png", ".pdf", ".json", ".ifc", ".dxf") and p.name not in ("validation.json", "manifest.json"))
         try:
             izler = {p.relative_to(W).as_posix(): ozet(p) for p in ciktilar}
             genel_izler = {p.relative_to(W).as_posix(): genel_ozet(p) for p in genel_ciktilar}

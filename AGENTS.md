@@ -32,7 +32,7 @@ Bu dosya her ajanın okuduğu ortak kuraldır. Claude'a özgü oturum akışı `
 | Yol | İçerik |
 |---|---|
 | `beyin/`, `motor/`, `kanal/`, `vps/` | Canlıdaki kod (v1.1.1 ağacı ve İE-02 eklemeleri). Canlı paket `DURUM.md`'de yazar |
-| `motor/genel/` | Genel motor (serbest aks; çelik ve modül dışı planlar; D-08, İE-08): Yapı Tanımı → çizim seti, IFC, yükleme listesi, bayi görseli ve Örnek Şablon paftası (`python -m motor.genel.uret`). Pano birimli Motor (`motor/*.py`) P6001 ve prefabrik için aynen durur |
+| `motor/genel/` | Genel motor (serbest aks; çelik ve modül dışı planlar; D-08, İE-08): Yapı Tanımı → çizim seti, IFC, yükleme listesi, bayi görseli, Örnek Şablon paftası ve düzenlenebilir DXF (D-11) (`python -m motor.genel.uret`). Pano birimli Motor (`motor/*.py`) P6001 ve prefabrik için aynen durur |
 | `kurallar/` | Kural kitabı (İE-05): yükleme listesi kuralları (`liste/kurallar.json`, güncel; dondurulmuş setler `liste/setler/0.12–0.19.json`), çizim seti, seçenekler, bayi örneği. Sürümle sunucuya gider; eski set eski çıktıyı bayt bayt verir |
 | `modeller/` | Genel motor model tanımları (Ç8201, Ç8801 ve çatı varyantları, KT-01/02/03) + `altin.json` ve KT pafta sayımları. Sürümle gider; tanım değişirse yeni dosya ya da sürüm (D-07) |
 | `is_emri/`, `ref_katalog/`, `ref_yan/`, `beyin/veri/` | Dondurulmuş referans girdiler (23 dosya); değiştirilmez, yeni dosya eklenebilir. İE-08'den beri `modeller/*.json` ve `kurallar/` (setler, cizim, secenekler, bayi) da referans girdisidir |
@@ -42,7 +42,7 @@ Bu dosya her ajanın okuduğu ortak kuraldır. Claude'a özgü oturum akışı `
 | `KARARLAR/` | K01–K25, Z-01–Z-10, D-01…; açık kararlar `KARARLAR/README.md`'de. Kökteki `KARARLAR.md` dondurulmuş günlüktür |
 | `testler/` | Referans (dondurulmuş), kalıcı akış (Postgres) ve bilinen hata testleri |
 | `deneme/` | Tarihli denemeler; canlıda değil |
-| `araclar/` | Yerel ortam kurulumu (`ortam_kur.sh`); aday araçları (İE-04/İE-08): `aday_kaydet.py` (prefabrik İş Emri ya da `--motor genel` Yapı Tanımı → `beyin/veri/adaylar.json` + `is_emri/adaylar/<kod>.png`), `kabul_paketi.py` (mühendise yedi modelin paftası, çizim seti, listesi, kısa parça notları), `aday_kabul.py` (K-A10 kabul kaydı; sunucuda `vps/ie08_adaylar.sh`) |
+| `araclar/` | Yerel ortam kurulumu (`ortam_kur.sh`); aday araçları (İE-04/İE-08): `aday_kaydet.py` (prefabrik İş Emri ya da `--motor genel` Yapı Tanımı → `beyin/veri/adaylar.json` + `is_emri/adaylar/<kod>.png`), `kabul_paketi.py` (kabul edene yedi modelin paftası, çizim seti, listesi, kısa parça notları; D-11'den beri DXF ve Excel liste), `aday_kabul.py` (K-A10 kabul kaydı; sunucuda `vps/ie08_adaylar.sh`) |
 | `hosting/` | Hosting'teki canlı dosyaların kayıt kopyası; pakete girmez |
 | `.claude/` | Ajan ayarları: `rules/` (alan kuralları), `skills/` (komutlar), `agents/` (hakemler), `hooks/` (frenler), `settings.json` (izinler) |
 

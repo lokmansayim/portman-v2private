@@ -11,8 +11,12 @@ koşar (VTK, OSMesa yokken çökebilir; çökmesi işi düşürmez: `validation.
 `kurallar/liste/kurallar.json`; `PORTMAN_KURALLAR` ortam değişkeni de geçerlidir).
 
 Manifest, canlı Motor'un (`motor/dxf_out.uret`) worker'a verdiği anahtarları taşır: `pdf`, `pdf_sha256`, `warnings`; ek olarak
-`ifc`, `ifc_sha256`, `preview`, `plan_bayi`, `yukleme_json`, `ciktilar`. `validation.json`: `passed` (zorunlu çıktılar tam ve IFC şema
-hatası 0), `errors`, `eksik`, `ifc`, `liste_satir`, `perspektif`.
+`ifc`, `ifc_sha256`, `preview`, `plan_bayi`, `yukleme_json`, `ciktilar`, `duzenlenebilir_dxf`. `validation.json`: `passed` (zorunlu
+çıktılar tam ve IFC şema hatası 0), `errors`, `eksik`, `ifc`, `liste_satir`, `perspektif`.
+
+D-11 (Lokman, 13 Ekim 2026): `kurallar/cizim/duzenlenebilir.json › dxf` varsa çizim setinin düzenlenebilir kopyası `<kod>_cizim.dxf`
+(plan + dört görünüş, katmanlı, cm; `dxf_genel.py`) da yazılır. Çıktıdır, kaynak değil; bayiye gitmez; üretilemezse uyarı, iş düşmez.
+Çizim setinin dosya listesine (`cizim_seti.json`) girmez: `ciktilar` sayısı ve öteki çıktıların baytları değişmez.
 """
 from __future__ import annotations
 from .toplam import sum  # noqa: A001 — 3.11 toplama sırası her Python sürümünde (İE-08 GM2; toplam.py)
@@ -135,6 +139,7 @@ def uret(tanim_yolu: Path, hedef: Path, is_emri_no: str | None = None, revizyon:
         from . import kural
         set_kullanilan = str(kural.yol())
         ifc = hedef / f"{kod}.ifc"; ozet: dict = {}
+        dxf_yol: Path | None = None
         if not yalniz_liste:
             # 1) çizimler (plan, pafta, görünüşler)
             if _main(ciz_genel, [tanim_yolu, "--cikti", hedef] + ek, gunluk):
@@ -146,6 +151,14 @@ def uret(tanim_yolu: Path, hedef: Path, is_emri_no: str | None = None, revizyon:
                 hatalar.append("ifc_genel başarısız")
             elif ozet.get("sema_hatasi"):
                 hatalar.append(f"IFC şema hatası {ozet['sema_hatasi']}")
+            # 2b) düzenlenebilir DXF (D-11; kural anahtarı yoksa üretilmez): plan + dört görünüş. Çıktıdır, kaynak değil; bayiye gitmez,
+            # üretilemezse ya da yeniden açılıp denetlenince hata verirse uyarı (iş düşmez)
+            from . import dxf_genel
+            dxf_kural = dxf_genel.kurallar()
+            if dxf_kural.get("dxf"):
+                dxf_yol = hedef / dxf_genel.dosya_adi(dxf_kural, kod)
+                if _main(dxf_genel, [tanim_yolu, "--cikti", hedef] + ek, gunluk):
+                    uyarilar.append("düzenlenebilir DXF üretilemedi ya da denetimden geçmedi (dxf_genel; uret.log)")
         # 3) yükleme listesi (girdi + liste)
         girdi = hedef / f"{kod}_girdi.json"; liste = hedef / f"{kod}_yukleme.json"
         if _main(girdi_genel, [tanim_yolu, "--dosya", girdi, "--uzerine-yaz", "--kaynak", kaynak or f"Yapı Tanımı 0.5 ({tanim_yolu.name})"] + ek, gunluk):
@@ -214,6 +227,7 @@ def uret(tanim_yolu: Path, hedef: Path, is_emri_no: str | None = None, revizyon:
                 "ifc": ifc.name if ifc.exists() else None, "ifc_sha256": sha256(ifc) if ifc.exists() else None,
                 "preview": f"{kod}_plan.png" if (hedef / f"{kod}_plan.png").exists() else None, "plan_bayi": bayi_png.name if bayi_png.exists() else None,
                 "bayi_gorsel": bayi_gorsel.name if bayi_gorsel.exists() else None, "bilgi_var": bool(bilgi),
+                "duzenlenebilir_dxf": dxf_yol.name if dxf_yol is not None and dxf_yol.exists() else None,
                 "yukleme_json": liste.name if liste.exists() else None, "ciktilar": {d: v for d, v in var.items()}, "set": set_kullanilan}
     (hedef / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     return manifest
