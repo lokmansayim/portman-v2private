@@ -51,6 +51,7 @@ Adlar yazılabilir (D-11). Bulunan dosya adları yalnız dizin listesinden.
 | PK-05 | `90bc8e5` 12:21:54 | `561ad34a…a779` aynı (Mac, 12:21:58) | 12:22:10 | `deneme/2026-10-13_pk_05/sonuc/PK05_kiyas.md` |
 | PK-03 | `022b0d3` 12:09:37 | `fe5948f5…3f04` ve `1a42996f…ad67` aynı (Mac, 12:09:43) | 12:10:02 | `deneme/2026-10-13_pk_03/sonuc/PK03_kiyas.md` |
 | PK-06 | `90869d0` 12:41:20 | `3cf21751…e2fe` xlsx ve `5874e5e7…3555` pdf aynı (Mac, 12:41:30) | 12:41:40 | `deneme/2026-10-13_pk_06/sonuc/PK06_kiyas.md` |
+| PK-07 | `f3bb50f` 13:02:48 | `985c3a20…6086` aynı (Mac, 13:02:52) | 13:03:02 | `deneme/2026-10-13_pk_07/sonuc/PK07_kiyas.md` |
 
 PK-02 klasöründe mühür tablosunda olmayan bir xlsx daha var (`Mehmet Balaban 58 m² .xlsx`, 7 Kasım 2025, `7327bef1…93bd9`); açılmadı, kıyasa girmedi.
 
