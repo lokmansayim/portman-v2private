@@ -1,0 +1,753 @@
+{
+ "kod": "PK-06",
+ "is_emri_no": "PK06-SEVIM-GULER-82+10M2 (pafta kipi)",
+ "H0": 250.0,
+ "W": 1259.8,
+ "D": 773.0,
+ "brut_m2": 91.976,
+ "dis_cevre_m": 38.25,
+ "t_dis": 10.0,
+ "panolar": [
+  {
+   "duvar": "dis",
+   "kal_mm": 100,
+   "boy": 125.5,
+   "aciklik": null
+  },
+  {
+   "duvar": "dis",
+   "kal_mm": 100,
+   "boy": 125.5,
+   "aciklik": {
+    "tur": "pencere",
+    "olcu": "120x180",
+    "genislik": 120.0
+   }
+  },
+  {
+   "duvar": "dis",
+   "kal_mm": 100,
+   "boy": 125.5,
+   "aciklik": null
+  },
+  {
+   "duvar": "dis",
+   "kal_mm": 100,
+   "boy": 125.5,
+   "aciklik": null
+  },
+  {
+   "duvar": "dis",
+   "kal_mm": 100,
+   "boy": 125.5,
+   "aciklik": {
+    "tur": "pencere",
+    "olcu": "60x40",
+    "genislik": 60.0
+   }
+  },
+  {
+   "duvar": "dis",
+   "kal_mm": 100,
+   "boy": 125.5,
+   "aciklik": null
+  },
+  {
+   "duvar": "dis",
+   "kal_mm": 100,
+   "boy": 125.5,
+   "aciklik": {
+    "tur": "pencere",
+    "olcu": "120x120",
+    "genislik": 120.0
+   }
+  },
+  {
+   "duvar": "dis",
+   "kal_mm": 100,
+   "boy": 125.5,
+   "aciklik": null
+  },
+  {
+   "duvar": "dis",
+   "kal_mm": 100,
+   "boy": 125.5,
+   "aciklik": null
+  },
+  {
+   "duvar": "dis",
+   "kal_mm": 100,
+   "boy": 125.5,
+   "aciklik": null
+  },
+  {
+   "duvar": "dis",
+   "kal_mm": 100,
+   "boy": 125.5,
+   "aciklik": null
+  },
+  {
+   "duvar": "dis",
+   "kal_mm": 100,
+   "boy": 125.5,
+   "aciklik": {
+    "tur": "pencere",
+    "olcu": "60x40",
+    "genislik": 60.0
+   }
+  },
+  {
+   "duvar": "dis",
+   "kal_mm": 100,
+   "boy": 125.5,
+   "aciklik": null
+  },
+  {
+   "duvar": "dis",
+   "kal_mm": 100,
+   "boy": 125.5,
+   "aciklik": {
+    "tur": "pencere",
+    "olcu": "120x120",
+    "genislik": 120.0
+   }
+  },
+  {
+   "duvar": "dis",
+   "kal_mm": 100,
+   "boy": 125.5,
+   "aciklik": null
+  },
+  {
+   "duvar": "dis",
+   "kal_mm": 100,
+   "boy": 125.5,
+   "aciklik": null
+  },
+  {
+   "duvar": "dis",
+   "kal_mm": 100,
+   "boy": 125.5,
+   "aciklik": null
+  },
+  {
+   "duvar": "dis",
+   "kal_mm": 100,
+   "boy": 125.5,
+   "aciklik": null
+  },
+  {
+   "duvar": "ic",
+   "kal_mm": 60,
+   "boy": 125.5,
+   "aciklik": null
+  },
+  {
+   "duvar": "ic",
+   "kal_mm": 60,
+   "boy": 125.5,
+   "aciklik": null
+  },
+  {
+   "duvar": "ic",
+   "kal_mm": 60,
+   "boy": 125.5,
+   "aciklik": null
+  },
+  {
+   "duvar": "ic",
+   "kal_mm": 60,
+   "boy": 125.5,
+   "aciklik": null
+  },
+  {
+   "duvar": "ic",
+   "kal_mm": 60,
+   "boy": 125.5,
+   "aciklik": {
+    "tur": "ic_kapi",
+    "olcu": "82",
+    "genislik": 82.0,
+    "mentese": "sol"
+   }
+  },
+  {
+   "duvar": "ic",
+   "kal_mm": 60,
+   "boy": 125.5,
+   "aciklik": null
+  },
+  {
+   "duvar": "ic",
+   "kal_mm": 60,
+   "boy": 125.5,
+   "aciklik": {
+    "tur": "ic_kapi",
+    "olcu": "82",
+    "genislik": 82.0,
+    "mentese": "sol"
+   }
+  },
+  {
+   "duvar": "ic",
+   "kal_mm": 60,
+   "boy": 125.5,
+   "aciklik": null
+  },
+  {
+   "duvar": "ic",
+   "kal_mm": 60,
+   "boy": 125.5,
+   "aciklik": null
+  },
+  {
+   "duvar": "ic",
+   "kal_mm": 60,
+   "boy": 125.5,
+   "aciklik": {
+    "tur": "ic_kapi",
+    "olcu": "82",
+    "genislik": 82.0,
+    "mentese": "sag"
+   }
+  },
+  {
+   "duvar": "ic",
+   "kal_mm": 60,
+   "boy": 125.5,
+   "aciklik": {
+    "tur": "ic_kapi",
+    "olcu": "82",
+    "genislik": 82.0,
+    "mentese": "sol"
+   }
+  },
+  {
+   "duvar": "ic",
+   "kal_mm": 60,
+   "boy": 125.5,
+   "aciklik": null
+  },
+  {
+   "duvar": "ic",
+   "kal_mm": 60,
+   "boy": 125.5,
+   "aciklik": null
+  },
+  {
+   "duvar": "ic",
+   "kal_mm": 60,
+   "boy": 125.5,
+   "aciklik": {
+    "tur": "ic_kapi",
+    "olcu": "82",
+    "genislik": 82.0,
+    "mentese": "sag"
+   }
+  },
+  {
+   "duvar": "dis",
+   "kal_mm": 100,
+   "boy": 125.5,
+   "aciklik": {
+    "tur": "dis_kapi",
+    "olcu": "90",
+    "genislik": 90.0,
+    "mentese": "sol"
+   }
+  },
+  {
+   "duvar": "dis",
+   "kal_mm": 100,
+   "boy": 125.5,
+   "aciklik": null
+  },
+  {
+   "duvar": "dis",
+   "kal_mm": 100,
+   "boy": 251.0,
+   "aciklik": {
+    "tur": "pencere",
+    "olcu": "160x180",
+    "genislik": 160.0
+   }
+  },
+  {
+   "duvar": "dis",
+   "kal_mm": 100,
+   "boy": 251.0,
+   "aciklik": {
+    "tur": "pencere",
+    "olcu": "160x180",
+    "genislik": 160.0
+   }
+  },
+  {
+   "duvar": "dis",
+   "kal_mm": 100,
+   "boy": 62.75,
+   "aciklik": null
+  },
+  {
+   "duvar": "dis",
+   "kal_mm": 100,
+   "boy": 62.75,
+   "aciklik": null
+  },
+  {
+   "duvar": "dis",
+   "kal_mm": 100,
+   "boy": 62.75,
+   "aciklik": null
+  },
+  {
+   "duvar": "dis",
+   "kal_mm": 100,
+   "boy": 115.5,
+   "aciklik": null
+  },
+  {
+   "duvar": "ic",
+   "kal_mm": 60,
+   "boy": 122.5,
+   "aciklik": null
+  },
+  {
+   "duvar": "ic",
+   "kal_mm": 60,
+   "boy": 122.5,
+   "aciklik": null
+  },
+  {
+   "duvar": "ic",
+   "kal_mm": 60,
+   "boy": 60.75,
+   "aciklik": null
+  },
+  {
+   "duvar": "ic",
+   "kal_mm": 60,
+   "boy": 49.75,
+   "aciklik": null
+  },
+  {
+   "duvar": "ic",
+   "kal_mm": 60,
+   "boy": 122.5,
+   "aciklik": null
+  },
+  {
+   "duvar": "ic",
+   "kal_mm": 60,
+   "boy": 122.5,
+   "aciklik": null
+  },
+  {
+   "duvar": "ic",
+   "kal_mm": 60,
+   "boy": 120.5,
+   "aciklik": null
+  },
+  {
+   "duvar": "ic",
+   "kal_mm": 60,
+   "boy": 120.5,
+   "aciklik": null
+  },
+  {
+   "duvar": "ic",
+   "kal_mm": 60,
+   "boy": 119.5,
+   "aciklik": {
+    "tur": "ic_kapi",
+    "olcu": "82",
+    "genislik": 82.0,
+    "mentese": "sag"
+   }
+  },
+  {
+   "duvar": "dis",
+   "kal_mm": 100,
+   "boy": 62.75,
+   "aciklik": null
+  },
+  {
+   "duvar": "dis",
+   "kal_mm": 100,
+   "boy": 125.5,
+   "aciklik": null
+  },
+  {
+   "duvar": "ic",
+   "kal_mm": 60,
+   "boy": 125.5,
+   "aciklik": null
+  },
+  {
+   "duvar": "ic",
+   "kal_mm": 60,
+   "boy": 125.5,
+   "aciklik": null
+  },
+  {
+   "duvar": "dis",
+   "kal_mm": 100,
+   "boy": 125.5,
+   "aciklik": {
+    "tur": "pencere",
+    "olcu": "120x120",
+    "genislik": 120.0
+   }
+  },
+  {
+   "duvar": "dis",
+   "kal_mm": 100,
+   "boy": 125.5,
+   "aciklik": null
+  }
+ ],
+ "ekler": [
+  {
+   "duvar": "dis",
+   "cins": "pano_eki",
+   "sacak": true
+  },
+  {
+   "duvar": "dis",
+   "cins": "pano_eki",
+   "sacak": true
+  },
+  {
+   "duvar": "dis",
+   "cins": "pano_eki",
+   "sacak": true
+  },
+  {
+   "duvar": "dis",
+   "cins": "uclu",
+   "sacak": true
+  },
+  {
+   "duvar": "dis",
+   "cins": "pano_eki",
+   "sacak": true
+  },
+  {
+   "duvar": "dis",
+   "cins": "pano_eki",
+   "sacak": true
+  },
+  {
+   "duvar": "dis",
+   "cins": "pano_eki",
+   "sacak": true
+  },
+  {
+   "duvar": "dis",
+   "cins": "pano_eki",
+   "sacak": true
+  },
+  {
+   "duvar": "dis",
+   "cins": "pano_eki",
+   "sacak": false
+  },
+  {
+   "duvar": "dis",
+   "cins": "pano_eki",
+   "sacak": false
+  },
+  {
+   "duvar": "dis",
+   "cins": "uclu",
+   "sacak": false
+  },
+  {
+   "duvar": "dis",
+   "cins": "uclu",
+   "sacak": false
+  },
+  {
+   "duvar": "dis",
+   "cins": "pano_eki",
+   "sacak": false
+  },
+  {
+   "duvar": "dis",
+   "cins": "pano_eki",
+   "sacak": true
+  },
+  {
+   "duvar": "dis",
+   "cins": "pano_eki",
+   "sacak": true
+  },
+  {
+   "duvar": "dis",
+   "cins": "uclu",
+   "sacak": true
+  },
+  {
+   "duvar": "dis",
+   "cins": "pano_eki",
+   "sacak": true
+  },
+  {
+   "duvar": "dis",
+   "cins": "uclu",
+   "sacak": true
+  },
+  {
+   "duvar": "dis",
+   "cins": "pano_eki",
+   "sacak": true
+  },
+  {
+   "duvar": "dis",
+   "cins": "pano_eki",
+   "sacak": true
+  },
+  {
+   "duvar": "ic",
+   "cins": "pano_eki",
+   "sacak": false
+  },
+  {
+   "duvar": "ic",
+   "cins": "pano_eki",
+   "sacak": false
+  },
+  {
+   "duvar": "ic",
+   "cins": "pano_eki",
+   "sacak": false
+  },
+  {
+   "duvar": "ic",
+   "cins": "pano_eki",
+   "sacak": false
+  },
+  {
+   "duvar": "ic",
+   "cins": "pano_eki",
+   "sacak": false
+  },
+  {
+   "duvar": "ic",
+   "cins": "pano_eki",
+   "sacak": false
+  },
+  {
+   "duvar": "ic",
+   "cins": "pano_eki",
+   "sacak": false
+  },
+  {
+   "duvar": "ic",
+   "cins": "pano_eki",
+   "sacak": false
+  },
+  {
+   "duvar": "ic",
+   "cins": "uclu",
+   "sacak": false
+  },
+  {
+   "duvar": "ic",
+   "cins": "pano_eki",
+   "sacak": false
+  },
+  {
+   "duvar": "ic",
+   "cins": "pano_eki",
+   "sacak": false
+  },
+  {
+   "duvar": "ic",
+   "cins": "pano_eki",
+   "sacak": false
+  },
+  {
+   "duvar": "ic",
+   "cins": "uclu",
+   "sacak": false
+  },
+  {
+   "duvar": "ic",
+   "cins": "pano_eki",
+   "sacak": false
+  },
+  {
+   "duvar": "ic",
+   "cins": "uclu",
+   "sacak": false
+  },
+  {
+   "duvar": "ic",
+   "cins": "uclu",
+   "sacak": false
+  },
+  {
+   "duvar": "ic",
+   "cins": "pano_eki",
+   "sacak": false
+  },
+  {
+   "duvar": "dis",
+   "cins": "pano_eki",
+   "sacak": false
+  },
+  {
+   "duvar": "dis",
+   "cins": "pano_eki",
+   "sacak": false
+  },
+  {
+   "duvar": "dis",
+   "cins": "pano_eki",
+   "sacak": false
+  },
+  {
+   "duvar": "dis",
+   "cins": "pano_eki",
+   "sacak": false
+  }
+ ],
+ "koseler": {
+  "dis": 6,
+  "ic": 2
+ },
+ "dikmeler": 2,
+ "ic_kalan_dis_duvar_m": 5.319,
+ "veranda_kirisleri_cm": [
+  298.5,
+  313.75,
+  110.25
+ ],
+ "kapali": [
+  {
+   "ad": "SALON",
+   "tur": "salon",
+   "alan_m2": 18.451,
+   "en_cm": 494.0,
+   "derin_cm": 373.5
+  },
+  {
+   "ad": "SALON",
+   "tur": "salon",
+   "alan_m2": 1.012,
+   "en_cm": 182.1,
+   "derin_cm": 55.6
+  },
+  {
+   "ad": "HOL",
+   "tur": "antre_hol",
+   "alan_m2": 4.43,
+   "en_cm": 370.4,
+   "derin_cm": 119.6
+  },
+  {
+   "ad": "ÇAMAŞIR ODASI",
+   "tur": "camasir",
+   "alan_m2": 2.907,
+   "en_cm": 243.1,
+   "derin_cm": 119.6
+  },
+  {
+   "ad": "BANYO",
+   "tur": "banyo",
+   "alan_m2": 4.517,
+   "en_cm": 182.2,
+   "derin_cm": 247.9
+  },
+  {
+   "ad": "YATAK ODASI 1",
+   "tur": "yatak_odasi",
+   "alan_m2": 10.692,
+   "en_cm": 431.3,
+   "derin_cm": 247.9
+  },
+  {
+   "ad": "MUTFAK",
+   "tur": "mutfak",
+   "alan_m2": 11.422,
+   "en_cm": 305.8,
+   "derin_cm": 373.5
+  },
+  {
+   "ad": "YATAK ODASI 2",
+   "tur": "yatak_odasi",
+   "alan_m2": 9.151,
+   "en_cm": 245.0,
+   "derin_cm": 373.5
+  },
+  {
+   "ad": "YATAK ODASI 3",
+   "tur": "yatak_odasi",
+   "alan_m2": 13.76,
+   "en_cm": 368.4,
+   "derin_cm": 373.5
+  }
+ ],
+ "acik": [
+  {
+   "ad": "VERANDA",
+   "tur": "veranda",
+   "alan_m2": 9.373,
+   "en_cm": 298.7,
+   "derin_cm": 313.8
+  }
+ ],
+ "cati": [
+  {
+   "ad": "ana çatı",
+   "tip": "besik",
+   "aciklik_cm": 773.0,
+   "boy_cm": 1139.5,
+   "egim_yuzde": 34.0,
+   "sacak_cm": 30.0,
+   "kalkan": 2,
+   "sacak_hatlari_m": [
+    13.1975,
+    11.995
+   ],
+   "not": "sayfa 4–5: MK01–MK10 (125,5'te bir, x 4 … 1135); sayfa 2 kesiti: yükselme 140,06 / yatay 411,51 → %34,0, eğik 434,69. Ön saçak verandanın önünden de geçer (veranda çatısının ön yüzü aynı düzlemde): 11,995 + 1,2025"
+  },
+  {
+   "ad": "veranda çatısı",
+   "tip": "besik",
+   "aciklik_cm": 333.8,
+   "boy_cm": 120.3,
+   "egim_yuzde": 32.8,
+   "sacak_cm": 30.0,
+   "kalkan": 1,
+   "capraz": false,
+   "mahya_boy_cm": 150.25,
+   "sacak_hatlari_m": [
+    1.5025
+   ],
+   "not": "ana çatıya paralel ikinci beşik (MK11 x −4, MK12 x −116); sol kesit: taban 373,75, yükselme 61,37 / 186,87 → %32,8; ön yüzü ana çatının ön yüzüyle aynı düzlemde (aşık planında ön yüzün alt dört sırası 120,25 uzuyor), arka yüzü 4 × 150,25"
+  }
+ ],
+ "ozellikler": {
+  "Panel Türü": "Press Panel",
+  "Çatı Şekli": "Beşik",
+  "Çatı Kaplaması": "Tek kat panel",
+  "Çatı Kaplama Rengi": "Antrasit",
+  "Dış Kapı": "Çelik",
+  "İç Kapılar": "Amerikan Panel",
+  "Dış Cephe Boya": "Sandeco",
+  "İç Cephe Boya": "Sandeco",
+  "Tavan": "Ters tavan",
+  "Saçak Rengi": "Antrasit",
+  "Saçak Çıkması": "30 cm",
+  "Yağmur Oluğu": "Metal",
+  "Yağmur Oluğu Rengi": "Antrasit",
+  "Yağmur İniş Borusu": ""
+ },
+ "alici_ait": {
+  "kalemler": [],
+  "kaynak": "onay paftasının özellik tablosu: alıcıya ait kalem yazılmamış; açıklama boş; iniş borusu boş"
+ },
+ "kaynak_notu": "deneme/2026-10-13_pk_06/pafta_oku.py; Motor çizemiyor (L plan, 160/180 iki modüllük pano, paralel veranda beşiği)"
+}

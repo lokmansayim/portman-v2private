@@ -1,0 +1,20 @@
+{
+ "kaynak": "PK-06 montaj paftası seti (Sevim Güler 82 + 10 m², Loftev; 8 sayfa). Sayılar `pafta_montaj.json`'dan (vektör) ya da göz sayımından; her satırda yazılı. Varsayılan hesabı değiştirmez (protokol §5).",
+ "makas_bas": {"adet": 2, "not": "makas ve dere planı (sayfa 4–5): ana çatıda 10 makas MK01–MK10, x 4 … 1135, 125,5'te bir; uçtaki ikisi (MK01 sağ, MK10 sol) kalkan"},
+ "makas_orta": {"adet": 8, "not": "MK02–MK09; veranda çatısının MK11 (x −4) ve MK12 (x −116) ayrı (yavru makas 2)"},
+ "asik": {"adet": 52, "not": "aşık planı (sayfa 6): 32 × 410 + 16 × 379,5 (ana çatı, iki yüz × 8 sıra × 1199,5) + 3 × 120,25 + 127,75 (ön yüzün verandaya uzayan alt dört sırası) + 4 × 150,25 (veranda çatısının arka yüzü) = 202,8 m; 4200'lük boydan kesimle 32 + 16 + 2 + 2 = 52 (÷ 4,2 = 48,3)"},
+ "sandvic_panel": {"adet": 30, "not": "çatı kaplaması planı (sayfa 7): tek kat panel şeridi 87 × 444,9 cm; arka yüz 14, ön yüz 16 (verandaya uzayan iki şerit dahil); veranda çatısının arka yüzü (207 × 150) şeritsiz, ön yüzün uç şeritlerinden ok (artan parça)"},
+ "tavan_omegasi": {"adet": 47, "not": "tavan omega planı (sayfa 3, ters tavan, 60'ta bir; veranda dahil): 61 parça, 169,6 m → ÷ 3,65 = 46,5 → 47 (parça başına bir boy sayılsa 61)"},
+ "elektrik": {
+  "tavan_armaturu": {"adet": 7, "not": "kırmızı çerçeveli X: salon 2, hol 1, mutfak 1, yatak odaları 1 + 1 + 1 (göz)"},
+  "glop": {"adet": 3, "not": "daire içinde X: banyo 1, çamaşır odası 1, veranda 1 (göz)"},
+  "anahtar_tekli": {"adet": 7, "not": "tek tırnaklı daire: salon (mutfak kapısının salon yanı), mutfak, banyo (holde), yatak 1, çamaşır, yatak 2, yatak 3 (göz)"},
+  "anahtar_cift": {"adet": 1, "not": "iki tırnaklı daire: salonda dış kapının yanında (göz)"},
+  "priz_tekli": {"adet": 20, "not": "salon 3, veranda 1 (kapı zilinin yanında, sürgülü pencere duvarında), mutfak 5 (buzdolabı, bulaşık makinesi, ısıtıcı, fırın, davlumbaz), hol 1, banyo 1 (lavabo), yatak 1: 2, çamaşır 2 (k.m., ç.m.), yatak 2: 2, yatak 3: 3 (göz)"},
+  "priz_cift": {"adet": 0, "not": "çift priz simgesi yok"},
+  "uydu_prizi": {"adet": 1, "not": "salon \"UYDU\""},
+  "zil": {"adet": 1, "not": "\"KAPI ZİLİ\": dış kapının veranda yanında"},
+  "sigorta_kutusu": {"adet": 1, "not": "salonda dış kapının yanında \"12 Lİ\""}
+ },
+ "diger": {"not": "paftada iniş ve dere kapağı işareti yok; \"Acil Müdahale Kapağı\" holde (h: 80 cm); mutfakta ısıtıcı H 110, fırın H 40, davlumbaz H 170 prizleri"}
+}

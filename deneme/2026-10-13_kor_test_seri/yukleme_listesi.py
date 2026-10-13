@@ -40,6 +40,8 @@ Sürüm 5'te (PK-05 kıyası, `deneme/2026-10-13_pk_05/sonuc/PK05_kiyas.md`):
   L3. Tek kat panel 87 cm kapatır, boy 50 mm'ye yukarı (kurallar.json'daki 1,0 bu ürün için yanlış; kural kitabı adayı).
   L4. Çelik dış kapı listede 900 × 2000 (paftada 100/220 ya da 100'lük yay çizilse de; PK-02, PK-03, PK-05).
   L5. Tek kat panel vidası 5,5 × 76.
+Sürüm 5.1 (PK-06 okumasıyla, gerçek liste açılmadan; kural değil model alanı): ek çatı parçasında `capraz: false` (ana çatıya paralel
+  beşik, PK-06 verandası) ters mahya (dere içi) almaz; anahtarsız parça eskisi gibi çapraz beşik sayılır.
 LLM yok, ağ yok.
 """
 from __future__ import annotations
@@ -55,7 +57,7 @@ from pathlib import Path
 KOK = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(KOK))
 
-SURUM = "5 (13 Ekim 2026; Portatifev varsayılan, PK-02, PK-03 ve PK-05 dersleri, pafta kipi)"
+SURUM = "5.1 (13 Ekim 2026; Portatifev varsayılan, PK-02, PK-03 ve PK-05 dersleri, pafta kipi; paralel ek beşik)"
 GRUPLAR = {"1001": "Panel", "1002": "Metal aksam", "1003": "Kapı ve pencere", "1004": "Tavan", "1005": "Makas", "1006": "Çatı",
            "1007": "Elektrik", "1008": "Vida", "1009": "Depo", "1010": "Sıhhi tesisat", "1011": "Dere", "1012": "Boya"}
 TAVAN = lambda x: int(math.ceil(x - 1e-9))
@@ -426,7 +428,7 @@ def liste(N: dict, k: dict, pafta: dict | None = None) -> dict:
         ekle("1006", "Metal kiremit mahyası", "L 2800", mahya, "Kural", "beşik mahyaları ÷ 2,6", "PK-01 ve PK-02'de tuttu")
     ters_m = 0.0
     for c, o in C:
-        if c is not ana and c["tip"] == "besik":
+        if c is not ana and c["tip"] == "besik" and c.get("capraz", True):      # 5.1: ana çatıya paralel ek beşikte dere içi yok
             a_ = c["aciklik_cm"] / 200 + o["sac"]; h_ = a_ * o["eg"]; b_ = h_ / max(ao["eg"], 1e-6)
             ters_m += 2 * math.sqrt(a_ * a_ + b_ * b_ + h_ * h_)
     if ters_m:
