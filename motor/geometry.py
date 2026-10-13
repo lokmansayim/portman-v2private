@@ -26,6 +26,9 @@ _AKS_EK = {"x": [], "y": []}   # İE-11: ek aks değerleri (etiket için)
 
 PENCERE_OLCULERI = {"120x120": (120, 120), "120x180": (120, 180), "60x40": (60, 40)}
 KAPI_GENISLIK = {"ic_kapi": 82.0, "dis_kapi": 97.0, "gecis": 82.0}
+# İE-11 (PK-01 montaj paftası, 13.10.2026; yalnız `dizilim.pencere` / `dizilim.kapi` anahtarıyla):
+PENCERE_ORTALAMA_ESIGI_CM = MOD / 4.0   # oda ortası ızgara panosunun ortasından en çok ¼ pano kaçıyorsa ızgara kalır (paftada 6 pencerenin 4'ü), yoksa pencereli pano odaya ortalanır
+KAPI_YASLAMA_CM = 11.5                  # oda kapısı boşluğu menteşe tarafındaki pano ucundan 11,5 cm içeride (paftada 4 kapı: 11,3 / 11,3 / 11,6 / 11,5)
 ACIK_MAHAL_TURLERI = {"veranda", "balkon", "sundurma", "teras"}
 
 
@@ -208,6 +211,9 @@ class Acilim:
     varyant: Optional[str] = None
     alan_kime: Optional[str] = None  # geçiş boşluğunun alanı hangi mahale yazılır
     dograma: Optional[str] = None    # İE-11: None | "alıcıya ait"
+    kayma: float = 0.0               # İE-11: boşluk merkezinin pano merkezinden kayması (+a yönünde, cm); 0 → ortada (eski)
+    mentese_is_emri: Optional[str] = None   # İE-11: İş Emri'nin yazdığı menteşe (yoksa None); `kapi: mantik` kuralı bununla karşılaştırır
+    pano_is_emri: Optional[int] = None      # İE-11: İş Emri'nin yazdığı pano dizini (yoksa None)
 
 
 @dataclass
@@ -232,20 +238,22 @@ class Pano:
             return [self.rect()]
         w = self.acilim.genislik
         s = (self.boy - w) / 2.0
+        sl, sr = s + self.acilim.kayma, s - self.acilim.kayma      # kayma 0 → eski formül bit bit (a1 − s)
         d = self.duvar
         if d.yon == "x":
-            return [(self.a0, d.c - d.h, self.a0 + s, d.c + d.h), (self.a1 - s, d.c - d.h, self.a1, d.c + d.h)]
-        return [(d.c - d.h, self.a0, d.c + d.h, self.a0 + s), (d.c - d.h, self.a1 - s, d.c + d.h, self.a1)]
+            return [(self.a0, d.c - d.h, self.a0 + sl, d.c + d.h), (self.a1 - sr, d.c - d.h, self.a1, d.c + d.h)]
+        return [(d.c - d.h, self.a0, d.c + d.h, self.a0 + sl), (d.c - d.h, self.a1 - sr, d.c + d.h, self.a1)]
 
     def gap(self) -> Optional[tuple]:
         if not self.acilim:
             return None
         w = self.acilim.genislik
         s = (self.boy - w) / 2.0
+        sl, sr = s + self.acilim.kayma, s - self.acilim.kayma
         d = self.duvar
         if d.yon == "x":
-            return (self.a0 + s, d.c - d.h, self.a1 - s, d.c + d.h)
-        return (d.c - d.h, self.a0 + s, d.c + d.h, self.a1 - s)
+            return (self.a0 + sl, d.c - d.h, self.a1 - sr, d.c + d.h)
+        return (d.c - d.h, self.a0 + sl, d.c + d.h, self.a1 - sr)
 
 
 @dataclass
@@ -376,6 +384,17 @@ def _kur(is_emri: dict) -> Plan:
     else:
         W, H = (MOD * nx + 2.0 * T_DIS, MOD * ny + T_DIS) if X_SON is None else (X_SON + T_DIS, Y_SON + T_DIS / 2.0)
     dis_v_konum = yapi.get("dis_dusey_duvar", "aks_disinda")   # 'aks_disinda' (v1.4.3 son örnek) | 'eksende' (eski 6×8)
+    if dis_v_konum not in ("aks_disinda", "eksende", "cevre_aks_disinda"):   # İE-11: 'cevre_aks_disinda' → yalnız çevre duvarı aks dışında,
+        raise IsEmriHatasi(f"dis_dusey_duvar bilinmiyor: {dis_v_konum} (aks_disinda | eksende | cevre_aks_disinda)")   # veranda duvarı aksa ortalı (PK-01)
+    pencere_kurali = dizilim.get("pencere", "pano")         # İE-11: "pano" (İş Emri dizini / orta aday; eski) | "oda_ortasi"
+    kapi_kurali = dizilim.get("kapi", "is_emri")            # İE-11: "is_emri" (menteşe İş Emri'nden, kapı panoda ortada; eski) | "mantik"
+    if pencere_kurali not in ("pano", "oda_ortasi"):
+        raise IsEmriHatasi(f"dizilim.pencere bilinmiyor: {pencere_kurali} (pano | oda_ortasi)")
+    if kapi_kurali not in ("is_emri", "mantik"):
+        raise IsEmriHatasi(f"dizilim.kapi bilinmiyor: {kapi_kurali} (is_emri | mantik)")
+    kose_kurali = dizilim.get("kose", "eski")               # İE-11: "eski" (gövdesi aks dışındaki V uzar) | "oda" (kollar arasında kapalı oda → V uzar)
+    if kose_kurali not in ("eski", "oda"):
+        raise IsEmriHatasi(f"dizilim.kose bilinmiyor: {kose_kurali} (eski | oda)")
     uyarilar = []
 
     # ---------------- mahaller
@@ -525,6 +544,10 @@ def _kur(is_emri: dict) -> Plan:
     def L_kose(Hw, H_uc, Vw, V_uc, tur):
         H_side = +1 if H_uc == 0 else -1          # H duvarı köşenin hangi tarafında uzanıyor
         v_extender = (Vw.govde_yonu != 0 and H_side != Vw.govde_yonu)
+        if kose_kurali == "oda":                  # İE-11 (PK-01 paftası): kollar arasında kapalı oda varsa V uzar, köşe parçası odanın dışında
+            V_side = +1 if V_uc == 0 else -1
+            u, v = Vw.hat, Hw.hat
+            v_extender = not is_out(owner(u if H_side > 0 else u - 1, v if V_side > 0 else v - 1))
         if v_extender:
             # V uzatan: V, H'nin orta eksenine kadar; H, V'nin yüzünde (aks) biter; köşe parçası V şeridinde
             if V_uc == 0: Vw.p0 = Hw.c
@@ -589,6 +612,24 @@ def _kur(is_emri: dict) -> Plan:
         else:
             uyarilar.append(f"Aks noktası {P}: çözümsüz birleşim {[(d.id, uc) for d, uc in ends]}")
 
+    # ---------------- açıklık listesi (aynalı çerçevede) ve oda ortası pencere hedefleri (İE-11; bölmeden önce gerekir)
+    NORMAL = {"sol": "-x", "sag": "+x", "on": "-y", "arka": "+y"}
+    acikliklar = [(_ayna_aciklik(a) if ayna_y else a) for a in is_emri.get("acikliklar", [])]
+    pencere_hedef = {}          # açıklık sırası → [duvar id, oda net merkezi, aks aralığı lo, hi, seçilen pano başı]
+    if pencere_kurali == "oda_ortasi":
+        for i, ac in enumerate(acikliklar):
+            if ac.get("tur") != "pencere" or "pano" in ac or ac.get("olcu") not in PENCERE_OLCULERI or ac.get("mahal") not in mahaller \
+                    or ac.get("duvar") not in NORMAL:
+                continue                                        # hatalı girdi aşağıdaki döngüde açık hata verir; "pano" yazılmışsa o geçerli
+            cand = _edges_of_room_side(duvarlar, ac["mahal"], NORMAL[ac["duvar"]])
+            if not cand:
+                continue
+            d, k0, k1 = max(cand, key=lambda c: c[2] - c[1])
+            lo, hi = (X(k0 / 2), X(k1 / 2)) if d.yon == "x" else (Y(k0 / 2), Y(k1 / 2))
+            lo, hi = min(lo, hi), max(lo, hi)
+            nlo, nhi = _oda_net_araligi(duvarlar, d, lo, hi)
+            pencere_hedef[i] = [d.id, (nlo + nhi) / 2.0, lo, hi, None]
+
     # ---------------- pano ayrıştırma
     for d in duvarlar:
         splits = []
@@ -616,6 +657,21 @@ def _kur(is_emri: dict) -> Plan:
             sinirlar += [s0 + MOD * i for i in range(1, k)]
         sinirlar += splits
         pts = [d.p0] + sorted(s for s in set(sinirlar) if d.p0 + 1e-9 < s < d.p1 - 1e-9) + [d.p1]
+        for i, hedef in pencere_hedef.items():                # İE-11 `dizilim.pencere: oda_ortasi`
+            did, mrk, lo, hi, _ = hedef
+            if did != d.id:
+                continue
+            w = float(PENCERE_OLCULERI[acikliklar[i]["olcu"]][0])
+            lo_p, hi_p = max(lo, d.p0), min(hi, d.p1)
+            parca = next(((a, b) for a, b in zip(pts, pts[1:]) if a - 1e-9 <= mrk <= b + 1e-9 and a >= lo_p - 1e-6 and b <= hi_p + 1e-6), None)
+            if parca and abs((parca[0] + parca[1]) / 2.0 - mrk) <= PENCERE_ORTALAMA_ESIGI_CM + 1e-6 and parca[1] - parca[0] >= w + 4 - 1e-9:
+                hedef[4] = parca[0]; continue                  # ızgara panosu oda ortasına yeterince yakın: ek kesim yok
+            q0, q1 = mrk - MOD / 2.0, mrk + MOD / 2.0
+            if q0 < lo_p - 1e-6 or q1 > hi_p + 1e-6:
+                uyarilar.append(f"Pencere {acikliklar[i].get('mahal')} {acikliklar[i].get('olcu')}: oda duvarı 125,5'lik pencereli panoya dar; ızgara panosunda kaldı")
+                continue
+            pts = [pts[0]] + sorted(set([q for q in pts[1:-1] if not (q0 - 1e-9 < q < q1 + 1e-9)] + [q for q in (q0, q1) if pts[0] + 1e-9 < q < pts[-1] - 1e-9])) + [pts[-1]]
+            hedef[4] = q0
         d.panolar = [Pano(d, pts[i], pts[i + 1]) for i in range(len(pts) - 1)]
         for p in d.panolar:
             if p.boy < 20 - 1e-9:
@@ -624,9 +680,7 @@ def _kur(is_emri: dict) -> Plan:
                 uyarilar.append(f"Duvar {d.id}: {p.boy} cm'lik uzun özel pano (125,5 üstü) — doğrulanmalı")
 
     # ---------------- açıklıklar
-    NORMAL = {"sol": "-x", "sag": "+x", "on": "-y", "arka": "+y"}
-    acikliklar = [(_ayna_aciklik(a) if ayna_y else a) for a in is_emri.get("acikliklar", [])]
-    for ac in acikliklar:
+    for i_ac, ac in enumerate(acikliklar):
         tur = ac["tur"]
         if "konum_cm" in ac or "hizalama" in ac:               # İE-11 madde 4 (cm konumlu / odada ortalı açıklık) PR-2'ye ertelendi; sessizce yutulmaz (K21)
             raise IsEmriHatasi(f"Açıklıkta konum_cm / hizalama henüz desteklenmiyor (İE-11 PR-2); pano dizini kullanın: {ac}")
@@ -658,7 +712,7 @@ def _kur(is_emri: dict) -> Plan:
             if not cand:
                 raise IsEmriHatasi(f"{a}–{b} arasında duvar yok: {ac}")
             acl = Acilim(tur, str(int(w)) if w == int(w) else str(w), w, None, arasi=(a, b), mentese=ac.get("mentese", "sag"),
-                         alan_kime=ac.get("alan_kime", a))
+                         alan_kime=ac.get("alan_kime", a), mentese_is_emri=ac.get("mentese"))
         panolar = []
         for d, k0, k1 in cand:
             lo = X(k0 / 2) if d.yon == "x" else Y(k0 / 2)
@@ -671,6 +725,10 @@ def _kur(is_emri: dict) -> Plan:
         if not panolar:
             raise IsEmriHatasi(f"Açıklık için uygun pano yok: {ac}")
         idx = ac.get("pano")
+        acl.pano_is_emri = idx
+        hedef = pencere_hedef.get(i_ac)
+        if idx is None and hedef is not None and hedef[4] is not None:     # İE-11 oda ortası pencere: bölmede seçilen pano
+            idx = next((j for j, (dd, pp) in enumerate(panolar) if dd.id == hedef[0] and abs(pp.a0 - hedef[4]) < 1e-6), None)
         if idx is None:
             idx = (len(panolar) - 1) // 2
         if not (0 <= idx < len(panolar)):
@@ -754,6 +812,8 @@ def _kur(is_emri: dict) -> Plan:
     plan = Plan(grid_nx, grid_ny, W, H, mahaller, duvarlar, koseler, h_bag, dikmeler, profil, acik_sinir_cizgileri, uyarilar, is_emri)
     if ayna_y:
         _aynala_y(plan, ny2)
+    if kapi_kurali == "mantik":
+        _kapi_mantigi(plan)
     return plan
 
 
@@ -810,6 +870,120 @@ def _acik_strip(k, yon, hat, a, b, sahip, h, cizgiler, ekle, cikar):
     ekle[sahip].append(strip); cikar[diger].append(strip)
 
 
+def _oda_net_araligi(duvarlar, d, lo, hi):
+    """İE-11: d duvarı boyunca [lo, hi] aks aralığının net hali — uçta d'ye değen dik duvarın gövdesi düşülür (PK-01: mutfak ön duvarı
+    10 … 256, salon ön duvarı 389,5 … 590)."""
+    for w in duvarlar:
+        if w.yon == d.yon:
+            continue
+        if not (min(w.p0, w.p1) <= d.c + d.h + 1e-6 and max(w.p0, w.p1) >= d.c - d.h - 1e-6):
+            continue                                            # w, d'nin hattına değmiyor
+        if abs(w.c - lo) <= w.h + 1e-6:
+            lo = max(lo, w.c + w.h)
+        if abs(w.c - hi) <= w.h + 1e-6:
+            hi = min(hi, w.c - w.h)
+    return lo, hi
+
+
+def _dayanak(duvarlar, d, e, isaret) -> bool:
+    """İE-11 kapı mantığı: d duvarındaki pano ucunda (e, d boyunca cm) açılma tarafına (isaret ±1, d'ye dik eksende) giden dik bir duvar var mı?
+    Kanat açıkken o duvara yaslanır."""
+    for w in duvarlar:
+        if w.yon == d.yon or abs(w.c - e) > w.h + 1e-6:
+            continue
+        lo_w, hi_w = min(w.p0, w.p1), max(w.p0, w.p1)
+        if isaret > 0 and lo_w <= d.c + d.h + 1e-6 and hi_w > d.c + d.h + 1.0:
+            return True
+        if isaret < 0 and hi_w >= d.c - d.h - 1e-6 and lo_w < d.c - d.h - 1.0:
+            return True
+    return False
+
+
+def _kapi_mantigi(plan: "Plan") -> None:
+    """İE-11 `dizilim.kapi: mantik` (Lokman 13.10.2026: "iç oda kapılarının kanatları birbirine doğru açılır"; PK-01 montaj paftası).
+    Gerçek çerçevede, aynadan sonra koşar. Her kapı için:
+      1. Pano: İş Emri dizin vermediyse aday panolardan, ucunda açılma tarafına dik duvar (dayanak) olan seçilir (kanat duvara yaslanır).
+      2. Menteşe ucu: dayanaklı uç; iki uç da dayanaklıysa komşu panoda (aynı hat, kavşağın öte yanı) kapı olan uç — kanatlar birbirine
+         doğru açılır, ikisi de bölmeye yaslanır; yine eşitse a0 ucu (sol / ön). Hiç dayanak yoksa İş Emri menteşesi kalır.
+      3. Oda kapısı (iç kapı) menteşe ucuna kayar: boşluk o pano ucundan KAPI_YASLAMA_CM içeride. Dış kapı panoda ortada kalır (pafta).
+    İş Emri menteşe yazdıysa ve kural farklı diyorsa İş Emri geçerli, uyarı yazılır."""
+    duvarlar = plan.duvarlar
+    tum = [(d, p) for d in duvarlar for p in d.panolar]
+    isaret_of = {"+x": 1, "-x": -1, "+y": 1, "-y": -1}
+
+    def dayanaklar(d, p, n):
+        k = isaret_of[n]
+        return _dayanak(duvarlar, d, p.a0, k), _dayanak(duvarlar, d, p.a1, k)
+
+    def sigar(p, acl):
+        return acl.genislik <= p.boy - 4 + 1e-9
+
+    # 1) pano seçimi (yalnız dizinsiz kapılar)
+    for d, p in list(tum):
+        acl = p.acilim
+        if not acl or acl.tur not in ("ic_kapi", "dis_kapi") or acl.pano_is_emri is not None:
+            continue
+        a, b = acl.arasi
+        cand = _edges_between(duvarlar, a, b) if OUT not in (a, b) else [(d, 0, 0)]
+        adaylar = []
+        for dd, k0, k1 in cand:
+            if OUT in (a, b):
+                adaylar = [(d, p)]; break
+            lo = X(k0 / 2) if dd.yon == "x" else Y(k0 / 2); hi = X(k1 / 2) if dd.yon == "x" else Y(k1 / 2)
+            lo, hi = min(lo, hi), max(lo, hi)
+            for pp in dd.panolar:
+                mid = (pp.a0 + pp.a1) / 2
+                if mid - acl.genislik / 2 >= lo - 1e-6 and mid + acl.genislik / 2 <= hi + 1e-6 and (pp.acilim is None or pp is p) and sigar(pp, acl):
+                    adaylar.append((dd, pp))
+        dayanakli = [(dd, pp) for dd, pp in adaylar if any(dayanaklar(dd, pp, _normal_from_to(dd, a, b)))]
+        if dayanakli and (d, p) not in dayanakli:
+            dayanakli.sort(key=lambda dp: (dp[0].id, dp[1].a0))
+            dd, pp = dayanakli[(len(dayanakli) - 1) // 2]
+            p.acilim = None; acl.icine_normal = _normal_from_to(dd, a, b); pp.acilim = acl
+
+    # 2–3) menteşe ucu ve kayma
+    def komsu_kapi(d, p, uc):
+        e = p.a0 if uc == 0 else p.a1
+        for dd in duvarlar:
+            if dd.yon != d.yon or abs(dd.c - d.c) > 1e-6:
+                continue
+            for q in dd.panolar:
+                if q is p or not q.acilim or q.acilim.tur not in ("ic_kapi", "dis_kapi"):
+                    continue
+                if (uc == 0 and abs(q.a1 - e) < 1e-6) or (uc == 1 and abs(q.a0 - e) < 1e-6):
+                    return True
+        return False
+
+    for d in duvarlar:
+        for p in d.panolar:
+            acl = p.acilim
+            if not acl or acl.tur not in ("ic_kapi", "dis_kapi"):
+                continue
+            n = acl.icine_normal
+            d0, d1 = dayanaklar(d, p, n)
+            if d0 and d1:
+                k0, k1 = komsu_kapi(d, p, 0), komsu_kapi(d, p, 1)
+                uc = 1 if (k1 and not k0) else 0
+            elif d0 or d1:
+                uc = 0 if d0 else 1
+            else:
+                uc = None
+            if uc is None:
+                continue                                        # dayanak yok: İş Emri menteşesi ve ortalı kapı kalır
+            # menteşe adı: açılma yönünde yürürken sol / sağ (`mentese_ucu`, `kapi_varyanti` ile aynı sözleşme)
+            acl.mentese = "sol"
+            kural = "sol" if mentese_ucu(acl) == uc else "sag"
+            if acl.mentese_is_emri is not None and acl.mentese_is_emri != kural:
+                plan.uyarilar.append(f"Kapı {'–'.join(acl.arasi)}: İş Emri menteşesi '{acl.mentese_is_emri}', kapı mantığı '{kural}' diyor; İş Emri uygulandı")
+                kural = acl.mentese_is_emri
+            acl.mentese = kural; acl.varyant = None
+            uc = mentese_ucu(acl)
+            if acl.tur == "ic_kapi":
+                s = (p.boy - acl.genislik) / 2.0
+                if s > KAPI_YASLAMA_CM:
+                    acl.kayma = (s - KAPI_YASLAMA_CM) if uc == 1 else -(s - KAPI_YASLAMA_CM)
+
+
 def _edges_of_room_side(duvarlar, mahal, normal):
     out = []
     for d in duvarlar:
@@ -841,6 +1015,14 @@ def _normal_from_to(d, a, b):
             if d.yon == "y": return "+x" if x == a else "-x"
             return "+y" if x == a else "-y"
     raise IsEmriHatasi("kapı normali bulunamadı")
+
+
+def mentese_ucu(ac) -> int:
+    """Menteşenin panonun hangi ucunda olduğu: 0 → a0 (−x / ön), 1 → a1 (+x / arka). Sözleşme `kapi_varyanti` ile aynı: menteşe adı,
+    açılma yönünde (icine_normal) yürürken sol / sağ."""
+    sol_eksen = {"+x": 1, "-x": -1, "+y": -1, "-y": 1}[ac.icine_normal]   # sol vektörün duvar ekseni boyunca işareti
+    yon = sol_eksen if (ac.mentese or "sag") == "sol" else -sol_eksen
+    return 1 if yon > 0 else 0
 
 
 def kapi_varyanti(d, ac) -> str:

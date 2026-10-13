@@ -27,6 +27,9 @@ def dogrula(doc, plan: G.Plan, is_emri: dict) -> dict:
     KOSE_LAYERS = {G.katman("KOSE_PROFIL_60"), G.katman("KOSE_PROFIL_100")}
     limit = W + 150.0   # ana plan bölgesi (kopya sağda +300)
     hatalar = []
+    # İE-11: boşluğu panoda kaydırılmış açıklıklar (kapı mantığı); anahtar yoksa hepsi 0 → eski denetim
+    _r3 = lambda r: tuple(round(v, 3) for v in r)
+    kayma_of = {_r3(pn.rect()): pn.acilim.kayma for pn in plan.panolar if pn.acilim and abs(pn.acilim.kayma) > 1e-9}
     panels, koseler, gaps = [], [], []
     kinds = collections.Counter()
     for e in msp:
@@ -56,8 +59,8 @@ def dogrula(doc, plan: G.Plan, is_emri: dict) -> dict:
                 length = (gap[3] - gap[1]) if vertical else (gap[2] - gap[0])
                 mid_gap = ((gap[1] + gap[3]) / 2) if vertical else ((gap[0] + gap[2]) / 2)
                 mid_pan = ((outer[1] + outer[3]) / 2) if vertical else ((outer[0] + outer[2]) / 2)
-                if abs(mid_gap - mid_pan) > 1e-6:
-                    hatalar.append(f"Açıklık panoda merkezlenmemiş: {e.dxf.name}")
+                if abs(mid_gap - mid_pan - kayma_of.get(_r3(outer), 0.0)) > 1e-6:
+                    hatalar.append(f"Açıklık panoda merkezlenmemiş: {e.dxf.name}" if not kayma_of else f"Açıklık Plan'daki yerinde değil: {e.dxf.name}")
                 toks = e.dxf.name.split("_")
                 tok = next((t for t in toks if t in ("P01", "P02", "P03", "K01", "K02", "K03", "OPEN")), "?")
                 kind = "pencere" if tok.startswith("P") else ("gecis" if tok == "OPEN" else "kapi")
@@ -117,6 +120,27 @@ def dogrula(doc, plan: G.Plan, is_emri: dict) -> dict:
     for need in (W, H):
         if round(need, 6) not in meas:
             hatalar.append(f"Gerçek dış ölçü nesnesi yok: {need}")
+    # İE-11 `dizilim.kapi: mantik`: kapı kanadının süpürdüğü alan (kare, kanat boyu) başka kanatla ya da duvarla çakışmaz
+    if ((is_emri.get("yapi", {}).get("dizilim") or {}).get("kapi")) == "mantik":
+        sup = []
+        for pn in plan.panolar:
+            ac = pn.acilim
+            if not ac or ac.tur not in ("ic_kapi", "dis_kapi") or not ac.icine_normal:
+                continue
+            g = pn.gap(); dd = pn.duvar; w = ac.genislik; n = ac.icine_normal
+            if dd.yon == "y":
+                x0 = dd.c + dd.h if n == "+x" else dd.c - dd.h - w
+                sup.append((pn, box(x0, g[1], x0 + w, g[3])))
+            else:
+                y0 = dd.c + dd.h if n == "+y" else dd.c - dd.h - w
+                sup.append((pn, box(g[0], y0, g[2], y0 + w)))
+        duvar_govde = unary_union([box(*r) for p_ in panels for r in p_["rects"]] + [box(*k) for k in koseler])
+        for i, (pa, ba) in enumerate(sup):
+            if ba.intersection(duvar_govde).area > 1e-6:
+                hatalar.append(f"Kapı kanadı duvara çarpıyor: {'–'.join(pa.acilim.arasi)}")
+            for pb, bb in sup[i + 1:]:
+                if ba.intersection(bb).area > 1e-6:
+                    hatalar.append(f"Kapı kanatları çakışıyor: {'–'.join(pa.acilim.arasi)} / {'–'.join(pb.acilim.arasi)}")
     # H bağlantıları
     hs = [e for e in msp.query(f'INSERT[layer=="{G.katman("IC_UCLU_H_60")}"]') if e.dxf.insert.x < limit]
     hs_dis = [e for e in msp.query(f'INSERT[layer=="{G.katman("DIS_UCLU_H_100")}"]') if e.dxf.insert.x < limit]   # İE-11

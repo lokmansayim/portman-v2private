@@ -191,14 +191,21 @@ class Cizici:
         var = ""
         if ac is not None and ac.tur == "ic_kapi":
             var = ac.varyant or G.kapi_varyanti(d, ac); ac.varyant = var
-        name = f"BOM_{kod}_{mm_tag(L)}_{'DIS' if dis else 'IC'}_{kind}" + (f"_{var}" if var else "")
+        # İE-11 `dizilim.kapi: mantik`: dış kapı sembolü kaynakta sağ menteşeli (açılma yönünde yürürken); "sol" ise aynalanır. Eski yol: sembol sabit
+        dis_ayna = bool(ac is not None and ac.tur == "dis_kapi" and ac.mentese == "sol"
+                        and (self.plan.is_emri.get("yapi", {}).get("dizilim") or {}).get("kapi") == "mantik")
+        if dis_ayna:
+            var = "SOL"
+        kay = ac.kayma if ac is not None else 0.0                  # İE-11: boşluk panoda kaydırılmışsa blok geometrisi farklıdır
+        name = f"BOM_{kod}_{mm_tag(L)}_{'DIS' if dis else 'IC'}_{kind}" + (f"_{var}" if var else "") \
+            + (f"_KAY{'M' if kay < 0 else 'P'}{mm_tag(abs(kay))}" if abs(kay) > 1e-9 else "")
         frame = "H" if (ac is not None and ac.tur == "dis_kapi") else "V"
         if name in self.doc.blocks:
             return name, frame, kod
         blk = self.doc.blocks.new(name)
         if ac is None:
             self._rect(blk, 0, 0, t, L); return name, frame, kod
-        w = ac.genislik; s = (L - w) / 2.0
+        w = ac.genislik; s = (L - w) / 2.0 + kay                  # kay 0 → eski değer bit bit
         if ac.tur == "pencere":
             src, nat, bb = PENCERE_KAYNAK[ac.olcu]; dname, _ = self.dograma[ac.olcu]
             self._rect(blk, 0, 0, t, s); self._rect(blk, 0, s + w, t, L)
@@ -212,7 +219,7 @@ class Cizici:
             if var.startswith("SAG"): ix += t - 6.0   # kaynak yerleşim 60 mm duvarın +x yüzüne göredir
             if abs(w - 82) > 1e-6:
                 self.plan.uyarilar.append(f"İç kapı {w} cm: kaynak kapı sembolü 82 cm'lik; sembol ölçeklenmedi")
-            blk.add_blockref(dname, (ix, iy + (L - 125.5) / 2.0), dxfattribs={"rotation": rot, "xscale": xs, "layer": "IC_KAPILAR"})
+            blk.add_blockref(dname, (ix, iy + (L - 125.5) / 2.0 + kay), dxfattribs={"rotation": rot, "xscale": xs, "layer": "IC_KAPILAR"})
         elif ac.tur == "gecis":
             self._rect(blk, 0, 0, t, s); self._rect(blk, 0, s + w, t, L)
             blk.add_line((0, s), (t, s + w), dxfattribs={"layer": "IC_KAPILAR", "linetype": "DASHED"})   # kapısız geçiş işareti
@@ -221,7 +228,11 @@ class Cizici:
             src, (ix, iy), w0, SRC_LEFT, MARGIN = DIS_KAPI_KAYNAK; dname, _ = self._dis_kapi_blok(w)
             self._rect(blk, 0, 0, s, t); self._rect(blk, s + w, 0, L, t)
             xs = w / w0
-            blk.add_blockref(dname, (s + xs * (MARGIN - SRC_LEFT), iy), dxfattribs={"rotation": 0.0, "layer": "IC_KAPILAR"})
+            x_ins = s + xs * (MARGIN - SRC_LEFT)
+            if dis_ayna:                                            # boşluk ortasına göre ayna: x' = 2·orta − x, xscale −1
+                blk.add_blockref(dname, (2 * s + w - x_ins, iy), dxfattribs={"rotation": 0.0, "xscale": -1.0, "layer": "IC_KAPILAR"})
+            else:
+                blk.add_blockref(dname, (x_ins, iy), dxfattribs={"rotation": 0.0, "layer": "IC_KAPILAR"})
         return name, frame, kod
 
     def kose_blok(self, k: G.Kose):

@@ -9,6 +9,7 @@ kapsamadığı yolları (doğrulama kuralı, 250 dışı yükseklik, hata sonras
 """
 from __future__ import annotations
 import json
+import math
 import sys
 from collections import Counter
 from pathlib import Path
@@ -176,37 +177,46 @@ def test_hiza_izgara_tek_basina_p6001_ayni():
     assert izi(plan) == izi(ref)
 
 
-# --------------------------------------------------------------------------- PK-01 · Motor kilidi (paftaya uygunluk kanıtı değil)
+# --------------------------------------------------------------------------- PK-01 · Motor kilidi (gerileme; paftaya uygunluk kanıtı değil)
+
+PAFTA = KOK / "deneme" / "2026-10-13_pk_01" / "pafta_montaj.json"      # `pafta_oku.py` ile montaj paftasının vektörlerinden (elle okuma yok)
+
 
 def test_pk01_motor_kilidi():
-    """PK-01'in bugünkü Motor çıktısı (gerileme kilidi). Paftayla karşılaştırma `test_pk01_paftadan_sayilanlar`'da."""
+    """PK-01'in bugünkü Motor çıktısı (gerileme kilidi). Paftayla karşılaştırma `test_pk01_pafta_vektorleriyle`'de."""
     ie = _oku(PK01)
     assert G.yeni_anahtar_var(ie)
     plan = G.kur(_kopya(ie))
     assert (plan.W, plan.H) == (600.0, 1000.0)
     assert (plan.nx, plan.ny) == (5.0, 8.0), "Plan.nx/ny İş Emri ızgarasıdır; ek aks tabloyu büyütür, ızgarayı değil"
     dis = [d for d in plan.duvarlar if d.tur == "dis"]; ic = [d for d in plan.duvarlar if d.tur == "ic"]
-    assert sum(len(d.panolar) for d in dis) == 28 and sum(len(d.panolar) for d in ic) == 20
+    assert sum(len(d.panolar) for d in dis) == 30 and sum(len(d.panolar) for d in ic) == 20
     assert len(plan.koseler) == 7 and Counter(k.tur for k in plan.koseler) == {"dis": 6, "ic": 1}
     assert Counter(h.tur for h in plan.h_baglantilar) == {"ic": 4, "dis": 5}
-    # boylar: tam küme (alt küme değil)
-    assert Counter(round(p.boy, 2) for d in dis for p in d.panolar) == {125.5: 19, 111.5: 2, 78.0: 2, 62.75: 2, 120.5: 1, 83.5: 1, 37.0: 1}
-    assert Counter(round(p.boy, 2) for d in ic for p in d.panolar) == {125.5: 9, 122.5: 5, 120.5: 2, 32.0: 2, 62.75: 1, 78.0: 1}
+    assert Counter(round(p.boy, 2) for d in dis for p in d.panolar) == {125.5: 19, 111.5: 2, 62.75: 2, 78.0: 1, 83.5: 1, 37.0: 1,
+                                                                        60.25: 2, 40.5: 1, 37.5: 1}
+    assert Counter(round(p.boy, 2) for d in ic for p in d.panolar) == {125.5: 10, 122.5: 4, 120.5: 2, 32.0: 2, 59.75: 1, 78.0: 1}
     assert Counter(p.acilim.tur for p in plan.panolar if p.acilim) == {"pencere": 6, "ic_kapi": 5, "dis_kapi": 1}
-    # aks dışı duvar: arkadan 795 → gerçek çerçevede 205
-    assert any(d.yon == "x" and abs(d.c - 205.0) < 1e-6 for d in dis)
-    assert abs(_duvar(plan, "y", 5.0).panolar[0].boy - 111.5) < 1e-6           # sol dış duvarın ön ucu kesilmiş pano
-    assert [round(p.boy, 2) for p in _duvar(plan, "y", 266.0).panolar] == [111.5, 83.5]   # veranda sol duvarı ızgara hizalı
+    assert any(d.yon == "x" and abs(d.c - 205.0) < 1e-6 for d in dis)                       # aks dışı duvar: arkadan 795 → 205
+    assert abs(_duvar(plan, "y", 5.0).panolar[0].boy - 111.5) < 1e-6                        # sol dış duvarın ön ucu kesilmiş pano
+    ver = _duvar(plan, "y", 261.0)                                                          # veranda sol duvarı aksa ortalı (cevre_aks_disinda)
+    assert ver.tur == "dis" and [round(p.boy, 2) for p in ver.panolar] == [111.5, 83.5]
     assert [p.acilim.dograma for p in plan.panolar if p.acilim and p.acilim.tur == "dis_kapi"] == ["alıcıya ait"]
-    # hol↔mutfak ve hol↔salon kapıları paftadaki panoda: arkadan 381,5–507 → gerçek 493–618,5
-    for c in (261.0, 386.5):
-        kapi = [p for p in _duvar(plan, "y", c).panolar if p.acilim and p.acilim.tur == "ic_kapi" and set(p.acilim.arasi) & {"MUTFAK", "SALON"}]
-        assert len(kapi) == 1 and (round(kapi[0].a0, 2), round(kapi[0].a1, 2)) == (493.0, 618.5), (c, [(p.a0, p.a1) for p in kapi])
+    # pencere odaya ortalı (mutfak ve salon önde; ötekiler ızgarada kaldı, ≤ ¼ pano)
+    pen = {(p.acilim.mahal, p.acilim.olcu): (round(p.a0, 2), round(p.a1, 2)) for p in plan.panolar if p.acilim and p.acilim.tur == "pencere"}
+    assert pen[("MUTFAK", "120x180")] == (70.25, 195.75) and pen[("SALON", "120x180")] == (427.0, 552.5)
+    assert pen[("BANYO", "60x40")] == (198.25, 323.75) and pen[("SALON", "120x120")] == (367.5, 493.0)
+    # kapı mantığı: oda kapıları bölmeye yaslı, kanatlar birbirine doğru (Lokman 13.10 08:53)
+    kapi = {tuple(p.acilim.arasi): (round(p.gap()[1 if p.duvar.yon == "y" else 0], 2), round(p.gap()[3 if p.duvar.yon == "y" else 2], 2), G.mentese_ucu(p.acilim))
+            for p in plan.panolar if p.acilim and p.acilim.tur in ("ic_kapi", "dis_kapi")}
+    assert kapi[("HOL", "MUTFAK")] == (525.0, 607.0, 1) and kapi[("HOL", "YATAK ODASI 1")] == (630.0, 712.0, 0)
+    assert kapi[("HOL", "SALON")] == (525.0, 607.0, 1) and kapi[("HOL", "YATAK ODASI 2")] == (630.0, 712.0, 0)
+    assert kapi[("HOL", "BANYO")] == (290.0, 372.0, 1) and kapi[("VERANDA", "HOL")] == (278.75, 368.75, 0)
     # aks etiketleri: ek aks numara kaydırmaz (205 → "2′")
     assert G.ana_aks_etiketleri("x") == ["A", "B", "C", "D", "E", "F"]
     assert G.ana_aks_etiketleri("y") == ["1", "2", "2′", "3", "4", "5", "6", "7", "8", "9"]
     assert G.ana_akslar("y")[2] == 205.0
-    assert plan.uyarilar == []
+    assert plan.uyarilar == [] and plan.dikmeler == [(590.0, 0.0, 600.0, 10.0)]
     # yan dış duvarlardaki dış üçlü H gövde ortasında (x = 5 / 595), ön-arka duvardakiler eksende (hakem 2. tur 6)
     dis_h = sorted((round(h.x, 2), round(h.y, 2), h.rot) for h in plan.h_baglantilar if h.tur == "dis")
     assert {x for x, _, rot in dis_h if rot in (0.0, 180.0)} <= {5.0, 595.0}, dis_h
@@ -219,64 +229,152 @@ def test_pk01_motor_kilidi():
             assert mh.poly.difference(hucreler).area < 1e-6, ad
 
 
-def test_pk01_paftadan_sayilanlar():
-    """Paftadan sayılanların Motor'la tutan kısmı (PK01_okuma.md). Tutmayanlar `test_pk01_pafta_sapmalari`'nda."""
+def _pano_ekleri(plan):
+    """Pano eki H noktaları: her duvarda iki pano arasındaki ek; üçlü H'nin oturduğu T bölmeleri hariç."""
+    out = []
+    for d in plan.duvarlar:
+        for a, b in zip(d.panolar, d.panolar[1:]):
+            xy = (a.a1, d.c) if d.yon == "x" else (d.c, a.a1)
+            if not any(abs(h.x - xy[0]) < 6 and abs(h.y - xy[1]) < 6 for h in plan.h_baglantilar):
+                out.append((d.tur, xy))
+    return out
+
+
+def _bire_bir(ref, aday, tol):
+    """Her referans noktasına en yakın, henüz kullanılmamış aday nokta (tol cm içinde). Eşleşmeyen referanslar döner."""
+    kalan, eksik = list(aday), []
+    for r in ref:
+        j = min(range(len(kalan)), key=lambda i: math.dist(r, kalan[i]), default=None)
+        if j is None or math.dist(r, kalan[j]) > tol:
+            eksik.append(r)
+        else:
+            kalan.pop(j)
+    return eksik, kalan
+
+
+def test_pk01_pafta_vektorleriyle():
+    """Kör test geometri kanıtı: Motor'un PK-01 çıktısı montaj paftasının vektörleriyle (`pafta_montaj.json`, `pafta_oku.py`).
+    Panolar ve köşeler 0,6 cm (PDF adımı ~0,25 cm), pencereler 1 cm, H işaretleri 10 cm (daireler kavşağın yanına çizili), kapı boşluğu 2,5 cm.
+    Bilinen fark: dış kapı boşluğu 90 (K04 çalışma kabulü), paftada 82 çizili — yalnız menteşe ucu ve boşluğun içte kalması sınanır."""
+    pf = json.loads(PAFTA.read_text(encoding="utf-8")); m = pf["montaj_plani_s2"]
     plan = G.kur(_oku(PK01))
-    pafta = {"YATAK ODASI 1": 7.5, "BANYO": 4.4, "YATAK ODASI 2": 7.3, "HOL": 6.3, "MUTFAK": 14.9, "SALON": 8.1, "VERANDA": 6.6}
-    for ad, m2 in pafta.items():
-        assert abs(plan.mahaller[ad].alan_m2 - m2) <= 0.2, (ad, plan.mahaller[ad].alan_m2)   # pafta etiketi 0,1 m²'ye yuvarlı
-    assert Counter(p.acilim.tur for p in plan.panolar if p.acilim) == {"pencere": 6, "ic_kapi": 5, "dis_kapi": 1}   # pafta: 6 pencere, 5 iç + 1 dış kapı
-    ic = [d for d in plan.duvarlar if d.tur == "ic"]
-    ic_eki = sum(len(d.panolar) - 1 for d in ic) - sum(1 for h in plan.h_baglantilar if h.tur == "ic")
-    assert ic_eki == 10                                                                      # pafta: H standart (iç) 10
-    assert {37.0, 62.75, 78.0, 83.5, 111.5, 120.5, 122.5, 32.0} <= {round(p.boy, 2) for d in plan.duvarlar for p in d.panolar}   # paftadaki özel boylar
-    assert len(plan.koseler) == 7
-
-
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason="PK-01 paftası: üçlü H 10 (5 iç); Motor 9 (4 iç + 5 dış) — İE-11 Kanıt 3, PR-2 kıyas raporu")
-def test_pk01_sapma_uclu_h():
-    plan = G.kur(_oku(PK01))
-    assert Counter(h.tur for h in plan.h_baglantilar) == {"ic": 5, "dis": 5}
-
-
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason="PK-01 paftası: dış pano eki H 19 (12 kulaklı + 7 dübelli); Motor 17 — İE-11 Kanıt 3, PR-2")
-def test_pk01_sapma_dis_pano_eki_h():
-    plan = G.kur(_oku(PK01))
-    dis = [d for d in plan.duvarlar if d.tur == "dis"]
-    assert sum(len(d.panolar) - 1 for d in dis) - sum(1 for h in plan.h_baglantilar if h.tur == "dis") == 19
-
-
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason="PK-01 paftası: banyo 60/40 penceresinin panosu 122,5 (x 204,25–326,75: dış pano iç T'de kısalıyor); Motor 125,5 (198,25–323,75) — PR-2")
-def test_pk01_sapma_banyo_penceresi_panosu():
-    plan = G.kur(_oku(PK01))
-    p = next(p for p in plan.panolar if p.acilim and p.acilim.olcu == "60x40")
-    assert (round(p.a0, 2), round(p.a1, 2)) == (204.25, 326.75)
-
-
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason="PK-01 okuması (PK01_okuma.md:32): 59,75'lik parça var (62,75 − 3); Motor üretmiyor (banyo alt duvarı 261'de bölünüyor: 62,75 + 122,5) — paftada yeri PR-2'de doğrulanır")
-def test_pk01_sapma_59_75():
-    plan = G.kur(_oku(PK01))
-    assert 59.75 in {round(p.boy, 2) for p in plan.panolar}
+    es = lambda a, b, t: all(abs(x - y) <= t for x, y in zip(a, b))
+    # panolar: 50 / 50, standart ↔ özel ayrımı dahil
+    mp = [(("STD" if abs(p.boy - G.MOD) < 1e-6 else "OZEL"), p.rect()) for p in plan.panolar]
+    assert len(m["panolar"]) == len(mp) == 50
+    for pp in m["panolar"]:
+        assert any(t == pp["tur"] and es(pp["rect"], r, 0.6) for t, r in mp), pp
+    # köşeler (7) + veranda dikmesi (paftada köşe renginde 10 × 10)
+    motor_kose = [k.rect for k in plan.koseler] + list(plan.dikmeler)
+    assert len(m["koseler"]) == len(motor_kose) == 8
+    for k in m["koseler"]:
+        assert any(es(k["rect"], r, 0.6) for r in motor_kose), k
+    # pencereler: uç işaretleri çiftler halinde pencere boşluğunun iki ucunda
+    isaret = m["pencere_uc_isaretleri"]; assert len(isaret) == 12
+    for p in [p for p in plan.panolar if p.acilim and p.acilim.tur == "pencere"]:
+        g = p.gap(); d = p.duvar
+        uc = [(g[0], d.c), (g[2], d.c)] if d.yon == "x" else [(d.c, g[1]), (d.c, g[3])]   # boşluğun iki ucu, duvar ekseninde
+        for x, y in uc:
+            assert any(r[0] - 1.0 <= x <= r[2] + 1.0 and r[1] - 1.0 <= y <= r[3] + 1.0 for r in isaret), (p.acilim.mahal, p.acilim.olcu, uc)
+    # kapılar: kanat (ince dörtgen) + yay → boşluk aralığı ve menteşe ucu
+    kapilar = [p for p in plan.panolar if p.acilim and p.acilim.tur in ("ic_kapi", "dis_kapi")]
+    assert len(m["kanatlar"]) == len(m["kanat_yaylari"]) == len(kapilar) == 6
+    for p in kapilar:
+        d, ac = p.duvar, p.acilim; g = p.gap()
+        lo, hi = (g[1], g[3]) if d.yon == "y" else (g[0], g[2])
+        # bu duvardaki pafta kanadı: yayın bir ucu duvar hattında (kapalı kanat ucu), kanadın kökü duvar yüzünde
+        eslesen = None
+        for kn in m["kanatlar"]:
+            r = kn["rect"]
+            uzun_x = (r[2] - r[0]) > (r[3] - r[1])
+            if d.yon == "y" and uzun_x and (abs(r[0] - (d.c + d.h)) < 1 or abs(r[2] - (d.c - d.h)) < 1) and lo - 15 < (r[1] + r[3]) / 2 < hi + 15:
+                eslesen = (r[1], r[3]); break
+            if d.yon == "x" and not uzun_x and (abs(r[1] - (d.c + d.h)) < 1 or abs(r[3] - (d.c - d.h)) < 1) and lo - 15 < (r[0] + r[2]) / 2 < hi + 15:
+                eslesen = (r[0], r[2]); break
+        assert eslesen, ("paftada kanat yok", ac.arasi)
+        kanat_orta = (eslesen[0] + eslesen[1]) / 2
+        pafta_ucu = 0 if abs(kanat_orta - lo) < abs(kanat_orta - hi) else 1           # kanat menteşe ucunda durur
+        assert G.mentese_ucu(ac) == pafta_ucu, (ac.arasi, G.mentese_ucu(ac), pafta_ucu)
+        yay = next(y for y in m["kanat_yaylari"] if any(
+            (abs(px - (d.c - d.h if d.yon == "y" and ac.icine_normal == "-x" else d.c + d.h if d.yon == "y" else 0)) < 1.5 and lo - 15 < py < hi + 15) if d.yon == "y"
+            else (abs(py - (d.c + d.h if ac.icine_normal == "+y" else d.c - d.h)) < 1.5 and lo - 15 < px < hi + 15)
+            for px, py in ((y[0], y[1]), (y[2], y[3]))))
+        kapali = [(px, py) for px, py in ((yay[0], yay[1]), (yay[2], yay[3]))
+                  if (abs(px - (d.c + d.h if ac.icine_normal == "+x" else d.c - d.h)) < 1.5 if d.yon == "y" else abs(py - (d.c + d.h if ac.icine_normal == "+y" else d.c - d.h)) < 1.5)]
+        kapali_ucu = (kapali[0][1] if d.yon == "y" else kapali[0][0])
+        dis_kenar = eslesen[1] if pafta_ucu == 1 else eslesen[0]
+        p_lo, p_hi = sorted((kapali_ucu, dis_kenar))
+        if ac.tur == "dis_kapi":
+            assert lo - 1 <= p_lo and p_hi <= hi + 1, (ac.arasi, (lo, hi), (p_lo, p_hi))   # paftadaki 82'lik boşluk bizim 90'lık boşluğun içinde
+        else:
+            assert abs(lo - p_lo) <= 2.5 and abs(hi - p_hi) <= 2.5, (ac.arasi, (lo, hi), (p_lo, p_hi))
+    # H profil planı (sayfa 3): 38 işaret; üçlü (4 iç + 5 dış) ve pano ekleri (19 dış + 10 iç) yer yer eşleşir
+    hp = pf["h_plani_s3"]
+    for cins, duvar, motor in (("uclu", "ic", [(h.x, h.y) for h in plan.h_baglantilar if h.tur == "ic"]),
+                               ("uclu", "dis", [(h.x, h.y) for h in plan.h_baglantilar if h.tur == "dis"]),
+                               ("pano_eki", "dis", [xy for t, xy in _pano_ekleri(plan) if t == "dis"]),
+                               ("pano_eki", "ic", [xy for t, xy in _pano_ekleri(plan) if t == "ic"])):
+        ref = [tuple(h["xy"]) for h in hp if h["cins"] == cins and h["duvar"] == duvar]
+        eksik, fazla = _bire_bir(ref, motor, 10.0)
+        assert not eksik and not fazla, (cins, duvar, len(ref), len(motor), eksik, fazla)
+    assert Counter((h["cins"], h["duvar"]) for h in hp) == {("uclu", "ic"): 4, ("uclu", "dis"): 5, ("pano_eki", "dis"): 19, ("pano_eki", "ic"): 10}
+    # mahal alanları pafta etiketleriyle (0,1 m²'ye yuvarlı) ±0,2 m²
+    etiket = {"YATAK ODASI 1": 7.5, "BANYO": 4.4, "YATAK ODASI 2": 7.3, "HOL": 6.3, "MUTFAK": 14.9, "SALON": 8.1, "VERANDA": 6.6}
+    for ad, m2 in etiket.items():
+        assert abs(plan.mahaller[ad].alan_m2 - m2) <= 0.2, (ad, plan.mahaller[ad].alan_m2)
 
 
 def test_pk01_uret_dogrulama(tmp_path):
     import ezdxf
     from motor import dxf_out
-    m = dxf_out.uret(_oku(PK01), tmp_path, pdf_hatada=True)
+    ie = _oku(PK01)
+    m = dxf_out.uret(ie, tmp_path, pdf_hatada=True)
     assert m["validation_passed"] is True and m["pdf"] is not None
     bom = json.loads((tmp_path / "bom.json").read_text(encoding="utf-8"))["kalemler"]
     k03 = [r for r in bom if r["kod"] == "K03"]                       # doğrama satırı; "Dış kapılı özel pano" (D07) işaretlenmez
     assert len(k03) == 1 and k03[0].get("alici") is True and k03[0]["alici_adet"] == 1 and "Alıcıya ait" in k03[0]["not"]
     assert not any(r.get("alici") for r in bom if r["kod"] != "K03"), "alıcıya ait işareti yalnız doğrama satırında olmalı"
     assert any(r["malzeme"].startswith("Üçlü H bağlantı dış") and r["adet"] == 5 for r in bom)
-    # dış üçlü H kendi katmanında; iç katmanda yalnız 4 iç
+    # dış üçlü H kendi katmanında; iç katmanda yalnız 4 iç; dış kapı sembolü sol menteşe için aynalı blokta
     doc = ezdxf.readfile(tmp_path / Path(m["dxf"]).name); msp = doc.modelspace(); W = 600.0 + 150.0
     assert sum(1 for e in msp.query('INSERT[layer=="DIS_UCLU_H_100"]') if e.dxf.insert.x < W) == 5
     assert sum(1 for e in msp.query('INSERT[layer=="IC_UCLU_H_60"]') if e.dxf.insert.x < W) == 4
+    assert any(b.name.endswith("_K02_SOL") for b in doc.blocks)
     v = json.loads((tmp_path / "validation.json").read_text(encoding="utf-8"))
     assert v["panel_grid"] == [5.0, 8.0]
-    # Motor uyarısı yok; İş Emri'nin pafta uyarıları validation.json'da
-    assert len(v["warnings"]) == 5 and all(w.startswith(("PK-01", "Veranda", "Banyo", "Üçlü H", "Okumadaki")) for w in v["warnings"])
+    assert v["warnings"] == list(ie.get("pafta_uyarilari", [])), "Motor uyarısı yok; yalnız İş Emri'nin pafta uyarıları"
+
+
+def test_kapi_mantigi_p6001_carpismasiz(tmp_path):
+    """`dizilim.kapi: mantik` başka bir planda da çalışır: P6001'e uygulanınca doğrulama (kanat çakışması dahil) geçer, her kapı dayanaklı uca menteşelenir."""
+    from motor import dxf_out
+    ie = _oku(P6001); ie["yapi"]["dizilim"] = {"kapi": "mantik"}
+    for a in ie["acikliklar"]:
+        a.pop("mentese", None)
+    m = dxf_out.uret(ie, tmp_path, pdf_hatada=True)
+    v = json.loads((tmp_path / "validation.json").read_text(encoding="utf-8"))
+    assert m["validation_passed"] is True, v["errors"]
+    plan = G.kur(_oku(P6001) | {"yapi": ie["yapi"], "acikliklar": ie["acikliklar"]})
+    for p in plan.panolar:
+        if p.acilim and p.acilim.tur == "ic_kapi":
+            d0, d1 = (G._dayanak(plan.duvarlar, p.duvar, e, {"+x": 1, "-x": -1, "+y": 1, "-y": -1}[p.acilim.icine_normal]) for e in (p.a0, p.a1))
+            if d0 or d1:
+                assert (d0, d1)[G.mentese_ucu(p.acilim)], (p.acilim.arasi, d0, d1)
+
+
+def test_pencere_oda_ortasi_esigi():
+    """`dizilim.pencere: oda_ortasi`: ızgara panosu oda ortasından ≤ ¼ pano kaçıyorsa ızgara kalır (banyo tam ¼: 31,375), yoksa pencereli pano odaya ortalanır."""
+    plan = G.kur(_oku(PK01))
+    for p in plan.panolar:
+        if p.acilim and p.acilim.tur == "pencere":
+            assert abs(p.boy - G.MOD) < 1e-6, (p.acilim.mahal, p.boy)                  # pencereli pano her zaman tam pano
+    ie = _oku(PK01); ie["yapi"]["dizilim"]["pencere"] = "pano"
+    for a in ie["acikliklar"]:
+        if a["tur"] == "pencere":
+            a["pano"] = 0
+    with_pano = G.kur(ie)
+    mutfak = next(p for p in with_pano.panolar if p.acilim and p.acilim.mahal == "MUTFAK")
+    assert (round(mutfak.a0, 2), round(mutfak.a1, 2)) != (70.25, 195.75)                  # eski kural: ızgara panosu, ortalama yok
 
 
 def test_alici_karisik_kod_satiri_isaretlenmez(tmp_path):

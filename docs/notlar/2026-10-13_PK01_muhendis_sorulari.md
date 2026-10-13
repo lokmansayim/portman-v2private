@@ -1,5 +1,11 @@
 # PK-01 (Huma 60 m² tek kat prefabrik) · mühendise dört soru
 
+> **13 Ekim 2026 09:40 güncellemesi:** montaj paftası vektörlerinden okununca (`deneme/2026-10-13_pk_01/pafta_oku.py`) 1, 2 ve 3 cevaplandı,
+> mühendise gitmesi gerekmiyor. **1–2:** pencereli pano (125,5) odanın net açıklığına ortalı, yanları özel pano. Mutfak önde
+> 60,25 + 125,5 + 60,25 (10 → 256), salon önde 40,5 + 125,5 + 37,5 (386,5 → 590). Lokman 08:53'te "pencereleri ortaya al" dedi.
+> **3:** veranda sol duvarı 255,9–266 aralığında, yani 261 aksına ortalı; önceki "266–276" okumam yanlıştı. Motor bu üçünü artık
+> paftayla aynı çiziyor (İE-11, D-13). **4 (tavan omega) açık;** yükleme listesiyle (PR-2) birlikte sorulur.
+
 13 Ekim 2026. Lokman iletir; cevaplar `deneme/2026-10-13_pk_01/PK01_okuma.md`'ye ve gerekirse kural kitabına işlenir. Kaynak: montaj paftası
 (`HUMA 60M2 MONTAJ PAFTASI.pdf`, 10 sayfa) ve aynı klasördeki iki pafta. Gerçek yükleme listesi henüz açılmadı (kör test).
 

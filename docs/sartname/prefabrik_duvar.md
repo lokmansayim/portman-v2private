@@ -30,6 +30,19 @@ Kaynak: Lokman'ın anlattıkları (1–2, 6 ve 12 Ekim 2026). Astra dönemindeki
   Anahtar yoksa eski davranış sürer (P6001 bayt bayt aynı).
   **Çerçeve kuralı (arka-sol):** konumlar (`konum_cm`, `ek_akslar_cm`, `konum_pano`, sol/sağ duvardaki pano dizini) arkadan sayılır; cephe adları, menteşe ve dikmeler gerçek yöndedir. Yanlış çerçevede girilen değer hata vermez, başka yere çizer — İş Emri yazarken (ve Beyin'e bağlanırken) bu kural uygulanır.
 
+## Kapı ve pencere yerleşimi (D-13; Lokman 13 Ekim 08:53)
+
+- **Pencere** odanın net açıklığına ortalanır. Pencereli pano 125,5 cm'dir, yanları özel pano olur (PK-01: mutfak önde 60,25 + 125,5 + 60,25, salon önde 40,5 + 125,5 + 37,5). Izgaradaki pano oda ortasından en çok ¼ pano kaçıyorsa ızgara kalır. Anahtar: `dizilim.pencere: oda_ortasi`.
+- **Kapı:**
+  - Ucunda açılma tarafına dik duvar olan panoya konur; menteşe o uçtadır.
+  - Bölmenin iki yanındaki oda kapılarının kanatları birbirine doğru açılır, ikisi de bölmeye yaslanır.
+  - Oda kapısının boşluğu menteşe ucundaki pano kenarından 11,5 cm içeridedir; dış kapı panoda ortada kalır.
+  - Kanat süpürme alanları çakışmaz.
+  - Anahtar: `dizilim.kapi: mantik`.
+- **Köşe:** L köşenin kolları arasında kapalı oda varsa düşey duvar uzar ve köşe parçası odanın dışına düşer. Veranda içindeki köşede yatay duvar uzar. Anahtar: `dizilim.kose: oda`.
+- **Veranda duvarı:** çevrede olmayan dış düşey duvar aksa ortalıdır. Anahtar: `dis_dusey_duvar: cevre_aks_disinda`.
+- Hepsi PK-01 montaj paftasının vektörleriyle ölçüldü (`deneme/2026-10-13_pk_01/pafta_oku.py`). Motor bu planda 50 panonun 50'sini, 38 H işaretinin 38'ini paftayla aynı veriyor.
+
 ## Aks dışı duvar ve dış duvar T bölmesi (PK-01; İE-11)
 
 - Gerçek projede bir duvar 125,5 ızgarasının dışında olabilir (PK-01: hol/salon ön duvarı arkadan 795). `yapi.ek_akslar_cm` ile aks tablosuna eklenir; mahaller `konum_cm` ile aks sınırlarıyla verilir (aks olmayan değer hata). Ek aks paftada ana aks sayılır.
@@ -60,6 +73,6 @@ Kaynak: Lokman'ın anlattıkları (1–2, 6 ve 12 Ekim 2026). Astra dönemindeki
 - İç duvar (6 cm) neyden oluşuyor?
 - Ölçüye kesimde son parça çok dar çıkarsa (örnek: 30 cm; iç duvarda 22 cm) ne yapılır? En az pano boyu var mı? (PK-01 paftasında en dar dış parça 37, iç 32.)
 - Ölçüye kesimde dizilim hangi uçtan başlar? — **Projeye göre değişiyor; parametre (İE-11 `dizilim.baslangic`).** PK-01 paftası arkadan ve ızgaraya hizalı dizer; kural mı, o paftanın tercihi mi — ikinci kör testle (çift kat) görülecek.
-- PK-01 mühendis soruları (`docs/notlar/2026-10-13_PK01_muhendis_sorulari.md`): ön pencerelerin iki panoya yayılması, veranda duvar hizası (266 ↔ 261), tavan omega adetleri.
+- PK-01 mühendis soruları: pencere ve veranda hizası paftadan cevaplandı (D-13). Tavan omega adetleri açık (PR-2).
 - 160 mm dış ve 100 mm iç duvarda köşe ve H bağlantı profilleri hangileri?
 - 160 mm ve 100 mm panonun katmanları (levha ve dolgu kalınlığı).

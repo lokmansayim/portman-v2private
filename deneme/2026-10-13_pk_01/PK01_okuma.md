@@ -94,3 +94,26 @@ Bu yüzden kör testin 2–3. adımları (motor çizimi, kendi listemiz) **bekle
 - Baş makas betopanı: kalkan başına 2 × (125 × 250).
 - Dış duvarlar 100 mm'de bile köşe parçası ve H ölçüleri: H 100×100, iç H 60×60.
 - İç duvarın T'ye gelen panosu 3 cm (122,5) ya da 5 cm (120,5) kısalır (Astra v1.4.3 ile aynı).
+
+## Düzeltme · vektör okuması (13 Ekim 2026 09:40)
+
+Montaj paftasının (sayfa 2) ve H profil planının (sayfa 3) çizgileri `pafta_oku.py` ile koordinata çevrildi (`pafta_montaj.json`).
+Elle yaptığım ilk okumada şunlar **yanlıştı**:
+
+| Konu | İlk okuma | Pafta vektörü |
+|---|---|---|
+| Banyo 60/40 penceresi | x 204,25–326,75 (122,5'lik pano) | **198,25–323,75 (125,5'lik pano)**, pencere 230,7–290,7 (panoda ortalı) |
+| Veranda sol duvarı | 266–276 | **255,9–266**, 261 aksına ortalı |
+| Üçlü H | 10 (5 iç) | **9 (4 iç + 5 dış)**; plandaki 38 işaret: dış pano eki 19 (12 kulaklı + 7 dübelli), iç 10, üçlü 9 |
+| 59,75'lik parça | yeri belirsiz | banyo alt duvarı 201,25 → 261 (iç L köşede düşey duvar aksa iner, yatay yüzden başlar) |
+| Kapı yerleri | panoda ortalı varsayıldı | oda kapıları bölme duvarın dibinde; menteşe bölme tarafında, kanatlar birbirine doğru; boşluk menteşe ucundaki pano kenarından 11,3–11,6 cm içeride (banyo 13,3); dış kapı panoda ortada, sol menteşe |
+| Veranda dikmesi | yok | ön-sağ köşede 10 × 10 (590–600 × 0–10) |
+
+Bunlarla birlikte Motor'un PK-01 çıktısı paftayla örtüşüyor (`testler/motor/test_ie11.py::test_pk01_pafta_vektorleriyle`):
+- 50/50 pano 0,6 cm içinde;
+- 7 köşe ve dikme;
+- 6 pencere 1 cm içinde;
+- 6 kapının menteşe ucu ve 5'inin boşluğu 2,5 cm içinde (dış kapı 90 ↔ paftada 82, K04);
+- H işaretlerinin 38'i de yerinde.
+
+Kalan bilinen farklar `tanim/PK01.json › pafta_uyarilari`'nda.

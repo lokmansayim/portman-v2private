@@ -10,7 +10,7 @@
     8.0
   ],
   "units": "cm",
-  "panel_count": 48,
+  "panel_count": 50,
   "corner_count": 7,
   "windows": 6,
   "doors": 6,
@@ -28,22 +28,22 @@
     },
     {
       "kind": "kapi",
-      "name": "BOM_I04_1225p0_IC_K01_SOL_UST",
+      "name": "BOM_I04_1225p0_IC_K01_SOL_UST_KAYP87p5",
       "gap": [
-        281.25,
+        290.0,
         741.0,
-        363.25,
+        372.0,
         747.0
       ],
       "length": 82.0
     },
     {
       "kind": "kapi",
-      "name": "BOM_D07_1205p0_DIS_K02",
+      "name": "BOM_D10_1255p0_DIS_K02_SOL",
       "gap": [
-        281.25,
+        278.75,
         200.0,
-        371.25,
+        368.75,
         210.0
       ],
       "length": 90.0
@@ -52,9 +52,9 @@
       "kind": "pencere",
       "name": "BOM_D03_1255p0_DIS_P02",
       "gap": [
-        389.25,
+        429.75,
         200.0,
-        509.25,
+        549.75,
         210.0
       ],
       "length": 120.0
@@ -63,9 +63,9 @@
       "kind": "pencere",
       "name": "BOM_D03_1255p0_DIS_P02",
       "gap": [
-        12.75,
+        73.0,
         0.0,
-        132.75,
+        193.0,
         10.000000000000007
       ],
       "length": 120.0
@@ -83,45 +83,45 @@
     },
     {
       "kind": "kapi",
-      "name": "BOM_I11_1255p0_IC_K01_SOL_ALT",
+      "name": "BOM_I11_1255p0_IC_K01_SOL_UST_KAYP102p5",
       "gap": [
         258.0,
-        514.75,
+        525.0,
         264.0,
-        596.75
+        607.0
       ],
       "length": 82.0
     },
     {
       "kind": "kapi",
-      "name": "BOM_I04_1225p0_IC_K01_SOL_ALT",
+      "name": "BOM_I04_1225p0_IC_K01_SOL_ALT_KAYM87p5",
       "gap": [
         258.0,
-        638.75,
+        630.0,
         264.0,
-        720.75
+        712.0
       ],
       "length": 82.0
     },
     {
       "kind": "kapi",
-      "name": "BOM_I11_1255p0_IC_K01_SAG_ALT",
+      "name": "BOM_I11_1255p0_IC_K01_SAG_UST_KAYP102p5",
       "gap": [
         383.5,
-        514.75,
+        525.0,
         389.5,
-        596.75
+        607.0
       ],
       "length": 82.0
     },
     {
       "kind": "kapi",
-      "name": "BOM_I11_1255p0_IC_K01_SAG_ALT",
+      "name": "BOM_I11_1255p0_IC_K01_SAG_ALT_KAYM102p5",
       "gap": [
         383.5,
-        640.25,
+        630.0,
         389.5,
-        722.25
+        712.0
       ],
       "length": 82.0
     },
@@ -153,9 +153,9 @@
     "BANYO": 4.428675,
     "YATAK ODASI 2": 7.388425,
     "HOL": 6.34545,
-    "MUTFAK": 15.0764,
+    "MUTFAK": 14.9764,
     "SALON": 8.130275,
-    "VERANDA": 6.58
+    "VERANDA": 6.68
   },
   "h_connectors": 9,
   "h_connectors_dis": 5,
@@ -163,11 +163,8 @@
   "wall_overlap": true,
   "altin": null,
   "warnings": [
-    "PK-01 kör test (İE-11): ön pencereler panoda ortalı çizildi; paftada odada ortalı (salon 40,5/37,5, mutfak 60,25/60,25) — mühendis cevabı bekleniyor.",
-    "Veranda sol duvarı hol aksında (261–271); paftadaki 266–276 hizası mühendis sorusu.",
-    "Banyo 60/40 penceresi 198,25–323,75 panosunda; paftada 204,25–326,75 (dış duvar iç T'de 122,5'e kısalıyor) — Motor dış panoyu T'de kısaltmıyor, PR-2 kıyasına.",
-    "Üçlü H: Motor 4 iç + 5 dış = 9; paftada 10 (5 iç). Dış pano eki H: Motor 17; paftada 19. Fark PR-2 raporunda sınıflanır.",
-    "Okumadaki 59,75'lik parça (62,75 − 3) Motor'da yok: banyo alt duvarı hol duvarının T'sinde 261'de bölünüyor (62,75 + 122,5); paftadaki yeri PR-2 kıyasında doğrulanır."
+    "PK-01 kör test (İE-11): dış kapı boşluğu 90 cm (K04 çalışma kabulü); montaj paftasında 82 cm çizili — alıcıya ait kapının ölçüsü teyit edilmeli.",
+    "Banyo kapısı boşluğu paftadan 1,9 cm sağda (oda kapısı yaslama kuralı 11,5 cm; paftada bu kapıda 13,3)."
   ],
   "scope": "Ön onay taslağı; statik, üretim, BOM veya yeni oda tasarımı değildir",
   "saved_dxf_audit_errors": 0,
@@ -176,22 +173,26 @@
     "B01": 1,
     "B02": 6,
     "B03": 4,
+    "B04": 1,
     "B05": 5,
-    "D01": 13,
+    "D01": 12,
     "D02": 3,
     "D03": 2,
     "D04": 1,
     "D06": 2,
-    "D07": 1,
-    "D09": 2,
-    "D10": 2,
+    "D09": 1,
+    "D10": 1,
     "D11": 1,
     "D12": 1,
-    "I01": 6,
+    "D13": 2,
+    "D14": 2,
+    "D15": 1,
+    "D16": 1,
+    "I01": 7,
     "I02": 2,
+    "I03": 1,
     "I04": 2,
-    "I06": 1,
-    "I07": 3,
+    "I07": 2,
     "I11": 3,
     "I12": 1,
     "I13": 2,
