@@ -15,6 +15,7 @@ Kaynak: Lokman'ın anlattıkları (1–2, 6 ve 12 Ekim 2026). Astra dönemindeki
 - Panel ölçüsü 125 × 250, 280 ya da 300 cm. (1 Ekim)
 - **Yükseklik dağılımı (13 Ekim 07:28): %80 H 2500, %19 H 2800, %1 H 3000 mm; "bunların dışında başka ölçü yok", 260 diye bir yükseklik yok.** Kayıt: **D-12**, `kurallar/model/duvar_tipleri.json` `PE-DIS-100.pano.yukseklik_dagilimi`. Motor başka yüksekliği açık hatayla reddeder; 280 / 300 yeni kod yolundan geçer (pano kodu 2800 / 3000, lento = yükseklik − 200; pencere üst kotu 200 sabit **çıkarımdır, teyit bekler**).
 - Aksların 125,5 olmasının nedeni: birleşim elemanı olarak H profil kullanılıyor. (1 Ekim)
+- **Her iki panonun arasında H birleştirme profili; dışarıdan bakınca 5 cm, eke tam ortalı** (Lokman, 13 Ekim 09:39: "çelikten en büyük farkı pano yerleşimleri olacak"). Bayi paftasında ve perspektiflerde her ek görünür (İE-12). Ekte üçlü H varsa (T) o ek üçlü sayılır; PK-01: 19 dış + 10 iç pano eki, 5 dış + 4 iç üçlü (paftanın H planıyla aynı).
 - Astra'nın prefabrik aks mantığı doğru. (1 Ekim)
 
 ## Ölçüye kesim (özel pano)
