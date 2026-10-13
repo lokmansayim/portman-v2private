@@ -21,6 +21,7 @@ from .toplam import sum  # noqa: A001 — 3.11 toplama sırası her Python sür�
 import argparse
 import json
 import math
+import re
 import sys
 import time
 from pathlib import Path
@@ -189,36 +190,69 @@ def _blok(satirlar: list[str], pt: float) -> tuple[list[float], float]:
     return ara, (olc[0][0] + sum(ara) + olc[-1][1]) if satirlar else 0.0
 
 
-def _sigdir(v: str, pt_bas: float, en_az: float, gen: float, yuk: float | None = None, en_az_mutlak: float | None = None) -> tuple[float, list[str]]:
-    """Bina özellikleri değeri: önce yazı küçülür (en_az'a kadar), sığmazsa **iki** satıra sarılır (en büyük boyda), o da olmazsa üç
-    satır (kesilmez, bilgi kaybolmaz — Lokman 12.10.2026; KT-02'nin pencere satırı). Az satır çok satırdan önce gelir. Satır aralığı
-    mürekkep ölçüsüyledir (`_blok`; Lokman 13.10: yazı kutuları binmesin): blok `yuk`'a sığmalı. en_az'da hiçbir sarma sığmazsa yazı
-    `en_az_mutlak`'a kadar küçülür (kural anahtarı `ozellik_yazi_pt_mutlak`; KT-02 pencereler ≈ 4,4 pt) — bilgi kesilmez. Dönen: (pt, satırlar)."""
+def _sadelestir(v: str, bir_carpani: bool, adet_sozcugu: bool) -> list[str]:
+    """Sığmayan değerin daha kısa yazımları (bilgi aynı): önce "1×" önekleri kalkar ("1×80/180" → "80/180"; "N adet (…)" içinde tek
+    adet zaten bellidir — Lokman 13.10.2026), o da yetmezse "adet" sözcüğü kalkar ("5 (120/100, …)"; kural anahtarı
+    `ozellik_adet_sozcugu_kalkar`, varsayım). Dönen: denenecek yazımlar, en sade sonda; değişmeyenler atlanır."""
+    out = []
+    v1 = re.sub(r"(?<![\d×])1×(?=\d)", "", v) if bir_carpani else v
+    if v1 != v:
+        out.append(v1)
+    v2 = re.sub(r"^(\d+) adet \(", r"\1 (", v1) if adet_sozcugu else v1
+    if v2 != v1:
+        out.append(v2)
+    return out
+
+
+def _sigdir(v: str, pt_bas: float, en_az: float, gen: float, yuk: float | None = None, en_az_mutlak: float | None = None,
+            sade: list[str] | None = None) -> tuple[float, list[str]]:
+    """Bina özellikleri değeri (Lokman 12–13.10.2026; bilgi kesilmez, uydurulmaz): önce yazı küçülür (en_az'a kadar); sığmazsa önce
+    daha sade yazım (`sade`: "1×" önekleri kalkmış, sonra "adet"siz) tek satırda denenir; o da sığmazsa sade yazım **iki** satıra sarılır
+    (en büyük boyda), o da olmazsa üç satır. Satır aralığı mürekkep ölçüsüyledir (`_blok`): blok `yuk`'a sığmalı. en_az'da sığmazsa yazı
+    `en_az_mutlak`'a kadar küçülür (kural anahtarı `ozellik_yazi_pt_mutlak`; 5 pt'nin altına inmez). Az satır çok satırdan önce,
+    büyük yazı küçük yazıdan önce gelir. Dönen: (pt, satırlar)."""
     if yazi_eni(v, pt_bas, COMIC) <= gen:
         return pt_bas, [v]
-    pt = max(en_az, pt_bas * (gen - 2.0) / yazi_eni(v, pt_bas, COMIC))
-    if yazi_eni(v, pt, COMIC) <= gen:
-        return pt, [v]
+    sade = list(sade or [])
+    bir = [s_ for s_ in sade if s_.startswith(v.split(" ")[0] + " adet") or " adet" not in v]   # "1×" kalkmış yazım (adet sözcüğü duruyor)
+    adetsiz = [s_ for s_ in sade if s_ not in bir]                                               # son çare (varsayım): "adet" de kalkmış
 
-    def dene(n: int, taban: float) -> tuple[float, list[str]] | None:
+    def tek_satir(metin: str, taban: float) -> tuple[float, list[str]] | None:
+        pt = max(taban, pt_bas * (gen - 2.0) / yazi_eni(metin, pt_bas, COMIC))
+        return (pt, [metin]) if yazi_eni(metin, pt, COMIC) <= gen else None
+
+    def sarili(metin: str, n: int, taban: float) -> tuple[float, list[str]] | None:
         for pt2 in [pt_bas - 0.1 * i for i in range(int((pt_bas - taban) / 0.1) + 1)] + [taban]:
             if pt2 < taban - 1e-9:
                 break
-            satirlar = _satirlara(v, pt2, gen)
+            satirlar = _satirlara(metin, pt2, gen)
             if len(satirlar) <= n and all(yazi_eni(s_, pt2, COMIC) <= gen for s_ in satirlar) and (yuk is None or _blok(satirlar, pt2)[1] <= yuk):
                 return pt2, satirlar
         return None
 
-    for n in (2, 3):
-        r = dene(n, en_az)
-        if r:
-            return r
-    if en_az_mutlak is not None and en_az_mutlak < en_az:
-        for n in (2, 3):
-            r = dene(n, en_az_mutlak)
-            if r:
-                return r
-    return (en_az_mutlak or en_az), _satirlara(v, en_az_mutlak or en_az, gen)
+    tabanlar = [en_az] + ([en_az_mutlak] if en_az_mutlak is not None and en_az_mutlak < en_az else [])
+
+    def asama(yazimlar: list[str]) -> tuple[float, list[str]] | None:
+        """Verilen yazımlarla: önce tek satır (en_az'a kadar), sonra iki ve üç satır; en_az'da olmazsa en_az_mutlak'a kadar."""
+        for taban in tabanlar:
+            for metin in yazimlar:
+                r = tek_satir(metin, taban)
+                if r:
+                    return r
+            for n in (2, 3):
+                for metin in (yazimlar[1:] or yazimlar):        # sarma en sade yazımla (Lokman: önce 1× kalkar, sonra iki satır)
+                    r = sarili(metin, n, taban)
+                    if r:
+                        return r
+        return None
+
+    r = asama([v] + bir)
+    if r is None and adetsiz:                                   # son çare (varsayım, kural anahtarı): "adet" sözcüğü de kalkar
+        r = asama(adetsiz)
+    if r:
+        return r
+    son = tabanlar[-1]
+    return son, _satirlara((adetsiz or bir or [v])[-1], son, gen)
 
 
 def _sar(metin: str, genislik: int) -> list[str]:
@@ -274,13 +308,16 @@ def cerceveler(sf: Sayfa, t: dict, oz: dict, bilgi: dict, oturum_m2: float):
     en_cok, en_az = float(yp.get("en_cok", 7.3)), float(yp.get("en_az", 5.2))
     _m = (sablon_kurallari().get("ozellik_yazi_pt_mutlak") or {}).get("deger")
     en_az_mutlak = float(_m) if _m is not None else None             # anahtar yoksa en_az'ın altına inilmez
+    bir_carpani = bool((sablon_kurallari().get("ozellik_bir_carpani_kalkar") or {}).get("deger", False))
+    adet_sozcugu = bool((sablon_kurallari().get("ozellik_adet_sozcugu_kalkar") or {}).get("deger", False))
     gen = OZELLIK[2] - 765.0 - 2
     yuk = adim - 1.0                                                   # sarılı bloğun mürekkebi satır çizgilerinden ≥ 0,5 pt uzak
     for i, ad in enumerate(OZELLIK_SIRASI):
         yt = OZELLIK_BASLIK_ALT + i * adim
         sf.cizgi(OZELLIK[0], yt, OZELLIK[2], yt)
         v = str(oz.get(ad, "..."))
-        pt, satirlar = (en_cok, [v]) if v == "..." else _sigdir(v, en_cok, en_az, gen, yuk, en_az_mutlak)   # sığmazsa küçülür, sonra sarılır; kesilmez
+        pt, satirlar = (en_cok, [v]) if v == "..." else _sigdir(v, en_cok, en_az, gen, yuk, en_az_mutlak, _sadelestir(v, bir_carpani, adet_sozcugu))
+        v = satirlar[0] if len(satirlar) == 1 else v                   # sığmazsa sade yazım, küçülür, sonra sarılır; bilgi kesilmez (pafta_ozet tam değeri taşır)
         sf.yazi(695.0, yt + adim / 2 + 0.6, ad, 7.3)
         if len(satirlar) == 1:
             sf.yazi(765.0, yt + adim / 2 + (0.6 if v != "..." else -1.2), v, pt if v != "..." else 12.0)

@@ -124,9 +124,21 @@ def test_ozellik_degeri_once_kuculur_sonra_iki_satir_en_son_uc():
     gen = sp.OZELLIK[2] - 765.0 - 2
     yuk = (sp.OZELLIK[3] - sp.OZELLIK_BASLIK_ALT) / len(sp.OZELLIK_SIRASI) - 1.6
     pt, sat = sp._sigdir("8 adet (4×120/120, 3×120/180, 1×80/180)", 7.3, 5.2, gen, yuk)
-    assert len(sat) == 2 and sat[0].endswith(",") and 5.2 <= pt <= yuk / 2 / 0.95, (pt, sat)
-    pt3, sat3 = sp._sigdir("9 adet (3×120/120, 2×100/120, 2×120/180, 1×80/180, 1×60/120)", 7.3, 5.2, gen, yuk)
-    assert len(sat3) == 3 and pt3 == 5.2 and sat3[0].endswith(",") and not sat3[-1].endswith(","), (pt3, sat3)
-    for p_, s_ in ((pt, sat), (pt3, sat3)):
-        assert all(sp.yazi_eni(x, p_, sp.COMIC) <= gen for x in s_)
+    assert len(sat) == 2 and sat[0].endswith(",") and 5.2 <= pt <= 7.3 and sp._blok(sat, pt)[1] <= yuk, (pt, sat)
     assert sp._sigdir("1 adet (1×60/40)", 7.3, 5.2, gen, yuk) == (7.3, ["1 adet (1×60/40)"])
+    # Lokman 13.10: sığmayan satırda önce "1×" önekleri kalkar, sonra iki satıra sarılır; yazı 5 pt'nin altına inmez (ozellik_yazi_pt_mutlak)
+    v8 = "8 adet (4×120/120, 3×120/180, 1×80/180)"
+    assert sp._sadelestir(v8, True, False) == ["8 adet (4×120/120, 3×120/180, 80/180)"] and sp._sadelestir("11×100/120", True, True) == []
+    pt8, sat8 = sp._sigdir(v8, 7.3, 5.2, gen, yuk, 5.0, sp._sadelestir(v8, True, True))
+    assert sat8 == ["8 adet (4×120/120,", "3×120/180, 80/180)"] and pt8 >= 5.2, (pt8, sat8)
+    v3 = "3 adet (1×80/214, 2×90/214)"                                                          # "1×" kalkınca da tek satıra sığmaz: iki satır, büyük boy
+    pt3, sat3 = sp._sigdir(v3, 7.3, 5.2, gen, yuk, 5.0, sp._sadelestir(v3, True, True))
+    assert sat3 == ["3 adet (80/214,", "2×90/214)"] and pt3 > 6.0, (pt3, sat3)
+    # KT-02: "1×" kalkmış hâliyle 5 pt'de iki/üç satır 14,7 pt'lik satıra sığmaz → son çare (varsayım anahtarı) "adet" sözcüğü kalkar; sayı ve liste aynen
+    v5 = "5 adet (1×120/100, 1×120/120, 2×120/180, 1×300/200)"
+    pt5, sat5 = sp._sigdir(v5, 7.3, 5.2, gen, yuk, 5.0, sp._sadelestir(v5, True, True))
+    assert sat5 == ["5 (120/100, 120/120,", "2×120/180, 300/200)"] and pt5 >= 5.2 and sp._blok(sat5, pt5)[1] <= yuk, (pt5, sat5)
+    pt5b, sat5b = sp._sigdir(v5, 7.3, 5.2, gen, yuk, 5.0, sp._sadelestir(v5, True, False))   # adet anahtarı kapalı: 5 pt'de üç satır, kesilmez
+    assert pt5b == 5.0 and len(sat5b) == 3 and "".join(sat5b).startswith("5 adet (120/100,"), (pt5b, sat5b)
+    for p_, s_ in ((pt, sat), (pt8, sat8), (pt3, sat3), (pt5, sat5)):
+        assert all(sp.yazi_eni(x, p_, sp.COMIC) <= gen for x in s_)
