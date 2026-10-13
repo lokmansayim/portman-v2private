@@ -23,7 +23,16 @@ Kaynak: Lokman'ın anlattıkları (1–2, 6 ve 12 Ekim 2026). Astra dönemindeki
 - Çıkarım: dizilim soldan ve önden başlar; kesilen parça sağ ve arka uçta kalır.
 - Çıkarım: iç duvarlar aks üstünde kalır; her iç duvar koşusu da kendi başından 125,5 cm ilerler ve son parçası kesilir.
 - Örnek (dış 160 mm): 1150 cm → 8 tam pano + 114 cm; 1050 cm → 8 tam pano + 30 cm.
-- Canlı Motor'da yok. Deneme: `deneme/2026-10-06_kalinlik_160_100/`.
+- **Motor'da (İE-11, 13 Ekim 2026):** `yapi.dis_olcu_cm` verilirse yapı o ölçüde kesilir (Adım 1, 6 Ekim yaması canlı Motor'a taşındı; `deneme/2026-10-06_kalinlik_160_100/` yaması artık gerekmez).
+  Kesim ucu **parametredir**: `yapi.dizilim.baslangic` `on-sol` (eski; kesilen parça sağ ve arka uçta) ya da `arka-sol` (PK-01 paftası: y arkadan sayılır, kesilen parça sağ ve **ön** uçta).
+  `yapi.dizilim.hiza` `kosu` (eski: her koşu kendi başından 125,5) ya da `izgara` (PK-01 paftası: ekler ızgara akslarında; ızgara dışı başlayan segment önce bir sonraki tam aksa kadar parça alır).
+  Anahtar yoksa eski davranış sürer (P6001 bayt bayt aynı).
+
+## Aks dışı duvar ve dış duvar T bölmesi (PK-01; İE-11)
+
+- Gerçek projede bir duvar 125,5 ızgarasının dışında olabilir (PK-01: hol/salon ön duvarı arkadan 795). `yapi.ek_akslar_cm` ile aks tablosuna eklenir; mahaller `konum_cm` ile aks sınırlarıyla verilir (aks olmayan değer hata). Ek aks paftada ana aks sayılır.
+- PK-01 paftasında dış duvar, iç duvarın geldiği T'de bölünür ve oraya **dış üçlü H** konur (`yapi.dizilim.dis_duvar_t_bolme`; katalog "Üçlü H bağlantı dış", blok `BOM_*_UCLU_H_DIS_*`). Eski kuralda dış duvar bölünmez (6×8, P6001).
+- Dış kapı ya da pencere alıcıya aitse `acikliklar[].dograma: "alıcıya ait"`: BOM satırı işaretlenir, doğrama yükleme listesine girmez; `ozellikler` tablosunda da yazar.
 
 ## Duvar kalınlığı seçeneği (müşteri örneği; standart değil)
 
@@ -47,7 +56,8 @@ Kaynak: Lokman'ın anlattıkları (1–2, 6 ve 12 Ekim 2026). Astra dönemindeki
 - 100 × 100 köşe dikmesiyle köşedeki panel dizilimi nasıl değişiyor?
 - Alt kat karkasının profilleri ve aralıkları.
 - İç duvar (6 cm) neyden oluşuyor?
-- Ölçüye kesimde son parça çok dar çıkarsa (örnek: 30 cm; iç duvarda 22 cm) ne yapılır? En az pano boyu var mı?
-- Ölçüye kesimde dizilim hangi uçtan başlar?
+- Ölçüye kesimde son parça çok dar çıkarsa (örnek: 30 cm; iç duvarda 22 cm) ne yapılır? En az pano boyu var mı? (PK-01 paftasında en dar dış parça 37, iç 32.)
+- Ölçüye kesimde dizilim hangi uçtan başlar? — **Projeye göre değişiyor; parametre (İE-11 `dizilim.baslangic`).** PK-01 paftası arkadan ve ızgaraya hizalı dizer; kural mı, o paftanın tercihi mi — ikinci kör testle (çift kat) görülecek.
+- PK-01 mühendis soruları (`docs/notlar/2026-10-13_PK01_muhendis_sorulari.md`): ön pencerelerin iki panoya yayılması, veranda duvar hizası (266 ↔ 261), tavan omega adetleri.
 - 160 mm dış ve 100 mm iç duvarda köşe ve H bağlantı profilleri hangileri?
 - 160 mm ve 100 mm panonun katmanları (levha ve dolgu kalınlığı).

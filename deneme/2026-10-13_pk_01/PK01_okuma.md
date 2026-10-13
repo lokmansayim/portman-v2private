@@ -9,7 +9,7 @@ Bu belge montaj paftasının **okumasıdır**; motor çizmedi (aşağıda neden)
 |---|---|---|
 | `HUMA 60M2 MONTAJ PAFTASI.pdf` (10 sayfa A3; iLovePDF birleştirme) | `492c7613 0da0e66a 6dce82eb aa67e3f9 da9949eb 314c1034 445d223f aaac658d` | okundu → `kaynak/` |
 | `HUMA 60M2 BASMAKAS BETOPAN YERLESIMI.pdf` (AutoCAD 2027, 1 Ekim 2026) | `a3806470 80280982 bbede9cd 72725eeb 9e4101ba dacbb64d 1606bb0f 2addc3f1` | okundu → `kaynak/` |
-| `HUMA 60M2 OZEL PROFIL.pdf` (AutoCAD 2027, 1 Ekim 2026) | `6b481fbc 2387aa17 2a955da9 60d44c15 a8d0fd19 6fac9357 12075072 0e293b27 00e` → tam: `6b481fbc2387aa172a955da960d44c15a8d0fd196fac9357120750e293b2700e` | okundu → `kaynak/` |
+| `HUMA 60M2 OZEL PROFIL.pdf` (AutoCAD 2027, 1 Ekim 2026) | `6b481fbc 2387aa17 2a955da9 60d44c15 a8d0fd19 6fac9357 120750e2 93b2700e` | okundu → `kaynak/` |
 | `HUMA 60M2 YUKLEME LISTESI.xlsx` (196.855 bayt) | `17e43b88 8bd1a5dd 5bfb06eb b38b620b 1b0c3708 c176a35d 7ea576f1 e948d106` | **mühürlü: açılmadı, kopyalanmadı.** Kendi listemiz depoya kaydedilince açılacak; hash o gün bununla karşılaştırılır |
 
 Pafta künyesi: Huma Prefabrik, 60 m² prefabrik konut; çizen Ubeydullah Özer, kontrol Lokman Sayım (D-11: adlar yazılabilir).
