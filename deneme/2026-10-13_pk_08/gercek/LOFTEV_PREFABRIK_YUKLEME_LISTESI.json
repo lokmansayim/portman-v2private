@@ -1,0 +1,1102 @@
+{
+ "kaynak": "LOFTEV PREFABRİK YÜKLEME LİSTESİ.xlsx (dca060f8…531c)",
+ "baslik": {
+  "LOFTEV YÜKLEME LİSTESİ": [],
+  "MÜŞTERİ AD SOYAD": [],
+  "İLETİŞİM NUMARASI": [],
+  "SEVKİYAT YERİ": [],
+  "SATIŞ TEMSİLCİSİ": [],
+  "BİNA M2 / KAT ADEDİ / KAT YÜKSEKLİĞİ": [
+   "TEK",
+   "2500"
+  ],
+  "HAZIRLANMA BİLGİLERİ": [
+   "HAZIRLAYAN",
+   "TARİH",
+   "KONTROL",
+   "TARİH"
+  ]
+ },
+ "satirlar": [
+  {
+   "grup": "YAPIŞTIRMA VE KARKASLI PANEL GRUBU",
+   "malzeme": "100'LÜK YAPIŞTIRMA DOLU PANO",
+   "boyut": "100x1250x2500",
+   "adet": null
+  },
+  {
+   "grup": "YAPIŞTIRMA VE KARKASLI PANEL GRUBU",
+   "malzeme": "100'LÜK YAPIŞTIRMA DOLU PANO",
+   "boyut": "100x1038x2500",
+   "adet": null
+  },
+  {
+   "grup": "YAPIŞTIRMA VE KARKASLI PANEL GRUBU",
+   "malzeme": "100'LÜK YAPIŞTIRMA DOLU PANO",
+   "boyut": "100x938x2500",
+   "adet": null
+  },
+  {
+   "grup": "YAPIŞTIRMA VE KARKASLI PANEL GRUBU",
+   "malzeme": "100'LÜK YAPIŞTIRMA DOLU PANO",
+   "boyut": "100x798x2500",
+   "adet": null
+  },
+  {
+   "grup": "YAPIŞTIRMA VE KARKASLI PANEL GRUBU",
+   "malzeme": "100'LÜK YAPIŞTIRMA DOLU PANO",
+   "boyut": "100x625x2500",
+   "adet": null
+  },
+  {
+   "grup": "YAPIŞTIRMA VE KARKASLI PANEL GRUBU",
+   "malzeme": "100'LÜK YAPIŞTIRMA DOLU PANO",
+   "boyut": "100x509x2500",
+   "adet": null
+  },
+  {
+   "grup": "YAPIŞTIRMA VE KARKASLI PANEL GRUBU",
+   "malzeme": "100'LÜK YAPIŞTIRMA DOLU PANO",
+   "boyut": "100x425x2500",
+   "adet": null
+  },
+  {
+   "grup": "YAPIŞTIRMA VE KARKASLI PANEL GRUBU",
+   "malzeme": "100'LÜK YAPIŞTIRMA DOLU PANO",
+   "boyut": "100x312x2500",
+   "adet": null
+  },
+  {
+   "grup": "YAPIŞTIRMA VE KARKASLI PANEL GRUBU",
+   "malzeme": "100'LÜK YAPIŞTIRMA DOLU VASİSTASLI PANO (60/40)",
+   "boyut": "100x1250x2500",
+   "adet": null
+  },
+  {
+   "grup": "YAPIŞTIRMA VE KARKASLI PANEL GRUBU",
+   "malzeme": "60'LIK YAPIŞTIRMA DOLU PANO",
+   "boyut": "60x1250x2500",
+   "adet": null
+  },
+  {
+   "grup": "YAPIŞTIRMA VE KARKASLI PANEL GRUBU",
+   "malzeme": "60'LIK YAPIŞTIRMA DOLU PANO",
+   "boyut": "60x565x2500",
+   "adet": null
+  },
+  {
+   "grup": "YAPIŞTIRMA VE KARKASLI PANEL GRUBU",
+   "malzeme": "60'LIK YAPIŞTIRMA DOLU PANO",
+   "boyut": "60x625x2500",
+   "adet": null
+  },
+  {
+   "grup": "YAPIŞTIRMA VE KARKASLI PANEL GRUBU",
+   "malzeme": "60'LIK YAPIŞTIRMA DOLU PANO",
+   "boyut": "60x590x2500",
+   "adet": null
+  },
+  {
+   "grup": "YAPIŞTIRMA VE KARKASLI PANEL GRUBU",
+   "malzeme": "PENCERE ÜST PANEL",
+   "boyut": "100x1250x500",
+   "adet": null
+  },
+  {
+   "grup": "YAPIŞTIRMA VE KARKASLI PANEL GRUBU",
+   "malzeme": "PENCERE ALT PANEL (120/120)",
+   "boyut": "100x1250x800",
+   "adet": null
+  },
+  {
+   "grup": "YAPIŞTIRMA VE KARKASLI PANEL GRUBU",
+   "malzeme": "PENCERE ALT PANEL (120/180)",
+   "boyut": "100x1250x200",
+   "adet": null
+  },
+  {
+   "grup": "YAPIŞTIRMA VE KARKASLI PANEL GRUBU",
+   "malzeme": "PENCERE ALT PANEL (120/100)",
+   "boyut": "100x1250x1000",
+   "adet": null
+  },
+  {
+   "grup": "YAPIŞTIRMA VE KARKASLI PANEL GRUBU",
+   "malzeme": "KUBBE KARKASLI ÖZEL PENCERE PANOSU (105/180)",
+   "boyut": "100x1250x2030",
+   "adet": 1
+  },
+  {
+   "grup": "YAPIŞTIRMA VE KARKASLI PANEL GRUBU",
+   "malzeme": "KUBBE KARKASLI ÖZEL PENCERE PANOSU (53/180)",
+   "boyut": "100x790x2030",
+   "adet": 2
+  },
+  {
+   "grup": "YAPIŞTIRMA VE KARKASLI PANEL GRUBU",
+   "malzeme": "KUBBE ÖZEL PANO",
+   "boyut": "100x2500x500",
+   "adet": 1
+  },
+  {
+   "grup": "YAPIŞTIRMA VE KARKASLI PANEL GRUBU",
+   "malzeme": "KARKASLI ÇELİK KAPI PANOSU",
+   "boyut": "100x1250x2500",
+   "adet": null
+  },
+  {
+   "grup": "YAPIŞTIRMA VE KARKASLI PANEL GRUBU",
+   "malzeme": "60'LIK KARKASLI +KASALI  PANOLAR",
+   "boyut": "60x1250x2500",
+   "adet": null
+  },
+  {
+   "grup": "YAPIŞTIRMA VE KARKASLI PANEL GRUBU",
+   "malzeme": "60'LIK KARKASLI +KASALI  PANOLAR",
+   "boyut": "60x1190x2500",
+   "adet": null
+  },
+  {
+   "grup": "YAPIŞTIRMA VE KARKASLI PANEL GRUBU",
+   "malzeme": "SORUMLI ÜRETİM PERSONELİ AD SOYAD",
+   "boyut": null,
+   "adet": "EYÜP DERİN"
+  },
+  {
+   "grup": "METAL AKSAM GRUBU",
+   "malzeme": "KÖŞE DİREĞİ",
+   "boyut": "100x100x2500",
+   "adet": null
+  },
+  {
+   "grup": "METAL AKSAM GRUBU",
+   "malzeme": "KÖŞE DİREĞİ",
+   "boyut": "60x60x2500",
+   "adet": null
+  },
+  {
+   "grup": "METAL AKSAM GRUBU",
+   "malzeme": "KÖŞEBENT",
+   "boyut": "L:2500",
+   "adet": null
+  },
+  {
+   "grup": "METAL AKSAM GRUBU",
+   "malzeme": "KUTU PROFİL  (KİRİŞ)",
+   "boyut": "100*100*4400",
+   "adet": null
+  },
+  {
+   "grup": "METAL AKSAM GRUBU",
+   "malzeme": "KUTU PROFİL  (KİRİŞ)",
+   "boyut": "100*100*1780",
+   "adet": null
+  },
+  {
+   "grup": "METAL AKSAM GRUBU",
+   "malzeme": "KUTU PROFİL (KOLON)",
+   "boyut": "100*100*2500",
+   "adet": null
+  },
+  {
+   "grup": "METAL AKSAM GRUBU",
+   "malzeme": "PROFİL VİDALAMA APARATI",
+   "boyut": "ADET",
+   "adet": null
+  },
+  {
+   "grup": "METAL AKSAM GRUBU",
+   "malzeme": "H ( DÜBELLİ&KULAKLI)",
+   "boyut": "100*100*2500",
+   "adet": null
+  },
+  {
+   "grup": "METAL AKSAM GRUBU",
+   "malzeme": "H ( DÜBELLİ )",
+   "boyut": "100*100*2500",
+   "adet": null
+  },
+  {
+   "grup": "METAL AKSAM GRUBU",
+   "malzeme": "H (  STANDART )",
+   "boyut": "60*60*2500",
+   "adet": null
+  },
+  {
+   "grup": "METAL AKSAM GRUBU",
+   "malzeme": "3 LÜ H ( DÜBELLİ VE KULAKLI)",
+   "boyut": "100*100*60*2500",
+   "adet": null
+  },
+  {
+   "grup": "METAL AKSAM GRUBU",
+   "malzeme": "3 LÜ H ( DÜBELLİ )",
+   "boyut": "100*100*60*2500",
+   "adet": null
+  },
+  {
+   "grup": "METAL AKSAM GRUBU",
+   "malzeme": "3 LÜ H (  STANDART )",
+   "boyut": "60*60*2500",
+   "adet": null
+  },
+  {
+   "grup": "METAL AKSAM GRUBU",
+   "malzeme": "ÇEKTİRME U'SU (60 LIK)",
+   "boyut": "60*2440",
+   "adet": null
+  },
+  {
+   "grup": "METAL AKSAM GRUBU",
+   "malzeme": "KUBBE ÜSTÜ H",
+   "boyut": "100*100*500",
+   "adet": 2
+  },
+  {
+   "grup": "METAL AKSAM GRUBU",
+   "malzeme": "ÖZEL AÇILI KÖŞE DİREĞİ + KAPAMASI",
+   "boyut": "100*100*2330",
+   "adet": 4
+  },
+  {
+   "grup": "METAL AKSAM GRUBU",
+   "malzeme": "ÇEKTİRME U'SU (100 LÜK)",
+   "boyut": "100*2440",
+   "adet": null
+  },
+  {
+   "grup": "METAL AKSAM GRUBU",
+   "malzeme": "100'LÜK PENCERE U SU H GEÇEN",
+   "boyut": "L:2500",
+   "adet": null
+  },
+  {
+   "grup": "METAL AKSAM GRUBU",
+   "malzeme": "60'LIK DUVAR OMEGASI",
+   "boyut": "60*2500",
+   "adet": null
+  },
+  {
+   "grup": "METAL AKSAM GRUBU",
+   "malzeme": "100'LÜK DUVAR OMEGASI",
+   "boyut": "100*2500",
+   "adet": null
+  },
+  {
+   "grup": "METAL AKSAM GRUBU",
+   "malzeme": "100'LÜK SAÇAK OMEGASI",
+   "boyut": "100*2500",
+   "adet": null
+  },
+  {
+   "grup": "METAL AKSAM GRUBU",
+   "malzeme": "( RENK ) SAÇAK SACI",
+   "boyut": "250*2800",
+   "adet": null
+  },
+  {
+   "grup": "METAL AKSAM GRUBU",
+   "malzeme": "( RENK ) SIFIR SAÇAK SACI",
+   "boyut": "250*2800",
+   "adet": null
+  },
+  {
+   "grup": "METAL AKSAM GRUBU",
+   "malzeme": "( RENK ) KUBBE SAÇAK SACI",
+   "boyut": "170*1500",
+   "adet": 3
+  },
+  {
+   "grup": "METAL AKSAM GRUBU",
+   "malzeme": "BAŞ MAKAS OMEGASI",
+   "boyut": "L:2500",
+   "adet": null
+  },
+  {
+   "grup": "METAL AKSAM GRUBU",
+   "malzeme": "( RENK ) ALIN SACI",
+   "boyut": "250*2800",
+   "adet": null
+  },
+  {
+   "grup": "METAL AKSAM GRUBU",
+   "malzeme": "BAŞ MAKAS Z'Sİ",
+   "boyut": "L:2800",
+   "adet": null
+  },
+  {
+   "grup": "METAL AKSAM GRUBU",
+   "malzeme": "BAŞ MAKAS MENFEZİ",
+   "boyut": "ADET",
+   "adet": null
+  },
+  {
+   "grup": "METAL AKSAM GRUBU",
+   "malzeme": "BAŞ MAKAS BETOPANI",
+   "boyut": "1250*2500",
+   "adet": null
+  },
+  {
+   "grup": "METAL AKSAM GRUBU",
+   "malzeme": "100'LÜK ALT ÇERÇEVE",
+   "boyut": "100*3750",
+   "adet": null
+  },
+  {
+   "grup": "METAL AKSAM GRUBU",
+   "malzeme": "60'LIK ALT ÇERÇEVE",
+   "boyut": "60*3750",
+   "adet": null
+  },
+  {
+   "grup": "METAL AKSAM GRUBU",
+   "malzeme": "SORUMLI ÜRETİM PERSONELİ AD SOYAD",
+   "boyut": null,
+   "adet": "AHMET BALABAN"
+  },
+  {
+   "grup": "MAKAS GRUBU",
+   "malzeme": "AŞIK",
+   "boyut": "L:3650",
+   "adet": null
+  },
+  {
+   "grup": "MAKAS GRUBU",
+   "malzeme": "MAKAS (X BAŞ MAKAS, X ORTA MAKAS )",
+   "boyut": "L:",
+   "adet": null
+  },
+  {
+   "grup": "MAKAS GRUBU",
+   "malzeme": "CUMBA MAKAS",
+   "boyut": "L:",
+   "adet": null
+  },
+  {
+   "grup": "MAKAS GRUBU",
+   "malzeme": "YAVRU MAKAS",
+   "boyut": "L:",
+   "adet": null
+  },
+  {
+   "grup": "MAKAS GRUBU",
+   "malzeme": "SORUMLI ÜRETİM PERSONELİ AD SOYAD",
+   "boyut": null,
+   "adet": "AHMET BALABAN"
+  },
+  {
+   "grup": "ÇATI KAPLAMALARI GRUBU",
+   "malzeme": "OSB",
+   "boyut": "1220*2440",
+   "adet": null
+  },
+  {
+   "grup": "ÇATI KAPLAMALARI GRUBU",
+   "malzeme": "MEMBRAN",
+   "boyut": "ADET/8 M2",
+   "adet": null
+  },
+  {
+   "grup": "ÇATI KAPLAMALARI GRUBU",
+   "malzeme": "SHİNGLE (RENK)",
+   "boyut": "ADET/8 M2",
+   "adet": null
+  },
+  {
+   "grup": "ÇATI KAPLAMALARI GRUBU",
+   "malzeme": "OSB MAHYASI",
+   "boyut": "L: 2800",
+   "adet": null
+  },
+  {
+   "grup": "ÇATI KAPLAMALARI GRUBU",
+   "malzeme": "(RENK )TRAPEZ SAC ( 80 CM KAPATIR )",
+   "boyut": "L:",
+   "adet": null
+  },
+  {
+   "grup": "ÇATI KAPLAMALARI GRUBU",
+   "malzeme": "(RENK) TRAPEZ SAC MAHYASI",
+   "boyut": "L:1000",
+   "adet": null
+  },
+  {
+   "grup": "ÇATI KAPLAMALARI GRUBU",
+   "malzeme": "(RENK)TEK KAT PANEL ( 87 CM KAPATIR )",
+   "boyut": "L:",
+   "adet": null
+  },
+  {
+   "grup": "ÇATI KAPLAMALARI GRUBU",
+   "malzeme": "(RENK) METAL KİREMİT MAHYASI",
+   "boyut": "L: 2800",
+   "adet": null
+  },
+  {
+   "grup": "ÇATI KAPLAMALARI GRUBU",
+   "malzeme": "(RENK)SANDVİÇ PANEL ( 100 CM KAPATIR )",
+   "boyut": "L:",
+   "adet": null
+  },
+  {
+   "grup": "ÇATI KAPLAMALARI GRUBU",
+   "malzeme": "(RENK) METAL KİREMİT MAHYASI",
+   "boyut": "L: 2800",
+   "adet": null
+  },
+  {
+   "grup": "ÇATI KAPLAMALARI GRUBU",
+   "malzeme": "(RENK)SANDVİÇ PANEL KAPAĞI",
+   "boyut": "METRE",
+   "adet": null
+  },
+  {
+   "grup": "ÇATI KAPLAMALARI GRUBU",
+   "malzeme": "OSB",
+   "boyut": "1220*2440",
+   "adet": null
+  },
+  {
+   "grup": "ÇATI KAPLAMALARI GRUBU",
+   "malzeme": "MEMBRAN",
+   "boyut": "ADET/8 M2",
+   "adet": null
+  },
+  {
+   "grup": "ÇATI KAPLAMALARI GRUBU",
+   "malzeme": "(RENK) METAL KİREMİT  ( 110 CM KAPATIR )",
+   "boyut": "L:",
+   "adet": null
+  },
+  {
+   "grup": "ÇATI KAPLAMALARI GRUBU",
+   "malzeme": "(RENK) METAL KİREMİT MAHYASI",
+   "boyut": "L: 2800",
+   "adet": null
+  },
+  {
+   "grup": "ÇATI KAPLAMALARI GRUBU",
+   "malzeme": "OSB MAHYASI",
+   "boyut": "L: 2800",
+   "adet": null
+  },
+  {
+   "grup": "ÇATI KAPLAMALARI GRUBU",
+   "malzeme": "KUBBE OSB",
+   "boyut": "1220*2440",
+   "adet": 1
+  },
+  {
+   "grup": "ÇATI KAPLAMALARI GRUBU",
+   "malzeme": "KUBBE ANTRASİT SHİNGLE",
+   "boyut": "PAKET",
+   "adet": 1
+  },
+  {
+   "grup": "ÇATI KAPLAMALARI GRUBU",
+   "malzeme": "(RENK) TERS MAHYA",
+   "boyut": "L:2800",
+   "adet": null
+  },
+  {
+   "grup": "ÇATI KAPLAMALARI GRUBU",
+   "malzeme": "(RENK) ÖZEL MAHYA GENİŞ OLAN",
+   "boyut": "L:2800",
+   "adet": null
+  },
+  {
+   "grup": "ÇATI KAPLAMALARI GRUBU",
+   "malzeme": "ÇATI İZOLASYONU (KNAUF IBP037)",
+   "boyut": "Paket / 8,64 m²",
+   "adet": null
+  },
+  {
+   "grup": "ÇATI KAPLAMALARI GRUBU",
+   "malzeme": "ÇATI ŞİLTESİ 80mm",
+   "boyut": "9,6 M2/ADET",
+   "adet": null
+  },
+  {
+   "grup": "ÇATI KAPLAMALARI GRUBU",
+   "malzeme": "SORUMLI ÜRETİM PERSONELİ AD SOYAD",
+   "boyut": null,
+   "adet": "MEHMET BALABAN"
+  },
+  {
+   "grup": "DIŞ CEPHE KAPLAMALARI GRUBU",
+   "malzeme": "DIŞ CEPHE YALIPAN",
+   "boyut": "0.43 M2 / ADET",
+   "adet": null
+  },
+  {
+   "grup": "DIŞ CEPHE KAPLAMALARI GRUBU",
+   "malzeme": "KÖŞE LATASI",
+   "boyut": "150*250",
+   "adet": null
+  },
+  {
+   "grup": "DIŞ CEPHE KAPLAMALARI GRUBU",
+   "malzeme": "KÖŞE LATASI",
+   "boyut": "130*250",
+   "adet": null
+  },
+  {
+   "grup": "DIŞ CEPHE KAPLAMALARI GRUBU",
+   "malzeme": "PENCERE LATASI",
+   "boyut": "100*2500",
+   "adet": null
+  },
+  {
+   "grup": "DIŞ CEPHE KAPLAMALARI GRUBU",
+   "malzeme": "SORUMLI ÜRETİM PERSONELİ AD SOYAD",
+   "boyut": null,
+   "adet": "MEHMET BALABAN"
+  },
+  {
+   "grup": "İÇ CEPHE KAPLAMALARI GRUBU",
+   "malzeme": "( ASMA / TERS )TAVAN BEYAZ ALÇIPAN",
+   "boyut": "1200*2500",
+   "adet": null
+  },
+  {
+   "grup": "İÇ CEPHE KAPLAMALARI GRUBU",
+   "malzeme": "( ASMA / TERS) TAVAN YEŞİL ALÇIPAN",
+   "boyut": "1200*2500",
+   "adet": null
+  },
+  {
+   "grup": "İÇ CEPHE KAPLAMALARI GRUBU",
+   "malzeme": "DUVAR ALÇIPAN BEYAZ",
+   "boyut": "1200*2500",
+   "adet": null
+  },
+  {
+   "grup": "İÇ CEPHE KAPLAMALARI GRUBU",
+   "malzeme": "DUVAR ALÇIPAN YEŞİL",
+   "boyut": "1200*2500",
+   "adet": null
+  },
+  {
+   "grup": "İÇ CEPHE KAPLAMALARI GRUBU",
+   "malzeme": "ALÇIPAN DESTEK STRAFORU",
+   "boyut": "PKT / 60 M2",
+   "adet": null
+  },
+  {
+   "grup": "İÇ CEPHE KAPLAMALARI GRUBU",
+   "malzeme": "SORUMLI ÜRETİM PERSONELİ AD SOYAD",
+   "boyut": null,
+   "adet": "MEHMET BALABAN"
+  },
+  {
+   "grup": "DERE GRUBU",
+   "malzeme": "( RENK ) METAL DERE",
+   "boyut": "L:4000",
+   "adet": null
+  },
+  {
+   "grup": "DERE GRUBU",
+   "malzeme": "METAL DERE İNİŞİ APARATI",
+   "boyut": "ADET",
+   "adet": null
+  },
+  {
+   "grup": "DERE GRUBU",
+   "malzeme": "DERE KAPAĞI",
+   "boyut": "ADET",
+   "adet": null
+  },
+  {
+   "grup": "DERE GRUBU",
+   "malzeme": "70 MM PVC DERE İNİŞ BORUSU",
+   "boyut": "L:2000",
+   "adet": null
+  },
+  {
+   "grup": "DERE GRUBU",
+   "malzeme": "70 MM PVC DERE İNİŞ BORUSU",
+   "boyut": "L:500",
+   "adet": null
+  },
+  {
+   "grup": "DERE GRUBU",
+   "malzeme": "AÇIK DİRSEK",
+   "boyut": "ADET",
+   "adet": null
+  },
+  {
+   "grup": "DERE GRUBU",
+   "malzeme": "KAPALI  DİRSEK",
+   "boyut": "ADET",
+   "adet": null
+  },
+  {
+   "grup": "DERE GRUBU",
+   "malzeme": "İNİŞ KELEPÇESİ",
+   "boyut": "ADET",
+   "adet": null
+  },
+  {
+   "grup": "DERE GRUBU",
+   "malzeme": "DERE KELEPÇESİ",
+   "boyut": "ADET",
+   "adet": 0
+  },
+  {
+   "grup": "DERE GRUBU",
+   "malzeme": "SORUMLI ÜRETİM PERSONELİ AD SOYAD",
+   "boyut": null,
+   "adet": "AHMET BALABAN "
+  },
+  {
+   "grup": "KAPI VE PENCERE GRUBU",
+   "malzeme": "ÇELİK KAPI ( SAĞ )",
+   "boyut": "90*200",
+   "adet": null
+  },
+  {
+   "grup": "KAPI VE PENCERE GRUBU",
+   "malzeme": "AMERİKAN  KAPI ( 80 LİK KANAT ) (3 SOL, 1 SAĞ )",
+   "boyut": "82*196",
+   "adet": null
+  },
+  {
+   "grup": "KAPI VE PENCERE GRUBU",
+   "malzeme": "PVC DOĞRAMA+PERVAZ MATİK +BEYAZ+ÇİFT AÇILIM",
+   "boyut": "120*120",
+   "adet": null
+  },
+  {
+   "grup": "KAPI VE PENCERE GRUBU",
+   "malzeme": "PVC DOĞRAMA+PERVAZ MATİK +BEYAZ+ÇİFT AÇILIM",
+   "boyut": "120*180",
+   "adet": null
+  },
+  {
+   "grup": "KAPI VE PENCERE GRUBU",
+   "malzeme": "PVC DOĞRAMA+PERVAZ MATİK + BEYAZ+VASİSTAS",
+   "boyut": "60*40",
+   "adet": null
+  },
+  {
+   "grup": "KAPI VE PENCERE GRUBU",
+   "malzeme": "SORUMLI ÜRETİM PERSONELİ AD SOYAD",
+   "boyut": null,
+   "adet": "MEHMET BALABAN"
+  },
+  {
+   "grup": "DEPO GRUBU",
+   "malzeme": "PVC PLASTİK BETOPAN H' I",
+   "boyut": "60X3000",
+   "adet": null
+  },
+  {
+   "grup": "DEPO GRUBU",
+   "malzeme": "TAVAN H' I",
+   "boyut": "L:3750",
+   "adet": null
+  },
+  {
+   "grup": "DEPO GRUBU",
+   "malzeme": "OMEGA KAPAK",
+   "boyut": "ADET",
+   "adet": null
+  },
+  {
+   "grup": "DEPO GRUBU",
+   "malzeme": "ÇELİK DÜBEL",
+   "boyut": "ADET",
+   "adet": null
+  },
+  {
+   "grup": "DEPO GRUBU",
+   "malzeme": "İÇ KAPI KİLİDİ + KOLU TAKIM",
+   "boyut": "Takım",
+   "adet": null
+  },
+  {
+   "grup": "DEPO GRUBU",
+   "malzeme": "İÇ KAPI MENTEŞE",
+   "boyut": "Adet",
+   "adet": null
+  },
+  {
+   "grup": "DEPO GRUBU",
+   "malzeme": "DIŞ KAPI KOL + KİLİT + BAREL",
+   "boyut": "Adet",
+   "adet": null
+  },
+  {
+   "grup": "DEPO GRUBU",
+   "malzeme": "SORUMLI ÜRETİM PERSONELİ AD SOYAD",
+   "boyut": null,
+   "adet": "MEHMET BALABAN"
+  },
+  {
+   "grup": "VİDA GRUBU",
+   "malzeme": "RYSB PUL BAŞLI  ( 3.9 x 32 )",
+   "boyut": "Adet",
+   "adet": null
+  },
+  {
+   "grup": "VİDA GRUBU",
+   "malzeme": "ALÇIPAN VİDASI  ( 3.5 x 35 )",
+   "boyut": "Adet",
+   "adet": null
+  },
+  {
+   "grup": "VİDA GRUBU",
+   "malzeme": "16 MM BETOPAN VE KAPI KOLLARI ( 3.9 x 32)",
+   "boyut": "Adet",
+   "adet": null
+  },
+  {
+   "grup": "VİDA GRUBU",
+   "malzeme": "PREFABRİK PENCERELER ( 4.8 x 70 )",
+   "boyut": "Adet",
+   "adet": null
+  },
+  {
+   "grup": "VİDA GRUBU",
+   "malzeme": "( 5.5 x 25 ) TRAPEZ VİDA (AŞIK+OMEGA+KÖŞEBENT)",
+   "boyut": "Adet",
+   "adet": null
+  },
+  {
+   "grup": "VİDA GRUBU",
+   "malzeme": "( 5.5 x 60 ) TRAPEZ VİDA (TRAPEZ SAC / METAL KİREMİT)",
+   "boyut": "Adet",
+   "adet": null
+  },
+  {
+   "grup": "VİDA GRUBU",
+   "malzeme": "( 5.5 x 76 ) TRAPEZ VİDA (TEK KAT PANEL)",
+   "boyut": "Adet",
+   "adet": null
+  },
+  {
+   "grup": "VİDA GRUBU",
+   "malzeme": "( 5.5x 110) TRAPEZ VİDA ( SANDVİÇ PANEL)",
+   "boyut": "Adet",
+   "adet": null
+  },
+  {
+   "grup": "VİDA GRUBU",
+   "malzeme": "8 LİK TRAPEZ UÇ",
+   "boyut": "ADET",
+   "adet": null
+  },
+  {
+   "grup": "VİDA GRUBU",
+   "malzeme": "PH2 UÇ",
+   "boyut": "ADET",
+   "adet": null
+  },
+  {
+   "grup": "VİDA GRUBU",
+   "malzeme": "230 LUK KESME TAŞI",
+   "boyut": "ADET",
+   "adet": null
+  },
+  {
+   "grup": "VİDA GRUBU",
+   "malzeme": "İNOX TAŞ",
+   "boyut": "ADET",
+   "adet": null
+  },
+  {
+   "grup": "VİDA GRUBU",
+   "malzeme": "ÇIRPI İPİ",
+   "boyut": "METRE",
+   "adet": null
+  },
+  {
+   "grup": "VİDA GRUBU",
+   "malzeme": "SORUMLI ÜRETİM PERSONELİ AD SOYAD",
+   "boyut": null,
+   "adet": "MEHMET BALABAN"
+  },
+  {
+   "grup": "ELEKTRİK GRUBU",
+   "malzeme": "TİJLİ DUY",
+   "boyut": "ADET",
+   "adet": null
+  },
+  {
+   "grup": "ELEKTRİK GRUBU",
+   "malzeme": "YUVARLAK GLOP",
+   "boyut": "ADET",
+   "adet": null
+  },
+  {
+   "grup": "ELEKTRİK GRUBU",
+   "malzeme": "AMPUL",
+   "boyut": "ADET",
+   "adet": null
+  },
+  {
+   "grup": "ELEKTRİK GRUBU",
+   "malzeme": "NYM KABLO (3 x 2.5)",
+   "boyut": "3 x 2.5",
+   "adet": null
+  },
+  {
+   "grup": "ELEKTRİK GRUBU",
+   "malzeme": "NYM KABLO (3 x 1.5) (VAVİEN)",
+   "boyut": "3 x 1.5",
+   "adet": null
+  },
+  {
+   "grup": "ELEKTRİK GRUBU",
+   "malzeme": "NYM KABLO (2 x 1.5)",
+   "boyut": "2 x 1.5",
+   "adet": null
+  },
+  {
+   "grup": "ELEKTRİK GRUBU",
+   "malzeme": "UYDU KABLO",
+   "boyut": "METRE",
+   "adet": null
+  },
+  {
+   "grup": "ELEKTRİK GRUBU",
+   "malzeme": "BESLEME KABLOSU ( SİGORTA KUTULARI ARASI )",
+   "boyut": "METRE",
+   "adet": null
+  },
+  {
+   "grup": "ELEKTRİK GRUBU",
+   "malzeme": "TEKLİ ANAHTAR ( TAKIM )",
+   "boyut": "ADET",
+   "adet": null
+  },
+  {
+   "grup": "ELEKTRİK GRUBU",
+   "malzeme": "ÇİFTLİ ANAHTAR ( TAKIM )",
+   "boyut": "ADET",
+   "adet": null
+  },
+  {
+   "grup": "ELEKTRİK GRUBU",
+   "malzeme": "TEKLİ PRİZ ( TAKIM )",
+   "boyut": "ADET",
+   "adet": null
+  },
+  {
+   "grup": "ELEKTRİK GRUBU",
+   "malzeme": "ÇİFTLİ PRİZ (TAKIM)",
+   "boyut": "ADET",
+   "adet": null
+  },
+  {
+   "grup": "ELEKTRİK GRUBU",
+   "malzeme": "UYDU  PRİZİ ( TAKIM )",
+   "boyut": "ADET",
+   "adet": null
+  },
+  {
+   "grup": "ELEKTRİK GRUBU",
+   "malzeme": "ZİL",
+   "boyut": "ADET",
+   "adet": null
+  },
+  {
+   "grup": "ELEKTRİK GRUBU",
+   "malzeme": "BUAT KASA",
+   "boyut": "ADET",
+   "adet": null
+  },
+  {
+   "grup": "ELEKTRİK GRUBU",
+   "malzeme": "W OTOMAT (SİGORTA)",
+   "boyut": "16  Amper",
+   "adet": null
+  },
+  {
+   "grup": "ELEKTRİK GRUBU",
+   "malzeme": "SİGORTA KUTUSU",
+   "boyut": "8 Lİ",
+   "adet": null
+  },
+  {
+   "grup": "ELEKTRİK GRUBU",
+   "malzeme": "İZOLE BANT",
+   "boyut": "Adet",
+   "adet": null
+  },
+  {
+   "grup": "ELEKTRİK GRUBU",
+   "malzeme": "SORUMLI ÜRETİM PERSONELİ AD SOYAD",
+   "boyut": null,
+   "adet": "MEHMET BALABAN"
+  },
+  {
+   "grup": "SIHHİ TESİSAT GRUBU",
+   "malzeme": "TEMİZ SU BORUSU",
+   "boyut": "L : 4000",
+   "adet": null
+  },
+  {
+   "grup": "SIHHİ TESİSAT GRUBU",
+   "malzeme": "NORMAL DİRSEK   20mm",
+   "boyut": "Adet",
+   "adet": null
+  },
+  {
+   "grup": "SIHHİ TESİSAT GRUBU",
+   "malzeme": "KULAKLI DİRSEK   20mm",
+   "boyut": "Adet",
+   "adet": null
+  },
+  {
+   "grup": "SIHHİ TESİSAT GRUBU",
+   "malzeme": "DÜZ T   20mm",
+   "boyut": "Adet",
+   "adet": null
+  },
+  {
+   "grup": "SIHHİ TESİSAT GRUBU",
+   "malzeme": "MAŞON   20mm",
+   "boyut": "Adet",
+   "adet": null
+  },
+  {
+   "grup": "SIHHİ TESİSAT GRUBU",
+   "malzeme": "İÇ DİŞLİ T   20mm",
+   "boyut": "Adet",
+   "adet": null
+  },
+  {
+   "grup": "SIHHİ TESİSAT GRUBU",
+   "malzeme": "ATLAMA PARÇASI YARIM PARMAK",
+   "boyut": "Adet",
+   "adet": null
+  },
+  {
+   "grup": "SIHHİ TESİSAT GRUBU",
+   "malzeme": "PİS SU TESİSATI",
+   "boyut": "TAKIM",
+   "adet": null
+  },
+  {
+   "grup": "SIHHİ TESİSAT GRUBU",
+   "malzeme": "KALORİFER TESİSATI",
+   "boyut": "TAKIM",
+   "adet": null
+  },
+  {
+   "grup": "SIHHİ TESİSAT GRUBU",
+   "malzeme": "DUŞAKABİN",
+   "boyut": "TAKIM",
+   "adet": null
+  },
+  {
+   "grup": "SIHHİ TESİSAT GRUBU",
+   "malzeme": "KLOZET",
+   "boyut": "TAKIM",
+   "adet": null
+  },
+  {
+   "grup": "SIHHİ TESİSAT GRUBU",
+   "malzeme": "BANYO DOLABI",
+   "boyut": "TAKIM",
+   "adet": null
+  },
+  {
+   "grup": "SIHHİ TESİSAT GRUBU",
+   "malzeme": "AYAKLI LAVABO",
+   "boyut": "TAKIM",
+   "adet": null
+  },
+  {
+   "grup": "SIHHİ TESİSAT GRUBU",
+   "malzeme": "BACA BORUSU (13 CM ÇAP)",
+   "boyut": "METRE",
+   "adet": null
+  },
+  {
+   "grup": "SIHHİ TESİSAT GRUBU",
+   "malzeme": "BACA ŞAPKASI (40X40)",
+   "boyut": "ADET",
+   "adet": null
+  },
+  {
+   "grup": "SIHHİ TESİSAT GRUBU",
+   "malzeme": "BACA KÖR TAPA",
+   "boyut": "ADET",
+   "adet": null
+  },
+  {
+   "grup": "SIHHİ TESİSAT GRUBU",
+   "malzeme": "BACA T Sİ",
+   "boyut": "ADET",
+   "adet": null
+  },
+  {
+   "grup": "SIHHİ TESİSAT GRUBU",
+   "malzeme": "SORUMLI ÜRETİM PERSONELİ AD SOYAD",
+   "boyut": null,
+   "adet": "MEHMET BALABAN"
+  },
+  {
+   "grup": "BOYA GRUBU",
+   "malzeme": "Dış Cephe Boyası",
+   "boyut": "L / 6 M2",
+   "adet": null
+  },
+  {
+   "grup": "BOYA GRUBU",
+   "malzeme": "İç Cephe",
+   "boyut": "L / 6 M2",
+   "adet": null
+  },
+  {
+   "grup": "BOYA GRUBU",
+   "malzeme": "Tavan Boyası",
+   "boyut": "L / 4 M2",
+   "adet": null
+  },
+  {
+   "grup": "BOYA GRUBU",
+   "malzeme": "Yalıpan Boyası",
+   "boyut": "L / 4 M2",
+   "adet": null
+  },
+  {
+   "grup": "BOYA GRUBU",
+   "malzeme": "Metal Boyası",
+   "boyut": "ADET",
+   "adet": null
+  },
+  {
+   "grup": "BOYA GRUBU",
+   "malzeme": "Tiner",
+   "boyut": "ADET",
+   "adet": 3
+  },
+  {
+   "grup": "BOYA GRUBU",
+   "malzeme": "Silikonize Mastik",
+   "boyut": "ADET",
+   "adet": 30
+  },
+  {
+   "grup": "BOYA GRUBU",
+   "malzeme": "Poliüretan Mastik",
+   "boyut": "ADET",
+   "adet": 2
+  },
+  {
+   "grup": "BOYA GRUBU",
+   "malzeme": "Poliüretan Köpük",
+   "boyut": "ADET",
+   "adet": 2
+  },
+  {
+   "grup": "BOYA GRUBU",
+   "malzeme": "SORUMLI ÜRETİM PERSONELİ AD SOYAD",
+   "boyut": null,
+   "adet": "MEHMET BALABAN"
+  }
+ ]
+}
