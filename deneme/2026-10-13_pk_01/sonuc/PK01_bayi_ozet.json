@@ -1,0 +1,111 @@
+{
+ "kod": "PK-01",
+ "is_emri_no": "PM-PK01-HUMA-60M2",
+ "revizyon": 1,
+ "dogrulama": {
+  "passed": true,
+  "errors": []
+ },
+ "teslim": true,
+ "sayfa_pt": [
+  842.0,
+  595.0
+ ],
+ "sayimlar": {
+  "pano_dis": 30,
+  "pano_ic": 20,
+  "h_pano_eki": 29,
+  "h_uclu": 9,
+  "kose": 7,
+  "dikme": 1,
+  "pencere": [
+   "120/180",
+   "120/180",
+   "120/120",
+   "120/120",
+   "120/120"
+  ],
+  "vasistas": [
+   "60/40"
+  ],
+  "ic_kapi": 5,
+  "dis_kapi": [
+   "90"
+  ],
+  "oda_programi": "2+1",
+  "oturum_m2": 60.0
+ },
+ "ozellikler": {
+  "Bina Yüksekliği": "2500 mm",
+  "Dış Duvarlar": "100 mm Pres Panel",
+  "İç Duvarlar": "60 mm Pres Panel",
+  "Panel Türü": "Pres Panel",
+  "Çatı Şekli": "Beşik",
+  "Çatı Eğimi": "%33",
+  "Çatı Kaplaması": "Sandviç Panel",
+  "Çatı Kaplama Rengi": "Antrasit Gri",
+  "Dış Kapı": "Alıcıya ait",
+  "İç Kapılar": "5 adet (Standart Amerikan)",
+  "Pencereler": "5 adet (3 × 120/120, 2 × 120/180)",
+  "Vasistaslar": "1 adet (1 × 60/40)",
+  "Dış Boya Rengi": "Alıcıya ait",
+  "İç Boya Rengi": "Alıcıya ait",
+  "Köşe ve Söveler": "..."
+ },
+ "ozel_istekler": [
+  "Pencere Rengi: Alıcıya ait",
+  "Tavan: Düz",
+  "Saçak ve Alın Rengi: Antrasit Gri"
+ ],
+ "zincirler_cm": {
+  "alt": [
+   0.0,
+   266.0,
+   386.5,
+   600.0
+  ],
+  "ust": [
+   0.0,
+   198.25,
+   386.5,
+   600.0
+  ],
+  "sol": [
+   0.0,
+   618.5,
+   1000.0
+  ],
+  "sag": [
+   0.0,
+   200.0,
+   618.5,
+   1000.0
+  ]
+ },
+ "dis_olcu_cm": [
+  600.0,
+  1000.0
+ ],
+ "perspektif": {
+  "durum": "TAMAM",
+  "sure_s": 3.9,
+  "ifc": "PK01_sunum.ifc",
+  "ifc_ozet": {
+   "duvar": 50,
+   "pencere": 6,
+   "kapi": 6,
+   "mahal": 7,
+   "bosluk": 12,
+   "sema_hatasi": 0,
+   "cati": {
+    "mahya_cm": 368.9,
+    "makas": 9,
+    "cati_alan_m2": 73.67
+   }
+  }
+ },
+ "dosyalar": [
+  "PK01_bayi.pdf",
+  "PK01_plan_bayi.png"
+ ]
+}

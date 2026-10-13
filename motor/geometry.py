@@ -1035,3 +1035,20 @@ def kapi_varyanti(d, ac) -> str:
         taraf = "SOL" if n == "+y" else "SAG"
         uc = ("ALT" if m == "sol" else "UST") if n == "+y" else ("UST" if m == "sol" else "ALT")
     return f"{taraf}_{uc}"
+
+
+H_PROFIL_GORUNEN_CM = 5.0   # İE-12 (Lokman 13.10.2026 09:39): pano eki H profili dışarıdan bakınca 5 cm, eke tam ortalı
+
+
+def pano_ekleri(plan: "Plan") -> list:
+    """İE-12: bir duvardaki ardışık iki panonun her eki (Lokman 13.10.2026 09:39: "her panonun arasına H birleştirme profili gelir").
+    Ekte üçlü H varsa (iç duvar T'si ya da dış duvar T bölmesi; `plan.h_baglantilar`) `cins` "uclu", yoksa "pano_eki".
+    Yalnız okur; Motor'un çizimini ve sayımını değiştirmez. PK-01 paftasıyla: pano eki 19 dış + 10 iç, üçlü 5 dış + 4 iç."""
+    cik = []
+    for d in plan.duvarlar:
+        for a, b in zip(d.panolar, d.panolar[1:]):
+            e = a.a1
+            x, y = (e, d.c) if d.yon == "x" else (d.c, e)
+            uclu = any(abs(h.x - x) <= d.h + 3.5 and abs(h.y - y) <= d.h + 3.5 for h in plan.h_baglantilar)
+            cik.append({"duvar": d.tur, "yon": d.yon, "c": d.c, "h": d.h, "e": e, "x": x, "y": y, "cins": "uclu" if uclu else "pano_eki"})
+    return cik

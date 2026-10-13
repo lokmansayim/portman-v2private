@@ -37,6 +37,7 @@ DUVAR_H = 250.0
 LENTO = 50.0
 PENCERE_ESIK = {"120x120": 80.0, "120x180": 20.0, "60x40": 160.0}   # BOM notlarındaki eşik yükseklikleri (23.09)
 KAPI_UST = DUVAR_H - LENTO                                            # 200: lento kuralı
+H_PROFIL_TASMA_CM = 0.4       # İE-12, yalnız 3B gösterim: H şeridi duvar yüzünden taşar (görünüşte seçilsin); kesim ölçüsü değil
 
 
 def _m(v):
@@ -110,6 +111,17 @@ def hazirla(ie: dict) -> dict:
         tur = "dikme" if "dikme" in lab.lower() else ("veranda_profil" if kod[0] == "V" else "baglanti")
         baglantilar.append({"kod": kod, "kalem": kalem(kod), "tur": tur, "rect": [_r(x0), _r(y0), _r(x1), _r(y1)], "blok": e.dxf.name})
 
+    # İE-12 (Lokman 13.10.2026 09:39): her iki panonun arasında H birleştirme profili; dışarıdan 5 cm, eke tam ortalı. Yalnız yeni anahtarlı
+    # İş Emri'nde (prefabrik bayi sunumu); eski IFC'ler değişmez. Şerit duvar gövdesinden her yüzde 0,4 cm taşar ki görünüşte seçilsin.
+    # Üçlü H olan eklerde şerit yalnız görünümdür (BOM satırı bağlantılarda, B03 / B05).
+    pano_ekleri = []
+    if G.yeni_anahtar_var(ie):
+        w = G.H_PROFIL_GORUNEN_CM / 2.0
+        for k in G.pano_ekleri(plan):
+            e, c, t = k["e"], k["c"], k["h"] + H_PROFIL_TASMA_CM
+            rect = [e - w, c - t, e + w, c + t] if k["yon"] == "x" else [c - t, e - w, c + t, e + w]
+            pano_ekleri.append({"duvar": k["duvar"], "cins": k["cins"], "rect": [_r(v) for v in rect]})
+
     odalar, veranda = [], None
     for ad, m in plan.mahaller.items():
         poly = m.poly.simplify(0.0)
@@ -134,6 +146,7 @@ def hazirla(ie: dict) -> dict:
                           "topuk": float(cati.get("topuk_cm", 10)), "makas_yonu": ("y (derinlik)" if cati.get("makas_ekseni") == "y" else "x (kısa kenar)"),
                           **({"makas_ekseni": cati["makas_ekseni"]} if "makas_ekseni" in cati else {}), "renk": "antrasit"}},
         "panolar": panolar, "acikliklar": acikliklar, "baglantilar": baglantilar, "odalar": odalar, "veranda": veranda, "tefris": [],
+        **({"pano_ekleri": pano_ekleri} if pano_ekleri else {}),
         "kanit": {"motor_uyarilari": plan.uyarilar}, "uyari": [],
     }
 
@@ -563,8 +576,21 @@ class IfcUretici:
                                                 "Not": "Kot varsayım (profil kotu kaynakta tanımlı değil)" if b["tur"] == "veranda_profil"
                                                        else f"{H0:.0f} cm yalnız 3B gösterim; kesim boyu değil"})
 
+    def pano_ekleri(self):
+        """İE-12: pano eki H profilleri (IfcMember, STUD; galvaniz). Görünen genişlik 5 cm, eke ortalı; yalnız sunum (hazirla'da varsa)."""
+        H0 = self.G["bina"]["duvar_h"]
+        for i, b in enumerate(self.G.get("pano_ekleri", [])):
+            x0, y0, x1, y1 = b["rect"]
+            eki = b.get("cins", "pano_eki") == "pano_eki"
+            e = self._urun("IfcMember", f"H_{'PANO_EKI' if eki else 'UCLU'}_{'DIS' if b['duvar'] == 'dis' else 'IC'}_{i:03d}", predefined="STUD")
+            self._yerlestir(e)
+            self._temsil(e, self._prizma_xy([(x0, y0), (x1, y0), (x1, y1), (x0, y1)], 0.0, H0), "galv")
+            self._pset(e, "PortatifEv_Kapsam", {"BOMKalem": "H birleştirme profili (pano eki)" if eki else "Üçlü H bağlantısı: yüz görünümü (BOM satırı bağlantılarda)",
+                                                "KesimBoyuTanimli": False,
+                                                "Not": f"Görünen 5 cm, eke ortalı (Lokman 13.10.2026); {H0:.0f} cm yalnız 3B gösterim"})
+
     def calistir(self, yol: Path):
-        self.panolar(); self.baglantilar(); self.mahaller(); self.doseme(); self.cati(); self.veranda()
+        self.panolar(); self.baglantilar(); self.pano_ekleri(); self.mahaller(); self.doseme(); self.cati(); self.veranda()
         self.f.write(str(yol))
         return yol
 
