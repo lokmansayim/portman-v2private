@@ -1,0 +1,12 @@
+{
+ "kaynak": "PK-01 montaj paftası (kaynak/HUMA_60M2_MONTAJ_PAFTASI.pdf) ve baş makas betopan paftası; okuma PK01_okuma.md (13 Ekim 2026), H sayıları vektörden (pafta_montaj.json). Gerçek yükleme listesi değildir; varsayılan hesabı değiştirmez (kör test protokolü §5).",
+ "h_dis": {"adet": 19, "not": "H planı: 12 dübelli & kulaklı (makasa denk gelen) + 7 dübelli"},
+ "h_ic": {"adet": 10, "not": "H planı: H standart 60 × 60"},
+ "uclu_dis": {"adet": 5, "not": "H planı: 2 dübelli & kulaklı + 3 dübelli"},
+ "uclu_ic": {"adet": 4, "not": "H planı (vektör; ilk elle okumada 5 yazılmıştı)"},
+ "makas_bas": {"adet": 2, "not": "makas planı MK01 ve MK09"},
+ "makas_orta": {"adet": 7, "not": "makas planı MK02–MK08; 125,5 c/c"},
+ "asik": {"adet": 42, "not": "aşık planı: yarı başına 7 sıra × (410 + 410 + 240) → 28 × L 4100 + 14 × L 2400 (L 4200 değil)"},
+ "tavan_omegasi": {"adet": 20, "not": "tavan omega planı okuması: 365 × 8, 243, 240,5, 249, 190 × 6 (veranda), 166 × 2, 50 — adetler yeniden sayılacak (okuma kaydı)"},
+ "bas_makas_betopan": {"adet": 4, "not": "baş makas betopan yerleşimi: iki kalkan için 4 × (125 × 250)"}
+}

@@ -259,6 +259,7 @@
     "Tavan": "Düz",
     "Saçak ve Alın Rengi": "Antrasit Gri"
   },
+  "alici_ait": {"kalemler": ["Sıhhi tesisat", "Vitrifiye", "Boya grubu (mastikler dahil)", "Acil müdahale kapağı", "Pencere detayı"], "kaynak": "PK-01 montaj paftası sayfa 1 açıklama ve teknik özellikler (PK01_okuma.md); Motor okumaz, yalnız yükleme listesi"},
   "pafta_uyarilari": [
     "PK-01 kör test (İE-11): dış kapı boşluğu 90 cm (K04 çalışma kabulü); montaj paftasında 82 cm çizili — alıcıya ait kapının ölçüsü teyit edilmeli.",
     "Banyo kapısı boşluğu paftadan 1,9 cm sağda (oda kapısı yaslama kuralı 11,5 cm; paftada bu kapıda 13,3)."
