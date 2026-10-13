@@ -30,6 +30,8 @@ Adlar yazılabilir (D-11). Bulunan dosya adları yalnız dizin listesinden.
 | | | | `… - Revize.pdf` | `3c448656a1cbaba830482f0bd68670474ec59f7a7646625b6598109b579ef5f6` | 340.146 |
 | PK-08 | Eren Bey 60 m² (Muhammed Uysal) | duvar ve omega yerleşim PDF'leri | `LOFTEV PREFABRİK YÜKLEME LİSTESİ.xlsx` | `dca060f8ff046f69f9466ba6d99d5fa0c2dbec16f5ff75bc4ffdb16f202d531c` | 50.134 |
 | | | | `M.Uysal Eren Bey 60 ㎡Yükleme Listeis.xlsx` | `a748c76bf2a1169dee87762aaa78fba37b92385ca020e7e84eb7bac5677441ea` | 48.456 |
+| | | | `Eren Bey 70 m2 Prefabrik Teklif.xlsx` (açılmadı; 13.10 13:30'da eklendi) | `d4617fa0a5d7fad4aafbad48888a3f1cff292acb4b3027d81c3ef12841165973` | 176.166 |
+| | | | `PREFABRİK - TEKLİF PORTATİFEV.xlsx` (açılmadı) | `59e32e93c2e4d46c5146f283cc227c3b315a7139c8aad4f54acb8931beca69a5` | 176.397 |
 
 ## Kör değil (kıyas için değil, kaynak olarak)
 

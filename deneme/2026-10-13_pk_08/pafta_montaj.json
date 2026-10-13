@@ -1,0 +1,1087 @@
+{
+ "kaynak": "Duvar Yerleşim Planı.pdf, Kat planı.pdf (Uysallar Yapı)",
+ "cerceve": "cm; x sol dış yüzden (sağ dış yüz 769,8), y yatak 2'nin ön duvar ekseninden (y = 0; arka dış yüz 782,5); açılı cumba y < 0.",
+ "montaj_plani": {
+  "panolar": [
+   {
+    "yon": "y",
+    "c": 4.98,
+    "a0": 651.91,
+    "a1": 777.51,
+    "boy": 125.5,
+    "boy_cizim": 125.6,
+    "t": 10.0,
+    "duvar": "dis",
+    "tur": "STD",
+    "rect": [
+     0.0,
+     651.91,
+     9.96,
+     777.51
+    ]
+   },
+   {
+    "yon": "y",
+    "c": 4.98,
+    "a0": 526.51,
+    "a1": 651.91,
+    "boy": 125.5,
+    "boy_cizim": 125.4,
+    "t": 10.0,
+    "duvar": "dis",
+    "tur": "STD",
+    "rect": [
+     0.0,
+     526.51,
+     9.96,
+     651.91
+    ]
+   },
+   {
+    "yon": "y",
+    "c": 4.98,
+    "a0": 400.91,
+    "a1": 526.51,
+    "boy": 125.5,
+    "boy_cizim": 125.6,
+    "t": 10.0,
+    "duvar": "dis",
+    "tur": "STD",
+    "rect": [
+     0.0,
+     400.91,
+     9.96,
+     526.51
+    ],
+    "aciklik": {
+     "tur": "pencere",
+     "olcu": "120x100",
+     "genislik": 120.0,
+     "kaynak": "etiket 120/100 (-10.0, 496.0)"
+    }
+   },
+   {
+    "yon": "y",
+    "c": 4.98,
+    "a0": 275.51,
+    "a1": 400.91,
+    "boy": 125.5,
+    "boy_cizim": 125.4,
+    "t": 10.0,
+    "duvar": "dis",
+    "tur": "STD",
+    "rect": [
+     0.0,
+     275.51,
+     9.96,
+     400.91
+    ]
+   },
+   {
+    "yon": "y",
+    "c": 4.98,
+    "a0": 162.36,
+    "a1": 275.51,
+    "boy": 113.0,
+    "boy_cizim": 113.15,
+    "t": 10.0,
+    "duvar": "dis",
+    "tur": "STD",
+    "rect": [
+     0.0,
+     162.36,
+     9.96,
+     275.51
+    ]
+   },
+   {
+    "yon": "x",
+    "c": 777.5,
+    "a0": 9.96,
+    "a1": 135.36,
+    "boy": 125.5,
+    "boy_cizim": 125.4,
+    "t": 10.0,
+    "duvar": "dis",
+    "tur": "STD",
+    "rect": [
+     9.96,
+     772.53,
+     135.36,
+     782.48
+    ]
+   },
+   {
+    "yon": "x",
+    "c": 777.5,
+    "a0": 135.36,
+    "a1": 260.96,
+    "boy": 125.5,
+    "boy_cizim": 125.6,
+    "t": 10.0,
+    "duvar": "dis",
+    "tur": "STD",
+    "rect": [
+     135.36,
+     772.53,
+     260.96,
+     782.48
+    ]
+   },
+   {
+    "yon": "x",
+    "c": 777.5,
+    "a0": 260.96,
+    "a1": 386.36,
+    "boy": 125.5,
+    "boy_cizim": 125.4,
+    "t": 10.0,
+    "duvar": "dis",
+    "tur": "STD",
+    "rect": [
+     260.96,
+     772.53,
+     386.36,
+     782.48
+    ]
+   },
+   {
+    "yon": "x",
+    "c": 777.5,
+    "a0": 386.36,
+    "a1": 511.96,
+    "boy": 125.5,
+    "boy_cizim": 125.6,
+    "t": 10.0,
+    "duvar": "dis",
+    "tur": "STD",
+    "rect": [
+     386.36,
+     772.53,
+     511.96,
+     782.48
+    ]
+   },
+   {
+    "yon": "x",
+    "c": 777.5,
+    "a0": 511.96,
+    "a1": 637.36,
+    "boy": 125.5,
+    "boy_cizim": 125.4,
+    "t": 10.0,
+    "duvar": "dis",
+    "tur": "STD",
+    "rect": [
+     511.96,
+     772.53,
+     637.36,
+     782.48
+    ]
+   },
+   {
+    "yon": "x",
+    "c": 777.5,
+    "a0": 637.36,
+    "a1": 759.7,
+    "boy": 122.0,
+    "boy_cizim": 122.34,
+    "t": 10.0,
+    "duvar": "dis",
+    "tur": "STD",
+    "rect": [
+     637.36,
+     772.53,
+     759.7,
+     782.48
+    ]
+   },
+   {
+    "yon": "x",
+    "c": 162.36,
+    "a0": 9.96,
+    "a1": 249.66,
+    "boy": 240.0,
+    "boy_cizim": 239.7,
+    "t": 10.0,
+    "duvar": "dis",
+    "tur": "PENCERE_240",
+    "rect": [
+     9.96,
+     157.38,
+     249.66,
+     167.33
+    ],
+    "aciklik": {
+     "tur": "pencere",
+     "olcu": "180x180",
+     "genislik": 180.0,
+     "kaynak": "etiket 180/180 (129.8, 150.0)"
+    }
+   },
+   {
+    "yon": "x",
+    "c": 162.36,
+    "a0": 249.66,
+    "a1": 374.87,
+    "boy": 125.0,
+    "boy_cizim": 125.21,
+    "t": 10.0,
+    "duvar": "dis",
+    "tur": "STD",
+    "rect": [
+     249.66,
+     157.38,
+     374.87,
+     167.33
+    ],
+    "aciklik": {
+     "tur": "dis_kapi",
+     "olcu": "90",
+     "genislik": 90.0,
+     "mentese": "sag",
+     "bosluk": [
+      258.6,
+      358.6
+     ],
+     "kaynak": "kat planı yay [349,8 334,8 400,1 385,1] (r 100); listede 90 × 200 (L4)"
+    }
+   },
+   {
+    "yon": "y",
+    "c": 379.85,
+    "a0": 149.72,
+    "a1": 275.32,
+    "boy": 125.5,
+    "boy_cizim": 125.6,
+    "t": 10.0,
+    "duvar": "dis",
+    "tur": "STD",
+    "rect": [
+     374.87,
+     149.72,
+     384.83,
+     275.32
+    ]
+   },
+   {
+    "yon": "y",
+    "c": 379.85,
+    "a0": 24.32,
+    "a1": 149.72,
+    "boy": 125.5,
+    "boy_cizim": 125.4,
+    "t": 10.0,
+    "duvar": "dis",
+    "tur": "STD",
+    "rect": [
+     374.87,
+     24.32,
+     384.83,
+     149.72
+    ]
+   },
+   {
+    "yon": "y",
+    "c": 379.85,
+    "a0": 0.0,
+    "a1": 24.32,
+    "boy": 24.0,
+    "boy_cizim": 24.32,
+    "t": 10.0,
+    "duvar": "dis",
+    "tur": "STD",
+    "rect": [
+     374.87,
+     0.0,
+     384.83,
+     24.32
+    ]
+   },
+   {
+    "yon": "y",
+    "c": 764.87,
+    "a0": 527.27,
+    "a1": 652.68,
+    "boy": 125.5,
+    "boy_cizim": 125.41,
+    "t": 10.0,
+    "duvar": "dis",
+    "tur": "STD",
+    "rect": [
+     759.89,
+     527.27,
+     769.85,
+     652.68
+    ],
+    "aciklik": {
+     "tur": "pencere",
+     "olcu": "120x100",
+     "genislik": 120.0,
+     "kaynak": "etiket 120/100 (780.0, 556.0)"
+    }
+   },
+   {
+    "yon": "y",
+    "c": 764.78,
+    "a0": 652.68,
+    "a1": 777.51,
+    "boy": 125.0,
+    "boy_cizim": 124.83,
+    "t": 10.1,
+    "duvar": "dis",
+    "tur": "STD",
+    "rect": [
+     759.7,
+     652.68,
+     769.85,
+     777.51
+    ]
+   },
+   {
+    "yon": "y",
+    "c": 764.87,
+    "a0": 401.68,
+    "a1": 527.27,
+    "boy": 125.5,
+    "boy_cizim": 125.59,
+    "t": 10.0,
+    "duvar": "dis",
+    "tur": "STD",
+    "rect": [
+     759.89,
+     401.68,
+     769.85,
+     527.27
+    ]
+   },
+   {
+    "yon": "y",
+    "c": 764.87,
+    "a0": 276.27,
+    "a1": 401.68,
+    "boy": 125.5,
+    "boy_cizim": 125.41,
+    "t": 10.0,
+    "duvar": "dis",
+    "tur": "STD",
+    "rect": [
+     759.89,
+     276.27,
+     769.85,
+     401.68
+    ]
+   },
+   {
+    "yon": "y",
+    "c": 764.87,
+    "a0": 150.68,
+    "a1": 276.27,
+    "boy": 125.5,
+    "boy_cizim": 125.59,
+    "t": 10.0,
+    "duvar": "dis",
+    "tur": "STD",
+    "rect": [
+     759.89,
+     150.68,
+     769.85,
+     276.27
+    ]
+   },
+   {
+    "yon": "y",
+    "c": 764.87,
+    "a0": 25.27,
+    "a1": 150.68,
+    "boy": 125.5,
+    "boy_cizim": 125.41,
+    "t": 10.0,
+    "duvar": "dis",
+    "tur": "STD",
+    "rect": [
+     759.89,
+     25.27,
+     769.85,
+     150.68
+    ]
+   },
+   {
+    "yon": "y",
+    "c": 764.78,
+    "a0": 0.0,
+    "a1": 25.27,
+    "boy": 25.0,
+    "boy_cizim": 25.27,
+    "t": 10.1,
+    "duvar": "dis",
+    "tur": "STD",
+    "rect": [
+     759.7,
+     0.0,
+     769.85,
+     25.27
+    ]
+   },
+   {
+    "yon": "y",
+    "c": 386.46,
+    "a0": 461.99,
+    "a1": 587.58,
+    "boy": 125.5,
+    "boy_cizim": 125.59,
+    "t": 5.9,
+    "duvar": "ic",
+    "tur": "STD",
+    "rect": [
+     383.49,
+     461.99,
+     389.42,
+     587.58
+    ]
+   },
+   {
+    "yon": "y",
+    "c": 386.46,
+    "a0": 587.58,
+    "a1": 712.99,
+    "boy": 125.5,
+    "boy_cizim": 125.41,
+    "t": 5.9,
+    "duvar": "ic",
+    "tur": "STD",
+    "rect": [
+     383.49,
+     587.58,
+     389.42,
+     712.99
+    ]
+   },
+   {
+    "yon": "y",
+    "c": 386.46,
+    "a0": 712.99,
+    "a1": 772.53,
+    "boy": 59.0,
+    "boy_cizim": 59.54,
+    "t": 5.9,
+    "duvar": "ic",
+    "tur": "STD",
+    "rect": [
+     383.49,
+     712.99,
+     389.42,
+     772.53
+    ]
+   },
+   {
+    "yon": "x",
+    "c": 464.96,
+    "a0": 389.42,
+    "a1": 514.83,
+    "boy": 125.5,
+    "boy_cizim": 125.41,
+    "t": 5.9,
+    "duvar": "ic",
+    "tur": "STD",
+    "rect": [
+     389.42,
+     461.99,
+     514.83,
+     467.92
+    ],
+    "aciklik": {
+     "tur": "ic_kapi",
+     "olcu": "82",
+     "genislik": 82.0,
+     "mentese": "sol",
+     "bosluk": [
+      404.6,
+      490.6
+     ],
+     "kaynak": "yatak 1: kanat sol pervazdan yatak odasına"
+    }
+   },
+   {
+    "yon": "x",
+    "c": 464.96,
+    "a0": 514.83,
+    "a1": 640.42,
+    "boy": 125.5,
+    "boy_cizim": 125.59,
+    "t": 5.9,
+    "duvar": "ic",
+    "tur": "STD",
+    "rect": [
+     514.83,
+     461.99,
+     640.42,
+     467.92
+    ]
+   },
+   {
+    "yon": "x",
+    "c": 464.96,
+    "a0": 640.42,
+    "a1": 759.89,
+    "boy": 120.0,
+    "boy_cizim": 119.47,
+    "t": 5.9,
+    "duvar": "ic",
+    "tur": "STD",
+    "rect": [
+     640.42,
+     461.99,
+     759.89,
+     467.92
+    ]
+   },
+   {
+    "yon": "y",
+    "c": 514.92,
+    "a0": 336.58,
+    "a1": 461.99,
+    "boy": 125.5,
+    "boy_cizim": 125.41,
+    "t": 5.9,
+    "duvar": "ic",
+    "tur": "STD",
+    "rect": [
+     511.96,
+     336.58,
+     517.89,
+     461.99
+    ],
+    "aciklik": {
+     "tur": "ic_kapi",
+     "olcu": "82",
+     "genislik": 82.0,
+     "mentese": "sol",
+     "bosluk": [
+      358.0,
+      440.0
+     ],
+     "kaynak": "WC: kanat üst pervazdan WC'ye"
+    }
+   },
+   {
+    "yon": "y",
+    "c": 514.92,
+    "a0": 280.29,
+    "a1": 336.58,
+    "boy": 56.0,
+    "boy_cizim": 56.29,
+    "t": 5.9,
+    "duvar": "ic",
+    "tur": "STD",
+    "rect": [
+     511.96,
+     280.29,
+     517.89,
+     336.58
+    ]
+   },
+   {
+    "yon": "x",
+    "c": 277.23,
+    "a0": 384.83,
+    "a1": 510.42,
+    "boy": 125.5,
+    "boy_cizim": 125.59,
+    "t": 6.1,
+    "duvar": "ic",
+    "tur": "STD",
+    "rect": [
+     384.83,
+     274.17,
+     510.42,
+     280.29
+    ],
+    "aciklik": {
+     "tur": "ic_kapi",
+     "olcu": "82",
+     "genislik": 82.0,
+     "mentese": "sag",
+     "bosluk": [
+      404.6,
+      490.6
+     ],
+     "kaynak": "yatak 2: kanat sol pervazdan yatak odasına"
+    }
+   },
+   {
+    "yon": "x",
+    "c": 277.23,
+    "a0": 510.42,
+    "a1": 635.83,
+    "boy": 125.5,
+    "boy_cizim": 125.41,
+    "t": 6.1,
+    "duvar": "ic",
+    "tur": "STD",
+    "rect": [
+     510.42,
+     274.17,
+     635.83,
+     280.29
+    ]
+   },
+   {
+    "yon": "x",
+    "c": 277.23,
+    "a0": 635.83,
+    "a1": 759.89,
+    "boy": 124.0,
+    "boy_cizim": 124.06,
+    "t": 6.1,
+    "duvar": "ic",
+    "tur": "STD",
+    "rect": [
+     635.83,
+     274.17,
+     759.89,
+     280.29
+    ]
+   },
+   {
+    "yon": "x",
+    "c": -0.09,
+    "a0": 728.88,
+    "a1": 759.7,
+    "boy": 31.0,
+    "boy_cizim": 30.82,
+    "t": 10.2,
+    "duvar": "dis",
+    "tur": "OZEL",
+    "rect": [
+     728.88,
+     -5.17,
+     759.7,
+     4.98
+    ]
+   },
+   {
+    "yon": "x",
+    "c": 0.0,
+    "a0": 384.8,
+    "a1": 415.7,
+    "boy": 31.0,
+    "boy_cizim": 30.9,
+    "t": 10.0,
+    "duvar": "dis",
+    "tur": "OZEL",
+    "rect": [
+     384.8,
+     -5.2,
+     415.7,
+     5.0
+    ],
+    "not": "cumbanın sol 31'lik parçası (çizgi)"
+   }
+  ],
+  "cumba_panolari": [
+   {
+    "yon": "a",
+    "c": null,
+    "a0": null,
+    "a1": null,
+    "boy": 79.0,
+    "boy_cizim": 79.6,
+    "t": 10.0,
+    "duvar": "dis",
+    "tur": "OZEL",
+    "aciklik": {
+     "tur": "pencere",
+     "olcu": "59x170",
+     "genislik": 59.0,
+     "kaynak": "etiket 59/170 (açılı pano, 790)"
+    },
+    "not": "cumba açılı pano (45°)"
+   },
+   {
+    "yon": "a",
+    "c": null,
+    "a0": null,
+    "a1": null,
+    "boy": 79.0,
+    "boy_cizim": 79.6,
+    "t": 10.0,
+    "duvar": "dis",
+    "tur": "OZEL",
+    "aciklik": {
+     "tur": "pencere",
+     "olcu": "59x170",
+     "genislik": 59.0,
+     "kaynak": "etiket 59/170 (açılı pano, 790)"
+    },
+    "not": "cumba açılı pano (45°)"
+   },
+   {
+    "yon": "x",
+    "c": -52.35,
+    "a0": 471.9,
+    "a1": 672.6,
+    "boy": 200.75,
+    "boy_cizim": 200.7,
+    "t": 10.0,
+    "duvar": "dis",
+    "tur": "OZEL",
+    "aciklik": {
+     "tur": "pencere",
+     "olcu": "105x170",
+     "genislik": 105.0,
+     "kaynak": "etiket 105/170"
+    },
+    "not": "cumba ön panosu"
+   }
+  ],
+  "koseler": [
+   {
+    "tur": "dis",
+    "rect": [
+     0.0,
+     777.51,
+     9.96,
+     782.48
+    ]
+   },
+   {
+    "tur": "dis",
+    "rect": [
+     0.0,
+     157.38,
+     9.96,
+     162.36
+    ]
+   },
+   {
+    "tur": "dis",
+    "rect": [
+     759.7,
+     777.51,
+     769.66,
+     782.48
+    ]
+   },
+   {
+    "tur": "dis",
+    "rect": [
+     759.7,
+     -5.17,
+     769.66,
+     0.0
+    ]
+   },
+   {
+    "tur": "dis",
+    "rect": [
+     374.87,
+     -5.17,
+     384.83,
+     0.0
+    ]
+   },
+   {
+    "tur": "dis",
+    "rect": [
+     374.87,
+     275.32,
+     384.83,
+     280.29
+    ]
+   }
+  ],
+  "dikmeler": [
+   [
+    0.0,
+    -5.74,
+    14.93,
+    9.19
+   ]
+  ],
+  "etiketler": [
+   {
+    "metin": "180/180",
+    "x": 129.8,
+    "y": 150.0
+   },
+   {
+    "metin": "120/100",
+    "x": -10.0,
+    "y": 496.0
+   },
+   {
+    "metin": "120/100",
+    "x": 780.0,
+    "y": 556.0
+   }
+  ],
+  "ekler": [
+   {
+    "duvar": "dis",
+    "cins": "pano_eki",
+    "sacak": false,
+    "yer": [
+     5.0,
+     275.5
+    ]
+   },
+   {
+    "duvar": "dis",
+    "cins": "pano_eki",
+    "sacak": false,
+    "yer": [
+     5.0,
+     400.9
+    ]
+   },
+   {
+    "duvar": "dis",
+    "cins": "pano_eki",
+    "sacak": false,
+    "yer": [
+     5.0,
+     526.5
+    ]
+   },
+   {
+    "duvar": "dis",
+    "cins": "pano_eki",
+    "sacak": false,
+    "yer": [
+     5.0,
+     651.9
+    ]
+   },
+   {
+    "duvar": "dis",
+    "cins": "pano_eki",
+    "sacak": true,
+    "yer": [
+     135.4,
+     777.5
+    ]
+   },
+   {
+    "duvar": "dis",
+    "cins": "pano_eki",
+    "sacak": true,
+    "yer": [
+     261.0,
+     777.5
+    ]
+   },
+   {
+    "duvar": "dis",
+    "cins": "uclu",
+    "sacak": true,
+    "yer": [
+     386.4,
+     777.5
+    ]
+   },
+   {
+    "duvar": "dis",
+    "cins": "pano_eki",
+    "sacak": true,
+    "yer": [
+     512.0,
+     777.5
+    ]
+   },
+   {
+    "duvar": "dis",
+    "cins": "pano_eki",
+    "sacak": true,
+    "yer": [
+     637.4,
+     777.5
+    ]
+   },
+   {
+    "duvar": "dis",
+    "cins": "pano_eki",
+    "sacak": false,
+    "yer": [
+     249.7,
+     162.5
+    ]
+   },
+   {
+    "duvar": "dis",
+    "cins": "pano_eki",
+    "sacak": false,
+    "yer": [
+     380.0,
+     24.3
+    ]
+   },
+   {
+    "duvar": "dis",
+    "cins": "pano_eki",
+    "sacak": false,
+    "yer": [
+     380.0,
+     149.7
+    ]
+   },
+   {
+    "duvar": "dis",
+    "cins": "pano_eki",
+    "sacak": false,
+    "yer": [
+     765.0,
+     25.3
+    ]
+   },
+   {
+    "duvar": "dis",
+    "cins": "pano_eki",
+    "sacak": false,
+    "yer": [
+     765.0,
+     150.7
+    ]
+   },
+   {
+    "duvar": "dis",
+    "cins": "uclu",
+    "sacak": false,
+    "yer": [
+     765.0,
+     276.3
+    ]
+   },
+   {
+    "duvar": "dis",
+    "cins": "pano_eki",
+    "sacak": false,
+    "yer": [
+     765.0,
+     401.7
+    ]
+   },
+   {
+    "duvar": "dis",
+    "cins": "pano_eki",
+    "sacak": false,
+    "yer": [
+     765.0,
+     527.3
+    ]
+   },
+   {
+    "duvar": "dis",
+    "cins": "pano_eki",
+    "sacak": false,
+    "yer": [
+     765.0,
+     652.7
+    ]
+   },
+   {
+    "duvar": "ic",
+    "cins": "pano_eki",
+    "sacak": false,
+    "yer": [
+     386.5,
+     587.6
+    ]
+   },
+   {
+    "duvar": "ic",
+    "cins": "pano_eki",
+    "sacak": false,
+    "yer": [
+     386.5,
+     713.0
+    ]
+   },
+   {
+    "duvar": "ic",
+    "cins": "uclu",
+    "sacak": false,
+    "yer": [
+     514.8,
+     465.0
+    ]
+   },
+   {
+    "duvar": "ic",
+    "cins": "pano_eki",
+    "sacak": false,
+    "yer": [
+     640.4,
+     465.0
+    ]
+   },
+   {
+    "duvar": "ic",
+    "cins": "pano_eki",
+    "sacak": false,
+    "yer": [
+     515.0,
+     336.6
+    ]
+   },
+   {
+    "duvar": "ic",
+    "cins": "pano_eki",
+    "sacak": false,
+    "yer": [
+     510.4,
+     277.0
+    ]
+   },
+   {
+    "duvar": "ic",
+    "cins": "pano_eki",
+    "sacak": false,
+    "yer": [
+     635.8,
+     277.0
+    ]
+   },
+   {
+    "duvar": "dis",
+    "cins": "pano_eki",
+    "sacak": false,
+    "yer": [
+     415.7,
+     0.0
+    ],
+    "not": "cumba açılı ek"
+   },
+   {
+    "duvar": "dis",
+    "cins": "pano_eki",
+    "sacak": false,
+    "yer": [
+     471.9,
+     0.0
+    ],
+    "not": "cumba açılı ek"
+   },
+   {
+    "duvar": "dis",
+    "cins": "pano_eki",
+    "sacak": false,
+    "yer": [
+     672.6,
+     0.0
+    ],
+    "not": "cumba açılı ek"
+   },
+   {
+    "duvar": "dis",
+    "cins": "pano_eki",
+    "sacak": false,
+    "yer": [
+     728.9,
+     0.0
+    ],
+    "not": "cumba açılı ek"
+   }
+  ]
+ }
+}

@@ -65,6 +65,9 @@ kalemlerde varsayılan PK-07'ye geçti, soru açık):
        RYSB m² × 7,5 (50'ye), çelik dübel = dübelli H, çatı müdahale kapağı 1.
   O17. Bir banyolu evde sıhhi tesisat sabit takımı (7 satır).  O18. Boya dış / iç / kenar / tavan / astar; dayson yukarı; köpük 2.
   O19. Buat kasa = elektrik noktaları.
+Sürüm 7.1 (PK-08 okumasıyla, gerçek liste açılmadan; model anlamı): 120 genişlikteki her pencere standart (üst + alt panel; 120/100 dahil);
+  vasistas yalnız en ≤ 60 ve boy ≤ 60 (59/170 dar uzun pencere karkaslı özel pano); çatı parçasında `dere_yok`; vitrifiye alıcıya aitse 0;
+  trapez çatıda O16'nın 5,5 × 60 satırı yazılmaz (kaplama vidası satırı zaten 5,5 × 60).
 LLM yok, ağ yok.
 """
 from __future__ import annotations
@@ -80,7 +83,7 @@ from pathlib import Path
 KOK = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(KOK))
 
-SURUM = "7 (13 Ekim 2026; Portatifev varsayılan, PK-02, PK-03, PK-05, PK-06 ve PK-07 dersleri, pafta kipi)"
+SURUM = "7.1 (13 Ekim 2026; Portatifev varsayılan, PK-02, PK-03, PK-05, PK-06 ve PK-07 dersleri, pafta kipi; pencere sınıfları)"
 GRUPLAR = {"1001": "Panel", "1002": "Metal aksam", "1003": "Kapı ve pencere", "1004": "Tavan", "1005": "Makas", "1006": "Çatı",
            "1007": "Elektrik", "1008": "Vida", "1009": "Depo", "1010": "Sıhhi tesisat", "1011": "Dere", "1012": "Boya"}
 TAVAN = lambda x: int(math.ceil(x - 1e-9))
@@ -241,8 +244,10 @@ def liste(N: dict, k: dict, pafta: dict | None = None) -> dict:
     ana, ao = C[0]
     acl = [p["aciklik"] for p in N["panolar"] if p["aciklik"]]
     pen = [a for a in acl if a["tur"] == "pencere"]
-    cift = {id(a) for a in pen if a["olcu"] not in STANDART_PENCERE and pencere_olcusu(a["olcu"])[0] > 60}   # L1: karkaslı özel pencere panosu
-    pen_k = [a for a in pen if pencere_olcusu(a["olcu"])[0] > 60 and id(a) not in cift]   # ayrı karkaslı pencereler (vasistas ve iki modüllük hariç)
+    vasistas = lambda a: pencere_olcusu(a["olcu"])[0] <= 60 and pencere_olcusu(a["olcu"])[1] <= 60   # 7.1: 59/170 gibi dar uzun pencere vasistas değil
+    standart = lambda a: pencere_olcusu(a["olcu"])[0] == 120                                          # 7.1: 120 genişlikte her pencere üst + alt panel (H7)
+    cift = {id(a) for a in pen if not standart(a) and not vasistas(a)}                               # L1: karkaslı özel pencere panosu
+    pen_k = [a for a in pen if not vasistas(a) and id(a) not in cift]   # ayrı karkaslı pencereler (vasistas ve iki modüllük hariç)
 
     # ── 1001 Panel ──────────────────────────────────────────────────────────
     fugali = "fugalı" in oz.get("açıklama", "") or "fugali" in oz.get("açıklama", "")
@@ -257,7 +262,7 @@ def liste(N: dict, k: dict, pafta: dict | None = None) -> dict:
             sayac[(f"{kal} yapıştırma dolu pano{fg}", f"{kal_mm} × {L} × {mm(H0)}", "Sayım", "sipariş boyu (PK-01 dersi 2)")] += 1
         elif a["tur"] == "pencere":
             en, boy = pencere_olcusu(a["olcu"])
-            if en <= 60:
+            if vasistas(a):
                 sayac[(f"{kal} yapıştırma dolu vasistaslı pano ({en}/{boy}){fg}", f"{kal_mm} × {L} × {mm(H0)}", "Sayım", "vasistaslı pano")] += 1
             elif id(a) in cift:
                 sayac[(f"Karkaslı özel pencere panosu ({en}/{boy}){fg}", f"{kal_mm} × {L} × {mm(H0)}", "Kural (L1)", "standart dışı pencere panosu tek parça (PK-03 160/180, PK-05 80/120)")] += 1
@@ -394,7 +399,7 @@ def liste(N: dict, k: dict, pafta: dict | None = None) -> dict:
     else:
         for olcu, n in sorted(Counter(a["olcu"] for a in pen).items()):
             en, boy = pencere_olcusu(olcu)
-            ekle("1003", "PVC vasistas" if en <= 60 else "PVC pencere", f"{en}/{boy}", n, "Sayım", kaynak_ad)
+            ekle("1003", "PVC vasistas" if (en <= 60 and boy <= 60) else "PVC pencere", f"{en}/{boy}", n, "Sayım", kaynak_ad)
 
     # ── 1004 Tavan ──────────────────────────────────────────────────────────
     ekle("1004", "Tavan beyaz alçıpan", "1200 × 2500", ASAGI(tavan_kuru * 1.05 / 3 + 2), "Şablon formülü (H6)",
@@ -538,8 +543,9 @@ def liste(N: dict, k: dict, pafta: dict | None = None) -> dict:
          aday=int(math.ceil(L_vida / 250 - 1e-9) * 250), aday_notu="Loftev (PK-02 500 ✓): 250'nin katına yukarı")
     if pen:                                                     # O12: pencere alıcıya ait olsa da montaj vidası bizde (PK-07 120)
         ekle("1008", "Prefabrik pencere vidası (4,8 × 70)", "adet", 20 * len(pen), "Kural (H2, O12)", "pencere × 20", "PK-02 100, PK-07 120 tuttu; PK-01'de 0")
-    ekle("1008", "Trapez vida 5,5 × 60 (trapez sac / metal kiremit)", "adet", int(math.ceil(bina_m2 * 2.5 / 100 - 1e-9) * 100), "Kural (O16)",
-         "m² × 2,5, 100'e yukarı (kural kitabı: Excel motoru)", "PK-07 200 tuttu", aday=int(math.ceil(bina_m2 * 2.5 / 250 - 1e-9) * 250), aday_notu="Loftev: 250'nin katı")
+    if not trapez:                                              # 7.1: trapez çatıda 5,5 × 60 zaten kaplama vidası satırında
+        ekle("1008", "Trapez vida 5,5 × 60 (trapez sac / metal kiremit)", "adet", int(math.ceil(bina_m2 * 2.5 / 100 - 1e-9) * 100), "Kural (O16)",
+             "m² × 2,5, 100'e yukarı (kural kitabı: Excel motoru)", "PK-07 200 tuttu", aday=int(math.ceil(bina_m2 * 2.5 / 250 - 1e-9) * 250), aday_notu="Loftev: 250'nin katı")
     ekle("1008", "230'luk kesme taşı", "adet", TAVAN(bina_m2 * 0.02), "Kural (O16)", "m² × 0,02 (kural kitabı)", "PK-06 2, PK-07 2 tuttu")
     ekle("1008", "Çırpı ipi", "adet", 1, "Kural (O16)", "sabit 1", "PK-02, PK-05, PK-06, PK-07 1")
     inox_vb = ASAGI(bina_m2 / 10)                                # N3 adayı: listedeki "VİDA BİLGİ" sayfası (PK-06)
@@ -576,12 +582,14 @@ def liste(N: dict, k: dict, pafta: dict | None = None) -> dict:
         for kalem, olcu, n in (("Temiz su borusu", "L 4000", 6), ("Normal dirsek 20 mm", "adet", 15), ("Kulaklı dirsek 20 mm", "adet", 12),
                                ("Düz T 20 mm", "adet", 6), ("Maşon 20 mm", "adet", 15), ("İç dişli T 20 mm", "adet", 6), ("Atlama parçası yarım parmak", "adet", 3)):
             ekle("1010", kalem, olcu, n, "Kural (O17)", "sabit takım (bir banyo)", "PK-03, PK-05, PK-07 tuttu; PK-06 (üç ıslak nokta) boru 10, dirsek 20")
-        ekle("1010", "Vitrifiye ve batarya (duş teknesi, klozet, lavabo, batarya grubu)", "takım", None, "Kural yok", "—", "PK-07'de 4 satır × 1", aday=1, aday_notu="PK-07")
+        vit_alici = any("vitrifiye" in x for x in alici)
+        ekle("1010", "Vitrifiye ve batarya (duş teknesi, klozet, lavabo, batarya grubu)", "takım", 0 if vit_alici else None, "İş Emri" if vit_alici else "Kural yok",
+             "alıcıya ait" if vit_alici else "—", "PK-07'de 4 satır × 1", aday=None if vit_alici else 1, aday_notu="" if vit_alici else "PK-07")
     else:
         ekle("1010", "Sıhhi tesisat grubu", "—", None, "Kural yok", "—", "ıslak hacim yok")
 
     # ── 1011 Dere ───────────────────────────────────────────────────────────
-    kanopi = lambda c: bool(c.get("acik") and c.get("makas_yok"))   # O15: veranda saçağı (makassız sandviç) dere almaz, damlalık (PK-07)
+    kanopi = lambda c: bool(c.get("dere_yok") or (c.get("acik") and c.get("makas_yok")))   # O15: veranda saçağı (makassız sandviç) dere almaz (PK-07); 7.1: `dere_yok`
     dere_hat = [x for c, o in C if not kanopi(c) for x in o["hatlar"]]
     pd_, bd = _kural(k, "parca_boyu_m", "dere"), _kural(k, "bindirme_m", "dere")
     dere = TAVAN(sum(dere_hat) / (pd_ - bd))
