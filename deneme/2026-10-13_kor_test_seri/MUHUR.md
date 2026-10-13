@@ -37,3 +37,12 @@ Adlar yazılabilir (D-11). Bulunan dosya adları yalnız dizin listesinden.
 - Çift kat: Diamond Bereket 144 m² (H 2800), Altan Bey 150 m², Doğan 162 / 164 m². Çelik: Aytaç Bey 62, Hüseyin Yıldırım 105, Bedirhan Bey 90, Çatalca showroom.
 - Montajı yalnız DWG olanlar (burada okunamıyor; PDF çıktısı gelirse eklenir): Doğan 61 / 60 m² (`Doğan Prefabrik 61 m² Yükleme Listesi.xlsx` `d62ffc7a…f07f90`, örnek 60 m² `09504702…2f3c70`), Kenan Karabiber 74 m² (`95cb0173…d74eb`), Altan Bey 135 m² (ön onay PDF'i 62 KB; liste `9d56668b…efb9`), Sibel Akar 87 m² (`37445438…312071`).
 - Portman çıktısı (gerçek liste değil): Modern Prefabrik `T1012CV_yukleme_listesi`.
+
+## Açılışlar
+
+| PK | Kendi listemiz (commit) | Mühür denetimi | Açılış | Kıyas |
+|---|---|---|---|---|
+| PK-01 | `aebcfca` 10:48:50 | `17e43b88…d106` aynı | 10:49:17 | `deneme/2026-10-13_pk_01/sonuc/PK01_kiyas.md` |
+| PK-02 | `d31c35c` 11:20:47 | `9081e5e1…961f28` aynı (Mac, 11:21:08) | 11:21:21 | `deneme/2026-10-13_pk_02/sonuc/PK02_kiyas.md` |
+
+PK-02 klasöründe mühür tablosunda olmayan bir xlsx daha var (`Mehmet Balaban 58 m² .xlsx`, 7 Kasım 2025, `7327bef1…93bd9`); açılmadı, kıyasa girmedi.
