@@ -99,6 +99,30 @@ def montaj() -> dict:
     return {"panolar": panolar, "koseler": koseler, "dikmeler": dikmeler, "kanatlar": kanatlar, "etiketler": etiket, "olcu_yazilari": olculer}
 
 
+def makas_konumlari() -> list[float]:
+    """Sayfa 5 (makas ve dere): camgöbeği makas kafesleri; tam derinlik (y −29,9 … 803,1) geçen her kafesin ekseni. Sayfanın ölçeği farklı
+    (437,64 pt = 773 cm); x = 0 yine salonun sol dış yüzü."""
+    pg = fitz.open(K / "PK06_5.pdf")[0]
+    s5 = 437.64 / 773.0
+    x0p, y0p = 262.28, 202.52 + 120.33 * s5
+    kafes = {}
+    for d in pg.get_drawings():
+        if tuple(round(v, 3) for v in (d.get("color") or (9, 9, 9))) != (0.0, 1.0, 1.0):
+            continue
+        r = d["rect"]
+        xa, xb = sorted(((r.y0 - y0p) / s5, (r.y1 - y0p) / s5))
+        ya, yb = sorted(((r.x0 - x0p) / s5, (r.x1 - x0p) / s5))
+        if yb - ya > 800:                                   # ana çatı makası (veranda makasları MK11, MK12 kısa)
+            kafes.setdefault(round((xa + xb) / 2, 1), True)
+    eksen = []                                              # bir makasın kafes parçaları (≈ 8 cm genişlik) tek eksene
+    for x in sorted(kafes):
+        if eksen and x - eksen[-1][-1] < 10:
+            eksen[-1].append(x)
+        else:
+            eksen.append([x])
+    return [round((g[0] + g[-1]) / 2, 1) for g in eksen]
+
+
 def tavan_omega() -> dict:
     """Sayfa 3: omega parçalarının ölçü yazıları eflatun (0xff00ff); plan ölçüleri siyah (ayıklanır)."""
     pg = fitz.open(K / "PK06_3.pdf")[0]
@@ -167,10 +191,12 @@ def main() -> int:
         if a and a["tur"] == "pencere" and p["tur"] == "PENCERE_251" and abs(p["c"] - 193.1) < 1:
             a["not"] = "paftada \"Sürgülü Pencere\" (verandaya bakan)"
     M["ekler"] = PK03.ekler(M)
-    # kulaklı H = makas ayağının geldiği ek (PK-01, -02, -03, -05'te tuttu): makaslar y yönünde, ayaklar ön (y = 0) ve arka (y = 773)
-    # dış duvarda; salon–veranda duvarı (y 323,7–333,8) çatının ortasında kalır, makas ayağı almaz
+    # kulaklı H = makasın denk geldiği dış ek (PK-01, -02, -03, -05'te saçak duvarında tuttu). Kör tahminde (90869d0) yalnız ön ve arka
+    # duvar sayılmıştı (12 / 7); gerçek liste 13 / 6: salon–veranda duvarındaki ek (x 130,4) MK09'un tam altında. Sürüm 6: makaslar y yönünde
+    # (sayfa 5, x konumları), x yönündeki bir dış duvarın eki bir makas konumuna ±2 cm denk geliyorsa kulaklı.
+    makas_x = makas_konumlari()
     for e in M["ekler"]:
-        e["sacak"] = bool(e["sacak"] and (e["yer"][1] < 15 or e["yer"][1] > 760))
+        e["sacak"] = bool(e["sacak"] and any(abs(e["yer"][0] - mx) <= 2.0 for mx in makas_x))
     kos = Counter(k_["tur"] for k_ in M["koseler"])
     to, asik_, kap = tavan_omega(), asik(), kaplama()
     (BURASI / "pafta_montaj.json").write_text(json.dumps({"kaynak": "PK06_1–8.pdf (Sevim Güler 82 + 10 m², Loftev)", "cerceve": __doc__.split("Çerçeve: ")[1].split("\n")[0],
@@ -197,7 +223,7 @@ def main() -> int:
                     "not": "sayfa 4–5: MK01–MK10 (125,5'te bir, x 4 … 1135); sayfa 2 kesiti: yükselme 140,06 / yatay 411,51 → %34,0, eğik 434,69. "
                            "Ön saçak verandanın önünden de geçer (veranda çatısının ön yüzü aynı düzlemde): 11,995 + 1,2025"},
                    {"ad": "veranda çatısı", "tip": "besik", "aciklik_cm": 333.8, "boy_cm": 120.3, "egim_yuzde": 32.8, "sacak_cm": 30.0, "kalkan": 1,
-                    "capraz": False, "mahya_boy_cm": 150.25, "sacak_hatlari_m": [1.5025],
+                    "capraz": False, "acik": True, "mahya_boy_cm": 150.25, "sacak_hatlari_m": [1.5025],
                     "not": "ana çatıya paralel ikinci beşik (MK11 x −4, MK12 x −116); sol kesit: taban 373,75, yükselme 61,37 / 186,87 → %32,8; "
                            "ön yüzü ana çatının ön yüzüyle aynı düzlemde (aşık planında ön yüzün alt dört sırası 120,25 uzuyor), arka yüzü 4 × 150,25"}],
           "ozellikler": {"Panel Türü": "Press Panel", "Çatı Şekli": "Beşik", "Çatı Kaplaması": "Tek kat panel", "Çatı Kaplama Rengi": "Antrasit",

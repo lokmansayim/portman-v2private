@@ -595,7 +595,7 @@
   {
    "duvar": "dis",
    "cins": "pano_eki",
-   "sacak": false
+   "sacak": true
   },
   {
    "duvar": "dis",
@@ -722,6 +722,7 @@
    "sacak_cm": 30.0,
    "kalkan": 1,
    "capraz": false,
+   "acik": true,
    "mahya_boy_cm": 150.25,
    "sacak_hatlari_m": [
     1.5025

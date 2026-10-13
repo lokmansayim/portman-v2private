@@ -14,9 +14,9 @@
 | Varsayılan adetle aynı | 45 | panoların 15'i (16 satır), köşe 6 + 2, kolon 2, çektirme U'su 60, 100'lük duvar omegası 3, alt çerçeve 11 + 12, aşık 52, mahya 6, dere 8, kelepçe 64, dere kapağı 6, kapılar (çelik SOL; Amerikan 3 SOL + 3 SAĞ), betopan H'ı 5, acil müdahale kapağı, elektrikte 13 |
 | Toplam aynı, ayrım farklı | 4 | dış H 19 (kulaklı 13 / dübelli 6; aday 12 / 7), iç H 17 (H 4 / 3'lü 13; biz 13 / 4, yer değişmiş gibi) |
 | Aday ya da pafta sütunu tuttu | 9 | 3'lü H 3 / 2 (iki satır), çelik dübel 24, RYSB 750, betopan vidası 500, tek kat panel vidası 750, köpük 2, tek kat panel 30 (pafta), baş makas Z'si 8 (aday 10'un ana çatı payı) |
-| Farklı: bizim kural hatamız | 12 | kiriş boyları 3, baş makas omegası ve betopanı, şilte, pencere U'ları 2, inox ve uçlar 3, iki modüllük pano boyu (aşağıda 1–8) |
+| Farklı: bizim kural hatamız | 9 | baş makas omegası ve betopanı, şilte, pencere U'ları 2, inox ve uçlar 3, iki modüllük pano boyu (aşağıda) |
 | Farklı: karar (Loftev ↔ Portatifev) | 4 | köşebent 7, profil vidalama 6, iniş borusu L 2000, dayson 3 |
-| Farklı: elle ya da açıklanamadı | 12 | 60'lık omega 50 (biz 47 + 5), saçak omegası 14 (11), saçak sacı 16 (12), alın 9 (10), iniş 7 (8) ve ona bağlı 4 satır, NYM 140 / 120, izole bant 3 |
+| Farklı: elle ya da açıklanamadı | 15 | kiriş boyları 3, 60'lık omega 50 (biz 47 + 5), saçak omegası 14 (11), saçak sacı 16 (12), alın 9 (10), iniş 7 (8) ve ona bağlı 4 satır, NYM 140 / 120, izole bant 3 |
 | Bizde yok | 14 | damlalık 1, tek kat panel kapaması 16, 5,5 × 25 vida 1400, 5,5 × 60 vida 100, kesme taşı 2, çırpı ipi 1, W otomat 9, sıhhi tesisat 7 satır |
 
 **Pafta kipi üçüncü kez çalıştı:** 16 pano satırının 15'i birebir; tek fark iki modüllük pencere panosunun sipariş boyu (2510 ↔ 2500).
@@ -34,7 +34,7 @@ ayrı bir listeye mi gittiği, alıcıya mı ait olduğu bilinmiyor → soru.
 2. **Açık çatı parçası (veranda çatısı) kalkan kalemi ve şilte almaz:** sol kalkanın altında duvar yok (kiriş). Listede baş makas omegası 7
    (ana çatı 2 × 7,73 ÷ 2,5), Z'si 8 (ana çatı), betopanı 6 (ana çatı); biz verandayı da sayıp 8 / 10 / 7 dedik. Şilte 11 = ana çatının saçaklı
    tabanı ÷ 9,6 (veranda parçası hariç; Loftev adayı verandayla 12 dedi).
-3. **Kiriş boyu 10 mm'ye yukarı:** 110,25 → 1110, 298,5 → 2990, 313,75 → 3140 (biz 1102,5 / 2985 / 3137,5).
+3. **Kiriş boyları** 1110 / 2990 / 3140 (biz 1102,5 / 2985 / 3137,5): 10 mm'ye yukarı yuvarlanmış gibi, ama PK-03'te 1155 yuvarlanmamıştı → kural değil, elle.
 4. **Tek kat panel yüz başına yukarı ve paftadaki boy:** arka yüz 11,995 ÷ 0,87 → 14, ön yüz (verandaya uzayan düzlem dahil) 13,2 ÷ 0,87 → 16 = 30;
    boy L 4450 (paftada şerit 444,9; eğik + ≈ 5 cm). Veranda arka yüzü artan parçalardan; ayrı veranda satırı yok. Biz 28 × 4400 + 4 × 2100.
 5. **Veranda tavan omegası ayrı satır değil** (PK-03 dersi 10 ikinci kez): listede tek satır 50.
@@ -42,6 +42,17 @@ ayrı bir listeye mi gittiği, alıcıya mı ait olduğu bilinmiyor → soru.
 7. **İnox taşı m² ÷ 10 aşağı, uçlar inox ÷ 2** ("VİDA BİLGİ" sayfası): 92 → 9, 8'lik uç ve PH2 4 (biz 10 / 7 / 7). PK-01'de de tutuyor;
    PK-02, -03, -05'te listeler farklı (elle).
 8. **İki modüllük pencere panosunun sipariş boyu 2510** (PK-03'te 2500): kesintisiz modül boyu; karar.
+
+## Sürüm 6'ya geçenler (kalibrasyon, kör değil)
+
+- **N1** açık çatı parçası (`acik: true`): baş makas omegası 7, betopan 6, Z adayı 8, şilte adayı 11 — dördü de tuttu.
+- **N2** veranda tavan omegası ayrı satır değil (PK-01, -03, -06).
+- **N3** aday sütunu: W otomat 9, PVC iniş L 2000, profil vidalama kolon × 3 (PK-03, -06 ✓), inox m² ÷ 10 aşağı (PK-01, -05, -06 ✓; PK-02, -03 ✗),
+  uçlar inox ÷ 2 (yalnız PK-06 ✓).
+- **Kulaklı H** okuyucuda: makasın denk geldiği dış ek → 13 / 6 ve 3 / 2 tuttu.
+- Geri test (sürüm 5 → 6): PK-01 ve PK-03'te fazla veranda omega satırı düştü, öteki varsayılan adetler aynı; PK-02, -05 yalnız aday sütunu.
+- Geçmeyenler: kiriş yuvarlaması, tek kat panel yüz başına (PK-02 sandviçte toplam yukarı 17 tutuyordu), pencere U'ları, saçak sacı / omegası,
+  iniş 7, iki modüllük pano 2510 (PK-03 2500).
 
 ## VİDA BİLGİ sayfası (veri; kural adayı)
 

@@ -1619,7 +1619,7 @@
    {
     "duvar": "dis",
     "cins": "pano_eki",
-    "sacak": false,
+    "sacak": true,
     "yer": [
      130.4,
      328.5
