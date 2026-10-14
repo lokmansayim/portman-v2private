@@ -25,6 +25,7 @@ Hesapta LLM yoktur: aynı plan aynı tanımı verir. Geçersiz plan `PlanHatasi`
 Kullanım: python -m motor.genel.plan_derle plan.json tanim.json [--kod YENI]
 """
 from __future__ import annotations
+from .toplam import sum  # noqa: A001 — 3.11 toplama sırası her Python sürümünde (İE-08 GM2; toplam.py)
 
 import argparse
 import json
