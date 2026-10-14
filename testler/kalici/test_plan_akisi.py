@@ -442,3 +442,20 @@ def test_golge_farkli_okumada_karar_yine_kuralin(depo, wa, hizli_genel, tmp_path
 def test_okuma_modu_geriye_uyum():
     assert W.okuma_modu({}) == "kapali" and W.okuma_modu({"acik": True}) == "acik"
     assert W.okuma_modu({"acik": True, "mod": "golge"}) == "golge" and W.okuma_modu({"mod": "kapali", "acik": True}) == "kapali"
+
+
+# ───────────────────────── r3 · P6 (M6): kayıtlardan ölçüm raporu (yalnız okur; numara yazmaz) ─────────────────────────
+def test_olcum_raporu_kayitlardan(depo, wa, hizli_genel, uretici):
+    import sys as _s
+    _s.path.insert(0, str(KOK / "araclar"))
+    import plan_olcum as PO
+    t1(depo)
+    st = sorgu(depo, "SELECT id, adaylar FROM secenek_setleri")[0]
+    assert depo.mesaj_kaydet(buton(f"s:{st['id']}:{st['adaylar'][0]['kod']}"))
+    isle_hepsi(depo, URETIM)
+    with depo.baglan() as c:
+        o = PO.topla(c)
+    assert o["uretim"] == 1 and o["durum"] == {"gecerli": 1} and o["secilen"] == 1 and o["cagri"] == 0
+    assert o["yeni_plan_isi"] == 1 and o["revizyon_ortalama"] == 0 and o["sure_ms_medyan"] is not None
+    metin = PO.rapor(o, 7)
+    assert "Yeni plan üretimi | 1 (gecerli 1)" in metin and NUMARA_A not in metin and "Hedef yok" in metin
