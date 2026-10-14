@@ -67,6 +67,68 @@ class PlanTaslagi(BaseModel):
                                                                       "sözüyle (ör. 'çift kat olsun'); uygulananlar buraya yazılmaz")
 
 
+# ── ortak plan sözleşmesi (İE-14 r3, P1; Lokman 14.10.2026: iki motor birleşmez, adaptörle bağlanır) ─────────────────────
+SOZLESME = "portman.plan/0.1"
+
+
+class SozMahal(BaseModel):
+    """Sözleşmede mahal: dikdörtgen birleşimi (cm, aks ya da dış yüz; ızgara aileye göre). Prefabrikte pano katı ondalıklı olabilir."""
+    ad: str
+    islev: Literal["salon", "mutfak", "yatak_odasi", "banyo", "hol", "depo", "veranda"]
+    dikdortgenler: list[list[float]] = Field(..., min_length=1)
+    ortu: Optional[Literal["cati", "pergola", "acik"]] = None
+
+
+class SozKaynak(BaseModel):
+    yol: Literal["banka", "uyarlama", "cozucu", "llm_program", "prefabrik_is_emri", "elle"]
+    kod: Optional[str] = Field(None, description="İç kayıt: kaynak model kodu (bayiye ve LLM'e gitmez)")
+    islemler: list[str] = Field(default_factory=list)
+
+
+class PlanSozlesmesi(BaseModel):
+    """İki motorun üstündeki küçük ortak plan sözleşmesi. Mimari geometri ve anlamı taşır; üretim kuralları motorlarda kalır.
+    Çelik: `plan_derle.derle` (yazma) ve `tanimdan` (okuma). Prefabrik: İş Emri'nden okuma (prototip; yazma yönü yok)."""
+    sema: Literal["portman.plan/0.1"] = SOZLESME
+    aile: Literal["tek_kat_celik", "tek_kat_prefabrik"]
+    birim: Literal["cm"] = "cm"
+    izgara_cm: float = Field(..., description="5 (çelik, dış yüzden) ya da 125,5 (prefabrik pano aksı)")
+    olcu_kaynagi: Literal["dis_yuz", "pano_aksi"] = "dis_yuz"
+    dis_olcu: dict[str, float]
+    mahaller: list[SozMahal]
+    kapilar: list[Kapi]
+    pencereler: list[Pencere]
+    acik_sinirlar: list[list[str]] = Field(default_factory=list, description="Duvarsız sınır: [mahal, mahal] (prefabrikte salon–mutfak)")
+    cati: Optional[dict] = None
+    dis_karkas: Optional[Literal[80, 140]] = None
+    kaynak: SozKaynak
+    kural_seti: Optional[str] = None
+    kat: int = Field(1, ge=1, le=1, description="14a: tek kat (çift kat yer tutucu)")
+    varsayimlar: list[str] = Field(default_factory=list)
+    uygulanamayan: list[str] = Field(default_factory=list)
+
+
+def sozlesme(plan: dict, aile: str, kaynak: dict, kural_seti: str | None = None, varsayimlar: list[str] | None = None) -> dict:
+    """Plan şeması (çelik çekirdeği) → sözleşme sözlüğü (doğrulanmış)."""
+    s = {k: plan[k] for k in ("dis_olcu", "mahaller", "kapilar", "pencereler") if k in plan}
+    s.update(aile=aile, izgara_cm=IZGARA if aile == "tek_kat_celik" else 125.5, kaynak=kaynak, kural_seti=kural_seti,
+             cati=plan.get("cati"), dis_karkas=plan.get("dis_karkas"), varsayimlar=list(varsayimlar or []),
+             uygulanamayan=list(plan.get("uygulanamayan") or []), acik_sinirlar=list(plan.get("acik_sinirlar") or []))
+    return PlanSozlesmesi.model_validate(s).model_dump(exclude_none=False)
+
+
+def cekirdek(soz: dict) -> dict:
+    """Sözleşme → çelik plan şeması (derleyici ve denetçi girdisi): yalnız geometri ve açıklıklar."""
+    p = {k: soz[k] for k in ("dis_olcu", "mahaller", "kapilar", "pencereler", "cati") if soz.get(k) is not None}
+    p["dis_olcu"] = {k: int(v) for k, v in p["dis_olcu"].items()}
+    p["mahaller"] = [{**m, "dikdortgenler": [[int(v) for v in r] for r in m["dikdortgenler"]]} for m in p["mahaller"]]
+    for m in p["mahaller"]:
+        if m.get("ortu") is None:
+            m.pop("ortu", None)
+    if soz.get("dis_karkas"):
+        p["dis_karkas"] = soz["dis_karkas"]
+    return p
+
+
 ARAC_ADI = "plan_kaydet"
 ARAC_ACIKLAMA = "Tek kat çelik plan taslağını kaydet (İE-14 plan şeması). Yalnız bu araçla cevap ver."
 
