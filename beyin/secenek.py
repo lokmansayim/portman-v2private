@@ -90,7 +90,8 @@ def puanla(adaylar: list[dict], ts: dict) -> list[dict]:
             kes = min(W["alan_puan_basi_yuzde"] * fark, W["alan_en_cok_kesinti"])
             puan -= kes
             if round(kes) > 0:                                  # BK-09 M3: sıfır kesinti bayiye yazılmaz ("%0 → −0"); puan aynı
-                hesap.append(f"alan farkı %{fark:.0f} → −{kes:.0f}")
+                fs = f"{fark:.0f}" if round(fark) >= 1 else f"{fark:.1f}".replace(".", ",")      # %0,3 → −1 (yuvarlanmış "%0" değil)
+                hesap.append(f"alan farkı %{fs} → −{kes:.0f}")
         if veranda_ist and not (_f(a.get("veranda_m2")) or 0) > 0:
             puan -= W["veranda_yok"]; hesap.append(f"veranda yok → −{W['veranda_yok']:.0f}")
         if oncelik in ONCELIKLER and ikramiye(a):

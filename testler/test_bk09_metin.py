@@ -55,3 +55,17 @@ def test_m2_prefabrik_ornek_aynen():
     sira = S.puanla([_aday("P8801", 88, "prefabrik"), _aday("P9401", 94, "prefabrik"), _aday("P7201", 72, "prefabrik")],
                     {"alan_m2": 88, "oda_programi": "2+1"})
     assert 'örn. "P9401 olsun"' in S.mesaj_metni(sira, {"alan_m2": 88, "oda_programi": "2+1"})
+
+
+def test_m3_kucuk_fark_yuvarlanip_sifir_yazilmaz():
+    """İnceleme bulgusu: fark %0,34 iken kesinti 1 puan; "%0 → −1" değil "%0,3 → −1"."""
+    [a] = S.puanla([_aday("Ç8801", 88.3)], {"alan_m2": 88})
+    assert a["hesap"] == "alan farkı %0,3 → −1", a["hesap"]
+
+
+def test_m1_cati_bayinin_gordugu_gosterimle(tmp_path):
+    """İnceleme bulgusu: "Uygulanan" metni artık tek açıklama; çatı iç koduyla (Ç8801L) değil gösterimle (Ç8801-L) yazılır."""
+    s = Sohbet(tmp_path)
+    r01_k(s)
+    k = s.yaz("çatı L olsun", varyantlar=[var("cati_degistir", "çatı L")])
+    assert "Uygulanan: çatı Ç8801-L" in k.mesaj and "Ç8801L" not in k.mesaj, k.mesaj
