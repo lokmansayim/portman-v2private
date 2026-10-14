@@ -22,6 +22,8 @@ from pathlib import Path
 
 import pytest
 
+GOC_SURUMLERI = sorted(int(p.name[:3]) for p in (Path(__file__).resolve().parents[2] / "kanal" / "goc").glob("[0-9][0-9][0-9]_*.sql"))
+
 from conftest import ADMIN, BAYI_A, KOK, NUMARA_A, _admin, dsn, mesaj, sorgu, talep
 
 VPS = KOK / "vps"
@@ -139,7 +141,7 @@ def test_guncelle_ikinci_surum_ve_geri_don(surum_ortam):
     assert not (s9 / "testler").exists() and not (s9 / "deneme").exists()
     assert (s9 / "beyin" / "testler" / "mesajlar.json").exists() and list((s9 / "beyin" / "testler").glob("cikarim_*.json"))
     assert os.readlink(kok / "guncel") == str(s9) and not (kok / "onceki").exists()
-    assert "içe aktarma tamam" in out and "uygulanan göçler: [1, 2, 3, 4, 5]" in out and "sağlık: sürüm v2026.10.09, Postgres bağlı" in out and "etkin" in out
+    assert "içe aktarma tamam" in out and f"uygulanan göçler: {GOC_SURUMLERI}" in out and "sağlık: sürüm v2026.10.09, Postgres bağlı" in out and "etkin" in out
     # BK-07 [3b]: sonuç ne olursa olsun sürüm etkin; PERSPEKTIF dosyasında (durum.sh okur). Test venv'inde vtk yoksa "denenmedi";
     # vtk varsa ama OSMesa yoksa ayrı süreç çöker (sinyal 11) ve "ÇİZİLEMEDİ … pilot perspektifsiz" yazılır (bulut, 12.10).
     pers = (s9 / "PERSPEKTIF").read_text()
@@ -152,7 +154,7 @@ def test_guncelle_ikinci_surum_ve_geri_don(surum_ortam):
     assert "genel motor: AYNI (" in out and genel.startswith("AYNI (plan PNG, liste JSON ve IFC izi altınla aynı"), genel
     assert (s9 / "kurallar" / "liste" / "kurallar.json").exists() and (s9 / "modeller" / "altin.json").exists() and (s9 / "motor" / "genel" / "uret.py").exists()
     assert "stop portman-webhook portman-gonderici portman-agent portman-panel" in log.read_text() and "start portman-webhook" in log.read_text()
-    assert sorgu(__import__("depo").Depo(dsn(surum_ortam["db"])), "SELECT max(surum) AS s FROM sema_surumu")[0]["s"] == 5
+    assert sorgu(__import__("depo").Depo(dsn(surum_ortam["db"])), "SELECT max(surum) AS s FROM sema_surumu")[0]["s"] == GOC_SURUMLERI[-1]      # İE-08 8b: 006 (sayı göç dosyalarından)
     assert surum_ortam["saglik"].istekler and surum_ortam["saglik"].istekler[0]["path"] == "/saglik"
     # BK-07 [7/7]: nginx yapılandırması sürümden yazıldı (sertifika yok → yalnız 80 bloğu), alan adı işlendi, yedek yok (ilk yazım)
     nginx_conf = surum_ortam["nginx"] / "sites-available" / "portman.conf"

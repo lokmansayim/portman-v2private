@@ -891,6 +891,7 @@ class Depo:
     _KONTROL_ALANLARI = {"durum", "dosya_gonderildi", "karar_zamani", "son_hatirlatma", "hatirlatma_sayisi", "gecikme_bildirildi", "bekleyen",
                          "not_", "listeler", "patron_durum", "patron_hatirlatma_sayisi", "patron_son_hatirlatma"}
     SIMDI = "__simdi__"            # güncellemede zaman alanı için: veritabanının now()'u
+    _KONTROL_ZAMANLARI = {"dosya_gonderildi", "karar_zamani", "son_hatirlatma", "gecikme_bildirildi", "patron_son_hatirlatma"}
 
     def muhendis_numarasi(self) -> str | None:
         """Aktif mühendis kartı (rol = muhendis; birden çoksa ilk girilen). Yoksa None: bildirim gitmez, Patron'a söylenir."""
@@ -911,6 +912,8 @@ class Depo:
                 raise ValueError(f"kontrol alanı: {a!r}")
             if v == self.SIMDI:
                 parca.append(f"{a} = now()")
+            elif a in self._KONTROL_ZAMANLARI and isinstance(v, (int, float)):
+                parca.append(f"{a} = to_timestamp(%s)"); deger.append(float(v))      # hatırlatma turu kendi saatini yazar (belirlenimci)
             else:
                 parca.append(f"{a} = %s"); deger.append(Jsonb(v) if a == "listeler" else v)
         if parca:

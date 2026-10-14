@@ -338,19 +338,19 @@ def _hatirlatmalar(k: dict, simdi: float, say: dict) -> tuple[list[dict], dict]:
         son = k.get("t_son_hatirlatma")
         if gecen >= HATIRLATMA_ARALIGI_SN * (n + 1) and (son is None or simdi - float(son) >= HATIRLATMA_ARALIGI_SN - 60):
             satirlar.append(S.muhendis_hatirlatma_satiri(k["onay_mesaj_id"], 0, no, rev, int(gecen // SAAT)))
-            guncelle.update(hatirlatma_sayisi=n + 1, son_hatirlatma=Depo.SIMDI); say["muhendis"] += 1
+            guncelle.update(hatirlatma_sayisi=n + 1, son_hatirlatma=simdi); say["muhendis"] += 1
         if gecen >= CEVAP_SURESI_SN and k.get("t_gecikme") is None:
             satirlar.append(W.giden_metin(cipa, f"Portman: {_etiket(no, rev)} ({_bayi_kodu(k)}) için mühendis {int(gecen // SAAT)} saattir cevap "
                                                 "vermedi (cevap süresi 3 saat).", 0, "PATRON", "bildirim"))
             satirlar.append(_patron_sablonu(k["onay_mesaj_id"], k))
-            guncelle["gecikme_bildirildi"] = Depo.SIMDI; say["gecikme"] += 1
+            guncelle["gecikme_bildirildi"] = simdi; say["gecikme"] += 1
     if k["patron_durum"] == "bekliyor" and int(k.get("patron_hatirlatma_sayisi") or 0) < PATRON_EN_COK:
         son = k.get("t_patron_son") or k.get("t_karar")
         if son is not None and simdi - float(son) >= PATRON_ARALIGI_SN:
             satirlar.append(W.giden_metin(cipa, f"Hatırlatma: {_etiket(no, rev)} ({_bayi_kodu(k)}) için fiyat bekleniyor; mühendis onayladı. Fiyatı "
                                                 "bayiye iletince panelde 'Fiyat verildi'ye basın.", 0, "PATRON", "bildirim"))
             satirlar.append(_patron_sablonu(k["onay_mesaj_id"], k))
-            guncelle.update(patron_hatirlatma_sayisi=int(k.get("patron_hatirlatma_sayisi") or 0) + 1, patron_son_hatirlatma=Depo.SIMDI)
+            guncelle.update(patron_hatirlatma_sayisi=int(k.get("patron_hatirlatma_sayisi") or 0) + 1, patron_son_hatirlatma=simdi)
             say["patron"] += 1
     for s in satirlar:
         s["kaynak"] = "sistem"

@@ -24,7 +24,8 @@ def test_bayi_yaz_oku_turetme_ve_dogrulama(depo):
     assert b2["kod"] == "ABC" and b2["aktif"] is False and b2["hitap"] == ""   # güncelleme bütün alanları yazar
     assert depo.gelen_bayisi(NUMARA_A) is None                                # pasif bayi kayıtsız sayılır
     depo.bayi_yaz(NUMARA_A, ad="Deneme Bayi A", kod="ABC", rol="bayi", aktif=True)
-    assert depo.gelen_bayisi(NUMARA_A) == {"kod": "ABC", "ad": "Deneme Bayi A", "firma": "", "rol": "bayi", "numara": NUMARA_A}   # İE-08 D-09: kart numarası (antet)
+    assert depo.gelen_bayisi(NUMARA_A) == {"kod": "ABC", "ad": "Deneme Bayi A", "firma": "", "rol": "bayi", "numara": NUMARA_A,
+                                            "hitap": ""}   # İE-08 D-09: kart numarası (antet); 8b M5: hitap (D-06)
     assert depo.gelen_bayisi(NUMARA_P)["kod"] == "PATRON" and depo.patron_numarasi() == NUMARA_P
     m = depo.bayi_yaz(NUMARA_B, ad="Mühendis", rol="muhendis")
     assert m["rol"] == "muhendis"
