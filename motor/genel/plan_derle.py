@@ -16,7 +16,8 @@ Kurallar (Ç8801 tanım üretecinin formülleri, `deneme/2026-10-10_c8801/tanim/
   yayına (15 cm payla) binmeyen ilki.
 - Pencere: mahalin cephe parçasında eşit aralıkla (aynı parçadaki dış kapıyla birlikte), üst kot 200 (kat 270 − lento 70).
 - Çatı: saçak 30, topuk 10, saçak kotu 280, eğim %33 (verilmezse), panel 8; beşik 2 düzlem + 2 kalkan, kırma 4 düzlem.
-- Veranda kolonu 30 × 8 (KT-02), boştaki köşede ve açık kenarlarda en çok 400 cm arayla.
+- Veranda kolonu 30 × 8 (KT-02), boştaki köşede ve açık kenarlarda en çok 400 cm arayla; açık kenarlarda kiriş (alt 240, üst 270).
+  Çatı altındaki veranda yalnız kırma çatıyla (beşikte kalkan açık kenara otururdu; denetçi reddeder).
 
 Hesapta LLM yoktur: aynı plan aynı tanımı verir. Geçersiz plan `PlanHatasi` (ihlal listesi) verir; geometri denetimi ayrıca
 `yapi.kur` ve açıklık denetimiyle yapılır (`beyin/plan_denetim.py`).
@@ -418,6 +419,7 @@ def _acikliklar(p: dict, iz: Izgara, odalar: list[dict], duvarlar: list[dict], d
             hata.append(f"kapı: {a} ile {b} arasındaki ortak duvar kapıya yetmiyor ({max(0, u1 - u0):.0f} cm kullanılabilir, kapı {en})")
             continue
         acilim = ("sag" if yan > 0 else "sol") if e == "y" else ("ust" if yan > 0 else "alt")
+        from shapely.geometry import box
         kutular = {d["ad"]: d["kutu"] for d in duvarlar}
         yaylar = [kapi_yayi(o, kutular[o["duvar"]]) for o in out if o["tur"] in ("dis_kapi", "ic_kapi")]
         # aday konumlar: iki uç (köşeye yakın) ve orta, her biri iki menteşe yönüyle; yayı başka kapıya binmeyen ilki
@@ -436,7 +438,8 @@ def _acikliklar(p: dict, iz: Izgara, odalar: list[dict], duvarlar: list[dict], d
                 if secim is None:
                     secim = aday
                 yay = kapi_yayi(aday, duvar["kutu"])
-                if all(yay.buffer(YAY_PAYI).intersection(q).area <= 25 for q in yaylar):
+                if all(yay.buffer(YAY_PAYI).intersection(q).area <= 25 for q in yaylar) and \
+                        all(yay.intersection(box(*d["kutu"])).area <= 1 for d in duvarlar if d["ad"] != duvar["ad"]):
                     secim = aday
                     break
             else:
@@ -508,6 +511,32 @@ def _kolonlar(iz: Izgara, R: list[int]) -> list[dict]:
     return [{"ad": f"KLN{n}", "sinif": "kolon", "kutu": [r2(v) for v in k], "yukseklik": 240} for n, k in enumerate(kutular, 1)]
 
 
+def _kirisler(iz: Izgara, R: list[int]) -> list[dict]:
+    """Çatı altındaki verandanın kirişleri (KT-02 KRS01–05 gibi): her açık kenarda kolon hizasında, alt 240 / üst 270; binaya değen ucu
+    dış duvarın karkasına kadar uzanır. `acik`: kirişin açıkta kalan aralığı (uzun eksen boyunca)."""
+    from shapely.geometry import Point, box
+    W, H = iz.W, iz.H
+    x0, y0, x1, y1 = R
+    kapali = box(0, 0, W, H).difference(box(x0, y0, x1, y1))
+    out = []
+
+    def uc_binada(px, py):
+        return kapali.distance(Point(px, py)) <= 1
+    if y0 == 0 or y1 == H:
+        for yk, yy in ((K, 0), (H - K - D, H)) if (y0 == 0 and y1 == H) else (((K, 0),) if y0 == 0 else ((H - K - D, H),)):
+            ba, bb = x0 > 0 and uc_binada(x0, yy), x1 < W and uc_binada(x1, yy)
+            a = x0 - K - D if ba else (x0 + K if x0 > 0 else K)
+            b = x1 + K + D if bb else (x1 - K if x1 < W else W - K)
+            out.append({"kutu": [r2(a), r2(yk), r2(b), r2(yk + D)], "acik": [[r2(x0 - K if ba else a), r2(x1 + K if bb else b)]]})
+    if x0 == 0 or x1 == W:
+        for xk, xx in ((K, 0), (W - K - D, W)) if (x0 == 0 and x1 == W) else (((K, 0),) if x0 == 0 else ((W - K - D, W),)):
+            ba, bb = y0 > 0 and uc_binada(xx, y0), y1 < H and uc_binada(xx, y1)
+            a = y0 - K - D if ba else K + D                      # açık uçta yatay kirişin karkasından sonra başlar
+            b = y1 + K + D if bb else H - K - D
+            out.append({"kutu": [r2(xk), r2(a), r2(xk + D), r2(b)], "acik": [[r2(y0 - K if ba else a), r2(y1 + K if bb else b)]]})
+    return [{"ad": f"KRS{n}", "alt": 240, "ust": 270, "bolge": "veranda", "not": "veranda kirişi (İE-14)", **k} for n, k in enumerate(out, 1)]
+
+
 # ── çatı ───────────────────────────────────────────────────────────────────────────────────────────────────────────────
 def _duzlem(ad, plan, yukari, egim, sacak, notu):
     return {"ad": ad, "plan": [[r2(x), r2(y)] for x, y in plan], "yukari": yukari, "egim": round(egim, 5), "sacak_kotu": SACAK_KOTU,
@@ -517,7 +546,7 @@ def _duzlem(ad, plan, yukari, egim, sacak, notu):
 def cati_uret(R: tuple[float, float, float, float], tip: str, mahya: str | None, egim: float | None) -> dict:
     """Dikdörtgen (dış yüzler) üstüne beşik ya da kırma. Mahya verilmezse uzun kenar boyunca."""
     x0, y0, x1, y1 = R
-    e = EGIM if not egim else round(egim / 100, 5)
+    e = EGIM if egim is None else round(egim / 100, 5)
     if mahya not in ("x", "y"):
         mahya = "x" if (x1 - x0) >= (y1 - y0) else "y"
     X0, Y0, X1, Y1 = x0 - SACAK, y0 - SACAK, x1 + SACAK, y1 + SACAK
@@ -586,6 +615,7 @@ def derle(p: dict, kod: str = "YENI", ad: str | None = None) -> dict:
     kapali = [int(v) for v in np.argwhere(iz.lab >= 0).min(axis=0) * IZGARA] + \
              [int(v) for v in (np.argwhere(iz.lab >= 0).max(axis=0) + 1) * IZGARA]
     cati_R = (kapali[0], kapali[1], kapali[2], kapali[3])
+    kirisler: list[dict] = []
     if ver is not None:
         x0, y0, x1, y1 = (int(v) for v in ver["dikdortgenler"][0])
         ortu = ver.get("ortu") or "cati"
@@ -595,6 +625,7 @@ def derle(p: dict, kod: str = "YENI", ad: str | None = None) -> dict:
             cati_R = (0, 0, W, H)
             siniflar["kolon"] = {"ad": "veranda kolonu", "profil": "80x45x1,2", "yalitim": False, "yuz": {"veranda": "dis", "dis": "dis"}}
             duvarlar += _kolonlar(iz, [x0, y0, x1, y1])
+            kirisler = _kirisler(iz, [x0, y0, x1, y1])
     ct = p.get("cati") or {"tip": "besik"}
     cati = cati_uret(cati_R, ct.get("tip") or "besik", ct.get("mahya_yonu"), ct.get("egim_yuzde"))
     alan = W * H / 1e4
@@ -605,7 +636,7 @@ def derle(p: dict, kod: str = "YENI", ad: str | None = None) -> dict:
                    "koordinat": "Köken binanın güneybatı dış köşesi; +x doğu, +y kuzey; cm"},
         "kat_yuksekligi": DUVAR_USTU, "duvar_panelleri": "tahmin",
         "yuz_kaplamalari": {"dis": {"kalinlik": K, "malzeme": ["boardex"]}, "ic": {"kalinlik": K, "malzeme": ["alcipan"]}},
-        "duvar_siniflari": siniflar, "duvarlar": duvarlar, "mahaller": mahaller, "acikliklar": acikliklar, "kirisler": [], "lento": 70,
+        "duvar_siniflari": siniflar, "duvarlar": duvarlar, "mahaller": mahaller, "acikliklar": acikliklar, "kirisler": kirisler, "lento": 70,
         "cati": cati,
     }
 

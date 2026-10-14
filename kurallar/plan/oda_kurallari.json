@@ -11,8 +11,9 @@
   "mutfak": {"en_az_m2": 9.5, "dar_kenar_cm": 250, "banka_en_kucuk": "Ç8801 Mutfak 10,05 m², 260 cm (ayrı mutfak; salonla birlikteyse salon kuralı)"},
   "banyo": {"en_az_m2": 3.8, "dar_kenar_cm": 170, "banka_en_kucuk": "KT-01 Banyo 3,81 m²; KT-01 175 cm"},
   "hol": {"en_az_m2": 0, "dar_kenar_cm": 130, "banka_en_kucuk": "KT-02 Hol 137 cm"},
-  "depo": {"en_az_m2": 0, "dar_kenar_cm": 0}
+  "depo": {"en_az_m2": 0, "dar_kenar_cm": 100, "banka_en_kucuk": "varsayım (geometri hakemi 14.10: 60 cm derin depoya kapı açılamıyordu)"}
  },
+ "kol_en_az_cm": {"deger": 60, "not": "mahalin hiçbir kolu bundan dar olamaz (net; L oda ve holün ince kolu, duvara gömülen şerit)"},
  "pencere_zorunlu": {"deger": ["salon", "yatak_odasi", "mutfak", "banyo"], "not": "banyoda vasistas (60x40) yeter"},
  "erisim": {"banyo_yatak_odasindan_gecmez": true, "yatak_odasi_baska_yatak_odasindan_gecmez": true},
  "cati": {"egim_yuzde": 33, "sacak_cm": 30, "kaynak": "Ç8801 ve kör test projeleri (Excel hesaplama motoru)"}

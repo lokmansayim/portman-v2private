@@ -35,7 +35,7 @@ class Mahal(BaseModel):
 
 
 class Kapi(BaseModel):
-    arasinda: list[str] = Field(..., description="İki mahal adı; dış kapı için ['dis', '<mahal>']. Kapı ikincisine açılır")
+    arasinda: list[str] = Field(..., description="İki mahal adı; dış kapı için ['dis', '<mahal>']. Açılım yönünü kod seçer (kapı odaya açılır)")
     cephe: Optional[Literal["G", "K", "B", "D"]] = Field(None, description="Yalnız dış kapı: hangi cephede (verilmezse kod seçer)")
 
 
@@ -49,8 +49,9 @@ class Pencere(BaseModel):
 
 class Cati(BaseModel):
     tip: Literal["besik", "kirma"]
-    mahya_yonu: Optional[Literal["x", "y"]] = Field(None, description="Mahya doğu–batı (x) ya da kuzey–güney (y); verilmezse uzun kenar boyunca")
-    egim_yuzde: Optional[float] = Field(None, description="Verilmezse %33")
+    mahya_yonu: Optional[Literal["x", "y"]] = Field(None, description="Mahya doğu–batı (x) ya da kuzey–güney (y); verilmezse uzun kenar "
+                                                                     "boyunca. Kırmada mahya her zaman uzun kenar boyuncadır")
+    egim_yuzde: Optional[float] = Field(None, ge=10, le=60, description="Yüzde; verilmezse %33")
 
 
 class PlanTaslagi(BaseModel):

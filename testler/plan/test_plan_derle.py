@@ -77,13 +77,17 @@ def test_kapi_yaylari_cakismaz():
         assert all(y[i][1].intersection(y[j][1]).area <= 25 for i in range(len(y)) for j in range(i + 1, len(y)))
 
 
-@pytest.mark.parametrize("tip,mahya,n_duz,n_kal", [("besik", "x", 2, 2), ("besik", "y", 2, 2), ("kirma", "x", 4, 0), ("kirma", "y", 4, 0)])
-def test_cati_uretici_dikdortgeni_tam_orter(tip, mahya, n_duz, n_kal):
+@pytest.mark.parametrize("tip,mahya,R,n_duz,n_kal", [("besik", "x", (0, 0, 1200, 800), 2, 2), ("besik", "y", (0, 0, 1200, 800), 2, 2),
+                                                      ("kirma", "x", (0, 0, 1200, 800), 4, 0), ("kirma", "y", (0, 0, 800, 1200), 4, 0)])
+def test_cati_uretici_dikdortgeni_tam_orter(tip, mahya, R, n_duz, n_kal):
     from shapely.geometry import Polygon
-    c = cati_uret((0, 0, 1200, 800), tip, mahya, None)
+    from motor.genel import cati_genel
+    c = cati_uret(R, tip, mahya, None)
     assert len(c["duzlemler"]) == n_duz and len(c["kalkanlar"]) == n_kal
+    assert all(Polygon(d["plan"]).is_valid for d in c["duzlemler"])
     toplam = sum(Polygon(d["plan"]).area for d in c["duzlemler"])
-    assert abs(toplam - 1260 * 860) < 1
+    assert abs(toplam - (R[2] + 60) * (R[3] + 60)) < 1
+    cati_genel.cati_kur(c)
     assert all(d["egim"] == 0.33 and d["sacak_kotu"] == 280 for d in c["duzlemler"])
 
 
@@ -186,3 +190,52 @@ def test_genel_motor_cizer_ve_bayi_ciktilarinda_yazi_cakismaz(ad):
             if rap[d][tur]:
                 bulgular.append((d, tur, rap[d][tur]))
     assert bulgular == [], json.dumps(bulgular, ensure_ascii=False, default=str)
+
+
+# ───────────────────────── geometri hakemi (14.10) bulguları ─────────────────────────
+def test_yakin_paralel_sinir_ust_uste_duvar_ve_kisa_parca_reddedilir():
+    # geometri hakeminin örneği (14.10): 5 cm'lik mahal kolu çift duvar üretiyordu; denetim ve genel motor "geçti" diyordu
+    r = denetle(ornek("hakem_ust_uste_duvar"))
+    assert not r["gecerli"] and any("üst üste biniyor" in i for i in r["ihlaller"]) and any("15 cm ve daha kısa" in i for i in r["ihlaller"])
+
+
+def test_kirmada_mahya_kisa_kenarda_reddedilir():
+    p = ornek(GECERLI)
+    p["cati"] = {"tip": "kirma", "mahya_yonu": "y"}
+    r = denetle(p)
+    assert not r["gecerli"] and any("mahya uzun kenar" in i for i in r["ihlaller"])
+
+
+def test_cati_altinda_verandada_besik_reddedilir_ve_kirisler_var():
+    p = ornek(KOSE)
+    p["cati"] = {"tip": "besik"}
+    assert any("yalnız kırma" in i for i in denetle(p)["ihlaller"])
+    t = derle(ornek(KOSE))
+    assert [k["ad"] for k in t["kirisler"]] == ["KRS1", "KRS2"] and all(k["alt"] == 240 and k["ust"] == 270 for k in t["kirisler"])
+    assert t["kirisler"][0]["acik"] == [[1.25, 631.25]]                       # binaya değen uçta açık aralık dış duvarın karkasında biter
+
+
+def test_kapi_yayi_duvara_carpan_dar_depo_reddedilir():
+    p = ornek(GECERLI)
+    _mahal(p, "Yatak Odası 3")["dikdortgenler"] = [[0, 450, 340, 740]]
+    p["mahaller"].append({"ad": "Depo", "islev": "depo", "dikdortgenler": [[0, 740, 340, 800]]})
+    p["kapilar"].append({"arasinda": ["Yatak Odası 3", "Depo"]})
+    r = denetle(p)
+    assert not r["gecerli"] and any("Depo" in i and ("dar kenarı" in i or "çarpıyor" in i or "yetmiyor" in i) for i in r["ihlaller"]), r["ihlaller"]
+
+
+def test_l_odanin_dar_kolu_reddedilir():
+    p = ornek(GECERLI)
+    _mahal(p, "Salon")["dikdortgenler"] = [[0, 0, 560, 450], [0, 450, 50, 800]]   # 50 cm'lik kol (net ≈ 40)
+    _mahal(p, "Yatak Odası 3")["dikdortgenler"] = [[50, 450, 340, 800]]
+    next(x for x in p["pencereler"] if x["mahal"] == "Yatak Odası 3")["cephe"] = "K"
+    r = denetle(p)
+    assert not r["gecerli"] and any("dar kolu" in i for i in r["ihlaller"]), r["ihlaller"]
+
+
+def test_egim_sinirli_ve_sessiz_degismez():
+    p = ornek(GECERLI)
+    p["cati"] = {"tip": "kirma", "egim_yuzde": 0}
+    assert any(i.startswith("şema: cati.egim_yuzde") for i in denetle(p)["ihlaller"])
+    p["cati"] = {"tip": "kirma", "egim_yuzde": 25}
+    assert {d["egim"] for d in derle(p)["cati"]["duzlemler"]} == {0.25}
