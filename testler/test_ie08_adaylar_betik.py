@@ -28,8 +28,13 @@ def test_kuru_kosu_yazmadigini_soyler(tmp_path):
 
 
 def test_stdin_ile_gonderilse_de_kalan_satirlar_yutulmaz(tmp_path):
+    """Alt süreç stdin okursa (13 Ekim'deki takılmanın olası yolu: `sudo`, `psql` ya da Python), betik stdin'le gönderildiğinde kalanını
+    yutar. Sahte Python stdin'i sonuna kadar okur: `< /dev/null` yoksa sonraki satırlar hiç koşmaz (bu test o yönlendirmeyi korur)."""
+    sahte = tmp_path / "sahte_python"
+    sahte.write_text("#!/usr/bin/env bash\ncat > /dev/null\necho \"KURU: 1 kayıt yazılacak (sahte)\"\n", encoding="utf-8")
+    sahte.chmod(0o755)
     metin = BETIK.read_text(encoding="utf-8") + "\necho SONRAKI_SATIR_CALISTI\n"
     r = subprocess.run(["bash", "-s", "--", "--kuru", "Ç8801", "Lokman", "2026-10-14"], input=metin, capture_output=True, text=True,
-                       env=_ortam(tmp_path), cwd=str(KOK / "vps"), timeout=120)
+                       env={**_ortam(tmp_path), "PM_PYTHON": str(sahte)}, cwd=str(KOK / "vps"), timeout=120)
     assert r.returncode == 0, r.stderr
     assert "hiçbir şey yazılmadı" in r.stdout and "SONRAKI_SATIR_CALISTI" in r.stdout

@@ -9,18 +9,21 @@ Desen bilinen biçimlerle sınırlıdır (açgözlü bir "rakam ve boşluk" dizi
   cep numarası (`5xx …`; "350 400 30 25" gibi ölçü listesi numara sayılmaz);
 - uluslararası: `+` ülke kodu ve 2–5 hane grubu (toplam 10–15 hane);
 - bitişik: 10–15 hane (önceki davranış).
-Ayırıcı yalnız tek boşluk ya da tire; nokta, virgül ve `x` ayırıcı değildir (ondalık, tarih ve ölçü numara sayılmaz).
+Ayırıcı tek boşluk (bölünmez ve ince boşluk dahil) ya da tire (en tire dahil); nokta, virgül ve `x` ayırıcı değildir (ondalık, tarih ve
+ölçü numara sayılmaz); arkasından birim (cm, m, m²) ya da çarpı ve sayı gelen dizi de numara sayılmaz. Bilinen sınır: birimsiz ve
+numara biçiminde yazılmış ölçü dizisi ("540 300 20 10", "+10 120 180 240") numara sayılır; öneksiz sabit hat ("212 000 07 77") sayılmaz.
 """
 from __future__ import annotations
 import re
 
-_AYR = r"[ -]?"
+_AYR = "[ \u00a0\u2009\u202f\u2011\u2013-]?"            # boşluk, bölünmez boşluk (WhatsApp kopyası), ince boşluk, tire, en tire
+_BIRIM = r"(?!\s*(?:(?:cm|mm|m2|m)\b|m²|[x×]\s*\d))"      # ölçü: arkasından birim ya da çarpı + sayı gelen dizi numara değil
 _ONEK = rf"(?:(?:\+|00)90{_AYR}|0{_AYR})"
 _ALAN = rf"(?:{_ONEK}(?:\([2-58]\d{{2}}\)|[2-58]\d{{2}})|\(0[2-58]\d{{2}}\)|\(5\d{{2}}\)|5\d{{2}})"   # öneksiz yalnız cep (5xx)
 _TR = rf"{_ALAN}{_AYR}\d{{3}}(?:{_AYR}\d{{2}}{_AYR}\d{{2}}|{_AYR}\d{{4}})"
 _ULUS = rf"\+\d{{1,3}}(?:{_AYR}(?:\(\d{{1,4}}\)|\d{{1,4}})){{2,5}}"
 _BITISIK = r"\+?\d{10,15}"
-DESEN = re.compile(rf"(?<![\d+])(?:{_TR}|{_ULUS}|{_BITISIK})(?!\d)")
+DESEN = re.compile(rf"(?<![\d+])(?:{_TR}|{_ULUS}|{_BITISIK})(?!\d){_BIRIM}")
 
 
 def _rakamlar(s: str) -> str:
