@@ -448,6 +448,58 @@ try:
     d12, _ = depo.konusma_oku(BAYI)
     ok(d12["revizyon"] == 2 and BAYI not in json.dumps(i12["sonuc"]) and q("SELECT durum FROM sorular WHERE gonderen = %s ORDER BY id DESC LIMIT 1", BAYI)[0]["durum"] == "cevaplandi",
        "sayaç 2 (r03), soru cevaplandı, iş sonucunda ham numara yok")
+
+    print("11) İE-08 8b: bayi r03'ü onaylar → mühendise şablon → Gönder → görsel, PDF, Excel, DXF → Patron'a gönder → Patron şablonu; panel tablosu")
+    MUH = "900000000303"                                                                         # gerçek olmayan deneme numarası
+    depo.bayi_yaz(MUH, ad="Deneme Mühendis", rol="muhendis")
+    AY.yaz(VERI, "mode", "kayitli")
+    for a11, d11 in (("sablon_muhendis_kontrol", "portman_muhendis_kontrol_v1"), ("sablon_muhendis_hatirlatma", "portman_hatirlatma_v1")):
+        AY.yaz(VERI, a11, d11)
+    gonder()                                                                                       # r03 bayiye gider (onay ona bağlanır)
+    no11 = q("SELECT is_emri_no FROM revizyonlar WHERE gonderen = %s ORDER BY id DESC LIMIT 1", BAYI)[0]["is_emri_no"]
+    r03_wamid = q("SELECT dis_id FROM giden WHERE mesaj_id = 'wamid.E2ER3' AND kind = 'interactive'")[0]["dis_id"]
+    time.sleep(1.2)
+    kod, c = webhook(yuk([buton(BAYI, f"o:{no11}:3", "Onayla", r03_wamid, mid="wamid.E2EM1")]))
+    ok(c.get("mesaj") == {"sahiplenildi": 1} and ajan() == 0, "ajan: bayinin Onayla düğmesi işlendi")
+    k11 = q("SELECT durum, muhendis, bayi, onay_mesaj_id FROM muhendis_kontrolleri")
+    rv11 = q("SELECT durum, ekler FROM revizyonlar WHERE is_emri_no = %s AND rev = 3", no11)[0]
+    ok(len(k11) == 1 and k11[0]["durum"] == "bekliyor" and k11[0]["muhendis"] == MUH and k11[0]["onay_mesaj_id"] == "wamid.E2EM1" and rv11["durum"] == "onaylandi",
+       "kontrol kaydı açıldı (mühendiste), revizyon onaylandı")
+    ok(Path(rv11["ekler"]["excel"]["dosya"]).is_file() and rv11["ekler"]["excel"]["dosya"].endswith("_r03_yukleme_listesi.xlsx") and Path(rv11["ekler"]["dxf"]["dosya"]).is_file(),
+       "r03'ün Excel'i sunucuda (gerçek genel motorun listesinden; D-17) ve DXF'i klasörde")
+    b11 = q("SELECT alici, kind, govde FROM giden WHERE mesaj_id = 'wamid.E2EM1' ORDER BY sira")
+    ok(b11[0]["alici"] == BAYI and b11[0]["govde"].endswith("Plan teknik kontrole gönderildi; sonucu size bildireceğiz.")
+       and [(x["alici"], x["kind"]) for x in b11[1:]] == [("MUHENDIS", "template")], "bayiye 'teknik kontrole gönderildi'; mühendise şablon satırı")
+    say = gonder()
+    m11 = [y for y in sahte.gidenler() if y["to"] == MUH]
+    ok(say.get("kabul_edildi") == 2 and len(m11) == 1 and m11[0]["template"]["name"] == "portman_muhendis_kontrol_v1"
+       and m11[0]["template"]["components"][0]["parameters"] == [{"type": "text", "text": no11}, {"type": "text", "text": "r03"}],
+       "Meta: mühendis kartına şablon (iş no, r03) ve Gönder düğmesi")
+    sab_wamid = q("SELECT dis_id FROM giden WHERE mesaj_id = 'wamid.E2EM1' AND alici = 'MUHENDIS'")[0]["dis_id"]
+    time.sleep(1.2)
+    kod, c = webhook(yuk([buton(MUH, f"muh:gonder:{no11}:3", "Gönder", sab_wamid, mid="wamid.E2EM2")]))
+    ok(c.get("mesaj") == {"sahiplenildi": 1} and ajan() == 0 and q("SELECT cikarim FROM isler WHERE mesaj_id = 'wamid.E2EM2'")[0]["cikarim"] is None,
+       "ajan: mühendisin Gönder düğmesi (LLM'siz)")
+    say = gonder()
+    m11b = [y for y in sahte.gidenler() if y["to"] == MUH][1:]
+    belge11 = [y["document"]["filename"] for y in m11b if y["type"] == "document"]
+    ok(say.get("kabul_edildi") == 5 and [y["type"] for y in m11b] == ["image", "document", "document", "document", "interactive"]
+       and belge11 == [f"Portman_{no11}_r03.pdf", f"Portman_{no11}_r03_yukleme_listesi.xlsx", f"Portman_{no11}_r03.dxf"],
+       f"Meta: mühendise görsel, TASLAK pafta, Excel, DXF ve iki düğme ({belge11})")
+    dug_wamid = q("SELECT dis_id FROM giden WHERE mesaj_id = 'wamid.E2EM2' AND kind = 'interactive'")[0]["dis_id"]
+    time.sleep(1.2)
+    kod, c = webhook(yuk([buton(MUH, f"muh:patron:{no11}:3", "Patron'a gönder", dug_wamid, mid="wamid.E2EM3")]))
+    ok(c.get("mesaj") == {"sahiplenildi": 1} and ajan() == 0, "ajan: mühendisin 'Patron'a gönder' düğmesi")
+    say = gonder()
+    p11 = q("SELECT kind, durum, hata FROM giden WHERE mesaj_id = 'wamid.E2EM3' AND alici = 'PATRON' ORDER BY sira")
+    son11 = [y for y in sahte.gidenler() if y["to"] == PATRON][-1]
+    ok([x["kind"] for x in p11] == ["text", "template", "document"] and p11[1]["durum"] == "kabul_edildi" and son11["template"]["name"] == "portman_patron_bekliyor_v1"
+       and son11["template"]["components"][0]["parameters"] == [{"type": "text", "text": "TSTA"}, {"type": "text", "text": no11}],
+       "Patron'a 'mühendis onayladı, fiyat sizde': penceresi kapalı → şablon gitti (bayi kodu, iş no)")
+    ok(q("SELECT durum, patron_durum FROM muhendis_kontrolleri")[0] == {"durum": "patrona_gonderildi", "patron_durum": "bekliyor"}
+       and MUH not in json.dumps(q("SELECT sonuc FROM isler WHERE mesaj_id = 'wamid.E2EM3'")[0]["sonuc"]), "kontrol: Patron'a gönderildi, fiyat bekleniyor; iş sonucunda numara yok")
+    kod, body, _ = istek(app_pn, "GET", "/panel/", cerez=cerez)
+    ok(kod == 200 and "Mühendis kontrolleri".encode() in body and "fiyat bekleniyor".encode() in body, "panel: mühendis kontrolleri tablosu ve Fiyat verildi düğmesi")
 finally:
     with psycopg.connect(ADMIN + " dbname=postgres", autocommit=True) as c:
         c.execute(f"DROP DATABASE IF EXISTS {dbad} WITH (FORCE)")
