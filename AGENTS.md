@@ -18,7 +18,10 @@ Bu dosya her ajanın okuduğu ortak kuraldır. Claude'a özgü oturum akışı `
   - yeni veri paylaşımı;
   - `main`'e birleştirme.
 - **Sunucu erişimi.**
-  - VPS'e asistan bağlanmaz. Betik hazırlanır, Lokman `ssh portman-vps 'bash -s' < betik > çıktı.txt` ile koşar, çıktı okunur.
+  - VPS'e asistan bağlanmaz. Betik hazırlanır, Lokman Mac'inden koşar, çıktı dosyaya yazılır ve okunur. Nasıl koşulacağı (Lokman, 14 Ekim 2026, BK-09):
+    - **Sunucuda kopyası olan betik** (kurulu sürümdeki `vps/…`): sunucudaki kopya, `ssh -n` ve `timeout` ile; betik stdin'le gönderilmez. Ör. `ssh -n portman-vps 'timeout 120 bash /opt/portman/guncel/vps/durum.sh' > çıktı.txt 2>&1`.
+    - **Kopyası olmayan geçici betik:** `ssh portman-vps 'timeout 300 bash -s' < betik > çıktı.txt 2>&1`.
+    - **Bir dakikadan uzun iş** (sürüm kurulumu, uzun denetim): `setsid` ile oturumdan ayrılır, çıktı sunucuda dosyaya yazılır, sonra okunur; SSH koparsa iş yarıda kalmaz. Ör. `ssh -n portman-vps 'setsid nohup timeout 900 bash /opt/portman/guncel/vps/guncelle.sh v2026.10.XX > /root/guncelle_v2026.10.XX.txt 2>&1 < /dev/null &'`, ardından `ssh -n portman-vps 'cat /root/guncelle_v2026.10.XX.txt' > çıktı.txt`.
   - Hosting'e yalnız DirectAdmin üzerinden girilir; DirectAdmin atlatılmaz; `vps_komut` açılmaz.
 - **Yasaklar.** Veritabanı eski bir yedekle ezilmez. Onaysız geri dönüşe (H) geçilmez.
 - **WhatsApp ücreti.** Ücret doğacaksa önceden bildirilir. 1 Ekim 2026'dan itibaren servis mesajları da ücretli; Türkiye utility tarifesi, tutar o gün Meta'nın dosyasından okunur.

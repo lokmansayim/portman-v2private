@@ -88,7 +88,9 @@ def puanla(adaylar: list[dict], ts: dict) -> list[dict]:
         if alan is not None and km2 is not None and alan > 0:
             fark = abs(km2 - alan) / alan * 100
             kes = min(W["alan_puan_basi_yuzde"] * fark, W["alan_en_cok_kesinti"])
-            puan -= kes; hesap.append(f"alan farkı %{fark:.0f} → −{kes:.0f}")
+            puan -= kes
+            if round(kes) > 0:                                  # BK-09 M3: sıfır kesinti bayiye yazılmaz ("%0 → −0"); puan aynı
+                hesap.append(f"alan farkı %{fark:.0f} → −{kes:.0f}")
         if veranda_ist and not (_f(a.get("veranda_m2")) or 0) > 0:
             puan -= W["veranda_yok"]; hesap.append(f"veranda yok → −{W['veranda_yok']:.0f}")
         if oncelik in ONCELIKLER and ikramiye(a):
@@ -176,5 +178,6 @@ def mesaj_metni(siralanmis: list[dict], ts: dict, gerekli: int = GEREKEN_ADAY) -
         durum = f"Kurallardan geçen {n} seçenek var."
     govde = f"{bas} için seçenekler.{onc} {durum}"
     if satirlar:
-        govde += "\n\n" + "\n".join(satirlar) + "\n\nBirini seçin ya da yazın (örn. \"P9401 olsun\"); ölçü değişikliği de yazabilirsiniz."
+        ornek = gosterim(siralanmis[0]) if celik_seti_mi(siralanmis) else "P9401"      # BK-09 M2: çelik setinde örnek çelik kodu
+        govde += "\n\n" + "\n".join(satirlar) + f"\n\nBirini seçin ya da yazın (örn. \"{ornek} olsun\"); ölçü değişikliği de yazabilirsiniz."
     return govde[:1024]
