@@ -25,6 +25,7 @@ import time
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+import meta_api as M
 import sablonlar as S
 import worker as W
 from depo import Depo
@@ -37,7 +38,7 @@ HATIRLATMA_ARALIGI_SN = SAAT          # mühendise saat başı
 PATRON_ARALIGI_SN = 2 * SAAT          # Patron'a fiyat hatırlatması 2 saatte bir
 PATRON_EN_COK = 3
 NOT_EN_COK = 600
-KONTROL_NOTU_EN_COK = 6
+NOTLAR_GOVDEDE_EN_COK = 6            # kısa parça notu bundan çoksa düğmeli mesajda sayı, notların hepsi ayrı metinde (D-10: hepsi gösterilir)
 DUZELTME_NOTU = "duzeltme_notu"
 BAYI_KONTROL_SURUYOR = "Planınızın teknik kontrolü sürüyor; revizyon hakkınız düşmez. Sonucu size bildireceğiz."
 
@@ -55,6 +56,21 @@ def sure_baslangici(t: float) -> float:
     return dt.datetime(gun.year, gun.month, gun.day, MESAI[0], tzinfo=ISTANBUL).timestamp()
 
 
+def mesai_suresi(a: float, b: float) -> float:
+    """[a, b] aralığının 08:00–20:00 (İstanbul) içine düşen saniyesi: cevap süresi ve "N saattir" gece saymaz (Lokman 14.10; inceleme)."""
+    if b <= a:
+        return 0.0
+    toplam = 0.0
+    gun = dt.datetime.fromtimestamp(a, ISTANBUL).date()
+    son = dt.datetime.fromtimestamp(b, ISTANBUL).date()
+    while gun <= son:
+        bas = dt.datetime(gun.year, gun.month, gun.day, MESAI[0], tzinfo=ISTANBUL).timestamp()
+        bit = dt.datetime(gun.year, gun.month, gun.day, MESAI[1], tzinfo=ISTANBUL).timestamp()
+        toplam += max(0.0, min(b, bit) - max(a, bas))
+        gun += dt.timedelta(days=1)
+    return toplam
+
+
 def celik_plani_mi(d: dict | None) -> bool:
     return (((d or {}).get("son_is_emri") or {}).get("yapi") or {}).get("sistem") == "celik"
 
@@ -64,7 +80,7 @@ def _etiket(no: str, rev: int) -> str:
 
 
 def _bayi_kodu(k: dict) -> str:
-    return str(k.get("bayi_kod") or "") or "B" + str(k.get("bayi") or "")[-4:]
+    return S.bayi_kodu({"kod": k.get("bayi_kod")}, str(k.get("bayi") or ""))
 
 
 def _patron_sablonu(cipa_id: str, k: dict) -> dict:
@@ -92,6 +108,8 @@ def onay_kancasi(depo: Depo, gelen: dict, d: dict | None, cikti: dict, simdi: fl
     else:
         satirlar.append(W.giden_metin(gelen, f"Portman: {_etiket(no, rev)} bayi tarafından onaylandı ama aktif mühendis kartı yok; teknik kontrol "
                                              "bildirimi gitmedi. Panelden mühendis kartını girin.", sira, "PATRON", "bildirim"))
+        satirlar.append(_patron_sablonu(gelen["id"], {"bayi_kod": (gelen.get("bayi") or {}).get("kod"), "bayi": gelen["sender"], "is_emri_no": no}))
+        satirlar[-1].update(seq=sira + 1, id=W.satir_id(gelen["id"], sira + 1))       # Patron'un penceresi kapalıysa da ulaşsın
         durum = "kart_yok"
     cikti["muhendis_kontrolu"] = {"is_emri_no": no, "rev": rev, "muhendis": numara, "durum": durum, "sure_baslangici": sure_baslangici(simdi)}
     sonuc["muhendis"] = {"durum": durum}
@@ -151,18 +169,17 @@ def isle(depo: Depo, gelen: dict) -> dict:
     return c.sozluk()
 
 
-def kontrol_notlari(pdf_yolu: str | None) -> list[str]:
-    """Paftada komşusuna katılan 15 cm'den kısa parçalar (D-10: `pafta_ozet.json › kontrol_notlari`, 8b'de mühendise gösterilir)."""
-    if not pdf_yolu:
-        return []
-    out = []
-    for p in sorted(Path(pdf_yolu).parent.glob("*_pafta_ozet.json"))[:1]:
-        try:
-            for n in (json.loads(p.read_text(encoding="utf-8")).get("kontrol_notlari") or [])[:KONTROL_NOTU_EN_COK]:
-                out.append(f"{n.get('zincir')} {float(n.get('parca_cm') or 0):g} cm (@{float(n.get('konum_cm') or 0):g})")
-        except (OSError, ValueError, TypeError, AttributeError):
-            return []
-    return out
+def kontrol_notlari(pdf_yolu: str | None) -> list[str] | None:
+    """Paftada komşusuna katılan 15 cm'den kısa parçaların HEPSİ (D-10: `pafta_ozet.json › kontrol_notlari`, 8b'de mühendise gösterilir;
+    KT-03'te 17). Özet yoksa ya da okunamıyorsa None: mühendise "kısa parça notları okunamadı" yazılır (yok ile okunamadı ayrılır)."""
+    ozetler = sorted(Path(pdf_yolu).parent.glob("*_pafta_ozet.json")) if pdf_yolu else []
+    if not ozetler:
+        return None
+    try:
+        return [f"{n.get('zincir')} {float(n.get('parca_cm') or 0):g} cm (@{float(n.get('konum_cm') or 0):g})"
+                for n in (json.loads(ozetler[0].read_text(encoding="utf-8")).get("kontrol_notlari") or [])]
+    except (OSError, ValueError, TypeError, AttributeError):
+        return None
 
 
 def _belge(c: _Cikti, yol: Path, ad: str, aciklama: str, mime: str, no: str, rev: int, sha: str | None = None) -> None:
@@ -192,6 +209,8 @@ def _dosyalar(depo: Depo, c: _Cikti, k: dict) -> None:
     ekler = rv.get("ekler") or {}
     eksik = []
     g = ekler.get("kart") or ekler.get("gorsel")                  # bayinin onayladığı planın görseli (r02+'da kart; önce–sonra değil)
+    if g and g.get("kaynak") == "once_sonra" and not ekler.get("kart"):
+        g = None                                                  # kart yoksa önce–sonra "onaylanan plan" diye gitmez
     if g and Path(str(g.get("file") or "")).is_file():
         c.ekle(W.giden_gorsel(c.gelen, Path(g["file"]), g.get("filename") or Path(g["file"]).name, f"{_etiket(no, rev)} · bayinin onayladığı plan",
                               0, g.get("sha256") or W._sha(Path(g["file"])), no, rev))
@@ -213,9 +232,15 @@ def _dosyalar(depo: Depo, c: _Cikti, k: dict) -> None:
     else:
         eksik.append("DXF")
     notlar = kontrol_notlari(rv.get("pdf_yolu"))
+    if notlar is None:
+        eksik.append("kısa parça notları (pafta özeti okunamadı)")
+    notlar = notlar or []
+    kisa = "Kontrol edilecek kısa parçalar (paftada komşusuna katıldı): " + "; ".join(notlar) + "."
+    if len(notlar) > NOTLAR_GOVDEDE_EN_COK:                       # hepsi ayrı metinde; düğmeli mesajda yalnız sayı
+        c.metin(f"{_etiket(no, rev)} · {kisa}")
+        kisa = f"Kısa parça notu: {len(notlar)} (ayrı mesajda)."
     govde = (f"{_etiket(no, rev)} teknik kontrol dosyaları yukarıda."
-             + (f" Eksik: {', '.join(eksik)}." if eksik else "")
-             + (" Kontrol edilecek kısa parçalar (paftada komşusuna katıldı): " + "; ".join(notlar) + "." if notlar else ""))
+             + (f" Eksik: {', '.join(eksik)}." if eksik else "") + (f" {kisa}" if notlar else ""))
     if k["durum"] in ("bekliyor", "duzeltme"):
         govde += (" Listeyi düzelttiyseniz Excel'i bu sohbete gönderin, sonra Patron'a gönder'e basın. Ciddi düzeltme gerekiyorsa "
                   "Düzeltme iste'ye basıp notunuzu yazın.")
@@ -317,11 +342,15 @@ def hatirlatma_turu(depo: Depo, simdi: float | None = None) -> dict:
     say = {"muhendis": 0, "gecikme": 0, "patron": 0, "hata": 0}
     if not mesaide_mi(simdi):
         return say
+    testler = set(depo.test_kartlari())                          # kuru koşu kartının onayı hatırlatma doğurmaz (satırlar zaten tutulur)
     for k in depo.hatirlatma_adaylari():
+        if k["bayi"] in testler:
+            continue
         try:
             satirlar, guncelle = _hatirlatmalar(k, simdi, say)
-            if satirlar or guncelle:
-                depo.kontrol_satir_ekle(k["id"], k["onay_mesaj_id"], satirlar, guncelle)
+            if satirlar or guncelle:                               # arada mühendis karar verdiyse ya da Fiyat verildi dendiyse yazılmaz
+                depo.kontrol_satir_ekle(k["id"], k["onay_mesaj_id"], satirlar, guncelle,
+                                        beklenen={"durum": k["durum"], "patron_durum": k["patron_durum"]})
         except Exception as e:                                     # bir kontrol düşerse öteki hatırlatmalar sürer
             say["hata"] += 1
             W.log("hatırlatma hatası:", k.get("id"), type(e).__name__)
@@ -333,7 +362,7 @@ def _hatirlatmalar(k: dict, simdi: float, say: dict) -> tuple[list[dict], dict]:
     cipa = {"id": k["onay_mesaj_id"], "sender": k["bayi"]}
     satirlar: list[dict] = []; guncelle: dict = {}
     if k["durum"] == "bekliyor" and k.get("muhendis") and simdi >= float(k["t_baslangic"]):
-        gecen = simdi - float(k["t_baslangic"])
+        gecen = mesai_suresi(float(k["t_baslangic"]), simdi)      # gece sayılmaz
         n = int(k.get("hatirlatma_sayisi") or 0)
         son = k.get("t_son_hatirlatma")
         if gecen >= HATIRLATMA_ARALIGI_SN * (n + 1) and (son is None or simdi - float(son) >= HATIRLATMA_ARALIGI_SN - 60):
@@ -346,7 +375,7 @@ def _hatirlatmalar(k: dict, simdi: float, say: dict) -> tuple[list[dict], dict]:
             guncelle["gecikme_bildirildi"] = simdi; say["gecikme"] += 1
     if k["patron_durum"] == "bekliyor" and int(k.get("patron_hatirlatma_sayisi") or 0) < PATRON_EN_COK:
         son = k.get("t_patron_son") or k.get("t_karar")
-        if son is not None and simdi - float(son) >= PATRON_ARALIGI_SN:
+        if son is not None and mesai_suresi(float(son), simdi) >= PATRON_ARALIGI_SN:
             satirlar.append(W.giden_metin(cipa, f"Hatırlatma: {_etiket(no, rev)} ({_bayi_kodu(k)}) için fiyat bekleniyor; mühendis onayladı. Fiyatı "
                                                 "bayiye iletince panelde 'Fiyat verildi'ye basın.", 0, "PATRON", "bildirim"))
             satirlar.append(_patron_sablonu(k["onay_mesaj_id"], k))
@@ -357,5 +386,5 @@ def _hatirlatmalar(k: dict, simdi: float, say: dict) -> tuple[list[dict], dict]:
     return satirlar, guncelle
 
 
-S_XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"     # meta_api.XLSX ile aynı (testle denetlenir)
-S_DXF = "text/plain"                                                            # meta_api.DXF_MIME ile aynı
+S_XLSX = M.XLSX
+S_DXF = M.DXF_MIME

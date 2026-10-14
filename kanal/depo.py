@@ -798,8 +798,9 @@ class Depo:
         with self.baglan() as c:
             return c.execute(
                 "SELECT g.gonderen, g.n, extract(epoch FROM g.son)::float8 AS son, s.metin AS son_metin, s.tur AS son_tur, s.sahiplenildi, "
-                "b.ad, b.kod, b.rol, b.firma, b.aktif FROM (SELECT gonderen, count(*) AS n, max(wa_zamani) AS son FROM mesajlar GROUP BY gonderen) g "
-                "LEFT JOIN LATERAL (SELECT metin, tur, sahiplenildi FROM mesajlar WHERE gonderen = g.gonderen ORDER BY wa_zamani DESC, alindi DESC LIMIT 1) s ON true "
+                "b.ad, b.kod, b.rol, b.firma, b.aktif FROM (SELECT gonderen, count(*) AS n, max(wa_zamani) AS son FROM mesajlar WHERE tur <> 'panel_ilk_temas' "
+                "GROUP BY gonderen) g LEFT JOIN LATERAL (SELECT metin, tur, sahiplenildi FROM mesajlar WHERE gonderen = g.gonderen AND tur <> 'panel_ilk_temas' "
+                "ORDER BY wa_zamani DESC, alindi DESC LIMIT 1) s ON true "
                 "LEFT JOIN bayiler b ON b.numara = g.gonderen ORDER BY g.son DESC LIMIT %s", (en_fazla,)).fetchall()
 
     def konusma_mesajlari(self, numara: str, en_fazla: int = 300) -> list[dict]:
@@ -901,7 +902,7 @@ class Depo:
                 "(SELECT count(*) FROM giden WHERE durum = 'bekliyor') AS bekleyen_giden, "
                 "(SELECT count(*) FROM giden WHERE durum = 'belirsiz' AND olusturuldu > now() - interval '24 hours') AS belirsiz_24s, "
                 "(SELECT count(*) FROM giden WHERE durum = 'gonderilmedi' AND olusturuldu > now() - interval '24 hours') AS gonderilmedi_24s, "
-                "(SELECT count(*) FROM mesajlar WHERE alindi > now() - interval '24 hours') AS gelen_24s, "
+                "(SELECT count(*) FROM mesajlar WHERE alindi > now() - interval '24 hours' AND tur <> 'panel_ilk_temas') AS gelen_24s, "
                 "(SELECT count(*) FROM gelen_dosyalar WHERE yol IS NULL AND deneme < 3) AS bekleyen_medya, "
                 "(SELECT count(*) FROM bayiler WHERE aktif) AS aktif_bayi").fetchone()
 
@@ -960,9 +961,15 @@ class Depo:
             idler.append(s["id"]); n += 1
         return idler
 
-    def kontrol_satir_ekle(self, kid: int, mesaj_id: str, satirlar: list[dict], guncelle: dict | None = None) -> list[str]:
-        """Hatırlatma turu: satırlar ve kontrol güncellemesi tek işlemde (yarım kalırsa ikisi de yazılmaz)."""
+    def kontrol_satir_ekle(self, kid: int, mesaj_id: str, satirlar: list[dict], guncelle: dict | None = None,
+                           beklenen: dict | None = None) -> list[str]:
+        """Hatırlatma turu: satırlar ve kontrol güncellemesi tek işlemde (yarım kalırsa ikisi de yazılmaz). beklenen verilirse kontrol
+        kilitlenir ve alanları hâlâ o değerdeyse yazılır (arada Fiyat verildi ya da mühendisin kararı: ücretli hatırlatma gitmez)."""
         with self.baglan() as c, c.transaction():
+            if beklenen:
+                r = c.execute("SELECT durum, patron_durum FROM muhendis_kontrolleri WHERE id = %s FOR UPDATE", (int(kid),)).fetchone()
+                if r is None or any(r[a] != v for a, v in beklenen.items()):
+                    return []
             idler = self._cipa_satir_yaz(c, mesaj_id, satirlar) if satirlar else []
             if guncelle:
                 self._kontrol_guncelle(c, kid, guncelle)

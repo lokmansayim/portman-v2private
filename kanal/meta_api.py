@@ -159,8 +159,14 @@ _DXF_BASI = re.compile(rb"\A\s*0\s*\r?\n\s*SECTION\b")
 def belge_turu(yol: Path, veri: bytes) -> str:
     """PDF ve görsel dışındaki belge: .xlsx (ZIP, içinde xl/workbook.xml) ya da .dxf (ASCII DXF, '0 / SECTION' ile başlar). Yoksa ''."""
     ad = Path(str(yol)).name.lower()
-    if ad.endswith(".xlsx") and veri[:4] == b"PK\x03\x04" and b"xl/workbook" in veri[:200000]:
-        return XLSX
+    if ad.endswith(".xlsx") and veri[:4] == b"PK\x03\x04":
+        import zipfile
+        try:                                                    # merkezi dizinden (çalışma kitabı ZIP'in sonunda da olabilir)
+            with zipfile.ZipFile(io.BytesIO(veri)) as z:
+                if "xl/workbook.xml" in z.namelist():
+                    return XLSX
+        except (zipfile.BadZipFile, ValueError):
+            return ""
     if ad.endswith(".dxf") and _DXF_BASI.match(veri[:64]):
         return DXF_MIME
     return ""

@@ -39,7 +39,7 @@ from depo import Depo, kimlik_izi, maske                                   # noq
 
 SURUM = "gonderici-v2.0"
 SEMBOLIK = ("PATRON", "MUHENDIS")   # gönderim anında karttan çözülen alıcılar (rol patron / muhendis, aktif)
-ILK_TEMAS_KAYNAGI = "panel ilk temas"   # depo.ilk_temas_ekle ile aynı
+ILK_TEMAS_KAYNAGI = Depo.ILK_TEMAS_KAYNAGI   # depo.ilk_temas_ekle'nin başlangıç kaydı
 PENCERE_SN = 86400
 MEDYA_YENIDEN = 2                   # feature.php: upload_failed satır en çok 2 deneme
 TUR_BEKLEME_SN = 3

@@ -146,7 +146,8 @@ def test_llm_baglaminda_ad_ve_hitap_numara_yok(monkeypatch):
     W.cikar({"text": "merhaba", "bayi": {"ad": "Deneme Bayi A", "hitap": "Ahmet Bey", "numara": NUMARA_A}}, ayar, BellekKonusma(NUMARA_A, None))
     W.cikar({"text": "merhaba", "bayi": {"ad": NUMARA_A, "hitap": "", "numara": NUMARA_A}}, ayar, BellekKonusma(NUMARA_A, None))
     W.cikar({"text": "merhaba", "bayi": None}, ayar, BellekKonusma(NUMARA_A, None))
-    assert gorulen[0] == "bayi: Deneme Bayi A, hitap: Ahmet Bey" and gorulen[1] == "" and gorulen[2] == ""
+    W.cikar({"text": "merhaba", "bayi": {"ad": "Deneme Bayi A", "hitap": "", "numara": NUMARA_A}}, ayar, BellekKonusma(NUMARA_A, None))
+    assert gorulen[:3] == ["bayinin hitabı: Ahmet Bey", "", ""] and gorulen[3] == "bayinin adı: Deneme Bayi A"      # hitap varsa ad gitmez
     assert all(NUMARA_A not in b for b in gorulen)
 
 

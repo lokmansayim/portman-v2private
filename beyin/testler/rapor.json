@@ -14,7 +14,7 @@
   "gerekce": "şablon P6001 (sol-sağ aynalandı)",
   "cevap": "P6001 modelinin aynalanmış halinin çizimini istiyorsunuz. (sol-sağ aynalandı) Ön onay planını hazırlıyorum; birkaç dakika içinde PDF olarak göndereceğim.",
   "uyum": true,
-  "is_emri_no": "PM-B001-20261014-78329",
+  "is_emri_no": "PM-B001-20260921-16652",
   "asama": "onay_bekliyor"
  },
  {
@@ -46,7 +46,7 @@
   "gerekce": "şablon P6001",
   "cevap": "Sistem önerilerinden P6001 modelini seçtiniz. Ön onay planını hazırlıyorum; birkaç dakika içinde PDF olarak göndereceğim.",
   "uyum": true,
-  "is_emri_no": "PM-B001-20261014-78329",
+  "is_emri_no": "PM-B001-20260921-16652",
   "asama": "onay_bekliyor"
  },
  {
@@ -62,7 +62,7 @@
   "gerekce": "şablon GRID-6x8",
   "cevap": "Dış ölçü 7,73 m x 10,14 m (6x8 pano). 6x8 pano, tek katlı, 2+1 oda, prefabrik plan istiyorsunuz. Ön onay planını hazırlıyorum; birkaç dakika içinde PDF olarak göndereceğim.",
   "uyum": true,
-  "is_emri_no": "PM-B002-20261014-78329",
+  "is_emri_no": "PM-B002-20260921-16652",
   "asama": "onay_bekliyor"
  },
  {
@@ -92,7 +92,7 @@
   "varyant": [],
   "eylem": "cevapla",
   "gerekce": "plan onaylandı",
-  "cevap": "Onayınız kaydedildi (PM-B002-20261014-78329, revizyon 1). Teklif aşamasına geçiliyor.",
+  "cevap": "Onayınız kaydedildi (PM-B002-20260921-16652, revizyon 0). Teklif aşamasına geçiliyor.",
   "uyum": true,
   "is_emri_no": null,
   "asama": "onaylandi"
@@ -146,7 +146,7 @@
   "gerekce": "şablon P6001 (YATAK ODASI 1 penceresi 120x180)",
   "cevap": "P6001 modelini yatak odası 1 penceresinde 120x180 ölçüyle, beyaz dış boyayla ve çatıya OSB+nem bariyeri ile istiyorsunuz. (YATAK ODASI 1 penceresi 120x180) Ön onay planını hazırlıyorum; birkaç dakika içinde PDF olarak göndereceğim.",
   "uyum": true,
-  "is_emri_no": "PM-B002-20261014-78329",
+  "is_emri_no": "PM-B002-20260921-16652",
   "asama": "onay_bekliyor"
  },
  {
@@ -192,7 +192,7 @@
   "varyant": [],
   "eylem": "sor",
   "gerekce": "eksik: model_veya_olcu",
-  "cevap": "95 m² 3+1 çelik için katalog önerilerim: Ç1142 (114 m², 3+1, çelik çift kat), Ç1151 (115 m², 3+1, çelik tek kat), Ç1241 (124 m², 3+1, çelik tek kat). Birini seçin ya da dış ölçü verin (örn. 8x7,5 m).",
+  "cevap": "95 m² 3+1 için katalog önerilerim: Ç1142 (114 m², 3+1, çelik tek kat), Ç1031 (115 m², 3+1, çelik tek kat), Ç1151 (115 m², 3+1, çelik tek kat). Birini seçin ya da dış ölçü verin (örn. 8x7,5 m).",
   "uyum": true,
   "is_emri_no": null,
   "asama": "topluyor"
@@ -225,10 +225,10 @@
    "ayna_y"
   ],
   "eylem": "is_emri",
-  "gerekce": "şablon P6001 (ön-arka aynalandı, YATAK ODASI 1 penceresi 120x180)",
-  "cevap": "P6001 modelini ön-arka simetrikleştirip kapının arka cepheye gelmesini istiyorsunuz. (ön-arka aynalandı, YATAK ODASI 1 penceresi 120x180) Ön onay planını hazırlıyorum; birkaç dakika içinde PDF olarak göndereceğim.",
+  "gerekce": "şablon P6001 (YATAK ODASI 1 penceresi 120x180, ön-arka aynalandı)",
+  "cevap": "P6001 modelini ön-arka simetrikleştirip kapının arka cepheye gelmesini istiyorsunuz. (YATAK ODASI 1 penceresi 120x180, ön-arka aynalandı) Ön onay planını hazırlıyorum; birkaç dakika içinde PDF olarak göndereceğim.",
   "uyum": true,
-  "is_emri_no": "PM-B002-20261014-78329",
+  "is_emri_no": "PM-B002-20260921-16652",
   "asama": "onay_bekliyor"
  },
  {
@@ -246,119 +246,5 @@
   "uyum": true,
   "is_emri_no": null,
   "asama": "topluyor"
- },
- {
-  "id": 16,
-  "mesaj": "P6001 aynalı, yatak odası 1 penceresi 120x180",
-  "beklenen": "is_emri",
-  "not": "canlı 22.09: LLM pencereyi islem=ekle ile verdi; mahalde tek pencere var → ölçü değişikliği (kural)",
-  "niyet": "yeni_talep",
-  "guven": "yuksek",
-  "kod": "P6001",
-  "varyant": [
-   "ayna_x"
-  ],
-  "eylem": "is_emri",
-  "gerekce": "şablon P6001 (sol-sağ aynalandı, YATAK ODASI 1 mevcut penceresi ölçü değişikliği sayıldı (ekleme değil), YATAK ODASI 1 penceresi 120x180)",
-  "cevap": "P6001 modelinin aynalı hali için yatak odası 1 penceresi 120x180 eklenmesini istiyorsunuz. (sol-sağ aynalandı, YATAK ODASI 1 mevcut penceresi ölçü değişikliği sayıldı (ekleme değil), YATAK ODASI 1 penceresi 120x180) Ön onay planını hazırlıyorum; birkaç dakika içinde PDF olarak göndereceğim.",
-  "uyum": true,
-  "is_emri_no": "PM-B002-20261014-78329",
-  "asama": "onay_bekliyor"
- },
- {
-  "id": 17,
-  "mesaj": "P6001 yatak odası 1'e bir tane daha 120x180 pencere ekle",
-  "beklenen": "yonlendir",
-  "not": "gerçek ekleme (bayi 'bir tane daha … ekle' dedi) → v0.1'de yönlendirme; kural bayinin sözüne bakar",
-  "niyet": "yeni_talep",
-  "guven": "yuksek",
-  "kod": "P6001",
-  "varyant": [],
-  "eylem": "yonlendir",
-  "gerekce": "pencere ekle/kaldır v0.1'de yok",
-  "cevap": "Pencere ekleme/kaldırma otomatik yapılamıyor. Bu konuyu Lokman Bey'e iletiyorum; en kısa sürede dönüş yapılacak.",
-  "uyum": true,
-  "is_emri_no": null,
-  "asama": "yonlendirildi"
- },
- {
-  "id": 18,
-  "mesaj": "P6001 yatak odası 1 penceresi 120x180 olsun, bekle",
-  "beklenen": "is_emri",
-  "not": "Astra karşı örneği: 'bekle' içinde 'ekle' var; sözcük sınırı → ekleme değil; 'penceresi … olsun' → ölçü değişikliği",
-  "niyet": "yeni_talep",
-  "guven": "yuksek",
-  "kod": "P6001",
-  "varyant": [],
-  "eylem": "is_emri",
-  "gerekce": "şablon P6001 (YATAK ODASI 1 mevcut penceresi ölçü değişikliği sayıldı (ekleme değil), YATAK ODASI 1 penceresi 120x180)",
-  "cevap": "P6001 modelinde yatak odası 1 penceresinin 120x180 olmasını istiyorsunuz. (YATAK ODASI 1 mevcut penceresi ölçü değişikliği sayıldı (ekleme değil), YATAK ODASI 1 penceresi 120x180) Ön onay planını hazırlıyorum; birkaç dakika içinde PDF olarak göndereceğim.",
-  "uyum": true,
-  "is_emri_no": "PM-B002-20261014-78329",
-  "asama": "onay_bekliyor"
- },
- {
-  "id": 19,
-  "mesaj": "P6001 yatak odası 1 için bir pencere koy 120x180",
-  "beklenen": "yonlendir",
-  "not": "Astra karşı örneği: 'bir pencere koy' = ekleme → v0.1'de yönlendirme (ölçü değişikliği sayılmaz)",
-  "niyet": "yeni_talep",
-  "guven": "yuksek",
-  "kod": "P6001",
-  "varyant": [],
-  "eylem": "yonlendir",
-  "gerekce": "pencere ekle/kaldır v0.1'de yok",
-  "cevap": "Pencere ekleme/kaldırma otomatik yapılamıyor. Bu konuyu Lokman Bey'e iletiyorum; en kısa sürede dönüş yapılacak.",
-  "uyum": true,
-  "is_emri_no": null,
-  "asama": "yonlendirildi"
- },
- {
-  "id": 20,
-  "mesaj": "P6001, yatak odası 1, 120x180",
-  "beklenen": "sor",
-  "not": "belirsiz: ne 'değiştir' ne 'ekle' sözü var; mahalde tek pencere → sessizce değiştirmek yerine SORULUR",
-  "niyet": "yeni_talep",
-  "guven": "yuksek",
-  "kod": "P6001",
-  "varyant": [],
-  "eylem": "sor",
-  "gerekce": "eksik: pencere_islem",
-  "cevap": "YATAK ODASI 1 odasında zaten bir pencere var (120x120). Ölçüsünü 120x180 yapalım mı, yoksa ikinci bir pencere mi ekleyelim? \"değiştir\" ya da \"ekle\" yazmanız yeterli.",
-  "uyum": true,
-  "is_emri_no": null,
-  "asama": "topluyor"
- },
- {
-  "id": 21,
-  "mesaj": "değiştir",
-  "beklenen": "is_emri",
-  "not": "20'nin cevabı: kısa 'değiştir' → LLM niyeti 'diger' dese de kural cevabı işler → ölçü değişikliği → İş Emri",
-  "niyet": "diger",
-  "guven": "dusuk",
-  "kod": null,
-  "varyant": [],
-  "eylem": "is_emri",
-  "gerekce": "şablon P6001 (YATAK ODASI 1 penceresi 120x180)",
-  "cevap": "Değiştir. (YATAK ODASI 1 penceresi 120x180) Ön onay planını hazırlıyorum; birkaç dakika içinde PDF olarak göndereceğim.",
-  "uyum": true,
-  "is_emri_no": "PM-B003-20261014-78329",
-  "asama": "onay_bekliyor"
- },
- {
-  "id": 22,
-  "mesaj": "P6001 yatak odası 1 pencereyi 120x180 yap",
-  "beklenen": "is_emri",
-  "not": "açık değiştirme fiili ('yap') → ölçü değişikliği",
-  "niyet": "yeni_talep",
-  "guven": "yuksek",
-  "kod": "P6001",
-  "varyant": [],
-  "eylem": "is_emri",
-  "gerekce": "şablon P6001 (YATAK ODASI 1 mevcut penceresi ölçü değişikliği sayıldı (ekleme değil), YATAK ODASI 1 penceresi 120x180)",
-  "cevap": "P6001 modelinde yatak odası 1 penceresini 120x180 yapmanızı istiyorsunuz. (YATAK ODASI 1 mevcut penceresi ölçü değişikliği sayıldı (ekleme değil), YATAK ODASI 1 penceresi 120x180) Ön onay planını hazırlıyorum; birkaç dakika içinde PDF olarak göndereceğim.",
-  "uyum": true,
-  "is_emri_no": "PM-B001-20261014-78329",
-  "asama": "onay_bekliyor"
  }
 ]

@@ -1,5 +1,5 @@
 {
- "is_emri_no": "PM-B002-20261014-78329",
+ "is_emri_no": "PM-B002-20260921-16652",
  "revizyon": 2,
  "talep": {
   "bayi": {
@@ -190,15 +190,15 @@
   "Hol yok: yatak odaları ve banyo yaşam alanından girilir; yaşam alanı 3,5–4,5 pano arasındaki nişi kapsar (PDF'te 'Hol').",
   "Dış kapı 90 cm (21.09 kararı); kaynak kapı sembolü 97'den ölçeklendi — çalışma kabulü.",
   "Banyo kapısı özgün planda üst panoda; motorun alt-koşu kuralı (özel pano sonda) nedeniyle alt panoya düştü — doğrulanacak.",
-  "Varyant: ayna_y uygulandı (pano biriminde deterministik dönüşüm).",
-  "Varyant: 1 pencere 120x180 yapıldı (mahal=YATAK ODASI 1)."
+  "Varyant: 1 pencere 120x180 yapıldı (mahal=YATAK ODASI 1).",
+  "Varyant: ayna_y uygulandı (pano biriminde deterministik dönüşüm)."
  ],
  "eksikler": [],
  "kunye": {
-  "proje_kodu": "PM-B002-20261014-78329",
+  "proje_kodu": "PM-B002-20260921-16652",
   "ilgili_kisi_telefon": "Nadire Hanım / BAYI-TEST-2",
   "sevk_adresi": "",
-  "tarih": "14/10/2026",
+  "tarih": "21/09/2026",
   "cizen": "Portman",
   "kontrol": "",
   "onay": ""

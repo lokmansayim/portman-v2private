@@ -139,8 +139,9 @@ def test_muhendis_karti_yoksa_patrona_soylenir(depo, wa, genel_liste):
     rev = celik_onay(depo, wa)
     ss = satirlar(depo, rev["onay_mesaj_id"])
     assert not [s for s in ss if s["_alici"] == "MUHENDIS"]
-    [p] = [s for s in ss if s["_alici"] == "PATRON"]
+    p, sab = [s for s in ss if s["_alici"] == "PATRON"]
     assert "aktif mühendis kartı yok" in p["body"] and NUMARA_A not in p["body"]
+    assert sab["kind"] == "template" and sab["pencere_kapaliysa"] is True and sab["sablon"]["govde"] == [BAYI_A["kod"], rev["is_emri_no"]]   # inceleme: pencere kapalıysa da
     assert depo.muhendis_kontrolu(rev["is_emri_no"], 1)["durum"] == "kart_yok"
 
 
@@ -405,3 +406,68 @@ def test_belge_turu_tanima():
     assert M.belge_turu(Path("a.txt"), b"  0\nSECTION\n") == ""                         # uzantı da gerekir
     assert M.belge_turu(Path("a.xlsx"), b"PK\x03\x04 rastgele") == ""                    # ZIP ama çalışma kitabı değil
     assert M.belge_turu(Path("a.dxf"), b"MZ\x90\x00") == ""
+
+
+# ───────────────────────── kapanış incelemesi (14.10) ─────────────────────────
+def test_kisa_parca_notlarinin_hepsi_gider_cok_ise_ayri_metinde(depo, wa, genel_liste):
+    """Geometri hakemi (kritik): KT-03'te 17 not var; ilk 6'yla kesilmez (D-10). 6'dan çoksa hepsi ayrı metinde, düğmeli mesajda sayı."""
+    muhendis_karti(depo)
+    rev = celik_onay(depo, wa); no = rev["is_emri_no"]
+    ozet = next(Path(rev["pdf_yolu"]).parent.glob("*_pafta_ozet.json"))
+    notlar = [{"zincir": z, "konum_cm": 10 * i, "parca_cm": 3, "not": "x"} for i, z in enumerate(["arka"] * 3 + ["on"] * 5 + ["sol"] * 5 + ["sag"] * 4)]
+    ozet.write_text(json.dumps({"kontrol_notlari": notlar}), encoding="utf-8")
+    g = muhendis_mesaji(reply_id=f"muh:gonder:{no}:1"); muhendis_isle(depo, g)
+    ss = satirlar(depo, g["id"])
+    [liste] = [x for x in ss if x["kind"] == "text"]
+    assert liste["body"].count(" cm (@") == 17 and "sag 3 cm (@160)" in liste["body"]
+    assert "Kısa parça notu: 17 (ayrı mesajda)." in ss[-1]["body"]
+    ozet.unlink()                                                                          # özet yoksa "okunamadı" (yok ile ayrılır)
+    g2 = muhendis_mesaji(reply_id=f"muh:gonder:{no}:1"); muhendis_isle(depo, g2)
+    assert "kısa parça notları (pafta özeti okunamadı)" in satirlar(depo, g2["id"])[-1]["body"]
+
+
+def test_mesai_suresi_gece_saymaz():
+    assert MH.mesai_suresi(saat(14, 18, 30), saat(15, 8)) == 1.5 * 3600
+    assert MH.mesai_suresi(saat(14, 21), saat(15, 7)) == 0
+    assert MH.mesai_suresi(saat(14, 9), saat(16, 9)) == 2 * 12 * 3600
+
+
+def test_aksam_onayinda_gecikme_ertesi_sabah_mesai_saatiyle(depo, wa, genel_liste):
+    """İnceleme: 18:30 onayı sabah 08:00'de "13 saattir" sayılmaz; 3 mesai saati 09:30'da dolar."""
+    muhendis_karti(depo)
+    rev = celik_onay(depo, wa); no = rev["is_emri_no"]
+    _kontrol_saati(depo, no, saat(14, 18, 30))
+    assert MH.hatirlatma_turu(depo, saat(14, 19, 30))["muhendis"] == 1
+    say = MH.hatirlatma_turu(depo, saat(15, 8, 0))
+    assert say == {"muhendis": 0, "gecikme": 0, "patron": 0, "hata": 0}                 # 1,5 mesai saati
+    assert MH.hatirlatma_turu(depo, saat(15, 8, 30))["muhendis"] == 1
+    h = [s for s in _cipa(depo, rev) if s["_alici"] == "MUHENDIS"][-1]
+    assert h["sablon"]["govde"] == [no, "2"]
+    assert MH.hatirlatma_turu(depo, saat(15, 9, 30))["gecikme"] == 1
+
+
+def test_arada_fiyat_verildiyse_hatirlatma_yazilmaz(depo, wa, genel_liste):
+    muhendis_karti(depo)
+    rev = celik_onay(depo, wa); no = rev["is_emri_no"]
+    k = depo.muhendis_kontrolu(no, 1)
+    assert depo.kontrol_satir_ekle(k["id"], k["onay_mesaj_id"], [W.giden_metin({"id": k["onay_mesaj_id"], "sender": NUMARA_A}, "x", 0, "PATRON")],
+                                   {"hatirlatma_sayisi": 9}, beklenen={"durum": "patrona_gonderildi", "patron_durum": "bekliyor"}) == []
+    assert depo.muhendis_kontrolu(no, 1)["hatirlatma_sayisi"] == 0 and not _cipa(depo, rev)
+
+
+def test_test_kartinin_kontrolu_hatirlatma_dogurmaz(depo, wa, genel_liste):
+    muhendis_karti(depo)
+    rev = celik_onay(depo, wa); no = rev["is_emri_no"]
+    depo.bayi_yaz(NUMARA_A, ad="Kuru koşu", kod="TEST", rol="test")
+    _kontrol_saati(depo, no, saat(14, 9))
+    assert MH.hatirlatma_turu(depo, saat(14, 12)) == {"muhendis": 0, "gecikme": 0, "patron": 0, "hata": 0}
+
+
+def test_xlsx_calisma_kitabi_zip_sonunda_da_taninir(tmp_path):
+    import io
+    import zipfile
+    b = io.BytesIO()
+    with zipfile.ZipFile(b, "w") as z:
+        z.writestr("xl/worksheets/sheet1.xml", "x" * 300000)
+        z.writestr("xl/workbook.xml", "<workbook/>")
+    assert M.belge_turu(Path("a.xlsx"), b.getvalue()) == M.XLSX

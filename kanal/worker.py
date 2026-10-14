@@ -191,15 +191,16 @@ def _sha(p: Path) -> str:
 
 
 def bayi_tanimi(bayi: dict | None) -> str:
-    """İE-08 8b M5 (D-06): LLM bağlamında bayinin adı ve hitabı; telefon numarası asla (ad alanı numaraya düşmüşse ad yazılmaz, numara
-    biçimli her şey maskelenir). Kayıtsız ya da boşsa ''."""
+    """İE-08 8b M5 (D-06; iş emri M5 "bayinin hitabı, yoksa adı"): LLM bağlamında yalnız hitap, hitap yoksa ad; ikisi birden değil (veri
+    en aza). Telefon numarası asla: ad numaraya düşmüşse yazılmaz, numara biçimli her şey maskelenir. Kayıtsız ya da boşsa ''."""
     b = bayi or {}
-    numara = str(b.get("numara") or "")
-    ad = str(b.get("ad") or "").strip()
-    ad = "" if (not ad or ad == numara or ad.isdigit()) else maske_numaralar(ad)[:80]
     hitap = maske_numaralar(str(b.get("hitap") or "").strip())[:40]
-    parca = ([f"bayi: {ad}"] if ad else []) + ([f"hitap: {hitap}"] if hitap else [])
-    return ", ".join(parca)
+    if hitap:
+        return f"bayinin hitabı: {hitap}"
+    ad = str(b.get("ad") or "").strip()
+    if not ad or ad == str(b.get("numara") or "") or ad.isdigit():
+        return ""
+    return f"bayinin adı: {maske_numaralar(ad)[:80]}"
 
 
 def baglam_ozeti(k) -> str:
