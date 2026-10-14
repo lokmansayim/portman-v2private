@@ -12,6 +12,8 @@ olan yazılarda (yön etiketi, veranda adı) yamanın kutusu alınır. Döndür�
 - `olcu_cizgileri`: ölçü okları — `plan_eksen`'in `annotate` okları (gövde + uç; yol çokgeni) ve şablon paftasının `Sayfa.olcu` çizgileri
   (`gid` "olcu_cizgi" / "olcu_centik").
 - `cizgi_kapatanlar`: ölçü okunu/çentiğini kapatan yazılar (mürekkep kutusu ok yoluna değiyor; KT-02 "25,1" ve "22,4" örneği).
+- `kapi_yaylari` + `cizgi_kapatanlar`: kapı açılım yayını (`gid` "kapi_yay") kesen yazılar (BK-09: KT-02 paftasında "BANYO").
+- `sayfa_disindakiler`: mürekkebi figürün dışına taşan yazılar (BK-09: Ç8801-L paftası 2. sayfada "TASLAK").
 
 Testte (`testler/genel/test_yazi_cakismasi.py`) `Figure.savefig` ve `PdfPages.savefig` sarılarak `plan_bayi.png`, `bayi_gorsel` alt
 sırası ve şablon paftasının iki sayfası kaydedilmeden önce denetlenir. Çizim baytlarına dokunmaz."""
@@ -154,6 +156,36 @@ def olcu_cizgileri(fig) -> list[dict]:
     return out
 
 
+def kapi_yaylari(fig) -> list[dict]:
+    """Kapı açılım yayları (`Arc`, gid "kapi_yay"): yay çizgisi kalınlığı kadar şişirilmiş çokgen (piksel). {ad, poligon, eksen}."""
+    sc = fig.dpi / 72.0
+    out = []
+    for i, ax in enumerate(fig.axes):
+        for p in ax.patches:
+            if p.get_gid() != "kapi_yay":
+                continue
+            (cx, cy), rx, ry = p.center, p.width / 2, p.height / 2
+            t0, t1 = p.theta1, p.theta2 if p.theta2 > p.theta1 else p.theta2 + 360
+            n = max(8, int((t1 - t0) / 3))
+            pts = [(cx + rx * math.cos(math.radians(t0 + (t1 - t0) * k / n)), cy + ry * math.sin(math.radians(t0 + (t1 - t0) * k / n)))
+                   for k in range(n + 1)]
+            g = _yol_cokgeni(ax.transData.transform(pts), None, p.get_linewidth() * sc)
+            if g is not None:
+                out.append({"ad": "kapi_yay", "poligon": g, "eksen": i})
+    return out
+
+
+def sayfa_disindakiler(kutular: list[dict], fig, pay: float = PAY_PX) -> list[tuple[str, float]]:
+    """Mürekkebi figür sınırının dışına taşan yazılar (metin, dışarıda kalan alan px²)."""
+    sayfa = _kutu_poligon(0, 0, fig.bbox.width, fig.bbox.height)
+    out = []
+    for k in kutular:
+        dis = k["murekkep"].difference(sayfa)
+        if not dis.is_empty and dis.area > pay:
+            out.append((k["metin"], round(dis.area, 1)))
+    return out
+
+
 def cakisanlar(kutular: list[dict], pay: float = PAY_PX, anahtar: str = "murekkep") -> list[tuple[str, str, float]]:
     """Aynı eksende örtüşen yazı çiftleri (metin, metin, örtüşme px²). anahtar: 'murekkep' (varsayılan) ya da 'yerlesim'."""
     out = []
@@ -187,8 +219,10 @@ def cizgi_kapatanlar(kutular: list[dict], cizgiler: list[dict], secici=None, pay
 
 def denetle(fig, ad: str = "") -> dict:
     """Tek figür için rapor: {ad, yazi: n, cakisan: mürekkep çakışmaları, yerlesim_cakisan: yalnız yerleşim kutusu örtüşmeleri (bilgi;
-    yanlış alarm sayılır), cizgi_kapatan: ölçü okunu kapatan yazılar}."""
+    yanlış alarm sayılır), cizgi_kapatan: ölçü okunu kapatan yazılar, yay_kapatan: kapı yayını kesen yazılar, sayfa_disi: sayfadan taşan
+    yazılar (BK-09)}."""
     k = metin_kutulari(fig)
     ink = cakisanlar(k)
     yer = [x for x in cakisanlar(k, anahtar="yerlesim") if (x[0], x[1]) not in {(a, b) for a, b, _ in ink}]
-    return {"ad": ad, "yazi": len(k), "cakisan": ink, "yerlesim_cakisan": yer, "cizgi_kapatan": cizgi_kapatanlar(k, olcu_cizgileri(fig))}
+    return {"ad": ad, "yazi": len(k), "cakisan": ink, "yerlesim_cakisan": yer, "cizgi_kapatan": cizgi_kapatanlar(k, olcu_cizgileri(fig)),
+            "yay_kapatan": cizgi_kapatanlar(k, kapi_yaylari(fig)), "sayfa_disi": sayfa_disindakiler(k, fig)}

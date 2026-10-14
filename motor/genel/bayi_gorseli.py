@@ -161,6 +161,9 @@ def plan_bayi(t: dict, hedef: Path, kod: str, is_emri_no: str | None = None, rev
         ax.set_xlim(min(x0, etiket_yeri["sol"] - pay), max(x1, etiket_yeri["sag"] + pay))
         ax.set_ylim(min(y0, etiket_yeri["on"] - pay), max(y1, etiket_yeri["arka"] + pay))
         _bayi_duzelt(fig, ax, y, (ex0, ey0, ex1, ey1))   # son ölçekle: dar parça sayıları içeri sıraya, dar mahalde yazı küçülür (13.10)
+        gruplar = [([t for t in ax.texts if t.get_gid() == f"mahal:{b['ad']}"], b["net"]) for b in y["bolgeler"].values()
+                   if b["sinif"] != "dis" and not b.get("etiket_yeri")]
+        ciz_genel.etiket_yaydan_kacir(fig, ax, [g for g in gruplar if g[0]], adim=4.0, en_cok=20)   # BK-09 M5: yayı kesen mahal etiketi
         fig.savefig(yol, bbox_inches="tight", facecolor="white")
         plt.close(fig)
 
