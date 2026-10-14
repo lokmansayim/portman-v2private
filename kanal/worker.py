@@ -326,7 +326,7 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
     except Exception as e:
         hata = str(e)[:320] if isinstance(e, CikarimHatasi) else f"{type(e).__name__}: {str(e)[:300]}"
         ekle("Mesajınızı şu an işleyemedim; Lokman Bey'e iletiyorum, en kısa sürede dönüş yapılacak.")
-        patrona(f"Portman: {kim} mesajı işlenemedi (çıkarım hatası). Mesaj: \"{gelen['text'][:300]}\"", sablon=True)
+        patrona(f"Portman: {kim} mesajı işlenemedi (çıkarım hatası). Mesaj: \"{maske_numaralar(gelen['text'])[:300]}\"", sablon=True)
         sonuc.update(eylem="hata", gerekce="çıkarım hatası", hata=hata)
         return {"satirlar": satirlar, "sonuc": sonuc, "hata": hata}
 
@@ -422,7 +422,7 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
     if karar.eylem == "yonlendir":
         model = katalog.bul(talep.katalog_kodu) if talep.katalog_kodu else None
         model_notu = f" Katalog notu ({model['code']}): {model['not']}" if model and model.get("not") else ""   # D-07: yalnız Patron'a
-        patrona(f"Portman yönlendirme: {kim} — {karar.gerekce}.{model_notu} Mesaj: \"{(gelen.get('text') or '')[:300]}\"",
+        patrona(f"Portman yönlendirme: {kim} — {karar.gerekce}.{model_notu} Mesaj: \"{maske_numaralar(gelen.get('text') or '')[:300]}\"",
                 sablon=True, is_emri_no=sonuc.get("is_emri_no"))
     return {"satirlar": satirlar, "sonuc": sonuc}
 
@@ -562,12 +562,11 @@ def cizim_genel(ie: dict, hedef: Path) -> dict:
                   kaynak=f"İş Emri {no} r{rev:02d} ({y.get('referans_model') or y.get('kod')})", bilgi=ie.get("bilgi"))
 
 
-_NUMARA = re.compile(r"(?<!\d)(\d{10,15})(?!\d)")
-
-
 def maske_numaralar(metin: str) -> str:
-    """Günlük, hata iletisi ve kayıt kopyası için: 10–15 haneli rakam dizileri (telefon numarası olabilir) maskelenir (K09, D-09)."""
-    return _NUMARA.sub(lambda m: "…" + m.group(1)[-4:], metin or "")
+    """Günlük, hata iletisi, Patron metni ve kayıt kopyası için: telefon numaraları "…" + son dört hane olur (K09, D-09). BK-08 madde 9:
+    bitişik 10–15 hanenin yanında boşluklu, tireli, parantezli ve `+90`'lı biçimler de (`beyin/numara.py`, paftayla aynı desen)."""
+    from beyin import numara
+    return numara.maskele(metin, son_dort=True)
 
 
 def ekler_uret(ie: dict, hedef: Path, v: dict, settings: dict, m: dict | None = None) -> dict:

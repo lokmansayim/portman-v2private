@@ -18,6 +18,8 @@ import re
 import time
 from pathlib import Path
 
+from . import numara
+
 ROOT = Path(__file__).resolve().parent.parent
 # `motor/genel/sablon_pafta.OZELLIK_SIRASI` ile aynı liste (testler/kalici/test_celik_akisi.py denetler); matplotlib içe aktarılmasın diye kopya
 OZELLIK_ALANLARI = ["Bina Yüksekliği", "Dış Duvarlar", "İç Duvarlar", "Panel Türü", "Çatı Şekli", "Çatı Eğimi", "Çatı Kaplaması", "Çatı Kaplama Rengi",
@@ -72,13 +74,11 @@ def tanim_yolu(aday: dict) -> Path:
     return ROOT / aday["tanim"]
 
 
-_NUMARA = re.compile(r"(?<!\d)\d{10,15}(?!\d)")
-
-
 def numarasiz(metin: str) -> str:
-    """D-09 "başka numara reddedilir": serbest metin alanlarında (sevk adresi, özel istekler, özellikler) 10–15 haneli rakam dizileri
-    paftaya girmez; yerine "…" yazılır (bayi mesajında müşterinin numarası geçse de PDF'e basılmaz; KVKK denetçisi 12.10)."""
-    return _NUMARA.sub("…", metin or "")
+    """D-09 "başka numara reddedilir": serbest metin alanlarında (sevk adresi, özel istekler, özellikler) telefon numaraları paftaya
+    girmez; yerine "…" yazılır (bayi mesajında müşterinin numarası geçse de PDF'e basılmaz; KVKK denetçisi 12.10). BK-08 madde 9:
+    boşluklu, tireli, parantezli ve `+90`'lı biçimler de (`beyin/numara.py`)."""
+    return numara.maskele(metin)
 
 
 def bayi_adi(bayi: dict | None) -> str:
