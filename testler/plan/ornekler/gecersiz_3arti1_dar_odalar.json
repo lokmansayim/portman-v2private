@@ -1,0 +1,178 @@
+{
+ "dis_olcu": {
+  "en": 1200,
+  "boy": 800
+ },
+ "mahaller": [
+  {
+   "ad": "Salon",
+   "islev": "salon",
+   "dikdortgenler": [
+    [
+     0,
+     0,
+     500,
+     450
+    ]
+   ]
+  },
+  {
+   "ad": "Mutfak",
+   "islev": "mutfak",
+   "dikdortgenler": [
+    [
+     0,
+     450,
+     350,
+     800
+    ]
+   ]
+  },
+  {
+   "ad": "Banyo",
+   "islev": "banyo",
+   "dikdortgenler": [
+    [
+     350,
+     450,
+     500,
+     800
+    ]
+   ]
+  },
+  {
+   "ad": "Hol",
+   "islev": "hol",
+   "dikdortgenler": [
+    [
+     500,
+     0,
+     620,
+     800
+    ]
+   ]
+  },
+  {
+   "ad": "Yatak Odası 1",
+   "islev": "yatak_odasi",
+   "dikdortgenler": [
+    [
+     620,
+     0,
+     1200,
+     270
+    ]
+   ]
+  },
+  {
+   "ad": "Yatak Odası 2",
+   "islev": "yatak_odasi",
+   "dikdortgenler": [
+    [
+     620,
+     270,
+     1200,
+     540
+    ]
+   ]
+  },
+  {
+   "ad": "Yatak Odası 3",
+   "islev": "yatak_odasi",
+   "dikdortgenler": [
+    [
+     620,
+     540,
+     1200,
+     800
+    ]
+   ]
+  }
+ ],
+ "kapilar": [
+  {
+   "arasinda": [
+    "dis",
+    "Salon"
+   ]
+  },
+  {
+   "arasinda": [
+    "Salon",
+    "Hol"
+   ]
+  },
+  {
+   "arasinda": [
+    "Salon",
+    "Mutfak"
+   ]
+  },
+  {
+   "arasinda": [
+    "Hol",
+    "Banyo"
+   ]
+  },
+  {
+   "arasinda": [
+    "Hol",
+    "Yatak Odası 1"
+   ]
+  },
+  {
+   "arasinda": [
+    "Hol",
+    "Yatak Odası 2"
+   ]
+  },
+  {
+   "arasinda": [
+    "Hol",
+    "Yatak Odası 3"
+   ]
+  }
+ ],
+ "pencereler": [
+  {
+   "mahal": "Salon",
+   "cephe": "G",
+   "olcu": "120x180",
+   "adet": 2
+  },
+  {
+   "mahal": "Salon",
+   "cephe": "B",
+   "olcu": "120x120"
+  },
+  {
+   "mahal": "Mutfak",
+   "cephe": "K",
+   "olcu": "120x120"
+  },
+  {
+   "mahal": "Banyo",
+   "cephe": "K",
+   "olcu": "60x40"
+  },
+  {
+   "mahal": "Yatak Odası 1",
+   "cephe": "D",
+   "olcu": "120x120"
+  },
+  {
+   "mahal": "Yatak Odası 2",
+   "cephe": "D",
+   "olcu": "120x120"
+  },
+  {
+   "mahal": "Yatak Odası 3",
+   "cephe": "D",
+   "olcu": "120x120"
+  }
+ ],
+ "cati": {
+  "tip": "kirma"
+ },
+ "gerekce": "elle yazılmış geçersiz test planı: banyo, hol ve yatak odaları dar (denetçi ihlal vermeli)"
+}
