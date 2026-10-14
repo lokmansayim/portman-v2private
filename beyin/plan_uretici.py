@@ -1,34 +1,35 @@
-"""İE-14 · plan üreteci: talep → (LLM) plan taslağı → (kod) denetim → geçerli Yapı Tanımı ya da "uygulayamadım".
+"""İE-14 · plan üreteci (r3; Lokman 14.10.2026): talep → oda programı → bankadan uyarlama → deterministik çözücü → en son sınırlı LLM.
 
-LLM anlar, kod karar verir: LLM yalnız plan şemasını doldurur (`beyin/plan_sema.py`, araç `plan_kaydet`); geçerlilik
-`beyin/plan_denetim.denetle`'nin kararıdır. İhlaller aynı konuşmada araç sonucu (is_error) olarak geri gider; en çok `en_cok_cagri`
-(varsayılan 3: 1 + 2 düzeltme; D-18) çağrı. Örnek olarak bankadaki en yakın 2–3 gerçek plan (`plan_sema.tanimdan`) verilir.
+LLM koordinat yazmaz. Sıra:
+1. Bankadan en yakın plan: kararın bugünkü seçenek yolu (uyan model varsa üretim hiç çağrılmaz; `karar.plan_uretimi_uygun`).
+2. Program (`plan_program.oku`): yapısal talepten koddan; tanınmayan serbest istek kalırsa ve ayar açıksa tek LLM çağrısı (koordinatsız).
+3. Bankadan uyarlama (`plan_uyarlama.uyarla`) ve deterministik çözücü (`plan_cozucu.coz`); ikisinin adayları puanla sıralanır, en iyi `n`.
+4. İkisi de boş dönerse ve ayar açıksa en çok `en_cok_cagri` (2) kez `plan_program.yeniden`: LLM programı ve yerleşim ipucunu en az
+   değişiklikle yeniden önerir (adsız örnek özetleriyle); yerleşimi yine çözücü kurar, denetçi geçirir. Değişen her şey bayiye yazılır.
+Her aday denetçiden geçmiştir (`plan_denetim.denetle`); sözleşmesi (`portman.plan/0.1`) ve doğrulama kalemleri yanındadır.
 
-Her deneme kaydedilir (taslak, ihlaller, token): geri bildirim döngüsünün kaydı ve test seti budur. `manuel` arka uç kayıtlı
-cevapları sırayla oynatır (LLM çağrısı yok; `testler/plan/kayitlar/`).
+`manuel` arka uç kayıtlı cevapları oynatır: `hazir = {"program": {...} | None, "yeniden": [{...}, …]}` (LLM çağrısı yok).
 """
 from __future__ import annotations
 
 import json
-import math
+import time
 from functools import lru_cache
 from pathlib import Path
 
-from beyin import llm, numara
-from beyin.plan_denetim import ISLEV_ADI, denetle, kurallar, program_coz
-from beyin.plan_sema import ARAC_ACIKLAMA, ARAC_ADI, sema, tanimdan
+from beyin import numara, plan_cozucu, plan_program, plan_uyarlama
+from beyin.plan_sema import sozlesme, tanimdan
 
 ROOT = Path(__file__).resolve().parent.parent
-PROMPT = (Path(__file__).resolve().parent / "plan_prompt.md").read_text(encoding="utf-8")
 ADAYLAR = ROOT / "beyin" / "veri" / "adaylar.json"
-VARSAYILAN_AYAR = {"backend": "anthropic", "model": "claude-opus-5-5", "effort": "medium", "en_cok_cagri": 3, "timeout_s": 180,
-                   "max_tokens": 8000}
-VERANDA_KONUM = {"on": "ön (güney) cephede", "arka": "arka (kuzey) cephede", "yan": "yan cephede", "kose": "bir köşede"}
+VARSAYILAN_AYAR = {"backend": "anthropic", "model": "claude-opus-5-5", "effort": "low", "en_cok_cagri": 2, "timeout_s": 60,
+                   "max_tokens": 2000}
+YOL_ADI = {"uyarlama": "bankadaki bir modelden uyarlandı", "cozucu": "programdan çözüldü", "llm_program": "programdan çözüldü"}
 
 
 @lru_cache(maxsize=1)
 def _banka() -> tuple[dict, ...]:
-    """Bankadaki çelik adaylar, çatı varyantları ayıklanmış (aynı plan): {kod, katalog_m2, oda_programi, odalar, plan}."""
+    """Bankadaki çelik adaylar, çatı varyantları ayıklanmış (aynı plan): {kod, katalog_m2, oda_programi, odalar, plan}. Kod iç kayıttır."""
     adaylar = json.loads(ADAYLAR.read_text(encoding="utf-8"))
     varyant = {v for a in adaylar for v in (a.get("varyantlar") or [])}
     out = []
@@ -41,12 +42,6 @@ def _banka() -> tuple[dict, ...]:
     return tuple(out)
 
 
-def yakin_ornekler(alan: float | None, n: int = 3, haric: tuple[str, ...] = ()) -> list[dict]:
-    """Brüt alanı en yakın n banka planı (kör üretimde modelin kendisi `haric`)."""
-    banka = [b for b in _banka() if b["kod"] not in haric and not any(b["kod"].startswith(h) for h in haric)]
-    return sorted(banka, key=lambda b: (abs((b["katalog_m2"] or 0) - (alan or 0)), b["kod"]))[:n]
-
-
 def hedef_alan(talep: dict) -> float | None:
     if talep.get("alan_m2"):
         return float(talep["alan_m2"])
@@ -56,131 +51,74 @@ def hedef_alan(talep: dict) -> float | None:
     return None
 
 
-def talep_metni(talep: dict, ornekler: list[dict], kural: dict) -> str:
-    """Kullanıcı mesajı: talep, kurallar (oda en küçükleri), örnek planlar."""
-    alan = hedef_alan(talep)
-    tol = kural["alan_tolerans"]["deger"]
-    satir = ["## Talep"]
-    if alan:
-        satir.append(f"- Brüt alan: yaklaşık {alan:g} m² (kabul: {alan * (1 - tol):.1f}–{alan * (1 + tol):.1f} m²)")
-    d = talep.get("dis_olcu") or {}
-    if d.get("en_m") and d.get("boy_m"):
-        satir.append(f"- Bayinin verdiği dış ölçü: {d['en_m']:g} × {d['boy_m']:g} m")
-    prog = program_coz(talep.get("oda_programi"))
-    if prog:
-        satir.append(f"- Oda programı: {prog[0]}+{prog[1]} ({prog[0]} yatak odası, {prog[1]} salon)")
-    ct = (talep.get("cati") or {}).get("tip")
-    satir.append(f"- Çatı: {'kırma' if ct == 'kirma' else 'beşik' if ct == 'besik' else 'belirtilmedi (beşik ya da kırma seç)'}"
-                 + (" (istenen çatı tipi bu sürümde yok; beşik ya da kırma seç)" if ct in ("tek_egimli", "teras") else ""))
-    v = talep.get("veranda") or {}
-    if v.get("istiyor") is True:
-        satir.append(f"- Veranda: istiyor" + (f", {VERANDA_KONUM[v['konum']]}" if v.get("konum") in VERANDA_KONUM else "")
-                     + (f", yaklaşık {v['alan_m2']:g} m²" if v.get("alan_m2") else ""))
-    elif v.get("istiyor") is False:
-        satir.append("- Veranda: istemiyor")
-    for o in talep.get("ozel_istekler") or []:
-        satir.append(f"- Özel istek: {o}")
-    if talep.get("ozet"):
-        satir.append(f"- Talebin özeti: {talep['ozet']}")
-    satir.append("\n## Oda kuralları (net ölçü; kod denetler)")
-    for islev, r in kural["odalar"].items():
-        if r.get("en_az_m2") or r.get("dar_kenar_cm"):
-            satir.append(f"- {ISLEV_ADI[islev]}: en az {r['en_az_m2']:g} m², dar kenar en az {r['dar_kenar_cm']} cm (eksenden eksene "
-                         f"en az {math.ceil((r['dar_kenar_cm'] + 10.5) / 5) * 5} cm)")
-    satir.append("- Pencere zorunlu: " + ", ".join(ISLEV_ADI[i] for i in kural["pencere_zorunlu"]["deger"]))
-    if ornekler:
-        satir.append("\n## Bankadaki en yakın gerçek planlar (örnek; plan şemasında, yaklaşık çeviri)")
-        for o in ornekler:
-            satir.append(f"### {o['kod']} · {o['katalog_m2']:g} m² · {o['oda_programi']}")
-            satir.append("Net oda alanları: " + ", ".join(f"{k} {v:g} m²" for k, v in o["odalar"].items()))
-            satir.append("```json\n" + json.dumps(o["plan"], ensure_ascii=False, separators=(",", ":")) + "\n```")
-    satir.append("\nBu talebe uyan yeni bir plan taslağı çiz ve plan_kaydet ile kaydet.")
-    return "\n".join(satir)
+def _sec(gruplar: list[list[dict]], n: int) -> list[dict]:
+    """Uyarlama ve çözücü adayları puanla birlikte sıralanır (küçük iyi); en iyi n."""
+    hepsi = sorted((a for g in gruplar for a in g), key=lambda a: (a["puan"], a["yol"], json.dumps(a["plan"]["dis_olcu"], sort_keys=True)))
+    return hepsi[:n]
 
 
-def ihlal_metni(ihlaller: list[str]) -> str:
-    return ("Taslak denetimden geçmedi. İhlaller:\n" + "\n".join(f"- {i}" for i in ihlaller) +
-            "\nBu ihlallerin hepsini gideren düzeltilmiş tam planı yeniden plan_kaydet ile kaydet.")
+def _uret_bir(program: dict, n: int, haric: tuple[str, ...], kod: str, ipucu: dict | None = None) -> tuple[list[dict], list[str], int]:
+    u = plan_uyarlama.uyarla(program, n=n, haric=haric, kod=kod) if not ipucu else {"adaylar": [], "denetim": 0}
+    c = plan_cozucu.coz(program, n=n, kod=kod, ipucu=ipucu)
+    return _sec([u["adaylar"], c["adaylar"]], n), (c.get("notlar") or []) + ([] if c["adaylar"] else c.get("ihlaller") or []), \
+        u["denetim"] + c["denetim"]
 
 
-def uret(talep: dict, ayar: dict | None = None, hazir: list[dict] | None = None, haric: tuple[str, ...] = (), kod: str = "YENI",
-         ornek_sayisi: int = 3) -> dict:
-    """Talep → plan. Dönüş: {durum: gecerli|gecersiz|hata, plan, tanim, ozet, denemeler[], cagri, girdi_token, cikti_token, hata}.
-    `hazir`: manuel arka uçta sırayla oynatılan kayıtlı cevaplar. İstisna fırlatmaz."""
-    kural = kurallar()
-    ornekler = yakin_ornekler(hedef_alan(talep), ornek_sayisi, haric)
-    s = _dongu([{"role": "user", "content": talep_metni(talep, ornekler, kural)}], talep, ayar, hazir, kod, kural)
-    s["ornekler"] = [o["kod"] for o in ornekler]
-    return s
-
-
-def _dongu(mesajlar: list[dict], talep: dict, ayar: dict | None, hazir: list[dict] | None, kod: str, kural: dict | None = None) -> dict:
-    """LLM çağrısı → denetim → ihlaller araç sonucu olarak geri; en çok `en_cok_cagri` çağrı. İstisna fırlatmaz."""
+def uret(talep: dict, ayar: dict | None = None, hazir: dict | None = None, haric: tuple[str, ...] = (), kod: str = "YENI", n: int = 2) -> dict:
+    """Talep → en çok n plan. Dönüş: {durum: gecerli|gecersiz|hata, adaylar: [{plan, tanim, ozet, puan, yol, kaynak?, islemler?, kalip?,
+    denetim, sozlesme}], program, degisen, okunamayan, notlar, cagri, girdi_token, cikti_token, hata, model, denemeler, sure_ms} ve geriye
+    uyum için ilk adayın plan/tanim/ozet/puan/yol'u. `ayar['acik']` yanlışsa LLM hiç çağrılmaz (kör üretim). İstisna fırlatmaz."""
+    t0 = time.time()
     a = {**VARSAYILAN_AYAR, **(ayar or {})}
+    hz = hazir or {}
     if hazir is not None:
         a["backend"] = "manuel"
-    kural = kural or kurallar()
-    sonuc = {"durum": "gecersiz", "plan": None, "tanim": None, "ozet": {}, "denemeler": [], "cagri": 0, "girdi_token": 0, "cikti_token": 0,
-             "hata": None, "model": a.get("model") if a["backend"] != "manuel" else None}
-    for n in range(int(a["en_cok_cagri"])):
-        if a["backend"] == "manuel" and n >= len(hazir or []):
+    llm_acik = bool(a.get("acik")) or hazir is not None
+    s = {"durum": "gecersiz", "adaylar": [], "program": None, "degisen": [], "okunamayan": [], "notlar": [], "cagri": 0, "girdi_token": 0,
+         "cikti_token": 0, "hata": None, "model": a.get("model") if (a["backend"] != "manuel" and llm_acik) else None, "denemeler": [],
+         "plan": None, "tanim": None, "ozet": {}, "puan": None, "yol": None}
+
+    def say(x: dict) -> None:
+        s["cagri"] += x.get("cagri") or 0
+        s["girdi_token"] += x.get("girdi_token") or 0
+        s["cikti_token"] += x.get("cikti_token") or 0
+
+    pr = plan_program.oku(talep, ayar={**a, "acik": llm_acik}, hazir=hz.get("program"))
+    say(pr)
+    if pr.get("hata") and not pr.get("program"):
+        s.update(durum="hata", hata=pr["hata"], sure_ms=int((time.time() - t0) * 1000))
+        return s
+    program = pr["program"]
+    s["program"], s["okunamayan"] = program, list(pr.get("okunamayan") or [])
+    adaylar, nedenler, denetim = _uret_bir(program, n, haric, kod)
+    s["denemeler"].append({"basamak": "uyarlama+cozucu", "aday": len(adaylar), "denetim": denetim, "ihlaller": [] if adaylar else nedenler[:8]})
+    s["notlar"] += plan_cozucu.hazirla(program)["notlar"]
+    for i in range(int(a["en_cok_cagri"]) if (not adaylar and llm_acik) else 0):
+        hz_y = (hz.get("yeniden") or [])
+        if a["backend"] == "manuel" and i >= len(hz_y):
             break
-        try:
-            plan, meta = llm.arac_cagir(PROMPT, mesajlar, ARAC_ADI, ARAC_ACIKLAMA, sema(), backend=a["backend"], model=a.get("model"),
-                                        effort=a.get("effort"), max_tokens=int(a["max_tokens"]),
-                                        hazir=(hazir[n] if a["backend"] == "manuel" else None), timeout=int(a["timeout_s"]))
-        except (llm.LLMHatasi, ValueError) as e:
-            sonuc["cagri"] += 1 if a["backend"] != "manuel" else 0       # ücretli olabilir: tavan için sayılır (temkinli)
-            sonuc.update(durum="hata", hata=numara.maskele(str(e))[:300])
+        y = plan_program.yeniden(program, nedenler, ayar=a, hazir=hz_y[i] if a["backend"] == "manuel" else None, haric=haric)
+        say(y)
+        if not y.get("program"):
+            s["denemeler"].append({"basamak": "llm_program", "aday": 0, "hata": y.get("hata")})
+            if y.get("hata"):
+                s["hata"] = y["hata"]
             break
-        sonuc["cagri"] += 1 if a["backend"] != "manuel" else 0
-        sonuc["girdi_token"] += meta.get("girdi_token") or 0
-        sonuc["cikti_token"] += meta.get("cikti_token") or 0
-        try:
-            d = denetle(plan, talep, kural, kod=kod)
-        except Exception as e:                                       # derleyicinin öngörmediği bozuk taslak: ihlal olarak geri gider
-            d = {"gecerli": False, "ihlaller": [f"taslak derlenemedi: {type(e).__name__}: {numara.maskele(str(e))[:160]}"], "tanim": None, "ozet": {}}
-        sonuc["denemeler"].append({"plan": plan, "gecerli": d["gecerli"], "ihlaller": d["ihlaller"], "ozet": d["ozet"],
-                                   "girdi_token": meta.get("girdi_token"), "cikti_token": meta.get("cikti_token"), "sure_ms": meta.get("sure_ms")})
-        if d["gecerli"]:
-            sonuc.update(durum="gecerli", plan=plan, tanim=d["tanim"], ozet=d["ozet"])
-            return sonuc
-        mesajlar += [{"role": "assistant", "content": meta["icerik"]},
-                     {"role": "user", "content": [{"type": "tool_result", "tool_use_id": meta["arac_id"], "is_error": True,
-                                                   "content": ihlal_metni(d["ihlaller"])}]}]
-    if sonuc["denemeler"] and sonuc["durum"] != "hata":
-        sonuc["ozet"] = sonuc["denemeler"][-1]["ozet"]
-    return sonuc
-
-
-def duzenle_metni(plan: dict, istek: str, talep: dict, kural: dict) -> str:
-    """Revizyon (LLM-önce, T3): mevcut plan + bayinin isteği; istenmeyen yer aynen kalır."""
-    satir = ["## Mevcut plan (bayiye gönderildi)", "```json\n" + json.dumps(plan, ensure_ascii=False, separators=(",", ":")) + "\n```",
-             "\n## Bayinin değişiklik isteği", istek.strip(),
-             "\n## Yapılacak",
-             "- İsteği planda uygula (oda büyüt/küçült, kapı, pencere, veranda, çatı, dış ölçü, dış duvar 140'lık: `dis_karkas`). İstenmeyen "
-             "her şey olduğu gibi kalsın.",
-             "- Oda büyürken komşusu küçülür ya da dış ölçü büyür; mahaller dış dikdörtgeni yine boşluksuz doldurur.",
-             "- Uygulayamadığın isteği `uygulanamayan` listesine bayinin sözüyle yaz; tahminle başka bir şey değiştirme."]
-    prog = program_coz(talep.get("oda_programi"))
-    if prog:
-        satir.append(f"- Oda programı {prog[0]}+{prog[1]} kalır (bayi açıkça değiştirmedikçe).")
-    satir.append("\n## Oda kuralları (net ölçü; kod denetler)")
-    for islev, r in kural["odalar"].items():
-        if r.get("en_az_m2") or r.get("dar_kenar_cm"):
-            satir.append(f"- {ISLEV_ADI[islev]}: en az {r['en_az_m2']:g} m², dar kenar en az {r['dar_kenar_cm']} cm")
-    satir.append("\nDüzeltilmiş tam planı plan_kaydet ile kaydet.")
-    return "\n".join(satir)
-
-
-def duzenle(plan: dict, istek: str, talep: dict, ayar: dict | None = None, hazir: list[dict] | None = None, kod: str = "YENI") -> dict:
-    """Yeni planın revizyonu: LLM mevcut planı istekle yeniden yazar, denetçi karar verir (en çok 3 çağrı). Alan ±%10 denetimi revizyonda
-    yoktur (bayi alanı bilerek değiştirebilir); oda programı korunur. Dönüş `uret` ile aynı biçim; geçerliyse `uygulanamayan` ve `fark`."""
-    t = {"oda_programi": talep.get("oda_programi")}
-    s = _dongu([{"role": "user", "content": duzenle_metni(plan, istek, talep, kurallar())}], t, ayar, hazir, kod)
-    if s["durum"] == "gecerli":
-        s["uygulanamayan"] = list(s["plan"].get("uygulanamayan") or [])
-        s["fark"] = plan_farki(plan, s["plan"])
+        adaylar, nedenler, denetim = _uret_bir(y["program"], n, haric, kod, ipucu=y.get("ipucu") or None)
+        s["denemeler"].append({"basamak": "llm_program", "aday": len(adaylar), "denetim": denetim, "degisen": y["degisen"],
+                               "ipucu": y.get("ipucu"), "ihlaller": [] if adaylar else nedenler[:8]})
+        if adaylar:
+            for x in adaylar:
+                x["yol"] = "llm_program"
+            s["degisen"], s["program"] = y["degisen"], y["program"]
+            break
+    for x in adaylar:
+        x["sozlesme"] = sozlesme(x["plan"], "tek_kat_celik", {"yol": x["yol"], "kod": x.get("kaynak"), "islemler": x.get("islemler") or []},
+                                 varsayimlar=s["notlar"])
+    s["adaylar"] = adaylar
+    if adaylar:
+        s.update(durum="gecerli", hata=None, **{k: adaylar[0][k] for k in ("plan", "tanim", "ozet", "puan", "yol")})
+    s["sure_ms"] = int((time.time() - t0) * 1000)
     return s
 
 
@@ -204,6 +142,7 @@ def plan_farki(eski: dict, yeni: dict) -> list[str]:
         elif abs(alan(ym[ad]) - alan(em[ad])) >= 0.25:
             out.append(f"{ad} {_tr(alan(em[ad]))} → {_tr(alan(ym[ad]))} m²")
     out += [f"{ad} kaldırıldı" for ad in em if ad not in ym]
+
     def pencereler(p):
         c = {}
         for x in p["pencereler"]:
@@ -228,10 +167,11 @@ def plan_farki(eski: dict, yeni: dict) -> list[str]:
 
 
 def kayit(sonuc: dict, talep: dict, etiket: str) -> dict:
-    """Test seti kaydı (`testler/plan/kayitlar/<etiket>.json`; kanalda göç 007): talep, denemelerin ham taslakları ve ihlalleri, sayaçlar.
-    Talep yapısaldır (`karar.plan_talebi`: müşteri adı, numara ve LLM özeti yok; özel istekler numarasız). Özel istek serbest metindir:
-    kanaldan test setine aktarılırken ad maskesi ayrıca uygulanır (28.09 kuralı)."""
-    return {"etiket": etiket, "talep": talep, "durum": sonuc["durum"], "model": sonuc.get("model"), "ornekler": sonuc.get("ornekler"),
+    """Test seti ve göç 007 kaydı: talep (yapısal; ad ve numara yok, özel istekler numarasız), program, basamaklar, adaylar (yol, puan,
+    iç kaynak kodu, işlemler, plan), sayaçlar, süre. Kaynak kodu iç kayıttır (bayiye ve LLM'e gitmez)."""
+    return {"etiket": etiket, "talep": talep, "durum": sonuc["durum"], "model": sonuc.get("model"), "program": sonuc.get("program"),
+            "yol": sonuc.get("yol"), "puan": sonuc.get("puan"), "sure_ms": sonuc.get("sure_ms"), "degisen": sonuc.get("degisen") or [],
+            "okunamayan": [numara.maskele(str(x)) for x in sonuc.get("okunamayan") or []],
             "cagri": sonuc["cagri"], "girdi_token": sonuc["girdi_token"], "cikti_token": sonuc["cikti_token"], "hata": sonuc.get("hata"),
-            "denemeler": [{k: v for k, v in d.items() if k in ("plan", "gecerli", "ihlaller", "girdi_token", "cikti_token", "sure_ms")}
-                          for d in sonuc["denemeler"]]}
+            "denemeler": sonuc.get("denemeler") or [],
+            "adaylar": [{k: x.get(k) for k in ("yol", "puan", "kaynak", "islemler", "kalip", "plan")} for x in sonuc.get("adaylar") or []]}

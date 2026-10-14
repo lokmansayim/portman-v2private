@@ -1,5 +1,5 @@
-"""İE-14 PR-2 · talepten plana, kanal (kalıcı akış, gerçek Postgres, kayıtlı LLM çıkarımı, sahte WhatsApp; üretici elle yazılmış
-cevaplarla — `worker.plan_uret` manuel arka uca bağlanır, LLM çağrısı yok).
+"""İE-14 PR-2 / r3 · talepten plana, kanal (kalıcı akış, gerçek Postgres, kayıtlı LLM çıkarımı, sahte WhatsApp). r3: üretici LLM'siz
+koşar (program → bankadan uyarlama → çözücü); yeni plan revizyonu kayıtlı işlem listesiyle (`plan_islem`, manuel arka uç). LLM çağrısı yok.
 
 T1: "95 m² 3+1 tek kat çelik" (bankada 3+1 yok) → önce "hazırlıyorum", sonra seçenek görseli: 1. Yeni plan + bankadan en yakın iki
 model; üretim sonucu iş satırına (`isler.cikarim.plan_uretimi`) yazılır. T2: "Yeni plan" düğmesi → r01, zarfta tanım gömülü (kanonik
@@ -33,14 +33,15 @@ def ornek(ad):
 
 @pytest.fixture
 def uretici(monkeypatch):
-    """`worker.plan_uret` → manuel arka uç (elle yazılmış cevaplar sırayla); çağrı sayısı ve gelen talep tutulur."""
+    """`worker.plan_uret` → gerçek üretici, LLM kapalı (r3: yapısal talepte LLM gerekmez); çağrı sayısı ve gelen talep tutulur.
+    `durum["talep_ezme"]` verilirse üretim o taleple yapılır (ör. sığmayan program)."""
     from beyin import plan_uretici as PU
-    durum = {"cevaplar": [ornek("gecersiz_3arti1_dar_odalar"), ornek("gecerli_3arti1_100")], "cagri": 0, "talep": None}
+    durum = {"cagri": 0, "talep": None, "talep_ezme": None}
 
     def sahte(talep_, ayar):
         durum["cagri"] += 1
         durum["talep"] = talep_
-        return PU.uret(talep_, hazir=durum["cevaplar"])
+        return PU.uret(durum["talep_ezme"] or talep_, ayar={"acik": False})
     monkeypatch.setattr(W, "plan_uret", sahte)
     return durum
 
@@ -61,23 +62,34 @@ def test_t1_uyan_yoksa_yeni_plan_ve_bankadan_en_yakinlar(depo, wa, hizli_genel, 
     assert "telefon" not in json.dumps(tl) and "musteri" not in tl                    # LLM'e yalnız yapısal talep
     st = sorgu(depo, "SELECT id, durum, adaylar FROM secenek_setleri")[0]
     kodlar = [a["kod"] for a in st["adaylar"]]
-    assert kodlar[0].startswith("YENI-") and kodlar[1:] == ["KT03", "KT02"]           # brüt alana en yakın iki banka modeli (94, 92)
+    assert kodlar[0].startswith("YENI-") and kodlar[1].startswith("YENI-") and kodlar[0] != kodlar[1]
+    assert kodlar[2:] == ["KT03"]                                                    # r3: iki yeni plan + brüt alana en yakın banka modeli (94)
     assert st["adaylar"][0]["tanim"] is None                                         # set kaydı tanımı taşımaz; konuşmada
     satirlar = sorgu(depo, "SELECT kind, govde, satir FROM giden ORDER BY sira")
     assert satirlar[0]["kind"] == "text" and "yeni bir plan taslağı hazırlıyorum" in satirlar[0]["govde"]
     s = satirlar[1]["satir"]
-    assert [b["reply"]["title"] for b in s["interactive"]["action"]["buttons"]][0] == "1. Yeni plan"
-    assert "1. Yeni plan · 100 m² · 3+1 · TASLAK" in s["body"] and "(bankadan en yakın)" in s["body"]
+    assert [b["reply"]["title"] for b in s["interactive"]["action"]["buttons"]][:2] == ["1. Yeni plan", "2. Yeni plan 2"]
+    assert "2 yeni plan taslağı" in s["body"] and "1. Yeni plan · " in s["body"] and "TASLAK, programdan çözüldü" in s["body"]
+    yeni_satirlar = [x for x in s["body"].splitlines() if x.startswith(("1.", "2."))]
+    assert "(bankadan en yakın)" in s["body"] and len(yeni_satirlar) == 2
+    assert not any(c in x for x in yeni_satirlar for c in ("KT", "Ç8", "C8"))           # uyarlama kaynağı bayiye adsız (P5)
     d, _ = depo.konusma_oku(NUMARA_A)
     u = d["uretilen_plan"]
     assert u["kod"] == kodlar[0] and isinstance(u["tanim"], dict) and u["durum"] == "uretilen" and "plan_istegi" not in d
+    assert [x["kod"] for x in d["uretilen_planlar"]] == kodlar[:2]
     c = sorgu(depo, "SELECT cikarim FROM isler")[0]["cikarim"]
     pu = c["plan_uretimi"]
-    assert pu["durum"] == "gecerli" and len(pu["denemeler"]) == 2 and not pu["denemeler"][0]["gecerli"]
+    assert pu["durum"] == "gecerli" and len(pu["adaylar"]) == 2 and pu["cagri"] == 0 and pu["denemeler"][0]["basamak"] == "uyarlama+cozucu"
     assert c["talep"]["oda_programi"] == "3+1"                                       # çıkarım kaydı korunur
-    pr = sorgu(depo, "SELECT durum, plan_kodu, cagri, talep, denemeler, is_emri_no FROM plan_uretimleri")     # göç 007
-    assert len(pr) == 1 and pr[0]["durum"] == "gecerli" and pr[0]["plan_kodu"] == kodlar[0] and len(pr[0]["denemeler"]) == 2
+    pr = sorgu(depo, "SELECT durum, plan_kodu, cagri, talep, denemeler, is_emri_no, yol, sure_ms, adaylar FROM plan_uretimleri")     # göç 007
+    assert len(pr) == 1 and pr[0]["durum"] == "gecerli" and pr[0]["plan_kodu"] == kodlar[0] and pr[0]["cagri"] == 0
+    assert pr[0]["yol"] in ("uyarlama", "cozucu") and pr[0]["sure_ms"] >= 0
+    assert [x["kod"] for x in pr[0]["adaylar"]] == kodlar[:2]
+    dg = pr[0]["adaylar"][0]["dogrulama"]["kalemler"]
+    assert dg["geometri"]["durum"] == "GECTI" and dg["yapisal"]["durum"] == "YAPILMADI" and dg["muhendis_kabulu"]["durum"] == "YAPILMADI"
+    assert dg["cizim"]["durum"] in ("GECTI", "KALDI")                               # sahte genel motor (hizli_genel); gerçeği e2e bölüm 12'de
     assert pr[0]["talep"]["oda_programi"] == "3+1" and pr[0]["is_emri_no"] is None and NUMARA_A not in json.dumps(pr[0]["talep"])
+    assert Path(u["gorsel"]).with_name("dogrulama.json").is_file()                   # rapor kartın klasöründe (bayiye gitmez)
 
 
 def test_t2_yeni_plan_secimi_r01_gomulu_tanim(depo, wa, hizli_genel, uretici):
@@ -93,11 +105,28 @@ def test_t2_yeni_plan_secimi_r01_gomulu_tanim(depo, wa, hizli_genel, uretici):
     assert y["kod"] == yeni and y["sistem"] == "celik" and isinstance(y["tanim"], dict) and C.tanim_dogrula(y)
     assert y["gosterim"] == "Yeni plan" and rev["rev"] == 1
     assert sorgu(depo, "SELECT is_emri_no FROM plan_uretimleri")[0]["is_emri_no"] == rev["is_emri_no"]      # r01 üretime bağlandı
-    assert uretici["cagri"] == 1                                                      # seçim LLM'i yeniden çağırmaz
+    assert uretici["cagri"] == 1                                                      # seçim üretimi yeniden çağırmaz
     belge = sorgu(depo, "SELECT govde FROM giden WHERE kind = 'document' ORDER BY olusturuldu DESC")[0]["govde"]
     assert "ÖN ONAYA SUNULAN TASLAK" in belge
     govde = sorgu(depo, "SELECT govde FROM giden WHERE kind = 'interactive' ORDER BY olusturuldu DESC")[0]["govde"]
-    assert govde.startswith("Yeni plan") and "100 m², 3+1" in govde
+    assert govde.startswith("Yeni plan") and "3+1" in govde
+
+
+def test_t2_ikinci_yeni_plan_secilir_ve_uretime_baglanir(depo, wa, hizli_genel, uretici):
+    from beyin import celik as C
+    t1(depo)
+    st = sorgu(depo, "SELECT id, adaylar FROM secenek_setleri")[0]
+    ikinci = st["adaylar"][1]["kod"]
+    assert depo.mesaj_kaydet(buton(f"s:{st['id']}:{ikinci}"))
+    [r] = isle_hepsi(depo, URETIM)
+    assert r["eylem"] == "is_emri", r
+    rev = son_rev(depo)
+    y = rev["is_emri"]["yapi"]
+    assert y["kod"] == ikinci and y["gosterim"] == "Yeni plan 2" and C.tanim_dogrula(y)
+    pr = sorgu(depo, "SELECT is_emri_no, plan_kodu FROM plan_uretimleri")[0]
+    assert pr["is_emri_no"] == rev["is_emri_no"] and pr["plan_kodu"] == ikinci
+    d, _ = depo.konusma_oku(NUMARA_A)
+    assert d["uretilen_plan"]["kod"] == ikinci
 
 
 def test_t2_numara_yazarak_secim(depo, wa, hizli_genel, uretici):
@@ -108,8 +137,7 @@ def test_t2_numara_yazarak_secim(depo, wa, hizli_genel, uretici):
 
 
 def test_t4_uretim_gecmezse_uygulayamadim_ve_patron(depo, wa, hizli_genel, uretici):
-    k = ornek("gecersiz_3arti1_dar_odalar")
-    uretici["cevaplar"] = [k, k, k]
+    uretici["talep_ezme"] = {"alan_m2": 45, "oda_programi": "3+1"}              # 45 m²'ye 3+1 sığmaz (LLM kapalı: son basamak yok)
     r = t1(depo)
     assert r["eylem"] == "yonlendir" and "yeni plan üretilemedi" in r["gerekce"]
     govdeler = [x["govde"] for x in sorgu(depo, "SELECT govde FROM giden ORDER BY sira")]
@@ -118,7 +146,7 @@ def test_t4_uretim_gecmezse_uygulayamadim_ve_patron(depo, wa, hizli_genel, ureti
     d, _ = depo.konusma_oku(NUMARA_A)
     assert "uretilen_plan" not in d and "plan_istegi" not in d
     pr = sorgu(depo, "SELECT durum, plan_kodu, denemeler FROM plan_uretimleri")[0]
-    assert pr["durum"] == "gecersiz" and pr["plan_kodu"] is None and len(pr["denemeler"]) == 3
+    assert pr["durum"] == "gecersiz" and pr["plan_kodu"] is None and pr["denemeler"][0]["aday"] == 0 and pr["denemeler"][0]["ihlaller"]
 
 
 def test_t5_onay_muhendis_kontrolune_gider(depo, wa, hizli_genel, uretici):
@@ -149,28 +177,38 @@ def _secilmis_yeni_plan(depo):
 
 @pytest.fixture
 def duzenleyici(monkeypatch):
-    """`worker.plan_duzenle` → manuel arka uç (elle yazılmış düzeltilmiş plan); çağrı ve gelen metin tutulur."""
-    from beyin import plan_uretici as PU
-    durum = {"cevaplar": [], "cagri": 0, "metin": None}
+    """`worker.plan_duzenle` → `plan_islem.duzenle` manuel arka uçla (kayıtlı işlem listesi); çağrı ve gelen metin tutulur."""
+    from beyin import plan_islem as PI
+    durum = {"cevap": {"islemler": [], "uygulanamayan": []}, "cagri": 0, "metin": None, "plan": None}
 
     def sahte(plan, metin, talep_, ayar):
         durum["cagri"] += 1
         durum["metin"] = metin
-        return PU.duzenle(plan, metin, talep_, hazir=durum["cevaplar"])
+        durum["plan"] = plan
+        return PI.duzenle(plan, metin, talep_, hazir=durum["cevap"])
     monkeypatch.setattr(W, "plan_duzenle", sahte)
     return durum
 
 
-def test_t3_yeni_plan_revizyonu_llm_once_dis_140_ve_salon(depo, wa, hizli_genel, uretici, duzenleyici):
+def _dis_yon(plan: dict, ad: str) -> str:
+    """Mahalin dış cepheye değen bir yanı (G/K/B/D): oda o yönde büyütülünce bina büyür."""
+    W, H = plan["dis_olcu"]["en"], plan["dis_olcu"]["boy"]
+    ver = [r for m in plan["mahaller"] if m["islev"] == "veranda" for r in m["dikdortgenler"]]
+    r = max(next(m for m in plan["mahaller"] if m["ad"] == ad)["dikdortgenler"], key=lambda t: (t[2] - t[0]) * (t[3] - t[1]))
+    for yon, ok in (("B", r[0] == 0), ("D", r[2] == W), ("G", r[1] == 0), ("K", r[3] == H)):
+        if ok and not ver:
+            return yon
+    raise AssertionError("dış yan yok")
+
+
+def test_t3_yeni_plan_revizyonu_islemlerle_dis_140_ve_salon(depo, wa, hizli_genel, uretici, duzenleyici):
     _secilmis_yeni_plan(depo)
-    yeni = ornek("gecerli_3arti1_100")
-    yeni["dis_karkas"] = 140
-    yeni["dis_olcu"]["en"] = 1300                                                          # salon doğuya 50 cm büyür, ötekiler kayar
-    for ad, r in (("Salon", [0, 0, 610, 450]), ("Yatak Odası 3", [0, 450, 350, 800]), ("Banyo", [350, 450, 610, 800]), ("Hol", [610, 0, 755, 800]),
-                  ("Yatak Odası 1", [755, 0, 1300, 400]), ("Yatak Odası 2", [755, 400, 1300, 800])):
-        next(m for m in yeni["mahaller"] if m["ad"] == ad)["dikdortgenler"] = [r]
-    yeni["uygulanamayan"] = ["çift kat olsun"]
-    duzenleyici["cevaplar"] = [yeni]
+    d, _ = depo.konusma_oku(NUMARA_A)
+    plan = d["uretilen_plan"]["plan"]
+    salon = next(m["ad"] for m in plan["mahaller"] if m["islev"] == "salon")
+    duzenleyici["cevap"] = {"islemler": [{"op": "dis_karkas_140"}, {"op": "oda_buyut", "mahal": salon, "yon": _dis_yon(plan, salon), "cm": 50,
+                                                                    "alinti": "salonu biraz büyütelim"}],
+                            "uygulanamayan": ["çift kat olsun"]}
     assert depo.mesaj_kaydet(mesaj("dışlar 140'lık olsun, salonu biraz büyütelim, çift kat olsun", talep("revizyon", ozet="revizyon"), bayi=BAYI_KART))
     [r] = isle_hepsi(depo, URETIM)
     assert r["eylem"] == "is_emri" and "LLM-önce" in r["gerekce"], r
@@ -179,8 +217,8 @@ def test_t3_yeni_plan_revizyonu_llm_once_dis_140_ve_salon(depo, wa, hizli_genel,
     y = rev["is_emri"]["yapi"]
     assert rev["rev"] == 2 and y["degisiklikler"] == [] and isinstance(y["tanim"], dict) and isinstance(y["onceki"]["tanim"], dict)
     assert y["tanim"]["duvar_siniflari"]["dis"]["profil"] == "140x45x1,2"
-    assert any(f.startswith("Salon 25,2 → 27,") for f in y["uygulanan"]) and "dış duvarlar 140'lık karkas" in y["uygulanan"]
-    assert "dış ölçü 1250×800 → 1300×800 cm" in y["uygulanan"]
+    assert any(f.startswith(f"{salon} ") and "→" in f for f in y["uygulanan"]) and "dış duvarlar 140'lık karkas" in y["uygulanan"]
+    assert any(f.startswith("dış ölçü ") for f in y["uygulanan"])                      # salon dış cepheye doğru: bina büyüdü
     govde = sorgu(depo, "SELECT govde FROM giden WHERE kind = 'interactive' ORDER BY olusturuldu DESC")[0]["govde"]
     assert "Uygulanan:" in govde and "\"çift kat olsun\" isteğini otomatik uygulayamadım" in govde
     d, _ = depo.konusma_oku(NUMARA_A)
@@ -190,9 +228,11 @@ def test_t3_yeni_plan_revizyonu_llm_once_dis_140_ve_salon(depo, wa, hizli_genel,
 
 def test_t3_yeni_plan_revizyonu_gecmezse_plan_degismez(depo, wa, hizli_genel, uretici, duzenleyici):
     _secilmis_yeni_plan(depo)
-    k = ornek("gecersiz_3arti1_dar_odalar")
-    duzenleyici["cevaplar"] = [k, k, k]
-    assert depo.mesaj_kaydet(mesaj("salonu küçültelim", talep("revizyon", ozet="salonu küçült"), bayi=BAYI_KART))
+    d, _ = depo.konusma_oku(NUMARA_A)
+    plan = d["uretilen_plan"]["plan"]
+    salon = next(m["ad"] for m in plan["mahaller"] if m["islev"] == "salon")
+    duzenleyici["cevap"] = {"islemler": [{"op": "kapi_kaldir", "mahal": salon, "mahal_b": "Hol"}], "uygulanamayan": []}
+    assert depo.mesaj_kaydet(mesaj("salonla hol arasındaki kapıyı kaldırın", talep("revizyon", ozet="kapı kaldır"), bayi=BAYI_KART))
     [r] = isle_hepsi(depo, URETIM)
     assert r["eylem"] == "yonlendir" and "revizyonu üretilemedi" in r["gerekce"]
     assert son_rev(depo)["rev"] == 1
@@ -204,7 +244,7 @@ def test_yeniden_denenen_is_uretimi_tekrarlamaz(depo, uretici, monkeypatch):
     # iş satırında üretim sonucu varsa worker LLM'i çağırmaz (kalıcı akışın yeniden denemesi; ücret iki kez doğmaz)
     from beyin import plan_uretici as PU
     kabul(depo, YEDI)
-    kayitli = PU.uret({"alan_m2": 95, "oda_programi": "3+1"}, hazir=[ornek("gecerli_3arti1_100")])
+    kayitli = PU.uret({"alan_m2": 95, "oda_programi": "3+1"}, ayar={"acik": False})
     import kalici
     k = kalici.BellekKonusma(NUMARA_A, None)
     g = mesaj("95 m² 3+1 tek kat çelik", T95, bayi=BAYI_KART)
@@ -313,6 +353,8 @@ def test_kart_tasinan_yerde_ve_konusmada_guncel(depo, wa, hizli_genel, uretici):
     g = d["uretilen_plan"]["gorsel"]
     assert g and Path(g).is_file() and str(W.KANAL / "projects") in g and ".hazirlik" not in g
     assert d["secenek_seti"]["adaylar"][0]["gorsel"] == g
+    g2 = d["uretilen_planlar"][1]["gorsel"]                                         # r3: ikinci yeni planın kartı da taşındı
+    assert g2 and Path(g2).is_file() and ".hazirlik" not in g2 and d["secenek_seti"]["adaylar"][1]["gorsel"] == g2
 
 
 def test_llm_okumasi_hata_donerse_kural_okumasi_cati_L(depo, wa, hizli_genel, tmp_path):

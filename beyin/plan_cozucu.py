@@ -446,12 +446,20 @@ def _islak_bitisik(plan: dict) -> bool:
 
 
 # ── çözüm ────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-def _secenekler(program: dict, hz: dict, kural: dict):
+def _secenekler(program: dict, hz: dict, kural: dict, ipucu: dict | None = None):
+    """Kalıp seçenekleri. `ipucu` (son basamaktaki LLM önerisi; koordinat değil): yatak_on, banyo_yeri, mutfak_yeri süzgeci."""
     n = int(program["yatak"])
     banyo = int(program.get("banyo") or 1)
+    ip = ipucu or {}
     for yatak_on in range(0, min(n, 2) + 1):
+        if ip.get("yatak_on") is not None and yatak_on != ip["yatak_on"]:
+            continue
         for mutfak_yeri in (("on", "arka") if hz["mutfak"] == "ayri" else ("on",)):
+            if ip.get("mutfak_yeri") and hz["mutfak"] == "ayri" and mutfak_yeri != ip["mutfak_yeri"]:
+                continue
             for banyo_yeri in ("orta", "arka"):
+                if ip.get("banyo_yeri") and banyo_yeri != ip["banyo_yeri"]:
+                    continue
                 for banyo_ucu in ("son", "bas"):
                     if banyo_yeri == "orta" and banyo == 1 and banyo_ucu == "bas" and mutfak_yeri == "on":
                         continue
@@ -492,7 +500,7 @@ def _kaba_puan(odalar: list[dict], W: int, H: int, program: dict, yon: str) -> f
     return round(p, 3)
 
 
-def adaylar(program: dict, kural: dict | None = None) -> list[dict]:
+def adaylar(program: dict, kural: dict | None = None, ipucu: dict | None = None) -> list[dict]:
     """Ön elemeden geçen kalıplar, kaba puanla sıralı (plan kurulmamış; `kur` ile kurulur). Belirlenimci."""
     kural = kural or kurallar()
     hz = hazirla(program)
@@ -514,7 +522,7 @@ def adaylar(program: dict, kural: dict | None = None) -> list[dict]:
                 cW = W - d
         for yon in ("G", "B", "D"):
             U, V = (cW, cH) if yon == "G" else (cH, cW)
-            for s in _secenekler(program, hz, kural):
+            for s in _secenekler(program, hz, kural, ipucu):
                 a_min = 345 if (s["mutfak"] == "ayri" and s["mutfak_yeri"] == "on") else 320
                 for hb in range(320, min(V - s["h"] - a_min, HB_EN_COK) + 1, 20):
                     kose = 0
@@ -544,7 +552,7 @@ def topoloji(kalip: dict) -> tuple:
     return tuple(kalip.get(k) for k in ("yatak_on", "banyo_yeri", "banyo_ucu", "mutfak_yeri"))
 
 
-def coz(program: dict, n: int = 2, kural: dict | None = None, en_cok_denetim: int = 60, kod: str = "YENI") -> dict:
+def coz(program: dict, n: int = 2, kural: dict | None = None, en_cok_denetim: int = 60, kod: str = "YENI", ipucu: dict | None = None) -> dict:
     """Program → denetçiden geçen, yerleşimi birbirinden farklı en iyi n plan. Dönüş: {adaylar: [{plan, tanim, ozet, puan, kalip, yol}],
     denetim, sure_ms, notlar, ihlaller}. İstisna fırlatmaz; hiçbir aday geçmezse `adaylar` boş, `ihlaller` son denetimin ihlalleri."""
     t0 = time.time()
@@ -554,7 +562,7 @@ def coz(program: dict, n: int = 2, kural: dict | None = None, en_cok_denetim: in
     gecen, denetim, son_ihlal = [], 0, []
     gorulen = set()
     try:
-        liste = adaylar(program, kural)
+        liste = adaylar(program, kural, ipucu)
     except (KeyError, ValueError, TypeError) as e:
         return {"adaylar": [], "denetim": 0, "sure_ms": int((time.time() - t0) * 1000), "notlar": hz["notlar"],
                 "ihlaller": [f"program: {type(e).__name__}: {e}"]}
@@ -571,7 +579,9 @@ def coz(program: dict, n: int = 2, kural: dict | None = None, en_cok_denetim: in
             continue
         gorulen.add(topoloji(a["kalip"]))
         gecen.append({"plan": plan, "tanim": d["tanim"], "ozet": d["ozet"], "puan": puan(plan, d["ozet"], program),
-                      "kalip": a["kalip"], "yol": "cozucu"})
+                      "kalip": a["kalip"], "yol": "cozucu", "denetim": {"kalemler": d["kalemler"], "kosan": d["kosan"]}})
     gecen.sort(key=lambda g: g["puan"])
+    if not gecen and not denetim:
+        son_ihlal = ["ön elemeden geçen yerleşim yok: oda en küçükleri (dar kenar, alan) ve hol bu dış ölçüye sığmıyor"]
     return {"adaylar": gecen, "denetim": denetim, "sure_ms": int((time.time() - t0) * 1000), "notlar": hz["notlar"],
             "ihlaller": [] if gecen else son_ihlal[:8]}

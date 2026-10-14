@@ -400,6 +400,7 @@ def _celik_dali(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts: dict) 
     metin = k.d.get("son_metin")
     if aday.get("uretilen"):                                   # İE-14: yeni plan çatı varyantı taşımaz; setten seçim ya da revizyon → plan
         _seti_kapat(k, aday["kod"])
+        k.d["uretilen_plan"] = aday                            # r3: setteki iki yeni plandan seçilen; revizyon ondan sürer
         return _celik_is_emri_uret(k, bayi, katalog, aday, ts)
     taban = katalog.aday(aday.get("referans_model")) if aday.get("referans_model") and not aday.get("varyantlar") else None
     kat_aday = taban if (taban and taban.get("varyantlar")) else aday
@@ -510,18 +511,25 @@ def plan_talebi(ts: dict, alan: float) -> dict:
 
 
 def _aday_bul(k: Konusma, katalog: Katalog, kod: str | None) -> dict | None:
-    """Banka adayı ya da bu konuşmada üretilen plan (`k.d['uretilen_plan']`, kod 'YENI-…')."""
-    u = k.d.get("uretilen_plan")
-    if u and kod and str(kod).strip().upper() == str(u.get("kod")).upper():
-        return u
+    """Banka adayı ya da bu konuşmada üretilen plan (`k.d['uretilen_plan']`; r3: setteki öteki üretilen plan `uretilen_planlar`'da). Seçilen
+    üretilen plan `_celik_dali`'da `uretilen_plan` olur (revizyon ondan sürer); burada yan etki yok (set galerisi her adayı arar)."""
+    if kod:
+        for u in [k.d.get("uretilen_plan")] + list(k.d.get("uretilen_planlar") or []):
+            if u and str(kod).strip().upper() == str(u.get("kod")).upper():
+                return u
     return katalog.aday(kod)
 
 
-def uretilen_aday(sonuc: dict, istek: dict, kart: str | None) -> dict:
-    """Üretim sonucu → aday kaydı biçiminde (tanım gömülü, durum 'uretilen'; banka adayı değil, K-A10 dışında; D-18)."""
+YOL_ADI = {"uyarlama": "bankadaki bir modelden uyarlandı", "cozucu": "programdan çözüldü", "llm_program": "programdan çözüldü"}
+
+
+def uretilen_aday(sonuc: dict, istek: dict, kart: str | None, sira: int = 1) -> dict:
+    """Üretim sonucu (ya da r3'te tek aday) → aday kaydı biçiminde (tanım gömülü, durum 'uretilen'; banka adayı değil, K-A10 dışında; D-18).
+    Uyarlamanın kaynak modeli bayiye yazılmaz (adsız; Lokman 14.10, 5. madde)."""
     import hashlib
     tanim = sonuc["tanim"]
-    kod = YENI_ONEK + hashlib.sha256(str(istek.get("mesaj_id") or json.dumps(istek.get("talep"), sort_keys=True)).encode()).hexdigest()[:6].upper()
+    tohum = str(istek.get("mesaj_id") or json.dumps(istek.get("talep"), sort_keys=True)) + ("" if sira == 1 else f":{sira}")
+    kod = YENI_ONEK + hashlib.sha256(tohum.encode()).hexdigest()[:6].upper()
     tanim = {**tanim, "kod": kod}
     oz = sonuc.get("ozet") or {}
     ver = 0.0
@@ -531,7 +539,8 @@ def uretilen_aday(sonuc: dict, istek: dict, kart: str | None) -> dict:
             ver += abs(sum(q[i][0] * q[(i + 1) % len(q)][1] - q[(i + 1) % len(q)][0] * q[i][1] for i in range(len(q)))) / 2 / 1e4
     from .plan_denetim import program_coz
     p = program_coz(istek["talep"].get("oda_programi"))
-    return {"kod": kod, "gosterim": "Yeni plan", "durum": "uretilen", "uretilen": True, "motor": "genel", "yapi_turu": "celik", "kat": 1,
+    return {"kod": kod, "gosterim": "Yeni plan" if sira == 1 else f"Yeni plan {sira}", "durum": "uretilen", "uretilen": True, "motor": "genel",
+            "yapi_turu": "celik", "kat": 1, "yol": sonuc.get("yol"), "dogrulama": sonuc.get("dogrulama"),
             "tanim": tanim, "tanim_sha256": celik.tanim_sha_icerik(tanim), "gorsel": kart, "plan": sonuc.get("plan"),
             "oda_programi": f"{p[0]}+{p[1]}" if p else istek["talep"].get("oda_programi"), "katalog_m2": oz.get("brut_m2"),
             "kapali_m2": round(sum((oz.get("odalar_m2") or {}).values()), 2) or None, "veranda_m2": round(ver, 2) if ver else None,
@@ -539,26 +548,30 @@ def uretilen_aday(sonuc: dict, istek: dict, kart: str | None) -> dict:
             "ozet": {"dis_olcu_cm": oz.get("dis_olcu_cm"), "odalar": oz.get("odalar_m2")}}
 
 
-def plan_sonucu(k: Konusma, katalog: Katalog, sonuc: dict, kart: str | None = None) -> Karar:
-    """İE-14 · worker'ın üretim sonucu → karar. Geçerliyse seçenek seti: 1. yeni plan, ardından bankadan brüt alanı en yakın iki çelik
-    model (oda programına bakılmaz; uyan zaten yoktu). Geçersizse "uygulayamadım" ve Patron'a (yönlendirme; köprü sürer)."""
+def plan_sonucu(k: Konusma, katalog: Katalog, sonuc: dict, kart=None) -> Karar:
+    """İE-14 · worker'ın üretim sonucu → karar. Geçerliyse seçenek seti: üretilen planlar (r3: en çok 2; uyarlama ve çözücü puanla), ardından
+    bankadan brüt alanı en yakın çelik modeller; görsel ve düğme en çok 3 (`SC.EN_COK_GORSEL`). Son basamakta (LLM programı) programdan
+    değişen her şey bayiye yazılır. Geçersizse "uygulayamadım" ve Patron'a (yönlendirme; köprü sürer). `kart`: tek yol ya da liste."""
     istek = k.d.pop("plan_istegi", None) or {}
     talep = istek.get("talep") or {}
     alan = talep.get("alan_m2")
-    if sonuc.get("durum") != "gecerli" or not sonuc.get("tanim"):
-        neden = sonuc.get("hata") and "üretim hatası" or f"{len(sonuc.get('denemeler') or [])} denemede kurallara uyan plan çıkmadı"
+    uretilen = [a for a in (sonuc.get("adaylar") or ([sonuc] if sonuc.get("tanim") else [])) if a.get("tanim")]
+    if sonuc.get("durum") != "gecerli" or not uretilen:
+        neden = sonuc.get("hata") and "üretim hatası" or "kurallara uyan yerleşim çıkmadı"
         k.not_dus("kural", f"yeni plan üretilemedi: {neden}")
         return _bitir(k, Karar(eylem="yonlendir", gerekce=f"yeni plan üretilemedi ({neden})",
                                 mesaj=f"{alan:g} m² {talep.get('oda_programi')} çelik için kurallara uyan yeni bir planı otomatik çizemedim. " + YONLENDIRME
                                 if isinstance(alan, (int, float)) else "Kurallara uyan yeni bir planı otomatik çizemedim. " + YONLENDIRME))
-    yeni = uretilen_aday(sonuc, istek, kart)
-    k.d["uretilen_plan"] = yeni
+    kartlar = list(kart) if isinstance(kart, (list, tuple)) else [kart]
+    yeniler = [uretilen_aday(a, istek, kartlar[i] if i < len(kartlar) else None, i + 1) for i, a in enumerate(uretilen[:SC.EN_COK_GORSEL - 1])]
+    k.d["uretilen_plan"] = yeniler[0]
+    k.d["uretilen_planlar"] = yeniler
     varyant_kodlari = {v for a in katalog.gorunur_adaylar() for v in (a.get("varyantlar") or [])}
     banka = sorted((a for a in katalog.gorunur_adaylar() if a.get("motor") == "genel" and a.get("yapi_turu") == "celik"
                     and a["kod"] not in varyant_kodlari and isinstance(a.get("katalog_m2"), (int, float))),
-                   key=lambda a: (abs(a["katalog_m2"] - (alan or 0)), a["kod"]))[:2]
-    uygun = [{**yeni, "tanim": None, "plan": None, "sira": 1, "puan": None, "hesap": "yeni plan"}] + \
-            [{**a, "sira": i, "puan": None, "hesap": "bankadan en yakın"} for i, a in enumerate(banka, 2)]
+                   key=lambda a: (abs(a["katalog_m2"] - (alan or 0)), a["kod"]))[:max(1, SC.EN_COK_GORSEL - len(yeniler))]
+    uygun = [{**y, "tanim": None, "plan": None, "sira": i, "puan": None, "hesap": "yeni plan"} for i, y in enumerate(yeniler, 1)] + \
+            [{**a, "sira": i, "puan": None, "hesap": "bankadan en yakın"} for i, a in enumerate(banka, len(yeniler) + 1)]
     kaynak_id = istek.get("mesaj_id") or f"{k.gonderen}:{int(time.time())}"
     st = SC.set_kaydi(kaynak_id, uygun, {"alan_m2": alan, "oda_programi": talep.get("oda_programi")}, tur="yeni_plan")
     eski = k.d.get("secenek_seti")
@@ -568,15 +581,22 @@ def plan_sonucu(k: Konusma, katalog: Katalog, sonuc: dict, kart: str | None = No
         k.d["eski_setler"] = k.d["eski_setler"][-5:]
     k.d["secenek_seti"] = st
     k.d["son_soru_alani"] = "secenek"
-    satirlar = [f"1. Yeni plan · {yeni['katalog_m2']:g} m² · {yeni['oda_programi']} · TASLAK (mühendis kontrolü onayınızdan sonra)"]
-    satirlar += [f"{a['sira']}. {SC.gosterim(a)} · {a['katalog_m2']:g} m² · {a.get('oda_programi') or ''} (bankadan en yakın)" for a in uygun[1:]]
-    mesaj = (f"{alan:g} m² {talep.get('oda_programi')} çelik için yeni bir plan taslağı çizdim; bankadaki en yakın modeller de yanında.\n\n"
-             + "\n".join(satirlar) + "\n\nBirini seçin (düğme ya da numara).")[:1024]
-    butonlar = [{"id": f"s:{st['id']}:{a['kod']}", "baslik": (f"{a['sira']}. Yeni plan" if a.get("uretilen") else f"{a['sira']}. {SC.gosterim(a)}")[:20]}
+    satirlar = [f"{y['sira']}. {y['gosterim']} · {y['katalog_m2']:g} m² · {y['oda_programi']} · TASLAK, {YOL_ADI.get(y.get('yol'), 'yeni')}"
+                for y in uygun[:len(yeniler)]]
+    satirlar += [f"{a['sira']}. {SC.gosterim(a)} · {a['katalog_m2']:g} m² · {a.get('oda_programi') or ''} (bankadan en yakın)" for a in uygun[len(yeniler):]]
+    degisen = list(sonuc.get("degisen") or [])
+    not_ = (f"\n\nİsteğinizi olduğu gibi sığdıramadım; şunları değiştirdim: {'; '.join(degisen)}.") if degisen else ""
+    olmayan = [numara.maskele(str(x))[:80] for x in (sonuc.get("okunamayan") or []) + ((sonuc.get("program") or {}).get("uygulanamayan") or [])]
+    if olmayan:
+        not_ += "\n" + "; ".join(f"\"{x}\"" for x in olmayan[:3]) + " isteğini otomatik uygulayamadım; plan okuyabildiklerimle çizildi."
+    bas = "yeni bir plan taslağı" if len(yeniler) == 1 else f"{len(yeniler)} yeni plan taslağı"
+    mesaj = (f"{alan:g} m² {talep.get('oda_programi')} çelik için {bas} çizdim; bankadaki en yakın model de yanında. Mühendis kontrolü "
+             f"onayınızdan sonra.\n\n" + "\n".join(satirlar) + not_ + "\n\nBirini seçin (düğme ya da numara).")[:1024]
+    butonlar = [{"id": f"s:{st['id']}:{a['kod']}", "baslik": (f"{a['sira']}. {a['gosterim']}" if a.get("uretilen") else f"{a['sira']}. {SC.gosterim(a)}")[:20]}
                 for a in uygun[:SC.EN_COK_GORSEL]]
-    k.not_dus("kural", f"yeni plan üretildi: {yeni['kod']} ({yeni['katalog_m2']} m²; {len(sonuc.get('denemeler') or [])} deneme)")
+    k.not_dus("kural", f"yeni plan üretildi: {', '.join(y['kod'] for y in yeniler)} ({sonuc.get('yol') or 'yeni'})")
     return _bitir(k, Karar(eylem="secenek", soru_alani="secenek", mesaj=mesaj, secenek_seti=st, butonlar=butonlar,
-                           gerekce=f"seçenek seti {st['id']}: yeni plan {yeni['kod']} + bankadan {len(banka)}"))
+                           gerekce=f"seçenek seti {st['id']}: yeni plan {' + '.join(y['kod'] for y in yeniler)} + bankadan {len(banka)}"))
 
 
 def _celik_seti_acik(k: Konusma) -> bool:

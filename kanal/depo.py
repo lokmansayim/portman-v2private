@@ -381,14 +381,17 @@ class Depo:
             pu = cikti.get("plan_uretimi")
             if pu:
                 c.execute("INSERT INTO plan_uretimleri (mesaj_id, gonderen, bayi_kod, durum, plan_kodu, talep, denemeler, cagri, girdi_token, "
-                          "cikti_token, model, hata) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT (mesaj_id) DO NOTHING",
+                          "cikti_token, model, hata, yol, puan, sure_ms, program, adaylar, degisen) "
+                          "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT (mesaj_id) DO NOTHING",
                           (gelen["id"], gelen["sender"], bayi_kod, pu["durum"], pu.get("plan_kodu"), Jsonb(pu.get("talep") or {}),
                            Jsonb(pu.get("denemeler") or []), int(pu.get("cagri") or 0), int(pu.get("girdi_token") or 0),
-                           int(pu.get("cikti_token") or 0), pu.get("model"), pu.get("hata")))
+                           int(pu.get("cikti_token") or 0), pu.get("model"), pu.get("hata"), pu.get("yol"), pu.get("puan"),
+                           pu.get("sure_ms"), Jsonb(pu.get("program")), Jsonb(pu.get("adaylar") or []), Jsonb(pu.get("degisen") or [])))
             yeni_kod = ((d_yeni.get("son_is_emri") or {}).get("yapi") or {}).get("kod")
             if revizyon_id and str(yeni_kod or "").startswith("YENI-"):
-                c.execute("UPDATE plan_uretimleri SET is_emri_no = %s WHERE plan_kodu = %s AND is_emri_no IS NULL",
-                          (sonuc["is_emri_no"], yeni_kod))
+                c.execute("UPDATE plan_uretimleri SET is_emri_no = %s, plan_kodu = %s WHERE is_emri_no IS NULL AND "
+                          "(plan_kodu = %s OR adaylar @> jsonb_build_array(jsonb_build_object('kod', %s::text)))",
+                          (sonuc["is_emri_no"], yeni_kod, yeni_kod, yeni_kod))      # seçilen yeni plan (iki aday varsa ikincisi de)
             for kid, alanlar in cikti.get("kontrol_guncelle") or []:
                 self._kontrol_guncelle(c, kid, alanlar)
             for cs in cikti.get("cipa_satirlari") or []:

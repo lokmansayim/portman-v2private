@@ -202,3 +202,122 @@ def oku(talep: dict, ayar: dict | None = None, hazir: dict | None = None) -> dic
     except ValidationError as e:
         s.update(hata=f"program şeması: {str(e)[:160]}", okunamayan=kalan)
     return s
+
+
+# ── son basamak: sınırlı LLM ile program yeniden önerisi (İE-14 r3, P2; koordinat yok) ─────────────────────────────────────
+YENIDEN_ARAC = "program_onerisi_kaydet"
+YENIDEN_ACIKLAMA = "Kodun yerleşim bulamadığı programın en az değişiklikli uygulanabilir önerisini kaydet (koordinatsız)."
+
+
+class YerlesimIpucu(BaseModel):
+    """Çözücü kalıbına süzgeç (koordinat değil)."""
+    yatak_on: Optional[int] = Field(None, ge=0, le=2, description="Ön (gündüz) bantta kaç yatak odası")
+    banyo_yeri: Optional[Literal["orta", "arka"]] = Field(None, description="banyo hol bandının ucunda mı, arka bantta mı")
+    mutfak_yeri: Optional[Literal["on", "arka"]] = Field(None, description="ayrı mutfak önde mi, arkada mı")
+
+
+class ProgramOnerisi(BaseModel):
+    program: PlanProgrami
+    ipucu: YerlesimIpucu = Field(default_factory=YerlesimIpucu)
+    gerekce: str = Field("", description="Kısa; bayiye gitmez")
+
+
+YENIDEN_PROMPT = """Sen PortatifEv'in tek kat çelik evleri için yerleşim danışmanısın. Kodun deterministik yerleşim çözücüsü bayinin oda programını
+kurallara uyan bir plana yerleştiremedi. Sen KOORDİNAT YAZMAZSIN, plan çizmezsin: yalnız programı en az değişiklikle uygulanabilir hâle
+getirirsin ve isteğe bağlı bir yerleşim ipucu verirsin; yerleşimi yine kod kurar ve denetler.
+
+Kurallar:
+- `yatak` ve `salon` değişmez (bayinin oda programı). Brüt alan istenenin ±%10'u içinde kalır.
+- Değiştirebileceklerin, en azından başlayarak: ayrı mutfağı açık mutfak yapmak, depoyu kaldırmak, ikinci banyoyu kaldırmak, verandanın yerini
+  ya da örtüsünü değiştirmek, alanı ±%10 içinde büyütmek.
+- Her değişiklik bayiye "sığdıramadım; şu değişti" diye yazılacak: gereksiz değişiklik yapma.
+- Örnekler bankadaki gerçek planların adsız özetidir; yol gösterir, kopyalanmaz.
+"""
+
+
+def ornek_ozetleri(n: int = 2, haric: tuple[str, ...] = ()) -> list[str]:
+    """Bankadaki gerçek planların ADSIZ özeti (Lokman 14.10, 5. madde): kod, model adı, mahal adı, gerekçe yok; yalnız işlev, alan, ölçü."""
+    from beyin.plan_uyarlama import kaynaklar
+    from beyin.plan_denetim import denetle
+    out = []
+    for i, k in enumerate(kaynaklar(haric)[:n]):
+        p = k["plan"]
+        d = denetle(p, {})
+        alan = (d.get("ozet") or {}).get("odalar_m2") or {}
+        islev = {m["ad"]: m["islev"] for m in p["mahaller"]}
+        say: dict[str, list[float]] = {}
+        for ad, a in alan.items():
+            say.setdefault(islev[ad], []).append(a)
+        ver = next((m for m in p["mahaller"] if m["islev"] == "veranda"), None)
+        oda = ", ".join(f"{i_.replace('_', ' ')} {' + '.join(f'{v:.1f}' for v in sorted(vs, reverse=True))} m²" for i_, vs in sorted(say.items()))
+        W, H = p["dis_olcu"]["en"], p["dis_olcu"]["boy"]
+        out.append(f"Örnek {chr(65 + i)}: {sum(1 for m in p['mahaller'] if m['islev'] == 'yatak_odasi')}+1, brüt {W * H / 1e4:.0f} m², "
+                   f"dış {W}×{H} cm; net odalar: {oda}; veranda: {'var (' + (ver.get('ortu') or 'cati') + ')' if ver else 'yok'}")
+    return out
+
+
+def _yeniden_metin(program: dict, nedenler: list[str], ornekler: list[str]) -> str:
+    satir = ["## Bayinin programı (koddan)", "```json\n" + json.dumps(program, ensure_ascii=False, separators=(",", ":")) + "\n```",
+             "\n## Çözücünün bulamama nedenleri"] + [f"- {numara.maskele(x)}" for x in nedenler[:8]]
+    if ornekler:
+        satir += ["\n## Bankadaki gerçek planlar (adsız özet)"] + [f"- {o}" for o in ornekler]
+    satir.append("\nEn az değişiklikli uygulanabilir programı program_onerisi_kaydet ile kaydet.")
+    return "\n".join(satir)
+
+
+def program_farki(eski: dict, yeni: dict) -> list[str]:
+    """Bayiye yazılacak değişiklikler (kodun hesabı; LLM'in sözü değil)."""
+    out = []
+    if (yeni.get("mutfak") or "acik") != (eski.get("mutfak") or "acik"):
+        out.append("mutfak salonla birlikte (açık)" if yeni.get("mutfak") == "acik" else "mutfak ayrı")
+    if int(yeni.get("banyo") or 1) != int(eski.get("banyo") or 1):
+        out.append(f"banyo {eski.get('banyo') or 1} → {yeni.get('banyo') or 1}")
+    if int(yeni.get("depo") or 0) != int(eski.get("depo") or 0):
+        out.append("depo çıkarıldı" if not yeni.get("depo") else "depo eklendi")
+    ev, yv = eski.get("veranda") or {}, yeni.get("veranda") or {}
+    for a, ad in (("istiyor", "veranda"), ("konum", "veranda yeri"), ("ortu", "veranda örtüsü")):
+        if ev.get(a) is not None and ev.get(a) != yv.get(a):
+            out.append(f"{ad}: {ev.get(a)} → {yv.get(a)}")
+    if eski.get("alan_m2") and yeni.get("alan_m2") and abs(float(eski["alan_m2"]) - float(yeni["alan_m2"])) >= 0.5:
+        out.append(f"alan {float(eski['alan_m2']):g} → {float(yeni['alan_m2']):g} m²")
+    if eski.get("cati_tipi") and yeni.get("cati_tipi") != eski.get("cati_tipi"):
+        out.append(f"çatı {eski['cati_tipi']} → {yeni.get('cati_tipi')}")
+    return out
+
+
+def yeniden(program: dict, nedenler: list[str], ayar: dict | None = None, hazir: dict | None = None, haric: tuple[str, ...] = ()) -> dict:
+    """Son basamak (tek çağrı): program + bulamama nedenleri + adsız örnekler → öneri. Kod denetler: yatak/salon değişmez, alan ±%10.
+    Dönüş: {program, ipucu, degisen[], cagri, girdi_token, cikti_token, hata, metin}. İstisna fırlatmaz."""
+    from beyin import llm
+    a = {**VARSAYILAN_AYAR, **(ayar or {})}
+    if hazir is not None:
+        a["backend"] = "manuel"
+    s = {"program": None, "ipucu": {}, "degisen": [], "cagri": 0, "girdi_token": 0, "cikti_token": 0, "hata": None}
+    metin = _yeniden_metin(program, nedenler, ornek_ozetleri(2, haric))
+    s["metin"] = metin
+    try:
+        cevap, meta = llm.arac_cagir(YENIDEN_PROMPT, [{"role": "user", "content": metin}], YENIDEN_ARAC, YENIDEN_ACIKLAMA,
+                                     ProgramOnerisi.model_json_schema(), backend=a["backend"], model=a.get("model"), effort=a.get("effort"),
+                                     max_tokens=int(a["max_tokens"]), hazir=hazir, timeout=int(a["timeout_s"]))
+    except (llm.LLMHatasi, ValueError) as e:
+        s["cagri"] = 1 if a["backend"] != "manuel" else 0
+        s["hata"] = numara.maskele(str(e))[:300]
+        return s
+    s["cagri"] = 1 if a["backend"] != "manuel" else 0
+    s["girdi_token"], s["cikti_token"] = meta.get("girdi_token") or 0, meta.get("cikti_token") or 0
+    try:
+        o = ProgramOnerisi.model_validate(cevap).model_dump()
+    except ValidationError as e:
+        s["hata"] = f"öneri şeması: {str(e)[:160]}"
+        return s
+    yeni = dict(o["program"])
+    yeni["yatak"], yeni["salon"] = program["yatak"], program.get("salon", 1)       # oda programı değişmez (kod karar verir)
+    if program.get("alan_m2"):
+        A0 = float(program["alan_m2"])
+        if not yeni.get("alan_m2") or abs(float(yeni["alan_m2"]) - A0) > 0.1 * A0:
+            yeni["alan_m2"] = A0
+    yeni["uygulanamayan"] = list(program.get("uygulanamayan") or [])
+    s["program"] = PlanProgrami.model_validate(yeni).model_dump()
+    s["ipucu"] = {k: v for k, v in (o.get("ipucu") or {}).items() if v is not None}
+    s["degisen"] = program_farki(program, s["program"])
+    return s

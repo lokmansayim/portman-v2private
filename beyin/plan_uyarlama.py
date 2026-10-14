@@ -477,7 +477,8 @@ def uyarla(program: dict, n: int = 2, haric: tuple[str, ...] = (), en_cok_deneti
         if d["gecerli"]:
             gorulen.add(a["kaynak"])
             gecen.append({"plan": a["plan"], "tanim": d["tanim"], "ozet": d["ozet"], "yol": "uyarlama", "kaynak": a["kaynak"],
-                          "islemler": a["islemler"], "puan": round(puan(a["plan"], d["ozet"], program) - TOPOLOJI_PAYI, 3)})
+                          "islemler": a["islemler"], "puan": round(puan(a["plan"], d["ozet"], program) - TOPOLOJI_PAYI, 3),
+                          "denetim": {"kalemler": d["kalemler"], "kosan": d["kosan"]}})
     gecen.sort(key=lambda g: g["puan"])
     return {"adaylar": gecen, "denetim": denetim, "sure_ms": int((time.time() - t0) * 1000)}
 

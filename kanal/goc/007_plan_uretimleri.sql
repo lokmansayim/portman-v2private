@@ -24,3 +24,12 @@ CREATE TABLE IF NOT EXISTS plan_uretimleri (
 );
 CREATE INDEX IF NOT EXISTS plan_uretimleri_zaman ON plan_uretimleri (olusturuldu);
 CREATE INDEX IF NOT EXISTS plan_uretimleri_kod ON plan_uretimleri (plan_kodu);
+
+-- İE-14 r3 (14.10.2026; 007 canlıya uygulanmadan, yalnız ekler): üretim yolu (uyarlama / çözücü / LLM programı), puan, süre, program,
+-- adaylar (her biri: kod, yol, puan, iç kaynak kodu, işlemler, doğrulama raporu) ve programdan değişenler (son basamak).
+ALTER TABLE plan_uretimleri ADD COLUMN IF NOT EXISTS yol       text;
+ALTER TABLE plan_uretimleri ADD COLUMN IF NOT EXISTS puan      real;
+ALTER TABLE plan_uretimleri ADD COLUMN IF NOT EXISTS sure_ms   int;
+ALTER TABLE plan_uretimleri ADD COLUMN IF NOT EXISTS program   jsonb;
+ALTER TABLE plan_uretimleri ADD COLUMN IF NOT EXISTS adaylar   jsonb NOT NULL DEFAULT '[]';
+ALTER TABLE plan_uretimleri ADD COLUMN IF NOT EXISTS degisen   jsonb NOT NULL DEFAULT '[]';

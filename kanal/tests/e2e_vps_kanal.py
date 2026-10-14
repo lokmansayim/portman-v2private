@@ -501,14 +501,15 @@ try:
     kod, body, _ = istek(app_pn, "GET", "/panel/", cerez=cerez)
     ok(kod == 200 and "Mühendis kontrolleri".encode() in body and "fiyat bekleniyor".encode() in body, "panel: mühendis kontrolleri tablosu ve Fiyat verildi düğmesi")
 
-    print("12) İE-14: '95 m² 3+1 tek kat çelik' (bankada 3+1 yok) → 'hazırlıyorum' → üretim (kayıtlı cevaplar, 2 deneme) → yeni plan + bankadan "
-          "en yakın ikisi tek görselde → '1. Yeni plan' → r01 gerçek genel motordan, tanım zarfta gömülü; plan_uretimleri kaydı")
+    print("12) İE-14 r3: '95 m² 3+1 tek kat çelik' (bankada 3+1 yok) → 'hazırlıyorum' → üretim (LLM'siz: program → uyarlama/çözücü) → iki "
+          "yeni plan + bankadan en yakını tek görselde → '1. Yeni plan' → r01 gerçek genel motordan, tanım zarfta gömülü; plan_uretimleri "
+          "kaydı ve doğrulama raporu")
     for kod12 in ("Ç8201", "KT01", "KT02", "KT03"):
         depo.aday_yaz(kod12, "gecerli", referans_model=kod12, muhendis_kabulu={"kim": "e2e", "tarih": "2026-10-14", "not": ""})
-    hazir12 = tmp / "plan_hazir.json"
-    hazir12.write_text(json.dumps([json.loads((ROOT / "testler" / "plan" / "ornekler" / f"{a}.json").read_text(encoding="utf-8"))
-                                   for a in ("gecersiz_3arti1_dar_odalar", "gecerli_3arti1_100")], ensure_ascii=False), encoding="utf-8")
+    hazir12 = tmp / "plan_hazir.json"                    # manuel arka uç: yapısal talepte LLM gerekmez; kayıt yalnız güvenlik için boş
+    hazir12.write_text(json.dumps({"uretim": {"program": None, "yeniden": []}}, ensure_ascii=False), encoding="utf-8")
     AY.yaz(VERI, "plan_uretimi", {"acik": True, "backend": "manuel", "hazir_dosya": str(hazir12)})
+    t12 = time.time()
     time.sleep(1.2)
     kod, c = webhook(yuk([metin(BAYI, "95 m² 3+1 tek kat çelik, kırma çatı", mid="wamid.E2EP1")]))
     hazir_ekle("wamid.E2EP1", {"niyet": "yeni_talep", "guven": "yuksek", "ozet": "95 m² 3+1 tek kat çelik, kırma çatı", "alan_m2": 95,
@@ -517,9 +518,11 @@ try:
     i12 = q("SELECT sonuc, cikarim FROM isler WHERE mesaj_id = 'wamid.E2EP1'")[0]
     s12 = q("SELECT id, adaylar FROM secenek_setleri ORDER BY olusturuldu DESC LIMIT 1")[0]
     yeni12 = s12["adaylar"][0]["kod"]
-    ok(i12["sonuc"]["eylem"] == "secenek" and yeni12.startswith("YENI-") and [a["kod"] for a in s12["adaylar"][1:]] == ["KT03", "KT02"]
-       and i12["cikarim"]["plan_uretimi"]["durum"] == "gecerli" and len(i12["cikarim"]["plan_uretimi"]["denemeler"]) == 2,
-       f"seçenek seti: yeni plan + KT03, KT02; üretim 2 denemede geçti, iş satırında ({i12['sonuc'].get('gerekce')})")
+    pu12a = i12["cikarim"]["plan_uretimi"]
+    ok(i12["sonuc"]["eylem"] == "secenek" and yeni12.startswith("YENI-") and s12["adaylar"][1]["kod"].startswith("YENI-")
+       and [a["kod"] for a in s12["adaylar"][2:]] == ["KT03"] and pu12a["durum"] == "gecerli" and len(pu12a["adaylar"]) == 2 and pu12a["cagri"] == 0,
+       f"seçenek seti: iki yeni plan + KT03; üretim LLM'siz ({pu12a.get('yol')}, {pu12a.get('sure_ms')} ms), iş satırında")
+    ok(time.time() - t12 < 180, f"K5 (ölçüm): talepten seçenek görseline {time.time() - t12:.0f} s (gerçek genel motorla iki kart)")
     k12 = q("SELECT kind, govde, satir FROM giden WHERE mesaj_id = 'wamid.E2EP1' ORDER BY sira")
     ok([x["kind"] for x in k12] == ["text", "interactive"] and "hazırlıyorum" in k12[0]["govde"] and Path(k12[1]["satir"]["file"]).is_file()
        and k12[1]["satir"]["interactive"]["action"]["buttons"][0]["reply"]["title"] == "1. Yeni plan", "önce 'hazırlıyorum', sonra görselli 3 düğmeli set")
@@ -536,9 +539,13 @@ try:
        f"r01 genel motordan geçti, tanım zarfta gömülü ({i12b['cizim'].get('sure_s')} s)")
     with fitz.open(r12["pdf_yolu"]) as d12:
         ok(len(d12) == 2 and "TASLAK" in [w[4] for w in d12[0].get_text("words")], "pafta PDF 2 sayfa, TASLAK")
-    pu12 = q("SELECT durum, plan_kodu, is_emri_no, cagri FROM plan_uretimleri")
+    pu12 = q("SELECT durum, plan_kodu, is_emri_no, cagri, yol, adaylar FROM plan_uretimleri")
     ok(len(pu12) == 1 and pu12[0]["plan_kodu"] == yeni12 and pu12[0]["is_emri_no"] == r12["is_emri_no"] and pu12[0]["cagri"] == 0,
-       "plan_uretimleri: üretim kaydı, r01'e bağlandı (manuel: ücretli çağrı 0)")
+       "plan_uretimleri: üretim kaydı, r01'e bağlandı (ücretli çağrı 0)")
+    dg12 = pu12[0]["adaylar"][0]["dogrulama"]
+    ok(dg12["kalemler"]["cizim"]["durum"] == "GECTI" and dg12["kalemler"]["geometri"]["durum"] == "GECTI"
+       and dg12["kalemler"]["yukleme_listesi"]["durum"] == "DOGRULANMADI" and dg12["kalemler"]["yapisal"]["durum"] == "YAPILMADI",
+       f"doğrulama raporu (gerçek motor): {dg12['ozet']}")
     say = gonder()
     ok(say.get("kabul_edildi") >= 2, "Meta: yeni planın bayi görseli + düğmeler ve PDF gitti")
 finally:

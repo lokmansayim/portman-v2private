@@ -380,14 +380,23 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
             pu = plan_uret(k.d["plan_istegi"]["talep"], pu_ayar)
             if ek_kaydet is not None:
                 ek_kaydet("plan_uretimi", pu)
-        kart = plan_karti(pu.get("tanim"), gelen, proje_koku) if pu.get("durum") == "gecerli" else None
-        karar = plan_sonucu(k, katalog, pu, kart)
-        sonuc["plan_uretimi"] = {a: pu.get(a) for a in ("durum", "cagri", "girdi_token", "cikti_token", "hata", "ornekler", "model")}
-        sonuc["plan_uretimi"]["deneme"] = len(pu.get("denemeler") or [])
-        sonuc["plan_uretimi"]["ihlaller"] = [d.get("ihlaller") for d in pu.get("denemeler") or []]
+        kartlar = []
+        if pu.get("durum") == "gecerli":                    # r3: en çok 2 yeni plan; her birinin kartı ve doğrulama raporu (bayiye gitmez)
+            for i, a in enumerate((pu.get("adaylar") or [pu])[:2]):
+                kart = plan_karti(a.get("tanim"), gelen, proje_koku, i + 1)
+                kartlar.append(kart)
+                a["dogrulama"] = plan_dogrulamasi(a, kart)
+        karar = plan_sonucu(k, katalog, pu, kartlar)
+        sonuc["plan_uretimi"] = {a: pu.get(a) for a in ("durum", "cagri", "girdi_token", "cikti_token", "hata", "model", "yol", "puan", "sure_ms")}
+        sonuc["plan_uretimi"]["adaylar"] = [{"yol": a.get("yol"), "puan": a.get("puan")} for a in pu.get("adaylar") or []]
+        sonuc["plan_uretimi"]["basamaklar"] = [d.get("basamak") for d in pu.get("denemeler") or []]
         from beyin import plan_uretici as PU
-        pu_kayit = {**PU.kayit({"cagri": 0, "girdi_token": 0, "cikti_token": 0, **pu}, plan_talep, "kanal"),        # göç 007 kaydı
-                    "plan_kodu": (k.d.get("uretilen_plan") or {}).get("kod") if karar.eylem == "secenek" else None}
+        kodlar = [u["kod"] for u in k.d.get("uretilen_planlar") or []] if karar.eylem == "secenek" else []
+        kayit = PU.kayit({"cagri": 0, "girdi_token": 0, "cikti_token": 0, **pu}, plan_talep, "kanal")
+        for x, a, kod_ in zip(kayit["adaylar"], pu.get("adaylar") or [], kodlar + [None] * 2):
+            x["kod"] = kod_
+            x["dogrulama"] = a.get("dogrulama")
+        pu_kayit = {**kayit, "plan_kodu": kodlar[0] if kodlar else None}                # göç 007 kaydı
     if etk is not None:
         sonuc["buton"] = etk["kimlik"]
     if karar.kullanilan_talep:      # D-01: bayi "yeni"/"değişiklik" diye cevap verdi; işlenen, bekletilen mesajın talebidir
@@ -588,15 +597,32 @@ def secenek_satirlari(gelen: dict, karar, katalog, metin: str, proje_koku: Path 
 
 
 def plan_uret(talep: dict, ayar: dict) -> dict:
-    """İE-14: üretici çağrısı (`beyin/plan_uretici.uret`; LLM, ücretli). Sonuç kayda yazılabilir biçimde (istisna fırlatmaz)."""
+    """İE-14 r3: üretici (`beyin/plan_uretici.uret`): program → bankadan uyarlama → çözücü → en son sınırlı LLM programı. LLM koordinat
+    yazmaz; çoğu talepte hiç çağrılmaz. Sonuç kayda yazılabilir biçimde (istisna fırlatmaz)."""
     from beyin import plan_uretici as PU
     try:
-        s = PU.uret(talep, ayar={a: ayar[a] for a in ("model", "effort", "en_cok_cagri", "timeout_s", "max_tokens", "backend") if a in ayar},
-                    hazir=_hazir(ayar))
+        h = _hazir(ayar)
+        s = PU.uret(talep, ayar={"acik": True, **{a: ayar[a] for a in ("model", "effort", "en_cok_cagri", "timeout_s", "max_tokens", "backend")
+                                                  if a in ayar}}, hazir=(h.get("uretim", h) if isinstance(h, dict) else None))
     except Exception as e:                                       # beklenmeyen: kayda hata yazılır, yeniden denenen iş çağırmaz
-        s = {"durum": "hata", "hata": maske_numaralar(f"{type(e).__name__}: {str(e)[:200]}"), "denemeler": [], "cagri": 0, "girdi_token": 0, "cikti_token": 0}
-    log("plan üretimi:", s.get("durum"), "deneme", len(s.get("denemeler") or []), "çağrı", s.get("cagri"))
+        s = {"durum": "hata", "hata": maske_numaralar(f"{type(e).__name__}: {str(e)[:200]}"), "adaylar": [], "denemeler": [], "cagri": 0,
+             "girdi_token": 0, "cikti_token": 0}
+    log("plan üretimi:", s.get("durum"), "yol", s.get("yol"), "aday", len(s.get("adaylar") or []), "çağrı", s.get("cagri"))
     return s
+
+
+def plan_dogrulamasi(aday: dict, kart: str | None) -> dict | None:
+    """İE-14 r3 (P1): üretilen planın çok durumlu doğrulama raporu; kartın klasörüne `dogrulama.json` (bayiye gitmez). İstisna fırlatmaz."""
+    try:
+        from beyin import plan_dogrulama as D
+        cikti = Path(kart).parent if kart else None
+        r = D.rapor(aday.get("denetim") or {}, aday.get("tanim"), cikti)
+        if cikti:
+            D.yaz(r, cikti / "dogrulama.json")
+        return r
+    except Exception as e:
+        log("doğrulama raporu yazılamadı:", maske_numaralar(f"{type(e).__name__}: {str(e)[:160]}"))
+        return None
 
 
 def llm_once_revizyon(k, talep, gelen: dict, etk, cikarim: dict | None, settings: dict, katalog, ek_kaydet) -> tuple[dict | None, dict | None]:
@@ -642,19 +668,22 @@ def llm_once_revizyon(k, talep, gelen: dict, etk, cikarim: dict | None, settings
 
 
 def _hazir(ayar: dict):
-    """manuel arka uç (yerel test; LLM çağrısı yok): kayıtlı cevap `hazir_dosya`dan."""
+    """manuel arka uç (yerel test; LLM çağrısı yok): kayıtlı cevap `hazir_dosya`dan. İE-14 r3: üretim ve yeni plan düzenlemesi aynı dosyada
+    `uretim` ({program, yeniden}) ve `duzenleme` (işlem listesi) anahtarlarıyla ayrılabilir."""
     return json.loads(Path(ayar["hazir_dosya"]).read_text(encoding="utf-8")) if ayar.get("backend") == "manuel" else None
 
 
 def plan_duzenle(plan: dict, metin: str, talep: dict, ayar: dict) -> dict:
-    """İE-14 PR-3: yeni planın revizyonu (`plan_uretici.duzenle`; LLM, ücretli). İstisna fırlatmaz."""
-    from beyin import plan_uretici as PU
+    """İE-14 r3: yeni planın revizyonu (`beyin/plan_islem.duzenle`): LLM isteği koordinatsız işlemlere çevirir (1 çağrı, ücretli), kod
+    uygular, denetçi karar verir. İstisna fırlatmaz."""
+    from beyin import plan_islem as PI
     try:
-        s = PU.duzenle(plan, metin, talep, ayar={a: ayar[a] for a in ("model", "effort", "en_cok_cagri", "timeout_s", "max_tokens", "backend")
-                                                                   if a in ayar}, hazir=_hazir(ayar))
+        h = _hazir(ayar)
+        s = PI.duzenle(plan, metin, talep, ayar={a: ayar[a] for a in ("model", "effort", "timeout_s", "max_tokens", "backend") if a in ayar},
+                       hazir=(h.get("duzenleme", h) if isinstance(h, dict) else None))
     except Exception as e:
         s = {"durum": "hata", "hata": maske_numaralar(f"{type(e).__name__}: {str(e)[:200]}"), "denemeler": [], "cagri": 0, "girdi_token": 0, "cikti_token": 0}
-    log("plan düzenleme:", s.get("durum"), "deneme", len(s.get("denemeler") or []), "çağrı", s.get("cagri"))
+    log("plan düzenleme:", s.get("durum"), "işlem", len(s.get("islemler") or []), "çağrı", s.get("cagri"))
     return s
 
 
@@ -678,26 +707,29 @@ def degisiklik_oku(son_y: dict, metin: str, katalog, ayar: dict) -> dict:
 
 
 def kart_son_yeri(k, proje_koku: Path | None) -> None:
-    """İE-14: yeni planın kartı hazırlık klasöründe çizilir; kalıcı akış `<ad>/r01`'i projects/'e taşır (`kalici._yerlestir`). Konuşmadaki
-    yol (sonraki set sunumları) taşınan yere çevrilir."""
-    u = k.d.get("uretilen_plan") or {}
-    g = u.get("gorsel")
-    if not (g and proje_koku and str(g).startswith(str(proje_koku))):
+    """İE-14: yeni planların kartları hazırlık klasöründe çizilir; kalıcı akış `<ad>/r01`'i projects/'e taşır (`kalici._yerlestir`). Konuşmadaki
+    yollar (sonraki set sunumları; r3: iki yeni plan) taşınan yere çevrilir."""
+    if not proje_koku:
         return
-    son = str(KANAL / "projects" / Path(g).relative_to(Path(proje_koku)))
-    u["gorsel"] = son
-    for a in (k.d.get("secenek_seti") or {}).get("adaylar") or []:
-        if a.get("gorsel") == g:
-            a["gorsel"] = son
+    planlar = [k.d.get("uretilen_plan") or {}] + list(k.d.get("uretilen_planlar") or [])
+    for u in planlar:
+        g = u.get("gorsel")
+        if not (g and str(g).startswith(str(proje_koku))):
+            continue
+        son = str(KANAL / "projects" / Path(g).relative_to(Path(proje_koku)))
+        for x in planlar + list((k.d.get("secenek_seti") or {}).get("adaylar") or []):
+            if x.get("gorsel") == g:
+                x["gorsel"] = son
 
 
-def plan_karti(tanim: dict | None, gelen: dict, proje_koku: Path | None) -> str | None:
-    """İE-14: yeni planın seçenek kartı (`<kod>_bayi_gorsel.png`, perspektifsiz; genel motor). Üretilemezse None (set görselsiz gider)."""
+def plan_karti(tanim: dict | None, gelen: dict, proje_koku: Path | None, sira: int = 1) -> str | None:
+    """İE-14: yeni planın seçenek kartı (`<kod>_bayi_gorsel.png`, perspektifsiz; genel motor). Üretilemezse None (set görselsiz gider).
+    r3: ikinci yeni planın klasörü `-2` ekiyle."""
     if not tanim:
         return None
     try:
         from motor.genel import uret as U
-        kok = (Path(proje_koku) if proje_koku else KANAL / "projects") / f"YENI-{satir_id(gelen['id'], 0)[4:16]}"
+        kok = (Path(proje_koku) if proje_koku else KANAL / "projects") / (f"YENI-{satir_id(gelen['id'], 0)[4:16]}" + ("" if sira == 1 else f"-{sira}"))
         kok.mkdir(parents=True, exist_ok=True)
         yol = kok / "tanim.json"
         yol.write_text(json.dumps(tanim, ensure_ascii=False), encoding="utf-8")
