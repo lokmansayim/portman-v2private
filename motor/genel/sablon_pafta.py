@@ -154,21 +154,48 @@ class Sayfa:
             self.yazi(mx + (-7.4 if taraf == "sol" else 7.4) + kaydir, my, metin, 10.7, ARIAL, ha="center", rot=90)
 
 
-def _olcu_yazisi_centige_deger(x0: float, y0: float, x1: float, y1: float, metin: str, taraf: str) -> bool:
-    """`Sayfa.olcu`'nun yazısı (kaydırmasız) uçlardaki eğik çentiğe değiyor mu (şablon koordinatı, pt). Yazı parçaya sığsa da çentiğin
-    köşesine binebilir (BK-09: G1'den sonra KT-03'te "35"); değiyorsa dar parça gibi içeri sıraya alınır."""
+def _olcu_yazi_kutusu(x0: float, y0: float, x1: float, y1: float, metin: str, taraf: str, kaydir: float = 0.0) -> SPolygon:
+    """`Sayfa.olcu`'nun yazısının yaklaşık mürekkep kutusu (şablon koordinatı, pt; yükseklik TextPath'ten)."""
     w = yazi_eni(metin, 10.7, ARIAL)
     e = TextPath((0, 0), metin, size=10.7, prop=ARIAL).get_extents()
     h = e.y1 - min(e.y0, 0.0)
     mx, my = (x0 + x1) / 2, (y0 + y1) / 2
     if y0 == y1:
-        cx, cy, kw, kh = mx, my + (-7.2 if taraf == "ust" else 7.6), w, h
+        cx, cy, kw, kh = mx, my + (-7.2 if taraf == "ust" else 7.6) + kaydir, w, h
     else:
-        cx, cy, kw, kh = mx + (-7.4 if taraf == "sol" else 7.4), my, h, w
-    kutu = SPolygon([(cx - kw / 2, cy - kh / 2), (cx + kw / 2, cy - kh / 2), (cx + kw / 2, cy + kh / 2), (cx - kw / 2, cy + kh / 2)])
+        cx, cy, kw, kh = mx + (-7.4 if taraf == "sol" else 7.4) + kaydir, my, h, w
+    return SPolygon([(cx - kw / 2, cy - kh / 2), (cx + kw / 2, cy - kh / 2), (cx + kw / 2, cy + kh / 2), (cx - kw / 2, cy + kh / 2)])
+
+
+def _centik(x: float, y: float):
     from shapely.geometry import LineString
-    centik = unary_union([LineString([(x - 4.2, y_ + 4.2), (x + 4.2, y_ - 4.2)]).buffer(0.78 + 0.5) for x, y_ in ((x0, y0), (x1, y1))])
-    return kutu.intersects(centik)
+    return LineString([(x - 4.2, y + 4.2), (x + 4.2, y - 4.2)]).buffer(0.78 + 0.5)
+
+
+def _dar_sayilari_yerlestir(parcalar: list[tuple], metinler: list[str], dar: list[bool], kaydir: list[float], taraf: str,
+                            genel_cizgi: tuple, genel_metin: str, plan_kutu, adaylar: tuple[float, ...]) -> list[float]:
+    """BK-09: dönüşümlü sırada çizgide kalan (kaydırmasız) dar sayı uçtaki eğik çentiğe değiyorsa (G1'den sonra KT-03 sağ zincirde "35")
+    `adaylar` sırayla denenir (önce zincirin dış yanı, sonra ikinci iç sıra): kutusu çentiklere, genel ölçünün çizgisine ve sayısına, plan
+    alanına ve öteki sayılara değmeyen ilk yer seçilir; hiçbiri boş değilse sayı ilk adaya gider. Başka sayıya dokunulmaz."""
+    from shapely.geometry import LineString
+    kaydir = list(kaydir)
+    uclar = [(p[0], p[1]) for p in parcalar] + [(p[2], p[3]) for p in parcalar] + [genel_cizgi[:2], genel_cizgi[2:]]
+    centik = unary_union([_centik(x, y) for x, y in uclar])
+    kutular = [_olcu_yazi_kutusu(*p, m, taraf, k) for p, m, k in zip(parcalar, metinler, kaydir)]
+    sabit = unary_union([centik, plan_kutu, _olcu_yazi_kutusu(*genel_cizgi, genel_metin, taraf),
+                         LineString([genel_cizgi[:2], genel_cizgi[2:]]).buffer(0.36 + 0.5)])
+    for i in range(len(parcalar)):
+        if not dar[i] or kaydir[i] != 0 or not kutular[i].intersects(centik):
+            continue
+        engel = unary_union([sabit] + [k for j, k in enumerate(kutular) if j != i])
+        secilen = adaylar[0]
+        for aday in adaylar:
+            if not _olcu_yazi_kutusu(*parcalar[i], metinler[i], taraf, aday).intersects(engel):
+                secilen = aday
+                break
+        kaydir[i] = secilen
+        kutular[i] = _olcu_yazi_kutusu(*parcalar[i], metinler[i], taraf, secilen)
+    return kaydir
 
 
 def _satirlara(v: str, pt: float, gen: float) -> list[str]:
@@ -533,6 +560,7 @@ def plan_ciz(sf: Sayfa, y: dict, t: dict, px0: float, py0: float, s: float) -> t
     ic_, dis_ = 16.0, 32.0
     ek = {"arka": 0.0, "sol": 0.0, "on": 8.0, "sag": 8.0}
     kayit = {}; notlar: list[dict] = []
+    plan_kutu = SPolygon([(X(bx0), Y(by1)), (X(bx1), Y(by1)), (X(bx1), Y(by0)), (X(bx0), Y(by0))])   # zincir sayıları buraya girmez
     _deger = (sablon_kurallari().get("zincir_en_kisa_parca_cm") or {}).get("deger")
     en_kisa = 15.0 if _deger is None else float(_deger)       # anahtar yoksa 15; 0 verilirse birleştirme kapanır
     for ad, yon in (("arka", "x"), ("on", "x"), ("sol", "y"), ("sag", "y")):
@@ -549,35 +577,31 @@ def plan_ciz(sf: Sayfa, y: dict, t: dict, px0: float, py0: float, s: float) -> t
         kaydir = []; son = 0
         for i, d in enumerate(dar):
             son = (son + 1) if (d and i and dar[i - 1]) else (1 if d else 0)
-            k_ = (son % 2) if d else 0
-            if d and k_ == 0:                                    # BK-09: çizgide kalan dar sayı uçtaki çentiğe değiyorsa ikinci iç sıraya
-                (a, b), v = (nk[i], nk[i + 1]), parca[i]         # (G1'den sonra KT-03 sağ zincirde "35")
-                if (_olcu_yazisi_centige_deger(X(a), 0.0, X(b), 0.0, str(v), "ust") if yon == "x"
-                        else _olcu_yazisi_centige_deger(0.0, Y(b), 0.0, Y(a), str(v), "sol")):
-                    k_ = 2
-            kaydir.append(k_)
+            kaydir.append((son % 2) if d else 0)
         # şablon koordinatında (y aşağı) sayı normalde: on → çizginin üstünde (içeri), arka → üstünde (dışarı), sol → solunda (dışarı),
         # sag → solunda (içeri). İçeri sıra: on −9.5, sag −9.5 (aynı yönde bir sıra daha), arka +14.4, sol +14.8 (çizginin öbür yanına)
         ic_kaydir = {"on": -9.5, "sag": -9.5, "arka": 14.4, "sol": 14.8}[ad]
+        dis_kaydir = {"on": 14.8, "sag": 14.8, "arka": -9.5, "sol": -9.5}[ad]     # BK-09: çizginin dış yanı / bir sıra daha dışarı
         kaydir = [ic_kaydir * k for k in kaydir]
         if yon == "x":
             yy = Y(by1) - ic_ if ad == "arka" else Y(by0) + ic_ + ek[ad]
             yg = Y(by1) - dis_ if ad == "arka" else Y(by0) + dis_ + ek[ad]
-            if len(nk) > 2:
-                for (a, b), v, k_ in zip(zip(nk, nk[1:]), parca, kaydir):
-                    sf.olcu(X(a), yy, X(b), yy, str(v), "ust", kaydir=k_)
-            else:
-                yg = yy
-            sf.olcu(X(bx0), yg, X(bx1), yg, str(genel), "ust")
+            parcalar = [(X(a), yy, X(b), yy) for a, b in zip(nk, nk[1:])]
+            taraf = "ust"
         else:
             xx = X(bx0) - ic_ if ad == "sol" else X(bx1) + ic_ + ek[ad]
             xg = X(bx0) - dis_ if ad == "sol" else X(bx1) + dis_ + ek[ad]
-            if len(nk) > 2:
-                for (a, b), v, k_ in zip(zip(nk, nk[1:]), parca, kaydir):
-                    sf.olcu(xx, Y(b), xx, Y(a), str(v), "sol", kaydir=k_)
-            else:
-                xg = xx
-            sf.olcu(xg, Y(by1), xg, Y(by0), str(genel), "sol")
+            parcalar = [(xx, Y(b), xx, Y(a)) for a, b in zip(nk, nk[1:])]
+            taraf = "sol"
+        if len(nk) > 2:
+            genel_cizgi = (X(bx0), yg, X(bx1), yg) if yon == "x" else (xg, Y(by1), xg, Y(by0))
+            kaydir = _dar_sayilari_yerlestir(parcalar, [str(v) for v in parca], dar, kaydir, taraf, genel_cizgi, str(genel), plan_kutu,
+                                             (dis_kaydir, ic_kaydir * 2))
+            for p, v, k_ in zip(parcalar, parca, kaydir):
+                sf.olcu(*p, str(v), taraf, kaydir=k_)
+        else:
+            genel_cizgi = (X(bx0), yy, X(bx1), yy) if yon == "x" else (xx, Y(by1), xx, Y(by0))
+        sf.olcu(*genel_cizgi, str(genel), taraf)
     # BK-09 M5: kapı açılım yayını kesen mahal etiketi (KT-02 "BANYO") oda içinde kaydırılır; kayda yeni yeri yazılır (cm)
     for gi, (dx, dy) in ciz_genel.etiket_yaydan_kacir(sf.fig, sf.ax, [(g[1], g[2]) for g in gruplar], adim=2.0).items():
         ad = gruplar[gi][0]

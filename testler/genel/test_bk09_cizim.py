@@ -66,7 +66,7 @@ def test_80_karkasta_zincir_degismez(kod):
 
 
 # ───────────────────────── BK-09 M7: KT başlığında m² koddan ─────────────────────────
-@pytest.mark.parametrize("kod, m2", [("KT02", "92 m²"), ("KT03", "94 m²")])
+@pytest.mark.parametrize("kod, m2", [("KT01", "99 m²"), ("KT02", "92 m²"), ("KT03", "94 m²")])
 def test_kt_basliginda_m2_koddan(kod, m2):
     from motor.genel import cati_genel, girdi_genel, kural
     t = tanim(kod); kur = kural.oku()
@@ -81,3 +81,39 @@ def test_katalog_basligi_aynen(kod):
     from motor.genel import girdi_genel
     t = tanim(kod)
     assert girdi_genel.baslik_adi(t, 123.4) == f"{t['kod']} · {t['ad']}"
+
+
+# ───────────────────────── geometri hakemi (14.10): zincir sayısı plan alanına girmez ─────────────────────────
+@pytest.mark.parametrize("kod", ["C8201", "C8801", "C8801K", "C8801L", "KT01", "KT02", "KT03"])
+def test_pafta_zincir_sayisi_plan_alanina_girmez(kod, tmp_path):
+    """Bayi paftasında plan ölçü zincirinin sayıları plan alanına (genel ölçülerin sınırladığı dikdörtgen) girmez; çentiğe değen dar sayı
+    plan çizgisinin üstüne değil zincirin dış yanına alınır (KT-03 sağ zincir "35": ikinci iç sırada sundurmanın açık kenarına biniyordu)."""
+    from shapely.geometry import box
+    from motor.genel import sablon_pafta as SP, uret
+    cagri, planda = [], [False]
+    asil_olcu, asil_plan = SP.Sayfa.olcu, SP.plan_ciz
+
+    def olcu(self, x0, y0, x1, y1, metin, taraf, kaydir=0.0):
+        if planda[0]:
+            cagri.append((x0, y0, x1, y1, metin, taraf, kaydir))
+        return asil_olcu(self, x0, y0, x1, y1, metin, taraf, kaydir=kaydir)
+
+    def plan_ciz(*a, **k):
+        planda[0] = True
+        try:
+            return asil_plan(*a, **k)
+        finally:
+            planda[0] = False
+
+    SP.Sayfa.olcu, SP.plan_ciz = olcu, plan_ciz
+    try:
+        m = uret.uret(KOK / "modeller" / f"{kod}.json", tmp_path, is_emri_no="PM-TEST-20261014-1", revizyon=1,
+                      set_yolu=KOK / "kurallar" / "liste" / "setler" / "0.19.json", yontem="panel", perspektif=False, bayi=True, bilgi={})
+    finally:
+        SP.Sayfa.olcu, SP.plan_ciz = asil_olcu, asil_plan
+    assert m["passed"] and cagri
+    gx = max((c for c in cagri if c[1] == c[3]), key=lambda c: abs(c[2] - c[0]))     # genel ölçüler: en uzun yatay ve düşey
+    gy = max((c for c in cagri if c[0] == c[2]), key=lambda c: abs(c[3] - c[1]))
+    alan = box(min(gx[0], gx[2]), min(gy[1], gy[3]), max(gx[0], gx[2]), max(gy[1], gy[3]))
+    giren = [(c[4], round(c[6], 1)) for c in cagri if alan.intersection(SP._olcu_yazi_kutusu(*c)).area > 1.0]
+    assert giren == [], giren

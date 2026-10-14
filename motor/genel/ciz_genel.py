@@ -89,7 +89,8 @@ def dis_hat(y: dict):
 
 def zincir_esigi(y: dict) -> float:
     """İç duvarın cepheye "ulaştığı" sayılan en büyük uzaklık (cm): en az 12,5; dış kaplama + en kalın dış duvar + 1 cm (BK-09 G1).
-    80'lik karkasta iç duvar ucu dış çizgiden 9,2 cm (eşik 12,5 kalır), 140'lıkta 15,2 cm (eşik 16,25)."""
+    80'lik karkasta iç duvar ucu dış çizgiden 9,2 cm (eşik 12,5 kalır), 140'lıkta 15,2 cm (1,25 kaplamayla eşik 16,25; KT-03'te 3 cm
+    kaplamayla 18). Eşik yapı için tektir (en kalın dış duvar): 80 ve 140 karışık modelde yeniden ölçülür (D-16 › Yeniden açılır)."""
     kd = y["tanim"]["yuz_kaplamalari"]["dis"]["kalinlik"]
     dis = max((d["kalinlik"] for d in y["duvarlar"] if d["sinif"] == "dis"), default=0.0)
     return max(12.5, kd + dis + 1.0)
@@ -138,7 +139,7 @@ def zincirler(y: dict) -> dict:
     return cik
 
 
-def etiket_yaydan_kacir(fig, ax, gruplar: list[tuple[list, object]], adim: float, en_cok: int = 12) -> dict[int, tuple[float, float]]:
+def etiket_yaydan_kacir(fig, ax, gruplar: list[tuple[list, object]], adim: float, en_cok: int = 12, bosluk_pt: float = 2.0) -> dict[int, tuple[float, float]]:
     """BK-09 M5: kapı açılım yayını (`gid` "kapi_yay") kesen mahal etiketi (ad + m² yazıları birlikte) oda içinde kaydırılır.
     gruplar: [(yazılar, odanın veri koordinatındaki çokgeni)]. Yalnız yayı kesen grup taşınır; aday kaydırmalar `adim` aralıklı ızgarada,
     uzaklık sırasıyla (eşitlikte sabit sıra): yazıların mürekkebi yaya değmez, odadan taşmaz, eksendeki öteki yazılara binmez. Uygun yer
@@ -153,6 +154,7 @@ def etiket_yaydan_kacir(fig, ax, gruplar: list[tuple[list, object]], adim: float
     if not yaylar:
         return {}
     yay = _birlesim(yaylar)
+    yay_pay = yay.buffer(bosluk_pt * fig.dpi / 72.0)          # yeni yer yaydan en az bu kadar uzak (harf yaya yapışmasın)
     tasinan = {}
     for gi, (yazilar, oda) in enumerate(gruplar):
         def murekkep():
@@ -170,7 +172,7 @@ def etiket_yaydan_kacir(fig, ax, gruplar: list[tuple[list, object]], adim: float
             for t, (x, y_) in zip(yazilar, bas):
                 t.set_position((x + dx, y_ + dy))
             mm = murekkep()
-            if all(oda_px.contains(m) and YC._gercek(m.intersection(yay), YC.PAY_PX) == 0 and YC._gercek(m.intersection(obur), YC.PAY_PX) == 0
+            if all(oda_px.contains(m) and YC._gercek(m.intersection(yay_pay), YC.PAY_PX) == 0 and YC._gercek(m.intersection(obur), YC.PAY_PX) == 0
                    for m in mm):
                 tasinan[gi] = (dx, dy)
                 break
