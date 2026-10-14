@@ -80,7 +80,8 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 |---|---|---|---|
 | D | D-01–D-11 | bu depo (`main`); D-10 ve D-11 İE-08'in | yazıldı |
 | D | D-12–D-15 | prefabrik hattının dört kararı; dallarda (`ie-10-prefabrik-referanslari`, `ie-11-*`, `ie-12-prefabrik-bayi-paftasi`) D-10–D-13 adıyla duruyor: ayrı pano motoru (100 / 60, P6001 çapa), kişisel veri esnetme, pano yüksekliği 250 / 280 / 300, kapı / pencere yerleşimi | ayrıldı; birleşmeden önce o dallarda bu numaralara taşınır (D-10/D-11 çakışması, İE-08 › 13 Ekim kararı) |
-| D | **D-16** | — | **sıradaki boş** |
+| D | D-16 | BK-09 PR-2: çizim düzeltmeleri (KT-02 kapı yayı, Ç8801-L 2. sayfa TASLAK, KT başlığında m², G1) ve referansın yeniden dondurulması | ayrıldı (BK-09 planı, 14.10) |
+| D | **D-17** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model bankası ve yeni model üretimi; P6001 güncellemesi | ayrıldı (pilottan sonra) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | dallarda |
@@ -88,7 +89,8 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | İE | — | `ie-11-pr2-kor-test` dalındaki onaysız İE-13 / İE-14 taslak planları | numarasız; planlanınca bu defterden numara alır |
 | İE | **İE-14** | — | **sıradaki boş** |
 | BK | BK-01–BK-08 | bu depo; BK-08 8a sonrası temizlik (`bk-08-8a-temizlik`) | yazıldı |
-| BK | **BK-09** | — | **sıradaki boş** |
+| BK | BK-09 | metin ve çizim düzeltmeleri, G1 (`bk-09-metin-cizim`, `bk-09-cizim-g1`) | alındı (14.10) |
+| BK | **BK-10** | — | **sıradaki boş** |
 
 ## 27 Eylülde Lokman'ın verdiği kararlar
 
