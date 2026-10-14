@@ -222,11 +222,13 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
         return _bitir(k, Karar(eylem="yonlendir", gerekce="kayıtsız numara",
                                 mesaj="Bu hat PortatifEv'in kayıtlı bayilerine hizmet verir. Kayıt ve bilgi için lütfen Lokman Bey ile iletişime geçin."))
     ad = bayi.get("ad", "")
+    # İE-08 8b M5 (D-06): selamda önce kartın hitabı; ad numaraya düşmüşse (kanal gelen_bayisi) numara yazılmaz
+    hitap = str(bayi.get("hitap") or "").strip() or ("" if (not ad or str(ad) == str(bayi.get("numara") or "") or str(ad).isdigit()) else str(ad))
 
     # 1) niyete göre
     if t.niyet == "selam":
         return _bitir(k, Karar(eylem="cevapla", gerekce="selam",
-                                mesaj=f"Merhaba {ad}. Hangi model ya da ölçü için ön onay planı hazırlayalım? Örnek: \"P6001 aynalı\" veya \"7x4 m, 2+1, ön verandalı\"."))
+                                mesaj=f"Merhaba{(' ' + hitap) if hitap else ''}. Hangi model ya da ölçü için ön onay planı hazırlayalım? Örnek: \"P6001 aynalı\" veya \"7x4 m, 2+1, ön verandalı\"."))
     if t.niyet == "soru":
         ek = " Açık bir plan talebiniz devam ediyor; ölçü/model bilgisini yazınca planı hazırlarım." if k.d["asama"] == "topluyor" else ""
         return _bitir(k, Karar(eylem="cevapla", gerekce="genel soru",

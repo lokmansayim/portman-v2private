@@ -728,8 +728,8 @@ class Depo:
     def son_gelen_zamani(self, numara) -> float | None:
         """Numaradan gelen son mesajın WhatsApp zamanı (epoch): Patron bildirimlerinde 24 saat penceresi için."""
         with self.baglan() as c:
-            r = c.execute("SELECT extract(epoch FROM max(wa_zamani))::float8 AS t FROM mesajlar WHERE gonderen = %s AND wa_zamani <= now()",
-                          (str(numara),)).fetchone()
+            r = c.execute("SELECT extract(epoch FROM max(wa_zamani))::float8 AS t FROM mesajlar WHERE gonderen = %s AND wa_zamani <= now() "
+                          "AND tur <> %s", (str(numara), self.ILK_TEMAS_TURU)).fetchone()     # 8b: panelin başlangıç kaydı pencere açmaz
         return float(r["t"]) if r and r["t"] is not None else None
 
     def giden_durum_satiri(self, wamid: str, opaque: str | None) -> dict | None:
@@ -809,7 +809,7 @@ class Depo:
                 "SELECT * FROM ("
                 " SELECT 'gelen' AS yon, id, tur AS kind, metin AS govde, extract(epoch FROM wa_zamani)::float8 AS zaman, NULL::text AS durum, "
                 "        NULL::text AS teslim, sahiplenildi, ham->>'reply_id' AS reply_id, NULL::text AS dosya_adi, NULL::text AS kaynak, NULL::text AS hata "
-                "        FROM mesajlar WHERE gonderen = %s "
+                "        FROM mesajlar WHERE gonderen = %s AND tur <> 'panel_ilk_temas' "
                 " UNION ALL "
                 " SELECT 'giden', id, kind, govde, extract(epoch FROM olusturuldu)::float8, durum, teslim_durumu, true, NULL, (satir->>'filename'), kaynak, hata "
                 "        FROM giden WHERE alici = %s OR alici_cozuldu = %s"
@@ -822,7 +822,8 @@ class Depo:
         """Numaranın son gelen mesajı (ham) ve iş kimliği: panel satırının ebeveyni. Hiç mesaj yoksa None."""
         with self.baglan() as c:
             return c.execute("SELECT m.id, m.ham, j.id AS is_id, extract(epoch FROM m.wa_zamani)::float8 AS zaman FROM mesajlar m "
-                             "JOIN isler j ON j.mesaj_id = m.id WHERE m.gonderen = %s ORDER BY m.wa_zamani DESC, j.id DESC LIMIT 1", (str(numara),)).fetchone()
+                             "JOIN isler j ON j.mesaj_id = m.id WHERE m.gonderen = %s AND m.tur <> %s ORDER BY m.wa_zamani DESC, j.id DESC LIMIT 1",
+                             (str(numara), self.ILK_TEMAS_TURU)).fetchone()
 
     def panel_giden_ekle(self, numara: str, satir_uret) -> str:
         """Panelden yazılan satırı (metin, PDF, şablon) bayinin SON gelen mesajına ve onun işine bağlı olarak yazar; giden.kaynak = 'panel'.
@@ -830,7 +831,7 @@ class Depo:
         mesajından ölçülür (kanal/gonderici.py). Hiç mesaj yoksa ValueError('gelen_yok')."""
         with self.baglan() as c, c.transaction():
             r = c.execute("SELECT m.id, m.ham, j.id AS is_id FROM mesajlar m JOIN isler j ON j.mesaj_id = m.id WHERE m.gonderen = %s "
-                          "ORDER BY m.wa_zamani DESC, j.id DESC LIMIT 1 FOR UPDATE OF m", (str(numara),)).fetchone()
+                          "AND m.tur <> %s ORDER BY m.wa_zamani DESC, j.id DESC LIMIT 1 FOR UPDATE OF m", (str(numara), self.ILK_TEMAS_TURU)).fetchone()
             if r is None:
                 raise ValueError("gelen_yok")
             n = c.execute("SELECT greatest(coalesce(max(sira), 0) + 1, %s) AS n FROM giden WHERE mesaj_id = %s", (self.PANEL_SIRA_BASI, r["id"])).fetchone()["n"]
@@ -839,6 +840,28 @@ class Depo:
                       "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'panel')",
                       (s["id"], r["is_id"], r["id"], int(n), str(numara), s.get("tur") or "cevap", s.get("kind") or "text", s.get("body") or "",
                        s.get("file"), s.get("sha256"), Jsonb(s)))
+            return s["id"]
+
+    ILK_TEMAS_TURU = "panel_ilk_temas"         # İE-08 8b M4: panelin hiç yazmamış karta açtığı başlangıç kaydı (gerçek gelen mesaj değil)
+    ILK_TEMAS_KAYNAGI = "panel ilk temas"      # kanal/gonderici.py ILK_TEMAS_KAYNAGI ile aynı (testle denetlenir)
+
+    def ilk_temas_ekle(self, numara: str, satir_uret) -> str:
+        """İE-08 8b M4 (İE-07 bulgusu b): kartın gelen mesajı yokken panelden şablon (karşılama, bilgi hazır). Satır gerçek bir gelen
+        mesaja bağlanamadığı için bir başlangıç kaydı açılır: mesajlar.tur 'panel_ilk_temas', kaynak 'panel', iş 'bitti'. Bu kayıt pencere
+        açmaz (son_gelen_zamani saymaz), panelin metin/PDF çapası olmaz; gönderici ona bağlı yalnız panel şablonunu gönderir."""
+        import uuid
+        numara = str(numara); mid = "panel.ilk." + uuid.uuid4().hex[:20]
+        ham = {"id": mid, "sender": numara, "type": self.ILK_TEMAS_TURU, "text": "", "timestamp": int(time.time()), "source": self.ILK_TEMAS_KAYNAGI,
+               "role": "bayi"}
+        with self.baglan() as c, c.transaction():
+            c.execute("INSERT INTO mesajlar (id, gonderen, tur, metin, wa_zamani, ham, kaynak, sahiplenildi) VALUES (%s, %s, %s, '', now(), %s, 'panel', true)",
+                      (mid, numara, self.ILK_TEMAS_TURU, Jsonb(ham)))
+            j = c.execute("INSERT INTO isler (mesaj_id, gonderen, durum, sonuc, basladi, bitti) VALUES (%s, %s, 'bitti', %s, now(), now()) RETURNING id",
+                          (mid, numara, Jsonb({"eylem": "ilk_temas", "gerekce": "panelden şablon"}))).fetchone()
+            n = self.PANEL_SIRA_BASI
+            s = dict(satir_uret(ham, n)); s.update(kaynak="panel", id=satir_id(mid, n), seq=n, inbound_id=mid)
+            c.execute("INSERT INTO giden (id, is_id, mesaj_id, sira, alici, tur, kind, govde, satir, kaynak) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 'panel')",
+                      (s["id"], j["id"], mid, n, numara, s.get("tur") or "bildirim", s.get("kind") or "template", s.get("body") or "", Jsonb(s)))
             return s["id"]
 
     def son_is_emri_no(self, numara: str) -> str | None:
