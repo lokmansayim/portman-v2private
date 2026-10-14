@@ -18,7 +18,7 @@ sys.path.insert(0, str(KOK))
 from beyin.plan_denetim import denetle, program_coz  # noqa: E402
 from beyin.plan_sema import tanimdan  # noqa: E402
 from motor.genel import yapi as Y  # noqa: E402
-from motor.genel.plan_derle import PlanHatasi, cati_uret, derle  # noqa: E402
+from motor.genel.plan_derle import PlanHatasi, derle  # noqa: E402
 
 ORNEK = KOK / "testler" / "plan" / "ornekler"
 SET = KOK / "kurallar" / "liste" / "setler" / "0.19.json"
@@ -75,20 +75,6 @@ def test_kapi_yaylari_cakismaz():
     for ad in (GECERLI, KOSE):
         y = kapi_yaylari(derle(ornek(ad)))
         assert all(y[i][1].intersection(y[j][1]).area <= 25 for i in range(len(y)) for j in range(i + 1, len(y)))
-
-
-@pytest.mark.parametrize("tip,mahya,R,n_duz,n_kal", [("besik", "x", (0, 0, 1200, 800), 2, 2), ("besik", "y", (0, 0, 1200, 800), 2, 2),
-                                                      ("kirma", "x", (0, 0, 1200, 800), 4, 0), ("kirma", "y", (0, 0, 800, 1200), 4, 0)])
-def test_cati_uretici_dikdortgeni_tam_orter(tip, mahya, R, n_duz, n_kal):
-    from shapely.geometry import Polygon
-    from motor.genel import cati_genel
-    c = cati_uret(R, tip, mahya, None)
-    assert len(c["duzlemler"]) == n_duz and len(c["kalkanlar"]) == n_kal
-    assert all(Polygon(d["plan"]).is_valid for d in c["duzlemler"])
-    toplam = sum(Polygon(d["plan"]).area for d in c["duzlemler"])
-    assert abs(toplam - (R[2] + 60) * (R[3] + 60)) < 1
-    cati_genel.cati_kur(c)
-    assert all(d["egim"] == 0.33 and d["sacak_kotu"] == 280 for d in c["duzlemler"])
 
 
 def _bozuk(ad, degis):

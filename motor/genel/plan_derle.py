@@ -15,7 +15,7 @@ Kurallar (Ç8801 tanım üretecinin formülleri, `deneme/2026-10-10_c8801/tanim/
   İç kapı odaya açılır (öncelik banyo, yatak odası, mutfak, depo, salon, hol); konum iki uç ve orta arasından, yayı başka kapının
   yayına (15 cm payla) binmeyen ilki.
 - Pencere: mahalin cephe parçasında eşit aralıkla (aynı parçadaki dış kapıyla birlikte), üst kot 200 (kat 270 − lento 70).
-- Çatı: saçak 30, topuk 10, saçak kotu 280, eğim %33 (verilmezse), panel 8; beşik 2 düzlem + 2 kalkan, kırma 4 düzlem.
+- Çatı: ayrı parça, `cati_uretici.uret` (kapalı ayak izi ya da çatı altındaki verandayla bütün dikdörtgen; kurallar/cizim/cati_uretici.json).
 - Veranda kolonu 30 × 8 (KT-02), boştaki köşede ve açık kenarlarda en çok 400 cm arayla; açık kenarlarda kiriş (alt 240, üst 270).
   Çatı altındaki veranda yalnız kırma çatıyla (beşikte kalkan açık kenara otururdu; denetçi reddeder).
 
@@ -34,13 +34,13 @@ from pathlib import Path
 
 import numpy as np
 
+from . import cati_uretici
+
 IZGARA = 5
 K = 1.25            # kaplama
 D = 8.0             # karkas
 Y = D / 2           # iç duvarın yarı kalınlığı
-SACAK, TOPUK, DUVAR_USTU, PANEL = 30.0, 10, 270, 8.0
-SACAK_KOTU = DUVAR_USTU + TOPUK
-EGIM = 0.33
+DUVAR_USTU = 270    # kat yüksekliği; çatı sayıları motor/genel/cati_uretici.py'de (kurallar/cizim/cati_uretici.json)
 UST_KOT = 200       # pencere üstü: kat 270 − lento 70
 PAY_KOSE = K + D + 10       # açıklığın dış köşeden payı (dış duvarın iç yüzünden 10)
 PAY_BIRLESIM = Y + 10       # iç duvar birleşiminden pay
@@ -538,52 +538,6 @@ def _kirisler(iz: Izgara, R: list[int]) -> list[dict]:
     return [{"ad": f"KRS{n}", "alt": 240, "ust": 270, "bolge": "veranda", "not": "veranda kirişi (İE-14)", **k} for n, k in enumerate(out, 1)]
 
 
-# ── çatı ───────────────────────────────────────────────────────────────────────────────────────────────────────────────
-def _duzlem(ad, plan, yukari, egim, sacak, notu):
-    return {"ad": ad, "plan": [[r2(x), r2(y)] for x, y in plan], "yukari": yukari, "egim": round(egim, 5), "sacak_kotu": SACAK_KOTU,
-            "sacak": sacak, "ust_pay": round(PANEL * math.sqrt(1 + egim ** 2), 3), "not": notu}
-
-
-def cati_uret(R: tuple[float, float, float, float], tip: str, mahya: str | None, egim: float | None) -> dict:
-    """Dikdörtgen (dış yüzler) üstüne beşik ya da kırma. Mahya verilmezse uzun kenar boyunca."""
-    x0, y0, x1, y1 = R
-    e = EGIM if egim is None else round(egim / 100, 5)
-    if mahya not in ("x", "y"):
-        mahya = "x" if (x1 - x0) >= (y1 - y0) else "y"
-    X0, Y0, X1, Y1 = x0 - SACAK, y0 - SACAK, x1 + SACAK, y1 + SACAK
-    duz, kal = [], []
-    if mahya == "x":
-        ym = (Y0 + Y1) / 2
-        if tip == "besik":
-            duz = [_duzlem("güney", [[X0, Y0], [X1, Y0], [X1, ym], [X0, ym]], [0, 1], e, {"y": Y0}, "güney yüzü"),
-                   _duzlem("kuzey", [[X0, ym], [X1, ym], [X1, Y1], [X0, Y1]], [0, -1], e, {"y": Y1}, "kuzey yüzü")]
-            kal = [{"ad": "batı kalkanı", "eksen": "x", "konum": r2(x0), "aralik": [r2(y0), r2(y1)], "ic": "dogu", "ust": ["güney", "kuzey"]},
-                   {"ad": "doğu kalkanı", "eksen": "x", "konum": r2(x1), "aralik": [r2(y0), r2(y1)], "ic": "bati", "ust": ["güney", "kuzey"]}]
-        else:
-            h = (Y1 - Y0) / 2
-            duz = [_duzlem("güney", [[X0, Y0], [X1, Y0], [X1 - h, ym], [X0 + h, ym]], [0, 1], e, {"y": Y0}, "güney yüzü"),
-                   _duzlem("kuzey", [[X0 + h, ym], [X1 - h, ym], [X1, Y1], [X0, Y1]], [0, -1], e, {"y": Y1}, "kuzey yüzü"),
-                   _duzlem("batı", [[X0, Y0], [X0 + h, ym], [X0, Y1]], [1, 0], e, {"x": X0}, "batı kırması"),
-                   _duzlem("doğu", [[X1, Y0], [X1, Y1], [X1 - h, ym]], [-1, 0], e, {"x": X1}, "doğu kırması")]
-    else:
-        xm = (X0 + X1) / 2
-        if tip == "besik":
-            duz = [_duzlem("batı", [[X0, Y0], [xm, Y0], [xm, Y1], [X0, Y1]], [1, 0], e, {"x": X0}, "batı yüzü"),
-                   _duzlem("doğu", [[xm, Y0], [X1, Y0], [X1, Y1], [xm, Y1]], [-1, 0], e, {"x": X1}, "doğu yüzü")]
-            kal = [{"ad": "güney kalkanı", "eksen": "y", "konum": r2(y0), "aralik": [r2(x0), r2(x1)], "ic": "kuzey", "ust": ["batı", "doğu"]},
-                   {"ad": "kuzey kalkanı", "eksen": "y", "konum": r2(y1), "aralik": [r2(x0), r2(x1)], "ic": "guney", "ust": ["batı", "doğu"]}]
-        else:
-            h = (X1 - X0) / 2
-            duz = [_duzlem("batı", [[X0, Y0], [xm, Y0 + h], [xm, Y1 - h], [X0, Y1]], [1, 0], e, {"x": X0}, "batı yüzü"),
-                   _duzlem("doğu", [[X1, Y0], [X1, Y1], [xm, Y1 - h], [xm, Y0 + h]], [-1, 0], e, {"x": X1}, "doğu yüzü"),
-                   _duzlem("güney", [[X0, Y0], [X1, Y0], [xm, Y0 + h]], [0, 1], e, {"y": Y0}, "güney kırması"),
-                   _duzlem("kuzey", [[X1, Y1], [X0, Y1], [xm, Y1 - h]], [0, -1], e, {"y": Y1}, "kuzey kırması")]
-    adi = {"besik": "beşik", "kirma": "kırma"}[tip]
-    yon = "doğu–batı" if mahya == "x" else "kuzey–güney"
-    return {"tip": tip, "tip_adi": f"{adi} (mahya {yon})", "sacak": int(SACAK), "topuk": TOPUK, "duvar_ustu": DUVAR_USTU,
-            "panel_kalinligi": int(PANEL), "duzlemler": duz, "kalkanlar": kal}
-
-
 # ── ana çağrı ──────────────────────────────────────────────────────────────────────────────────────────────────────────
 def derle(p: dict, kod: str = "YENI", ad: str | None = None) -> dict:
     """Plan şeması → Yapı Tanımı 0.5. Geçersizse PlanHatasi(ihlaller)."""
@@ -628,7 +582,10 @@ def derle(p: dict, kod: str = "YENI", ad: str | None = None) -> dict:
             duvarlar += _kolonlar(iz, [x0, y0, x1, y1])
             kirisler = _kirisler(iz, [x0, y0, x1, y1])
     ct = p.get("cati") or {"tip": "besik"}
-    cati = cati_uret(cati_R, ct.get("tip") or "besik", ct.get("mahya_yonu"), ct.get("egim_yuzde"))
+    try:
+        cati = cati_uretici.uret(cati_R, ct.get("tip") or "besik", ct.get("mahya_yonu"), ct.get("egim_yuzde"), duvar_ustu=DUVAR_USTU)
+    except cati_uretici.CatiHatasi as e:
+        raise PlanHatasi([f"çatı: {e}"])
     alan = W * H / 1e4
     return {
         "sema": "portman.yapi_tanimi/0.5-taslak", "kod": kod, "ad": ad or f"Yeni plan, tek kat çelik, {alan:.0f} m² (TASLAK)",
