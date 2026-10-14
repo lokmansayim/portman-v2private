@@ -521,6 +521,10 @@ if [ ! -f "$KOK/data/settings.json" ]; then
  "kayitsiz_cevap": "Bu hat PortatifEv bayileri için Portman planlama hattıdır. Kayıtlı bayi değilseniz lütfen PortatifEv ofisiyle görüşün.",
  "sablon_patron_bildirim": null,
  "sablon_bayi_dosyalar_hazir": null,
+ "sablon_muhendis_kontrol": null,
+ "sablon_muhendis_hatirlatma": null,
+ "sablon_bayi_karsilama": null,
+ "sablon_bayi_bilgi_hazir": null,
  "sablon_dil": "tr"
 }
 EOF

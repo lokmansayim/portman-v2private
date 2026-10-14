@@ -28,6 +28,7 @@ os.environ.setdefault("PORTMAN_KANAL_DIR", str(DATA))
 
 import ayarlar as AY                                       # noqa: E402
 import kalici as K                                         # noqa: E402
+import muhendis as MH                                      # noqa: E402  (İE-08 8b: hatırlatmalar)
 import nabiz as NB                                         # noqa: E402
 import worker as W                                         # noqa: E402
 from depo import Depo                                      # noqa: E402
@@ -37,7 +38,9 @@ KIRA_SN = 120                       # D-03: 3 deneme × 120 sn
 EN_COK_DENEME = 3
 BOS_BEKLEME_SN = 2
 ONESHOT = os.environ.get("PORTMAN_AGENT_ONESHOT") == "1"
+HATIRLATMA_ARALIGI_SN = 60          # İE-08 8b: hatırlatma turu sıklığı
 _dur = {"istendi": False}
+_zaman = {"hatirlatma": 0.0}
 _sayac = {"bitti": 0, "basarisiz": 0, "son": None}
 
 
@@ -68,8 +71,28 @@ def oz_test(depo: Depo, ayar: dict) -> None:
         log("öz-test çalıştırılamadı:", traceback.format_exc()[-600:])
 
 
+def hatirlatma(depo: Depo, ayar: dict, simdi: float | None = None) -> dict | None:
+    """İE-08 8b (M3): dakikada bir mühendis ve Patron hatırlatmaları (kanal/muhendis.py; satırları gönderici gönderir). Kanal kapalıyken
+    (enabled false) koşmaz. Hata iş döngüsünü durdurmaz."""
+    simdi = time.time() if simdi is None else simdi
+    if ayar.get("enabled") is not True or simdi - _zaman["hatirlatma"] < HATIRLATMA_ARALIGI_SN:
+        return None
+    _zaman["hatirlatma"] = simdi
+    try:
+        say = MH.hatirlatma_turu(depo, simdi)
+    except Exception as e:
+        if type(e).__module__.startswith("psycopg"):
+            raise
+        log("hatırlatma turu düştü:", type(e).__name__)
+        return None
+    if any(say.values()):
+        log("hatırlatma:", say)
+    return say
+
+
 def tur(depo: Depo, ayar: dict, sahip: str) -> dict | None:
-    """Bir iş işler (yoksa None). Nabız her turda yazılır."""
+    """Bir iş işler (yoksa None). Nabız her turda yazılır. İE-08 8b: dakikada bir hatırlatma turu."""
+    hatirlatma(depo, ayar)
     r = None
     if ayar.get("enabled") is True:
         r = K.bir_is(depo, isleme_ayari(ayar), sahip)

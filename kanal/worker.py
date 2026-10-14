@@ -575,6 +575,20 @@ def maske_numaralar(metin: str) -> str:
     return numara.maskele(metin, son_dort=True)
 
 
+def liste_exceli(json_yolu: Path, hedef: Path, no: str, rev: int, set_yolu=None) -> dict:
+    """İE-08 8b (D-17): yükleme listesinin Excel'i sunucuda, `motor/genel/excel_liste.xlsx_yaz` ile (kabul paketiyle aynı düzen);
+    `uret`'in dışında: genel motorun altın çıktısı ve referans izleri değişmez. Ad `Portman_<no>_rNN_yukleme_listesi.xlsx`.
+    Üretilemezse (openpyxl yok, liste bozuk) {"hata": …}; çizim ve bayi akışı durmaz, mühendise Excel'siz gider."""
+    try:
+        from motor.genel import excel_liste
+        hedef_x = Path(hedef) / f"Portman_{no}_r{int(rev):02d}_yukleme_listesi.xlsx"
+        excel_liste.xlsx_yaz(json.loads(Path(json_yolu).read_text(encoding="utf-8")), hedef_x, kaynak=Path(json_yolu).name,
+                             set_adi=Path(str(set_yolu or "")).name or None)
+        return {"dosya": str(hedef_x), "sha256": _sha(hedef_x), "bayiye_gider": False}
+    except Exception as e:
+        return {"hata": maske_numaralar(f"{type(e).__name__}: {str(e)[:200]}")}
+
+
 def ekler_uret(ie: dict, hedef: Path, v: dict, settings: dict, m: dict | None = None) -> dict:
     """Aynı İş Emri revizyonundan türetilen ekler: {"gorsel": {...}, "ifc": {...}, "ucb": {...}}. Her biri ayrı denenir; üretilemeyen
     ek akışı durdurmaz (satır metinle gider) ve 'hata' ile kaydedilir. Motor'un DXF/PDF'ine dokunulmaz.
@@ -598,6 +612,8 @@ def ekler_uret(ie: dict, hedef: Path, v: dict, settings: dict, m: dict | None = 
             ekler["ifc_hata"] = "IFC üretilmedi"
         if m.get("yukleme_json"):
             ekler["yukleme_listesi"] = {"dosya": str(hedef / m["yukleme_json"]), "bayiye_gider": False}
+            excel = liste_exceli(hedef / m["yukleme_json"], hedef, no, rev, m.get("set"))   # İE-08 8b (D-17): mühendise gider, bayiye gitmez
+            ekler.update({"excel": excel} if "dosya" in excel else {"excel_hata": excel["hata"]})
         if m.get("duzenlenebilir_dxf") and (hedef / m["duzenlenebilir_dxf"]).is_file():      # D-11: düzenlenebilir DXF (plan + görünüşler); kayıtta, bayiye gitmez
             ekler["dxf"] = {"dosya": str(hedef / m["duzenlenebilir_dxf"]), "sha256": _sha(hedef / m["duzenlenebilir_dxf"]), "bayiye_gider": False}
         y = ie.get("yapi") or {}

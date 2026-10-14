@@ -85,6 +85,7 @@ a = numpy.arange(12, dtype=float).reshape(3, 4)
 iz = float((a @ a.T).trace()); kok2 = float(numpy.sqrt(numpy.array([16.0]))[0])
 assert abs(iz - 506.0) < 1e-9 and abs(kok2 - 4.0) < 1e-12, (iz, kok2)
 import beyin.karar, motor.dxf_out, kalici, webhook, panel, gonderici, ayarlar, nabiz, meta_api   # noqa
+import openpyxl, muhendis   # noqa  (İE-08 8b, D-17: Excel yükleme listesi sunucuda; mühendis teknik kontrolü)
 import motor.genel.uret, motor.genel.iz   # noqa  (İE-08: genel motor paketi; kural kitabı ve modeller sürümle gider)
 import os
 for p in ("kurallar/liste/kurallar.json", "kurallar/cizim/cizim_seti.json", "modeller/C8801.json", "modeller/altin.json"):

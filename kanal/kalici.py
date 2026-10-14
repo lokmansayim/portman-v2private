@@ -35,6 +35,7 @@ import worker as W                                   # noqa: E402  (kanal/worker
 import etkilesim as ET                               # noqa: E402  (İE-04: buton ve liste cevaplarının çözümü)
 from depo import HATA_BAYIYE, Cakisma, Depo, KiraKaybi, maske     # noqa: E402
 from beyin.konusma import BellekKonusma              # noqa: E402
+import muhendis as MH                                # noqa: E402  (İE-08 8b: mühendis teknik kontrolü)
 
 
 class Gonderilmedi(Exception):
@@ -142,7 +143,8 @@ def bir_is(depo: Depo, settings: dict, sahip: str | None = None) -> dict | None:
     d_eski = _kopya(d)
     yazili = gelen.get("type") in W.GELEN_YAZILI and (bool((gelen.get("text") or "").strip()) or bool(gelen.get("reply_id")))
     cikarim = j.get("cikarim")
-    if yazili and cikarim is None:
+    muhendis_mu = (gelen.get("role") or "bayi") == "muhendis"      # İE-08 8b: mühendis kartının mesajı LLM'siz (kanal/muhendis.py)
+    if yazili and cikarim is None and not muhendis_mu:
         if gelen.get("reply_id"):                    # İE-04: buton/liste cevabı; LLM çağrılmaz, kimlik kayıtla doğrulanır
             etk = ET.coz(gelen, d, depo.giden_satiri)
             cikarim = {"etkilesim": etk, "talep": etk.get("talep"), "meta": {"backend": "etkilesim", "kimlik": etk.get("kimlik"), "gecerli": etk.get("gecerli")}}
@@ -156,16 +158,20 @@ def bir_is(depo: Depo, settings: dict, sahip: str | None = None) -> dict | None:
             return {"durum": "atildi", "is_id": j["id"], "neden": "kira kaybedildi (çıkarım kaydı)"}
     hazirlik = W.KANAL / "projects" / ".hazirlik" / f"is{j['id']}-{uuid.uuid4().hex[:8]}"      # her deneme kendi klasöründe
     try:
-        katalog = W.katalog_nesnesi(settings, kabul_edilmis=depo.kabul_edilmis_adaylar())      # K-A10: kabul kaydı olmayan 'gecerli' aday sunulmaz
-        cikti = W.isle(gelen, settings, k=k, cikarim=cikarim if yazili else None, proje_koku=hazirlik, giden_bul=depo.giden_satiri, katalog=katalog)
-        # Onay denetimi kuralın sonucuna bakar: hangi yoldan olursa olsun (ör. süresi dolan D-01 sorusundan sonra) bir onay
-        # kaydedildiyse, onay bayinin gördüğü revizyona bağlanabiliyor mu diye sınanır; bağlanamıyorsa onay yazılmaz.
-        if (cikti.get("sonuc") or {}).get("gerekce") == "plan onaylandı":
-            denetim = onay_denetimi(depo, gelen, d)
-            if not denetim["kabul"]:
-                k = BellekKonusma(gelen["sender"], d)
-                cikti = _red_ciktisi(gelen, k, cikarim["talep"], denetim)
-            cikti["sonuc"]["onay"] = {a: denetim.get(a) for a in ("kabul", "is_emri_no", "rev", "pdf_wamid", "alinti_id", "sinir", "neden")}
+        if muhendis_mu:
+            cikti = MH.isle(depo, gelen)                 # İE-08 8b: mühendisin düğmesi, Excel'i ya da notu (LLM'siz)
+        else:
+            katalog = W.katalog_nesnesi(settings, kabul_edilmis=depo.kabul_edilmis_adaylar())      # K-A10: kabul kaydı olmayan 'gecerli' aday sunulmaz
+            cikti = W.isle(gelen, settings, k=k, cikarim=cikarim if yazili else None, proje_koku=hazirlik, giden_bul=depo.giden_satiri, katalog=katalog)
+            # Onay denetimi kuralın sonucuna bakar: hangi yoldan olursa olsun (ör. süresi dolan D-01 sorusundan sonra) bir onay
+            # kaydedildiyse, onay bayinin gördüğü revizyona bağlanabiliyor mu diye sınanır; bağlanamıyorsa onay yazılmaz.
+            if (cikti.get("sonuc") or {}).get("gerekce") == "plan onaylandı":
+                denetim = onay_denetimi(depo, gelen, d)
+                if not denetim["kabul"]:
+                    k = BellekKonusma(gelen["sender"], d)
+                    cikti = _red_ciktisi(gelen, k, cikarim["talep"], denetim)
+                cikti["sonuc"]["onay"] = {a: denetim.get(a) for a in ("kabul", "is_emri_no", "rev", "pdf_wamid", "alinti_id", "sinir", "neden")}
+                MH.onay_kancasi(depo, gelen, d, cikti)          # İE-08 8b: çelik onayı → mühendis kontrol kaydı ve bildirimi (aynı işlemde)
     except Exception:
         hata = traceback.format_exc()[-2500:]
         k = BellekKonusma(gelen["sender"], d)       # yarım kalan durum değişikliği yazılmaz

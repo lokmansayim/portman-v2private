@@ -150,6 +150,22 @@ def _kes(metin, n: int) -> str:
     return str(metin or "")[:n]
 
 
+XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+DXF_MIME = "text/plain"          # DXF Cloud API'nin belge türlerinden değil: düz metin yüklenir, görünen ad .dxf (İE-08 8b, plan kararı 2)
+BELGE_TURLERI = ("application/pdf", XLSX, DXF_MIME)
+_DXF_BASI = re.compile(rb"\A\s*0\s*\r?\n\s*SECTION\b")
+
+
+def belge_turu(yol: Path, veri: bytes) -> str:
+    """PDF ve görsel dışındaki belge: .xlsx (ZIP, içinde xl/workbook.xml) ya da .dxf (ASCII DXF, '0 / SECTION' ile başlar). Yoksa ''."""
+    ad = Path(str(yol)).name.lower()
+    if ad.endswith(".xlsx") and veri[:4] == b"PK\x03\x04" and b"xl/workbook" in veri[:200000]:
+        return XLSX
+    if ad.endswith(".dxf") and _DXF_BASI.match(veri[:64]):
+        return DXF_MIME
+    return ""
+
+
 def dosya_denetle(yol, izinli: tuple[str, ...], kok: Path, sha256: str | None = None) -> tuple[Path, str]:
     """Satırın dosyası: <kok>/projects/ altında, boş değil, kayıtlı özetle aynı, türü ilk baytlardan; sınır: PDF 25 MB, görsel 5 MB."""
     try:
@@ -166,12 +182,14 @@ def dosya_denetle(yol, izinli: tuple[str, ...], kok: Path, sha256: str | None = 
     mime = "application/pdf" if bas.startswith(b"%PDF-") else ("image/png" if bas.startswith(b"\x89PNG\r\n\x1a\n")
                                                               else ("image/jpeg" if bas.startswith(b"\xff\xd8\xff") else ""))
     if mime == "":
+        mime = belge_turu(gercek, veri)       # İE-08 8b: mühendise giden Excel ve DXF (yalnız izin verilen yerde)
+    if mime == "":
         raise DosyaGecersiz("file_type_unknown")
     if mime not in izinli:
         raise DosyaGecersiz("file_type_not_allowed")
-    if mime == "application/pdf" and len(veri) > PDF_EN_COK:
-        raise DosyaGecersiz("pdf_too_large")
-    if mime != "application/pdf" and len(veri) > GORSEL_EN_COK:
+    if mime in BELGE_TURLERI and len(veri) > PDF_EN_COK:
+        raise DosyaGecersiz("pdf_too_large" if mime == "application/pdf" else "document_too_large")
+    if mime not in BELGE_TURLERI and len(veri) > GORSEL_EN_COK:
         raise DosyaGecersiz("image_too_large")
     return gercek, mime
 
