@@ -304,3 +304,59 @@ def test_llm_once_kapaliyken_kural_okumasi(depo, wa, hizli_genel, tmp_path):
                                                                            pencereler=[{"mahal": "mutfak", "olcu": "120x120", "islem": "degistir"}]), bayi=BAYI_KART))
     [r] = isle_hepsi(depo, {**AYAR, "mesaj_katmani": True})
     assert r["eylem"] == "is_emri" and "llm_degisiklik" not in r and sorgu(depo, "SELECT cikarim FROM isler ORDER BY id DESC")[0]["cikarim"].get("degisiklik") is None
+
+
+# ───────────────────────── kapanış incelemesi düzeltmeleri (14.10) ─────────────────────────
+def test_kart_tasinan_yerde_ve_konusmada_guncel(depo, wa, hizli_genel, uretici):
+    t1(depo)
+    d, _ = depo.konusma_oku(NUMARA_A)
+    g = d["uretilen_plan"]["gorsel"]
+    assert g and Path(g).is_file() and str(W.KANAL / "projects") in g and ".hazirlik" not in g
+    assert d["secenek_seti"]["adaylar"][0]["gorsel"] == g
+
+
+def test_llm_okumasi_hata_donerse_kural_okumasi_cati_L(depo, wa, hizli_genel, tmp_path):
+    _r01_c8801k(depo)
+    yol = tmp_path / "bozuk.json"
+    yol.write_text(json.dumps({"islemler": [{"tur": "bilinmeyen"}]}), encoding="utf-8")     # şema dışı → okuma 'hata'
+    ayar = {**AYAR, "mesaj_katmani": True, "llm_once_revizyon": {"acik": True, "backend": "manuel", "hazir_dosya": str(yol)}}
+    assert depo.mesaj_kaydet(mesaj("çatı L olsun", talep("revizyon", ozet="çatı L"), bayi=BAYI_KART))
+    [r] = isle_hepsi(depo, ayar)
+    assert r["eylem"] == "is_emri" and son_rev(depo)["is_emri"]["yapi"]["kod"] == "Ç8801L", r
+    assert sorgu(depo, "SELECT cikarim FROM isler ORDER BY id DESC")[0]["cikarim"]["degisiklik"]["durum"] == "hata"
+
+
+def test_llm_okumasi_dis_140_yinelenmez(depo, wa, hizli_genel, tmp_path):
+    _r01_c8801k(depo)
+    ayar = _llm_once(tmp_path, {"islemler": [_islem(tur="dis_karkas_140", alinti="dışlar 140")]})
+    assert depo.mesaj_kaydet(mesaj("dışlar 140'lık olsun", talep("revizyon", ozet="dış 140"), bayi=BAYI_KART))
+    [r] = isle_hepsi(depo, ayar)
+    assert r["eylem"] == "is_emri"
+    time.sleep(1.1)
+    ayar = _llm_once(tmp_path, {"islemler": [_islem(tur="dis_karkas_140", alinti="dışlar 140 kalsın"),
+                                             _islem(tur="pencere_olcu", aciklik="P5", en=120, yuk=120, alinti="mutfak 120x120")]})
+    assert depo.mesaj_kaydet(mesaj("dışlar 140 kalsın, mutfak penceresi 120x120", talep("revizyon", ozet="mutfak"), bayi=BAYI_KART))
+    [r2] = isle_hepsi(depo, ayar)
+    assert r2["eylem"] == "is_emri", r2
+    assert [d["op"] for d in son_rev(depo)["is_emri"]["yapi"]["degisiklikler"]] == ["dis_karkas_140", "pencere_olcu"]
+
+
+def test_yeniden_denemede_eski_plana_karsi_okuma_kullanilmaz(monkeypatch):
+    from beyin.sema import Talep
+    sayac = {"n": 0}
+
+    def sahte(son_y, metin, katalog, ayar):
+        sayac["n"] += 1
+        return {"durum": "tamam", "islemler": [], "bilgi": []}
+    monkeypatch.setattr(W, "degisiklik_oku", sahte)
+    k = type("K", (), {"d": {"asama": "onay_bekliyor", "revizyon": 0, "son_is_emri": {"is_emri_no": "PM-X-1", "revizyon": 2,
+                                                                                      "yapi": {"sistem": "celik", "kod": "Ç8801K"}}}})()
+    t = Talep(niyet="revizyon", guven="yuksek", ozet="x")
+    ayar = {"llm_once_revizyon": {"acik": True}}
+    g = {"text": "mutfak 120x120 olsun"}
+    _, lo = W.llm_once_revizyon(k, t, g, None, {"degisiklik": {"durum": "tamam", "islemler": [], "_temel": "PM-X-1:1"}}, ayar, None, None)
+    assert sayac["n"] == 1 and lo["_temel"] == "PM-X-1:2"                               # r01'e karşı hesaplanmış eski okuma kullanılmadı
+    _, lo = W.llm_once_revizyon(k, t, g, None, {"degisiklik": lo}, ayar, None, None)
+    assert sayac["n"] == 1                                                               # aynı plana karşı olan yeniden kullanıldı
+    k.d["son_soru_alani"] = "secenek"
+    assert W.llm_once_revizyon(k, t, g, None, None, ayar, None, None) == (None, None) and sayac["n"] == 1   # set açıkken ücretli çağrı yok

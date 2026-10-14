@@ -417,7 +417,8 @@ def _celik_dali(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts: dict) 
     cati = CO.cati_okumasi(metin, kat_aday, mahaller)
     kararsiz = len(secenekler) > 1 or CO.cati_olumsuz(metin, mahaller) or (kod in kaynak and not cati)
     son0 = (k.d.get("son_is_emri") or {}).get("yapi") or {}
-    if getattr(k, "llm_degisiklik", None) and son0.get("sistem") == "celik" and Katalog.taban_kod(son0.get("kod")) == Katalog.taban_kod(kod):
+    if (getattr(k, "llm_degisiklik", None) or {}).get("durum") == "tamam" and son0.get("sistem") == "celik" \
+            and Katalog.taban_kod(son0.get("kod")) == Katalog.taban_kod(kod):            # hata dönen okuma kural okumasını ezmez
         cati, kararsiz = _llm_cati(k, katalog, aday), False      # İE-14 PR-3: revizyonda çatı LLM-önce okumadan (kod denetler)
     if st and st.get("durum") == "acik" and _celik_seti_acik(k):
         set_kodlari = {str(a.get("kod")).upper() for a in st.get("adaylar") or []}
@@ -504,8 +505,8 @@ def plan_talebi(ts: dict, alan: float) -> dict:
     """Üreticiye giden talep (yapısal; müşteri adı, numara ve adres yok — LLM'e gerekmez)."""
     return {"alan_m2": float(alan), "oda_programi": ts.get("oda_programi"), "yapi_turu": "celik", "kat_sayisi": 1,
             "cati": {"tip": (ts.get("cati") or {}).get("tip")}, "veranda": {a: (ts.get("veranda") or {}).get(a) for a in ("istiyor", "konum", "alan_m2")},
-            "dis_olcu": ts.get("dis_olcu"), "ozel_istekler": [numara.maskele(str(x)) for x in ts.get("ozel_istekler") or []],
-            "ozet": numara.maskele(str(ts.get("ozet") or ""))}
+            "dis_olcu": ts.get("dis_olcu"), "ozel_istekler": [numara.maskele(str(x)) for x in ts.get("ozel_istekler") or []]}
+    # KVKK (kapanış): LLM'in serbest özeti (ad, adres taşıyabilir) üreticiye gitmez; yapısal alanlar yeter (Z-08 açık iş)
 
 
 def _aday_bul(k: Konusma, katalog: Katalog, kod: str | None) -> dict | None:
@@ -814,8 +815,9 @@ def _llm_degisiklikler(k: Konusma, katalog: Katalog, aday: dict, t: dict, onceki
         return _bitir(k, Karar(eylem="yonlendir", gerekce=f"LLM-önce okuma: {len(d['uygulanamaz'])} istek otomatik uygulanamıyor",
                                 mesaj=f"{alinti} isteğini otomatik uygulayamadım. Otomatik yapabildiklerim: pencere ölçüsü, çatı seçeneği, dış duvarlar "
                                       "140'lık karkas. " + YONLENDIRME))
-    ops = [o for o in d["ops"] if o["op"] != "cati_varyanti"]
-    okunan = {o["op"].split("_")[0] for o in ops}
+    zaten140 = any(o.get("op") == "dis_karkas_140" for o in onceki) or "140" in str((t.get("duvar_siniflari") or {}).get("dis", {}).get("profil", ""))
+    ops = [o for o in d["ops"] if o["op"] != "cati_varyanti" and not (o["op"] == "dis_karkas_140" and zaten140)]   # kural yoluyla aynı: yinelenmez
+    okunan = {{"pencere_olcu": "pencere", "dis_karkas_140": "dis140"}.get(o["op"], o["op"]) for o in ops}
     if d["sor"]:
         ortak = {"hazir": ops, "kalan": [], "okunan": sorted(okunan), "tanim": aday.get("tanim"), "kod": aday["kod"], "degisiklikler": onceki,
                  "mahaller_t": [{"ad": m["ad"], "islev": m.get("islev") or []} for m in t.get("mahaller", [])]}

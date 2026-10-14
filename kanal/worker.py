@@ -442,6 +442,7 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
     elif karar.eylem == "secenek" and karar.secenek_seti:
         for r in secenek_satirlari(gelen, karar, katalog, metin, proje_koku):
             ekle_satir(r)
+        kart_son_yeri(k, proje_koku)
         sonuc["secenek_seti"] = {"id": karar.secenek_seti["id"], "adaylar": [a["kod"] for a in karar.secenek_seti["adaylar"]]}
     elif cizim and cizim["passed"] and not katman:
         ekle(ek_sozu(metin, gorsel_var=False))
@@ -603,25 +604,37 @@ def llm_once_revizyon(k, talep, gelen: dict, etk, cikarim: dict | None, settings
     (`YENI-…`, `plan_uretimi.acik`) → `plan_duzenle` (en çok 3 çağrı); banka modeli (`llm_once_revizyon.acik`) → `degisiklik_oku` (1 çağrı).
     Sonuç iş satırına yazılır (`ek_kaydet`); yeniden denenen iş çağırmaz. Revizyon hakkı dolmuşsa ya da okuma sorusu askıdaysa çağrılmaz."""
     from beyin.konusma import MAX_REVIZYON
+    from beyin import numara
+    metin = numara.maskele((gelen.get("text") or "").strip())      # KVKK: LLM'e numara tam maskeli (son dört hane de gitmez)
+    from beyin.karar import ESKI_TASLAK_SORUSU
     son_y = (k.d.get("son_is_emri") or {}).get("yapi") or {}
-    metin = (gelen.get("text") or "").strip()
+    # kapanış incelemesi: ücretli çağrı yalnız karar revizyon yoluna girecekse — plan bayide (onay bekliyor ya da "Revize et" denmiş),
+    # askıda D-01 / seçenek / okuma sorusu yok, revizyon hakkı var
     if etk is not None or talep.niyet != "revizyon" or son_y.get("sistem") != "celik" or not metin \
-            or int(k.d.get("revizyon") or 0) + 1 > MAX_REVIZYON or k.d.get("son_soru_alani") in ("okuma", "okuma_olcu"):
+            or k.d.get("asama") not in ("onay_bekliyor", "revizyon") or k.d.get("bekleyen_talep") \
+            or int(k.d.get("revizyon") or 0) + 1 > MAX_REVIZYON \
+            or k.d.get("son_soru_alani") in ("okuma", "okuma_olcu", "okuma_metin", "secenek", ESKI_TASLAK_SORUSU):
         return None, None
+    temel = f"{(k.d.get('son_is_emri') or {}).get('is_emri_no')}:{(k.d.get('son_is_emri') or {}).get('revizyon')}"
+
+    def onceki(anahtar):                               # yeniden denemede yalnız aynı plana karşı hesaplanmış sonuç kullanılır
+        v = (cikarim or {}).get(anahtar)
+        return v if v is not None and v.get("_temel") == temel else None
     yeni_mi = str(son_y.get("kod") or "").startswith("YENI-")
     u = k.d.get("uretilen_plan") or {}
-    if yeni_mi and u.get("plan") and (settings.get("plan_uretimi") or {}).get("acik"):
-        pd = (cikarim or {}).get("plan_duzenleme")
+    # kural yoluyla değişiklik almış yeni plan LLM'e yeniden yazdırılmaz (o değişiklikler plan şemasında yok, düşerdi): kural okuması sürer
+    if yeni_mi and u.get("plan") and not son_y.get("degisiklikler") and (settings.get("plan_uretimi") or {}).get("acik"):
+        pd = onceki("plan_duzenleme")
         if pd is None:
-            pd = plan_duzenle(u["plan"], metin, {"oda_programi": u.get("oda_programi")}, settings.get("plan_uretimi") or {})
+            pd = {**plan_duzenle(u["plan"], metin, {"oda_programi": u.get("oda_programi")}, settings.get("plan_uretimi") or {}), "_temel": temel}
             if ek_kaydet is not None:
                 ek_kaydet("plan_duzenleme", pd)
         return pd, None
     lo_ayar = settings.get("llm_once_revizyon") or {}
     if not yeni_mi and lo_ayar.get("acik"):
-        lo = (cikarim or {}).get("degisiklik")
+        lo = onceki("degisiklik")
         if lo is None:
-            lo = degisiklik_oku(son_y, metin, katalog, lo_ayar)
+            lo = {**degisiklik_oku(son_y, metin, katalog, lo_ayar), "_temel": temel}
             if ek_kaydet is not None:
                 ek_kaydet("degisiklik", lo)
         return None, lo
@@ -637,7 +650,7 @@ def plan_duzenle(plan: dict, metin: str, talep: dict, ayar: dict) -> dict:
     """İE-14 PR-3: yeni planın revizyonu (`plan_uretici.duzenle`; LLM, ücretli). İstisna fırlatmaz."""
     from beyin import plan_uretici as PU
     try:
-        s = PU.duzenle(plan, maske_numaralar(metin), talep, ayar={a: ayar[a] for a in ("model", "effort", "en_cok_cagri", "timeout_s", "max_tokens", "backend")
+        s = PU.duzenle(plan, metin, talep, ayar={a: ayar[a] for a in ("model", "effort", "en_cok_cagri", "timeout_s", "max_tokens", "backend")
                                                                    if a in ayar}, hazir=_hazir(ayar))
     except Exception as e:
         s = {"durum": "hata", "hata": maske_numaralar(f"{type(e).__name__}: {str(e)[:200]}"), "denemeler": [], "cagri": 0, "girdi_token": 0, "cikti_token": 0}
@@ -658,10 +671,24 @@ def degisiklik_oku(son_y: dict, metin: str, katalog, ayar: dict) -> dict:
         catilar = [{"kod": x["kod"], "ad": (x.get("sunum") or {}).get("cati_adi") or ""} for x in
                    [kat] + [katalog.aday(v) for v in kat.get("varyantlar") or []] if x] if kat.get("varyantlar") else []
         dis140 = "140" in str((t.get("duvar_siniflari") or {}).get("dis", {}).get("profil", ""))
-        return DO.oku(maske_numaralar(metin), pencereler, catilar, dis140, ayar={a: ayar[a] for a in ("model", "effort", "timeout_s", "backend") if a in ayar},
+        return DO.oku(metin, pencereler, catilar, dis140, ayar={a: ayar[a] for a in ("model", "effort", "timeout_s", "backend") if a in ayar},
                       hazir=_hazir(ayar))
     except Exception as e:
         return {"durum": "hata", "islemler": [], "bilgi": [], "cagri": 0, "hata": maske_numaralar(f"{type(e).__name__}: {str(e)[:200]}")}
+
+
+def kart_son_yeri(k, proje_koku: Path | None) -> None:
+    """İE-14: yeni planın kartı hazırlık klasöründe çizilir; kalıcı akış `<ad>/r01`'i projects/'e taşır (`kalici._yerlestir`). Konuşmadaki
+    yol (sonraki set sunumları) taşınan yere çevrilir."""
+    u = k.d.get("uretilen_plan") or {}
+    g = u.get("gorsel")
+    if not (g and proje_koku and str(g).startswith(str(proje_koku))):
+        return
+    son = str(KANAL / "projects" / Path(g).relative_to(Path(proje_koku)))
+    u["gorsel"] = son
+    for a in (k.d.get("secenek_seti") or {}).get("adaylar") or []:
+        if a.get("gorsel") == g:
+            a["gorsel"] = son
 
 
 def plan_karti(tanim: dict | None, gelen: dict, proje_koku: Path | None) -> str | None:
@@ -674,8 +701,8 @@ def plan_karti(tanim: dict | None, gelen: dict, proje_koku: Path | None) -> str 
         kok.mkdir(parents=True, exist_ok=True)
         yol = kok / "tanim.json"
         yol.write_text(json.dumps(tanim, ensure_ascii=False), encoding="utf-8")
-        U.uret(yol, kok / "kart", is_emri_no="YENI", revizyon=1, perspektif=False, bayi=True)
-        kart = kok / "kart" / f"{U.kod_govde(tanim)}_bayi_gorsel.png"
+        U.uret(yol, kok / "r01", is_emri_no="YENI", revizyon=1, perspektif=False, bayi=True)     # r01: kalıcı akış projects/'e taşır
+        kart = kok / "r01" / f"{U.kod_govde(tanim)}_bayi_gorsel.png"
         return str(kart) if kart.is_file() else None
     except Exception as e:
         log("yeni plan kartı üretilemedi:", maske_numaralar(f"{type(e).__name__}: {str(e)[:160]}"))

@@ -29,7 +29,7 @@ class DisOlcu(BaseModel):
 class Mahal(BaseModel):
     ad: str = Field(..., description="Bayiye görünen ad: 'Salon', 'Mutfak', 'Yatak Odası 1', 'Banyo', 'Hol', 'Veranda' …")
     islev: Literal["salon", "mutfak", "yatak_odasi", "banyo", "hol", "depo", "veranda"]
-    dikdortgenler: list[list[int]] = Field(..., description="[[x0, y0, x1, y1], …] cm, 5 cm ızgarada, dış yüze göre; L biçimli mahal "
+    dikdortgenler: list[list[int]] = Field(..., min_length=1, description="[[x0, y0, x1, y1], …] cm, 5 cm ızgarada, dış yüze göre; L biçimli mahal "
                                                            "birden çok dikdörtgenle")
     ortu: Optional[Literal["cati", "pergola", "acik"]] = Field(None, description="Yalnız veranda: çatının altında mı, pergola mı, açık mı")
 

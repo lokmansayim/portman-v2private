@@ -101,3 +101,20 @@ def test_kayit_bicimi_ad_ve_numara_tasimaz():
     s = PU.uret(TALEP, hazir=[ornek("gecerli_3arti1_100")])
     k = PU.kayit(s, TALEP, "deneme")
     assert set(k) >= {"etiket", "talep", "durum", "denemeler", "cagri"} and k["denemeler"][0]["gecerli"]
+
+
+def test_bozuk_taslak_ihlal_olur_ve_cagri_sayilir(monkeypatch):
+    bozuk = ornek("gecerli_3arti1_100")
+    bozuk["mahaller"][0]["dikdortgenler"] = []                       # şema reddeder (min_length 1): istisna değil ihlal
+    s = PU.uret(TALEP, hazir=[bozuk, ornek("gecerli_3arti1_100")])
+    assert s["durum"] == "gecerli" and len(s["denemeler"]) == 2 and any("şema" in i for i in s["denemeler"][0]["ihlaller"])
+    from motor.genel import plan_derle
+    monkeypatch.setattr(plan_derle, "derle", lambda *a, **k: (_ for _ in ()).throw(ZeroDivisionError("beklenmeyen")))
+    s = PU.uret(TALEP, hazir=[ornek("gecerli_3arti1_100")])
+    assert s["durum"] == "gecersiz" and "taslak derlenemedi: ZeroDivisionError" in s["denemeler"][0]["ihlaller"][0]
+
+
+def test_llm_hatasi_cagri_olarak_sayilir(monkeypatch):
+    monkeypatch.setattr(llm, "arac_cagir", lambda *a, **k: (_ for _ in ()).throw(llm.LLMHatasi("plan_kaydet çağrısı dönmedi")))
+    s = PU.uret(TALEP, ayar={"backend": "anthropic"})
+    assert s["durum"] == "hata" and s["cagri"] == 1

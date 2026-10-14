@@ -15,7 +15,7 @@ from typing import Literal, Optional
 
 from pydantic import BaseModel, Field
 
-from beyin import llm
+from beyin import llm, numara
 
 ARAC_ADI = "degisiklik_kaydet"
 ARAC_ACIKLAMA = "Bayinin revizyon isteğini planın tablosuna göre değişiklik işlemlerine çevir. Yalnız bu araçla cevap ver."
@@ -72,7 +72,8 @@ def oku(metin: str, pencereler: list[dict], cati_secenekleri: list[dict], dis140
                                      model=a.get("model"), effort=a.get("effort"), max_tokens=2000, hazir=hazir, timeout=int(a["timeout_s"]))
         d = DegisiklikListesi.model_validate(cevap)
     except Exception as e:                                   # LLM ya da şema hatası: kayda yazılır; karar bugünkü okumaya döner
-        return {"durum": "hata", "islemler": [], "bilgi": [], "cagri": 0 if a["backend"] == "manuel" else 1, "hata": f"{type(e).__name__}: {str(e)[:200]}"}
+        return {"durum": "hata", "islemler": [], "bilgi": [], "cagri": 0 if a["backend"] == "manuel" else 1,
+                "hata": f"{type(e).__name__}: {numara.maskele(str(e))[:200]}"}
     return {"durum": "tamam", "islemler": [i.model_dump() for i in d.islemler], "bilgi": list(d.bilgi),
             "cagri": 0 if a["backend"] == "manuel" else 1, "girdi_token": meta.get("girdi_token") or 0, "cikti_token": meta.get("cikti_token") or 0}
 

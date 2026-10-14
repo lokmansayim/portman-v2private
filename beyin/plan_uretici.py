@@ -14,7 +14,7 @@ import math
 from functools import lru_cache
 from pathlib import Path
 
-from beyin import llm
+from beyin import llm, numara
 from beyin.plan_denetim import ISLEV_ADI, denetle, kurallar, program_coz
 from beyin.plan_sema import ARAC_ACIKLAMA, ARAC_ADI, sema, tanimdan
 
@@ -130,12 +130,16 @@ def _dongu(mesajlar: list[dict], talep: dict, ayar: dict | None, hazir: list[dic
                                         effort=a.get("effort"), max_tokens=int(a["max_tokens"]),
                                         hazir=(hazir[n] if a["backend"] == "manuel" else None), timeout=int(a["timeout_s"]))
         except (llm.LLMHatasi, ValueError) as e:
-            sonuc.update(durum="hata", hata=str(e)[:300])
+            sonuc["cagri"] += 1 if a["backend"] != "manuel" else 0       # ücretli olabilir: tavan için sayılır (temkinli)
+            sonuc.update(durum="hata", hata=numara.maskele(str(e))[:300])
             break
         sonuc["cagri"] += 1 if a["backend"] != "manuel" else 0
         sonuc["girdi_token"] += meta.get("girdi_token") or 0
         sonuc["cikti_token"] += meta.get("cikti_token") or 0
-        d = denetle(plan, talep, kural, kod=kod)
+        try:
+            d = denetle(plan, talep, kural, kod=kod)
+        except Exception as e:                                       # derleyicinin öngörmediği bozuk taslak: ihlal olarak geri gider
+            d = {"gecerli": False, "ihlaller": [f"taslak derlenemedi: {type(e).__name__}: {numara.maskele(str(e))[:160]}"], "tanim": None, "ozet": {}}
         sonuc["denemeler"].append({"plan": plan, "gecerli": d["gecerli"], "ihlaller": d["ihlaller"], "ozet": d["ozet"],
                                    "girdi_token": meta.get("girdi_token"), "cikti_token": meta.get("cikti_token"), "sure_ms": meta.get("sure_ms")})
         if d["gecerli"]:
@@ -224,8 +228,9 @@ def plan_farki(eski: dict, yeni: dict) -> list[str]:
 
 
 def kayit(sonuc: dict, talep: dict, etiket: str) -> dict:
-    """Test seti kaydı (`testler/plan/kayitlar/<etiket>.json`): talep, denemelerin ham taslakları ve ihlalleri, sayaçlar. Kişi adı ve
-    numara yoktur (talep alanları yapısal; özel istekler numarasız olmalı — çağıran maskeler)."""
+    """Test seti kaydı (`testler/plan/kayitlar/<etiket>.json`; kanalda göç 007): talep, denemelerin ham taslakları ve ihlalleri, sayaçlar.
+    Talep yapısaldır (`karar.plan_talebi`: müşteri adı, numara ve LLM özeti yok; özel istekler numarasız). Özel istek serbest metindir:
+    kanaldan test setine aktarılırken ad maskesi ayrıca uygulanır (28.09 kuralı)."""
     return {"etiket": etiket, "talep": talep, "durum": sonuc["durum"], "model": sonuc.get("model"), "ornekler": sonuc.get("ornekler"),
             "cagri": sonuc["cagri"], "girdi_token": sonuc["girdi_token"], "cikti_token": sonuc["cikti_token"], "hata": sonuc.get("hata"),
             "denemeler": [{k: v for k, v in d.items() if k in ("plan", "gecerli", "ihlaller", "girdi_token", "cikti_token", "sure_ms")}
