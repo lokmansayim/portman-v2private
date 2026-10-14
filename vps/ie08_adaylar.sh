@@ -4,9 +4,11 @@
 # muhendis_kabulu kalır); kabul edilmeyen aday yazılmaz, bayiye sunulmaz. Geliştirme döneminde kabul eden Lokman'dır (D-11; 13 Ekim
 # 2026): 2. argüman boşsa "Lokman". Bayi onayından sonraki teknik kontrol (8b mühendis adımı) ayrıdır, aynen kalır. Ad çıktıya girmez
 # (yalnız ilk harf). Canlı değişikliktir: Lokman'ın ayrı onayıyla, sürüm güncellendikten sonra, canlı A2 denemesinden önce koşar.
-#   ssh portman-vps 'bash -s -- "Ç8801,Ç8801K,Ç8801L,Ç8201,KT01,KT02,KT03" "Lokman" 2026-10-13 "kabul notu" "2026-10-13"' < vps/ie08_adaylar.sh
+#   ssh -n portman-vps 'timeout 120 bash /opt/portman/guncel/vps/ie08_adaylar.sh "Ç8801,Ç8801K,Ç8801L,Ç8201,KT01,KT02,KT03" "Lokman" 2026-10-13 "kabul notu" "2026-10-13"' > ie08_kabul.txt 2>&1
+#   Sunucudaki sürüm kopyası koşulur; betik stdin'le (`bash -s < betik`, `git show … | ssh … 'bash -s'`) GÖNDERİLMEZ: 13 Ekim
+#   17:40 UTC'de yazma adımında takıldı (BK-08 madde 5). `-n` ve `timeout` takılmayı önler; Python çağrısının stdin'i de /dev/null.
 #   (tırnaklar uzak kabuğun komut dizesinin İÇİNDE olmalı: ssh argümanları boşlukla birleştirir, iki sözcüklü not bölünür.)
-#   ... "--kuru" ile başlayan ilk argüman: yazmadan ne yazılacağını söyler.
+#   ... "--kuru" ile başlayan ilk argüman: yazmadan ne yazılacağını söyler (önce kuru koşu, sonra kayıt).
 # Sınama: PM_KOK, PM_ETC, PM_PYTHON (venv yerine), PM_PG_DSN (env dosyası yerine).
 set -uo pipefail
 KURU=""
@@ -30,7 +32,11 @@ echo "   kodlar: $KODLAR · tarih: $TARIH · kabul eden: ${KIM:0:1}… (ad çık
 cd /tmp
 # Ajanla aynı kimlik ve DSN (systemd: PORTMAN_PG_DSN=dbname=portman, kullanıcı portman; guncelle.sh de göçleri böyle koşar)
 if [ -n "${PM_OLARAK+x}" ]; then read -r -a OLARAK <<< "$PM_OLARAK"; elif [ "$(id -u)" = "0" ] && id portman >/dev/null 2>&1; then OLARAK=(sudo -u portman); else OLARAK=(); fi
-"${OLARAK[@]}" env PORTMAN_PG_DSN="$DSN" HOME="${HOME:-/tmp}" "$PY" "$GUNCEL/araclar/aday_kabul.py" $KURU --kodlar "$KODLAR" --kim "$KIM" --tarih "$TARIH" --not "$NOT" --paket "$PAKET"
+"${OLARAK[@]}" env PORTMAN_PG_DSN="$DSN" HOME="${HOME:-/tmp}" "$PY" "$GUNCEL/araclar/aday_kabul.py" $KURU --kodlar "$KODLAR" --kim "$KIM" --tarih "$TARIH" --not "$NOT" --paket "$PAKET" < /dev/null
 RC=$?
 [ "$RC" = "0" ] || dur "kabul kaydı yazılamadı (çıkış $RC)"
-echo "   tamam. Canlı A2 denemesi artık bu adayları sunar (bayi 'Ç8801' ya da '88 m² 2+1 çelik' yazınca)."
+if [ -n "$KURU" ]; then
+    echo "   KURU: hiçbir şey yazılmadı; kaydı yazmak için aynı komutu --kuru olmadan koşun."
+else
+    echo "   tamam. Canlı A2 denemesi artık bu adayları sunar (bayi 'Ç8801' ya da '88 m² 2+1 çelik' yazınca)."
+fi
