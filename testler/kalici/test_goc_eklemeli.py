@@ -107,3 +107,24 @@ def test_006_muhendis_kontrolleri_tekrar_kosulabilir(depo):
         with pytest.raises(Exception):
             with c.transaction():
                 c.execute("UPDATE muhendis_kontrolleri SET durum = 'baska'")
+
+
+def test_007_plan_uretimleri_tekrar_kosulabilir(depo):
+    """İE-14: 007 iki kez koşar, şema aynı kalır; durum CHECK'li; mesaj başına tek üretim kaydı."""
+    sql = (GOC / "007_plan_uretimleri.sql").read_text(encoding="utf-8")
+    with depo.baglan() as c:
+        once = c.execute("SELECT column_name FROM information_schema.columns WHERE table_name = 'plan_uretimleri' ORDER BY 1").fetchall()
+        with c.transaction():
+            c.execute(sql)
+        assert c.execute("SELECT column_name FROM information_schema.columns WHERE table_name = 'plan_uretimleri' ORDER BY 1").fetchall() == once
+        with c.transaction():
+            c.execute("INSERT INTO mesajlar (id, gonderen, tur, metin, wa_zamani, ham) VALUES ('wamid.G7', '900000000111', 'text', 'x', now(), '{}')")
+            c.execute("INSERT INTO plan_uretimleri (mesaj_id, gonderen, durum) VALUES ('wamid.G7', '900000000111', 'gecerli')")
+            r = c.execute("SELECT cagri, talep, denemeler, is_emri_no FROM plan_uretimleri").fetchone()
+            assert r == {"cagri": 0, "talep": {}, "denemeler": [], "is_emri_no": None}
+        with pytest.raises(Exception):
+            with c.transaction():
+                c.execute("INSERT INTO plan_uretimleri (mesaj_id, gonderen, durum) VALUES ('wamid.G7', '900000000111', 'gecerli')")
+        with pytest.raises(Exception):
+            with c.transaction():
+                c.execute("UPDATE plan_uretimleri SET durum = 'baska'")

@@ -107,14 +107,21 @@ def uret(talep: dict, ayar: dict | None = None, hazir: list[dict] | None = None,
          ornek_sayisi: int = 3) -> dict:
     """Talep → plan. Dönüş: {durum: gecerli|gecersiz|hata, plan, tanim, ozet, denemeler[], cagri, girdi_token, cikti_token, hata}.
     `hazir`: manuel arka uçta sırayla oynatılan kayıtlı cevaplar. İstisna fırlatmaz."""
+    kural = kurallar()
+    ornekler = yakin_ornekler(hedef_alan(talep), ornek_sayisi, haric)
+    s = _dongu([{"role": "user", "content": talep_metni(talep, ornekler, kural)}], talep, ayar, hazir, kod, kural)
+    s["ornekler"] = [o["kod"] for o in ornekler]
+    return s
+
+
+def _dongu(mesajlar: list[dict], talep: dict, ayar: dict | None, hazir: list[dict] | None, kod: str, kural: dict | None = None) -> dict:
+    """LLM çağrısı → denetim → ihlaller araç sonucu olarak geri; en çok `en_cok_cagri` çağrı. İstisna fırlatmaz."""
     a = {**VARSAYILAN_AYAR, **(ayar or {})}
     if hazir is not None:
         a["backend"] = "manuel"
-    kural = kurallar()
-    ornekler = yakin_ornekler(hedef_alan(talep), ornek_sayisi, haric)
-    mesajlar = [{"role": "user", "content": talep_metni(talep, ornekler, kural)}]
+    kural = kural or kurallar()
     sonuc = {"durum": "gecersiz", "plan": None, "tanim": None, "ozet": {}, "denemeler": [], "cagri": 0, "girdi_token": 0, "cikti_token": 0,
-             "hata": None, "ornekler": [o["kod"] for o in ornekler], "model": a.get("model") if a["backend"] != "manuel" else None}
+             "hata": None, "model": a.get("model") if a["backend"] != "manuel" else None}
     for n in range(int(a["en_cok_cagri"])):
         if a["backend"] == "manuel" and n >= len(hazir or []):
             break
@@ -140,6 +147,80 @@ def uret(talep: dict, ayar: dict | None = None, hazir: list[dict] | None = None,
     if sonuc["denemeler"] and sonuc["durum"] != "hata":
         sonuc["ozet"] = sonuc["denemeler"][-1]["ozet"]
     return sonuc
+
+
+def duzenle_metni(plan: dict, istek: str, talep: dict, kural: dict) -> str:
+    """Revizyon (LLM-önce, T3): mevcut plan + bayinin isteği; istenmeyen yer aynen kalır."""
+    satir = ["## Mevcut plan (bayiye gönderildi)", "```json\n" + json.dumps(plan, ensure_ascii=False, separators=(",", ":")) + "\n```",
+             "\n## Bayinin değişiklik isteği", istek.strip(),
+             "\n## Yapılacak",
+             "- İsteği planda uygula (oda büyüt/küçült, kapı, pencere, veranda, çatı, dış ölçü, dış duvar 140'lık: `dis_karkas`). İstenmeyen "
+             "her şey olduğu gibi kalsın.",
+             "- Oda büyürken komşusu küçülür ya da dış ölçü büyür; mahaller dış dikdörtgeni yine boşluksuz doldurur.",
+             "- Uygulayamadığın isteği `uygulanamayan` listesine bayinin sözüyle yaz; tahminle başka bir şey değiştirme."]
+    prog = program_coz(talep.get("oda_programi"))
+    if prog:
+        satir.append(f"- Oda programı {prog[0]}+{prog[1]} kalır (bayi açıkça değiştirmedikçe).")
+    satir.append("\n## Oda kuralları (net ölçü; kod denetler)")
+    for islev, r in kural["odalar"].items():
+        if r.get("en_az_m2") or r.get("dar_kenar_cm"):
+            satir.append(f"- {ISLEV_ADI[islev]}: en az {r['en_az_m2']:g} m², dar kenar en az {r['dar_kenar_cm']} cm")
+    satir.append("\nDüzeltilmiş tam planı plan_kaydet ile kaydet.")
+    return "\n".join(satir)
+
+
+def duzenle(plan: dict, istek: str, talep: dict, ayar: dict | None = None, hazir: list[dict] | None = None, kod: str = "YENI") -> dict:
+    """Yeni planın revizyonu: LLM mevcut planı istekle yeniden yazar, denetçi karar verir (en çok 3 çağrı). Alan ±%10 denetimi revizyonda
+    yoktur (bayi alanı bilerek değiştirebilir); oda programı korunur. Dönüş `uret` ile aynı biçim; geçerliyse `uygulanamayan` ve `fark`."""
+    t = {"oda_programi": talep.get("oda_programi")}
+    s = _dongu([{"role": "user", "content": duzenle_metni(plan, istek, talep, kurallar())}], t, ayar, hazir, kod)
+    if s["durum"] == "gecerli":
+        s["uygulanamayan"] = list(s["plan"].get("uygulanamayan") or [])
+        s["fark"] = plan_farki(plan, s["plan"])
+    return s
+
+
+def _tr(v: float) -> str:
+    return f"{v:.1f}".replace(".", ",")
+
+
+def plan_farki(eski: dict, yeni: dict) -> list[str]:
+    """İki plan arasındaki bayiye söylenecek farklar (kodun okuması; LLM'in özeti değil, K18 yönü): dış ölçü, mahal alanı (eksenden),
+    eklenen/kaldırılan mahal, pencere ve kapı."""
+    def alan(m):
+        return sum((r[2] - r[0]) * (r[3] - r[1]) for r in m["dikdortgenler"]) / 1e4
+    out = []
+    e, y = eski["dis_olcu"], yeni["dis_olcu"]
+    if (e["en"], e["boy"]) != (y["en"], y["boy"]):
+        out.append(f"dış ölçü {e['en']}×{e['boy']} → {y['en']}×{y['boy']} cm")
+    em, ym = {m["ad"]: m for m in eski["mahaller"]}, {m["ad"]: m for m in yeni["mahaller"]}
+    for ad in ym:
+        if ad not in em:
+            out.append(f"{ad} eklendi ({_tr(alan(ym[ad]))} m²)")
+        elif abs(alan(ym[ad]) - alan(em[ad])) >= 0.25:
+            out.append(f"{ad} {_tr(alan(em[ad]))} → {_tr(alan(ym[ad]))} m²")
+    out += [f"{ad} kaldırıldı" for ad in em if ad not in ym]
+    def pencereler(p):
+        c = {}
+        for x in p["pencereler"]:
+            c[(x["mahal"], x["cephe"], x["olcu"])] = c.get((x["mahal"], x["cephe"], x["olcu"]), 0) + int(x.get("adet") or 1)
+        return c
+    pe, py = pencereler(eski), pencereler(yeni)
+    for (m, c, o), n in py.items():
+        if n > pe.get((m, c, o), 0):
+            out.append(f"pencere eklendi: {m} {o.replace('x', '/')}")
+    for (m, c, o), n in pe.items():
+        if n > py.get((m, c, o), 0):
+            out.append(f"pencere kaldırıldı: {m} {o.replace('x', '/')}")
+    ke = {tuple(sorted(k["arasinda"])) for k in eski["kapilar"]}
+    ky = {tuple(sorted(k["arasinda"])) for k in yeni["kapilar"]}
+    out += [f"kapı eklendi: {' – '.join(x for x in k if x != 'dis') or 'dış'}" for k in sorted(ky - ke)]
+    out += [f"kapı kaldırıldı: {' – '.join(x for x in k if x != 'dis') or 'dış'}" for k in sorted(ke - ky)]
+    if (eski.get("dis_karkas") or 80) != (yeni.get("dis_karkas") or 80):
+        out.append("dış duvarlar 140'lık karkas" if yeni.get("dis_karkas") == 140 else "dış duvarlar 80'lik karkas")
+    if (eski.get("cati") or {}).get("tip") != (yeni.get("cati") or {}).get("tip"):
+        out.append(f"çatı {(yeni.get('cati') or {}).get('tip')}")
+    return out
 
 
 def kayit(sonuc: dict, talep: dict, etiket: str) -> dict:

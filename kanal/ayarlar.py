@@ -26,6 +26,10 @@ VARSAYILAN = {
     "sablon_bayi_karsilama": None,        # bayiye (panelden, hiç yazmamış karta): "Merhaba [hitap], Portman bayi kaydınız onaylandı…" (Nasıl çalışır?)
     "sablon_bayi_bilgi_hazir": None,      # bayiye (panelden): "Merhaba [hitap], talebinizle ilgili bilgi hazır…" (Bilgiyi gönder)
     "sablon_dil": "tr",                   # şablonların Meta'daki dil kodu
+    # İE-14 (D-18): uyan çelik model yoksa yeni plan üretimi (LLM, mesaj başına 1–3 ek çağrı; ücretli). Kapalıyken bugünkü davranış.
+    "plan_uretimi": {"acik": False, "model": "claude-opus-5-5", "effort": "medium", "en_cok_cagri": 3, "timeout_s": 180},
+    # İE-14 PR-3: çelik banka modelinin revizyonunu LLM-önce oku (mesaj başına 1 ek çağrı; ücretli). Kapalıyken kural okuması (celik_okuma).
+    "llm_once_revizyon": {"acik": False, "model": "claude-opus-5-5", "effort": "low", "timeout_s": 60},
 }
 ANAHTARLAR = tuple(VARSAYILAN)
 SABLON_ANAHTARLARI = ("sablon_patron_bildirim", "sablon_bayi_dosyalar_hazir", "sablon_muhendis_kontrol", "sablon_muhendis_hatirlatma",
@@ -45,8 +49,8 @@ def oku(veri) -> dict:
         return a
     if isinstance(d, dict):
         for k, v in d.items():
-            if k == "llm" and isinstance(v, dict):
-                a["llm"] = {**a["llm"], **v}
+            if k in ("llm", "plan_uretimi", "llm_once_revizyon") and isinstance(v, dict):
+                a[k] = {**a[k], **v}
             else:
                 a[k] = v
     return a

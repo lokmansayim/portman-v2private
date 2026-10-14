@@ -83,6 +83,9 @@ def denetle(plan: dict, talep: dict | None = None, kural: dict | None = None, ko
     except PlanHatasi as e:
         return {"gecerli": False, "ihlaller": ihlal + e.ihlaller, "tanim": None, "ozet": ozet}
     try:
+        if p.get("dis_karkas") == 140:                         # dış ölçü korunur, iç yüz içeri (İE-08 A4 işlemi; derleyici 80'lik kurar)
+            from beyin.varyant import dis_karkas_140
+            tanim = dis_karkas_140(tanim)
         g = _kur(tanim)
         aciklik_denetimi(tanim, g)
     except VaryantHatasi as e:

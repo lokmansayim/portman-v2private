@@ -377,6 +377,18 @@ class Depo:
             # bağlı satırlar (Patron'a, bayiye "kontrol sürüyor"); hepsi bu işle aynı işlemde (kanal/muhendis.py)
             if cikti.get("muhendis_kontrolu"):
                 self._kontrol_ac(c, gelen, bayi_kod, cikti["muhendis_kontrolu"])
+            # İE-14 (göç 007): yeni plan üretiminin kaydı; seçilen yeni planın r01'i üretime bağlanır
+            pu = cikti.get("plan_uretimi")
+            if pu:
+                c.execute("INSERT INTO plan_uretimleri (mesaj_id, gonderen, bayi_kod, durum, plan_kodu, talep, denemeler, cagri, girdi_token, "
+                          "cikti_token, model, hata) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT (mesaj_id) DO NOTHING",
+                          (gelen["id"], gelen["sender"], bayi_kod, pu["durum"], pu.get("plan_kodu"), Jsonb(pu.get("talep") or {}),
+                           Jsonb(pu.get("denemeler") or []), int(pu.get("cagri") or 0), int(pu.get("girdi_token") or 0),
+                           int(pu.get("cikti_token") or 0), pu.get("model"), pu.get("hata")))
+            yeni_kod = ((d_yeni.get("son_is_emri") or {}).get("yapi") or {}).get("kod")
+            if revizyon_id and str(yeni_kod or "").startswith("YENI-"):
+                c.execute("UPDATE plan_uretimleri SET is_emri_no = %s WHERE plan_kodu = %s AND is_emri_no IS NULL",
+                          (sonuc["is_emri_no"], yeni_kod))
             for kid, alanlar in cikti.get("kontrol_guncelle") or []:
                 self._kontrol_guncelle(c, kid, alanlar)
             for cs in cikti.get("cipa_satirlari") or []:

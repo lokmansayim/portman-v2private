@@ -60,7 +60,10 @@ class PlanTaslagi(BaseModel):
     kapilar: list[Kapi]
     pencereler: list[Pencere]
     cati: Cati
+    dis_karkas: Optional[Literal[80, 140]] = Field(None, description="Dış duvar karkası (mm); verilmezse 80. 140'lık: kalın dış duvar")
     gerekce: str = Field("", description="Kısa: yerleşimin mantığı (bayiye gitmez, kayda girer)")
+    uygulanamayan: list[str] = Field(default_factory=list, description="Yalnız revizyonda: bu planla uygulayamadığın istekler, bayinin "
+                                                                      "sözüyle (ör. 'çift kat olsun'); uygulananlar buraya yazılmaz")
 
 
 ARAC_ADI = "plan_kaydet"

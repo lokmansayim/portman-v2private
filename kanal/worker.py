@@ -244,7 +244,7 @@ def katalog_nesnesi(settings: dict, kabul_edilmis: set | None = None):
 
 
 def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje_koku: Path | None = None, giden_bul=None,
-         katalog=None) -> dict:
+         katalog=None, ek_kaydet=None) -> dict:
     """Bir gelen mesajı işler; giden satırlarını ve sonucu döndürür (kayda yazmaz — çağıran yazar: kanal/kalici.py).
     k verilirse konuşma o nesneden okunur (Postgres); verilmezse Beyin'in dosya tabanlı Konusma'sı (yalnız yerel koşum ve
     testler). cikarim verilirse ({"talep": …, "meta": …} ya da {"hata": …}) LLM çağrılmaz; proje_koku verilirse Motor çıktısı
@@ -253,7 +253,7 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
     (cikarim["etkilesim"] verilmişse o kullanılır). giden_bul(context_id) cevaplanan giden satırı verir (doğrulama için);
     None ise bu doğrulama yapılmaz."""
     from beyin.konusma import Konusma
-    from beyin.karar import karar_ver
+    from beyin.karar import karar_ver, plan_sonucu, PLAN_URETIMI
     from motor import dxf_out
     import etkilesim as ET
 
@@ -362,7 +362,32 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
         return {"satirlar": satirlar, "sonuc": sonuc, "hata": hata}
 
     d0 = _anlik(k.d)                               # İE-08 A4 "hak düşmez": çelik çizim düşerse konuşma bu duruma döner
+    pu_kayit = None
+    pu_ayar = settings.get("plan_uretimi") or {}
+    k.plan_uretimi = bool(pu_ayar.get("acik"))       # İE-14 (D-18): kapalıysa uyan-yok dalı bugünkü davranış
+    k.llm_yeni_plan, k.llm_degisiklik = llm_once_revizyon(k, talep, gelen, etk, cikarim, settings, katalog, ek_kaydet)
+    for a, v in (("plan_duzenleme", k.llm_yeni_plan), ("llm_degisiklik", k.llm_degisiklik)):
+        if v is not None:
+            sonuc[a] = {b: v.get(b) for b in ("durum", "cagri", "girdi_token", "cikti_token", "hata")}
     karar = karar_ver(talep, k, bayi, katalog, metin=metin_kural)
+    if karar.gerekce == PLAN_URETIMI and k.d.get("plan_istegi"):
+        # İE-14: bayiye önce "hazırlıyorum", sonra üretim (LLM, en çok 3 çağrı; sonuç iş satırına yazılır, yeniden denenen iş çağırmaz),
+        # yeni planın kartı ve seçenek seti (`karar.plan_sonucu`). Üretim düşerse "uygulayamadım" + Patron.
+        ekle(karar.mesaj)
+        plan_talep = k.d["plan_istegi"]["talep"]
+        pu = (cikarim or {}).get("plan_uretimi")
+        if pu is None:
+            pu = plan_uret(k.d["plan_istegi"]["talep"], pu_ayar)
+            if ek_kaydet is not None:
+                ek_kaydet("plan_uretimi", pu)
+        kart = plan_karti(pu.get("tanim"), gelen, proje_koku) if pu.get("durum") == "gecerli" else None
+        karar = plan_sonucu(k, katalog, pu, kart)
+        sonuc["plan_uretimi"] = {a: pu.get(a) for a in ("durum", "cagri", "girdi_token", "cikti_token", "hata", "ornekler", "model")}
+        sonuc["plan_uretimi"]["deneme"] = len(pu.get("denemeler") or [])
+        sonuc["plan_uretimi"]["ihlaller"] = [d.get("ihlaller") for d in pu.get("denemeler") or []]
+        from beyin import plan_uretici as PU
+        pu_kayit = {**PU.kayit({"cagri": 0, "girdi_token": 0, "cikti_token": 0, **pu}, plan_talep, "kanal"),        # göç 007 kaydı
+                    "plan_kodu": (k.d.get("uretilen_plan") or {}).get("kod") if karar.eylem == "secenek" else None}
     if etk is not None:
         sonuc["buton"] = etk["kimlik"]
     if karar.kullanilan_talep:      # D-01: bayi "yeni"/"değişiklik" diye cevap verdi; işlenen, bekletilen mesajın talebidir
@@ -457,7 +482,7 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
         model_notu = f" Katalog notu ({model['code']}): {model['not']}" if model and model.get("not") else ""   # D-07: yalnız Patron'a
         patrona(f"Portman yönlendirme: {kim} — {karar.gerekce}.{model_notu} Mesaj: \"{maske_numaralar(gelen.get('text') or '')[:300]}\"",
                 sablon=True, is_emri_no=sonuc.get("is_emri_no"))
-    return {"satirlar": satirlar, "sonuc": sonuc}
+    return {"satirlar": satirlar, "sonuc": sonuc, **({"plan_uretimi": pu_kayit} if pu_kayit else {})}
 
 
 def _cizim_hatasi(k, d0: dict, karar, talep, meta: dict, cizim: dict, ie: dict, settings: dict, sonuc: dict, satirlar: list, ekle, patrona,
@@ -510,10 +535,11 @@ def _geri_al(anlik: dict, simdiki: dict) -> dict:
     return d
 
 
-def _cizim_tanimi(yol_veya_tanim: str, degisiklikler: list[dict] | None) -> dict:
-    """Model tanımı (`modeller/<kod>.json`) + sırayla uygulanmış değişiklikler (`beyin/varyant.tanim_uygula`)."""
+def _cizim_tanimi(yol_veya_tanim, degisiklikler: list[dict] | None) -> dict:
+    """Model tanımı (`modeller/<kod>.json` ya da İE-14'te gömülü sözlük) + sırayla uygulanmış değişiklikler (`beyin/varyant.tanim_uygula`)."""
     from beyin import varyant
-    t = json.loads((KOD.parent / str(yol_veya_tanim)).read_text(encoding="utf-8"))
+    t = json.loads(json.dumps(yol_veya_tanim)) if isinstance(yol_veya_tanim, dict) else \
+        json.loads((KOD.parent / str(yol_veya_tanim)).read_text(encoding="utf-8"))
     for d in degisiklikler or []:
         t = varyant.tanim_uygula(t, d)
     return t
@@ -560,6 +586,102 @@ def secenek_satirlari(gelen: dict, karar, katalog, metin: str, proje_koku: Path 
     return rows
 
 
+def plan_uret(talep: dict, ayar: dict) -> dict:
+    """İE-14: üretici çağrısı (`beyin/plan_uretici.uret`; LLM, ücretli). Sonuç kayda yazılabilir biçimde (istisna fırlatmaz)."""
+    from beyin import plan_uretici as PU
+    try:
+        s = PU.uret(talep, ayar={a: ayar[a] for a in ("model", "effort", "en_cok_cagri", "timeout_s", "max_tokens", "backend") if a in ayar},
+                    hazir=_hazir(ayar))
+    except Exception as e:                                       # beklenmeyen: kayda hata yazılır, yeniden denenen iş çağırmaz
+        s = {"durum": "hata", "hata": maske_numaralar(f"{type(e).__name__}: {str(e)[:200]}"), "denemeler": [], "cagri": 0, "girdi_token": 0, "cikti_token": 0}
+    log("plan üretimi:", s.get("durum"), "deneme", len(s.get("denemeler") or []), "çağrı", s.get("cagri"))
+    return s
+
+
+def llm_once_revizyon(k, talep, gelen: dict, etk, cikarim: dict | None, settings: dict, katalog, ek_kaydet) -> tuple[dict | None, dict | None]:
+    """İE-14 PR-3: çelik revizyon mesajı (yazılı, düğme değil) karardan önce LLM-önce okunur; karar sonucu kodla denetler. Yeni plan
+    (`YENI-…`, `plan_uretimi.acik`) → `plan_duzenle` (en çok 3 çağrı); banka modeli (`llm_once_revizyon.acik`) → `degisiklik_oku` (1 çağrı).
+    Sonuç iş satırına yazılır (`ek_kaydet`); yeniden denenen iş çağırmaz. Revizyon hakkı dolmuşsa ya da okuma sorusu askıdaysa çağrılmaz."""
+    from beyin.konusma import MAX_REVIZYON
+    son_y = (k.d.get("son_is_emri") or {}).get("yapi") or {}
+    metin = (gelen.get("text") or "").strip()
+    if etk is not None or talep.niyet != "revizyon" or son_y.get("sistem") != "celik" or not metin \
+            or int(k.d.get("revizyon") or 0) + 1 > MAX_REVIZYON or k.d.get("son_soru_alani") in ("okuma", "okuma_olcu"):
+        return None, None
+    yeni_mi = str(son_y.get("kod") or "").startswith("YENI-")
+    u = k.d.get("uretilen_plan") or {}
+    if yeni_mi and u.get("plan") and (settings.get("plan_uretimi") or {}).get("acik"):
+        pd = (cikarim or {}).get("plan_duzenleme")
+        if pd is None:
+            pd = plan_duzenle(u["plan"], metin, {"oda_programi": u.get("oda_programi")}, settings.get("plan_uretimi") or {})
+            if ek_kaydet is not None:
+                ek_kaydet("plan_duzenleme", pd)
+        return pd, None
+    lo_ayar = settings.get("llm_once_revizyon") or {}
+    if not yeni_mi and lo_ayar.get("acik"):
+        lo = (cikarim or {}).get("degisiklik")
+        if lo is None:
+            lo = degisiklik_oku(son_y, metin, katalog, lo_ayar)
+            if ek_kaydet is not None:
+                ek_kaydet("degisiklik", lo)
+        return None, lo
+    return None, None
+
+
+def _hazir(ayar: dict):
+    """manuel arka uç (yerel test; LLM çağrısı yok): kayıtlı cevap `hazir_dosya`dan."""
+    return json.loads(Path(ayar["hazir_dosya"]).read_text(encoding="utf-8")) if ayar.get("backend") == "manuel" else None
+
+
+def plan_duzenle(plan: dict, metin: str, talep: dict, ayar: dict) -> dict:
+    """İE-14 PR-3: yeni planın revizyonu (`plan_uretici.duzenle`; LLM, ücretli). İstisna fırlatmaz."""
+    from beyin import plan_uretici as PU
+    try:
+        s = PU.duzenle(plan, maske_numaralar(metin), talep, ayar={a: ayar[a] for a in ("model", "effort", "en_cok_cagri", "timeout_s", "max_tokens", "backend")
+                                                                   if a in ayar}, hazir=_hazir(ayar))
+    except Exception as e:
+        s = {"durum": "hata", "hata": maske_numaralar(f"{type(e).__name__}: {str(e)[:200]}"), "denemeler": [], "cagri": 0, "girdi_token": 0, "cikti_token": 0}
+    log("plan düzenleme:", s.get("durum"), "deneme", len(s.get("denemeler") or []), "çağrı", s.get("cagri"))
+    return s
+
+
+def degisiklik_oku(son_y: dict, metin: str, katalog, ayar: dict) -> dict:
+    """İE-14 PR-3: banka modelinin revizyonu LLM-önce (`degisiklik_okuyucu.oku`; 1 çağrı). Tablo: son planın pencereleri (değişikliklerle),
+    modelin çatı seçenekleri, dış karkas. İstisna fırlatmaz."""
+    from beyin import celik_okuma as CO, degisiklik_okuyucu as DO, varyant
+    try:
+        t = _cizim_tanimi(son_y["tanim"], son_y.get("degisiklikler"))
+        pencereler = CO.pencere_adaylari(t, varyant._kur(t))
+        aday = katalog.aday(son_y.get("kod")) or {}
+        taban = katalog.aday(aday.get("referans_model")) if aday.get("referans_model") else None
+        kat = taban if (taban and taban.get("varyantlar")) else aday
+        catilar = [{"kod": x["kod"], "ad": (x.get("sunum") or {}).get("cati_adi") or ""} for x in
+                   [kat] + [katalog.aday(v) for v in kat.get("varyantlar") or []] if x] if kat.get("varyantlar") else []
+        dis140 = "140" in str((t.get("duvar_siniflari") or {}).get("dis", {}).get("profil", ""))
+        return DO.oku(maske_numaralar(metin), pencereler, catilar, dis140, ayar={a: ayar[a] for a in ("model", "effort", "timeout_s", "backend") if a in ayar},
+                      hazir=_hazir(ayar))
+    except Exception as e:
+        return {"durum": "hata", "islemler": [], "bilgi": [], "cagri": 0, "hata": maske_numaralar(f"{type(e).__name__}: {str(e)[:200]}")}
+
+
+def plan_karti(tanim: dict | None, gelen: dict, proje_koku: Path | None) -> str | None:
+    """İE-14: yeni planın seçenek kartı (`<kod>_bayi_gorsel.png`, perspektifsiz; genel motor). Üretilemezse None (set görselsiz gider)."""
+    if not tanim:
+        return None
+    try:
+        from motor.genel import uret as U
+        kok = (Path(proje_koku) if proje_koku else KANAL / "projects") / f"YENI-{satir_id(gelen['id'], 0)[4:16]}"
+        kok.mkdir(parents=True, exist_ok=True)
+        yol = kok / "tanim.json"
+        yol.write_text(json.dumps(tanim, ensure_ascii=False), encoding="utf-8")
+        U.uret(yol, kok / "kart", is_emri_no="YENI", revizyon=1, perspektif=False, bayi=True)
+        kart = kok / "kart" / f"{U.kod_govde(tanim)}_bayi_gorsel.png"
+        return str(kart) if kart.is_file() else None
+    except Exception as e:
+        log("yeni plan kartı üretilemedi:", maske_numaralar(f"{type(e).__name__}: {str(e)[:160]}"))
+        return None
+
+
 def KT_KOK() -> Path:
     from beyin import katalog as KT
     return KT.SABLON_DIR
@@ -580,12 +702,17 @@ def cizim_genel(ie: dict, hedef: Path) -> dict:
     `motor.genel.uret` (perspektifli; VTK yoksa görsel perspektifsiz, iş düşmez) güncel kural kitabıyla (sürümle gider) koşar.
     Antet bilgisi zarfın `bilgi`sinden (D-09). Manifest prefabrik Motor'unkiyle aynı anahtarları taşır (`pdf`, `pdf_sha256`, `warnings`)."""
     from motor.genel import uret as U
+    from beyin import celik as C
     y = ie.get("yapi") or {}
-    tanim_yolu = KOD.parent / str(y.get("tanim") or "")
-    if not y.get("tanim") or not tanim_yolu.is_file():
-        raise FileNotFoundError(f"model tanımı yok: {y.get('tanim')}")
-    if y.get("tanim_sha256") and hashlib.sha256(tanim_yolu.read_bytes()).hexdigest() != y["tanim_sha256"]:
-        raise ValueError(f"model tanımı zarftaki sha ile uyuşmuyor: {y.get('tanim')}")
+    if C.tanim_gomulu(y):                                       # İE-14 (D-18): üretilen planın tanımı zarfta gömülü; kanonik sha
+        if not C.tanim_dogrula(y):
+            raise ValueError(f"gömülü tanım zarftaki sha ile uyuşmuyor: {y.get('kod')}")
+    else:
+        tanim_yolu = KOD.parent / str(y.get("tanim") or "")
+        if not y.get("tanim") or not tanim_yolu.is_file():
+            raise FileNotFoundError(f"model tanımı yok: {y.get('tanim')}")
+        if y.get("tanim_sha256") and hashlib.sha256(tanim_yolu.read_bytes()).hexdigest() != y["tanim_sha256"]:
+            raise ValueError(f"model tanımı zarftaki sha ile uyuşmuyor: {y.get('tanim')}")
     t = _cizim_tanimi(y["tanim"], y.get("degisiklikler"))
     hedef = Path(hedef); hedef.mkdir(parents=True, exist_ok=True)
     calisma = hedef / "tanim.json"
@@ -675,9 +802,9 @@ def ekler_uret(ie: dict, hedef: Path, v: dict, settings: dict, m: dict | None = 
             # İE-08 A4: r02 ve sonrasında başlık görseli önce–sonra (önceki plan | bu plan; altta çatı planı ve iki perspektif, aynı görselde)
             try:
                 from motor.genel import okuma_gorseli as OG, uret as U
+                from beyin import celik as C
                 o = y["onceki"]
-                yol_o = KOD.parent / str(o.get("tanim") or "")
-                if o.get("tanim_sha256") and hashlib.sha256(yol_o.read_bytes()).hexdigest() != o["tanim_sha256"]:
+                if not C.tanim_dogrula(o):                          # dosyada bayt sha'sı, gömülüde (İE-14) kanonik sha
                     raise ValueError("önceki planın tanımı değişmiş")
                 t0 = _cizim_tanimi(o["tanim"], o.get("degisiklikler"))
                 t1 = json.loads((hedef / "tanim.json").read_text(encoding="utf-8"))

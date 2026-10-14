@@ -162,7 +162,13 @@ def bir_is(depo: Depo, settings: dict, sahip: str | None = None) -> dict | None:
             cikti = MH.isle(depo, gelen)                 # İE-08 8b: mühendisin düğmesi, Excel'i ya da notu (LLM'siz)
         else:
             katalog = W.katalog_nesnesi(settings, kabul_edilmis=depo.kabul_edilmis_adaylar())      # K-A10: kabul kaydı olmayan 'gecerli' aday sunulmaz
-            cikti = W.isle(gelen, settings, k=k, cikarim=cikarim if yazili else None, proje_koku=hazirlik, giden_bul=depo.giden_satiri, katalog=katalog)
+            ekli = dict(cikarim or {})
+
+            def ek_kaydet(anahtar: str, deger: dict) -> None:  # İE-14: LLM-önce sonuçları çıkarımın yanına; yeniden denenen iş LLM'i yeniden çağırmaz
+                ekli[anahtar] = deger
+                depo.cikarim_kaydet(j["id"], sahip, ekli)
+            cikti = W.isle(gelen, settings, k=k, cikarim=cikarim if yazili else None, proje_koku=hazirlik, giden_bul=depo.giden_satiri, katalog=katalog,
+                           ek_kaydet=ek_kaydet)
             # Onay denetimi kuralın sonucuna bakar: hangi yoldan olursa olsun (ör. süresi dolan D-01 sorusundan sonra) bir onay
             # kaydedildiyse, onay bayinin gördüğü revizyona bağlanabiliyor mu diye sınanır; bağlanamıyorsa onay yazılmaz.
             if (cikti.get("sonuc") or {}).get("gerekce") == "plan onaylandı":
