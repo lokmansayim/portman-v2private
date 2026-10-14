@@ -60,6 +60,10 @@ def _hatalar(rap: dict[str, dict], dosyalar: list[str]) -> list:
             h.append((d, "çakışan", rap[d]["cakisan"]))
         if rap[d]["cizgi_kapatan"]:
             h.append((d, "çizgiyi kapatan", rap[d]["cizgi_kapatan"]))
+        if rap[d]["yay_kapatan"]:                               # BK-09 M5: kapı açılım yayını kesen yazı (KT-02 "BANYO")
+            h.append((d, "kapı yayını kesen", rap[d]["yay_kapatan"]))
+        if rap[d]["sayfa_disi"]:                                # BK-09 M6: sayfadan taşan yazı (Ç8801-L 2. sayfa "TASLAK")
+            h.append((d, "sayfa dışı", rap[d]["sayfa_disi"]))
     return h
 
 

@@ -87,6 +87,15 @@ def dis_hat(y: dict):
     return [list(h.coords) for h in y["bolgeler"]["(dış)"]["net"].interiors]
 
 
+def zincir_esigi(y: dict) -> float:
+    """İç duvarın cepheye "ulaştığı" sayılan en büyük uzaklık (cm): en az 12,5; dış kaplama + en kalın dış duvar + 1 cm (BK-09 G1).
+    80'lik karkasta iç duvar ucu dış çizgiden 9,2 cm (eşik 12,5 kalır), 140'lıkta 15,2 cm (1,25 kaplamayla eşik 16,25; KT-03'te 3 cm
+    kaplamayla 18). Eşik yapı için tektir (en kalın dış duvar): 80 ve 140 karışık modelde yeniden ölçülür (D-16 › Yeniden açılır)."""
+    kd = y["tanim"]["yuz_kaplamalari"]["dis"]["kalinlik"]
+    dis = max((d["kalinlik"] for d in y["duvarlar"] if d["sinif"] == "dis"), default=0.0)
+    return max(12.5, kd + dis + 1.0)
+
+
 def zincirler(y: dict) -> dict:
     """Dört yan için ölçü zinciri noktaları: o yana bakan dış köşeler ve o yandaki cepheye ulaşan duvarlar
     (dış duvarda dış yüz, iç duvarda aks). Dönen: {'alt': [x...], 'ust': [x...], 'sol': [y...], 'sag': [y...]}"""
@@ -104,6 +113,7 @@ def zincirler(y: dict) -> dict:
             else:
                 kenar["sol" if nx < 0 else "sag"].append((a[0], min(a[1], b[1]), max(a[1], b[1])))
     cik = {}
+    esik = zincir_esigi(y)
     for yan in kenar:
         nok = {round(v, 2) for _, lo, hi in kenar[yan] for v in (lo, hi)}
         for d in y["duvarlar"]:
@@ -115,7 +125,7 @@ def zincirler(y: dict) -> dict:
             x0, y0, x1, y1 = d["kutu"]
             uc = {"alt": y0, "ust": y1, "sol": x0, "sag": x1}[yan]
             orta = ((x0 + x1) / 2) if yan in ("alt", "ust") else ((y0 + y1) / 2)
-            ulasir = any(abs(uc - sabit) <= 12.5 and lo - 1 <= orta <= hi + 1 for sabit, lo, hi in kenar[yan])
+            ulasir = any(abs(uc - sabit) <= esik and lo - 1 <= orta <= hi + 1 for sabit, lo, hi in kenar[yan])
             if not ulasir:
                 continue
             if d["sinif"] == "ic":
@@ -127,6 +137,49 @@ def zincirler(y: dict) -> dict:
                     nok.add(round(c, 2))
         cik[yan] = sorted(nok)
     return cik
+
+
+def etiket_yaydan_kacir(fig, ax, gruplar: list[tuple[list, object]], adim: float, en_cok: int = 12, bosluk_pt: float = 2.0) -> dict[int, tuple[float, float]]:
+    """BK-09 M5: kapı açılım yayını (`gid` "kapi_yay") kesen mahal etiketi (ad + m² yazıları birlikte) oda içinde kaydırılır.
+    gruplar: [(yazılar, odanın veri koordinatındaki çokgeni)]. Yalnız yayı kesen grup taşınır; aday kaydırmalar `adim` aralıklı ızgarada,
+    uzaklık sırasıyla (eşitlikte sabit sıra): yazıların mürekkebi yaya değmez, odadan taşmaz, eksendeki öteki yazılara binmez. Uygun yer
+    yoksa grup yerinde kalır (yazı çakışma testi `yay_kapatan` görür). Dönen: {grup sırası: (dx, dy)} veri biriminde. Eksen sınırları
+    son hâlinde olmalı (çizim baytları yalnız taşınan yazıda değişir)."""
+    from shapely import affinity
+    from shapely.ops import unary_union as _birlesim
+    from . import yazi_cakisma as YC
+    r = fig.canvas.get_renderer()
+    eksen = fig.axes.index(ax)
+    yaylar = [k["poligon"] for k in YC.kapi_yaylari(fig) if k["eksen"] == eksen]
+    if not yaylar:
+        return {}
+    yay = _birlesim(yaylar)
+    yay_pay = yay.buffer(bosluk_pt * fig.dpi / 72.0)          # yeni yer yaydan en az bu kadar uzak (harf yaya yapışmasın)
+    tasinan = {}
+    for gi, (yazilar, oda) in enumerate(gruplar):
+        def murekkep():
+            return [YC._murekkep(t, r, fig.dpi)[0] for t in yazilar]
+        if not any(YC._gercek(m.intersection(yay), YC.PAY_PX) > 0 for m in murekkep()):
+            continue
+        M = ax.transData.get_affine().get_matrix()
+        oda_px = affinity.affine_transform(oda, [M[0, 0], M[0, 1], M[1, 0], M[1, 1], M[0, 2], M[1, 2]])
+        obur = _birlesim([YC._murekkep(t, r, fig.dpi)[0] for t in ax.texts if t not in yazilar and t.get_text().strip() and t.get_visible()]
+                         or [box(0, 0, 0, 0)])
+        bas = [t.get_position() for t in yazilar]
+        adaylar = sorted(((i * adim, j * adim) for i in range(-en_cok, en_cok + 1) for j in range(-en_cok, en_cok + 1) if (i, j) != (0, 0)),
+                         key=lambda d: (round(d[0] ** 2 + d[1] ** 2, 6), -d[1], d[0]))
+        for dx, dy in adaylar:
+            for t, (x, y_) in zip(yazilar, bas):
+                t.set_position((x + dx, y_ + dy))
+            mm = murekkep()
+            if all(oda_px.contains(m) and YC._gercek(m.intersection(yay_pay), YC.PAY_PX) == 0 and YC._gercek(m.intersection(obur), YC.PAY_PX) == 0
+                   for m in mm):
+                tasinan[gi] = (dx, dy)
+                break
+        else:
+            for t, p in zip(yazilar, bas):
+                t.set_position(p)
+    return tasinan
 
 
 def kapi_ciz(ax, y: dict, ac: dict):
@@ -147,7 +200,7 @@ def kapi_ciz(ax, y: dict, ac: dict):
     t1, t2 = sorted([kapali % 360, acik % 360])
     if t2 - t1 > 180:
         t1, t2 = t2, t1 + 360
-    ax.add_patch(Arc((hx, hy), 2 * r, 2 * r, theta1=t1, theta2=t2, color="#8a4b2a", lw=0.8, ls=(0, (3, 2)), zorder=6))
+    ax.add_patch(Arc((hx, hy), 2 * r, 2 * r, theta1=t1, theta2=t2, color="#8a4b2a", lw=0.8, ls=(0, (3, 2)), zorder=6, gid="kapi_yay"))
 
 
 def aciklik_kutusu(y: dict, ac: dict, pay: float = 3.5):
@@ -174,8 +227,10 @@ def plan_eksen(ax, y: dict, baslik: str | None = None, bilgi: list[str] | None =
         c = b["net"].representative_point()
         cx, cy = b.get("etiket_yeri", (c.x, c.y))
         kutu = dict(fc="white", ec="none", pad=1.5) if veranda else None
-        ax.text(cx, cy + mahal_aralik, b["ad"].upper(), ha="center", va="center", fontsize=8.6, weight="bold", zorder=8, bbox=kutu)
-        ax.text(cx, cy - mahal_aralik, f"{tr(b['alan_m2'])} m²", ha="center", va="center", fontsize=8.6, zorder=8, bbox=kutu)
+        ax.text(cx, cy + mahal_aralik, b["ad"].upper(), ha="center", va="center", fontsize=8.6, weight="bold", zorder=8, bbox=kutu,
+                gid=f"mahal:{b['ad']}")                                     # gid çizime girmez; bayi görselinde yay denetimi bulur (BK-09)
+        ax.text(cx, cy - mahal_aralik, f"{tr(b['alan_m2'])} m²", ha="center", va="center", fontsize=8.6, zorder=8, bbox=kutu,
+                gid=f"mahal:{b['ad']}")
     # duvarlar (kapı ve geçitlerde kesilir; pencerede duvar sürer)
     delik = unary_union([aciklik_kutusu(y, a) for a in y["acikliklar"] if a["tur"] != "pencere"] or [box(0, 0, 0, 0)])
     for sinif in ("korkuluk", "ic", "ek", "dis", "baca", "kolon"):
@@ -543,8 +598,10 @@ def gorunus_eksen(ax, S: list[dict], taraf: str, duvar_h: float, olculu: bool = 
     ax.axis("off")
 
 
-def pafta(y: dict, c: dict, S: list[dict], cikti: Path, sol: list[str], sag: list[str], inisler=None, alt_baslik: str = "TASLAK · modelden okunan ölçülerle kuruldu · üretim projesi değildir"):
+def pafta(y: dict, c: dict, S: list[dict], cikti: Path, sol: list[str], sag: list[str], inisler=None, alt_baslik: str = "TASLAK · modelden okunan ölçülerle kuruldu · üretim projesi değildir",
+          ad: str | None = None):
     t = y["tanim"]
+    ad = ad or f"{t['kod']} · {t['ad']}"
     fig = plt.figure(figsize=(18.5, 13.6), dpi=140)
     gs = GridSpec(3, 4, figure=fig, height_ratios=[1.9, 1.0, 0.52], hspace=0.10, wspace=0.06)
     ax = fig.add_subplot(gs[0, 0:2])
@@ -559,7 +616,7 @@ def pafta(y: dict, c: dict, S: list[dict], cikti: Path, sol: list[str], sag: lis
     sar = lambda satirlar: "\n".join("\n    ".join(textwrap.wrap(x, 118)) for x in satirlar)
     ax.text(0.0, 0.98, sar(sol), ha="left", va="top", fontsize=8.8, linespacing=1.5, transform=ax.transAxes)
     ax.text(0.51, 0.98, sar(sag), ha="left", va="top", fontsize=8.8, linespacing=1.5, transform=ax.transAxes)
-    fig.suptitle(f"{t['kod']} · {t['ad']}   —   {alt_baslik}", fontsize=12.5, weight="bold", x=0.02, ha="left", y=0.965)
+    fig.suptitle(f"{ad}   —   {alt_baslik}", fontsize=12.5, weight="bold", x=0.02, ha="left", y=0.965)
     fig.savefig(cikti, bbox_inches="tight", facecolor="white")
     plt.close(fig)
 
@@ -594,11 +651,12 @@ def main() -> int:
     kod = t["kod"].replace("Ç", "C").replace("-", "")
     inis, _ = inis_kurali(c, kur, t["cati"].get("sacak", 30))
     fig, ax = plt.subplots(figsize=(13.5, 11.5), dpi=140)
-    plan_eksen(ax, y, baslik=f"{t['kod']} · {t['ad']}\nTASLAK · modelden okunan ölçülerle kuruldu · üretim projesi değildir", bilgi=sol + ["Ölçü zinciri: dış yüzler ve iç duvar aksları · ölçüler cm"])
+    ad = girdi_genel.baslik_adi(t, m["oturum_m2"])               # BK-09 M7: KT'de m² koddan
+    plan_eksen(ax, y, baslik=f"{ad}\nTASLAK · modelden okunan ölçülerle kuruldu · üretim projesi değildir", bilgi=sol + ["Ölçü zinciri: dış yüzler ve iç duvar aksları · ölçüler cm"])
     fig.savefig(a.cikti / f"{kod}_plan.png", bbox_inches="tight", facecolor="white")
     plt.close(fig)
-    pafta(y, c, S, a.cikti / f"{kod}_pafta.png", sol, sag, inis)
-    gorunusler(S, a.cikti / f"{kod}_gorunusler.png", t["kat_yuksekligi"], f"{t['kod']} · {t['ad']} · görünüşler")
+    pafta(y, c, S, a.cikti / f"{kod}_pafta.png", sol, sag, inis, ad=ad)
+    gorunusler(S, a.cikti / f"{kod}_gorunusler.png", t["kat_yuksekligi"], f"{ad} · görünüşler")
     print("yazıldı:", ", ".join(f"{kod}_{x}.png" for x in ("plan", "pafta", "gorunusler")))
     return 0
 

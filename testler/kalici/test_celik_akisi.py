@@ -328,6 +328,8 @@ def test_r02_pencere_olcusu_ayni_proje_once_sonra(depo, wa, hizli_genel):
     assert (p5["en"], p5["yuk"], p5["alt"], p5["etiket"]) == (120, 120, 80, "120/120")            # çizilen tanımda uygulandı
     satir = sorgu(depo, "SELECT satir, govde FROM giden WHERE kind = 'interactive' ORDER BY olusturuldu DESC, sira DESC")[0]
     assert satir["satir"]["file"].endswith("C8801K_once_sonra.png") and "Uygulanan: Mutfak penceresi" in satir["govde"]
+    belge = sorgu(depo, "SELECT govde FROM giden WHERE kind = 'document' ORDER BY olusturuldu DESC, sira DESC")[0]["govde"]
+    assert "Uygulanan: Mutfak penceresi" in belge and "mutfak penceresi 120x120 olsun" not in belge    # BK-09 M1: PDF açıklaması kodun okuması
     d, _ = depo.konusma_oku(NUMARA_A)
     assert d["revizyon"] == 1 and d["son_is_emri"]["revizyon"] == 2
     oz = W.baglam_ozeti(type("K", (), {"d": d})())
@@ -366,7 +368,7 @@ def test_okuma_iki_aday_gorselli_soru_ve_dugme_2(depo, wa, hizli_genel):
     assert d["revizyon"] == 1 and "okuma_bekleyen" not in d and d.get("son_soru_alani") is None
     assert sorgu(depo, "SELECT alan, durum FROM sorular ORDER BY id DESC")[0] == {"alan": "okuma", "durum": "cevaplandi"}
     belge = sorgu(depo, "SELECT govde FROM giden WHERE kind = 'document' ORDER BY olusturuldu DESC, sira DESC")[0]["govde"]
-    assert "kısa cevap" not in belge and "salondaki sol taraftaki pencere" in belge             # CR17: PDF başlığında talebin özeti
+    assert "kısa cevap" not in belge and "Uygulanan: " in belge and "→ 120/180" in belge     # CR17 + BK-09 M1: PDF başlığında kodun okuması
 
 
 def test_okuma_hicbiri_once_soru_sonra_yonlendirme(depo, wa, hizli_genel):
