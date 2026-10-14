@@ -123,6 +123,38 @@ def _bolge_dikdortgenleri(geo, eksenler_x: list[float], eksenler_y: list[float],
     return birlesik
 
 
+def sapma_duzelt(mahaller: list[dict], en: int, boy: int, esik: int = 10) -> None:
+    """Çevirinin 5 cm sapmalarını giderir (yerinde): bir eksende birbirine `esik` cm'den yakın köşe değerleri tek değere çekilir
+    (en sık geçen; eşitse küçüğü; dış yüzler 0 ve en/boy sabit). Ör. Ç8801'de veranda ve hol 630'da, yatak odaları 635'te biter."""
+    for k, ust in ((0, en), (1, boy)):
+        say: dict[int, int] = {}
+        for m in mahaller:
+            for r in m["dikdortgenler"]:
+                for v in (r[k], r[k + 2]):
+                    say[v] = say.get(v, 0) + 1
+        degerler = sorted(say)
+        esle: dict[int, int] = {}
+        grup: list[int] = []
+        for v in degerler + [None]:
+            if v is not None and grup and v - grup[-1] <= esik:
+                grup.append(v)
+                continue
+            if grup:
+                sabit = [g for g in grup if g in (0, ust)]
+                hedef = sabit[0] if sabit else max(grup, key=lambda g: (say[g], -g))
+                for g in grup:
+                    esle[g] = hedef
+            grup = [v] if v is not None else []
+        for m in mahaller:
+            yeni = []
+            for r in m["dikdortgenler"]:
+                q = list(r)
+                q[k], q[k + 2] = esle.get(q[k], q[k]), esle.get(q[k + 2], q[k + 2])
+                if q[k + 2] > q[k]:
+                    yeni.append(q)
+            m["dikdortgenler"] = yeni
+
+
 def tanimdan(tanim: dict) -> dict:
     """Bankadaki Yapı Tanımı → plan şeması sözlüğü (doğrulanmamış; LLM örneği). Dış ölçü, mahaller (eksene yaslı dikdörtgenler),
     kapılar (açıklığın duvarının iki yanındaki mahaller), pencereler (mahal, cephe, ölçü), çatı tipi."""
@@ -176,6 +208,7 @@ def tanimdan(tanim: dict) -> dict:
             if "dis" in ikisi:
                 ikisi = ["dis", a2 if a1 == "dis" else a1]
             kapilar.append({"arasinda": ikisi})
+    sapma_duzelt(mahaller, en, boy)
     ct = tanim.get("cati", {})
     tip = "kirma" if "kirma" in str(ct.get("tip", "")) else "besik"
     return {"dis_olcu": {"en": en, "boy": boy}, "mahaller": mahaller, "kapilar": kapilar, "pencereler": pencereler,
