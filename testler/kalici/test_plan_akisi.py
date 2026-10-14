@@ -402,3 +402,43 @@ def test_yeniden_denemede_eski_plana_karsi_okuma_kullanilmaz(monkeypatch):
     assert sayac["n"] == 1                                                               # aynı plana karşı olan yeniden kullanıldı
     k.d["son_soru_alani"] = "secenek"
     assert W.llm_once_revizyon(k, t, g, None, None, ayar, None, None) == (None, None) and sayac["n"] == 1   # set açıkken ücretli çağrı yok
+
+
+# ───────────────────────── r3 · P4: LLM-önce okuma gölgede (kural karar verir, LLM kayda; göç 008) ─────────────────────────
+def _golge(tmp_path, cevap: dict) -> dict:
+    yol = tmp_path / "golge.json"
+    yol.write_text(json.dumps(cevap, ensure_ascii=False), encoding="utf-8")
+    return {**AYAR, "mesaj_katmani": True, "llm_once_revizyon": {"mod": "golge", "backend": "manuel", "hazir_dosya": str(yol)}}
+
+
+def test_golge_ayni_okuma_kural_karar_verir_kiyas_kaydi(depo, wa, hizli_genel, tmp_path):
+    _r01_c8801k(depo)
+    ayar = _golge(tmp_path, {"islemler": [_islem(tur="pencere_olcu", aciklik="P5", en=120, yuk=120, alinti="mutfak penceresi 120x120")]})
+    assert depo.mesaj_kaydet(mesaj("mutfak penceresi 120x120 olsun", talep("revizyon", ozet="mutfak penceresi"), bayi=BAYI_KART))
+    [r] = isle_hepsi(depo, ayar)
+    assert r["eylem"] == "is_emri", r
+    sn = sorgu(depo, "SELECT sonuc FROM isler ORDER BY id DESC")[0]["sonuc"]
+    assert "llm_degisiklik" not in sn and sn["okuma_kiyasi"]["sinif"] == "aynı", sn
+    y = son_rev(depo)["is_emri"]["yapi"]
+    assert [(d["op"], d["aciklik"], d["en"], d["yuk"]) for d in y["degisiklikler"]] == [("pencere_olcu", "P5", 120, 120)]
+    ok = sorgu(depo, "SELECT sinif, model, kural, llm, is_emri_no, rev FROM okuma_kiyaslari")
+    assert len(ok) == 1 and ok[0]["sinif"] == "aynı" and ok[0]["model"] == "Ç8801K" and ok[0]["rev"] == 2
+    assert ok[0]["kural"]["ogeler"] == [["pencere", "P5", 120, 120]] and "mutfak" not in json.dumps(ok[0])     # metin satırda yok
+    assert sorgu(depo, "SELECT cikarim FROM isler ORDER BY id DESC")[0]["cikarim"]["degisiklik_golge"]["durum"] == "tamam"
+
+
+def test_golge_farkli_okumada_karar_yine_kuralin(depo, wa, hizli_genel, tmp_path):
+    _r01_c8801k(depo)
+    ayar = _golge(tmp_path, {"islemler": [_islem(tur="pencere_olcu", aciklik="P6", en=120, yuk=180, alinti="yanlış okuma")]})
+    assert depo.mesaj_kaydet(mesaj("mutfak penceresi 120x120 olsun", talep("revizyon", ozet="mutfak penceresi"), bayi=BAYI_KART))
+    [r] = isle_hepsi(depo, ayar)
+    assert r["eylem"] == "is_emri"
+    assert sorgu(depo, "SELECT sonuc FROM isler ORDER BY id DESC")[0]["sonuc"]["okuma_kiyasi"]["sinif"] == "farklı"
+    y = son_rev(depo)["is_emri"]["yapi"]
+    assert [(d["aciklik"], d["en"], d["yuk"]) for d in y["degisiklikler"]] == [("P5", 120, 120)]    # kuralın okuması uygulandı
+    assert sorgu(depo, "SELECT sinif FROM okuma_kiyaslari")[0]["sinif"] == "farklı"
+
+
+def test_okuma_modu_geriye_uyum():
+    assert W.okuma_modu({}) == "kapali" and W.okuma_modu({"acik": True}) == "acik"
+    assert W.okuma_modu({"acik": True, "mod": "golge"}) == "golge" and W.okuma_modu({"mod": "kapali", "acik": True}) == "kapali"

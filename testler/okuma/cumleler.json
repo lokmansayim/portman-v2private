@@ -1,0 +1,335 @@
+{
+ "sema": "portman.okuma_cumleleri/0.1",
+ "aciklama": "İE-14 r3 P4: LLM-önce okuma ile celik_okuma'nın kıyas seti. Bu cümleler GERÇEK BAYİ CÜMLESİ DEĞİLDİR: IE-08'deki bilinen sınırlamaların (S1–S7) örnekleri ve depodaki testlerde hakem/asistanın yazdığı cümleler. Gerçek bayi cümleleri canlıdan maskeli dışa aktarımla eklenir (yeni veri paylaşımı; Lokman'ın ayrı onayı). 'etiket': hangi okumanın doğru olduğu — Lokman ya da mühendis doldurur ('kural' | 'llm' | 'ikisi' | 'hicbiri').",
+ "cumleler": [
+  {
+   "id": "s01",
+   "model": "Ç8801",
+   "metin": "Ç8801L olmasa iyi olur",
+   "kaynak": "IE-08 bilinen sınırlama S1",
+   "etiket": null
+  },
+  {
+   "id": "s02",
+   "model": "Ç8801",
+   "metin": "salonu büyütüp mutfak penceresini 120x120 yapalım",
+   "kaynak": "IE-08 bilinen sınırlama S2",
+   "etiket": null
+  },
+  {
+   "id": "s03",
+   "model": "Ç8801",
+   "metin": "mutfağa kumaşın rengine uygun pencere yapalım",
+   "kaynak": "IE-08 bilinen sınırlama S4",
+   "etiket": null
+  },
+  {
+   "id": "s04",
+   "model": "Ç8801",
+   "metin": "dışlar 140'lık sandviç panel olsun",
+   "kaynak": "IE-08 bilinen sınırlama S5",
+   "etiket": null
+  },
+  {
+   "id": "s05",
+   "model": "Ç8801",
+   "metin": "mutfak penceresi 120x120 çift cam olsun",
+   "kaynak": "IE-08 bilinen sınırlama S5",
+   "etiket": null
+  },
+  {
+   "id": "s06",
+   "model": "Ç8801",
+   "metin": "pencereler PVC olsun",
+   "kaynak": "IE-08 bilinen sınırlama S5",
+   "etiket": null
+  },
+  {
+   "id": "s07",
+   "model": "Ç8801",
+   "metin": "dışlar 140'lık olsun ve yüksekliği 300 olsun",
+   "kaynak": "IE-08 bilinen sınırlama S5",
+   "etiket": null
+  },
+  {
+   "id": "s08",
+   "model": "Ç8801",
+   "metin": "mutfak penceresi 125x182,5 olsun",
+   "kaynak": "IE-08 bilinen sınırlama S7",
+   "etiket": null
+  },
+  {
+   "id": "s09",
+   "model": "Ç8801",
+   "metin": "mutfak penceresi 120,5x180 olsun",
+   "kaynak": "IE-08 bilinen sınırlama S7",
+   "etiket": null
+  },
+  {
+   "id": "t01",
+   "model": "Ç8801",
+   "metin": "mutfak penceresi 120x120 olsun",
+   "kaynak": "depo testleri (test_celik_okuma, test_celik_revizyon_karar)",
+   "etiket": null
+  },
+  {
+   "id": "t02",
+   "model": "Ç8801",
+   "metin": "Merhaba, mutfak penceresi 120x120 olsun lütfen. Teşekkürler",
+   "kaynak": "depo testleri (test_celik_okuma, test_celik_revizyon_karar)",
+   "etiket": null
+  },
+  {
+   "id": "t03",
+   "model": "Ç8801",
+   "metin": "Mutfağın penceresini 120 x 180 yapalım",
+   "kaynak": "depo testleri (test_celik_okuma, test_celik_revizyon_karar)",
+   "etiket": null
+  },
+  {
+   "id": "t04",
+   "model": "Ç8801",
+   "metin": "mutfak penceresini 120x120 ile değiştirelim",
+   "kaynak": "depo testleri (test_celik_okuma, test_celik_revizyon_karar)",
+   "etiket": null
+  },
+  {
+   "id": "t05",
+   "model": "Ç8801",
+   "metin": "mutfak penceresini büyütelim",
+   "kaynak": "depo testleri (test_celik_okuma, test_celik_revizyon_karar)",
+   "etiket": null
+  },
+  {
+   "id": "t06",
+   "model": "Ç8801",
+   "metin": "mutfak penceresi 120x120 olmasın",
+   "kaynak": "depo testleri (test_celik_okuma, test_celik_revizyon_karar)",
+   "etiket": null
+  },
+  {
+   "id": "t07",
+   "model": "Ç8801",
+   "metin": "mutfak 60x40 olsun",
+   "kaynak": "depo testleri (test_celik_okuma, test_celik_revizyon_karar)",
+   "etiket": null
+  },
+  {
+   "id": "t08",
+   "model": "Ç8801",
+   "metin": "banyo vasistası 60/60 olsun",
+   "kaynak": "depo testleri (test_celik_okuma, test_celik_revizyon_karar)",
+   "etiket": null
+  },
+  {
+   "id": "t09",
+   "model": "Ç8801",
+   "metin": "banyodaki vasistası kaldırın",
+   "kaynak": "depo testleri (test_celik_okuma, test_celik_revizyon_karar)",
+   "etiket": null
+  },
+  {
+   "id": "t10",
+   "model": "Ç8801",
+   "metin": "WC'ye 80x50 pencere yapalım",
+   "kaynak": "depo testleri (test_celik_okuma, test_celik_revizyon_karar)",
+   "etiket": null
+  },
+  {
+   "id": "t11",
+   "model": "Ç8801",
+   "metin": "arka cephedeki pencere 120x120 olsun",
+   "kaynak": "depo testleri (test_celik_okuma, test_celik_revizyon_karar)",
+   "etiket": null
+  },
+  {
+   "id": "t12",
+   "model": "Ç8801",
+   "metin": "1. yatak odasında pencereyi 120x180 yapalım",
+   "kaynak": "depo testleri (test_celik_okuma, test_celik_revizyon_karar)",
+   "etiket": null
+  },
+  {
+   "id": "t13",
+   "model": "Ç8801",
+   "metin": "bir yatak odasının penceresi 120x180 olsun",
+   "kaynak": "depo testleri (test_celik_okuma, test_celik_revizyon_karar)",
+   "etiket": null
+  },
+  {
+   "id": "t14",
+   "model": "Ç8801",
+   "metin": "hepsi 120x180 olsun",
+   "kaynak": "depo testleri (test_celik_okuma, test_celik_revizyon_karar)",
+   "etiket": null
+  },
+  {
+   "id": "t15",
+   "model": "Ç8801",
+   "metin": "mutfak penceresi 120x120, banyo vasistası 60x60 olsun",
+   "kaynak": "depo testleri (test_celik_okuma, test_celik_revizyon_karar)",
+   "etiket": null
+  },
+  {
+   "id": "t16",
+   "model": "Ç8801",
+   "metin": "mutfak penceresi 120x120 ve dışlar 140'lık olsun",
+   "kaynak": "depo testleri (test_celik_okuma, test_celik_revizyon_karar)",
+   "etiket": null
+  },
+  {
+   "id": "t17",
+   "model": "Ç8801",
+   "metin": "dış duvarlar 140'lık olsun",
+   "kaynak": "depo testleri (test_celik_okuma, test_celik_revizyon_karar)",
+   "etiket": null
+  },
+  {
+   "id": "t18",
+   "model": "Ç8801",
+   "metin": "140'lık dış duvar istiyoruz",
+   "kaynak": "depo testleri (test_celik_okuma, test_celik_revizyon_karar)",
+   "etiket": null
+  },
+  {
+   "id": "t19",
+   "model": "Ç8801",
+   "metin": "dışlar 140 olmasın",
+   "kaynak": "depo testleri (test_celik_okuma, test_celik_revizyon_karar)",
+   "etiket": null
+  },
+  {
+   "id": "t20",
+   "model": "Ç8801",
+   "metin": "dış kapı 140 cm olsun",
+   "kaynak": "depo testleri (test_celik_okuma, test_celik_revizyon_karar)",
+   "etiket": null
+  },
+  {
+   "id": "t21",
+   "model": "Ç8801",
+   "metin": "iç duvarlar 140 olsun",
+   "kaynak": "depo testleri (test_celik_okuma, test_celik_revizyon_karar)",
+   "etiket": null
+  },
+  {
+   "id": "t22",
+   "model": "Ç8801",
+   "metin": "dış duvarlar kalın olsun",
+   "kaynak": "depo testleri (test_celik_okuma, test_celik_revizyon_karar)",
+   "etiket": null
+  },
+  {
+   "id": "t23",
+   "model": "Ç8801",
+   "metin": "dışlar 140 olsun, mutfağa kapı ekleyin",
+   "kaynak": "depo testleri (test_celik_okuma, test_celik_revizyon_karar)",
+   "etiket": null
+  },
+  {
+   "id": "t24",
+   "model": "Ç8801",
+   "metin": "dış duvarlar 140'lık olsun ve çatı L olsun",
+   "kaynak": "depo testleri (test_celik_okuma, test_celik_revizyon_karar)",
+   "etiket": null
+  },
+  {
+   "id": "t25",
+   "model": "Ç8801",
+   "metin": "L olsun",
+   "kaynak": "depo testleri (test_celik_okuma, test_celik_revizyon_karar)",
+   "etiket": null
+  },
+  {
+   "id": "t26",
+   "model": "Ç8801",
+   "metin": "L yerine K olsun",
+   "kaynak": "depo testleri (test_celik_okuma, test_celik_revizyon_karar)",
+   "etiket": null
+  },
+  {
+   "id": "t27",
+   "model": "Ç8801",
+   "metin": "katalog çatısı olsun",
+   "kaynak": "depo testleri (test_celik_okuma, test_celik_revizyon_karar)",
+   "etiket": null
+  },
+  {
+   "id": "t28",
+   "model": "Ç8801",
+   "metin": "mutfak penceresi 120x120 olsun, çatı K ve L olsun",
+   "kaynak": "depo testleri (test_celik_okuma, test_celik_revizyon_karar)",
+   "etiket": null
+  },
+  {
+   "id": "t29",
+   "model": "Ç8801",
+   "metin": "eğimi dik olsun",
+   "kaynak": "depo testleri (test_celik_okuma, test_celik_revizyon_karar)",
+   "etiket": null
+  },
+  {
+   "id": "t30",
+   "model": "Ç8801",
+   "metin": "dış cephe rengi gri olsun",
+   "kaynak": "depo testleri (test_celik_okuma, test_celik_revizyon_karar)",
+   "etiket": null
+  },
+  {
+   "id": "t31",
+   "model": "Ç8801",
+   "metin": "banyo fayansı beyaz olsun",
+   "kaynak": "depo testleri (test_celik_okuma, test_celik_revizyon_karar)",
+   "etiket": null
+  },
+  {
+   "id": "t32",
+   "model": "Ç8801",
+   "metin": "mutfak kapısı 90x200 olsun",
+   "kaynak": "depo testleri (test_celik_okuma, test_celik_revizyon_karar)",
+   "etiket": null
+  },
+  {
+   "id": "t33",
+   "model": "Ç8801",
+   "metin": "mutfak dolabı 60x90 olsun",
+   "kaynak": "depo testleri (test_celik_okuma, test_celik_revizyon_karar)",
+   "etiket": null
+  },
+  {
+   "id": "t34",
+   "model": "Ç8801",
+   "metin": "mutfak büyük ve penceresi 120x120 olsun",
+   "kaynak": "depo testleri (test_celik_okuma, test_celik_revizyon_karar)",
+   "etiket": null
+  },
+  {
+   "id": "t35",
+   "model": "Ç8801",
+   "metin": "mutfak penceresi 120x120 ve salonu büyütelim",
+   "kaynak": "depo testleri (test_celik_okuma, test_celik_revizyon_karar)",
+   "etiket": null
+  },
+  {
+   "id": "t36",
+   "model": "Ç8801",
+   "metin": "dışlar 140'lık olsun ve odalar geniş olsun",
+   "kaynak": "depo testleri (test_celik_okuma, test_celik_revizyon_karar)",
+   "etiket": null
+  },
+  {
+   "id": "t37",
+   "model": "Ç8801",
+   "metin": "hol penceresi 120x120 olsun, banyoya havlupan koyalım",
+   "kaynak": "depo testleri (test_celik_okuma, test_celik_revizyon_karar)",
+   "etiket": null
+  },
+  {
+   "id": "t38",
+   "model": "Ç8801",
+   "metin": "değişiklik yok",
+   "kaynak": "depo testleri (test_celik_okuma, test_celik_revizyon_karar)",
+   "etiket": null
+  }
+ ]
+}

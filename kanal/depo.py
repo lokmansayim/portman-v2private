@@ -387,6 +387,14 @@ class Depo:
                            Jsonb(pu.get("denemeler") or []), int(pu.get("cagri") or 0), int(pu.get("girdi_token") or 0),
                            int(pu.get("cikti_token") or 0), pu.get("model"), pu.get("hata"), pu.get("yol"), pu.get("puan"),
                            pu.get("sure_ms"), Jsonb(pu.get("program")), Jsonb(pu.get("adaylar") or []), Jsonb(pu.get("degisen") or [])))
+            # İE-14 r3 (göç 008): gölge okuma kıyası (kural ↔ LLM); mesaj metni yazılmaz
+            ok_ = cikti.get("okuma_kiyasi")
+            if ok_:
+                c.execute("INSERT INTO okuma_kiyaslari (mesaj_id, gonderen, is_emri_no, rev, model, kural, llm, sinif, cagri, girdi_token, "
+                          "cikti_token) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT (mesaj_id) DO NOTHING",
+                          (gelen["id"], gelen["sender"], sonuc.get("is_emri_no"), sonuc.get("revizyon"), ok_.get("model"),
+                           Jsonb(ok_.get("kural") or {}), Jsonb(ok_.get("llm") or {}), ok_["sinif"], int(ok_.get("cagri") or 0),
+                           int(ok_.get("girdi_token") or 0), int(ok_.get("cikti_token") or 0)))
             yeni_kod = ((d_yeni.get("son_is_emri") or {}).get("yapi") or {}).get("kod")
             if revizyon_id and str(yeni_kod or "").startswith("YENI-"):
                 c.execute("UPDATE plan_uretimleri SET is_emri_no = %s, plan_kodu = %s WHERE is_emri_no IS NULL AND "

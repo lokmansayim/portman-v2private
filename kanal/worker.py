@@ -365,11 +365,19 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
     pu_kayit = None
     pu_ayar = settings.get("plan_uretimi") or {}
     k.plan_uretimi = bool(pu_ayar.get("acik"))       # İE-14 (D-18): kapalıysa uyan-yok dalı bugünkü davranış
+    k.llm_golge = None
+    son_y0 = (k.d.get("son_is_emri") or {}).get("yapi") or {}     # gölge kıyası karar öncesi açık plana karşı
     k.llm_yeni_plan, k.llm_degisiklik = llm_once_revizyon(k, talep, gelen, etk, cikarim, settings, katalog, ek_kaydet)
     for a, v in (("plan_duzenleme", k.llm_yeni_plan), ("llm_degisiklik", k.llm_degisiklik)):
         if v is not None:
             sonuc[a] = {b: v.get(b) for b in ("durum", "cagri", "girdi_token", "cikti_token", "hata")}
     karar = karar_ver(talep, k, bayi, katalog, metin=metin_kural)
+    okuma_k = None
+    if getattr(k, "llm_golge", None) is not None:        # r3 P4: kararı etkilemez; kayıt (göç 008) ve iş sonucu
+        from beyin import numara as _nm
+        okuma_k = okuma_kiyasi(son_y0, _nm.maskele((gelen.get("text") or "").strip()), katalog, k.llm_golge)
+        if okuma_k:
+            sonuc["okuma_kiyasi"] = {"sinif": okuma_k["sinif"], "cagri": okuma_k["cagri"]}
     if karar.gerekce == PLAN_URETIMI and k.d.get("plan_istegi"):
         # İE-14: bayiye önce "hazırlıyorum", sonra üretim (LLM, en çok 3 çağrı; sonuç iş satırına yazılır, yeniden denenen iş çağırmaz),
         # yeni planın kartı ve seçenek seti (`karar.plan_sonucu`). Üretim düşerse "uygulayamadım" + Patron.
@@ -492,7 +500,8 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
         model_notu = f" Katalog notu ({model['code']}): {model['not']}" if model and model.get("not") else ""   # D-07: yalnız Patron'a
         patrona(f"Portman yönlendirme: {kim} — {karar.gerekce}.{model_notu} Mesaj: \"{maske_numaralar(gelen.get('text') or '')[:300]}\"",
                 sablon=True, is_emri_no=sonuc.get("is_emri_no"))
-    return {"satirlar": satirlar, "sonuc": sonuc, **({"plan_uretimi": pu_kayit} if pu_kayit else {})}
+    return {"satirlar": satirlar, "sonuc": sonuc, **({"plan_uretimi": pu_kayit} if pu_kayit else {}),
+            **({"okuma_kiyasi": okuma_k} if okuma_k else {})}
 
 
 def _cizim_hatasi(k, d0: dict, karar, talep, meta: dict, cizim: dict, ie: dict, settings: dict, sonuc: dict, satirlar: list, ekle, patrona,
@@ -657,14 +666,49 @@ def llm_once_revizyon(k, talep, gelen: dict, etk, cikarim: dict | None, settings
                 ek_kaydet("plan_duzenleme", pd)
         return pd, None
     lo_ayar = settings.get("llm_once_revizyon") or {}
-    if not yeni_mi and lo_ayar.get("acik"):
+    mod = okuma_modu(lo_ayar)
+    if not yeni_mi and mod == "acik":
         lo = onceki("degisiklik")
         if lo is None:
             lo = {**degisiklik_oku(son_y, metin, katalog, lo_ayar), "_temel": temel}
             if ek_kaydet is not None:
                 ek_kaydet("degisiklik", lo)
         return None, lo
+    if not yeni_mi and mod == "golge":                    # r3 P4: kural karar verir; LLM okuması yalnız kayda ve kıyasa (bayiye gitmez)
+        lg = onceki("degisiklik_golge")
+        if lg is None:
+            lg = {**degisiklik_oku(son_y, metin, katalog, lo_ayar), "_temel": temel}
+            if ek_kaydet is not None:
+                ek_kaydet("degisiklik_golge", lg)
+        k.llm_golge = lg
     return None, None
+
+
+def okuma_modu(lo_ayar: dict) -> str:
+    """`llm_once_revizyon.mod`: kapali | golge | acik; `mod` yoksa geriye uyum (`acik: true` → acik)."""
+    m = lo_ayar.get("mod")
+    if m in ("kapali", "golge", "acik"):
+        return m
+    return "acik" if lo_ayar.get("acik") else "kapali"
+
+
+def okuma_kiyasi(son_y: dict, metin: str, katalog, lg: dict) -> dict | None:
+    """Gölge kipinde iki okumanın kıyası (`beyin/okuma_kiyas.py`): açık planın tablosuna karşı kural ve LLM okuması, sınıf. Metin satıra
+    yazılmaz (mesajlar tablosunda). İstisna fırlatmaz."""
+    from beyin import celik_okuma as CO, okuma_kiyas as OK, varyant
+    try:
+        t = _cizim_tanimi(son_y["tanim"], son_y.get("degisiklikler"))
+        y = varyant._kur(t)
+        aday = katalog.aday(son_y.get("kod")) or {}
+        taban = katalog.aday(aday.get("referans_model")) if aday.get("referans_model") else None
+        kat = taban if (taban and taban.get("varyantlar")) else aday
+        kodlar = {kat["kod"], *(kat.get("varyantlar") or [])} if kat.get("varyantlar") else set()
+        k = OK.kiyas(metin, t, kat if kat.get("varyantlar") else None, lg, CO.pencere_adaylari(t, y), kodlar, y)
+        return {"model": son_y.get("kod"), "kural": k["kural"], "llm": k["llm"], "sinif": k["sinif"],
+                **{a: lg.get(a) or 0 for a in ("cagri", "girdi_token", "cikti_token")}}
+    except Exception as e:
+        log("okuma kıyası yapılamadı:", maske_numaralar(f"{type(e).__name__}: {str(e)[:160]}"))
+        return None
 
 
 def _hazir(ayar: dict):
