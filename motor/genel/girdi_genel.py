@@ -33,6 +33,17 @@ KAPLAMA_ADI = {"sandvic_panel": "sandviç panel", "tek_kat_panel": "tek kat pane
                "osb_trapez": "OSB + nem bariyeri + trapez sac", "trapez_sac": "trapez sac", "osb_shingle": "OSB + membran + shingle"}
 
 
+
+def baslik_adi(t: dict, oturum_m2: float) -> str:
+    """Başlıktaki "kod · ad". Müşteri projesinde (KT-xx) addaki m² koddan hesaplanan brüt oturumla yazılır, bayi paftasıyla aynı sayı
+    (BK-09 M7; Görev 2: KT-02/03 başlığında 90 / 80 m², bayi PDF'inde 92 / 94). Model dosyası değişmez (D-07); katalog adları aynen."""
+    import re
+    from .bayi_gorseli import musteri_projesi
+    ad = t["ad"]
+    if musteri_projesi(t):
+        ad = re.sub(r"\d+(?:[.,]\d+)?\s*m²", f"{oturum_m2:.0f} m²", ad, count=1)
+    return f"{t['kod']} · {ad}"
+
 def tr(v: float, n: int = 1) -> str:
     return f"{v:.{n}f}".replace(".", ",")
 
@@ -682,7 +693,7 @@ def girdi(y: dict, c: dict, m: dict, kur: dict, kaynak: str) -> dict:
     duvar_paneli = sum(gr[s]["adet"] for s in ("dis", "ic", "ek", "korkuluk") if gr.get(s))
     g = {
         "sema": "portman.yukleme_girdisi/0.5-taslak",
-        "ad": f"{t['kod']} · {t['ad']}",
+        "ad": baslik_adi(t, m["oturum_m2"]),
         "kaynak": kaynak,
         "bina_m2": round(m["oturum_m2"]),
         "oturum_m2": round(m["oturum_m2"], 2),

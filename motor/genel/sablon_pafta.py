@@ -33,6 +33,7 @@ from matplotlib.patches import Arc, FancyBboxPatch, PathPatch, Polygon as MplPol
 from matplotlib.path import Path as MplPath
 from matplotlib.textpath import TextPath
 from shapely.geometry import Polygon as SPolygon
+from shapely.affinity import affine_transform
 from shapely.ops import unary_union
 
 BURADA = Path(__file__).resolve().parent
@@ -151,6 +152,50 @@ class Sayfa:
             self.yazi(mx, my + (-7.2 if taraf == "ust" else 7.6) + kaydir, metin, 10.7, ARIAL, ha="center")
         else:
             self.yazi(mx + (-7.4 if taraf == "sol" else 7.4) + kaydir, my, metin, 10.7, ARIAL, ha="center", rot=90)
+
+
+def _olcu_yazi_kutusu(x0: float, y0: float, x1: float, y1: float, metin: str, taraf: str, kaydir: float = 0.0) -> SPolygon:
+    """`Sayfa.olcu`'nun yazısının yaklaşık mürekkep kutusu (şablon koordinatı, pt; yükseklik TextPath'ten)."""
+    w = yazi_eni(metin, 10.7, ARIAL)
+    e = TextPath((0, 0), metin, size=10.7, prop=ARIAL).get_extents()
+    h = e.y1 - min(e.y0, 0.0)
+    mx, my = (x0 + x1) / 2, (y0 + y1) / 2
+    if y0 == y1:
+        cx, cy, kw, kh = mx, my + (-7.2 if taraf == "ust" else 7.6) + kaydir, w, h
+    else:
+        cx, cy, kw, kh = mx + (-7.4 if taraf == "sol" else 7.4) + kaydir, my, h, w
+    return SPolygon([(cx - kw / 2, cy - kh / 2), (cx + kw / 2, cy - kh / 2), (cx + kw / 2, cy + kh / 2), (cx - kw / 2, cy + kh / 2)])
+
+
+def _centik(x: float, y: float):
+    from shapely.geometry import LineString
+    return LineString([(x - 4.2, y + 4.2), (x + 4.2, y - 4.2)]).buffer(0.78 + 0.5)
+
+
+def _dar_sayilari_yerlestir(parcalar: list[tuple], metinler: list[str], dar: list[bool], kaydir: list[float], taraf: str,
+                            genel_cizgi: tuple, genel_metin: str, plan_kutu, adaylar: tuple[float, ...]) -> list[float]:
+    """BK-09: dönüşümlü sırada çizgide kalan (kaydırmasız) dar sayı uçtaki eğik çentiğe değiyorsa (G1'den sonra KT-03 sağ zincirde "35")
+    `adaylar` sırayla denenir (önce zincirin dış yanı, sonra ikinci iç sıra): kutusu çentiklere, genel ölçünün çizgisine ve sayısına, plan
+    alanına ve öteki sayılara değmeyen ilk yer seçilir; hiçbiri boş değilse sayı ilk adaya gider. Başka sayıya dokunulmaz."""
+    from shapely.geometry import LineString
+    kaydir = list(kaydir)
+    uclar = [(p[0], p[1]) for p in parcalar] + [(p[2], p[3]) for p in parcalar] + [genel_cizgi[:2], genel_cizgi[2:]]
+    centik = unary_union([_centik(x, y) for x, y in uclar])
+    kutular = [_olcu_yazi_kutusu(*p, m, taraf, k) for p, m, k in zip(parcalar, metinler, kaydir)]
+    sabit = unary_union([centik, plan_kutu, _olcu_yazi_kutusu(*genel_cizgi, genel_metin, taraf),
+                         LineString([genel_cizgi[:2], genel_cizgi[2:]]).buffer(0.36 + 0.5)])
+    for i in range(len(parcalar)):
+        if not dar[i] or kaydir[i] != 0 or not kutular[i].intersects(centik):
+            continue
+        engel = unary_union([sabit] + [k for j, k in enumerate(kutular) if j != i])
+        secilen = adaylar[0]
+        for aday in adaylar:
+            if not _olcu_yazi_kutusu(*parcalar[i], metinler[i], taraf, aday).intersects(engel):
+                secilen = aday
+                break
+        kaydir[i] = secilen
+        kutular[i] = _olcu_yazi_kutusu(*parcalar[i], metinler[i], taraf, secilen)
+    return kaydir
 
 
 def _satirlara(v: str, pt: float, gen: float) -> list[str]:
@@ -475,7 +520,7 @@ def plan_ciz(sf: Sayfa, y: dict, t: dict, px0: float, py0: float, s: float) -> t
             t0, t1 = sorted((a0 % 360, a1 % 360))
             if t1 - t0 > 180:
                 t0, t1 = t1, t0 + 360
-            sf.ax.add_patch(Arc((X(mente[0]), sf.y(Y(mente[1]))), 2 * w * s, 2 * w * s, theta1=t0, theta2=t1, color="black", lw=0.72, ls=(0, (4, 3)), zorder=5))
+            sf.ax.add_patch(Arc((X(mente[0]), sf.y(Y(mente[1]))), 2 * w * s, 2 * w * s, theta1=t0, theta2=t1, color="black", lw=0.72, ls=(0, (4, 3)), zorder=5, gid="kapi_yay"))
             if d["yon"] == "x":
                 for jx in (gx0, gx1):
                     sf.cizgi(X(jx), Y(gy0), X(jx), Y(gy1), MAVI, 1.4, z=5)
@@ -488,7 +533,7 @@ def plan_ciz(sf: Sayfa, y: dict, t: dict, px0: float, py0: float, s: float) -> t
                 sf.yazi(X(ex), Y(ey) + 4.4, "ÇELİK", 3.3, renk=GRI_YAZI, ha="center")
     # mahal adları ve m²: tanım `etiket_yeri` veriyorsa oraya (mühendis planı `ciz_genel.plan_eksen` gibi; KT-01 "Salon - Mutfak" yazısı
     # kapı simgesine biniyordu — rehberin göz denetimi, 12.10.2026), yoksa mahalin temsil noktasına
-    etiket = {}; etiket_yeri = {}
+    etiket = {}; etiket_yeri = {}; gruplar = []
     for ad, b in y["bolgeler"].items():
         if b.get("sinif") == "dis":
             continue
@@ -497,9 +542,11 @@ def plan_ciz(sf: Sayfa, y: dict, t: dict, px0: float, py0: float, s: float) -> t
         metin = ad.upper()
         ic_en = (mx1 - mx0) * s - 7.0
         pt = max(3.5, min(8.4, 8.4 * ic_en / max(yazi_eni(metin, 8.4), 1e-6)))
-        sf.yazi(X(ex), Y(ey) - 4.6 * pt / 8.4, metin, pt, ARIAL, renk=GRI_YAZI, ha="center")
-        sf.yazi(X(ex), Y(ey) + 5.4 * pt / 8.4, f"{b['alan_m2']:.0f} m²", pt + 0.2, ARIAL, renk=GRI_YAZI, ha="center")
+        t_ad = sf.yazi(X(ex), Y(ey) - 4.6 * pt / 8.4, metin, pt, ARIAL, renk=GRI_YAZI, ha="center")
+        t_m2 = sf.yazi(X(ex), Y(ey) + 5.4 * pt / 8.4, f"{b['alan_m2']:.0f} m²", pt + 0.2, ARIAL, renk=GRI_YAZI, ha="center")
         etiket[ad] = round(pt, 2); etiket_yeri[ad] = [round(ex, 1), round(ey, 1)]
+        if not b.get("etiket_yeri"):                        # tanımın verdiği yer korunur (BK-09 M5)
+            gruplar.append((ad, [t_ad, t_m2], affine_transform(b["net"], [s, 0, 0, s, px0 - s * bx0, BOY - py0 - s * by0])))   # (X, sf.y∘Y)
         for eks, sabit, lo, hi in b.get("_acik", []):      # açık mahal (veranda) kenarı: kırmızı kesik çizgi
             if eks == "x":
                 sf.cizgi(X(lo), Y(sabit), X(hi), Y(sabit), KIRMIZI, 0.9, ls=(0, (4, 3)), z=4)
@@ -513,6 +560,7 @@ def plan_ciz(sf: Sayfa, y: dict, t: dict, px0: float, py0: float, s: float) -> t
     ic_, dis_ = 16.0, 32.0
     ek = {"arka": 0.0, "sol": 0.0, "on": 8.0, "sag": 8.0}
     kayit = {}; notlar: list[dict] = []
+    plan_kutu = SPolygon([(X(bx0), Y(by1)), (X(bx1), Y(by1)), (X(bx1), Y(by0)), (X(bx0), Y(by0))])   # zincir sayıları buraya girmez
     _deger = (sablon_kurallari().get("zincir_en_kisa_parca_cm") or {}).get("deger")
     en_kisa = 15.0 if _deger is None else float(_deger)       # anahtar yoksa 15; 0 verilirse birleştirme kapanır
     for ad, yon in (("arka", "x"), ("on", "x"), ("sol", "y"), ("sag", "y")):
@@ -533,25 +581,31 @@ def plan_ciz(sf: Sayfa, y: dict, t: dict, px0: float, py0: float, s: float) -> t
         # şablon koordinatında (y aşağı) sayı normalde: on → çizginin üstünde (içeri), arka → üstünde (dışarı), sol → solunda (dışarı),
         # sag → solunda (içeri). İçeri sıra: on −9.5, sag −9.5 (aynı yönde bir sıra daha), arka +14.4, sol +14.8 (çizginin öbür yanına)
         ic_kaydir = {"on": -9.5, "sag": -9.5, "arka": 14.4, "sol": 14.8}[ad]
+        dis_kaydir = {"on": 14.8, "sag": 14.8, "arka": -9.5, "sol": -9.5}[ad]     # BK-09: çizginin dış yanı / bir sıra daha dışarı
         kaydir = [ic_kaydir * k for k in kaydir]
         if yon == "x":
             yy = Y(by1) - ic_ if ad == "arka" else Y(by0) + ic_ + ek[ad]
             yg = Y(by1) - dis_ if ad == "arka" else Y(by0) + dis_ + ek[ad]
-            if len(nk) > 2:
-                for (a, b), v, k_ in zip(zip(nk, nk[1:]), parca, kaydir):
-                    sf.olcu(X(a), yy, X(b), yy, str(v), "ust", kaydir=k_)
-            else:
-                yg = yy
-            sf.olcu(X(bx0), yg, X(bx1), yg, str(genel), "ust")
+            parcalar = [(X(a), yy, X(b), yy) for a, b in zip(nk, nk[1:])]
+            taraf = "ust"
         else:
             xx = X(bx0) - ic_ if ad == "sol" else X(bx1) + ic_ + ek[ad]
             xg = X(bx0) - dis_ if ad == "sol" else X(bx1) + dis_ + ek[ad]
-            if len(nk) > 2:
-                for (a, b), v, k_ in zip(zip(nk, nk[1:]), parca, kaydir):
-                    sf.olcu(xx, Y(b), xx, Y(a), str(v), "sol", kaydir=k_)
-            else:
-                xg = xx
-            sf.olcu(xg, Y(by1), xg, Y(by0), str(genel), "sol")
+            parcalar = [(xx, Y(b), xx, Y(a)) for a, b in zip(nk, nk[1:])]
+            taraf = "sol"
+        if len(nk) > 2:
+            genel_cizgi = (X(bx0), yg, X(bx1), yg) if yon == "x" else (xg, Y(by1), xg, Y(by0))
+            kaydir = _dar_sayilari_yerlestir(parcalar, [str(v) for v in parca], dar, kaydir, taraf, genel_cizgi, str(genel), plan_kutu,
+                                             (dis_kaydir, ic_kaydir * 2))
+            for p, v, k_ in zip(parcalar, parca, kaydir):
+                sf.olcu(*p, str(v), taraf, kaydir=k_)
+        else:
+            genel_cizgi = (X(bx0), yy, X(bx1), yy) if yon == "x" else (xx, Y(by1), xx, Y(by0))
+        sf.olcu(*genel_cizgi, str(genel), taraf)
+    # BK-09 M5: kapı açılım yayını kesen mahal etiketi (KT-02 "BANYO") oda içinde kaydırılır; kayda yeni yeri yazılır (cm)
+    for gi, (dx, dy) in ciz_genel.etiket_yaydan_kacir(sf.fig, sf.ax, [(g[1], g[2]) for g in gruplar], adim=2.0).items():
+        ad = gruplar[gi][0]
+        etiket_yeri[ad] = [round(etiket_yeri[ad][0] + dx / s, 1), round(etiket_yeri[ad][1] + dy / s, 1)]
     return kayit, etiket, notlar, etiket_yeri
 
 
@@ -739,7 +793,17 @@ def pafta_pdf(t: dict, hedef: Path, kod: str, is_emri_no: str | None = None, rev
         ciz_genel.gorunus_eksen(ax, S, taraf, t["kat_yuksekligi"], sigdir=True)      # küçük panelde iki düşey ölçü şeridi ölçeğe göre açılır (13.10)
     no = bilgi.get("is_emri_no") or t["kod"]
     ad = f"{t['kod']} · {oturum_m2:.0f} m²" if musteri_projesi(t) else f"{t['kod']} · {t['ad']}"     # müşteri projeleri bayiye adsız (D-08)
-    fig2.suptitle(f"{ad}   —   {no} r{int(bilgi.get('revizyon') or 1):02d} · görünüşler ve çatı planı · TASLAK", fontsize=10.5, weight="bold", x=0.03, ha="left", y=0.965)
+    # BK-09 M6: TASLAK başlıktan ayrı, sağ üstte (yedi modelde aynı yer); uzun katalog adı (Ç8801-K/L'nin parantezli açıklaması) TASLAK'a
+    # yetişirse parantez düşer, yine sığmazsa punto küçülür — başlık sayfa dışına ve TASLAK'ın üstüne taşmaz (yazı çakışma testi `sayfa_disi`)
+    taslak = fig2.text(0.985, 0.965, "TASLAK", fontsize=10.5, weight="bold", ha="right", va="top", color=KOYU_KIRMIZI)
+    kuyruk = f"   —   {no} r{int(bilgi.get('revizyon') or 1):02d} · görünüşler ve çatı planı"
+    baslik = fig2.suptitle(f"{ad}{kuyruk}", fontsize=10.5, weight="bold", x=0.03, ha="left", y=0.965)
+    rnd = fig2.canvas.get_renderer()
+    sinir = taslak.get_window_extent(rnd).x0 - 12.0
+    if baslik.get_window_extent(rnd).x1 > sinir:
+        baslik.set_text(re.sub(r"\s*\([^()]*\)\s*$", "", ad) + kuyruk)
+    while baslik.get_window_extent(rnd).x1 > sinir and baslik.get_fontsize() > 6.0:
+        baslik.set_fontsize(baslik.get_fontsize() - 0.5)
     with PdfPages(pdf, metadata={"Title": f"{t['kod']} plan paftası", "Creator": "Portman", "Producer": "Portman", "CreationDate": None, "ModDate": None}) as pp:
         pp.savefig(fig1); pp.savefig(fig2)
     fig1.savefig(png, dpi=200)
