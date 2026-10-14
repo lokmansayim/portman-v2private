@@ -190,6 +190,19 @@ def _sha(p: Path) -> str:
     return hashlib.sha256(p.read_bytes()).hexdigest()
 
 
+def bayi_tanimi(bayi: dict | None) -> str:
+    """İE-08 8b M5 (D-06; iş emri M5 "bayinin hitabı, yoksa adı"): LLM bağlamında yalnız hitap, hitap yoksa ad; ikisi birden değil (veri
+    en aza). Telefon numarası asla: ad numaraya düşmüşse yazılmaz, numara biçimli her şey maskelenir. Kayıtsız ya da boşsa ''."""
+    b = bayi or {}
+    hitap = maske_numaralar(str(b.get("hitap") or "").strip())[:40]
+    if hitap:
+        return f"bayinin hitabı: {hitap}"
+    ad = str(b.get("ad") or "").strip()
+    if not ad or ad == str(b.get("numara") or "") or ad.isdigit():
+        return ""
+    return f"bayinin adı: {maske_numaralar(ad)[:80]}"
+
+
 def baglam_ozeti(k) -> str:
     d = k.d
     if d.get("asama") == "topluyor" and d.get("taslak"):
@@ -281,6 +294,24 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
         ekle(S.BAYI_DOSYA_CEVABI)
         patrona(f"Portman: {kim} dosya penceresini açtı ({no}). Panelden dosyaları gönderebilirsiniz.", sablon=True, is_emri_no=no)
         sonuc.update(eylem="cevapla", gerekce="şablon cevabı: dosya penceresi açıldı", buton=reply_id, is_emri_no=no)
+        return {"satirlar": satirlar, "sonuc": sonuc}
+    if gelen.get("type") in GELEN_YAZILI and reply_id in (S0.BILGI_NASIL, S0.BILGI_HAZIR):
+        # İE-08 8b M4: karşılama şablonunun "Nasıl çalışır?" düğmesi → tek sayfa PDF; "bilgi hazır" şablonunun "Bilgiyi gönder" düğmesi →
+        # sabit cevap + Patron'a bildirim (pencere açıldı, Patron panelden yazar). LLM çağrılmaz, konuşma durumu değişmez.
+        if reply_id == S0.BILGI_NASIL:
+            try:
+                yol, sha = nasil_calisir_pdf()
+                ekle_satir(giden_belge(gelen, yol, "Portman_Nasil_calisir.pdf", "Portman · Nasıl çalışır?", 0, "", 0, sha))
+                ekle("Talebinizi bu sohbete yazabilirsiniz; örnek: \"Tek kat çelik, 2+1, 88 m² civarı, beşik çatı.\"")
+            except Exception as e:
+                log("nasıl çalışır PDF'i üretilemedi:", type(e).__name__)
+                ekle("Bilgi sayfasını şu an gönderemedim; Lokman Bey'e iletiyorum. Talebinizi bu sohbete yazabilirsiniz.")
+                patrona(f"Portman: {kim} 'Nasıl çalışır?' istedi ama PDF üretilemedi; günlüğe bakın.")
+            sonuc.update(eylem="cevapla", gerekce="şablon cevabı: nasıl çalışır", buton=reply_id)
+        else:
+            ekle(S0.BAYI_BILGI_CEVABI)
+            patrona(f"Portman: {kim} bilgi penceresini açtı. Panelden yazabilirsiniz.", sablon=True)
+            sonuc.update(eylem="cevapla", gerekce="şablon cevabı: bilgi penceresi açıldı", buton=reply_id)
         return {"satirlar": satirlar, "sonuc": sonuc}
     if gelen.get("type") not in GELEN_YAZILI or not ((gelen.get("text") or "").strip() or gelen.get("reply_id")):
         ekle("Şu an yalnız yazılı talepleri işleyebiliyorum. Talebinizi yazıyla iletirseniz (örn. \"P6001 aynalı\" ya da \"7x4 m, 2+1, ön verandalı\") ön onay planını hazırlarım."
@@ -577,6 +608,41 @@ def maske_numaralar(metin: str) -> str:
     return numara.maskele(metin, son_dort=True)
 
 
+NASIL_CALISIR = KOD / "belgeler" / "nasil_calisir.html"      # İE-08 8b M4: bayi rehberi §1–3 tek sayfa (Görev 9 metni)
+_NASIL_CSS = ("body{font-family:sans-serif;font-size:9.5pt} h1{font-size:16pt} h2{font-size:11.5pt;margin-top:8pt} "
+              "table{border-collapse:collapse} td,th{border:0.5pt solid #999;padding:2pt;font-size:8.5pt}")
+
+
+def nasil_calisir_pdf() -> tuple[Path, str]:
+    """'Nasıl çalışır?' PDF'i: kaynak HTML'den tek sayfa A4 (PyMuPDF), `projects/bilgi/` altına kaynağın özetiyle adlanır (gönderici yalnız
+    projects/ altından gönderir; metin değişmedikçe yeniden yazılmaz). Sayfaya sığmazsa hata: yarım sayfa gitmez."""
+    import fitz
+    html = NASIL_CALISIR.read_text(encoding="utf-8")
+    hedef = KANAL / "projects" / "bilgi" / f"Portman_Nasil_calisir_{hashlib.sha256(html.encode()).hexdigest()[:12]}.pdf"
+    if not hedef.is_file():
+        d = fitz.open(); sayfa = d.new_page(width=595, height=842)
+        bos, olcek = sayfa.insert_htmlbox(fitz.Rect(40, 40, 555, 802), html, css=_NASIL_CSS)
+        if bos < 0 or olcek < 1:
+            raise ValueError("nasıl çalışır metni tek sayfaya sığmadı")
+        hedef.parent.mkdir(parents=True, exist_ok=True)
+        gecici = hedef.with_suffix(".tmp"); gecici.write_bytes(d.tobytes(garbage=3, deflate=True)); os.replace(gecici, hedef)
+    return hedef, _sha(hedef)
+
+
+def liste_exceli(json_yolu: Path, hedef: Path, no: str, rev: int, set_yolu=None) -> dict:
+    """İE-08 8b (D-17): yükleme listesinin Excel'i sunucuda, `motor/genel/excel_liste.xlsx_yaz` ile (kabul paketiyle aynı düzen);
+    `uret`'in dışında: genel motorun altın çıktısı ve referans izleri değişmez. Ad `Portman_<no>_rNN_yukleme_listesi.xlsx`.
+    Üretilemezse (openpyxl yok, liste bozuk) {"hata": …}; çizim ve bayi akışı durmaz, mühendise Excel'siz gider."""
+    try:
+        from motor.genel import excel_liste
+        hedef_x = Path(hedef) / f"Portman_{no}_r{int(rev):02d}_yukleme_listesi.xlsx"
+        excel_liste.xlsx_yaz(json.loads(Path(json_yolu).read_text(encoding="utf-8")), hedef_x, kaynak=Path(json_yolu).name,
+                             set_adi=Path(str(set_yolu or "")).name or None)
+        return {"dosya": str(hedef_x), "sha256": _sha(hedef_x), "bayiye_gider": False}
+    except Exception as e:
+        return {"hata": maske_numaralar(f"{type(e).__name__}: {str(e)[:200]}")}
+
+
 def ekler_uret(ie: dict, hedef: Path, v: dict, settings: dict, m: dict | None = None) -> dict:
     """Aynı İş Emri revizyonundan türetilen ekler: {"gorsel": {...}, "ifc": {...}, "ucb": {...}}. Her biri ayrı denenir; üretilemeyen
     ek akışı durdurmaz (satır metinle gider) ve 'hata' ile kaydedilir. Motor'un DXF/PDF'ine dokunulmaz.
@@ -600,6 +666,8 @@ def ekler_uret(ie: dict, hedef: Path, v: dict, settings: dict, m: dict | None = 
             ekler["ifc_hata"] = "IFC üretilmedi"
         if m.get("yukleme_json"):
             ekler["yukleme_listesi"] = {"dosya": str(hedef / m["yukleme_json"]), "bayiye_gider": False}
+            excel = liste_exceli(hedef / m["yukleme_json"], hedef, no, rev, m.get("set"))   # İE-08 8b (D-17): mühendise gider, bayiye gitmez
+            ekler.update({"excel": excel} if "dosya" in excel else {"excel_hata": excel["hata"]})
         if m.get("duzenlenebilir_dxf") and (hedef / m["duzenlenebilir_dxf"]).is_file():      # D-11: düzenlenebilir DXF (plan + görünüşler); kayıtta, bayiye gitmez
             ekler["dxf"] = {"dosya": str(hedef / m["duzenlenebilir_dxf"]), "sha256": _sha(hedef / m["duzenlenebilir_dxf"]), "bayiye_gider": False}
         y = ie.get("yapi") or {}
@@ -654,7 +722,8 @@ def cikar(gelen: dict, settings: dict, k):
     from beyin import llm
     llm_ayar = settings.get("llm") or {}
     backend = llm_ayar.get("backend", "openai_chat")
-    return llm.cikar_guvenli(gelen["text"], baglam_ozeti(k), backend=backend, model=llm_ayar.get("model") or None,
+    baglam = "; ".join(x for x in (bayi_tanimi(gelen.get("bayi")), baglam_ozeti(k)) if x)       # İE-08 8b M5: ad ve hitap (D-06), numara yok
+    return llm.cikar_guvenli(gelen["text"], baglam, backend=backend, model=llm_ayar.get("model") or None,
                              hazir=gelen.get("test_cikarim") if backend == "manuel" else None,   # yalnız yerel test
                              ayarlar_json=settings.get("ayarlar_json"), timeout=int(llm_ayar.get("timeout_s", 60)))
 

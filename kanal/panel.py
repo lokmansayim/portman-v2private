@@ -53,6 +53,8 @@ PENCERE_SN = 86400                 # Meta 24 saat serbest cevap penceresi (kanal
 SCRYPT_N, SCRYPT_R, SCRYPT_P = 16384, 8, 1
 ROLLER = ("bayi", "patron", "muhendis", "test")    # test: kuru koşunun sahte kartı (İE-07; vps/kuru_kosu.sh), gerçek numara değil
 _NUMARA = re.compile(r"[1-9][0-9]{7,14}")
+_KONTROL_FIYAT = re.compile(r"/panel/kontrol/([0-9]{1,12})/fiyat")      # İE-08 8b
+KONUSMA_ISLEMLERI = ("gonder", "sablon", "karsilama", "bilgi")
 _DOSYA_ADI = re.compile(r"[^A-Za-z0-9._-]+")
 e = html.escape
 
@@ -248,7 +250,7 @@ def gelen_kutusu(p: Panel, oturum: dict) -> str:
                         f'<td>{kim}</td><td>{son}</td><td>{k["n"]}</td><td>{sahip}</td></tr>')
     tablo = ('<table><tr><th>Son mesaj</th><th>Numara</th><th>Bayi</th><th>Metin</th><th>Mesaj</th><th>Son durum</th></tr>' + "".join(satirlar) + "</table>"
              if satirlar else "<p>Henüz mesaj yok.</p>")
-    return sayfa("Gelen kutusu", durum + tablo, p, oturum)
+    return sayfa("Gelen kutusu", durum + kontrol_tablosu(p, oturum) + tablo, p, oturum)
 
 
 _HATA_METNI = (("reply_window_closed", "pencere kapalı (24 saat)"), ("sablon_gereksiz", "şablon gereksiz (pencere açıktı, metin gitti)"),
@@ -270,7 +272,8 @@ def cevap_formu(p: Panel, oturum: dict, numara: str, b: dict | None, hata: str |
     son = p.depo.son_gelen_mesaj(numara)
     govde = (f'<p class="hata">{e(hata)}</p>' if hata else "") + (f'<p class="bilgi">{e(bilgi)}</p>' if bilgi else "")
     if son is None:
-        return govde + '<p class="durum">Bu numaradan hiç mesaj gelmedi; panelden gönderim yapılamaz (bayi önce yazmalı ya da şablon için kaydı olmalı).</p>'
+        return (govde + '<p class="durum">Bu numaradan hiç mesaj gelmedi; metin ve PDF gönderilemez. Aktif bayi kartına karşılama ya da '
+                '"bilgi hazır" şablonu gönderilebilir (İE-08 8b).</p>' + ilk_temas_formu(p, oturum, numara, b, yazdi=False))
     kalan = PENCERE_SN - (time.time() - float(son.get("zaman") or 0))        # gönderici de bayinin son mesajından ölçer
     if kalan > 0:
         pencere = f'<p class="durum">24 saat penceresi <b>açık</b>; kalan yaklaşık {int(kalan // 3600)} saat {int(kalan % 3600 // 60)} dk. Metin ve PDF gönderilebilir.</p>'
@@ -291,7 +294,59 @@ def cevap_formu(p: Panel, oturum: dict, numara: str, b: dict | None, hata: str |
                   f'Bayi "Dosyaları gönder"e basınca pencere açılır.</span></form>')
     else:
         sablon = f'<p class="durum">"Dosyalar hazır" şablonu: {e(neden)}; düğme kapalı.</p>'
-    return govde + pencere + form + sablon
+    return govde + pencere + form + sablon + ilk_temas_formu(p, oturum, numara, b, yazdi=True)
+
+
+def ilk_temas_engeli(b: dict | None) -> str | None:
+    """İE-08 8b M4: karşılama ve 'bilgi hazır' şablonu kime gidebilir: kayıtlı, aktif, gerçek bayi kartı (test, Patron, mühendis değil)."""
+    if not b:
+        return "kayıtsız numara"
+    if b.get("rol") != "bayi":
+        return f"{b.get('rol')} kartı"
+    if not b.get("aktif"):
+        return "bayi pasif"
+    return None
+
+
+def ilk_temas_formu(p: Panel, oturum: dict, numara: str, b: dict | None, yazdi: bool) -> str:
+    """Karşılama (yalnız hiç yazmamış karta) ve 'bilgi hazır' (her aktif bayi kartına) düğmeleri; Meta şablonu, pencere kapalıyken de gider (ücretli)."""
+    neden = ilk_temas_engeli(b)
+    if neden is not None:
+        return f'<p class="durum">Karşılama / bilgi hazır şablonu: {e(neden)}; düğme kapalı.</p>'
+    csrf = p.csrf(oturum["n"]); out = ""
+    if not yazdi:
+        out += (f'<form class="kart" method="post" action="/panel/konusma/{e(numara)}/karsilama"><input type="hidden" name="csrf" value="{csrf}">'
+                f'<button>Karşılama şablonu gönder</button> <span class="durum">"Portman bayi kaydınız onaylandı…" + "Nasıl çalışır?" düğmesi '
+                f'(PDF). Ücretli.</span></form>')
+    out += (f'<form class="kart" method="post" action="/panel/konusma/{e(numara)}/bilgi"><input type="hidden" name="csrf" value="{csrf}">'
+            f'<button>"Bilgi hazır" şablonu gönder</button> <span class="durum">Planı olmasa da gider. Bayi "Bilgiyi gönder"e basınca pencere açılır, '
+            f'size bildirim gelir; sonra buradan yazarsınız. Ücretli.</span></form>')
+    return out
+
+
+def kontrol_tablosu(p: Panel, oturum: dict, bayi: str | None = None) -> str:
+    """İE-08 8b M2/M3: mühendis teknik kontrolleri (durum, not, liste sürümleri, Patron hatırlatmaları) ve 'Fiyat verildi'."""
+    try:
+        kontroller = p.depo.kontroller(bayi=bayi, limit=20)
+    except Exception:
+        return ""
+    if not kontroller:
+        return ""
+    csrf = p.csrf(oturum["n"]); satirlar = []
+    durum_adi = {"bekliyor": "mühendiste", "patrona_gonderildi": "mühendis onayladı", "duzeltme": "düzeltme istendi", "kart_yok": "mühendis kartı yok"}
+    for k in kontroller:
+        surumler = [int(x.get("surum") or 0) for x in (k.get("listeler") or []) if x.get("kaynak") == "muhendis"]
+        fiyat = ""
+        if k["patron_durum"] == "bekliyor":
+            fiyat = (f'<form method="post" action="/panel/kontrol/{k["id"]}/fiyat"><input type="hidden" name="csrf" value="{csrf}">'
+                     f'<button>Fiyat verildi</button></form>')
+        patron = {"yok": "-", "bekliyor": f'fiyat bekleniyor (hatırlatma {k["patron_hatirlatma_sayisi"]}/3)', "fiyat_verildi": "fiyat verildi",
+                  "durdu": "durdu (panelden gönderim)"}.get(k["patron_durum"], k["patron_durum"])
+        satirlar.append(f'<tr><td>{zaman(k["t_olusturuldu"])}</td><td><a href="/panel/konusma/{e(k["bayi"])}">{e(k["is_emri_no"])} r{int(k["rev"]):02d}</a></td>'
+                        f'<td>{e(k["bayi_kod"] or "")}</td><td>{e(durum_adi.get(k["durum"], k["durum"]))}</td><td>{k["hatirlatma_sayisi"]}</td>'
+                        f'<td>{e(", ".join(f"s{n}" for n in surumler) or "-")}</td><td>{e(k.get("not_") or "")}</td><td>{e(patron)}</td><td>{fiyat}</td></tr>')
+    return ('<h2>Mühendis kontrolleri</h2><table><tr><th>Onay</th><th>İş</th><th>Bayi</th><th>Durum</th><th>Hatırlatma</th><th>Mühendisin listesi</th>'
+            '<th>Not</th><th>Patron</th><th></th></tr>' + "".join(satirlar) + "</table>")
 
 
 def sablon_engeli(p: Panel, numara: str, b: dict | None) -> str | None:
@@ -343,7 +398,7 @@ def konusma_sayfasi(p: Panel, oturum: dict, numara: str, hata: str | None = None
             bag = f'indirilmedi{(" (" + e(d["hata"]) + ")") if d.get("hata") else ""}'
         dosyalar.append(f'<tr><td>{zaman(d["zaman"])}</td><td>{e(d["dosya_adi"] or "-")}</td><td>{e(d["mime"] or "-")}</td><td>{d["boyut"] or "-"}</td><td>{bag}</td></tr>')
     dosya_tablo = ("<h2>Gelen dosyalar</h2><table><tr><th>Zaman</th><th>Ad</th><th>Tür</th><th>Bayt</th><th></th></tr>" + "".join(dosyalar) + "</table>") if dosyalar else ""
-    return sayfa(f"Konuşma · {numara}", kart + liste + dosya_tablo, p, oturum)
+    return sayfa(f"Konuşma · {numara}", kart + kontrol_tablosu(p, oturum, bayi=numara) + liste + dosya_tablo, p, oturum)
 
 
 def bayiler_sayfasi(p: Panel, oturum: dict) -> str:
@@ -351,9 +406,10 @@ def bayiler_sayfasi(p: Panel, oturum: dict) -> str:
     for b in p.depo.bayi_listesi():
         satirlar.append(f'<tr class="{"aktif" if b["aktif"] else "pasif"}"><td><a href="/panel/bayi/{e(b["numara"])}">{e(b["numara"])}</a></td><td>{e(b["kod"] or "")}</td>'
                         f'<td>{e(b["ad"] or "")}</td><td>{e(b["hitap"] or "")}</td><td>{e(b["firma"] or "")}</td><td>{e(b["bolge"] or "")}</td>'
-                        f'<td>{e(b["rol"])}</td><td>{"evet" if b["aktif"] else "hayır"}</td><td>{zaman(b["guncellendi"].timestamp() if hasattr(b["guncellendi"], "timestamp") else None)}</td></tr>')
+                        f'<td>{e(b["rol"])}</td><td>{"evet" if b["aktif"] else "hayır"}</td><td>{zaman(b["guncellendi"].timestamp() if hasattr(b["guncellendi"], "timestamp") else None)}</td>'
+                        f'<td><a href="/panel/konusma/{e(b["numara"])}">konuşma</a></td></tr>')     # 8b M4: hiç yazmamış karta karşılama buradan
     govde = '<p><a href="/panel/bayi/yeni">+ Yeni bayi</a></p>'
-    govde += ('<table><tr><th>Numara</th><th>Kod</th><th>Ad</th><th>Hitap</th><th>Firma</th><th>Bölge</th><th>Rol</th><th>Aktif</th><th>Güncellendi</th></tr>'
+    govde += ('<table><tr><th>Numara</th><th>Kod</th><th>Ad</th><th>Hitap</th><th>Firma</th><th>Bölge</th><th>Rol</th><th>Aktif</th><th>Güncellendi</th><th></th></tr>'
               + "".join(satirlar) + "</table>") if satirlar else "<p>Kayıtlı bayi yok.</p>"
     return sayfa("Bayiler", govde, p, oturum)
 
@@ -519,7 +575,18 @@ def konusma_gonder(p: Panel, oturum: dict, i: Istek, numara: str) -> tuple:
         log("panel giden yazılamadı", maske(numara), type(hata).__name__)
         return _html(500, konusma_sayfasi(p, oturum, numara, hata="Satır yazılamadı; günlüğe bakın." + (" Metin satırı yazıldı." if (metin and yazilan) else "")))
     log("panel giden", maske(numara), "metin" if metin else "", "pdf" if pdf else "", *yazilan)
+    _hatirlatma_durdur(p, numara)
     return _yonlendir(f"/panel/konusma/{numara}")
+
+
+def _hatirlatma_durdur(p: Panel, numara: str) -> None:
+    """İE-08 8b M3: Patron bayiye panelden yazınca o bayinin fiyat bekleyen kontrollerinde Patron hatırlatması durur."""
+    try:
+        n = p.depo.patron_hatirlatma_durdur(numara)
+        if n:
+            log("patron hatırlatması durdu", maske(numara), n)
+    except Exception as hata:
+        log("patron hatırlatması durdurulamadı", maske(numara), type(hata).__name__)
 
 
 def _panel_metin(gelen: dict, metin: str, sira: int, numara: str) -> dict:
@@ -548,7 +615,35 @@ def konusma_sablon(p: Panel, oturum: dict, i: Istek, numara: str) -> tuple:
     except ValueError:
         return _html(400, konusma_sayfasi(p, oturum, numara, hata="Bu numaradan hiç mesaj gelmedi; şablon satırı bağlanamadı."))
     log("panel şablon", maske(numara), S.BAYI_DOSYALAR_HAZIR["anahtar"], kimlik)
+    _hatirlatma_durdur(p, numara)
     return _yonlendir(f"/panel/konusma/{numara}")
+
+
+def konusma_ilk_temas(p: Panel, oturum: dict, numara: str, tur: str) -> tuple:
+    """İE-08 8b M4: POST /panel/konusma/<numara>/karsilama (yalnız hiç yazmamış karta) ve /bilgi (her aktif bayi kartına). Kartın gelen
+    mesajı varsa satır son mesajına (panel_giden_ekle), yoksa başlangıç kaydına (ilk_temas_ekle) bağlanır."""
+    import sablonlar as S
+    b = p.depo.bayi_oku(numara)
+    neden = ilk_temas_engeli(b)
+    if neden is not None:
+        return _html(400, konusma_sayfasi(p, oturum, numara, hata=f"Şablon gönderilemez: {neden}."))
+    yazdi = p.depo.son_gelen_mesaj(numara) is not None
+    if tur == "karsilama" and yazdi:
+        return _html(400, konusma_sayfasi(p, oturum, numara, hata="Karşılama yalnız hiç yazmamış karta gider; bu bayi yazmış."))
+    uret = S.bayi_karsilama_satiri if tur == "karsilama" else S.bayi_bilgi_hazir_satiri
+    satir = lambda g, n: uret(g["id"], n, numara, b)                            # noqa: E731
+    kimlik = p.depo.panel_giden_ekle(numara, satir) if yazdi else p.depo.ilk_temas_ekle(numara, satir)
+    log("panel şablon", maske(numara), (S.BAYI_KARSILAMA if tur == "karsilama" else S.BAYI_BILGI_HAZIR)["anahtar"], kimlik)
+    if tur == "bilgi":
+        _hatirlatma_durdur(p, numara)
+    return _yonlendir(f"/panel/konusma/{numara}")
+
+
+def kontrol_fiyat(p: Panel, oturum: dict, kid: int) -> tuple:
+    """İE-08 8b M3: POST /panel/kontrol/<id>/fiyat — Patron fiyatı verdi; hatırlatmalar durur."""
+    p.depo.fiyat_verildi(kid)
+    log("fiyat verildi", kid)
+    return _yonlendir("/panel/")
 
 
 def isle(p: Panel, i: Istek) -> tuple:
@@ -579,8 +674,9 @@ def isle(p: Panel, i: Istek) -> tuple:
         if i.metod != "POST":
             return 405, b"method", "text/plain; charset=utf-8", []
         return _yonlendir("/panel/giris", [_cerez_sil("pm_oturum")])
-    konusma_post = i.yol.startswith("/panel/konusma/") and (i.yol.endswith("/gonder") or i.yol.endswith("/sablon"))   # İE-07
-    if i.metod == "POST" and i.yol not in ("/panel/bayi/yeni",) and not i.yol.startswith("/panel/bayi/") and not konusma_post:
+    konusma_post = i.yol.startswith("/panel/konusma/") and i.yol.rsplit("/", 1)[-1] in KONUSMA_ISLEMLERI   # İE-07; 8b karşılama, bilgi
+    kontrol_post = _KONTROL_FIYAT.fullmatch(i.yol)                                                           # İE-08 8b: Fiyat verildi
+    if i.metod == "POST" and i.yol not in ("/panel/bayi/yeni",) and not i.yol.startswith("/panel/bayi/") and not konusma_post and not kontrol_post:
         return 405, b"method", "text/plain; charset=utf-8", []
     if i.yol == "/panel/":
         return _html(200, gelen_kutusu(p, oturum))
@@ -611,7 +707,11 @@ def isle(p: Panel, i: Istek) -> tuple:
             return konusma_gonder(p, oturum, i, numara) if i.metod == "POST" else (405, b"method", "text/plain; charset=utf-8", [])
         if islem == "sablon":
             return konusma_sablon(p, oturum, i, numara) if i.metod == "POST" else (405, b"method", "text/plain; charset=utf-8", [])
+        if islem in ("karsilama", "bilgi"):
+            return konusma_ilk_temas(p, oturum, numara, islem) if i.metod == "POST" else (405, b"method", "text/plain; charset=utf-8", [])
         return _html(200, konusma_sayfasi(p, oturum, numara))
+    if kontrol_post:
+        return kontrol_fiyat(p, oturum, int(kontrol_post.group(1))) if i.metod == "POST" else (405, b"method", "text/plain; charset=utf-8", [])
     if i.yol.startswith("/panel/dosya/"):
         kimlik = i.yol[len("/panel/dosya/"):]
         if not kimlik.isdigit() or len(kimlik) > 12:

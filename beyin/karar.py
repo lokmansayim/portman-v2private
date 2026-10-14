@@ -222,11 +222,13 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
         return _bitir(k, Karar(eylem="yonlendir", gerekce="kayıtsız numara",
                                 mesaj="Bu hat PortatifEv'in kayıtlı bayilerine hizmet verir. Kayıt ve bilgi için lütfen Lokman Bey ile iletişime geçin."))
     ad = bayi.get("ad", "")
+    # İE-08 8b M5 (D-06): selamda önce kartın hitabı; ad numaraya düşmüşse (kanal gelen_bayisi) numara yazılmaz
+    hitap = str(bayi.get("hitap") or "").strip() or ("" if (not ad or str(ad) == str(bayi.get("numara") or "") or str(ad).isdigit()) else str(ad))
 
     # 1) niyete göre
     if t.niyet == "selam":
         return _bitir(k, Karar(eylem="cevapla", gerekce="selam",
-                                mesaj=f"Merhaba {ad}. Hangi model ya da ölçü için ön onay planı hazırlayalım? Örnek: \"P6001 aynalı\" veya \"7x4 m, 2+1, ön verandalı\"."))
+                                mesaj=f"Merhaba{(' ' + hitap) if hitap else ''}. Hangi model ya da ölçü için ön onay planı hazırlayalım? Örnek: \"P6001 aynalı\" veya \"7x4 m, 2+1, ön verandalı\"."))
     if t.niyet == "soru":
         ek = " Açık bir plan talebiniz devam ediyor; ölçü/model bilgisini yazınca planı hazırlarım." if k.d["asama"] == "topluyor" else ""
         return _bitir(k, Karar(eylem="cevapla", gerekce="genel soru",
@@ -238,8 +240,11 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
         if k.d["asama"] == "onay_bekliyor" and k.d.get("son_is_emri"):
             k.d["asama"] = "onaylandi"
             rev = k.d["son_is_emri"].get("revizyon", k.d["revizyon"] + 1)   # gönderilen planın numarası (r01 = 1)
+            # İE-08 8b (plan kararı 6, Lokman 14.10): çelik plan onaydan sonra mühendisin teknik kontrolüne gider (kanal/muhendis.py)
+            sonraki = ("Plan teknik kontrole gönderildi; sonucu size bildireceğiz." if (k.d["son_is_emri"].get("yapi") or {}).get("sistem") == "celik"
+                       else "Teklif aşamasına geçiliyor.")
             return _bitir(k, Karar(eylem="cevapla", gerekce="plan onaylandı", revizyon=rev,
-                                    mesaj=f"Onayınız kaydedildi ({k.d['son_is_emri'].get('is_emri_no')}, revizyon {rev}). Teklif aşamasına geçiliyor."))
+                                    mesaj=f"Onayınız kaydedildi ({k.d['son_is_emri'].get('is_emri_no')}, revizyon {rev}). {sonraki}"))
         return _bitir(k, Karar(eylem="cevapla", gerekce="onaylanacak plan yok",
                                 mesaj="Onaylanacak açık bir plan görünmüyor. Yeni plan için model kodu ya da ölçü yazabilirsiniz."))
     if t.niyet == "red":

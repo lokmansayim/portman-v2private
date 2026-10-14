@@ -72,6 +72,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-10](D-10.md) | Bayi paftasının 1. sayfasında 8b mühendis kabulüne kadar antet üstünde "TASLAK" (`pafta_sablonu.json › taslak_ibaresi`); 15 cm kuralı: "Çelikte 15 cm parça çıkmaz", kısa parça komşusuna katılır ve mühendise kontrol notu düşer (`pafta_ozet.json › kontrol_notlari`); yedi aday `gecerli` kayıtta, bayiye sunulma mühendisin K-A10 kabulüyle; KT-01 etiket yeri ve baca derinliği; `bayi_gorsel.png` (plan + çatı planı + iki perspektif); referans bu kararla yeniden donduruldu | 12.10 akşam |
 | [D-11](D-11.md) | Geliştirme döneminde çelik adayların bayiye sunulma kabulünü (K-A10) Lokman verir (kabul kaydında kim = Lokman, dayanak D-11; metinlerde "kabul eden"); 8b mühendis teknik kontrolü aynen; genel motor düzenlenebilir DXF üretir (plan + dört görünüş, katmanlı, cm), yükleme listesi Excel'i yalnız kabul paketinde (openpyxl sunucuda yok); DXF ve Excel çıktıdır, kaynak değil: düzeltme tanıma (D-07) ya da kural kitabına işlenir, yeniden üretilir | 13.10 sabah |
 | [D-16](D-16.md) | BK-09 çizim düzeltmeleri: kapı yayını kesen mahal etiketi oda içinde kaydırılır; pafta 2. sayfada TASLAK ayrı yazı; KT başlığında ve liste adında m² koddan (brüt oturum, model dosyası aynen); G1 ölçü zinciri eşiği `max(12,5; dış kaplama + en kalın dış duvar + 1)`; çentiğe değen dar sayı zincirin dış yanında; yazı denetimi kapı yayı ve sayfa dışı; referans `2026-10-14` bu kararla yeniden donduruldu | 14.10 (Lokman, BK-09 planı) |
+| [D-17](D-17.md) | Yükleme listesi Excel'i her çelik çizimde sunucuda üretilir (`kanal/worker.liste_exceli`, `uret` dışında; altın değişmez), bayi onaylayınca mühendise gider, bayiye gitmez; `openpyxl` + `et-xmlfile` sunucu listesinde; D-11'in "yalnız kabul paketinde" maddesi değişti | 14.10 (Lokman, Görev 4b ve 8b planı) |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
 
@@ -82,7 +83,8 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-01–D-11 | bu depo (`main`); D-10 ve D-11 İE-08'in | yazıldı |
 | D | D-12–D-15 | prefabrik hattının dört kararı; dallarda (`ie-10-prefabrik-referanslari`, `ie-11-*`, `ie-12-prefabrik-bayi-paftasi`) D-10–D-13 adıyla duruyor: ayrı pano motoru (100 / 60, P6001 çapa), kişisel veri esnetme, pano yüksekliği 250 / 280 / 300, kapı / pencere yerleşimi | ayrıldı; birleşmeden önce o dallarda bu numaralara taşınır (D-10/D-11 çakışması, İE-08 › 13 Ekim kararı) |
 | D | D-16 | BK-09 PR-2: çizim düzeltmeleri (KT-02 kapı yayı, 2. sayfa TASLAK, KT başlığında m², G1) ve referansın yeniden dondurulması | yazıldı (14.10) |
-| D | **D-17** | — | **sıradaki boş** |
+| D | D-17 | İE-08 8b: yükleme listesi Excel'i sunucuda üretilir ve mühendise gider (D-11'in "yalnız kabul paketinde" maddesini değiştirir) | yazıldı (14.10; `ie-08-8b-muhendis`) |
+| D | **D-18** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model bankası ve yeni model üretimi; P6001 güncellemesi | ayrıldı (pilottan sonra) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | dallarda |

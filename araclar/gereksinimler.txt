@@ -13,6 +13,6 @@ pydantic==2.14.1
 psycopg[binary]==3.3.6
 ifcopenshell==0.9.0
 pytest==9.1.1
-# openpyxl: yalnız yerel — kabul paketinin Excel yükleme listesi (motor/genel/excel_liste.py; D-11, 13.10.2026). Sunucu listesinde yok;
-# sunucuya girmesi canlı değişiklik, ayrı onay.
+# openpyxl: kabul paketinin (D-11) ve İE-08 8b'den beri sunucunun Excel yükleme listesi (D-17, 14.10.2026: vps/gereksinimler.txt'de de
+# aynı sürüm; motor/genel/excel_liste.py).
 openpyxl==3.1.5

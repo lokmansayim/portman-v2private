@@ -10,6 +10,7 @@ import pytest
 from conftest import KOK
 
 GOC = KOK / "kanal" / "goc"
+GOC_SURUMLERI = sorted(int(p.name[:3]) for p in GOC.glob("[0-9][0-9][0-9]_*.sql"))
 YASAK = [(r"\bDROP\s+TABLE\b", "DROP TABLE"), (r"\bDROP\s+COLUMN\b", "DROP COLUMN"), (r"\bRENAME\b", "RENAME"),
          (r"\bALTER\s+COLUMN\s+\S+\s+TYPE\b", "tür değişikliği"), (r"\bSET\s+NOT\s+NULL\b", "sonradan NOT NULL"), (r"\bTRUNCATE\b", "TRUNCATE"),
          (r"\bDELETE\s+FROM\b", "DELETE")]
@@ -44,7 +45,8 @@ def test_004_tekrar_kosulabilir(depo):
         with c.transaction():
             c.execute(sql)
         assert sutunlar(c) == once
-        assert c.execute("SELECT surum FROM sema_surumu ORDER BY surum").fetchall() == [{"surum": 1}, {"surum": 2}, {"surum": 3}, {"surum": 4}, {"surum": 5}]
+        # İE-08 8b: beklenen sürümler depodaki göç dosyalarından (006 eklendi; her yeni göçte elle sayı yazılmasın)
+        assert c.execute("SELECT surum FROM sema_surumu ORDER BY surum").fetchall() == [{"surum": n} for n in GOC_SURUMLERI]
 
 
 def test_eski_surumun_insertleri_yeni_semada_calisir(depo):
@@ -84,3 +86,24 @@ def test_005_kind_template_kaynak_ve_rol_test(depo):
             c.execute(sql)
         assert c.execute("SELECT table_name, column_name FROM information_schema.columns WHERE table_schema = 'public' ORDER BY 1, 2").fetchall() == once
         assert c.execute("SELECT kaynak FROM giden WHERE id = 'out_g005_2'").fetchone() == {"kaynak": "panel"}
+
+
+def test_006_muhendis_kontrolleri_tekrar_kosulabilir(depo):
+    """İE-08 8b: 006 iki kez koşar, şema aynı kalır; durum ve Patron durumu CHECK'li; (iş no, rev) tek."""
+    sql = (GOC / "006_muhendis.sql").read_text(encoding="utf-8")
+    with depo.baglan() as c:
+        once = c.execute("SELECT column_name FROM information_schema.columns WHERE table_name = 'muhendis_kontrolleri' ORDER BY 1").fetchall()
+        with c.transaction():
+            c.execute(sql)
+        assert c.execute("SELECT column_name FROM information_schema.columns WHERE table_name = 'muhendis_kontrolleri' ORDER BY 1").fetchall() == once
+        with c.transaction():
+            c.execute("INSERT INTO mesajlar (id, gonderen, tur, metin, wa_zamani, ham) VALUES ('wamid.G6', '900000000111', 'text', 'x', now(), '{}')")
+            c.execute("INSERT INTO muhendis_kontrolleri (is_emri_no, rev, bayi, onay_mesaj_id) VALUES ('PM-X-1', 1, '900000000111', 'wamid.G6')")
+            r = c.execute("SELECT durum, patron_durum, hatirlatma_sayisi, listeler FROM muhendis_kontrolleri").fetchone()
+            assert r == {"durum": "bekliyor", "patron_durum": "yok", "hatirlatma_sayisi": 0, "listeler": []}
+        with pytest.raises(Exception):
+            with c.transaction():
+                c.execute("INSERT INTO muhendis_kontrolleri (is_emri_no, rev, bayi, onay_mesaj_id) VALUES ('PM-X-1', 1, '900000000111', 'wamid.G6')")
+        with pytest.raises(Exception):
+            with c.transaction():
+                c.execute("UPDATE muhendis_kontrolleri SET durum = 'baska'")

@@ -17,3 +17,7 @@ psycopg[binary]==3.3.6
 pydantic==2.14.1
 gunicorn==26.2.0
 vtk==9.7.1
+# openpyxl (+ bağımlılığı et-xmlfile, tam sabit): İE-08 8b, D-17 (14.10.2026) — yükleme listesi Excel'i sunucuda üretilir, mühendise gider
+# (kanal/worker.liste_exceli → motor/genel/excel_liste.py; uret çağırmaz, altın çıktı değişmez). Yerel listeyle aynı sürüm.
+openpyxl==3.1.5
+et-xmlfile==2.0.0

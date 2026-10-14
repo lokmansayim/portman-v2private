@@ -20,10 +20,16 @@ VARSAYILAN = {
     # İE-07: Meta onaylı şablon adları (WhatsApp Manager'da onaylanınca Lokman ayar.sh ile girer; None = tanımsız → satır 'sablon_yok')
     "sablon_patron_bildirim": None,       # Patron'a: "[bayi kodu] kodlu bayinin [iş no] numaralı talebi sizi bekliyor" (url düğmesi)
     "sablon_bayi_dosyalar_hazir": None,   # bayiye: "Merhaba [hitap], [iş no] numaralı projenizin dosyaları hazır" (hızlı yanıt)
+    # İE-08 8b (docs/kanal/2026-10-14_Meta_sablon_basvurusu_8b.md): mühendis bildirimi ve hatırlatması, bayiye karşılama ve bilgi hazır
+    "sablon_muhendis_kontrol": None,      # mühendise: "[iş no] numaralı işin [rNN] revizyonu … teknik kontrolünüzü bekliyor" (hızlı yanıt Gönder)
+    "sablon_muhendis_hatirlatma": None,   # mühendise: "Hatırlatma: [iş no] … [saat] saattir sizi bekliyor" (hızlı yanıt Gönder)
+    "sablon_bayi_karsilama": None,        # bayiye (panelden, hiç yazmamış karta): "Merhaba [hitap], Portman bayi kaydınız onaylandı…" (Nasıl çalışır?)
+    "sablon_bayi_bilgi_hazir": None,      # bayiye (panelden): "Merhaba [hitap], talebinizle ilgili bilgi hazır…" (Bilgiyi gönder)
     "sablon_dil": "tr",                   # şablonların Meta'daki dil kodu
 }
 ANAHTARLAR = tuple(VARSAYILAN)
-SABLON_ANAHTARLARI = ("sablon_patron_bildirim", "sablon_bayi_dosyalar_hazir")
+SABLON_ANAHTARLARI = ("sablon_patron_bildirim", "sablon_bayi_dosyalar_hazir", "sablon_muhendis_kontrol", "sablon_muhendis_hatirlatma",
+                      "sablon_bayi_karsilama", "sablon_bayi_bilgi_hazir")
 
 
 def dosya(veri) -> Path:

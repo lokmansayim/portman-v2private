@@ -38,6 +38,8 @@ import nabiz as NB                                                         # noq
 from depo import Depo, kimlik_izi, maske                                   # noqa: E402
 
 SURUM = "gonderici-v2.0"
+SEMBOLIK = ("PATRON", "MUHENDIS")   # gönderim anında karttan çözülen alıcılar (rol patron / muhendis, aktif)
+ILK_TEMAS_KAYNAGI = Depo.ILK_TEMAS_KAYNAGI   # depo.ilk_temas_ekle'nin başlangıç kaydı
 PENCERE_SN = 86400
 MEDYA_YENIDEN = 2                   # feature.php: upload_failed satır en çok 2 deneme
 TUR_BEKLEME_SN = 3
@@ -69,14 +71,21 @@ class GonderenMeta:
 
     def __call__(self, r: dict) -> str:
         gelen = r.get("gelen") or {}
-        if not str(r.get("mesaj_id") or "").startswith("wamid."):
-            raise K.Gonderilmedi("Gönderilmedi: test_cannot_send")
-        if gelen.get("source") != "Meta imzalı webhook" or str(gelen.get("phone_number_id") or "") != self.istemci.ayar.phone_number_id:
-            raise K.Gonderilmedi("Gönderilmedi: inbox_not_verified")
-        bildirim = r["alici"] == "PATRON"
         sablon = r["kind"] == "template"                            # İE-07: Meta onaylı şablon; pencere dışında da gider
-        panel = str(r.get("kaynak") or "ajan") == "panel"           # İE-07: Patron panelden yazdı; satır bayinin son mesajına bağlı
-        alici = self.depo.patron_numarasi() if bildirim else str(r["alici"])
+        kaynak = str(r.get("kaynak") or "ajan")
+        # İE-08 8b M4: panelin hiç yazmamış karta açtığı başlangıç kaydı (depo.ilk_temas_ekle) gerçek bir gelen mesaj değildir; ona bağlı
+        # yalnız panelden giden şablon (karşılama, bilgi hazır) gönderilir, alıcı kaydın kartıdır
+        ilk_temas = gelen.get("source") == ILK_TEMAS_KAYNAGI and kaynak == "panel" and sablon
+        if not ilk_temas:
+            if not str(r.get("mesaj_id") or "").startswith("wamid."):
+                raise K.Gonderilmedi("Gönderilmedi: test_cannot_send")
+            if gelen.get("source") != "Meta imzalı webhook" or str(gelen.get("phone_number_id") or "") != self.istemci.ayar.phone_number_id:
+                raise K.Gonderilmedi("Gönderilmedi: inbox_not_verified")
+        bildirim = r["alici"] in SEMBOLIK                          # PATRON; İE-08 8b: MUHENDIS (aktif mühendis kartı)
+        # İE-07: Patron panelden yazdı; İE-08 8b: 'sistem' (mühendis kararı, hatırlatma) bayinin onay mesajına bağlı. İkisinde de pencere
+        # alıcının son mesajından ölçülür
+        panel = kaynak in ("panel", "sistem")
+        alici = (self.depo.patron_numarasi() if r["alici"] == "PATRON" else self.depo.muhendis_numarasi()) if bildirim else str(r["alici"])
         if not alici or not M.numara_gecerli(alici):
             raise K.Gonderilmedi("Gönderilmedi: recipient_unknown")
         if not bildirim and alici != str(gelen.get("sender") or ""):
@@ -112,7 +121,7 @@ class GonderenMeta:
         medya_id = None; baslik_medya = None
         try:
             if r["kind"] in ("document", "image") or (r["kind"] == "interactive" and M.baslik_gorseli_var(satir)):
-                izinli = ("application/pdf",) if r["kind"] == "document" else ("image/png", "image/jpeg")
+                izinli = M.BELGE_TURLERI if r["kind"] == "document" else ("image/png", "image/jpeg")    # 8b: Excel ve DXF mühendise
                 gercek, mime = M.dosya_denetle(r.get("dosya"), izinli, self.veri, r.get("sha256"))
                 medya = str(r.get("medya_id") or "")
                 if not re.fullmatch(r"[0-9]{1,40}", medya):
