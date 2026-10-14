@@ -121,6 +121,74 @@ def test_gecersiz_girdi_reddedilir(girdi, parca):
 def test_sayilar_kural_tablosundan():
     k = CU.kurallar()
     assert (k["sacak_cm"], k["topuk_cm"], k["panel_kalinligi_cm"], k["egim_varsayim"]) == (30, 10, 8, 0.33)
+    assert k["tipler"] == ["besik", "kirma", "cumba", "l"]
     k2 = dict(k, sacak_cm=50, egim_varsayim=0.25)
     c = CU.uret((0, 0, 1000, 600), "besik", kural=k2)
     assert c["duzlemler"][0]["plan"][0] == [-50, -50] and c["duzlemler"][0]["egim"] == 0.25
+
+
+# ── r3 · P3: tipe göre üreticiler (cumba, L) — bankadaki elle yazılmış çatıyla birebir ─────────────────────────────────────
+C8801_IZ = [[0, 220, 1024, 860], [624, 0, 1024, 220]]          # ana gövde + güneydoğudaki cumba (dış yüzler; batıdaki köşe pergola veranda)
+C8801L_IZ = [[0, 220, 624, 860], [624, 0, 1024, 860]]         # aynı L ayak izi: batı blok + boydan boya doğu kanadı
+
+
+def _eslesme(uretilen: dict, elle: dict) -> None:
+    for d in uretilen["duzlemler"]:
+        aday = [x for x in elle["duzlemler"] if x["yukari"] == d["yukari"]]
+        e = min(aday, key=lambda x: sum(min(abs(p[0] - q[0]) + abs(p[1] - q[1]) for q in x["plan"]) for p in d["plan"]))
+        assert len(d["plan"]) == len(e["plan"]) and abs(d["egim"] - e["egim"]) < 1e-4, (d["ad"], e["ad"])
+        for p in d["plan"]:
+            assert min(max(abs(p[0] - q[0]), abs(p[1] - q[1])) for q in e["plan"]) <= 1.0, (d["ad"], p)
+    kb = sorted((k["eksen"], k["konum"], tuple(k["aralik"]), k["ic"]) for k in elle["kalkanlar"])
+    ku = sorted((k["eksen"], k["konum"], tuple(k["aralik"]), k["ic"]) for k in uretilen["kalkanlar"])
+    assert len(kb) == len(ku) and all(a[0] == b[0] and a[3] == b[3] and abs(a[1] - b[1]) <= 1 and abs(a[2][0] - b[2][0]) <= 1
+                                      and abs(a[2][1] - b[2][1]) <= 1 for a, b in zip(kb, ku)), (kb, ku)
+
+
+def test_ayak_izleri_bankadaki_dis_duvarlarla_ayni():
+    for ad in ("C8801", "C8801L"):
+        t = json.loads((MODEL / f"{ad}.json").read_text(encoding="utf-8"))
+        k = t["yuz_kaplamalari"]["dis"]["kalinlik"]
+        x0, y0, x1, y1 = _dis_kutu(t, {"dis"})
+        assert (x0 - k, y0 - k, x1 + k, y1 + k) == (0, 0, 1024, 860), ad
+
+
+@pytest.mark.parametrize("ad,iz,tip", [("C8801", C8801_IZ, "cumba"), ("C8801L", C8801L_IZ, "l")])
+def test_cumba_ve_l_bankadaki_catiyla_ayni(ad, iz, tip):
+    elle = json.loads((MODEL / f"{ad}.json").read_text(encoding="utf-8"))["cati"]
+    u = CU.uret(iz, tip)
+    assert CU.olc(u) == CU.olc(elle)                                     # düzlem, kalkan, plan alanı, saçak/mahya/vadi/alın toplamları
+    _eslesme(u, elle)
+    assert CU.denetle(u, iz) == []
+    assert u["tip"] == "besik_cumba"
+
+
+def test_l_kanat_egimi_mahyalar_esit_kotta():
+    u = CU.uret(C8801L_IZ, "l")
+    kanat = {d["egim"] for d in u["duzlemler"] if d["ad"].startswith("kanat")}
+    assert kanat == {0.50217}                                            # 0,33 × 350 / 230
+
+
+@pytest.mark.parametrize("tip,iz", [("cumba", C8801_IZ), ("l", C8801L_IZ)])
+@pytest.mark.parametrize("donus", ["ayna_y", "ayna_x", "devrik", "devrik_ayna"])
+def test_dort_yonde_ayni_olcu_ve_ortak_denetim(tip, iz, donus):
+    f = {"ayna_y": lambda r: [r[0], 860 - r[3], r[2], 860 - r[1]], "ayna_x": lambda r: [1024 - r[2], r[1], 1024 - r[0], r[3]],
+         "devrik": lambda r: [r[1], r[0], r[3], r[2]], "devrik_ayna": lambda r: [r[1], 1024 - r[2], r[3], 1024 - r[0]]}[donus]
+    iz2 = [f(r) for r in iz]
+    u = CU.uret(iz2, tip)
+    assert CU.olc(u) == CU.olc(CU.uret(iz, tip)) and CU.denetle(u, iz2) == []
+
+
+def test_cumbanin_ana_kuzey_yuzu_besikle_ayni():
+    besik = CU.uret((0, 220, 1024, 860), "besik")
+    cumba = CU.uret(C8801_IZ, "cumba")
+    assert next(d["plan"] for d in cumba["duzlemler"] if d["ad"] == "ana kuzey") == next(d["plan"] for d in besik["duzlemler"] if d["ad"] == "kuzey")
+
+
+@pytest.mark.parametrize("tip,iz,parca", [("cumba", [[0, 0, 400, 300], [20, 300, 390, 700]], "çok geniş"),
+                                          ("cumba", [[0, 200, 1000, 800], [1100, 0, 1300, 200]], "bitişik"),
+                                          ("l", [[0, 200, 600, 800], [600, 300, 1000, 800]], "bitişik"),
+                                          ("cumba", [[0, 200, 1000, 800]], "iki dikdörtgen")])
+def test_cumba_ve_l_gecersiz_ayak_izi(tip, iz, parca):
+    with pytest.raises(CU.CatiHatasi, match=parca):
+        CU.uret(iz, tip)

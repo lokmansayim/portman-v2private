@@ -18,13 +18,14 @@ from __future__ import annotations
 from .toplam import sum  # noqa: A001 — 3.11 toplama sırası her Python sürümünde (İE-08 GM2; toplam.py)
 
 import json
-import math
 from pathlib import Path
+
+from . import cati_besik, cati_cumba, cati_kirma, cati_l, cati_ortak
 
 KURAL_YOLU = Path(__file__).resolve().parents[2] / "kurallar" / "cizim" / "cati_uretici.json"
 VARSAYILAN = {"sacak_cm": 30, "topuk_cm": 10, "panel_kalinligi_cm": 8, "egim_varsayim": 0.33, "egim_yuzde_aralik": [10, 60],
-              "tipler": ["besik", "kirma"]}
-TIP_ADI = {"besik": "beşik", "kirma": "kırma"}
+              "tipler": ["besik", "kirma", "cumba", "l"]}
+TIP_ADI = {"besik": "beşik", "kirma": "kırma", "cumba": "beşik + cumba", "l": "L beşik"}
 
 
 class CatiHatasi(ValueError):
@@ -43,30 +44,72 @@ def kurallar(yol: Path | None = None) -> dict:
     return k
 
 
-def _r2(v: float) -> float:
-    return round(float(v), 2)
+def _kenar_l(blok, kanat) -> str | None:
+    """L: kanadın bloğa bitişik olduğu yan; kanat bloğun o kenarını boydan boya örter (aşabilir)."""
+    x0, y0, x1, y1 = blok
+    a0, b0, a1, b1 = kanat
+    if a0 == x1 and b0 <= y0 and b1 >= y1:
+        return "D"
+    if a1 == x0 and b0 <= y0 and b1 >= y1:
+        return "B"
+    if b0 == y1 and a0 <= x0 and a1 >= x1:
+        return "K"
+    if b1 == y0 and a0 <= x0 and a1 >= x1:
+        return "G"
+    return None
 
 
-def _sade(plan: list) -> list:
-    """Ardışık aynı köşeyi at (kare kırmada mahya boyu 0)."""
-    out = []
-    for p in plan:
-        if not out or abs(out[-1][0] - p[0]) > 1e-6 or abs(out[-1][1] - p[1]) > 1e-6:
-            out.append(p)
-    if len(out) > 1 and abs(out[0][0] - out[-1][0]) < 1e-6 and abs(out[0][1] - out[-1][1]) < 1e-6:
-        out.pop()
-    return out
+def _kenar(ana, parca) -> str | None:
+    """Cumba: parçanın ana dikdörtgene göre bitişik olduğu yan (parça o kenarın içinde): G (güney), K, B, D; değilse None."""
+    x0, y0, x1, y1 = ana
+    a0, b0, a1, b1 = parca
+    if b1 == y0 and a0 >= x0 and a1 <= x1:
+        return "G"
+    if b0 == y1 and a0 >= x0 and a1 <= x1:
+        return "K"
+    if a1 == x0 and b0 >= y0 and b1 <= y1:
+        return "B"
+    if a0 == x1 and b0 >= y0 and b1 <= y1:
+        return "D"
+    return None
+
+
+DONUS_CUMBA = {"G": [], "K": ["ay"], "B": ["d"], "D": ["d", "ay"]}        # kanonik: cumba ana gövdenin güneyinde
+DONUS_L = {"D": [], "B": ["ax"], "K": ["d"], "G": ["d", "ax"]}            # kanonik: kanat bloğun doğusunda
+
+
+def _uygula(rs: list, islemler: list) -> tuple[list, list]:
+    """Dikdörtgenlere sırayla ax (x aynası), ay (y aynası), d (devrik) uygular; her aynanın merkezini döner (geri dönüş için)."""
+    merkez = []
+    for op in islemler:
+        if op == "d":
+            rs = [[r[1], r[0], r[3], r[2]] for r in rs]
+            merkez.append(None)
+        elif op == "ax":
+            c = (min(r[0] for r in rs) + max(r[2] for r in rs)) / 2
+            rs = [[2 * c - r[2], r[1], 2 * c - r[0], r[3]] for r in rs]
+            merkez.append(c)
+        else:
+            c = (min(r[1] for r in rs) + max(r[3] for r in rs)) / 2
+            rs = [[r[0], 2 * c - r[3], r[2], 2 * c - r[1]] for r in rs]
+            merkez.append(c)
+    return rs, merkez
+
+
+def _geri(c: dict, islemler: list, merkez: list) -> dict:
+    for op, m in reversed(list(zip(islemler, merkez))):
+        c = cati_ortak.devrik(c) if op == "d" else (cati_ortak.ayna_y(c, m) if op == "ay" else _ayna_x(c, m))
+    return c
 
 
 def uret(ayak_izi, tip: str = "besik", mahya: str | None = None, egim_yuzde: float | None = None,
          duvar_ustu: float = 270, kural: dict | None = None) -> dict:
-    """Dikdörtgen ayak izi (x0, y0, x1, y1; dış yüzler) üstüne çatı. `mahya`: "x" (doğu–batı) ya da "y" (kuzey–güney)."""
+    """Ayak izi üstüne çatı. Beşik ve kırma: tek dikdörtgen (x0, y0, x1, y1; dış yüzler), `mahya` "x" ya da "y". Cumba: [ana, cumba]
+    (cumba ana gövdenin bir uzun kenarına bitişik). L: [blok, kanat] (kanat bloğun bir kısa kenarına bitişik, onu boydan boya örter).
+    Tipe göre üretici ayrı modüldedir (`cati_besik`, `cati_kirma`, `cati_cumba`, `cati_l`); ortak sayılar kural tablosundan."""
     k = kural or kurallar()
-    x0, y0, x1, y1 = (float(v) for v in ayak_izi)
-    if x1 <= x0 or y1 <= y0:
-        raise CatiHatasi(f"ayak izi boş: {ayak_izi}")
     if tip not in k["tipler"]:
-        raise CatiHatasi(f"çatı tipi '{tip}' üretilmez (yalnız {', '.join(k['tipler'])}; L ve cumba 14b)")
+        raise CatiHatasi(f"çatı tipi '{tip}' üretilmez (yalnız {', '.join(k['tipler'])})")
     if egim_yuzde is None:
         e = float(k["egim_varsayim"])
     else:
@@ -74,53 +117,70 @@ def uret(ayak_izi, tip: str = "besik", mahya: str | None = None, egim_yuzde: flo
         if not lo <= egim_yuzde <= hi:
             raise CatiHatasi(f"eğim %{egim_yuzde} aralık dışı (%{lo}–%{hi})")
         e = round(egim_yuzde / 100, 5)
-    uzun = "x" if (x1 - x0) >= (y1 - y0) else "y"
-    if mahya not in ("x", "y"):
-        mahya = uzun
-    elif tip == "kirma" and mahya != uzun and abs((x1 - x0) - (y1 - y0)) > 1e-6:
-        raise CatiHatasi("kırmada mahya uzun kenar boyunca olur")
-    S, sacak_kotu = float(k["sacak_cm"]), float(duvar_ustu) + float(k["topuk_cm"])
-    ust_pay = round(float(k["panel_kalinligi_cm"]) * math.sqrt(1 + e ** 2), 3)
-    X0, Y0, X1, Y1 = x0 - S, y0 - S, x1 + S, y1 + S
-
-    def duzlem(ad, plan, yukari, sacak, notu):
-        return {"ad": ad, "plan": [[_r2(a), _r2(b)] for a, b in _sade(plan)], "yukari": yukari, "egim": round(e, 5),
-                "sacak_kotu": _r2(sacak_kotu), "sacak": {kk: _r2(v) for kk, v in sacak.items()}, "ust_pay": ust_pay, "not": notu}
-
-    def kalkan(ad, eksen, konum, aralik, ic, ust):
-        return {"ad": ad, "eksen": eksen, "konum": _r2(konum), "aralik": [_r2(aralik[0]), _r2(aralik[1])], "ic": ic, "ust": ust}
-
-    duz, kal = [], []
-    if mahya == "x":
-        ym = (Y0 + Y1) / 2
-        if tip == "besik":
-            duz = [duzlem("güney", [[X0, Y0], [X1, Y0], [X1, ym], [X0, ym]], [0, 1], {"y": Y0}, "güney yüzü"),
-                   duzlem("kuzey", [[X0, ym], [X1, ym], [X1, Y1], [X0, Y1]], [0, -1], {"y": Y1}, "kuzey yüzü")]
-            kal = [kalkan("batı kalkanı", "x", x0, (y0, y1), "dogu", ["güney", "kuzey"]),
-                   kalkan("doğu kalkanı", "x", x1, (y0, y1), "bati", ["güney", "kuzey"])]
-        else:
-            h = (Y1 - Y0) / 2
-            duz = [duzlem("güney", [[X0, Y0], [X1, Y0], [X1 - h, ym], [X0 + h, ym]], [0, 1], {"y": Y0}, "güney yüzü"),
-                   duzlem("kuzey", [[X0 + h, ym], [X1 - h, ym], [X1, Y1], [X0, Y1]], [0, -1], {"y": Y1}, "kuzey yüzü"),
-                   duzlem("batı", [[X0, Y0], [X0 + h, ym], [X0, Y1]], [1, 0], {"x": X0}, "batı kırması"),
-                   duzlem("doğu", [[X1, Y0], [X1, Y1], [X1 - h, ym]], [-1, 0], {"x": X1}, "doğu kırması")]
+    b = cati_ortak.baglam(k, e, duvar_ustu)
+    S = b["S"]
+    if tip in ("besik", "kirma"):
+        R = ayak_izi[0] if (len(ayak_izi) and isinstance(ayak_izi[0], (list, tuple))) else ayak_izi
+        x0, y0, x1, y1 = (float(v) for v in R)
+        if x1 <= x0 or y1 <= y0:
+            raise CatiHatasi(f"ayak izi boş: {R}")
+        uzun = "x" if (x1 - x0) >= (y1 - y0) else "y"
+        if mahya not in ("x", "y"):
+            mahya = uzun
+        elif tip == "kirma" and mahya != uzun and abs((x1 - x0) - (y1 - y0)) > 1e-6:
+            raise CatiHatasi("kırmada mahya uzun kenar boyunca olur")
+        duz, kal = (cati_besik if tip == "besik" else cati_kirma).uret((x0, y0, x1, y1), mahya, b)
+        yon = "doğu–batı" if mahya == "x" else "kuzey–güney"
+        tip_adi, tip_kayit = f"{TIP_ADI[tip]} (mahya {yon})", tip
     else:
-        xm = (X0 + X1) / 2
-        if tip == "besik":
-            duz = [duzlem("batı", [[X0, Y0], [xm, Y0], [xm, Y1], [X0, Y1]], [1, 0], {"x": X0}, "batı yüzü"),
-                   duzlem("doğu", [[xm, Y0], [X1, Y0], [X1, Y1], [xm, Y1]], [-1, 0], {"x": X1}, "doğu yüzü")]
-            kal = [kalkan("güney kalkanı", "y", y0, (x0, x1), "kuzey", ["batı", "doğu"]),
-                   kalkan("kuzey kalkanı", "y", y1, (x0, x1), "guney", ["batı", "doğu"])]
-        else:
-            h = (X1 - X0) / 2
-            duz = [duzlem("batı", [[X0, Y0], [xm, Y0 + h], [xm, Y1 - h], [X0, Y1]], [1, 0], {"x": X0}, "batı yüzü"),
-                   duzlem("doğu", [[X1, Y0], [X1, Y1], [xm, Y1 - h], [xm, Y0 + h]], [-1, 0], {"x": X1}, "doğu yüzü"),
-                   duzlem("güney", [[X0, Y0], [X1, Y0], [xm, Y0 + h]], [0, 1], {"y": Y0}, "güney kırması"),
-                   duzlem("kuzey", [[X1, Y1], [X0, Y1], [xm, Y1 - h]], [0, -1], {"y": Y1}, "kuzey kırması")]
-    yon = "doğu–batı" if mahya == "x" else "kuzey–güney"
-    return {"tip": tip, "tip_adi": f"{TIP_ADI[tip]} (mahya {yon})", "tip_kaynak": "İE-14 çatı üreticisi (motor/genel/cati_uretici.py)",
+        if len(ayak_izi) != 2:
+            raise CatiHatasi(f"{TIP_ADI[tip]} çatı iki dikdörtgenle verilir ([ana, cumba] ya da [blok, kanat])")
+        ana, parca = (list(map(float, r)) for r in ayak_izi)
+        yan = _kenar(ana, parca) if tip == "cumba" else _kenar_l(ana, parca)
+        islemler = (DONUS_CUMBA if tip == "cumba" else DONUS_L).get(yan or "")
+        if islemler is None:
+            raise CatiHatasi(f"{TIP_ADI[tip]}: ikinci parça birinciye bir kenarından bitişik olmalı")
+        rs, merkez = _uygula([ana, parca], islemler)
+        try:
+            duz, kal = (cati_cumba if tip == "cumba" else cati_l).uret(rs[0], rs[1], b)
+        except ValueError as ex:
+            raise CatiHatasi(f"{TIP_ADI[tip]}: {ex}")
+        c = _geri({"duzlemler": duz, "kalkanlar": kal}, islemler, merkez)
+        duz, kal = c["duzlemler"], c["kalkanlar"]
+        tip_adi, tip_kayit = TIP_ADI[tip], "besik_cumba"
+    return {"tip": tip_kayit, "tip_adi": tip_adi, "tip_kaynak": "İE-14 çatı üreticisi (motor/genel/cati_uretici.py)",
             "sacak": int(S) if float(S).is_integer() else S, "topuk": k["topuk_cm"], "duvar_ustu": duvar_ustu,
             "panel_kalinligi": k["panel_kalinligi_cm"], "duzlemler": duz, "kalkanlar": kal}
+
+
+def _ayna_x(c: dict, cx: float) -> dict:
+    """x → 2·cx − x: devrik + y aynası + devrik ile."""
+    return cati_ortak.devrik(cati_ortak.ayna_y(cati_ortak.devrik(c), cx))
+
+
+def denetle(cati: dict, ayak_izi: list) -> list[str]:
+    """Ortak denetim (her tip): `cati_kur`'dan geçer; düzlemler ayak izinin saçakla genişletilmiş birleşimini boşluksuz ve örtüşmesiz
+    örter; desteksiz üst kenar ('ust') yok. Dönüş: bulgular."""
+    from shapely.geometry import Polygon, box
+    from shapely.ops import unary_union
+    from . import cati_genel
+    bulgu = []
+    try:
+        c = cati_genel.cati_kur(cati)
+    except (SystemExit, Exception) as e:
+        return [f"cati_kur: {e}"]
+    S = float(cati.get("sacak") or 30)
+    rs = ayak_izi if (len(ayak_izi) and isinstance(ayak_izi[0], (list, tuple))) else [ayak_izi]
+    hedef = unary_union([box(r[0] - S, r[1] - S, r[2] + S, r[3] + S) for r in rs])
+    poli = [Polygon(d["plan"]) for d in cati["duzlemler"]]
+    toplam = sum(p.area for p in poli)
+    birlesim = unary_union(poli)
+    if abs(birlesim.area - hedef.area) > 1 or abs(toplam - birlesim.area) > 1:
+        bulgu.append(f"düzlemler saçaklı ayak izini tam örtmüyor (hedef {hedef.area:.0f}, birleşim {birlesim.area:.0f}, toplam {toplam:.0f} cm²)")
+    ust = [e for e in c["kenarlar"] if e["tur"] == "ust"]
+    if ust:
+        bulgu.append(f"desteksiz üst kenar: {len(ust)}")
+    return bulgu
 
 
 def olc(cati: dict) -> dict:

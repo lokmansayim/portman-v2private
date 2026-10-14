@@ -7,7 +7,9 @@
  "panel_kalinligi_cm": {"deger": 8, "durum": "varsayim", "kaynak": "Ç8201 panel çatı; üst pay = panel × √(1 + eğim²)"},
  "egim_varsayim": {"deger": 0.33, "durum": "varsayim", "kaynak": "Ç8201 ve Ç8801: %33; bayi eğim söylemezse"},
  "egim_yuzde_aralik": {"deger": [10, 60], "durum": "varsayim", "kaynak": "plan şemasındaki sınır (beyin/plan_sema.py)"},
- "tipler": {"deger": ["besik", "kirma"], "durum": "varsayim", "kaynak": "14a: dikdörtgen ayak izi üstünde beşik (2 düzlem + 2 kalkan) ya da kırma (4 düzlem). L ve cumba 14b"},
+ "tipler": {"deger": ["besik", "kirma", "cumba", "l"], "durum": "varsayim", "kaynak": "Tipe göre ayrı üretici (Lokman 14.10, r3 3. madde): beşik (dikdörtgen, 2 düzlem + 2 kalkan), kırma (dikdörtgen, 4 düzlem), cumba (ana beşik + dik küçük beşik girip biter; Ç8801), L (iki beşik kol aynı mahya kotunda, kanadın eğimi ona göre; Ç8801L). L kırma (KT-03) ve cumba doğu ucu kırma (Ç8801K) üretilmez"},
+ "cumba_egimi": {"deger": "ana_ile_ayni", "durum": "varsayim", "kaynak": "Ç8801: cumba eğimi ana çatıyla aynı (%33); vadiler 45°, cumba mahyası ana çatının güney yüzünde biter"},
+ "l_kanat_egimi": {"deger": "mahyalar_esit", "durum": "varsayim", "kaynak": "Ç8801L: kanat eğimi iki mahya aynı kotta buluşacak biçimde (0,33 × 350 / 230 = 0,50217); Lokman 10.10 14:46 kabul"},
  "kirma_mahya": {"deger": "uzun_kenar", "durum": "varsayim", "kaynak": "Ç8201 ve KT-02: kırmada mahya uzun kenar boyunca (kısa kenarda mahya ters kırma verir)"},
  "veranda_cati_alti": {"deger": "yalniz_kirma", "durum": "varsayim", "kaynak": "KT-02: çatı altındaki veranda kırmayla; beşikte kalkan verandanın açık kenarına otururdu"}
 }
