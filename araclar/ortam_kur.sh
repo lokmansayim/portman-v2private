@@ -77,12 +77,17 @@ if [[ $DOGRULA == 1 ]]; then
     git checkout -q -- beyin/testler/
     comm -13 <(printf '%s\n' "$once" | sort) <(git ls-files --others --exclude-standard beyin/testler | sort) | while read -r f; do [[ -n "$f" ]] && rm -f -- "$f"; done
   fi
-  # Bilinen (30.09): sır taraması vps/kapi_d_dogrula.sh:25'i işaretler. Yanlış pozitif: rolün parolası olup olmadığını
-  # (rolpassword IS NOT NULL) yazdıran SQL satırı; dosyada sır yok. Bu yüzden "sir_taramasi FARKLI · beklenmeyen 1" ve
-  # "2 kontrolde fark" beklenir; öteki satırlar AYNI olmalı.
+  # "SONUÇ: referansla aynı" beklenir; herhangi bir FARKLI satırı incelenir. (12.10'a kadar sır taramasının vps/kapi_d_dogrula.sh:25
+  # yanlış pozitifi "2 kontrolde fark" verirdi; İE-08'den beri denetim/kos.py'de beklenen bulgu.)
   "$VENV/bin/python" testler/referans/dogrula.py 2>&1 | grep -E "FARKLI|SONUÇ|parmak izleri" | sed 's/^/-- referans: /'
   if [[ $PG_OK == 1 ]]; then export PORTMAN_TEST_PG="host=127.0.0.1 port=$PORT user=postgres"; fi
-  "$VENV/bin/python" -m pytest -q -p no:cacheprovider testler 2>&1 | grep -E "passed|failed|error" | tail -1 | sed 's/^/-- testler: /'
+  # BK-08 madde 10: kırmızı testin adı ekrana gelir (-rfE), tam çıktı geçici günlükte kalır (depoya girmez), çıkış kodu korunur.
+  GUNLUK="$(mktemp "${TMPDIR:-/tmp}/portman-pytest.XXXXXX")"
+  "$VENV/bin/python" -m pytest -q -rfE -p no:cacheprovider testler > "$GUNLUK" 2>&1
+  TEST_RC=$?
+  grep -E "^(FAILED|ERROR) " "$GUNLUK" | sed 's/^/-- testler: /'
+  grep -E "passed|failed|error" "$GUNLUK" | tail -1 | sed 's/^/-- testler: /'
+  say "-- testler: çıkış $TEST_RC · tam çıktı $GUNLUK"
 fi
 
 say ""
@@ -92,3 +97,4 @@ say "  source $VENV/bin/activate"
 if [[ -f "$KOK/deneme/2026-09-30_asama2/kos.py" ]]; then
   say "Aday karşılaştırması: python deneme/2026-09-30_asama2/kos.py --cikti <klasör>"
 fi
+[[ ${TEST_RC:-0} == 0 ]] || { say "DUR: testlerde kırmızı var (yukarıdaki FAILED/ERROR satırları)"; exit "$TEST_RC"; }
