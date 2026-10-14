@@ -11,6 +11,7 @@ from .katalog import Katalog
 from .konusma import Konusma, MAX_REVIZYON, MAX_SORU, ESKI_TASLAK_SN
 from . import varyant
 from . import secenek as SC
+from . import numara                     # BK-08 madde 9: gerekçedeki serbest metin maskelenir
 from . import celik                      # İE-08: çelik aday zarfı, D-09 antet bilgisi
 from . import celik_okuma as CO          # İE-08 PR-2b: çelik revizyonunda bayinin sözünden pencere / çatı / dış 140 okuması (K18)
 
@@ -750,8 +751,9 @@ def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts
     on_bilgi = f"{celik.kaynak_notu(aday)}" + (f" · {aday.get('katalog_m2'):g} m², {aday.get('oda_programi')}" if isinstance(aday.get("katalog_m2"), (int, float)) else "") + ". "
     uyg = ("Uygulanan: " + "; ".join(CO.aciklama(d) for d in yeni) + ". ") if yeni else ""
     gerekce = f"çelik aday {aday['kod']} (genel motor)" + (f"; değişiklik: {', '.join(d['op'] for d in yeni)}" if yeni else "")
+    # BK-08 madde 4: çelik planda görsel ve PDF bu metinle birlikte gider (çizim düşerse bu metin gitmez, `worker._cizim_hatasi`)
     return _bitir(k, Karar(eylem="is_emri", is_emri=ie, revizyon=ie["revizyon"], gerekce=gerekce,
-                            mesaj=f"{on_not}{on_bilgi}{ozet} {uyg}Ön onay planını hazırlıyorum; birkaç dakika içinde plan görseli ve PDF olarak göndereceğim.".replace("  ", " ")))
+                            mesaj=f"{on_not}{on_bilgi}{ozet} {uyg}Ön onay planınız hazır; plan görseli ve PDF ektedir.".replace("  ", " ")))
 
 
 def _is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, sablon: dict, kaynak: str, ts: dict, on_bilgi: str = "") -> Karar:
@@ -1092,8 +1094,10 @@ def _eski_taslak_sor(k: Konusma, t: Talep | None = None, metin: str | None = Non
         k.d["bekleyen_talep"] = t.model_dump(mode="json")
         k.d["bekleyen_metin"] = (metin or "").strip()
     if n > ESKI_TASLAK_EN_COK:
-        bekleyen = _bekleyeni_birak(k); k.d.pop("eski_taslak_soru", None)
-        return _bitir(k, Karar(eylem="yonlendir", gerekce=f"eski taslak sorusu cevapsız (D-01); bekleyen mesaj: «{_kisalt(bekleyen, 200)}»",
+        # BK-08 madde 9: gerekçe günlüğe gider; bayinin cümlesi yazılmaz, yalnız bekleyen talebin kodu (metin konuşma kaydında ve panelde)
+        kod = (k.d.get("bekleyen_talep") or {}).get("katalog_kodu") or "kodsuz"
+        _bekleyeni_birak(k); k.d.pop("eski_taslak_soru", None)
+        return _bitir(k, Karar(eylem="yonlendir", gerekce=f"eski taslak sorusu cevapsız (D-01); bekleyen mesaj: {numara.maskele(str(kod))} talebi",
                                mesaj="Önceki taslakla ilgili sorumu netleştiremedim. " + YONLENDIRME))
     k.d["bekleyen_zamani"] = int(time.time())
     k.d["son_soru_alani"] = ESKI_TASLAK_SORUSU

@@ -116,3 +116,32 @@ def test_patron_gonderenken_patron_satiri_yok(depo):
     [r] = isle_hepsi(depo)
     assert r["eylem"] == "yonlendir"
     assert [(x["alici"], x["kind"]) for x in satirlar(depo, g["id"])] == [(NUMARA_P, "text")]
+
+
+# BK-08 madde 9: bayinin mesajındaki numara (boşluklu / tireli / +90'lı) Patron bildirimindeki alıntıda maskeli; bayinin satırı aynı.
+# Numara uydurma (sabit hat biçiminde, abonesi 000 07 77).
+TEL_BOSLUKLU = "0212 000 07 77"
+
+
+def test_yonlendirmede_patron_alintisi_numarasiz(depo):
+    depo.bayi_yaz(NUMARA_A, ad="Deneme Bayi A", kod="TSTA")
+    g = mesaj(f"P8501 olsun, müşteri {TEL_BOSLUKLU} arayacak", talep(ozet="P8501", katalog_kodu="P8501"), bayi=depo.gelen_bayisi(NUMARA_A))
+    depo.mesaj_kaydet(g)
+    [r] = isle_hepsi(depo)
+    assert r["eylem"] == "yonlendir"
+    s = satirlar(depo, g["id"])
+    assert s[1]["alici"] == "PATRON" and "P8501 olsun, müşteri …0777 arayacak" in s[1]["govde"] and "000 07 77" not in s[1]["govde"]
+
+
+def test_cikarim_hatasinda_patron_alintisi_numarasiz(depo, monkeypatch):
+    depo.bayi_yaz(NUMARA_A, ad="Deneme Bayi A", kod="TSTA")
+
+    def patlak(*a, **k):
+        raise RuntimeError("LLM yok")
+    monkeypatch.setattr(W, "cikar", patlak)
+    g = mesaj("numaram +90 (212) 000-07-77", None, bayi=depo.gelen_bayisi(NUMARA_A)); g.pop("test_cikarim", None)
+    depo.mesaj_kaydet(g)
+    [r] = isle_hepsi(depo)
+    assert r["eylem"] == "hata"
+    s = satirlar(depo, g["id"])
+    assert s[1]["alici"] == "PATRON" and "numaram …0777" in s[1]["govde"] and "07-77" not in s[1]["govde"]

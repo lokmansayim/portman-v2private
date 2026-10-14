@@ -536,3 +536,13 @@ def test_dorduncu_tur_set_acikken_kaynak_ve_kararsizlik(s):
     assert k.eylem == "secenek" and "Önce listeden seçin" in k.mesaj and not s.plan
     k = s.yaz("Ç8801K yerine Ç8801L olsun", katalog_kodu="Ç8801K")
     assert k.eylem == "is_emri" and s.plan["yapi"]["kod"] == "Ç8801L"
+
+
+def test_celik_plan_mesaji_ekleri_soyler(s):
+    """BK-08 madde 4 (13.10 canlı denemesi): çelik r01/r02'de görsel ve PDF metinle birlikte gider; mesaj "birkaç dakika içinde
+    göndereceğim" diye söz vermez. Prefabrik metni ayrı yolda, değişmedi."""
+    k = r01_k(s)
+    assert "plan görseli ve PDF ektedir" in k.mesaj and "göndereceğim" not in k.mesaj and "Görselde" not in k.mesaj
+    k = s.yaz("mutfak penceresi 120x120 olsun", pencereler=[pen("mutfak", "120x120")])
+    assert k.eylem == "is_emri" and k.revizyon == 2
+    assert "plan görseli ve PDF ektedir" in k.mesaj and "göndereceğim" not in k.mesaj

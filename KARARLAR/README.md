@@ -72,6 +72,24 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-10](D-10.md) | Bayi paftasının 1. sayfasında 8b mühendis kabulüne kadar antet üstünde "TASLAK" (`pafta_sablonu.json › taslak_ibaresi`); 15 cm kuralı: "Çelikte 15 cm parça çıkmaz", kısa parça komşusuna katılır ve mühendise kontrol notu düşer (`pafta_ozet.json › kontrol_notlari`); yedi aday `gecerli` kayıtta, bayiye sunulma mühendisin K-A10 kabulüyle; KT-01 etiket yeri ve baca derinliği; `bayi_gorsel.png` (plan + çatı planı + iki perspektif); referans bu kararla yeniden donduruldu | 12.10 akşam |
 | [D-11](D-11.md) | Geliştirme döneminde çelik adayların bayiye sunulma kabulünü (K-A10) Lokman verir (kabul kaydında kim = Lokman, dayanak D-11; metinlerde "kabul eden"); 8b mühendis teknik kontrolü aynen; genel motor düzenlenebilir DXF üretir (plan + dört görünüş, katmanlı, cm), yükleme listesi Excel'i yalnız kabul paketinde (openpyxl sunucuda yok); DXF ve Excel çıktıdır, kaynak değil: düzeltme tanıma (D-07) ya da kural kitabına işlenir, yeniden üretilir | 13.10 sabah |
 
+## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
+
+Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye burada ayrılır. `/is-emri` yalnız o dalın `docs/is_emirleri/` klasörüne bakar; yeni numara almadan önce bu tabloya bakılır, alınan numara aynı commit'te buraya yazılır.
+
+| Seri | Numara | Sahibi | Durum |
+|---|---|---|---|
+| D | D-01–D-11 | bu depo (`main`); D-10 ve D-11 İE-08'in | yazıldı |
+| D | D-12–D-15 | prefabrik hattının dört kararı; dallarda (`ie-10-prefabrik-referanslari`, `ie-11-*`, `ie-12-prefabrik-bayi-paftasi`) D-10–D-13 adıyla duruyor: ayrı pano motoru (100 / 60, P6001 çapa), kişisel veri esnetme, pano yüksekliği 250 / 280 / 300, kapı / pencere yerleşimi | ayrıldı; birleşmeden önce o dallarda bu numaralara taşınır (D-10/D-11 çakışması, İE-08 › 13 Ekim kararı) |
+| D | **D-16** | — | **sıradaki boş** |
+| İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
+| İE | İE-09 | model bankası ve yeni model üretimi; P6001 güncellemesi | ayrıldı (pilottan sonra) |
+| İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | dallarda |
+| İE | İE-13 | onaydan teklife: fiyat, Patron onayı, özellik formu, hitap (eski adıyla İE-10) | ayrıldı (pilottan sonra) |
+| İE | — | `ie-11-pr2-kor-test` dalındaki onaysız İE-13 / İE-14 taslak planları | numarasız; planlanınca bu defterden numara alır |
+| İE | **İE-14** | — | **sıradaki boş** |
+| BK | BK-01–BK-08 | bu depo; BK-08 8a sonrası temizlik (`bk-08-8a-temizlik`) | yazıldı |
+| BK | **BK-09** | — | **sıradaki boş** |
+
 ## 27 Eylülde Lokman'ın verdiği kararlar
 
 1. **Sunucu:** Elindeki Natro VPS ile başlanıyor; kurulum taşınabilir (K11 ile aynı yönde).

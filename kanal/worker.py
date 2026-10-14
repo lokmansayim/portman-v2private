@@ -10,7 +10,7 @@ Bu dosya WhatsApp'a bağlanmaz ve HİÇBİR ŞEY GÖNDERMEZ; dışarı yalnız L
 çıktıları checks/ altına yazar. Hosting dosya modu (state.json, cron, pip kurulumu) İE-06 ile kaldırıldı.
 """
 from __future__ import annotations
-import hashlib, json, os, re, sys, time, traceback, warnings
+import hashlib, json, os, sys, time, traceback, warnings
 from pathlib import Path
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -324,9 +324,9 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
         else:
             talep, meta = cikar(gelen, settings, k)
     except Exception as e:
-        hata = str(e)[:320] if isinstance(e, CikarimHatasi) else f"{type(e).__name__}: {str(e)[:300]}"
+        hata = maske_numaralar(str(e))[:320] if isinstance(e, CikarimHatasi) else maske_numaralar(f"{type(e).__name__}: {str(e)}")[:300]
         ekle("Mesajınızı şu an işleyemedim; Lokman Bey'e iletiyorum, en kısa sürede dönüş yapılacak.")
-        patrona(f"Portman: {kim} mesajı işlenemedi (çıkarım hatası). Mesaj: \"{gelen['text'][:300]}\"", sablon=True)
+        patrona(f"Portman: {kim} mesajı işlenemedi (çıkarım hatası). Mesaj: \"{maske_numaralar(gelen['text'])[:300]}\"", sablon=True)
         sonuc.update(eylem="hata", gerekce="çıkarım hatası", hata=hata)
         return {"satirlar": satirlar, "sonuc": sonuc, "hata": hata}
 
@@ -386,7 +386,7 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
             ekle_satir(r)
         sonuc["secenek_seti"] = {"id": karar.secenek_seti["id"], "adaylar": [a["kod"] for a in karar.secenek_seti["adaylar"]]}
     elif cizim and cizim["passed"] and not katman:
-        ekle(metin)
+        ekle(ek_sozu(metin, gorsel_var=False))
         ad = cizim.get("pdf_ad") or Path(cizim["pdf"]).name
         ekle_satir(giden_belge(gelen, Path(cizim["pdf"]), ad, f"{sonuc['is_emri_no']} r{sonuc['revizyon']:02d} · ÖN ONAYA SUNULAN TASLAK · {ozet_baslik}".strip(),
                                0, sonuc["is_emri_no"], sonuc["revizyon"], cizim["pdf_sha256"]))
@@ -394,7 +394,7 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
         ekler = cizim.get("ekler") or {}
         no, rev = sonuc["is_emri_no"], sonuc["revizyon"]
         gorsel = ekler.get("gorsel")
-        ekle_satir(giden_etkilesim(gelen, metin, 0, butonlar=[(f"o:{no}:{rev}", "Onayla"), (f"r:{no}:{rev}", "Revize et")],
+        ekle_satir(giden_etkilesim(gelen, ek_sozu(metin, gorsel_var=bool(gorsel)), 0, butonlar=[(f"o:{no}:{rev}", "Onayla"), (f"r:{no}:{rev}", "Revize et")],
                                    gorsel=gorsel, altbilgi=f"{no} r{rev:02d}", is_emri_no=no, revizyon=rev))
         ad = cizim.get("pdf_ad") or Path(cizim["pdf"]).name
         ekle_satir(giden_belge(gelen, Path(cizim["pdf"]), ad, f"{no} r{rev:02d} · ÖN ONAYA SUNULAN TASLAK · {ozet_baslik}".strip(),
@@ -422,7 +422,7 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
     if karar.eylem == "yonlendir":
         model = katalog.bul(talep.katalog_kodu) if talep.katalog_kodu else None
         model_notu = f" Katalog notu ({model['code']}): {model['not']}" if model and model.get("not") else ""   # D-07: yalnız Patron'a
-        patrona(f"Portman yönlendirme: {kim} — {karar.gerekce}.{model_notu} Mesaj: \"{(gelen.get('text') or '')[:300]}\"",
+        patrona(f"Portman yönlendirme: {kim} — {karar.gerekce}.{model_notu} Mesaj: \"{maske_numaralar(gelen.get('text') or '')[:300]}\"",
                 sablon=True, is_emri_no=sonuc.get("is_emri_no"))
     return {"satirlar": satirlar, "sonuc": sonuc}
 
@@ -517,7 +517,7 @@ def secenek_satirlari(gelen: dict, karar, katalog, metin: str, proje_koku: Path 
         if yol:
             gorsel = {"file": str(yol), "filename": yol.name, "sha256": _sha(yol), "mime": "image/png"}
     except Exception as e:      # görsel üretilemezse metinli buton mesajı gider; akış durmaz
-        log("seçenek görseli üretilemedi:", f"{type(e).__name__}: {str(e)[:160]}")
+        log("seçenek görseli üretilemedi:", maske_numaralar(f"{type(e).__name__}: {str(e)[:160]}"))
     rows = [giden_etkilesim(gelen, metin, 0, butonlar=butonlar, gorsel=gorsel, altbilgi="Butonla ya da yazarak seçin")]
     if len(adaylar) > len(butonlar):
         from beyin import secenek as SC
@@ -562,12 +562,17 @@ def cizim_genel(ie: dict, hedef: Path) -> dict:
                   kaynak=f"İş Emri {no} r{rev:02d} ({y.get('referans_model') or y.get('kod')})", bilgi=ie.get("bilgi"))
 
 
-_NUMARA = re.compile(r"(?<!\d)(\d{10,15})(?!\d)")
+def ek_sozu(metin: str, gorsel_var: bool) -> str:
+    """BK-08 madde 4: çelik plan mesajı "plan görseli ve PDF ektedir" der; görsel gitmiyorsa (mesaj katmanı kapalı ya da bayi görseli
+    üretilemedi) yalnız PDF'in ekte olduğu söylenir. Prefabrik metni bu sözü taşımaz, dokunulmaz."""
+    return metin if gorsel_var else metin.replace("plan görseli ve PDF ektedir", "PDF ektedir")
 
 
 def maske_numaralar(metin: str) -> str:
-    """Günlük, hata iletisi ve kayıt kopyası için: 10–15 haneli rakam dizileri (telefon numarası olabilir) maskelenir (K09, D-09)."""
-    return _NUMARA.sub(lambda m: "…" + m.group(1)[-4:], metin or "")
+    """Günlük, hata iletisi, Patron metni ve kayıt kopyası için: telefon numaraları "…" + son dört hane olur (K09, D-09). BK-08 madde 9:
+    bitişik 10–15 hanenin yanında boşluklu, tireli, parantezli ve `+90`'lı biçimler de (`beyin/numara.py`, paftayla aynı desen)."""
+    from beyin import numara
+    return numara.maskele(metin, son_dort=True)
 
 
 def ekler_uret(ie: dict, hedef: Path, v: dict, settings: dict, m: dict | None = None) -> dict:
