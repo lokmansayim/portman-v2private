@@ -1,0 +1,203 @@
+{
+ "dis_olcu": {
+  "en": 1025,
+  "boy": 860
+ },
+ "mahaller": [
+  {
+   "ad": "Yaşam Alanı",
+   "islev": "salon",
+   "dikdortgenler": [
+    [
+     0,
+     225,
+     360,
+     860
+    ]
+   ]
+  },
+  {
+   "ad": "Mutfak",
+   "islev": "mutfak",
+   "dikdortgenler": [
+    [
+     360,
+     460,
+     630,
+     860
+    ]
+   ]
+  },
+  {
+   "ad": "Hol",
+   "islev": "hol",
+   "dikdortgenler": [
+    [
+     360,
+     225,
+     630,
+     330
+    ],
+    [
+     360,
+     330,
+     765,
+     460
+    ]
+   ]
+  },
+  {
+   "ad": "Yatak Odası 1",
+   "islev": "yatak_odasi",
+   "dikdortgenler": [
+    [
+     630,
+     460,
+     765,
+     530
+    ],
+    [
+     630,
+     530,
+     1025,
+     860
+    ]
+   ]
+  },
+  {
+   "ad": "Yatak Odası 2",
+   "islev": "yatak_odasi",
+   "dikdortgenler": [
+    [
+     630,
+     0,
+     1025,
+     330
+    ]
+   ]
+  },
+  {
+   "ad": "Banyo",
+   "islev": "banyo",
+   "dikdortgenler": [
+    [
+     765,
+     330,
+     1025,
+     530
+    ]
+   ]
+  },
+  {
+   "ad": "Veranda",
+   "islev": "veranda",
+   "dikdortgenler": [
+    [
+     0,
+     0,
+     630,
+     225
+    ]
+   ],
+   "ortu": "cati"
+  }
+ ],
+ "kapilar": [
+  {
+   "arasinda": [
+    "Veranda",
+    "Hol"
+   ]
+  },
+  {
+   "arasinda": [
+    "Yaşam Alanı",
+    "Hol"
+   ]
+  },
+  {
+   "arasinda": [
+    "Hol",
+    "Mutfak"
+   ]
+  },
+  {
+   "arasinda": [
+    "Hol",
+    "Yatak Odası 1"
+   ]
+  },
+  {
+   "arasinda": [
+    "Yatak Odası 2",
+    "Hol"
+   ]
+  },
+  {
+   "arasinda": [
+    "Hol",
+    "Banyo"
+   ]
+  }
+ ],
+ "pencereler": [
+  {
+   "mahal": "Yaşam Alanı",
+   "cephe": "G",
+   "olcu": "120x180",
+   "adet": 1
+  },
+  {
+   "mahal": "Hol",
+   "cephe": "G",
+   "olcu": "80x180",
+   "adet": 1
+  },
+  {
+   "mahal": "Yaşam Alanı",
+   "cephe": "B",
+   "olcu": "120x120",
+   "adet": 1
+  },
+  {
+   "mahal": "Yaşam Alanı",
+   "cephe": "B",
+   "olcu": "120x120",
+   "adet": 1
+  },
+  {
+   "mahal": "Mutfak",
+   "cephe": "K",
+   "olcu": "120x180",
+   "adet": 1
+  },
+  {
+   "mahal": "Yatak Odası 1",
+   "cephe": "D",
+   "olcu": "120x120",
+   "adet": 1
+  },
+  {
+   "mahal": "Banyo",
+   "cephe": "D",
+   "olcu": "60x40",
+   "adet": 1
+  },
+  {
+   "mahal": "Yatak Odası 2",
+   "cephe": "D",
+   "olcu": "120x120",
+   "adet": 1
+  },
+  {
+   "mahal": "Yatak Odası 2",
+   "cephe": "G",
+   "olcu": "120x180",
+   "adet": 1
+  }
+ ],
+ "cati": {
+  "tip": "kirma"
+ },
+ "gerekce": "Ç8801 yerleşiminin plan şemasına çevirisi (tanimdan) + köşe veranda çatı altında, kırma çatı (test)"
+}
