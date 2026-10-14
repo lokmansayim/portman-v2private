@@ -35,7 +35,6 @@ import worker as W                                   # noqa: E402  (kanal/worker
 import etkilesim as ET                               # noqa: E402  (İE-04: buton ve liste cevaplarının çözümü)
 from depo import HATA_BAYIYE, Cakisma, Depo, KiraKaybi, maske     # noqa: E402
 from beyin.konusma import BellekKonusma              # noqa: E402
-import muhendis as MH                                # noqa: E402  (İE-08 8b: mühendis teknik kontrolü)
 
 
 class Gonderilmedi(Exception):
@@ -157,6 +156,7 @@ def bir_is(depo: Depo, settings: dict, sahip: str | None = None) -> dict | None:
         if not depo.cikarim_kaydet(j["id"], sahip, cikarim):
             return {"durum": "atildi", "is_id": j["id"], "neden": "kira kaybedildi (çıkarım kaydı)"}
     hazirlik = W.KANAL / "projects" / ".hazirlik" / f"is{j['id']}-{uuid.uuid4().hex[:8]}"      # her deneme kendi klasöründe
+    import muhendis as MH                              # İE-08 8b; burada: `kalici.py goc` ve eski paket düzenleri (Kapı M) muhendis.py'siz çalışır
     try:
         if muhendis_mu:
             cikti = MH.isle(depo, gelen)                 # İE-08 8b: mühendisin düğmesi, Excel'i ya da notu (LLM'siz)
