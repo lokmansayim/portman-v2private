@@ -733,8 +733,8 @@ def aciklama(op: dict, adaylar: list[dict] | None = None) -> str:
     """Değişikliğin bayiye ve bağlam özetine giden kısa, numarasız anlatımı."""
     if op.get("op") == "pencere_olcu":
         return op.get("aciklama") or f"{op.get('aciklik')} penceresi {op.get('en')}/{op.get('yuk')}"
-    if op.get("op") == "cati_varyanti":
-        return f"çatı {op.get('kod')}"
+    if op.get("op") == "cati_varyanti":                          # BK-09: bayinin gördüğü gösterim ("Ç8801-L"), iç kod değil
+        return op.get("aciklama") or f"çatı {op.get('kod')}"
     if op.get("op") == "dis_karkas_140":
         return "dış duvarlar 140'lık karkas (16,5 cm)"
     return str(op.get("op"))

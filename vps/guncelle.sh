@@ -3,8 +3,11 @@
 # /opt/portman/surumler/<etiket>/ altına kendi venv'iyle kurar, içe aktarma denetimini ve göçleri (yalnız ekler) koşar, 'onceki' ve
 # 'guncel' bağlantılarını değiştirir, servisleri başlatır ve /saglik'i bekler; sağlık gelmezse geri_don.sh ile önceki sürüme döner.
 # BK-07: sağlık geçince sürümdeki nginx yapılandırmasını uygular (vps/nginx_uygula.sh; nginx -t, yedek, reload; hata sürümü düşürmez).
-#   ssh portman-vps 'bash -s' < vps/guncelle.sh v2026.10.XX > ie06_4_surum.txt 2>&1      (ilk kez; depo sunucuda yokken)
-#   ssh portman-vps 'bash /opt/portman/guncel/vps/guncelle.sh v2026.10.XX'                 (sonrakiler)
+#   ssh portman-vps 'bash -s' < vps/guncelle.sh v2026.10.XX > ie06_4_surum.txt 2>&1      (tarihli: İE-06 ilk kurulum, depo sunucuda yokken)
+#   ssh -n portman-vps "setsid nohup bash -c 'bash /opt/portman/guncel/vps/guncelle.sh v2026.10.XX; echo == çıkış \$?' \
+#       > /root/guncelle_v2026.10.XX.txt 2>&1 < /dev/null &"                    (sonrakiler; BK-09 kuralı: uzun iş oturumdan ayrı,
+#   ssh -n portman-vps 'tail -5 /root/guncelle_v2026.10.XX.txt' > surum.txt      SSH koparsa yarım kalmaz; son satır "== çıkış N" değilse
+#                                                                                 sürüyor. timeout yok: yarıda kesilirse geri_don koşmaz)
 # DURUR: etiket biçimi (vYYYY.AA.GG[a-z]); etiket açıklamalı (annotated) değilse; etiket origin/main üzerinde değilse; içe aktarma
 # denetimi düşerse (sürüm etkinleşmez); göç hatası. Hiçbir şey SİLMEZ: yarım kalmış sürüm dizini '.yarim-…' adıyla kenara alınır,
 # eski sürümler durur (surum_temizle.sh ayrı kapıdır). Çıktıda sır yok.
