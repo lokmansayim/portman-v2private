@@ -47,7 +47,7 @@ class PlanProgrami(BaseModel):
     mutfak: Optional[Literal["acik", "ayri"]] = Field(None, description="açık (salonla tek mahal) ya da ayrı; söylenmediyse boş")
     depo: int = Field(0, ge=0, le=1, description="kiler/depo/çamaşır odası istendiyse 1")
     alan_m2: Optional[float] = Field(None, gt=20, le=250, description="Brüt alan, m² (verandayla)")
-    dis_olcu_cm: Optional[list[int]] = Field(None, description="Bayinin verdiği dış ölçü [en, boy] cm (en: ön cephe), söylediği sırayla")
+    dis_olcu_cm: Optional[list[int]] = Field(None, description="Bayinin verdiği dış ölçü [en, boy] cm (talep şemasında en kısa, boy uzun kenar; yön belirtmez)")
     veranda: VerandaIstegi = Field(default_factory=VerandaIstegi)
     cati_tipi: Optional[Literal["besik", "kirma"]] = None
     egim_yuzde: Optional[float] = Field(None, ge=10, le=60)
@@ -72,7 +72,7 @@ _KALIPLAR = [
     (re.compile(r"\b(kiler|depo|çamaşır\s*oda)", re.I), lambda m, p: p.update(depo=1), "depo 1"),
     # dış 140: "dış" sözü (ya da iç sözü olmadan "karkas") zorunlu; "iç duvarlar 140", "banyo duvarı 140" dış karkas değildir (inceleme C4)
     (re.compile(r"\bdış\s+(duvar\w*|karkas\w*)\D{0,12}140|140\s*('?l[ıi]k)?\s+dış\s+(duvar|karkas)|"
-                r"(?<![İi]ç\s)(?<!\w)karkas\w*\D{0,12}140", re.I),
+                r"^\s*karkas\w*\D{0,12}140", re.I),   # yalnız "karkas" cümle başında: "iç duvar karkası 140" dış değildir
      lambda m, p: p.update(dis_karkas=140), "dış 140"),
 ]
 
@@ -93,11 +93,12 @@ def _talep_programi(talep: dict) -> dict:
         p["alan_m2"] = float(talep["alan_m2"])
     d = talep.get("dis_olcu") or {}
     if d.get("en_m") and d.get("boy_m"):
-        # bayinin sırası korunur (en: ön cephe); 5 cm ızgaraya yuvarlama sessiz değil, varsayım olarak yazılır (inceleme G2)
+        # talep şemasında en kısa, boy uzun kenardır (yön değil: ön cephe bilinmez); 5 cm ızgaraya yuvarlama sessiz değil, varsayım
+        # olarak yazılır (inceleme G2)
         ham = (float(d["en_m"]) * 100, float(d["boy_m"]) * 100)
         a, b = (int(round(v / 5)) * 5 for v in ham)
         p["dis_olcu_cm"] = [a, b]
-        if any(abs(h - r) >= 0.5 for h, r in zip(ham, (a, b))):
+        if any(abs(h - r) > 1e-6 for h, r in zip(ham, (a, b))):          # her yuvarlama yazılır (kayan nokta gürültüsü hariç)
             p["varsayimlar"].append(f"dış ölçü {_m(ham[0])} × {_m(ham[1])} m, 5 cm ızgaraya {_m(a)} × {_m(b)} m olarak alındı")
         p.setdefault("alan_m2", round(a * b / 1e4, 1))
     v = talep.get("veranda") or {}

@@ -383,9 +383,11 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
     if karar.gerekce == PLAN_URETIMI and k.d.get("plan_istegi"):
         # İE-14: bayiye önce "hazırlıyorum", sonra üretim (LLM, en çok 3 çağrı; sonuç iş satırına yazılır, yeniden denenen iş çağırmaz),
         # yeni planın kartı ve seçenek seti (`karar.plan_sonucu`). Üretim düşerse "uygulayamadım" + Patron.
-        ekle(karar.mesaj)
-        if ara_gonder is not None and ara_gonder(satirlar[-1]):   # kalıcı akış: satır üretimden önce yazılır, gönderici hemen gönderir (inceleme C7)
-            satirlar[-1]["erken"] = True
+        erken = ara_gonder(karar.mesaj) if ara_gonder is not None else None   # kalıcı akış: üretimden önce yazılır, hemen gider (C7)
+        if erken:
+            satirlar.append({**erken, "erken": True})           # kayıtta; isi_bitir yinelemez, ajan sırası (1..n) değişmez
+        else:
+            ekle(karar.mesaj)
         plan_talep = k.d["plan_istegi"]["talep"]
         pu = (cikarim or {}).get("plan_uretimi")
         if pu is None:

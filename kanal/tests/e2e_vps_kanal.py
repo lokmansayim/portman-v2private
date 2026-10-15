@@ -523,7 +523,7 @@ try:
        and [a["kod"] for a in s12["adaylar"][2:]] == ["KT03"] and pu12a["durum"] == "gecerli" and len(pu12a["adaylar"]) == 2 and pu12a["cagri"] == 0,
        f"seçenek seti: iki yeni plan + KT03; üretim LLM'siz ({pu12a.get('yol')}, {pu12a.get('sure_ms')} ms), iş satırında")
     ok(time.time() - t12 < 180, f"K5 (ölçüm): talepten seçenek görseline {time.time() - t12:.0f} s (gerçek genel motorla iki kart)")
-    k12 = q("SELECT kind, govde, satir FROM giden WHERE mesaj_id = 'wamid.E2EP1' ORDER BY sira")
+    k12 = q("SELECT kind, govde, satir FROM giden WHERE mesaj_id = 'wamid.E2EP1' ORDER BY olusturuldu, sira")   # gönderim sırası (erken satır önce)
     ok([x["kind"] for x in k12] == ["text", "interactive"] and "hazırlıyorum" in k12[0]["govde"] and Path(k12[1]["satir"]["file"]).is_file()
        and k12[1]["satir"]["interactive"]["action"]["buttons"][0]["reply"]["title"] == "1. Yeni plan", "önce 'hazırlıyorum', sonra görselli 3 düğmeli set")
     say = gonder()

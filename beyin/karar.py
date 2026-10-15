@@ -704,6 +704,17 @@ _NEYI_DEGISTIRELIM_YENI = ("Planda neyi değiştirelim? Örneğin \"salonu 50 cm
                            "\"dış duvarlar 140 olsun\" yazabilirsiniz; planı onaylıyorsanız Onayla'ya basın.")
 
 
+def _yeni_plan_sorusu(k: Konusma, metin: str) -> Karar:
+    """Yeni plan revizyonunda soru: soru bütçesi işler, okuma alanı bırakılmaz ve plan bayide kalır (aşama `onay_bekliyor`): sonraki
+    cevap yine LLM düzenleyicisine gider, bayi doğrudan onaylayabilir (ikinci tur bulgu 1)."""
+    k.d["soru_sayisi"] += 1
+    k.d["son_soru_alani"] = "yeni_plan_degisiklik"
+    k.d["asama"] = "onay_bekliyor"
+    if k.d["soru_sayisi"] > MAX_SORU:
+        return _bitir(k, Karar(eylem="yonlendir", gerekce="soru sınırı", mesaj="Talebi netleştiremedim. " + YONLENDIRME))
+    return _bitir(k, Karar(eylem="sor", soru_alani="yeni_plan_degisiklik", mesaj=metin, gerekce="yeni plan: değişiklik okunmadı"))
+
+
 def _celik_degisiklikler(k: Konusma, katalog: Katalog, aday: dict, t: dict, onceki: list[dict], ayni_proje: bool) -> tuple[list[dict], set[str]] | Karar:
     """Bu mesajın (ve set sunulurken saklanan isteğin) çelik değişiklikleri, bayinin sözünden cümle cümle (K18). Dönen: ([op, …], okunan
     türler) ya da sorulacak/yönlendirilecek Karar. Sıra (kapanış incelemesi 13.10): önce desteklenmeyen LLM varyantı ve revizyonda tanınmayan
@@ -907,10 +918,17 @@ def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts
     if aday.get("uretilen") and ayni_proje and ly is not None:  # İE-14 PR-3 (T3): yeni planın revizyonu LLM'in yeniden planıyla
         if ly.get("durum") != "bos":
             return _yeni_plan_revizyonu(k, bayi, aday, ts, son, son_y, ly)
-        # işlem yok (ör. yalnız müşteri bilgisi): banka yoluyla aynı — bilgi varsa plan antet bilgisiyle yeniden, yoksa soru (inceleme C2)
+        # plan değişmedi (inceleme C2 ve ikinci tur): konuşma kapanmaz. Soru, sonraki cevap yine LLM düzenleyicisine gitsin diye
+        # okuma alanı bırakmaz ("okuma_metin" LLM-önce yolu kapatıp cevabı kural yoluna, oradan Patron'a düşürüyordu).
+        if ly.get("islemler"):                                  # işlem okundu ama plan zaten öyle (ör. dış 140'lık planda "dışlar 140")
+            return _yeni_plan_sorusu(k, "İstediğiniz değişiklik planda zaten var. " + _NEYI_DEGISTIRELIM_YENI)
         if not bilgi:
-            return _soru(k, "okuma_metin", _NEYI_DEGISTIRELIM_YENI)
-        sonuc: tuple[list[dict], set[str]] | Karar = ([], set())
+            return _yeni_plan_sorusu(k, _NEYI_DEGISTIRELIM_YENI)
+        if CO.degisiklik_var(k.d.get("son_metin") or ""):     # bilgiyle birlikte değişiklik isteği var ama LLM okumadı: sessiz düşmez
+            k.not_dus("kural", "yeni plan revizyonu: değişiklik isteği okunamadı")
+            return _bitir(k, Karar(eylem="yonlendir", gerekce="yeni plan revizyonu üretilemedi (istek okunamadı)",
+                                   mesaj="İsteğinizi kurallara uyan bir plana otomatik çeviremedim; önceki planınız geçerli. " + YONLENDIRME))
+        sonuc: tuple[list[dict], set[str]] | Karar = ([], set())   # yalnız bilgi: banka yoluyla aynı, plan antet bilgisiyle yeniden
     else:
         sonuc = _celik_degisiklikler(k, katalog, aday, t, onceki, ayni_proje)
     if isinstance(sonuc, Karar):
@@ -923,6 +941,8 @@ def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts
     if ayni_proje and str(son_y.get("kod")).upper() != str(aday["kod"]).upper():          # çatı varyantı değişti: zarf tanım dosyasını değiştirir
         yeni.append({"op": "cati_varyanti", "kod": aday["kod"], "aciklama": f"çatı {aday.get('gosterim') or aday['kod']}"}); okunan.add("cati")
     if ayni_proje and not yeni and not bilgi:
+        if "dis140" in okunan and _zaten_140(t, onceki):      # KT-03 gibi hazır 140'lık modelde aynı öneriyle geri sorulmaz (ikinci tur)
+            return _soru(k, "okuma_metin", "Bu planda dış duvarlar zaten 140'lık karkas. " + _NEYI_DEGISTIRELIM)
         return _soru(k, "okuma_metin", _NEYI_DEGISTIRELIM)   # aynı plan yeniden çizilip revizyon hakkı harcanmaz
     try:
         for d in yeni:

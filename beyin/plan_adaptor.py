@@ -117,7 +117,8 @@ def denetle(soz: dict, oda_programi: str | None = None) -> dict:
         return {"gecerli": False, "kalemler": k}
     k["doseme"] = _doseme(soz)
     # ızgara (inceleme G4): çelikte 5 cm; prefabrikte yarım pano (depodaki İş Emirlerinde kesirler yalnız 0 ve 0,5)
-    adim = soz["izgara_cm"] / 2 if soz["aile"] == "tek_kat_prefabrik" else soz["izgara_cm"]
+    from beyin.plan_sema import IZGARA
+    adim = PANO / 2 if soz["aile"] == "tek_kat_prefabrik" else IZGARA      # adım sabit; sözleşmedeki alandan okunmaz (hakem ikinci tur)
     disi = sorted({float(v) for v in [soz["dis_olcu"]["en"], soz["dis_olcu"]["boy"]] + [v for m in soz["mahaller"] for r in m["dikdortgenler"] for v in r]
                    if abs(v / adim - round(v / adim)) > 1e-3})
     if disi:

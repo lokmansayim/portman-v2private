@@ -30,18 +30,20 @@ def test_g1_olcu_veren_bayiye_olcusu_tutan_plan(en, boy):
 
 
 def test_g1_uyarlama_kaynagi_olcuye_getirilir():
-    # Ç8201 (1095×750) bayinin ölçüsünü söylediği yönde tutar; uyarlama ölçüyü alana değil ölçüye göre ayarlar
+    # Ç8201 (1095×750) bayinin ölçüsünü tutar; uyarlama ölçüyü alana değil ölçüye göre ayarlar (seçimde çözücüyle puanla yarışır)
+    from beyin import plan_uyarlama
+    pr = PP.talepten({"oda_programi": "2+1", "dis_olcu": {"en_m": 10.94, "boy_m": 7.5}})[0]
+    u = plan_uyarlama.uyarla(pr, n=2)
+    assert u["adaylar"] and all(a["plan"]["dis_olcu"] == {"en": 1095, "boy": 750} for a in u["adaylar"])
     s = PU.uret({"oda_programi": "2+1", "dis_olcu": {"en_m": 10.94, "boy_m": 7.5}}, ayar={"acik": False})
-    a = s["adaylar"][0]
-    assert a["yol"] == "uyarlama" and a["plan"]["dis_olcu"] == {"en": 1095, "boy": 750} and a["degisen"] == []
+    assert all(PU.olcu_sapmasi(s["program"], a["plan"]) == (0, 0) and a["degisen"] == [] for a in s["adaylar"])
 
 
-def test_g1_donuk_aday_bayiye_yazilir():
-    s = PU.uret({"oda_programi": "3+1", "dis_olcu": {"en_m": 12, "boy_m": 8}}, ayar={"acik": False})
-    ilk, ikinci = s["adaylar"]
-    assert ilk["plan"]["dis_olcu"] == {"en": 1200, "boy": 800} and ilk["degisen"] == []
-    if ikinci["plan"]["dis_olcu"] != ilk["plan"]["dis_olcu"]:
-        assert ikinci["degisen"] == ["dış ölçü 12 × 8 m döndürülmüş çizildi, ön cephe 8 m"]
+def test_g1_iki_yon_de_olcuyu_tutar():
+    # talep şemasında en kısa, boy uzun kenardır (ön cephe değil; ikinci tur bulgu 4): döndürülmüş aday "döndürüldü" diye yazılmaz
+    s = PU.uret({"oda_programi": "3+1", "dis_olcu": {"en_m": 8, "boy_m": 12}}, ayar={"acik": False})
+    for a in s["adaylar"]:
+        assert {a["plan"]["dis_olcu"]["en"], a["plan"]["dis_olcu"]["boy"]} == {800, 1200} and a["degisen"] == []
 
 
 def test_g1_secim_once_olcu_sonra_puan():
@@ -49,7 +51,7 @@ def test_g1_secim_once_olcu_sonra_puan():
     tutan = {"plan": {"dis_olcu": {"en": 1000, "boy": 1100}}, "puan": 9.0, "yol": "cozucu"}
     donuk = {"plan": {"dis_olcu": {"en": 1100, "boy": 1000}}, "puan": 2.0, "yol": "cozucu"}
     uzak = {"plan": {"dis_olcu": {"en": 765, "boy": 1440}}, "puan": 1.0, "yol": "uyarlama"}
-    assert PU._sec([[uzak, donuk], [tutan]], 3, pr) == [tutan, donuk, uzak]
+    assert PU._sec([[uzak, donuk], [tutan]], 3, pr) == [donuk, tutan, uzak]     # iki yön de tutar: aralarında puan
     assert PU.olcu_notu(pr, uzak["plan"]) == "dış ölçü 10 × 11 m yerine 7,65 × 14,4 m"
     assert PU._sec([[uzak, tutan]], 2) == [uzak, tutan]                     # ölçü verilmediyse yalnız puan
 
@@ -57,7 +59,7 @@ def test_g1_secim_once_olcu_sonra_puan():
 # ── G2 · yön ve yuvarlama ───────────────────────────────────────────────────────────────────────────────────────────────
 def test_g2_yon_korunur_yuvarlama_yazilir():
     p, _ = PP.talepten({"oda_programi": "2+1", "dis_olcu": {"en_m": 10.94, "boy_m": 7.5}})
-    assert p["dis_olcu_cm"] == [1095, 750]                                  # sıralanmaz: en ön cephe
+    assert p["dis_olcu_cm"] == [1095, 750]                                  # sıralanmaz (yazıldığı gibi)
     assert p["varsayimlar"] == ["dış ölçü 10,94 × 7,5 m, 5 cm ızgaraya 10,95 × 7,5 m olarak alındı"]
     p, _ = PP.talepten({"oda_programi": "2+1", "dis_olcu": {"en_m": 7.52, "boy_m": 10.03}})
     assert p["dis_olcu_cm"] == [750, 1005] and "7,52 × 10,03 m" in p["varsayimlar"][0]
@@ -110,7 +112,8 @@ def test_c3_llm_eklenen_dis_140_yazilir():
 @pytest.mark.parametrize("istek,dis", [
     ("dış duvarlar 140 olsun", 140), ("140'lık dış duvar", 140), ("140 lık dış karkas", 140), ("karkas 140 olsun", 140),
     ("dış duvarları 140 yapın", 140),
-    ("iç duvarlar 140 olsun", None), ("banyo duvarı 140 olsun", None), ("duvarlar 140 olsun", None), ("İç karkas 140", None)])
+    ("iç duvarlar 140 olsun", None), ("banyo duvarı 140 olsun", None), ("duvarlar 140 olsun", None), ("İç karkas 140", None),
+    ("iç duvar karkası 140 olsun", None), ("iç duvarların karkası 140", None), ("banyo duvarı karkası 140", None)])
 def test_c4_dis_140_deseni(istek, dis):
     p, kalan = PP.talepten({"oda_programi": "2+1", "alan_m2": 80, "ozel_istekler": [istek]})
     assert p["dis_karkas"] == dis

@@ -167,8 +167,9 @@ def bir_is(depo: Depo, settings: dict, sahip: str | None = None) -> dict | None:
             def ek_kaydet(anahtar: str, deger: dict) -> None:  # İE-14: LLM-önce sonuçları çıkarımın yanına; yeniden denenen iş LLM'i yeniden çağırmaz
                 ekli[anahtar] = deger
                 depo.cikarim_kaydet(j["id"], sahip, ekli)
-            def ara_gonder(satir: dict) -> bool:          # İE-14 (inceleme C7): "hazırlıyorum" uzun üretimden önce gider
-                return depo.ara_satir_yaz(j["id"], sahip, gelen["id"], satir)
+            def ara_gonder(metin: str) -> dict | None:    # İE-14 (inceleme C7): "hazırlıyorum" uzun üretimden önce, ayrılmış sırayla gider
+                s = W.giden_metin(gelen, metin, depo.ERKEN_SIRA)
+                return s if depo.ara_satir_yaz(j["id"], sahip, gelen["id"], s) else None
             cikti = W.isle(gelen, settings, k=k, cikarim=cikarim if yazili else None, proje_koku=hazirlik, giden_bul=depo.giden_satiri, katalog=katalog,
                            ek_kaydet=ek_kaydet, ara_gonder=ara_gonder)
             # Onay denetimi kuralın sonucuna bakar: hangi yoldan olursa olsun (ör. süresi dolan D-01 sorusundan sonra) bir onay
@@ -184,12 +185,11 @@ def bir_is(depo: Depo, settings: dict, sahip: str | None = None) -> dict | None:
         hata = traceback.format_exc()[-2500:]
         k = BellekKonusma(gelen["sender"], d)       # yarım kalan durum değişikliği yazılmaz
         import sablonlar as S
-        t = depo.ajan_sira_sonu(gelen["id"])        # iş sürerken yazılmış satırlar ("hazırlıyorum"; İE-14 C7) varsa onlardan sonra: çakışıp döngüye girmez
-        cikti = {"satirlar": [W.giden_metin(gelen, HATA_BAYIYE, t + 1)]
+        cikti = {"satirlar": [W.giden_metin(gelen, HATA_BAYIYE, 1)]
                  + ([] if gelen.get("role") == "patron" else
-                    [W.giden_metin(gelen, f"Portman: {maske(gelen['sender'])} mesajı işlenirken hata oluştu; günlüğe bakın.", t + 2, "PATRON", "bildirim"),
+                    [W.giden_metin(gelen, f"Portman: {maske(gelen['sender'])} mesajı işlenirken hata oluştu; günlüğe bakın.", 2, "PATRON", "bildirim"),
                      # İE-07 P4: Patron'un penceresi kapalıysa şablonla ulaşır (talep kimliği boş gitmez: T-<iz>)
-                     S.patron_bildirim_satiri(gelen, t + 3, gelen.get("bayi"), None, ((d or {}).get("son_is_emri") or {}).get("is_emri_no"))]),
+                     S.patron_bildirim_satiri(gelen, 3, gelen.get("bayi"), None, ((d or {}).get("son_is_emri") or {}).get("is_emri_no"))]),
                  "sonuc": {"eylem": "hata", "gerekce": "beklenmeyen hata"}, "hata": hata}
     cikti["sonuc"]["worker"] = "kalici"; cikti["sonuc"]["sure_s"] = round(time.time() - t0, 1)
     yer = None

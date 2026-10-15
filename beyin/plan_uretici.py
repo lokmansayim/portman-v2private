@@ -52,16 +52,15 @@ def hedef_alan(talep: dict) -> float | None:
 
 
 def olcu_sapmasi(program: dict, plan: dict) -> tuple[int, int]:
-    """Bayinin dış ölçüsüne uyum: (0, 0) söylediği yönde tutuyor (ya da ölçü vermedi), (1, 0) döndürülmüş tutuyor, (2, sapma cm) tutmuyor."""
+    """Bayinin dış ölçüsüne uyum: (0, 0) tutuyor (iki yönden biri; talep şemasında en/boy kısa/uzun kenardır, ön cephe değil) ya da ölçü
+    vermedi; (1, sapma cm) tutmuyor."""
     if not program.get("dis_olcu_cm"):
         return 0, 0
     en, boy = program["dis_olcu_cm"]
     W, H = plan["dis_olcu"]["en"], plan["dis_olcu"]["boy"]
-    if abs(W - en) <= 5 and abs(H - boy) <= 5:
+    if (W, H) in ((en, boy), (boy, en)):                      # ikisi de 5 cm ızgarada: tam eşitlik (5 cm sapma da yazılır)
         return 0, 0
-    if abs(W - boy) <= 5 and abs(H - en) <= 5:
-        return 1, 0
-    return 2, int(min(abs(W - en) + abs(H - boy), abs(W - boy) + abs(H - en)))
+    return 1, int(min(abs(W - en) + abs(H - boy), abs(W - boy) + abs(H - en)))
 
 
 def olcu_notu(program: dict, plan: dict) -> str | None:
@@ -72,8 +71,6 @@ def olcu_notu(program: dict, plan: dict) -> str | None:
     m = plan_program._m
     en, boy = program["dis_olcu_cm"]
     W, H = plan["dis_olcu"]["en"], plan["dis_olcu"]["boy"]
-    if sinif == 1:
-        return f"dış ölçü {m(en)} × {m(boy)} m döndürülmüş çizildi, ön cephe {m(W)} m"
     return f"dış ölçü {m(en)} × {m(boy)} m yerine {m(W)} × {m(H)} m"
 
 
@@ -198,7 +195,10 @@ def plan_farki(eski: dict, yeni: dict) -> list[str]:
 def kayit(sonuc: dict, talep: dict, etiket: str) -> dict:
     """Test seti ve göç 007 kaydı: talep (yapısal; ad ve numara yok, özel istekler numarasız), program, basamaklar, adaylar (yol, puan,
     iç kaynak kodu, işlemler, plan), sayaçlar, süre. Kaynak kodu iç kayıttır (bayiye ve LLM'e gitmez)."""
-    return {"etiket": etiket, "talep": talep, "durum": sonuc["durum"], "model": sonuc.get("model"), "program": sonuc.get("program"),
+    prog = dict(sonuc.get("program") or {}) or None
+    if prog:                                                   # bayinin sözü numarası maskeli (okunamayan gibi; KVKK ikinci tur notu)
+        prog["uygulanamayan"] = [numara.maskele(str(x)) for x in prog.get("uygulanamayan") or []]
+    return {"etiket": etiket, "talep": talep, "durum": sonuc["durum"], "model": sonuc.get("model"), "program": prog,
             "yol": sonuc.get("yol"), "puan": sonuc.get("puan"), "sure_ms": sonuc.get("sure_ms"), "degisen": sonuc.get("degisen") or [],
             "okunamayan": [numara.maskele(str(x)) for x in sonuc.get("okunamayan") or []],
             "cagri": sonuc["cagri"], "girdi_token": sonuc["girdi_token"], "cikti_token": sonuc["cikti_token"], "hata": sonuc.get("hata"),

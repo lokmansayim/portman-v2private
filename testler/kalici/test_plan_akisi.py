@@ -66,7 +66,7 @@ def test_t1_uyan_yoksa_yeni_plan_ve_bankadan_en_yakinlar(depo, wa, hizli_genel, 
     assert kodlar[0].startswith("YENI-") and kodlar[1].startswith("YENI-") and kodlar[0] != kodlar[1]
     assert kodlar[2:] == ["KT03"]                                                    # r3: iki yeni plan + brüt alana en yakın banka modeli (94)
     assert st["adaylar"][0]["tanim"] is None                                         # set kaydı tanımı taşımaz; konuşmada
-    satirlar = sorgu(depo, "SELECT kind, govde, satir FROM giden ORDER BY sira")
+    satirlar = sorgu(depo, "SELECT kind, govde, satir FROM giden ORDER BY olusturuldu, sira")      # gönderim sırası
     assert satirlar[0]["kind"] == "text" and "yeni bir plan taslağı hazırlıyorum" in satirlar[0]["govde"]
     s = satirlar[1]["satir"]
     assert [b["reply"]["title"] for b in s["interactive"]["action"]["buttons"]][:2] == ["1. Yeni plan", "2. Yeni plan 2"]
@@ -257,6 +257,60 @@ def test_c2_islemsiz_revizyon_konusmayi_kapatmaz(depo, wa, hizli_genel, uretici,
     assert "Planda neyi değiştirelim?" in son and "Lokman" not in son
 
 
+def test_c2_sorudan_sonra_cevap_llm_duzenleyicisine_gider(depo, wa, hizli_genel, uretici, duzenleyici):
+    # ikinci tur bulgu 1: soru okuma alanı bırakmaz; bayinin cevabı ("salonu 50 cm büyüt") Patron'a değil düzenleyiciye gider
+    _secilmis_yeni_plan(depo)
+    duzenleyici["cevap"] = {"islemler": [], "uygulanamayan": []}
+    assert depo.mesaj_kaydet(mesaj("tamam bir bakalım", talep("revizyon", ozet="revizyon"), bayi=BAYI_KART))
+    [r] = isle_hepsi(depo, URETIM)
+    assert r["eylem"] == "sor", r
+    d, _ = depo.konusma_oku(NUMARA_A)
+    assert d["asama"] == "onay_bekliyor" and d["son_soru_alani"] == "yeni_plan_degisiklik"
+    plan = d["uretilen_plan"]["plan"]
+    salon = next(m["ad"] for m in plan["mahaller"] if m["islev"] == "salon")
+    duzenleyici["cevap"] = {"islemler": [{"op": "oda_buyut", "mahal": salon, "yon": _dis_yon(plan, salon), "cm": 50, "alinti": "salonu 50 cm büyüt"}],
+                            "uygulanamayan": []}
+    time.sleep(1.1)
+    assert depo.mesaj_kaydet(mesaj("salonu 50 cm büyüt", talep("revizyon", ozet="salon büyüt"), bayi=BAYI_KART))
+    [r] = isle_hepsi(depo, URETIM)
+    assert duzenleyici["cagri"] == 2 and r["eylem"] == "is_emri" and "LLM-önce" in r["gerekce"], r
+
+
+def test_c2_zaten_uygulanmis_islem_zaten_var_der(depo, wa, hizli_genel, uretici, duzenleyici):
+    # ikinci tur bulgu 6: işlem okundu ama plan zaten öyle → "planda zaten var" (bayinin cümlesi örnek diye geri önerilmez)
+    _secilmis_yeni_plan(depo)
+    d, _ = depo.konusma_oku(NUMARA_A)
+    tip = (d["uretilen_plan"]["plan"].get("cati") or {}).get("tip") or "besik"
+    duzenleyici["cevap"] = {"islemler": [{"op": "cati_tipi", "tip": tip, "alinti": "çatı aynı olsun"}], "uygulanamayan": []}
+    assert depo.mesaj_kaydet(mesaj("çatı böyle olsun", talep("revizyon", ozet="çatı"), bayi=BAYI_KART))
+    [r] = isle_hepsi(depo, URETIM)
+    assert r["eylem"] == "sor", r
+    assert "planda zaten var" in sorgu(depo, "SELECT govde FROM giden ORDER BY is_id DESC, sira")[0]["govde"]
+
+
+def test_c2_bilgiyle_gelen_okunamayan_istek_sessiz_dusmez(depo, wa, hizli_genel, uretici, duzenleyici):
+    # ikinci tur bulgu 7: müşteri bilgisi + değişiklik isteği, LLM işlem çıkarmadı → plan bilgiyle yeniden çizilmez, yönlendirilir
+    _secilmis_yeni_plan(depo)
+    duzenleyici["cevap"] = {"islemler": [], "uygulanamayan": []}
+    assert depo.mesaj_kaydet(mesaj("müşteri Ahmet Bey, mutfak penceresi 120x120 olsun",
+                                   talep("revizyon", ozet="revizyon", musteri={"ad": "Ahmet Bey"}), bayi=BAYI_KART))
+    [r] = isle_hepsi(depo, URETIM)
+    assert r["eylem"] == "yonlendir" and "okunamadı" in r["gerekce"], r
+    assert son_rev(depo)["rev"] == 1
+
+
+def test_c1_hazir_140_modelde_dis_140_zaten_der(depo, wa, hizli_genel):
+    # ikinci tur bulgu 5: KT-03 (dış zaten 140) revizyonunda "dışlar 140" → aynı öneriyle geri sorulmaz, "zaten 140" denir
+    from test_celik_akisi import r01
+    kabul(depo, YEDI)
+    r01(depo, "KT03")
+    time.sleep(1.1)
+    assert depo.mesaj_kaydet(mesaj("dış duvarlar 140'lık olsun", talep("revizyon", ozet="dış 140"), bayi=BAYI_KART))
+    [r] = isle_hepsi(depo, {**AYAR, "mesaj_katmani": True})
+    assert r["eylem"] == "sor", r
+    assert "zaten 140'lık" in sorgu(depo, "SELECT govde FROM giden ORDER BY is_id DESC, sira")[0]["govde"]
+
+
 def test_t3_yeni_plan_revizyonu_gecmezse_plan_degismez(depo, wa, hizli_genel, uretici, duzenleyici):
     _secilmis_yeni_plan(depo)
     d, _ = depo.konusma_oku(NUMARA_A)
@@ -278,11 +332,11 @@ def test_k1_olcu_notu_ve_yuvarlama_bayiye_yazilir(depo, wa, hizli_genel, uretici
     assert depo.mesaj_kaydet(mesaj("12,02 x 8 m 3+1 tek kat çelik", tl, bayi=BAYI_KART))
     [r] = isle_hepsi(depo, URETIM)
     assert r["eylem"] == "secenek", r
-    body = sorgu(depo, "SELECT satir FROM giden ORDER BY sira")[1]["satir"]["body"]
+    body = sorgu(depo, "SELECT satir FROM giden ORDER BY olusturuldu, sira")[1]["satir"]["body"]
     assert "Not: dış ölçü 12,02 × 8 m, 5 cm ızgaraya 12 × 8 m olarak alındı" in body
     satir1, satir2 = (next(x for x in body.splitlines() if x.startswith(n)) for n in ("1.", "2."))
-    assert "(" not in satir1.split("TASLAK")[1]                                    # ilk aday ölçüyü tutuyor: notsuz
-    assert satir2.endswith("(dış ölçü 12 × 8 m döndürülmüş çizildi, ön cephe 8 m)")  # döndürülmüş aday notlu
+    # iki yön de ölçüyü tutar (talep şemasında en/boy kısa/uzun kenardır, ön cephe değil; ikinci tur): ikisi de notsuz
+    assert "(" not in satir1.split("TASLAK")[1] and "(" not in satir2.split("TASLAK")[1]
     assert body.endswith("Birini seçin (düğme ya da numara).")
 
 
@@ -298,8 +352,9 @@ def test_c7_hazirliyorum_uretimden_once_kayitta(depo, wa, hizli_genel, monkeypat
     r = t1(depo)
     assert r["eylem"] == "secenek", r
     assert [x["durum"] for x in gorulen["satir"]] == ["bekliyor"]
-    hepsi = sorgu(depo, "SELECT sira, govde FROM giden ORDER BY sira")
-    assert sum("hazırlıyorum" in x["govde"] for x in hepsi) == 1 and hepsi[0]["sira"] == 1 and hepsi[1]["sira"] == 2
+    hepsi = sorgu(depo, "SELECT sira, govde FROM giden ORDER BY olusturuldu, sira")
+    assert sum("hazırlıyorum" in x["govde"] for x in hepsi) == 1 and "hazırlıyorum" in hepsi[0]["govde"]
+    assert hepsi[0]["sira"] == depo.ERKEN_SIRA and hepsi[1]["sira"] == 1          # ayrılmış sıra; ajan satırları 1'den
 
 
 def test_c7_uretim_patlarsa_hata_mesaji_gider_dongu_yok(depo, wa, hizli_genel, monkeypatch):
@@ -313,24 +368,38 @@ def test_c7_uretim_patlarsa_hata_mesaji_gider_dongu_yok(depo, wa, hizli_genel, m
     assert depo.mesaj_kaydet(mesaj("95 m² 3+1 tek kat çelik, kırma çatı", T95, bayi=BAYI_KART))
     [r] = isle_hepsi(depo, URETIM)
     assert r["durum"] == "basarisiz" and r["eylem"] == "hata", r
-    hepsi = sorgu(depo, "SELECT sira, alici, govde FROM giden ORDER BY sira")
-    assert "hazırlıyorum" in hepsi[0]["govde"] and hepsi[1]["govde"] == D.HATA_BAYIYE and [x["sira"] for x in hepsi][:2] == [1, 2]
+    hepsi = {x["sira"]: x for x in sorgu(depo, "SELECT sira, alici, govde FROM giden")}
+    assert "hazırlıyorum" in hepsi[depo.ERKEN_SIRA]["govde"] and hepsi[1]["govde"] == D.HATA_BAYIYE
 
 
 def test_c7_basarisiz_is_hata_mesaji_hazirliyorumla_cakismaz(depo):
-    # erken yazılmış "hazırlıyorum" sıra 1'i tutar; iş başarısız sayılırsa bayinin hata mesajı sıra 2'ye yazılır (düşmez)
+    # erken "hazırlıyorum" ayrılmış sırada (99); iş başarısız sayılırsa bayinin hata mesajı sıra 1'e yazılır (çakışmaz, düşmez)
     import depo as D
     assert depo.mesaj_kaydet(mesaj("95 m² 3+1 tek kat çelik", T95, bayi=BAYI_KART))
     al = depo.is_al("deneme")
     g = al["gelen"]
-    s = W.giden_metin(g, "Sizin için yeni bir plan taslağı hazırlıyorum", 1)
+    s = W.giden_metin(g, "Sizin için yeni bir plan taslağı hazırlıyorum", depo.ERKEN_SIRA)
     assert depo.ara_satir_yaz(al["is"]["id"], "deneme", g["id"], s) and depo.ara_satir_yaz(al["is"]["id"], "deneme", g["id"], s)
     assert not depo.ara_satir_yaz(al["is"]["id"], "baskasi", g["id"], {**s, "id": s["id"] + "x"})      # kira başkasında: yazılmaz
     with depo.baglan() as c, c.transaction():
         depo._basarisiz_yaz(c, al["is"], g, "deneme")
-    satirlar = sorgu(depo, "SELECT sira, alici, govde FROM giden ORDER BY sira")
-    assert [x["sira"] for x in satirlar][:2] == [1, 2] and "hazırlıyorum" in satirlar[0]["govde"]
+    satirlar = {x["sira"]: x for x in sorgu(depo, "SELECT sira, alici, govde FROM giden")}
+    assert "hazırlıyorum" in satirlar[depo.ERKEN_SIRA]["govde"]
     assert satirlar[1]["alici"] == g["sender"] and satirlar[1]["govde"] == D.HATA_BAYIYE
+
+
+def test_c7_yeniden_denenen_is_baska_karar_verse_de_dongu_yok(depo, wa, hizli_genel, uretici):
+    # ikinci tur bulgu 2: erken satır kalıcı yazıldıktan sonra iş düşer, yeniden denemede karar değişir (ör. üretim kapatıldı) → sıra 1'e
+    # başka satır gelir; erken satır ayrılmış sırada olduğu için kayıt çakışmaz, iş biter
+    kabul(depo, YEDI)
+    assert depo.mesaj_kaydet(mesaj("95 m² 3+1 tek kat çelik, kırma çatı", T95, bayi=BAYI_KART))
+    al = depo.is_al("eski-isleyici", kira_sn=1)
+    g = al["gelen"]
+    assert depo.ara_satir_yaz(al["is"]["id"], "eski-isleyici", g["id"], W.giden_metin(g, "… hazırlıyorum", depo.ERKEN_SIRA))
+    time.sleep(1.2)                                                                   # kira doldu: iş yeniden alınır
+    [r] = isle_hepsi(depo, {**AYAR, "mesaj_katmani": True})                          # üretim kapalı: başka karar (katalog sorusu)
+    assert r["durum"] == "bitti" and r["eylem"] == "sor", r
+    assert {x["sira"] for x in sorgu(depo, "SELECT sira FROM giden")} >= {1, depo.ERKEN_SIRA}
 
 
 def test_yeniden_denenen_is_uretimi_tekrarlamaz(depo, uretici, monkeypatch):
