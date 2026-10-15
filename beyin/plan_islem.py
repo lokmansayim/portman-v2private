@@ -19,7 +19,7 @@ from pydantic import BaseModel, Field, ValidationError
 from beyin import numara
 from beyin.plan_denetim import denetle
 from beyin.plan_sema import PENCERE_OLCULERI
-from beyin.plan_uyarlama import uzat
+from beyin.plan_uyarlama import _kesitler, uzat
 
 ARAC_ADI = "plan_islemleri_kaydet"
 ARAC_ACIKLAMA = "Bayinin yeni plan revizyon isteğini koordinatsız işlemlere çevir. Yalnız bu araçla cevap ver."
@@ -108,8 +108,16 @@ def _oda_kenari(p: dict, mahal: str, yon: str, cm: int) -> tuple[dict | None, st
     ust = p["dis_olcu"]["en" if k == 0 else "boy"]
     eksen = "x" if k == 0 else "y"
     if kenar in (0, ust):                                        # dış cephe: bina o yönde büyür/küçülür
-        q = uzat(p, eksen, kenar - 5 if s > 0 else kenar + 5, cm)    # sol/ön kenarda da köken 0'da kalır (kesitin ötesi kayar)
-        return q, None if q else "dış ölçü bu kadar küçülemez"
+        # kesit odanın içinden geçer; verandayı kesen kesit seçilmez (köşe veranda büyümez; uyarlamadaki gibi, inceleme G10)
+        ilk = kenar - 5 if s > 0 else kenar + 5                  # sol/ön kenarda da köken 0'da kalır (kesitin ötesi kayar)
+        ver_keser = lambda kes: any(x["islev"] == "veranda" and r[k] < kes < r[k + 2]       # noqa: E731
+                                    for x in p["mahaller"] for r in x["dikdortgenler"])
+        adaylar = ([ilk] if not ver_keser(ilk) else []) + [kes for kes in _kesitler(p, eksen, cm, 10) if ana[k] < kes < ana[k + 2]]
+        for kes in adaylar:
+            q = uzat(p, eksen, kes, cm)
+            if q:
+                return q, None
+        return None, "verandayı büyütmeden bu yöne büyütemedim" if ver_keser(ilk) else "dış ölçü bu kadar küçülemez"
     # iç kenar: komşular kenarı tam paylaşmalı (dik aralıkları mahalin aralığı içinde)
     q = copy.deepcopy(p)
     lo, hi = ana[1 - k], ana[3 - k]
@@ -222,4 +230,6 @@ def duzenle(plan: dict, metin: str, talep: dict, ayar: dict | None = None, hazir
         s["ihlaller"] = d["ihlaller"][:8]
         return s
     s.update(durum="gecerli", plan=yeni, tanim=d["tanim"], ozet=d["ozet"], fark=plan_farki(plan, yeni))
+    if any(x["op"] in ("oda_buyut", "oda_kucult") and not x.get("cm") for x in o["islemler"]):
+        s["fark"].append("ölçü söylenmediği için 50 cm alındı")       # varsayım bayiye yazılır (inceleme G10)
     return s

@@ -118,9 +118,13 @@ def sozlesme(plan: dict, aile: str, kaynak: dict, kural_seti: str | None = None,
 
 def cekirdek(soz: dict) -> dict:
     """Sözleşme → çelik plan şeması (derleyici ve denetçi girdisi): yalnız geometri ve açıklıklar."""
+    def tam(v) -> int:                                  # ondalık kesilerek geçirilmez (inceleme G7): 350,9 → 350 ızgara denetimini atlatırdı
+        if abs(float(v) - round(float(v))) > 1e-6:
+            raise ValueError(f"çelik sözleşmede ölçü tam cm olmalı: {v}")
+        return int(round(float(v)))
     p = {k: soz[k] for k in ("dis_olcu", "mahaller", "kapilar", "pencereler", "cati") if soz.get(k) is not None}
-    p["dis_olcu"] = {k: int(v) for k, v in p["dis_olcu"].items()}
-    p["mahaller"] = [{**m, "dikdortgenler": [[int(v) for v in r] for r in m["dikdortgenler"]]} for m in p["mahaller"]]
+    p["dis_olcu"] = {k: tam(v) for k, v in p["dis_olcu"].items()}
+    p["mahaller"] = [{**m, "dikdortgenler": [[tam(v) for v in r] for r in m["dikdortgenler"]]} for m in p["mahaller"]]
     for m in p["mahaller"]:
         if m.get("ortu") is None:
             m.pop("ortu", None)

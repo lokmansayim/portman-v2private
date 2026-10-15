@@ -89,10 +89,8 @@ def denetle(plan: dict, talep: dict | None = None, kural: dict | None = None, ko
                          f"{_tr(hedef * (1 - tol))}–{_tr(hedef * (1 + tol))} m² arası olmalı")
 
     ct = p.get("cati") or {}
-    uzun = "x" if W >= H else "y"
-    if ct.get("tip") == "kirma" and ct.get("mahya_yonu") and ct["mahya_yonu"] != uzun and W != H:
-        ekle("cati", f"kırma çatıda mahya uzun kenar boyunca olur ({'doğu–batı' if uzun == 'x' else 'kuzey–güney'}); mahya_yonu '{uzun}' "
-                     "ya da boş bırakın")
+    # kırmada mahya yönü ve boyu çatının kurulduğu gerçek dikdörtgende (pergola/açık şerit hariç) üreticide denetlenir; W × H'ye bakan
+    # ikinci kontrol çelişen ihlal veriyordu (inceleme G8) — `cati_uretici.uret` → PlanHatasi "çatı: …"
     if any(m["islev"] == "veranda" and (m.get("ortu") or "cati") == "cati" for m in p["mahaller"]) and ct.get("tip") != "kirma":
         ekle("cati", "çatı altındaki veranda yalnız kırma çatıyla (beşikte kalkan verandanın açık kenarına oturur); kırma seçin ya da şerit "
                      "verandayı pergola/açık yapın")

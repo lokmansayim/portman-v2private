@@ -17,8 +17,7 @@ from collections import deque
 from pydantic import ValidationError
 
 from beyin.plan_sema import PlanSozlesmesi, cekirdek, sozlesme, tanimdan
-
-PANO = 125.5                       # motor/geometry.py MOD (tam pano)
+from motor.geometry import MOD as PANO                 # tam pano 125,5 (tek kaynak; inceleme G4)
 DUVAR_CEPHE = {"on": "G", "arka": "K", "sol": "B", "sag": "D"}
 PREFABRIK_ISLEV = {"salon": "salon", "mutfak": "mutfak", "yatak_odasi": "yatak_odasi", "banyo": "banyo", "veranda": "veranda",
                    "antre_hol": "hol", "hol": "hol", "antre": "hol"}
@@ -33,11 +32,16 @@ def celik_oku(tanim: dict, yol: str = "banka") -> dict:
 
 
 def celik_yaz(soz: dict, kod: str = "YENI", ad: str | None = None) -> dict:
-    """Sözleşme → Yapı Tanımı 0.5 (genel motor girdisi). Geçersizse `plan_derle.PlanHatasi`."""
-    from motor.genel.plan_derle import derle
+    """Sözleşme → Yapı Tanımı 0.5 (genel motor girdisi). Plan denetçisinden geçer (dış 140 dahil; inceleme G7); geçersizse
+    `plan_derle.PlanHatasi` (ihlallerle)."""
+    from beyin.plan_denetim import denetle as plan_denetle
+    from motor.genel.plan_derle import PlanHatasi
     if soz["aile"] != "tek_kat_celik":
         raise ValueError(f"çelik adaptörü yalnız tek kat çelik yazar ({soz['aile']})")
-    return derle(cekirdek(soz), kod=kod, ad=ad)
+    d = plan_denetle(cekirdek(soz), {}, kod=kod)
+    if not d["gecerli"]:
+        raise PlanHatasi(d["ihlaller"])
+    return {**d["tanim"], **({"ad": ad} if ad else {})}
 
 
 # ── prefabrik (okuma prototipi) ──────────────────────────────────────────────────────────────────────────────────────────
@@ -112,6 +116,12 @@ def denetle(soz: dict, oda_programi: str | None = None) -> dict:
         k["sozlesme"] = [f"{'.'.join(str(x) for x in er['loc'])}: {er['msg']}" for er in e.errors()][:12]
         return {"gecerli": False, "kalemler": k}
     k["doseme"] = _doseme(soz)
+    # ızgara (inceleme G4): çelikte 5 cm; prefabrikte yarım pano (depodaki İş Emirlerinde kesirler yalnız 0 ve 0,5)
+    adim = soz["izgara_cm"] / 2 if soz["aile"] == "tek_kat_prefabrik" else soz["izgara_cm"]
+    disi = sorted({float(v) for v in [soz["dis_olcu"]["en"], soz["dis_olcu"]["boy"]] + [v for m in soz["mahaller"] for r in m["dikdortgenler"] for v in r]
+                   if abs(v / adim - round(v / adim)) > 1e-3})
+    if disi:
+        k["sozlesme"].append(f"ızgara dışı ölçü ({adim:g} cm adım): {', '.join(f'{v:g}' for v in disi[:4])}")
     adlar = {m["ad"]: m["islev"] for m in soz["mahaller"]}
     if len(adlar) != len(soz["mahaller"]):
         k["sozlesme"].append("mahal adları tekil olmalı")

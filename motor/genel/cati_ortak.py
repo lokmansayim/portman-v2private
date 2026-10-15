@@ -54,19 +54,24 @@ def _ad(ad: str, tablo: dict) -> str:
     return " ".join(tablo.get(s, s) for s in ad.split(" "))
 
 
+def _not(k: dict, tablo: dict) -> dict:
+    """Notlardaki yön sözcükleri de çevrilir ("cumbanın güney alnı"; inceleme G11)."""
+    return {"not": _ad(k["not"], tablo)} if k.get("not") else {}
+
+
 def ayna_y(c: dict, c0: float) -> dict:
     """y → 2·c0 − y."""
     out = dict(c)
-    out["duzlemler"] = [{**d, "ad": _ad(d["ad"], _AD_Y), "plan": [[x, r2(2 * c0 - y)] for x, y in reversed(d["plan"])],
+    out["duzlemler"] = [{**d, "ad": _ad(d["ad"], _AD_Y), "not": _ad(d.get("not") or "", _AD_Y), "plan": [[x, r2(2 * c0 - y)] for x, y in reversed(d["plan"])],
                          "yukari": [d["yukari"][0], -d["yukari"][1]],
                          "sacak": {k: (r2(2 * c0 - v) if k == "y" else v) for k, v in d["sacak"].items()}} for d in c["duzlemler"]]
     ks = []
     for k in c.get("kalkanlar") or []:
         if k["eksen"] == "y":
-            ks.append({**k, "ad": _ad(k["ad"], _AD_Y), "konum": r2(2 * c0 - k["konum"]), "ic": _IC_Y.get(k["ic"], k["ic"]),
+            ks.append({**k, **_not(k, _AD_Y), "ad": _ad(k["ad"], _AD_Y), "konum": r2(2 * c0 - k["konum"]), "ic": _IC_Y.get(k["ic"], k["ic"]),
                        "ust": [_ad(u, _AD_Y) for u in k["ust"]]})
         else:
-            ks.append({**k, "ad": _ad(k["ad"], _AD_Y), "aralik": [r2(2 * c0 - k["aralik"][1]), r2(2 * c0 - k["aralik"][0])],
+            ks.append({**k, **_not(k, _AD_Y), "ad": _ad(k["ad"], _AD_Y), "aralik": [r2(2 * c0 - k["aralik"][1]), r2(2 * c0 - k["aralik"][0])],
                        "ust": [_ad(u, _AD_Y) for u in k["ust"]]})
     out["kalkanlar"] = ks
     return out
@@ -75,8 +80,8 @@ def ayna_y(c: dict, c0: float) -> dict:
 def devrik(c: dict) -> dict:
     """x ↔ y (köşegene göre yansıma)."""
     out = dict(c)
-    out["duzlemler"] = [{**d, "ad": _ad(d["ad"], _AD_D), "plan": [[y, x] for x, y in reversed(d["plan"])], "yukari": [d["yukari"][1], d["yukari"][0]],
+    out["duzlemler"] = [{**d, "ad": _ad(d["ad"], _AD_D), "not": _ad(d.get("not") or "", _AD_D), "plan": [[y, x] for x, y in reversed(d["plan"])], "yukari": [d["yukari"][1], d["yukari"][0]],
                          "sacak": {{"x": "y", "y": "x"}[k]: v for k, v in d["sacak"].items()}} for d in c["duzlemler"]]
-    out["kalkanlar"] = [{**k, "ad": _ad(k["ad"], _AD_D), "eksen": {"x": "y", "y": "x"}[k["eksen"]], "ic": _IC_D.get(k["ic"], k["ic"]),
+    out["kalkanlar"] = [{**k, **_not(k, _AD_D), "ad": _ad(k["ad"], _AD_D), "eksen": {"x": "y", "y": "x"}[k["eksen"]], "ic": _IC_D.get(k["ic"], k["ic"]),
                          "ust": [_ad(u, _AD_D) for u in k["ust"]]} for k in c.get("kalkanlar") or []]
     return out

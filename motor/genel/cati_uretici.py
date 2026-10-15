@@ -24,7 +24,7 @@ from . import cati_besik, cati_cumba, cati_kirma, cati_l, cati_ortak
 
 KURAL_YOLU = Path(__file__).resolve().parents[2] / "kurallar" / "cizim" / "cati_uretici.json"
 VARSAYILAN = {"sacak_cm": 30, "topuk_cm": 10, "panel_kalinligi_cm": 8, "egim_varsayim": 0.33, "egim_yuzde_aralik": [10, 60],
-              "tipler": ["besik", "kirma", "cumba", "l"]}
+              "tipler": ["besik", "kirma", "cumba", "l"], "kirma_mahya_en_az_cm": 15}
 TIP_ADI = {"besik": "beşik", "kirma": "kırma", "cumba": "beşik + cumba", "l": "L beşik"}
 
 
@@ -120,6 +120,8 @@ def uret(ayak_izi, tip: str = "besik", mahya: str | None = None, egim_yuzde: flo
     b = cati_ortak.baglam(k, e, duvar_ustu)
     S = b["S"]
     if tip in ("besik", "kirma"):
+        if len(ayak_izi) and isinstance(ayak_izi[0], (list, tuple)) and len(ayak_izi) > 1:
+            raise CatiHatasi(f"{TIP_ADI[tip]} çatı tek dikdörtgenle verilir ({len(ayak_izi)} verildi)")   # öteki sessizce atılmaz (inceleme G9)
         R = ayak_izi[0] if (len(ayak_izi) and isinstance(ayak_izi[0], (list, tuple))) else ayak_izi
         x0, y0, x1, y1 = (float(v) for v in R)
         if x1 <= x0 or y1 <= y0:
@@ -129,6 +131,10 @@ def uret(ayak_izi, tip: str = "besik", mahya: str | None = None, egim_yuzde: flo
             mahya = uzun
         elif tip == "kirma" and mahya != uzun and abs((x1 - x0) - (y1 - y0)) > 1e-6:
             raise CatiHatasi("kırmada mahya uzun kenar boyunca olur")
+        boy = abs((x1 - x0) - (y1 - y0))                     # kırmada mahya boyu = uzun − kısa kenar (kırmalar 45°)
+        if tip == "kirma" and 1e-6 < boy <= float(k["kirma_mahya_en_az_cm"]):
+            raise CatiHatasi(f"kırma mahyası {boy:g} cm: çelikte {k['kirma_mahya_en_az_cm']:g} cm ve daha kısa parça çıkmaz (D-10); "
+                             "ölçüyü kare ya da en az bu kadar farklı yapın")   # inceleme G3
         duz, kal = (cati_besik if tip == "besik" else cati_kirma).uret((x0, y0, x1, y1), mahya, b)
         yon = "doğu–batı" if mahya == "x" else "kuzey–güney"
         tip_adi, tip_kayit = f"{TIP_ADI[tip]} (mahya {yon})", tip
@@ -137,6 +143,10 @@ def uret(ayak_izi, tip: str = "besik", mahya: str | None = None, egim_yuzde: flo
             raise CatiHatasi(f"{TIP_ADI[tip]} çatı iki dikdörtgenle verilir ([ana, cumba] ya da [blok, kanat])")
         ana, parca = (list(map(float, r)) for r in ayak_izi)
         yan = _kenar(ana, parca) if tip == "cumba" else _kenar_l(ana, parca)
+        if tip == "cumba" and yan:                           # cumba ana gövdenin uzun kenarına bitişir (mahya uzun kenar boyunca; inceleme G5)
+            en_, boy_ = ana[2] - ana[0], ana[3] - ana[1]
+            if (yan in ("G", "K") and en_ < boy_) or (yan in ("B", "D") and boy_ < en_):
+                raise CatiHatasi("beşik + cumba: cumba ana gövdenin uzun kenarına bitişik olmalı")
         islemler = (DONUS_CUMBA if tip == "cumba" else DONUS_L).get(yan or "")
         if islemler is None:
             raise CatiHatasi(f"{TIP_ADI[tip]}: ikinci parça birinciye bir kenarından bitişik olmalı")
@@ -147,6 +157,10 @@ def uret(ayak_izi, tip: str = "besik", mahya: str | None = None, egim_yuzde: flo
             raise CatiHatasi(f"{TIP_ADI[tip]}: {ex}")
         c = _geri({"duzlemler": duz, "kalkanlar": kal}, islemler, merkez)
         duz, kal = c["duzlemler"], c["kalkanlar"]
+        lo, hi = k["egim_yuzde_aralik"]
+        for d in duz:                                        # L kanadının hesaplanan eğimi de aralıkta olmalı (inceleme G5)
+            if not lo / 100 - 1e-9 <= d["egim"] <= hi / 100 + 1e-9:
+                raise CatiHatasi(f"{TIP_ADI[tip]}: '{d['ad']}' eğimi %{d['egim'] * 100:.1f} aralık dışı (%{lo}–%{hi})")
         tip_adi, tip_kayit = TIP_ADI[tip], "besik_cumba"
     return {"tip": tip_kayit, "tip_adi": tip_adi, "tip_kaynak": "İE-14 çatı üreticisi (motor/genel/cati_uretici.py)",
             "sacak": int(S) if float(S).is_integer() else S, "topuk": k["topuk_cm"], "duvar_ustu": duvar_ustu,

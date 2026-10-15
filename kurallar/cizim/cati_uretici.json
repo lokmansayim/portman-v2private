@@ -11,5 +11,6 @@
  "cumba_egimi": {"deger": "ana_ile_ayni", "durum": "varsayim", "kaynak": "Ç8801: cumba eğimi ana çatıyla aynı (%33); vadiler 45°, cumba mahyası ana çatının güney yüzünde biter"},
  "l_kanat_egimi": {"deger": "mahyalar_esit", "durum": "varsayim", "kaynak": "Ç8801L: kanat eğimi iki mahya aynı kotta buluşacak biçimde (0,33 × 350 / 230 = 0,50217); Lokman 10.10 14:46 kabul"},
  "kirma_mahya": {"deger": "uzun_kenar", "durum": "varsayim", "kaynak": "Ç8201 ve KT-02: kırmada mahya uzun kenar boyunca (kısa kenarda mahya ters kırma verir)"},
- "veranda_cati_alti": {"deger": "yalniz_kirma", "durum": "varsayim", "kaynak": "KT-02: çatı altındaki veranda kırmayla; beşikte kalkan verandanın açık kenarına otururdu"}
+ "veranda_cati_alti": {"deger": "yalniz_kirma", "durum": "varsayim", "kaynak": "KT-02: çatı altındaki veranda kırmayla; beşikte kalkan verandanın açık kenarına otururdu"},
+ "kirma_mahya_en_az_cm": {"deger": 15, "durum": "varsayim", "kaynak": "D-10 'Çelikte 15 cm parça çıkmaz': kırmada mahya boyu (uzun − kısa kenar) 0 (piramit) ya da 15 cm'den uzun olur (İE-14 kapanış incelemesi G3)"}
 }

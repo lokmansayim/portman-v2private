@@ -72,10 +72,14 @@ def _olculer(program: dict) -> list[tuple[int, int]]:
         a, b = program["dis_olcu_cm"]
         return [(a, b), (b, a)] if a != b else [(a, b)]
     A = float(program["alan_m2"]) * 1e4
+    kirma = hazirla(program)["cati"] == "kirma"
     out = []
     s = r5(math.sqrt(A / 1.6))
     while s <= math.sqrt(A) + 1:
         L = r5(A / s)
+        if kirma and 0 < L - s <= 15:                  # kırma mahyası 15 cm ve daha kısa olamaz (D-10; inceleme G3)
+            s += 10
+            continue
         if L >= s and L / s <= 1.6 + 1e-9:
             out += [(L, s), (s, L)] if L != s else [(L, s)]
         s += 10
