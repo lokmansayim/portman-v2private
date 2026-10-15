@@ -931,6 +931,7 @@ def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts
                                 mesaj=f"Önceki değişiklikleriniz bu modele taşınamadı ({e}). " + YONLENDIRME))
     ly = getattr(k, "llm_yeni_plan", None)
     bilgi = bool((getattr(k, "son_llm", None) or {}).get("bilgi"))
+    kod_metni = ""                                              # yeni plan + bilgi: istek notu (mesajın başı ve PDF başlığı; LLM özeti değil)
     if aday.get("uretilen") and ayni_proje and ly is not None:  # İE-14 PR-3 (T3): yeni planın revizyonu LLM'in yeniden planıyla
         # plan değişmedi (inceleme C2 ve ikinci tur): konuşma kapanmaz. Soru, sonraki cevap yine LLM düzenleyicisine gitsin diye
         # okuma alanı bırakmaz ("okuma_metin" LLM-önce yolu kapatıp cevabı kural yoluna, oradan Patron'a düşürüyordu). Aynı mesajda
@@ -940,13 +941,13 @@ def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts
             k.not_dus("kural", "yeni plan revizyonu: istek uygulanamadı, plan aynen")
             if not bilgi:
                 return _yeni_plan_sorusu(k, f"{olmayan} isteğini otomatik uygulayamadım; planınız aynen geçerli. " + _BASKA_DEGISIKLIK)
-            ts["_on_not"] = ts.get("_on_not", "") + f"{olmayan} isteğini otomatik uygulayamadım. "
+            kod_metni = f"{olmayan} isteğini otomatik uygulayamadım; bilgileriniz plana işlendi."
         elif ly.get("durum") != "bos":
             return _yeni_plan_revizyonu(k, bayi, aday, ts, son, son_y, ly)
         elif ly.get("islemler"):                                # işlem okundu ama plan zaten öyle (ör. dış 140'lık planda "dışlar 140")
             if not bilgi:
                 return _yeni_plan_sorusu(k, "İstediğiniz değişiklik planda zaten var. " + _BASKA_DEGISIKLIK)
-            ts["_on_not"] = ts.get("_on_not", "") + "İstediğiniz değişiklik planda zaten var. "
+            kod_metni = "İstediğiniz değişiklik planda zaten var; bilgileriniz plana işlendi."
         elif not bilgi:
             return _yeni_plan_sorusu(k, _NEYI_DEGISTIRELIM_YENI)
         elif _bilgi_disi_cumle(k, t, aday):                     # bilgiyle birlikte istek var ama LLM işlem çıkarmadı: sessiz düşmez
@@ -999,6 +1000,10 @@ def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts
     if yeni:                                                   # BK-09 M1: kod değişiklik uyguladıysa LLM özeti yazılmaz (K18); özetin
         ozet = ""                                              # "teyit etmemiz gerekiyor" sorusu "Uygulanan"la çelişiyordu (14.10 canlı)
         ie["talep"]["metin"] = uyg.strip()                     # PDF açıklaması da kodun okuması (`worker`, `ozet_baslik`)
+    elif kod_metni:                                            # bilgi + uygulanamayan/zaten olan istek: LLM özeti isteği taşır ("çatı L tipi
+        ozet = kod_metni                                       # olsun"), plan değişmedi (geometri hakemi ikinci tur, K18): mesaj ve PDF
+        ie["talep"]["metin"] = kod_metni                       # başlığı kodun metni
+        ie["talep"]["metin_koddan"] = True
     gerekce = f"çelik aday {aday['kod']} (genel motor)" + (f"; değişiklik: {', '.join(d['op'] for d in yeni)}" if yeni else "")
     # BK-08 madde 4: çelik planda görsel ve PDF bu metinle birlikte gider (çizim düşerse bu metin gitmez, `worker._cizim_hatasi`)
     return _bitir(k, Karar(eylem="is_emri", is_emri=ie, revizyon=ie["revizyon"], gerekce=gerekce,

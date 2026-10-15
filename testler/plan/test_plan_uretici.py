@@ -194,10 +194,36 @@ def test_birlikte_gecmeyen_islemler_tek_tek_denenir():
     assert s["durum"] == "gecersiz"                                         # tek işlem geçmezse eskisi gibi (karar yönlendirir)
 
 
+def test_sonraki_islemin_mumkun_kildigi_erken_islem_yeniden_denenir():
+    # geometri hakemi ikinci tur (küçük 1): hole pencere ancak hol genişleyince sığar; tek geçişte pencere düşüyordu
+    hol_pen = {"op": "pencere_ekle", "mahal": "Hol", "cephe": "G", "olcu": "120x120", "alinti": "hole 120 pencere"}
+    hol_buy = {"op": "oda_buyut", "mahal": "Hol", "yon": "D", "cm": 50, "alinti": "holü 50 genişlet"}
+    kapi = {"op": "kapi_kaldir", "mahal": "Hol", "mahal_b": "Banyo", "alinti": "banyo kapısını kaldır"}
+    s = PI.duzenle(ornek("gecerli_3arti1_100"), "x", {"oda_programi": "3+1"}, hazir={"islemler": [hol_pen, hol_buy, kapi], "uygulanamayan": []})
+    assert s["durum"] == "gecerli" and "pencere eklendi: Hol 120/120" in s["fark"], s
+    assert [x.split(":")[0] for x in s["uygulanamayan"]] == ["banyo kapısını kaldır"]
+
+
+def test_elli_cm_notu_yalniz_uygulanan_isleme_bakar():
+    # hakem ikinci tur (küçük 2): ölçüsüz büyütme uygulanmadıysa "50 cm alındı" yazılmaz
+    s = PI.duzenle(ornek("gecerli_3arti1_100"), "x", {"oda_programi": "3+1"}, hazir={"islemler": [
+        {"op": "oda_buyut", "mahal": "Salon", "yon": "D", "alinti": "salonu doğuya büyüt"},
+        {"op": "pencere_ekle", "mahal": "Salon", "cephe": "G", "olcu": "120x120", "alinti": "salona pencere"}], "uygulanamayan": []})
+    assert s["durum"] == "gecerli" and s["uygulanamayan"] and not any("50 cm" in f for f in s["fark"]), s
+
+
+def test_kisa_gerekce_tur_adini_atar_mahal_adini_tutar():
+    # hakem ikinci tur (küçük 3)
+    assert PI._kisa("kapı: Hol ile Banyo arasında kapı yok (x)", 60) == "Hol ile Banyo arasında kapı yok"
+    assert PI._kisa("Banyo: giriş kapısından kapılarla ulaşılamıyor", 60) == "Banyo: giriş kapısından kapılarla ulaşılamıyor"
+
+
 @pytest.mark.parametrize("cevap,beklenen", [
     ({"islemler": [], "uygulanamayan": "çatı L olsun"}, ["çatı L olsun"]),                 # metin harf harf bölünmez (hakem küçük 1)
     ({"islemler": [], "uygulanamayan": [{"istek": "çift kat olsun"}]}, ["çift kat olsun"]),    # nesne süzülüp atılmaz (küçük 2)
-    ({"islemler": [{"op": "cati_tipi", "tip": "L"}], "uygulanamayan": []}, ["çatı tipi değişikliği"])])   # iç işlem adı gitmez (küçük 2)
+    ({"islemler": [{"op": "cati_tipi", "tip": "L"}], "uygulanamayan": []}, ["çatı tipi değişikliği"]),     # iç işlem adı gitmez (küçük 2)
+    ({"islemler": [], "uygulanamayan": {"istek": "çift kat olsun"}}, ["çift kat olsun"]),      # ikinci tur: tek nesne de
+    ({"islemler": [], "uygulanamayan": [None, "çift kat olsun"]}, ["çift kat olsun"])])        # "None" yazılmaz
 def test_semaya_uymayan_cevap_istegi_adiyla_tutar(cevap, beklenen):
     s = PI.duzenle(ornek("gecerli_3arti1_100"), "x", {"oda_programi": "3+1"}, hazir=cevap)
     assert s["durum"] == "uygulanamadi" and s["uygulanamayan"] == beklenen

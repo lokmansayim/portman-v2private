@@ -126,8 +126,8 @@ def _tek_tek(cevap) -> dict | None:
     if not isinstance(cevap, dict) or not isinstance(cevap.get("islemler"), list):
         return None
     u = cevap.get("uygulanamayan") or []
-    u = [u] if isinstance(u, str) else u if isinstance(u, list) else []         # metin harf harf bölünmez (hakem küçük 1)
-    olmayan = [str(x) if not isinstance(x, dict) else " ".join(str(v) for v in x.values() if isinstance(v, str)) for x in u]
+    u = [u] if isinstance(u, (str, dict)) else u if isinstance(u, list) else []    # metin harf harf bölünmez (hakem küçük 1)
+    olmayan = [str(x) if not isinstance(x, dict) else " ".join(str(v) for v in x.values() if isinstance(v, str)) for x in u if x is not None]
     olmayan = [x for x in olmayan if x.strip()]                                # nesne süzülüp atılmaz, metni alınır (küçük 2)
     islemler = []
     for o in cevap["islemler"]:
@@ -255,27 +255,40 @@ def uygula(plan: dict, islemler: list[dict]) -> tuple[dict, list[str]]:
     return p, olmayan
 
 
+IHLAL_TURU = re.compile(r"^(dış kapı|kapı yayları çakışıyor|kapı|pencere|çatı kurulamadı|çatı|geometri):\s*")
+
+
 def _kisa(ihlal: str, sinir: int) -> str:
     """Denetçi ihlalinin bayiye giden kısa biçimi: baştaki tür ("kapı: ") ve parantezli ayrıntı atılır, sözcük sınırında kesilir."""
-    t = re.sub(r"^\w+:\s*", "", ihlal.split(" (")[0]).strip()
+    t = IHLAL_TURU.sub("", ihlal.split(" (")[0]).strip()                         # tür adı atılır, mahal adı ("Banyo: …") kalır
     return t if len(t) <= sinir else t[:sinir].rsplit(" ", 1)[0] + "…"
 
 
 def _sirayla(plan: dict, islemler: list[dict], talep: dict, kod: str) -> tuple[dict, dict | None, list[str], list[dict]]:
-    """İşlemleri sırayla tek tek uygular ve denetler. Dönüş: (plan, son geçen denetim ya da None, uygulanamayan, uygulanan işlemler)."""
-    p, son, olmayan, kalan = plan, None, [], []
-    for o in islemler:
-        q, neden = uygula(p, [o])
-        if neden or q == p:
-            olmayan += neden
-            continue
-        d = denetle(q, {"oda_programi": talep.get("oda_programi")}, kod=kod)
-        if d["gecerli"]:
-            p, son = q, d
-            kalan.append(o)
-        else:
-            soz = _soz(o)[:40]
-            olmayan.append(f"{soz}: {_kisa((d['ihlaller'] or ['kurallara uymuyor'])[0], max(20, 78 - len(soz)))}")
+    """İşlemleri sırayla tek tek uygular ve denetler; geçmeyenler bir tur daha denenir (sonraki işlemin mümkün kıldığı erken işlem, ör. hol
+    genişleyince sığan pencere; hakem ikinci tur). Dönüş: (plan, son geçen denetim ya da None, uygulanamayan, uygulanan işlemler)."""
+    p, son, kalan, bekleyen, olmayan = plan, None, [], list(islemler), []
+    for _ in range(2):
+        olmayan, sonraki = [], []
+        for o in bekleyen:
+            q, neden = uygula(p, [o])
+            if neden:
+                olmayan += neden
+                sonraki.append(o)
+                continue
+            if q == p:                                           # plan zaten öyle: düşen istek değil
+                continue
+            d = denetle(q, {"oda_programi": talep.get("oda_programi")}, kod=kod)
+            if d["gecerli"]:
+                p, son = q, d
+                kalan.append(o)
+            else:
+                soz = _soz(o)[:40]
+                olmayan.append(f"{soz}: {_kisa((d['ihlaller'] or ['kurallara uymuyor'])[0], max(20, 78 - len(soz)))}")
+                sonraki.append(o)
+        if not sonraki or len(sonraki) == len(bekleyen):
+            break
+        bekleyen = sonraki
     return p, son, olmayan, kalan
 
 
@@ -299,7 +312,7 @@ def duzenle(plan: dict, metin: str, talep: dict, ayar: dict | None = None, hazir
         return s
     d = denetle(yeni, {"oda_programi": talep.get("oda_programi")}, kod=kod)
     s["denemeler"] = [{"plan": yeni, "gecerli": d["gecerli"], "ihlaller": d["ihlaller"]}]
-    kalan = o["islemler"]
+    kalan = [x for x in o["islemler"] if not any(m.startswith(_soz(x) + ":") for m in olmayan)]     # uygulanamayan işlem not doğurmaz
     if not d["gecerli"]:
         s["ihlaller"] = d["ihlaller"][:8]
         # birlikte kurallara uymadı: işlemler sırayla tek tek denenir; geçen uygulanır, geçmeyen bayinin sözü ve kısa gerekçesiyle yazılır

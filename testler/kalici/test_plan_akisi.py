@@ -753,7 +753,7 @@ def test_soru3_l_ve_cumba_cati_uygulayamadim_ve_besik_kirma(depo, wa, hizli_gene
 
 
 @pytest.mark.parametrize("cevap,not_", [
-    ({"islemler": [], "uygulanamayan": ["çatı L olsun"]}, '"çatı L olsun" isteğini otomatik uygulayamadım.'),
+    ({"islemler": [], "uygulanamayan": ["çatı L olsun"]}, '"çatı L olsun" isteğini otomatik uygulayamadım; bilgileriniz plana işlendi.'),
     ({"islemler": [{"op": "cati_tipi", "tip": "kirma", "alinti": "çatı kırma olsun"}], "uygulanamayan": []}, "planda zaten var")])
 def test_hakem_bilgi_uygulanamayan_istekle_dusmez(depo, wa, hizli_genel, uretici, duzenleyici, cevap, not_):
     # geometri hakemi 15.10 (Önemli 1): aynı mesajda bilgi + uygulanamayan (ya da planda zaten olan) istek gelince bilgi sessizce düşüyordu
@@ -762,13 +762,17 @@ def test_hakem_bilgi_uygulanamayan_istekle_dusmez(depo, wa, hizli_genel, uretici
     d, _ = depo.konusma_oku(NUMARA_A)
     assert d["uretilen_plan"]["plan"]["cati"]["tip"] == "kirma"                     # T1 kırma çatıyla: ikinci vakada istek planda zaten var
     duzenleyici["cevap"] = cevap
-    assert depo.mesaj_kaydet(mesaj("müşteri Ahmet Bey, çatı ...", talep("revizyon", ozet="revizyon", musteri={"ad": "Ahmet Bey"}),
-                                   bayi=BAYI_KART))
+    # hakem ikinci tur: LLM özeti isteği taşır ("çatı L tipi olsun"); ne bayi mesajına ne PDF başlığına girer, ikisi de kodun metni
+    assert depo.mesaj_kaydet(mesaj("müşteri Ahmet Bey, çatı ...", talep("revizyon", ozet="Müşteri adı Ahmet Bey; çatı L tipi olsun",
+                                                                      musteri={"ad": "Ahmet Bey"}), bayi=BAYI_KART))
     [r] = isle_hepsi(depo, URETIM)
     assert r["eylem"] == "is_emri", r
     rev = son_rev(depo)
     assert rev["rev"] == 2 and rev["is_emri"]["talep"]["musteri_adi"] == "Ahmet Bey"
-    assert not_ in sorgu(depo, "SELECT govde FROM giden WHERE kind = 'interactive' ORDER BY olusturuldu DESC")[0]["govde"]
+    govde = sorgu(depo, "SELECT govde FROM giden WHERE kind = 'interactive' ORDER BY olusturuldu DESC")[0]["govde"]
+    belge = sorgu(depo, "SELECT govde FROM giden WHERE kind = 'document' ORDER BY olusturuldu DESC")[0]["govde"]
+    assert not_ in govde and "L tipi" not in govde, govde
+    assert "L tipi" not in belge and not_.split(" isteğini")[0].strip('"') in belge, belge
 
 
 def test_soru3_revizyonda_l_cati_uygulayamadim_plan_onaylanabilir(depo, wa, hizli_genel, uretici, duzenleyici):

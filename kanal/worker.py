@@ -445,7 +445,8 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
     metin = karar.mesaj
     # PDF başlığındaki özet: soru düğmesinin cevabıysa ("kısa cevap: 2") talebin özeti (kapanış incelemesi 13.10)
     ozet_baslik = ((k.d.get("taslak") or {}).get("ozet") or "") if meta.get("tur") == "soru" else (talep.ozet or "")
-    if karar.is_emri and ((karar.is_emri.get("yapi") or {}).get("bu_revizyon")):     # BK-09 M1: çelikte değişiklik uygulandıysa
+    if karar.is_emri and ((karar.is_emri.get("yapi") or {}).get("bu_revizyon") or (karar.is_emri.get("talep") or {}).get("metin_koddan")):
+        # BK-09 M1: çelikte değişiklik uygulandıysa; İE-14: yeni planda istek uygulanamadı ya da zaten vardı (bilgiyle yeniden çizim)
         ozet_baslik = (karar.is_emri.get("talep") or {}).get("metin") or ""          # LLM özeti değil, kodun okuması ("Uygulanan: …")
     if patron_mu:
         metin = metin.replace("Bu konuyu Lokman Bey'e iletiyorum; en kısa sürede dönüş yapılacak.", "Bu talep şu an otomatik karşılanamıyor (Patron modu: ayrıca bildirim gönderilmez).")
