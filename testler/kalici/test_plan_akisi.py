@@ -310,6 +310,8 @@ def test_c1_hazir_140_modelde_dis_140_zaten_der(depo, wa, hizli_genel):
     [r] = isle_hepsi(depo, {**AYAR, "mesaj_katmani": True})
     assert r["eylem"] == "sor", r
     assert "zaten 140'lık" in sorgu(depo, "SELECT govde FROM giden ORDER BY is_id DESC, sira")[0]["govde"]
+    d, _ = depo.konusma_oku(NUMARA_A)
+    assert d["asama"] == "onay_bekliyor"                                            # mesajın söylediği Onayla çalışır (dördüncü tur)
 
 
 @pytest.mark.parametrize("istek", ["salonu 50 cm büyüt", "yatak odasını küçült", "mutfağa kapı ekleyin", "çatı kırma olsun"])
