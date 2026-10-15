@@ -1,0 +1,164 @@
+"""İE-14 r3 · P2 + P5: üretim sırası (program → bankadan uyarlama → çözücü → en son sınırlı LLM programı), yeni plan revizyon işlemleri
+ve LLM'e giden metinlerin adsızlığı. LLM çağrısı yok: `manuel` arka uç kayıtlı cevap oynatır, `anthropic` istekleri sahte `_post`'la sınanır.
+"""
+from __future__ import annotations
+
+import json
+import re
+import sys
+from pathlib import Path
+
+import pytest
+
+KOK = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(KOK))
+from beyin import llm, plan_islem as PI, plan_program as PP, plan_uretici as PU  # noqa: E402
+from beyin.plan_denetim import denetle  # noqa: E402
+
+ORNEK = KOK / "testler" / "plan" / "ornekler"
+T95 = {"alan_m2": 95, "oda_programi": "3+1", "cati": {"tip": "kirma"}}
+T82 = {"alan_m2": 82, "oda_programi": "2+1", "veranda": {"istiyor": True, "konum": "yan"}}
+T60 = {"alan_m2": 60, "oda_programi": "3+1", "ozel_istekler": ["iki banyo olsun", "kiler"]}
+
+
+def ornek(ad):
+    return json.loads((ORNEK / f"{ad}.json").read_text(encoding="utf-8"))
+
+
+# ── üretim sırası ─────────────────────────────────────────────────────────────────────────────────────────────────────
+def test_cogu_talepte_llm_yok_ve_iki_gecerli_plan():
+    s = PU.uret(T95, ayar={"acik": True, "backend": "anthropic"})          # LLM çağrılsaydı anahtar yokluğundan hata olurdu
+    assert s["durum"] == "gecerli" and s["cagri"] == 0 and len(s["adaylar"]) == 2
+    for a in s["adaylar"]:
+        assert denetle(a["plan"], {"oda_programi": "3+1", "alan_m2": 95})["gecerli"]
+        assert a["sozlesme"]["sema"] == "portman.plan/0.1" and a["sozlesme"]["kaynak"]["yol"] == a["yol"]
+        assert "kalemler" in a["denetim"]
+    assert [d["basamak"] for d in s["denemeler"]] == ["uyarlama+cozucu"]
+
+
+def test_uyarlama_ve_cozucu_puanla_birlikte_siralanir():
+    s = PU.uret(T82, ayar={"acik": False})
+    assert {a["yol"] for a in s["adaylar"]} == {"uyarlama", "cozucu"}
+    assert s["adaylar"][0]["puan"] <= s["adaylar"][1]["puan"]
+    assert s["adaylar"][0]["kaynak"] == "Ç8201"                            # iç kayıt; bayiye ve LLM'e gitmez
+
+
+def test_sigmayan_programda_son_basamak_llm_programi_ve_degisen():
+    hazir = {"program": None, "yeniden": [{"program": {"yatak": 3, "banyo": 1, "depo": 0, "alan_m2": 66}, "ipucu": {}}]}
+    s = PU.uret(T60, hazir=hazir)
+    assert s["durum"] == "gecerli" and s["yol"] == "llm_program"
+    assert [d["basamak"] for d in s["denemeler"]] == ["uyarlama+cozucu", "llm_program"]
+    assert "banyo 2 → 1" in s["degisen"] and "depo çıkarıldı" in s["degisen"] and "alan 60 → 66 m²" in s["degisen"]
+
+
+def test_son_basamak_oda_programini_ve_alan_sinirini_kod_korur():
+    hazir = {"program": None, "yeniden": [{"program": {"yatak": 2, "banyo": 1, "alan_m2": 120}, "ipucu": {"yatak_on": 1}}]}
+    s = PU.uret(T60, hazir=hazir)
+    assert s["program"]["yatak"] == 3                                       # LLM 2 dedi; oda programı değişmez
+    assert s["program"]["alan_m2"] == 60 or s["durum"] != "gecerli"        # ±%10 dışı alan reddedilir (60'a döner)
+
+
+def test_ayar_kapaliyken_son_basamak_cagrilmaz():
+    s = PU.uret(T60, ayar={"acik": False})
+    assert s["durum"] == "gecersiz" and s["cagri"] == 0 and [d["basamak"] for d in s["denemeler"]] == ["uyarlama+cozucu"]
+
+
+def test_llm_hatasi_cagri_sayilir_durum_gecersiz(monkeypatch):
+    monkeypatch.setattr(llm, "anahtar_bul", lambda *a, **k: "x")
+    monkeypatch.setattr(llm, "_post", lambda *a, **k: (_ for _ in ()).throw(llm.LLMHatasi("ağ")))
+    s = PU.uret(T60, ayar={"acik": True, "backend": "anthropic", "en_cok_cagri": 2})
+    assert s["durum"] == "gecersiz" and s["cagri"] == 1 and s["hata"]
+
+
+def test_kayit_bicimi():
+    s = PU.uret(T82, ayar={"acik": False})
+    k = PU.kayit(s, T82, "deneme")
+    assert k["yol"] == s["yol"] and k["sure_ms"] >= 0 and len(k["adaylar"]) == 2 and k["program"]["yatak"] == 2
+    assert {"yol", "puan", "kaynak", "islemler", "plan"} <= set(k["adaylar"][0])
+
+
+# ── P5: LLM'e giden metin adsız ───────────────────────────────────────────────────────────────────────────────────────
+def _banka_adlari() -> list[str]:
+    adlar = set()
+    for a in json.loads((KOK / "beyin" / "veri" / "adaylar.json").read_text(encoding="utf-8")):
+        adlar.add(a["kod"])
+        for x in (a.get("sunum") or {}).values():
+            if isinstance(x, str) and len(x) > 6:
+                adlar.add(x)
+    for f in (KOK / "modeller").glob("*.json"):
+        t = json.loads(f.read_text(encoding="utf-8"))
+        if isinstance(t, dict) and t.get("ad"):
+            adlar.add(t["ad"])
+    return sorted(adlar)
+
+
+BANKA_KODU = re.compile(r"\b(Ç|C)\s?\d{4}|\bKT[-\s]?0\d|\bP\d{4}", re.I)
+
+
+def _yakala(monkeypatch) -> list[str]:
+    giden: list[str] = []
+
+    def sahte(sistem, mesajlar, arac_adi, *a, **k):
+        giden.append(sistem + "\n" + json.dumps(mesajlar, ensure_ascii=False))
+        raise llm.LLMHatasi("yakalandı")
+    monkeypatch.setattr(llm, "arac_cagir", sahte)
+    return giden
+
+
+def test_son_basamak_ornekleri_adsiz(monkeypatch):
+    giden = _yakala(monkeypatch)
+    PU.uret(T60, ayar={"acik": True, "backend": "anthropic", "en_cok_cagri": 1})
+    assert giden and "Örnek A" in giden[-1]
+    for metin in giden:
+        assert not BANKA_KODU.search(metin), BANKA_KODU.search(metin)
+        for ad in _banka_adlari():
+            assert ad not in metin, ad
+        assert "Çocuk Odası" not in metin and "Müştemilat" not in metin and "bankadaki " not in metin.replace("bankadaki gerçek planlar", "")
+
+
+def test_program_okumasi_ve_islem_okumasi_adsiz(monkeypatch):
+    giden = _yakala(monkeypatch)
+    PP.oku({"oda_programi": "2+1", "alan_m2": 80, "ozel_istekler": ["şömine olsun"]}, ayar={"acik": True, "backend": "anthropic"})
+    PI.oku(ornek("gecerli_3arti1_100"), "salonu doğuya 50 cm büyütün", ayar={"backend": "anthropic"})
+    assert len(giden) == 2
+    for metin in giden:
+        assert not BANKA_KODU.search(metin) and not any(ad in metin for ad in _banka_adlari())
+
+
+def test_ornek_ozetleri_kod_ve_ad_tasimaz():
+    oz = PP.ornek_ozetleri(3)
+    assert oz and all(o.startswith("Örnek ") for o in oz)
+    assert not any(BANKA_KODU.search(o) for o in oz)
+
+
+# ── yeni plan revizyonu: koordinatsız işlemler ────────────────────────────────────────────────────────────────────────
+def test_duzenle_islemleri_kod_uygular_fark_koddan():
+    hazir = {"islemler": [{"op": "oda_buyut", "mahal": "Salon", "yon": "B", "cm": 50, "alinti": "salonu sola büyütün"},
+                          {"op": "dis_karkas_140"}], "uygulanamayan": ["çift kat olsun"]}
+    s = PI.duzenle(ornek("gecerli_3arti1_100"), "salonu sola 50 büyütün, dışlar 140, çift kat olsun", {"oda_programi": "3+1"}, hazir=hazir)
+    assert s["durum"] == "gecerli", s["ihlaller"]
+    assert "Salon 25,2 → 27,4 m²" in s["fark"] and "dış ölçü 1250×800 → 1300×800 cm" in s["fark"] and "dış duvarlar 140'lık karkas" in s["fark"]
+    assert s["uygulanamayan"] == ["çift kat olsun"] and s["tanim"]["duvar_siniflari"]["dis"]["profil"] == "140x45x1,2"
+
+
+def test_duzenle_komsu_baska_hizadaysa_uygulanamaz_ve_plan_degismez():
+    hazir = {"islemler": [{"op": "oda_buyut", "mahal": "Salon", "yon": "D", "cm": 50, "alinti": "salon doğuya"}], "uygulanamayan": []}
+    s = PI.duzenle(ornek("gecerli_3arti1_100"), "salon doğuya büyüsün", {"oda_programi": "3+1"}, hazir=hazir)
+    assert s["durum"] == "gecersiz" and any("başka hizada" in x for x in s["uygulanamayan"])
+
+
+def test_duzenle_denetimden_gecmezse_gecersiz():
+    hazir = {"islemler": [{"op": "kapi_kaldir", "mahal": "Salon", "mahal_b": "Hol"}], "uygulanamayan": []}
+    s = PI.duzenle(ornek("gecerli_3arti1_100"), "salon hol kapısını kaldırın", {"oda_programi": "3+1"}, hazir=hazir)
+    assert s["durum"] == "gecersiz" and any("ulaşılamıyor" in x for x in s["ihlaller"])
+
+
+@pytest.mark.parametrize("islem,beklenen", [
+    ({"op": "pencere_ekle", "mahal": "Yatak Odası 3", "cephe": "K", "olcu": "120x120"}, "pencere eklendi: Yatak Odası 3 120/120"),
+    ({"op": "cati_tipi", "tip": "besik"}, "çatı besik"),
+    ({"op": "oda_kucult", "mahal": "Salon", "yon": "K", "cm": 30}, "Salon 25,2 → 23,5 m²"),
+])
+def test_tekil_islemler(islem, beklenen):
+    s = PI.duzenle(ornek("gecerli_3arti1_100"), "x", {"oda_programi": "3+1"}, hazir={"islemler": [islem], "uygulanamayan": []})
+    assert s["durum"] == "gecerli", s["ihlaller"]
+    assert beklenen in s["fark"]

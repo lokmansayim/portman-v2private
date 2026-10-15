@@ -500,6 +500,54 @@ try:
        and MUH not in json.dumps(q("SELECT sonuc FROM isler WHERE mesaj_id = 'wamid.E2EM3'")[0]["sonuc"]), "kontrol: Patron'a gönderildi, fiyat bekleniyor; iş sonucunda numara yok")
     kod, body, _ = istek(app_pn, "GET", "/panel/", cerez=cerez)
     ok(kod == 200 and "Mühendis kontrolleri".encode() in body and "fiyat bekleniyor".encode() in body, "panel: mühendis kontrolleri tablosu ve Fiyat verildi düğmesi")
+
+    print("12) İE-14 r3: '95 m² 3+1 tek kat çelik' (bankada 3+1 yok) → 'hazırlıyorum' → üretim (LLM'siz: program → uyarlama/çözücü) → iki "
+          "yeni plan + bankadan en yakını tek görselde → '1. Yeni plan' → r01 gerçek genel motordan, tanım zarfta gömülü; plan_uretimleri "
+          "kaydı ve doğrulama raporu")
+    for kod12 in ("Ç8201", "KT01", "KT02", "KT03"):
+        depo.aday_yaz(kod12, "gecerli", referans_model=kod12, muhendis_kabulu={"kim": "e2e", "tarih": "2026-10-14", "not": ""})
+    hazir12 = tmp / "plan_hazir.json"                    # manuel arka uç: yapısal talepte LLM gerekmez; kayıt yalnız güvenlik için boş
+    hazir12.write_text(json.dumps({"uretim": {"program": None, "yeniden": []}}, ensure_ascii=False), encoding="utf-8")
+    AY.yaz(VERI, "plan_uretimi", {"acik": True, "backend": "manuel", "hazir_dosya": str(hazir12)})
+    t12 = time.time()
+    time.sleep(1.2)
+    kod, c = webhook(yuk([metin(BAYI, "95 m² 3+1 tek kat çelik, kırma çatı", mid="wamid.E2EP1")]))
+    hazir_ekle("wamid.E2EP1", {"niyet": "yeni_talep", "guven": "yuksek", "ozet": "95 m² 3+1 tek kat çelik, kırma çatı", "alan_m2": 95,
+                               "oda_programi": "3+1", "yapi_turu": "celik", "kat_sayisi": 1, "cati": {"tip": "kirma"}})
+    ok(c.get("mesaj") == {"sahiplenildi": 1} and ajan() == 0, "ajan: '95 m² 3+1 tek kat çelik' işlendi")
+    i12 = q("SELECT sonuc, cikarim FROM isler WHERE mesaj_id = 'wamid.E2EP1'")[0]
+    s12 = q("SELECT id, adaylar FROM secenek_setleri ORDER BY olusturuldu DESC LIMIT 1")[0]
+    yeni12 = s12["adaylar"][0]["kod"]
+    pu12a = i12["cikarim"]["plan_uretimi"]
+    ok(i12["sonuc"]["eylem"] == "secenek" and yeni12.startswith("YENI-") and s12["adaylar"][1]["kod"].startswith("YENI-")
+       and [a["kod"] for a in s12["adaylar"][2:]] == ["KT03"] and pu12a["durum"] == "gecerli" and len(pu12a["adaylar"]) == 2 and pu12a["cagri"] == 0,
+       f"seçenek seti: iki yeni plan + KT03; üretim LLM'siz ({pu12a.get('yol')}, {pu12a.get('sure_ms')} ms), iş satırında")
+    ok(time.time() - t12 < 180, f"K5 (ölçüm): talepten seçenek görseline {time.time() - t12:.0f} s (gerçek genel motorla iki kart)")
+    k12 = q("SELECT kind, govde, satir FROM giden WHERE mesaj_id = 'wamid.E2EP1' ORDER BY olusturuldu, sira")   # gönderim sırası (erken satır önce)
+    ok([x["kind"] for x in k12] == ["text", "interactive"] and "hazırlıyorum" in k12[0]["govde"] and Path(k12[1]["satir"]["file"]).is_file()
+       and k12[1]["satir"]["interactive"]["action"]["buttons"][0]["reply"]["title"] == "1. Yeni plan", "önce 'hazırlıyorum', sonra görselli 3 düğmeli set")
+    say = gonder()
+    ok(say.get("kabul_edildi") == 2 and sahte.gidenler()[-1]["type"] == "interactive", "Meta: metin + seçenek görseli gitti")
+    set12 = q("SELECT dis_id FROM giden WHERE mesaj_id = 'wamid.E2EP1' AND kind = 'interactive'")[0]["dis_id"]
+    time.sleep(1.2)
+    kod, c = webhook(yuk([buton(BAYI, f"s:{s12['id']}:{yeni12}", "1. Yeni plan", set12, mid="wamid.E2EP2")]))
+    ok(c.get("mesaj") == {"sahiplenildi": 1} and ajan() == 0, "ajan: 'Yeni plan' düğmesi işlendi (gerçek genel motor)")
+    i12b = q("SELECT sonuc FROM isler WHERE mesaj_id = 'wamid.E2EP2'")[0]["sonuc"]
+    r12 = q("SELECT is_emri_no, rev, is_emri, durum, pdf_yolu, ekler FROM revizyonlar WHERE gonderen = %s ORDER BY id DESC LIMIT 1", BAYI)[0]
+    y12 = r12["is_emri"]["yapi"]
+    ok(i12b["eylem"] == "is_emri" and i12b["cizim"]["passed"] is True and r12["rev"] == 1 and isinstance(y12["tanim"], dict) and y12["kod"] == yeni12,
+       f"r01 genel motordan geçti, tanım zarfta gömülü ({i12b['cizim'].get('sure_s')} s)")
+    with fitz.open(r12["pdf_yolu"]) as d12:
+        ok(len(d12) == 2 and "TASLAK" in [w[4] for w in d12[0].get_text("words")], "pafta PDF 2 sayfa, TASLAK")
+    pu12 = q("SELECT durum, plan_kodu, is_emri_no, cagri, yol, adaylar FROM plan_uretimleri")
+    ok(len(pu12) == 1 and pu12[0]["plan_kodu"] == yeni12 and pu12[0]["is_emri_no"] == r12["is_emri_no"] and pu12[0]["cagri"] == 0,
+       "plan_uretimleri: üretim kaydı, r01'e bağlandı (ücretli çağrı 0)")
+    dg12 = pu12[0]["adaylar"][0]["dogrulama"]
+    ok(dg12["kalemler"]["cizim"]["durum"] == "GECTI" and dg12["kalemler"]["geometri"]["durum"] == "GECTI"
+       and dg12["kalemler"]["yukleme_listesi"]["durum"] == "DOGRULANMADI" and dg12["kalemler"]["yapisal"]["durum"] == "YAPILMADI",
+       f"doğrulama raporu (gerçek motor): {dg12['ozet']}")
+    say = gonder()
+    ok(say.get("kabul_edildi") >= 2, "Meta: yeni planın bayi görseli + düğmeler ve PDF gitti")
 finally:
     with psycopg.connect(ADMIN + " dbname=postgres", autocommit=True) as c:
         c.execute(f"DROP DATABASE IF EXISTS {dbad} WITH (FORCE)")

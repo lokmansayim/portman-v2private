@@ -1,0 +1,20 @@
+{
+ "sema": "portman.plan_kurallari/0.1-taslak",
+ "aciklama": "İE-14 plan üreteci ve denetçisinin oda kuralları (tek kat çelik). Alanlar net (kaplanmış yüzler arası, yapi.kur), dar kenar net bölgenin sınır kutusunun kısa kenarı (cm).",
+ "durum": "varsayim",
+ "kaynak": "Bankadaki beş tanımın (Ç8201, Ç8801, KT-01, KT-02, KT-03) en küçükleri, aşağı yuvarlandı (14.10.2026; İE-14 plan onayı, soru 3). Mühendis ya da Lokman onaylayınca durum 'kabul' olur.",
+ "izgara_cm": 5,
+ "alan_tolerans": {"deger": 0.10, "kaynak": "K-A1 (brüt oturum ±%10; beyin/secenek.py ALAN_TOLERANS ile aynı)"},
+ "odalar": {
+  "yatak_odasi": {"en_az_m2": 10.5, "dar_kenar_cm": 300, "banka_en_kucuk": "KT-01 Yatak Odası 1 10,53 m²; KT-03 Çocuk Odası 305 cm"},
+  "salon": {"en_az_m2": 16.0, "dar_kenar_cm": 300, "banka_en_kucuk": "KT-03 Salon 16,29 m², 315 cm"},
+  "mutfak": {"en_az_m2": 9.5, "dar_kenar_cm": 250, "banka_en_kucuk": "Ç8801 Mutfak 10,05 m², 260 cm (ayrı mutfak; salonla birlikteyse salon kuralı)"},
+  "banyo": {"en_az_m2": 3.8, "dar_kenar_cm": 170, "banka_en_kucuk": "KT-01 Banyo 3,81 m²; KT-01 175 cm"},
+  "hol": {"en_az_m2": 0, "dar_kenar_cm": 130, "banka_en_kucuk": "KT-02 Hol 137 cm"},
+  "depo": {"en_az_m2": 0, "dar_kenar_cm": 100, "banka_en_kucuk": "varsayım (geometri hakemi 14.10: 60 cm derin depoya kapı açılamıyordu)"}
+ },
+ "kol_en_az_cm": {"deger": 60, "not": "mahalin hiçbir kolu bundan dar olamaz (net; L oda ve holün ince kolu, duvara gömülen şerit)"},
+ "pencere_zorunlu": {"deger": ["salon", "yatak_odasi", "mutfak", "banyo"], "not": "banyoda vasistas (60x40) yeter"},
+ "erisim": {"banyo_yatak_odasindan_gecmez": true, "yatak_odasi_baska_yatak_odasindan_gecmez": true},
+ "cati": {"egim_yuzde": 33, "sacak_cm": 30, "kaynak": "Ç8801 ve kör test projeleri (Excel hesaplama motoru)"}
+}

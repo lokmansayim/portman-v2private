@@ -525,7 +525,9 @@ if [ ! -f "$KOK/data/settings.json" ]; then
  "sablon_muhendis_hatirlatma": null,
  "sablon_bayi_karsilama": null,
  "sablon_bayi_bilgi_hazir": null,
- "sablon_dil": "tr"
+ "sablon_dil": "tr",
+ "plan_uretimi": {"acik": false, "model": "claude-opus-5-5", "effort": "low", "en_cok_cagri": 2, "timeout_s": 60},
+ "llm_once_revizyon": {"acik": false, "model": "claude-opus-5-5", "effort": "low", "timeout_s": 60}
 }
 EOF
   chmod 640 "$KOK/data/settings.json"

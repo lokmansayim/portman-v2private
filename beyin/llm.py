@@ -152,3 +152,41 @@ def cikar_guvenli(mesaj: str, baglam: str = "", backend: str = "manuel", model: 
 
 def cikar(mesaj: str, baglam: str = "", backend: str = "manuel", model: str | None = None, hazir: dict | None = None, **kw) -> Talep:
     return cikar_detayli(mesaj, baglam, backend, model, hazir, **kw)[0]
+
+
+# ── İE-14: genel araç çağrısı (plan üretimi, LLM-önce revizyon) ────────────────────────────────────────────────────────────
+# Çıkarım yolu (`cikar_detayli`, `prompt.md`, `Talep`) değişmez: prefabrik ve P6001 harness'i aynen. Bu yol ayrı istem ve ayrı araçla
+# çalışır; konuşma (`mesajlar`) çağıranın elindedir: düzeltme turunda modelin önceki araç çağrısına `tool_result` (is_error) ile
+# ihlaller yazılır, model bağlamı kaybetmeden yeniden çağırır (D-18: en çok 1 + 2 çağrı).
+def arac_cagir(sistem: str, mesajlar: list[dict], arac_adi: str, arac_aciklama: str, sema: dict, backend: str = "manuel",
+               model: str | None = None, effort: str | None = None, max_tokens: int = 8000, hazir: dict | None = None,
+               anahtar: str | None = None, ayarlar_json: str | None = None, timeout: int = 180) -> tuple[dict, dict]:
+    """Tek araç çağrısı. Dönüş: (araç girdisi sözlüğü, ölçüm {backend, model, girdi_token, cikti_token, sure_ms, arac_id, icerik}).
+    `icerik`: modelin ham yanıt blokları (konuşmayı sürdürmek için çağıran `assistant` mesajı olarak ekler). Manuel arka uç `hazir`ı
+    döner (kayıtlı cevap; LLM çağrısı yok)."""
+    t0 = time.time()
+    if backend == "manuel":
+        if hazir is None:
+            raise ValueError("manuel arka uç için hazır çıktı gerekli")
+        aid = f"manuel_{len(mesajlar)}"
+        return hazir, {"backend": "manuel", "model": None, "girdi_token": 0, "cikti_token": 0, "sure_ms": 0, "arac_id": aid,
+                       "icerik": [{"type": "tool_use", "id": aid, "name": arac_adi, "input": hazir}]}
+    if backend != "anthropic":
+        raise LLMHatasi(f"arac_cagir yalnız anthropic ya da manuel arka uçla: {backend}")
+    key = anahtar_bul(backend, anahtar, ayarlar_json)
+    model = model or "claude-opus-5-5"
+    govde = {"model": model, "max_tokens": max_tokens, "system": sistem + f"\nCevabı yalnız {arac_adi} aracını bir kez çağırarak ver.",
+             "tools": [{"name": arac_adi, "description": arac_aciklama, "input_schema": sema}],
+             "tool_choice": {"type": "auto", "disable_parallel_tool_use": True},
+             "messages": mesajlar}
+    if effort:
+        govde["output_config"] = {"effort": effort}
+    out = _post("https://api.anthropic.com/v1/messages", {"x-api-key": key, "anthropic-version": "2023-06-01"}, govde, timeout)
+    kullanim = out.get("usage") or {}
+    meta = {"backend": backend, "model": out.get("model") or model, "girdi_token": kullanim.get("input_tokens"),
+            "cikti_token": kullanim.get("output_tokens"), "sure_ms": int((time.time() - t0) * 1000), "icerik": out.get("content", [])}
+    calls = [b for b in out.get("content", []) if b.get("type") == "tool_use" and b.get("name") == arac_adi]
+    if out.get("stop_reason") != "tool_use" or len(calls) != 1:
+        raise LLMHatasi(f"{arac_adi} çağrısı dönmedi (stop_reason {out.get('stop_reason')})")
+    meta["arac_id"] = calls[0].get("id")
+    return calls[0].get("input") or {}, meta

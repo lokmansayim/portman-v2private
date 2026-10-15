@@ -1,0 +1,16 @@
+{
+ "sema": "portman.cati_uretici/0.1",
+ "durum": "varsayim",
+ "kaynak": "İE-14 r2 (Lokman, 14 Ekim 2026: otomatik çatı üreticisi ayrı parça). Değerler bankadaki çelik modellerin elle yazılmış çatılarından (Ç8201, Ç8801, KT-02) okundu; mühendis kabulüne kadar varsayım. motor/genel/cati_uretici.py okur; anahtar yoksa koddaki aynı değer kullanılır.",
+ "sacak_cm": {"deger": 30, "durum": "varsayim", "kaynak": "Ç8201 ve Ç8801 tanımları: dış yüzden 30 cm saçak"},
+ "topuk_cm": {"deger": 10, "durum": "varsayim", "kaynak": "Ç8201/Ç8801/KT-02: duvar üstü 270 + topuk 10 = saçak kotu 280"},
+ "panel_kalinligi_cm": {"deger": 8, "durum": "varsayim", "kaynak": "Ç8201 panel çatı; üst pay = panel × √(1 + eğim²)"},
+ "egim_varsayim": {"deger": 0.33, "durum": "varsayim", "kaynak": "Ç8201 ve Ç8801: %33; bayi eğim söylemezse"},
+ "egim_yuzde_aralik": {"deger": [10, 60], "durum": "varsayim", "kaynak": "plan şemasındaki sınır (beyin/plan_sema.py)"},
+ "tipler": {"deger": ["besik", "kirma", "cumba", "l"], "durum": "varsayim", "kaynak": "Tipe göre ayrı üretici (Lokman 14.10, r3 3. madde): beşik (dikdörtgen, 2 düzlem + 2 kalkan), kırma (dikdörtgen, 4 düzlem), cumba (ana beşik + dik küçük beşik girip biter; Ç8801), L (iki beşik kol aynı mahya kotunda, kanadın eğimi ona göre; Ç8801L). L kırma (KT-03) ve cumba doğu ucu kırma (Ç8801K) üretilmez"},
+ "cumba_egimi": {"deger": "ana_ile_ayni", "durum": "varsayim", "kaynak": "Ç8801: cumba eğimi ana çatıyla aynı (%33); vadiler 45°, cumba mahyası ana çatının güney yüzünde biter"},
+ "l_kanat_egimi": {"deger": "mahyalar_esit", "durum": "varsayim", "kaynak": "Ç8801L: kanat eğimi iki mahya aynı kotta buluşacak biçimde (0,33 × 350 / 230 = 0,50217); Lokman 10.10 14:46 kabul"},
+ "kirma_mahya": {"deger": "uzun_kenar", "durum": "varsayim", "kaynak": "Ç8201 ve KT-02: kırmada mahya uzun kenar boyunca (kısa kenarda mahya ters kırma verir)"},
+ "veranda_cati_alti": {"deger": "yalniz_kirma", "durum": "varsayim", "kaynak": "KT-02: çatı altındaki veranda kırmayla; beşikte kalkan verandanın açık kenarına otururdu"},
+ "kirma_mahya_en_az_cm": {"deger": 15, "durum": "varsayim", "kaynak": "D-10 'Çelikte 15 cm parça çıkmaz': kırmada mahya boyu (uzun − kısa kenar) 0 (piramit) ya da 15 cm'den uzun olur (İE-14 kapanış incelemesi G3)"}
+}

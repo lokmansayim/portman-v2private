@@ -14,6 +14,7 @@
 """
 from __future__ import annotations
 import hashlib
+import json
 import re
 import time
 from pathlib import Path
@@ -72,6 +73,37 @@ def tanim_sha(yol: Path) -> str:
 
 def tanim_yolu(aday: dict) -> Path:
     return ROOT / aday["tanim"]
+
+
+# İE-14 (D-18): üretilen planın tanımı dosyada değil, aday kaydında ve zarfta gömülüdür (`tanim` sözlük). Banka adayında `tanim` yol
+# (`modeller/<kod>.json`) kalır; okuma ve doğrulama ikisinde de buradan.
+def tanim_sha_icerik(t: dict) -> str:
+    """Gömülü tanımın kanonik JSON sha256'sı (anahtar sıralı, boşluksuz)."""
+    return hashlib.sha256(json.dumps(t, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
+
+
+def tanim_gomulu(kaynak: dict) -> bool:
+    return isinstance((kaynak or {}).get("tanim"), dict)
+
+
+def tanim_oku(kaynak: dict) -> dict:
+    """Aday ya da zarfın `yapi`sı → tanım sözlüğü (kopya). Yol ise `modeller/` dosyası okunur."""
+    t = kaynak.get("tanim")
+    if isinstance(t, dict):
+        return json.loads(json.dumps(t))
+    return json.loads((ROOT / str(t)).read_text(encoding="utf-8"))
+
+
+def tanim_dogrula(kaynak: dict) -> bool:
+    """Tanım var ve (sha verilmişse) sha'sı tutuyor mu: dosyada dosya baytları, gömülüde kanonik JSON."""
+    t = (kaynak or {}).get("tanim")
+    sha = (kaynak or {}).get("tanim_sha256")
+    if isinstance(t, dict):
+        return not sha or tanim_sha_icerik(t) == sha
+    if not t:
+        return False
+    yol = ROOT / str(t)
+    return yol.is_file() and (not sha or tanim_sha(yol) == sha)
 
 
 def numarasiz(metin: str) -> str:

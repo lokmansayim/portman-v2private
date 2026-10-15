@@ -1,0 +1,15 @@
+{"dis_olcu": {"en": 1250, "boy": 800},
+ "mahaller": [
+  {"ad": "Salon", "islev": "salon", "dikdortgenler": [[0, 0, 560, 450]]},
+  {"ad": "Yatak Odası 3", "islev": "yatak_odasi", "dikdortgenler": [[0, 450, 340, 800]]},
+  {"ad": "Banyo", "islev": "banyo", "dikdortgenler": [[340, 450, 560, 800]]},
+  {"ad": "Hol", "islev": "hol", "dikdortgenler": [[560, 0, 705, 800]]},
+  {"ad": "Yatak Odası 1", "islev": "yatak_odasi", "dikdortgenler": [[705, 0, 1250, 400]]},
+  {"ad": "Yatak Odası 2", "islev": "yatak_odasi", "dikdortgenler": [[705, 400, 1250, 800]]}],
+ "kapilar": [{"arasinda": ["dis", "Salon"]}, {"arasinda": ["Salon", "Hol"]}, {"arasinda": ["Salon", "Yatak Odası 3"]},
+  {"arasinda": ["Hol", "Banyo"]}, {"arasinda": ["Hol", "Yatak Odası 1"]}, {"arasinda": ["Hol", "Yatak Odası 2"]}],
+ "pencereler": [{"mahal": "Salon", "cephe": "G", "olcu": "120x180", "adet": 2}, {"mahal": "Salon", "cephe": "B", "olcu": "120x120"},
+  {"mahal": "Yatak Odası 3", "cephe": "B", "olcu": "120x120"}, {"mahal": "Banyo", "cephe": "K", "olcu": "60x40"},
+  {"mahal": "Yatak Odası 1", "cephe": "D", "olcu": "120x120"}, {"mahal": "Yatak Odası 2", "cephe": "D", "olcu": "120x120"}],
+ "cati": {"tip": "kirma"},
+ "gerekce": "elle yazılmış test planı: açık mutfaklı salon güneyde, hol ortada, iki yatak odası doğuda"}

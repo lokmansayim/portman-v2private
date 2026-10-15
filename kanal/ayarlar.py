@@ -26,6 +26,13 @@ VARSAYILAN = {
     "sablon_bayi_karsilama": None,        # bayiye (panelden, hiç yazmamış karta): "Merhaba [hitap], Portman bayi kaydınız onaylandı…" (Nasıl çalışır?)
     "sablon_bayi_bilgi_hazir": None,      # bayiye (panelden): "Merhaba [hitap], talebinizle ilgili bilgi hazır…" (Bilgiyi gönder)
     "sablon_dil": "tr",                   # şablonların Meta'daki dil kodu
+    # İE-14 (D-18; r3): uyan çelik model yoksa yeni plan (program → bankadan uyarlama → çözücü; LLM koordinat yazmaz). Yapısal talepte LLM
+    # çağrısı yok; tanınmayan serbest istek için 1, sığmayan programda en son en çok `en_cok_cagri` (ücretli). Kapalıyken bugünkü davranış.
+    "plan_uretimi": {"acik": False, "model": "claude-opus-5-5", "effort": "low", "en_cok_cagri": 2, "timeout_s": 60},
+    # İE-14 r3 (P4): çelik banka modelinin revizyonunda LLM-önce okuma. `mod`: "kapali" (kural okuması, celik_okuma) · "golge" (kural karar
+    # verir; LLM aynı mesajı gölgede okur, iki okuma okuma_kiyaslari'na yazılır; mesaj başına 1 ücretli çağrı) · "acik" (LLM-önce karar).
+    # Geriye uyum: `acik: true` ve `mod` yoksa "acik".
+    "llm_once_revizyon": {"acik": False, "model": "claude-opus-5-5", "effort": "low", "timeout_s": 60},   # `mod` yok = kapali (inceleme C5)
 }
 ANAHTARLAR = tuple(VARSAYILAN)
 SABLON_ANAHTARLARI = ("sablon_patron_bildirim", "sablon_bayi_dosyalar_hazir", "sablon_muhendis_kontrol", "sablon_muhendis_hatirlatma",
@@ -45,8 +52,8 @@ def oku(veri) -> dict:
         return a
     if isinstance(d, dict):
         for k, v in d.items():
-            if k == "llm" and isinstance(v, dict):
-                a["llm"] = {**a["llm"], **v}
+            if k in ("llm", "plan_uretimi", "llm_once_revizyon") and isinstance(v, dict):
+                a[k] = {**a[k], **v}
             else:
                 a[k] = v
     return a

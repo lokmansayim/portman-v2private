@@ -287,6 +287,22 @@ class Depo:
                       "VALUES (%s, %s, %s, %s, %s, %s, 'template', %s, %s) ON CONFLICT (id) DO NOTHING",
                       (s["id"], j["id"], gelen["id"], 3, "PATRON", "bildirim", s["body"], Jsonb(s)))
 
+    ERKEN_SIRA = 99                 # iş sürerken yazılan satır ("hazırlıyorum"); ajan satırları 1..n ile, hata yolunun 1–3'üyle çakışmaz
+
+    def ara_satir_yaz(self, is_id: int, sahip: str, mesaj_id: str, s: dict) -> bool:
+        """İş sürerken bir metin satırı (İE-14: yeni plan üretiminden önce "hazırlıyorum"; inceleme C7). Sırası `ERKEN_SIRA`: yeniden
+        denenen iş başka karar verse de ajan satırlarıyla çakışmaz (kayıt döngüsü yok). Kira bu işleyicideyse ayrı işlemde yazılır ve
+        gönderici hemen alır (olusturuldu sırasıyla önce gider); yeniden denemede aynı kimlik (ON CONFLICT: bir kez). Dönen: kayıtta mı."""
+        assert s["seq"] == self.ERKEN_SIRA, "erken satır ayrılmış sırayla yazılır"
+        with self.baglan() as c, c.transaction():
+            j = c.execute("SELECT id FROM isler WHERE id = %s AND sahip = %s AND durum = 'isleniyor' FOR UPDATE", (is_id, sahip)).fetchone()
+            if j is None:
+                return False
+            c.execute("INSERT INTO giden (id, is_id, mesaj_id, sira, alici, tur, kind, govde, satir, kaynak) "
+                      "VALUES (%s, %s, %s, %s, %s, %s, 'text', %s, %s, 'ajan') ON CONFLICT (id) DO NOTHING",
+                      (s["id"], is_id, mesaj_id, s["seq"], s["to"], s.get("tur") or "cevap", s.get("body") or "", Jsonb(s)))
+            return True
+
     def cikarim_kaydet(self, is_id: int, sahip: str, cikarim: dict) -> bool:
         with self.baglan() as c, c.transaction():
             r = c.execute("UPDATE isler SET cikarim = %s WHERE id = %s AND sahip = %s AND durum = 'isleniyor' RETURNING id",
@@ -366,6 +382,8 @@ class Depo:
             self._soru_kaydi(c, gelen, d_eski or {}, d_yeni, sonuc, karar_ozeti)
             self._set_kaydi(c, gelen, d_eski or {}, d_yeni, proje_id)
             for s in cikti.get("satirlar") or []:
+                if s.get("erken"):                       # iş sürerken yazıldı (`ara_satir_yaz`); yinelenmez
+                    continue
                 # Revizyona bağlı satırlar: PDF ve aynı İş Emri'nin görsel/etkileşim satırları (onay butonu → revizyon; alıntı → revizyon)
                 bagli = revizyon_id if (s.get("kind") == "document" or (s.get("is_emri_no") and s.get("is_emri_no") == sonuc.get("is_emri_no"))) else None
                 c.execute(
@@ -377,6 +395,29 @@ class Depo:
             # bağlı satırlar (Patron'a, bayiye "kontrol sürüyor"); hepsi bu işle aynı işlemde (kanal/muhendis.py)
             if cikti.get("muhendis_kontrolu"):
                 self._kontrol_ac(c, gelen, bayi_kod, cikti["muhendis_kontrolu"])
+            # İE-14 (göç 007): yeni plan üretiminin kaydı; seçilen yeni planın r01'i üretime bağlanır
+            pu = cikti.get("plan_uretimi")
+            if pu:
+                c.execute("INSERT INTO plan_uretimleri (mesaj_id, gonderen, bayi_kod, durum, plan_kodu, talep, denemeler, cagri, girdi_token, "
+                          "cikti_token, model, hata, yol, puan, sure_ms, program, adaylar, degisen) "
+                          "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT (mesaj_id) DO NOTHING",
+                          (gelen["id"], gelen["sender"], bayi_kod, pu["durum"], pu.get("plan_kodu"), Jsonb(pu.get("talep") or {}),
+                           Jsonb(pu.get("denemeler") or []), int(pu.get("cagri") or 0), int(pu.get("girdi_token") or 0),
+                           int(pu.get("cikti_token") or 0), pu.get("model"), pu.get("hata"), pu.get("yol"), pu.get("puan"),
+                           pu.get("sure_ms"), Jsonb(pu.get("program")), Jsonb(pu.get("adaylar") or []), Jsonb(pu.get("degisen") or [])))
+            # İE-14 r3 (göç 008): gölge okuma kıyası (kural ↔ LLM); mesaj metni yazılmaz
+            ok_ = cikti.get("okuma_kiyasi")
+            if ok_:
+                c.execute("INSERT INTO okuma_kiyaslari (mesaj_id, gonderen, is_emri_no, rev, model, kural, llm, sinif, cagri, girdi_token, "
+                          "cikti_token) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT (mesaj_id) DO NOTHING",
+                          (gelen["id"], gelen["sender"], ok_.get("is_emri_no"), ok_.get("rev"), ok_.get("model"),
+                           Jsonb(ok_.get("kural") or {}), Jsonb(ok_.get("llm") or {}), ok_["sinif"], int(ok_.get("cagri") or 0),
+                           int(ok_.get("girdi_token") or 0), int(ok_.get("cikti_token") or 0)))
+            yeni_kod = ((d_yeni.get("son_is_emri") or {}).get("yapi") or {}).get("kod")
+            if revizyon_id and str(yeni_kod or "").startswith("YENI-"):
+                c.execute("UPDATE plan_uretimleri SET is_emri_no = %s, plan_kodu = %s WHERE is_emri_no IS NULL AND "
+                          "(plan_kodu = %s OR adaylar @> jsonb_build_array(jsonb_build_object('kod', %s::text)))",
+                          (sonuc["is_emri_no"], yeni_kod, yeni_kod, yeni_kod))      # seçilen yeni plan (iki aday varsa ikincisi de)
             for kid, alanlar in cikti.get("kontrol_guncelle") or []:
                 self._kontrol_guncelle(c, kid, alanlar)
             for cs in cikti.get("cipa_satirlari") or []:

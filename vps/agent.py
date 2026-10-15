@@ -60,6 +60,7 @@ def isleme_ayari(ayar: dict) -> dict:
     return {"enabled": ayar.get("enabled") is True, "mode": ayar.get("mode"), "dry_run": ayar.get("dry_run") is True,
             "llm": dict(ayar.get("llm") or {}), "patron_teknik_not": ayar.get("patron_teknik_not", False) is True,
             "mesaj_katmani": ayar.get("mesaj_katmani") is True, "ucb_taban_url": ayar.get("ucb_taban_url") or None,
+            "plan_uretimi": dict(ayar.get("plan_uretimi") or {}), "llm_once_revizyon": dict(ayar.get("llm_once_revizyon") or {}),   # İE-14 (D-18)
             "kira_sn": KIRA_SN, "en_cok_deneme": EN_COK_DENEME}
 
 
