@@ -16,7 +16,7 @@ from pathlib import Path
 
 import pytest
 
-from conftest import AYAR, NUMARA_A, mesaj, sorgu, talep
+from conftest import AYAR, NUMARA_A, mesaj, sorgu, talep, tek
 from test_celik_akisi import BAYI_KART, YEDI, buton, hizli_genel, isle_hepsi, kabul, son_rev  # noqa: F401 (fikstür)
 
 import worker as W
@@ -697,3 +697,56 @@ def test_olcum_raporu_kayitlardan(depo, wa, hizli_genel, uretici):
         o2 = PO.topla(c)
     assert o2["yeni_plan_isi"] == 1 and o2["revizyon_ortalama"] == 1
     assert "Yeni plan üretimi | 1 (gecerli 1)" in metin and NUMARA_A not in metin and "Hedef yok" in metin
+
+
+# ───────────────────────── Lokman 15.10 · kapanış soruları ─────────────────────────
+def test_soru1_muhendis_mesajinda_yeni_plan_dogrulama_satiri(depo, wa, hizli_genel, uretici):
+    # soru 1: yalnız yeni üretilen planda mühendisin dosya mesajına tek satır doğrulama özeti (mühendis kabulü satırda yok)
+    import kalici
+    from test_muhendis import muhendis_isle, muhendis_karti, muhendis_mesaji, satirlar
+    muhendis_karti(depo)
+    _secilmis_yeni_plan(depo)
+    kalici.gonder(depo, wa)
+    rev = tek(depo, "SELECT * FROM revizyonlar ORDER BY id DESC LIMIT 1")
+    assert rev["is_emri"]["yapi"]["kod"].startswith("YENI-")
+    time.sleep(1.1)
+    assert depo.mesaj_kaydet(buton(f"o:{rev['is_emri_no']}:1"))
+    [r] = isle_hepsi(depo, URETIM)
+    assert r["gerekce"] == "plan onaylandı", r
+    g = muhendis_mesaji(reply_id=f"muh:gonder:{rev['is_emri_no']}:1")
+    muhendis_isle(depo, g)
+    govdeler = [x.get("body") or "" for x in satirlar(depo, g["id"])]
+    satir = [b for b in govdeler if "doğrulaması:" in b]
+    assert len(satir) == 1 and "Yeni plan (otomatik üretildi) doğrulaması: Sözleşme: geçti" in satir[0]
+    assert "Yapısal: yapılmadı" in satir[0] and "Mühendis kabulü" not in satir[0]
+
+
+def test_soru1_banka_modelinde_dogrulama_satiri_yok():
+    import muhendis as MH
+    assert MH.dogrulama_satiri({"is_emri": {"yapi": {"kod": "Ç8801K", "tanim": "modeller/C8801K.json"}}}) is None
+    assert MH.dogrulama_satiri({}) is None
+
+
+def test_soru1_satir_onaylanan_revizyonun_taniminden():
+    # r02+'da r01'in raporu bayatlar: satır revizyonun gömülü tanımından hesaplanır; çizim klasörü yoksa "doğrulanmadı"
+    import muhendis as MH
+    from beyin import plan_uretici as PU
+    s = PU.uret({"alan_m2": 95, "oda_programi": "3+1"}, ayar={"acik": False})
+    d = MH.dogrulama_satiri({"is_emri": {"yapi": {"kod": "YENI-ABC123", "tanim": s["tanim"]}}, "pdf_yolu": None})
+    assert d.startswith("Yeni plan (otomatik üretildi) doğrulaması: Sözleşme: geçti · Geometri: geçti")
+    assert "Çizim çıktıları: doğrulanmadı" in d and "Yükleme listesi: doğrulanmadı" in d
+    assert MH.dogrulama_satiri({"is_emri": {"yapi": {"kod": "YENI-BOZUK", "tanim": {"bozuk": True}}}}).endswith("hesaplanamadı.")
+
+
+@pytest.mark.parametrize("istek", ["L çatı olsun", "cumbalı çatı olsun"])
+def test_soru3_l_ve_cumba_cati_uygulayamadim_ve_besik_kirma(depo, wa, hizli_genel, uretici, istek):
+    # soru 3 (Lokman 15.10): L ve cumba derleyiciye bağlanmaz; istenirse "otomatik uygulayamadım", plan beşik ya da kırma
+    kabul(depo, YEDI)
+    tl = talep(ozet=f"95 m² 3+1 tek kat çelik, {istek}", alan_m2=95, oda_programi="3+1", yapi_turu="celik", kat_sayisi=1, ozel_istekler=[istek])
+    assert depo.mesaj_kaydet(mesaj(f"95 m² 3+1 tek kat çelik, {istek}", tl, bayi=BAYI_KART))
+    [r] = isle_hepsi(depo, URETIM)
+    assert r["eylem"] == "secenek", r
+    body = sorgu(depo, "SELECT satir FROM giden ORDER BY olusturuldu, sira")[1]["satir"]["body"]
+    assert f'"{istek}" isteğini otomatik uygulayamadım' in body
+    d, _ = depo.konusma_oku(NUMARA_A)
+    assert all((u["tanim"]["cati"]["tip"] in ("besik", "kirma")) for u in d["uretilen_planlar"])
