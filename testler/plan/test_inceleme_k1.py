@@ -63,6 +63,8 @@ def test_g2_yon_korunur_yuvarlama_yazilir():
     assert p["varsayimlar"] == ["dış ölçü 10,94 × 7,5 m, 5 cm ızgaraya 10,95 × 7,5 m olarak alındı"]
     p, _ = PP.talepten({"oda_programi": "2+1", "dis_olcu": {"en_m": 7.52, "boy_m": 10.03}})
     assert p["dis_olcu_cm"] == [750, 1005] and "7,52 × 10,03 m" in p["varsayimlar"][0]
+    p, _ = PP.talepten({"oda_programi": "2+1", "dis_olcu": {"en_m": 10.954, "boy_m": 8}})      # hakem üçüncü tur: yuvarlama notta görünür
+    assert p["varsayimlar"] == ["dış ölçü 10,954 × 8 m, 5 cm ızgaraya 10,95 × 8 m olarak alındı"]
     p, _ = PP.talepten({"oda_programi": "2+1", "dis_olcu": {"en_m": 8, "boy_m": 12}})
     assert p["dis_olcu_cm"] == [800, 1200] and p["varsayimlar"] == []       # ızgaradaysa not yok
 

@@ -77,9 +77,9 @@ _KALIPLAR = [
 ]
 
 
-def _m(cm: float) -> str:
-    """cm → bayinin okuyacağı metre ("7,52")."""
-    return f"{cm / 100:.2f}".rstrip("0").rstrip(".").replace(".", ",")
+def _m(cm: float, basamak: int = 2) -> str:
+    """cm → bayinin okuyacağı metre ("7,52"); ham ölçü için 3 basamak (yuvarlanan milimetre görünsün: "10,954")."""
+    return f"{cm / 100:.{basamak}f}".rstrip("0").rstrip(".").replace(".", ",")
 
 
 def _talep_programi(talep: dict) -> dict:
@@ -99,7 +99,7 @@ def _talep_programi(talep: dict) -> dict:
         a, b = (int(round(v / 5)) * 5 for v in ham)
         p["dis_olcu_cm"] = [a, b]
         if any(abs(h - r) > 1e-6 for h, r in zip(ham, (a, b))):          # her yuvarlama yazılır (kayan nokta gürültüsü hariç)
-            p["varsayimlar"].append(f"dış ölçü {_m(ham[0])} × {_m(ham[1])} m, 5 cm ızgaraya {_m(a)} × {_m(b)} m olarak alındı")
+            p["varsayimlar"].append(f"dış ölçü {_m(ham[0], 3)} × {_m(ham[1], 3)} m, 5 cm ızgaraya {_m(a)} × {_m(b)} m olarak alındı")
         p.setdefault("alan_m2", round(a * b / 1e4, 1))
     v = talep.get("veranda") or {}
     p["veranda"] = {k: v.get(k) for k in ("istiyor", "konum", "alan_m2") if v.get(k) is not None}

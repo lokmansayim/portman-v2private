@@ -118,7 +118,7 @@ def _oda_kenari(p: dict, mahal: str, yon: str, cm: int) -> tuple[dict | None, st
             if q:
                 return q, None
         if ver_keser(ilk):
-            return None, "verandayı değiştirmeden bu yöne " + ("büyütemedim" if s * cm > 0 else "küçültemedim")
+            return None, "verandayı değiştirmeden bu yöne " + ("büyütemedim" if cm > 0 else "küçültemedim")   # cm işareti işi taşır (yön değil)
         return None, "dış ölçü bu kadar küçülemez"
     # iç kenar: komşular kenarı tam paylaşmalı (dik aralıkları mahalin aralığı içinde)
     q = copy.deepcopy(p)

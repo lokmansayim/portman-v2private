@@ -166,3 +166,19 @@ def test_g11_ayna_ve_devrik_notlari_cevirir():
     assert y["duzlemler"][0]["not"] == "cumbanın kuzey alnı" and y["kalkanlar"][0]["not"] == "kuzey alnı"
     d = cati_ortak.devrik(c)
     assert d["duzlemler"][0]["not"] == "cumbanın batı alnı" and d["kalkanlar"][0]["not"] == "batı alnı"
+
+
+@pytest.mark.parametrize("cm,soz", [(50, "büyütemedim"), (-50, "küçültemedim")])
+def test_g10_gerekce_yonden_bagimsiz(cm, soz):
+    # hakem üçüncü tur: güney ve batıda büyütme/küçültme gerekçesi tersine dönüyordu (cm'nin işareti işi taşır)
+    p = _kose_verandali()
+    gorulen = set()
+    for m in p["mahaller"]:
+        if m["islev"] == "veranda":
+            continue
+        for yon in ("G", "B", "D", "K"):
+            q, neden = PI._oda_kenari(p, m["ad"], yon, cm)
+            if q is None and neden and neden.startswith("verandayı"):
+                assert neden.endswith(soz), (m["ad"], yon, neden)
+                gorulen.add(yon)
+    assert gorulen                                                          # en az bir yön verandayla karşılaştı
