@@ -239,6 +239,7 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
     if t.niyet == "onay":
         if k.d["asama"] == "onay_bekliyor" and k.d.get("son_is_emri"):
             k.d["asama"] = "onaylandi"
+            k.d["son_soru_alani"] = None                       # askıdaki yeni plan sorusu onayla kapanır (soru kaydı açık kalmaz)
             rev = k.d["son_is_emri"].get("revizyon", k.d["revizyon"] + 1)   # gönderilen planın numarası (r01 = 1)
             # İE-08 8b (plan kararı 6, Lokman 14.10): çelik plan onaydan sonra mühendisin teknik kontrolüne gider (kanal/muhendis.py)
             sonraki = ("Plan teknik kontrole gönderildi; sonucu size bildireceğiz." if (k.d["son_is_emri"].get("yapi") or {}).get("sistem") == "celik"
@@ -704,6 +705,21 @@ _NEYI_DEGISTIRELIM_YENI = ("Planda neyi değiştirelim? Örneğin \"salonu 50 cm
                            "\"dış duvarlar 140 olsun\" yazabilirsiniz; planı onaylıyorsanız Onayla'ya basın.")
 
 
+_BASKA_DEGISIKLIK = "Başka bir değişiklik isterseniz yazın; planı onaylıyorsanız Onayla'ya basın."
+
+
+def _bilgi_disi_cumle(k: Konusma, t: dict, aday: dict) -> bool:
+    """Mesajda müşteri/antet bilgisi dışında bir cümle var mı (oda büyüt, kapı, çatı, pencere, belirsiz…)? Banka yolunun bilgi denetimi
+    (`_bilgi_cumlesi`) cümle cümle; boş cümle sayılmaz (kod incelemesi üçüncü tur A: `degisiklik_var` oda ve kapı isteklerini tanımıyordu)."""
+    try:
+        y = varyant._kur(t)
+    except varyant.VaryantHatasi:
+        y = None
+    r = CO.oku(k.d.get("son_metin") or "", t, aday, y=y)
+    llm = getattr(k, "son_llm", None) or {}
+    return any(p["tur"] != "bos" and not (p["tur"] == "baska" and _bilgi_cumlesi(p, llm)) for p in r["parcalar"])
+
+
 def _yeni_plan_sorusu(k: Konusma, metin: str) -> Karar:
     """Yeni plan revizyonunda soru: soru bütçesi işler, okuma alanı bırakılmaz ve plan bayide kalır (aşama `onay_bekliyor`): sonraki
     cevap yine LLM düzenleyicisine gider, bayi doğrudan onaylayabilir (ikinci tur bulgu 1)."""
@@ -921,10 +937,10 @@ def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts
         # plan değişmedi (inceleme C2 ve ikinci tur): konuşma kapanmaz. Soru, sonraki cevap yine LLM düzenleyicisine gitsin diye
         # okuma alanı bırakmaz ("okuma_metin" LLM-önce yolu kapatıp cevabı kural yoluna, oradan Patron'a düşürüyordu).
         if ly.get("islemler"):                                  # işlem okundu ama plan zaten öyle (ör. dış 140'lık planda "dışlar 140")
-            return _yeni_plan_sorusu(k, "İstediğiniz değişiklik planda zaten var. " + _NEYI_DEGISTIRELIM_YENI)
+            return _yeni_plan_sorusu(k, "İstediğiniz değişiklik planda zaten var. " + _BASKA_DEGISIKLIK)
         if not bilgi:
             return _yeni_plan_sorusu(k, _NEYI_DEGISTIRELIM_YENI)
-        if CO.degisiklik_var(k.d.get("son_metin") or ""):     # bilgiyle birlikte değişiklik isteği var ama LLM okumadı: sessiz düşmez
+        if _bilgi_disi_cumle(k, t, aday):                       # bilgiyle birlikte istek var ama LLM işlem çıkarmadı: sessiz düşmez
             k.not_dus("kural", "yeni plan revizyonu: değişiklik isteği okunamadı")
             return _bitir(k, Karar(eylem="yonlendir", gerekce="yeni plan revizyonu üretilemedi (istek okunamadı)",
                                    mesaj="İsteğinizi kurallara uyan bir plana otomatik çeviremedim; önceki planınız geçerli. " + YONLENDIRME))
@@ -942,7 +958,7 @@ def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts
         yeni.append({"op": "cati_varyanti", "kod": aday["kod"], "aciklama": f"çatı {aday.get('gosterim') or aday['kod']}"}); okunan.add("cati")
     if ayni_proje and not yeni and not bilgi:
         if "dis140" in okunan and _zaten_140(t, onceki):      # KT-03 gibi hazır 140'lık modelde aynı öneriyle geri sorulmaz (ikinci tur)
-            return _soru(k, "okuma_metin", "Bu planda dış duvarlar zaten 140'lık karkas. " + _NEYI_DEGISTIRELIM)
+            return _soru(k, "okuma_metin", "Bu planda dış duvarlar zaten 140'lık karkas. " + _BASKA_DEGISIKLIK)
         return _soru(k, "okuma_metin", _NEYI_DEGISTIRELIM)   # aynı plan yeniden çizilip revizyon hakkı harcanmaz
     try:
         for d in yeni:

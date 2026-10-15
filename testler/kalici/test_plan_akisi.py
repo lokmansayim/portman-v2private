@@ -285,7 +285,8 @@ def test_c2_zaten_uygulanmis_islem_zaten_var_der(depo, wa, hizli_genel, uretici,
     assert depo.mesaj_kaydet(mesaj("çatı böyle olsun", talep("revizyon", ozet="çatı"), bayi=BAYI_KART))
     [r] = isle_hepsi(depo, URETIM)
     assert r["eylem"] == "sor", r
-    assert "planda zaten var" in sorgu(depo, "SELECT govde FROM giden ORDER BY is_id DESC, sira")[0]["govde"]
+    son = sorgu(depo, "SELECT govde FROM giden ORDER BY is_id DESC, sira")[0]["govde"]
+    assert "planda zaten var" in son and "Onayla" in son and "çatı kırma olsun" not in son          # aynı istek yeniden önerilmez
 
 
 def test_c2_bilgiyle_gelen_okunamayan_istek_sessiz_dusmez(depo, wa, hizli_genel, uretici, duzenleyici):
@@ -309,6 +310,45 @@ def test_c1_hazir_140_modelde_dis_140_zaten_der(depo, wa, hizli_genel):
     [r] = isle_hepsi(depo, {**AYAR, "mesaj_katmani": True})
     assert r["eylem"] == "sor", r
     assert "zaten 140'lık" in sorgu(depo, "SELECT govde FROM giden ORDER BY is_id DESC, sira")[0]["govde"]
+
+
+@pytest.mark.parametrize("istek", ["salonu 50 cm büyüt", "yatak odasını küçült", "mutfağa kapı ekleyin", "çatı kırma olsun"])
+def test_c2_bilgiyle_gelen_oda_istegi_de_dusmez(depo, wa, hizli_genel, uretici, duzenleyici, istek):
+    # kod incelemesi üçüncü tur A: oda büyütme, kapı ve çatı istekleri de (yalnız pencere değil) bilgiyle gelince sessiz düşmez
+    _secilmis_yeni_plan(depo)
+    duzenleyici["cevap"] = {"islemler": [], "uygulanamayan": []}
+    assert depo.mesaj_kaydet(mesaj(f"müşteri Ahmet Bey, {istek}", talep("revizyon", ozet="revizyon", musteri={"ad": "Ahmet Bey"}),
+                                   bayi=BAYI_KART))
+    [r] = isle_hepsi(depo, URETIM)
+    assert r["eylem"] == "yonlendir" and "okunamadı" in r["gerekce"], r
+    assert son_rev(depo)["rev"] == 1
+
+
+def test_c2_yalniz_bilgi_plani_antetle_yeniden_cizer(depo, wa, hizli_genel, uretici, duzenleyici):
+    # bilgi dışında cümle yoksa banka yoluyla aynı: plan antet bilgisiyle yeniden (yönlendirme yok)
+    _secilmis_yeni_plan(depo)
+    duzenleyici["cevap"] = {"islemler": [], "uygulanamayan": []}
+    assert depo.mesaj_kaydet(mesaj("müşteri Ahmet Bey", talep("revizyon", ozet="müşteri bilgisi", musteri={"ad": "Ahmet Bey"}), bayi=BAYI_KART))
+    [r] = isle_hepsi(depo, URETIM)
+    assert r["eylem"] == "is_emri", r
+
+
+def test_c2_sorudan_sonra_onay_soruyu_kapatir(depo, wa, hizli_genel, uretici, duzenleyici):
+    # kod incelemesi üçüncü tur B: soru alanı onayla temizlenir
+    _secilmis_yeni_plan(depo)
+    duzenleyici["cevap"] = {"islemler": [], "uygulanamayan": []}
+    assert depo.mesaj_kaydet(mesaj("tamam bir bakalım", talep("revizyon", ozet="revizyon"), bayi=BAYI_KART))
+    isle_hepsi(depo, URETIM)
+    d, _ = depo.konusma_oku(NUMARA_A)
+    assert d["son_soru_alani"] == "yeni_plan_degisiklik"
+    # karar katmanı (kalıcı akışın onay denetimi PDF'in teslim bildirimini ister; bu test onu kurmaz)
+    import kalici
+    from beyin.karar import karar_ver
+    from beyin.sema import Talep
+    k = kalici.BellekKonusma(NUMARA_A, d)
+    kr = karar_ver(Talep.model_validate(talep("onay", ozet="onay")), k, BAYI_KART, W.katalog_nesnesi(URETIM, kabul_edilmis=depo.kabul_edilmis_adaylar()),
+                   metin="onaylıyorum")
+    assert kr.gerekce == "plan onaylandı" and k.d["asama"] == "onaylandi" and k.d["son_soru_alani"] is None
 
 
 def test_t3_yeni_plan_revizyonu_gecmezse_plan_degismez(depo, wa, hizli_genel, uretici, duzenleyici):

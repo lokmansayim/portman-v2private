@@ -72,7 +72,7 @@ _KALIPLAR = [
     (re.compile(r"\b(kiler|depo|çamaşır\s*oda)", re.I), lambda m, p: p.update(depo=1), "depo 1"),
     # dış 140: "dış" sözü (ya da iç sözü olmadan "karkas") zorunlu; "iç duvarlar 140", "banyo duvarı 140" dış karkas değildir (inceleme C4)
     (re.compile(r"\bdış\s+(duvar\w*|karkas\w*)\D{0,12}140|140\s*('?l[ıi]k)?\s+dış\s+(duvar|karkas)|"
-                r"^\s*karkas\w*\D{0,12}140", re.I),   # yalnız "karkas" cümle başında: "iç duvar karkası 140" dış değildir
+                r"^\s*karkas\w*(?![^\d]*\b[iİ]ç\b)\D{0,12}140", re.I),   # "karkas" cümle başında ve arada "iç" yok
      lambda m, p: p.update(dis_karkas=140), "dış 140"),
 ]
 

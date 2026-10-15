@@ -115,7 +115,8 @@ def test_c3_llm_eklenen_dis_140_yazilir():
     ("dış duvarlar 140 olsun", 140), ("140'lık dış duvar", 140), ("140 lık dış karkas", 140), ("karkas 140 olsun", 140),
     ("dış duvarları 140 yapın", 140),
     ("iç duvarlar 140 olsun", None), ("banyo duvarı 140 olsun", None), ("duvarlar 140 olsun", None), ("İç karkas 140", None),
-    ("iç duvar karkası 140 olsun", None), ("iç duvarların karkası 140", None), ("banyo duvarı karkası 140", None)])
+    ("iç duvar karkası 140 olsun", None), ("iç duvarların karkası 140", None), ("banyo duvarı karkası 140", None),
+    ("karkası iç 140 olsun", None)])
 def test_c4_dis_140_deseni(istek, dis):
     p, kalan = PP.talepten({"oda_programi": "2+1", "alan_m2": 80, "ozel_istekler": [istek]})
     assert p["dis_karkas"] == dis
