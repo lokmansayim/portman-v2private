@@ -49,7 +49,7 @@ if [ "${1:-}" = "deneme" ]; then
   DK="${2:-90}"
   echo "-- son $DK dakikanın işleri (sıra · durum · eylem · gerekçe · LLM çağrısı):"
   q "SELECT j.id||' · '||j.durum||' · '||coalesce(j.sonuc->>'eylem','-')||' · '||left(coalesce(j.sonuc->>'gerekce','-'),90)
-            ||' · çıkarım '||CASE WHEN (j.cikarim->'meta'->>'backend') IN ('anthropic','openai') THEN '1' ELSE '0' END
+            ||' · çıkarım '||CASE WHEN coalesce(j.cikarim->'meta'->>'backend','') IN ('','manuel','etkilesim') THEN '0' ELSE '1' END
             ||coalesce(' · plan '||(j.sonuc->'plan_uretimi'->>'cagri'),'')||coalesce(' · düzenleme '||(j.sonuc->'plan_duzenleme'->>'cagri'),'')
             ||coalesce(' · gölge '||(j.sonuc->'okuma_kiyasi'->>'cagri'),'')
      FROM isler j WHERE j.basladi >= now() - make_interval(mins => $DK) ORDER BY j.id"
