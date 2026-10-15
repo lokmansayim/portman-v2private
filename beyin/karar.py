@@ -700,6 +700,10 @@ _NEYI_DEGISTIRELIM = ("Neyi değiştirelim? Odayı ve pencere ölçüsünü yaz�
                       "\"çatı L\", dış duvar için \"dışlar 140'lık olsun\" yazabilirsiniz.")
 
 
+_NEYI_DEGISTIRELIM_YENI = ("Planda neyi değiştirelim? Örneğin \"salonu 50 cm büyüt\", \"mutfağa 120x120 pencere ekle\", \"çatı kırma olsun\" ya da "
+                           "\"dış duvarlar 140 olsun\" yazabilirsiniz; planı onaylıyorsanız Onayla'ya basın.")
+
+
 def _celik_degisiklikler(k: Konusma, katalog: Katalog, aday: dict, t: dict, onceki: list[dict], ayni_proje: bool) -> tuple[list[dict], set[str]] | Karar:
     """Bu mesajın (ve set sunulurken saklanan isteğin) çelik değişiklikleri, bayinin sözünden cümle cümle (K18). Dönen: ([op, …], okunan
     türler) ya da sorulacak/yönlendirilecek Karar. Sıra (kapanış incelemesi 13.10): önce desteklenmeyen LLM varyantı ve revizyonda tanınmayan
@@ -797,7 +801,7 @@ def _celik_degisiklikler(k: Konusma, katalog: Katalog, aday: dict, t: dict, once
         okunan.add("cati")                                      # aday zaten o çatı (`_celik_dali` seçti); op zarfta
     if r["dis140"]:
         okunan.add("dis140")
-        if any(d.get("op") == "dis_karkas_140" for d in onceki):
+        if _zaten_140(t, onceki):                               # üretilen plan ilk mesajdaki istekle zaten 140 çizilmiş olabilir (inceleme C1)
             k.not_dus("kural", "dış 140 zaten uygulanmış; yinelenmedi")
         else:
             ops.append({"op": "dis_karkas_140", "aciklama": "dış duvarlar 140'lık karkas (16,5 cm)"})
@@ -805,6 +809,12 @@ def _celik_degisiklikler(k: Konusma, katalog: Katalog, aday: dict, t: dict, once
     if pencereler:
         okunan.add("pencere")
     return _pencereleri_coz(k, aday, t, onceki, ops, pencereler, okunan)
+
+
+def _zaten_140(t: dict, onceki: list[dict]) -> bool:
+    """Dış karkas zaten 140 mı: önceki revizyonda uygulanmış ya da tanımın dış sınıfı 140 (KT-03; ilk mesajdaki istekle üretilen plan)."""
+    return any(o.get("op") == "dis_karkas_140" for o in onceki) or \
+        bool(re.match(r"\s*140", str(((t.get("duvar_siniflari") or {}).get("dis") or {}).get("profil") or "")))
 
 
 def _cati_kodlari(katalog: Katalog, aday: dict) -> set[str]:
@@ -839,7 +849,7 @@ def _llm_degisiklikler(k: Konusma, katalog: Katalog, aday: dict, t: dict, onceki
         return _bitir(k, Karar(eylem="yonlendir", gerekce=f"LLM-önce okuma: {len(d['uygulanamaz'])} istek otomatik uygulanamıyor",
                                 mesaj=f"{alinti} isteğini otomatik uygulayamadım. Otomatik yapabildiklerim: pencere ölçüsü, çatı seçeneği, dış duvarlar "
                                       "140'lık karkas. " + YONLENDIRME))
-    zaten140 = any(o.get("op") == "dis_karkas_140" for o in onceki) or "140" in str((t.get("duvar_siniflari") or {}).get("dis", {}).get("profil", ""))
+    zaten140 = _zaten_140(t, onceki)
     ops = [o for o in d["ops"] if o["op"] != "cati_varyanti" and not (o["op"] == "dis_karkas_140" and zaten140)]   # kural yoluyla aynı: yinelenmez
     okunan = {{"pencere_olcu": "pencere", "dis_karkas_140": "dis140"}.get(o["op"], o["op"]) for o in ops}
     if d["sor"]:
@@ -893,9 +903,16 @@ def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts
         return _bitir(k, Karar(eylem="yonlendir", gerekce=f"önceki değişiklikler yeni tanıma uygulanamadı: {e}",
                                 mesaj=f"Önceki değişiklikleriniz bu modele taşınamadı ({e}). " + YONLENDIRME))
     ly = getattr(k, "llm_yeni_plan", None)
+    bilgi = bool((getattr(k, "son_llm", None) or {}).get("bilgi"))
     if aday.get("uretilen") and ayni_proje and ly is not None:  # İE-14 PR-3 (T3): yeni planın revizyonu LLM'in yeniden planıyla
-        return _yeni_plan_revizyonu(k, bayi, aday, ts, son, son_y, ly)
-    sonuc = _celik_degisiklikler(k, katalog, aday, t, onceki, ayni_proje)
+        if ly.get("durum") != "bos":
+            return _yeni_plan_revizyonu(k, bayi, aday, ts, son, son_y, ly)
+        # işlem yok (ör. yalnız müşteri bilgisi): banka yoluyla aynı — bilgi varsa plan antet bilgisiyle yeniden, yoksa soru (inceleme C2)
+        if not bilgi:
+            return _soru(k, "okuma_metin", _NEYI_DEGISTIRELIM_YENI)
+        sonuc: tuple[list[dict], set[str]] | Karar = ([], set())
+    else:
+        sonuc = _celik_degisiklikler(k, katalog, aday, t, onceki, ayni_proje)
     if isinstance(sonuc, Karar):
         return sonuc
     yeni, okunan = sonuc
@@ -905,7 +922,7 @@ def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts
     yeni = list(tekil.values())
     if ayni_proje and str(son_y.get("kod")).upper() != str(aday["kod"]).upper():          # çatı varyantı değişti: zarf tanım dosyasını değiştirir
         yeni.append({"op": "cati_varyanti", "kod": aday["kod"], "aciklama": f"çatı {aday.get('gosterim') or aday['kod']}"}); okunan.add("cati")
-    if ayni_proje and not yeni and not (getattr(k, "son_llm", None) or {}).get("bilgi"):
+    if ayni_proje and not yeni and not bilgi:
         return _soru(k, "okuma_metin", _NEYI_DEGISTIRELIM)   # aynı plan yeniden çizilip revizyon hakkı harcanmaz
     try:
         for d in yeni:

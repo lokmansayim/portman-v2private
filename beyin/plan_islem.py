@@ -201,7 +201,7 @@ def uygula(plan: dict, islemler: list[dict]) -> tuple[dict, list[str]]:
 
 def duzenle(plan: dict, metin: str, talep: dict, ayar: dict | None = None, hazir: dict | None = None, kod: str = "YENI") -> dict:
     """Yeni planın revizyonu: oku → uygula → denetle (alan ±%10 revizyonda aranmaz; oda programı korunur). Dönüş (karar sözleşmesi):
-    {durum: gecerli|gecersiz|hata, plan, tanim, ozet, fark, uygulanamayan, islemler, cagri, girdi_token, cikti_token, hata, ihlaller}."""
+    {durum: gecerli|gecersiz|bos|hata, plan, tanim, ozet, fark, uygulanamayan, islemler, cagri, girdi_token, cikti_token, hata, ihlaller}."""
     from beyin.plan_uretici import plan_farki
     o = oku(plan, metin, ayar, hazir)
     s = {"durum": "hata" if o["durum"] != "tamam" else "gecersiz", "plan": None, "tanim": None, "ozet": {}, "fark": [], "islemler": o["islemler"],
@@ -213,6 +213,8 @@ def duzenle(plan: dict, metin: str, talep: dict, ayar: dict | None = None, hazir
     s["uygulanamayan"] += olmayan
     if yeni == plan:
         s["ihlaller"] = ["uygulanacak işlem kalmadı"]
+        if not s["uygulanamayan"]:
+            s["durum"] = "bos"                  # değişiklik isteği yok (ör. yalnız müşteri bilgisi): karar sorar, konuşmayı kapatmaz (inceleme C2)
         return s
     d = denetle(yeni, {"oda_programi": talep.get("oda_programi")}, kod=kod)
     s["denemeler"] = [{"plan": yeni, "gecerli": d["gecerli"], "ihlaller": d["ihlaller"]}]

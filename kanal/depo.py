@@ -270,10 +270,11 @@ class Depo:
     def _basarisiz_yaz(self, c, j: dict, gelen: dict, neden: str) -> None:
         c.execute("UPDATE isler SET durum = 'basarisiz', hata = %s, bitti = now(), sahip = NULL, kira_bitis = NULL WHERE id = %s",
                   (neden, j["id"]))
-        satirlar = [(1, gelen["sender"], "cevap", HATA_BAYIYE)]
+        t = self.ajan_sira_sonu(gelen["id"], c)   # iş sürerken yazılmış satırlar ("hazırlıyorum") varsa sıra onlardan sonra: hata mesajı düşmez
+        satirlar = [(t + 1, gelen["sender"], "cevap", HATA_BAYIYE)]
         patrona = (gelen.get("role") or "bayi") != "patron"
         if patrona:
-            satirlar.append((2, "PATRON", "bildirim",
+            satirlar.append((t + 2, "PATRON", "bildirim",
                              f"Portman: {maske(gelen['sender'])} mesajı işlenemedi ({neden}). Panelden bakabilirsiniz."))
         for sira, alici, tur, govde in satirlar:
             c.execute("INSERT INTO giden (id, is_id, mesaj_id, sira, alici, tur, kind, govde, satir) "
@@ -282,10 +283,30 @@ class Depo:
                        Jsonb(metin_satiri(gelen, govde, sira, alici, tur))))
         if patrona:                                  # İE-07 P4: Patron'un penceresi kapalıysa şablonla ulaşır (talep kimliği T-<iz>)
             import sablonlar as S
-            s = S.patron_bildirim_satiri(gelen, 3, gelen.get("bayi") if isinstance(gelen.get("bayi"), dict) else None, None, None)
+            s = S.patron_bildirim_satiri(gelen, t + 3, gelen.get("bayi") if isinstance(gelen.get("bayi"), dict) else None, None, None)
             c.execute("INSERT INTO giden (id, is_id, mesaj_id, sira, alici, tur, kind, govde, satir) "
                       "VALUES (%s, %s, %s, %s, %s, %s, 'template', %s, %s) ON CONFLICT (id) DO NOTHING",
-                      (s["id"], j["id"], gelen["id"], 3, "PATRON", "bildirim", s["body"], Jsonb(s)))
+                      (s["id"], j["id"], gelen["id"], t + 3, "PATRON", "bildirim", s["body"], Jsonb(s)))
+
+    def ajan_sira_sonu(self, mesaj_id: str, c=None) -> int:
+        """Bu gelen mesaja iş sürerken yazılmış ajan satırlarının son sırası (yoksa 0); panel ve çapa satırları sayılmaz."""
+        q = "SELECT coalesce(max(sira), 0) AS n FROM giden WHERE mesaj_id = %s AND sira < %s"
+        if c is not None:
+            return int(c.execute(q, (mesaj_id, self.PANEL_SIRA_BASI)).fetchone()["n"])
+        with self.baglan() as c2:
+            return int(c2.execute(q, (mesaj_id, self.PANEL_SIRA_BASI)).fetchone()["n"])
+
+    def ara_satir_yaz(self, is_id: int, sahip: str, mesaj_id: str, s: dict) -> bool:
+        """İş sürerken bir metin satırı (İE-14: yeni plan üretiminden önce "hazırlıyorum"; inceleme C7). Kira bu işleyicideyse ayrı işlemde
+        yazılır ve gönderici hemen alır; yeniden denenen iş aynı kimlikle yazar (ON CONFLICT: bir kez gider). Dönen: satır kayıtta mı."""
+        with self.baglan() as c, c.transaction():
+            j = c.execute("SELECT id FROM isler WHERE id = %s AND sahip = %s AND durum = 'isleniyor' FOR UPDATE", (is_id, sahip)).fetchone()
+            if j is None:
+                return False
+            c.execute("INSERT INTO giden (id, is_id, mesaj_id, sira, alici, tur, kind, govde, satir, kaynak) "
+                      "VALUES (%s, %s, %s, %s, %s, %s, 'text', %s, %s, 'ajan') ON CONFLICT (id) DO NOTHING",
+                      (s["id"], is_id, mesaj_id, s["seq"], s["to"], s.get("tur") or "cevap", s.get("body") or "", Jsonb(s)))
+            return True
 
     def cikarim_kaydet(self, is_id: int, sahip: str, cikarim: dict) -> bool:
         with self.baglan() as c, c.transaction():
@@ -366,6 +387,8 @@ class Depo:
             self._soru_kaydi(c, gelen, d_eski or {}, d_yeni, sonuc, karar_ozeti)
             self._set_kaydi(c, gelen, d_eski or {}, d_yeni, proje_id)
             for s in cikti.get("satirlar") or []:
+                if s.get("erken"):                       # iş sürerken yazıldı (`ara_satir_yaz`); yinelenmez
+                    continue
                 # Revizyona bağlı satırlar: PDF ve aynı İş Emri'nin görsel/etkileşim satırları (onay butonu → revizyon; alıntı → revizyon)
                 bagli = revizyon_id if (s.get("kind") == "document" or (s.get("is_emri_no") and s.get("is_emri_no") == sonuc.get("is_emri_no"))) else None
                 c.execute(
@@ -392,7 +415,7 @@ class Depo:
             if ok_:
                 c.execute("INSERT INTO okuma_kiyaslari (mesaj_id, gonderen, is_emri_no, rev, model, kural, llm, sinif, cagri, girdi_token, "
                           "cikti_token) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON CONFLICT (mesaj_id) DO NOTHING",
-                          (gelen["id"], gelen["sender"], sonuc.get("is_emri_no"), sonuc.get("revizyon"), ok_.get("model"),
+                          (gelen["id"], gelen["sender"], ok_.get("is_emri_no"), ok_.get("rev"), ok_.get("model"),
                            Jsonb(ok_.get("kural") or {}), Jsonb(ok_.get("llm") or {}), ok_["sinif"], int(ok_.get("cagri") or 0),
                            int(ok_.get("girdi_token") or 0), int(ok_.get("cikti_token") or 0)))
             yeni_kod = ((d_yeni.get("son_is_emri") or {}).get("yapi") or {}).get("kod")

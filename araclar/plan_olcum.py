@@ -37,8 +37,9 @@ def topla(c, gun: int | None = None) -> dict:
         b["cagri"] += r["cagri"] or 0
         b["token"] += (r["girdi_token"] or 0) + (r["cikti_token"] or 0)
         b["secilen"] += 1 if r["is_emri_no"] else 0
-    rv = c.execute("SELECT is_emri_no, max(rev) AS son, bool_or(durum = 'onaylandi') AS onay FROM revizyonlar "
-                   "WHERE is_emri->'yapi'->>'kod' LIKE 'YENI-%%' GROUP BY is_emri_no").fetchall()
+    # her revizyon yeni İş Emri numarası alır; iş = proje (inceleme C6)
+    rv = c.execute("SELECT proje_id, max(rev) AS son, bool_or(durum = 'onaylandi') AS onay FROM revizyonlar "
+                   "WHERE is_emri->'yapi'->>'kod' LIKE 'YENI-%%' GROUP BY proje_id").fetchall()
     try:
         ok = c.execute(f"SELECT sinif, cagri, etiket FROM okuma_kiyaslari {kos}", arg).fetchall()
     except Exception:                                    # 008 uygulanmamış sürüm

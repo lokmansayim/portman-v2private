@@ -20,6 +20,7 @@ from conftest import AYAR, NUMARA_A, mesaj, sorgu, talep
 from test_celik_akisi import BAYI_KART, YEDI, buton, hizli_genel, isle_hepsi, kabul, son_rev  # noqa: F401 (fikstür)
 
 import worker as W
+from psycopg.types.json import Jsonb
 
 KOK = Path(__file__).resolve().parents[2]
 ORNEK = KOK / "testler" / "plan" / "ornekler"
@@ -226,6 +227,36 @@ def test_t3_yeni_plan_revizyonu_islemlerle_dis_140_ve_salon(depo, wa, hizli_gene
     assert sorgu(depo, "SELECT cikarim FROM isler ORDER BY id DESC")[0]["cikarim"]["plan_duzenleme"]["durum"] == "gecerli"
 
 
+def test_c1_ilk_mesajda_dis_140_secimde_yinelenmez(depo, wa, hizli_genel, uretici):
+    # inceleme C1: "dış duvarlar 140 olsun" üretimde uygulanır; seçimde saklanan istek ikinci kez uygulanıp Patron'a düşürmez
+    kabul(depo, YEDI)
+    tl = talep(ozet="95 m² 3+1 tek kat çelik, dış duvarlar 140", alan_m2=95, oda_programi="3+1", yapi_turu="celik", kat_sayisi=1,
+               ozel_istekler=["dış duvarlar 140 olsun"])
+    assert depo.mesaj_kaydet(mesaj("95 m² 3+1 tek kat çelik, dış duvarlar 140 olsun", tl, bayi=BAYI_KART))
+    [r] = isle_hepsi(depo, URETIM)
+    assert r["eylem"] == "secenek", r
+    st = sorgu(depo, "SELECT id, adaylar FROM secenek_setleri")[0]
+    assert depo.mesaj_kaydet(buton(f"s:{st['id']}:{st['adaylar'][0]['kod']}"))
+    [r] = isle_hepsi(depo, URETIM)
+    assert r["eylem"] == "is_emri", r
+    y = son_rev(depo)["is_emri"]["yapi"]
+    assert y["tanim"]["duvar_siniflari"]["dis"]["profil"] == "140x45x1,2" and y["degisiklikler"] == []
+
+
+def test_c2_islemsiz_revizyon_konusmayi_kapatmaz(depo, wa, hizli_genel, uretici, duzenleyici):
+    # inceleme C2: işlem çıkmayan mesaj (değişiklik isteği yok) sorulur; taslak ve hak kalır, ardından onay çalışır
+    _secilmis_yeni_plan(depo)
+    duzenleyici["cevap"] = {"islemler": [], "uygulanamayan": []}
+    assert depo.mesaj_kaydet(mesaj("tamam bir bakalım", talep("revizyon", ozet="revizyon"), bayi=BAYI_KART))
+    [r] = isle_hepsi(depo, URETIM)
+    assert r["eylem"] == "sor" and duzenleyici["cagri"] == 1, r
+    d, _ = depo.konusma_oku(NUMARA_A)
+    assert d["asama"] not in ("yonlendirildi", "is_emri_hazir") and d["uretilen_plan"] and d["revizyon"] == 0
+    assert son_rev(depo)["rev"] == 1
+    son = sorgu(depo, "SELECT govde FROM giden ORDER BY is_id DESC, sira")[0]["govde"]
+    assert "Planda neyi değiştirelim?" in son and "Lokman" not in son
+
+
 def test_t3_yeni_plan_revizyonu_gecmezse_plan_degismez(depo, wa, hizli_genel, uretici, duzenleyici):
     _secilmis_yeni_plan(depo)
     d, _ = depo.konusma_oku(NUMARA_A)
@@ -253,6 +284,53 @@ def test_k1_olcu_notu_ve_yuvarlama_bayiye_yazilir(depo, wa, hizli_genel, uretici
     assert "(" not in satir1.split("TASLAK")[1]                                    # ilk aday ölçüyü tutuyor: notsuz
     assert satir2.endswith("(dış ölçü 12 × 8 m döndürülmüş çizildi, ön cephe 8 m)")  # döndürülmüş aday notlu
     assert body.endswith("Birini seçin (düğme ya da numara).")
+
+
+def test_c7_hazirliyorum_uretimden_once_kayitta(depo, wa, hizli_genel, monkeypatch):
+    # inceleme C7: "hazırlıyorum" satırı üretim başlamadan giden tablosunda 'bekliyor' (gönderici hemen alır); iş bitince yinelenmez
+    from beyin import plan_uretici as PU
+    gorulen = {}
+
+    def sahte(talep_, ayar):
+        gorulen["satir"] = sorgu(depo, "SELECT durum FROM giden WHERE govde LIKE %s", "%hazırlıyorum%")
+        return PU.uret(talep_, ayar={"acik": False})
+    monkeypatch.setattr(W, "plan_uret", sahte)
+    r = t1(depo)
+    assert r["eylem"] == "secenek", r
+    assert [x["durum"] for x in gorulen["satir"]] == ["bekliyor"]
+    hepsi = sorgu(depo, "SELECT sira, govde FROM giden ORDER BY sira")
+    assert sum("hazırlıyorum" in x["govde"] for x in hepsi) == 1 and hepsi[0]["sira"] == 1 and hepsi[1]["sira"] == 2
+
+
+def test_c7_uretim_patlarsa_hata_mesaji_gider_dongu_yok(depo, wa, hizli_genel, monkeypatch):
+    # erken "hazırlıyorum"dan sonra beklenmeyen hata: hata yolu sıra 1'le çakışıp işi sonsuz döngüye sokmaz; bayi hata mesajını alır
+    import depo as D
+
+    def patlar(talep_, ayar):
+        raise RuntimeError("deneme")
+    monkeypatch.setattr(W, "plan_uret", patlar)
+    kabul(depo, YEDI)
+    assert depo.mesaj_kaydet(mesaj("95 m² 3+1 tek kat çelik, kırma çatı", T95, bayi=BAYI_KART))
+    [r] = isle_hepsi(depo, URETIM)
+    assert r["durum"] == "basarisiz" and r["eylem"] == "hata", r
+    hepsi = sorgu(depo, "SELECT sira, alici, govde FROM giden ORDER BY sira")
+    assert "hazırlıyorum" in hepsi[0]["govde"] and hepsi[1]["govde"] == D.HATA_BAYIYE and [x["sira"] for x in hepsi][:2] == [1, 2]
+
+
+def test_c7_basarisiz_is_hata_mesaji_hazirliyorumla_cakismaz(depo):
+    # erken yazılmış "hazırlıyorum" sıra 1'i tutar; iş başarısız sayılırsa bayinin hata mesajı sıra 2'ye yazılır (düşmez)
+    import depo as D
+    assert depo.mesaj_kaydet(mesaj("95 m² 3+1 tek kat çelik", T95, bayi=BAYI_KART))
+    al = depo.is_al("deneme")
+    g = al["gelen"]
+    s = W.giden_metin(g, "Sizin için yeni bir plan taslağı hazırlıyorum", 1)
+    assert depo.ara_satir_yaz(al["is"]["id"], "deneme", g["id"], s) and depo.ara_satir_yaz(al["is"]["id"], "deneme", g["id"], s)
+    assert not depo.ara_satir_yaz(al["is"]["id"], "baskasi", g["id"], {**s, "id": s["id"] + "x"})      # kira başkasında: yazılmaz
+    with depo.baglan() as c, c.transaction():
+        depo._basarisiz_yaz(c, al["is"], g, "deneme")
+    satirlar = sorgu(depo, "SELECT sira, alici, govde FROM giden ORDER BY sira")
+    assert [x["sira"] for x in satirlar][:2] == [1, 2] and "hazırlıyorum" in satirlar[0]["govde"]
+    assert satirlar[1]["alici"] == g["sender"] and satirlar[1]["govde"] == D.HATA_BAYIYE
 
 
 def test_yeniden_denenen_is_uretimi_tekrarlamaz(depo, uretici, monkeypatch):
@@ -427,7 +505,7 @@ def _golge(tmp_path, cevap: dict) -> dict:
 
 
 def test_golge_ayni_okuma_kural_karar_verir_kiyas_kaydi(depo, wa, hizli_genel, tmp_path):
-    _r01_c8801k(depo)
+    ilk = _r01_c8801k(depo)
     ayar = _golge(tmp_path, {"islemler": [_islem(tur="pencere_olcu", aciklik="P5", en=120, yuk=120, alinti="mutfak penceresi 120x120")]})
     assert depo.mesaj_kaydet(mesaj("mutfak penceresi 120x120 olsun", talep("revizyon", ozet="mutfak penceresi"), bayi=BAYI_KART))
     [r] = isle_hepsi(depo, ayar)
@@ -437,7 +515,8 @@ def test_golge_ayni_okuma_kural_karar_verir_kiyas_kaydi(depo, wa, hizli_genel, t
     y = son_rev(depo)["is_emri"]["yapi"]
     assert [(d["op"], d["aciklik"], d["en"], d["yuk"]) for d in y["degisiklikler"]] == [("pencere_olcu", "P5", 120, 120)]
     ok = sorgu(depo, "SELECT sinif, model, kural, llm, is_emri_no, rev FROM okuma_kiyaslari")
-    assert len(ok) == 1 and ok[0]["sinif"] == "aynı" and ok[0]["model"] == "Ç8801K" and ok[0]["rev"] == 2
+    # inceleme C8: kayıt okunan planın (r01) numarasını taşır, bu işin ürettiği r02'yi değil
+    assert len(ok) == 1 and ok[0]["sinif"] == "aynı" and ok[0]["model"] == "Ç8801K" and ok[0]["rev"] == 1 and ok[0]["is_emri_no"] == ilk["is_emri_no"]
     assert ok[0]["kural"]["ogeler"] == [["pencere", "P5", 120, 120]] and "mutfak" not in json.dumps(ok[0])     # metin satırda yok
     assert sorgu(depo, "SELECT cikarim FROM isler ORDER BY id DESC")[0]["cikarim"]["degisiklik_golge"]["durum"] == "tamam"
 
@@ -459,6 +538,16 @@ def test_okuma_modu_geriye_uyum():
     assert W.okuma_modu({"acik": True, "mod": "golge"}) == "golge" and W.okuma_modu({"mod": "kapali", "acik": True}) == "kapali"
 
 
+def test_c5_ayar_dosyasindan_geriye_uyum(tmp_path):
+    # inceleme C5: varsayılan `mod`'u birleştirmez; dosyada yalnız `acik: true` → acik (belgelenen geriye uyum)
+    import ayarlar
+    (tmp_path / ayarlar.DOSYA).write_text(json.dumps({"llm_once_revizyon": {"acik": True}}), encoding="utf-8")
+    assert W.okuma_modu(ayarlar.oku(tmp_path)["llm_once_revizyon"]) == "acik"
+    (tmp_path / ayarlar.DOSYA).write_text(json.dumps({"llm_once_revizyon": {"acik": True, "mod": "golge"}}), encoding="utf-8")
+    assert W.okuma_modu(ayarlar.oku(tmp_path)["llm_once_revizyon"]) == "golge"
+    assert W.okuma_modu(ayarlar.oku(tmp_path / "yok")["llm_once_revizyon"]) == "kapali"
+
+
 # ───────────────────────── r3 · P6 (M6): kayıtlardan ölçüm raporu (yalnız okur; numara yazmaz) ─────────────────────────
 def test_olcum_raporu_kayitlardan(depo, wa, hizli_genel, uretici):
     import sys as _s
@@ -473,4 +562,12 @@ def test_olcum_raporu_kayitlardan(depo, wa, hizli_genel, uretici):
     assert o["uretim"] == 1 and o["durum"] == {"gecerli": 1} and o["secilen"] == 1 and o["cagri"] == 0
     assert o["yeni_plan_isi"] == 1 and o["revizyon_ortalama"] == 0 and o["sure_ms_medyan"] is not None
     metin = PO.rapor(o, 7)
+    # inceleme C6: r02 ayrı iş sayılmaz (her revizyon yeni İş Emri numarası alır; iş = proje)
+    with depo.baglan() as c:
+        r1 = c.execute("SELECT * FROM revizyonlar ORDER BY id DESC LIMIT 1").fetchone()
+        c.execute("INSERT INTO revizyonlar (proje_id, rev, is_emri_no, gonderen, bayi_kod, kaynak_mesaj_id, is_emri, dogrulandi, durum) "
+                  "VALUES (%s, 2, %s, %s, %s, %s, %s, true, 'onay_bekliyor')",
+                  (r1["proje_id"], r1["is_emri_no"] + "-r2", r1["gonderen"], r1["bayi_kod"], r1["kaynak_mesaj_id"], Jsonb(r1["is_emri"])))
+        o2 = PO.topla(c)
+    assert o2["yeni_plan_isi"] == 1 and o2["revizyon_ortalama"] == 1
     assert "Yeni plan üretimi | 1 (gecerli 1)" in metin and NUMARA_A not in metin and "Hedef yok" in metin

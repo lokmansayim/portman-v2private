@@ -244,7 +244,7 @@ def katalog_nesnesi(settings: dict, kabul_edilmis: set | None = None):
 
 
 def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje_koku: Path | None = None, giden_bul=None,
-         katalog=None, ek_kaydet=None) -> dict:
+         katalog=None, ek_kaydet=None, ara_gonder=None) -> dict:
     """Bir gelen mesajı işler; giden satırlarını ve sonucu döndürür (kayda yazmaz — çağıran yazar: kanal/kalici.py).
     k verilirse konuşma o nesneden okunur (Postgres); verilmezse Beyin'in dosya tabanlı Konusma'sı (yalnız yerel koşum ve
     testler). cikarim verilirse ({"talep": …, "meta": …} ya da {"hata": …}) LLM çağrılmaz; proje_koku verilirse Motor çıktısı
@@ -366,7 +366,8 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
     pu_ayar = settings.get("plan_uretimi") or {}
     k.plan_uretimi = bool(pu_ayar.get("acik"))       # İE-14 (D-18): kapalıysa uyan-yok dalı bugünkü davranış
     k.llm_golge = None
-    son_y0 = (k.d.get("son_is_emri") or {}).get("yapi") or {}     # gölge kıyası karar öncesi açık plana karşı
+    son0 = k.d.get("son_is_emri") or {}
+    son_y0 = son0.get("yapi") or {}                               # gölge kıyası karar öncesi açık plana karşı
     k.llm_yeni_plan, k.llm_degisiklik = llm_once_revizyon(k, talep, gelen, etk, cikarim, settings, katalog, ek_kaydet)
     for a, v in (("plan_duzenleme", k.llm_yeni_plan), ("llm_degisiklik", k.llm_degisiklik)):
         if v is not None:
@@ -377,11 +378,14 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
         from beyin import numara as _nm
         okuma_k = okuma_kiyasi(son_y0, _nm.maskele((gelen.get("text") or "").strip()), katalog, k.llm_golge)
         if okuma_k:
+            okuma_k.update(is_emri_no=son0.get("is_emri_no"), rev=son0.get("revizyon"))     # okunan plan (inceleme C8), bu işin ürettiği değil
             sonuc["okuma_kiyasi"] = {"sinif": okuma_k["sinif"], "cagri": okuma_k["cagri"]}
     if karar.gerekce == PLAN_URETIMI and k.d.get("plan_istegi"):
         # İE-14: bayiye önce "hazırlıyorum", sonra üretim (LLM, en çok 3 çağrı; sonuç iş satırına yazılır, yeniden denenen iş çağırmaz),
         # yeni planın kartı ve seçenek seti (`karar.plan_sonucu`). Üretim düşerse "uygulayamadım" + Patron.
         ekle(karar.mesaj)
+        if ara_gonder is not None and ara_gonder(satirlar[-1]):   # kalıcı akış: satır üretimden önce yazılır, gönderici hemen gönderir (inceleme C7)
+            satirlar[-1]["erken"] = True
         plan_talep = k.d["plan_istegi"]["talep"]
         pu = (cikarim or {}).get("plan_uretimi")
         if pu is None:
