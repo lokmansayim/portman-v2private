@@ -240,6 +240,21 @@ def test_t3_yeni_plan_revizyonu_gecmezse_plan_degismez(depo, wa, hizli_genel, ur
     assert d["revizyon"] == 0 and d["asama"] != "is_emri_hazir"
 
 
+def test_k1_olcu_notu_ve_yuvarlama_bayiye_yazilir(depo, wa, hizli_genel, uretici):
+    # inceleme G1/G2 (15.10): döndürülmüş aday ve 5 cm yuvarlama bayiye yazılır; "Birini seçin" 1024 sınırında kesilmez
+    kabul(depo, YEDI)
+    tl = talep(ozet="12,02 × 8 m 3+1 tek kat çelik", oda_programi="3+1", yapi_turu="celik", kat_sayisi=1, dis_olcu={"en_m": 12.02, "boy_m": 8})
+    assert depo.mesaj_kaydet(mesaj("12,02 x 8 m 3+1 tek kat çelik", tl, bayi=BAYI_KART))
+    [r] = isle_hepsi(depo, URETIM)
+    assert r["eylem"] == "secenek", r
+    body = sorgu(depo, "SELECT satir FROM giden ORDER BY sira")[1]["satir"]["body"]
+    assert "Not: dış ölçü 12,02 × 8 m, 5 cm ızgaraya 12 × 8 m olarak alındı" in body
+    satir1, satir2 = (next(x for x in body.splitlines() if x.startswith(n)) for n in ("1.", "2."))
+    assert "(" not in satir1.split("TASLAK")[1]                                    # ilk aday ölçüyü tutuyor: notsuz
+    assert satir2.endswith("(dış ölçü 12 × 8 m döndürülmüş çizildi, ön cephe 8 m)")  # döndürülmüş aday notlu
+    assert body.endswith("Birini seçin (düğme ya da numara).")
+
+
 def test_yeniden_denenen_is_uretimi_tekrarlamaz(depo, uretici, monkeypatch):
     # iş satırında üretim sonucu varsa worker LLM'i çağırmaz (kalıcı akışın yeniden denemesi; ücret iki kez doğmaz)
     from beyin import plan_uretici as PU

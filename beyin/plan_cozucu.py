@@ -66,10 +66,11 @@ def hazirla(program: dict) -> dict:
 
 
 def _olculer(program: dict) -> list[tuple[int, int]]:
-    """Dış ölçü adayları (en, boy): bayinin verdiği ölçü ya da alanı ±%3 içinde tutan, oranı 1,0–1,6 olan dikdörtgenler."""
+    """Dış ölçü adayları (en, boy): bayinin verdiği ölçü (önce söylediği yönde, sonra döndürülmüş; dönük olan bayiye yazılır) ya da alanı
+    ±%3 içinde tutan, oranı 1,0–1,6 olan dikdörtgenler."""
     if program.get("dis_olcu_cm"):
         a, b = program["dis_olcu_cm"]
-        return [(b, a), (a, b)] if a != b else [(a, b)]
+        return [(a, b), (b, a)] if a != b else [(a, b)]
     A = float(program["alan_m2"]) * 1e4
     out = []
     s = r5(math.sqrt(A / 1.6))

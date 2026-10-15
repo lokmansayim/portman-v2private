@@ -582,16 +582,20 @@ def plan_sonucu(k: Konusma, katalog: Katalog, sonuc: dict, kart=None) -> Karar:
     k.d["secenek_seti"] = st
     k.d["son_soru_alani"] = "secenek"
     satirlar = [f"{y['sira']}. {y['gosterim']} · {y['katalog_m2']:g} m² · {y['oda_programi']} · TASLAK, {YOL_ADI.get(y.get('yol'), 'yeni')}"
-                for y in uygun[:len(yeniler)]]
+                + "".join(f" ({d})" for d in (uretilen[i].get("degisen") or [])[:2]) for i, y in enumerate(uygun[:len(yeniler)])]
     satirlar += [f"{a['sira']}. {SC.gosterim(a)} · {a['katalog_m2']:g} m² · {a.get('oda_programi') or ''} (bankadan en yakın)" for a in uygun[len(yeniler):]]
     degisen = list(sonuc.get("degisen") or [])
     not_ = (f"\n\nİsteğinizi olduğu gibi sığdıramadım; şunları değiştirdim: {'; '.join(degisen)}.") if degisen else ""
     olmayan = [numara.maskele(str(x))[:80] for x in (sonuc.get("okunamayan") or []) + ((sonuc.get("program") or {}).get("uygulanamayan") or [])]
     if olmayan:
         not_ += "\n" + "; ".join(f"\"{x}\"" for x in olmayan[:3]) + " isteğini otomatik uygulayamadım; plan okuyabildiklerimle çizildi."
+    notlar = [str(x) for x in sonuc.get("notlar") or []]                 # kodun varsayımları da bayiye yazılır (sessiz değişiklik yok; G1, G2)
+    if notlar:
+        not_ += "\nNot: " + "; ".join(notlar[:3]) + "."
     bas = "yeni bir plan taslağı" if len(yeniler) == 1 else f"{len(yeniler)} yeni plan taslağı"
+    son = "\n\nBirini seçin (düğme ya da numara)."
     mesaj = (f"{alan:g} m² {talep.get('oda_programi')} çelik için {bas} çizdim; bankadaki en yakın model de yanında. Mühendis kontrolü "
-             f"onayınızdan sonra.\n\n" + "\n".join(satirlar) + not_ + "\n\nBirini seçin (düğme ya da numara).")[:1024]
+             f"onayınızdan sonra.\n\n" + "\n".join(satirlar) + not_)[:1024 - len(son)] + son
     butonlar = [{"id": f"s:{st['id']}:{a['kod']}", "baslik": (f"{a['sira']}. {a['gosterim']}" if a.get("uretilen") else f"{a['sira']}. {SC.gosterim(a)}")[:20]}
                 for a in uygun[:SC.EN_COK_GORSEL]]
     k.not_dus("kural", f"yeni plan üretildi: {', '.join(y['kod'] for y in yeniler)} ({sonuc.get('yol') or 'yeni'})")

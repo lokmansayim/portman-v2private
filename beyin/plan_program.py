@@ -47,13 +47,14 @@ class PlanProgrami(BaseModel):
     mutfak: Optional[Literal["acik", "ayri"]] = Field(None, description="açık (salonla tek mahal) ya da ayrı; söylenmediyse boş")
     depo: int = Field(0, ge=0, le=1, description="kiler/depo/çamaşır odası istendiyse 1")
     alan_m2: Optional[float] = Field(None, gt=20, le=250, description="Brüt alan, m² (verandayla)")
-    dis_olcu_cm: Optional[list[int]] = Field(None, description="Bayinin verdiği dış ölçü [kısa, uzun] cm")
+    dis_olcu_cm: Optional[list[int]] = Field(None, description="Bayinin verdiği dış ölçü [en, boy] cm (en: ön cephe), söylediği sırayla")
     veranda: VerandaIstegi = Field(default_factory=VerandaIstegi)
     cati_tipi: Optional[Literal["besik", "kirma"]] = None
     egim_yuzde: Optional[float] = Field(None, ge=10, le=60)
     dis_karkas: Optional[Literal[80, 140]] = None
     oda_hedefleri: list[OdaHedefi] = Field(default_factory=list)
     uygulanamayan: list[str] = Field(default_factory=list, description="Bu sürümde plana çevrilemeyen istekler, bayinin sözüyle")
+    varsayimlar: list[str] = Field(default_factory=list, description="Kodun yazdığı varsayımlar (ör. ölçü yuvarlama); boş bırak")
 
 
 def sema() -> dict:
@@ -69,24 +70,35 @@ _KALIPLAR = [
     (re.compile(r"(ayrı|kapalı)\s+mutfak|mutfa(k|ğı)\s+(ayrı|kapalı)", re.I), lambda m, p: p.update(mutfak="ayri"), "mutfak ayrı"),
     (re.compile(r"(açık|amerikan)\s+mutfak|mutfa(k|ğı)\s+(açık|salonla)", re.I), lambda m, p: p.update(mutfak="acik"), "mutfak açık"),
     (re.compile(r"\b(kiler|depo|çamaşır\s*oda)", re.I), lambda m, p: p.update(depo=1), "depo 1"),
-    (re.compile(r"\b(dış\s*)?(duvar\w*|karkas\w*)\s*140|140\s*(lık|lik|'lık|'lik)?\s*(dış\s*)?(duvar|karkas)", re.I),
+    # dış 140: "dış" sözü (ya da iç sözü olmadan "karkas") zorunlu; "iç duvarlar 140", "banyo duvarı 140" dış karkas değildir (inceleme C4)
+    (re.compile(r"\bdış\s+(duvar\w*|karkas\w*)\D{0,12}140|140\s*('?l[ıi]k)?\s+dış\s+(duvar|karkas)|"
+                r"(?<![İi]ç\s)(?<!\w)karkas\w*\D{0,12}140", re.I),
      lambda m, p: p.update(dis_karkas=140), "dış 140"),
 ]
+
+
+def _m(cm: float) -> str:
+    """cm → bayinin okuyacağı metre ("7,52")."""
+    return f"{cm / 100:.2f}".rstrip("0").rstrip(".").replace(".", ",")
 
 
 def _talep_programi(talep: dict) -> dict:
     prog = program_coz(talep.get("oda_programi"))
     if not prog:
         raise ValueError("oda programı çözülemedi (ör. '3+1')")
-    p: dict = {"yatak": prog[0], "salon": 1, "uygulanamayan": []}
+    p: dict = {"yatak": prog[0], "salon": 1, "uygulanamayan": [], "varsayimlar": []}
     if prog[1] != 1:
         p["uygulanamayan"].append(f"{prog[0]}+{prog[1]} (bu sürümde tek salon)")
     if talep.get("alan_m2"):
         p["alan_m2"] = float(talep["alan_m2"])
     d = talep.get("dis_olcu") or {}
     if d.get("en_m") and d.get("boy_m"):
-        a, b = sorted((int(round(float(d["en_m"]) * 20)) * 5, int(round(float(d["boy_m"]) * 20)) * 5))
+        # bayinin sırası korunur (en: ön cephe); 5 cm ızgaraya yuvarlama sessiz değil, varsayım olarak yazılır (inceleme G2)
+        ham = (float(d["en_m"]) * 100, float(d["boy_m"]) * 100)
+        a, b = (int(round(v / 5)) * 5 for v in ham)
         p["dis_olcu_cm"] = [a, b]
+        if any(abs(h - r) >= 0.5 for h, r in zip(ham, (a, b))):
+            p["varsayimlar"].append(f"dış ölçü {_m(ham[0])} × {_m(ham[1])} m, 5 cm ızgaraya {_m(a)} × {_m(b)} m olarak alındı")
         p.setdefault("alan_m2", round(a * b / 1e4, 1))
     v = talep.get("veranda") or {}
     p["veranda"] = {k: v.get(k) for k in ("istiyor", "konum", "alan_m2") if v.get(k) is not None}
@@ -164,6 +176,8 @@ def birlestir(kod_prog: dict, llm_prog: dict, kalan: list[str]) -> dict:
     p["veranda"] = v
     p["oda_hedefleri"] = list(llm_prog.get("oda_hedefleri") or [])
     p["uygulanamayan"] = list(kod_prog.get("uygulanamayan") or []) + [str(s) for s in llm_prog.get("uygulanamayan") or []]
+    p["varsayimlar"] = list(kod_prog.get("varsayimlar") or [])                 # yalnız kodun; LLM yazamaz
+    p["dis_olcu_cm"] = kod_prog.get("dis_olcu_cm")                             # bayinin ölçüsü LLM'le değişmez
     return PlanProgrami.model_validate(p).model_dump()
 
 
@@ -265,8 +279,13 @@ def _yeniden_metin(program: dict, nedenler: list[str], ornekler: list[str]) -> s
     return "\n".join(satir)
 
 
+_VERANDA_SOZ = {"istiyor": {True: "var", False: "yok"}, "konum": {"on": "önde", "yan": "yanda", "arka": "arkada", "kose": "köşede"},
+               "ortu": {"cati": "çatı altında", "pergola": "pergola", "acik": "açık"}}
+
+
 def program_farki(eski: dict, yeni: dict) -> list[str]:
-    """Bayiye yazılacak değişiklikler (kodun hesabı; LLM'in sözü değil)."""
+    """Bayiye yazılacak değişiklikler (kodun hesabı; LLM'in sözü değil). Bayinin söylediği her alan kıyaslanır; bayinin söylemediği ama LLM'in
+    eklediği kısıt (dış 140, veranda) da yazılır (inceleme C3)."""
     out = []
     if (yeni.get("mutfak") or "acik") != (eski.get("mutfak") or "acik"):
         out.append("mutfak salonla birlikte (açık)" if yeni.get("mutfak") == "acik" else "mutfak ayrı")
@@ -276,12 +295,26 @@ def program_farki(eski: dict, yeni: dict) -> list[str]:
         out.append("depo çıkarıldı" if not yeni.get("depo") else "depo eklendi")
     ev, yv = eski.get("veranda") or {}, yeni.get("veranda") or {}
     for a, ad in (("istiyor", "veranda"), ("konum", "veranda yeri"), ("ortu", "veranda örtüsü")):
-        if ev.get(a) is not None and ev.get(a) != yv.get(a):
-            out.append(f"{ad}: {ev.get(a)} → {yv.get(a)}")
+        if ev.get(a) != yv.get(a) and (ev.get(a) is not None or yv.get(a) is not None):
+            sz = _VERANDA_SOZ[a]
+            out.append(f"{ad}: {sz.get(ev.get(a), 'belirtilmemiş')} → {sz.get(yv.get(a), 'belirtilmemiş')}")
+    if ev.get("alan_m2") != yv.get("alan_m2") and ev.get("alan_m2"):
+        out.append(f"veranda alanı {float(ev['alan_m2']):g} → " + (f"{float(yv['alan_m2']):g} m²" if yv.get("alan_m2") else "belirtilmemiş"))
     if eski.get("alan_m2") and yeni.get("alan_m2") and abs(float(eski["alan_m2"]) - float(yeni["alan_m2"])) >= 0.5:
         out.append(f"alan {float(eski['alan_m2']):g} → {float(yeni['alan_m2']):g} m²")
+    if eski.get("dis_olcu_cm") and list(yeni.get("dis_olcu_cm") or []) != list(eski["dis_olcu_cm"]):
+        e, y = eski["dis_olcu_cm"], yeni.get("dis_olcu_cm")
+        out.append(f"dış ölçü {_m(e[0])} × {_m(e[1])} m → " + (f"{_m(y[0])} × {_m(y[1])} m" if y else "alana göre"))
+    if (eski.get("dis_karkas") or 80) != (yeni.get("dis_karkas") or 80):
+        out.append("dış duvarlar 140'lık" if yeni.get("dis_karkas") == 140 else "dış duvarlar 80'lik (140 uygulanmadı)")
     if eski.get("cati_tipi") and yeni.get("cati_tipi") != eski.get("cati_tipi"):
         out.append(f"çatı {eski['cati_tipi']} → {yeni.get('cati_tipi')}")
+    if eski.get("egim_yuzde") and yeni.get("egim_yuzde") != eski.get("egim_yuzde"):
+        out.append(f"çatı eğimi %{float(eski['egim_yuzde']):g} → " + (f"%{float(yeni['egim_yuzde']):g}" if yeni.get("egim_yuzde") else "varsayılan"))
+    eh = sorted((h["islev"], float(h["m2"])) for h in eski.get("oda_hedefleri") or [])
+    yh = sorted((h["islev"], float(h["m2"])) for h in yeni.get("oda_hedefleri") or [])
+    if eh != yh and eh:
+        out += [f"{i.replace('_', ' ')} {m:g} m² isteği alınmadı" for i, m in eh if (i, m) not in yh]
     return out
 
 
@@ -317,6 +350,7 @@ def yeniden(program: dict, nedenler: list[str], ayar: dict | None = None, hazir:
         if not yeni.get("alan_m2") or abs(float(yeni["alan_m2"]) - A0) > 0.1 * A0:
             yeni["alan_m2"] = A0
     yeni["uygulanamayan"] = list(program.get("uygulanamayan") or [])
+    yeni["varsayimlar"] = list(program.get("varsayimlar") or [])
     s["program"] = PlanProgrami.model_validate(yeni).model_dump()
     s["ipucu"] = {k: v for k, v in (o.get("ipucu") or {}).items() if v is not None}
     s["degisen"] = program_farki(program, s["program"])

@@ -365,6 +365,25 @@ def _alan_ayarlari(p: dict, hedef_m2: float) -> list[tuple[list, dict]]:
     return out
 
 
+def _olcu_ayarlari(p: dict, en: int, boy: int) -> list[tuple[list, dict]]:
+    """Bayinin verdiği dış ölçüye (en × boy, söylediği yönde) getiren uzatma/kısaltma seçenekleri (inceleme G1: alan tutsa da ölçü tutmalı)."""
+    W, H = p["dis_olcu"]["en"], p["dis_olcu"]["boy"]
+    dx, dy = en - W, boy - H
+    if not dx and not dy:
+        return [([], p)]
+    out = []
+    for kx in (_kesitler(p, "x", dx, 2) if dx else [None]):
+        for ky in (_kesitler(p, "y", dy, 2) if dy else [None]):
+            q, isl = p, []
+            if kx is not None:
+                q, isl = uzat(q, "x", kx, dx), isl + [f"uzat x {dx:+d}"]
+            if q and ky is not None:
+                q, isl = uzat(q, "y", ky, dy), isl + [f"uzat y {dy:+d}"]
+            if q:
+                out.append((isl, q))
+    return out
+
+
 def math_sqrt(v: float) -> float:
     return v ** 0.5
 
@@ -456,8 +475,11 @@ def uyarla(program: dict, n: int = 2, haric: tuple[str, ...] = (), en_cok_deneti
                                     if q2:
                                         yeni.append((isl + [f"oda ekle ({m['ad']}, {eksen} {yer})"], q2))
                 dizi = yeni
-            # alan
-            if program.get("alan_m2"):
+            # ölçü (bayi verdiyse) ya da alan
+            if program.get("dis_olcu_cm"):
+                en, boy = program["dis_olcu_cm"]
+                dizi = [(isl + i2, q2) for isl, q in dizi for i2, q2 in _olcu_ayarlari(q, en, boy)]
+            elif program.get("alan_m2"):
                 dizi = [(isl + i2, q2) for isl, q in dizi for i2, q2 in _alan_ayarlari(q, program["alan_m2"])]
             for isl, q in dizi:
                 if len([i for i in isl if not i.startswith(("ayna", "devrik"))]) > EN_COK_ISLEM:

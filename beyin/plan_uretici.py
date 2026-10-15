@@ -51,16 +51,44 @@ def hedef_alan(talep: dict) -> float | None:
     return None
 
 
-def _sec(gruplar: list[list[dict]], n: int) -> list[dict]:
-    """Uyarlama ve çözücü adayları puanla birlikte sıralanır (küçük iyi); en iyi n."""
-    hepsi = sorted((a for g in gruplar for a in g), key=lambda a: (a["puan"], a["yol"], json.dumps(a["plan"]["dis_olcu"], sort_keys=True)))
+def olcu_sapmasi(program: dict, plan: dict) -> tuple[int, int]:
+    """Bayinin dış ölçüsüne uyum: (0, 0) söylediği yönde tutuyor (ya da ölçü vermedi), (1, 0) döndürülmüş tutuyor, (2, sapma cm) tutmuyor."""
+    if not program.get("dis_olcu_cm"):
+        return 0, 0
+    en, boy = program["dis_olcu_cm"]
+    W, H = plan["dis_olcu"]["en"], plan["dis_olcu"]["boy"]
+    if abs(W - en) <= 5 and abs(H - boy) <= 5:
+        return 0, 0
+    if abs(W - boy) <= 5 and abs(H - en) <= 5:
+        return 1, 0
+    return 2, int(min(abs(W - en) + abs(H - boy), abs(W - boy) + abs(H - en)))
+
+
+def olcu_notu(program: dict, plan: dict) -> str | None:
+    """Bayiye yazılacak ölçü farkı (sessiz değişiklik yok; inceleme G1)."""
+    sinif, _ = olcu_sapmasi(program, plan)
+    if not sinif:
+        return None
+    m = plan_program._m
+    en, boy = program["dis_olcu_cm"]
+    W, H = plan["dis_olcu"]["en"], plan["dis_olcu"]["boy"]
+    if sinif == 1:
+        return f"dış ölçü {m(en)} × {m(boy)} m döndürülmüş çizildi, ön cephe {m(W)} m"
+    return f"dış ölçü {m(en)} × {m(boy)} m yerine {m(W)} × {m(H)} m"
+
+
+def _sec(gruplar: list[list[dict]], n: int, program: dict | None = None) -> list[dict]:
+    """Uyarlama ve çözücü adayları önce bayinin dış ölçüsüne uyuma (inceleme G1), sonra puana göre sıralanır (küçük iyi); en iyi n."""
+    pr = program or {}
+    hepsi = sorted((a for g in gruplar for a in g), key=lambda a: (olcu_sapmasi(pr, a["plan"]), a["puan"], a["yol"],
+                                                                  json.dumps(a["plan"]["dis_olcu"], sort_keys=True)))
     return hepsi[:n]
 
 
 def _uret_bir(program: dict, n: int, haric: tuple[str, ...], kod: str, ipucu: dict | None = None) -> tuple[list[dict], list[str], int]:
     u = plan_uyarlama.uyarla(program, n=n, haric=haric, kod=kod) if not ipucu else {"adaylar": [], "denetim": 0}
     c = plan_cozucu.coz(program, n=n, kod=kod, ipucu=ipucu)
-    return _sec([u["adaylar"], c["adaylar"]], n), (c.get("notlar") or []) + ([] if c["adaylar"] else c.get("ihlaller") or []), \
+    return _sec([u["adaylar"], c["adaylar"]], n, program), (c.get("notlar") or []) + ([] if c["adaylar"] else c.get("ihlaller") or []), \
         u["denetim"] + c["denetim"]
 
 
@@ -92,7 +120,7 @@ def uret(talep: dict, ayar: dict | None = None, hazir: dict | None = None, haric
     s["program"], s["okunamayan"] = program, list(pr.get("okunamayan") or [])
     adaylar, nedenler, denetim = _uret_bir(program, n, haric, kod)
     s["denemeler"].append({"basamak": "uyarlama+cozucu", "aday": len(adaylar), "denetim": denetim, "ihlaller": [] if adaylar else nedenler[:8]})
-    s["notlar"] += plan_cozucu.hazirla(program)["notlar"]
+    s["notlar"] += list(program.get("varsayimlar") or []) + plan_cozucu.hazirla(program)["notlar"]
     for i in range(int(a["en_cok_cagri"]) if (not adaylar and llm_acik) else 0):
         hz_y = (hz.get("yeniden") or [])
         if a["backend"] == "manuel" and i >= len(hz_y):
@@ -113,6 +141,7 @@ def uret(talep: dict, ayar: dict | None = None, hazir: dict | None = None, haric
             s["degisen"], s["program"] = y["degisen"], y["program"]
             break
     for x in adaylar:
+        x["degisen"] = [d for d in (olcu_notu(s["program"] if x["yol"] == "llm_program" else program, x["plan"]),) if d]
         x["sozlesme"] = sozlesme(x["plan"], "tek_kat_celik", {"yol": x["yol"], "kod": x.get("kaynak"), "islemler": x.get("islemler") or []},
                                  varsayimlar=s["notlar"])
     s["adaylar"] = adaylar
