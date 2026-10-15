@@ -932,19 +932,24 @@ def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts
     ly = getattr(k, "llm_yeni_plan", None)
     bilgi = bool((getattr(k, "son_llm", None) or {}).get("bilgi"))
     if aday.get("uretilen") and ayni_proje and ly is not None:  # İE-14 PR-3 (T3): yeni planın revizyonu LLM'in yeniden planıyla
+        # plan değişmedi (inceleme C2 ve ikinci tur): konuşma kapanmaz. Soru, sonraki cevap yine LLM düzenleyicisine gitsin diye
+        # okuma alanı bırakmaz ("okuma_metin" LLM-önce yolu kapatıp cevabı kural yoluna, oradan Patron'a düşürüyordu). Aynı mesajda
+        # bilgi (müşteri, antet) varsa soru yerine plan antetle yeniden çizilir, not başa yazılır: bilgi sessiz düşmez (geometri hakemi 15.10)
         if ly.get("durum") == "uygulanamadi":                  # Lokman 15.10 (karar 3): "otomatik uygulayamadım", plan aynen ve onaylanabilir
             olmayan = "; ".join(f"\"{numara.maskele(str(x))[:80]}\"" for x in (ly.get("uygulanamayan") or [])[:3])
             k.not_dus("kural", "yeni plan revizyonu: istek uygulanamadı, plan aynen")
-            return _yeni_plan_sorusu(k, f"{olmayan} isteğini otomatik uygulayamadım; planınız aynen geçerli. " + _BASKA_DEGISIKLIK)
-        if ly.get("durum") != "bos":
+            if not bilgi:
+                return _yeni_plan_sorusu(k, f"{olmayan} isteğini otomatik uygulayamadım; planınız aynen geçerli. " + _BASKA_DEGISIKLIK)
+            ts["_on_not"] = ts.get("_on_not", "") + f"{olmayan} isteğini otomatik uygulayamadım. "
+        elif ly.get("durum") != "bos":
             return _yeni_plan_revizyonu(k, bayi, aday, ts, son, son_y, ly)
-        # plan değişmedi (inceleme C2 ve ikinci tur): konuşma kapanmaz. Soru, sonraki cevap yine LLM düzenleyicisine gitsin diye
-        # okuma alanı bırakmaz ("okuma_metin" LLM-önce yolu kapatıp cevabı kural yoluna, oradan Patron'a düşürüyordu).
-        if ly.get("islemler"):                                  # işlem okundu ama plan zaten öyle (ör. dış 140'lık planda "dışlar 140")
-            return _yeni_plan_sorusu(k, "İstediğiniz değişiklik planda zaten var. " + _BASKA_DEGISIKLIK)
-        if not bilgi:
+        elif ly.get("islemler"):                                # işlem okundu ama plan zaten öyle (ör. dış 140'lık planda "dışlar 140")
+            if not bilgi:
+                return _yeni_plan_sorusu(k, "İstediğiniz değişiklik planda zaten var. " + _BASKA_DEGISIKLIK)
+            ts["_on_not"] = ts.get("_on_not", "") + "İstediğiniz değişiklik planda zaten var. "
+        elif not bilgi:
             return _yeni_plan_sorusu(k, _NEYI_DEGISTIRELIM_YENI)
-        if _bilgi_disi_cumle(k, t, aday):                       # bilgiyle birlikte istek var ama LLM işlem çıkarmadı: sessiz düşmez
+        elif _bilgi_disi_cumle(k, t, aday):                     # bilgiyle birlikte istek var ama LLM işlem çıkarmadı: sessiz düşmez
             k.not_dus("kural", "yeni plan revizyonu: değişiklik isteği okunamadı")
             return _bitir(k, Karar(eylem="yonlendir", gerekce="yeni plan revizyonu üretilemedi (istek okunamadı)",
                                    mesaj="İsteğinizi kurallara uyan bir plana otomatik çeviremedim; önceki planınız geçerli. " + YONLENDIRME))

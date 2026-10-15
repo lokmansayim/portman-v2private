@@ -752,6 +752,25 @@ def test_soru3_l_ve_cumba_cati_uygulayamadim_ve_besik_kirma(depo, wa, hizli_gene
     assert all((u["tanim"]["cati"]["tip"] in ("besik", "kirma")) for u in d["uretilen_planlar"])
 
 
+@pytest.mark.parametrize("cevap,not_", [
+    ({"islemler": [], "uygulanamayan": ["çatı L olsun"]}, '"çatı L olsun" isteğini otomatik uygulayamadım.'),
+    ({"islemler": [{"op": "cati_tipi", "tip": "kirma", "alinti": "çatı kırma olsun"}], "uygulanamayan": []}, "planda zaten var")])
+def test_hakem_bilgi_uygulanamayan_istekle_dusmez(depo, wa, hizli_genel, uretici, duzenleyici, cevap, not_):
+    # geometri hakemi 15.10 (Önemli 1): aynı mesajda bilgi + uygulanamayan (ya da planda zaten olan) istek gelince bilgi sessizce düşüyordu
+    # (soru soruluyor, plan antetsiz kalıyordu). Artık plan antet bilgisiyle yeniden çizilir, istek adıyla yazılır
+    _secilmis_yeni_plan(depo)
+    d, _ = depo.konusma_oku(NUMARA_A)
+    assert d["uretilen_plan"]["plan"]["cati"]["tip"] == "kirma"                     # T1 kırma çatıyla: ikinci vakada istek planda zaten var
+    duzenleyici["cevap"] = cevap
+    assert depo.mesaj_kaydet(mesaj("müşteri Ahmet Bey, çatı ...", talep("revizyon", ozet="revizyon", musteri={"ad": "Ahmet Bey"}),
+                                   bayi=BAYI_KART))
+    [r] = isle_hepsi(depo, URETIM)
+    assert r["eylem"] == "is_emri", r
+    rev = son_rev(depo)
+    assert rev["rev"] == 2 and rev["is_emri"]["talep"]["musteri_adi"] == "Ahmet Bey"
+    assert not_ in sorgu(depo, "SELECT govde FROM giden WHERE kind = 'interactive' ORDER BY olusturuldu DESC")[0]["govde"]
+
+
 def test_soru3_revizyonda_l_cati_uygulayamadim_plan_onaylanabilir(depo, wa, hizli_genel, uretici, duzenleyici):
     # Lokman 15.10 (karar 3) ve canlı deneme sırası T4 → T5: yeni plan revizyonunda "çatı L olsun" → istek adıyla "otomatik uygulayamadım",
     # plan aynen (yönlendirme yok), ardından Onayla çalışır

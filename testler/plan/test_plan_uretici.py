@@ -181,6 +181,28 @@ def test_semaya_uymayan_islem_yalniz_kendini_dusurur():
     assert s["durum"] == "hata" and s["hata"].startswith("işlem şeması")      # liste bile değilse eskisi gibi hata
 
 
+def test_birlikte_gecmeyen_islemler_tek_tek_denenir():
+    # geometri hakemi 15.10 (Önemli 2): Hol güney cephesine değer ama 120'lik pencere sığmaz; birlikte denetimden geçmeyince geçerli küçültme
+    # de düşüyordu. Artık işlemler sırayla tek tek denenir: geçen uygulanır, geçmeyen bayinin sözü ve kısa gerekçesiyle yazılır
+    islemler = [{"op": "oda_kucult", "mahal": "Salon", "yon": "K", "cm": 30, "alinti": "salonu 30 küçült"},
+                {"op": "pencere_ekle", "mahal": "Hol", "cephe": "G", "olcu": "120x120", "alinti": "hole pencere"}]
+    s = PI.duzenle(ornek("gecerli_3arti1_100"), "x", {"oda_programi": "3+1"}, hazir={"islemler": islemler, "uygulanamayan": []})
+    assert s["durum"] == "gecerli" and "Salon 25,2 → 23,5 m²" in s["fark"], s
+    assert s["uygulanamayan"] == ["hole pencere: Hol güney cephesine 1 açıklık sığmıyor"]
+    assert len(s["denemeler"]) == 2 and not s["denemeler"][0]["gecerli"] and s["denemeler"][1]["gecerli"]
+    s = PI.duzenle(ornek("gecerli_3arti1_100"), "x", {"oda_programi": "3+1"}, hazir={"islemler": islemler[1:], "uygulanamayan": []})
+    assert s["durum"] == "gecersiz"                                         # tek işlem geçmezse eskisi gibi (karar yönlendirir)
+
+
+@pytest.mark.parametrize("cevap,beklenen", [
+    ({"islemler": [], "uygulanamayan": "çatı L olsun"}, ["çatı L olsun"]),                 # metin harf harf bölünmez (hakem küçük 1)
+    ({"islemler": [], "uygulanamayan": [{"istek": "çift kat olsun"}]}, ["çift kat olsun"]),    # nesne süzülüp atılmaz (küçük 2)
+    ({"islemler": [{"op": "cati_tipi", "tip": "L"}], "uygulanamayan": []}, ["çatı tipi değişikliği"])])   # iç işlem adı gitmez (küçük 2)
+def test_semaya_uymayan_cevap_istegi_adiyla_tutar(cevap, beklenen):
+    s = PI.duzenle(ornek("gecerli_3arti1_100"), "x", {"oda_programi": "3+1"}, hazir=cevap)
+    assert s["durum"] == "uygulanamadi" and s["uygulanamayan"] == beklenen
+
+
 def test_llm_tablosu_odanin_dis_cephelerini_yazar():
     t = PI.tablo(ornek("gecerli_3arti1_100")).splitlines()
     assert next(x for x in t if x.startswith("- Salon ")).endswith("; dış cepheler: G, B")
