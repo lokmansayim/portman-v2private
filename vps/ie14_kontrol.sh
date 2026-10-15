@@ -27,8 +27,9 @@ q "SELECT 'bekleyen giden '||count(*) FROM giden WHERE durum = 'bekliyor'"
 for t in plan_uretimleri okuma_kiyaslari; do
   if var "$t"; then q "SELECT '$t: var, '||count(*)||' satır' FROM $t"; else echo "   $t: yok"; fi
 done
-echo "-- aktif kartlar (rol · kod · numaranın son 4 hanesi):"
-q "SELECT rol||' · '||coalesce(nullif(kod,''),'-')||' · …'||right(numara,4) FROM bayiler WHERE aktif ORDER BY rol, kod"
+echo "-- aktif kartlar (rol · kod · numaranın son 4 hanesi; elle yazılmış kod ad taşıyabilir, gösterilmez):"
+q "SELECT rol||' · '||CASE WHEN coalesce(kod,'') ~ '^(PATRON|TEST|B[0-9]{4})?\$' THEN coalesce(nullif(kod,''),'-') ELSE '(özel kod)' END
+          ||' · …'||right(numara,4) FROM bayiler WHERE aktif ORDER BY rol, kod"
 q "SELECT 'aktif kart toplam '||count(*) FROM bayiler WHERE aktif"
 
 echo "-- ayarlar (İE-14 ve kanal anahtarları; sır içermez):"
@@ -46,9 +47,10 @@ else
 fi
 
 if [ "${1:-}" = "deneme" ]; then
-  DK="${2:-90}"
+  DK="${2:-90}"; [[ "$DK" =~ ^[0-9]{1,5}$ ]] || DK=90          # SQL'e yalnız sayı girer
   echo "-- son $DK dakikanın işleri (sıra · durum · eylem · gerekçe · LLM çağrısı):"
-  q "SELECT j.id||' · '||j.durum||' · '||coalesce(j.sonuc->>'eylem','-')||' · '||left(coalesce(j.sonuc->>'gerekce','-'),90)
+  q "SELECT j.id||' · '||j.durum||' · '||coalesce(j.sonuc->>'eylem','-')||' · '
+            ||regexp_replace(left(coalesce(j.sonuc->>'gerekce','-'),90), '[0-9]{7,}', '…', 'g')
             ||' · çıkarım '||CASE WHEN coalesce(j.cikarim->'meta'->>'backend','') IN ('','manuel','etkilesim') THEN '0' ELSE '1' END
             ||coalesce(' · plan '||(j.sonuc->'plan_uretimi'->>'cagri'),'')||coalesce(' · düzenleme '||(j.sonuc->'plan_duzenleme'->>'cagri'),'')
             ||coalesce(' · gölge '||(j.sonuc->'okuma_kiyasi'->>'cagri'),'')

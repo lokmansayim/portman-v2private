@@ -26,7 +26,8 @@ Beklenen (`ie14_1_on_kontrol.txt`):
 - kurulu sürüm `v2026.10.14b`, sağlık `200`;
 - `şema 6`, `açık iş 0`, `bekleyen giden 0`;
 - `plan_uretimleri: yok`, `okuma_kiyaslari: yok`;
-- aktif kartlar yalnız iki satır: `patron · … · …dddd` ve prova kartı; `aktif kart toplam 2`;
+- aktif kartlar yalnız iki satır: Patron (`patron · PATRON · …dddd`) ve prova kartı; `aktif kart toplam 2`. Kod `PATRON`, `TEST`
+  ya da `B` + 4 hane değilse `(özel kod)` görünür (elle yazılmış kod ad taşıyabilir; KVKK denetimi B1);
 - `plan_uretimi: null`, `llm_once_revizyon: null` (bu sürümde anahtar yok).
 
 `durum.sh`'de son yedeğin tarihi görülür. Göçler yalnız ekler (007 tablo ve sütun, 008 tablo); ayrı yedek gerekmez.
