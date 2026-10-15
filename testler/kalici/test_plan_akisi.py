@@ -750,3 +750,27 @@ def test_soru3_l_ve_cumba_cati_uygulayamadim_ve_besik_kirma(depo, wa, hizli_gene
     assert f'"{istek}" isteğini otomatik uygulayamadım' in body
     d, _ = depo.konusma_oku(NUMARA_A)
     assert all((u["tanim"]["cati"]["tip"] in ("besik", "kirma")) for u in d["uretilen_planlar"])
+
+
+def test_soru3_revizyonda_l_cati_uygulayamadim_plan_onaylanabilir(depo, wa, hizli_genel, uretici, duzenleyici):
+    # Lokman 15.10 (karar 3) ve canlı deneme sırası T4 → T5: yeni plan revizyonunda "çatı L olsun" → istek adıyla "otomatik uygulayamadım",
+    # plan aynen (yönlendirme yok), ardından Onayla çalışır
+    import kalici
+    _secilmis_yeni_plan(depo)
+    kalici.gonder(depo, wa)
+    duzenleyici["cevap"] = {"islemler": [], "uygulanamayan": ["çatı L olsun"]}
+    assert depo.mesaj_kaydet(mesaj("çatı L olsun", talep("revizyon", ozet="çatı L"), bayi=BAYI_KART))
+    [r] = isle_hepsi(depo, URETIM)
+    assert r["eylem"] == "sor", r
+    son = sorgu(depo, "SELECT govde FROM giden ORDER BY is_id DESC, sira")[0]["govde"]
+    assert '"çatı L olsun" isteğini otomatik uygulayamadım; planınız aynen geçerli.' in son and "Onayla" in son
+    assert sum(1 for x in sorgu(depo, "SELECT alici FROM giden") if x["alici"] == "PATRON") == 0
+    d, _ = depo.konusma_oku(NUMARA_A)
+    assert d["asama"] == "onay_bekliyor" and d["revizyon"] == 0
+    kalici.gonder(depo, wa)
+    rev = tek(depo, "SELECT * FROM revizyonlar ORDER BY id DESC LIMIT 1")
+    assert rev["rev"] == 1
+    time.sleep(1.1)
+    assert depo.mesaj_kaydet(buton(f"o:{rev['is_emri_no']}:1"))
+    [r5] = isle_hepsi(depo, URETIM)
+    assert r5["gerekce"] == "plan onaylandı", r5

@@ -932,6 +932,10 @@ def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts
     ly = getattr(k, "llm_yeni_plan", None)
     bilgi = bool((getattr(k, "son_llm", None) or {}).get("bilgi"))
     if aday.get("uretilen") and ayni_proje and ly is not None:  # İE-14 PR-3 (T3): yeni planın revizyonu LLM'in yeniden planıyla
+        if ly.get("durum") == "uygulanamadi":                  # Lokman 15.10 (karar 3): "otomatik uygulayamadım", plan aynen ve onaylanabilir
+            olmayan = "; ".join(f"\"{numara.maskele(str(x))[:80]}\"" for x in (ly.get("uygulanamayan") or [])[:3])
+            k.not_dus("kural", "yeni plan revizyonu: istek uygulanamadı, plan aynen")
+            return _yeni_plan_sorusu(k, f"{olmayan} isteğini otomatik uygulayamadım; planınız aynen geçerli. " + _BASKA_DEGISIKLIK)
         if ly.get("durum") != "bos":
             return _yeni_plan_revizyonu(k, bayi, aday, ts, son, son_y, ly)
         # plan değişmedi (inceleme C2 ve ikinci tur): konuşma kapanmaz. Soru, sonraki cevap yine LLM düzenleyicisine gitsin diye

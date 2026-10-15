@@ -144,7 +144,8 @@ def test_duzenle_islemleri_kod_uygular_fark_koddan():
 def test_duzenle_komsu_baska_hizadaysa_uygulanamaz_ve_plan_degismez():
     hazir = {"islemler": [{"op": "oda_buyut", "mahal": "Salon", "yon": "D", "cm": 50, "alinti": "salon doğuya"}], "uygulanamayan": []}
     s = PI.duzenle(ornek("gecerli_3arti1_100"), "salon doğuya büyüsün", {"oda_programi": "3+1"}, hazir=hazir)
-    assert s["durum"] == "gecersiz" and any("başka hizada" in x for x in s["uygulanamayan"])
+    # Lokman 15.10 (karar 3): plan değişmeyip istek uygulanamadıysa durum "uygulanamadi" (önceden "gecersiz"); plan yine değişmez, gerekçe aynı
+    assert s["durum"] == "uygulanamadi" and s["plan"] is None and any("başka hizada" in x for x in s["uygulanamayan"])
 
 
 def test_duzenle_denetimden_gecmezse_gecersiz():
