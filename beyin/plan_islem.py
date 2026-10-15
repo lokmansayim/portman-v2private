@@ -18,6 +18,7 @@ from pydantic import BaseModel, Field, ValidationError
 
 from beyin import numara
 from beyin.plan_denetim import denetle
+from beyin.plan_cozucu import cepheler
 from beyin.plan_sema import PENCERE_OLCULERI
 from beyin.plan_uyarlama import _kesitler, uzat
 
@@ -25,6 +26,13 @@ ARAC_ADI = "plan_islemleri_kaydet"
 ARAC_ACIKLAMA = "Bayinin yeni plan revizyon isteğini koordinatsız işlemlere çevir. Yalnız bu araçla cevap ver."
 VARSAYILAN_AYAR = {"backend": "anthropic", "model": "claude-opus-5-5", "effort": "low", "timeout_s": 60, "max_tokens": 2000}
 YONLER = {"G": (1, -1), "K": (1, 1), "B": (0, -1), "D": (0, 1)}       # (eksen indisi, yön)
+YON_SOZU = {"G": "ön", "K": "arka", "B": "sol", "D": "sağ"}           # bayiye giden gerekçede (PROMPT'taki sözcükler)
+
+
+def _dis_cepheler(p: dict) -> dict[str, list[str]]:
+    """Mahal → değdiği dış cepheler (G, K, B, D sırasıyla; veranda yüzü dahil, çözücünün pencere yerleşimiyle aynı ölçüt)."""
+    ce = cepheler(p["mahaller"], p["dis_olcu"]["en"], p["dis_olcu"]["boy"])
+    return {ad: [c for c in "GKBD" if d.get(c)] for ad, d in ce.items()}
 
 
 class Islem(BaseModel):
@@ -61,9 +69,12 @@ def tablo(plan: dict) -> str:
     """LLM'e giden tablo: yalnız bu bayinin planı (mahal adı, işlev, eksenden ölçü, cepheler, pencereler, kapılar). Banka kodu yok."""
     satir = [f"Dış ölçü {plan['dis_olcu']['en']}×{plan['dis_olcu']['boy']} cm; çatı {(plan.get('cati') or {}).get('tip')}; "
              f"dış karkas {plan.get('dis_karkas') or 80}", "Mahaller:"]
+    ce = _dis_cepheler(plan)
     for m in plan["mahaller"]:
         r = max(m["dikdortgenler"], key=lambda t: (t[2] - t[0]) * (t[3] - t[1]))
-        satir.append(f"- {m['ad']} ({m['islev']}): {r[2] - r[0]}×{r[3] - r[1]} cm")
+        dis = ", ".join(ce.get(m["ad"]) or [])
+        ek = "" if m["islev"] == "veranda" else f"; dış cepheler: {dis}" if dis else "; dış cephesi yok"     # LLM pencere cephesini buradan seçer
+        satir.append(f"- {m['ad']} ({m['islev']}): {r[2] - r[0]}×{r[3] - r[1]} cm{ek}")
     satir.append("Pencereler: " + "; ".join(f"{p['mahal']} {p['cephe']} {p['olcu']}" for p in plan["pencereler"]))
     satir.append("Kapılar: " + "; ".join(" – ".join(k["arasinda"]) for k in plan["kapilar"]))
     return "\n".join(satir)
@@ -189,6 +200,10 @@ def uygula(plan: dict, islemler: list[dict]) -> tuple[dict, list[str]]:
             if op == "pencere_ekle":
                 if not (o.get("cephe") and o.get("olcu") in PENCERE_OLCULERI):
                     olmayan.append(f"{o.get('alinti') or op}: cephe ve ölçü belli değil")
+                    continue
+                if o["cephe"] not in _dis_cepheler(p).get(o["mahal"], []):
+                    # denetçi bütün revizyonu reddederdi (geçerli öteki işlemler de düşer); yalnız bu istek düşer (canlı deneme hazırlığı, 15.10)
+                    olmayan.append(f"{o.get('alinti') or op}: {o['mahal']} {YON_SOZU[o['cephe']]} cepheye değmiyor")
                     continue
                 p["pencereler"].append({"mahal": o["mahal"], "cephe": o["cephe"], "olcu": o["olcu"], "adet": 1})
             else:
