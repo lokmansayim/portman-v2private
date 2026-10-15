@@ -5,12 +5,14 @@ Sırayla gidilir; bir adımın beklenen sonucu gelmezse durulur, çıktı payla�
 
 ## 0 · Önce: `main`'e birleştirme (Lokman'ın onayı)
 
-- `main` `d3c8e58` canlı deneme için eksik. Dalda ondan sonra beş commit var:
+- `main` `d3c8e58` canlı deneme için eksik. Dalda ondan sonra şu commit'ler var:
   - `f97b47b`: mühendis mesajına doğrulama satırı (karar 1, "canlıdan önce");
   - `44986b2`: revizyonda uygulanamayan istek planı kapatmaz (T4 → T5);
   - `94576eb`: `vps/ie14_kontrol.sh`;
   - `3bc3244`: değmeyen cepheye istenen pencere yalnız kendini düşürür (T3);
-  - `ea4b5b9`: şemaya uymayan işlem (ör. çatı "L") yalnız kendini düşürür (T4).
+  - `ea4b5b9`: şemaya uymayan işlem (ör. çatı "L") yalnız kendini düşürür (T4);
+  - `1136f05`: kontrol betiğinde KVKK düzeltmesi;
+  - `5827812`: geometri hakemi bulguları — aynı mesajdaki bilgi düşmez, işlemler tek tek denenir (T3).
 - `d3c8e58` etiketlenirse T4 "çatı L olsun" konuşmayı yönlendirmeyle kapatır, T5 "Onaylanacak açık bir plan görünmüyor" der.
 - Öneri: dalın PR'ı açılır, Lokman birleştirir, etiket birleştirme commit'ine atılır.
 - Mac'te depo güncellenir: `git checkout main && git pull`.
@@ -88,7 +90,9 @@ Patron kartında bayiye gidecek her mesaj Patron'a gelir, sonuna `— teknik: �
 T3'te salonun hangi yana büyüyeceğini mesaj söylemiyor; yönü LLM seçer. Olasılıklar (T1'in 1. planında yerelde denendi):
 - ön ya da sol: ikisi de uygulanır (beklenen);
 - arka: büyütme "komşu başka hizada … otomatik büyütemedim" diye yazılır, pencere uygulanır;
-- sağ: salon o yanda iç duvara bakıyor; büyütme bir kapıyı sığmaz kılar. Denetçi reddeder; mesaj "İsteğinizi kurallara uyan bir plana otomatik çeviremedim; önceki planınız geçerli…" olur ve konuşma kapanır. O zaman T4–T5 için T1'den yeniden başlanır (+1 LLM). LLM'e giden tabloda salonun dış cepheleri (ön, sol) yazılı olduğu için bu yol beklenmiyor.
+- sağ: salon o yanda iç duvara bakıyor; büyütme Hol ile Yatak Odası 3 arasındaki kapıyı sığmaz kılar. İşlemler tek tek denenir: pencere uygulanır, mesajda "\"salonu 50 cm büyüt: Hol ile Yatak Odası 3 arasındaki ortak duvar kapıya yetmiyor\" isteğini otomatik uygulayamadım." yazar; konuşma açık kalır.
+- Pencere salonun değmediği bir cepheye yazılırsa o istek "… cepheye değmiyor" diye yazılır, büyütme uygulanır. LLM'e giden tabloda salonun dış cepheleri (ön, sol) yazılı.
+- İki istek de uygulanamazsa: "… isteğini otomatik uygulayamadım; planınız aynen geçerli." T4 ve T5 yine çalışır. Konuşmayı kapatan tek yol, tek tek denendiğinde de hiçbir işlemin kurallara uymaması: "İsteğinizi kurallara uyan bir plana otomatik çeviremedim…". O zaman T4–T5 için T1'den yeniden başlanır (+1 LLM).
 
 Mühendis doğrulama satırı (karar 1) Patron kartında koşmaz: onay kancası yalnız bayi ve prova kartında çalışır. Canlıda görmek için ayrı
 bir deneme gerekir: prova kartı, aktif mühendis kartı ve ücretli bir şablon mesajı.
