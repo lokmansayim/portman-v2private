@@ -521,6 +521,21 @@ def test_golge_ayni_okuma_kural_karar_verir_kiyas_kaydi(depo, wa, hizli_genel, t
     assert sorgu(depo, "SELECT cikarim FROM isler ORDER BY id DESC")[0]["cikarim"]["degisiklik_golge"]["durum"] == "tamam"
 
 
+def test_kv1_kiyas_kaydinda_cumle_parcasi_yok(depo, wa, hizli_genel, tmp_path):
+    # inceleme KV1: okunamayan cümle kayda metin olarak değil sayı olarak girer (ad maskelenmez; göç 008 yalnız yapı ve sayı)
+    _r01_c8801k(depo)
+    ayar = _golge(tmp_path, {"islemler": [_islem(tur="pencere_olcu", aciklik="P5", en=120, yuk=120, alinti="mutfak penceresi 120x120"),
+                                          _islem(tur="uygulanamaz", alinti="salona Zeynep Hanım için şömine")]})
+    assert depo.mesaj_kaydet(mesaj("mutfak penceresi 120x120 olsun. salona Zeynep Hanım için şömine koyalım",
+                                   talep("revizyon", ozet="mutfak penceresi"), bayi=BAYI_KART))
+    isle_hepsi(depo, ayar)
+    ok = sorgu(depo, "SELECT kural, llm FROM okuma_kiyaslari")
+    assert len(ok) == 1
+    ham = json.dumps(ok[0], ensure_ascii=False)
+    assert "Zeynep" not in ham and "şömine" not in ham and "mutfak" not in ham, ham
+    assert ok[0]["kural"]["okunamayan_n"] >= 1 and "okunamayan" not in ok[0]["kural"]
+
+
 def test_golge_farkli_okumada_karar_yine_kuralin(depo, wa, hizli_genel, tmp_path):
     _r01_c8801k(depo)
     ayar = _golge(tmp_path, {"islemler": [_islem(tur="pencere_olcu", aciklik="P6", en=120, yuk=180, alinti="yanlış okuma")]})

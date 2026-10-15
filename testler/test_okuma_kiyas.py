@@ -73,3 +73,12 @@ def test_cumle_seti_gecerli_ve_gercek_olmadigi_yazili():
     assert len({c["id"] for c in doc["cumleler"]}) == len(doc["cumleler"])
     s = ARAC.kos(doc["cumleler"])
     assert all(x["sinif"] == "llm_yok" for x in s)                       # LLM'siz: kural okuması baz çizgisi
+
+
+def test_kv1_kayit_ozeti_yalniz_yapi_ve_sayi():
+    # İE-14 kapanış incelemesi KV1: kayda bayinin cümlesi gitmez
+    k = {"ogeler": [("pencere", "P5", 120, 120)], "okunamayan": ["salona şömine"], "olumsuz": ["mutfak olmasın"]}
+    l_ = {"ogeler": [], "okunamayan": ["şömine"], "hata": "LLMHatasi: zaman aşımı"}
+    assert OK.kayit_ozeti(k) == {"ogeler": [["pencere", "P5", 120, 120]], "okunamayan_n": 1, "olumsuz_n": 1}
+    assert OK.kayit_ozeti(l_) == {"ogeler": [], "okunamayan_n": 1, "hata": True}
+    assert OK.kayit_ozeti(None) == {}

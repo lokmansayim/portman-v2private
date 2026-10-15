@@ -708,7 +708,7 @@ def okuma_kiyasi(son_y: dict, metin: str, katalog, lg: dict) -> dict | None:
         kat = taban if (taban and taban.get("varyantlar")) else aday
         kodlar = {kat["kod"], *(kat.get("varyantlar") or [])} if kat.get("varyantlar") else set()
         k = OK.kiyas(metin, t, kat if kat.get("varyantlar") else None, lg, CO.pencere_adaylari(t, y), kodlar, y)
-        return {"model": son_y.get("kod"), "kural": k["kural"], "llm": k["llm"], "sinif": k["sinif"],
+        return {"model": son_y.get("kod"), "kural": OK.kayit_ozeti(k["kural"]), "llm": OK.kayit_ozeti(k["llm"]), "sinif": k["sinif"],
                 **{a: lg.get(a) or 0 for a in ("cagri", "girdi_token", "cikti_token")}}
     except Exception as e:
         log("okuma kıyası yapılamadı:", maske_numaralar(f"{type(e).__name__}: {str(e)[:160]}"))

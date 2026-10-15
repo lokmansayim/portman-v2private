@@ -82,6 +82,19 @@ def sinifla(kural: dict, llm: dict) -> str:
     return "farklı"
 
 
+def kayit_ozeti(okuma: dict | None) -> dict:
+    """Kayda (göç 008) giden biçim: yapısal öğeler aynen; bayinin cümle parçaları yalnız sayı; hata yalnız var/yok (İE-14 kapanış
+    incelemesi KV1: okunamayan/olumsuz listeleri bayinin sözünü taşır, ad maskelenmez). Sınıf tam okumayla, bundan önce hesaplanır."""
+    if not okuma:
+        return {}
+    o = {"ogeler": [list(x) for x in okuma.get("ogeler") or []], "okunamayan_n": len(okuma.get("okunamayan") or [])}
+    if "olumsuz" in okuma:
+        o["olumsuz_n"] = len(okuma.get("olumsuz") or [])
+    if okuma.get("hata"):
+        o["hata"] = True
+    return o
+
+
 def kiyas(metin: str, t: dict, katalog_aday: dict | None, llm_sonuc: dict | None, pencereler: list[dict] | None = None,
           cati_kodlari: set[str] | None = None, y: dict | None = None) -> dict:
     """Tek cümle/mesaj için iki okuma ve sınıf. `llm_sonuc` yoksa sınıf 'llm_yok'."""
