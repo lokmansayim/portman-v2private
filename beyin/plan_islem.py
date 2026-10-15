@@ -59,6 +59,8 @@ yazmazsın: isteği aşağıdaki işlemlere çevirirsin; uygulamayı ve denetimi
 İşlemler: oda_buyut / oda_kucult (mahal, yon: G ön, K arka, B sol, D sağ; cm — bayi sayı vermediyse 50), kapi_ekle / kapi_kaldir (mahal,
 mahal_b; dış kapı için mahal_b "dis"), pencere_ekle / pencere_kaldir (mahal, cephe, olcu), cati_tipi (tip), dis_karkas_140.
 - Mahal adlarını tablodaki gibi yaz. Yalnız bayinin bu mesajda istediğini yaz; söylenmeyeni ekleme.
+- Pencere cephesini mahalin tablodaki dış cephelerinden seç. Çatı tipi yalnız besik ya da kirma olabilir; L, cumba ve başka çatı biçimlerini
+  `uygulanamayan`'a yaz.
 - Olumsuz ("olmasın", "istemiyoruz") ya da soru biçimli cümle işlem değildir.
 - Bu işlemlere çevrilemeyen her isteği `uygulanamayan`'a bayinin sözüyle yaz (ör. "çift kat olsun"). Renk ve malzeme istekleri plan değildir,
   onları yazma.
@@ -101,10 +103,26 @@ def oku(plan: dict, metin: str, ayar: dict | None = None, hazir: dict | None = N
     try:
         L = IslemListesi.model_validate(cevap).model_dump()
     except ValidationError as e:
-        s["hata"] = f"işlem şeması: {str(e)[:160]}"
-        return s
+        L = _tek_tek(cevap)
+        if L is None:
+            s["hata"] = f"işlem şeması: {str(e)[:160]}"
+            return s
     s.update(durum="tamam", islemler=L["islemler"], uygulanamayan=[str(x) for x in L["uygulanamayan"]])
     return s
+
+
+def _tek_tek(cevap) -> dict | None:
+    """Şemaya uymayan işlem bütün okumayı düşürmez (ör. çatı "L"; canlı deneme hazırlığı, 15.10): geçerli işlemler alınır, uymayan bayinin
+    sözüyle `uygulanamayan`'a gider. Cevabın kendisi liste taşımıyorsa None (eskisi gibi şema hatası)."""
+    if not isinstance(cevap, dict) or not isinstance(cevap.get("islemler"), list):
+        return None
+    islemler, olmayan = [], [str(x) for x in cevap.get("uygulanamayan") or [] if isinstance(x, (str, int, float))]
+    for o in cevap["islemler"]:
+        try:
+            islemler.append(Islem.model_validate(o).model_dump())
+        except ValidationError:
+            olmayan.append(str((o.get("alinti") or o.get("op") or "istek") if isinstance(o, dict) else "istek")[:80])
+    return {"islemler": islemler, "uygulanamayan": olmayan}
 
 
 # ── uygulama ─────────────────────────────────────────────────────────────────────────────────────────────────────────────

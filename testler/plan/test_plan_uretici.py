@@ -167,6 +167,20 @@ def test_pencere_degmeyen_cepheye_istenirse_yalniz_o_istek_duser():
     assert s["durum"] == "uygulanamadi" and s["plan"] is None
 
 
+def test_semaya_uymayan_islem_yalniz_kendini_dusurur():
+    # canlı deneme hazırlığı (T4 "çatı L olsun"): LLM çatıyı şemada olmayan "L" diye yazarsa bütün okuma şema hatasına düşüp konuşma
+    # yönlendirmeyle kapanıyordu; uymayan işlem bayinin sözüyle "uygulanamayan"a gider, geçerliler uygulanır
+    hazir = {"islemler": [{"op": "cati_tipi", "tip": "L", "alinti": "çatı L olsun"},
+                          {"op": "pencere_ekle", "mahal": "Salon", "cephe": "G", "olcu": "120x120", "alinti": "salona pencere"}],
+             "uygulanamayan": []}
+    s = PI.duzenle(ornek("gecerli_3arti1_100"), "x", {"oda_programi": "3+1"}, hazir=hazir)
+    assert s["durum"] == "gecerli" and s["uygulanamayan"] == ["çatı L olsun"] and "pencere eklendi: Salon 120/120" in s["fark"]
+    s = PI.duzenle(ornek("gecerli_3arti1_100"), "x", {"oda_programi": "3+1"}, hazir={"islemler": hazir["islemler"][:1], "uygulanamayan": []})
+    assert s["durum"] == "uygulanamadi" and s["uygulanamayan"] == ["çatı L olsun"]
+    s = PI.duzenle(ornek("gecerli_3arti1_100"), "x", {"oda_programi": "3+1"}, hazir={"islemler": "bozuk"})
+    assert s["durum"] == "hata" and s["hata"].startswith("işlem şeması")      # liste bile değilse eskisi gibi hata
+
+
 def test_llm_tablosu_odanin_dis_cephelerini_yazar():
     t = PI.tablo(ornek("gecerli_3arti1_100")).splitlines()
     assert next(x for x in t if x.startswith("- Salon ")).endswith("; dış cepheler: G, B")
