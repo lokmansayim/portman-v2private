@@ -67,7 +67,8 @@ PROMPT = """Sen PortatifEv'in tek kat çelik evlerinde bayinin revizyon isteğin
 yazmazsın: isteği aşağıdaki işlemlere çevirirsin; uygulamayı ve denetimi kod yapar.
 
 İşlemler: oda_buyut / oda_kucult (mahal, yon: G ön, K arka, B sol, D sağ; cm — bayi sayı vermediyse 50), kapi_ekle / kapi_kaldir (mahal,
-mahal_b; dış kapı için mahal_b "dis"), pencere_ekle / pencere_kaldir (mahal, cephe, olcu), cati_tipi (tip), dis_karkas_140.
+mahal_b; dış kapı için mahal_b "dis" ve istenirse cephe — dış kapıyı başka cepheye almak da kapi_ekle'dir), pencere_ekle / pencere_kaldir
+(mahal, cephe, olcu), cati_tipi (tip), dis_karkas_140.
 - Mahal adlarını tablodaki gibi yaz. Yalnız bayinin bu mesajda istediğini yaz; söylenmeyeni ekleme.
 - Pencere cephesini mahalin tablodaki dış cephelerinden seç. Çatı tipi yalnız besik ya da kirma olabilir; L, cumba ve başka çatı biçimlerini
   `uygulanamayan`'a yaz.
@@ -220,8 +221,14 @@ def uygula(plan: dict, islemler: list[dict]) -> tuple[dict, list[str]]:
                 continue
             cift = sorted([a, b])
             var = [k for k in p["kapilar"] if sorted(k["arasinda"]) == cift]
+            c = o.get("cephe") if b == "dis" else None             # dış kapının istenen cephesi (geometri hakemi 16.10: önceden yok sayılıyordu)
+            if op == "kapi_ekle" and c and c not in _dis_cepheler(p).get(a, []):
+                olmayan.append(f"{_soz(o)}: {a} {YON_SOZU[c]} cepheye değmiyor")
+                continue
             if op == "kapi_ekle" and not var:
-                p["kapilar"].append({"arasinda": [b, a] if b == "dis" else [a, b]})
+                p["kapilar"].append({"arasinda": [b, a] if b == "dis" else [a, b], **({"cephe": c} if c else {})})
+            elif op == "kapi_ekle" and c and var[0].get("cephe") != c:
+                var[0]["cephe"] = c                                    # var olan dış kapı istenen cepheye taşınır
             elif op == "kapi_kaldir":
                 if not var:
                     olmayan.append(f"{_soz(o)}: o iki mahal arasında kapı yok")

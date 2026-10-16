@@ -333,3 +333,30 @@ def test_ayni_karsilastirmasi_kapinin_butun_alanlarina_bakar():
     a = ornek("gecerli_3arti1_100")
     b = {**a, "kapilar": [{**k, "cephe": "K"} if "dis" in k["arasinda"] else k for k in a["kapilar"]]}
     assert PI._ayni(a, {**a, "kapilar": list(reversed(a["kapilar"]))}) and not PI._ayni(a, b)
+
+
+# ── geometri hakemi ikinci tur (16.10): dış kapının cephesi ──────────────────────────────────────────────────────────────
+def _dis_kapi(p):
+    return [k for k in p["kapilar"] if "dis" in k["arasinda"]]
+
+
+def test_dis_kapi_istenen_cepheye_tasinir_ve_yazilir():
+    # önceden kapi_ekle istenen cepheyi yok sayıyordu: kapı derleyicinin seçtiği yere gidiyor, fark boş, bayiye genel metin gidiyordu
+    s = PI.duzenle(ornek("gecerli_3arti1_100"), "x", {"oda_programi": "3+1"}, hazir={"islemler": [
+        {"op": "kapi_ekle", "mahal": "Salon", "mahal_b": "dis", "cephe": "B", "alinti": "dış kapıyı sola al"}], "uygulanamayan": []})
+    assert s["durum"] == "gecerli", s
+    assert _dis_kapi(s["plan"]) == [{"arasinda": ["dis", "Salon"], "cephe": "B"}]
+    assert any(f.startswith("dış kapı: Salon ") and f.endswith("→ sol") for f in s["fark"]), s["fark"]
+
+
+def test_dis_kapi_degmeyen_cepheye_alinmaz():
+    s = PI.duzenle(ornek("gecerli_3arti1_100"), "x", {"oda_programi": "3+1"}, hazir={"islemler": [
+        {"op": "kapi_ekle", "mahal": "Salon", "mahal_b": "dis", "cephe": "D", "alinti": "dış kapıyı sağa al"}], "uygulanamayan": []})
+    assert s["durum"] == "uygulanamadi" and s["uygulanamayan"] == ["dış kapıyı sağa al: Salon sağ cepheye değmiyor"]
+
+
+def test_dis_kapi_kaldir_ekle_cepheyle():
+    s = PI.duzenle(ornek("gecerli_3arti1_100"), "x", {"oda_programi": "3+1"}, hazir={"islemler": [
+        {"op": "kapi_kaldir", "mahal": "Salon", "mahal_b": "dis"},
+        {"op": "kapi_ekle", "mahal": "Salon", "mahal_b": "dis", "cephe": "B"}], "uygulanamayan": []})
+    assert s["durum"] == "gecerli" and _dis_kapi(s["plan"])[0]["cephe"] == "B" and s["fark"], s

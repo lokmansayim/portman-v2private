@@ -196,6 +196,12 @@ def plan_farki(eski: dict, yeni: dict) -> list[str]:
     ky = {tuple(sorted(k["arasinda"])) for k in yeni["kapilar"]}
     out += [f"kapı eklendi: {' – '.join(x for x in k if x != 'dis') or 'dış'}" for k in sorted(ky - ke)]
     out += [f"kapı kaldırıldı: {' – '.join(x for x in k if x != 'dis') or 'dış'}" for k in sorted(ke - ky)]
+    de = {next(x for x in k["arasinda"] if x != "dis"): k.get("cephe") for k in eski["kapilar"] if "dis" in k["arasinda"]}
+    dy = {next(x for x in k["arasinda"] if x != "dis"): k.get("cephe") for k in yeni["kapilar"] if "dis" in k["arasinda"]}
+    for m in sorted(set(de) & set(dy)):                       # dış kapının yeri (cephesi) değiştiyse yazılır (geometri hakemi 16.10)
+        if de[m] != dy[m]:
+            out.append(f"dış kapı: {m} {CEPHE_SOZU.get(de[m], 'otomatik yer') if de[m] else 'otomatik yer'} → "
+                       f"{CEPHE_SOZU.get(dy[m], dy[m]) if dy[m] else 'otomatik yer'}")
     if (eski.get("dis_karkas") or 80) != (yeni.get("dis_karkas") or 80):
         out.append("dış duvarlar 140'lık karkas" if yeni.get("dis_karkas") == 140 else "dış duvarlar 80'lik karkas")
     if (eski.get("cati") or {}).get("tip") != (yeni.get("cati") or {}).get("tip"):
