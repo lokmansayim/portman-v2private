@@ -255,7 +255,7 @@ def uygula(plan: dict, islemler: list[dict]) -> tuple[dict, list[str]]:
     return p, olmayan
 
 
-IHLAL_TURU = re.compile(r"^(dış kapı|kapı yayları çakışıyor|kapı|pencere|çatı kurulamadı|çatı|geometri):\s*")
+IHLAL_TURU = re.compile(r"^(dış kapı|kapı|pencere|çatı|geometri):\s*")       # yalnız tek ad; "kapı yayları çakışıyor:" cümledir, kalır
 
 
 def _kisa(ihlal: str, sinir: int) -> str:
@@ -302,7 +302,12 @@ def duzenle(plan: dict, metin: str, talep: dict, ayar: dict | None = None, hazir
          "hata": o["hata"], "ihlaller": [], "denemeler": []}
     if o["durum"] != "tamam":
         return s
-    yeni, olmayan = uygula(plan, o["islemler"])
+    yeni, olmayan, kalan = plan, [], []                       # işlem işlem (uygula(plan, hepsi) ile aynı sonuç): uygulanan kimlikle izlenir
+    for x in o["islemler"]:
+        yeni, n = uygula(yeni, [x])
+        olmayan += n
+        if not n:
+            kalan.append(x)
     s["uygulanamayan"] += olmayan
     if yeni == plan:
         s["ihlaller"] = ["uygulanacak işlem kalmadı"]
@@ -312,7 +317,6 @@ def duzenle(plan: dict, metin: str, talep: dict, ayar: dict | None = None, hazir
         return s
     d = denetle(yeni, {"oda_programi": talep.get("oda_programi")}, kod=kod)
     s["denemeler"] = [{"plan": yeni, "gecerli": d["gecerli"], "ihlaller": d["ihlaller"]}]
-    kalan = [x for x in o["islemler"] if not any(m.startswith(_soz(x) + ":") for m in olmayan)]     # uygulanamayan işlem not doğurmaz
     if not d["gecerli"]:
         s["ihlaller"] = d["ihlaller"][:8]
         # birlikte kurallara uymadı: işlemler sırayla tek tek denenir; geçen uygulanır, geçmeyen bayinin sözü ve kısa gerekçesiyle yazılır

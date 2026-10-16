@@ -212,10 +212,21 @@ def test_elli_cm_notu_yalniz_uygulanan_isleme_bakar():
     assert s["durum"] == "gecerli" and s["uygulanamayan"] and not any("50 cm" in f for f in s["fark"]), s
 
 
+def test_elli_cm_notu_ayni_sozlu_islemde_dusmez():
+    # hakem üçüncü tur: aynı sözle (ya da sözsüz) iki büyütmeden biri düşünce uygulanan ötekinin "50 cm" notu silinmez (işlem kimliğiyle)
+    for soz in ("salonu ve yatak odası 3'ü büyütün", ""):
+        s = PI.duzenle(ornek("gecerli_3arti1_100"), "x", {"oda_programi": "3+1"}, hazir={"islemler": [
+            {"op": "oda_buyut", "mahal": "Salon", "yon": "D", "alinti": soz},
+            {"op": "oda_buyut", "mahal": "Yatak Odası 3", "yon": "B", "alinti": soz}], "uygulanamayan": []})
+        assert s["durum"] == "gecerli" and s["uygulanamayan"] and "ölçü söylenmediği için 50 cm alındı" in s["fark"], s
+
+
 def test_kisa_gerekce_tur_adini_atar_mahal_adini_tutar():
-    # hakem ikinci tur (küçük 3)
+    # hakem ikinci tur (küçük 3) ve üçüncü tur: cümle olan önek ("kapı yayları çakışıyor:") atılmaz
     assert PI._kisa("kapı: Hol ile Banyo arasında kapı yok (x)", 60) == "Hol ile Banyo arasında kapı yok"
     assert PI._kisa("Banyo: giriş kapısından kapılarla ulaşılamıyor", 60) == "Banyo: giriş kapısından kapılarla ulaşılamıyor"
+    assert PI._kisa("kapı yayları çakışıyor: K2 ile K5 (x)", 60) == "kapı yayları çakışıyor: K2 ile K5"
+    assert PI._kisa("çatı kurulamadı: mahya kısa", 60) == "çatı kurulamadı: mahya kısa"
 
 
 @pytest.mark.parametrize("cevap,beklenen", [
