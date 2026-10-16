@@ -497,6 +497,20 @@ PLAN_URETIMI = "plan üretimi: uyan çelik model yok"
 YENI_ONEK = "YENI-"
 
 
+KURALA_UYMADI = "yeni plan: istek kurallara uymadı"         # Lokman 16.10 (G): gerekçede bu söz varsa worker Patron'a bilgi verir
+
+
+def _istekler(liste) -> str:
+    """Bayiye adıyla yazılan istekler: en çok üç, maskeli ve 80 karakter; kalanı sayıyla ("ve 2 istek daha"; hakem 16.10, sessiz düşmez)."""
+    liste = [str(x) for x in liste or []]
+    return "; ".join(f"\"{numara.maskele(x)[:80]}\"" for x in liste[:3])
+
+
+def _istek_fazlasi(liste) -> str:
+    n = len(list(liste or [])) - 3
+    return f" (ve {n} istek daha)" if n > 0 else ""
+
+
 def _m2(x) -> str:
     """Bayiye giden m²: Türkçe, bir ondalık ("95,1"; "95,03" → "95"; "88.0" → "88"); plan kartıyla aynı (`motor/bayi_gorseli._tr`,
     Lokman 12.10). Canlı deneme 16.10 (E): mesaj "95.03 m²", kart "95 m²" yazıyordu."""
@@ -947,13 +961,16 @@ def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts
         # okuma alanı bırakmaz ("okuma_metin" LLM-önce yolu kapatıp cevabı kural yoluna, oradan Patron'a düşürüyordu). Aynı mesajda
         # bilgi (müşteri, antet) varsa soru yerine plan antetle yeniden çizilir, not başa yazılır: bilgi sessiz düşmez (geometri hakemi 15.10)
         if ly.get("durum") == "uygulanamadi":                  # Lokman 15.10 (karar 3): "otomatik uygulayamadım", plan aynen ve onaylanabilir
-            olmayan = "; ".join(f"\"{numara.maskele(str(x))[:80]}\"" for x in (ly.get("uygulanamayan") or [])[:3])
-            # Lokman 16.10 (canlı deneme G): kurallara uymayan istek de buradan; konuşma açık, Patron'a bilgiyi worker verir
-            gerekce = "yeni plan: istek kurallara uymadı, plan aynen" if ly.get("kurala_uymayan") else "yeni plan: istek uygulanamadı, plan aynen"
+            uy = ly.get("uygulanamayan") or []
+            olmayan = _istekler(uy)
+            # Lokman 16.10 (canlı deneme G): kurallara uymayan istek de buradan; konuşma açık, Patron'a bilgiyi worker verir (KURALA_UYMADI)
+            kurala = bool(ly.get("kurala_uymayan"))
+            gerekce = f"{KURALA_UYMADI}, plan aynen" if kurala else "yeni plan: istek uygulanamadı, plan aynen"
             k.not_dus("kural", f"{gerekce} (revizyon)")
             if not bilgi:
-                return _yeni_plan_sorusu(k, f"{olmayan} isteğini otomatik uygulayamadım; planınız aynen geçerli. " + _BASKA_DEGISIKLIK, gerekce)
-            kod_metni = f"{olmayan} isteğini otomatik uygulayamadım; bilgileriniz plana işlendi."
+                return _yeni_plan_sorusu(k, f"{olmayan} isteğini otomatik uygulayamadım{_istek_fazlasi(uy)}; planınız aynen geçerli. "
+                                         + _BASKA_DEGISIKLIK, gerekce)
+            kod_metni = f"{olmayan} isteğini otomatik uygulayamadım{_istek_fazlasi(uy)}; bilgileriniz plana işlendi."
         elif ly.get("durum") != "bos":
             return _yeni_plan_revizyonu(k, bayi, aday, ts, son, son_y, ly)
         elif ly.get("islemler"):                                # işlem okundu ama plan zaten öyle (ör. dış 140'lık planda "dışlar 140")
@@ -1017,6 +1034,8 @@ def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts
         ie["talep"]["metin"] = kod_metni                       # başlığı kodun metni
         ie["talep"]["metin_koddan"] = True
     gerekce = f"çelik aday {aday['kod']} (genel motor)" + (f"; değişiklik: {', '.join(d['op'] for d in yeni)}" if yeni else "")
+    if kod_metni and aday.get("uretilen") and ly is not None and ly.get("durum") == "uygulanamadi" and ly.get("kurala_uymayan"):
+        gerekce += f"; {KURALA_UYMADI}, plan aynen"            # bilgiyle yeniden çizimde de Patron'a bilgi (plan geometrisi aynen)
     # BK-08 madde 4: çelik planda görsel ve PDF bu metinle birlikte gider (çizim düşerse bu metin gitmez, `worker._cizim_hatasi`)
     return _bitir(k, Karar(eylem="is_emri", is_emri=ie, revizyon=ie["revizyon"], gerekce=gerekce,
                             mesaj=f"{on_not}{on_bilgi}{ozet} {uyg}Ön onay planınız hazır; plan görseli ve PDF ektedir.".replace("  ", " ")))
@@ -1046,8 +1065,8 @@ def _yeni_plan_revizyonu(k: Konusma, bayi: dict, aday: dict, ts: dict, son: dict
                             "degisiklikler": list(son_y.get("degisiklikler") or []), "revizyon": son.get("revizyon")}
     uyg = "Uygulanan: " + "; ".join(fark) + ". "
     ie["talep"]["metin"] = uyg.strip()
-    olmayan = [numara.maskele(str(x))[:80] for x in ly.get("uygulanamayan") or []]
-    not_ = ("; ".join(f"\"{x}\"" for x in olmayan) + " isteğini otomatik uygulayamadım. ") if olmayan else ""
+    uy = ly.get("uygulanamayan") or []
+    not_ = f"{_istekler(uy)} isteğini otomatik uygulayamadım{_istek_fazlasi(uy)}. " if uy else ""
     k.d["revizyon"] = ie["revizyon"] - 1
     k.d["son_is_emri"] = ie
     k.d["asama"] = "is_emri_hazir"

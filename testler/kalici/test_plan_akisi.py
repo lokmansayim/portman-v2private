@@ -380,6 +380,34 @@ def test_t3_yeni_plan_revizyonu_gecmezse_plan_aynen_onaylanabilir_patrona_bilgi(
     assert NUMARA_A not in pg and sahte_no not in pg and "…0555" in pg
 
 
+def test_kismi_basarida_patrona_bilgi_gitmez(depo, wa, hizli_genel, uretici, duzenleyici):
+    # geometri hakemi 16.10 (düşük 2): Patron bilgisi LLM sonucuna değil kararın yoluna bağlı; karar 5 yalnız "plan aynen" durumunu kapsar.
+    # Kısmi başarıda (biri uygulandı, biri kurallara uymadı) r02 çizilir, düşen istek bayiye yazılır, Patron'a bilgi gitmez
+    _secilmis_yeni_plan(depo)
+    d, _ = depo.konusma_oku(NUMARA_A)
+    salon = next(m["ad"] for m in d["uretilen_plan"]["plan"]["mahaller"] if m["islev"] == "salon")
+    duzenleyici["cevap"] = {"islemler": [{"op": "cati_tipi", "tip": "besik", "alinti": "çatı beşik olsun"},
+                                         {"op": "kapi_kaldir", "mahal": salon, "mahal_b": "Hol", "alinti": "salon kapısını kaldır"}],
+                            "uygulanamayan": []}
+    assert depo.mesaj_kaydet(mesaj("çatı beşik olsun, salon kapısını kaldır", talep("revizyon", ozet="revizyon"), bayi=BAYI_KART))
+    [r] = isle_hepsi(depo, URETIM)
+    assert r["eylem"] == "is_emri", r
+    govde = sorgu(depo, "SELECT govde FROM giden WHERE kind = 'interactive' ORDER BY olusturuldu DESC")[0]["govde"]
+    assert "Uygulanan: çatı beşik." in govde and '"salon kapısını kaldır: ' in govde
+    assert not [x for x in sorgu(depo, "SELECT alici FROM giden") if x["alici"] == "PATRON"]
+
+
+def test_dorten_fazla_dusen_istek_sayilir(depo, wa, hizli_genel, uretici, duzenleyici):
+    # geometri hakemi 16.10 (düşük 5): bayiye en çok üç istek adıyla yazılır; kalanı sayıyla söylenir (sessiz düşmez)
+    _secilmis_yeni_plan(depo)
+    duzenleyici["cevap"] = {"islemler": [], "uygulanamayan": ["bir", "iki", "üç", "dört"]}
+    assert depo.mesaj_kaydet(mesaj("dört istek", talep("revizyon", ozet="revizyon"), bayi=BAYI_KART))
+    [r] = isle_hepsi(depo, URETIM)
+    assert r["eylem"] == "sor", r
+    govde = sorgu(depo, "SELECT govde FROM giden ORDER BY is_id DESC, sira")[0]["govde"]
+    assert '"bir"; "iki"; "üç" isteğini otomatik uygulayamadım (ve 1 istek daha); planınız aynen geçerli.' in govde, govde
+
+
 def test_canli_a_e_cati_adi_guncel_ve_m2_turkce(depo, wa, hizli_genel, uretici, duzenleyici):
     # canlı deneme 16.10: (A) çatı değişince mesajdaki çatı adı eski kalıyordu ("beşik", çizim kırma); (B) "çatı kirma";
     # (E) "95.03 m²" noktalı yazılıyordu (kartta "95 m²")

@@ -179,15 +179,19 @@ def plan_farki(eski: dict, yeni: dict) -> list[str]:
             c[(x["mahal"], x["cephe"], x["olcu"])] = c.get((x["mahal"], x["cephe"], x["olcu"]), 0) + int(x.get("adet") or 1)
         return c
     pe, py = pencereler(eski), pencereler(yeni)
-    ek = [k for k, n in py.items() for _ in range(n - pe.get(k, 0))]
-    cik = [k for k, n in pe.items() for _ in range(n - py.get(k, 0))]
-    for k in list(cik):                       # aynı mahal ve cephede biri gidip biri geldiyse ölçü değişikliğidir (canlı deneme 16.10, C)
-        es = next((x for x in ek if x[:2] == k[:2]), None)
-        if es is not None:
-            ek.remove(es); cik.remove(k)
-            out.append(f"pencere ölçüsü: {k[0]} {CEPHE_SOZU.get(k[1], k[1])} {k[2].replace('x', '/')} → {es[2].replace('x', '/')}")
-    out += [f"pencere eklendi: {m} {o.replace('x', '/')}" for m, c, o in ek]
-    out += [f"pencere kaldırıldı: {m} {o.replace('x', '/')}" for m, c, o in cik]
+    ek = {k: n - pe.get(k, 0) for k, n in py.items() if n > pe.get(k, 0)}
+    cik = {k: n - py.get(k, 0) for k, n in pe.items() if n > py.get(k, 0)}
+    yer = lambda m, c, o: f"{m} {CEPHE_SOZU.get(c, c)} {o.replace('x', '/')}"                 # noqa: E731
+    for k in list(cik):
+        # ölçü değişikliği yalnız o mahal ve cephede tam bir kaldırma ve tam bir ekleme varsa (canlı deneme 16.10, C; geometri hakemi:
+        # birden çok pencere değişince eşleştirme bayiye yanlış satır yazıyordu); öbür durumlar eklendi / kaldırıldı
+        ayni_ek = [x for x in ek if x[:2] == k[:2]]
+        if cik[k] == 1 and len(ayni_ek) == 1 and ek[ayni_ek[0]] == 1 and sum(1 for x in cik if x[:2] == k[:2]) == 1:
+            out.append(f"pencere ölçüsü: {yer(*k)} → {ayni_ek[0][2].replace('x', '/')}")
+            del ek[ayni_ek[0]], cik[k]
+    adet = lambda n: f" ({n} adet)" if n > 1 else ""                                            # noqa: E731
+    out += [f"pencere eklendi: {yer(*k)}{adet(n)}" for k, n in ek.items()]
+    out += [f"pencere kaldırıldı: {yer(*k)}{adet(n)}" for k, n in cik.items()]
     ke = {tuple(sorted(k["arasinda"])) for k in eski["kapilar"]}
     ky = {tuple(sorted(k["arasinda"])) for k in yeni["kapilar"]}
     out += [f"kapı eklendi: {' – '.join(x for x in k if x != 'dis') or 'dış'}" for k in sorted(ky - ke)]
