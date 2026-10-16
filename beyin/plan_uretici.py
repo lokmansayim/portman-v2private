@@ -152,6 +152,10 @@ def _tr(v: float) -> str:
     return f"{v:.1f}".replace(".", ",")
 
 
+CATI_ADI = {"besik": "beşik", "kirma": "kırma"}                    # bayiye giden metin (ham değer "kirma" yazılmaz; canlı deneme 16.10)
+CEPHE_SOZU = {"G": "ön", "K": "arka", "B": "sol", "D": "sağ"}         # plan görselindeki ÖN / ARKA / SOL / SAĞ etiketleriyle aynı
+
+
 def plan_farki(eski: dict, yeni: dict) -> list[str]:
     """İki plan arasındaki bayiye söylenecek farklar (kodun okuması; LLM'in özeti değil, K18 yönü): dış ölçü, mahal alanı (eksenden),
     eklenen/kaldırılan mahal, pencere ve kapı."""
@@ -175,20 +179,34 @@ def plan_farki(eski: dict, yeni: dict) -> list[str]:
             c[(x["mahal"], x["cephe"], x["olcu"])] = c.get((x["mahal"], x["cephe"], x["olcu"]), 0) + int(x.get("adet") or 1)
         return c
     pe, py = pencereler(eski), pencereler(yeni)
-    for (m, c, o), n in py.items():
-        if n > pe.get((m, c, o), 0):
-            out.append(f"pencere eklendi: {m} {o.replace('x', '/')}")
-    for (m, c, o), n in pe.items():
-        if n > py.get((m, c, o), 0):
-            out.append(f"pencere kaldırıldı: {m} {o.replace('x', '/')}")
+    ek = {k: n - pe.get(k, 0) for k, n in py.items() if n > pe.get(k, 0)}
+    cik = {k: n - py.get(k, 0) for k, n in pe.items() if n > py.get(k, 0)}
+    yer = lambda m, c, o: f"{m} {CEPHE_SOZU.get(c, c)} {o.replace('x', '/')}"                 # noqa: E731
+    for k in list(cik):
+        # ölçü değişikliği yalnız o mahal ve cephede tam bir kaldırma ve tam bir ekleme varsa (canlı deneme 16.10, C; geometri hakemi:
+        # birden çok pencere değişince eşleştirme bayiye yanlış satır yazıyordu); öbür durumlar eklendi / kaldırıldı
+        ayni_ek = [x for x in ek if x[:2] == k[:2]]
+        if cik[k] == 1 and len(ayni_ek) == 1 and ek[ayni_ek[0]] == 1 and sum(1 for x in cik if x[:2] == k[:2]) == 1:
+            out.append(f"pencere ölçüsü: {yer(*k)} → {ayni_ek[0][2].replace('x', '/')}")
+            del ek[ayni_ek[0]], cik[k]
+    adet = lambda n: f" ({n} adet)" if n > 1 else ""                                            # noqa: E731
+    out += [f"pencere eklendi: {yer(*k)}{adet(n)}" for k, n in ek.items()]
+    out += [f"pencere kaldırıldı: {yer(*k)}{adet(n)}" for k, n in cik.items()]
     ke = {tuple(sorted(k["arasinda"])) for k in eski["kapilar"]}
     ky = {tuple(sorted(k["arasinda"])) for k in yeni["kapilar"]}
     out += [f"kapı eklendi: {' – '.join(x for x in k if x != 'dis') or 'dış'}" for k in sorted(ky - ke)]
     out += [f"kapı kaldırıldı: {' – '.join(x for x in k if x != 'dis') or 'dış'}" for k in sorted(ke - ky)]
+    de = {next(x for x in k["arasinda"] if x != "dis"): k.get("cephe") for k in eski["kapilar"] if "dis" in k["arasinda"]}
+    dy = {next(x for x in k["arasinda"] if x != "dis"): k.get("cephe") for k in yeni["kapilar"] if "dis" in k["arasinda"]}
+    for m in sorted(set(de) & set(dy)):                       # dış kapının yeri (cephesi) değiştiyse yazılır (geometri hakemi 16.10)
+        if de[m] != dy[m]:
+            out.append(f"dış kapı: {m} {CEPHE_SOZU.get(de[m], 'otomatik yer') if de[m] else 'otomatik yer'} → "
+                       f"{CEPHE_SOZU.get(dy[m], dy[m]) if dy[m] else 'otomatik yer'}")
     if (eski.get("dis_karkas") or 80) != (yeni.get("dis_karkas") or 80):
         out.append("dış duvarlar 140'lık karkas" if yeni.get("dis_karkas") == 140 else "dış duvarlar 80'lik karkas")
     if (eski.get("cati") or {}).get("tip") != (yeni.get("cati") or {}).get("tip"):
-        out.append(f"çatı {(yeni.get('cati') or {}).get('tip')}")
+        tip = (yeni.get("cati") or {}).get("tip")
+        out.append(f"çatı {CATI_ADI.get(tip, tip)}")
     return out
 
 

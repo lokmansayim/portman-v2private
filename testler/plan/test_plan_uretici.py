@@ -148,10 +148,13 @@ def test_duzenle_komsu_baska_hizadaysa_uygulanamaz_ve_plan_degismez():
     assert s["durum"] == "uygulanamadi" and s["plan"] is None and any("başka hizada" in x for x in s["uygulanamayan"])
 
 
-def test_duzenle_denetimden_gecmezse_gecersiz():
+def test_duzenle_denetimden_gecmezse_uygulanamadi_gerekceyle():
+    # Lokman 16.10 (canlı deneme, G): kurallara uymayan istek konuşmayı kapatmaz; önceden "gecersiz" → yönlendirme idi. Plan aynen,
+    # istek bayinin sözü (yoksa işlemin Türkçesi) ve denetçinin kısa gerekçesiyle yazılır; karar Patron'a bilgi verir (kurala_uymayan)
     hazir = {"islemler": [{"op": "kapi_kaldir", "mahal": "Salon", "mahal_b": "Hol"}], "uygulanamayan": []}
     s = PI.duzenle(ornek("gecerli_3arti1_100"), "salon hol kapısını kaldırın", {"oda_programi": "3+1"}, hazir=hazir)
-    assert s["durum"] == "gecersiz" and any("ulaşılamıyor" in x for x in s["ihlaller"])
+    assert s["durum"] == "uygulanamadi" and s["plan"] is None and s["kurala_uymayan"] is True
+    assert any("ulaşılamıyor" in x for x in s["ihlaller"]) and s["uygulanamayan"][0].startswith("kapı kaldırma: ")
 
 
 def test_pencere_degmeyen_cepheye_istenirse_yalniz_o_istek_duser():
@@ -174,7 +177,7 @@ def test_semaya_uymayan_islem_yalniz_kendini_dusurur():
                           {"op": "pencere_ekle", "mahal": "Salon", "cephe": "G", "olcu": "120x120", "alinti": "salona pencere"}],
              "uygulanamayan": []}
     s = PI.duzenle(ornek("gecerli_3arti1_100"), "x", {"oda_programi": "3+1"}, hazir=hazir)
-    assert s["durum"] == "gecerli" and s["uygulanamayan"] == ["çatı L olsun"] and "pencere eklendi: Salon 120/120" in s["fark"]
+    assert s["durum"] == "gecerli" and s["uygulanamayan"] == ["çatı L olsun"] and "pencere eklendi: Salon ön 120/120" in s["fark"]
     s = PI.duzenle(ornek("gecerli_3arti1_100"), "x", {"oda_programi": "3+1"}, hazir={"islemler": hazir["islemler"][:1], "uygulanamayan": []})
     assert s["durum"] == "uygulanamadi" and s["uygulanamayan"] == ["çatı L olsun"]
     s = PI.duzenle(ornek("gecerli_3arti1_100"), "x", {"oda_programi": "3+1"}, hazir={"islemler": "bozuk"})
@@ -191,7 +194,7 @@ def test_birlikte_gecmeyen_islemler_tek_tek_denenir():
     assert s["uygulanamayan"] == ["hole pencere: Hol güney cephesine 1 açıklık sığmıyor"]
     assert len(s["denemeler"]) == 2 and not s["denemeler"][0]["gecerli"] and s["denemeler"][1]["gecerli"]
     s = PI.duzenle(ornek("gecerli_3arti1_100"), "x", {"oda_programi": "3+1"}, hazir={"islemler": islemler[1:], "uygulanamayan": []})
-    assert s["durum"] == "gecersiz"                                         # tek işlem geçmezse eskisi gibi (karar yönlendirir)
+    assert s["durum"] == "uygulanamadi" and s["kurala_uymayan"]            # Lokman 16.10 (G): tek işlem geçmezse de plan aynen, gerekçeli
 
 
 def test_sonraki_islemin_mumkun_kildigi_erken_islem_yeniden_denenir():
@@ -200,7 +203,7 @@ def test_sonraki_islemin_mumkun_kildigi_erken_islem_yeniden_denenir():
     hol_buy = {"op": "oda_buyut", "mahal": "Hol", "yon": "D", "cm": 50, "alinti": "holü 50 genişlet"}
     kapi = {"op": "kapi_kaldir", "mahal": "Hol", "mahal_b": "Banyo", "alinti": "banyo kapısını kaldır"}
     s = PI.duzenle(ornek("gecerli_3arti1_100"), "x", {"oda_programi": "3+1"}, hazir={"islemler": [hol_pen, hol_buy, kapi], "uygulanamayan": []})
-    assert s["durum"] == "gecerli" and "pencere eklendi: Hol 120/120" in s["fark"], s
+    assert s["durum"] == "gecerli" and "pencere eklendi: Hol ön 120/120" in s["fark"], s
     assert [x.split(":")[0] for x in s["uygulanamayan"]] == ["banyo kapısını kaldır"]
 
 
@@ -247,11 +250,113 @@ def test_llm_tablosu_odanin_dis_cephelerini_yazar():
 
 
 @pytest.mark.parametrize("islem,beklenen", [
-    ({"op": "pencere_ekle", "mahal": "Yatak Odası 3", "cephe": "K", "olcu": "120x120"}, "pencere eklendi: Yatak Odası 3 120/120"),
-    ({"op": "cati_tipi", "tip": "besik"}, "çatı besik"),
+    ({"op": "pencere_ekle", "mahal": "Yatak Odası 3", "cephe": "K", "olcu": "120x120"}, "pencere eklendi: Yatak Odası 3 arka 120/120"),  # cephe yazılır (hakem 16.10)
+    ({"op": "cati_tipi", "tip": "besik"}, "çatı beşik"),                   # canlı deneme 16.10 (B): ham değer "kirma" yazılıyordu
     ({"op": "oda_kucult", "mahal": "Salon", "yon": "K", "cm": 30}, "Salon 25,2 → 23,5 m²"),
 ])
 def test_tekil_islemler(islem, beklenen):
     s = PI.duzenle(ornek("gecerli_3arti1_100"), "x", {"oda_programi": "3+1"}, hazir={"islemler": [islem], "uygulanamayan": []})
     assert s["durum"] == "gecerli", s["ihlaller"]
     assert beklenen in s["fark"]
+
+
+# ── canlı deneme dönüşü (16.10.2026; Patron kartı, v2026.10.15) ─────────────────────────────────────────────────────────
+def test_pencere_olcu_degisikligi_tek_satir():
+    # C: "mutfağın penceresini 120x180 yap" → kaldır + ekle; bayiye "eklendi … kaldırıldı" değil, ölçü değişikliği olarak
+    islemler = [{"op": "pencere_kaldir", "mahal": "Salon", "cephe": "B", "olcu": "120x120"},
+                {"op": "pencere_ekle", "mahal": "Salon", "cephe": "B", "olcu": "120x180"}]
+    s = PI.duzenle(ornek("gecerli_3arti1_100"), "x", {"oda_programi": "3+1"}, hazir={"islemler": islemler, "uygulanamayan": []})
+    assert s["durum"] == "gecerli" and s["fark"] == ["pencere ölçüsü: Salon sol 120/120 → 120/180"], s["fark"]
+
+
+@pytest.mark.parametrize("islem,beklenen", [
+    ({"op": "oda_buyut", "mahal": "Salon", "cm": 50, "alinti": "salonu 50 cm büyüt"},
+     "salonu 50 cm büyüt: hangi yöne (ön, arka, sol, sağ) büyütüleceği belli değil"),
+    ({"op": "oda_kucult", "yon": "K", "cm": 50, "alinti": "50 cm küçült"}, "50 cm küçült: hangi oda belli değil"),
+    ({"op": "oda_buyut", "alinti": "biraz büyüt"}, "biraz büyüt: hangi oda ve hangi yöne (ön, arka, sol, sağ) büyütüleceği belli değil")])
+def test_oda_islemi_eksik_bilgiyi_ayri_soyler(islem, beklenen):
+    # D: canlıda yalnız yön eksikken "hangi oda ve hangi yön belli değil" yazıyordu
+    s = PI.duzenle(ornek("gecerli_3arti1_100"), "x", {"oda_programi": "3+1"}, hazir={"islemler": [islem], "uygulanamayan": []})
+    assert s["durum"] == "uygulanamadi" and s["uygulanamayan"] == [beklenen] and not s.get("kurala_uymayan")
+
+
+# ── geometri hakemi (16.10, 19cfd2b) ─────────────────────────────────────────────────────────────────────────────────────
+def _pen(*ler):
+    return [{"mahal": m, "cephe": c, "olcu": o, "adet": n} for m, c, o, n in ler]
+
+
+def test_olcu_eslesmesi_yalniz_tek_kaldirma_tek_ekleme():
+    # Orta bulgu: aynı mahal ve cephede birden çok pencere değişince ilk kaldırılan ilk eklenenle eşleşiyor, bayiye yanlış "ölçü" yazılıyordu
+    e = ornek("gecerli_3arti1_100")
+    y = {**e}
+    e = {**e, "pencereler": _pen(("Salon", "B", "60x60", 1), ("Salon", "B", "120x120", 1))}
+    f = PU.plan_farki(e, {**y, "pencereler": _pen(("Salon", "B", "120x180", 1))})                # küçüğü kaldır, 120x120 → 120x180
+    assert not any("ölçüsü" in x for x in f) and "pencere eklendi: Salon sol 120/180" in f
+    assert "pencere kaldırıldı: Salon sol 60/60" in f and "pencere kaldırıldı: Salon sol 120/120" in f
+    f = PU.plan_farki(e, {**y, "pencereler": _pen(("Salon", "B", "80x120", 1), ("Salon", "B", "120x160", 1))})   # ikisi de değişir
+    assert not any("ölçüsü" in x for x in f) and len(f) == 4
+    f = PU.plan_farki({**y, "pencereler": _pen(("Salon", "B", "120x120", 1), ("Salon", "G", "120x180", 1))},
+                      {**y, "pencereler": _pen(("Salon", "B", "120x180", 1), ("Salon", "G", "120x180", 1))})
+    assert f == ["pencere ölçüsü: Salon sol 120/120 → 120/180"]                                  # tek kaldırma + tek ekleme
+
+
+def test_pencere_satirlari_cephe_ve_adetle():
+    # hakem düşük 3: farklı cephede aynı ölçü "eklendi … kaldırıldı" hiçbir şey değişmemiş gibi okunuyordu; adet 2 iki kez yazılıyordu
+    y = ornek("gecerli_3arti1_100")
+    f = PU.plan_farki({**y, "pencereler": _pen(("Salon", "B", "120x120", 1))}, {**y, "pencereler": _pen(("Salon", "G", "120x120", 1))})
+    assert f == ["pencere eklendi: Salon ön 120/120", "pencere kaldırıldı: Salon sol 120/120"]
+    f = PU.plan_farki({**y, "pencereler": []}, {**y, "pencereler": _pen(("Salon", "G", "120x120", 2))})
+    assert f == ["pencere eklendi: Salon ön 120/120 (2 adet)"]
+
+
+def test_adetli_pencereden_biri_kaldirilir():
+    # hakem (diff dışı): pencere_kaldir adet 2 girdiyi tümden siliyordu
+    p = ornek("gecerli_3arti1_100")
+    p["pencereler"] = [{**x, "adet": 2} if (x["mahal"], x["cephe"]) == ("Salon", "G") else x for x in p["pencereler"]]
+    s = PI.duzenle(p, "x", {"oda_programi": "3+1"}, hazir={"islemler": [{"op": "pencere_kaldir", "mahal": "Salon", "cephe": "G"}],
+                                                           "uygulanamayan": []})
+    assert s["durum"] == "gecerli", s
+    assert [x["adet"] for x in s["plan"]["pencereler"] if (x["mahal"], x["cephe"]) == ("Salon", "G")] == [1]
+    assert s["fark"] == ["pencere kaldırıldı: Salon ön 120/180"]
+
+
+def test_ayni_plan_yeniden_cizilmez():
+    # hakem (diff dışı): aynı ölçüde kaldır + ekle (yazılışı farklı, içeriği aynı plan) "gecerli" sayılıp revizyon hakkı yakıyordu
+    islemler = [{"op": "pencere_kaldir", "mahal": "Salon", "cephe": "B", "olcu": "120x120"},
+                {"op": "pencere_ekle", "mahal": "Salon", "cephe": "B", "olcu": "120x120"}]
+    s = PI.duzenle(ornek("gecerli_3arti1_100"), "x", {"oda_programi": "3+1"}, hazir={"islemler": islemler, "uygulanamayan": []})
+    assert s["durum"] == "bos" and s["plan"] is None
+
+
+def test_ayni_karsilastirmasi_kapinin_butun_alanlarina_bakar():
+    # kapının cephesi de içeriktir: dış kapının yeri değişirse plan "aynı" sayılmaz
+    a = ornek("gecerli_3arti1_100")
+    b = {**a, "kapilar": [{**k, "cephe": "K"} if "dis" in k["arasinda"] else k for k in a["kapilar"]]}
+    assert PI._ayni(a, {**a, "kapilar": list(reversed(a["kapilar"]))}) and not PI._ayni(a, b)
+
+
+# ── geometri hakemi ikinci tur (16.10): dış kapının cephesi ──────────────────────────────────────────────────────────────
+def _dis_kapi(p):
+    return [k for k in p["kapilar"] if "dis" in k["arasinda"]]
+
+
+def test_dis_kapi_istenen_cepheye_tasinir_ve_yazilir():
+    # önceden kapi_ekle istenen cepheyi yok sayıyordu: kapı derleyicinin seçtiği yere gidiyor, fark boş, bayiye genel metin gidiyordu
+    s = PI.duzenle(ornek("gecerli_3arti1_100"), "x", {"oda_programi": "3+1"}, hazir={"islemler": [
+        {"op": "kapi_ekle", "mahal": "Salon", "mahal_b": "dis", "cephe": "B", "alinti": "dış kapıyı sola al"}], "uygulanamayan": []})
+    assert s["durum"] == "gecerli", s
+    assert _dis_kapi(s["plan"]) == [{"arasinda": ["dis", "Salon"], "cephe": "B"}]
+    assert any(f.startswith("dış kapı: Salon ") and f.endswith("→ sol") for f in s["fark"]), s["fark"]
+
+
+def test_dis_kapi_degmeyen_cepheye_alinmaz():
+    s = PI.duzenle(ornek("gecerli_3arti1_100"), "x", {"oda_programi": "3+1"}, hazir={"islemler": [
+        {"op": "kapi_ekle", "mahal": "Salon", "mahal_b": "dis", "cephe": "D", "alinti": "dış kapıyı sağa al"}], "uygulanamayan": []})
+    assert s["durum"] == "uygulanamadi" and s["uygulanamayan"] == ["dış kapıyı sağa al: Salon sağ cepheye değmiyor"]
+
+
+def test_dis_kapi_kaldir_ekle_cepheyle():
+    s = PI.duzenle(ornek("gecerli_3arti1_100"), "x", {"oda_programi": "3+1"}, hazir={"islemler": [
+        {"op": "kapi_kaldir", "mahal": "Salon", "mahal_b": "dis"},
+        {"op": "kapi_ekle", "mahal": "Salon", "mahal_b": "dis", "cephe": "B"}], "uygulanamayan": []})
+    assert s["durum"] == "gecerli" and _dis_kapi(s["plan"])[0]["cephe"] == "B" and s["fark"], s
