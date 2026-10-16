@@ -85,9 +85,11 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-16 | BK-09 PR-2: çizim düzeltmeleri (KT-02 kapı yayı, 2. sayfa TASLAK, KT başlığında m², G1) ve referansın yeniden dondurulması | yazıldı (14.10) |
 | D | D-17 | İE-08 8b: yükleme listesi Excel'i sunucuda üretilir ve mühendise gider (D-11'in "yalnız kabul paketinde" maddesini değiştirir) | yazıldı (14.10; `ie-08-8b-muhendis`) |
 | D | D-18 | İE-14: yeni üretilen çelik plan bayiye TASLAK gider; plan üretimi ve revizyon için ek LLM çağrısı (K05 istisnası) | yazıldı (14.10; `ie-14-talepten-plana`) |
-| D | **D-19** | — | **sıradaki boş** |
+| D | D-19 | BK-10: 24 saat kapanış kuralı (CIO devri, 15.10) | ayrıldı |
+| D | D-20 | İE-09: atölye modelleri referans zincirine girmez, her biri kendi kontrol dosyasıyla korunur; referans ve kontrol dosyaları yalnız motor ya da kural değişince birlikte yeniden dondurulur | ayrıldı (16.10; Görev 6e, plan onayıyla yazılır) |
+| D | **D-21** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
-| İE | İE-09 | model bankası ve yeni model üretimi; P6001 güncellemesi | ayrıldı (pilottan sonra) |
+| İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; panel ve P6001 güncellemesi kapsam dışı, pilottan sonra) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | dallarda |
 | İE | İE-13 | onaydan teklife: fiyat, Patron onayı, özellik formu, hitap (eski adıyla İE-10) | ayrıldı (pilottan sonra) |
 | İE | — | `ie-11-pr2-kor-test` dalındaki onaysız İE-13 / İE-14 taslak planları | numarasız; planlanınca bu defterden numara alır |
