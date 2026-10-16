@@ -95,7 +95,9 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | İE | **İE-15** | — | **sıradaki boş** |
 | BK | BK-01–BK-08 | bu depo; BK-08 8a sonrası temizlik (`bk-08-8a-temizlik`) | yazıldı |
 | BK | BK-09 | metin ve çizim düzeltmeleri, G1 (`bk-09-metin-cizim`, `bk-09-cizim-g1`) | alındı (14.10) |
-| BK | **BK-10** | — | **sıradaki boş** |
+| BK | BK-10 | 8b sonrası düzeltmeler (DXF `.txt` notu, geç gelen Excel, Patron'a Excel bağlantısı, çelikte kapı değişikliği; `docs/devir/2026-10-14_IE-08_8b_Devri.md` › Sıradaki; CIO'nun Notion defterinde D-18 ile) | ayrıldı |
+| BK | BK-11 | `ortam_kur.sh` Postgres'i kurtarma bitene kadar dener (`bk-11-postgres-bekleme`) | alındı (16.10) |
+| BK | **BK-12** | — | **sıradaki boş** |
 
 ## 27 Eylülde Lokman'ın verdiği kararlar
 

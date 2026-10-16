@@ -52,10 +52,18 @@ else
     "${ASPG[@]}" "setsid $PGBIN/pg_ctl -D '$PGK/data' -o '-p $PORT -k $PGK -c listen_addresses=127.0.0.1' -l '$PGK/log.txt' -w start" </dev/null >/dev/null 2>&1 \
       || say "-- UYARI: Postgres başlatılamadı (günlük: $PGK/log.txt)"
   fi
-  if "$VENV/bin/python" -c "import psycopg; psycopg.connect('host=127.0.0.1 port=$PORT user=postgres dbname=postgres', connect_timeout=5).close()" 2>/dev/null; then
-    PG_OK=1; say "-- Postgres 16: 127.0.0.1:$PORT (yalnız yerel; güven kipi yalnız bu test sunucusunda)"
+  # BK-11: düzgün kapanmamış veriyle açılışta Postgres kurtarma yapar ve o arada bağlantıyı geri çevirir ("starting up");
+  # su altında setsid hemen döndüğü için pg_ctl -w'nin beklemesi buraya yansımaz. 10 kez, 1 sn arayla denenir.
+  for deneme in {1..10}; do
+    if "$VENV/bin/python" -c "import psycopg; psycopg.connect('host=127.0.0.1 port=$PORT user=postgres dbname=postgres', connect_timeout=5).close()" 2>/dev/null; then
+      PG_OK=1; break
+    fi
+    (( deneme < 10 )) && sleep 1
+  done
+  if [[ $PG_OK == 1 ]]; then
+    say "-- Postgres 16: 127.0.0.1:$PORT (yalnız yerel; güven kipi yalnız bu test sunucusunda)"
   else
-    say "-- UYARI: Postgres'e bağlanılamadı; kalıcı akış testleri atlanacak."
+    say "-- UYARI: Postgres'e bağlanılamadı (10 deneme, 1 sn arayla); kalıcı akış testleri atlanacak."
   fi
 fi
 
