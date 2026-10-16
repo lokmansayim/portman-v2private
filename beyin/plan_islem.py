@@ -264,14 +264,14 @@ IHLAL_TURU = re.compile(r"^(dış kapı|kapı|pencere|çatı|geometri):\s*")    
 
 
 def _ayni(a: dict, b: dict) -> bool:
-    """İki plan içerikçe aynı mı: pencereler (mahal, cephe, ölçü) başına adet toplamıyla, kapılar sırasız. Kaldır + aynı ölçüde ekle
+    """İki plan içerikçe aynı mı: pencereler (mahal, cephe, ölçü) başına adet toplamıyla, kapılar sırasız (bütün alanlarıyla). Kaldır + aynı ölçüde ekle
     (girdi sırası ve `adet` anahtarı değişir) aynı plandır; revizyon hakkı yakılmaz."""
     def kanon(p):
         say: dict = {}
         for x in p.get("pencereler") or []:
             k = (x["mahal"], x["cephe"], x["olcu"]); say[k] = say.get(k, 0) + int(x.get("adet") or 1)
-        return json.dumps({**p, "pencereler": sorted(say.items()), "kapilar": sorted(tuple(sorted(k["arasinda"])) for k in p.get("kapilar") or [])},
-                          sort_keys=True, ensure_ascii=False, default=str)
+        kapilar = sorted(json.dumps({**k, "arasinda": sorted(k["arasinda"])}, sort_keys=True, ensure_ascii=False) for k in p.get("kapilar") or [])
+        return json.dumps({**p, "pencereler": sorted(say.items()), "kapilar": kapilar}, sort_keys=True, ensure_ascii=False, default=str)
     return kanon(a) == kanon(b)
 
 

@@ -326,3 +326,10 @@ def test_ayni_plan_yeniden_cizilmez():
                 {"op": "pencere_ekle", "mahal": "Salon", "cephe": "B", "olcu": "120x120"}]
     s = PI.duzenle(ornek("gecerli_3arti1_100"), "x", {"oda_programi": "3+1"}, hazir={"islemler": islemler, "uygulanamayan": []})
     assert s["durum"] == "bos" and s["plan"] is None
+
+
+def test_ayni_karsilastirmasi_kapinin_butun_alanlarina_bakar():
+    # kapının cephesi de içeriktir: dış kapının yeri değişirse plan "aynı" sayılmaz
+    a = ornek("gecerli_3arti1_100")
+    b = {**a, "kapilar": [{**k, "cephe": "K"} if "dis" in k["arasinda"] else k for k in a["kapilar"]]}
+    assert PI._ayni(a, {**a, "kapilar": list(reversed(a["kapilar"]))}) and not PI._ayni(a, b)
