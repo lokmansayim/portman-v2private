@@ -130,3 +130,83 @@ Beklenen:
 
 Sonra birlikte karar: `plan_uretimi.acik` açık mı kalsın (pilot bayiler bundan sonra uyan modeli olmayan talepte yeni plan alır;
 LLM yalnız revizyonda ve son basamakta), `llm_once_revizyon` kapalı kalsın mı (karar 2: pilotla ve ücret onayıyla açılır).
+
+## v2026.10.16 · deneme düzeltmeleri ve kalan deneme (16 Ekim)
+
+Yine Mac'te, Terminal'de, depo klasöründe. Her yeni pencerede önce:
+
+```
+cd ~/Desktop/"Claude Portman Çalışması"/30_IE06/depo
+CIKTI=~/Desktop/"Claude Portman Çalışması"/IE14_canli
+```
+
+1. **Etiket** (PR birleştikten sonra):
+
+   ```
+   git checkout main && git pull
+   git fetch origin main --tags
+   git log --oneline -1 origin/main
+   git tag -a v2026.10.16 -m "İE-14 canlı deneme düzeltmeleri (A–E, G; dış kapı cephesi)" origin/main
+   git push origin v2026.10.16
+   ```
+
+2. **Kurulum** (`setsid`; birkaç dakika):
+
+   ```
+   ssh -n portman-vps "setsid nohup bash -c 'bash /opt/portman/guncel/vps/guncelle.sh v2026.10.16; echo == çıkış \$?' > /root/guncelle_v2026.10.16.txt 2>&1 < /dev/null &"
+   ```
+
+   3–4 dakika sonra:
+
+   ```
+   ssh -n portman-vps 'timeout 60 grep -E "genel motor:|uygulanan göçler|sağlık:|== bitti|== çıkış" /root/guncelle_v2026.10.16.txt' > "$CIKTI/ie14_6_surum.txt" 2>&1
+   cat "$CIKTI/ie14_6_surum.txt"
+   ```
+
+   Beklenen:
+   - `genel motor: AYNI`;
+   - `uygulanan göçler: yok (güncel)` (yeni göç yok, şema 8 kalır);
+   - `sağlık: sürüm v2026.10.16, Postgres bağlı`;
+   - `== çıkış 0`.
+
+   Ayar dosyası korunur, `plan_uretimi` açık kalır.
+
+3. **Kontrol:**
+
+   ```
+   ssh -n portman-vps 'timeout 120 bash /opt/portman/guncel/vps/ie14_kontrol.sh' > "$CIKTI/ie14_7_sonra.txt" 2>&1
+   ```
+
+   Beklenen: sürüm `v2026.10.16`, sağlık 200, şema 8, açık iş 0, `plan_uretimi` içinde `"acik": true`.
+
+4. **Kalan deneme** (ücretli; Patron kartı). Önceki konuşma yönlendirmeyle kapandığı için T5'e yeni bir planla gidilir.
+
+   | Adım | Patron yazar | Gelmesi gereken | LLM |
+   |---|---|---|---|
+   | T1' | `95 m² 3+1 tek kat çelik` | "hazırlıyorum", sonra iki yeni plan + KT-03; mesajda m² "95" ve "95,1" | 1 |
+   | T2' | düğme **1. Yeni plan** | r01, görsel, TASLAK PDF | 0 |
+   | T5 | düğme **Onayla** | "Onayınız kaydedildi (…, revizyon 1). Plan teknik kontrole gönderildi; sonucu size bildireceğiz." (Patron kartında mühendis adımı koşmaz.) | 0 |
+   | G1 | `Ç8801K` | r01 (banka planı) | 1 |
+   | G2 | — | gölgeyi aç (aşağıda) | — |
+   | G3 | `dış duvarlar 140 olsun` | r02, "Uygulanan: dış duvarlar 140'lık karkas …"; karar kuralın, LLM okuması yalnız kayda | 2 |
+   | G4 | — | gölgeyi kapat (aşağıda) | — |
+
+   Gölgeyi aç / kapat:
+
+   ```
+   ssh -n portman-vps 'timeout 60 bash /opt/portman/guncel/vps/ayar.sh llm_once_revizyon "{\"mod\": \"golge\"}"' > "$CIKTI/ie14_8_golge_ac.txt" 2>&1
+   ssh -n portman-vps 'timeout 60 bash /opt/portman/guncel/vps/ayar.sh llm_once_revizyon "{\"mod\": \"kapali\"}"' > "$CIKTI/ie14_9_golge_kapat.txt" 2>&1
+   ```
+
+   Ücret tahmini: 4 LLM çağrısı ve yaklaşık 10 WhatsApp mesajı.
+
+5. **Son kontrol:**
+
+   ```
+   ssh -n portman-vps 'timeout 120 bash /opt/portman/guncel/vps/ie14_kontrol.sh deneme 120' > "$CIKTI/ie14_10_deneme.txt" 2>&1
+   ```
+
+   Beklenen:
+   - `okuma_kiyaslari`'nda 1 satır `Ç8801K · r1 · … · 1`;
+   - `plan_uretimleri`'nde seçilen planla yeni satır;
+   - açık iş 0, bekleyen giden 0.

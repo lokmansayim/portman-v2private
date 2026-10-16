@@ -13,7 +13,8 @@ Yeni pencere için hazırlıklar:
 - **Canlıya alma (07:49–07:57 UTC):** PR #23 birleşti (`18b095a`); etiket `v2026.10.15`; `guncelle.sh` `== çıkış 0`; şema 8 (göç 007–008), sağlık 200; `plan_uretimi.acik = true`. Aktif kart yalnız Patron.
 - **Deneme (Patron kartı, 07:56–08:06 UTC):** T1 talep → iki yeni plan + KT-03, T2 seçim → r01, T3 revizyon (pencere ölçüsü uygulandı, yönsüz büyütme bayiye yazıldı), T4 L çatı → "otomatik uygulayamadım", plan onaylanabilir: **Canlıda çalışıyor**. T5 ve gölge okuma **denenmedi**. Ücret: 11 LLM çağrısı, 12 giden mesaj.
 - **Bulgular ve düzeltme (`19cfd2b`, dal `ie-14-talepten-plana`):** A revizyonda eski çatı adı, B "kirma", C pencere ölçüsü, D eksik bilgi metni, E m² biçimi; G (Lokman 16.10) kurallara uymayan istek konuşmayı kapatmaz, Patron'a bilgi.
-- **Bekleyen (Lokman):** PR ve birleştirme → etiket `v2026.10.16` → `guncelle.sh` → T5 + gölge okuma denemesi (ücretli) → ayarların açık kalıp kalmayacağı; Notion Görev 6d "Dönüş:".
+- **Düzeltmelerin kanıtı (`9ef4b32`):** tam doğrulama 10:15–10:39 UTC çıkış 0: harness 22/22, DXF/PDF 18/18 AYNI, "referansla aynı", pytest 1043 geçti; e2e 104/104. Geometri hakemi üç tur, kvkk-denetcisi: "kapanır". Ek: dış kapı istenen cepheye taşınır; içeriği aynı plan revizyon hakkı yakmaz.
+- **Bekleyen (Lokman):** PR ve birleştirme → etiket `v2026.10.16` → `guncelle.sh` → T5 + gölge okuma denemesi (ücretli) → ayarların açık kalıp kalmayacağı; Notion Görev 6d "Dönüş:". Komutlar: `docs/notlar/2026-10-15_IE14_canliya_alma.md` › "v2026.10.16".
 
 **16 Ekim 2026 sabah eki (Görev 6d · İE-14 canlıya alma hazırlığı; yönerge `docs/notlar/2026-10-15_IE14_canliya_alma.md`):**
 - **Bulgu:** `main` `d3c8e58` canlı deneme için eksikti. Yerel benzetimde T4 "çatı L olsun" konuşmayı kapatıyordu, T5 onayı çalışmıyordu; mühendis doğrulama satırı (karar 1) da yoktu.
