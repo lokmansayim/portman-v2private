@@ -363,7 +363,9 @@ def test_t3_yeni_plan_revizyonu_gecmezse_plan_aynen_onaylanabilir_patrona_bilgi(
     salon = next(m["ad"] for m in plan["mahaller"] if m["islev"] == "salon")
     duzenleyici["cevap"] = {"islemler": [{"op": "kapi_kaldir", "mahal": salon, "mahal_b": "Hol", "alinti": "salonla hol arasındaki kapıyı kaldırın"}],
                             "uygulanamayan": []}
-    assert depo.mesaj_kaydet(mesaj("salonla hol arasındaki kapıyı kaldırın", talep("revizyon", ozet="kapı kaldır"), bayi=BAYI_KART))
+    sahte_no = "900000000555"                                           # gerçek olmayan (depo deseni); Patron metnindeki alıntı maskeli olmalı
+    assert depo.mesaj_kaydet(mesaj(f"salonla hol arasındaki kapıyı kaldırın, müşteri {sahte_no}", talep("revizyon", ozet="kapı kaldır"),
+                                   bayi=BAYI_KART))
     [r] = isle_hepsi(depo, URETIM)
     assert r["eylem"] == "sor" and "kurallara uymadı" in r["gerekce"], r
     assert son_rev(depo)["rev"] == 1
@@ -374,7 +376,8 @@ def test_t3_yeni_plan_revizyonu_gecmezse_plan_aynen_onaylanabilir_patrona_bilgi(
     assert '"salonla hol arasındaki kapıyı kaldırın: ' in bayiye and "planınız aynen geçerli" in bayiye and "Onayla" in bayiye
     patron = [x for x in satirlar if x["alici"] == "PATRON"]
     assert any("kurallara uymayan" in (x["govde"] or "") for x in patron) and any(x["kind"] == "template" for x in patron)
-    assert NUMARA_A not in json.dumps([x["govde"] for x in patron], ensure_ascii=False)
+    pg = json.dumps([x["govde"] for x in patron], ensure_ascii=False)
+    assert NUMARA_A not in pg and sahte_no not in pg and "…0555" in pg
 
 
 def test_canli_a_e_cati_adi_guncel_ve_m2_turkce(depo, wa, hizli_genel, uretici, duzenleyici):
