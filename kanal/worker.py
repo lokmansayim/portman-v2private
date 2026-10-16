@@ -502,6 +502,10 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
     if cizim and not cizim["passed"]:
         ekle("Ön onay planı otomatik doğrulamadan geçmedi; Lokman Bey'e iletiyorum, en kısa sürede dönüş yapılacak.")
         patrona(f"Portman: {kim} için {sonuc['is_emri_no']} çizimi doğrulamadan geçmedi: {'; '.join(cizim['errors'])[:400]}")
+    if (getattr(k, "llm_yeni_plan", None) or {}).get("kurala_uymayan") and karar.eylem != "yonlendir":
+        # Lokman 16.10 (canlı deneme G): kurallara uymayan istek konuşmayı kapatmaz; bayi planı onaylayabilir, Patron elle yardım için bilgilenir
+        patrona(f"Portman bilgi: {kim} — yeni plan revizyonunda kurallara uymayan istek otomatik uygulanmadı; konuşma açık, plan onaylanabilir. "
+                f"Mesaj: \"{maske_numaralar(gelen.get('text') or '')[:300]}\"", sablon=True, is_emri_no=sonuc.get("is_emri_no"))
     if karar.eylem == "yonlendir":
         model = katalog.bul(talep.katalog_kodu) if talep.katalog_kodu else None
         model_notu = f" Katalog notu ({model['code']}): {model['not']}" if model and model.get("not") else ""   # D-07: yalnız Patron'a

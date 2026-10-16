@@ -148,10 +148,13 @@ def test_duzenle_komsu_baska_hizadaysa_uygulanamaz_ve_plan_degismez():
     assert s["durum"] == "uygulanamadi" and s["plan"] is None and any("başka hizada" in x for x in s["uygulanamayan"])
 
 
-def test_duzenle_denetimden_gecmezse_gecersiz():
+def test_duzenle_denetimden_gecmezse_uygulanamadi_gerekceyle():
+    # Lokman 16.10 (canlı deneme, G): kurallara uymayan istek konuşmayı kapatmaz; önceden "gecersiz" → yönlendirme idi. Plan aynen,
+    # istek bayinin sözü (yoksa işlemin Türkçesi) ve denetçinin kısa gerekçesiyle yazılır; karar Patron'a bilgi verir (kurala_uymayan)
     hazir = {"islemler": [{"op": "kapi_kaldir", "mahal": "Salon", "mahal_b": "Hol"}], "uygulanamayan": []}
     s = PI.duzenle(ornek("gecerli_3arti1_100"), "salon hol kapısını kaldırın", {"oda_programi": "3+1"}, hazir=hazir)
-    assert s["durum"] == "gecersiz" and any("ulaşılamıyor" in x for x in s["ihlaller"])
+    assert s["durum"] == "uygulanamadi" and s["plan"] is None and s["kurala_uymayan"] is True
+    assert any("ulaşılamıyor" in x for x in s["ihlaller"]) and s["uygulanamayan"][0].startswith("kapı kaldırma: ")
 
 
 def test_pencere_degmeyen_cepheye_istenirse_yalniz_o_istek_duser():
@@ -191,7 +194,7 @@ def test_birlikte_gecmeyen_islemler_tek_tek_denenir():
     assert s["uygulanamayan"] == ["hole pencere: Hol güney cephesine 1 açıklık sığmıyor"]
     assert len(s["denemeler"]) == 2 and not s["denemeler"][0]["gecerli"] and s["denemeler"][1]["gecerli"]
     s = PI.duzenle(ornek("gecerli_3arti1_100"), "x", {"oda_programi": "3+1"}, hazir={"islemler": islemler[1:], "uygulanamayan": []})
-    assert s["durum"] == "gecersiz"                                         # tek işlem geçmezse eskisi gibi (karar yönlendirir)
+    assert s["durum"] == "uygulanamadi" and s["kurala_uymayan"]            # Lokman 16.10 (G): tek işlem geçmezse de plan aynen, gerekçeli
 
 
 def test_sonraki_islemin_mumkun_kildigi_erken_islem_yeniden_denenir():
@@ -248,10 +251,29 @@ def test_llm_tablosu_odanin_dis_cephelerini_yazar():
 
 @pytest.mark.parametrize("islem,beklenen", [
     ({"op": "pencere_ekle", "mahal": "Yatak Odası 3", "cephe": "K", "olcu": "120x120"}, "pencere eklendi: Yatak Odası 3 120/120"),
-    ({"op": "cati_tipi", "tip": "besik"}, "çatı besik"),
+    ({"op": "cati_tipi", "tip": "besik"}, "çatı beşik"),                   # canlı deneme 16.10 (B): ham değer "kirma" yazılıyordu
     ({"op": "oda_kucult", "mahal": "Salon", "yon": "K", "cm": 30}, "Salon 25,2 → 23,5 m²"),
 ])
 def test_tekil_islemler(islem, beklenen):
     s = PI.duzenle(ornek("gecerli_3arti1_100"), "x", {"oda_programi": "3+1"}, hazir={"islemler": [islem], "uygulanamayan": []})
     assert s["durum"] == "gecerli", s["ihlaller"]
     assert beklenen in s["fark"]
+
+
+# ── canlı deneme dönüşü (16.10.2026; Patron kartı, v2026.10.15) ─────────────────────────────────────────────────────────
+def test_pencere_olcu_degisikligi_tek_satir():
+    # C: "mutfağın penceresini 120x180 yap" → kaldır + ekle; bayiye "eklendi … kaldırıldı" değil, ölçü değişikliği olarak
+    islemler = [{"op": "pencere_kaldir", "mahal": "Salon", "cephe": "B", "olcu": "120x120"},
+                {"op": "pencere_ekle", "mahal": "Salon", "cephe": "B", "olcu": "120x180"}]
+    s = PI.duzenle(ornek("gecerli_3arti1_100"), "x", {"oda_programi": "3+1"}, hazir={"islemler": islemler, "uygulanamayan": []})
+    assert s["durum"] == "gecerli" and s["fark"] == ["pencere ölçüsü: Salon sol 120/120 → 120/180"], s["fark"]
+
+
+@pytest.mark.parametrize("islem,beklenen", [
+    ({"op": "oda_buyut", "mahal": "Salon", "cm": 50, "alinti": "salonu 50 cm büyüt"},
+     "salonu 50 cm büyüt: hangi yöne (ön, arka, sol, sağ) büyütüleceği belli değil"),
+    ({"op": "oda_kucult", "yon": "K", "cm": 50, "alinti": "50 cm küçült"}, "50 cm küçült: hangi oda belli değil")])
+def test_oda_islemi_eksik_bilgiyi_ayri_soyler(islem, beklenen):
+    # D: canlıda yalnız yön eksikken "hangi oda ve hangi yön belli değil" yazıyordu
+    s = PI.duzenle(ornek("gecerli_3arti1_100"), "x", {"oda_programi": "3+1"}, hazir={"islemler": [islem], "uygulanamayan": []})
+    assert s["durum"] == "uygulanamadi" and s["uygulanamayan"] == [beklenen] and not s.get("kurala_uymayan")

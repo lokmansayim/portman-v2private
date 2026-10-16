@@ -11,6 +11,7 @@ Koşum: PORTMAN_TEST_PG="host=127.0.0.1 port=55432 user=postgres" python -m pyte
 from __future__ import annotations
 
 import json
+import re
 import time
 from pathlib import Path
 
@@ -353,18 +354,44 @@ def test_c2_sorudan_sonra_onay_soruyu_kapatir(depo, wa, hizli_genel, uretici, du
     assert kr.gerekce == "plan onaylandı" and k.d["asama"] == "onaylandi" and k.d["son_soru_alani"] is None
 
 
-def test_t3_yeni_plan_revizyonu_gecmezse_plan_degismez(depo, wa, hizli_genel, uretici, duzenleyici):
+def test_t3_yeni_plan_revizyonu_gecmezse_plan_aynen_onaylanabilir_patrona_bilgi(depo, wa, hizli_genel, uretici, duzenleyici):
+    # Lokman 16.10 (canlı deneme G): kurallara uymayan istek ("kapıyı ve duvarları kaldır") konuşmayı kapatmaz. Önceden yönlendirme
+    # konuşmayı kapatıyor, son plan onaylanamıyordu. Plan aynen ve onaylanabilir, istek gerekçesiyle yazılır, Patron'a bilgi (metin + şablon)
     _secilmis_yeni_plan(depo)
     d, _ = depo.konusma_oku(NUMARA_A)
     plan = d["uretilen_plan"]["plan"]
     salon = next(m["ad"] for m in plan["mahaller"] if m["islev"] == "salon")
-    duzenleyici["cevap"] = {"islemler": [{"op": "kapi_kaldir", "mahal": salon, "mahal_b": "Hol"}], "uygulanamayan": []}
+    duzenleyici["cevap"] = {"islemler": [{"op": "kapi_kaldir", "mahal": salon, "mahal_b": "Hol", "alinti": "salonla hol arasındaki kapıyı kaldırın"}],
+                            "uygulanamayan": []}
     assert depo.mesaj_kaydet(mesaj("salonla hol arasındaki kapıyı kaldırın", talep("revizyon", ozet="kapı kaldır"), bayi=BAYI_KART))
     [r] = isle_hepsi(depo, URETIM)
-    assert r["eylem"] == "yonlendir" and "revizyonu üretilemedi" in r["gerekce"]
+    assert r["eylem"] == "sor" and "kurallara uymadı" in r["gerekce"], r
     assert son_rev(depo)["rev"] == 1
     d, _ = depo.konusma_oku(NUMARA_A)
-    assert d["revizyon"] == 0 and d["asama"] != "is_emri_hazir"
+    assert d["revizyon"] == 0 and d["asama"] == "onay_bekliyor"
+    satirlar = sorgu(depo, "SELECT alici, kind, govde FROM giden ORDER BY is_id DESC, sira")
+    bayiye = [x for x in satirlar if x["alici"] != "PATRON"][0]["govde"]
+    assert '"salonla hol arasındaki kapıyı kaldırın: ' in bayiye and "planınız aynen geçerli" in bayiye and "Onayla" in bayiye
+    patron = [x for x in satirlar if x["alici"] == "PATRON"]
+    assert any("kurallara uymayan" in (x["govde"] or "") for x in patron) and any(x["kind"] == "template" for x in patron)
+    assert NUMARA_A not in json.dumps([x["govde"] for x in patron], ensure_ascii=False)
+
+
+def test_canli_a_e_cati_adi_guncel_ve_m2_turkce(depo, wa, hizli_genel, uretici, duzenleyici):
+    # canlı deneme 16.10: (A) çatı değişince mesajdaki çatı adı eski kalıyordu ("beşik", çizim kırma); (B) "çatı kirma";
+    # (E) "95.03 m²" noktalı yazılıyordu (kartta "95 m²")
+    _secilmis_yeni_plan(depo)
+    d, _ = depo.konusma_oku(NUMARA_A)
+    assert d["uretilen_plan"]["plan"]["cati"]["tip"] == "kirma"
+    govdeler = [x["govde"] for x in sorgu(depo, "SELECT govde FROM giden WHERE kind = 'interactive' ORDER BY olusturuldu, sira")]
+    assert govdeler and not any(re.search(r"\d\.\d+ m²", g) for g in govdeler), govdeler
+    duzenleyici["cevap"] = {"islemler": [{"op": "cati_tipi", "tip": "besik", "alinti": "çatı beşik olsun"}], "uygulanamayan": []}
+    assert depo.mesaj_kaydet(mesaj("çatı beşik olsun", talep("revizyon", ozet="çatı"), bayi=BAYI_KART))
+    [r] = isle_hepsi(depo, URETIM)
+    assert r["eylem"] == "is_emri", r
+    govde = sorgu(depo, "SELECT govde FROM giden WHERE kind = 'interactive' ORDER BY olusturuldu DESC")[0]["govde"]
+    assert "Yeni plan (beşik" in govde and "(kırma" not in govde and "Uygulanan: çatı beşik." in govde, govde
+    assert not re.search(r"\d\.\d+ m²", govde), govde
 
 
 def test_k1_olcu_notu_ve_yuvarlama_bayiye_yazilir(depo, wa, hizli_genel, uretici):

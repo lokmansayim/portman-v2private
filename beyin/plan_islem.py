@@ -197,8 +197,10 @@ def uygula(plan: dict, islemler: list[dict]) -> tuple[dict, list[str]]:
     for o in islemler:
         op = o["op"]
         if op in ("oda_buyut", "oda_kucult"):
-            if not (o.get("mahal") and o.get("yon")):
-                olmayan.append(f"{_soz(o)}: hangi oda ve hangi yön belli değil")
+            if not (o.get("mahal") and o.get("yon")):                 # canlı deneme 16.10 (D): eksik olanı ayrı söyler
+                fiil = "büyütüleceği" if op == "oda_buyut" else "küçültüleceği"
+                olmayan.append(f"{_soz(o)}: " + ("hangi oda belli değil" if not o.get("mahal")
+                                                  else f"hangi yöne (ön, arka, sol, sağ) {fiil} belli değil"))
                 continue
             cm = int(o.get("cm") or 50)
             cm = (cm if op == "oda_buyut" else -cm)
@@ -264,12 +266,13 @@ def _kisa(ihlal: str, sinir: int) -> str:
     return t if len(t) <= sinir else t[:sinir].rsplit(" ", 1)[0] + "…"
 
 
-def _sirayla(plan: dict, islemler: list[dict], talep: dict, kod: str) -> tuple[dict, dict | None, list[str], list[dict]]:
+def _sirayla(plan: dict, islemler: list[dict], talep: dict, kod: str) -> tuple[dict, dict | None, list[str], list[dict], bool]:
     """İşlemleri sırayla tek tek uygular ve denetler; geçmeyenler bir tur daha denenir (sonraki işlemin mümkün kıldığı erken işlem, ör. hol
-    genişleyince sığan pencere; hakem ikinci tur). Dönüş: (plan, son geçen denetim ya da None, uygulanamayan, uygulanan işlemler)."""
-    p, son, kalan, bekleyen, olmayan = plan, None, [], list(islemler), []
+    genişleyince sığan pencere; hakem ikinci tur). Dönüş: (plan, son geçen denetim ya da None, uygulanamayan, uygulanan işlemler,
+    denetçiden geçmeyen işlem var mı)."""
+    p, son, kalan, bekleyen, olmayan, kurala = plan, None, [], list(islemler), [], False
     for _ in range(2):
-        olmayan, sonraki = [], []
+        olmayan, sonraki, kurala = [], [], False                 # son turun sonucu geçerli
         for o in bekleyen:
             q, neden = uygula(p, [o])
             if neden:
@@ -286,10 +289,11 @@ def _sirayla(plan: dict, islemler: list[dict], talep: dict, kod: str) -> tuple[d
                 soz = _soz(o)[:40]
                 olmayan.append(f"{soz}: {_kisa((d['ihlaller'] or ['kurallara uymuyor'])[0], max(20, 78 - len(soz)))}")
                 sonraki.append(o)
+                kurala = True
         if not sonraki or len(sonraki) == len(bekleyen):
             break
         bekleyen = sonraki
-    return p, son, olmayan, kalan
+    return p, son, olmayan, kalan, kurala
 
 
 def duzenle(plan: dict, metin: str, talep: dict, ayar: dict | None = None, hazir: dict | None = None, kod: str = "YENI") -> dict:
@@ -320,14 +324,15 @@ def duzenle(plan: dict, metin: str, talep: dict, ayar: dict | None = None, hazir
     if not d["gecerli"]:
         s["ihlaller"] = d["ihlaller"][:8]
         # birlikte kurallara uymadı: işlemler sırayla tek tek denenir; geçen uygulanır, geçmeyen bayinin sözü ve kısa gerekçesiyle yazılır
-        # (geometri hakemi 15.10, Önemli 2: pencere cepheye değer ama sığmaz; büyütme bir kapıyı sığmaz kılar). Hiçbiri geçmezse eskisi gibi.
-        if len(o["islemler"]) < 2:
-            return s
-        yeni, d, olmayan, kalan = _sirayla(plan, o["islemler"], talep, kod)
+        # (geometri hakemi 15.10, Önemli 2: pencere cepheye değer ama sığmaz; büyütme bir kapıyı sığmaz kılar). Hiçbiri geçmezse plan aynen,
+        # istek gerekçesiyle "uygulanamadi" (Lokman 16.10, canlı deneme G: konuşma kapanmaz; `kurala_uymayan` ile karar Patron'a bilgi verir)
+        yeni, d, olmayan, kalan, kurala = _sirayla(plan, o["islemler"], talep, kod)
+        s["uygulanamayan"], s["kurala_uymayan"] = list(o["uygulanamayan"]) + olmayan, kurala
         if d is None:
+            s["durum"] = "uygulanamadi" if s["uygulanamayan"] else "gecersiz"
             return s
         s["denemeler"].append({"plan": yeni, "gecerli": True, "ihlaller": [], "sirayla": True})
-        s["uygulanamayan"], s["ihlaller"] = list(o["uygulanamayan"]) + olmayan, []
+        s["ihlaller"] = []
     s.update(durum="gecerli", plan=yeni, tanim=d["tanim"], ozet=d["ozet"], fark=plan_farki(plan, yeni))
     if any(x["op"] in ("oda_buyut", "oda_kucult") and not x.get("cm") for x in kalan):
         s["fark"].append("ölçü söylenmediği için 50 cm alındı")       # varsayım bayiye yazılır (inceleme G10)

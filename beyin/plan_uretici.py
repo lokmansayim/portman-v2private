@@ -152,6 +152,10 @@ def _tr(v: float) -> str:
     return f"{v:.1f}".replace(".", ",")
 
 
+CATI_ADI = {"besik": "beşik", "kirma": "kırma"}                    # bayiye giden metin (ham değer "kirma" yazılmaz; canlı deneme 16.10)
+CEPHE_SOZU = {"G": "ön", "K": "arka", "B": "sol", "D": "sağ"}         # plan görselindeki ÖN / ARKA / SOL / SAĞ etiketleriyle aynı
+
+
 def plan_farki(eski: dict, yeni: dict) -> list[str]:
     """İki plan arasındaki bayiye söylenecek farklar (kodun okuması; LLM'in özeti değil, K18 yönü): dış ölçü, mahal alanı (eksenden),
     eklenen/kaldırılan mahal, pencere ve kapı."""
@@ -175,12 +179,15 @@ def plan_farki(eski: dict, yeni: dict) -> list[str]:
             c[(x["mahal"], x["cephe"], x["olcu"])] = c.get((x["mahal"], x["cephe"], x["olcu"]), 0) + int(x.get("adet") or 1)
         return c
     pe, py = pencereler(eski), pencereler(yeni)
-    for (m, c, o), n in py.items():
-        if n > pe.get((m, c, o), 0):
-            out.append(f"pencere eklendi: {m} {o.replace('x', '/')}")
-    for (m, c, o), n in pe.items():
-        if n > py.get((m, c, o), 0):
-            out.append(f"pencere kaldırıldı: {m} {o.replace('x', '/')}")
+    ek = [k for k, n in py.items() for _ in range(n - pe.get(k, 0))]
+    cik = [k for k, n in pe.items() for _ in range(n - py.get(k, 0))]
+    for k in list(cik):                       # aynı mahal ve cephede biri gidip biri geldiyse ölçü değişikliğidir (canlı deneme 16.10, C)
+        es = next((x for x in ek if x[:2] == k[:2]), None)
+        if es is not None:
+            ek.remove(es); cik.remove(k)
+            out.append(f"pencere ölçüsü: {k[0]} {CEPHE_SOZU.get(k[1], k[1])} {k[2].replace('x', '/')} → {es[2].replace('x', '/')}")
+    out += [f"pencere eklendi: {m} {o.replace('x', '/')}" for m, c, o in ek]
+    out += [f"pencere kaldırıldı: {m} {o.replace('x', '/')}" for m, c, o in cik]
     ke = {tuple(sorted(k["arasinda"])) for k in eski["kapilar"]}
     ky = {tuple(sorted(k["arasinda"])) for k in yeni["kapilar"]}
     out += [f"kapı eklendi: {' – '.join(x for x in k if x != 'dis') or 'dış'}" for k in sorted(ky - ke)]
@@ -188,7 +195,8 @@ def plan_farki(eski: dict, yeni: dict) -> list[str]:
     if (eski.get("dis_karkas") or 80) != (yeni.get("dis_karkas") or 80):
         out.append("dış duvarlar 140'lık karkas" if yeni.get("dis_karkas") == 140 else "dış duvarlar 80'lik karkas")
     if (eski.get("cati") or {}).get("tip") != (yeni.get("cati") or {}).get("tip"):
-        out.append(f"çatı {(yeni.get('cati') or {}).get('tip')}")
+        tip = (yeni.get("cati") or {}).get("tip")
+        out.append(f"çatı {CATI_ADI.get(tip, tip)}")
     return out
 
 
