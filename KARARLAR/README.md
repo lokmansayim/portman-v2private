@@ -73,6 +73,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-11](D-11.md) | Geliştirme döneminde çelik adayların bayiye sunulma kabulünü (K-A10) Lokman verir (kabul kaydında kim = Lokman, dayanak D-11; metinlerde "kabul eden"); 8b mühendis teknik kontrolü aynen; genel motor düzenlenebilir DXF üretir (plan + dört görünüş, katmanlı, cm), yükleme listesi Excel'i yalnız kabul paketinde (openpyxl sunucuda yok); DXF ve Excel çıktıdır, kaynak değil: düzeltme tanıma (D-07) ya da kural kitabına işlenir, yeniden üretilir | 13.10 sabah |
 | [D-16](D-16.md) | BK-09 çizim düzeltmeleri: kapı yayını kesen mahal etiketi oda içinde kaydırılır; pafta 2. sayfada TASLAK ayrı yazı; KT başlığında ve liste adında m² koddan (brüt oturum, model dosyası aynen); G1 ölçü zinciri eşiği `max(12,5; dış kaplama + en kalın dış duvar + 1)`; çentiğe değen dar sayı zincirin dış yanında; yazı denetimi kapı yayı ve sayfa dışı; referans `2026-10-14` bu kararla yeniden donduruldu | 14.10 (Lokman, BK-09 planı) |
 | [D-17](D-17.md) | Yükleme listesi Excel'i her çelik çizimde sunucuda üretilir (`kanal/worker.liste_exceli`, `uret` dışında; altın değişmez), bayi onaylayınca mühendise gider, bayiye gitmez; `openpyxl` + `et-xmlfile` sunucu listesinde; D-11'in "yalnız kabul paketinde" maddesi değişti | 14.10 (Lokman, Görev 4b ve 8b planı) |
+| [D-20](D-20.md) | Model atölyesi (İE-09): banka modelleri `modeller/banka/<DOSYA>/` altında, referans zincirine girmez, her biri kendi kontrol dosyasıyla korunur (tanım özeti, kural seti pimi, hızlı ölçüm, çizim izleri); kontrol ve referans yalnız motor ya da kural değişince ayrı PR'da, kararla ve Patron'un onayıyla yeniden dondurulur; kabul kapısı: metraj (gerçek Excel'de çelik kg ±%3, aşarsa beklemede; Excel yoksa "koşulmadı" yazılır), harness ve testler aynen; atölye modeli bayiye yalnız açık K-A10 kaydıyla, çatı varyantı ayrı sunulmaz; kör test seti açılmaz | 16.10 (Lokman, İE-09 planı), kayıt 17.10 |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
 
@@ -86,8 +87,10 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-17 | İE-08 8b: yükleme listesi Excel'i sunucuda üretilir ve mühendise gider (D-11'in "yalnız kabul paketinde" maddesini değiştirir) | yazıldı (14.10; `ie-08-8b-muhendis`) |
 | D | D-18 | İE-14: yeni üretilen çelik plan bayiye TASLAK gider; plan üretimi ve revizyon için ek LLM çağrısı (K05 istisnası) | yazıldı (14.10; `ie-14-talepten-plana`) |
 | D | D-19 | BK-10: 24 saat kapanış kuralı (CIO devri, 15.10) | ayrıldı |
-| D | D-20 | İE-09: atölye modelleri referans zincirine girmez, her biri kendi kontrol dosyasıyla korunur; referans ve kontrol dosyaları yalnız motor ya da kural değişince birlikte yeniden dondurulur | ayrıldı (16.10; Görev 6e, plan onayıyla yazılır) |
-| D | **D-21** | — | **sıradaki boş** |
+| D | D-20 | İE-09: atölye modelleri referans zincirine girmez, her biri kendi kontrol dosyasıyla korunur; referans ve kontrol dosyaları yalnız motor ya da kural değişince, ayrı PR'da ve Patron'un onayıyla yeniden dondurulur | yazıldı (17.10; `claude/gorev-6e-model-atolyesi-rnhtcp`) |
+| D | D-21 | İE-09 ilk projeler sırası: Ç8801'den sonra 28 AIPrefabrik projesi ve mühendisin tek kat çelikleri; katalog çelikler sıradan çıktı; çift kat canlıdan sonra; kör 20 liste kapalı (Patron, 17.10 07:00, CIO kartı) | ayrıldı (CIO panosu; metni `IE-09.md › Sonraki sıra`) |
+| D | D-22 | İE-09: atölye önce mühendisin tek kat çelikleriyle; AIPrefabrik prefabrik motoru `main`'e girince (Patron, 17.10 08:01, karar kartı "Önce mühendis") | ayrıldı (CIO panosu; metni `IE-09.md › Sonraki sıra`) |
+| D | **D-23** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; panel ve P6001 güncellemesi kapsam dışı, pilottan sonra) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | dallarda |

@@ -19,6 +19,7 @@ Ortak kurallar yukarıdaki `AGENTS.md`'den gelir; burada yalnız Claude'a özgü
 | `/is-emri <KOD> <başlık>` | Dal + iş emri belgesi + plan; onay için durur |
 | `/kapanis` | Doğrulama → kanıt → DURUM → commit/push → `/code-review` → PR özeti |
 | `/sahip-ozeti` | Lokman için 10 satırlık durum: canlıda ne var, bekleyen onaylar, açık riskler |
+| `/atolye <KOD> <istek>` | Model atölyesi (İE-09): kart, tanım, çizim, kontrol sayfası, düzeltme, kabul, gün sonu |
 
 Hakemler (`.claude/agents/`): `geometri-hakemi` (Motor/İş Emri değişikliklerini kurallara karşı inceler), `kvkk-denetcisi` (diff'te sır ve kişisel veri arar). Kapanışta ikisi de koşturulur.
 
