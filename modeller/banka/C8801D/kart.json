@@ -1,0 +1,276 @@
+{
+ "sema": "portman.model_karti/0.1",
+ "kod": "Ç8801D",
+ "gosterim": "Ç8801-D",
+ "ad": "Tek kat çelik, 2+1, 88 m² (Ç8801'in çatı varyantı D: tam kırma, dört omuz)",
+ "aile": "tek kat çelik",
+ "yapi_turu": "celik",
+ "kat": 1,
+ "musteri_projesi": false,
+ "taban_model": "Ç8801",
+ "varyant_turu": "cati",
+ "varyantlar": [],
+ "kaynak": {
+  "tur": "varyant",
+  "metin": "Lokman, 15 Ekim 2026 23:41: örnek Ç8801'in çatı tipleri; ilk model tam kırma (plan onayı 16 Ekim 21:31)",
+  "taban": "Ç8801",
+  "taban_tanim": "modeller/C8801.json",
+  "taban_sha256": "a8ca2f1910ee33b9de7af39c73b71914584f7703c240e4c10f8ab7c9b57f58ff",
+  "dosyalar": []
+ },
+ "kaynak_degerleri": {
+  "odalar": {
+   "Yaşam Alanı": {
+    "deger": 21.34,
+    "kaynak": "bankada Ç8801 kaydı (koddan; adaylar.json)"
+   },
+   "Mutfak": {
+    "deger": 10.05,
+    "kaynak": "bankada Ç8801 kaydı (koddan; adaylar.json)"
+   },
+   "Hol": {
+    "deger": 7.38,
+    "kaynak": "bankada Ç8801 kaydı (koddan; adaylar.json)"
+   },
+   "Yatak Odası 1": {
+    "deger": 12.74,
+    "kaynak": "bankada Ç8801 kaydı (koddan; adaylar.json)"
+   },
+   "Yatak Odası 2": {
+    "deger": 11.79,
+    "kaynak": "bankada Ç8801 kaydı (koddan; adaylar.json)"
+   },
+   "Banyo": {
+    "deger": 4.68,
+    "kaynak": "bankada Ç8801 kaydı (koddan; adaylar.json)"
+   },
+   "Veranda": {
+    "deger": 13.73,
+    "kaynak": "bankada Ç8801 kaydı (koddan; adaylar.json)"
+   }
+  },
+  "brut_m2": {
+   "deger": 88.06,
+   "kaynak": "bankada Ç8801 kaydı (koddan; adaylar.json)"
+  },
+  "oda_programi": {
+   "deger": "2+1",
+   "kaynak": "bankada Ç8801 kaydı (koddan; adaylar.json)"
+  },
+  "pencere": {
+   "deger": 9,
+   "kaynak": "bankada Ç8801 kaydı (koddan; adaylar.json)"
+  },
+  "kapi": {
+   "deger": 6,
+   "kaynak": "bankada Ç8801 kaydı (koddan; adaylar.json)"
+  },
+  "dis_olcu_cm": {
+   "deger": [
+    1024.0,
+    860.0
+   ],
+   "kaynak": "bankada Ç8801 kaydı (koddan; adaylar.json)"
+  }
+ },
+ "durum": "kontrolde",
+ "metraj_testi": {
+  "durum": "yok",
+  "not": "referans yok: gerçek yükleme listesi (Excel) yok; metraj kapısı koşulmadı (kabul metraj doğrulaması sayılmaz)"
+ },
+ "olcum": {
+  "dis_olcu_cm": [
+   1024.0,
+   860.0
+  ],
+  "oturum_m2": 88.06,
+  "veranda_m2": 13.73,
+  "odalar": {
+   "Yaşam Alanı": 21.34,
+   "Mutfak": 10.05,
+   "Hol": 7.38,
+   "Yatak Odası 1": 12.74,
+   "Yatak Odası 2": 11.79,
+   "Banyo": 4.68,
+   "Veranda": 13.73
+  },
+  "oda_programi": "2+1",
+  "pencere": 9,
+  "kapi": 6,
+  "acikliklar": [
+   "dis_kapi",
+   "ic_kapi",
+   "ic_kapi",
+   "ic_kapi",
+   "ic_kapi",
+   "ic_kapi",
+   "pencere Banyo 60/40",
+   "pencere Hol 80/180",
+   "pencere Mutfak 120/180",
+   "pencere Yatak Odası 1 120/120",
+   "pencere Yatak Odası 2 120/120",
+   "pencere Yatak Odası 2 120/180",
+   "pencere Yaşam Alanı 120/120",
+   "pencere Yaşam Alanı 120/120",
+   "pencere Yaşam Alanı 120/180"
+  ],
+  "cati": {
+   "tip": "kirma",
+   "duzlem": 6,
+   "yuzey_m2": 90.56,
+   "kenar_cm": {
+    "kirma": 2367.1,
+    "mahya": 604.0,
+    "sacak": 4008.0,
+    "vadi": 334.0
+   }
+  },
+  "liste": {
+   "satir": 90,
+   "celik_kg": 4990.48,
+   "iz": "d72e6bb06f25d42316c22b0b726a835e9ec6ef03f31b6696f087c74dc7cda9ae",
+   "gruplar": {
+    "Çelik panel": {
+     "satir": 8,
+     "kg": 4990.48
+    },
+    "Metal aksam": {
+     "satir": 3,
+     "kg": 0.0
+    },
+    "Dış cephe kaplama": {
+     "satir": 1,
+     "kg": 0.0
+    },
+    "İç cephe kaplama": {
+     "satir": 5,
+     "kg": 0.0
+    },
+    "Çatı kaplamaları": {
+     "satir": 8,
+     "kg": 0.0
+    },
+    "Dere": {
+     "satir": 7,
+     "kg": 0.0
+    },
+    "Kapı ve pencere": {
+     "satir": 6,
+     "kg": 0.0
+    },
+    "Elektrik": {
+     "satir": 19,
+     "kg": 0.0
+    },
+    "Vida": {
+     "satir": 14,
+     "kg": 0.0
+    },
+    "Sıhhi tesisat": {
+     "satir": 12,
+     "kg": 0.0
+    },
+    "Boya": {
+     "satir": 7,
+     "kg": 0.0
+    }
+   }
+  },
+  "kural_seti": "kurallar.json"
+ },
+ "son_cizim": {
+  "no": 2,
+  "zaman": "2026-10-17T10:52+0300",
+  "tanim_sha256": "587fd1c182054d8d23f5ba3b1b07f60303099e113e4d5ee4693fa3499bcde36d",
+  "kural_seti": "kurallar.json",
+  "passed": true,
+  "cikti": "/mnt/project-files/Portman_Proje_Dosyalari/IE-09_atolye/2026-10-17/C8801D/c02",
+  "denetimler": [
+   {
+    "ad": "Motor doğrulaması",
+    "durum": "geçti",
+    "ayrinti": "çıktılar 8/15 (perspektif yok: bu ortamda VTK yok)"
+   },
+   {
+    "ad": "IFC şema denetimi",
+    "durum": "geçti",
+    "ayrinti": "şema hatası 0"
+   },
+   {
+    "ad": "Yazı çakışması (bayiye giden 4 figür)",
+    "durum": "uyarı",
+    "ayrinti": "pafta_sayfa_2: çakışan mahya 220 / %33,0"
+   },
+   {
+    "ad": "15 cm ve daha kısa parçalar (bayi paftası)",
+    "durum": "geçti",
+    "ayrinti": "yok"
+   },
+   {
+    "ad": "Kartla çizimin tutarlılığı (m², oda programı, açıklık, çatı)",
+    "durum": "geçti",
+    "ayrinti": "kaynak değerleri çizimle aynı"
+   },
+   {
+    "ad": "Bankada aynı model",
+    "durum": "geçti",
+    "ayrinti": "aynı plan: Ç8801, Ç8801K, Ç8801L (çatı varyantı; çatı farklı)"
+   }
+  ],
+  "sure_s": 13.1,
+  "perspektif": "ATLANDI",
+  "kontrol_pdf": "/mnt/project-files/Portman_Proje_Dosyalari/IE-09_atolye/2026-10-17/C8801D/c02/C8801D_kontrol_c02.pdf"
+ },
+ "duzeltmeler": [
+  {
+   "zaman": "2026-10-17T10:52+0300",
+   "tur": "motor",
+   "metin": "Şablon paftası 1. sayfa: iki satıra sarılan çatı adı ('Kanatlı kırma (dört omuz)') satırları birbirine biniyor (yazı çakışması). Atölyede ad 'Tam kırma' olarak kısaltıldı (onaylı plandaki ad); sarma aralığı ayrı PR'da düzeltilir.",
+   "cizim": 1
+  },
+  {
+   "zaman": "2026-10-17T10:52+0300",
+   "tur": "motor",
+   "metin": "Şablon paftası 2. sayfa, çatı planı: cumba batı düzleminin eğim yazısı (%33,0) cumba mahyasının boy yazısına (mahya 220) biniyor. Ayrı PR'da düzeltilir; bu çizimde kalıyor.",
+   "cizim": 1
+  }
+ ],
+ "gecmis": [
+  {
+   "zaman": "2026-10-17T10:50+0300",
+   "olay": "varyant",
+   "taban": "Ç8801",
+   "kaynak": "Lokman, 15 Ekim 2026 23:41: örnek Ç8801'in çatı tipleri; ilk model tam kırma (plan onayı 16 Ekim 21:31)"
+  },
+  {
+   "zaman": "2026-10-17T10:50+0300",
+   "olay": "ciz",
+   "no": 1,
+   "durum": "kontrolde",
+   "passed": true
+  },
+  {
+   "zaman": "2026-10-17T10:52+0300",
+   "olay": "duzelt",
+   "tur": "motor"
+  },
+  {
+   "zaman": "2026-10-17T10:52+0300",
+   "olay": "duzelt",
+   "tur": "motor"
+  },
+  {
+   "zaman": "2026-10-17T10:52+0300",
+   "olay": "ciz",
+   "no": 2,
+   "durum": "kontrolde",
+   "passed": true
+  }
+ ],
+ "kabul": null,
+ "aday": null,
+ "brut_m2": 88.06,
+ "oda_programi": "2+1",
+ "cati_tipi": "kirma",
+ "cati_adi": "Tam kırma"
+}
