@@ -12,12 +12,15 @@ LLM planı yeniden yazmaz (eski `plan_uretici.duzenle` kalktı). İşlemler:
 from __future__ import annotations
 
 import copy
+import json
+import re
 from typing import Literal, Optional
 
 from pydantic import BaseModel, Field, ValidationError
 
 from beyin import numara
 from beyin.plan_denetim import denetle
+from beyin.plan_cozucu import cepheler
 from beyin.plan_sema import PENCERE_OLCULERI
 from beyin.plan_uyarlama import _kesitler, uzat
 
@@ -25,6 +28,21 @@ ARAC_ADI = "plan_islemleri_kaydet"
 ARAC_ACIKLAMA = "Bayinin yeni plan revizyon isteğini koordinatsız işlemlere çevir. Yalnız bu araçla cevap ver."
 VARSAYILAN_AYAR = {"backend": "anthropic", "model": "claude-opus-5-5", "effort": "low", "timeout_s": 60, "max_tokens": 2000}
 YONLER = {"G": (1, -1), "K": (1, 1), "B": (0, -1), "D": (0, 1)}       # (eksen indisi, yön)
+YON_SOZU = {"G": "ön", "K": "arka", "B": "sol", "D": "sağ"}           # bayiye giden gerekçede (PROMPT'taki sözcükler)
+ISLEM_SOZU = {"oda_buyut": "oda büyütme", "oda_kucult": "oda küçültme", "kapi_ekle": "kapı ekleme", "kapi_kaldir": "kapı kaldırma",
+              "pencere_ekle": "pencere ekleme", "pencere_kaldir": "pencere kaldırma", "cati_tipi": "çatı tipi değişikliği",
+              "dis_karkas_140": "dış duvarların 140'lık olması"}
+
+
+def _soz(o: dict) -> str:
+    """Bayiye giden gerekçede isteğin adı: bayinin sözü; yoksa iç işlem adı değil, Türkçesi (geometri hakemi 15.10, küçük 2)."""
+    return str(o.get("alinti") or ISLEM_SOZU.get(o.get("op")) or "istek")
+
+
+def _dis_cepheler(p: dict) -> dict[str, list[str]]:
+    """Mahal → değdiği dış cepheler (G, K, B, D sırasıyla; veranda yüzü dahil, çözücünün pencere yerleşimiyle aynı ölçüt)."""
+    ce = cepheler(p["mahaller"], p["dis_olcu"]["en"], p["dis_olcu"]["boy"])
+    return {ad: [c for c in "GKBD" if d.get(c)] for ad, d in ce.items()}
 
 
 class Islem(BaseModel):
@@ -49,8 +67,11 @@ PROMPT = """Sen PortatifEv'in tek kat çelik evlerinde bayinin revizyon isteğin
 yazmazsın: isteği aşağıdaki işlemlere çevirirsin; uygulamayı ve denetimi kod yapar.
 
 İşlemler: oda_buyut / oda_kucult (mahal, yon: G ön, K arka, B sol, D sağ; cm — bayi sayı vermediyse 50), kapi_ekle / kapi_kaldir (mahal,
-mahal_b; dış kapı için mahal_b "dis"), pencere_ekle / pencere_kaldir (mahal, cephe, olcu), cati_tipi (tip), dis_karkas_140.
+mahal_b; dış kapı için mahal_b "dis" ve istenirse cephe — dış kapıyı başka cepheye almak da kapi_ekle'dir), pencere_ekle / pencere_kaldir
+(mahal, cephe, olcu), cati_tipi (tip), dis_karkas_140.
 - Mahal adlarını tablodaki gibi yaz. Yalnız bayinin bu mesajda istediğini yaz; söylenmeyeni ekleme.
+- Pencere cephesini mahalin tablodaki dış cephelerinden seç. Çatı tipi yalnız besik ya da kirma olabilir; L, cumba ve başka çatı biçimlerini
+  `uygulanamayan`'a yaz.
 - Olumsuz ("olmasın", "istemiyoruz") ya da soru biçimli cümle işlem değildir.
 - Bu işlemlere çevrilemeyen her isteği `uygulanamayan`'a bayinin sözüyle yaz (ör. "çift kat olsun"). Renk ve malzeme istekleri plan değildir,
   onları yazma.
@@ -61,9 +82,12 @@ def tablo(plan: dict) -> str:
     """LLM'e giden tablo: yalnız bu bayinin planı (mahal adı, işlev, eksenden ölçü, cepheler, pencereler, kapılar). Banka kodu yok."""
     satir = [f"Dış ölçü {plan['dis_olcu']['en']}×{plan['dis_olcu']['boy']} cm; çatı {(plan.get('cati') or {}).get('tip')}; "
              f"dış karkas {plan.get('dis_karkas') or 80}", "Mahaller:"]
+    ce = _dis_cepheler(plan)
     for m in plan["mahaller"]:
         r = max(m["dikdortgenler"], key=lambda t: (t[2] - t[0]) * (t[3] - t[1]))
-        satir.append(f"- {m['ad']} ({m['islev']}): {r[2] - r[0]}×{r[3] - r[1]} cm")
+        dis = ", ".join(ce.get(m["ad"]) or [])
+        ek = "" if m["islev"] == "veranda" else f"; dış cepheler: {dis}" if dis else "; dış cephesi yok"     # LLM pencere cephesini buradan seçer
+        satir.append(f"- {m['ad']} ({m['islev']}): {r[2] - r[0]}×{r[3] - r[1]} cm{ek}")
     satir.append("Pencereler: " + "; ".join(f"{p['mahal']} {p['cephe']} {p['olcu']}" for p in plan["pencereler"]))
     satir.append("Kapılar: " + "; ".join(" – ".join(k["arasinda"]) for k in plan["kapilar"]))
     return "\n".join(satir)
@@ -90,10 +114,30 @@ def oku(plan: dict, metin: str, ayar: dict | None = None, hazir: dict | None = N
     try:
         L = IslemListesi.model_validate(cevap).model_dump()
     except ValidationError as e:
-        s["hata"] = f"işlem şeması: {str(e)[:160]}"
-        return s
+        L = _tek_tek(cevap)
+        if L is None:
+            s["hata"] = f"işlem şeması: {str(e)[:160]}"
+            return s
     s.update(durum="tamam", islemler=L["islemler"], uygulanamayan=[str(x) for x in L["uygulanamayan"]])
     return s
+
+
+def _tek_tek(cevap) -> dict | None:
+    """Şemaya uymayan işlem bütün okumayı düşürmez (ör. çatı "L"; canlı deneme hazırlığı, 15.10): geçerli işlemler alınır, uymayan bayinin
+    sözüyle `uygulanamayan`'a gider. Cevabın kendisi liste taşımıyorsa None (eskisi gibi şema hatası)."""
+    if not isinstance(cevap, dict) or not isinstance(cevap.get("islemler"), list):
+        return None
+    u = cevap.get("uygulanamayan") or []
+    u = [u] if isinstance(u, (str, dict)) else u if isinstance(u, list) else []    # metin harf harf bölünmez (hakem küçük 1)
+    olmayan = [str(x) if not isinstance(x, dict) else " ".join(str(v) for v in x.values() if isinstance(v, str)) for x in u if x is not None]
+    olmayan = [x for x in olmayan if x.strip()]                                # nesne süzülüp atılmaz, metni alınır (küçük 2)
+    islemler = []
+    for o in cevap["islemler"]:
+        try:
+            islemler.append(Islem.model_validate(o).model_dump())
+        except ValidationError:
+            olmayan.append(_soz(o)[:80] if isinstance(o, dict) else "istek")
+    return {"islemler": islemler, "uygulanamayan": olmayan}
 
 
 # ── uygulama ─────────────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -155,52 +199,66 @@ def uygula(plan: dict, islemler: list[dict]) -> tuple[dict, list[str]]:
     for o in islemler:
         op = o["op"]
         if op in ("oda_buyut", "oda_kucult"):
-            if not (o.get("mahal") and o.get("yon")):
-                olmayan.append(f"{o.get('alinti') or op}: hangi oda ve hangi yön belli değil")
+            if not (o.get("mahal") and o.get("yon")):                 # canlı deneme 16.10 (D): eksik olanı ayrı söyler
+                fiil = "büyütüleceği" if op == "oda_buyut" else "küçültüleceği"
+                eksik = ["hangi oda"] * (not o.get("mahal")) + [f"hangi yöne (ön, arka, sol, sağ) {fiil}"] * (not o.get("yon"))
+                olmayan.append(f"{_soz(o)}: {' ve '.join(eksik)} belli değil")
                 continue
             cm = int(o.get("cm") or 50)
             cm = (cm if op == "oda_buyut" else -cm)
             if cm % 5:
-                olmayan.append(f"{o.get('alinti') or op}: ölçü 5 cm katı olmalı")
+                olmayan.append(f"{_soz(o)}: ölçü 5 cm katı olmalı")
                 continue
             q, neden = _oda_kenari(p, o["mahal"], o["yon"], cm)
             if q is None:
-                olmayan.append(f"{o.get('alinti') or o['mahal']}: {neden}")
+                olmayan.append(f"{_soz(o)}: {neden}")
             else:
                 p = q
         elif op in ("kapi_ekle", "kapi_kaldir"):
             a, b = o.get("mahal"), o.get("mahal_b") or "dis"
             if a not in adlar() or (b != "dis" and b not in adlar()):
-                olmayan.append(f"{o.get('alinti') or op}: mahal bulunamadı")
+                olmayan.append(f"{_soz(o)}: mahal bulunamadı")
                 continue
             cift = sorted([a, b])
             var = [k for k in p["kapilar"] if sorted(k["arasinda"]) == cift]
+            c = o.get("cephe") if b == "dis" else None             # dış kapının istenen cephesi (geometri hakemi 16.10: önceden yok sayılıyordu)
+            if op == "kapi_ekle" and c and c not in _dis_cepheler(p).get(a, []):
+                olmayan.append(f"{_soz(o)}: {a} {YON_SOZU[c]} cepheye değmiyor")
+                continue
             if op == "kapi_ekle" and not var:
-                p["kapilar"].append({"arasinda": [b, a] if b == "dis" else [a, b]})
+                p["kapilar"].append({"arasinda": [b, a] if b == "dis" else [a, b], **({"cephe": c} if c else {})})
+            elif op == "kapi_ekle" and c and var[0].get("cephe") != c:
+                var[0]["cephe"] = c                                    # var olan dış kapı istenen cepheye taşınır
             elif op == "kapi_kaldir":
                 if not var:
-                    olmayan.append(f"{o.get('alinti') or op}: o iki mahal arasında kapı yok")
+                    olmayan.append(f"{_soz(o)}: o iki mahal arasında kapı yok")
                 else:
                     p["kapilar"].remove(var[0])
         elif op in ("pencere_ekle", "pencere_kaldir"):
             if o.get("mahal") not in adlar():
-                olmayan.append(f"{o.get('alinti') or op}: mahal bulunamadı")
+                olmayan.append(f"{_soz(o)}: mahal bulunamadı")
                 continue
             if op == "pencere_ekle":
                 if not (o.get("cephe") and o.get("olcu") in PENCERE_OLCULERI):
-                    olmayan.append(f"{o.get('alinti') or op}: cephe ve ölçü belli değil")
+                    olmayan.append(f"{_soz(o)}: cephe ve ölçü belli değil")
+                    continue
+                if o["cephe"] not in _dis_cepheler(p).get(o["mahal"], []):
+                    # denetçi bütün revizyonu reddederdi (geçerli öteki işlemler de düşer); yalnız bu istek düşer (canlı deneme hazırlığı, 15.10)
+                    olmayan.append(f"{_soz(o)}: {o['mahal']} {YON_SOZU[o['cephe']]} cepheye değmiyor")
                     continue
                 p["pencereler"].append({"mahal": o["mahal"], "cephe": o["cephe"], "olcu": o["olcu"], "adet": 1})
             else:
                 uy = [x for x in p["pencereler"] if x["mahal"] == o["mahal"] and (not o.get("cephe") or x["cephe"] == o["cephe"])
                       and (not o.get("olcu") or x["olcu"] == o["olcu"])]
                 if len(uy) != 1:
-                    olmayan.append(f"{o.get('alinti') or op}: " + ("o pencere yok" if not uy else "birden çok pencere uyuyor; hangisi?"))
+                    olmayan.append(f"{_soz(o)}: " + ("o pencere yok" if not uy else "birden çok pencere uyuyor; hangisi?"))
+                elif int(uy[0].get("adet") or 1) > 1:                   # adetli girdiden biri kaldırılır (hakem 16.10; önceden hepsi siliniyordu)
+                    uy[0]["adet"] = int(uy[0]["adet"]) - 1
                 else:
                     p["pencereler"].remove(uy[0])
         elif op == "cati_tipi":
             if o.get("tip") not in ("besik", "kirma"):
-                olmayan.append(f"{o.get('alinti') or op}: çatı tipi belli değil")
+                olmayan.append(f"{_soz(o)}: çatı tipi belli değil")
                 continue
             p["cati"] = {**(p.get("cati") or {}), "tip": o["tip"]}
             p["cati"].pop("mahya_yonu", None)
@@ -209,9 +267,60 @@ def uygula(plan: dict, islemler: list[dict]) -> tuple[dict, list[str]]:
     return p, olmayan
 
 
+IHLAL_TURU = re.compile(r"^(dış kapı|kapı|pencere|çatı|geometri):\s*")       # yalnız tek ad; "kapı yayları çakışıyor:" cümledir, kalır
+
+
+def _ayni(a: dict, b: dict) -> bool:
+    """İki plan içerikçe aynı mı: pencereler (mahal, cephe, ölçü) başına adet toplamıyla, kapılar sırasız (bütün alanlarıyla). Kaldır + aynı ölçüde ekle
+    (girdi sırası ve `adet` anahtarı değişir) aynı plandır; revizyon hakkı yakılmaz."""
+    def kanon(p):
+        say: dict = {}
+        for x in p.get("pencereler") or []:
+            k = (x["mahal"], x["cephe"], x["olcu"]); say[k] = say.get(k, 0) + int(x.get("adet") or 1)
+        kapilar = sorted(json.dumps({**k, "arasinda": sorted(k["arasinda"])}, sort_keys=True, ensure_ascii=False) for k in p.get("kapilar") or [])
+        return json.dumps({**p, "pencereler": sorted(say.items()), "kapilar": kapilar}, sort_keys=True, ensure_ascii=False, default=str)
+    return kanon(a) == kanon(b)
+
+
+def _kisa(ihlal: str, sinir: int) -> str:
+    """Denetçi ihlalinin bayiye giden kısa biçimi: baştaki tür ("kapı: ") ve parantezli ayrıntı atılır, sözcük sınırında kesilir."""
+    t = IHLAL_TURU.sub("", ihlal.split(" (")[0]).strip()                         # tür adı atılır, mahal adı ("Banyo: …") kalır
+    return t if len(t) <= sinir else t[:sinir].rsplit(" ", 1)[0] + "…"
+
+
+def _sirayla(plan: dict, islemler: list[dict], talep: dict, kod: str) -> tuple[dict, dict | None, list[str], list[dict], bool]:
+    """İşlemleri sırayla tek tek uygular ve denetler; geçmeyenler bir tur daha denenir (sonraki işlemin mümkün kıldığı erken işlem, ör. hol
+    genişleyince sığan pencere; hakem ikinci tur). Dönüş: (plan, son geçen denetim ya da None, uygulanamayan, uygulanan işlemler,
+    denetçiden geçmeyen işlem var mı)."""
+    p, son, kalan, bekleyen, olmayan, kurala = plan, None, [], list(islemler), [], False
+    for _ in range(2):
+        olmayan, sonraki, kurala = [], [], False                 # son turun sonucu geçerli
+        for o in bekleyen:
+            q, neden = uygula(p, [o])
+            if neden:
+                olmayan += neden
+                sonraki.append(o)
+                continue
+            if _ayni(q, p):                                      # plan zaten öyle: düşen istek değil
+                continue
+            d = denetle(q, {"oda_programi": talep.get("oda_programi")}, kod=kod)
+            if d["gecerli"]:
+                p, son = q, d
+                kalan.append(o)
+            else:
+                soz = _soz(o)[:40]
+                olmayan.append(f"{soz}: {_kisa((d['ihlaller'] or ['kurallara uymuyor'])[0], max(20, 78 - len(soz)))}")
+                sonraki.append(o)
+                kurala = True
+        if not sonraki or len(sonraki) == len(bekleyen):
+            break
+        bekleyen = sonraki
+    return p, son, olmayan, kalan, kurala
+
+
 def duzenle(plan: dict, metin: str, talep: dict, ayar: dict | None = None, hazir: dict | None = None, kod: str = "YENI") -> dict:
     """Yeni planın revizyonu: oku → uygula → denetle (alan ±%10 revizyonda aranmaz; oda programı korunur). Dönüş (karar sözleşmesi):
-    {durum: gecerli|gecersiz|bos|hata, plan, tanim, ozet, fark, uygulanamayan, islemler, cagri, girdi_token, cikti_token, hata, ihlaller}."""
+    {durum: gecerli|gecersiz|bos|uygulanamadi|hata, plan, tanim, ozet, fark, uygulanamayan, islemler, cagri, girdi_token, cikti_token, hata, ihlaller}."""
     from beyin.plan_uretici import plan_farki
     o = oku(plan, metin, ayar, hazir)
     s = {"durum": "hata" if o["durum"] != "tamam" else "gecersiz", "plan": None, "tanim": None, "ozet": {}, "fark": [], "islemler": o["islemler"],
@@ -219,19 +328,34 @@ def duzenle(plan: dict, metin: str, talep: dict, ayar: dict | None = None, hazir
          "hata": o["hata"], "ihlaller": [], "denemeler": []}
     if o["durum"] != "tamam":
         return s
-    yeni, olmayan = uygula(plan, o["islemler"])
+    yeni, olmayan, kalan = plan, [], []                       # işlem işlem (uygula(plan, hepsi) ile aynı sonuç): uygulanan kimlikle izlenir
+    for x in o["islemler"]:
+        yeni, n = uygula(yeni, [x])
+        olmayan += n
+        if not n:
+            kalan.append(x)
     s["uygulanamayan"] += olmayan
-    if yeni == plan:
+    if _ayni(yeni, plan):                                       # yazılışı farklı, içeriği aynı plan yeniden çizilmez (hakem 16.10)
         s["ihlaller"] = ["uygulanacak işlem kalmadı"]
-        if not s["uygulanamayan"]:
-            s["durum"] = "bos"                  # değişiklik isteği yok (ör. yalnız müşteri bilgisi): karar sorar, konuşmayı kapatmaz (inceleme C2)
+        # plan değişmedi: istek yoksa "bos" (karar sorar, inceleme C2); istek anlaşıldı ama uygulanamadıysa (L/cumba çatı, çift kat, belirsiz
+        # cephe) "uygulanamadi" — bayiye istek adıyla yazılır, plan aynen geçerli ve onaylanabilir kalır (Lokman 15.10, karar 3)
+        s["durum"] = "uygulanamadi" if s["uygulanamayan"] else "bos"
         return s
     d = denetle(yeni, {"oda_programi": talep.get("oda_programi")}, kod=kod)
     s["denemeler"] = [{"plan": yeni, "gecerli": d["gecerli"], "ihlaller": d["ihlaller"]}]
     if not d["gecerli"]:
         s["ihlaller"] = d["ihlaller"][:8]
-        return s
+        # birlikte kurallara uymadı: işlemler sırayla tek tek denenir; geçen uygulanır, geçmeyen bayinin sözü ve kısa gerekçesiyle yazılır
+        # (geometri hakemi 15.10, Önemli 2: pencere cepheye değer ama sığmaz; büyütme bir kapıyı sığmaz kılar). Hiçbiri geçmezse plan aynen,
+        # istek gerekçesiyle "uygulanamadi" (Lokman 16.10, canlı deneme G: konuşma kapanmaz; `kurala_uymayan` ile karar Patron'a bilgi verir)
+        yeni, d, olmayan, kalan, kurala = _sirayla(plan, o["islemler"], talep, kod)
+        s["uygulanamayan"], s["kurala_uymayan"] = list(o["uygulanamayan"]) + olmayan, kurala
+        if d is None:
+            s["durum"] = "uygulanamadi" if s["uygulanamayan"] else "gecersiz"
+            return s
+        s["denemeler"].append({"plan": yeni, "gecerli": True, "ihlaller": [], "sirayla": True})
+        s["ihlaller"] = []
     s.update(durum="gecerli", plan=yeni, tanim=d["tanim"], ozet=d["ozet"], fark=plan_farki(plan, yeni))
-    if any(x["op"] in ("oda_buyut", "oda_kucult") and not x.get("cm") for x in o["islemler"]):
+    if any(x["op"] in ("oda_buyut", "oda_kucult") and not x.get("cm") for x in kalan):
         s["fark"].append("ölçü söylenmediği için 50 cm alındı")       # varsayım bayiye yazılır (inceleme G10)
     return s

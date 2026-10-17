@@ -11,12 +11,13 @@ Koşum: PORTMAN_TEST_PG="host=127.0.0.1 port=55432 user=postgres" python -m pyte
 from __future__ import annotations
 
 import json
+import re
 import time
 from pathlib import Path
 
 import pytest
 
-from conftest import AYAR, NUMARA_A, mesaj, sorgu, talep
+from conftest import AYAR, NUMARA_A, mesaj, sorgu, talep, tek
 from test_celik_akisi import BAYI_KART, YEDI, buton, hizli_genel, isle_hepsi, kabul, son_rev  # noqa: F401 (fikstür)
 
 import worker as W
@@ -353,18 +354,75 @@ def test_c2_sorudan_sonra_onay_soruyu_kapatir(depo, wa, hizli_genel, uretici, du
     assert kr.gerekce == "plan onaylandı" and k.d["asama"] == "onaylandi" and k.d["son_soru_alani"] is None
 
 
-def test_t3_yeni_plan_revizyonu_gecmezse_plan_degismez(depo, wa, hizli_genel, uretici, duzenleyici):
+def test_t3_yeni_plan_revizyonu_gecmezse_plan_aynen_onaylanabilir_patrona_bilgi(depo, wa, hizli_genel, uretici, duzenleyici):
+    # Lokman 16.10 (canlı deneme G): kurallara uymayan istek ("kapıyı ve duvarları kaldır") konuşmayı kapatmaz. Önceden yönlendirme
+    # konuşmayı kapatıyor, son plan onaylanamıyordu. Plan aynen ve onaylanabilir, istek gerekçesiyle yazılır, Patron'a bilgi (metin + şablon)
     _secilmis_yeni_plan(depo)
     d, _ = depo.konusma_oku(NUMARA_A)
     plan = d["uretilen_plan"]["plan"]
     salon = next(m["ad"] for m in plan["mahaller"] if m["islev"] == "salon")
-    duzenleyici["cevap"] = {"islemler": [{"op": "kapi_kaldir", "mahal": salon, "mahal_b": "Hol"}], "uygulanamayan": []}
-    assert depo.mesaj_kaydet(mesaj("salonla hol arasındaki kapıyı kaldırın", talep("revizyon", ozet="kapı kaldır"), bayi=BAYI_KART))
+    duzenleyici["cevap"] = {"islemler": [{"op": "kapi_kaldir", "mahal": salon, "mahal_b": "Hol", "alinti": "salonla hol arasındaki kapıyı kaldırın"}],
+                            "uygulanamayan": []}
+    sahte_no = "900000000555"                                           # gerçek olmayan (depo deseni); Patron metnindeki alıntı maskeli olmalı
+    assert depo.mesaj_kaydet(mesaj(f"salonla hol arasındaki kapıyı kaldırın, müşteri {sahte_no}", talep("revizyon", ozet="kapı kaldır"),
+                                   bayi=BAYI_KART))
     [r] = isle_hepsi(depo, URETIM)
-    assert r["eylem"] == "yonlendir" and "revizyonu üretilemedi" in r["gerekce"]
+    assert r["eylem"] == "sor" and "kurallara uymadı" in r["gerekce"], r
     assert son_rev(depo)["rev"] == 1
     d, _ = depo.konusma_oku(NUMARA_A)
-    assert d["revizyon"] == 0 and d["asama"] != "is_emri_hazir"
+    assert d["revizyon"] == 0 and d["asama"] == "onay_bekliyor"
+    satirlar = sorgu(depo, "SELECT alici, kind, govde FROM giden ORDER BY is_id DESC, sira")
+    bayiye = [x for x in satirlar if x["alici"] != "PATRON"][0]["govde"]
+    assert '"salonla hol arasındaki kapıyı kaldırın: ' in bayiye and "planınız aynen geçerli" in bayiye and "Onayla" in bayiye
+    patron = [x for x in satirlar if x["alici"] == "PATRON"]
+    assert any("kurallara uymayan" in (x["govde"] or "") for x in patron) and any(x["kind"] == "template" for x in patron)
+    pg = json.dumps([x["govde"] for x in patron], ensure_ascii=False)
+    assert NUMARA_A not in pg and sahte_no not in pg and "…0555" in pg
+
+
+def test_kismi_basarida_patrona_bilgi_gitmez(depo, wa, hizli_genel, uretici, duzenleyici):
+    # geometri hakemi 16.10 (düşük 2): Patron bilgisi LLM sonucuna değil kararın yoluna bağlı; karar 5 yalnız "plan aynen" durumunu kapsar.
+    # Kısmi başarıda (biri uygulandı, biri kurallara uymadı) r02 çizilir, düşen istek bayiye yazılır, Patron'a bilgi gitmez
+    _secilmis_yeni_plan(depo)
+    d, _ = depo.konusma_oku(NUMARA_A)
+    salon = next(m["ad"] for m in d["uretilen_plan"]["plan"]["mahaller"] if m["islev"] == "salon")
+    duzenleyici["cevap"] = {"islemler": [{"op": "cati_tipi", "tip": "besik", "alinti": "çatı beşik olsun"},
+                                         {"op": "kapi_kaldir", "mahal": salon, "mahal_b": "Hol", "alinti": "salon kapısını kaldır"}],
+                            "uygulanamayan": []}
+    assert depo.mesaj_kaydet(mesaj("çatı beşik olsun, salon kapısını kaldır", talep("revizyon", ozet="revizyon"), bayi=BAYI_KART))
+    [r] = isle_hepsi(depo, URETIM)
+    assert r["eylem"] == "is_emri", r
+    govde = sorgu(depo, "SELECT govde FROM giden WHERE kind = 'interactive' ORDER BY olusturuldu DESC")[0]["govde"]
+    assert "Uygulanan: çatı beşik." in govde and '"salon kapısını kaldır: ' in govde
+    assert not [x for x in sorgu(depo, "SELECT alici FROM giden") if x["alici"] == "PATRON"]
+
+
+def test_dorten_fazla_dusen_istek_sayilir(depo, wa, hizli_genel, uretici, duzenleyici):
+    # geometri hakemi 16.10 (düşük 5): bayiye en çok üç istek adıyla yazılır; kalanı sayıyla söylenir (sessiz düşmez)
+    _secilmis_yeni_plan(depo)
+    duzenleyici["cevap"] = {"islemler": [], "uygulanamayan": ["bir", "iki", "üç", "dört"]}
+    assert depo.mesaj_kaydet(mesaj("dört istek", talep("revizyon", ozet="revizyon"), bayi=BAYI_KART))
+    [r] = isle_hepsi(depo, URETIM)
+    assert r["eylem"] == "sor", r
+    govde = sorgu(depo, "SELECT govde FROM giden ORDER BY is_id DESC, sira")[0]["govde"]
+    assert '"bir"; "iki"; "üç" isteğini otomatik uygulayamadım (ve 1 istek daha); planınız aynen geçerli.' in govde, govde
+
+
+def test_canli_a_e_cati_adi_guncel_ve_m2_turkce(depo, wa, hizli_genel, uretici, duzenleyici):
+    # canlı deneme 16.10: (A) çatı değişince mesajdaki çatı adı eski kalıyordu ("beşik", çizim kırma); (B) "çatı kirma";
+    # (E) "95.03 m²" noktalı yazılıyordu (kartta "95 m²")
+    _secilmis_yeni_plan(depo)
+    d, _ = depo.konusma_oku(NUMARA_A)
+    assert d["uretilen_plan"]["plan"]["cati"]["tip"] == "kirma"
+    govdeler = [x["govde"] for x in sorgu(depo, "SELECT govde FROM giden WHERE kind = 'interactive' ORDER BY olusturuldu, sira")]
+    assert govdeler and not any(re.search(r"\d\.\d+ m²", g) for g in govdeler), govdeler
+    duzenleyici["cevap"] = {"islemler": [{"op": "cati_tipi", "tip": "besik", "alinti": "çatı beşik olsun"}], "uygulanamayan": []}
+    assert depo.mesaj_kaydet(mesaj("çatı beşik olsun", talep("revizyon", ozet="çatı"), bayi=BAYI_KART))
+    [r] = isle_hepsi(depo, URETIM)
+    assert r["eylem"] == "is_emri", r
+    govde = sorgu(depo, "SELECT govde FROM giden WHERE kind = 'interactive' ORDER BY olusturuldu DESC")[0]["govde"]
+    assert "Yeni plan (beşik" in govde and "(kırma" not in govde and "Uygulanan: çatı beşik." in govde, govde
+    assert not re.search(r"\d\.\d+ m²", govde), govde
 
 
 def test_k1_olcu_notu_ve_yuvarlama_bayiye_yazilir(depo, wa, hizli_genel, uretici):
@@ -697,3 +755,103 @@ def test_olcum_raporu_kayitlardan(depo, wa, hizli_genel, uretici):
         o2 = PO.topla(c)
     assert o2["yeni_plan_isi"] == 1 and o2["revizyon_ortalama"] == 1
     assert "Yeni plan üretimi | 1 (gecerli 1)" in metin and NUMARA_A not in metin and "Hedef yok" in metin
+
+
+# ───────────────────────── Lokman 15.10 · kapanış soruları ─────────────────────────
+def test_soru1_muhendis_mesajinda_yeni_plan_dogrulama_satiri(depo, wa, hizli_genel, uretici):
+    # soru 1: yalnız yeni üretilen planda mühendisin dosya mesajına tek satır doğrulama özeti (mühendis kabulü satırda yok)
+    import kalici
+    from test_muhendis import muhendis_isle, muhendis_karti, muhendis_mesaji, satirlar
+    muhendis_karti(depo)
+    _secilmis_yeni_plan(depo)
+    kalici.gonder(depo, wa)
+    rev = tek(depo, "SELECT * FROM revizyonlar ORDER BY id DESC LIMIT 1")
+    assert rev["is_emri"]["yapi"]["kod"].startswith("YENI-")
+    time.sleep(1.1)
+    assert depo.mesaj_kaydet(buton(f"o:{rev['is_emri_no']}:1"))
+    [r] = isle_hepsi(depo, URETIM)
+    assert r["gerekce"] == "plan onaylandı", r
+    g = muhendis_mesaji(reply_id=f"muh:gonder:{rev['is_emri_no']}:1")
+    muhendis_isle(depo, g)
+    govdeler = [x.get("body") or "" for x in satirlar(depo, g["id"])]
+    satir = [b for b in govdeler if "doğrulaması:" in b]
+    assert len(satir) == 1 and "Yeni plan (otomatik üretildi) doğrulaması: Sözleşme: geçti" in satir[0]
+    assert "Yapısal: yapılmadı" in satir[0] and "Mühendis kabulü" not in satir[0]
+
+
+def test_soru1_banka_modelinde_dogrulama_satiri_yok():
+    import muhendis as MH
+    assert MH.dogrulama_satiri({"is_emri": {"yapi": {"kod": "Ç8801K", "tanim": "modeller/C8801K.json"}}}) is None
+    assert MH.dogrulama_satiri({}) is None
+
+
+def test_soru1_satir_onaylanan_revizyonun_taniminden():
+    # r02+'da r01'in raporu bayatlar: satır revizyonun gömülü tanımından hesaplanır; çizim klasörü yoksa "doğrulanmadı"
+    import muhendis as MH
+    from beyin import plan_uretici as PU
+    s = PU.uret({"alan_m2": 95, "oda_programi": "3+1"}, ayar={"acik": False})
+    d = MH.dogrulama_satiri({"is_emri": {"yapi": {"kod": "YENI-ABC123", "tanim": s["tanim"]}}, "pdf_yolu": None})
+    assert d.startswith("Yeni plan (otomatik üretildi) doğrulaması: Sözleşme: geçti · Geometri: geçti")
+    assert "Çizim çıktıları: doğrulanmadı" in d and "Yükleme listesi: doğrulanmadı" in d
+    assert MH.dogrulama_satiri({"is_emri": {"yapi": {"kod": "YENI-BOZUK", "tanim": {"bozuk": True}}}}).endswith("hesaplanamadı.")
+
+
+@pytest.mark.parametrize("istek", ["L çatı olsun", "cumbalı çatı olsun"])
+def test_soru3_l_ve_cumba_cati_uygulayamadim_ve_besik_kirma(depo, wa, hizli_genel, uretici, istek):
+    # soru 3 (Lokman 15.10): L ve cumba derleyiciye bağlanmaz; istenirse "otomatik uygulayamadım", plan beşik ya da kırma
+    kabul(depo, YEDI)
+    tl = talep(ozet=f"95 m² 3+1 tek kat çelik, {istek}", alan_m2=95, oda_programi="3+1", yapi_turu="celik", kat_sayisi=1, ozel_istekler=[istek])
+    assert depo.mesaj_kaydet(mesaj(f"95 m² 3+1 tek kat çelik, {istek}", tl, bayi=BAYI_KART))
+    [r] = isle_hepsi(depo, URETIM)
+    assert r["eylem"] == "secenek", r
+    body = sorgu(depo, "SELECT satir FROM giden ORDER BY olusturuldu, sira")[1]["satir"]["body"]
+    assert f'"{istek}" isteğini otomatik uygulayamadım' in body
+    d, _ = depo.konusma_oku(NUMARA_A)
+    assert all((u["tanim"]["cati"]["tip"] in ("besik", "kirma")) for u in d["uretilen_planlar"])
+
+
+@pytest.mark.parametrize("cevap,not_", [
+    ({"islemler": [], "uygulanamayan": ["çatı L olsun"]}, '"çatı L olsun" isteğini otomatik uygulayamadım; bilgileriniz plana işlendi.'),
+    ({"islemler": [{"op": "cati_tipi", "tip": "kirma", "alinti": "çatı kırma olsun"}], "uygulanamayan": []}, "planda zaten var")])
+def test_hakem_bilgi_uygulanamayan_istekle_dusmez(depo, wa, hizli_genel, uretici, duzenleyici, cevap, not_):
+    # geometri hakemi 15.10 (Önemli 1): aynı mesajda bilgi + uygulanamayan (ya da planda zaten olan) istek gelince bilgi sessizce düşüyordu
+    # (soru soruluyor, plan antetsiz kalıyordu). Artık plan antet bilgisiyle yeniden çizilir, istek adıyla yazılır
+    _secilmis_yeni_plan(depo)
+    d, _ = depo.konusma_oku(NUMARA_A)
+    assert d["uretilen_plan"]["plan"]["cati"]["tip"] == "kirma"                     # T1 kırma çatıyla: ikinci vakada istek planda zaten var
+    duzenleyici["cevap"] = cevap
+    # hakem ikinci tur: LLM özeti isteği taşır ("çatı L tipi olsun"); ne bayi mesajına ne PDF başlığına girer, ikisi de kodun metni
+    assert depo.mesaj_kaydet(mesaj("müşteri Ahmet Bey, çatı ...", talep("revizyon", ozet="Müşteri adı Ahmet Bey; çatı L tipi olsun",
+                                                                      musteri={"ad": "Ahmet Bey"}), bayi=BAYI_KART))
+    [r] = isle_hepsi(depo, URETIM)
+    assert r["eylem"] == "is_emri", r
+    rev = son_rev(depo)
+    assert rev["rev"] == 2 and rev["is_emri"]["talep"]["musteri_adi"] == "Ahmet Bey"
+    govde = sorgu(depo, "SELECT govde FROM giden WHERE kind = 'interactive' ORDER BY olusturuldu DESC")[0]["govde"]
+    belge = sorgu(depo, "SELECT govde FROM giden WHERE kind = 'document' ORDER BY olusturuldu DESC")[0]["govde"]
+    assert not_ in govde and "L tipi" not in govde, govde
+    assert "L tipi" not in belge and not_.split(" isteğini")[0].strip('"') in belge, belge
+
+
+def test_soru3_revizyonda_l_cati_uygulayamadim_plan_onaylanabilir(depo, wa, hizli_genel, uretici, duzenleyici):
+    # Lokman 15.10 (karar 3) ve canlı deneme sırası T4 → T5: yeni plan revizyonunda "çatı L olsun" → istek adıyla "otomatik uygulayamadım",
+    # plan aynen (yönlendirme yok), ardından Onayla çalışır
+    import kalici
+    _secilmis_yeni_plan(depo)
+    kalici.gonder(depo, wa)
+    duzenleyici["cevap"] = {"islemler": [], "uygulanamayan": ["çatı L olsun"]}
+    assert depo.mesaj_kaydet(mesaj("çatı L olsun", talep("revizyon", ozet="çatı L"), bayi=BAYI_KART))
+    [r] = isle_hepsi(depo, URETIM)
+    assert r["eylem"] == "sor", r
+    son = sorgu(depo, "SELECT govde FROM giden ORDER BY is_id DESC, sira")[0]["govde"]
+    assert '"çatı L olsun" isteğini otomatik uygulayamadım; planınız aynen geçerli.' in son and "Onayla" in son
+    assert sum(1 for x in sorgu(depo, "SELECT alici FROM giden") if x["alici"] == "PATRON") == 0
+    d, _ = depo.konusma_oku(NUMARA_A)
+    assert d["asama"] == "onay_bekliyor" and d["revizyon"] == 0
+    kalici.gonder(depo, wa)
+    rev = tek(depo, "SELECT * FROM revizyonlar ORDER BY id DESC LIMIT 1")
+    assert rev["rev"] == 1
+    time.sleep(1.1)
+    assert depo.mesaj_kaydet(buton(f"o:{rev['is_emri_no']}:1"))
+    [r5] = isle_hepsi(depo, URETIM)
+    assert r5["gerekce"] == "plan onaylandı", r5

@@ -203,6 +203,26 @@ def _excel_yolu(rv: dict, no: str, rev: int) -> Path | None:
     return Path(x["dosya"]) if "dosya" in x else None
 
 
+def dogrulama_satiri(rv: dict) -> str | None:
+    """İE-14 (Lokman 15.10, soru 1): yalnız yeni üretilen planda (kod `YENI-`) mühendis mesajına tek satır doğrulama özeti. Onaylanan
+    revizyonun kendisinden hesaplanır (r02+'da r01'in raporu bayatlar): gömülü tanımdan plan denetimi + revizyon klasöründeki çizim kaydı
+    (`plan_dogrulama.rapor`). Mühendis kabulü satıra girmez (o adım mühendisin). Hesaplanamazsa bunu söyler; istisna fırlatmaz."""
+    y = ((rv or {}).get("is_emri") or {}).get("yapi") or {}
+    if not str(y.get("kod") or "").upper().startswith("YENI-"):
+        return None
+    try:
+        from beyin import plan_dogrulama as D
+        from beyin.plan_denetim import denetle
+        from beyin.plan_sema import tanimdan
+        tanim = y["tanim"]
+        cikti = Path(rv["pdf_yolu"]).parent if rv.get("pdf_yolu") else None
+        r = D.rapor(denetle(tanimdan(tanim), {}), tanim, cikti)
+        return "Yeni plan (otomatik üretildi) doğrulaması: " + D.ozet({a: v for a, v in r["kalemler"].items() if a != "muhendis_kabulu"}) + "."
+    except Exception as e:                                       # mesaj düşmez; mühendis bilir
+        W.log("mühendis doğrulama satırı hesaplanamadı:", W.maske_numaralar(f"{type(e).__name__}: {str(e)[:160]}"))
+        return "Yeni plan (otomatik üretildi): doğrulama özeti hesaplanamadı."
+
+
 def _dosyalar(depo: Depo, c: _Cikti, k: dict) -> None:
     no, rev = k["is_emri_no"], int(k["rev"])
     rv = depo.revizyon_kaydi(no, rev) or {}
@@ -239,8 +259,13 @@ def _dosyalar(depo: Depo, c: _Cikti, k: dict) -> None:
     if len(notlar) > NOTLAR_GOVDEDE_EN_COK:                       # hepsi ayrı metinde; düğmeli mesajda yalnız sayı
         c.metin(f"{_etiket(no, rev)} · {kisa}")
         kisa = f"Kısa parça notu: {len(notlar)} (ayrı mesajda)."
+    dg = dogrulama_satiri(rv)
     govde = (f"{_etiket(no, rev)} teknik kontrol dosyaları yukarıda."
              + (f" Eksik: {', '.join(eksik)}." if eksik else "") + (f" {kisa}" if notlar else ""))
+    if dg and len(govde) + len(dg) + 260 <= 1024:               # düğmeli mesaj gövdesi 1024 sınırı (WhatsApp); sığmazsa ayrı metin
+        govde += f" {dg}"
+    elif dg:
+        c.metin(f"{_etiket(no, rev)} · {dg}")
     if k["durum"] in ("bekliyor", "duzeltme"):
         govde += (" Listeyi düzelttiyseniz Excel'i bu sohbete gönderin, sonra Patron'a gönder'e basın. Ciddi düzeltme gerekiyorsa "
                   "Düzeltme iste'ye basıp notunuzu yazın.")

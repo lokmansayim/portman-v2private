@@ -445,7 +445,8 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
     metin = karar.mesaj
     # PDF başlığındaki özet: soru düğmesinin cevabıysa ("kısa cevap: 2") talebin özeti (kapanış incelemesi 13.10)
     ozet_baslik = ((k.d.get("taslak") or {}).get("ozet") or "") if meta.get("tur") == "soru" else (talep.ozet or "")
-    if karar.is_emri and ((karar.is_emri.get("yapi") or {}).get("bu_revizyon")):     # BK-09 M1: çelikte değişiklik uygulandıysa
+    if karar.is_emri and ((karar.is_emri.get("yapi") or {}).get("bu_revizyon") or (karar.is_emri.get("talep") or {}).get("metin_koddan")):
+        # BK-09 M1: çelikte değişiklik uygulandıysa; İE-14: yeni planda istek uygulanamadı ya da zaten vardı (bilgiyle yeniden çizim)
         ozet_baslik = (karar.is_emri.get("talep") or {}).get("metin") or ""          # LLM özeti değil, kodun okuması ("Uygulanan: …")
     if patron_mu:
         metin = metin.replace("Bu konuyu Lokman Bey'e iletiyorum; en kısa sürede dönüş yapılacak.", "Bu talep şu an otomatik karşılanamıyor (Patron modu: ayrıca bildirim gönderilmez).")
@@ -501,6 +502,12 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
     if cizim and not cizim["passed"]:
         ekle("Ön onay planı otomatik doğrulamadan geçmedi; Lokman Bey'e iletiyorum, en kısa sürede dönüş yapılacak.")
         patrona(f"Portman: {kim} için {sonuc['is_emri_no']} çizimi doğrulamadan geçmedi: {'; '.join(cizim['errors'])[:400]}")
+    from beyin.karar import KURALA_UYMADI
+    if KURALA_UYMADI in (karar.gerekce or "") and karar.eylem != "yonlendir":
+        # Lokman 16.10 (canlı deneme G): kurallara uymayan istek konuşmayı kapatmaz; bayi planı onaylayabilir, Patron elle yardım için bilgilenir.
+        # Kararın yoluna bağlı (geometri hakemi: LLM sonucuna bakmak, karar yeni plan dalına girmese de bilgi gönderiyordu; kısmi başarı kapsam dışı)
+        patrona(f"Portman bilgi: {kim} — yeni plan revizyonunda kurallara uymayan istek otomatik uygulanmadı; konuşma açık, plan onaylanabilir. "
+                f"Mesaj: \"{maske_numaralar(gelen.get('text') or '')[:300]}\"", sablon=True, is_emri_no=sonuc.get("is_emri_no"))
     if karar.eylem == "yonlendir":
         model = katalog.bul(talep.katalog_kodu) if talep.katalog_kodu else None
         model_notu = f" Katalog notu ({model['code']}): {model['not']}" if model and model.get("not") else ""   # D-07: yalnız Patron'a
