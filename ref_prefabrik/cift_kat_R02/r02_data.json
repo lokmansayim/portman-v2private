@@ -1,0 +1,1753 @@
+{
+  "version": "R02",
+  "size_mm": [
+    12500,
+    6000
+  ],
+  "grid_x": [
+    100,
+    1355,
+    2610,
+    3865,
+    5120,
+    6375,
+    7630,
+    8885,
+    10140,
+    11395,
+    12400
+  ],
+  "grid_y": [
+    5900,
+    4645,
+    3390,
+    2135,
+    880,
+    100
+  ],
+  "panels": [
+    {
+      "id": "PN001",
+      "x": 100,
+      "y": 0,
+      "length": 1255,
+      "th": 100,
+      "ori": "H",
+      "op": null,
+      "gap": 0,
+      "mx": 1,
+      "my": 1,
+      "facade": "ON",
+      "code": "CK-D01",
+      "w": 1255,
+      "h": 100,
+      "name": "R02_CK_D01_H_1_1"
+    },
+    {
+      "id": "PN002",
+      "x": 1355,
+      "y": 0,
+      "length": 1255,
+      "th": 100,
+      "ori": "H",
+      "op": "P02",
+      "gap": 1200,
+      "mx": 1,
+      "my": 1,
+      "facade": "ON",
+      "code": "CK-D02",
+      "w": 1255,
+      "h": 100,
+      "name": "R02_CK_D02_H_1_1",
+      "aperture": [
+        1382.5,
+        0,
+        2582.5,
+        100
+      ]
+    },
+    {
+      "id": "PN003",
+      "x": 2610,
+      "y": 0,
+      "length": 1255,
+      "th": 100,
+      "ori": "H",
+      "op": null,
+      "gap": 0,
+      "mx": 1,
+      "my": 1,
+      "facade": "ON",
+      "code": "CK-D01",
+      "w": 1255,
+      "h": 100,
+      "name": "R02_CK_D01_H_1_1"
+    },
+    {
+      "id": "PN004",
+      "x": 3865,
+      "y": 0,
+      "length": 1255,
+      "th": 100,
+      "ori": "H",
+      "op": "K02",
+      "gap": 970,
+      "mx": -1,
+      "my": 1,
+      "facade": "ON",
+      "code": "CK-D03",
+      "w": 1255,
+      "h": 100,
+      "name": "R02_CK_D03_H_N1_1",
+      "aperture": [
+        4007.5,
+        0,
+        4977.5,
+        100
+      ]
+    },
+    {
+      "id": "PN005",
+      "x": 5120,
+      "y": 0,
+      "length": 1255,
+      "th": 100,
+      "ori": "H",
+      "op": null,
+      "gap": 0,
+      "mx": 1,
+      "my": 1,
+      "facade": "ON",
+      "code": "CK-D01",
+      "w": 1255,
+      "h": 100,
+      "name": "R02_CK_D01_H_1_1"
+    },
+    {
+      "id": "PN006",
+      "x": 6375,
+      "y": 0,
+      "length": 1255,
+      "th": 100,
+      "ori": "H",
+      "op": "P02",
+      "gap": 1200,
+      "mx": 1,
+      "my": 1,
+      "facade": "ON",
+      "code": "CK-D02",
+      "w": 1255,
+      "h": 100,
+      "name": "R02_CK_D02_H_1_1",
+      "aperture": [
+        6402.5,
+        0,
+        7602.5,
+        100
+      ]
+    },
+    {
+      "id": "PN007",
+      "x": 7630,
+      "y": 0,
+      "length": 1255,
+      "th": 100,
+      "ori": "H",
+      "op": null,
+      "gap": 0,
+      "mx": 1,
+      "my": 1,
+      "facade": "ON",
+      "code": "CK-D01",
+      "w": 1255,
+      "h": 100,
+      "name": "R02_CK_D01_H_1_1"
+    },
+    {
+      "id": "PN008",
+      "x": 8885,
+      "y": 0,
+      "length": 1255,
+      "th": 100,
+      "ori": "H",
+      "op": null,
+      "gap": 0,
+      "mx": 1,
+      "my": 1,
+      "facade": "ON",
+      "code": "CK-D01",
+      "w": 1255,
+      "h": 100,
+      "name": "R02_CK_D01_H_1_1"
+    },
+    {
+      "id": "PN009",
+      "x": 10140,
+      "y": 0,
+      "length": 1255,
+      "th": 100,
+      "ori": "H",
+      "op": "P02",
+      "gap": 1200,
+      "mx": 1,
+      "my": 1,
+      "facade": "ON",
+      "code": "CK-D02",
+      "w": 1255,
+      "h": 100,
+      "name": "R02_CK_D02_H_1_1",
+      "aperture": [
+        10167.5,
+        0,
+        11367.5,
+        100
+      ]
+    },
+    {
+      "id": "PN010",
+      "x": 11395,
+      "y": 0,
+      "length": 1005,
+      "th": 100,
+      "ori": "H",
+      "op": null,
+      "gap": 0,
+      "mx": 1,
+      "my": 1,
+      "facade": "ON",
+      "code": "CK-D04",
+      "w": 1005,
+      "h": 100,
+      "name": "R02_CK_D04_H_1_1"
+    },
+    {
+      "id": "PN011",
+      "x": 100,
+      "y": 5900,
+      "length": 1255,
+      "th": 100,
+      "ori": "H",
+      "op": null,
+      "gap": 0,
+      "mx": 1,
+      "my": 1,
+      "facade": "ARKA",
+      "code": "CK-D01",
+      "w": 1255,
+      "h": 100,
+      "name": "R02_CK_D01_H_1_1"
+    },
+    {
+      "id": "PN012",
+      "x": 1355,
+      "y": 5900,
+      "length": 1255,
+      "th": 100,
+      "ori": "H",
+      "op": "P01",
+      "gap": 1200,
+      "mx": 1,
+      "my": 1,
+      "facade": "ARKA",
+      "code": "CK-D05",
+      "w": 1255,
+      "h": 100,
+      "name": "R02_CK_D05_H_1_1",
+      "aperture": [
+        1382.5,
+        5900,
+        2582.5,
+        6000
+      ]
+    },
+    {
+      "id": "PN013",
+      "x": 2610,
+      "y": 5900,
+      "length": 1255,
+      "th": 100,
+      "ori": "H",
+      "op": null,
+      "gap": 0,
+      "mx": 1,
+      "my": 1,
+      "facade": "ARKA",
+      "code": "CK-D01",
+      "w": 1255,
+      "h": 100,
+      "name": "R02_CK_D01_H_1_1"
+    },
+    {
+      "id": "PN014",
+      "x": 3865,
+      "y": 5900,
+      "length": 1255,
+      "th": 100,
+      "ori": "H",
+      "op": null,
+      "gap": 0,
+      "mx": 1,
+      "my": 1,
+      "facade": "ARKA",
+      "code": "CK-D01",
+      "w": 1255,
+      "h": 100,
+      "name": "R02_CK_D01_H_1_1"
+    },
+    {
+      "id": "PN015",
+      "x": 5120,
+      "y": 5900,
+      "length": 1255,
+      "th": 100,
+      "ori": "H",
+      "op": "P03",
+      "gap": 600,
+      "mx": 1,
+      "my": 1,
+      "facade": "ARKA",
+      "code": "CK-D06",
+      "w": 1255,
+      "h": 100,
+      "name": "R02_CK_D06_H_1_1",
+      "aperture": [
+        5447.5,
+        5900,
+        6047.5,
+        6000
+      ]
+    },
+    {
+      "id": "PN016",
+      "x": 6375,
+      "y": 5900,
+      "length": 1255,
+      "th": 100,
+      "ori": "H",
+      "op": "P03",
+      "gap": 600,
+      "mx": 1,
+      "my": 1,
+      "facade": "ARKA",
+      "code": "CK-D06",
+      "w": 1255,
+      "h": 100,
+      "name": "R02_CK_D06_H_1_1",
+      "aperture": [
+        6702.5,
+        5900,
+        7302.5,
+        6000
+      ]
+    },
+    {
+      "id": "PN017",
+      "x": 7630,
+      "y": 5900,
+      "length": 1255,
+      "th": 100,
+      "ori": "H",
+      "op": null,
+      "gap": 0,
+      "mx": 1,
+      "my": 1,
+      "facade": "ARKA",
+      "code": "CK-D01",
+      "w": 1255,
+      "h": 100,
+      "name": "R02_CK_D01_H_1_1"
+    },
+    {
+      "id": "PN018",
+      "x": 8885,
+      "y": 5900,
+      "length": 1255,
+      "th": 100,
+      "ori": "H",
+      "op": "P01",
+      "gap": 1200,
+      "mx": 1,
+      "my": 1,
+      "facade": "ARKA",
+      "code": "CK-D05",
+      "w": 1255,
+      "h": 100,
+      "name": "R02_CK_D05_H_1_1",
+      "aperture": [
+        8912.5,
+        5900,
+        10112.5,
+        6000
+      ]
+    },
+    {
+      "id": "PN019",
+      "x": 10140,
+      "y": 5900,
+      "length": 1255,
+      "th": 100,
+      "ori": "H",
+      "op": null,
+      "gap": 0,
+      "mx": 1,
+      "my": 1,
+      "facade": "ARKA",
+      "code": "CK-D01",
+      "w": 1255,
+      "h": 100,
+      "name": "R02_CK_D01_H_1_1"
+    },
+    {
+      "id": "PN020",
+      "x": 11395,
+      "y": 5900,
+      "length": 1005,
+      "th": 100,
+      "ori": "H",
+      "op": null,
+      "gap": 0,
+      "mx": 1,
+      "my": 1,
+      "facade": "ARKA",
+      "code": "CK-D04",
+      "w": 1005,
+      "h": 100,
+      "name": "R02_CK_D04_H_1_1"
+    },
+    {
+      "id": "PN021",
+      "x": 0,
+      "y": 4645,
+      "length": 1255,
+      "th": 100,
+      "ori": "V",
+      "op": null,
+      "gap": 0,
+      "mx": 1,
+      "my": 1,
+      "facade": "SOL",
+      "code": "CK-D01",
+      "w": 100,
+      "h": 1255,
+      "name": "R02_CK_D01_V_1_1"
+    },
+    {
+      "id": "PN022",
+      "x": 0,
+      "y": 3390,
+      "length": 1255,
+      "th": 100,
+      "ori": "V",
+      "op": null,
+      "gap": 0,
+      "mx": 1,
+      "my": 1,
+      "facade": "SOL",
+      "code": "CK-D01",
+      "w": 100,
+      "h": 1255,
+      "name": "R02_CK_D01_V_1_1"
+    },
+    {
+      "id": "PN023",
+      "x": 0,
+      "y": 2135,
+      "length": 1255,
+      "th": 100,
+      "ori": "V",
+      "op": null,
+      "gap": 0,
+      "mx": 1,
+      "my": 1,
+      "facade": "SOL",
+      "code": "CK-D01",
+      "w": 100,
+      "h": 1255,
+      "name": "R02_CK_D01_V_1_1"
+    },
+    {
+      "id": "PN024",
+      "x": 0,
+      "y": 880,
+      "length": 1255,
+      "th": 100,
+      "ori": "V",
+      "op": null,
+      "gap": 0,
+      "mx": 1,
+      "my": 1,
+      "facade": "SOL",
+      "code": "CK-D01",
+      "w": 100,
+      "h": 1255,
+      "name": "R02_CK_D01_V_1_1"
+    },
+    {
+      "id": "PN025",
+      "x": 0,
+      "y": 100,
+      "length": 780,
+      "th": 100,
+      "ori": "V",
+      "op": null,
+      "gap": 0,
+      "mx": 1,
+      "my": 1,
+      "facade": "SOL",
+      "code": "CK-D07",
+      "w": 100,
+      "h": 780,
+      "name": "R02_CK_D07_V_1_1"
+    },
+    {
+      "id": "PN026",
+      "x": 12400,
+      "y": 4645,
+      "length": 1255,
+      "th": 100,
+      "ori": "V",
+      "op": null,
+      "gap": 0,
+      "mx": 1,
+      "my": 1,
+      "facade": "SAG",
+      "code": "CK-D01",
+      "w": 100,
+      "h": 1255,
+      "name": "R02_CK_D01_V_1_1"
+    },
+    {
+      "id": "PN027",
+      "x": 12400,
+      "y": 3390,
+      "length": 1255,
+      "th": 100,
+      "ori": "V",
+      "op": null,
+      "gap": 0,
+      "mx": 1,
+      "my": 1,
+      "facade": "SAG",
+      "code": "CK-D01",
+      "w": 100,
+      "h": 1255,
+      "name": "R02_CK_D01_V_1_1"
+    },
+    {
+      "id": "PN028",
+      "x": 12400,
+      "y": 2135,
+      "length": 1255,
+      "th": 100,
+      "ori": "V",
+      "op": null,
+      "gap": 0,
+      "mx": 1,
+      "my": 1,
+      "facade": "SAG",
+      "code": "CK-D01",
+      "w": 100,
+      "h": 1255,
+      "name": "R02_CK_D01_V_1_1"
+    },
+    {
+      "id": "PN029",
+      "x": 12400,
+      "y": 880,
+      "length": 1255,
+      "th": 100,
+      "ori": "V",
+      "op": null,
+      "gap": 0,
+      "mx": 1,
+      "my": 1,
+      "facade": "SAG",
+      "code": "CK-D01",
+      "w": 100,
+      "h": 1255,
+      "name": "R02_CK_D01_V_1_1"
+    },
+    {
+      "id": "PN030",
+      "x": 12400,
+      "y": 100,
+      "length": 780,
+      "th": 100,
+      "ori": "V",
+      "op": null,
+      "gap": 0,
+      "mx": 1,
+      "my": 1,
+      "facade": "SAG",
+      "code": "CK-D07",
+      "w": 100,
+      "h": 780,
+      "name": "R02_CK_D07_V_1_1"
+    },
+    {
+      "id": "PN031",
+      "x": 3835,
+      "y": 4645,
+      "length": 1255,
+      "th": 60,
+      "ori": "V",
+      "op": null,
+      "gap": 0,
+      "mx": 1,
+      "my": 1,
+      "facade": null,
+      "code": "CK-I01",
+      "w": 60,
+      "h": 1255,
+      "name": "R02_CK_I01_V_1_1"
+    },
+    {
+      "id": "PN032",
+      "x": 3835,
+      "y": 3390,
+      "length": 1255,
+      "th": 60,
+      "ori": "V",
+      "op": "K01",
+      "gap": 820,
+      "mx": 1,
+      "my": 1,
+      "facade": null,
+      "code": "CK-I02",
+      "w": 60,
+      "h": 1255,
+      "name": "R02_CK_I02_V_1_1",
+      "aperture": [
+        3835,
+        3607.5,
+        3895,
+        4427.5
+      ]
+    },
+    {
+      "id": "PN033",
+      "x": 3835,
+      "y": 2135,
+      "length": 1255,
+      "th": 60,
+      "ori": "V",
+      "op": "K01",
+      "gap": 820,
+      "mx": 1,
+      "my": 1,
+      "facade": null,
+      "code": "CK-I02",
+      "w": 60,
+      "h": 1255,
+      "name": "R02_CK_I02_V_1_1",
+      "aperture": [
+        3835,
+        2352.5,
+        3895,
+        3172.5
+      ]
+    },
+    {
+      "id": "PN034",
+      "x": 3835,
+      "y": 880,
+      "length": 1255,
+      "th": 60,
+      "ori": "V",
+      "op": null,
+      "gap": 0,
+      "mx": 1,
+      "my": 1,
+      "facade": null,
+      "code": "CK-I01",
+      "w": 60,
+      "h": 1255,
+      "name": "R02_CK_I01_V_1_1"
+    },
+    {
+      "id": "PN035",
+      "x": 3835,
+      "y": 100,
+      "length": 780,
+      "th": 60,
+      "ori": "V",
+      "op": null,
+      "gap": 0,
+      "mx": 1,
+      "my": 1,
+      "facade": null,
+      "code": "CK-I03",
+      "w": 60,
+      "h": 780,
+      "name": "R02_CK_I03_V_1_1"
+    },
+    {
+      "id": "PN036",
+      "x": 100,
+      "y": 3360,
+      "length": 1255,
+      "th": 60,
+      "ori": "H",
+      "op": null,
+      "gap": 0,
+      "mx": 1,
+      "my": 1,
+      "facade": null,
+      "code": "CK-I01",
+      "w": 1255,
+      "h": 60,
+      "name": "R02_CK_I01_H_1_1"
+    },
+    {
+      "id": "PN037",
+      "x": 1355,
+      "y": 3360,
+      "length": 1255,
+      "th": 60,
+      "ori": "H",
+      "op": null,
+      "gap": 0,
+      "mx": 1,
+      "my": 1,
+      "facade": null,
+      "code": "CK-I01",
+      "w": 1255,
+      "h": 60,
+      "name": "R02_CK_I01_H_1_1"
+    },
+    {
+      "id": "PN038",
+      "x": 2610,
+      "y": 3360,
+      "length": 1225,
+      "th": 60,
+      "ori": "H",
+      "op": null,
+      "gap": 0,
+      "mx": 1,
+      "my": 1,
+      "facade": null,
+      "code": "CK-I04",
+      "w": 1225,
+      "h": 60,
+      "name": "R02_CK_I04_H_1_1"
+    },
+    {
+      "id": "PN039",
+      "x": 3895,
+      "y": 4615,
+      "length": 1225,
+      "th": 60,
+      "ori": "H",
+      "op": "K01",
+      "gap": 820,
+      "mx": -1,
+      "my": 1,
+      "facade": null,
+      "code": "CK-I05",
+      "w": 1225,
+      "h": 60,
+      "name": "R02_CK_I05_H_N1_1",
+      "aperture": [
+        4097.5,
+        4615,
+        4917.5,
+        4675
+      ]
+    },
+    {
+      "id": "PN040",
+      "x": 5090,
+      "y": 3420,
+      "length": 1195,
+      "th": 60,
+      "ori": "V",
+      "op": null,
+      "gap": 0,
+      "mx": 1,
+      "my": 1,
+      "facade": null,
+      "code": "CK-I06",
+      "w": 60,
+      "h": 1195,
+      "name": "R02_CK_I06_V_1_1"
+    },
+    {
+      "id": "PN041",
+      "x": 5120,
+      "y": 3360,
+      "length": 1255,
+      "th": 60,
+      "ori": "H",
+      "op": null,
+      "gap": 0,
+      "mx": -1,
+      "my": 1,
+      "facade": null,
+      "code": "CK-I01",
+      "w": 1255,
+      "h": 60,
+      "name": "R02_CK_I01_H_N1_1"
+    },
+    {
+      "id": "PN042",
+      "x": 6375,
+      "y": 3360,
+      "length": 1255,
+      "th": 60,
+      "ori": "H",
+      "op": null,
+      "gap": 0,
+      "mx": -1,
+      "my": 1,
+      "facade": null,
+      "code": "CK-I01",
+      "w": 1255,
+      "h": 60,
+      "name": "R02_CK_I01_H_N1_1"
+    },
+    {
+      "id": "PN043",
+      "x": 7630,
+      "y": 3360,
+      "length": 1255,
+      "th": 60,
+      "ori": "H",
+      "op": "K01",
+      "gap": 820,
+      "mx": -1,
+      "my": 1,
+      "facade": null,
+      "code": "CK-I02",
+      "w": 1255,
+      "h": 60,
+      "name": "R02_CK_I02_H_N1_1",
+      "aperture": [
+        7847.5,
+        3360,
+        8667.5,
+        3420
+      ]
+    },
+    {
+      "id": "PN044",
+      "x": 8885,
+      "y": 3360,
+      "length": 1255,
+      "th": 60,
+      "ori": "H",
+      "op": null,
+      "gap": 0,
+      "mx": -1,
+      "my": 1,
+      "facade": null,
+      "code": "CK-I01",
+      "w": 1255,
+      "h": 60,
+      "name": "R02_CK_I01_H_N1_1"
+    },
+    {
+      "id": "PN045",
+      "x": 6345,
+      "y": 4645,
+      "length": 1255,
+      "th": 60,
+      "ori": "V",
+      "op": null,
+      "gap": 0,
+      "mx": 1,
+      "my": 1,
+      "facade": null,
+      "code": "CK-I01",
+      "w": 60,
+      "h": 1255,
+      "name": "R02_CK_I01_V_1_1"
+    },
+    {
+      "id": "PN046",
+      "x": 6345,
+      "y": 3420,
+      "length": 1225,
+      "th": 60,
+      "ori": "V",
+      "op": null,
+      "gap": 0,
+      "mx": 1,
+      "my": 1,
+      "facade": null,
+      "code": "CK-I04",
+      "w": 60,
+      "h": 1225,
+      "name": "R02_CK_I04_V_1_1"
+    },
+    {
+      "id": "PN047",
+      "x": 7600,
+      "y": 4645,
+      "length": 1255,
+      "th": 60,
+      "ori": "V",
+      "op": "K01",
+      "gap": 820,
+      "mx": 1,
+      "my": 1,
+      "facade": null,
+      "code": "CK-I02",
+      "w": 60,
+      "h": 1255,
+      "name": "R02_CK_I02_V_1_1",
+      "aperture": [
+        7600,
+        4862.5,
+        7660,
+        5682.5
+      ]
+    },
+    {
+      "id": "PN048",
+      "x": 7600,
+      "y": 3420,
+      "length": 1225,
+      "th": 60,
+      "ori": "V",
+      "op": null,
+      "gap": 0,
+      "mx": 1,
+      "my": 1,
+      "facade": null,
+      "code": "CK-I04",
+      "w": 60,
+      "h": 1225,
+      "name": "R02_CK_I04_V_1_1"
+    },
+    {
+      "id": "PN049",
+      "x": 5120,
+      "y": 2105,
+      "length": 1255,
+      "th": 60,
+      "ori": "H",
+      "op": "K01",
+      "gap": 820,
+      "mx": -1,
+      "my": -1,
+      "facade": null,
+      "code": "CK-I02",
+      "w": 1255,
+      "h": 60,
+      "name": "R02_CK_I02_H_N1_N1",
+      "aperture": [
+        5337.5,
+        2105,
+        6157.5,
+        2165
+      ]
+    },
+    {
+      "id": "PN050",
+      "x": 6375,
+      "y": 2105,
+      "length": 1255,
+      "th": 60,
+      "ori": "H",
+      "op": null,
+      "gap": 0,
+      "mx": -1,
+      "my": -1,
+      "facade": null,
+      "code": "CK-I01",
+      "w": 1255,
+      "h": 60,
+      "name": "R02_CK_I01_H_N1_N1"
+    },
+    {
+      "id": "PN051",
+      "x": 7630,
+      "y": 2105,
+      "length": 1255,
+      "th": 60,
+      "ori": "H",
+      "op": null,
+      "gap": 0,
+      "mx": -1,
+      "my": -1,
+      "facade": null,
+      "code": "CK-I01",
+      "w": 1255,
+      "h": 60,
+      "name": "R02_CK_I01_H_N1_N1"
+    },
+    {
+      "id": "PN052",
+      "x": 8885,
+      "y": 2105,
+      "length": 1255,
+      "th": 60,
+      "ori": "H",
+      "op": "K01",
+      "gap": 820,
+      "mx": -1,
+      "my": -1,
+      "facade": null,
+      "code": "CK-I02",
+      "w": 1255,
+      "h": 60,
+      "name": "R02_CK_I02_H_N1_N1",
+      "aperture": [
+        9102.5,
+        2105,
+        9922.5,
+        2165
+      ]
+    },
+    {
+      "id": "PN053",
+      "x": 10140,
+      "y": 2105,
+      "length": 1255,
+      "th": 60,
+      "ori": "H",
+      "op": null,
+      "gap": 0,
+      "mx": -1,
+      "my": -1,
+      "facade": null,
+      "code": "CK-I01",
+      "w": 1255,
+      "h": 60,
+      "name": "R02_CK_I01_H_N1_N1"
+    },
+    {
+      "id": "PN054",
+      "x": 11395,
+      "y": 2105,
+      "length": 1005,
+      "th": 60,
+      "ori": "H",
+      "op": null,
+      "gap": 0,
+      "mx": -1,
+      "my": -1,
+      "facade": null,
+      "code": "CK-I07",
+      "w": 1005,
+      "h": 60,
+      "name": "R02_CK_I07_H_N1_N1"
+    },
+    {
+      "id": "PN055",
+      "x": 5090,
+      "y": 880,
+      "length": 1225,
+      "th": 60,
+      "ori": "V",
+      "op": null,
+      "gap": 0,
+      "mx": 1,
+      "my": 1,
+      "facade": null,
+      "code": "CK-I04",
+      "w": 60,
+      "h": 1225,
+      "name": "R02_CK_I04_V_1_1"
+    },
+    {
+      "id": "PN056",
+      "x": 5090,
+      "y": 100,
+      "length": 780,
+      "th": 60,
+      "ori": "V",
+      "op": null,
+      "gap": 0,
+      "mx": 1,
+      "my": 1,
+      "facade": null,
+      "code": "CK-I03",
+      "w": 60,
+      "h": 780,
+      "name": "R02_CK_I03_V_1_1"
+    },
+    {
+      "id": "PN057",
+      "x": 8855,
+      "y": 880,
+      "length": 1225,
+      "th": 60,
+      "ori": "V",
+      "op": null,
+      "gap": 0,
+      "mx": 1,
+      "my": 1,
+      "facade": null,
+      "code": "CK-I04",
+      "w": 60,
+      "h": 1225,
+      "name": "R02_CK_I04_V_1_1"
+    },
+    {
+      "id": "PN058",
+      "x": 8855,
+      "y": 100,
+      "length": 780,
+      "th": 60,
+      "ori": "V",
+      "op": null,
+      "gap": 0,
+      "mx": 1,
+      "my": 1,
+      "facade": null,
+      "code": "CK-I03",
+      "w": 60,
+      "h": 780,
+      "name": "R02_CK_I03_V_1_1"
+    },
+    {
+      "id": "PN059",
+      "x": 10110,
+      "y": 2165,
+      "length": 1195,
+      "th": 60,
+      "ori": "V",
+      "op": null,
+      "gap": 0,
+      "mx": 1,
+      "my": 1,
+      "facade": null,
+      "code": "CK-I06",
+      "w": 60,
+      "h": 1195,
+      "name": "R02_CK_I06_V_1_1"
+    }
+  ],
+  "joints": [
+    {
+      "kind": "H",
+      "x": 3865,
+      "y": 3390,
+      "angle": 180,
+      "code": "CK-B03",
+      "name": "R02_H",
+      "id": "JN01"
+    },
+    {
+      "kind": "H",
+      "x": 3865,
+      "y": 4645,
+      "angle": 0,
+      "code": "CK-B03",
+      "name": "R02_H",
+      "id": "JN02"
+    },
+    {
+      "kind": "H",
+      "x": 6375,
+      "y": 3390,
+      "angle": 90,
+      "code": "CK-B03",
+      "name": "R02_H",
+      "id": "JN03"
+    },
+    {
+      "kind": "H",
+      "x": 7630,
+      "y": 3390,
+      "angle": 90,
+      "code": "CK-B03",
+      "name": "R02_H",
+      "id": "JN04"
+    },
+    {
+      "kind": "H",
+      "x": 8885,
+      "y": 2135,
+      "angle": 270,
+      "code": "CK-B03",
+      "name": "R02_H",
+      "id": "JN05"
+    },
+    {
+      "kind": "H",
+      "x": 10140,
+      "y": 2135,
+      "angle": 90,
+      "code": "CK-B03",
+      "name": "R02_H",
+      "id": "JN06"
+    },
+    {
+      "kind": "L",
+      "x": 5120,
+      "y": 4615,
+      "w": 30,
+      "h": 60,
+      "angle": 0,
+      "code": "CK-B02",
+      "name": "R02_L",
+      "id": "JN07"
+    },
+    {
+      "kind": "L",
+      "x": 5090,
+      "y": 3360,
+      "w": 30,
+      "h": 60,
+      "angle": 0,
+      "code": "CK-B02",
+      "name": "R02_L",
+      "id": "JN08"
+    },
+    {
+      "kind": "L",
+      "x": 5090,
+      "y": 2105,
+      "w": 30,
+      "h": 60,
+      "angle": 0,
+      "code": "CK-B02",
+      "name": "R02_L",
+      "id": "JN09"
+    },
+    {
+      "kind": "L",
+      "x": 10140,
+      "y": 3360,
+      "w": 30,
+      "h": 60,
+      "angle": 0,
+      "code": "CK-B02",
+      "name": "R02_L",
+      "id": "JN10"
+    }
+  ],
+  "rooms": [
+    {
+      "name": "MUTFAK",
+      "label": "Mutfak",
+      "rects": [
+        [
+          100,
+          3420,
+          3835,
+          5900
+        ]
+      ],
+      "pos": [
+        1950,
+        4700
+      ],
+      "area_m2": 9.2628
+    },
+    {
+      "name": "SALON",
+      "label": "Salon",
+      "rects": [
+        [
+          100,
+          100,
+          3835,
+          3360
+        ]
+      ],
+      "pos": [
+        1950,
+        1650
+      ],
+      "area_m2": 12.1761
+    },
+    {
+      "name": "BANYO / WC",
+      "label": "Banyo / WC",
+      "rects": [
+        [
+          3895,
+          4675,
+          6345,
+          5900
+        ],
+        [
+          5150,
+          3420,
+          6345,
+          4675
+        ]
+      ],
+      "pos": [
+        5260,
+        5350
+      ],
+      "area_m2": 4.500975
+    },
+    {
+      "name": "EBEVEYN BANYO",
+      "label": "Ebeveyn banyo",
+      "rects": [
+        [
+          6405,
+          3420,
+          7600,
+          5900
+        ]
+      ],
+      "pos": [
+        7000,
+        4250
+      ],
+      "area_m2": 2.9636
+    },
+    {
+      "name": "YATAK ODASI",
+      "label": "Yatak odası",
+      "rects": [
+        [
+          7660,
+          3420,
+          12400,
+          5900
+        ],
+        [
+          10170,
+          2165,
+          12400,
+          3420
+        ]
+      ],
+      "pos": [
+        10050,
+        4500
+      ],
+      "area_m2": 14.55385
+    },
+    {
+      "name": "ODA 1",
+      "label": "Oda 1",
+      "rects": [
+        [
+          5150,
+          100,
+          8855,
+          2105
+        ]
+      ],
+      "pos": [
+        7000,
+        1200
+      ],
+      "area_m2": 7.428525
+    },
+    {
+      "name": "ODA 2",
+      "label": "Oda 2",
+      "rects": [
+        [
+          8915,
+          100,
+          12400,
+          2105
+        ]
+      ],
+      "pos": [
+        10650,
+        1150
+      ],
+      "area_m2": 6.987425
+    },
+    {
+      "name": "KORIDOR",
+      "label": "Koridor",
+      "rects": [
+        [
+          3895,
+          100,
+          5090,
+          2165
+        ],
+        [
+          3895,
+          2165,
+          10110,
+          3360
+        ],
+        [
+          3895,
+          3360,
+          5090,
+          4615
+        ]
+      ],
+      "pos": [
+        7240,
+        2810
+      ],
+      "area_m2": 11.394325
+    }
+  ],
+  "materials": {
+    "P01": {
+      "code": "P01",
+      "group": "Kapı ve pencereler",
+      "label": "Pencere 120×120",
+      "dimensions_mm": [
+        1200,
+        1200,
+        null
+      ],
+      "note": "Ölçü en × yükseklik; eşik 800 mm.",
+      "unit": "adet",
+      "family": "DOG"
+    },
+    "P02": {
+      "code": "P02",
+      "group": "Kapı ve pencereler",
+      "label": "Pencere 120×180",
+      "dimensions_mm": [
+        1200,
+        1800,
+        null
+      ],
+      "note": "Ölçü en × yükseklik; eşik 200 mm.",
+      "unit": "adet",
+      "family": "DOG"
+    },
+    "P03": {
+      "code": "P03",
+      "group": "Kapı ve pencereler",
+      "label": "Vasistas 60×40",
+      "dimensions_mm": [
+        600,
+        400,
+        null
+      ],
+      "note": "Ölçü en × yükseklik; eşik 1600 mm.",
+      "unit": "adet",
+      "family": "DOG"
+    },
+    "K01": {
+      "code": "K01",
+      "group": "Kapı ve pencereler",
+      "label": "İç kapı",
+      "dimensions_mm": [
+        820,
+        null,
+        null
+      ],
+      "note": "Plandaki açıklık eni; ürün/sipariş ölçüsü değildir. Açıklık üst kotu 2000 mm çizim kabulüdür.",
+      "unit": "adet",
+      "family": "DOG"
+    },
+    "K02": {
+      "code": "K02",
+      "group": "Kapı ve pencereler",
+      "label": "Dış kapı",
+      "dimensions_mm": [
+        970,
+        null,
+        null
+      ],
+      "note": "Plandaki açıklık eni; ürün/sipariş ölçüsü değildir. Açıklık üst kotu 2000 mm çizim kabulüdür.",
+      "unit": "adet",
+      "family": "DOG"
+    },
+    "CK-B01": {
+      "code": "CK-B01",
+      "family": "B",
+      "label": "Sürekli dış köşe profili",
+      "dimensions_mm": [
+        100,
+        100,
+        5320
+      ],
+      "unit": "adet",
+      "note": "Et kalınlığı tanımlı değil; kesit dış boyu ve sürekli boy."
+    },
+    "CK-B02": {
+      "code": "CK-B02",
+      "family": "B",
+      "label": "İç köşe bağlantısı",
+      "dimensions_mm": [
+        30,
+        60,
+        null
+      ],
+      "unit": "adet",
+      "note": "Özgün 30×60 kesit. Profil kesim boyu katalogda tanımlı değil."
+    },
+    "CK-B03": {
+      "code": "CK-B03",
+      "family": "B",
+      "label": "Üçlü H bağlantısı",
+      "dimensions_mm": [
+        60,
+        null,
+        null
+      ],
+      "unit": "adet",
+      "note": "Özgün sekiz çizgili H kanalı. Kesim boyu katalogda tanımlı değil."
+    },
+    "CK-BP01": {
+      "code": "CK-BP01",
+      "family": "BP",
+      "label": "Ara kat Betopan kaplama alanı",
+      "dimensions_mm": [
+        null,
+        null,
+        20
+      ],
+      "unit": "m²",
+      "note": "Dört sürekli kolon kesiti düşülmüş net geometrik alan; levha adedi/kesim planı değildir."
+    },
+    "CK-D01": {
+      "code": "CK-D01",
+      "family": "D",
+      "label": "Dış dolu pano",
+      "dimensions_mm": [
+        1255,
+        100,
+        2500
+      ],
+      "unit": "adet",
+      "note": ""
+    },
+    "CK-D02": {
+      "code": "CK-D02",
+      "family": "D",
+      "label": "Dış 1200×1800 pencereli pano",
+      "dimensions_mm": [
+        1255,
+        100,
+        2500
+      ],
+      "unit": "adet",
+      "note": "Açıklık dahil tek pano."
+    },
+    "CK-D03": {
+      "code": "CK-D03",
+      "family": "D",
+      "label": "Dış giriş kapılı pano",
+      "dimensions_mm": [
+        1255,
+        100,
+        2500
+      ],
+      "unit": "adet",
+      "note": "Açıklık dahil tek pano."
+    },
+    "CK-D04": {
+      "code": "CK-D04",
+      "family": "D",
+      "label": "Dış dolu pano",
+      "dimensions_mm": [
+        1005,
+        100,
+        2500
+      ],
+      "unit": "adet",
+      "note": ""
+    },
+    "CK-D05": {
+      "code": "CK-D05",
+      "family": "D",
+      "label": "Dış 1200×1200 pencereli pano",
+      "dimensions_mm": [
+        1255,
+        100,
+        2500
+      ],
+      "unit": "adet",
+      "note": "Açıklık dahil tek pano."
+    },
+    "CK-D06": {
+      "code": "CK-D06",
+      "family": "D",
+      "label": "Dış 600×400 vasistaslı pano",
+      "dimensions_mm": [
+        1255,
+        100,
+        2500
+      ],
+      "unit": "adet",
+      "note": "Açıklık dahil tek pano."
+    },
+    "CK-D07": {
+      "code": "CK-D07",
+      "family": "D",
+      "label": "Dış dolu pano",
+      "dimensions_mm": [
+        780,
+        100,
+        2500
+      ],
+      "unit": "adet",
+      "note": ""
+    },
+    "CK-I01": {
+      "code": "CK-I01",
+      "family": "I",
+      "label": "İç dolu pano",
+      "dimensions_mm": [
+        1255,
+        60,
+        2500
+      ],
+      "unit": "adet",
+      "note": ""
+    },
+    "CK-I02": {
+      "code": "CK-I02",
+      "family": "I",
+      "label": "İç kapılı pano",
+      "dimensions_mm": [
+        1255,
+        60,
+        2500
+      ],
+      "unit": "adet",
+      "note": "Açıklık dahil tek pano."
+    },
+    "CK-I03": {
+      "code": "CK-I03",
+      "family": "I",
+      "label": "İç dolu pano",
+      "dimensions_mm": [
+        780,
+        60,
+        2500
+      ],
+      "unit": "adet",
+      "note": ""
+    },
+    "CK-I04": {
+      "code": "CK-I04",
+      "family": "I",
+      "label": "İç dolu pano",
+      "dimensions_mm": [
+        1225,
+        60,
+        2500
+      ],
+      "unit": "adet",
+      "note": ""
+    },
+    "CK-I05": {
+      "code": "CK-I05",
+      "family": "I",
+      "label": "İç kapılı pano",
+      "dimensions_mm": [
+        1225,
+        60,
+        2500
+      ],
+      "unit": "adet",
+      "note": "Açıklık dahil tek pano."
+    },
+    "CK-I06": {
+      "code": "CK-I06",
+      "family": "I",
+      "label": "İç dolu pano",
+      "dimensions_mm": [
+        1195,
+        60,
+        2500
+      ],
+      "unit": "adet",
+      "note": ""
+    },
+    "CK-I07": {
+      "code": "CK-I07",
+      "family": "I",
+      "label": "İç dolu pano",
+      "dimensions_mm": [
+        1005,
+        60,
+        2500
+      ],
+      "unit": "adet",
+      "note": ""
+    }
+  },
+  "sources": {
+    "P01": [
+      "BOM_P01_PENCERE_1200x1200",
+      [
+        53392.00576944451,
+        8132.860800860144
+      ],
+      90
+    ],
+    "P02": [
+      "BOM_P02_PENCERE_1200x1800",
+      [
+        53899.87442785705,
+        6708.823149062435
+      ],
+      0
+    ],
+    "P03": [
+      "BOM_P03_PENCERE_600x400",
+      [
+        53380.86173530974,
+        7962.278192298952
+      ],
+      90
+    ],
+    "K01": [
+      "BOM_K01_IC_KAPI_ACIKLIK820",
+      [
+        54290.46864870935,
+        7915.929522724242
+      ],
+      0
+    ],
+    "K02": [
+      "BOM_K02_DIS_KAPI_ACIKLIK970",
+      [
+        54335.3510276647,
+        7073.569124800833
+      ],
+      0
+    ],
+    "B03": [
+      "BOM_B03_UCLU_H_60",
+      [
+        7546.678040288549,
+        806.98966762085
+      ],
+      0
+    ]
+  },
+  "opening": {
+    "P01": [
+      1200,
+      1200,
+      800
+    ],
+    "P02": [
+      1200,
+      1800,
+      200
+    ],
+    "P03": [
+      600,
+      400,
+      1600
+    ],
+    "K01": [
+      820,
+      2000,
+      0
+    ],
+    "K02": [
+      970,
+      2000,
+      0
+    ]
+  },
+  "notes": [
+    "İç akslar sol üst kolon yüzlerinden 1255 mm ilerler. Sağ/alt son parçalarda kalan boy kullanılır.",
+    "Mutfak 3×2 modül, banyo 2 modül, ebeveyn banyosu ve koridor 1 modül aks genişliğindedir.",
+    "Banyo kapı kademesi kapıların sığması için 1×1 pano aksında çözüldü.",
+    "Ebeveyn banyosu girişi yatak odası tarafına yerleştirildi.",
+    "Kapı açıklık yüksekliği 2000 mm çizim kabulüdür; katalog ürün yüksekliği tanımlı değildir.",
+    "Betopan 20 mm; çelik kirişler için 300 mm bölge gösterildi, kiriş kesiti/adedi tanımlanmadı."
+  ]
+}

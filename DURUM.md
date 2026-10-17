@@ -9,6 +9,12 @@ Yeni pencere için hazırlıklar:
 - Dış çizim denetimi: `deneme/2026-09-30_asama2/kos.py --dxf`.
 - Mac'te `24_Astra_Cizimler/`.
 
+**17 Ekim 2026 öğle eki (BK-12 · prefabrik hattını `main`'e alma; `docs/is_emirleri/BK-12.md`):**
+- **Karar ve onay:** D-23 (Patron, 09:39, "Önce motor"); plan onayı 09:48 (dal `bk-12-prefabrik-main`). Altı PR: PR-1 motor ve bayi paftası (öneren), PR-R referans, PR-K kişisel veri, PR-3 mühür kıyası (hakem; Patron onayıyla), PR-2 liste üreteci, PR-4 atölyenin prefabrik yolu.
+- **PR-1 (yerelde):** İE-11 motoru, İE-12 `motor/sunum.py`, birim testleri (`testler/motor/`; PK-01 tanımı `testler/motor/veri/`'ye taşındı), duvar tipleri, D-12 / D-14 / D-15 (dalda D-10 / D-12 / D-13), İE-10/11/12 belgeleri, `ref_prefabrik/` veri olarak. Bayi adı maskeli.
+- **Önce:** adım 0, Mac'teki AIPrefabrik dosyalarının 13 Ekim mührüne karşı SHA denetimi (Mac bağlanınca).
+- **Bekleyen (Lokman):** PR'ların birleştirilmesi; PR-R, PR-K, PR-3 için ayrı onay.
+
 **16–17 Ekim 2026 eki (BK-11 · yerel ortamda Postgres denemesi; `docs/is_emirleri/BK-11.md`):**
 - **Yapıldı (dal `bk-11-postgres-bekleme`; PR #25):** konteyner yeniden başlayınca Postgres kurtarma yaparken `ortam_kur.sh`'in tek bağlantı denemesi düşüyor, `--dogrula` kalıcı akış testlerini atlıyordu. Bağlantı artık en çok 10 kez, 1 sn arayla deneniyor; ancak hepsi düşerse uyarı. Kök neden: `su` altında `setsid` hemen döndüğü için `pg_ctl -w`'nin beklemesi betiğe yansımıyor (düzeltilmedi; BK-11 › Gözlem).
 - **Kullanıcı adımları:** P1–P4 **Yerelde çalışıyor** (eski betikle hata yeniden üretildi, yenisiyle geçti; açık, kapalı, bağlanılamaz). Tam doğrulama çıkış 0: harness 22/22, DXF/PDF 18/18 AYNI, "referansla aynı", pytest 1007 geçti, atlanan 0.

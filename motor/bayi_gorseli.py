@@ -24,6 +24,14 @@ def _fmt(cm: float) -> str:
     return f"{cm:.1f}".rstrip("0").rstrip(".").replace(".", ",")
 
 
+def _mentese_a0_ucunda(ac) -> bool:
+    """Menteşe boşluğun a0 (−x / ön) ucunda mı. DXF'teki sözleşmeyle aynı (`G.mentese_ucu`: menteşe adı, açılma yönünde yürürken sol / sağ).
+    Eskiden "sol" her zaman a0 sayılıyordu; −y ve +x yönüne açılan kapılarda kanat DXF'e göre ters çiziliyordu (geometri hakemi, 13.10.2026, Ö4)."""
+    if not ac.icine_normal:
+        return (ac.mentese or "sag") == "sol"
+    return G.mentese_ucu(ac) == 0
+
+
 def plan_gorseli(ie: dict, yol: Path, v: dict | None = None, genislik_px: int = 1400) -> Path:
     """İş Emri → PNG. v: Motor doğrulaması (validation.json; rooms_m2 varsa net alanlar oradan, yoksa geometriden)."""
     plan = G.kur(ie)
@@ -75,12 +83,12 @@ def plan_gorseli(ie: dict, yol: Path, v: dict | None = None, genislik_px: int = 
                 w = p.acilim.genislik
                 if d.yon == "x":
                     yon = 1 if (p.acilim.icine_normal or "+y").endswith("y") and (p.acilim.icine_normal or "+y").startswith("+") else -1
-                    cx = x0 if (p.acilim.mentese or "sag") == "sol" else x1
+                    cx = x0 if _mentese_a0_ucunda(p.acilim) else x1
                     ax.add_patch(Arc((cx, (y0 + y1) / 2), 2 * w, 2 * w, angle=0, theta1=0 if (cx == x0 and yon > 0) else (90 if (cx == x1 and yon > 0) else (180 if cx == x1 else 270)),
                                      theta2=(90 if (cx == x0 and yon > 0) else (180 if (cx == x1 and yon > 0) else (270 if cx == x1 else 360))), color=KAPI, linewidth=1.0, zorder=5))
                 else:
                     yon = 1 if (p.acilim.icine_normal or "+x").startswith("+") else -1
-                    cy = y0 if (p.acilim.mentese or "sag") == "sol" else y1
+                    cy = y0 if _mentese_a0_ucunda(p.acilim) else y1
                     ax.add_patch(Arc(((x0 + x1) / 2, cy), 2 * w, 2 * w, angle=0, theta1=0 if (cy == y0 and yon > 0) else (270 if (cy == y1 and yon > 0) else (90 if cy == y0 else 180)),
                                      theta2=(90 if (cy == y0 and yon > 0) else (360 if (cy == y1 and yon > 0) else (180 if cy == y0 else 270))), color=KAPI, linewidth=1.0, zorder=5))
     for k in plan.koseler:

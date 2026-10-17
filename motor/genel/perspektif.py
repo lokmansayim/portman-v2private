@@ -71,7 +71,9 @@ def denetim(f, sekiller) -> dict:
     return {"nesne": dict(Counter(s["sinif"] for s in sekiller)), "ucgen": int(sum(len(s["f"]) for s in sekiller)), "duvar": duvar}
 
 
-def ciz(f, sekiller, cikti: Path, on_ek: str, genislik=1800, yukseklik=1150):
+def ciz(f, sekiller, cikti: Path, on_ek: str, genislik=1800, yukseklik=1150, uzaklik: float = 1.35, yalniz: tuple | None = None):
+    """`uzaklik`: dört perspektifte kameranın uzaklığı (yapı köşegeninin katı); `yalniz`: yalnız bu adlardaki görüntüler (ör. prefabrik
+    bayi paftası, İE-12). Varsayılanlar çelik çıktısını değiştirmez."""
     import vtk
     from vtk.util import numpy_support as ns
     import ifcopenshell.util.element as ue
@@ -245,14 +247,18 @@ def ciz(f, sekiller, cikti: Path, on_ek: str, genislik=1800, yukseklik=1150):
         return yol.name
 
     cikanlar = []
+    istenir = lambda ad: yalniz is None or ad in yalniz
     r = sahne()
     # az: kameranın yapıya göre yeri (0° doğu, 90° kuzey, 180° batı, 270° güney); ön cephe güneydedir
     for ad, az in (("perspektif_on_sag", 300), ("perspektif_on_sol", 238), ("perspektif_arka_sol", 128), ("perspektif_arka_sag", 52)):
-        cikanlar.append(kaydet(r, ad, az, 24))
+        if istenir(ad):
+            cikanlar.append(kaydet(r, ad, az, 24, uzaklik=uzaklik))
     cati = lambda sh: sh["sinif"] in ("IfcRoof", "IfcCovering", "IfcElementAssembly", "IfcMember", "IfcPlate") or (sh["sinif"] == "IfcSlab" and sh["tip"] == "ROOF")
-    cikanlar.append(kaydet(sahne(gizli_fn=cati, mahal=True, etiket=True), "catisiz", 262, 58, uzaklik=1.3, hedef_z=0.6))
+    if istenir("catisiz"):
+        cikanlar.append(kaydet(sahne(gizli_fn=cati, mahal=True, etiket=True), "catisiz", 262, 58, uzaklik=1.3, hedef_z=0.6))
     kaplama = lambda sh: sh["sinif"] == "IfcCovering" or (sh["sinif"] == "IfcSlab" and sh["tip"] == "ROOF") or (sh["sinif"] == "IfcPlate" and sh["ad"].startswith("ALIN"))
-    cikanlar.append(kaydet(sahne(gizli_fn=kaplama, mahal=True), "makasli", 300, 38, uzaklik=1.4, hedef_z=1.4))
+    if istenir("makasli"):
+        cikanlar.append(kaydet(sahne(gizli_fn=kaplama, mahal=True), "makasli", 300, 38, uzaklik=1.4, hedef_z=1.4))
     return cikanlar
 
 

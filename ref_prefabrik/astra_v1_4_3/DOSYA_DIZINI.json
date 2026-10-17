@@ -1,0 +1,448 @@
+{
+  "arsiv": "AI Çizim Dosyaları",
+  "tarih": "2026-09-05",
+  "masaustu_konumu": "/Users/lokmansayim/Desktop/AI Çizim Dosyaları",
+  "kisayollar": {
+    "guncel-2plus1": "2+1 Çizimleri/Yan Verandalı 6x8p5/yeni-2plus1-yan-verandali.dwg",
+    "guncel-3plus1": "3+1 Çizimleri/prefabrik-3plus1-verandali-kapili-panel-duzeltilmis.dwg",
+    "kurallar": "prefabrik-cizim-kurallari.md",
+    "proje-kararlari": "proje-kararlari.md",
+    "on-gorunus": "2+1 Çizimleri/prefabrik-2plus1-cumbali-6x5-on-gorunus.png",
+    "yapilandirilmis-kurallar": "KURALLAR.json",
+    "arsivi-okuma": "ARŞİVİ OKUMA.md",
+    "onceki-2plus1-6x8": "2+1 Çizimleri/prefabrik-2plus1-kroki-alanli-kopya.dwg",
+    "cumbali-6x5": "2+1 Çizimleri/prefabrik-2plus1-cumbali-6x5.dwg",
+    "cumbali-proje-notlari": "cumbali-6x5-proje-notlari.md",
+    "cumbali-bom-dwg": "BOM ve Yükleme Listeleri/Cumbalı 6x5/prefabrik-cumbali-6x5-BOM.dwg",
+    "cumbali-yukleme-listesi": "BOM ve Yükleme Listeleri/Cumbalı 6x5/Cumbali-6x5-Yukleme-Listesi.xlsx",
+    "bom-okuma": "BOM ve Yükleme Listeleri/Cumbalı 6x5/BOM OKUMA.md",
+    "cizim-ve-bom-is-akisi": "CIZIM_VE_BOM_IS_AKISI.md",
+    "yan-verandali-2plus1": "2+1 Çizimleri/Yan Verandalı 6x8p5/yeni-2plus1-yan-verandali.dwg",
+    "guncel-yukleme-listesi": "2+1 Çizimleri/Yan Verandalı 6x8p5/Yan-Verandali-2plus1-Yukleme-Listesi.xlsx",
+    "yan-verandali-proje-notlari": "2+1 Çizimleri/Yan Verandalı 6x8p5/PROJE NOTLARI.md",
+    "malzeme-katalogu": "MALZEME_KATALOGU.json",
+    "montaj-plani": "2+1 Çizimleri/Yan Verandalı 6x8p5/yeni-2plus1-yan-verandali.dwg",
+    "blender-kurallari": "BLENDER_CIZIM_KURALLARI.md",
+    "blender-yapilandirilmis-kurallar": "BLENDER_KURALLAR.json"
+  },
+  "dosyalar": [
+    {
+      "dosya": "2+1 Çizimleri/Yan Verandalı 6x8p5/BOM_SAYIM_KAYDI.json",
+      "tur": "json",
+      "boyut": 52091,
+      "sha256": "20f28818f99eb5e8d40884a0b752fc47e3a4d34a47162e66a2803fbab25418e4"
+    },
+    {
+      "dosya": "2+1 Çizimleri/Yan Verandalı 6x8p5/DOGRULAMA.json",
+      "tur": "json",
+      "boyut": 1710,
+      "sha256": "1382785e05c878d7ad8ccbc7bcb562b821d58e40a2f4afdc4d066b4a935ed261"
+    },
+    {
+      "dosya": "2+1 Çizimleri/Yan Verandalı 6x8p5/MONTAJ_KAYDI.json",
+      "tur": "json",
+      "boyut": 19380,
+      "sha256": "1d4d8cf3ce92a767fec76aa8d17825daa29eae5164b98e1e7e0a6c119b6569b3"
+    },
+    {
+      "dosya": "2+1 Çizimleri/Yan Verandalı 6x8p5/PROJE NOTLARI.md",
+      "tur": "md",
+      "boyut": 10439,
+      "sha256": "f59e45b8cc8a1971584a9434f130e10cffc4c89981e16340244296df001ec309"
+    },
+    {
+      "dosya": "2+1 Çizimleri/Yan Verandalı 6x8p5/Yan-Verandali-2plus1-Yukleme-Listesi.xlsx",
+      "tur": "xlsx",
+      "boyut": 13150,
+      "sha256": "ff991785d068f9307b4a21a08986de87a3352d29cda72dfc36fd2befdb8bd054"
+    },
+    {
+      "dosya": "2+1 Çizimleri/Yan Verandalı 6x8p5/kaynak-plan.jpeg",
+      "tur": "jpeg",
+      "boyut": 128749,
+      "sha256": "1352884e3465b347cab549b77a316ece85ddfb7b11e3a103003e0b19d167e2e0"
+    },
+    {
+      "dosya": "2+1 Çizimleri/Yan Verandalı 6x8p5/yeni-2plus1-yan-verandali.dwg",
+      "tur": "dwg",
+      "boyut": 365343,
+      "sha256": "c1bbe4c465a3f8017d8dbaa9f1ca3378f302e93e5ae65af69f4e50ed5228a0a1"
+    },
+    {
+      "dosya": "2+1 Çizimleri/Yan Verandalı 6x8p5/yeni-2plus1-yan-verandali.dxf",
+      "tur": "dxf",
+      "boyut": 2834948,
+      "sha256": "f1ad005637c60e34307e1eea2d136449c97b6be199a32f153943b612e37e2086"
+    },
+    {
+      "dosya": "2+1 Çizimleri/prefabrik-2plus1-6x8-genel.png",
+      "tur": "png",
+      "boyut": 59091,
+      "sha256": "865b3163a31d2e47fc1c503114f824e947b87028ccdf94d4ad3e8d84f01bf1c5"
+    },
+    {
+      "dosya": "2+1 Çizimleri/prefabrik-2plus1-6x8-kapi-birlesim.png",
+      "tur": "png",
+      "boyut": 66741,
+      "sha256": "f8d7f6300050ce069bc6d4396fe603069ca85414f41afcdc4df73792b6c06b3e"
+    },
+    {
+      "dosya": "2+1 Çizimleri/prefabrik-2plus1-6x8-verandali.dwg",
+      "tur": "dwg",
+      "boyut": 122135,
+      "sha256": "021b819033a9468d835936e659aca9686e2a061c32086fded91d71aec4a6c46e"
+    },
+    {
+      "dosya": "2+1 Çizimleri/prefabrik-2plus1-cati-topuk-sacak.png",
+      "tur": "png",
+      "boyut": 47132,
+      "sha256": "420d29ed8104b61b3e30e5ac73e1f04e61cb97b00d81fe5747a16a6f02ba4d34"
+    },
+    {
+      "dosya": "2+1 Çizimleri/prefabrik-2plus1-cati-yuzde33.png",
+      "tur": "png",
+      "boyut": 46411,
+      "sha256": "c39b0bae763611a7dbff13c81f145c5b2874b7adc1fc4412ba12bd18540be660"
+    },
+    {
+      "dosya": "2+1 Çizimleri/prefabrik-2plus1-cumbali-6x5-genel.png",
+      "tur": "png",
+      "boyut": 85568,
+      "sha256": "0b676ff54d21476b8a473068cb1835180dad64f05bf3be2049016626e273c9a3"
+    },
+    {
+      "dosya": "2+1 Çizimleri/prefabrik-2plus1-cumbali-6x5-on-gorunus.png",
+      "tur": "png",
+      "boyut": 60246,
+      "sha256": "8dfc35043d9000f82bd2ff794689f10624b6ec468e30407ce8ade61220731e2f"
+    },
+    {
+      "dosya": "2+1 Çizimleri/prefabrik-2plus1-cumbali-6x5-plan.png",
+      "tur": "png",
+      "boyut": 76526,
+      "sha256": "7e3bf68766cbac2cb2a6464803dacb12df471259b07542d4d9176ddd73600301"
+    },
+    {
+      "dosya": "2+1 Çizimleri/prefabrik-2plus1-cumbali-6x5.dwg",
+      "tur": "dwg",
+      "boyut": 253764,
+      "sha256": "6de834648596bd807396cf007404dc23b1c090a57e3454ad9277f62298a8c473"
+    },
+    {
+      "dosya": "2+1 Çizimleri/prefabrik-2plus1-kroki-alanli-kopya.dwg",
+      "tur": "dwg",
+      "boyut": 245974,
+      "sha256": "5075e5539522d1c302584323176d7c8715697956fe821dd3018d8bea9d8e9aec"
+    },
+    {
+      "dosya": "2+1 Çizimleri/prefabrik-2plus1-kroki-iki-plan.png",
+      "tur": "png",
+      "boyut": 72721,
+      "sha256": "f5ef79609cb5c2cc4ecb41e5f4eeb627ac75e9bfe039e61ec2d6d2790fb3f02c"
+    },
+    {
+      "dosya": "2+1 Çizimleri/prefabrik-2plus1-kroki-net-alanlar.png",
+      "tur": "png",
+      "boyut": 54926,
+      "sha256": "5e3f93b416e1a6b4a261dc6e5e9fbc27001df0a0d16b0b7b776a8b0cc9115db1"
+    },
+    {
+      "dosya": "2+1 Çizimleri/prefabrik-2plus1-kroki-profilli-genel.png",
+      "tur": "png",
+      "boyut": 73928,
+      "sha256": "32e92b6a74485d69723d3b2cba664561083d6c47f54da63adb931dafcb122203"
+    },
+    {
+      "dosya": "2+1 Çizimleri/prefabrik-2plus1-krokiden-6x8.dwg",
+      "tur": "dwg",
+      "boyut": 164963,
+      "sha256": "1e9a7453153bf1ae6a922079407608c40c59d1babe5bc65392dd34b907cbcfff"
+    },
+    {
+      "dosya": "2+1 Çizimleri/prefabrik-2plus1-krokiden-genel.png",
+      "tur": "png",
+      "boyut": 55035,
+      "sha256": "10b84da148a970f8b1911d10ecef1656dfe1ac3dafb66d254516aebb7e162b6a"
+    },
+    {
+      "dosya": "2+1 Çizimleri/prefabrik-2plus1-on-gorunus-sablon-kapili.png",
+      "tur": "png",
+      "boyut": 51811,
+      "sha256": "fb71a16067d62b04dc8fbb89c17fc3be52ad6cdf5ec6e1e184260f174e734616"
+    },
+    {
+      "dosya": "2+1 Çizimleri/prefabrik-2plus1-on-gorunus.png",
+      "tur": "png",
+      "boyut": 48059,
+      "sha256": "7a25854f188e45f69899bd08775a4e845af213a1838a1b692b78127fd8c306ae"
+    },
+    {
+      "dosya": "2+1 Çizimleri/prefabrik-2plus1-pencereli-genel.png",
+      "tur": "png",
+      "boyut": 83065,
+      "sha256": "5c302278abca4e37bdaf5dfd4242a66f72665cf4657e0c869392bae6e1b9ffd8"
+    },
+    {
+      "dosya": "2+1 Çizimleri/prefabrik-2plus1-pencereli-net-plan.png",
+      "tur": "png",
+      "boyut": 61649,
+      "sha256": "e8abb687e19b4128959e97a5810ef773e913e37ceddbb0ff18930ec110e0e3b6"
+    },
+    {
+      "dosya": "2+1 Çizimleri/prefabrik-2plus1-veranda-profil-detay.png",
+      "tur": "png",
+      "boyut": 39157,
+      "sha256": "77f27c084d94085b89ea5e16d0ff3662f482c534f6584b83ef622388e8699596"
+    },
+    {
+      "dosya": "3+1 Çizimleri/ic-kapilar-olcu-detayi.png",
+      "tur": "png",
+      "boyut": 87979,
+      "sha256": "687835d4cf64eda76a0ad22f83c04f7f6147a8375a8c3d49b91b2d6fc0aaf2fd"
+    },
+    {
+      "dosya": "3+1 Çizimleri/kapili-panel-duzeltilmis-detay.png",
+      "tur": "png",
+      "boyut": 78293,
+      "sha256": "127175d97153ddef12d1737a0a86f7d5a06332212928fa8df557e0672ce02fc1"
+    },
+    {
+      "dosya": "3+1 Çizimleri/prefabrik-3plus1-duvar-aks.dwg",
+      "tur": "dwg",
+      "boyut": 65612,
+      "sha256": "92ffc78dd57930cd44994346c5348abffa1431d83439c13608c1c91a370faf53"
+    },
+    {
+      "dosya": "3+1 Çizimleri/prefabrik-3plus1-duvar-aks.png",
+      "tur": "png",
+      "boyut": 109226,
+      "sha256": "048b2d0c11df622f866ed1e03cb202bf389fb367a0f71d2a8e9abc53f6daa57f"
+    },
+    {
+      "dosya": "3+1 Çizimleri/prefabrik-3plus1-verandali-ic-kapili.dwg",
+      "tur": "dwg",
+      "boyut": 125448,
+      "sha256": "e956a64981f945e52c597e3baef7b3df11a5537871220107fccd7537bdf70124"
+    },
+    {
+      "dosya": "3+1 Çizimleri/prefabrik-3plus1-verandali-ic-kapili.png",
+      "tur": "png",
+      "boyut": 69098,
+      "sha256": "c91faf2d5b5492d9dc78af4010609af5ceffd65c5d8f4cd0cf02dae7731a8795"
+    },
+    {
+      "dosya": "3+1 Çizimleri/prefabrik-3plus1-verandali-kapili-panel-duzeltilmis.dwg",
+      "tur": "dwg",
+      "boyut": 132674,
+      "sha256": "2781333efea4c6a67f9f51dc20daf7797fe2866c7a083285eb14876e1fd7499e"
+    },
+    {
+      "dosya": "3+1 Çizimleri/prefabrik-3plus1-verandali-kapili-panel-duzeltilmis.png",
+      "tur": "png",
+      "boyut": 66203,
+      "sha256": "7c15b8f4655d28359533eb3fd297584c3983bc1616cbee4eb74f2fc8de8086dc"
+    },
+    {
+      "dosya": "3+1 Çizimleri/prefabrik-3plus1-verandali.dwg",
+      "tur": "dwg",
+      "boyut": 70089,
+      "sha256": "99ea4c13be652a9df5fcf00419c71842ad7f1b6f7cec42ae058456fdf5544cfe"
+    },
+    {
+      "dosya": "3+1 Çizimleri/prefabrik-3plus1-verandali.png",
+      "tur": "png",
+      "boyut": 127313,
+      "sha256": "0b9cae3988bde2e91cc40811577d825439fb5c708253f05b7737c361e4894d58"
+    },
+    {
+      "dosya": "BOM ve Yükleme Listeleri/Cumbalı 6x5/BOM OKUMA.md",
+      "tur": "md",
+      "boyut": 3138,
+      "sha256": "e3a0419cd67a57113c00f9a6c124f14684e61e737d7769889a868a9ca5b931e5"
+    },
+    {
+      "dosya": "BOM ve Yükleme Listeleri/Cumbalı 6x5/BOM_DOGRULAMA.json",
+      "tur": "json",
+      "boyut": 566,
+      "sha256": "6488c55af4f205e326efa7e7f95f4fe524e7e30b96b3ec3896fe8a9bc76c58f6"
+    },
+    {
+      "dosya": "BOM ve Yükleme Listeleri/Cumbalı 6x5/BOM_SAYIM_KAYDI.json",
+      "tur": "json",
+      "boyut": 35185,
+      "sha256": "6777b7ce0ef4a755ab1f116af6ca5fa32fbaf076b683c83305814e93821d4899"
+    },
+    {
+      "dosya": "BOM ve Yükleme Listeleri/Cumbalı 6x5/Cumbali-6x5-Yukleme-Listesi.xlsx",
+      "tur": "xlsx",
+      "boyut": 12543,
+      "sha256": "b4d9a3a358c1921149244b478f57a0d53a406dd78ba8aa459b674b2d8163d019"
+    },
+    {
+      "dosya": "BOM ve Yükleme Listeleri/Cumbalı 6x5/prefabrik-cumbali-6x5-BOM.dwg",
+      "tur": "dwg",
+      "boyut": 224689,
+      "sha256": "d3702b7d71a45bc3923fec87aaad3af0e9e1b94079c859553591fdac01a5b7d2"
+    },
+    {
+      "dosya": "BURADAN BAŞLAYIN.txt",
+      "tur": "txt",
+      "boyut": 696,
+      "sha256": "be7d2242532091fed20481f20f24ba51b1a41dab4a31eb129d70b1cb049c7954"
+    },
+    {
+      "dosya": "CIZIM_VE_BOM_IS_AKISI.md",
+      "tur": "md",
+      "boyut": 14432,
+      "sha256": "3152d2cbfe66fb0fedfe95203ee986f7b177caf334be3b5308fb5ef8a02289bb"
+    },
+    {
+      "dosya": "Ekran Resmi 2026-09-05 17.43.14.png",
+      "tur": "png",
+      "boyut": 2113617,
+      "sha256": "c3a8487d5088d6ba08712a3d24033cb067ea493238f704c4f6038e6501c13a18"
+    },
+    {
+      "dosya": "Ekran Resmi 2026-09-05 17.49.59.png",
+      "tur": "png",
+      "boyut": 1696501,
+      "sha256": "6a74aacda6ff7dbe1fdc45edaa5fcdcd323c0342a7a7a5b9d7f0537cda2d2aca"
+    },
+    {
+      "dosya": "KURALLAR.json",
+      "tur": "json",
+      "boyut": 79330,
+      "sha256": "567b0f6964eacc1deeacd08589ebc8427424dcf595908912fc30d19c1980d757"
+    },
+    {
+      "dosya": "MALZEME_KATALOGU.json",
+      "tur": "json",
+      "boyut": 8943,
+      "sha256": "8de0e995a3ee511d344bfb5c7094307ea13fe3b48fe32cc7c584acca67a4f9a0"
+    },
+    {
+      "dosya": "cumbali-6x5-proje-notlari.md",
+      "tur": "md",
+      "boyut": 6917,
+      "sha256": "338e1467e2b9d27193ede25d0f8facf7da895890a3875e903eb2ce518a663fd3"
+    },
+    {
+      "dosya": "dosya_bul.py",
+      "tur": "py",
+      "boyut": 605,
+      "sha256": "c5cb19a690177bc16d18db17c6f18bbd97631df6018b057fb90bc721a9466c2f"
+    },
+    {
+      "dosya": "prefabrik-cizim-kurallari.md",
+      "tur": "md",
+      "boyut": 49300,
+      "sha256": "5fb4e5299b401226678b40d69eb0193c725bc677acea32c1264b9a61ef3d9d14"
+    },
+    {
+      "dosya": "proje-kararlari.md",
+      "tur": "md",
+      "boyut": 6893,
+      "sha256": "c163e26df6ed12dc6d5331efa2392408d523cbcdf05e5362420a171310ad32d0"
+    },
+    {
+      "dosya": "İlk Çalışmalar/3-arti-1-akslar.png",
+      "tur": "png",
+      "boyut": 21174,
+      "sha256": "fa68de5a3c4110167bef5260a9c9d0259ec51f7762380bbab12568686b0d497f"
+    },
+    {
+      "dosya": "İlk Çalışmalar/ic-kapilar-olcu-detayi.png",
+      "tur": "png",
+      "boyut": 87979,
+      "sha256": "687835d4cf64eda76a0ad22f83c04f7f6147a8375a8c3d49b91b2d6fc0aaf2fd"
+    },
+    {
+      "dosya": "İlk Çalışmalar/kapili-panel-duzeltilmis-detay.png",
+      "tur": "png",
+      "boyut": 78293,
+      "sha256": "127175d97153ddef12d1737a0a86f7d5a06332212928fa8df557e0672ce02fc1"
+    },
+    {
+      "dosya": "İlk Çalışmalar/prefabrik-2plus1-6x8-genel.png",
+      "tur": "png",
+      "boyut": 59091,
+      "sha256": "865b3163a31d2e47fc1c503114f824e947b87028ccdf94d4ad3e8d84f01bf1c5"
+    },
+    {
+      "dosya": "İlk Çalışmalar/prefabrik-2plus1-6x8-kapi-birlesim.png",
+      "tur": "png",
+      "boyut": 66741,
+      "sha256": "f8d7f6300050ce069bc6d4396fe603069ca85414f41afcdc4df73792b6c06b3e"
+    },
+    {
+      "dosya": "İlk Çalışmalar/prefabrik-2plus1-6x8-verandali.dwg",
+      "tur": "dwg",
+      "boyut": 122135,
+      "sha256": "021b819033a9468d835936e659aca9686e2a061c32086fded91d71aec4a6c46e"
+    },
+    {
+      "dosya": "İlk Çalışmalar/prefabrik-3-arti-1.dwg",
+      "tur": "dwg",
+      "boyut": 38093,
+      "sha256": "3247bd70dd9bff4a03e2eecb05ea9ea6d4a41354ab88bbb2831e802d3ca8b7be"
+    },
+    {
+      "dosya": "İlk Çalışmalar/prefabrik-3plus1-duvar-aks.dwg",
+      "tur": "dwg",
+      "boyut": 65612,
+      "sha256": "92ffc78dd57930cd44994346c5348abffa1431d83439c13608c1c91a370faf53"
+    },
+    {
+      "dosya": "İlk Çalışmalar/prefabrik-3plus1-duvar-aks.png",
+      "tur": "png",
+      "boyut": 109226,
+      "sha256": "048b2d0c11df622f866ed1e03cb202bf389fb367a0f71d2a8e9abc53f6daa57f"
+    },
+    {
+      "dosya": "İlk Çalışmalar/prefabrik-3plus1-verandali-ic-kapili.dwg",
+      "tur": "dwg",
+      "boyut": 125448,
+      "sha256": "e956a64981f945e52c597e3baef7b3df11a5537871220107fccd7537bdf70124"
+    },
+    {
+      "dosya": "İlk Çalışmalar/prefabrik-3plus1-verandali-ic-kapili.png",
+      "tur": "png",
+      "boyut": 69098,
+      "sha256": "c91faf2d5b5492d9dc78af4010609af5ceffd65c5d8f4cd0cf02dae7731a8795"
+    },
+    {
+      "dosya": "İlk Çalışmalar/prefabrik-3plus1-verandali-kapili-panel-duzeltilmis.dwg",
+      "tur": "dwg",
+      "boyut": 132674,
+      "sha256": "2781333efea4c6a67f9f51dc20daf7797fe2866c7a083285eb14876e1fd7499e"
+    },
+    {
+      "dosya": "İlk Çalışmalar/prefabrik-3plus1-verandali-kapili-panel-duzeltilmis.png",
+      "tur": "png",
+      "boyut": 66203,
+      "sha256": "7c15b8f4655d28359533eb3fd297584c3983bc1616cbee4eb74f2fc8de8086dc"
+    },
+    {
+      "dosya": "BLENDER_CIZIM_KURALLARI.md",
+      "tur": "md",
+      "boyut": 5849,
+      "sha256": "21627106709014e35855eff2e682bd0bf5dcde3431b456df921be298a3fbd792"
+    },
+    {
+      "dosya": "BLENDER_KURALLAR.json",
+      "tur": "json",
+      "boyut": 6727,
+      "sha256": "66c147f5c56d56e476871b4206ff069de2af7fbdc2e8329a2d3857a178b253d4"
+    },
+    {
+      "dosya": "ARŞİVİ OKUMA.md",
+      "tur": "md",
+      "boyut": 6335,
+      "sha256": "f54e139f9fda1f45704fb63200633744357b508e6674fce982ebfcbec5a9e93b"
+    }
+  ],
+  "guncellendi": "2026-09-07",
+  "kural_surumu": "1.4.3",
+  "blender_kural_surumu": "1.0",
+  "blender_kural_kaydi_tarihi": "2026-09-07"
+}
