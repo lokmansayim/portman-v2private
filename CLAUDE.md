@@ -20,7 +20,7 @@ Ortak kurallar yukarıdaki `AGENTS.md`'den gelir; burada yalnız Claude'a özgü
 | `/kapanis` | Doğrulama → kanıt → DURUM → commit/push → `/code-review` → PR özeti |
 | `/sahip-ozeti` | Lokman için 10 satırlık durum: canlıda ne var, bekleyen onaylar, açık riskler |
 
-Hakemler (`.claude/agents/`): `geometri-hakemi` (Motor/İş Emri değişikliklerini kurallara karşı inceler), `kvkk-denetcisi` (diff'te sır ve kişisel veri arar). Kapanışta ikisi de koşturulur.
+Hakemler (`.claude/agents/`): `geometri-hakemi` (Motor/İş Emri değişikliklerini kurallara karşı inceler), `kvkk-denetcisi` (diff'te sır ve kişisel veri arar). Kapanışta ikisi de koşturulur. **Lokman (16 Ekim 2026):** `kvkk-denetcisi` şimdilik yalnız **sır taraması** olarak koşar (anahtar, parola, token; "anahtar ve parola hiçbir yere yazılmaz" kuralının otomatik freni); KVKK maddelerini (telefon, kişi ve bayi adı) raporlamaz. Mevcut maskeleme kodu olduğu gibi kalır; pilottan önce, gerçek bayi verisi gelmeden bir kez toplu bakılır.
 
 ## Frenler (hook; `.claude/settings.json`)
 

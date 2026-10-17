@@ -22,7 +22,7 @@ Kapanış, "çalışıyor" demenin kanıtını üretir. Sıra sabittir; bir adı
 ## 3. Bağımsız inceleme (iki hakem + hazır inceleme)
 - `/code-review` koş; bulguları doğruluk etkisine göre ayır (düzeltilecek / isteğe bağlı).
 - `motor/`, `is_emri/` ya da `beyin/varyant.py` değiştiyse **geometri-hakemi** subagent'ını diff üstünde koştur.
-- Her kapanışta **kvkk-denetcisi** subagent'ını diff ve yeni dosyalar üstünde koştur; bulgu varsa maskele.
+- Her kapanışta **kvkk-denetcisi** subagent'ını diff ve yeni dosyalar üstünde koştur; bulgu varsa maskele. Lokman (16.10): şimdilik yalnız sır taraması (anahtar, parola, token) iste, KVKK maddelerini raporlatma; pilottan önce bir kez toplu bakılır (`CLAUDE.md` › Hakemler).
 - Düzeltme gerekiyorsa yap, 2. adımı tekrarla.
 
 ## 4. Kanıt ve belge
