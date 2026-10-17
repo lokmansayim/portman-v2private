@@ -90,7 +90,8 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-20 | İE-09: atölye modelleri referans zincirine girmez, her biri kendi kontrol dosyasıyla korunur; referans ve kontrol dosyaları yalnız motor ya da kural değişince, ayrı PR'da ve Patron'un onayıyla yeniden dondurulur | yazıldı (17.10; `claude/gorev-6e-model-atolyesi-rnhtcp`) |
 | D | D-21 | İE-09 ilk projeler sırası: Ç8801'den sonra 28 AIPrefabrik projesi ve mühendisin tek kat çelikleri; katalog çelikler sıradan çıktı; çift kat canlıdan sonra; kör 20 liste kapalı (Patron, 17.10 07:00, CIO kartı) | ayrıldı (CIO panosu; metni `IE-09.md › Sonraki sıra`) |
 | D | D-22 | İE-09: atölye önce mühendisin tek kat çelikleriyle; AIPrefabrik prefabrik motoru `main`'e girince (Patron, 17.10 08:01, karar kartı "Önce mühendis") | ayrıldı (CIO panosu; metni `IE-09.md › Sonraki sıra`) |
-| D | **D-23** | — | **sıradaki boş** |
+| D | D-23 | İE-09: AIPrefabrik prefabrik pano motoruyla çizilir; motor, bayi paftası ve liste üreteci önce `main`'e (BK-12); D-22'yi değiştirir (Patron, 17.10 09:39, karar kartı "Önce motor") | ayrıldı (CIO panosu; metni `IE-09.md › Sonraki sıra`) |
+| D | **D-24** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; panel ve P6001 güncellemesi kapsam dışı, pilottan sonra) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | dallarda |
