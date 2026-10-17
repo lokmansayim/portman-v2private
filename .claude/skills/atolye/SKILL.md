@@ -11,7 +11,7 @@ Sen Portman'ın model atölyesindesin (İE-09, `docs/is_emirleri/IE-09.md`; kara
 ## Değişmezler
 
 - **Hakem değişmez.** Model PR'ında yalnız yeni modelin kendi dosyaları eklenir (`modeller/banka/<DOSYA>/`). Referans (`testler/referans/`), başka modelin kontrol dosyası ve var olan test değişmez. Bunlar ayrı PR'da, gerekçe ve `KARARLAR/` altındaki bir kararla, Patron'un açık onayıyla değişir (`atolye.py dondur`; D-02).
-- **Kör test seti açılmaz.** AIPrefabrik'te yükleme listesi açılmamış 20 proje (açıklar: AP-01…05, 07, 08, 19) kaynak ya da kıyas olarak alınmaz. Araç reddeder; elle de açma, okuma.
+- **Kör test seti açılmaz.** AIPrefabrik'te 20 projenin yükleme listesi kapalıdır (listesi açık olanlar: AP-01…05, 07, 08, 19); bu listeler kaynak ya da kıyas olarak alınmaz. Araç reddeder; elle de açma, okuma. Montaj paftası kaynak olabilir; liste yalnız kör test protokolüyle açılır.
 - **Kaynak dosyalar depoya girmez.** Karta etiket (kişi ya da bayi adı taşımayan, senin yazdığın), uzantı, boyut ve SHA-256 girer. Müşteri projesi bayiye adsızdır (AP/KT kodu).
 - **LLM anlar, kod karar verir.** DWG varsa LibreDWG ile DXF'e çevir, ölçüleri ezdxf ile koddan oku; PDF'te vektör ve metin koddan. Görselden okuduğun her ölçüyü ve kapı/pencere sayısını `kaynak --kaynagi "görsel okuma: …"` ile kaynağıyla yaz; kontrol sayfasında yan yana durur.
 - **Motor kusuru o an düzeltilmez.** `duzelt --tur motor` kusur defterine (`docs/notlar/IE-09_motor_kusurlari.md`) yazar; düzeltmesi ayrı PR. Tanımla atlatılabiliyorsa (ör. kısa ad) atlat ve defterde söyle.
