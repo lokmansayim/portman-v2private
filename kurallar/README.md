@@ -39,7 +39,7 @@ Tanımda o projenin teknik özelliklerinden gelen birkaç seçim de yazılıdır
 | `cizim/cizim_seti.json` | Çizim setinin içeriği (Lokman onayladı, 7 Ekim 2026 07:45). Anlatımı `docs/sartname/cizim_seti.md` |
 | `cizim/pafta_sablonu.json` | Örnek Şablon paftasının koda bağlı seçimleri (İE-08, 12 Ekim 2026): vasistas eşiği, çatı tipi adları, özellik yazı boyu (Lokman 14:53 kabul etti, `lokman`), genel ölçü yuvarlaması (şablon kuralı), zincirde en kısa parça 15 cm (`varsayim`, onay bekliyor). `motor/genel/sablon_pafta.py` okur; anahtar yoksa koddaki varsayılan sürer |
 | `liste/kurallar.json` | Metraj ve yükleme listesi kuralları; her anahtarda `deger`, `durum`, `kaynak`. Sürümü `sema` alanında (bugün 0.19-taslak) |
-| `liste/prefabrik.json` | Prefabrik pano evinin yükleme listesine özgü kurallar (BK-12 PR-2, 18 Ekim 2026; sema `portman.prefabrik_liste/1.0`); her anahtarda `deger`, `durum`, `kaynak`. Okuyan `motor/prefabrik_liste.py`. Kural kitabını `kitap_seti`'nde sabitlenmiş setten okur (`setler/0.19.json`; `PORTMAN_KURALLAR` etkilemez). Kitabın her kuralı üç yerden birindedir: aynı değerse okunur, yinelenmez; farklıysa `kitapla_farkli`'da beyanlı (39 kayıt, 17'si Lokman'ın kararını bekliyor); prefabrikte karşılığı yoksa `kitaptan_okunmayan`'da (24). Çelik setinin sürümünü değiştirmemek için ayrı dosyada; `dogrula.py` girdi kalıbında değil |
+| `liste/prefabrik.json` | Prefabrik pano evinin yükleme listesine özgü kurallar (BK-12 PR-2, 18 Ekim 2026; sema `portman.prefabrik_liste/1.0`); her anahtarda `deger`, `durum`, `kaynak`. Okuyan `motor/prefabrik_liste.py`. Kural kitabını `kitap_seti`'nde sabitlenmiş setten okur (`setler/0.19.json`; `PORTMAN_KURALLAR` etkilemez). Kitabın her kuralı üç yerden birindedir: aynı değerse okunur, yinelenmez; farklıysa `kitapla_farkli`'da beyanlı (22 kayıt; Lokman'ın 18 Ekim kararıyla on yedisi kitaba geçti, bekleyen yok); prefabrikte karşılığı yoksa `kitaptan_okunmayan`'da (29). Çelik setinin sürümünü değiştirmemek için ayrı dosyada; `dogrula.py` girdi kalıbında değil |
 | `liste/setler/` | Dondurulmuş sürümler (0.12–0.19; aşağıda). Bir set `PORTMAN_KURALLAR` ortam değişkeniyle ya da `python -m motor.genel.uret --set` ile seçilir (`motor/genel/kural.py`; deneme kopyası `deneme/2026-10-03_yukleme/kural.py`) |
 | `bayi/ornek.json` | Bayi standardı örneği: listeye giren gruplar, çatı yöntemi. Gerçek bayi, numara ya da ad yok |
 
@@ -56,8 +56,8 @@ değerler orada yinelenmez, farklıları `kitapla_farkli`'da beyanlıdır, prefa
 110 kuralının her biri bu üç yerden birindedir (`testler/motor/test_prefabrik_liste.py`). Prefabrik liste kitabı `prefabrik.json › kitap_seti`'nde
 sabitlenmiş setten okur (bugün `setler/0.19.json`): çelik için kitapta yapılan bir değişiklik prefabrik listeyi sessizce değiştirmez; seti
 ilerletmek `prefabrik.json`'da bilinçli bir değişikliktir. `liste/kurallar.json`'daki yöntem B kalemlerini (tavan omegası, aşık, saçak ve alın
-sacı, baş makas Z'si) prefabrik liste okur; çelik listesinde onlar yalnız karşılaştırma için hesaplanır. Veranda tavanı: prefabrik liste bugün
-Boardex yazar (PK-07 listesi), aşağıdaki kayıt yeşil alçıpan; Lokman'ın kararını bekliyor (`kitapla_farkli`).
+sacı, baş makas Z'si) prefabrik liste okur; çelik listesinde onlar yalnız karşılaştırma için hesaplanır. Veranda tavanı: prefabrik liste de
+aşağıdaki kayıttaki gibi yeşil alçıpan yazar (Lokman, 18 Ekim 2026 19:22, kart "Kitap"; önceden Boardex, PK-07 listesi).
 
 | Konu | Bugünkü kayıt | Durum |
 |---|---|---|

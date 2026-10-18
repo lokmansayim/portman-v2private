@@ -9,7 +9,8 @@
   satırın yazısı (ölçü, formül ya da aday notu) da değişir; parça boyu değişince ölçü, bölen de birlikte değişir.
 - Kural değeri kilidi (`veri/prefabrik_kural_kilidi.json`): okunan her yaprağın değeri. Bir değer değişince test düşer; kilidi yeniden yazmak
   bilinçli bir değişikliktir (`python testler/motor/test_prefabrik_liste.py --kilit`, gerekçesi iş emrine).
-- Orta iniş (Lokman, 13 Ekim 15:10): uzunluğa bağlı; eşik kitabın 9 m'si, varsayım. 7.3'ün "her saçak hattına bir" kuralı aday sütununda.
+- Orta iniş (Lokman, 13 Ekim 15:10): uzunluğa bağlı; eşik kitabın 9 m'si (Lokman, 18 Ekim 19:22). 7.3'ün "her saçak hattına bir" kuralı aday sütununda.
+- Kitapla farklı on yedi kalemde kitap geçer (Lokman, 18 Ekim 19:22, kart "Kitap"): kayıtları kalktı, Lokman'ın kararını bekleyen konu yok.
 - Pafta kipi Motor kipiyle aynı geometriden aynı adetleri verir; komut satırı JSON ve tek sayfalık Excel yazar.
 """
 from __future__ import annotations
@@ -80,7 +81,7 @@ def test_pk01_aliciya_ait(pk01):
     assert _satir(pk01, "Pencere grubu")["adet"] == 0
     dis_kapi = [s for s in pk01["satirlar"] if s["kalem"].startswith("Prefabrik çelik kapı")]
     assert len(dis_kapi) == 1 and dis_kapi[0]["adet"] == 0
-    assert _satir(pk01, "Boya grubu ve mastik")["adet"] == 0
+    assert _satir(pk01, "Boya grubu")["adet"] == 0
     assert _satir(pk01, "Sıhhi tesisat grubu")["adet"] == 0
     assert _satir(pk01, "Elektrik grubu")["dayanak"] == "Kural yok"     # PK-01 paftasında elektrik planı yok
 
@@ -102,7 +103,9 @@ def test_ortak_degerler_kural_kitabindan(N, kurallar):
     Geometri hakeminin denemesi: saçak sacı parçası 2,8 olunca ölçü, formül ve adet birlikte değişir."""
     yinelenmez = {"parca_boyu_m", "bindirme_m", "asik", "silte_adet_m2", "sandvic_panel_kapatma_m", "trapez_sac_kapatma_m", "levha_m2", "zayiat",
                   "bas_makas_z", "dere_kelepcesi_dere_basina", "inis", "inis_basina", "veranda_boardex", "ters_mahya_bolen_m", "bas_makas_z_bolen_m",
-                  "mahya_bandi", "tesisat", "levha_kalinligi_mm", "cati_mudahale_kapagi"}
+                  "mahya_bandi", "tesisat", "levha_kalinligi_mm", "cati_mudahale_kapagi", "tek_kat_panel_kapatma_m", "kiremit_kapatma_m",
+                  "panel_boyu_yuvarlama_mm", "cati_kaplama_tasma_m", "sandvic_kapama", "panel_kapamasi", "veranda_tavani", "kapsam_alici",
+                  "ters_mahya_kenar_kutusu", "duvar_dibi", "panel_cati_kenarlari", "ek_yapi_ve_korkuluk", "urun_adlari"}
     assert not yinelenmez & set(kurallar["prefabrik"]["kurallar"])
     k = copy.deepcopy(kurallar)
     k["ortak"]["parca_boyu_m"]["sacak_saci"]["deger"] = 2.8
@@ -139,7 +142,7 @@ def test_kural_dosyasi_bicimi(kurallar):
         assert v["durum"] in DURUMLAR, (ad, v["durum"])
         assert v["kaynak"].strip(), ad
     assert R["kurallar"]["inis_orta"]["deger"] in ("esik", "her_sacak")
-    assert R["kurallar"]["inis_orta"]["durum"] == "varsayim"         # eşiği Lokman vermedi (geometri hakemi, bulgu 2)
+    assert R["kurallar"]["inis_orta"]["durum"] == "lokman"           # eşik 9 m: Lokman, 18 Ekim 19:22 (önce varsayımdı; geometri hakemi, bulgu 2)
 
 
 def _yol(kok: dict, yol: str):
@@ -151,12 +154,11 @@ def _yol(kok: dict, yol: str):
     return v
 
 
-# Kitabın Lokman'ın kararıyla çelişen ve prefabrikte başka yazılan değerleri: Lokman'ın kararını bekler (geometri hakemi, 1.–5. tur).
-# Alçıpan vidasının levhaları kitabın Lokman kararı değil, çalışma kitabının notu; PK-03'ün gerçek listesi kitapla tuttuğu için soruya girer.
-KARAR_BEKLEYEN = {"Tek kat çatı paneli kapatması", "Metal kiremit kapatması", "Çatı paneli boyu", "Sandviç panel kapaması", "Trapez sac mahyası",
-                  "Veranda tavanı", "Pencere alıcıya aitken vida ve mastik", "Ters mahya kenar kutusu", "Müdahale kapakları", "Duvar dibi",
-                  "Dayson", "Silikonize mastik", "Buat kasa", "NYM kablo uzunluğu", "Alçıpan vidasının levhaları",
-                  "Panel çatının kenarları", "Tek kat panel kapaması"}
+# Lokman'ın 18 Ekim 19:22 kararıyla (kart "Kitap") kitapla farklı on yedi kayıt kalktı; o kalemler kitaptan okunur. Kararı bekleyen konu yok.
+KITABA_GECEN = {"Tek kat çatı paneli kapatması", "Metal kiremit kapatması", "Çatı paneli boyu", "Sandviç panel kapaması", "Trapez sac mahyası",
+                "Veranda tavanı", "Pencere alıcıya aitken vida ve mastik", "Ters mahya kenar kutusu", "Müdahale kapakları", "Duvar dibi",
+                "Dayson", "Silikonize mastik", "Buat kasa", "NYM kablo uzunluğu", "Alçıpan vidasının levhaları",
+                "Panel çatının kenarları", "Tek kat panel kapaması"}
 
 
 def _kitap_yollari(b: dict) -> list[str]:
@@ -165,8 +167,8 @@ def _kitap_yollari(b: dict) -> list[str]:
 
 def test_kitapla_farkli_beyanlari(kurallar):
     """Kitaptan farklı değer, yöntem, kalem ya da kapsam beyanlıdır: her kayıt iki yanda da bulunur, değer kayıtlarında değerler gerçekten
-    farklıdır (eşitlenince kayıt kalkar, değer kitaptan okunur), kitapla aynı adı taşıyan her prefabrik kuralı beyan edilmiştir ve
-    Lokman'ın kararını bekleyenler işaretlidir."""
+    farklıdır (eşitlenince kayıt kalkar, değer kitaptan okunur), kitapla aynı adı taşıyan her prefabrik kuralı beyan edilmiştir ve Lokman'ın
+    kararını bekleyen konu yoktur (18 Ekim 19:22'den beri; yeni bir konu bekleyecekse satır işareti de geri gelir: 06bbf1b)."""
     R, kitap = kurallar["prefabrik"], kurallar["ortak"]
     beyan = R["kitapla_farkli"]
     for b in beyan:
@@ -182,7 +184,8 @@ def test_kitapla_farkli_beyanlari(kurallar):
     beyanli = {b["prefabrik"].split(".")[0] for b in beyan if b["prefabrik"]}
     ayni_ad = set(R["kurallar"]) & set(kitap)
     assert ayni_ad <= beyanli, ayni_ad - beyanli
-    assert {b["konu"] for b in beyan if b["karar_bekliyor"]} == KARAR_BEKLEYEN
+    assert [b["konu"] for b in beyan if b["karar_bekliyor"]] == []
+    assert not KITABA_GECEN & {b["konu"] for b in beyan}
     assert {"Dere kapağı", "Çatı OSB'si zayiatı", "Boya", "Vida", "Elektrik"} <= {b["konu"] for b in beyan}
 
 
@@ -236,7 +239,7 @@ def test_orta_inis_uzunluga_bagli(kurallar):
                    "sacak_hatlari_m": [8.0, 10.0]}]}
     esik = _satir(PL.liste(PL.model_pafta(copy.deepcopy(N)), kurallar), "Metal dere inişi aparatı")
     assert (esik["adet"], esik["aday"]) == (5, 6)
-    assert esik["dayanak"] == "Varsayım (uzunluğa bağlı: Lokman 13.10 15:10; eşik 9 m kural kitabından)"
+    assert esik["dayanak"] == "Kural (uzunluğa bağlı: Lokman 13.10 15:10; eşik 9 m: Lokman 18.10)"
     k = copy.deepcopy(kurallar)
     k["prefabrik"]["kurallar"]["inis_orta"]["deger"] = "her_sacak"
     her = _satir(PL.liste(PL.model_pafta(copy.deepcopy(N)), k), "Metal dere inişi aparatı")
@@ -251,7 +254,9 @@ def _varyantlar(N: dict, pf: dict) -> dict:
     """PK-01 ve sentetik türevleri: PK-01'de koşmayan yolları açar (gerçek proje değildir; öteki inceleme projelerinin girdileri PR-3'te gelir).
     bizde: alıcıya ait kalem yok, fugalı cephe, iç cephe alçıpanı, metal iniş, elektrik planı, kubbe, vasistas sınırının iki yanında pencere;
     kisa_uzun: 8 ve 10 m saçaklı beşik (orta iniş); ters100 ve ters60: ters tavan, trapez / kiremit + OSB + nem, 100'lük iç duvar, cumba,
-    özel köşe, özel büküm; tekyon: tek yön çatı, tek kat panel, iç duvarsız, ıslak hacimsiz, makassız açık veranda çatısı."""
+    özel köşe, özel büküm; tekyon: tek yön çatı, tek kat panel, iç duvarsız, ıslak hacimsiz, makassız açık veranda çatısı; ek_yapi: kapalı çatı
+    panelli (makassız) tek yön ek yapı, paftasında özel büküm saçlar (kenar Boardex şeridi, sundurma kapama, duvar dibi); sundurma: uzun
+    kenar boyunca kapalı çatı panelli ek yapı (Boardex şeridi birden çok levha: zayiat adedi değiştirir)."""
     def tur(n, **d):
         n = copy.deepcopy(n)
         n.update(d)
@@ -276,6 +281,9 @@ def _varyantlar(N: dict, pf: dict) -> dict:
                  "cati": [{"ad": "ana çatı", "tip": "besik", "aciklik_cm": 600.0, "boy_cm": 900.0, "egim_yuzde": 33.0, "sacak_cm": 30.0,
                            "sacak_hatlari_m": [8.0, 10.0]}]}
     veranda = dict(ana, ad="veranda", acik=True, makas_yok=True, aciklik_cm=200.0, boy_cm=300.0, kalkan=0, makas_kosu_cm=280.0)
+    ek_yapi = {"ad": "ek yapı", "tip": "tek_yon", "aciklik_cm": 200.0, "boy_cm": 400.0, "egim_yuzde": 5.0, "sacak_cm": 30.0, "kalkan": 0, "makas_yok": True,
+               "makas_kosu_cm": 380.0}
+    sundurma = dict(ek_yapi, ad="sundurma", aciklik_cm=300.0, boy_cm=1000.0, makas_kosu_cm=980.0)
     return {
         "pk01": (N, pf),
         "bizde": (tur(N, alici_ait={}, ozellikler=bizde_oz, cati=N["cati"] + [kubbe], panolar=pan_b), {**pf, **elektrik}),
@@ -288,6 +296,8 @@ def _varyantlar(N: dict, pf: dict) -> dict:
         "tekyon": (tur(N, panolar=[p for p in N["panolar"] if p["duvar"] == "dis"], ekler=[e for e in N["ekler"] if e["duvar"] == "dis"],
                        kapali=[dict(m, tur="oda") for m in N["kapali"]], ozellikler={**oz, "Çatı Kaplaması": "Tek kat panel"},
                        cati=[dict(ana, tip="tek_yon"), veranda]), pf),
+        "ek_yapi": (tur(N, cati=N["cati"] + [ek_yapi], ozel_bukum={"sacak": 2, "alin": 2}), pf),
+        "sundurma": (tur(N, cati=N["cati"] + [sundurma]), pf),
     }
 
 
@@ -371,11 +381,16 @@ def _harita(L: dict) -> dict:
 
 
 # Parça boyu ya da levha olan yapraklar: bozulunca bir satırın ölçüsü değişmeli (ya da levha denetimi listeyi durdurmalı)
-OLCULU = {("prefabrik", "trapez_mahyasi_parca_m"), ("prefabrik", "kapama", "sandvic_parca_m"), ("prefabrik", "fugali_cephe", "lata_boyu_m"),
+OLCULU = {("ortak", "sandvic_kapama", "parca_boyu_m"), ("ortak", "duvar_dibi", "parca_boyu_m"), ("ortak", "panel_cati_kenarlari", "sacak", "parca_boyu_m"),
+          ("ortak", "panel_cati_kenarlari", "yan", "parca_boyu_m"), ("ortak", "levha_kalinligi_mm", "boardex"), ("ortak", "ters_mahya_kenar_kutusu", "boyut"),
+          ("prefabrik", "fugali_cephe", "lata_boyu_m"),
           ("prefabrik", "fugali_cephe", "lata_kisa_boyu_m"), ("prefabrik", "duvar_omegasi_100_bolen_m"), ("prefabrik", "sacak_omegasi_bolen_m"),
           ("prefabrik", "bas_makas_omegasi_bolen_m"), ("prefabrik", "alt_cerceve_bolen_m"), ("prefabrik", "cektirme_u_100_aday", "boy_cm"),
           ("prefabrik", "bas_makas_betopani", "levha_m2"), ("prefabrik", "siparis_boyu", "modul_siparis_mm"), ("ortak", "bas_makas_z", "parca_boyu_m"),
-          ("prefabrik", "omega_kapak", "parca_m"), ("prefabrik", "veranda_tavani", "kalinlik_mm"), ("duvar_tipleri", "tipler", "PE-IC-60", "anma_mm")}
+          ("prefabrik", "omega_kapak", "parca_m"), ("duvar_tipleri", "tipler", "PE-IC-60", "anma_mm")}
+# Ölçüsü kitabın kendi yaprağından aynen gelen satırlar: o yaprak OLCULU'da sınanır; başka bir parça boyunun milimetresi bu ölçüde geçse de
+# (kenar kutusunun 2800'ü mahyanın 2800'ü değildir) eski boydan kalmış yazı sayılmaz (BK-12 › Kanıt, 18 Ekim "Kitap")
+SABIT_OLCU = {("ortak", "ters_mahya_kenar_kutusu", "boyut")}
 
 
 @pytest.fixture(scope="module")
@@ -456,13 +471,13 @@ def test_parca_boyu_degisince_olcu_degisir(bozma, kurallar):
             return T.keys() != B.keys() or any(T[a]["olcu"] != B[a]["olcu"] for a in T)
         assert any(olcu_degisti(t, b) for _ad, t, b in sonuc[yol]), yol
         if yol[-1].endswith("_m") or yol[1] == "parca_boyu_m":     # metre: eski boy (mm) ölçüde kaldıysa ve adet değiştiyse yazı bayat
-            eski = PL.mm_m(_al_taban(yol))
+            eski, sabit = PL.mm_m(_al_taban(yol)), {_al_taban(y) for y in SABIT_OLCU}
             for _ad, t, b in sonuc[yol]:
                 if isinstance(b, Exception):
                     continue
                 T, B = _harita(t), _harita(b)
                 for a in T.keys() & B.keys():
-                    if T[a]["adet"] != B[a]["adet"] and eski in T[a]["olcu"] and T[a]["olcu"] == B[a]["olcu"]:
+                    if T[a]["adet"] != B[a]["adet"] and eski in T[a]["olcu"] and T[a]["olcu"] == B[a]["olcu"] and T[a]["olcu"] not in sabit:
                         pytest.fail(f"{'.'.join(yol)}: {a[1]} ölçüsü {T[a]['olcu']} kaldı, adet {T[a]['adet']} → {B[a]['adet']}")
                     x, y = T[a], B[a]
                     if x["olcu"] != y["olcu"] and "÷" in x["formul"] and (x["adet"], x["formul"]) == (y["adet"], y["formul"]):
@@ -501,52 +516,79 @@ def test_pafta_kipi_motor_kipiyle_ayni(N, kurallar):
     assert Lp["girdi_ozeti"]["geometri"] == "pafta"
 
 
-def test_karar_bekleyen_satirlar(pk01, N, kurallar):
-    """Hesabında Lokman'ın kararını bekleyen değeri ya da kuralı kullanan satır konuyu taşır (türeyen vida, bant, kelepçe, iniş dahil); karar
-    verilince (bayrak kalkınca) işaret de kalkar. PK-01'de yedi konu, sekiz satır (CIO kıyası, 18 Ekim: Patron'un baktığı Excel'de görünmüyordu;
-    geometri hakemi, 7.–9. tur: panelli çatının dere, kenar ve tavanı, türev satırlar, acil kapak)."""
-    isaretli = {s["kalem"]: s["karar_bekliyor"] for s in pk01["satirlar"] if s["karar_bekliyor"]}
-    assert isaretli == {"Veranda tavan Boardex": ["Veranda tavanı"], "Sandviç panel (100 cm kapatır) · ana çatı": ["Çatı paneli boyu"],
-                        "Sandviç panel kapaması": ["Sandviç panel kapaması"],
-                        "Prefabrik pencere vidası (4,8 × 70)": ["Pencere alıcıya aitken vida ve mastik"],
-                        "Alçıpan vidası": ["Alçıpan vidasının levhaları"], "Trapez vida 5,5 × 110 (sandviç panel)": ["Çatı paneli boyu"],
-                        "Çatı müdahale kapağı": ["Müdahale kapakları"], "Dayson (çatı renginde)": ["Dayson"]}
-    assert set().union(*isaretli.values()) <= KARAR_BEKLEYEN
-    V = {ad: PL.liste(copy.deepcopy(n), kurallar, pf) for ad, (n, pf) in _varyantlar(N, _oku(PAFTA_KATMANI)).items() if ad in ("tekyon", "ters100")}
-    pck = {s["kalem"] for s in V["tekyon"]["satirlar"] if "Panel çatının kenarları" in s["karar_bekliyor"]}
-    assert pck == {"Metal dere", "Dere kelepçesi", "Metal dere inişi aparatı", "70 mm PVC dere iniş borusu", "Açık dirsek", "Kapalı dirsek",
-                   "PVC iniş kelepçesi", "Dere kapağı",                # makassız açık veranda: kitapta saçakta dere (PK-07'de dere 6 → 7)
-                   "100'lük saçak omegası", "Saçak sacı (30'luk, 3'ü menfezli)",   # kitapta özel büküm saçak; beşik verandanın alnı yok
-                   "Veranda tavan Boardex"}                            # kitapta açık alanın tavanı çatı planıyla
-    assert _satir(V["tekyon"], "Veranda tavan Boardex")["karar_bekliyor"] == ["Veranda tavanı", "Panel çatının kenarları"]
+def test_kitaba_gecen_kalemler(pk01, N, kurallar):
+    """Lokman, 18 Ekim 19:22 (kart "Kitap"): kitapla farklı on yedi kalemde kural kitabının değeri ve yöntemi geçer. Sayılar PK-01'de ve
+    sentetik türevlerde elle hesaplanmış değerlerdir; 7.3'ün değeri kaldığı yerde aday sütunundadır."""
+    kalemler = {s["kalem"] for s in pk01["satirlar"]}
+    # panel boyu eğik + 5 cm taşma, 10 mm'ye yukarı (3,475 + 0,05 → 3530); kapama L 2500, saçakların toplamı ÷ 2,3 (21,20 m → 10)
+    assert _satir(pk01, "Sandviç panel (100 cm kapatır) · ana çatı")["olcu"] == "L 3530"
+    s = _satir(pk01, "Sandviç panel kapaması")
+    assert (s["olcu"], s["adet"]) == ("L 2500", 10)
+    # veranda tavanı yeşil alçıpanda ((4,43 + 6,68) × 1,05 ÷ 3 + 1 → 4); pencere alıcıya ait: vida ve mastik yazılmaz; tek müdahale kapağı,
+    # paftasında alıcıya ait (7.3'ün ayrı çatı müdahale kapağı satırı da gider); dayson m² × 0,06 (60 m² → 4)
+    assert _satir(pk01, "Tavan yeşil alçıpan")["adet"] == 4
+    assert {"Veranda tavan Boardex", "Prefabrik pencere vidası (4,8 × 70)", "Silikonize mastik", "Çatı müdahale kapağı", "Boya grubu ve mastik"}.isdisjoint(kalemler)
+    s = _satir(pk01, "Acil müdahale kapağı")
+    assert (s["adet"], s["formul"]) == (0, "yapı başına 1 (alıcıya ait)")
+    assert _satir(pk01, "Dayson (çatı renginde)")["adet"] == 4
+    V = {ad: PL.liste(copy.deepcopy(n), kurallar, pf) for ad, (n, pf) in _varyantlar(N, _oku(PAFTA_KATMANI)).items()}
+    # bizde (pencere, boya ve elektrik planı bizde): mastik pencere × 1, boyadan bağımsız; pencere vidası; buat anahtar + priz + oda (aday 7.3'ün
+    # bütün noktaları); NYM sigorta (W otomat 8) × köşegen 11,66 m + nokta × 2 m (aday Portatifev sabiti)
+    b = V["bizde"]
+    assert _satir(b, "Silikonize mastik")["adet"] == 6 and _satir(b, "Prefabrik pencere vidası (4,8 × 70)")["adet"] == 120
+    assert (_satir(b, "Buat kasa")["adet"], _satir(b, "Buat kasa")["aday"]) == (24, 28)              # 7 + 11 + 6
+    assert [(_satir(b, x)["adet"], _satir(b, x)["aday"]) for x in ("NYM kablo 3 × 2,5", "NYM kablo 2 × 1,5")] == [(124, 130), (112, 100)]
+    assert _satir(b, "Acil müdahale kapağı")["adet"] == 1 and "Çatı müdahale kapağı" not in {s["kalem"] for s in b["satirlar"]}
+    # ters100 (trapez, cumba): trapez mahyası L 800 ÷ 0,6; ters mahya başına iki kenar kutusu. ters60: metal kiremit 100 cm kapatır
+    t = V["ters100"]
+    assert (_satir(t, "Trapez sac mahyası")["olcu"], _satir(t, "Trapez sac mahyası")["adet"]) == ("L 800", 22)
+    kk = _satir(t, "Ters mahya kenar kutusu")
+    assert (kk["olcu"], kk["adet"]) == ("L 21 × 40 × 21 × 2800", 2 * _satir(t, "Ters mahya (dere içi)")["adet"])
+    assert _satir(V["ters60"], "Metal kiremit (100 cm kapatır) · ana çatı")["adet"] == 22
+    # tekyon (tek kat panel, çatı panelli açık veranda): kapatma 1,0; tek kat panel kapaması yok; verandanın saçağında dere ve özel büküm saçak
+    # sacı, düz saçak sacı ve saçak omegası yok; veranda tavanı çatının saçaklı planıyla (2,6 × 3,6 = 9,36 m²)
+    y = V["tekyon"]
+    assert "Panel kapaması" not in {s["kalem"] for s in y["satirlar"]}
+    assert "÷ 1⌉" in _satir(y, "Tek kat çatı paneli · ana çatı")["formul"]
+    assert "10.60 + 3.60 + 3.60" in _satir(y, "Metal dere")["formul"]
+    assert _satir(y, "Özel büküm saçak sacı")["adet"] == 4                         # 7,20 m ÷ 2,3
+    assert _satir(y, "Saçak sacı (30'luk, 3'ü menfezli)")["formul"].startswith("saçak kenarları 10.60 m (çatı panelli")
+    assert _satir(y, "100'lük saçak omegası")["adet"] == 5
+    assert "veranda tavanı 9.36" in _satir(y, "Tavan yeşil alçıpan")["formul"]
+    # ek_yapi (kapalı çatı panelli tek yön ek yapı, paftasında 2 + 2 özel büküm): sundurma kapama, kenarın altında Boardex şeridi (üreticinin adıyla),
+    # duvar dibine özel mahya; paftanın özel büküm saçları kitabın kenar satırlarının notunda, düz saçtan düşülmez
+    e = V["ek_yapi"]
+    assert "Özel büküm alın sacı" not in {s["kalem"] for s in e["satirlar"]}
+    assert _satir(e, "Saçak sacı (30'luk, 3'ü menfezli)")["adet"] == 10                 # 21,20 m ÷ 2,3, özel büküm düşülmez
+    assert _satir(e, "Sundurma kapama")["adet"] == 3 and "özel büküm saçlarında 2" in _satir(e, "Sundurma kapama")["kaynak"]
+    bx = _satir(e, "OUTWEAR Dış Cephe Levhası (çatı panelli parçanın saçak ve yan altı)")
+    assert (bx["olcu"], bx["adet"]) == ("12,5 × 1200 × 2400", 1)                          # 9,21 m × 0,15 m
+    assert _satir(e, "Özel mahya (geniş)")["adet"] == 2                                    # 4,60 m ÷ 2,6
+    assert "Boardex 1" in _satir(e, "Alçıpan vidası")["formul"]
+    # sundurma (10 m'lik kenar boyunca): şerit saçak 10,60 + iki yan 6,61 = 17,21 m × 0,15 m = 2,58 m² × 1,08 ÷ 2,88 → 1 (zayiat %62 olsa 2)
+    bx = _satir(V["sundurma"], "OUTWEAR Dış Cephe Levhası (çatı panelli parçanın saçak ve yan altı)")
+    assert bx["adet"] == 1 and bx["formul"].startswith("17.21 m × 0,15 m = 2.58 m² × 1,08")
+    n, pf = _varyantlar(N, _oku(PAFTA_KATMANI))["ek_yapi"]
+    n = copy.deepcopy(n)
+    n["cati"][-1]["duvar_dibi_m"] = 0.0                                                   # paftası duvar dibi yok derse özel mahya yazılmaz
+    assert "Özel mahya (geniş)" not in {s["kalem"] for s in PL.liste(n, kurallar, pf)["satirlar"]}
     n, pf = _varyantlar(N, _oku(PAFTA_KATMANI))["tekyon"]
     n = copy.deepcopy(n)
-    n["cati"][1].update(acik=False, dere_yok=True)                       # paftası deresiz makassız parça: kitapta yine saçakta dere
-    assert "Panel çatının kenarları" in _satir(PL.liste(n, kurallar, pf), "Metal dere")["karar_bekliyor"]
-    assert _satir(V["tekyon"], "Trapez vida 5,5 × 76 (tek kat panel)")["karar_bekliyor"] == ["Çatı paneli boyu", "Tek kat çatı paneli kapatması"]
-    assert _satir(V["ters100"], "Mahya bandı")["karar_bekliyor"] == ["Trapez sac mahyası"]
-    assert not any("Panel çatının kenarları" in s["karar_bekliyor"] for s in pk01["satirlar"])
-    k = copy.deepcopy(kurallar)
-    for b in k["prefabrik"]["kitapla_farkli"]:
-        if b["konu"] == "Dayson":
-            b["karar_bekliyor"] = False
-    L = PL.liste(copy.deepcopy(N), k, _oku(PAFTA_KATMANI))
-    assert _satir(L, "Dayson (çatı renginde)")["karar_bekliyor"] == [] and _satir(L, "Veranda tavan Boardex")["karar_bekliyor"] == ["Veranda tavanı"]
-    k["prefabrik"]["kitapla_farkli"] = [b for b in k["prefabrik"]["kitapla_farkli"] if b["konu"] != "Dayson"]
-    with pytest.raises(ValueError, match="Dayson"):                  # satırın bağlandığı konu beyandan çıkarsa liste üretilmez
-        PL.liste(copy.deepcopy(N), k, _oku(PAFTA_KATMANI))
+    n["cati"][1].update(acik=False, dere_yok=True)                                      # paftası deresiz çatı panelli parça: kitapta saçakta dere
+    assert "10.60 + 3.60 + 3.60" in _satir(PL.liste(n, kurallar, pf), "Metal dere")["formul"]
 
 
 def test_komut_satiri(tmp_path):
     openpyxl = pytest.importorskip("openpyxl")
     assert PL.main([str(PK01), str(tmp_path), "--pafta", str(PAFTA_KATMANI)]) == 0
     L = _oku(tmp_path / "PK01_liste.json")
-    assert L["kod"] == "PK-01" and L["ozet"]["satir"] == len(L["satirlar"]) == 93
+    assert L["kod"] == "PK-01" and L["ozet"]["satir"] == len(L["satirlar"]) == 90
     assert L["kural_seti"]["prefabrik"] == "portman.prefabrik_liste/1.0"
     wb = openpyxl.load_workbook(tmp_path / "PK01_liste.xlsx")
-    assert wb.sheetnames == ["Liste"] and wb["Liste"].max_row == 93 + 2
+    assert wb.sheetnames == ["Liste"] and wb["Liste"].max_row == 90 + 2
     d = {r[1]: r[5] for r in wb["Liste"].iter_rows(min_row=3, values_only=True)}
-    assert d["Dayson (çatı renginde)"] == "Şablon formülü (O18) · karar bekliyor (Dayson)" and d["Poliüretan köpük"] == "Şablon formülü (O18)"
+    assert d["Dayson (çatı renginde)"] == "Kural kitabı" and d["Poliüretan köpük"] == "Şablon formülü (O18)"
+    assert not any("karar bekliyor" in str(x) for r in wb["Liste"].iter_rows(values_only=True) for x in r)
     with pytest.raises(SystemExit):
         PL.main([str(tmp_path)])                                     # ne İş Emri ne --yapi
 
