@@ -1,0 +1,483 @@
+{
+ "sema": "portman.prefabrik_liste/1.0",
+ "aciklama": "Prefabrik pano evinin yükleme listesi kuralları (BK-12 PR-2, 18 Ekim 2026). Okuyan `motor/prefabrik_liste.py`. Kör test serisinin üreteci 7.3'ün (13 Ekim 2026, `ie-11-pr2-kor-test` dalı) kodun içindeki sabitleri buraya taşındı; değerler aynı. Saçak, alın, mahya, dere, aşık, şilte, kaplama ve iniş gibi çelikle ortak değerler burada yinelenmez, `kurallar.json`'dan okunur (kural kitabı tektir). Kitapta çelik ve yöntem B karşılaştırması için yazılmış aynı adlı yedi anahtar (boya, elektrik, kosebent, mahya_bandi, panel_boyu_yuvarlama_mm, tavan_omegasi_aralik_m, vida) ve dere_kapagi başka değerlerdedir; prefabrik liste onları okumaz. Kitaptaki yöntem B kalemleri çelik listesinde yalnız karşılaştırma için hesaplanır (Lokman, 7 Ekim 07:45); onları bu dosyaya bağlamak çelik setinin sürümünü değiştirir, ayrı iştir (BK-12 › PR-2 › Bilinen sınırlama). Durum değerleri kural kitabınınkiler (`kurallar/README.md`): lokman, excel (Portatifev şablonunun, yani yükleme listesi çalışma kitabının formülü), uydurma, varsayim; prefabrikte üç değer daha: pafta (inceleme projelerinin montaj paftası ya da açık listesiyle tuttu), cizim (pano Motor'unun çizim kuralı), aday (öteki uygulama; listede aday sütununda). Kişi ve bayi adları yazılmaz; projeler PK ve AP kodlarıyla, ikinci şablon 'Şablon B' (Kasım 2025, PK-02).",
+ "kurallar": {
+  "pencere_ust_kotu_cm": {
+   "deger": 200.0,
+   "durum": "cizim",
+   "kaynak": "Motor: pencere üst kotu ve kapı üstü 200 cm (lento = duvar yüksekliği − 200)."
+  },
+  "islak_hacim": {
+   "deger": [
+    "banyo",
+    "wc",
+    "islak",
+    "lavabo"
+   ],
+   "durum": "lokman",
+   "kaynak": "Lokman, 13 Ekim 14:35: ıslak hacim yalnız banyo ve WC, mutfak kuru."
+  },
+  "pencere_sinifi": {
+   "deger": {
+    "vasistas_en_cm": 60,
+    "vasistas_boy_cm": 60,
+    "standart_en_cm": 120
+   },
+   "durum": "pafta",
+   "kaynak": "L1 ve 7.1: en ve boyu 60'ı geçmeyen vasistas; 120 genişlikteki her pencere üst + alt panelle; ötekiler karkaslı özel pencere panosu (PK-03 160/180, PK-05 80/120, PK-08 59/170)."
+  },
+  "siparis_boyu": {
+   "deger": {
+    "kesinti_mm": 2.5,
+    "yuvarlama_mm": 5,
+    "modul_siparis_mm": 1250,
+    "modul_tolerans_cm": 0.06
+   },
+   "durum": "pafta",
+   "kaynak": "PK-01 dersi 2: net boy − 2,5 mm, 5 mm'ye aşağı; modül katı panoda n × 1250 (J1, PK-03 251 → 2500)."
+  },
+  "kubbe_takimi": {
+   "deger": [
+    [
+     "1001",
+     "Kubbe özel pano",
+     "100 × 2500 × 500",
+     1
+    ],
+    [
+     "1002",
+     "Kubbe üstü H",
+     "100 × 100 × 500",
+     2
+    ],
+    [
+     "1002",
+     "Özel açılı köşe direği + kapaması",
+     "100 × 100 × 2330",
+     4
+    ],
+    [
+     "1002",
+     "Kubbe saçak sacı (antrasit)",
+     "170 × 1500",
+     3
+    ],
+    [
+     "1005",
+     "Kubbe makası",
+     "80 × 0,8",
+     3
+    ],
+    [
+     "1006",
+     "Kubbe OSB 11 mm",
+     "1220 × 2440",
+     1
+    ],
+    [
+     "1006",
+     "Kubbe üstü membran",
+     "paket",
+     1
+    ],
+    [
+     "1006",
+     "Kubbe antrasit shingle",
+     "paket",
+     1
+    ]
+   ],
+   "durum": "lokman",
+   "kaynak": "Lokman, 13 Ekim 14:42 (R6): kubbeli cumba takımı = E2 − E3 (AP-02 kubbeli − AP-03 kubbesiz); bir kubbe başına."
+  },
+  "kosebent": {
+   "deger": 7,
+   "durum": "excel",
+   "kaynak": "Portatifev şablonu notu \"tek kat 7\" (O3; PK-06 ve PK-07 7). Lokman 13 Ekim 14:35: standart pakette her zaman var."
+  },
+  "kosebent_aday": {
+   "deger": 3,
+   "durum": "aday",
+   "kaynak": "Şablon B: PK-02 3, PK-03 ve PK-05 5."
+  },
+  "profil_vidalama": {
+   "deger": 2,
+   "durum": "excel",
+   "kaynak": "Özel profil varsa 2 (PK-01 listesinin notu)."
+  },
+  "profil_vidalama_aday_kolon_basina": {
+   "deger": 3,
+   "durum": "aday",
+   "kaynak": "Şablon B: kolon × 3 (PK-03 6, PK-06 6)."
+  },
+  "veranda_kirisi_eksik_cm": {
+   "deger": 10,
+   "durum": "pafta",
+   "kaynak": "Veranda kirişi açık kenarın dış ölçüsü − 10 cm (PK-01'de tuttu)."
+  },
+  "cektirme_u_100": {
+   "deger": 2,
+   "durum": "excel",
+   "kaynak": "Karkas hazır gidince 2 sabit (PK-01 notu)."
+  },
+  "cektirme_u_100_aday": {
+   "deger": {
+    "boy_cm": 244,
+    "ek": 2
+   },
+   "durum": "aday",
+   "kaynak": "Şablon B (PK-02 6): karkaslı pencerelerde (2 × en) ÷ 244 + 2."
+  },
+  "pencere_u_h_gecen": {
+   "deger": 1,
+   "durum": "excel",
+   "kaynak": "PK-01'de 1."
+  },
+  "pencere_u_h_gecen_aday_pencere_basina": {
+   "deger": 2,
+   "durum": "aday",
+   "kaynak": "Şablon B (PK-02 8): karkaslı pencere × 2."
+  },
+  "cektirme_u_ic": {
+   "deger": 2,
+   "durum": "pafta",
+   "kaynak": "PK-01 ve PK-02'de 2."
+  },
+  "tavan_omegasi_aralik_m": {
+   "deger": {
+    "asma": 1.255,
+    "ters": 0.6
+   },
+   "durum": "pafta",
+   "kaynak": "Asma dizme tavanda 125,5 cm'de bir (PK-01 şablonu; PK-02 tavan planı 125); ters tavanda 60 cm'de bir (PK-03 tavan planı; H8)."
+  },
+  "tavan_omegasi": {
+   "deger": {
+    "bolen_m": 3.65,
+    "ek": 5
+   },
+   "durum": "excel",
+   "kaynak": "Portatifev şablonu: (oda içi hatlar + iç duvar üstleri) ÷ 3,65 + 5 (PK-07 36). Şablon B'de \"+5\" yok (aday)."
+  },
+  "duvar_omegasi_100_bolen_m": {
+   "deger": 2.5,
+   "durum": "pafta",
+   "kaynak": "J2 ve O5: çatı kenarına gelmeyen dış duvarlar ve 100'lük iç duvarlar ÷ 2,5 (PK-03 3, PK-06 3, PK-07 10)."
+  },
+  "sacak_omegasi_bolen_m": {
+   "deger": 2.5,
+   "durum": "pafta",
+   "kaynak": "Saçak kenarları ÷ 2,5 (PK-01 9, PK-02 7)."
+  },
+  "bas_makas_omegasi_bolen_m": {
+   "deger": 2.5,
+   "durum": "excel",
+   "kaynak": "Kalkan duvarları ÷ 2,5 (PK-01 dersi 5; PK-06 7)."
+  },
+  "bas_makas_z_bolen_m": {
+   "deger": 2.8,
+   "durum": "pafta",
+   "kaynak": "O7: ana çatının alın kenarları × ⌈eğik ÷ 2,8⌉ (PK-02, PK-06, PK-07 8). Lokman 13 Ekim 14:35: dörtomuz çatıda baş makas Z'si yok."
+  },
+  "bas_makas_betopani": {
+   "deger": {
+    "katsayi": 1.5,
+    "levha_m2": 3.125
+   },
+   "durum": "pafta",
+   "kaynak": "H5: kalkan başına ⌈1,5 × saçaklı üçgen ÷ 3,125⌉ (PK-01 4, PK-02 6, PK-06 6)."
+  },
+  "alt_cerceve_bolen_m": {
+   "deger": 3.75,
+   "durum": "lokman",
+   "kaynak": "Lokman, 13 Ekim 14:35 ve 15:10 (R1): alt çerçeve her zaman L 3750, 60'lık da; dış çevre (ve iç duvar) ÷ 3,75 (H4; PK-01 9, PK-02 9, PK-07 16)."
+  },
+  "alt_cerceve_60_aday_bolen_m": {
+   "deger": 2.5,
+   "durum": "aday",
+   "kaynak": "2026 listelerindeki 60 × 2500 (eski uygulama)."
+  },
+  "tavan_alcipani": {
+   "deger": {
+    "fire": 1.05,
+    "levha_m2": 3,
+    "kuru_ek": 2,
+    "islak_ek": 1
+   },
+   "durum": "excel",
+   "kaynak": "H6, Portatifev formülü: kuru tavan × 1,05 ÷ 3 + 2 beyaz, ıslak × 1,05 ÷ 3 + 1 yeşil, aşağı (PK-02 18 / 3)."
+  },
+  "duvar_alcipani": {
+   "deger": {
+    "fire": 1.05,
+    "levha_m2": 3,
+    "kapi_en_m": 0.82,
+    "kapi_boy_m": 2.0,
+    "strafor_m2": 60
+   },
+   "durum": "uydurma",
+   "kaynak": "J7: açıklamada iç cephe alçıpanı varsa duvar yüzeyi − boşluklar, × 1,05 ÷ 3; ıslak hacim duvarları yeşil; destek straforu yüzey ÷ 60 m² (PK-03 toplam 61, tahmin 62)."
+  },
+  "fugali_cephe": {
+   "deger": {
+    "h_lata_yedek": 3,
+    "lata_boyu_m": 2.8,
+    "lata_kisa_boyu_m": 2.5,
+    "kapi_en_m": 0.9,
+    "kapi_boy_m": 2.0,
+    "artik_esik_m": 0.05
+   },
+   "durum": "lokman",
+   "kaynak": "O1 ve R5 (Lokman, 13 Ekim 14:40): fugalı cephede H latası = dış 100'lük duvar H'ları + 3 yedek; köşe latası 150 + 130; pencere latası çevreler ÷ 2,8, artan ÷ 2,5 (PK-07 30 / 5 / 10 + 1)."
+  },
+  "veranda_boardex": {
+   "deger": {
+    "fire": 1.08,
+    "levha_m2": 2.88
+   },
+   "durum": "excel",
+   "kaynak": "O14: veranda × 1,08 ÷ 2,88 (PK-07 2)."
+  },
+  "tavan_h_ek": {
+   "deger": 5,
+   "durum": "excel",
+   "kaynak": "Asma dizme tavanda net tavan ÷ (1,255 × 0,625) + 5 (PK-01 66, PK-02 75)."
+  },
+  "tavan_h_aralik_m": {
+   "deger": 0.625,
+   "durum": "excel",
+   "kaynak": "PK-01 şablonu: duvar omegalarına dik, 62,5 cm'de bir."
+  },
+  "omega_kapak": {
+   "deger": {
+    "bolen_m": 3.65,
+    "ek": 3
+   },
+   "durum": "excel",
+   "kaynak": "Oda içi omega hatları ÷ 3,65 + 3 (PK-01 10). Şablon B'de \"+3\" yok (aday)."
+  },
+  "pvc_betopan_h": {
+   "deger": 5,
+   "durum": "excel",
+   "kaynak": "Standart 3–5; PK-01 5 (J6: tavan tipinden bağımsız)."
+  },
+  "pvc_betopan_h_aday": {
+   "deger": 3,
+   "durum": "aday",
+   "kaynak": "Şablon B (PK-02, PK-03): 3."
+  },
+  "asik_mahya_payi_m": {
+   "deger": 0.2,
+   "durum": "pafta",
+   "kaynak": "P2 ve O13: beşikte yüz başına (eğik − 0,20) ÷ aralık en yakın + 1 sıra (PK-06, PK-07 paftaları 8)."
+  },
+  "asik_aday": {
+   "deger": {
+    "bolen_m": 4.1,
+    "ek": 5
+   },
+   "durum": "aday",
+   "kaynak": "Portatifev kaba hesabı: aşık boyları ÷ 4,1 + 5."
+  },
+  "makas_aralik_cm": {
+   "deger": 125.5,
+   "durum": "cizim",
+   "kaynak": "Makas her pano modülünde (125,5 cm; P1): saçak duvarının pano koşusu ÷ 1255 yukarı + 1."
+  },
+  "kapatma_m": {
+   "deger": {
+    "metal_kiremit": 1.05,
+    "tek_kat": 0.87
+   },
+   "durum": "pafta",
+   "kaynak": "L3: tek kat panel 87 cm kapatır (PK-05 listesi); 7.3: metal kiremit 105 cm kapatır (TS-01 kaplama paftası). Sandviç ve trapez kural kitabından (`kurallar.json`)."
+  },
+  "panel_boyu_yuvarlama_mm": {
+   "deger": {
+    "sandvic_trapez": 100,
+    "diger": 50
+   },
+   "durum": "pafta",
+   "kaynak": "Çatı paneli boyu eğik boydan yukarı: sandviç ve trapez 100 mm'ye, tek kat ve metal kiremit 50 mm'ye (L3)."
+  },
+  "trapez_mahya_etkin_m": {
+   "deger": 0.8,
+   "durum": "pafta",
+   "kaynak": "J5: trapez sac mahyası L 1000, 20 cm bindirme (PK-03 15)."
+  },
+  "ters_mahya_bolen_m": {
+   "deger": 2.6,
+   "durum": "pafta",
+   "kaynak": "J5: çapraz beşiğin iki deresi ÷ 2,6 (PK-03 4)."
+  },
+  "kapama_bolen_m": {
+   "deger": 2.5,
+   "durum": "pafta",
+   "kaynak": "O11: sandviç panel kapaması saçak ÷ 2,5 (PK-07 10, PK-02 7). Tek kat panelde kural yok, aynı formül aday."
+  },
+  "mahya_bandi": {
+   "deger": {
+    "mahya_boyu_m": 2.8,
+    "rulo_m": 10
+   },
+   "durum": "excel",
+   "kaynak": "Mahya × 2,8 ÷ 10 (PK-01 2)."
+  },
+  "osb_cati": {
+   "deger": {
+    "fire": 1.1,
+    "levha_en_m": 1.22,
+    "levha_boy_m": 2.44
+   },
+   "durum": "varsayim",
+   "kaynak": "7.3: kaplamada OSB varsa çatı alanı × 1,10 ÷ 2,977 (E2 / E3 29)."
+  },
+  "nem_bariyeri_yuvarlama_m2": {
+   "deger": 10,
+   "durum": "varsayim",
+   "kaynak": "7.3: çatı alanı, 10 m²'ye yukarı (E2 / E3 80)."
+  },
+  "elektrik": {
+   "deger": {
+    "nym_3x25_m": 130,
+    "nym_2x15_m": 100,
+    "uydu_kablo_m": 25,
+    "besleme_m": 5,
+    "besleme_boru_m": 5,
+    "kacak_akim": 1,
+    "w_otomat": 8,
+    "izole_bant_m2_carpan": 6,
+    "izole_bant_bolen": 100
+   },
+   "durum": "excel",
+   "kaynak": "Elektrik planı olan projede: NYM PK-01 130 / 100; uydu prizi × 25 m, besleme 5 + boru 5, izole bant m² × 6 ÷ 100, kaçak akım 1 (PK-02); W otomat Portatifev 8 (Lokman, 13 Ekim 14:40, R4)."
+  },
+  "elektrik_aday": {
+   "deger": {
+    "kablo_en_uzun_m": 20,
+    "nokta_basina_m": 2,
+    "w_otomat": 9
+   },
+   "durum": "aday",
+   "kaynak": "Şablon: sigorta × en uzun (≈ 20 m) + priz ya da anahtar × 2; Şablon B W otomat 9."
+  },
+  "vida": {
+   "deger": {
+    "betopan_vidasi": 500,
+    "kaplama_panel_boyu_bolen_mm": 200,
+    "kaplama_yuvarlama": 100,
+    "pencere_vidasi_pencere_basina": 20,
+    "trapez_5560_m2_basina": 2.5,
+    "trapez_5560_yuvarlama": 100,
+    "kesme_tasi_m2_basina": 0.02,
+    "cirpi_ipi": 1,
+    "uc_m2_bolen": 15,
+    "inox_tas_m2_bolen": 10,
+    "alcipan_vidasi_levha_basina": 40,
+    "alcipan_vidasi_yuvarlama": 250,
+    "rysb_m2_basina": 7.5,
+    "rysb_yuvarlama": 50
+   },
+   "durum": "excel",
+   "kaynak": "O16 ve Portatifev şablonu: betopan vidası 500; kaplama vidası panel boyu ÷ 200 × adet, 100'e; pencere × 20 (H2, O12); 5,5 × 60 m² × 2,5; kesme taşı m² × 0,02; çırpı ipi 1; uçlar m² ÷ 15; inox m² ÷ 10; alçıpan vidası levha × 40, 250'ye; RYSB m² × 7,5, 50'ye (PK-07)."
+  },
+  "vida_aday_yuvarlama": {
+   "deger": 250,
+   "durum": "aday",
+   "kaynak": "Şablon B: vidalar 250'nin katına; alçıpan vidası sabit 250."
+  },
+  "depo": {
+   "deger": {
+    "acil_mudahale_kapagi": 1,
+    "cati_mudahale_kapagi": 1
+   },
+   "durum": "excel",
+   "kaynak": "Sabit 1 (O16; PK-07)."
+  },
+  "tesisat_takimi": {
+   "deger": [
+    [
+     "Temiz su borusu",
+     "L 4000",
+     6
+    ],
+    [
+     "Normal dirsek 20 mm",
+     "adet",
+     15
+    ],
+    [
+     "Kulaklı dirsek 20 mm",
+     "adet",
+     12
+    ],
+    [
+     "Düz T 20 mm",
+     "adet",
+     6
+    ],
+    [
+     "Maşon 20 mm",
+     "adet",
+     15
+    ],
+    [
+     "İç dişli T 20 mm",
+     "adet",
+     6
+    ],
+    [
+     "Atlama parçası yarım parmak",
+     "adet",
+     3
+    ]
+   ],
+   "durum": "pafta",
+   "kaynak": "O17: bir banyolu evde sabit takım (PK-03, PK-05, PK-07 birebir; PK-06 üç ıslak noktada boru 10, dirsek 20)."
+  },
+  "ana_cati_kose": {
+   "deger": {
+    "besik": 4,
+    "tek_yon": 2
+   },
+   "durum": "lokman",
+   "kaynak": "Lokman, 13 Ekim 14:35: iniş ana çatıda dört köşe; dere kapağı beşikte 4, tek yönde 2 (J4)."
+  },
+  "ek_cati_parcasi_basina": {
+   "deger": 2,
+   "durum": "lokman",
+   "kaynak": "Lokman, 13 Ekim 14:35: ek çatı parçası başına +2 iniş; dere kapağı da +2 (J4)."
+  },
+  "inis_orta": {
+   "deger": "esik",
+   "durum": "lokman",
+   "kaynak": "Lokman, 13 Ekim 15:10: orta iniş uzunluğa bağlı, eşik verilmedi (7,6 m'de var, 8,1 / 9 / 11 m'de yok, 12 / 15 m'de var). Uygulama 'esik': kural kitabının eşiği (`kurallar.json › inis.orta_inis_esigi_m`, 9 m, Lokman 8 Ekim) geçen saçak hattına bir orta iniş. 'her_sacak': 14:35 kararı (R3, beşikte 4 + 2), aday sütununda."
+  },
+  "inis_borusu": {
+   "deger": {
+    "metal": "L 3000",
+    "pvc": [
+     "L 2000",
+     "L 500"
+    ]
+   },
+   "durum": "lokman",
+   "kaynak": "H3: özellik metal ise L 3000; PVC iniş borusu L 2000 + L 500 (Lokman, 13 Ekim 14:35, R2: bina yüksekliği 2500)."
+  },
+  "boya": {
+   "deger": {
+    "cephe_m2_carpan": 2,
+    "cephe_bolen": 100,
+    "kenar": 1,
+    "tavan": 1,
+    "astar": 1,
+    "mastik_m2_carpan": 2,
+    "mastik_bolen": 3,
+    "dayson_m2_basina": 0.03,
+    "kopuk": 2
+   },
+   "durum": "excel",
+   "kaynak": "O18 ve şablon: dış ve iç boya m² × 2 ÷ 100 kova; kenar, tavan, astar 1; mastik pencere + m² × 2/3 (mantolama yok); dayson m² × 0,03 yukarı; köpük 2 (PK-07)."
+  }
+ }
+}

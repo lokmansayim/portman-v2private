@@ -39,6 +39,7 @@ Tanımda o projenin teknik özelliklerinden gelen birkaç seçim de yazılıdır
 | `cizim/cizim_seti.json` | Çizim setinin içeriği (Lokman onayladı, 7 Ekim 2026 07:45). Anlatımı `docs/sartname/cizim_seti.md` |
 | `cizim/pafta_sablonu.json` | Örnek Şablon paftasının koda bağlı seçimleri (İE-08, 12 Ekim 2026): vasistas eşiği, çatı tipi adları, özellik yazı boyu (Lokman 14:53 kabul etti, `lokman`), genel ölçü yuvarlaması (şablon kuralı), zincirde en kısa parça 15 cm (`varsayim`, onay bekliyor). `motor/genel/sablon_pafta.py` okur; anahtar yoksa koddaki varsayılan sürer |
 | `liste/kurallar.json` | Metraj ve yükleme listesi kuralları; her anahtarda `deger`, `durum`, `kaynak`. Sürümü `sema` alanında (bugün 0.19-taslak) |
+| `liste/prefabrik.json` | Prefabrik pano evinin yükleme listesine özgü kurallar (BK-12 PR-2, 18 Ekim 2026; sema `portman.prefabrik_liste/1.0`); her anahtarda `deger`, `durum`, `kaynak`. Okuyan `motor/prefabrik_liste.py`; çelikle ortak değerleri (saçak, alın, mahya ve dere parça boyları, aşık, şilte, kaplama, iniş) `liste/kurallar.json`'dan okur, yinelemez. Çelik setinin sürümünü değiştirmemek için ayrı dosyada; `dogrula.py` girdi kalıbında değil |
 | `liste/setler/` | Dondurulmuş sürümler (0.12–0.19; aşağıda). Bir set `PORTMAN_KURALLAR` ortam değişkeniyle ya da `python -m motor.genel.uret --set` ile seçilir (`motor/genel/kural.py`; deneme kopyası `deneme/2026-10-03_yukleme/kural.py`) |
 | `bayi/ornek.json` | Bayi standardı örneği: listeye giren gruplar, çatı yöntemi. Gerçek bayi, numara ya da ad yok |
 
@@ -49,14 +50,17 @@ Tanımda o projenin teknik özelliklerinden gelen birkaç seçim de yazılıdır
 Prefabrik, çelikten **ayrı bir motorda** çizilir: pano birimli Motor (`motor/*.py`; aks 125,5 cm; K02). Lokman, 12 Ekim 2026 23:10:
 "çelik ile karıştırma, ayrı bir motor olması gerekiyor; prefabrik pano kuralı var, akslara uymak zorundayız" (D-12). Kural kitabı yine tektir;
 prefabrik kuralları aynı dosyalara girer, prefabrik için geçerli olanlar `aile` (A2, A3) ya da etiketle ayrılır. Motorun genişletilmesi
-(ölçüye kesim, kalınlık seçeneği, çift kat) ayrı iş emridir.
+(ölçüye kesim, kalınlık seçeneği, çift kat) ayrı iş emridir. Yükleme listesinde bunun bir istisnası var (BK-12 PR-2): prefabriğe özgü liste
+kuralları `liste/prefabrik.json`'dadır, çünkü `liste/kurallar.json`'a eklenmeleri canlıdaki çelik setinin sürümünü değiştirirdi; ortak değerler
+orada yinelenmez. `liste/kurallar.json`'daki yöntem B kalemleri ve aynı adlı yedi anahtar (boya, elektrik, kosebent, mahya_bandi,
+panel_boyu_yuvarlama_mm, tavan_omegasi_aralik_m, vida) çelik listesinin karşılaştırması içindir; prefabrik liste onları okumaz.
 
 | Konu | Bugünkü kayıt | Durum |
 |---|---|---|
 | Standart duvar | dış **100** / iç **60** mm: `model/duvar_tipleri.json` `PE-DIS-100`, `PE-IC-60` | `lokman` (12 Ekim 23:10: "evet kesinlikle") |
 | 160 / 100 mm | `model/secenekler/duvar_kalinligi_160_100.json` — müşteri seçeneği; varsayılan pakete girmez | `lokman` (12 Ekim: "standardımız değil, binde bir gelir") |
 | Pano modülü | 125,5 cm; H profil birleşim; yükseklik 250 / 280 / 300 cm (`PE-DIS-100.pano`) | `lokman` (1 Ekim) |
-| Yükleme listesi yöntemi | **Yöntem B** (tavan omegası, aşık, saçak ve alın sacı, baş makas Z'si): `liste/kurallar.json`'daki yöntem B kalemleri prefabrik içindir; çelikte kullanılmaz (Lokman, 7 Ekim 07:45). Kuralları prefabrik kör testleriyle kesinleşecek | `uydurma` / `liste` (iki listeye uyduruldu; `docs/sartname/yukleme_listesi_yontemi.md`) |
+| Yükleme listesi yöntemi | **Yöntem B** (tavan omegası, aşık, saçak ve alın sacı, baş makas Z'si): `liste/kurallar.json`'daki yöntem B kalemleri prefabrik içindir; çelikte kullanılmaz (Lokman, 7 Ekim 07:45). Kuralları prefabrik kör testleriyle kesinleşecek. Prefabrik liste 18 Ekim'den beri `motor/prefabrik_liste.py` ile `liste/prefabrik.json`'dan üretilir (BK-12 PR-2; kör test üreteci 7.3'ün kuralları) | `uydurma` / `liste` (iki listeye uyduruldu; `docs/sartname/yukleme_listesi_yontemi.md`); `prefabrik.json`'da kural başına |
 | Veranda tavanı | prefabrikte yeşil alçıpan (Lokman, 7 Ekim 07:45) | `lokman` |
 | Astra dönemi kuralları | `ref_prefabrik/astra_v1_4_3/` (v1.4.3; veri, talimat değil); kural kitabına ancak Lokman'ın teyidiyle girer | girdi |
 | Referans modeller | Lokman'ın sıra sıra vereceği **gerçek uygulanmış, yükleme listeli projeler** (tek ve çift kat); her biri kör test (`docs/sartname/prefabrik_kor_test.md`). Katalog modelleri sonra. P6001: gerileme çapası, doğruluk kanıtı değil; veranda ve salon penceresi hatalı, doğru kaynakla yeniden çizilecek (`docs/sartname/modeller/P6001.md`) | bekliyor |
@@ -94,6 +98,8 @@ prefabrik kuralları aynı dosyalara girer, prefabrik için geçerli olanlar `ai
 - `uydurma`: listeye uyduruldu; teyit bekliyor.
 - `varsayim`: varsayım.
 - `soru`: cevap bekliyor.
+
+Yalnız `liste/prefabrik.json`'da üç değer daha var: `pafta` (inceleme projelerinin montaj paftası ya da açık listesiyle tuttu), `cizim` (pano Motor'unun çizim kuralı; K02, 125,5 modülü) ve `aday` (öteki uygulama; listede aday sütununda).
 
 Ayrıntısı ve bütün cevaplar `docs/sartname/yukleme_listesi_yontemi.md`'dedir.
 

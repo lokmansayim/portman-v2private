@@ -1,0 +1,41 @@
+{
+ "kaynak": "PK-01 (AP-19) montaj paftası ve baş makas betopan paftası okuması (13 Ekim 2026; H sayıları vektörden). Gerçek yükleme listesi değildir; varsayılan hesabı değiştirmez. Sürüm 1 katmanından 7.3 anahtarlarına çevrildi (18 Ekim): h_dis → h_plani.dis, h_ic → h_plani.h_standart, uclu_dis → h_plani.uclu_dis, uclu_ic → h_plani.uclu_standart, tavan_omegasi → duvar_omegasi_asma (PK-01 tavanı düz, asma dizme).",
+ "h_plani": {
+  "dis": {
+   "adet": 19,
+   "not": "H planı: 12 dübelli & kulaklı (makasa denk gelen) + 7 dübelli"
+  },
+  "h_standart": {
+   "adet": 10,
+   "not": "H planı: H standart 60 × 60"
+  },
+  "uclu_dis": {
+   "adet": 5,
+   "not": "H planı: 2 dübelli & kulaklı + 3 dübelli"
+  },
+  "uclu_standart": {
+   "adet": 4,
+   "not": "H planı (vektör; ilk elle okumada 5 yazılmıştı)"
+  }
+ },
+ "makas_bas": {
+  "adet": 2,
+  "not": "makas planı MK01 ve MK09"
+ },
+ "makas_orta": {
+  "adet": 7,
+  "not": "makas planı MK02–MK08; 125,5 c/c"
+ },
+ "asik": {
+  "adet": 42,
+  "not": "aşık planı: yarı başına 7 sıra × (410 + 410 + 240) → 28 × L 4100 + 14 × L 2400 (L 4200 değil)"
+ },
+ "duvar_omegasi_asma": {
+  "adet": 20,
+  "not": "tavan omega planı okuması: 365 × 8, 243, 240,5, 249, 190 × 6 (veranda), 166 × 2, 50 — adetler yeniden sayılacak (okuma kaydı)"
+ },
+ "bas_makas_betopan": {
+  "adet": 4,
+  "not": "baş makas betopan yerleşimi: iki kalkan için 4 × (125 × 250)"
+ }
+}
