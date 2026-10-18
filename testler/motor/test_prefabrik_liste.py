@@ -151,11 +151,12 @@ def _yol(kok: dict, yol: str):
     return v
 
 
-# Kitabın Lokman'ın kararıyla çelişen ve prefabrikte başka yazılan değerleri: Lokman'ın kararını bekler (geometri hakemi, 1.–3. tur).
+# Kitabın Lokman'ın kararıyla çelişen ve prefabrikte başka yazılan değerleri: Lokman'ın kararını bekler (geometri hakemi, 1.–4. tur).
 # Alçıpan vidasının levhaları kitabın Lokman kararı değil, çalışma kitabının notu; PK-03'ün gerçek listesi kitapla tuttuğu için soruya girer.
 KARAR_BEKLEYEN = {"Tek kat çatı paneli kapatması", "Metal kiremit kapatması", "Çatı paneli boyu", "Sandviç panel kapaması", "Trapez sac mahyası",
                   "Veranda tavanı", "Pencere alıcıya aitken vida ve mastik", "Ters mahya kenar kutusu", "Müdahale kapakları", "Duvar dibi",
-                  "Dayson", "Buat kasa", "Alçıpan vidasının levhaları", "Panel çatının kenarları", "Tek kat panel kapaması"}
+                  "Dayson", "Buat kasa", "NYM kablo uzunluğu", "Alçıpan vidasının levhaları", "Panel çatının kenarları",
+                  "Tek kat panel kapaması"}
 
 
 def _kitap_yollari(b: dict) -> list[str]:

@@ -578,7 +578,7 @@
    ],
    "tur": "deger",
    "karar_bekliyor": false,
-   "not": "Prefabrik beşikte 4, tek yönde 2, ek çatı parçası başına +2 (Lokman, 13 Ekim 14:35; PK-01 4, PK-02 4, PK-03 6); kitap Excel motoru beşik 5, beşik + cumba 6, beşik + 2 cumba 7, dere hatları biliniyorsa serbest uç sayısı (KT-01)."
+   "not": "Prefabrik beşikte 4, tek yönde 2, ek çatı parçası başına +2 (J4; PK-01 4, PK-02 4, PK-03 6); kitap Excel motoru beşik 5, beşik + cumba 6, beşik + 2 cumba 7, dere hatları biliniyorsa serbest uç sayısı (KT-01)."
   },
   {
    "konu": "Mahya bandı",
@@ -586,7 +586,7 @@
    "kitap": "mahya_bandi",
    "tur": "yontem",
    "karar_bekliyor": false,
-   "not": "Rulo boyu (10 m) ve mahya parça boyu (2,8 m) kitaptan. Prefabrik yalnız mahya adedi × 2,8 ÷ 10 (Portatifev şablonu; PK-01 2); kitap ters mahya × 2,8, trapez mahyası × 0,8 ve damlalık × 2,5 de ekler (mühendis ve Excel motoru). Trapez sac çatıda prefabrik de mahya adedini 2,8 ile çarpar."
+   "not": "Rulo boyu (10 m) ve mahya parça boyu (2,8 m) kitaptan. Prefabrik yalnız mahya adedi × 2,8 ÷ 10 (Portatifev şablonu; PK-01 2). Kitap ters mahya × 2,8 ve trapez mahyası × 0,8 de ekler, baca çatıyı deliyorsa çevresini de (mühendis ve Excel motoru); damlalık terimi yalnız listede damlalık satırı varsa girer, varsayılan hesapta yok (Lokman, 4 Ekim 15:18 ve 7 Ekim 07:45). Trapez sac çatıda prefabrik de mahya adedini 2,8 ile çarpar."
   },
   {
    "konu": "Tavan omegası",
@@ -621,7 +621,18 @@
    ],
    "tur": "yontem",
    "karar_bekliyor": false,
-   "not": "Uydu kablosu, besleme kablosu, izole bant ve kaçak akım rölesi kitaptan. Prefabrik NYM 130 / 100 m ve W otomat 8 Portatifev şablonunun sabitleri (Lokman, 13 Ekim 14:40), sayılar paftadaki elektrik planından. Kitap kabloyu sigorta × en uzak mesafe + nokta × 2 ile hesaplar (Excel hesaplama motoru; en uzak mesafe sigortadan, Lokman 7 Ekim 07:45) ve plan yoksa oda başına kuralla sayar (mühendis). Prefabrik plan yoksa \"Kural yok\" yazar. Buat kasa ayrı kayıtta."
+   "not": "Uydu kablosu, besleme kablosu, izole bant ve kaçak akım rölesi kitaptan. W otomat 8 Portatifev şablonunun sabiti (Lokman, 13 Ekim 14:40, R4); elektrik noktalarının sayıları paftadaki elektrik planından. Kitap plan yoksa noktaları oda başına kuralla sayar (mühendis); prefabrik plan yoksa \"Kural yok\" yazar. NYM kablo uzunluğu ve buat kasa ayrı kayıtlarda."
+  },
+  {
+   "konu": "NYM kablo uzunluğu",
+   "prefabrik": "elektrik.nym_3x25_m",
+   "kitap": [
+    "elektrik.kablo",
+    "kablo_en_uzak_mesafe"
+   ],
+   "tur": "yontem",
+   "karar_bekliyor": true,
+   "not": "Prefabrik NYM 3 × 2,5 130 m ve 2 × 1,5 100 m sabit (PK-01'in listesi; PK-02 135 / 120); aday sütununda şablonun formülü, en uzun mesafe ≈ 20 m sabit. Kitap sigorta adedi × sigortadan evin en uzak mesafesi + (priz ya da anahtar sayısı) × 2 m (Excel hesaplama motoru ve Eylül 2026 şablonu; en uzak mesafe sigortadan: Lokman, 7 Ekim 07:45, C1 q; kutunun yeri tanımda yoksa giriş kapısı: 8 Ekim 00:45)."
   },
   {
    "konu": "Buat kasa",
@@ -645,7 +656,7 @@
    "kitap": "vida.alcipan_vidasi_levha_basina",
    "tur": "yontem",
    "karar_bekliyor": true,
-   "not": "Prefabrik tavan ve duvar alçıpanı levhalarını sayar, veranda tavanının Boardex levhalarını saymaz (J7, O16). Kitapta \"1 alçıpan ya da Boardex için 40\" (çalışma kitabının vida notu; levha başına 40, Lokman 7 Ekim 07:45). Fark: PK-03 bizde 3500, kitapla 3750 (7.3'ün notu gerçek listede 3750 diyor); PK-06 1250 / 1500; PK-01 ve PK-07'de ikisi de 1000."
+   "not": "Prefabrik tavan ve duvar alçıpanı levhalarını sayar; veranda tavanının Boardex levhaları ayrı satırda (O14) ve vidaya girmez (7.3). J7 \"bütün levhalar × 40\", O16 yalnız tavanı sayar; Boardex'in dışarıda kalması büyük olasılıkla veranda tavanının sonradan ayrı satıra çıkmasından (çıkarım). Kitapta \"1 alçıpan ya da Boardex için 40\" (çalışma kitabının vida notu; levha başına 40, Lokman 7 Ekim 07:45). Fark: PK-03 bizde 3500, kitapla 3750 (7.3'ün notu gerçek listede 3750 diyor); PK-06 1250 / 1500; PK-01 ve PK-07'de ikisi de 1000."
   },
   {
    "konu": "Çelik dübel ve şase pul",
