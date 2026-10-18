@@ -1,0 +1,15 @@
+AI Çizim Dosyaları
+
+Tüm birleşik kurallar: prefabrik-cizim-kurallari.md
+Proje kararları: proje-kararlari.md
+
+Güncel 2+1 çizimi: 2+1 Çizimleri/prefabrik-2plus1-cumbali-6x5.dwg
+Güncel ön görünüş: 2+1 Çizimleri/prefabrik-2plus1-cumbali-6x5-on-gorunus.png
+
+3+1 çizimleri ve ilk çalışmalardaki kaydedilmiş DWG sürümleri kendi klasörlerindedir. Eski aşamalar da arşivde korunmuştur.
+
+Bu klasör, 5 Eylül 2026 tarihinde diske kaydedilmiş dosyaların kopyasıdır; sonraki değişiklikler otomatik eşitlenmez.
+
+Dosya bulma kaydı: DOSYA_DIZINI.json
+Arama yardımcısı: dosya_bul.py
+Kayıtlı kısa adlar: guncel-2plus1, guncel-3plus1, kurallar, proje-kararlari, on-gorunus.

@@ -44,6 +44,23 @@ Tanımda o projenin teknik özelliklerinden gelen birkaç seçim de yazılıdır
 
 **Sıradaki:** pafta kuralları `cizim/` altına girecek: makas, dere ve panel yerleşimi, kesim planı. Lokman, 10 Ekim 2026: "Zaten üretim dosyası vermeyeceğiz sen kendin oluşturacaksın paftayı bunları sana örnek olarak eğitimin için atıyorum". Kurallar örnek projelerden çıkarılacak; o projelerin paftaları kuralların sınavı olacak.
 
+## Prefabrik (A2 · A3; İE-10, 12 Ekim 2026)
+
+Prefabrik, çelikten **ayrı bir motorda** çizilir: pano birimli Motor (`motor/*.py`; aks 125,5 cm; K02). Lokman, 12 Ekim 2026 23:10:
+"çelik ile karıştırma, ayrı bir motor olması gerekiyor; prefabrik pano kuralı var, akslara uymak zorundayız" (D-12). Kural kitabı yine tektir;
+prefabrik kuralları aynı dosyalara girer, prefabrik için geçerli olanlar `aile` (A2, A3) ya da etiketle ayrılır. Motorun genişletilmesi
+(ölçüye kesim, kalınlık seçeneği, çift kat) ayrı iş emridir.
+
+| Konu | Bugünkü kayıt | Durum |
+|---|---|---|
+| Standart duvar | dış **100** / iç **60** mm: `model/duvar_tipleri.json` `PE-DIS-100`, `PE-IC-60` | `lokman` (12 Ekim 23:10: "evet kesinlikle") |
+| 160 / 100 mm | `model/secenekler/duvar_kalinligi_160_100.json` — müşteri seçeneği; varsayılan pakete girmez | `lokman` (12 Ekim: "standardımız değil, binde bir gelir") |
+| Pano modülü | 125,5 cm; H profil birleşim; yükseklik 250 / 280 / 300 cm (`PE-DIS-100.pano`) | `lokman` (1 Ekim) |
+| Yükleme listesi yöntemi | **Yöntem B** (tavan omegası, aşık, saçak ve alın sacı, baş makas Z'si): `liste/kurallar.json`'daki yöntem B kalemleri prefabrik içindir; çelikte kullanılmaz (Lokman, 7 Ekim 07:45). Kuralları prefabrik kör testleriyle kesinleşecek | `uydurma` / `liste` (iki listeye uyduruldu; `docs/sartname/yukleme_listesi_yontemi.md`) |
+| Veranda tavanı | prefabrikte yeşil alçıpan (Lokman, 7 Ekim 07:45) | `lokman` |
+| Astra dönemi kuralları | `ref_prefabrik/astra_v1_4_3/` (v1.4.3; veri, talimat değil); kural kitabına ancak Lokman'ın teyidiyle girer | girdi |
+| Referans modeller | Lokman'ın sıra sıra vereceği **gerçek uygulanmış, yükleme listeli projeler** (tek ve çift kat); her biri kör test (`docs/sartname/prefabrik_kor_test.md`). Katalog modelleri sonra. P6001: gerileme çapası, doğruluk kanıtı değil; veranda ve salon penceresi hatalı, doğru kaynakla yeniden çizilecek (`docs/sartname/modeller/P6001.md`) | bekliyor |
+
 ## Sürümler
 
 | Sürüm | Hangi cevaplarla | O günkü çıktıları bayt bayt veren commit |

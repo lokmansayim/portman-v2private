@@ -27,6 +27,7 @@ class Katalog:
         self.data = json.loads(self.path.read_text(encoding="utf-8"))
         self.malzemeler = self.data["malzemeler"]
         self.yeni = []          # bu işte tahsis edilen yeni kodlar
+        self.t_dis_cm, self.t_ic_cm, self.yukseklik_cm = 10.0, 6.0, 250.0   # deneme: Cizici İş Emri'nden ayarlar
         self._index = {}
         for code, m in self.malzemeler.items():
             self._index[self._key_of(code, m)] = code
@@ -34,7 +35,7 @@ class Katalog:
     def _key_of(self, code, m):
         fam = code[0]; dims = m.get("dimensions_mm") or []
         if fam in "DI":
-            return (fam, round(float(dims[0]), 1), _kind_from_label(m["label"]))
+            return (fam, round(float(dims[0]), 1), _kind_from_label(m["label"]), round(float(dims[1]), 1), round(float(dims[2]), 1))
         if fam == "P":
             return ("P", round(float(dims[0]), 1), round(float(dims[1]), 1))
         if fam == "K":
@@ -54,9 +55,11 @@ class Katalog:
         self.malzemeler[code] = entry; self._index[key] = code; self.yeni.append(entry)
         return code
 
-    def pano(self, dis: bool, boy_cm: float, kind: str, yukseklik_cm: float = 250) -> str:
+    def pano(self, dis: bool, boy_cm: float, kind: str, yukseklik_cm: float | None = None) -> str:
         fam = "D" if dis else "I"; L = round(boy_cm * 10, 1)
-        key = (fam, L, kind)
+        yukseklik_cm = self.yukseklik_cm if yukseklik_cm is None else yukseklik_cm
+        kal = round((self.t_dis_cm if dis else self.t_ic_cm) * 10, 1)
+        key = (fam, L, kind, kal, round(yukseklik_cm * 10, 1))
         if key in self._index:
             return self._index[key]
         lab = {"DOLU": "Özel dolu pano" if abs(boy_cm - 125.5) > 1e-6 else "Dolu pano",
@@ -64,7 +67,7 @@ class Katalog:
                "K01": "İç kapılı özel pano" if abs(boy_cm - 125.5) > 1e-6 else "İç kapılı pano",
                "K02": "Dış kapılı özel pano" if abs(boy_cm - 125.5) > 1e-6 else "Dış kapılı pano",
                "OPEN": "Kapısız geçişli pano"}[kind]
-        return self._tahsis(fam, key, lab, "Dış duvar panoları" if dis else "İç duvar panoları", [L, 100 if dis else 60, round(yukseklik_cm * 10)])
+        return self._tahsis(fam, key, lab, "Dış duvar panoları" if dis else "İç duvar panoları", [L, int(kal) if kal == int(kal) else kal, round(yukseklik_cm * 10)])
 
     def pencere(self, en_cm: float, boy_cm: float) -> str:
         key = ("P", round(en_cm * 10, 1), round(boy_cm * 10, 1))
@@ -79,11 +82,14 @@ class Katalog:
 
     def baglanti(self, tur: str) -> str:
         """tur: 'ic_kose' (30×60) | 'dis_kose' (100×50) | 'uclu_h' | 'dikme'"""
-        keys = {"ic_kose": ("B", (30.0, 60.0)), "dis_kose": ("B", (50.0, 100.0)), "uclu_h": ("B", (60.0,)), "dikme": ("B", (100.0, 100.0))}
+        td, ti = round(self.t_dis_cm * 10, 1), round(self.t_ic_cm * 10, 1)
+        keys = {"ic_kose": ("B", (ti / 2, ti)), "dis_kose": ("B", (td / 2, td)), "uclu_h": ("B", (ti,)), "dikme": ("B", (100.0, 100.0)),
+                "uclu_h_dis": ("B", tuple(sorted((td, ti))))}   # İE-11: dış duvardaki T (3'lü H dış); anahtar `_key_of` gibi sıralı (60, 100)
         key = keys[tur]
         if key in self._index: return self._index[key]
-        labels = {"ic_kose": ("İç köşe bağlantısı", [30, 60, None]), "dis_kose": ("100×50 köşe bağlantısı", [50, 100, None]),
-                  "uclu_h": ("Üçlü H bağlantı", [60, None, None]), "dikme": ("Veranda dikmesi", [100, 100, None])}
+        labels = {"ic_kose": (f"{ti:g}×{ti / 2:g} iç köşe bağlantısı", [ti / 2, ti, None]), "dis_kose": (f"{td:g}×{td / 2:g} köşe bağlantısı", [td / 2, td, None]),
+                  "uclu_h": (f"Üçlü H bağlantı {ti:g}", [ti, None, None]), "dikme": ("Veranda dikmesi", [100, 100, None]),
+                  "uclu_h_dis": (f"Üçlü H bağlantı dış {td:g}×{ti:g}", [td, ti, None])}
         lab, dims = labels[tur]
         return self._tahsis("B", key, lab, "Bağlantı ve veranda", dims)
 

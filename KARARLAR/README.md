@@ -71,6 +71,9 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-09](D-09.md) | Bayi paftasının antetinde bayinin adı ve bayi kartındaki telefonu yazılır (D-06'nın genişletilmesi); başka kimsenin numarası yazılmaz; LLM'e gitmez (Z-08), günlükte maskeli (K09); PR-2'de yalnız o bayinin kartındaki numara kabul edilir | 12.10 14:53 |
 | [D-10](D-10.md) | Bayi paftasının 1. sayfasında 8b mühendis kabulüne kadar antet üstünde "TASLAK" (`pafta_sablonu.json › taslak_ibaresi`); 15 cm kuralı: "Çelikte 15 cm parça çıkmaz", kısa parça komşusuna katılır ve mühendise kontrol notu düşer (`pafta_ozet.json › kontrol_notlari`); yedi aday `gecerli` kayıtta, bayiye sunulma mühendisin K-A10 kabulüyle; KT-01 etiket yeri ve baca derinliği; `bayi_gorsel.png` (plan + çatı planı + iki perspektif); referans bu kararla yeniden donduruldu | 12.10 akşam |
 | [D-11](D-11.md) | Geliştirme döneminde çelik adayların bayiye sunulma kabulünü (K-A10) Lokman verir (kabul kaydında kim = Lokman, dayanak D-11; metinlerde "kabul eden"); 8b mühendis teknik kontrolü aynen; genel motor düzenlenebilir DXF üretir (plan + dört görünüş, katmanlı, cm), yükleme listesi Excel'i yalnız kabul paketinde (openpyxl sunucuda yok); DXF ve Excel çıktıdır, kaynak değil: düzeltme tanıma (D-07) ya da kural kitabına işlenir, yeniden üretilir | 13.10 sabah |
+| [D-12](D-12.md) | Prefabrik hattı: çelikten ayrı pano motoru (125,5 aks; genişletilecek olan bu), standart duvar 100 / 60 mm (160 / 100 yalnız müşteri seçeneği), P6001 gerileme çapasıdır doğruluk kanıtı değil (bilinen hata: veranda ve salon penceresi; doğru kaynakla yeni dosyada yeniden çizilir), referanslar gerçek yükleme listeli projelerden kör testle, Astra R02 referans model değil | 12.10 22:49 / 23:10 |
+| [D-14](D-14.md) | Prefabrik pano yüksekliği yalnız 250 / 280 / 300 cm (%80 / %19 / %1); Motor başka değeri reddeder (K21); 250 dışı yükseklik yeni kod yolundan (pano kodu 2800/3000, lento h − 200 çıkarımı), 250'lik çıktılar bayt bayt aynı; doğrulama kuralını değiştirmez | 13.10 07:28 |
+| [D-15](D-15.md) | Prefabrikte kapı ve pencere yerleşimi mantıkla: pencere odaya ortalı (ızgara ≤ ¼ pano kaçıyorsa kalır), oda kapıları bölmeye yaslı ve kanatları birbirine doğru, menteşe dayanaklı uçta; PK-01 paftasıyla ölçülü; LLM değil kod | 13.10 08:53 |
 | [D-16](D-16.md) | BK-09 çizim düzeltmeleri: kapı yayını kesen mahal etiketi oda içinde kaydırılır; pafta 2. sayfada TASLAK ayrı yazı; KT başlığında ve liste adında m² koddan (brüt oturum, model dosyası aynen); G1 ölçü zinciri eşiği `max(12,5; dış kaplama + en kalın dış duvar + 1)`; çentiğe değen dar sayı zincirin dış yanında; yazı denetimi kapı yayı ve sayfa dışı; referans `2026-10-14` bu kararla yeniden donduruldu | 14.10 (Lokman, BK-09 planı) |
 | [D-17](D-17.md) | Yükleme listesi Excel'i her çelik çizimde sunucuda üretilir (`kanal/worker.liste_exceli`, `uret` dışında; altın değişmez), bayi onaylayınca mühendise gider, bayiye gitmez; `openpyxl` + `et-xmlfile` sunucu listesinde; D-11'in "yalnız kabul paketinde" maddesi değişti | 14.10 (Lokman, Görev 4b ve 8b planı) |
 
@@ -81,14 +84,15 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | Seri | Numara | Sahibi | Durum |
 |---|---|---|---|
 | D | D-01–D-11 | bu depo (`main`); D-10 ve D-11 İE-08'in | yazıldı |
-| D | D-12–D-15 | prefabrik hattının dört kararı; dallarda (`ie-10-prefabrik-referanslari`, `ie-11-*`, `ie-12-prefabrik-bayi-paftasi`) D-10–D-13 adıyla duruyor: ayrı pano motoru (100 / 60, P6001 çapa), kişisel veri esnetme, pano yüksekliği 250 / 280 / 300, kapı / pencere yerleşimi | ayrıldı; birleşmeden önce o dallarda bu numaralara taşınır (D-10/D-11 çakışması, İE-08 › 13 Ekim kararı) |
+| D | D-12, D-14, D-15 | prefabrik hattının kararları (dallarda D-10, D-12, D-13 adıyla yazılmıştı): ayrı pano motoru (100 / 60, P6001 çapa), pano yüksekliği 250 / 280 / 300, kapı ve pencere yerleşimi | yazıldı (BK-12 PR-1; `bk-12-prefabrik-main`) |
+| D | D-13 | kişisel veri esnetme (dalda D-11; Lokman 12.10 23:10) | ayrıldı (BK-12 PR-K, Patron onayıyla; AGENTS.md ve `kvkk-denetcisi` ile birlikte) |
 | D | D-16 | BK-09 PR-2: çizim düzeltmeleri (KT-02 kapı yayı, 2. sayfa TASLAK, KT başlığında m², G1) ve referansın yeniden dondurulması | yazıldı (14.10) |
 | D | D-17 | İE-08 8b: yükleme listesi Excel'i sunucuda üretilir ve mühendise gider (D-11'in "yalnız kabul paketinde" maddesini değiştirir) | yazıldı (14.10; `ie-08-8b-muhendis`) |
 | D | D-18 | İE-14: yeni üretilen çelik plan bayiye TASLAK gider; plan üretimi ve revizyon için ek LLM çağrısı (K05 istisnası) | yazıldı (14.10; `ie-14-talepten-plana`) |
 | D | **D-19** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model bankası ve yeni model üretimi; P6001 güncellemesi | ayrıldı (pilottan sonra) |
-| İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | dallarda |
+| İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | `main`'e BK-12 ile (PR-1: motor ve bayi paftası; liste ve mühür kıyası sonraki PR'larda) |
 | İE | İE-13 | onaydan teklife: fiyat, Patron onayı, özellik formu, hitap (eski adıyla İE-10) | ayrıldı (pilottan sonra) |
 | İE | — | `ie-11-pr2-kor-test` dalındaki onaysız İE-13 / İE-14 taslak planları | numarasız; planlanınca bu defterden numara alır |
 | İE | İE-14 | talepten plana (14a: tek kat çelik; LLM-önce üretim ve revizyon) | alındı (14.10; `ie-14-talepten-plana`) |
@@ -97,7 +101,8 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | BK | BK-09 | metin ve çizim düzeltmeleri, G1 (`bk-09-metin-cizim`, `bk-09-cizim-g1`) | alındı (14.10) |
 | BK | BK-10 | 8b sonrası düzeltmeler (DXF `.txt` notu, geç gelen Excel, Patron'a Excel bağlantısı, çelikte kapı değişikliği; `docs/devir/2026-10-14_IE-08_8b_Devri.md` › Sıradaki; CIO'nun Notion defterinde D-18 ile) | ayrıldı |
 | BK | BK-11 | `ortam_kur.sh` Postgres'i kurtarma bitene kadar dener (`bk-11-postgres-bekleme`) | alındı (16.10) |
-| BK | **BK-12** | — | **sıradaki boş** |
+| BK | BK-12 | prefabrik hattını `main`'e alma (D-23; `bk-12-prefabrik-main`; PR-1, PR-R, PR-K, PR-2, PR-3, PR-4) | alındı (17.10) |
+| BK | **BK-13** | — | **sıradaki boş** |
 
 ## 27 Eylülde Lokman'ın verdiği kararlar
 
