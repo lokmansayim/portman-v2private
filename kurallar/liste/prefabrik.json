@@ -802,7 +802,7 @@
    "kitap": "panel_cati_kenarlari",
    "tur": "kapsam",
    "karar_bekliyor": true,
-   "not": "Kitabınki çelik yapının (KT-03) veranda ve sundurma panel çatısı: saçakta dere, yanlarda sundurma kapama, özel büküm saçak (Lokman, 10 Ekim 10:18); kitabın okuması bütün tek eğimli panelli çatılar (veranda, sundurma, müştemilat) için (Lokman, 10 Ekim 10:39). Prefabrikte makassız açık veranda çatısı dere almaz (O15: PK-07), sundurma kapaması yazılmaz."
+   "not": "Kitabınki çelik yapının (KT-03) veranda ve sundurma panel çatısı: saçakta dere ve özel büküm saçak sacı, yanlarda sundurma kapama (Lokman, 10 Ekim 10:18); düz saçak sacı, saçak omegası ve alın sacı yok (`ek_yapi_ve_korkuluk.cati_panelli_cati`, kör test projesinin gerçek listesi). Kitabın okuması bütün tek eğimli panelli çatılar (veranda, sundurma, müştemilat) için (Lokman, 10 Ekim 10:39). Prefabrikte makassız parçanın kenarları öteki kenarlar gibi düz saçak sacı, saçak omegası ve alın sacı alır (PK-07 listesi 9 + 2 özel büküm), sundurma kapaması yazılmaz; makassız açık veranda çatısı dere almaz (O15: PK-07). Kararın içinde PK-05'in kapalı makassız ek bölümü ve PK-07'nin veranda saçağı."
   },
   {
    "konu": "Duvar dibi",
@@ -884,7 +884,7 @@
   },
   {
    "kitap": "ek_yapi_ve_korkuluk",
-   "neden": "müştemilat, korkuluk ve baca (çelik kör test projesi); prefabrik inceleme projelerinde yok"
+   "neden": "müştemilat duvarı, korkuluk ve baca ağırlıkları (çelik kör test projesi; prefabrikte karşılığı yok). Çatı panelli çatının kenar bayrakları (dere, saçak sacı, saçak omegası, alın sacı yok) okunmaz: prefabrikte makassız parçası olan girdide (PK-05, PK-07) fark `kitapla_farkli` › Panel çatının kenarları'nda, karar bekliyor"
   },
   {
    "kitap": "korkuluk_kaplamasi",

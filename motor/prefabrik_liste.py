@@ -392,21 +392,24 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
          if (ic_kalan or ust100) else "dikdörtgen beşikte bütün dış duvarlar saçak ya da baş makas omegası alır",
          "PK-01 0, PK-03 3, PK-06 3, PK-07 10 tuttu")
     sacak_m = sum(sum(o["hatlar"]) for _c, o in C)
+    # kitapla farklı (`Panel çatının kenarları`): kitapta makassız (çatı panelli) parçanın saçağında özel büküm saçak sacı, yanlarında
+    # sundurma kapama; düz saçak sacı, saçak omegası ve alın sacı yok. Prefabrikte öteki kenarlar gibi sayılır (PK-07 9 + 2)
+    karar_kenar = "Panel çatının kenarları" if any(c.get("makas_yok") for c, _o in C) else ()
     sob = r("sacak_omegasi_bolen_m")
     ekle("1002", "100'lük saçak omegası", f"100 × {mm_m(sob)}", TAVAN(sacak_m / sob), "Kural (PK-01)", f"saçak kenarları {sacak_m:.2f} m ÷ {sy(sob)}, bir kez yukarı",
-         "PK-01 9, PK-02 7 tuttu")
+         "PK-01 9, PK-02 7 tuttu", karar=karar_kenar)
     ps, bs = _ortak(k, "parca_boyu_m", "sacak_saci"), _ortak(k, "bindirme_m", "sacak_saci")
     ob = N.get("ozel_bukum") or {}                              # O6: paftadaki özel büküm saçlar düz saçtan düşülür (PK-07 2 + 2)
     ekle("1002", "Saçak sacı (30'luk, 3'ü menfezli)", f"300 × {mm_m(ps)}", TAVAN(sacak_m / (ps - bs)) - ob.get("sacak", 0), "Kural",
-         f"saçak kenarları {sacak_m:.2f} m ÷ {sy(ps - bs)}" + (f" − özel büküm {ob['sacak']}" if ob.get("sacak") else ""), "PK-01 ve PK-02'de tuttu; PK-07 9 + 2")
+         f"saçak kenarları {sacak_m:.2f} m ÷ {sy(ps - bs)}" + (f" − özel büküm {ob['sacak']}" if ob.get("sacak") else ""), "PK-01 ve PK-02'de tuttu; PK-07 9 + 2", karar=karar_kenar)
     if ob.get("sacak"):
-        ekle("1002", "Özel büküm saçak sacı", f"L {mm_m(ps)}", ob["sacak"], "Pafta", "özel büküm saçlar paftası", "PK-07 2 tuttu")
+        ekle("1002", "Özel büküm saçak sacı", f"L {mm_m(ps)}", ob["sacak"], "Pafta", "özel büküm saçlar paftası", "PK-07 2 tuttu", karar=karar_kenar)
     alin = sum((2 * c["kalkan"] if c["tip"] == "besik" else 2) * o["egik"] for c, o in C)
     pa_, ba_ = _ortak(k, "parca_boyu_m", "alin_saci"), _ortak(k, "bindirme_m", "alin_saci")
     ekle("1002", "Alın sacı (30'luk)", f"300 × {mm_m(pa_)}", TAVAN(alin / (pa_ - ba_)) - ob.get("alin", 0),
-         "Kural", f"alın eğik kenarları {alin:.2f} m ÷ {sy(pa_ - ba_)}" + (f" − özel büküm {ob['alin']}" if ob.get("alin") else ""), "PK-01 ve PK-02'de tuttu; PK-07 9 + 2")
+         "Kural", f"alın eğik kenarları {alin:.2f} m ÷ {sy(pa_ - ba_)}" + (f" − özel büküm {ob['alin']}" if ob.get("alin") else ""), "PK-01 ve PK-02'de tuttu; PK-07 9 + 2", karar=karar_kenar)
     if ob.get("alin"):
-        ekle("1002", "Özel büküm alın sacı", f"L {mm_m(pa_)}", ob["alin"], "Pafta", "özel büküm saçlar paftası", "PK-07 2 tuttu")
+        ekle("1002", "Özel büküm alın sacı", f"L {mm_m(pa_)}", ob["alin"], "Pafta", "özel büküm saçlar paftası", "PK-07 2 tuttu", karar=karar_kenar)
     kk = lambda c: 0 if c.get("acik") else c["kalkan"]          # N1: açık çatı parçasının kalkanının altında duvar yok (PK-06 veranda)
     kalkan = sum((c["kalkan_duvar_cm"] / 100 if c.get("kalkan_duvar_cm") is not None else kk(c) * c["aciklik_cm"] / 100) for c, _o in C)   # 6.1: paftadaki kalkan duvarı
     kalkan_s = sum(kk(c) * (c["aciklik_cm"] / 100 + 2 * o["sac"]) for c, o in C)
@@ -725,9 +728,9 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
     # ── 1011 Dere ───────────────────────────────────────────────────────────
     kanopi = lambda c: bool(c.get("dere_yok") or (c.get("acik") and c.get("makas_yok")))   # O15: veranda saçağı (makassız sandviç) dere almaz (PK-07); 7.1: `dere_yok`
     dere_hat = [x for c, o in C if not kanopi(c) for x in o["hatlar"]]
-    o15 = lambda c: bool(c.get("acik") and c.get("makas_yok") and not c.get("dere_yok"))   # kitapla farklı: `Panel çatının kenarları`
-    karar_dere = "Panel çatının kenarları" if any(o15(c) and o.get("hatlar") for c, o in C) else ()
-    karar_cumba = "Panel çatının kenarları" if any(o15(c) for c, _o in C[1:]) else ()        # iniş ve dere kapağı (ek çatı sayısı)
+    deresiz_panel = lambda c: bool(kanopi(c) and c.get("makas_yok"))   # kitapta (0.18'den beri) her çatı panelli saçakta dere: `Panel çatının kenarları`
+    karar_dere = "Panel çatının kenarları" if any(deresiz_panel(c) and o.get("hatlar") for c, o in C) else ()
+    karar_cumba = "Panel çatının kenarları" if any(deresiz_panel(c) for c, _o in C[1:]) else ()   # iniş ve dere kapağı (ek çatı sayısı)
     pd_, bd = _ortak(k, "parca_boyu_m", "dere"), _ortak(k, "bindirme_m", "dere")
     dere = TAVAN(sum(dere_hat) / (pd_ - bd))
     dy = r("dere_aday_yuvarlama_mm")
