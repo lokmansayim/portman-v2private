@@ -12,7 +12,8 @@ Yeni pencere için hazırlıklar:
 **17 Ekim 2026 öğle eki (BK-12 · prefabrik hattını `main`'e alma; `docs/is_emirleri/BK-12.md`):**
 - **Karar ve onay:** D-23 (Patron, 09:39, "Önce motor"); plan onayı 09:48 (dal `bk-12-prefabrik-main`). Altı PR: PR-1 motor ve bayi paftası (öneren), PR-R referans, PR-K kişisel veri, PR-3 mühür kıyası (hakem; Patron onayıyla), PR-2 liste üreteci, PR-4 atölyenin prefabrik yolu.
 - **PR-1 (yerelde):** İE-11 motoru, İE-12 `motor/sunum.py`, birim testleri (`testler/motor/`; PK-01 tanımı `testler/motor/veri/`'ye taşındı), duvar tipleri, D-12 / D-14 / D-15 (dalda D-10 / D-12 / D-13), İE-10/11/12 belgeleri, `ref_prefabrik/` veri olarak. Bayi adı maskeli.
-- **Önce:** adım 0, Mac'teki AIPrefabrik dosyalarının 13 Ekim mührüne karşı SHA denetimi (Mac bağlanınca).
+- **Adım 0 (18 Ekim):** Mac'teki AIPrefabrik 13 Ekim mührüyle bayt bayt aynı (61/61, dosyalar açılmadan; `docs/notlar/2026-10-18_AIPrefabrik_muhur.md`). Drive'a 17 Ekim'de eklenen 28 R10 DWG Patron kararıyla ilk indirmede SHA'lanır.
+- **PR-1 (18 Ekim):** geometri hakemi üç turda kapandı (giriş kapısı kanadı bayi görseli ve paftada DXF ile aynı kuraldan; ön uyumsuzluk ayrı bakım işi); tam doğrulama `88a4f8e` çıkış 0, pytest 1073.
 - **Bekleyen (Lokman):** PR'ların birleştirilmesi; PR-R, PR-K, PR-3 için ayrı onay.
 
 **16–17 Ekim 2026 eki (BK-11 · yerel ortamda Postgres denemesi; `docs/is_emirleri/BK-11.md`):**
