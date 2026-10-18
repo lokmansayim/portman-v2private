@@ -333,7 +333,7 @@
     "w_otomat": 9
    },
    "durum": "aday",
-   "kaynak": "Şablon: sigorta × en uzun (≈ 20 m) + priz ya da anahtar × 2; Şablon B W otomat 9."
+   "kaynak": "7.3: en uzun ≈ 20 m + priz ya da anahtar × 2 m; şablonun formülündeki sigorta çarpanı adayda yok (geometri hakemi, 5. tur). Şablon B W otomat 9."
   },
   "vida": {
    "deger": {
@@ -586,7 +586,7 @@
    "kitap": "mahya_bandi",
    "tur": "yontem",
    "karar_bekliyor": false,
-   "not": "Rulo boyu (10 m) ve mahya parça boyu (2,8 m) kitaptan. Prefabrik yalnız mahya adedi × 2,8 ÷ 10 (Portatifev şablonu; PK-01 2). Kitap ters mahya × 2,8 ve trapez mahyası × 0,8 de ekler, baca çatıyı deliyorsa çevresini de (mühendis ve Excel motoru); damlalık terimi yalnız listede damlalık satırı varsa girer, varsayılan hesapta yok (Lokman, 4 Ekim 15:18 ve 7 Ekim 07:45). Trapez sac çatıda prefabrik de mahya adedini 2,8 ile çarpar."
+   "not": "Rulo boyu (10 m) ve mahya parça boyu (2,8 m) kitaptan. Prefabrik yalnız mahya adedi × 2,8 ÷ 10 (Portatifev şablonu; PK-01 2). Kitap ters mahya × 2,8 ve trapez mahyası × 0,8 de ekler (mühendis ve Excel motoru), baca çatıyı deliyorsa çevresini de (kör test projesinin gerçek listesi, 6 Ekim; kitabın 7 Ekim düzenlemesi); damlalık terimi yalnız listede damlalık satırı varsa girer, varsayılan hesapta yok (Lokman, 4 Ekim 15:18 ve 7 Ekim 07:45). Trapez sac çatıda prefabrik de mahya adedini 2,8 ile çarpar."
   },
   {
    "konu": "Tavan omegası",
@@ -616,8 +616,7 @@
    "kitap": [
     "elektrik",
     "elektrik_oda",
-    "elektrik_oda_ek",
-    "kablo_en_uzak_mesafe"
+    "elektrik_oda_ek"
    ],
    "tur": "yontem",
    "karar_bekliyor": false,
@@ -632,7 +631,7 @@
    ],
    "tur": "yontem",
    "karar_bekliyor": true,
-   "not": "Prefabrik NYM 3 × 2,5 130 m ve 2 × 1,5 100 m sabit (PK-01'in listesi; PK-02 135 / 120); aday sütununda şablonun formülü, en uzun mesafe ≈ 20 m sabit. Kitap sigorta adedi × sigortadan evin en uzak mesafesi + (priz ya da anahtar sayısı) × 2 m (Excel hesaplama motoru ve Eylül 2026 şablonu; en uzak mesafe sigortadan: Lokman, 7 Ekim 07:45, C1 q; kutunun yeri tanımda yoksa giriş kapısı: 8 Ekim 00:45)."
+   "not": "Prefabrik NYM 3 × 2,5 130 m ve 2 × 1,5 100 m sabit (PK-01'in listesi; PK-02 135 / 120); aday sütununda 20 m + priz ya da anahtar × 2 m (7.3; şablonun sigorta çarpanı yok). Kitap sigorta adedi × sigortadan evin en uzak mesafesi + (priz ya da anahtar sayısı) × 2 m (Excel hesaplama motoru ve Eylül 2026 şablonu; en uzak mesafe sigortadan: Lokman, 7 Ekim 07:45, C1 q; kutunun yeri tanımda yoksa giriş kapısı: 8 Ekim 00:45)."
   },
   {
    "konu": "Buat kasa",
@@ -672,7 +671,19 @@
    "kitap": "boya",
    "tur": "deger",
    "karar_bekliyor": false,
-   "not": "Dış ve iç cephe (m² × 0,02 kova), mastiğin pencere başına adedi (1) ve köpük (2) kitaptan. Farklar: tavan boyası ve astar prefabrikte sabit 1 kova (O18 ve Portatifev şablonu, PK-07), kitapta m² × 0,01 kova (Excel hesaplama motoru); mastiğin m² payı prefabrikte tam 2/3, kitapta 0,6667 (Excel motoru; adet değişmesin diye kitaptan okunmuyor). Dayson ayrı kayıtta."
+   "not": "Dış ve iç cephe (m² × 0,02 kova), mastiğin pencere başına adedi (1) ve köpük (2) kitaptan. Fark: tavan boyası ve astar prefabrikte sabit 1 kova (O18 ve Portatifev şablonu, PK-07), kitapta m² × 0,01 kova (Excel hesaplama motoru). Silikonize mastik ve dayson ayrı kayıtlarda."
+  },
+  {
+   "konu": "Silikonize mastik",
+   "prefabrik": "boya.mastik_m2_carpan",
+   "kitap": [
+    "boya.mastik_pencere_basina",
+    "boya.mastik_mantolamasiz_m2_basina",
+    "satir_notlari.Silikonize mastik"
+   ],
+   "tur": "yontem",
+   "karar_bekliyor": true,
+   "not": "Prefabrik pencere × 1 + m² × 2/3, yukarı (O18 ve Portatifev şablonu, mantolama yok; PK-02'de 60); boya grubu alıcıya aitse mastik de 0. Kitap pencere başına 1, m² payı yok, boyaya bağlı değil (Lokman, 7 Ekim 07:45, C6: \"boyu ne olursa olsun pencere başı 1 adet\"; kör test listesinde 7); kitaptaki 0,6667 Excel motorunun değeri, kitabın hesabına girmiyor (`motor/genel/yukleme.py`). Fark yaklaşık on kat: PK-03 60 / 6, PK-05 45 / 6, PK-06 70 / 8, PK-08 48 / 6. Pencere alıcıya aitken mastik ayrı kayıtta."
   },
   {
    "konu": "Dayson",
@@ -688,7 +699,7 @@
    "kitap": "kapsam_alici",
    "tur": "kapsam",
    "karar_bekliyor": false,
-   "not": "Dış ve iç cephe boyası alıcıya aitse prefabrik bütün boya grubunu ve mastiği 0 yazar (PK-01); kitapta tavan boyası ve astar, alıcıya ait yazılmadıkça listede kalır (KT-01 listesi)."
+   "not": "Dış ve iç cephe boyası alıcıya aitse prefabrik bütün boya grubunu ve silikonize mastiği 0 yazar (PK-01); kitapta tavan boyası ve astar, alıcıya ait yazılmadıkça listede kalır (KT-01 listesi), mastik de pencereye bağlı olduğu için kalır (Silikonize mastik kaydı)."
   },
   {
    "konu": "Sıhhi tesisat",
@@ -902,7 +913,7 @@
   },
   {
    "kitap": "satir_notlari",
-   "neden": "çelik listesinin satır notları (adet ve formül değiştirmez); prefabrik satırın notu kendi dayanağından"
+   "neden": "çelik listesinin satır notları (adet ve formül değiştirmez); prefabrik satırın notu kendi dayanağından. Silikonize mastiğin notundaki Lokman kararı `boya`'da da durur ve `kitapla_farkli` › Silikonize mastik'te beyanlı"
   },
   {
    "kitap": "sablon_2026",

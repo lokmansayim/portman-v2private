@@ -622,9 +622,9 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
         ekle("1007", "Buat kasa", "adet", nokta, "Kural (O19)", "bütün elektrik noktaları (anahtar, priz, uydu, zil, duy, glop)", "PK-07'nin gerçek listesinde 31, paftadan okunan noktalarla 30")
         uzun, nokta_m = sy(Ea["kablo_en_uzun_m"]), sy(Ea["nokta_basina_m"])
         ekle("1007", "NYM kablo 3 × 2,5", "metre", E["nym_3x25_m"], "Kural (Portatifev)", f"sabit {sy(E['nym_3x25_m'])} m (PK-01 130, PK-02 135)",
-             aday=Ea["kablo_en_uzun_m"] + priz * Ea["nokta_basina_m"], aday_notu=f"şablon: sigorta × en uzun (≈ {uzun} m) + priz × {nokta_m}")
+             aday=Ea["kablo_en_uzun_m"] + priz * Ea["nokta_basina_m"], aday_notu=f"7.3: {uzun} m + priz × {nokta_m} m (sigorta çarpanı yok)")
         ekle("1007", "NYM kablo 2 × 1,5", "metre", E["nym_2x15_m"], "Kural (Portatifev)", f"sabit {sy(E['nym_2x15_m'])} m (PK-01 100, PK-02 120)",
-             aday=Ea["kablo_en_uzun_m"] + anah * Ea["nokta_basina_m"], aday_notu=f"şablon: sigorta × en uzun (≈ {uzun} m) + anahtar × {nokta_m}")
+             aday=Ea["kablo_en_uzun_m"] + anah * Ea["nokta_basina_m"], aday_notu=f"7.3: {uzun} m + anahtar × {nokta_m} m (sigorta çarpanı yok)")
         uk, bk = Ek["uydu_kablo_priz_basina_m"], Ek["besleme_kablosu_kat_basina_m"]
         ekle("1007", "Uydu kablo", "metre", uk * (es("uydu_prizi") or 0), "Şablon formülü", f"uydu prizi × {sy(uk)} m", "PK-02 tuttu")
         ekle("1007", "Besleme kablosu", "metre", bk, "Şablon formülü", f"kat × {sy(bk)} m", "PK-02 tuttu")
