@@ -501,6 +501,27 @@ def test_pafta_kipi_motor_kipiyle_ayni(N, kurallar):
     assert Lp["girdi_ozeti"]["geometri"] == "pafta"
 
 
+def test_karar_bekleyen_satirlar(pk01, N, kurallar):
+    """Lokman'ın kararını bekleyen konuya bağlı satır bunu taşır; karar verilince (bayrak kalkınca) işaret de kalkar. PK-01'de yedi konu,
+    sekiz satır (CIO kıyası, 18 Ekim: Patron'un baktığı Excel'de görünmüyordu)."""
+    isaretli = {s["kalem"]: s["karar_bekliyor"] for s in pk01["satirlar"] if s["karar_bekliyor"]}
+    assert isaretli == {"Veranda tavan Boardex": ["Veranda tavanı"], "Sandviç panel (100 cm kapatır) · ana çatı": ["Çatı paneli boyu"],
+                        "Sandviç panel kapaması": ["Sandviç panel kapaması"],
+                        "Prefabrik pencere vidası (4,8 × 70)": ["Pencere alıcıya aitken vida ve mastik"],
+                        "Alçıpan vidası": ["Alçıpan vidasının levhaları"], "Acil müdahale kapağı": ["Müdahale kapakları"],
+                        "Çatı müdahale kapağı": ["Müdahale kapakları"], "Dayson (çatı renginde)": ["Dayson"]}
+    assert set().union(*isaretli.values()) <= KARAR_BEKLEYEN
+    k = copy.deepcopy(kurallar)
+    for b in k["prefabrik"]["kitapla_farkli"]:
+        if b["konu"] == "Dayson":
+            b["karar_bekliyor"] = False
+    L = PL.liste(copy.deepcopy(N), k, _oku(PAFTA_KATMANI))
+    assert _satir(L, "Dayson (çatı renginde)")["karar_bekliyor"] == [] and _satir(L, "Veranda tavan Boardex")["karar_bekliyor"] == ["Veranda tavanı"]
+    k["prefabrik"]["kitapla_farkli"] = [b for b in k["prefabrik"]["kitapla_farkli"] if b["konu"] != "Dayson"]
+    with pytest.raises(ValueError, match="Dayson"):                  # satırın bağlandığı konu beyandan çıkarsa liste üretilmez
+        PL.liste(copy.deepcopy(N), k, _oku(PAFTA_KATMANI))
+
+
 def test_komut_satiri(tmp_path):
     openpyxl = pytest.importorskip("openpyxl")
     assert PL.main([str(PK01), str(tmp_path), "--pafta", str(PAFTA_KATMANI)]) == 0
@@ -509,6 +530,8 @@ def test_komut_satiri(tmp_path):
     assert L["kural_seti"]["prefabrik"] == "portman.prefabrik_liste/1.0"
     wb = openpyxl.load_workbook(tmp_path / "PK01_liste.xlsx")
     assert wb.sheetnames == ["Liste"] and wb["Liste"].max_row == 93 + 2
+    d = {r[1]: r[5] for r in wb["Liste"].iter_rows(min_row=3, values_only=True)}
+    assert d["Dayson (çatı renginde)"] == "Şablon formülü (O18) · karar bekliyor (Dayson)" and d["Poliüretan köpük"] == "Şablon formülü (O18)"
     with pytest.raises(SystemExit):
         PL.main([str(tmp_path)])                                     # ne İş Emri ne --yapi
 
