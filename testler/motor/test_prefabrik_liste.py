@@ -151,9 +151,11 @@ def _yol(kok: dict, yol: str):
     return v
 
 
-# Kitabın Lokman'ın kararıyla çelişen ve prefabrikte başka yazılan değerleri: Lokman'ın kararını bekler (geometri hakemi, 1. ve 2. tur)
+# Kitabın Lokman'ın kararıyla çelişen ve prefabrikte başka yazılan değerleri: Lokman'ın kararını bekler (geometri hakemi, 1.–3. tur).
+# Alçıpan vidasının levhaları kitabın Lokman kararı değil, çalışma kitabının notu; PK-03'ün gerçek listesi kitapla tuttuğu için soruya girer.
 KARAR_BEKLEYEN = {"Tek kat çatı paneli kapatması", "Metal kiremit kapatması", "Çatı paneli boyu", "Sandviç panel kapaması", "Trapez sac mahyası",
-                  "Veranda tavanı", "Pencere alıcıya aitken vida ve mastik", "Ters mahya kenar kutusu", "Müdahale kapakları"}
+                  "Veranda tavanı", "Pencere alıcıya aitken vida ve mastik", "Ters mahya kenar kutusu", "Müdahale kapakları", "Duvar dibi",
+                  "Dayson", "Buat kasa", "Alçıpan vidasının levhaları", "Panel çatının kenarları", "Tek kat panel kapaması"}
 
 
 def _kitap_yollari(b: dict) -> list[str]:
@@ -464,10 +466,16 @@ def test_parca_boyu_degisince_olcu_degisir(bozma, kurallar):
                     x, y = T[a], B[a]
                     if x["olcu"] != y["olcu"] and "÷" in x["formul"] and (x["adet"], x["formul"]) == (y["adet"], y["formul"]):
                         pytest.fail(f"{'.'.join(yol)}: {a[1]} ölçüsü {x['olcu']} → {y['olcu']}, adet ve formül aynı ({x['formul']})")
+                    if x["olcu"] != y["olcu"] and "÷" in x["aday_notu"] and (x["aday"], x["aday_notu"]) == (y["aday"], y["aday_notu"]):
+                        pytest.fail(f"{'.'.join(yol)}: {a[1]} ölçüsü {x['olcu']} → {y['olcu']}, aday ve notu aynı ({x['aday_notu']})")
 
 
 def _deger_kilidi(okunan: set, kurallar: dict) -> dict:
-    return {"kitap_seti": kurallar["prefabrik"]["kitap_seti"], "degerler": {".".join(y): _al(kurallar, y) for y in sorted(okunan)}}
+    """Okunan değerler ve beyanların listesi (konu ve karar bayrağı; kitaptan okunmayanların yolu): bir beyan sessizce kalkmaz (hakem, 3. tur)."""
+    R = kurallar["prefabrik"]
+    return {"kitap_seti": R["kitap_seti"], "degerler": {".".join(y): _al(kurallar, y) for y in sorted(okunan)},
+            "kitapla_farkli": sorted([b["konu"], b["karar_bekliyor"]] for b in R["kitapla_farkli"]),
+            "kitaptan_okunmayan": sorted(b["kitap"] for b in R["kitaptan_okunmayan"])}
 
 
 def test_kural_degerleri_kilitli(bozma, kurallar):
@@ -476,6 +484,7 @@ def test_kural_degerleri_kilitli(bozma, kurallar):
     okunan, _ = bozma
     simdi, kilit = _deger_kilidi(okunan, kurallar), _oku(DEGER_KILIDI)
     assert simdi["kitap_seti"] == kilit["kitap_seti"]
+    assert (simdi["kitapla_farkli"], simdi["kitaptan_okunmayan"]) == (kilit["kitapla_farkli"], kilit["kitaptan_okunmayan"]), "beyan değişti; --kilit"
     farklar = sorted(set(simdi["degerler"]) ^ set(kilit["degerler"])) + sorted(
         y for y in simdi["degerler"].keys() & kilit["degerler"].keys() if simdi["degerler"][y] != kilit["degerler"][y])
     assert farklar == [], "kural değeri değişti; bilerek değiştiyse kilidi yeniden yaz (--kilit) ve gerekçeyi iş emrine yaz"

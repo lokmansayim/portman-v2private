@@ -69,8 +69,8 @@
   "prefabrik.alt_cerceve_bolen_m": 3.75,
   "prefabrik.ana_cati_kose.besik": 4,
   "prefabrik.ana_cati_kose.tek_yon": 2,
-  "prefabrik.asik_aday.bolen_m": 4.1,
   "prefabrik.asik_aday.ek": 5,
+  "prefabrik.asik_aday.pay_m": 0.1,
   "prefabrik.asik_mahya_payi_m": 0.2,
   "prefabrik.bas_makas_betopani.katsayi": 1.5,
   "prefabrik.bas_makas_betopani.levha_m2": 3.125,
@@ -117,8 +117,8 @@
    "islak",
    "lavabo"
   ],
-  "prefabrik.kapama.sandvic_bindirme_m": 0.3,
   "prefabrik.kapama.sandvic_parca_m": 2.8,
+  "prefabrik.kapama.sandvic_pay_m": 0.3,
   "prefabrik.kapatma_m.metal_kiremit": 1.05,
   "prefabrik.kapatma_m.tek_kat": 0.87,
   "prefabrik.kosebent": 7,
@@ -252,5 +252,181 @@
   "prefabrik.vida.trapez_5560_yuvarlama": 100,
   "prefabrik.vida_aday_yuvarlama": 250,
   "prefabrik.vitrifiye_aday": 1
- }
+ },
+ "kitapla_farkli": [
+  [
+   "Alçıpan vidasının levhaları",
+   true
+  ],
+  [
+   "Baş makas Z'si",
+   false
+  ],
+  [
+   "Boya",
+   false
+  ],
+  [
+   "Boya alıcıya aitken",
+   false
+  ],
+  [
+   "Buat kasa",
+   true
+  ],
+  [
+   "Dayson",
+   true
+  ],
+  [
+   "Dere kapağı",
+   false
+  ],
+  [
+   "Duvar dibi",
+   true
+  ],
+  [
+   "Elektrik",
+   false
+  ],
+  [
+   "Kalem adlarında renk",
+   false
+  ],
+  [
+   "Kapı boşlukları",
+   false
+  ],
+  [
+   "Köşebent",
+   false
+  ],
+  [
+   "Mahya bandı",
+   false
+  ],
+  [
+   "Metal kiremit kapatması",
+   true
+  ],
+  [
+   "Müdahale kapakları",
+   true
+  ],
+  [
+   "PVC iniş borusu",
+   false
+  ],
+  [
+   "Panel çatının kenarları",
+   true
+  ],
+  [
+   "Pencere alıcıya aitken vida ve mastik",
+   true
+  ],
+  [
+   "Sandviç panel kapaması",
+   true
+  ],
+  [
+   "Saçak parçaları",
+   false
+  ],
+  [
+   "Sıhhi tesisat",
+   false
+  ],
+  [
+   "Tavan alçıpanı",
+   false
+  ],
+  [
+   "Tavan omegası",
+   false
+  ],
+  [
+   "Tek kat panel kapaması",
+   true
+  ],
+  [
+   "Tek kat çatı paneli kapatması",
+   true
+  ],
+  [
+   "Ters mahya kenar kutusu",
+   true
+  ],
+  [
+   "Trapez sac mahyası",
+   true
+  ],
+  [
+   "Veranda tavanı",
+   true
+  ],
+  [
+   "Vida",
+   false
+  ],
+  [
+   "Çatı OSB'si zayiatı",
+   false
+  ],
+  [
+   "Çatı kaplaması türleri",
+   false
+  ],
+  [
+   "Çatı paneli adedi",
+   false
+  ],
+  [
+   "Çatı paneli boyu",
+   true
+  ],
+  [
+   "Çatı yüzeyi",
+   false
+  ],
+  [
+   "Çatı şiltesi",
+   false
+  ],
+  [
+   "Çelik dübel ve şase pul",
+   false
+  ],
+  [
+   "İniş yerleri",
+   false
+  ]
+ ],
+ "kitaptan_okunmayan": [
+  "baca_ici",
+  "bayi_kurali",
+  "baz_paket_cati_kaplamasi",
+  "cati_yontemi",
+  "celik",
+  "celik_cati_yontemi",
+  "duvar_izolasyonu",
+  "ek_yapi_ve_korkuluk",
+  "kapama_aparati",
+  "korkuluk_kaplamasi",
+  "motorda_olup_listede_olmayanlar",
+  "nem_bariyeri_dis_cephe",
+  "osb_takviye",
+  "sablon_2026",
+  "sacak_alti_boardex_eni_m",
+  "sacak_yuzu",
+  "satir_notlari",
+  "veranda_cercevesi",
+  "yalitim_kat",
+  "yalitim_paket_m2",
+  "yontem_a_alin_kaplamasi",
+  "yontem_a_kalkan_ust_kapamasi",
+  "zayiat.cati_kaplama_kirma",
+  "zayiat.dis_osb"
+ ]
 }
