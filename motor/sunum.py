@@ -183,6 +183,7 @@ def plan_ciz(ax, plan: G.Plan, yazi: float = 1.0) -> dict:
 
     bx0, by0, bx1, by1 = sinirlar(plan)
     fs = lambda pt: pt * yazi
+    kapi_mantik = ((plan.is_emri.get("yapi") or {}).get("dizilim") or {}).get("kapi") == "mantik"
     # mahaller
     for ad, m in plan.mahaller.items():
         if m.poly is None or m.poly.is_empty:
@@ -242,7 +243,7 @@ def plan_ciz(ax, plan: G.Plan, yazi: float = 1.0) -> dict:
                     ax.text(d.c + s * (d.h + 8), (g[1] + g[3]) / 2, et, ha="left" if s > 0 else "right", va="center", rotation=90, fontsize=fs(5.0),
                             color=ETIKET_MAVI, zorder=9, bbox=bb)
             elif a.tur in ("ic_kapi", "dis_kapi") and a.icine_normal:
-                _kapi_ciz(ax, d, g, a)
+                _kapi_ciz(ax, d, g, a, kapi_mantik)
                 if a.tur == "dis_kapi":
                     s = -1 if a.icine_normal[0] == "+" else 1                 # dışarı
                     if d.yon == "x":
@@ -280,12 +281,15 @@ def plan_ciz(ax, plan: G.Plan, yazi: float = 1.0) -> dict:
     return {"zincirler_cm": z, "dis_olcu_cm": [round(bx1 - bx0, 2), round(by1 - by0, 2)]}
 
 
-def _kapi_ciz(ax, d, g, a) -> None:
-    """Kapı kanadı (açık konumda) ve açılım yayı: menteşe `mentese_ucu` ucunda, kanat `icine_normal` yönünde (D-15), boy = boşluk eni."""
+def _kapi_ciz(ax, d, g, a, kapi_mantik: bool = False) -> None:
+    """Kapı kanadı (açık konumda) ve açılım yayı: menteşe `mentese_ucu` ucunda, kanat `icine_normal` yönünde (D-15), boy = boşluk eni.
+    Menteşe ucu bayi görseliyle aynı kuraldan (`bayi_gorseli._mentese_a0_ucunda`): dış kapıda DXF sembolü yalnız `dizilim.kapi: mantik`
+    varken menteşeye göre aynalanır, yoksa "sol" = a0 (BK-12 geometri hakemi 3. tur)."""
     from matplotlib.patches import Arc
+    from . import bayi_gorseli as BG
     a0, a1 = (g[0], g[2]) if d.yon == "x" else (g[1], g[3])
     L = a1 - a0
-    uc = G.mentese_ucu(a)
+    uc = 0 if BG._mentese_a0_ucunda(a, kapi_mantik) else 1
     hm = a0 if uc == 0 else a1
     s = 1 if a.icine_normal[0] == "+" else -1
     if d.yon == "x":

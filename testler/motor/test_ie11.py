@@ -506,11 +506,13 @@ def test_bayi_gorseli_mentese_dxf_ile_ayni(tmp_path):
     """Hakem Ö4 (13.10.2026): bayi görselinin iç kapı kanadı DXF'teki menteşe ucuyla aynı (`G.mentese_ucu`). Eski kural ("sol" = a0) −y ve +x yönüne
     açılan kapılarda tersti; test eski kuralın gerçekten farklı olduğu kapıları da sayar (ayırt edici). Dış kapıda DXF sembolü yalnız
     `dizilim.kapi: mantik` varken menteşeye göre aynalanır (`dxf_out.py` `dis_ayna`); anahtarsız İş Emri'nde görsel eski kuralla kalır
-    (BK-12 geometri hakemi 2. tur: P6001 ayna y'de `mentese_ucu` giriş kapısını DXF'e göre ters çiziyordu)."""
+    (BK-12 geometri hakemi 2. tur: P6001 ayna y'de `mentese_ucu` giriş kapısını DXF'e göre ters çiziyordu). `kapi: mantik` eklenmiş ayna y
+    kopyasında aynı kapı `mentese_ucu`'ya geçer (3. tur: PK-01'in +y giriş kapısında iki kural aynı sonucu verdiği için dal ayırt edilmiyordu)."""
     from motor import bayi_gorseli as BG
-    farkli = dis_ayrisan = 0
-    for yol in (P6001, P6001_AYNA_Y, PK01):
-        ie = _oku(yol)
+    ayna_mantik = _oku(P6001_AYNA_Y)
+    ayna_mantik["yapi"].setdefault("dizilim", {})["kapi"] = "mantik"
+    farkli = dis_ayrisan = mantik_ayrisan = 0
+    for ad, ie in (("P6001", _oku(P6001)), ("ayna_y", _oku(P6001_AYNA_Y)), ("PK01", _oku(PK01)), ("ayna_y_mantik", ayna_mantik)):
         mantik = ((ie.get("yapi") or {}).get("dizilim") or {}).get("kapi") == "mantik"
         plan = G.kur(ie)
         for p in plan.panolar:
@@ -519,11 +521,15 @@ def test_bayi_gorseli_mentese_dxf_ile_ayni(tmp_path):
                 continue
             eski = (a.mentese or "sag") == "sol"
             if a.tur == "dis_kapi" and not mantik:
-                assert BG._mentese_a0_ucunda(a, mantik) == eski, (yol.name, a.arasi)
+                assert BG._mentese_a0_ucunda(a, mantik) == eski, (ad, a.arasi)
                 dis_ayrisan += eski != (G.mentese_ucu(a) == 0)
                 continue
-            assert BG._mentese_a0_ucunda(a, mantik) == (G.mentese_ucu(a) == 0), (yol.name, a.arasi)
-            farkli += eski != BG._mentese_a0_ucunda(a, mantik)
+            assert BG._mentese_a0_ucunda(a, mantik) == (G.mentese_ucu(a) == 0), (ad, a.arasi)
+            if a.tur == "dis_kapi":
+                mantik_ayrisan += eski != BG._mentese_a0_ucunda(a, mantik)
+            else:
+                farkli += eski != BG._mentese_a0_ucunda(a, mantik)
     assert farkli >= 3                      # P6001 YAŞAM–BANYO; PK-01 HOL–SALON ve HOL–YATAK ODASI 2
     assert dis_ayrisan >= 1                 # P6001 ayna y'nin giriş kapısı: `mentese_ucu` burada eski kuraldan ayrılır
+    assert mantik_ayrisan >= 1              # aynı kapı `kapi: mantik`'le: `mentese_ucu` (a1), eski kural a0 derdi
     assert BG.plan_gorseli(_oku(PK01), tmp_path / "pk01.png").is_file()

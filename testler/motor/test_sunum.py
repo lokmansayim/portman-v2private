@@ -22,6 +22,7 @@ from motor import sunum  # noqa: E402
 PK01 = KOK / "testler" / "motor" / "veri" / "PK01.json"
 PAFTA = KOK / "testler" / "motor" / "veri" / "PK01_pafta_montaj.json"   # dalda deneme/2026-10-13_pk_01/; BK-12 PR-1 ile taşındı
 P6001 = KOK / "is_emri" / "P6001_2plus1_6x6.json"
+P6001_AYNA_Y = KOK / "is_emri" / "P6001_ayna_y.json"
 
 
 def _oku(p: Path) -> dict:
@@ -100,6 +101,7 @@ class _KayitEkseni:
 def test_kapi_kanadi_mentese_ucunda(pk01):
     """Kanat menteşe ucundan (`mentese_ucu`, DXF ile aynı sözleşme) `icine_normal` yönünde, boy = boşluk eni. Bölmeye yaslı iki oda kapısının
     kanatları birbirine doğru (D-15): HOL'ün iki yanındaki çiftler bölmeye (y = 618,5) yakın uçta."""
+    assert pk01["yapi"]["dizilim"]["kapi"] == "mantik"
     plan = G.kur(pk01)
     kanatlar = {}
     for d in plan.duvarlar:
@@ -109,7 +111,7 @@ def test_kapi_kanadi_mentese_ucunda(pk01):
                 continue
             ax = _KayitEkseni()
             g = p.gap()
-            sunum._kapi_ciz(ax, d, g, a)
+            sunum._kapi_ciz(ax, d, g, a, kapi_mantik=True)
             (x0, x1), (y0, y1) = ax.cizgiler[0]
             a0, a1 = (g[0], g[2]) if d.yon == "x" else (g[1], g[3])
             beklenen = a0 if G.mentese_ucu(a) == 0 else a1
@@ -120,6 +122,41 @@ def test_kapi_kanadi_mentese_ucunda(pk01):
             kanatlar[a.arasi] = (y0 if d.yon == "y" else None)
     for oda in ("MUTFAK", "YATAK ODASI 1", "SALON", "YATAK ODASI 2"):
         assert abs(kanatlar[("HOL", oda)] - 618.5) < 15, (oda, kanatlar[("HOL", oda)])
+
+
+def test_giris_kapisi_bayi_gorseliyle_ayni(pk01):
+    """BK-12 geometri hakemi 3. tur: bayi paftası (`plan_ciz`) giriş kapısının menteşesini bayi görseliyle aynı kuraldan alır
+    (`bayi_gorseli._mentese_a0_ucunda`): anahtarsız İş Emri'nde "sol" = a0, çünkü DXF sembolü aynalanmaz; `dizilim.kapi: mantik`'te
+    `mentese_ucu` (DXF `dis_ayna`). Eskiden dış kapıda da `mentese_ucu` vardı, P6001 ayna y'de giriş kapısı DXF'e göre tersti.
+    Ayırt edici: aynı kapı anahtarsız a0'da, `mantik`'li kopyada a1'de."""
+    import matplotlib.pyplot as plt
+    from matplotlib.patches import Arc
+    from motor import bayi_gorseli as BG
+    ayna_mantik = _oku(P6001_AYNA_Y)
+    ayna_mantik["yapi"].setdefault("dizilim", {})["kapi"] = "mantik"
+    a0_ucunda = {}
+    for ad, ie in (("ayna_y", _oku(P6001_AYNA_Y)), ("ayna_y_mantik", ayna_mantik), ("PK01", pk01)):
+        mantik = ((ie.get("yapi") or {}).get("dizilim") or {}).get("kapi") == "mantik"
+        plan = G.kur(ie)
+        fig, ax = plt.subplots()
+        try:
+            sunum.plan_ciz(ax, plan)
+            merkezler = [tuple(p.center) for p in ax.patches if isinstance(p, Arc)]
+        finally:
+            plt.close(fig)
+        for d in plan.duvarlar:
+            for p in d.panolar:
+                a = p.acilim
+                if a is None or a.tur != "dis_kapi":
+                    continue
+                g = p.gap()
+                a0, a1 = (g[0], g[2]) if d.yon == "x" else (g[1], g[3])
+                dik = d.c + (1 if a.icine_normal[0] == "+" else -1) * d.h
+                hm = a0 if BG._mentese_a0_ucunda(a, mantik) else a1
+                beklenen = (hm, dik) if d.yon == "x" else (dik, hm)
+                assert any(m == pytest.approx(beklenen) for m in merkezler), (ad, a.arasi, beklenen)
+                a0_ucunda[ad] = hm == a0
+    assert a0_ucunda == {"ayna_y": True, "ayna_y_mantik": False, "PK01": True}
 
 
 def test_bayi_paftasi_perspektifsiz(pk01, pk01_dogrulama, tmp_path):
