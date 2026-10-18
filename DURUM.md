@@ -14,6 +14,7 @@ Yeni pencere için hazırlıklar:
 - **PR-1 (yerelde):** İE-11 motoru, İE-12 `motor/sunum.py`, birim testleri (`testler/motor/`; PK-01 tanımı `testler/motor/veri/`'ye taşındı), duvar tipleri, D-12 / D-14 / D-15 (dalda D-10 / D-12 / D-13), İE-10/11/12 belgeleri, `ref_prefabrik/` veri olarak. Bayi adı maskeli.
 - **Adım 0 (18 Ekim):** Mac'teki AIPrefabrik 13 Ekim mührüyle bayt bayt aynı (61/61, dosyalar açılmadan; `docs/notlar/2026-10-18_AIPrefabrik_muhur.md`). Drive'a 17 Ekim'de eklenen 28 R10 DWG Patron kararıyla ilk indirmede SHA'lanır.
 - **PR-1 (18 Ekim):** geometri hakemi üç turda kapandı (giriş kapısı kanadı bayi görseli ve paftada DXF ile aynı kuraldan; ön uyumsuzluk ayrı bakım işi); tam doğrulama `88a4f8e` çıkış 0, pytest 1073.
+- **PR-1 · CIO kıyası (18 Ekim, PR #27):** 17 madde `c37cb68`'de işlendi (anahtarsız yoldaki farklar beyan edildi; R02 PDF ve DWG PR-K'ya; mühür notu ve ad maskesi); tam doğrulama 06:04–06:30 çıkış 0, harness 22/22, DXF/PDF 18/18 AYNI, pytest 1073. Lokman'a yeniden sunuldu.
 - **Bekleyen (Lokman):** PR'ların birleştirilmesi; PR-R, PR-K, PR-3 için ayrı onay.
 
 **16–17 Ekim 2026 eki (BK-11 · yerel ortamda Postgres denemesi; `docs/is_emirleri/BK-11.md`):**
