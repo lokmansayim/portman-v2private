@@ -1,6 +1,7 @@
 {
  "sema": "portman.prefabrik_liste/1.0",
- "aciklama": "Prefabrik pano evinin yükleme listesi kuralları (BK-12 PR-2, 18 Ekim 2026). Okuyan `motor/prefabrik_liste.py`. Kör test serisinin üreteci 7.3'ün (13 Ekim 2026, `ie-11-pr2-kor-test` dalı) kodun içindeki sabitleri buraya taşındı; değerler aynı. Kural kitabında aynı anlamda bir değer varsa: değer aynıysa burada yinelenmez, `kurallar.json`'dan okunur (saçak, alın, mahya, dere, aşık, köşebent, tavan omegası ve iniş borusu parça boyları ile bindirmeleri; levha alanları ve zayiatlar; şilte; sandviç ve trapez kapatması; baş makas Z'si; dere kelepçesi; iniş eşiği ve iniş başına parçalar); iç duvar kalınlığı `kurallar/model/duvar_tipleri.json`'dan. Değer ya da yöntem farklıysa `kitapla_farkli`'da beyan edilir (değer, yöntem, kalem ya da kapsam farkı ve nedeni); kitapta çelik ve yöntem B için yazılmış kurallar çelik listesinde yalnız karşılaştırma için hesaplanır (Lokman, 7 Ekim 07:45), onları bu dosyaya bağlamak çelik setinin sürümünü değiştirir, ayrı iştir (BK-12 › PR-2 › Bilinen sınırlama). Durum değerleri kural kitabınınkiler (`kurallar/README.md`): lokman, excel (Portatifev şablonunun, yani yükleme listesi çalışma kitabının formülü), uydurma, varsayim; prefabrikte üç değer daha: pafta (inceleme projelerinin montaj paftası ya da açık listesiyle tuttu), cizim (pano Motor'unun çizim kuralı), aday (öteki uygulama; listede aday sütununda). Kişi ve bayi adları yazılmaz; projeler PK ve AP kodlarıyla, ikinci şablon 'Şablon B' (Kasım 2025, PK-02).",
+ "aciklama": "Prefabrik pano evinin yükleme listesi kuralları (BK-12 PR-2, 18 Ekim 2026). Okuyan `motor/prefabrik_liste.py`. Kör test serisinin üreteci 7.3'ün (13 Ekim 2026, `ie-11-pr2-kor-test` dalı) kodun içindeki sabitleri buraya taşındı; değerler aynı. Kural kitabı `kitap_seti`'ndeki dondurulmuş setten okunur (`PORTMAN_KURALLAR` bu listeyi etkilemez): kitapta çelik için yapılan bir değişiklik prefabrik listeyi sessizce değiştirmez, seti ilerletmek bu dosyada bilinçli bir değişikliktir. Kitabın her kuralı üç yerden birindedir: kitapta aynı kalemin aynı anlamlı değeri varsa okunur (burada yinelenmez); değer, yöntem, kalem ya da kapsam farklıysa `kitapla_farkli`'da beyanlıdır (`karar_bekliyor`: Lokman'ın kararını bekleyenler); prefabrikte karşılığı yoksa `kitaptan_okunmayan`'da nedeniyle. İç duvar kalınlığı `kurallar/model/duvar_tipleri.json`'dan. Kitabın yöntem B kalemleri prefabrik içindir, çelik listesinde yalnız karşılaştırma için hesaplanır (Lokman, 7 Ekim 07:45). Durum değerleri kural kitabınınkiler (`kurallar/README.md`): lokman, excel (Portatifev şablonunun, yani yükleme listesi çalışma kitabının formülü), uydurma, varsayim; prefabrikte üç değer daha: pafta (inceleme projelerinin montaj paftası ya da açık listesiyle tuttu), cizim (pano Motor'unun çizim kuralı), aday (öteki uygulama; listede aday sütununda). Kişi ve bayi adları yazılmaz; projeler PK ve AP kodlarıyla, ikinci şablon 'Şablon B' (Kasım 2025, PK-02).",
+ "kitap_seti": "setler/0.19.json",
  "kurallar": {
   "pencere_ust_kotu_cm": {
    "deger": 200.0,
@@ -145,19 +146,18 @@
   },
   "tavan_omegasi_aralik_m": {
    "deger": {
-    "asma": 1.255,
-    "ters": 0.6
+    "asma": 1.255
    },
    "durum": "pafta",
-   "kaynak": "Asma dizme tavanda 125,5 cm'de bir (PK-01 şablonu; PK-02 tavan planı 125); ters tavanda 60 cm'de bir (PK-03 tavan planı; H8)."
+   "kaynak": "Asma dizme tavanda 125,5 cm'de bir (PK-01 şablonu; PK-02 tavan planı 125). Ters tavanda aralık kural kitabından (`tavan_omegasi_aralik_m`, 0,60; PK-03 tavan planı da 60, H8)."
   },
   "tavan_omegasi": {
    "deger": {
-    "bolen_m": 3.65,
+    "pay_m": 0.1,
     "ek": 5
    },
    "durum": "excel",
-   "kaynak": "Portatifev şablonu: (oda içi hatlar + iç duvar üstleri) ÷ 3,65 + 5 (PK-07 36). Şablon B'de \"+5\" yok (aday)."
+   "kaynak": "Portatifev şablonu: (oda içi hatlar + iç duvar üstleri) ÷ 3,65 + 5 (PK-07 36). 3,65 = parça boyu − 0,10 m pay; parça boyu kural kitabından (`parca_boyu_m.tavan_omegasi`, L 3750), değişince bölen de değişir. Şablon B'de \"+5\" yok (aday)."
   },
   "duvar_omegasi_100_bolen_m": {
    "deger": 2.5,
@@ -233,11 +233,12 @@
   },
   "omega_kapak": {
    "deger": {
-    "bolen_m": 3.65,
+    "parca_m": 3.75,
+    "pay_m": 0.1,
     "ek": 3
    },
    "durum": "excel",
-   "kaynak": "Oda içi omega hatları ÷ 3,65 + 3 (PK-01 10). Şablon B'de \"+3\" yok (aday)."
+   "kaynak": "PVC omega kapak L 3750 (omega profilinden ayrı ürün; kural kitabında yok): oda içi omega hatları ÷ (3,75 − 0,10) + 3 (PK-01 10). Şablon B'de \"+3\" yok (aday)."
   },
   "pvc_betopan_h": {
    "deger": 5,
@@ -291,18 +292,17 @@
   "kapama": {
    "deger": {
     "sandvic_parca_m": 2.8,
-    "bolen_m": 2.5
+    "sandvic_bindirme_m": 0.3
    },
    "durum": "pafta",
-   "kaynak": "O11: sandviç panel kapaması L 2800, saçak kenarları ÷ 2,5 (PK-07 10, PK-02 7). Tek kat panelde kural yok; aynı bölen aday, parça boyu kural kitabından (`parca_boyu_m.sandvic_kapama`, L 2500). Kitabın sandviç kapaması L 2500, 0,2 bindirme: `kitapla_farkli`."
+   "kaynak": "O11: sandviç panel kapaması L 2800, saçak kenarları ÷ 2,5 (PK-07 10, PK-02 7); 2,5 = parça boyu − 0,30 bindirme (çıkarım: Lokman'ın 7 Ekim'de 20 cm'ye indirdiği eski 30 cm bindirmeyle tutuyor). Tek kat panelde kural yok; aday saçak ÷ parça boyu, bindirmesiz (PK-05 tek kat 6), parça boyu kural kitabından (`parca_boyu_m.sandvic_kapama`, L 2500). Kitabın sandviç kapaması L 2500, 0,2 bindirme: `kitapla_farkli`."
   },
-  "mahya_bandi": {
+  "veranda_tavani": {
    "deger": {
-    "mahya_boyu_m": 2.8,
-    "rulo_m": 10
+    "kalinlik_mm": 8
    },
-   "durum": "excel",
-   "kaynak": "Mahya × 2,8 ÷ 10 (PK-01 2)."
+   "durum": "pafta",
+   "kaynak": "O14: veranda tavanı Boardex 8 × 1200 × 2400 (PK-07 listesi 2 levha); zayiat ve levha alanı kural kitabının Boardex değerleri. Kitapta prefabrik veranda tavanı yeşil alçıpan, Boardex 12,5 mm: `kitapla_farkli`."
   },
   "osb_cati": {
    "deger": {
@@ -320,16 +320,11 @@
    "deger": {
     "nym_3x25_m": 130,
     "nym_2x15_m": 100,
-    "uydu_kablo_m": 25,
-    "besleme_m": 5,
     "besleme_boru_m": 5,
-    "kacak_akim": 1,
-    "w_otomat": 8,
-    "izole_bant_m2_carpan": 6,
-    "izole_bant_bolen": 100
+    "w_otomat": 8
    },
    "durum": "excel",
-   "kaynak": "Elektrik planı olan projede: NYM PK-01 130 / 100; uydu prizi × 25 m, besleme 5 + boru 5, izole bant m² × 6 ÷ 100, kaçak akım 1 (PK-02); W otomat Portatifev 8 (Lokman, 13 Ekim 14:40, R4)."
+   "kaynak": "Elektrik planı olan projede: NYM PK-01 130 / 100; besleme borusu 5 m (PK-02); W otomat Portatifev 8 (Lokman, 13 Ekim 14:40, R4). Uydu kablosu (priz × 25 m), besleme kablosu (5 m), izole bant (m² × 0,06) ve kaçak akım rölesi (1) kural kitabından (`elektrik`; PK-02 de böyle)."
   },
   "elektrik_aday": {
    "deger": {
@@ -343,22 +338,14 @@
   "vida": {
    "deger": {
     "betopan_vidasi": 500,
-    "kaplama_panel_boyu_bolen_mm": 200,
     "kaplama_yuvarlama": 100,
-    "pencere_vidasi_pencere_basina": 20,
-    "trapez_5560_m2_basina": 2.5,
     "trapez_5560_yuvarlama": 100,
     "kesme_tasi_m2_basina": 0.02,
-    "cirpi_ipi": 1,
-    "uc_m2_bolen": 15,
-    "inox_tas_m2_bolen": 10,
-    "alcipan_vidasi_levha_basina": 40,
     "alcipan_vidasi_yuvarlama": 250,
-    "rysb_m2_basina": 7.5,
     "rysb_yuvarlama": 50
    },
    "durum": "excel",
-   "kaynak": "O16 ve Portatifev şablonu: betopan vidası 500; kaplama vidası panel boyu ÷ 200 × adet, 100'e; pencere × 20 (H2, O12); 5,5 × 60 m² × 2,5; kesme taşı m² × 0,02; çırpı ipi 1; uçlar m² ÷ 15; inox m² ÷ 10; alçıpan vidası levha × 40, 250'ye; RYSB m² × 7,5, 50'ye (PK-07)."
+   "kaynak": "O16 ve Portatifev şablonu (PK-07): betopan vidası 500; kaplama vidası ve 5,5 × 60 100'e; kesme taşı m² × 0,02; alçıpan vidası 250'ye; RYSB 50'ye. Levha ve pencere başına adetler, panel boyu böleni, 5,5 × 60 ve RYSB'nin m² başına adedi, uç ve inox bölenleri, çırpı ipi kural kitabından (`vida`; çalışma kitabının vida notları)."
   },
   "vida_aday_yuvarlama": {
    "deger": 250,
@@ -367,52 +354,51 @@
   },
   "depo": {
    "deger": {
-    "acil_mudahale_kapagi": 1,
     "cati_mudahale_kapagi": 1
    },
    "durum": "excel",
-   "kaynak": "Sabit 1 (O16; PK-07)."
+   "kaynak": "Çatı müdahale kapağı sabit 1 (O16; PK-07). Acil müdahale kapağı kural kitabından (`cati_mudahale_kapagi.yapi_basina`, Lokman, 7 Ekim 07:45, C6)."
   },
   "tesisat_takimi": {
    "deger": [
     [
      "Temiz su borusu",
      "L 4000",
-     6
+     "temiz_su_borusu_4m"
     ],
     [
      "Normal dirsek 20 mm",
      "adet",
-     15
+     "normal_dirsek_20"
     ],
     [
      "Kulaklı dirsek 20 mm",
      "adet",
-     12
+     "kulakli_dirsek_20"
     ],
     [
      "Düz T 20 mm",
      "adet",
-     6
+     "duz_t_20"
     ],
     [
      "Maşon 20 mm",
      "adet",
-     15
+     "mason_20"
     ],
     [
      "İç dişli T 20 mm",
      "adet",
-     6
+     "ic_disli_t_20"
     ],
     [
      "Atlama parçası yarım parmak",
      "adet",
-     3
+     "atlama_parcasi"
     ]
    ],
    "durum": "pafta",
-   "kaynak": "O17: bir banyolu evde sabit takım (PK-03, PK-05, PK-07 birebir; PK-06 üç ıslak noktada boru 10, dirsek 20)."
+   "kaynak": "O17: bir banyolu evde ev başına bir takım (PK-03, PK-05, PK-07 birebir; PK-06 üç ıslak noktada boru 10, dirsek 20). Her satır: ad, ölçü, kural kitabındaki anahtar; adetler kitaptan (`tesisat`, ıslak hacim başına takım)."
   },
   "ana_cati_kose": {
    "deger": {
@@ -440,7 +426,7 @@
     ]
    },
    "durum": "lokman",
-   "kaynak": "Lokman, 13 Ekim 14:35 (R2): PVC iniş borusu L 2000 + L 500 (bina yüksekliği 2500). Metal iniş borusu (H3: özellik metal ise) iniş başına bir parça, boyu kural kitabından (`parca_boyu_m.inis_borusu`, L 3000)."
+   "kaynak": "Lokman, 13 Ekim 14:35 (R2): PVC iniş borusu L 2000 + L 500 (bina yüksekliği 2500). Metal iniş borusu (H3: özellik metal ise) kural kitabı gibi: iniş başına `inis_basina.inis_borusu` parça, boyu `parca_boyu_m.inis_borusu` (L 3000)."
   },
   "inis_borusu_aday": {
    "deger": "L 2500",
@@ -449,18 +435,15 @@
   },
   "boya": {
    "deger": {
-    "cephe_m2_carpan": 2,
-    "cephe_bolen": 100,
     "kenar": 1,
     "tavan": 1,
     "astar": 1,
     "mastik_m2_carpan": 2,
     "mastik_bolen": 3,
-    "dayson_m2_basina": 0.03,
-    "kopuk": 2
+    "dayson_m2_basina": 0.03
    },
    "durum": "excel",
-   "kaynak": "O18 ve şablon: dış ve iç boya m² × 2 ÷ 100 kova; kenar, tavan, astar 1; mastik pencere + m² × 2/3 (mantolama yok); dayson m² × 0,03 yukarı; köpük 2 (PK-07)."
+   "kaynak": "O18 ve şablon (PK-07): kenar, tavan ve astar sabit 1 kova; mastiğin m² payı × 2/3 (mantolama yok); dayson m² × 0,03 yukarı. Dış ve iç cephe boyası (m² × 0,02 kova), mastiğin pencere başına adedi ve köpük (2) kural kitabından (`boya`)."
   },
   "uc_aday_inox_boleni": {
    "deger": 2,
@@ -484,133 +467,403 @@
    "prefabrik": "kapatma_m.tek_kat",
    "kitap": "tek_kat_panel_kapatma_m",
    "tur": "deger",
-   "not": "Prefabrik 0,87 (L3: PK-05 listesi ve 90 m² projenin montaj paftası notu \"87 cm kapatır\"); kitap 1,0 (Lokman, 4 Ekim 15:18: ürün değişiyor, \"100 kapatır geliyor\"). Lokman'ın kararını bekliyor."
+   "karar_bekliyor": true,
+   "not": "Prefabrik 0,87 (L3: PK-05 listesi ve 90 m² projenin montaj paftası notu \"87 cm kapatır\"); kitap 1,0 (Lokman, 4 Ekim 15:18: ürün değişiyor, \"100 kapatır geliyor\")."
   },
   {
    "konu": "Metal kiremit kapatması",
    "prefabrik": "kapatma_m.metal_kiremit",
    "kitap": "kiremit_kapatma_m",
    "tur": "deger",
-   "not": "Prefabrik 1,05 (7.3: TS-01 kaplama paftası \"Kapatır: 105 cm\"); kitap 1,0 (Lokman, 4 Ekim 15:18). Lokman'ın kararını bekliyor."
+   "karar_bekliyor": true,
+   "not": "Prefabrik 1,05 (7.3: TS-01 kaplama paftası \"Kapatır: 105 cm\"); kitap 1,0 (Lokman, 4 Ekim 15:18)."
   },
   {
-   "konu": "Çatı paneli boyu yuvarlaması",
+   "konu": "Çatı paneli boyu",
    "prefabrik": "panel_boyu_yuvarlama_mm",
-   "kitap": "panel_boyu_yuvarlama_mm",
+   "kitap": [
+    "panel_boyu_yuvarlama_mm",
+    "cati_kaplama_tasma_m",
+    "panel_boyu_uzatma"
+   ],
    "tur": "deger",
-   "not": "Prefabrik sandviç ve trapez 100 mm'ye, tek kat ve metal kiremit 50 mm'ye (L3; inceleme listelerinin panel boyları); kitap 10 mm'ye (Lokman, 7 Ekim 08:02). Lokman'ın kararını bekliyor."
+   "karar_bekliyor": true,
+   "not": "Prefabrik eğik boydan yukarı: sandviç ve trapez 100 mm'ye, tek kat ve metal kiremit 50 mm'ye (L3; inceleme listelerinin panel boyları). Kitap eğik boy + 5 cm taşma (mühendis), 10 mm'ye (Lokman, 7 Ekim 08:02), adet düşüyorsa en çok 3 cm uzatma (Lokman, 4 Ekim 16:18)."
   },
   {
    "konu": "Sandviç panel kapaması",
    "prefabrik": "kapama",
    "kitap": "sandvic_kapama",
    "tur": "deger",
-   "not": "Prefabrik L 2800, saçak ÷ 2,5 (O11; PK-07 10, PK-02 7); kitap L 2500, 0,2 bindirme, ÷ 2,3 (Lokman, 7 Ekim 08:02 \"en son 2500 dü diye biliyorum\"). Lokman'ın kararını bekliyor."
-  },
-  {
-   "konu": "Tek kat panel kapaması",
-   "prefabrik": null,
-   "kitap": "panel_kapamasi",
-   "tur": "kalem",
-   "not": "Kitapta tek kat panel kapaması listeden çıktı (Lokman, 4 Ekim 16:18). Prefabrik listede satır kalır, adedi yok (\"Kural yok\"); aday sütununda saçak ÷ 2,5 (PK-05 tek kat 6)."
+   "karar_bekliyor": true,
+   "not": "Prefabrik L 2800, 0,30 bindirme, saçak ÷ 2,5 (O11; PK-07 10, PK-02 7); kitap L 2500, 0,2 bindirme, ÷ 2,3 (Lokman, 7 Ekim 08:02 \"en son 2500 dü diye biliyorum\"; bindirmeler 20 cm, 7 Ekim 07:45)."
   },
   {
    "konu": "Trapez sac mahyası",
    "prefabrik": "trapez_mahyasi_parca_m",
    "kitap": "parca_boyu_m.trapez_mahyasi",
    "tur": "deger",
-   "not": "Prefabrik L 1000 (J5; PK-03 15); kitap L 800 (Excel motoru ve mühendisin metrajı). Lokman'ın kararını bekliyor."
+   "karar_bekliyor": true,
+   "not": "Prefabrik L 1000 (J5; PK-03 15); kitap L 800 (Excel motoru ve mühendisin metrajı)."
+  },
+  {
+   "konu": "Veranda tavanı",
+   "prefabrik": "veranda_tavani",
+   "kitap": [
+    "veranda_tavani.prefabrik",
+    "levha_kalinligi_mm.boardex",
+    "urun_adlari"
+   ],
+   "tur": "kalem",
+   "karar_bekliyor": true,
+   "not": "Kitapta prefabrik veranda tavanı yeşil alçıpan (Lokman, 7 Ekim 07:45, C1 j); Boardex'in kalınlığı 12,5 mm (Lokman, 7 Ekim, C1 k: \"listelerdeki 8 mm hatalı girilmiş\") ve satır adı üreticinin adı (Lokman, 8 Ekim 00:45). Prefabrik liste veranda için \"Veranda tavan Boardex\", 8 × 1200 × 2400 yazar (O14: PK-07 listesi 2 levha); zayiat ve levha alanı kitabın Boardex değerleri."
+  },
+  {
+   "konu": "Pencere alıcıya aitken vida ve mastik",
+   "prefabrik": null,
+   "kitap": "kapsam_alici.pencere_aliciya_aitse",
+   "tur": "kapsam",
+   "karar_bekliyor": true,
+   "not": "Prefabrik pencere alıcıya ait olsa da montaj vidasını (pencere × 20) ve silikonize mastiği (pencere + m² × 2/3) yazar (O12: PK-07 listesinde pencere alıcıya aitken 120 vida). Kitapta pencere alıcıya aitse ikisi de yazılmaz (KT-01 listesi; mastik için Lokman, 8 Ekim 00:45 \"hayır yazılmasın\"). PK-01'in gerçek listesinde pencere vidası yok."
+  },
+  {
+   "konu": "Ters mahya kenar kutusu",
+   "prefabrik": null,
+   "kitap": "ters_mahya_kenar_kutusu",
+   "tur": "kalem",
+   "karar_bekliyor": true,
+   "not": "Kitapta ters mahya başına 2 kenar kutusu, L 21 × 40 × 21 × 2800 (Lokman, 7 Ekim 08:02: \"bu tarz cumbalı çatılarda olmazsa olmazdır\"; KT-01 listesi). Prefabrik listede kalem yok (7.3); PK-03'te ters mahya 4, kitapla 8 kenar kutusu olurdu."
+  },
+  {
+   "konu": "Müdahale kapakları",
+   "prefabrik": "depo",
+   "kitap": [
+    "cati_mudahale_kapagi",
+    "cati_cikis_kapagi"
+   ],
+   "tur": "kalem",
+   "karar_bekliyor": true,
+   "not": "Prefabrik iki satır: acil müdahale kapağı (yapı başına 1, kitaptan) ve çatı müdahale kapağı 1 (O16; PK-07 listesi). Kitapta tek kalem \"Acil müdahale kapağı\", yapı başına 1 (Lokman, 7 Ekim 07:45, C6); çatı çıkış kapağı listede yok (Lokman, 10 Ekim 10:18)."
+  },
+  {
+   "konu": "Tek kat panel kapaması",
+   "prefabrik": null,
+   "kitap": "panel_kapamasi",
+   "tur": "kalem",
+   "karar_bekliyor": false,
+   "not": "Kitapta tek kat panel kapaması listeden çıktı (Lokman, 4 Ekim 16:18). Prefabrik listede satır kalır, adedi yok (\"Kural yok\"); aday sütununda saçak ÷ 2,5 (PK-05 tek kat 6)."
   },
   {
    "konu": "Çatı OSB'si zayiatı",
    "prefabrik": "osb_cati.zayiat",
    "kitap": "zayiat.osb",
    "tur": "deger",
+   "karar_bekliyor": false,
    "not": "Prefabrik %10 (7.3, ilk tahmin; E2 / E3 29); kitap %5 (çalışma kitabı; çatı OSB'sinde 39 adedi tutturuyor)."
-  },
-  {
-   "konu": "Veranda tavanı",
-   "prefabrik": null,
-   "kitap": "veranda_tavani.prefabrik",
-   "tur": "kalem",
-   "not": "Kitapta prefabrik veranda tavanı yeşil alçıpan (Lokman, 7 Ekim 07:45). Prefabrik liste veranda için Boardex satırı yazar (O14: PK-07 listesinde Boardex 2); zayiat ve levha kitabın Boardex değerleri. Lokman'ın kararını bekliyor."
   },
   {
    "konu": "Tavan alçıpanı",
    "prefabrik": "tavan_alcipani",
    "kitap": "zayiat.tavan_alcipan",
    "tur": "yontem",
+   "karar_bekliyor": false,
    "not": "Zayiat ve levha alanı aynı (kitaptan okunur); prefabrik Portatifev şablonunun \"+2 beyaz, +1 yeşil, aşağı\" eklerini uygular (H6; PK-02 18 / 3), kitabın Excel motoru eklemez."
   },
   {
    "konu": "Dere kapağı",
    "prefabrik": "ana_cati_kose",
-   "kitap": "dere_kapagi",
+   "kitap": [
+    "dere_kapagi",
+    "dere_kapagi_serbest_uc"
+   ],
    "tur": "deger",
-   "not": "Prefabrik beşikte 4, tek yönde 2, ek çatı parçası başına +2 (Lokman, 13 Ekim 14:35; PK-01 4, PK-02 4, PK-03 6); kitap Excel motoru beşik 5, beşik + cumba 6, beşik + 2 cumba 7."
+   "karar_bekliyor": false,
+   "not": "Prefabrik beşikte 4, tek yönde 2, ek çatı parçası başına +2 (Lokman, 13 Ekim 14:35; PK-01 4, PK-02 4, PK-03 6); kitap Excel motoru beşik 5, beşik + cumba 6, beşik + 2 cumba 7, dere hatları biliniyorsa serbest uç sayısı (KT-01)."
   },
   {
    "konu": "Mahya bandı",
-   "prefabrik": "mahya_bandi",
+   "prefabrik": null,
    "kitap": "mahya_bandi",
    "tur": "yontem",
-   "not": "Prefabrik mahya adedi × 2,8 ÷ 10 (Portatifev şablonu; PK-01 2); kitap (mahya × 2,8 + ters mahya × 2,8 + trapez mahyası × 0,8 + damlalık × 2,5) ÷ 10 (mühendis ve Excel motoru)."
+   "karar_bekliyor": false,
+   "not": "Rulo boyu (10 m) ve mahya parça boyu (2,8 m) kitaptan. Prefabrik yalnız mahya adedi × 2,8 ÷ 10 (Portatifev şablonu; PK-01 2); kitap ters mahya × 2,8, trapez mahyası × 0,8 ve damlalık × 2,5 de ekler (mühendis ve Excel motoru). Trapez sac çatıda prefabrik de mahya adedini 2,8 ile çarpar."
   },
   {
-   "konu": "Tavan omegası aralığı ve dizilimi",
+   "konu": "Tavan omegası",
    "prefabrik": "tavan_omegasi_aralik_m",
-   "kitap": "tavan_omegasi_aralik_m",
+   "kitap": [
+    "tavan_omegasi_aralik_m",
+    "tavan_omegasi_dizilim"
+   ],
    "tur": "yontem",
-   "not": "Prefabrik asma dizme tavanda 125,5 cm, ters tavanda 60 cm; hat sayısı oda derinliği ÷ aralık en yakın (PK-02, PK-03 tavan planları); kitap yöntem B 0,60 (uydurma) ve KT-01 dizilimi (`tavan_omegasi_dizilim`)."
+   "karar_bekliyor": false,
+   "not": "Ters tavanda aralık (0,60) ve parça boyu (L 3750) kitaptan; asma dizme tavanda 125,5 cm prefabrikin (PK-01 şablonu). Prefabrik hat sayısı oda derinliği ÷ aralık en yakın (PK-02, PK-03 tavan planları); kitabın KT-01 dizilimi (ilk hat duvar yüzünde, kiriş gözü böler) çelik tavan içindir."
   },
   {
    "konu": "Köşebent",
    "prefabrik": "kosebent",
-   "kitap": "kosebent",
+   "kitap": [
+    "kosebent",
+    "kosebent_m2_bolu"
+   ],
    "tur": "yontem",
+   "karar_bekliyor": false,
    "not": "Prefabrik sabit 7 (şablon notu \"tek kat 7\"; Lokman, 13 Ekim 14:35 standart pakette); kitap mühendis formülü (oda çevreleri + iç köşeler × 2,7) ÷ 2,5 ve yedek `kosebent_m2_bolu`. Parça boyu (L 2500) kitaptan okunur."
   },
   {
    "konu": "Elektrik",
    "prefabrik": "elektrik",
-   "kitap": "elektrik",
+   "kitap": [
+    "elektrik",
+    "elektrik_oda",
+    "elektrik_oda_ek",
+    "kablo_en_uzak_mesafe"
+   ],
    "tur": "yontem",
-   "not": "Prefabrik Portatifev şablonunun sabitleri (NYM 130 / 100 m, W otomat 8; Lokman, 13 Ekim 14:40) ve paftadaki elektrik planının sayımı; kitap çelik listesinin kablo formülü (sigorta × en uzak mesafe + nokta × 2). Uydu kablosu, besleme, izole bant ve kaçak akım değerleri aynı."
+   "karar_bekliyor": false,
+   "not": "Uydu kablosu, besleme kablosu, izole bant ve kaçak akım rölesi kitaptan. Prefabrik NYM 130 / 100 m ve W otomat 8 Portatifev şablonunun sabitleri (Lokman, 13 Ekim 14:40), sayılar paftadaki elektrik planından; kitap kabloyu sigorta × en uzak mesafe + nokta × 2 ile hesaplar ve plan yoksa oda başına kuralla sayar (mühendis). Prefabrik plan yoksa \"Kural yok\" yazar."
   },
   {
    "konu": "Vida",
    "prefabrik": "vida",
    "kitap": "vida",
    "tur": "yontem",
-   "not": "Prefabrik Portatifev şablonunun vida satırları (O16; PK-07); kitap çelik listesinin vida kuralları. Alçıpan vidası (levha × 40), pencere vidası (× 20), inox taşı (m² ÷ 10) ve RYSB (m² × 7,5) değerleri aynı."
+   "karar_bekliyor": false,
+   "not": "Levha başına alçıpan vidası (40), pencere başına (20), panel boyu ÷ 200, 5,5 × 60 (m² × 2,5), uç (m² ÷ 15), inox (m² ÷ 10), RYSB (m² × 7,5) ve çırpı ipi (1) kitaptan. Farklar: kesme taşı prefabrikte m² × 0,02, kitapta m² ÷ 15; kaplama vidası ve 5,5 × 60 prefabrikte 100'e, kitapta 250'ye (Şablon B adayı da 250); betopan vidası 500 kitapta yok; kitabın OSB vidası ve 5,5 × 25 kalemleri prefabrikte yok."
   },
   {
    "konu": "Boya",
    "prefabrik": "boya",
    "kitap": "boya",
    "tur": "deger",
-   "not": "Prefabrik tavan boyası sabit 1 kova, dayson m² × 0,03 (O18; PK-06 3, PK-07 3); kitap Excel motoru tavan m² × 0,01, dayson m² × 0,06. Dış ve iç cephe (m² × 0,02), mastik ve köpük aynı."
+   "karar_bekliyor": false,
+   "not": "Dış ve iç cephe (m² × 0,02), mastiğin pencere başına adedi ve köpük kitaptan. Farklar: tavan boyası ve astar prefabrikte sabit 1 kova, kitapta m² × 0,01; dayson prefabrikte m² × 0,03 (O18; PK-06 3, PK-07 3), kitapta 0,06; mastiğin m² payı prefabrikte tam 2/3, kitapta 0,6667."
+  },
+  {
+   "konu": "Boya alıcıya aitken",
+   "prefabrik": null,
+   "kitap": "kapsam_alici",
+   "tur": "kapsam",
+   "karar_bekliyor": false,
+   "not": "Dış ve iç cephe boyası alıcıya aitse prefabrik bütün boya grubunu ve mastiği 0 yazar (PK-01); kitapta tavan boyası ve astar, alıcıya ait yazılmadıkça listede kalır (KT-01 listesi)."
   },
   {
    "konu": "Sıhhi tesisat",
    "prefabrik": "tesisat_takimi",
-   "kitap": "tesisat",
+   "kitap": [
+    "tesisat",
+    "taharet_muslugu"
+   ],
    "tur": "yontem",
-   "not": "Prefabrik bir banyolu evde sabit takım (O17; PK-03, PK-05, PK-07 birebir), vitrifiye satırı \"Kural yok\" (aday 1 takım); kitap ıslak hacim başına aynı adetler ve dört vitrifiye satırı."
+   "karar_bekliyor": false,
+   "not": "Takımın adetleri kitaptan. Prefabrik ev başına bir takım yazar (O17; PK-03, PK-05, PK-07 birebir), kitap ıslak hacim başına. Vitrifiye prefabrikte \"Kural yok\" (aday 1 takım), kitapta dört satır; kitabın taharet musluğu (vitrifiye listedeyse ıslak hacim × 4, Lokman, 10 Ekim) bu yüzden prefabrikte yok."
   },
   {
-   "konu": "Müdahale kapakları",
-   "prefabrik": "depo",
-   "kitap": "cati_mudahale_kapagi",
-   "tur": "kalem",
-   "not": "Prefabrik iki satır: acil müdahale kapağı 1 ve çatı müdahale kapağı 1 (O16; PK-07); kitapta tek kalem \"Acil müdahale kapağı\", yapı başına 1 (Lokman, 7 Ekim 07:45, C6)."
-  },
-  {
-   "konu": "İç kapı boşluğu",
+   "konu": "Kapı boşlukları",
    "prefabrik": "duvar_alcipani.kapi_en_m",
-   "kitap": "kapi_boslugu_m.ic",
+   "kitap": [
+    "kapi_boslugu_m.ic",
+    "kapi_boslugu_m.dis"
+   ],
    "tur": "kapsam",
-   "not": "Kitabınki çelik (LGF) iç kapı boşluğu 90 × 214; prefabrik duvar alçıpanında Amerikan kapı kanadı 82 × 200 düşülür."
+   "karar_bekliyor": false,
+   "not": "Kitabınkiler çelik (LGF) boşlukları: iç 90 × 214 (Lokman, 3 Ekim), dış 95 × 210. Prefabrik duvar alçıpanında iç ve dış kapı için kanat 82 × 200 düşülür; fugalı cephede dış kapı 90 × 200 (L4)."
+  },
+  {
+   "konu": "PVC iniş borusu",
+   "prefabrik": "inis_borusu",
+   "kitap": "inis_basina.inis_borusu",
+   "tur": "kalem",
+   "karar_bekliyor": false,
+   "not": "Prefabrik PVC'de iniş başına iki parça, L 2000 + L 500 (Lokman, 13 Ekim 14:35, R2); kitap iniş başına bir boru, L 3000. Metal iniş borusunda prefabrik de kitap gibi (iniş başına bir, L 3000; kitaptan)."
+  },
+  {
+   "konu": "İniş yerleri",
+   "prefabrik": "ek_cati_parcasi_basina",
+   "kitap": "inis",
+   "tur": "yontem",
+   "karar_bekliyor": false,
+   "not": "Köşe başına iniş ve 9 m eşiği kitaptan (eşik varsayım: `inis_orta`). Prefabrik ana çatıda 4 köşe (tek yönde 2) + ek çatı parçası başına 2 (Lokman, 13 Ekim 14:35); kitabın kısa dere (4 m'den kısa hatta tek iniş), alçak çatının üstündeki köşe ve iki hattın köşede buluştuğu yerde tek iniş kuralları (Lokman, 8 ve 10 Ekim) uygulanmaz."
+  },
+  {
+   "konu": "Saçak parçaları",
+   "prefabrik": null,
+   "kitap": "sacak_parcasi_kenar_kenar",
+   "tur": "yontem",
+   "karar_bekliyor": false,
+   "not": "Prefabrik saçak sacı, saçak omegası ve sandviç kapaması adedini saçak kenarlarının toplamından bir kez yukarı yuvarlar (PK-01 9, PK-02 7); kitap her kenarı ayrı yuvarlar (uydurma)."
+  },
+  {
+   "konu": "Baş makas Z'si",
+   "prefabrik": null,
+   "kitap": "bas_makas_z.kenar_kenar",
+   "tur": "kapsam",
+   "karar_bekliyor": false,
+   "not": "Parça boyu (L 2800) kitaptan. Prefabrik yalnız ana çatının alın kenarlarına yazar (O7; PK-02, PK-06, PK-07 8), kitap her alın kenarına ayrı (uydurma)."
+  },
+  {
+   "konu": "Çatı yüzeyi",
+   "prefabrik": "nem_bariyeri_yuvarlama_m2",
+   "kitap": [
+    "cati_katsayisi",
+    "nem_bariyeri"
+   ],
+   "tur": "yontem",
+   "karar_bekliyor": false,
+   "not": "Prefabrik çatı alanını her parçanın eğik boyu × mahya boyundan hesaplar, nem bariyerini 10 m²'ye yukarı (7.3 varsayımı); kitap Excel motorunun bina m² × çatı katsayısı (beşik 1, beşik + cumba 1,14 …)."
+  },
+  {
+   "konu": "Çatı şiltesi",
+   "prefabrik": null,
+   "kitap": "silte_en_payi_m",
+   "tur": "yontem",
+   "karar_bekliyor": false,
+   "not": "Paket alanı (9,6 m²) kitaptan. Prefabrik brüt alan ÷ 9,6 (Portatifev kaba hesabı; aday Şablon B saçaklı çatı tabanı); kitap çatı boyu × (bina eni + 0,20) (uydurma)."
+  },
+  {
+   "konu": "Çatı kaplaması türleri",
+   "prefabrik": null,
+   "kitap": [
+    "cati_kaplama",
+    "shingle_adet_m2",
+    "membran_adet_m2"
+   ],
+   "tur": "kapsam",
+   "karar_bekliyor": false,
+   "not": "Prefabrik sandviç panel, trapez sac, metal kiremit (OSB ve nem bariyeriyle) ve tek kat paneli hesaplar; shingle ve membran yalnız kubbe takımında, kubbe başına 1 paket (Lokman, 13 Ekim, R6). Kitabın shingle ve membranı çatı yüzeyi ÷ 8 m²; shingle ya da membranlı ana çatı prefabrikte yok."
+  },
+  {
+   "konu": "Çatı paneli adedi",
+   "prefabrik": null,
+   "kitap": [
+    "kirma_cati_dizilim",
+    "cok_duzlemli_cati"
+   ],
+   "tur": "yontem",
+   "karar_bekliyor": false,
+   "not": "Prefabrik beşik ve tek yön çatıda mahya ÷ kapatma, ana çatıda yüz başına (O9; PK-01 22, PK-07 18); kitabın açılım ve şerit dizilimi kırma ve çok düzlemli çelik çatı içindir (Lokman, 4 Ekim; KT-01)."
+  },
+  {
+   "konu": "Panel çatının kenarları",
+   "prefabrik": null,
+   "kitap": "panel_cati_kenarlari",
+   "tur": "kapsam",
+   "karar_bekliyor": false,
+   "not": "Kitabınki çelik yapının (KT-03) veranda ve sundurma panel çatısı: saçakta dere, yanlarda sundurma kapama, özel büküm saçak (Lokman, 10 Ekim 10:18). Prefabrikte makassız açık veranda çatısı dere almaz (O15: PK-07), sundurma kapaması yazılmaz."
+  },
+  {
+   "konu": "Duvar dibi",
+   "prefabrik": null,
+   "kitap": "duvar_dibi",
+   "tur": "kalem",
+   "karar_bekliyor": false,
+   "not": "Kitapta alçak çatının duvara dayandığı kenara duvar dibi sacı (L 2800; kitapta da kuralı yok, soru durumunda sayılır); prefabrik liste yazmaz (7.3)."
+  },
+  {
+   "konu": "Kalem adlarında renk",
+   "prefabrik": null,
+   "kitap": "renkli_kalemler",
+   "tur": "kalem",
+   "karar_bekliyor": false,
+   "not": "Kitap girdide renk varsa çatı, saçak ve alın kalemlerinin adına yazar (KT-01 listesi); prefabrik girdide renk yok, adlar renksiz (7.3). Kubbe saçak sacının \"antrasit\"i kubbe takımının adıdır."
+  }
+ ],
+ "kitaptan_okunmayan": [
+  {
+   "kitap": "celik",
+   "neden": "çelik karkas tonajı, panel ve et kalınlıkları; prefabrik pano evinde çelik karkas yok"
+  },
+  {
+   "kitap": "celik_cati_yontemi",
+   "neden": "çelik çatının yöntemi (çatı ve tavan paneli)"
+  },
+  {
+   "kitap": "cati_yontemi",
+   "neden": "yöntem tanımı; prefabrik her zaman yöntem B'dir (tavan omegası, aşık, alın ve saçak sacı; Lokman, 7 Ekim 07:45)"
+  },
+  {
+   "kitap": "yontem_a_alin_kaplamasi",
+   "neden": "yöntem A (çelik)"
+  },
+  {
+   "kitap": "yontem_a_kalkan_ust_kapamasi",
+   "neden": "yöntem A (çelik)"
+  },
+  {
+   "kitap": "sacak_yuzu",
+   "neden": "yöntem A (çelik): saçak yüzü Boardex, saçak omegası yok; prefabrikte saçak omegası ve saçak sacı (Lokman, 7 Ekim 07:45)"
+  },
+  {
+   "kitap": "sacak_alti_boardex_eni_m",
+   "neden": "yöntem A (çelik): saçak altı Boardex"
+  },
+  {
+   "kitap": "zayiat.cati_kaplama_kirma",
+   "neden": "kitapta kullanılmıyor (4 Ekim)"
+  },
+  {
+   "kitap": "zayiat.dis_osb",
+   "neden": "çelik dış duvarın OSB'si; prefabrik dış duvar hazır panodur"
+  },
+  {
+   "kitap": "yalitim_paket_m2",
+   "neden": "duvar izolasyonu listede yok (Lokman, 7 Ekim 07:45; `duvar_izolasyonu`); prefabrik de yazmaz"
+  },
+  {
+   "kitap": "yalitim_kat",
+   "neden": "duvar izolasyonu listede yok; prefabrik de yazmaz"
+  },
+  {
+   "kitap": "duvar_izolasyonu",
+   "neden": "aynı: listede yok; prefabrik de yazmaz"
+  },
+  {
+   "kitap": "osb_takviye",
+   "neden": "çelik duvarın OSB takviyesi (dolap ve TV duvarları)"
+  },
+  {
+   "kitap": "nem_bariyeri_dis_cephe",
+   "neden": "çelik dış cephesinin nem bariyeri"
+  },
+  {
+   "kitap": "veranda_cercevesi",
+   "neden": "çelik verandanın kaplanan çerçevesi (80 mm sırt); prefabrikte kutu profil kiriş ve kolon (PK-01)"
+  },
+  {
+   "kitap": "ek_yapi_ve_korkuluk",
+   "neden": "müştemilat, korkuluk ve baca (çelik kör test projesi); prefabrik inceleme projelerinde yok"
+  },
+  {
+   "kitap": "korkuluk_kaplamasi",
+   "neden": "korkuluk; prefabrik inceleme projelerinde yok"
+  },
+  {
+   "kitap": "baca_ici",
+   "neden": "baca içi listede yok (Lokman, 10 Ekim); prefabrik inceleme projelerinde baca yok"
+  },
+  {
+   "kitap": "kapama_aparati",
+   "neden": "aynı: listede yok (Lokman, 4 Ekim); prefabrik de yazmaz"
+  },
+  {
+   "kitap": "motorda_olup_listede_olmayanlar",
+   "neden": "boş liste"
+  },
+  {
+   "kitap": "baz_paket_cati_kaplamasi",
+   "neden": "aynı: kaplama yazılmamışsa prefabrik de tek kat panel sayar"
+  },
+  {
+   "kitap": "bayi_kurali",
+   "neden": "aynı: vida, boya, elektrik ve sıhhi tesisat grupları her prefabrik listede"
+  },
+  {
+   "kitap": "satir_notlari",
+   "neden": "çelik listesinin satır notları (adet ve formül değiştirmez); prefabrik satırın notu kendi dayanağından"
+  },
+  {
+   "kitap": "sablon_2026",
+   "neden": "çelik listesinin 2026 şablon katmanı (`--sablon 2026`, KT-01)"
   }
  ]
 }
