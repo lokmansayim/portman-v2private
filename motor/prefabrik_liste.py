@@ -394,7 +394,9 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
     sacak_m = sum(sum(o["hatlar"]) for _c, o in C)
     # kitapla farklı (`Panel çatının kenarları`): kitapta makassız (çatı panelli) parçanın saçağında özel büküm saçak sacı, yanlarında
     # sundurma kapama; düz saçak sacı, saçak omegası ve alın sacı yok. Prefabrikte öteki kenarlar gibi sayılır (PK-07 9 + 2)
-    karar_kenar = "Panel çatının kenarları" if any(c.get("makas_yok") for c, _o in C) else ()
+    alin_boy = lambda c, o: (2 * c["kalkan"] if c["tip"] == "besik" else 2) * o["egik"]
+    karar_kenar = "Panel çatının kenarları" if any(c.get("makas_yok") and sum(o["hatlar"]) > 0 for c, o in C) else ()   # saçak
+    karar_yan = "Panel çatının kenarları" if any(c.get("makas_yok") and alin_boy(c, o) > 0 for c, o in C) else ()      # alın (yan)
     sob = r("sacak_omegasi_bolen_m")
     ekle("1002", "100'lük saçak omegası", f"100 × {mm_m(sob)}", TAVAN(sacak_m / sob), "Kural (PK-01)", f"saçak kenarları {sacak_m:.2f} m ÷ {sy(sob)}, bir kez yukarı",
          "PK-01 9, PK-02 7 tuttu", karar=karar_kenar)
@@ -404,12 +406,12 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
          f"saçak kenarları {sacak_m:.2f} m ÷ {sy(ps - bs)}" + (f" − özel büküm {ob['sacak']}" if ob.get("sacak") else ""), "PK-01 ve PK-02'de tuttu; PK-07 9 + 2", karar=karar_kenar)
     if ob.get("sacak"):
         ekle("1002", "Özel büküm saçak sacı", f"L {mm_m(ps)}", ob["sacak"], "Pafta", "özel büküm saçlar paftası", "PK-07 2 tuttu", karar=karar_kenar)
-    alin = sum((2 * c["kalkan"] if c["tip"] == "besik" else 2) * o["egik"] for c, o in C)
+    alin = sum(alin_boy(c, o) for c, o in C)
     pa_, ba_ = _ortak(k, "parca_boyu_m", "alin_saci"), _ortak(k, "bindirme_m", "alin_saci")
     ekle("1002", "Alın sacı (30'luk)", f"300 × {mm_m(pa_)}", TAVAN(alin / (pa_ - ba_)) - ob.get("alin", 0),
-         "Kural", f"alın eğik kenarları {alin:.2f} m ÷ {sy(pa_ - ba_)}" + (f" − özel büküm {ob['alin']}" if ob.get("alin") else ""), "PK-01 ve PK-02'de tuttu; PK-07 9 + 2", karar=karar_kenar)
+         "Kural", f"alın eğik kenarları {alin:.2f} m ÷ {sy(pa_ - ba_)}" + (f" − özel büküm {ob['alin']}" if ob.get("alin") else ""), "PK-01 ve PK-02'de tuttu; PK-07 9 + 2", karar=karar_yan)
     if ob.get("alin"):
-        ekle("1002", "Özel büküm alın sacı", f"L {mm_m(pa_)}", ob["alin"], "Pafta", "özel büküm saçlar paftası", "PK-07 2 tuttu", karar=karar_kenar)
+        ekle("1002", "Özel büküm alın sacı", f"L {mm_m(pa_)}", ob["alin"], "Pafta", "özel büküm saçlar paftası", "PK-07 2 tuttu", karar=karar_yan)
     kk = lambda c: 0 if c.get("acik") else c["kalkan"]          # N1: açık çatı parçasının kalkanının altında duvar yok (PK-06 veranda)
     kalkan = sum((c["kalkan_duvar_cm"] / 100 if c.get("kalkan_duvar_cm") is not None else kk(c) * c["aciklik_cm"] / 100) for c, _o in C)   # 6.1: paftadaki kalkan duvarı
     kalkan_s = sum(kk(c) * (c["aciklik_cm"] / 100 + 2 * o["sac"]) for c, o in C)
@@ -500,7 +502,8 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
         ver = sum(x["alan_m2"] for x in N["acik"])
         fire_b, lev_b = zay("boardex"), lev("boardex")             # kitabın Boardex'i; kitapta prefabrik veranda tavanı yeşil alçıpan (`kitapla_farkli`)
         ekle("1004", "Veranda tavan Boardex", levha(f"{sy(r('veranda_tavani.kalinlik_mm'))} × 1200 × 2400", lev_b), TAVAN(ver * fire_b / lev_b), "Şablon formülü (O14)",
-             f"veranda {ver:.2f} m² × {sy(fire_b)} ÷ {sy(lev_b)}", "PK-07 2 tuttu; PK-01'de 0", karar="Veranda tavanı")
+             f"veranda {ver:.2f} m² × {sy(fire_b)} ÷ {sy(lev_b)}", "PK-07 2 tuttu; PK-01'de 0",
+             karar=("Veranda tavanı",) + (("Panel çatının kenarları",) if any(c.get("acik") and c.get("makas_yok") for c, _o in C) else ()))   # kitapta çatı panelli açık alanın tavanı çatı planıyla
     if not ters:
         okap = r("omega_kapak")
         okb = round(okap["parca_m"] - okap["pay_m"], 4)
