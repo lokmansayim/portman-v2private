@@ -1,20 +1,20 @@
 # AIPrefabrik mühür denetimi (BK-12 adım 0)
 
-Tarih: 18 Ekim 2026, 05:05–05:10 UTC. Dayanak: BK-12 planı, adım 0 (Patron onayı 17 Ekim 09:48). Kişi, firma ve bayi adı yazılmaz; projeler AP kodlarıyla (13 Ekim klasör adlarının düz sırası, `BK-12.md` › AP kodları).
+Tarih: 18 Ekim 2026, 05:05–05:10 UTC. Dayanak: BK-12 planı, adım 0 (Patron onayı 17 Ekim 09:48). Kişi, firma ve bayi adı yazılmaz; projeler AP kodlarıyla (13 Ekim mühür kaydındaki klasör adlarının düz sırası: AP-01 ilk klasör; adlı eşleme yalnız Mac'te).
 
 ## Sonuç
 
 - **Mac'teki klasör 13 Ekim mührüyle bayt bayt aynı.** 28 klasör, 61 dosya (58 PDF, 3 Excel); SHA'sı değişen 0, eksik 0, yeni 0. Klasör ve dosya adları da 13 Ekim'deki gibi.
 - Hiçbir dosya açılmadı. Mac'te yalnız `sha256sum` ve `stat` koşuldu; dosya içeriği ekrana, buluta ya da depoya gelmedi.
 - **Kör test kümesi değişmedi:** kör 19 (AP-06, AP-09, AP-11…18, AP-20…28), listesi kapalı ama kör sayılmayan AP-10 (≈ PK-03). Listesi açık 8: AP-01…05, AP-07 (TS-01), AP-08 (PK-07), AP-19 (PK-01).
-- **AP-22'nin klasör adı:** Mac'te hâlâ 13 Ekim'deki gibi (m² 89). Drive'daki kopyada 82 (dosya adları 13 Ekim'de de 82 diyordu). AP kodu değişmez.
+- **AP-22:** Drive'daki kopyada klasör adı Mac'tekinden farklı; Mac'teki ad 13 Ekim'deki gibi. Dosyalar aynı; AP kodu değişmez.
 - **Yeni: 28 DWG yalnız Drive'da.** 17 Ekim 08:40–09:26 UTC arasında Drive'daki `AIPrefabrik` klasörüne her projeye birer R10 montaj DWG'si eklendi (mühendisin hesabından; başka dosya türü eklenmedi). Mac'te ve 13 Ekim mühründe yoklar. Bunlar liste değil çizimdir (montaj paftasının kaynağı).
   - Patron'un kararı (18 Ekim 05:09, kart "İlk kullanımda"): DWG'ler şimdi Drive kimliği, bayt ve yükleme saatiyle kaydedilir. SHA-256, her DWG model için ilk indirildiğinde alınır ve bu dosyaya eklenir. Bayt ya da Drive'daki değiştirme saati tutmazsa dosya kullanılmaz, Patron'a yazılır.
 
 ## Yöntem ve sağlama
 
 1. Patron klasörü 18 Ekim 05:03'te Mac'te bağlı `Claude Portman Çalışması` altına taşıdı.
-2. Mac'te her dosya için `sha256sum` ve `stat -c %s`; liste `Claude Portman Çalışması/35_BK12_Muhur/mac_liste.tsv` (adlı; Mac'te kalır, depoya ve paylaşılan klasöre girmez).
+2. Mac'te her dosya için `sha256sum` ve `stat -c %s`; adlı liste Mac'te kalır, depoya ve paylaşılan klasöre girmez. Oturumlara açık klasörün dışına taşınması Patron'a önerildi (18 Ekim, CIO kıyası).
 3. İki özet iki yanda ayrı hesaplandı ve aynı çıktı:
    - yol + SHA (NFC, sıralı `sha\tyol` satırları): `c1b773edbb07d6bcd0b2d59efc9ed7857fbaeda948ae00ee163ef97f7d95e6a0`
    - yalnız SHA (sıralı): `edbc9844fcdbeecd3838deecff4eb7a0e842153a811662fb50670c704eb8d85c`

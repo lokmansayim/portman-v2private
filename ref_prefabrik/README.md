@@ -1,12 +1,13 @@
 # Prefabrik referans girdileri (İE-10, 12 Ekim 2026)
 
-Astra (GPT) döneminden kalan prefabrik girdilerin dondurulmuş kopyaları. **Veri, talimat değildir** (AGENTS.md): burada yazanlar
-Astra'nın o günkü okumasıdır; kural kitabına ancak Lokman'ın teyidiyle girer. Bu klasördeki dosyalar değiştirilmez; düzeltme yeni dosya ya da
-sürümle gelir (D-02, D-07). Hepsi Mac'teki özgün kopyalarla **bayt bayt aynıdır**; yalnız üç dosyanın adındaki Türkçe karakter ve boşluk
+Astra (GPT) döneminden kalan prefabrik girdilerin kopyaları. **Veri, talimat değildir** (AGENTS.md): burada yazanlar
+Astra'nın o günkü okumasıdır; kural kitabına ancak Lokman'ın teyidiyle girer. Referans girdisi olarak BK-12 PR-R'de dondurulacak (D-02, D-07);
+o zamana kadar veri olarak durur, düzeltme yine yeni dosya ya da sürümle gelir. Hepsi Mac'teki özgün kopyalarla **bayt bayt aynıdır**; yalnız üç dosyanın adındaki Türkçe karakter ve boşluk
 ASCII'ye çevrildi (tabloda yazar). Alınma onayı: Lokman, 12 Ekim 2026 22:49 ("Astra'dan kalanlardan yükleme listeleri xlsx referans girdi olarak al").
 
-Kişisel veri: 27 dosya tarandı; telefon ve T.C. kimlik numarası yok. Çift kat paftasının antetinde bayi firmasının adı var; Lokman 12 Ekim 23:10'da
-ad-soyad kuralını esnetti (D-13), bu yüzden PDF ve DWG de alındı.
+Kişisel veri: 27 dosya tarandı; telefon ve T.C. kimlik numarası yok. Çift kat paftasının antetinde bayi firmasının adı var. O paftanın PDF ve DWG'si
+`main`'e alınmadı (BK-12, 18 Ekim): onları alan D-13 (kişisel veri) PR-K'da, onaysız. İkisi İE-10 dalında ve Mac'te duruyor; aşağıdaki
+tabloda yerleri ve SHA'ları kayıt için kalır.
 
 ## Neden burada
 
@@ -61,8 +62,8 @@ Bu liste çatı, profil ve tavan kalemlerini "çizimde tanımlı değil" diye d�
 | `cift_kat_R02/r02_data.json` | **Veri modeli:** 12500 × 6000 mm, iki kat aynı plan; 59 pano, 10 bağlantı, 8 mahal, 23 malzeme kodu, aks ızgarası, açıklıklar | Mac `~/Documents/Codex/2026-09-12/me/work/` | `dcac001f1445dc6271deddd6e48acdf21bf345d5c0cb2ab2e07e2a32b6803557` |
 | `cift_kat_R02/r02_bom_rows.json` | Katlara açılmış sayım satırları (Z-/U- parçalar) | aynı | `90f7eabdfb63f739455bebcdc747e059ff459968fafbbe8a2795677f57f17b77` |
 | `cift_kat_R02/cift-kat-prefabrik-malzeme-R02.xlsx` | YÜKLEME + Blok Sayımı; formülle toplanan gerçek model sayımı | `…/me/outputs/` | `ff6649a7a4befaa02261923ebd8e1d9eac8acff84a54fddbd3fd6e89d588472e` |
-| `cift_kat_R02/cift-kat-prefabrik-plan-montaj-R02.pdf` | A3, 3 sayfa: ortak kat planı, pano montaj planı (PN001–PN059), ön görünüş ve kat kotları | `…/me/outputs/` | `b4b01d7ffdb26c0f401e329a96cda60db7d3470cff8ed824a9c3a7ab359a3813` |
-| `cift_kat_R02/cift-kat-prefabrik-75m2-iki-daire-R02.dwg` | AutoCAD modeli (iki katlı duvar/kolon, planlar, montaj kopyaları, ön görünüş) | `…/me/outputs/` | `24ef989b608da62034a9acea38540db4e2e5285c2a161d0e03d602aecc67ced1` |
+| `cift_kat_R02/cift-kat-prefabrik-plan-montaj-R02.pdf` (`main`'de yok; İE-10 dalında, PR-K'dan sonra) | A3, 3 sayfa: ortak kat planı, pano montaj planı (PN001–PN059), ön görünüş ve kat kotları | `…/me/outputs/` | `b4b01d7ffdb26c0f401e329a96cda60db7d3470cff8ed824a9c3a7ab359a3813` |
+| `cift_kat_R02/cift-kat-prefabrik-75m2-iki-daire-R02.dwg` (`main`'de yok; İE-10 dalında, PR-K'dan sonra) | AutoCAD modeli (iki katlı duvar/kolon, planlar, montaj kopyaları, ön görünüş) | `…/me/outputs/` | `24ef989b608da62034a9acea38540db4e2e5285c2a161d0e03d602aecc67ced1` |
 | `cift_kat_R02/cift-kat-prefabrik-R02-teknik-ozet.md` | Astra'nın teknik özeti: düşey sistem, cephe kontrolü, aks uygulaması, sayım, sınırlar | `…/me/outputs/` | `26ac521399e841e019d3018a969b768d7951eeb19154b898826610f8d74f4bea` |
 | `cift_kat_R02/cift-kat-prefabrik-on-kontrol.md` | Çizim öncesi kontrol: ilk 13600 mm talebi, belirsizlikler, kalite kontrol durumu | `…/me/outputs/` | `ba8c62938d6a7be2e649698a5327133eefd7a3e82e75a9371347d6c944b4bdc7` |
 | `cift_kat_R02/cift-kat-prefabrik-R01-durum.md` | R01 ana gövde durumu (R02 bunun yerine geçti) | `…/me/outputs/` | `852f7063aa40b18e1b7387e8754af9d754ad6224f58b1e8ba3c15e9ce30f2e5a` |

@@ -254,7 +254,7 @@ def _bire_bir(ref, aday, tol):
 
 
 def test_pk01_pafta_vektorleriyle():
-    """Kör test geometri kanıtı: Motor'un PK-01 çıktısı montaj paftasının vektörleriyle (`pafta_montaj.json`, `pafta_oku.py`).
+    """Geometri kanıtı (açık pafta): Motor'un PK-01 çıktısı montaj paftasının vektörleriyle (`pafta_montaj.json`, `pafta_oku.py`).
     Panolar ve köşeler 0,6 cm (PDF adımı ~0,25 cm), pencereler 1 cm, H işaretleri 10 cm (daireler kavşağın yanına çizili), kapı boşluğu 2,5 cm.
     Bilinen fark: dış kapı boşluğu 90 (K04 çalışma kabulü), paftada 82 çizili — yalnız menteşe ucu ve boşluğun içte kalması sınanır."""
     pf = json.loads(PAFTA.read_text(encoding="utf-8")); m = pf["montaj_plani_s2"]
