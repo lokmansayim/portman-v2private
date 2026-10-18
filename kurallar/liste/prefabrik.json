@@ -678,12 +678,11 @@
    "prefabrik": "boya.mastik_m2_carpan",
    "kitap": [
     "boya.mastik_pencere_basina",
-    "boya.mastik_mantolamasiz_m2_basina",
-    "satir_notlari.Silikonize mastik"
+    "boya.mastik_mantolamasiz_m2_basina"
    ],
    "tur": "yontem",
    "karar_bekliyor": true,
-   "not": "Prefabrik pencere × 1 + m² × 2/3, yukarı (O18 ve Portatifev şablonu, mantolama yok; PK-02'de 60); boya grubu alıcıya aitse mastik de 0. Kitap pencere başına 1, m² payı yok, boyaya bağlı değil (Lokman, 7 Ekim 07:45, C6: \"boyu ne olursa olsun pencere başı 1 adet\"; kör test listesinde 7); kitaptaki 0,6667 Excel motorunun değeri, kitabın hesabına girmiyor (`motor/genel/yukleme.py`). Fark yaklaşık on kat: PK-03 60 / 6, PK-05 45 / 6, PK-06 70 / 8, PK-08 48 / 6. Pencere alıcıya aitken mastik ayrı kayıtta."
+   "not": "Prefabrik pencere × 1 + m² × 2/3, yukarı (O18 ve Portatifev şablonu, mantolama yok; PK-02'de 60); boya grubu alıcıya aitse mastik de 0. Kitap pencere başına 1, m² payı yok, boyaya bağlı değil (Lokman, 7 Ekim 07:45, C6: \"boyu ne olursa olsun pencere başı 1 adet\"; kitabın kör test hesabında 7, KT-01 raporu; gerçek listede pencereler alıcıya aitti); kitaptaki 0,6667 Excel motorunun değeri, kitabın hesabına girmiyor (`motor/genel/yukleme.py`). Fark yaklaşık on kat: PK-03 60 / 6, PK-05 45 / 6, PK-06 70 / 8, PK-08 48 / 6. Pencere alıcıya aitken mastik ayrı kayıtta."
   },
   {
    "konu": "Dayson",
