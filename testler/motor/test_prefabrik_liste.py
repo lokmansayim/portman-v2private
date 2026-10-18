@@ -502,15 +502,23 @@ def test_pafta_kipi_motor_kipiyle_ayni(N, kurallar):
 
 
 def test_karar_bekleyen_satirlar(pk01, N, kurallar):
-    """Lokman'ın kararını bekleyen konuya bağlı satır bunu taşır; karar verilince (bayrak kalkınca) işaret de kalkar. PK-01'de yedi konu,
-    sekiz satır (CIO kıyası, 18 Ekim: Patron'un baktığı Excel'de görünmüyordu)."""
+    """Hesabında Lokman'ın kararını bekleyen değeri ya da kuralı kullanan satır konuyu taşır (türeyen vida, bant, kelepçe, iniş dahil); karar
+    verilince (bayrak kalkınca) işaret de kalkar. PK-01'de yedi konu, sekiz satır (CIO kıyası, 18 Ekim: Patron'un baktığı Excel'de görünmüyordu;
+    geometri hakemi, 7. tur: veranda deresi, türev satırlar, acil kapak)."""
     isaretli = {s["kalem"]: s["karar_bekliyor"] for s in pk01["satirlar"] if s["karar_bekliyor"]}
     assert isaretli == {"Veranda tavan Boardex": ["Veranda tavanı"], "Sandviç panel (100 cm kapatır) · ana çatı": ["Çatı paneli boyu"],
                         "Sandviç panel kapaması": ["Sandviç panel kapaması"],
                         "Prefabrik pencere vidası (4,8 × 70)": ["Pencere alıcıya aitken vida ve mastik"],
-                        "Alçıpan vidası": ["Alçıpan vidasının levhaları"], "Acil müdahale kapağı": ["Müdahale kapakları"],
+                        "Alçıpan vidası": ["Alçıpan vidasının levhaları"], "Trapez vida 5,5 × 110 (sandviç panel)": ["Çatı paneli boyu"],
                         "Çatı müdahale kapağı": ["Müdahale kapakları"], "Dayson (çatı renginde)": ["Dayson"]}
     assert set().union(*isaretli.values()) <= KARAR_BEKLEYEN
+    V = {ad: PL.liste(copy.deepcopy(n), kurallar, pf) for ad, (n, pf) in _varyantlar(N, _oku(PAFTA_KATMANI)).items() if ad in ("tekyon", "ters100")}
+    pck = {s["kalem"] for s in V["tekyon"]["satirlar"] if "Panel çatının kenarları" in s["karar_bekliyor"]}
+    assert pck == {"Metal dere", "Dere kelepçesi", "Metal dere inişi aparatı", "70 mm PVC dere iniş borusu", "Açık dirsek", "Kapalı dirsek",
+                   "PVC iniş kelepçesi", "Dere kapağı"}                # makassız açık veranda: kitapta saçakta dere (PK-07'de dere 6 → 7)
+    assert _satir(V["tekyon"], "Trapez vida 5,5 × 76 (tek kat panel)")["karar_bekliyor"] == ["Çatı paneli boyu", "Tek kat çatı paneli kapatması"]
+    assert _satir(V["ters100"], "Mahya bandı")["karar_bekliyor"] == ["Trapez sac mahyası"]
+    assert not any("Panel çatının kenarları" in s["karar_bekliyor"] for s in pk01["satirlar"])
     k = copy.deepcopy(kurallar)
     for b in k["prefabrik"]["kitapla_farkli"]:
         if b["konu"] == "Dayson":
