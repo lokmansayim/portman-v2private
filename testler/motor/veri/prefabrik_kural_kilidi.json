@@ -37,6 +37,7 @@
   "ortak.inis_basina.inis_borusu": 1,
   "ortak.inis_basina.inis_kelepcesi": 2,
   "ortak.inis_basina.kapali_dirsek": 1,
+  "ortak.kablo_en_uzak_mesafe": "sigortadan",
   "ortak.kapsam_alici.pencere_aliciya_aitse.pencere_vidasi": false,
   "ortak.kapsam_alici.pencere_aliciya_aitse.silikonize_mastik": false,
   "ortak.kiremit_kapatma_m": 1.0,
@@ -331,6 +332,10 @@
    false
   ],
   [
+   "Sigortadan en uzak mesafe (pafta kipi)",
+   false
+  ],
+  [
    "Sıhhi tesisat",
    false
   ],
@@ -387,7 +392,6 @@
   "duvar_izolasyonu",
   "ek_yapi_ve_korkuluk.baca_ust_kapak",
   "ek_yapi_ve_korkuluk.cati_panelli_cati.dere",
-  "kablo_en_uzak_mesafe",
   "kapama_aparati",
   "korkuluk_kaplamasi",
   "motorda_olup_listede_olmayanlar",

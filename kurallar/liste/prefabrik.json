@@ -482,7 +482,15 @@
    ],
    "tur": "yontem",
    "karar_bekliyor": false,
-   "not": "Uydu kablosu, besleme kablosu, izole bant ve kaçak akım rölesi kitaptan. W otomat 8 Portatifev şablonunun sabiti (Lokman, 13 Ekim 14:40, R4); elektrik noktalarının sayıları paftadaki elektrik planından. Kitap plan yoksa noktaları oda başına kuralla sayar (mühendis); prefabrik plan yoksa \"Kural yok\" yazar. NYM kablo uzunluğu ve buat kasa kitabın yöntemiyle (Lokman, 18 Ekim 19:22; Portatifev'in sabit NYM'si aday sütununda)."
+   "not": "Uydu kablosu, besleme kablosu, izole bant ve kaçak akım rölesi kitaptan. W otomat 8 Portatifev şablonunun sabiti (Lokman, 13 Ekim 14:40, R4); elektrik noktalarının sayıları paftadaki elektrik planından. Kitap plan yoksa noktaları oda başına kuralla sayar (mühendis); prefabrik plan yoksa \"Kural yok\" yazar. NYM kablo uzunluğu ve buat kasa kitabın yöntemiyle (Lokman, 18 Ekim 19:22; Portatifev'in sabit NYM'si aday sütununda; pafta kipinde en uzak mesafe ayrı kayıtta)."
+  },
+  {
+   "konu": "Sigortadan en uzak mesafe (pafta kipi)",
+   "prefabrik": null,
+   "kitap": "kablo_en_uzak_mesafe",
+   "tur": "yontem",
+   "karar_bekliyor": false,
+   "not": "Motor kipinde kitabın yöntemi: sigorta kutusu giriş kapısında; kapının ortasından kapalı kısmın en uzak köşesine kuş uçuşu (Lokman, 7 Ekim 07:45 ve 8 Ekim 00:45). Pafta kipinde kapının ve odaların yeri girdide yok. Kitabın son çaresi kapalı kısmın köşegeni; prefabrik dış ölçünün köşegenini alır. Veranda L'nin içindeyse ikisi aynı, dış ölçüyü büyütüyorsa NYM fazla çıkar (geometri hakemi, 10. tur). Lokman'ın 18 Ekim elektrik kuralıyla (her odadan en uzak noktaya) elektrik PR'ında yeniden ele alınır."
   },
   {
    "konu": "Vida",
@@ -560,7 +568,7 @@
    "kitap": "sacak_parcasi_kenar_kenar",
    "tur": "yontem",
    "karar_bekliyor": false,
-   "not": "Prefabrik saçak sacı, saçak omegası ve sandviç kapaması adedini saçak kenarlarının toplamından bir kez yukarı yuvarlar (PK-01 9, PK-02 7); kitap her kenarı ayrı yuvarlar (uydurma)."
+   "not": "Prefabrik saçak sacı ve saçak omegası adedini saçak kenarlarının toplamından bir kez yukarı yuvarlar (PK-01 9, PK-02 7); kitap her kenarı ayrı yuvarlar (uydurma). Sandviç kapaması kitaptan gelir; kitap da onu saçakların toplamından sayar (`sandvic_kapama`, Lokman 18 Ekim 19:22)."
   },
   {
    "konu": "Baş makas Z'si",
@@ -716,7 +724,7 @@
   },
   {
    "kitap": "satir_notlari",
-   "neden": "çelik listesinin satır notları (adet ve formül değiştirmez); prefabrik satırın notu kendi dayanağından. Silikonize mastiğin notundaki Lokman kararı `boya`'da da durur ve `kitapla_farkli` › Silikonize mastik'te beyanlı"
+   "neden": "çelik listesinin satır notları (adet ve formül değiştirmez); prefabrik satırın notu kendi dayanağından"
   },
   {
    "kitap": "sablon_2026",
@@ -729,10 +737,6 @@
   {
    "kitap": "cati_cikis_kapagi",
    "neden": "aynı: çatı çıkış kapağı listede yok (Lokman, 10 Ekim 10:18); prefabrik de yazmaz"
-  },
-  {
-   "kitap": "kablo_en_uzak_mesafe",
-   "neden": "sigorta kutusunun yeri prefabrik girdisinde yok: en uzak mesafe yerine dış ölçünün köşegeni (kitap da kutunun yeri yoksa köşegeni alır)"
   },
   {
    "kitap": "boya.mastik_mantolamasiz_m2_basina",

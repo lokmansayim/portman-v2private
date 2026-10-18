@@ -83,7 +83,8 @@ def test_pk01_aliciya_ait(pk01):
     assert len(dis_kapi) == 1 and dis_kapi[0]["adet"] == 0
     assert _satir(pk01, "Boya grubu")["adet"] == 0
     assert _satir(pk01, "Sıhhi tesisat grubu")["adet"] == 0
-    assert _satir(pk01, "Elektrik grubu")["dayanak"] == "Kural yok"     # PK-01 paftasında elektrik planı yok
+    # PK-01'in pafta katmanında elektrik sayımı yok (paftanın 10. sayfası elektrik yerleşim planıdır; okunması elektrik PR'ında)
+    assert (_satir(pk01, "Elektrik grubu")["dayanak"], _satir(pk01, "Elektrik grubu")["formul"]) == ("Kural yok", "pafta katmanında elektrik sayımı yok")
 
 
 def test_kurallar_dosyadan_okunur(N, kurallar):
@@ -533,11 +534,25 @@ def test_kitaba_gecen_kalemler(pk01, N, kurallar):
     assert _satir(pk01, "Dayson (çatı renginde)")["adet"] == 4
     V = {ad: PL.liste(copy.deepcopy(n), kurallar, pf) for ad, (n, pf) in _varyantlar(N, _oku(PAFTA_KATMANI)).items()}
     # bizde (pencere, boya ve elektrik planı bizde): mastik pencere × 1, boyadan bağımsız; pencere vidası; buat anahtar + priz + oda (aday 7.3'ün
-    # bütün noktaları); NYM sigorta (W otomat 8) × köşegen 11,66 m + nokta × 2 m (aday Portatifev sabiti)
+    # bütün noktaları); NYM sigorta (W otomat 8) × sigortadan en uzak mesafe + nokta × 2 m (aday Portatifev sabiti). Kutu giriş kapısında
+    # (323,75; 205), kapalı kısmın en uzak köşesi (0; 1000): √(323,75² + 795²) = 8,58 m → 8 × 8,58 + 15 × 2 → 99, 8 × 8,58 + 9 × 2 → 87
+    # (hakem, 10. tur: köşegen 11,66 kitabın yöntemi değil)
     b = V["bizde"]
     assert _satir(b, "Silikonize mastik")["adet"] == 6 and _satir(b, "Prefabrik pencere vidası (4,8 × 70)")["adet"] == 120
     assert (_satir(b, "Buat kasa")["adet"], _satir(b, "Buat kasa")["aday"]) == (24, 28)              # 7 + 11 + 6
-    assert [(_satir(b, x)["adet"], _satir(b, x)["aday"]) for x in ("NYM kablo 3 × 2,5", "NYM kablo 2 × 1,5")] == [(124, 130), (112, 100)]
+    assert [(_satir(b, x)["adet"], _satir(b, x)["aday"]) for x in ("NYM kablo 3 × 2,5", "NYM kablo 2 × 1,5")] == [(99, 130), (87, 100)]
+    assert "giriş kapısından kapalı kısmın en uzak köşesi" in _satir(b, "NYM kablo 3 × 2,5")["formul"]
+    # pafta kipi: kapının ve odaların yeri okunmadı → dış ölçünün köşegeni 11,66 m (`kitapla_farkli`); L biçimli odanın aynı adlı iki parçası
+    # tek oda sayılır (hakem, 10. tur: PK-03'te 9 parça, 6 oda)
+    nb, pfb = _varyantlar(N, _oku(PAFTA_KATMANI))["bizde"]
+    yp = {a: v for a, v in copy.deepcopy(nb).items() if a not in ("kaynak", "veranda_kenarlari_cm", "sigorta_en_uzak")}
+    yp["veranda_kirisleri_cm"] = [x - 10 for x in nb["veranda_kenarlari_cm"]]
+    salon = next(m for m in yp["kapali"] if m["ad"] == "SALON")
+    yp["kapali"] = [m for m in yp["kapali"] if m is not salon] + [dict(salon, alan_m2=salon["alan_m2"] - 1.0), dict(salon, alan_m2=1.0, en_cm=100.0, derin_cm=100.0)]
+    bp = PL.liste(PL.model_pafta(yp), kurallar, pfb)
+    assert _satir(bp, "Buat kasa")["adet"] == 24 and "oda 6 " in _satir(bp, "Buat kasa")["formul"]
+    assert [_satir(bp, x)["adet"] for x in ("NYM kablo 3 × 2,5", "NYM kablo 2 × 1,5")] == [124, 112]
+    assert "dış ölçünün köşegeni" in _satir(bp, "NYM kablo 2 × 1,5")["formul"]
     assert _satir(b, "Acil müdahale kapağı")["adet"] == 1 and "Çatı müdahale kapağı" not in {s["kalem"] for s in b["satirlar"]}
     # ters100 (trapez, cumba): trapez mahyası L 800 ÷ 0,6; ters mahya başına iki kenar kutusu. ters60: metal kiremit 100 cm kapatır
     t = V["ters100"]
