@@ -1,0 +1,413 @@
+{
+ "aciklama": "BK-12 PR-2: prefabrik listenin okuduğu kural yapraklarının değeri (test_kural_degerleri_kilitli). Elle düzenlenmez; `python testler/motor/test_prefabrik_liste.py --kilit` yazar.",
+ "kitap_seti": "setler/0.19.json",
+ "degerler": {
+  "duvar_tipleri.tipler.PE-IC-60.anma_mm": 60,
+  "ortak.asik.aralik_m": 0.6,
+  "ortak.asik.zayiat": 0.05,
+  "ortak.bas_makas_z.parca_boyu_m": 2.8,
+  "ortak.bindirme_m.alin_saci": 0.2,
+  "ortak.bindirme_m.dere": 0.2,
+  "ortak.bindirme_m.mahya": 0.2,
+  "ortak.bindirme_m.sacak_saci": 0.2,
+  "ortak.bindirme_m.trapez_mahyasi": 0.2,
+  "ortak.boya.dayson_m2_basina": 0.06,
+  "ortak.boya.dis_cephe_kova_m2_basina": 0.02,
+  "ortak.boya.ic_cephe_kova_m2_basina": 0.02,
+  "ortak.boya.kopuk": 2,
+  "ortak.boya.mastik_pencere_basina": 1,
+  "ortak.cati_kaplama_tasma_m": 0.05,
+  "ortak.cati_mudahale_kapagi.ad": "Acil müdahale kapağı",
+  "ortak.cati_mudahale_kapagi.yapi_basina": 1,
+  "ortak.dere_kelepcesi_dere_basina": 8,
+  "ortak.duvar_dibi.malzeme": "ozel_mahya",
+  "ortak.duvar_dibi.parca_boyu_m": 2.8,
+  "ortak.ek_yapi_ve_korkuluk.cati_panelli_cati.alin_saci": false,
+  "ortak.ek_yapi_ve_korkuluk.cati_panelli_cati.sacak_kaplamasi.alt_m": 0.15,
+  "ortak.ek_yapi_ve_korkuluk.cati_panelli_cati.sacak_omegasi": false,
+  "ortak.ek_yapi_ve_korkuluk.cati_panelli_cati.sacak_saci": false,
+  "ortak.elektrik.besleme_kablosu_kat_basina_m": 5,
+  "ortak.elektrik.izole_bant_m2_basina": 0.06,
+  "ortak.elektrik.kacak_akim_rolesi": 1,
+  "ortak.elektrik.uydu_kablo_priz_basina_m": 25,
+  "ortak.inis.kose_basina": 1,
+  "ortak.inis.orta_inis_esigi_m": 9.0,
+  "ortak.inis_basina.acik_dirsek": 2,
+  "ortak.inis_basina.inis_aparati": 1,
+  "ortak.inis_basina.inis_borusu": 1,
+  "ortak.inis_basina.inis_kelepcesi": 2,
+  "ortak.inis_basina.kapali_dirsek": 1,
+  "ortak.kablo_en_uzak_mesafe": "sigortadan",
+  "ortak.kapsam_alici.pencere_aliciya_aitse.pencere_vidasi": false,
+  "ortak.kapsam_alici.pencere_aliciya_aitse.silikonize_mastik": false,
+  "ortak.kiremit_kapatma_m": 1.0,
+  "ortak.levha_kalinligi_mm.boardex": 12.5,
+  "ortak.levha_kalinligi_mm.osb": 11,
+  "ortak.levha_m2.alcipan": 3.0,
+  "ortak.levha_m2.boardex": 2.88,
+  "ortak.levha_m2.osb": 2.9768,
+  "ortak.mahya_bandi.parca_boyu_m.metal_kiremit_mahyasi": 2.8,
+  "ortak.mahya_bandi.rulo_m": 10.0,
+  "ortak.panel_boyu_yuvarlama_mm": 10,
+  "ortak.panel_cati_kenarlari.acik_alan.kenar_boardex": false,
+  "ortak.panel_cati_kenarlari.acik_alan.tavan": "cati_plani",
+  "ortak.panel_cati_kenarlari.dere": true,
+  "ortak.panel_cati_kenarlari.ek_yapi.kenar_boardex": "yalniz_alt",
+  "ortak.panel_cati_kenarlari.sacak.ad": "Özel büküm saçak sacı",
+  "ortak.panel_cati_kenarlari.sacak.bindirme_m": 0.2,
+  "ortak.panel_cati_kenarlari.sacak.parca_boyu_m": 2.5,
+  "ortak.panel_cati_kenarlari.yan.ad": "Sundurma kapama",
+  "ortak.panel_cati_kenarlari.yan.bindirme_m": 0.2,
+  "ortak.panel_cati_kenarlari.yan.parca_boyu_m": 2.5,
+  "ortak.panel_kapamasi.sandvic_panel": true,
+  "ortak.panel_kapamasi.tek_kat_panel": false,
+  "ortak.parca_boyu_m.alin_saci": 2.5,
+  "ortak.parca_boyu_m.asik": 4.2,
+  "ortak.parca_boyu_m.dere": 4.0,
+  "ortak.parca_boyu_m.inis_borusu": 3.0,
+  "ortak.parca_boyu_m.kosebent": 2.5,
+  "ortak.parca_boyu_m.mahya": 2.8,
+  "ortak.parca_boyu_m.sacak_saci": 2.5,
+  "ortak.parca_boyu_m.sandvic_kapama": 2.5,
+  "ortak.parca_boyu_m.tavan_omegasi": 3.75,
+  "ortak.parca_boyu_m.trapez_mahyasi": 0.8,
+  "ortak.sandvic_kapama.bindirme_m": 0.2,
+  "ortak.sandvic_kapama.olcu": "sacak_toplami",
+  "ortak.sandvic_kapama.parca_boyu_m": 2.5,
+  "ortak.sandvic_panel_kapatma_m": 1.0,
+  "ortak.silte_adet_m2": 9.6,
+  "ortak.tavan_omegasi_aralik_m": 0.6,
+  "ortak.tek_kat_panel_kapatma_m": 1.0,
+  "ortak.ters_mahya_kenar_kutusu.boyut": "L 21 × 40 × 21 × 2800",
+  "ortak.ters_mahya_kenar_kutusu.ters_mahya_basina": 2,
+  "ortak.ters_mahya_kenar_kutusu.varsayilan": true,
+  "ortak.tesisat.atlama_parcasi": 3,
+  "ortak.tesisat.duz_t_20": 6,
+  "ortak.tesisat.ic_disli_t_20": 6,
+  "ortak.tesisat.kulakli_dirsek_20": 12,
+  "ortak.tesisat.mason_20": 15,
+  "ortak.tesisat.normal_dirsek_20": 15,
+  "ortak.tesisat.temiz_su_borusu_4m": 6,
+  "ortak.trapez_sac_kapatma_m": 0.8,
+  "ortak.urun_adlari.degistir": [
+   [
+    "Dış cephe Boardex",
+    "OUTWEAR Dış Cephe Levhası"
+   ],
+   [
+    "Boardex",
+    "OUTWEAR Dış Cephe Levhası"
+   ]
+  ],
+  "ortak.veranda_tavani.prefabrik": "yesil_alcipan",
+  "ortak.vida.alcipan_vidasi_levha_basina": 40,
+  "ortak.vida.cirpi_ipi": 1,
+  "ortak.vida.inox_tasi_m2_bolu": 10,
+  "ortak.vida.pencere_vidasi_pencere_basina": 20,
+  "ortak.vida.rysb_m2_basina": 7.5,
+  "ortak.vida.trapez_5_5x60_m2_basina": 2.5,
+  "ortak.vida.trapez_panel_boyu_bolu_mm": 200,
+  "ortak.vida.uc_m2_bolu": 15,
+  "ortak.zayiat.boardex": 0.08,
+  "ortak.zayiat.duvar_alcipan": 0.05,
+  "ortak.zayiat.tavan_alcipan": 0.05,
+  "prefabrik.alt_cerceve_60_aday_bolen_m": 2.5,
+  "prefabrik.alt_cerceve_bolen_m": 3.75,
+  "prefabrik.ana_cati_kose.besik": 4,
+  "prefabrik.ana_cati_kose.tek_yon": 2,
+  "prefabrik.asik_aday.ek": 5,
+  "prefabrik.asik_aday.pay_m": 0.1,
+  "prefabrik.asik_mahya_payi_m": 0.2,
+  "prefabrik.bas_makas_betopani.katsayi": 1.5,
+  "prefabrik.bas_makas_betopani.levha_m2": 3.125,
+  "prefabrik.bas_makas_omegasi_bolen_m": 2.5,
+  "prefabrik.boya.astar": 1,
+  "prefabrik.boya.kenar": 1,
+  "prefabrik.boya.tavan": 1,
+  "prefabrik.cektirme_u_100": 2,
+  "prefabrik.cektirme_u_100_aday.boy_cm": 244,
+  "prefabrik.cektirme_u_100_aday.ek": 2,
+  "prefabrik.cektirme_u_ic": 2,
+  "prefabrik.dere_aday_yuvarlama_mm": 500,
+  "prefabrik.duvar_alcipani.kapi_boy_m": 2.0,
+  "prefabrik.duvar_alcipani.kapi_en_m": 0.82,
+  "prefabrik.duvar_alcipani.strafor_m2": 60,
+  "prefabrik.duvar_omegasi_100_bolen_m": 2.5,
+  "prefabrik.ek_cati_parcasi_basina": 2,
+  "prefabrik.elektrik.besleme_boru_m": 5,
+  "prefabrik.elektrik.kablo_nokta_basina_m": 2,
+  "prefabrik.elektrik.w_otomat": 8,
+  "prefabrik.elektrik_aday.nym_2x15_m": 100,
+  "prefabrik.elektrik_aday.nym_3x25_m": 130,
+  "prefabrik.elektrik_aday.w_otomat": 9,
+  "prefabrik.fugali_cephe.artik_esik_m": 0.05,
+  "prefabrik.fugali_cephe.h_lata_yedek": 3,
+  "prefabrik.fugali_cephe.kapi_boy_m": 2.0,
+  "prefabrik.fugali_cephe.kapi_en_m": 0.9,
+  "prefabrik.fugali_cephe.lata_boyu_m": 2.8,
+  "prefabrik.fugali_cephe.lata_kisa_boyu_m": 2.5,
+  "prefabrik.inis_borusu.pvc": [
+   "L 2000",
+   "L 500"
+  ],
+  "prefabrik.inis_borusu_aday": "L 2500",
+  "prefabrik.inis_orta": "esik",
+  "prefabrik.islak_hacim": [
+   "banyo",
+   "wc",
+   "islak",
+   "lavabo"
+  ],
+  "prefabrik.kosebent": 7,
+  "prefabrik.kosebent_aday": 3,
+  "prefabrik.kubbe_takimi": [
+   [
+    "1001",
+    "Kubbe özel pano",
+    "100 × 2500 × 500",
+    1
+   ],
+   [
+    "1002",
+    "Kubbe üstü H",
+    "100 × 100 × 500",
+    2
+   ],
+   [
+    "1002",
+    "Özel açılı köşe direği + kapaması",
+    "100 × 100 × 2330",
+    4
+   ],
+   [
+    "1002",
+    "Kubbe saçak sacı (antrasit)",
+    "170 × 1500",
+    3
+   ],
+   [
+    "1005",
+    "Kubbe makası",
+    "80 × 0,8",
+    3
+   ],
+   [
+    "1006",
+    "Kubbe OSB 11 mm",
+    "1220 × 2440",
+    1
+   ],
+   [
+    "1006",
+    "Kubbe üstü membran",
+    "paket",
+    1
+   ],
+   [
+    "1006",
+    "Kubbe antrasit shingle",
+    "paket",
+    1
+   ]
+  ],
+  "prefabrik.makas_aralik_cm": 125.5,
+  "prefabrik.nem_bariyeri_yuvarlama_m2": 10,
+  "prefabrik.omega_kapak.ek": 3,
+  "prefabrik.omega_kapak.parca_m": 3.75,
+  "prefabrik.omega_kapak.pay_m": 0.1,
+  "prefabrik.osb_cati.zayiat": 0.1,
+  "prefabrik.pencere_sinifi.standart_en_cm": 120,
+  "prefabrik.pencere_sinifi.vasistas_boy_cm": 60,
+  "prefabrik.pencere_sinifi.vasistas_en_cm": 60,
+  "prefabrik.pencere_u_h_gecen": 1,
+  "prefabrik.pencere_u_h_gecen_aday_pencere_basina": 2,
+  "prefabrik.pencere_ust_kotu_cm": 200.0,
+  "prefabrik.profil_vidalama": 2,
+  "prefabrik.profil_vidalama_aday_kolon_basina": 3,
+  "prefabrik.pvc_betopan_h": 5,
+  "prefabrik.pvc_betopan_h_aday": 3,
+  "prefabrik.sacak_omegasi_bolen_m": 2.5,
+  "prefabrik.siparis_boyu.kesinti_mm": 2.5,
+  "prefabrik.siparis_boyu.modul_siparis_mm": 1250,
+  "prefabrik.siparis_boyu.modul_tolerans_cm": 0.06,
+  "prefabrik.siparis_boyu.yuvarlama_mm": 5,
+  "prefabrik.tavan_alcipani.islak_ek": 1,
+  "prefabrik.tavan_alcipani.kuru_ek": 2,
+  "prefabrik.tavan_h_aralik_m": 0.625,
+  "prefabrik.tavan_h_ek": 5,
+  "prefabrik.tavan_omegasi.ek": 5,
+  "prefabrik.tavan_omegasi.pay_m": 0.1,
+  "prefabrik.tavan_omegasi_aralik_m.asma": 1.255,
+  "prefabrik.tesisat_takimi": [
+   [
+    "Temiz su borusu",
+    "L 4000",
+    "temiz_su_borusu_4m"
+   ],
+   [
+    "Normal dirsek 20 mm",
+    "adet",
+    "normal_dirsek_20"
+   ],
+   [
+    "Kulaklı dirsek 20 mm",
+    "adet",
+    "kulakli_dirsek_20"
+   ],
+   [
+    "Düz T 20 mm",
+    "adet",
+    "duz_t_20"
+   ],
+   [
+    "Maşon 20 mm",
+    "adet",
+    "mason_20"
+   ],
+   [
+    "İç dişli T 20 mm",
+    "adet",
+    "ic_disli_t_20"
+   ],
+   [
+    "Atlama parçası yarım parmak",
+    "adet",
+    "atlama_parcasi"
+   ]
+  ],
+  "prefabrik.uc_aday_inox_boleni": 2,
+  "prefabrik.veranda_kirisi_eksik_cm": 10,
+  "prefabrik.vida.alcipan_vidasi_yuvarlama": 250,
+  "prefabrik.vida.betopan_vidasi": 500,
+  "prefabrik.vida.kaplama_yuvarlama": 100,
+  "prefabrik.vida.kesme_tasi_m2_basina": 0.02,
+  "prefabrik.vida.rysb_yuvarlama": 50,
+  "prefabrik.vida.trapez_5560_yuvarlama": 100,
+  "prefabrik.vida_aday_yuvarlama": 250,
+  "prefabrik.vitrifiye_aday": 1
+ },
+ "kitapla_farkli": [
+  [
+   "Baş makas Z'si",
+   false
+  ],
+  [
+   "Boya",
+   false
+  ],
+  [
+   "Boya alıcıya aitken",
+   false
+  ],
+  [
+   "Dere kapağı",
+   false
+  ],
+  [
+   "Elektrik",
+   false
+  ],
+  [
+   "Kalem adlarında renk",
+   false
+  ],
+  [
+   "Kapı boşlukları",
+   false
+  ],
+  [
+   "Köşebent",
+   false
+  ],
+  [
+   "Mahya bandı",
+   false
+  ],
+  [
+   "PVC iniş borusu",
+   false
+  ],
+  [
+   "Saçak parçaları",
+   false
+  ],
+  [
+   "Sigortadan en uzak mesafe (pafta kipi)",
+   false
+  ],
+  [
+   "Sıhhi tesisat",
+   false
+  ],
+  [
+   "Tavan alçıpanı",
+   false
+  ],
+  [
+   "Tavan omegası",
+   false
+  ],
+  [
+   "Vida",
+   false
+  ],
+  [
+   "Çatı OSB'si zayiatı",
+   false
+  ],
+  [
+   "Çatı kaplaması türleri",
+   false
+  ],
+  [
+   "Çatı paneli adedi",
+   false
+  ],
+  [
+   "Çatı yüzeyi",
+   false
+  ],
+  [
+   "Çatı şiltesi",
+   false
+  ],
+  [
+   "Çelik dübel ve şase pul",
+   false
+  ],
+  [
+   "İniş yerleri",
+   false
+  ]
+ ],
+ "kitaptan_okunmayan": [
+  "baca_ici",
+  "bayi_kurali",
+  "baz_paket_cati_kaplamasi",
+  "boya.mastik_mantolamasiz_m2_basina",
+  "cati_cikis_kapagi",
+  "cati_yontemi",
+  "celik",
+  "celik_cati_yontemi",
+  "duvar_izolasyonu",
+  "ek_yapi_ve_korkuluk.baca_ust_kapak",
+  "ek_yapi_ve_korkuluk.cati_panelli_cati.dere",
+  "kapama_aparati",
+  "korkuluk_kaplamasi",
+  "motorda_olup_listede_olmayanlar",
+  "nem_bariyeri_dis_cephe",
+  "osb_takviye",
+  "panel_boyu_uzatma",
+  "sablon_2026",
+  "sacak_alti_boardex_eni_m",
+  "sacak_yuzu",
+  "satir_notlari",
+  "veranda_cercevesi",
+  "yalitim_kat",
+  "yalitim_paket_m2",
+  "yontem_a_alin_kaplamasi",
+  "yontem_a_kalkan_ust_kapamasi",
+  "zayiat.cati_kaplama_kirma",
+  "zayiat.dis_osb"
+ ]
+}
