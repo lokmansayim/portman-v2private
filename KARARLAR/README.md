@@ -91,14 +91,16 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-21 | İE-09 ilk projeler sırası: Ç8801'den sonra 28 AIPrefabrik projesi ve mühendisin tek kat çelikleri; katalog çelikler sıradan çıktı; çift kat canlıdan sonra; kör 20 liste kapalı (Patron, 17.10 07:00, CIO kartı) | ayrıldı (CIO panosu; metni `IE-09.md › Sonraki sıra`) |
 | D | D-22 | İE-09: atölye önce mühendisin tek kat çelikleriyle; AIPrefabrik prefabrik motoru `main`'e girince (Patron, 17.10 08:01, karar kartı "Önce mühendis") | ayrıldı (CIO panosu; metni `IE-09.md › Sonraki sıra`) |
 | D | D-23 | İE-09: AIPrefabrik prefabrik pano motoruyla çizilir; motor, bayi paftası ve liste üreteci önce `main`'e (BK-12); D-22'yi değiştirir (Patron, 17.10 09:39, karar kartı "Önce motor") | ayrıldı (CIO panosu; metni `IE-09.md › Sonraki sıra`) |
-| D | **D-24** | — | **sıradaki boş** |
+| D | D-24 | Ürün kimlik kartı işi (İE-15) PK-01 ile başlar; PR #28 (BK-12 PR-2) birleşince, BK-12 PR-3'ü beklemez (Patron, 19.10; CIO panosu satır 102) | ayrıldı (CIO panosu) |
+| D | **D-25** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; panel ve P6001 güncellemesi kapsam dışı, pilottan sonra) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | dallarda |
 | İE | İE-13 | onaydan teklife: fiyat, Patron onayı, özellik formu, hitap (eski adıyla İE-10) | ayrıldı (pilottan sonra) |
 | İE | — | `ie-11-pr2-kor-test` dalındaki onaysız İE-13 / İE-14 taslak planları | numarasız; planlanınca bu defterden numara alır |
 | İE | İE-14 | talepten plana (14a: tek kat çelik; LLM-önce üretim ve revizyon) | alındı (14.10; `ie-14-talepten-plana`) |
-| İE | **İE-15** | — | **sıradaki boş** |
+| İE | İE-15 | ürün kimlik kartlı model: her ürünün IFC tür nesnesi, kural yerleştirir, kod sayar (Patron 18.10 19:52; CIO panosu satır 73.5) | ayrıldı (planlama thread'i; plan Patron onayında) |
+| İE | **İE-16** | — | **sıradaki boş** |
 | BK | BK-01–BK-08 | bu depo; BK-08 8a sonrası temizlik (`bk-08-8a-temizlik`) | yazıldı |
 | BK | BK-09 | metin ve çizim düzeltmeleri, G1 (`bk-09-metin-cizim`, `bk-09-cizim-g1`) | alındı (14.10) |
 | BK | **BK-10** | — | **sıradaki boş** |
