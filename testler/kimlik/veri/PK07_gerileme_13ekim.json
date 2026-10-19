@@ -1,0 +1,11 @@
+{
+ "kaynak": "PK-07 (AP-08) montaj paftasının 13 Ekim 2026 tek seferlik okuması (`ie-11-pr2-kor-test` dalı eeb4072, `deneme/2026-10-13_pk_07/pafta_montaj.json`); yalnız sayılar ve makas konumları. Tek genel okuyucunun gerilemesi içindir; PK-07'nin hakem cevabı değildir (o, PK-07'ye geçilirken ayrı hakem PR'ıyla gelir).",
+ "pafta_sha256": "a819c0f1c0bdd150930b71d2762773c8a6513f19f6bf1539407dab1077441b71",
+ "pano": {"adet": 57, "std": 25, "ozel": 32, "dis": 33, "ic": 24},
+ "kose": 8,
+ "kose_not": "13 Ekim'de 6 köşe + 2 kolon (duvar kalınlığında kare kutu profil); okuyucu ikisini `kose` altında sayar, kareleri `kose_kare`'de",
+ "kose_kare": 2,
+ "kanat": 6,
+ "h_turleri": {"dubelli_kulakli": 11, "dubelli": 12, "standart": 14, "uclu_dubelli_kulakli": 1, "uclu_dubelli": 3, "uclu_standart": 4},
+ "makas": {"ana_cm": [124.9, 267.6, 393.0, 518.4, 644.1, 769.5, 894.9], "cumba_cm": [5.0, 79.3, 116.9], "makas_bas": 2, "makas_orta": 5}
+}
