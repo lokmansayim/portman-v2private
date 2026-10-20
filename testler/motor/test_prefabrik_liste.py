@@ -610,7 +610,7 @@ def test_pk07_hedef_ornek_duzeltmeleri(N, kurallar, pk01):
 def test_tek_kaynak_isaretleri(bozma, N, kurallar, tmp_path, monkeypatch):
     """Kaynağı tek listeye dayanan kurallar `prefabrik_isaret.json`'da işaretli (CIO notu 5, BK-12 PR-2c; `prefabrik.json`'un biçimi ve
     `DURUMLAR` aynı): her ad bir prefabrik kuralı, değeri `tek_kaynak`, her işaret okunur. İşaretli satırın dayanağı "Tek kaynak (zayıf)"
-    (Excel'de renkli), işaretsizinki değil; tanınmayan işaret listeyi, kural olmayan ad, eksik ya da üreteçte satırı işaretlenmeyen işaret
+    (Excel rengi ayrı testte), işaretsizinki değil; tanınmayan işaret listeyi, kural olmayan ad, eksik ya da üreteçte satırı işaretlenmeyen işaret
     kuralların okunmasını durdurur (geometri hakemi PR-2c: işaret sessizce yok sayılmaz)."""
     dosya = _oku(KOK / "kurallar" / "liste" / "prefabrik_isaret.json")
     isaret = dosya["isaretler"]
@@ -624,10 +624,6 @@ def test_tek_kaynak_isaretleri(bozma, N, kurallar, tmp_path, monkeypatch):
     assert {s["kalem"] for s in zayif} == {"PVC plastik betopan H'ı", "100'lük pencere U'su H geçen", "PVC omega kapak L 3750 (asma dizme tavan)"}
     assert all("yalnız PK-01" in s["formul"] for s in zayif)
     assert _satir(V["ters100"], "PVC plastik betopan H'ı")["dayanak"] == "Kural (Portatifev)"     # ters tavanda beş liste: işaretsiz
-    openpyxl = pytest.importorskip("openpyxl")
-    PL.xlsx(V["pk01"], tmp_path / "liste.xlsx")
-    renk = {r[1].value: r[0].fill.fgColor.rgb for r in openpyxl.load_workbook(tmp_path / "liste.xlsx")["Liste"].iter_rows(min_row=3)}
-    assert renk["PVC plastik betopan H'ı"].endswith("FFC7CE") and not renk["Köşebent"].endswith("FFC7CE")
     k = copy.deepcopy(kurallar)
     k["prefabrik_isaret"]["omega_kapak"] = "zayif"
     with pytest.raises(ValueError, match="omega_kapak"):
@@ -640,6 +636,14 @@ def test_tek_kaynak_isaretleri(bozma, N, kurallar, tmp_path, monkeypatch):
         y.write_text(json.dumps({"isaretler": bozuk}), encoding="utf-8")
         with pytest.raises(ValueError, match=ad):
             PL.kurallari_oku()
+
+
+def test_tek_kaynak_excel_rengi(pk01, tmp_path):
+    """İşaretli satır Excel'de renkli, işaretsizi değil (openpyxl yoksa yalnız bu test atlanır; CIO, PR #30 okuması)."""
+    openpyxl = pytest.importorskip("openpyxl")
+    PL.xlsx(pk01, tmp_path / "liste.xlsx")
+    renk = {r[1].value: r[0].fill.fgColor.rgb for r in openpyxl.load_workbook(tmp_path / "liste.xlsx")["Liste"].iter_rows(min_row=3)}
+    assert renk["PVC plastik betopan H'ı"].endswith("FFC7CE") and not renk["Köşebent"].endswith("FFC7CE")
 
 
 def test_komut_satiri(tmp_path):
