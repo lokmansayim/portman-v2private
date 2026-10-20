@@ -14,7 +14,8 @@ Yeni pencere için hazırlıklar:
 - **Yapıldı (dal `bk-12-pr2c-pk07`, `main` `a1e6d30`'dan):** PVC betopan H'ı her evde 5 → 7 (tavandan bağımsız; Portatifev'in beş listesi), satırı Tavan grubundan Depo grubuna (Portatifev listelerindeki gibi); profil vidalama aparatı yazılmaz. Kaynağı tek listeye dayanan iki kural `kurallar/liste/prefabrik_isaret.json`'da işaretli, listede dayanakları "Tek kaynak (zayıf)". Metre satırlarının birimi m, nem bariyeri m², formüllerde ondalık virgül (CIO notları 5–6). 48 kural; PK-01 90 → 89 satır; değer kilidi 181 yaprak. `main` ile 14 girdide satır satır kıyas: beklenmeyen fark 0.
 - **Kullanıcı adımı B3:** Kısmen. Liste üretiliyor; kıyas PK-07 ile (`IE-09_atolye/BK-12_PR-2c/`).
 - **Kanıt:** geometri hakemi 3. turda "Kapanır" (`4b08fe1`; önceki iki turun notları işlendi), `kvkk-denetcisi` temiz, tam doğrulama `4b08fe1` 20 Ekim 19:55–20:25 çıkış 0 (harness 22/22, DXF/PDF 18/18 AYNI, "referansla aynı", pytest 1117 geçti, 2 atlandı). PK-07 kıyası 134 satırın 92'si aynı (PR #28'de 91). PR incelemede (Lokman); komut ve sonuç BK-12 › Kanıt.
-- **Bekleyen (Lokman):** CIO'nun yeniden okumasından sonra PR #30'un birleştirilmesi.
+- **Güncel `main` ile birleşim:** merge `af08889` (`main` `c542ca5`, K1); tam doğrulama 20:53–21:23 çıkış 0, pytest 1136 geçti, 2 atlandı; K1 testleri bu PR'ın kilidiyle geçti.
+- **Bekleyen (Lokman):** CIO'nun okumasından sonra PR #30'un birleştirilmesi.
 
 **20 Ekim 2026 akşam eki (İE-15 · K1 kart şeması ve PK-01'in kart modeli; `docs/is_emirleri/IE-15.md`):**
 - **KH-1 birleşti:** PR #29, 20 Ekim 15:25 (`main` `a1e6d30`); K1 aynı dalda güncel `main`'den.
