@@ -15,7 +15,8 @@
   öteki dış H dübelli. Girdiler bugünkü IFC'de: dış duvarların ve H'lerin yeri, makasların yeri (makas parçalarından). Denk gelme payı makas
   aralığının yarısıdır; aralık `kurallar/liste/prefabrik.json`'dan okunur. İki makas aynı H'ye denk gelirse kayıt en yakınını yazar.
 - **Çatı tipi İş Emri'nden gelir:** bugünkü IFC çatıyı her zaman beşik çizer. Eşlemesi ya da kuralı `cati_tipleri` taşıyan parça (makaslar ve
-  makasa bağlı dış H'ler) İş Emri'nin çatısı o tiplerden değilse "kural yok" yazar; model makası olmayan bir çatıdan tür türetmez.
+  makasa bağlı dış H'ler) İş Emri'nin çatısı o tiplerden değilse "kural yok" yazar (ikisinde de yazılıysa ikisi de sağlanır); model makası
+  olmayan bir çatıdan tür türetmez.
 - **Kartı olmayan parça sayılmaz:** hiçbir karta uymayan parça "kural yok" yazar; iki karta uyan parçada model üretilmez. Görünüm (üçlü H'nin
   yüz görünümü), bileşen (makasın çubukları) ve kartsız olduğu bildirilen parçalar (çatı yüzü, alın, zemin betonu, boşluk) ayrı listelenir.
 
@@ -149,11 +150,13 @@ def h_turleri(f: ifcopenshell.file, adaylar: list, kural: dict, makas_aralik_cm:
 
 
 # ----------------------------------------------------------------------------- sınıflandırma
-def _cati_tipleri(m: dict, yerlesim: dict) -> list[str] | None:
-    """Eşlemenin geçerli olduğu çatı tipleri: eşlemede ya da uyguladığı yerleşim kuralında; yoksa her çatıda geçerli."""
-    if m.get("cati_tipleri"):
-        return m["cati_tipleri"]
-    return yerlesim["kurallar"][m["kural"]["ad"]].get("cati_tipleri") if m.get("kural") else None
+def _cati_sinirlari(m: dict, yerlesim: dict) -> list[list[str]]:
+    """Eşlemenin çatı tipi sınırları: eşlemede ve uyguladığı yerleşim kuralında yazılı olanlar. Parça hepsini sağlamalı (biri ötekini
+    genişletmez); hiçbiri yoksa her çatıda geçerli."""
+    sinirlar = [m.get("cati_tipleri")]
+    if m.get("kural"):
+        sinirlar.append(yerlesim["kurallar"][m["kural"]["ad"]].get("cati_tipleri"))
+    return [x for x in sinirlar if x]
 
 
 def siniflandir(f: ifcopenshell.file, kartlar: dict, yerlesim: dict, makas_aralik_cm: float, cati_tipi: str) -> list[dict]:
@@ -190,8 +193,8 @@ def siniflandir(f: ifcopenshell.file, kartlar: dict, yerlesim: dict, makas_arali
             raise ValueError(f"{e.Name}: iki karta uyuyor ({', '.join(k['kod'] for k, _ in uyan)}); kart dosyası düzeltilmeli")
         if uyan:
             k, m = uyan[0]
-            izin = _cati_tipleri(m, yerlesim)
-            if izin and cati_tipi not in izin:
+            izin = next((x for x in _cati_sinirlari(m, yerlesim) if cati_tipi not in x), None)
+            if izin:
                 out.append({"e": e, "rol": "kural_yok", "neden": f"İş Emri'nin çatısı \"{cati_tipi}\"; {k['kod']} eşlemesi yalnız "
                                                                   f"{', '.join(izin)} çatıda geçerli (bugünkü IFC çatıyı hep beşik çizer)"})
                 continue
@@ -381,11 +384,13 @@ def katalog_excel(kartlar: dict, say: dict | None, yol: Path) -> Path:
         sayfa(wb.create_sheet("H türü"), ["Parça", "Kart", "Tür", "Denk geldiği makas", "Uzaklık (cm)"],
               [[x["parca"], x["kart"], H_TURU_AD[x["tur"]], x["makas"] or "—", x["uzaklik_cm"] if x["uzaklik_cm"] is not None else "—"]
                for x in say["h_turu"]], [24, 8, 18, 18, 12])
+        kural_yok = {x["parca"] for x in say["kural_yok"]}
         sayfa(wb.create_sheet("Kartsız"), ["Parça", "IFC sınıfı", "Rol", "Neden"],
               [[x["parca"], x["sinif"], "kartsız", x["neden"]] for x in say["kartsiz"]]
               + [[x["parca"], x["sinif"], "kural yok", x["neden"]] for x in say["kural_yok"]]
               + [[x["parca"], "IfcMember", "görünüm", f"sayılan parça {x['asil']}"] for x in say["gorunum"]]
-              + [[a, "IfcElementAssembly", "bileşen", f"{n} çubuk birleşimin kartında"] for a, n in say["bilesen"].items()],
+              + [[a, "IfcElementAssembly", "bileşen", f"{n} çubuk; birleşim kural yok, sayılmadı" if a in kural_yok else f"{n} çubuk birleşimin kartında"]
+                 for a, n in say["bilesen"].items()],
               [26, 20, 12, 60])
     yol = Path(yol)
     yol.parent.mkdir(parents=True, exist_ok=True)

@@ -212,7 +212,7 @@ def test_h_kaydi_en_yakin_makas(tmp_path):
     assert ue.get_psets(e)[KM.PARCA_SETI]["Kural"] == "h_turu: dübelli & kulaklı (MAKAS_04 0.00 cm)"
 
 
-def test_besik_olmayan_catida_makasa_bagli_parca_kural_yok(pk01, cevap, tmp_path):
+def test_besik_olmayan_catida_makasa_bagli_parca_kural_yok(pk01, kartlar, cevap, tmp_path):
     """Bugünkü IFC kırma çatıda da beşik makas çizer: model makaslardan ve onlara bağlı dış H türünden sayı vermez."""
     say = KM.kart_modeli(pk01["bugunku"], tmp_path / "kirma.ifc", "kirma")
     assert say["cati_tipi"] == "kirma"
@@ -223,6 +223,14 @@ def test_besik_olmayan_catida_makasa_bagli_parca_kural_yok(pk01, cevap, tmp_path
     assert (adet["H-03"], adet["H-06"], adet["D-01"]) == (10, 4, 23)                                    # çatıya bağlı olmayanlar aynı
     k = KY.kiyasla(tmp_path / "kirma.ifc", cevap, _oku(PROJE))
     assert k["kapi_1"] == "geçmez"
+    # eşlemedeki çatı tipi kuralın sınırını genişletmez (ikisi birden sağlanmalı; geometri hakemi K1 ikinci tur)
+    k2 = copy.deepcopy(kartlar)
+    for kart in k2["kartlar"]:
+        if kart["kod"] in ("H-01", "H-02", "H-04", "H-05"):
+            for m in kart["bugunku_ifc"]:
+                m["cati_tipleri"] = ["besik", "kirma"]
+    say2 = KM.kart_modeli(pk01["bugunku"], tmp_path / "kirma2.ifc", "kirma", kartlar=k2)
+    assert Counter(x["sinif"] for x in say2["kural_yok"]) == {"IfcElementAssembly": 2 + 7, "IfcMember": 19 + 5}
 
 
 def test_kart_modeli_tek_basina_yuklenir(pk01, tmp_path):
@@ -241,6 +249,10 @@ def test_komut_kirma_catida_1_doner(tmp_path):
     assert KM.main([str(tmp_path / "PK01_kirma.json"), str(tmp_path / "cikti")]) == 1
     say = _oku(tmp_path / "cikti" / "PK01_kirma_kart_sayim.json")
     assert say["cati_tipi"] == "kirma" and len(say["kural_yok"]) == 33
+    from openpyxl import load_workbook
+    bilesen = {r[0]: r[3] for r in load_workbook(tmp_path / "cikti" / "PK01_kirma_kart_katalogu.xlsx")["Kartsız"].iter_rows(values_only=True)
+               if r[2] == "bileşen"}
+    assert bilesen["MAKAS_01"] == "8 çubuk; birleşim kural yok, sayılmadı"                 # kartı olmayan birleşim "kartında" yazmaz
 
 
 def _ozdes(f, e) -> list[str]:
