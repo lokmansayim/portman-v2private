@@ -222,9 +222,7 @@
   "prefabrik.pencere_u_h_gecen": 1,
   "prefabrik.pencere_u_h_gecen_aday_pencere_basina": 2,
   "prefabrik.pencere_ust_kotu_cm": 200.0,
-  "prefabrik.profil_vidalama": 2,
-  "prefabrik.profil_vidalama_aday_kolon_basina": 3,
-  "prefabrik.pvc_betopan_h": 5,
+  "prefabrik.pvc_betopan_h": 7,
   "prefabrik.pvc_betopan_h_aday": 3,
   "prefabrik.sacak_omegasi_bolen_m": 2.5,
   "prefabrik.siparis_boyu.kesinti_mm": 2.5,
@@ -284,7 +282,9 @@
   "prefabrik.vida.rysb_yuvarlama": 50,
   "prefabrik.vida.trapez_5560_yuvarlama": 100,
   "prefabrik.vida_aday_yuvarlama": 250,
-  "prefabrik.vitrifiye_aday": 1
+  "prefabrik.vitrifiye_aday": 1,
+  "prefabrik_isaret.omega_kapak": "tek_kaynak",
+  "prefabrik_isaret.pencere_u_h_gecen": "tek_kaynak"
  },
  "kitapla_farkli": [
   [

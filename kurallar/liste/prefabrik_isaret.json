@@ -1,0 +1,12 @@
+{
+ "sema": "portman.prefabrik_isaret/1.0",
+ "aciklama": "Prefabrik yükleme listesinde kaynağı tek bir listeye dayanan kurallar (BK-12 PR-2c, 20 Ekim 2026; CIO notu 5, PR #28'in 2. okuması). `prefabrik.json`'un biçimi ve durum değerleri değişmesin diye ayrı dosyada; `dogrula.py`'nin girdi kalıbında değil. Okuyan `motor/prefabrik_liste.py` (`kurallari_oku`, `_isaret`): yalnız `isaretler` okunur, değeri yalnız `tek_kaynak` olabilir; işaretli kuralın satırında dayanak \"Tek kaynak (zayıf)\" ve Excel'de satır renkli. Her ad `prefabrik.json`'da bir kuraldır ve adlar üretecin işaretli satırlarıyla (`ISARETLI`) aynıdır: işaret eklemek ya da kaldırmak üreteçte o satırın `zayif(...)` çağrısıyla birlikte yapılır, yalnız biri değişirse kurallar okunmaz (`kurallari_oku` durur; testler/motor/test_prefabrik_liste.py, `test_tek_kaynak_isaretleri`). `nedenler` belge içindir, okunmaz.",
+ "isaretler": {
+  "pencere_u_h_gecen": "tek_kaynak",
+  "omega_kapak": "tek_kaynak"
+ },
+ "nedenler": {
+  "pencere_u_h_gecen": "Portatifev listelerinde yalnız PK-01'de 1; PK-07, TS-01, AP-02, AP-03, AP-05'te satır yok. Bu beşte pencerenin alıcıya ait olup olmadığı listelerden okunmadı (karkas alıcıya ait pencerede de yazılır, O12); kural değişmez, kıyası PR-3'te.",
+  "omega_kapak": "\"+3\": asma dizme tavanlı tek Portatifev listesi PK-01 (10). Şablon B'de \"+3\" yok (aday sütunu)."
+ }
+}

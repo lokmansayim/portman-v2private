@@ -1,6 +1,6 @@
 {
  "sema": "portman.prefabrik_liste/1.0",
- "aciklama": "Prefabrik pano evinin yükleme listesi kuralları (BK-12 PR-2, 18 Ekim 2026). Okuyan `motor/prefabrik_liste.py`. Kör test serisinin üreteci 7.3'ün (13 Ekim 2026, `ie-11-pr2-kor-test` dalı) kodun içindeki sabitleri buraya taşındı; değerler aynıydı. Lokman'ın 18 Ekim 2026 19:22 kararları (kart) işlendi: orta iniş eşiği 9 m (`inis_orta`), kitapla farklı on yedi kalemde kitap geçer (kayıtları `kitapla_farkli`'dan kalktı, değerler kitaptan okunur; liste BK-12 › Kanıt). Kural kitabı `kitap_seti`'ndeki dondurulmuş setten okunur (`PORTMAN_KURALLAR` bu listeyi etkilemez): kitapta çelik için yapılan bir değişiklik prefabrik listeyi sessizce değiştirmez, seti ilerletmek bu dosyada bilinçli bir değişikliktir. Kitabın her kuralı üç yerden birindedir: kitapta aynı kalemin aynı anlamlı değeri varsa okunur (burada yinelenmez); değer, yöntem, kalem ya da kapsam farklıysa `kitapla_farkli`'da beyanlıdır (`karar_bekliyor`: Lokman'ın kararını bekleyenler; 18 Ekim 19:22'den beri bekleyen yok); prefabrikte karşılığı yoksa `kitaptan_okunmayan`'da nedeniyle. İç duvar kalınlığı `kurallar/model/duvar_tipleri.json`'dan. Kitabın yöntem B kalemleri prefabrik içindir, çelik listesinde yalnız karşılaştırma için hesaplanır (Lokman, 7 Ekim 07:45). Durum değerleri kural kitabınınkiler (`kurallar/README.md`): lokman, excel (Portatifev şablonunun, yani yükleme listesi çalışma kitabının formülü), uydurma, varsayim; prefabrikte üç değer daha: pafta (inceleme projelerinin montaj paftası ya da açık listesiyle tuttu), cizim (pano Motor'unun çizim kuralı), aday (öteki uygulama; listede aday sütununda). Kişi ve bayi adları yazılmaz; projeler PK ve AP kodlarıyla, ikinci şablon 'Şablon B' (Kasım 2025, PK-02).",
+ "aciklama": "Prefabrik pano evinin yükleme listesi kuralları (BK-12 PR-2, 18 Ekim 2026). Okuyan `motor/prefabrik_liste.py`. Kör test serisinin üreteci 7.3'ün (13 Ekim 2026, `ie-11-pr2-kor-test` dalı) kodun içindeki sabitleri buraya taşındı; değerler aynıydı. Lokman'ın 18 Ekim 2026 19:22 kararları (kart) işlendi: orta iniş eşiği 9 m (`inis_orta`), kitapla farklı on yedi kalemde kitap geçer (kayıtları `kitapla_farkli`'dan kalktı, değerler kitaptan okunur; liste BK-12 › Kanıt). Kural kitabı `kitap_seti`'ndeki dondurulmuş setten okunur (`PORTMAN_KURALLAR` bu listeyi etkilemez): kitapta çelik için yapılan bir değişiklik prefabrik listeyi sessizce değiştirmez, seti ilerletmek bu dosyada bilinçli bir değişikliktir. Kitabın her kuralı üç yerden birindedir: kitapta aynı kalemin aynı anlamlı değeri varsa okunur (burada yinelenmez); değer, yöntem, kalem ya da kapsam farklıysa `kitapla_farkli`'da beyanlıdır (`karar_bekliyor`: Lokman'ın kararını bekleyenler; 18 Ekim 19:22'den beri bekleyen yok); prefabrikte karşılığı yoksa `kitaptan_okunmayan`'da nedeniyle. İç duvar kalınlığı `kurallar/model/duvar_tipleri.json`'dan. Kitabın yöntem B kalemleri prefabrik içindir, çelik listesinde yalnız karşılaştırma için hesaplanır (Lokman, 7 Ekim 07:45). Durum değerleri kural kitabınınkiler (`kurallar/README.md`): lokman, excel (Portatifev şablonunun, yani yükleme listesi çalışma kitabının formülü), uydurma, varsayim; prefabrikte üç değer daha: pafta (inceleme projelerinin montaj paftası ya da açık listesiyle tuttu), cizim (pano Motor'unun çizim kuralı), aday (öteki uygulama; listede aday sütununda). PK-07 hedef örnekle düzeltmeler (BK-12 PR-2c, 20 Ekim 2026; Lokman'ın kartı 15:27 \"İkisi de değişsin\"): PVC betopan H'ı her evde 7 (tavanla bağı yok; Lokman 19:45, kart 19:50), profil vidalama aparatı kalktı. Kaynağı tek bir listeye dayanan kurallar ayrı dosyada işaretlidir (`prefabrik_isaret.json`; bu dosyanın biçimi ve durum değerleri aynı kalsın diye): listede dayanakları \"Tek kaynak (zayıf)\". Kişi ve bayi adları yazılmaz; projeler PK ve AP kodlarıyla, ikinci şablon 'Şablon B' (Kasım 2025, PK-02).",
  "kitap_seti": "setler/0.19.json",
  "kurallar": {
   "pencere_ust_kotu_cm": {
@@ -101,16 +101,6 @@
    "durum": "aday",
    "kaynak": "Şablon B: PK-02 3, PK-03 ve PK-05 5."
   },
-  "profil_vidalama": {
-   "deger": 2,
-   "durum": "excel",
-   "kaynak": "Özel profil varsa 2 (PK-01 listesinin notu)."
-  },
-  "profil_vidalama_aday_kolon_basina": {
-   "deger": 3,
-   "durum": "aday",
-   "kaynak": "Şablon B: kolon × 3 (PK-03 6, PK-06 6)."
-  },
   "veranda_kirisi_eksik_cm": {
    "deger": 10,
    "durum": "pafta",
@@ -132,7 +122,7 @@
   "pencere_u_h_gecen": {
    "deger": 1,
    "durum": "excel",
-   "kaynak": "PK-01'de 1."
+   "kaynak": "PK-01'de 1. Tek kaynak (`prefabrik_isaret.json`): PK-07, TS-01, AP-02, AP-03, AP-05'in listelerinde satır yok; bu beşte pencerenin alıcıya ait olup olmadığı listelerden okunmadı, kıyası PR-3'te."
   },
   "pencere_u_h_gecen_aday_pencere_basina": {
    "deger": 2,
@@ -142,7 +132,7 @@
   "cektirme_u_ic": {
    "deger": 2,
    "durum": "pafta",
-   "kaynak": "PK-01 ve PK-02'de 2."
+   "kaynak": "PK-01 ve PK-02'de 2. Açık Portatifev listelerinde 2–5 (PK-07 100'lük 5; TS-01 2, AP-02 ve AP-03 3, AP-05 5, 60'lık): ortak bir ölçü bulunamadı, değer 2 kaldı (BK-12 PR-2c)."
   },
   "tavan_omegasi_aralik_m": {
    "deger": {
@@ -238,12 +228,12 @@
     "ek": 3
    },
    "durum": "excel",
-   "kaynak": "PVC omega kapak L 3750 (omega profilinden ayrı ürün; kural kitabında yok): oda içi omega hatları ÷ (3,75 − 0,10) + 3 (PK-01 10). Şablon B'de \"+3\" yok (aday)."
+   "kaynak": "PVC omega kapak L 3750 (omega profilinden ayrı ürün; kural kitabında yok): oda içi omega hatları ÷ (3,75 − 0,10) + 3 (PK-01 10). Şablon B'de \"+3\" yok (aday). \"+3\" tek kaynak (`prefabrik_isaret.json`): asma dizme tavanlı tek Portatifev listesi PK-01."
   },
   "pvc_betopan_h": {
-   "deger": 5,
-   "durum": "excel",
-   "kaynak": "Standart 3–5; PK-01 5 (J6: tavan tipinden bağımsız)."
+   "deger": 7,
+   "durum": "lokman",
+   "kaynak": "Her evde 7: baş makaslarda betopanların birleşim yerlerine konur, tavanla bağı yok (Lokman, 20 Ekim 19:45; kart 19:50 \"Her evde 7\", BK-12 PR-2c). Portatifev listelerinde 7, Depo grubunda (PK-07, TS-01; AP-02, AP-03, AP-05 13 Ekim kayıtları, `E2/E3/E5_gercek.json`; baş makas betopanı 6–8 levha). PK-01 5 (4 levha; liste stoktan düşülmüş, kanıt sayılmaz)."
   },
   "pvc_betopan_h_aday": {
    "deger": 3,

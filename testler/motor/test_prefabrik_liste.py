@@ -317,7 +317,7 @@ class _Izli(dict):
 
 
 def _okunanlar(monkeypatch, calistir) -> set:
-    iz, asil_pr, asil_or, asil_dt = set(), PL._pr, PL._ortak, PL._dt
+    iz, asil_pr, asil_or, asil_dt, asil_is = set(), PL._pr, PL._ortak, PL._dt, PL._isaret
 
     def sar(v, yol):
         if isinstance(v, dict):
@@ -328,6 +328,7 @@ def _okunanlar(monkeypatch, calistir) -> set:
         m.setattr(PL, "_pr", lambda k, yol: sar(asil_pr(k, yol), ("prefabrik",) + tuple(yol.split("."))))
         m.setattr(PL, "_ortak", lambda k, *yol: sar(asil_or(k, *yol), ("ortak",) + yol))
         m.setattr(PL, "_dt", lambda k, *yol: sar(asil_dt(k, *yol), ("duvar_tipleri",) + yol))
+        m.setattr(PL, "_isaret", lambda k, kural: sar(asil_is(k, kural), ("prefabrik_isaret", kural)))
         calistir()
     return iz
 
@@ -565,11 +566,11 @@ def test_kitaba_gecen_kalemler(pk01, N, kurallar):
     y = V["tekyon"]
     assert "Panel kapaması" not in {s["kalem"] for s in y["satirlar"]}
     assert "÷ 1⌉" in _satir(y, "Tek kat çatı paneli · ana çatı")["formul"]
-    assert "10.60 + 3.60 + 3.60" in _satir(y, "Metal dere")["formul"]
+    assert "10,60 + 3,60 + 3,60" in _satir(y, "Metal dere")["formul"]
     assert _satir(y, "Özel büküm saçak sacı")["adet"] == 4                         # 7,20 m ÷ 2,3
-    assert _satir(y, "Saçak sacı (30'luk, 3'ü menfezli)")["formul"].startswith("saçak kenarları 10.60 m (çatı panelli")
+    assert _satir(y, "Saçak sacı (30'luk, 3'ü menfezli)")["formul"].startswith("saçak kenarları 10,60 m (çatı panelli")
     assert _satir(y, "100'lük saçak omegası")["adet"] == 5
-    assert "veranda tavanı 9.36" in _satir(y, "Tavan yeşil alçıpan")["formul"]
+    assert "veranda tavanı 9,36" in _satir(y, "Tavan yeşil alçıpan")["formul"]
     # ek_yapi (kapalı çatı panelli tek yön ek yapı, paftasında 2 + 2 özel büküm): sundurma kapama, kenarın altında Boardex şeridi (üreticinin adıyla),
     # duvar dibine özel mahya; paftanın özel büküm saçları kitabın kenar satırlarının notunda, düz saçtan düşülmez
     e = V["ek_yapi"]
@@ -582,7 +583,7 @@ def test_kitaba_gecen_kalemler(pk01, N, kurallar):
     assert "Boardex 1" in _satir(e, "Alçıpan vidası")["formul"]
     # sundurma (10 m'lik kenar boyunca): şerit saçak 10,60 + iki yan 6,61 = 17,21 m × 0,15 m = 2,58 m² × 1,08 ÷ 2,88 → 1 (zayiat %62 olsa 2)
     bx = _satir(V["sundurma"], "OUTWEAR Dış Cephe Levhası (çatı panelli parçanın saçak ve yan altı)")
-    assert bx["adet"] == 1 and bx["formul"].startswith("17.21 m × 0,15 m = 2.58 m² × 1,08")
+    assert bx["adet"] == 1 and bx["formul"].startswith("17,21 m × 0,15 m = 2,58 m² × 1,08")
     n, pf = _varyantlar(N, _oku(PAFTA_KATMANI))["ek_yapi"]
     n = copy.deepcopy(n)
     n["cati"][-1]["duvar_dibi_m"] = 0.0                                                   # paftası duvar dibi yok derse özel mahya yazılmaz
@@ -590,17 +591,70 @@ def test_kitaba_gecen_kalemler(pk01, N, kurallar):
     n, pf = _varyantlar(N, _oku(PAFTA_KATMANI))["tekyon"]
     n = copy.deepcopy(n)
     n["cati"][1].update(acik=False, dere_yok=True)                                      # paftası deresiz çatı panelli parça: kitapta saçakta dere
-    assert "10.60 + 3.60 + 3.60" in _satir(PL.liste(n, kurallar, pf), "Metal dere")["formul"]
+    assert "10,60 + 3,60 + 3,60" in _satir(PL.liste(n, kurallar, pf), "Metal dere")["formul"]
+
+
+def test_pk07_hedef_ornek_duzeltmeleri(N, kurallar, pk01):
+    """Lokman, 20 Ekim 15:27 (kart "İkisi de değişsin") ve 19:45–19:50 (kart "Her evde 7"; BK-12 PR-2c): PVC betopan H'ı baş makaslarda
+    betopanların birleşim yerlerine konur, tavanla bağı yok: her evde 7, Portatifev listelerindeki gibi Depo grubunun ilk satırı. Profil vidalama
+    aparatı yazılmaz (kolonlu beş Portatifev listesinde yok). CIO notu 6: metreyle sayılan satırların birimi m, nem bariyerininki m²."""
+    V = {ad: PL.liste(copy.deepcopy(n), kurallar, pf) for ad, (n, pf) in _varyantlar(N, _oku(PAFTA_KATMANI)).items()}
+    H = "PVC plastik betopan H'ı"
+    assert "ters" not in pk01["girdi_ozeti"]["tavan"] and all("ters" in V[a]["girdi_ozeti"]["tavan"] for a in ("ters100", "ters60"))
+    assert {(_satir(L, H)["grup"], _satir(L, H)["adet"], _satir(L, H)["dayanak"]) for L in (pk01, *V.values())} == {("1009", 7, "Kural (Lokman 20.10)")}
+    assert all([s["kalem"] for s in L["satirlar"] if s["grup"] == "1009"][0] == H for L in (pk01, *V.values()))
+    assert N["dikmeler"] and not any(s["kalem"] == "Profil vidalama aparatı" for L in (pk01, *V.values()) for s in L["satirlar"])
+    assert {s["kalem"]: s["birim"] for s in V["bizde"]["satirlar"] if s["olcu"] == "metre"} == dict.fromkeys(
+        ("NYM kablo 3 × 2,5", "NYM kablo 2 × 1,5", "Uydu kablo", "Besleme kablosu", "Besleme kablo borusu"), "m")
+    assert _satir(V["ters60"], "Nem bariyeri")["birim"] == "m²"
+
+
+def test_tek_kaynak_isaretleri(bozma, N, kurallar, tmp_path, monkeypatch):
+    """Kaynağı tek listeye dayanan kurallar `prefabrik_isaret.json`'da işaretli (CIO notu 5, BK-12 PR-2c; `prefabrik.json`'un biçimi ve
+    `DURUMLAR` aynı): her ad bir prefabrik kuralı, değeri `tek_kaynak`, her işaret okunur. İşaretli satırın dayanağı "Tek kaynak (zayıf)"
+    (Excel rengi ayrı testte), işaretsizinki değil; tanınmayan işaret listeyi, kural olmayan ad, eksik ya da üreteçte satırı işaretlenmeyen işaret
+    kuralların okunmasını durdurur (geometri hakemi PR-2c: işaret sessizce yok sayılmaz)."""
+    dosya = _oku(KOK / "kurallar" / "liste" / "prefabrik_isaret.json")
+    isaret = dosya["isaretler"]
+    assert isaret == kurallar["prefabrik_isaret"] and set(dosya["nedenler"]) == set(isaret)
+    assert set(isaret) == {"pencere_u_h_gecen", "omega_kapak"} and set(isaret.values()) == {"tek_kaynak"}
+    assert set(isaret) <= set(kurallar["prefabrik"]["kurallar"]) and set(isaret) == set(PL.ISARETLI)
+    okunan, _ = bozma
+    assert {o[1] for o in okunan if o[0] == "prefabrik_isaret"} == set(isaret)
+    V = {ad: PL.liste(copy.deepcopy(n), kurallar, pf) for ad, (n, pf) in _varyantlar(N, _oku(PAFTA_KATMANI)).items()}
+    zayif = [s for L in V.values() for s in L["satirlar"] if s["dayanak"] == PL.TEK_KAYNAK]
+    assert {s["kalem"] for s in zayif} == {"100'lük pencere U'su H geçen", "PVC omega kapak L 3750 (asma dizme tavan)"}
+    assert all("yalnız PK-01" in s["formul"] for s in zayif)
+    k = copy.deepcopy(kurallar)
+    k["prefabrik_isaret"]["omega_kapak"] = "zayif"
+    with pytest.raises(ValueError, match="omega_kapak"):
+        PL.liste(copy.deepcopy(N), k)
+    y = tmp_path / "prefabrik_isaret.json"
+    monkeypatch.setattr(PL, "ISARET_YOLU", y)
+    for bozuk, ad in (({**isaret, "profil_vidalama": "tek_kaynak"}, "profil_vidalama"),                 # kural değil
+                      ({a: v for a, v in isaret.items() if a != "omega_kapak"}, "omega_kapak"),          # işaret kalktı, satır hâlâ zayıf
+                      ({**isaret, "cektirme_u_100": "tek_kaynak"}, "cektirme_u_100")):                 # satırı üreteçte işaretlenmiyor
+        y.write_text(json.dumps({"isaretler": bozuk}), encoding="utf-8")
+        with pytest.raises(ValueError, match=ad):
+            PL.kurallari_oku()
+
+
+def test_tek_kaynak_excel_rengi(pk01, tmp_path):
+    """İşaretli satır Excel'de renkli, işaretsizi değil (openpyxl yoksa yalnız bu test atlanır; CIO, PR #30 okuması)."""
+    openpyxl = pytest.importorskip("openpyxl")
+    PL.xlsx(pk01, tmp_path / "liste.xlsx")
+    renk = {r[1].value: r[0].fill.fgColor.rgb for r in openpyxl.load_workbook(tmp_path / "liste.xlsx")["Liste"].iter_rows(min_row=3)}
+    assert renk["PVC omega kapak L 3750 (asma dizme tavan)"].endswith("FFC7CE") and not renk["PVC plastik betopan H'ı"].endswith("FFC7CE")
 
 
 def test_komut_satiri(tmp_path):
     openpyxl = pytest.importorskip("openpyxl")
     assert PL.main([str(PK01), str(tmp_path), "--pafta", str(PAFTA_KATMANI)]) == 0
     L = _oku(tmp_path / "PK01_liste.json")
-    assert L["kod"] == "PK-01" and L["ozet"]["satir"] == len(L["satirlar"]) == 90
+    assert L["kod"] == "PK-01" and L["ozet"]["satir"] == len(L["satirlar"]) == 89
     assert L["kural_seti"]["prefabrik"] == "portman.prefabrik_liste/1.0"
     wb = openpyxl.load_workbook(tmp_path / "PK01_liste.xlsx")
-    assert wb.sheetnames == ["Liste"] and wb["Liste"].max_row == 90 + 2
+    assert wb.sheetnames == ["Liste"] and wb["Liste"].max_row == 89 + 2
     d = {r[1]: r[5] for r in wb["Liste"].iter_rows(min_row=3, values_only=True)}
     assert d["Dayson (çatı renginde)"] == "Kural kitabı" and d["Poliüretan köpük"] == "Şablon formülü (O18)"
     assert not any("karar bekliyor" in str(x) for r in wb["Liste"].iter_rows(values_only=True) for x in r)
