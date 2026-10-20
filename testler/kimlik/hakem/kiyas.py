@@ -133,6 +133,8 @@ def md(k: dict) -> str:
         satir.append("Kart modeli: hayır (bugünkü IFC; ad ve Pset eşlemesiyle sayıldı).")
     if not k["metraj_referansi"]:
         satir.append("Metraj kapısı: referans yok, koşulmadı; Patron kabulü kapının yerine geçmez.")
+    else:
+        satir.append(f"Metraj kapısı: referans {k['metraj_referansi']}; bu araç koşmaz, sonucu metraj kapısının raporunda.")
     if k["teyit_bekliyor"]:
         satir.append("Teyit bekleyen (bu bölümlerin satırları kapıdan geçmez):")
         satir += [f"- {t['bolum']}: {t['neden']}" for t in k["teyit_bekliyor"]]

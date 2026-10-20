@@ -3,8 +3,9 @@
 - **Sentetik pafta (her koşuda):** okuyucunun şablon kuralları PyMuPDF ile çizilen üç sayfalık bir paftada sınanır: sayfa başlıktan
   bulunur (sıra karışık), montaj ve makas sayfaları 270° döndürülmüş, ölçek 125,5'lik panodan ve dış ölçü yazısından, dış / iç
   ayrımı konumdan, H türleri lejantın renginden, makaslar MK etiketlerinin yanındaki çizgiden (turuncu tarama çizgisi oylamayı
-  şaşırtmaz), kısa makaslar ayrı aile. Bir bölümde uyarı varsa (lejantta rengi olmayan tür ya da daire, tek çizgili makas) o
-  bölümün satırları katmana girmez, nedeniyle "teyit bekliyor"a yazılır; öteki bölüm yine okunur.
+  şaşırtmaz), kısa makaslar ayrı aile. Bir bölümde uyarı varsa (lejantta rengi olmayan tür ya da daire, tek çizgili makas; montajda
+  önde girinti, duvar zincirine bağlı olmayan pano, bina dışındaki kolon) o bölümün satırları katmana girmez, nedeniyle
+  "teyit bekliyor"a yazılır; öteki bölüm yine okunur.
 - **PK-07 gerilemesi (paftayla):** `PORTMAN_PAFTA_DIZINI` altında `PK07.pdf` (SHA tutarsa) varsa okuyucu 13 Ekim betiğinin pano, H ve
   makas sayılarını ve makas konumlarını (±0,5 cm) yeniden üretir; yoksa atlanır. Pafta depoya girmez (antetinde ad var).
 """
@@ -80,7 +81,8 @@ H_KONUM = {"dubelli_kulakli": [(5, 130), (5, 255), (595, 130)], "dubelli": [(130
 MAKAS = {"MK01": (390, 660), "MK02": (260, 660), "MK03": (140, 660), "MK04": (10, 660), "MK05": (200, 260), "MK06": (75, 260)}
 
 
-def sentetik(yol: Path, lejant_eksik: str | None = None, yabanci_daire: bool = False, tek_cizgi: str | None = None) -> Path:
+def sentetik(yol: Path, lejant_eksik: str | None = None, yabanci_daire: bool = False, tek_cizgi: str | None = None,
+              disari: str | None = None) -> Path:
     doc = fitz.open()
     # 1. sayfa kapak (başlıksız), sonra H, makas ve montaj: sayfa başlıktan bulunur
     Sayfa(doc, 0).yazi(400, 500, "TEKNİK ÖZELLİKLER")
@@ -110,6 +112,11 @@ def sentetik(yol: Path, lejant_eksik: str | None = None, yabanci_daire: bool = F
         for y0, y1, tur in ((10, 135.5, "STD"), (135.5, 261, "STD"), (261, 390, "OZEL")):
             m.dortgen([x0, y0, x1, y1], R[tur])
     m.dortgen([150, 200, 232, 204], R["KANAT"])
+    if disari == "pano":                                               # bina dışında pano oranlı dörtgen (lejant örneği gibi)
+        m.dortgen([-300, 100, -200, 110], R["STD"])
+    elif disari == "kolon":                                            # cephenin 150 cm önünde köşe renginde kolonlar
+        for x in (0, 195, 590):
+            m.dortgen([x, -150, x + 10, -140], R["KOSE"])
     for metin, (X, Y) in (("600", (450, 640)), ("400", (130, 500)), ("78", (580, 620)), ("129", (250, 450))):
         m.yazi(X, Y, metin)
     m.yazi(500, 700, "MONTAJ PLANI", 12)
@@ -195,6 +202,44 @@ def test_tek_cizgili_makas_makas_bolumunu_bekletir(tmp_path):
     assert [t["bolum"] for t in o["teyit_bekliyor"]] == ["makas"]
     assert "çift çizgi olmayan makas" in o["teyit_bekliyor"][0]["neden"]
     assert o["h_plani"]["dis"]["adet"] == 5
+
+
+@pytest.mark.parametrize("disari, neden", [("pano", "duvar zincirine bağlı olmayan 1 pano"),
+                                            ("kolon", "duvar zincirinin dışında 3 öğe dış ölçüyü genişletiyor")])
+def test_bina_disindaki_cizim_montaji_bekletir(tmp_path, disari, neden):
+    """Bina dışında pano ya da köşe renginde çizim: sayılar ve dış ölçü bozulabilir, montaj teyite düşer."""
+    o = PO.oku(sentetik(tmp_path / f"{disari}.pdf", disari=disari))
+    assert any(t["bolum"] == "montaj" and t["neden"].startswith(neden) for t in o["teyit_bekliyor"]), o["teyit_bekliyor"]
+
+
+def _nisli(yol: Path) -> Path:
+    """Önde 200 × 160 cm girintisi olan ev; bütün panolar dış duvarda (yalnız montaj sayfası)."""
+    doc = fitz.open()
+    m = Sayfa(doc, 0)
+    for k in ([0, 0, 10, 10], [590, 0, 600, 10], [0, 390, 10, 400], [590, 390, 600, 400],
+              [190, 0, 200, 10], [400, 0, 410, 10], [190, 160, 200, 170], [400, 160, 410, 170]):
+        m.dortgen(k, R["KOSE"])
+    panolar = [([x0, 390, x1, 400], t) for x0, x1, t in ((10, 135.5, "STD"), (135.5, 261, "STD"), (261, 386.5, "STD"),
+                                                         (386.5, 512, "STD"), (512, 590, "OZEL"))]
+    panolar += [([x0, y0, x1, y1], t) for x0, x1 in ((0, 10), (590, 600)) for y0, y1, t in ((10, 135.5, "STD"), (135.5, 261, "STD"), (261, 390, "OZEL"))]
+    panolar += [([10, 0, 135.5, 10], "STD"), ([135.5, 0, 190, 10], "OZEL"), ([410, 0, 535.5, 10], "STD"), ([535.5, 0, 590, 10], "OZEL")]
+    panolar += [([x0, y0, x1, y1], t) for x0, x1 in ((190, 200), (400, 410)) for y0, y1, t in ((10, 135.5, "STD"), (135.5, 160, "OZEL"))]
+    panolar += [([200, 160, 325.5, 170], "STD"), ([325.5, 160, 400, 170], "OZEL")]
+    for k, t in panolar:
+        m.dortgen(k, R[t])
+    for metin, (X, Y) in (("600", (450, 640)), ("400", (130, 500))):
+        m.yazi(X, Y, metin)
+    m.yazi(500, 700, "MONTAJ PLANI", 12)
+    doc.save(yol)
+    return yol
+
+
+def test_onde_girinti_montaji_bekletir(tmp_path):
+    """Nişin yan duvarları yüzüne dik ışında iç görünür; okuyucu bunu bilir ve montajı teyite düşürür."""
+    o = PO.oku(_nisli(tmp_path / "nis.pdf"))
+    assert o["ayrinti"]["montaj"]["pano"]["adet"] == 21
+    assert [t["neden"] for t in o["teyit_bekliyor"] if t["bolum"] == "montaj"] == \
+        ["dış / iç belirsiz 4 pano (iç sayıldı, yüzünün önü dışarıya açılıyor; önde girinti olabilir)"]
 
 
 def test_sha_tutmazsa_okunmaz(tmp_path):

@@ -163,6 +163,49 @@ def _isin_acik(p: dict, yon: str, isaret: int, oran: float, engeller: list[dict]
     return True
 
 
+def _paralel_kacis(p: dict, engeller: list[dict], d: float = 1.0) -> bool:
+    """Panonun bir yüzünün `d` cm önünden, panoya paralel giden ışın üç noktada da hiçbir duvar öğesine çarpmıyor mu (önde girinti:
+    nişin yan duvarı, yüzüne dik ışında iç görünür ama dışarıya açılır)."""
+    x0, y0, x1, y1 = p["rect"]
+    e = 0.01
+    for yan in (-1, 1):
+        for yon in (-1, 1):
+            acik = True
+            for oran in (0.25, 0.5, 0.75):
+                if p["yon"] == "x":                   # yatay pano: paralel ışın x boyunca, yüzün önünde sabit y
+                    c, s = (y0 - d) if yan < 0 else (y1 + d), x0 + (x1 - x0) * oran
+                    ara = [(o["rect"][1], o["rect"][3], o["rect"][0], o["rect"][2]) for o in engeller if o is not p]
+                else:
+                    c, s = (x0 - d) if yan < 0 else (x1 + d), y0 + (y1 - y0) * oran
+                    ara = [(o["rect"][0], o["rect"][2], o["rect"][1], o["rect"][3]) for o in engeller if o is not p]
+                if any(c0 + e < c < c1 - e and (b1 > s + e if yon > 0 else b0 < s - e) for c0, c1, b0, b1 in ara):
+                    acik = False
+                    break
+            if acik:
+                return True
+    return False
+
+
+def _bilesenler(ogeler: list[dict], pay: float = 2.0) -> list[list[int]]:
+    """Birbirine `pay` cm'den yakın duvar öğeleri (pano, köşe) bir zincirdir; zincirler büyükten küçüğe."""
+    kok = list(range(len(ogeler)))
+
+    def bul(i):
+        while kok[i] != i:
+            kok[i] = kok[kok[i]]
+            i = kok[i]
+        return i
+    for i, a in enumerate(ogeler):
+        for j in range(i + 1, len(ogeler)):
+            b = ogeler[j]["rect"]
+            if a["rect"][0] - pay <= b[2] and b[0] - pay <= a["rect"][2] and a["rect"][1] - pay <= b[3] and b[1] - pay <= a["rect"][3]:
+                kok[bul(i)] = bul(j)
+    gruplar: dict[int, list[int]] = {}
+    for i in range(len(ogeler)):
+        gruplar.setdefault(bul(i), []).append(i)
+    return sorted(gruplar.values(), key=len, reverse=True)
+
+
 def montaj_oku(pg, ayar: dict) -> dict:
     A = ayar["montaj"]
     renkler = {ad: tuple(v) for ad, v in A["renkler"].items()}
@@ -235,6 +278,21 @@ def montaj_oku(pg, ayar: dict) -> dict:
     for p in panolar:
         dis = any(all(_isin_acik(p, p["yon"], isaret, o, engeller) for o in (0.25, 0.5, 0.75)) for isaret in (-1, 1))
         p["duvar"] = "dis" if dis else "ic"
+    # okuyucunun bilmediği biçimler sayıyı sessizce bozmasın: teyide düşer
+    belirsiz = [p for p in panolar if p["duvar"] == "ic" and _paralel_kacis(p, engeller)]
+    if belirsiz:
+        uyarilar.append(f"dış / iç belirsiz {len(belirsiz)} pano (iç sayıldı, yüzünün önü dışarıya açılıyor; önde girinti olabilir)")
+    zincir = _bilesenler(engeller)
+    ana = [engeller[i] for i in zincir[0]]
+    ax0, ay0 = min(o["rect"][0] for o in ana), min(o["rect"][1] for o in ana)
+    ax1, ay1 = max(o["rect"][2] for o in ana), max(o["rect"][3] for o in ana)
+    kopuk = [engeller[i] for g in zincir[1:] for i in g]
+    kopuk_pano = sum(1 for o in kopuk if any(o is p for p in panolar))
+    if kopuk_pano:
+        uyarilar.append(f"duvar zincirine bağlı olmayan {kopuk_pano} pano (bina dışında bir çizim olabilir)")
+    disarida = [o for o in kopuk if o["rect"][0] < ax0 - 1 or o["rect"][1] < ay0 - 1 or o["rect"][2] > ax1 + 1 or o["rect"][3] > ay1 + 1]
+    if disarida:
+        uyarilar.append(f"duvar zincirinin dışında {len(disarida)} öğe dış ölçüyü genişletiyor")
     panolar.sort(key=lambda p: (p["duvar"], p["yon"], p["rect"]))
     return {
         "olcek_pt_cm": [round(sx, 5), round(sy, 5)],

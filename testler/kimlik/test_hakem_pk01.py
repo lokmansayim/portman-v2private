@@ -90,7 +90,8 @@ def test_cevap_pr28_katmaniyla_ayni(cevap):
 
 
 def test_liste_ureteci_cevabi_okur(cevap):
-    """PR #28 katmanının H ve makas anahtarları bu cevapla değişince listenin pafta sütunu aynı kalır, başka hiçbir şey değişmez."""
+    """PR #28 katmanının H ve makas anahtarları bu cevapla değişince listenin grup, kalem, ölçü, adet, pafta ve aday sütunları aynı
+    kalır. Pafta notu okuyucunun notuyla değişir (ör. "boy 660.1 cm"); PR #28 katmanı bu PR'da değişmediği için bugünkü liste aynıdır."""
     pr28 = _oku(MOTOR_VERI / "PK01_pafta_katmani.json")
     yeni = copy.deepcopy(pr28) | {k: cevap[k] for k in ("h_plani", "makas_bas", "makas_orta")} | {"ayrinti": cevap["ayrinti"]}
     N = PL.model_motor(_oku(MOTOR_VERI / "PK01.json"))
@@ -196,6 +197,13 @@ def test_kiyas_kart_modeli_kapidan_gecer(tmp_path, cevap, proje):
     assert all(s["kapida"] and s["sonuc"] == "geçer" and s["sayim_yolu"] == "PortatifEv_Parca.PaftaAnahtari" for s in k["satirlar"]), \
         [s for s in k["satirlar"] if s["sonuc"] != "geçer"]
     assert (len(k["satirlar"]), k["kapi_1"], k["kart_modeli"]) == (13, "geçer", 50 + sum(t.values()) + 9)
+
+
+def test_kiyas_metraj_referansi_varsa_kosmadigini_yazar(pk01_ifc, cevap, proje):
+    k = KY.kiyasla(pk01_ifc, cevap, proje | {"metraj_referansi": "PK-07 listesi"})
+    rapor = KY.md(k).splitlines()
+    assert "Metraj kapısı: referans PK-07 listesi; bu araç koşmaz, sonucu metraj kapısının raporunda." in rapor
+    assert not any(r.startswith("Metraj kapısı: referans yok") for r in rapor)
 
 
 def _pafta() -> Path | None:
