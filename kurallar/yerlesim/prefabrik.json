@@ -1,0 +1,35 @@
+{
+ "sema": "portman.prefabrik_yerlesim/1",
+ "surum": "1",
+ "aciklama": "Prefabrik pano evinde parçaların yerleşim kuralları (İE-15). Okuyan `motor/kart_model.py` (K1; K2 ve K3'te `motor/yerlesim/`). Yalnız kural kitabında ve `kurallar/liste/prefabrik.json`'da olmayan konum kuralları buraya yazılır; aynı anahtar iki dosyada olmaz (test). Oradaki değerler (makas aralığı, omega aralığı, aşık mahya payı) okunur, burada yeniden yazılmaz.",
+ "kurallar": {
+  "h_turu": {
+   "kural": "Dış duvarda, makasın oturduğu duvar çizgisinde makasa en yakın dış H (pano eki ya da 3'lü) dübelli & kulaklıdır; öteki dış H dübellidir. İç H standarttır (kartı ayrı).",
+   "makasin_oturdugu_duvar": {
+    "deger": "Makasın doğrultusuna dik dış duvar; duvarın çizgisi makasın boyu içinde, makasın yeri duvarın iki ucu arasında",
+    "durum": "varsayim",
+    "tarih": "2026-10-20",
+    "not": "Lejant \"dış duvarlarda çatı makaslarına denk gelen\" der; hangi duvarın makasın oturduğu duvar olduğunu söylemez. Bu okuma K1'in yorumudur."
+   },
+   "duvar_cizgisi_payi_cm": {
+    "deger": 6,
+    "durum": "varsayim",
+    "tarih": "2026-10-20",
+    "not": "H'nin merkezi ile dış duvarın orta çizgisi arasındaki en büyük uzaklık (100'lük duvarın yarısı ve 1 cm). K1'in seçimi."
+   },
+   "denk_gelme_payi": {
+    "okunan": "kurallar/liste/prefabrik.json › kurallar.makas_aralik_cm",
+    "carpan": 0.5,
+    "durum": "varsayim",
+    "tarih": "2026-10-20",
+    "not": "Makas aralığının yarısı: bir duvar çizgisinde her makasa en çok bir H düşer. Çarpan K1'in seçimi; makas aralığı liste kurallarından okunur."
+   },
+   "cati_tipleri": ["besik"],
+   "turler": {"denk": "dubelli_kulakli", "denk_degil": "dubelli"},
+   "durum": "muhendis",
+   "tarih": "2026-10-13",
+   "kaynak": "PK-07 H planı lejantı: \"Dış duvarlarda çatı makaslarına denk gelen H'lar\" dübelli & kulaklı (kör test, 13 Ekim 2026). PK-01'de paftanın kodla okunmuş türleriyle sınandı (İE-15 K1): pano ekinde 12 / 7, 3'lüde 2 / 3; tutmayan yer fark olarak yazılır, kural evlere uydurulmaz.",
+   "not": "Kuralın cümlesi mühendisin (PK-07 lejantı); onu uygulamak için seçilen üç değer (`makasin_oturdugu_duvar`, `duvar_cizgisi_payi_cm`, `denk_gelme_payi`) K1'in varsayımıdır, her biri kendi durumunu taşır. Bir duvar çizgisinde iki makas aynı H'ye denk gelirse kayıt en yakın makası yazar. `cati_tipleri`: makasların yeri bugünkü IFC'den okunur ve bugünkü IFC çatıyı her zaman beşik çizer (`motor/ifc_uret.py`); İş Emri'nin çatısı başka tipteyse makasa bağlı parçalar \"kural yok\" yazar. Bugünkü IFC'de makaslar eşit aralıklı (PK-01'de 123,75 cm), paftada pano eklerinde (125,5); PK-01'de en büyük kayma 12,25 cm ve pay içinde. Başka bir evde aralık ya da kayma farklıdır; pay içinde kaldığı her evde ayrıca görülmelidir."
+  }
+ }
+}

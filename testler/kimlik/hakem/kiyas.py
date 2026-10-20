@@ -13,8 +13,10 @@ Sayım iki yoldan biriyle yapılır:
 Kapı 1 (plan.md §5): adette fark 0 geçer. Kapıya `kapi` listesindeki anahtarlar girer; model sözleşmeyi taşıyan en az bir parça
 içeriyorsa (kart modeli) `kart_kapisi` listesindeki anahtarlar da girer. Böylece bugünkü IFC'de "modelde yok" yazan ayrıntı
 (H türleri) K1'de hakem değişmeden kapıya girer. Okuyucunun teyit beklettiği bölümün (montaj, h_plani, makas) satırları
-"teyit bekliyor" yazar ve kapı geçmez; neden rapora yazılır. Boyla alınan kartların metre kıyası (±%3) KH-2'nin işidir ve yeni bir
-işlev olarak eklenir; bu dosyadaki sayım ve Kapı 1 değişmez.
+"teyit bekliyor" yazar ve kapı geçmez; neden rapora yazılır. Bu araç bölümünü tanımadığı bir teyit görürse hangi satırı etkilediğini
+bilemez: bütün satırlar "teyit bekliyor" yazar. Bir parçada aynı anahtar iki kez yazılmışsa bir kez sayılır (bu iki cümle K1'in hakem
+değişikliğidir). Boyla alınan kartların metre kıyası (±%3) KH-2'nin işidir ve yeni bir işlev olarak eklenir; bu dosyadaki sayım ve Kapı 1
+değişmez.
 
 Koşma:
     python3 -I testler/kimlik/hakem/kiyas.py <model.ifc> <cevap.json> --proje testler/kimlik/hakem/projeler/PK01.json [--md <rapor.md>]
@@ -53,6 +55,9 @@ def _uyar(e, kural: dict) -> bool:
     return True
 
 
+BOLUMLER = ("montaj", "h_plani", "makas")
+
+
 def bolum(anahtar: str) -> str | None:
     """Anahtarın okuyucudaki bölümü; teyit bekleyen bölümün satırı kapıya girmez."""
     if anahtar.startswith("ayrinti.montaj."):
@@ -77,7 +82,7 @@ def say(model: ifcopenshell.file, anahtarlar: list[str], eslemeler: list[dict]) 
         k = ue.get_psets(e).get(SOZLESME[0], {}).get(SOZLESME[1])
         if k:
             kartli += 1
-            for a in _sozlesme_anahtarlari(k):
+            for a in dict.fromkeys(_sozlesme_anahtarlari(k)):          # parça başına bir kez ("a;a" iki sayılmaz)
                 sozlesmeli[a] = sozlesmeli.get(a, 0) + 1
     out = {}
     for anahtar in anahtarlar:
@@ -103,7 +108,7 @@ def kiyasla(model_yolu: Path | str, cevap: dict, proje: dict) -> dict:
     satirlar = []
     for a in anahtarlar:
         p, m = cevap_degeri(cevap, a), sayim[a]["adet"]
-        if bolum(a) in kapali:
+        if bolum(a) in kapali or kapali - set(BOLUMLER):
             sonuc = "teyit bekliyor"
         elif p is None:
             sonuc = "paftada yok"
@@ -137,7 +142,8 @@ def md(k: dict) -> str:
         satir.append(f"Metraj kapısı: referans {k['metraj_referansi']}; bu araç koşmaz, sonucu metraj kapısının raporunda.")
     if k["teyit_bekliyor"]:
         satir.append("Teyit bekleyen (bu bölümlerin satırları kapıdan geçmez):")
-        satir += [f"- {t['bolum']}: {t['neden']}" for t in k["teyit_bekliyor"]]
+        satir += [f"- {t['bolum']}: {t['neden']}" + ("" if t["bolum"] in BOLUMLER else " (bölüm tanınmıyor; bütün satırlar teyit bekliyor)")
+                  for t in k["teyit_bekliyor"]]
     else:
         satir.append("Teyit bekleyen yok.")
     return "\n".join(satir) + "\n"

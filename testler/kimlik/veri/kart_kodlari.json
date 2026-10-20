@@ -1,0 +1,30 @@
+{
+ "aciklama": "Kart kodlarının kilidi (İE-15 K1): bir kod başka ürüne verilmez. Kartlar dosyasındaki her kod burada aynı adla durur; yeni kart buraya da eklenir. Kart dosyasından kalkan kod burada kalır ve başka ürüne verilmez. Var olan satır değiştirilmez; ad düzeltmesi gerekirse gerekçesi iş emrine yazılır.",
+ "kodlar": {
+  "D-01": "100'lük yapıştırma dolu pano",
+  "D-02": "100'lük pencereli pano (120/120)",
+  "D-03": "100'lük pencereli pano (120/180)",
+  "D-04": "100'lük yapıştırma dolu vasistaslı pano (60/40)",
+  "D-05": "Karkaslı çelik kapı panosu",
+  "I-01": "60'lık yapıştırma dolu pano",
+  "I-02": "60'lık karkaslı + kasalı pano",
+  "I-03": "60'lık geçişli pano",
+  "K-01": "Amerikan kapı (80'lik kanat)",
+  "K-02": "Prefabrik çelik kapı",
+  "P-01": "PVC pencere 120/120",
+  "P-02": "PVC pencere 120/180",
+  "P-03": "PVC vasistas 60/40",
+  "B-01": "10'luk köşe direği 100 × 100",
+  "B-02": "6'lık köşe direği 60 × 60",
+  "V-01": "Özel kutu profil (kolon) 100 × 100",
+  "V-02": "Kutu profil (kiriş) 100 × 100",
+  "H-01": "H 100 dübelli & kulaklı (dış pano eki)",
+  "H-02": "H 100 dübelli (dış pano eki)",
+  "H-03": "H standart 60 (iç pano eki)",
+  "H-04": "3'lü H 100 × 100 × 60 dübelli & kulaklı (dış duvar T'si)",
+  "H-05": "3'lü H 100 × 100 × 60 dübelli (dış duvar T'si)",
+  "H-06": "3'lü H standart 60 (iç T)",
+  "MA-01": "Makas (baş)",
+  "MA-02": "Makas (orta)"
+ }
+}
