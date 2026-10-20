@@ -18,4 +18,5 @@ Bonsai bakma yeridir: sayı bizim kodumuzdan gelir, Bonsai'de yapılan değişik
 - **Kart kodu katalog kodundan ayrıdır.** Bugünkü malzeme kataloğunun kodu (D01, D09…) boya göre verilir ve projede yeni boy çıktıkça yenisi eklenir. Kart kodu ürünü gösterir, boyla değişmez, bu yüzden tirelidir (D-01). Aile harfleri katalogla aynıdır.
 - **Kartı olmayan parça sayılmaz.** Bir parça tam bir karta uyar. İki karta uyarsa model üretilmez; hiçbirine uymazsa "kural yok" yazar.
 - **Ayrıca listelenen parçalar.** Görünüm (üçlü H'nin yüz görünümü), bileşen (makasın çubukları) ve kartsız parçalar sayılmaz, ayrı listelenir. Kartsız olanlar bu dosyada nedeniyle yazılıdır: çatı yüzü, alın, zemin betonu, boşluk.
+- **Çatı tipi İş Emri'nden gelir.** Bugünkü IFC çatıyı hep beşik çizer. Eşlemesi ya da kuralı `cati_tipleri` taşıyan parça (makaslar, makasa bağlı dış H'ler) İş Emri'nin çatısı o tiplerden değilse sayılmaz, "kural yok" yazar.
 - **Yerleşim kuralı başka dosyadadır.** Kartı parçaya bağlayan yerleşim kuralı (ör. H türü) `kurallar/yerlesim/prefabrik.json`'dadır. Liste kurallarındaki değerler (makas aralığı) `kurallar/liste/prefabrik.json`'dan okunur, iki yerde yazılmaz.

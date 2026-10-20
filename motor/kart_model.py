@@ -13,7 +13,9 @@
   bugünkü IFC esastır (test). İkisinin tek dosyada birleşmesi K4'ün işidir.
 - **H türü bir kuraldır** (`kurallar/yerlesim/prefabrik.json › h_turu`, PK-07 lejantı): dış duvarda makasa denk gelen H dübelli & kulaklı,
   öteki dış H dübelli. Girdiler bugünkü IFC'de: dış duvarların ve H'lerin yeri, makasların yeri (makas parçalarından). Denk gelme payı makas
-  aralığının yarısıdır; aralık `kurallar/liste/prefabrik.json`'dan okunur.
+  aralığının yarısıdır; aralık `kurallar/liste/prefabrik.json`'dan okunur. İki makas aynı H'ye denk gelirse kayıt en yakınını yazar.
+- **Çatı tipi İş Emri'nden gelir:** bugünkü IFC çatıyı her zaman beşik çizer. Eşlemesi ya da kuralı `cati_tipleri` taşıyan parça (makaslar ve
+  makasa bağlı dış H'ler) İş Emri'nin çatısı o tiplerden değilse "kural yok" yazar; model makası olmayan bir çatıdan tür türetmez.
 - **Kartı olmayan parça sayılmaz:** hiçbir karta uymayan parça "kural yok" yazar; iki karta uyan parçada model üretilmez. Görünüm (üçlü H'nin
   yüz görünümü), bileşen (makasın çubukları) ve kartsız olduğu bildirilen parçalar (çatı yüzü, alın, zemin betonu, boşluk) ayrı listelenir.
 
@@ -23,7 +25,9 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib
 import json
+import math
 import re
 import sys
 import uuid
@@ -56,8 +60,9 @@ def _goreli(yol: Path) -> str:
 
 
 def _api(ad: str, *a, **k):
+    """`ifcopenshell.api.<modül>.<işlev>`; modül burada yüklenir (`import ifcopenshell.api` alt modülleri yüklemez)."""
     modul, islev = ad.split(".")
-    return getattr(getattr(ifcopenshell.api, modul), islev)(*a, **k)
+    return getattr(importlib.import_module(f"ifcopenshell.api.{modul}"), islev)(*a, **k)
 
 
 # ----------------------------------------------------------------------------- geometri (dünya koordinatı, cm)
@@ -108,7 +113,7 @@ def _uyar(e, m: dict) -> bool:
 # ----------------------------------------------------------------------------- H türü kuralı
 def h_turleri(f: ifcopenshell.file, adaylar: list, kural: dict, makas_aralik_cm: float, kutu: _Kutular) -> dict[int, dict]:
     """Dış H adaylarının türü (PK-07 lejantı). Dönen: parça id → {tur, makas, uzaklik_cm}."""
-    pay_cizgi = kural["duvar_cizgisi_payi_cm"]
+    pay_cizgi = kural["duvar_cizgisi_payi_cm"]["deger"]
     pay_denk = makas_aralik_cm * kural["denk_gelme_payi"]["carpan"]
     makaslar = []
     for e in sorted(f.by_type("IfcElementAssembly"), key=lambda e: e.Name or ""):
@@ -126,6 +131,7 @@ def h_turleri(f: ifcopenshell.file, adaylar: list, kural: dict, makas_aralik_cm:
         duvarlar.append((yon, (a[1 - yon] + b[1 - yon]) / 2, a[yon], b[yon]))
     H = [(e, kutu.merkez(e)) for e in adaylar]
     sonuc = {e.id(): {"tur": kural["turler"]["denk_degil"], "makas": None, "uzaklik_cm": None} for e, _ in H}
+    en_yakin: dict[int, float] = {}                                    # iki makas aynı H'ye denk gelirse kayıt en yakınını yazar
     for m in makaslar:
         yon = 1 - m["eksen"]                                           # oturduğu duvar makasın dizildiği eksende uzanır
         cizgiler = sorted({round(c, 1) for y, c, u0, u1 in duvarlar
@@ -136,14 +142,22 @@ def h_turleri(f: ifcopenshell.file, adaylar: list, kural: dict, makas_aralik_cm:
                 continue
             e, xy = min(ustteki, key=lambda t: (abs(t[1][yon] - m["konum"]), t[0].Name or ""))
             d = abs(xy[yon] - m["konum"])
-            if d <= pay_denk:
+            if d <= pay_denk and d < en_yakin.get(e.id(), math.inf):
+                en_yakin[e.id()] = d
                 sonuc[e.id()] = {"tur": kural["turler"]["denk"], "makas": m["ad"], "uzaklik_cm": round(d, 2)}
     return sonuc
 
 
 # ----------------------------------------------------------------------------- sınıflandırma
-def siniflandir(f: ifcopenshell.file, kartlar: dict, yerlesim: dict, makas_aralik_cm: float) -> list[dict]:
-    """Her `IfcElement` için rol: kart, görünüm, bileşen, kartsız ya da kural yok."""
+def _cati_tipleri(m: dict, yerlesim: dict) -> list[str] | None:
+    """Eşlemenin geçerli olduğu çatı tipleri: eşlemede ya da uyguladığı yerleşim kuralında; yoksa her çatıda geçerli."""
+    if m.get("cati_tipleri"):
+        return m["cati_tipleri"]
+    return yerlesim["kurallar"][m["kural"]["ad"]].get("cati_tipleri") if m.get("kural") else None
+
+
+def siniflandir(f: ifcopenshell.file, kartlar: dict, yerlesim: dict, makas_aralik_cm: float, cati_tipi: str) -> list[dict]:
+    """Her `IfcElement` için rol: kart, görünüm, bileşen, kartsız ya da kural yok. `cati_tipi` İş Emri'ndendir (bugünkü IFC hep beşik çizer)."""
     kutu = _Kutular()
     elemanlar = sorted(f.by_type("IfcElement"), key=lambda e: (e.is_a(), e.Name or "", e.GlobalId))
     h_adaylari = [e for e in elemanlar if any(_uyar(e, m) for k in kartlar["kartlar"] for m in k["bugunku_ifc"]
@@ -170,12 +184,18 @@ def siniflandir(f: ifcopenshell.file, kartlar: dict, yerlesim: dict, makas_arali
         for k in kartlar["kartlar"]:
             for m in k["bugunku_ifc"]:
                 if _uyar(e, m) and (not m.get("kural") or kural_sonucu[m["kural"]["ad"]](e) == m["kural"]["deger"]):
-                    uyan.append(k)
+                    uyan.append((k, m))
                     break
         if len(uyan) > 1:
-            raise ValueError(f"{e.Name}: iki karta uyuyor ({', '.join(k['kod'] for k in uyan)}); kart dosyası düzeltilmeli")
+            raise ValueError(f"{e.Name}: iki karta uyuyor ({', '.join(k['kod'] for k, _ in uyan)}); kart dosyası düzeltilmeli")
         if uyan:
-            kayit = {"e": e, "rol": "kart", "kart": uyan[0]}
+            k, m = uyan[0]
+            izin = _cati_tipleri(m, yerlesim)
+            if izin and cati_tipi not in izin:
+                out.append({"e": e, "rol": "kural_yok", "neden": f"İş Emri'nin çatısı \"{cati_tipi}\"; {k['kod']} eşlemesi yalnız "
+                                                                  f"{', '.join(izin)} çatıda geçerli (bugünkü IFC çatıyı hep beşik çizer)"})
+                continue
+            kayit = {"e": e, "rol": "kart", "kart": k}
             if e.id() in hk:
                 kayit["h"] = hk[e.id()]
             out.append(kayit)
@@ -248,16 +268,16 @@ def _eski_turu_kaldir(f, t) -> None:
     _api("root.remove_product", f, product=t)
 
 
-def kart_modeli(ifc_yolu: Path, cikti_yolu: Path, kartlar: dict | None = None, yerlesim: dict | None = None,
+def kart_modeli(ifc_yolu: Path, cikti_yolu: Path, cati_tipi: str, kartlar: dict | None = None, yerlesim: dict | None = None,
                 liste_kurallari: dict | None = None) -> dict:
-    """Bugünkü IFC → kart modeli. Bugünkü IFC'ye yazılmaz. Dönen: sayım (JSON'a yazılacak biçimde)."""
+    """Bugünkü IFC → kart modeli. Bugünkü IFC'ye yazılmaz. `cati_tipi` İş Emri'nin `cati.tip`'i. Dönen: sayım (JSON'a yazılacak biçimde)."""
     kartlar = kartlar or _oku(KARTLAR)
     yerlesim = yerlesim or _oku(YERLESIM)
     liste_kurallari = liste_kurallari or _oku(LISTE_KURALLARI)
     okunan = yerlesim["kurallar"]["h_turu"]["denk_gelme_payi"]["okunan"]
     makas_aralik_cm = liste_kurallari["kurallar"][okunan.rsplit(".", 1)[1]]["deger"]
     f = ifcopenshell.open(str(ifc_yolu))
-    sinif = siniflandir(f, kartlar, yerlesim, makas_aralik_cm)
+    sinif = siniflandir(f, kartlar, yerlesim, makas_aralik_cm, cati_tipi)
     surum = kartlar["surum"]
     kaynak = f"{_goreli(KARTLAR)} sürüm {surum}"
 
@@ -296,10 +316,10 @@ def kart_modeli(ifc_yolu: Path, cikti_yolu: Path, kartlar: dict | None = None, y
     cikti_yolu = Path(cikti_yolu)
     cikti_yolu.parent.mkdir(parents=True, exist_ok=True)
     f.write(str(cikti_yolu))
-    return sayim(sinif, kartlar, yerlesim, makas_aralik_cm, ifc_yolu, cikti_yolu)
+    return sayim(sinif, kartlar, yerlesim, makas_aralik_cm, cati_tipi, ifc_yolu, cikti_yolu)
 
 
-def sayim(sinif: list[dict], kartlar: dict, yerlesim: dict, makas_aralik_cm: float, ifc_yolu: Path, model_yolu: Path) -> dict:
+def sayim(sinif: list[dict], kartlar: dict, yerlesim: dict, makas_aralik_cm: float, cati_tipi: str, ifc_yolu: Path, model_yolu: Path) -> dict:
     adet = Counter(s["kart"]["kod"] for s in sinif if s["rol"] == "kart")
     katalog = {}
     for s in sinif:
@@ -312,7 +332,7 @@ def sayim(sinif: list[dict], kartlar: dict, yerlesim: dict, makas_aralik_cm: flo
         "aciklama": "İE-15 K1 kart sayımı: her parça kartına bağlı; kartsız parça sayılmaz. Paftayla kıyas hakemin işidir (`testler/kimlik/hakem/kiyas.py`).",
         "bugunku_ifc": Path(ifc_yolu).name, "bugunku_ifc_sha256": hashlib.sha256(Path(ifc_yolu).read_bytes()).hexdigest(),
         "kart_modeli": Path(model_yolu).name,
-        "kartlar_surumu": kartlar["surum"], "yerlesim_surumu": yerlesim["surum"], "makas_aralik_cm": makas_aralik_cm,
+        "kartlar_surumu": kartlar["surum"], "yerlesim_surumu": yerlesim["surum"], "makas_aralik_cm": makas_aralik_cm, "cati_tipi": cati_tipi,
         "kartlar": [{"kod": k["kod"], "ad": k["ad"], "adet": adet[k["kod"]], "katalog_kodlari": dict(sorted(katalog.get(k["kod"], {}).items()))}
                     for k in kartlar["kartlar"]],
         "pafta_anahtarlari": dict(sorted(pafta.items())),
@@ -380,7 +400,7 @@ def uret(ie: dict, klasor: Path, kod: str) -> dict:
     klasor = Path(klasor)
     bugunku = klasor / f"{kod}.ifc"
     ozet = ifc_uret.uret(ie, bugunku)
-    say = kart_modeli(bugunku, klasor / f"{kod}_model.ifc")
+    say = kart_modeli(bugunku, klasor / f"{kod}_model.ifc", ie.get("cati", {}).get("tip", "besik"))   # ifc_uret'in varsayılanı
     say["sema_hatasi"] = {"bugunku_ifc": ozet["sema_hatasi"], "kart_modeli": ifc_uret.ozet(klasor / f"{kod}_model.ifc")["sema_hatasi"]}
     (klasor / f"{kod}_kart_sayim.json").write_text(json.dumps(say, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     katalog_excel(_oku(KARTLAR), say, klasor / f"{kod}_kart_katalogu.xlsx")

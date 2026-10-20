@@ -13,7 +13,7 @@
   "ifc": "IFC4 tür sınıfı ve alt türü (PredefinedType)",
   "pafta": "Montaj paftasında bu ürünün sayıldığı anahtarlar (tek genel pafta okuyucusunun çıktısı, `pafta_katmani.json` biçimi). Parçaya `PortatifEv_Parca.PaftaAnahtari` olarak `;` ile yazılır; yerleşim kapısının hakemi bu sözleşmeyle sayar",
   "pafta_dis_ic": "Duvarın dış ya da iç olmasına göre parçaya eklenen anahtar (`Pset_WallCommon.IsExternal`); kart ürünü tanımlar, duvarın dış ya da iç olduğu parçanın bilgisidir",
-  "bugunku_ifc": "Bugünkü IFC'de (`motor.ifc_uret`) bu kartın parçasını tanıyan eşleme: IFC sınıfı, ad deseni, özellik koşulları (`[set, özellik, desen]`), duvarın boşluk türleri (`bosluk`, sıralı ve virgülle) ve yerleşim kuralının sonucu (`kural`). Bir parça tam bir karta uymalı; ikiye uyarsa model üretilmez, hiçbirine uymazsa \"kural yok\" yazar",
+  "bugunku_ifc": "Bugünkü IFC'de (`motor.ifc_uret`) bu kartın parçasını tanıyan eşleme: IFC sınıfı, ad deseni, özellik koşulları (`[set, özellik, desen]`), duvarın boşluk türleri (`bosluk`, sıralı ve virgülle), yerleşim kuralının sonucu (`kural`) ve geçerli olduğu çatı tipleri (`cati_tipleri`; eşlemede ya da uyguladığı kuralda). Bugünkü IFC çatıyı hep beşik çizer; İş Emri'nin çatısı bu tiplerden değilse parça \"kural yok\" yazar. Bir parça tam bir karta uymalı; ikiye uyarsa model üretilmez, hiçbirine uymazsa \"kural yok\" yazar",
   "kaynak": "Kaynak ve durum: `lokman`, `muhendis` ya da `varsayim`; tarih ve dayanak"
  },
  "aileler": {
@@ -357,7 +357,7 @@
    "sayim": "yerlesen_adet",
    "ifc": {"sinif": "IfcElementAssemblyType", "alt_tur": "TRUSS"},
    "pafta": ["makas_bas"],
-   "bugunku_ifc": [{"sinif": "IfcElementAssembly", "kosul": [["PortatifEv_Kapsam", "BOMKalem", "\\(baş\\)"]]}],
+   "bugunku_ifc": [{"sinif": "IfcElementAssembly", "kosul": [["PortatifEv_Kapsam", "BOMKalem", "\\(baş\\)"]], "cati_tipleri": ["besik"]}],
    "kaynak": {"durum": "muhendis", "tarih": "2026-10-19", "dayanak": "PK-01 gerçek listesinin satır adı (PR #28)"}
   },
   {
@@ -370,7 +370,7 @@
    "sayim": "yerlesen_adet",
    "ifc": {"sinif": "IfcElementAssemblyType", "alt_tur": "TRUSS"},
    "pafta": ["makas_orta"],
-   "bugunku_ifc": [{"sinif": "IfcElementAssembly", "kosul": [["PortatifEv_Kapsam", "BOMKalem", "\\(orta\\)"]]}],
+   "bugunku_ifc": [{"sinif": "IfcElementAssembly", "kosul": [["PortatifEv_Kapsam", "BOMKalem", "\\(orta\\)"]], "cati_tipleri": ["besik"]}],
    "kaynak": {"durum": "muhendis", "tarih": "2026-10-19", "dayanak": "PK-01 gerçek listesinin satır adı (PR #28)"}
   }
  ],
