@@ -1,0 +1,1006 @@
+{
+ "kaynak": "PK-01 (AP-19) montaj paftası; tek genel pafta okuyucusu (İE-15 KH-1, sürüm 1); kodla okundu, elle okuma yok",
+ "pafta_sha256": "492c76133da0e66a6dce82ebaa67e3f9da9949eb314c1034445d223faaac658d",
+ "okuyucu": {
+  "surum": "1",
+  "sayfa_sayisi": 10,
+  "sayfalar": {
+   "h": 3,
+   "makas": 7,
+   "montaj": 2
+  }
+ },
+ "h_plani": {
+  "dis": {
+   "adet": 19,
+   "not": "H planı: 12 dübelli & kulaklı + 7 dübelli"
+  },
+  "h_standart": {
+   "adet": 10,
+   "not": "H planı: H standart"
+  },
+  "uclu_dis": {
+   "adet": 5,
+   "not": "H planı: 3'lü 2 dübelli & kulaklı + 3 dübelli"
+  },
+  "uclu_standart": {
+   "adet": 4,
+   "not": "H planı: 3'lü H standart"
+  }
+ },
+ "makas_bas": {
+  "adet": 2,
+  "not": "makas planı MK01 ve MK09 (ana çatının iki ucu)"
+ },
+ "makas_orta": {
+  "adet": 7,
+  "not": "makas planı MK02–MK08; boy 660.1 cm"
+ },
+ "teyit_bekliyor": [],
+ "ayrinti": {
+  "montaj": {
+   "pano": {
+    "adet": 50,
+    "std": 29,
+    "ozel": 21,
+    "dis": 30,
+    "ic": 20
+   },
+   "kose": 8,
+   "kose_kare": 1,
+   "kanat": 6,
+   "kanat_yayi": 6,
+   "olcek_pt_cm": [
+    0.4764,
+    0.47652
+   ],
+   "olcek_kaynagi": [
+    "ölçü yazısı",
+    "ölçü yazısı"
+   ],
+   "dis_olcu_cm": [
+    600.0,
+    1000.0
+   ],
+   "panolar": [
+    {
+     "tur": "OZEL",
+     "duvar": "dis",
+     "boy": 60.25,
+     "rect": [
+      9.82,
+      0.0,
+      70.28,
+      10.07
+     ]
+    },
+    {
+     "tur": "STD",
+     "duvar": "dis",
+     "boy": 125.5,
+     "rect": [
+      9.82,
+      990.18,
+      135.52,
+      1000.0
+     ]
+    },
+    {
+     "tur": "STD",
+     "duvar": "dis",
+     "boy": 125.5,
+     "rect": [
+      70.28,
+      0.0,
+      195.72,
+      10.07
+     ]
+    },
+    {
+     "tur": "OZEL",
+     "duvar": "dis",
+     "boy": 62.75,
+     "rect": [
+      135.52,
+      990.18,
+      198.24,
+      1000.0
+     ]
+    },
+    {
+     "tur": "OZEL",
+     "duvar": "dis",
+     "boy": 60.25,
+     "rect": [
+      195.72,
+      0.0,
+      255.92,
+      10.07
+     ]
+    },
+    {
+     "tur": "STD",
+     "duvar": "dis",
+     "boy": 125.5,
+     "rect": [
+      198.24,
+      990.18,
+      323.68,
+      1000.0
+     ]
+    },
+    {
+     "tur": "STD",
+     "duvar": "dis",
+     "boy": 125.5,
+     "rect": [
+      260.96,
+      199.95,
+      386.4,
+      210.02
+     ]
+    },
+    {
+     "tur": "OZEL",
+     "duvar": "dis",
+     "boy": 62.75,
+     "rect": [
+      323.68,
+      990.18,
+      386.4,
+      1000.0
+     ]
+    },
+    {
+     "tur": "OZEL",
+     "duvar": "dis",
+     "boy": 40.5,
+     "rect": [
+      386.4,
+      199.95,
+      426.95,
+      210.02
+     ]
+    },
+    {
+     "tur": "STD",
+     "duvar": "dis",
+     "boy": 125.5,
+     "rect": [
+      386.4,
+      990.18,
+      512.09,
+      1000.0
+     ]
+    },
+    {
+     "tur": "STD",
+     "duvar": "dis",
+     "boy": 125.5,
+     "rect": [
+      426.95,
+      199.95,
+      552.64,
+      210.02
+     ]
+    },
+    {
+     "tur": "OZEL",
+     "duvar": "dis",
+     "boy": 78.0,
+     "rect": [
+      512.09,
+      990.18,
+      590.18,
+      1000.0
+     ]
+    },
+    {
+     "tur": "OZEL",
+     "duvar": "dis",
+     "boy": 37.5,
+     "rect": [
+      552.64,
+      199.95,
+      590.18,
+      210.02
+     ]
+    },
+    {
+     "tur": "OZEL",
+     "duvar": "dis",
+     "boy": 111.5,
+     "rect": [
+      0.0,
+      5.04,
+      9.82,
+      116.6
+     ]
+    },
+    {
+     "tur": "STD",
+     "duvar": "dis",
+     "boy": 125.5,
+     "rect": [
+      0.0,
+      116.6,
+      9.82,
+      242.0
+     ]
+    },
+    {
+     "tur": "STD",
+     "duvar": "dis",
+     "boy": 125.5,
+     "rect": [
+      0.0,
+      242.0,
+      9.82,
+      367.67
+     ]
+    },
+    {
+     "tur": "STD",
+     "duvar": "dis",
+     "boy": 125.5,
+     "rect": [
+      0.0,
+      367.67,
+      9.82,
+      493.07
+     ]
+    },
+    {
+     "tur": "STD",
+     "duvar": "dis",
+     "boy": 125.5,
+     "rect": [
+      0.0,
+      493.07,
+      9.82,
+      618.48
+     ]
+    },
+    {
+     "tur": "STD",
+     "duvar": "dis",
+     "boy": 125.5,
+     "rect": [
+      0.0,
+      618.48,
+      9.82,
+      744.15
+     ]
+    },
+    {
+     "tur": "STD",
+     "duvar": "dis",
+     "boy": 125.5,
+     "rect": [
+      0.0,
+      744.15,
+      9.82,
+      869.55
+     ]
+    },
+    {
+     "tur": "STD",
+     "duvar": "dis",
+     "boy": 125.5,
+     "rect": [
+      0.0,
+      869.55,
+      9.82,
+      995.22
+     ]
+    },
+    {
+     "tur": "OZEL",
+     "duvar": "dis",
+     "boy": 111.5,
+     "rect": [
+      255.92,
+      5.04,
+      265.99,
+      116.6
+     ]
+    },
+    {
+     "tur": "OZEL",
+     "duvar": "dis",
+     "boy": 83.5,
+     "rect": [
+      255.92,
+      116.6,
+      265.99,
+      199.95
+     ]
+    },
+    {
+     "tur": "OZEL",
+     "duvar": "dis",
+     "boy": 37.0,
+     "rect": [
+      590.18,
+      204.99,
+      600.0,
+      242.0
+     ]
+    },
+    {
+     "tur": "STD",
+     "duvar": "dis",
+     "boy": 125.5,
+     "rect": [
+      590.18,
+      242.0,
+      600.0,
+      367.67
+     ]
+    },
+    {
+     "tur": "STD",
+     "duvar": "dis",
+     "boy": 125.5,
+     "rect": [
+      590.18,
+      367.67,
+      600.0,
+      493.07
+     ]
+    },
+    {
+     "tur": "STD",
+     "duvar": "dis",
+     "boy": 125.5,
+     "rect": [
+      590.18,
+      493.07,
+      600.0,
+      618.48
+     ]
+    },
+    {
+     "tur": "STD",
+     "duvar": "dis",
+     "boy": 125.5,
+     "rect": [
+      590.18,
+      618.48,
+      600.0,
+      744.15
+     ]
+    },
+    {
+     "tur": "STD",
+     "duvar": "dis",
+     "boy": 125.5,
+     "rect": [
+      590.18,
+      744.15,
+      600.0,
+      869.55
+     ]
+    },
+    {
+     "tur": "STD",
+     "duvar": "dis",
+     "boy": 125.5,
+     "rect": [
+      590.18,
+      869.55,
+      600.0,
+      995.22
+     ]
+    },
+    {
+     "tur": "STD",
+     "duvar": "ic",
+     "boy": 125.5,
+     "rect": [
+      9.82,
+      615.46,
+      135.52,
+      621.51
+     ]
+    },
+    {
+     "tur": "OZEL",
+     "duvar": "ic",
+     "boy": 122.5,
+     "rect": [
+      135.52,
+      615.46,
+      257.93,
+      621.51
+     ]
+    },
+    {
+     "tur": "OZEL",
+     "duvar": "ic",
+     "boy": 59.75,
+     "rect": [
+      201.26,
+      741.12,
+      260.96,
+      747.17
+     ]
+    },
+    {
+     "tur": "OZEL",
+     "duvar": "ic",
+     "boy": 122.5,
+     "rect": [
+      260.96,
+      741.12,
+      383.63,
+      747.17
+     ]
+    },
+    {
+     "tur": "OZEL",
+     "duvar": "ic",
+     "boy": 122.5,
+     "rect": [
+      389.42,
+      615.46,
+      512.09,
+      621.51
+     ]
+    },
+    {
+     "tur": "OZEL",
+     "duvar": "ic",
+     "boy": 78.0,
+     "rect": [
+      512.09,
+      615.46,
+      590.18,
+      621.51
+     ]
+    },
+    {
+     "tur": "STD",
+     "duvar": "ic",
+     "boy": 125.5,
+     "rect": [
+      195.21,
+      744.15,
+      201.26,
+      869.55
+     ]
+    },
+    {
+     "tur": "OZEL",
+     "duvar": "ic",
+     "boy": 120.5,
+     "rect": [
+      195.21,
+      869.55,
+      201.26,
+      990.18
+     ]
+    },
+    {
+     "tur": "OZEL",
+     "duvar": "ic",
+     "boy": 32.0,
+     "rect": [
+      257.93,
+      210.02,
+      263.98,
+      242.0
+     ]
+    },
+    {
+     "tur": "STD",
+     "duvar": "ic",
+     "boy": 125.5,
+     "rect": [
+      257.93,
+      242.0,
+      263.98,
+      367.67
+     ]
+    },
+    {
+     "tur": "STD",
+     "duvar": "ic",
+     "boy": 125.5,
+     "rect": [
+      257.93,
+      367.67,
+      263.98,
+      493.07
+     ]
+    },
+    {
+     "tur": "STD",
+     "duvar": "ic",
+     "boy": 125.5,
+     "rect": [
+      257.93,
+      493.07,
+      263.98,
+      618.48
+     ]
+    },
+    {
+     "tur": "OZEL",
+     "duvar": "ic",
+     "boy": 122.5,
+     "rect": [
+      257.93,
+      618.48,
+      263.98,
+      741.12
+     ]
+    },
+    {
+     "tur": "OZEL",
+     "duvar": "ic",
+     "boy": 32.0,
+     "rect": [
+      383.63,
+      210.02,
+      389.42,
+      242.0
+     ]
+    },
+    {
+     "tur": "STD",
+     "duvar": "ic",
+     "boy": 125.5,
+     "rect": [
+      383.63,
+      242.0,
+      389.42,
+      367.67
+     ]
+    },
+    {
+     "tur": "STD",
+     "duvar": "ic",
+     "boy": 125.5,
+     "rect": [
+      383.63,
+      367.67,
+      389.42,
+      493.07
+     ]
+    },
+    {
+     "tur": "STD",
+     "duvar": "ic",
+     "boy": 125.5,
+     "rect": [
+      383.63,
+      493.07,
+      389.42,
+      618.48
+     ]
+    },
+    {
+     "tur": "STD",
+     "duvar": "ic",
+     "boy": 125.5,
+     "rect": [
+      383.63,
+      618.48,
+      389.42,
+      744.15
+     ]
+    },
+    {
+     "tur": "STD",
+     "duvar": "ic",
+     "boy": 125.5,
+     "rect": [
+      383.63,
+      744.15,
+      389.42,
+      869.55
+     ]
+    },
+    {
+     "tur": "OZEL",
+     "duvar": "ic",
+     "boy": 120.5,
+     "rect": [
+      383.63,
+      869.55,
+      389.42,
+      990.18
+     ]
+    }
+   ]
+  },
+  "h_plani": {
+   "turler": {
+    "dubelli_kulakli": 12,
+    "dubelli": 7,
+    "standart": 10,
+    "uclu_dubelli_kulakli": 2,
+    "uclu_dubelli": 3,
+    "uclu_standart": 4
+   },
+   "konumlar": [
+    {
+     "tur": "dubelli_kulakli",
+     "xy": [
+      3.6,
+      118.1
+     ]
+    },
+    {
+     "tur": "dubelli_kulakli",
+     "xy": [
+      3.6,
+      243.7
+     ]
+    },
+    {
+     "tur": "dubelli_kulakli",
+     "xy": [
+      3.6,
+      369.1
+     ]
+    },
+    {
+     "tur": "dubelli_kulakli",
+     "xy": [
+      3.6,
+      490.4
+     ]
+    },
+    {
+     "tur": "dubelli_kulakli",
+     "xy": [
+      3.6,
+      745.7
+     ]
+    },
+    {
+     "tur": "dubelli_kulakli",
+     "xy": [
+      3.6,
+      871.3
+     ]
+    },
+    {
+     "tur": "dubelli_kulakli",
+     "xy": [
+      264.4,
+      118.1
+     ]
+    },
+    {
+     "tur": "dubelli_kulakli",
+     "xy": [
+      593.5,
+      741.4
+     ]
+    },
+    {
+     "tur": "dubelli_kulakli",
+     "xy": [
+      596.9,
+      243.7
+     ]
+    },
+    {
+     "tur": "dubelli_kulakli",
+     "xy": [
+      598.0,
+      369.1
+     ]
+    },
+    {
+     "tur": "dubelli_kulakli",
+     "xy": [
+      598.0,
+      867.9
+     ]
+    },
+    {
+     "tur": "dubelli_kulakli",
+     "xy": [
+      598.5,
+      500.0
+     ]
+    },
+    {
+     "tur": "dubelli",
+     "xy": [
+      71.0,
+      2.5
+     ]
+    },
+    {
+     "tur": "dubelli",
+     "xy": [
+      135.3,
+      998.3
+     ]
+    },
+    {
+     "tur": "dubelli",
+     "xy": [
+      196.9,
+      0.4
+     ]
+    },
+    {
+     "tur": "dubelli",
+     "xy": [
+      323.6,
+      997.5
+     ]
+    },
+    {
+     "tur": "dubelli",
+     "xy": [
+      426.4,
+      200.4
+     ]
+    },
+    {
+     "tur": "dubelli",
+     "xy": [
+      509.0,
+      995.4
+     ]
+    },
+    {
+     "tur": "dubelli",
+     "xy": [
+      555.0,
+      206.2
+     ]
+    },
+    {
+     "tur": "standart",
+     "xy": [
+      132.7,
+      617.4
+     ]
+    },
+    {
+     "tur": "standart",
+     "xy": [
+      200.9,
+      870.8
+     ]
+    },
+    {
+     "tur": "standart",
+     "xy": [
+      257.8,
+      368.8
+     ]
+    },
+    {
+     "tur": "standart",
+     "xy": [
+      261.5,
+      243.2
+     ]
+    },
+    {
+     "tur": "standart",
+     "xy": [
+      263.6,
+      488.0
+     ]
+    },
+    {
+     "tur": "standart",
+     "xy": [
+      387.6,
+      243.2
+     ]
+    },
+    {
+     "tur": "standart",
+     "xy": [
+      387.6,
+      368.8
+     ]
+    },
+    {
+     "tur": "standart",
+     "xy": [
+      390.0,
+      489.9
+     ]
+    },
+    {
+     "tur": "standart",
+     "xy": [
+      390.0,
+      870.8
+     ]
+    },
+    {
+     "tur": "standart",
+     "xy": [
+      517.8,
+      619.0
+     ]
+    },
+    {
+     "tur": "uclu_dubelli_kulakli",
+     "xy": [
+      11.0,
+      613.4
+     ]
+    },
+    {
+     "tur": "uclu_dubelli_kulakli",
+     "xy": [
+      589.5,
+      615.0
+     ]
+    },
+    {
+     "tur": "uclu_dubelli",
+     "xy": [
+      200.9,
+      996.9
+     ]
+    },
+    {
+     "tur": "uclu_dubelli",
+     "xy": [
+      386.3,
+      203.1
+     ]
+    },
+    {
+     "tur": "uclu_dubelli",
+     "xy": [
+      389.0,
+      996.9
+     ]
+    },
+    {
+     "tur": "uclu_standart",
+     "xy": [
+      261.8,
+      620.6
+     ]
+    },
+    {
+     "tur": "uclu_standart",
+     "xy": [
+      265.7,
+      739.8
+     ]
+    },
+    {
+     "tur": "uclu_standart",
+     "xy": [
+      388.4,
+      612.9
+     ]
+    },
+    {
+     "tur": "uclu_standart",
+     "xy": [
+      390.6,
+      745.9
+     ]
+    }
+   ],
+   "olcek_pt_cm": [
+    0.4518,
+    0.4518
+   ],
+   "lejant_dairesi": 12
+  },
+  "makas": {
+   "yon": "x",
+   "renk": [
+    0.0,
+    1.0,
+    1.0
+   ],
+   "makaslar": [
+    {
+     "konum_cm": 4.9,
+     "bas_cm": -30.2,
+     "son_cm": 629.9,
+     "boy_cm": 660.1,
+     "cizgi": 2,
+     "ad": "MK09",
+     "aile": "ana",
+     "rol": "bas"
+    },
+    {
+     "konum_cm": 116.5,
+     "bas_cm": -30.2,
+     "son_cm": 629.9,
+     "boy_cm": 660.1,
+     "cizgi": 2,
+     "ad": "MK08",
+     "aile": "ana",
+     "rol": "orta"
+    },
+    {
+     "konum_cm": 242.0,
+     "bas_cm": -30.2,
+     "son_cm": 629.9,
+     "boy_cm": 660.1,
+     "cizgi": 2,
+     "ad": "MK07",
+     "aile": "ana",
+     "rol": "orta"
+    },
+    {
+     "konum_cm": 367.5,
+     "bas_cm": -30.2,
+     "son_cm": 629.9,
+     "boy_cm": 660.1,
+     "cizgi": 2,
+     "ad": "MK06",
+     "aile": "ana",
+     "rol": "orta"
+    },
+    {
+     "konum_cm": 493.0,
+     "bas_cm": -30.2,
+     "son_cm": 629.9,
+     "boy_cm": 660.1,
+     "cizgi": 2,
+     "ad": "MK05",
+     "aile": "ana",
+     "rol": "orta"
+    },
+    {
+     "konum_cm": 618.5,
+     "bas_cm": -30.2,
+     "son_cm": 629.9,
+     "boy_cm": 660.1,
+     "cizgi": 2,
+     "ad": "MK04",
+     "aile": "ana",
+     "rol": "orta"
+    },
+    {
+     "konum_cm": 744.0,
+     "bas_cm": -30.2,
+     "son_cm": 629.9,
+     "boy_cm": 660.1,
+     "cizgi": 2,
+     "ad": "MK03",
+     "aile": "ana",
+     "rol": "orta"
+    },
+    {
+     "konum_cm": 869.5,
+     "bas_cm": -30.2,
+     "son_cm": 629.9,
+     "boy_cm": 660.1,
+     "cizgi": 2,
+     "ad": "MK02",
+     "aile": "ana",
+     "rol": "orta"
+    },
+    {
+     "konum_cm": 995.0,
+     "bas_cm": -30.2,
+     "son_cm": 629.9,
+     "boy_cm": 660.1,
+     "cizgi": 2,
+     "ad": "MK01",
+     "aile": "ana",
+     "rol": "bas"
+    }
+   ],
+   "olcek_pt_cm": [
+    0.4852,
+    0.48528
+   ]
+  }
+ }
+}

@@ -1,0 +1,38 @@
+{
+ "kod": "PK-01",
+ "ap": "AP-19",
+ "pafta_sha256": "492c76133da0e66a6dce82ebaa67e3f9da9949eb314c1034445d223faaac658d",
+ "not": "Öğrenme evi (D-24). Mühürlü montaj paftası, 10 sayfa; PDF depoya girmez (antetinde ad var). Şablonun renkleri ve başlıkları okuyucunun varsayılanıyla aynı; ayar gerekmedi. Gerçek listede stoktan düşme var (Patron, 18 Ekim 19:52): metraj kapısının referansı değildir.",
+ "ayar": {},
+ "metraj_referansi": null,
+ "kiyas": {
+  "anahtarlar": [
+   "ayrinti.montaj.pano.adet", "ayrinti.montaj.pano.dis", "ayrinti.montaj.pano.ic",
+   "h_plani.dis", "h_plani.h_standart", "h_plani.uclu_dis", "h_plani.uclu_standart",
+   "ayrinti.h_plani.turler.dubelli_kulakli", "ayrinti.h_plani.turler.dubelli",
+   "ayrinti.h_plani.turler.uclu_dubelli_kulakli", "ayrinti.h_plani.turler.uclu_dubelli",
+   "makas_bas", "makas_orta"
+  ],
+  "kapi": [
+   "ayrinti.montaj.pano.adet", "ayrinti.montaj.pano.dis", "ayrinti.montaj.pano.ic",
+   "h_plani.dis", "h_plani.h_standart", "h_plani.uclu_dis", "h_plani.uclu_standart",
+   "makas_bas", "makas_orta"
+  ],
+  "kart_kapisi": [
+   "ayrinti.h_plani.turler.dubelli_kulakli", "ayrinti.h_plani.turler.dubelli",
+   "ayrinti.h_plani.turler.uclu_dubelli_kulakli", "ayrinti.h_plani.turler.uclu_dubelli"
+  ],
+  "eslemeler": [
+   {"anahtar": "ayrinti.montaj.pano.adet", "sinif": "IfcWall", "ad": "^PANO_"},
+   {"anahtar": "ayrinti.montaj.pano.dis", "sinif": "IfcWall", "ad": "^PANO_D_", "pset": ["Pset_WallCommon", "IsExternal", "^True$"]},
+   {"anahtar": "ayrinti.montaj.pano.ic", "sinif": "IfcWall", "ad": "^PANO_I_", "pset": ["Pset_WallCommon", "IsExternal", "^False$"]},
+   {"anahtar": "h_plani.dis", "sinif": "IfcMember", "ad": "^H_PANO_EKI_DIS_"},
+   {"anahtar": "h_plani.h_standart", "sinif": "IfcMember", "ad": "^H_PANO_EKI_IC_"},
+   {"anahtar": "h_plani.uclu_dis", "sinif": "IfcMember", "ad": "^H_UCLU_DIS_"},
+   {"anahtar": "h_plani.uclu_standart", "sinif": "IfcMember", "ad": "^H_UCLU_IC_"},
+   {"anahtar": "makas_bas", "sinif": "IfcElementAssembly", "ad": "^MAKAS_\\d+$", "pset": ["PortatifEv_Kapsam", "BOMKalem", "\\(baş\\)"]},
+   {"anahtar": "makas_orta", "sinif": "IfcElementAssembly", "ad": "^MAKAS_\\d+$", "pset": ["PortatifEv_Kapsam", "BOMKalem", "\\(orta\\)"]}
+  ],
+  "not": "H türlerinin ayrımı (dübelli & kulaklı / dübelli) bugünkü IFC'de yok, bilgi satırıdır. Model `PortatifEv_Parca.PaftaAnahtari` taşıyan bir parça içerince (kart modeli, K1) `kart_kapisi` satırları kendiliğinden kapıya girer; hakem değişmez."
+ }
+}
