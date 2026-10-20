@@ -610,12 +610,13 @@ def test_pk07_hedef_ornek_duzeltmeleri(N, kurallar, pk01):
 def test_tek_kaynak_isaretleri(bozma, N, kurallar, tmp_path, monkeypatch):
     """Kaynağı tek listeye dayanan kurallar `prefabrik_isaret.json`'da işaretli (CIO notu 5, BK-12 PR-2c; `prefabrik.json`'un biçimi ve
     `DURUMLAR` aynı): her ad bir prefabrik kuralı, değeri `tek_kaynak`, her işaret okunur. İşaretli satırın dayanağı "Tek kaynak (zayıf)"
-    (Excel'de renkli), işaretsizinki değil; tanınmayan işaret listeyi, kural olmayan ad kuralların okunmasını durdurur."""
+    (Excel'de renkli), işaretsizinki değil; tanınmayan işaret listeyi, kural olmayan ad, eksik ya da üreteçte satırı işaretlenmeyen işaret
+    kuralların okunmasını durdurur (geometri hakemi PR-2c: işaret sessizce yok sayılmaz)."""
     dosya = _oku(KOK / "kurallar" / "liste" / "prefabrik_isaret.json")
     isaret = dosya["isaretler"]
     assert isaret == kurallar["prefabrik_isaret"] and set(dosya["nedenler"]) == set(isaret)
     assert set(isaret) == {"pvc_betopan_h_asma", "pencere_u_h_gecen", "omega_kapak"} and set(isaret.values()) == {"tek_kaynak"}
-    assert set(isaret) <= set(kurallar["prefabrik"]["kurallar"])
+    assert set(isaret) <= set(kurallar["prefabrik"]["kurallar"]) and set(isaret) == set(PL.ISARETLI)
     okunan, _ = bozma
     assert {o[1] for o in okunan if o[0] == "prefabrik_isaret"} == set(isaret)
     V = {ad: PL.liste(copy.deepcopy(n), kurallar, pf) for ad, (n, pf) in _varyantlar(N, _oku(PAFTA_KATMANI)).items()}
@@ -632,10 +633,13 @@ def test_tek_kaynak_isaretleri(bozma, N, kurallar, tmp_path, monkeypatch):
     with pytest.raises(ValueError, match="omega_kapak"):
         PL.liste(copy.deepcopy(N), k)
     y = tmp_path / "prefabrik_isaret.json"
-    y.write_text(json.dumps({"isaretler": {"profil_vidalama": "tek_kaynak"}}), encoding="utf-8")
     monkeypatch.setattr(PL, "ISARET_YOLU", y)
-    with pytest.raises(ValueError, match="profil_vidalama"):
-        PL.kurallari_oku()
+    for bozuk, ad in (({**isaret, "profil_vidalama": "tek_kaynak"}, "profil_vidalama"),                 # kural değil
+                      ({a: v for a, v in isaret.items() if a != "omega_kapak"}, "omega_kapak"),          # işaret kalktı, satır hâlâ zayıf
+                      ({**isaret, "cektirme_u_100": "tek_kaynak"}, "cektirme_u_100")):                 # satırı üreteçte işaretlenmiyor
+        y.write_text(json.dumps({"isaretler": bozuk}), encoding="utf-8")
+        with pytest.raises(ValueError, match=ad):
+            PL.kurallari_oku()
 
 
 def test_komut_satiri(tmp_path):

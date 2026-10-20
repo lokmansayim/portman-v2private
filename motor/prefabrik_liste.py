@@ -44,6 +44,7 @@ KURAL_YOLU = KOK / "kurallar" / "liste" / "prefabrik.json"
 DUVAR_TIPLERI = KOK / "kurallar" / "model" / "duvar_tipleri.json"
 ISARET_YOLU = KOK / "kurallar" / "liste" / "prefabrik_isaret.json"
 TEK_KAYNAK = "Tek kaynak (zayıf)"
+ISARETLI = ("pvc_betopan_h_asma", "pencere_u_h_gecen", "omega_kapak")   # satırı `zayif(...)` ile yazılan kurallar (BK-12 PR-2c)
 
 SURUM = "1.2 (20 Ekim 2026; kör test üreteci 7.3, kurallar kural kitabında; orta iniş 9 m, kitapla farklı on yedi kalemde kitap; PK-07 hedef örnek)"
 GRUPLAR = {"1001": "Panel", "1002": "Metal aksam", "1003": "Kapı ve pencere", "1004": "Tavan", "1005": "Makas", "1006": "Çatı",
@@ -57,12 +58,17 @@ def kurallari_oku(yol: Path | str | None = None) -> dict:
     """Prefabrik kuralları (`prefabrik.json`), kural kitabının o dosyada sabitlenmiş seti (`kitap_seti`, `kurallar/liste/setler/` altında;
     `PORTMAN_KURALLAR` bu listeyi etkilemez: kitapta çelik için yapılan bir değişiklik prefabrik listeyi sessizce değiştirmesin) ve duvar
     tipleri (`kurallar/model/duvar_tipleri.json`; iç duvarı olmayan planda iç duvar kalınlığı). Kaynağı tek listeye dayanan kuralların işaretleri
-    `prefabrik_isaret.json › isaretler`'den (`prefabrik_isaret`; BK-12 PR-2c): her ad `prefabrik.json`'da bir kural olmalı."""
+    `prefabrik_isaret.json › isaretler`'den (`prefabrik_isaret`; BK-12 PR-2c): her ad `prefabrik.json`'da bir kural ve adlar üretecin işaretli
+    satırlarıyla (`ISARETLI`) aynı olmalı. İşaret eklemek ya da kaldırmak o satırın `zayif(...)` çağrısıyla birlikte yapılır; yalnız biri
+    değişirse kurallar okunmaz (işaret sessizce yok sayılmasın, geometri hakemi PR-2c)."""
     p = json.loads(Path(yol or KURAL_YOLU).read_text(encoding="utf-8"))
     kitap = KOK / "kurallar" / "liste" / p["kitap_seti"]
     isaret = json.loads(ISARET_YOLU.read_text(encoding="utf-8"))["isaretler"]
     if set(isaret) - set(p["kurallar"]):
         raise ValueError(f"prefabrik_isaret.json: {sorted(set(isaret) - set(p['kurallar']))} prefabrik.json'da kural değil")
+    if set(isaret) != set(ISARETLI):
+        raise ValueError(f"prefabrik_isaret.json: işaretler {sorted(isaret)} üretecin işaretli satırlarıyla {sorted(ISARETLI)} aynı değil "
+                         "(işaret, satırın `zayif(...)` çağrısıyla birlikte eklenir ya da kalkar)")
     return {"prefabrik": p, "ortak": json.loads(kitap.read_text(encoding="utf-8")), "duvar_tipleri": json.loads(DUVAR_TIPLERI.read_text(encoding="utf-8")),
             "prefabrik_isaret": isaret}
 
