@@ -655,7 +655,8 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
                  f"ek çatı parçasının pano koşusu {mm(c['makas_kosu_cm'])} ÷ {mm(makas_ara)} yukarı + 1", "PK-03: yavru makas 3 (MK10–MK12)")
         else:
             if c["kalkan"]:
-                ekle("1005", f"Makas (baş) · {ad}", f"açıklık {mm(c['aciklik_cm'])}", c["kalkan"], "Kural", "çatının iki ucunda", "", pafta=("makas_bas",))
+                ekle("1005", f"Makas (baş) · {ad}", f"açıklık {mm(c['aciklik_cm'])}", c["kalkan"], "Kural", "çatının iki ucunda" if c["kalkan"] == 2 else "çatının ucunda", "",
+                     pafta=("makas_bas",))
             ekle("1005", f"Makas (orta) · {ad}", f"açıklık {mm(c['aciklik_cm'])}", n_m - c["kalkan"], "Kural (P1)",
                  f"saçak duvarının pano koşusu {mm(c['makas_kosu_cm'])} ÷ {mm(makas_ara)} yukarı + 1 = {n_m}" + (f", − {c['kalkan']} baş" if c["kalkan"] else ""),
                  "baş ve orta toplamı PK-01 9, PK-02 7, PK-03 9 tuttu", pafta=("makas_orta",))
