@@ -11,7 +11,7 @@ Yeni pencere için hazırlıklar:
 
 **20 Ekim 2026 gece eki (BK-12 · PR-2d, T76 denemesinin cevapları; `docs/is_emirleri/BK-12.md` › Değişiklik (PR-2d)):**
 - **Karar:** Lokman 20 Ekim 20:45 (T76 raporunun beş sorusu): alt çerçeve yalnız dış duvarların altına, veranda sayılmaz; makas omegası baş makasların altına; 100'lük duvar omegası 0 olmaz; profil vidalama yok; trapez çatıda kapama olmaz. Kart 20:59 "İç 100'e de" (100'lük iç duvarların altına da 100'lük alt çerçeve; PK-07 16). Plan `IE-09_atolye/BK-12_PR-2d/plan.md` (CIO kıyasıyla iki sürüm).
-- **Yapıldı (dal `bk-12-pr2d-t76`, `main` `1c2a586`'dan):** Motor kipinde dış duvar boyu kapalı kısmın dış sınırından (veranda sayılmaz); pafta kipinde verandalı girdide okunmuş değer şart; trapezde "Panel kapaması" yazılmaz; satır yazılarında "kalkan" yerine "baş makas"; üretici 1.3. 14 girdide adet değişmedi, kapama satırı üç girdide kalktı.
+- **Yapıldı (dal `bk-12-pr2d-t76`, `main` `1c2a586`'dan):** Motor kipinde dış duvar boyu kapalı kısmın dış sınırından (veranda sayılmaz); pafta kipinde verandalı girdide okunmuş değer şart; trapezde "Panel kapaması" yazılmaz; satır yazılarında "kalkan" yerine "baş makas"; üretici 1.3. 14 girdide adet değişmedi, kapama satırı üç girdide kalktı. Tam doğrulama (`ac605f8`, 22:12–22:40) çıkış 0, pytest 1137 geçti; hakem "Kurallara uygun", sır taraması temiz.
 - **Bekleyen (Lokman):** 100'lük duvar omegası, verandasız düz dikdörtgende nasıl sayılır (kart 21:16; cevapsız kodlanmaz); PR'ın birleştirilmesi.
 
 **20 Ekim 2026 eki (BK-12 · PR-2c, PK-07 hedef örnekle düzeltmeler; `docs/is_emirleri/BK-12.md` › Değişiklik (PR-2c)):**
