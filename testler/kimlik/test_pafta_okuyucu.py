@@ -3,7 +3,8 @@
 - **Sentetik pafta (her koşuda):** okuyucunun şablon kuralları PyMuPDF ile çizilen üç sayfalık bir paftada sınanır: sayfa başlıktan
   bulunur (sıra karışık), montaj ve makas sayfaları 270° döndürülmüş, ölçek 125,5'lik panodan ve dış ölçü yazısından, dış / iç
   ayrımı konumdan, H türleri lejantın renginden, makaslar MK etiketlerinin yanındaki çizgiden (turuncu tarama çizgisi oylamayı
-  şaşırtmaz), kısa makaslar ayrı aile. Lejant eksikse H satırı katmana girmez, "teyit bekliyor" yazar.
+  şaşırtmaz), kısa makaslar ayrı aile. Bir bölümde uyarı varsa (lejantta rengi olmayan tür ya da daire, tek çizgili makas) o
+  bölümün satırları katmana girmez, nedeniyle "teyit bekliyor"a yazılır; öteki bölüm yine okunur.
 - **PK-07 gerilemesi (paftayla):** `PORTMAN_PAFTA_DIZINI` altında `PK07.pdf` (SHA tutarsa) varsa okuyucu 13 Ekim betiğinin pano, H ve
   makas sayılarını ve makas konumlarını (±0,5 cm) yeniden üretir; yoksa atlanır. Pafta depoya girmez (antetinde ad var).
 """
@@ -79,7 +80,7 @@ H_KONUM = {"dubelli_kulakli": [(5, 130), (5, 255), (595, 130)], "dubelli": [(130
 MAKAS = {"MK01": (390, 660), "MK02": (260, 660), "MK03": (140, 660), "MK04": (10, 660), "MK05": (200, 260), "MK06": (75, 260)}
 
 
-def sentetik(yol: Path, lejant_eksik: str | None = None) -> Path:
+def sentetik(yol: Path, lejant_eksik: str | None = None, yabanci_daire: bool = False, tek_cizgi: str | None = None) -> Path:
     doc = fitz.open()
     # 1. sayfa kapak (başlıksız), sonra H, makas ve montaj: sayfa başlıktan bulunur
     Sayfa(doc, 0).yazi(400, 500, "TEKNİK ÖZELLİKLER")
@@ -93,6 +94,8 @@ def sentetik(yol: Path, lejant_eksik: str | None = None) -> Path:
             h.yazi(180, 200 + 30 * i, H_ETIKETI[tur])
         for x, y in H_KONUM[tur]:
             h.daire(*h.gor(x, y), renk)
+    if yabanci_daire:
+        h.daire(*h.gor(450, 200), (0.2, 0.6, 0.9))                 # lejantta olmayan renk: türü bilinmeyen bir parça
     h.yazi(420, 1100, "H PROFİL MONTAJ PLANI", 16)
     h.bitir()
 
@@ -115,7 +118,7 @@ def sentetik(yol: Path, lejant_eksik: str | None = None) -> Path:
     k = Sayfa(doc, 270)
     _dis_cizgi(k)
     for ad, (y, boy) in MAKAS.items():
-        for dy in (-4, 4):
+        for dy in ((-4,) if ad == tek_cizgi else (-4, 4)):
             k.cizgi((-30, y + dy), (-30 + boy, y + dy), (0.0, 1.0, 1.0))
         k.yazi(X0 - 40, k.gor(0, y)[1], ad)
         k.cizgi((300, y), (580, y), (0.949, 0.404, 0.133))           # veranda taraması gibi uzun turuncu çizgi, etiketten uzakta
@@ -165,14 +168,33 @@ def test_makas(okuma):
     assert okuma["ayrinti"]["makas"]["renk"] == [0.0, 1.0, 1.0]
     assert okuma["makas_bas"] == {"adet": 2, "not": "makas planı MK01 ve MK04 (ana çatının iki ucu)"}
     assert okuma["makas_orta"]["adet"] == 2 and okuma["makas_orta"]["not"].startswith("makas planı MK02 ve MK03; boy 660.0 cm; ana çatıdan ayrı 2")
-    assert okuma["teyit_bekliyor"] == [] and okuma["ayrinti"]["uyarilar"] == []
+    assert okuma["teyit_bekliyor"] == []
 
 
 def test_lejant_eksikse_teyit(tmp_path):
     o = PO.oku(sentetik(tmp_path / "eksik.pdf", lejant_eksik="dubelli"))
     assert "h_plani" not in o
-    assert any(t.startswith("h_plani:") and "dubelli" in t for t in o["teyit_bekliyor"])
+    assert {t["bolum"] for t in o["teyit_bekliyor"]} == {"h_plani"}
+    assert any("dubelli" in t["neden"] for t in o["teyit_bekliyor"])
     assert o["makas_bas"]["adet"] == 2                       # öteki satırlar yine okunur
+
+
+def test_tanimsiz_daire_h_bolumunu_bekletir(tmp_path):
+    """Planda lejantta olmayan renkte bir daire: H sayımı eksik olabilir, H satırları katmana girmez."""
+    o = PO.oku(sentetik(tmp_path / "yabanci.pdf", yabanci_daire=True))
+    assert "h_plani" not in o
+    assert [t["bolum"] for t in o["teyit_bekliyor"]] == ["h_plani"]
+    assert "lejantta olmayan renkte 1 daire" in o["teyit_bekliyor"][0]["neden"]
+    assert (o["makas_bas"]["adet"], o["makas_orta"]["adet"]) == (2, 2)
+
+
+def test_tek_cizgili_makas_makas_bolumunu_bekletir(tmp_path):
+    """Çift çizgisi olmayan makas: makasın sayısı ve rolü belirsiz, makas satırları katmana girmez; H yine okunur."""
+    o = PO.oku(sentetik(tmp_path / "tek.pdf", tek_cizgi="MK05"))
+    assert "makas_bas" not in o and "makas_orta" not in o
+    assert [t["bolum"] for t in o["teyit_bekliyor"]] == ["makas"]
+    assert "çift çizgi olmayan makas" in o["teyit_bekliyor"][0]["neden"]
+    assert o["h_plani"]["dis"]["adet"] == 5
 
 
 def test_sha_tutmazsa_okunmaz(tmp_path):

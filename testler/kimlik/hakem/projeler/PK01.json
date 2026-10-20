@@ -18,6 +18,10 @@
    "h_plani.dis", "h_plani.h_standart", "h_plani.uclu_dis", "h_plani.uclu_standart",
    "makas_bas", "makas_orta"
   ],
+  "kart_kapisi": [
+   "ayrinti.h_plani.turler.dubelli_kulakli", "ayrinti.h_plani.turler.dubelli",
+   "ayrinti.h_plani.turler.uclu_dubelli_kulakli", "ayrinti.h_plani.turler.uclu_dubelli"
+  ],
   "eslemeler": [
    {"anahtar": "ayrinti.montaj.pano.adet", "sinif": "IfcWall", "ad": "^PANO_"},
    {"anahtar": "ayrinti.montaj.pano.dis", "sinif": "IfcWall", "ad": "^PANO_D_", "pset": ["Pset_WallCommon", "IsExternal", "^True$"]},
@@ -29,6 +33,6 @@
    {"anahtar": "makas_bas", "sinif": "IfcElementAssembly", "ad": "^MAKAS_\\d+$", "pset": ["PortatifEv_Kapsam", "BOMKalem", "\\(baş\\)"]},
    {"anahtar": "makas_orta", "sinif": "IfcElementAssembly", "ad": "^MAKAS_\\d+$", "pset": ["PortatifEv_Kapsam", "BOMKalem", "\\(orta\\)"]}
   ],
-  "not": "H türlerinin ayrımı (dübelli & kulaklı / dübelli) bugünkü IFC'de yok; kart modeli (K1) `PortatifEv_Parca.PaftaAnahtari` ile taşıyınca sayılır ve K1'in kabulünde kapıya girer."
+  "not": "H türlerinin ayrımı (dübelli & kulaklı / dübelli) bugünkü IFC'de yok, bilgi satırıdır. Model `PortatifEv_Parca.PaftaAnahtari` taşıyan bir parça içerince (kart modeli, K1) `kart_kapisi` satırları kendiliğinden kapıya girer; hakem değişmez."
  }
 }
