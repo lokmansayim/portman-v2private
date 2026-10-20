@@ -25,8 +25,8 @@ kitap geçer: çatı kaplamasının kapatması ve panel boyu, sandviç ve tek ka
 vida ve mastik, ters mahya kenar kutusu, müdahale kapağı, NYM kablo, buat kasa, alçıpan vidasının levhaları, silikonize mastik, dayson, çatı panelli
 çatının kenarları ve duvar dibi (bu on yedi kalemde 7.3'ün değeri ya da yöntemi, kaldığı yerde aday sütununda).
 
-PK-07 hedef örnekle düzeltmeler (BK-12 PR-2c; Lokman, 20 Ekim 15:27): ters tavanda PVC betopan H'ı 7 (asma dizme tavanda 5), profil vidalama
-aparatı yazılmaz. Kaynağı tek bir listeye dayanan kurallar `kurallar/liste/prefabrik_isaret.json`'da işaretli; satırlarının dayanağı
+PK-07 hedef örnekle düzeltmeler (BK-12 PR-2c; Lokman, 20 Ekim 15:27 ve 19:45–19:50): PVC betopan H'ı her evde 7 (baş makaslarda
+betopanların birleşim yerlerine konur, tavanla bağı yok; Portatifev listelerindeki gibi Depo grubunda), profil vidalama aparatı yazılmaz. Kaynağı tek bir listeye dayanan kurallar `kurallar/liste/prefabrik_isaret.json`'da işaretli; satırlarının dayanağı
 "Tek kaynak (zayıf)", Excel'de satır renkli. Metreyle sayılan satırların birimi m; formül yazılarında ondalık virgül.
 """
 from __future__ import annotations
@@ -44,7 +44,7 @@ KURAL_YOLU = KOK / "kurallar" / "liste" / "prefabrik.json"
 DUVAR_TIPLERI = KOK / "kurallar" / "model" / "duvar_tipleri.json"
 ISARET_YOLU = KOK / "kurallar" / "liste" / "prefabrik_isaret.json"
 TEK_KAYNAK = "Tek kaynak (zayıf)"
-ISARETLI = ("pvc_betopan_h_asma", "pencere_u_h_gecen", "omega_kapak")   # satırı `zayif(...)` ile yazılan kurallar (BK-12 PR-2c)
+ISARETLI = ("pencere_u_h_gecen", "omega_kapak")   # satırı `zayif(...)` ile yazılan kurallar (BK-12 PR-2c)
 
 SURUM = "1.2 (20 Ekim 2026; kör test üreteci 7.3, kurallar kural kitabında; orta iniş 9 m, kitapla farklı on yedi kalemde kitap; PK-07 hedef örnek)"
 GRUPLAR = {"1001": "Panel", "1002": "Metal aksam", "1003": "Kapı ve pencere", "1004": "Tavan", "1005": "Makas", "1006": "Çatı",
@@ -624,12 +624,6 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
         ekle("1004", f"PVC omega kapak L {mm_m(okap['parca_m'])} (asma dizme tavan)", "adet", TAVAN(L_hat / okb + okap["ek"]), zayif("omega_kapak"),
              f"oda içi omega hatları {od(L_hat)} m ÷ {sy(okb)} + {okap['ek']} (\"+{okap['ek']}\" yalnız PK-01)", "PK-01'in gerçek listesinde 10 (formül 10,03): tutmuyor", aday=TAVAN(L_hat / okb),
              aday_notu=f"Şablon B (PK-02 11 ✓): \"+{okap['ek']}\" eklenmeden")
-    if ters:                                                    # J6: satır iki tavanda da yazılır; adedi tavana göre (BK-12 PR-2c)
-        ekle("1004", "PVC plastik betopan H'ı", "adet", r("pvc_betopan_h"), "Kural (Portatifev)", f"ters tavan sabit {r('pvc_betopan_h')} (Portatifev listeleri)",
-             "PK-07, TS-01, AP-02, AP-03, AP-05 7", aday=r("pvc_betopan_h_aday"), aday_notu=f"Şablon B (PK-02, PK-03): {r('pvc_betopan_h_aday')}")
-    else:
-        ekle("1004", "PVC plastik betopan H'ı", "adet", r("pvc_betopan_h_asma"), zayif("pvc_betopan_h_asma"), f"asma dizme sabit {r('pvc_betopan_h_asma')} (yalnız PK-01)",
-             aday=r("pvc_betopan_h_aday"), aday_notu=f"Şablon B (PK-02, PK-03): {r('pvc_betopan_h_aday')}")
     silte = _ortak(k, "silte_adet_m2")
     ekle("1004", f"Çatı şiltesi / izolasyonu ({sy(silte)} m²/paket)", "paket", TAVAN(bina_m2 / silte), "Liste kuralı", f"brüt {od(bina_m2)} ÷ {sy(silte)}",
          "Portatifev kaba hesabı (PK-01 6,4; girilen 4)",
@@ -852,6 +846,11 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
     # kitap: tek kalem, yapı başına 1 (Lokman, 7 Ekim 07:45, C6); çatı çıkış kapağı listede yok (10 Ekim 10:18). 7.3'ün ayrı "Çatı müdahale
     # kapağı" satırı (O16; PK-07 1) kalktı (Lokman, 18 Ekim 19:22)
     acil, acil_ad = _ortak(k, "cati_mudahale_kapagi", "yapi_basina"), _ortak(k, "cati_mudahale_kapagi", "ad")
+    # PVC betopan H'ı: baş makaslarda betopanların birleşim yerlerine konur, tavanla bağı yok; her evde 7 (Lokman, 20 Ekim 19:45 ve kart 19:50;
+    # BK-12 PR-2c). Portatifev listelerinde Depo grubunun ilk satırı
+    ekle("1009", "PVC plastik betopan H'ı", "adet", r("pvc_betopan_h"), "Kural (Lokman 20.10)", f"her evde sabit {r('pvc_betopan_h')} (baş makas betopanlarının birleşimleri)",
+         "PK-07, TS-01, AP-02, AP-03, AP-05 7 (baş makas betopanı 6–8 levha)", aday=r("pvc_betopan_h_aday"),
+         aday_notu=f"Şablon B (PK-02, PK-03): {r('pvc_betopan_h_aday')}")
     ekle("1009", acil_ad, "adet", 0 if any("acil" in x for x in alici) else acil, "Şablon formülü (Portatifev)",
          f"yapı başına {acil}" + (" (alıcıya ait)" if any("acil" in x for x in alici) else ""), "Şablon B'de yok; 7.3'ün ayrı çatı müdahale kapağı satırı kitapta yok")
     ekle("1009", "Şase pul", "adet", dubelli, "Şablon formülü (Portatifev)", f"dübelli H adedi kadar (dış H {ec[('dis', 'pano_eki')]} + dış 3'lü H {ec[('dis', 'uclu')]})",

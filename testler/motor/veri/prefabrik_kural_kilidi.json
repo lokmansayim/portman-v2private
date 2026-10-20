@@ -224,7 +224,6 @@
   "prefabrik.pencere_ust_kotu_cm": 200.0,
   "prefabrik.pvc_betopan_h": 7,
   "prefabrik.pvc_betopan_h_aday": 3,
-  "prefabrik.pvc_betopan_h_asma": 5,
   "prefabrik.sacak_omegasi_bolen_m": 2.5,
   "prefabrik.siparis_boyu.kesinti_mm": 2.5,
   "prefabrik.siparis_boyu.modul_siparis_mm": 1250,
@@ -285,8 +284,7 @@
   "prefabrik.vida_aday_yuvarlama": 250,
   "prefabrik.vitrifiye_aday": 1,
   "prefabrik_isaret.omega_kapak": "tek_kaynak",
-  "prefabrik_isaret.pencere_u_h_gecen": "tek_kaynak",
-  "prefabrik_isaret.pvc_betopan_h_asma": "tek_kaynak"
+  "prefabrik_isaret.pencere_u_h_gecen": "tek_kaynak"
  },
  "kitapla_farkli": [
   [

@@ -595,12 +595,14 @@ def test_kitaba_gecen_kalemler(pk01, N, kurallar):
 
 
 def test_pk07_hedef_ornek_duzeltmeleri(N, kurallar, pk01):
-    """Lokman, 20 Ekim 15:27 (kart "İkisi de değişsin"; BK-12 PR-2c): ters tavanda PVC betopan H'ı 7 (Portatifev'in ters tavanlı beş listesi),
-    asma dizme tavanda 5 (yalnız PK-01); profil vidalama aparatı yazılmaz (kolonlu beş Portatifev listesinde yok). CIO notu 6: metreyle
-    sayılan satırların birimi m, nem bariyerininki m²."""
+    """Lokman, 20 Ekim 15:27 (kart "İkisi de değişsin") ve 19:45–19:50 (kart "Her evde 7"; BK-12 PR-2c): PVC betopan H'ı baş makaslarda
+    betopanların birleşim yerlerine konur, tavanla bağı yok: her evde 7, Portatifev listelerindeki gibi Depo grubunun ilk satırı. Profil vidalama
+    aparatı yazılmaz (kolonlu beş Portatifev listesinde yok). CIO notu 6: metreyle sayılan satırların birimi m, nem bariyerininki m²."""
     V = {ad: PL.liste(copy.deepcopy(n), kurallar, pf) for ad, (n, pf) in _varyantlar(N, _oku(PAFTA_KATMANI)).items()}
-    assert "ters" not in pk01["girdi_ozeti"]["tavan"] and _satir(pk01, "PVC plastik betopan H'ı")["adet"] == 5        # asma dizme (düz) tavan
-    assert [("ters" in V[a]["girdi_ozeti"]["tavan"], _satir(V[a], "PVC plastik betopan H'ı")["adet"]) for a in ("ters100", "ters60")] == [(True, 7)] * 2
+    H = "PVC plastik betopan H'ı"
+    assert "ters" not in pk01["girdi_ozeti"]["tavan"] and all("ters" in V[a]["girdi_ozeti"]["tavan"] for a in ("ters100", "ters60"))
+    assert {(_satir(L, H)["grup"], _satir(L, H)["adet"], _satir(L, H)["dayanak"]) for L in (pk01, *V.values())} == {("1009", 7, "Kural (Lokman 20.10)")}
+    assert all([s["kalem"] for s in L["satirlar"] if s["grup"] == "1009"][0] == H for L in (pk01, *V.values()))
     assert N["dikmeler"] and not any(s["kalem"] == "Profil vidalama aparatı" for L in (pk01, *V.values()) for s in L["satirlar"])
     assert {s["kalem"]: s["birim"] for s in V["bizde"]["satirlar"] if s["olcu"] == "metre"} == dict.fromkeys(
         ("NYM kablo 3 × 2,5", "NYM kablo 2 × 1,5", "Uydu kablo", "Besleme kablosu", "Besleme kablo borusu"), "m")
@@ -615,15 +617,14 @@ def test_tek_kaynak_isaretleri(bozma, N, kurallar, tmp_path, monkeypatch):
     dosya = _oku(KOK / "kurallar" / "liste" / "prefabrik_isaret.json")
     isaret = dosya["isaretler"]
     assert isaret == kurallar["prefabrik_isaret"] and set(dosya["nedenler"]) == set(isaret)
-    assert set(isaret) == {"pvc_betopan_h_asma", "pencere_u_h_gecen", "omega_kapak"} and set(isaret.values()) == {"tek_kaynak"}
+    assert set(isaret) == {"pencere_u_h_gecen", "omega_kapak"} and set(isaret.values()) == {"tek_kaynak"}
     assert set(isaret) <= set(kurallar["prefabrik"]["kurallar"]) and set(isaret) == set(PL.ISARETLI)
     okunan, _ = bozma
     assert {o[1] for o in okunan if o[0] == "prefabrik_isaret"} == set(isaret)
     V = {ad: PL.liste(copy.deepcopy(n), kurallar, pf) for ad, (n, pf) in _varyantlar(N, _oku(PAFTA_KATMANI)).items()}
     zayif = [s for L in V.values() for s in L["satirlar"] if s["dayanak"] == PL.TEK_KAYNAK]
-    assert {s["kalem"] for s in zayif} == {"PVC plastik betopan H'ı", "100'lük pencere U'su H geçen", "PVC omega kapak L 3750 (asma dizme tavan)"}
+    assert {s["kalem"] for s in zayif} == {"100'lük pencere U'su H geçen", "PVC omega kapak L 3750 (asma dizme tavan)"}
     assert all("yalnız PK-01" in s["formul"] for s in zayif)
-    assert _satir(V["ters100"], "PVC plastik betopan H'ı")["dayanak"] == "Kural (Portatifev)"     # ters tavanda beş liste: işaretsiz
     k = copy.deepcopy(kurallar)
     k["prefabrik_isaret"]["omega_kapak"] = "zayif"
     with pytest.raises(ValueError, match="omega_kapak"):
@@ -643,7 +644,7 @@ def test_tek_kaynak_excel_rengi(pk01, tmp_path):
     openpyxl = pytest.importorskip("openpyxl")
     PL.xlsx(pk01, tmp_path / "liste.xlsx")
     renk = {r[1].value: r[0].fill.fgColor.rgb for r in openpyxl.load_workbook(tmp_path / "liste.xlsx")["Liste"].iter_rows(min_row=3)}
-    assert renk["PVC plastik betopan H'ı"].endswith("FFC7CE") and not renk["Köşebent"].endswith("FFC7CE")
+    assert renk["PVC omega kapak L 3750 (asma dizme tavan)"].endswith("FFC7CE") and not renk["PVC plastik betopan H'ı"].endswith("FFC7CE")
 
 
 def test_komut_satiri(tmp_path):
