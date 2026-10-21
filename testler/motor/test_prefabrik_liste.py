@@ -609,6 +609,34 @@ def test_pk07_hedef_ornek_duzeltmeleri(N, kurallar, pk01):
     assert _satir(V["ters60"], "Nem bariyeri")["birim"] == "m²"
 
 
+def test_t76_cevaplari(N, kurallar, pk01):
+    """Lokman, 20 Ekim 20:45 (T76 denemesinin soruları) ve kart 20:59 "İç 100'e de" (BK-12 PR-2d): 100'lük alt çerçeve dış duvarların altına,
+    veranda sayılmaz (Motor kipinde kapalı kısmın dış sınırı; pafta kipinde verandalı girdide okunmuş olmalı); trapez çatıda kapama olmaz;
+    satır yazılarında "kalkan" yerine "baş makas" (paftadan okunan `pafta_notu` girdi yazısıdır, denetlenmez)."""
+    assert N["dis_cevre_m"] == 32.0 and "dış duvarlar 32,00 m (veranda sayılmaz) ÷ 3,75" == _satir(pk01, "100'lük alt çerçeve")["formul"]
+    ie = _oku(PK01)                                             # verandası bir kenar boyunca: kapalı kısım 6 × 8 m, dış dikdörtgen 6 × 10 m
+    for m in ie["mahaller"]:
+        if m["tur"] == "veranda":
+            m["konum_cm"] = [[10, 795, 590, 995]]
+        if m["tur"] == "mutfak":
+            m["konum_cm"] = [[10, 381.5, 261, 795]]
+    ie["dikmeler"] = [[590, 0], [0, 0]]
+    Nv = PL.model_motor(ie)
+    assert (Nv["dis_cevre_m"], 2 * (Nv["W"] + Nv["D"]) / 100) == (28.0, 32.0)          # `.length` odaların sınırını da sayardı (98,42)
+    ac = _satir(PL.liste(copy.deepcopy(Nv), kurallar), "100'lük alt çerçeve")
+    assert (ac["adet"], ac["formul"]) == (8, "dış duvarlar 28,00 m (veranda sayılmaz) ÷ 3,75")
+    yp = {a: v for a, v in copy.deepcopy(Nv).items() if a not in ("kaynak", "veranda_kenarlari_cm", "dis_cevre_m")}
+    with pytest.raises(ValueError, match="dış duvar boyu"):
+        PL.model_pafta(yp)
+    assert PL.model_pafta(dict(yp, acik=[], dikmeler=0))["dis_cevre_m"] == 32.0         # verandasız: dikdörtgen
+    V = {ad: PL.liste(copy.deepcopy(n), kurallar, pf) for ad, (n, pf) in _varyantlar(N, _oku(PAFTA_KATMANI)).items()}
+    assert "Panel kapaması" not in {s["kalem"] for s in V["ters100"]["satirlar"]}                # trapez
+    pk = _satir(V["ters60"], "Panel kapaması")                                                  # metal kiremit: soru açık
+    assert (pk["adet"], pk["dayanak"]) == (None, "Kural yok")
+    assert not [(s["kalem"], a) for L in (pk01, *V.values()) for s in L["satirlar"] for a in ("kalem", "dayanak", "formul", "kaynak", "aday_notu")
+                if "kalkan" in str(s.get(a) or "").lower()]
+
+
 def test_tek_kaynak_isaretleri(bozma, N, kurallar, tmp_path, monkeypatch):
     """Kaynağı tek listeye dayanan kurallar `prefabrik_isaret.json`'da işaretli (CIO notu 5, BK-12 PR-2c; `prefabrik.json`'un biçimi ve
     `DURUMLAR` aynı): her ad bir prefabrik kuralı, değeri `tek_kaynak`, her işaret okunur. İşaretli satırın dayanağı "Tek kaynak (zayıf)"

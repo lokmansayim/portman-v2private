@@ -170,12 +170,12 @@
     "levha_m2": 3.125
    },
    "durum": "pafta",
-   "kaynak": "H5: kalkan başına ⌈1,5 × saçaklı üçgen ÷ 3,125⌉ (PK-01 4, PK-02 6, PK-06 6)."
+   "kaynak": "H5: baş makas başına ⌈1,5 × saçaklı üçgen ÷ 3,125⌉ (PK-01 4, PK-02 6, PK-06 6)."
   },
   "alt_cerceve_bolen_m": {
    "deger": 3.75,
    "durum": "lokman",
-   "kaynak": "Lokman, 13 Ekim 14:35 ve 15:10 (R1): alt çerçeve her zaman L 3750, 60'lık da; dış çevre (ve iç duvar) ÷ 3,75 (H4; PK-01 9, PK-02 9, PK-07 16)."
+   "kaynak": "Lokman, 13 Ekim 14:35 ve 15:10 (R1): alt çerçeve her zaman L 3750, 60'lık da; dış duvarlar (ve iç duvar) ÷ 3,75 (H4; PK-01 9, PK-02 9, PK-07 16). Veranda sayılmaz, 100'lük iç duvarların altına da 100'lük (Lokman, 20 Ekim 20:45 ve kart 20:59; BK-12 PR-2d)."
   },
   "alt_cerceve_60_aday_bolen_m": {
    "deger": 2.5,
