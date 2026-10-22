@@ -155,9 +155,10 @@ def test_ayni_ad_farkli_tur(kurallar):
 
 
 def test_acik_mutfak(kurallar):
-    """Mutfak ayrı mahal değilse (açık mutfak; planlayıcının varsayılanı, PK-08 "yaşam alanı", TS-01 "salon & mutfak") mutfağın kitap sayıları
-    salona eklenir, salonun oda takımına ek olarak (kitap birleşik mahale ikisinin kuralını uygular). Birden çok salon türlü odada ilkine. Mutfak
-    ayrıysa salona eklenmez. Salon da yoksa mutfak noktası yazılmaz, satırın yazısı uyarıyla başlar (sessiz değil)."""
+    """Mutfak ayrı mahal değilse (açık mutfak, varsayım, Lokman'ın kartı bekleniyor; planlayıcının varsayılanı, PK-08 ve P6001 "yaşam alanı",
+    TS-01 "salon & mutfak") mutfağın kitap sayıları salona eklenir, salonun oda takımına ek olarak (kitap birleşik mahale ikisinin kuralını
+    uygular). Birden çok salon türlü odada ilkine. Mutfak ayrıysa salona eklenmez. Salon da yoksa mutfak noktası yazılmaz, satırın yazısı
+    uyarıyla başlar (sessiz değil)."""
     kitap = kurallar["ortak"]["elektrik_oda"]["deger"]["odalar"]["mutfak"]
     L = PL.liste(_ev([_oda("SALON & MUTFAK", "salon", 20.0), _oda("OTURMA", "salon", 9.0), _oda("YATAK ODASI", "yatak_odasi", 9.0)]), kurallar)
     assert _adet(L) == {"tavan_armaturu": 2 + 1 + 1 + kitap["tijli_duy"], "glop": 0, "anahtar_tekli": 2 + 1 + 1 + kitap["tekli_anahtar"],
@@ -172,6 +173,16 @@ def test_acik_mutfak(kurallar):
     for kalem in ("Tijli duy", "Tekli anahtar (takım)", "Tekli priz (takım)", "Çiftli priz (takım)"):
         assert _satir(L, kalem)["formul"].startswith("UYARI: mutfak ayrı mahal değil, açık mutfağın odası da yok; mutfağın kitap noktaları yazılmadı.")
     assert _satir(L, "Yuvarlak glop")["formul"] == "oda kuralında yok"
+
+
+def test_odasiz_girdi_uyarir(kurallar):
+    """Girdide kapalı oda yoksa (odaları okunmamış pafta) oda noktalarının 0'ı kural sonucu gibi yazılmaz: uydu dışındaki nokta satırları uyarıyla
+    başlar; açık mahalin takımı yine sayılır (hakem, 22 Ekim)."""
+    L = PL.liste(_ev([], [_oda("VERANDA", "veranda", 10.0)]), kurallar)
+    for kalem, a in NOKTA.items():
+        assert _satir(L, kalem)["formul"].startswith("UYARI: girdide kapalı oda yok; oda noktaları sayılmadı.") == (a != "uydu_prizi"), kalem
+    assert _satir(L, "Yuvarlak glop")["formul"] == "UYARI: girdide kapalı oda yok; oda noktaları sayılmadı. VERANDA: 2"
+    assert (_adet(L)["glop"], _adet(L)["priz_tekli"]) == (2, 0)
 
 
 def test_sayim_varsa_sayim_gecer(N, kurallar):

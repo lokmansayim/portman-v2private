@@ -330,7 +330,8 @@ def elektrik_oda(N: dict, EO, odalar_k) -> tuple[dict, dict]:
     sayılarını alır (`kitaptan`; kitap `elektrik_oda.odalar`; ıslak hacim türleri banyo, koridor hol gibi); öteki her oda oda takımını, açık mahal
     veranda takımını alır. Takım sayısı alan ÷ `takim_m2`, yukarı, en az 1 (Lokman, 18 Ekim 19:52; kartlar 19 Ekim 16:50 ve 22 Ekim 11:10).
     Mutfak ayrı mahal değilse mutfağın kitap sayıları `acik_mutfak_odasi` türündeki ilk odaya eklenir (kitap da birleşik mahale ikisinin kuralını
-    uygular; planlayıcı açık mutfağı salona koyar); o oda da yoksa satırın yazısı uyarıyla başlar. Uydu prizi her evde `uydu_prizi_ev_basina`
+    uygular; planlayıcı açık mutfağı salona koyar); o oda da yoksa satırın yazısı uyarıyla başlar, girdide hiç kapalı oda yoksa da (sessiz 0
+    değil). Uydu prizi her evde `uydu_prizi_ev_basina`
     (kart 22 Ekim 11:09). Döner: ({pafta katmanındaki ad: adet}, {pafta katmanındaki ad: oda oda döküm yazısı})."""
     say = dict.fromkeys(ELEKTRIK_NOKTALARI.values(), 0)
     dokum = {a: [] for a in say}
@@ -379,8 +380,13 @@ def elektrik_oda(N: dict, EO, odalar_k) -> tuple[dict, dict]:
             topla(ad, EO["oda_takimi"], takim(b["alan"]), b["alan"])
         if not acik and ad == acik_mutfak:
             topla(f"{ad} (açık mutfak)", kitap_odasi("mutfak"), ek=" (kitap)")
-    uyari = {} if mutfak_var or acik_mutfak else {ELEKTRIK_NOKTALARI[kk]: "UYARI: mutfak ayrı mahal değil, açık mutfağın odası da yok; mutfağın "
-                                                  "kitap noktaları yazılmadı." for kk in kitap_odasi("mutfak")}
+    if not odalar:                                              # odasız girdi: oda noktaları sayılmadı (0 kural sonucu değil)
+        uyari = {a: "UYARI: girdide kapalı oda yok; oda noktaları sayılmadı." for a in say if a != "uydu_prizi"}
+    elif not (mutfak_var or acik_mutfak):
+        uyari = {ELEKTRIK_NOKTALARI[kk]: "UYARI: mutfak ayrı mahal değil, açık mutfağın odası da yok; mutfağın kitap noktaları yazılmadı."
+                 for kk in kitap_odasi("mutfak")}
+    else:
+        uyari = {}
     u = EO["uydu_prizi_ev_basina"]
     say["uydu_prizi"] += u
     dokum["uydu_prizi"].append(f"her evde {u}")
