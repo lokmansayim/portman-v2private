@@ -3,8 +3,10 @@ koyarsın, 15 m² ye kadar verandalara 2 glop 1 tane 2li anahtar koyarsın"; kar
 22 Ekim 11:09–11:10 "Uygula", "Her eve 1", "Yukarı").
 
 - Paftada elektrik sayımı yoksa noktalar odalardan: öteki her oda takım × (2 tekli priz, 1 tekli anahtar, 1 duy); açık mahal takım × (2 glop,
-  1 çiftli anahtar); takım = alan ÷ 15, yukarı, en az 1. Banyo, WC, mutfak ve hol kitabın sayılarını alır (WC banyo gibi). Uydu prizi her evde 1.
-- Odalar adla birleşir (L biçimli oda tek oda). Sayım varsa sayım geçer, kuralın sonucu aday sütununda. Zil her evde kitabın 1'i.
+  1 çiftli anahtar); takım = alan ÷ 15, yukarı, en az 1. Banyo, WC, mutfak ve hol kitabın sayılarını alır (ıslak hacimler banyo, koridor hol
+  gibi). Mutfağı ayrı mahal olmayan evde mutfağın kitap sayıları salona (açık mutfak). Uydu prizi her evde 1.
+- Odalar adla birleşir (L biçimli oda tek oda; aynı ad farklı türde olamaz). Sayım varsa sayım geçer, kuralın sonucu aday sütununda. Zil her
+  evde kitabın 1'i.
 - `sigorta_en_uzak` pafta kipinde Motor kipindeki biçimde (`{m, nereden}`); biçimi yanlışsa liste üretilmez.
 """
 from __future__ import annotations
@@ -85,29 +87,46 @@ def test_pk01_elle_hesap(N, kurallar):
 @pytest.mark.parametrize("alan, takim", [(14.98, 1), (15.0, 1), (15.1, 2), (22.4, 2), (22.5, 2), (30.0, 2), (30.1, 3), (0.5, 1)])
 def test_takim_yukari(kurallar, alan, takim):
     """Kart 22 Ekim 11:10 "Yukarı": 15 m²'yi geçen her oda 2 takım, 30'u geçen 3 takım; en az 1. Veranda da aynı (kart 19 Ekim 16:50)."""
-    k = _kural(_ev([_oda("SALON", "salon", alan)], [_oda("VERANDA", "veranda", alan)]), kurallar)
+    k = _kural(_ev([_oda("YATAK ODASI", "yatak_odasi", alan)], [_oda("VERANDA", "veranda", alan)]), kurallar)
     assert (k["priz_tekli"], k["anahtar_tekli"], k["tavan_armaturu"]) == (2 * takim, takim, takim)
     assert (k["glop"], k["anahtar_cift"]) == (2 * takim, takim)
 
 
 def test_kartin_ornegi_26_m2_salon(kurallar):
-    """Kart 19 Ekim 16:50: "26 m2'lik salon 2 takım alır: 4 priz, 2 anahtar, 2 duy". Formül takımı ve alanı yazar."""
-    L = PL.liste(_ev([_oda("SALON", "salon", 26.0)]), kurallar)
-    assert (_satir(L, "Tekli priz (takım)")["adet"], _satir(L, "Tekli anahtar (takım)")["adet"], _satir(L, "Tijli duy")["adet"]) == (4, 2, 2)
-    assert _satir(L, "Tekli priz (takım)")["formul"] == "SALON (26,0 m²): 2 takım × 2"
+    """Kart 19 Ekim 16:50: "26 m2'lik salon 2 takım alır: 4 priz, 2 anahtar, 2 duy". Formül takımı ve alanı yazar; mutfak kitaptan (5 tekli
+    priz, 1 anahtar, 1 duy)."""
+    L = PL.liste(_ev([_oda("SALON", "salon", 26.0), _oda("MUTFAK", "mutfak", 8.0)]), kurallar)
+    assert (_satir(L, "Tekli priz (takım)")["adet"], _satir(L, "Tekli anahtar (takım)")["adet"], _satir(L, "Tijli duy")["adet"]) == (4 + 5, 2 + 1, 2 + 1)
+    assert _satir(L, "Tekli priz (takım)")["formul"] == "SALON (26,0 m²): 2 takım × 2 + MUTFAK: 5 (kitap)"
+
+
+@pytest.mark.parametrize("alan, yazi", [(15.04, "15,04 m²): 2 takım"), (30.04, "30,04 m²): 3 takım"), (15.0001, "15,0001 m²): 2 takım"),
+                                        (26.0, "26,0 m²): 2 takım"), (18.18, "18,2 m²): 2 takım")])
+def test_alan_yazisi_takimla_tutar(kurallar, alan, yazi):
+    """Formüldeki alan takım sayısını elle sağlatır: tek basamak yetmezse basamak artar (15,04 m² "15,0" yazılsa 1 takım okunurdu; hakem, 22 Ekim)."""
+    L = PL.liste(_ev([_oda("ODA", "yatak_odasi", alan)]), kurallar)
+    assert yazi in _satir(L, "Tekli priz (takım)")["formul"]
 
 
 def test_kitaptaki_gibi_ve_oteki_odalar(kurallar):
-    """Kart 19 Ekim 16:50 "Kitaptaki gibi": banyo, mutfak ve hol (antre de) kitabın sayılarını alır, WC banyo gibi; 15 m²'yi geçse de takım
-    çarpanı yok. Çamaşır, oturma ve "diğer" oda takımını alır (kart: "öteki odalar sizin kuralınızla")."""
+    """Kart 19 Ekim 16:50 "Kitaptaki gibi": banyo, mutfak ve hol (antre ve koridor da) kitabın sayılarını alır, WC ve öteki ıslak hacimler
+    (ıslak, lavabo) banyo gibi; 15 m²'yi geçse de takım çarpanı yok. Çamaşır, depo, teknik, çalışma, giyinme, oturma ve "diğer" oda takımını alır
+    (kart: "öteki odalar sizin kuralınızla"; kitabın depo satırı okunmaz, `kitapla_farkli`)."""
     kitap = kurallar["ortak"]["elektrik_oda"]["deger"]["odalar"]
-    for tur, ko in (("banyo", "banyo"), ("wc", "banyo"), ("mutfak", "mutfak"), ("antre_hol", "hol"), ("hol", "hol")):
+    for tur, ko in (("banyo", "banyo"), ("wc", "banyo"), ("islak", "banyo"), ("lavabo", "banyo"), ("mutfak", "mutfak"), ("antre_hol", "hol"),
+                    ("hol", "hol"), ("koridor", "hol")):
         k = _kural(_ev([_oda("ODA", tur, 20.0)]), kurallar)
         beklenen = {PL.ELEKTRIK_NOKTALARI[a]: n for a, n in kitap[ko].items()}
         assert {a: n for a, n in k.items() if n and a != "uydu_prizi"} == beklenen, tur
-    for tur in ("camasir", "oturma", "diger", "yatak_odasi"):
+    for tur in ("camasir", "depo", "teknik", "calisma", "giyinme", "oturma", "diger", "yatak_odasi"):
         k = _kural(_ev([_oda("ODA", tur, 9.0)]), kurallar)
         assert {a: n for a, n in k.items() if n and a != "uydu_prizi"} == {"priz_tekli": 2, "anahtar_tekli": 1, "tavan_armaturu": 1}, tur
+
+
+def test_islak_hacimler_banyo_gibi(kurallar):
+    """Listenin ıslak hacim saydığı her tür (`islak_hacim`: tavan, duvar, sıhhi takım) elektrikte de banyo gibi sayılır; iki kural ayrışmaz."""
+    R = kurallar["prefabrik"]["kurallar"]
+    assert {t: R["elektrik_oda"]["deger"]["kitaptan"].get(t) for t in R["islak_hacim"]["deger"]} == dict.fromkeys(R["islak_hacim"]["deger"], "banyo")
 
 
 def test_acik_mahaller_ve_uydu(kurallar):
@@ -122,17 +141,37 @@ def test_oda_adla_birlesir(kurallar):
     """L biçimli oda aynı adlı parçalarla gelir (PK-03'te salon 15,25 + 2,93): tek oda, alanları toplanır (18,18 m² → 2 takım). Ayrı adlı iki
     oda ayrı sayılır; buat kasadaki oda sayısı da adla."""
     L = PL.liste(_ev([_oda("SALON", "salon", 15.25), _oda("SALON", "salon", 2.93), _oda("YATAK ODASI 1", "yatak_odasi", 9.0),
-                      _oda("YATAK ODASI 2", "yatak_odasi", 9.0)]), kurallar)
-    assert _satir(L, "Tekli priz (takım)")["formul"] == "SALON (18,2 m²): 2 takım × 2 + YATAK ODASI 1: 2 + YATAK ODASI 2: 2"
-    assert _satir(L, "Tekli priz (takım)")["adet"] == 8
-    assert "oda 3 " in _satir(L, "Buat kasa")["formul"]
+                      _oda("YATAK ODASI 2", "yatak_odasi", 9.0), _oda("MUTFAK", "mutfak", 8.0)]), kurallar)
+    assert _satir(L, "Tekli priz (takım)")["formul"] == "SALON (18,2 m²): 2 takım × 2 + YATAK ODASI 1: 2 + YATAK ODASI 2: 2 + MUTFAK: 5 (kitap)"
+    assert _satir(L, "Tekli priz (takım)")["adet"] == 13
+    assert "oda 4 " in _satir(L, "Buat kasa")["formul"]
 
 
-def test_birlesik_mahal_yalniz_oda_takimi(kurallar):
-    """Bilinen sınırlama (BK-12 › PR-2f): "salon & mutfak" gibi birleşik mahal pafta girdisinde tek türle gelir ve yalnız oda takımını alır;
-    kitabın "ikisini de uygula" kuralı (mutfağın 5 + 1 prizi) prefabrik girdisinde uygulanamaz. Sınırlama değişirse bu test bilerek değişir."""
-    k = _kural(_ev([_oda("SALON & MUTFAK", "salon", 20.0)]), kurallar)
-    assert (k["priz_tekli"], k["priz_cift"]) == (4, 0)
+def test_ayni_ad_farkli_tur(kurallar):
+    """Aynı adlı parçalar tek oda sayılır; türleri farklıysa (salon ile mutfak aynı adla) mutfağın kitap sayıları sessizce düşmez, liste
+    üretilmez (hakem, 22 Ekim)."""
+    with pytest.raises(ValueError, match="farklı türde"):
+        PL.liste(_ev([_oda("SALON", "salon", 10.0), _oda("SALON", "mutfak", 8.0)]), kurallar)
+
+
+def test_acik_mutfak(kurallar):
+    """Mutfak ayrı mahal değilse (açık mutfak; planlayıcının varsayılanı, PK-08 "yaşam alanı", TS-01 "salon & mutfak") mutfağın kitap sayıları
+    salona eklenir, salonun oda takımına ek olarak (kitap birleşik mahale ikisinin kuralını uygular). Birden çok salon türlü odada ilkine. Mutfak
+    ayrıysa salona eklenmez. Salon da yoksa mutfak noktası yazılmaz, satırın yazısı uyarıyla başlar (sessiz değil)."""
+    kitap = kurallar["ortak"]["elektrik_oda"]["deger"]["odalar"]["mutfak"]
+    L = PL.liste(_ev([_oda("SALON & MUTFAK", "salon", 20.0), _oda("OTURMA", "salon", 9.0), _oda("YATAK ODASI", "yatak_odasi", 9.0)]), kurallar)
+    assert _adet(L) == {"tavan_armaturu": 2 + 1 + 1 + kitap["tijli_duy"], "glop": 0, "anahtar_tekli": 2 + 1 + 1 + kitap["tekli_anahtar"],
+                        "anahtar_cift": 0, "priz_tekli": 4 + 2 + 2 + kitap["tekli_priz"], "priz_cift": kitap["cift_priz"], "uydu_prizi": 1}
+    assert _satir(L, "Tekli priz (takım)")["formul"] == ("SALON & MUTFAK (20,0 m²): 2 takım × 2 + SALON & MUTFAK (açık mutfak): 5 (kitap) + "
+                                                         "OTURMA: 2 + YATAK ODASI: 2")
+    assert _satir(L, "Çiftli priz (takım)")["formul"] == "SALON & MUTFAK (açık mutfak): 1 (kitap)"
+    ayri = _kural(_ev([_oda("SALON", "salon", 12.0), _oda("MUTFAK", "mutfak", 8.0)]), kurallar)
+    assert (ayri["priz_tekli"], ayri["priz_cift"]) == (2 + kitap["tekli_priz"], kitap["cift_priz"])
+    L = PL.liste(_ev([_oda("YATAK ODASI", "yatak_odasi", 9.0)]), kurallar)
+    assert (_satir(L, "Tekli priz (takım)")["adet"], _satir(L, "Çiftli priz (takım)")["adet"]) == (2, 0)
+    for kalem in ("Tijli duy", "Tekli anahtar (takım)", "Tekli priz (takım)", "Çiftli priz (takım)"):
+        assert _satir(L, kalem)["formul"].startswith("UYARI: mutfak ayrı mahal değil, açık mutfağın odası da yok; mutfağın kitap noktaları yazılmadı.")
+    assert _satir(L, "Yuvarlak glop")["formul"] == "oda kuralında yok"
 
 
 def test_sayim_varsa_sayim_gecer(N, kurallar):
@@ -160,7 +199,7 @@ def test_sayim_varsa_sayim_gecer(N, kurallar):
 def test_sigorta_en_uzak_bicimi(kurallar):
     """Pafta kipinde sigortadan en uzak mesafe Motor kipindeki biçimde: `{"m": metre, "nereden": yazı}`. Verilirse NYM onu kullanır; biçimi
     yanlışsa liste üretilmez (pafta okuyucusunun sözleşmesi). Verilmezse dış ölçünün köşegeni (8 × 6 m → 10,00)."""
-    oda = [_oda("SALON", "salon", 12.0)]
+    oda = [_oda("YATAK ODASI", "yatak_odasi", 12.0)]
     L = PL.liste(_ev(oda, sigorta_en_uzak={"m": 7.5, "nereden": "paftada sigorta kutusundan en uzak köşe"}), kurallar)
     assert _satir(L, "NYM kablo 2 × 1,5")["formul"].startswith("sigorta 8 × en uzak 7,50 m (paftada sigorta kutusundan en uzak köşe)")
     assert _satir(L, "NYM kablo 2 × 1,5")["adet"] == 8 * 7.5 + 1 * 2

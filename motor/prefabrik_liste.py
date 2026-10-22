@@ -35,8 +35,9 @@ yerine "baş makas".
 
 Elektrik oda kuralı (BK-12 PR-2f; Lokman, 18 Ekim 19:52, kartlar 19 Ekim 16:50 ve 22 Ekim 11:09–11:10): paftada elektrik sayımı yoksa noktalar
 odalardan sayılır (`elektrik_oda`): oda başına 2 tekli priz, 1 tekli anahtar, 1 duy; açık mahale 2 glop, 1 çiftli anahtar; 15 m²'yi geçen her
-15 m²'ye bir takım daha (yukarı); banyo, WC, mutfak ve hol kitabın sayılarıyla; uydu prizi her evde 1. Sayım varsa sayım geçer, kuralın sonucu aday
-sütununda. Zil her evde kitabın 1'i.
+15 m²'ye bir takım daha (yukarı); banyo, WC, mutfak ve hol kitabın sayılarıyla (ıslak hacimler banyo, koridor hol gibi); mutfağı ayrı mahal
+olmayan evde mutfağın kitap sayıları salona (açık mutfak); uydu prizi her evde 1. Sayım varsa sayım geçer, kuralın sonucu aday sütununda. Zil her
+evde kitabın 1'i.
 """
 from __future__ import annotations
 
@@ -325,44 +326,65 @@ ELEKTRIK_NOKTALARI = {"tijli_duy": "tavan_armaturu", "glop": "glop", "tekli_anah
 
 def elektrik_oda(N: dict, EO, odalar_k) -> tuple[dict, dict]:
     """Elektrik noktalarının oda kuralı (`prefabrik.json › elektrik_oda`; BK-12 PR-2f). Odalar ve açık mahaller adla birleşir (L biçimli oda
-    aynı adlı parçalarla gelir, buat kasadaki gibi tek oda). Banyo, WC, mutfak ve hol kitabın sayılarını alır (`kitaptan`; kitap
-    `elektrik_oda.odalar`); öteki her oda oda takımını, açık mahal veranda takımını alır. Takım sayısı alan ÷ `takim_m2`, yukarı, en az 1 (Lokman,
-    18 Ekim 19:52; kartlar 19 Ekim 16:50 ve 22 Ekim 11:10). Uydu prizi her evde `uydu_prizi_ev_basina` (kart 22 Ekim 11:09).
-    Döner: ({pafta katmanındaki ad: adet}, {pafta katmanındaki ad: ["oda: adet", …]})."""
+    aynı adlı parçalarla gelir, buat kasadaki gibi tek oda; aynı adlı parçalar farklı türdeyse liste üretilmez). Banyo, WC, mutfak ve hol kitabın
+    sayılarını alır (`kitaptan`; kitap `elektrik_oda.odalar`; ıslak hacim türleri banyo, koridor hol gibi); öteki her oda oda takımını, açık mahal
+    veranda takımını alır. Takım sayısı alan ÷ `takim_m2`, yukarı, en az 1 (Lokman, 18 Ekim 19:52; kartlar 19 Ekim 16:50 ve 22 Ekim 11:10).
+    Mutfak ayrı mahal değilse mutfağın kitap sayıları `acik_mutfak_odasi` türündeki ilk odaya eklenir (kitap da birleşik mahale ikisinin kuralını
+    uygular; planlayıcı açık mutfağı salona koyar); o oda da yoksa satırın yazısı uyarıyla başlar. Uydu prizi her evde `uydu_prizi_ev_basina`
+    (kart 22 Ekim 11:09). Döner: ({pafta katmanındaki ad: adet}, {pafta katmanındaki ad: oda oda döküm yazısı})."""
     say = dict.fromkeys(ELEKTRIK_NOKTALARI.values(), 0)
     dokum = {a: [] for a in say}
+    tm = EO["takim_m2"]
 
-    def topla(ad, sayilar, takim=1, alan=None, ek=""):
+    def takim(alan):
+        return max(1, TAVAN(alan / tm))
+
+    def alan_yazisi(alan, t):                                   # takım sayısı yazıdaki alandan da çıksın (15,04 m² "15,0" değil)
+        b = 1
+        while b < 6 and takim(round(alan, b)) != t:
+            b += 1
+        return od(alan, b)
+
+    def topla(ad, sayilar, t=1, alan=None, ek=""):
         for kk in sayilar:
             if kk not in ELEKTRIK_NOKTALARI:
                 raise ValueError(f"elektrik oda kuralı: {kk!r} tanınmıyor ({', '.join(ELEKTRIK_NOKTALARI)})")
             n = sayilar[kk]
             if n:
                 a = ELEKTRIK_NOKTALARI[kk]
-                say[a] += takim * n
-                dokum[a].append(f"{ad}: {n}{ek}" if takim == 1 else f"{ad} ({od(alan, 1)} m²): {takim} takım × {n}")
-
-    def takim(alan):
-        return max(1, TAVAN(alan / EO["takim_m2"]))
+                say[a] += t * n
+                dokum[a].append(f"{ad}: {n}{ek}" if t == 1 else f"{ad} ({alan_yazisi(alan, t)} m²): {t} takım × {n}")
     birlesik = {}
     for acik, mahaller in ((False, N["kapali"]), (True, N["acik"])):
         for m in mahaller:
             b = birlesik.setdefault((acik, m["ad"]), {"tur": m["tur"], "alan": 0.0})
+            if b["tur"] != m["tur"]:
+                raise ValueError(f"elektrik oda kuralı: {m['ad']!r} adlı parçalar farklı türde ({b['tur']}, {m['tur']}); aynı adlı parçalar tek oda sayılır")
             b["alan"] += m["alan_m2"]
     KT = EO["kitaptan"]
+
+    def kitap_odasi(tur):
+        if KT[tur] not in odalar_k:
+            raise ValueError(f"elektrik oda kuralı: {tur} kitabın {KT[tur]!r} odasıyla sayılır, kitapta yok")
+        return odalar_k[KT[tur]]
+    odalar = [(ad, b) for (acik, ad), b in birlesik.items() if not acik]
+    mutfak_var = any(b["tur"] == "mutfak" for _, b in odalar)
+    acik_mutfak = None if mutfak_var else next((ad for ad, b in odalar if b["tur"] == EO["acik_mutfak_odasi"]), None)
     for (acik, ad), b in birlesik.items():
         if acik:
             topla(ad, EO["acik_takimi"], takim(b["alan"]), b["alan"])
         elif b["tur"] in KT:
-            if KT[b["tur"]] not in odalar_k:
-                raise ValueError(f"elektrik oda kuralı: {b['tur']} kitabın {KT[b['tur']]!r} odasıyla sayılır, kitapta yok")
-            topla(ad, odalar_k[KT[b["tur"]]], ek=" (kitap)")
+            topla(ad, kitap_odasi(b["tur"]), ek=" (kitap)")
         else:
             topla(ad, EO["oda_takimi"], takim(b["alan"]), b["alan"])
+        if not acik and ad == acik_mutfak:
+            topla(f"{ad} (açık mutfak)", kitap_odasi("mutfak"), ek=" (kitap)")
+    uyari = {} if mutfak_var or acik_mutfak else {ELEKTRIK_NOKTALARI[kk]: "UYARI: mutfak ayrı mahal değil, açık mutfağın odası da yok; mutfağın "
+                                                  "kitap noktaları yazılmadı." for kk in kitap_odasi("mutfak")}
     u = EO["uydu_prizi_ev_basina"]
     say["uydu_prizi"] += u
     dokum["uydu_prizi"].append(f"her evde {u}")
-    return say, dokum
+    return say, {a: " ".join(x for x in (uyari.get(a), " + ".join(d)) if x) for a, d in dokum.items()}
 
 
 def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> dict:
@@ -878,9 +900,9 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
     def nokta_satiri(kalem, a, formul_sayim="", kural_k=oda_k):
         if el:
             ekle("1007", kalem, "adet", es(a), sayim[0], formul_sayim or "elektrik planından", sayim[1], aday=ks[a],
-                 aday_notu="oda kuralı: " + (" + ".join(kd[a]) or "yok"))
+                 aday_notu="oda kuralı: " + (kd[a] or "yok"))
         else:
-            ekle("1007", kalem, "adet", ks[a], kural_k[0], " + ".join(kd[a]) or "oda kuralında yok", kural_k[1])
+            ekle("1007", kalem, "adet", ks[a], kural_k[0], kd[a] or "oda kuralında yok", kural_k[1])
     nokta_satiri("Tijli duy", "tavan_armaturu", "tavan armatürü")
     nokta_satiri("Yuvarlak glop", "glop", "ıslak hacim glopu (H1)")
     d, g = ks["tavan_armaturu"], ks["glop"]                         # ampul = duy + glop (kitap `elektrik.ampul`)

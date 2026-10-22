@@ -305,12 +305,16 @@
      "wc": "banyo",
      "mutfak": "mutfak",
      "antre_hol": "hol",
-     "hol": "hol"
+     "hol": "hol",
+     "islak": "banyo",
+     "lavabo": "banyo",
+     "koridor": "hol"
     },
+    "acik_mutfak_odasi": "salon",
     "uydu_prizi_ev_basina": 1
    },
    "durum": "lokman",
-   "kaynak": "Paftada elektrik sayımı yoksa noktaların oda kuralı (BK-12 PR-2f; okuyan `elektrik_oda`). Lokman, 18 Ekim 19:52: \"elektrik tesisatında 15 m² ye kadar her bir odaya 2 piriz 1 tane anahtar, 1 tane duy ve lamba koyarsın, 15 m² ye kadar verandalara 2 glop 1 tane 2li anahtar koyarsın\" (`oda_takimi`, `acik_takimi`; lamba duyun ampulü, ampul = duy + glop). Kartlar 19 Ekim 16:50: 15 m²'yi geçen oda ve verandaya \"Her 15 m2'ye bir takım\"; banyo, WC, mutfak ve hol \"Kitaptaki gibi\" (kitabın `elektrik_oda.odalar` sayıları, WC banyo gibi: `kitaptan`). Kart 22 Ekim 11:10: takım sayısı \"Yukarı\" (alan ÷ 15, yukarı, en az 1: 15,0 m² 1 takım, 15,1 m² 2, 30,1 m² 3). Kart 22 Ekim 11:09: uydu prizi \"Her eve 1\" (salona; kitabın salonunda 1). Odalar ve açık mahaller adla birleşir (L biçimli oda tek oda); çamaşır ve öteki odalar oda takımını alır. Paftada sayım varsa sayım geçer, bu kuralın sonucu aday sütununda. Birleşik mahal (TS-01 \"salon & mutfak\") girdide tek türle gelir, yalnız oda takımını alır (BK-12 › Bilinen sınırlama)."
+   "kaynak": "Paftada elektrik sayımı yoksa noktaların oda kuralı (BK-12 PR-2f; okuyan `elektrik_oda`). Lokman, 18 Ekim 19:52: \"elektrik tesisatında 15 m² ye kadar her bir odaya 2 piriz 1 tane anahtar, 1 tane duy ve lamba koyarsın, 15 m² ye kadar verandalara 2 glop 1 tane 2li anahtar koyarsın\" (`oda_takimi`, `acik_takimi`; lamba duyun ampulü, ampul = duy + glop). Kartlar 19 Ekim 16:50: 15 m²'yi geçen oda ve verandaya \"Her 15 m2'ye bir takım\"; banyo, WC, mutfak ve hol \"Kitaptaki gibi\" (kitabın `elektrik_oda.odalar` sayıları, WC banyo gibi: `kitaptan`). Kart 22 Ekim 11:10: takım sayısı \"Yukarı\" (alan ÷ 15, yukarı, en az 1: 15,0 m² 1 takım, 15,1 m² 2, 30,1 m² 3). Kart 22 Ekim 11:09: uydu prizi \"Her eve 1\" (salona; kitabın salonunda 1). Islak hacim türleri (`islak_hacim`: banyo, WC, ıslak hacim, lavabo) banyo gibi, koridor hol gibi (Motor'un ve çıkarıcının eşlemesi; geometri hakemi, 22 Ekim). Mutfak ayrı mahal değilse (açık mutfak; planlayıcının varsayılanı, PK-08 \"yaşam alanı\", TS-01 \"salon & mutfak\") mutfağın kitap sayıları `acik_mutfak_odasi` türündeki ilk odaya eklenir, o odanın oda takımına ek olarak (kitap birleşik mahale ikisinin kuralını uygular; planlayıcı açık mutfağı salona koyar: `beyin/plan_cozucu.py`); o tür oda da yoksa satır uyarıyla başlar. Odalar ve açık mahaller adla birleşir (L biçimli oda tek oda; aynı adlı parçalar farklı türdeyse liste üretilmez). Çamaşır, depo ve öteki odalar oda takımını alır (kart: \"öteki odalar sizin kuralınızla\"). Paftada sayım varsa sayım geçer, bu kuralın sonucu aday sütununda."
   },
   "vida": {
    "deger": {
@@ -505,7 +509,7 @@
    ],
    "tur": "yontem",
    "karar_bekliyor": false,
-   "not": "Kitabın oda başına kuralı (mühendis) banyo, mutfak ve holde aynen okunur, WC banyo gibi (kart 19 Ekim 16:50 \"Kitaptaki gibi\"). Farklar: kitabın yatak odası 3 tekli priz alır, prefabrikte oda takımı 2; kitabın salonu 2 duy, 1 çiftli anahtar, 3 tekli ve 1 çiftli priz, 1 uydu prizi alır, prefabrikte oda takımı ve uydu prizi ayrı (her evde 1); veranda iki yanda 2 glop ve 1 çiftli anahtar, ama kitapta takım çarpanı yok (prefabrikte 15 m²'yi geçen her 15 m²'ye bir takım daha). Kitabın `dogruluk_payi: 0.75`'i bir bilgi notu, hesapta kullanılmaz. Kitabın `sigorta: 9`'u yerine W otomat 8 (`elektrik`, R4). Depo (`elektrik_oda_ek`) prefabrik girdisinde tür olarak yok; çamaşır ve öteki odalar oda takımını alır (kart: \"öteki odalar sizin kuralınızla\"). Salon ile mutfak aynı mahaldeyse kitap ikisinin kuralını birlikte uygular; prefabrik girdisinde birleşik mahal tek türle gelir (BK-12 › Bilinen sınırlama)."
+   "not": "Kitabın oda başına kuralı (mühendis) banyo, mutfak ve holde aynen okunur, WC banyo gibi (kart 19 Ekim 16:50 \"Kitaptaki gibi\"). Farklar: kitabın yatak odası 3 tekli priz alır, prefabrikte oda takımı 2; kitabın salonu 2 duy, 1 çiftli anahtar, 3 tekli ve 1 çiftli priz, 1 uydu prizi alır, prefabrikte oda takımı ve uydu prizi ayrı (her evde 1); veranda iki yanda 2 glop ve 1 çiftli anahtar, ama kitapta takım çarpanı yok (prefabrikte 15 m²'yi geçen her 15 m²'ye bir takım daha). Kitabın `dogruluk_payi: 0.75`'i bir bilgi notu, hesapta kullanılmaz. Kitabın `sigorta: 9`'u yerine W otomat 8 (`elektrik`, R4). Kitabın depo satırı (`elektrik_oda_ek`: 2 glop ve 1 çiftli anahtar; kitapta durumu `liste`) okunmaz: planlayıcı ve çıkarıcı depo ve kileri `depo` türüyle yazar, prefabrikte depo da çamaşır ve öteki odalar gibi oda takımını alır (kart: \"öteki odalar sizin kuralınızla\"; banyo, WC, mutfak ve hol dışında kitap seçilmedi). Salon ile mutfak aynı mahaldeyse kitap ikisinin kuralını birlikte uygular; prefabrikte de mutfağı ayrı olmayan evde mutfağın kitap sayıları salona eklenir (`acik_mutfak_odasi`)."
   },
   {
    "konu": "Sigortadan en uzak mesafe (pafta kipi)",

@@ -260,7 +260,8 @@ def _varyantlar(N: dict, pf: dict) -> dict:
     özel köşe, özel büküm; tekyon: tek yön çatı, tek kat panel, iç duvarsız, ıslak hacimsiz, makassız açık veranda çatısı; ek_yapi: kapalı çatı
     panelli (makassız) tek yön ek yapı, paftasında özel büküm saçlar (kenar Boardex şeridi, sundurma kapama, duvar dibi); sundurma: uzun
     kenar boyunca kapalı çatı panelli ek yapı (Boardex şeridi birden çok levha: zayiat adedi değiştirir); genis: 15 m²'yi geçen salon (26 m²) ve
-    veranda (18 m²), WC ve hol türü: elektrik oda kuralının takımı ve kitaptan sayılan odaları (BK-12 PR-2f)."""
+    veranda (18 m²), WC ve hol türü: elektrik oda kuralının takımı ve kitaptan sayılan odaları; acik_mutfak: mutfağı ayrı mahal olmayan ev
+    (mutfak koridor, banyo ıslak hacim türünde, ek lavabo): açık mutfak salona, ıslak hacim ve lavabo banyo, koridor hol gibi (BK-12 PR-2f)."""
     def tur(n, **d):
         n = copy.deepcopy(n)
         n.update(d)
@@ -304,6 +305,8 @@ def _varyantlar(N: dict, pf: dict) -> dict:
         "sundurma": (tur(N, cati=N["cati"] + [sundurma]), pf),
         "genis": (tur(N, kapali=[dict(m, **{"salon": {"alan_m2": 26.0}, "banyo": {"tur": "wc"}, "antre_hol": {"tur": "hol"}}.get(m["tur"], {}))
                                  for m in N["kapali"]], acik=[dict(m, alan_m2=18.0) for m in N["acik"]]), pf),
+        "acik_mutfak": (tur(N, kapali=[dict(m, **{"mutfak": {"ad": "KORIDOR", "tur": "koridor"}, "banyo": {"tur": "islak"}}.get(m["tur"], {}))
+                                       for m in N["kapali"]] + [{"ad": "LAVABO", "tur": "lavabo", "alan_m2": 2.0, "en_cm": 100.0, "derin_cm": 200.0}]), pf),
     }
 
 
