@@ -14,7 +14,8 @@ Yeni pencere için hazırlıklar:
 - **Yapıldı (dal `bk-12-pr2e-duvar-omegasi`, `main` `acd7eea`'dan):** kural ⌈(çatı kenarına gelmeyen dış duvarlar + çatı kenarında olmayan kirişler + 100'lük iç duvarlar) ÷ 2,5⌉. Motor kipinde verandaya bakan duvarlar (PK-01 5,34 m → 3); pafta kipinde verandalı girdide okunmuş değer şart, yeni `ic_kirisler_cm` kiriş satırı da yazar, okunmamışsa satır uyarı yazar. Portatifev'in beş açık listesinde paftadan elle 5/5. `main` ile 14 girdide: adet yalnız altı Motor girdisinde 0 → 3, beklenmeyen fark 0. PK-01 kilidinde yalnız bu satır; üretici 1.4.
 - **Kullanıcı adımı B3:** Kısmen. Liste üretiliyor; duvar omegası Lokman'ın kuralıyla; kıyas PK-07 ve açık listelerle.
 - **Duvarsız açıklık:** Lokman, kart 22 Ekim 05:26 "Evet, gelir": Motor planında iki oda arasındaki duvarsız sınır kiriş satırı ve duvar omegası alır (katalogdaki 2+1 6×8'de 3 → 4); iki açık mahalin (ör. iki veranda parçası) arası kiriş sayılmaz.
-- **Bekleyen (Lokman):** PR'ın birleştirilmesi.
+- **Canlıya kurulum notu:** verandalı pafta girdisi `ic_kalan_dis_duvar_m` olmadan liste üretmez; P3 pafta okuyucusu bu alanı (ve `ic_kirisler_cm`'yi) yazacak biçimde güncellenmeden bu üretici sürümü (1.4) canlıya kurulmaz (CIO, PR #33 okuması).
+- **Bekleyen (Lokman):** PR #33'ün birleştirilmesi.
 
 **20 Ekim 2026 gece eki (BK-12 · PR-2d, T76 denemesinin cevapları; `docs/is_emirleri/BK-12.md` › Değişiklik (PR-2d)):**
 - **Karar:** Lokman 20 Ekim 20:45 (T76 raporunun beş sorusu): alt çerçeve yalnız dış duvarların altına, veranda sayılmaz; makas omegası baş makasların altına; 100'lük duvar omegası 0 olmaz; profil vidalama yok; trapez çatıda kapama olmaz. Kart 20:59 "İç 100'e de" (100'lük iç duvarların altına da 100'lük alt çerçeve; PK-07 16). Plan `IE-09_atolye/BK-12_PR-2d/plan.md` (CIO kıyasıyla iki sürüm).
