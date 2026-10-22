@@ -3,8 +3,9 @@ kartlar 22 Ekim: "Uygula", PK-01'in 0'ı "Stoktan", kirişsiz verandasız 60'lı
 
 Kural: ⌈(çatı kenarına gelmeyen dış duvarlar + çatı kenarında olmayan kirişler + 100'lük iç duvarlar) ÷ 2,5⌉. Paftadaki yeşil kesikli profil
 kutu profil kiriştir; çatı kenarındaki duvar ve kiriş saçak ya da baş makas omegası alır.
-- Motor kipi: çatı kenarına gelmeyen dış duvar = kapalı kısmın veranda ile ortak sınırı (PK-01 3,34 + 2,00 = 5,34 m → 3). Motor planında
-  kenarda olmayan kiriş yok. Değer `ic_kalan_dis_duvar_m` olarak yazılır, pafta biçimine taşınınca aynı adet çıkar.
+- Motor kipi: çatı kenarına gelmeyen dış duvar = kapalı kısmın veranda ile ortak sınırı (PK-01 3,34 + 2,00 = 5,34 m → 3). Değer
+  `ic_kalan_dis_duvar_m` olarak yazılır, pafta biçimine taşınınca aynı adet çıkar. İş Emri'ndeki duvarsız sınırın (`acik_sinirlar`, ör.
+  salon–mutfak) üstünde kiriş olup olmadığı planda yok: kiriş sayılmaz, satır uyarır (geometri hakemi, PR-2e 1. tur).
 - Pafta kipi: verandalı girdide `ic_kalan_dis_duvar_m` okunmuş olmalı; `ic_kirisler_cm` kiriş satırı da yazar, yoksa formül uyarıyla başlar.
 """
 from __future__ import annotations
@@ -70,6 +71,18 @@ def test_motor_pk01(N, kurallar):
     assert (s["adet"], s["olcu"], s["formul"]) == (3, "100 × 2500", "çatı kenarına gelmeyen dış duvarlar 5,34 m ÷ 2,5")
     assert "PK-01" not in s["kaynak"] and "PK-03" not in s["kaynak"]
     assert sum(x["kalem"] == KIRIS for x in L["satirlar"]) == len(N["veranda_kenarlari_cm"])
+
+
+def test_motor_duvarsiz_sinir_uyarir(kurallar):
+    """ALTIN 6×8'de salonla mutfak arası duvarsız (2,51 m): kiriş sayılmaz, formül uyarıyla başlar; PK-01'de duvarsız sınır yok, uyarı yok."""
+    N6 = PL.model_motor(_oku(KOK / "is_emri" / "ALTIN_2plus1_6x8.json"))
+    L = PL.liste(copy.deepcopy(N6), kurallar)
+    s = _satir(L, OMEGA)
+    assert N6["acik_sinir_m"] == 2.51
+    assert s["formul"] == ("UYARI: duvarsız sınır 2,51 m kiriş sayılmadı (İş Emri'nde açık sınır); üstünde kiriş varsa eksik. "
+                           "çatı kenarına gelmeyen dış duvarlar 6,33 m ÷ 2,5")
+    assert s["adet"] == 3 and sum(x["kalem"] == KIRIS for x in L["satirlar"]) == len(N6["veranda_kenarlari_cm"])
+    assert PL.model_motor(_oku(VERI / "PK01.json"))["acik_sinir_m"] == 0.0
 
 
 def test_motor_veranda_kenar_boyunca(kurallar):
