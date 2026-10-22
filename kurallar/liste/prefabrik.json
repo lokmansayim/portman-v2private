@@ -152,7 +152,7 @@
   "duvar_omegasi_100_bolen_m": {
    "deger": 2.5,
    "durum": "pafta",
-   "kaynak": "J2 ve O5: çatı kenarına gelmeyen dış duvarlar ve 100'lük iç duvarlar ÷ 2,5 (PK-03 3, PK-06 3, PK-07 10)."
+   "kaynak": "J2, O5 ve Lokman 21 Ekim 16:22 (paftadaki yeşil kesikli profil): çatı kenarına gelmeyen dış duvarlar, çatı kenarında olmayan kirişler ve 100'lük iç duvarlar ÷ 2,5 (Portatifev E2, E3, E5, PK-07 elle tuttu; Şablon B bilgi: E1, E4, PK-06)."
   },
   "sacak_omegasi_bolen_m": {
    "deger": 2.5,
@@ -162,7 +162,7 @@
   "bas_makas_omegasi_bolen_m": {
    "deger": 2.5,
    "durum": "excel",
-   "kaynak": "Kalkan duvarları ÷ 2,5 (PK-01 dersi 5; PK-06 7)."
+   "kaynak": "Baş makasların altı ÷ 2,5 (PK-01 dersi 5; PK-06 7)."
   },
   "bas_makas_betopani": {
    "deger": {

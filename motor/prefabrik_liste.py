@@ -50,7 +50,7 @@ ISARET_YOLU = KOK / "kurallar" / "liste" / "prefabrik_isaret.json"
 TEK_KAYNAK = "Tek kaynak (zayıf)"
 ISARETLI = ("pencere_u_h_gecen", "omega_kapak")   # satırı `zayif(...)` ile yazılan kurallar (BK-12 PR-2c)
 
-SURUM = "1.3 (20 Ekim 2026; kör test üreteci 7.3, kurallar kural kitabında; orta iniş 9 m, kitapla farklı on yedi kalemde kitap; PK-07 hedef örnek; T76 cevapları)"
+SURUM = "1.4 (22 Ekim 2026; kör test üreteci 7.3, kurallar kural kitabında; orta iniş 9 m, kitapla farklı on yedi kalemde kitap; PK-07 hedef örnek; T76 cevapları; 100'lük duvar omegası kirişlerin de üstünde)"
 GRUPLAR = {"1001": "Panel", "1002": "Metal aksam", "1003": "Kapı ve pencere", "1004": "Tavan", "1005": "Makas", "1006": "Çatı",
            "1007": "Elektrik", "1008": "Vida", "1009": "Depo", "1010": "Sıhhi tesisat", "1011": "Dere", "1012": "Boya"}
 TAVAN = lambda x: int(math.ceil(x - 1e-9))
@@ -169,7 +169,7 @@ def pencere_olcusu(olcu: str) -> tuple[int, int]:
 # ── geometri: Motor kipi ────────────────────────────────────────────────────────
 def model_motor(ie: dict) -> dict:
     from . import geometry as G
-    from shapely.geometry import LineString, box
+    from shapely.geometry import LineString, Point, box
     from shapely.ops import unary_union
     plan = G.kur(json.loads(json.dumps(ie)))
     y = ie["yapi"]; c = ie.get("cati") or {}
@@ -194,6 +194,30 @@ def model_motor(ie: dict) -> dict:
     fp = plan.footprint()
     # dış duvar boyu: kapalı kısmın dış sınırı; veranda ve dikmeler sayılmaz (Lokman, 20 Ekim 20:45; BK-12 PR-2d). Odalar çokgende delik, `.length` değil
     dis_duvar_m = sum(g_.exterior.length for g_ in getattr(fp, "geoms", [fp])) / 100
+    # çatı kenarına gelmeyen dış duvarlar: kapalı kısmın açık mahallerle ortak sınırı. Motor'un çatısı dış dikdörtgeni örter; veranda dış çizgide,
+    # ona bakan duvarlar çatının altında kalır ve 100'lük duvar omegası alır (Lokman, 21 Ekim 16:22; BK-12 PR-2e; PK-01 3,34 + 2,00)
+    ic_kalan_m = sum(g_.exterior.intersection(m.poly).length for g_ in getattr(fp, "geoms", [fp]) for m in acik if m.poly is not None) / 100
+    # duvarsız sınır (İş Emri `acik_sinirlar`, ör. salon–mutfak): üstüne kiriş gelir (Lokman, kart 22 Ekim "Evet, gelir"; E5, TS-01). Sınır
+    # çizgileri ızgara gözü başına; aynı hattaki bitişik parçalar tek kiriş, boyu aks arası. Motor iki açık mahalin (ör. iki veranda) arasına da
+    # çizgi koyar; o sınır iki oda arası değil, kiriş sayılmaz (geometri hakemi 3. tur)
+    acik_g = [m.poly for m in acik if m.poly is not None]
+    hatlar = {}
+    for x0, y0, x1, y1 in plan.acik_sinir_cizgileri:
+        orta = Point((x0 + x1) / 2, (y0 + y1) / 2)
+        if any(g_.distance(orta) < 0.5 for g_ in acik_g):
+            continue
+        dik = abs(x1 - x0) < 1e-6
+        hatlar.setdefault(("y" if dik else "x", round(x0 if dik else y0, 2)), []).append(tuple(sorted((y0, y1) if dik else (x0, x1))))
+    ic_kirisler = []
+    for _h, parcalar in sorted(hatlar.items()):
+        parcalar.sort()
+        u0, u1 = parcalar[0]
+        for p0, p1 in parcalar[1:]:
+            if p0 <= u1 + 0.5:
+                u1 = max(u1, p1)
+            else:
+                ic_kirisler.append(round(u1 - u0, 2)); u0, u1 = p0, p1
+        ic_kirisler.append(round(u1 - u0, 2))
 
     def oda(m):
         x0, y0, x1, y1 = m.poly.bounds
@@ -222,7 +246,7 @@ def model_motor(ie: dict) -> dict:
         fx0, fy0, fx1, fy1 = fp.bounds
         en_uzak = {"m": math.hypot(fx1 - fx0, fy1 - fy0) / 100, "nereden": "giriş kapısı yok: kapalı kısmın köşegeni"}
     return {"kaynak": "Motor", "H0": float(y.get("duvar_yuksekligi_cm", 250)), "W": W, "D": D, "brut_m2": round(W * D / 1e4, 3),
-            "dis_cevre_m": dis_duvar_m, "t_dis": t_dis, "panolar": panolar, "ekler": ekler,
+            "dis_cevre_m": dis_duvar_m, "ic_kalan_dis_duvar_m": ic_kalan_m, "ic_kirisler_cm": ic_kirisler, "t_dis": t_dis, "panolar": panolar, "ekler": ekler,
             "koseler": dict(Counter("dis" if kk.tur == "dis" else "ic" for kk in plan.koseler)), "dikmeler": len(plan.dikmeler),
             "veranda_kenarlari_cm": kirisler, "kapali": [oda(m) for m in kapali], "acik": [{**oda(m), "tur": "veranda"} for m in acik],
             "sigorta_en_uzak": en_uzak,
@@ -236,7 +260,8 @@ def model_motor(ie: dict) -> dict:
 # ── geometri: pafta kipi ────────────────────────────────────────────────────────
 def model_pafta(yp: dict) -> dict:
     """`yapi_pafta.json`: paftadan okunmuş geometri. Alanlar `model_motor` ile aynı; yalnız veranda kirişlerinin boyu
-    `veranda_kirisleri_cm`'de paftadan okunmuş olarak gelir (Motor kipi açık kenarları verir, kiriş boyu kuraldan). L biçimli bir oda birden çok
+    `veranda_kirisleri_cm`'de paftadan okunmuş olarak gelir (Motor kipi açık kenarları verir, kiriş boyu kuraldan). Çatı kenarında olmayan kirişler
+    (paftadaki yeşil kesikli profil: duvarsız açıklık, veranda ortası) isteğe bağlı `ic_kirisler_cm`'de; Motor kipinde iki oda arasındaki duvarsız sınırdan. L biçimli bir oda birden çok
     dikdörtgenle, aynı adla gelir. Sigortadan en uzak mesafe (`sigorta_en_uzak`) okunmadıysa yoktur: kapının ve odaların yeri girdide yok."""
     N = dict(yp)
     N["kaynak"] = "pafta"
@@ -247,6 +272,14 @@ def model_pafta(yp: dict) -> dict:
             raise ValueError("pafta kipi: verandalı yapıda dış duvar boyu (`dis_cevre_m`) paftadan okunmalı; dış dikdörtgen verandayı da sayar "
                              "(alt çerçeve yalnız dış duvarların altına: Lokman, 20 Ekim 20:45)")
         N["dis_cevre_m"] = 2 * (yp["W"] + yp["D"]) / 100       # verandasız: dikdörtgende ve köşesi çentikli L'de duvar boyu
+    if "ic_kalan_dis_duvar_m" not in N:
+        if N.get("acik") or N.get("dikmeler"):
+            raise ValueError("pafta kipi: verandalı yapıda çatı kenarına gelmeyen dış duvar boyu (`ic_kalan_dis_duvar_m`) paftadan okunmalı; "
+                             "verandaya bakan duvarlar 100'lük duvar omegası alır (Lokman, 21 Ekim 16:22)")
+        N["ic_kalan_dis_duvar_m"] = 0.0                          # verandasız: bütün dış duvarlar çatı kenarında
+    ik = N.get("ic_kirisler_cm")
+    if ik is not None and not (isinstance(ik, list) and all(isinstance(x, (int, float)) and x > 0 for x in ik)):
+        raise ValueError("pafta kipi: `ic_kirisler_cm` kiriş boylarının listesi olmalı (cm, sıfırdan büyük)")
     for c in N["cati"]:
         c.setdefault("kalkan", 2 if c["tip"] == "besik" else 0)
         c.setdefault("makas_kosu_cm", c["boy_cm"] - 2 * N["t_dis"])
@@ -397,6 +430,10 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
         kiris_formul = f"açık kenar dış ölçüsü − {mm(r('veranda_kirisi_eksik_cm'))}"
     for L_ in kirisler:
         ekle("1002", "Kutu profil (kiriş) 100 × 100", f"L {mm(L_)}", 1, "Liste kuralı", kiris_formul, "PK-01'de tuttu")
+    for L_ in N.get("ic_kirisler_cm") or []:                    # paftadaki yeşil kesikli profil (Lokman, 21 Ekim 16:22); Motor'da duvarsız sınır
+        ekle("1002", "Kutu profil (kiriş) 100 × 100", f"L {mm(L_)}", 1, "Liste kuralı",
+             "duvarsız sınırın boyu (İş Emri'nde açık sınır, aks arası)" if N["kaynak"] == "Motor" else "paftadan okunan kiriş boyu (çatı kenarında değil: duvarsız açıklık)",
+             "E5 L 3255 ve TS-01 L 2800 gerçek listelerde var; duvarsız açıklığa kiriş gelir (Lokman, kart 22 Ekim)")
     ec = Counter((e["duvar"], e["cins"]) for e in N["ekler"])
     ek_s = Counter((e["duvar"], e["cins"]) for e in N["ekler"] if e["sacak"])
     ekle("1002", "H 100 (dış pano eki)", f"100 × 100 × {mm(H0)}", ec[("dis", "pano_eki")], "Sayım", "her dış ekte bir H", "kulaklı / dübelli ayrımı: aday",
@@ -446,13 +483,18 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
              "PK-01'de formül 21, girilen 8 (soru 1)", pafta=("duvar_omegasi_asma",), aday=TAVAN((L_hat + L_duvar) / to_b),
              aday_notu=f"Şablon B (PK-02 16 ✓): \"+{to['ek']}\" eklenmeden")
     # N2 (sürüm 6): veranda tavanının omegası ayrı satır değil — PK-01, PK-03 ve PK-06 listelerinde tek omega satırı var (PK-03 dersi 10, PK-06)
+    # Lokman, 21 Ekim 16:22: çatının altında kalıp kenarına gelmeyen her şeyin üstü (BK-12 PR-2e). Kenardakiler saçak ya da baş makas omegası alır
     ic_kalan = N.get("ic_kalan_dis_duvar_m", 0.0)
+    kiris_ic = sum(N.get("ic_kirisler_cm") or []) / 100
     ust100 = L_duvar if ic_kal >= 100 else 0.0                  # O5: 100'lük iç duvarların üstü de 100'lük omega (PK-07 10)
     dob = r("duvar_omegasi_100_bolen_m")
-    ekle("1002", "100'lük duvar omegası", f"100 × {mm_m(dob)}", TAVAN((ic_kalan + ust100) / dob), "Kural (J2, O5)",
-         (f"çatı kenarına gelmeyen dış duvarlar {od(ic_kalan)} m" + (f" + 100'lük iç duvarlar {od(ust100)} m" if ust100 else "") + f" ÷ {sy(dob)}")
-         if (ic_kalan or ust100) else "dikdörtgen beşikte bütün dış duvarlar saçak ya da baş makas omegası alır",
-         "PK-01 0, PK-03 3, PK-06 3, PK-07 10 tuttu")
+    terim = " + ".join(t for t, v in ((f"çatı kenarına gelmeyen dış duvarlar {od(ic_kalan)} m", ic_kalan),
+                                      (f"çatı kenarında olmayan kirişler {od(kiris_ic)} m", kiris_ic), (f"100'lük iç duvarlar {od(ust100)} m", ust100)) if v)
+    uyari = ("UYARI: kenarda olmayan kiriş okunmadı (ic_kirisler_cm yok); paftada çatı kenarında olmayan yeşil kesikli profil varsa eksik. "
+             if N["kaynak"] == "pafta" and N.get("ic_kirisler_cm") is None else "")
+    ekle("1002", "100'lük duvar omegası", f"100 × {mm_m(dob)}", TAVAN((ic_kalan + kiris_ic + ust100) / dob), "Kural (J2, O5)",
+         uyari + (f"{terim} ÷ {sy(dob)}" if terim else "çatı kenarına gelmeyen duvar ve kiriş yok (bütün dış duvarlar saçak ya da baş makas omegası alır)"),
+         "Portatifev E2, E3, E5, PK-07 elle tuttu; TS-01 kuralla 2, girdide kiriş yok (üretilen 0); Şablon B bilgi: E1, E4, PK-06")
     sacak_m = sum(sum(o["hatlar"]) for _c, o in C)                # bütün saçaklar (sandviç kapaması da toplamdan; kitapta da)
     # Çatı panelli (makassız) parçanın kenarları kural kitabından (`panel_cati_kenarlari`; Lokman, 10 Ekim 10:18; prefabrikte 18 Ekim 19:22):
     # saçakta özel büküm saçak sacı, yanlarda sundurma kapama; o kenarlarda düz saçak sacı, saçak omegası ve alın sacı yok
