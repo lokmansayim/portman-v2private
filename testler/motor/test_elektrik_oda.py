@@ -66,7 +66,8 @@ def _ev(kapali, acik=(), **d) -> dict:
 
 
 def _kural(N: dict, kurallar: dict) -> dict:
-    return PL.elektrik_oda(N, kurallar["prefabrik"]["kurallar"]["elektrik_oda"]["deger"], kurallar["ortak"]["elektrik_oda"]["deger"]["odalar"])[0]
+    R = kurallar["prefabrik"]["kurallar"]
+    return PL.elektrik_oda(N, R["elektrik_oda"]["deger"], kurallar["ortak"]["elektrik_oda"]["deger"]["odalar"], R["elektrik_acik_mutfak"]["deger"])[0]
 
 
 def test_pk01_elle_hesap(N, kurallar):
@@ -155,10 +156,10 @@ def test_ayni_ad_farkli_tur(kurallar):
 
 
 def test_acik_mutfak(kurallar):
-    """Mutfak ayrı mahal değilse (açık mutfak, varsayım, Lokman'ın kartı bekleniyor; planlayıcının varsayılanı, PK-08 ve P6001 "yaşam alanı",
-    TS-01 "salon & mutfak") mutfağın kitap sayıları salona eklenir, salonun oda takımına ek olarak (kitap birleşik mahale ikisinin kuralını
-    uygular). Birden çok salon türlü odada ilkine. Mutfak ayrıysa salona eklenmez. Salon da yoksa mutfak noktası yazılmaz, satırın yazısı
-    uyarıyla başlar (sessiz değil)."""
+    """Mutfak ayrı mahal değilse (açık mutfak, `elektrik_acik_mutfak`, varsayım, Lokman'ın kartı bekleniyor; planlayıcının varsayılanı, PK-08
+    ve P6001 "yaşam alanı", TS-01 "salon & mutfak") mutfağın kitap sayıları salona eklenir, salonun oda takımına ek olarak (kitap birleşik mahale
+    ikisinin kuralını uygular). Birden çok salon türlü odada ilkine. Mutfak ayrıysa salona eklenmez. Salon da yoksa mutfak noktası yazılmaz,
+    satırın yazısı uyarıyla başlar (sessiz değil)."""
     kitap = kurallar["ortak"]["elektrik_oda"]["deger"]["odalar"]["mutfak"]
     L = PL.liste(_ev([_oda("SALON & MUTFAK", "salon", 20.0), _oda("OTURMA", "salon", 9.0), _oda("YATAK ODASI", "yatak_odasi", 9.0)]), kurallar)
     assert _adet(L) == {"tavan_armaturu": 2 + 1 + 1 + kitap["tijli_duy"], "glop": 0, "anahtar_tekli": 2 + 1 + 1 + kitap["tekli_anahtar"],

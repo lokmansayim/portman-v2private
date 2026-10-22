@@ -324,12 +324,12 @@ ELEKTRIK_NOKTALARI = {"tijli_duy": "tavan_armaturu", "glop": "glop", "tekli_anah
                       "tekli_priz": "priz_tekli", "cift_priz": "priz_cift", "uydu_prizi": "uydu_prizi"}
 
 
-def elektrik_oda(N: dict, EO, odalar_k) -> tuple[dict, dict]:
+def elektrik_oda(N: dict, EO, odalar_k, acik_mutfak_odasi) -> tuple[dict, dict]:
     """Elektrik noktalarının oda kuralı (`prefabrik.json › elektrik_oda`; BK-12 PR-2f). Odalar ve açık mahaller adla birleşir (L biçimli oda
     aynı adlı parçalarla gelir, buat kasadaki gibi tek oda; aynı adlı parçalar farklı türdeyse liste üretilmez). Banyo, WC, mutfak ve hol kitabın
     sayılarını alır (`kitaptan`; kitap `elektrik_oda.odalar`; ıslak hacim türleri banyo, koridor hol gibi); öteki her oda oda takımını, açık mahal
     veranda takımını alır. Takım sayısı alan ÷ `takim_m2`, yukarı, en az 1 (Lokman, 18 Ekim 19:52; kartlar 19 Ekim 16:50 ve 22 Ekim 11:10).
-    Mutfak ayrı mahal değilse mutfağın kitap sayıları `acik_mutfak_odasi` türündeki ilk odaya eklenir (kitap da birleşik mahale ikisinin kuralını
+    Mutfak ayrı mahal değilse mutfağın kitap sayıları `acik_mutfak_odasi` türündeki ilk odaya eklenir (`elektrik_acik_mutfak`; varsayım) (kitap da birleşik mahale ikisinin kuralını
     uygular; planlayıcı açık mutfağı salona koyar); o oda da yoksa satırın yazısı uyarıyla başlar, girdide hiç kapalı oda yoksa da (sessiz 0
     değil). Uydu prizi her evde `uydu_prizi_ev_basina`
     (kart 22 Ekim 11:09). Döner: ({pafta katmanındaki ad: adet}, {pafta katmanındaki ad: oda oda döküm yazısı})."""
@@ -370,7 +370,7 @@ def elektrik_oda(N: dict, EO, odalar_k) -> tuple[dict, dict]:
         return odalar_k[KT[tur]]
     odalar = [(ad, b) for (acik, ad), b in birlesik.items() if not acik]
     mutfak_var = any(b["tur"] == "mutfak" for _, b in odalar)
-    acik_mutfak = None if mutfak_var else next((ad for ad, b in odalar if b["tur"] == EO["acik_mutfak_odasi"]), None)
+    acik_mutfak = None if mutfak_var else next((ad for ad, b in odalar if b["tur"] == acik_mutfak_odasi), None)
     for (acik, ad), b in birlesik.items():
         if acik:
             topla(ad, EO["acik_takimi"], takim(b["alan"]), b["alan"])
@@ -895,7 +895,7 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
     # (`elektrik.zil`; açık on bir listenin hepsinde 1, PK-07'nin paftasında yok), paftadaki sayım pafta sütununda
     el = P.get("elektrik") or {}
     E, Ea, Ek = r("elektrik"), r("elektrik_aday"), _ortak(k, "elektrik")
-    ks, kd = elektrik_oda(N, r("elektrik_oda"), _ortak(k, "elektrik_oda", "odalar"))
+    ks, kd = elektrik_oda(N, r("elektrik_oda"), _ortak(k, "elektrik_oda", "odalar"), r("elektrik_acik_mutfak"))
     es = (lambda a: (el.get(a) or {}).get("adet")) if el else (lambda a: ks[a])
     v = lambda a: es(a) or 0
     sayim = ("Sayım (pafta)", "göz sayımı; prefabrik.json › elektrik")
