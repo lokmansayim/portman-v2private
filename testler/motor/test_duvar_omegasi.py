@@ -4,8 +4,8 @@ kartlar 22 Ekim: "Uygula", PK-01'in 0'ı "Stoktan", kirişsiz verandasız 60'lı
 Kural: ⌈(çatı kenarına gelmeyen dış duvarlar + çatı kenarında olmayan kirişler + 100'lük iç duvarlar) ÷ 2,5⌉. Paftadaki yeşil kesikli profil
 kutu profil kiriştir; çatı kenarındaki duvar ve kiriş saçak ya da baş makas omegası alır.
 - Motor kipi: çatı kenarına gelmeyen dış duvar = kapalı kısmın veranda ile ortak sınırı (PK-01 3,34 + 2,00 = 5,34 m → 3). Değer
-  `ic_kalan_dis_duvar_m` olarak yazılır, pafta biçimine taşınınca aynı adet çıkar. İş Emri'ndeki duvarsız sınırın (`acik_sinirlar`, ör.
-  salon–mutfak) üstünde kiriş olup olmadığı planda yok: kiriş sayılmaz, satır uyarır (geometri hakemi, PR-2e 1. tur).
+  `ic_kalan_dis_duvar_m` olarak yazılır, pafta biçimine taşınınca aynı adet çıkar. İş Emri'ndeki duvarsız sınır (`acik_sinirlar`, ör.
+  salon–mutfak) kiriştir (Lokman, kart 22 Ekim 05:26 "Evet, gelir"): aynı hattaki parçaları bir kiriş, `ic_kirisler_cm` olarak yazılır.
 - Pafta kipi: verandalı girdide `ic_kalan_dis_duvar_m` okunmuş olmalı; `ic_kirisler_cm` kiriş satırı da yazar, yoksa formül uyarıyla başlar.
 """
 from __future__ import annotations
@@ -73,16 +73,22 @@ def test_motor_pk01(N, kurallar):
     assert sum(x["kalem"] == KIRIS for x in L["satirlar"]) == len(N["veranda_kenarlari_cm"])
 
 
-def test_motor_duvarsiz_sinir_uyarir(kurallar):
-    """ALTIN 6×8'de salonla mutfak arası duvarsız (2,51 m): kiriş sayılmaz, formül uyarıyla başlar; PK-01'de duvarsız sınır yok, uyarı yok."""
+def test_motor_duvarsiz_sinir_kiris(N, kurallar):
+    """ALTIN 6×8'de salonla mutfak arası duvarsız, L biçimli (125,5 + 125,5 cm): iki kiriş satırı ve duvar omegası 3 → 4. TEST02'de hol–salon
+    üç düz parça (5,02 m). PK-01'de duvarsız sınır yok. Pafta biçimine taşınınca aynı adet, uyarı yok."""
     N6 = PL.model_motor(_oku(KOK / "is_emri" / "ALTIN_2plus1_6x8.json"))
     L = PL.liste(copy.deepcopy(N6), kurallar)
     s = _satir(L, OMEGA)
-    assert N6["acik_sinir_m"] == 2.51
-    assert s["formul"] == ("UYARI: duvarsız sınır 2,51 m kiriş sayılmadı (İş Emri'nde açık sınır); üstünde kiriş varsa eksik. "
-                           "çatı kenarına gelmeyen dış duvarlar 6,33 m ÷ 2,5")
-    assert s["adet"] == 3 and sum(x["kalem"] == KIRIS for x in L["satirlar"]) == len(N6["veranda_kenarlari_cm"])
-    assert PL.model_motor(_oku(VERI / "PK01.json"))["acik_sinir_m"] == 0.0
+    assert N6["ic_kirisler_cm"] == [125.5, 125.5]
+    assert (s["adet"], s["formul"]) == (4, "çatı kenarına gelmeyen dış duvarlar 6,33 m + çatı kenarında olmayan kirişler 2,51 m ÷ 2,5")
+    ic = [x for x in L["satirlar"] if x["kalem"] == KIRIS and x["formul"].startswith("duvarsız sınırın boyu")]
+    assert [(x["olcu"], x["adet"]) for x in ic] == [("L 1255", 1), ("L 1255", 1)]
+    assert sum(x["kalem"] == KIRIS for x in L["satirlar"]) == len(N6["veranda_kenarlari_cm"]) + 2
+    sp = _satir(PL.liste(PL.model_pafta(_pafta(N6)), kurallar), OMEGA)
+    assert (sp["adet"], sp["formul"]) == (4, s["formul"])
+    N2 = PL.model_motor(_oku(KOK / "is_emri" / "adaylar" / "TEST02.json"))
+    assert (len(N2["ic_kirisler_cm"]), round(sum(N2["ic_kirisler_cm"]), 2)) == (3, 502.0)
+    assert N["ic_kirisler_cm"] == []
 
 
 def test_motor_veranda_kenar_boyunca(kurallar):
@@ -112,8 +118,8 @@ def test_motor_cati_parcasi_ve_girdideki_deger(N, kurallar):
 def test_pafta_motordan_tasinir(N, kurallar):
     """Motor'un değeri pafta biçimine taşınınca aynı adet; `ic_kirisler_cm` okunmamışsa formül uyarıyla başlar, `[]` ise uyarı yok."""
     sm = _satir(PL.liste(copy.deepcopy(N), kurallar), OMEGA)
-    s0 = _satir(PL.liste(PL.model_pafta(_pafta(N)), kurallar), OMEGA)
-    s1 = _satir(PL.liste(PL.model_pafta(_pafta(N, ic_kirisler_cm=[])), kurallar), OMEGA)
+    s0 = _satir(PL.liste(PL.model_pafta({k: v for k, v in _pafta(N).items() if k != "ic_kirisler_cm"}), kurallar), OMEGA)
+    s1 = _satir(PL.liste(PL.model_pafta(_pafta(N)), kurallar), OMEGA)
     assert sm["adet"] == s0["adet"] == s1["adet"] == 3
     assert s0["formul"] == UYARI + sm["formul"] and s1["formul"] == sm["formul"]
     assert s0["formul"].endswith("÷ 2,5")
