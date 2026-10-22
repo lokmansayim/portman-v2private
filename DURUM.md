@@ -13,7 +13,7 @@ Yeni pencere için hazırlıklar:
 - **Karar ve onay:** Lokman 20 Ekim 20:45 (cevap 3: duvar omegası 0 olmaz), kart 21 Ekim 07:06 "Duvar boyundan", 21 Ekim 16:22 (E5 paftası: omega yeşil kesikli profilin, yani kirişin üstüne de gelir). Plan `IE-09_atolye/BK-12_PR-2e/plan.md` (CIO kıyasıyla üç sürüm); kartlar 22 Ekim 04:19: "Uygula", PK-01'in 0'ı "Stoktan", kirişsiz verandasız 60'lık evde 0 "Doğru".
 - **Yapıldı (dal `bk-12-pr2e-duvar-omegasi`, `main` `acd7eea`'dan):** kural ⌈(çatı kenarına gelmeyen dış duvarlar + çatı kenarında olmayan kirişler + 100'lük iç duvarlar) ÷ 2,5⌉. Motor kipinde verandaya bakan duvarlar (PK-01 5,34 m → 3); pafta kipinde verandalı girdide okunmuş değer şart, yeni `ic_kirisler_cm` kiriş satırı da yazar, okunmamışsa satır uyarı yazar. Portatifev'in beş açık listesinde paftadan elle 5/5. `main` ile 14 girdide: adet yalnız altı Motor girdisinde 0 → 3, beklenmeyen fark 0. PK-01 kilidinde yalnız bu satır; üretici 1.4.
 - **Kullanıcı adımı B3:** Kısmen. Liste üretiliyor; duvar omegası Lokman'ın kuralıyla; kıyas PK-07 ve açık listelerle.
-- **Duvarsız açıklık:** Lokman, kart 22 Ekim 05:26 "Evet, gelir": Motor planındaki duvarsız sınır kiriş satırı ve duvar omegası alır (katalogdaki 2+1 6×8'de 3 → 4).
+- **Duvarsız açıklık:** Lokman, kart 22 Ekim 05:26 "Evet, gelir": Motor planında iki oda arasındaki duvarsız sınır kiriş satırı ve duvar omegası alır (katalogdaki 2+1 6×8'de 3 → 4); iki açık mahalin (ör. iki veranda parçası) arası kiriş sayılmaz.
 - **Bekleyen (Lokman):** PR'ın birleştirilmesi.
 
 **20 Ekim 2026 gece eki (BK-12 · PR-2d, T76 denemesinin cevapları; `docs/is_emirleri/BK-12.md` › Değişiklik (PR-2d)):**

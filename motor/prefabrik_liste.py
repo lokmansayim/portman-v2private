@@ -169,7 +169,7 @@ def pencere_olcusu(olcu: str) -> tuple[int, int]:
 # ── geometri: Motor kipi ────────────────────────────────────────────────────────
 def model_motor(ie: dict) -> dict:
     from . import geometry as G
-    from shapely.geometry import LineString, box
+    from shapely.geometry import LineString, Point, box
     from shapely.ops import unary_union
     plan = G.kur(json.loads(json.dumps(ie)))
     y = ie["yapi"]; c = ie.get("cati") or {}
@@ -198,9 +198,14 @@ def model_motor(ie: dict) -> dict:
     # ona bakan duvarlar çatının altında kalır ve 100'lük duvar omegası alır (Lokman, 21 Ekim 16:22; BK-12 PR-2e; PK-01 3,34 + 2,00)
     ic_kalan_m = sum(g_.exterior.intersection(m.poly).length for g_ in getattr(fp, "geoms", [fp]) for m in acik if m.poly is not None) / 100
     # duvarsız sınır (İş Emri `acik_sinirlar`, ör. salon–mutfak): üstüne kiriş gelir (Lokman, kart 22 Ekim "Evet, gelir"; E5, TS-01). Sınır
-    # çizgileri ızgara gözü başına; aynı hattaki bitişik parçalar tek kiriş, boyu aks arası
+    # çizgileri ızgara gözü başına; aynı hattaki bitişik parçalar tek kiriş, boyu aks arası. Motor iki açık mahalin (ör. iki veranda) arasına da
+    # çizgi koyar; o sınır iki oda arası değil, kiriş sayılmaz (geometri hakemi 3. tur)
+    acik_g = [m.poly for m in acik if m.poly is not None]
     hatlar = {}
     for x0, y0, x1, y1 in plan.acik_sinir_cizgileri:
+        orta = Point((x0 + x1) / 2, (y0 + y1) / 2)
+        if any(g_.distance(orta) < 0.5 for g_ in acik_g):
+            continue
         dik = abs(x1 - x0) < 1e-6
         hatlar.setdefault(("y" if dik else "x", round(x0 if dik else y0, 2)), []).append(tuple(sorted((y0, y1) if dik else (x0, x1))))
     ic_kirisler = []
@@ -256,7 +261,7 @@ def model_motor(ie: dict) -> dict:
 def model_pafta(yp: dict) -> dict:
     """`yapi_pafta.json`: paftadan okunmuş geometri. Alanlar `model_motor` ile aynı; yalnız veranda kirişlerinin boyu
     `veranda_kirisleri_cm`'de paftadan okunmuş olarak gelir (Motor kipi açık kenarları verir, kiriş boyu kuraldan). Çatı kenarında olmayan kirişler
-    (paftadaki yeşil kesikli profil: duvarsız açıklık, veranda ortası) isteğe bağlı `ic_kirisler_cm`'de; Motor kipinde duvarsız sınırdan. L biçimli bir oda birden çok
+    (paftadaki yeşil kesikli profil: duvarsız açıklık, veranda ortası) isteğe bağlı `ic_kirisler_cm`'de; Motor kipinde iki oda arasındaki duvarsız sınırdan. L biçimli bir oda birden çok
     dikdörtgenle, aynı adla gelir. Sigortadan en uzak mesafe (`sigorta_en_uzak`) okunmadıysa yoktur: kapının ve odaların yeri girdide yok."""
     N = dict(yp)
     N["kaynak"] = "pafta"

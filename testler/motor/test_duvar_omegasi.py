@@ -91,6 +91,20 @@ def test_motor_duvarsiz_sinir_kiris(N, kurallar):
     assert N["ic_kirisler_cm"] == []
 
 
+def test_motor_iki_acik_mahal_arasi_kiris_degil(N, kurallar):
+    """Motor iki açık mahalin arasına da sınır çizgisi koyar (`geometry.py`: ikisi açıksa `acik_sinir`). O sınır iki oda arası değil; kiriş
+    satırı ve duvar omegası terimi yazılmaz (geometri hakemi 3. tur; Lokman'ın 22 Ekim 05:26 kartı "iki oda arası"). PK-01'in verandası ikiye
+    bölünür: 2,00 m'lik sınır sayılmaz, liste bölünmemiş PK-01'inkiyle aynı adet."""
+    ie = _oku(VERI / "PK01.json")
+    v = next(m for m in ie["mahaller"] if m["tur"] == "veranda")
+    v["konum_cm"] = [[261, 795, 386.5, 995]]
+    ie["mahaller"].append(dict(copy.deepcopy(v), ad="VERANDA 2", konum_cm=[[386.5, 795, 590, 995]]))
+    Nb = PL.model_motor(ie)
+    assert (Nb["ic_kirisler_cm"], Nb["ic_kalan_dis_duvar_m"]) == ([], N["ic_kalan_dis_duvar_m"])
+    L = PL.liste(Nb, kurallar)
+    assert (_satir(L, OMEGA)["adet"], _satir(L, OMEGA)["formul"]) == (3, "çatı kenarına gelmeyen dış duvarlar 5,34 m ÷ 2,5")
+    assert not [x for x in L["satirlar"] if x["kalem"] == KIRIS and x["formul"].startswith("duvarsız sınırın boyu")]
+
 def test_motor_veranda_kenar_boyunca(kurallar):
     """Verandası bir kenar boyunca uzanan türev (`test_t76_cevaplari`'ndaki gibi): ortak sınır kenar boyu, 6,00 m → 3."""
     ie = _oku(VERI / "PK01.json")
