@@ -89,7 +89,13 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-16 | BK-09 PR-2: çizim düzeltmeleri (KT-02 kapı yayı, 2. sayfa TASLAK, KT başlığında m², G1) ve referansın yeniden dondurulması | yazıldı (14.10) |
 | D | D-17 | İE-08 8b: yükleme listesi Excel'i sunucuda üretilir ve mühendise gider (D-11'in "yalnız kabul paketinde" maddesini değiştirir) | yazıldı (14.10; `ie-08-8b-muhendis`) |
 | D | D-18 | İE-14: yeni üretilen çelik plan bayiye TASLAK gider; plan üretimi ve revizyon için ek LLM çağrısı (K05 istisnası) | yazıldı (14.10; `ie-14-talepten-plana`) |
-| D | **D-19** | — | **sıradaki boş** |
+| D | D-19 | 24 saat kapanış kuralı (BK-10; Patron, 14.10 23:56); ayrıntısı (zaman aşımı, Patron'a tek bildirim) CIO yorumu ve Patron teyidini bekliyor | kaydı CIO'nun Notion defterinde ve Kurulum Panosu'nda (satır 15); `KARARLAR/`'da dosyası yok |
+| D | D-20 | İE-09 model atölyesi (Görev 6e, 16.10); defterde ayrı karar metni yok | kaydı CIO'nun Notion defterinde ve Kurulum Panosu'nda; `KARARLAR/`'da dosyası yok |
+| D | D-21 | atölye sırası "AIPrefabrik + mühendis" (17.10 07:00, kart); D-22 değiştirdi | kaydı CIO'nun Notion defterinde ve Kurulum Panosu'nda (satır 97); `KARARLAR/`'da dosyası yok |
+| D | D-22 | atölye sırası "Önce mühendis" (17.10 08:01, kart; D-21'i değiştirir); D-23 değiştirdi | kaydı CIO'nun Notion defterinde ve Kurulum Panosu'nda (satır 98); `KARARLAR/`'da dosyası yok |
+| D | D-23 | atölye prefabrikle başlar, yol "Önce motor" (17.10 09:30 ve kart 09:39; D-22'yi değiştirir); uygulaması BK-12 | kaydı CIO'nun Notion defterinde ve Kurulum Panosu'nda (satır 99); `KARARLAR/`'da dosyası yok |
+| D | D-24 | kimlik kartı işi PK-01 ile başlar (19.10 04:04, kart; PR #28 birleşince, BK-12 PR-3'ü beklemez); İE-15'in sırası | kaydı CIO'nun Notion defterinde ve Kurulum Panosu'nda (satır 102); `KARARLAR/`'da dosyası yok |
+| D | **D-25** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model bankası ve yeni model üretimi; P6001 güncellemesi | ayrıldı (pilottan sonra) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | `main`'e BK-12 ile (PR-1: motor ve bayi paftası; liste ve mühür kıyası sonraki PR'larda) |
@@ -100,7 +106,7 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | İE | **İE-16** | — | **sıradaki boş** |
 | BK | BK-01–BK-08 | bu depo; BK-08 8a sonrası temizlik (`bk-08-8a-temizlik`) | yazıldı |
 | BK | BK-09 | metin ve çizim düzeltmeleri, G1 (`bk-09-metin-cizim`, `bk-09-cizim-g1`) | alındı (14.10) |
-| BK | BK-10 | 8b sonrası düzeltmeler (DXF `.txt` notu, geç gelen Excel, Patron'a Excel bağlantısı, çelikte kapı değişikliği; `docs/devir/2026-10-14_IE-08_8b_Devri.md` › Sıradaki; CIO'nun Notion defterinde D-18 ile) | ayrıldı |
+| BK | BK-10 | 8b sonrası düzeltmeler (DXF `.txt` notu, geç gelen Excel, Patron'a Excel bağlantısı, çelikte kapı değişikliği; `docs/devir/2026-10-14_IE-08_8b_Devri.md` › Sıradaki; CIO'nun Notion defterinde D-19 ile: 24 saat kapanış kuralı) | ayrıldı |
 | BK | BK-11 | `ortam_kur.sh` Postgres'i kurtarma bitene kadar dener (`bk-11-postgres-bekleme`) | alındı (16.10) |
 | BK | BK-12 | prefabrik hattını `main`'e alma (D-23; `bk-12-prefabrik-main`; PR-1, PR-R, PR-K, PR-2, PR-3, PR-4) | alındı (17.10) |
 | BK | **BK-13** | — | **sıradaki boş** |
