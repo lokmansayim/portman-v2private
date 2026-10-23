@@ -301,15 +301,21 @@ def test_hakem_kiyasi_kapi_1_gecer(pk01, cevap):
 
 
 def test_hakem_yanlis_h_kuralini_yakalar(pk01, cevap, tmp_path):
-    """Denk gelme payı makas aralığının yarısı yerine 1/20'si olsa kulaklı H'ler düşer; kapı 1 geçmez (kural PK-01'e uydurulmuş değil)."""
+    """Türleri ters bir H kuralı (makasa denk gelen dübelli, öteki kulaklı) kapı 1'den geçmez; dört H türü anahtarı geçmez listesinde.
+    Dar pay (makas aralığının 1/20'si) PK-01'de sonucu değiştirmez: makaslar pano eklerinde, her makasın H'si ekte (BK-12 PR-R)."""
+    y = _oku(KM.YERLESIM)
+    y["kurallar"]["h_turu"]["turler"] = {"denk": "dubelli", "denk_degil": "dubelli_kulakli"}
+    say = KM.kart_modeli(pk01["bugunku"], tmp_path / "ters.ifc", "besik", yerlesim=y)
+    adet = {k["kod"]: k["adet"] for k in say["kartlar"]}
+    assert (adet["H-01"], adet["H-02"], adet["H-04"], adet["H-05"]) == (7, 12, 3, 2)
+    k = KY.kiyasla(tmp_path / "ters.ifc", cevap, _oku(PROJE))
+    assert k["kapi_1"] == "geçmez"
+    assert {s["anahtar"] for s in k["satirlar"] if s["sonuc"] == "geçmez"} >= {
+        f"ayrinti.h_plani.turler.{t}" for t in ("dubelli_kulakli", "dubelli", "uclu_dubelli_kulakli", "uclu_dubelli")}
     y = _oku(KM.YERLESIM)
     y["kurallar"]["h_turu"]["denk_gelme_payi"]["carpan"] = 0.05
-    say = KM.kart_modeli(pk01["bugunku"], tmp_path / "dar.ifc", "besik", yerlesim=y)
-    adet = {k["kod"]: k["adet"] for k in say["kartlar"]}
-    assert adet["H-01"] + adet["H-02"] == 19 and adet["H-01"] < 12
-    k = KY.kiyasla(tmp_path / "dar.ifc", cevap, _oku(PROJE))
-    assert k["kapi_1"] == "geçmez"
-    assert {s["anahtar"] for s in k["satirlar"] if s["sonuc"] == "geçmez"} >= {"ayrinti.h_plani.turler.dubelli_kulakli", "ayrinti.h_plani.turler.dubelli"}
+    adet = {k["kod"]: k["adet"] for k in KM.kart_modeli(pk01["bugunku"], tmp_path / "dar.ifc", "besik", yerlesim=y)["kartlar"]}
+    assert (adet["H-01"], adet["H-02"], adet["H-04"], adet["H-05"]) == (12, 7, 2, 3)
 
 
 def test_karti_olmayan_parca_sayilmaz(pk01, kartlar, cevap, tmp_path):

@@ -438,10 +438,28 @@ class IfcUretici:
             pl = self._urun("IfcPlate", ad, predefined="SHEET")
             self._yerlestir(pl); self._temsil(pl, self._prizma_xz(alin, ya, yb), "fiber")
             self._pset(pl, "PortatifEv_Kapsam", {"BOMKalem": "Çatı alın dolgusu (üçgen) — kural teyit edilecek"})
-        # makaslar
-        n = math.ceil((Hd - 10) / 125.5) + 1
-        for i in range(n):
-            y = 5 + i * (Hd - 10) / (n - 1)
+        # makaslar pano eklerinde (BK-12 PR-R): iki baş makas uç duvarların ekseninde, orta makaslar boydan boya kesintisiz
+        # koşan saçak duvarının (x = 0 ya da Wd) pano eklerinde; PK-01'de paftadaki MK01–MK09. İki saçak duvarı da kesintisizse
+        # ortak ekler alınır; ikisi de kesintiliyse (iki yanda veranda, L plan) eşit aralık kalır ve özete uyarı yazılır
+        td = max(p["kalinlik"] for p in G["panolar"])
+        def sacak_ekleri(x):
+            ar = sorted((p["rect"][1], p["rect"][3]) for p in G["panolar"] if p["yon"] == "y" and p["tur"] == "dis"
+                        and abs((p["rect"][0] if x == 0 else p["rect"][2]) - x) < 1e-6)
+            tam = (bool(ar) and ar[0][0] <= td + 1e-6 and ar[-1][1] >= Hd - td - 1e-6
+                   and all(abs(a[1] - b[0]) < 1e-6 for a, b in zip(ar, ar[1:])))
+            return {round(v, 3) for a in ar for v in a if td + 1e-6 < v < Hd - td - 1e-6} if tam else None
+        ekler = [e for e in (sacak_ekleri(0), sacak_ekleri(Wd)) if e is not None]
+        uyari = []
+        if ekler:
+            if len(ekler) == 2 and ekler[0] != ekler[1]:
+                uyari.append("makas yeri: iki saçak duvarının pano ekleri farklı; orta makaslar ortak eklerde")
+            ys = [td / 2] + sorted(set.intersection(*ekler)) + [Hd - td / 2]
+        else:
+            uyari.append("makas yeri: boydan boya kesintisiz saçak duvarı yok; makaslar eşit aralıklı")
+            n = math.ceil((Hd - 10) / 125.5) + 1
+            ys = [5 + i * (Hd - 10) / (n - 1) for i in range(n)]
+        n = len(ys)
+        for i, y in enumerate(ys):
             asm = self._urun("IfcElementAssembly", f"MAKAS_{i + 1:02d}", predefined="TRUSS")
             self._yerlestir(asm)
             self._pset(asm, "PortatifEv_Kapsam", {"BOMKalem": "Çatı makası (baş)" if i in (0, n - 1) else "Çatı makası (orta)", "Aciklik_cm": round(Wd, 1)})
@@ -460,7 +478,8 @@ class IfcUretici:
                 self._yerlestir(m); self._temsil(m, self._prizma_xz(k, y - 2.5, y + 2.5), "galv")
                 uyeler_e.append(m)
             api("aggregate.assign_object", self.f, relating_object=asm, products=uyeler_e)
-        self.cati_ozet = {"mahya_cm": round(zm, 1), "makas": n, "cati_alan_m2": round(alan, 2)}
+        self.cati_ozet = {"mahya_cm": round(zm, 1), "makas": n, "cati_alan_m2": round(alan, 2), "makas_y_cm": [round(y, 2) for y in ys],
+                          **({"uyari": uyari} if uyari else {})}
 
     def _prizma_yz(self, pts_yz, x0, x1):
         """Dünya y-z düzlemindeki kesit (cm), x0..x1 boyunca (dünya koordinatı)."""
