@@ -258,6 +258,14 @@ def sonuc_kaydi(k: dict) -> dict:
     }
 
 
+def sonuc_yaz(kayit: dict, yol: Path) -> None:
+    """`sonuc.json`: üst alanlar girintili, her tutan satır tek satırda (fark okunur kalsın)."""
+    ust = {k: v for k, v in kayit.items() if k != "tutanlar"}
+    metin = json.dumps(ust, ensure_ascii=False, indent=1)[:-2]
+    satirlar = ",\n".join("  " + json.dumps(t, ensure_ascii=False) for t in kayit["tutanlar"])
+    Path(yol).write_text(metin + ',\n "tutanlar": [\n' + satirlar + "\n ]\n}\n", encoding="utf-8")
+
+
 # ------------------------------------------------------------------------------------------------------------------- rapor
 
 def maske(t) -> str:
@@ -396,7 +404,7 @@ def main(argv: list[str] | None = None) -> int:
     if a.xlsx:
         rapor_xlsx(k, a.xlsx)
     if a.sonuc_yaz:
-        (a.proje / "sonuc.json").write_text(json.dumps(sonuc_kaydi(k), ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+        sonuc_yaz(sonuc_kaydi(k), a.proje / "sonuc.json")
     return 0
 
 
