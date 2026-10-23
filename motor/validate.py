@@ -5,6 +5,7 @@ beklentilerle) karşılaştırılır. Kod, çizen fonksiyonların ara sonuçlar�
 """
 from __future__ import annotations
 import collections
+import re
 from shapely.geometry import box, Polygon
 from shapely.ops import unary_union
 
@@ -62,7 +63,7 @@ def dogrula(doc, plan: G.Plan, is_emri: dict) -> dict:
                 if abs(mid_gap - mid_pan - kayma_of.get(_r3(outer), 0.0)) > 1e-6:
                     hatalar.append(f"Açıklık panoda merkezlenmemiş: {e.dxf.name}" if not kayma_of else f"Açıklık Plan'daki yerinde değil: {e.dxf.name}")
                 toks = e.dxf.name.split("_")
-                tok = next((t for t in toks if t in ("P01", "P02", "P03", "K01", "K02", "K03", "OPEN")), "?")
+                tok = next((t for t in toks if t in ("P01", "P02", "P03", "K01", "K02", "K03", "OPEN") or re.fullmatch(r"P\d+x\d+", t)), "?")   # BK-13: P150x140
                 kind = "pencere" if tok.startswith("P") else ("gecis" if tok == "OPEN" else "kapi")
                 kinds[kind] += 1
                 gaps.append({"kind": kind, "name": e.dxf.name, "gap": gap, "length": round(length, 6)})

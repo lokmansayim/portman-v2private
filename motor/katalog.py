@@ -8,13 +8,26 @@ import json, re
 from pathlib import Path
 
 KATALOG_YOLU = Path(__file__).resolve().parent / "malzeme_katalogu.json"
+OTOMATIK_NOT = "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli."
+VASISTAS_EN_COK_BOY_CM = 60          # BK-13: boy ≤ 60 vasistas (pafta yazısı gibi; `sunum.VASISTAS_ESIGI_CM`)
+
+
+def pencere_turu(olcu: str) -> str:
+    """BK-13: bugünkü üç ölçü dışındaki pencereli panonun türü ("150x140" → "P150x140"); etiketi `Katalog.pano` yazar."""
+    m = re.fullmatch(r"(\d+)x(\d+)", olcu)
+    if not m:
+        raise ValueError(f"pencere ölçüsü okunamadı: {olcu}")
+    return f"P{int(m[1])}x{int(m[2])}"
 
 
 def _kind_from_label(label: str) -> str:
     l = label.replace("İ", "i").replace("I", "ı").lower()
-    if "120×120" in l or "120x120" in l: return "P01"
-    if "120×180" in l or "120x180" in l: return "P02"
-    if "60×40" in l or "60x40" in l: return "P03"
+    olc = lambda o: re.search(rf"(?<!\d){o}(?!\d)", l.replace("x", "×"))   # BK-13: "160×40" P03 değil
+    if olc("120×120"): return "P01"
+    if olc("120×180"): return "P02"
+    if olc("60×40"): return "P03"
+    m = re.search(r"(\d+)×(\d+) (?:pencereli|vasistaslı) pano", l)       # BK-13: öteki ölçülerin etiketi
+    if m: return f"P{int(m[1])}x{int(m[2])}"
     if "kapısız" in l: return "OPEN"
     if "iç kapılı" in l: return "K01"
     if "dış kapılı" in l: return "K02"
@@ -51,7 +64,7 @@ class Katalog:
     def _tahsis(self, fam, key, label, group, dims, note=""):
         nums = [int(c[1:]) for c in self.malzemeler if c[0] == fam and c[1:].isdigit()]
         code = f"{fam}{(max(nums) + 1) if nums else 1:02d}"
-        entry = {"code": code, "group": group, "label": label, "dimensions_mm": dims, "note": note or "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli.", "unit": "adet"}
+        entry = {"code": code, "group": group, "label": label, "dimensions_mm": dims, "note": note or OTOMATIK_NOT, "unit": "adet"}
         self.malzemeler[code] = entry; self._index[key] = code; self.yeni.append(entry)
         return code
 
@@ -62,6 +75,12 @@ class Katalog:
         key = (fam, L, kind, kal, round(yukseklik_cm * 10, 1))
         if key in self._index:
             return self._index[key]
+        m = re.fullmatch(r"P(\d+)x(\d+)", kind)              # BK-13: üç ölçü dışındaki pencereli pano
+        if m:
+            en, boy = int(m[1]), int(m[2])
+            return self._tahsis(fam, key, f"{en}×{boy} " + ("vasistaslı pano" if boy <= VASISTAS_EN_COK_BOY_CM else "pencereli pano"),
+                                "Dış duvar panoları" if dis else "İç duvar panoları", [L, int(kal) if kal == int(kal) else kal, round(yukseklik_cm * 10)],
+                                note="Pencere ayrı kalem; pano tek parça sayıldı. " + OTOMATIK_NOT)
         lab = {"DOLU": "Özel dolu pano" if abs(boy_cm - 125.5) > 1e-6 else "Dolu pano",
                "P01": "120×120 pencereli pano", "P02": "120×180 pencereli pano", "P03": "60×40 vasistaslı pano",
                "K01": "İç kapılı özel pano" if abs(boy_cm - 125.5) > 1e-6 else "İç kapılı pano",
@@ -69,10 +88,12 @@ class Katalog:
                "OPEN": "Kapısız geçişli pano"}[kind]
         return self._tahsis(fam, key, lab, "Dış duvar panoları" if dis else "İç duvar panoları", [L, int(kal) if kal == int(kal) else kal, round(yukseklik_cm * 10)])
 
-    def pencere(self, en_cm: float, boy_cm: float) -> str:
+    def pencere(self, en_cm: float, boy_cm: float, esik_cm: float | None = None) -> str:
         key = ("P", round(en_cm * 10, 1), round(boy_cm * 10, 1))
         if key in self._index: return self._index[key]
-        return self._tahsis("P", key, f"Pencere {int(en_cm)}×{int(boy_cm)}", "Kapı ve pencereler", [round(en_cm * 10, 1), round(boy_cm * 10, 1), None])
+        ad = "Vasistas" if boy_cm <= VASISTAS_EN_COK_BOY_CM else "Pencere"      # BK-13: P01–P03 gibi ad ve eşik notu
+        note = "" if esik_cm is None else f"Ölçü en × yükseklik; eşik {round(esik_cm * 10)} mm. " + OTOMATIK_NOT
+        return self._tahsis("P", key, f"{ad} {int(en_cm)}×{int(boy_cm)}", "Kapı ve pencereler", [round(en_cm * 10, 1), round(boy_cm * 10, 1), None], note=note)
 
     def kapi(self, aciklik_cm: float, dis: bool) -> str:
         key = ("K", round(aciklik_cm * 10, 1))

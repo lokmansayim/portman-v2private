@@ -14,6 +14,7 @@ from pathlib import Path
 
 import ezdxf
 from ezdxf import units
+from ezdxf.math import Matrix44
 from ezdxf.addons import Importer
 from ezdxf.enums import TextEntityAlignment
 from ezdxf.addons.drawing import Frontend, RenderContext, config, layout, pymupdf
@@ -24,7 +25,7 @@ except ImportError:  # eski PyMuPDF
 from shapely.geometry import box
 
 from . import geometry as G
-from .katalog import Katalog
+from .katalog import Katalog, pencere_turu
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -46,13 +47,14 @@ REF_H = _ref("ref_h-connector.json")
 FONT = "DejaVuSans.ttf"
 FONT_PATH = _ref(FONT)
 LABEL = "ÖN ONAYA SUNULAN TASLAK — ÜRETİM/STATİK PROJESİ DEĞİLDİR"
-PENCERE_UST_KOTU = 200.0   # 250 cm duvarda lento 50; yükseklik değişince üst kot sabit tutulur (çıkarım, teyit bekliyor)
+PENCERE_UST_KOTU = G.PENCERE_UST_KOTU_CM   # 200: 250 cm duvarda lento 50; yükseklik değişince üst kot sabit tutulur (çıkarım, teyit bekliyor)
 
 PENCERE_KAYNAK = {   # olcu: (kaynak blok, doğal yön, bbox)
     "120x120": ("kaynak-pencere-120120", "V", (53365.182, 8072.861, 53397.006, 8192.861)),
     "60x40":   ("kaynak-pencere-6040",   "V", (53358.249, 7932.278, 53385.862, 7992.278)),
     "120x180": ("kaynak-pencere-120180", "H", (53839.874, 6682.0,   53959.874, 6713.823)),
 }
+PENCERE_YAZI_CM_HARF = 120 / len("120/120")   # BK-13: 120x120 bloğunda ölçü yazısının harf başına düşen sembol boyu; yeni ölçüde yazı boyu buna göre
 IC_KAPI_VARYANT = {   # kanonik V çerçevesi (pano +y, kalınlık +x), 125,5 pano, 82 açıklık
     "SOL_UST": ((7918.93, -54227.719), 90.0, 1.0),
     "SOL_ALT": ((7918.93, 54353.219), 90.0, -1.0),
@@ -151,6 +153,34 @@ class Cizici:
         k1 = self.kat.kapi(82, False); n1 = f"BOM_{k1}_IC_KAPI_ACIKLIK820"
         self.doc.blocks.new(n1).add_blockref("kaynak-ic-kapi", (0, 0), dxfattribs={"layer": "IC_KAPILAR"}); self.dograma["ic82"] = (n1, k1)
 
+    def _pencere_blok(self, olcu):
+        """(sarmalayıcı blok adı, malzeme kodu, kaynak blok, doğal yön, kutu). Bugünkü üç ölçü `_dograma_bloklari`'nın bloğu (aynen);
+        BK-13: başka ölçüde kaynak 120x120 (en ≤ 60 ise 60x40) sembolü duvar boyunca en'e ölçeklenir (kalınlık aynı; yazı boyu harf başına
+        120x120'deki sembol boyuyla sınırlı, dar pencerede küçülür), ölçü yazısı "en/boy" olur. Kod ilk kullanımda tahsis edilir (yalnız bugünkü üç ölçüyü kullanan çizimde yeni kod yok)."""
+        if olcu in PENCERE_KAYNAK:
+            src, nat, bb = PENCERE_KAYNAK[olcu]; name, kod = self.dograma[olcu]
+            return name, kod, src, nat, bb
+        pk = G.pencere_kurali(olcu)
+        temel = "60x40" if pk.en <= 60 else "120x120"
+        tsrc, nat, bb = PENCERE_KAYNAK[temel]; k = pk.en / G.PENCERE_OLCULERI[temel][0]
+        bb = (bb[0], bb[1] * k, bb[2], bb[3] * k)                  # doğal yön V: duvar boyu +y
+        src = f"kaynak-pencere-{pk.en}x{pk.boy}"
+        if olcu not in self.dograma:
+            kblk = self.doc.blocks.new(src)
+            for e in self.doc.blocks.get(tsrc):
+                c = e.copy()
+                if c.dxftype() == "TEXT":                         # yazı harf başına 120x120'deki kadar sembol boyu alır: dar pencerede küçülür, taşmaz (geometri hakemi, 23 Ekim)
+                    x, y, z = c.dxf.insert; c.dxf.insert = (x, y * k, z); c.dxf.text = yazi = f"{pk.en}/{pk.boy}"
+                    c.dxf.height *= min(1.0, pk.en / len(yazi) / PENCERE_YAZI_CM_HARF)
+                else:
+                    c.transform(Matrix44.scale(1.0, k, 1.0))
+                kblk.add_entity(c)
+            kod = self.kat.pencere(pk.en, pk.boy, pk.esik); name = f"BOM_{kod}_PENCERE_{pk.en*10}x{pk.boy*10}"
+            self.doc.blocks.new(name).add_blockref(src, (0, 0), dxfattribs={"layer": "PENCERE"})
+            self.dograma[olcu] = (name, kod)
+        name, kod = self.dograma[olcu]
+        return name, kod, src, nat, bb
+
     def _dis_kapi_blok(self, w):
         key = f"dis{int(w)}"
         if key not in self.dograma:
@@ -185,8 +215,10 @@ class Cizici:
         """(blok adı, çerçeve, malzeme kodu). Kanonik V çerçevesi: pano +y boyunca, kalınlık +x; dış kapı H çerçevesi."""
         d = p.duvar; L = p.boy; t = 2 * d.h; dis = d.tur == "dis"
         ac = p.acilim
-        kind = "DOLU" if ac is None else {"pencere": {"120x120": "P01", "120x180": "P02", "60x40": "P03"}.get(ac.olcu, "PXX"),
+        kind = "DOLU" if ac is None else {"pencere": {"120x120": "P01", "120x180": "P02", "60x40": "P03"}.get(ac.olcu),
                                          "ic_kapi": "K01", "dis_kapi": "K02", "gecis": "OPEN"}[ac.tur]
+        if ac is not None and ac.tur == "pencere" and kind is None:
+            kind = pencere_turu(ac.olcu)                            # BK-13: üç ölçü dışındaki pencere
         kod = self.kat.pano(dis, L, kind)
         var = ""
         if ac is not None and ac.tur == "ic_kapi":
@@ -207,7 +239,7 @@ class Cizici:
             self._rect(blk, 0, 0, t, L); return name, frame, kod
         w = ac.genislik; s = (L - w) / 2.0 + kay                  # kay 0 → eski değer bit bit
         if ac.tur == "pencere":
-            src, nat, bb = PENCERE_KAYNAK[ac.olcu]; dname, _ = self.dograma[ac.olcu]
+            dname, _, src, nat, bb = self._pencere_blok(ac.olcu)
             self._rect(blk, 0, 0, t, s); self._rect(blk, 0, s + w, t, L)
             orta = (t - 10.0) / 2.0
             if nat == "V": ins, rot = (t - bb[2] - orta, s - bb[1]), 0.0
@@ -292,10 +324,11 @@ class Cizici:
                         self.dim((r[0] + ox, r[1] + oy if side > 0 else r[3] + oy), (r[2] + ox, r[1] + oy if side > 0 else r[3] + oy), (0, yd + oy), 0, "MONTAJ_OZEL_OLCU")
                 if montaj and p.acilim and p.acilim.tur == "pencere":
                     g = p.gap(); cx, cy = (g[0] + g[2]) / 2, (g[1] + g[3]) / 2
-                    en, boy = G.PENCERE_OLCULERI[p.acilim.olcu]; pk = self.dograma[p.acilim.olcu][1]
-                    off = 28 if d.yon == "x" else 0; offx = 0 if d.yon == "x" else 28
-                    if d.yon == "y" and d.c > W / 2: offx = -28
-                    if d.yon == "x" and d.c > H / 2: off = -28
+                    pkr = G.pencere_kurali(p.acilim.olcu); en, boy = pkr.en, pkr.boy; pk = self.dograma[p.acilim.olcu][1]
+                    u = 28 if pkr.pano == 1 else 68                  # BK-13: 251'lik panonun ölçüsü (mor, +40) yazının yerinde; yazı içeri kayar
+                    off = u if d.yon == "x" else 0; offx = 0 if d.yon == "x" else u
+                    if d.yon == "y" and d.c > W / 2: offx = -u
+                    if d.yon == "x" and d.c > H / 2: off = -u
                     self.text(f"{pk} {en}×{boy} cm", (cx + ox + offx, cy + oy + off), 11, "MONTAJ_YAZI", rot=(90.0 if d.yon == "y" else 0.0))
         for k in plan.koseler:
             name, kod = self.kose_blok(k)
@@ -613,11 +646,16 @@ def uret(is_emri: dict, cikti_dir: Path, ad_govde: str | None = None, pdf_hatada
     c.ciz_on_gorunus(0.0, -600.0 - kay)
     c.ciz_cati_profili(gap, -550.0 - kay)
     hy = yapi.get("duvar_yuksekligi_cm", 250); cati = is_emri.get("cati", {})
+    _olculer = {p.acilim.olcu for p in plan.panolar if p.acilim and p.acilim.tur == "pencere"}
+    _pencere_satiri = "PVC doğrama; " + ", ".join(f"{e}×{b}" for e, b in sorted((k.en, k.boy) for k in map(G.pencere_kurali, _olculer)))
+    if len(_pencere_satiri) > 64:                         # BK-13: üç ölçü dışında pencere varsa plandakiler; hücreye sığmazsa sayı
+        _pencere_satiri = f"PVC doğrama; {len(_olculer)} ölçü, plandaki etiketlerde (en/boy)"
     tab = [("Bina / pano grid", f"{_grid_yazi(yapi, ' × ', ' pano')} — {fmt(W)} × {fmt(H)} cm"),
            ("Sistem", "Prefabrik panel (8 mm fibercement)"), ("Duvar yüksekliği", f"{fmt(hy)} cm"), ("Dış duvar / iç duvar", f"{G._mm(G.T_DIS)} mm / {G._mm(G.T_IC)} mm"),
            ("Pano modülü", "125,5 cm (isteğe bağlı yarım pano 62,75 cm)"),
            ("Çatı", f"{cati.get('tip','besik').capitalize()} — %{fmt(float(cati.get('egim_yuzde',33)))} eğim, {fmt(float(cati.get('sacak_cm',30)))} cm saçak, {fmt(float(cati.get('topuk_cm',10)))} cm topuk"),
-           ("Pencereler", "PVC doğrama; katalog 120×120 / 120×180 / 60×40"), ("Kapılar", "Dış: çelik kapı; iç: Amerikan panel kapı"),
+           ("Pencereler", "PVC doğrama; katalog 120×120 / 120×180 / 60×40" if _olculer <= set(G.PENCERE_OLCULERI) else _pencere_satiri),
+           ("Kapılar", "Dış: çelik kapı; iç: Amerikan panel kapı"),
            ("Kat sayısı", str(yapi.get("kat_sayisi", 1))), ("Revizyon", f"r{int(is_emri.get('revizyon',1)):02d}")]
     if is_emri.get("ozellikler"):                       # İE-11: paftanın teknik özellikleri İş Emri'nden (PK-01: "Dış Kapı: Alıcıya ait")
         tab = [r for r in tab if r[0] not in ("Pencereler", "Kapılar")] + [(str(k), str(v)) for k, v in is_emri["ozellikler"].items()]
