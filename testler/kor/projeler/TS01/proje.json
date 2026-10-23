@@ -1,0 +1,14 @@
+{
+ "kod": "TS-01",
+ "ap": "AP-07",
+ "kip": "pafta",
+ "girdi": {
+  "yapi_pafta": "testler/kor/projeler/TS01/yapi_pafta.json",
+  "pafta_katmani": "testler/kor/projeler/TS01/pafta_katmani.json"
+ },
+ "bizim_liste": "bizim_liste.json",
+ "liste_sha256": "dcfd289b1db17ff9ada64309b27e28569bcf503ac7defe964d34fbaafd8c20b4",
+ "sayfa": null,
+ "kapi": true,
+ "not": "PR-3'ün hedef örneği."
+}

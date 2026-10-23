@@ -1,0 +1,86 @@
+{
+ "kaynak": "PK-07 montaj paftası (70 m²; 13 sayfa) ve üretim dosyası. Sayılar `pafta_montaj.json`'dan (vektör) ya da göz sayımından; her satırda yazılı. Varsayılan hesabı değiştirmez (protokol §5).",
+ "makas_bas": {
+  "adet": 2,
+  "not": "makas ve dere planı (sayfa 9): ana çatıda MK01–MK07 (y 124,9 … 894,9); uçtaki MK01 (arka) ve MK07 (sağ bölümün ön duvarı) kalkan; üretimde MKS01–07 alt başlık 8450"
+ },
+ "makas_orta": {
+  "adet": 5,
+  "not": "MK02–MK06; cumbada ayrıca MK08–MK10 (y 116,9 / 79,3 / 5,0; üretimde MKS08–10 alt başlık 4515)"
+ },
+ "asik": {
+  "adet": 37,
+  "not": "aşık planı (sayfa 11): 32 × 410 + 4 × 140 + 5 × 150 + 12 × 20 = 146,7 m (sol yüz 4 × 840 + 4 × 960, sağ yüz 8 × 840, cumbanın iç yüzü 5 × 150); 4200'lük boydan kesimle 32 + 2 + 3 = 37"
+ },
+ "sandvic_panel": {
+  "adet": 25,
+  "not": "çatı kaplaması planı (sayfa 12): sandviç panel 100 kapatır, bordo: 450 × 18 (ana çatı iki yüz 9 + 9), 240 × 3 (sol yüzün cumbaya uzayan ucu 1 + cumbanın iç yüzü 2), 125 × 4 (veranda saçağı)"
+ },
+ "tavan_omegasi": {
+  "adet": 31,
+  "not": "tavan omega planı (sayfa 8, ters tavan, mahyaya paralel): 42 parça, 112,8 m → ÷ 3,65 = 30,9 → 31; veranda yok"
+ },
+ "pencere_karkasi": {
+  "adet": 4,
+  "not": "özel profiller (sayfa 4–5) C: çektirme U'su 100 + 100'lük pencere U'su H geçen, 120 × 120, 4 adet (pencereler alıcıya ait, karkas bizde); 100/120 pencere D01 çelik duvar panelinde, 60/40'ta karkas yok"
+ },
+ "h_plani": {
+  "dis": {
+   "adet": 23,
+   "not": "H profil montaj planı (sayfa 3): dübelli & kulaklı 11, dübelli 12"
+  },
+  "uclu_dis": {
+   "adet": 4,
+   "not": "3'lü H dübelli & kulaklı 1, dübelli 3"
+  },
+  "h_standart": {
+   "adet": 14,
+   "not": "H standart (iç duvar) 14; lejantta 100 × 100 × 2500"
+  },
+  "uclu_standart": {
+   "adet": 4,
+   "not": "3'lü H standart 4"
+  }
+ },
+ "elektrik": {
+  "tavan_armaturu": {
+   "adet": 5,
+   "not": "tijli duy (kırmızı çerçeveli X): oturma, salon, mutfak, hol, yatak (göz; sayfa 13 lejantı)"
+  },
+  "glop": {
+   "adet": 3,
+   "not": "banyo 1, veranda 2 (göz)"
+  },
+  "anahtar_tekli": {
+   "adet": 6,
+   "not": "oturma, salon, mutfak, banyo (holde), hol, yatak (göz). Kör okumada 7 yazılmıştı; dış kapının veranda yanındaki simge iki tırnaklı (çift), kıyastan sonra büyütülüp düzeltildi (okuma hatası, 6242ba7 sonrası)"
+  },
+  "anahtar_cift": {
+   "adet": 1,
+   "not": "dış kapının veranda yanında iki tırnaklı daire (hol + veranda glopları); kör okumada tekli sayılmıştı"
+  },
+  "priz_tekli": {
+   "adet": 13,
+   "not": "oturma 3, salon 2, mutfak 4 (tezgah), banyo 2, yatak 2 (göz)"
+  },
+  "priz_cift": {
+   "adet": 1,
+   "not": "salonda UYDU'nun yanında çift priz (TV)"
+  },
+  "uydu_prizi": {
+   "adet": 1,
+   "not": "salon \"UYDU\""
+  },
+  "zil": {
+   "adet": 0,
+   "not": "zil simgesi yok (lejantta da yok)"
+  },
+  "sigorta_kutusu": {
+   "adet": 1,
+   "not": "dış kapının yanında (holde)"
+  }
+ },
+ "diger": {
+  "not": "baş makas betopanı (sayfa 10): arka kalkan 4, ön kalkan 3 levha, cumba kalkanı artanlardan → 7; özel büküm bordo saçak sacı L 2500 × 2 ve alın sacı L 2500 × 2 (sayfa 7); özel kutu profiller A (kolon 2500 + çektirme U'su + vidalama aparatı, 3 mm), B (kutu profil 2098, 3 mm), D (10'luk dış köşe direği + çektirme U'su), E (kutu profil kiriş 3935, 3 mm); dış cephe fugalı düz betopan (sayfa 6: 38 cm şerit + 2 cm fuga); iç kapı panoları üretimde çelik (KAPI-01…05, 1250 × 2490), 100/120 pencereli pano D01 (1470 × 2490, 80 × 45 × 1,2)"
+ }
+}

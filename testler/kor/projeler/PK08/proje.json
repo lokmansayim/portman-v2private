@@ -1,0 +1,14 @@
+{
+ "kod": "PK-08",
+ "ap": null,
+ "kip": "pafta",
+ "girdi": {
+  "yapi_pafta": "testler/kor/projeler/PK08/yapi_pafta.json",
+  "pafta_katmani": "testler/kor/projeler/PK08/pafta_katmani.json"
+ },
+ "bizim_liste": "bizim_liste.json",
+ "liste_sha256": "a748c76bf2a1169dee87762aaa78fba37b92385ca020e7e84eb7bac5677441ea",
+ "sayfa": null,
+ "kapi": true,
+ "not": "Bayi arşivi; mühürlü iki Excel aynı listenin iki sürümü, kıyas 70 dolu satırlı olanla (13 Ekim'deki gibi)."
+}

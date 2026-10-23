@@ -1,0 +1,927 @@
+{
+ "aciklama": "Kör test mührü (BK-12 PR-3, M7). Kayıt başına kod (PK ve AP), dosya türü, uzantı, bayt, SHA-256 ve durum; dosya adı ve kişi adı yazılmaz. Durum: acik (13 Ekim'de açıldı), kor (kör 19: açılış kaydı olmadan açılmaz), kapali (açılmadı; kör sayılmaz ama açılış kaydı olmadan o da açılmaz), kaynak (montaj paftası ya da detay; liste değil, araç okumaz). Açılış kaydı: proje kodu → tarih, kendi listemizin commit'i ve saatler; kör ya da kapalı bir kayıt açılacaksa Patron kararıyla `acilislar`'a eklenir ({\"karar\": …, \"tarih\": …, \"liste_commit\": …}).",
+ "kaynaklar": [
+  "13 Ekim 2026 kör test serisi mührü (`ie-11-pr2-kor-test` dalı, `deneme/2026-10-13_aiprefabrik` mühür kaydı; adlı satırlar orada kalır)",
+  "docs/notlar/2026-10-18_AIPrefabrik_muhur.md (AP kodlarıyla 61 dosya; 28 DWG'nin SHA'sı ilk indirmede alınır, bu dosyada yok)"
+ ],
+ "sayilar": {
+  "acik": 17,
+  "kaynak": 32,
+  "kor": 19,
+  "kapali": 14
+ },
+ "acilislar": {
+  "PK-01": {
+   "tarih": "2026-10-13",
+   "liste_commit": "aebcfca",
+   "liste_commit_saati": "10:48:50",
+   "acilis_saati": "10:49:17",
+   "dayanak": "13 Ekim kör test serisi (Lokman, 13 Ekim 10:37); kendi listemiz önce commit'lendi, sonra mühür denetlendi ve liste açıldı"
+  },
+  "PK-02": {
+   "tarih": "2026-10-13",
+   "liste_commit": "d31c35c",
+   "liste_commit_saati": "11:20:47",
+   "muhur_denetimi_saati": "11:21:08",
+   "acilis_saati": "11:21:21",
+   "dayanak": "13 Ekim kör test serisi (Lokman, 13 Ekim 10:37); kendi listemiz önce commit'lendi, sonra mühür denetlendi ve liste açıldı"
+  },
+  "PK-03": {
+   "tarih": "2026-10-13",
+   "liste_commit": "022b0d3",
+   "liste_commit_saati": "12:09:37",
+   "muhur_denetimi_saati": "12:09:43",
+   "acilis_saati": "12:10:02",
+   "dayanak": "13 Ekim kör test serisi (Lokman, 13 Ekim 10:37); kendi listemiz önce commit'lendi, sonra mühür denetlendi ve liste açıldı"
+  },
+  "PK-05": {
+   "tarih": "2026-10-13",
+   "liste_commit": "90bc8e5",
+   "liste_commit_saati": "12:21:54",
+   "muhur_denetimi_saati": "12:21:58",
+   "acilis_saati": "12:22:10",
+   "dayanak": "13 Ekim kör test serisi (Lokman, 13 Ekim 10:37); kendi listemiz önce commit'lendi, sonra mühür denetlendi ve liste açıldı"
+  },
+  "PK-06": {
+   "tarih": "2026-10-13",
+   "liste_commit": "90869d0",
+   "liste_commit_saati": "12:41:20",
+   "muhur_denetimi_saati": "12:41:30",
+   "acilis_saati": "12:41:40",
+   "dayanak": "13 Ekim kör test serisi (Lokman, 13 Ekim 10:37); kendi listemiz önce commit'lendi, sonra mühür denetlendi ve liste açıldı"
+  },
+  "PK-07": {
+   "tarih": "2026-10-13",
+   "liste_commit": "f3bb50f",
+   "liste_commit_saati": "13:02:48",
+   "muhur_denetimi_saati": "13:02:52",
+   "acilis_saati": "13:03:02",
+   "dayanak": "13 Ekim kör test serisi (Lokman, 13 Ekim 10:37); kendi listemiz önce commit'lendi, sonra mühür denetlendi ve liste açıldı"
+  },
+  "PK-08": {
+   "tarih": "2026-10-13",
+   "liste_commit": "c997d0a",
+   "liste_commit_saati": "13:21:46",
+   "muhur_denetimi_saati": "13:21:49",
+   "acilis_saati": "13:22:02",
+   "dayanak": "13 Ekim kör test serisi (Lokman, 13 Ekim 10:37); kendi listemiz önce commit'lendi, sonra mühür denetlendi ve liste açıldı"
+  },
+  "TS-01": {
+   "tarih": "2026-10-13",
+   "liste_commit": "f12cdd6",
+   "liste_commit_saati": "14:57:39",
+   "muhur_denetimi_saati": "14:57:42",
+   "acilis_saati": "14:57:49",
+   "dayanak": "13 Ekim kör test serisi (Lokman, 13 Ekim 10:37); kendi listemiz önce commit'lendi, sonra mühür denetlendi ve liste açıldı"
+  },
+  "AP-01…05": {
+   "tarih": "2026-10-13",
+   "dayanak": "kör test değil: listeler örnek olarak okundu (E1–E5); paftaları okunmadı"
+  }
+ },
+ "dosyalar": [
+  {
+   "kod": [
+    "AP-01"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": ".pdf",
+   "bayt": 192433,
+   "sha256": "042fab25db1f856370997bcb39d36835e2becb6ecaa55c3c767380cfd0be9c8e",
+   "durum": "acik",
+   "not": "kör test değil; liste 13 Ekim'de örnek olarak okundu (E1–E5)"
+  },
+  {
+   "kod": [
+    "AP-01"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": ".xlsx",
+   "bayt": 29728,
+   "sha256": "2daaf8cb9e86bf351c0b693162a6f1aeb55bdd7e9ec3da30d1b59c217257b9ae",
+   "durum": "acik",
+   "not": "kör test değil; liste 13 Ekim'de örnek olarak okundu (E1–E5)"
+  },
+  {
+   "kod": [
+    "AP-01"
+   ],
+   "tur": "detay",
+   "uzanti": ".pdf",
+   "bayt": 169762,
+   "sha256": "28e22eecf1968171438fd380a776fc1c0bc7c88bc7874d0ed5bf3a47a85eae7c",
+   "durum": "kaynak"
+  },
+  {
+   "kod": [
+    "AP-01"
+   ],
+   "tur": "montaj paftası",
+   "uzanti": ".pdf",
+   "bayt": 1409307,
+   "sha256": "517871cb77e2d4d7d673935f9976dba343d124bce823ef51d59458025e69c831",
+   "durum": "kaynak"
+  },
+  {
+   "kod": [
+    "AP-01"
+   ],
+   "tur": "detay",
+   "uzanti": ".pdf",
+   "bayt": 162678,
+   "sha256": "f6d8d10d1a54c1d7773b077f2699d6f6ef1b3ea74a1eadba18206ae6bb66c981",
+   "durum": "kaynak"
+  },
+  {
+   "kod": [
+    "AP-02"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": ".pdf",
+   "bayt": 238790,
+   "sha256": "b2174de293292b5bf9b1a1562655115d7314e8bb012ffcecf3f866e58f4bedaf",
+   "durum": "acik",
+   "not": "kör test değil; liste 13 Ekim'de örnek olarak okundu (E1–E5)"
+  },
+  {
+   "kod": [
+    "AP-02"
+   ],
+   "tur": "montaj paftası",
+   "uzanti": ".pdf",
+   "bayt": 1395976,
+   "sha256": "3f55b892434052fdfca8360cabe168db6919ec83da68d7920259e3f9034f0c49",
+   "durum": "kaynak"
+  },
+  {
+   "kod": [
+    "AP-03"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": ".pdf",
+   "bayt": 233027,
+   "sha256": "6af9731912e0653fb286be0574d814131134806ccd7e6e2739bd9628a6890b88",
+   "durum": "acik",
+   "not": "kör test değil; liste 13 Ekim'de örnek olarak okundu (E1–E5)"
+  },
+  {
+   "kod": [
+    "AP-03"
+   ],
+   "tur": "montaj paftası",
+   "uzanti": ".pdf",
+   "bayt": 1372866,
+   "sha256": "f9174ddf3ff27e972f2c0e31417a088edaacbe101079b6859244b46ad02072c8",
+   "durum": "kaynak"
+  },
+  {
+   "kod": [
+    "AP-04"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": ".pdf",
+   "bayt": 239957,
+   "sha256": "11c49f7853adf6862c62b063c399311adc679f9618667c02dce30b2d766e722f",
+   "durum": "acik",
+   "not": "kör test değil; liste 13 Ekim'de örnek olarak okundu (E1–E5)"
+  },
+  {
+   "kod": [
+    "AP-04"
+   ],
+   "tur": "montaj paftası",
+   "uzanti": ".pdf",
+   "bayt": 1695946,
+   "sha256": "d5918f3916e587d26900982a34057226e33817a3d44592ef65638fa54466af88",
+   "durum": "kaynak"
+  },
+  {
+   "kod": [
+    "AP-05"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": ".pdf",
+   "bayt": 223320,
+   "sha256": "2f037a78e30fdca9e5b99ad3f607a700f04b25e208aee46de0d3427d2121c6ae",
+   "durum": "acik",
+   "not": "kör test değil; liste 13 Ekim'de örnek olarak okundu (E1–E5)"
+  },
+  {
+   "kod": [
+    "AP-05"
+   ],
+   "tur": "montaj paftası",
+   "uzanti": ".pdf",
+   "bayt": 1350592,
+   "sha256": "5ef593d3e43e32cbed349f7cf173564a3c4964b1983c37b687c0a38c37fbdd40",
+   "durum": "kaynak"
+  },
+  {
+   "kod": [
+    "AP-06"
+   ],
+   "tur": "montaj paftası",
+   "uzanti": ".pdf",
+   "bayt": 1795627,
+   "sha256": "b41deeb521ff559413874d60c656ccac23d5f8c82c3bb39d9b3f2ac22856398e",
+   "durum": "kaynak"
+  },
+  {
+   "kod": [
+    "AP-06"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": ".pdf",
+   "bayt": 232767,
+   "sha256": "8104f0298e6d80f6c639c9367a1e42cf35e248971179c1d0c03c38cfd7745691",
+   "durum": "kor"
+  },
+  {
+   "kod": [
+    "AP-07"
+   ],
+   "tur": "montaj paftası",
+   "uzanti": ".pdf",
+   "bayt": 1515620,
+   "sha256": "631976212db7a4ae6d353c815aff82b06a4cfe7670caac522bf92100915860b7",
+   "durum": "kaynak"
+  },
+  {
+   "kod": [
+    "AP-08"
+   ],
+   "tur": "montaj paftası",
+   "uzanti": ".pdf",
+   "bayt": 1572896,
+   "sha256": "a819c0f1c0bdd150930b71d2762773c8a6513f19f6bf1539407dab1077441b71",
+   "durum": "kaynak"
+  },
+  {
+   "kod": [
+    "AP-09"
+   ],
+   "tur": "montaj paftası",
+   "uzanti": ".pdf",
+   "bayt": 1634746,
+   "sha256": "24faae19f68bf2728bb0b74a83393f73ae9588113ad4f721914a47fbd5344520",
+   "durum": "kaynak"
+  },
+  {
+   "kod": [
+    "AP-09"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": ".pdf",
+   "bayt": 176407,
+   "sha256": "b51874749775ee07d5ebab5fda596eb9c704db49fda7185d6918d0cc299c8da5",
+   "durum": "kor"
+  },
+  {
+   "kod": [
+    "AP-10"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": ".pdf",
+   "bayt": 200798,
+   "sha256": "4d55b361c2bbc97eef777d03a068c1cc5edb4e55d2e3b1c6565e3debabb2a812",
+   "durum": "kapali",
+   "not": "listesi kapalı, kör sayılmaz (≈ PK-03; BK-12 planı)"
+  },
+  {
+   "kod": [
+    "AP-10"
+   ],
+   "tur": "montaj paftası",
+   "uzanti": ".pdf",
+   "bayt": 1410723,
+   "sha256": "d4ec815ea6293383cefeb0a2e71bbf905d9207ec0b93a44957c962c75691a713",
+   "durum": "kaynak"
+  },
+  {
+   "kod": [
+    "AP-11"
+   ],
+   "tur": "montaj paftası",
+   "uzanti": ".pdf",
+   "bayt": 1296197,
+   "sha256": "39080728d4059d360cb454f5fc306f34c604e72a0ae8d07e427afc4528dd8947",
+   "durum": "kaynak"
+  },
+  {
+   "kod": [
+    "AP-11"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": ".pdf",
+   "bayt": 192733,
+   "sha256": "317f6a74387aa9a576c0c050960fbf513c7de1f7a88111c35cfb101698ad9c7d",
+   "durum": "kor"
+  },
+  {
+   "kod": [
+    "AP-12"
+   ],
+   "tur": "montaj paftası",
+   "uzanti": ".pdf",
+   "bayt": 1187013,
+   "sha256": "370703cf5b861019b05f14587050caee9bbdea28bececbd23149c9203dcea797",
+   "durum": "kaynak"
+  },
+  {
+   "kod": [
+    "AP-12"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": ".pdf",
+   "bayt": 232344,
+   "sha256": "89fe8d529aef5a8dcb2b0ed25678663d3eafbac05069585e69267dd6d0f87060",
+   "durum": "kor"
+  },
+  {
+   "kod": [
+    "AP-13"
+   ],
+   "tur": "montaj paftası",
+   "uzanti": ".pdf",
+   "bayt": 1563033,
+   "sha256": "8476c6c529f63f3d64621f5eb12876e3ace6e997018b12a91416434cab2e495a",
+   "durum": "kaynak"
+  },
+  {
+   "kod": [
+    "AP-13"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": ".pdf",
+   "bayt": 245860,
+   "sha256": "f676aa3f1dcaad04654bbaeb084fb6dfc74bfcb1e9048fad9d04521567906fe1",
+   "durum": "kor"
+  },
+  {
+   "kod": [
+    "AP-14"
+   ],
+   "tur": "montaj paftası",
+   "uzanti": ".pdf",
+   "bayt": 1270458,
+   "sha256": "c46b277bdd3874ebd8475d2620278d1e440198ea40009a00b4dc99b2394f3b1a",
+   "durum": "kaynak"
+  },
+  {
+   "kod": [
+    "AP-14"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": ".pdf",
+   "bayt": 236890,
+   "sha256": "a55033adbf63642d5a5a47eac19724f51766f53554a7a2fd16edb7d561ace2fd",
+   "durum": "kor"
+  },
+  {
+   "kod": [
+    "AP-15"
+   ],
+   "tur": "montaj paftası",
+   "uzanti": ".pdf",
+   "bayt": 1250141,
+   "sha256": "88a02fcd1c9a2a1b3e2be894950f62c1509acc0c664de61193f4ff23457fb47d",
+   "durum": "kaynak"
+  },
+  {
+   "kod": [
+    "AP-15"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": ".pdf",
+   "bayt": 250892,
+   "sha256": "a8fb316b2e8aac04bba8f897ea9f7402f03432c2ef2f16486c49286d63ae8724",
+   "durum": "kor"
+  },
+  {
+   "kod": [
+    "AP-16"
+   ],
+   "tur": "montaj paftası",
+   "uzanti": ".pdf",
+   "bayt": 1254646,
+   "sha256": "ce7c05acb09eeaf3eadf3da645c5c24a75c2f02157bd06679ef1c2d4f347e5fd",
+   "durum": "kaynak"
+  },
+  {
+   "kod": [
+    "AP-16"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": ".pdf",
+   "bayt": 239623,
+   "sha256": "3e8ad249871f4e495d460e2d93c54faec9770b6456c9d79760601659e025cd8c",
+   "durum": "kor"
+  },
+  {
+   "kod": [
+    "AP-17"
+   ],
+   "tur": "montaj paftası",
+   "uzanti": ".pdf",
+   "bayt": 2483506,
+   "sha256": "ed75e88727d2fa45c6d4e0e8f263db33d615dff2e43b6808a24e13446ad73d2a",
+   "durum": "kaynak"
+  },
+  {
+   "kod": [
+    "AP-17"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": ".pdf",
+   "bayt": 222642,
+   "sha256": "4aa3c0e2f0f765830505768bcfcf1302ed9bf6c3d9f2107439d7bd9d6b9f8afa",
+   "durum": "kor"
+  },
+  {
+   "kod": [
+    "AP-18"
+   ],
+   "tur": "montaj paftası",
+   "uzanti": ".pdf",
+   "bayt": 1383036,
+   "sha256": "daa7b84ca5456de3d239b3fe67bfc9cb8fc69816442f56e476692f9dc4eed0a1",
+   "durum": "kaynak"
+  },
+  {
+   "kod": [
+    "AP-18"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": ".pdf",
+   "bayt": 229567,
+   "sha256": "52a6494c673e9adba86269f1fa360ad95eb2187e443b4f12a38bd6af60c8c010",
+   "durum": "kor"
+  },
+  {
+   "kod": [
+    "AP-19"
+   ],
+   "tur": "montaj paftası",
+   "uzanti": ".pdf",
+   "bayt": 1272880,
+   "sha256": "492c76133da0e66a6dce82ebaa67e3f9da9949eb314c1034445d223faaac658d",
+   "durum": "kaynak"
+  },
+  {
+   "kod": [
+    "AP-19"
+   ],
+   "tur": "detay",
+   "uzanti": ".pdf",
+   "bayt": 103696,
+   "sha256": "6b481fbc2387aa172a955da960d44c15a8d0fd196fac9357120750e293b2700e",
+   "durum": "kaynak"
+  },
+  {
+   "kod": [
+    "AP-19"
+   ],
+   "tur": "detay",
+   "uzanti": ".pdf",
+   "bayt": 84506,
+   "sha256": "a380647080280982bbede9cd72725eeb9e4101badacbb64d1606bb0f2addc3f1",
+   "durum": "kaynak"
+  },
+  {
+   "kod": [
+    "AP-20"
+   ],
+   "tur": "montaj paftası",
+   "uzanti": ".pdf",
+   "bayt": 1835051,
+   "sha256": "18d3f654c207a18df2184681bdd9ce9a714da9fbcd76b8e9e37eabbfacba9d23",
+   "durum": "kaynak"
+  },
+  {
+   "kod": [
+    "AP-20"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": ".xlsx",
+   "bayt": 45641,
+   "sha256": "29caed98c826c241055a6be8c3d9168aefe21800621f44a1feb807478e567477",
+   "durum": "kor"
+  },
+  {
+   "kod": [
+    "AP-21"
+   ],
+   "tur": "montaj paftası",
+   "uzanti": ".pdf",
+   "bayt": 1282128,
+   "sha256": "98b0c0acae5d1b550294cbc233d29cc8b3806a9fd7a3a3036bfcc7387a6a1522",
+   "durum": "kaynak"
+  },
+  {
+   "kod": [
+    "AP-21"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": ".pdf",
+   "bayt": 233771,
+   "sha256": "71d0f698ae51cd7f9257374b0c91d44657be2763cef0d170fe2b480863dcd737",
+   "durum": "kor"
+  },
+  {
+   "kod": [
+    "AP-22"
+   ],
+   "tur": "montaj paftası",
+   "uzanti": ".pdf",
+   "bayt": 1311519,
+   "sha256": "c0df06e23fb4866cff686ef5251b477101a9050cb1a1ccd7c695d55045058530",
+   "durum": "kaynak"
+  },
+  {
+   "kod": [
+    "AP-22"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": ".pdf",
+   "bayt": 232216,
+   "sha256": "379c4fb14d4abaa04c780a1148fb4652c2b42b4a6989e55063ee3bf18959f981",
+   "durum": "kor"
+  },
+  {
+   "kod": [
+    "AP-23"
+   ],
+   "tur": "montaj paftası",
+   "uzanti": ".pdf",
+   "bayt": 933403,
+   "sha256": "d9ce06538c17ac8c70835d1f999622dcc03f480265cc6d3ac39fd5319cd65dfc",
+   "durum": "kaynak"
+  },
+  {
+   "kod": [
+    "AP-23"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": ".pdf",
+   "bayt": 145195,
+   "sha256": "7abb57e4ea90bd7e242bd593b2c793cdf96d717507af7ec5f896c4b022b08223",
+   "durum": "kor"
+  },
+  {
+   "kod": [
+    "AP-24"
+   ],
+   "tur": "montaj paftası",
+   "uzanti": ".pdf",
+   "bayt": 889870,
+   "sha256": "d3ff0cb4bd52cbef6863aba9135b3c708c4c580f94ad46c3f8c46ff8cfe034df",
+   "durum": "kaynak"
+  },
+  {
+   "kod": [
+    "AP-24"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": ".pdf",
+   "bayt": 159213,
+   "sha256": "40934fd0cec22709119bf1c558f52be1e4093aaba81f3603745c5df05c715e56",
+   "durum": "kor"
+  },
+  {
+   "kod": [
+    "AP-25"
+   ],
+   "tur": "montaj paftası",
+   "uzanti": ".pdf",
+   "bayt": 1397844,
+   "sha256": "4e272f02243e46459b93dd9c29b869b25070dcb73cb10dde3a342bcd8cd851ed",
+   "durum": "kaynak"
+  },
+  {
+   "kod": [
+    "AP-25"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": ".pdf",
+   "bayt": 230427,
+   "sha256": "1fb37530d24494cbc56c183ac11c6105d81ca68bdaa25530e3d343e93cdbc430",
+   "durum": "kor"
+  },
+  {
+   "kod": [
+    "AP-26"
+   ],
+   "tur": "montaj paftası",
+   "uzanti": ".pdf",
+   "bayt": 1554594,
+   "sha256": "a2546b338839b51f0249cb42002c7496f0773aa483b6e117de088a28764a735e",
+   "durum": "kaynak"
+  },
+  {
+   "kod": [
+    "AP-26"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": ".pdf",
+   "bayt": 246526,
+   "sha256": "6d9b40e64634aa11beed47269642b61d1a6fe04c5958ada7bcb1e8a7e50302dc",
+   "durum": "kor"
+  },
+  {
+   "kod": [
+    "AP-27"
+   ],
+   "tur": "montaj paftası",
+   "uzanti": ".pdf",
+   "bayt": 2248093,
+   "sha256": "8446af572368a1ad96007f40c865f26903de07130d4f0340835c7d75c575e2b6",
+   "durum": "kaynak"
+  },
+  {
+   "kod": [
+    "AP-27"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": ".pdf",
+   "bayt": 236224,
+   "sha256": "dc0ebc6924a41c4a566112cf195667544c3ff944fa1db5b0a05a30d6fb0787dc",
+   "durum": "kor"
+  },
+  {
+   "kod": [
+    "AP-28"
+   ],
+   "tur": "montaj paftası",
+   "uzanti": ".pdf",
+   "bayt": 1501639,
+   "sha256": "d958ed0b9433ace76be6f4340ad10faffb7591f81ce2ed3c2338d57c5d37cd7d",
+   "durum": "kaynak"
+  },
+  {
+   "kod": [
+    "AP-28"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": ".pdf",
+   "bayt": 230923,
+   "sha256": "169b60a7087f8cc2db4835b38640a40b35e76ed3cda19989e784a4cca04491a6",
+   "durum": "kor"
+  },
+  {
+   "kod": [
+    "PK-01",
+    "AP-19"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": ".xlsx",
+   "bayt": 196855,
+   "sha256": "17e43b888bd1a5dd5bfb06ebb38b620b1b0c3708c176a35d7ea576f1e948d106",
+   "durum": "acik"
+  },
+  {
+   "kod": [
+    "PK-02"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": ".xlsx",
+   "bayt": 164625,
+   "sha256": "9081e5e14b36db504cc4292ceedcf95fc903f72c1b1362e8e3e4ee5f10961f28",
+   "durum": "acik"
+  },
+  {
+   "kod": [
+    "PK-02"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": null,
+   "bayt": 360341,
+   "sha256": "588c111a140f9aa501e4cf1e5412a6e3b5bc69d54346c77049de4e807e4f2c29",
+   "durum": "kapali",
+   "not": "13 Ekim'de mühürlendi, açılmadı"
+  },
+  {
+   "kod": [
+    "PK-02"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": null,
+   "bayt": 358521,
+   "sha256": "9e0a87d11cecb0ffc8c099b7f088886e64eecbc8e6d57543c878db45c7bc5006",
+   "durum": "kapali",
+   "not": "13 Ekim'de mühürlendi, açılmadı"
+  },
+  {
+   "kod": [
+    "PK-03"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": ".xlsx",
+   "bayt": 171083,
+   "sha256": "1a42996f551190b96396cd2adf4dd63608c4c6340ed997872e9eac014978ad67",
+   "durum": "acik"
+  },
+  {
+   "kod": [
+    "PK-03"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": ".xlsx",
+   "bayt": 172141,
+   "sha256": "fe5948f5dcbcfb3cdd870d69751758f4b333d54a3d587871d35b3033d97c3f04",
+   "durum": "acik"
+  },
+  {
+   "kod": [
+    "PK-04"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": ".pdf",
+   "bayt": 481765,
+   "sha256": "0a3ef4ccdf45f52f5bd67c538aa75457ed77b15a6bc4391480f3f92329765e0a",
+   "durum": "kapali",
+   "not": "PK-04 seriden çıktı (çelik karkas); listesi açılmadı"
+  },
+  {
+   "kod": [
+    "PK-04"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": ".pdf",
+   "bayt": 512970,
+   "sha256": "4edb8d3d10e4bac7bfd8be0c4ad92932751177a3e017266e991d5eaf964adcab",
+   "durum": "kapali",
+   "not": "PK-04 seriden çıktı (çelik karkas); listesi açılmadı"
+  },
+  {
+   "kod": [
+    "PK-04"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": ".pdf",
+   "bayt": 513395,
+   "sha256": "ed1a24dbeaa1c17733d335d26b8856d673b373376063f6d617b771b3622b6193",
+   "durum": "kapali",
+   "not": "PK-04 seriden çıktı (çelik karkas); listesi açılmadı"
+  },
+  {
+   "kod": [
+    "PK-05"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": ".xlsx",
+   "bayt": 217461,
+   "sha256": "561ad34a90ffee815f73e6013a37a8b7536a118ca5292bb6cf29be2a3c70a779",
+   "durum": "acik"
+  },
+  {
+   "kod": [
+    "PK-05"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": null,
+   "bayt": 161954,
+   "sha256": "2a03aa6764ee71b2a975a0ab2db4684534c511384ff06ed7ee95cb4cad5fe866",
+   "durum": "kapali",
+   "not": "13 Ekim'de mühürlendi, açılmadı"
+  },
+  {
+   "kod": [
+    "PK-05"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": ".pdf",
+   "bayt": 98637,
+   "sha256": "3f23db158c7751e6d34cee6420016c0b9f00fbb68dc14f6dd9ac16f0ec9fc02b",
+   "durum": "kapali",
+   "not": "13 Ekim'de mühürlendi, açılmadı"
+  },
+  {
+   "kod": [
+    "PK-06"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": ".xlsx",
+   "bayt": 212572,
+   "sha256": "3cf217510de4c60f4c702ca4d1336b2b7cb649a2fb27f313149244012340e2fe",
+   "durum": "acik"
+  },
+  {
+   "kod": [
+    "PK-06"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": ".pdf",
+   "bayt": 148166,
+   "sha256": "5874e5e764458e9bbeaecce6418b19a3aa7abc4149ece04e2d41b9fac5923555",
+   "durum": "acik"
+  },
+  {
+   "kod": [
+    "PK-07",
+    "AP-08"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": ".pdf",
+   "bayt": 240638,
+   "sha256": "985c3a209bd736eb68fe46cab9964569ca85b41ab7cb8cfb68fe29af7ce78086",
+   "durum": "acik"
+  },
+  {
+   "kod": [
+    "PK-07"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": ".pdf",
+   "bayt": 340178,
+   "sha256": "105c6f87f57ebcc8c6ec57070ed8d461a8632c51c71b749e669c3c0906c5f722",
+   "durum": "kapali",
+   "not": "13 Ekim'de mühürlendi, açılmadı"
+  },
+  {
+   "kod": [
+    "PK-07"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": null,
+   "bayt": 148179,
+   "sha256": "36d5f1f353ad606fa972a309ccf620a774a40c708f966170dd45fe01caec3d76",
+   "durum": "kapali",
+   "not": "13 Ekim'de mühürlendi, açılmadı"
+  },
+  {
+   "kod": [
+    "PK-07"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": ".pdf",
+   "bayt": 340146,
+   "sha256": "3c448656a1cbaba830482f0bd68670474ec59f7a7646625b6598109b579ef5f6",
+   "durum": "kapali",
+   "not": "13 Ekim'de mühürlendi, açılmadı"
+  },
+  {
+   "kod": [
+    "PK-07"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": ".xlsx",
+   "bayt": 148249,
+   "sha256": "d25c68fc4cd2578095b0a698f212869ec2babd3bdb1187badb5e963ab18f5b97",
+   "durum": "kapali",
+   "not": "13 Ekim'de mühürlendi, açılmadı"
+  },
+  {
+   "kod": [
+    "PK-08"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": ".xlsx",
+   "bayt": 48456,
+   "sha256": "a748c76bf2a1169dee87762aaa78fba37b92385ca020e7e84eb7bac5677441ea",
+   "durum": "acik"
+  },
+  {
+   "kod": [
+    "PK-08"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": ".xlsx",
+   "bayt": 50134,
+   "sha256": "dca060f8ff046f69f9466ba6d99d5fa0c2dbec16f5ff75bc4ffdb16f202d531c",
+   "durum": "acik"
+  },
+  {
+   "kod": [
+    "PK-08"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": null,
+   "bayt": 176397,
+   "sha256": "59e32e93c2e4d46c5146f283cc227c3b315a7139c8aad4f54acb8931beca69a5",
+   "durum": "kapali",
+   "not": "13 Ekim'de mühürlendi, açılmadı"
+  },
+  {
+   "kod": [
+    "PK-08"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": null,
+   "bayt": 176166,
+   "sha256": "d4617fa0a5d7fad4aafbad48888a3f1cff292acb4b3027d81c3ef12841165973",
+   "durum": "kapali",
+   "not": "13 Ekim'de mühürlendi, açılmadı"
+  },
+  {
+   "kod": [
+    "TS-01",
+    "AP-07"
+   ],
+   "tur": "yükleme listesi",
+   "uzanti": ".pdf",
+   "bayt": 234421,
+   "sha256": "dcfd289b1db17ff9ada64309b27e28569bcf503ac7defe964d34fbaafd8c20b4",
+   "durum": "acik"
+  }
+ ]
+}
