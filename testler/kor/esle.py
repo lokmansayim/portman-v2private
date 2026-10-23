@@ -8,11 +8,11 @@ Eşleme iki katmanlıdır:
 
 Grup içinde satırlar anahtarlarla eşlenir (sözlükte `olcu`):
 - `tam` (aynı ad gruplarının varsayılanı): anahtar düzgünleştirilmiş ölçüdür; yazısı farklı ama sayıları aynı olan ölçüler de eşlenir
-  ("1200*1200" ↔ "1200 × 1200", "120*120" ↔ "120/120", "90*200" ↔ "900 × 2000"). `anahtar: en_buyuk` ise anahtar ölçünün en büyük
+  ("1200*1200" ↔ "1200 × 1200", "125*125" ↔ "125/125", "90*200" ↔ "900 × 2000"). `anahtar: en_buyuk` ise anahtar ölçünün en büyük
   sayısıdır (profil boyları: "100*100*3240" ↔ "L 3240"); `tolerans` (mm) içindeki anahtarlar da eşlenir (yuvarlama). `sira: true`
   ise eşi kalmayan anahtarlar iki yanda aynı sayıdaysa büyükten küçüğe eşlenir ve ölçüsü tutmadığı için "farklı" sayılır. Aynı ad
   grubunda iki yanda birer anahtar kalmışsa ikisi eşlenir: birinin ölçüsünde sayı yoksa ("ADET", "METRE") adet kıyaslanır, ikisinde
-  de sayı varsa ölçü tutmadığı için "farklı" sayılır (uydurma: L 1200 ↔ L 900, "4,2 X 13" ↔ "3,9 X 32", "16 Amper" ↔ "25 Amper").
+  de sayı varsa ölçü tutmadığı için "farklı" sayılır (uydurma: L 1150 ↔ L 950, "4,2 X 13" ↔ "3,9 X 32", "16 Amper" ↔ "25 Amper").
 - `yok`: grubun bütün satırları tek anahtardır; toplam kıyaslanır, satırlar arasındaki dağılım kıyaslanmaz (ör. H'ların kulaklı /
   dübelli / özel bölünmesi; 13 Ekim tanımında "toplam aynı, ayrım farklı"). Ölçü kümesi ayrıca kıyaslanır: iki yanda da ölçüsünde
   sayı olan satır varsa her gerçek ölçünün bizde, her bizim ölçümüzün (adet > 0) gerçek listede eşi olmalı, yoksa satırlar "farklı"
