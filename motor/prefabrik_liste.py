@@ -36,7 +36,7 @@ yerine "baş makas".
 Elektrik oda kuralı (BK-12 PR-2f; Lokman, 18 Ekim 19:52, kartlar 19 Ekim 16:50 ve 22 Ekim 11:09–11:10): paftada elektrik sayımı yoksa noktalar
 odalardan sayılır (`elektrik_oda`): oda başına 2 tekli priz, 1 tekli anahtar, 1 duy; açık mahale 2 glop, 1 çiftli anahtar; 15 m²'yi geçen her
 15 m²'ye bir takım daha (yukarı); banyo, WC, mutfak ve hol kitabın sayılarıyla (ıslak hacimler banyo, koridor hol gibi); mutfağı ayrı mahal
-olmayan evde mutfağın kitap sayıları salona (açık mutfak); uydu prizi her evde 1. Sayım varsa sayım geçer, kuralın sonucu aday sütununda. Zil her
+olmayan evde salona yalnız tezgahın 4 tekli prizi (açık mutfak; Lokman, 23 Ekim 03:57); uydu prizi her evde 1. Sayım varsa sayım geçer, kuralın sonucu aday sütununda. Zil her
 evde kitabın 1'i.
 """
 from __future__ import annotations
@@ -324,14 +324,14 @@ ELEKTRIK_NOKTALARI = {"tijli_duy": "tavan_armaturu", "glop": "glop", "tekli_anah
                       "tekli_priz": "priz_tekli", "cift_priz": "priz_cift", "uydu_prizi": "uydu_prizi"}
 
 
-def elektrik_oda(N: dict, EO, odalar_k, acik_mutfak_odasi) -> tuple[dict, dict]:
+def elektrik_oda(N: dict, EO, odalar_k, AM) -> tuple[dict, dict]:
     """Elektrik noktalarının oda kuralı (`prefabrik.json › elektrik_oda`; BK-12 PR-2f). Odalar ve açık mahaller adla birleşir (L biçimli oda
     aynı adlı parçalarla gelir, buat kasadaki gibi tek oda; aynı adlı parçalar farklı türdeyse liste üretilmez). Banyo, WC, mutfak ve hol kitabın
     sayılarını alır (`kitaptan`; kitap `elektrik_oda.odalar`; ıslak hacim türleri banyo, koridor hol gibi); öteki her oda oda takımını, açık mahal
     veranda takımını alır. Takım sayısı alan ÷ `takim_m2`, yukarı, en az 1 (Lokman, 18 Ekim 19:52; kartlar 19 Ekim 16:50 ve 22 Ekim 11:10).
-    Mutfak ayrı mahal değilse mutfağın kitap sayıları `acik_mutfak_odasi` türündeki ilk odaya eklenir (`elektrik_acik_mutfak`; varsayım) (kitap da birleşik mahale ikisinin kuralını
-    uygular; planlayıcı açık mutfağı salona koyar); o oda da yoksa satırın yazısı uyarıyla başlar, girdide hiç kapalı oda yoksa da (sessiz 0
-    değil). Uydu prizi her evde `uydu_prizi_ev_basina`
+    Mutfak ayrı mahal değilse (açık mutfak, `elektrik_acik_mutfak`; planlayıcı açık mutfağı salona koyar) `AM["oda"]` türündeki ilk oda kendi
+    takımını alır, ona yalnız tezgahın prizleri (`AM["ek"]`) eklenir (Lokman, 23 Ekim 03:57); o oda da yoksa satırın yazısı uyarıyla başlar,
+    girdide hiç kapalı oda yoksa da (sessiz 0 değil). Uydu prizi her evde `uydu_prizi_ev_basina`
     (kart 22 Ekim 11:09). Döner: ({pafta katmanındaki ad: adet}, {pafta katmanındaki ad: oda oda döküm yazısı})."""
     say = dict.fromkeys(ELEKTRIK_NOKTALARI.values(), 0)
     dokum = {a: [] for a in say}
@@ -370,7 +370,7 @@ def elektrik_oda(N: dict, EO, odalar_k, acik_mutfak_odasi) -> tuple[dict, dict]:
         return odalar_k[KT[tur]]
     odalar = [(ad, b) for (acik, ad), b in birlesik.items() if not acik]
     mutfak_var = any(b["tur"] == "mutfak" for _, b in odalar)
-    acik_mutfak = None if mutfak_var else next((ad for ad, b in odalar if b["tur"] == acik_mutfak_odasi), None)
+    acik_mutfak = None if mutfak_var else next((ad for ad, b in odalar if b["tur"] == AM["oda"]), None)
     for (acik, ad), b in birlesik.items():
         if acik:
             topla(ad, EO["acik_takimi"], takim(b["alan"]), b["alan"])
@@ -379,12 +379,11 @@ def elektrik_oda(N: dict, EO, odalar_k, acik_mutfak_odasi) -> tuple[dict, dict]:
         else:
             topla(ad, EO["oda_takimi"], takim(b["alan"]), b["alan"])
         if not acik and ad == acik_mutfak:
-            topla(f"{ad} (açık mutfak)", kitap_odasi("mutfak"), ek=" (kitap)")
+            topla(f"{ad} (açık mutfak)", AM["ek"], ek=" (tezgah)")
     if not odalar:                                              # odasız girdi: oda noktaları sayılmadı (0 kural sonucu değil)
         uyari = {a: "UYARI: girdide kapalı oda yok; oda noktaları sayılmadı." for a in say if a != "uydu_prizi"}
     elif not (mutfak_var or acik_mutfak):
-        uyari = {ELEKTRIK_NOKTALARI[kk]: "UYARI: mutfak ayrı mahal değil, açık mutfağın odası da yok; mutfağın kitap noktaları yazılmadı."
-                 for kk in kitap_odasi("mutfak")}
+        uyari = {ELEKTRIK_NOKTALARI[kk]: "UYARI: mutfak ayrı mahal değil, açık mutfağın odası da yok; tezgahın prizleri yazılmadı." for kk in AM["ek"]}
     else:
         uyari = {}
     u = EO["uydu_prizi_ev_basina"]

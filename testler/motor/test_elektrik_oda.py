@@ -4,7 +4,7 @@ koyarsın, 15 m² ye kadar verandalara 2 glop 1 tane 2li anahtar koyarsın"; kar
 
 - Paftada elektrik sayımı yoksa noktalar odalardan: öteki her oda takım × (2 tekli priz, 1 tekli anahtar, 1 duy); açık mahal takım × (2 glop,
   1 çiftli anahtar); takım = alan ÷ 15, yukarı, en az 1. Banyo, WC, mutfak ve hol kitabın sayılarını alır (ıslak hacimler banyo, koridor hol
-  gibi). Mutfağı ayrı mahal olmayan evde mutfağın kitap sayıları salona (açık mutfak). Uydu prizi her evde 1.
+  gibi). Mutfağı ayrı mahal olmayan evde salona yalnız tezgahın 4 tekli prizi (açık mutfak; Lokman, 23 Ekim 03:57). Uydu prizi her evde 1.
 - Odalar adla birleşir (L biçimli oda tek oda; aynı ad farklı türde olamaz). Sayım varsa sayım geçer, kuralın sonucu aday sütununda. Zil her
   evde kitabın 1'i.
 - `sigorta_en_uzak` pafta kipinde Motor kipindeki biçimde (`{m, nereden}`); biçimi yanlışsa liste üretilmez.
@@ -156,23 +156,27 @@ def test_ayni_ad_farkli_tur(kurallar):
 
 
 def test_acik_mutfak(kurallar):
-    """Mutfak ayrı mahal değilse (açık mutfak, `elektrik_acik_mutfak`, varsayım, Lokman'ın kartı bekleniyor; planlayıcının varsayılanı, PK-08
-    ve P6001 "yaşam alanı", TS-01 "salon & mutfak") mutfağın kitap sayıları salona eklenir, salonun oda takımına ek olarak (kitap birleşik mahale
-    ikisinin kuralını uygular). Birden çok salon türlü odada ilkine. Mutfak ayrıysa salona eklenmez. Salon da yoksa mutfak noktası yazılmaz,
-    satırın yazısı uyarıyla başlar (sessiz değil)."""
+    """Mutfak ayrı mahal değilse (açık mutfak, `elektrik_acik_mutfak`; planlayıcının varsayılanı, PK-08 ve P6001 "yaşam alanı", TS-01 "salon &
+    mutfak") salon kendi oda takımını alır, ona yalnız tezgahın 4 tekli prizi eklenir (Lokman, 23 Ekim 03:57: "sayılamaz çünkü mutfakta sadece
+    tezgahın olduğu yerde ayrıca 4 tane ekstra priz var"); kitabın mutfak sayıları eklenmez. Birden çok salon türlü odada ilkine. Mutfak ayrıysa
+    kitaptaki gibi, salona tezgah eklenmez. Salon da yoksa tezgah prizleri yazılmaz, satırın yazısı uyarıyla başlar (sessiz değil)."""
+    am = kurallar["prefabrik"]["kurallar"]["elektrik_acik_mutfak"]
+    assert (am["deger"], am["durum"]) == ({"oda": "salon", "ek": {"tekli_priz": 4}}, "lokman")
     kitap = kurallar["ortak"]["elektrik_oda"]["deger"]["odalar"]["mutfak"]
     L = PL.liste(_ev([_oda("SALON & MUTFAK", "salon", 20.0), _oda("OTURMA", "salon", 9.0), _oda("YATAK ODASI", "yatak_odasi", 9.0)]), kurallar)
-    assert _adet(L) == {"tavan_armaturu": 2 + 1 + 1 + kitap["tijli_duy"], "glop": 0, "anahtar_tekli": 2 + 1 + 1 + kitap["tekli_anahtar"],
-                        "anahtar_cift": 0, "priz_tekli": 4 + 2 + 2 + kitap["tekli_priz"], "priz_cift": kitap["cift_priz"], "uydu_prizi": 1}
-    assert _satir(L, "Tekli priz (takım)")["formul"] == ("SALON & MUTFAK (20,0 m²): 2 takım × 2 + SALON & MUTFAK (açık mutfak): 5 (kitap) + "
+    assert _adet(L) == {"tavan_armaturu": 2 + 1 + 1, "glop": 0, "anahtar_tekli": 2 + 1 + 1, "anahtar_cift": 0, "priz_tekli": 4 + 4 + 2 + 2,
+                        "priz_cift": 0, "uydu_prizi": 1}
+    assert _satir(L, "Tekli priz (takım)")["formul"] == ("SALON & MUTFAK (20,0 m²): 2 takım × 2 + SALON & MUTFAK (açık mutfak): 4 (tezgah) + "
                                                          "OTURMA: 2 + YATAK ODASI: 2")
-    assert _satir(L, "Çiftli priz (takım)")["formul"] == "SALON & MUTFAK (açık mutfak): 1 (kitap)"
+    assert _satir(L, "Çiftli priz (takım)")["formul"] == "oda kuralında yok"
     ayri = _kural(_ev([_oda("SALON", "salon", 12.0), _oda("MUTFAK", "mutfak", 8.0)]), kurallar)
     assert (ayri["priz_tekli"], ayri["priz_cift"]) == (2 + kitap["tekli_priz"], kitap["cift_priz"])
     L = PL.liste(_ev([_oda("YATAK ODASI", "yatak_odasi", 9.0)]), kurallar)
     assert (_satir(L, "Tekli priz (takım)")["adet"], _satir(L, "Çiftli priz (takım)")["adet"]) == (2, 0)
-    for kalem in ("Tijli duy", "Tekli anahtar (takım)", "Tekli priz (takım)", "Çiftli priz (takım)"):
-        assert _satir(L, kalem)["formul"].startswith("UYARI: mutfak ayrı mahal değil, açık mutfağın odası da yok; mutfağın kitap noktaları yazılmadı.")
+    assert _satir(L, "Tekli priz (takım)")["formul"] == ("UYARI: mutfak ayrı mahal değil, açık mutfağın odası da yok; tezgahın prizleri "
+                                                         "yazılmadı. YATAK ODASI: 2")
+    for kalem in ("Tijli duy", "Tekli anahtar (takım)", "Çiftli priz (takım)", "Yuvarlak glop"):
+        assert not _satir(L, kalem)["formul"].startswith("UYARI"), kalem
     assert _satir(L, "Yuvarlak glop")["formul"] == "oda kuralında yok"
 
 
