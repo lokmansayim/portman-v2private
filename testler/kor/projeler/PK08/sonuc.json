@@ -1,12 +1,12 @@
 {
- "aciklama": "Kör test sonucu (BK-12 PR-3). Yalnız tutan satırlar: anahtar ve adet (bizim adedimiz). Tutmayan satırların gerçek değeri depoya girmez. Gerileme kapısı `test_kor_kiyas.py`; yeniden sayım tam koşuda.",
+ "aciklama": "Kör test sonucu (BK-12 PR-3). Yalnız tutan satırlar: grup, bizim ölçü anahtarımız, eşleme türü, adet (bizim adedimiz) ve kıyas anındaki bizim satırlarımız (kalem, ölçü). Tutmayan satırların gerçek değeri depoya girmez; sayilar kıyasın özetidir (kaç gerçek satır doğru, farklı, bizde yok). Gerileme kapısı `test_kor_kiyas.py`; yeniden sayım tam koşuda.",
  "kod": "PK-08",
  "ap": null,
  "kip": "pafta",
  "kapi": true,
  "not": "Bayi arşivi; mühürlü iki Excel aynı listenin iki sürümü, kıyas 70 dolu satırlı olanla (13 Ekim'deki gibi).",
  "tarih": "2026-10-23",
- "kiyas_commit": "416e3f3dc8234bf283a680a024011109d97c4408",
+ "kiyas_commit": "9f13755bf9f60ccd472260f9aa847af55b9688a5",
  "bizim_liste": {
   "yol": "testler/kor/projeler/PK08/bizim_liste.json",
   "commit": "8f361f481ad711c3f71a0870a558ee5cbcc7ce4b",
@@ -16,13 +16,13 @@
   "sha256": "a748c76bf2a1169dee87762aaa78fba37b92385ca020e7e84eb7bac5677441ea",
   "bayt": 48456,
   "durum": "acik",
-  "muhur_commit": "8f361f481ad711c3f71a0870a558ee5cbcc7ce4b"
+  "muhur_commit": "9f13755bf9f60ccd472260f9aa847af55b9688a5"
  },
  "sozluk": {
-  "surum": "1 (23 Ekim 2026; açık sekiz projenin adlarıyla)",
-  "commit": "b0fa4b0be850c4019ed80988ddd46e8ebeaaef4b"
+  "surum": "2 (23 Ekim 2026; açık sekiz projenin adlarıyla; yok gruplarında ölçü kümesi)",
+  "commit": "9f13755bf9f60ccd472260f9aa847af55b9688a5",
+  "acilistan_sonra_degisti": null
  },
- "gercek_satir": 129,
  "sayilar": {
   "aynı": 17,
   "ayrım": 1,
@@ -44,25 +44,25 @@
   "sınıflanmadı": 118
  },
  "tutanlar": [
-  {"grup": null, "ad": "PENCERE ÜST PANEL", "b_anahtar": "100X1250X500", "deger": 2, "gercek_satir": 1, "sonuc": "aynı", "bizim": [{"kalem": "Pencere üst panel", "olcu": "100 × 1250 × 500"}]},
-  {"grup": null, "ad": "KUBBE ÖZEL PANO", "b_anahtar": "100X2500X500", "deger": 1, "gercek_satir": 1, "sonuc": "aynı", "bizim": [{"kalem": "Kubbe özel pano", "olcu": "100 × 2500 × 500"}]},
-  {"grup": "60'lık karkaslı + kasalı pano", "ad": null, "b_anahtar": "60X1250X2500", "deger": 3, "gercek_satir": 1, "sonuc": "aynı", "bizim": [{"kalem": "60'lık karkaslı + kasalı pano", "olcu": "60 × 1250 × 2500"}]},
-  {"grup": "Köşe direği", "ad": null, "b_anahtar": "100X100X2500", "deger": 6, "gercek_satir": 1, "sonuc": "aynı", "bizim": [{"kalem": "10'luk köşe direği 100 × 100", "olcu": "100 × 100 × 2500"}]},
-  {"grup": null, "ad": "KUBBE ÜSTÜ H", "b_anahtar": "100X100X500", "deger": 2, "gercek_satir": 1, "sonuc": "aynı", "bizim": [{"kalem": "Kubbe üstü H", "olcu": "100 × 100 × 500"}]},
-  {"grup": null, "ad": "ÖZEL AÇILI KÖŞE DİREĞİ+KAPAMASI", "b_anahtar": "100X100X2330", "deger": 4, "gercek_satir": 1, "sonuc": "aynı", "bizim": [{"kalem": "Özel açılı köşe direği + kapaması", "olcu": "100 × 100 × 2330"}]},
-  {"grup": null, "ad": "100LÜK PENCERE USU H GEÇEN", "b_anahtar": "2500", "deger": 4, "gercek_satir": 1, "sonuc": "aday", "bizim": [{"kalem": "100'lük pencere U'su H geçen", "olcu": "L 2500"}]},
-  {"grup": null, "ad": "BAŞ MAKAS BETOPANI", "b_anahtar": "1250X2500", "deger": 6, "gercek_satir": 1, "sonuc": "aynı", "bizim": [{"kalem": "Baş makas betopanı", "olcu": "1250 × 2500"}]},
-  {"grup": "60'lık alt çerçeve", "ad": null, "b_anahtar": "60X3750", "deger": 5, "gercek_satir": 1, "sonuc": "aday", "bizim": [{"kalem": "60'lık alt çerçeve", "olcu": "60 × 3750"}]},
-  {"grup": "Kubbe OSB", "ad": null, "b_anahtar": null, "deger": 1, "gercek_satir": 1, "sonuc": "aynı", "bizim": [{"kalem": "Kubbe OSB 11 mm", "olcu": "1220 × 2440"}]},
-  {"grup": null, "ad": "KUBBE ANTRASİT SHİNGLE", "b_anahtar": "PAKET", "deger": 1, "gercek_satir": 1, "sonuc": "aynı", "bizim": [{"kalem": "Kubbe antrasit shingle", "olcu": "paket"}]},
-  {"grup": "Çatı şiltesi / izolasyonu", "ad": null, "b_anahtar": null, "deger": 7, "gercek_satir": 1, "sonuc": "aynı", "bizim": [{"kalem": "Çatı şiltesi / izolasyonu (9,6 m²/paket)", "olcu": "paket"}]},
-  {"grup": null, "ad": "METAL DERE İNİŞİ APARATI", "b_anahtar": "ADET", "deger": 4, "gercek_satir": 1, "sonuc": "aynı", "bizim": [{"kalem": "Metal dere inişi aparatı", "olcu": "adet"}]},
-  {"grup": null, "ad": "DERE KAPAĞI", "b_anahtar": "ADET", "deger": 4, "gercek_satir": 1, "sonuc": "aynı", "bizim": [{"kalem": "Dere kapağı", "olcu": "adet"}]},
-  {"grup": null, "ad": "70MM PVC DERE İNİŞ BORUSU", "b_anahtar": "2000", "deger": 4, "gercek_satir": 1, "sonuc": "aynı", "bizim": [{"kalem": "70 mm PVC dere iniş borusu", "olcu": "L 2000"}]},
-  {"grup": null, "ad": "70MM PVC DERE İNİŞ BORUSU", "b_anahtar": "500", "deger": 4, "gercek_satir": 1, "sonuc": "aynı", "bizim": [{"kalem": "70 mm PVC dere iniş borusu", "olcu": "L 500"}]},
-  {"grup": "Kapalı dirsek", "ad": null, "b_anahtar": null, "deger": 4, "gercek_satir": 1, "sonuc": "aynı", "bizim": [{"kalem": "Kapalı dirsek", "olcu": "adet"}]},
-  {"grup": "Çelik kapı (sağ)", "ad": null, "b_anahtar": null, "deger": 1, "gercek_satir": 1, "sonuc": "aynı", "bizim": [{"kalem": "Prefabrik çelik kapı (SAĞ)", "olcu": "900 × 2000"}]},
-  {"grup": "Amerikan kapı", "ad": null, "b_anahtar": null, "deger": 3, "gercek_satir": 1, "sonuc": "ayrım", "bizim": [{"kalem": "Amerikan kapı (80'lik kanat) (SAĞ)", "olcu": "82 × 196"}, {"kalem": "Amerikan kapı (80'lik kanat) (SOL)", "olcu": "82 × 196"}]},
-  {"grup": null, "ad": "POLİÜRETAN KÖPÜK", "b_anahtar": "ADET", "deger": 2, "gercek_satir": 1, "sonuc": "aynı", "bizim": [{"kalem": "Poliüretan köpük", "olcu": "adet"}]}
+  {"grup": null, "ad": "PENCERE ÜST PANEL", "b_anahtar": "100X1250X500", "eslesme": "anahtar", "deger": 2, "sonuc": "aynı", "bizim": [{"kalem": "Pencere üst panel", "olcu": "100 × 1250 × 500"}]},
+  {"grup": null, "ad": "KUBBE ÖZEL PANO", "b_anahtar": "100X2500X500", "eslesme": "anahtar", "deger": 1, "sonuc": "aynı", "bizim": [{"kalem": "Kubbe özel pano", "olcu": "100 × 2500 × 500"}]},
+  {"grup": "60'lık karkaslı + kasalı pano", "ad": null, "b_anahtar": "60X1250X2500", "eslesme": "anahtar", "deger": 3, "sonuc": "aynı", "bizim": [{"kalem": "60'lık karkaslı + kasalı pano", "olcu": "60 × 1250 × 2500"}]},
+  {"grup": "Köşe direği", "ad": null, "b_anahtar": "100X100X2500", "eslesme": "anahtar", "deger": 6, "sonuc": "aynı", "bizim": [{"kalem": "10'luk köşe direği 100 × 100", "olcu": "100 × 100 × 2500"}]},
+  {"grup": null, "ad": "KUBBE ÜSTÜ H", "b_anahtar": "100X100X500", "eslesme": "anahtar", "deger": 2, "sonuc": "aynı", "bizim": [{"kalem": "Kubbe üstü H", "olcu": "100 × 100 × 500"}]},
+  {"grup": null, "ad": "ÖZEL AÇILI KÖŞE DİREĞİ+KAPAMASI", "b_anahtar": "100X100X2330", "eslesme": "anahtar", "deger": 4, "sonuc": "aynı", "bizim": [{"kalem": "Özel açılı köşe direği + kapaması", "olcu": "100 × 100 × 2330"}]},
+  {"grup": null, "ad": "100LÜK PENCERE USU H GEÇEN", "b_anahtar": "2500", "eslesme": "anahtar", "deger": 4, "sonuc": "aday", "bizim": [{"kalem": "100'lük pencere U'su H geçen", "olcu": "L 2500"}]},
+  {"grup": null, "ad": "BAŞ MAKAS BETOPANI", "b_anahtar": "1250X2500", "eslesme": "anahtar", "deger": 6, "sonuc": "aynı", "bizim": [{"kalem": "Baş makas betopanı", "olcu": "1250 × 2500"}]},
+  {"grup": "60'lık alt çerçeve", "ad": null, "b_anahtar": "60X3750", "eslesme": "anahtar", "deger": 5, "sonuc": "aday", "bizim": [{"kalem": "60'lık alt çerçeve", "olcu": "60 × 3750"}]},
+  {"grup": "Kubbe OSB", "ad": null, "b_anahtar": null, "eslesme": "toplam", "deger": 1, "sonuc": "aynı", "bizim": [{"kalem": "Kubbe OSB 11 mm", "olcu": "1220 × 2440"}]},
+  {"grup": null, "ad": "KUBBE ANTRASİT SHİNGLE", "b_anahtar": "PAKET", "eslesme": "anahtar", "deger": 1, "sonuc": "aynı", "bizim": [{"kalem": "Kubbe antrasit shingle", "olcu": "paket"}]},
+  {"grup": "Çatı şiltesi / izolasyonu", "ad": null, "b_anahtar": null, "eslesme": "toplam", "deger": 7, "sonuc": "aynı", "bizim": [{"kalem": "Çatı şiltesi / izolasyonu (9,6 m²/paket)", "olcu": "paket"}]},
+  {"grup": null, "ad": "METAL DERE İNİŞİ APARATI", "b_anahtar": "ADET", "eslesme": "anahtar", "deger": 4, "sonuc": "aynı", "bizim": [{"kalem": "Metal dere inişi aparatı", "olcu": "adet"}]},
+  {"grup": null, "ad": "DERE KAPAĞI", "b_anahtar": "ADET", "eslesme": "anahtar", "deger": 4, "sonuc": "aynı", "bizim": [{"kalem": "Dere kapağı", "olcu": "adet"}]},
+  {"grup": null, "ad": "70MM PVC DERE İNİŞ BORUSU", "b_anahtar": "2000", "eslesme": "anahtar", "deger": 4, "sonuc": "aynı", "bizim": [{"kalem": "70 mm PVC dere iniş borusu", "olcu": "L 2000"}]},
+  {"grup": null, "ad": "70MM PVC DERE İNİŞ BORUSU", "b_anahtar": "500", "eslesme": "anahtar", "deger": 4, "sonuc": "aynı", "bizim": [{"kalem": "70 mm PVC dere iniş borusu", "olcu": "L 500"}]},
+  {"grup": "Kapalı dirsek", "ad": null, "b_anahtar": null, "eslesme": "toplam", "deger": 4, "sonuc": "aynı", "bizim": [{"kalem": "Kapalı dirsek", "olcu": "adet"}]},
+  {"grup": "Çelik kapı (sağ)", "ad": null, "b_anahtar": null, "eslesme": "toplam", "deger": 1, "sonuc": "aynı", "bizim": [{"kalem": "Prefabrik çelik kapı (SAĞ)", "olcu": "900 × 2000"}]},
+  {"grup": "Amerikan kapı", "ad": null, "b_anahtar": null, "eslesme": "toplam", "deger": 3, "sonuc": "ayrım", "bizim": [{"kalem": "Amerikan kapı (80'lik kanat) (SAĞ)", "olcu": "82 × 196"}, {"kalem": "Amerikan kapı (80'lik kanat) (SOL)", "olcu": "82 × 196"}]},
+  {"grup": null, "ad": "POLİÜRETAN KÖPÜK", "b_anahtar": "ADET", "eslesme": "anahtar", "deger": 2, "sonuc": "aynı", "bizim": [{"kalem": "Poliüretan köpük", "olcu": "adet"}]}
  ]
 }
