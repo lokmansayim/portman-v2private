@@ -438,10 +438,41 @@ class IfcUretici:
             pl = self._urun("IfcPlate", ad, predefined="SHEET")
             self._yerlestir(pl); self._temsil(pl, self._prizma_xz(alin, ya, yb), "fiber")
             self._pset(pl, "PortatifEv_Kapsam", {"BOMKalem": "Çatı alın dolgusu (üçgen) — kural teyit edilecek"})
-        # makaslar
-        n = math.ceil((Hd - 10) / 125.5) + 1
-        for i in range(n):
-            y = 5 + i * (Hd - 10) / (n - 1)
+        # makaslar pano eklerinde (BK-12 PR-R): iki baş makas uç duvarların ekseninde, orta makaslar boydan boya kesintisiz
+        # koşan saçak duvarının (x = 0 ya da Wd) pano eklerinde; PK-01'de paftadaki MK01–MK09. İki saçak duvarı da kesintisizse
+        # ortak ekler alınır. Ekler düzenli olmalı: orta makaslar 125,5 arayla, uçtaki açıklıklar 125,5'ten uzun değil, sayı
+        # yükleme listesininkiyle aynı (⌈(boy − 2 × dış duvar) ÷ 125,5⌉ + 1; `prefabrik_liste`). Değilse (iki yanda veranda,
+        # L plan, saçak duvarında 251'lik pano, T'de ızgara dışı bölünme) eşit aralık: liste sayısında makas, baş makaslar yine uç
+        # duvarların ekseninde (100'lük dış duvarda PR-R'den önceki dizilimle aynı); uyarı özete ve IFC'ye yazılır (K16)
+        td = max(p["kalinlik"] for p in G["panolar"])
+        n_liste = math.ceil((Hd - 2 * td) / 125.5 - 1e-6) + 1
+        def sacak_ekleri(x):
+            ar = sorted((p["rect"][1], p["rect"][3]) for p in G["panolar"] if p["yon"] == "y" and p["tur"] == "dis"
+                        and abs((p["rect"][0] if x == 0 else p["rect"][2]) - x) < 1e-6)
+            tam = (bool(ar) and ar[0][0] <= td + 1e-6 and ar[-1][1] >= Hd - td - 1e-6
+                   and all(abs(a[1] - b[0]) < 1e-6 for a, b in zip(ar, ar[1:])))
+            return {round(v, 3) for a in ar for v in a if td + 1e-6 < v < Hd - td - 1e-6} if tam else None
+        ekler = [e for e in (sacak_ekleri(0), sacak_ekleri(Wd)) if e is not None]
+        uyari, ys = [], None
+        if not ekler:
+            uyari.append(f"makas yeri: boydan boya kesintisiz saçak duvarı yok; eşit aralıklı {n_liste} makas")
+        else:
+            if len(ekler) == 2 and ekler[0] != ekler[1]:
+                uyari.append("makas yeri: iki saçak duvarının pano ekleri farklı; ortak ekler alındı")
+            aday = [td / 2] + sorted(set.intersection(*ekler)) + [Hd - td / 2]
+            araliklar = [b - a for a, b in zip(aday, aday[1:])]
+            if (len(aday) == n_liste and all(abs(a - 125.5) < 0.01 for a in araliklar[1:-1])
+                    and all(0 < a < 125.5 + 0.01 for a in (araliklar[0], araliklar[-1]))):
+                ys = aday
+            else:
+                uyari.append(f"makas yeri: saçak duvarının pano ekleri düzensiz ({len(aday)} makas, listede {n_liste}; "
+                             f"aralıklar {', '.join(f'{a:g}' for a in (round(x, 2) for x in araliklar))}); eşit aralıklı {n_liste} makas")
+        if ys is None:
+            ys = [td / 2 + i * (Hd - td) / (n_liste - 1) for i in range(n_liste)]
+        if uyari:
+            self._pset(roof, "PortatifEv_Uyari", {"MakasYeri": " | ".join(uyari)})
+        n = len(ys)
+        for i, y in enumerate(ys):
             asm = self._urun("IfcElementAssembly", f"MAKAS_{i + 1:02d}", predefined="TRUSS")
             self._yerlestir(asm)
             self._pset(asm, "PortatifEv_Kapsam", {"BOMKalem": "Çatı makası (baş)" if i in (0, n - 1) else "Çatı makası (orta)", "Aciklik_cm": round(Wd, 1)})
@@ -460,7 +491,8 @@ class IfcUretici:
                 self._yerlestir(m); self._temsil(m, self._prizma_xz(k, y - 2.5, y + 2.5), "galv")
                 uyeler_e.append(m)
             api("aggregate.assign_object", self.f, relating_object=asm, products=uyeler_e)
-        self.cati_ozet = {"mahya_cm": round(zm, 1), "makas": n, "cati_alan_m2": round(alan, 2)}
+        self.cati_ozet = {"mahya_cm": round(zm, 1), "makas": n, "cati_alan_m2": round(alan, 2), "makas_y_cm": [round(y, 2) for y in ys],
+                          **({"uyari": uyari} if uyari else {})}
 
     def _prizma_yz(self, pts_yz, x0, x1):
         """Dünya y-z düzlemindeki kesit (cm), x0..x1 boyunca (dünya koordinatı)."""
