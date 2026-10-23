@@ -33,6 +33,7 @@
   {"ad": "Panel kapaması", "bizim": ["^PANEL KAPAMASI$"], "gercek": ["^TEK KAT PANEL PANEL KAPAMASI", "^PANEL KAPAMASI$"], "olcu": "yok"},
   {"ad": "OSB 11 mm (çatı)", "bizim": ["^OSB 11MM"], "gercek": ["^OSB 11MM"], "olcu": "yok"},
   {"ad": "Kubbe OSB", "bizim": ["^KUBBE OSB"], "gercek": ["^KUBBE OSB"], "olcu": "yok"},
+  {"ad": "Veranda tavan Boardex", "bizim": ["BOARDEX"], "gercek": ["BOARDEX"], "olcu": "tam"},
   {"ad": "Ters mahya", "bizim": ["^TERS MAHYA($|\\()"], "gercek": ["^TERS MAHYA($|\\()"], "olcu": "yok"},
   {"ad": "Ters mahya kenar kutusu", "bizim": ["^TERS MAHYA KENAR KUTU"], "gercek": ["^TERS MAHYA KENAR KUTU"], "olcu": "yok"},
   {"ad": "Özel mahya (geniş)", "bizim": ["^ÖZEL MAHYA\\(GENİŞ\\)"], "gercek": ["^ÖZEL MAHYA GENİŞ"], "olcu": "yok"},
