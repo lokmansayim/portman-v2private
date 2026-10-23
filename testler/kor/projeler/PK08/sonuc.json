@@ -6,7 +6,7 @@
  "kapi": true,
  "not": "Bayi arşivi; mühürlü iki Excel aynı listenin iki sürümü, kıyas 70 dolu satırlı olanla (13 Ekim'deki gibi).",
  "tarih": "2026-10-23",
- "kiyas_commit": "9f13755bf9f60ccd472260f9aa847af55b9688a5",
+ "kiyas_commit": "742e9c1caa5e15e29849cc19574a566fbeb33026",
  "bizim_liste": {
   "yol": "testler/kor/projeler/PK08/bizim_liste.json",
   "commit": "8f361f481ad711c3f71a0870a558ee5cbcc7ce4b",
@@ -34,6 +34,7 @@
   "gercek_dolu": 70,
   "dogru": 20
  },
+ "okunmayan_adetli": 0,
  "sinif_sayilari": {
   "girdi": 0,
   "kural": 0,

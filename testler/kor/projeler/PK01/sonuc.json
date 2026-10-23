@@ -6,7 +6,7 @@
  "kapi": false,
  "not": "Gerçek listesi stoktan düşülmüş (Lokman, 18 Ekim 2026): sonuç bilgi için kaydedilir, hedef değil, kapıya girmez.",
  "tarih": "2026-10-23",
- "kiyas_commit": "9f13755bf9f60ccd472260f9aa847af55b9688a5",
+ "kiyas_commit": "742e9c1caa5e15e29849cc19574a566fbeb33026",
  "bizim_liste": {
   "yol": "testler/kor/projeler/PK01/bizim_liste.json",
   "commit": "8f361f481ad711c3f71a0870a558ee5cbcc7ce4b",
@@ -34,6 +34,7 @@
   "gercek_dolu": 94,
   "dogru": 69
  },
+ "okunmayan_adetli": 0,
  "sinif_sayilari": {
   "girdi": 0,
   "kural": 0,
@@ -85,7 +86,7 @@
   {"grup": null, "ad": "100LÜK ALT ÇERÇEVE", "b_anahtar": "100X3750", "eslesme": "anahtar", "deger": 9, "sonuc": "aynı", "bizim": [{"kalem": "100'lük alt çerçeve", "olcu": "100 × 3750"}]},
   {"grup": "Makas", "ad": null, "b_anahtar": null, "eslesme": "toplam", "deger": 9, "sonuc": "ayrım", "bizim": [{"kalem": "Makas (baş) · ana çatı", "olcu": "açıklık 6000"}, {"kalem": "Makas (orta) · ana çatı", "olcu": "açıklık 6000"}]},
   {"grup": null, "ad": "METAL KİREMİT MAHYASI", "b_anahtar": "2800", "eslesme": "anahtar", "deger": 5, "sonuc": "aynı", "bizim": [{"kalem": "Metal kiremit mahyası", "olcu": "L 2800"}]},
-  {"grup": null, "ad": "MAHYA BANDI", "b_anahtar": "RULO10M", "eslesme": "esdeger", "deger": 2, "sonuc": "aynı", "bizim": [{"kalem": "Mahya bandı", "olcu": "rulo 10 m"}]},
+  {"grup": null, "ad": "MAHYA BANDI", "b_anahtar": "RULO10M", "eslesme": "esdeger", "deger": 2, "sonuc": "aynı", "bizim": [{"kalem": "Mahya bandı", "olcu": "rulo 10 m"}], "grup_olculeri": ["RULO10M"]},
   {"grup": null, "ad": "METAL DERE", "b_anahtar": "4000", "eslesme": "anahtar", "deger": 6, "sonuc": "aynı", "bizim": [{"kalem": "Metal dere", "olcu": "L 4000"}]},
   {"grup": null, "ad": "METAL DERE İNİŞİ APARATI", "b_anahtar": "ADET", "eslesme": "anahtar", "deger": 6, "sonuc": "aynı", "bizim": [{"kalem": "Metal dere inişi aparatı", "olcu": "adet"}]},
   {"grup": null, "ad": "DERE KAPAĞI", "b_anahtar": "ADET", "eslesme": "anahtar", "deger": 4, "sonuc": "aynı", "bizim": [{"kalem": "Dere kapağı", "olcu": "adet"}]},
