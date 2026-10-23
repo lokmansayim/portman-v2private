@@ -943,7 +943,8 @@ def ekler_uret(ie: dict, hedef: Path, v: dict, settings: dict, m: dict | None = 
         from motor import ifc_uret as IU
         ad = f"Portman_{no}_r{rev:02d}.ifc"
         oz = IU.uret(ie, hedef / ad, baslik=f"Portman — {no} r{rev:02d}")
-        ekler["ifc"] = {"dosya": str(hedef / ad), "sha256": _sha(hedef / ad), **{k: oz.get(k) for k in ("duvar", "pencere", "kapi", "mahal", "sema_hatasi")}}
+        ekler["ifc"] = {"dosya": str(hedef / ad), "sha256": _sha(hedef / ad), **{k: oz.get(k) for k in ("duvar", "pencere", "kapi", "mahal", "sema_hatasi")},
+                        **({"cati_uyari": oz["cati"]["uyari"]} if (oz.get("cati") or {}).get("uyari") else {})}   # makas yeri uyarısı (BK-12 PR-R, K16)
         try:
             from motor import ucb_sayfa as US
             html = US.uret(hedef / ad, hedef / "3d" / "index.html", baslik=f"{no} r{rev:02d}")
