@@ -3,9 +3,9 @@
 Kural: baş makaslar uç duvarların ekseninde (5 cm ve boy − 5 cm), orta makaslar boydan boya kesintisiz koşan saçak duvarının pano
 eklerinde; PK-01'de paftadaki MK01–MK09 ("125,5 c/c"). İki saçak duvarı da kesintisizse ortak ekler alınır, ekler farklıysa uyarı
 yazılır. Ekler düzenli olmalı (orta makaslar 125,5 arayla, uç açıklıklar 125,5'ten uzun değil, sayı listeyle aynı); değilse ya da
-iki duvar da kesintiliyse eşit aralık kalır, uyarı özete ve IFC'ye (`PortatifEv_Uyari`) yazılır (K16). Makas sayısı değişmez:
-yükleme listesi makasları kendi kuralıyla sayar (`prefabrik_liste.py`, saçak duvarının pano koşusu ÷ 125,5 yukarı + 1), IFC aynı
-sayıyı verir. Düzensiz eklere iki örnek geometri hakeminin (23 Ekim): saçak duvarında 251'lik pencereli pano ve dış duvarın T'de
+iki duvar da kesintiliyse eşit aralık kalır (liste sayısında makas, baş makaslar uç duvarların ekseninde), uyarı özete ve IFC'ye
+(`PortatifEv_Uyari`) yazılır (K16). Makas sayısı her yolda listeninkiyle aynı: liste makasları kendi kuralıyla sayar
+(`prefabrik_liste.py`, saçak duvarının pano koşusu ÷ 125,5 yukarı + 1), IFC aynı sayıyı verir. Düzensiz eklere iki örnek geometri hakeminin (23 Ekim): saçak duvarında 251'lik pencereli pano ve dış duvarın T'de
 ızgara dışında bölünmesi.
 """
 from __future__ import annotations
@@ -45,6 +45,13 @@ def _esit(Hd: float) -> list[float]:
     """PR-R'den önceki dizilim: 5 … boy − 5 arası eşit aralık."""
     n = math.ceil((Hd - 10) / 125.5) + 1
     return [round(5 + i * (Hd - 10) / (n - 1), 2) for i in range(n)]
+
+
+def _yedek(G: dict) -> list[float]:
+    """Eşit aralık yedeği: liste sayısında makas, uçlar uç duvarların ekseninde (100'lük dış duvarda `_esit` ile aynı)."""
+    Hd = _boy(G); td = max(p["kalinlik"] for p in G["panolar"])
+    n = math.ceil((Hd - 2 * td) / 125.5 - 1e-6) + 1
+    return [round(td / 2 + i * (Hd - td) / (n - 1), 2) for i in range(n)]
 
 
 def _boy(G: dict) -> float:
@@ -114,8 +121,8 @@ def test_iki_sacak_duvari_kesintiliyse_esit_aralik_ve_uyari(tmp_path):
     G = I.hazirla(_oku(PK01))
     G["panolar"] = [p for p in G["panolar"] if not (p["yon"] == "y" and p["tur"] == "dis" and p["rect"][0] == 0 and p["rect"][1] == 367.5)]
     c = _cati(G, tmp_path / "kesik.ifc")
-    assert c["makas_y_cm"] == _esit(_boy(G)) and c["makas"] == 9
-    assert c["uyari"] == ["makas yeri: boydan boya kesintisiz saçak duvarı yok; makaslar eşit aralıklı"]
+    assert c["makas_y_cm"] == _yedek(G) == _esit(_boy(G)) and c["makas"] == 9
+    assert c["uyari"] == ["makas yeri: boydan boya kesintisiz saçak duvarı yok; eşit aralıklı 9 makas"]
     assert _ifc_uyari(tmp_path / "kesik.ifc") == c["uyari"][0]
 
 
@@ -145,10 +152,10 @@ def test_ortak_ekler_duzensizse_esit_aralik_ve_uyari(tmp_path):
     ek["id"] = max(q["id"] for q in G["panolar"]) + 1
     G["panolar"].append(ek)
     c = _cati(G, tmp_path / "duzensiz.ifc")
-    assert c["makas_y_cm"] == _esit(_boy(G)) and c["makas"] == 9
+    assert c["makas_y_cm"] == _yedek(G) == _esit(_boy(G)) and c["makas"] == 9
     assert c["uyari"][0] == "makas yeri: iki saçak duvarının pano ekleri farklı; ortak ekler alındı"
     assert c["uyari"][1].startswith("makas yeri: saçak duvarının pano ekleri düzensiz (8 makas, listede 9; aralıklar 251, 125.5")
-    assert c["uyari"][1].endswith("); makaslar eşit aralıklı") and len(c["uyari"]) == 2
+    assert c["uyari"][1].endswith("); eşit aralıklı 9 makas") and len(c["uyari"]) == 2
 
 
 @pytest.mark.parametrize("olcu", ["200x120", "240x120"])
@@ -183,4 +190,22 @@ def test_sacak_duvarinda_izgara_disi_ek_esit_aralik(tmp_path):
     G = I.hazirla(_oku(PK01))
     _bol(G, 0, 367.5, 440.0)
     c = _cati(G, tmp_path / "bolunmus.ifc")
-    assert c["makas_y_cm"] == _esit(_boy(G)) and c["makas"] == 9 and "düzensiz (10 makas, listede 9;" in c["uyari"][0]
+    assert c["makas_y_cm"] == _yedek(G) == _esit(_boy(G)) and c["makas"] == 9 and "düzensiz (10 makas, listede 9;" in c["uyari"][0]
+
+
+@pytest.mark.parametrize("boy", [1016, 1018, 1020])
+def test_160_100_duvarda_yedek_liste_sayisinda_ve_uc_duvar_ekseninde(boy, tmp_path):
+    """Geometri hakemi 2. tur: 160 / 100 duvarlı PK-01 türevi (D-12 müşteri seçeneği), saçak duvarında 200x120. Yedek, eski
+    sabitlerle (boy − 10, uçlar 5) listeden bir fazla makas veriyordu; artık liste sayısında ve baş makaslar 8'de (uç duvar ekseni)."""
+    ie = _oku(PK01)
+    X = {10: 16, 590: 584, 198.25: 204.25, 261: 267, 386.5: 392.5}
+    Y = {5: 8, 995: boy - 8, 256: 259, 381.5: 384.5, 795: 798}
+    ie["yapi"]["duvar_kalinligi_cm"] = {"dis": 16, "ic": 10}; ie["yapi"]["ek_akslar_cm"]["y"] = [798]; ie["yapi"]["dis_olcu_cm"]["y"] = boy
+    for m in ie["mahaller"]:
+        m["konum_cm"] = [[X.get(a, a), Y.get(b, b), X.get(c, c), Y.get(e, e)] for a, b, c, e in m["konum_cm"]]
+    next(a for a in ie["acikliklar"] if a["tur"] == "pencere" and a["mahal"] == "YATAK ODASI 1" and a["duvar"] == "sol")["olcu"] = "200x120"
+    c = I.uret(ie, tmp_path / "kalin.ifc")["cati"]
+    assert c["makas"] == PL.liste(PL.model_motor(ie))["girdi_ozeti"]["makas"] == len(c["makas_y_cm"])
+    assert c["makas_y_cm"][0] == 8 and c["makas_y_cm"][-1] == boy - 8
+    assert len({round(b - a, 2) for a, b in zip(c["makas_y_cm"], c["makas_y_cm"][1:])}) == 1          # eşit aralık
+    assert c["uyari"][-1].endswith(f"; eşit aralıklı {c['makas']} makas")

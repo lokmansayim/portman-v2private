@@ -442,8 +442,10 @@ class IfcUretici:
         # koşan saçak duvarının (x = 0 ya da Wd) pano eklerinde; PK-01'de paftadaki MK01–MK09. İki saçak duvarı da kesintisizse
         # ortak ekler alınır. Ekler düzenli olmalı: orta makaslar 125,5 arayla, uçtaki açıklıklar 125,5'ten uzun değil, sayı
         # yükleme listesininkiyle aynı (⌈(boy − 2 × dış duvar) ÷ 125,5⌉ + 1; `prefabrik_liste`). Değilse (iki yanda veranda,
-        # L plan, saçak duvarında 251'lik pano, T'de ızgara dışı bölünme) eşit aralık kalır; uyarı özete ve IFC'ye yazılır (K16)
+        # L plan, saçak duvarında 251'lik pano, T'de ızgara dışı bölünme) eşit aralık: liste sayısında makas, baş makaslar yine uç
+        # duvarların ekseninde (100'lük dış duvarda PR-R'den önceki dizilimle aynı); uyarı özete ve IFC'ye yazılır (K16)
         td = max(p["kalinlik"] for p in G["panolar"])
+        n_liste = math.ceil((Hd - 2 * td) / 125.5 - 1e-6) + 1
         def sacak_ekleri(x):
             ar = sorted((p["rect"][1], p["rect"][3]) for p in G["panolar"] if p["yon"] == "y" and p["tur"] == "dis"
                         and abs((p["rect"][0] if x == 0 else p["rect"][2]) - x) < 1e-6)
@@ -453,22 +455,20 @@ class IfcUretici:
         ekler = [e for e in (sacak_ekleri(0), sacak_ekleri(Wd)) if e is not None]
         uyari, ys = [], None
         if not ekler:
-            uyari.append("makas yeri: boydan boya kesintisiz saçak duvarı yok; makaslar eşit aralıklı")
+            uyari.append(f"makas yeri: boydan boya kesintisiz saçak duvarı yok; eşit aralıklı {n_liste} makas")
         else:
             if len(ekler) == 2 and ekler[0] != ekler[1]:
                 uyari.append("makas yeri: iki saçak duvarının pano ekleri farklı; ortak ekler alındı")
             aday = [td / 2] + sorted(set.intersection(*ekler)) + [Hd - td / 2]
             araliklar = [b - a for a, b in zip(aday, aday[1:])]
-            n_liste = math.ceil((Hd - 2 * td) / 125.5 - 1e-6) + 1
             if (len(aday) == n_liste and all(abs(a - 125.5) < 0.01 for a in araliklar[1:-1])
                     and all(0 < a < 125.5 + 0.01 for a in (araliklar[0], araliklar[-1]))):
                 ys = aday
             else:
                 uyari.append(f"makas yeri: saçak duvarının pano ekleri düzensiz ({len(aday)} makas, listede {n_liste}; "
-                             f"aralıklar {', '.join(f'{a:g}' for a in (round(x, 2) for x in araliklar))}); makaslar eşit aralıklı")
+                             f"aralıklar {', '.join(f'{a:g}' for a in (round(x, 2) for x in araliklar))}); eşit aralıklı {n_liste} makas")
         if ys is None:
-            n = math.ceil((Hd - 10) / 125.5) + 1
-            ys = [5 + i * (Hd - 10) / (n - 1) for i in range(n)]
+            ys = [td / 2 + i * (Hd - td) / (n_liste - 1) for i in range(n_liste)]
         if uyari:
             self._pset(roof, "PortatifEv_Uyari", {"MakasYeri": " | ".join(uyari)})
         n = len(ys)
