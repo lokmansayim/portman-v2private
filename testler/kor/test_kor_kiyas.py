@@ -172,12 +172,41 @@ def test_baslik_blogu_ve_personel_okunmaz(depo, tmp_path):
 
 @pytest.mark.parametrize("malzeme, okunur", [
     ("MÜŞTERİ TEMSİLCİSİ", False), ("SEVKİYAT YERİ", False), ("Tarih: 23.10.2026", False), ("PROJE İSMİ", False),
-    ("Müşteri Adı Soyadı", False), ("TELEFON PRİZİ", True), ("PVC PENCERE (MÜŞTERİYE AİT)", True), ("SEVKİYAT PALETİ", True)])
+    ("Müşteri Adı Soyadı", False), ("MUSTERI TEMSILCISI", False), ("Müşteri Temsilcisi " + UYDURMA_AD, False), ("SEVK TARİHİ", False),
+    ("TESLİM TARİHİ", False), ("TARİH 23.10.2026", False), ("TEL " + UYDURMA_TEL, False), ("Tel: " + UYDURMA_TEL, False),
+    ("TELEFON PRİZİ", True), ("PVC PENCERE (MÜŞTERİYE AİT)", True), ("SEVKİYAT PALETİ", True), ("TEL", True), ("TEL 2,5 MM", True)])
 def test_baslik_etiketi_yalniz_etiketse_okunmaz(malzeme, okunur):
-    """Başlık süzgeci satırın adı yalnız bir etiketse düşürür; etiket sözcüğünü taşıyan malzeme okunur (hakem 2. tur, bulgu 3)."""
+    """Başlık süzgeci adı bir etiketle başlayan satırı düşürür (etiket yalnız, iki noktayla, ek sözcük ve yazıyla, tarihle, numarayla;
+    Türkçe ya da ASCII); etiket sözcüğünü taşıyan malzeme okunur (hakem 2. tur bulgu 3, 3. tur B4)."""
     sayac = {}
     assert (oku._satir(None, malzeme, None, 1, sayac=sayac) is not None) == okunur
     assert sayac == ({} if okunur else {"baslik": 1, "adetli": 1})
+
+
+def test_numara_adet_sayilmaz():
+    """Adet sütununa boşluksuz düşen bir numara adet sayılmaz (milyonu geçen sayı); olağan adetler okunur."""
+    numara = UYDURMA_TEL.replace(" ", "")
+    assert oku.sayi(numara) is None and oku.sayi(int(numara)) is None
+    assert (oku.sayi("1.250"), oku.sayi("2,5"), oku.sayi(999999), oku.sayi(" 12 ")) == (1250, 2.5, 999999, 12)
+
+
+def test_pdf_okuyucu_okunmayanlari_sayar(tmp_path):
+    """PDF'te de başlık etiketli ve personel satırları okunmaz, sayılır (uydurma PDF; hakem 3. tur, B3)."""
+    import pymupdf
+    doc = pymupdf.open()
+    s = doc.new_page()
+    for x, y, yazi in [(50, 60, "DENEME GRUBU"), (300, 60, "BOYUT"), (400, 60, "ADET"),
+                       (50, 90, "DENEME KALEM"), (300, 90, "100 X 200"), (400, 90, "4"),
+                       (50, 120, "MUSTERI TEMSILCISI"), (400, 120, "1"),
+                       (50, 150, "SORUMLU URETIM PERSONELI AD SOYAD"), (400, 150, "1"),
+                       (50, 180, "DENEME KALEM IKI"), (300, 180, "L 2500"), (400, 180, "2")]:
+        s.insert_text((x, y), yazi, fontsize=9)
+    doc.save(str(tmp_path / "liste.pdf"))
+    sayac = {}
+    satirlar = oku.oku(tmp_path / "liste.pdf", ".pdf", sayac=sayac)
+    assert [(r["grup"], r["malzeme"], r["boyut"], r["adet"]) for r in satirlar] == [
+        ("DENEME GRUBU", "DENEME KALEM", "100 X 200", 4), ("DENEME GRUBU", "DENEME KALEM IKI", "L 2500", 2)]
+    assert sayac == {"baslik": 1, "personel": 1, "adetli": 2}
 
 
 @pytest.mark.parametrize("bozma", ["bir_bayt", "eksik_bayt", "bos"])
@@ -416,9 +445,10 @@ def test_kayitta_bizim_degerimizden_baska_deger_yok(pd, sozluk):
     assert kayit["sayilar"]["dogru"] == sum(kayit["sayilar"][s] for s in esle.DOGRU)
     assert kayit["bizim_liste"]["commit"] == K.kayitli_mi(pd / "bizim_liste.json")["commit"]
     for t in kayit["tutanlar"]:
-        assert set(t) <= {"grup", "ad", "b_anahtar", "eslesme", "deger", "sonuc", "bizim", "grup_olculeri"}, t
+        assert set(t) <= {"grup", "ad", "b_anahtar", "eslesme", "deger", "sonuc", "bizim", "grup_olculeri", "olcu_toplamlari"}, t
         assert t["sonuc"] in esle.DOGRU and t["eslesme"] in ("anahtar", "esdeger", "tolerans", "kalan", "toplam", "her_satir")
         assert ("grup_olculeri" in t) == (t["eslesme"] in esle.GRUP_OLCULU)
+        assert "olcu_toplamlari" not in t or t["eslesme"] in esle.OLCU_BASINA
         assert all(set(b) == {"kalem", "olcu"} for b in t["bizim"])
     bozuk = [(t, esle.kapi_denetle(bizim["satirlar"], sozluk, t)[1]) for t in kayit["tutanlar"]
              if esle.tutuyor_mu(bizim["satirlar"], sozluk, t) is None]
@@ -517,6 +547,60 @@ def test_kapi_kalan_eslemede_grubun_olculerini_korur(sozluk, bugun):
     s = esle.bizim_secimi(L["satirlar"], sozluk, t)[0]
     L["satirlar"].append({**s, "olcu": "L 2500"})
     assert esle.kapi_denetle(L["satirlar"], sozluk, t)[1].startswith("grubun ölçüleri değişti")
+
+
+def _tutanlar(bizim, gercek, gruplar) -> list[dict]:
+    """Uydurma kıyasın tutan satırları, `sonuc.json`'daki biçimde."""
+    k = {"bizim": {"satirlar": bizim}, "esle": esle.esle(bizim, [{"malzeme": m, "boyut": b, "adet": a} for m, b, a in gercek], gruplar)}
+    return json.loads(json.dumps(K.tutanlar(k), ensure_ascii=False))
+
+
+def test_kapi_esdeger_eslemede_grubun_olculerini_korur():
+    """cm ↔ mm eşdeğeriyle tutmuş satırın grubuna gerçek ölçünün kendisi gelirse gerçek satırı o alır: kapı durur (hakem 3. tur, B3)."""
+    once, gercek = [{"kalem": "Deneme kapı", "olcu": "900 × 2000", "adet": 2}], [("DENEME KAPI", "90*200", 2)]
+    (t,) = _tutanlar(once, gercek, [])
+    assert t["eslesme"] == "esdeger" and esle.tutuyor_mu(once, [], t) == "aynı"
+    sonra = once + [{"kalem": "Deneme kapı", "olcu": "90 × 200", "adet": 1}]
+    assert _sonuc(sonra, gercek, []) == ["farklı"]
+    assert esle.kapi_denetle(sonra, [], t)[1].startswith("grubun ölçüleri değişti")
+
+
+def test_kapi_pafta_kaydinda_aday_sutunu_yetmez():
+    """Pafta sütunuyla tutmuş satırda pafta bozulup aday sütunu kayıttaki değeri taşırsa kapı durur (hakem 3. tur, B3)."""
+    once, gercek = [{"kalem": "Deneme pano", "olcu": "ADET", "adet": 3, "pafta": 5, "aday": 7}], [("DENEME PANO", "ADET", 5)]
+    (t,) = _tutanlar(once, gercek, [])
+    assert t["sonuc"] == "pafta" and esle.tutuyor_mu(once, [], t) == "pafta"
+    assert esle.kapi_denetle([{**once[0], "pafta": 6, "aday": 5}], [], t)[1].startswith("adet")
+    assert esle.tutuyor_mu([{**once[0], "adet": 5}], [], t) == "aynı"           # varsayılan tutarsa pafta kaydı da tutar
+
+
+def test_kapi_olcu_basina_toplami_korur(tmp_path):
+    """Toplanan ve her satır gruplarında adet ölçüler arasında kayınca eşleme "farklı" der, kapı da durur (uydurma; hakem 3. tur, B1)."""
+    def s(kalem, o, a):
+        return {"kalem": kalem, "olcu": o, "adet": a}
+    toplam = _gruplar(tmp_path, TOPLAM)
+    iki = [("DENEME TOPLAM", "300 X 2500", 4), ("DENEME TOPLAM", "500 X 3000", 6)]
+    takim = {"ad": "Deneme takım", "bizim": ["^DENEME TAKIM"], "gercek": ["^DENEME TAKIM"], "olcu": "her_satir"}
+    vakalar = [  # grup, kayıttaki bizim, gerçek, bugünkü bizim
+        (toplam, [s("Deneme toplam", "300 × 2500", 4), s("Deneme toplam", "500 × 3000", 6)], iki,
+         [s("Deneme toplam", "300 × 2500", 6), s("Deneme toplam", "500 × 3000", 4)]),                     # ters dağılım
+        (toplam, [s("Deneme toplam", "300 × 2500", 4), s("Deneme toplam", "500 × 3000", 6)], iki,
+         [s("Deneme toplam", "300 × 2500", 0), s("Deneme toplam", "500 × 3000", 10)]),                    # bir ölçü 0'a iniyor
+        (toplam, [s("Deneme toplam", "300 × 2500", 10), s("Deneme toplam", "500 × 3000", 0)], [("DENEME TOPLAM", "300 X 2500", 10)],
+         [s("Deneme toplam", "300 × 2500", 9), s("Deneme toplam", "500 × 3000", 1)]),                     # adedi 0 olan ölçüye kayma
+        (_gruplar(tmp_path, takim), [s("Deneme takım", "600 × 450", 1), s("Deneme takım", "800 × 450", 0)],
+         [("DENEME TAKIM LAVABO", "600 X 450", 1)], [s("Deneme takım", "600 × 450", 0), s("Deneme takım", "800 × 450", 1)]),
+    ]
+    for g, once, gercek, sonra in vakalar:
+        (t,) = _tutanlar(once, gercek, g)
+        assert "olcu_toplamlari" in t and esle.tutuyor_mu(once, g, t), once
+        assert "farklı" in _sonuc(sonra, gercek, g), sonra
+        assert esle.kapi_denetle(sonra, g, t)[1].startswith("ölçü başına toplam"), sonra
+    serbest = _gruplar(tmp_path, {**TOPLAM, "olcu_serbest": True, "not": "uydurma gerekçe"})
+    once, sonra = vakalar[0][1], vakalar[0][3]
+    (t,) = _tutanlar(once, iki, serbest)
+    assert "olcu_toplamlari" not in t                                    # ölçü kıyaslanmayan grupta kayma eşlemeyi değiştirmez
+    assert _sonuc(sonra, iki, serbest) == ["ayrım", "ayrım"] and esle.tutuyor_mu(sonra, serbest, t)
 
 
 def test_pk01_bilgi_kapiya_girmez(sozluk, bugun):

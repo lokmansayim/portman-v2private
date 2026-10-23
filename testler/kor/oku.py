@@ -2,12 +2,14 @@
 
 Yalnız malzeme satırları okunur: grup, malzeme, boyut, adet. Okunmayanlar:
 - başlık bloğu (müşteri, temsilci, hazırlayan, sevkiyat yeri, tarih, telefon): ilk sütun başlığından ("BOYUT", "ADET") önceki her şey;
-  sütun başlığından sonra da adı yalnız böyle bir etiket olan satır (`BASLIK`: "MÜŞTERİ TEMSİLCİSİ", "SEVKİYAT YERİ", "TARİH: …";
-  "TELEFON PRİZİ" gibi malzeme okunur). PDF'te sütun başlığı sonraki sayfalarda yinelenmeyebilir (TS-01'in 2. ve 3. sayfası başlıksız
+  sütun başlığından sonra da adı bir etiketle başlayan satır (`BASLIK`, Türkçe ya da ASCII yazımla: etiket yalnız ya da iki noktayla
+  "TARİH: …", ek sözcükle ve ardından herhangi bir yazıyla "MÜŞTERİ TEMSİLCİSİ <ad>", "SEVK TARİHİ", tarihle "TARİH 23.10.2026", numarayla
+  "TEL <numara>"; "TELEFON PRİZİ", "TEL", "TEL 2,5 MM" gibi malzeme okunur). PDF'te sütun başlığı sonraki sayfalarda yinelenmeyebilir (TS-01'in 2. ve 3. sayfası başlıksız
   sürer), bu yüzden sütun yerleri sayfadan sayfaya taşınır;
 - sayfa adları, dosya adı ve belge özellikleri;
 - imza ve personel satırları ("SORUMLU ÜRETİM PERSONELİ AD SOYAD", "HAZIRLAYAN", "TESLİM", "İMZA");
-- adet sütununda sayı olmayan yazı (ör. bir ad); sayı değilse adet boş kalır, yazı alınmaz;
+- adet sütununda sayı olmayan yazı (ör. bir ad) ve milyonu geçen sayı (boşluksuz yazılmış bir telefon numarası); adet boş kalır, yazı
+  alınmaz;
 - PDF'te satıra bağlı olmayan notlar ve KG / makine sütunları. "ALICIYA AİT" damgası yalnız bir işaret olarak kalır (`damga`).
 
 İki biçim:
@@ -28,12 +30,19 @@ import re
 from pathlib import Path
 
 PERSONEL = re.compile(r"PERSONEL|AD\s*SOYAD|HAZIRLAYAN|TESL[İI]M\s+(ALAN|EDEN)|[İI]MZA", re.I)
-BASLIK = re.compile(r"^(MÜŞTERİ|TEMSİLCİ|SEVKİYAT|TESLİMAT|TARİH|TELEFON|TEL|GSM|İLETİŞİM|PROJE|FİRMA|BAYİ)"
-                    r"(\s+(ADI|SOYADI|TEMSİLCİSİ|YERİ|TARİHİ|ADRESİ|NO|NUMARASI|İSMİ|BİLGİLERİ))*\s*(:.*)?$")
+_ETIKET = r"(MUSTERI|TEMSILCI|SEVKIYAT|SEVK|TESLIMAT|TESLIM|TARIH|TELEFON|ILETISIM|PROJE|FIRMA|BAYI)"
+_EK = r"(\s+(ADI|SOYADI|TEMSILCISI|YERI|TARIHI|ADRESI|NO|NUMARASI|ISMI|BILGILERI))"
+BASLIK = re.compile(  # ASCII'ye katlanmış büyük harfli ada uygulanır (`_katla`)
+    rf"^{_ETIKET}{_EK}*\s*(:.*)?$"                                    # etiket yalnız ya da iki noktayla: "TARİH: …"
+    rf"|^{_ETIKET}{_EK}+\s.*$"                                        # ek sözcükten sonra herhangi bir yazı: "MÜŞTERİ TEMSİLCİSİ <ad>"
+    rf"|^{_ETIKET}{_EK}*\s+\d{{1,2}}[./-]\d{{1,2}}[./-]\d{{2,4}}$"      # tarih: "TARİH 23.10.2026"
+    r"|^(TELEFON|TEL|GSM)(\s+(NO|NUMARASI))?(\s*:.*|\s+[\d\s()+-]{7,})$")   # "TEL: …", "TEL <numara>" ("TEL" yalnız malzeme olabilir)
+_KATLA = str.maketrans("ÇĞİÖŞÜÂÎÛ", "CGIOSUAIU")
 DAMGA = "ALICIYA AİT"
 SUTUN_BOYUT = ("BOYUT", "BOYUT/ÖLÇÜ")
 EXCEL_SATIR_SINIRI = 2000      # bazı hesap sayfaları 1.048.576 satır gösterir; liste sayfaları 250 satırın altında (dosya salt okunur açılır)
 EXCEL_SUTUN_SINIRI = 30
+SAYI_SINIRI = 1_000_000      # adet bunu geçmez; geçen sayı boşluksuz yazılmış bir numaradır
 
 
 class OkumaHatasi(Exception):
@@ -41,31 +50,39 @@ class OkumaHatasi(Exception):
 
 
 def sayi(t):
-    """Adet hücresi → sayı; sayı değilse None (yazı alınmaz)."""
+    """Adet hücresi → sayı; sayı değilse ya da `SAYI_SINIRI`'nı geçiyorsa None (yazı ve numara alınmaz)."""
     if isinstance(t, bool):
         return None
     if isinstance(t, (int, float)):
-        return int(t) if float(t) == int(t) else float(t)
-    s = str(t if t is not None else "").strip()
-    if not re.fullmatch(r"[\d.,]+", s):
+        v = t
+    else:
+        s = str(t if t is not None else "").strip()
+        if not re.fullmatch(r"[\d.,]+", s):
+            return None
+        s = s.replace(".", "").replace(",", ".")   # 13 Ekim okuyucusu gibi: nokta binlik, virgül ondalık
+        try:
+            v = float(s)
+        except ValueError:
+            return None
+    if abs(v) >= SAYI_SINIRI:
         return None
-    s = s.replace(".", "").replace(",", ".")   # 13 Ekim okuyucusu gibi: nokta binlik, virgül ondalık
-    try:
-        v = float(s)
-    except ValueError:
-        return None
-    return int(v) if v == int(v) else v
+    return int(v) if float(v) == int(v) else float(v)
 
 
 def _ust(t: str) -> str:
     return t.replace("i", "İ").replace("ı", "I").upper()
 
 
+def _katla(t: str) -> str:
+    """Büyük harf ve ASCII: "Müşteri" ve "MUSTERI" aynı."""
+    return _ust(t).translate(_KATLA)
+
+
 def _satir(grup, malzeme, boyut, adet, damga=False, sayac: dict | None = None) -> dict | None:
     malzeme = re.sub(r"\s+", " ", str(malzeme or "")).strip()
     if not malzeme:
         return None
-    neden = "personel" if PERSONEL.search(malzeme) else "baslik" if BASLIK.match(_ust(malzeme)) else None
+    neden = "personel" if PERSONEL.search(malzeme) else "baslik" if BASLIK.match(_katla(malzeme)) else None
     if neden:
         if sayac is not None:
             sayac[neden] = sayac.get(neden, 0) + 1

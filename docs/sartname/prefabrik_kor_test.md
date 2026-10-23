@@ -53,8 +53,9 @@ Sıra her koşuda aynı; bir adım tutmazsa araç durur, nedenini yazar ve sonra
    kendi listemizin commit'ini taşıyorsa açılır; kayıttaki sözlük commit'i bugünkünden farklıysa (sözlük açılıştan sonra değişmiş) sonuç ve rapor
    bunu yazar (› Kör 19 ve açılış kaydı).
 4. **Okuma** (`oku.py`): PDF'in iki şablonu ve Portatifev Excel şablonu. Başlık bloğu (müşteri, temsilci, hazırlayan, sevkiyat yeri, tarih), telefon,
-   sayfa ve dosya adları, personel ve imza satırları okunmaz; adı yalnız bir başlık etiketi olan satır sütun başlığından sonra da okunmaz.
-   Okunmayan satırların sayısı (adedi sayı olanlar ayrıca) sonuca ve rapora yazılır: paydaya girmezler.
+   sayfa ve dosya adları, personel ve imza satırları okunmaz; adı bir başlık etiketiyle başlayan satır (etiket yalnız, iki noktayla, ek
+   sözcükle, tarihle ya da numarayla; Türkçe ya da ASCII) sütun başlığından sonra da okunmaz. Okunmayan satırların sayısı rapora, adedi sayı
+   olanların sayısı sonuca da yazılır: paydaya girmezler.
 5. **Eşleme** (`esle.py`, kalem sözlüğü `sozluk.json`): her gerçek satır bizim satırlarımızla grup, kalem ve ölçüyle eşlenir. Sonuç: varsayılan
    adetle aynı · toplam aynı, ayrım farklı · pafta sütunu tuttu · aday sütunu tuttu · adet ya da ölçü farklı · bizde yok · bizde fazla.
    **Doğru = aynı + ayrım + pafta + aday** (13 Ekim raporlarının tanımı). Ölçü: ölçüyle eşlenen gruplarda ölçüsü tutmayan satır adet tutsa da
@@ -66,7 +67,8 @@ Sıra her koşuda aynı; bir adım tutmazsa araç durur, nedenini yazar ve sonra
 
 Testler (`testler/kor/test_kor_kiyas.py`) her koşuda aracın sırasını ve ölçü kurallarını uydurma satırlarla, gerçek mühür kaydının kör ve kapalı
 kayıtları reddettiğini ve durumların değişmediğini, açık sekiz projenin gerileme kapısını dener; kaynak liste gerekmez. Kapı tutan her satırın
-bugünkü listede kayıttaki (kalem, ölçü) çiftlerini ve kayıttaki sonucun sütununda aynı adedi ister. Tam koşu `PORTMAN_KOR_TAM=1` ve depo dışındaki kaynak klasörüyle
+bugünkü listede kayıttaki (kalem, ölçü) çiftlerini ve kayıttaki sonucun sütununda aynı adedi ister; eşdeğer, tolerans ve kalan eşlemesinde
+grubun ölçüleri, iki ya da daha çok sayılı ölçülü toplanan gruplarda ölçü başına toplamlar da kayıttaki gibi olmalı. Tam koşu `PORTMAN_KOR_TAM=1` ve depo dışındaki kaynak klasörüyle
 (`PORTMAN_KOR_KAYNAK`): sayılar ve tutan satırlar gerçek listeden yeniden hesaplanır ve kayıtla aynı olmalı.
 
 ## Kör 19 ve açılış kaydı
