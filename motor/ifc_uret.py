@@ -35,7 +35,6 @@ api = ifcopenshell.api.run
 MOD = 125.5
 DUVAR_H = 250.0
 LENTO = 50.0
-PENCERE_ESIK = {"120x120": 80.0, "120x180": 20.0, "60x40": 160.0}   # BOM notlarındaki eşik yükseklikleri (23.09)
 KAPI_UST = DUVAR_H - LENTO                                            # 200: lento kuralı
 H_PROFIL_TASMA_CM = 0.4       # İE-12, yalnız 3B gösterim: H şeridi duvar yüzünden taşar (görünüşte seçilsin); kesim ölçüsü değil
 
@@ -82,8 +81,9 @@ def hazirla(ie: dict) -> dict:
                 g = p.gap()
                 a0, a1 = (g[0], g[2]) if d.yon == "x" else (g[1], g[3])
                 if ac.tur == "pencere":
-                    en, boy = G.PENCERE_OLCULERI[ac.olcu]
-                    z0 = PENCERE_ESIK[ac.olcu]; z1 = min(z0 + boy, KAPI_UST)
+                    pk = G.pencere_kurali(ac.olcu)                  # BK-13: eşik = 200 − boy (bugünkü üçü BOM notlarındaki 80, 20, 160)
+                    en, boy = pk.en, pk.boy
+                    z0 = pk.esik; z1 = min(z0 + boy, KAPI_UST)
                     dk = c.dograma[ac.olcu][1]
                     a = {"tur": "pencere", "olcu": ac.olcu}
                 else:

@@ -45,7 +45,6 @@ KOSE_RENGI = "#151515"
 H_RENGI, H_KENAR = "#e4e8ec", "#8a949d"        # galvaniz H profili
 CAM, CERCEVE, KAPI_RENGI, ACIK_RENGI = "#cfe6f7", "#2a78b8", "#8a4b2a", "#e9f2e0"
 ETIKET_MAVI = "#1f5f93"
-PENCERE_OLCU_YAZISI = {"120x120": "120/120", "120x180": "120/180", "60x40": "60/40"}
 VASISTAS_ESIGI_CM = 60.0             # şablonun kuralı (`kurallar/cizim/pafta_sablonu.json` › vasistas_en_cok_yukseklik_cm); yoksa 60
 
 
@@ -102,8 +101,8 @@ def sayimlar(plan: G.Plan) -> dict:
     salon = 1 if any(m.tur == "salon" for m in plan.mahaller.values()) else 0
     return {"pano_dis": sum(len(d.panolar) for d in plan.duvarlar if d.tur == "dis"), "pano_ic": sum(len(d.panolar) for d in plan.duvarlar if d.tur == "ic"),
             "h_pano_eki": sum(k["cins"] == "pano_eki" for k in ek), "h_uclu": sum(k["cins"] == "uclu" for k in ek), "kose": len(plan.koseler),
-            "dikme": len(plan.dikmeler), "pencere": [PENCERE_OLCU_YAZISI.get(a.olcu, a.olcu) for a in pen],
-            "vasistas": [PENCERE_OLCU_YAZISI.get(a.olcu, a.olcu) for a in vas], "ic_kapi": sum(a.tur == "ic_kapi" for a in acl),
+            "dikme": len(plan.dikmeler), "pencere": [G.pencere_yazisi(a.olcu) for a in pen],
+            "vasistas": [G.pencere_yazisi(a.olcu) for a in vas], "ic_kapi": sum(a.tur == "ic_kapi" for a in acl),
             "dis_kapi": [_f(a.genislik) for a in acl if a.tur == "dis_kapi"], "oda_programi": f"{yatak}+{salon}", "oturum_m2": round(oturum_m2(plan), 2)}
 
 
@@ -234,7 +233,7 @@ def plan_ciz(ax, plan: G.Plan, yazi: float = 1.0) -> dict:
                     ax.plot([d.c, d.c], [g[1], g[3]], color=CERCEVE, lw=0.35, zorder=6.5)
                 n = a.disari_normal or ("-y" if d.yon == "x" else "-x")
                 s = 1 if n[0] == "+" else -1
-                et = PENCERE_OLCU_YAZISI.get(a.olcu, a.olcu)
+                et = G.pencere_yazisi(a.olcu)
                 bb = dict(fc="white", ec="none", pad=0.6, alpha=0.85)
                 if d.yon == "x":
                     ax.text((g[0] + g[2]) / 2, d.c + s * (d.h + 8), et, ha="center", va="bottom" if s > 0 else "top", fontsize=fs(5.0), color=ETIKET_MAVI,
