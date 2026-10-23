@@ -53,19 +53,20 @@ Sıra her koşuda aynı; bir adım tutmazsa araç durur, nedenini yazar ve sonra
    kendi listemizin commit'ini taşıyorsa açılır; kayıttaki sözlük commit'i bugünkünden farklıysa (sözlük açılıştan sonra değişmiş) sonuç ve rapor
    bunu yazar (› Kör 19 ve açılış kaydı).
 4. **Okuma** (`oku.py`): PDF'in iki şablonu ve Portatifev Excel şablonu. Başlık bloğu (müşteri, temsilci, hazırlayan, sevkiyat yeri, tarih), telefon,
-   sayfa ve dosya adları, personel ve imza satırları okunmaz; başlık etiketi taşıyan satır sütun başlığından sonra da okunmaz.
+   sayfa ve dosya adları, personel ve imza satırları okunmaz; adı yalnız bir başlık etiketi olan satır sütun başlığından sonra da okunmaz.
+   Okunmayan satırların sayısı (adedi sayı olanlar ayrıca) sonuca ve rapora yazılır: paydaya girmezler.
 5. **Eşleme** (`esle.py`, kalem sözlüğü `sozluk.json`): her gerçek satır bizim satırlarımızla grup, kalem ve ölçüyle eşlenir. Sonuç: varsayılan
    adetle aynı · toplam aynı, ayrım farklı · pafta sütunu tuttu · aday sütunu tuttu · adet ya da ölçü farklı · bizde yok · bizde fazla.
    **Doğru = aynı + ayrım + pafta + aday** (13 Ekim raporlarının tanımı). Ölçü: ölçüyle eşlenen gruplarda ölçüsü tutmayan satır adet tutsa da
    "farklı"; farklı bölünen kalemlerin toplandığı gruplarda toplamla birlikte ölçü kümesi kıyaslanır (iki yanda sayılı ölçü varsa her birinin
-   öbür yanda eşi olmalı), satırlar arasındaki dağılım kıyaslanmaz; bir yanda sayılı ölçü yoksa ("ADET") yalnız adet kıyaslanır. Ölçünün
+   öbür yanda eşi olmalı; bütün satırlar sayılı ölçülüyse ölçü başına toplam da), ayrı kalemler arasındaki dağılım kıyaslanmaz; bir yanda sayılı ölçü yoksa ("ADET") yalnız adet kıyaslanır. Ölçünün
    kıyaslanmadığı grup sözlükte gerekçesiyle yazar (`olcu_serbest`, ör. makas: bizde açıklık, gerçek listede boy).
 6. **Sınıf:** proje başına sınıf dosyası (proje klasöründe); sınıfı yazılmamış fark "sınıflanmadı" sayılır.
 7. **Rapor:** md ve xlsx; kod, m² ve satırlar. Ad, bayi adı ve dosya adı yazılmaz; telefona benzeyen her şey maskelenir.
 
 Testler (`testler/kor/test_kor_kiyas.py`) her koşuda aracın sırasını ve ölçü kurallarını uydurma satırlarla, gerçek mühür kaydının kör ve kapalı
 kayıtları reddettiğini ve durumların değişmediğini, açık sekiz projenin gerileme kapısını dener; kaynak liste gerekmez. Kapı tutan her satırın
-bugünkü listede aynı adedi ve kayıttaki (kalem, ölçü) çiftlerini ister. Tam koşu `PORTMAN_KOR_TAM=1` ve depo dışındaki kaynak klasörüyle
+bugünkü listede kayıttaki (kalem, ölçü) çiftlerini ve kayıttaki sonucun sütununda aynı adedi ister. Tam koşu `PORTMAN_KOR_TAM=1` ve depo dışındaki kaynak klasörüyle
 (`PORTMAN_KOR_KAYNAK`): sayılar ve tutan satırlar gerçek listeden yeniden hesaplanır ve kayıtla aynı olmalı.
 
 ## Kör 19 ve açılış kaydı

@@ -294,7 +294,7 @@ TOPLAM = {"ad": "Deneme toplam", "bizim": ["^DENEME TOPLAM"], "gercek": ["^DENEM
 
 
 def test_toplanan_grupta_olcu_kumesi_kiyaslanir(tmp_path):
-    """`yok` kipinde toplam tutsa da ölçü kümesi tutmazsa "farklı" (saçak sacı 300 × 2500 ↔ 250 × 2800)."""
+    """`yok` kipinde toplam tutsa da ölçü kümesi tutmazsa "farklı" (uydurma saçak sacı 300 × 2500 ↔ 500 × 3000)."""
     g = _gruplar(tmp_path, TOPLAM)
     gercek = [("DENEME TOPLAM", "500 X 3000", 6), ("DENEME TOPLAM ÖZEL", "500 X 3000", 4)]
     assert _sonuc([{"kalem": "Deneme toplam", "olcu": "500 × 3000", "adet": 10}], gercek, g) == ["ayrım", "ayrım"]
