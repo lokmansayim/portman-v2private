@@ -1,6 +1,6 @@
 {
  "sema": "portman.prefabrik_liste/1.0",
- "aciklama": "Prefabrik pano evinin yükleme listesi kuralları (BK-12 PR-2, 18 Ekim 2026). Okuyan `motor/prefabrik_liste.py`. Kör test serisinin üreteci 7.3'ün (13 Ekim 2026, `ie-11-pr2-kor-test` dalı) kodun içindeki sabitleri buraya taşındı; değerler aynıydı. Lokman'ın 18 Ekim 2026 19:22 kararları (kart) işlendi: orta iniş eşiği 9 m (`inis_orta`), kitapla farklı on yedi kalemde kitap geçer (kayıtları `kitapla_farkli`'dan kalktı, değerler kitaptan okunur; liste BK-12 › Kanıt). Kural kitabı `kitap_seti`'ndeki dondurulmuş setten okunur (`PORTMAN_KURALLAR` bu listeyi etkilemez): kitapta çelik için yapılan bir değişiklik prefabrik listeyi sessizce değiştirmez, seti ilerletmek bu dosyada bilinçli bir değişikliktir. Kitabın her kuralı üç yerden birindedir: kitapta aynı kalemin aynı anlamlı değeri varsa okunur (burada yinelenmez); değer, yöntem, kalem ya da kapsam farklıysa `kitapla_farkli`'da beyanlıdır (`karar_bekliyor`: Lokman'ın kararını bekleyenler; 18 Ekim 19:22'den beri bekleyen yok); prefabrikte karşılığı yoksa `kitaptan_okunmayan`'da nedeniyle. İç duvar kalınlığı `kurallar/model/duvar_tipleri.json`'dan. Kitabın yöntem B kalemleri prefabrik içindir, çelik listesinde yalnız karşılaştırma için hesaplanır (Lokman, 7 Ekim 07:45). Durum değerleri kural kitabınınkiler (`kurallar/README.md`): lokman, excel (Portatifev şablonunun, yani yükleme listesi çalışma kitabının formülü), uydurma, varsayim; prefabrikte üç değer daha: pafta (inceleme projelerinin montaj paftası ya da açık listesiyle tuttu), cizim (pano Motor'unun çizim kuralı), aday (öteki uygulama; listede aday sütununda). PK-07 hedef örnekle düzeltmeler (BK-12 PR-2c, 20 Ekim 2026; Lokman'ın kartı 15:27 \"İkisi de değişsin\"): PVC betopan H'ı her evde 7 (tavanla bağı yok; Lokman 19:45, kart 19:50), profil vidalama aparatı kalktı. Kaynağı tek bir listeye dayanan kurallar ayrı dosyada işaretlidir (`prefabrik_isaret.json`; bu dosyanın biçimi ve durum değerleri aynı kalsın diye): listede dayanakları \"Tek kaynak (zayıf)\". Kişi ve bayi adları yazılmaz; projeler PK ve AP kodlarıyla, ikinci şablon 'Şablon B' (Kasım 2025, PK-02).",
+ "aciklama": "Prefabrik pano evinin yükleme listesi kuralları (BK-12 PR-2, 18 Ekim 2026). Okuyan `motor/prefabrik_liste.py`. Kör test serisinin üreteci 7.3'ün (13 Ekim 2026, `ie-11-pr2-kor-test` dalı) kodun içindeki sabitleri buraya taşındı; değerler aynıydı. Lokman'ın 18 Ekim 2026 19:22 kararları (kart) işlendi: orta iniş eşiği 9 m (`inis_orta`), kitapla farklı on yedi kalemde kitap geçer (kayıtları `kitapla_farkli`'dan kalktı, değerler kitaptan okunur; liste BK-12 › Kanıt). Kural kitabı `kitap_seti`'ndeki dondurulmuş setten okunur (`PORTMAN_KURALLAR` bu listeyi etkilemez): kitapta çelik için yapılan bir değişiklik prefabrik listeyi sessizce değiştirmez, seti ilerletmek bu dosyada bilinçli bir değişikliktir. Kitabın her kuralı üç yerden birindedir: kitapta aynı kalemin aynı anlamlı değeri varsa okunur (burada yinelenmez); değer, yöntem, kalem ya da kapsam farklıysa `kitapla_farkli`'da beyanlıdır (`karar_bekliyor`: Lokman'ın kararını bekleyenler; 18 Ekim 19:22'den beri bekleyen yok); prefabrikte karşılığı yoksa `kitaptan_okunmayan`'da nedeniyle. İç duvar kalınlığı `kurallar/model/duvar_tipleri.json`'dan. Kitabın yöntem B kalemleri prefabrik içindir, çelik listesinde yalnız karşılaştırma için hesaplanır (Lokman, 7 Ekim 07:45). Durum değerleri kural kitabınınkiler (`kurallar/README.md`): lokman, excel (Portatifev şablonunun, yani yükleme listesi çalışma kitabının formülü), uydurma, varsayim; prefabrikte üç değer daha: pafta (inceleme projelerinin montaj paftası ya da açık listesiyle tuttu), cizim (pano Motor'unun çizim kuralı), aday (öteki uygulama; listede aday sütununda). PK-07 hedef örnekle düzeltmeler (BK-12 PR-2c, 20 Ekim 2026; Lokman'ın kartı 15:27 \"İkisi de değişsin\"): PVC betopan H'ı her evde 7 (tavanla bağı yok; Lokman 19:45, kart 19:50), profil vidalama aparatı kalktı. Kaynağı tek bir listeye dayanan kurallar ayrı dosyada işaretlidir (`prefabrik_isaret.json`; bu dosyanın biçimi ve durum değerleri aynı kalsın diye): listede dayanakları \"Tek kaynak (zayıf)\". Kişi ve bayi adları yazılmaz; projeler PK ve AP kodlarıyla, ikinci şablon 'Şablon B' (Kasım 2025, PK-02). Elektrik oda kuralı (BK-12 PR-2f, 22 Ekim 2026; Lokman'ın kartları 11:09–11:10): paftada elektrik sayımı yoksa noktalar `elektrik_oda`'dan, açık mutfakta salona tezgahın 4 tekli prizi (`elektrik_acik_mutfak`; Lokman, 23 Ekim 03:57), zil her evde 1.",
  "kitap_seti": "setler/0.19.json",
  "kurallar": {
   "pencere_ust_kotu_cm": {
@@ -277,7 +277,7 @@
     "kablo_nokta_basina_m": 2
    },
    "durum": "excel",
-   "kaynak": "Elektrik planı olan projede: besleme borusu 5 m (PK-02); W otomat Portatifev 8 (Lokman, 13 Ekim 14:40, R4). NYM kablo kural kitabının yöntemiyle (`elektrik.kablo`: sigorta adedi × sigortadan en uzak mesafe + (priz ya da anahtar sayısı) × 2 m; Lokman, 18 Ekim 19:22): sigorta adedi W otomat sayısı, nokta başına 2 m kitabın kuralındaki sayı (kitapta yazıyla; kitap motoru da 2 yazar, `motor/genel/yukleme.py`). Uydu kablosu (priz × 25 m), besleme kablosu (5 m), izole bant (m² × 0,06) ve kaçak akım rölesi (1) kural kitabından (`elektrik`; PK-02 de böyle)."
+   "kaynak": "Besleme borusu 5 m (PK-02); W otomat Portatifev 8 (Lokman, 13 Ekim 14:40, R4). NYM kablo kural kitabının yöntemiyle (`elektrik.kablo`: sigorta adedi × sigortadan en uzak mesafe + (priz ya da anahtar sayısı) × 2 m; Lokman, 18 Ekim 19:22): sigorta adedi W otomat sayısı, nokta başına 2 m kitabın kuralındaki sayı (kitapta yazıyla; kitap motoru da 2 yazar, `motor/genel/yukleme.py`). Uydu kablosu (priz × 25 m), besleme kablosu (5 m), izole bant (m² × 0,06) ve kaçak akım rölesi (1) kural kitabından (`elektrik`; PK-02 de böyle). Elektrik planı olmayan evde de yazılır (oda kuralıyla; BK-12 PR-2f)."
   },
   "elektrik_aday": {
    "deger": {
@@ -287,6 +287,43 @@
    },
    "durum": "aday",
    "kaynak": "Aday sütunu: NYM 3 × 2,5 130 m, 2 × 1,5 100 m Portatifev şablonunun sabitleri (PK-01'in listesi; PK-02 135 / 120; 18 Ekim'e kadar listenin değeri); W otomat Şablon B sabit 9 (PK-02, -03, -05, -06, E1, E4)."
+  },
+  "elektrik_oda": {
+   "deger": {
+    "takim_m2": 15,
+    "oda_takimi": {
+     "tekli_priz": 2,
+     "tekli_anahtar": 1,
+     "tijli_duy": 1
+    },
+    "acik_takimi": {
+     "glop": 2,
+     "cift_anahtar": 1
+    },
+    "kitaptan": {
+     "banyo": "banyo",
+     "wc": "banyo",
+     "mutfak": "mutfak",
+     "antre_hol": "hol",
+     "hol": "hol",
+     "islak": "banyo",
+     "lavabo": "banyo",
+     "koridor": "hol"
+    },
+    "uydu_prizi_ev_basina": 1
+   },
+   "durum": "lokman",
+   "kaynak": "Paftada elektrik sayımı yoksa noktaların oda kuralı (BK-12 PR-2f; okuyan `elektrik_oda`). Lokman, 18 Ekim 19:52: \"elektrik tesisatında 15 m² ye kadar her bir odaya 2 piriz 1 tane anahtar, 1 tane duy ve lamba koyarsın, 15 m² ye kadar verandalara 2 glop 1 tane 2li anahtar koyarsın\" (`oda_takimi`, `acik_takimi`; lamba duyun ampulü, ampul = duy + glop). Kartlar 19 Ekim 16:50: 15 m²'yi geçen oda ve verandaya \"Her 15 m2'ye bir takım\"; banyo, WC, mutfak ve hol \"Kitaptaki gibi\" (kitabın `elektrik_oda.odalar` sayıları, WC banyo gibi: `kitaptan`). Kart 22 Ekim 11:10: takım sayısı \"Yukarı\" (alan ÷ 15, yukarı, en az 1: 15,0 m² 1 takım, 15,1 m² 2, 30,1 m² 3). Kart 22 Ekim 11:09: uydu prizi \"Her eve 1\" (salona; kitabın salonunda 1). Kartın banyo, WC ve hol türleri (çıkarım, kart değil): listenin ıslak saydığı türler (`islak_hacim`, Lokman 13 Ekim: banyo, WC, ıslak hacim, lavabo) banyo gibi, koridor hol gibi (Motor `sunum.py` ve çelik okuması koridoru hol sayar). Mutfak ayrı mahal değilse: `elektrik_acik_mutfak` (ayrı kural; Lokman, 23 Ekim 03:57). Girdide kapalı oda yoksa nokta satırları uyarıyla başlar. Odalar ve açık mahaller adla birleşir (L biçimli oda tek oda; aynı adlı parçalar farklı türdeyse liste üretilmez). Çamaşır, depo ve öteki odalar oda takımını alır (kart: \"öteki odalar sizin kuralınızla\"). Paftada sayım varsa sayım geçer, bu kuralın sonucu aday sütununda."
+  },
+  "elektrik_acik_mutfak": {
+   "deger": {
+    "oda": "salon",
+    "ek": {
+     "tekli_priz": 4
+    }
+   },
+   "durum": "lokman",
+   "kaynak": "Açık mutfak (BK-12 PR-2f; okuyan `elektrik_oda`): mutfak ayrı mahal değilse (planlayıcının varsayılanı; PK-08 ve P6001 \"yaşam alanı\", TS-01 \"salon & mutfak\") `oda` türündeki ilk oda kendi oda takımını alır, ona yalnız mutfak tezgahının prizleri eklenir (`ek`). Lokman, 23 Ekim 03:57, açık mutfak kartına (22 Ekim, \"Mutfağı ayrı odası olmayan evde mutfağın prizleri salona yazılsın mı?\") cevap: \"sayılamaz çünkü mutfakta sadece tezgahın olduğu yerde ayrıca 4 tane ekstra priz var\". Okuma: 'priz' tekli priz (kitabın okumasıyla aynı); duy, anahtar ve çiftli priz salonun takımından, kitabın mutfak sayıları (1 duy, 1 anahtar, 5 tekli ve 1 çiftli priz) eklenmez. Etkisi: P6001 ve PK-08 tekli priz 10 → 14. O tür oda da yoksa tezgah prizleri yazılmaz, satır uyarıyla başlar. Ayrı mahal olan mutfak kitaptaki gibi (kart 19 Ekim 16:50)."
   },
   "vida": {
    "deger": {
@@ -466,13 +503,22 @@
    "konu": "Elektrik",
    "prefabrik": "elektrik",
    "kitap": [
-    "elektrik",
+    "elektrik"
+   ],
+   "tur": "yontem",
+   "karar_bekliyor": false,
+   "not": "Uydu kablosu, besleme kablosu, izole bant ve kaçak akım rölesi kitaptan; zil her evde kitabın 1'i (paftadaki sayım pafta sütununda), sigorta kutusu sayım yoksa kitaptan (kat başına 1; BK-12 PR-2f). W otomat 8 Portatifev şablonunun sabiti (Lokman, 13 Ekim 14:40, R4). Elektrik noktalarının sayıları paftadaki elektrik planından; plan yoksa oda kuralıyla (`elektrik_oda`, ayrı kayıt). NYM kablo uzunluğu ve buat kasa kitabın yöntemiyle (Lokman, 18 Ekim 19:22; Portatifev'in sabit NYM'si aday sütununda; pafta kipinde en uzak mesafe ayrı kayıtta)."
+  },
+  {
+   "konu": "Elektrik oda kuralı",
+   "prefabrik": "elektrik_oda",
+   "kitap": [
     "elektrik_oda",
     "elektrik_oda_ek"
    ],
    "tur": "yontem",
    "karar_bekliyor": false,
-   "not": "Uydu kablosu, besleme kablosu, izole bant ve kaçak akım rölesi kitaptan. W otomat 8 Portatifev şablonunun sabiti (Lokman, 13 Ekim 14:40, R4); elektrik noktalarının sayıları paftadaki elektrik planından. Kitap plan yoksa noktaları oda başına kuralla sayar (mühendis); prefabrik plan yoksa \"Kural yok\" yazar. NYM kablo uzunluğu ve buat kasa kitabın yöntemiyle (Lokman, 18 Ekim 19:22; Portatifev'in sabit NYM'si aday sütununda; pafta kipinde en uzak mesafe ayrı kayıtta)."
+   "not": "Kitabın oda başına kuralı (mühendis) banyo, mutfak ve holde aynen okunur, WC banyo gibi (kart 19 Ekim 16:50 \"Kitaptaki gibi\"). Farklar: kitabın yatak odası 3 tekli priz alır, prefabrikte oda takımı 2; kitabın salonu 2 duy, 1 çiftli anahtar, 3 tekli ve 1 çiftli priz, 1 uydu prizi alır, prefabrikte oda takımı ve uydu prizi ayrı (her evde 1); veranda iki yanda 2 glop ve 1 çiftli anahtar, ama kitapta takım çarpanı yok (prefabrikte 15 m²'yi geçen her 15 m²'ye bir takım daha). Kitabın `dogruluk_payi: 0.75`'i bir bilgi notu, hesapta kullanılmaz. Kitabın `sigorta: 9`'u yerine W otomat 8 (`elektrik`, R4). Kitabın depo satırı (`elektrik_oda_ek`: 2 glop ve 1 çiftli anahtar; kitapta durumu `liste`) okunmaz: planlayıcı ve çıkarıcı depo ve kileri `depo` türüyle yazar, prefabrikte depo da çamaşır ve öteki odalar gibi oda takımını alır (kart: \"öteki odalar sizin kuralınızla\"; banyo, WC, mutfak ve hol dışında kitap seçilmedi). Salon ile mutfak aynı mahaldeyse kitap ikisinin kuralını birlikte uygular (mutfağa 1 duy, 1 anahtar, 5 tekli ve 1 çiftli priz); prefabrikte mutfağı ayrı olmayan evde salon kendi oda takımını alır, ona yalnız tezgahın 4 tekli prizi eklenir (`elektrik_acik_mutfak`; Lokman, 23 Ekim 03:57)."
   },
   {
    "konu": "Sigortadan en uzak mesafe (pafta kipi)",
@@ -480,7 +526,7 @@
    "kitap": "kablo_en_uzak_mesafe",
    "tur": "yontem",
    "karar_bekliyor": false,
-   "not": "Motor kipinde kitabın yöntemi: sigorta kutusu giriş kapısında; kapının ortasından kapalı kısmın en uzak köşesine kuş uçuşu (Lokman, 7 Ekim 07:45 ve 8 Ekim 00:45). Pafta kipinde kapının ve odaların yeri girdide yok. Kitabın son çaresi kapalı kısmın köşegeni; prefabrik dış ölçünün köşegenini alır. Veranda L'nin içindeyse ikisi aynı, dış ölçüyü büyütüyorsa NYM fazla çıkar (geometri hakemi, 10. tur). Lokman'ın 18 Ekim elektrik kuralıyla (her odadan en uzak noktaya) elektrik PR'ında yeniden ele alınır."
+   "not": "Motor kipinde kitabın yöntemi: sigorta kutusu giriş kapısında; kapının ortasından kapalı kısmın en uzak köşesine kuş uçuşu (Lokman, 7 Ekim 07:45 ve 8 Ekim 00:45). Pafta kipinde kapının ve odaların yeri girdide yok. Kitabın son çaresi kapalı kısmın köşegeni; prefabrik dış ölçünün köşegenini alır. Veranda L'nin içindeyse ikisi aynı, dış ölçüyü büyütüyorsa NYM fazla çıkar (geometri hakemi, 10. tur). Lokman'ın 18 Ekim 19:52 sözü (\"3x2.5 kablo içinde aynı çelikte olduğu gibi en uzak noktaya\") çelikteki bu yöntemdir. Pafta okuyucusu mesafeyi `sigorta_en_uzak`'a (`{m, nereden}`) yazarsa o kullanılır, biçimi denetlenir (BK-12 PR-2f)."
   },
   {
    "konu": "Vida",

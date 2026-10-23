@@ -83,8 +83,10 @@ def test_pk01_aliciya_ait(pk01):
     assert len(dis_kapi) == 1 and dis_kapi[0]["adet"] == 0
     assert _satir(pk01, "Boya grubu")["adet"] == 0
     assert _satir(pk01, "Sıhhi tesisat grubu")["adet"] == 0
-    # PK-01'in pafta katmanında elektrik sayımı yok (paftanın 10. sayfası elektrik yerleşim planıdır; okunması elektrik PR'ında)
-    assert (_satir(pk01, "Elektrik grubu")["dayanak"], _satir(pk01, "Elektrik grubu")["formul"]) == ("Kural yok", "pafta katmanında elektrik sayımı yok")
+    # PK-01'in pafta katmanında elektrik sayımı yok (paftanın 10. sayfası elektrik yerleşim planıdır; okunması genel pafta okuyucusunda): noktalar
+    # oda kuralından (BK-12 PR-2f; Lokman, 18 Ekim 19:52, kartlar 19 Ekim 16:50 ve 22 Ekim; eski beklenti "Elektrik grubu — Kural yok", gerekçe BK-12 › PR-2f)
+    assert "Elektrik grubu" not in {s["kalem"] for s in pk01["satirlar"]}
+    assert (_satir(pk01, "Tekli priz (takım)")["dayanak"], _satir(pk01, "Tekli priz (takım)")["adet"]) == ("Kural (Lokman 18.10, oda başına)", 13)
 
 
 def test_kurallar_dosyadan_okunur(N, kurallar):
@@ -257,7 +259,9 @@ def _varyantlar(N: dict, pf: dict) -> dict:
     kisa_uzun: 8 ve 10 m saçaklı beşik (orta iniş); ters100 ve ters60: ters tavan, trapez / kiremit + OSB + nem, 100'lük iç duvar, cumba,
     özel köşe, özel büküm; tekyon: tek yön çatı, tek kat panel, iç duvarsız, ıslak hacimsiz, makassız açık veranda çatısı; ek_yapi: kapalı çatı
     panelli (makassız) tek yön ek yapı, paftasında özel büküm saçlar (kenar Boardex şeridi, sundurma kapama, duvar dibi); sundurma: uzun
-    kenar boyunca kapalı çatı panelli ek yapı (Boardex şeridi birden çok levha: zayiat adedi değiştirir)."""
+    kenar boyunca kapalı çatı panelli ek yapı (Boardex şeridi birden çok levha: zayiat adedi değiştirir); genis: 15 m²'yi geçen salon (26 m²) ve
+    veranda (18 m²), WC ve hol türü: elektrik oda kuralının takımı ve kitaptan sayılan odaları; acik_mutfak: mutfağı ayrı mahal olmayan ev
+    (mutfak koridor, banyo ıslak hacim türünde, ek lavabo): açık mutfak salona, ıslak hacim ve lavabo banyo, koridor hol gibi (BK-12 PR-2f)."""
     def tur(n, **d):
         n = copy.deepcopy(n)
         n.update(d)
@@ -299,6 +303,10 @@ def _varyantlar(N: dict, pf: dict) -> dict:
                        cati=[dict(ana, tip="tek_yon"), veranda]), pf),
         "ek_yapi": (tur(N, cati=N["cati"] + [ek_yapi], ozel_bukum={"sacak": 2, "alin": 2}), pf),
         "sundurma": (tur(N, cati=N["cati"] + [sundurma]), pf),
+        "genis": (tur(N, kapali=[dict(m, **{"salon": {"alan_m2": 26.0}, "banyo": {"tur": "wc"}, "antre_hol": {"tur": "hol"}}.get(m["tur"], {}))
+                                 for m in N["kapali"]], acik=[dict(m, alan_m2=18.0) for m in N["acik"]]), pf),
+        "acik_mutfak": (tur(N, kapali=[dict(m, **{"mutfak": {"ad": "KORIDOR", "tur": "koridor"}, "banyo": {"tur": "islak"}}.get(m["tur"], {}))
+                                       for m in N["kapali"]] + [{"ad": "LAVABO", "tur": "lavabo", "alan_m2": 2.0, "en_cm": 100.0, "derin_cm": 200.0}]), pf),
     }
 
 
@@ -679,10 +687,10 @@ def test_komut_satiri(tmp_path):
     openpyxl = pytest.importorskip("openpyxl")
     assert PL.main([str(PK01), str(tmp_path), "--pafta", str(PAFTA_KATMANI)]) == 0
     L = _oku(tmp_path / "PK01_liste.json")
-    assert L["kod"] == "PK-01" and L["ozet"]["satir"] == len(L["satirlar"]) == 89
+    assert L["kod"] == "PK-01" and L["ozet"]["satir"] == len(L["satirlar"]) == 107          # BK-12 PR-2f: elektrik oda kuralıyla 89 → 107
     assert L["kural_seti"]["prefabrik"] == "portman.prefabrik_liste/1.0"
     wb = openpyxl.load_workbook(tmp_path / "PK01_liste.xlsx")
-    assert wb.sheetnames == ["Liste"] and wb["Liste"].max_row == 89 + 2
+    assert wb.sheetnames == ["Liste"] and wb["Liste"].max_row == 107 + 2
     d = {r[1]: r[5] for r in wb["Liste"].iter_rows(min_row=3, values_only=True)}
     assert d["Dayson (çatı renginde)"] == "Kural kitabı" and d["Poliüretan köpük"] == "Şablon formülü (O18)"
     assert not any("karar bekliyor" in str(x) for r in wb["Liste"].iter_rows(values_only=True) for x in r)

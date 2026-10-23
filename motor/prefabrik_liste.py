@@ -32,6 +32,12 @@ betopanların birleşim yerlerine konur, tavanla bağı yok; Portatifev listeler
 T76 denemesinin cevapları (BK-12 PR-2d; Lokman, 20 Ekim 20:45 ve kart 20:59): 100'lük alt çerçeve dış duvarların altına (veranda sayılmaz; Motor
 kipinde kapalı kısmın dış sınırı), 100'lük iç duvar varsa onların altına da; trapez çatıda panel kapaması yazılmaz; satır yazılarında "kalkan"
 yerine "baş makas".
+
+Elektrik oda kuralı (BK-12 PR-2f; Lokman, 18 Ekim 19:52, kartlar 19 Ekim 16:50 ve 22 Ekim 11:09–11:10): paftada elektrik sayımı yoksa noktalar
+odalardan sayılır (`elektrik_oda`): oda başına 2 tekli priz, 1 tekli anahtar, 1 duy; açık mahale 2 glop, 1 çiftli anahtar; 15 m²'yi geçen her
+15 m²'ye bir takım daha (yukarı); banyo, WC, mutfak ve hol kitabın sayılarıyla (ıslak hacimler banyo, koridor hol gibi); mutfağı ayrı mahal
+olmayan evde salona yalnız tezgahın 4 tekli prizi (açık mutfak; Lokman, 23 Ekim 03:57); uydu prizi her evde 1. Sayım varsa sayım geçer, kuralın sonucu aday sütununda. Zil her
+evde kitabın 1'i.
 """
 from __future__ import annotations
 
@@ -50,7 +56,7 @@ ISARET_YOLU = KOK / "kurallar" / "liste" / "prefabrik_isaret.json"
 TEK_KAYNAK = "Tek kaynak (zayıf)"
 ISARETLI = ("pencere_u_h_gecen", "omega_kapak")   # satırı `zayif(...)` ile yazılan kurallar (BK-12 PR-2c)
 
-SURUM = "1.4 (22 Ekim 2026; kör test üreteci 7.3, kurallar kural kitabında; orta iniş 9 m, kitapla farklı on yedi kalemde kitap; PK-07 hedef örnek; T76 cevapları; 100'lük duvar omegası kirişlerin de üstünde)"
+SURUM = "1.5 (22 Ekim 2026; kör test üreteci 7.3, kurallar kural kitabında; orta iniş 9 m, kitapla farklı on yedi kalemde kitap; PK-07 hedef örnek; T76 cevapları; 100'lük duvar omegası kirişlerin de üstünde; elektrik oda kuralı)"
 GRUPLAR = {"1001": "Panel", "1002": "Metal aksam", "1003": "Kapı ve pencere", "1004": "Tavan", "1005": "Makas", "1006": "Çatı",
            "1007": "Elektrik", "1008": "Vida", "1009": "Depo", "1010": "Sıhhi tesisat", "1011": "Dere", "1012": "Boya"}
 TAVAN = lambda x: int(math.ceil(x - 1e-9))
@@ -262,10 +268,15 @@ def model_pafta(yp: dict) -> dict:
     """`yapi_pafta.json`: paftadan okunmuş geometri. Alanlar `model_motor` ile aynı; yalnız veranda kirişlerinin boyu
     `veranda_kirisleri_cm`'de paftadan okunmuş olarak gelir (Motor kipi açık kenarları verir, kiriş boyu kuraldan). Çatı kenarında olmayan kirişler
     (paftadaki yeşil kesikli profil: duvarsız açıklık, veranda ortası) isteğe bağlı `ic_kirisler_cm`'de; Motor kipinde iki oda arasındaki duvarsız sınırdan. L biçimli bir oda birden çok
-    dikdörtgenle, aynı adla gelir. Sigortadan en uzak mesafe (`sigorta_en_uzak`) okunmadıysa yoktur: kapının ve odaların yeri girdide yok."""
+    dikdörtgenle, aynı adla gelir. Sigortadan en uzak mesafe isteğe bağlı `sigorta_en_uzak`'ta, Motor kipindeki gibi `{"m": metre, "nereden": yazı}`
+    (paftada sigorta kutusundan kapalı kısmın en uzak köşesine); okunmadıysa yoktur ve NYM dış ölçünün köşegenini alır (BK-12 PR-2f)."""
     N = dict(yp)
     N["kaynak"] = "pafta"
     N.setdefault("sigorta_en_uzak", None)
+    se = N["sigorta_en_uzak"]
+    if se is not None and not (isinstance(se, dict) and set(se) == {"m", "nereden"} and isinstance(se["m"], (int, float))
+                               and not isinstance(se["m"], bool) and se["m"] > 0 and isinstance(se["nereden"], str) and se["nereden"].strip()):
+        raise ValueError("pafta kipi: `sigorta_en_uzak` {\"m\": sıfırdan büyük metre, \"nereden\": ölçünün nereden alındığı} olmalı")
     N.setdefault("brut_m2", round(yp["W"] * yp["D"] / 1e4, 3))
     if "dis_cevre_m" not in N:
         if N.get("acik") or N.get("dikmeler"):
@@ -306,6 +317,79 @@ def cati_olculeri(c: dict) -> dict:
     mahya_boy = c["mahya_boy_cm"] / 100 if c.get("mahya_boy_cm") else c["boy_cm"] / 100 + 2 * sac
     hatlar = list(c.get("sacak_hatlari_m") or [mahya_boy] * sacak_hat)      # pafta kipi: paftadaki gerçek saçak / dere hatları
     return {"sac": sac, "eg": eg, "egik": egik, "yuz": yuz, "sacak_hat": sacak_hat, "mahya_boy": mahya_boy, "hatlar": hatlar}
+
+
+# kitabın oda kuralındaki nokta adı → pafta katmanındaki elektrik sayımının adı (`prefabrik.json › elektrik`)
+ELEKTRIK_NOKTALARI = {"tijli_duy": "tavan_armaturu", "glop": "glop", "tekli_anahtar": "anahtar_tekli", "cift_anahtar": "anahtar_cift",
+                      "tekli_priz": "priz_tekli", "cift_priz": "priz_cift", "uydu_prizi": "uydu_prizi"}
+
+
+def elektrik_oda(N: dict, EO, odalar_k, AM) -> tuple[dict, dict]:
+    """Elektrik noktalarının oda kuralı (`prefabrik.json › elektrik_oda`; BK-12 PR-2f). Odalar ve açık mahaller adla birleşir (L biçimli oda
+    aynı adlı parçalarla gelir, buat kasadaki gibi tek oda; aynı adlı parçalar farklı türdeyse liste üretilmez). Banyo, WC, mutfak ve hol kitabın
+    sayılarını alır (`kitaptan`; kitap `elektrik_oda.odalar`; ıslak hacim türleri banyo, koridor hol gibi); öteki her oda oda takımını, açık mahal
+    veranda takımını alır. Takım sayısı alan ÷ `takim_m2`, yukarı, en az 1 (Lokman, 18 Ekim 19:52; kartlar 19 Ekim 16:50 ve 22 Ekim 11:10).
+    Mutfak ayrı mahal değilse (açık mutfak, `elektrik_acik_mutfak`; planlayıcı açık mutfağı salona koyar) `AM["oda"]` türündeki ilk oda kendi
+    takımını alır, ona yalnız tezgahın prizleri (`AM["ek"]`) eklenir (Lokman, 23 Ekim 03:57); o oda da yoksa satırın yazısı uyarıyla başlar,
+    girdide hiç kapalı oda yoksa da (sessiz 0 değil). Uydu prizi her evde `uydu_prizi_ev_basina`
+    (kart 22 Ekim 11:09). Döner: ({pafta katmanındaki ad: adet}, {pafta katmanındaki ad: oda oda döküm yazısı})."""
+    say = dict.fromkeys(ELEKTRIK_NOKTALARI.values(), 0)
+    dokum = {a: [] for a in say}
+    tm = EO["takim_m2"]
+
+    def takim(alan):
+        return max(1, TAVAN(alan / tm))
+
+    def alan_yazisi(alan, t):                                   # takım sayısı yazıdaki alandan da çıksın (15,04 m² "15,0" değil)
+        b = 1
+        while b < 6 and takim(round(alan, b)) != t:
+            b += 1
+        return od(alan, b)
+
+    def topla(ad, sayilar, t=1, alan=None, ek=""):
+        for kk in sayilar:
+            if kk not in ELEKTRIK_NOKTALARI:
+                raise ValueError(f"elektrik oda kuralı: {kk!r} tanınmıyor ({', '.join(ELEKTRIK_NOKTALARI)})")
+            n = sayilar[kk]
+            if n:
+                a = ELEKTRIK_NOKTALARI[kk]
+                say[a] += t * n
+                dokum[a].append(f"{ad}: {n}{ek}" if t == 1 else f"{ad} ({alan_yazisi(alan, t)} m²): {t} takım × {n}")
+    birlesik = {}
+    for acik, mahaller in ((False, N["kapali"]), (True, N["acik"])):
+        for m in mahaller:
+            b = birlesik.setdefault((acik, m["ad"]), {"tur": m["tur"], "alan": 0.0})
+            if b["tur"] != m["tur"]:
+                raise ValueError(f"elektrik oda kuralı: {m['ad']!r} adlı parçalar farklı türde ({b['tur']}, {m['tur']}); aynı adlı parçalar tek oda sayılır")
+            b["alan"] += m["alan_m2"]
+    KT = EO["kitaptan"]
+
+    def kitap_odasi(tur):
+        if KT[tur] not in odalar_k:
+            raise ValueError(f"elektrik oda kuralı: {tur} kitabın {KT[tur]!r} odasıyla sayılır, kitapta yok")
+        return odalar_k[KT[tur]]
+    odalar = [(ad, b) for (acik, ad), b in birlesik.items() if not acik]
+    mutfak_var = any(b["tur"] == "mutfak" for _, b in odalar)
+    acik_mutfak = None if mutfak_var else next((ad for ad, b in odalar if b["tur"] == AM["oda"]), None)
+    for (acik, ad), b in birlesik.items():
+        if acik:
+            topla(ad, EO["acik_takimi"], takim(b["alan"]), b["alan"])
+        elif b["tur"] in KT:
+            topla(ad, kitap_odasi(b["tur"]), ek=" (kitap)")
+        else:
+            topla(ad, EO["oda_takimi"], takim(b["alan"]), b["alan"])
+        if not acik and ad == acik_mutfak:
+            topla(f"{ad} (açık mutfak)", AM["ek"], ek=" (tezgah)")
+    if not odalar:                                              # odasız girdi: oda noktaları sayılmadı (0 kural sonucu değil)
+        uyari = {a: "UYARI: girdide kapalı oda yok; oda noktaları sayılmadı." for a in say if a != "uydu_prizi"}
+    elif not (mutfak_var or acik_mutfak):
+        uyari = {ELEKTRIK_NOKTALARI[kk]: "UYARI: mutfak ayrı mahal değil, açık mutfağın odası da yok; tezgahın prizleri yazılmadı." for kk in AM["ek"]}
+    else:
+        uyari = {}
+    u = EO["uydu_prizi_ev_basina"]
+    say["uydu_prizi"] += u
+    dokum["uydu_prizi"].append(f"her evde {u}")
+    return say, {a: " ".join(x for x in (uyari.get(a), " + ".join(d)) if x) for a, d in dokum.items()}
 
 
 def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> dict:
@@ -804,50 +888,75 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
     if kubbeler:
         kubbe_takimi("1006")
 
-    # ── 1007 Elektrik (montaj paftasındaki elektrik planından; prefabrik.json › elektrik) ──
+    # ── 1007 Elektrik ───────────────────────────────────────────────────────
+    # Noktalar montaj paftasındaki elektrik planının sayımından (kesin sayı, çelik hattındaki gibi; prefabrik.json › elektrik); sayım yoksa oda
+    # kuralından (`elektrik_oda`; BK-12 PR-2f). Sayım varken oda kuralının sonucu aday sütununda (PR-3'te kıyas için). Zil her evde kitabın sayısı
+    # (`elektrik.zil`; açık on bir listenin hepsinde 1, PK-07'nin paftasında yok), paftadaki sayım pafta sütununda
     el = P.get("elektrik") or {}
+    E, Ea, Ek = r("elektrik"), r("elektrik_aday"), _ortak(k, "elektrik")
+    ks, kd = elektrik_oda(N, r("elektrik_oda"), _ortak(k, "elektrik_oda", "odalar"), r("elektrik_acik_mutfak"))
+    es = (lambda a: (el.get(a) or {}).get("adet")) if el else (lambda a: ks[a])
+    v = lambda a: es(a) or 0
+    sayim = ("Sayım (pafta)", "göz sayımı; prefabrik.json › elektrik")
+    oda_k = ("Kural (Lokman 18.10, oda başına)",
+             f"oda kuralı (prefabrik.json › elektrik_oda): oda ve veranda takımı Lokman, 18 Ekim 19:52; her {sy(r('elektrik_oda.takim_m2'))} m²'ye bir "
+             "takım, yukarı (kartlar 19 Ekim 16:50 ve 22 Ekim 11:10); banyo, WC, mutfak ve hol kitaptaki gibi (kart 19 Ekim 16:50)")
+
+    def nokta_satiri(kalem, a, formul_sayim="", kural_k=oda_k):
+        if el:
+            ekle("1007", kalem, "adet", es(a), sayim[0], formul_sayim or "elektrik planından", sayim[1], aday=ks[a],
+                 aday_notu="oda kuralı: " + (kd[a] or "yok"))
+        else:
+            ekle("1007", kalem, "adet", ks[a], kural_k[0], kd[a] or "oda kuralında yok", kural_k[1])
+    nokta_satiri("Tijli duy", "tavan_armaturu", "tavan armatürü")
+    nokta_satiri("Yuvarlak glop", "glop", "ıslak hacim glopu (H1)")
+    d, g = ks["tavan_armaturu"], ks["glop"]                         # ampul = duy + glop (kitap `elektrik.ampul`)
     if el:
-        E, Ea, Ek = r("elektrik"), r("elektrik_aday"), _ortak(k, "elektrik")
-        es = lambda a: (el.get(a) or {}).get("adet")
-        anah = (es("anahtar_tekli") or 0) + 2 * (es("anahtar_cift") or 0)
-        for kalem, adet, formul in (("Tijli duy", es("tavan_armaturu"), "tavan armatürü"), ("Yuvarlak glop", es("glop"), "ıslak hacim glopu (H1)"),
-                                    ("Ampul", (es("tavan_armaturu") or 0) + (es("glop") or 0), "duy + glop; dış aplik girmez (H1)"),
-                                    ("Tekli anahtar (takım)", es("anahtar_tekli"), ""), ("Çiftli anahtar (takım)", es("anahtar_cift"), ""),
-                                    ("Tekli priz (takım)", es("priz_tekli"), ""), ("Çiftli priz (takım)", es("priz_cift"), ""), ("Uydu prizi (takım)", es("uydu_prizi"), ""),
-                                    ("Zil", es("zil"), ""), ("Sigorta kutusu (12'li)", es("sigorta_kutusu"), "")):
-            ekle("1007", kalem, "adet", adet, "Sayım (pafta)", formul or "elektrik planından", "göz sayımı; prefabrik.json › elektrik")
-        nokta = sum((es(a_) or 0) for a_ in ("anahtar_tekli", "anahtar_cift", "priz_tekli", "priz_cift", "uydu_prizi", "zil", "tavan_armaturu", "glop"))
-        # buat ve NYM kural kitabından (`elektrik.buat_kasa`, `elektrik.kablo`; Excel hesaplama motoru; prefabrikte Lokman, 18 Ekim 19:22)
-        # oda sayısı adla: pafta girdisinde L biçimli oda aynı adlı parçalarla gelir (PK-03 9 parça, 6 oda); Motor'da her mahalin adı tektir
-        anah_t, priz_t = (es("anahtar_tekli") or 0) + (es("anahtar_cift") or 0), (es("priz_tekli") or 0) + (es("priz_cift") or 0) + (es("uydu_prizi") or 0)
-        oda = len({x["ad"] for x in N["kapali"]})
-        ekle("1007", "Buat kasa", "adet", anah_t + priz_t + oda, "Kural kitabı", f"anahtar {anah_t} + priz {priz_t} (uydu dahil) + oda {oda} (veranda hariç)",
-             "Excel hesaplama motoru; oda sayısı Lokman, 7 Ekim 07:45", aday=nokta,
-             aday_notu="7.3 (O19): bütün elektrik noktaları (PK-07'nin gerçek listesinde 31, paftadan okunan noktalarla 30)")
-        # sigorta adedi W otomat sayısıdır (kitapta da). En uzak mesafe kitabın yöntemiyle (Motor kipi: giriş kapısından kapalı kısmın en uzak köşesi);
-        # pafta kipinde kapının ve odaların yeri okunmadı: dış ölçünün köşegeni (kitabın son çaresi kapalı kısmın köşegeni; `kitapla_farkli`)
-        if _ortak(k, "kablo_en_uzak_mesafe") != "sigortadan":
-            raise ValueError(f"kablo_en_uzak_mesafe {_ortak(k, 'kablo_en_uzak_mesafe')!r}: prefabrik liste yalnız sigortadan en uzak mesafeyi bilir")
-        eu = N.get("sigorta_en_uzak") or {"m": math.hypot(N["W"], N["D"]) / 100, "nereden": "kapının yeri girdide yok: dış ölçünün köşegeni"}
-        sig, kos, nm = E["w_otomat"], eu["m"], E["kablo_nokta_basina_m"]
-        p_say = (es("priz_tekli") or 0) + 2 * (es("priz_cift") or 0) + (es("uydu_prizi") or 0)
-        for kalem, n_say, nokta_adi, aday_k in (("NYM kablo 3 × 2,5", p_say, "tekli priz + çiftli priz × 2 + uydu prizi", "nym_3x25_m"),
-                                                ("NYM kablo 2 × 1,5", anah, "tekli anahtar + çiftli anahtar × 2", "nym_2x15_m")):
-            ekle("1007", kalem, "metre", TAVAN(sig * kos + n_say * nm), "Kural kitabı",
-                 f"sigorta {sig} × en uzak {od(kos)} m ({eu['nereden']}) + ({nokta_adi} = {n_say}) × {sy(nm)} m",
-                 "Excel hesaplama motoru; sigortadan en uzak mesafe Lokman, 7 Ekim 07:45 ve 8 Ekim 00:45",
-                 birim="m", aday=Ea[aday_k], aday_notu=f"Portatifev şablonu sabit {sy(Ea[aday_k])} m (PK-01 130 / 100, PK-02 135 / 120)")
-        uk, bk = Ek["uydu_kablo_priz_basina_m"], Ek["besleme_kablosu_kat_basina_m"]
-        ekle("1007", "Uydu kablo", "metre", uk * (es("uydu_prizi") or 0), "Şablon formülü", f"uydu prizi × {sy(uk)} m", "PK-02 tuttu", birim="m")
-        ekle("1007", "Besleme kablosu", "metre", bk, "Şablon formülü", f"kat × {sy(bk)} m", "PK-02 tuttu", birim="m")
-        ekle("1007", "Besleme kablo borusu", "metre", E["besleme_boru_m"], "Şablon formülü", f"kat × {sy(E['besleme_boru_m'])} m", "PK-02 tuttu", birim="m")
-        ekle("1007", "İzole bant", "adet", TAVAN(bina_m2 * Ek["izole_bant_m2_basina"]), "Şablon formülü",
-             f"m² × {sy(Ek['izole_bant_m2_basina'])}", "PK-02 tuttu")
-        ekle("1007", "Kaçak akım rölesi (ikili)", "adet", Ek["kacak_akim_rolesi"], "Şablon formülü", f"tek kat {Ek['kacak_akim_rolesi']} ikili", "PK-02 tuttu")
-        ekle("1007", "W otomat 16 A", "adet", E["w_otomat"], "Kural (Lokman 13.10, R4)", f"Portatifev şablonu sabit {E['w_otomat']} (alandan bağımsız)",
-             "PK-07, E2, E3, E5 8", aday=Ea["w_otomat"], aday_notu=f"Şablon B sabit {Ea['w_otomat']} (PK-02, -03, -05, -06, E1, E4)")
+        ekle("1007", "Ampul", "adet", v("tavan_armaturu") + v("glop"), sayim[0], "duy + glop; dış aplik girmez (H1)", sayim[1],
+             aday=d + g, aday_notu=f"oda kuralı: duy {d} + glop {g}")
     else:
-        ekle("1007", "Elektrik grubu", "—", None, "Kural yok", "pafta katmanında elektrik sayımı yok", "prefabrik.json › elektrik")
+        ekle("1007", "Ampul", "adet", d + g, "Kural kitabı", f"duy {d} + glop {g}; dış aplik girmez (H1)", "kitap `elektrik.ampul`")
+    for kalem, a in (("Tekli anahtar (takım)", "anahtar_tekli"), ("Çiftli anahtar (takım)", "anahtar_cift"), ("Tekli priz (takım)", "priz_tekli"),
+                     ("Çiftli priz (takım)", "priz_cift")):
+        nokta_satiri(kalem, a)
+    nokta_satiri("Uydu prizi (takım)", "uydu_prizi", kural_k=("Kural (Lokman 22.10)", "Lokman, kart 22 Ekim 11:09 \"Her eve 1\" (salona; kitabın salonunda 1)"))
+    z, sk = Ek["zil"], Ek["sigorta_kutusu_kat_basina"]
+    ekle("1007", "Zil", "adet", z, "Kural kitabı", f"her evde {z}", "kitap `elektrik.zil`; açık on bir listenin hepsinde 1 (BK-12 PR-2f)", pafta=("elektrik", "zil"))
+    if el:
+        ekle("1007", "Sigorta kutusu (12'li)", "adet", es("sigorta_kutusu"), sayim[0], "elektrik planından", sayim[1], aday=sk, aday_notu=f"kitap: kat × {sk}")
+    else:
+        ekle("1007", "Sigorta kutusu (12'li)", "adet", sk, "Kural kitabı", f"kat × {sk}", "kitap `elektrik.sigorta_kutusu_kat_basina`")
+    anah = v("anahtar_tekli") + 2 * v("anahtar_cift")
+    # buat ve NYM kural kitabından (`elektrik.buat_kasa`, `elektrik.kablo`; Excel hesaplama motoru; prefabrikte Lokman, 18 Ekim 19:22)
+    # oda sayısı adla: pafta girdisinde L biçimli oda aynı adlı parçalarla gelir (PK-03 9 parça, 6 oda); Motor'da her mahalin adı tektir
+    anah_t, priz_t = v("anahtar_tekli") + v("anahtar_cift"), v("priz_tekli") + v("priz_cift") + v("uydu_prizi")
+    oda = len({x["ad"] for x in N["kapali"]})
+    ekle("1007", "Buat kasa", "adet", anah_t + priz_t + oda, "Kural kitabı", f"anahtar {anah_t} + priz {priz_t} (uydu dahil) + oda {oda} (veranda hariç)",
+         "Excel hesaplama motoru; oda sayısı Lokman, 7 Ekim 07:45", aday=anah_t + priz_t + v("tavan_armaturu") + v("glop") + z,
+         aday_notu=f"7.3 (O19): listedeki bütün elektrik noktaları (anahtar {anah_t} + priz {priz_t} + duy {v('tavan_armaturu')} + glop {v('glop')} + zil {z}; "
+                   "PK-07'nin gerçek listesinde 31)")
+    # sigorta adedi W otomat sayısıdır (kitapta da). En uzak mesafe kitabın yöntemiyle (Motor kipi: giriş kapısından kapalı kısmın en uzak köşesi);
+    # pafta kipinde okunduysa `sigorta_en_uzak`, okunmadıysa dış ölçünün köşegeni (kitabın son çaresi kapalı kısmın köşegeni; `kitapla_farkli`)
+    if _ortak(k, "kablo_en_uzak_mesafe") != "sigortadan":
+        raise ValueError(f"kablo_en_uzak_mesafe {_ortak(k, 'kablo_en_uzak_mesafe')!r}: prefabrik liste yalnız sigortadan en uzak mesafeyi bilir")
+    eu = N.get("sigorta_en_uzak") or {"m": math.hypot(N["W"], N["D"]) / 100, "nereden": "kapının yeri girdide yok: dış ölçünün köşegeni"}
+    sig, kos, nm = E["w_otomat"], eu["m"], E["kablo_nokta_basina_m"]
+    p_say = v("priz_tekli") + 2 * v("priz_cift") + v("uydu_prizi")
+    for kalem, n_say, nokta_adi, aday_k in (("NYM kablo 3 × 2,5", p_say, "tekli priz + çiftli priz × 2 + uydu prizi", "nym_3x25_m"),
+                                            ("NYM kablo 2 × 1,5", anah, "tekli anahtar + çiftli anahtar × 2", "nym_2x15_m")):
+        ekle("1007", kalem, "metre", TAVAN(sig * kos + n_say * nm), "Kural kitabı",
+             f"sigorta {sig} × en uzak {od(kos)} m ({eu['nereden']}) + ({nokta_adi} = {n_say}) × {sy(nm)} m",
+             "Excel hesaplama motoru; sigortadan en uzak mesafe Lokman, 7 Ekim 07:45 ve 8 Ekim 00:45",
+             birim="m", aday=Ea[aday_k], aday_notu=f"Portatifev şablonu sabit {sy(Ea[aday_k])} m (PK-01 130 / 100, PK-02 135 / 120)")
+    uk, bk = Ek["uydu_kablo_priz_basina_m"], Ek["besleme_kablosu_kat_basina_m"]
+    ekle("1007", "Uydu kablo", "metre", uk * v("uydu_prizi"), "Şablon formülü", f"uydu prizi {v('uydu_prizi')} × {sy(uk)} m", "PK-02 tuttu", birim="m")
+    ekle("1007", "Besleme kablosu", "metre", bk, "Şablon formülü", f"kat × {sy(bk)} m", "PK-02 tuttu", birim="m")
+    ekle("1007", "Besleme kablo borusu", "metre", E["besleme_boru_m"], "Şablon formülü", f"kat × {sy(E['besleme_boru_m'])} m", "PK-02 tuttu", birim="m")
+    ekle("1007", "İzole bant", "adet", TAVAN(bina_m2 * Ek["izole_bant_m2_basina"]), "Şablon formülü",
+         f"m² × {sy(Ek['izole_bant_m2_basina'])}", "PK-02 tuttu")
+    ekle("1007", "Kaçak akım rölesi (ikili)", "adet", Ek["kacak_akim_rolesi"], "Şablon formülü", f"tek kat {Ek['kacak_akim_rolesi']} ikili", "PK-02 tuttu")
+    ekle("1007", "W otomat 16 A", "adet", E["w_otomat"], "Kural (Lokman 13.10, R4)", f"Portatifev şablonu sabit {E['w_otomat']} (alandan bağımsız)",
+         "PK-07, E2, E3, E5 8", aday=Ea["w_otomat"], aday_notu=f"Şablon B sabit {Ea['w_otomat']} (PK-02, -03, -05, -06, E1, E4)")
 
     # ── 1008 Vida ───────────────────────────────────────────────────────────
     V, Vk, va = r("vida"), _ortak(k, "vida"), r("vida_aday_yuvarlama")      # Vk: kitabın vida değerleri (çalışma kitabının notları)
