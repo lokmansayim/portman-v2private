@@ -3,8 +3,8 @@
 - Her ölçü tek kuraldan (`geometry.pencere_kurali`): "ENxBOY" tam cm, en 30–247, boy 20–180; eşik = 200 − boy; en 121,5'i geçerse pencere
   iki panoluk 251'lik pencereli panoda.
 - Komşu kuralı (CIO notu 2): önce dizilim yönünde sonraki pano, olmazsa önceki; tam boy, açıklıksız, aynı odanın duvar aralığında. Yoksa hata.
-  Birleşme bütün açıklıklar yerleşince: İş Emri'nin pano dizinleri ızgaraya göre kalır, sonuç açıklıkların yazılış sırasına bağlı değil
-  (geometri hakemi, 23 Ekim).
+  Birleşme bütün açıklıklar yerleşince; aynı duvardaki geniş pencereler dizilimin sonundan başına kurulur. İş Emri'nin pano dizinleri
+  ızgaraya göre kalır, sonuç açıklıkların yazılış sırasına bağlı değil (geometri hakemi, 23 Ekim, iki tur).
 - Bugünkü üç ölçü (120x120, 120x180, 60x40) eskisi gibi: eşik, yazı, kod ve blok adları aynı; yalnız bunları kullanan çizimde yeni kod
   tahsis edilmez (CIO notu 3). Çıktıların bayt bayt aynılığı referans gerilemesinde (`dogrula.py`, DXF/PDF içerik izleri).
 - Deneme girdisi: ALTIN 6×8 İş Emri'nin pencereleri T76'nın dört ölçüsü (150x140, 60x60, 120x150, 180x150) ve PK-07'nin 100x120'si
@@ -160,6 +160,17 @@ def test_duvar_yonleri(girdi, sira, olcu, beklenen):
     assert (p.a0, p.a1) == beklenen
 
 
+def test_iki_genis_pencere_ayni_duvarda_sira_bagimsiz():
+    """Geometri hakemi ikinci tur (23 Ekim): TEST01 ön cephede iki geniş pencere (pano 2 ve 4) aradaki boş panoyu ister. Dizilimin sonundan
+    kurulunca sondaki önceki panoyu, öteki kendi önceki panosunu alır; iki yazılış sırasında da aynı plan (eskiden biri hataydı)."""
+    ie = _oku(KOK / "is_emri" / "adaylar" / "TEST01.json")
+    for i in (4, 5):
+        ie["acikliklar"][i]["olcu"] = "160x180"
+    ters = _kopya(ie); ters["acikliklar"][4], ters["acikliklar"][5] = ters["acikliklar"][5], ters["acikliklar"][4]
+    yer = lambda pl: sorted((p.a0, p.a1, p.acilim.pano_is_emri) for p in pl.panolar if p.acilim and p.acilim.olcu == "160x180")
+    assert yer(G.kur(_kopya(ie))) == yer(G.kur(ters)) == [(512.0, 763.0, 2), (763.0, 1014.0, 4)]
+
+
 def test_ayni_girdi_ayni_cikti():
     ozet = lambda pl: [(d.id, [(q.a0, q.a1, q.acilim.olcu if q.acilim else None) for q in d.panolar]) for d in pl.duvarlar]
     assert ozet(G.kur(_deneme())) == ozet(G.kur(_deneme()))
@@ -202,12 +213,25 @@ def test_dxf_dogrulama_ve_semboller(deneme_uret):
         blk = doc.blocks.get(f"kaynak-pencere-{k.en}x{k.boy}")
         assert blk is not None, olcu
         assert [e.dxf.text for e in blk.query("TEXT")] == [f"{k.en}/{k.boy}"]           # ölçü yazısı kaynağın "120/120"si değil
-        temel = 60 if k.en <= 60 else 120                                              # dar pencerede yazı küçülür (sembolden taşmaz)
-        assert abs(blk.query("TEXT")[0].dxf.height - 15.21739130434782 * min(1.0, k.en / temel)) < 1e-9
+        yazi_boyu = 15.21739130434782 * min(1.0, k.en / len(f"{k.en}/{k.boy}") / (120 / 7))   # harf başına 120x120'deki sembol boyu
+        assert abs(blk.query("TEXT")[0].dxf.height - yazi_boyu) < 1e-9
         ys = [y for e in blk.query("LINE") for y in (e.dxf.start.y, e.dxf.end.y)]
         assert abs(max(ys) - min(ys) - k.en) < 1e-6, olcu                               # sembol duvar boyunca en kadar
     tablo = [e.dxf.text for e in doc.modelspace().query("TEXT") if e.dxf.text.startswith("PVC doğrama")]
     assert tablo == ["PVC doğrama; 60×60, 100×120, 120×150, 120×180, 150×140, 180×150"]
+
+
+@pytest.mark.parametrize("olcu", ["60x60", "60x120", "59x170", "50x100", "45x180", "30x20", "62x180", "80x120", "100x120", "150x140", "247x120"])
+def test_yazi_sembolden_tasmaz(olcu):
+    """Geometri hakemi ikinci tur (23 Ekim): dar pencerede ve üç haneli boyda ölçü yazısı sembolün duvar boyundaki uzunluğunu aşmaz."""
+    from ezdxf import bbox
+    from motor import dxf_out
+    from motor.katalog import Katalog
+    c = dxf_out.Cizici(G.kur(_oku(ALTIN)), Katalog())
+    blk = c.doc.blocks.get(c._pencere_blok(olcu)[2])
+    sembol = bbox.extents([e for e in blk if e.dxftype() != "TEXT"])
+    yazi = bbox.extents(blk.query("TEXT"))
+    assert sembol.extmin.y - 0.5 <= yazi.extmin.y and yazi.extmax.y <= sembol.extmax.y + 0.5, (yazi, sembol)
 
 
 def test_kodlar_ve_etiketler(deneme_uret):

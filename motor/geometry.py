@@ -789,8 +789,12 @@ def _kur(is_emri: dict) -> Plan:
             raise IsEmriHatasi(f"Açıklıkta dograma yalnız \"alıcıya ait\" olabilir: {ac}")
         acl.dograma = ac.get("dograma")           # İE-11: "alıcıya ait" → boşluk var, doğrama blok olarak çizilir, BOM satırı işaretli (listeye girmez)
         p.acilim = acl
-    for d, p, aralik, ac in genis_pencereler:                 # BK-13: komşu tam panoyla 251'lik pano. Sonra: İş Emri'nin pano dizinleri ızgaraya göre
-        yeni = _genis_pencere_panosu(d, p, aralik, ac)        # kalır ve komşu kuralı listede sonra yazılan açıklıkları da görür (geometri hakemi, 23 Ekim)
+    # BK-13: komşu tam panoyla 251'lik pano. Bütün açıklıklar yerleştikten sonra: İş Emri'nin pano dizinleri ızgaraya göre kalır ve komşu kuralı
+    # listede sonra yazılan açıklıkları da görür. Aynı duvardaki geniş pencereler dizilimin sonundan başına kurulur: her biri önce kendi sonraki
+    # panosunu alır, sonuç yazılış sırasından bağımsızdır (geometri hakemi, 23 Ekim).
+    genis_pencereler.sort(key=lambda t: (t[0].id, -next(k for k, q in enumerate(t[0].panolar) if q is t[1])))
+    for d, p, aralik, ac in genis_pencereler:
+        yeni = _genis_pencere_panosu(d, p, aralik, ac)
         if yeni.acilim.genislik > yeni.boy - 4:
             raise IsEmriHatasi(f"Açıklık panodan geniş: {ac} (pano {yeni.boy})")
 

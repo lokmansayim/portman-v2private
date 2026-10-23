@@ -54,6 +54,7 @@ PENCERE_KAYNAK = {   # olcu: (kaynak blok, doğal yön, bbox)
     "60x40":   ("kaynak-pencere-6040",   "V", (53358.249, 7932.278, 53385.862, 7992.278)),
     "120x180": ("kaynak-pencere-120180", "H", (53839.874, 6682.0,   53959.874, 6713.823)),
 }
+PENCERE_YAZI_CM_HARF = 120 / len("120/120")   # BK-13: 120x120 bloğunda ölçü yazısının harf başına düşen sembol boyu; yeni ölçüde yazı boyu buna göre
 IC_KAPI_VARYANT = {   # kanonik V çerçevesi (pano +y, kalınlık +x), 125,5 pano, 82 açıklık
     "SOL_UST": ((7918.93, -54227.719), 90.0, 1.0),
     "SOL_ALT": ((7918.93, 54353.219), 90.0, -1.0),
@@ -154,8 +155,8 @@ class Cizici:
 
     def _pencere_blok(self, olcu):
         """(sarmalayıcı blok adı, malzeme kodu, kaynak blok, doğal yön, kutu). Bugünkü üç ölçü `_dograma_bloklari`'nın bloğu (aynen);
-        BK-13: başka ölçüde kaynak 120x120 (en ≤ 60 ise 60x40) sembolü duvar boyunca en'e ölçeklenir (kalınlık aynı; yazı boyu kaynaktan
-        dar pencerede küçülür), ölçü yazısı "en/boy" olur. Kod ilk kullanımda tahsis edilir (yalnız bugünkü üç ölçüyü kullanan çizimde yeni kod yok)."""
+        BK-13: başka ölçüde kaynak 120x120 (en ≤ 60 ise 60x40) sembolü duvar boyunca en'e ölçeklenir (kalınlık aynı; yazı boyu harf başına
+        120x120'deki sembol boyuyla sınırlı, dar pencerede küçülür), ölçü yazısı "en/boy" olur. Kod ilk kullanımda tahsis edilir (yalnız bugünkü üç ölçüyü kullanan çizimde yeni kod yok)."""
         if olcu in PENCERE_KAYNAK:
             src, nat, bb = PENCERE_KAYNAK[olcu]; name, kod = self.dograma[olcu]
             return name, kod, src, nat, bb
@@ -168,8 +169,9 @@ class Cizici:
             kblk = self.doc.blocks.new(src)
             for e in self.doc.blocks.get(tsrc):
                 c = e.copy()
-                if c.dxftype() == "TEXT":                         # dar pencerede yazı da küçülür, sembolden taşmaz (geometri hakemi, 23 Ekim)
-                    x, y, z = c.dxf.insert; c.dxf.insert = (x, y * k, z); c.dxf.text = f"{pk.en}/{pk.boy}"; c.dxf.height *= min(1.0, k)
+                if c.dxftype() == "TEXT":                         # yazı harf başına 120x120'deki kadar sembol boyu alır: dar pencerede küçülür, taşmaz (geometri hakemi, 23 Ekim)
+                    x, y, z = c.dxf.insert; c.dxf.insert = (x, y * k, z); c.dxf.text = yazi = f"{pk.en}/{pk.boy}"
+                    c.dxf.height *= min(1.0, pk.en / len(yazi) / PENCERE_YAZI_CM_HARF)
                 else:
                     c.transform(Matrix44.scale(1.0, k, 1.0))
                 kblk.add_entity(c)
