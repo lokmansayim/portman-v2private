@@ -1,6 +1,6 @@
 {
- "aciklama": "Kör test aracının kalem sözlüğü (BK-12 PR-3, M7): iki listede farklı yazılan ya da farklı bölünen kalemler. Desenler esle.ad() ile düzgünleştirilmiş adlara uygulanır (büyük harf, apostrof yok, sayı ile 'LÜK / MM' bitişik, noktalama çevresinde boşluk yok); ilk uyan grup alır. olcu: tam (ölçüyle eşle), yok (grubun toplamı), her_satir (bizim satır her gerçek satırla). Sözlük adet ve ölçü taşımaz. Bir kör projenin listesi açılmadan önce sözlük commit'li olmalı; açılıştan sonra yapılan değişiklik o projenin raporunda yazılır.",
- "surum": "1 (23 Ekim 2026; açık sekiz projenin adlarıyla)",
+ "aciklama": "Kör test aracının kalem sözlüğü (BK-12 PR-3, M7): iki listede farklı yazılan ya da farklı bölünen kalemler. Desenler esle.ad() ile düzgünleştirilmiş adlara uygulanır (büyük harf, apostrof yok, sayı ile 'LÜK / MM' bitişik, noktalama çevresinde boşluk yok); ilk uyan grup alır. olcu: tam (ölçüyle eşle), yok (grubun toplamı ve ölçü kümesi), her_satir (bizim satır her gerçek satırla); anahtar: en_buyuk (ölçünün en büyük sayısı, profil boyu), tolerans (mm), sira; olcu_serbest: yok / her_satir grubunda ölçü kıyaslanmaz (gerekçe not'ta). Sözlük adet ve ölçü taşımaz. Araç sözlüğü gerçek listeyi okumadan önce denetler (commit'li, değişmemiş); kör bir projenin açılış kaydı sözlük commit'ini taşır, açılıştan sonra yapılan değişiklik o projenin sonucunda ve raporunda yazılır.",
+ "surum": "2 (23 Ekim 2026; açık sekiz projenin adlarıyla; yok gruplarında ölçü kümesi)",
  "gruplar": [
   {"ad": "60'lık karkaslı + kasalı pano", "bizim": ["^60LIK KARKASLI\\+KASALI PANO$"], "gercek": ["^60LIK KARKASLI\\+KASALI PANO(LAR)?$"], "olcu": "tam"},
   {"ad": "100'lük karkaslı + kasalı pano", "bizim": ["^100LÜK KARKASLI\\+KASALI PANO$"], "gercek": ["^100LÜK KARKASLI\\+KASALI PANO(LAR)?$"], "olcu": "tam"},
@@ -11,8 +11,8 @@
   {"ad": "Kutu profil (kolon)", "bizim": ["^(ÖZEL )?KUTU PROFİL\\(KOLON\\)"], "gercek": ["^(ÖZEL )?KUTU PROFİL\\(KOLON\\)"], "olcu": "tam", "anahtar": "en_buyuk", "tolerans": 2, "sira": true},
   {"ad": "H 100 (dış pano eki)", "bizim": ["^H 100\\(DIŞ PANO EKİ\\)"], "gercek": ["^(ÖZEL )?H\\(DÜBELLİ( VE KULAKLI)?\\)"], "olcu": "yok"},
   {"ad": "H standart (iç pano eki)", "bizim": ["^H STANDART"], "gercek": ["^(ÖZEL )?H\\(STANDART\\)"], "olcu": "tam"},
-  {"ad": "3'lü H (dış duvar T'si)", "bizim": ["^3LÜ H 100 X 100"], "gercek": ["^(ÖZEL )?3LÜ H\\(DÜBELLİ( VE KULAKLI)?\\)"], "olcu": "yok"},
-  {"ad": "3'lü H standart (iç T)", "bizim": ["^3LÜ H STANDART"], "gercek": ["^(ÖZEL )?3LÜ H\\(STANDART\\)"], "olcu": "yok"},
+  {"ad": "3'lü H (dış duvar T'si)", "bizim": ["^3LÜ H 100 X 100"], "gercek": ["^(ÖZEL )?3LÜ H\\(DÜBELLİ( VE KULAKLI)?\\)"], "olcu": "yok", "anahtar": "en_buyuk"},
+  {"ad": "3'lü H standart (iç T)", "bizim": ["^3LÜ H STANDART"], "gercek": ["^(ÖZEL )?3LÜ H\\(STANDART\\)"], "olcu": "yok", "anahtar": "en_buyuk"},
   {"ad": "Çektirme U'su 60", "bizim": ["^ÇEKTİRME USU 60"], "gercek": ["^ÇEKTİRME USU\\(60LIK\\)"], "olcu": "yok"},
   {"ad": "Çektirme U'su 100", "bizim": ["^ÇEKTİRME USU 100"], "gercek": ["^ÇEKTİRME USU\\(100LÜK\\)"], "olcu": "yok"},
   {"ad": "Özel pencere karkası", "bizim": ["^ÖZEL PENCERE KARKASI"], "gercek": ["^ÖZEL PENCERE KARKASI"], "olcu": "tam"},
@@ -25,7 +25,7 @@
   {"ad": "Duvar alçıpanı beyaz", "bizim": ["^DUVAR ALÇIPANI BEYAZ"], "gercek": ["^DUVAR ALÇIPANI? BEYAZ"], "olcu": "yok"},
   {"ad": "Duvar alçıpanı yeşil", "bizim": ["^DUVAR ALÇIPANI YEŞİL"], "gercek": ["^DUVAR ALÇIPANI? YEŞİL"], "olcu": "yok"},
   {"ad": "Çatı şiltesi / izolasyonu", "bizim": ["^ÇATI ŞİLTESİ/İZOLASYONU"], "gercek": ["^ÇATI (İZOLASYONU|ŞİLTESİ)"], "olcu": "yok"},
-  {"ad": "Makas", "bizim": ["^MAKAS\\(", "^YAVRU MAKAS"], "gercek": ["^MAKAS($|\\()", "^YAVRU MAKAS"], "olcu": "yok"},
+  {"ad": "Makas", "bizim": ["^MAKAS\\(", "^YAVRU MAKAS"], "gercek": ["^MAKAS($|\\()", "^YAVRU MAKAS"], "olcu": "yok", "olcu_serbest": true, "not": "Bizim ölçümüz makas açıklığı ya da yavru makas boyu, gerçek listede makas boyu ya da profil kesiti (80 × 45 × 0,8): ölçü kıyaslanmaz, adet kıyaslanır."},
   {"ad": "Metal kiremit", "bizim": ["^METAL KİREMİT\\("], "gercek": ["^METAL KİREMİT\\("], "olcu": "tam", "sira": true},
   {"ad": "Trapez sac", "bizim": ["^TRAPEZ SAC·"], "gercek": ["^TRAPEZ SAC\\("], "olcu": "tam", "sira": true},
   {"ad": "Sandviç panel", "bizim": ["^SANDVİÇ PANEL\\("], "gercek": ["^SANDVİÇ PANEL\\("], "olcu": "tam", "sira": true},

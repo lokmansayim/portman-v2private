@@ -2,6 +2,8 @@
 
 Yalnız malzeme satırları okunur: grup, malzeme, boyut, adet. Okunmayanlar:
 - başlık bloğu (müşteri, temsilci, hazırlayan, sevkiyat yeri, tarih, telefon): ilk sütun başlığından ("BOYUT", "ADET") önceki her şey;
+  sütun başlığından sonra da bu etiketlerden birini taşıyan satır (`BASLIK`). PDF'te sütun başlığı sonraki sayfalarda yinelenmeyebilir
+  (TS-01'in 2. ve 3. sayfası başlıksız sürer), bu yüzden sütun yerleri sayfadan sayfaya taşınır;
 - sayfa adları, dosya adı ve belge özellikleri;
 - imza ve personel satırları ("SORUMLU ÜRETİM PERSONELİ AD SOYAD", "HAZIRLAYAN", "TESLİM", "İMZA");
 - adet sütununda sayı olmayan yazı (ör. bir ad); sayı değilse adet boş kalır, yazı alınmaz;
@@ -22,6 +24,7 @@ import re
 from pathlib import Path
 
 PERSONEL = re.compile(r"PERSONEL|AD\s*SOYAD|HAZIRLAYAN|TESL[İI]M\s+(ALAN|EDEN)|[İI]MZA", re.I)
+BASLIK = re.compile(r"M[ÜU]ŞTER[İI]|TEMS[İI]LC[İI]|SEVK[İI]YAT|TAR[İI]H|TELEFON|[İI]LET[İI]Ş[İI]M|PROJE\s+[İI]SM[İI]", re.I)
 DAMGA = "ALICIYA AİT"
 SUTUN_BOYUT = ("BOYUT", "BOYUT/ÖLÇÜ")
 EXCEL_SATIR_SINIRI = 2000      # bazı hesap sayfaları 1.048.576 satır gösterir; liste sayfaları 250 satırın altında (dosya salt okunur açılır)
@@ -51,7 +54,7 @@ def sayi(t):
 
 def _satir(grup, malzeme, boyut, adet, damga=False) -> dict | None:
     malzeme = re.sub(r"\s+", " ", str(malzeme or "")).strip()
-    if not malzeme or PERSONEL.search(malzeme):
+    if not malzeme or PERSONEL.search(malzeme) or BASLIK.search(malzeme):
         return None
     s = {"grup": re.sub(r"\s+", " ", str(grup or "")).strip() or None, "malzeme": malzeme,
          "boyut": re.sub(r"\s+", " ", str(boyut)).strip() if boyut not in (None, "") else None, "adet": adet}

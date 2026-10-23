@@ -2,11 +2,13 @@
 
 Sıra her koşuda aynı; bir adım tutmazsa araç `Durdu` ile durur ve sonrakine geçmez (protokol `docs/sartname/prefabrik_kor_test.md`):
 
-1. **Kendi listemiz kayıtlı mı?** Projenin `bizim_liste.json`'u depoda commit'li ve çalışma ağacında değişmemiş olmalı.
+1. **Kendi listemiz kayıtlı mı?** Projenin `bizim_liste.json`'u, `proje.json`'u ve kalem sözlüğü (`sozluk.json`) depoda commit'li ve
+   çalışma ağacında değişmemiş olmalı: gerçek liste okunmadan önce bizim yanımız sabittir.
 2. **Mühür tutuyor mu?** `muhur.json` depoda değişmemiş; kaynak dosyanın baytı ve SHA-256'sı bir kayıtla aynı; kayıt bu projenin ve bir
    yükleme listesinin. Tutmazsa dosyanın içeriği okunmaz (yalnız bayt sayısı ve özet alınır).
 3. **Açılabilir mi?** Kayıt `acik` olmalı. `kor` ya da `kapali` bir kayıt, ancak Patron'un açılış kaydı (`muhur.json` › `acilislar`)
-   varsa ve kayıt kendi listemizin commit'ini taşıyorsa açılır.
+   varsa, kayıt bu dosyanın SHA-256'sını ve kendi listemizin commit'ini taşıyorsa açılır. Kayıttaki sözlük commit'i bugünkünden farklıysa
+   (sözlük açılıştan sonra değişmiş) sonuç ve rapor bunu yazar.
 4. **Okuma** (`oku.py`): başlık bloğu, telefon, personel ve imza satırları okunmaz.
 5. **Eşleme ve otomatik sonuç** (`esle.py`, `sozluk.json`).
 6. **İnsan sınıfı** (`--siniflar`): farkın nedeni araçtan çıkmaz; sınıfı yazılmamış fark "sınıflanmadı" sayılır.
@@ -25,6 +27,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -47,7 +50,7 @@ LISTE = "yükleme listesi"
 
 
 class Durdu(Exception):
-    """Kıyas bir adımda durdu; `adim` 1–3 (kayıt, mühür, açılış) ya da 4 (okuma)."""
+    """Kıyas bir adımda durdu; `adim` 1 (kayıt), 2 (mühür), 3 (açılış) ya da 4 (okuma)."""
 
     def __init__(self, adim: int, neden: str):
         super().__init__(f"adım {adim}: {neden}")
@@ -112,22 +115,35 @@ def muhur_denetle(kaynak: Path, muhur: dict, kod: str) -> dict:
     return kayit
 
 
-def acilabilir_mi(kayit: dict, muhur: dict, kod: str, liste: dict) -> dict:
-    """Adım 3: kayıt açık mı; kör ya da kapalıysa Patron'un açılış kaydı kendi listemizin commit'ini taşıyor mu."""
+def acilabilir_mi(kayit: dict, muhur: dict, kod: str, liste: dict, sozluk: dict | None = None) -> dict:
+    """Adım 3: kayıt açık mı; kör ya da kapalıysa Patron'un açılış kaydı bu dosyanın özetini, kendi listemizin ve sözlüğün commit'ini
+    taşıyor mu. Dönen kayıtta `sozluk_degisti`: açılış kaydındaki sözlük commit'i bugünkü değilse True (kayıtta yoksa None)."""
     durum = kayit["durum"]
     acilis = muhur.get("acilislar", {}).get(kod)
     if durum == "acik":
-        return {"durum": durum, **(acilis or {})}
+        return {"durum": durum, **(acilis or {}), "sozluk_degisti": _sozluk_degisti(acilis, sozluk)}
     if durum in ("kor", "kapali"):
         ad = "kör" if durum == "kor" else "kapalı"
         if not acilis or not str(acilis.get("karar") or "").strip():
             raise Durdu(3, f"{kod} listesi {ad}: Patron'un açılış kaydı yok; liste açılmaz")
+        if acilis.get("sha256") != kayit["sha256"]:
+            raise Durdu(3, f"{kod} açılış kaydı bu dosya için değil (SHA-256 {str(acilis.get('sha256') or 'yok')[:12]}…, dosya "
+                           f"{kayit['sha256'][:12]}…); liste açılmaz")
         c = str(acilis.get("liste_commit") or "")
         if len(c) < 7 or not liste["commit"].startswith(c):
             raise Durdu(3, f"{kod} açılış kaydındaki liste commit'i ({c or 'yok'}) kendi listemizin commit'i değil "
                            f"({liste['commit'][:7]}); liste açılmaz")
-        return {"durum": durum, **acilis}
+        if len(str(acilis.get("sozluk_commit") or "")) < 7:
+            raise Durdu(3, f"{kod} açılış kaydında sözlük commit'i yok; liste açılmaz")
+        return {"durum": durum, **acilis, "sozluk_degisti": _sozluk_degisti(acilis, sozluk)}
     raise Durdu(3, f"kayıt durumu {durum}: liste değil")
+
+
+def _sozluk_degisti(acilis: dict | None, sozluk: dict | None):
+    c = str((acilis or {}).get("sozluk_commit") or "")
+    if len(c) < 7 or not sozluk:
+        return None
+    return not sozluk["commit"].startswith(c)
 
 
 def _proje(proje: Path) -> dict:
@@ -176,12 +192,15 @@ def kiyasla(proje: Path, kaynak: Path, *, kok: Path = KOK, muhur_yol: Path | Non
     sozluk_yol = Path(sozluk_yol) if sozluk_yol else kok / "testler" / "kor" / "sozluk.json"
     P = _proje(proje)
     kod = P["kod"]
-    # 1. kendi listemiz
+    # 1. bizim yanımız: proje kaydı, kendi listemiz ve sözlük commit'li
+    proje_kaydi = kayitli_mi(proje / "proje.json", kok, 1)
     liste_yol = proje / P.get("bizim_liste", "bizim_liste.json")
     liste = kayitli_mi(liste_yol, kok, 1)
     bizim = json.loads(liste_yol.read_text(encoding="utf-8"))
     if bizim.get("kod") != kod:
         raise Durdu(1, f"kendi listemiz {bizim.get('kod')} için; proje {kod}")
+    sozluk_kaydi = kayitli_mi(sozluk_yol, kok, 1)
+    gruplar = esle.sozluk_oku(sozluk_yol)
     # 2. mühür
     muhur_kaydi = kayitli_mi(muhur_yol, kok, 2)
     muhur = muhur_oku(muhur_yol)
@@ -189,7 +208,7 @@ def kiyasla(proje: Path, kaynak: Path, *, kok: Path = KOK, muhur_yol: Path | Non
     if kayit["sha256"] != P["liste_sha256"]:
         raise Durdu(2, f"dosya mühürlü ama {kod}'in kıyas listesi değil (proje.json › liste_sha256); dosya okunmadı")
     # 3. açılış
-    acilis = acilabilir_mi(kayit, muhur, kod, liste)
+    acilis = acilabilir_mi(kayit, muhur, kod, liste, sozluk_kaydi)
     # 4. okuma
     uzanti = kayit.get("uzanti") or Path(kaynak).suffix
     try:
@@ -197,8 +216,6 @@ def kiyasla(proje: Path, kaynak: Path, *, kok: Path = KOK, muhur_yol: Path | Non
     except oku.OkumaHatasi as e:
         raise Durdu(4, str(e)) from None
     # 5. eşleme
-    sozluk_kaydi = kayitli_mi(sozluk_yol, kok, 5)
-    gruplar = esle.sozluk_oku(sozluk_yol)
     r = esle.esle(bizim["satirlar"], gercek, gruplar)
     # 6. sınıf
     S = siniflar_oku(siniflar, kod, kayit["sha256"])
@@ -220,7 +237,8 @@ def kiyasla(proje: Path, kaynak: Path, *, kok: Path = KOK, muhur_yol: Path | Non
     if onceki:
         ol = json.loads(Path(onceki).read_text(encoding="utf-8"))
         once = {"liste": ol, "esle": esle.esle(ol["satirlar"], gercek, gruplar)}
-    return {"proje": P, "kod": kod, "liste": liste, "bizim": bizim, "muhur": muhur_kaydi, "kayit": kayit, "acilis": acilis,
+    return {"proje": P, "proje_kaydi": proje_kaydi, "kod": kod, "liste": liste, "bizim": bizim, "muhur": muhur_kaydi, "kayit": kayit,
+            "acilis": acilis,
             "sozluk": {**sozluk_kaydi, "surum": json.loads(sozluk_yol.read_text(encoding="utf-8")).get("surum")},
             "gercek": gercek, "esle": r, "sinif": sinif, "sinif_sayilari": sinif_sayilari, "once": once,
             "kiyas_commit": _git(kok, "rev-parse", "HEAD").stdout.strip()}
@@ -234,24 +252,29 @@ def tutanlar(k: dict) -> list[dict]:
         if x["sonuc"] not in esle.DOGRU or anahtar in gorulen:
             continue
         gorulen.add(anahtar)
-        out.append({"grup": x["grup"], "ad": x["ad"], "b_anahtar": x["b_anahtar"], "deger": x["G"], "gercek_satir": x["n_g"],
-                    "sonuc": x["sonuc"], "bizim": [{"kalem": bizim[j]["kalem"], "olcu": bizim[j]["olcu"]} for j in x["bizim"]]})
+        t = {"grup": x["grup"], "ad": x["ad"], "b_anahtar": x["b_anahtar"], "eslesme": x["eslesme"], "deger": x["G"],
+             "sonuc": x["sonuc"], "bizim": [{"kalem": bizim[j]["kalem"], "olcu": bizim[j]["olcu"]} for j in x["bizim"]]}
+        if x["eslesme"] == "kalan":
+            t["grup_olculeri"] = sorted(esle.olcu(bizim[j]["olcu"]) for j in x["grup_bizim"])
+        out.append(t)
     return out
 
 
 def sonuc_kaydi(k: dict) -> dict:
     P = k["proje"]
     return {
-        "aciklama": ("Kör test sonucu (BK-12 PR-3). Yalnız tutan satırlar: anahtar ve adet (bizim adedimiz). Tutmayan satırların "
-                     "gerçek değeri depoya girmez. Gerileme kapısı `test_kor_kiyas.py`; yeniden sayım tam koşuda."),
+        "aciklama": ("Kör test sonucu (BK-12 PR-3). Yalnız tutan satırlar: grup, bizim ölçü anahtarımız, eşleme türü, adet (bizim "
+                     "adedimiz) ve kıyas anındaki bizim satırlarımız (kalem, ölçü). Tutmayan satırların gerçek değeri depoya girmez; "
+                     "sayilar kıyasın özetidir (kaç gerçek satır doğru, farklı, bizde yok). Gerileme kapısı `test_kor_kiyas.py`; yeniden "
+                     "sayım tam koşuda."),
         "kod": k["kod"], "ap": P.get("ap"), "kip": P["kip"], "kapi": bool(P.get("kapi", True)), "not": P.get("not"),
         "tarih": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
         "kiyas_commit": k["kiyas_commit"],
         "bizim_liste": {"yol": k["liste"]["yol"], "commit": k["liste"]["commit"], "uretici_surum": k["bizim"].get("uretici_surum")},
         "muhur": {"sha256": k["kayit"]["sha256"], "bayt": k["kayit"]["bayt"], "durum": k["kayit"]["durum"],
                   "muhur_commit": k["muhur"]["commit"]},
-        "sozluk": {"surum": k["sozluk"]["surum"], "commit": k["sozluk"]["commit"]},
-        "gercek_satir": len(k["gercek"]),
+        "sozluk": {"surum": k["sozluk"]["surum"], "commit": k["sozluk"]["commit"],
+                   "acilistan_sonra_degisti": k["acilis"]["sozluk_degisti"]},
         "sayilar": k["esle"]["sayilar"],
         "sinif_sayilari": k["sinif_sayilari"],
         "tutanlar": tutanlar(k),
@@ -307,15 +330,23 @@ def rapor_satirlari(k: dict) -> tuple[list[dict], list[dict]]:
     return satirlar, fazla
 
 
+def _surum(t) -> str:
+    """Sürüm yazısının başı: "1.5 (22 Ekim 2026; …)" → "1.5 (22 Ekim 2026)"."""
+    m = re.match(r"^([^ (]+)\s*\(([^;)]*)", str(t or ""))
+    return maske(f"{m.group(1)} ({m.group(2).strip()})" if m else str(t or "—"))
+
+
 def _ozet_satirlari(k: dict) -> list[tuple[str, str]]:
     s, P, b = k["esle"]["sayilar"], k["proje"], k["bizim"]
     m2 = (b.get("girdi_ozeti") or {}).get("brut_m2")
     out = [("Proje", k["kod"] + (f" ({P['ap']})" if P.get("ap") else "")), ("Kip", P["kip"]),
            ("Brüt alan", f"{_sayi(round(m2, 2))} m²" if m2 else "—"),
            ("Kendi listemiz", f"{k['liste']['yol']} · commit {k['liste']['commit'][:7]} ({k['liste']['tarih']})"),
-           ("Üreteç", maske(b.get("uretici_surum", ""))[:60]),
+           ("Üreteç", _surum(b.get("uretici_surum"))),
            ("Mühür", f"SHA-256 {k['kayit']['sha256'][:12]}… · {k['kayit']['bayt']} bayt · durum {k['kayit']['durum']}"),
-           ("Sözlük", f"{k['sozluk']['surum']} · commit {k['sozluk']['commit'][:7]}"),
+           ("Sözlük", f"{_surum(k['sozluk']['surum'])} · commit {k['sozluk']['commit'][:7]}"
+                      + (" · AÇILIŞTAN SONRA DEĞİŞTİ (açılışta " + str(k["acilis"].get("sozluk_commit"))[:7] + ")"
+                         if k["acilis"].get("sozluk_degisti") else "")),
            ("Gerçek liste (dolu satır)", str(s["gercek_dolu"])),
            ("Doğru (aynı + ayrım + pafta + aday)", f"{s['dogru']} / {s['gercek_dolu']}")]
     out += [(esle.ADLAR[x], str(s[x])) for x in (*esle.SONUCLAR, "bizde fazla")]
@@ -323,7 +354,7 @@ def _ozet_satirlari(k: dict) -> list[tuple[str, str]]:
     if k["once"]:
         o = k["once"]["esle"]["sayilar"]
         out.append(("13 Ekim listesiyle (aynı araç)", f"{o['dogru']} / {o['gercek_dolu']} · üreteç "
-                    f"{maske(k['once']['liste'].get('uretici_surum', ''))[:40]}"))
+                    f"{_surum(k['once']['liste'].get('uretici_surum'))}"))
     if P.get("not"):
         out.append(("Not", maske(P["not"])))
     return out
