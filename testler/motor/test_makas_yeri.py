@@ -1,6 +1,6 @@
 """BK-12 PR-R · IFC makas yeri (`motor/ifc_uret.py › cati`, makaslar x'i geçince).
 
-Kural: baş makaslar uç duvarların ekseninde (5 cm ve boy − 5 cm), orta makaslar boydan boya kesintisiz koşan saçak duvarının pano
+Kural: baş makaslar uç duvarların ekseninde (dış duvar kalınlığının yarısı: 100'lük duvarda 5 cm ve boy − 5 cm), orta makaslar boydan boya kesintisiz koşan saçak duvarının pano
 eklerinde; PK-01'de paftadaki MK01–MK09 ("125,5 c/c"). İki saçak duvarı da kesintisizse ortak ekler alınır, ekler farklıysa uyarı
 yazılır. Ekler düzenli olmalı (orta makaslar 125,5 arayla, uç açıklıklar 125,5'ten uzun değil, sayı listeyle aynı); değilse ya da
 iki duvar da kesintiliyse eşit aralık kalır (liste sayısında makas, baş makaslar uç duvarların ekseninde), uyarı özete ve IFC'ye
