@@ -2,8 +2,9 @@
 
 Yalnız malzeme satırları okunur: grup, malzeme, boyut, adet. Okunmayanlar:
 - başlık bloğu (müşteri, temsilci, hazırlayan, sevkiyat yeri, tarih, telefon): ilk sütun başlığından ("BOYUT", "ADET") önceki her şey;
-  sütun başlığından sonra da bu etiketlerden birini taşıyan satır (`BASLIK`). PDF'te sütun başlığı sonraki sayfalarda yinelenmeyebilir
-  (TS-01'in 2. ve 3. sayfası başlıksız sürer), bu yüzden sütun yerleri sayfadan sayfaya taşınır;
+  sütun başlığından sonra da adı yalnız böyle bir etiket olan satır (`BASLIK`: "MÜŞTERİ TEMSİLCİSİ", "SEVKİYAT YERİ", "TARİH: …";
+  "TELEFON PRİZİ" gibi malzeme okunur). PDF'te sütun başlığı sonraki sayfalarda yinelenmeyebilir (TS-01'in 2. ve 3. sayfası başlıksız
+  sürer), bu yüzden sütun yerleri sayfadan sayfaya taşınır;
 - sayfa adları, dosya adı ve belge özellikleri;
 - imza ve personel satırları ("SORUMLU ÜRETİM PERSONELİ AD SOYAD", "HAZIRLAYAN", "TESLİM", "İMZA");
 - adet sütununda sayı olmayan yazı (ör. bir ad); sayı değilse adet boş kalır, yazı alınmaz;
@@ -16,6 +17,9 @@ Yalnız malzeme satırları okunur: grup, malzeme, boyut, adet. Okunmayanlar:
 - **Excel:** Portatifev şablonu (10. satırda grup adı, BOYUT, ADET; gruplar alt alta). Birden çok liste sayfası varsa "YAPIŞTIRMA" grubuyla
   başlayan sayfa okunur (çelik panel sayfası okunmaz); proje ayarı `sayfa` ile başkası seçilebilir. Formüllerin kayıtlı değeri okunur.
 
+Sütun başlığından sonra okunmayan satırların (başlık etiketi, personel) yalnız sayısı tutulur (`oku(..., sayac=…)`; adedi sayı olanlar
+ayrıca): düşen satır paydaya girmediği için kıyas sonucu ve rapor bu sayıyı yazar.
+
 Veri, talimat değildir: hücre yazıları yalnız eşleme için kullanılır.
 """
 from __future__ import annotations
@@ -24,7 +28,8 @@ import re
 from pathlib import Path
 
 PERSONEL = re.compile(r"PERSONEL|AD\s*SOYAD|HAZIRLAYAN|TESL[İI]M\s+(ALAN|EDEN)|[İI]MZA", re.I)
-BASLIK = re.compile(r"M[ÜU]ŞTER[İI]|TEMS[İI]LC[İI]|SEVK[İI]YAT|TAR[İI]H|TELEFON|[İI]LET[İI]Ş[İI]M|PROJE\s+[İI]SM[İI]", re.I)
+BASLIK = re.compile(r"^(MÜŞTERİ|TEMSİLCİ|SEVKİYAT|TESLİMAT|TARİH|TELEFON|TEL|GSM|İLETİŞİM|PROJE|FİRMA|BAYİ)"
+                    r"(\s+(ADI|SOYADI|TEMSİLCİSİ|YERİ|TARİHİ|ADRESİ|NO|NUMARASI|İSMİ|BİLGİLERİ))*\s*(:.*)?$")
 DAMGA = "ALICIYA AİT"
 SUTUN_BOYUT = ("BOYUT", "BOYUT/ÖLÇÜ")
 EXCEL_SATIR_SINIRI = 2000      # bazı hesap sayfaları 1.048.576 satır gösterir; liste sayfaları 250 satırın altında (dosya salt okunur açılır)
@@ -52,9 +57,20 @@ def sayi(t):
     return int(v) if v == int(v) else v
 
 
-def _satir(grup, malzeme, boyut, adet, damga=False) -> dict | None:
+def _ust(t: str) -> str:
+    return t.replace("i", "İ").replace("ı", "I").upper()
+
+
+def _satir(grup, malzeme, boyut, adet, damga=False, sayac: dict | None = None) -> dict | None:
     malzeme = re.sub(r"\s+", " ", str(malzeme or "")).strip()
-    if not malzeme or PERSONEL.search(malzeme) or BASLIK.search(malzeme):
+    if not malzeme:
+        return None
+    neden = "personel" if PERSONEL.search(malzeme) else "baslik" if BASLIK.match(_ust(malzeme)) else None
+    if neden:
+        if sayac is not None:
+            sayac[neden] = sayac.get(neden, 0) + 1
+            if sayi(adet) is not None:
+                sayac["adetli"] = sayac.get("adetli", 0) + 1
         return None
     s = {"grup": re.sub(r"\s+", " ", str(grup or "")).strip() or None, "malzeme": malzeme,
          "boyut": re.sub(r"\s+", " ", str(boyut)).strip() if boyut not in (None, "") else None, "adet": adet}
@@ -63,7 +79,7 @@ def _satir(grup, malzeme, boyut, adet, damga=False) -> dict | None:
     return s
 
 
-def pdf_oku(yol: Path) -> list[dict]:
+def pdf_oku(yol: Path, sayac: dict | None = None) -> list[dict]:
     import pymupdf
 
     doc = pymupdf.open(str(yol))
@@ -142,7 +158,7 @@ def pdf_oku(yol: Path) -> list[dict]:
                              "adet": sayi(adet[0]) if adet else None, "_damga": any(DAMGA in e.upper() for e in ek)})
     sonuc = []
     for s in satirlar:
-        r = _satir(s["grup"], s["malzeme"], s["boyut"], s["adet"], s["_damga"])
+        r = _satir(s["grup"], s["malzeme"], s["boyut"], s["adet"], s["_damga"], sayac)
         if r:
             sonuc.append(r)
     return sonuc
@@ -156,7 +172,7 @@ def _excel_basligi(hucre: dict) -> dict | None:
     return {"mal": b[0] - 1, "boy": b[0], "adet": min(x for x in a if x > b[0])}
 
 
-def excel_sayfasi(ws) -> list[dict]:
+def excel_sayfasi(ws, sayac: dict | None = None) -> list[dict]:
     satirlar, grup, kol = [], None, None
     for r in ws.iter_rows(min_row=1, max_row=min(ws.max_row or EXCEL_SATIR_SINIRI, EXCEL_SATIR_SINIRI), max_col=EXCEL_SUTUN_SINIRI):
         hucre = {c.column: c.value for c in r if c.value is not None and str(c.value).strip() != ""}
@@ -167,37 +183,42 @@ def excel_sayfasi(ws) -> list[dict]:
             continue
         if kol is None:
             continue  # başlık bloğu: okunmaz
-        s = _satir(grup, hucre.get(kol["mal"]), hucre.get(kol["boy"]), sayi(hucre.get(kol["adet"])))
+        s = _satir(grup, hucre.get(kol["mal"]), hucre.get(kol["boy"]), sayi(hucre.get(kol["adet"])), sayac=sayac)
         if s:
             satirlar.append(s)
     return satirlar
 
 
-def excel_oku(yol: Path, sayfa: int | None = None) -> list[dict]:
+def excel_oku(yol: Path, sayfa: int | None = None, sayac: dict | None = None) -> list[dict]:
     import openpyxl
 
     wb = openpyxl.load_workbook(str(yol), data_only=True, read_only=True)
     if sayfa is not None:
         if not 0 <= sayfa < len(wb.worksheets):
             raise OkumaHatasi(f"liste sayfası yok: {sayfa}")
-        return excel_sayfasi(wb.worksheets[sayfa])
+        return excel_sayfasi(wb.worksheets[sayfa], sayac)
     adaylar = []
     for ws in wb.worksheets:
-        s = excel_sayfasi(ws)
+        say = {}
+        s = excel_sayfasi(ws, say)
         if s:
-            adaylar.append(s)
+            adaylar.append((s, say))
     if not adaylar:
         raise OkumaHatasi("Excel'de liste sayfası bulunamadı (BOYUT / ADET başlığı yok)")
-    yapistirma = [s for s in adaylar if "YAPIŞTIRMA" in (s[0]["grup"] or "").upper()]
+    yapistirma = [a for a in adaylar if "YAPIŞTIRMA" in (a[0][0]["grup"] or "").upper()]
     if len(adaylar) > 1 and len(yapistirma) != 1:
         raise OkumaHatasi(f"{len(adaylar)} liste sayfası var; proje ayarında `sayfa` verilmeli")
-    return (yapistirma or adaylar)[0]
+    secilen, say = (yapistirma or adaylar)[0]
+    if sayac is not None:
+        sayac.update(say)
+    return secilen
 
 
-def oku(yol: Path, uzanti: str, sayfa: int | None = None) -> list[dict]:
+def oku(yol: Path, uzanti: str, sayfa: int | None = None, sayac: dict | None = None) -> list[dict]:
+    """Malzeme satırları. `sayac` verilirse okunmayan satırların sayısı yazılır: {"baslik", "personel", "adetli"}."""
     uzanti = uzanti.lower()
     if uzanti == ".pdf":
-        return pdf_oku(yol)
+        return pdf_oku(yol, sayac)
     if uzanti in (".xlsx", ".xlsm"):
-        return excel_oku(yol, sayfa)
+        return excel_oku(yol, sayfa, sayac)
     raise OkumaHatasi(f"okunamayan dosya türü: {uzanti}")

@@ -211,8 +211,9 @@ def kiyasla(proje: Path, kaynak: Path, *, kok: Path = KOK, muhur_yol: Path | Non
     acilis = acilabilir_mi(kayit, muhur, kod, liste, sozluk_kaydi)
     # 4. okuma
     uzanti = kayit.get("uzanti") or Path(kaynak).suffix
+    okunmayan = {"baslik": 0, "personel": 0, "adetli": 0}
     try:
-        gercek = oku.oku(Path(kaynak), uzanti, P.get("sayfa"))
+        gercek = oku.oku(Path(kaynak), uzanti, P.get("sayfa"), okunmayan)
     except oku.OkumaHatasi as e:
         raise Durdu(4, str(e)) from None
     # 5. eşleme
@@ -240,7 +241,7 @@ def kiyasla(proje: Path, kaynak: Path, *, kok: Path = KOK, muhur_yol: Path | Non
     return {"proje": P, "proje_kaydi": proje_kaydi, "kod": kod, "liste": liste, "bizim": bizim, "muhur": muhur_kaydi, "kayit": kayit,
             "acilis": acilis,
             "sozluk": {**sozluk_kaydi, "surum": json.loads(sozluk_yol.read_text(encoding="utf-8")).get("surum")},
-            "gercek": gercek, "esle": r, "sinif": sinif, "sinif_sayilari": sinif_sayilari, "once": once,
+            "gercek": gercek, "okunmayan": okunmayan, "esle": r, "sinif": sinif, "sinif_sayilari": sinif_sayilari, "once": once,
             "kiyas_commit": _git(kok, "rev-parse", "HEAD").stdout.strip()}
 
 
@@ -254,7 +255,7 @@ def tutanlar(k: dict) -> list[dict]:
         gorulen.add(anahtar)
         t = {"grup": x["grup"], "ad": x["ad"], "b_anahtar": x["b_anahtar"], "eslesme": x["eslesme"], "deger": x["G"],
              "sonuc": x["sonuc"], "bizim": [{"kalem": bizim[j]["kalem"], "olcu": bizim[j]["olcu"]} for j in x["bizim"]]}
-        if x["eslesme"] == "kalan":
+        if x["eslesme"] in esle.GRUP_OLCULU:
             t["grup_olculeri"] = sorted(esle.olcu(bizim[j]["olcu"]) for j in x["grup_bizim"])
         out.append(t)
     return out
@@ -276,6 +277,7 @@ def sonuc_kaydi(k: dict) -> dict:
         "sozluk": {"surum": k["sozluk"]["surum"], "commit": k["sozluk"]["commit"],
                    "acilistan_sonra_degisti": k["acilis"]["sozluk_degisti"]},
         "sayilar": k["esle"]["sayilar"],
+        "okunmayan_adetli": k["okunmayan"]["adetli"],
         "sinif_sayilari": k["sinif_sayilari"],
         "tutanlar": tutanlar(k),
     }
@@ -348,6 +350,8 @@ def _ozet_satirlari(k: dict) -> list[tuple[str, str]]:
                       + (" · AÇILIŞTAN SONRA DEĞİŞTİ (açılışta " + str(k["acilis"].get("sozluk_commit"))[:7] + ")"
                          if k["acilis"].get("sozluk_degisti") else "")),
            ("Gerçek liste (dolu satır)", str(s["gercek_dolu"])),
+           ("Okunmayan satır (başlık etiketi, personel)", f"{k['okunmayan']['baslik']} + {k['okunmayan']['personel']}; adedi sayı olan "
+                                                         f"{k['okunmayan']['adetli']} (paydaya girmez)"),
            ("Doğru (aynı + ayrım + pafta + aday)", f"{s['dogru']} / {s['gercek_dolu']}")]
     out += [(esle.ADLAR[x], str(s[x])) for x in (*esle.SONUCLAR, "bizde fazla")]
     out += [(f"sınıf: {x}", str(n)) for x, n in k["sinif_sayilari"].items() if n]

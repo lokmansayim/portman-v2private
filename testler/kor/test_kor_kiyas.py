@@ -156,6 +156,8 @@ def test_baslik_blogu_ve_personel_okunmaz(depo, tmp_path):
     assert UYDURMA_AD not in metin and "000 07 77" not in metin
     assert [s["malzeme"] for s in k["gercek"]] == [m for m, *_ in GERCEK] + ["DENEME KALEM H"]
     assert k["gercek"][-1]["adet"] is None                             # adet sütunundaki yazı alınmaz
+    assert k["okunmayan"] == {"baslik": 2, "personel": 1, "adetli": 2}   # okunmayan satırların yalnız sayısı
+    assert K.sonuc_kaydi(k)["okunmayan_adetli"] == 2
     K.rapor_md(k, tmp_path / "r.md")
     K.rapor_xlsx(k, tmp_path / "r.xlsx")
     import openpyxl
@@ -164,6 +166,18 @@ def test_baslik_blogu_ve_personel_okunmaz(depo, tmp_path):
     for t in ((tmp_path / "r.md").read_text(encoding="utf-8"), hucre, " ".join(wb.sheetnames), "liste.xlsx"):
         assert UYDURMA_AD not in t and "000 07 77" not in t
     assert "liste.xlsx" not in (tmp_path / "r.md").read_text(encoding="utf-8")   # dosya adı yazılmaz
+    assert "| Okunmayan satır (başlık etiketi, personel) | 2 + 1; adedi sayı olan 2 (paydaya girmez) |" in (tmp_path / "r.md").read_text(
+        encoding="utf-8")
+
+
+@pytest.mark.parametrize("malzeme, okunur", [
+    ("MÜŞTERİ TEMSİLCİSİ", False), ("SEVKİYAT YERİ", False), ("Tarih: 23.10.2026", False), ("PROJE İSMİ", False),
+    ("Müşteri Adı Soyadı", False), ("TELEFON PRİZİ", True), ("PVC PENCERE (MÜŞTERİYE AİT)", True), ("SEVKİYAT PALETİ", True)])
+def test_baslik_etiketi_yalniz_etiketse_okunmaz(malzeme, okunur):
+    """Başlık süzgeci satırın adı yalnız bir etiketse düşürür; etiket sözcüğünü taşıyan malzeme okunur (hakem 2. tur, bulgu 3)."""
+    sayac = {}
+    assert (oku._satir(None, malzeme, None, 1, sayac=sayac) is not None) == okunur
+    assert sayac == ({} if okunur else {"baslik": 1, "adetli": 1})
 
 
 @pytest.mark.parametrize("bozma", ["bir_bayt", "eksik_bayt", "bos"])
@@ -296,6 +310,34 @@ def test_toplanan_grupta_olcu_kumesi_kiyaslanir(tmp_path):
         _gruplar(tmp_path, {**TOPLAM, "olcu_serbest": True})                       # gerekçesiz olmaz
 
 
+def test_toplanan_grupta_olcu_basina_toplam(tmp_path):
+    """Aynı kalemin iki ölçüsünde adetler ters dağılırsa toplam ve ölçü kümesi tutar, ölçü başına toplam tutmaz (hakem 2. tur, 4a)."""
+    g = _gruplar(tmp_path, TOPLAM)
+    gercek = [("DENEME TOPLAM", "300 X 2500", 4), ("DENEME TOPLAM", "500 X 3000", 6)]
+    tutan = [{"kalem": "Deneme toplam", "olcu": "300 × 2500", "adet": 4}, {"kalem": "Deneme toplam", "olcu": "500 × 3000", "adet": 6}]
+    ters = [{**tutan[0], "adet": 6}, {**tutan[1], "adet": 4}]
+    assert _sonuc(tutan, gercek, g) == ["ayrım", "ayrım"]
+    assert _sonuc(ters, gercek, g) == ["farklı", "farklı"]
+    serbest = _gruplar(tmp_path, {**TOPLAM, "olcu_serbest": True, "not": "uydurma gerekçe"})
+    assert _sonuc(ters, gercek, serbest) == ["ayrım", "ayrım"]
+
+
+def test_her_satir_grubunda_olcu(tmp_path):
+    """`her_satir`: gerçek satırın sayılı ölçüsünün bizim sayılı ölçülerimizden birinde eşi olmalı."""
+    g = _gruplar(tmp_path, {"ad": "Deneme takım", "bizim": ["^DENEME TAKIM"], "gercek": ["^DENEME TAKIM"], "olcu": "her_satir"})
+    gercek = [("DENEME TAKIM LAVABO", "600 X 450", 1), ("DENEME TAKIM BATARYA", "ADET", 1)]
+    assert _sonuc([{"kalem": "Deneme takım", "olcu": "600 × 450", "adet": 1}], gercek, g) == ["aynı", "aynı"]
+    assert _sonuc([{"kalem": "Deneme takım", "olcu": "800 × 450", "adet": 1}], gercek, g) == ["farklı", "aynı"]
+    assert _sonuc([{"kalem": "Deneme takım", "olcu": "ADET", "adet": 1}], gercek, g) == ["aynı", "aynı"]
+
+
+def test_birim_cevirisi_cm_mm(tmp_path):
+    """Sayıları 10 katı olan ölçü aynı sayılır (cm ↔ mm; çelik kapı 90*200 ↔ 900 × 2000); beyanlı: 100 × 100 ↔ 1000*1000 de."""
+    assert _sonuc([{"kalem": "Deneme kapı", "olcu": "900 × 2000", "adet": 2}], [("DENEME KAPI", "90*200", 2)], []) == ["aynı"]
+    assert _sonuc([{"kalem": "Deneme kapı", "olcu": "900 × 2000", "adet": 2}], [("DENEME KAPI", "90*210", 2)], []) == ["farklı"]
+    assert esle.esdeger("100 × 100", "1000*1000") and not esle.ayni_olcu("100 × 100", "1000*1000")
+
+
 def test_kalan_eslemede_iki_yanda_sayi_varsa_olcu_tutmali(tmp_path):
     """Aynı ad grubunda kalan iki satır eşlenir; iki ölçüde de sayı varsa ve aynı değilse "farklı" (4,2 × 13 ↔ 3,9 × 32)."""
     for bizim, beklenen in [("3,9 × 32", "farklı"), ("1,5 mm", "farklı"), ("ADET", "aynı"), ("4,2 × 13", "aynı")]:
@@ -369,13 +411,14 @@ def test_kayitta_bizim_degerimizden_baska_deger_yok(pd, sozluk):
     kayit, bizim = _oku(pd / "sonuc.json"), _oku(pd / "bizim_liste.json")
     assert kayit["kod"] == bizim["kod"] == _oku(pd / "proje.json")["kod"]
     assert set(kayit) == {"aciklama", "kod", "ap", "kip", "kapi", "not", "tarih", "kiyas_commit", "bizim_liste", "muhur", "sozluk",
-                          "sayilar", "sinif_sayilari", "tutanlar"}
+                          "sayilar", "okunmayan_adetli", "sinif_sayilari", "tutanlar"}
+    assert kayit["okunmayan_adetli"] == 0                               # açık sekiz listede adedi sayı olan satır düşmedi
     assert kayit["sayilar"]["dogru"] == sum(kayit["sayilar"][s] for s in esle.DOGRU)
     assert kayit["bizim_liste"]["commit"] == K.kayitli_mi(pd / "bizim_liste.json")["commit"]
     for t in kayit["tutanlar"]:
         assert set(t) <= {"grup", "ad", "b_anahtar", "eslesme", "deger", "sonuc", "bizim", "grup_olculeri"}, t
         assert t["sonuc"] in esle.DOGRU and t["eslesme"] in ("anahtar", "esdeger", "tolerans", "kalan", "toplam", "her_satir")
-        assert ("grup_olculeri" in t) == (t["eslesme"] == "kalan")
+        assert ("grup_olculeri" in t) == (t["eslesme"] in esle.GRUP_OLCULU)
         assert all(set(b) == {"kalem", "olcu"} for b in t["bizim"])
     bozuk = [(t, esle.kapi_denetle(bizim["satirlar"], sozluk, t)[1]) for t in kayit["tutanlar"]
              if esle.tutuyor_mu(bizim["satirlar"], sozluk, t) is None]
@@ -431,6 +474,41 @@ def test_kapi_toplanan_grupta_olcuyu_ve_satirlari_korur(sozluk, bugun):
     assert esle.kapi_denetle(L["satirlar"], sozluk, t)[1].startswith("yeni satır")
 
 
+def test_kapi_kayittaki_sonucun_sutununu_ister(sozluk, bugun):
+    """Varsayılan adetle tutmuş satırın adedi bozulursa, pafta ya da aday sütunu kayıttaki değeri taşısa da kapı durur (hakem 2. tur, 1)."""
+    adaylar = []
+    for pd in PROJELER:
+        L = json.loads(json.dumps(bugun[pd.name]))
+        for t in _oku(pd / "sonuc.json")["tutanlar"]:
+            sec = esle.bizim_secimi(L["satirlar"], sozluk, t)
+            if t["sonuc"] == "aynı" and len(sec) == 1 and t["deger"] in (sec[0].get("pafta"), sec[0].get("aday")):
+                adaylar.append((pd.name, L, t, sec[0]))
+    assert adaylar                                                       # bugün böyle satırlar var (TS-01 tavan alçıpanı gibi)
+    for ad, L, t, s in adaylar:
+        s["adet"] += 5
+        sonuc, neden = esle.kapi_denetle(L["satirlar"], sozluk, t)
+        assert sonuc is None and neden.startswith("adet"), (ad, t["grup"] or t["ad"])
+        s["adet"] -= 5
+        assert esle.tutuyor_mu(L["satirlar"], sozluk, t) == "aynı"
+    ad, L, t, s = adaylar[0]
+    s["adet"] += 5                                                       # pafta ya da aday tutmuş kayıtta varsayılanın değişmesi kapıyı durdurmaz
+    assert esle.tutuyor_mu(L["satirlar"], sozluk, {**t, "sonuc": "aday"}) in ("pafta", "aday")
+
+
+def test_kapi_tolerans_eslemede_grubun_olculerini_korur(sozluk, bugun):
+    """Tolerans eşlemesiyle tutmuş satırın grubuna yeni boy gelirse gerçek satırı o alabilir: kapı durur (hakem 2. tur, 2)."""
+    for pd in PROJELER:
+        L = json.loads(json.dumps(bugun[pd.name]))
+        t = next((t for t in _oku(pd / "sonuc.json")["tutanlar"] if t["eslesme"] == "tolerans"), None)
+        if t:
+            break
+    assert t, "tolerans eşlemeli tutan yok"
+    assert esle.tutuyor_mu(L["satirlar"], sozluk, t)
+    s = esle.bizim_secimi(L["satirlar"], sozluk, t)[0]
+    L["satirlar"].append({**s, "olcu": s["olcu"] + "1", "adet": 1})
+    assert esle.kapi_denetle(L["satirlar"], sozluk, t)[1].startswith("grubun ölçüleri değişti")
+
+
 def test_kapi_kalan_eslemede_grubun_olculerini_korur(sozluk, bugun):
     """Kalan eşlemeyle tutmuş satırda gruba eklenen satır eşlemeyi değiştirir: kapı durur."""
     kayit, L = _ts01(bugun)
@@ -471,7 +549,7 @@ def test_tam_kosu_sonuc_kayitla_ayni(pd, tmp_path):
     kaynak = _kaynak_bul(kayit["muhur"])
     k = K.kiyasla(pd, kaynak)
     yeni = K.sonuc_kaydi(k)
-    assert (yeni["sayilar"], yeni["tutanlar"]) == (kayit["sayilar"], kayit["tutanlar"])
+    assert (yeni["sayilar"], yeni["okunmayan_adetli"], yeni["tutanlar"]) == (kayit["sayilar"], kayit["okunmayan_adetli"], kayit["tutanlar"])
     assert yeni["bizim_liste"]["commit"] == kayit["bizim_liste"]["commit"]
     b = bytearray(kaynak.read_bytes())
     b[len(b) // 3] ^= 0x01
