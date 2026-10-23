@@ -720,6 +720,7 @@ def _kur(is_emri: dict) -> Plan:
                 uyarilar.append(f"Duvar {d.id}: {p.boy} cm'lik uzun özel pano (125,5 üstü) — doğrulanmalı")
 
     # ---------------- açıklıklar
+    genis_pencereler = []                                     # BK-13: (duvar, ızgara panosu, odanın duvar aralığı, açıklık)
     for i_ac, ac in enumerate(acikliklar):
         tur = ac["tur"]
         if "konum_cm" in ac or "hizalama" in ac:               # İE-11 madde 4 (cm konumlu / odada ortalı açıklık) PR-2'ye ertelendi; sessizce yutulmaz (K21)
@@ -778,9 +779,9 @@ def _kur(is_emri: dict) -> Plan:
         d, p = panolar[idx]
         if p.acilim:
             raise IsEmriHatasi(f"Aynı panoya iki açıklık: {ac}")
-        if pk is not None and pk.pano == 2:                     # BK-13: panodan geniş pencere komşu tam panoyla 251'lik panoda
-            p = _genis_pencere_panosu(d, p, next(((lo, hi) for dd, lo, hi in pano_araliklari if dd is d and lo - 1e-6 <= p.a0 and p.a1 <= hi + 1e-6), None), ac)
-        if acl.genislik > p.boy - 4:
+        if pk is not None and pk.pano == 2:                     # BK-13: panodan geniş pencere; komşusu bütün açıklıklar yerleşince seçilir
+            genis_pencereler.append((d, p, next(((lo, hi) for dd, lo, hi in pano_araliklari if dd is d and lo - 1e-6 <= p.a0 and p.a1 <= hi + 1e-6), None), ac))
+        elif acl.genislik > p.boy - 4:
             raise IsEmriHatasi(f"Açıklık panodan geniş: {ac} (pano {p.boy})")
         if tur != "pencere":
             acl.icine_normal = _normal_from_to(d, a, b)
@@ -788,6 +789,10 @@ def _kur(is_emri: dict) -> Plan:
             raise IsEmriHatasi(f"Açıklıkta dograma yalnız \"alıcıya ait\" olabilir: {ac}")
         acl.dograma = ac.get("dograma")           # İE-11: "alıcıya ait" → boşluk var, doğrama blok olarak çizilir, BOM satırı işaretli (listeye girmez)
         p.acilim = acl
+    for d, p, aralik, ac in genis_pencereler:                 # BK-13: komşu tam panoyla 251'lik pano. Sonra: İş Emri'nin pano dizinleri ızgaraya göre
+        yeni = _genis_pencere_panosu(d, p, aralik, ac)        # kalır ve komşu kuralı listede sonra yazılan açıklıkları da görür (geometri hakemi, 23 Ekim)
+        if yeni.acilim.genislik > yeni.boy - 4:
+            raise IsEmriHatasi(f"Açıklık panodan geniş: {ac} (pano {yeni.boy})")
 
     # ---------------- veranda dikmeleri (İş Emri'nde cm konum: sol-alt köşe, 10×10)
     dikmeler = [(float(x), float(y), float(x) + 10.0, float(y) + 10.0) for x, y in is_emri.get("dikmeler", [])]
@@ -1042,7 +1047,7 @@ def _genis_pencere_panosu(d: "Duvar", p: Pano, aralik: Optional[tuple], ac: dict
             q = d.panolar[j]
             if tam(q) and q.acilim is None and q.a0 >= lo - 1e-6 and q.a1 <= hi + 1e-6:
                 a, b = min(i, j), max(i, j)
-                yeni = Pano(d, d.panolar[a].a0, d.panolar[b].a1)
+                yeni = Pano(d, d.panolar[a].a0, d.panolar[b].a1, p.acilim)
                 d.panolar[a:b + 1] = [yeni]
                 return yeni
     raise IsEmriHatasi(f"Panodan geniş pencere için yanında tam pano yok (sonraki ya da önceki pano 125,5, açıklıksız ve aynı odada olmalı): {ac}")

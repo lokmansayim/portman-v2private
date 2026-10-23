@@ -154,8 +154,8 @@ class Cizici:
 
     def _pencere_blok(self, olcu):
         """(sarmalayıcı blok adı, malzeme kodu, kaynak blok, doğal yön, kutu). Bugünkü üç ölçü `_dograma_bloklari`'nın bloğu (aynen);
-        BK-13: başka ölçüde kaynak 120x120 (en ≤ 60 ise 60x40) sembolü duvar boyunca en'e ölçeklenir (kalınlık ve yazı boyu aynı), ölçü
-        yazısı "en/boy" olur. Kod ilk kullanımda tahsis edilir (yalnız bugünkü üç ölçüyü kullanan çizimde yeni kod yok)."""
+        BK-13: başka ölçüde kaynak 120x120 (en ≤ 60 ise 60x40) sembolü duvar boyunca en'e ölçeklenir (kalınlık aynı; yazı boyu kaynaktan
+        dar pencerede küçülür), ölçü yazısı "en/boy" olur. Kod ilk kullanımda tahsis edilir (yalnız bugünkü üç ölçüyü kullanan çizimde yeni kod yok)."""
         if olcu in PENCERE_KAYNAK:
             src, nat, bb = PENCERE_KAYNAK[olcu]; name, kod = self.dograma[olcu]
             return name, kod, src, nat, bb
@@ -168,8 +168,8 @@ class Cizici:
             kblk = self.doc.blocks.new(src)
             for e in self.doc.blocks.get(tsrc):
                 c = e.copy()
-                if c.dxftype() == "TEXT":
-                    x, y, z = c.dxf.insert; c.dxf.insert = (x, y * k, z); c.dxf.text = f"{pk.en}/{pk.boy}"
+                if c.dxftype() == "TEXT":                         # dar pencerede yazı da küçülür, sembolden taşmaz (geometri hakemi, 23 Ekim)
+                    x, y, z = c.dxf.insert; c.dxf.insert = (x, y * k, z); c.dxf.text = f"{pk.en}/{pk.boy}"; c.dxf.height *= min(1.0, k)
                 else:
                     c.transform(Matrix44.scale(1.0, k, 1.0))
                 kblk.add_entity(c)

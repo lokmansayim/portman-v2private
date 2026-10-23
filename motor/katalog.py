@@ -22,9 +22,10 @@ def pencere_turu(olcu: str) -> str:
 
 def _kind_from_label(label: str) -> str:
     l = label.replace("İ", "i").replace("I", "ı").lower()
-    if "120×120" in l or "120x120" in l: return "P01"
-    if "120×180" in l or "120x180" in l: return "P02"
-    if "60×40" in l or "60x40" in l: return "P03"
+    olc = lambda o: re.search(rf"(?<!\d){o}(?!\d)", l.replace("x", "×"))   # BK-13: "160×40" P03 değil
+    if olc("120×120"): return "P01"
+    if olc("120×180"): return "P02"
+    if olc("60×40"): return "P03"
     m = re.search(r"(\d+)×(\d+) (?:pencereli|vasistaslı) pano", l)       # BK-13: öteki ölçülerin etiketi
     if m: return f"P{int(m[1])}x{int(m[2])}"
     if "kapısız" in l: return "OPEN"

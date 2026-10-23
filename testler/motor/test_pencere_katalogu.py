@@ -3,6 +3,8 @@
 - Her ölçü tek kuraldan (`geometry.pencere_kurali`): "ENxBOY" tam cm, en 30–247, boy 20–180; eşik = 200 − boy; en 121,5'i geçerse pencere
   iki panoluk 251'lik pencereli panoda.
 - Komşu kuralı (CIO notu 2): önce dizilim yönünde sonraki pano, olmazsa önceki; tam boy, açıklıksız, aynı odanın duvar aralığında. Yoksa hata.
+  Birleşme bütün açıklıklar yerleşince: İş Emri'nin pano dizinleri ızgaraya göre kalır, sonuç açıklıkların yazılış sırasına bağlı değil
+  (geometri hakemi, 23 Ekim).
 - Bugünkü üç ölçü (120x120, 120x180, 60x40) eskisi gibi: eşik, yazı, kod ve blok adları aynı; yalnız bunları kullanan çizimde yeni kod
   tahsis edilmez (CIO notu 3). Çıktıların bayt bayt aynılığı referans gerilemesinde (`dogrula.py`, DXF/PDF içerik izleri).
 - Deneme girdisi: ALTIN 6×8 İş Emri'nin pencereleri T76'nın dört ölçüsü (150x140, 60x60, 120x150, 180x150) ve PK-07'nin 100x120'si
@@ -43,6 +45,10 @@ def _deneme() -> dict:
 
 def _pencereler(plan) -> dict:
     return {p.acilim.olcu: p for p in plan.panolar if p.acilim and p.acilim.tur == "pencere"}
+
+
+def _yerler(plan) -> list:
+    return sorted((p.acilim.tur, p.acilim.olcu, p.a0, p.a1) for p in plan.panolar if p.acilim)
 
 
 # --------------------------------------------------------------------------- kural
@@ -106,15 +112,52 @@ def test_komsu_sonraki_yoksa_onceki():
 
 
 def test_komsu_yoksa_hata():
-    """BANYO sağ duvarında iki pano: ilki açıklıklı, sonraki ODA 2'nin aralığında → "yanında tam pano yok"."""
-    ie = _oku(ALTIN)
-    ie["acikliklar"].insert(5, {"tur": "pencere", "olcu": "60x40", "mahal": "BANYO / WC", "duvar": "sag", "pano": 0})
-    ie["acikliklar"][6]["olcu"] = "150x140"                                     # BANYO'nun asıl penceresi (pano 1)
-    with pytest.raises(G.IsEmriHatasi, match="yanında tam pano yok"):
-        G.kur(ie)
-    ie["acikliklar"].pop(5)                                                   # önceki boşsa önceki alınır
+    """BANYO sağ duvarında iki pano: ilki açıklıklı, sonraki ODA 2'nin aralığında → "yanında tam pano yok". Dolu panonun açıklığı
+    listede geniş pencereden önce de sonra da yazılsa aynı."""
+    vasistas = {"tur": "pencere", "olcu": "60x40", "mahal": "BANYO / WC", "duvar": "sag", "pano": 0}
+    for yer in (5, 6):
+        ie = _oku(ALTIN); ie["acikliklar"][5]["olcu"] = "150x140"            # BANYO'nun asıl penceresi (pano 1)
+        ie["acikliklar"].insert(yer, dict(vasistas))
+        with pytest.raises(G.IsEmriHatasi, match="yanında tam pano yok"):
+            G.kur(ie)
+    ie = _oku(ALTIN); ie["acikliklar"][5]["olcu"] = "150x140"                # önceki boşsa önceki alınır
     p = _pencereler(G.kur(ie))["150x140"]
     assert (p.a0, p.a1) == (381.5, 632.5)
+
+
+@pytest.mark.parametrize("girdi, sil, kapi, pencere, beklenen", [
+    # TEST01 ön cephe: pencere pano 2, dış kapı pano 3 (sonraki dolu → önceki); kapı kaymaz
+    ("is_emri/adaylar/TEST01.json", 5, 10, 4, {"dis_kapi": (763.0, 888.5), "pencere": (512.0, 763.0)}),
+    # P6001 ön cephe: dış kapı pano 2; pano dizini birleşmeden etkilenmez (eskiden "aralık dışı" hatası)
+    ("is_emri/P6001_2plus1_6x6.json", None, 5, 1, {"dis_kapi": (261.0, 386.5), "pencere": (10.0, 261.0)})])
+def test_sonra_yazilan_aciklik_yerinde_kalir(girdi, sil, kapi, pencere, beklenen):
+    """Geometri hakemi (23 Ekim): komşu kuralı listede sonra yazılan açıklığı da görür; o açıklığın pano dizini ızgaraya göre kalır."""
+    ie = _oku(KOK / girdi)
+    if sil is not None:
+        del ie["acikliklar"][sil]
+    if girdi.endswith("TEST01.json"):
+        ie["acikliklar"][kapi]["pano"] = 3
+    taban_kapi = next(p for p in G.kur(_kopya(ie)).panolar if p.acilim and p.acilim.tur == "dis_kapi")
+    ie["acikliklar"][pencere]["olcu"] = "160x180"
+    plan = G.kur(_kopya(ie))
+    kapi_once = _kopya(ie); kapi_once["acikliklar"].insert(0, kapi_once["acikliklar"].pop(kapi))
+    assert _yerler(plan) == _yerler(G.kur(kapi_once)), "sonuç açıklıkların yazılış sırasına bağlı olmamalı"
+    k = next(p for p in plan.panolar if p.acilim and p.acilim.tur == "dis_kapi")
+    w = _pencereler(plan)["160x180"]
+    assert (k.a0, k.a1) == (taban_kapi.a0, taban_kapi.a1) == beklenen["dis_kapi"]
+    assert (w.a0, w.a1) == beklenen["pencere"] and w.boy == 2 * G.MOD
+
+
+@pytest.mark.parametrize("girdi, sira, olcu, beklenen", [
+    (ALTIN, 3, "180x150", (10.0, 261.0)),          # ön duvar (x), SALON
+    (ALTIN, 1, "150x140", (758.0, 1009.0)),        # sağ duvar (+x dış), ODA 2
+    (PK01, 0, "150x140", (618.5, 869.5))])         # arka-sol: y duvarında "sonraki" arkadan öne (744–869,5 → 618,5–869,5)
+def test_duvar_yonleri(girdi, sira, olcu, beklenen):
+    ie = _oku(girdi)
+    pencereler = [a for a in ie["acikliklar"] if a["tur"] == "pencere"]
+    pencereler[sira]["olcu"] = olcu
+    p = _pencereler(G.kur(ie))[olcu]
+    assert (p.a0, p.a1) == beklenen
 
 
 def test_ayni_girdi_ayni_cikti():
@@ -159,6 +202,8 @@ def test_dxf_dogrulama_ve_semboller(deneme_uret):
         blk = doc.blocks.get(f"kaynak-pencere-{k.en}x{k.boy}")
         assert blk is not None, olcu
         assert [e.dxf.text for e in blk.query("TEXT")] == [f"{k.en}/{k.boy}"]           # ölçü yazısı kaynağın "120/120"si değil
+        temel = 60 if k.en <= 60 else 120                                              # dar pencerede yazı küçülür (sembolden taşmaz)
+        assert abs(blk.query("TEXT")[0].dxf.height - 15.21739130434782 * min(1.0, k.en / temel)) < 1e-9
         ys = [y for e in blk.query("LINE") for y in (e.dxf.start.y, e.dxf.end.y)]
         assert abs(max(ys) - min(ys) - k.en) < 1e-6, olcu                               # sembol duvar boyunca en kadar
     tablo = [e.dxf.text for e in doc.modelspace().query("TEXT") if e.dxf.text.startswith("PVC doğrama")]
