@@ -9,7 +9,8 @@ bu dosya KH-3'ün eklediklerini sınar:
   ölçüsü), zil (lejantta yoksa 0). Aynı yerde iki kez çizilmiş işaret bir sayılır. Konumlar duvar çerçevesinde cm. Sessiz sayı yok:
   lejant renginde ya da ona yakın tonda hiçbir işarete uymayan öğe, içi lejanttakine uymayan duy, glop, BUAT, anahtar ya da sigorta
   ölçüsünde kutu, tırnağı bir ya da iki olmayan anahtar, iki daireye değen ya da ucunda fazla çizgi olan tırnak, ölçüsü tutmayan dolgu,
-  çaprazsız ve BUAT yazısız daire, çaprazı eksik ya da içinde BUAT yazan glop, lejantta çaprazsız glop, sap boyundan yakın ya da
+  çaprazsız ve BUAT yazısız daire, eğrileri çemberin üstünde olmayan daire (eğrilerle çizilmiş elmas, yıldız), çaprazı eksik ya da
+  içinde BUAT yazan glop, lejantta çaprazsız glop, sap boyundan yakın ya da
   birbirine binen iki U, Z biçimli U, işareti ya da etiketi olmayan lejant satırı, lejanttaki zil, lejant alanının hemen altında öğe ya da alanın dışında lejant
   etiketi, yanında priz olmayan ya da başka UYDU'yla aynı prize bağlanan UYDU, üçlü zincir priz, duvar çerçevesinin dışındaki lejant
   renginde öğe, dış ölçüye oturmayan duvar, lejantta tanınmayan sözcük ya da etiketsiz işaret, lejantta olup planda hiç bulunamayan tür
@@ -607,10 +608,11 @@ def _u_acili(e, X, Y, kollar=(0, 0), sap=0, don=0):
 
 
 @pytest.mark.parametrize("ek, kw, neden", [
-    # PDF yolunda işaretin dairesine ya da kutusuna eklenmiş ikinci daire ya da dörtgen; tek yoldaki çaprazın biri kısa
-    (lambda e: e.glop(X_U, Y_U, ic=3), {}, "glop ya da BUAT dairesinin içinde lejanttakine uymayan öğe (1 daire)"),
-    (lambda e: e.buat(X_U, Y_U, ic=3), {}, "glop ya da BUAT dairesinin içinde lejanttakine uymayan öğe (1 daire)"),
-    (lambda e: e.anahtar(X_A, Y_A, 1, ic=2), {}, "anahtar dairesinin içinde lejanttakine uymayan öğe (1 daire)"),
+    # PDF yolunda işaretin dairesine ya da kutusuna eklenmiş ikinci daire ya da dörtgen; tek yoldaki çaprazın biri kısa. 5. turdan beri
+    # içteki dairenin eğrileri çemberin üstünde olmadığından yol daire sayılmaz (önceden yolun yapısı tutmuyordu; ikisi de bekletir)
+    (lambda e: e.glop(X_U, Y_U, ic=3), {}, "glop renginde ve çapında, eğrileri çemberin üstünde olmayan 1 yol (daire değil)"),
+    (lambda e: e.buat(X_U, Y_U, ic=3), {}, "glop renginde ve çapında, eğrileri çemberin üstünde olmayan 1 yol (daire değil)"),
+    (lambda e: e.anahtar(X_A, Y_A, 1, ic=2), {}, "anahtar dairesinin renginde ve çapında, eğrileri çemberin üstünde olmayan 1 yol (daire değil)"),
     (lambda e: e.sigorta(X_U, Y_U, ic=(8, 5)), {}, "sigorta kutusu ölçüsünde, içi lejanttaki işarete uymayan 1 kutu"),
     (lambda e: (e.daire(X_U, Y_U, 9.5), e.yol([((X_U - 6.7, Y_U - 6.7), (X_U + 6.7, Y_U + 6.7)), ((X_U - 2, Y_U + 2), (X_U + 2, Y_U - 2))])),
      {"glop_tek_yol": True}, "glop ya da BUAT dairesinin içinde lejanttakine uymayan öğe (1 daire)"),
@@ -619,19 +621,114 @@ def _u_acili(e, X, Y, kollar=(0, 0), sap=0, don=0):
     (lambda e: _u_acili(e, X_U, Y_U, kollar=(8, -8)), {}, "açıları lejanttakine (kollar 0°, kol–taban 90°, sap–taban 90°) uymayan 1 U"),
     (lambda e: _u_acili(e, X_U, Y_U, kollar=(45, 45)), {}, "açıları lejanttakine (kollar 0°, kol–taban 90°, sap–taban 90°) uymayan 1 U"),
     (lambda e: _u_acili(e, X_U, Y_U, sap=45), {}, "açıları lejanttakine (kollar 0°, kol–taban 90°, sap–taban 90°) uymayan 1 U"),
-    (lambda e: _u_acili(e, *e.priz(X_U, Y_U), don=12, sap=-12), {}, "açıları lejanttakine (kollar 0°, kol–taban 90°, sap–taban 90°) uymayan 1 U"),
+    (lambda e: _u_acili(e, *e.priz(X_U, Y_U), don=12, sap=12), {}, "açıları lejanttakine (kollar 0°, kol–taban 90°, sap–taban 90°) uymayan 1 U"),
     # çift prizin ikinci U'su payın hemen dışında
     (lambda e: _ikinci_u_donuk(e, 10.5), {}, "sapı öbürünün tabanına değen ama yönü farklı 1 U çifti"),
 ], ids=["glop_yolunda_daire", "buat_yolunda_daire", "anahtar_yolunda_daire", "sigorta_yolunda_dortgen", "tek_yolda_kisa_capraz",
         "u_kolu_acik", "u_kollari_8_derece", "u_paralelkenar", "u_sapi_egik", "ikinci_u_sapi_duz", "cift_priz_10_5"])
 def test_yol_ve_u_acisi_bekletir(tmp_path, ek, kw, neden):
     """KH-3 hakeminin 4. turu: işaretin PDF yoluna eklenmiş daire ya da dörtgen, tek yoldaki kısa çapraz; açıları lejanttakine uymayan U
-    (kolu açık; kolları tabanla payın içinde ama birbirine 16° açılı; paralelkenar; sapı eğik; dönük ikinci U'nun sapı düz çizilmiş);
-    ikinci U'su 10,5° dönük çift priz de elektriği bekletir."""
+    (kolu açık; kolları tabanla payın içinde ama birbirine 16° açılı; paralelkenar; sapı eğik; 12° dönük ikinci U'nun sapı birincinin
+    sapıyla aynı yönde); ikinci U'su 10,5° dönük çift priz de elektriği bekletir."""
     o = PO.oku(kh3_sentetik(tmp_path / "s.pdf", ek=ek, **kw), EL)
     t = _teyit(o)
     assert set(t) == {"elektrik"} and neden in t["elektrik"], t
     assert "elektrik" not in o and "makas_bas" in o and "h_plani" in o
+
+
+def _egri_yol(e, X, Y, r, renk, bicim, ters=False):
+    """Dört kübik eğriyle (c) çizilmiş kapalı yol; eğrilerin uçları dairenin dört yanında, kutusu dairenin kutusu. `daire`: çeyrek daireler
+    (`ters` ile öbür yöne çizilir); `elmas`: eğriler düz; `yildiz`: dördü içe bükük; `girintili`: bir çeyreği içe bükük."""
+    uc = [(X + r, Y), (X, Y + r), (X - r, Y), (X, Y - r), (X + r, Y)]
+    k = 0.5523                                                     # çeyrek dairenin kontrol noktası, yarıçapın oranı
+    egriler = []
+    for i in range(4):
+        a, b = uc[i], uc[i + 1]
+        if bicim == "daire":
+            t0, t1 = math.radians(90 * i), math.radians(90 * (i + 1))
+            c1 = (a[0] - k * r * math.sin(t0), a[1] + k * r * math.cos(t0))
+            c2 = (b[0] + k * r * math.sin(t1), b[1] - k * r * math.cos(t1))
+        elif bicim == "yildiz":
+            c1, c2 = (X + (a[0] - X) * 0.2, Y + (a[1] - Y) * 0.2), (X + (b[0] - X) * 0.2, Y + (b[1] - Y) * 0.2)
+        else:
+            c1, c2 = (a[0] + (b[0] - a[0]) / 3, a[1] + (b[1] - a[1]) / 3), (a[0] + 2 * (b[0] - a[0]) / 3, a[1] + 2 * (b[1] - a[1]) / 3)
+            if bicim == "girintili" and i == 0:
+                c1, c2 = (X + (c1[0] - X) * 0.3, Y + (c1[1] - Y) * 0.3), (X + (c2[0] - X) * 0.3, Y + (c2[1] - Y) * 0.3)
+        egriler.append((a, c1, c2, b))
+    sh = e.s.pg.new_shape()
+    for eg in ([tuple(reversed(x)) for x in reversed(egriler)] if ters else egriler):
+        sh.draw_bezier(*(e.p(*q) for q in eg))
+    sh.finish(color=renk, width=0.4, closePath=False)
+    sh.commit()
+
+
+def _glop_bicimli(e, X, Y, bicim, ters=False):
+    _egri_yol(e, X, Y, 9.5, KIRMIZI, bicim, ters)
+    for a, b in (((X - 6.7, Y - 6.7), (X + 6.7, Y + 6.7)), ((X - 6.7, Y + 6.7), (X + 6.7, Y - 6.7))):
+        e.cizgi(a, b)
+
+
+def _anahtar_bicimli(e, X, Y, bicim, ters=False):
+    """Tekli anahtar (`Elektrik.anahtar` ile aynı tırnak ve uç), dairesi `_egri_yol` ile."""
+    _egri_yol(e, X, Y, 4.5, TURUNCU, bicim, ters)
+    c, s = math.cos(math.radians(-60)), math.sin(math.radians(-60))
+    b = (X + 4.5 * c, Y + 4.5 * s)
+    t = (b[0] + 4.6 * c, b[1] + 4.6 * s)
+    e.cizgi(b, t, TURUNCU)
+    e.cizgi(t, (t[0] + 2.4, t[1]), TURUNCU)
+
+
+@pytest.mark.parametrize("ek, kw, neden", [
+    # eğrilerle çizilmiş daire olmayan yol: uçları ve kutusu dairenin, eğrileri çemberin üstünde değil
+    (lambda e: _glop_bicimli(e, X_U, Y_U, "elmas"), {}, "glop renginde ve çapında, eğrileri çemberin üstünde olmayan 1 yol (daire değil)"),
+    (lambda e: _glop_bicimli(e, X_U, Y_U, "yildiz"), {}, "glop renginde ve çapında, eğrileri çemberin üstünde olmayan 1 yol (daire değil)"),
+    (lambda e: _glop_bicimli(e, X_U, Y_U, "girintili"), {}, "glop renginde ve çapında, eğrileri çemberin üstünde olmayan 1 yol (daire değil)"),
+    (lambda e: (_egri_yol(e, X_U, Y_U, 9.5, KIRMIZI, "elmas"), e.yazi(X_U, Y_U, "BUAT", 3)), {},
+     "glop renginde ve çapında, eğrileri çemberin üstünde olmayan 1 yol (daire değil)"),
+    (lambda e: _anahtar_bicimli(e, X_A, Y_A, "elmas"), {},
+     "anahtar dairesinin renginde ve çapında, eğrileri çemberin üstünde olmayan 1 yol (daire değil)"),
+    (lambda e: _glop_bicimli(e, 665, 385, "elmas"), {"lejant_isaretsiz": "glop"}, "lejantta 'glop' etiketinin işareti okunamadı"),
+    # çift prizin ikinci U'su: tabanı 15° dönük, sapı kendi tabanına 9°, birincinin sapına 6° (yön sapın yönünden okunsa çift sayılırdı)
+    (lambda e: _u_acili(e, *e.priz(X_U, Y_U), don=15, sap=9), {}, "sapı öbürünün tabanına değen ama yönü farklı 1 U çifti"),
+    # U'nun iki kolu da tabanla denetlenir: kolların arası 9° (pay içinde), ikinci kol tabana 73°
+    (lambda e: _u_acili(e, X_U, Y_U, kollar=(8, 17)), {}, "açıları lejanttakine (kollar 0°, kol–taban 90°, sap–taban 90°) uymayan 1 U"),
+], ids=["glop_elmas", "glop_yildiz", "glop_ceyregi_ice_bukuk", "buat_elmas", "anahtar_elmas", "lejantta_elmas_glop", "ikinci_u_tabani_15",
+        "u_kollari_8_17"])
+def test_daire_bicimi_ve_u_yonu_bekletir(tmp_path, ek, kw, neden):
+    """KH-3 hakeminin 5. turu: glop, BUAT ya da anahtar dairesinin renginde ve çapında, eğrileri çemberin üstünde olmayan yol (eğrilerle
+    çizilmiş elmas, yıldız, bir çeyreği içe bükük daire; lejanttaki de); tabanı payın dışında dönük, sapı birincinin sapıyla payın içinde
+    ikinci U; iki kolu birbirine payın içinde, biri tabana payın dışında açılı U da elektriği bekletir."""
+    o = PO.oku(kh3_sentetik(tmp_path / "s.pdf", ek=ek, **kw), EL)
+    t = _teyit(o)
+    assert set(t) == {"elektrik"} and neden in t["elektrik"], t
+    assert "elektrik" not in o and "makas_bas" in o and "h_plani" in o
+
+
+def test_yolun_yapisi_tur_ve_olcu():
+    """`_yapi` her öğenin türünü ve ölçüsünü verir (çizgide ve eğride iki ucunun arası, dörtgende iki kenarı); `_ayni_yapi` öğelerin
+    sayısını, türünü ve ölçüsünü karşılaştırır: aynı boyda çizgi ile eğri, başka kenarlı dörtgen, başka boyda eğri, bir ve iki çizgi aynı
+    yapı değildir (KH-3 hakeminin 5. turu: sentetik işaretlerde tür ve dörtgenin kenarları imzayla ve kutuyla örtülüyordu)."""
+    pg = fitz.open().new_page()
+    P = fitz.Point
+
+    def yol(*ogeler):
+        sh = pg.new_shape()
+        for tur, *v in ogeler:
+            {"l": sh.draw_line, "c": sh.draw_bezier, "re": sh.draw_rect}[tur](*v)
+        sh.finish(color=KIRMIZI, width=0.4, closePath=False)
+        sh.commit()
+    yol(("l", P(10, 10), P(15, 10)), ("l", P(10, 20), P(15, 20)))
+    yol(("l", P(10, 30), P(15, 30)), ("c", P(10, 40), P(11, 42), P(14, 42), P(15, 40)))
+    yol(("re", fitz.Rect(10, 50, 18, 55)))
+    yol(("re", fitz.Rect(10, 60, 17, 66)))
+    yol(("c", P(10, 70), P(11, 72), P(14, 72), P(15, 70)))
+    yol(("c", P(10, 80), P(11, 82), P(15, 82), P(16, 80)))
+    yol(("l", P(10, 90), P(15, 90)))
+    o = PO._ogeler(pg)
+    assert [x["yapi"] for x in o] == [[("l", 5.0), ("l", 5.0)], [("c", 5.0), ("l", 5.0)], [("re", 5.0, 8.0)], [("re", 6.0, 7.0)], [("c", 5.0)],
+                                      [("c", 6.0)], [("l", 5.0)]]
+    assert all(PO._ayni_yapi(x, x, 0.3) for x in o)
+    assert not any(PO._ayni_yapi(o[i], o[j], 0.3) or PO._ayni_yapi(o[j], o[i], 0.3) for i, j in ((0, 1), (2, 3), (4, 5), (0, 6)))
 
 
 @pytest.mark.parametrize("ek, kw, sayim, atilan", [
@@ -646,12 +743,15 @@ def test_yol_ve_u_acisi_bekletir(tmp_path, ek, kw, neden):
     (lambda e: _ikinci_u_donuk(e, 8), {}, {"priz_cift": 2}, {}),                                           # 8° dönük ikinci U: pay içinde
     (lambda e: _ikinci_u_donuk(e, 9.5), {}, {"priz_cift": 2}, {}),                                         # 9,5°: payın hemen içinde
     (lambda e: _u_acili(e, X_U, Y_U, don=30), {}, {"priz_tekli": 4}, {}),                                        # 30° dönük tekli U
+    (lambda e: _glop_bicimli(e, X_U, Y_U, "daire"), {}, {"glop": 2}, {}),                                   # dairesi eğrilerle çizilmiş glop
+    (lambda e: _anahtar_bicimli(e, X_A, Y_A, "daire", ters=True), {}, {"anahtar_tekli": 3}, {}),            # dairesi öbür yöne çizilmiş
 ], ids=["tek_yolda_iki_u", "desenli_sigorta", "baslik_cercevesi", "donuk_cift_anahtar", "aynali_cift_anahtar", "glop_tek_yol", "egik_tirnakli_anahtarlar",
-        "yan_yana_duy", "cift_priz_8", "cift_priz_9_5", "donuk_tekli_u"])
+        "yan_yana_duy", "cift_priz_8", "cift_priz_9_5", "donuk_tekli_u", "egrili_daire_glop", "ters_yonde_daire_anahtar"])
 def test_dogru_cizim_teyitsiz(tmp_path, ek, kw, sayim, atilan):
     """Sessiz sayı denetimleri doğru çizimi bekletmez: aynı yoldaki iki tam U iki priz; iç deseni başka renkte sigorta; işaretten büyük
     yakın tonda çerçeve denetlenmez, sayılır; döndürülmüş ya da aynalanmış çift anahtar, çaprazları tek yolda glop, tırnakları yarıçapla
-    açılı (lejanttaki gibi eğik) anahtarlar, yan yana iki duy; ikinci U'su `aci_payi_derece` içinde dönük çift priz; dönük tekli U."""
+    açılı (lejanttaki gibi eğik) anahtarlar, yan yana iki duy; ikinci U'su `aci_payi_derece` içinde dönük çift priz; dönük tekli U;
+    dairesi tek tek eğrilerle (çeyrek daireler) ya da öbür yöne çizilmiş glop ve anahtar."""
     o = PO.oku(kh3_sentetik(tmp_path / "s.pdf", ek=ek, **kw), EL)
     a = o["ayrinti"]["elektrik"]
     assert o["teyit_bekliyor"] == [] and a["sayim"] == BEKLENEN | sayim

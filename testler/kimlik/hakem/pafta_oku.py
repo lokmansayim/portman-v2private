@@ -971,8 +971,8 @@ def _yapi(it: tuple) -> tuple:
 
 
 def _ogeler(pg) -> list[dict]:
-    """Çizimler görünen sayfada: renk (dolgulu çizimde dolgunun rengi), dolgu, öğe türleri, kutu, merkez, çizgi parçaları, yolun
-    öğelerinin türü ve ölçüsü (`_yapi`) ve bütün noktalar (aynı yerde iki kez çizilmiş öğeyi tanımak için)."""
+    """Çizimler görünen sayfada: renk (dolgulu çizimde dolgunun rengi), dolgu, öğe türleri, kutu, merkez, çizgi parçaları, eğrilerin dört
+    noktası (`_cemberde`), yolun öğelerinin türü ve ölçüsü (`_yapi`) ve bütün noktalar (aynı yerde iki kez çizilmiş öğeyi tanımak için)."""
     rm, out = pg.rotation_matrix, []
     for d in pg.get_drawings():
         dolgu = d.get("fill") is not None
@@ -988,6 +988,7 @@ def _ogeler(pg) -> list[dict]:
         out.append({"renk": _renk(d["fill"] if dolgu else d.get("color")), "dolgu": dolgu, "tur": {it[0] for it in d["items"]}, "r": r,
                     "m": fitz.Point((r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2),
                     "cizgiler": [(it[1] * rm, it[2] * rm) for it in d["items"] if it[0] == "l"], "noktalar": noktalar,
+                    "egriler": [tuple(v * rm for v in it[1:5]) for it in d["items"] if it[0] == "c"],
                     "yapi": sorted(_yapi(it) for it in d["items"])})
     return out
 
@@ -1236,23 +1237,42 @@ def _lejant(E: dict, sozcukler: list, ogeler: list[dict], duvar: tuple) -> tuple
     return {t: {"etiket": etiket[t], "ogeler": isaret[t]} for t in etiket}, lk, uyarilar
 
 
+def _bezier(e: tuple, t: float) -> fitz.Point:
+    """Kübik eğrinin (dört noktası `e`) t'deki noktası."""
+    u = 1 - t
+    k = (u ** 3, 3 * u * u * t, 3 * u * t * t, t ** 3)
+    return fitz.Point(sum(a * p.x for a, p in zip(k, e)), sum(a * p.y for a, p in zip(k, e)))
+
+
+def _cemberde(o: dict) -> bool:
+    """Yolun her eğrisi çemberin üstünde: eğrinin dokuz noktası (iki ucu, aradaki yedi nokta) kutunun ortasından kutunun yarı eni kadar
+    uzakta (`DAIRE_PAYI_PT`'nin yarısı içinde). Eğrilerle çizilmiş elmas, yıldız ya da bir çeyreği içe bükük yol daire sayılmaz; yalnız
+    uçlarına ve kutusuna bakılsa daire sanılırdı. PK-01 ve PK-07'nin glop ve anahtar daireleri en çok 0,0025 pt uzakta."""
+    yc = (o["r"].width + o["r"].height) / 4
+    return all(abs(_uzak(_bezier(e, i / 8), o["m"]) - yc) <= DAIRE_PAYI_PT / 2 for e in o["egriler"] for i in range(9))
+
+
 def _lejant_dairesi(g: list[dict]) -> dict | None:
-    d = [o for o in g if o["tur"] == {"c"} and _daire_mi(o["r"])]
+    d = [o for o in g if o["tur"] == {"c"} and _daire_mi(o["r"]) and _cemberde(o)]
     return {"renk": d[0]["renk"], "cap": d[0]["r"].width, "m": d[0]["m"], "r": d[0]["r"]} \
         if d and len({(o["renk"], round(o["r"].width, 1)) for o in d}) == 1 else None
 
 
-def _daireler_renkte(ogeler: list[dict], renk: tuple, cap: float) -> list[dict]:
-    """Bir renkte, lejanttaki çapta daireler; aynı merkezde iki kez çizilmiş daire bir sayılır (öğeleri birlikte döner)."""
-    out = []
+def _daireler_renkte(ogeler: list[dict], renk: tuple, cap: float) -> tuple[list[dict], int]:
+    """Bir renkte, lejanttaki çapta daireler; aynı merkezde iki kez çizilmiş daire bir sayılır (öğeleri birlikte döner). Döner: (daireler,
+    bu renkte ve çapta olup eğrileri çemberin üstünde olmayan yolların sayısı; `_cemberde`)."""
+    out, bicimsiz = [], 0
     for o in ogeler:
         if o["tur"] == {"c"} and o["renk"] == renk and abs(o["r"].width - cap) <= DAIRE_PAYI_PT and abs(o["r"].height - cap) <= DAIRE_PAYI_PT:
+            if not _cemberde(o):
+                bicimsiz += 1                                   # sahipsiz kalır
+                continue
             es = next((d for d in out if _uzak(d["m"], o["m"]) <= 0.5), None)
             if es:
                 es["ogeler"].append(o)
             else:
                 out.append({"m": o["m"], "r": o["r"], "ogeler": [o]})
-    return out
+    return out, bicimsiz
 
 
 def _capraz(s: tuple) -> bool:
@@ -1268,12 +1288,13 @@ def elektrik_oku(pg, ayar: dict, dis_olcu_cm: list[float]) -> dict:
     dolgusuz öğede ölçüsü ve PDF yolunun öğeleri) lejanttan okunur, koda gömülmez. Aynı yerde (0,05 pt içinde) ikinci kez çizilmiş öğe
     bir sayılır (`ayrinti.elektrik.atilan.ayni_yerde_iki_kez`):
     - tijli duy: lejanttaki dolgunun renginde, birbirine değen dolgular; kutusu lejanttakinin ölçüsünde (±1 pt), içi lejanttakiyle aynı;
-    - glop: lejanttaki daire (renk, çap), içinde lejanttaki kadar çapraz (aralarındaki açılar `aci_payi_derece` içinde) ve lejanttaki
-      işaretle aynı bileşim; çaprazsız, içinde yalnız dairesi olan ve "BUAT" yazan daire buat (bilgi);
-    - anahtar: lejanttaki daire (içi lejanttakiyle aynı) ve ona değen, lejanttaki boyda eğik tırnaklar; her tırnağın dıştaki ucunda
-      lejanttaki boyda ve tırnakla lejanttaki açıda tek kısa çizgi; her tırnağın yarıçapla açısı lejanttakiyle aynı; bir tırnak tekli,
-      iki tırnak çift (dizilişi lejanttaki çiftinki: değdikleri yerlerin merkezden ve çizgilerinin açı farkı; aynalanmış çift de olur).
-      Açılar `aci_payi_derece` içinde;
+    - glop: lejanttaki daire (renk, çap; eğrileri çemberin üstünde), içinde lejanttaki kadar çapraz (aralarındaki açılar
+      `aci_payi_derece` içinde) ve lejanttaki işaretle aynı bileşim; çaprazsız, içinde yalnız dairesi olan ve "BUAT" yazan daire buat
+      (bilgi);
+    - anahtar: lejanttaki daire (eğrileri çemberin üstünde, içi lejanttakiyle aynı) ve ona değen, lejanttaki boyda eğik tırnaklar; her
+      tırnağın dıştaki ucunda lejanttaki boyda ve tırnakla lejanttaki açıda tek kısa çizgi; her tırnağın yarıçapla açısı lejanttakiyle
+      aynı; bir tırnak tekli, iki tırnak çift (dizilişi lejanttaki çiftinki: değdikleri yerlerin merkezden ve çizgilerinin açı farkı;
+      aynalanmış çift de olur). Açılar `aci_payi_derece` içinde;
     - priz: lejanttaki U (kol, sap ve taban boyu; kollar aynı yana; kolların arası, kolların ve sapın tabanla açısı `aci_payi_derece`
       içinde); birinin sapının ucu öbürünün tabanının ortasına değen, tabanı aynı yöne (`aci_payi_derece` içinde) bakan iki U çift
       prizdir; "UYDU" yazısına en yakın (`uydu_uzakligi_pt` içinde) tek U uydu prizidir, tekli prizden düşülür;
@@ -1283,7 +1304,8 @@ def elektrik_oku(pg, ayar: dict, dis_olcu_cm: list[float]) -> dict:
     - lejant renginde hiçbir işarete girmeyen öğe; sigortanın iç desenindeki ya da lejant rengine yakın (`yakin_renk_payi`) tonda, işaret
       boyunda hiçbir işarete girmeyen öğe; duvar çerçevesinin dışında bu renklerde öğe; bir parçası (çizgisi) işarete giren ama başka
       parçası hiçbir işarete girmeyen çizim (PDF yolu);
-    - içi lejanttakine uymayan duy, glop, BUAT, anahtar dairesi ya da sigorta ölçüsünde kutu; ölçüsü tutmayan duy dolgusu;
+    - içi lejanttakine uymayan duy, glop, BUAT, anahtar dairesi ya da sigorta ölçüsünde kutu; ölçüsü tutmayan duy dolgusu; glop ya da
+      anahtar dairesinin renginde ve çapında, eğrileri çemberin üstünde olmayan yol (eğrilerle çizilmiş elmas, yıldız);
     - tırnak sayısı bir ya da iki olmayan anahtar, iki anahtar dairesine birden değen tırnak, daireye değen ama tırnak boyunda olmayan eğik
       çizgi, yarıçapla açısı lejanttakinden farklı tırnak, iki tırnağının dizilişi lejanttakine uymayan anahtar (tırnak kaydırılarak ya
       da aynalanarak ikinci kez çizilmiş), tırnağın ucunda birden çok, lejanttakinden başka boyda ya da açıda ya da hiç çizgi; çaprazı
@@ -1476,7 +1498,10 @@ def elektrik_oku(pg, ayar: dict, dis_olcu_cm: list[float]) -> dict:
         Gb = [o for o in Gg if o["tur"] != {"l"}]                         # buat: glopun çaprazsız kısmı (daire)
         capraz_yok, tutmayan, icsiz, yazili_glop, desensiz = 0, [], 0, 0, 0
         parca = _parcalar(plan, L["glop"]["renk"])
-        for d in _daireler_renkte(plan, L["glop"]["renk"], L["glop"]["cap"]):
+        daireler, bicimsiz = _daireler_renkte(plan, L["glop"]["renk"], L["glop"]["cap"])
+        if bicimsiz:
+            uyarilar.append(f"glop renginde ve çapında, eğrileri çemberin üstünde olmayan {bicimsiz} yol (daire değil)")
+        for d in daireler:
             _, ic = _bilesim(serbest(), d["r"], rg, 0.5)
             cs = [s for s in parca if _capraz(s) and _icinde(s[0]["r"], d["r"], 0.5)]
             n = len(cs)
@@ -1516,7 +1541,9 @@ def elektrik_oku(pg, ayar: dict, dis_olcu_cm: list[float]) -> dict:
         A = L["anahtar"]
         Ga, ra = G["anahtar"]
         parca = _parcalar(plan, A["renk"])
-        daireler = _daireler_renkte(plan, A["renk"], A["cap"])
+        daireler, bicimsiz = _daireler_renkte(plan, A["renk"], A["cap"])
+        if bicimsiz:
+            uyarilar.append(f"anahtar dairesinin renginde ve çapında, eğrileri çemberin üstünde olmayan {bicimsiz} yol (daire değil)")
         degenler = [degen_tirnaklar(parca, d["m"], A["cap"]) for d in daireler]
         ortak = sum(1 for v in Counter(id(s) for t in degenler for s in t).values() if v > 1)
         if ortak:
