@@ -1348,8 +1348,9 @@ def elektrik_oku(pg, ayar: dict, dis_olcu_cm: list[float]) -> dict:
       ortası başka türden bir işaretin kutusunda olan işaret (ör. BUAT dairesinin içine çizilmiş U);
     - lejantta: etiketi ya da işareti bulunamayan tür, tanınmayan sözcük, hiçbir etikete bağlanmayan işaret, zil (okunmuyor), alanın
       hemen altında öğe, alanın dışında lejant etiketine benzeyen sözcük; lejant işaretinde okunmayan öğe (aynı satıra çizilmiş ikinci
-      işaret, işarete eklenmiş çizim); lejantta tırnağı bir ya da iki olmayan, tırnağının ucunda tek çizgi olmayan ya da iki tırnağının
-      boyu, yarıçapla açısı ya da ucu birbirinden planın payından fazla farklı anahtar; lejant kutusunda hiçbir lejant işaretine
+      işaret, işarete eklenmiş çizim); lejantta tırnağı bir ya da iki olmayan, tırnağının ucunda tek çizgi olmayan, iki tırnağının
+      boyu, yarıçapla açısı ya da ucu birbirinden planın payından fazla farklı ya da iki tırnağı çift oluşturmayan (daireye değdikleri
+      yerler ya da çizgileri açı payının iki katı içinde) anahtar; lejant kutusunda hiçbir lejant işaretine
       girmeyen lejant renginde öğe; duvar çerçevesiyle kesişen lejant kutusu (kutudaki öğe plana girmez);
     - planda hiç işareti bulunamayan lejant türü; yanında priz olmayan, en yakın prizi çift olan ya da başka bir UYDU yazısıyla aynı prize
       bağlanan UYDU yazısı.
@@ -1440,6 +1441,13 @@ def elektrik_oku(pg, ayar: dict, dis_olcu_cm: list[float]) -> dict:
                                      ("ucun açısı", [_aci_farki(_aci(s), _aci(x[0])) for s, x in zip(t, ucta)], E["aci_payi_derece"])]
                         if farkli := [ad for ad, (a, b), pay_ in olcu if abs(a - b) > pay_]:
                             uyarilar.append(f"lejantta anahtarın iki tırnağı birbirinden farklı: {', '.join(farkli)}")
+                        # iki tırnak bir çift olmalı: daireye değdikleri yerler ve çizgileri açı payının iki katından fazla ayrık; plandaki
+                        # kopya tırnak (0°) böyle bir çifte payla eşleşemez (KH-3 hakeminin 15. turu: tek tırnaklı lejanta tırnağın 5–12°
+                        # döndürülmüş ya da 0,65 pt kaydırılmış kopyası eklenince lejant çift okunuyor, kopyalı tekli anahtar da sessizce çift
+                        # sayılıyordu)
+                        if min(isin, aci) <= 2 * E["aci_payi_derece"]:
+                            uyarilar.append(f"lejantta anahtarın iki tırnağı çift değil: daireye değdikleri yerler {isin:.0f}°, çizgileri {aci:.0f}° "
+                                            f"ayrık (en az {2 * E['aci_payi_derece']:g}°; aynı tırnak iki kez çizilmiş olabilir)")
                 G[tur] = bilesim(g, d["r"], 0.5)
                 okunan = G[tur][0]
         elif tur == "duy":

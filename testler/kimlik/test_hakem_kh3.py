@@ -907,17 +907,27 @@ _IKINCI_UC = _tirnak_ucu(665, 330, -120)                           # ikinci tır
 LA = {"lejant_isaretsiz": "anahtar"}                               # lejant anahtarı `_lejant_anahtari` ile çizilir
 
 
-def _lejant_anahtari(e, boylar=(4.6, 4.6), uclar=(2.4, 2.4), uc_yonler=(0, 0), sapmalar=(0, 0), tirnak=2):
-    """Lejant satırına anahtar (`LA` ile): her tırnak kendi boyu, yarıçapla açısı (`sapmalar`) ve ucunun boyu ve yönüyle (derece); ucu
-    0 olan tırnağın ucu çizilmez. Varsayılanlar sentetik lejantın anahtarı (KH-3 hakeminin 14. turu)."""
+def _lejant_anahtari(e, boylar=(4.6, 4.6), uclar=(2.4, 2.4), uc_yonler=(0, 0), sapmalar=(0, 0), tirnak=2, acilar=(-60, -120)):
+    """Lejant satırına anahtar (`LA` ile): her tırnak dairenin `acilar`daki yerinden, kendi boyu, yarıçapla açısı (`sapmalar`) ve ucunun
+    boyu ve yönüyle (derece); ucu 0 olan tırnağın ucu çizilmez. Varsayılanlar sentetik lejantın anahtarı (KH-3 hakeminin 14. turu)."""
     X, Y = 665, 330
     e.daire(X, Y, 4.5, TURUNCU)
-    for aci, boy, uc, u, sp in list(zip((-60, -120), boylar, uclar, uc_yonler, sapmalar))[:tirnak]:
+    for aci, boy, uc, u, sp in list(zip(acilar, boylar, uclar, uc_yonler, sapmalar))[:tirnak]:
         b = (X + 4.5 * math.cos(math.radians(aci)), Y + 4.5 * math.sin(math.radians(aci)))
         t = (b[0] + boy * math.cos(math.radians(aci + sp)), b[1] + boy * math.sin(math.radians(aci + sp)))
         e.cizgi(b, t, TURUNCU)
         if uc:
             e.cizgi(t, (t[0] + uc * math.cos(math.radians(u)), t[1] + uc * math.sin(math.radians(u))), TURUNCU)
+
+
+def _kaymis_kopya_tirnak(e, k=0.65):
+    """Tek tırnaklı lejant anahtarı ve tırnağın ucuyla birlikte tırnağa dik `k` pt kaydırılmış kopyası (KH-3 hakeminin 15. turu)."""
+    _lejant_anahtari(e, tirnak=1)
+    c, s_ = math.cos(math.radians(-60)), math.sin(math.radians(-60))
+    nx, ny = -s_ * k, c * k
+    b, t = (665 + 4.5 * c + nx, 330 + 4.5 * s_ + ny), (665 + 9.1 * c + nx, 330 + 9.1 * s_ + ny)
+    e.cizgi(b, t, TURUNCU)
+    e.cizgi(t, (t[0] + 2.4, t[1]), TURUNCU)
 
 
 def _lejant_u_kisa_kollu(e):
@@ -977,6 +987,40 @@ def test_lejant_anahtarinin_her_tirnagi_denetlenir(tmp_path, ek, kw, neden):
     assert "elektrik" not in o and "makas_bas" in o and "h_plani" in o
 
 
+def _cift_degil(isin, aci):
+    return (f"lejantta anahtarın iki tırnağı çift değil: daireye değdikleri yerler {isin}°, çizgileri {aci}° ayrık (en az 20°; aynı tırnak "
+            "iki kez çizilmiş olabilir)")
+
+
+LAT = {**LA, "ciftsiz_plan": True}                                 # lejant anahtarı elle, planda çift anahtar yok
+
+
+@pytest.mark.parametrize("ek, kw, neden", [
+    (lambda e: _lejant_anahtari(e, acilar=(-60, -52), uc_yonler=(0, 8)), LAT, _cift_degil(8, 8)),     # 8° döndürülmüş kopya tırnak
+    (lambda e: _lejant_anahtari(e, acilar=(-60, -72), uc_yonler=(0, -12)), LAT, _cift_degil(12, 12)),  # öbür yöne 12°
+    (_kaymis_kopya_tirnak, LAT, _cift_degil(8, 0)),                                                     # 0,65 pt kaydırılmış kopya
+    (lambda e: _lejant_anahtari(e, acilar=(-60, -52), uc_yonler=(0, 8)), LA, _cift_degil(8, 8)),       # planda çift varken de
+    (lambda e: _lejant_anahtari(e, acilar=(-60, -90), sapmalar=(-10, 20)), LAT, _cift_degil(30, 0)),   # yalnız çizgiler koşut
+    (lambda e: _lejant_anahtari(e, acilar=(-60, -50), sapmalar=(0, 25), uc_yonler=(0, 35)), LAT, _cift_degil(10, 35)),  # yalnız yerler yakın
+    (lambda e: _lejant_anahtari(e, boylar=(4.6, 4.95)), LA, _farkli("tırnak boyu")),                    # payın hemen dışında: 0,35 pt
+    (lambda e: _lejant_anahtari(e, uclar=(2.4, 2.75)), LA, _farkli("ucun boyu")),
+    (lambda e: _lejant_anahtari(e, uc_yonler=(0, 11)), LA, _farkli("ucun açısı")),                      # 11°
+    (lambda e: _lejant_anahtari(e, sapmalar=(0, -11), uc_yonler=(0, -11)), LA, _farkli("yarıçapla açısı")),
+], ids=["donuk_kopya_8", "donuk_kopya_12", "kaymis_kopya_0_65", "donuk_kopya_planda_cift", "yerler_30_cizgiler_0",
+        "yerler_10_cizgiler_35", "tirnak_boyu_0_35", "uc_boyu_0_35", "uc_acisi_11", "yaricapla_acisi_11"])
+def test_lejant_cifti_ve_fark_payi(tmp_path, ek, kw, neden):
+    """KH-3 hakeminin 15. turu: lejanttaki iki tırnağın dizilişi denetlenmiyordu. Tek tırnaklı lejanta tırnağın ucuyla birlikte dairenin
+    ortası çevresinde 5–12° döndürülmüş ya da 0,65 pt kaydırılmış kopyası eklenince lejant teyitsiz çift okunuyor (boyları, açıları ve
+    uçları aynı kaldığından 14. turun fark denetimi görmüyor), plandaki kopya tırnaklı tekli anahtar da sessizce çift sayılıyordu. Artık
+    iki tırnağın daireye değdiği yerler ya da çizgileri açı payının iki katı (20°) içinde ayrıksa elektrik bekler (ikisi ayrı ayrı: yerleri
+    30° ayrık koşut tırnaklar, çizgileri 35° ayrık ama yerleri 10° yakın tırnaklar). 14. turun fark
+    denetimi payın hemen dışında da sınanır (0,35 pt, 11°; önceki testler payın 1,6 katı bozmasını düşürmüyordu)."""
+    o = PO.oku(kh3_sentetik(tmp_path / "s.pdf", ek=ek, **kw), EL)
+    t = _teyit(o)
+    assert set(t) == {"elektrik"} and neden in t["elektrik"], t
+    assert "elektrik" not in o and "makas_bas" in o and "h_plani" in o
+
+
 def test_yolun_yapisi_tur_ve_olcu():
     """`_yapi` her öğenin türünü ve ölçüsünü verir (çizgide ve eğride iki ucunun arası, dörtgende iki kenarı); `_ayni_yapi` öğelerin
     sayısını, türünü ve ölçüsünü karşılaştırır: aynı boyda çizgi ile eğri, başka kenarlı dörtgen, başka boyda eğri, bir ve iki çizgi aynı
@@ -1030,11 +1074,13 @@ def test_yolun_yapisi_tur_ve_olcu():
     (lambda e: _lejant_anahtari(e, boylar=(4.6, 4.8), uclar=(2.4, 2.6), uc_yonler=(0, 8)), LA, {}, {}),  # iki tırnak pay içinde farklı
     (lambda e: _lejant_anahtari(e, sapmalar=(0, 8), uc_yonler=(0, 8)), LA, {}, {}),                      # yarıçapla 8° açılı tırnak
     (None, {"lejant_tek_tirnak": True, "ciftsiz_plan": True}, {"anahtar_cift": 0}, {"ayni_yerde_iki_kez": 0}),  # tek tırnaklı lejant
+    (lambda e: _lejant_anahtari(e, boylar=(4.6, 4.85), uclar=(2.4, 2.65), uc_yonler=(0, 9.5)), LA, {}, {}),  # payın hemen içinde
+    (lambda e: _lejant_anahtari(e, acilar=(-60, -35), uc_yonler=(0, 25)), LAT, {"anahtar_cift": 0}, {"ayni_yerde_iki_kez": 0}),  # 25° çift
 ], ids=["tek_yolda_iki_u", "desenli_sigorta", "baslik_cercevesi", "donuk_cift_anahtar", "aynali_cift_anahtar", "glop_tek_yol", "egik_tirnakli_anahtarlar",
         "yan_yana_duy", "cift_priz_8", "cift_priz_9_5", "donuk_tekli_u", "egrili_daire_glop", "ters_yonde_daire_anahtar", "az_basik_glop",
         "karisik_ceyrekli_anahtar", "karisik_yayli_glop", "kapanisi_0_15_acik_glop", "beyaz_dolgulu_siyah_cerceve", "lejant_cercevesi_yakin_ton",
         "lejant_cercevesi_siyah", "lejant_payin_hemen_disinda", "lejant_anahtari_elle", "lejant_tirnaklari_pay_icinde",
-        "lejant_tirnagi_8_derece", "tek_tirnakli_lejant_ciftsiz_plan"])
+        "lejant_tirnagi_8_derece", "tek_tirnakli_lejant_ciftsiz_plan", "lejant_tirnaklari_payin_hemen_icinde", "lejant_cifti_25_derece"])
 def test_dogru_cizim_teyitsiz(tmp_path, ek, kw, sayim, atilan):
     """Sessiz sayı denetimleri doğru çizimi bekletmez: aynı yoldaki iki tam U iki priz; iç deseni başka renkte sigorta; işaretten büyük
     yakın tonda çerçeve denetlenmez, sayılır; döndürülmüş ya da aynalanmış çift anahtar, çaprazları tek yolda glop, tırnakları yarıçapla
@@ -1044,7 +1090,8 @@ def test_dogru_cizim_teyitsiz(tmp_path, ek, kw, sayim, atilan):
     kapanış yerinde 0,15 pt açık (uç payının içinde) glop; beyaz dolgulu siyah çerçeve (siyah denetlenmez); lejantı çevreleyen yakın tonda
     çerçeve (lejant kutusundaki de `isaretten_buyuk`'a sayılır; KH-3 hakeminin 12. turu) ya da siyah çerçeve; duvar çerçevesinin payına
     0,5 pt kalan lejant kutusu; 14. turdan: iki tırnağı birbirinden planın payı içinde farklı lejant anahtarı (boy, uç, açılar) ve
-    planında çift anahtar olmayan tek tırnaklı lejant."""
+    planında çift anahtar olmayan tek tırnaklı lejant; 15. turdan: payın hemen içinde farklı iki tırnak (0,25 pt, 9,5°) ve tırnakları
+    25° ayrık lejant çifti (planında çift yok)."""
     o = PO.oku(kh3_sentetik(tmp_path / "s.pdf", ek=ek, **kw), EL)
     a = o["ayrinti"]["elektrik"]
     assert o["teyit_bekliyor"] == [] and a["sayim"] == BEKLENEN | sayim
