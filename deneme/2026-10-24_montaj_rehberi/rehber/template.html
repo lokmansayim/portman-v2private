@@ -97,6 +97,8 @@ body{height:100%;background:var(--bg);color:var(--ink);font-family:var(--f-body)
 .ctl.primary:hover{background:color-mix(in srgb,var(--accent) 88%,white)}
 .ctl:disabled{opacity:.35;cursor:default;background:transparent}
 .ctl svg{width:14px;height:14px;fill:currentColor}
+.rnd{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#c9c9c9}
+.rnd[hidden]{display:none}
 .gal{position:absolute;inset:0;z-index:5;display:flex;flex-direction:column;background:var(--scene)}
 .gal[hidden]{display:none}
 .gal .gx{position:absolute;top:10px;right:10px;z-index:1}
@@ -152,9 +154,11 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
     <section class="stage" aria-label="3D montaj sahnesi">
       <div id="viewport"></div>
+      <img class="rnd" id="rndImg" alt="" hidden>
       <div class="badge glass"><span class="bn" id="badgeNo"></span><span class="bt" id="badgeTitle"></span></div>
       <div class="tools">
         <button class="tog glass" id="roofTog" type="button" aria-pressed="false">Çatıyı gizle</button>
+        <button class="tog glass" id="rndTog" type="button" aria-pressed="false">Adımı render göster</button>
         <button class="tog glass" id="galTog" type="button" aria-haspopup="dialog">Render görselleri</button>
         <div class="hint glass">Parçaya dokun: kimlik kartı</div>
       </div>
@@ -763,15 +767,15 @@ const STEPS = [
     rows: [R(null, 'Saçak sacı (antrasit gri)', '10 adet', 'liste'), I('Profil', '3 + 30 + 13 + 10 cm'), I('Açınım', '≈ 56 cm'), I('Sac', '1 mm')] },
   { t: 'Çatı makasları', p: '9 makas, her biri bir dış duvar H’ı hizasında: iki uçta baş makas (MK01, MK09), arada 7 orta makas. Alpha Mini düzeni: 10 cm topuk, duvar hizasında dikme, Warren zikzak. Üst düğümler aşık sıralarına denk gelir. Kulaklı H’lara 2×M6 8.8 ile bağlanır.',
     extra: [I('Açıklık', '660 cm (2 × 30 saçak)'), I('Eğim', '%33 · 18,2°'), I('Topuk / tepe', '10 cm / 118,9 cm'), I('Makas aralığı', '125,5 cm'), I('İç çubuk', `Warren · ${NB} göz, ${fmt(PITCH)} cm`)] },
-  { t: 'Baş makas betopanı', p: 'İki baş makasın dış yüzü 125 × 250 betopanla kapatılır, her uçta 2 adet.',
+  { t: 'Baş makas betopanı', p: 'İki baş makasın dış yüzü 125 × 250 betopanla kapatılır, her uçta 2 adet. Üstüne baş makas Z\'si gelir: makasın ve betopanın üstünden geçer, betopanın dış yüzünden 3 cm iner ve dışarı kıvrılır; alın sacının tırnağı buna girer.',
     rows: [R(null, 'Baş makas betopanı 125 × 250', '4 adet', 'pafta')] },
   { t: 'Tavan omegaları', p: 'Düz asma tavan için omegalar makas alt başlığının altına, şapkası aşağı, odaların uzun yönünde bağlanır: 9’u duvar ekseninde, 14’ü iki duvar arasında, 1’i duvar yüzünde. Verandada 6 omega. Kesit 110 × 35 mm, sac 1 mm.',
     rows: [R(null, 'Tavan omegası', '24 parça', 'pafta'), I('Toplam boy', '58,46 m'), I('L 365', '8 parça'), I('L 190 (veranda)', '6 parça')] },
-  { t: 'Omega aşıklar', p: 'Her çatı yüzünde 7 sıra omega aşık makasın üst düğümlerine vidalanır. Bir sıra 1060 cm: 410 + 410 + 240. İlk sıra saçakta, son sıra mahyada; aralar 47 ve 60 cm. Kesit 87 × 30 mm (üst 35), sac 1 mm.',
+  { t: 'Omega aşıklar', p: 'Her çatı yüzünde 7 sıra omega aşık makasın üst düğümlerine vidalanır. Bir sıra 1060 cm: 410 + 410 + 240. İlk sıra saçakta, son sıra mahyada; aralar 47 ve 60 cm. Kesit 87 × 30 mm (üst 35), sac 1 mm. Kalkan saçağında aşık uçları C kapamayla kapatılır.',
     rows: [R(null, 'Aşık L 410', '28 adet', 'pafta'), R(null, 'Aşık L 240', '14 adet', 'pafta'), I('Toplam', '148,4 m'), I('Sıra', '2 yüz × 7')] },
   { t: 'Sandviç panel ve mahya', p: 'Antrasit sandviç panel (100 cm kapatır, 350 cm boy) her yüze 11 adet serilir ve aşıklara vidalanır. Mahya metal kiremit mahyasıyla kapatılır.',
     rows: [R(null, 'Sandviç panel 350 × 100', '22 adet', 'pafta'), R(null, 'Metal kiremit mahyası L 2800', '5 adet', 'liste')] },
-  { t: 'Alın sacı ve dere', p: 'Alın sacı (antrasit gri) iki kalkanın eğik kenarlarına takılır. İki uzun kenara metal dere asılır, 6 iniş borusu bağlanır.',
+  { t: 'Alın sacı ve dere', p: 'İki uzun kenara K kesitli dere asılır. Alın sacı (antrasit) kalkanların eğik kenarlarına takılır: tırnağı baş makas Z\'sine girer, saçak altı aşıkların altını kapatır, üstte trapezin kenar hadvesini kavrar; alt ucu derenin alnını kapatır. 6 iniş borusu kaz boynuyla binaya döner ve kelepçeyle bina boyunca iner.',
     rows: [R(null, 'Alın sacı 300 × 2500', '7 adet', 'liste'), R(null, 'Metal dere', '2 hat · 21,2 m', 'pafta'), R(null, 'İniş', '6 adet', 'pafta')] },
   { t: 'Kapı ve pencereler', p: '5 Amerikan kapı kasalı panolara takılır, açılış yönleri plandaki gibidir. Pencereler (3 × 120/120, 2 × 120/180, 1 vasistas 60/40) ve çelik dış kapı yerine konur; bu projede bunlar alıcıya ait. Bu adımda çatı gizlenir; düğmeyle geri açılır.',
     extra: [I('Pencere ve dış kapı', 'bu projede alıcıya ait')] },
@@ -849,7 +853,7 @@ function goTo(i, animate = true) {
   if (animating) { stepT0 = now(); byStep[cur].forEach(p => { p.obj.visible = false; }); }
   stepEnd = now() + (animating ? timing[cur].total : 0);
   if (controls) controls.autoRotate = false;
-  renderUI(); flyTo(cur);
+  renderUI(); flyTo(cur); rndGuncelle();
 }
 function rowsHtml(rows) {
   return rows.map(r => {
@@ -906,6 +910,15 @@ $('play').addEventListener('click', () => {
   if (cur === 0 || cur === N) goTo(1); else if (!animating) goTo(cur + 1); else updatePlay();
 });
 $('roofTog').addEventListener('click', () => { cutaway = !cutaway; applyVisibility(); });
+/* Adım adım render: her adımın Blender Cycles görüntüsü (yeni parçalar turuncu); 3B ile geçiş */
+let rndAcik = false;
+const rndYol = i => `gorsel/adim/adim_${String(i).padStart(2, '0')}.jpg`;
+function rndGuncelle() {
+  const im = $('rndImg'), b = $('rndTog'); if (!im || !b) return;
+  im.hidden = !rndAcik; b.setAttribute('aria-pressed', String(rndAcik)); b.textContent = rndAcik ? '3B görünüme dön' : 'Adımı render göster';
+  if (rndAcik) { im.src = rndYol(cur); im.alt = `Adım ${cur}: ${STEPS[cur].t} (render)`; if (cur < N) { const on = new Image(); on.src = rndYol(cur + 1); } }
+}
+$('rndTog').addEventListener('click', () => { rndAcik = !rndAcik; rndGuncelle(); });
 /* Render görselleri (Blender Cycles; montaj hâli, ham malzeme) */
 const GORSELLER = [
   ['gorsel/ev_on_sag.jpg', 'Ön-sağdan: montajı biten ev (ham malzeme; boya ve sıva yok)'],

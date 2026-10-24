@@ -1,0 +1,13 @@
+const { chromium } = require('playwright'); const fs = require('fs'), path = require('path'); const SP = process.argv[2];
+const body = fs.readFileSync(path.join(SP, 'montaj-rehberi.html'), 'utf8');
+fs.writeFileSync(path.join(SP, 't/index.html'), `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0}[hidden]{display:none!important}</style></head><body>${body}</body></html>`);
+(async () => { const b = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
+  const p = await (await b.newContext({ viewport: { width: 1440, height: 860 } })).newPage(); const e = []; p.on('pageerror', x => e.push(x.message));
+  await p.route('https://cdn.jsdelivr.net/npm/three@0.160.0/**', r => r.fulfill({ path: path.join(SP, 't/node_modules/three', r.request().url().replace('https://cdn.jsdelivr.net/npm/three@0.160.0/', '')), contentType: 'application/javascript' }));
+  await p.route(/fonts\.(googleapis|gstatic)\.com/, r => r.abort());
+  await p.goto('file://' + path.join(SP, 't/index.html'), { waitUntil: 'domcontentloaded', timeout: 90000 }); await p.waitForTimeout(1500);
+  await p.click('#rndTog'); await p.evaluate(() => window.__montaj.goTo(12, false)); await p.waitForTimeout(1200);
+  await p.screenshot({ path: path.join(SP, 't/rnd-12.png') });
+  const d = await p.evaluate(() => { const i = document.getElementById('rndImg'); return [i.hidden, i.src.split('/').slice(-2).join('/'), i.complete && i.naturalWidth, document.getElementById('rndTog').textContent]; });
+  await p.click('#rndTog'); const kapali = await p.evaluate(() => document.getElementById('rndImg').hidden);
+  console.log('hata', e, d, '3B dönüş', kapali); await b.close(); })();

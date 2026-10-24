@@ -89,3 +89,15 @@ Dal: `claude/montaj-rehberi-devir`. Dosyalar: `deneme/2026-10-24_montaj_rehberi/
   - saçak kıvrımı 10 cm;
   - makas çubuk kesiti yönü;
   - köşede alın sacı alt ucunun yatay kesim yüksekliği (derenin altından, saçak altı hizası varsayıldı).
+
+## Güncelleme · 24 Ekim 2026, 15:10 (adım adım render)
+
+Lokman'ın seçimi: montaj dizilimi adım adım render.
+- `render/adim_render.py`, 18 kare: genel bakış ve 17 adım.
+  - Her karede o adıma kadarki parçalar görünür, o adımın yeni parçaları turuncu.
+  - Kamera rehberin `preset()` açılarıyla aynı; 1280 × 800, 24 örnek, kare başına ~1,5 dk.
+- Kareler `rehber/gorsel/adim/adim_NN.jpg`.
+- Rehberde **Adımı render göster** düğmesi: açıkken her adımda o adımın karesi görünür; Oynat ile kare kare ilerler; tekrar basınca 3B'ye döner.
+- Adım 12, 14 ve 16'nın metinleri Z, C kapama ve alın sacı ayrıntılarıyla güncellendi.
+- Artefakt sürüm 10.
+- Model değişirse kareler yeniden üretilir: `export.js`, sonra `adim_render.py 24 1.0`, sonra JPEG'e çevirme (`ev_pafta.py`'deki gibi).
