@@ -12,12 +12,12 @@ Grup içinde satırlar anahtarlarla eşlenir (sözlükte `olcu`):
   sayısıdır (profil boyları: "100*100*3240" ↔ "L 3240"); `tolerans` (mm) içindeki anahtarlar da eşlenir (yuvarlama). `sira: true`
   ise eşi kalmayan anahtarlar iki yanda aynı sayıdaysa büyükten küçüğe eşlenir ve ölçüsü tutmadığı için "farklı" sayılır. Aynı ad
   grubunda iki yanda birer anahtar kalmışsa ikisi eşlenir: birinin ölçüsünde sayı yoksa ("ADET", "METRE") adet kıyaslanır, ikisinde
-  de sayı varsa ölçü tutmadığı için "farklı" sayılır (uydurma: L 1150 ↔ L 950, "4,2 X 13" ↔ "3,9 X 32", "20 Amper" ↔ "25 Amper").
+  de sayı varsa ölçü tutmadığı için "farklı" sayılır (uydurma: L 1150 ↔ L 950, "4,5 X 16" ↔ "3,5 X 25", "20 Amper" ↔ "25 Amper").
 - `yok`: grubun bütün satırları tek anahtardır; toplam kıyaslanır, satırlar arasındaki dağılım kıyaslanmaz (ör. H'ların kulaklı /
   dübelli / özel bölünmesi; 13 Ekim tanımında "toplam aynı, ayrım farklı"). Ölçü kümesi ayrıca kıyaslanır: iki yanda da ölçüsünde
   sayı olan satır varsa her gerçek ölçünün bizde, her bizim ölçümüzün (adet > 0) gerçek listede eşi olmalı, yoksa satırlar "farklı"
-  sayılır (ör. saçak sacı 300 × 2500 ↔ 500 × 3000). İki yanın bütün satırları sayılı ölçülüyse ve bizde birden çok ölçü varsa ölçü
-  başına toplam da tutmalı (ör. 300 × 2500 × 4 + 500 × 3000 × 6 ↔ 6 + 4 "farklı"). Eş: aynı ölçü ya da aynı sayılar; `anahtar:
+  sayılır (ör. saçak sacı 300 × 2500 ↔ 500 × 3000). Gerçek yanın bütün satırları ve bizim yanın adedi dolu bütün satırları sayılı
+  ölçülüyse ve bizde birden çok ölçü varsa ölçü başına toplam da tutmalı (ör. 300 × 2500 × 4 + 500 × 3000 × 6 ↔ 6 + 4 "farklı"). Eş: aynı ölçü ya da aynı sayılar; `anahtar:
   en_buyuk` ise en büyük sayı (`tolerans` içinde). `olcu_serbest: true` olan grupta ölçü kıyaslanmaz (iki listenin ölçüsü başka şeyi
   anlatıyor; gerekçe `not`'ta).
 - `her_satir`: bizim satırlarımız gerçek listenin her satırıyla ayrı ayrı kıyaslanır (ör. vitrifiye takımı: dört satır, her biri 1);
@@ -48,7 +48,7 @@ ADLAR = {"aynı": "varsayılan adetle aynı", "ayrım": "toplam aynı, ayrım fa
 KIPLER = ("tam", "yok", "her_satir")
 KAPI_SONUC = {"aynı": ("aynı", "ayrım"), "ayrım": ("aynı", "ayrım"), "pafta": ("aynı", "ayrım", "pafta"), "aday": DOGRU}
 GRUP_OLCULU = ("kalan", "esdeger", "tolerans")      # kapıda grubun bütün bizim ölçüleri de sabit
-OLCU_BASINA = ("toplam", "her_satir")              # kapıda ölçü başına bizim toplamlarımız da sabit (gerekirse; `olcu_toplamlari`)
+SATIR_BASINA = ("toplam", "her_satir")             # kapıda grubun bizim satır değerleri de sabit (gerekirse; `satir_degerleri`)
 
 
 def ust(t) -> str:
@@ -125,8 +125,9 @@ def _kume_tutar(g_olcu: list, b_olcu: list, grup: dict | None) -> bool:
 
 
 def _olcu_basina_tutar(g_satir: list[dict], b_satir: list[dict], grup: dict | None) -> bool:
-    """`yok` kipinde iki yanın bütün satırları sayılı ölçülüyse ve bizde birden çok ölçü varsa her ölçünün toplamı da tutmalı
-    (aynı kalemin iki ölçüsünde adetler ters dağılmışsa toplam ve ölçü kümesi tutar, ölçü başına toplam tutmaz)."""
+    """`yok` kipinde gerçek yanın bütün satırları ve bizim yanın adedi dolu bütün satırları (`b_satir`) sayılı ölçülüyse ve bizde birden
+    çok ölçü varsa her ölçünün toplamı da tutmalı (aynı kalemin iki ölçüsünde adetler ters dağılmışsa toplam ve ölçü kümesi tutar, ölçü
+    başına toplam tutmaz)."""
     if grup and grup.get("olcu_serbest"):
         return True
     if not all(olculu(s["boyut"]) for s in g_satir) or not all(olculu(s["olcu"]) for s in b_satir):
@@ -144,24 +145,23 @@ def _olcu_basina_tutar(g_satir: list[dict], b_satir: list[dict], grup: dict | No
     return True
 
 
-def olcu_toplamlari(satirlar: list[dict], grup: dict | None) -> list | None:
-    """`yok` ve `her_satir` kipinde gerileme kapısı için bizim sayılı ölçülü satırlarımızın ölçü başına toplamları: [[ölçü, varsayılan,
-    pafta, aday]] (adedi 0 olan satır da). Ölçü kümesi, ölçü başına toplam ve `her_satir` ölçüsü yalnız adedi > 0 olan sayılı ölçülü
-    satırlara bakar; adet bu satırlar arasında kayarsa ya da adedi boş bir sayılı ölçülü satıra adet gelirse eşleme değişebilir. Bu ikisi
-    olamıyorsa None: grubun ölçüsü serbest, ya da sayılı ölçü tek ve adedi dolu (o zaman adet yalnız sayılı ölçüsü olmayan satırlarla
-    paylaşılır, bu da eşlemeyi değiştirmez)."""
+def satir_degerleri(satirlar: list[dict], grup: dict | None) -> list | None:
+    """`yok` ve `her_satir` kipinde gerileme kapısı için grubun bizim satırlarımızın değerleri: [[kalem, ölçü, varsayılan, pafta, aday]].
+
+    Ölçü kümesi, ölçü başına toplam ve `her_satir` ölçüsü satırların doluluğuna (adet > 0), ölçüsüne ve pafta / aday sütunlarına satır
+    satır bakar: grupta iki ya da daha çok sayılı ölçü varsa ya da adedi dolu olmayan sayılı ölçülü bir satır varsa, toplamlar aynı
+    kalsa da bir satırın adedi ya da sütunu değişince eşleme değişebilir (ör. adedin iki ölçü arasında kayması, sayılı ölçüsü olmayan
+    satırın boşalması, aynı ölçüdeki iki satır arasında pafta dağılımı). Kapı bu yüzden satırların değerlerini ister (yanlış alarm yönünde
+    katı). Öteki durumlarda None: grubun ölçüsü serbest, sayılı ölçü yok, ya da sayılı ölçü tek ve adedi dolu (eşleme o zaman yalnız
+    toplama bakar, kapı toplamı zaten ister)."""
     if grup and grup.get("olcu_serbest"):
         return None
     sayili = [s for s in satirlar if olculu(s["olcu"])]
-    olculer = sorted({olcu(s["olcu"]) for s in sayili})
+    olculer = {olcu(s["olcu"]) for s in sayili}
     if not olculer or (len(olculer) == 1 and all(sayi_mi(s["adet"]) and s["adet"] > 0 for s in sayili)):
         return None
-
-    def top(sec, alan):
-        v = [s[alan] for s in sec if sayi_mi(s.get(alan))]
-        return round(sum(v), 6) if v else None
-
-    return [[o, *(top([s for s in satirlar if olcu(s["olcu"]) == o], a) for a in ("adet", "pafta", "aday"))] for o in olculer]
+    d = [[ad(s["kalem"]), olcu(s["olcu"]), s.get("adet"), s.get("pafta"), s.get("aday")] for s in satirlar]
+    return sorted(d, key=lambda r: json.dumps(r, ensure_ascii=False))
 
 
 def sayi_mi(v) -> bool:
@@ -296,10 +296,10 @@ def esle(bizim: list[dict], gercek: list[dict], gruplar: list[dict]) -> dict:
     """bizim: liste üretecinin satırları (kalem, olcu, adet, pafta, aday); gercek: okuyucunun satırları (malzeme, boyut, adet).
 
     Dönen: {"gercek": [her dolu gerçek satır için {i, sonuc, grup, ad, bizim: [j…], b_anahtar, G, n_g, olcu_tuttu, eslesme,
-    anahtar_satirlari, grup_bizim, olcu_toplamlari}], "fazla": [j…], "sayilar": {…}}. `grup` sözlük grubunun adı, `ad` aynı ad grubunun düzgünleştirilmiş
+    anahtar_satirlari, grup_bizim, satir_degerleri}], "fazla": [j…], "sayilar": {…}}. `grup` sözlük grubunun adı, `ad` aynı ad grubunun düzgünleştirilmiş
     adı; `b_anahtar` bizim yanın ölçü anahtarı (`yok` ve `her_satir` kipinde None: grubun bütün satırları); `grup_bizim` grubun bütün
-    bizim satırları (eşdeğer, tolerans ve kalan eşlemesinin kapısı için); `olcu_toplamlari` toplam ve her satır eşlemesinde
-    bizim ölçü başına toplamlarımız (kapı için; gerekmiyorsa None, › `olcu_toplamlari`).
+    bizim satırları (eşdeğer, tolerans ve kalan eşlemesinin kapısı için); `satir_degerleri` toplam ve her satır eşlemesinde
+    grubun bizim satır değerleri (kapı için; gerekmiyorsa None, › `satir_degerleri`).
     """
     dolu = {i: s for i, s in enumerate(gercek) if sayi_mi(s.get("adet")) and s["adet"] > 0}
     gg, bg = {}, {}
@@ -317,15 +317,15 @@ def esle(bizim: list[dict], gercek: list[dict], gruplar: list[dict]) -> dict:
         for gi, bj, olcu_tuttu, b_anahtar, eslesme in cift:
             G = sum(dolu[i]["adet"] for i in gi)
             s = _karar(G, [bizim[j] for j in bj], len(gi)) if olcu_tuttu else "farklı"
-            ot = olcu_toplamlari([bizim[j] for j in bj], grup) if eslesme in OLCU_BASINA else None
+            sd = satir_degerleri([bizim[j] for j in bj], grup) if eslesme in SATIR_BASINA else None
             for i in gi:
                 satir[i] = {"i": i, "sonuc": s, **ortak, "bizim": list(bj), "b_anahtar": b_anahtar, "G": G, "n_g": len(gi),
                             "olcu_tuttu": olcu_tuttu, "eslesme": eslesme, "anahtar_satirlari": list(gi), "grup_bizim": list(b_satir),
-                            "olcu_toplamlari": ot}
+                            "satir_degerleri": sd}
         for i in essiz_g:
             satir[i] = {"i": i, "sonuc": "bizde yok", **ortak, "bizim": [], "b_anahtar": None, "G": dolu[i]["adet"], "n_g": 1,
                         "olcu_tuttu": None, "eslesme": None, "anahtar_satirlari": [i], "grup_bizim": list(b_satir),
-                        "olcu_toplamlari": None}
+                        "satir_degerleri": None}
         fazla += [j for j in essiz_b if sayi_mi(bizim[j]["adet"]) and bizim[j]["adet"] > 0]
     sonuc = [satir[i] for i in sorted(satir)]
     say = {s: sum(1 for r in sonuc if r["sonuc"] == s) for s in SONUCLAR}
@@ -363,9 +363,9 @@ def kapi_denetle(bizim: list[dict], gruplar: list[dict], tutan: dict) -> tuple[s
     kayıttaki değeri kayıttaki sonucun sütununda vermeli: aynı ya da ayrım tutmuşsa varsayılan adet, pafta tutmuşsa pafta ya da
     varsayılan, aday tutmuşsa üçünden biri (`KAPI_SONUC`). Kalan, eşdeğer ya da tolerans eşlemesiyle tutmuş satırda grubun bütün
     ölçüleri de kayıttaki gibi olmalı (`GRUP_OLCULU`): gruba eklenen ya da ölçüsü değişen bir satır eşlemeyi değiştirebilir. Toplam ya da
-    her satır eşlemesiyle tutmuş satırda kayıtta `olcu_toplamlari` varsa (iki ya da daha çok sayılı ölçü, ya da adedi boş sayılı ölçülü
-    satır) ölçü başına toplamlar da kayıttaki gibi olmalı: adedin ölçüler arasında kayması ölçü kümesini ya da ölçü başına toplamı
-    bozabilir."""
+    her satır eşlemesiyle tutmuş satırda kayıtta `satir_degerleri` varsa (iki ya da daha çok sayılı ölçü, ya da adedi boş ya da 0 olan
+    sayılı ölçülü satır) grubun satırlarının değerleri de kayıttaki gibi olmalı: satırlar arasında kayan bir adet ya da sütun değeri ölçü kümesini,
+    ölçü başına toplamı ya da `her_satir` ölçüsünü bozabilir."""
     hedef, grup = _hedef(gruplar, tutan)
     if hedef is None:
         return None, "sözlükte grup yok"
@@ -382,10 +382,10 @@ def kapi_denetle(bizim: list[dict], gruplar: list[dict], tutan: dict) -> tuple[s
         bugun = sorted(olcu(s["olcu"]) for s in bizim if grup_anahtari(s["kalem"], gruplar, "_b") == hedef)
         if bugun != tutan["grup_olculeri"]:
             return None, f"grubun ölçüleri değişti ({tutan['eslesme']} eşleme): kayıtta {tutan['grup_olculeri']}, bugün {bugun}"
-    if "olcu_toplamlari" in tutan:
-        bugun = olcu_toplamlari(secilen, grup)
-        if bugun != tutan["olcu_toplamlari"]:
-            return None, f"ölçü başına toplam değişti ({tutan['eslesme']} eşleme): kayıtta {tutan['olcu_toplamlari']}, bugün {bugun}"
+    if "satir_degerleri" in tutan:
+        bugun = satir_degerleri(secilen, grup)
+        if bugun != tutan["satir_degerleri"]:
+            return None, f"satır değerleri değişti ({tutan['eslesme']} eşleme): kayıtta {tutan['satir_degerleri']}, bugün {bugun}"
     s = _karar(tutan["deger"], secilen, 1)
     if s not in KAPI_SONUC[tutan["sonuc"]]:
         return None, (f"adet: kayıtta {tutan['deger']} ({tutan['sonuc']}), bugün " + " + ".join(_adet_yazisi(x) for x in secilen)

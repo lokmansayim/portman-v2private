@@ -445,10 +445,10 @@ def test_kayitta_bizim_degerimizden_baska_deger_yok(pd, sozluk):
     assert kayit["sayilar"]["dogru"] == sum(kayit["sayilar"][s] for s in esle.DOGRU)
     assert kayit["bizim_liste"]["commit"] == K.kayitli_mi(pd / "bizim_liste.json")["commit"]
     for t in kayit["tutanlar"]:
-        assert set(t) <= {"grup", "ad", "b_anahtar", "eslesme", "deger", "sonuc", "bizim", "grup_olculeri", "olcu_toplamlari"}, t
+        assert set(t) <= {"grup", "ad", "b_anahtar", "eslesme", "deger", "sonuc", "bizim", "grup_olculeri", "satir_degerleri"}, t
         assert t["sonuc"] in esle.DOGRU and t["eslesme"] in ("anahtar", "esdeger", "tolerans", "kalan", "toplam", "her_satir")
         assert ("grup_olculeri" in t) == (t["eslesme"] in esle.GRUP_OLCULU)
-        assert "olcu_toplamlari" not in t or t["eslesme"] in esle.OLCU_BASINA
+        assert "satir_degerleri" not in t or t["eslesme"] in esle.SATIR_BASINA
         assert all(set(b) == {"kalem", "olcu"} for b in t["bizim"])
     bozuk = [(t, esle.kapi_denetle(bizim["satirlar"], sozluk, t)[1]) for t in kayit["tutanlar"]
              if esle.tutuyor_mu(bizim["satirlar"], sozluk, t) is None]
@@ -574,10 +574,11 @@ def test_kapi_pafta_kaydinda_aday_sutunu_yetmez():
     assert esle.tutuyor_mu([{**once[0], "adet": 5}], [], t) == "aynı"           # varsayılan tutarsa pafta kaydı da tutar
 
 
-def test_kapi_olcu_basina_toplami_korur(tmp_path):
-    """Toplanan ve her satır gruplarında adet ölçüler arasında kayınca eşleme "farklı" der, kapı da durur (uydurma; hakem 3. tur, B1)."""
-    def s(kalem, o, a):
-        return {"kalem": kalem, "olcu": o, "adet": a}
+def test_kapi_satir_degerlerini_korur(tmp_path):
+    """Toplanan ve her satır gruplarında toplamlar aynı kalsa da bir satırın adedi ya da sütunu kayınca eşleme "farklı" diyebilir; kapı da
+    durur (uydurma; hakem 3. tur B1, 4. tur 1–2, 5. tur B1–B2)."""
+    def s(kalem, o, a, **sutun):
+        return {"kalem": kalem, "olcu": o, "adet": a, **sutun}
     toplam = _gruplar(tmp_path, TOPLAM)
     iki = [("DENEME TOPLAM", "300 X 2500", 4), ("DENEME TOPLAM", "500 X 3000", 6)]
     takim = {"ad": "Deneme takım", "bizim": ["^DENEME TAKIM"], "gercek": ["^DENEME TAKIM"], "olcu": "her_satir"}
@@ -599,20 +600,32 @@ def test_kapi_olcu_basina_toplami_korur(tmp_path):
          [("DENEME TAKIM LAVABO", "800 X 450", 1)], [s("Deneme takım", "ADET", 0), s("Deneme takım", "600 × 450", 1)]),
         (toplam, [{**s("Deneme toplam", "300 × 2500", 0), "pafta": 5}], [("DENEME TOPLAM", "500 X 3000", 5)],
          [{**s("Deneme toplam", "300 × 2500", 5), "pafta": 5}]),                                      # pafta kaydı, varsayılana adet
+        (toplam, [s("Deneme toplam", "300 × 2500", 1, aday=4), s("Deneme toplam", "500 × 3000", 1, aday=6)], iki,
+         [s("Deneme toplam", "300 × 2500", 1, aday=6), s("Deneme toplam", "500 × 3000", 1, aday=4)]),    # aday sütununda ters
+        (toplam, [s("Deneme toplam", "ADET", 7), s("Deneme toplam", "300 × 2500", None)], [("DENEME TOPLAM", "500 X 3000", 7)],
+         [s("Deneme toplam", "ADET", 3), s("Deneme toplam", "300 × 2500", 4)]),                         # adedi boş (None) satır
+        # sayılı ölçüsü olmayan satır boşalınca ölçü başına toplam açılır
+        (toplam, [s("Deneme toplam", "ADET", 1, pafta=2), s("Deneme toplam", "300 × 2500", 3, pafta=4),
+                  s("Deneme toplam", "500 × 3000", 5, pafta=4)], iki,
+         [s("Deneme toplam", "ADET", 0, pafta=2), s("Deneme toplam", "300 × 2500", 3, pafta=4), s("Deneme toplam", "500 × 3000", 5, pafta=4)]),
+        # aynı ölçüdeki iki kalem arasında adet, paftası olmayan satıra geçiyor
+        (toplam, [s("Deneme toplam", "300 × 2500", 2, pafta=4), s("Deneme toplam özel", "300 × 2500", 0),
+                  s("Deneme toplam", "500 × 3000", 8, pafta=6)], iki,
+         [s("Deneme toplam", "300 × 2500", 0, pafta=4), s("Deneme toplam özel", "300 × 2500", 2), s("Deneme toplam", "500 × 3000", 8, pafta=6)]),
     ]
     for g, once, gercek, sonra in vakalar:
         (t,) = _tutanlar(once, gercek, g)
-        assert "olcu_toplamlari" in t and esle.tutuyor_mu(once, g, t), once
+        assert "satir_degerleri" in t and esle.tutuyor_mu(once, g, t), once
         assert "farklı" in _sonuc(sonra, gercek, g), sonra
-        assert esle.kapi_denetle(sonra, g, t)[1].startswith("ölçü başına toplam"), sonra
+        assert esle.kapi_denetle(sonra, g, t)[1].startswith("satır değerleri değişti"), sonra
     serbest = _gruplar(tmp_path, {**TOPLAM, "olcu_serbest": True, "not": "uydurma gerekçe"})
     once, sonra = vakalar[0][1], vakalar[0][3]
     (t,) = _tutanlar(once, iki, serbest)
-    assert "olcu_toplamlari" not in t                                    # ölçü kıyaslanmayan grupta kayma eşlemeyi değiştirmez
+    assert "satir_degerleri" not in t                                    # ölçü kıyaslanmayan grupta kayma eşlemeyi değiştirmez
     assert _sonuc(sonra, iki, serbest) == ["ayrım", "ayrım"] and esle.tutuyor_mu(sonra, serbest, t)
     tek = [s("Deneme toplam", "ADET", 3), s("Deneme toplam", "300 × 2500", 7)]
     (t,) = _tutanlar(tek, [("DENEME TOPLAM", "300 X 2500", 10)], toplam)
-    assert "olcu_toplamlari" not in t                                    # tek sayılı ölçü ve adedi dolu: kayma eşlemeyi değiştirmez
+    assert "satir_degerleri" not in t                                    # tek sayılı ölçü ve adedi dolu: kayma eşlemeyi değiştirmez
 
 
 def test_pk01_bilgi_kapiya_girmez(sozluk, bugun):

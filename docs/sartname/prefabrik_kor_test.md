@@ -60,7 +60,7 @@ Sıra her koşuda aynı; bir adım tutmazsa araç durur, nedenini yazar ve sonra
    adetle aynı · toplam aynı, ayrım farklı · pafta sütunu tuttu · aday sütunu tuttu · adet ya da ölçü farklı · bizde yok · bizde fazla.
    **Doğru = aynı + ayrım + pafta + aday** (13 Ekim raporlarının tanımı). Ölçü: ölçüyle eşlenen gruplarda ölçüsü tutmayan satır adet tutsa da
    "farklı"; farklı bölünen kalemlerin toplandığı gruplarda toplamla birlikte ölçü kümesi kıyaslanır (iki yanda sayılı ölçü varsa her birinin
-   öbür yanda eşi olmalı; bütün satırlar sayılı ölçülüyse ölçü başına toplam da), ayrı kalemler arasındaki dağılım kıyaslanmaz; bir yanda sayılı ölçü yoksa ("ADET") yalnız adet kıyaslanır. Ölçünün
+   öbür yanda eşi olmalı; gerçek yanın bütün satırları ve bizim yanın adedi dolu bütün satırları sayılı ölçülüyse ölçü başına toplam da), ayrı kalemler arasındaki dağılım kıyaslanmaz; bir yanda sayılı ölçü yoksa ("ADET") yalnız adet kıyaslanır. Ölçünün
    kıyaslanmadığı grup sözlükte gerekçesiyle yazar (`olcu_serbest`, ör. makas: bizde açıklık, gerçek listede boy).
 6. **Sınıf:** proje başına sınıf dosyası (proje klasöründe); sınıfı yazılmamış fark "sınıflanmadı" sayılır.
 7. **Rapor:** md ve xlsx; kod, m² ve satırlar. Ad, bayi adı ve dosya adı yazılmaz; telefona benzeyen her şey maskelenir.
@@ -68,8 +68,8 @@ Sıra her koşuda aynı; bir adım tutmazsa araç durur, nedenini yazar ve sonra
 Testler (`testler/kor/test_kor_kiyas.py`) her koşuda aracın sırasını ve ölçü kurallarını uydurma satırlarla, gerçek mühür kaydının kör ve kapalı
 kayıtları reddettiğini ve durumların değişmediğini, açık sekiz projenin gerileme kapısını dener; kaynak liste gerekmez. Kapı tutan her satırın
 bugünkü listede kayıttaki (kalem, ölçü) çiftlerini ve kayıttaki sonucun sütununda aynı adedi ister; eşdeğer, tolerans ve kalan eşlemesinde
-grubun ölçüleri, toplanan ve her satır gruplarında (iki ya da daha çok sayılı ölçü ya da adedi boş sayılı ölçülü satır varsa) ölçü başına
-toplamlar da kayıttaki gibi olmalı. Tam koşu `PORTMAN_KOR_TAM=1` ve depo dışındaki kaynak klasörüyle
+grubun ölçüleri, toplanan ve her satır gruplarında (bizde iki ya da daha çok sayılı ölçü ya da adedi boş ya da 0 olan sayılı ölçülü satır varsa)
+grubun bütün bizim satırlarının değerleri (kalem, ölçü, varsayılan, pafta, aday) de kayıttaki gibi olmalı. Tam koşu `PORTMAN_KOR_TAM=1` ve depo dışındaki kaynak klasörüyle
 (`PORTMAN_KOR_KAYNAK`): sayılar ve tutan satırlar gerçek listeden yeniden hesaplanır ve kayıtla aynı olmalı.
 
 ## Kör 19 ve açılış kaydı
