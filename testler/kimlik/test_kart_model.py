@@ -12,6 +12,11 @@
 - H türünün kaydı en yakın makası yazar (makaslar y ekseninde, iki makas aynı H'ye denk gelir). İş Emri'nin çatısı beşik değilse makaslar
   ve makasa bağlı dış H'ler "kural yok" yazar, komut 1 döner (bugünkü IFC çatıyı hep beşik çizer; geometri hakemi K1, 20 Ekim).
 - Komut dört dosyayı yazar; iki IFC'de şema hatası 0; Excel'de kartlar, sayım, H türü ve kartsız sayfaları.
+
+K2'de (gerekçeleri `docs/is_emirleri/IE-15.md` › Değişiklik (K2)): kartın eşlemesi `bugunku_ifc`, `yerlesim` ya da `sabit`'ten biri; PK-01'in
+kart sayısı sözlüğüne K2 kartları 0 adetle girer (bu dosyadaki modeller K1'in yolundan, İş Emri'siz); komut K2 katmanlarını da kurar (beşinci
+dosya yerleşim planları, Excel'de iki sayfa daha; kırma çatıda dört çatı katmanı da "kural yok"); kod kilidinde K1'de çıkan 25 satır SHA ile
+donar (kilitten satır silinmez). K2'nin kendi testleri `test_k2.py`'de.
 """
 from __future__ import annotations
 
@@ -44,6 +49,8 @@ H_KART = {"H-01": "dubelli_kulakli", "H-02": "dubelli", "H-03": "standart", "H-0
           "H-06": "uclu_standart"}
 # PK-01'in İş Emri'nde dış kapı ve pencereler alıcıya ait: modelde parça var, listede satır adet 0 (PK-01 dersi 1; liste K4'te modelden okur)
 ALICIYA_AIT = {"Prefabrik çelik kapı", "PVC pencere", "PVC vasistas"}
+K2_KARTLARI = {"OM-01": 0, "AS-01": 0, "KP-01": 0, "BT-01": 0, "DR-01": 0, "DR-02": 0, "SR-01": 0}    # bu dosyanın modelleri İş Emri'siz (K1)
+KILIT_K1 = "94c253954968d2dee4023c097e47326281fe57998c92e347e2b48d24762e4d23"   # K1'de çıkan 25 kodun adlarıyla SHA'sı (PR #31)
 
 
 def _oku(p: Path) -> dict:
@@ -80,8 +87,10 @@ def test_kart_dosyasi(kartlar, cevap):
     kodlar = [k["kod"] for k in kartlar["kartlar"]]
     assert len(kodlar) == len(set(kodlar))
     alanlar = set(kartlar["alanlar"])
+    yerlesim = _oku(KM.YERLESIM)
     for k in kartlar["kartlar"]:
-        assert {"kod", "ad", "liste", "olcu", "birim", "nerede", "sayim", "ifc", "pafta", "bugunku_ifc", "kaynak"} <= set(k) <= alanlar, k["kod"]
+        assert {"kod", "ad", "liste", "olcu", "birim", "nerede", "sayim", "ifc", "pafta", "kaynak"} <= set(k) <= alanlar, k["kod"]
+        assert sum(a in k for a in ("bugunku_ifc", "yerlesim", "sabit")) == 1, k["kod"]
         aile = re.fullmatch(r"([A-Z]+)-(\d{2})", k["kod"])
         assert aile and aile.group(1) in kartlar["aileler"], k["kod"]
         assert k["birim"] in kartlar["birimler"] and k["sayim"] in kartlar["sayim_yollari"], k["kod"]
@@ -94,24 +103,39 @@ def test_kart_dosyasi(kartlar, cevap):
         assert "IfcElementType" in ust, k["kod"]
         pt = next(a for a in tur.all_attributes() if a.name() == "PredefinedType")
         assert k["ifc"]["alt_tur"] in pt.type_of_attribute().declared_type().enumeration_items(), k["kod"]
-        assert k["bugunku_ifc"], k["kod"]
-        for m in k["bugunku_ifc"]:
+        assert k.get("bugunku_ifc", True), k["kod"]
+        for m in k.get("bugunku_ifc", []):
             assert m["sinif"] in ut.get_applicable_entities(k["ifc"]["sinif"], schema="IFC4"), (k["kod"], m["sinif"])
             assert not m.get("kural") or m["kural"]["ad"] == "h_turu", k["kod"]
             assert "cati_tipleri" not in m or (m["cati_tipleri"] and all(isinstance(t, str) for t in m["cati_tipleri"])), k["kod"]
+        if "yerlesim" in k:
+            y = k["yerlesim"]
+            assert y["kural"] in yerlesim["kurallar"] and y["parca"] and y["sinif"] in ut.get_applicable_entities(k["ifc"]["sinif"], schema="IFC4"), k["kod"]
+        if "sabit" in k:
+            assert k["sayim"] == "sabit_paket" and k["sabit"]["okunan"].startswith("kurallar/liste/prefabrik.json › "), k["kod"]
         anahtarlar = list(k["pafta"]) + list(k.get("pafta_dis_ic", {}).values())
         for a in anahtarlar:
             assert KY.cevap_degeri(cevap, a) is not None, (k["kod"], a)
+        for a in k.get("pafta_tavan", {}).values():                     # PK-01 asma: ters tavanın anahtarı cevapta yok, okuyucu tanır
+            assert a in KY.EK_ANAHTAR, (k["kod"], a)
+        if k.get("pafta_bilgi"):                                         # bilgiyle kurulan anahtarın öneki cevapta bir sözlük (ör. omeganın yerleri)
+            v = cevap
+            for a in k["pafta_bilgi"]["onek"].split("."):
+                v = v.get(a, {}) if isinstance(v, dict) else {}
+            assert v and all(isinstance(n, int) for n in v.values()), k["kod"]
     for g in kartlar["gorunum"]:
         assert g["asil"]["sinif"] and g["pay_cm"] > 0 and g["neden"]
     assert all(k["neden"] for k in kartlar["kartsiz"])
 
 
 def test_kart_kodlari_kilitli(kartlar):
-    """Bir kod başka ürüne verilmez: kartlardaki her kod kilitte aynı adla durur; kilitten satır silinmez."""
+    """Bir kod başka ürüne verilmez: kartlardaki her kod kilitte aynı adla durur; kilitten satır silinmez (K1'de çıkan 25 satır SHA ile
+    donar; yeni kod sona eklenir)."""
     kilit = _oku(VERI / "kart_kodlari.json")["kodlar"]
     for k in kartlar["kartlar"]:
         assert kilit.get(k["kod"]) == k["ad"], k["kod"]
+    ilk = dict(list(kilit.items())[:25])
+    assert hashlib.sha256(json.dumps(ilk, ensure_ascii=False, sort_keys=True).encode()).hexdigest() == KILIT_K1
 
 
 def test_yerlesim_kurallari():
@@ -140,7 +164,7 @@ def test_her_parca_kartli(pk01, kartlar):
     adet = {k["kod"]: k["adet"] for k in s["kartlar"]}
     assert adet == {"D-01": 23, "D-02": 3, "D-03": 2, "D-04": 1, "D-05": 1, "I-01": 15, "I-02": 5, "I-03": 0,
                     "K-01": 5, "K-02": 1, "P-01": 3, "P-02": 2, "P-03": 1, "B-01": 6, "B-02": 1, "V-01": 1, "V-02": 2,
-                    "H-01": 12, "H-02": 7, "H-03": 10, "H-04": 2, "H-05": 3, "H-06": 4, "MA-01": 2, "MA-02": 7}
+                    "H-01": 12, "H-02": 7, "H-03": 10, "H-04": 2, "H-05": 3, "H-06": 4, "MA-01": 2, "MA-02": 7} | K2_KARTLARI
     assert len(s["gorunum"]) == 9 and all(g["asil"].startswith("BAGLANTI_B0") for g in s["gorunum"])
     assert s["bilesen"] == {f"MAKAS_{i:02d}": 8 for i in range(1, 10)}
     assert Counter(k["sinif"] for k in s["kartsiz"]) == {"IfcOpeningElement": 12, "IfcSlab": 3, "IfcPlate": 2, "IfcRoof": 1}
@@ -248,7 +272,7 @@ def test_komut_kirma_catida_1_doner(tmp_path):
     (tmp_path / "PK01_kirma.json").write_text(json.dumps(ie, ensure_ascii=False), encoding="utf-8")
     assert KM.main([str(tmp_path / "PK01_kirma.json"), str(tmp_path / "cikti")]) == 1
     say = _oku(tmp_path / "cikti" / "PK01_kirma_kart_sayim.json")
-    assert say["cati_tipi"] == "kirma" and len(say["kural_yok"]) == 33
+    assert say["cati_tipi"] == "kirma" and len(say["kural_yok"]) == 33 + 4       # K2: dört çatı katmanı (aşık, kaplama, betopan, dere ve iniş)
     from openpyxl import load_workbook
     bilesen = {r[0]: r[3] for r in load_workbook(tmp_path / "cikti" / "PK01_kirma_kart_katalogu.xlsx")["Kartsız"].iter_rows(values_only=True)
                if r[2] == "bileşen"}
@@ -337,11 +361,12 @@ def test_iki_karta_uyan_parca_model_uretmez(pk01, kartlar, tmp_path):
 
 def test_komut(tmp_path, kartlar):
     assert KM.main([str(MOTOR_VERI / "PK01.json"), str(tmp_path), "--kod", "PK01"]) == 0
-    assert sorted(p.name for p in tmp_path.iterdir()) == ["PK01.ifc", "PK01_kart_katalogu.xlsx", "PK01_kart_sayim.json", "PK01_model.ifc"]
+    assert sorted(p.name for p in tmp_path.iterdir()) == ["PK01.ifc", "PK01_kart_katalogu.xlsx", "PK01_kart_sayim.json", "PK01_model.ifc",
+                                                          "PK01_yerlesim_planlari.pdf"]
     say = _oku(tmp_path / "PK01_kart_sayim.json")
     assert say["sema_hatasi"] == {"bugunku_ifc": 0, "kart_modeli": 0} and say["makas_aralik_cm"] == 125.5 and say["cati_tipi"] == "besik"
     assert say["pafta_anahtarlari"]["ayrinti.montaj.kanat"] == 6 and say["pafta_anahtarlari"]["ayrinti.montaj.kose"] == 8
     from openpyxl import load_workbook
     wb = load_workbook(tmp_path / "PK01_kart_katalogu.xlsx")
-    assert wb.sheetnames == ["Kartlar", "Sayım", "H türü", "Kartsız"]
+    assert wb.sheetnames == ["Kartlar", "Sayım", "H türü", "Kartsız", "Çatı ve tavan", "Kesim planı"]
     assert wb["Kartlar"].max_row == len(kartlar["kartlar"]) + 1 and wb["H türü"].max_row == 19 + 5 + 1
