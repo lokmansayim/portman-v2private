@@ -1,0 +1,10 @@
+{
+ "kaynak": "PK-08: montaj paftası DWG; PDF olarak duvar yerleşim ve omega yerleşim planı, mimari kat planı. Varsayılan hesabı değiştirmez (protokol §5).",
+ "tavan_omegasi": {
+  "adet": 28,
+  "not": "omega yerleşim planı: 13 hat × (365 + 365 + 39,821) = 100,1 m, bütün genişlik boyunca (iç duvarların üstünden geçiyor), 60 cm'de bir → ÷ 3,65 = 27,4 → 28 (+5 → 33)"
+ },
+ "diger": {
+  "not": "makas, aşık, kaplama, dere ve elektrik planı PDF olarak yok (DWG'de); veranda dikmesi 15 × 15; cumba açılı panoları 790 (59/170) ve ön panosu 200,7 (105/170); mimari planda cumba pencereleri 50/180, 180/180, 50/180"
+ }
+}

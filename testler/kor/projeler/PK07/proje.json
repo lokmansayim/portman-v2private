@@ -1,0 +1,14 @@
+{
+ "kod": "PK-07",
+ "ap": "AP-08",
+ "kip": "pafta",
+ "girdi": {
+  "yapi_pafta": "testler/kor/projeler/PK07/yapi_pafta.json",
+  "pafta_katmani": "testler/kor/projeler/PK07/pafta_katmani.json"
+ },
+ "bizim_liste": "bizim_liste.json",
+ "liste_sha256": "985c3a209bd736eb68fe46cab9964569ca85b41ab7cb8cfb68fe29af7ce78086",
+ "sayfa": null,
+ "kapi": true,
+ "not": "Hedef örnek (PR-2c'den beri)."
+}

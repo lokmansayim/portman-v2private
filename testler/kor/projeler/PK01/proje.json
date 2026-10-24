@@ -1,0 +1,14 @@
+{
+ "kod": "PK-01",
+ "ap": "AP-19",
+ "kip": "motor",
+ "girdi": {
+  "is_emri": "testler/motor/veri/PK01.json",
+  "pafta_katmani": "testler/motor/veri/PK01_pafta_katmani.json"
+ },
+ "bizim_liste": "bizim_liste.json",
+ "liste_sha256": "17e43b888bd1a5dd5bfb06ebb38b620b1b0c3708c176a35d7ea576f1e948d106",
+ "sayfa": null,
+ "kapi": false,
+ "not": "Gerçek listesi stoktan düşülmüş (Lokman, 18 Ekim 2026): sonuç bilgi için kaydedilir, hedef değil, kapıya girmez."
+}

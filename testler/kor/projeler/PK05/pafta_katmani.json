@@ -1,0 +1,19 @@
+{
+ "kaynak": "PK-05 montaj seti: pano yerleşimi PDF'i, LyteCad çatı DXF'leri, Alpha Mini hafif çelik makine dosyaları (13 Ekim 2026 okuması). Varsayılan hesabı değiştirmez (protokol §5).",
+ "makas_bas": {
+  "adet": 2,
+  "not": "makas DXF'i: MK01–MK07 (aralık 1250 mm), uçtaki ikisi kalkan"
+ },
+ "makas_orta": {
+  "adet": 5,
+  "not": "MK02–MK06; Alpha Mini dosyası: her makas alt başlık 6600, üst başlık 6648, dikme 883"
+ },
+ "cati_paneli": {
+  "adet": 2,
+  "not": "ek bölüm (çok amaçlı + WC) çatısında makas yok: ÇP01, ÇP02 hafif çelik çatı paneli 2398 × 2082 (aşıklar panelin içinde, 520 mm'de bir)"
+ },
+ "ozel_pano": {
+  "adet": 1,
+  "not": "Alpha Mini duvar paneli W01: 1250 × 2500, 80 × 120 pencere boşluklu (P80/120 için hafif çelik özel pano)"
+ }
+}

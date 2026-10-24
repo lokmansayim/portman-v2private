@@ -1,0 +1,14 @@
+{
+ "kod": "PK-06",
+ "ap": null,
+ "kip": "pafta",
+ "girdi": {
+  "yapi_pafta": "testler/kor/projeler/PK06/yapi_pafta.json",
+  "pafta_katmani": "testler/kor/projeler/PK06/pafta_katmani.json"
+ },
+ "bizim_liste": "bizim_liste.json",
+ "liste_sha256": "3cf217510de4c60f4c702ca4d1336b2b7cb649a2fb27f313149244012340e2fe",
+ "sayfa": null,
+ "kapi": true,
+ "not": "Bayi arşivi; mühürlü PDF aynı listenin baskısı."
+}

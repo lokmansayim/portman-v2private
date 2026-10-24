@@ -1,0 +1,14 @@
+{
+ "kod": "PK-05",
+ "ap": null,
+ "kip": "pafta",
+ "girdi": {
+  "yapi_pafta": "testler/kor/projeler/PK05/yapi_pafta.json",
+  "pafta_katmani": "testler/kor/projeler/PK05/pafta_katmani.json"
+ },
+ "bizim_liste": "bizim_liste.json",
+ "liste_sha256": "561ad34a90ffee815f73e6013a37a8b7536a118ca5292bb6cf29be2a3c70a779",
+ "sayfa": null,
+ "kapi": true,
+ "not": "Bayi arşivi; liste sayfası YAPIŞTIRMA grubuyla başlayan sayfa."
+}

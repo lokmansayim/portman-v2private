@@ -1,0 +1,14 @@
+{
+ "kod": "PK-03",
+ "ap": null,
+ "kip": "pafta",
+ "girdi": {
+  "yapi_pafta": "testler/kor/projeler/PK03/yapi_pafta.json",
+  "pafta_katmani": "testler/kor/projeler/PK03/pafta_katmani.json"
+ },
+ "bizim_liste": "bizim_liste.json",
+ "liste_sha256": "fe5948f5dcbcfb3cdd870d69751758f4b333d54a3d587871d35b3033d97c3f04",
+ "sayfa": null,
+ "kapi": true,
+ "not": "≈ AP-10 (13 Ekim mührü); AP-10'un kendi listesi kapalı kalır. Mühürlü iki Excel'den güncel olanı (öteki eski sürüm)."
+}

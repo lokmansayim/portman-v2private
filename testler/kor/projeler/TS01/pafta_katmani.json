@@ -1,0 +1,106 @@
+{
+ "kaynak": "TS-01 montaj paftası (45 m²; 12 sayfa). Sayılar `pafta_montaj.json`'dan (vektör) ya da göz sayımından; her satırda yazılı. Varsayılan hesabı değiştirmez (protokol §5).",
+ "makas_bas": {
+  "adet": 2,
+  "not": "makas ve dere planı (sayfa 7): ana çatıda MK01 (x 745,9) ve MK08 (x 4) kalkan; cumbada MK11 ön kalkan (y 3,9), sundurmada MK09 açık ön kalkan (kolonlar D üstünde)"
+ },
+ "makas_orta": {
+  "adet": 6,
+  "not": "ana çatı MK02–MK07 (x 130,6 / 193,2 / 318,8 / 381,5 / 507 / 632,4); cumbada MK12 (y 72,8) ve iç uçta MK13 (y 201,9, 143,6 boy), sundurmada MK10; toplam 13 makas"
+ },
+ "asik": {
+  "adet": 29,
+  "not": "aşık planı (sayfa 9): 41 parça, 115,39 m (410 × 7, 400 × 12, kesik parçalar 38,69 m); 4200'lük boydan 7 + 12 + ⌈38,69 ÷ 4,1⌉ = 29"
+ },
+ "sandvic_panel": {
+  "adet": 16,
+  "not": "çatı kaplaması planı (sayfa 11): metal kiremit 105 kapatır, bordo: L 320 × 16 (ana çatı 8 + 8), L 195 × 6 (cumba 3 + 3), L 108 × 4 (sundurma 2 + 2)"
+ },
+ "osb": {
+  "adet": 27,
+  "not": "OSB yerleşim planı (sayfa 10): \"ÇATI OSB : 27 ADET\", 122 × 244"
+ },
+ "tavan_omegasi": {
+  "adet": 22,
+  "not": "tavan omega planı (sayfa 6, ters tavan, mahyaya paralel): 31 parça, 77,17 m ÷ 3,65 = 21,1 → 22; sundurma tavanı 2 × 120 ve dikey 248 / 268,6 duvar ölçüleri sayılmadı"
+ },
+ "pencere_karkasi": {
+  "adet": 1,
+  "not": "özel profiller (sayfa 4–5) E: çektirme U'su 100 + 100'lük pencere U'su H geçen, 120 × 120, 1 adet (pencereler alıcıya ait); 150/190'lar D01 (251) ve D02 (290) özel panoda, 60/40'ta karkas yok"
+ },
+ "h_plani": {
+  "dis": {
+   "adet": 16,
+   "not": "H profil montaj planı (sayfa 3): dübelli & kulaklı 8 (F dahil), dübelli 8 (A dahil); vektör okuması 8 + 8 birebir"
+  },
+  "uclu_dis": {
+   "adet": 4,
+   "not": "3'lü H dübelli & kulaklı 3 (C dahil), 3'lü dübelli 1; vektör okuması 3 + 1 birebir"
+  },
+  "h_standart": {
+   "adet": 3,
+   "not": "H standart (iç duvar) 3; vektör okumasında iç ek 5 (yatak–salon duvarının x 318'deki iki eki paftada işaretli değil)"
+  },
+  "uclu_standart": {
+   "adet": 2,
+   "not": "3'lü H standart 2"
+  }
+ },
+ "inis": {
+  "adet": 7,
+  "not": "makas ve dere planı (sayfa 7) iniş daireleri: ana çatı 3 köşe (arka sol, arka sağ, ön sağ; ön sol cumbanın içinde), cumba önü 2, sundurma önü 2; orta iniş yok"
+ },
+ "elektrik": {
+  "tavan_armaturu": {
+   "adet": 5,
+   "not": "tijli duy (kırmızı çerçeveli X): giriş 1, salon 2, yatak 2 (biri cumbada) (göz; sayfa 12 lejantı)"
+  },
+  "glop": {
+   "adet": 2,
+   "not": "banyo 1, sundurma 1 (göz)"
+  },
+  "anahtar_tekli": {
+   "adet": 1,
+   "not": "banyo (girişte) (göz; tek tırnak)"
+  },
+  "anahtar_cift": {
+   "adet": 3,
+   "not": "giriş (dış kapı yanı; duy + sundurma glopu), yatak kapısı (iki duy), salon kapısı (iki duy) (göz; iki tırnak, 400 dpi)"
+  },
+  "priz_tekli": {
+   "adet": 10,
+   "not": "banyo 2, yatak 4 (sol 2, sağ 1, cumba 1), salon 4 (tezgah 2, sağ duvar 1, ön sol 1) (göz)"
+  },
+  "priz_cift": {
+   "adet": 3,
+   "not": "salon: tezgahta iki çift, UYDU yanında TV çifti (göz; 400 dpi)"
+  },
+  "uydu_prizi": {
+   "adet": 1,
+   "not": "salonda yatak duvarında \"UYDU\""
+  },
+  "zil": {
+   "adet": 0,
+   "not": "lejantta ve planda zil yok"
+  },
+  "sigorta_kutusu": {
+   "adet": 1,
+   "not": "girişte dış kapının yanında"
+  }
+ },
+ "diger": {
+  "bas_makas_betopani": {
+   "adet": 6,
+   "not": "baş makas betopan yerleşimi (sayfa 8): ana çatının iki kalkanı 2 + 2, cumba 1, sundurma 1 (açık ön kalkan da kaplanmış)"
+  },
+  "ozel_profiller": {
+   "not": "sayfa 4–5: A özel H dübelli (sol duvar y 155, profil vidalama aparatıyla) 1; B dış köşe direği (L'nin iç köşesi) 1; C 3'lü H dübelli & kulaklı (arka duvar x 193) 1; D 10'luk kutu profil 3 mm, 250, sundurma kolonu 2; E pencere karkası 120 × 120 1; F H dübelli & kulaklı (arka duvar x 318) 1"
+  },
+  "pencereler": {
+   "not": "150/190 × 2 (D01 sağ ön 251'lik, D02 cumba önü 290'lık mavi özel pano), 120/120 × 1 (sağ duvar), 60/40 × 1 (banyo, arka duvar); pencere rengi alıcıya ait"
+  },
+  "kapilar": {
+   "not": "dış kapı arka duvarda sundurmaya (kanat geometrisi: SOL); iç kapı 3 (banyo, salon, yatak; SOL)"
+  }
+ }
+}

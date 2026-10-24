@@ -1,0 +1,69 @@
+{
+ "kaynak": "PK-03 montaj paftası seti (17 Eylül 2025). Sayılar `pafta_montaj.json`'dan (vektör) ya da göz sayımından; her satırda yazılı. Varsayılan hesabı değiştirmez (protokol §5).",
+ "makas_bas": {
+  "adet": 2,
+  "not": "makas ve dere planı: ana çatıda 9 makas (MK01–MK09), uçtaki ikisi kalkan; veranda çatısında MK10, MK11; ayrıca MK12 (salon önünde) — toplam 12"
+ },
+ "makas_orta": {
+  "adet": 7,
+  "not": "ana çatı MK02–MK08 (aralık 118); veranda çatısı ve MK12 ayrı"
+ },
+ "asik": {
+  "adet": 49,
+  "not": "aşık planı: ana çatı 16 sıra × (410 + 410 + 191,25) = 161,8 m → 32 tam boy + 16 × 191,25 (8 boy); veranda çatısı 2 yüz × 6 sıra (125,5 / 181,1 / 236,7 / 292,4 / 348,0 / 384,6; dere içe doğru uzuyor) = 31,4 m → yaklaşık 9 boy; toplam 193,2 m"
+ },
+ "sandvic_panel": {
+  "adet": 32,
+  "not": "çatı kaplaması planı: trapez 440 × 80, 25 adet (ana çatı) + 300 × 80, 7 adet (veranda çatısı); \"Alanı: 95,5 m²\""
+ },
+ "tavan_omegasi": {
+  "adet": 54,
+  "not": "tavan omega planı (ters tavan, 60'ta bir): 52 parça, 135,2 m (oda içi hatlar ve duvar üstleri 43 parça 113,5 m; veranda 9 × 241); parça başına bir 3750'lik boy → 54; ÷ 3,65 → 37,1"
+ },
+ "inis": {
+  "adet": 6,
+  "not": "makas ve dere planı: altı iniş dairesi (arka iki köşe, sağ ön, veranda çatısının iki ucu, sol ön) (göz)"
+ },
+ "pencere_karkasi": {
+  "adet": 2,
+  "not": "mavi karkas işaretleri yalnız iki 160/180 pencerede (işaretler arası 150 cm); 120/120'lerde ve 60/40'ta işaret yok"
+ },
+ "elektrik": {
+  "tavan_armaturu": {
+   "adet": 6,
+   "not": "kırmızı çerçeveli X: salon 2, yatak odaları 1 + 1, hol 1, mutfak 1 (göz)"
+  },
+  "glop": {
+   "adet": 2,
+   "not": "daire içinde X: banyo 1, veranda 1 (göz)"
+  },
+  "anahtar_tekli": {
+   "adet": 5,
+   "not": "yatak 1, yatak 2, banyo (holde), hol, mutfak (göz)"
+  },
+  "anahtar_cift": {
+   "adet": 1,
+   "not": "salon kapısı yanında iki kollu simge (göz)"
+  },
+  "priz_tekli": {
+   "adet": 14,
+   "not": "salon 3, yatak 1: 4, yatak 2: 3, banyo 1, mutfak 3 (göz)"
+  },
+  "priz_cift": {
+   "adet": 3,
+   "not": "salon TV duvarı 1, mutfak sağ duvar 2 (göz)"
+  },
+  "uydu_prizi": {
+   "adet": 1,
+   "not": "salon \"UYDU\""
+  },
+  "zil": {
+   "adet": 1,
+   "not": "dış kapının önünde kapı zili simgesi"
+  },
+  "sigorta_kutusu": {
+   "adet": 1,
+   "not": "holde \"12 Lİ\""
+  }
+ }
+}

@@ -1,0 +1,14 @@
+{
+ "kod": "PK-02",
+ "ap": null,
+ "kip": "motor",
+ "girdi": {
+  "is_emri": "testler/kor/projeler/PK02/is_emri.json",
+  "pafta_katmani": "testler/kor/projeler/PK02/pafta_katmani.json"
+ },
+ "bizim_liste": "bizim_liste.json",
+ "liste_sha256": "9081e5e14b36db504cc4292ceedcf95fc903f72c1b1362e8e3e4ee5f10961f28",
+ "sayfa": null,
+ "kapi": true,
+ "not": "Bayi arşivi; AP setinde yok."
+}
