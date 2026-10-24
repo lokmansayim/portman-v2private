@@ -6,7 +6,7 @@
  "kapi": true,
  "not": "PR-3'ün hedef örneği.",
  "tarih": "2026-10-24",
- "kiyas_commit": "cba33ba93ae20b1fe4545f5e708988e2b73355ea",
+ "kiyas_commit": "8a41fa21b4796ce134781e299c26dcce2bd063ee",
  "bizim_liste": {
   "yol": "testler/kor/projeler/TS01/bizim_liste.json",
   "commit": "8f361f481ad711c3f71a0870a558ee5cbcc7ce4b",
