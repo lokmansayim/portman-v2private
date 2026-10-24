@@ -405,6 +405,16 @@ def _u_parcalari(X, Y, k=1.0, z=False):
     return [(a, b), (a, (a[0], a[1] - 4.9 * k)), (b, (b[0], b[1] + (4.9 if z else -4.9) * k)), ((X, Y), (X, Y + 7.8 * k))]
 
 
+def _u_egrili_yol(e, X, Y):
+    """U'nun dört parçası ve kollarının arasında küçük bir eğri, tek PDF yolunda (KH-3 hakeminin 13. turu)."""
+    sh = e.s.pg.new_shape()
+    for a, b in _u_parcalari(X, Y):
+        sh.draw_line(e.p(*a), e.p(*b))
+    sh.draw_bezier(e.p(X - 1.5, Y - 2), e.p(X - 0.5, Y - 3), e.p(X + 0.5, Y - 3), e.p(X + 1.5, Y - 2))
+    sh.finish(color=KIRMIZI, width=0.4, closePath=False)
+    sh.commit()
+
+
 def _u(e, X, Y, renk=KIRMIZI, k=1.0, z=False):
     """Elle çizilmiş U, her parçası ayrı yolda."""
     for a, b in _u_parcalari(X, Y, k, z):
@@ -874,16 +884,43 @@ def _okunmayan(tur, n):
     (lambda e: e.cizgi((660.75, 352), (663.75, 352)), {}, _okunmayan("priz", 1)),                         # U'nun koluna değen çizgi
     (lambda e: e.yol(_u_parcalari(665, 355) + [((663.5, 352), (666.5, 352))]), {"lejant_isaretsiz": "priz"},   # U ile aynı yolda çizgi
      _okunmayan("priz", 1)),
+    (lambda e: _u_egrili_yol(e, 665, 355), {"lejant_isaretsiz": "priz"}, _okunmayan("priz", 1)),          # U ile aynı yolda eğri
+    (lambda e: e.kutu(651, 330, 4, 4, KIRMIZI, KIRMIZI), {}, _okunmayan("anahtar", 1)),                   # dolgulu kare
+    (lambda e: e.cizgi((649, 330), (652, 330), SIYAH), {}, _okunmayan("anahtar", 1)),                     # siyah çizgi
 ], ids=["anahtar_satirinda_cizgi", "priz_satirinda_cizgi", "glop_satirinda_cizgi", "duy_satirinda_cizgi", "sigorta_satirinda_cizgi",
-        "ikinci_anahtar", "priz_satirinda_anahtar", "u_koluna_degen_cizgi", "u_ile_ayni_yolda_cizgi"])
+        "ikinci_anahtar", "priz_satirinda_anahtar", "u_koluna_degen_cizgi", "u_ile_ayni_yolda_cizgi", "u_ile_ayni_yolda_egri",
+        "anahtar_satirinda_dolgulu_kare", "anahtar_satirinda_siyah_cizgi"])
 def test_lejant_isaretinin_her_ogesi_okunur(tmp_path, ek, kw, neden):
     """KH-3 hakeminin 12. turu: lejant satırının işaret sütunundaki her öğe o türün işaretine girer, ama okuma yalnız ilk işareti alır.
     Aynı satıra çizilmiş ikinci işaret ya da lejanttaki U'ya eklenmiş çizgi ne sayılıyor ne teyit yazıyordu (lejant "U + çizgi"
     gösterirken plandaki çizgisiz U'lar priz sayılıyordu). Artık lejant işaretinin her öğesi ya bütünüyle ya da bütün parçalarıyla
-    okunur; okunmayan öğe elektriği bekletir (beş türün her biri; U ile aynı PDF yolundaki fazla parça da)."""
+    okunur; okunmayan öğe elektriği bekletir (beş türün her biri; U ile aynı PDF yolundaki fazla parça da). 13. turdan: U ile aynı
+    yoldaki eğri, işaret sütununda dolgulu kare ve siyah çizgi (rengi ne olursa olsun; Bilinen sınırlama)."""
     o = PO.oku(kh3_sentetik(tmp_path / "s.pdf", ek=ek, **kw), EL)
     t = _teyit(o)
     assert t == {"elektrik": [neden]}, t
+    assert "elektrik" not in o and "makas_bas" in o and "h_plani" in o
+
+
+_LEJANT_UCU = (665 + 4.55, 330 - 7.881)                            # lejant anahtarının ilk tırnağının dış ucu
+
+
+@pytest.mark.parametrize("ek, kw, neden", [
+    (lambda e: e.cizgi(_LEJANT_UCU, (_LEJANT_UCU[0] - 2.4, _LEJANT_UCU[1]), TURUNCU), {},             # ucun aynası
+     "lejantta ucunda birden çok çizgi olan 1 tırnak"),
+    (lambda e: e.cizgi(_LEJANT_UCU, (_LEJANT_UCU[0] - 2.4, _LEJANT_UCU[1]), TURUNCU), {"lejant_tek_tirnak": True},
+     "lejantta ucunda birden çok çizgi olan 1 tırnak"),
+    (lambda e: e.anahtar(665, 330, 3), {}, "lejantta anahtar dairesinde bir ya da iki olmayan tırnak: 3"),    # üçüncü tırnak
+    (lambda e: _u_egrili_yol(e, X_U, Y_U), {}, "bir parçası işarete giren ama başka parçası hiçbir işarete girmeyen 1 çizim"),  # planda
+], ids=["lejantta_ucun_aynasi", "tek_tirnakli_lejantta_ucun_aynasi", "lejantta_ucuncu_tirnak", "planda_u_ile_ayni_yolda_egri"])
+def test_lejant_anahtari_ve_yoldaki_egri_bekletir(tmp_path, ek, kw, neden):
+    """KH-3 hakeminin 13. turu: lejantta tırnağın ucuna değen bütün çizgiler uç sayılıyor, üçüncü tırnak da okunuyordu; planda ise
+    tırnak bir ya da iki, ucunda tek çizgi olmalı. Lejant anahtarının tırnağının ucuna eklenmiş ikinci çizgi ya da üçüncü tırnak ne
+    sayılıyor ne teyit yazıyordu (plandaki anahtarlar sayılıyordu). Planda U ile aynı PDF yolundaki eğri (yolun bir parçası işarete
+    girer, eğri girmez) 2. turdan beri teyit yazıyordu ama testi yoktu (priz bir fazla sayılırdı)."""
+    o = PO.oku(kh3_sentetik(tmp_path / "s.pdf", ek=ek, **kw), EL)
+    t = _teyit(o)
+    assert set(t) == {"elektrik"} and neden in t["elektrik"], t
     assert "elektrik" not in o and "makas_bas" in o and "h_plani" in o
 
 

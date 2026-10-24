@@ -1348,7 +1348,7 @@ def elektrik_oku(pg, ayar: dict, dis_olcu_cm: list[float]) -> dict:
       ortası başka türden bir işaretin kutusunda olan işaret (ör. BUAT dairesinin içine çizilmiş U);
     - lejantta: etiketi ya da işareti bulunamayan tür, tanınmayan sözcük, hiçbir etikete bağlanmayan işaret, zil (okunmuyor), alanın
       hemen altında öğe, alanın dışında lejant etiketine benzeyen sözcük; lejant işaretinde okunmayan öğe (aynı satıra çizilmiş ikinci
-      işaret, işarete eklenmiş çizim); lejant kutusunda hiçbir lejant işaretine girmeyen lejant renginde öğe; duvar çerçevesiyle
+      işaret, işarete eklenmiş çizim); lejantta tırnağı bir ya da iki olmayan ya da tırnağının ucunda birden çok çizgi olan anahtar; lejant kutusunda hiçbir lejant işaretine girmeyen lejant renginde öğe; duvar çerçevesiyle
       kesişen lejant kutusu (kutudaki öğe plana girmez);
     - planda hiç işareti bulunamayan lejant türü; yanında priz olmayan, en yakın prizi çift olan ya da başka bir UYDU yazısıyla aynı prize
       bağlanan UYDU yazısı.
@@ -1418,6 +1418,12 @@ def elektrik_oku(pg, ayar: dict, dis_olcu_cm: list[float]) -> dict:
                               "uc": sum(uc) / len(uc) if uc else None, "uc_aci": sum(uc_aci) / len(uc_aci) if uc_aci else None,
                               "sapma": sum(_sapma(s, d["m"]) for s in t) / len(t) if t else None, "aci": aci, "isin_aci": isin}
                     okunan_parca = [*t, *(s2 for _, s2 in uclar)]
+                    # planda anahtarın tırnağı bir ya da iki, ucunda tek çizgi: lejant da öyle olmalı (KH-3 hakeminin 13. turu: lejantta
+                    # ucuna ikinci çizgi eklenmiş tırnak ya da üçüncü tırnak okunmuş sayılıyor, plandaki anahtarlar sessizce sayılıyordu)
+                    if len(t) > 2:
+                        uyarilar.append(f"lejantta anahtar dairesinde bir ya da iki olmayan tırnak: {len(t)}")
+                    if cok_uclu := sum(1 for s in t if len(uctaki(parca, s, d["m"])) > 1):
+                        uyarilar.append(f"lejantta ucunda birden çok çizgi olan {cok_uclu} tırnak")
                 G[tur] = bilesim(g, d["r"], 0.5)
                 okunan = G[tur][0]
         elif tur == "duy":
