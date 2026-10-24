@@ -1851,7 +1851,9 @@
     0.59316
    ],
    "atilan": {
-    "cerceve_disinda": 0
+    "cerceve_disinda": 0,
+    "ayni_yerde_iki_kez": 2,
+    "isaretten_buyuk": 1
    }
   }
  }

@@ -2,17 +2,20 @@
 
 KH-1, KH-2 ve K1–K2'nin testleri değişmez (tek istisna: `test_hakem_kh2.py`'de cevap dosyasının sürüm iğnesi 2 → 3; gerekçe iş emrinde);
 bu dosya KH-3'ün eklediklerini sınar:
-- **Okuyucu, sentetik pafta (her koşuda):** KH-1'in sentetik paftasına 270° döndürülmüş bir elektrik sayfası eklenir (PK-07'deki gibi).
-  Bölüm proje ayarıyla açılır (`ek_bolumler`); kapalıyken çıktı önceki gibidir. İşaretlerin rengi ve ölçüsü lejanttan okunur: tijli duy
-  (dolgulu kare), glop (çaprazlı daire), buat (çaprazsız, içinde BUAT yazan daire; bilgi), anahtar (daire ve tırnak sayısı), priz (U;
-  arka arkaya iki U çift), uydu prizi ("UYDU" yazısına en yakın tek U), sigorta kutusu (çerçeve ölçüsü), zil (lejantta yoksa 0).
-  Konumlar duvar çerçevesinde cm. Sessiz sayı yok: lejant renginde hiçbir işarete uymayan öğe, tırnağı bir ya da iki olmayan anahtar,
-  ölçüsü tutmayan dolgu, çaprazsız ve BUAT yazısız daire, çaprazı eksik glop, işareti ya da etiketi olmayan lejant satırı, lejanttaki zil,
-  yanında priz olmayan UYDU, üçlü zincir priz, duvar çerçevesinin dışındaki lejant renginde öğe, dış ölçüye oturmayan duvar, lejantta
-  tanınmayan sözcük ya da etiketsiz işaret, lejantta olup planda hiç bulunamayan tür ve montaj teyidi bölümü bekletir; okunamayan sayfa
-  yalnız kendini bekletir.
-- **PK-01 cevabı:** s. 10; duy 6, glop 2, anahtar 4 + 2, priz 15 + 4, uydu 1, zil 0, sigorta 1; buat 5 (bilgi); 40 konum. Paftayla
-  yeniden üretimi `test_hakem_pk01.py`'deki test sınar.
+- **Okuyucu, sentetik pafta (her koşuda):** KH-1'in sentetik paftasına 270° döndürülmüş bir elektrik sayfası eklenir (PK-07'deki gibi;
+  0°, 90° ve 180° de okunur). Bölüm proje ayarıyla açılır (`ek_bolumler`); kapalıyken çıktı önceki gibidir. İşaretlerin rengi, ölçüsü ve
+  içi lejanttan okunur: tijli duy (dolgulu kare), glop (çaprazlı daire), buat (çaprazsız, içinde BUAT yazan daire; bilgi), anahtar
+  (daire ve tırnak sayısı), priz (U; arka arkaya iki U çift), uydu prizi ("UYDU" yazısına en yakın tek U), sigorta kutusu (çerçeve
+  ölçüsü), zil (lejantta yoksa 0). Aynı yerde iki kez çizilmiş işaret bir sayılır. Konumlar duvar çerçevesinde cm. Sessiz sayı yok:
+  lejant renginde ya da ona yakın tonda hiçbir işarete uymayan öğe, içi lejanttakine uymayan duy, glop, BUAT, anahtar ya da sigorta
+  ölçüsünde kutu, tırnağı bir ya da iki olmayan anahtar, iki daireye değen ya da ucunda fazla çizgi olan tırnak, ölçüsü tutmayan dolgu,
+  çaprazsız ve BUAT yazısız daire, çaprazı eksik ya da içinde BUAT yazan glop, lejantta çaprazsız glop, sap boyundan yakın ya da
+  birbirine binen iki U, Z biçimli U, işareti ya da etiketi olmayan lejant satırı, lejanttaki zil, lejant alanının hemen altında öğe ya da alanın dışında lejant
+  etiketi, yanında priz olmayan ya da başka UYDU'yla aynı prize bağlanan UYDU, üçlü zincir priz, duvar çerçevesinin dışındaki lejant
+  renginde öğe, dış ölçüye oturmayan duvar, lejantta tanınmayan sözcük ya da etiketsiz işaret, lejantta olup planda hiç bulunamayan tür
+  ve montaj teyidi bölümü bekletir; okunamayan sayfa yalnız kendini bekletir.
+- **PK-01 cevabı:** s. 10; duy 6, glop 2, anahtar 4 + 2, priz 15 + 4, uydu 1, zil 0, sigorta 1; buat 5 (bilgi); 40 konum; iki kez
+  çizilmiş 2 öğe bir sayıldı. Paftayla yeniden üretimi `test_hakem_pk01.py`'deki test sınar.
 - **PK-07 gerilemesi (paftayla):** s. 13 (270° döndürülmüş) BK-12 PR-3'ün göz sayımıyla aynı; KH-1 bölümleri elektrik açılınca değişmez.
 - **Kıyas aracı (`kiyas.py` değişmedi):** `--adim K3` K2'nin kapısını aynen taşır, elektrik satırları bilgidir (kapıya girmez). Elektrik
   teyitteyse araç bölümü tanımadığı için bütün satırlar bekler (daha sıkı).
@@ -51,11 +54,24 @@ def _oku(p: Path) -> dict:
 
 
 # ----------------------------------------------------------------------------- sentetik elektrik sayfası
+class Donuk(T.Sayfa):
+    """KH-1'in sayfası yalnız 0° ve 270° çevirir; 90° ve 180°'de görünen koordinat sayfanın kendi ters döndürme matrisiyle çevrilir."""
+
+    def __init__(self, doc, rot: int):
+        super().__init__(doc, rot)
+        self.pg.set_rotation(rot)
+        self.m = self.pg.derotation_matrix
+        self.pg.set_rotation(0)
+
+    def ters(self, X, Y):
+        return fitz.Point(X, Y) * self.m
+
+
 class Elektrik:
     """Elektrik sayfasına görünen koordinatta (pt) çizer; sayfa döndürülür, yazılar görünen sayfada düz durur."""
 
     def __init__(self, doc, rot: int = 270):
-        self.s = T.Sayfa(doc, rot)
+        self.s = T.Sayfa(doc, rot) if rot in (0, 270) else Donuk(doc, rot)
 
     def p(self, X, Y):
         return self.s.ters(X, Y)
@@ -146,8 +162,10 @@ def kh3_sentetik(yol: Path, *, taban: dict | None = None, rot: int = 270, tirnak
                  buyuk_dolgu: bool = False, bos_daire: bool = False, tek_capraz: bool = False, lejant_isaretsiz: str | None = None,
                  lejant_etiketsiz: str | None = None, zil: bool = False, uydu_uzak: bool = False, disarida: bool = False,
                  serbest_cizgi: bool = False, oran: bool = False, duvarsiz: bool = False, uclu_priz: bool = False,
-                 yabanci_etiket: bool = False, bagsiz_isaret: bool = False, glopsuz_plan: bool = False, uydu_cift: bool = False) -> Path:
-    """KH-1'in sentetik paftası + elektrik sayfası. Bina 600 × 400 cm (montajın dış ölçüsü); lejant binanın sağında."""
+                 yabanci_etiket: bool = False, bagsiz_isaret: bool = False, glopsuz_plan: bool = False, uydu_cift: bool = False,
+                 caprazsiz_glop: bool = False, ek=None) -> Path:
+    """KH-1'in sentetik paftası + elektrik sayfası. Bina 600 × 400 cm (montajın dış ölçüsü); lejant binanın sağında. `ek(e)`: sayfa
+    döndürülmeden önce eklenen bozma."""
     gecici = yol.with_suffix(".kh1.pdf")
     T.sentetik(gecici, **(taban or {}))
     doc = fitz.open(gecici)
@@ -159,7 +177,7 @@ def kh3_sentetik(yol: Path, *, taban: dict | None = None, rot: int = 270, tirnak
     # lejant (binanın sağında; dik sayfaya da sığar)
     e.yazi(710, 300, "LEJANT", 12)
     satir = {"anahtar": (330, ["ANAHTAR"], lambda X, Y: e.anahtar(X, Y, 2)), "priz": (355, ["PRİZ"], lambda X, Y: e.priz(X, Y)),
-             "glop": (385, ["GLOP"], lambda X, Y: e.glop(X, Y)), "duy": (412, ["TİJLİ", "DUY"], lambda X, Y: e.duy(X, Y + 3)),
+             "glop": (385, ["GLOP"], lambda X, Y: e.glop(X, Y, 0 if caprazsiz_glop else 2)), "duy": (412, ["TİJLİ", "DUY"], lambda X, Y: e.duy(X, Y + 3)),
              "sigorta": (445, ["SİGORTA", "KUTUSU"], lambda X, Y: e.sigorta(X, Y + 3))}
     if zil:
         satir["zil"] = (475, ["ZİL"], lambda X, Y: e.daire(X, Y, 3, SIYAH))
@@ -178,7 +196,7 @@ def kh3_sentetik(yol: Path, *, taban: dict | None = None, rot: int = 270, tirnak
     for x, y in DUY:
         e.duy(*g(x, y))
     for x, y in [] if glopsuz_plan else GLOP:
-        e.glop(*g(x, y))
+        e.glop(*g(x, y), 0 if caprazsiz_glop else 2)
     for x, y in BUAT:
         e.buat(*g(x, y))
     for x, y in ANAHTAR_TEKLI:
@@ -215,6 +233,8 @@ def kh3_sentetik(yol: Path, *, taban: dict | None = None, rot: int = 270, tirnak
         e.cizgi(g(250, 250), g(280, 250))
     if uclu_priz:
         e.cift_priz(*g(250, 250), uclu=True)
+    if ek:
+        ek(e)
     e.bitir()
     doc.save(yol)
     return yol
@@ -258,6 +278,7 @@ def test_sayim(okuma):
     assert okuma["teyit_bekliyor"] == []
     a = okuma["ayrinti"]["elektrik"]
     assert a["sayfa"] == 5 and a["sayim"] == BEKLENEN and (a["buat"], a["buat_yazisi"]) == (1, 1)
+    assert a["atilan"] == {"cerceve_disinda": 0, "ayni_yerde_iki_kez": 1, "isaretten_buyuk": 0}     # çift anahtarın ikinci dairesi
     assert {k: v["adet"] for k, v in okuma["elektrik"].items()} == BEKLENEN
     assert all(v["not"].startswith("elektrik planı: ") for v in okuma["elektrik"].values())
     assert okuma["elektrik"]["zil"]["not"] == "elektrik planı: lejantta zil yok"
@@ -291,8 +312,9 @@ def test_katman_anahtarlari_liste_ureteciyle_ayni(okuma):
     assert set(okuma["elektrik"]) == set(PO.ELEKTRIK) == set(PL.ELEKTRIK_NOKTALARI.values()) | {"zil", "sigorta_kutusu"}
 
 
-def test_dik_sayfa_da_okunur(tmp_path):
-    o = PO.oku(kh3_sentetik(tmp_path / "s.pdf", rot=0), EL)
+@pytest.mark.parametrize("rot", [0, 90, 180])
+def test_dik_ve_donuk_sayfa_da_okunur(tmp_path, rot):
+    o = PO.oku(kh3_sentetik(tmp_path / "s.pdf", rot=rot), EL)
     assert o["teyit_bekliyor"] == [] and o["ayrinti"]["elektrik"]["sayim"] == BEKLENEN
 
 
@@ -323,6 +345,109 @@ def test_uymayan_oge_elektrigi_bekletir(tmp_path, kw, neden):
     t = _teyit(o)
     assert set(t) == {"elektrik"} and neden in t["elektrik"], t
     assert "elektrik" not in o and "makas_bas" in o and "h_plani" in o
+
+
+def _tirnak_ucu(X, Y, aci=-60):
+    c, s = math.cos(math.radians(aci)), math.sin(math.radians(aci))
+    return X + 9.1 * c, Y + 9.1 * s
+
+
+def _u(e, X, Y, renk=KIRMIZI, k=1.0, z=False):
+    """Elle çizilmiş U: `k` ölçü çarpanı; `z` kollardan biri ters yana (Z biçimi)."""
+    a, b = (X - 4.25 * k, Y), (X + 4.25 * k, Y)
+    e.cizgi(a, b, renk)
+    e.cizgi(a, (a[0], a[1] - 4.9 * k), renk)
+    e.cizgi(b, (b[0], b[1] + (4.9 if z else -4.9) * k), renk)
+    e.cizgi((X, Y), (X, Y + 7.8 * k), renk)
+
+
+def _komsu_anahtar(e):
+    """Tekli anahtarın tırnağının ucu, yanındaki (kendi tırnağı olan) anahtar dairesine değer."""
+    X, Y = g(250, 120)
+    e.anahtar(X, Y, 1)
+    u = _tirnak_ucu(X, Y)
+    cx, cy = u[0] + 4.5, u[1]
+    e.daire(cx, cy, 4.5, TURUNCU)
+    b = (cx + 4.5 * math.cos(math.radians(-30)), cy + 4.5 * math.sin(math.radians(-30)))
+    e.cizgi(b, (b[0] + 4.6 * math.cos(math.radians(-30)), b[1] + 4.6 * math.sin(math.radians(-30))), TURUNCU)
+
+
+def _zil_alanin_altinda(e):
+    """Lejantta ZİL satırı alanın altında (başlığın 250 pt'sinden uzakta); planda siyah küçük daire."""
+    w = fitz.Font(fontfile=T.FONT).text_length("ZİL", 7)
+    e.yazi(718 + w / 2, 580, "ZİL")
+    e.daire(665, 580, 3, SIYAH)
+    e.daire(*g(560, 30), 3, SIYAH)
+
+
+def _yakin_cift(e):
+    uc = e.priz(*g(250, 250))
+    e.priz(uc[0], uc[1] + 0.5)                                    # sapın ucu öbürünün tabanına 0,5 pt kala biter
+
+
+@pytest.mark.parametrize("ek, kw, neden", [
+    # tanınan işaretin kutusundaki uymayan öğe yutulmaz (işaretin içi lejanttakiyle aynı olmalı)
+    (lambda e: e.daire(*g(*DUY[0]), 2.5), {}, "duy ölçüsünde, içi lejanttaki işarete uymayan 1 dolgu"),
+    (lambda e: e.daire(*g(*GLOP[0]), 3), {}, "glop ya da BUAT dairesinin içinde lejanttakine uymayan öğe (1 daire)"),
+    (lambda e: _u(e, *g(*BUAT[0]), k=0.7), {}, "glop ya da BUAT dairesinin içinde lejanttakine uymayan öğe (1 daire)"),
+    (lambda e: e.priz(*g(*BUAT[0]), kolsuz=True), {}, "glop ya da BUAT dairesinin içinde lejanttakine uymayan öğe (1 daire)"),
+    (lambda e: (lambda X, Y: e.cizgi((X - 2, Y), (X + 2, Y), TURUNCU))(*g(*ANAHTAR_TEKLI[0])), {},
+     "anahtar dairesinin içinde lejanttakine uymayan öğe (1 daire)"),
+    (lambda e: (lambda X, Y: e.cizgi((X - 4, Y + 2), (X + 4, Y + 2), SIYAH))(*g(*SIGORTA)), {},
+     "sigorta kutusu ölçüsünde, içi lejanttaki işarete uymayan 1 kutu"),
+    (lambda e: e.kutu(*g(100, 300), 14, 10, SIYAH), {}, "sigorta kutusu ölçüsünde, içi lejanttaki işarete uymayan 1 kutu"),
+    # U'nun biçimi ve rengi, çift priz payı
+    (_yakin_cift, {}, "sapı öbürünün tabanına değmeyen ama sap boyundan yakın 1 U çifti (çift priz olabilir)"),
+    (lambda e: [e.priz(X + d, Y) for X, Y in [g(250, 250)] for d in (0, 0.5)], {},
+     "kutusu bir başkasıyla kesişen ve çift olmayan 1 U çifti (aynı priz iki kez çizilmiş olabilir)"),
+    (lambda e: _u(e, *g(250, 250), z=True), {},
+     "lejant renginde, hiçbir işarete uymayan 4 öğe (çizgi 4.9 pt × 2, çizgi 7.8 pt × 1, çizgi 8.5 pt × 1)"),
+    (lambda e: _u(e, *g(250, 250), renk=(0.804, 0.125, 0.153)), {},
+     "sigortanın iç desenindeki ya da lejant rengine yakın tonda, hiçbir işarete uymayan 4 öğe (çizgi 4.9 pt × 2, çizgi 7.8 pt × 1, "
+     "çizgi 8.5 pt × 1)"),
+    # anahtar tırnakları
+    (_komsu_anahtar, {}, "iki anahtar dairesine birden değen 1 tırnak"),
+    (lambda e: (lambda u: e.cizgi(u, (u[0], u[1] - 2.4), TURUNCU))(_tirnak_ucu(*g(*ANAHTAR_TEKLI[0]))), {},
+     "ucunda birden çok çizgi olan 1 tırnak"),
+    # glop ve BUAT
+    (None, {"caprazsiz_glop": True}, "lejantta glop işaretinde çapraz yok: glop BUAT'tan ayrılamaz"),
+    (lambda e: e.yazi(*g(*GLOP[0]), "BUAT", 3), {}, "içinde \"BUAT\" yazan 1 glop: glop mu buat mı belli değil"),
+    # lejant alanı ve UYDU
+    (_zil_alanin_altinda, {}, "lejant alanının (başlığın 250 pt altına kadar) hemen altında 2 öğe: lejant alandan uzun olabilir"),
+    (_zil_alanin_altinda, {}, "lejant alanının dışında lejant etiketine benzeyen 1 sözcük"),
+    (lambda e: e.daire(665, 575, 3, SIYAH), {}, "lejant alanının (başlığın 250 pt altına kadar) hemen altında 1 öğe: lejant alandan uzun olabilir"),
+    (lambda e: (lambda X, Y: e.yazi(X, Y - 12, "UYDU"))(*g(*UYDU)), {}, "iki \"UYDU\" yazısı aynı prize bağlanıyor"),
+], ids=["duy_ici", "glop_ici", "buat_ici_u", "buat_ici_eksik_u", "anahtar_ici", "sigorta_ici", "ici_bos_sigorta", "yakin_cift", "kaymis_priz", "z_u", "yakin_ton_u",
+        "komsu_tirnak", "tirnak_ucu", "caprazsiz_glop", "buat_yazili_glop", "zil_alt_bant", "zil_alan_disi", "bantta_daire", "iki_uydu"])
+def test_isaretin_ici_ve_bicimi_bekletir(tmp_path, ek, kw, neden):
+    """KH-3 hakeminin 1. turu: tanınan işaretin kutusundaki uymayan öğe, biçimi ya da tonu tutmayan U, komşu daireye değen tırnak,
+    lejant alanından taşan satır ve aynı prize bağlanan ikinci UYDU yazısı da elektriği bekletir (sessiz sayı yok)."""
+    o = PO.oku(kh3_sentetik(tmp_path / "s.pdf", ek=ek, **kw), EL)
+    t = _teyit(o)
+    assert set(t) == {"elektrik"} and neden in t["elektrik"], t
+    assert "elektrik" not in o and "makas_bas" in o and "h_plani" in o
+
+
+def _tekli_anahtar_tirnagi_iki_kez(e):
+    X, Y = g(250, 120)
+    e.anahtar(X, Y, 1)
+    c, s = math.cos(math.radians(-60)), math.sin(math.radians(-60))
+    e.cizgi((X + 4.5 * c, Y + 4.5 * s), _tirnak_ucu(X, Y), TURUNCU)
+
+
+@pytest.mark.parametrize("ek, tur, kopya", [
+    (lambda e: [e.anahtar(*g(250, 120), 1) for _ in range(2)], "anahtar_tekli", 3),
+    (_tekli_anahtar_tirnagi_iki_kez, "anahtar_tekli", 1),              # iki tırnak sayılıp çift olmaz
+    (lambda e: [e.duy(*g(250, 250)) for _ in range(2)], "tavan_armaturu", 3),
+    (lambda e: [e.glop(*g(250, 250)) for _ in range(2)], "glop", 3),
+    (lambda e: [e.priz(*g(250, 250)) for _ in range(2)], "priz_tekli", 4),
+    (lambda e: [e.sigorta(*g(100, 300)) for _ in range(2)], "sigorta_kutusu", 0),   # siyah öğe sayaca girmez
+], ids=["anahtar", "tirnak", "duy", "glop", "priz", "sigorta"])
+def test_ayni_yerde_iki_kez_cizilen_isaret_bir_sayilir(tmp_path, ek, tur, kopya):
+    o = PO.oku(kh3_sentetik(tmp_path / "s.pdf", ek=ek), EL)
+    a = o["ayrinti"]["elektrik"]
+    assert o["teyit_bekliyor"] == [] and a["sayim"] == BEKLENEN | {tur: BEKLENEN[tur] + 1}
+    assert a["atilan"] == {"cerceve_disinda": 0, "ayni_yerde_iki_kez": 1 + kopya, "isaretten_buyuk": 0}
 
 
 def test_montaj_teyidi_elektrige_iner(tmp_path):
@@ -358,7 +483,9 @@ def test_pk01_elektrik_cevabi(cevap):
     assert {k: v["adet"] for k, v in cevap["elektrik"].items()} == a["sayim"] == \
         {"tavan_armaturu": 6, "glop": 2, "anahtar_tekli": 4, "anahtar_cift": 2, "priz_tekli": 15, "priz_cift": 4, "uydu_prizi": 1, "zil": 0,
          "sigorta_kutusu": 1}
-    assert (a["buat"], a["buat_yazisi"], a["uydu_uzakligi_pt"], a["atilan"]) == (5, 5, [12.4], {"cerceve_disinda": 0})
+    assert (a["buat"], a["buat_yazisi"], a["uydu_uzakligi_pt"]) == (5, 5, [12.4])
+    # iki çift anahtar dairesi ikişer kez çizilmiş (bir sayıldı); sayfa başlığının koyu kırmızı çerçevesi işaretten büyük, denetlenmedi
+    assert a["atilan"] == {"cerceve_disinda": 0, "ayni_yerde_iki_kez": 2, "isaretten_buyuk": 1}
     # ölçek: duvar çizgisinin sınırı 600 × 1000 cm'ye oturur; bu sayfada duvar öteki sayfalardan açık (proje ayarı)
     assert abs(a["olcek_pt_cm"][0] - a["olcek_pt_cm"][1]) / a["olcek_pt_cm"][0] < 0.001
     assert _oku(PROJE / "PK01.json")["ayar"]["elektrik"] == {"duvar_rengi": [0.576, 0.584, 0.596]}
@@ -376,6 +503,7 @@ def test_pk07_elektrik_gerilemesi():
     kh1, o = PO.oku(KH2._pafta("PK07"), proje), PO.oku(KH2._pafta("PK07"), proje | EL)
     assert {k: v["adet"] for k, v in o["elektrik"].items()} == o["ayrinti"]["elektrik"]["sayim"] == g_["elektrik"]
     assert o["teyit_bekliyor"] == kh1["teyit_bekliyor"] == [] and o["ayrinti"]["elektrik"]["sayfa"] == 13
+    assert o["ayrinti"]["elektrik"]["atilan"] == {"cerceve_disinda": 0, "ayni_yerde_iki_kez": 1, "isaretten_buyuk": 1}
     assert {k: v for k, v in o.items() if k not in ("elektrik", "ayrinti")} == {k: v for k, v in kh1.items() if k != "ayrinti"}
     assert {k: v for k, v in o["ayrinti"].items() if k != "elektrik"} == kh1["ayrinti"]
 
