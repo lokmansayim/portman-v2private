@@ -1,8 +1,8 @@
 {
- "kaynak": "PK-01 (AP-19) montaj paftası; tek genel pafta okuyucusu (İE-15 KH-1 ve KH-2, sürüm 2); kodla okundu, elle okuma yok",
+ "kaynak": "PK-01 (AP-19) montaj paftası; tek genel pafta okuyucusu (İE-15 KH-1, KH-2 ve KH-3, sürüm 3); kodla okundu, elle okuma yok",
  "pafta_sha256": "492c76133da0e66a6dce82ebaa67e3f9da9949eb314c1034445d223faaac658d",
  "okuyucu": {
-  "surum": "2",
+  "surum": "3",
   "sayfa_sayisi": 10,
   "sayfalar": {
    "h": 3,
@@ -63,6 +63,44 @@
  "inis": {
   "adet": 6,
   "not": "makas ve dere planı: 6 iniş (hat ucunda 4, arada 2)"
+ },
+ "elektrik": {
+  "tavan_armaturu": {
+   "adet": 6,
+   "not": "elektrik planı: tijli duy, lejanttaki dolgulu karenin ölçüsünde (25,1 × 25,2 pt)"
+  },
+  "glop": {
+   "adet": 2,
+   "not": "elektrik planı: lejanttaki daire (19,1 pt) ve içinde 2 çapraz; çaprazsız, içinde BUAT yazan 5 daire buat (sayılmadı)"
+  },
+  "anahtar_tekli": {
+   "adet": 4,
+   "not": "elektrik planı: lejanttaki daire (9,0 pt) ve ona değen tek tırnak"
+  },
+  "anahtar_cift": {
+   "adet": 2,
+   "not": "elektrik planı: aynı daire, iki tırnak"
+  },
+  "priz_tekli": {
+   "adet": 15,
+   "not": "elektrik planı: lejanttaki U (kol 4,9, taban 8,5, sap 7,8 pt); UYDU yanındaki 1 U düşüldü"
+  },
+  "priz_cift": {
+   "adet": 4,
+   "not": "elektrik planı: iki U arka arkaya: birinin sapı öbürünün tabanının ortasına değer"
+  },
+  "uydu_prizi": {
+   "adet": 1,
+   "not": "elektrik planı: \"UYDU\" yazısına en yakın tek U (12,4 pt)"
+  },
+  "zil": {
+   "adet": 0,
+   "not": "elektrik planı: lejantta zil yok"
+  },
+  "sigorta_kutusu": {
+   "adet": 1,
+   "not": "elektrik planı: lejanttaki çerçevenin ölçüsünde (10,6 × 13,9 pt)"
+  }
  },
  "teyit_bekliyor": [],
  "ayrinti": {
@@ -1451,6 +1489,366 @@
    "olcek_pt_cm": [
     0.4852,
     0.48528
+   ],
+   "atilan": {
+    "cerceve_disinda": 0
+   }
+  },
+  "elektrik": {
+   "sayfa": 10,
+   "sayim": {
+    "tavan_armaturu": 6,
+    "glop": 2,
+    "anahtar_tekli": 4,
+    "anahtar_cift": 2,
+    "priz_tekli": 15,
+    "priz_cift": 4,
+    "uydu_prizi": 1,
+    "zil": 0,
+    "sigorta_kutusu": 1
+   },
+   "buat": 5,
+   "buat_yazisi": 5,
+   "konumlar": [
+    {
+     "tur": "tavan_armaturu",
+     "xy": [
+      101.4,
+      806.5
+     ]
+    },
+    {
+     "tur": "tavan_armaturu",
+     "xy": [
+      131.0,
+      123.1
+     ]
+    },
+    {
+     "tur": "tavan_armaturu",
+     "xy": [
+      149.6,
+      382.8
+     ]
+    },
+    {
+     "tur": "tavan_armaturu",
+     "xy": [
+      324.0,
+      495.3
+     ]
+    },
+    {
+     "tur": "tavan_armaturu",
+     "xy": [
+      493.5,
+      799.0
+     ]
+    },
+    {
+     "tur": "tavan_armaturu",
+     "xy": [
+      503.2,
+      413.7
+     ]
+    },
+    {
+     "tur": "glop",
+     "xy": [
+      291.8,
+      873.5
+     ]
+    },
+    {
+     "tur": "glop",
+     "xy": [
+      438.5,
+      99.8
+     ]
+    },
+    {
+     "tur": "anahtar_tekli",
+     "xy": [
+      241.6,
+      733.5
+     ]
+    },
+    {
+     "tur": "anahtar_tekli",
+     "xy": [
+      275.0,
+      733.3
+     ]
+    },
+    {
+     "tur": "anahtar_tekli",
+     "xy": [
+      397.2,
+      511.5
+     ]
+    },
+    {
+     "tur": "anahtar_tekli",
+     "xy": [
+      397.2,
+      730.2
+     ]
+    },
+    {
+     "tur": "anahtar_cift",
+     "xy": [
+      250.3,
+      496.4
+     ]
+    },
+    {
+     "tur": "anahtar_cift",
+     "xy": [
+      376.4,
+      263.5
+     ]
+    },
+    {
+     "tur": "priz_tekli",
+     "xy": [
+      20.6,
+      184.2
+     ]
+    },
+    {
+     "tur": "priz_tekli",
+     "xy": [
+      20.6,
+      248.1
+     ]
+    },
+    {
+     "tur": "priz_tekli",
+     "xy": [
+      20.6,
+      920.5
+     ]
+    },
+    {
+     "tur": "priz_tekli",
+     "xy": [
+      76.8,
+      979.2
+     ]
+    },
+    {
+     "tur": "priz_tekli",
+     "xy": [
+      212.0,
+      778.2
+     ]
+    },
+    {
+     "tur": "priz_tekli",
+     "xy": [
+      212.0,
+      796.8
+     ]
+    },
+    {
+     "tur": "priz_tekli",
+     "xy": [
+      215.0,
+      886.8
+     ]
+    },
+    {
+     "tur": "priz_tekli",
+     "xy": [
+      223.0,
+      730.5
+     ]
+    },
+    {
+     "tur": "priz_tekli",
+     "xy": [
+      245.6,
+      475.5
+     ]
+    },
+    {
+     "tur": "priz_tekli",
+     "xy": [
+      400.1,
+      492.8
+     ]
+    },
+    {
+     "tur": "priz_tekli",
+     "xy": [
+      400.1,
+      747.4
+     ]
+    },
+    {
+     "tur": "priz_tekli",
+     "xy": [
+      507.7,
+      973.5
+     ]
+    },
+    {
+     "tur": "priz_tekli",
+     "xy": [
+      579.8,
+      308.4
+     ]
+    },
+    {
+     "tur": "priz_tekli",
+     "xy": [
+      579.8,
+      545.7
+     ]
+    },
+    {
+     "tur": "priz_tekli",
+     "xy": [
+      579.8,
+      910.8
+     ]
+    },
+    {
+     "tur": "priz_cift",
+     "xy": [
+      27.2,
+      354.9
+     ]
+    },
+    {
+     "tur": "priz_cift",
+     "xy": [
+      27.2,
+      445.6
+     ]
+    },
+    {
+     "tur": "priz_cift",
+     "xy": [
+      27.2,
+      562.8
+     ]
+    },
+    {
+     "tur": "priz_cift",
+     "xy": [
+      406.7,
+      397.8
+     ]
+    },
+    {
+     "tur": "uydu_prizi",
+     "xy": [
+      400.1,
+      428.8
+     ]
+    },
+    {
+     "tur": "sigorta_kutusu",
+     "xy": [
+      321.9,
+      209.0
+     ]
+    },
+    {
+     "tur": "buat",
+     "xy": [
+      204.2,
+      730.2
+     ]
+    },
+    {
+     "tur": "buat",
+     "xy": [
+      244.5,
+      449.8
+     ]
+    },
+    {
+     "tur": "buat",
+     "xy": [
+      371.1,
+      291.6
+     ]
+    },
+    {
+     "tur": "buat",
+     "xy": [
+      405.7,
+      467.6
+     ]
+    },
+    {
+     "tur": "buat",
+     "xy": [
+      405.7,
+      772.3
+     ]
+    }
+   ],
+   "lejant": {
+    "duy": {
+     "renk": [
+      1.0,
+      0.0,
+      0.0
+     ],
+     "olcu": [
+      25.08,
+      25.2
+     ]
+    },
+    "glop": {
+     "renk": [
+      1.0,
+      0.0,
+      0.0
+     ],
+     "cap": 19.08,
+     "cizgi": 2
+    },
+    "anahtar": {
+     "renk": [
+      1.0,
+      0.247,
+      0.0
+     ],
+     "cap": 9.0,
+     "cizgi": 2
+    },
+    "priz": {
+     "renk": [
+      1.0,
+      0.0,
+      0.0
+     ],
+     "kol": 4.92,
+     "sap": 7.8,
+     "taban": 8.52
+    },
+    "sigorta": {
+     "renk": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "olcu": [
+      10.56,
+      13.92
+     ]
+    }
+   },
+   "uydu_uzakligi_pt": [
+    12.4
+   ],
+   "olcek_pt_cm": [
+    0.5932,
+    0.59316
    ],
    "atilan": {
     "cerceve_disinda": 0
