@@ -590,6 +590,15 @@ def test_kapi_olcu_basina_toplami_korur(tmp_path):
          [s("Deneme toplam", "300 × 2500", 9), s("Deneme toplam", "500 × 3000", 1)]),                     # adedi 0 olan ölçüye kayma
         (_gruplar(tmp_path, takim), [s("Deneme takım", "600 × 450", 1), s("Deneme takım", "800 × 450", 0)],
          [("DENEME TAKIM LAVABO", "600 X 450", 1)], [s("Deneme takım", "600 × 450", 0), s("Deneme takım", "800 × 450", 1)]),
+        (toplam, [{**s("Deneme toplam", "300 × 2500", 2), "pafta": 4}, {**s("Deneme toplam", "500 × 3000", 3), "pafta": 6}], iki,
+         [{**s("Deneme toplam", "300 × 2500", 2), "pafta": 6}, {**s("Deneme toplam", "500 × 3000", 3), "pafta": 4}]),   # pafta sütununda ters
+        # tek sayılı ölçü, adedi boş satıra adet geliyor (hakem 4. tur, 1)
+        (toplam, [s("Deneme toplam", "ADET", 7), s("Deneme toplam", "300 × 2500", 0)], [("DENEME TOPLAM", "500 X 3000", 7)],
+         [s("Deneme toplam", "ADET", 3), s("Deneme toplam", "300 × 2500", 4)]),
+        (_gruplar(tmp_path, takim), [s("Deneme takım", "ADET", 1), s("Deneme takım", "600 × 450", 0)],
+         [("DENEME TAKIM LAVABO", "800 X 450", 1)], [s("Deneme takım", "ADET", 0), s("Deneme takım", "600 × 450", 1)]),
+        (toplam, [{**s("Deneme toplam", "300 × 2500", 0), "pafta": 5}], [("DENEME TOPLAM", "500 X 3000", 5)],
+         [{**s("Deneme toplam", "300 × 2500", 5), "pafta": 5}]),                                      # pafta kaydı, varsayılana adet
     ]
     for g, once, gercek, sonra in vakalar:
         (t,) = _tutanlar(once, gercek, g)
@@ -601,6 +610,9 @@ def test_kapi_olcu_basina_toplami_korur(tmp_path):
     (t,) = _tutanlar(once, iki, serbest)
     assert "olcu_toplamlari" not in t                                    # ölçü kıyaslanmayan grupta kayma eşlemeyi değiştirmez
     assert _sonuc(sonra, iki, serbest) == ["ayrım", "ayrım"] and esle.tutuyor_mu(sonra, serbest, t)
+    tek = [s("Deneme toplam", "ADET", 3), s("Deneme toplam", "300 × 2500", 7)]
+    (t,) = _tutanlar(tek, [("DENEME TOPLAM", "300 X 2500", 10)], toplam)
+    assert "olcu_toplamlari" not in t                                    # tek sayılı ölçü ve adedi dolu: kayma eşlemeyi değiştirmez
 
 
 def test_pk01_bilgi_kapiya_girmez(sozluk, bugun):
