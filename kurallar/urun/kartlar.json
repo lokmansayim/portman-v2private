@@ -1,7 +1,7 @@
 {
  "sema": "portman.urun_kartlari/1",
- "surum": "1",
- "aciklama": "Ürün kimlik kartları (İE-15 K1, D-24). Kart bir ürünü tanımlar; modelde IFC tür nesnesidir, parça (örnek) türüne bağlanır. Okuyan `motor/kart_model.py`. Kod kalıcıdır: bir kod başka ürüne verilmez, ürün kalkarsa kod boş kalır (`testler/kimlik/veri/kart_kodlari.json` kilidi). Kart kodu boy ve projeyle değişmez; bugünkü malzeme kataloğunun kodu (D01, D09…) boya göre ve projede yeni boy çıktıkça verilir, parçada `KatalogKodu` olarak kalır. Bu yüzden kart kodu tirelidir (D-01). Ailelerin harfi katalogla aynıdır. Kartı düzeltmek için bu dosya düzeltilir, model yeniden üretilir; Bonsai'de yapılan değişiklik geri okunmaz.",
+ "surum": "2",
+ "aciklama": "Ürün kimlik kartları (İE-15 K1 ve K2, D-24). Kart bir ürünü tanımlar; modelde IFC tür nesnesidir, parça (örnek) türüne bağlanır. Okuyan `motor/kart_model.py`. Kod kalıcıdır: bir kod başka ürüne verilmez, ürün kalkarsa kod boş kalır (`testler/kimlik/veri/kart_kodlari.json` kilidi). Kart kodu boy ve projeyle değişmez; bugünkü malzeme kataloğunun kodu (D01, D09…) boya göre ve projede yeni boy çıktıkça verilir, parçada `KatalogKodu` olarak kalır. Bu yüzden kart kodu tirelidir (D-01). Ailelerin harfi katalogla aynıdır. Kartı düzeltmek için bu dosya düzeltilir, model yeniden üretilir; Bonsai'de yapılan değişiklik geri okunmaz.",
  "alanlar": {
   "kod": "Kalıcı kod, `<aile>-<nn>`",
   "ad": "Ürünün adı; listedeki adı ya da ona en yakın ad",
@@ -13,7 +13,11 @@
   "ifc": "IFC4 tür sınıfı ve alt türü (PredefinedType)",
   "pafta": "Montaj paftasında bu ürünün sayıldığı anahtarlar (tek genel pafta okuyucusunun çıktısı, `pafta_katmani.json` biçimi). Parçaya `PortatifEv_Parca.PaftaAnahtari` olarak `;` ile yazılır; yerleşim kapısının hakemi bu sözleşmeyle sayar",
   "pafta_dis_ic": "Duvarın dış ya da iç olmasına göre parçaya eklenen anahtar (`Pset_WallCommon.IsExternal`); kart ürünü tanımlar, duvarın dış ya da iç olduğu parçanın bilgisidir",
-  "bugunku_ifc": "Bugünkü IFC'de (`motor.ifc_uret`) bu kartın parçasını tanıyan eşleme: IFC sınıfı, ad deseni, özellik koşulları (`[set, özellik, desen]`), duvarın boşluk türleri (`bosluk`, sıralı ve virgülle), yerleşim kuralının sonucu (`kural`) ve geçerli olduğu çatı tipleri (`cati_tipleri`; eşlemede ya da uyguladığı kuralda; ikisinde de yazılıysa ikisi de sağlanır). Bugünkü IFC çatıyı hep beşik çizer; İş Emri'nin çatısı bu tiplerden değilse parça \"kural yok\" yazar. Bir parça tam bir karta uymalı; ikiye uyarsa model üretilmez, hiçbirine uymazsa \"kural yok\" yazar",
+  "pafta_tavan": "Tavanın türüne göre (asma dizme / ters; İş Emri'nin `Tavan` özelliği, liste üreteciyle aynı okuma) parçaya eklenen anahtar: aynı ürün paftada ve listede tavana göre başka adla sayılır",
+  "pafta_bilgi": "Parçanın kuraldan aldığı bir bilginin (`alan`) değeriyle kurulan anahtar (`<onek>.<değer>`); ör. omeganın yeri (`ayrinti.omega.konum.ara`)",
+  "bugunku_ifc": "Bugünkü IFC'de (`motor.ifc_uret`) bu kartın parçasını tanıyan eşleme: IFC sınıfı, ad deseni, özellik koşulları (`[set, özellik, desen]`), duvarın boşluk türleri (`bosluk`, sıralı ve virgülle), yerleşim kuralının sonucu (`kural`) ve geçerli olduğu çatı tipleri (`cati_tipleri`; eşlemede ya da uyguladığı kuralda; ikisinde de yazılıysa ikisi de sağlanır). Bugünkü IFC çatıyı hep beşik çizer; İş Emri'nin çatısı bu tiplerden değilse parça \"kural yok\" yazar. Bir parça tam bir karta uymalı; ikiye uyarsa model üretilmez, hiçbirine uymazsa \"kural yok\" yazar. Kartta `bugunku_ifc`, `yerlesim` ya da `sabit`'ten tam biri olur",
+  "yerlesim": "K2: parçayı bugünkü IFC değil yerleşim kuralı kurar (`motor/yerlesim/`; kural `kurallar/yerlesim/prefabrik.json`'da). Eşleme: kuralın adı (`kural`), parçanın çeşidi (`parca`), kuralın parçaya yazdığı bilgiler (`bilgi`, isteğe bağlı; hepsi aynı olmalı) ve parçanın IFC sınıfı (`sinif`). Kuralın kurduğu parça tam bir karta uymalı; hiçbirine uymazsa \"kural yok\" yazar, ikisine uyarsa model üretilmez",
+  "sabit": "Sabit paket: adet modelden değil liste kuralından okunur (`okunan`); modelde parçası yoktur",
   "kaynak": "Kaynak ve durum: `lokman`, `muhendis` ya da `varsayim`; tarih ve dayanak"
  },
  "aileler": {
@@ -24,13 +28,19 @@
   "B": "Köşe direği",
   "V": "Veranda profili",
   "H": "H profil",
-  "MA": "Makas"
+  "MA": "Makas",
+  "OM": "Omega (tavan)",
+  "AS": "Aşık",
+  "KP": "Çatı kaplaması",
+  "BT": "Betopan",
+  "DR": "Dere ve iniş",
+  "SR": "Sabit paketle sayılan bağlantı parçası"
  },
  "birimler": ["adet", "boy", "paket", "rulo", "m", "m2", "takım"],
  "sayim_yollari": {
   "yerlesen_adet": "Modelde yerleşen parça sayısı",
   "boy_kesim": "Parçalar stok boyuna kesim planıyla (K2)",
-  "alan": "Levha ya da paket, alandan (K2)",
+  "alan": "Levha ya da paket, alandan; levha modelde yerleşir (K2)",
   "turev": "Başka kartın adedinden",
   "sabit_paket": "Sabit paket",
   "aliciya_ait": "Alıcıya ait: satır kalır, adet 0"
@@ -262,12 +272,12 @@
    "liste": {"grup": "1002", "satirlar": ["Kutu profil (kiriş) 100 × 100"]},
    "olcu": "100 × 100; boy parçada (açık kenar dış ölçüsü − 100)",
    "birim": "adet",
-   "nerede": "Verandanın açık kenarında, duvar üstü kotunda (kot bugünkü IFC'de varsayım)",
+   "nerede": "Verandanın açık kenarında, duvar üstü kotunda (kot bugünkü IFC'de varsayım); iki oda arasındaki duvarsız sınırda da (iç kiriş)",
    "sayim": "yerlesen_adet",
    "ifc": {"sinif": "IfcBeamType", "alt_tur": "BEAM"},
    "pafta": [],
    "bugunku_ifc": [{"sinif": "IfcBeam", "kosul": [["PortatifEv_Kapsam", "Blok", "^BOM_V\\d+_VERANDA_(ON|YAN)_"]]}],
-   "kaynak": {"durum": "muhendis", "tarih": "2026-10-19", "dayanak": "PK-01 gerçek listesinin satır adı; açık kenar başına bir kiriş (PR #28, PK-01'de tuttu)"}
+   "kaynak": {"durum": "muhendis", "tarih": "2026-10-19", "dayanak": "PK-01 gerçek listesinin satır adı; açık kenar başına bir kiriş (PR #28, PK-01'de tuttu). İç kiriş: duvarsız sınırda da gelir (Lokman, kart 22 Ekim 05:26 \"Evet, gelir\"; liste kuralı `ic_kirisler_cm`, BK-12 PR-2e); bugünkü IFC iç kirişi çizmez, PK-01'de yok"}
   },
   {
    "kod": "H-01",
@@ -353,7 +363,7 @@
    "liste": {"grup": "1005", "satirlar": ["Makas (baş)"]},
    "olcu": "Açıklık parçada (PK-01'de 6000)",
    "birim": "adet",
-   "nerede": "Kalkan duvarlarının üstünde, çatının iki ucunda",
+   "nerede": "Çatının iki ucunda, uç duvarların üstünde",
    "sayim": "yerlesen_adet",
    "ifc": {"sinif": "IfcElementAssemblyType", "alt_tur": "TRUSS"},
    "pafta": ["makas_bas"],
@@ -372,6 +382,99 @@
    "pafta": ["makas_orta"],
    "bugunku_ifc": [{"sinif": "IfcElementAssembly", "kosul": [["PortatifEv_Kapsam", "BOMKalem", "\\(orta\\)"]], "cati_tipleri": ["besik"]}],
    "kaynak": {"durum": "muhendis", "tarih": "2026-10-19", "dayanak": "PK-01 gerçek listesinin satır adı (PR #28)"}
+  },
+  {
+   "kod": "OM-01",
+   "ad": "60'lık tavan omegası L 3750",
+   "liste": {"grup": "1002", "satirlar": ["60'lık duvar omegası (asma dizme tavan)", "60'lık tavan omegası (ters tavan)"]},
+   "olcu": "60 × 3750; parça boyu parçada (tam parça 365, kesim planında)",
+   "birim": "adet",
+   "nerede": "Tavanda mahyaya paralel hatlar: asma dizme tavanda iç duvarların ekseninde ve odada ~125 cm arayla, ters tavanda bir duvar yüzünden 60 cm arayla (`kurallar/yerlesim/prefabrik.json › tavan_omegasi_yerlesimi`, karar B)",
+   "sayim": "boy_kesim",
+   "ifc": {"sinif": "IfcMemberType", "alt_tur": "MEMBER"},
+   "pafta": [],
+   "pafta_tavan": {"asma": "duvar_omegasi_asma", "ters": "tavan_omegasi"},
+   "pafta_bilgi": {"alan": "Yer", "onek": "ayrinti.omega.konum"},
+   "yerlesim": {"kural": "tavan_omegasi_yerlesimi", "parca": "omega", "sinif": "IfcMember"},
+   "kaynak": {"durum": "lokman", "tarih": "2026-10-24", "dayanak": "Karar B (Lokman, kart 24 Ekim 06:17 \"Türe göre\"); PK-01 tavan omega planı (s. 6, 24 parça). Listede tavanın türüne göre iki ad, ürün aynı (kitap `parca_boyu_m.tavan_omegasi`, L 3750)"}
+  },
+  {
+   "kod": "AS-01",
+   "ad": "Aşık L 4200",
+   "liste": {"grup": "1005", "satirlar": ["Aşık"]},
+   "olcu": "L 4200; parça boyu parçada (tam parça 410, kesim planında)",
+   "birim": "adet",
+   "nerede": "Çatı yüzünde mahyaya paralel sıralar: mahyadan 60 cm arayla, saçağa 60'tan az kalınca saçakta bir sıra (`asik_sirasi`, karar C)",
+   "sayim": "boy_kesim",
+   "ifc": {"sinif": "IfcMemberType", "alt_tur": "PURLIN"},
+   "pafta": ["asik"],
+   "yerlesim": {"kural": "asik_sirasi", "parca": "asik", "sinif": "IfcMember"},
+   "kaynak": {"durum": "lokman", "tarih": "2026-10-24", "dayanak": "Karar C (Lokman, kart 24 Ekim 06:17 \"Mahyadan 60\"); PK-01 aşık planı (s. 8, 42 parça)"}
+  },
+  {
+   "kod": "KP-01",
+   "ad": "Sandviç panel (100 cm kapatır)",
+   "liste": {"grup": "1006", "satirlar": ["Sandviç panel (100 cm kapatır)"]},
+   "olcu": "100 cm kapatır; boy parçada (eğik boy + 5 cm, 10 mm'ye yukarı)",
+   "birim": "adet",
+   "nerede": "Çatı yüzünde mahyadan saçağa şeritler; dizilimin başladığı uçtan, son şerit yüzün ucunda kesilir (`cati_kaplamasi`)",
+   "sayim": "yerlesen_adet",
+   "ifc": {"sinif": "IfcCoveringType", "alt_tur": "ROOFING"},
+   "pafta": ["sandvic_panel"],
+   "yerlesim": {"kural": "cati_kaplamasi", "parca": "panel", "sinif": "IfcCovering", "bilgi": {"Kaplama": "sandvi"}},
+   "kaynak": {"durum": "muhendis", "tarih": "2026-10-24", "dayanak": "PK-01 çatı kaplaması planı (s. 9, 22 panel); kapatma ve boy kural kitabından (Lokman 4 ve 7 Ekim)"}
+  },
+  {
+   "kod": "BT-01",
+   "ad": "Baş makas betopanı 1250 × 2500",
+   "liste": {"grup": "1002", "satirlar": ["Baş makas betopanı"]},
+   "olcu": "1250 × 2500 (3,125 m²)",
+   "birim": "adet",
+   "nerede": "Baş makasların dış yüzünde, yatık, mahyaya ortalı (`bas_makas_betopani_yerlesimi`); sayı liste kuralından (H5)",
+   "sayim": "alan",
+   "ifc": {"sinif": "IfcPlateType", "alt_tur": "SHEET"},
+   "pafta": ["bas_makas_betopan"],
+   "yerlesim": {"kural": "bas_makas_betopani_yerlesimi", "parca": "levha", "sinif": "IfcPlate"},
+   "kaynak": {"durum": "muhendis", "tarih": "2026-10-24", "dayanak": "PK-01 baş makas betopan yerleşimi (s. 5, 4 levha); sayı liste kuralı `bas_makas_betopani` (H5: PK-01 4, PK-02 6, PK-06 6)"}
+  },
+  {
+   "kod": "DR-01",
+   "ad": "Metal dere L 4000",
+   "liste": {"grup": "1011", "satirlar": ["Metal dere"]},
+   "olcu": "L 4000; hattın boyu parçada (kesim planında 20 cm bindirmeyle)",
+   "birim": "adet",
+   "nerede": "Beşikte her saçak kenarı boyunca bir hat (`dere_hatti`)",
+   "sayim": "boy_kesim",
+   "ifc": {"sinif": "IfcPipeSegmentType", "alt_tur": "GUTTER"},
+   "pafta": ["dere"],
+   "yerlesim": {"kural": "dere_hatti", "parca": "dere", "sinif": "IfcPipeSegment"},
+   "kaynak": {"durum": "muhendis", "tarih": "2026-10-24", "dayanak": "PK-01 makas ve dere planı (s. 7): 2 hat × 1059,8; parça boyu ve bindirme kural kitabından"}
+  },
+  {
+   "kod": "DR-02",
+   "ad": "Metal dere inişi aparatı",
+   "liste": {"grup": "1011", "satirlar": ["Metal dere inişi aparatı"]},
+   "olcu": "İniş başına bir",
+   "birim": "adet",
+   "nerede": "Dere hattının iki ucunda; 9 m'yi geçen hattın ortasında bir tane daha (`dere_hatti`; Lokman 13 ve 18 Ekim)",
+   "sayim": "yerlesen_adet",
+   "ifc": {"sinif": "IfcPipeFittingType", "alt_tur": "TRANSITION"},
+   "pafta": ["inis"],
+   "yerlesim": {"kural": "dere_hatti", "parca": "inis", "sinif": "IfcPipeFitting"},
+   "kaynak": {"durum": "lokman", "tarih": "2026-10-24", "dayanak": "Köşe başına iniş ve 9 m eşiği Lokman'ın kuralı (liste `ana_cati_kose`, `inis_orta`); PK-01 makas ve dere planında 6"}
+  },
+  {
+   "kod": "SR-01",
+   "ad": "PVC plastik betopan H'ı",
+   "liste": {"grup": "1009", "satirlar": ["PVC plastik betopan H'ı"]},
+   "olcu": "—",
+   "birim": "adet",
+   "nerede": "Baş makaslarda betopanların birleşim yerlerinde; tavanla bağı yok",
+   "sayim": "sabit_paket",
+   "ifc": {"sinif": "IfcMemberType", "alt_tur": "MEMBER"},
+   "pafta": [],
+   "sabit": {"okunan": "kurallar/liste/prefabrik.json › kurallar.pvc_betopan_h"},
+   "kaynak": {"durum": "lokman", "tarih": "2026-10-20", "dayanak": "Lokman, 20 Ekim 19:45 ve kart 19:50 \"Her evde 7\" (liste kuralı `pvc_betopan_h`); modelde parçası yok"}
   }
  ],
  "gorunum": [
@@ -380,8 +483,8 @@
  ],
  "bilesen": "Bir `IfcElementAssembly`'nin parçası (makasın çubukları) ayrıca sayılmaz; kartı birleşimdedir",
  "kartsiz": [
-  {"sinif": "IfcSlab", "ad": "^CATI_", "neden": "Çatı yüzü (trapez sac gösterimi); çatı kaplamasının kartları K2'de"},
-  {"sinif": "IfcPlate", "ad": "^ALIN_", "neden": "Çatı alın dolgusu; bugünkü IFC'de kuralı teyit edilecek, K2'de"},
+  {"sinif": "IfcSlab", "ad": "^CATI_", "neden": "Çatı yüzü (bugünkü IFC'nin trapez sac gösterimi); kaplama K2'de kartlı parçalarla (KP-01), bu yüz sayılmaz"},
+  {"sinif": "IfcPlate", "ad": "^ALIN_", "neden": "Çatı alın dolgusu (bugünkü IFC'nin gösterimi); baş makasın betopanı K2'de kartlı levhalarla (BT-01), bu dolgu sayılmaz"},
   {"sinif": "IfcSlab", "ad": "^ZEMIN_BETONU$", "neden": "Kapsam dışı (bayi ya da saha)"},
   {"sinif": "IfcRoof", "neden": "Çatının kabı; parçaları ayrı sayılır"},
   {"sinif": "IfcOpeningElement", "neden": "Boşluk; ürün değil, doğraması ayrı parça"}
