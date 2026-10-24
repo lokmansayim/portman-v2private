@@ -7,19 +7,23 @@ KH-2'nin eklediklerini sınar:
   ölçülü parça iki ok başı ve boy yazısıdır; ok başsız kısa ölçü boşluktur, 10 cm ve üstü teyit. Lejantlı sayfada sayı lejantın
   "N ADET" yazısıyla kıyaslanır. Montaj teyitteyken ölçeğini montajdan alan bölümler (H, makas, omega, dere) de teyide düşer; bina içinde
   sayılmayan renkli dörtgen ve yazıyla doğrulanmayan dış ölçü montajı bekletir; kırma çatıda makas teyitte; okunamayan ek bölüm
-  yalnız kendini bekletir.
+  yalnız kendini bekletir ve komutun özeti çökmez. Sessiz sayı yok (hakem 1. tur): ölçülü parçası olmayan omega ya da aşık sayfası,
+  duvar çerçevesinin dışındaki omega parçası ya da dere hattı (sayılmaz), inişi olmayan dere hattı ve tek sıralı aşık yüzü teyittir.
 - **PK-01 cevabı:** omega 24 parça 58,46 m (karar B: dokuz parça iç duvar ekseninde), aşık 42 parça 148,4 m (karar C: iki yüz, yedişer
   sıra), kaplama 22, betopan 4, dere 2 hat 21,2 m, iniş 6. Paftayla yeniden üretimi `test_hakem_pk01.py`'deki test sınar.
 - **PK-07 gerilemesi (paftayla):** omega ve aşık 13 Ekim okumasıyla aynı (aşığın 20 cm'lik 12 ölçüsü teyitte), kaplama lejantla aynı,
   iniş 8, betopan teyitte (lejantta adet yok), yavru makas 3; KH-1 bölümleri ek bölümler açılınca değişmez.
 - **Kıyas aracı:** adımsız koşu KH-1'deki gibi; `--adim K2` ile K2 satırları ve metre kapısı (±%3, `Qto_…BaseQuantities.Length`, birim
   çevrilir) kapıya girer; K1 modeli K2'den geçmez; yanlış bir K2 (bir omega eksik, aşık %5 kısa, kaplama bir fazla, boysuz parça) geçmez.
+  Tutarsız adım ayarı (boş kapı, satırlarda olmayan kapı anahtarı, eksik metre satırı) koşmaz; omega anahtarı proje ayarından da
+  tanınır; sayfası bulunamayan bölümün satırı "paftada yok" yazar ve kapıyı geçmez.
 """
 from __future__ import annotations
 
 import copy
 import json
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -41,6 +45,7 @@ MOTOR_VERI = KOK / "testler" / "motor" / "veri"
 MOR = tuple(PO.VARSAYILAN["olcu"]["renk"])
 DERE = tuple(PO.VARSAYILAN["dere"]["renk"])
 SARI, TURUNCU = (0.973, 0.843, 0.192), (0.949, 0.404, 0.133)
+BASKA_MOR = (0.8, 0.0, 0.8)                                       # ölçü renginden farklı: bu renkte parça okunmaz
 EK = {"ayar": {"ek_bolumler": list(PO.EK_BOLUMLER)}}
 
 
@@ -55,27 +60,27 @@ def _yazi(pg, X, Y, metin, renk=(0, 0, 0), boy=7):
     pg.insert_text((X - w / 2, Y + 0.35 * boy), metin, fontsize=boy, fontname="ls", fontfile=T.FONT, color=renk)
 
 
-def _ok(pg, noktalar):
-    pg.draw_polyline(noktalar + [noktalar[0]], color=MOR, fill=MOR, width=0.1, closePath=True)
+def _ok(pg, noktalar, renk=MOR):
+    pg.draw_polyline(noktalar + [noktalar[0]], color=renk, fill=renk, width=0.1, closePath=True)
 
 
-def _parca(s: T.Sayfa, p, q, yazi: str | None):
+def _parca(s: T.Sayfa, p, q, yazi: str | None, renk=MOR):
     """Bina cm'sinde p → q (eksene paralel) eflatun ölçülü parça: çizgi, iki dolgulu ok başı, boy yazısı (çizginin yanında)."""
     (x0, y0), (x1, y1) = s.gor(*p), s.gor(*q)
-    s.pg.draw_line((x0, y0), (x1, y1), color=MOR, width=0.3)
+    s.pg.draw_line((x0, y0), (x1, y1), color=renk, width=0.3)
     L, w = 4, 0.8
     if abs(y0 - y1) < 1e-6:
         a, b = min(x0, x1), max(x0, x1)
-        _ok(s.pg, [(a, y0), (a + L, y0 - w), (a + L, y0 + w)])
-        _ok(s.pg, [(b, y0), (b - L, y0 - w), (b - L, y0 + w)])
+        _ok(s.pg, [(a, y0), (a + L, y0 - w), (a + L, y0 + w)], renk)
+        _ok(s.pg, [(b, y0), (b - L, y0 - w), (b - L, y0 + w)], renk)
         if yazi:
-            _yazi(s.pg, (a + b) / 2, y0 - 6, yazi, MOR)
+            _yazi(s.pg, (a + b) / 2, y0 - 6, yazi, renk)
     else:
         a, b = min(y0, y1), max(y0, y1)
-        _ok(s.pg, [(x0, a), (x0 - w, a + L), (x0 + w, a + L)])
-        _ok(s.pg, [(x0, b), (x0 - w, b - L), (x0 + w, b - L)])
+        _ok(s.pg, [(x0, a), (x0 - w, a + L), (x0 + w, a + L)], renk)
+        _ok(s.pg, [(x0, b), (x0 - w, b - L), (x0 + w, b - L)], renk)
         if yazi:
-            _yazi(s.pg, x0 + 8, (a + b) / 2, yazi, MOR)
+            _yazi(s.pg, x0 + 8, (a + b) / 2, yazi, renk)
 
 
 def _uzerine(doc, baslik: str) -> T.Sayfa:
@@ -117,7 +122,8 @@ def _lejantli(doc, baslik, L, adet: int | None, kesik: bool = False):
 
 def kh2_sentetik(yol: Path, *, oksuz_uzun: bool = False, omega_duvarsiz: bool = False, kaplama_adet: int = 6, kaplama_kesik: bool = False,
                  betopan_adet: int | None = 4, dis_yazisiz: bool = False, bina_icinde: bool = False, kose_tasan: bool = False,
-                 h_buyuk_daire: bool = False, kaplamasiz: bool = False) -> Path:
+                 h_buyuk_daire: bool = False, kaplamasiz: bool = False, omega_renksiz: bool = False, omega_disarida: bool = False,
+                 asik_bos: bool = False, asik_tek_sira: bool = False, dere_disarida: bool = False, inissiz_hat: bool = False) -> Path:
     gecici = yol.with_suffix(".kh1.pdf")
     T.sentetik(gecici)
     doc = fitz.open(gecici)
@@ -126,15 +132,19 @@ def kh2_sentetik(yol: Path, *, oksuz_uzun: bool = False, omega_duvarsiz: bool = 
     if not omega_duvarsiz:
         T._dis_cizgi(o)
     for p, q, b in OMEGA:
-        _parca(o, p, q, b)
+        _parca(o, p, q, b, BASKA_MOR if omega_renksiz else MOR)
+    if omega_disarida:                                            # binanın önünde, lejant örneği gibi ok başlı 100'lük ölçü
+        _parca(o, (0, -150), (100, -150), "100")
     _yazi(o.pg, *o.gor(150 + 28, 208.25), "3,5", MOR)              # ok başsız boşluk ölçüsü (bilgi)
     if oksuz_uzun:
         _yazi(o.pg, *o.gor(530, 200), "20", MOR)                  # ok başsız 20 cm: parça mı boşluk mu belli değil
     _yazi(o.pg, 420, 1100, "TAVAN OMEGA YERLEŞİM PLANI", boy=14)
 
     a = T.Sayfa(doc, 0)                                           # aşık planı: iki yüz, üçer sıra
-    for y, x0, x1, b in ASIK:
+    for y, x0, x1, b in ([] if asik_bos else ASIK):
         _parca(a, (x0, y), (x1, y), b)
+    if asik_tek_sira:                                             # yüzlerden uzakta ok başlı tek bir 410'luk ölçü
+        _parca(a, (0, -300), (410, -300), "410")
     _yazi(a.pg, 420, 1100, "AŞIK YERLEŞİM PLANI", boy=14)
 
     if not kaplamasiz:
@@ -148,6 +158,11 @@ def kh2_sentetik(yol: Path, *, oksuz_uzun: bool = False, omega_duvarsiz: bool = 
     for x, y in ((-35, -20), (-35, 410), (635, -20), (635, 410), (635, 195)):
         for r in (5, 3):
             k.daire(*k.gor(x, y), (0.0, 0.0, 0.0), r)
+    if dere_disarida:                                             # binanın önünde, lejant örneği gibi 60 cm'lik dere çizgisi
+        k.cizgi((700, -150), (760, -150), DERE)
+    if inissiz_hat:                                               # ön saçakta 400 cm'lik bir hat daha; yanında iniş yok
+        for i in range(10):
+            k.cizgi((100 + 40 * i, -35), (100 + 40 * i + 30 if i < 9 else 500, -35), DERE)
     k.bitir()
 
     if h_buyuk_daire:                                             # H lejant renginde, H dairesinden büyük bir daire (4–40 pt dışı)
@@ -193,8 +208,7 @@ def test_ek_bolumler_kapaliyken_kh1_ayni(pdf, tmp_path):
     for x in (kh1, o):
         x.pop("pafta_sha256")
         x["okuyucu"].pop("sayfa_sayisi")
-        x["ayrinti"]["makas"].pop("atilan")                       # dere çizgileri makasa dik; makas sayısını değiştirmez
-    assert o == kh1
+    assert o == kh1                                               # dere çizgileri makas sayfasında; makası ve atılanı değiştirmez
     assert not set(PO.EK_BOLUMLER) & set(o["ayrinti"]) and "tavan_omegasi" not in o
 
 
@@ -304,6 +318,58 @@ def test_kirma_catida_makas_bekler(pdf):
     o = PO.oku(pdf, {"ayar": {"ek_bolumler": list(PO.EK_BOLUMLER), "cati": "kirma"}})
     assert _teyit(o) == {"makas": ["çatı \"kirma\"; baş makas kuralı (ana ailenin iki ucu) yalnız kalkanlı beşikte"]}
     assert "makas_bas" not in o and o["tavan_omegasi"]["adet"] == 5
+
+
+# hakem 1. tur: sessiz sayı yok (bulgu 2, 3, 4)
+YOK = "ölçülü parça yok (ölçü renginde iki ok başı ve boy yazısı); sayfayı ve `olcu.renk` ayarını denetleyin"
+
+
+@pytest.mark.parametrize("kw, bolum, anahtar", [({"omega_renksiz": True}, "omega", "tavan_omegasi"), ({"asik_bos": True}, "asik", "asik")])
+def test_olculu_parcasi_olmayan_sayfa_bekler(tmp_path, kw, bolum, anahtar):
+    """Sayfası bulunan bölümde hiç ölçülü parça okunmazsa bölüm sessizce 0 yazmaz, teyittir."""
+    o = PO.oku(kh2_sentetik(tmp_path / "s.pdf", **kw), EK)
+    assert _teyit(o) == {bolum: [YOK]}
+    assert anahtar not in o and o["ayrinti"][bolum]["parca"] == 0
+
+
+@pytest.mark.parametrize("kw, bolum, neden, alan, sayi", [
+    ({"omega_disarida": True}, "omega", "duvar çerçevesinin dışında 1 ölçülü parça (100 cm): sayılmadı (lejant örneği ya da başka bir "
+                                        "çizim olabilir)", "parca", 5),
+    ({"dere_disarida": True}, "dere", "duvar çerçevesinden 60 cm'den uzakta 1 dere hattı (60 cm): sayılmadı", "hat", 2),
+])
+def test_bina_cercevesi_disindaki_oge_sayilmaz_ve_bekletir(tmp_path, kw, bolum, neden, alan, sayi):
+    """Omega parçası duvar çerçevesinin içinde, dere hattı saçakta (çerçeveden 60 cm içinde) durur; dışındaki öğe sayılmaz, bölüm bekler."""
+    o = PO.oku(kh2_sentetik(tmp_path / "s.pdf", **kw), EK)
+    assert _teyit(o) == {bolum: [neden]}
+    a = o["ayrinti"][bolum]
+    assert (a[alan], a["atilan"]) == (sayi, {"cerceve_disinda": 1})
+    assert o["ayrinti"]["omega"]["toplam_m"] == 15.165 and o["ayrinti"]["dere"]["toplam_m"] == 8.6
+
+
+def test_inisi_olmayan_dere_hatti_bekletir(tmp_path):
+    o = PO.oku(kh2_sentetik(tmp_path / "s.pdf", inissiz_hat=True), EK)
+    assert _teyit(o) == {"dere": ["inişi olmayan 1 dere hattı (400 cm)"]}
+    D = o["ayrinti"]["dere"]
+    assert (D["hat"], D["toplam_m"], D["inis"]) == (3, 12.6, 5) and "dere" not in o and "inis" not in o
+
+
+def test_tek_sirali_asik_yuzu_bekletir(tmp_path):
+    """Aşık sayfasında duvar çizgisi yok; yüzlerden uzak tek bir ölçü tek sıralı yüz olur ve aşığı bekletir."""
+    o = PO.oku(kh2_sentetik(tmp_path / "s.pdf", asik_tek_sira=True), EK)
+    assert _teyit(o) == {"asik": ["tek sıralı 1 çatı yüzü (1 parça): bina dışında bir ölçü ya da tek sıralı küçük bir çatı olabilir"]}
+    assert "asik" not in o and sorted(y["sira"] for y in o["ayrinti"]["asik"]["yuzler"]) == [1, 3, 3]
+
+
+def test_komut_ozeti_okunamayan_ve_sayfasiz_bolumde_cokmez(tmp_path, capsys):
+    """Okunamayan ek bölüm (duvar çizgisi yok) ve sayfası bulunamayan bölüm belgelenen komutun özetini çökertmez."""
+    pdf = kh2_sentetik(tmp_path / "s.pdf", omega_duvarsiz=True, kaplamasiz=True)
+    proje = tmp_path / "p.json"
+    proje.write_text(json.dumps(EK), encoding="utf-8")
+    assert PO.main([str(pdf), "--proje", str(proje), "--cikti", str(tmp_path / "o.json")]) == 0
+    cikti = capsys.readouterr().out.splitlines()
+    assert {"omega (s. 5): okunamadı (nedeni TEYİT satırında)", "kaplama: sayfası bulunamadı (katmana girmedi)",
+            "TEYİT (omega): okunamadı: omega sayfasında duvar çizgisi yok; `duvar_rengi` ayarını denetleyin"} <= set(cikti)
+    assert _oku(tmp_path / "o.json")["ayrinti"]["omega"] == {"sayfa": 5}
 
 
 # ----------------------------------------------------------------------------- PK-01 cevabı (karar B ve C'nin kanıtı)
@@ -500,6 +566,45 @@ def test_ek_bolum_teyidi_yalniz_kendi_satirlarini_durdurur(k2_ifc, cevap, proje)
 def test_bilinmeyen_adim(k2_ifc, cevap, proje):
     with pytest.raises(ValueError, match="adım yok: K9"):
         KY.kiyasla(k2_ifc, cevap, proje, "K9")
+
+
+@pytest.mark.parametrize("bozma, hata", [
+    (lambda A: A.update(kapi=[]), "adım K2: kapı listesi boş"),
+    (lambda A: A["kapi"].append("cati_mahyasi"), "adım K2: kapıdaki anahtar satırlarda yok: ['cati_mahyasi']"),
+    (lambda A: A["metre"].append({"anahtar": "inis"}), "adım K2: metre satırında `anahtar` ya da `cevap` yok"),
+])
+def test_tutarsiz_adim_ayari_kosmaz(k2_ifc, cevap, proje, bozma, hata):
+    """Boş bir adım "geçer" yazmaz; satırı olmayan kapı anahtarı sessizce düşmez (hakem 1. tur, bilgi notu)."""
+    p = copy.deepcopy(proje)
+    bozma(p["kiyas"]["adimlar"]["K2"])
+    with pytest.raises(ValueError, match=re.escape(hata)):
+        KY.kiyasla(k2_ifc, cevap, p, "K2")
+
+
+def test_omega_anahtari_proje_ayarindan_taninir(tmp_path, cevap, proje):
+    """Okuyucu omega anahtarını proje ayarından alır, kıyas da öyle tanır: omega teyitteyken başka adla açılan omeganın metre satırı da
+    bekler (eskiden teyitli okumanın metresiyle kıyaslanırdı)."""
+    yeni = "tavan_omegasi_ters"
+    c = copy.deepcopy(cevap)
+    del c["duvar_omegasi_asma"]
+    c["teyit_bekliyor"] = [{"bolum": "omega", "neden": "ok başı olmayan 1 ölçü (20 cm)"}]
+    p = json.loads(json.dumps(proje).replace("duvar_omegasi_asma", yeni))
+    parcalar = [(s, a, k.replace("duvar_omegasi_asma", yeni) if k else k, b) for s, a, k, b in _k2_parcalari(cevap)]
+    k = KY.kiyasla(_ifc(tmp_path / "o.ifc", parcalar), c, p, "K2")
+    assert next(s for s in k["satirlar"] if s["anahtar"] == yeni)["sonuc"] == "teyit bekliyor"
+    assert next(m for m in k["metre"] if m["anahtar"] == yeni)["sonuc"] == "teyit bekliyor" and k["kapi_1"] == "geçmez"
+    assert KY.bolum(yeni) is None and KY.bolum(yeni, yeni) == "omega"
+
+
+def test_sayfasi_olmayan_bolum_kiyasta_paftada_yok(k2_ifc, cevap):
+    """Okuyucu sayfası bulunamayan bölümü katmana yazmaz (`test_sayfasi_olmayan_ek_bolum_katmana_girmez`); kıyasta satırı "paftada yok"
+    yazar ve kapıyı geçmez."""
+    c = copy.deepcopy(cevap)
+    del c["sandvic_panel"]
+    c["ayrinti"]["kaplama"] = None
+    k = KY.kiyasla(k2_ifc, c, _oku(PROJE / "PK01.json"), "K2")
+    s = {x["anahtar"]: x["sonuc"] for x in k["satirlar"]}
+    assert s["sandvic_panel"] == "paftada yok" and {a for a, v in s.items() if v != "geçer"} == {"sandvic_panel"} and k["kapi_1"] == "geçmez"
 
 
 @pytest.fixture(scope="module")

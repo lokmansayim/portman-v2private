@@ -8,7 +8,7 @@
  "kanat": 6,
  "h_turleri": {"dubelli_kulakli": 11, "dubelli": 12, "standart": 14, "uclu_dubelli_kulakli": 1, "uclu_dubelli": 3, "uclu_standart": 4},
  "makas": {"ana_cm": [124.9, 267.6, 393.0, 518.4, 644.1, 769.5, 894.9], "cumba_cm": [5.0, 79.3, 116.9], "makas_bas": 2, "makas_orta": 5},
- "kh2_not": "KH-2'de eklendi (aynı 13 Ekim okumasının `tavan_omega` ve `asik` alanları; üstteki değerler değişmedi). 13 Ekim okuması aşıkta 20 cm'lik 12 ölçüyü parça saydı; tek okuyucu bunları ok başı olmadığı için teyite düşürür (CIO, 24 Ekim: 10 cm ve üstü teyit), toplam yine aynıdır.",
+ "kh2_not": "KH-2'de eklendi (aynı 13 Ekim okumasının `tavan_omega` ve `asik` alanları; üstteki değerler değişmedi). 13 Ekim okuması aşıkta 20 cm'lik 12 ölçüyü parça saydı; tek okuyucu bunları ok başı olmadığı için teyite düşürür (CIO, 24 Ekim: 10 cm ve üstü teyit); ok başlı 41 parça ve teyitteki 12 × 20 birlikte buradaki 53 parça ve 146,7 m'dir.",
  "tavan_omega": {"parca": 42, "toplam_m": 112.8, "boylar": {"365": 16, "320.75": 5, "241": 2, "219": 5, "200.25": 5, "144": 2, "138.5": 7}},
  "asik": {"parca": 53, "toplam_m": 146.7, "boylar": {"410": 32, "150": 5, "140": 4, "20": 12}}
 }

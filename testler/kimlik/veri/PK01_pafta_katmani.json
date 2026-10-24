@@ -1274,7 +1274,10 @@
    "olcek_pt_cm": [
     0.508,
     0.50808
-   ]
+   ],
+   "atilan": {
+    "cerceve_disinda": 0
+   }
   },
   "asik": {
    "sayfa": 8,
@@ -1448,7 +1451,10 @@
    "olcek_pt_cm": [
     0.4852,
     0.48528
-   ]
+   ],
+   "atilan": {
+    "cerceve_disinda": 0
+   }
   }
  }
 }

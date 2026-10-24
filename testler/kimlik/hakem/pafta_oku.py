@@ -18,8 +18,12 @@ tutuyorsa yazıdaki ölçü kullanılır. H, makas ve omega sayfalarında duvar 
 
 Eflatun boy yazılı parçalar (omega, aşık): iki ok başı arasındaki çizgi ve yanındaki sayı bir parçadır; boy sayıdan alınır, çizimdeki
 boy sayıyla %3 içinde tutmalıdır. Ok başı olmayan ölçü parça sayılmaz: `EN_KISA_PARCA_CM`'den kısası boşluk ölçüsüdür (bilgi), uzunu
-parça mı boşluk mu bilinmediği için bölümü teyide düşürür. Lejantlı sayfalarda (kaplama, betopan) lejanttaki dörtgenin rengi ve
-ölçüsüyle aynı dörtgenler sayılır ve lejanttaki "N adet" yazısıyla kıyaslanır.
+parça mı boşluk mu bilinmediği için bölümü teyide düşürür; sayfada hiç ölçülü parça yoksa bölüm teyittedir. Lejantlı sayfalarda
+(kaplama, betopan) lejanttaki dörtgenin rengi ve ölçüsüyle aynı dörtgenler sayılır ve lejanttaki "N adet" yazısıyla kıyaslanır.
+
+Bina çerçevesi (KH-2): omega parçası duvar çerçevesinin içinde, dere hattı çerçevenin `dere.cerceve_payi_cm` yakınında (saçakta)
+durur; dışındaki öğe sayılmaz (`atilan.cerceve_disinda`) ve bölümü teyide düşürür. İnişi olmayan dere hattı teyittir. Aşık sayfasında
+duvar çizgisi yoktur; tek sıralı çatı yüzü (bina dışında bir ölçü olabilir) aşığı teyide düşürür.
 
 Koşma:
     python3 -I testler/kimlik/hakem/pafta_oku.py <pafta.pdf> --proje testler/kimlik/hakem/projeler/PK01.json [--cikti <json>]
@@ -62,9 +66,11 @@ VARSAYILAN = {
     "makas": {"renk": None, "en_kisa_cm": 50.0},   # renk None: MK etiketlerinin yanındaki çizgilerden oylanır
     "sayfalar": {},                         # zorunlu sayfa numarası (1'den), başlık bulunamazsa
     "olcu": {"renk": [1.0, 0.0, 1.0], "oran_payi": 0.03},   # eflatun boy yazıları ve okları; çizim / yazı oranı bu payın içinde
-    "omega": {"anahtar": "tavan_omegasi", "duvar_payi_cm": 1.0},   # katman anahtarı (asma tavanda `duvar_omegasi_asma`)
+    "omega": {"anahtar": "tavan_omegasi", "duvar_payi_cm": 1.0,    # katman anahtarı (asma tavanda `duvar_omegasi_asma`)
+              "cerceve_payi_cm": 10.0},  # parça duvar çerçevesinin bu payla içinde; dışındaki sayılmaz, bölüm teyitte
     "asik": {"yuz_sira_araligi_cm": 100.0},  # bu aralıktan yakın ve boyca örtüşen sıralar aynı çatı yüzüdür
-    "dere": {"renk": [0.663, 0.325, 0.627], "inis_rengi": [0.0, 0.0, 0.0], "birlesme_cm": 20.0, "uc_payi_cm": 10.0},
+    "dere": {"renk": [0.663, 0.325, 0.627], "inis_rengi": [0.0, 0.0, 0.0], "birlesme_cm": 20.0, "uc_payi_cm": 10.0,
+             "cerceve_payi_cm": 60.0},  # dere saçakta: duvar çerçevesinden bu paydan uzak hat sayılmaz, bölüm teyitte
 }
 EK_BOLUMLER = ("omega", "asik", "kaplama", "betopan", "dere")
 EK_SAYFA = {"omega": "omega", "asik": "asik", "kaplama": "kaplama", "betopan": "betopan", "dere": "makas"}
@@ -614,6 +620,8 @@ def olculu_parcalar(pg, ayar: dict) -> dict:
     if sapan:
         uyarilar.append(f"çizimdeki boyu yazısından %{O['oran_payi'] * 100:g}'ten çok farklı {len(sapan)} parça: "
                         + ", ".join(f"{p['boy']:g}" for p in sapan[:5]))
+    if not okunan:
+        uyarilar.append("ölçülü parça yok (ölçü renginde iki ok başı ve boy yazısı); sayfayı ve `olcu.renk` ayarını denetleyin")
     oksuz = sorted(y["deger"] for j, y in enumerate(yazilar) if j not in bag.values())
     uzun = [v for v in oksuz if v >= EN_KISA_PARCA_CM]
     if uzun:
@@ -667,26 +675,35 @@ def omega_oku(pg, ayar: dict, M: dict) -> dict:
         uyarilar.append(f"duvar sınırı montajdaki dış ölçüye oturmuyor ({sx:.5f} / {sy:.5f} pt/cm)")
     if P["olcek_pt_cm"] and abs(P["olcek_pt_cm"] / ((sx + sy) / 2) - 1) > ayar["olcu"]["oran_payi"]:
         uyarilar.append(f"boy yazılarının ölçeği ({P['olcek_pt_cm']:.5f}) duvar çerçevesininkiyle tutmuyor ({sx:.5f} pt/cm)")
-    parcalar = []
+    parcalar, disarida, pay = [], [], ayar["omega"]["cerceve_payi_cm"]
     for p in P["parcalar"]:
         if p["eksen"] == "y":                         # görünen sayfada dikey: binanın y'si boyunca, konumu x
             yon, k, b, s = "y", (p["c"] - kutu.x0) / sx, (kutu.y1 - p["u1"]) / sy, (kutu.y1 - p["u0"]) / sy
         else:
             yon, k, b, s = "x", (kutu.y1 - p["c"]) / sy, (p["u0"] - kutu.x0) / sx, (p["u1"] - kutu.x0) / sx
+        kg, bg = (dis[0], dis[1]) if yon == "y" else (dis[1], dis[0])
+        if not (-pay <= k <= kg + pay and -pay <= b and s <= bg + pay):
+            disarida.append(p["boy"])
+            continue
         yer, duvar = _duvara_gore(yon, k, b, s, M["panolar"], ayar["omega"]["duvar_payi_cm"])
         parcalar.append({"yon": yon, "konum_cm": round(k, 1), "bas_cm": round(b, 1), "son_cm": round(s, 1), "boy_cm": p["boy"],
                          "yer": yer, **({"duvar": duvar} if duvar else {})})
+    if disarida:
+        uyarilar.append(f"duvar çerçevesinin dışında {len(disarida)} ölçülü parça ({', '.join(f'{v:g}' for v in disarida[:6])} cm): "
+                        "sayılmadı (lejant örneği ya da başka bir çizim olabilir)")
     parcalar.sort(key=lambda p: (p["yon"], p["konum_cm"], p["bas_cm"]))
     yerler = Counter(p["yer"] for p in parcalar)
     return {"parca": len(parcalar), "toplam_m": round(sum(p["boy_cm"] for p in parcalar) / 100, 4),
             "boylar": _boylar([p["boy_cm"] for p in parcalar]),
             "konum": {y: yerler.get(y, 0) for y in ("duvar_ekseni", "duvar_yuzu", "duvar_ici", "ara")},
-            "parcalar": parcalar, "bosluk_olculeri": P["bosluk"], "olcek_pt_cm": [round(sx, 5), round(sy, 5)], "uyarilar": uyarilar}
+            "parcalar": parcalar, "bosluk_olculeri": P["bosluk"], "olcek_pt_cm": [round(sx, 5), round(sy, 5)],
+            "atilan": {"cerceve_disinda": len(disarida)}, "uyarilar": uyarilar}
 
 
 def asik_oku(pg, ayar: dict) -> dict:
     """Aşık planı: eflatun boy yazılı parçalar. Aynı doğrultudaki parçalar bir sıradır; yakın ve boyca örtüşen sıralar bir çatı yüzüdür.
-    Sıra konumları yüzün sayfadaki ilk sırasından ölçülür (mahya ya da saçak tarafı paftanın çatı şeklinden okunur, burada değil)."""
+    Sıra konumları yüzün sayfadaki ilk sırasından ölçülür (mahya ya da saçak tarafı paftanın çatı şeklinden okunur, burada değil).
+    Aşık sayfasında duvar çizgisi olmadığı için bina çerçevesi yoktur; tek sıralı yüz (bina dışında bir ölçü olabilir) teyittir."""
     P = olculu_parcalar(pg, ayar)
     uyarilar, s = list(P["uyarilar"]), P["olcek_pt_cm"]
     siralar: list[dict] = []
@@ -719,6 +736,10 @@ def asik_oku(pg, ayar: dict) -> dict:
         rs.sort(key=lambda r: r["c"])
         yuz.append({"sira": len(rs), "sira_konumlari_cm": [round((r["c"] - rs[0]["c"]) / s, 1) for r in rs],
                     "sira_boylari_cm": [round(sum(r["boylar"]), 2) for r in rs], "parca": sum(len(r["boylar"]) for r in rs)})
+    tek = [y for y in yuz if y["sira"] == 1]
+    if tek:
+        uyarilar.append(f"tek sıralı {len(tek)} çatı yüzü ({', '.join(str(y['parca']) + ' parça' for y in tek)}): bina dışında bir ölçü "
+                        "ya da tek sıralı küçük bir çatı olabilir")
     boylar = [p["boy"] for p in P["parcalar"]]
     return {"parca": len(boylar), "toplam_m": round(sum(boylar) / 100, 4), "boylar": _boylar(boylar), "yuzler": yuz,
             "bosluk_olculeri": P["bosluk"], "teyitli_olculer": P["oksuz_uzun"], "olcek_pt_cm": round(s, 5) if s else None,
@@ -817,7 +838,7 @@ def _temas_gruplari(rs: list[fitz.Rect], pay: float = 1.0) -> list[int]:
 def dere_oku(pg, ayar: dict, dis_olcu_cm: list[float]) -> dict:
     """Dere: dere renginde (kesikli) çizgiler doğrultu doğrultu birleştirilir, aradaki boşluk `birlesme_cm`'den kısaysa aynı hattır.
     İniş: iniş renginde daire (çift daire tek sayılır); hattın ucunda (`uc_payi_cm`) ya da arasında. Ölçek duvar çizgilerinin sınırının
-    montajdaki dış ölçüye oturmasından."""
+    montajdaki dış ölçüye oturmasından. Duvar çerçevesinden `cerceve_payi_cm`'den uzak hat sayılmaz; inişi olmayan hat teyittir."""
     D = ayar["dere"]
     kutu = _duvar_kutusu(pg, tuple(ayar["duvar_rengi"]))
     if kutu is None:
@@ -843,7 +864,7 @@ def dere_oku(pg, ayar: dict, dis_olcu_cm: list[float]) -> dict:
         parca.setdefault(anahtar, []).append((a, b))
     if egik:
         uyarilar.append(f"dere renginde eğik {egik} çizgi okunmadı")
-    hatlar = []
+    hatlar, disarida, pay = [], [], D["cerceve_payi_cm"]
     for (e, c), ps in sorted(parca.items()):
         s_boy = sy if e == "y" else sx
         ps.sort()
@@ -853,14 +874,18 @@ def dere_oku(pg, ayar: dict, dis_olcu_cm: list[float]) -> dict:
                 b = max(b, b2)
                 continue
             if e == "y":
-                hatlar.append({"yon": "y", "konum_cm": round((c - kutu.x0) / sx, 1), "bas_cm": round((kutu.y1 - b) / sy, 1),
-                               "son_cm": round((kutu.y1 - a) / sy, 1)})
+                h = {"yon": "y", "konum_cm": round((c - kutu.x0) / sx, 1), "bas_cm": round((kutu.y1 - b) / sy, 1),
+                     "son_cm": round((kutu.y1 - a) / sy, 1)}
             else:
-                hatlar.append({"yon": "x", "konum_cm": round((kutu.y1 - c) / sy, 1), "bas_cm": round((a - kutu.x0) / sx, 1),
-                               "son_cm": round((b - kutu.x0) / sx, 1)})
+                h = {"yon": "x", "konum_cm": round((kutu.y1 - c) / sy, 1), "bas_cm": round((a - kutu.x0) / sx, 1),
+                     "son_cm": round((b - kutu.x0) / sx, 1)}
+            h["boy_cm"] = round(h["son_cm"] - h["bas_cm"], 1)
+            kg, bg = (dis_olcu_cm[0], dis_olcu_cm[1]) if e == "y" else (dis_olcu_cm[1], dis_olcu_cm[0])
+            (hatlar if -pay <= h["konum_cm"] <= kg + pay and -pay <= h["bas_cm"] and h["son_cm"] <= bg + pay else disarida).append(h)
             a, b = a2, b2
-    for h in hatlar:
-        h["boy_cm"] = round(h["son_cm"] - h["bas_cm"], 1)
+    if disarida:
+        uyarilar.append(f"duvar çerçevesinden {pay:g} cm'den uzakta {len(disarida)} dere hattı "
+                        f"({', '.join(format(h['boy_cm'], 'g') for h in disarida)} cm): sayılmadı")
     if not hatlar:
         uyarilar.append("dere çizgisi yok")
     inisler = []
@@ -872,12 +897,9 @@ def dere_oku(pg, ayar: dict, dis_olcu_cm: list[float]) -> dict:
             continue
         inisler.append({"xy": [round(x, 1), round(y, 1)]})
     for i in inisler:
-        x, y = i["xy"]
         en, yer = math.inf, None
         for h in hatlar:
-            k, t = (x, y) if h["yon"] == "y" else (y, x)
-            d = abs(k - h["konum_cm"]) + max(h["bas_cm"] - t, 0, t - h["son_cm"])
-            uc = min(abs(t - h["bas_cm"]), abs(t - h["son_cm"])) <= D["uc_payi_cm"]
+            d, uc = _hatta_uzaklik(h, *i["xy"], D["uc_payi_cm"])
             if d < en:
                 en, yer = d, "uc" if uc else "ara"
         i["yer"] = yer if en <= D["birlesme_cm"] else None
@@ -886,9 +908,19 @@ def dere_oku(pg, ayar: dict, dis_olcu_cm: list[float]) -> dict:
         uyarilar.append(f"dere hattına bağlı olmayan {len(bagsiz)} iniş")
     if hatlar and not inisler:
         uyarilar.append("iniş yok")
+    inissiz = [h for h in hatlar if not any(_hatta_uzaklik(h, *i["xy"], D["uc_payi_cm"])[0] <= D["birlesme_cm"] for i in inisler)]
+    if inisler and inissiz:
+        uyarilar.append(f"inişi olmayan {len(inissiz)} dere hattı ({', '.join(format(h['boy_cm'], 'g') for h in inissiz)} cm)")
     inisler.sort(key=lambda i: i["xy"])
     return {"hat": len(hatlar), "toplam_m": round(sum(h["boy_cm"] for h in hatlar) / 100, 4), "hatlar": hatlar,
-            "inis": len(inisler), "inisler": inisler, "olcek_pt_cm": [round(sx, 5), round(sy, 5)], "uyarilar": uyarilar}
+            "inis": len(inisler), "inisler": inisler, "olcek_pt_cm": [round(sx, 5), round(sy, 5)],
+            "atilan": {"cerceve_disinda": len(disarida)}, "uyarilar": uyarilar}
+
+
+def _hatta_uzaklik(h: dict, x: float, y: float, uc_payi: float) -> tuple[float, bool]:
+    """İnişin (x, y; cm) hatta uzaklığı (dik uzaklık + hattın ucundan taşma) ve hattın ucunda olup olmadığı."""
+    k, t = (x, y) if h["yon"] == "y" else (y, x)
+    return abs(k - h["konum_cm"]) + max(h["bas_cm"] - t, 0, t - h["son_cm"]), min(abs(t - h["bas_cm"]), abs(t - h["son_cm"])) <= uc_payi
 
 
 # ── katman ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -1054,11 +1086,17 @@ def ozet(o: dict) -> str:
     if o["ayrinti"]["makas"]:
         satir.append("makas " + ", ".join(f"{x.get('ad', '?')} {x['rol']} {x['boy_cm']}" for x in o["ayrinti"]["makas"]["makaslar"]))
     for b in EK_BOLUMLER:
-        a = o["ayrinti"].get(b)
-        if a:
-            ozet_alani = {"omega": ("parca", "toplam_m", "boylar", "konum"), "asik": ("parca", "toplam_m", "boylar", "yuzler"),
-                          "kaplama": ("adet", "turler", "gruplar"), "betopan": ("adet", "turler", "gruplar"),
-                          "dere": ("hat", "toplam_m", "inis")}[b]
+        if b not in o["ayrinti"]:
+            continue
+        a = o["ayrinti"][b]
+        ozet_alani = {"omega": ("parca", "toplam_m", "boylar", "konum"), "asik": ("parca", "toplam_m", "boylar", "yuzler"),
+                      "kaplama": ("adet", "turler", "gruplar"), "betopan": ("adet", "turler", "gruplar"),
+                      "dere": ("hat", "toplam_m", "inis")}[b]
+        if a is None:
+            satir.append(f"{b}: sayfası bulunamadı (katmana girmedi)")
+        elif not all(k in a for k in ozet_alani):
+            satir.append(f"{b} (s. {a['sayfa']}): okunamadı (nedeni TEYİT satırında)")
+        else:
             satir.append(f"{b} (s. {a['sayfa']}) " + json.dumps({k: a[k] for k in ozet_alani}, ensure_ascii=False))
     for k in o:
         if isinstance(o[k], dict) and "adet" in o[k] or k == "h_plani":

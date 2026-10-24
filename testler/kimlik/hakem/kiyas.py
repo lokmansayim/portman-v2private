@@ -24,6 +24,9 @@ KH-2 (hakem değişikliği; ayrı onayla):
   modelin uzunluk birimiyle metreye çevrilir) toplanır ve cevaptaki metreyle kıyaslanır; fark ±%3 içindeyse geçer. Boy taşımayan bir
   parça "modelde boy yok" yazar ve geçmez. Adımla koşulunca Kapı 1 adet ve metre birlikte geçerse geçer.
 - **Bölümler.** Okuyucunun KH-2 bölümleri (omega, aşık, kaplama, betopan, dere) tanınır; birinin teyidi yalnız kendi satırlarını durdurur.
+  Omega anahtarı, okuyucudaki gibi proje ayarından (`ayar.omega.anahtar`) da tanınır.
+- **Adım ayarı denetlenir.** Adımın `kapi` listesi boşsa ya da satırlarda olmayan bir anahtar içeriyorsa, `metre` satırında `anahtar`
+  ya da `cevap` yoksa araç koşmaz (hata); boş bir adım "geçer" yazmaz.
 - **Rapor.** Adet tablosunda satırın sayım yolu (kart sözleşmesi ya da ad eşlemesi) görünür.
 
 Koşma:
@@ -70,8 +73,10 @@ EK_ANAHTAR = {"tavan_omegasi": "omega", "duvar_omegasi_asma": "omega", "asik": "
               "bas_makas_betopan": "betopan", "dere": "dere", "inis": "dere"}
 
 
-def bolum(anahtar: str) -> str | None:
+def bolum(anahtar: str, omega_anahtari: str | None = None) -> str | None:
     """Anahtarın okuyucudaki bölümü; teyit bekleyen bölümün satırı kapıya girmez."""
+    if omega_anahtari and anahtar == omega_anahtari:
+        return "omega"
     if anahtar.startswith("ayrinti.montaj."):
         return "montaj"
     if anahtar.startswith(("h_plani.", "ayrinti.h_plani.")):
@@ -143,14 +148,15 @@ def boylar(model: ifcopenshell.file, anahtarlar: list[str]) -> dict[str, dict]:
     return out
 
 
-def metre_kiyasla(model: ifcopenshell.file, cevap: dict, metre: list[dict], kapali: set[str] = frozenset()) -> list[dict]:
+def metre_kiyasla(model: ifcopenshell.file, cevap: dict, metre: list[dict], kapali: set[str] = frozenset(),
+                  omega_anahtari: str | None = None) -> list[dict]:
     """Metre kapısı (KH-2): `metre` listesindeki her anahtar için modelin boy toplamı cevaptaki metreyle (`cevap` yolu) kıyaslanır."""
     B = boylar(model, [m["anahtar"] for m in metre])
     satirlar = []
     for m in metre:
         a, p, b = m["anahtar"], cevap_degeri(cevap, m["cevap"]), B[m["anahtar"]]
         md_ = b["toplam_m"] if b["parca"] and not b["boysuz"] else None
-        if bolum(a) in kapali or kapali - set(BOLUMLER):
+        if bolum(a, omega_anahtari) in kapali or kapali - set(BOLUMLER):
             sonuc = "teyit bekliyor"
         elif p is None:
             sonuc = "paftada yok"
@@ -173,6 +179,16 @@ def kiyasla(model_yolu: Path | str, cevap: dict, proje: dict, adim: str | None =
         if A is None:
             raise ValueError(f"proje ayarında adım yok: {adim} (var olanlar: {sorted(K.get('adimlar', {}))})")
     anahtarlar = K.get("anahtarlar", []) + [a for a in (A or {}).get("anahtarlar", []) if a not in K.get("anahtarlar", [])]
+    if A is not None:
+        if not A.get("kapi"):
+            raise ValueError(f"adım {adim}: kapı listesi boş")
+        yok = [a for a in A["kapi"] if a not in anahtarlar]
+        if yok:
+            raise ValueError(f"adım {adim}: kapıdaki anahtar satırlarda yok: {yok}")
+        eksik = [m for m in A.get("metre", []) if not (m.get("anahtar") and m.get("cevap"))]
+        if eksik:
+            raise ValueError(f"adım {adim}: metre satırında `anahtar` ya da `cevap` yok: {eksik}")
+    omega_anahtari = proje.get("ayar", {}).get("omega", {}).get("anahtar")
     model = ifcopenshell.open(str(model_yolu))
     sayim, kartli = say(model, anahtarlar, K.get("eslemeler", []))
     teyit = cevap.get("teyit_bekliyor", [])
@@ -181,7 +197,7 @@ def kiyasla(model_yolu: Path | str, cevap: dict, proje: dict, adim: str | None =
     satirlar = []
     for a in anahtarlar:
         p, m = cevap_degeri(cevap, a), sayim[a]["adet"]
-        if bolum(a) in kapali or kapali - set(BOLUMLER):
+        if bolum(a, omega_anahtari) in kapali or kapali - set(BOLUMLER):
             sonuc = "teyit bekliyor"
         elif p is None:
             sonuc = "paftada yok"
@@ -196,7 +212,7 @@ def kiyasla(model_yolu: Path | str, cevap: dict, proje: dict, adim: str | None =
            "kapi_1": "geçer" if kapi and all(s["sonuc"] == "geçer" for s in kapi) else "geçmez",
            "kart_modeli": kartli, "teyit_bekliyor": teyit, "metraj_referansi": proje.get("metraj_referansi")}
     if A is not None:                                   # adımla: Kapı 1 adet ve metre birlikte
-        metre = metre_kiyasla(model, cevap, A.get("metre", []), kapali)
+        metre = metre_kiyasla(model, cevap, A.get("metre", []), kapali, omega_anahtari)
         gecer = out["kapi_1"] == "geçer" and all(m["sonuc"] == "geçer" for m in metre)
         out |= {"adim": adim, "metre": metre, "kapi_1": "geçer" if gecer else "geçmez"}
     return out
