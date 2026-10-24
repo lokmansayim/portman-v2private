@@ -1,8 +1,8 @@
 {
- "kaynak": "PK-01 (AP-19) montaj paftası; tek genel pafta okuyucusu (İE-15 KH-1, sürüm 1); kodla okundu, elle okuma yok",
+ "kaynak": "PK-01 (AP-19) montaj paftası; tek genel pafta okuyucusu (İE-15 KH-1 ve KH-2, sürüm 2); kodla okundu, elle okuma yok",
  "pafta_sha256": "492c76133da0e66a6dce82ebaa67e3f9da9949eb314c1034445d223faaac658d",
  "okuyucu": {
-  "surum": "1",
+  "surum": "2",
   "sayfa_sayisi": 10,
   "sayfalar": {
    "h": 3,
@@ -35,6 +35,34 @@
  "makas_orta": {
   "adet": 7,
   "not": "makas planı MK02–MK08; boy 660.1 cm"
+ },
+ "makas_yavru": {
+  "adet": 0,
+  "not": "makas planı: ana çatıdan ayrı makas yok"
+ },
+ "duvar_omegasi_asma": {
+  "adet": 24,
+  "not": "tavan omega planı: 24 parça, 58.4575 m (8 × 365, 249, 248, 243, 240.5, 200.5, 6 × 190, 182.25, 2 × 166, 50, 40.5); duvar ekseninde 9, duvar yüzünde 1, arada 14"
+ },
+ "asik": {
+  "adet": 42,
+  "not": "aşık planı: 28 × 410 + 14 × 240 = 148.4 m; 2 yüz (7 sıra, 7 sıra)"
+ },
+ "sandvic_panel": {
+  "adet": 22,
+  "not": "çatı kaplaması planı: 22 × (350 × 100); lejantta 22; 2 grup (11 + 11)"
+ },
+ "bas_makas_betopan": {
+  "adet": 4,
+  "not": "baş makas betopan yerleşimi: 4 × (125 × 250); lejantta 4; 2 grup (2 + 2)"
+ },
+ "dere": {
+  "adet": 2,
+  "not": "makas ve dere planı: 2 hat, 1059.8 + 1059.8 cm = 21.196 m"
+ },
+ "inis": {
+  "adet": 6,
+  "not": "makas ve dere planı: 6 iniş (hat ucunda 4, arada 2)"
  },
  "teyit_bekliyor": [],
  "ayrinti": {
@@ -613,7 +641,11 @@
       990.18
      ]
     }
-   ]
+   ],
+   "atilan": {
+    "bina_icinde": 0,
+    "bina_disinda": 0
+   }
   },
   "h_plani": {
    "turler": {
@@ -896,7 +928,10 @@
     0.4518,
     0.4518
    ],
-   "lejant_dairesi": 12
+   "lejant_dairesi": 12,
+   "atilan": {
+    "duvar_renginde_egri": 6
+   }
   },
   "makas": {
    "yon": "x",
@@ -995,6 +1030,419 @@
      "ad": "MK01",
      "aile": "ana",
      "rol": "bas"
+    }
+   ],
+   "olcek_pt_cm": [
+    0.4852,
+    0.48528
+   ],
+   "atilan": {
+    "kisa_cizgi": 42
+   }
+  },
+  "omega": {
+   "sayfa": 6,
+   "parca": 24,
+   "toplam_m": 58.4575,
+   "boylar": {
+    "365": 8,
+    "249": 1,
+    "248": 1,
+    "243": 1,
+    "240.5": 1,
+    "200.5": 1,
+    "190": 6,
+    "182.25": 1,
+    "166": 2,
+    "50": 1,
+    "40.5": 1
+   },
+   "konum": {
+    "duvar_ekseni": 9,
+    "duvar_yuzu": 1,
+    "duvar_ici": 0,
+    "ara": 14
+   },
+   "parcalar": [
+    {
+     "yon": "x",
+     "konum_cm": 618.4,
+     "bas_cm": 9.9,
+     "son_cm": 258.0,
+     "boy_cm": 248.0,
+     "yer": "duvar_ekseni",
+     "duvar": "ic"
+    },
+    {
+     "yon": "x",
+     "konum_cm": 618.4,
+     "bas_cm": 389.5,
+     "son_cm": 590.1,
+     "boy_cm": 200.5,
+     "yer": "duvar_ekseni",
+     "duvar": "ic"
+    },
+    {
+     "yon": "x",
+     "konum_cm": 744.1,
+     "bas_cm": 201.3,
+     "son_cm": 383.6,
+     "boy_cm": 182.25,
+     "yer": "duvar_ekseni",
+     "duvar": "ic"
+    },
+    {
+     "yon": "y",
+     "konum_cm": 135.5,
+     "bas_cm": 9.9,
+     "son_cm": 250.4,
+     "boy_cm": 240.5,
+     "yer": "ara"
+    },
+    {
+     "yon": "y",
+     "konum_cm": 135.5,
+     "bas_cm": 250.4,
+     "son_cm": 615.5,
+     "boy_cm": 365.0,
+     "yer": "ara"
+    },
+    {
+     "yon": "y",
+     "konum_cm": 135.5,
+     "bas_cm": 624.9,
+     "son_cm": 990.1,
+     "boy_cm": 365.0,
+     "yer": "ara"
+    },
+    {
+     "yon": "y",
+     "konum_cm": 198.2,
+     "bas_cm": 740.9,
+     "son_cm": 990.1,
+     "boy_cm": 249.0,
+     "yer": "duvar_ekseni",
+     "duvar": "ic"
+    },
+    {
+     "yon": "y",
+     "konum_cm": 260.9,
+     "bas_cm": 210.0,
+     "son_cm": 376.0,
+     "boy_cm": 166.0,
+     "yer": "duvar_ekseni",
+     "duvar": "ic"
+    },
+    {
+     "yon": "y",
+     "konum_cm": 260.9,
+     "bas_cm": 376.0,
+     "son_cm": 740.9,
+     "boy_cm": 365.0,
+     "yer": "duvar_ekseni",
+     "duvar": "ic"
+    },
+    {
+     "yon": "y",
+     "konum_cm": 266.0,
+     "bas_cm": 9.9,
+     "son_cm": 200.0,
+     "boy_cm": 190.0,
+     "yer": "duvar_yuzu",
+     "duvar": "dis"
+    },
+    {
+     "yon": "y",
+     "konum_cm": 323.7,
+     "bas_cm": 210.0,
+     "son_cm": 376.0,
+     "boy_cm": 166.0,
+     "yer": "ara"
+    },
+    {
+     "yon": "y",
+     "konum_cm": 323.7,
+     "bas_cm": 376.0,
+     "son_cm": 740.9,
+     "boy_cm": 365.0,
+     "yer": "ara"
+    },
+    {
+     "yon": "y",
+     "konum_cm": 323.7,
+     "bas_cm": 747.0,
+     "son_cm": 990.1,
+     "boy_cm": 243.0,
+     "yer": "ara"
+    },
+    {
+     "yon": "y",
+     "konum_cm": 326.0,
+     "bas_cm": 9.9,
+     "son_cm": 200.0,
+     "boy_cm": 190.0,
+     "yer": "ara"
+    },
+    {
+     "yon": "y",
+     "konum_cm": 386.1,
+     "bas_cm": 9.9,
+     "son_cm": 200.0,
+     "boy_cm": 190.0,
+     "yer": "ara"
+    },
+    {
+     "yon": "y",
+     "konum_cm": 386.1,
+     "bas_cm": 210.0,
+     "son_cm": 260.0,
+     "boy_cm": 50.0,
+     "yer": "duvar_ekseni",
+     "duvar": "ic"
+    },
+    {
+     "yon": "y",
+     "konum_cm": 386.1,
+     "bas_cm": 260.0,
+     "son_cm": 624.9,
+     "boy_cm": 365.0,
+     "yer": "duvar_ekseni",
+     "duvar": "ic"
+    },
+    {
+     "yon": "y",
+     "konum_cm": 386.1,
+     "bas_cm": 624.9,
+     "son_cm": 990.1,
+     "boy_cm": 365.0,
+     "yer": "duvar_ekseni",
+     "duvar": "ic"
+    },
+    {
+     "yon": "y",
+     "konum_cm": 446.1,
+     "bas_cm": 9.9,
+     "son_cm": 200.0,
+     "boy_cm": 190.0,
+     "yer": "ara"
+    },
+    {
+     "yon": "y",
+     "konum_cm": 506.1,
+     "bas_cm": 9.9,
+     "son_cm": 200.0,
+     "boy_cm": 190.0,
+     "yer": "ara"
+    },
+    {
+     "yon": "y",
+     "konum_cm": 509.6,
+     "bas_cm": 210.0,
+     "son_cm": 250.4,
+     "boy_cm": 40.5,
+     "yer": "ara"
+    },
+    {
+     "yon": "y",
+     "konum_cm": 509.6,
+     "bas_cm": 250.4,
+     "son_cm": 615.5,
+     "boy_cm": 365.0,
+     "yer": "ara"
+    },
+    {
+     "yon": "y",
+     "konum_cm": 512.0,
+     "bas_cm": 624.9,
+     "son_cm": 990.1,
+     "boy_cm": 365.0,
+     "yer": "ara"
+    },
+    {
+     "yon": "y",
+     "konum_cm": 566.1,
+     "bas_cm": 9.9,
+     "son_cm": 200.0,
+     "boy_cm": 190.0,
+     "yer": "ara"
+    }
+   ],
+   "bosluk_olculeri": [
+    3.5,
+    3.5
+   ],
+   "olcek_pt_cm": [
+    0.508,
+    0.50808
+   ]
+  },
+  "asik": {
+   "sayfa": 8,
+   "parca": 42,
+   "toplam_m": 148.4,
+   "boylar": {
+    "410": 28,
+    "240": 14
+   },
+   "yuzler": [
+    {
+     "sira": 7,
+     "sira_konumlari_cm": [
+      0.0,
+      47.2,
+      107.3,
+      167.2,
+      227.3,
+      287.2,
+      347.3
+     ],
+     "sira_boylari_cm": [
+      1060.0,
+      1060.0,
+      1060.0,
+      1060.0,
+      1060.0,
+      1060.0,
+      1060.0
+     ],
+     "parca": 21
+    },
+    {
+     "sira": 7,
+     "sira_konumlari_cm": [
+      0.0,
+      59.9,
+      119.9,
+      179.9,
+      239.9,
+      299.9,
+      347.3
+     ],
+     "sira_boylari_cm": [
+      1060.0,
+      1060.0,
+      1060.0,
+      1060.0,
+      1060.0,
+      1060.0,
+      1060.0
+     ],
+     "parca": 21
+    }
+   ],
+   "bosluk_olculeri": [],
+   "teyitli_olculer": [],
+   "olcek_pt_cm": 0.501
+  },
+  "kaplama": {
+   "sayfa": 9,
+   "adet": 22,
+   "turler": [
+    {
+     "olcu_cm": [
+      350.0,
+      100.0
+     ],
+     "cizimde": 22,
+     "lejantta": 22,
+     "renk": [
+      0.973,
+      0.843,
+      0.192
+     ]
+    }
+   ],
+   "gruplar": [
+    11,
+    11
+   ]
+  },
+  "betopan": {
+   "sayfa": 5,
+   "adet": 4,
+   "turler": [
+    {
+     "olcu_cm": [
+      125.0,
+      250.0
+     ],
+     "cizimde": 4,
+     "lejantta": 4,
+     "renk": [
+      0.949,
+      0.404,
+      0.133
+     ]
+    }
+   ],
+   "gruplar": [
+    2,
+    2
+   ]
+  },
+  "dere": {
+   "sayfa": 7,
+   "hat": 2,
+   "toplam_m": 21.196,
+   "hatlar": [
+    {
+     "yon": "y",
+     "konum_cm": -30.2,
+     "bas_cm": -29.9,
+     "son_cm": 1029.9,
+     "boy_cm": 1059.8
+    },
+    {
+     "yon": "y",
+     "konum_cm": 629.9,
+     "bas_cm": -29.9,
+     "son_cm": 1029.9,
+     "boy_cm": 1059.8
+    }
+   ],
+   "inis": 6,
+   "inisler": [
+    {
+     "xy": [
+      -30.3,
+      -29.8
+     ],
+     "yer": "uc"
+    },
+    {
+     "xy": [
+      -30.3,
+      497.2
+     ],
+     "yer": "ara"
+    },
+    {
+     "xy": [
+      -30.3,
+      1030.0
+     ],
+     "yer": "uc"
+    },
+    {
+     "xy": [
+      629.8,
+      -29.8
+     ],
+     "yer": "uc"
+    },
+    {
+     "xy": [
+      629.8,
+      497.2
+     ],
+     "yer": "ara"
+    },
+    {
+     "xy": [
+      629.8,
+      1030.0
+     ],
+     "yer": "uc"
     }
    ],
    "olcek_pt_cm": [
