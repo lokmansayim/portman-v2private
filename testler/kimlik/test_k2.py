@@ -383,8 +383,10 @@ def _g_tavan(odalar, duvarlar, acik=(), engeller=(), tavan_="asma"):
 
 
 def test_asma_en_kisa_ve_l_oda():
-    """Asma: ara hat odanın öteki sınırından 10 cm uzaktaysa konur, 9,9 cm'deyse konmaz (odaya ortasında bir hat). L biçimli odada hat,
-    kolun kendi sınırına 10 cm'den yakın kısımda kesilir. Açık mahali profil bölerse hat en büyük parçaya, öteki parça uyarı."""
+    """Asma: ara hat odanın öteki sınırından 10 cm uzaktaysa konur, 9,9 cm'deyse konmaz (odaya ortasında bir hat); sınır iç duvarsa
+    ölçü duvarın ekseninden. L biçimli odada hat,
+    kolun kendi sınırına 10 cm'den yakın kısımda kesilir; ters tavanda ve açık mahalde de. Açık mahali profil bölerse hat en büyük parçaya,
+    öteki parça uyarı."""
     K = {"aralik_asma": 125.5, "aralik_ters": 60.0, "en_kisa": 10.0}
     sol = Duvar("dis", "y", 5.0, 5.0, 0.0, 300.0)
     def ara(gen):
@@ -392,10 +394,18 @@ def test_asma_en_kisa_ve_l_oda():
         H = tavan.hatlar(_g_tavan([[[10, 0], [10 + gen, 0], [10 + gen, 300], [10, 300]]], [sol, sag]), K)
         return [h["s"] for h in H]
     assert ara(135.5) == [135.5] and ara(135.4) == [pytest.approx(10 + 135.4 / 2)]
-    L = [[10, 0], [300, 0], [300, 100], [140.5, 100], [140.5, 200], [10, 200]]           # kol 2'nin sağ yüzü 140,5: 135,5 hattına 5 cm
+    ic = Duvar("ic", "y", 145.5, 5.0, 0.0, 300.0)                                       # öteki sınır iç duvar: 10 cm eksenden (yüzden 5)
+    H = tavan.hatlar(_g_tavan([[[10, 0], [140.5, 0], [140.5, 300], [10, 300]]], [sol, ic]), K)
+    assert [(h["yer"], h["s"], h["r0"], h["r1"]) for h in H] == [("duvar_ekseni", 145.5, 0, 300), ("ara", 135.5, 0, 300)]
+    L =[[10, 0], [300, 0], [300, 100], [140.5, 100], [140.5, 200], [10, 200]]           # kol 2'nin sağ yüzü 140,5: 135,5 hattına 5 cm
     duv = [sol, Duvar("dis", "y", 305.0, 5.0, 0.0, 100.0), Duvar("dis", "y", 145.5, 5.0, 100.0, 200.0)]
     H = tavan.hatlar(_g_tavan([L], duv), K)
     assert [(h["s"], h["r0"], h["r1"]) for h in H] == [(135.5, 0, 100), (261.0, 0, 100)]
+    L = [[10, 0], [300, 0], [300, 100], [135, 100], [135, 200], [10, 200]]               # ters ve açık: 130 hattı kol 2'nin yüzüne 5 cm
+    duv = [sol, Duvar("dis", "y", 305.0, 5.0, 0.0, 100.0), Duvar("dis", "y", 140.0, 5.0, 100.0, 200.0)]
+    beklenen = [(10, 0, 200), (70, 0, 200), (130, 0, 100), (190, 0, 100), (250, 0, 100)]
+    assert [(h["s"], h["r0"], h["r1"]) for h in tavan.hatlar(_g_tavan([L], duv, tavan_="ters"), K)] == beklenen
+    assert [(h["s"], h["r0"], h["r1"]) for h in tavan.hatlar(_g_tavan([], [], acik=[L], tavan_="ters"), K)] == beklenen
     uyari = []
     H = tavan.hatlar(_g_tavan([], [], acik=[[[0, 0], [300, 0], [300, 200], [0, 200]]], engeller=[[140, 0, 150, 200]]), K, uyari)
     assert {h["s"] for h in H} and all(150 <= h["s"] <= 300 for h in H)
