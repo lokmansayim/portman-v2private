@@ -320,6 +320,7 @@ def _sonuc(bizim, gercek, gruplar) -> list[str]:
 
 
 TOPLAM = {"ad": "Deneme toplam", "bizim": ["^DENEME TOPLAM"], "gercek": ["^DENEME TOPLAM"], "olcu": "yok"}
+KUTU = {"ad": "Deneme kutu", "bizim": ["^DENEME KUTU"], "gercek": ["^DENEME KUTU"], "olcu": "tam", "anahtar": "en_buyuk", "tolerans": 10}
 
 
 def test_toplanan_grupta_olcu_kumesi_kiyaslanir(tmp_path):
@@ -625,20 +626,40 @@ def test_esleme_bizim_satir_sirasina_bagli_degil(tmp_path):
 
     def s(kalem, o, a):
         return {"kalem": kalem, "olcu": o, "adet": a}
-    profil = {"ad": "Deneme profil", "bizim": ["^DENEME PROFIL"], "gercek": ["^DENEME PROFIL"], "olcu": "tam", "anahtar": "en_buyuk",
-              "tolerans": 10}
+    kutu = KUTU
     vakalar = [
         ([], [s("Deneme kapak", "1200 × 300", 2), s("Deneme kapak", "1200/300", 5)], [("DENEME KAPAK", "120*30", 2)]),
         ([], [s("Deneme kapak", "1200 × 300", 3), s("Deneme kapak", "120 × 30", 5)], [("DENEME KAPAK", "1200/300", 3)]),
-        (_gruplar(tmp_path, profil), [s("Deneme profil", "L 3240", 2), s("Deneme profil", "L 3250", 3)], [("DENEME PROFIL", "L 3245", 2)]),
-        (_gruplar(tmp_path, {**profil, "olcu": "yok"}),
-         [s("Deneme profil", "L 3248", 3), s("Deneme profil", "L 3240", 3), s("Deneme profil", "L 3256", 3)], [("DENEME PROFIL", "L 3250", 9)]),
+        (_gruplar(tmp_path, kutu), [s("Deneme kutu", "L 3240", 2), s("Deneme kutu", "L 3250", 3)], [("DENEME KUTU", "L 3245", 2)]),
+        (_gruplar(tmp_path, {**kutu, "olcu": "yok"}),
+         [s("Deneme kutu", "L 3248", 3), s("Deneme kutu", "L 3240", 3), s("Deneme kutu", "L 3256", 3)], [("DENEME KUTU", "L 3250", 9)]),
         (_gruplar(tmp_path, TOPLAM), [s("Deneme toplam", "12 × 3", 2), s("Deneme toplam", "120 × 30", 2), s("Deneme toplam", "1200 × 300", 2)],
          [("DENEME TOPLAM", "120 X 30", 6)]),
     ]
     for g, bizim, gercek in vakalar:
         sonuclar = {tuple(_sonuc(list(p), gercek, g)) for p in permutations(bizim)}
-        assert len(sonuclar) == 1, (bizim, sonuclar)
+        assert len(sonuclar) == 1 and "bizde yok" not in next(iter(sonuclar)), (bizim, sonuclar)   # vaka grubu gerçekten eşliyor
+
+
+def test_kapi_en_buyuk_anahtarina_gelen_satiri_gorur(tmp_path):
+    """`anahtar: en_buyuk` grubunda en büyük sayısı aynı, kimliği farklı yeni bir satır eşlemede anahtara girer ve toplamı değiştirir:
+    kapı onu da seçer ve "yeni satır" der (uydurma; hakem 9. tur, B1)."""
+    kutu = _gruplar(tmp_path, KUTU)
+    once, gercek = [{"kalem": "Deneme kutu", "olcu": "L 3240", "adet": 1}], [("DENEME KUTU", "70X70X3240", 1)]
+    (t,) = _tutanlar(once, gercek, kutu)
+    assert t["eslesme"] == "anahtar" and esle.tutuyor_mu(once, kutu, t) == "aynı"
+    sonra = once + [{"kalem": "Deneme kutu", "olcu": "70*70*3240", "adet": 1}]
+    assert _sonuc(sonra, gercek, kutu) == ["farklı"]
+    assert esle.kapi_denetle(sonra, kutu, t)[1].startswith("yeni satır")
+    once = [{"kalem": "Deneme kutu", "olcu": "70 × 610 × 2430", "adet": 2}, {"kalem": "Deneme kutu", "olcu": "70 × 1130 × 2430", "adet": 1}]
+    gercek = [("DENEME KUTU", "70X610X2430", 3)]
+    (t,) = _tutanlar(once, gercek, kutu)
+    assert t["eslesme"] == "anahtar" and esle.tutuyor_mu(once, kutu, t) == "ayrım"
+    sonra = once + [{"kalem": "Deneme kutu", "olcu": "70 × 930 × 2430", "adet": 1}]
+    assert _sonuc(sonra, gercek, kutu) == ["farklı"]
+    assert esle.kapi_denetle(sonra, kutu, t)[1].startswith("yeni satır")
+    sonra = [{**once[0], "olcu": "70 × 620 × 2430"}, once[1]]                    # ölçüsü değişen satır: anahtar aynı, kimlik değil
+    assert esle.kapi_denetle(sonra, kutu, t)[1].startswith("satır yok")
 
 
 def test_kapi_pafta_kaydinda_aday_sutunu_yetmez():

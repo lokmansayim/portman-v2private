@@ -68,7 +68,7 @@ Sıra her koşuda aynı; bir adım tutmazsa araç durur, nedenini yazar ve sonra
 
 Testler (`testler/kor/test_kor_kiyas.py`) her koşuda aracın sırasını ve ölçü kurallarını uydurma satırlarla, gerçek mühür kaydının kör ve kapalı
 kayıtları reddettiğini ve durumların değişmediğini, açık sekiz projenin gerileme kapısını dener; kaynak liste gerekmez. Kapı tutan her satırın
-bugünkü listede kayıttaki (kalem, ölçü) çiftlerini (ölçü yazısı ve sayılarıyla; grupta aynı yazıya inen iki farklı ölçü varsa durur) ve kayıttaki sonucun sütununda aynı adedi ister; eşdeğer, tolerans ve kalan eşlemesinde
+bugünkü listede kayıttaki (kalem, ölçü) çiftlerini (ölçü yazısı ve sayılarıyla; grupta aynı yazıya inen iki farklı ölçü varsa ya da en büyük sayıyla eşlenen grupta aynı en büyük sayıyla yeni bir satır gelirse durur) ve kayıttaki sonucun sütununda aynı adedi ister; eşdeğer, tolerans ve kalan eşlemesinde
 grubun ölçüleri, toplanan ve her satır gruplarında (bizde iki ya da daha çok sayılı ölçü ya da adedi boş ya da 0 olan sayılı ölçülü satır varsa)
 grubun bütün bizim satırlarının değerleri (kalem, ölçü, varsayılan, pafta, aday) de kayıttaki gibi olmalı. Tam koşu `PORTMAN_KOR_TAM=1` ve depo dışındaki kaynak klasörüyle
 (`PORTMAN_KOR_KAYNAK`): sayılar ve tutan satırlar gerçek listeden yeniden hesaplanır ve kayıtla aynı olmalı.
