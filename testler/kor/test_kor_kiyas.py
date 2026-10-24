@@ -565,6 +565,27 @@ def test_kapi_esdeger_eslemede_grubun_olculerini_korur():
     assert esle.kapi_denetle(sonra, [], t)[1].startswith("grubun ölçüleri değişti")
 
 
+def test_kapi_olcu_kimligi_yazi_ve_sayilar():
+    """Aynı yazıya inen ama sayıları farklı ölçü kapıda aynı değildir: "1 200 × 300" ↔ "1200 × 300", "60 M2" ↔ "60M2" (uydurma;
+    hakem 6. tur, B2)."""
+    assert esle.olcu("1 200 × 300") == esle.olcu("1200 × 300") and esle.sayilar("1 200 × 300") != esle.sayilar("1200 × 300")
+    assert not esle.ayni_olcu("1 200 × 300", "1200 × 300") and not esle.ayni_olcu("60 M2", "60M2")
+    assert esle.kimlik("1200 × 300") == esle.olcu("1200 × 300") and esle.ayni_olcu("1200 × 300", "1200 X 300")
+    once, gercek = [{"kalem": "Deneme kapak", "olcu": "1200 × 300", "adet": 5}], [("DENEME KAPAK", "120 X 30", 5)]
+    (t,) = _tutanlar(once, gercek, [])
+    assert t["eslesme"] == "esdeger" and esle.tutuyor_mu(once, [], t) == "aynı"
+    sonra = [{**once[0], "olcu": "1 200 × 300"}]
+    assert _sonuc(sonra, gercek, []) == ["farklı"]
+    assert esle.kapi_denetle(sonra, [], t)[1].startswith("satır yok")
+    once = once + [{"kalem": "Deneme kapak", "olcu": "1500 × 300", "adet": 1}]       # grubun öteki satırında aynı yazım
+    (t,) = _tutanlar(once, gercek, [])
+    assert t["eslesme"] == "esdeger" and esle.tutuyor_mu(once, [], t) == "aynı"
+    sonra = [once[0], {**once[1], "olcu": "1 500 × 300"}]
+    assert esle.kapi_denetle(sonra, [], t)[1].startswith("grubun ölçüleri değişti")
+    (t,) = _tutanlar(sonra, gercek, [])
+    assert esle.tutuyor_mu(sonra, [], t) == "aynı"                                   # kayıt da kimlikle: aynı liste kapıdan geçer
+
+
 def test_kapi_pafta_kaydinda_aday_sutunu_yetmez():
     """Pafta sütunuyla tutmuş satırda pafta bozulup aday sütunu kayıttaki değeri taşırsa kapı durur (hakem 3. tur, B3)."""
     once, gercek = [{"kalem": "Deneme pano", "olcu": "ADET", "adet": 3, "pafta": 5, "aday": 7}], [("DENEME PANO", "ADET", 5)]

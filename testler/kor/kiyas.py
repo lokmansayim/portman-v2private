@@ -256,7 +256,7 @@ def tutanlar(k: dict) -> list[dict]:
         t = {"grup": x["grup"], "ad": x["ad"], "b_anahtar": x["b_anahtar"], "eslesme": x["eslesme"], "deger": x["G"],
              "sonuc": x["sonuc"], "bizim": [{"kalem": bizim[j]["kalem"], "olcu": bizim[j]["olcu"]} for j in x["bizim"]]}
         if x["eslesme"] in esle.GRUP_OLCULU:
-            t["grup_olculeri"] = sorted(esle.olcu(bizim[j]["olcu"]) for j in x["grup_bizim"])
+            t["grup_olculeri"] = sorted(esle.kimlik(bizim[j]["olcu"]) for j in x["grup_bizim"])
         if x.get("satir_degerleri") is not None:
             t["satir_degerleri"] = x["satir_degerleri"]
         out.append(t)

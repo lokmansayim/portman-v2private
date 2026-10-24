@@ -107,13 +107,22 @@ def esdeger(a, b, grup: dict | None = None) -> bool:
     return ayni_sayilar(a, b)
 
 
+def kimlik(t) -> str:
+    """Kapıda ölçünün kimliği: `olcu` yazısı; yazıya çevirmek sayıları değiştiriyorsa (boşlukla ayrılmış rakamlar "1 200 × 300" →
+    "1200X300", birim yazısı "60 M2" → "60M2") yanına sayılar da yazılır. Eşleme hem yazıya (`esdeger`) hem sayılara (`ayni_sayilar`,
+    `olculu`) baktığı için kapı ikisini birlikte sabitler; sekiz projenin bizim listelerinde kimlik `olcu` ile aynı."""
+    o, s = olcu(t), sayilar(t)
+    return o if sayilar(o) == s else o + " | " + " ".join(f"{x:g}" for x in s)
+
+
 def ayni_olcu(a, b, grup: dict | None = None) -> bool:
-    """Gerileme kapısında kayıttaki bizim ölçümüzle bugünkü aynı mı: aynı yazı ya da aynı sayılar (birim çevirisi ve tolerans yok;
-    `anahtar: en_buyuk` ise en büyük sayı birebir)."""
+    """Gerileme kapısında kayıttaki bizim ölçümüzle bugünkü aynı mı: aynı kimlik ya da aynı sayılar (birim çevirisi ve tolerans yok;
+    `anahtar: en_buyuk` ise en büyük sayı birebir). Aynı yazıya inen ama sayıları farklı iki ölçü ("1 200 × 300" ↔ "1200 × 300")
+    aynı değildir."""
     if grup and grup.get("anahtar") == "en_buyuk":
         x, y = _en_buyuk(a), _en_buyuk(b)
         return x is not None and x == y
-    return olcu(a) == olcu(b) or (bool(sayilar(a)) and sayilar(a) == sayilar(b))
+    return kimlik(a) == kimlik(b) or (bool(sayilar(a)) and sayilar(a) == sayilar(b))
 
 
 def _kume_tutar(g_olcu: list, b_olcu: list, grup: dict | None) -> bool:
@@ -362,10 +371,10 @@ def kapi_denetle(bizim: list[dict], gruplar: list[dict], tutan: dict) -> tuple[s
     Kayıttaki bizim satırlarımızın (kalem, ölçü) çiftleri bugün de aynı olmalı (eksik ya da yeni satır yok; ölçü `ayni_olcu`), adetleri
     kayıttaki değeri kayıttaki sonucun sütununda vermeli: aynı ya da ayrım tutmuşsa varsayılan adet, pafta tutmuşsa pafta ya da
     varsayılan, aday tutmuşsa üçünden biri (`KAPI_SONUC`). Kalan, eşdeğer ya da tolerans eşlemesiyle tutmuş satırda grubun bütün
-    ölçüleri de kayıttaki gibi olmalı (`GRUP_OLCULU`): gruba eklenen ya da ölçüsü değişen bir satır eşlemeyi değiştirebilir. Toplam ya da
-    her satır eşlemesiyle tutmuş satırda kayıtta `satir_degerleri` varsa (iki ya da daha çok sayılı ölçü, ya da adedi boş ya da 0 olan
-    sayılı ölçülü satır) grubun satırlarının değerleri de kayıttaki gibi olmalı: satırlar arasında kayan bir adet ya da sütun değeri ölçü kümesini,
-    ölçü başına toplamı ya da `her_satir` ölçüsünü bozabilir."""
+    ölçüleri de (`kimlik`) kayıttaki gibi olmalı (`GRUP_OLCULU`): gruba eklenen ya da ölçüsü değişen bir satır eşlemeyi değiştirebilir.
+    Toplam ya da her satır eşlemesiyle tutmuş satırda kayıtta `satir_degerleri` varsa (iki ya da daha çok sayılı ölçü, ya da adedi boş ya
+    da 0 olan sayılı ölçülü satır) grubun satırlarının değerleri de kayıttaki gibi olmalı: satırlar arasında kayan bir adet ya da sütun
+    değeri ölçü kümesini, ölçü başına toplamı ya da `her_satir` ölçüsünü bozabilir (o satırların sayıları çift denetiminde sabittir)."""
     hedef, grup = _hedef(gruplar, tutan)
     if hedef is None:
         return None, "sözlükte grup yok"
@@ -379,7 +388,7 @@ def kapi_denetle(bizim: list[dict], gruplar: list[dict], tutan: dict) -> tuple[s
     if kalan:
         return None, "yeni satır: " + " + ".join(f"{s['kalem']} · {s['olcu']}" for s in kalan)
     if tutan.get("eslesme") in GRUP_OLCULU:
-        bugun = sorted(olcu(s["olcu"]) for s in bizim if grup_anahtari(s["kalem"], gruplar, "_b") == hedef)
+        bugun = sorted(kimlik(s["olcu"]) for s in bizim if grup_anahtari(s["kalem"], gruplar, "_b") == hedef)
         if bugun != tutan["grup_olculeri"]:
             return None, f"grubun ölçüleri değişti ({tutan['eslesme']} eşleme): kayıtta {tutan['grup_olculeri']}, bugün {bugun}"
     if "satir_degerleri" in tutan:
