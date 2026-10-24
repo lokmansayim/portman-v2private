@@ -996,14 +996,16 @@ def _ogeler(pg) -> list[dict]:
 
 
 def _tekille(ogeler: list[dict], pay: float = 0.05) -> tuple[list[dict], list[dict]]:
-    """Aynı yerde ikinci kez çizilmiş öğe (renk, dolgu, öğe türleri aynı; noktaları `pay` pt içinde aynı) bir sayılır. Döner: (tekiller,
+    """Aynı yerde ikinci kez çizilmiş öğe (renk, dolgu, dolgulu çizimin çizgi rengi, öğe türleri aynı; noktaları `pay` pt içinde aynı) bir
+    sayılır; çizgisi başka renkte olan dolgulu yol kopya değildir (KH-3 hakeminin 9. turu: çizgisiz bir yolun üstüne aynı noktalarla
+    kırmızı çizgili çizilen ikinci yol kopya diye atılıyor, dolgu denetimine girmiyordu). Döner: (tekiller,
     atılan kopyalar). Göz iki kopyayı tek işaret görür; okuyucu da öyle sayar (iki kez çizilmiş tekli anahtar çift sayılmaz). PK-01 ve
     PK-07'de kopyalar birebir aynı koordinatta (pay 0,3 pt'de sigortanın iç desenindeki ayrı kısa çizgiler de birleşiyordu)."""
     def anahtar(p):
         return (round(p.x, 1), round(p.y, 1))
 
     def ayni(a, b):
-        if (a["renk"], a["dolgu"], a["tur"], len(a["noktalar"])) != (b["renk"], b["dolgu"], b["tur"], len(b["noktalar"])):
+        if (a["renk"], a["dolgu"], a["cizgi"], a["tur"], len(a["noktalar"])) != (b["renk"], b["dolgu"], b["cizgi"], b["tur"], len(b["noktalar"])):
             return False
         return all(_uzak(p, q) <= pay for p, q in zip(sorted(a["noktalar"], key=anahtar), sorted(b["noktalar"], key=anahtar)))
     kova: dict[tuple, list[dict]] = {}
@@ -1319,7 +1321,8 @@ def elektrik_oku(pg, ayar: dict, dis_olcu_cm: list[float]) -> dict:
     - priz: lejanttaki U (kol, sap ve taban boyu; kollar aynı yana; kolların arası, kolların ve sapın tabanla açısı `aci_payi_derece`
       içinde); birinin sapının ucu öbürünün tabanının ortasına değen, tabanı aynı yöne (`aci_payi_derece` içinde) bakan iki U çift
       prizdir; "UYDU" yazısına en yakın (`uydu_uzakligi_pt` içinde) tek U uydu prizidir, tekli prizden düşülür;
-    - sigorta kutusu: `sigorta_rengi`nde, birbirine değen çizgilerin kutusu lejanttaki çerçevenin ölçüsünde (±%10), içi lejanttakiyle aynı;
+    - sigorta kutusu: `sigorta_rengi`nde (dolgulu çizimde çizgisi bu renkte olan da), birbirine değen çizgilerin kutusu lejanttaki
+      çerçevenin ölçüsünde (±%10), içi lejanttakiyle aynı;
     - zil: lejantta yoksa 0.
     Sessiz sayı yok; şunların her biri bölümü teyide düşürür:
     - lejant renginde hiçbir işarete girmeyen öğe; sigortanın iç desenindeki ya da lejant rengine yakın (`yakin_renk_payi`) tonda, işaret
@@ -1636,7 +1639,8 @@ def elektrik_oku(pg, ayar: dict, dis_olcu_cm: list[float]) -> dict:
     if "sigorta" in L:
         Gs, rs = G["sigorta"]
         lw, lh = L["sigorta"]["olcu"]
-        siyah = [o for o in plan if _ayni_renk(o["renk"], tuple(E["sigorta_rengi"])) and o["r"].width <= 2 * lh and o["r"].height <= 2 * lh]
+        siyah = [o for o in plan if (_ayni_renk(o["renk"], tuple(E["sigorta_rengi"])) or _ayni_renk(o["cizgi"], tuple(E["sigorta_rengi"])))
+                 and o["r"].width <= 2 * lh and o["r"].height <= 2 * lh]           # dolgulu çizimde çizgisi siyah olan da (hakemin 9. turu)
         icsiz = 0
         for k in _kumeler(siyah):
             r = _kutu(k)

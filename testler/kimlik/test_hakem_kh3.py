@@ -762,9 +762,9 @@ def test_daire_tam_ve_kapali_bekletir(tmp_path, ek, kw, neden):
     assert "elektrik" not in o and "makas_bas" in o and "h_plani" in o
 
 
-def _beyaz_dolgulu(e, X, Y, tur, renk=None):
-    """Tek PDF yolunda, beyaz dolgulu, işaret renginde (ya da `renk`te) çizgili işaret: `glop` (daire ve çaprazları), `buat` (daire; yanına
-    BUAT yazısı), `anahtar` (daire, tırnak ve ucu), `priz` (U)."""
+def _beyaz_dolgulu(e, X, Y, tur, renk=None, cizgisiz=False):
+    """Tek PDF yolunda, beyaz dolgulu, işaret renginde (ya da `renk`te; `cizgisiz` ile çizgisiz) çizgili işaret: `glop` (daire ve
+    çaprazları), `buat` (daire; yanına BUAT yazısı), `anahtar` (daire, tırnak ve ucu), `priz` (U)."""
     sh = e.s.pg.new_shape()
     if tur in ("glop", "buat"):
         sh.draw_circle(e.p(X, Y), 9.5)
@@ -782,7 +782,8 @@ def _beyaz_dolgulu(e, X, Y, tur, renk=None):
         for a, b in (((X - 4.25, Y), (X + 4.25, Y)), ((X - 4.25, Y), (X - 4.25, Y - 4.9)), ((X + 4.25, Y), (X + 4.25, Y - 4.9)),
                      ((X, Y), (X, Y + 7.8))):
             sh.draw_line(e.p(*a), e.p(*b))
-    sh.finish(color=renk or (TURUNCU if tur == "anahtar" else KIRMIZI), fill=(1.0, 1.0, 1.0), width=0.4, closePath=False)
+    sh.finish(color=None if cizgisiz else renk or (TURUNCU if tur == "anahtar" else KIRMIZI), fill=(1.0, 1.0, 1.0), width=0.4,
+              closePath=False)
     sh.commit()
     if tur == "buat":
         e.yazi(X, Y, "BUAT", 3)
@@ -798,11 +799,26 @@ BEYAZ_DOLGULU = "dolgusu başka renkte, çizgisi lejant renginde ya da yakın to
     (lambda e: _beyaz_dolgulu(e, X_U, Y_U, "priz"), {}, BEYAZ_DOLGULU),
     (lambda e: e.kutu(X_U, Y_U, 12, 12, KIRMIZI, (1.0, 1.0, 1.0)), {}, BEYAZ_DOLGULU),                     # duy ölçüsünde kutu
     (lambda e: _beyaz_dolgulu(e, X_U, Y_U, "glop", KOYU_KIRMIZI), {}, BEYAZ_DOLGULU),                       # çizgisi yakın tonda
-], ids=["glop", "buat", "anahtar", "priz", "kutu", "glop_yakin_tonda"])
+    # 9. tur: aynı noktalarla önce çizgisiz ya da siyah çizgili, sonra işaret renginde çizgili çizilmiş yol kopya sayılıp atılmaz
+    (lambda e: (_beyaz_dolgulu(e, X_U, Y_U, "glop", cizgisiz=True), _beyaz_dolgulu(e, X_U, Y_U, "glop")), {}, BEYAZ_DOLGULU),
+    (lambda e: (_beyaz_dolgulu(e, X_U, Y_U, "glop", SIYAH), _beyaz_dolgulu(e, X_U, Y_U, "glop")), {}, BEYAZ_DOLGULU),
+    (lambda e: (_beyaz_dolgulu(e, X_U, Y_U, "priz", cizgisiz=True), _beyaz_dolgulu(e, X_U, Y_U, "priz")), {}, BEYAZ_DOLGULU),
+    # sigortanın iç desenindeki renkte çizgili; duvar çerçevesinin dışında; lejant alanında
+    (lambda e: e.kutu(X_U, Y_U, 8, 2.5, MAVI, (1.0, 1.0, 1.0)), {"sigorta_deseni": True}, BEYAZ_DOLGULU),
+    (lambda e: _beyaz_dolgulu(e, *g(300, -150), "glop"), {}, BEYAZ_DOLGULU),
+    (lambda e: e.kutu(700, 470, 6, 6, KIRMIZI, (1.0, 1.0, 1.0)), {}, BEYAZ_DOLGULU),
+    # sigorta ölçüsünde, beyaz dolgulu siyah kutu: sigorta gibi denetlenir (iç deseni yok)
+    (lambda e: e.kutu(X_U, Y_U, 14, 10, SIYAH, (1.0, 1.0, 1.0)), {}, "sigorta kutusu ölçüsünde, içi lejanttaki işarete uymayan 1 kutu"),
+    (lambda e: e.kutu(X_U, Y_U, 14, 10, (0.5, 0.5, 0.5), SIYAH), {}, "sigorta kutusu ölçüsünde, içi lejanttaki işarete uymayan 1 kutu"),
+], ids=["glop", "buat", "anahtar", "priz", "kutu", "glop_yakin_tonda", "glop_cizgisiz_kopyasinin_ustunde", "glop_siyah_cizgili_kopyasinin_ustunde",
+        "priz_cizgisiz_kopyasinin_ustunde", "sigorta_desen_renginde", "cerceve_disinda_glop", "lejant_alaninda_kutu", "sigorta_olcusunde_siyah_kutu",
+        "sigorta_olcusunde_siyah_dolgulu_gri_kutu"])
 def test_beyaz_dolgulu_isaret_bekletir(tmp_path, ek, kw, neden):
     """KH-3 hakeminin 8. turu: dolgulu çizim dolgunun rengiyle okunur; tek yolda, beyaz dolgulu ve işaret renginde çizgili glop, BUAT,
     anahtar ve priz (ya da duy ölçüsünde kutu; çizgisi yakın tonda glop) hiçbir renge girmeden kalırdı: ne sayılır ne teyit yazardı. Artık
-    elektriği bekletir."""
+    elektriği bekletir. 9. tur: aynı noktalarla çizilmiş çizgisiz ya da siyah çizgili bir yolun üstündeki ikinci yol da (kopya sayılmaz);
+    çizgisi sigortanın iç desen renginde olan, duvar çerçevesinin dışındaki ve lejant alanındaki yol da (sayfanın her yerinde); sigorta
+    ölçüsünde, beyaz dolgulu siyah çizgili ya da siyah dolgulu gri çizgili kutu sigorta gibi denetlenir."""
     o = PO.oku(kh3_sentetik(tmp_path / "s.pdf", ek=ek, **kw), EL)
     t = _teyit(o)
     assert set(t) == {"elektrik"} and neden in t["elektrik"], t
