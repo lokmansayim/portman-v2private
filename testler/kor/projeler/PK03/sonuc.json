@@ -6,7 +6,7 @@
  "kapi": true,
  "not": "≈ AP-10 (13 Ekim mührü); AP-10'un kendi listesi kapalı kalır. Mühürlü iki Excel'den güncel olanı (öteki eski sürüm).",
  "tarih": "2026-10-24",
- "kiyas_commit": "0ca3e4edfd2e17778f8454ac43e198adde9d306a",
+ "kiyas_commit": "3ea24bec57fde654b15109ac236cd73063ce5cac",
  "bizim_liste": {
   "yol": "testler/kor/projeler/PK03/bizim_liste.json",
   "commit": "8f361f481ad711c3f71a0870a558ee5cbcc7ce4b",
