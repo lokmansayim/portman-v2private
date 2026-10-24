@@ -204,9 +204,10 @@ def kh3_sentetik(yol: Path, *, taban: dict | None = None, rot: int = 270, tirnak
                  serbest_cizgi: bool = False, oran: bool = False, duvarsiz: bool = False, uclu_priz: bool = False,
                  yabanci_etiket: bool = False, bagsiz_isaret: bool = False, glopsuz_plan: bool = False, uydu_cift: bool = False,
                  caprazsiz_glop: bool = False, lejant_tirnaksiz: bool = False, sigorta_deseni: bool = False,
-                 lejant_tek_tirnak: bool = False, glop_tek_yol: bool = False, anahtar_yonler: tuple | None = None, ek=None) -> Path:
-    """KH-1'in sentetik paftası + elektrik sayfası. Bina 600 × 400 cm (montajın dış ölçüsü); lejant binanın sağında. `ek(e)`: sayfa
-    döndürülmeden önce eklenen bozma."""
+                 lejant_tek_tirnak: bool = False, glop_tek_yol: bool = False, anahtar_yonler: tuple | None = None, ek=None,
+                 lejant_kaydir: tuple = (0, 0)) -> Path:
+    """KH-1'in sentetik paftası + elektrik sayfası. Bina 600 × 400 cm (montajın dış ölçüsü); lejant binanın sağında (`lejant_kaydir` pt
+    kaydırır). `ek(e)`: sayfa döndürülmeden önce eklenen bozma."""
     gecici = yol.with_suffix(".kh1.pdf")
     T.sentetik(gecici, **(taban or {}))
     doc = fitz.open(gecici)
@@ -216,7 +217,8 @@ def kh3_sentetik(yol: Path, *, taban: dict | None = None, rot: int = 270, tirnak
     if oran:                                                       # duvar çizgisi 450 cm'ye uzar: sınır dış ölçüye oturmaz
         e.s.cizgi((0, 400), (0, 450), T.DUVAR)
     # lejant (binanın sağında; dik sayfaya da sığar)
-    e.yazi(710, 300, "LEJANT", 12)
+    DX, DY = lejant_kaydir
+    e.yazi(710 + DX, 300 + DY, "LEJANT", 12)
     satir = {"anahtar": (330, ["ANAHTAR"], lambda X, Y: e.anahtar(X, Y, 0 if lejant_tirnaksiz else 1 if lejant_tek_tirnak else 2)), "priz": (355, ["PRİZ"], lambda X, Y: e.priz(X, Y)),
              "glop": (385, ["GLOP"], lambda X, Y: e.glop(X, Y, 0 if caprazsiz_glop else 2)), "duy": (412, ["TİJLİ", "DUY"], lambda X, Y: e.duy(X, Y + 3)),
              "sigorta": (445, ["SİGORTA", "KUTUSU"], lambda X, Y: e.sigorta(X, Y + 3, sigorta_deseni))}
@@ -230,9 +232,9 @@ def kh3_sentetik(yol: Path, *, taban: dict | None = None, rot: int = 270, tirnak
         if tur != lejant_etiketsiz:
             for i, s in enumerate(sozler):
                 w = fitz.Font(fontfile=T.FONT).text_length(s, 7)
-                e.yazi(718 + w / 2, Y + 8 * i, s)
+                e.yazi(718 + DX + w / 2, Y + DY + 8 * i, s)
         if tur != lejant_isaretsiz:
-            ciz(665, Y)
+            ciz(665 + DX, Y + DY)
     # plan
     for x, y in DUY:
         e.duy(*g(x, y))
@@ -828,6 +830,23 @@ def test_beyaz_dolgulu_isaret_bekletir(tmp_path, ek, kw, neden):
     ölçüsünde, beyaz dolgulu siyah çizgili ya da siyah dolgulu gri çizgili kutu sigorta gibi denetlenir. 10. tur: sigortanın içine ya da
     kenarına çizilmiş beyaz dolgulu, siyah çizgili kutu sigortanın içine girer (içi lejanttakine uymaz); sarı dolgulu, siyah çizgili kutu da
     sigorta gibi denetlenir."""
+    o = PO.oku(kh3_sentetik(tmp_path / "s.pdf", ek=ek, **kw), EL)
+    t = _teyit(o)
+    assert set(t) == {"elektrik"} and neden in t["elektrik"], t
+    assert "elektrik" not in o and "makas_bas" in o and "h_plani" in o
+
+
+@pytest.mark.parametrize("ek, kw, neden", [
+    (lambda e: e.glop(735, 370), {}, "lejant kutusunda, hiçbir lejant işaretine girmeyen lejant renginde 3 öğe"),      # etiket sütununda
+    (lambda e: e.cizgi((730, 368), (738, 368), KOYU_KIRMIZI), {},                                          # yakın tonda çizgi
+     "lejant kutusunda, hiçbir lejant işaretine girmeyen lejant renginde 1 öğe"),
+    (None, {"lejant_kaydir": (-426, 103)},                                                                # sol duvarın payında
+     "lejant kutusu duvar çerçevesiyle (30 cm payıyla) kesişiyor: o kısımdaki plan öğeleri okunmadı"),
+], ids=["etiket_sutununda_glop", "etiket_sutununda_yakin_ton", "lejant_cercevede"])
+def test_lejant_kutusu_bekletir(tmp_path, ek, kw, neden):
+    """KH-3 hakeminin 11. turu: lejant kutusundaki öğe ne plana ne çerçevenin dışına girer. Lejantın etiket sütununa çizilmiş glop (ya da
+    yakın tonda çizgi) ne sayılıyor ne teyit yazıyordu; lejant kutusu duvar çerçevesine girince kutudaki plan işareti (sol duvardaki tekli priz) sessizce
+    düşüyordu. Artık ikisi de elektriği bekletir."""
     o = PO.oku(kh3_sentetik(tmp_path / "s.pdf", ek=ek, **kw), EL)
     t = _teyit(o)
     assert set(t) == {"elektrik"} and neden in t["elektrik"], t

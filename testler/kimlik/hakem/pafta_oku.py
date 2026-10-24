@@ -1347,7 +1347,8 @@ def elektrik_oku(pg, ayar: dict, dis_olcu_cm: list[float]) -> dict:
       öbürüyle tek kümeye girer ve ölçüsü tutmaz, kaymış sigorta kopyası da tek büyük kutu olur ve iç deseni sahipsiz kalır); kutusunun
       ortası başka türden bir işaretin kutusunda olan işaret (ör. BUAT dairesinin içine çizilmiş U);
     - lejantta: etiketi ya da işareti bulunamayan tür, tanınmayan sözcük, hiçbir etikete bağlanmayan işaret, zil (okunmuyor), alanın
-      hemen altında öğe, alanın dışında lejant etiketine benzeyen sözcük;
+      hemen altında öğe, alanın dışında lejant etiketine benzeyen sözcük; lejant kutusunda hiçbir lejant işaretine girmeyen lejant
+      renginde öğe; duvar çerçevesiyle kesişen lejant kutusu (kutudaki öğe plana girmez);
     - planda hiç işareti bulunamayan lejant türü; yanında priz olmayan, en yakın prizi çift olan ya da başka bir UYDU yazısıyla aynı prize
       bağlanan UYDU yazısı.
     Konumlar duvar çizgilerinin sınırının montajdaki dış ölçüye oturmasından (cm; `oran_payi` içinde); oda ataması burada değil."""
@@ -1366,6 +1367,8 @@ def elektrik_oku(pg, ayar: dict, dis_olcu_cm: list[float]) -> dict:
     cerceve = fitz.Rect(kutu.x0 - pay, kutu.y0 - pay, kutu.x1 + pay, kutu.y1 + pay)
     plan = [o for o in ogeler if not lk.contains(o["m"]) and cerceve.contains(o["m"])]
     disari = [o for o in ogeler if not lk.contains(o["m"]) and not cerceve.contains(o["m"])]
+    if lk.intersects(cerceve):                      # lejant kutusundaki öğe plana girmez: kutu çerçeveye girerse planın o kısmı okunmaz
+        uyarilar.append(f"lejant kutusu duvar çerçevesiyle ({E['cerceve_payi_cm']:g} cm payıyla) kesişiyor: o kısımdaki plan öğeleri okunmadı")
 
     # lejant: her türün rengi, ölçüsü ve bileşimi (G: tür → (imza sayımı, renkler); plandaki işaretin kutusu aynısını taşımalı)
     L: dict[str, dict] = {}
@@ -1701,6 +1704,11 @@ def elektrik_oku(pg, ayar: dict, dis_olcu_cm: list[float]) -> dict:
                and (o["cizgi"] in tam | ek or any(_renk_farki(o["cizgi"], c) <= E["yakin_renk_payi"] for c in tam))]
     if cizgili:
         uyarilar.append(f"dolgusu başka renkte, çizgisi lejant renginde ya da yakın tonda {len(cizgili)} öğe (dolgunun rengiyle okunur)")
+    # lejant kutusunda lejant işaretlerinden başka öğe (ör. etiket sütununa çizilmiş glop) ne plana ne çerçevenin dışına girer
+    lejant_ici = {id(o) for d in lejant.values() for o in d["ogeler"]}
+    lejantta_fazla = [o for o in ogeler if lk.contains(o["m"]) and aday(o) and id(o) not in lejant_ici]
+    if lejantta_fazla:
+        uyarilar.append(f"lejant kutusunda, hiçbir lejant işaretine girmeyen lejant renginde {len(lejantta_fazla)} öğe")
     disarida = [o for o in disari if aday(o)]
     if disarida:
         uyarilar.append(f"duvar çerçevesinin {E['cerceve_payi_cm']:g} cm dışında lejant renginde {len(disarida)} öğe: sayılmadı")
