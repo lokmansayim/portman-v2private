@@ -971,8 +971,9 @@ def _yapi(it: tuple) -> tuple:
 
 
 def _ogeler(pg) -> list[dict]:
-    """Çizimler görünen sayfada: renk (dolgulu çizimde dolgunun rengi), dolgu, öğe türleri, kutu, merkez, çizgi parçaları, eğrilerin dört
-    noktası (`_cemberde`), yolun öğelerinin türü ve ölçüsü (`_yapi`) ve bütün noktalar (aynı yerde iki kez çizilmiş öğeyi tanımak için)."""
+    """Çizimler görünen sayfada: renk (dolgulu çizimde dolgunun rengi), dolgulu çizimin çizgisinin rengi (`cizgi`; çizgisizse ya da
+    dolgusuzsa None), dolgu, öğe türleri, kutu, merkez, çizgi parçaları, eğrilerin dört noktası (`_cemberde`), yolun öğelerinin türü ve
+    ölçüsü (`_yapi`) ve bütün noktalar (aynı yerde iki kez çizilmiş öğeyi tanımak için)."""
     rm, out = pg.rotation_matrix, []
     for d in pg.get_drawings():
         dolgu = d.get("fill") is not None
@@ -985,7 +986,8 @@ def _ogeler(pg) -> list[dict]:
                 elif isinstance(v, (fitz.Rect, fitz.Quad)):
                     q = v.quad if isinstance(v, fitz.Rect) else v
                     noktalar += [q.ul * rm, q.ur * rm, q.lr * rm, q.ll * rm]
-        out.append({"renk": _renk(d["fill"] if dolgu else d.get("color")), "dolgu": dolgu, "tur": {it[0] for it in d["items"]}, "r": r,
+        out.append({"renk": _renk(d["fill"] if dolgu else d.get("color")), "dolgu": dolgu,
+                    "cizgi": _renk(d["color"]) if dolgu and d.get("color") is not None else None, "tur": {it[0] for it in d["items"]}, "r": r,
                     "m": fitz.Point((r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2),
                     "cizgiler": [(it[1] * rm, it[2] * rm) for it in d["items"] if it[0] == "l"], "noktalar": noktalar,
                     "egriler": [tuple(v * rm for v in it[1:5]) for it in d["items"] if it[0] == "c"],
@@ -1322,7 +1324,8 @@ def elektrik_oku(pg, ayar: dict, dis_olcu_cm: list[float]) -> dict:
     Sessiz sayı yok; şunların her biri bölümü teyide düşürür:
     - lejant renginde hiçbir işarete girmeyen öğe; sigortanın iç desenindeki ya da lejant rengine yakın (`yakin_renk_payi`) tonda, işaret
       boyunda hiçbir işarete girmeyen öğe; duvar çerçevesinin dışında bu renklerde öğe; bir parçası (çizgisi) işarete giren ama başka
-      parçası hiçbir işarete girmeyen çizim (PDF yolu);
+      parçası hiçbir işarete girmeyen çizim (PDF yolu); dolgusu başka renkte, çizgisi lejant renginde ya da yakın tonda yol (dolgulu çizim
+      dolgunun rengiyle okunur; ör. beyaz dolgulu glop);
     - içi lejanttakine uymayan duy, glop, BUAT, anahtar dairesi ya da sigorta ölçüsünde kutu; ölçüsü tutmayan duy dolgusu; glop ya da
       anahtar dairesinin renginde ve çapında, tam daire olmayan eğri yolu (eğrilerle çizilmiş elmas, yıldız; açık ya da yarısı iki kez
       çizilmiş daire);
@@ -1684,6 +1687,12 @@ def elektrik_oku(pg, ayar: dict, dis_olcu_cm: list[float]) -> dict:
             tur = Counter(("dolgu" if o["dolgu"] else "çizgi" if o["tur"] == {"l"} else "eğri") + f" {max(o['r'].width, o['r'].height):.1f}"
                           for o in oo)
             uyarilar.append(f"{ad}, hiçbir işarete uymayan {len(oo)} öğe ({', '.join(f'{k} pt × {n}' for k, n in sorted(tur.items()))})")
+    # dolgulu çizim dolgunun rengiyle okunur: çizgisi işaret renginde ya da yakın tonda, dolgusu başka renkte yol (ör. beyaz dolgulu,
+    # kırmızı çizgili glop ya da BUAT) hiçbir renge girmeden kalırdı (PK-01 ve PK-07'de dolgulu ve çizgili yolların hepsinde iki renk aynı)
+    cizgili = [o for o in ogeler if o["cizgi"] is not None and o["cizgi"] != o["renk"]
+               and (o["cizgi"] in tam | ek or any(_renk_farki(o["cizgi"], c) <= E["yakin_renk_payi"] for c in tam))]
+    if cizgili:
+        uyarilar.append(f"dolgusu başka renkte, çizgisi lejant renginde ya da yakın tonda {len(cizgili)} öğe (dolgunun rengiyle okunur)")
     disarida = [o for o in disari if aday(o)]
     if disarida:
         uyarilar.append(f"duvar çerçevesinin {E['cerceve_payi_cm']:g} cm dışında lejant renginde {len(disarida)} öğe: sayılmadı")

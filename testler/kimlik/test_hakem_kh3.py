@@ -736,21 +736,73 @@ def test_daire_bicimi_ve_u_yonu_bekletir(tmp_path, ek, kw, neden):
     # çembere uzaklığın payı (0,2 pt) ve dokuz nokta: 0,3 pt basık daire; ortası çemberde, çeyrekleri 0,5 pt dalgalı daire
     (lambda e: _glop_bicimli(e, X_U, Y_U, "daire", k=0.4928), {}, GLOP_BICIMSIZ),
     (lambda e: _glop_bicimli(e, X_U, Y_U, "daire", d=4.0), {}, GLOP_BICIMSIZ),
-    # yayların uç uca değmesi (pay 0,2 pt) ve kapanması: kapanış yerinde 4° açık glop (0,66 pt boşluk); dört yerinden 3° kesik glop ya da
-    # bir yerinden 3° örtüşen glop (0,5 pt; dört yerinden örtüşünce kutusu büyür, daire sayılmaz); bir çeyreği iki kez çizilmiş glop (beş
-    # eğri); kapanış yerinde 8° açık anahtar dairesi (0,63 pt)
+    # yayların uç uca değmesi (pay 0,2 pt) ve kapanması: kapanış yerinde 4° açık glop (0,66 pt boşluk); dört yerinden 3° kesik glop (0,5 pt);
+    # bir yerinden 3° örtüşen glop (kutusu 0,27 pt büyür, çembere uzaklık 0,204 pt: uzaklığa takılır); bir çeyreği iki kez çizilmiş glop
+    # (beş eğri); kapanış yerinde 8° açık anahtar dairesi (0,63 pt)
     (lambda e: _glop_bicimli(e, X_U, Y_U, "daire", yaylar=((0, 90), (90, 180), (180, 270), (270, 356))), {}, GLOP_BICIMSIZ),
     (lambda e: _glop_bicimli(e, X_U, Y_U, "daire", yaylar=((0, 87), (90, 177), (180, 267), (270, 357))), {}, GLOP_BICIMSIZ),
     (lambda e: _glop_bicimli(e, X_U, Y_U, "daire", yaylar=((0, 90), (90, 180), (180, 270), (267, 360))), {}, GLOP_BICIMSIZ),
     (lambda e: _glop_bicimli(e, X_U, Y_U, "daire", yaylar=((0, 90), (90, 180), (180, 270), (270, 360), (90, 0))), {}, GLOP_BICIMSIZ),
     (lambda e: _anahtar_bicimli(e, X_A, Y_A, "daire", yaylar=((0, 90), (90, 180), (180, 270), (270, 352))), {}, ANAHTAR_BICIMSIZ),
+    # uç payının kendisi (kutu ve çembere uzaklık tam): kapanış yerinde 1,5° açık glop ve ortada (135°'de) 1,5° örtüşen beş yaylı glop
+    # (0,25 pt; pay 0,2 pt)
+    (lambda e: _glop_bicimli(e, X_U, Y_U, "daire", yaylar=((0, 90), (90, 180), (180, 270), (270, 358.5))), {}, GLOP_BICIMSIZ),
+    (lambda e: _glop_bicimli(e, X_U, Y_U, "daire", yaylar=((0, 90), (90, 135), (133.5, 180), (180, 270), (270, 360))), {}, GLOP_BICIMSIZ),
 ], ids=["glop_acik", "glop_yarisi_iki_kez", "buat_acik", "anahtar_acik", "anahtar_yarisi_iki_kez", "glop_0_3_basik", "glop_dalgali",
-        "glop_kapanisi_4_acik", "glop_dort_yerden_kesik", "glop_bir_yerden_ortusen", "glop_bir_ceyregi_iki_kez", "anahtar_kapanisi_8_acik"])
+        "glop_kapanisi_4_acik", "glop_dort_yerden_kesik", "glop_bir_yerden_ortusen", "glop_bir_ceyregi_iki_kez", "anahtar_kapanisi_8_acik",
+        "glop_kapanisi_0_25_acik", "glop_ortada_0_25_ortusen"])
 def test_daire_tam_ve_kapali_bekletir(tmp_path, ek, kw, neden):
     """KH-3 hakeminin 6. turu: eğrileri çemberin üstünde ama bir çeyreği eksik (yerine komşusu geri geçilmiş) ya da karşı iki çeyreği
     ikişer kez geçilmiş glop, BUAT ve anahtar dairesi; çembere uzaklığı payın dışında (0,3 pt basık; uçları ve ortası çemberde, çeyrekleri
     0,5 pt dalgalı) daire de elektriği bekletir. 7. tur: yayları uç uca değmeyen (kapanış yerinde ya da dört yerinden payın dışında boşluklu
-    ya da bir yerinden örtüşen) ya da bir yayı iki kez çizilmiş daire de."""
+    ya da bir yerinden örtüşen) ya da bir yayı iki kez çizilmiş daire de. 8. tur: payın hemen dışında (0,25 pt) açık ya da örtüşen daire."""
+    o = PO.oku(kh3_sentetik(tmp_path / "s.pdf", ek=ek, **kw), EL)
+    t = _teyit(o)
+    assert set(t) == {"elektrik"} and neden in t["elektrik"], t
+    assert "elektrik" not in o and "makas_bas" in o and "h_plani" in o
+
+
+def _beyaz_dolgulu(e, X, Y, tur, renk=None):
+    """Tek PDF yolunda, beyaz dolgulu, işaret renginde (ya da `renk`te) çizgili işaret: `glop` (daire ve çaprazları), `buat` (daire; yanına
+    BUAT yazısı), `anahtar` (daire, tırnak ve ucu), `priz` (U)."""
+    sh = e.s.pg.new_shape()
+    if tur in ("glop", "buat"):
+        sh.draw_circle(e.p(X, Y), 9.5)
+        if tur == "glop":
+            for a, b in (((X - 6.7, Y - 6.7), (X + 6.7, Y + 6.7)), ((X - 6.7, Y + 6.7), (X + 6.7, Y - 6.7))):
+                sh.draw_line(e.p(*a), e.p(*b))
+    elif tur == "anahtar":
+        sh.draw_circle(e.p(X, Y), 4.5)
+        c, s_ = math.cos(math.radians(-60)), math.sin(math.radians(-60))
+        b = (X + 4.5 * c, Y + 4.5 * s_)
+        t = (b[0] + 4.6 * c, b[1] + 4.6 * s_)
+        sh.draw_line(e.p(*b), e.p(*t))
+        sh.draw_line(e.p(*t), e.p(t[0] + 2.4, t[1]))
+    else:
+        for a, b in (((X - 4.25, Y), (X + 4.25, Y)), ((X - 4.25, Y), (X - 4.25, Y - 4.9)), ((X + 4.25, Y), (X + 4.25, Y - 4.9)),
+                     ((X, Y), (X, Y + 7.8))):
+            sh.draw_line(e.p(*a), e.p(*b))
+    sh.finish(color=renk or (TURUNCU if tur == "anahtar" else KIRMIZI), fill=(1.0, 1.0, 1.0), width=0.4, closePath=False)
+    sh.commit()
+    if tur == "buat":
+        e.yazi(X, Y, "BUAT", 3)
+
+
+BEYAZ_DOLGULU = "dolgusu başka renkte, çizgisi lejant renginde ya da yakın tonda 1 öğe (dolgunun rengiyle okunur)"
+
+
+@pytest.mark.parametrize("ek, kw, neden", [
+    (lambda e: _beyaz_dolgulu(e, X_U, Y_U, "glop"), {}, BEYAZ_DOLGULU),
+    (lambda e: _beyaz_dolgulu(e, X_U, Y_U, "buat"), {}, BEYAZ_DOLGULU),
+    (lambda e: _beyaz_dolgulu(e, X_A, Y_A, "anahtar"), {}, BEYAZ_DOLGULU),
+    (lambda e: _beyaz_dolgulu(e, X_U, Y_U, "priz"), {}, BEYAZ_DOLGULU),
+    (lambda e: e.kutu(X_U, Y_U, 12, 12, KIRMIZI, (1.0, 1.0, 1.0)), {}, BEYAZ_DOLGULU),                     # duy ölçüsünde kutu
+    (lambda e: _beyaz_dolgulu(e, X_U, Y_U, "glop", KOYU_KIRMIZI), {}, BEYAZ_DOLGULU),                       # çizgisi yakın tonda
+], ids=["glop", "buat", "anahtar", "priz", "kutu", "glop_yakin_tonda"])
+def test_beyaz_dolgulu_isaret_bekletir(tmp_path, ek, kw, neden):
+    """KH-3 hakeminin 8. turu: dolgulu çizim dolgunun rengiyle okunur; tek yolda, beyaz dolgulu ve işaret renginde çizgili glop, BUAT,
+    anahtar ve priz (ya da duy ölçüsünde kutu; çizgisi yakın tonda glop) hiçbir renge girmeden kalırdı: ne sayılır ne teyit yazardı. Artık
+    elektriği bekletir."""
     o = PO.oku(kh3_sentetik(tmp_path / "s.pdf", ek=ek, **kw), EL)
     t = _teyit(o)
     assert set(t) == {"elektrik"} and neden in t["elektrik"], t
@@ -801,15 +853,18 @@ def test_yolun_yapisi_tur_ve_olcu():
     (lambda e: _glop_bicimli(e, X_U, Y_U, "daire", k=0.5365), {}, {"glop": 2}, {}),                         # 0,08 pt basık: pay içinde
     (lambda e: _anahtar_bicimli(e, X_A, Y_A, "karisik"), {}, {"anahtar_tekli": 3}, {}),                     # çeyrekler karışık sırayla
     (lambda e: _glop_bicimli(e, X_U, Y_U, "daire", yaylar=((180, 90), (270, 360), (90, 0), (180, 270))), {}, {"glop": 2}, {}),  # yaylarla
+    (lambda e: _glop_bicimli(e, X_U, Y_U, "daire", yaylar=((0, 90), (90, 180), (180, 270), (270, 359.1))), {}, {"glop": 2}, {}),  # 0,15 pt
+    (lambda e: e.kutu(*g(300, 300), 60, 8, SIYAH, (1.0, 1.0, 1.0)), {}, {}, {}),                       # beyaz dolgulu siyah çerçeve
 ], ids=["tek_yolda_iki_u", "desenli_sigorta", "baslik_cercevesi", "donuk_cift_anahtar", "aynali_cift_anahtar", "glop_tek_yol", "egik_tirnakli_anahtarlar",
         "yan_yana_duy", "cift_priz_8", "cift_priz_9_5", "donuk_tekli_u", "egrili_daire_glop", "ters_yonde_daire_anahtar", "az_basik_glop",
-        "karisik_ceyrekli_anahtar", "karisik_yayli_glop"])
+        "karisik_ceyrekli_anahtar", "karisik_yayli_glop", "kapanisi_0_15_acik_glop", "beyaz_dolgulu_siyah_cerceve"])
 def test_dogru_cizim_teyitsiz(tmp_path, ek, kw, sayim, atilan):
     """Sessiz sayı denetimleri doğru çizimi bekletmez: aynı yoldaki iki tam U iki priz; iç deseni başka renkte sigorta; işaretten büyük
     yakın tonda çerçeve denetlenmez, sayılır; döndürülmüş ya da aynalanmış çift anahtar, çaprazları tek yolda glop, tırnakları yarıçapla
     açılı (lejanttaki gibi eğik) anahtarlar, yan yana iki duy; ikinci U'su `aci_payi_derece` içinde dönük çift priz; dönük tekli U;
     dairesi tek tek eğrilerle (çeyrek daireler) ya da öbür yöne çizilmiş glop ve anahtar; 0,08 pt basık (payın içinde) glop; dairesinin
-    çeyrekleri karışık sırayla ve yönle çizilmiş anahtar ve glop (glopta `_egri_yol`'un `yaylar`'ıyla; bozuk yay senaryolarının denetimi)."""
+    çeyrekleri karışık sırayla ve yönle çizilmiş anahtar ve glop (glopta `_egri_yol`'un `yaylar`'ıyla; bozuk yay senaryolarının denetimi);
+    kapanış yerinde 0,15 pt açık (uç payının içinde) glop; beyaz dolgulu siyah çerçeve (siyah denetlenmez)."""
     o = PO.oku(kh3_sentetik(tmp_path / "s.pdf", ek=ek, **kw), EL)
     a = o["ayrinti"]["elektrik"]
     assert o["teyit_bekliyor"] == [] and a["sayim"] == BEKLENEN | sayim
