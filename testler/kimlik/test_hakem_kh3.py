@@ -205,7 +205,7 @@ def kh3_sentetik(yol: Path, *, taban: dict | None = None, rot: int = 270, tirnak
                  yabanci_etiket: bool = False, bagsiz_isaret: bool = False, glopsuz_plan: bool = False, uydu_cift: bool = False,
                  caprazsiz_glop: bool = False, lejant_tirnaksiz: bool = False, sigorta_deseni: bool = False,
                  lejant_tek_tirnak: bool = False, glop_tek_yol: bool = False, anahtar_yonler: tuple | None = None, ek=None,
-                 lejant_kaydir: tuple = (0, 0)) -> Path:
+                 lejant_kaydir: tuple = (0, 0), ciftsiz_plan: bool = False) -> Path:
     """KH-1'in sentetik paftası + elektrik sayfası. Bina 600 × 400 cm (montajın dış ölçüsü); lejant binanın sağında (`lejant_kaydir` pt
     kaydırır). `ek(e)`: sayfa döndürülmeden önce eklenen bozma."""
     gecici = yol.with_suffix(".kh1.pdf")
@@ -244,7 +244,7 @@ def kh3_sentetik(yol: Path, *, taban: dict | None = None, rot: int = 270, tirnak
         e.buat(*g(x, y))
     for x, y in ANAHTAR_TEKLI:
         e.anahtar(*g(x, y), 1)
-    for x, y in ANAHTAR_CIFT:
+    for x, y in [] if ciftsiz_plan else ANAHTAR_CIFT:
         e.anahtar(*g(x, y), 2)
         e.daire(*g(x, y), 4.5, TURUNCU)                            # aynı daire iki kez çizilmiş (PK-01'deki gibi): bir sayılır
     for (x, y), yon in PRIZ_TEKLI:
@@ -903,6 +903,29 @@ def test_lejant_isaretinin_her_ogesi_okunur(tmp_path, ek, kw, neden):
 
 
 _LEJANT_UCU = (665 + 4.55, 330 - 7.881)                            # lejant anahtarının ilk tırnağının dış ucu
+_IKINCI_UC = _tirnak_ucu(665, 330, -120)                           # ikinci tırnağının dış ucu
+LA = {"lejant_isaretsiz": "anahtar"}                               # lejant anahtarı `_lejant_anahtari` ile çizilir
+
+
+def _lejant_anahtari(e, boylar=(4.6, 4.6), uclar=(2.4, 2.4), uc_yonler=(0, 0), sapmalar=(0, 0), tirnak=2):
+    """Lejant satırına anahtar (`LA` ile): her tırnak kendi boyu, yarıçapla açısı (`sapmalar`) ve ucunun boyu ve yönüyle (derece); ucu
+    0 olan tırnağın ucu çizilmez. Varsayılanlar sentetik lejantın anahtarı (KH-3 hakeminin 14. turu)."""
+    X, Y = 665, 330
+    e.daire(X, Y, 4.5, TURUNCU)
+    for aci, boy, uc, u, sp in list(zip((-60, -120), boylar, uclar, uc_yonler, sapmalar))[:tirnak]:
+        b = (X + 4.5 * math.cos(math.radians(aci)), Y + 4.5 * math.sin(math.radians(aci)))
+        t = (b[0] + boy * math.cos(math.radians(aci + sp)), b[1] + boy * math.sin(math.radians(aci + sp)))
+        e.cizgi(b, t, TURUNCU)
+        if uc:
+            e.cizgi(t, (t[0] + uc * math.cos(math.radians(u)), t[1] + uc * math.sin(math.radians(u))), TURUNCU)
+
+
+def _lejant_u_kisa_kollu(e):
+    """Lejant satırına U, bir kolu 0,4 pt kısa (`lejant_isaretsiz="priz"` ile; KH-3 hakeminin 14. turu)."""
+    p = _u_parcalari(665, 355)
+    p[1] = (p[1][0], (p[1][0][0], p[1][0][1] - 4.5))
+    for a, b in p:
+        e.cizgi(a, b)
 
 
 @pytest.mark.parametrize("ek, kw, neden", [
@@ -918,6 +941,36 @@ def test_lejant_anahtari_ve_yoldaki_egri_bekletir(tmp_path, ek, kw, neden):
     tırnak bir ya da iki, ucunda tek çizgi olmalı. Lejant anahtarının tırnağının ucuna eklenmiş ikinci çizgi ya da üçüncü tırnak ne
     sayılıyor ne teyit yazıyordu (plandaki anahtarlar sayılıyordu). Planda U ile aynı PDF yolundaki eğri (yolun bir parçası işarete
     girer, eğri girmez) 2. turdan beri teyit yazıyordu ama testi yoktu (priz bir fazla sayılırdı)."""
+    o = PO.oku(kh3_sentetik(tmp_path / "s.pdf", ek=ek, **kw), EL)
+    t = _teyit(o)
+    assert set(t) == {"elektrik"} and neden in t["elektrik"], t
+    assert "elektrik" not in o and "makas_bas" in o and "h_plani" in o
+
+
+def _farkli(*adlar):
+    return f"lejantta anahtarın iki tırnağı birbirinden farklı: {', '.join(adlar)}"
+
+
+@pytest.mark.parametrize("ek, kw, neden", [
+    (lambda e: _lejant_anahtari(e, uclar=(0, 2.4)), LA, "lejantta ucunda çizgi olmayan 1 tırnak"),                  # ilk tırnağın ucu yok
+    (lambda e: _lejant_anahtari(e, uclar=(2.4, 0)), LA, "lejantta ucunda çizgi olmayan 1 tırnak"),                  # ikincinin ucu yok
+    (lambda e: _lejant_anahtari(e, uclar=(0, 0), tirnak=1), LA, "lejantta ucunda çizgi olmayan 1 tırnak"),          # tek tırnak, ucsuz
+    (lambda e: e.cizgi(_IKINCI_UC, (_IKINCI_UC[0] - 2.4, _IKINCI_UC[1]), TURUNCU), {},                             # ikinci ucun aynası
+     "lejantta ucunda birden çok çizgi olan 1 tırnak"),
+    (lambda e: _lejant_anahtari(e, boylar=(4.6, 5.1)), LA, _farkli("tırnak boyu")),                                 # 0,5 pt uzun tırnak
+    (lambda e: _lejant_anahtari(e, uclar=(2.4, 2.9)), LA, _farkli("ucun boyu")),                                    # 0,5 pt uzun uç
+    (lambda e: _lejant_anahtari(e, uc_yonler=(0, 19)), LA, _farkli("ucun açısı")),                                  # 19° dönük uç
+    (lambda e: _lejant_anahtari(e, uc_yonler=(0, -19)), LA, _farkli("ucun açısı")),
+    (lambda e: _lejant_anahtari(e, sapmalar=(0, -19), uc_yonler=(0, -19)), LA, _farkli("yarıçapla açısı")),         # 19° eğik tırnak
+    (_lejant_u_kisa_kollu, {"lejant_isaretsiz": "priz"}, "lejantta 'priz' etiketinin işareti okunamadı"),          # U'nun kolu 0,4 pt kısa
+], ids=["ilk_tirnagin_ucu_yok", "ikinci_tirnagin_ucu_yok", "tek_tirnakli_lejantta_uc_yok", "ikinci_ucun_aynasi", "tirnak_boyu_farkli",
+        "uc_boyu_farkli", "uc_acisi_farkli", "uc_acisi_ters_farkli", "yaricapla_acisi_farkli", "lejant_u_kolu_kisa"])
+def test_lejant_anahtarinin_her_tirnagi_denetlenir(tmp_path, ek, kw, neden):
+    """KH-3 hakeminin 14. turu: lejantta tırnağın ucunun "en çok bir" yanı denetleniyordu, "hiç yok" yanı denetlenmiyordu (iki tırnaklı
+    lejantta bir tırnağın ucu silinince lejantın ucu öbüründen okunuyor, plandaki anahtarlar sayılıyordu); iki tırnağın boyu, yarıçapla
+    açısı ve ucu ortalanıyor, aradaki fark payın iki katına kadar sessiz kalıyordu. Planda ikisi de teyit yazar. Artık lejantta ucunda
+    çizgi olmayan tırnak ve birbirinden planın payından fazla farklı iki tırnak elektriği bekletir. Testsiz kenarlar: ikinci tırnağın
+    ucunun aynası (13. turun denetimi yalnız ilk tırnakta sınanıyordu) ve lejant U'sunun iki kolunun aynılığı (ilk KH-3'ten beri)."""
     o = PO.oku(kh3_sentetik(tmp_path / "s.pdf", ek=ek, **kw), EL)
     t = _teyit(o)
     assert set(t) == {"elektrik"} and neden in t["elektrik"], t
@@ -973,10 +1026,15 @@ def test_yolun_yapisi_tur_ve_olcu():
     (lambda e: e.kutu(703.5, 373, 110, 175, KOYU_KIRMIZI), {}, {}, {"isaretten_buyuk": 1}),              # lejantın yakın tonda çerçevesi
     (lambda e: e.kutu(703.5, 373, 110, 175, SIYAH), {}, {}, {}),                                          # lejantın siyah çerçevesi
     (None, {"lejant_kaydir": (-40, 0)}, {}, {}),                                                          # lejant payın hemen dışında
+    (lambda e: _lejant_anahtari(e), LA, {}, {}),                                                          # lejant anahtarı elle
+    (lambda e: _lejant_anahtari(e, boylar=(4.6, 4.8), uclar=(2.4, 2.6), uc_yonler=(0, 8)), LA, {}, {}),  # iki tırnak pay içinde farklı
+    (lambda e: _lejant_anahtari(e, sapmalar=(0, 8), uc_yonler=(0, 8)), LA, {}, {}),                      # yarıçapla 8° açılı tırnak
+    (None, {"lejant_tek_tirnak": True, "ciftsiz_plan": True}, {"anahtar_cift": 0}, {"ayni_yerde_iki_kez": 0}),  # tek tırnaklı lejant
 ], ids=["tek_yolda_iki_u", "desenli_sigorta", "baslik_cercevesi", "donuk_cift_anahtar", "aynali_cift_anahtar", "glop_tek_yol", "egik_tirnakli_anahtarlar",
         "yan_yana_duy", "cift_priz_8", "cift_priz_9_5", "donuk_tekli_u", "egrili_daire_glop", "ters_yonde_daire_anahtar", "az_basik_glop",
         "karisik_ceyrekli_anahtar", "karisik_yayli_glop", "kapanisi_0_15_acik_glop", "beyaz_dolgulu_siyah_cerceve", "lejant_cercevesi_yakin_ton",
-        "lejant_cercevesi_siyah", "lejant_payin_hemen_disinda"])
+        "lejant_cercevesi_siyah", "lejant_payin_hemen_disinda", "lejant_anahtari_elle", "lejant_tirnaklari_pay_icinde",
+        "lejant_tirnagi_8_derece", "tek_tirnakli_lejant_ciftsiz_plan"])
 def test_dogru_cizim_teyitsiz(tmp_path, ek, kw, sayim, atilan):
     """Sessiz sayı denetimleri doğru çizimi bekletmez: aynı yoldaki iki tam U iki priz; iç deseni başka renkte sigorta; işaretten büyük
     yakın tonda çerçeve denetlenmez, sayılır; döndürülmüş ya da aynalanmış çift anahtar, çaprazları tek yolda glop, tırnakları yarıçapla
@@ -985,7 +1043,8 @@ def test_dogru_cizim_teyitsiz(tmp_path, ek, kw, sayim, atilan):
     çeyrekleri karışık sırayla ve yönle çizilmiş anahtar ve glop (glopta `_egri_yol`'un `yaylar`'ıyla; bozuk yay senaryolarının denetimi);
     kapanış yerinde 0,15 pt açık (uç payının içinde) glop; beyaz dolgulu siyah çerçeve (siyah denetlenmez); lejantı çevreleyen yakın tonda
     çerçeve (lejant kutusundaki de `isaretten_buyuk`'a sayılır; KH-3 hakeminin 12. turu) ya da siyah çerçeve; duvar çerçevesinin payına
-    0,5 pt kalan lejant kutusu."""
+    0,5 pt kalan lejant kutusu; 14. turdan: iki tırnağı birbirinden planın payı içinde farklı lejant anahtarı (boy, uç, açılar) ve
+    planında çift anahtar olmayan tek tırnaklı lejant."""
     o = PO.oku(kh3_sentetik(tmp_path / "s.pdf", ek=ek, **kw), EL)
     a = o["ayrinti"]["elektrik"]
     assert o["teyit_bekliyor"] == [] and a["sayim"] == BEKLENEN | sayim

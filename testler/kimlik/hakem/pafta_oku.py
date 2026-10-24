@@ -1348,8 +1348,9 @@ def elektrik_oku(pg, ayar: dict, dis_olcu_cm: list[float]) -> dict:
       ortası başka türden bir işaretin kutusunda olan işaret (ör. BUAT dairesinin içine çizilmiş U);
     - lejantta: etiketi ya da işareti bulunamayan tür, tanınmayan sözcük, hiçbir etikete bağlanmayan işaret, zil (okunmuyor), alanın
       hemen altında öğe, alanın dışında lejant etiketine benzeyen sözcük; lejant işaretinde okunmayan öğe (aynı satıra çizilmiş ikinci
-      işaret, işarete eklenmiş çizim); lejantta tırnağı bir ya da iki olmayan ya da tırnağının ucunda birden çok çizgi olan anahtar; lejant kutusunda hiçbir lejant işaretine girmeyen lejant renginde öğe; duvar çerçevesiyle
-      kesişen lejant kutusu (kutudaki öğe plana girmez);
+      işaret, işarete eklenmiş çizim); lejantta tırnağı bir ya da iki olmayan, tırnağının ucunda tek çizgi olmayan ya da iki tırnağının
+      boyu, yarıçapla açısı ya da ucu birbirinden planın payından fazla farklı anahtar; lejant kutusunda hiçbir lejant işaretine
+      girmeyen lejant renginde öğe; duvar çerçevesiyle kesişen lejant kutusu (kutudaki öğe plana girmez);
     - planda hiç işareti bulunamayan lejant türü; yanında priz olmayan, en yakın prizi çift olan ya da başka bir UYDU yazısıyla aynı prize
       bağlanan UYDU yazısı.
     Konumlar duvar çizgilerinin sınırının montajdaki dış ölçüye oturmasından (cm; `oran_payi` içinde); oda ataması burada değil."""
@@ -1410,7 +1411,8 @@ def elektrik_oku(pg, ayar: dict, dis_olcu_cm: list[float]) -> dict:
                     L[tur] = {"renk": d["renk"], "cap": d["cap"], "cizgi": len(cs), "capraz_aci": _capraz_acilari(cs)}
                 else:                                   # tırnak: boyu, ucundaki kısa çizginin boyu; iki tırnağın dizilişi
                     t = degen_tirnaklar(parca, d["m"], d["cap"])
-                    uclar = [(s, s2) for s in t for s2 in uctaki(parca, s, d["m"])]
+                    ucta = [uctaki(parca, s, d["m"]) for s in t]  # her tırnağın ucundaki çizgiler
+                    uclar = [(s, s2) for s, x in zip(t, ucta) for s2 in x]
                     uc = [s2[3] for _, s2 in uclar]
                     uc_aci = [_aci_farki(_aci(s), _aci(s2)) for s, s2 in uclar]
                     isin, aci = _tirnak_cifti(t, d["m"]) if len(t) == 2 else (None, None)
@@ -1419,11 +1421,25 @@ def elektrik_oku(pg, ayar: dict, dis_olcu_cm: list[float]) -> dict:
                               "sapma": sum(_sapma(s, d["m"]) for s in t) / len(t) if t else None, "aci": aci, "isin_aci": isin}
                     okunan_parca = [*t, *(s2 for _, s2 in uclar)]
                     # planda anahtarın tırnağı bir ya da iki, ucunda tek çizgi: lejant da öyle olmalı (KH-3 hakeminin 13. turu: lejantta
-                    # ucuna ikinci çizgi eklenmiş tırnak ya da üçüncü tırnak okunmuş sayılıyor, plandaki anahtarlar sessizce sayılıyordu)
+                    # ucuna ikinci çizgi eklenmiş tırnak ya da üçüncü tırnak okunmuş sayılıyor, plandaki anahtarlar sessizce sayılıyordu;
+                    # 14. turu: ucu olmayan tırnak da öyle, lejantın ucu öbür tırnaktan okunuyordu)
                     if len(t) > 2:
                         uyarilar.append(f"lejantta anahtar dairesinde bir ya da iki olmayan tırnak: {len(t)}")
-                    if cok_uclu := sum(1 for s in t if len(uctaki(parca, s, d["m"])) > 1):
+                    if cok_uclu := sum(1 for x in ucta if len(x) > 1):
                         uyarilar.append(f"lejantta ucunda birden çok çizgi olan {cok_uclu} tırnak")
+                    if ucsuz := sum(1 for x in ucta if not x):
+                        uyarilar.append(f"lejantta ucunda çizgi olmayan {ucsuz} tırnak")
+                    # iki tırnak aynı tırnağın iki kopyası: boyları, yarıçapla açıları ve uçları birbirinden planın payından fazla ayrılmaz
+                    # (KH-3 hakeminin 14. turu: lejanttan ikisinin ortalaması okunuyor, aradaki fark payın iki katına kadar sessiz kalıyordu;
+                    # planda aynı fark teyit yazar)
+                    if len(t) == 2:
+                        olcu = [("tırnak boyu", [s[3] for s in t], UC_PAYI_PT),
+                                ("yarıçapla açısı", [_sapma(s, d["m"]) for s in t], E["aci_payi_derece"])]
+                        if all(len(x) == 1 for x in ucta):
+                            olcu += [("ucun boyu", [x[0][3] for x in ucta], UC_PAYI_PT),
+                                     ("ucun açısı", [_aci_farki(_aci(s), _aci(x[0])) for s, x in zip(t, ucta)], E["aci_payi_derece"])]
+                        if farkli := [ad for ad, (a, b), pay_ in olcu if abs(a - b) > pay_]:
+                            uyarilar.append(f"lejantta anahtarın iki tırnağı birbirinden farklı: {', '.join(farkli)}")
                 G[tur] = bilesim(g, d["r"], 0.5)
                 okunan = G[tur][0]
         elif tur == "duy":
