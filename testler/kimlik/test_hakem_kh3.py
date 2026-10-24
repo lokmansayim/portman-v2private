@@ -82,8 +82,13 @@ class Elektrik:
     def cizgi(self, a, b, renk=KIRMIZI):
         self.s.pg.draw_line(self.p(*a), self.p(*b), color=renk, width=0.4)
 
-    def daire(self, X, Y, r, renk=KIRMIZI):
-        self.s.pg.draw_circle(self.p(X, Y), r, color=renk, width=0.4)
+    def daire(self, X, Y, r, renk=KIRMIZI, ic=None):
+        """`ic` verilirse aynı PDF yolunda bu yarıçapta ikinci bir daire."""
+        sh = self.s.pg.new_shape()
+        for yc in (r, ic) if ic else (r,):
+            sh.draw_circle(self.p(X, Y), yc)
+        sh.finish(color=renk, width=0.4)
+        sh.commit()
 
     def yol(self, parcalar, renk=KIRMIZI):
         """Birden çok çizgi tek bir PDF yolunda (path)."""
@@ -93,9 +98,14 @@ class Elektrik:
         sh.finish(color=renk, width=0.4, closePath=False)
         sh.commit()
 
-    def kutu(self, X, Y, w, h, renk, dolgu=None):
-        a, b = self.p(X - w / 2, Y - h / 2), self.p(X + w / 2, Y + h / 2)
-        self.s.pg.draw_rect(fitz.Rect(min(a.x, b.x), min(a.y, b.y), max(a.x, b.x), max(a.y, b.y)), color=renk, fill=dolgu, width=0.3)
+    def kutu(self, X, Y, w, h, renk, dolgu=None, ic=None):
+        """`ic` (en, boy) verilirse aynı PDF yolunda ortası aynı ikinci bir dörtgen."""
+        sh = self.s.pg.new_shape()
+        for w2, h2 in ((w, h), ic) if ic else ((w, h),):
+            a, b = self.p(X - w2 / 2, Y - h2 / 2), self.p(X + w2 / 2, Y + h2 / 2)
+            sh.draw_rect(fitz.Rect(min(a.x, b.x), min(a.y, b.y), max(a.x, b.x), max(a.y, b.y)))
+        sh.finish(color=renk, fill=dolgu, width=0.3)
+        sh.commit()
 
     def yazi(self, X, Y, metin, boy=7):
         w = fitz.Font(fontfile=T.FONT).text_length(metin, boy)
@@ -107,8 +117,8 @@ class Elektrik:
         self.cizgi((X - 4, Y - 4), (X + 4, Y + 4))
         self.cizgi((X - 4, Y + 4), (X + 4, Y - 4))
 
-    def glop(self, X, Y, capraz=2):
-        self.daire(X, Y, 9.5)
+    def glop(self, X, Y, capraz=2, ic=None):
+        self.daire(X, Y, 9.5, ic=ic)
         cs = (((X - 6.7, Y - 6.7), (X + 6.7, Y + 6.7)), ((X - 6.7, Y + 6.7), (X + 6.7, Y - 6.7)))[:capraz]
         if self.glop_tek_yol and cs:
             self.yol(cs)
@@ -116,12 +126,12 @@ class Elektrik:
         for a, b in cs:
             self.cizgi(a, b)
 
-    def buat(self, X, Y, yazili=True):
-        self.daire(X, Y, 9.5)
+    def buat(self, X, Y, yazili=True, ic=None):
+        self.daire(X, Y, 9.5, ic=ic)
         if yazili:
             self.yazi(X, Y, "BUAT", 3)
 
-    def anahtar(self, X, Y, tirnak=1, boy=4.6, uc=2.4, acilar=(-60, -120, -30), yonler=None, don=0, ayna=False, uc_yonler=None):
+    def anahtar(self, X, Y, tirnak=1, boy=4.6, uc=2.4, acilar=(-60, -120, -30), yonler=None, don=0, ayna=False, uc_yonler=None, ic=None):
         """Tırnaklar dairenin `acilar`daki yerlerinden çıkar; çizgileri `yonler`e (verilmezse yarıçap boyunca); ucundaki kısa çizgi
         `uc_yonler`e (verilmezse yatay). Bütün işaret `ayna` ile yatay eksene göre aynalanır, sonra `don` derece döndürülür."""
         yonler = yonler or self.anahtar_yonler
@@ -130,7 +140,7 @@ class Elektrik:
             y = -y if ayna else y
             c, s = math.cos(math.radians(don)), math.sin(math.radians(don))
             return X + x * c - y * s, Y + x * s + y * c
-        self.daire(X, Y, 4.5, TURUNCU)
+        self.daire(X, Y, 4.5, TURUNCU, ic=ic)
         for i, aci in enumerate(acilar[:tirnak]):
             c, s = math.cos(math.radians(aci)), math.sin(math.radians(aci))
             b = (4.5 * c, 4.5 * s)
@@ -161,8 +171,8 @@ class Elektrik:
         if uclu:
             self.priz(*uc, yon)
 
-    def sigorta(self, X, Y, desen=False):
-        self.kutu(X, Y, 14, 10, SIYAH)
+    def sigorta(self, X, Y, desen=False, ic=None):
+        self.kutu(X, Y, 14, 10, SIYAH, ic=ic)
         self.cizgi((X - 4, Y), (X + 4, Y), SIYAH)
         if desen:                                                  # iç desen başka renkte (PK-07'deki gri-mavi gibi)
             self.cizgi((X - 4, Y + 2.5), (X + 4, Y + 2.5), MAVI)
@@ -320,6 +330,7 @@ def test_lejanttan_okunan_olculer(okuma):
     assert (L["anahtar"]["tirnak"], L["anahtar"]["uc"], L["anahtar"]["aci"]) == (4.6, 2.4, 60.0)
     assert (L["anahtar"]["isin_aci"], L["anahtar"]["sapma"], L["anahtar"]["uc_aci"]) == (60.0, 0.0, 60.0)
     assert L["glop"]["capraz_aci"] == [90.0]
+    assert L["priz"]["aci"] == {"kol_kol": 0.0, "kol_taban": 90.0, "sap_taban": 90.0}
     assert (L["priz"]["kol"], L["priz"]["taban"], L["priz"]["sap"]) == (4.9, 8.5, 7.8)
     assert L["duy"]["renk"] == list(KIRMIZI) and L["anahtar"]["renk"] == list(TURUNCU) and L["sigorta"]["renk"] == list(SIYAH)
     assert okuma["ayrinti"]["elektrik"]["uydu_uzakligi_pt"] == [12.0]
@@ -577,6 +588,52 @@ def test_dizilis_desen_ve_ic_ice_bekletir(tmp_path, ek, kw, neden):
     assert "elektrik" not in o and "makas_bas" in o and "h_plani" in o
 
 
+def _u_acili(e, X, Y, kollar=(0, 0), sap=0, don=0):
+    """Taban ortası (X, Y), kollar yukarı, sap aşağı bir U; kolların ve sapın tabana dik yönden sapması `kollar` ve `sap` (derece), bütün
+    U'nun (X, Y) çevresinde dönüşü `don`. Sapın ucu döner."""
+    def d(x, y):
+        c, s = math.cos(math.radians(don)), math.sin(math.radians(don))
+        return X + x * c - y * s, Y + x * s + y * c
+
+    def yon(aci, boy, taban):
+        return taban[0] + boy * math.sin(math.radians(aci)), taban[1] + boy * math.cos(math.radians(aci))
+    a, b = (-4.25, 0), (4.25, 0)
+    e.cizgi(d(*a), d(*b))
+    for u, aci in zip((a, b), kollar):
+        e.cizgi(d(*u), d(*yon(180 + aci, 4.9, u)))
+    uc = d(*yon(sap, 7.8, (0, 0)))
+    e.cizgi((X, Y), uc)
+    return uc
+
+
+@pytest.mark.parametrize("ek, kw, neden", [
+    # PDF yolunda işaretin dairesine ya da kutusuna eklenmiş ikinci daire ya da dörtgen; tek yoldaki çaprazın biri kısa
+    (lambda e: e.glop(X_U, Y_U, ic=3), {}, "glop ya da BUAT dairesinin içinde lejanttakine uymayan öğe (1 daire)"),
+    (lambda e: e.buat(X_U, Y_U, ic=3), {}, "glop ya da BUAT dairesinin içinde lejanttakine uymayan öğe (1 daire)"),
+    (lambda e: e.anahtar(X_A, Y_A, 1, ic=2), {}, "anahtar dairesinin içinde lejanttakine uymayan öğe (1 daire)"),
+    (lambda e: e.sigorta(X_U, Y_U, ic=(8, 5)), {}, "sigorta kutusu ölçüsünde, içi lejanttaki işarete uymayan 1 kutu"),
+    (lambda e: (e.daire(X_U, Y_U, 9.5), e.yol([((X_U - 6.7, Y_U - 6.7), (X_U + 6.7, Y_U + 6.7)), ((X_U - 2, Y_U + 2), (X_U + 2, Y_U - 2))])),
+     {"glop_tek_yol": True}, "glop ya da BUAT dairesinin içinde lejanttakine uymayan öğe (1 daire)"),
+    # U'nun açıları: kolu açık, kolları eğik (paralelkenar), sapı eğik; ikinci U'su dönük ama sapı birincininkiyle aynı yönde çift
+    (lambda e: _u_acili(e, X_U, Y_U, kollar=(0, 20)), {}, "açıları lejanttakine (kollar 0°, kol–taban 90°, sap–taban 90°) uymayan 1 U"),
+    (lambda e: _u_acili(e, X_U, Y_U, kollar=(8, -8)), {}, "açıları lejanttakine (kollar 0°, kol–taban 90°, sap–taban 90°) uymayan 1 U"),
+    (lambda e: _u_acili(e, X_U, Y_U, kollar=(45, 45)), {}, "açıları lejanttakine (kollar 0°, kol–taban 90°, sap–taban 90°) uymayan 1 U"),
+    (lambda e: _u_acili(e, X_U, Y_U, sap=45), {}, "açıları lejanttakine (kollar 0°, kol–taban 90°, sap–taban 90°) uymayan 1 U"),
+    (lambda e: _u_acili(e, *e.priz(X_U, Y_U), don=12, sap=-12), {}, "açıları lejanttakine (kollar 0°, kol–taban 90°, sap–taban 90°) uymayan 1 U"),
+    # çift prizin ikinci U'su payın hemen dışında
+    (lambda e: _ikinci_u_donuk(e, 10.5), {}, "sapı öbürünün tabanına değen ama yönü farklı 1 U çifti"),
+], ids=["glop_yolunda_daire", "buat_yolunda_daire", "anahtar_yolunda_daire", "sigorta_yolunda_dortgen", "tek_yolda_kisa_capraz",
+        "u_kolu_acik", "u_kollari_8_derece", "u_paralelkenar", "u_sapi_egik", "ikinci_u_sapi_duz", "cift_priz_10_5"])
+def test_yol_ve_u_acisi_bekletir(tmp_path, ek, kw, neden):
+    """KH-3 hakeminin 4. turu: işaretin PDF yoluna eklenmiş daire ya da dörtgen, tek yoldaki kısa çapraz; açıları lejanttakine uymayan U
+    (kolu açık; kolları tabanla payın içinde ama birbirine 16° açılı; paralelkenar; sapı eğik; dönük ikinci U'nun sapı düz çizilmiş);
+    ikinci U'su 10,5° dönük çift priz de elektriği bekletir."""
+    o = PO.oku(kh3_sentetik(tmp_path / "s.pdf", ek=ek, **kw), EL)
+    t = _teyit(o)
+    assert set(t) == {"elektrik"} and neden in t["elektrik"], t
+    assert "elektrik" not in o and "makas_bas" in o and "h_plani" in o
+
+
 @pytest.mark.parametrize("ek, kw, sayim, atilan", [
     (lambda e: e.yol(_u_parcalari(X_U, Y_U) + _u_parcalari(X_U + 40, Y_U)), {}, {"priz_tekli": 5}, {}),     # tek yolda iki tam U: iki priz
     (None, {"sigorta_deseni": True}, {}, {}),                                                               # iç desenli sigorta
@@ -587,13 +644,14 @@ def test_dizilis_desen_ve_ic_ice_bekletir(tmp_path, ek, kw, neden):
     (None, {"anahtar_yonler": EGIK}, {}, {}),                                                               # tırnakları eğik anahtarlar
     (lambda e: (lambda X, Y: e.duy(X + 20, Y))(*g(*DUY[0])), {}, {"tavan_armaturu": 3}, {}),                # yan yana iki duy
     (lambda e: _ikinci_u_donuk(e, 8), {}, {"priz_cift": 2}, {}),                                           # 8° dönük ikinci U: pay içinde
+    (lambda e: _ikinci_u_donuk(e, 9.5), {}, {"priz_cift": 2}, {}),                                         # 9,5°: payın hemen içinde
+    (lambda e: _u_acili(e, X_U, Y_U, don=30), {}, {"priz_tekli": 4}, {}),                                        # 30° dönük tekli U
 ], ids=["tek_yolda_iki_u", "desenli_sigorta", "baslik_cercevesi", "donuk_cift_anahtar", "aynali_cift_anahtar", "glop_tek_yol", "egik_tirnakli_anahtarlar",
-        "yan_yana_duy",
-        "cift_priz_8"])
+        "yan_yana_duy", "cift_priz_8", "cift_priz_9_5", "donuk_tekli_u"])
 def test_dogru_cizim_teyitsiz(tmp_path, ek, kw, sayim, atilan):
     """Sessiz sayı denetimleri doğru çizimi bekletmez: aynı yoldaki iki tam U iki priz; iç deseni başka renkte sigorta; işaretten büyük
     yakın tonda çerçeve denetlenmez, sayılır; döndürülmüş ya da aynalanmış çift anahtar, çaprazları tek yolda glop, tırnakları yarıçapla
-    açılı (lejanttaki gibi eğik) anahtarlar, yan yana iki duy; ikinci U'su `aci_payi_derece` içinde dönük çift priz."""
+    açılı (lejanttaki gibi eğik) anahtarlar, yan yana iki duy; ikinci U'su `aci_payi_derece` içinde dönük çift priz; dönük tekli U."""
     o = PO.oku(kh3_sentetik(tmp_path / "s.pdf", ek=ek, **kw), EL)
     a = o["ayrinti"]["elektrik"]
     assert o["teyit_bekliyor"] == [] and a["sayim"] == BEKLENEN | sayim
@@ -660,6 +718,7 @@ def test_pk01_elektrik_cevabi(cevap):
     # çift anahtarın dizilişi: tırnakların değdiği yerler merkezden 78,25° ayrık, her tırnak yarıçapla 24,38°, uç tırnakla 75,26°
     assert (a["lejant"]["anahtar"]["isin_aci"], a["lejant"]["anahtar"]["sapma"], a["lejant"]["anahtar"]["uc_aci"]) == (78.25, 24.38, 75.26)
     assert a["lejant"]["glop"]["capraz_aci"] == [90.0]
+    assert a["lejant"]["priz"]["aci"] == {"kol_kol": 0.0, "kol_taban": 90.0, "sap_taban": 90.0}
     # iki çift anahtar dairesi ikişer kez çizilmiş (bir sayıldı); sayfa başlığının koyu kırmızı çerçevesi işaretten büyük, denetlenmedi
     assert a["atilan"] == {"cerceve_disinda": 0, "ayni_yerde_iki_kez": 2, "isaretten_buyuk": 1}
     # ölçek: duvar çizgisinin sınırı 600 × 1000 cm'ye oturur; bu sayfada duvar öteki sayfalardan açık (proje ayarı)

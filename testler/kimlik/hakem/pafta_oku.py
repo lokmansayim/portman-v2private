@@ -89,7 +89,8 @@ VARSAYILAN = {
         "uydu_uzakligi_pt": 25.0,           # "UYDU" yazısı ile uydu prizinin tabanı arası en çok
         "lejant_alt_boslugu_pt": 40.0,      # lejant alanının hemen altındaki bu bant boş olmalı (lejant alandan uzunsa teyit)
         "yakin_renk_payi": 0.25,            # işaret rengine bu kadar yakın (kanal başına) başka tondaki öğe de denetlenir
-        "aci_payi_derece": 10.0,            # açılar lejanttakiyle bu payla aynı: çift anahtarın iki tırnağı, glopun çaprazları; çift prizin iki U'su
+        "aci_payi_derece": 10.0,            # açılar lejanttakiyle bu payla aynı: anahtarın tırnakları (yarıçapla, çiftte birbiriyle) ve
+                                            # ucu, glopun çaprazları, U'nun kolları ve sapı, çift prizin iki U'sunun yönü
         "oran_payi": 0.03,                  # duvar sınırının oranı montajdaki dış ölçünün oranıyla bu payla aynı
         "cerceve_payi_cm": 30.0,            # işaret duvar çerçevesinin bu payla içinde; dışında lejant renginde öğe bölümü teyide düşürür
     },
@@ -961,9 +962,17 @@ def _sozcukler(pg) -> list[tuple[str, fitz.Rect]]:
     return [(_norm(w[4]), fitz.Rect(w[:4]) * rm) for w in pg.get_text("words")]
 
 
+def _yapi(it: tuple) -> tuple:
+    """Bir PDF yolu öğesinin türü ve ölçüsü (döndürmeyle değişmez): çizgi ve eğride iki ucunun arası, dörtgende kenarları."""
+    if it[0] in ("l", "c"):
+        return (it[0], round(_uzak(it[1], it[-1]), 3))
+    q = it[1].quad if isinstance(it[1], fitz.Rect) else it[1]
+    return (it[0], *sorted((round(_uzak(q.ul, q.ur), 3), round(_uzak(q.ur, q.lr), 3))))
+
+
 def _ogeler(pg) -> list[dict]:
-    """Çizimler görünen sayfada: renk (dolgulu çizimde dolgunun rengi), dolgu, öğe türleri, kutu, merkez, çizgi parçaları ve bütün
-    noktalar (aynı yerde iki kez çizilmiş öğeyi tanımak için)."""
+    """Çizimler görünen sayfada: renk (dolgulu çizimde dolgunun rengi), dolgu, öğe türleri, kutu, merkez, çizgi parçaları, yolun
+    öğelerinin türü ve ölçüsü (`_yapi`) ve bütün noktalar (aynı yerde iki kez çizilmiş öğeyi tanımak için)."""
     rm, out = pg.rotation_matrix, []
     for d in pg.get_drawings():
         dolgu = d.get("fill") is not None
@@ -978,7 +987,8 @@ def _ogeler(pg) -> list[dict]:
                     noktalar += [q.ul * rm, q.ur * rm, q.lr * rm, q.ll * rm]
         out.append({"renk": _renk(d["fill"] if dolgu else d.get("color")), "dolgu": dolgu, "tur": {it[0] for it in d["items"]}, "r": r,
                     "m": fitz.Point((r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2),
-                    "cizgiler": [(it[1] * rm, it[2] * rm) for it in d["items"] if it[0] == "l"], "noktalar": noktalar})
+                    "cizgiler": [(it[1] * rm, it[2] * rm) for it in d["items"] if it[0] == "l"], "noktalar": noktalar,
+                    "yapi": sorted(_yapi(it) for it in d["items"])})
     return out
 
 
@@ -1037,17 +1047,23 @@ def _boyut(o: dict) -> tuple[float, ...]:
     return tuple(sorted((o["r"].width, o["r"].height)))
 
 
+def _ayni_yapi(a: dict, b: dict, pay: float) -> bool:
+    """İki PDF yolunun öğeleri bire bir aynı: türleri (çizgi, eğri, dörtgen) ve sayıları aynı, her birinin ölçüsü `pay` pt içinde."""
+    return len(a["yapi"]) == len(b["yapi"]) and all(x[0] == y[0] and len(x) == len(y) and all(abs(p - q) <= pay for p, q in zip(x[1:], y[1:]))
+                                                    for x, y in zip(a["yapi"], b["yapi"]))
+
+
 def _ayni_icerik(ic: list[dict], lejant: list[dict], pay: float) -> bool:
     """Plandaki işaretin kutusundaki öğeler lejant işaretindekilerle bire bir eşleşir: imzası (renk, dolgu, tür) aynı; dolgusuz öğenin
-    ölçüsü ve çizgi sayısı da aynı, ölçüsü `pay` pt içinde (ör. glopun çaprazı kısa bir çentik olamaz; çok çizgili bir PDF yoluna kutunun
-    içinde çizgi eklenemez). Dolgunun parçalarına ölçü bakılmaz: tarama deseni sayfanın başlangıcına göre kesilir, her işarette parçaları
-    başka boydadır (PK-07'nin duyları); dolgunun kendi kutusu ayrıca denetlenir."""
+    ölçüsü `pay` pt içinde ve yolunun öğeleri de (`_ayni_yapi`) aynı (ör. glopun çaprazı kısa bir çentik olamaz; bir PDF yoluna kutunun
+    içinde çizgi, daire ya da dörtgen eklenemez). Dolgunun parçalarına ölçü bakılmaz: tarama deseni sayfanın başlangıcına göre kesilir,
+    her işarette parçaları başka boydadır (PK-07'nin duyları); dolgunun kendi kutusu ayrıca denetlenir."""
     if len(ic) != len(lejant):
         return False
     kalan = list(ic)
     for a in sorted(lejant, key=_boyut, reverse=True):
         es = next((b for b in kalan if _imza(b) == _imza(a) and (a["dolgu"] or (len(_boyut(b)) == len(_boyut(a))
-                   and len(b["cizgiler"]) == len(a["cizgiler"]) and all(abs(x - y) <= pay for x, y in zip(_boyut(a), _boyut(b)))))), None)
+                   and _ayni_yapi(a, b, pay) and all(abs(x - y) <= pay for x, y in zip(_boyut(a), _boyut(b)))))), None)
         if es is None:
             return False
         kalan.remove(es)
@@ -1125,7 +1141,9 @@ def _parcalar(ogeler: list[dict], renk: tuple) -> list[tuple]:
 
 def _u_isaretleri(parcalar: list[tuple], olcu: dict | None = None) -> list[dict]:
     """Priz işareti (U): taban, tabanın iki ucunda aynı yana giden birer kol ve tabanın ortasından kolların öbür yanına giden sap. `olcu`
-    (kol, sap, taban; pt) verilirse parçanın boyu bu ölçüyle `UC_PAYI_PT` içinde aynı olmalı. Bir parça tek bir U'ya girer."""
+    (kol, sap, taban; pt) verilirse parçanın boyu bu ölçüyle `UC_PAYI_PT` içinde aynı olmalı. Bir parça tek bir U'ya girer. Her U'nun
+    açıları (`aci`: iki kolun arası, kolların ve sapın tabanla açısı; 0–90) ve yönü (`yon`: tabana dik, sap yanına birim vektör) de
+    döner; açıların lejanttakiyle aynılığı çağıranda denetlenir."""
     def uyar(s, ad):
         return olcu is None or abs(s[3] - olcu[ad]) <= UC_PAYI_PT
 
@@ -1147,7 +1165,7 @@ def _u_isaretleri(parcalar: list[tuple], olcu: dict | None = None) -> list[dict]
             continue
         o = fitz.Point((t[1].x + t[2].x) / 2, (t[1].y + t[2].y) / 2)
         yon, yon2 = kollar[0][1] - t[1], kollar[1][1] - t[2]
-        if yon.x * yon2.x + yon.y * yon2.y < 0.9 * math.hypot(yon.x, yon.y) * math.hypot(yon2.x, yon2.y):
+        if yon.x * yon2.x + yon.y * yon2.y <= 0:
             continue                       # kollar aynı yana gitmiyor (Z biçimi): U değil; parçaları sahipsiz kalır
         saplar = [(s, degen(s, o)) for s in parcalar if s is not t and id(s) not in kullanilan and uyar(s, "sap") and degen(s, o) is not None]
         saplar = [(s, uc) for s, uc in saplar if (uc.x - o.x) * yon.x + (uc.y - o.y) * yon.y < 0]
@@ -1156,7 +1174,11 @@ def _u_isaretleri(parcalar: list[tuple], olcu: dict | None = None) -> list[dict]
         sap, uc = saplar[0]
         parca = [t, kollar[0][0], kollar[1][0], sap]
         kullanilan |= {id(s) for s in parca}
-        out.append({"o": o, "uc": uc, "parcalar": parca, "olcu": {"kol": round((kollar[0][0][3] + kollar[1][0][3]) / 2, 2),
+        n = fitz.Point(-(t[2].y - t[1].y), t[2].x - t[1].x) / t[3]                   # tabana dik birim vektör, sap yanına
+        n = n if (uc.x - o.x) * n.x + (uc.y - o.y) * n.y > 0 else -n
+        aci = {"kol_kol": round(_aci_farki(_aci(kollar[0][0]), _aci(kollar[1][0])), 2),
+               "kol_taban": [round(_aci_farki(_aci(k[0]), _aci(t)), 2) for k in kollar], "sap_taban": round(_aci_farki(_aci(sap), _aci(t)), 2)}
+        out.append({"o": o, "uc": uc, "yon": n, "aci": aci, "parcalar": parca, "olcu": {"kol": round((kollar[0][0][3] + kollar[1][0][3]) / 2, 2),
                                                                    "sap": round(sap[3], 2), "taban": round(t[3], 2)},
                     "r": fitz.Rect(min(p.x for s in parca for p in s[1:3]), min(p.y for s in parca for p in s[1:3]),
                                    max(p.x for s in parca for p in s[1:3]), max(p.y for s in parca for p in s[1:3]))})
@@ -1243,8 +1265,8 @@ def _renk_farki(a: tuple, b: tuple) -> float:
 
 def elektrik_oku(pg, ayar: dict, dis_olcu_cm: list[float]) -> dict:
     """Elektrik yerleşim planı (KH-3). İşaretlerin rengi, ölçüsü ve bileşimi (işaretin kutusundaki öğelerin rengi, dolgusu, türü;
-    dolgusuz öğede ölçüsü ve çizgi sayısı) lejanttan okunur, koda gömülmez. Aynı yerde (0,05 pt içinde) ikinci kez çizilmiş öğe bir sayılır
-    (`ayrinti.elektrik.atilan.ayni_yerde_iki_kez`):
+    dolgusuz öğede ölçüsü ve PDF yolunun öğeleri) lejanttan okunur, koda gömülmez. Aynı yerde (0,05 pt içinde) ikinci kez çizilmiş öğe
+    bir sayılır (`ayrinti.elektrik.atilan.ayni_yerde_iki_kez`):
     - tijli duy: lejanttaki dolgunun renginde, birbirine değen dolgular; kutusu lejanttakinin ölçüsünde (±1 pt), içi lejanttakiyle aynı;
     - glop: lejanttaki daire (renk, çap), içinde lejanttaki kadar çapraz (aralarındaki açılar `aci_payi_derece` içinde) ve lejanttaki
       işaretle aynı bileşim; çaprazsız, içinde yalnız dairesi olan ve "BUAT" yazan daire buat (bilgi);
@@ -1252,9 +1274,9 @@ def elektrik_oku(pg, ayar: dict, dis_olcu_cm: list[float]) -> dict:
       lejanttaki boyda ve tırnakla lejanttaki açıda tek kısa çizgi; her tırnağın yarıçapla açısı lejanttakiyle aynı; bir tırnak tekli,
       iki tırnak çift (dizilişi lejanttaki çiftinki: değdikleri yerlerin merkezden ve çizgilerinin açı farkı; aynalanmış çift de olur).
       Açılar `aci_payi_derece` içinde;
-    - priz: lejanttaki U (kol, sap ve taban boyu; kollar aynı yana); birinin sapının ucu öbürünün tabanının ortasına değen, aynı yöne
-      (`aci_payi_derece` içinde) bakan iki U çift prizdir; "UYDU" yazısına en yakın (`uydu_uzakligi_pt` içinde) tek U uydu prizidir,
-      tekli prizden düşülür;
+    - priz: lejanttaki U (kol, sap ve taban boyu; kollar aynı yana; kolların arası, kolların ve sapın tabanla açısı `aci_payi_derece`
+      içinde); birinin sapının ucu öbürünün tabanının ortasına değen, tabanı aynı yöne (`aci_payi_derece` içinde) bakan iki U çift
+      prizdir; "UYDU" yazısına en yakın (`uydu_uzakligi_pt` içinde) tek U uydu prizidir, tekli prizden düşülür;
     - sigorta kutusu: `sigorta_rengi`nde, birbirine değen çizgilerin kutusu lejanttaki çerçevenin ölçüsünde (±%10), içi lejanttakiyle aynı;
     - zil: lejantta yoksa 0.
     Sessiz sayı yok; şunların her biri bölümü teyide düşürür:
@@ -1267,8 +1289,8 @@ def elektrik_oku(pg, ayar: dict, dis_olcu_cm: list[float]) -> dict:
       da aynalanarak ikinci kez çizilmiş), tırnağın ucunda birden çok, lejanttakinden başka boyda ya da açıda ya da hiç çizgi; çaprazı
       lejanttakinden başka sayıda ya da başka açıda glop (tek çapraz iki kez çizilmiş), çaprazsız ve BUAT yazısız daire, içinde BUAT yazan
       glop; lejantta çaprazsız glop, tırnaksız anahtar ya da iki tırnaklı anahtar yokken planda iki tırnaklı anahtar;
-    - iki çift prize giren U; sapı öbürünün tabanına değmeyen ama sap boyundan yakın iki U (çift priz olabilir); sapı öbürünün tabanına
-      değen ama başka yöne bakan iki U; kutusu bir başkasıyla kesişen ve çift olmayan iki U ya da kutusu aynı türden bir başkasıyla
+    - açıları lejanttakine uymayan U (kolu açık, paralelkenar, sapı eğik); iki çift prize giren U; sapı öbürünün tabanına değmeyen ama
+      sap boyundan yakın iki U (çift priz olabilir); sapı öbürünün tabanına değen ama başka yöne bakan iki U; kutusu bir başkasıyla kesişen ve çift olmayan iki U ya da kutusu aynı türden bir başkasıyla
       kesişen iki duy, glop/BUAT, anahtar ya da sigorta (aynı işaret kaydırılarak iki kez çizilmiş olabilir; kaymış duy kopyası
       öbürüyle tek kümeye girer ve ölçüsü tutmaz, kaymış sigorta kopyası da tek büyük kutu olur ve iç deseni sahipsiz kalır); kutusunun
       ortası başka türden bir işaretin kutusunda olan işaret (ör. BUAT dairesinin içine çizilmiş U);
@@ -1340,7 +1362,9 @@ def elektrik_oku(pg, ayar: dict, dis_olcu_cm: list[float]) -> dict:
             renkler = Counter(o["renk"] for o in g if not o["dolgu"] and o["cizgiler"])
             U = _u_isaretleri(_parcalar(g, renkler.most_common(1)[0][0])) if renkler else []
             if len(U) == 1 and abs(U[0]["parcalar"][1][3] - U[0]["parcalar"][2][3]) <= UC_PAYI_PT:
-                L[tur] = {"renk": renkler.most_common(1)[0][0], **U[0]["olcu"]}
+                a = U[0]["aci"]                         # açılar: iki kolun arası, kolların (ortalama) ve sapın tabanla açısı
+                L[tur] = {"renk": renkler.most_common(1)[0][0], **U[0]["olcu"],
+                          "aci": {"kol_kol": a["kol_kol"], "kol_taban": round(sum(a["kol_taban"]) / 2, 2), "sap_taban": a["sap_taban"]}}
         else:
             siyah = [o for o in g if _ayni_renk(o["renk"], tuple(E["sigorta_rengi"]))]
             if siyah:
@@ -1376,12 +1400,18 @@ def elektrik_oku(pg, ayar: dict, dis_olcu_cm: list[float]) -> dict:
     if "priz" in L:
         P = L["priz"]
         U = _u_isaretleri(_parcalar(plan, P["renk"]), P)
+        pa = E["aci_payi_derece"]                       # U'nun açıları lejanttakiyle aynı; uymayanın parçaları sahipsiz kalır
+        aci_disi = [u for u in U if abs(u["aci"]["kol_kol"] - P["aci"]["kol_kol"]) > pa or abs(u["aci"]["sap_taban"] - P["aci"]["sap_taban"]) > pa
+                    or any(abs(a - P["aci"]["kol_taban"]) > pa for a in u["aci"]["kol_taban"])]
+        if aci_disi:
+            uyarilar.append(f"açıları lejanttakine (kollar {P['aci']['kol_kol']:g}°, kol–taban {P['aci']['kol_taban']:g}°, sap–taban "
+                            f"{P['aci']['sap_taban']:g}°) uymayan {len(aci_disi)} U")
+        U = [u for u in U if u not in aci_disi]
         for u in U:
             parca_al(u["parcalar"])
 
-        def ayni_yon(a, b):                             # iki U'nun sapı aynı yöne (`aci_payi_derece` içinde)
-            va, vb = a["uc"] - a["o"], b["uc"] - b["o"]
-            return va.x * vb.x + va.y * vb.y >= math.cos(math.radians(E["aci_payi_derece"])) * math.hypot(va.x, va.y) * math.hypot(vb.x, vb.y)
+        def ayni_yon(a, b):                             # iki U'nun tabanı aynı yöne bakar (`aci_payi_derece` içinde)
+            return a["yon"].x * b["yon"].x + a["yon"].y * b["yon"].y >= math.cos(math.radians(pa))
         degen_ = [(i, j) for i, a in enumerate(U) for j, b in enumerate(U) if i != j and _uzak(a["uc"], b["o"]) <= UC_PAYI_PT]
         cift = [(i, j) for i, j in degen_ if ayni_yon(U[i], U[j])]
         if len(cift) != len(degen_):

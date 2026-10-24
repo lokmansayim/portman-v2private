@@ -1838,7 +1838,12 @@
      ],
      "kol": 4.92,
      "sap": 7.8,
-     "taban": 8.52
+     "taban": 8.52,
+     "aci": {
+      "kol_kol": 0.0,
+      "kol_taban": 90.0,
+      "sap_taban": 90.0
+     }
     },
     "sigorta": {
      "renk": [
