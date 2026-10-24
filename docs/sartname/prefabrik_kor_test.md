@@ -61,7 +61,8 @@ Sıra her koşuda aynı; bir adım tutmazsa araç durur, nedenini yazar ve sonra
    **Doğru = aynı + ayrım + pafta + aday** (13 Ekim raporlarının tanımı). Ölçü: ölçüyle eşlenen gruplarda ölçüsü tutmayan satır adet tutsa da
    "farklı"; farklı bölünen kalemlerin toplandığı gruplarda toplamla birlikte ölçü kümesi kıyaslanır (iki yanda sayılı ölçü varsa her birinin
    öbür yanda eşi olmalı; gerçek yanın bütün satırları ve bizim yanın adedi dolu bütün satırları sayılı ölçülüyse ölçü başına toplam da), ayrı kalemler arasındaki dağılım kıyaslanmaz; bir yanda sayılı ölçü yoksa ("ADET") yalnız adet kıyaslanır. Ölçünün
-   kıyaslanmadığı grup sözlükte gerekçesiyle yazar (`olcu_serbest`, ör. makas: bizde açıklık, gerçek listede boy).
+   kıyaslanmadığı grup sözlükte gerekçesiyle yazar (`olcu_serbest`, ör. makas: bizde açıklık, gerçek listede boy). Bizim satırların sırası
+   eşlemeyi değiştirmez.
 6. **Sınıf:** proje başına sınıf dosyası (proje klasöründe); sınıfı yazılmamış fark "sınıflanmadı" sayılır.
 7. **Rapor:** md ve xlsx; kod, m² ve satırlar. Ad, bayi adı ve dosya adı yazılmaz; telefona benzeyen her şey maskelenir.
 

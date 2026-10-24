@@ -117,19 +117,17 @@ def kimlik(t) -> str:
 
 
 def ayni_olcu(a, b, grup: dict | None = None) -> bool:
-    """Gerileme kapısında kayıttaki bizim ölçümüzle bugünkü aynı mı: aynı kimlik (birim çevirisi ve tolerans yok; `anahtar: en_buyuk`
-    ise en büyük sayı birebir). Aynı yazıya inen ama sayıları farklı iki ölçü ("1 200 × 300" ↔ "1200 × 300") de, sayıları aynı ama
-    yazısı farklı iki ölçü ("1200 × 300" ↔ "1200/300") de aynı değildir: `tam` kipinde anahtar yazıdır, eşdeğer adımı sayılara bakar."""
-    if grup and grup.get("anahtar") == "en_buyuk":
-        x, y = _en_buyuk(a), _en_buyuk(b)
-        return x is not None and x == y
+    """Gerileme kapısında kayıttaki bizim ölçümüzle bugünkü aynı mı: aynı kimlik, her kipte (birim çevirisi ve tolerans yok;
+    `anahtar: en_buyuk` grubunda da yalnız en büyük sayı yetmez, eşleme önce yazıya bakar). Aynı yazıya inen ama sayıları farklı iki
+    ölçü ("1 200 × 300" ↔ "1200 × 300") de, sayıları aynı ama yazısı farklı iki ölçü ("1200 × 300" ↔ "1200/300") de aynı değildir:
+    `tam` kipinde anahtar yazıdır, eşdeğer adımı sayılara bakar. `grup` imza için durur."""
     return kimlik(a) == kimlik(b)
 
 
 def belirsiz_olcu(satirlar: list[dict]) -> list[str]:
     """Aynı yazıya inen ama sayıları farklı bizim ölçülerimiz (ör. "1200 × 300" ile "1 200 × 300"): `tam` kipinde ikisi aynı
-    anahtardadır, eşleme anahtarın ilk satırının sayılarına bakar; satır sırası değişince sonuç değişebilir. Kapı böyle bir grupta
-    durur (bugün sekiz projede yok)."""
+    anahtardadır ve anahtarın sayıları kimlik sırasıyla ilk satırdan gelir; aynı ölçünün iki yazımı üreteçte tutarsızlıktır. Kapı böyle
+    bir grupta, tutan satır başka anahtarda olsa da durur (yanlış alarm yönünde katı; bugün sekiz projede yok)."""
     k: dict[str, set] = {}
     for s in satirlar:
         k.setdefault(olcu(s["olcu"]), set()).add(kimlik(s["olcu"]))
@@ -153,7 +151,7 @@ def _olcu_basina_tutar(g_satir: list[dict], b_satir: list[dict], grup: dict | No
     if not all(olculu(s["boyut"]) for s in g_satir) or not all(olculu(s["olcu"]) for s in b_satir):
         return True
     temsil = []
-    for s in b_satir:
+    for s in sorted(b_satir, key=lambda s: kimlik(s["olcu"])):        # satır sırasına bağlı kalmasın (`esdeger` geçişli değil)
         if not any(esdeger(s["olcu"], r, grup) for r in temsil):
             temsil.append(s["olcu"])
     if len(temsil) < 2:
@@ -271,7 +269,7 @@ def _anahtarla(g_satir: dict, b_satir: dict, grup: dict | None):
     gk, bk = {}, {}
     for i, s in g_satir.items():
         gk.setdefault(anahtar(s["boyut"]), []).append(i)
-    for j, s in b_satir.items():
+    for j, s in sorted(b_satir.items(), key=lambda js: kimlik(js[1]["olcu"])):   # bizim satır sırası eşlemeyi değiştirmesin
         bk.setdefault(anahtar(s["olcu"]), []).append(j)
     cift = [(gk[k], bk[k], True, k, "anahtar") for k in gk if k in bk]
     kalan_g = [k for k in gk if k not in bk]

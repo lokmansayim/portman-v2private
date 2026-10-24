@@ -586,6 +586,8 @@ def test_kapi_olcu_kimligi_yazi_ve_sayilar():
     assert esle.tutuyor_mu(sonra, [], t) == "aynı"                                   # kayıt da kimlikle: aynı liste kapıdan geçer
     # sayıları aynı, yazısı farklı: `tam` kipinde anahtar yazıdır, bölünür (hakem 7. tur, B2)
     assert not esle.ayni_olcu("1200 × 300", "1200/300") and not esle.ayni_olcu("1200 × 300", "1200 × 300 CM")
+    boy = {"anahtar": "en_buyuk"}                                                  # en büyük sayı yetmez (hakem 8. tur, B2)
+    assert not esle.ayni_olcu("100*100*3240", "60*60*3240", boy) and esle.ayni_olcu("L 3240", "L:3240", boy)
     once = [{"kalem": "Deneme kapak", "olcu": "1200 × 300", "adet": 5}, {"kalem": "Deneme kapak", "olcu": "1200 × 300", "adet": 2}]
     gercek = [("DENEME KAPAK", "1200 X 300", 7)]
     (t,) = _tutanlar(once, gercek, [])
@@ -596,19 +598,47 @@ def test_kapi_olcu_kimligi_yazi_ve_sayilar():
 
 
 def test_kapi_belirsiz_olcude_durur(tmp_path):
-    """Aynı yazıya inen ama sayıları farklı iki bizim ölçümüz aynı anahtardadır; eşleme satır sırasına bağlı kalır: kapı durur
-    (uydurma; hakem 7. tur, B1)."""
+    """Aynı yazıya inen ama sayıları farklı iki bizim ölçümüz (aynı ölçünün iki yazımı) grupta varsa kapı durur, tutan satır başka
+    anahtarda olsa da (uydurma; hakem 7. tur B1, 8. tur B3)."""
     once = [{"kalem": "Deneme kapak", "olcu": "1200 × 300", "adet": 1}, {"kalem": "Deneme kapak", "olcu": "1 200 × 300", "adet": 1}]
     gercek = [("DENEME KAPAK", "120*30", 2)]
     (t,) = _tutanlar(once, gercek, [])
-    assert t["eslesme"] == "esdeger" and _sonuc(once, gercek, []) == ["ayrım"] and _sonuc(once[::-1], gercek, []) == ["farklı"]
+    assert t["eslesme"] == "esdeger" and _sonuc(once, gercek, []) == _sonuc(once[::-1], gercek, []) == ["ayrım"]   # sıraya bağlı değil
     assert esle.belirsiz_olcu(once) == ["1200X300"]
     assert esle.kapi_denetle(once, [], t)[1].startswith("belirsiz ölçü")
     toplam = _gruplar(tmp_path, TOPLAM)
     once = [{"kalem": "Deneme toplam", "olcu": "1 200 × 300", "adet": 0}, {"kalem": "Deneme toplam", "olcu": "1200 × 300", "adet": 5}]
     (t,) = _tutanlar(once, [("DENEME TOPLAM", "120 X 30", 5)], toplam)
     assert esle.kapi_denetle(once, toplam, t)[1].startswith("belirsiz ölçü")
+    once = [{"kalem": "Deneme kapak", "olcu": "1200 × 300", "adet": 2}, {"kalem": "Deneme kapak", "olcu": "1500/300", "adet": 1},
+            {"kalem": "Deneme kapak", "olcu": "1 500/300", "adet": 1}]                    # belirsiz ölçü başka anahtarda
+    (t,) = _tutanlar(once, [("DENEME KAPAK", "1200 X 300", 2)], [])
+    assert t["eslesme"] == "anahtar" and t["sonuc"] == "aynı"
+    assert esle.kapi_denetle(once, [], t)[1].startswith("belirsiz ölçü")
     assert esle.belirsiz_olcu([{"olcu": "1200 × 300"}, {"olcu": "1200 X 300"}, {"olcu": "ADET"}]) == []
+
+
+def test_esleme_bizim_satir_sirasina_bagli_degil(tmp_path):
+    """Bizim satırlarımızın sırası eşlemeyi değiştirmez: anahtarlar ve ölçü başına toplamın temsilcileri kimlik sırasıyla (uydurma;
+    hakem 8. tur, B1: aynı ad grubunda eşdeğer adımı, cm ↔ mm kardeşleri, tolerans, geçişli olmayan eşdeğerlik)."""
+    from itertools import permutations
+
+    def s(kalem, o, a):
+        return {"kalem": kalem, "olcu": o, "adet": a}
+    profil = {"ad": "Deneme profil", "bizim": ["^DENEME PROFIL"], "gercek": ["^DENEME PROFIL"], "olcu": "tam", "anahtar": "en_buyuk",
+              "tolerans": 10}
+    vakalar = [
+        ([], [s("Deneme kapak", "1200 × 300", 2), s("Deneme kapak", "1200/300", 5)], [("DENEME KAPAK", "120*30", 2)]),
+        ([], [s("Deneme kapak", "1200 × 300", 3), s("Deneme kapak", "120 × 30", 5)], [("DENEME KAPAK", "1200/300", 3)]),
+        (_gruplar(tmp_path, profil), [s("Deneme profil", "L 3240", 2), s("Deneme profil", "L 3250", 3)], [("DENEME PROFIL", "L 3245", 2)]),
+        (_gruplar(tmp_path, {**profil, "olcu": "yok"}),
+         [s("Deneme profil", "L 3248", 3), s("Deneme profil", "L 3240", 3), s("Deneme profil", "L 3256", 3)], [("DENEME PROFIL", "L 3250", 9)]),
+        (_gruplar(tmp_path, TOPLAM), [s("Deneme toplam", "12 × 3", 2), s("Deneme toplam", "120 × 30", 2), s("Deneme toplam", "1200 × 300", 2)],
+         [("DENEME TOPLAM", "120 X 30", 6)]),
+    ]
+    for g, bizim, gercek in vakalar:
+        sonuclar = {tuple(_sonuc(list(p), gercek, g)) for p in permutations(bizim)}
+        assert len(sonuclar) == 1, (bizim, sonuclar)
 
 
 def test_kapi_pafta_kaydinda_aday_sutunu_yetmez():
