@@ -119,9 +119,10 @@ def kimlik(t) -> str:
 def ayni_olcu(a, b, grup: dict | None = None) -> bool:
     """Gerileme kapısında kayıttaki bizim ölçümüzle bugünkü aynı mı: aynı kimlik, her kipte (birim çevirisi ve tolerans yok;
     `anahtar: en_buyuk` grubunda da yalnız en büyük sayı yetmez: kapı o grupta satırları en büyük sayıyla seçer, `bizim_secimi`, ve
-    kayıttakilerle kimlikle eşler; en büyük sayısı aynı, kimliği farklı satır "yeni satır" olur). Aynı yazıya inen ama sayıları farklı iki
-    ölçü ("1 200 × 300" ↔ "1200 × 300") de, sayıları aynı ama yazısı farklı iki ölçü ("1200 × 300" ↔ "1200/300") de aynı değildir:
-    `tam` kipinde anahtar yazıdır, eşdeğer adımı sayılara bakar. `grup` imza için durur."""
+    kayıttakilerle kimlikle eşler; en büyük sayısı aynı, kimliği farklı yeni satır "yeni satır", kimliği değişen kayıt satırı "satır yok"
+    olur). Aynı yazıya inen ama sayıları farklı iki ölçü ("1 200 × 300" ↔ "1200 × 300") de, sayıları aynı ama yazısı farklı iki
+    ölçü ("1200 × 300" ↔ "1200/300") de aynı değildir: `tam` kipinde anahtar yazıdır, eşdeğer adımı sayılara bakar. `grup` imza için
+    durur."""
     return kimlik(a) == kimlik(b)
 
 
@@ -366,7 +367,9 @@ def _hedef(gruplar: list[dict], tutan: dict):
 def bizim_secimi(bizim: list[dict], gruplar: list[dict], tutan: dict) -> list[dict]:
     """Gerileme kapısı: tutan bir anahtarın bugünkü listedeki satırları (aynı grup ya da ad; `tam` kipinde eşlemenin anahtarı,
     `olcu_anahtari`, kayıttaki bizim satırlarımızınkiyle aynı olanlar: `anahtar: en_buyuk` grubunda en büyük sayısı aynı ama yazısı
-    farklı yeni bir satır da seçilir ve çift denetiminde "yeni satır" olur)."""
+    farklı yeni bir satır da seçilir ve çift denetiminde "yeni satır" olur). Anahtarı None olan kayıt bütün grubu seçer: `yok` ve `her_satir`
+    kipinde kayıt bütün grubu taşır; en büyük sayılı grupta sayısız ölçülü bir tutan olursa (bugün yok) grubun öteki ölçüleri "yeni
+    satır" olur (yanlış alarm yönünde)."""
     hedef, grup = _hedef(gruplar, tutan)
     if hedef is None:
         return []
