@@ -15,7 +15,7 @@ Yeni pencere için hazırlıklar:
   - Köşe direkleri render'ı (B-01 13 × 13, B-02 9 × 9; Blender Cycles); evin tamamı için render hattı.
   - Alpha Mini çatı makası .bde okuyucusu ve makas kuralı.
   - Lokman'ın 24 Ekim düzeltmeleri rehberde: köşeler; saçak sacı makastan önce; alın sacı saçak sacıyla aynı; dereler binayla birlikte iner (eksiz galvaniz oluk).
-- **Kullanıcı adımları:** rehber Yerelde çalışıyor (artefakt, özel). Ev render'ının son görünümleri alınmadı. .bde üretimi Çalışmıyor (işlem harfleri yazılımcıdan bekleniyor). Herkese açık yayın Çalışmıyor.
+- **Kullanıcı adımları:** rehber Yerelde çalışıyor (artefakt, özel; sürüm 9, render galerili). Ev render'ı tamam (24 Ekim öğleden sonra: beş görünüm + etiketli pafta; kalkan kenarı, dere köşesi ve inişler Lokman'ın çizim ve fotoğraflarına göre). .bde üretimi Çalışmıyor (işlem harfleri yazılımcıdan bekleniyor). Herkese açık yayın Çalışmıyor.
 - **Devir:** `docs/devir/2026-10-24_Alpha_Mini_Devri.md`, `docs/devir/2026-10-24_Render_Devri.md`, `docs/devir/2026-10-24_Rehber_Yayin_Devri.md`.
 - **Bekleyen (Lokman):** .bde harfleri (yazılımcı); kalkan köşe dolguları; 6'lık iç kanat 8,5 cm; saçak kıvrımı 10 cm; makas çubuk kesiti yönü; dere fotoğrafı; yayın için adres ve onay.
 

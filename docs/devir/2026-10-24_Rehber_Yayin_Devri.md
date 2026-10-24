@@ -64,3 +64,15 @@ Render oturumunun çıktısı: son görünümler ve rehbere eklenmiş galeri. Ha
    - `curl -I` (200, başlıklar);
    - sayfanın telefonda açılması (Lokman).
 6. **Kapanış.** `DURUM.md` ve devir notu güncellenir; durum kanıtla yazılır ("Canlıda çalışıyor").
+
+## Güncelleme · 24 Ekim 2026 öğleden sonra
+
+**Render işi bitti (kart 103):**
+- Rehberde galeri var.
+- Görseller `deneme/2026-10-24_montaj_rehberi/rehber/gorsel/*.jpg` (her biri 50–300 KB); sayfa onlara `gorsel/…` göreli yoluyla bağlanıyor.
+- Yayın paketi: `uret.py` çıktısı `index.html` olur, yanına `gorsel/` klasörü konur.
+
+**Herkese açık sürümde maskelenecekler (görsel ve metin):**
+- Pafta görselindeki "Lokman'ın çizimleri" ibaresi ve kartlardaki "Lokman çizimi", "Lokman, fotoğraflar", "teyit bekliyor" notları.
+- `__PROJE__` adı.
+- Galeri `GORSELLER` dizisi, şablonda.

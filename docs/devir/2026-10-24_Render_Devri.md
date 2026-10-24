@@ -60,3 +60,32 @@ Dal: `claude/montaj-rehberi-devir`. Dosyalar: `deneme/2026-10-24_montaj_rehberi/
 2. Üç son görünüm alınır (`on_sag`, `arka_sol`, `catisiz`). Köşe paftası gibi tek, etiketli bir pafta yapılır.
 3. Render'lar rehbere eklenir ("render'lı montaj rehberi"): genel bakışta galeri, son adımda bitmiş ev görseli. Bu, yayın işinin girdisidir (`2026-10-24_Rehber_Yayin_Devri.md`).
 4. İstenirse adım başına render (ör. oda oda dizilimin üç karesi) ya da kısa animasyon.
+
+## Güncelleme · 24 Ekim 2026 öğleden sonra (aynı oturum, kart 103)
+
+**Yapıldı:**
+- **Son render'lar alındı** (1600 × 1000, 64 örnek, görünüm başına ~3–4 dk): ön-sağ, arka-sol, çatısız, köşe (`kose_dere`) ve ortografik kalkan kesiti (`kalkan_kesit`).
+- **Etiketli pafta:** `render/gorsel/ev_render_pafta.png`.
+- **Galeri:** rehbere "Render görselleri" düğmesi ve galeri eklendi; görseller `rehber/gorsel/*.jpg`.
+- **Artefakt:** sürüm 9; görseller artefaktın yan dosyaları (`gorsel/…`).
+- **Lokman'ın 24 Ekim öğleden sonra düzeltmeleri işlendi:**
+  - **Kalkan kenarı** (`render/gorsel/kalkan_kesit_cizimi.png`, Lokman'ın çizimi):
+    - baş makas Z'si: makas ve betopan üstünden geçer, betopan yüzünden 3 cm çentikle iner, altta 3 cm dışarı kıvrılır;
+    - alın sacı makas üstünün 3 cm altından başlar, tırnağı Z'ye girer;
+    - C kapama aşık uçlarını kapatır;
+    - alın sacının üstünde, saçak sacına ek olarak trapezin kenar hadvesini kavrayan bir kıvrım var.
+  - **Çatı hadveleri** gerçek trapez kesiti oldu: taban 9, tepe 3, yükseklik 3 cm, ~25 cm aralık, iki kalkan kenarında birer hadve.
+  - **Köşe** (fotoğraflar):
+    - alın sacı aşağı iner ve derenin alnını kapatır, alttan düz kesilir;
+    - saçak sacının saçak altı alın sacına kadar uzar, alnı ve üst kıvrımı makas topuğunda kesilir.
+  - **Dere ve iniş:** dere antrasit boyalı K kesit; iniş dikdörtgen kesitli ve oluklu (~8 × 6 cm), antrasit, kaz boynu ve kelepçeyle binayla iner.
+- **Lokman'ın kararı:** montaj rehberi ve render'lar ham malzemeyle kalır (betopan, galvaniz). Boyalı bitmiş görünüme (beyaz duvar, antrasit profil) "sonra bakarız".
+
+**Kalan:**
+- Bitmiş görünüm (boyama) ayrı iş.
+- Teyit bekleyenler:
+  - kalkan köşe dolguları;
+  - 6'lık iç kanat 8,5 cm;
+  - saçak kıvrımı 10 cm;
+  - makas çubuk kesiti yönü;
+  - köşede alın sacı alt ucunun yatay kesim yüksekliği (derenin altından, saçak altı hizası varsayıldı).

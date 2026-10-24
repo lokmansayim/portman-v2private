@@ -67,7 +67,7 @@ YENI = {
     'pvc': boyali('pvc', (0.90, 0.90, 0.88), 0.35, 0.0),
     'glass': cam(),
     'cdoor': boyali('celik_kapi', (0.06, 0.065, 0.07), 0.4, 0.4),
-    'roof': cati(), 'ridge': ANTRASIT, 'trim': ANTRASIT, 'gutter': GALV,
+    'roof': cati(), 'ridge': ANTRASIT, 'trim': ANTRASIT, 'gutter': ANTRASIT,
 }
 
 def kok(o):
@@ -83,10 +83,17 @@ def adim(o):
     return None
 
 gizle = set(range(9, 17)) if gorunum == 'catisiz' else set()
+if gorunum == 'kalkan_kesit':   # yalnız kalkan kenarı: makas, betopan, Z, aşık, C kapama, kaplama, alın sacı
+    gizle = set(range(0, 11)) | {13, 17}
 for o in list(bpy.data.objects):
     if o.type != 'MESH': continue
     if adim(o) in gizle:
         o.hide_render = True; continue
+    if gorunum == 'kalkan_kesit' and o.material_slots and o.material_slots[0].material:
+        k0 = o.material_slots[0].material.name.split('.')[0]
+        bb = [o.matrix_world @ Vector(c) for c in o.bound_box]; dx = max(v.x for v in bb) - min(v.x for v in bb)
+        if k0 in ('gutter', 'ridge') or (k0 == 'trim' and dx < 0.5):
+            o.hide_render = True; continue
     for i, s in enumerate(o.material_slots):
         if s.material:
             k = s.material.name.split('.')[0]
@@ -114,7 +121,11 @@ KAM = {  # konum, hedef, objektif (mm), güneş yönü (azimut, yükseklik derec
     'arka_sol': ((-12.0, 14.5, 3.6), (0.0, 0.6, 1.45), 40, (140, 42)),
     'catisiz':  ((-7.5, -11.5, 13.0), (0.15, 0.1, 0.6), 32, (-35, 55)),
     'kalkan':   ((-4.6, -9.0, 2.2), (-2.2, -5.2, 2.75), 50, (-35, 42)),
+    'alin_ucu': ((-3.95, -5.85, 2.30), (-3.05, -5.22, 2.70), 45, (-35, 42)),
+    'alin_yan': ((-2.6, -6.6, 2.55), (-1.6, -5.3, 3.05), 55, (-35, 42)),
+    'kose_dere': ((-4.35, -6.35, 2.05), (-3.25, -5.25, 2.55), 40, (-35, 42)),
     'detay':    ((-6.2, -8.6, 2.5), (-3.05, -5.05, 2.05), 45, (-35, 42)),
+    'kalkan_kesit': ((0, 0, 0), (0, 0, 1), 50, (-60, 35)),
 }
 kp, kh, lens, (az, yuk) = KAM[gorunum]
 gun = bpy.data.lights.new('gunes', 'SUN'); gun.energy = 3.2; gun.angle = math.radians(3)
@@ -125,6 +136,12 @@ go.rotation_euler = (-yon).to_track_quat('-Z', 'Y').to_euler()
 kam = bpy.data.objects.new('kamera', bpy.data.cameras.new('kamera')); sc.collection.objects.link(kam); sc.camera = kam
 kam.data.lens = lens; kam.location = kp
 kam.rotation_euler = (Vector(kh) - Vector(kp)).to_track_quat('-Z', 'Y').to_euler()
+if gorunum == 'kalkan_kesit':   # ön kalkanın sol yüzü, eğim boyunca alt uçtan ortografik bakış (Lokman'ın kesit çizimi gibi)
+    T = math.atan(0.33); d = Vector((math.cos(T), 0, math.sin(T))); n = Vector((-math.sin(T), 0, math.cos(T)))
+    C = Vector((-3.304, -5.0 - 0.10, 2.6018)) + n * 0.03
+    kam.data.type = 'ORTHO'; kam.data.ortho_scale = 0.56; kam.data.clip_start = 0.01; kam.data.clip_end = 1.5 + 3.3
+    kam.location = C - d * 1.5
+    kam.rotation_euler = d.to_track_quat('-Z', 'Y').to_euler()
 
 sc.render.engine = 'CYCLES'; sc.cycles.device = 'CPU'; sc.cycles.samples = ornek
 sc.cycles.use_adaptive_sampling = True; sc.cycles.use_denoising = True

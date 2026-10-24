@@ -97,6 +97,17 @@ body{height:100%;background:var(--bg);color:var(--ink);font-family:var(--f-body)
 .ctl.primary:hover{background:color-mix(in srgb,var(--accent) 88%,white)}
 .ctl:disabled{opacity:.35;cursor:default;background:transparent}
 .ctl svg{width:14px;height:14px;fill:currentColor}
+.gal{position:absolute;inset:0;z-index:5;display:flex;flex-direction:column;background:var(--scene)}
+.gal[hidden]{display:none}
+.gal .gx{position:absolute;top:10px;right:10px;z-index:1}
+.gal figure{flex:1;min-height:0;margin:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:52px 16px 6px}
+.gal figure img{max-width:100%;max-height:calc(100% - 30px);object-fit:contain;border-radius:8px;box-shadow:0 8px 24px rgba(10,20,30,.16)}
+.gal figcaption{font-size:13px;line-height:1.35;color:var(--muted);margin-top:8px;text-align:center;max-width:70ch}
+.gal .thumbs{display:flex;gap:8px;padding:6px 12px 12px;overflow-x:auto}
+.gal .thumbs>:first-child{margin-left:auto}.gal .thumbs>:last-child{margin-right:auto}
+.gal .thumbs button{flex:0 0 auto;border:2px solid transparent;border-radius:8px;padding:0;background:none;cursor:pointer}
+.gal .thumbs button[aria-current="true"]{border-color:var(--accent)}
+.gal .thumbs img{display:block;width:92px;height:58px;object-fit:cover;border-radius:6px}
 .nogl{position:absolute;inset:0;display:grid;place-items:center;padding:24px;text-align:center;color:var(--muted)}
 button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
@@ -144,6 +155,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
       <div class="badge glass"><span class="bn" id="badgeNo"></span><span class="bt" id="badgeTitle"></span></div>
       <div class="tools">
         <button class="tog glass" id="roofTog" type="button" aria-pressed="false">Çatıyı gizle</button>
+        <button class="tog glass" id="galTog" type="button" aria-haspopup="dialog">Render görselleri</button>
         <div class="hint glass">Parçaya dokun: kimlik kartı</div>
       </div>
       <div class="info glass" id="info" hidden>
@@ -151,6 +163,11 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
         <div class="ik" id="infoK"></div>
         <h4 id="infoT"></h4>
         <dl id="infoD"></dl>
+      </div>
+      <div class="gal" id="gal" role="dialog" aria-label="Render görselleri" hidden>
+        <button class="tog glass gx" id="galX" type="button">Kapat</button>
+        <figure><img id="galImg" alt=""><figcaption id="galCap"></figcaption></figure>
+        <div class="thumbs" id="galThumbs"></div>
       </div>
       <div class="dock">
         <div class="progress" id="progress" role="group" aria-label="Adımlar"></div>
@@ -258,7 +275,7 @@ const BASE = {
   roof:     { color: 0x4b535b, roughness: 0.5, metalness: 0.4 },
   ridge:    { color: 0x3f464d, roughness: 0.5, metalness: 0.45 },
   trim:     { color: 0x474f57, roughness: 0.55, metalness: 0.4 },
-  gutter:   { color: 0xb4bcc2, roughness: 0.38, metalness: 0.62 },   // galvaniz
+  gutter:   { color: 0x3f464d, roughness: 0.45, metalness: 0.4 },    // boyalı antrasit (Lokman'ın fotoğrafları, 24.10)
 };
 const HL = new THREE.Color(0xf0a020);
 const matCache = new Map();
@@ -479,6 +496,29 @@ D.makas.slice().sort((a, b) => b.konum_cm - a.konum_cm).forEach((mk, i) => {
     add(12, o, gi * 4 + k, { kod: null, ad: dolgu ? 'Baş makas betopanı · köşe dolgusu' : 'Baş makas betopanı', satir: dolgu ? [['Bu parça', `${Math.round(b - a)} cm · ${side < 0 ? 'ön' : 'arka'} kalkan köşesi`], ['Durum', 'paftada yok; kesimden varsayıldı, teyit bekliyor']] : [['Bu parça', `125 × 250 · ${side < 0 ? 'ön' : 'arka'} kalkan`], ['Pafta', 'Baş makas betopan yerleşimi: 4 adet']] });
   });
 });
+// Kalkan kenarı parçaları eğim boyunca: o = betopanın dış yüzüne göre dışarı mesafe (cm; makas içe doğru eksi),
+// p = aşık oturma çizgisinden (makas üst başlığının üstü) eğime dik yükseklik (cm). Lokman'ın kalkan kesiti çizimi, 24.10.2026.
+function kalkanKenar(yf, sgn, side, m, uzat = 0) {   // uzat: alt uçta saçak ucundan dışarı uzama (cm)
+  const xa = side > 0 ? XL - 0.2 - uzat : XR + 0.2 + uzat, xm = (xa + XM) / 2, Ls = Math.abs(XM - xa) / cosT, g = new THREE.Group();
+  g.position.set(X(xm), ys(xm) / 100, 0); g.rotation.z = side * TH;
+  const zz = o => Z(yf + sgn * o);
+  const lev = (o0, o1, p0, p1) => { const b = mesh(new THREE.BoxGeometry(Ls / 100, (p1 - p0) / 100, Math.abs(zz(o1) - zz(o0))), m); b.position.set(0, (p0 + p1) / 200, (zz(o0) + zz(o1)) / 2); g.add(b); };
+  const egik = (o0, p0, o1, p1) => {
+    const dz = zz(o1) - zz(o0), dy = (p1 - p0) / 100, b = mesh(new THREE.BoxGeometry(Ls / 100, SAC / 100, Math.hypot(dz, dy)), m);
+    b.position.set(0, (p0 + p1) / 200, (zz(o0) + zz(o1)) / 2); b.rotation.x = Math.atan2(-dy, dz); g.add(b);
+  };
+  return { g, Ls, lev, egik };
+}
+// Baş makas Z'si: baş makasın ve betopanın üstünden geçer (aşığın altında), betopanın dış yüzünden 3 cm iner (çentik), altta 3 cm dışarı kıvrılır.
+// Alın sacının tırnağı bu alt kanada girer; alın sacı makas üstünün 3 cm altından başlar (Lokman, 24.10.2026).
+let zo = 0;
+[[0, -1], [1000, 1]].forEach(([yf, sgn]) => [1, -1].forEach(side => {
+  const K = kalkanKenar(yf, sgn, side, mat('frame', 12));
+  K.lev(-8.9, 0.4, -SAC, 0);          // üst kanat: makas ve betopan üstü
+  K.lev(0.3, 0.3 + SAC, -3, 0);       // gövde: betopanın dış yüzünde 3 cm
+  K.lev(0.3, 3.4, -3, -3 + SAC);      // alt kanat: 3 cm dışarı
+  add(12, K.g, 8 + zo++, { kod: null, ad: "Baş makas Z'si", satir: [['Bu parça', `${yf ? 'arka' : 'ön'} kalkan, ${side > 0 ? 'sol' : 'sağ'} yüz · L ${Math.round(K.Ls)} cm`], ['Kesit', 'üst kanat makas ve betopan üstünde · 3 cm çentik · 3 cm dış kanat; sac 1 mm'], ['Kaynak', 'Lokman çizimi (24.10.2026)']] });
+}));
 
 /* 11 · Tavan omegaları (asma düz tavan) */
 D.omega.forEach((o, i) => {
@@ -506,9 +546,19 @@ rowsFromEave.forEach((d, r) => [1, -1].forEach(side => {
   });
   ao++;
 }));
+// C kapama: kalkan saçağında aşık uçlarını kapatır; gövde aşık uçlarında, aşık üstünden alın sacının saçak altına kadar, kanatlar 2 cm içeri (Lokman çizimi, 24.10.2026)
+[[0, -1], [1000, 1]].forEach(([yf, sgn]) => [1, -1].forEach(side => {
+  const K = kalkanKenar(yf, sgn, side, mat('asik', 14));
+  K.lev(30.0, 30.0 + SAC, -2.9, 3.0 + SAC);   // gövde
+  K.lev(28.0, 30.0, 3.0, 3.0 + SAC);          // üst kanat: aşık uçlarının üstünde, panelin altında
+  K.lev(28.0, 30.0, -2.9, -2.9 + SAC);        // alt kanat
+  add(14, K.g, 100 + ao++, { kod: null, ad: 'C kapama', satir: [['Bu parça', `${yf ? 'arka' : 'ön'} kalkan, ${side > 0 ? 'sol' : 'sağ'} yüz · L ${Math.round(K.Ls)} cm`], ['Görev', 'aşık uçlarını kapatır; alın sacı bunun önüne gelir'], ['Kaynak', 'Lokman çizimi (24.10.2026)']] });
+}));
 
 /* 13 · Sandviç panel (yüz başına 11) + mahya */
 const PL = 350, PD = -1.35, AH = 3.0 + SAC;  // AH: aşık yüksekliği
+const RIB = (() => { const s = new THREE.Shape(); s.moveTo(-0.045, 0); s.lineTo(0.045, 0); s.lineTo(0.015, 0.03); s.lineTo(-0.015, 0.03); s.closePath(); return s; })();
+const RIB_Y = []; { const n = Math.round((1060 - 9) / 25), p = (1060 - 9) / n; for (let i = 0; i <= n; i++) RIB_Y.push(-30 + 4.5 + i * p); }
 let so = 0;
 [1, -1].forEach(side => {
   const ex = side > 0 ? XL : XR, dm = PD + PL / 2, lift = AH + 2;
@@ -520,12 +570,16 @@ let so = 0;
     g.rotation.z = side * TH;
     const m = mat('roof', 15);
     g.add(mesh(new THREE.BoxGeometry(PL / 100, 0.04, w - 0.004), m));
-    for (let r = 0.12; r < w - 0.05; r += 0.25) { const rb = mesh(new THREE.BoxGeometry(PL / 100, 0.025, 0.03), m); rb.position.set(0, 0.032, -w / 2 + r); g.add(rb); }
+    // Trapez hadveler: taban 9, tepe 3, yükseklik 3 cm, ~25 cm aralık; iki kalkan kenarında birer hadve (alın sacı kenar hadvesini kavrar)
+    RIB_Y.filter(yc => yc >= yLo && yc < yHi).forEach(yc => {
+      const rb = mesh(new THREE.ExtrudeGeometry(RIB, { depth: PL / 100, bevelEnabled: false }), m);
+      rb.rotation.y = Math.PI / 2; rb.position.set(-PL / 200, 0.02, Z(yc) - Z((yHi + yLo) / 2)); g.add(rb);
+    });
     add(15, g, so++, { kod: null, ad: 'Sandviç panel (100 cm kapatır)', satir: [['Bu parça', `${PL} × ${Math.round(w * 100)} cm · ${side > 0 ? 'sol' : 'sağ'} yüz`], ['Renk', 'antrasit gri'], ['Pafta', 'Çatı kaplaması yerleşim planı: 22 adet']] });
   }
 });
 {
-  const top = (ys(XM) + AH + 4 + 1) / 100;
+  const top = (ys(XM) + 11.2) / 100;   // hadve tepelerinin (eğime dik 10,1 cm) üstünde
   [1, -1].forEach((side, i) => {
     const o = mesh(new THREE.BoxGeometry(0.26, 0.006, 10.64), mat('ridge', 15));
     o.position.set(X(XM) - side * Math.cos(TH) * 0.12, top - Math.sin(TH) * 0.12 + 0.01, 0);
@@ -538,29 +592,40 @@ let so = 0;
 let to = 0;
 [[XL, 0], [D.dis[0], XR]].forEach(([a, b], si) => {
   for (let k = 0; k < 5; k++) {
-    const yHi = 1030 - k * 250, yLo = Math.max(-30, yHi - 250);
+    const yHi = k ? 1030 - k * 250 : 1030.2, yLo = Math.max(-30.2, yHi - 250);
     const m = mat('trim', 10), g = new THREE.Group(), face = si ? D.dis[0] : 0, o = si ? 1 : -1, tip = si ? XR + 0.2 : XL - 0.2;
     const hs = TB - 0.05, ht = hs + 13;                        // saçak altı: omeganın üstünde, makas alt başlığının altında; alın 13 cm
     const bx = (u0, u1, h0, h1) => g.add(bp(Math.min(u0, u1), Math.max(u0, u1), yLo, yHi, h0, h1, m));
     bx(face - o * 2.8, tip, hs - SAC, hs);                    // tırnak 3 cm (omeganın üstüne girer, makas oturunca sıkışır) + saçak altı 30 cm
-    bx(tip, tip + o * SAC, hs - SAC, ht);                     // alın 13 cm: makas topuğu + aşık
-    const fl = mesh(new THREE.BoxGeometry(0.10, SAC / 100, (yHi - yLo) / 100), m);   // makasa doğru 10 cm kıvrım: aşığın üstünden çatı örtüsünün altına
-    fl.position.set(X(tip - o * 5 * cosT), (ht + 5 * sinT) / 100, Z((yHi + yLo) / 2)); fl.rotation.z = -o * TH; g.add(fl);
+    // Kalkan uçlarında saçak altı alın sacına kadar uzar; alın ve üst kıvrım baş makasın topuğunda kesilir (Lokman, 24.10.2026)
+    const fLo = Math.max(yLo, -0.4), fHi = Math.min(yHi, D.dis[1] + 0.4);
+    g.add(bp(Math.min(tip, tip + o * SAC), Math.max(tip, tip + o * SAC), fLo, fHi, hs - SAC, ht, m));   // alın 13 cm: makas topuğu + aşık
+    const fl = mesh(new THREE.BoxGeometry(0.10, SAC / 100, (fHi - fLo) / 100), m);   // makasa doğru 10 cm kıvrım: aşığın üstünden çatı örtüsünün altına
+    fl.position.set(X(tip - o * 5 * cosT), (ht + 5 * sinT) / 100, Z((fHi + fLo) / 2)); fl.rotation.z = -o * TH; g.add(fl);
     add(10, g, to++ * 0.5, { kod: null, ad: 'Saçak sacı', satir: [['Bu parça', `${si ? 'sağ' : 'sol'} saçak · L ${yHi - yLo} cm`], ['Profil', 'tırnak 3 → saçak altı 30 → alın 13 → makasa doğru kıvrım 10; açınım ≈ 56 cm'], ['Sıra', 'saçak omegasından sonra, makaslardan önce'], ['Kaynak', 'Lokman notu (24.10.2026)']] });
   }
 });
-// Alın sacı: saçak sacıyla birebir aynı profil (Lokman, 24.10.2026), kalkanda eğim boyunca.
-// Tırnak 3 cm baş makasın üst başlığına girer, aşık oturunca sıkışır; saçak altı 30 cm aşıkların altını kapatır; alın 13 cm; kıvrım 10 cm içeri.
+// Alın sacı: saçak sacının profili + trapezin kenar hadvesini kavrayan bir kıvrım daha (Lokman, 24.10.2026), kalkanda eğim boyunca.
+// Makas üstünün 3 cm altından başlar: tırnak baş makas Z'sinin alt kanadına girer; saçak altı aşıkların 3 cm altında; alın 13 cm (C kapamanın önünde);
+// üstte kenar hadvesinin üstünden geçer ve hadvenin iç yüzünden aşağı kıvrılarak onu kavrar.
 [[0, -1], [1000, 1]].forEach(([yf, sgn]) => [1, -1].forEach(side => {
-  const xa = side > 0 ? XL - 0.2 : XR + 0.2, xm = (xa + XM) / 2, Ls = Math.abs(XM - xa) / cosT;
-  const ytip = yf + sgn * 30.2, m = mat('trim', 16), g = new THREE.Group();
-  g.position.set(X(xm), ys(xm) / 100, 0); g.rotation.z = side * TH;
-  const lev = (y0, y1, v0, v1) => { const o = mesh(new THREE.BoxGeometry(Ls / 100, (v1 - v0) / 100, Math.abs(Z(y1) - Z(y0))), m); o.position.set(0, (v0 + v1) / 200, (Z(y0) + Z(y1)) / 2); g.add(o); };
-  const hA = 13 * cosT;                                     // 13 cm düşey alın, eğime dik ölçüde
-  lev(yf - sgn * 3, ytip, -SAC, 0);                         // tırnak 3 + saçak altı 30 (aşıkların altında)
-  lev(ytip, ytip + sgn * SAC, -SAC, hA);                    // alın 13 cm
-  lev(ytip - sgn * 10, ytip, hA, hA + SAC);                 // kıvrım 10 cm, içeri
-  add(16, g, 5 + to++ * 0.5, { kod: null, ad: 'Alın sacı', satir: [['Bu parça', `${yf ? 'arka' : 'ön'} kalkan, ${side > 0 ? 'sol' : 'sağ'} yüz · L ${Math.round(Ls)} cm`], ['Profil', 'saçak sacıyla aynı: tırnak 3 → saçak altı 30 → alın 13 → kıvrım 10'], ['Kaynak', 'Lokman (24.10.2026)'], ['Liste', '300 × 2500 · 7 adet']] });
+  const K = kalkanKenar(yf, sgn, side, mat('trim', 16));
+  K.lev(0.3 + SAC, 30.2, -3 - SAC, -3);                   // tırnak (Z'nin alt kanadının altında) + saçak altı
+  const KU = kalkanKenar(yf, sgn, side, mat('trim', 16), 16.5);   // alın ve üst kıvrımlar alt uçta derenin önüne kadar uzar
+  KU.lev(30.2, 30.2 + SAC, -3 - SAC, 10.2);               // alın 13 cm
+  KU.lev(24, 30.2 + SAC, 10.1, 10.2);                     // kıvrım: kenar hadvesinin tepesinin üstünden içeri
+  KU.egik(24, 10.1, 21.5, 7.6);                           // hadveyi kavrayan kıvrım: hadvenin iç yüzü boyunca aşağı
+  add(16, KU.g, 5 + to++ * 0.5, { kod: null, ad: 'Alın sacı', satir: [['Bu parça', `${yf ? 'arka' : 'ön'} kalkan, ${side > 0 ? 'sol' : 'sağ'} yüz · alın ve üst kıvrımlar, alt uçta derenin önüne kadar`], ['Kaynak', 'Lokman çizimleri (24.10.2026)']] });
+  add(16, K.g, 5 + to++ * 0.5, { kod: null, ad: 'Alın sacı', satir: [['Bu parça', `${yf ? 'arka' : 'ön'} kalkan, ${side > 0 ? 'sol' : 'sağ'} yüz · L ${Math.round(K.Ls)} cm`], ['Profil', "tırnak 3 (baş makas Z'sine) → saçak altı 30 → alın 13 → hadve üstünden kıvrım → hadveyi kavrayan kıvrım"], ['Kaynak', 'Lokman çizimleri (24.10.2026)'], ['Liste', '300 × 2500 · 7 adet']] });
+  // Alın sacının alt ucu: saçak ucundan dışarı derenin önüne kadar uzar, alttan derenin altında düz kesilir; derenin kapağını kapatır (Lokman, fotoğraflar 24.10)
+  {
+    const xt = side > 0 ? XL - 0.2 : XR + 0.2, xd = xt - side * 16.5, alt = TB - 0.05 - SAC - 0.1, ust = x => ys(x) + 10.2 / cosT;   // alt kesim: saçak altının ve derenin altında
+    const xi = side > 0 ? 0 : D.dis[0];   // duvar hizasına kadar: kalkan saçağının köşe yüzünü kapatır
+    const sh = new THREE.Shape(); sh.moveTo(X(xi), alt / 100); sh.lineTo(X(xd), alt / 100); sh.lineTo(X(xd), ust(xd) / 100); sh.lineTo(X(xi), ust(xi) / 100); sh.closePath();
+    const pl = mesh(new THREE.ExtrudeGeometry(sh, { depth: SAC / 100, bevelEnabled: false }), mat('trim', 16));
+    pl.position.z = Math.min(Z(yf + sgn * (30.2 - SAC)), Z(yf + sgn * 30.2));   // alın bandının hemen arkasında (çakışmasın)
+    add(16, pl, 5 + to++ * 0.5, { kod: null, ad: 'Alın sacı · alt uç', satir: [['Bu parça', `${yf ? 'arka' : 'ön'} ${side > 0 ? 'sol' : 'sağ'} köşe`], ['Görev', 'saçak ucundan derenin önüne kadar iner, alttan düz kesilir; derenin kapağını kapatır'], ['Kaynak', 'Lokman, fotoğraflar (24.10.2026)']] });
+  }
 }));
 // Dere: galvaniz eksiz oluk, K kesit (38'lik açınım; Lokman'ın verdiği tedarikçi sistemi), sırtı saçak sacının alnına asılır
 const DERE_K = [[0, 11.4], [0, 0], [9, 0], [10, 0.8], [10.6, 2.6], [12, 3.6], [13, 5.6], [13.4, 8.6], [14.6, 10.2], [15, 11.4], [14, 11.4]];
@@ -575,28 +640,28 @@ D.dere.hatlar.forEach((hat, i) => {
   [Z(hat.son_cm) - 0.001, Z(hat.bas_cm)].forEach(zz => {      // dere kapağı, iki uçta
     const c = mesh(new THREE.ExtrudeGeometry(kap, { depth: 0.001, bevelEnabled: false }), m); c.position.set(X(dereSirt(sol)), DERE_ALT / 100, zz); g.add(c);
   });
-  add(16, g, 12 + i, { kod: null, ad: 'Galvaniz eksiz oluk (dere)', satir: [['Bu parça', `${i ? 'sağ' : 'sol'} hat · ${fmtc(hat.boy_cm)} cm · iki ucunda kapak`], ['Kesit', 'K profil, 15 × 11,4 cm (38’lik açınım)'], ['Pafta', 'Makas ve dere planı: 2 hat, 21,2 m'], ['Liste', 'dere L 4000, 20 cm bindirme']] });
+  add(16, g, 12 + i, { kod: null, ad: 'Galvaniz eksiz oluk (dere)', satir: [['Bu parça', `${i ? 'sağ' : 'sol'} hat · ${fmtc(hat.boy_cm)} cm · iki ucunda kapak`], ['Kesit', 'K profil, 15 × 11,4 cm (38’lik açınım), boyalı antrasit'], ['Pafta', 'Makas ve dere planı: 2 hat, 21,2 m'], ['Liste', 'dere L 4000, 20 cm bindirme']] });
 });
 D.dere.inisler.forEach((p, i) => {
   // İniş aparatı → kaz boynu (2 açık dirsek) → duvar boyunca boru, 2 kelepçe → alt kapalı dirsek (listedeki takım). Uçtaki inişler köşeye yakın duvar üstüne alınır
-  const sol = p.xy[0] < 300, gx = dereSirt(sol) + (sol ? -5 : 5), wx = sol ? -5 : D.dis[0] + 5;
+  const sol = p.xy[0] < 300, gx = dereSirt(sol) + (sol ? -5 : 5), wx = sol ? -4 : D.dis[0] + 4;   // dikdörtgen boru 8 × 6 cm, duvardan 1 cm
   const gy = Math.min(988, Math.max(12, p.xy[1])), m = mat('gutter', 16), o = new THREE.Group(), ust = DERE_ALT / 100;
   const boru = (x1, y1, x2, y2) => {
-    const dx = X(x2) - X(x1), dy = y2 - y1, c = mesh(new THREE.CylinderGeometry(0.035, 0.035, Math.hypot(dx, dy), 14), m);
+    const dx = X(x2) - X(x1), dy = y2 - y1, c = mesh(new THREE.BoxGeometry(0.06, Math.hypot(dx, dy), 0.08), m);
     c.position.set((X(x1) + X(x2)) / 2, (y1 + y2) / 2, Z(gy)); c.rotation.z = Math.atan2(dy, dx) - Math.PI / 2; o.add(c);
   };
-  const dirsek = (x, y) => { const s = mesh(new THREE.SphereGeometry(0.035, 14, 10), m); s.position.set(X(x), y, Z(gy)); o.add(s); };
-  const ap = mesh(new THREE.CylinderGeometry(0.042, 0.036, 0.05, 14), m); ap.position.set(X(gx), ust - 0.025, Z(gy)); o.add(ap);   // iniş aparatı
+  const dirsek = (x, y) => { const s = mesh(new THREE.BoxGeometry(0.064, 0.064, 0.084), m); s.position.set(X(x), y, Z(gy)); o.add(s); };
+  const ap = mesh(new THREE.BoxGeometry(0.07, 0.05, 0.09), m); ap.position.set(X(gx), ust - 0.025, Z(gy)); o.add(ap);   // iniş aparatı
   boru(gx, ust - 0.05, gx, ust - 0.14); dirsek(gx, ust - 0.14);
   boru(gx, ust - 0.14, wx, ust - 0.40); dirsek(wx, ust - 0.40);
   boru(wx, ust - 0.40, wx, 0.16); dirsek(wx, 0.16);
   boru(wx, 0.16, wx + (sol ? -12 : 12), 0.06);
   const yuz = sol ? 0 : D.dis[0];                            // duvar dış yüzü
   [0.8, 1.8].forEach(h => {                                  // 2 kelepçe (listede iniş başına 2)
-    const k = mesh(new THREE.TorusGeometry(0.037, 0.004, 6, 18), m); k.rotation.x = Math.PI / 2; k.position.set(X(wx), h, Z(gy)); o.add(k);
-    o.add(bp(Math.min(yuz, wx + (sol ? 3.5 : -3.5)), Math.max(yuz, wx + (sol ? 3.5 : -3.5)), gy - 1, gy + 1, h * 100 - 1.5, h * 100 + 1.5, m));
+    const k = mesh(new THREE.BoxGeometry(0.066, 0.02, 0.088), m); k.position.set(X(wx), h, Z(gy)); o.add(k);
+    o.add(bp(Math.min(yuz, wx + (sol ? 3 : -3)), Math.max(yuz, wx + (sol ? 3 : -3)), gy - 1, gy + 1, h * 100 - 1, h * 100 + 1, m));
   });
-  add(16, o, 14 + i * 0.4, { kod: null, ad: 'İniş borusu Ø70', satir: [['Bu parça', p.yer === 'uc' ? 'hat ucunda' : 'hat ortasında'], ['Takım', 'iniş aparatı · 2 açık dirsek (kaz boynu) · boru L 3000 · 2 kelepçe · kapalı dirsek'], ['Pafta', '6 iniş']] });
+  add(16, o, 14 + i * 0.4, { kod: null, ad: 'İniş borusu (dikdörtgen, oluklu)', satir: [['Bu parça', p.yer === 'uc' ? 'hat ucunda' : 'hat ortasında'], ['Kesit', 'yaklaşık 8 × 6 cm, boyalı antrasit; bina ile birlikte iner (Lokman’ın fotoğrafları)'], ['Takım', 'iniş aparatı · 2 açık dirsek (kaz boynu) · boru L 3000 · 2 kelepçe · kapalı dirsek'], ['Pafta', '6 iniş']] });
 });
 
 /* 15 · İç kapılar (K-01): menteşe ve açılış yönü planın kanat ve yaylarından */
@@ -841,6 +906,26 @@ $('play').addEventListener('click', () => {
   if (cur === 0 || cur === N) goTo(1); else if (!animating) goTo(cur + 1); else updatePlay();
 });
 $('roofTog').addEventListener('click', () => { cutaway = !cutaway; applyVisibility(); });
+/* Render görselleri (Blender Cycles; montaj hâli, ham malzeme) */
+const GORSELLER = [
+  ['gorsel/ev_on_sag.jpg', 'Ön-sağdan: montajı biten ev (ham malzeme; boya ve sıva yok)'],
+  ['gorsel/ev_arka_sol.jpg', 'Arka-soldan: kalkan, alın sacı ve inişler'],
+  ['gorsel/ev_catisiz.jpg', 'Çatısız: oda oda dizilim, iç kapılar, pencereler ve dış kapı'],
+  ['gorsel/kose_dere.jpg', 'Köşe: alın sacı aşağı iner ve derenin alnını kapatır; saçak altı alın sacına kadar uzar; iniş bina ile birlikte iner'],
+  ['gorsel/kalkan_kesit.jpg', "Kalkan kesiti: makas, betopan, baş makas Z'si (3 cm çentik), aşık, C kapama ve alın sacı; alın sacı kenar hadvesini kavrar"],
+  ['gorsel/kose_direkleri.jpg', 'Köşe direkleri: B-01 13 × 13 (dış köşe), B-02 9 × 9 (iç duvar köşesi)'],
+  ['gorsel/ev_render_pafta.jpg', 'Hepsi tek paftada'],
+];
+{
+  const gal = $('gal'), img = $('galImg'), cap = $('galCap'), th = $('galThumbs'); let gi = 0;
+  const goster = i => { gi = (i + GORSELLER.length) % GORSELLER.length; img.src = GORSELLER[gi][0]; img.alt = GORSELLER[gi][1]; cap.textContent = GORSELLER[gi][1];
+    [...th.children].forEach((b, k) => b.setAttribute('aria-current', String(k === gi))); };
+  GORSELLER.forEach(([src, ad], i) => { const b = document.createElement('button'); b.type = 'button'; b.setAttribute('aria-label', ad);
+    const t = document.createElement('img'); t.src = src; t.alt = ''; t.loading = 'lazy'; b.appendChild(t); b.addEventListener('click', () => goster(i)); th.appendChild(b); });
+  const ac = () => { gal.hidden = false; goster(gi); $('galX').focus(); }, kapa = () => { gal.hidden = true; $('galTog').focus(); };
+  $('galTog').addEventListener('click', ac); $('galX').addEventListener('click', kapa);
+  document.addEventListener('keydown', e => { if (gal.hidden) return; e.stopPropagation(); if (e.key === 'Escape') kapa(); else if (e.key === 'ArrowRight') goster(gi + 1); else if (e.key === 'ArrowLeft') goster(gi - 1); });
+}
 window.addEventListener('keydown', e => {
   if (e.key === 'ArrowRight') { playing = false; goTo(cur + 1); }
   if (e.key === 'ArrowLeft') { playing = false; goTo(cur - 1); }

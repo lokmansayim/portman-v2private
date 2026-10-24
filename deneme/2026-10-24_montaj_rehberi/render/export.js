@@ -12,7 +12,7 @@ fs.writeFileSync(path.join(SP, 't/index.html'), `<!doctype html><html><head><met
   const b64 = await page.evaluate(async () => {
     const M = window.__montaj, T = M.THREE;
     M.goTo(17, true);
-    const BASE = { concrete: 0xb7babc, frame: 0x98a2aa, pdis: 0xeceae3, pic: 0xe2ded6, eps: 0xf6f4ef, dubel: 0x7d878f, steel: 0xa9b3bb, post: 0x87929b, box: 0x6f7a83, kasa: 0xf4f3ef, door: 0xd6c6aa, pvc: 0xf7f7f5, glass: 0x9cc3dc, cdoor: 0x3e464e, truss: 0xb3bcc3, betopan: 0xc6c9c8, tomega: 0x9fb0bc, asik: 0xbac3ca, roof: 0x4b535b, ridge: 0x3f464d, trim: 0x474f57, gutter: 0xb4bcc2 };
+    const BASE = { concrete: 0xb7babc, frame: 0x98a2aa, pdis: 0xeceae3, pic: 0xe2ded6, eps: 0xf6f4ef, dubel: 0x7d878f, steel: 0xa9b3bb, post: 0x87929b, box: 0x6f7a83, kasa: 0xf4f3ef, door: 0xd6c6aa, pvc: 0xf7f7f5, glass: 0x9cc3dc, cdoor: 0x3e464e, truss: 0xb3bcc3, betopan: 0xc6c9c8, tomega: 0x9fb0bc, asik: 0xbac3ca, roof: 0x4b535b, ridge: 0x3f464d, trim: 0x474f57, gutter: 0x3f464d };
     const byHex = {}; for (const [k, v] of Object.entries(BASE)) byHex[new T.Color(v).getHex()] = k;
     const root = new T.Group(); const bilinmeyen = new Set();
     M.parts.forEach((p, i) => {
