@@ -6,7 +6,7 @@
  "kapi": true,
  "not": "Bayi arşivi; liste sayfası YAPIŞTIRMA grubuyla başlayan sayfa.",
  "tarih": "2026-10-24",
- "kiyas_commit": "87f83bf4f8d0fa73f615b2e51d0f0fda73849b0c",
+ "kiyas_commit": "0ca3e4edfd2e17778f8454ac43e198adde9d306a",
  "bizim_liste": {
   "yol": "testler/kor/projeler/PK05/bizim_liste.json",
   "commit": "8f361f481ad711c3f71a0870a558ee5cbcc7ce4b",
