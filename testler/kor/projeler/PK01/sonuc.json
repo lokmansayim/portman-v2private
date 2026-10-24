@@ -5,8 +5,8 @@
  "kip": "motor",
  "kapi": false,
  "not": "Gerçek listesi stoktan düşülmüş (Lokman, 18 Ekim 2026): sonuç bilgi için kaydedilir, hedef değil, kapıya girmez.",
- "tarih": "2026-10-23",
- "kiyas_commit": "dc00d2774f717cb7621815671847864cf82f93fe",
+ "tarih": "2026-10-24",
+ "kiyas_commit": "ab9be7129bbf208358cdbc7b757f748906b72288",
  "bizim_liste": {
   "yol": "testler/kor/projeler/PK01/bizim_liste.json",
   "commit": "8f361f481ad711c3f71a0870a558ee5cbcc7ce4b",
