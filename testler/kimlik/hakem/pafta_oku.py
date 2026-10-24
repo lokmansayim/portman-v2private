@@ -998,14 +998,17 @@ def _ogeler(pg) -> list[dict]:
 def _tekille(ogeler: list[dict], pay: float = 0.05) -> tuple[list[dict], list[dict]]:
     """Aynı yerde ikinci kez çizilmiş öğe (renk, dolgu, dolgulu çizimin çizgi rengi, öğe türleri aynı; noktaları `pay` pt içinde aynı) bir
     sayılır; çizgisi başka renkte olan dolgulu yol kopya değildir (KH-3 hakeminin 9. turu: çizgisiz bir yolun üstüne aynı noktalarla
-    kırmızı çizgili çizilen ikinci yol kopya diye atılıyor, dolgu denetimine girmiyordu). Döner: (tekiller,
-    atılan kopyalar). Göz iki kopyayı tek işaret görür; okuyucu da öyle sayar (iki kez çizilmiş tekli anahtar çift sayılmaz). PK-01 ve
+    kırmızı çizgili çizilen ikinci yol kopya diye atılıyor, dolgu denetimine girmiyordu); çizgisi dolgusuyla aynı renkte yol çizgisiz
+    sayılır, göz ikisini ayıramaz (10. turu). Döner: (tekiller, atılan kopyalar). Göz iki kopyayı tek işaret görür; okuyucu da öyle sayar (iki kez çizilmiş tekli anahtar çift sayılmaz). PK-01 ve
     PK-07'de kopyalar birebir aynı koordinatta (pay 0,3 pt'de sigortanın iç desenindeki ayrı kısa çizgiler de birleşiyordu)."""
     def anahtar(p):
         return (round(p.x, 1), round(p.y, 1))
 
+    def cizgi(o):
+        return None if o["cizgi"] == o["renk"] else o["cizgi"]
+
     def ayni(a, b):
-        if (a["renk"], a["dolgu"], a["cizgi"], a["tur"], len(a["noktalar"])) != (b["renk"], b["dolgu"], b["cizgi"], b["tur"], len(b["noktalar"])):
+        if (a["renk"], a["dolgu"], cizgi(a), a["tur"], len(a["noktalar"])) != (b["renk"], b["dolgu"], cizgi(b), b["tur"], len(b["noktalar"])):
             return False
         return all(_uzak(p, q) <= pay for p, q in zip(sorted(a["noktalar"], key=anahtar), sorted(b["noktalar"], key=anahtar)))
     kova: dict[tuple, list[dict]] = {}
@@ -1040,8 +1043,9 @@ def _imza(o: dict) -> tuple:
 
 def _bilesim(ogeler: list[dict], kutu: fitz.Rect, renkler: set, pay: float) -> tuple[Counter, list[dict]]:
     """Kutunun (pay pt genişletilmiş) içindeki, verilen renklerdeki öğeler ve imzalarının (renk, dolgu, öğe türleri) sayımı. Plandaki bir
-    işaretin bileşimi lejanttakiyle aynı olmalı: işaretin içine düşen fazla ya da eksik öğe sessizce yutulmaz."""
-    ic = [o for o in ogeler if o["renk"] in renkler and _icinde(o["r"], kutu, pay)]
+    işaretin bileşimi lejanttakiyle aynı olmalı: işaretin içine düşen fazla ya da eksik öğe sessizce yutulmaz. Dolgulu çizimin çizgisi bu
+    renklerdeyse de girer (KH-3 hakeminin 10. turu: sigortanın içine çizilmiş beyaz dolgulu, siyah çizgili kutu yutuluyordu)."""
+    ic = [o for o in ogeler if (o["renk"] in renkler or o["cizgi"] in renkler) and _icinde(o["r"], kutu, pay)]
     return Counter(_imza(o) for o in ic), ic
 
 

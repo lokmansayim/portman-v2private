@@ -113,8 +113,8 @@ class Elektrik:
         self.s.pg.insert_text(self.p(X - w / 2, Y + 0.35 * boy), metin, fontsize=boy, fontname="ls", fontfile=T.FONT, rotate=self.s.rot)
 
     # işaretler (ortası görünen X, Y)
-    def duy(self, X, Y, a=12.0):
-        self.kutu(X, Y, a, a, KIRMIZI, KIRMIZI)
+    def duy(self, X, Y, a=12.0, cizgisiz=False):
+        self.kutu(X, Y, a, a, None if cizgisiz else KIRMIZI, KIRMIZI)
         self.cizgi((X - 4, Y - 4), (X + 4, Y + 4))
         self.cizgi((X - 4, Y + 4), (X + 4, Y - 4))
 
@@ -810,15 +810,24 @@ BEYAZ_DOLGULU = "dolgusu başka renkte, çizgisi lejant renginde ya da yakın to
     # sigorta ölçüsünde, beyaz dolgulu siyah kutu: sigorta gibi denetlenir (iç deseni yok)
     (lambda e: e.kutu(X_U, Y_U, 14, 10, SIYAH, (1.0, 1.0, 1.0)), {}, "sigorta kutusu ölçüsünde, içi lejanttaki işarete uymayan 1 kutu"),
     (lambda e: e.kutu(X_U, Y_U, 14, 10, (0.5, 0.5, 0.5), SIYAH), {}, "sigorta kutusu ölçüsünde, içi lejanttaki işarete uymayan 1 kutu"),
+    # 10. tur: sigortanın içine ya da kenarına çizilmiş beyaz dolgulu siyah çizgili kutu yutulmaz; sarı dolgulu siyah çizgili kutu da aday
+    (lambda e: (lambda X, Y: e.kutu(X, Y + 2.5, 2, 2, SIYAH, (1.0, 1.0, 1.0)))(*g(*SIGORTA)), {},
+     "sigorta kutusu ölçüsünde, içi lejanttaki işarete uymayan 1 kutu"),
+    (lambda e: (lambda X, Y: e.kutu(X + 7, Y, 1, 1, SIYAH, (1.0, 1.0, 1.0)))(*g(*SIGORTA)), {},
+     "sigorta kutusu ölçüsünde, içi lejanttaki işarete uymayan 1 kutu"),
+    (lambda e: e.kutu(X_U, Y_U, 14, 10, SIYAH, (1.0, 1.0, 0.0)), {}, "sigorta kutusu ölçüsünde, içi lejanttaki işarete uymayan 1 kutu"),
 ], ids=["glop", "buat", "anahtar", "priz", "kutu", "glop_yakin_tonda", "glop_cizgisiz_kopyasinin_ustunde", "glop_siyah_cizgili_kopyasinin_ustunde",
         "priz_cizgisiz_kopyasinin_ustunde", "sigorta_desen_renginde", "cerceve_disinda_glop", "lejant_alaninda_kutu", "sigorta_olcusunde_siyah_kutu",
-        "sigorta_olcusunde_siyah_dolgulu_gri_kutu"])
+        "sigorta_olcusunde_siyah_dolgulu_gri_kutu", "sigorta_icinde_beyaz_dolgulu_kutu", "sigorta_kenarinda_beyaz_dolgulu_kutu",
+        "sigorta_olcusunde_sari_dolgulu_kutu"])
 def test_beyaz_dolgulu_isaret_bekletir(tmp_path, ek, kw, neden):
     """KH-3 hakeminin 8. turu: dolgulu çizim dolgunun rengiyle okunur; tek yolda, beyaz dolgulu ve işaret renginde çizgili glop, BUAT,
     anahtar ve priz (ya da duy ölçüsünde kutu; çizgisi yakın tonda glop) hiçbir renge girmeden kalırdı: ne sayılır ne teyit yazardı. Artık
     elektriği bekletir. 9. tur: aynı noktalarla çizilmiş çizgisiz ya da siyah çizgili bir yolun üstündeki ikinci yol da (kopya sayılmaz);
     çizgisi sigortanın iç desen renginde olan, duvar çerçevesinin dışındaki ve lejant alanındaki yol da (sayfanın her yerinde); sigorta
-    ölçüsünde, beyaz dolgulu siyah çizgili ya da siyah dolgulu gri çizgili kutu sigorta gibi denetlenir."""
+    ölçüsünde, beyaz dolgulu siyah çizgili ya da siyah dolgulu gri çizgili kutu sigorta gibi denetlenir. 10. tur: sigortanın içine ya da
+    kenarına çizilmiş beyaz dolgulu, siyah çizgili kutu sigortanın içine girer (içi lejanttakine uymaz); sarı dolgulu, siyah çizgili kutu da
+    sigorta gibi denetlenir."""
     o = PO.oku(kh3_sentetik(tmp_path / "s.pdf", ek=ek, **kw), EL)
     t = _teyit(o)
     assert set(t) == {"elektrik"} and neden in t["elektrik"], t
@@ -901,7 +910,8 @@ def _tekli_anahtar_tirnagi_iki_kez(e):
     (lambda e: [e.glop(*g(250, 250)) for _ in range(2)], "glop", 3),
     (lambda e: [e.priz(*g(250, 250)) for _ in range(2)], "priz_tekli", 4),
     (lambda e: [e.sigorta(*g(100, 300)) for _ in range(2)], "sigorta_kutusu", 0),   # siyah öğe sayaca girmez
-], ids=["anahtar", "tirnak", "duy", "glop", "priz", "sigorta"])
+    (lambda e: [e.duy(*g(250, 250), cizgisiz=c) for c in (False, True)], "tavan_armaturu", 3),   # çizgisi dolgusuyla aynı renkte ve çizgisiz
+], ids=["anahtar", "tirnak", "duy", "glop", "priz", "sigorta", "duy_cizgili_ve_cizgisiz"])
 def test_ayni_yerde_iki_kez_cizilen_isaret_bir_sayilir(tmp_path, ek, tur, kopya):
     o = PO.oku(kh3_sentetik(tmp_path / "s.pdf", ek=ek), EL)
     a = o["ayrinti"]["elektrik"]
