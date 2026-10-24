@@ -89,6 +89,7 @@ VARSAYILAN = {
         "uydu_uzakligi_pt": 25.0,           # "UYDU" yazısı ile uydu prizinin tabanı arası en çok
         "lejant_alt_boslugu_pt": 40.0,      # lejant alanının hemen altındaki bu bant boş olmalı (lejant alandan uzunsa teyit)
         "yakin_renk_payi": 0.25,            # işaret rengine bu kadar yakın (kanal başına) başka tondaki öğe de denetlenir
+        "tirnak_aci_payi_derece": 10.0,     # çift anahtarın iki tırnağı arasındaki açı lejanttakiyle bu payla aynı (koşut iki tırnak çift değil)
         "oran_payi": 0.03,                  # duvar sınırının oranı montajdaki dış ölçünün oranıyla bu payla aynı
         "cerceve_payi_cm": 30.0,            # işaret duvar çerçevesinin bu payla içinde; dışında lejant renginde öğe bölümü teyide düşürür
     },
@@ -1029,6 +1030,44 @@ def _bilesim(ogeler: list[dict], kutu: fitz.Rect, renkler: set, pay: float) -> t
     return Counter(_imza(o) for o in ic), ic
 
 
+def _boyut(o: dict) -> tuple[float, ...]:
+    """Öğenin ölçüsü: tek çizgide boyu; öbürlerinde kutusunun kısa ve uzun kenarı (90° dönük işarette de aynı)."""
+    if o["tur"] == {"l"} and len(o["cizgiler"]) == 1:
+        return (_uzak(*o["cizgiler"][0]),)
+    return tuple(sorted((o["r"].width, o["r"].height)))
+
+
+def _ayni_icerik(ic: list[dict], lejant: list[dict], pay: float) -> bool:
+    """Plandaki işaretin kutusundaki öğeler lejant işaretindekilerle bire bir eşleşir: imzası (renk, dolgu, tür) aynı; dolgusuz öğenin
+    ölçüsü de `pay` pt içinde (ör. glopun çaprazı kısa bir çentik olamaz). Dolgunun parçalarına ölçü bakılmaz: tarama deseni sayfanın
+    başlangıcına göre kesilir, her işarette parçaları başka boydadır (PK-07'nin duyları); dolgunun kendi kutusu ayrıca denetlenir."""
+    if len(ic) != len(lejant):
+        return False
+    kalan = list(ic)
+    for a in sorted(lejant, key=_boyut, reverse=True):
+        es = next((b for b in kalan if _imza(b) == _imza(a) and (a["dolgu"] or (len(_boyut(b)) == len(_boyut(a))
+                   and all(abs(x - y) <= pay for x, y in zip(_boyut(a), _boyut(b)))))), None)
+        if es is None:
+            return False
+        kalan.remove(es)
+    return True
+
+
+def _kesisiyor(a: fitz.Rect, b: fitz.Rect, pay: float) -> bool:
+    """İki kutu iki yönde de `pay` pt'den çok örtüşüyor mu (yalnız değmek değil)."""
+    return min(a.x1, b.x1) - max(a.x0, b.x0) > pay and min(a.y1, b.y1) - max(a.y0, b.y0) > pay
+
+
+def _aci(s: tuple) -> float:
+    """Çizgi parçasının yönü, derece (0–180; yönsüz)."""
+    return math.degrees(math.atan2(s[2].y - s[1].y, s[2].x - s[1].x)) % 180
+
+
+def _aci_farki(a: float, b: float) -> float:
+    d = abs(a - b) % 180
+    return min(d, 180 - d)
+
+
 def _kumeler(ogeler: list[dict], pay: float = 0.6) -> list[list[dict]]:
     """Kutuları birbirine değen (pay pt) öğelerin kümeleri."""
     sira = sorted(range(len(ogeler)), key=lambda i: ogeler[i]["r"].x0)
@@ -1181,24 +1220,30 @@ def _renk_farki(a: tuple, b: tuple) -> float:
 
 
 def elektrik_oku(pg, ayar: dict, dis_olcu_cm: list[float]) -> dict:
-    """Elektrik yerleşim planı (KH-3). İşaretlerin rengi, ölçüsü ve bileşimi (işaretin kutusundaki öğelerin rengi, dolgusu ve türü) lejanttan
-    okunur, koda gömülmez. Aynı yerde ikinci kez çizilmiş öğe bir sayılır (`ayrinti.elektrik.atilan.ayni_yerde_iki_kez`):
+    """Elektrik yerleşim planı (KH-3). İşaretlerin rengi, ölçüsü ve bileşimi (işaretin kutusundaki öğelerin rengi, dolgusu, türü ve
+    dolgusuz öğede ölçüsü) lejanttan okunur, koda gömülmez. Aynı yerde (0,05 pt içinde) ikinci kez çizilmiş öğe bir sayılır
+    (`ayrinti.elektrik.atilan.ayni_yerde_iki_kez`):
     - tijli duy: lejanttaki dolgunun renginde, birbirine değen dolgular; kutusu lejanttakinin ölçüsünde (±1 pt), içi lejanttakiyle aynı;
     - glop: lejanttaki daire (renk, çap), içinde lejanttaki kadar çapraz ve lejanttaki işaretle aynı bileşim; çaprazsız, içinde yalnız
       dairesi olan ve "BUAT" yazan daire buat (bilgi);
-    - anahtar: lejanttaki daire (içi lejanttakiyle aynı) ve ona değen eğik tırnaklar; bir tırnak tekli, iki tırnak çift;
-    - priz: lejanttaki U (kol, sap ve taban boyu; kollar aynı yana); birinin sapının ucu öbürünün tabanının ortasına değen iki U çift
-      prizdir; "UYDU" yazısına en yakın (`uydu_uzakligi_pt` içinde) tek U uydu prizidir, tekli prizden düşülür;
+    - anahtar: lejanttaki daire (içi lejanttakiyle aynı) ve ona değen, lejanttaki boyda eğik tırnaklar; her tırnağın dıştaki ucunda
+      lejanttaki boyda tek kısa çizgi; bir tırnak tekli, iki tırnak çift (aralarındaki açı lejanttakiyle `tirnak_aci_payi_derece` içinde);
+    - priz: lejanttaki U (kol, sap ve taban boyu; kollar aynı yana); birinin sapının ucu öbürünün tabanının ortasına değen, aynı yöne bakan
+      iki U çift prizdir; "UYDU" yazısına en yakın (`uydu_uzakligi_pt` içinde) tek U uydu prizidir, tekli prizden düşülür;
     - sigorta kutusu: `sigorta_rengi`nde, birbirine değen çizgilerin kutusu lejanttaki çerçevenin ölçüsünde (±%10), içi lejanttakiyle aynı;
     - zil: lejantta yoksa 0.
     Sessiz sayı yok; şunların her biri bölümü teyide düşürür:
     - lejant renginde hiçbir işarete girmeyen öğe; sigortanın iç desenindeki ya da lejant rengine yakın (`yakin_renk_payi`) tonda, işaret
-      boyunda hiçbir işarete girmeyen öğe; duvar çerçevesinin dışında bu renklerde öğe;
+      boyunda hiçbir işarete girmeyen öğe; duvar çerçevesinin dışında bu renklerde öğe; bir parçası (çizgisi) işarete giren ama başka
+      parçası hiçbir işarete girmeyen çizim (PDF yolu);
     - içi lejanttakine uymayan duy, glop, BUAT, anahtar dairesi ya da sigorta ölçüsünde kutu; ölçüsü tutmayan duy dolgusu;
-    - tırnak sayısı bir ya da iki olmayan anahtar, iki anahtar dairesine birden değen tırnak, tırnağın ucunda birden çok çizgi;
-      çaprazı lejanttakinden başka sayıda glop, çaprazsız ve BUAT yazısız daire, içinde BUAT yazan glop, lejantta çaprazsız glop;
-    - iki çift prize giren U; sapı öbürünün tabanına değmeyen ama sap boyundan yakın iki U (çift priz olabilir); kutusu bir başkasıyla
-      kesişen ve çift olmayan iki U (aynı priz kaydırılarak iki kez çizilmiş olabilir);
+    - tırnak sayısı bir ya da iki olmayan anahtar, iki anahtar dairesine birden değen tırnak, daireye değen ama tırnak boyunda olmayan eğik
+      çizgi, iki tırnağı arasındaki açı lejanttakine uymayan anahtar (koşut iki tırnak: tırnak kaydırılarak iki kez çizilmiş), tırnağın
+      ucunda birden çok, lejanttakinden başka boyda ya da hiç çizgi; çaprazı lejanttakinden başka sayıda glop, çaprazsız ve BUAT yazısız
+      daire, içinde BUAT yazan glop; lejantta çaprazsız glop ya da tırnaksız anahtar;
+    - iki çift prize giren U; sapı öbürünün tabanına değmeyen ama sap boyundan yakın iki U (çift priz olabilir); sapı öbürünün tabanına
+      değen ama başka yöne bakan iki U; kutusu bir başkasıyla kesişen ve çift olmayan iki U ya da kutusu aynı türden bir başkasıyla
+      kesişen iki duy, glop/BUAT, anahtar ya da sigorta (aynı işaret kaydırılarak iki kez çizilmiş olabilir);
     - lejantta: etiketi ya da işareti bulunamayan tür, tanınmayan sözcük, hiçbir etikete bağlanmayan işaret, zil (okunmuyor), alanın
       hemen altında öğe, alanın dışında lejant etiketine benzeyen sözcük;
     - planda hiç işareti bulunamayan lejant türü; yanında priz olmayan, en yakın prizi çift olan ya da başka bir UYDU yazısıyla aynı prize
@@ -1222,11 +1267,18 @@ def elektrik_oku(pg, ayar: dict, dis_olcu_cm: list[float]) -> dict:
 
     # lejant: her türün rengi, ölçüsü ve bileşimi (G: tür → (imza sayımı, renkler); plandaki işaretin kutusu aynısını taşımalı)
     L: dict[str, dict] = {}
-    G: dict[str, tuple[Counter, set]] = {}
+    G: dict[str, tuple[list, set]] = {}
 
     def bilesim(g, r, pay_):
         renkler = {o["renk"] for o in g}
-        return _bilesim(g, r, renkler, pay_)[0], renkler
+        return _bilesim(g, r, renkler, pay_)[1], renkler
+
+    def degen_tirnaklar(parca, d, cap):
+        return [s for s in parca if _capraz(s) and min(abs(_uzak(s[1], d) - cap / 2), abs(_uzak(s[2], d) - cap / 2)) <= 0.6]
+
+    def uctaki(parca, s, d):                            # tırnağın dıştaki ucuna değen öbür çizgiler
+        dis = s[1] if _uzak(s[1], d) > _uzak(s[2], d) else s[2]
+        return [s2 for s2 in parca if s2 is not s and min(_uzak(dis, s2[1]), _uzak(dis, s2[2])) <= 0.6]
     for tur in ("duy", "glop", "anahtar", "priz", "sigorta"):
         if tur not in lejant:
             uyarilar.append(f"lejantta {tur} etiketi yok; sayısı bilinmiyor")
@@ -1235,9 +1287,14 @@ def elektrik_oku(pg, ayar: dict, dis_olcu_cm: list[float]) -> dict:
         if tur in ("glop", "anahtar"):
             d = _lejant_dairesi(g)
             if d:
-                cizgi = [s for s in _parcalar(g, d["renk"]) if _capraz(s)]
-                L[tur] = {"renk": d["renk"], "cap": d["cap"], "cizgi": len(cizgi) if tur == "glop" else
-                          sum(1 for s in cizgi if min(abs(_uzak(s[1], d["m"]) - d["cap"] / 2), abs(_uzak(s[2], d["m"]) - d["cap"] / 2)) <= 0.6)}
+                parca = _parcalar(g, d["renk"])
+                if tur == "glop":
+                    L[tur] = {"renk": d["renk"], "cap": d["cap"], "cizgi": sum(1 for s in parca if _capraz(s))}
+                else:                                   # tırnak: boyu, ucundaki kısa çizginin boyu, iki tırnak arasındaki açı
+                    t = degen_tirnaklar(parca, d["m"], d["cap"])
+                    uc = [s2[3] for s in t for s2 in uctaki(parca, s, d["m"])]
+                    L[tur] = {"renk": d["renk"], "cap": d["cap"], "cizgi": len(t), "tirnak": sum(s[3] for s in t) / len(t) if t else None,
+                              "uc": sum(uc) / len(uc) if uc else None, "aci": _aci_farki(_aci(t[0]), _aci(t[1])) if len(t) == 2 else None}
                 G[tur] = bilesim(g, d["r"], 0.5)
         elif tur == "duy":
             dolgu = [o for o in g if o["dolgu"]]
@@ -1263,12 +1320,21 @@ def elektrik_oku(pg, ayar: dict, dis_olcu_cm: list[float]) -> dict:
         uyarilar.append("lejantta zil var; bu okuyucu zil işaretini okumuyor")
     if L.get("glop", {}).get("cizgi") == 0:
         uyarilar.append("lejantta glop işaretinde çapraz yok: glop BUAT'tan ayrılamaz")
+    if "anahtar" in L and L["anahtar"]["tirnak"] is None:
+        uyarilar.append("lejantta anahtar dairesinde tırnak yok: tekli ve çift ayrılamaz")
 
     sahipli: set[int] = set()
     isaretler: list[tuple[str, fitz.Rect]] = []          # (tür, kutu)
 
+    parcali: dict[int, set] = {}                       # parçasıyla (çizgi çizgi) bir işarete giren çizim → kullanılan parçaları
+
     def al(oo):
         sahipli.update(id(o) for o in oo)
+
+    def parca_al(ss):
+        for s in ss:
+            sahipli.add(id(s[0]))
+            parcali.setdefault(id(s[0]), set()).add((round(s[1].x, 3), round(s[1].y, 3), round(s[2].x, 3), round(s[2].y, 3)))
 
     def serbest():                                      # henüz bir işarete girmemiş plan öğeleri
         return [o for o in plan if id(o) not in sahipli]
@@ -1278,14 +1344,20 @@ def elektrik_oku(pg, ayar: dict, dis_olcu_cm: list[float]) -> dict:
         P = L["priz"]
         U = _u_isaretleri(_parcalar(plan, P["renk"]), P)
         for u in U:
-            sahipli.update(id(s[0]) for s in u["parcalar"])
-        cift = [(i, j) for i, a in enumerate(U) for j, b in enumerate(U) if i != j and _uzak(a["uc"], b["o"]) <= UC_PAYI_PT]
+            parca_al(u["parcalar"])
+
+        def ayni_yon(a, b):
+            va, vb = a["uc"] - a["o"], b["uc"] - b["o"]
+            return va.x * vb.x + va.y * vb.y >= 0.9 * math.hypot(va.x, va.y) * math.hypot(vb.x, vb.y)
+        degen_ = [(i, j) for i, a in enumerate(U) for j, b in enumerate(U) if i != j and _uzak(a["uc"], b["o"]) <= UC_PAYI_PT]
+        cift = [(i, j) for i, j in degen_ if ayni_yon(U[i], U[j])]
+        if len(cift) != len(degen_):
+            uyarilar.append(f"sapı öbürünün tabanına değen ama yönü farklı {len(degen_) - len(cift)} U çifti")
         yakin = sum(1 for i, a in enumerate(U) for j, b in enumerate(U) if i != j and UC_PAYI_PT < _uzak(a["uc"], b["o"]) <= P["sap"])
         if yakin:
             uyarilar.append(f"sapı öbürünün tabanına değmeyen ama sap boyundan yakın {yakin} U çifti (çift priz olabilir)")
         cakisan = sum(1 for i, a in enumerate(U) for j, b in enumerate(U) if i < j and (i, j) not in cift and (j, i) not in cift
-                      and min(a["r"].x1, b["r"].x1) - max(a["r"].x0, b["r"].x0) > UC_PAYI_PT
-                      and min(a["r"].y1, b["r"].y1) - max(a["r"].y0, b["r"].y0) > UC_PAYI_PT)
+                      and _kesisiyor(a["r"], b["r"], UC_PAYI_PT))
         if cakisan:                                     # iki ayrı priz üst üste binmez; kaymış bir kopya iki tekli sayılmasın
             uyarilar.append(f"kutusu bir başkasıyla kesişen ve çift olmayan {cakisan} U çifti (aynı priz iki kez çizilmiş olabilir)")
         ciftte = [i for e in cift for i in e]
@@ -1323,8 +1395,8 @@ def elektrik_oku(pg, ayar: dict, dis_olcu_cm: list[float]) -> dict:
                 olmayan.append(f"{r.width:.1f} × {r.height:.1f}")
                 al(k)                                       # ölçüsü tutmayan dolgu kendi uyarısıyla yazılır
                 continue
-            C, ic = _bilesim(serbest(), r, rd, 1.0)
-            if C == Gd:
+            _, ic = _bilesim(serbest(), r, rd, 1.0)
+            if _ayni_icerik(ic, Gd, 1.0):
                 isaretler.append(("tavan_armaturu", r))
                 al(ic)
             else:
@@ -1338,18 +1410,18 @@ def elektrik_oku(pg, ayar: dict, dis_olcu_cm: list[float]) -> dict:
     buat = [r for t, r in soz if re.fullmatch(E["buat"], t)]
     if "glop" in L:
         Gg, rg = G["glop"]
-        Gb = Counter({k: v for k, v in Gg.items() if k[2] != ("l",)})     # buat: glopun çaprazsız kısmı (daire)
+        Gb = [o for o in Gg if o["tur"] != {"l"}]                         # buat: glopun çaprazsız kısmı (daire)
         capraz_yok, tutmayan, icsiz, yazili_glop = 0, [], 0, 0
         parca = _parcalar(plan, L["glop"]["renk"])
         for d in _daireler_renkte(plan, L["glop"]["renk"], L["glop"]["cap"]):
-            C, ic = _bilesim(serbest(), d["r"], rg, 0.5)
+            _, ic = _bilesim(serbest(), d["r"], rg, 0.5)
             n = sum(1 for s in parca if _capraz(s) and _icinde(s[0]["r"], d["r"], 0.5))
             yazili = any(d["r"].contains(fitz.Point((r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2)) for r in buat)
-            if n == L["glop"]["cizgi"] and C == Gg:
+            if n == L["glop"]["cizgi"] and _ayni_icerik(ic, Gg, 0.5):
                 isaretler.append(("glop", d["r"]))
                 yazili_glop += yazili
                 al(ic)
-            elif n == 0 and C == Gb:
+            elif n == 0 and _ayni_icerik(ic, Gb, 0.5):
                 if yazili:
                     isaretler.append(("buat", d["r"]))
                 else:
@@ -1374,34 +1446,52 @@ def elektrik_oku(pg, ayar: dict, dis_olcu_cm: list[float]) -> dict:
         Ga, ra = G["anahtar"]
         parca = _parcalar(plan, A["renk"])
         daireler = _daireler_renkte(plan, A["renk"], A["cap"])
-        tirnaklar = [[s for s in parca if _capraz(s) and min(abs(_uzak(s[1], d["m"]) - A["cap"] / 2), abs(_uzak(s[2], d["m"]) - A["cap"] / 2)) <= 0.6]
-                     for d in daireler]
-        ortak = sum(1 for v in Counter(id(s) for t in tirnaklar for s in t).values() if v > 1)
+        degenler = [degen_tirnaklar(parca, d["m"], A["cap"]) for d in daireler]
+        ortak = sum(1 for v in Counter(id(s) for t in degenler for s in t).values() if v > 1)
         if ortak:
             uyarilar.append(f"iki anahtar dairesine birden değen {ortak} tırnak")
-        tirnak_disi, icsiz, uc_fazla = [], 0, 0
-        for d, tirnak in zip(daireler, tirnaklar):
-            C, ic = _bilesim(serbest(), d["r"], ra, 0.5)
-            if C != Ga:
+        tirnak_disi, icsiz, uc_fazla, boy_disi, uc_disi, uc_eksik, acisi = [], 0, 0, 0, 0, 0, []
+        aci_payi = E["tirnak_aci_payi_derece"]
+        for d, degen in zip(daireler, degenler):
+            _, ic = _bilesim(serbest(), d["r"], ra, 0.5)
+            if not _ayni_icerik(ic, Ga, 0.5):
                 icsiz += 1
                 continue
+            # tırnak: daireye değen eğik çizgi, boyu lejanttakiyle aynı; öbürleri sahipsiz kalır
+            tirnak = [s for s in degen if A["tirnak"] is not None and abs(s[3] - A["tirnak"]) <= UC_PAYI_PT]
+            boy_disi += len(degen) - len(tirnak)
             n = len(tirnak)
+            if n == 2:                                      # koşut iki tırnak (kaydırılarak iki kez çizilmiş tırnak) çift değil
+                aci = _aci_farki(_aci(tirnak[0]), _aci(tirnak[1]))
+                if aci < aci_payi or (A["aci"] is not None and abs(aci - A["aci"]) > aci_payi):
+                    acisi.append(round(aci))
+                    continue
             if n in (1, 2):
                 isaretler.append(("anahtar_tekli" if n == 1 else "anahtar_cift", d["r"]))
             else:
                 tirnak_disi.append(n)
             al(ic)
-            for s in tirnak:                                # tırnak ve dıştaki ucunda kısa çizgi (en çok bir)
-                dis = s[1] if _uzak(s[1], d["m"]) > _uzak(s[2], d["m"]) else s[2]
-                ucta = [s2 for s2 in parca if s2 is not s and min(_uzak(dis, s2[1]), _uzak(dis, s2[2])) <= 0.6]
+            for s in tirnak:                                # tırnak ve dıştaki ucunda lejanttaki boyda tek kısa çizgi
+                ucta = uctaki(parca, s, d["m"])
+                uygun = [s2 for s2 in ucta if A["uc"] is not None and abs(s2[3] - A["uc"]) <= UC_PAYI_PT]
                 uc_fazla += len(ucta) > 1
-                al([s[0], *(s2[0] for s2 in ucta[:1])])
+                uc_disi += len(ucta) - len(uygun)
+                uc_eksik += A["uc"] is not None and not uygun
+                parca_al([s, *uygun[:1]])
         if tirnak_disi:
             uyarilar.append(f"anahtar dairesinde bir ya da iki olmayan tırnak: {tirnak_disi}")
         if icsiz:
             uyarilar.append(f"anahtar dairesinin içinde lejanttakine uymayan öğe ({icsiz} daire)")
+        if boy_disi:
+            uyarilar.append(f"anahtar dairesine değen, boyu lejanttaki tırnaktan farklı {boy_disi} eğik çizgi")
+        if acisi:
+            uyarilar.append(f"iki tırnağının arasındaki açı lejanttakine uymayan {len(acisi)} anahtar dairesi ({', '.join(f'{a}°' for a in acisi)})")
         if uc_fazla:
             uyarilar.append(f"ucunda birden çok çizgi olan {uc_fazla} tırnak")
+        if uc_disi:
+            uyarilar.append(f"tırnağın ucunda boyu lejanttakinden farklı {uc_disi} çizgi")
+        if uc_eksik:
+            uyarilar.append(f"ucunda lejanttaki kısa çizgi olmayan {uc_eksik} tırnak")
     # sigorta kutusu
     if "sigorta" in L:
         Gs, rs = G["sigorta"]
@@ -1412,14 +1502,26 @@ def elektrik_oku(pg, ayar: dict, dis_olcu_cm: list[float]) -> dict:
             r = _kutu(k)
             a, b = sorted((r.width, r.height))
             if abs(a - lw) <= 0.1 * lw and abs(b - lh) <= 0.1 * lh:
-                C, ic = _bilesim(serbest(), r, rs, 1.0)
-                if C == Gs:
+                _, ic = _bilesim(serbest(), r, rs, 1.0)
+                if _ayni_icerik(ic, Gs, 1.0):
                     isaretler.append(("sigorta_kutusu", r))
                     al(ic)
                 else:
                     icsiz += 1
         if icsiz:
             uyarilar.append(f"sigorta kutusu ölçüsünde, içi lejanttaki işarete uymayan {icsiz} kutu")
+
+    # kaydırılarak iki kez çizilmiş işaret: aynı türden iki işaretin kutusu kesişmez (prizde U'ların kutusu yukarıda)
+    aile = {"tavan_armaturu": "duy", "glop": "glop", "buat": "glop", "anahtar_tekli": "anahtar", "anahtar_cift": "anahtar",
+            "sigorta_kutusu": "sigorta"}
+    ust_uste = sum(1 for i, (t1, r1) in enumerate(isaretler) for t2, r2 in isaretler[i + 1:]
+                   if t1 in aile and aile.get(t2) == aile[t1] and _kesisiyor(r1, r2, UC_PAYI_PT))
+    if ust_uste:
+        uyarilar.append(f"kutusu aynı türden bir başkasıyla kesişen {ust_uste} işaret çifti (aynı işaret kaydırılarak iki kez çizilmiş olabilir)")
+    # parçasıyla işarete giren çizimin (PDF yolu) öbür parçaları da bir işarete girmeli: aynı yolda U'nun yanına çizilmiş fazla çizgi yutulmaz
+    yarim = sum(1 for o in plan if id(o) in parcali and (o["tur"] != {"l"} or len(parcali[id(o)]) < len(o["cizgiler"])))
+    if yarim:
+        uyarilar.append(f"bir parçası işarete giren ama başka parçası hiçbir işarete girmeyen {yarim} çizim")
 
     # sessiz sayı yok: işaret renklerinde (her boyda) ya da sigortanın iç desenindeki ve işaret renklerine yakın tonlarda (işaret boyunda),
     # hiçbir işarete girmeyen öğe; aynı renklerde duvar çerçevesinin dışındaki öğe
