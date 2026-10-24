@@ -1347,8 +1347,9 @@ def elektrik_oku(pg, ayar: dict, dis_olcu_cm: list[float]) -> dict:
       öbürüyle tek kümeye girer ve ölçüsü tutmaz, kaymış sigorta kopyası da tek büyük kutu olur ve iç deseni sahipsiz kalır); kutusunun
       ortası başka türden bir işaretin kutusunda olan işaret (ör. BUAT dairesinin içine çizilmiş U);
     - lejantta: etiketi ya da işareti bulunamayan tür, tanınmayan sözcük, hiçbir etikete bağlanmayan işaret, zil (okunmuyor), alanın
-      hemen altında öğe, alanın dışında lejant etiketine benzeyen sözcük; lejant kutusunda hiçbir lejant işaretine girmeyen lejant
-      renginde öğe; duvar çerçevesiyle kesişen lejant kutusu (kutudaki öğe plana girmez);
+      hemen altında öğe, alanın dışında lejant etiketine benzeyen sözcük; lejant işaretinde okunmayan öğe (aynı satıra çizilmiş ikinci
+      işaret, işarete eklenmiş çizim); lejant kutusunda hiçbir lejant işaretine girmeyen lejant renginde öğe; duvar çerçevesiyle
+      kesişen lejant kutusu (kutudaki öğe plana girmez);
     - planda hiç işareti bulunamayan lejant türü; yanında priz olmayan, en yakın prizi çift olan ya da başka bir UYDU yazısıyla aynı prize
       bağlanan UYDU yazısı.
     Konumlar duvar çizgilerinin sınırının montajdaki dış ölçüye oturmasından (cm; `oran_payi` içinde); oda ataması burada değil."""
@@ -1384,11 +1385,22 @@ def elektrik_oku(pg, ayar: dict, dis_olcu_cm: list[float]) -> dict:
     def uctaki(parca, s, d):                            # tırnağın dıştaki ucuna değen öbür çizgiler
         dis = s[1] if _uzak(s[1], d) > _uzak(s[2], d) else s[2]
         return [s2 for s2 in parca if s2 is not s and min(_uzak(dis, s2[1]), _uzak(dis, s2[2])) <= 0.6]
+
+    def okunmayan(g, ogeler_, parcalar_):
+        """Lejant işaretinin okunmayan öğeleri: işaretin her öğesi ya bütünüyle ya da (çizgi çizgi) bütün parçalarıyla okunur (KH-3
+        hakeminin 12. turu: aynı satıra çizilmiş ikinci işaret ya da U'ya eklenmiş çizgi lejantın okumasına girmeden yutuluyordu)."""
+        alinan = {id(o) for o in ogeler_}
+        parca: dict[int, set] = {}
+        for s in parcalar_:
+            parca.setdefault(id(s[0]), set()).add((round(s[1].x, 3), round(s[1].y, 3), round(s[2].x, 3), round(s[2].y, 3)))
+        return [o for o in g if id(o) not in alinan
+                and (id(o) not in parca or o["tur"] != {"l"} or len(parca[id(o)]) < len(o["cizgiler"]))]
     for tur in ("duy", "glop", "anahtar", "priz", "sigorta"):
         if tur not in lejant:
             uyarilar.append(f"lejantta {tur} etiketi yok; sayısı bilinmiyor")
             continue
         g = lejant[tur]["ogeler"]
+        okunan, okunan_parca = [], []                   # lejant işaretinin okunan öğeleri ve (çizgi çizgi okunan) parçaları
         if tur in ("glop", "anahtar"):
             d = _lejant_dairesi(g)
             if d:
@@ -1405,7 +1417,9 @@ def elektrik_oku(pg, ayar: dict, dis_olcu_cm: list[float]) -> dict:
                     L[tur] = {"renk": d["renk"], "cap": d["cap"], "cizgi": len(t), "tirnak": sum(s[3] for s in t) / len(t) if t else None,
                               "uc": sum(uc) / len(uc) if uc else None, "uc_aci": sum(uc_aci) / len(uc_aci) if uc_aci else None,
                               "sapma": sum(_sapma(s, d["m"]) for s in t) / len(t) if t else None, "aci": aci, "isin_aci": isin}
+                    okunan_parca = [*t, *(s2 for _, s2 in uclar)]
                 G[tur] = bilesim(g, d["r"], 0.5)
+                okunan = G[tur][0]
         elif tur == "duy":
             dolgu = [o for o in g if o["dolgu"]]
             if dolgu:
@@ -1413,6 +1427,7 @@ def elektrik_oku(pg, ayar: dict, dis_olcu_cm: list[float]) -> dict:
                 r = _kutu([o for o in dolgu if o["renk"] == renk])
                 L[tur] = {"renk": renk, "olcu": sorted((r.width, r.height))}
                 G[tur] = bilesim(g, r, 1.0)
+                okunan = G[tur][0]
         elif tur == "priz":
             renkler = Counter(o["renk"] for o in g if not o["dolgu"] and o["cizgiler"])
             U = _u_isaretleri(_parcalar(g, renkler.most_common(1)[0][0])) if renkler else []
@@ -1420,14 +1435,19 @@ def elektrik_oku(pg, ayar: dict, dis_olcu_cm: list[float]) -> dict:
                 a = U[0]["aci"]                         # açılar: iki kolun arası, kolların (ortalama) ve sapın tabanla açısı
                 L[tur] = {"renk": renkler.most_common(1)[0][0], **U[0]["olcu"],
                           "aci": {"kol_kol": a["kol_kol"], "kol_taban": round(sum(a["kol_taban"]) / 2, 2), "sap_taban": a["sap_taban"]}}
+                okunan_parca = U[0]["parcalar"]
         else:
             siyah = [o for o in g if _ayni_renk(o["renk"], tuple(E["sigorta_rengi"]))]
             if siyah:
                 r = _kutu(siyah)
                 L[tur] = {"renk": siyah[0]["renk"], "olcu": sorted((r.width, r.height))}
                 G[tur] = bilesim(g, r, 1.0)
+                okunan = G[tur][0]
         if tur not in L:
             uyarilar.append(f"lejantta '{tur}' etiketinin işareti okunamadı")
+        elif fazla := okunmayan(g, okunan, okunan_parca):
+            uyarilar.append(f"lejantta '{tur}' işaretinde okunmayan {len(fazla)} öğe (aynı satıra çizilmiş başka işaret ya da işarete eklenmiş "
+                            "çizim)")
     if "zil" in lejant:
         uyarilar.append("lejantta zil var; bu okuyucu zil işaretini okumuyor")
     if L.get("glop", {}).get("cizgi") == 0:
@@ -1727,7 +1747,7 @@ def elektrik_oku(pg, ayar: dict, dis_olcu_cm: list[float]) -> dict:
                                [round(x, 2) for x in v] if isinstance(v, list) else v) for k, v in d.items()} for t, d in L.items()},
             "uydu_uzakligi_pt": uydu_uzaklik, "olcek_pt_cm": [round(sx, 5), round(sy, 5)],
             "atilan": {"cerceve_disinda": len(disarida), "ayni_yerde_iki_kez": sum(1 for o in kopyalar if o["renk"] in tam | ek and not lk.contains(o["m"])),
-                       "isaretten_buyuk": sum(1 for o in plan + disari if o["renk"] in ek and not aday(o))},
+                       "isaretten_buyuk": sum(1 for o in ogeler if o["renk"] in ek and not aday(o))},   # lejant kutusundaki de
             "uyarilar": uyarilar}
 
 

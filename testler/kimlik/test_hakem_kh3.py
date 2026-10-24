@@ -12,7 +12,7 @@ bu dosya KH-3'ün eklediklerini sınar:
   çaprazsız ve BUAT yazısız daire, tam olmayan daire (eğrilerle çizilmiş elmas, yıldız; açık ya da yarısı iki kez), çaprazı eksik ya da
   içinde BUAT yazan glop, lejantta çaprazsız glop, sap boyundan yakın ya da
   birbirine binen iki U, Z biçimli U, işareti ya da etiketi olmayan lejant satırı, lejanttaki zil, lejant alanının hemen altında öğe ya da alanın dışında lejant
-  etiketi, yanında priz olmayan ya da başka UYDU'yla aynı prize bağlanan UYDU, üçlü zincir priz, duvar çerçevesinin dışındaki lejant
+  etiketi, lejant işaretinde okunmayan öğe, lejant kutusunda işarete girmeyen öğe ya da duvar çerçevesine giren lejant kutusu, yanında priz olmayan ya da başka UYDU'yla aynı prize bağlanan UYDU, üçlü zincir priz, duvar çerçevesinin dışındaki lejant
   renginde öğe, dış ölçüye oturmayan duvar, lejantta tanınmayan sözcük ya da etiketsiz işaret, lejantta olup planda hiç bulunamayan tür
   ve montaj teyidi bölümü bekletir; okunamayan sayfa yalnız kendini bekletir.
 - **PK-01 cevabı:** s. 10; duy 6, glop 2, anahtar 4 + 2, priz 15 + 4, uydu 1, zil 0, sigorta 1; buat 5 (bilgi); 40 konum; iki kez
@@ -842,14 +842,48 @@ def test_beyaz_dolgulu_isaret_bekletir(tmp_path, ek, kw, neden):
      "lejant kutusunda, hiçbir lejant işaretine girmeyen lejant renginde 1 öğe"),
     (None, {"lejant_kaydir": (-426, 103)},                                                                # sol duvarın payında
      "lejant kutusu duvar çerçevesiyle (30 cm payıyla) kesişiyor: o kısımdaki plan öğeleri okunmadı"),
-], ids=["etiket_sutununda_glop", "etiket_sutununda_yakin_ton", "lejant_cercevede"])
+    (None, {"lejant_kaydir": (-48, 0)},                                                                   # yalnız payda (duvara değmez)
+     "lejant kutusu duvar çerçevesiyle (30 cm payıyla) kesişiyor: o kısımdaki plan öğeleri okunmadı"),
+    (lambda e: e.glop(750, 370), {}, "lejant kutusunda, hiçbir lejant işaretine girmeyen lejant renginde 3 öğe"),      # kutunun kenarında
+    (lambda e: e.duy(735, 372, 6), {}, "lejant kutusunda, hiçbir lejant işaretine girmeyen lejant renginde 3 öğe"),    # dolgulu
+    (lambda e: e.kutu(703.5, 373, 110, 175, KIRMIZI), {},                                                   # lejant renginde çerçeve
+     "lejant kutusunda, hiçbir lejant işaretine girmeyen lejant renginde 1 öğe"),
+], ids=["etiket_sutununda_glop", "etiket_sutununda_yakin_ton", "lejant_cercevede", "lejant_yalniz_payda", "kutunun_kenarinda_glop",
+        "etiket_sutununda_dolgulu_duy", "lejant_cercevesi_lejant_renginde"])
 def test_lejant_kutusu_bekletir(tmp_path, ek, kw, neden):
     """KH-3 hakeminin 11. turu: lejant kutusundaki öğe ne plana ne çerçevenin dışına girer. Lejantın etiket sütununa çizilmiş glop (ya da
     yakın tonda çizgi) ne sayılıyor ne teyit yazıyordu; lejant kutusu duvar çerçevesine girince kutudaki plan işareti (sol duvardaki tekli priz) sessizce
-    düşüyordu. Artık ikisi de elektriği bekletir."""
+    düşüyordu. Artık ikisi de elektriği bekletir. 12. turdan: kesişme denetimi duvarın kendisine değil payına bakar (kutu yalnız paya
+    girer); ölçüt öğenin ortası (ortası kutuda, kutusu kenardan taşan glop); dolgulu öğe de; lejantı çevreleyen lejant renginde çerçeve
+    teyit yazar (tutucu; Bilinen sınırlama)."""
     o = PO.oku(kh3_sentetik(tmp_path / "s.pdf", ek=ek, **kw), EL)
     t = _teyit(o)
     assert set(t) == {"elektrik"} and neden in t["elektrik"], t
+    assert "elektrik" not in o and "makas_bas" in o and "h_plani" in o
+
+
+def _okunmayan(tur, n):
+    return f"lejantta '{tur}' işaretinde okunmayan {n} öğe (aynı satıra çizilmiş başka işaret ya da işarete eklenmiş çizim)"
+
+
+@pytest.mark.parametrize("ek, kw, neden", [
+    *((lambda e, Y=Y: e.cizgi((649, Y), (652, Y)), {}, _okunmayan(tur, 1))                                 # satırın işaret sütununda kısa çizgi
+      for tur, Y in (("anahtar", 330), ("priz", 355), ("glop", 385), ("duy", 415), ("sigorta", 448))),
+    (lambda e: e.anahtar(655, 330, 1), {}, _okunmayan("anahtar", 3)),                                     # aynı satırda ikinci anahtar
+    (lambda e: e.anahtar(653, 357, 1), {}, _okunmayan("priz", 3)),                                        # priz satırında anahtar
+    (lambda e: e.cizgi((660.75, 352), (663.75, 352)), {}, _okunmayan("priz", 1)),                         # U'nun koluna değen çizgi
+    (lambda e: e.yol(_u_parcalari(665, 355) + [((663.5, 352), (666.5, 352))]), {"lejant_isaretsiz": "priz"},   # U ile aynı yolda çizgi
+     _okunmayan("priz", 1)),
+], ids=["anahtar_satirinda_cizgi", "priz_satirinda_cizgi", "glop_satirinda_cizgi", "duy_satirinda_cizgi", "sigorta_satirinda_cizgi",
+        "ikinci_anahtar", "priz_satirinda_anahtar", "u_koluna_degen_cizgi", "u_ile_ayni_yolda_cizgi"])
+def test_lejant_isaretinin_her_ogesi_okunur(tmp_path, ek, kw, neden):
+    """KH-3 hakeminin 12. turu: lejant satırının işaret sütunundaki her öğe o türün işaretine girer, ama okuma yalnız ilk işareti alır.
+    Aynı satıra çizilmiş ikinci işaret ya da lejanttaki U'ya eklenmiş çizgi ne sayılıyor ne teyit yazıyordu (lejant "U + çizgi"
+    gösterirken plandaki çizgisiz U'lar priz sayılıyordu). Artık lejant işaretinin her öğesi ya bütünüyle ya da bütün parçalarıyla
+    okunur; okunmayan öğe elektriği bekletir (beş türün her biri; U ile aynı PDF yolundaki fazla parça da)."""
+    o = PO.oku(kh3_sentetik(tmp_path / "s.pdf", ek=ek, **kw), EL)
+    t = _teyit(o)
+    assert t == {"elektrik": [neden]}, t
     assert "elektrik" not in o and "makas_bas" in o and "h_plani" in o
 
 
@@ -899,16 +933,22 @@ def test_yolun_yapisi_tur_ve_olcu():
     (lambda e: _glop_bicimli(e, X_U, Y_U, "daire", yaylar=((180, 90), (270, 360), (90, 0), (180, 270))), {}, {"glop": 2}, {}),  # yaylarla
     (lambda e: _glop_bicimli(e, X_U, Y_U, "daire", yaylar=((0, 90), (90, 180), (180, 270), (270, 359.1))), {}, {"glop": 2}, {}),  # 0,15 pt
     (lambda e: e.kutu(*g(300, 300), 60, 8, SIYAH, (1.0, 1.0, 1.0)), {}, {}, {}),                       # beyaz dolgulu siyah çerçeve
+    (lambda e: e.kutu(703.5, 373, 110, 175, KOYU_KIRMIZI), {}, {}, {"isaretten_buyuk": 1}),              # lejantın yakın tonda çerçevesi
+    (lambda e: e.kutu(703.5, 373, 110, 175, SIYAH), {}, {}, {}),                                          # lejantın siyah çerçevesi
+    (None, {"lejant_kaydir": (-40, 0)}, {}, {}),                                                          # lejant payın hemen dışında
 ], ids=["tek_yolda_iki_u", "desenli_sigorta", "baslik_cercevesi", "donuk_cift_anahtar", "aynali_cift_anahtar", "glop_tek_yol", "egik_tirnakli_anahtarlar",
         "yan_yana_duy", "cift_priz_8", "cift_priz_9_5", "donuk_tekli_u", "egrili_daire_glop", "ters_yonde_daire_anahtar", "az_basik_glop",
-        "karisik_ceyrekli_anahtar", "karisik_yayli_glop", "kapanisi_0_15_acik_glop", "beyaz_dolgulu_siyah_cerceve"])
+        "karisik_ceyrekli_anahtar", "karisik_yayli_glop", "kapanisi_0_15_acik_glop", "beyaz_dolgulu_siyah_cerceve", "lejant_cercevesi_yakin_ton",
+        "lejant_cercevesi_siyah", "lejant_payin_hemen_disinda"])
 def test_dogru_cizim_teyitsiz(tmp_path, ek, kw, sayim, atilan):
     """Sessiz sayı denetimleri doğru çizimi bekletmez: aynı yoldaki iki tam U iki priz; iç deseni başka renkte sigorta; işaretten büyük
     yakın tonda çerçeve denetlenmez, sayılır; döndürülmüş ya da aynalanmış çift anahtar, çaprazları tek yolda glop, tırnakları yarıçapla
     açılı (lejanttaki gibi eğik) anahtarlar, yan yana iki duy; ikinci U'su `aci_payi_derece` içinde dönük çift priz; dönük tekli U;
     dairesi tek tek eğrilerle (çeyrek daireler) ya da öbür yöne çizilmiş glop ve anahtar; 0,08 pt basık (payın içinde) glop; dairesinin
     çeyrekleri karışık sırayla ve yönle çizilmiş anahtar ve glop (glopta `_egri_yol`'un `yaylar`'ıyla; bozuk yay senaryolarının denetimi);
-    kapanış yerinde 0,15 pt açık (uç payının içinde) glop; beyaz dolgulu siyah çerçeve (siyah denetlenmez)."""
+    kapanış yerinde 0,15 pt açık (uç payının içinde) glop; beyaz dolgulu siyah çerçeve (siyah denetlenmez); lejantı çevreleyen yakın tonda
+    çerçeve (lejant kutusundaki de `isaretten_buyuk`'a sayılır; KH-3 hakeminin 12. turu) ya da siyah çerçeve; duvar çerçevesinin payına
+    0,5 pt kalan lejant kutusu."""
     o = PO.oku(kh3_sentetik(tmp_path / "s.pdf", ek=ek, **kw), EL)
     a = o["ayrinti"]["elektrik"]
     assert o["teyit_bekliyor"] == [] and a["sayim"] == BEKLENEN | sayim
@@ -977,8 +1017,9 @@ def test_pk01_elektrik_cevabi(cevap):
     assert (a["lejant"]["anahtar"]["isin_aci"], a["lejant"]["anahtar"]["sapma"], a["lejant"]["anahtar"]["uc_aci"]) == (78.25, 24.38, 75.26)
     assert a["lejant"]["glop"]["capraz_aci"] == [90.0]
     assert a["lejant"]["priz"]["aci"] == {"kol_kol": 0.0, "kol_taban": 90.0, "sap_taban": 90.0}
-    # iki çift anahtar dairesi ikişer kez çizilmiş (bir sayıldı); sayfa başlığının koyu kırmızı çerçevesi işaretten büyük, denetlenmedi
-    assert a["atilan"] == {"cerceve_disinda": 0, "ayni_yerde_iki_kez": 2, "isaretten_buyuk": 1}
+    # iki çift anahtar dairesi ikişer kez çizilmiş (bir sayıldı); sayfa başlığının ve lejantın koyu kırmızı çerçevesi işaretten büyük,
+    # denetlenmedi (lejant kutusundaki de sayılır; KH-3 hakeminin 12. turu)
+    assert a["atilan"] == {"cerceve_disinda": 0, "ayni_yerde_iki_kez": 2, "isaretten_buyuk": 2}
     # ölçek: duvar çizgisinin sınırı 600 × 1000 cm'ye oturur; bu sayfada duvar öteki sayfalardan açık (proje ayarı)
     assert abs(a["olcek_pt_cm"][0] - a["olcek_pt_cm"][1]) / a["olcek_pt_cm"][0] < 0.001
     assert _oku(PROJE / "PK01.json")["ayar"]["elektrik"] == {"duvar_rengi": [0.576, 0.584, 0.596]}
