@@ -1447,7 +1447,7 @@ def elektrik_oku(pg, ayar: dict, dis_olcu_cm: list[float]) -> dict:
                         # sayılıyordu)
                         if min(isin, aci) <= 2 * E["aci_payi_derece"]:
                             uyarilar.append(f"lejantta anahtarın iki tırnağı çift değil: daireye değdikleri yerler {isin:.0f}°, çizgileri {aci:.0f}° "
-                                            f"ayrık (en az {2 * E['aci_payi_derece']:g}°; aynı tırnak iki kez çizilmiş olabilir)")
+                                            f"ayrık ({2 * E['aci_payi_derece']:g}°'den fazla olmalı; aynı tırnak iki kez çizilmiş olabilir)")
                 G[tur] = bilesim(g, d["r"], 0.5)
                 okunan = G[tur][0]
         elif tur == "duy":
