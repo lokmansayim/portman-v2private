@@ -584,6 +584,31 @@ def test_kapi_olcu_kimligi_yazi_ve_sayilar():
     assert esle.kapi_denetle(sonra, [], t)[1].startswith("grubun ölçüleri değişti")
     (t,) = _tutanlar(sonra, gercek, [])
     assert esle.tutuyor_mu(sonra, [], t) == "aynı"                                   # kayıt da kimlikle: aynı liste kapıdan geçer
+    # sayıları aynı, yazısı farklı: `tam` kipinde anahtar yazıdır, bölünür (hakem 7. tur, B2)
+    assert not esle.ayni_olcu("1200 × 300", "1200/300") and not esle.ayni_olcu("1200 × 300", "1200 × 300 CM")
+    once = [{"kalem": "Deneme kapak", "olcu": "1200 × 300", "adet": 5}, {"kalem": "Deneme kapak", "olcu": "1200 × 300", "adet": 2}]
+    gercek = [("DENEME KAPAK", "1200 X 300", 7)]
+    (t,) = _tutanlar(once, gercek, [])
+    assert t["eslesme"] == "anahtar" and esle.tutuyor_mu(once, [], t) == "ayrım"
+    sonra = [once[0], {**once[1], "olcu": "1200 × 300 CM"}]
+    assert _sonuc(sonra, gercek, []) == ["farklı"]
+    assert esle.kapi_denetle(sonra, [], t)[1].startswith("satır yok")
+
+
+def test_kapi_belirsiz_olcude_durur(tmp_path):
+    """Aynı yazıya inen ama sayıları farklı iki bizim ölçümüz aynı anahtardadır; eşleme satır sırasına bağlı kalır: kapı durur
+    (uydurma; hakem 7. tur, B1)."""
+    once = [{"kalem": "Deneme kapak", "olcu": "1200 × 300", "adet": 1}, {"kalem": "Deneme kapak", "olcu": "1 200 × 300", "adet": 1}]
+    gercek = [("DENEME KAPAK", "120*30", 2)]
+    (t,) = _tutanlar(once, gercek, [])
+    assert t["eslesme"] == "esdeger" and _sonuc(once, gercek, []) == ["ayrım"] and _sonuc(once[::-1], gercek, []) == ["farklı"]
+    assert esle.belirsiz_olcu(once) == ["1200X300"]
+    assert esle.kapi_denetle(once, [], t)[1].startswith("belirsiz ölçü")
+    toplam = _gruplar(tmp_path, TOPLAM)
+    once = [{"kalem": "Deneme toplam", "olcu": "1 200 × 300", "adet": 0}, {"kalem": "Deneme toplam", "olcu": "1200 × 300", "adet": 5}]
+    (t,) = _tutanlar(once, [("DENEME TOPLAM", "120 X 30", 5)], toplam)
+    assert esle.kapi_denetle(once, toplam, t)[1].startswith("belirsiz ölçü")
+    assert esle.belirsiz_olcu([{"olcu": "1200 × 300"}, {"olcu": "1200 X 300"}, {"olcu": "ADET"}]) == []
 
 
 def test_kapi_pafta_kaydinda_aday_sutunu_yetmez():
