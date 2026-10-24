@@ -272,7 +272,7 @@ def _k2(f, kartlar: dict, yerlesim: dict, liste_kurallari: dict, is_emri: dict, 
         k = uyan[0]
         eslesen.append(dict(p, ad=ad, kart=k, sinif=k["yerlesim"]["sinif"], pafta=_yerlesim_anahtarlari(k, p, g["tavan"])))
     turler = {k["kod"]: _tur_olustur(f, k, surum) for k in kartlar["kartlar"] if any(p["kart"] is k for p in eslesen)}
-    elemanlar = yaz.yaz(f, eslesen, turler, kaynak, PARCA_SETI)
+    elemanlar = yaz.yaz(f, eslesen, turler, kaynak, PARCA_SETI, str(is_emri.get("is_emri_no", "")))
     kayitlar = [{"e": e, "rol": "kart", "kart": p["kart"], "pafta": p["pafta"], "k2": p} for e, p in zip(elemanlar, eslesen)]
 
     kitap = Y.kitap_oku(liste_kurallari)
@@ -286,7 +286,7 @@ def _k2(f, kartlar: dict, yerlesim: dict, liste_kurallari: dict, is_emri: dict, 
                                      else kesim.boy_karti(boylar, cm(R["parca_boyu"]), cm(R["pay"])))
         if k.get("sabit"):
             sabit[k["kod"]] = {"adet": Y.oku(k["sabit"]["okunan"], liste_kurallari, kitap), "okunan": k["sabit"]["okunan"]}
-    ozet = {"tavan": g["tavan"], "cati_tipi": g["cati_tipi"], "baslangic": g["baslangic"],
+    ozet = {"tavan": g["tavan"], "cati_tipi": g["cati_tipi"], "baslangic": g["baslangic"], "uyarilar": sonuc["uyarilar"],
             "omega_hatlari": [{"no": h["no"], "yer": h["yer"], "eksen": h["eksen"], "s_cm": h["s"], "r0_cm": round(h["r0"], 4), "r1_cm": round(h["r1"], 4),
                                "mahal": h["mahal"], "parcalar_cm": [round(b - a, 4) for a, b in h["parcalar"]], "bosluk_cm": round(h["bosluk_cm"], 4)}
                               for h in sonuc["hatlar"]],
@@ -532,6 +532,10 @@ def main(argv: list[str] | None = None) -> int:
             print(f"{k['kod']:6} {k['adet']:4}  {k['ad']}{ek}")
     print(f"görünüm {len(say['gorunum'])}, bileşen {sum(say['bilesen'].values())}, kartsız {len(say['kartsiz'])}, kural yok {len(say['kural_yok'])}; "
           f"şema hatası {say['sema_hatasi']}")
+    for x in say["kural_yok"]:
+        print(f"kural yok: {x['parca']}: {x['neden']}")
+    for u in say.get("yerlesim", {}).get("uyarilar", []):
+        print(f"uyarı ({u['katman']}): {u['metin']}")
     return 1 if say["kural_yok"] or any(say["sema_hatasi"].values()) else 0
 
 

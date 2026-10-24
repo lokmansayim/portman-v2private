@@ -6,13 +6,20 @@
   dere hatları ve inişler paftadaki yerde, kaplama yüz başına 11, betopan makas başına 2.
 - K2 modeli K1 modelinin parçalarını aynen taşır; yeni parçalar yalnız K2 kartlarındandır; GlobalId'leri her üretimde aynı.
 - Değerler okunur: her `okunan` yol çözülür (liste kuralları ve kitap); yerleşim kurallarıyla liste kurallarında ortak anahtar yok.
-- Kural birimleri: ters tavan (duvar yüzünden 60 cm, paftadaki anahtarı `tavan_omegasi`), aşığın saçak sırası, iniş eşiği, kırma çatı ve
-  sandviç dışı kaplama "kural yok", iniş kuralı "esik" değilse iniş yok, kartı olmayan ve iki karta uyan parça, makaslar y ekseninde.
-- Kesim planı (yedek yok, karar D açık), gösterim değerlerinin sayıyı değiştirmemesi, komutun yerleşim planları (beş sayfa).
+- Kural birimleri: ters tavan (başlangıç duvarının yüzünden 60 cm, karşı yüzde hat yok; paftadaki anahtarı `tavan_omegasi`), asma ara
+  hattın en kısa sınırı (10 cm dahil) ve L biçimli odada kolun kendi sınırı, aşığın saçak sırası ve en kısa boyu, kaplamanın dizilimi ve
+  taşan son şeridi, betopanın mahyaya ortalanması ve tek sıranın örtmediği üçgen ("kural yok"), iniş eşiği, kırma çatı ve sandviç dışı
+  kaplama "kural yok", iniş kuralı "esik" değilse iniş yok, kartı olmayan ve iki karta uyan parça, makaslar y ekseninde.
+- Uyarılar: Tavan yazılı değilse, İş Emri'nde planda olmayan açık mahal varsa, profil açık mahali bölerse.
+- Kesim planı (yedek yok, karar D açık), gösterim değerlerinin sayıyı değiştirmemesi, komutun yerleşim planları (beş sayfa; kural yokta
+  EKSİK ve nedeni), GlobalId'nin evden eve ayrışması, K2 kodlarının kilidi.
+(Geometri hakeminin K2 ilk turundan sonra eklenenler: en kısa sınırlar, L biçimli oda, kaplama dizilimi ve taşma, betopan, uyarılar,
+EKSİK, ev kimliği, kod kilidi.)
 """
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 import math
 import sys
@@ -30,12 +37,14 @@ import kiyas as KY  # noqa: E402
 from motor import ifc_uret  # noqa: E402
 from motor import kart_model as KM  # noqa: E402
 from motor import yerlesim as Y  # noqa: E402
-from motor.yerlesim import cati, kesim  # noqa: E402
+from motor.yerlesim import cati, girdi, kesim, tavan  # noqa: E402
+from motor.yerlesim.girdi import Duvar  # noqa: E402
 
 VERI = KOK / "testler" / "kimlik" / "veri"
 MOTOR_VERI = KOK / "testler" / "motor" / "veri"
 PROJE = KOK / "testler" / "kimlik" / "hakem" / "projeler" / "PK01.json"
 K2_KODLARI = ("OM-01", "AS-01", "KP-01", "BT-01", "DR-01", "DR-02")
+KILIT_K2 = "21476fe2de4d20ca5d111694f90de7f8ce203fe6c6dadc65d4b6d2710f4ac6e0"   # K1'in 25 ve K2'nin 7 kodu (bu PR)
 
 
 def _oku(p: Path) -> dict:
@@ -145,6 +154,8 @@ def test_globalid_her_uretimde_ayni(pk01, tmp_path):
         f = ifcopenshell.open(str(yol))
         return {e.GlobalId: e.Name for e in f.by_type("IfcProduct") if ue.get_psets(e).get(KM.PARCA_SETI, {}).get("KartKodu") in K2_KODLARI}
     assert ad(m["model"]) == ad(pk01["model"]) and len(ad(m["model"])) == 100
+    baska = _model(_ie(is_emri_no="PM-BASKA-EV"), tmp_path, "baska")         # iki evin modeli birlikte açılınca çakışmaz
+    assert sorted(ad(baska["model"]).values()) == sorted(ad(pk01["model"]).values()) and not set(ad(baska["model"])) & set(ad(pk01["model"]))
     x, y = m["say"], pk01["say"]
     assert {k: v for k, v in x.items() if k not in ("bugunku_ifc", "bugunku_ifc_sha256", "kart_modeli")} == \
            {k: v for k, v in y.items() if k not in ("bugunku_ifc", "bugunku_ifc_sha256", "kart_modeli")}
@@ -204,13 +215,20 @@ def test_kaplama_ve_betopan_paftayla(pk01, cevap):
     K = _parcalar(pk01["model"], "KP-01")
     assert sorted(Counter(p["p"]["Yuz"] for p in K).values()) == cevap["ayrinti"]["kaplama"]["gruplar"]
     assert {p["p"]["PanelBoyu_cm"] for p in K} == {353}                 # kitabın boyu; paftada 350 (iş emrinde bilinen fark)
-    assert Counter(p["p"]["Genislik_cm"] for p in K) == {100: 20, 60: 2}
+    assert Counter(p["p"]["Genislik_cm"] for p in K) == {100: 22}         # şerit kesilmez, son şerit taşar (paftada 22 tam panel)
+    tasan = [p for p in K if p["p"]["Tasma_cm"]]
+    assert sorted(p["p"]["Tasma_cm"] for p in tasan) == [40, 40] and all(p["p"]["Serit"] == 11 for p in tasan)
+    assert all(p["a"][1] == pytest.approx(-70) for p in tasan)          # dizilim arka uçtan (arka-sol): taşma ön saçakta
+    assert all(p["b"][1] == pytest.approx(1030) for p in K if p["p"]["Serit"] == 1)
     B = _parcalar(pk01["model"], "BT-01")
     assert sorted(Counter(p["p"]["Makas"] for p in B).values()) == cevap["ayrinti"]["betopan"]["gruplar"]
     for p in B:                                                          # binanın uç duvarlarının dış yüzünde, alt başlıktan yukarı
         assert p["b"][1] <= 0 + 1e-6 or p["a"][1] >= 1000 - 1e-6, p["ad"]
         assert p["a"][2] == pytest.approx(250) and p["p"]["Levha_cm"] == "250 × 125"
     assert all(p["q"]["Qto_PlateBaseQuantities"]["GrossArea"] == pytest.approx(3.125) for p in B)
+    for ad in {p["p"]["Makas"] for p in B}:                              # mahyaya ortalı: 50 … 550 (mahya 300)
+        u = [(p["a"][0], p["b"][0]) for p in B if p["p"]["Makas"] == ad]
+        assert min(a for a, _ in u) == pytest.approx(50) and max(b for _, b in u) == pytest.approx(550)
 
 
 def test_boy_ve_alan_qto(pk01):
@@ -263,6 +281,12 @@ def test_ters_tavan(pk01, tmp_path):
     eksen = lambda H: [(h["eksen"], h["s_cm"], h["r0_cm"], h["r1_cm"]) for h in H if h["yer"] == "duvar_ekseni"]
     assert eksen(hat) == eksen(pk01["say"]["yerlesim"]["omega_hatlari"]) and len(eksen(hat)) > 0
     assert _adet(m["say"])["OM-01"] > 24
+    plan = ifc_uret.hazirla(ie)                                          # başlangıç sol (x küçük): ilk hat odanın sol yüzünde, sağ yüze 10 cm'den yakın hat yok
+    from shapely.geometry import Polygon
+    for o in plan["odalar"]:
+        x0, _y0, x1, _y1 = Polygon(o["poligon"]).bounds
+        s = sorted({h["s_cm"] for h in hat if h["mahal"] == o["ad"]})
+        assert s and s[0] == pytest.approx(x0) and s[-1] <= x1 - 10 + 1e-6, (o["ad"], s, x0, x1)
 
 
 def test_asik_saçak_sirasi():
@@ -270,7 +294,7 @@ def test_asik_saçak_sirasi():
     def g(aciklik_cm, egim):
         return {"W": aciklik_cm, "H": 500, "duvar_h": 250, "cati": {"tip": "besik", "egim": egim, "sacak": 30, "topuk": 10, "makas_ekseni": "x"},
                 "baslangic": {"x": "min", "y": "max"}, "makaslar": []}
-    K = {"kesit_asik": [5, 5], "aralik": 60.0, "tam": 410.0}
+    K = {"kesit_asik": [5, 5], "aralik": 60.0, "tam": 410.0, "en_kisa": 10.0}
     for aciklik, egim in ((600, 0.33), (500, 0.30), (840, 0.0)):
         F = cati.cerceve(g(aciklik, egim))
         d = sorted({p["bilgi"]["MahyadanEgik_cm"] for p in cati.asik(g(aciklik, egim), K)})
@@ -279,6 +303,13 @@ def test_asik_saçak_sirasi():
     F = cati.cerceve(g(1140, 0.0))                                       # eğik 600: 0 … 540 ve 600, saçakta tek sıra
     assert F["egik"] == pytest.approx(600)
     assert sorted({p["bilgi"]["MahyadanEgik_cm"] for p in cati.asik(g(1140, 0.0), K)}) == [60.0 * i for i in range(11)]
+    for aciklik, son in ((1141, 600.5), (1158, 609.0), (1160, 610.0)):  # saçak sırasına 10 cm'den yakın sıra konmaz (10 cm dahil kalır)
+        d = sorted({p["bilgi"]["MahyadanEgik_cm"] for p in cati.asik(g(aciklik, 0.0), K)})
+        assert d[-1] == pytest.approx(son) and (d[-2] == 540 if son - 600 < 10 else d[-2] == 600) and d[-1] - d[-2] <= 70 + 1e-6
+    def boylar(H):                                                       # mahya boyu H + 60; kalan 10 cm'den kısaysa parçasız
+        gg = dict(g(600, 0.33), H=H)
+        return sorted({p["boy_cm"] for p in cati.asik(gg, K)})
+    assert boylar(763) == [410.0] and boylar(770) == [10.0, 410.0] and boylar(1000) == [240.0, 410.0]
 
 
 def test_inis_esigi():
@@ -333,15 +364,89 @@ def test_karti_olmayan_ve_iki_karta_uyan_parca(tmp_path):
 
 
 def test_makaslar_y_ekseninde(tmp_path):
-    """Makaslar derinliği geçince (makas ekseni y) mahya x boyunca: aşık ve kaplama x yönünde, dere hatları y = −30 ve 1030'da."""
+    """Makaslar derinliği geçince (makas ekseni y) mahya x boyunca: aşık ve kaplama x yönünde, dere hatları y = −30 ve 1030'da. Açıklık
+    1000 cm'de üçgen 184,9 cm: tek sıra betopan örtmez, "kural yok" (öteki katmanlar kurulur)."""
     m = _model(_ie(cati__makas_ekseni="y"), tmp_path, "y")
-    assert m["say"]["kural_yok"] == [] and ifc_uret.ozet(m["model"])["sema_hatasi"] == 0
+    assert [x["parca"] for x in m["say"]["kural_yok"]] == ["baş makas betopanı"] and ifc_uret.ozet(m["model"])["sema_hatasi"] == 0
     A = _parcalar(m["model"], "AS-01")
     assert all(p["b"][0] - p["a"][0] > p["b"][1] - p["a"][1] for p in A)
     D = _parcalar(m["model"], "DR-01")
     assert sorted(round(p["b"][1] if p["b"][1] <= 0 else p["a"][1]) for p in D) == [-30, 1030]
     assert all(p["p"]["Boy_cm"] == pytest.approx(660) for p in D)
-    assert _adet(m["say"])["BT-01"] > 0 and _adet(m["say"])["DR-02"] == 4        # 660 cm < 9 m: orta iniş yok
+    assert _adet(m["say"])["BT-01"] == 0 and _adet(m["say"])["DR-02"] == 4       # 660 cm < 9 m: orta iniş yok
+
+
+def _g_tavan(odalar, duvarlar, acik=(), engeller=(), tavan_="asma"):
+    return {"duvarlar": list(duvarlar), "odalar": [{"ad": f"O{i}", "poligon": p} for i, p in enumerate(odalar)],
+            "acik": [{"ad": "V", "poligon": p} for p in acik], "engeller": list(engeller), "tavan": tavan_,
+            "cati": {"makas_ekseni": "x"}, "baslangic": {"x": "min", "y": "max"}}
+
+
+def test_asma_en_kisa_ve_l_oda():
+    """Asma: ara hat odanın öteki sınırından 10 cm uzaktaysa konur, 9,9 cm'deyse konmaz (odaya ortasında bir hat). L biçimli odada hat,
+    kolun kendi sınırına 10 cm'den yakın kısımda kesilir. Açık mahali profil bölerse hat en büyük parçaya, öteki parça uyarı."""
+    K = {"aralik_asma": 125.5, "aralik_ters": 60.0, "en_kisa": 10.0}
+    sol = Duvar("dis", "y", 5.0, 5.0, 0.0, 300.0)
+    def ara(gen):
+        sag = Duvar("dis", "y", 10 + gen + 5, 5.0, 0.0, 300.0)
+        H = tavan.hatlar(_g_tavan([[[10, 0], [10 + gen, 0], [10 + gen, 300], [10, 300]]], [sol, sag]), K)
+        return [h["s"] for h in H]
+    assert ara(135.5) == [135.5] and ara(135.4) == [pytest.approx(10 + 135.4 / 2)]
+    L = [[10, 0], [300, 0], [300, 100], [140.5, 100], [140.5, 200], [10, 200]]           # kol 2'nin sağ yüzü 140,5: 135,5 hattına 5 cm
+    duv = [sol, Duvar("dis", "y", 305.0, 5.0, 0.0, 100.0), Duvar("dis", "y", 145.5, 5.0, 100.0, 200.0)]
+    H = tavan.hatlar(_g_tavan([L], duv), K)
+    assert [(h["s"], h["r0"], h["r1"]) for h in H] == [(135.5, 0, 100), (261.0, 0, 100)]
+    uyari = []
+    H = tavan.hatlar(_g_tavan([], [], acik=[[[0, 0], [300, 0], [300, 200], [0, 200]]], engeller=[[140, 0, 150, 200]]), K, uyari)
+    assert {h["s"] for h in H} and all(150 <= h["s"] <= 300 for h in H)
+    assert len(uyari) == 1 and "2.80 m²" in uyari[0]["metin"]
+
+
+def test_betopan_tek_sira_ortmezse_kural_yok(tmp_path):
+    """Üçgen (alt başlıktan mahyada üst başlığın altına) levhanın kısa kenarını geçerse tek sıra örtmez: baş makas betopanı "kural yok",
+    komut 1. PK-01'de üçgen 118,9 cm (%33); %40'ta 142 cm."""
+    F = cati.cerceve(Y.girdi.kur(_ie(), ifc_uret.hazirla(_ie()), []))
+    assert cati._ust(F, F["um"]) - 10 - 250 == pytest.approx(118.9)
+    m = _model(_ie(cati__egim_yuzde=40), tmp_path, "dik")
+    k = [x for x in m["say"]["kural_yok"] if x["parca"] == "baş makas betopanı"]
+    assert len(k) == 1 and "tek sıra örtmez" in k[0]["neden"] and _adet(m["say"])["BT-01"] == 0
+    assert _adet(m["say"])["AS-01"] > 0 and _adet(m["say"])["KP-01"] > 0
+
+
+def test_uyarilar(tmp_path):
+    """Tavan yazılı değilse asma sayılır ve uyarı yazar; İş Emri'nde planda olmayan açık mahal uyarı yazar. PK-01'de uyarı yok."""
+    ie = _ie()
+    plan = ifc_uret.hazirla(ie)
+    assert girdi.kur(ie, plan, [])["uyarilar"] == []
+    del ie["ozellikler"]["Tavan"]
+    ie["mahaller"].append({"ad": "VERANDA 2", "tur": "veranda", "konum_cm": [[0, 0, 1, 1]]})
+    u = girdi.kur(ie, plan, [])["uyarilar"]
+    assert len(u) == 2 and "Tavan yazılı değil" in u[0]["metin"] and "VERANDA 2" in u[1]["metin"]
+    ie = _ie()
+    del ie["ozellikler"]["Tavan"]
+    m = _model(ie, tmp_path, "tavansiz")
+    assert m["say"]["yerlesim"]["tavan"] == "asma" and [x["katman"] for x in m["say"]["yerlesim"]["uyarilar"]] == ["tavan omegası"]
+    assert m["say"]["kural_yok"] == []
+
+
+def test_kod_kilidi_k2():
+    """K2'de eklenen yedi kod kilitte; kilidin ilk 32 satırı (K1 ve K2) donmuştur, yeni kod sona eklenir."""
+    kilit = _oku(VERI / "kart_kodlari.json")["kodlar"]
+    ilk = dict(list(kilit.items())[:32])
+    assert list(ilk)[25:] == ["OM-01", "AS-01", "KP-01", "BT-01", "DR-01", "DR-02", "SR-01"]
+    assert hashlib.sha256(json.dumps(ilk, ensure_ascii=False, sort_keys=True).encode()).hexdigest() == KILIT_K2
+
+
+def test_kural_yokta_planlar_eksik_yazar(tmp_path):
+    """Kural yok varsa her sayfanın başında EKSİK; kurulmayan katmanın sayfasında nedeni (kırma çatıda aşık, kaplama, betopan, dere)."""
+    (tmp_path / "kirma.json").write_text(json.dumps(_ie(cati__tip="kirma"), ensure_ascii=False), encoding="utf-8")
+    assert KM.main([str(tmp_path / "kirma.json"), str(tmp_path / "c"), "--kod", "K"]) == 1
+    import pymupdf
+    metin = [" ".join(p.get_text().split()) for p in pymupdf.open(tmp_path / "c" / "K_yerlesim_planlari.pdf")]
+    assert all("EKSİK" in s for s in metin)
+    for i, ad in ((1, "dere ve iniş"), (2, "baş makas betopanı"), (3, "aşık"), (4, "çatı kaplaması")):
+        assert f"Kurulmadı: {ad}:" in metin[i], ad
+    assert "Kurulmadı" not in metin[0]
 
 
 # ----------------------------------------------------------------------------- kesim planı, gösterim, komut
@@ -380,6 +485,8 @@ def test_komut_yerlesim_planlari(tmp_path):
         assert f"PK01 · {baslik}" in metin[i], baslik
     assert "24 parça, 58,46 m" in metin[0] and "42 parça, 148,40 m" in metin[3] and "22 panel" in metin[4] and "4 levha" in metin[2]
     assert d.metadata.get("creationDate", "") == ""
+    assert not any("EKSİK" in s or "Kurulmadı" in s or "Uyarı" in s for s in metin)
+    assert "son şerit yüzün ucundan taşar (40 cm)" in " ".join(metin[4].split())
     from openpyxl import load_workbook
     wb = load_workbook(tmp_path / "PK01_kart_katalogu.xlsx")
     assert wb["Çatı ve tavan"].max_row == 100 + 1 and wb["Kesim planı"].max_row == 3 + 1 + 1

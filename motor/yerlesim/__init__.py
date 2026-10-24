@@ -4,8 +4,8 @@ Kurallar `kurallar/yerlesim/prefabrik.json`'dadır; oradaki değerlerin çoğu b
 (`kurallar/liste/prefabrik.json`) ve onların sabitlediği kural kitabı seti (`kitap_seti`). Burada sayı yazılmaz.
 
 `katmanlar(ie, plan, makaslar, yerlesim, liste)` parçaları döner: {kural, parca, boy_cm?, geo, bilgi, aciklama}. Parçanın kartı kart
-modelinde bulunur (`motor/kart_model.py`; kartın `yerlesim` alanı). Kuralı uygulanamayan katman (çatı tipi, kaplama, iniş kuralı) parça
-üretmez, "kural yok" yazar. Kesim planı `kesim.py`'de, IFC'ye yazım `yaz.py`'de, planların çizimi `cizim.py`'de.
+modelinde bulunur (`motor/kart_model.py`; kartın `yerlesim` alanı). Kuralı uygulanamayan katman (çatı tipi, kaplama, iniş kuralı, tek sıra
+betopanın örtmediği üçgen) parça üretmez, "kural yok" yazar; varsayılan okumalar ve kurulamayan yerler `uyarilar`'dadır. Kesim planı `kesim.py`'de, IFC'ye yazım `yaz.py`'de, planların çizimi `cizim.py`'de.
 """
 from __future__ import annotations
 
@@ -77,7 +77,8 @@ def katmanlar(ie: dict, plan: dict, makaslar: list[dict], yerlesim: dict, liste:
     # tavan omegası (karar B)
     T = D["tavan_omegasi_yerlesimi"]
     tam = _cm(T["parca_boyu"] - T["pay"])
-    hatlar = tavan.hatlar(g, {"aralik_asma": _cm(T["aralik_asma"]), "aralik_ters": _cm(T["aralik_ters"]), "en_kisa": T["en_kisa_cm"]})
+    uyarilar = list(g["uyarilar"])
+    hatlar = tavan.hatlar(g, {"aralik_asma": _cm(T["aralik_asma"]), "aralik_ters": _cm(T["aralik_ters"]), "en_kisa": T["en_kisa_cm"]}, uyarilar)
     ow, oh = kesit["omega"]
     for i, h in enumerate(hatlar, 1):
         h["no"] = i
@@ -101,7 +102,8 @@ def katmanlar(ie: dict, plan: dict, makaslar: list[dict], yerlesim: dict, liste:
             continue
         if ad == "asik_sirasi":
             A = D[ad]
-            parcalar += cati.asik(g, {"kesit_asik": kesit["asik"], "aralik": _cm(A["aralik"]), "tam": _cm(A["parca_boyu"] - A["pay"])})
+            parcalar += cati.asik(g, {"kesit_asik": kesit["asik"], "aralik": _cm(A["aralik"]), "tam": _cm(A["parca_boyu"] - A["pay"]),
+                                      "en_kisa": A["en_kisa_cm"]})
         elif ad == "cati_kaplamasi":
             C = D[ad]
             yazili = girdi.kucuk(next((v for k, v in g["ozellikler"].items() if girdi.kucuk(k) == "çatı kaplaması"), ""))
@@ -116,8 +118,11 @@ def katmanlar(ie: dict, plan: dict, makaslar: list[dict], yerlesim: dict, liste:
                 parcalar.append(p)
         elif ad == "bas_makas_betopani_yerlesimi":
             B = D[ad]
-            parcalar += cati.betopan(g, {"katsayi": B["katsayi"], "levha_m2": B["levha_m2"], "levha_cm": B["levha_cm"],
-                                         "kalinlik_betopan": kesit["betopan"]})
+            levhalar, neden = cati.betopan(g, {"katsayi": B["katsayi"], "levha_m2": B["levha_m2"], "levha_cm": B["levha_cm"],
+                                               "kalinlik_betopan": kesit["betopan"]})
+            if neden:
+                kural_yok.append({"parca": adi, "sinif": sinif, "neden": f"{ad}: {neden}"})
+            parcalar += levhalar
         else:
             R = D[ad]
             dere = cati.dere(g, {"kesit_dere": kesit["dere"], "kesit_inis": kesit["inis"], "orta_esik_cm": _cm(R["orta_esik"]),
@@ -127,4 +132,5 @@ def katmanlar(ie: dict, plan: dict, makaslar: list[dict], yerlesim: dict, liste:
                                   "neden": f"liste kuralı inis_orta \"{R['orta_kurali']}\"; dere hattının inişi yalnız \"esik\" kuralıyla kurulur"})
                 dere = [p for p in dere if p["parca"] != "inis"]
             parcalar += dere
-    return {"parcalar": parcalar, "kural_yok": kural_yok, "hatlar": hatlar, "girdi": g, "cerceve": cati.cerceve(g), "degerler": D}
+    return {"parcalar": parcalar, "kural_yok": kural_yok, "uyarilar": uyarilar, "hatlar": hatlar, "girdi": g, "cerceve": cati.cerceve(g),
+            "degerler": D}

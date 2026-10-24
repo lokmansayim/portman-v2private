@@ -10,6 +10,8 @@ import math
 
 from shapely.geometry import Polygon, box
 
+from .tavan import parcala
+
 ESIK = 1e-6
 
 
@@ -40,26 +42,18 @@ def _prizma(F: dict, uz: list, v0: float, v1: float) -> dict:
     return {"tip": "prizma", "duzlem": "xz" if F["mx"] else "yz", "noktalar": [list(p) for p in uz], "a0": v0, "a1": v1}
 
 
-def _bol(v0: float, v1: float, tam: float, sondan: bool) -> list[tuple[float, float]]:
-    out, u = [], (v1 if sondan else v0)
-    kalan = v1 - v0
-    while kalan > ESIK:
-        b = min(tam, kalan)
-        out.append((u - b, u) if sondan else (u, u + b))
-        u = u - b if sondan else u + b
-        kalan -= b
-    return out
-
-
 def asik(g: dict, K: dict) -> list[dict]:
-    """Karar C: her yüzde ilk sıra mahyada, sonra kitabın aralığıyla (eğik boyca); saçağa aralıktan az kalınca saçakta bir sıra daha.
-    Sıra boyu mahya boyu; dizilimin başladığı uçtan tam parçalar (parça boyu − pay), kalan son parçada."""
+    """Karar C: her yüzde ilk sıra mahyada, sonra kitabın aralığıyla (eğik boyca); saçağa aralıktan az kalınca saçakta bir sıra daha;
+    saçak sırasına `en_kisa`'dan yakın kalan sıra konmaz. Sıra boyu mahya boyu; dizilimin başladığı uçtan tam parçalar (parça boyu − pay),
+    kalan son parçada; `en_kisa`'dan kısa kalan parçasız boşluk (omegadaki gibi)."""
     F = cerceve(g)
     a, w = K["kesit_asik"]
     d = []
     k = 0
     while k * K["aralik"] < F["egik"] - ESIK:
         d.append(k * K["aralik"]); k += 1
+    if len(d) > 1 and F["egik"] - d[-1] < K["en_kisa"] - ESIK:          # saçak sırası son sıranın yerini alır
+        d.pop()
     d.append(F["egik"])
     out = []
     for yuz, isaret in (("sol", -1), ("sag", 1)):
@@ -68,7 +62,7 @@ def asik(g: dict, K: dict) -> list[dict]:
             hg = min(max(h, w / 2), F["um"] + F["s"] - w / 2)                 # gösterim: kesit yüzün içinde kalsın
             u = F["um"] + isaret * hg
             z = _ust(F, u)
-            for v0, v1 in _bol(F["v0"], F["v1"], K["tam"], F["v_bas"] == "max"):
+            for v0, v1 in parcala(F["v0"], F["v1"], K["tam"], K["en_kisa"], F["v_bas"] == "max")[0]:
                 out.append({"kural": "asik_sirasi", "parca": "asik", "boy_cm": round(v1 - v0, 4),
                             "geo": _kutu(F, u - w / 2, u + w / 2, v0, v1, z, z + a),
                             "bilgi": {"Yuz": yuz, "Sira": i + 1, "MahyadanEgik_cm": round(di, 2)},
@@ -77,8 +71,8 @@ def asik(g: dict, K: dict) -> list[dict]:
 
 
 def kaplama(g: dict, K: dict) -> list[dict]:
-    """Her yüz kaplamanın kapattığı genişlikte şeritlere bölünür (dizilimin başladığı uçtan; son şerit yüzün ucunda kesilir). Şerit mahyadan
-    saçağa, boyu eğik boy + taşma, `yuvarlama`'ya yukarı (liste üretecinin boyu)."""
+    """Her yüz ⌈mahya boyu ÷ kapatma⌉ şerit (liste üretecinin sayısı): ilk şerit dizilimin başladığı uçtan, son şerit yüzün öteki ucundan
+    taşar (kesilmez; PK-01 paftası). Şerit mahyadan saçağa, boyu eğik boy + taşma, `yuvarlama`'ya yukarı (liste üretecinin boyu)."""
     F = cerceve(g)
     a = K["kesit_asik"][0]
     t = K["kalinlik_kaplama"]
@@ -88,24 +82,31 @@ def kaplama(g: dict, K: dict) -> list[dict]:
         zr = _ust(F, F["um"]) + a
         du, dz = isaret * L * F["kos"], -L * F["kos"] * F["eg"]
         kesit = [(F["um"], zr), (F["um"] + du, zr + dz), (F["um"] + du, zr + dz + t), (F["um"], zr + t)]
-        for i, (v0, v1) in enumerate(_bol(F["v0"], F["v1"], K["kapatma_cm"], F["v_bas"] == "max")):
-            out.append({"kural": "cati_kaplamasi", "parca": "panel", "geo": _prizma(F, kesit, v0, v1), "alan_m2": round((v1 - v0) * L / 1e4, 4),
-                        "bilgi": {"Yuz": yuz, "Serit": i + 1, "PanelBoyu_cm": L, "Genislik_cm": round(v1 - v0, 2),
-                                  "Kesik": abs((v1 - v0) - K["kapatma_cm"]) > ESIK},
-                        "aciklama": f"{yuz} yüz, {i + 1}. şerit ({v1 - v0:g} × {L:g})"})
+        b = K["kapatma_cm"]
+        n = math.ceil((F["v1"] - F["v0"]) / b - 1e-9)
+        for i in range(n):
+            v0, v1 = (F["v1"] - (i + 1) * b, F["v1"] - i * b) if F["v_bas"] == "max" else (F["v0"] + i * b, F["v0"] + (i + 1) * b)
+            tasma = round(max(0.0, F["v0"] - v0, v1 - F["v1"]), 2)
+            out.append({"kural": "cati_kaplamasi", "parca": "panel", "geo": _prizma(F, kesit, v0, v1), "alan_m2": round(b * L / 1e4, 4),
+                        "bilgi": {"Yuz": yuz, "Serit": i + 1, "PanelBoyu_cm": L, "Genislik_cm": b, "Tasma_cm": tasma},
+                        "aciklama": f"{yuz} yüz, {i + 1}. şerit ({b:g} × {L:g}" + (f"; {tasma:g} cm taşar)" if tasma else ")")})
     return out
 
 
-def betopan(g: dict, K: dict) -> list[dict]:
-    """Her baş makasın dış yüzünde levhalar yatık, makasın alt başlığından başlayarak mahyaya ortalı yan yana; sayı liste kuralından (H5:
-    ⌈katsayı × saçaklı üçgen ÷ levha⌉). Levha binanın dış yüzünde (uç duvarın dış yüzüyle aynı düzlem); gösterimde makasın üst başlığının
-    altında kalan kısmı çizilir (levha yerinde kesilir), sayı ve ölçü tam levhadır."""
+def betopan(g: dict, K: dict) -> tuple[list[dict], str | None]:
+    """Her baş makasın dış yüzünde levhalar yatık, makasın alt başlığından başlayarak mahyaya ortalı, tek sıra yan yana; sayı liste
+    kuralından (H5: ⌈katsayı × saçaklı üçgen ÷ levha⌉). Levha binanın dış yüzünde (uç duvarın dış yüzüyle aynı düzlem); gösterimde
+    makasın üst başlığının altında kalan kısmı çizilir (levha yerinde kesilir), sayı ve ölçü tam levhadır. Üçgenin yüksekliği (alt
+    başlıktan mahyada üst başlığın alt yüzüne) levhanın kısa kenarını geçerse tek sıra örtmez: parça yok, neden döner ("kural yok")."""
     F = cerceve(g)
     yuks = (F["aciklik"] / 200 + F["s"] / 100) * F["eg"]
     n = math.ceil(K["katsayi"] * 0.5 * (F["aciklik"] / 100 + 2 * F["s"] / 100) * yuks / K["levha_m2"] - 1e-9)
     lu, lz = K["levha_cm"]
     t = K["kalinlik_betopan"]
     z0 = g["duvar_h"]
+    h = _ust(F, F["um"]) - 10 - z0                                      # üst başlığın alt yüzü (`ifc_uret`: başlık 10 cm)
+    if h > lz + ESIK:
+        return [], f"üçgen {h:.1f} cm yüksek, levha {lz:g} cm: tek sıra örtmez"
     ucgen = Polygon([(-F["s"], z0), (F["aciklik"] + F["s"], z0), (F["aciklik"] + F["s"], _ust(F, F["aciklik"] + F["s"])),
                      (F["um"], _ust(F, F["um"])), (-F["s"], _ust(F, -F["s"]))])
     out = []
@@ -114,11 +115,13 @@ def betopan(g: dict, K: dict) -> list[dict]:
         for i in range(n):
             u0 = F["um"] - n * lu / 2 + i * lu
             kesik = box(u0, z0, u0 + lu, z0 + lz).intersection(ucgen)
+            if kesik.is_empty or kesik.geom_type != "Polygon":
+                return [], f"{m['ad']}: {i + 1}. levha üçgenin dışında kalıyor (tek sıra {n} levha)"
             out.append({"kural": "bas_makas_betopani_yerlesimi", "parca": "levha", "alan_m2": round(lu * lz / 1e4, 4),
                         "geo": _prizma(F, [(round(u, 4), round(z, 4)) for u, z in kesik.exterior.coords[:-1]], v0, v1),
                         "bilgi": {"Makas": m["ad"], "Levha": i + 1, "LevhaAdedi": n, "Levha_cm": f"{lu:g} × {lz:g}"},
                         "aciklama": f"{m['ad']}, {i + 1}. levha ({lu:g} × {lz:g})"})
-    return out
+    return out, None
 
 
 def dere(g: dict, K: dict) -> list[dict]:

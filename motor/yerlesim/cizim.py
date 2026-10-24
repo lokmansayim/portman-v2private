@@ -2,10 +2,12 @@
 
 Her şekil modeldeki parçanın kendi geometrisinden (dünya koordinatı) ve özellik setinden okunur; planlar yerleşim kurallarının çıktısından
 değil modelden gelir. Sayılar (adet, metre, kesim) sayımdandır (`<kod>_kart_sayim.json`). Antet bizimdir; paftanın anteti ve adları
-çıktıya girmez. Paftayla kıyas hakemin işidir (`testler/kimlik/hakem/kiyas.py`).
+çıktıya girmez. Paftayla kıyas hakemin işidir (`testler/kimlik/hakem/kiyas.py`). Sayımda "kural yok" varsa her sayfanın başında EKSİK
+yazar; sayfanın katmanı kurulmadıysa nedeni, yerleşimin uyarıları da ilgili sayfada yazar.
 """
 from __future__ import annotations
 
+import textwrap
 from pathlib import Path
 
 import ifcopenshell
@@ -19,6 +21,9 @@ RENK = {"duvar": "#c9c9c9", "duvar_kenar": "#8a8a8a", "omega": {"duvar_ekseni": 
         "makas": "#2c3e50", "dere": "#2e86c1", "inis": "#1b4f72", "asik": "#2471a3", "kaplama": ("#f4d03f", "#f9e79f"), "levha": "#e67e22"}
 OMEGA_YER = {"duvar_ekseni": "iç duvar ekseninde", "duvar_yuzu": "duvar yüzünde", "ara": "arada"}
 YUZ = {"sol": "sol", "sag": "sağ"}
+# sayfanın katmanları: kural yokta katmanın adı (`motor.yerlesim`), parça adının öneki ve uyarının katmanı
+SAYFA = {1: (("tavan omegası",), ("OMEGA_",)), 2: (("dere ve iniş", "iniş"), ("DERE_", "INIS_")), 3: (("baş makas betopanı",), ("BETOPAN_",)),
+         4: (("aşık",), ("ASIK_",)), 5: (("çatı kaplaması",), ("KAPLAMA_",))}
 
 
 def _sayi(x: float, n: int = 2) -> str:
@@ -87,6 +92,20 @@ def _kart(say: dict, kod: str) -> dict:
     return next((k for k in say["kartlar"] if k["kod"] == kod), {"adet": 0})
 
 
+def _notlar(fig, say: dict, sayfa: int):
+    """Sayımda kural yok varsa sayfanın başında EKSİK; bu sayfanın katmanında kural yok ve uyarı varsa lejantın altında."""
+    adlar, onekler = SAYFA[sayfa]
+    if say["kural_yok"]:
+        fig.text(0.02, 0.975, f"EKSİK · sayımda {len(say['kural_yok'])} parça \"kural yok\" (ayrıntı `_kart_sayim.json`); bu planlar tam değildir",
+                 fontsize=11, color="#b03a2e", fontweight="bold", va="top")
+    satir = [f"Kurulmadı: {x['parca']}: {x['neden']}" for x in say["kural_yok"]
+             if x["parca"] in adlar or str(x["parca"]).startswith(onekler)]
+    satir += [f"Uyarı: {u['metin']}" for u in say.get("yerlesim", {}).get("uyarilar", []) if u["katman"] in adlar]
+    if satir:
+        fig.text(0.76, 0.30, "\n".join(textwrap.fill(s, 46) for s in satir[:8]) + ("\n…" if len(satir) > 8 else ""), fontsize=8.5,
+                 va="top", ha="left", color="#b03a2e")
+
+
 def ciz(model_yolu: Path, say: dict, yol: Path, kod: str) -> Path:
     import matplotlib
     matplotlib.use("Agg")
@@ -121,6 +140,7 @@ def ciz(model_yolu: Path, say: dict, yol: Path, kod: str) -> Path:
                 + ([f"", f"kesim: {kesim['OM-01']['stok']} boy L {kesim['OM-01']['parca_boyu_cm']:g}", f"(tam parça {kesim['OM-01']['kullanilir_cm']:g}; yedek yok, karar D)"]
                    if "OM-01" in kesim else []))
         _cerceve(ax, f"{kod} · TAVAN OMEGA YERLEŞİM PLANI", alt)
+        _notlar(fig, say, 1)
         pdf.savefig(fig); plt.close(fig)
 
         # 2 · makas ve dere
@@ -153,6 +173,7 @@ def ciz(model_yolu: Path, say: dict, yol: Path, kod: str) -> Path:
                    if "DR-01" in kesim else [])
                 + [f"DR-02 Dere inişi: {ki['adet']} (◎)"])
         _cerceve(ax, f"{kod} · MAKAS VE DERE YERLEŞİM PLANI", alt)
+        _notlar(fig, say, 2)
         pdf.savefig(fig); plt.close(fig)
 
         # 3 · baş makas betopanı (görünüş)
@@ -181,10 +202,11 @@ def ciz(model_yolu: Path, say: dict, yol: Path, kod: str) -> Path:
                              "(sabit paket, liste kuralı; modelde yok)"])
         fig.suptitle(f"{kod} · BAŞ MAKAS BETOPAN YERLEŞİMİ", fontsize=15, fontweight="bold", x=0.02, ha="left")
         fig.text(0.02, 0.03, alt, fontsize=9, color="#444")
+        _notlar(fig, say, 3)
         pdf.savefig(fig); plt.close(fig)
 
         # 4 · aşık ve 5 · çatı kaplaması
-        for kart, baslik in (("AS-01", "AŞIK YERLEŞİM PLANI"), ("KP-01", "ÇATI KAPLAMASI YERLEŞİM PLANI")):
+        for sayfa, kart, baslik in ((4, "AS-01", "AŞIK YERLEŞİM PLANI"), (5, "KP-01", "ÇATI KAPLAMASI YERLEŞİM PLANI")):
             fig, ax = plt.subplots(figsize=(16.54, 11.69))
             _duvarlar(ax, m, dolgu=False)
             parcalar = m["k2"].get(kart, [])
@@ -196,7 +218,7 @@ def ciz(model_yolu: Path, say: dict, yol: Path, kod: str) -> Path:
                     ax.plot([(x0 + x1) / 2] * 2 if dik else [x0, x1], [y0, y1] if dik else [(y0 + y1) / 2] * 2, color=RENK["asik"], lw=1.8)
                     sol = p["p"]["Yuz"] == "sol"
                     ax.text((x0 + x1) / 2 + ((-5 if sol else 5) if dik else 0), (y0 + y1) / 2 + (0 if dik else (-5 if sol else 5)),
-                            _sayi(p["p"]["Boy_cm"], 0), rotation=90 if dik else 0, fontsize=7, color="#1b2631",
+                            _sayi(p["p"]["Boy_cm"], 2).rstrip("0").rstrip(","), rotation=90 if dik else 0, fontsize=7, color="#1b2631",
                             ha=("right" if sol else "left") if dik else "center", va="center" if dik else ("top" if sol else "bottom"))
                 else:
                     renk = RENK["kaplama"][p["p"]["Serit"] % 2]
@@ -216,8 +238,12 @@ def ciz(model_yolu: Path, say: dict, yol: Path, kod: str) -> Path:
                 yuz = {}
                 for p in parcalar:
                     yuz[p["p"]["Yuz"]] = yuz.get(p["p"]["Yuz"], 0) + 1
-                _lejant(fig, [f"KP-01 Sandviç panel (100 cm kapatır)", f"{ka['adet']} panel ({', '.join(f'{YUZ[a]} yüz {n}' for a, n in sorted(yuz.items()))})",
-                             f"boy {', '.join(f'{b:g}' for b in boy)} cm (eğik boy + 5, 10 mm'ye yukarı)", "son şerit yüzün ucunda kesilir"])
+                tasma = sorted({p["p"].get("Tasma_cm", 0) for p in parcalar} - {0})
+                _lejant(fig, [f"KP-01 Sandviç panel (100 cm kapatır)",
+                             f"{ka['adet']} panel" + (f" ({', '.join(f'{YUZ[a]} yüz {n}' for a, n in sorted(yuz.items()))})" if yuz else ""),
+                             *([f"boy {', '.join(f'{b:g}' for b in boy)} cm (eğik boy + 5, 10 mm'ye yukarı)"] if boy else []),
+                             "son şerit yüzün ucundan taşar" + (f" ({', '.join(f'{x:g}' for x in tasma)} cm)" if tasma else "")])
             _cerceve(ax, f"{kod} · {baslik}", alt)
+            _notlar(fig, say, sayfa)
             pdf.savefig(fig); plt.close(fig)
     return yol

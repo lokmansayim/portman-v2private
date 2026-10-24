@@ -71,15 +71,30 @@ def tavan_turu(ozellikler: dict) -> str:
     return "ters" if "ters" in kucuk_.get("tavan", kucuk_.get("tavan şekli", "asma")) else "asma"
 
 
+def _tavan_yazili(ozellikler: dict) -> bool:
+    return any(kucuk(k) in ("tavan", "tavan şekli") for k in (ozellikler or {}))
+
+
 def kur(ie: dict, plan: dict, makaslar: list[dict]) -> dict:
     """`plan`: `motor.ifc_uret.hazirla(ie)`; `makaslar`: kart modelindeki makasların yeri ({ad, rol: bas | orta, konum}; konum makasın
-    dizildiği eksende, cm). Dönen sözlük yerleşim modüllerinin tek girdisidir."""
+    dizildiği eksende, cm). Dönen sözlük yerleşim modüllerinin tek girdisidir; `uyarilar` varsayılan okumaları ve girdide olup planda
+    olmayanları yazar (sayımda ve planlarda görünür)."""
+    from motor.geometry import ACIK_MAHAL_TURLERI
     P = plan["panolar"]
     W, H = max(p["rect"][2] for p in P), max(p["rect"][3] for p in P)            # bugünkü IFC'nin çatısıyla aynı dış ölçü (`ifc_uret.doseme`)
     b = plan["bina"]
     c = b["cati"]
     baslangic = ((ie.get("yapi") or {}).get("dizilim") or {}).get("baslangic", "on-sol")
     acik = [plan["veranda"]] if plan.get("veranda") else []
+    uyarilar = []
+    oz = ie.get("ozellikler") or {}
+    if not _tavan_yazili(oz):
+        uyarilar.append({"katman": "tavan omegası", "metin": "İş Emri'nde Tavan yazılı değil; asma dizme sayıldı (liste üreteciyle aynı okuma)"})
+    acik_ie = [m.get("ad", "?") for m in ie.get("mahaller", []) if m.get("tur") in ACIK_MAHAL_TURLERI]
+    if len(acik_ie) > len(acik):                                    # `hazirla` tek açık mahal verir (sonuncusu)
+        kalan = [a for a in acik_ie if a not in {v["ad"] for v in acik}]
+        uyarilar.append({"katman": "tavan omegası", "metin": f"İş Emri'nde {len(acik_ie)} açık mahal, bugünkü IFC'nin planında {len(acik)}; "
+                                                             f"{', '.join(kalan)} için omega kurulmadı"})
     koseler = [x for x in plan.get("baglantilar", []) if x["tur"] == "baglanti" and "iç köşe" in kucuk(x["kalem"])]
     return {
         "W": W, "H": H, "duvar_h": b["duvar_h"],
@@ -88,9 +103,10 @@ def kur(ie: dict, plan: dict, makaslar: list[dict]) -> dict:
         "odalar": [{"ad": o["ad"], "poligon": o["poligon"]} for o in plan["odalar"]],
         "acik": [{"ad": v["ad"], "poligon": v["poligon"]} for v in acik],
         "engeller": [x["rect"] for x in plan.get("baglantilar", []) if x["tur"] in ("veranda_profil", "dikme")],
-        "ozellikler": ie.get("ozellikler") or {},
-        "tavan": tavan_turu(ie.get("ozellikler") or {}),
+        "ozellikler": oz,
+        "tavan": tavan_turu(oz),
         "cati_tipi": (ie.get("cati") or {}).get("tip", "besik"),
         "baslangic": {"x": "min", "y": "max" if baslangic.startswith("arka") else "min"},
         "makaslar": makaslar,
+        "uyarilar": uyarilar,
     }

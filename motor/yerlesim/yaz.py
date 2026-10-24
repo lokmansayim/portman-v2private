@@ -1,7 +1,7 @@
 """K2 parçalarının kart modeline yazılması: her parça kartının türüne bağlı bir IFC örneği.
 
-Parça dünya koordinatındadır (cm; yerleşimi birim matris, bugünkü IFC'nin parçaları gibi), kat kabına girer. GlobalId parçanın adından
-türer (her üretimde aynı). `PortatifEv_Parca`: kart kodu, paftadaki anahtarı (`;`), uygulanan kural, kaynak ve kuralın parçaya yazdığı
+Parça dünya koordinatındadır (cm; yerleşimi birim matris, bugünkü IFC'nin parçaları gibi), kat kabına girer. GlobalId evin kimliğinden
+(İş Emri numarası) ve parçanın adından türer: her üretimde aynı, iki evin modeli birlikte açılınca çakışmaz. `PortatifEv_Parca`: kart kodu, paftadaki anahtarı (`;`), uygulanan kural, kaynak ve kuralın parçaya yazdığı
 bilgiler. Boyla alınan parçada `Qto_…BaseQuantities.Length` (m; yerleşim kapısı metreyi buradan toplar), levha ve kaplamada `GrossArea` (tam
 levha, kaplamada şerit).
 Renkler yalnız gösterimdir.
@@ -15,7 +15,7 @@ import ifcopenshell.guid
 import numpy as np
 from ifcopenshell.util.shape_builder import ShapeBuilder
 
-AD_ALANI = uuid.UUID("8c0f3b5e-2a71-4d4e-9f3c-6b1a0e2d7c94")     # K2 parçalarının GlobalId'si adından türer
+AD_ALANI = uuid.UUID("8c0f3b5e-2a71-4d4e-9f3c-6b1a0e2d7c94")     # K2 parçalarının GlobalId'si ev kimliği ve adından türer
 QTO = {"IfcMember": "Qto_MemberBaseQuantities", "IfcPipeSegment": "Qto_PipeSegmentBaseQuantities", "IfcCovering": "Qto_CoveringBaseQuantities",
        "IfcPlate": "Qto_PlateBaseQuantities"}
 RENK = {"omega": (0.85, 0.55, 0.15), "asik": (0.20, 0.45, 0.80), "panel": (0.25, 0.27, 0.30), "levha": (0.80, 0.42, 0.20),
@@ -45,8 +45,9 @@ def _govde(sb: ShapeBuilder, geo: dict):
                       position_z_axis=np.array([1.0, 0.0, 0.0]), position_x_axis=np.array([0.0, 1.0, 0.0]))
 
 
-def yaz(f, parcalar: list[dict], turler: dict, kaynak: str, parca_seti: str) -> list:
-    """`parcalar`: kart modelinin eşlediği K2 parçaları ({ad, kart, sinif, pafta, kural, geo, bilgi, boy_cm?}); `turler`: kart kodu → tür."""
+def yaz(f, parcalar: list[dict], turler: dict, kaynak: str, parca_seti: str, kimlik: str) -> list:
+    """`parcalar`: kart modelinin eşlediği K2 parçaları ({ad, kart, sinif, pafta, kural, geo, bilgi, boy_cm?}); `turler`: kart kodu → tür;
+    `kimlik`: evin kimliği (İş Emri numarası)."""
     kat = f.by_type("IfcBuildingStorey")[0]
     govde = next(c for c in f.by_type("IfcGeometricRepresentationSubContext") if c.ContextIdentifier == "Body")
     sb = ShapeBuilder(f)
@@ -54,7 +55,7 @@ def yaz(f, parcalar: list[dict], turler: dict, kaynak: str, parca_seti: str) -> 
     out = []
     for p in parcalar:
         e = _api("root.create_entity", f, ifc_class=p["sinif"], name=p["ad"])
-        e.GlobalId = ifcopenshell.guid.compress(uuid.uuid5(AD_ALANI, p["ad"]).hex)
+        e.GlobalId = ifcopenshell.guid.compress(uuid.uuid5(AD_ALANI, f"{kimlik}/{p['ad']}").hex)
         e.Description = p["aciklama"]
         _api("geometry.edit_object_placement", f, product=e)
         temsil = sb.get_representation(govde, [_govde(sb, p["geo"])])
