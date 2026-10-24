@@ -6,7 +6,7 @@
  "kapi": true,
  "not": "Bayi arşivi; AP setinde yok.",
  "tarih": "2026-10-24",
- "kiyas_commit": "8a41fa21b4796ce134781e299c26dcce2bd063ee",
+ "kiyas_commit": "a9b8cde1af5422a233d26440a93189a16d9ae136",
  "bizim_liste": {
   "yol": "testler/kor/projeler/PK02/bizim_liste.json",
   "commit": "8f361f481ad711c3f71a0870a558ee5cbcc7ce4b",
