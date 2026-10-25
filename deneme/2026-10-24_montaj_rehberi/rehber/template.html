@@ -483,7 +483,7 @@ D.makas.slice().sort((a, b) => b.konum_cm - a.konum_cm).forEach((mk, i) => {
     g.add(bxy(B(k), yb, T(k + 1) - 4, yt(T(k + 1) - 4), m));
   }
   const kod = mk.rol === 'bas' ? 'MA-01' : 'MA-02', card = D.cards[kod];
-  add(11, g, i, { kod, ad: card.ad, satir: [['Bu parça', `${mk.ad} · boy ${fmtc(mk.boy_cm)} cm`], ['Yer', `y = ${fmtc(mk.konum_cm)} cm (ön dış yüzden)`], ['İç çubuklar', `Warren, ${2 * NB} çapraz · göz ${fmt(PITCH)} cm · üst düğümler aşık sıralarında (PK-01 .bde ile teyit)`], ['Profil', 'C80 (80 × 45 × 10)'] ['Kart ölçüsü', card.olcu], ['IFC', `${card.ifc.sinif} · ${card.ifc.alt_tur}`]] });
+  add(11, g, i, { kod, ad: card.ad, satir: [['Bu parça', `${mk.ad} · boy ${fmtc(mk.boy_cm)} cm`], ['Yer', `y = ${fmtc(mk.konum_cm)} cm (ön dış yüzden)`], ['İç çubuklar', `Warren, ${2 * NB} çapraz · göz ${fmt(PITCH)} cm · üst düğümler aşık sıralarında (PK-01 .bde ile teyit)`], ['Profil', 'C80 (80 × 45 × 10)'], ['Kart ölçüsü', card.olcu], ['IFC', `${card.ifc.sinif} · ${card.ifc.alt_tur}`]] });
 });
 
 /* 10 · Baş makas betopanı (2 kalkan × 2) */
