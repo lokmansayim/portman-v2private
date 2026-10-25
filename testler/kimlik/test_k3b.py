@@ -4,9 +4,10 @@
 - Sayı = liste üretecinin yöntemi × modelin boyu: dokuz İş Emri'nde (PK01, ALTIN, P6001 ve iki aynası, yan verandalı, TEST01–03) alt çerçeve
   (100'lük, 60'lık), saçak sacı, alın sacı, baş makas Z'si ve mahya liste üretecinin satırıyla aynı. Saçak omegası rehberdeki gibi duvar
   boyunca (liste saçak boyunu sayar): PK01 8 / 9, yan verandalı 9 / 10, ötekiler aynı. C kapama listede yok; metresi dört eğik kenar.
+  Kesim planının yukarı yuvarlaması liste üretecininki (1e-9).
 - Kurallar ve değerler: `okunan` çözülür (liste kuralları ve kitap), seçimler kendi durumunu taşır; kartlar (sekiz kod, kilitte ilk 51 satır).
 - Yer (montaj rehberi; teyit bekleyenler varsayım): alt çerçeve duvarların altında, kesilen kapı boşlukları açık, dış hatlar dış sınırın
-  kenarları (toplam dış çevre), iç hatlar iç duvarın bitişik panoları; saçak omegası saçak duvarının üstünde makasın altında binanın boyunca;
+  kenarları (toplam dış çevre), iç hatlar iç duvarın bitişik panoları, dokuz evde her kapı ve geçiş kesik; saçak omegası saçak duvarının üstünde makasın altında binanın boyunca;
   saçak sacı ve mahya saçak ucundan ucuna; her baş makasın iki eğik kenarında Z betopanın dış yüzünde, C kapama aşık uçlarında, alın sacı
   C'nin önünde. Gösterim kesitleri sayıyı ve boyu değiştirmez.
 - Kural yok: beşik olmayan çatıda altı çatı parçası, trapez kaplamada mahya, baş makas yoksa kalkan kenarları; alt çerçeve yine kurulur.
@@ -36,11 +37,12 @@ KOK = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(KOK))
 sys.path.insert(0, str(KOK / "testler" / "kimlik" / "hakem"))
 import kiyas as KY  # noqa: E402
+from motor import geometry as G  # noqa: E402
 from motor import ifc_uret  # noqa: E402
 from motor import kart_model as KM  # noqa: E402
 from motor import prefabrik_liste as PL  # noqa: E402
 from motor import yerlesim as Y  # noqa: E402
-from motor.yerlesim import cati, cizim, girdi, yaz  # noqa: E402
+from motor.yerlesim import cati, cizim, girdi, kesim, yaz  # noqa: E402
 from motor.yerlesim import kenar as KE  # noqa: E402
 
 VERI = KOK / "testler" / "kimlik" / "veri"
@@ -147,6 +149,7 @@ def test_kurallar_ve_degerler():
             if isinstance(v, dict) and "deger" in v:
                 assert v["durum"] in durumlar and v["tarih"] and v.get("not"), (ad, alt)
     assert K[KE.ALT_CERCEVE]["kesilen_bosluklar"]["durum"] == "varsayim" and K["mahya_yerlesimi"]["trapez_yazisi"]["durum"] == "muhendis"
+    assert D[KE.ALT_CERCEVE]["kesilen_bosluklar"] == ["ic_kapi", "dis_kapi", "gecis"] and D[KE.ALT_CERCEVE]["ic_100_esigi_mm"] == 100
     assert K[KE.GOSTERIM]["kesit_cm"]["durum"] == "varsayim"
 
 
@@ -211,6 +214,35 @@ def test_alt_cerceve_hatlari_liste_uretecinin_boyu(dokuz):
         assert abs(sum(x["boy_cm"] for x in h if x["duvar"] == "dış") - N["dis_cevre_m"] * 100) < 1e-6, ad
         assert abs(sum(x["boy_cm"] for x in h if x["duvar"] == "iç") - sum(q["boy"] for q in N["panolar"] if q["duvar"] == "ic")) < 1e-6, ad
         assert {x["cerceve"] for x in h if x["duvar"] == "dış"} == {"100'lük"} and {x["cerceve"] for x in h if x["duvar"] == "iç"} == {"60'lık"}
+
+
+def test_alt_cerceve_kapi_ve_gecis_kesilir(dokuz):
+    """Dokuz evde her kapı (iç ve dış) ve geçiş bir hatta kesiktir, pencere kesilmez; geçiş yalnız yan verandalıda (kuralın değeri test
+    edilir: geçiş çıkarılırsa yan verandalı bir kesik eksik verir)."""
+    turler = Counter()
+    for ad, m in dokuz.items():
+        P = G.kur(copy.deepcopy(m["ie"]))
+        acik = Counter(q.acilim.tur for d in P.duvarlar for q in d.panolar if q.acilim)
+        turler.update({(ad, t): n for t, n in acik.items() if t == "gecis"})
+        kesik = sum(len(h["kesikler_cm"]) for h in m["say"]["kenar"]["hatlar"])
+        assert kesik == acik["ic_kapi"] + acik["dis_kapi"] + acik["gecis"], (ad, kesik, dict(acik))
+    assert turler == {("YAN_VERANDALI", "gecis"): 1}
+    y = _oku(KM.YERLESIM)
+    y["kurallar"][KE.ALT_CERCEVE]["kesilen_bosluklar"]["deger"] = ["ic_kapi", "dis_kapi"]
+    D = Y.degerler(y, _oku(KM.LISTE_KURALLARI))
+    yan = dokuz["YAN_VERANDALI"]
+    _p, hatlar = KE.alt_cerceve(yan["ie"], D[KE.ALT_CERCEVE], D[KE.GOSTERIM]["kesit_cm"])
+    assert sum(len(h["kesikler_cm"]) for h in hatlar) == sum(len(h["kesikler_cm"]) for h in yan["say"]["kenar"]["hatlar"]) - 1
+
+
+def test_kesim_yuvarlamasi_liste_uretecinin():
+    """Yukarı yuvarlamanın payı liste üretecininki (`TAVAN`, 1e-9): bölüm bir tamsayının hemen üstüne düşerse iki taraf da bir fazla sayar."""
+    for hat, boy, bindirme in (([2000.0], 250.0, 0.0), ([2000.0001], 250.0, 0.0), ([1999.99999999], 250.0, 0.0), ([1060.0, 1060.0], 250.0, 20.0),
+                               ([920.00002], 250.0, 20.0)):
+        assert kesim.toplam_karti(hat, boy, bindirme)["stok"] == PL.TAVAN(sum(hat) / (boy - bindirme)), (hat, boy, bindirme)
+    for kenar in (560.0, 560.0001, 347.5043):
+        assert kesim.kenar_karti([kenar] * 4, 280.0)["stok"] == 4 * PL.TAVAN(kenar / 280.0), kenar
+    assert kesim.toplam_karti([2000.0001], 250.0)["stok"] == 9 and kesim.kenar_karti([560.0001], 280.0)["stok"] == 3
 
 
 # ----------------------------------------------------------------------------- yer (PK-01)
@@ -278,7 +310,7 @@ def test_cati_kenarlari_yerleri(pk01):
             v_dis = -betopan if on else F["boy"] + betopan
             v_uc = F["v0"] if on else F["v1"]
             if p["kod"] == "CK-04":                                        # Z makasın üstünden betopanın dış yüzüne
-                assert v0 - 1e-6 <= v_dis <= v1 + 1e-6 and v1 - v0 <= 5 + G_["bas_makas_z"]["dis_kanat"] + 1e-6, p["ad"]
+                assert v0 - 1e-6 <= v_dis <= v1 + 1e-6 and yakin(v1 - v0, G_["bas_makas_z"]["ust_kanat"] + G_["bas_makas_z"]["dis_kanat"]), p["ad"]
             elif p["kod"] == "CK-05":                                      # C aşık uçlarında
                 assert v0 - 1e-6 <= v_uc <= v1 + 1e-6 and v1 - v0 <= G_["c_kapama"]["kanat"] + G_["sac"] + 1e-6, p["ad"]
             else:                                                          # alın C'nin önünde, saçak altı Z'ye kadar
@@ -293,7 +325,7 @@ def test_gosterim_sayiyi_degistirmez(pk01, tmp_path):
     y = _oku(KM.YERLESIM)
     y["kurallar"][KE.GOSTERIM]["kesit_cm"]["deger"] = {"sac": 0.5, "alt_cerceve": {"pay": 1, "kanat": 5}, "sacak_omegasi": [14, 6],
                                                        "sacak_saci": {"tirnak": 6, "alin": 20, "kivrim": 4}, "alin_saci": {"makas_ustunden": 5, "alin": 20, "kivrim": 4},
-                                                       "bas_makas_z": {"centik": 5, "dis_kanat": 6}, "c_kapama": {"govde": 9, "kanat": 4}, "mahya": {"kanat": 30}}
+                                                       "bas_makas_z": {"centik": 5, "dis_kanat": 6, "ust_kanat": 9}, "c_kapama": {"govde": 9, "kanat": 4}, "mahya": {"kanat": 30}}
     (tmp_path / "PK01.ifc").write_bytes(pk01["bugunku"].read_bytes())
     m = _model(pk01["ie"], tmp_path, "PK01", yerlesim=y)
     a, b = pk01["say"], m["say"]

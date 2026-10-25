@@ -5,13 +5,19 @@ Omega ve aşıkta modelin parçaları stok boylara en uzun önce, ilk sığan bo
 eklenmez (karar D açık); sayı modelin yerleşimidir, yükleme listesinin metrajı değildir.
 
 K3b'nin kartlarında (alt çerçeve, saçak ve kalkan kenarları, mahya) sayı liste üretecinin sayma yoludur, boy modelden: hatların toplamı
-(`toplam_karti`: ⌈Σ hat ÷ (parça boyu − bindirme)⌉, bir kez yukarı) ya da kenar başına (`kenar_karti`: ⌈kenar ÷ parça boyu⌉).
+(`toplam_karti`: ⌈Σ hat ÷ (parça boyu − bindirme)⌉, bir kez yukarı) ya da kenar başına (`kenar_karti`: ⌈kenar ÷ parça boyu⌉). Yukarı
+yuvarlamanın payı liste üretecininki (`motor.prefabrik_liste.TAVAN`, 1e-9); K2'nin kartları kendi payıyla (`ESIK`).
 """
 from __future__ import annotations
 
 import math
 
 ESIK = 1e-6
+LISTE_ESIK = 1e-9          # liste üretecinin yukarı yuvarlaması (`TAVAN`); K3b sayıyı onun yoluyla verir
+
+
+def _tavan(x: float) -> int:
+    return int(math.ceil(x - LISTE_ESIK))
 
 
 def yerlestir(boylar_cm: list[float], kullanilir_cm: float) -> list[list[float]]:
@@ -46,7 +52,7 @@ def dere_karti(hatlar_cm: list[float], parca_boyu_cm: float, bindirme_cm: float)
 
 def toplam_karti(hatlar_cm: list[float], parca_boyu_cm: float, bindirme_cm: float = 0.0, parca: int | None = None) -> dict:
     """Hatların toplamı bir kez yukarı bölünür (liste üretecinin yolu); `parca` modeldeki parça sayısı (kesik hatta hattan çok)."""
-    n = math.ceil(sum(hatlar_cm) / (parca_boyu_cm - bindirme_cm) - ESIK)
+    n = _tavan(sum(hatlar_cm) / (parca_boyu_cm - bindirme_cm))
     return {"yontem": "⌈hatların toplamı ÷ (parça boyu − bindirme)⌉, bir kez yukarı", "parca_boyu_cm": parca_boyu_cm, "bindirme_cm": bindirme_cm,
             "parca": len(hatlar_cm) if parca is None else parca, "hat": len(hatlar_cm), "toplam_m": round(sum(hatlar_cm) / 100, 4), "stok": n,
             "hatlar_cm": [round(h, 4) for h in hatlar_cm]}
@@ -54,6 +60,6 @@ def toplam_karti(hatlar_cm: list[float], parca_boyu_cm: float, bindirme_cm: floa
 
 def kenar_karti(kenarlar_cm: list[float], parca_boyu_cm: float) -> dict:
     """Kenar başına ⌈kenar ÷ parça boyu⌉ (kitap: kenar kenar; bindirme yok)."""
-    n = [math.ceil(h / parca_boyu_cm - ESIK) for h in kenarlar_cm]
+    n = [_tavan(h / parca_boyu_cm) for h in kenarlar_cm]
     return {"yontem": "kenar başına ⌈kenar ÷ parça boyu⌉", "parca_boyu_cm": parca_boyu_cm, "parca": len(kenarlar_cm),
             "toplam_m": round(sum(kenarlar_cm) / 100, 4), "stok": sum(n), "hat_basina": n}

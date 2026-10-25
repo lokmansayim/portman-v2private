@@ -350,13 +350,13 @@
      "sacak_omegasi": [10, 4],
      "sacak_saci": {"tirnak": 3, "alin": 13, "kivrim": 10},
      "alin_saci": {"makas_ustunden": 3, "alin": 13, "kivrim": 10},
-     "bas_makas_z": {"centik": 3, "dis_kanat": 3},
+     "bas_makas_z": {"centik": 3, "dis_kanat": 3, "ust_kanat": 5},
      "c_kapama": {"govde": 6, "kanat": 2},
      "mahya": {"kanat": 26}
     },
     "durum": "varsayim",
     "tarih": "2026-10-25",
-    "not": "Yalnız 3B gösterim (cm): sacın çizilen kalınlığı (gerçeği 1 mm), alt çerçevenin duvarın iki yüzünden payı ve kanadı, saçak omegasının ters U'su [genişlik, yükseklik], sacların tırnağı, alnı ve kıvrımı, alın sacının makas üstünden aşağı başladığı yer, Z'nin çentiği ve dış kanadı, C kapamanın gövdesi ve kanadı, mahyanın kanadı. Montaj rehberinden (Lokman'ın 24 Ekim çizimleri). Sayı, boy ve metre bunlardan çıkmaz."
+    "not": "Yalnız 3B gösterim (cm): sacın çizilen kalınlığı (gerçeği 1 mm), alt çerçevenin duvarın iki yüzünden payı ve kanadı, saçak omegasının ters U'su [genişlik, yükseklik], sacların tırnağı, alnı ve kıvrımı, alın sacının makas üstünden aşağı başladığı yer, Z'nin çentiği, dış kanadı ve makasın üstündeki kanadı, C kapamanın gövdesi ve kanadı, mahyanın kanadı. Montaj rehberinden (Lokman'ın 24 Ekim çizimleri). Sayı, boy ve metre bunlardan çıkmaz."
    },
    "durum": "varsayim",
    "tarih": "2026-10-25",

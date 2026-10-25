@@ -202,7 +202,7 @@ def kalkan_kenarlari(g: dict, G_: dict, kesit: dict, kurallar: set[str]) -> list
             bilgi = {"Makas": m["ad"], "Yuz": yuz}
             ortak = {"boy_cm": _r(F["egik"]), "bilgi": bilgi}
             if "bas_makas_z_yerlesimi" in kurallar:
-                kes = [(_bant(F, u0, u1, 0.0, t), *v(v_dis, v_dis - s * 5)),
+                kes = [(_bant(F, u0, u1, 0.0, t), *v(v_dis, v_dis - s * Z["ust_kanat"])),
                        (_bant(F, u0, u1, -Z["centik"], t), *v(v_dis, v_dis + s * t)),
                        (_bant(F, u0, u1, -Z["centik"], -Z["centik"] + t), *v(v_dis, v_dis + s * Z["dis_kanat"]))]
                 out.append({"kural": "bas_makas_z_yerlesimi", "parca": "bas_makas_z", "geo": _coklu(F, kes), **ortak,
