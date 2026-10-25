@@ -214,7 +214,7 @@ def test_muhurun_dondurulmus_bolumleri_degismez(muhur):
     öteki bölümlerden biri değişirse iz tutmaz ve araç durur: hakem değişikliğidir, beyanla ve Patron'un onayıyla gelir."""
     assert set(muhur) == {"aciklama", "kaynaklar", "kat_ayrimi", "secim_kurali", "secim", "kiyas_listesi_kurali", "sayilar", "projeler",
                           "dosyalar", *K.EKLENEBILIR}
-    assert K.donmus_iz(muhur) == K.MUHUR_IZI
+    assert K.donmus_iz(muhur) == K.MUHUR_IZI == "311e56af37811219e2419cf884f74ade0f6f696537b4a7f94a28d5de3182704c"
     K.muhur_dogrula(MUHUR, KOK)                    # depodaki mühür: iz ve yalnız-ekleme geçmişi tutuyor
     for degistir in (lambda m: m["projeler"]["ÇP-17"].update(durum="acik"), lambda m: m["dosyalar"][0].update(durum="acik"),
                      lambda m: m["projeler"]["ÇP-17"].update(kiyas_listesi=m["dosyalar"][0]["drive_id"])):
@@ -251,6 +251,7 @@ def test_eklenen_kayitlar_kurala_uygun(muhur):
         if kod == "ÇP-06":
             continue
         assert P[kod]["durum"] in ("kor", "kapali") and set(a) == {"karar", "tarih", "sha256", "liste_commit"}
+        assert re.fullmatch(r"[0-9a-f]{40}", a["liste_commit"]), "tam commit"
         assert any(K.kayit_ozeti(r, muhur) == a["sha256"] for r in muhur["dosyalar"] if r["kod"] == kod and r["tur"] in K.LISTELER)
     for kod, k in muhur["kat_kayitlari"].items():
         assert P[kod]["kat"] == "belirsiz" and set(k) == {"kat", "tarih", "dayanak", "pafta_sha256"} and k["kat"] in ("tek", "çift")
@@ -553,7 +554,7 @@ def _liste_commit(depo, ad="DN02"):
 
 def _ac(depo, sha=None, commit=None):
     """DN-02'nin açılış kaydı (Patron kararının yerine uydurma karar)."""
-    a = {"karar": "uydurma karar", "tarih": "2026-10-25", "sha256": sha or _sha(depo["kor"]), "liste_commit": (commit or _liste_commit(depo))[:7]}
+    a = {"karar": "uydurma karar", "tarih": "2026-10-25", "sha256": sha or _sha(depo["kor"]), "liste_commit": commit or _liste_commit(depo)}
     _muhur_degistir(depo, lambda m: m["acilislar"].update({"DN-02": a}))
 
 
@@ -614,7 +615,7 @@ def test_pdf_te_sayfa_secilmez(depo):
 
 @pytest.mark.parametrize("ek", [{"durum": "acik"}, {"sayfa": 0}])
 def test_acilis_kaydinda_fazla_alan_reddedilir(depo, okunmaz, ek):
-    a = {"karar": "uydurma karar", "tarih": "2026-10-25", "sha256": _sha(depo["kor"]), "liste_commit": _liste_commit(depo)[:7], **ek}
+    a = {"karar": "uydurma karar", "tarih": "2026-10-25", "sha256": _sha(depo["kor"]), "liste_commit": _liste_commit(depo), **ek}
     _muhur_degistir(depo, lambda m: m["acilislar"].update({"DN-02": a}))
     with pytest.raises(Durdu) as e:
         K.kiyasla(depo["bizim"]("DN02"), depo["kor"], kok=depo["kok"])
@@ -634,12 +635,52 @@ def test_kendi_listemiz_yalniz_projenin_yolundan(depo, okunmaz):
         assert e.value.adim == 1 and "yolundan okunur" in e.value.neden
 
 
+def test_acilis_kaydi_tam_commit_ister(depo, okunmaz):
+    _ac(depo, commit=_liste_commit(depo)[:7])
+    with pytest.raises(Durdu) as e:
+        K.kiyasla(depo["bizim"]("DN02"), depo["kor"], kok=depo["kok"])
+    assert e.value.adim == 3 and "liste commit" in e.value.neden
+
+
+@pytest.mark.parametrize("hangisi", ["bizim", "klasor", "muhur"])
+def test_sembolik_bagla_baska_dosya_okunmaz(depo, okunmaz, hangisi):
+    """Kanonik yola (ya da üst klasörüne, ya da mühüre) commit'siz sembolik bağ konup denetim başka dosyada yapılamaz."""
+    _ac(depo)
+    kok = depo["kok"]
+    (kok / "docs").mkdir()
+    if hangisi == "muhur":
+        kopya = kok / "docs" / "muhur_kopya.json"
+        kopya.write_text(depo["muhur"].read_text(encoding="utf-8"), encoding="utf-8")
+        _git(kok, "add", ".")
+        _git(kok, "commit", "-q", "-m", "kopya")
+        depo["muhur"].unlink()
+        depo["muhur"].symlink_to(kopya)
+        beklenen = 2
+    elif hangisi == "bizim":
+        b = kok / "docs" / "b.json"
+        b.write_text(depo["bizim"]("DN02").read_text(encoding="utf-8"), encoding="utf-8")
+        _git(kok, "add", ".")
+        _git(kok, "commit", "-q", "-m", "b")
+        depo["bizim"]("DN02").unlink()
+        depo["bizim"]("DN02").symlink_to(b)
+        beklenen = 1
+    else:
+        klasor = depo["cel"] / "projeler" / "DN02"
+        yedek = kok / "docs" / "DN02"
+        klasor.rename(yedek)
+        klasor.symlink_to(yedek, target_is_directory=True)
+        beklenen = 1
+    with pytest.raises(Durdu) as e:
+        K.kiyasla(depo["bizim"]("DN02"), depo["kor"], kok=kok)
+    assert e.value.adim == beklenen and "sembolik bağ" in e.value.neden
+
+
 @pytest.mark.parametrize("isaret", ["--assume-unchanged", "--skip-worktree"])
 def test_git_isaretiyle_gizlenen_degisiklik_durur(depo, okunmaz, isaret):
     """`git status`'u susturan işaret konup commit'siz açılış kaydı yazılırsa araç HEAD'le baytı kıyaslar ve durur."""
     _git(depo["kok"], "update-index", isaret, "testler/celik/muhur.json")
     m = _oku(depo["muhur"])
-    m["acilislar"]["DN-02"] = {"karar": "commit'siz", "tarih": "2026-10-25", "sha256": _sha(depo["kor"]), "liste_commit": _liste_commit(depo)[:7]}
+    m["acilislar"]["DN-02"] = {"karar": "commit'siz", "tarih": "2026-10-25", "sha256": _sha(depo["kor"]), "liste_commit": _liste_commit(depo)}
     depo["muhur"].write_text(json.dumps(m, ensure_ascii=False), encoding="utf-8")
     with pytest.raises(Durdu) as e:
         K.kiyasla(depo["bizim"]("DN02"), depo["kor"], kok=depo["kok"])
@@ -856,7 +897,7 @@ def test_birlestirmede_degisen_acilis_kaydi_durur(depo, strateji):
     _git(kok, "branch", "yan")
     _ac(depo)
     _git(kok, "checkout", "-q", "yan")
-    a = {"karar": "başka karar", "tarih": "2026-10-26", "sha256": _sha(depo["kor"]), "liste_commit": _liste_commit(depo)[:7]}
+    a = {"karar": "başka karar", "tarih": "2026-10-26", "sha256": _sha(depo["kor"]), "liste_commit": _liste_commit(depo)}
     _muhur_degistir(depo, lambda m: m["acilislar"].update({"DN-02": a}))
     _git(kok, "checkout", "-q", dal)
     _git(kok, "merge", "-q", "--no-edit", *strateji, "yan")

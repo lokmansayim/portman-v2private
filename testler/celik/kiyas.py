@@ -38,6 +38,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import subprocess
 import sys
@@ -107,6 +108,7 @@ def muhur_dogrula(muhur_yol: Path, kok: Path) -> tuple[dict, dict]:
     """Adım 2'nin ilk yarısı: mühür commit'li ve değişmemiş; depodaki gerçek mühürse dondurulmuş bölümlerin izi `MUHUR_IZI`; geçmişindeki
     her commit'te eklenebilir bölümlere yalnız ekleme yapılmış."""
     muhur_yol, kok = Path(muhur_yol), Path(kok)
+    bag_yok(muhur_yol, kok, 2)
     kayit = kayitli_mi(muhur_yol, kok, 2)
     head_ile_ayni(muhur_yol, kok, 2)
     muhur = muhur_oku(muhur_yol)
@@ -123,6 +125,18 @@ def head_ile_ayni(yol: Path, kok: Path, adim: int) -> None:
     r = subprocess.run(["git", "-C", str(kok), "show", f"HEAD:{rel}"], capture_output=True)
     if r.returncode != 0 or r.stdout != Path(yol).read_bytes():
         raise Durdu(adim, f"{Path(yol).name} HEAD'deki commit'le bayt bayt aynı değil (commit'siz değişiklik ya da git işareti); araç durdu")
+
+
+def bag_yok(yol: Path, kok: Path, adim: int) -> None:
+    """Dosyada ve depo içindeki üst klasörlerinde sembolik bağ yok: denetimler başka bir dosyada yapılamaz."""
+    rel = Path(os.path.relpath(Path(yol).absolute(), Path(kok).absolute()))
+    if rel.parts[:1] == ("..",):
+        raise Durdu(adim, f"{Path(yol).name} depo dışında; önce depoya commit'lenmeli")
+    p = Path(kok).absolute()
+    for parca in rel.parts:
+        p = p / parca
+        if p.is_symlink():
+            raise Durdu(adim, f"{rel.as_posix()} yolunda sembolik bağ var ({parca}); araç durdu")
 
 
 def kod_klasoru(kod: str) -> str:
@@ -243,7 +257,7 @@ def acilabilir_mi(kayit: dict, muhur: dict, kod: str, liste: dict | None) -> dic
         if not acilis.get("sha256") or acilis.get("sha256") != kayit_ozeti(kayit, muhur):
             raise Durdu(3, f"{kod} açılış kaydı bu dosya için değil (SHA-256 {str(acilis.get('sha256') or 'yok')[:12]}…); liste açılmaz")
         c = str(acilis.get("liste_commit") or "")
-        if len(c) < 7 or not liste["commit"].startswith(c):
+        if not re.fullmatch(r"[0-9a-f]{40}", c) or c != liste["commit"]:            # tam commit: kısa önek tutturulabilir
             raise Durdu(3, f"{kod} açılış kaydındaki liste commit'i ({c or 'yok'}) kendi listemizin commit'i değil "
                            f"({liste['commit'][:7]}); liste açılmaz")
         return {**acilis, "durum": durum, "kayit_durumu": kayit["durum"]}
@@ -408,6 +422,7 @@ def kiyasla(bizim_yol: Path, liste: Path, pafta_yol: Path | None = None, *, kok:
     kok, bizim_yol = Path(kok), Path(bizim_yol)
     muhur_yol = Path(muhur_yol) if muhur_yol else kok / "testler" / "celik" / "muhur.json"
     # 1. bizim yanımız
+    bag_yok(bizim_yol, kok, 1)
     liste_kaydi = kayitli_mi(bizim_yol, kok, 1)
     bizim = json.loads(bizim_yol.read_text(encoding="utf-8"))
     kod = bizim.get("kod")
