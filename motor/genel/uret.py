@@ -156,6 +156,7 @@ def uret(tanim_yolu: Path, hedef: Path, is_emri_no: str | None = None, revizyon:
         from . import kural
         set_kullanilan = str(kural.yol())
         ifc = hedef / f"{kod}.ifc"; ozet: dict = {}
+        karkas_paftasi: dict | None = None
         dxf_yol: Path | None = None
         if not yalniz_liste:
             # 1) çizimler (plan, pafta, görünüşler)
@@ -179,6 +180,13 @@ def uret(tanim_yolu: Path, hedef: Path, is_emri_no: str | None = None, revizyon:
                     if dxf_yol.exists():                     # denetimden geçmeyen DXF teslim adıyla kalmaz (K23'ün amacı; kod incelemesi 13.10)
                         dxf_yol.replace(dxf_yol.with_name(dxf_yol.stem + ".HATALI.dxf"))
                     dxf_yol = None
+            # 2c) duvar panelleri yerleşim planı (İE-16 PR-3a): yalnız tanım karkas kuralını isterse; istemeyenin çizim seti aynı
+            if t.get("karkas") == "kural":
+                try:
+                    from . import karkas_pafta
+                    karkas_paftasi = karkas_pafta.ciz(t, hedef, kod)
+                except (Exception, SystemExit) as e:
+                    hatalar.append(f"duvar panelleri paftası: {type(e).__name__}: {str(e)[:200]}")
         # 3) yükleme listesi (girdi + liste)
         girdi = hedef / f"{kod}_girdi.json"; liste = hedef / f"{kod}_yukleme.json"
         if _main(girdi_genel, [tanim_yolu, "--dosya", girdi, "--uzerine-yaz", "--kaynak", kaynak or f"Yapı Tanımı 0.5 ({tanim_yolu.name})"] + ek, gunluk):
@@ -248,7 +256,8 @@ def uret(tanim_yolu: Path, hedef: Path, is_emri_no: str | None = None, revizyon:
                 "preview": f"{kod}_plan.png" if (hedef / f"{kod}_plan.png").exists() else None, "plan_bayi": bayi_png.name if bayi_png.exists() else None,
                 "bayi_gorsel": bayi_gorsel.name if bayi_gorsel.exists() else None, "bilgi_var": bool(bilgi),
                 "duzenlenebilir_dxf": dxf_yol.name if dxf_yol is not None and dxf_yol.exists() else None,
-                "yukleme_json": liste.name if liste.exists() else None, "ciktilar": {d: v for d, v in var.items()}, "set": set_kullanilan}
+                "yukleme_json": liste.name if liste.exists() else None, "ciktilar": {d: v for d, v in var.items()}, "set": set_kullanilan,
+                **({"duvar_panelleri": karkas_paftasi} if karkas_paftasi else {})}       # İE-16 PR-3a; karkas istemeyen tanımın manifest'i aynı
     (hedef / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     return manifest
 

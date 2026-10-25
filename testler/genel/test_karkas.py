@@ -150,3 +150,27 @@ def test_karkas_alani_yalniz_kural():
         y = yapi.kur(t2)
         with pytest.raises(SystemExit, match="yalnız"):
             girdi_genel.metraj(y, cati_genel.cati_kur(t2["cati"], kur), kur)
+
+
+def test_duvar_panelleri_paftasi_belirlenimci(tmp_path):
+    from motor.genel import karkas_pafta, uret
+    uret.matplotlib_sabitle()
+    t = json.loads((KOK / "testler" / "celik" / "projeler" / "CP03" / "CP03.json").read_text(encoding="utf-8"))
+    (tmp_path / "a").mkdir(); (tmp_path / "b").mkdir()
+    r = karkas_pafta.ciz(t, tmp_path / "a", "CP03", KURAL)
+    karkas_pafta.ciz(t, tmp_path / "b", "CP03", KURAL)
+    assert r["duvar_paneli"]["dis"] == 13 and r["kolon_kiris"] == 10 and r["kural"]["sha256"] == KURAL["_sha256"]
+    for ad in (r["png"], r["pdf"]):
+        assert (tmp_path / "a" / ad).read_bytes() == (tmp_path / "b" / ad).read_bytes(), ad
+    panelli = json.loads((CP06 / "CP06.json").read_text(encoding="utf-8"))
+    with pytest.raises(SystemExit, match="yalnız karkas"):
+        karkas_pafta.ciz(panelli, tmp_path, "CP06")
+
+
+def test_uret_paftayi_yalniz_kuralda_yazar(tmp_path):
+    from motor.genel import uret
+    m = uret.uret(CP06 / "CP06_kural.json", tmp_path / "kural", perspektif=False, bayi=False)
+    assert m["passed"] and m["duvar_panelleri"]["duvar_paneli"] == {"dis": 14, "ic": 8, "ek": 0, "korkuluk": 0}
+    assert (tmp_path / "kural" / "CP06_duvar_panelleri.png").is_file() and (tmp_path / "kural" / "CP06_duvar_panelleri.pdf").is_file()
+    m = uret.uret(CP06 / "CP06.json", tmp_path / "panelli", perspektif=False, bayi=False)
+    assert m["passed"] and "duvar_panelleri" not in m and not list((tmp_path / "panelli").glob("*duvar_panelleri*"))
