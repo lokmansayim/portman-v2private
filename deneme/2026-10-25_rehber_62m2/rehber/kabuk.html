@@ -97,8 +97,6 @@ body{height:100%;background:var(--bg);color:var(--ink);font-family:var(--f-body)
 .ctl.primary:hover{background:color-mix(in srgb,var(--accent) 88%,white)}
 .ctl:disabled{opacity:.35;cursor:default;background:transparent}
 .ctl svg{width:14px;height:14px;fill:currentColor}
-.rnd{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#c9c9c9}
-.rnd[hidden]{display:none}
 .gal{position:absolute;inset:0;z-index:5;display:flex;flex-direction:column;background:var(--scene)}
 .gal[hidden]{display:none}
 .gal .gx{position:absolute;top:10px;right:10px;z-index:1}
@@ -154,11 +152,9 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
     <section class="stage" aria-label="3D montaj sahnesi">
       <div id="viewport"></div>
-      <img class="rnd" id="rndImg" alt="" hidden>
       <div class="badge glass"><span class="bn" id="badgeNo"></span><span class="bt" id="badgeTitle"></span></div>
       <div class="tools">
         <button class="tog glass" id="roofTog" type="button" aria-pressed="false">Çatıyı gizle</button>
-        <button class="tog glass" id="rndTog" type="button" aria-pressed="false">Adımı render göster</button>
         <button class="tog glass" id="galTog" type="button" aria-haspopup="dialog">Render görselleri</button>
         <div class="hint glass">Parçaya dokun: kimlik kartı</div>
       </div>

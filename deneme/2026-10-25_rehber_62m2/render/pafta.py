@@ -54,9 +54,9 @@ if os.path.exists(os.path.join(RD, 'son_bas_kesit.png')):
     B = ac('son_bas_kesit.png'); db = ImageDraw.Draw(B); s = B.width / 1600
     KP, KH, LN = (-4.46, -2.9, 2.52), (-4.46, -1.5, 2.52), 135
     X = lambda x: x / 100 - 4.5
-    NOK = [((X(3.89), -1.5, 2.525), 'Baş makas (alt başlık)', (1180, 470), True),
-           ((X(-1.6), -1.5, 2.4605), 'Baş makas omegası: dış kanal', (520, 840), False),
-           ((X(-0.7), -1.5, 2.60), 'Baş makas betopanı', (520, 150), False),
+    NOK = [((X(3.4), -1.5, 2.525), 'Baş makas (alt başlık)', (1180, 470), True),
+           ((X(-1.1), -1.5, 2.4695), 'Baş makas omegası: dış U yanak', (520, 840), False),
+           ((X(-1.0), -1.5, 2.60), 'Baş makas betopanı (8 mm)', (520, 150), False),
            ((X(5.0), -1.5, 2.43), 'Duvar panosu (10 cm)', (520, 950), False),
            ((X(16), -1.5, 2.57), 'Cam yünü 10 cm', (1180, 200), True),
            ((X(18), -1.5, 2.461), 'Ters tavan alçıpanı', (1180, 880), True)]
@@ -70,7 +70,7 @@ def olc(im, gen): return im.resize((gen, round(im.height * gen / im.width)), Ima
 ust = olc(ac('son_on_sol.png'), W - 2 * M)
 satirlar = [([ac('son_on_sag.png'), ac('son_arka_sol.png')], ['Ön-sağdan: cumba ile ana çatının dere hattı, iç köşede iniş', 'Arka-soldan: kalkan, alın sacı ve inişler']),
             ([ac('son_catisiz.png'), K or ac('son_cati_katman.png')], ['Çatısız: oda oda dizilim, kapılar ve pencereler', 'Çatı: makas → aşık → trapez sac; tavanda cam yünü (OSB, nem bariyeri yok)'])]
-satirlar.append(([ac('son_ic_kose.png'), B or ac('son_bas_kesit.png')], ['Cumbanın sağı: iç köşede dere ve iniş', 'Baş makas kesiti: betopan omeganın dış kanalında']))
+satirlar.append(([ac('son_ic_kose.png'), B or ac('son_bas_kesit.png')], ['Cumbanın sağı: iç köşede dere ve iniş', 'Baş makas kesiti: 8 mm betopan omeganın dış U yanağında']))
 if MAKET:
     mk = Image.open(MAKET).convert('RGB')
     satirlar.append(([mk.crop((230, 100, 1190, 680))], ['3D yazıcı maketi 1:50: gövde ve çıkarılabilir çatı']))

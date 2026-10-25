@@ -25,7 +25,7 @@ Bir bayi projesinin (900 × 600 cm, veranda üstünde cumba) montaj rehberi. Kay
    - Adım kameraları `model_kamera.json`'a yazılır.
 5. **Render:** `render/render.py` (Blender 4.2 bpy, Cycles), iki kip:
    - `gorunum <ad> <png> 64 1.0` — altı görünüm: `on_sol`, `on_sag`, `arka_sol`, `catisiz`, `cati_katman`, `ic_kose`;
-   - `adim hepsi <klasör> 24 1.0` — 20 kare (genel bakış + 19 adım); izolasyon karesinde son iki şerit yarı serili, uçlarında rulo.
+   - `adim hepsi <klasör> 24 1.0` — 20 kare (genel bakış + 19 adım). Rehberde "Adımı render göster" kaldırıldı (Lokman, 25 Ekim gece); kip betikte duruyor, `hepsi.sh` çağırmıyor.
    - `gorunum bas_kesit …` — baş makas kesiti (plan y = 150'de gerçek kesit: düzlemi kesen nesneler boolean ile kesilir).
 6. **Maket:** `python maket/maket.py rehber/data.json <klasör> 50 <önek>` → 1:50 kapalı STL.
    - Parçalar: gövde ve çıkarılabilir çatı, 4 köşe tırnağı.
@@ -43,10 +43,11 @@ Bir bayi projesinin (900 × 600 cm, veranda üstünde cumba) montaj rehberi. Kay
 - **Çatı katmanları.** Trapez (80 cm kapatır) doğrudan aşıkların üstünde; ters mahya; trapez sac mahyası. OSB ve nem bariyeri yok (Lokman, 25 Ekim akşamı; paftadaki not bu projede geçerli değil).
 - **Cephe fugası.** Dış panoların dış betopanında 6 sıra 2 cm fuga (alttan 38 cm'de bir, üstte 10 cm bant; pafta: fugalı duvar detayı). Modelde 5 mm derin oluk; malzeme anahtarı `fuga`. Makette 0,5 × 0,3 mm oluk.
 - **Makas uçları.** Kalkanlarda iki 125 × 250 betopanın dışında kalan uçlara, betopanların eğimle kesilen artanı döşenir (Lokman, 25 Ekim akşamı).
-- **Baş makas detayı (Lokman çizimi, 25 Ekim akşamı).** Baş makas omegası: iç kanat ve içe ayak (tavan seviyesinde), dış kanat + dışa kanal + dudak. Betopan makasa dayanır, alt ucu kanala oturur; baş makaslar omeganın dış kanadıyla aynı hizada (`build_data.py` `BAS_DIS`). Z değişmedi.
-- **İç duvar omegası.** İç duvar üstlerine 60'lık duvar omegası (`omega_duvar` `tur='ic'`, 375'lik parçalar, kapı üstlerinden kesintisiz).
+- **100'lük omegalar ve baş makas detayı (Lokman çizimi ve ölçüleri, 25 Ekim).** 100'lük omegalar 10,5 cm, dış kanat dış duvara tam yaslı, içte 5 mm aralık (silikonize mastik, modelde boşluk). Baş makas omegası: derinlik 3 cm, içte 3 cm açık yanak, dışta 1 cm U yanak; 8 mm betopan U'ya girer, makasa dayanır; baş makaslar dış kanatla aynı hizada (`build_data.py` `BAS_DIS` = 0,1). Z değişmedi.
+- **Büyük pencereler.** 180/180 pencereli çelik karkas panelde (DVR, 251 × 250) pencere yanları da betopan kaplı ve fugalı.
+- **İç duvar omegası.** İç duvar üstlerine 60'lık duvar omegası: 6,5 cm açıklık (6 cm pano + H sacları), 3 cm derinlik, 3 cm kulaklar (`omega_duvar` `tur='ic'`, 375'lik parçalar, kapı üstlerinden kesintisiz).
 - **Ters tavan (adım 14).** Tavan omegalarının altına 12,5 mm alçıpan 120 × 250 (banyoda yeşil), verandada boardex 120 × 240.
-- **Çatı izolasyonu (adım 16).** 10 cm rulo cam yünü, her makas aralığına bir şerit; rehberde rulo açılarak serilir (`anim.serme`; rulo `userData.gecici`, GLB'ye girmez).
+- **Çatı izolasyonu (adım 16).** 10 cm rulo cam yünü, her makas aralığına bir şerit; cumbada (veranda) makas yönünde yatay iki şerit; rehberde rulo açılarak serilir (`anim.serme`; rulo `userData.gecici`, GLB'ye girmez).
 - **Genel çatı yüzü sistemi.**
   - Her yüz yerel s (eğim boyunca), t (saçak boyunca), n (dik) koordinatlarında kurulur.
   - Levhalar dışbükey çokgen kırpmayla dere hattında kesilir.
@@ -61,10 +62,9 @@ Bir bayi projesinin (900 × 600 cm, veranda üstünde cumba) montaj rehberi. Kay
 4. **Dere iç köşesi.** Cumba sağ deresi ön dereye iç köşede bağlanır.
 5. **Fuga derinliği.** Paftada yok; modelde 5 mm.
 
-6. **Baş makas omegası ölçüleri.** Çizimde ölçü yok; kanatlar ~3–4 cm, kanal 2,6 cm, dudak 2 cm.
-7. **Alçıpan dizilimi ve cam yünü şeritleri.** Levha ve şerit yerleşimi varsayım.
+6. **Baş makas omegasının U dudağı** ~2 cm (ölçü verilmedi).
 
-Teyit edilenler (25 Ekim akşamı): OSB dizilimi sorusu (OSB yok), kalkan uç dolguları (artan betopandan).
+Teyit edilenler (25 Ekim): OSB yok, kalkan uç dolguları (artan betopandan), omega ölçüleri, alçıpan ve cam yünü dizilimi.
 
 ## PK-01 düzeltmesi (bu oturum)
 

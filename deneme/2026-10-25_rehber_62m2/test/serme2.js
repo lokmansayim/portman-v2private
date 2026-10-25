@@ -1,4 +1,4 @@
-// Serme ara durumu: node serme2.js <html> <png> <oran> <kamera px,py,pz,tx,ty,tz>
+// Serme ara durumu: node serme2.js <html> <png> <oran> [kamera px,py,pz,tx,ty,tz] (kamera verilmezse adımın kamerası)
 const { chromium } = require('playwright'); const fs = require('fs'), path = require('path');
 const [html, out, oran, kam] = process.argv.slice(2), NM = path.join(__dirname, 'node_modules/three');
 const tmp = path.join(path.dirname(html), '_test.html');
@@ -10,7 +10,7 @@ fs.writeFileSync(tmp, `<!doctype html><html><head><meta charset="utf-8"></head><
   await p.route('https://cdn.jsdelivr.net/npm/three@0.160.0/**', r => r.fulfill({ path: path.join(NM, r.request().url().replace('https://cdn.jsdelivr.net/npm/three@0.160.0/', '')), contentType: 'application/javascript' }));
   await p.route(/fonts\.(googleapis|gstatic)\.com/, r => r.abort());
   await p.goto('file://' + tmp, { waitUntil: 'domcontentloaded', timeout: 90000 }); await p.waitForTimeout(2500);
-  await p.evaluate(([o, k]) => { const M = window.__montaj; M.goTo(16, false); M.serme(+o); const v = k.split(',').map(Number); M.kamera(v.slice(0, 3), v.slice(3, 6)); }, [oran, kam]);
-  await p.waitForTimeout(1200); await p.screenshot({ path: out });
+  await p.evaluate(([o, k]) => { const M = window.__montaj; M.goTo(16, false); M.serme(+o); if (k) { const v = k.split(',').map(Number); M.kamera(v.slice(0, 3), v.slice(3, 6)); } }, [oran, kam]);
+  await p.waitForTimeout(2600); await p.screenshot({ path: out });
   console.log('hata', e); await b.close();
 })();
