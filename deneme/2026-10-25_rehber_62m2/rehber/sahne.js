@@ -261,7 +261,7 @@ D.panels.forEach(p => {
 D.hs.forEach(h => {
   const s = h.step, g = new THREE.Group(), dis = h.t > 8;
   const m = mat('steel', s), a = h.o === 'h' ? h.xy[0] : h.xy[1], perp = h.o === 'h' ? h.xy[1] : h.xy[0];
-  const fl = dis ? 5 : 3;                       // başlık yarı genişliği: H 100 → 10 cm, H 60 → 6 cm; kanat 2 mm (1,2 mm sac, uçta ezilmiş kıvrım)
+  const fl = 5;                                 // sırt: gövdenin iki yanına 5'er cm, 100'lük ve 60'lık H'da aynı (Lokman); kanat 2 mm (1,2 mm sac, uçta ezilmiş kıvrım)
   const plate = (a0, a1, c0, c1) => g.add(h.o === 'h' ? bp(a0, a1, c0, c1, 0, H, m) : bp(c0, c1, a0, a1, 0, H, m));
   const sgn = h.stub ? (h.o === 'h' ? h.stub[1] : h.stub[0]) : 0;
   [[perp - h.t / 2, -1], [perp + h.t / 2, 1]].forEach(([f, side]) => {
