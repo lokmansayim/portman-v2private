@@ -24,7 +24,8 @@ def sha(p: Path) -> str:
 
 
 def test_listeler_var():
-    assert [p.parent.name for p in LISTELER][:1] == ["CP06"]
+    """Açık dört proje ve hedef örnek (İE-16 PR-3a)."""
+    assert [p.parent.name for p in LISTELER] == ["CP03", "CP06", "CP07", "CP13", "CP14"]
 
 
 @pytest.mark.parametrize("yol", LISTELER, ids=[p.parent.name for p in LISTELER])
@@ -38,8 +39,17 @@ def test_liste_girdilerinden_yeniden_uretilir(yol, tmp_path):
     kopya = KOK / ks["kopya"]
     assert kopya.parent == liste_yap.SETLER and kopya.name == ks["sha256"][:16] + ".json" and sha(kopya) == ks["sha256"]
     assert json.loads(kopya.read_text(encoding="utf-8")).get("sema") == ks["sema"]
-    yukleme = liste_yap.motor(tanim, tmp_path, b["yontem"]["kod"], kopya)
-    assert liste_yap.liste(tanim, yukleme, b["yontem"]["kod"], ks) == b
+    # karkas kuralı (İE-16 PR-3a): yalnız tanım isterse; kural seti gibi listeyle donan kopyasından okunur
+    kk = b.get("karkas_kurali")
+    assert bool(kk) == (json.loads(tanim.read_text(encoding="utf-8")).get("karkas") == "kural")
+    kk_kopya = None
+    if kk:
+        assert kk["yol"] == liste_yap.VARSAYILAN_KARKAS.relative_to(KOK).as_posix() and (KOK / kk["yol"]).is_file(), kk["yol"]
+        kk_kopya = KOK / kk["kopya"]
+        assert kk_kopya.parent == liste_yap.SETLER and kk_kopya.name == kk["sha256"][:16] + ".json" and sha(kk_kopya) == kk["sha256"]
+        assert json.loads(kk_kopya.read_text(encoding="utf-8")).get("sema") == kk["sema"]
+    yukleme = liste_yap.motor(tanim, tmp_path, b["yontem"]["kod"], kopya, kk_kopya)
+    assert liste_yap.liste(tanim, yukleme, b["yontem"]["kod"], ks, karkas_kaydi=kk) == b
 
 
 def test_sozluk_adet_tasimaz_olcuye_sayi_yazmaz():

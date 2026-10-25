@@ -1,0 +1,674 @@
+{
+ "sema": "portman.yapi_tanimi/0.5-taslak",
+ "kod": "ÇP-03",
+ "ad": "Tek kat çelik, açık plan, verandalı, dörtomuz, 68,34 m² (açık ölçüm projesi)",
+ "aile": "tek_kat_celik",
+ "paket": "proje",
+ "birim": "cm",
+ "kat": "zemin",
+ "kaynak": {
+  "okunmayanlar": "Paftalardaki makas paneli, tavan paneli ve çatı paneli adetleri girdi değil (çatının kuralı PR-3b). DWG okunmadı. Gerçek yükleme listesi hedef örnek olarak açıktır (hakem cevabı, İE-16 PR-1); tanıma girdi değildir. Panel bölmesi tanımda yok: karkas kuralından (`karkas: kural`; İE-16 PR-3a).",
+  "koordinat": "Köken karkasın sağ–arka dış köşesi (paftada sol alt): sağ duvarın dış yüzü x = 0, arka duvarın dış yüzü y = 0; +x paftada sağa (SOL cepheye), +y paftada yukarı (ÖN cepheye); paftada kuzey işareti yok. Kaplamayla dış çizgi 3 cm dışarıda (zemin kat planı 1015 × 725).",
+  "cizim": "Projenin montaj paftası (PDF, yedi sayfa; mühürde ÇP-03'ün montaj paftası, SHA-256 39600bde…); 25 Ekim 2026'da okundu. Duvarlar, kolonlar ve kirişler duvar paneli yerleşim planının çizgilerinden ve ölçülerinden (karkas; dış ölçü 1009 × 719,19, dış duvar 14); açıklıklar zemin kat planından (450/220, 220/220, 90 × 220 PVC kapı); saçaklı ve saçaksız kenarlar zemin kat planının sarı ve kırmızı çizgilerinden (açıklama); çatının biçimi makas paneli ve çatı paneli yerleşim planlarındaki kırma çizgilerinden; makaslar makas ve tavan paneli yerleşim planından."
+ },
+ "kat_yuksekligi": 270,
+ "teknik_ozellikler": {
+  "Bina yüksekliği": "2700 mm",
+  "Dış duvarlar": "140 mm",
+  "İç duvarlar": "iç duvar yok",
+  "Panel türü": "galvanizli yapısal çelik",
+  "Çatı şekli": "dörtomuz çatı",
+  "Çatı kaplaması": "alıcıya ait",
+  "Çatı kaplama rengi": "alıcıya ait",
+  "Dış kapı": "alıcıya ait",
+  "İç kapılar": "mevcut değil",
+  "Dış cephe boya": "alıcıya ait",
+  "İç cephe boya": "alıcıya ait",
+  "Pencere rengi": "alıcıya ait",
+  "Tavan": "ters tavan",
+  "Saçak ve alın rengi": "müşteriyle teyitleşilecek"
+ },
+ "aciklama_notlari": [
+  "Sadece çelik olacak.",
+  "Sarı çizili yerler 30 cm saçak olacak. Kırmızı olan yerlerde saçak olmayacak."
+ ],
+ "kapsam": {
+  "dis_kapi": false,
+  "ic_kapi": false,
+  "pencere": false,
+  "boya": false,
+  "vitrifiye": false,
+  "sihhi_tesisat": false,
+  "elektrik": false,
+  "kaynak": "teknik özellikler (dış kapı, boya, pencere, çatı kaplaması alıcıya ait; iç kapı yok) ve açıklama ('sadece çelik olacak')"
+ },
+ "yuz_kaplamalari": {
+  "dis": {
+   "kalinlik": 3.0,
+   "malzeme": [],
+   "not": "Zemin kat planında dış ölçü karkastan 3'er cm büyük (1009 → 1015). Sadece çelik: kaplama teslimatta yok"
+  },
+  "ic": {
+   "kalinlik": 2.35,
+   "malzeme": [],
+   "not": "kaplama teslimatta yok (sadece çelik); kalınlık mahal ölçüsü için kitabın değeri (OSB 11 + alçıpan 12,5)"
+  }
+ },
+ "duvar_siniflari": {
+  "dis": {
+   "ad": "bina dış duvarı",
+   "profil": "140x45x1,2",
+   "yalitim": false,
+   "yuz": {
+    "ic": "ic",
+    "dis": "dis",
+    "veranda": "dis"
+   },
+   "not": "teknik özellikler: dış duvarlar 140 mm; et kalınlığı paftada yok (1,2: kitabın varsayılanı); sadece çelik: yalıtım yok"
+  },
+  "ic": {
+   "ad": "iç duvar",
+   "profil": "80x45x1,2",
+   "yalitim": false,
+   "yuz": {
+    "ic": "ic"
+   },
+   "not": "projede iç duvar yok; sınıf mahal ölçüsü için"
+  },
+  "kolon": {
+   "ad": "kolon",
+   "profil": "80x45x1,2",
+   "yalitim": false,
+   "yuz": {
+    "ic": "ic",
+    "dis": "dis",
+    "veranda": "dis"
+   },
+   "not": "kolon panelinin profili paftada yok (motorun varsayılanı)"
+  }
+ },
+ "duvarlar": [
+  {
+   "ad": "W01",
+   "sinif": "dis",
+   "kutu": [
+    0,
+    705.2,
+    74.4,
+    719.2
+   ],
+   "yukseklik": 270,
+   "not": "ön cephe, sağ uç (paftada D12, 74,4)"
+  },
+  {
+   "ad": "W02",
+   "sinif": "dis",
+   "kutu": [
+    104.4,
+    705.2,
+    554.6,
+    719.2
+   ],
+   "yukseklik": 20,
+   "not": "ön açıklığın (450/220) altındaki alçak panel (paftada D11: 'pencere alt paneli şeklindedir'); yükseklik 240 − 220 (bilinen_sinirlar)"
+  },
+  {
+   "ad": "W03",
+   "sinif": "dis",
+   "kutu": [
+    584.6,
+    705.2,
+    659,
+    719.2
+   ],
+   "yukseklik": 270,
+   "not": "ön cephe, sol uç (paftada D10, 74,4)"
+  },
+  {
+   "ad": "W04",
+   "sinif": "dis",
+   "kutu": [
+    645,
+    429.2,
+    659,
+    705.2
+   ],
+   "yukseklik": 270,
+   "not": "ön çıkıntının sol duvarı; önü açık, arkası veranda (paftada D09, 276)"
+  },
+  {
+   "ad": "W05",
+   "sinif": "dis",
+   "kutu": [
+    645,
+    415.2,
+    995,
+    429.2
+   ],
+   "yukseklik": 270,
+   "not": "verandanın arka duvarı (paftada D08, 350)"
+  },
+  {
+   "ad": "W06",
+   "sinif": "dis",
+   "kutu": [
+    995,
+    0.0,
+    1009,
+    429.2
+   ],
+   "yukseklik": 270,
+   "not": "sol cephe (paftada D07, 365,9; pah köşesi dik yazıldı)"
+  },
+  {
+   "ad": "W07",
+   "sinif": "dis",
+   "kutu": [
+    14,
+    0.0,
+    995,
+    14.0
+   ],
+   "yukseklik": 270,
+   "not": "arka cephe (paftada D03 352, D04 244, D05 273,42; pah köşesi dik yazıldı)"
+  },
+  {
+   "ad": "W08",
+   "sinif": "dis",
+   "kutu": [
+    0,
+    0.0,
+    14,
+    705.2
+   ],
+   "yukseklik": 270,
+   "not": "sağ cephe (paftada D01 359,6, D02 345,2)"
+  },
+  {
+   "ad": "KLN01",
+   "sinif": "kolon",
+   "kutu": [
+    74.4,
+    705.2,
+    104.4,
+    719.2
+   ],
+   "yukseklik": 240,
+   "not": "ön açıklığın sağ kolonu (30 × 14), KRS01'in altında"
+  },
+  {
+   "ad": "KLN02",
+   "sinif": "kolon",
+   "kutu": [
+    554.6,
+    705.2,
+    584.6,
+    719.2
+   ],
+   "yukseklik": 240,
+   "not": "ön açıklığın sol kolonu (30 × 14), KRS01'in altında"
+  },
+  {
+   "ad": "KLN03",
+   "sinif": "kolon",
+   "kutu": [
+    979,
+    565.2,
+    1009,
+    579.2
+   ],
+   "yukseklik": 240,
+   "not": "verandanın köşe kolonu (30 × 14), KRS02 ile KRS03'ün altında"
+  },
+  {
+   "ad": "CRK2",
+   "sinif": "kolon",
+   "kutu": [
+    14,
+    429.2,
+    44,
+    443.2
+   ],
+   "yukseklik": 240,
+   "not": "iç çerçevenin sağ dikmesi (paftada CERCEVE-KRS 2, 30 × 14)"
+  },
+  {
+   "ad": "CRK3",
+   "sinif": "kolon",
+   "kutu": [
+    615,
+    429.2,
+    645,
+    443.2
+   ],
+   "yukseklik": 240,
+   "not": "iç çerçevenin sol dikmesi (paftada CERCEVE-KRS 3, 30 × 14)"
+  }
+ ],
+ "mahaller": [
+  {
+   "ad": "Salon",
+   "nokta": [
+    300,
+    200
+   ],
+   "sinif": "ic",
+   "islev": [
+    "salon"
+   ],
+   "not": "iç duvar yok (teknik özellikler): tek açık mekân; CRK1 kirişi ve iki dikmesi içinden geçer"
+  },
+  {
+   "ad": "Veranda",
+   "poligon": [
+    [
+     659,
+     429.2
+    ],
+    [
+     1009,
+     429.2
+    ],
+    [
+     1009,
+     579.2
+    ],
+    [
+     659,
+     579.2
+    ]
+   ],
+   "sinif": "veranda",
+   "islev": [
+    "veranda"
+   ],
+   "not": "önü ve yanı açık veranda (350 × 150, zemin kat planı); köşede KLN03, üstte KRS02 ve KRS03; korkuluk yok"
+  }
+ ],
+ "acikliklar": [
+  {
+   "ad": "P1",
+   "tur": "pencere",
+   "duvar": "W05",
+   "bas": 722.0,
+   "en": 220,
+   "yuk": 220,
+   "alt": 20,
+   "mahal": "Salon",
+   "etiket": "220/220",
+   "not": "verandadan içeri açıklık (zemin kat planı: 220/220, yeri ± 2 cm); alt kotu varsayım (ön açıklık gibi altta alçak panel, üstte kafes lento); pencere alıcıya ait"
+  },
+  {
+   "ad": "K1",
+   "tur": "dis_kapi",
+   "duvar": "W04",
+   "bas": 452.5,
+   "en": 90,
+   "yuk": 220,
+   "mentese": "bas",
+   "acilim": "sol",
+   "mahal": "Salon",
+   "not": "PVC kapı 90 × 220 (zemin kat planı), verandadan içeri; yeri ± 2 cm; kanat yönü paftada yok (varsayım); kapı alıcıya ait"
+  }
+ ],
+ "kirisler": [
+  {
+   "ad": "KRS01",
+   "kutu": [
+    74.4,
+    705.2,
+    584.6,
+    719.2
+   ],
+   "alt": 240,
+   "ust": 270,
+   "acik": [
+    [
+     104.4,
+     554.6
+    ]
+   ],
+   "not": "ön açıklığın kirişi (510,2): KLN01 ile KLN02'nin üstünde"
+  },
+  {
+   "ad": "KRS02",
+   "kutu": [
+    645,
+    565.2,
+    995,
+    579.2
+   ],
+   "alt": 240,
+   "ust": 270,
+   "acik": [
+    [
+     659,
+     979
+    ]
+   ],
+   "bolge": "veranda",
+   "not": "verandanın ön kirişi (350): W04'ün ucundan KLN03'e"
+  },
+  {
+   "ad": "KRS03",
+   "kutu": [
+    995,
+    415.2,
+    1009,
+    579.2
+   ],
+   "alt": 240,
+   "ust": 270,
+   "acik": [
+    [
+     429.2,
+     565.2
+    ]
+   ],
+   "bolge": "veranda",
+   "not": "verandanın yan kirişi (163,9): KLN03'ten W06'nın ucuna"
+  },
+  {
+   "ad": "KRS04",
+   "kutu": [
+    0,
+    415.2,
+    685,
+    429.2
+   ],
+   "alt": 240,
+   "ust": 270,
+   "acik": [
+    [
+     14,
+     645
+    ]
+   ],
+   "bolge": "Salon",
+   "not": "W05 hattında, sağ duvardan W05'in üstüne (684,9)"
+  },
+  {
+   "ad": "CRK1",
+   "kutu": [
+    14,
+    429.2,
+    645,
+    443.2
+   ],
+   "alt": 240,
+   "ust": 270,
+   "acik": [
+    [
+     44,
+     615
+    ]
+   ],
+   "bolge": "Salon",
+   "not": "iç çerçevenin kirişi (paftada CERCEVE-KRS 1): CRK2 ile CRK3'ün üstünde, KRS04'ün önünde"
+  }
+ ],
+ "lento": 70,
+ "cati": {
+  "tip": "kirma",
+  "tip_kaynak": "teknik özellikler: çatı şekli 'Dörtomuz Çatı'; makas paneli ve çatı paneli paftalarında her kenarda kırma",
+  "yontem": "panel",
+  "yontem_kaynak": "montaj paftasında makas, makas paneli, tavan paneli ve çatı paneli yerleşim planları var; tavan omegası ve aşık yok (yöntem A)",
+  "kaplama_kaynak": "teknik özellikler: çatı kaplaması alıcıya ait; motorda 'kaplama yok' seçeneği yok, kitabın baz kaplaması yazılır (bilinen_sinirlar)",
+  "sacak": 30,
+  "topuk": 10,
+  "duvar_ustu": 270,
+  "egim_kaynak": "Paftada kesit yok: kitabın varsayımı 0,33 (KT-03'ün kırma çatısı da 0,33); bitmiş proje görünüşlerinden kaba tahmin 0,37–0,42 (perspektif). Saçak kotu her kenarda 280 (saçaklı kenarda saçak ucunda, saçaksızda duvar yüzünde).",
+  "duzlemler": [
+   {
+    "ad": "ön",
+    "plan": [
+     [
+      0.0,
+      749.2
+     ],
+     [
+      689.0,
+      749.2
+     ],
+     [
+      344.5,
+      404.7
+     ]
+    ],
+    "yukari": [
+     0,
+     -1
+    ],
+    "egim": 0.33,
+    "sacak_kotu": 280.0,
+    "sacak": {
+     "y": 749.2
+    },
+    "not": "ana kısmın ön yüzü (kırma ucu; mahya önden arkaya)"
+   },
+   {
+    "ad": "ön sol",
+    "plan": [
+     [
+      689.0,
+      749.2
+     ],
+     [
+      689.0,
+      609.2
+     ],
+     [
+      384.4,
+      304.6
+     ],
+     [
+      344.5,
+      344.5
+     ],
+     [
+      344.5,
+      404.7
+     ]
+    ],
+    "yukari": [
+     -1,
+     0
+    ],
+    "egim": 0.33,
+    "sacak_kotu": 280.0,
+    "sacak": {
+     "x": 689.0
+    },
+    "not": "ana kısmın sola bakan yüzü: önde ön çıkıntının saçağı (W04'ün önü), arkada verandalı kanatla vadi"
+   },
+   {
+    "ad": "veranda önü",
+    "plan": [
+     [
+      689.0,
+      609.2
+     ],
+     [
+      1009.0,
+      609.2
+     ],
+     [
+      704.4,
+      304.6
+     ],
+     [
+      384.4,
+      304.6
+     ]
+    ],
+    "yukari": [
+     0,
+     -1
+    ],
+    "egim": 0.33,
+    "sacak_kotu": 280.0,
+    "sacak": {
+     "y": 609.2
+    },
+    "not": "verandalı kanadın ön yüzü (saçak KRS02'nin 30 cm önünde)"
+   },
+   {
+    "ad": "sol",
+    "plan": [
+     [
+      1009.0,
+      609.2
+     ],
+     [
+      1009.0,
+      0.0
+     ],
+     [
+      704.4,
+      304.6
+     ]
+    ],
+    "yukari": [
+     -1,
+     0
+    ],
+    "egim": 0.33,
+    "sacak_kotu": 280.0,
+    "sacak": {
+     "x": 1009.0
+    },
+    "not": "verandalı kanadın kırma ucu (sol cephe, saçaksız)"
+   },
+   {
+    "ad": "arka",
+    "plan": [
+     [
+      1009.0,
+      0.0
+     ],
+     [
+      0.0,
+      0.0
+     ],
+     [
+      344.5,
+      344.5
+     ],
+     [
+      384.4,
+      304.6
+     ],
+     [
+      704.4,
+      304.6
+     ]
+    ],
+    "yukari": [
+     0,
+     1
+    ],
+    "egim": 0.33,
+    "sacak_kotu": 280.0,
+    "sacak": {
+     "y": 0.0
+    },
+    "not": "arka yüz (saçaksız; pah köşesi dik)"
+   },
+   {
+    "ad": "sağ",
+    "plan": [
+     [
+      0.0,
+      0.0
+     ],
+     [
+      0.0,
+      749.2
+     ],
+     [
+      344.5,
+      404.7
+     ],
+     [
+      344.5,
+      344.5
+     ]
+    ],
+    "yukari": [
+     1,
+     0
+    ],
+    "egim": 0.33,
+    "sacak_kotu": 280.0,
+    "sacak": {
+     "x": 0.0
+    },
+    "not": "ana kısmın kırma ucu (sağ cephe, saçaksız)"
+   }
+  ],
+  "makaslar": {
+   "ana": {
+    "eksen": "y",
+    "y": [
+     0.0,
+     749.2
+    ],
+    "x": [
+     113.5,
+     226.9,
+     340.5,
+     376.4,
+     480.6,
+     584.9
+    ],
+    "kalinlik": 8,
+    "adet": 6,
+    "not": "MKS01–MKS06: ana kısmın önden arkaya makasları (ön saçaktan arka duvara)"
+   },
+   "kanat": {
+    "eksen": "y",
+    "y": [
+     0.0,
+     609.2
+    ],
+    "x": [
+     696.5,
+     771.2,
+     845.6,
+     927.3
+    ],
+    "kalinlik": 8,
+    "adet": 4,
+    "not": "MKS07–MKS10: verandalı kanadın makasları (veranda saçağından arka duvara)"
+   },
+   "on_cikinti": {
+    "eksen": "x",
+    "x": [
+     592.7,
+     689.0
+    ],
+    "y": [
+     645.0,
+     611.9
+    ],
+    "kalinlik": 8,
+    "adet": 2,
+    "not": "MKS12, MKS13: ön çıkıntının (W04'ün önü) sağdan sola makasları"
+   },
+   "kosegen": {
+    "adet": 2,
+    "not": "MKS11, MKS14: ön çıkıntının köşegen makasları (planda 45°); motor eksene paralel olmayan makası çizmez, yalnız adet"
+   }
+  }
+ },
+ "bilinen_sinirlar": [
+  "Pah (paftada D06, 121,9; arka–sol köşe) motorda çizilemiyor (duvar eksene paralel kutu): köşe dik yazıldı. W06 ve W07 köşeye uzar; alan karkas dış ölçüsüyle ≈ +0,34 m², dış duvar boyu ≈ +44 cm; çatıda pahın üçgen yüzü yok (sol ve arka yüzler köşede kırma yapar). Kıyasta D sayısı ve duvar kg'ı bu sapmayı taşır.",
+  "Ön açıklık (450/220) KLN01 ile KLN02 arasında, üstünde KRS01: altındaki panel (paftada D11, 'pencere alt paneli şeklindedir') 20 cm yüksekliğinde alçak duvar (W02) yazıldı: kirişin alt kotu 240 − açıklığın yüksekliği 220. Görünüşte panel ~30 cm görünüyor (perspektif, kaba). Açıklık ayrı pencere olarak yazılmadı (alçak duvarın üstü açık); paftada D11'in boyu kolonlar dahil 510,2, tanımda kolonların arası 450,2.",
+  "Kirişlerin ve kolonların kotları paftada yok: kirişler 240–270 (KT-01'deki gibi 30 cm), kolonlar 240. KRS04 (W05 hattında) ile CRK1 (önünde) yan yana çizili; ikisi de kiriş sayıldı.",
+  "Çatı saçak çizgisinin düz iskeleti (her kenar aynı eğim ve saçak kotu): paftadaki kırma çizgileri bununla tutuyor (ön çıkıntının köşesinden ana mahyaya x + y doğrusu, sağ uçta 45° kırmalar, verandalı kanadın mahyası, pah köşesinden kırma). Eğim varsayım (`cati.egim_kaynak`).",
+  "MKS11 ve MKS14 köşegen (planda 45°): motor eksene paralel olmayan makası çizmez; yalnız adetleri yazıldı.",
+  "Sadece çelik (açıklama): kapı, pencere, boya, vitrifiye, tesisat ve elektrik kapsam dışı yazıldı; kaplama, yalıtım ve çatı kaplaması için motorda 'alıcıya ait' anahtarı yok, çelik dışı satırlar PR-3c'de (kitap–liste farkları).",
+  "D08'deki 220/220 açıklığın ve D09'daki PVC kapının yeri zemin kat planından (± 2 cm); açıklığın alt kotu 20 varsayım."
+ ],
+ "karkas": "kural"
+}

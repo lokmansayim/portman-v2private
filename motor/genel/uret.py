@@ -84,6 +84,22 @@ def kural_seti(set_yolu: Path | None):
     return kural.secili(set_yolu)
 
 
+@contextlib.contextmanager
+def karkas_kurali(karkas_yolu: Path | None):
+    """Blok boyunca karkas kuralının dosyasını seçer (`PORTMAN_KARKAS`; İE-16 PR-3a); çıkışta eski değeri geri koyar. `None` ise dokunmaz."""
+    eski = os.environ.get("PORTMAN_KARKAS")
+    if karkas_yolu is not None:
+        os.environ["PORTMAN_KARKAS"] = str(Path(karkas_yolu).expanduser().resolve())
+    try:
+        yield
+    finally:
+        if karkas_yolu is not None:
+            if eski is None:
+                os.environ.pop("PORTMAN_KARKAS", None)
+            else:
+                os.environ["PORTMAN_KARKAS"] = eski
+
+
 def perspektif_kos(ifc: Path, hedef: Path, kod: str, zaman_asimi: int = PERSPEKTIF_ZAMAN_ASIMI_S) -> dict:
     """VTK çizimini ayrı süreçte koşar: çökme (sinyal), zaman aşımı ya da içe aktarma hatası işi düşürmez."""
     try:
@@ -119,13 +135,14 @@ def matplotlib_sabitle() -> None:
 
 def uret(tanim_yolu: Path, hedef: Path, is_emri_no: str | None = None, revizyon: int | None = 1, set_yolu: Path | None = None,
          yontem: str | None = None, perspektif: bool = True, bayi: bool = True, kaynak: str | None = None,
-         elektrik_sayimi: Path | None = None, yalniz_liste: bool = False, bilgi: dict | None = None) -> dict:
+         elektrik_sayimi: Path | None = None, yalniz_liste: bool = False, bilgi: dict | None = None, karkas_yolu: Path | None = None) -> dict:
     """Bir Yapı Tanımı'ndan çizim setini, IFC'yi, yükleme listesini ve bayi çıktılarını üretir; manifest döner.
     `elektrik_sayimi`: elektrik paftasından sayım (JSON); verilirse listede priz/anahtar/duy satırları oda kuralı yerine sayımdan gelir
     (kör testlerin listeleri böyle üretildi: `sonuc/KT0x_pafta_sayimi.json`). Katalog modellerinde yok.
     `yalniz_liste`: yalnız girdi ve yükleme listesi (çizim, IFC, perspektif ve bayi çıktıları yok; eski kural setleriyle altın liste matrisi).
     `bilgi`: bayi paftasının antet, özellik ve özel istek alanları (İş Emri zarfından: `bayi_adi`, `bayi_telefonu` (D-09), `sevk_adresi`,
-    `ozellikler`, `ozel_istekler`); verilmezse "..." (katalog ve altın üretim). Değerleri manifest'e ve günlüğe yazılmaz (yalnız `bilgi_var`)."""
+    `ozellikler`, `ozel_istekler`); verilmezse "..." (katalog ve altın üretim). Değerleri manifest'e ve günlüğe yazılmaz (yalnız `bilgi_var`).
+    `karkas_yolu`: karkas kuralının dosyası (İE-16 PR-3a; yalnız tanım `karkas: kural` isterse okunur; verilmezse kurallar/karkas/celik_karkas.json)."""
     matplotlib_sabitle()
     from . import ciz_genel, girdi_genel, ifc_genel, yukleme
     t0 = time.time()
@@ -135,7 +152,7 @@ def uret(tanim_yolu: Path, hedef: Path, is_emri_no: str | None = None, revizyon:
     kod = kod_govde(t)
     gunluk = io.StringIO(); hatalar: list[str] = []; uyarilar: list[str] = []
     ek = ["--yontem", yontem] if yontem else []
-    with kural_seti(set_yolu):
+    with kural_seti(set_yolu), karkas_kurali(karkas_yolu):
         from . import kural
         set_kullanilan = str(kural.yol())
         ifc = hedef / f"{kod}.ifc"; ozet: dict = {}
@@ -244,9 +261,10 @@ def main() -> int:
     ap.add_argument("--perspektifsiz", action="store_true"); ap.add_argument("--bayisiz", action="store_true", help="bayi görseli ve şablon paftası üretme")
     ap.add_argument("--is-emri-no", default=None); ap.add_argument("--revizyon", type=int, default=1)
     ap.add_argument("--elektrik-sayimi", type=Path, default=None, help="elektrik paftasından sayım (JSON; kör testlerin listeleri için)")
+    ap.add_argument("--karkas", type=Path, default=None, help="karkas kuralı (yalnız tanım `karkas: kural` isterse; varsayılan: kurallar/karkas/celik_karkas.json)")
     a = ap.parse_args()
     m = uret(a.tanim, a.cikti, is_emri_no=a.is_emri_no, revizyon=a.revizyon, set_yolu=a.set, yontem=a.yontem, perspektif=not a.perspektifsiz, bayi=not a.bayisiz,
-             elektrik_sayimi=a.elektrik_sayimi)
+             elektrik_sayimi=a.elektrik_sayimi, karkas_yolu=a.karkas)
     v = json.loads((a.cikti / "validation.json").read_text(encoding="utf-8"))
     print(f"{m['kod']}: {'geçti' if m['passed'] else 'GEÇMEDİ'} · çıktılar {v['ciktilar']['var']}/{v['ciktilar']['beklenen']} · IFC şema hatası {v['ifc'].get('sema_hatasi', '?')} · "
           f"liste {v['liste_satir']} satır · perspektif {v['perspektif']['durum']} · {v['sure_s']} s" + (f" · HATA: {'; '.join(m and v['errors'])}" if v["errors"] else "")

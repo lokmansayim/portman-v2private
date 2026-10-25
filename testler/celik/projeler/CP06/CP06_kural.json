@@ -1,0 +1,857 @@
+{
+ "sema": "portman.yapi_tanimi/0.5-taslak",
+ "kod": "ÇP-06",
+ "ad": "Tek kat çelik, 2+1, verandalı, beşik + cumba, 90 m² (çelik hattının hedef örneği)",
+ "aile": "tek_kat_celik",
+ "paket": "proje",
+ "birim": "cm",
+ "kat": "zemin",
+ "kaynak": {
+  "okunmayanlar": "Paftalardaki adetler (tavan omegası, aşık, çatı kaplaması, dere inişi) girdi değil; dizilimler koddan çıkar. Elektrik paftası sayılmadı (motorun kuralı geçer). SketchUp modeli ve DWG okunmadı; çelik ağırlığı motorun ortalamasından (karkas modeli yok). Gerçek yükleme listesi hedef örnek olarak açıktır (hakem cevabı, İE-16 PR-1); tanıma girdi değildir.",
+  "koordinat": "Köken planın sol-alt dış köşesi (verandanın güneybatı köşesi); +x doğu, +y kuzey (paftada kuzey işareti yok; çizimin üstü kuzey alındı). Ön cephe güney (veranda ve cumba); giriş batıda, hole.",
+  "cizim": "Projenin montaj paftası (PDF, yedi sayfa; mühürde ÇP-06'nın montaj paftası, SHA-256 3bc46b62…); 25 Ekim 2026'da okundu. Duvarlar, açıklıklar, kolon ve kirişler duvar paneli paftasının çizgilerinden (karkas; dış ölçü 894 × 994, kaplamayla 900 × 1000); mahaller ve kapı açılışları müşteri onay paftasından; makaslar ve çatının biçimi makas, aşık ve çatı kaplaması paftalarından.",
+  "bolmesiz": "testler/celik/projeler/CP06/CP06.json tanımının bölmesiz yazımı (testler/celik/projeler/bolmesiz.py): aynı hattaki uç uca paneller tek duvar (W01…); panel bölmesi tanımda yok, karkas kuralından (`karkas: kural`). Karkas modeli (`celik_modeli`) çıkarıldı."
+ },
+ "kat_yuksekligi": 270,
+ "teknik_ozellikler": {
+  "Bina yüksekliği": "2700 mm",
+  "Dış duvarlar": "80 mm",
+  "İç duvarlar": "80 mm",
+  "Panel türü": "galvanizli yapısal çelik",
+  "Çatı şekli": "beşik + cumba",
+  "Çatı kaplaması": "4 cm poliüretan sandviç panel",
+  "Çatı kaplama rengi": "antrasit gri",
+  "Dış kapı": "çelik standart",
+  "İç kapılar": "melamin panel kapı",
+  "Dış cephe boya": "(boş)",
+  "İç cephe boya": "(boş)",
+  "Pencere rengi": "alıcıya ait",
+  "Tavan": "ters tavan",
+  "Saçak ve alın rengi": "antrasit gri",
+  "Pencere detay": "alıcıya ait",
+  "Saçak çıkması": "30 cm / sac (duvar paneli paftası)",
+  "Dere inişi": "metal, antrasit gri (duvar paneli paftası)"
+ },
+ "aciklama_notlari": [
+  "1- Dış cephe panelleri: dıştan içe: Boardex + çelik karkas + OSB + alçıpan",
+  "2- İç cephe panelleri: alçıpan + OSB + çelik karkas + OSB + alçıpan",
+  "3- Ön cumba tarafı yüksek tavan olacak. Ana çatı alnına kadar yüksek tavan olması yeterlidir.",
+  "4- Yüksek tavan cumbanın üstünde üçgen pencere var.",
+  "5- Pencere alıcıya ait (duvar paneli paftası).",
+  "Duvar paneli paftası: 1- Duvar birleşimleri köşebent ile birleştirilecektir. 2- Duvar karkası içerisinde, projede belirtilen kalınlık ve yoğunlukta ısı ve/veya ses yalıtım malzemesi kullanılmalıdır. 3- Her duvarın betonla birleşimi için dübelleme yapılacaktır.",
+  "Tavan omegası paftası: 1- Ters tavan yapılacaktır. Çatı paneli (cumba) altında omega yok.",
+  "Aşık paftası: 1- Aşıklar 60 cm aralıklarla atılacaktır."
+ ],
+ "kapsam": {
+  "dis_kapi": true,
+  "pencere": false,
+  "elektrik": true,
+  "kaynak": "teknik özellikler (dış kapı çelik standart; pencere rengi ve pencere detayı: alıcıya ait) ve duvar paneli paftasının 5. notu (pencere alıcıya ait). Boya, vitrifiye ve tesisat için not yok: varsayılan (listede)"
+ },
+ "renk": {
+  "cati": "antrasit gri",
+  "sacak_alin": "antrasit gri",
+  "kaynak": "teknik özellikler"
+ },
+ "yuz_kaplamalari": {
+  "dis": {
+   "kalinlik": 3.0,
+   "malzeme": [
+    "boardex"
+   ],
+   "not": "Duvar paneli paftasında karkas 894 × 994, müşteri onay paftasında dış ölçü 900 × 1000: 3 cm. Açıklama 1: Boardex + çelik karkas + OSB + alçıpan; nem bariyeri yazmıyor"
+  },
+  "ic": {
+   "kalinlik": 2.35,
+   "malzeme": [
+    "osb",
+    "alcipan"
+   ],
+   "not": "OSB 11 mm + alçıpan 12,5 mm (açıklama 1 ve 2)"
+  }
+ },
+ "duvar_siniflari": {
+  "dis": {
+   "ad": "bina dış duvarı",
+   "profil": "80x45x1,2",
+   "yalitim": true,
+   "yuz": {
+    "ic": "ic",
+    "dis": "dis",
+    "veranda": "dis"
+   }
+  },
+  "ic": {
+   "ad": "iç duvar",
+   "profil": "80x45x1,2",
+   "yalitim": true,
+   "yuz": {
+    "ic": "ic"
+   }
+  },
+  "kolon": {
+   "ad": "veranda dikmesi",
+   "profil": "80x45x1,2",
+   "yalitim": false,
+   "yuz": {
+    "veranda": "dis",
+    "dis": "dis"
+   }
+  }
+ },
+ "duvarlar": [
+  {
+   "ad": "W01",
+   "sinif": "dis",
+   "kutu": [
+    401.0,
+    3.0,
+    897.0,
+    11.0
+   ],
+   "yukseklik": 270
+  },
+  {
+   "ad": "W02",
+   "sinif": "dis",
+   "kutu": [
+    11.0,
+    235.0,
+    401.0,
+    243.0
+   ],
+   "yukseklik": 270
+  },
+  {
+   "ad": "W03",
+   "sinif": "dis",
+   "kutu": [
+    11.0,
+    989.0,
+    889.0,
+    997.0
+   ],
+   "yukseklik": 270
+  },
+  {
+   "ad": "W04",
+   "sinif": "dis",
+   "kutu": [
+    3.0,
+    235.0,
+    11.0,
+    997.0
+   ],
+   "yukseklik": 270
+  },
+  {
+   "ad": "W05",
+   "sinif": "dis",
+   "kutu": [
+    401.0,
+    11.0,
+    409.0,
+    243.0
+   ],
+   "yukseklik": 270
+  },
+  {
+   "ad": "W06",
+   "sinif": "dis",
+   "kutu": [
+    889.0,
+    11.0,
+    897.0,
+    997.0
+   ],
+   "yukseklik": 270
+  },
+  {
+   "ad": "W07",
+   "sinif": "ic",
+   "kutu": [
+    551.0,
+    433.0,
+    889.0,
+    441.0
+   ],
+   "yukseklik": 270
+  },
+  {
+   "ad": "W08",
+   "sinif": "ic",
+   "kutu": [
+    11.0,
+    523.0,
+    551.0,
+    531.0
+   ],
+   "yukseklik": 270
+  },
+  {
+   "ad": "W09",
+   "sinif": "ic",
+   "kutu": [
+    11.0,
+    651.0,
+    889.0,
+    659.0
+   ],
+   "yukseklik": 270
+  },
+  {
+   "ad": "W10",
+   "sinif": "ic",
+   "kutu": [
+    421.0,
+    659.0,
+    429.0,
+    989.0
+   ],
+   "yukseklik": 270
+  },
+  {
+   "ad": "W11",
+   "sinif": "ic",
+   "kutu": [
+    551.0,
+    441.0,
+    559.0,
+    651.0
+   ],
+   "yukseklik": 270
+  },
+  {
+   "ad": "K03",
+   "sinif": "kolon",
+   "kutu": [
+    3.0,
+    3.0,
+    33.0,
+    11.0
+   ],
+   "yukseklik": 240,
+   "kaplama_yuksekligi": 240,
+   "not": "veranda dikmesi, güneybatı köşesi (sırt 8, genişlik 30)"
+  }
+ ],
+ "mahaller": [
+  {
+   "ad": "Yatak Odası 1",
+   "nokta": [
+    216,
+    824
+   ],
+   "sinif": "ic",
+   "islev": [
+    "yatak_odasi"
+   ],
+   "etiket_m2": 13.53
+  },
+  {
+   "ad": "Yatak Odası 2",
+   "nokta": [
+    659,
+    824
+   ],
+   "sinif": "ic",
+   "islev": [
+    "yatak_odasi"
+   ],
+   "etiket_m2": 15.18
+  },
+  {
+   "ad": "Hol",
+   "nokta": [
+    281,
+    591
+   ],
+   "sinif": "ic",
+   "islev": [
+    "hol"
+   ],
+   "etiket_m2": 6.47
+  },
+  {
+   "ad": "Banyo",
+   "nokta": [
+    724,
+    546
+   ],
+   "sinif": "ic",
+   "islev": [
+    "banyo"
+   ],
+   "islak": true,
+   "etiket_m2": 6.93
+  },
+  {
+   "ad": "Salon - Mutfak",
+   "nokta": [
+    649,
+    222
+   ],
+   "sinif": "ic",
+   "islev": [
+    "salon",
+    "mutfak"
+   ],
+   "etiket_m2": 32.67,
+   "not": "salon ve mutfak aynı mahalde; K04 kirişinin iki yanı açık; cumbanın altı yüksek tavan (açıklama 3)"
+  },
+  {
+   "ad": "Veranda",
+   "poligon": [
+    [
+     3.0,
+     3.0
+    ],
+    [
+     401.0,
+     3.0
+    ],
+    [
+     401.0,
+     235.0
+    ],
+    [
+     3.0,
+     235.0
+    ]
+   ],
+   "sinif": "veranda",
+   "islev": [
+    "veranda"
+   ],
+   "etiket_m2": 9.42,
+   "not": "batısı ve güneyi açık veranda (K01, K02 kirişleri, K03 dikmesi); korkuluk yok"
+  }
+ ],
+ "acikliklar": [
+  {
+   "ad": "P1",
+   "tur": "pencere",
+   "duvar": "W04",
+   "bas": 323.15,
+   "en": 120,
+   "yuk": 120,
+   "alt": 80,
+   "mahal": "Salon - Mutfak",
+   "etiket": "120/120"
+  },
+  {
+   "ad": "P2",
+   "tur": "pencere",
+   "duvar": "W04",
+   "bas": 764.25,
+   "en": 120,
+   "yuk": 120,
+   "alt": 80,
+   "mahal": "Yatak Odası 1",
+   "etiket": "120/120"
+  },
+  {
+   "ad": "P3",
+   "tur": "pencere",
+   "duvar": "W03",
+   "bas": 599.15,
+   "en": 120,
+   "yuk": 120,
+   "alt": 80,
+   "mahal": "Yatak Odası 2",
+   "etiket": "120/120"
+  },
+  {
+   "ad": "P4",
+   "tur": "pencere",
+   "duvar": "W06",
+   "bas": 451.35,
+   "en": 60,
+   "yuk": 40,
+   "alt": 160,
+   "mahal": "Banyo",
+   "etiket": "60/40"
+  },
+  {
+   "ad": "P5",
+   "tur": "pencere",
+   "duvar": "W01",
+   "bas": 559.15,
+   "en": 180,
+   "yuk": 180,
+   "alt": 20,
+   "mahal": "Salon - Mutfak",
+   "etiket": "180/180"
+  },
+  {
+   "ad": "P6",
+   "tur": "pencere",
+   "duvar": "W02",
+   "bas": 102.25,
+   "en": 200,
+   "yuk": 200,
+   "alt": 0,
+   "mahal": "Salon - Mutfak",
+   "etiket": "200/200"
+  },
+  {
+   "ad": "P7",
+   "tur": "pencere",
+   "duvar": "W05",
+   "bas": 74.4,
+   "en": 90,
+   "yuk": 200,
+   "alt": 0,
+   "mahal": "Salon - Mutfak",
+   "etiket": "90/200"
+  },
+  {
+   "ad": "K1",
+   "tur": "dis_kapi",
+   "duvar": "W04",
+   "bas": 546.15,
+   "en": 95,
+   "yuk": 210,
+   "mentese": "bas",
+   "acilim": "sag",
+   "mahal": "Hol",
+   "not": "giriş kapısı (batı duvarından hole); duvar paneli paftasında boşluk 94,8; teknik özellikler: dış kapı çelik standart"
+  },
+  {
+   "ad": "K2",
+   "tur": "ic_kapi",
+   "duvar": "W09",
+   "bas": 321.25,
+   "en": 90,
+   "yuk": 214,
+   "mentese": "son",
+   "acilim": "ust",
+   "kanat": [
+    80,
+    200
+   ],
+   "mahal": "Yatak Odası 1"
+  },
+  {
+   "ad": "K3",
+   "tur": "ic_kapi",
+   "duvar": "W09",
+   "bas": 439.2,
+   "en": 90,
+   "yuk": 214,
+   "mentese": "bas",
+   "acilim": "ust",
+   "kanat": [
+    80,
+    200
+   ],
+   "mahal": "Yatak Odası 2"
+  },
+  {
+   "ad": "K4",
+   "tur": "ic_kapi",
+   "duvar": "W08",
+   "bas": 451.05,
+   "en": 90,
+   "yuk": 214,
+   "mentese": "son",
+   "acilim": "alt",
+   "kanat": [
+    80,
+    200
+   ],
+   "mahal": "Salon - Mutfak"
+  },
+  {
+   "ad": "K5",
+   "tur": "ic_kapi",
+   "duvar": "W11",
+   "bas": 551.15,
+   "en": 90,
+   "yuk": 214,
+   "mentese": "son",
+   "acilim": "sag",
+   "kanat": [
+    80,
+    200
+   ],
+   "mahal": "Banyo",
+   "not": "banyo kapısı; duvar paneli paftasında boşluk 90 (müşteri onay paftasında kanat 80 çizilmiş)"
+  }
+ ],
+ "kirisler": [
+  {
+   "ad": "K01",
+   "kutu": [
+    3.0,
+    3.0,
+    11.0,
+    265.0
+   ],
+   "alt": 240,
+   "ust": 270,
+   "acik": [
+    [
+     11.0,
+     235.0
+    ]
+   ],
+   "bolge": "veranda",
+   "not": "veranda kirişi, batı; 235–265 arası W04'in içinde"
+  },
+  {
+   "ad": "K02",
+   "kutu": [
+    3.0,
+    3.0,
+    423.0,
+    11.0
+   ],
+   "alt": 240,
+   "ust": 270,
+   "acik": [
+    [
+     33.0,
+     401.0
+    ]
+   ],
+   "bolge": "veranda",
+   "not": "veranda kirişi, güney; 401–423 arası W01'ün içinde"
+  },
+  {
+   "ad": "K04",
+   "kutu": [
+    401.0,
+    213.0,
+    409.0,
+    531.0
+   ],
+   "alt": 240,
+   "ust": 270,
+   "acik": [
+    [
+     243.0,
+     523.0
+    ]
+   ],
+   "bolge": "Salon - Mutfak",
+   "not": "salonun batı kısmı ile cumbanın altı arasındaki açıklığın kirişi; 213–243 arası W05'in, 523–531 arası W08'un içinde"
+  }
+ ],
+ "lento": 70,
+ "cati": {
+  "tip": "besik_cumba",
+  "tip_kaynak": "teknik özellikler: çatı şekli 'Beşik + Cumba'",
+  "yontem": "omega_asik",
+  "yontem_kaynak": "montaj paftasında tavan omegası ve aşık yerleşim planları var (yöntem B, yapıldığı gibi); bayiye giden liste kitabın çelik kuralıyla yöntem A (`--yontem panel`; Lokman, 7 Ekim 2026)",
+  "kaplama": "sandvic_panel",
+  "kaplama_kaynak": "teknik özellikler: 4 cm poliüretan sandviç panel",
+  "sacak": 30,
+  "topuk": 10,
+  "duvar_ustu": 270,
+  "egim_kaynak": "müşteri onay paftasındaki kesitler: 18°, mahya yüksekliği 167 (topuk 10 dahil) ÷ yarım açıklık 477 = 0,329; cumba 101 ÷ 278 = 0,327. Değer KT-01'deki gibi 0,32872; verandanın eğimi makas paftasındaki kırmadan (M12: 146 ÷ 270) 0,178, KT-01'de 0,17806",
+  "duzlemler": [
+   {
+    "ad": "batı",
+    "plan": [
+     [
+      -27.0,
+      -27.0
+     ],
+     [
+      103.0,
+      213.0
+     ],
+     [
+      450.0,
+      213.0
+     ],
+     [
+      450.0,
+      1027.0
+     ],
+     [
+      -27.0,
+      1027.0
+     ]
+    ],
+    "yukari": [
+     1,
+     0
+    ],
+    "egim": 0.32872,
+    "sacak_kotu": 280.0,
+    "sacak": {
+     "x": -27.0
+    },
+    "not": "ana çatının batı yüzü; güneybatıda veranda sundurmasıyla kırma yapar (M12)"
+   },
+   {
+    "ad": "doğu",
+    "plan": [
+     [
+      450.0,
+      213.0
+     ],
+     [
+      649.0,
+      213.0
+     ],
+     [
+      649.0,
+      -27.0
+     ],
+     [
+      927.0,
+      -27.0
+     ],
+     [
+      927.0,
+      1027.0
+     ],
+     [
+      450.0,
+      1027.0
+     ]
+    ],
+    "yukari": [
+     -1,
+     0
+    ],
+    "egim": 0.32872,
+    "sacak_kotu": 280.0,
+    "sacak": {
+     "x": 927.0
+    },
+    "not": "ana çatının doğu yüzü; güneyde cumbanın doğu yüzüyle aynı düzlem (cumbanın saçağı ve eğimi ana çatınınkiyle aynı)"
+   },
+   {
+    "ad": "cumba batı",
+    "plan": [
+     [
+      371.0,
+      -27.0
+     ],
+     [
+      649.0,
+      -27.0
+     ],
+     [
+      649.0,
+      243.0
+     ],
+     [
+      517.25,
+      243.0
+     ]
+    ],
+    "yukari": [
+     1,
+     0
+    ],
+    "egim": 0.32872,
+    "sacak_kotu": 280.0,
+    "sacak": {
+     "x": 371.0
+    },
+    "not": "cumbanın batı yüzü; veranda sundurmasıyla vadi yapar; 213–243 arası ana çatının saçağının altında"
+   },
+   {
+    "ad": "veranda",
+    "plan": [
+     [
+      -27.0,
+      -27.0
+     ],
+     [
+      371.0,
+      -27.0
+     ],
+     [
+      517.25,
+      243.0
+     ],
+     [
+      119.25,
+      243.0
+     ]
+    ],
+    "yukari": [
+     0,
+     1
+    ],
+    "egim": 0.17806,
+    "sacak_kotu": 280.0,
+    "sacak": {
+     "y": -27.0
+    },
+    "not": "veranda sundurması; ana çatının güney kalkan duvarına (W02'nın üstü) dayanır"
+   }
+  ],
+  "kenar_ozel": [
+   {
+    "duzlem": "veranda",
+    "p": [
+     517.25,
+     243.0
+    ],
+    "q": [
+     119.25,
+     243.0
+    ],
+    "tur": "duvar_dibi",
+    "not": "ana çatının güney kalkan duvarı"
+   },
+   {
+    "duzlem": "cumba batı",
+    "p": [
+     649.0,
+     243.0
+    ],
+    "q": [
+     517.25,
+     243.0
+    ],
+    "tur": "duvar_dibi",
+    "not": "ana çatının güney kalkan duvarı"
+   },
+   {
+    "duzlem": "veranda",
+    "p": [
+     119.25,
+     243.0
+    ],
+    "q": [
+     103.0,
+     213.0
+    ],
+    "tur": "gizli",
+    "not": "kırmanın, ana çatının güney saçağının altında kalan 30 cm'lik kısmı"
+   },
+   {
+    "duzlem": "cumba batı",
+    "p": [
+     649.0,
+     213.0
+    ],
+    "q": [
+     649.0,
+     243.0
+    ],
+    "tur": "gizli",
+    "not": "cumba mahyasının, ana çatının güney saçağının altında kalan 30 cm'lik kısmı"
+   }
+  ],
+  "kalkanlar": [
+   {
+    "ad": "kuzey kalkanı",
+    "eksen": "y",
+    "konum": 1000.0,
+    "aralik": [
+     -27.0,
+     927.0
+    ],
+    "ic": "guney",
+    "ust": [
+     "batı",
+     "doğu"
+    ],
+    "not": "ana çatı; kuzey duvarının üstü"
+   },
+   {
+    "ad": "cumba kalkanı",
+    "eksen": "y",
+    "konum": 0.0,
+    "aralik": [
+     371.0,
+     927.0
+    ],
+    "ic": "kuzey",
+    "ust": [
+     "veranda",
+     "cumba batı",
+     "doğu"
+    ],
+    "not": "cumbanın güney alnı (W01–W01'ün üstü); 371–398 arası verandanın üstünde. Paftada bu alında üçgen pencere var (açıklama 4; alıcıya ait), tanımda yok"
+   },
+   {
+    "ad": "güney kalkanı (alçak çatıların üstü)",
+    "eksen": "y",
+    "konum": 243.0,
+    "aralik": [
+     -27.0,
+     927.0
+    ],
+    "ic": "kuzey",
+    "ust": [
+     "batı",
+     "doğu"
+    ],
+    "alt": [
+     "veranda",
+     "cumba batı"
+    ],
+    "not": "ana çatının güney kalkanı; verandanın ve cumbanın batı yüzünün üstünde kalan kısmı"
+   }
+  ],
+  "makaslar": {
+   "tam": {
+    "x": [
+     -27.0,
+     927.0
+    ],
+    "y": [
+     989.0,
+     868.0,
+     743.0,
+     618.0,
+     493.0,
+     368.0,
+     243.0
+    ],
+    "kalinlik": 8,
+    "adet": 7,
+    "not": "M01–M07 (makas paftası: 121 + 5 × 125)"
+   },
+   "cumba_kuzey": {
+    "eksen": "x",
+    "x": [
+     401.0,
+     897.0
+    ],
+    "y": [
+     235.0
+    ],
+    "kalinlik": 8,
+    "adet": 1,
+    "not": "M08: cumbanın kuzey ucu (C01–C02 çatı panelleri buna ve güney duvarına oturur)"
+   },
+   "veranda_makaslari": {
+    "eksen": "y",
+    "y": [
+     -27.0,
+     243.0
+    ],
+    "x": [
+     123.0,
+     248.0,
+     363.0
+    ],
+    "kalinlik": 8,
+    "adet": 3,
+    "not": "M11, M10, M09 (makas paftası: 154 + 125 + 115)"
+   },
+   "diger": {
+    "adet": 2,
+    "not": "M12 (kırma boyunca çapraz), M13 (kırma ucunda kısa makas)"
+   }
+  }
+ },
+ "bilinen_sinirlar": [
+  "Cumbanın C01–C02 çatı panelleri (çelik) tanımda yok: motorda çatı paneli olan düzlemde aşık hesaplanmıyor; bu projede cumba yüzlerinde çatı panelinin üstüne aşık geliyor (aşık paftası). Cumba düzlemleri makaslı yazıldı (aşık doğru, çatı paneli satırı eksik). Panel dizilimi İE-16 PR-3'ün işi.",
+  "Cumbanın altında tavan omegası yok (tavan omegası paftası: 'çatı paneli omega yok'); motor salonun bütün tavanına omega yazar.",
+  "Pencerelerin alt kotu paftada yok: üst kotları 200 alındı (lento 70; KT-01 ile aynı).",
+  "Cumbanın güney kalkanındaki üçgen pencere (açıklama notu 4) çizilmedi; pencereler alıcıya ait, listede pencere satırı yok (kapsam)."
+ ],
+ "karkas": "kural"
+}
