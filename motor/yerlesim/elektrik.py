@@ -268,7 +268,7 @@ def katman(ie: dict, plan: dict, D: dict, K: dict) -> dict:
 
     kapilar = [_kapi_bilgisi(d, p) for d in P.duvarlar for p in d.panolar if p.acilim and p.acilim.tur in KAPILAR and p.acilim.arasi]
     kapi_sayisi = Counter(a for k in kapilar for a in k["p"].acilim.arasi)
-    giris = next((k for k in kapilar if k["p"].acilim.tur == "dis_kapi"), None)
+    giris = next((k for k in kapilar if k["p"].acilim.tur == "dis_kapi" and k["d"].tur == "dis"), None)   # liste üreteci gibi: dış duvardaki
 
     def oda_kapilari(o) -> list[dict]:
         """Odanın kapıları, anahtarın aranacağı sırayla: giriş kapısı, sonra komşusunun en çok kapısı olan (sirkülasyon), sonra planın sırası."""
@@ -311,7 +311,10 @@ def katman(ie: dict, plan: dict, D: dict, K: dict) -> dict:
             if len(yerler) < len(anahtar):
                 eksik = len(anahtar) - len(yerler)
                 uyarilar.append({"katman": KATMAN, "metin": f"{ad}: {neden}; {eksik} anahtar uzun duvara konuldu"})
-                yerler += _duvar_yerleri(duvarlar[:1], eksik, P, O, S["anahtar"][0] / 2, "uzun duvar (yedek)")[0]
+                y, bos = _duvar_yerleri(duvarlar[:1], eksik, P, O, S["anahtar"][0] / 2, "uzun duvar (yedek)")
+                yerler += y
+                if bos:
+                    uyarilar.append({"katman": KATMAN, "metin": f"{ad}: {bos} (yedek anahtar)"})
             for tur, (yon, yuz, ic, s, yer) in zip(anahtar, yerler):
                 parca(tur, ad, yer, _kutu_duvar(yon, yuz, ic, s, S["anahtar"], Z["anahtar"]), f"{ad}, {yer}, {yon} boyunca {s:g}")
 

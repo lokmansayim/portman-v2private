@@ -316,7 +316,8 @@ def _elektrik(ax, m: dict, say: dict, plt) -> None:
 
 def _elektrik_lejanti(say: dict) -> list[str]:
     E = say["elektrik"]
-    satir = ["Sayılar kuraldan (Lokman, 18 Ekim;", "oda ve veranda takımı, her 15 m²'ye", "bir takım; banyo, mutfak, hol kitaptan).",
+    satir = ["Sayılar kuraldan (Lokman, 18 Ekim;", f"oda ve veranda takımı, her {_sayi(E['degerler']['oda_kurali']['takim_m2'], 0)} m²'ye",
+             "bir takım; banyo, mutfak, hol kitaptan).",
              "Yerler varsayım (plan §6).", ""]
     isaret = {"EL-01": "■", "EL-02": "⊗", "EL-03": "●╱", "EL-04": "●╱╱", "EL-05": "U", "EL-06": "UU", "EL-07": "TV", "EL-08": "Z", "EL-09": "▬"}
     for k in say["kartlar"]:

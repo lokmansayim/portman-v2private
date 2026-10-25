@@ -7,9 +7,10 @@
 - Oda oda: PK-01'in odaları; birden çok takım (salon 2, yaşam alanı 3, veranda 2: glop 4, çiftli anahtar 2); açık mutfakta tezgahın 4 prizi.
 - Yer (varsayım): duy ve glop odasının içinde, anahtar kapının kol tarafında, sigorta kutusu giriş kapısının üstünde iç yüzde, zil dışarıda,
   veranda globu evin duvarında kapının iki yanında; duvardaki nokta açıklığın önünde değil; takımlı odada tavan noktaları eşit şeritlerde;
-  zil önce kol tarafında; anahtar sirkülasyon kapısında. Gösterim, ölçü ve kot sayıyı değiştirmez.
+  zilin sırası (kol, menteşe, anahtarın hizası); anahtar sirkülasyon kapısında. Gösterim, ölçü ve kot sayıyı değiştirmez.
 - Kural yok ve uyarılar: en uzak mesafe "sigortadan" değilse kablo kurulmaz; kapısız oda, salonsuz ev (uydu), mutfaksız ve salonsuz ev
-  (tezgah), giriş kapısız ev, sigorta kutusu tavanda, zile dışarıda yer yok, uzun duvarlarda yer yok (sayı yine liste üretecininki).
+  (tezgah), giriş kapısız ev, iç duvarda dış kapı, sigorta kutusu tavanda, zile dışarıda yer yok, uzun duvarlarda ve yedek anahtarın
+  duvarında yer yok (sayı yine liste üretecininki).
   Elektrik İş Emri'siz kurulmaz.
 - Komut: yerleşim planlarının altıncı sayfası elektrik planı; oda tablosunun (`k3_oda_tablosu.py`) toplamı paftanın ve modelin sayımı;
   EL kodlarının kilidi, GlobalId ev kimliğinden.
@@ -42,6 +43,7 @@ from motor import ifc_uret  # noqa: E402
 from motor import kart_model as KM  # noqa: E402
 from motor import prefabrik_liste as PL  # noqa: E402
 from motor import yerlesim as Y  # noqa: E402
+from motor.yerlesim import cizim  # noqa: E402
 from motor.yerlesim import elektrik as EL  # noqa: E402
 from motor.yerlesim import yaz  # noqa: E402
 
@@ -385,19 +387,26 @@ def test_takimli_odada_tavan_noktalari_seritlerinde(DK):
                      ("YAN_VERANDALI", "SALON"): 2, ("TEST01", "YASAM ALANI"): 3, ("TEST02", "SALON"): 2, ("TEST03", "YASAM ALANI"): 3}
 
 
-def test_zil_once_kol_tarafinda(DK):
-    """Giriş kapısının iki yanı da dışarıdaysa zil kol tarafında. Dokuz evin hiçbirinde iki yan birden boş değil; PK-01'de veranda ön cephe
-    boyunca uzatılınca (mutfak verandanın arkasında kalır) menteşe tarafı da verandanın içine düşer."""
+def test_zil_sirasi(DK, monkeypatch):
+    """Zilin sırası: kol tarafında 30 cm, menteşe tarafında 30 cm, sonra anahtarın hizası (10 cm). Dokuz evin hiçbirinde kol ve menteşe
+    tarafı birden boş değil; PK-01'de veranda ön cephe boyunca uzatılınca (mutfak verandanın arkasında kalır) menteşe tarafı da verandanın
+    içine düşer. İki yan boşken zil kol tarafında; kol tarafında 30 cm'ye bir açıklık konunca menteşe tarafında 30 cm'de (kol tarafının
+    10 cm'si boş olduğu hâlde)."""
     ie = _oku(MOTOR_VERI / "PK01.json")
     for m in ie["mahaller"]:
         if m["ad"] == "MUTFAK":
             m["konum_cm"] = [[10, 381.5, 261, 795]]
         if m["ad"] == "VERANDA":
             m["konum_cm"] = [[10, 795, 590, 995]]
+
+    def zil(E):
+        return [(p["bilgi"]["Yer"], (p["geo"]["kutu"][0] + p["geo"]["kutu"][3]) / 2) for p in E["parcalar"] if p["parca"] == "zil"]
     E = _katman(ie, DK)
-    z = [p for p in E["parcalar"] if p["parca"] == "zil"]
-    assert [(p["bilgi"]["Yer"], (p["geo"]["kutu"][0] + p["geo"]["kutu"][3]) / 2) for p in z] == [("giriş kapısının dışı, kol tarafı", 398.75)]
-    assert E["uyarilar"] == []
+    assert zil(E) == [("giriş kapısının dışı, kol tarafı", 398.75)] and E["uyarilar"] == []
+    asil = EL._bosluklar
+    monkeypatch.setattr(EL, "_bosluklar", lambda P, yon, yuz: asil(P, yon, yuz) + ([(390.0, 405.0)] if (yon, round(yuz, 2)) == ("x", 200.0) else []))
+    E = _katman(ie, DK)
+    assert zil(E) == [("giriş kapısının dışı, menteşe tarafı", 248.75)] and E["uyarilar"] == []
 
 
 def test_anahtar_sirkulasyon_kapisinda(DK):
@@ -473,6 +482,32 @@ def test_giris_kapisiz_ev(DK):
     assert _kuraldan(E) == _liste(ie)
 
 
+def test_ic_duvardaki_dis_kapi_giris_sayilmaz(DK):
+    """Giriş kapısı liste üretecindeki gibi dış duvardaki dış kapıdır: iç duvarda `dis_kapi` yazan kapı giriş sayılmaz (sigorta kutusu ve zil
+    yedek yerde), kablonun metresi liste üretecininkiyle aynı (PK-01'in giriş kapısı çıkarılıp hol–salon kapısı `dis_kapi` yazılınca 126 / 110)."""
+    ie = _oku(MOTOR_VERI / "PK01.json")
+    ie["acikliklar"] = [a for a in ie["acikliklar"] if a["tur"] != "dis_kapi"]
+    for a in ie["acikliklar"]:
+        if a.get("arasi") == ["HOL", "SALON"]:
+            a["tur"] = "dis_kapi"
+    E = _katman(ie, DK)
+    assert "giriş kapısı yok; sigorta kutusu ve zil YATAK ODASI 1 odasının uzun duvarına konuldu" in [u["metin"] for u in E["uyarilar"]]
+    assert [k["metre"] for k in E["kablo"]] == [126, 110] and _kuraldan(E) == _liste(ie)
+
+
+def test_yedek_anahtarin_notu(DK, monkeypatch):
+    """Yedek yerdeki anahtarın duvarında da açıklık dışında yer yoksa bunu söyleyen uyarı yazılır (ALTIN'in kapısız mutfağı; bütün duvarlar
+    açıklık sayılarak). Sayı yine kural."""
+    al = _oku(IS_EMIRLERI["ALTIN"])
+    toplam = _katman(al, DK)["toplam"]
+    monkeypatch.setattr(EL, "_bosluklar", lambda P, yon, yuz: [(-1e6, 1e6)])
+    E = _katman(al, DK)
+    metin = [u["metin"] for u in E["uyarilar"]]
+    assert "MUTFAK: kapısı yok; 1 anahtar uzun duvara konuldu" in metin
+    assert "MUTFAK: uzun duvarlarda açıklık dışında yer yok; noktalar açıklık gözetilmeden konuldu (yedek anahtar)" in metin
+    assert E["toplam"] == toplam
+
+
 def test_sigorta_kutusu_tavana_dayanir(DK):
     ie = _oku(MOTOR_VERI / "PK01.json")
     plan = ifc_uret.hazirla(ie)
@@ -525,9 +560,12 @@ def test_komut_elektrik_plani(komut):
     for s in ("Tijli duy: 5", "Yuvarlak glop: 3", "Tekli anahtar: 6", "Çiftli anahtar: 1", "Tekli priz: 13", "Çiftli priz: 1", "Uydu prizi: 1",
               "Zil: 1", "Sigorta kutusu (12'li): 1", "NYM kablo 3 × 2,5: 101 m", "NYM kablo 2 × 1,5: 85 m",
               "priz hattı: 8 W otomat × 8,58 m + 16 nokta × 2 m, yukarı", "aydınlatma hattı: 8 W otomat × 8,58 m + 8 nokta × 2 m, yukarı",
-              "MUTFAK 14,98 m² · kitap (mutfak)", "VERANDA 6,68 m² · 1 takım"):
+              "MUTFAK 14,98 m² · kitap (mutfak)", "VERANDA 6,68 m² · 1 takım", "oda ve veranda takımı, her 15 m²'ye"):
         assert s in metin, s
     assert not any(x in metin for x in ("EKSİK", "Kurulmadı", "Uyarı"))
+    say = copy.deepcopy(komut["say"])                                      # lejantın takım alanı kuraldan okunur
+    say["elektrik"]["degerler"]["oda_kurali"]["takim_m2"] = 20
+    assert "oda ve veranda takımı, her 20 m²'ye" in cizim._elektrik_lejanti(say)
     from openpyxl import load_workbook
     ws = load_workbook(komut["klasor"] / "PK01_kart_katalogu.xlsx")["Sayım"]
     satir = {r[0]: r for r in ws.iter_rows(min_row=2, values_only=True)}
