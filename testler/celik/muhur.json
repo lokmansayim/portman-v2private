@@ -182,7 +182,38 @@
    "dayanak": "hedef örnek önerisi için plan aşamasında, Lokman'ın 25 Ekim 09:10 kartından ve bu mühürden önce açıldı (yalnız yükleme listesi Excel'i); kör sayılmaz. Hedef örnek ve açık dört proje kartla onaylandı (\"Evet, 4 açık + kalanı kör\")"
   }
  },
- "ilk_indirmeler": {},
+ "ilk_indirmeler": {
+  "17qvD40WCNSHabqbHCNas-WrM5nDnb7aK": {
+   "sha256": "7f343b5e4ae429626889ddcb14da93d747cf0992864dd7e3bd4bdf3c58634d4d",
+   "bayt": 180390,
+   "drive_degisme": "2026-09-18T08:39:53.801Z",
+   "tarih": "2026-10-25"
+  },
+  "1hJ3M-Q3jBx9KybZQmVErnS8rpUW0w43M": {
+   "sha256": "6974f6a6cc6bfc3ffd0f6ac98284f5b42429d9f2af64bb69032e2ca3fe5c30f3",
+   "bayt": 28331,
+   "drive_degisme": "2026-09-23T11:53:01.968Z",
+   "tarih": "2026-10-25"
+  },
+  "1Ke9lTQBm1npBncK-AvYHLpIcvNkVvIa4": {
+   "sha256": "0c10f64958bd12d3fd01282cdf47692e314f31f7c0186fae44dd9245559ee02c",
+   "bayt": 188790,
+   "drive_degisme": "2026-09-28T14:20:58.226Z",
+   "tarih": "2026-10-25"
+  },
+  "1MTfVqY_e111E6-NEa6YHrZ4aO3acRvAw": {
+   "sha256": "b53ffa93730529ca92c0e14e7939606a20e0d5846d3be8134a753723b2cbcc4c",
+   "bayt": 229309,
+   "drive_degisme": "2026-09-07T06:31:19.994Z",
+   "tarih": "2026-10-25"
+  },
+  "1aEw_NPj-rIpIl_v6f0ing0qJUKHn4y3e": {
+   "sha256": "4b884c7c27bf3bd509f618c504ededb3611346fa15b5d4ee763742160c8bc406",
+   "bayt": 182026,
+   "drive_degisme": "2026-04-03T15:31:38Z",
+   "tarih": "2026-10-25"
+  }
+ },
  "kat_kayitlari": {},
  "dosyalar": [
   {
