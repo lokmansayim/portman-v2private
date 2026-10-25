@@ -1,5 +1,7 @@
-"""K2'nin beş yerleşim planı ve K3'ün elektrik planı, kart modelinin IFC'sinden çizilir: tavan omega, makas ve dere, baş makas betopanı,
-aşık, çatı kaplaması; sayımda elektrik varsa (komut her zaman kurar) altıncı sayfa elektrik yerleşim planıdır.
+"""K2'nin beş yerleşim planı, K3'ün elektrik planı ve K3b'nin alt çerçeve ve çatı kenarları planı, kart modelinin IFC'sinden çizilir: tavan
+omega, makas ve dere, baş makas betopanı, aşık, çatı kaplaması; sayımda elektrik varsa (komut her zaman kurar) altıncı sayfa elektrik
+yerleşim planı, kenar varsa (komut her zaman kurar) yedinci sayfa alt çerçeve (zemin) ve çatı kenarlarıdır (çatı planı); yedinci sayfanın
+lejantında her kartın sayısı liste üretecinin aynı satırıyla yan yanadır.
 
 Her şekil modeldeki parçanın kendi geometrisinden (dünya koordinatı) ve özellik setinden okunur; planlar yerleşim kurallarının çıktısından
 değil modelden gelir. Sayılar (adet, metre, kesim) sayımdandır (`<kod>_kart_sayim.json`). Antet bizimdir; paftanın anteti ve adları
@@ -26,9 +28,13 @@ YUZ = {"sol": "sol", "sag": "sağ"}
 SAYFA = {1: (("tavan omegası",), ("OMEGA_",)), 2: (("dere ve iniş", "iniş"), ("DERE_", "INIS_")), 3: (("baş makas betopanı",), ("BETOPAN_",)),
          4: (("aşık",), ("ASIK_",)), 5: (("çatı kaplaması",), ("KAPLAMA_",)),
          6: (("elektrik", "elektrik noktaları", "kablo_priz", "kablo_aydinlatma"),
-             ("DUY_", "GLOP_", "ANAHTAR_", "PRIZ_", "UYDU_", "ZIL_", "SIGORTA_", "KABLO_"))}
+             ("DUY_", "GLOP_", "ANAHTAR_", "PRIZ_", "UYDU_", "ZIL_", "SIGORTA_", "KABLO_")),
+         7: (("alt çerçeve", "saçak omegası", "saçak sacı", "alın sacı", "baş makas Z'si", "C kapama", "mahya", "alt çerçeve ve çatı kenarları"),
+             ("ALT_CERCEVE_", "SACAK_OMEGASI_", "SACAK_SACI_", "ALIN_SACI_", "BAS_MAKAS_Z_", "C_KAPAMA_", "MAHYA_"))}
 ELEKTRIK_RENK = {"EL-01": "#c0392b", "EL-02": "#c0392b", "EL-03": "#1e8449", "EL-04": "#1e8449", "EL-05": "#1f4e9c", "EL-06": "#1f4e9c",
                  "EL-07": "#7d3c98", "EL-08": "#ca6f1e", "EL-09": "#111111", "EL-10": "#1f4e9c", "EL-11": "#e67e22"}
+KENAR_RENK = {"AC-01": "#1f4e9c", "AC-02": "#e67e22", "CK-01": "#c0392b", "CK-02": "#85c1e9", "CK-03": "#ca6f1e", "CK-04": "#7d3c98",
+              "CK-05": "#111111", "CK-06": "#1e8449"}
 
 
 def _sayi(x: float, n: int = 2) -> str:
@@ -106,7 +112,7 @@ def _notlar(fig, say: dict, sayfa: int):
     satir = [f"Kurulmadı: {x['parca']}: {x['neden']}" for x in say["kural_yok"]
              if x["parca"] in adlar or str(x["parca"]).startswith(onekler)]
     satir += [f"Uyarı: {u['metin']}" for u in say.get("yerlesim", {}).get("uyarilar", []) + say.get("elektrik", {}).get("uyarilar", [])
-              if u["katman"] in adlar]
+              + say.get("kenar", {}).get("uyarilar", []) if u["katman"] in adlar]
     if satir:
         fig.text(0.76, 0.30, "\n".join(textwrap.fill(s, 46) for s in satir[:8]) + ("\n…" if len(satir) > 8 else ""), fontsize=8.5,
                  va="top", ha="left", color="#b03a2e")
@@ -261,7 +267,94 @@ def ciz(model_yolu: Path, say: dict, yol: Path, kod: str) -> Path:
             _lejant(fig, _elektrik_lejanti(say))
             _notlar(fig, say, 6)
             pdf.savefig(fig); plt.close(fig)
+
+        # 7 · alt çerçeve ve çatı kenarları (K3b)
+        if "kenar" in say:
+            fig = plt.figure(figsize=(16.54, 11.69))
+            zemin, cati_ = fig.add_axes([0.02, 0.08, 0.35, 0.80]), fig.add_axes([0.39, 0.08, 0.35, 0.80])
+            _kenar(zemin, cati_, m, plt)
+            fig.suptitle(f"{kod} · ALT ÇERÇEVE VE ÇATI KENARLARI YERLEŞİM PLANI", fontsize=15, fontweight="bold", x=0.02, ha="left")
+            fig.text(0.02, 0.03, alt.replace("(İE-15 K2)", "(İE-15 K3b)"), fontsize=9, color="#444")
+            _kenar_lejanti(fig, say, plt)
+            _notlar(fig, say, 7)
+            pdf.savefig(fig); plt.close(fig)
     return yol
+
+
+def _kenar(zemin, cati_, m: dict, plt) -> None:
+    """Solda zemin: alt çerçeve parçaları (100'lük ve 60'lık ayrı renk; kesilen kapı boşlukları açık), her hattın numarası ve boyu.
+    Sağda çatı planı: saçak omegası duvarın üstünde, saçak sacı saçakta, mahya mahyada, her baş makasın iki eğik kenarında Z (duvarın
+    dış yüzünde), C kapama (aşık uçlarında) ve alın sacı (C'nin önünde). Şekiller modeldeki parçaların plan izidir."""
+    _duvarlar(zemin, m, dolgu=True)
+    hatlar = {}
+    for kod in ("AC-01", "AC-02"):
+        for p in m["k2"].get(kod, []):
+            x0, y0 = p["v"][:, :2].min(0); x1, y1 = p["v"][:, :2].max(0)
+            zemin.add_patch(plt.Rectangle((x0, y0), x1 - x0, y1 - y0, color=KENAR_RENK[kod], lw=0))
+            h = hatlar.setdefault(p["p"]["Hat"], {"kod": kod, "boy": p["p"]["HatBoyu_cm"], "k": []})
+            h["k"].append((x0, y0, x1, y1))
+    for no, h in sorted(hatlar.items()):                    # hattın yazısı en uzun parçasının ortasında (kapı ve T'den uzak)
+        x0, y0, x1, y1 = max(h["k"], key=lambda k: max(k[2] - k[0], k[3] - k[1]))
+        dik = (y1 - y0) > (x1 - x0)
+        zemin.text((x0 + x1) / 2 + (9 if dik else 0), (y0 + y1) / 2 + (0 if dik else 9),
+                   f"{no} · {h['boy']:g}".replace(".", ","), rotation=90 if dik else 0,
+                   fontsize=7, ha="left" if dik else "center", va="center" if dik else "bottom", color=KENAR_RENK[h["kod"]])
+    zemin.set_aspect("equal"); zemin.axis("off"); zemin.set_anchor("N")
+    zemin.set_title("Zemin · alt çerçeve (hat no · hat boyu cm; kapı boşlukları açık)", fontsize=11, loc="left")
+
+    _duvarlar(cati_, m, dolgu=False)
+    for ad, mk in sorted(m["makas"].items()):
+        x, yy = _iz(np.vstack(mk["uyeler"])).exterior.xy
+        cati_.fill(x, yy, color=RENK["makas"], alpha=0.12, lw=0)
+    for kod, alfa in (("CK-02", 0.55), ("CK-06", 0.75), ("CK-01", 0.9)):
+        for p in m["k2"].get(kod, []):
+            iz = _iz(p["v"]); x, yy = iz.exterior.xy
+            cati_.fill(x, yy, color=KENAR_RENK[kod], alpha=alfa, lw=0)
+    for kod in ("CK-03", "CK-05", "CK-04"):
+        for p in m["k2"].get(kod, []):
+            iz = _iz(p["v"]); x, yy = iz.exterior.xy
+            cati_.fill(x, yy, color=KENAR_RENK[kod], lw=0)
+    from shapely.ops import unary_union
+    orta = unary_union(m["duvar"]).centroid if m["duvar"] else None
+    for p in m["k2"].get("CK-04", []):                      # her kalkan kenarının eğik boyu, Z'nin iç yanında
+        x0, y0, x1, y1 = _iz(p["v"]).bounds
+        dik = (y1 - y0) > (x1 - x0)
+        cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+        ic = 1 if orta is None or ((orta.x > cx) if dik else (orta.y > cy)) else -1
+        cati_.text(cx + (14 * ic if dik else 0), cy + (0 if dik else 14 * ic), f"{p['p']['Makas']} {YUZ[p['p']['Yuz']]}: {_sayi(p['p']['Boy_cm'], 1)}",
+                   rotation=90 if dik else 0, fontsize=6.5, ha=("left" if ic > 0 else "right") if dik else "center",
+                   va="center" if dik else ("bottom" if ic > 0 else "top"), color=KENAR_RENK["CK-04"])
+    for kod, ad in (("CK-02", "saçak sacı"), ("CK-01", "saçak omegası"), ("CK-06", "mahya")):
+        for p in m["k2"].get(kod, []):
+            x0, y0, x1, y1 = _iz(p["v"]).bounds
+            dik = (y1 - y0) > (x1 - x0)
+            cati_.text((x0 + x1) / 2 if dik else (3 * x0 + x1) / 4, (3 * y0 + y1) / 4 if dik else (y0 + y1) / 2,
+                       f"{ad} {p['p']['Boy_cm']:g}", rotation=90 if dik else 0, fontsize=6.5, ha="center", va="center", color="#1b2631",
+                       bbox={"boxstyle": "round,pad=0.1", "fc": "white", "ec": "none", "alpha": 0.8})
+    cati_.set_aspect("equal"); cati_.axis("off"); cati_.set_anchor("N")
+    cati_.set_title("Çatı · saçak, mahya ve kalkan kenarları (boylar cm)", fontsize=11, loc="left")
+
+
+def _kenar_lejanti(fig, say: dict, plt) -> None:
+    """Her kartın modeldeki sayısı (kesim planı: boy; C kapama metre) ve liste üretecinin aynı satırı yan yana."""
+    from matplotlib.patches import Patch
+    kesim, liste = say.get("kesim_plani", {}), say["kenar"]["liste"]
+    tutamak, yazi = [], []
+    for k in say["kartlar"]:
+        if k["kod"] not in KENAR_RENK:
+            continue
+        kp = kesim.get(k["kod"])
+        model = f"{kp['stok']} boy" if kp else f"{_sayi(k.get('metre', 0))} m"
+        lst = liste.get(k["kod"])
+        lst = "listede yok" if lst is None else f"liste {lst}" + ("" if kp and kp["stok"] == lst else "  ≠")
+        tutamak.append(Patch(color=KENAR_RENK[k["kod"]]))
+        yazi.append(f"{k['kod']} {k['ad']}\nmodel {model} · {lst}")
+    fig.legend(tutamak, yazi, loc="upper left", bbox_to_anchor=(0.76, 0.90), fontsize=9, frameon=True, edgecolor="#999",
+               title="model (kesim planı) · liste üreteci", title_fontsize=9, labelspacing=0.9)
+    fig.text(0.76, 0.56, "\n".join(textwrap.fill(s, 48) for s in (
+        "Sayı listenin yöntemiyle, boy modelden (kesim planı); C kapama metreyle sayılır.",
+        "Yer montaj rehberinden; teyit bekleyen maddeler varsayım (Lokman, 25 Ekim).",
+        "Saçak omegası rehberdeki gibi duvar boyunca; liste saçak boyunu sayar.")), fontsize=8.5, va="top", ha="left", color="#444")
 
 
 def _elektrik(ax, m: dict, say: dict, plt) -> None:

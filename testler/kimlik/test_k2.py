@@ -15,6 +15,8 @@
   EKSİK ve nedeni), GlobalId'nin evden eve ayrışması, K2 kodlarının kilidi.
 (Geometri hakeminin K2 ilk turundan sonra eklenenler: en kısa sınırlar, L biçimli oda, kaplama dizilimi ve taşma, betopan, uyarılar,
 EKSİK, ev kimliği, kod kilidi.)
+K3b'de (gerekçe `docs/is_emirleri/IE-15.md` › Değişiklik (K3b)): komutun planları yedi sayfa (yedincisi alt çerçeve ve çatı kenarları,
+`test_k3b.py`), Excel'in kesim planında K3b'nin yedi kartı da.
 """
 from __future__ import annotations
 
@@ -489,9 +491,10 @@ def test_komut_yerlesim_planlari(tmp_path):
     import pymupdf
     d = pymupdf.open(tmp_path / "PK01_yerlesim_planlari.pdf")
     metin = [p.get_text() for p in d]
-    assert len(d) == 6                                                    # K3: altıncı sayfa elektrik planı (test_k3.py)
+    assert len(d) == 7                                                    # K3: altıncı sayfa elektrik planı (test_k3.py); K3b: yedinci (test_k3b.py)
     for i, baslik in enumerate(("TAVAN OMEGA YERLEŞİM PLANI", "MAKAS VE DERE YERLEŞİM PLANI", "BAŞ MAKAS BETOPAN YERLEŞİMİ",
-                                "AŞIK YERLEŞİM PLANI", "ÇATI KAPLAMASI YERLEŞİM PLANI", "ELEKTRİK YERLEŞİM PLANI")):
+                                "AŞIK YERLEŞİM PLANI", "ÇATI KAPLAMASI YERLEŞİM PLANI", "ELEKTRİK YERLEŞİM PLANI",
+                                "ALT ÇERÇEVE VE ÇATI KENARLARI YERLEŞİM PLANI")):
         assert f"PK01 · {baslik}" in metin[i], baslik
     assert "24 parça, 58,46 m" in metin[0] and "42 parça, 148,40 m" in metin[3] and "22 panel" in metin[4] and "4 levha" in metin[2]
     assert d.metadata.get("creationDate", "") == ""
@@ -499,6 +502,6 @@ def test_komut_yerlesim_planlari(tmp_path):
     assert "son şerit yüzün ucundan taşar (40 cm)" in " ".join(metin[4].split())
     from openpyxl import load_workbook
     wb = load_workbook(tmp_path / "PK01_kart_katalogu.xlsx")
-    assert wb["Çatı ve tavan"].max_row == 100 + 1 and wb["Kesim planı"].max_row == 3 + 1 + 1
+    assert wb["Çatı ve tavan"].max_row == 100 + 1 and wb["Kesim planı"].max_row == 3 + 7 + 1 + 1      # K3b: alt çerçeve ve çatı kenarı 7 kart
     k = KY.kiyasla(tmp_path / "PK01_model.ifc", _oku(VERI / "PK01_pafta_katmani.json"), _oku(PROJE), adim="K2")
     assert k["kapi_1"] == "geçer"
