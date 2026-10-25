@@ -17,6 +17,10 @@ K2'de (gerekçeleri `docs/is_emirleri/IE-15.md` › Değişiklik (K2)): kartın 
 kart sayısı sözlüğüne K2 kartları 0 adetle girer (bu dosyadaki modeller K1'in yolundan, İş Emri'siz); komut K2 katmanlarını da kurar (beşinci
 dosya yerleşim planları, Excel'de iki sayfa daha; kırma çatıda dört çatı katmanı da "kural yok"); kod kilidinde K1'de çıkan 25 satır SHA ile
 donar (kilitten satır silinmez). K2'nin kendi testleri `test_k2.py`'de.
+
+K3b'de (gerekçe `docs/is_emirleri/IE-15.md` › Değişiklik (K3b)): listede satırı olmayan kart (C kapama) `liste.yok`'ta nedenini yazar, satırsız
+kart ancak öyle geçer; K3b kartları da sözlüğe 0 adetle girer (İş Emri ister); komut kırma çatıda altı çatı kenarını da "kural yok" yazar,
+Excel'e "Alt çerçeve ve çatı kenarı" sayfasını ekler. K3b'nin kendi testleri `test_k3b.py`'de.
 """
 from __future__ import annotations
 
@@ -51,6 +55,7 @@ H_KART = {"H-01": "dubelli_kulakli", "H-02": "dubelli", "H-03": "standart", "H-0
 ALICIYA_AIT = {"Prefabrik çelik kapı", "PVC pencere", "PVC vasistas"}
 K2_KARTLARI = {"OM-01": 0, "AS-01": 0, "KP-01": 0, "BT-01": 0, "DR-01": 0, "DR-02": 0, "SR-01": 0}    # bu dosyanın modelleri İş Emri'siz (K1)
 K3_KARTLARI = {f"EL-{i:02d}": 0 for i in range(1, 12)}    # K3 (elektrik) de İş Emri ister
+K3B_KARTLARI = {k: 0 for k in ("AC-01", "AC-02", "CK-01", "CK-02", "CK-03", "CK-04", "CK-05", "CK-06")}    # K3b (alt çerçeve, çatı kenarı) de
 KILIT_K1 = "94c253954968d2dee4023c097e47326281fe57998c92e347e2b48d24762e4d23"   # K1'de çıkan 25 kodun adlarıyla SHA'sı (PR #31)
 
 
@@ -96,7 +101,8 @@ def test_kart_dosyasi(kartlar, cevap):
         assert aile and aile.group(1) in kartlar["aileler"], k["kod"]
         assert k["birim"] in kartlar["birimler"] and k["sayim"] in kartlar["sayim_yollari"], k["kod"]
         assert k["kaynak"]["durum"] in kartlar["durumlar"] and re.fullmatch(r"\d{4}-\d{2}-\d{2}", k["kaynak"]["tarih"]) and k["kaynak"]["dayanak"]
-        assert k["liste"]["grup"] in PL.GRUPLAR and k["liste"]["satirlar"], k["kod"]
+        assert k["liste"]["grup"] in PL.GRUPLAR, k["kod"]
+        assert k["liste"]["satirlar"] or (isinstance(k["liste"].get("yok"), str) and k["liste"]["yok"].strip()), k["kod"]   # K3b: C kapama
         tur = sema.declaration_by_name(k["ifc"]["sinif"])
         ust, d = set(), tur
         while d:
@@ -165,7 +171,7 @@ def test_her_parca_kartli(pk01, kartlar):
     adet = {k["kod"]: k["adet"] for k in s["kartlar"]}
     assert adet == {"D-01": 23, "D-02": 3, "D-03": 2, "D-04": 1, "D-05": 1, "I-01": 15, "I-02": 5, "I-03": 0,
                     "K-01": 5, "K-02": 1, "P-01": 3, "P-02": 2, "P-03": 1, "B-01": 6, "B-02": 1, "V-01": 1, "V-02": 2,
-                    "H-01": 12, "H-02": 7, "H-03": 10, "H-04": 2, "H-05": 3, "H-06": 4, "MA-01": 2, "MA-02": 7} | K2_KARTLARI | K3_KARTLARI
+                    "H-01": 12, "H-02": 7, "H-03": 10, "H-04": 2, "H-05": 3, "H-06": 4, "MA-01": 2, "MA-02": 7} | K2_KARTLARI | K3_KARTLARI | K3B_KARTLARI
     assert len(s["gorunum"]) == 9 and all(g["asil"].startswith("BAGLANTI_B0") for g in s["gorunum"])
     assert s["bilesen"] == {f"MAKAS_{i:02d}": 8 for i in range(1, 10)}
     assert Counter(k["sinif"] for k in s["kartsiz"]) == {"IfcOpeningElement": 12, "IfcSlab": 3, "IfcPlate": 2, "IfcRoof": 1}
@@ -273,7 +279,7 @@ def test_komut_kirma_catida_1_doner(tmp_path):
     (tmp_path / "PK01_kirma.json").write_text(json.dumps(ie, ensure_ascii=False), encoding="utf-8")
     assert KM.main([str(tmp_path / "PK01_kirma.json"), str(tmp_path / "cikti")]) == 1
     say = _oku(tmp_path / "cikti" / "PK01_kirma_kart_sayim.json")
-    assert say["cati_tipi"] == "kirma" and len(say["kural_yok"]) == 33 + 4       # K2: dört çatı katmanı (aşık, kaplama, betopan, dere ve iniş)
+    assert say["cati_tipi"] == "kirma" and len(say["kural_yok"]) == 33 + 4 + 6   # K2: dört çatı katmanı (aşık, kaplama, betopan, dere ve iniş); K3b: altı çatı kenarı
     from openpyxl import load_workbook
     bilesen = {r[0]: r[3] for r in load_workbook(tmp_path / "cikti" / "PK01_kirma_kart_katalogu.xlsx")["Kartsız"].iter_rows(values_only=True)
                if r[2] == "bileşen"}
@@ -369,5 +375,5 @@ def test_komut(tmp_path, kartlar):
     assert say["pafta_anahtarlari"]["ayrinti.montaj.kanat"] == 6 and say["pafta_anahtarlari"]["ayrinti.montaj.kose"] == 8
     from openpyxl import load_workbook
     wb = load_workbook(tmp_path / "PK01_kart_katalogu.xlsx")
-    assert wb.sheetnames == ["Kartlar", "Sayım", "H türü", "Kartsız", "Çatı ve tavan", "Kesim planı"]
+    assert wb.sheetnames == ["Kartlar", "Sayım", "H türü", "Kartsız", "Çatı ve tavan", "Kesim planı", "Alt çerçeve ve çatı kenarı"]     # K3b
     assert wb["Kartlar"].max_row == len(kartlar["kartlar"]) + 1 and wb["H türü"].max_row == 19 + 5 + 1

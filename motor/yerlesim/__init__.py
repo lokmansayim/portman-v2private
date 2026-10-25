@@ -3,7 +3,8 @@
 Kurallar `kurallar/yerlesim/prefabrik.json`'dadır; oradaki değerlerin çoğu başka dosyadan okunur (`okunan`): liste kuralları
 (`kurallar/liste/prefabrik.json`) ve onların sabitlediği kural kitabı seti (`kitap_seti`). Burada sayı yazılmaz.
 
-K3'ün elektrik katmanı `elektrik.py`'dedir (kural `elektrik_yerlesimi`; kart modeli yalnız istenince kurar).
+K3'ün elektrik katmanı `elektrik.py`'dedir (kural `elektrik_yerlesimi`; kart modeli yalnız istenince kurar). K3b'nin alt çerçeve ve çatı
+kenarları katmanı `kenar.py`'dedir (montaj rehberinin kartsız yedi parçası; kuralları `kenar.KENAR` ve `kenar_gosterim`; o da istenince).
 
 `katmanlar(ie, plan, makaslar, yerlesim, liste)` parçaları döner: {kural, parca, boy_cm?, geo, bilgi, aciklama}. Parçanın kartı kart
 modelinde bulunur (`motor/kart_model.py`; kartın `yerlesim` alanı). Kuralı uygulanamayan katman (çatı tipi, kaplama, iniş kuralı, tek sıra
@@ -22,7 +23,9 @@ KURALLAR = ("tavan_omegasi_yerlesimi", "asik_sirasi", "cati_kaplamasi", "bas_mak
 PARCA_ADI = {"omega": "OMEGA", "asik": "ASIK", "panel": "KAPLAMA", "levha": "BETOPAN", "dere": "DERE", "inis": "INIS",    # modelde parçanın adı
              "tavan_armaturu": "DUY", "glop": "GLOP", "anahtar_tekli": "ANAHTAR", "anahtar_cift": "ANAHTAR_CIFT", "priz_tekli": "PRIZ",
              "priz_cift": "PRIZ_CIFT", "uydu_prizi": "UYDU", "zil": "ZIL", "sigorta_kutusu": "SIGORTA", "kablo_priz": "KABLO_PRIZ",
-             "kablo_aydinlatma": "KABLO_AYDINLATMA"}
+             "kablo_aydinlatma": "KABLO_AYDINLATMA",
+             "alt_cerceve": "ALT_CERCEVE", "sacak_omegasi": "SACAK_OMEGASI", "sacak_saci": "SACAK_SACI", "alin_saci": "ALIN_SACI",
+             "bas_makas_z": "BAS_MAKAS_Z", "c_kapama": "C_KAPAMA", "mahya": "MAHYA"}
 ELEKTRIK = "elektrik_yerlesimi"                                     # K3 (`elektrik.py`); K2'nin katmanlarından ayrı, istenince kurulur
 CATI_KATMANLARI = (("asik_sirasi", "aşık", "IfcMember"), ("cati_kaplamasi", "çatı kaplaması", "IfcCovering"),
                    ("bas_makas_betopani_yerlesimi", "baş makas betopanı", "IfcPlate"), ("dere_hatti", "dere ve iniş", "IfcPipeSegment"))
