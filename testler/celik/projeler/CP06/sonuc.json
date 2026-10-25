@@ -1,0 +1,82 @@
+{
+ "aciklama": "Çelik hakeminin sonucu (İE-16). Yalnız tutanlar: çelik kg kapısının sonucu (farkı yalnız geçtiyse), adedi tutan çelik türleri ve adedi tutan öteki satırlar (anahtar ve bizim adedimiz). Tutmayan satırların gerçek değeri depoya girmez; sayilar kıyasın özetidir.",
+ "kod": "ÇP-06",
+ "tarih": "2026-10-25",
+ "kiyas_commit": "a0a230ff0d0fd616ae2aabc0b36cb8125454504b",
+ "bizim_liste": {
+  "yol": "testler/celik/projeler/CP06/bizim_liste.json",
+  "commit": "a0a230ff0d0fd616ae2aabc0b36cb8125454504b"
+ },
+ "muhur": {
+  "sha256": "51fd4518b79d3c971a0857a8a4b156f7e1a6a52890bff615e3e9653a7741da5e",
+  "bayt": 27948,
+  "durum": "acik",
+  "kayit_durumu": "acik",
+  "liste_sayfasi": 0,
+  "muhur_commit": "c96ec25f97cc3c2a2f308d91a2d5dccf13d13189"
+ },
+ "celik_kg_kapisi": {
+  "sonuc": "geçmedi",
+  "pay_yuzde": 3.0,
+  "kapi_disi": [],
+  "kapi_disi_bizim_kg": null,
+  "fark_yuzde": null
+ },
+ "celik_turleri_tutan": [
+  {
+   "tur": "duvar_paneli",
+   "adet": 26
+  },
+  {
+   "tur": "kolon_kiris",
+   "adet": 4
+  },
+  {
+   "tur": "makas",
+   "adet": 13
+  },
+  {
+   "tur": "c_profil",
+   "adet": 6
+  }
+ ],
+ "sayilar": {
+  "aynı": 30,
+  "farklı": 24,
+  "adet okunamadı": 0,
+  "bizde yok": 31,
+  "bizde fazla": 31
+ },
+ "tutanlar": [
+  {"grup": "METAL AKSAM", "ad": "SACAK SACI 30 LUK ANTRASIT", "olcu": [2500.0], "adet": 11},
+  {"grup": "CATI KAPLAMALARI", "ad": "MAHYA SAC ANTRASIT", "olcu": [2800.0], "adet": 6},
+  {"grup": "CATI KAPLAMALARI", "ad": "VADI SAC TERS MAHYA ANTRASIT", "olcu": [2800.0], "adet": 2},
+  {"grup": "DERE", "ad": "METAL DERE ANTRASIT", "olcu": [4000.0], "adet": 7},
+  {"grup": "DERE", "ad": "DERE KAPAGI ANTRASIT", "olcu": [], "adet": 4},
+  {"grup": "DERE", "ad": "DERE KELEPCESI", "olcu": [], "adet": 56},
+  {"grup": "KAPI VE PENCERE", "ad": "KOMPOZIT CELIK KAPI", "olcu": [90.0, 210.0], "adet": 1},
+  {"grup": "ELEKTRIK", "ad": "DUYLU ARMATUR", "olcu": [], "adet": 6},
+  {"grup": "ELEKTRIK", "ad": "YUVARLAK GLOP", "olcu": [], "adet": 3},
+  {"grup": "ELEKTRIK", "ad": "CIFTLI ANAHTAR", "olcu": [], "adet": 2},
+  {"grup": "ELEKTRIK", "ad": "SIGORTA KUTUSU", "olcu": [12.0], "adet": 1},
+  {"grup": "ELEKTRIK", "ad": "ZIL", "olcu": [], "adet": 1},
+  {"grup": "DEPO", "ad": "8 LIK TRAPEZ UC", "olcu": [], "adet": 6},
+  {"grup": "DEPO", "ad": "PH2 UC", "olcu": [], "adet": 6},
+  {"grup": "DEPO", "ad": "INOX TAS", "olcu": [], "adet": 9},
+  {"grup": "DEPO", "ad": "ACIL MUDAHELE KAPAGI", "olcu": [], "adet": 1},
+  {"grup": "DEPO", "ad": "POLURETAN KOPUK", "olcu": [], "adet": 2},
+  {"grup": "MEKANIK TESISAT", "ad": "TEMIZ SU BORUSU", "olcu": [4000.0], "adet": 6},
+  {"grup": "MEKANIK TESISAT", "ad": "NORMAL DIRSEK 20MM", "olcu": [], "adet": 15},
+  {"grup": "MEKANIK TESISAT", "ad": "KULAKLI DIRSEK 20MM", "olcu": [], "adet": 12},
+  {"grup": "MEKANIK TESISAT", "ad": "DUZ T 20MM", "olcu": [], "adet": 6},
+  {"grup": "MEKANIK TESISAT", "ad": "MASON 20MM", "olcu": [], "adet": 15},
+  {"grup": "MEKANIK TESISAT", "ad": "TAHARET MUSLUGU 20 MM", "olcu": [], "adet": 4},
+  {"grup": "MEKANIK TESISAT", "ad": "IC DISLI T 20MM", "olcu": [], "adet": 6},
+  {"grup": "MEKANIK TESISAT", "ad": "ATLAMA PARCASI YARIM PARMAK", "olcu": [], "adet": 3},
+  {"grup": "MEKANIK TESISAT", "ad": "BANYO BATARYA GRUBU LAVABO BATARYASI BANYO BATARYASI DUS BASLIGI TAHARET MUSLUGU", "olcu": [], "adet": 1},
+  {"grup": "BOYA", "ad": "DIS CEPHE BOYA RENK KODU", "olcu": [17.5], "adet": 2},
+  {"grup": "BOYA", "ad": "IC CEPHE BOYA RENK KODU", "olcu": [17.5], "adet": 2},
+  {"grup": "BOYA", "ad": "TAVAN BOYA", "olcu": [17.5], "adet": 1},
+  {"grup": "BOYA", "ad": "ASTAR", "olcu": [17.5], "adet": 1}
+ ]
+}
