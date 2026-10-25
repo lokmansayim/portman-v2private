@@ -126,10 +126,10 @@ def betopan(g: dict, K: dict) -> tuple[list[dict], str | None]:
 
 def dere(g: dict, K: dict) -> list[dict]:
     """Beşikte her saçak kenarı boyunca bir dere hattı, boyu mahya boyu. İniş her hattın iki ucunda (köşe başına `kose_basina`); eşiği
-    geçen hattın ortasında bir iniş daha."""
+    geçen hattın ortasında bir iniş daha. İnişin gösterim kesiti [dere boyunca, dereye dik] ya da tek sayı (kare)."""
     F = cerceve(g)
     dw, dh = K["kesit_dere"]
-    iw = K["kesit_inis"]
+    iw, iu = (K["kesit_inis"], K["kesit_inis"]) if isinstance(K["kesit_inis"], (int, float)) else K["kesit_inis"]
     ze = F["zs"] + 10
     out = []
     for yuz, ue in (("sol", -F["s"]), ("sag", F["aciklik"] + F["s"])):
@@ -145,6 +145,6 @@ def dere(g: dict, K: dict) -> list[dict]:
         uc = (u0 + u1) / 2
         for yer, v in konumlar:
             out.append({"kural": "dere_hatti", "parca": "inis",
-                        "geo": _kutu(F, uc - iw / 2, uc + iw / 2, v - iw / 2, v + iw / 2, ze - dh - 15, ze - dh),
+                        "geo": _kutu(F, uc - iu / 2, uc + iu / 2, v - iw / 2, v + iw / 2, ze - dh - 15, ze - dh),
                         "bilgi": {"Yuz": yuz, "Yer": yer}, "aciklama": f"{yuz} saçak, {yer}"})
     return out

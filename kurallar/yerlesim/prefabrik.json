@@ -1,7 +1,7 @@
 {
  "sema": "portman.prefabrik_yerlesim/1",
- "surum": "3",
- "aciklama": "Prefabrik pano evinde parçaların yerleşim kuralları (İE-15). Okuyan `motor/kart_model.py` (K1: H türü) ve `motor/yerlesim/` (K2: tavan omegası, aşık, çatı kaplaması, baş makas betopanı, dere ve iniş; K3: elektrik). Yalnız kural kitabında ve `kurallar/liste/prefabrik.json`'da olmayan konum kuralları buraya yazılır; aynı anahtar iki dosyada olmaz (test). Oradaki değerler (makas aralığı, omega aralığı, aşık aralığı, parça boyları, levha) `okunan` ile gösterilir, burada yeniden yazılmaz: `kurallar/liste/prefabrik.json › kurallar.<ad>[.<alt>]` liste kuralının değeri, `kitap › <ad>[.<alt>]` liste kurallarının sabitlediği kural kitabı setinin (`kitap_seti`) değeri.",
+ "surum": "4",
+ "aciklama": "Prefabrik pano evinde parçaların yerleşim kuralları (İE-15). Okuyan `motor/kart_model.py` (K1: H türü) ve `motor/yerlesim/` (K2: tavan omegası, aşık, çatı kaplaması, baş makas betopanı, dere ve iniş; K3: elektrik; K3b: alt çerçeve ve çatı kenarları, montaj rehberinden). Yalnız kural kitabında ve `kurallar/liste/prefabrik.json`'da olmayan konum kuralları buraya yazılır; aynı anahtar iki dosyada olmaz (test). Oradaki değerler (makas aralığı, omega aralığı, aşık aralığı, parça boyları, levha) `okunan` ile gösterilir, burada yeniden yazılmaz: `kurallar/liste/prefabrik.json › kurallar.<ad>[.<alt>]` liste kuralının değeri, `kitap › <ad>[.<alt>]` liste kurallarının sabitlediği kural kitabı setinin (`kitap_seti`) değeri.",
  "kurallar": {
   "h_turu": {
    "kural": "Dış duvarda, makasın oturduğu duvar çizgisinde makasa en yakın dış H (pano eki ya da 3'lü) dübelli & kulaklıdır; öteki dış H dübellidir. İç H standarttır (kartı ayrı).",
@@ -137,7 +137,7 @@
    "not": "Modelde dere hat başına bir parçadır (pafta da hatları sayar); stok boyları kesim planındadır: hat başına ⌈(hat − bindirme) ÷ (parça boyu − bindirme)⌉."
   },
   "kesim_plani": {
-   "kural": "Boyla alınan kartta (omega, aşık) modelin parçaları stok boylara en uzun önce, ilk sığan boya yerleşir; bir boyun kullanılır uzunluğu parça boyu − pay (yerleşim kuralındaki tam parça). Dere hat başına bindirmeyle bölünür. Yedek parça eklenmez (karar D açık).",
+   "kural": "Boyla alınan kartta (omega, aşık) modelin parçaları stok boylara en uzun önce, ilk sığan boya yerleşir; bir boyun kullanılır uzunluğu parça boyu − pay (yerleşim kuralındaki tam parça). Dere hat başına bindirmeyle bölünür. K3b'nin kartlarında sayı liste üretecinin yoludur, boy modelden: hatların toplamı ya da kenar başına (kuralın `yontem`'i); C kapama metreyle. Yedek parça eklenmez (karar D açık).",
    "durum": "varsayim",
    "tarih": "2026-10-24",
    "not": "Montaj paftası incelemesi (4 Ekim): tavan omegası en iyi yerleşim + 1, aşık en az boy + 0–2. Yedek (+1, 0–2) karar D'dir; cevaplanınca buraya yazılır."
@@ -145,16 +145,16 @@
   "gosterim": {
    "kesit_cm": {
     "deger": {
-     "omega": [6, 3],
-     "asik": [5, 5],
-     "dere": [15, 10],
-     "inis": 10,
+     "omega": [11, 3.5],
+     "asik": [3, 8.7],
+     "dere": [15, 11.4],
+     "inis": [8, 6],
      "kaplama": 6,
-     "betopan": 1.6
+     "betopan": 1.2
     },
     "durum": "varsayim",
-    "tarih": "2026-10-24",
-    "not": "Yalnız 3B gösterim: omega [genişlik, yükseklik], aşık [yükseklik, genişlik], dere [genişlik, yükseklik], iniş kutusu, kaplama ve betopan kalınlığı. Sayı, boy ve metre bunlardan çıkmaz."
+    "tarih": "2026-10-25",
+    "not": "Yalnız 3B gösterim: omega [genişlik, yükseklik], aşık [yükseklik, genişlik], dere [genişlik, yükseklik], iniş [dere boyunca, dereye dik] (tek sayıysa kare), kaplama ve betopan kalınlığı. Sayı, boy ve metre bunlardan çıkmaz. K3b (25 Ekim): montaj rehberinin kesitleri (Lokman'ın 24 Ekim çizimleri; tavan omegası 110 × 35 mm, aşık omega 87 × 30 mm, dere K kesit ~15 × 11,4 cm, iniş ~8 × 6 cm, betopan 12 mm); teyit bekleyen maddeler Lokman'ın 25 Ekim 09:10 kararıyla (\"Varsayım kalsın\") varsayım. Önceki değerler (K2): omega 6 × 3, aşık 5 × 5, dere 15 × 10, iniş 10, betopan 1,6."
    },
    "durum": "varsayim",
    "tarih": "2026-10-24",
@@ -217,6 +217,150 @@
    "tarih": "2026-10-18",
    "kaynak": "Lokman, 18 Ekim 19:52: \"15 m² ye kadar her bir odaya 2 piriz 1 tane anahtar, 1 tane duy ve lamba koyarsın, 15 m² ye kadar verandalara 2 glop 1 tane 2li anahtar koyarsın ve 3x2.5 kablo içinde aynı çelikte olduğu gibi en uzak noktaya her bir odadan hesap yaparsın\"; kartlar 19 Ekim 16:50 (her 15 m²'ye bir takım; banyo, WC, mutfak ve hol kitaptaki gibi), 22 Ekim 11:09 (uydu prizi her eve 1) ve 11:10 (takım sayısı yukarı); 23 Ekim 03:57 (açık mutfakta tezgahın 4 prizi). Değerler liste kurallarındadır (BK-12 PR-2f); burada yalnız okunur.",
    "not": "PK-01'de duy 5, glop 3, anahtar 6 tekli ve 1 çift, priz 13 tekli ve 1 çift, uydu 1, zil 1, sigorta kutusu 1; NYM 3 × 2,5 101 m, NYM 2 × 1,5 85 m (liste kilidiyle aynı). Paftanın elektrik planı (s. 10) başka sayılar verir (duy 6, glop 2, anahtar 4 + 2, priz 15 + 4, zil 0); K3'te kuralla yan yana bilgidir, kapıya girmez (plan §5). Buat kasa, ampul, uydu ve besleme kablosu liste üretecinde kalır."
+  },
+  "alt_cerceve_yerlesimi": {
+   "kural": "Alt çerçeve (U profil) duvarların altına, zemine serilir ve sabitlenir; kapı ve geçiş boşluklarında kesilir. Dış hat kapalı kısmın dış sınırının her düz kenarıdır (köşe dahil; veranda sayılmaz), iç hat bir iç duvarın panolarıdır (iç köşe bağlantısı sayılmaz). Dış hat ve 100'lük iç duvarın hattı 100'lük, öteki iç hat 60'lık çerçeve alır. Sayı kart başına ⌈hatların toplamı ÷ parça boyu⌉, bir kez yukarı; kesilen parça artıktır, sayı hattın tamamından çıkar (liste üretecinin şablon formülü H4 ve O8).",
+   "parca_boyu": {"okunan": "kurallar/liste/prefabrik.json › kurallar.alt_cerceve_bolen_m"},
+   "yontem": {
+    "deger": "toplam",
+    "durum": "lokman",
+    "tarih": "2026-10-25",
+    "not": "K3b planı §2 (Lokman, 25 Ekim 17:47 \"Uygula\"): sayı listenin sayma yoluyla, boy modelden. Liste üreteci dış duvar boyunu kapalı kısmın dış sınırından (`dis_cevre_m`), iç duvar boyunu iç panoların boyundan alır; model aynı boyları kendi hatlarından ölçer."
+   },
+   "ic_100_esigi_mm": {
+    "deger": 100,
+    "durum": "muhendis",
+    "tarih": "2026-10-20",
+    "not": "Liste üretecinin O8 okuması (`motor/prefabrik_liste.py`): iç duvar 100 mm ya da kalınsa çerçevesi 100'lük ve dış duvarlarınkiyle tek satırda sayılır (PK-07 16 tuttu); değilse 60'lık. Model duvar duvar bakar, liste evin en sık iç duvar kalınlığına; bugünkü evlerde iç duvarlar tek kalınlıkta."
+   },
+   "kesilen_bosluklar": {
+    "deger": ["ic_kapi", "dis_kapi", "gecis"],
+    "durum": "varsayim",
+    "tarih": "2026-10-25",
+    "not": "Rehber: \"serilip sabitlenir, kapı boşluklarında kesilir\". Geçiş (kanatsız kapı boşluğu) de kapı sayıldı; pencerede çerçeve kesilmez (pencere duvarın içinde, eşiği yerden yüksek)."
+   },
+   "durum": "varsayim",
+   "tarih": "2026-10-25",
+   "kaynak": "Montaj rehberi (Lokman'ın 24 Ekim çizimleri ve notları; `claude/montaj-rehberi-devir` dalı, yalnız okundu): alt çerçeve dış ve iç duvar hatları boyunca, kapı boşluklarında kesik; kesit U, taban duvar + 0,6 cm, kanat 2,7 cm. Teyit bekleyen rehber maddeleri: Lokman, 25 Ekim 09:10 \"Varsayım kalsın\". Sayı liste kuralından (`alt_cerceve_bolen_m`; Lokman 13 Ekim: alt çerçeve her zaman 3750; PK-01 9 ve 6, PK-02 9 tuttu).",
+   "not": "Modelde parça hattın kapı boşlukları arasındaki kısmıdır (boyu `Qto_MemberBaseQuantities.Length`, metre bunun toplamı); `Hat` ve `HatBoyu_cm` hattın kendisi. Kesim planı hatların toplamıdır, parça parça yerleşim değildir (kesilen parça artık)."
+  },
+  "sacak_omegasi_yerlesimi": {
+   "kural": "100'lük saçak omegası iki saçak duvarının üstünde, makasın altında, duvar boyunca (binanın boyu); duvarın olmadığı yerde (verandanın tarafında) kirişin üstünde, hat kesintisiz. Sayı ⌈iki hattın toplamı ÷ parça boyu⌉, bir kez yukarı.",
+   "parca_boyu": {"okunan": "kurallar/liste/prefabrik.json › kurallar.sacak_omegasi_bolen_m"},
+   "yontem": {
+    "deger": "toplam",
+    "durum": "lokman",
+    "tarih": "2026-10-25",
+    "not": "K3b planı §2 ve karttaki seçim (Lokman, 25 Ekim 17:47 \"Uygula\"): rehberdeki gibi duvar boyu. Liste üreteci saçak boyunu sayar (iki saçak kenarı, bina boyu + iki saçak; PK-01 21,20 m ÷ 2,5 → 9); model duvar boyunu (PK-01 20 m → 8). Liste 6e'nin dosyası; fark oraya not olarak gider."
+   },
+   "cati_tipleri": ["besik"],
+   "durum": "varsayim",
+   "tarih": "2026-10-25",
+   "kaynak": "Montaj rehberi (Lokman'ın 24 Ekim çizimleri): saçak omegası yüz başına 4 × 250 cm, duvarın üstünde, makasın altında; kesit ters U (içte ~6 cm kanat ve 4 cm ayak, dışta eğik ~6 cm kanat). Teyit bekleyen maddeler varsayım (Lokman, 25 Ekim 09:10).",
+   "not": "Modelde saçak duvarı başına bir parça (binanın boyu); stok boyları kesim planında."
+  },
+  "sacak_saci_yerlesimi": {
+   "kural": "Saçak sacı iki saçak kenarı boyunca, saçak ucundan ucuna (mahya boyu: bina boyu + iki saçak); tırnağı saçak omegasının üstüne girer ve makasın altında sıkışır, saçağın altını kapatır, alnı saçak ucunda. Sayı ⌈iki kenarın toplamı ÷ (parça boyu − bindirme)⌉ (liste üretecinin kuralı).",
+   "parca_boyu": {"okunan": "kitap › parca_boyu_m.sacak_saci"},
+   "bindirme": {"okunan": "kitap › bindirme_m.sacak_saci"},
+   "yontem": {
+    "deger": "toplam",
+    "durum": "lokman",
+    "tarih": "2026-10-25",
+    "not": "K3b planı §2 (Lokman, 25 Ekim 17:47 \"Uygula\"): liste üretecinin sayma yolu, boy modelden."
+   },
+   "cati_tipleri": ["besik"],
+   "durum": "varsayim",
+   "tarih": "2026-10-25",
+   "kaynak": "Montaj rehberi (Lokman'ın 24 Ekim çizimleri): profil tırnak 3 → saçak altı 30 → alın 13 → kıvrım 10 cm (açınım ≈ 56 cm), sac 1 mm; kıvrımın ölçüsü teyit bekliyor (Lokman, 25 Ekim 09:10: \"Varsayım kalsın\"). Sayı liste kuralından (PK-01 ve PK-02 tuttu).",
+   "not": "Modelde saçak kenarı başına bir parça; stok boyları kesim planında. Saçak altının genişliği çatının saçağıdır (İş Emri; rehberde 30)."
+  },
+  "alin_saci_yerlesimi": {
+   "kural": "Alın sacı kalkanların iki eğik kenarında (her baş makasın iki kenarı), saçak ucundan mahyaya; tırnağı baş makas Z'sine girer, makas üstünün 3 cm altından başlar, kalkan saçağının altını kapatır, alnı aşık uçlarının (C kapamanın) önünde; alt ucu derenin önüne iner. Sayı ⌈kenarların toplamı ÷ (parça boyu − bindirme)⌉ (liste üretecinin kuralı).",
+   "parca_boyu": {"okunan": "kitap › parca_boyu_m.alin_saci"},
+   "bindirme": {"okunan": "kitap › bindirme_m.alin_saci"},
+   "yontem": {
+    "deger": "toplam",
+    "durum": "lokman",
+    "tarih": "2026-10-25",
+    "not": "K3b planı §2 (Lokman, 25 Ekim 17:47 \"Uygula\"): liste üretecinin sayma yolu, boy modelden."
+   },
+   "cati_tipleri": ["besik"],
+   "durum": "varsayim",
+   "tarih": "2026-10-25",
+   "kaynak": "Montaj rehberi (Lokman'ın 24 Ekim çizimleri): profil saçak sacınınki ve kenar hadvesini kavrayan kıvrım; alt ucun kesim yüksekliği teyit bekliyor (Lokman, 25 Ekim 09:10: \"Varsayım kalsın\"). Sayı liste kuralından (PK-01 ve PK-02 tuttu).",
+   "not": "Modelde kenar başına bir parça (eğik boy). Kalkanlar bugünkü IFC'nin baş makaslarıdır (PK-01'de 2)."
+  },
+  "bas_makas_z_yerlesimi": {
+   "kural": "Baş makas Z'si her baş makasın iki eğik kenarında, saçak ucundan mahyaya; üst kanadı makasın ve betopanın üstünden geçer, 3 cm çentik, 3 cm dış kanat. Sayı kenar başına ⌈eğik boy ÷ parça boyu⌉ (kitap: kenar kenar; liste üretecinin O7'si).",
+   "parca_boyu": {"okunan": "kitap › bas_makas_z.parca_boyu_m"},
+   "yontem": {
+    "deger": "kenar",
+    "durum": "lokman",
+    "tarih": "2026-10-25",
+    "not": "K3b planı §2 (Lokman, 25 Ekim 17:47 \"Uygula\"): liste üretecinin sayma yolu (O7; kitabın `bas_makas_z.kenar_kenar`'ı), boy modelden."
+   },
+   "cati_tipleri": ["besik"],
+   "durum": "varsayim",
+   "tarih": "2026-10-25",
+   "kaynak": "Montaj rehberi (Lokman'ın 24 Ekim çizimleri): üst kanat makas ve betopan üstünde, 3 cm çentik, 3 cm dış kanat, sac 1 mm. Teyit bekleyen maddeler varsayım (Lokman, 25 Ekim 09:10). Sayı liste kuralından (O7; PK-02, PK-06, PK-07 tuttu).",
+   "not": "Modelde kenar başına bir parça (eğik boy); stok boyları kesim planında."
+  },
+  "c_kapama_yerlesimi": {
+   "kural": "C kapama kalkan saçağında, aşık uçlarında: aşığın üstünden alın sacının saçak altına iner; alın sacı önüne gelir. Kalkanın iki eğik kenarı boyunca (her baş makasın iki kenarı). Listede satırı yok; stok boyu bilinmediği için metreyle sayılır.",
+   "yontem": {
+    "deger": "metre",
+    "durum": "lokman",
+    "tarih": "2026-10-25",
+    "not": "K3b planı §1 (Lokman, 25 Ekim 17:47 \"Uygula\"): listede satırı yok, kart metreyle sayılır; listeye satır eklemek 6e'nin ve Lokman'ın kararı. Listedeki \"Sandviç panel kapaması\" başka parçadır (kitaba göre dere boyunca)."
+   },
+   "cati_tipleri": ["besik"],
+   "durum": "varsayim",
+   "tarih": "2026-10-25",
+   "kaynak": "Montaj rehberi (Lokman'ın 24 Ekim çizimleri): gövde ~6 cm, kanatlar 2 cm içeri; aşık uçlarında, alın sacının arkasında. Teyit bekleyen maddeler varsayım (Lokman, 25 Ekim 09:10).",
+   "not": "Modelde kenar başına bir parça (eğik boy); metre parçaların toplamı."
+  },
+  "mahya_yerlesimi": {
+   "kural": "Metal kiremit mahyası mahya boyunca, saçak ucundan ucuna, kaplamanın üstünde; iki yanında kanat. Sayı ⌈mahya boyu ÷ (parça boyu − bindirme)⌉ (liste üretecinin O10'u). Çatı kaplamasında trapez sac varsa mahya trapez sac mahyasıdır; kartı yok, \"kural yok\" yazar.",
+   "parca_boyu": {"okunan": "kitap › parca_boyu_m.mahya"},
+   "bindirme": {"okunan": "kitap › bindirme_m.mahya"},
+   "yontem": {
+    "deger": "toplam",
+    "durum": "lokman",
+    "tarih": "2026-10-25",
+    "not": "K3b planı §2 (Lokman, 25 Ekim 17:47 \"Uygula\"): liste üretecinin sayma yolu, boy modelden."
+   },
+   "trapez_yazisi": {
+    "deger": "trapez",
+    "durum": "muhendis",
+    "tarih": "2026-10-25",
+    "not": "Liste üretecinin okuması (`motor/prefabrik_liste.py`, J5 ve O10): İş Emri'nin \"Çatı Kaplaması\" özelliğinde bu yazı geçiyorsa mahya trapez sac mahyasıdır (ayrı ürün), geçmiyorsa metal kiremit mahyası."
+   },
+   "cati_tipleri": ["besik"],
+   "durum": "muhendis",
+   "tarih": "2026-10-25",
+   "kaynak": "Liste kuralı O10 (PK-01, PK-02, PK-06, PK-07 listelerinde tuttu); yer ve kanat montaj rehberinden (Lokman'ın 24 Ekim çizimleri: mahyanın iki yanında 26'şar cm kanat).",
+   "not": "Modelde mahya başına bir parça; stok boyları kesim planında."
+  },
+  "kenar_gosterim": {
+   "kesit_cm": {
+    "deger": {
+     "sac": 0.2,
+     "alt_cerceve": {"pay": 0.3, "kanat": 2.7},
+     "sacak_omegasi": [10, 4],
+     "sacak_saci": {"tirnak": 3, "alin": 13, "kivrim": 10},
+     "alin_saci": {"makas_ustunden": 3, "alin": 13, "kivrim": 10},
+     "bas_makas_z": {"centik": 3, "dis_kanat": 3},
+     "c_kapama": {"govde": 6, "kanat": 2},
+     "mahya": {"kanat": 26}
+    },
+    "durum": "varsayim",
+    "tarih": "2026-10-25",
+    "not": "Yalnız 3B gösterim (cm): sacın çizilen kalınlığı (gerçeği 1 mm), alt çerçevenin duvarın iki yüzünden payı ve kanadı, saçak omegasının ters U'su [genişlik, yükseklik], sacların tırnağı, alnı ve kıvrımı, alın sacının makas üstünden aşağı başladığı yer, Z'nin çentiği ve dış kanadı, C kapamanın gövdesi ve kanadı, mahyanın kanadı. Montaj rehberinden (Lokman'ın 24 Ekim çizimleri). Sayı, boy ve metre bunlardan çıkmaz."
+   },
+   "durum": "varsayim",
+   "tarih": "2026-10-25",
+   "not": "Alt çerçeve zeminde: tabanı panonun altında, kanatları duvarın iki yüzünde. Saçak omegası saçak duvarının üstünde; saçak sacının saçak altı omeganın üstü kotunda, alnı saçak ucunda; mahya kaplamanın üstünde. Kalkan kenarlarında Z baş makasın üstünden betopanın dışına iner; alın sacının saçak altı makas üstünün 3 cm altında, uç duvardan saçak ucuna; C kapama saçak ucunda aşık uçlarında; alın sacının alnı en önde."
   }
  }
 }

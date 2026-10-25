@@ -3,6 +3,9 @@
 Omega ve aşıkta modelin parçaları stok boylara en uzun önce, ilk sığan boya yerleşir; bir boyun kullanılır uzunluğu parça boyu − pay
 (yerleşim kuralındaki tam parça). Dere hattı bindirmeyle bölünür: hat başına ⌈(hat − bindirme) ÷ (parça boyu − bindirme)⌉. Yedek parça
 eklenmez (karar D açık); sayı modelin yerleşimidir, yükleme listesinin metrajı değildir.
+
+K3b'nin kartlarında (alt çerçeve, saçak ve kalkan kenarları, mahya) sayı liste üretecinin sayma yoludur, boy modelden: hatların toplamı
+(`toplam_karti`: ⌈Σ hat ÷ (parça boyu − bindirme)⌉, bir kez yukarı) ya da kenar başına (`kenar_karti`: ⌈kenar ÷ parça boyu⌉).
 """
 from __future__ import annotations
 
@@ -39,3 +42,18 @@ def dere_karti(hatlar_cm: list[float], parca_boyu_cm: float, bindirme_cm: float)
     n = [math.ceil((h - bindirme_cm) / (parca_boyu_cm - bindirme_cm) - ESIK) for h in hatlar_cm]
     return {"yontem": "hat başına ⌈(hat − bindirme) ÷ (parça boyu − bindirme)⌉", "parca_boyu_cm": parca_boyu_cm, "bindirme_cm": bindirme_cm,
             "parca": len(hatlar_cm), "toplam_m": round(sum(hatlar_cm) / 100, 4), "stok": sum(n), "hat_basina": n}
+
+
+def toplam_karti(hatlar_cm: list[float], parca_boyu_cm: float, bindirme_cm: float = 0.0, parca: int | None = None) -> dict:
+    """Hatların toplamı bir kez yukarı bölünür (liste üretecinin yolu); `parca` modeldeki parça sayısı (kesik hatta hattan çok)."""
+    n = math.ceil(sum(hatlar_cm) / (parca_boyu_cm - bindirme_cm) - ESIK)
+    return {"yontem": "⌈hatların toplamı ÷ (parça boyu − bindirme)⌉, bir kez yukarı", "parca_boyu_cm": parca_boyu_cm, "bindirme_cm": bindirme_cm,
+            "parca": len(hatlar_cm) if parca is None else parca, "hat": len(hatlar_cm), "toplam_m": round(sum(hatlar_cm) / 100, 4), "stok": n,
+            "hatlar_cm": [round(h, 4) for h in hatlar_cm]}
+
+
+def kenar_karti(kenarlar_cm: list[float], parca_boyu_cm: float) -> dict:
+    """Kenar başına ⌈kenar ÷ parça boyu⌉ (kitap: kenar kenar; bindirme yok)."""
+    n = [math.ceil(h / parca_boyu_cm - ESIK) for h in kenarlar_cm]
+    return {"yontem": "kenar başına ⌈kenar ÷ parça boyu⌉", "parca_boyu_cm": parca_boyu_cm, "parca": len(kenarlar_cm),
+            "toplam_m": round(sum(kenarlar_cm) / 100, 4), "stok": sum(n), "hat_basina": n}

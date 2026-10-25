@@ -103,11 +103,12 @@ def _turu_degistir(ie: dict, **turler) -> dict:
 
 @pytest.fixture(scope="module")
 def komut(tmp_path_factory):
-    """Kabul komutu (`python -m motor.kart_model … --kod PK01`): K3 modeli; aynı bugünkü IFC'den K2 modeli de (elektriksiz)."""
+    """Kabul komutu (`python -m motor.kart_model … --kod PK01`): K3 modeli; aynı bugünkü IFC'den K2 modeli de (elektriksiz; K3b'nin kenar
+    katmanıyla, komut da onu kurar: iki modelin farkı yalnız elektrik)."""
     d = tmp_path_factory.mktemp("k3")
     assert KM.main([str(MOTOR_VERI / "PK01.json"), str(d), "--kod", "PK01"]) == 0
     ie = _oku(MOTOR_VERI / "PK01.json")
-    say_k2 = KM.kart_modeli(d / "PK01.ifc", d / "PK01_k2.ifc", "besik", is_emri=ie, plan=ifc_uret.hazirla(ie))
+    say_k2 = KM.kart_modeli(d / "PK01.ifc", d / "PK01_k2.ifc", "besik", is_emri=ie, plan=ifc_uret.hazirla(ie), kenar=True)
     return {"klasor": d, "model": d / "PK01_model.ifc", "k2": d / "PK01_k2.ifc", "say": _oku(d / "PK01_kart_sayim.json"), "say_k2": say_k2,
             "ie": ie}
 
@@ -565,7 +566,7 @@ def test_elektrik_is_emri_ister(komut, tmp_path):
 def test_komut_elektrik_plani(komut):
     import pymupdf
     d = pymupdf.open(komut["klasor"] / "PK01_yerlesim_planlari.pdf")
-    assert len(d) == 6
+    assert len(d) == 7                                                     # K3b: yedinci sayfa alt çerçeve ve çatı kenarları (test_k3b.py)
     metin = " ".join(d[5].get_text().split())
     assert "PK01 · ELEKTRİK YERLEŞİM PLANI" in metin and "(İE-15 K3)" in metin
     for s in ("Tijli duy: 5", "Yuvarlak glop: 3", "Tekli anahtar: 6", "Çiftli anahtar: 1", "Tekli priz: 13", "Çiftli priz: 1", "Uydu prizi: 1",

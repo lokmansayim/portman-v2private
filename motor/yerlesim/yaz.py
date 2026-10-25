@@ -4,7 +4,7 @@ Parça dünya koordinatındadır (cm; yerleşimi birim matris, bugünkü IFC'nin
 (İş Emri numarası) ve parçanın adından türer: her üretimde aynı, iki evin modeli birlikte açılınca çakışmaz. `PortatifEv_Parca`: kart kodu, paftadaki anahtarı (`;`), uygulanan kural, kaynak ve kuralın parçaya yazdığı
 bilgiler. Boyla alınan parçada `Qto_…BaseQuantities.Length` (m; yerleşim kapısı metreyi buradan toplar), levha ve kaplamada `GrossArea` (tam
 levha, kaplamada şerit). Kablo (K3) kare kesitli çubuktur; boyu (`Qto_CableSegmentBaseQuantities.Length`) formülden, çizgisinin boyundan değil.
-Renkler yalnız gösterimdir.
+K3b'nin sacları ve profilleri birden çok kesitli gövdedir (`coklu`: sacın her yüzü bir prizma; tek temsilde). Renkler yalnız gösterimdir.
 """
 from __future__ import annotations
 
@@ -22,7 +22,9 @@ RENK = {"omega": (0.85, 0.55, 0.15), "asik": (0.20, 0.45, 0.80), "panel": (0.25,
         "dere": (0.55, 0.58, 0.62), "inis": (0.40, 0.42, 0.46),
         "tavan_armaturu": (0.95, 0.20, 0.15), "glop": (0.95, 0.75, 0.20), "anahtar_tekli": (0.20, 0.60, 0.30), "anahtar_cift": (0.10, 0.45, 0.20),
         "priz_tekli": (0.20, 0.40, 0.85), "priz_cift": (0.10, 0.25, 0.65), "uydu_prizi": (0.55, 0.30, 0.75), "zil": (0.85, 0.45, 0.10),
-        "sigorta_kutusu": (0.15, 0.15, 0.15), "kablo_priz": (0.20, 0.40, 0.85), "kablo_aydinlatma": (0.95, 0.55, 0.15)}
+        "sigorta_kutusu": (0.15, 0.15, 0.15), "kablo_priz": (0.20, 0.40, 0.85), "kablo_aydinlatma": (0.95, 0.55, 0.15),
+        "alt_cerceve": (0.45, 0.47, 0.50), "sacak_omegasi": (0.70, 0.35, 0.15), "sacak_saci": (0.30, 0.32, 0.36), "alin_saci": (0.20, 0.22, 0.26),
+        "bas_makas_z": (0.55, 0.20, 0.55), "c_kapama": (0.15, 0.50, 0.50), "mahya": (0.60, 0.15, 0.15)}
 
 
 def _api(ad: str, *a, **k):
@@ -32,6 +34,12 @@ def _api(ad: str, *a, **k):
 
 def _m(v: float) -> float:
     return v / 100.0
+
+
+def _govdeler(sb: ShapeBuilder, geo: dict) -> list:
+    if geo["tip"] == "coklu":                                          # K3b: sacın yüzleri, her biri bir prizma
+        return [g for p in geo["parcalar"] for g in _govdeler(sb, p)]
+    return [_govde(sb, geo)]
 
 
 def _govde(sb: ShapeBuilder, geo: dict):
@@ -71,7 +79,7 @@ def yaz(f, parcalar: list[dict], turler: dict, kaynak: str, parca_seti: str, kim
         e.GlobalId = ifcopenshell.guid.compress(uuid.uuid5(AD_ALANI, f"{kimlik}/{p['ad']}").hex)
         e.Description = p["aciklama"]
         _api("geometry.edit_object_placement", f, product=e)
-        temsil = sb.get_representation(govde, [_govde(sb, p["geo"])])
+        temsil = sb.get_representation(govde, _govdeler(sb, p["geo"]))
         _api("geometry.assign_representation", f, product=e, representation=temsil)
         if p["parca"] not in stiller:
             stiller[p["parca"]] = s = _api("style.add_style", f, name=f"K2 {p['parca']}")
