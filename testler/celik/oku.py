@@ -24,15 +24,18 @@ from testler.kor import oku as kor_oku
 OkumaHatasi = kor_oku.OkumaHatasi
 CELIK_GRUBU = "CELIK PANEL"          # ASCII'ye katlanmış grup adında aranır
 TOPLAM = "TOPLAM"
-TURLER = (  # (tür, paftadaki harf, katlanmış adda desen)
-    ("duvar_paneli", "D", r"\bDUVAR\b.*\bPANEL"),
-    ("kolon_kiris", "K", r"\bKOLON\b|\bKIRIS"),
+TURLER = (  # (tür, paftadaki harf, katlanmış adda desen; ayraç içi açıklama türe bakılmadan önce atılır)
+    ("duvar_paneli", "D", r"\bDUVAR|\bKORKULUK"),
+    ("kolon_kiris", "K", r"\bKOLON|\bKIRIS"),
     ("makas", "M", r"\bMAKAS"),
-    ("cati_paneli", "C", r"\bCATI\b.*\bPANEL"),
-    ("tavan_paneli", "T", r"\bTAVAN\b.*\bPANEL"),
+    ("cati_paneli", "C", r"^(?!.*\bMAKAS).*\bCATI\b.*\bPANEL"),
+    ("tavan_paneli", "T", r"^(?!.*\bMAKAS).*\bTAVAN\b.*\bPANEL"),
+    ("baca_paneli", "B", r"\bBACA"),
     ("c_profil", None, r"\bC\s*PROFIL"),
 )
 HARF = {t: h for t, h, _ in TURLER}
+KG_BASLIKLARI = ("KG", "AGIRLIK", "AGIRLIK (KG)", "AGIRLIK(KG)")
+KG_SIZ = ("c_profil",)               # kg'ı yazılmayabilen tek tür (listeler boy C profilin kg'ını kimi zaman boş bırakır)
 KG_PAYI = 0.5                        # TOPLAM sağlamasında yuvarlama payı (kg)
 
 
@@ -45,12 +48,32 @@ def celik_grubu_mu(grup) -> bool:
     return CELIK_GRUBU in katla(grup)
 
 
+SOZLUK = {"DUVAR", "PANEL", "PANELI", "PANELLERI", "PANELLER", "KOLON", "KIRIS", "MAKAS", "MAKASI", "MAKASLARI", "MAKASLAR", "CATI",
+          "TAVAN", "BOY", "C", "PROFIL", "PROFILI", "IC", "DIS", "VERANDA", "SUNDURMA", "KAPI", "PENCERE", "BASLIK", "LENTO", "ARA",
+          "UST", "ALT", "BAS", "YAN", "ON", "ARKA", "KOSE", "DERE", "ASIK", "OMEGA", "GRUBU", "TOPLAM", "ZEMIN", "KAT", "CEPHE",
+          "PARCA", "CERCEVE", "MUSTEMILAT", "KORKULUK", "BACA", "VEANDA", "DIKME", "DIKMELERI", "ARASI", "USTU", "SIRT", "MM"}
+
+
+def guvenli(ad) -> str:
+    """Hata iletisi için satır adı: yalnız çelik sözlüğündeki sözcükler ve sayılar kalır, öteki sözcükler "…" olur (kişi ya da bayi adı
+    iletiye girmez)."""
+    out = []
+    for w in re.split(r"[^A-Z0-9]+", katla(ad)):
+        if not w:
+            continue
+        w = w if (w in SOZLUK or w.isdigit()) else "…"
+        if not (w == "…" and out and out[-1] == "…"):
+            out.append(w)
+    return " ".join(out) or "…"
+
+
 def tur(ad) -> str:
     """Çelik panel satırının türü; bilinmiyorsa ya da iki türe uyuyorsa `OkumaHatasi`."""
-    a = katla(ad)
+    a = re.sub(r"\(.*?\)", " ", katla(ad))
     uyan = [t for t, _, d in TURLER if re.search(d, a)]
     if len(uyan) != 1:
-        raise OkumaHatasi(f"çelik panel satırının türü {'bilinmiyor' if not uyan else 'belirsiz (' + ', '.join(uyan) + ')'}: {ad!r}")
+        raise OkumaHatasi(f"çelik panel satırının türü {'bilinmiyor' if not uyan else 'belirsiz (' + ', '.join(uyan) + ')'}: "
+                          f"{guvenli(ad)!r}")
     return uyan[0]
 
 
@@ -75,7 +98,7 @@ def _excel_baslik(hucre: dict) -> dict | None:
     a = [k for k, v in hucre.items() if katla(v) == "ADET"]
     if not b or not a:
         return None
-    kg = [k for k, v in hucre.items() if katla(v) == "KG" and k > min(a)]
+    kg = [k for k, v in hucre.items() if katla(v) in KG_BASLIKLARI and k > min(a)]
     return {"ad": b[0] - 1, "boyut": b[0], "adet": min(a), "kg": min(kg) if kg else None,
             "grup": str(hucre.get(b[0] - 1, "") or "").strip()}
 
@@ -96,7 +119,7 @@ def _excel_celik(ws) -> dict | None:
             continue
         if kol is None:
             continue
-        if any(katla(v) == TOPLAM for v in hucre.values()):
+        if any(re.search(rf"\b{TOPLAM}\b", katla(v)) for k, v in hucre.items() if k <= kol["ad"]):
             toplam = {"adet": _sayi(hucre.get(kol["adet"])), "kg": _sayi(hucre.get(kol["kg"]))}
             continue
         ad = hucre.get(kol["ad"])
@@ -161,12 +184,13 @@ def pdf_celik(yol: Path) -> dict:
                     and not any(re.fullmatch(r"[\d.,]+", p["t"]) for p in ps)):
                 if kol is not None:
                     return {"satirlar": satirlar, "toplam": toplam}
-                grup = " ".join(p["t"] for p in ps if katla(p["t"]) not in ("BOYUT", "BOYUT/OLCU", "ADET", "KG", "MAKINE", "NO"))
+                grup = " ".join(p["t"] for p in ps if katla(p["t"]) not in ("BOYUT", "BOYUT/OLCU", "ADET", "MAKINE", "NO", *KG_BASLIKLARI))
                 if celik_grubu_mu(grup):
-                    if "KG" not in basliklar:
+                    kgb = next((basliklar[x] for x in KG_BASLIKLARI if x in basliklar), None)
+                    if kgb is None:
                         raise OkumaHatasi("çelik panel grubunda KG sütunu yok")
                     bo = basliklar.get("BOYUT/OLCU") or basliklar["BOYUT"]
-                    kol = {"boyut": bo["x0"] - 8, "adet": basliklar["ADET"]["xc"], "kg": basliklar["KG"]["xc"]}
+                    kol = {"boyut": bo["x0"] - 8, "adet": basliklar["ADET"]["xc"], "kg": kgb["xc"]}
                 continue
             if kol is None:
                 continue
@@ -183,11 +207,8 @@ def pdf_celik(yol: Path) -> dict:
                 elif p["xc"] < kol["adet"] - 22:
                     boy.append(p["t"])
             a = " ".join(ad).strip()
-            if katla(a) == TOPLAM:
+            if any(re.search(rf"\b{TOPLAM}\b", katla(p["t"])) for p in ps):   # "TOPLAM" ad sütununda ya da ölçü sütununa taşmış
                 toplam = {"adet": _sayi(adet[0]) if adet else None, "kg": _sayi(kg[0]) if kg else None}
-                continue
-            if not a and kg and not adet and satirlar and satirlar[-1]["kg"] is None:
-                satirlar[-1]["kg"] = _sayi(kg[0])        # kg yazısı satırın yarım çizgi üstünde
                 continue
             if not a:
                 continue
@@ -201,27 +222,33 @@ def pdf_celik(yol: Path) -> dict:
 # ---------------------------------------------------------------------------------------------------------------- birlikte
 
 def _ozet(c: dict) -> dict:
+    """Türler ve toplam; TOPLAM satırı listenin kendi sağlamasıdır. Kg'ı boş satır yalnız boy C profilde olabilir (`KG_SIZ`); o zaman
+    TOPLAM'ın adedi ya bütün satırların ya kg'lı satırların toplamıdır, hangisi olduğu `toplam_kapsami`'na yazılır."""
     out = []
     for s in c["satirlar"]:
-        if s["adet"] is None or s["kg"] is None:
-            raise OkumaHatasi(f"çelik panel satırında adet ya da kg okunamadı: {s['ad']!r}")
         t = tur(s["ad"])
+        if s["adet"] is None or (s["kg"] is None and t not in KG_SIZ):
+            raise OkumaHatasi(f"çelik panel satırında adet ya da kg okunamadı: {guvenli(s['ad'])!r}")
         out.append({**s, "tur": t, "harf": HARF[t]})
     if not out:
         raise OkumaHatasi("çelik panel grubunda satır yok")
     adet = sum(s["adet"] for s in out)
-    kg = round(sum(s["kg"] for s in out), 3)
+    adet_kgli = sum(s["adet"] for s in out if s["kg"] is not None)
+    kg = round(sum(s["kg"] for s in out if s["kg"] is not None), 3)
     T = c.get("toplam")
     if not T or T.get("adet") is None or T.get("kg") is None:
         raise OkumaHatasi("çelik panel grubunun TOPLAM satırı okunamadı")
-    if T["adet"] != adet or abs(T["kg"] - kg) > KG_PAYI:
-        raise OkumaHatasi(f"çelik panel TOPLAM satırı satırlarla tutmuyor: liste {T['adet']} adet {T['kg']} kg, satırlar {adet} adet {kg} kg")
+    kapsam = "bütün satırlar" if T["adet"] == adet else "kg'lı satırlar" if T["adet"] == adet_kgli else None
+    if kapsam is None or abs(T["kg"] - kg) > KG_PAYI:
+        raise OkumaHatasi(f"çelik panel TOPLAM satırı satırlarla tutmuyor: liste {T['adet']} adet {T['kg']} kg, satırlar {adet} adet "
+                          f"(kg'lı {adet_kgli}) {kg} kg")
     turler = {}
     for s in out:
         x = turler.setdefault(s["tur"], {"harf": s["harf"], "adet": 0, "kg": 0.0})
         x["adet"] += s["adet"]
-        x["kg"] = round(x["kg"] + s["kg"], 3)
-    return {"satirlar": out, "toplam": {"adet": adet, "kg": kg}, "turler": turler}
+        x["kg"] = None if (x["kg"] is None or s["kg"] is None) else round(x["kg"] + s["kg"], 3)
+    return {"satirlar": out, "toplam": {"adet": adet, "kg": kg}, "turler": turler, "toplam_kapsami": kapsam,
+            "kgsiz_turler": sorted({s["tur"] for s in out if s["kg"] is None})}
 
 
 def _ayni_satirlar(celik: list[dict], kor: list[dict]) -> None:
@@ -229,6 +256,11 @@ def _ayni_satirlar(celik: list[dict], kor: list[dict]) -> None:
     b = [(katla(s["malzeme"]), katla(s["boyut"]), kor_oku.sayi(s["adet"])) for s in kor]
     if a != b:
         raise OkumaHatasi(f"çelik panel satırları iki okumada farklı ({len(a)} / {len(b)} satır); liste şablonu beklenenden farklı")
+
+
+def _toplam_satiri_mi(s: dict) -> bool:
+    """Grubun toplam satırı ("TOPLAM", "ÇELİK PANEL TOPLAM"): ölçüsü yok, adında TOPLAM sözcüğü var; malzeme sayılmaz."""
+    return bool(re.search(rf"\b{TOPLAM}\b", katla(s["malzeme"]))) and not _yazi(s.get("boyut"))
 
 
 def oku(yol: Path, uzanti: str, sayfa: int | None = None, sayac: dict | None = None) -> dict:
@@ -241,6 +273,6 @@ def oku(yol: Path, uzanti: str, sayfa: int | None = None, sayac: dict | None = N
         sayfa = c["sayfa"]
     else:
         raise OkumaHatasi(f"okunamayan dosya türü: {uzanti}")
-    satirlar = [s for s in kor_oku.oku(Path(yol), uzanti, sayfa, sayac) if katla(s["malzeme"]) != TOPLAM]
+    satirlar = [s for s in kor_oku.oku(Path(yol), uzanti, sayfa, sayac) if not _toplam_satiri_mi(s)]
     _ayni_satirlar(c["satirlar"], [s for s in satirlar if celik_grubu_mu(s["grup"])])
     return {"satirlar": satirlar, "celik": _ozet(c)}
