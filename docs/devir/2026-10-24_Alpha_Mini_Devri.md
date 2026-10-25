@@ -79,3 +79,26 @@ Portman'ın çatı makasını Alpha Mini roll-former'ın okuduğu .bde dosyası 
 - Kişi ve bayi adları depoya, commit'e ve çıktıya girmez.
 - Ücretli deneme yok.
 - İlerleme kullanıcı adımlarıyla yazılır, kanıtla.
+
+## 25 Ekim eki: Frame Builder CSV ve SKP
+
+Ayrıntı ve kanıt: `deneme/2026-10-24_montaj_rehberi/alpha_mini/CSV_SKP_inceleme.md`.
+
+- **Gelen.** Lokman 62 m²'lik bir projenin DVR1 duvar panelini gönderdi. Depoya maskeli girdi:
+  - `kaynak/DVR1_duvar.csv`: MRD Frame Builder CSV'si, Howick biçimi;
+  - `kaynak/DVR1_fbd.json`: SKP'deki eklenti verisinin dökümü.
+- **CSV işlemleri adlarıyla yazıyor:** DIMPLE, LIP_CUT, SWAGE, NOTCH, SERVICE_HOLE, CUT. SKP'nin kendi işlem listesiyle 168/168 aynı; CSV, SKP'nin dışa aktarımı.
+- **Duvar kuralları çıkarıldı.** `duvar_kural.py` işlemleri yalnız geometriden ve beş sabitten (31, 34, 25, 610|1830, W 54) üretiyor:
+  - 168/168 işlem ±0,1 mm, 21/21 etiket;
+  - kurallar aynı panelden çıktı, kör test değil; ikinci panel gerekli.
+- **.bde harfleri (hipotez):**
+  - h = DIMPLE, f = LIP_CUT, w = SWAGE;
+  - BDE-58'de sayıyla tutuyor: f başlık ucunda 31 (42/42), w giren çubukta iki uçta 25 (168/168), her giren çubukta 2 h;
+  - n, s büyük olasılıkla NOTCH ve SERVICE_HOLE; l bilinmiyor;
+  - "altıncı istasyon" büyük olasılıkla dudak kesme.
+- **BDE-144 başka takım ayarıyla üretilmiş.** f her çaprazda bir, w uçtan 20–33. Kör test için Alpha Mini'nin bugünkü ayarı sorulmalı.
+- **CSV'nin profili 80S54-12 (1,2 mm), takım ayarı "UNBAK U1".** Alpha Mini 0,8'in makas profilinden farklı. Hangi makineye gittiği ve Alpha Mini'nin CSV okuyup okumadığı soruldu.
+- **Sıra.**
+  - Sorular: Lokman'a makine ve CSV; yazılımcıya harf tablosu.
+  - İkinci panel geldiğinde gerçek kör test.
+  - İE-16 planı hâlâ Lokman'ın onayını bekliyor.

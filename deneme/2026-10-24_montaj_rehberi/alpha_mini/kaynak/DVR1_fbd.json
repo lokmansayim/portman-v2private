@@ -1,0 +1,915 @@
+{
+ "kaynak": "SketchUp 24.0.553 · MRD Frame Builder (fbd-einfo, fbd-profile) · birim mm",
+ "paneller": [
+  {
+   "panel": {
+    "length": 2510.0,
+    "height": 2500.0,
+    "width": 80.0,
+    "thickness": 54.0,
+    "stud_spacing": 600.0,
+    "nog_first": 1200.0,
+    "nog_spacing": 1200.0,
+    "edge_clearance": 5.0,
+    "top_clearance": 2.0,
+    "bottom_clearance": 2.0,
+    "bottom_plate_to_stud": 2.0,
+    "top_plate_to_stud": 2.0,
+    "noggin_to_stud": 2.0,
+    "sill_to_stud": 2.0,
+    "head_to_stud": 2.0,
+    "adjacent_clearance": 1.0,
+    "adjacent_stud_proximity": 100.0,
+    "adjacent_nog_proximity": 100.0,
+    "hole_position": 27.0,
+    "hole_diameter": 5.0,
+    "lip_width": 10.0,
+    "coil_thickness": 1.2,
+    "web_brace_to_top_plate": 2.0,
+    "web_brace_to_bottom_plate": 2.0,
+    "brace_start_end_clearance": 20.0,
+    "brace_hole_extension": 5.8,
+    "header_brace_hole_extension": -4.0,
+    "chamfered_end_clearance": 15.0,
+    "header_height": 2100.0,
+    "stud1_offset": -23.0,
+    "stud2_offset": 23.0,
+    "studs": [
+     27.0,
+     327.0,
+     627.0,
+     1227.0,
+     1883.0,
+     2183.0,
+     2483.0
+    ],
+    "deleted_studs": [
+     1827.0
+    ],
+    "nogs": [
+     1227.0
+    ],
+    "name": "DVR1",
+    "type": "wall",
+    "style": "80S54-12",
+    "machine_tooling": "UNBAK U1 2000m Tooling",
+    "horz_service_hole_pos": "610|1830",
+    "vert_service_hole_pos": "",
+    "top_track_fixing": "dimple",
+    "stick_order": "logical_numbering",
+    "staggered_nogging": "true",
+    "justify": "left",
+    "added_service_holes": [
+     [
+      "Ng",
+      5.0,
+      1227.0,
+      349.0,
+      1227.0,
+      [
+       172.01
+      ]
+     ],
+     [
+      "Tp",
+      0.0,
+      2472.99,
+      2510.0,
+      2472.99,
+      [
+       177.01,
+       2332.99
+      ]
+     ],
+     [
+      "Ng",
+      2161.01,
+      1227.0,
+      2505.0,
+      1227.0,
+      [
+       172.01
+      ]
+     ]
+    ],
+    "elle_eklenen_diger": {}
+   },
+   "aciklik": [
+    {
+     "width": 1800.0,
+     "height": 1800.0,
+     "sill_height": 173.0,
+     "header_height": 2000.0,
+     "new_origin_y": 354.0,
+     "webspace": 150.0,
+     "web_offset": 5.0,
+     "web_start_end_clearance": 8.0,
+     "king_stud_gap": 0.5,
+     "head_to_stud": 2.0,
+     "noggin_to_stud": 2.0,
+     "lip_width": 10.0,
+     "name": "window1",
+     "type": "window",
+     "base_name": "Win",
+     "header_type": "warren",
+     "style": "80S54-12",
+     "header_style1": "80S54-12",
+     "sill_type": "std",
+     "qty_jamp_stud": 1
+    }
+   ],
+   "uyeler": [
+    {
+     "kod": "Bp",
+     "tur": "BottomPlate",
+     "x1": -0.0,
+     "y1": 27.0,
+     "x2": 2510.0,
+     "y2": 27.0,
+     "boy": 2510.0,
+     "flip_x": true,
+     "stil": "80S54-12",
+     "takim": {
+      "lip_cut_tool_size": 46.0,
+      "notch_tool_size": 48.0,
+      "swage_tool_size": 55.0,
+      "service_hole_size": 12.0,
+      "tab_size": 50.0,
+      "cut_clearance": 1.0
+     },
+     "islem_skp": {
+      "DIMPLE": [
+       27.0,
+       327.0,
+       627.0,
+       1227.0,
+       1883.0,
+       2183.0,
+       2483.0
+      ],
+      "LIP_CUT": [
+       31.0,
+       327.0,
+       627.0,
+       1227.0,
+       1883.0,
+       2183.0,
+       2479.0
+      ],
+      "SWAGE": [],
+      "NOTCH": [],
+      "SERVICE_HOLE": []
+     },
+     "csv_ad": "D-G1-1"
+    },
+    {
+     "kod": "St",
+     "tur": "Stud",
+     "x1": 27.0,
+     "y1": 5.0,
+     "x2": 27.0,
+     "y2": 2495.0,
+     "boy": 2490.0,
+     "flip_x": false,
+     "stil": "80S54-12",
+     "takim": {
+      "lip_cut_tool_size": 46.0,
+      "notch_tool_size": 48.0,
+      "swage_tool_size": 55.0,
+      "service_hole_size": 12.0,
+      "tab_size": 50.0,
+      "cut_clearance": 1.0
+     },
+     "islem_skp": {
+      "DIMPLE": [
+       22.0,
+       1221.99,
+       2467.99
+      ],
+      "LIP_CUT": [
+       1221.99
+      ],
+      "SWAGE": [
+       34.0,
+       2456.0
+      ],
+      "NOTCH": [],
+      "SERVICE_HOLE": [
+       605.03,
+       1824.99
+      ]
+     },
+     "csv_ad": "D-G1-2"
+    },
+    {
+     "kod": "Tp",
+     "tur": "TopPlate",
+     "x1": -0.0,
+     "y1": 2473.0,
+     "x2": 2510.0,
+     "y2": 2473.0,
+     "boy": 2510.0,
+     "flip_x": false,
+     "stil": "80S54-12",
+     "takim": {
+      "lip_cut_tool_size": 46.0,
+      "notch_tool_size": 48.0,
+      "swage_tool_size": 55.0,
+      "service_hole_size": 12.0,
+      "tab_size": 50.0,
+      "cut_clearance": 1.0
+     },
+     "islem_skp": {
+      "DIMPLE": [
+       27.0,
+       327.0,
+       591.39,
+       650.37,
+       1014.15,
+       1073.12,
+       1436.9,
+       1495.88,
+       1859.66,
+       1918.64,
+       2183.0,
+       2483.0
+      ],
+      "LIP_CUT": [
+       31.0,
+       327.0,
+       582.16,
+       659.6,
+       1004.91,
+       1082.36,
+       1427.67,
+       1505.11,
+       1850.43,
+       1927.87,
+       2183.0,
+       2479.0
+      ],
+      "SWAGE": [],
+      "NOTCH": [],
+      "SERVICE_HOLE": [
+       177.04,
+       2332.99
+      ]
+     },
+     "csv_ad": "D-G1-3"
+    },
+    {
+     "kod": "Ng",
+     "tur": "Nog",
+     "x1": 5.0,
+     "y1": 1227.0,
+     "x2": 349.0,
+     "y2": 1227.0,
+     "boy": 344.0,
+     "flip_x": false,
+     "stil": "80S54-12",
+     "takim": {
+      "lip_cut_tool_size": 46.0,
+      "notch_tool_size": 48.0,
+      "swage_tool_size": 55.0,
+      "service_hole_size": 12.0,
+      "tab_size": 50.0,
+      "cut_clearance": 1.0
+     },
+     "islem_skp": {
+      "DIMPLE": [
+       22.0,
+       322.0
+      ],
+      "LIP_CUT": [],
+      "SWAGE": [
+       34.0,
+       310.0
+      ],
+      "NOTCH": [],
+      "SERVICE_HOLE": [
+       171.96
+      ]
+     },
+     "csv_ad": "D-G1-4"
+    },
+    {
+     "kod": "Ks",
+     "tur": "KingStud",
+     "x1": 327.0,
+     "y1": 5.0,
+     "x2": 327.0,
+     "y2": 2495.0,
+     "boy": 2490.0,
+     "flip_x": true,
+     "stil": "80S54-12",
+     "takim": {
+      "lip_cut_tool_size": 46.0,
+      "notch_tool_size": 48.0,
+      "swage_tool_size": 55.0,
+      "service_hole_size": 12.0,
+      "tab_size": 50.0,
+      "cut_clearance": 1.0
+     },
+     "islem_skp": {
+      "DIMPLE": [
+       22.0,
+       168.0,
+       1221.99,
+       2021.99,
+       2467.99
+      ],
+      "LIP_CUT": [
+       1221.99
+      ],
+      "SWAGE": [
+       34.0,
+       168.0,
+       2021.99,
+       2456.0
+      ],
+      "NOTCH": [],
+      "SERVICE_HOLE": [
+       605.03,
+       1824.99
+      ]
+     },
+     "csv_ad": "D-G1-5"
+    },
+    {
+     "kod": "Ws",
+     "tur": "SillPlate1",
+     "x1": 305.0,
+     "y1": 173.0,
+     "x2": 2205.0,
+     "y2": 173.0,
+     "boy": 1900.0,
+     "flip_x": false,
+     "stil": "80S54-12",
+     "takim": {
+      "lip_cut_tool_size": 46.0,
+      "notch_tool_size": 48.0,
+      "swage_tool_size": 55.0,
+      "service_hole_size": 12.0,
+      "tab_size": 50.0,
+      "cut_clearance": 1.0
+     },
+     "islem_skp": {
+      "DIMPLE": [
+       22.0,
+       322.0,
+       921.99,
+       1578.0,
+       1878.0
+      ],
+      "LIP_CUT": [
+       31.0,
+       322.0,
+       921.99,
+       1578.0,
+       1869.0
+      ],
+      "SWAGE": [],
+      "NOTCH": [
+       25.0,
+       1875.0
+      ],
+      "SERVICE_HOLE": []
+     },
+     "csv_ad": "D-G1-6"
+    },
+    {
+     "kod": "Hb",
+     "tur": "HeaderPlate1",
+     "x1": 305.0,
+     "y1": 2027.0,
+     "x2": 2205.0,
+     "y2": 2027.0,
+     "boy": 1900.0,
+     "flip_x": true,
+     "stil": "80S54-12",
+     "takim": {
+      "lip_cut_tool_size": 46.0,
+      "notch_tool_size": 48.0,
+      "swage_tool_size": 55.0,
+      "service_hole_size": 12.0,
+      "tab_size": 50.0,
+      "cut_clearance": 1.0
+     },
+     "islem_skp": {
+      "DIMPLE": [
+       22.0,
+       133.99,
+       497.76,
+       556.74,
+       920.52,
+       979.5,
+       1343.28,
+       1402.26,
+       1766.04,
+       1878.0
+      ],
+      "LIP_CUT": [
+       31.0,
+       143.22,
+       488.53,
+       565.97,
+       911.29,
+       988.73,
+       1334.05,
+       1411.49,
+       1756.8,
+       1869.0
+      ],
+      "SWAGE": [],
+      "NOTCH": [
+       25.0,
+       1875.0
+      ],
+      "SERVICE_HOLE": []
+     },
+     "csv_ad": "D-G1-7"
+    },
+    {
+     "kod": "Wbh",
+     "tur": "HeaderWebBrace",
+     "x1": 435.84,
+     "y1": 2017.75,
+     "x2": 594.54,
+     "y2": 2482.25,
+     "boy": 490.86,
+     "flip_x": false,
+     "stil": "80S54-12",
+     "takim": {
+      "lip_cut_tool_size": 46.0,
+      "notch_tool_size": 48.0,
+      "swage_tool_size": 55.0,
+      "service_hole_size": 12.0,
+      "tab_size": 50.0,
+      "cut_clearance": 1.0
+     },
+     "islem_skp": {
+      "DIMPLE": [
+       9.78,
+       481.08
+      ],
+      "LIP_CUT": [],
+      "SWAGE": [
+       34.0,
+       456.86
+      ],
+      "NOTCH": [],
+      "SERVICE_HOLE": []
+     },
+     "csv_ad": "D-G1-8"
+    },
+    {
+     "kod": "St",
+     "tur": "Stud",
+     "x1": 627.0,
+     "y1": 5.0,
+     "x2": 627.0,
+     "y2": 195.0,
+     "boy": 190.0,
+     "flip_x": false,
+     "stil": "80S54-12",
+     "takim": {
+      "lip_cut_tool_size": 46.0,
+      "notch_tool_size": 48.0,
+      "swage_tool_size": 55.0,
+      "service_hole_size": 12.0,
+      "tab_size": 50.0,
+      "cut_clearance": 1.0
+     },
+     "islem_skp": {
+      "DIMPLE": [
+       22.0,
+       168.0
+      ],
+      "LIP_CUT": [],
+      "SWAGE": [
+       34.0,
+       156.0
+      ],
+      "NOTCH": [],
+      "SERVICE_HOLE": []
+     },
+     "csv_ad": "D-G1-9"
+    },
+    {
+     "kod": "Wbh",
+     "tur": "HeaderWebBrace",
+     "x1": 805.91,
+     "y1": 2017.75,
+     "x2": 647.22,
+     "y2": 2482.25,
+     "boy": 490.86,
+     "flip_x": true,
+     "stil": "80S54-12",
+     "takim": {
+      "lip_cut_tool_size": 46.0,
+      "notch_tool_size": 48.0,
+      "swage_tool_size": 55.0,
+      "service_hole_size": 12.0,
+      "tab_size": 50.0,
+      "cut_clearance": 1.0
+     },
+     "islem_skp": {
+      "DIMPLE": [
+       9.78,
+       481.08
+      ],
+      "LIP_CUT": [],
+      "SWAGE": [
+       34.0,
+       456.86
+      ],
+      "NOTCH": [],
+      "SERVICE_HOLE": []
+     },
+     "csv_ad": "D-G1-10"
+    },
+    {
+     "kod": "Wbh",
+     "tur": "HeaderWebBrace",
+     "x1": 858.59,
+     "y1": 2017.75,
+     "x2": 1017.29,
+     "y2": 2482.25,
+     "boy": 490.86,
+     "flip_x": false,
+     "stil": "80S54-12",
+     "takim": {
+      "lip_cut_tool_size": 46.0,
+      "notch_tool_size": 48.0,
+      "swage_tool_size": 55.0,
+      "service_hole_size": 12.0,
+      "tab_size": 50.0,
+      "cut_clearance": 1.0
+     },
+     "islem_skp": {
+      "DIMPLE": [
+       9.78,
+       481.08
+      ],
+      "LIP_CUT": [],
+      "SWAGE": [
+       34.0,
+       456.86
+      ],
+      "NOTCH": [],
+      "SERVICE_HOLE": []
+     },
+     "csv_ad": "D-G1-11"
+    },
+    {
+     "kod": "Wbh",
+     "tur": "HeaderWebBrace",
+     "x1": 1228.67,
+     "y1": 2017.75,
+     "x2": 1069.97,
+     "y2": 2482.25,
+     "boy": 490.86,
+     "flip_x": true,
+     "stil": "80S54-12",
+     "takim": {
+      "lip_cut_tool_size": 46.0,
+      "notch_tool_size": 48.0,
+      "swage_tool_size": 55.0,
+      "service_hole_size": 12.0,
+      "tab_size": 50.0,
+      "cut_clearance": 1.0
+     },
+     "islem_skp": {
+      "DIMPLE": [
+       9.78,
+       481.08
+      ],
+      "LIP_CUT": [],
+      "SWAGE": [
+       34.0,
+       456.86
+      ],
+      "NOTCH": [],
+      "SERVICE_HOLE": []
+     },
+     "csv_ad": "D-G1-12"
+    },
+    {
+     "kod": "St",
+     "tur": "Stud",
+     "x1": 1227.0,
+     "y1": 5.0,
+     "x2": 1227.0,
+     "y2": 195.0,
+     "boy": 190.0,
+     "flip_x": false,
+     "stil": "80S54-12",
+     "takim": {
+      "lip_cut_tool_size": 46.0,
+      "notch_tool_size": 48.0,
+      "swage_tool_size": 55.0,
+      "service_hole_size": 12.0,
+      "tab_size": 50.0,
+      "cut_clearance": 1.0
+     },
+     "islem_skp": {
+      "DIMPLE": [
+       22.0,
+       168.0
+      ],
+      "LIP_CUT": [],
+      "SWAGE": [
+       34.0,
+       156.0
+      ],
+      "NOTCH": [],
+      "SERVICE_HOLE": []
+     },
+     "csv_ad": "D-G1-13"
+    },
+    {
+     "kod": "Wbh",
+     "tur": "HeaderWebBrace",
+     "x1": 1281.35,
+     "y1": 2017.75,
+     "x2": 1440.05,
+     "y2": 2482.25,
+     "boy": 490.86,
+     "flip_x": false,
+     "stil": "80S54-12",
+     "takim": {
+      "lip_cut_tool_size": 46.0,
+      "notch_tool_size": 48.0,
+      "swage_tool_size": 55.0,
+      "service_hole_size": 12.0,
+      "tab_size": 50.0,
+      "cut_clearance": 1.0
+     },
+     "islem_skp": {
+      "DIMPLE": [
+       9.78,
+       481.08
+      ],
+      "LIP_CUT": [],
+      "SWAGE": [
+       34.0,
+       456.86
+      ],
+      "NOTCH": [],
+      "SERVICE_HOLE": []
+     },
+     "csv_ad": "D-G1-14"
+    },
+    {
+     "kod": "Wbh",
+     "tur": "HeaderWebBrace",
+     "x1": 1651.42,
+     "y1": 2017.75,
+     "x2": 1492.73,
+     "y2": 2482.25,
+     "boy": 490.86,
+     "flip_x": true,
+     "stil": "80S54-12",
+     "takim": {
+      "lip_cut_tool_size": 46.0,
+      "notch_tool_size": 48.0,
+      "swage_tool_size": 55.0,
+      "service_hole_size": 12.0,
+      "tab_size": 50.0,
+      "cut_clearance": 1.0
+     },
+     "islem_skp": {
+      "DIMPLE": [
+       9.78,
+       481.08
+      ],
+      "LIP_CUT": [],
+      "SWAGE": [
+       34.0,
+       456.86
+      ],
+      "NOTCH": [],
+      "SERVICE_HOLE": []
+     },
+     "csv_ad": "D-G1-15"
+    },
+    {
+     "kod": "Wbh",
+     "tur": "HeaderWebBrace",
+     "x1": 1704.1,
+     "y1": 2017.75,
+     "x2": 1862.8,
+     "y2": 2482.25,
+     "boy": 490.86,
+     "flip_x": false,
+     "stil": "80S54-12",
+     "takim": {
+      "lip_cut_tool_size": 46.0,
+      "notch_tool_size": 48.0,
+      "swage_tool_size": 55.0,
+      "service_hole_size": 12.0,
+      "tab_size": 50.0,
+      "cut_clearance": 1.0
+     },
+     "islem_skp": {
+      "DIMPLE": [
+       9.78,
+       481.08
+      ],
+      "LIP_CUT": [],
+      "SWAGE": [
+       34.0,
+       456.86
+      ],
+      "NOTCH": [],
+      "SERVICE_HOLE": []
+     },
+     "csv_ad": "D-G1-16"
+    },
+    {
+     "kod": "St",
+     "tur": "Stud",
+     "x1": 1883.0,
+     "y1": 5.0,
+     "x2": 1883.0,
+     "y2": 195.0,
+     "boy": 190.0,
+     "flip_x": false,
+     "stil": "80S54-12",
+     "takim": {
+      "lip_cut_tool_size": 46.0,
+      "notch_tool_size": 48.0,
+      "swage_tool_size": 55.0,
+      "service_hole_size": 12.0,
+      "tab_size": 50.0,
+      "cut_clearance": 1.0
+     },
+     "islem_skp": {
+      "DIMPLE": [
+       22.0,
+       168.0
+      ],
+      "LIP_CUT": [],
+      "SWAGE": [
+       34.0,
+       156.0
+      ],
+      "NOTCH": [],
+      "SERVICE_HOLE": []
+     },
+     "csv_ad": "D-G1-17"
+    },
+    {
+     "kod": "Wbh",
+     "tur": "HeaderWebBrace",
+     "x1": 2074.18,
+     "y1": 2017.75,
+     "x2": 1915.48,
+     "y2": 2482.25,
+     "boy": 490.86,
+     "flip_x": true,
+     "stil": "80S54-12",
+     "takim": {
+      "lip_cut_tool_size": 46.0,
+      "notch_tool_size": 48.0,
+      "swage_tool_size": 55.0,
+      "service_hole_size": 12.0,
+      "tab_size": 50.0,
+      "cut_clearance": 1.0
+     },
+     "islem_skp": {
+      "DIMPLE": [
+       9.78,
+       481.08
+      ],
+      "LIP_CUT": [],
+      "SWAGE": [
+       34.0,
+       456.86
+      ],
+      "NOTCH": [],
+      "SERVICE_HOLE": []
+     },
+     "csv_ad": "D-G1-18"
+    },
+    {
+     "kod": "Ks",
+     "tur": "KingStud",
+     "x1": 2183.0,
+     "y1": 5.0,
+     "x2": 2183.0,
+     "y2": 2495.0,
+     "boy": 2490.0,
+     "flip_x": false,
+     "stil": "80S54-12",
+     "takim": {
+      "lip_cut_tool_size": 46.0,
+      "notch_tool_size": 48.0,
+      "swage_tool_size": 55.0,
+      "service_hole_size": 12.0,
+      "tab_size": 50.0,
+      "cut_clearance": 1.0
+     },
+     "islem_skp": {
+      "DIMPLE": [
+       22.0,
+       168.0,
+       1221.99,
+       2021.99,
+       2467.99
+      ],
+      "LIP_CUT": [
+       1221.99
+      ],
+      "SWAGE": [
+       34.0,
+       168.0,
+       2021.99,
+       2456.0
+      ],
+      "NOTCH": [],
+      "SERVICE_HOLE": [
+       605.03,
+       1824.99
+      ]
+     },
+     "csv_ad": "D-G1-19"
+    },
+    {
+     "kod": "Ng",
+     "tur": "Nog",
+     "x1": 2161.0,
+     "y1": 1227.0,
+     "x2": 2505.0,
+     "y2": 1227.0,
+     "boy": 344.0,
+     "flip_x": false,
+     "stil": "80S54-12",
+     "takim": {
+      "lip_cut_tool_size": 46.0,
+      "notch_tool_size": 48.0,
+      "swage_tool_size": 55.0,
+      "service_hole_size": 12.0,
+      "tab_size": 50.0,
+      "cut_clearance": 1.0
+     },
+     "islem_skp": {
+      "DIMPLE": [
+       22.0,
+       322.0
+      ],
+      "LIP_CUT": [],
+      "SWAGE": [
+       34.0,
+       310.0
+      ],
+      "NOTCH": [],
+      "SERVICE_HOLE": [
+       171.96
+      ]
+     },
+     "csv_ad": "D-G1-20"
+    },
+    {
+     "kod": "St",
+     "tur": "Stud",
+     "x1": 2483.0,
+     "y1": 5.0,
+     "x2": 2483.0,
+     "y2": 2495.0,
+     "boy": 2490.0,
+     "flip_x": true,
+     "stil": "80S54-12",
+     "takim": {
+      "lip_cut_tool_size": 46.0,
+      "notch_tool_size": 48.0,
+      "swage_tool_size": 55.0,
+      "service_hole_size": 12.0,
+      "tab_size": 50.0,
+      "cut_clearance": 1.0
+     },
+     "islem_skp": {
+      "DIMPLE": [
+       22.0,
+       1221.99,
+       2467.99
+      ],
+      "LIP_CUT": [
+       1221.99
+      ],
+      "SWAGE": [
+       34.0,
+       2456.0
+      ],
+      "NOTCH": [],
+      "SERVICE_HOLE": [
+       605.03,
+       1824.99
+      ]
+     },
+     "csv_ad": "D-G1-21"
+    }
+   ]
+  }
+ ]
+}
