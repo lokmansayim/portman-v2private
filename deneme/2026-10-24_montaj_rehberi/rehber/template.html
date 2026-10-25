@@ -958,7 +958,7 @@ function showInfo(obj) {
   $('infoK').textContent = inf.kod ? `Kimlik kartı ${inf.kod}` : 'Kimlik kartı henüz yok';
   $('infoK').className = 'ik' + (inf.kod ? '' : ' none');
   $('infoT').textContent = inf.ad;
-  $('infoD').innerHTML = inf.satir.filter(r => r[1]).map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join('');
+  $('infoD').innerHTML = inf.satir.filter(r => r && r[1]).map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join('');
   $('info').hidden = false;
 }
 $('infoX').addEventListener('click', clearSel);
