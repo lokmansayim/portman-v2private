@@ -493,13 +493,24 @@ def test_ic_duvardaki_dis_kapi_giris_sayilmaz(DK):
     E = _katman(ie, DK)
     assert "giriş kapısı yok; sigorta kutusu ve zil YATAK ODASI 1 odasının uzun duvarına konuldu" in [u["metin"] for u in E["uyarilar"]]
     assert [k["metre"] for k in E["kablo"]] == [126, 110] and _kuraldan(E) == _liste(ie)
+    # anahtarın kapısı da giriş sayılmayan bu kapıyı öne almaz: holün anahtarı planın ilk kapısında (hol–banyo), sirkülasyon eşit
+    assert [p["aciklama"] for p in E["parcalar"] if p["parca"] == "anahtar_tekli" and p["bilgi"]["Mahal"] == "HOL"] == [
+        "HOL, kapının kol tarafı, x boyunca 280"]
 
 
 def test_yedek_anahtarin_notu(DK, monkeypatch):
-    """Yedek yerdeki anahtarın duvarında da açıklık dışında yer yoksa bunu söyleyen uyarı yazılır (ALTIN'in kapısız mutfağı; bütün duvarlar
-    açıklık sayılarak). Sayı yine kural."""
+    """Yedek anahtar açıklık dışında yeri olan ilk uzun duvara konur; iki duvarda da yer yoksa bunu söyleyen uyarı yazılır (ALTIN'in kapısız
+    mutfağı: önce yalnız ilk uzun duvar, sonra bütün duvarlar açıklık sayılarak). Sayı yine kural."""
     al = _oku(IS_EMIRLERI["ALTIN"])
-    toplam = _katman(al, DK)["toplam"]
+    E = _katman(al, DK)
+    toplam = E["toplam"]
+    ilk = EL.uzun_duvarlar(Polygon(next(o["poligon"] for o in E["odalar"] if o["ad"] == "MUTFAK")))[0]
+    asil = EL._bosluklar
+    monkeypatch.setattr(EL, "_bosluklar", lambda P, yon, yuz: [(-1e6, 1e6)] if (yon, yuz) == ilk[:2] else asil(P, yon, yuz))
+    E = _katman(al, DK)
+    a = [p for p in E["parcalar"] if p["parca"] == "anahtar_tekli" and p["bilgi"]["Mahal"] == "MUTFAK"]
+    assert [(p["bilgi"]["Yer"], p["geo"]["kutu"][4]) for p in a] == [("uzun duvar (yedek)", 378.5)] and ilk[1] == 10.0
+    assert not any("(yedek anahtar)" in u["metin"] for u in E["uyarilar"])
     monkeypatch.setattr(EL, "_bosluklar", lambda P, yon, yuz: [(-1e6, 1e6)])
     E = _katman(al, DK)
     metin = [u["metin"] for u in E["uyarilar"]]
@@ -564,8 +575,8 @@ def test_komut_elektrik_plani(komut):
         assert s in metin, s
     assert not any(x in metin for x in ("EKSİK", "Kurulmadı", "Uyarı"))
     say = copy.deepcopy(komut["say"])                                      # lejantın takım alanı kuraldan okunur
-    say["elektrik"]["degerler"]["oda_kurali"]["takim_m2"] = 20
-    assert "oda ve veranda takımı, her 20 m²'ye" in cizim._elektrik_lejanti(say)
+    say["elektrik"]["degerler"]["oda_kurali"]["takim_m2"] = 12.5
+    assert "oda ve veranda takımı, her 12,5 m²'ye" in cizim._elektrik_lejanti(say)
     from openpyxl import load_workbook
     ws = load_workbook(komut["klasor"] / "PK01_kart_katalogu.xlsx")["Sayım"]
     satir = {r[0]: r for r in ws.iter_rows(min_row=2, values_only=True)}

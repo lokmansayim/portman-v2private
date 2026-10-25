@@ -275,7 +275,7 @@ def katman(ie: dict, plan: dict, D: dict, K: dict) -> dict:
         def komsu(k):
             return next((a for a in k["p"].acilim.arasi if a != o["ad"]), o["ad"])
         aday = [(i, k) for i, k in enumerate(kapilar) if o["ad"] in k["p"].acilim.arasi]
-        return [k for _, k in sorted(aday, key=lambda x: (x[1]["p"].acilim.tur != "dis_kapi", -kapi_sayisi[komsu(x[1])], x[0]))]
+        return [k for _, k in sorted(aday, key=lambda x: (x[1] is not giris, -kapi_sayisi[komsu(x[1])], x[0]))]
 
     for o in odalar:
         poly, ad = o["poly"], o["ad"]
@@ -311,7 +311,9 @@ def katman(ie: dict, plan: dict, D: dict, K: dict) -> dict:
             if len(yerler) < len(anahtar):
                 eksik = len(anahtar) - len(yerler)
                 uyarilar.append({"katman": KATMAN, "metin": f"{ad}: {neden}; {eksik} anahtar uzun duvara konuldu"})
-                y, bos = _duvar_yerleri(duvarlar[:1], eksik, P, O, S["anahtar"][0] / 2, "uzun duvar (yedek)")
+                yari = S["anahtar"][0] / 2                                     # yedek duvar: açıklık dışında yeri olan ilk uzun duvar
+                yedek = [w for w in duvarlar if _serbest(w[2] + yari, w[3] - yari, _bosluklar(P, w[0], w[1]), O["bosluk_payi"] + yari)][:1]
+                y, bos = _duvar_yerleri(yedek or duvarlar[:1], eksik, P, O, yari, "uzun duvar (yedek)")
                 yerler += y
                 if bos:
                     uyarilar.append({"katman": KATMAN, "metin": f"{ad}: {bos} (yedek anahtar)"})
