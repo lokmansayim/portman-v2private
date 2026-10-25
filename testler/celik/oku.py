@@ -290,6 +290,8 @@ def oku(yol: Path, uzanti: str, sayfa: int | None = None, sayac: dict | None = N
     Excel sayfası (PDF'te None)}."""
     uzanti = uzanti.lower()
     if uzanti == ".pdf":
+        if sayfa is not None:
+            raise OkumaHatasi("PDF'te sayfa seçilmez")
         c = pdf_celik(yol)
     elif uzanti in (".xlsx", ".xlsm"):
         c = excel_celik(yol, sayfa)

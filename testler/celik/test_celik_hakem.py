@@ -568,7 +568,8 @@ def okunmaz(monkeypatch):
 
 def test_kiyas_acik_liste(depo, tmp_path):
     k = K.kiyasla(depo["bizim"]("DN01"), depo["acik"], depo["pafta"], kok=depo["kok"])
-    assert k["kapi"] == {"sonuc": "geçti", "fark_yuzde": round(100 * (894 - 874) / 874, 2), "pay_yuzde": 3.0, "kapi_disi": []}
+    assert k["kapi"] == {"sonuc": "geçti", "fark_yuzde": round(100 * (894 - 874) / 874, 2), "pay_yuzde": 3.0, "kapi_disi": [],
+                         "kapi_disi_bizim_kg": None, "bizim_kapi_kg": 894.0, "gercek_kapi_kg": 874.0}
     T = {r["tur"]: r for r in k["tablo"]}
     assert (T["makas"]["gercek_adet"], T["makas"]["bizim_adet"], T["makas"]["pafta_etiket"]) == (6, 7, 1)
     assert T["duvar_paneli"]["pafta_liste"] == "farklı"
@@ -600,15 +601,63 @@ def test_sonuc_kaydi_okunan_sayfayi_yazar(depo):
 def test_kor_listede_sayfa_secilmez(depo, okunmaz):
     _ac(depo)
     with pytest.raises(Durdu) as e:
-        K.kiyasla(depo["bizim"]("DN02"), depo["kor"], kok=depo["kok"], sayfa=0)
+        K.kiyasla(depo["bizim"]("DN02"), depo["kor"], depo["pafta2"], kok=depo["kok"], sayfa=0)   # pafta da okunmadan
     assert e.value.adim == 3 and "sayfa seçilmez" in e.value.neden
+
+
+def test_pdf_te_sayfa_secilmez(depo):
+    with pytest.raises(oku.OkumaHatasi):
+        oku.oku(depo["acik_pdf"], ".pdf", 3)
+    assert oku.oku(depo["acik_pdf"], ".pdf")["sayfa"] is None
+    assert K.sonuc_kaydi(K.kiyasla(depo["bizim"]("DN01"), depo["acik"], kok=depo["kok"]))["muhur"]["liste_sayfasi"] == 0
+
+
+@pytest.mark.parametrize("ek", [{"durum": "acik"}, {"sayfa": 0}])
+def test_acilis_kaydinda_fazla_alan_reddedilir(depo, okunmaz, ek):
+    a = {"karar": "uydurma karar", "tarih": "2026-10-25", "sha256": _sha(depo["kor"]), "liste_commit": _liste_commit(depo)[:7], **ek}
+    _muhur_degistir(depo, lambda m: m["acilislar"].update({"DN-02": a}))
+    with pytest.raises(Durdu) as e:
+        K.kiyasla(depo["bizim"]("DN02"), depo["kor"], kok=depo["kok"])
+    assert e.value.adim == 3 and "alanları" in e.value.neden
+
+
+def test_kendi_listemiz_yalniz_projenin_yolundan(depo, okunmaz):
+    """Aynı commit'te ikinci bir aday liste (başka klasörde ya da başka adla) açılış kaydıyla kıyaslanamaz: projenin tek listesi."""
+    _ac(depo)
+    for yol in (depo["cel"] / "projeler" / "DN02b" / "bizim_liste.json", depo["kok"] / "docs" / "aday.json"):
+        yol.parent.mkdir(parents=True, exist_ok=True)
+        yol.write_text(depo["bizim"]("DN02").read_text(encoding="utf-8"), encoding="utf-8")
+        _git(depo["kok"], "add", ".")
+        _git(depo["kok"], "commit", "-q", "-m", "aday")
+        with pytest.raises(Durdu) as e:
+            K.kiyasla(yol, depo["kor"], kok=depo["kok"])
+        assert e.value.adim == 1 and "yolundan okunur" in e.value.neden
+
+
+@pytest.mark.parametrize("isaret", ["--assume-unchanged", "--skip-worktree"])
+def test_git_isaretiyle_gizlenen_degisiklik_durur(depo, okunmaz, isaret):
+    """`git status`'u susturan işaret konup commit'siz açılış kaydı yazılırsa araç HEAD'le baytı kıyaslar ve durur."""
+    _git(depo["kok"], "update-index", isaret, "testler/celik/muhur.json")
+    m = _oku(depo["muhur"])
+    m["acilislar"]["DN-02"] = {"karar": "commit'siz", "tarih": "2026-10-25", "sha256": _sha(depo["kor"]), "liste_commit": _liste_commit(depo)[:7]}
+    depo["muhur"].write_text(json.dumps(m, ensure_ascii=False), encoding="utf-8")
+    with pytest.raises(Durdu) as e:
+        K.kiyasla(depo["bizim"]("DN02"), depo["kor"], kok=depo["kok"])
+    assert e.value.adim == 2 and "HEAD" in e.value.neden
+    _git(depo["kok"], "update-index", isaret.replace("--", "--no-"), "testler/celik/muhur.json")
+    _git(depo["kok"], "checkout", "--", "testler/celik/muhur.json")
+    _git(depo["kok"], "update-index", isaret, "testler/celik/projeler/DN01/bizim_liste.json")
+    depo["bizim"]("DN01").write_text(json.dumps({"kod": "DN-01", "satirlar": BIZIM[:1]}, ensure_ascii=False), encoding="utf-8")
+    with pytest.raises(Durdu) as e:
+        K.kiyasla(depo["bizim"]("DN01"), depo["acik"], kok=depo["kok"])
+    assert e.value.adim == 1 and "HEAD" in e.value.neden
 
 
 def test_gecmeyen_kapinin_farki_kayda_girmez(depo):
     k = K.kiyasla(depo["bizim"]("DN01"), depo["acik"], kok=depo["kok"])
     k["kapi"] = K.kg_kapisi(1000, 874) | {"kapi_disi": []}
     s = K.sonuc_kaydi(k)["celik_kg_kapisi"]
-    assert s == {"sonuc": "geçmedi", "pay_yuzde": 3.0, "kapi_disi": [], "fark_yuzde": None}
+    assert s == {"sonuc": "geçmedi", "pay_yuzde": 3.0, "kapi_disi": [], "kapi_disi_bizim_kg": None, "fark_yuzde": None}
 
 
 @pytest.mark.parametrize("bizim_kg,sonuc", [(874 * 1.03, "geçti"), (874 * 0.97, "geçti"), (874 * 1.0301, "geçmedi"),
@@ -651,6 +700,17 @@ def test_kapi_disi_turun_kgli_satiri_da_disarida():
     bk, gk, disi = K.kapi_kg(b, g)
     assert (bk, gk, disi) == (1060.0, 1000.0, ["c_profil"])
     assert K.kg_kapisi(bk, gk)["sonuc"] == "geçmedi", "+6 %; C profil gerçek yanda kalsaydı +2,9 % geçerdi"
+
+
+@pytest.mark.parametrize("c_kg,sonuc", [(30.0, "geçti"), (30.01, "koşulmadı"), (300.0, "koşulmadı"), (None, "koşulmadı")])
+def test_kapi_disinda_kalan_kg_imiz_sinirli(c_kg, sonuc):
+    """Kapı dışı türe hangi satırın gireceğini öneren seçer: dışarıda kalan kg'ımız bilinmeli ve gerçek kapı kg'ının %3'ünü geçmemeli."""
+    g = {"kgsiz_turler": ["c_profil"], "turler": {"duvar_paneli": {"kg": 1000.0}, "c_profil": {"kg": None}}}
+    b = K.bizim_celik([{"grup": "Çelik panel", "tur": "duvar_paneli", "malzeme": "Duvar paneli", "adet": 10, "kg": 1000.0},
+                       {"grup": "Çelik panel", "tur": "c_profil", "malzeme": "Boy C profil", "adet": 6, "kg": c_kg}])
+    k = K.kapi(b, g)
+    assert k["sonuc"] == sonuc and k["kapi_disi"] == ["c_profil"] and k["kapi_disi_bizim_kg"] == c_kg
+    assert K.kapi(b, {"kgsiz_turler": [], "turler": {"duvar_paneli": {"kg": 1000.0}}})["kapi_disi_bizim_kg"] is None
 
 
 def test_kg_hucresi_bos_ile_okunamayan_ayri():
@@ -764,7 +824,7 @@ def test_acilis_sonradan_degistirilirse_durur(depo, okunmaz):
     ("çift", "pafta2", None, "kapali"),                      # çift katlı çıkan kör proje kapalı sayılır, açılış kaydıyla açılır
     ("tek", "pafta2", None, "kor"),
     ("tek", "yok", 3, "paftasına bağlı değil"),            # SHA'sız pafta kaydı ve SHA'sız kat kaydı (None == None geçmez)
-    ("tek", "anahtarsiz", 3, "paftasına bağlı değil"),
+    ("tek", "anahtarsiz", 3, "alanları"),
 ])
 def test_kati_belirsiz_kor_liste(depo, kat, pafta_ad, adim, beklenen):
     def belirsiz(m):

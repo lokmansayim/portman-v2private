@@ -61,7 +61,9 @@ DOSYA_TURLERI = (*LISTELER, PAFTA, "montaj paftası (DWG)", "pafta sayfası", "d
 KG_PAYI = 0.03                       # çelik kg kapısı (pano 91)
 EKLENEBILIR = ("acilislar", "ilk_indirmeler", "kat_kayitlari")   # mühürde yalnız ekleme yapılan bölümler
 # Mühürün dondurulmuş bölümlerinin izi (`donmus_iz`); değişirse hakem değişikliğidir.
-MUHUR_IZI = "5037dd730180f32502f281a80efdacef8b433a921f1803a9862907136ce1cff4"
+MUHUR_IZI = "311e56af37811219e2419cf884f74ade0f6f696537b4a7f94a28d5de3182704c"
+ACILIS_ALANLARI = {"karar", "tarih", "sha256", "liste_commit"}
+KAT_ALANLARI = {"kat", "tarih", "dayanak", "pafta_sha256"}
 TUR_ADLARI = {"duvar_paneli": "Duvar paneli", "kolon_kiris": "Kolon-kiriş paneli", "makas": "Makas", "cati_paneli": "Çatı paneli",
               "tavan_paneli": "Tavan paneli", "baca_paneli": "Baca paneli", "c_profil": "Boy C profil"}
 
@@ -106,12 +108,26 @@ def muhur_dogrula(muhur_yol: Path, kok: Path) -> tuple[dict, dict]:
     her commit'te eklenebilir bölümlere yalnız ekleme yapılmış."""
     muhur_yol, kok = Path(muhur_yol), Path(kok)
     kayit = kayitli_mi(muhur_yol, kok, 2)
+    head_ile_ayni(muhur_yol, kok, 2)
     muhur = muhur_oku(muhur_yol)
     if muhur_yol.resolve() == MUHUR.resolve() and donmus_iz(muhur) != MUHUR_IZI:
         raise Durdu(2, "mühürün dondurulmuş bölümleri değişmiş (iz tutmuyor): hakem değişikliği, beyanla ve Patron'un onayıyla gelir; "
                        "araç durdu")
     gecmis_denetle(kok, muhur_yol.resolve().relative_to(kok.resolve()).as_posix())
     return kayit, muhur
+
+
+def head_ile_ayni(yol: Path, kok: Path, adim: int) -> None:
+    """Dosyanın baytı HEAD'deki sürümüyle aynı (`git status`'u susturan `assume-unchanged` ya da `skip-worktree` işareti de olsa)."""
+    rel = Path(yol).resolve().relative_to(Path(kok).resolve()).as_posix()
+    r = subprocess.run(["git", "-C", str(kok), "show", f"HEAD:{rel}"], capture_output=True)
+    if r.returncode != 0 or r.stdout != Path(yol).read_bytes():
+        raise Durdu(adim, f"{Path(yol).name} HEAD'deki commit'le bayt bayt aynı değil (commit'siz değişiklik ya da git işareti); araç durdu")
+
+
+def kod_klasoru(kod: str) -> str:
+    """Kendi listemizin klasörü: "ÇP-06" → "CP06"."""
+    return kod.replace("Ç", "C").replace("-", "")
 
 
 def gecmis_denetle(kok: Path, yol: str) -> None:
@@ -122,15 +138,27 @@ def gecmis_denetle(kok: Path, yol: str) -> None:
         for c in (sinir.read_text().split() if sinir.is_file() else []):
             if _git(kok, "cat-file", "-e", f"{c}:{yol}").returncode == 0:
                 raise Durdu(2, "depo sığ klon ve mühürün geçmişi sınırın ötesinde (`git fetch --unshallow` sonra yeniden); araç durdu")
-    kenarlar = [x.split() for x in _git(kok, "rev-list", "--full-history", "--parents", "HEAD", "--", yol).stdout.splitlines()]
+    def bozuk(neden):
+        raise Durdu(2, f"mühürün geçmişi okunamadı ({neden}); araç durdu")
+    r = _git(kok, "rev-list", "--full-history", "--parents", "HEAD", "--", yol)
+    if r.returncode != 0:
+        bozuk("rev-list")
+    kenarlar = [x.split() for x in r.stdout.splitlines()]
+    if not kenarlar:
+        bozuk("dosyanın commit'i yok")
     commitler = sorted({c for x in kenarlar for c in x})
     sorgu = "".join(f"{c}:{yol}\n" for c in commitler)
-    cikti = subprocess.run(["git", "-C", str(kok), "cat-file", "--batch-check=%(objectname)"], input=sorgu, capture_output=True,
-                           text=True).stdout.splitlines()
+    r = subprocess.run(["git", "-C", str(kok), "cat-file", "--batch-check=%(objectname)"], input=sorgu, capture_output=True, text=True)
+    cikti = r.stdout.splitlines()
+    if r.returncode != 0 or len(cikti) != len(commitler):
+        bozuk("cat-file")
     blob = {c: (b if not b.endswith("missing") else None) for c, b in zip(commitler, cikti)}
     surum: dict = {None: {}}
     for b in set(blob.values()) - {None}:
-        surum[b] = json.loads(_git(kok, "cat-file", "-p", b).stdout)
+        r = _git(kok, "cat-file", "-p", b)
+        if r.returncode != 0:
+            bozuk(f"nesne {b[:12]}")
+        surum[b] = json.loads(r.stdout)
     for c, *ebeveynler in kenarlar:
         for e in ebeveynler:
             if blob[e] != blob[c]:
@@ -186,6 +214,8 @@ def etkin_durum(kayit: dict, muhur: dict, kod: str) -> str:
     kk = (muhur.get("kat_kayitlari") or {}).get(kod) or {}
     if kk.get("kat") not in ("tek", "çift"):
         raise Durdu(3, f"{kod} kat sayısı belirsiz: önce paftadan kat kaydı `kat_kayitlari`'na ayrı commit'le yazılmalı; liste açılmaz")
+    if set(kk) != KAT_ALANLARI:
+        raise Durdu(3, f"{kod} kat kaydının alanları {sorted(KAT_ALANLARI)} olmalı ({sorted(kk)}); liste açılmaz")
     ps = kk.get("pafta_sha256")
     if not (isinstance(ps, str) and re.fullmatch(r"[0-9a-f]{64}", ps)) or not any(
             kayit_ozeti(r, muhur) == ps for r in muhur["dosyalar"] if r["kod"] == kod and r["tur"] in (PAFTA, "pafta sayfası")):
@@ -199,7 +229,7 @@ def acilabilir_mi(kayit: dict, muhur: dict, kod: str, liste: dict | None) -> dic
     ise (cevap) yalnız açık kayıt açılır."""
     acilis = muhur.get("acilislar", {}).get(kod)
     if kayit["durum"] == "acik":
-        return {"durum": "acik", **(acilis or {})}
+        return {**(acilis or {}), "durum": "acik", "kayit_durumu": "acik"}
     if kayit["durum"] in ("kor", "kapali"):
         if liste is None:
             raise Durdu(3, f"{kod} listesi {'kör' if kayit['durum'] == 'kor' else 'kapalı'}: cevabı kıyastan önce çıkarılmaz; "
@@ -208,13 +238,15 @@ def acilabilir_mi(kayit: dict, muhur: dict, kod: str, liste: dict | None) -> dic
         ad = "kör" if durum == "kor" else "kapalı"
         if not acilis or not str(acilis.get("karar") or "").strip():
             raise Durdu(3, f"{kod} listesi {ad}: Patron'un açılış kaydı yok; liste açılmaz")
+        if set(acilis) != ACILIS_ALANLARI:
+            raise Durdu(3, f"{kod} açılış kaydının alanları {sorted(ACILIS_ALANLARI)} olmalı ({sorted(acilis)}); liste açılmaz")
         if not acilis.get("sha256") or acilis.get("sha256") != kayit_ozeti(kayit, muhur):
             raise Durdu(3, f"{kod} açılış kaydı bu dosya için değil (SHA-256 {str(acilis.get('sha256') or 'yok')[:12]}…); liste açılmaz")
         c = str(acilis.get("liste_commit") or "")
         if len(c) < 7 or not liste["commit"].startswith(c):
             raise Durdu(3, f"{kod} açılış kaydındaki liste commit'i ({c or 'yok'}) kendi listemizin commit'i değil "
                            f"({liste['commit'][:7]}); liste açılmaz")
-        return {"durum": durum, "kayit_durumu": kayit["durum"], **acilis}
+        return {**acilis, "durum": durum, "kayit_durumu": kayit["durum"]}
     raise Durdu(3, f"kayıt durumu {kayit['durum']}: liste değil")
 
 
@@ -268,6 +300,25 @@ def kapi_kg(bizim: dict, gercek: dict) -> tuple:
     v = [x["kg"] for t, x in bizim["turler"].items() if t not in cikan]
     g = [x["kg"] for t, x in gercek["turler"].items() if t not in cikan]
     return (None if not v or None in v else round(sum(v), 3)), (round(sum(g), 3) if g and None not in g else None), cikan
+
+
+def kapi_disi_bizim(bizim: dict, cikan: list) -> float | None:
+    """Kapı dışında kalan bizim kg'ımız (öneren hangi satıra o türü yazdığını seçer): None, kapı dışı türde kg'ımız yoksa."""
+    v = [bizim["turler"][t]["kg"] for t in cikan if t in bizim["turler"]]
+    return None if None in v else round(sum(v), 3)
+
+
+def kapi(bizim: dict, gercek: dict, pay: float = KG_PAYI) -> dict:
+    """Çelik kg kapısı, kapı dışı türlerle: kapı dışında kalan bizim kg'ımız bilinmeli ve gerçek kapı kg'ının payını (±%3) geçmemeli;
+    yoksa kapı koşulmaz (dışarıda kalan kütle kapının kendisinden büyük olamaz)."""
+    bk, gk, cikan = kapi_kg(bizim, gercek)
+    disarida = kapi_disi_bizim(bizim, cikan) if cikan else 0
+    sonuc = kg_kapisi(bk, gk, pay)
+    if cikan and disarida is None:
+        sonuc = {"sonuc": "koşulmadı", "neden": "kapı dışı türde kendi listemizin kg'ı yok"}
+    elif cikan and gk and disarida > pay * gk + 1e-9:
+        sonuc = {"sonuc": "koşulmadı", "neden": f"kapı dışı kalan kg'ımız ({_s(disarida)}) gerçek kapı kg'ının %{_s(100 * pay)}'ünü geçiyor"}
+    return {**sonuc, "kapi_disi": cikan, "kapi_disi_bizim_kg": disarida if cikan else None, "bizim_kapi_kg": bk, "gercek_kapi_kg": gk}
 
 
 def kg_kapisi(bizim_kg, gercek_kg, pay: float = KG_PAYI) -> dict:
@@ -360,6 +411,11 @@ def kiyasla(bizim_yol: Path, liste: Path, pafta_yol: Path | None = None, *, kok:
     liste_kaydi = kayitli_mi(bizim_yol, kok, 1)
     bizim = json.loads(bizim_yol.read_text(encoding="utf-8"))
     kod = bizim.get("kod")
+    beklenen = kok / "testler" / "celik" / "projeler" / kod_klasoru(str(kod)) / "bizim_liste.json"
+    if bizim_yol.resolve() != beklenen.resolve():
+        raise Durdu(1, f"kendi listemiz yalnız {beklenen.relative_to(kok).as_posix()} yolundan okunur (projenin tek listesi; açılış kaydı "
+                       "o dosyanın commit'ine bağlıdır)")
+    head_ile_ayni(bizim_yol, kok, 1)
     try:
         bc = bizim_celik(bizim["satirlar"])          # türler gerçek liste açılmadan denetlenir
     except oku.OkumaHatasi as e:
@@ -372,18 +428,17 @@ def kiyasla(bizim_yol: Path, liste: Path, pafta_yol: Path | None = None, *, kok:
     kiyas_listesi_mi(kayit, muhur, kod)
     # 3. açılış
     acilis = acilabilir_mi(kayit, muhur, kod, liste_kaydi)
-    pk, etiket = _pafta(pafta_yol, muhur, kod)
     if sayfa is not None and acilis["durum"] != "acik":
         raise Durdu(3, f"{kod} listesi {acilis['durum']}: kör ve kapalı listede sayfa seçilmez (çelik grubu birden çok sayfadaysa okuma "
                        "durur); liste açılmaz")
+    pk, etiket = _pafta(pafta_yol, muhur, kod)
     # 4. okuma
     okunan, okunmayan = _oku(kayit, liste, sayfa)
     # 5. kıyas
-    bizim_kg, gercek_kg, kapi_disi = kapi_kg(bc, okunan["celik"])
     return {"kod": kod, "proje": muhur["projeler"][kod], "liste": liste_kaydi, "bizim": bizim, "muhur": muhur_kaydi, "kayit": kayit,
             "ozet": kayit_ozeti(kayit, muhur), "acilis": acilis, "pafta_kaydi": pk, "pafta_ozet": pk and kayit_ozeti(pk, muhur),
             "etiket": etiket, "celik": okunan["celik"], "bizim_celik": bc,
-            "kapi": {**kg_kapisi(bizim_kg, gercek_kg), "kapi_disi": kapi_disi}, "sayfa": okunan["sayfa"],
+            "kapi": kapi(bc, okunan["celik"]), "sayfa": okunan["sayfa"],
             "tablo": celik_tablosu(okunan["celik"], bc, etiket), "gercek": okunan["satirlar"], "okunmayan": okunmayan,
             "satir": satir_satir(bizim["satirlar"], okunan["satirlar"]), "kiyas_commit": _git(kok, "rev-parse", "HEAD").stdout.strip()}
 
@@ -399,6 +454,7 @@ def sonuc_kaydi(k: dict) -> dict:
         "muhur": {"sha256": k["ozet"], "bayt": k["kayit"]["bayt"], "durum": k["acilis"]["durum"], "kayit_durumu": k["kayit"]["durum"],
                   "liste_sayfasi": k["sayfa"], "muhur_commit": k["muhur"]["commit"]},
         "celik_kg_kapisi": {"sonuc": k["kapi"]["sonuc"], "pay_yuzde": k["kapi"].get("pay_yuzde"), "kapi_disi": k["kapi"]["kapi_disi"],
+                            "kapi_disi_bizim_kg": k["kapi"].get("kapi_disi_bizim_kg"),
                             "fark_yuzde": k["kapi"].get("fark_yuzde") if k["kapi"]["sonuc"] == "geçti" else None},
         "celik_turleri_tutan": [{"tur": r["tur"], "adet": r["bizim_adet"]} for r in k["tablo"]
                                 if r["bizim_adet"] is not None and r["bizim_adet"] == r["gercek_adet"]],
@@ -453,10 +509,13 @@ def _celik_md(k: dict, bizimli: bool) -> list[str]:
     h = ["**Toplam**", "", f"**{_s(t['adet'])}**", f"**{_s(t['kg'])}**"]
     if bizimli:
         bt = k["bizim_celik"]["toplam"]
-        h += [f"**{_s(bt['adet'])}**", f"**{_s(bt['kg'])}**", f"**{_fark(bt['kg'], t['kg'])}**"]
+        h += [f"**{_s(bt['adet'])}**", f"**{_s(bt['kg'])}**", f"**{_fark(k['kapi'].get('bizim_kapi_kg'), k['kapi'].get('gercek_kapi_kg'))}**"]
     if k.get("etiket"):
         h += ["", ""]
     L.append("| " + " | ".join(h) + " |")
+    if bizimli and k["kapi"].get("kapi_disi"):
+        L += ["", f"Toplamın kg farkı kapının kapsamıyla: {', '.join(TUR_ADLARI[x] for x in k['kapi']['kapi_disi'])} iki yanda da hariç "
+                  f"(kapı dışı kalan kg'ımız {_s(k['kapi'].get('kapi_disi_bizim_kg'))})."]
     return L
 
 
@@ -576,7 +635,7 @@ def main(argv: list[str] | None = None) -> int:
             if a.sonuc_yaz:
                 sonuc_yaz(sonuc_kaydi(r), a.bizim.parent / "sonuc.json")
         else:
-            m = muhur_oku()
+            _, m = muhur_dogrula(MUHUR, KOK)               # commit'li, iz ve geçmiş tutuyor; yazılan kayıt sonra ayrı commit'le girer
             kayit = ilk_indirme(a.kod, a.dosya, a.drive_degisme, m)
             print(json.dumps(kayit, ensure_ascii=False))
             if a.yaz:
