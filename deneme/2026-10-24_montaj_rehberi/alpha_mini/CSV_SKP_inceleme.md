@@ -99,7 +99,9 @@ Sonra CSV ile kıyaslar.
 
 **Biçim.** `--yaz` üretilen işlemleri aynı biçimde CSV'ye yazar. Geri okununca işlemler, boylar ve etiketler aynı çıkar. Yalnız bir tür içindeki işlemlerin sırası eklentininkinden farklıdır; makinenin sıraya bakıp bakmadığı bilinmiyor.
 
-## 4. .bde harfleri: hipotez ve sınama
+## 4. .bde harfleri: hipotez ve sınama (kayıt için; 25 Ekim kararıyla gerekmiyor)
+
+Lokman, 25 Ekim: .bde çözülmeyecek, üretim Meosis üzerinden CSV ile yapılır (§5). Bu bölüm yalnız kayıt için duruyor.
 
 | Harf | Karşılığı (hipotez) | Kanıt |
 |---|---|---|
@@ -120,14 +122,25 @@ Sonra CSV ile kıyaslar.
   - SL x = 300'de, alt başlıktaki vida deliği x = 273'te;
   - SL'nin boyu 172, 45'lik flanşla tutuyor; 54'lükle 169 olurdu.
 
-## 5. Açık sorular
+## 5. Karar ve açık sorular
 
-1. Bu CSV hangi makineye gidiyor (UNBAK U1 mi)? Alpha Mini CSV okuyor mu? Okuyorsa Portman doğrudan bu biçimi üretebilir.
-2. Yazılımcıya:
-   - h = DIMPLE, f = LIP_CUT, w = SWAGE, n = NOTCH, s = SERVICE_HOLE doğru mu?
-   - l nedir?
-   - BDE-58 ve BDE-144 farklı ayarla mı üretildi?
-3. İkinci bir panelin CSV + SKP'si (kör test).
+**Karar (Lokman, 25 Ekim 2026).**
+- .bde'yi çözmeye gerek yok.
+- Roll-form makineleri **Meosis** programı üzerinden CSV ile üretim yapıyor. CSV'yi bugün SketchUp eklentisi MRD Frame Builder çıkarıyor.
+- Bu yüzden Portman'ın hedef biçimi bu CSV'dir. Kör testin karşılığı da .bde değil, Frame Builder'ın gerçek CSV'sidir.
+
+**Bunun sonucu.**
+- Yazılımcıya sorulan harf tablosu sorusu düştü. BDE-58 ve BDE-144 yalnız makas geometrisi için kaynak olarak kalıyor.
+- Portman'ın CSV üretmesi için üç parça gerekiyor:
+  1. **çerçeve geometrisi:** çubukların yeri, boyu ve türü, Portman'ın modelinden;
+  2. **işlem kuralları:** duvar için `duvar_kural.py` var, makas için Frame Builder'ın makas CSV'si gerekiyor;
+  3. **CSV yazıcı:** `duvar_kural.py --yaz` var.
+
+**Açık sorular.**
+1. Frame Builder'dan bir **çatı makası** CSV + SKP'si (ilk hedef makas). Mümkünse BDE-58'in projesinden, geometri iki kaynakla kıyaslanabilsin.
+2. İkinci bir duvar panelinin CSV + SKP'si; duvar kuralları onunla kör sınanır.
+3. Alpha Mini'ye giden CSV'de `PROFILE` satırı ve eklentinin takım ayarı ne olmalı (bu CSV'de 80S54-12 ve "UNBAK U1")? Makas CSV'si gelince görülür.
+4. Meosis bir tür içindeki işlemlerin sırasına bakıyor mu? Bakıyorsa Frame Builder'ın sırası da taklit edilir.
 
 ## Kanıt (25 Ekim 2026, `deneme/2026-10-24_montaj_rehberi/alpha_mini/` içinde)
 

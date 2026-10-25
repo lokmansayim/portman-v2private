@@ -1,6 +1,14 @@
 # Devir · Alpha Mini imalat çıktısı (.bde) · 24 Ekim 2026
 
-Dal: `claude/montaj-rehberi-devir`. Dosyalar: `deneme/2026-10-24_montaj_rehberi/alpha_mini/`. Deneme; canlıda değil, iş emri yok.
+> **Karar (Lokman, 25 Ekim 2026): hedef biçim .bde değil, CSV.** Roll-form makineleri Meosis programı üzerinden CSV ile üretim yapıyor. CSV'yi bugün SketchUp eklentisi MRD Frame Builder çıkarıyor.
+> - .bde'yi çözmeye gerek yok.
+> - Portman bu CSV'yi kendisi üretecek. Kör test Frame Builder'ın gerçek CSV'siyle yapılır.
+> - Aşağıdaki .bde bölümleri yalnız kayıt ve makas geometrisi için duruyor.
+>
+> Ayrıntı: `deneme/2026-10-24_montaj_rehberi/alpha_mini/CSV_SKP_inceleme.md` › §5.
+
+
+Dal: `claude/montaj-rehberi-devir` (25 Ekim'den beri iş `claude/optimistic-planck-0490xu` dalında sürüyor; o dal bunu içerir). Dosyalar: `deneme/2026-10-24_montaj_rehberi/alpha_mini/`. Deneme; canlıda değil, iş emri yok.
 
 ## Amaç
 
@@ -98,7 +106,9 @@ Ayrıntı ve kanıt: `deneme/2026-10-24_montaj_rehberi/alpha_mini/CSV_SKP_incele
   - "altıncı istasyon" büyük olasılıkla dudak kesme.
 - **BDE-144 başka takım ayarıyla üretilmiş.** f her çaprazda bir, w uçtan 20–33. Kör test için Alpha Mini'nin bugünkü ayarı sorulmalı.
 - **CSV'nin profili 80S54-12 (1,2 mm), takım ayarı "UNBAK U1".** Alpha Mini 0,8'in makas profilinden farklı. Hangi makineye gittiği ve Alpha Mini'nin CSV okuyup okumadığı soruldu.
-- **Sıra.**
-  - Sorular: Lokman'a makine ve CSV; yazılımcıya harf tablosu.
-  - İkinci panel geldiğinde gerçek kör test.
-  - İE-16 planı hâlâ Lokman'ın onayını bekliyor.
+- **Sıra (karardan sonra).**
+  1. Lokman'dan Frame Builder'ın bir çatı makası CSV + SKP'si; ilk hedef makas.
+  2. Makas işlem kuralları çıkarılır; `duvar_kural.py`'nin makas karşılığı yazılır.
+  3. İkinci bir duvar paneliyle duvar kuralları kör sınanır.
+  4. İE-16 "Alpha Mini CSV çıktısı" planı: Plan modu, Lokman'ın onayı. Kabul koşulu: Frame Builder CSV'siyle kör test (çubuk sayısı, boylar ±1 mm, işlem türleri ve konumları ±1 mm, etiket).
+  - Yazılımcıya harf tablosu sorusu düştü.
