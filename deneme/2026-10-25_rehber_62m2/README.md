@@ -49,7 +49,7 @@ Bir bayi projesinin (900 × 600 cm, veranda üstünde cumba) montaj rehberi. Kay
 - **İç duvar omegası.** İç duvar üstlerine 60'lık duvar omegası: 6,5 cm açıklık (6 cm pano + H sacları), 3 cm derinlik, 3 cm kulaklar (`omega_duvar` `tur='ic'`, 375'lik parçalar, kapı üstlerinden kesintisiz).
 - **Ters tavan (adım 14).** Tavan omegalarının altına 12,5 mm alçıpan 120 × 250 (banyoda yeşil), verandada boardex 120 × 240.
 - **Çatı izolasyonu (adım 16).** 10 cm rulo cam yünü, her makas aralığına bir şerit; cumbada (veranda) makas yönünde yatay iki şerit; rehberde rulo açılarak serilir (`anim.serme`; rulo `userData.gecici`, GLB'ye girmez).
-- **Saçak, alın ve dere birleşimi** (Lokman'ın gönderdiği ev fotoğraflarına göre). İniş ağzı derenin ucunda, alın sacının altında; kaz boynu çapraz inip köşede duvara (cumbada veranda kolonuna) döner. Saçak sacının alnı derenin bütün boyunca köşeye kadar uzar (`SACAK` `f0`/`f1`); alın sacının alt ucu derenin ucunu kapatır.
+- **Saçak, alın ve dere birleşimi** (Lokman'ın gönderdiği ev fotoğraflarına göre). Köşede iniş ağzı derenin uç kısmında, borunun hizasında; kaz boynu duvara (cumbada veranda kolonuna) dik döner, boru köşe direği kaplamasının (13 cm) yanından iner. Saçak sacının alnı derenin bütün boyunca köşeye kadar uzar (`SACAK` `f0`/`f1`); alın sacının alt ucu derenin ucunu kapatır.
 - **Genel çatı yüzü sistemi.**
   - Her yüz yerel s (eğim boyunca), t (saçak boyunca), n (dik) koordinatlarında kurulur.
   - Levhalar dışbükey çokgen kırpmayla dere hattında kesilir.
@@ -61,7 +61,7 @@ Bir bayi projesinin (900 × 600 cm, veranda üstünde cumba) montaj rehberi. Kay
 1. **Trapez dizilimi.** 100'lük levhayla kalkan kenarından; cumbada 10 parça (listede 8).
 2. **Kesitler.** PK-01'deki köşe, Z, C kapama, saçak ve alın sacı kesitleri aynen alındı.
 3. **Alın sacı.** Trapez kenar hadvesine göre ~9 cm (OSB yok, hadve 27 mm).
-4. **Dere iç köşesi.** Cumba sağ deresi ön dereye iç köşede bağlanır. Köşede saçak altı ile kalkan saçak altı arasında modelde ince bir yarık var; sahadaki kapanışı soruldu.
+4. **Dere iç köşesi.** Cumba sağ deresi ön dereye iç köşede bağlanır. Köşede ayrı bir parça yok (Lokman'ın yakın fotoğrafı): kalkan saçak altı saçak sacının saçak altına dayanır, arada ince bir derz kalır. Modelde kalkan saçak altı duvar hizasında saçak altından ~17 cm yukarıda (makas topuğu SketchUp modelinden), köşede bir cep açılıyor; sahada nasıl kapandığı teyit bekler.
 5. **Fuga derinliği.** Paftada yok; modelde 5 mm.
 
 6. **Baş makas omegasının U dudağı** ~2 cm (ölçü verilmedi).

@@ -683,13 +683,13 @@ D.dere.hatlar.forEach((h, i) => {
   add(18, g, 30 + i, { kod: null, ad: 'Galvaniz eksiz oluk (dere)', satir: [['Bu parça', `${h.ad} hat · ${fmtc(h.a1 - h.a0)} cm (paftada ${fmtc(h.pafta)}) · iki ucunda kapak`], ['Kesit', 'K profil, 15 × 11,4 cm (38’lik açınım), boyalı antrasit'], ['Pafta', 'Makas ve dere planı: 4 hat, 16,4 m'], ['Liste', '( ANTRASİT ) METAL DERE L 4000 · 5 adet; dere kapağı 8, dere kelepçesi 40']] });
 });
 D.dere.inisler.forEach((p, i) => {
-  // İniş aparatı derenin ucunda, alın sacının hemen altında (Lokman'ın fotoğrafları); kaz boynu (2 açık dirsek) çapraz iner ve köşede
-  // duvara ya da veranda kolonuna döner; boru duvar boyunca 2 kelepçeyle iner, altta kapalı dirsek. Ortadaki inişte ağız borunun hizasında.
+  // Lokman'ın fotoğrafları (25–26.10.2026): köşede iniş aparatı derenin uç kısmında, borunun tam hizasında; kaz boynu (2 açık dirsek)
+  // duvara (verandada kolona) dik döner; boru köşe direği kaplamasının (13 cm) hemen yanından 2 kelepçeyle iner, altta kapalı dirsek.
   const h = HAT[p.hat], S = dereSerit(h), w = S.yeni(), m = mat('gutter', 18), ust = DERE_ALT;   // cm
   const kolon = p.duvar === 'veranda kolonu';
   const yuzU = (p.yuz - h.kenar) * h.out;   // duvar yüzünün yerel x'i (dışa pozitif)
-  const sw = kolon ? -145 : Math.min(D.dis[0] - 12, Math.max(12, p.s));                 // boru: duvarda ya da kolonda
-  const so = Math.min(Math.max(h.a0, h.a1) - 6, Math.max(Math.min(h.a0, h.a1) + 6, p.s));   // ağız: derenin içinde, uca yakın
+  const sw = kolon ? -145 : Math.min(D.dis[0] - 17, Math.max(17, p.s));                 // boru: köşe direği kaplamasının yanında ya da kolonda
+  const so = Math.min(Math.max(h.a0, h.a1) - 6, Math.max(Math.min(h.a0, h.a1) + 6, sw));    // ağız: borunun hizasında
   const zo = S.zOf(so), zw = S.zOf(sw), gx = SAC + 0.03 + 7.5, wx = yuzU + 4;
   const V = (x, y, z) => new THREE.Vector3(x / 100, y / 100, z / 100);
   const boru = (a, b) => { const d = new THREE.Vector3().subVectors(b, a), c = mesh(new THREE.BoxGeometry(0.06, d.length(), 0.08), m);
@@ -703,7 +703,7 @@ D.dere.inisler.forEach((p, i) => {
     const k = mesh(new THREE.BoxGeometry(0.066, 0.02, 0.088), m); k.position.copy(V(wx, hh, zw)); w.add(k);
     w.add(lb(yuzU, wx - 3, hh - 1, hh + 1, zw - 1, zw + 1, m));
   });
-  add(18, w, 40 + i * 0.4, { kod: null, ad: 'İniş borusu (dikdörtgen, oluklu)', satir: [['Bu parça', `${h.ad} hattı · ${p.duvar} boyunca`], ['Ağız', so === sw ? 'borunun hizasında' : 'derenin ucunda, alın sacının altında; kaz boynu çapraz iner'], ['Kesit', 'yaklaşık 8 × 6 cm, boyalı antrasit; bina ile birlikte iner'], ['Takım', 'iniş aparatı · 2 açık dirsek (kaz boynu) · boru L 3000 · 2 kelepçe · kapalı dirsek'], ['Pafta', '7 iniş'], ['Liste', 'iniş borusu 7, açık dirsek 14, kapalı dirsek 7, kelepçe 14']] });
+  add(18, w, 40 + i * 0.4, { kod: null, ad: 'İniş borusu (dikdörtgen, oluklu)', satir: [['Bu parça', `${h.ad} hattı · ${p.duvar} boyunca`], ['Ağız', kolon ? 'kolonun hizasında; kaz boynu kolona dik döner' : (p.s < 17 || p.s > D.dis[0] - 17) ? 'derenin köşe ucunda, borunun hizasında; kaz boynu duvara dik döner, boru köşe direğinin yanından iner (Lokman’ın fotoğrafları)' : 'borunun hizasında; kaz boynu duvara dik döner'], ['Kesit', 'yaklaşık 8 × 6 cm, boyalı antrasit; bina ile birlikte iner'], ['Takım', 'iniş aparatı · 2 açık dirsek (kaz boynu) · boru L 3000 · 2 kelepçe · kapalı dirsek'], ['Pafta', '7 iniş'], ['Liste', 'iniş borusu 7, açık dirsek 14, kapalı dirsek 7, kelepçe 14']] });
 });
 
 /* 19 · İç kapılar (K-01 kanadı; bu projede iç kapılar alıcıya ait) */

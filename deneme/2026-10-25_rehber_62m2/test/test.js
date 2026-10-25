@@ -19,7 +19,7 @@ fs.writeFileSync(tmp, `<!doctype html><html><head><meta charset="utf-8"><meta na
     const [st, kam, ad] = a.split('@');
     await p.evaluate(i => window.__montaj.goTo(+i, false), st); await p.waitForTimeout(1400);
     if (kam) { await p.evaluate(k => { const M = window.__montaj, v = k.split(',').map(Number); M.kamera(v.slice(0, 3), v.slice(3, 6)); }, kam); await p.waitForTimeout(700); }
-    await p.screenshot({ path: path.join(out, (ad || `s${String(st).padStart(2, '0')}`) + '.png') });
+    await p.screenshot({ path: path.join(out, (ad || `s${String(st).padStart(2, '0')}`) + '.png'), timeout: 180000 });
   }
   if (e.length) console.log('HATA', e);
   await b.close();

@@ -38,7 +38,7 @@ Lokman'ın Mac'indeki proje klasörü (DWG, SKP, yükleme listesi) okunarak PK-0
 5b. **Büyük pencereler:** DVR (251 × 250 çelik karkas) pencere yanları da fugalı.
 6. **Ters tavan alçıpanı** tavan omegalarından sonra (yeni adım 14; banyoda yeşil; verandada listedeki boardex).
 7. **10 cm rulo cam yünü** çatı kapanmadan (yeni adım 16): her makas aralığına bir şerit, cumbada makas yönünde yatay iki şerit; rehberde rulo açılarak serilir, kamera bütün şeritleri gösterir.
-8. **Saçak, alın ve dere birleşimi** (Lokman'ın gönderdiği ev fotoğrafları, gece). İniş ağzı derenin ucunda, alın sacının altında; kaz boynu çapraz inip köşede duvara (cumbada veranda kolonuna) döner. Saçak sacının alnı derenin boyunca köşeye kadar uzar; alın sacının alt ucu derenin ucunu kapatır.
+8. **Saçak, alın ve dere birleşimi** (Lokman'ın gönderdiği ev fotoğrafları, gece; 26 Ekim'deki yakın fotoğrafla düzeltildi). Köşede iniş ağzı derenin uç kısmında, borunun hizasında; kaz boynu duvara (cumbada veranda kolonuna) dik döner, boru köşe direği kaplamasının yanından iner. Saçak sacının alnı derenin boyunca köşeye kadar uzar; alın sacının alt ucu derenin ucunu kapatır.
 
 1 ve 2'yi "nem bariyeri ve OSB yok" ve "makas uçlarına artan betopanları döşe" cümlelerinin, gönderilen teyit listesinin 1. ve 3. maddesine cevap olduğu okumasıyla yaptım; Lokman'a söylendi.
 
@@ -50,7 +50,7 @@ Lokman'ın Mac'indeki proje klasörü (DWG, SKP, yükleme listesi) okunarak PK-0
 4. PK-01'den aynen alınan kesitler: köşe, Z, C kapama, saçak ve alın sacı.
 5. Fuga derinliği (paftada yok; modelde 5 mm).
 6. Baş makas omegasının U dudağı ~2 cm (ölçü verilmedi).
-7. Köşede saçak altı ile kalkan saçak altının birleşimi: modelde ince bir yarık var; sahada nasıl kapandığı soruldu.
+7. Köşede ayrı bir parça yok (Lokman'ın yakın fotoğrafı): kalkan saçak altı saçak sacının saçak altına dayanır, arada ince bir derz kalır. Modelde kalkan saçak altı duvar hizasında saçak altından ~17 cm yukarıda (makas topuğu SketchUp modelinden), köşede bir cep açılıyor; sahada nasıl kapandığı teyit bekler.
 
 Teyit edilenler: omega ölçüleri, alçıpan ve cam yünü dizilimi (Lokman, 25 Ekim gece).
 

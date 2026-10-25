@@ -140,6 +140,8 @@ KAM = {  # konum, hedef, objektif (mm), güneş (azimut, yükseklik)
     'kose_yan':   ((-6.6, 2.55, 2.62), (-4.78, 3.25, 2.54), 45, (160, 30)),
     'kose_ust':   ((-5.7, 4.35, 3.55), (-4.76, 3.24, 2.56), 40, (135, 45)),
     'kose_alt':   ((-5.15, 3.75, 1.98), (-4.72, 3.22, 2.49), 32, (135, 32)),
+    # Lokman'ın yakın fotoğrafının açısı (26.10.2026): arka-sağ köşe, kalkan yüzünün önünden yukarı bakış
+    'foto_kose':  ((5.6, 3.5, 1.6), (4.5, 3.02, 2.35), 16, (135, 32)),
 }
 if kip == 'gorunum':
     kp, kh, lens, (az, yuk) = KAM[sec]
