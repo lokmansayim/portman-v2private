@@ -223,6 +223,11 @@ def test_muhurun_dondurulmus_bolumleri_degismez(muhur):
         assert K.donmus_iz(m) != K.MUHUR_IZI
 
 
+def test_muhur_izi_is_emrinde_de_yazili():
+    """İzin ikinci kaydı iş emrinin hakem kuralında: mühürle izi birlikte değiştiren commit iş emrini de değiştirmek zorunda (beyan)."""
+    assert K.MUHUR_IZI in (KOK / "docs" / "is_emirleri" / "IE-16.md").read_text(encoding="utf-8")
+
+
 def test_yalniz_ekleme_kurali():
     a = {"acilislar": {"X": {"karar": "k", "sha256": "1" * 64, "liste_commit": "abcdef1"}}, "ilk_indirmeler": {}, "kat_kayitlari": {}}
     K.yalniz_ekleme([a, {**a, "ilk_indirmeler": {"d": {"sha256": "2" * 64}}}])
@@ -372,7 +377,10 @@ def test_hata_iletisinde_ad_yazilmaz():
     with pytest.raises(oku.OkumaHatasi) as e:
         oku.tur(f"{UYDURMA_AD} KUTU")
     assert "Deneme" not in str(e.value) and "Kişisi" not in str(e.value) and "…" in str(e.value)
-    assert oku.guvenli("ZEMİN KAT DIŞ CEPHE DUVAR PANELLERİ") == "ZEMIN KAT DIS CEPHE DUVAR PANELLERI"
+    assert oku.guvenli("ZEMİN KAT DIŞ CEPHE DUVAR PANELLERİ 140") == "ZEMIN KAT DIS CEPHE DUVAR PANELLERI 140"
+    for ad in (f"ÇATI {UYDURMA_TEL}", f"ÇATI {UYDURMA_TEL.replace(' ', '')}", f"DUVAR +9{UYDURMA_TEL}"):
+        g = oku.guvenli(ad)
+        assert not re.search(r"\d{4}", g) and sum(c.isdigit() for c in g) == 0, "telefon gibi sayı dizisi iletiye girmez"
 
 
 def _beklenen_celik():
@@ -446,16 +454,18 @@ def test_bilinmeyen_celik_satiri_durur(tmp_path):
 def test_pafta_etiketleri(tmp_path):
     yol = tmp_path / "pafta.pdf"
     _pafta_pdf(yol, [["D01", "D02", "D03", "D05", "K01", "DN01", "MD1", "AD01", "D01A", "M01", "M2", "M3"], ["M01", "M02", "C01", "C02"],
-                     ["MK01", "MK02", "MKP01", "KLN01", "KRS01", "KRS02", "Ç01", "TP01", "B01", "S280", "VD01"]])
+                     ["MK01", "MK02", "MKP01", "KLN01", "KRS01", "KRS02", "Ç01", "TP01", "B01", "S280", "VD01"], ["(D06)", "d07,"]])
     e = pafta.etiketler(yol)
     T = e["turler"]
-    assert {h: x["adet"] for h, x in T.items()} == {"D": 6, "K": 4, "M": 5, "C": 3, "T": 1, "B": 1}, "tek basamaklı etiket sayılır, M2/M3 birimdir"
+    assert {h: x["adet"] for h, x in T.items()} == {"D": 8, "K": 4, "M": 5, "C": 3, "T": 1, "B": 1}, \
+        "tek basamaklı etiket sayılır, noktalama atılır, küçük harf büyütülür, M2/M3 birimdir"
     assert {h: sorted(x["onekler"]) for h, x in T.items()} == {"D": ["D", "MD", "VD"], "K": ["K", "KLN", "KRS"], "M": ["M", "MK", "MKP"],
                                                                 "C": ["C", "Ç"], "T": ["TP"], "B": ["B"]}
-    assert T["D"]["onekler"]["D"]["eksik"] == [4] and T["D"]["onekler"]["D"]["en_buyuk"] == 5
+    assert T["D"]["onekler"]["D"]["eksik"] == [4] and T["D"]["onekler"]["D"]["en_buyuk"] == 7
     assert T["M"]["onekler"]["M"]["yinelenen"] == ["M01"] and T["M"]["sayfalar"] == [1, 2, 3]
     assert e["uyarilar"] == ["D: eksik numara D04", "M: birden çok yerde geçen etiket M01"]
-    assert e["taninmayan"] == {"AD": 1, "DN": 1, "S": 1}, "önek dışındaki etiket biçimli sözcük sayılmaz, bilgi olarak durur"
+    assert e["taninmayan"] == {"AD#": 1, "D#A": 1, "DN#": 1, "S#": 1}, "önek dışındaki ve harf ekli etiket sayılmaz, bilgi olarak durur"
+    assert e["birimler"] == {"M2": 1, "M3": 1}
 
 
 def test_paftada_etiketi_olmayan_tur_ayri_yazilir():
@@ -572,6 +582,28 @@ def test_kiyas_acik_liste(depo, tmp_path):
     assert "geçti" in metin and UYDURMA_AD not in metin and "acik.xlsx" not in metin
 
 
+def test_adedi_okunamayan_tur_tutan_sayilmaz(depo):
+    """Bizim yanda adedi okunamayan tür gerçek listede hiç yoksa None == None tutan değildir."""
+    satirlar = BIZIM + [{"grup": "Çelik panel", "tur": "tavan_paneli", "malzeme": "Tavan paneli", "adet": None, "kg": 5.0}]
+    depo["bizim"]("DN01").write_text(json.dumps({"kod": "DN-01", "satirlar": satirlar}, ensure_ascii=False), encoding="utf-8")
+    _git(depo["kok"], "commit", "-q", "-am", "bizim")
+    s = K.sonuc_kaydi(K.kiyasla(depo["bizim"]("DN01"), depo["acik"], kok=depo["kok"]))
+    assert "tavan_paneli" not in {x["tur"] for x in s["celik_turleri_tutan"]}
+    assert all(x["adet"] is not None for x in s["celik_turleri_tutan"])
+
+
+def test_sonuc_kaydi_okunan_sayfayi_yazar(depo):
+    assert K.sonuc_kaydi(K.kiyasla(depo["bizim"]("DN01"), depo["acik"], kok=depo["kok"], sayfa=0))["muhur"]["liste_sayfasi"] == 0
+    assert K.sonuc_kaydi(K.kiyasla(depo["bizim"]("DN01"), depo["acik"], kok=depo["kok"]))["muhur"]["liste_sayfasi"] == 0
+
+
+def test_kor_listede_sayfa_secilmez(depo, okunmaz):
+    _ac(depo)
+    with pytest.raises(Durdu) as e:
+        K.kiyasla(depo["bizim"]("DN02"), depo["kor"], kok=depo["kok"], sayfa=0)
+    assert e.value.adim == 3 and "sayfa seçilmez" in e.value.neden
+
+
 def test_gecmeyen_kapinin_farki_kayda_girmez(depo):
     k = K.kiyasla(depo["bizim"]("DN01"), depo["acik"], kok=depo["kok"])
     k["kapi"] = K.kg_kapisi(1000, 874) | {"kapi_disi": []}
@@ -604,8 +636,28 @@ def test_bizim_satirin_turu_alanindan():
 
 def test_kapi_disi_tur_iki_yanda_da_disarida():
     bizim = K.bizim_celik(BIZIM)
-    kg, disi = K.kapi_kg(bizim, {"kgsiz_turler": ["c_profil"]})
-    assert disi == ["c_profil"] and kg == 884.0
+    gercek = {"kgsiz_turler": ["c_profil"], "turler": {"duvar_paneli": {"kg": 500.0}, "c_profil": {"kg": None}}}
+    assert K.kapi_kg(bizim, gercek) == (884.0, 500.0, ["c_profil"])
+
+
+def test_kapi_disi_turun_kgli_satiri_da_disarida():
+    """Gerçek listede boy C profilin bir satırı kg'lı, öteki boş: türün kg'lı satırı da kapıya girmez (iki yan aynı kapsamda)."""
+    g = oku._ozet({"satirlar": [{"ad": "DUVAR PANELİ", "boyut": "80", "adet": 10, "kg": 1000},
+                                {"ad": "BOY C PROFİL", "boyut": "80", "adet": 3, "kg": 30}, {"ad": "BOY C PROFİL", "boyut": "80", "adet": 3, "kg": None}],
+                   "toplam": {"adet": 16, "kg": 1030}})
+    assert g["kgsiz_turler"] == ["c_profil"] and g["turler"]["c_profil"]["kg"] is None and g["toplam"]["kg"] == 1030
+    b = K.bizim_celik([{"grup": "Çelik panel", "tur": "duvar_paneli", "malzeme": "Duvar paneli", "adet": 10, "kg": 1060.0},
+                       {"grup": "Çelik panel", "tur": "c_profil", "malzeme": "Boy C profil", "adet": 6, "kg": 60.0}])
+    bk, gk, disi = K.kapi_kg(b, g)
+    assert (bk, gk, disi) == (1060.0, 1000.0, ["c_profil"])
+    assert K.kg_kapisi(bk, gk)["sonuc"] == "geçmedi", "+6 %; C profil gerçek yanda kalsaydı +2,9 % geçerdi"
+
+
+def test_kg_hucresi_bos_ile_okunamayan_ayri():
+    assert [oku._kg(v) for v in (None, "", " ", "-", "—", "125,72", 1367, "1.367")] == [None, None, None, None, None, 125.72, 1367, 1367]
+    for v in ("15 KG", "yok", "?"):
+        with pytest.raises(oku.OkumaHatasi):
+            oku._kg(v)
 
 
 def test_adedi_okunamayan_satir_tutan_sayilmaz():
@@ -711,20 +763,56 @@ def test_acilis_sonradan_degistirilirse_durur(depo, okunmaz):
     ("tek", "pafta", 3, "paftasına bağlı değil"),          # başka projenin paftası
     ("çift", "pafta2", None, "kapali"),                      # çift katlı çıkan kör proje kapalı sayılır, açılış kaydıyla açılır
     ("tek", "pafta2", None, "kor"),
+    ("tek", "yok", 3, "paftasına bağlı değil"),            # SHA'sız pafta kaydı ve SHA'sız kat kaydı (None == None geçmez)
+    ("tek", "anahtarsiz", 3, "paftasına bağlı değil"),
 ])
 def test_kati_belirsiz_kor_liste(depo, kat, pafta_ad, adim, beklenen):
-    _muhur_degistir(depo, lambda m: m["projeler"]["DN-02"].update(kat="belirsiz"))
+    def belirsiz(m):
+        m["projeler"]["DN-02"].update(kat="belirsiz")
+        m["dosyalar"].append({**m["dosyalar"][5], "drive_id": "z" * 33, "sha256": None})   # paftası henüz indirilmemiş kayıt
+    _muhur_degistir(depo, belirsiz)
     if kat:
-        _muhur_degistir(depo, lambda m: m["kat_kayitlari"].update(
-            {"DN-02": {"kat": kat, "tarih": "2026-10-26", "dayanak": "uydurma", "pafta_sha256": _sha(depo[pafta_ad])}}))
+        kk = {"kat": kat, "tarih": "2026-10-26", "dayanak": "uydurma"}
+        if pafta_ad != "anahtarsiz":
+            kk["pafta_sha256"] = None if pafta_ad == "yok" else _sha(depo[pafta_ad])
+        _muhur_degistir(depo, lambda m: m["kat_kayitlari"].update({"DN-02": kk}))
     _ac(depo)
     if adim:
         with pytest.raises(Durdu) as e:
             K.kiyasla(depo["bizim"]("DN02"), depo["kor"], kok=depo["kok"])
         assert e.value.adim == adim and beklenen in e.value.neden
     else:
-        a = K.kiyasla(depo["bizim"]("DN02"), depo["kor"], kok=depo["kok"])["acilis"]
-        assert a["durum"] == beklenen and a["kayit_durumu"] == "kor"
+        k = K.kiyasla(depo["bizim"]("DN02"), depo["kor"], kok=depo["kok"])
+        assert k["acilis"]["durum"] == beklenen and k["acilis"]["kayit_durumu"] == "kor"
+        m = K.sonuc_kaydi(k)["muhur"]
+        assert (m["durum"], m["kayit_durumu"]) == (beklenen, "kor"), "sonuç kaydı kıyastaki durumu yazar (çift çıkan kapalı)"
+
+
+@pytest.mark.parametrize("strateji", [["-s", "ours"], ["-X", "theirs"]])
+def test_birlestirmede_degisen_acilis_kaydi_durur(depo, strateji):
+    """İki dalda aynı projeye iki ayrı açılış kaydı; birleştirme birini alır. Öteki dalın kaydı değişmiş sayılır (her ebeveynle kıyas)."""
+    kok = depo["kok"]
+    dal = subprocess.run(["git", "-C", str(kok), "rev-parse", "--abbrev-ref", "HEAD"], capture_output=True, text=True).stdout.strip()
+    _git(kok, "branch", "yan")
+    _ac(depo)
+    _git(kok, "checkout", "-q", "yan")
+    a = {"karar": "başka karar", "tarih": "2026-10-26", "sha256": _sha(depo["kor"]), "liste_commit": _liste_commit(depo)[:7]}
+    _muhur_degistir(depo, lambda m: m["acilislar"].update({"DN-02": a}))
+    _git(kok, "checkout", "-q", dal)
+    _git(kok, "merge", "-q", "--no-edit", *strateji, "yan")
+    with pytest.raises(Durdu) as e:
+        K.muhur_dogrula(depo["muhur"], kok)
+    assert e.value.adim == 2 and "yalnız ekleme" in e.value.neden
+
+
+def test_sig_klonda_gecmis_eksikse_durur(depo, tmp_path):
+    _ac(depo)
+    klon = tmp_path / "klon"
+    subprocess.run(["git", "clone", "-q", "--depth", "1", f"file://{depo['kok']}", str(klon)], check=True, capture_output=True)
+    with pytest.raises(Durdu) as e:
+        K.gecmis_denetle(klon, "testler/celik/muhur.json")
+    assert e.value.adim == 2 and "sığ klon" in e.value.neden
+    K.gecmis_denetle(depo["kok"], "testler/celik/muhur.json")
 
 
 def test_kat_kaydi_sonradan_degistirilemez(depo, okunmaz):

@@ -4,21 +4,24 @@ Sıra her koşuda aynı; bir adım tutmazsa araç `Durdu` ile durur ve sonrakine
 
 1. **Kendi listemiz kayıtlı mı?** `bizim_liste.json` depoda commit'li ve çalışma ağacında değişmemiş, çelik satırlarının türü belli (satırın
    `tur` alanı ya da adı; yalnız `kiyas`): gerçek liste okunmadan önce bizim yanımız sabittir.
-2. **Mühür tutuyor mu?** `testler/celik/muhur.json` depoda commit'li ve değişmemiş; dondurulmuş bölümlerinin izi `MUHUR_IZI`; geçmişinde
-   eklenebilir üç bölüme (`acilislar`, `ilk_indirmeler`, `kat_kayitlari`) yalnız ekleme yapılmış. Dosyanın baytı ve SHA-256'sı bu
+2. **Mühür tutuyor mu?** `testler/celik/muhur.json` depoda commit'li ve değişmemiş; dondurulmuş bölümlerinin izi `MUHUR_IZI`; bütün
+   geçmişinde (birleştirmeler ve her ebeveyn dahil; sığ klonda sınır ötesi geçmiş varsa durur) eklenebilir üç bölüme (`acilislar`,
+   `ilk_indirmeler`, `kat_kayitlari`) yalnız ekleme yapılmış. Dosyanın baytı ve SHA-256'sı bu
    projenin bir kaydıyla aynı; kayıtta SHA yoksa (ilk indirmede alınır) `ilk_indirmeler`'de bu dosyanın kaydı olmalı ve Drive saati
    mühürdekiyle aynı olmalı. `kiyas` yalnız projenin mühürde yazılı kıyas listesiyle (`projeler › kiyas_listesi`) yapılır. Tutmazsa
    dosyanın içeriği okunmaz (yalnız bayt sayısı ve özet alınır).
 3. **Açılabilir mi?** Liste kaydı `acik` olmalı. `kor` ya da `kapali` kayıt Patron'un açılış kaydıyla (`acilislar`: karar, bu dosyanın
    SHA-256'sı, kendi listemizin commit'i) açılır. Kat sayısı belirsiz kör projede önce paftadan kat kaydı (`kat_kayitlari`: kat ve okunan
-   paftanın SHA-256'sı) gerekir; çift katlı çıkan proje kapalı sayılır (D-26) ve kapalı gibi açılış kaydıyla açılır. `cevap` yalnız
+   paftanın SHA-256'sı; o SHA projenin mühürlü bir paftasının olmalı) gerekir; çift katlı çıkan proje kapalı sayılır (D-26) ve kapalı gibi
+   açılış kaydıyla açılır. Kör ve kapalı listede Excel sayfası seçilmez (çelik grubu birden çok sayfadaysa okuma durur). `cevap` yalnız
    açık listede çalışır: kör listenin cevabı kıyastan önce çıkarılmaz.
 4. **Okuma** (`oku.py`; pafta verilmişse `pafta.py`, paftanın da mühürlü olması şartıyla).
 5. **Kıyas:** çelik panel türleri (adet, kg) ve **çelik kg kapısı**: bizim toplam çelik kg'ımız gerçek listenin ±%3'ü içinde (pano 91);
-   gerçek listede kg'ı yazılmayan tür (boy C profil) iki yanda da kapı dışında kalır ve raporda yazılır. Öteki gruplar satır satır (bilgi;
+   gerçek listede bir satırının bile kg'ı yazılmamış tür (boy C profil) bütünüyle, iki yanda da kapı dışında kalır ve raporda yazılır. Öteki gruplar satır satır (bilgi;
    anahtar grup, ad ve ölçüdeki sayılar; bizim satır `liste_adi` taşıyorsa ad yerine o; adedi okunamayan satır "aynı" sayılmaz). Pafta
    verilmişse etiket sayıları listenin tür adetleriyle ve bizimkiyle yan yana (bilgi; etiketi metin olmayan türde "paftada etiket yok").
-6. **Rapor** (md): kod, m², satırlar. Ad, bayi adı ve dosya adı yazılmaz; telefona benzeyen her şey maskelenir.
+6. **Rapor** (md): kod, m², satırlar. Ad, bayi adı ve dosya adı yazılmaz; telefona benzeyen her şey maskelenir. Sonuç kaydı kıyastaki
+   durumu (çift çıkan kör proje `kapali`), kayıttaki durumu ve okunan Excel sayfasını yazar.
 
 Kaynak dosyalar depo dışında durur. Depoya yalnız tutan satırlar ve kapının sonucu girer (`sonuc.json`; prefabrik kör testinin kuralı,
 Lokman 23 Ekim 2026 "Yalnız tutanlar").
@@ -107,10 +110,31 @@ def muhur_dogrula(muhur_yol: Path, kok: Path) -> tuple[dict, dict]:
     if muhur_yol.resolve() == MUHUR.resolve() and donmus_iz(muhur) != MUHUR_IZI:
         raise Durdu(2, "mühürün dondurulmuş bölümleri değişmiş (iz tutmuyor): hakem değişikliği, beyanla ve Patron'un onayıyla gelir; "
                        "araç durdu")
-    yol = muhur_yol.resolve().relative_to(kok.resolve()).as_posix()
-    commitler = _git(kok, "log", "--reverse", "--format=%H", "--", yol).stdout.split()
-    yalniz_ekleme([json.loads(_git(kok, "show", f"{c}:{yol}").stdout) for c in commitler])
+    gecmis_denetle(kok, muhur_yol.resolve().relative_to(kok.resolve()).as_posix())
     return kayit, muhur
+
+
+def gecmis_denetle(kok: Path, yol: str) -> None:
+    """Mühürün bütün geçmişi: dosyayı değiştiren her commit ve her birleştirme (`--full-history`), her ebeveyniyle; eklenebilir bölümlerde
+    yalnız ekleme. Sığ klonda sınırdaki bir commit'te dosya varsa geçmiş eksiktir: araç durur."""
+    if _git(kok, "rev-parse", "--is-shallow-repository").stdout.strip() == "true":
+        sinir = Path(kok) / _git(kok, "rev-parse", "--git-path", "shallow").stdout.strip()
+        for c in (sinir.read_text().split() if sinir.is_file() else []):
+            if _git(kok, "cat-file", "-e", f"{c}:{yol}").returncode == 0:
+                raise Durdu(2, "depo sığ klon ve mühürün geçmişi sınırın ötesinde (`git fetch --unshallow` sonra yeniden); araç durdu")
+    kenarlar = [x.split() for x in _git(kok, "rev-list", "--full-history", "--parents", "HEAD", "--", yol).stdout.splitlines()]
+    commitler = sorted({c for x in kenarlar for c in x})
+    sorgu = "".join(f"{c}:{yol}\n" for c in commitler)
+    cikti = subprocess.run(["git", "-C", str(kok), "cat-file", "--batch-check=%(objectname)"], input=sorgu, capture_output=True,
+                           text=True).stdout.splitlines()
+    blob = {c: (b if not b.endswith("missing") else None) for c, b in zip(commitler, cikti)}
+    surum: dict = {None: {}}
+    for b in set(blob.values()) - {None}:
+        surum[b] = json.loads(_git(kok, "cat-file", "-p", b).stdout)
+    for c, *ebeveynler in kenarlar:
+        for e in ebeveynler:
+            if blob[e] != blob[c]:
+                yalniz_ekleme([surum[blob[e]], surum[blob[c]]])
 
 
 def kayit_ozeti(r: dict, muhur: dict) -> str | None:
@@ -162,8 +186,9 @@ def etkin_durum(kayit: dict, muhur: dict, kod: str) -> str:
     kk = (muhur.get("kat_kayitlari") or {}).get(kod) or {}
     if kk.get("kat") not in ("tek", "çift"):
         raise Durdu(3, f"{kod} kat sayısı belirsiz: önce paftadan kat kaydı `kat_kayitlari`'na ayrı commit'le yazılmalı; liste açılmaz")
-    if not any(kayit_ozeti(r, muhur) == kk.get("pafta_sha256") for r in muhur["dosyalar"]
-               if r["kod"] == kod and r["tur"] in (PAFTA, "pafta sayfası")):
+    ps = kk.get("pafta_sha256")
+    if not (isinstance(ps, str) and re.fullmatch(r"[0-9a-f]{64}", ps)) or not any(
+            kayit_ozeti(r, muhur) == ps for r in muhur["dosyalar"] if r["kod"] == kod and r["tur"] in (PAFTA, "pafta sayfası")):
         raise Durdu(3, f"{kod} kat kaydı bu projenin mühürlü bir paftasına bağlı değil (`pafta_sha256`); liste açılmaz")
     return "kapali" if kk["kat"] == "çift" else "kor"
 
@@ -183,7 +208,7 @@ def acilabilir_mi(kayit: dict, muhur: dict, kod: str, liste: dict | None) -> dic
         ad = "kör" if durum == "kor" else "kapalı"
         if not acilis or not str(acilis.get("karar") or "").strip():
             raise Durdu(3, f"{kod} listesi {ad}: Patron'un açılış kaydı yok; liste açılmaz")
-        if acilis.get("sha256") != kayit_ozeti(kayit, muhur):
+        if not acilis.get("sha256") or acilis.get("sha256") != kayit_ozeti(kayit, muhur):
             raise Durdu(3, f"{kod} açılış kaydı bu dosya için değil (SHA-256 {str(acilis.get('sha256') or 'yok')[:12]}…); liste açılmaz")
         c = str(acilis.get("liste_commit") or "")
         if len(c) < 7 or not liste["commit"].startswith(c):
@@ -237,10 +262,12 @@ def bizim_celik(satirlar: list[dict]) -> dict:
 
 
 def kapi_kg(bizim: dict, gercek: dict) -> tuple:
-    """Kapıya giren bizim kg'ımız: gerçek listede kg'ı yazılmayan türler (boy C profil, `oku.KG_SIZ`) iki yanda da kapı dışında kalır."""
+    """Kapıya giren kg, iki yanda: gerçek listede bir satırının bile kg'ı yazılmamış tür (boy C profil, `oku.KG_SIZ`) bütünüyle, iki yanda
+    da kapı dışında kalır (kg'lı satırları da). (bizim kg, gerçek kg, kapı dışı türler)."""
     cikan = list(gercek.get("kgsiz_turler") or [])
     v = [x["kg"] for t, x in bizim["turler"].items() if t not in cikan]
-    return (None if not v or None in v else round(sum(v), 3)), cikan
+    g = [x["kg"] for t, x in gercek["turler"].items() if t not in cikan]
+    return (None if not v or None in v else round(sum(v), 3)), (round(sum(g), 3) if g and None not in g else None), cikan
 
 
 def kg_kapisi(bizim_kg, gercek_kg, pay: float = KG_PAYI) -> dict:
@@ -346,14 +373,17 @@ def kiyasla(bizim_yol: Path, liste: Path, pafta_yol: Path | None = None, *, kok:
     # 3. açılış
     acilis = acilabilir_mi(kayit, muhur, kod, liste_kaydi)
     pk, etiket = _pafta(pafta_yol, muhur, kod)
+    if sayfa is not None and acilis["durum"] != "acik":
+        raise Durdu(3, f"{kod} listesi {acilis['durum']}: kör ve kapalı listede sayfa seçilmez (çelik grubu birden çok sayfadaysa okuma "
+                       "durur); liste açılmaz")
     # 4. okuma
     okunan, okunmayan = _oku(kayit, liste, sayfa)
     # 5. kıyas
-    bizim_kg, kapi_disi = kapi_kg(bc, okunan["celik"])
+    bizim_kg, gercek_kg, kapi_disi = kapi_kg(bc, okunan["celik"])
     return {"kod": kod, "proje": muhur["projeler"][kod], "liste": liste_kaydi, "bizim": bizim, "muhur": muhur_kaydi, "kayit": kayit,
             "ozet": kayit_ozeti(kayit, muhur), "acilis": acilis, "pafta_kaydi": pk, "pafta_ozet": pk and kayit_ozeti(pk, muhur),
             "etiket": etiket, "celik": okunan["celik"], "bizim_celik": bc,
-            "kapi": {**kg_kapisi(bizim_kg, okunan["celik"]["toplam"]["kg"]), "kapi_disi": kapi_disi},
+            "kapi": {**kg_kapisi(bizim_kg, gercek_kg), "kapi_disi": kapi_disi}, "sayfa": okunan["sayfa"],
             "tablo": celik_tablosu(okunan["celik"], bc, etiket), "gercek": okunan["satirlar"], "okunmayan": okunmayan,
             "satir": satir_satir(bizim["satirlar"], okunan["satirlar"]), "kiyas_commit": _git(kok, "rev-parse", "HEAD").stdout.strip()}
 
@@ -366,11 +396,12 @@ def sonuc_kaydi(k: dict) -> dict:
                      "kıyasın özetidir."),
         "kod": k["kod"], "tarih": datetime.now(timezone.utc).strftime("%Y-%m-%d"), "kiyas_commit": k["kiyas_commit"],
         "bizim_liste": {"yol": k["liste"]["yol"], "commit": k["liste"]["commit"]},
-        "muhur": {"sha256": k["ozet"], "bayt": k["kayit"]["bayt"],
-                  "durum": k["kayit"]["durum"], "muhur_commit": k["muhur"]["commit"]},
+        "muhur": {"sha256": k["ozet"], "bayt": k["kayit"]["bayt"], "durum": k["acilis"]["durum"], "kayit_durumu": k["kayit"]["durum"],
+                  "liste_sayfasi": k["sayfa"], "muhur_commit": k["muhur"]["commit"]},
         "celik_kg_kapisi": {"sonuc": k["kapi"]["sonuc"], "pay_yuzde": k["kapi"].get("pay_yuzde"), "kapi_disi": k["kapi"]["kapi_disi"],
                             "fark_yuzde": k["kapi"].get("fark_yuzde") if k["kapi"]["sonuc"] == "geçti" else None},
-        "celik_turleri_tutan": [{"tur": r["tur"], "adet": r["bizim_adet"]} for r in k["tablo"] if r["bizim_adet"] == r["gercek_adet"]],
+        "celik_turleri_tutan": [{"tur": r["tur"], "adet": r["bizim_adet"]} for r in k["tablo"]
+                                if r["bizim_adet"] is not None and r["bizim_adet"] == r["gercek_adet"]],
         "sayilar": k["satir"]["sayilar"],
         "tutanlar": [{"grup": x["anahtar"][0], "ad": x["anahtar"][1], "olcu": list(x["anahtar"][2]), "adet": x["bizim"]["adet"]}
                      for x in k["satir"]["satirlar"] if x["sonuc"] == "aynı"],
@@ -397,7 +428,8 @@ def _ust(k: dict) -> list[str]:
     P = k["proje"]
     L = ["| | |", "|---|---|", f"| Proje | {k['kod']} · {_s(P['m2'])} m² · {P['kat']} kat · durum {P['durum']} |",
          f"| Liste mührü | SHA-256 {k['ozet'][:12]}… · {k['kayit']['bayt']} bayt · "
-         f"{k['kayit']['tur']} {k['kayit']['uzanti']} · durum {k['kayit']['durum']} · mühür commit {k['muhur']['commit'][:7]} |"]
+         f"{k['kayit']['tur']} {k['kayit']['uzanti']} · durum {k['acilis']['durum']}"
+         f"{'' if k['acilis']['durum'] == k['kayit']['durum'] else ' (kayıtta ' + k['kayit']['durum'] + ')'} · mühür commit {k['muhur']['commit'][:7]} |"]
     if k.get("pafta_kaydi"):
         L.append(f"| Pafta mührü | SHA-256 {k['pafta_ozet'][:12]}… · {k['pafta_kaydi']['bayt']} bayt · "
                  f"{k['etiket']['sayfa_sayisi']} sayfa |")

@@ -62,14 +62,17 @@ SOZLUK = {"DUVAR", "PANEL", "PANELI", "PANELLERI", "PANELLER", "KOLON", "KIRIS",
 def guvenli(ad) -> str:
     """Hata iletisi için satır adı: yalnız çelik sözlüğündeki sözcükler ve sayılar kalır, öteki sözcükler "…" olur (kişi ya da bayi adı
     iletiye girmez)."""
-    out = []
-    for w in re.split(r"[^A-Z0-9]+", katla(ad)):
-        if not w:
+    parcalar = [w if (w in SOZLUK or w.isdigit()) else "…" for w in re.split(r"[^A-Z0-9]+", katla(ad)) if w]
+    out, sayilar = [], []
+    for w in parcalar + [None]:                          # art arda sayılar toplam 7 haneyi bulursa (telefon gibi) "…"
+        if w is not None and w.isdigit():
+            sayilar.append(w)
             continue
-        w = w if (w in SOZLUK or w.isdigit()) else "…"
-        if not (w == "…" and out and out[-1] == "…"):
+        out += ["…"] if sum(map(len, sayilar)) >= 7 else sayilar
+        sayilar = []
+        if w is not None:
             out.append(w)
-    return " ".join(out) or "…"
+    return " ".join(w for i, w in enumerate(out) if not (w == "…" and i and out[i - 1] == "…")) or "…"
 
 
 def tur(ad) -> str:
@@ -93,6 +96,20 @@ def _sayi(v):
     except (TypeError, ValueError):
         return None
     return int(x) if x == int(x) else x
+
+
+BOS = ("", "-", "—", "–")
+
+
+def _kg(v):
+    """Satırın kg'ı: hücre boşsa None (yalnız `KG_SIZ` türünde kabul edilir); yazı varsa sayı olmalı, değilse okuma durur ("15 KG" gibi
+    yazı boş sayılmaz)."""
+    if v is None or (isinstance(v, str) and v.strip() in BOS):
+        return None
+    x = _sayi(v)
+    if x is None:
+        raise OkumaHatasi(f"çelik panel satırında kg okunamadı: {guvenli(v)!r}")
+    return x
 
 
 # ------------------------------------------------------------------------------------------------------------------ Excel
@@ -131,7 +148,7 @@ def _excel_celik(ws) -> dict | None:
         if ad is None:
             continue
         satirlar.append({"ad": re.sub(r"\s+", " ", str(ad)).strip(), "boyut": _yazi(hucre.get(kol["boyut"])),
-                         "adet": _sayi(hucre.get(kol["adet"])), "kg": _sayi(hucre.get(kol["kg"]))})
+                         "adet": _sayi(hucre.get(kol["adet"])), "kg": _kg(hucre.get(kol["kg"]))})
     if kol is None:
         return None
     return {"satirlar": satirlar, "toplam": toplam}
@@ -218,7 +235,7 @@ def pdf_celik(yol: Path) -> dict:
             if not a:
                 continue
             satirlar.append({"ad": a, "boyut": " ".join(boy) or None, "adet": _sayi(adet[0]) if adet else None,
-                             "kg": _sayi(kg[0]) if kg else None})
+                             "kg": _kg(" ".join(kg)) if kg else None})
     if kol is None:
         raise OkumaHatasi("PDF'te çelik panel grubu yok")
     return {"satirlar": satirlar, "toplam": toplam}
@@ -269,7 +286,8 @@ def _toplam_satiri_mi(s: dict) -> bool:
 
 
 def oku(yol: Path, uzanti: str, sayfa: int | None = None, sayac: dict | None = None) -> dict:
-    """{"satirlar": prefabrik okuyucunun satırları (TOPLAM hariç), "celik": çelik panel satırları, türleri ve toplamı}."""
+    """{"satirlar": prefabrik okuyucunun satırları (TOPLAM hariç), "celik": çelik panel satırları, türleri ve toplamı, "sayfa": okunan
+    Excel sayfası (PDF'te None)}."""
     uzanti = uzanti.lower()
     if uzanti == ".pdf":
         c = pdf_celik(yol)
@@ -280,4 +298,4 @@ def oku(yol: Path, uzanti: str, sayfa: int | None = None, sayac: dict | None = N
         raise OkumaHatasi(f"okunamayan dosya türü: {uzanti}")
     satirlar = [s for s in kor_oku.oku(Path(yol), uzanti, sayfa, sayac) if not _toplam_satiri_mi(s)]
     _ayni_satirlar(c["satirlar"], [s for s in satirlar if celik_grubu_mu(s["grup"])])
-    return {"satirlar": satirlar, "celik": _ozet(c)}
+    return {"satirlar": satirlar, "celik": _ozet(c), "sayfa": sayfa}
