@@ -1,7 +1,8 @@
 """Çelik hakeminin pafta okuyucusu (İE-16 PR-1): montaj paftasındaki panel etiketleri.
 
-Montaj paftası PDF'inin bütün sayfalarındaki sözcükler okunur; yalnız panel etiketine uyan sözcükler sayılır. Etiket bir önek ve iki ya da
-üç basamaktır ("D01", "MK14", "KLN03", "Ç07"; önekle sayı arasında tire olabilir). Önekler mühendisin açık beş projedeki paftalarından
+Montaj paftası PDF'inin bütün sayfalarındaki sözcükler okunur; yalnız panel etiketine uyan sözcükler sayılır. Etiket bir önek ve bir ile
+üç basamaktır ("D01", "MK14", "KLN03", "Ç07", "VD1", "B8"; önekle sayı arasında tire olabilir; "D1" ile "D01" aynı numaradır). Birim olan
+"M2" ve "M3" (metrekare, metreküp) etiket sayılmaz (`BIRIMLER`). Önekler mühendisin açık beş projedeki paftalarından
 (ÇP-03, 06, 07, 13, 14; 25 Ekim 2026), liste okuyucusunun türlerine (`oku.TURLER`) bağlanır (`ONEKLER`):
 - duvar paneli: D, VD (veranda duvarı ve korkuluğu), MD (müştemilat duvarı);
 - kolon-kiriş paneli: K, KLN (kolon), KRS (kiriş);
@@ -32,8 +33,9 @@ ONEKLER = {
     "T": "tavan_paneli", "TP": "tavan_paneli",
     "B": "baca_paneli",
 }
-ETIKET = re.compile(r"^(" + "|".join(sorted(ONEKLER, key=len, reverse=True)) + r")-?(\d{2,3})$")
-ETIKET_BICIMI = re.compile(r"^([A-ZÇĞİÖŞÜ]{1,3})-?(\d{2,3})$")
+ETIKET = re.compile(r"^(" + "|".join(sorted(ONEKLER, key=len, reverse=True)) + r")-?(\d{1,3})$")
+ETIKET_BICIMI = re.compile(r"^([A-ZÇĞİÖŞÜ]{1,3})-?(\d{1,3})$")
+BIRIMLER = {"M2", "M3"}
 
 
 def etiketler(yol: Path) -> dict:
@@ -47,6 +49,8 @@ def etiketler(yol: Path) -> dict:
     for sno, sayfa in enumerate(doc, 1):
         for w in sayfa.get_text("words"):
             t = w[4].strip()
+            if t in BIRIMLER:
+                continue
             m = ETIKET.match(t)
             if m:
                 gorulen.setdefault(m.group(1), {}).setdefault(int(m.group(2)), []).append(sno)

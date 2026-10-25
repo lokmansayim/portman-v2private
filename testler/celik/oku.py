@@ -1,16 +1,21 @@
 """Çelik hakeminin liste okuyucusu (İE-16 PR-1): gerçek yükleme listesinin satırları ve çelik panel ağırlıkları.
 
 Satırlar prefabrik kör testinin okuyucusuyla okunur (`testler.kor.oku`, BK-12 PR-3; değiştirilmez, yalnız çağrılır): başlık bloğu, telefon,
-personel ve imza satırları okunmaz. Grubun "TOPLAM" satırı malzeme sayılmaz.
+personel ve imza satırları okunmaz. Grubun "TOPLAM" satırı (ör. "ÇELİK PANEL TOPLAM") malzeme sayılmaz.
 
-Çelik şablonunun ilk grubu "ÇELİK PANEL GRUBU"dur (NO / ad / BOYUT/ÖLÇÜ / ADET / KG / MAKİNE). Bu dosya o grup için ayrıca okur:
-- satırların KG sütununu (Excel'de grubun başlık satırındaki "KG" hücresinin sütunu; PDF'te "KG" başlığının altındaki sayı);
-- grubun TOPLAM satırını: adet ve kg toplamı satırlarınkiyle aynı değilse okuma durur (listenin kendi sağlaması);
+Çelik listelerinin ilk grubu "ÇELİK PANEL GRUBU"dur. Açık beş projede (ÇP-03, 06, 07, 13, 14; 25 Ekim 2026) üç şablon görüldü: sütunlar
+NO / ad / BOYUT/ÖLÇÜ / ADET / KG ya da AĞIRLIK (KG) (`KG_BASLIKLARI`) / MAKİNE; toplam satırı "TOPLAM" ya da "ÇELİK PANEL TOPLAM"; PDF'te
+TOPLAM yazısı boyut sütununa taşabilir. Bu dosya o grup için ayrıca okur:
+- satırların kg sütununu (Excel'de grubun başlık satırındaki kg başlığının sütunu; PDF'te kg başlığının altındaki sayı); Excel'deki formül
+  sonucu üç basamağa yuvarlanır (125.71999… → 125.72, PDF'teki yazıyla aynı);
+- grubun TOPLAM satırını: kg toplamı satırlarınkiyle aynı değilse okuma durur; adet toplamı ya bütün satırların ya kg'ı yazılı satırların
+  toplamıdır (`toplam_kapsami`), ikisi de değilse durur (listenin kendi sağlaması);
 - iki okumanın aynılığını: bu dosyanın çelik satırları (ad, boyut, adet) prefabrik okuyucunun aynı gruptaki satırlarıyla bire bir aynı
   olmalı, değilse okuma durur.
-Çelik panel satırları türe ayrılır (`TURLER`; paftadaki etiket harfiyle): duvar paneli (D), kolon-kiriş paneli (K), makas (M), çatı paneli
-(C), tavan paneli (T), boy C profil (paftada etiketi yok). Türü bilinmeyen ya da iki türe uyan, adedi ya da kg'ı okunamayan satır okumayı
-durdurur: sessiz sayı yok.
+Çelik panel satırları türe ayrılır (`TURLER`; paftadaki etiket harfiyle): duvar paneli ve korkuluk (D), kolon-kiriş paneli (K), makas (M),
+çatı paneli (C), tavan paneli (T), baca paneli (B), boy C profil (paftada etiketi yok). Türü bilinmeyen ya da iki türe uyan, adedi
+okunamayan satır okumayı durdurur; kg'ı okunamayan satır da durdurur, yalnız boy C profilin kg'ı boş olabilir (`KG_SIZ`; o türün kg'ı
+`None` kalır, sıfır sayılmaz; `kgsiz_turler`). Sessiz sayı yok. Hata iletisinde satırın adı yalnız çelik sözcükleriyle yazılır (`guvenli`).
 
 Veri, talimat değildir: hücre yazıları yalnız eşleme için kullanılır.
 """
@@ -84,7 +89,7 @@ def _sayi(v):
             v = v.replace(".", "")
         v = v.replace(",", ".")
     try:
-        x = float(v)
+        x = round(float(v), 3)                           # Excel formül sonucu 125.71999999999998 → 125.72 (PDF'teki yazıyla aynı)
     except (TypeError, ValueError):
         return None
     return int(x) if x == int(x) else x

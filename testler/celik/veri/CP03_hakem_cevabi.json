@@ -1,0 +1,228 @@
+{
+ "kod": "ÇP-03",
+ "m2": 69,
+ "liste_sha256": "7f343b5e4ae429626889ddcb14da93d747cf0992864dd7e3bd4bdf3c58634d4d",
+ "pafta_sha256": "39600bde0e78da5d3f20e091385f7b27b36cbf186b15bd0a53ee161d53e90dd1",
+ "celik": {
+  "satirlar": [
+   {
+    "tur": "duvar_paneli",
+    "harf": "D",
+    "boyut": "140X45X10X1,2",
+    "adet": 11,
+    "kg": 841.55
+   },
+   {
+    "tur": "duvar_paneli",
+    "harf": "D",
+    "boyut": "140X45X10X1,2",
+    "adet": 1,
+    "kg": 23.78
+   },
+   {
+    "tur": "kolon_kiris",
+    "harf": "K",
+    "boyut": "140X45X10X1,2",
+    "adet": 3,
+    "kg": 79.05
+   },
+   {
+    "tur": "kolon_kiris",
+    "harf": "K",
+    "boyut": "140X45X10X1,2",
+    "adet": 2,
+    "kg": 42.4
+   },
+   {
+    "tur": "kolon_kiris",
+    "harf": "K",
+    "boyut": "140X45X10X1,5",
+    "adet": 2,
+    "kg": 122.88
+   },
+   {
+    "tur": "kolon_kiris",
+    "harf": "K",
+    "boyut": "140X45X10X1,5",
+    "adet": 3,
+    "kg": 107.64
+   },
+   {
+    "tur": "tavan_paneli",
+    "harf": "T",
+    "boyut": "80X45X10X0,8",
+    "adet": 26,
+    "kg": 384.84
+   },
+   {
+    "tur": "makas",
+    "harf": "M",
+    "boyut": "80X45X10X0,8",
+    "adet": 14,
+    "kg": 326.36
+   },
+   {
+    "tur": "makas",
+    "harf": "M",
+    "boyut": "80X45X10X0,8",
+    "adet": 13,
+    "kg": 159.57
+   },
+   {
+    "tur": "cati_paneli",
+    "harf": "C",
+    "boyut": "80X45X10X0,8",
+    "adet": 20,
+    "kg": 404.51
+   },
+   {
+    "tur": "c_profil",
+    "harf": null,
+    "boyut": "140X45X10X1,2",
+    "adet": 3,
+    "kg": 15
+   },
+   {
+    "tur": "c_profil",
+    "harf": null,
+    "boyut": "80X45X10X0,8",
+    "adet": 3,
+    "kg": 15
+   }
+  ],
+  "turler": {
+   "duvar_paneli": {
+    "harf": "D",
+    "adet": 12,
+    "kg": 865.33
+   },
+   "kolon_kiris": {
+    "harf": "K",
+    "adet": 10,
+    "kg": 351.97
+   },
+   "tavan_paneli": {
+    "harf": "T",
+    "adet": 26,
+    "kg": 384.84
+   },
+   "makas": {
+    "harf": "M",
+    "adet": 27,
+    "kg": 485.93
+   },
+   "cati_paneli": {
+    "harf": "C",
+    "adet": 20,
+    "kg": 404.51
+   },
+   "c_profil": {
+    "harf": null,
+    "adet": 6,
+    "kg": 30.0
+   }
+  },
+  "toplam": {
+   "adet": 101,
+   "kg": 2522.58
+  }
+ },
+ "pafta": {
+  "D": {
+   "tur": "duvar_paneli",
+   "adet": 12,
+   "onekler": {
+    "D": {
+     "adet": 12,
+     "en_buyuk": 12,
+     "eksik": [],
+     "yinelenen": []
+    }
+   },
+   "sayfalar": [
+    2
+   ]
+  },
+  "K": {
+   "tur": "kolon_kiris",
+   "adet": 7,
+   "onekler": {
+    "KLN": {
+     "adet": 3,
+     "en_buyuk": 3,
+     "eksik": [],
+     "yinelenen": []
+    },
+    "KRS": {
+     "adet": 4,
+     "en_buyuk": 4,
+     "eksik": [],
+     "yinelenen": []
+    }
+   },
+   "sayfalar": [
+    2
+   ]
+  },
+  "M": {
+   "tur": "makas",
+   "adet": 27,
+   "onekler": {
+    "MKS": {
+     "adet": 14,
+     "en_buyuk": 14,
+     "eksik": [],
+     "yinelenen": []
+    },
+    "MKP": {
+     "adet": 13,
+     "en_buyuk": 13,
+     "eksik": [],
+     "yinelenen": []
+    }
+   },
+   "sayfalar": [
+    4,
+    5
+   ]
+  },
+  "C": {
+   "tur": "cati_paneli",
+   "adet": 20,
+   "onekler": {
+    "CP": {
+     "adet": 20,
+     "en_buyuk": 20,
+     "eksik": [],
+     "yinelenen": []
+    }
+   },
+   "sayfalar": [
+    6
+   ]
+  },
+  "T": {
+   "tur": "tavan_paneli",
+   "adet": 26,
+   "onekler": {
+    "TP": {
+     "adet": 26,
+     "en_buyuk": 26,
+     "eksik": [],
+     "yinelenen": []
+    }
+   },
+   "sayfalar": [
+    4
+   ]
+  }
+ },
+ "pafta_uyarilari": [],
+ "pafta_liste": {
+  "duvar_paneli": "aynı",
+  "kolon_kiris": "farklı",
+  "makas": "aynı",
+  "cati_paneli": "aynı",
+  "tavan_paneli": "aynı"
+ }
+}

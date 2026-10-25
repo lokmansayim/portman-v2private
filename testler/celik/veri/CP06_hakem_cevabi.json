@@ -1,6 +1,4 @@
 {
- "aciklama": "Hedef örneğin (ÇP-06, 90 m², tek kat) hakem cevabı (İE-16 PR-1): yükleme listesinin çelik panel grubu (tür, boyut, adet, kg; listenin Excel'i ve PDF'i aynı okunur) ve montaj paftasının panel etiketleri. Üreten komut: `python3 -m testler.celik.kiyas cevap --kod ÇP-06 --liste <liste> --pafta <pafta> --json <bu dosya>`. Listenin öteki grupları depoya girmez. Açık hedef örneğin cevabıdır; kör projelerin cevabı kıyastan önce çıkarılmaz.",
- "tarih": "2026-10-25",
  "kod": "ÇP-06",
  "m2": 90,
  "liste_sha256": "51fd4518b79d3c971a0857a8a4b156f7e1a6a52890bff615e3e9653a7741da5e",
@@ -91,37 +89,61 @@
  },
  "pafta": {
   "D": {
+   "tur": "duvar_paneli",
    "adet": 26,
-   "en_buyuk": 26,
-   "eksik": [],
-   "yinelenen": [],
+   "onekler": {
+    "D": {
+     "adet": 26,
+     "en_buyuk": 26,
+     "eksik": [],
+     "yinelenen": []
+    }
+   },
    "sayfalar": [
     2
    ]
   },
   "K": {
+   "tur": "kolon_kiris",
    "adet": 4,
-   "en_buyuk": 4,
-   "eksik": [],
-   "yinelenen": [],
+   "onekler": {
+    "K": {
+     "adet": 4,
+     "en_buyuk": 4,
+     "eksik": [],
+     "yinelenen": []
+    }
+   },
    "sayfalar": [
     2
    ]
   },
   "M": {
+   "tur": "makas",
    "adet": 13,
-   "en_buyuk": 13,
-   "eksik": [],
-   "yinelenen": [],
+   "onekler": {
+    "M": {
+     "adet": 13,
+     "en_buyuk": 13,
+     "eksik": [],
+     "yinelenen": []
+    }
+   },
    "sayfalar": [
     3
    ]
   },
   "C": {
+   "tur": "cati_paneli",
    "adet": 2,
-   "en_buyuk": 2,
-   "eksik": [],
-   "yinelenen": [],
+   "onekler": {
+    "C": {
+     "adet": 2,
+     "en_buyuk": 2,
+     "eksik": [],
+     "yinelenen": []
+    }
+   },
    "sayfalar": [
     3
    ]

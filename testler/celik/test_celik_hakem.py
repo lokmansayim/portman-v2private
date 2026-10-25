@@ -4,8 +4,10 @@ Her koşuda: gerçek mühür kaydının yapısı (ad yok, durumlar, çift katlar
 kapalı listelerin açılış kaydı olmadan reddedilmesi; uydurma çelik listesi (Excel ve PDF) ve uydurma pafta ile okuyucular; geçici bir depoda
 aracın sırası (bizim yanımız kayıtlı → mühür → açılış) ve kapının sınırı. Kaynak dosya gerekmez.
 
-Tam koşu (`PORTMAN_CELIK_KAYNAK=<klasör>`; dosyalar Drive kimliğiyle adlı, ör. `<drive_id>.xlsx`): hedef örneğin listesi (Excel ve PDF) ve
-paftası yeniden okunur, cevap `veri/CP06_hakem_cevabi.json`'la aynı olmalı; bir baytı değiştirilmiş kopya okunmadan durmalı.
+Açık beş projenin (hedef ÇP-06 ve açık dört) hakem cevapları `veri/CPnn_hakem_cevabi.json`'da: her koşuda mühürle ve kendi içinde tutarlı.
+Tam koşu (`PORTMAN_CELIK_KAYNAK=<klasör>`; dosyalar Drive kimliğiyle adlı, ör. `<drive_id>.xlsx`): beş projenin kıyas listesi (Excel) ve
+indirilmiş PDF kopyaları (ÇP-06, ÇP-13) paftalarıyla yeniden okunur, cevap kayıtlıyla aynı olmalı; bir baytı değiştirilmiş kopya okunmadan
+durmalı.
 Uydurma listedeki ad ve numara uydurmadır; numara çalışma anında kurulur (dosyada düz yazılmaz).
 """
 from __future__ import annotations
@@ -26,7 +28,7 @@ from testler.celik import kiyas as K, oku, pafta  # noqa: E402
 from testler.kor.kiyas import Durdu  # noqa: E402
 
 MUHUR = KOK / "testler" / "celik" / "muhur.json"
-CEVAP = KOK / "testler" / "celik" / "veri" / "CP06_hakem_cevabi.json"
+VERI = KOK / "testler" / "celik" / "veri"
 FONT = str(KOK / "motor" / "genel" / "font" / "LiberationSans-Regular.ttf")
 UYDURMA_AD = "Deneme Kişisi Uydurma"
 UYDURMA_TEL = "0" + "5" + "00 000 07 77"
@@ -293,16 +295,51 @@ def test_kor_ve_kapali_acilis_kaydi_olmadan_reddedilir(muhur, liste):
     assert n == 38
 
 
-def test_hedef_cevabi_mühürle_ve_kendi_icinde_tutarli(muhur):
-    c = _oku(CEVAP)
-    kayit = {r["sha256"]: r for r in muhur["dosyalar"] if r["sha256"]}
-    assert kayit[c["liste_sha256"]]["kod"] == "ÇP-06" and kayit[c["liste_sha256"]]["tur"] == K.LISTE
-    assert kayit[c["pafta_sha256"]]["kod"] == "ÇP-06" and kayit[c["pafta_sha256"]]["tur"] == K.PAFTA
+def _cevap_yolu(kod: str) -> Path:
+    return VERI / f"CP{kod[3:]}_hakem_cevabi.json"
+
+
+AYNI = "aynı"
+ACIK_CEVAPLAR = {  # kod: (çelik toplamı, paftadaki etiket sayıları, pafta ↔ liste, pafta uyarıları); 25 Ekim 2026, açık listeler
+    "ÇP-06": ({"adet": 51, "kg": 2122}, {"D": 26, "K": 4, "M": 13, "C": 2},
+              {"duvar_paneli": AYNI, "kolon_kiris": AYNI, "makas": AYNI, "cati_paneli": AYNI}, []),
+    "ÇP-03": ({"adet": 101, "kg": 2522.58}, {"D": 12, "K": 7, "M": 27, "C": 20, "T": 26},
+              {"duvar_paneli": AYNI, "kolon_kiris": "farklı", "makas": AYNI, "cati_paneli": AYNI, "tavan_paneli": AYNI}, []),
+    "ÇP-07": ({"adet": 98, "kg": 2847}, {"D": 26, "K": 7, "M": 34, "C": 17, "B": 8},
+              {"duvar_paneli": AYNI, "kolon_kiris": AYNI, "makas": AYNI, "cati_paneli": AYNI, "baca_paneli": AYNI},
+              ["MK: eksik numara MK01, MK14", "Ç: eksik numara Ç10"]),
+    "ÇP-13": ({"adet": 52, "kg": 1936.87}, {"D": 21, "K": 4},
+              {"duvar_paneli": AYNI, "kolon_kiris": AYNI, "makas": "paftada etiket yok", "cati_paneli": "paftada etiket yok",
+               "baca_paneli": "paftada etiket yok"}, []),
+    "ÇP-14": ({"adet": 80, "kg": 3059.29}, {"D": 37, "K": 6, "M": 26, "C": 5},
+              {"duvar_paneli": AYNI, "kolon_kiris": AYNI, "makas": AYNI, "cati_paneli": AYNI},
+              ["MK: eksik numara MK06", "Ç: eksik numara Ç02, Ç03, Ç04, Ç05"]),
+}
+
+
+def test_acik_cevaplar_yalniz_hedef_ve_acik_dort():
+    assert sorted(ACIK_CEVAPLAR) == sorted(["ÇP-06", *ACIK])
+    assert sorted(p.name for p in VERI.glob("*_hakem_cevabi.json")) == sorted(_cevap_yolu(k).name for k in ACIK_CEVAPLAR)
+
+
+@pytest.mark.parametrize("kod", list(ACIK_CEVAPLAR))
+def test_acik_cevap_muhurle_ve_kendi_icinde_tutarli(muhur, kod):
+    toplam, pafta_adet, pafta_liste, uyarilar = ACIK_CEVAPLAR[kod]
+    c = _oku(_cevap_yolu(kod))
+    kayit = {K.kayit_ozeti(r, muhur): r for r in muhur["dosyalar"] if K.kayit_ozeti(r, muhur)}
+    liste, pf = kayit[c["liste_sha256"]], kayit[c["pafta_sha256"]]
+    assert (c["kod"], liste["kod"], liste["tur"], pf["kod"], pf["tur"]) == (kod, kod, K.LISTE, kod, K.PAFTA)
+    assert liste["drive_id"] == muhur["projeler"][kod]["kiyas_listesi"], "cevap projenin kıyas listesinden"
+    assert muhur["projeler"][kod]["durum"] == ("hedef" if kod == "ÇP-06" else "acik") and c["m2"] == muhur["projeler"][kod]["m2"]
     s = c["celik"]["satirlar"]
-    assert c["celik"]["toplam"] == {"adet": sum(x["adet"] for x in s), "kg": sum(x["kg"] for x in s)} == {"adet": 51, "kg": 2122}
-    assert {h: x["adet"] for h, x in c["pafta"].items()} == {"D": 26, "K": 4, "M": 13, "C": 2}
-    assert c["pafta_liste"] == {"duvar_paneli": "aynı", "kolon_kiris": "aynı", "makas": "aynı", "cati_paneli": "aynı"}
-    assert c["pafta_uyarilari"] == []
+    assert all(x["kg"] is not None or x["tur"] in oku.KG_SIZ for x in s)
+    assert c["celik"]["toplam"] == {"adet": sum(x["adet"] for x in s), "kg": round(sum(x["kg"] for x in s if x["kg"] is not None), 3)}
+    assert c["celik"]["toplam"] == toplam
+    for t, x in c["celik"]["turler"].items():
+        assert x["adet"] == sum(y["adet"] for y in s if y["tur"] == t)
+    assert {h: x["adet"] for h, x in c["pafta"].items()} == pafta_adet
+    assert {h: sum(o["adet"] for o in x["onekler"].values()) for h, x in c["pafta"].items()} == pafta_adet
+    assert c["pafta_liste"] == pafta_liste and c["pafta_uyarilari"] == uyarilar
 
 
 # ----------------------------------------------------------------------------------------------------------- okuyucular
@@ -408,12 +445,12 @@ def test_bilinmeyen_celik_satiri_durur(tmp_path):
 
 def test_pafta_etiketleri(tmp_path):
     yol = tmp_path / "pafta.pdf"
-    _pafta_pdf(yol, [["D01", "D02", "D03", "D05", "K01", "DN01", "D1", "AD01", "D01A", "M01"], ["M01", "M02", "C01", "C02"],
+    _pafta_pdf(yol, [["D01", "D02", "D03", "D05", "K01", "DN01", "MD1", "AD01", "D01A", "M01", "M2", "M3"], ["M01", "M02", "C01", "C02"],
                      ["MK01", "MK02", "MKP01", "KLN01", "KRS01", "KRS02", "Ç01", "TP01", "B01", "S280", "VD01"]])
     e = pafta.etiketler(yol)
     T = e["turler"]
-    assert {h: x["adet"] for h, x in T.items()} == {"D": 5, "K": 4, "M": 5, "C": 3, "T": 1, "B": 1}
-    assert {h: sorted(x["onekler"]) for h, x in T.items()} == {"D": ["D", "VD"], "K": ["K", "KLN", "KRS"], "M": ["M", "MK", "MKP"],
+    assert {h: x["adet"] for h, x in T.items()} == {"D": 6, "K": 4, "M": 5, "C": 3, "T": 1, "B": 1}, "tek basamaklı etiket sayılır, M2/M3 birimdir"
+    assert {h: sorted(x["onekler"]) for h, x in T.items()} == {"D": ["D", "MD", "VD"], "K": ["K", "KLN", "KRS"], "M": ["M", "MK", "MKP"],
                                                                 "C": ["C", "Ç"], "T": ["TP"], "B": ["B"]}
     assert T["D"]["onekler"]["D"]["eksik"] == [4] and T["D"]["onekler"]["D"]["en_buyuk"] == 5
     assert T["M"]["onekler"]["M"]["yinelenen"] == ["M01"] and T["M"]["sayfalar"] == [1, 2, 3]
@@ -741,19 +778,32 @@ def test_cevap_acik_listede(depo, tmp_path):
 KAYNAK = os.environ.get("PORTMAN_CELIK_KAYNAK")
 
 
+def _kaynak_listeleri():
+    """Tam koşuda okunan listeler: beş projenin kıyas listesi ve SHA'sı bilinen PDF kopyaları."""
+    m = K.muhur_oku(MUHUR)
+    return [(r["kod"], r["drive_id"] + r["uzanti"]) for r in m["dosyalar"]
+            if r["kod"] in ACIK_CEVAPLAR and r["tur"] == K.LISTE and K.kayit_ozeti(r, m)]
+
+
+def test_tam_kosunun_listeleri():
+    uzantilar = sorted((k, Path(d).suffix) for k, d in _kaynak_listeleri())
+    assert uzantilar == sorted([(k, ".xlsx") for k in ACIK_CEVAPLAR] + [("ÇP-06", ".pdf"), ("ÇP-13", ".pdf")])
+
+
 @pytest.mark.skipif(not KAYNAK, reason="tam koşu: PORTMAN_CELIK_KAYNAK=<klasör> (dosyalar Drive kimliğiyle adlı)")
-@pytest.mark.parametrize("uzanti", [".xlsx", ".pdf"])
-def test_tam_kosu_hedef_cevabi(muhur, uzanti, tmp_path):
-    hedef = [r for r in muhur["dosyalar"] if r["kod"] == "ÇP-06" and r["sha256"]]
-    liste = next(Path(KAYNAK) / f"{r['drive_id']}{r['uzanti']}" for r in hedef if r["tur"] == K.LISTE and r["uzanti"] == uzanti)
-    pf = next(Path(KAYNAK) / f"{r['drive_id']}{r['uzanti']}" for r in hedef if r["tur"] == K.PAFTA)
-    j = K.cevap_json(K.cevap("ÇP-06", liste, pf))
-    beklenen = {k: v for k, v in _oku(CEVAP).items() if k not in ("aciklama", "tarih")}
+@pytest.mark.parametrize("kod,dosya", _kaynak_listeleri())
+def test_tam_kosu_acik_cevaplar(muhur, kod, dosya, tmp_path):
+    pf = next(Path(KAYNAK) / f"{r['drive_id']}{r['uzanti']}" for r in muhur["dosyalar"] if r["kod"] == kod and r["tur"] == K.PAFTA)
+    liste = Path(KAYNAK) / dosya
+    c = K.cevap(kod, liste, pf)
+    assert c["kiyas_listesi"] is dosya.endswith(".xlsx")
+    j = K.cevap_json(c)
+    beklenen = {k: v for k, v in _oku(_cevap_yolu(kod)).items() if k not in ("aciklama", "tarih")}
     assert {**j, "liste_sha256": None} == {**beklenen, "liste_sha256": None}
-    bozuk = tmp_path / f"bozuk{uzanti}"
+    bozuk = tmp_path / f"bozuk{liste.suffix}"
     b = bytearray(liste.read_bytes())
     b[-10] ^= 1
     bozuk.write_bytes(bytes(b))
     with pytest.raises(Durdu) as e:
-        K.cevap("ÇP-06", bozuk, pf)
+        K.cevap(kod, bozuk, pf)
     assert e.value.adim == 2
