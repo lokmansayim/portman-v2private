@@ -95,7 +95,10 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-22 | atölye sırası "Önce mühendis" (17.10 08:01, kart; D-21'i değiştirir); D-23 değiştirdi | kaydı CIO'nun Notion defterinde ve Kurulum Panosu'nda (satır 98); `KARARLAR/`'da dosyası yok |
 | D | D-23 | atölye prefabrikle başlar, yol "Önce motor" (17.10 09:30 ve kart 09:39; D-22'yi değiştirir); uygulaması BK-12 | kaydı CIO'nun Notion defterinde ve Kurulum Panosu'nda (satır 99); `KARARLAR/`'da dosyası yok |
 | D | D-24 | kimlik kartı işi PK-01 ile başlar (19.10 04:04, kart; PR #28 birleşince, BK-12 PR-3'ü beklemez); İE-15'in sırası | kaydı CIO'nun Notion defterinde ve Kurulum Panosu'nda (satır 102); `KARARLAR/`'da dosyası yok |
-| D | **D-25** | — | **sıradaki boş** |
+| D | D-25 | çelik hattı prefabrikle yan yana başlar (25.10 08:42 ve 08:43; "çakışma ve bozulma olmayacak ise"); uygulaması İE-16 | kaydı CIO'nun Notion defterinde ve Kurulum Panosu'nda (satır 106); `KARARLAR/`'da dosyası yok |
+| D | D-26 | pilot kapsamı: tek katlı prefabrik ve tek katlı çelik ikisi birden kesin çalışır; dubleks ve çift kat canlıdan sonra (25.10 08:58) | kaydı CIO'nun Notion defterinde ve Kurulum Panosu'nda (satır 107); `KARARLAR/`'da dosyası yok |
+| D | D-27 | canlıya geçiş şartı: başlangıçta kurulan rehberdeki her şey çalışır duruma gelir, sonra canlı (pilot); teklif ve fiyat dahil (25.10 09:09); "rehber"in "Portman Bayi Rehberi ve Süreç Taslağı" (6 Ekim) olduğu CIO çıkarımı, Patron teyidini bekliyor | kaydı CIO'nun Notion defterinde ve Kurulum Panosu'nda (satır 109); `KARARLAR/`'da dosyası yok |
+| D | **D-28** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model bankası ve yeni model üretimi; P6001 güncellemesi | ayrıldı (pilottan sonra) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | `main`'e BK-12 ile (PR-1: motor ve bayi paftası; liste ve mühür kıyası sonraki PR'larda) |
@@ -103,7 +106,8 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | İE | — | `ie-11-pr2-kor-test` dalındaki onaysız İE-13 / İE-14 taslak planları | numarasız; planlanınca bu defterden numara alır |
 | İE | İE-14 | talepten plana (14a: tek kat çelik; LLM-önce üretim ve revizyon) | alındı (14.10; `ie-14-talepten-plana`) |
 | İE | İE-15 | kimlik kartlı model: yerleşim planları ve adetler aynı modelden (D-24; KH-1, K1, KH-2, K2, KH-3, K3; eski `ie-11-pr2-kor-test` dalındaki "İE-15 · LLM'li katman" o dal birleşmeden önce yeni numara alır) | alındı (19.10; `claude/project-thread-far6rz`) |
-| İE | **İE-16** | — | **sıradaki boş** |
+| İE | İE-16 | çelik hattı: çelik projeleri ve çelik çizim kuralları (D-25; PR-1 hakem ve mühür, PR-2 hedef örnek, PR-3 çizim kuralları, PR-4 kör ölçüm) | alındı (25.10; `claude/project-thread-1ff0ou`) |
+| İE | **İE-17** | — | **sıradaki boş** |
 | BK | BK-01–BK-08 | bu depo; BK-08 8a sonrası temizlik (`bk-08-8a-temizlik`) | yazıldı |
 | BK | BK-09 | metin ve çizim düzeltmeleri, G1 (`bk-09-metin-cizim`, `bk-09-cizim-g1`) | alındı (14.10) |
 | BK | BK-10 | 8b sonrası düzeltmeler (DXF `.txt` notu, geç gelen Excel, Patron'a Excel bağlantısı, çelikte kapı değişikliği; `docs/devir/2026-10-14_IE-08_8b_Devri.md` › Sıradaki; CIO'nun Notion defterinde D-19 ile: 24 saat kapanış kuralı) | ayrıldı |

@@ -1,0 +1,137 @@
+{
+ "aciklama": "Hedef örneğin (ÇP-06, 90 m², tek kat) hakem cevabı (İE-16 PR-1): yükleme listesinin çelik panel grubu (tür, boyut, adet, kg; listenin Excel'i ve PDF'i aynı okunur) ve montaj paftasının panel etiketleri. Üreten komut: `python3 -m testler.celik.kiyas cevap --kod ÇP-06 --liste <liste> --pafta <pafta> --json <bu dosya>`. Listenin öteki grupları depoya girmez. Açık hedef örneğin cevabıdır; kör projelerin cevabı kıyastan önce çıkarılmaz.",
+ "tarih": "2026-10-25",
+ "kod": "ÇP-06",
+ "m2": 90,
+ "liste_sha256": "51fd4518b79d3c971a0857a8a4b156f7e1a6a52890bff615e3e9653a7741da5e",
+ "pafta_sha256": "3bc46b62ff704abe1bf6c23a597ad8c1c7f8b24a6355ab87c3dfb94773678f73",
+ "celik": {
+  "satirlar": [
+   {
+    "tur": "makas",
+    "harf": "M",
+    "boyut": "80X45X10X0,8",
+    "adet": 12,
+    "kg": 473
+   },
+   {
+    "tur": "kolon_kiris",
+    "harf": "K",
+    "boyut": "80X45X10X1,2",
+    "adet": 4,
+    "kg": 88
+   },
+   {
+    "tur": "cati_paneli",
+    "harf": "C",
+    "boyut": "80X45X10X1,2",
+    "adet": 2,
+    "kg": 119
+   },
+   {
+    "tur": "duvar_paneli",
+    "harf": "D",
+    "boyut": "80X45X10X1,2",
+    "adet": 26,
+    "kg": 1367
+   },
+   {
+    "tur": "makas",
+    "harf": "M",
+    "boyut": "80X45X10X1,2",
+    "adet": 1,
+    "kg": 45
+   },
+   {
+    "tur": "c_profil",
+    "harf": null,
+    "boyut": "80X45X10X0,8",
+    "adet": 3,
+    "kg": 15
+   },
+   {
+    "tur": "c_profil",
+    "harf": null,
+    "boyut": "80X45X10X1,2",
+    "adet": 3,
+    "kg": 15
+   }
+  ],
+  "turler": {
+   "makas": {
+    "harf": "M",
+    "adet": 13,
+    "kg": 518.0
+   },
+   "kolon_kiris": {
+    "harf": "K",
+    "adet": 4,
+    "kg": 88.0
+   },
+   "cati_paneli": {
+    "harf": "C",
+    "adet": 2,
+    "kg": 119.0
+   },
+   "duvar_paneli": {
+    "harf": "D",
+    "adet": 26,
+    "kg": 1367.0
+   },
+   "c_profil": {
+    "harf": null,
+    "adet": 6,
+    "kg": 30.0
+   }
+  },
+  "toplam": {
+   "adet": 51,
+   "kg": 2122
+  }
+ },
+ "pafta": {
+  "D": {
+   "adet": 26,
+   "en_buyuk": 26,
+   "eksik": [],
+   "yinelenen": [],
+   "sayfalar": [
+    2
+   ]
+  },
+  "K": {
+   "adet": 4,
+   "en_buyuk": 4,
+   "eksik": [],
+   "yinelenen": [],
+   "sayfalar": [
+    2
+   ]
+  },
+  "M": {
+   "adet": 13,
+   "en_buyuk": 13,
+   "eksik": [],
+   "yinelenen": [],
+   "sayfalar": [
+    3
+   ]
+  },
+  "C": {
+   "adet": 2,
+   "en_buyuk": 2,
+   "eksik": [],
+   "yinelenen": [],
+   "sayfalar": [
+    3
+   ]
+  }
+ },
+ "pafta_uyarilari": [],
+ "pafta_liste": {
+  "duvar_paneli": "aynı",
+  "kolon_kiris": "aynı",
+  "makas": "aynı",
+  "cati_paneli": "aynı"
+ }
+}
