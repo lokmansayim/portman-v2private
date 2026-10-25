@@ -12,6 +12,7 @@
   "C": "ÇP-14",
   "D": "ÇP-13"
  },
+ "kiyas_listesi_kurali": "Her projenin kıyas listesi, içeriğe bakılmadan, mühürdeki alanlarla seçilir: projenin `yükleme listesi` kayıtlarından Excel (.xlsx) olanların Drive saati en yeni olanı; Excel yoksa PDF'lerin en yenisi. `kiyas` yalnız bu dosyayla yapılır; projenin öteki liste kayıtları (PDF kopyası, eski sürüm, sundurma ve çatı kaplama listesi) kıyasa girmez.",
  "sayilar": {
   "projeler": {
    "acik": 4,
@@ -33,147 +34,168 @@
    "kat": "çift",
    "liste_tarihi": "2026-08-14",
    "drive_klasor": "1NRRTjkBFgUKqSiOtb4bFEdo0krBTtfWL",
-   "durum": "kapali"
+   "durum": "kapali",
+   "kiyas_listesi": "13GrynDnOKHKGGHnG-SPAAI9FL7yL5eD-"
   },
   "ÇP-02": {
    "m2": 123,
    "kat": "belirsiz",
    "liste_tarihi": "2026-01-16",
    "drive_klasor": "1_Fyo-OPAU3lmqW2fjxmT830X0NIGm2Vu",
-   "durum": "kor"
+   "durum": "kor",
+   "kiyas_listesi": "1z237VbOwdNCtc2JhZJVg0WXEqfZnhpPR"
   },
   "ÇP-03": {
    "m2": 69,
    "kat": "tek",
    "liste_tarihi": "2026-09-18",
    "drive_klasor": "1KOwZ5b2QTCCcC7bAUxYCJDS3kIG3Rjyr",
-   "durum": "acik"
+   "durum": "acik",
+   "kiyas_listesi": "17qvD40WCNSHabqbHCNas-WrM5nDnb7aK"
   },
   "ÇP-04": {
    "m2": 55,
    "kat": "belirsiz",
    "liste_tarihi": "2026-05-20",
    "drive_klasor": "1IBr0gnlbEzXGKuYsueQQlu8SJVKP56WW",
-   "durum": "kor"
+   "durum": "kor",
+   "kiyas_listesi": "14dOpzdq6dCELz4yFXQk95EaMGUTAkhaX"
   },
   "ÇP-05": {
    "m2": 197,
    "kat": "çift",
    "liste_tarihi": "2026-09-23",
    "drive_klasor": "1d5SUnbbGPQtEw1dyTBBOObh6PKmZjzIU",
-   "durum": "kapali"
+   "durum": "kapali",
+   "kiyas_listesi": "1mDiOzchwNQhxkyPoYuHETc5ZK_rwWTjN"
   },
   "ÇP-06": {
    "m2": 90,
    "kat": "tek",
    "liste_tarihi": "2026-09-17",
    "drive_klasor": "1w1yj0ofcGvojiq_ZyZe8GvqqWi2mLuUo",
-   "durum": "hedef"
+   "durum": "hedef",
+   "kiyas_listesi": "1C8D2vCGZDTwqKA2eBnSyjtJ1iyKg3U9T"
   },
   "ÇP-07": {
    "m2": 80,
    "kat": "tek",
    "liste_tarihi": "2026-09-23",
    "drive_klasor": "1XAnix3sPEggai0R9LdRhcGjcJ2QkjEts",
-   "durum": "acik"
+   "durum": "acik",
+   "kiyas_listesi": "1hJ3M-Q3jBx9KybZQmVErnS8rpUW0w43M"
   },
   "ÇP-08": {
    "m2": 81,
    "kat": "belirsiz",
    "liste_tarihi": "2026-02-23",
    "drive_klasor": "1KSV9E0Uq5pzPNqVD-vJ7T8x9SvrsCT7F",
-   "durum": "kor"
+   "durum": "kor",
+   "kiyas_listesi": "1-JHGZQqFmLwxHuSipHu0gFUeP7odywNI"
   },
   "ÇP-09": {
    "m2": 82,
    "kat": "belirsiz",
    "liste_tarihi": "2026-03-18",
    "drive_klasor": "1dgu3vhm8TKiMZPzfhYO_XZFDK3H5fVlc",
-   "durum": "kor"
+   "durum": "kor",
+   "kiyas_listesi": "1gQYmo4QuRd7XYZgO1VlJEEzhkofZhgNh"
   },
   "ÇP-10": {
    "m2": 123,
    "kat": "çift",
    "liste_tarihi": "2026-09-14",
    "drive_klasor": "1XPYqI25MopVZ17Qij_uL0yHFrSLntEAx",
-   "durum": "kapali"
+   "durum": "kapali",
+   "kiyas_listesi": "1wigfEh8GVmxQkahrAuAXNtEUETqgMwx3"
   },
   "ÇP-11": {
    "m2": 150,
    "kat": "belirsiz",
    "liste_tarihi": "2026-08-25",
    "drive_klasor": "1rQV8fKkHzL_hjqdI9FLHI1EnVfRHVH9J",
-   "durum": "kor"
+   "durum": "kor",
+   "kiyas_listesi": "14CIpbPD00UhodeI9jmis_amQektwcb9G"
   },
   "ÇP-12": {
    "m2": 99.7,
    "kat": "tek",
    "liste_tarihi": "2026-08-02",
    "drive_klasor": "1Wo_4kCQWqwrED3XNwc-BgJpgUJJdMlg1",
-   "durum": "kor"
+   "durum": "kor",
+   "kiyas_listesi": "14DwVfQQ5khh9mc3CslAnMWBvJxkKFRo5"
   },
   "ÇP-13": {
    "m2": 99,
    "kat": "tek",
    "liste_tarihi": "2026-09-28",
    "drive_klasor": "1aEFMnSOzMrQp9j34H3FG5CEs2aWqqNVf",
-   "durum": "acik"
+   "durum": "acik",
+   "kiyas_listesi": "1Ke9lTQBm1npBncK-AvYHLpIcvNkVvIa4"
   },
   "ÇP-14": {
    "m2": 120,
    "kat": "tek",
    "liste_tarihi": "2026-04-03",
    "drive_klasor": "1xcGbsYnKn27oHmQsaUhEhdZ_1EEjvfZb",
-   "durum": "acik"
+   "durum": "acik",
+   "kiyas_listesi": "1aEw_NPj-rIpIl_v6f0ing0qJUKHn4y3e"
   },
   "ÇP-15": {
    "m2": 125,
    "kat": "çift",
    "liste_tarihi": "2026-03-17",
    "drive_klasor": "1wI_T6XygxDqQ1imROgn4HLILbH_FGfJ2",
-   "durum": "kapali"
+   "durum": "kapali",
+   "kiyas_listesi": "14FUhy01FJ2_qDkAE7eMRNFB9URXJAxXb"
   },
   "ÇP-16": {
    "m2": 160,
    "kat": "çift",
    "liste_tarihi": "2026-01-14",
    "drive_klasor": "1tLCuu5IESC8FbVHsKHJK4iXIN1lAbgH9",
-   "durum": "kapali"
+   "durum": "kapali",
+   "kiyas_listesi": "1Vi9ayx3k-NttE2r236sebfpxGjNj7ML9"
   },
   "ÇP-17": {
    "m2": 90,
    "kat": "tek",
    "liste_tarihi": "2026-08-07",
    "drive_klasor": "11nboG2EumvSjeeTC3rs8a-YThZxRcIPo",
-   "durum": "kor"
+   "durum": "kor",
+   "kiyas_listesi": "1eQt3zw3_qle61Hj2xejqn49i47ldP7aJ"
   },
   "ÇP-18": {
    "m2": 90,
    "kat": "tek",
    "liste_tarihi": "2026-04-11",
    "drive_klasor": "11PdfBCbKecFZ1d55Yip03qNd7uSfShBV",
-   "durum": "kor"
+   "durum": "kor",
+   "kiyas_listesi": "1vP2LiZ07AuT_54NAzSwFN59eZe6I5WB9"
   },
   "ÇP-19": {
    "m2": 90,
    "kat": "tek",
    "liste_tarihi": "2026-04-19",
    "drive_klasor": "1E-PVO017Ro6nIzmcwr3WeO2FdpwSCHNc",
-   "durum": "kor"
+   "durum": "kor",
+   "kiyas_listesi": "1DC8Hbp6EmEtflhCVPaAQxi9lLZAPy01a"
   },
   "ÇP-20": {
    "m2": 92,
    "kat": "tek",
    "liste_tarihi": "2026-05-21",
    "drive_klasor": "1022EAIY0pj6J7fcgpxs9OoaI1gCGeznj",
-   "durum": "kor"
+   "durum": "kor",
+   "kiyas_listesi": "1hKULVPsowv8vEfTbOuuG1UQt2cfQWAA6"
   },
   "ÇP-21": {
    "m2": 138,
    "kat": "çift",
    "liste_tarihi": "2026-06-05",
    "drive_klasor": "1SplACjij1DPkvTmUuMhIsvpUQpiUcUTk",
-   "durum": "kapali"
+   "durum": "kapali",
+   "kiyas_listesi": "12HeXRMzlbofEIGCwGvYIrOX7KWnQXABJ"
   }
  },
  "acilislar": {
