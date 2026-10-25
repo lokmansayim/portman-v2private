@@ -152,7 +152,8 @@ echo "   paket tamam: $(find "$TMP/a" -type f | wc -l) dosya, $(du -sh "$TMP/a" 
 
 adim 2 "DNS"
 YERELLER=$(ip -o addr show scope global 2>/dev/null | awk '{print $4}' | cut -d/ -f1 | sort -u)
-COZUM=$( { getent ahostsv4 "$ALAN"; getent ahostsv6 "$ALAN"; } 2>/dev/null | awk '{print $1}' | sort -u || true)
+# ahostsv6 IPv4 kaydını ::ffff:a.b.c.d biçiminde de verir; o biçim IPv4'e indirilir (25.10: bu yüzden ilk --uygula durdu)
+COZUM=$( { getent ahostsv4 "$ALAN"; getent ahostsv6 "$ALAN"; } 2>/dev/null | awk '{print $1}' | sed 's/^::ffff://I' | sort -u || true)
 IPV4=$(echo "$YERELLER" | grep -v ':' | head -1 || true)
 echo "   sunucu IPv4: ${IPV4:-?} · $ALAN çözümü: ${COZUM:-(kayıt yok)}"
 DNS_OK=1
