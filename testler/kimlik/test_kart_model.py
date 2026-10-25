@@ -50,6 +50,7 @@ H_KART = {"H-01": "dubelli_kulakli", "H-02": "dubelli", "H-03": "standart", "H-0
 # PK-01'in İş Emri'nde dış kapı ve pencereler alıcıya ait: modelde parça var, listede satır adet 0 (PK-01 dersi 1; liste K4'te modelden okur)
 ALICIYA_AIT = {"Prefabrik çelik kapı", "PVC pencere", "PVC vasistas"}
 K2_KARTLARI = {"OM-01": 0, "AS-01": 0, "KP-01": 0, "BT-01": 0, "DR-01": 0, "DR-02": 0, "SR-01": 0}    # bu dosyanın modelleri İş Emri'siz (K1)
+K3_KARTLARI = {f"EL-{i:02d}": 0 for i in range(1, 12)}    # K3 (elektrik) de İş Emri ister
 KILIT_K1 = "94c253954968d2dee4023c097e47326281fe57998c92e347e2b48d24762e4d23"   # K1'de çıkan 25 kodun adlarıyla SHA'sı (PR #31)
 
 
@@ -164,7 +165,7 @@ def test_her_parca_kartli(pk01, kartlar):
     adet = {k["kod"]: k["adet"] for k in s["kartlar"]}
     assert adet == {"D-01": 23, "D-02": 3, "D-03": 2, "D-04": 1, "D-05": 1, "I-01": 15, "I-02": 5, "I-03": 0,
                     "K-01": 5, "K-02": 1, "P-01": 3, "P-02": 2, "P-03": 1, "B-01": 6, "B-02": 1, "V-01": 1, "V-02": 2,
-                    "H-01": 12, "H-02": 7, "H-03": 10, "H-04": 2, "H-05": 3, "H-06": 4, "MA-01": 2, "MA-02": 7} | K2_KARTLARI
+                    "H-01": 12, "H-02": 7, "H-03": 10, "H-04": 2, "H-05": 3, "H-06": 4, "MA-01": 2, "MA-02": 7} | K2_KARTLARI | K3_KARTLARI
     assert len(s["gorunum"]) == 9 and all(g["asil"].startswith("BAGLANTI_B0") for g in s["gorunum"])
     assert s["bilesen"] == {f"MAKAS_{i:02d}": 8 for i in range(1, 10)}
     assert Counter(k["sinif"] for k in s["kartsiz"]) == {"IfcOpeningElement": 12, "IfcSlab": 3, "IfcPlate": 2, "IfcRoof": 1}

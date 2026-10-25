@@ -1,7 +1,7 @@
 {
  "sema": "portman.prefabrik_yerlesim/1",
- "surum": "2",
- "aciklama": "Prefabrik pano evinde parçaların yerleşim kuralları (İE-15). Okuyan `motor/kart_model.py` (K1: H türü) ve `motor/yerlesim/` (K2: tavan omegası, aşık, çatı kaplaması, baş makas betopanı, dere ve iniş). Yalnız kural kitabında ve `kurallar/liste/prefabrik.json`'da olmayan konum kuralları buraya yazılır; aynı anahtar iki dosyada olmaz (test). Oradaki değerler (makas aralığı, omega aralığı, aşık aralığı, parça boyları, levha) `okunan` ile gösterilir, burada yeniden yazılmaz: `kurallar/liste/prefabrik.json › kurallar.<ad>[.<alt>]` liste kuralının değeri, `kitap › <ad>[.<alt>]` liste kurallarının sabitlediği kural kitabı setinin (`kitap_seti`) değeri.",
+ "surum": "3",
+ "aciklama": "Prefabrik pano evinde parçaların yerleşim kuralları (İE-15). Okuyan `motor/kart_model.py` (K1: H türü) ve `motor/yerlesim/` (K2: tavan omegası, aşık, çatı kaplaması, baş makas betopanı, dere ve iniş; K3: elektrik). Yalnız kural kitabında ve `kurallar/liste/prefabrik.json`'da olmayan konum kuralları buraya yazılır; aynı anahtar iki dosyada olmaz (test). Oradaki değerler (makas aralığı, omega aralığı, aşık aralığı, parça boyları, levha) `okunan` ile gösterilir, burada yeniden yazılmaz: `kurallar/liste/prefabrik.json › kurallar.<ad>[.<alt>]` liste kuralının değeri, `kitap › <ad>[.<alt>]` liste kurallarının sabitlediği kural kitabı setinin (`kitap_seti`) değeri.",
  "kurallar": {
   "h_turu": {
    "kural": "Dış duvarda, makasın oturduğu duvar çizgisinde makasa en yakın dış H (pano eki ya da 3'lü) dübelli & kulaklıdır; öteki dış H dübellidir. İç H standarttır (kartı ayrı).",
@@ -159,6 +159,64 @@
    "durum": "varsayim",
    "tarih": "2026-10-24",
    "not": "Omega duvar üstü kotunun hemen altında (makasın alt başlığının altı); aşık makas üst başlığının üstünde (bugünkü IFC'nin çatı yüzüyle aynı kotta), kaplama aşığın üstünde; dere saçak ucunun altında; betopan uç duvarın dış yüzünde, makasın üst başlığının altında kalan kısmı. Bugünkü IFC'nin çatı yüzü (`CATI_`) ve alın dolgusu (`ALIN_`) kartsız gösterim olarak kalır."
+  },
+  "elektrik_yerlesimi": {
+   "kural": "Elektrik noktaları liste üretecinin oda kuralıyla (`elektrik_oda`, aynı değerler) oda oda sayılır ve modele konur: kapalı odaya oda takımı, açık mahale (veranda) veranda takımı; takım sayısı alan ÷ takım alanı, yukarı, en az 1; banyo, WC, mutfak ve hol kitabın sayılarını alır (`kitaptan`). Odalar ve açık mahaller adla birleşir. Mutfak ayrı mahal değilse açık mutfağın odası (`elektrik_acik_mutfak`) kendi takımına ek olarak tezgahın prizlerini alır. Uydu prizi ev başına, zil ev başına, sigorta kutusu kat başına. Kablo iki hat: priz hattı NYM 3 × 2,5 ve aydınlatma hattı NYM 2 × 1,5; boyu liste üretecinin formülüyle: W otomat × sigortadan kapalı kısmın en uzak köşesi + nokta × nokta başına metre, metreye yukarı (priz hattında tekli priz + 2 × çiftli priz + uydu prizi, aydınlatma hattında tekli anahtar + 2 × çiftli anahtar). Sayılar modelde yerleşen noktalardan, kablonun noktaları da. Noktaların yeri varsayımdır, sayıyı değiştirmez (`yerler`).",
+   "oda_kurali": {"okunan": "kurallar/liste/prefabrik.json › kurallar.elektrik_oda"},
+   "acik_mutfak": {"okunan": "kurallar/liste/prefabrik.json › kurallar.elektrik_acik_mutfak"},
+   "kitap_odalari": {"okunan": "kitap › elektrik_oda.odalar"},
+   "zil": {"okunan": "kitap › elektrik.zil"},
+   "sigorta_kutusu": {"okunan": "kitap › elektrik.sigorta_kutusu_kat_basina"},
+   "w_otomat": {"okunan": "kurallar/liste/prefabrik.json › kurallar.elektrik.w_otomat"},
+   "kablo_nokta_basina_m": {"okunan": "kurallar/liste/prefabrik.json › kurallar.elektrik.kablo_nokta_basina_m"},
+   "en_uzak_mesafe": {
+    "okunan": "kitap › kablo_en_uzak_mesafe",
+    "beklenen": "sigortadan",
+    "not": "Lokman, 7 Ekim 07:45 (sigortadan en uzak mesafe) ve 8 Ekim 00:45 (kutu giriş kapısında). Değeri \"sigortadan\" değilse kablo kurulmaz, \"kural yok\" yazar (liste üreteci de yalnız bunu bilir). Mesafe liste üretecindeki gibi giriş kapısının ortasından (duvar ekseni) kapalı kısmın en uzak köşesine kuş uçuşu; giriş kapısı yoksa kapalı kısmın köşegeni."
+   },
+   "uydu_odasi": {
+    "deger": "salon",
+    "durum": "varsayim",
+    "tarih": "2026-10-25",
+    "not": "Uydu prizi bu türdeki ilk kapalı odaya konur (liste kuralının yazısı \"salona; kitabın salonunda 1\"). O tür oda yoksa ilk kapalı odaya, uyarıyla."
+   },
+   "yerler": {
+    "deger": {
+     "duy": "kapalı odanın tavanında: oda uzun ekseni boyunca tavan noktası sayısınca eşit şeride bölünür, her nokta kendi şeridinin ortasında (tek noktada tavanın ortası); duydan sonra glop",
+     "glop_veranda": "açık mahalde evin duvarında (açık mahalle kapalı kısmın ortak sınırı), giriş kapısının iki yanına yarı yarıya; her yanda boşluklar dışındaki boyda eşit aralıkla",
+     "anahtar": "odanın kapısının kol tarafında (menteşenin öbür ucu), odanın içindeki yüzde; birden çok anahtar yan yana; kol tarafı odaya düşmezse menteşe tarafı; geçişte (kanatsız) aynı uç",
+     "kapi": "odanın kapısı: giriş kapısı odaya açılıyorsa o, değilse komşusunun en çok kapısı olduğu kapı (sirkülasyon: hol, salon); eşitlikte planın sırası. Anahtar o kapının yanına sığmazsa sıradaki kapıya; hiçbirine sığmazsa (ya da odanın kapısı yoksa) uzun duvara, uyarıyla",
+     "priz": "odanın iki uzun duvarında (uzun eksene paralel, iki yandaki en uzun kenar), sırayla bir o yana bir bu yana; tekli, çiftli, uydu sırası; her duvarda kapı ve pencere boşlukları dışındaki boyda eşit aralıkla",
+     "sigorta_kutusu": "giriş kapısının kapalı odaya bakan iç yüzünde, kapının ortasında, kapının üstünde (karar E)",
+     "zil": "giriş kapısının dış yüzünde, kapı boşluğundan 30 cm, kol tarafında; orada dışarıda yer yoksa (başka odanın duvarı, açıklık, açık mahalin dışı) menteşe tarafında; o da yoksa iki yanda anahtarın hizasında (anahtarın üstünde); hiçbirinde yoksa kol tarafında, uyarıyla",
+     "kablo": "hat başına bir parça; çizgisi sigorta kutusundan kapalı kısmın en uzak köşesine, tavanın altında; boyu formülden (çizginin boyu değil)"
+    },
+    "durum": "varsayim",
+    "tarih": "2026-10-25",
+    "not": "Plan §6 (onaylı plan v2, \"PK-01 ile\"): duy oda tavanının ortasında, anahtar kapının kol tarafında, prizler odanın iki uzun duvarında, glop veranda duvarında kapının iki yanında. Sigorta kutusu: karar E (planın varsayımı holde, giriş kapısının iç yanı; PK-01 paftasında da orada) ve Lokman, 8 Ekim 00:45 (\"giriş kapısında sayılması uygun\"). Kapının seçimi, zilin yeri ve priz sırası K3'ün seçimi. Yer sayıyı değiştirmez; kurulamayan yer uyarı yazar."
+   },
+   "olculer_cm": {
+    "deger": {"anahtar_kapidan": 10, "anahtar_arasi": 12, "zil_kapidan": 30, "bosluk_payi": 10, "sigorta_kapidan": 5, "tavan_alti": 5},
+    "durum": "varsayim",
+    "tarih": "2026-10-25",
+    "not": "Anahtarın kapı boşluğundan uzaklığı, yan yana anahtarların arası, zilin kapı boşluğundan uzaklığı, prizin ve duvar glopunun kenarının boşluklara en çok yaklaşacağı yer, sigorta kutusunun kapının üstünden boşluğu ve kablonun tavandan aşağıda koştuğu yer. K3'ün seçimi; sayıyı değiştirmez."
+   },
+   "kot_cm": {
+    "deger": {"anahtar": 110, "priz": 30, "zil": 150, "glop_duvar": 210},
+    "durum": "varsayim",
+    "tarih": "2026-10-25",
+    "not": "Noktanın döşemeden yüksekliği (merkezi). Duy ve tavandaki glop tavanda. Yalnız gösterim; sayıyı değiştirmez."
+   },
+   "gosterim_cm": {
+    "deger": {"duy": [25, 25, 5], "glop": [20, 20, 8], "anahtar": [8, 2, 8], "priz": [8, 2, 8], "zil": [6, 2, 6], "sigorta_kutusu": [30, 10, 35], "kablo": 2},
+    "durum": "varsayim",
+    "tarih": "2026-10-25",
+    "not": "Yalnız 3B gösterim: [duvar boyunca, duvardan dışarı, yükseklik] (tavandakilerde [x, y, kalınlık]); kablo kesitinin kenarı. Sayı ve metre bunlardan çıkmaz."
+   },
+   "durum": "lokman",
+   "tarih": "2026-10-18",
+   "kaynak": "Lokman, 18 Ekim 19:52: \"15 m² ye kadar her bir odaya 2 piriz 1 tane anahtar, 1 tane duy ve lamba koyarsın, 15 m² ye kadar verandalara 2 glop 1 tane 2li anahtar koyarsın ve 3x2.5 kablo içinde aynı çelikte olduğu gibi en uzak noktaya her bir odadan hesap yaparsın\"; kartlar 19 Ekim 16:50 (her 15 m²'ye bir takım; banyo, WC, mutfak ve hol kitaptaki gibi), 22 Ekim 11:09 (uydu prizi her eve 1) ve 11:10 (takım sayısı yukarı); 23 Ekim 03:57 (açık mutfakta tezgahın 4 prizi). Değerler liste kurallarındadır (BK-12 PR-2f); burada yalnız okunur.",
+   "not": "PK-01'de duy 5, glop 3, anahtar 6 tekli ve 1 çift, priz 13 tekli ve 1 çift, uydu 1, zil 1, sigorta kutusu 1; NYM 3 × 2,5 101 m, NYM 2 × 1,5 85 m (liste kilidiyle aynı). Paftanın elektrik planı (s. 10) başka sayılar verir (duy 6, glop 2, anahtar 4 + 2, priz 15 + 4, zil 0); K3'te kuralla yan yana bilgidir, kapıya girmez (plan §5). Buat kasa, ampul, uydu ve besleme kablosu liste üretecinde kalır."
   }
  }
 }
