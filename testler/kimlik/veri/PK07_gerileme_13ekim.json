@@ -10,5 +10,7 @@
  "makas": {"ana_cm": [124.9, 267.6, 393.0, 518.4, 644.1, 769.5, 894.9], "cumba_cm": [5.0, 79.3, 116.9], "makas_bas": 2, "makas_orta": 5},
  "kh2_not": "KH-2'de eklendi (aynı 13 Ekim okumasının `tavan_omega` ve `asik` alanları; üstteki değerler değişmedi). 13 Ekim okuması aşıkta 20 cm'lik 12 ölçüyü parça saydı; tek okuyucu bunları ok başı olmadığı için teyite düşürür (CIO, 24 Ekim: 10 cm ve üstü teyit); ok başlı 41 parça ve teyitteki 12 × 20 birlikte buradaki 53 parça ve 146,7 m'dir.",
  "tavan_omega": {"parca": 42, "toplam_m": 112.8, "boylar": {"365": 16, "320.75": 5, "241": 2, "219": 5, "200.25": 5, "144": 2, "138.5": 7}},
- "asik": {"parca": 53, "toplam_m": 146.7, "boylar": {"410": 32, "150": 5, "140": 4, "20": 12}}
+ "asik": {"parca": 53, "toplam_m": 146.7, "boylar": {"410": 32, "150": 5, "140": 4, "20": 12}},
+ "kh3_not": "KH-3'te eklendi (üstteki değerler değişmedi). Kaynak 13 Ekim okuması değil: BK-12 PR-3'ün PK-07 pafta katmanı (`testler/kor/projeler/PK07/pafta_katmani.json` › elektrik; s. 13'ün göz sayımı, kör okumada tekli sayılan iki tırnaklı anahtar kıyastan sonra çift diye düzeltilmişti). Okuyucunun elektrik bölümü bu sayıları kodla yeniden üretmeli.",
+ "elektrik": {"tavan_armaturu": 5, "glop": 3, "anahtar_tekli": 6, "anahtar_cift": 1, "priz_tekli": 13, "priz_cift": 1, "uydu_prizi": 1, "zil": 0, "sigorta_kutusu": 1}
 }

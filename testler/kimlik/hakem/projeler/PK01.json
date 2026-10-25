@@ -2,8 +2,9 @@
  "kod": "PK-01",
  "ap": "AP-19",
  "pafta_sha256": "492c76133da0e66a6dce82ebaa67e3f9da9949eb314c1034445d223faaac658d",
- "not": "Öğrenme evi (D-24). Mühürlü montaj paftası, 10 sayfa; PDF depoya girmez (antetinde ad var). Şablonun renkleri ve başlıkları okuyucunun varsayılanıyla aynı. KH-2: çatı ve tavan bölümleri (s. 5–9) `ek_bolumler` ile açılır; tavan asma dizme olduğu için omega anahtarı `duvar_omegasi_asma` (PR #28 katmanı ve liste üretecinin anahtarı). Gerçek listede stoktan düşme var (Patron, 18 Ekim 19:52): metraj kapısının referansı değildir.",
- "ayar": {"ek_bolumler": ["omega", "asik", "kaplama", "betopan", "dere"], "omega": {"anahtar": "duvar_omegasi_asma"}},
+ "not": "Öğrenme evi (D-24). Mühürlü montaj paftası, 10 sayfa; PDF depoya girmez (antetinde ad var). Şablonun renkleri ve başlıkları okuyucunun varsayılanıyla aynı. KH-2: çatı ve tavan bölümleri (s. 5–9) `ek_bolumler` ile açılır; tavan asma dizme olduğu için omega anahtarı `duvar_omegasi_asma` (PR #28 katmanı ve liste üretecinin anahtarı). KH-3: elektrik yerleşim planı (s. 10) `ek_bolumler` ile açılır; bu sayfada duvar çizgisi öteki sayfalardan açık renkte (`ayar.elektrik.duvar_rengi`). Gerçek listede stoktan düşme var (Patron, 18 Ekim 19:52): metraj kapısının referansı değildir.",
+ "ayar": {"ek_bolumler": ["omega", "asik", "kaplama", "betopan", "dere", "elektrik"], "omega": {"anahtar": "duvar_omegasi_asma"},
+          "elektrik": {"duvar_rengi": [0.576, 0.584, 0.596]}},
  "metraj_referansi": null,
  "kiyas": {
   "anahtarlar": [
@@ -47,6 +48,20 @@
      {"anahtar": "dere", "cevap": "ayrinti.dere.toplam_m"}
     ],
     "not": "KH-2 (hakem değişikliği): `--adim K2` ile bu satırlar KH-1'in satırlarına eklenir ve kapıya girer; adet fark 0, metre ±%3. Satırlar yalnız kart sözleşmesiyle sayılır (bugünkü IFC'de omega, aşık, kaplama, betopan, dere ve iniş yok). Omega konum satırları bilgidir (karar B'nin kanıtı); K2'de konumu kendi testi denetler."
+   },
+   "K3": {
+    "anahtarlar": [
+     "duvar_omegasi_asma", "asik", "sandvic_panel", "bas_makas_betopan", "dere", "inis",
+     "elektrik.tavan_armaturu", "elektrik.glop", "elektrik.anahtar_tekli", "elektrik.anahtar_cift", "elektrik.priz_tekli",
+     "elektrik.priz_cift", "elektrik.uydu_prizi", "elektrik.zil", "elektrik.sigorta_kutusu"
+    ],
+    "kapi": ["duvar_omegasi_asma", "asik", "sandvic_panel", "bas_makas_betopan", "dere", "inis"],
+    "metre": [
+     {"anahtar": "duvar_omegasi_asma", "cevap": "ayrinti.omega.toplam_m"},
+     {"anahtar": "asik", "cevap": "ayrinti.asik.toplam_m"},
+     {"anahtar": "dere", "cevap": "ayrinti.dere.toplam_m"}
+    ],
+    "not": "KH-3 (hakem değişikliği): elektrik satırları bilgidir, kapıya girmez (plan §5: elektrikte ölçüt Patron'un kuralı; K3'te \"model = kural\" kendi testidir). Kapıda K2'nin altı satırı ve metresi durur: K3 modeli çatı ve tavanı bozmamalıdır. Kıyas aracı `elektrik` bölümünü tanımaz; okuyucu elektriği teyide düşürürse bütün satırlar \"teyit bekliyor\" yazar ve kapı geçmez (daha sıkı)."
    }
   }
  }

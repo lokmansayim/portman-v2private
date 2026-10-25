@@ -380,7 +380,7 @@ def cevap():
 
 def test_pk01_kh2_cevabi(cevap):
     a = cevap["ayrinti"]
-    assert cevap["okuyucu"]["surum"] == PO.SURUM == "2" and cevap["teyit_bekliyor"] == []
+    assert cevap["okuyucu"]["surum"] == PO.SURUM == "3" and cevap["teyit_bekliyor"] == []
     assert {k: cevap[k]["adet"] for k in ("duvar_omegasi_asma", "asik", "sandvic_panel", "bas_makas_betopan", "dere", "inis", "makas_yavru")} == \
         {"duvar_omegasi_asma": 24, "asik": 42, "sandvic_panel": 22, "bas_makas_betopan": 4, "dere": 2, "inis": 6, "makas_yavru": 0}
     assert {k: a[k]["sayfa"] for k in PO.EK_BOLUMLER} == {"omega": 6, "asik": 8, "kaplama": 9, "betopan": 5, "dere": 7}
