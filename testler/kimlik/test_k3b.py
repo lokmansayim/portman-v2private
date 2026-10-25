@@ -236,13 +236,17 @@ def test_alt_cerceve_kapi_ve_gecis_kesilir(dokuz):
 
 
 def test_kesim_yuvarlamasi_liste_uretecinin():
-    """Yukarı yuvarlamanın payı liste üretecininki (`TAVAN`, 1e-9): bölüm bir tamsayının hemen üstüne düşerse iki taraf da bir fazla sayar."""
+    """Yukarı yuvarlamanın payı liste üretecininki (`TAVAN`, 1e-9): bölüm bir tamsayının hemen üstüne düşerse iki taraf da bir fazla sayar;
+    kayan nokta gürültüsü (dört hattın toplamı 1000,0000000000001, hesaplanan kenar 560,0000000000001) bir fazla saydırmaz."""
     for hat, boy, bindirme in (([2000.0], 250.0, 0.0), ([2000.0001], 250.0, 0.0), ([1999.99999999], 250.0, 0.0), ([1060.0, 1060.0], 250.0, 20.0),
-                               ([920.00002], 250.0, 20.0)):
+                               ([920.00002], 250.0, 20.0), ([298.6, 106.6, 82.6, 512.2], 250.0, 0.0), ([284.1, 119.1, 234.2, 282.6], 250.0, 20.0)):
         assert kesim.toplam_karti(hat, boy, bindirme)["stok"] == PL.TAVAN(sum(hat) / (boy - bindirme)), (hat, boy, bindirme)
-    for kenar in (560.0, 560.0001, 347.5043):
+    for kenar in (560.0, 560.0001, 347.5043, 560.0000000000001):
         assert kesim.kenar_karti([kenar] * 4, 280.0)["stok"] == 4 * PL.TAVAN(kenar / 280.0), kenar
     assert kesim.toplam_karti([2000.0001], 250.0)["stok"] == 9 and kesim.kenar_karti([560.0001], 280.0)["stok"] == 3
+    assert sum([298.6, 106.6, 82.6, 512.2]) > 1000 and kesim.toplam_karti([298.6, 106.6, 82.6, 512.2], 250.0)["stok"] == 4
+    assert sum([284.1, 119.1, 234.2, 282.6]) > 920 and kesim.toplam_karti([284.1, 119.1, 234.2, 282.6], 250.0, 20.0)["stok"] == 4
+    assert kesim.kenar_karti([560.0000000000001], 280.0)["stok"] == 2
 
 
 # ----------------------------------------------------------------------------- yer (PK-01)
@@ -332,6 +336,9 @@ def test_gosterim_sayiyi_degistirmez(pk01, tmp_path):
     assert [(k["kod"], k["adet"], k.get("metre")) for k in a["kartlar"]] == [(k["kod"], k["adet"], k.get("metre")) for k in b["kartlar"]]
     assert a["kesim_plani"] == b["kesim_plani"] and a["kenar"]["liste"] == b["kenar"]["liste"]
     assert [(p["parca"], p["boy_cm"], p["bilgi"]) for p in a["kenar"]["parcalar"]] == [(p["parca"], p["boy_cm"], p["bilgi"]) for p in b["kenar"]["parcalar"]]
+    for p in _parcalar(m["model"], ("CK-04",)):                            # gösterim değeri yere geçer: Z makasın 9 cm üstünden dış kanada
+        _u0, _u1, v0, v1, _z0, _z1 = _uv(pk01["F"], p["a"], p["b"])
+        assert abs((v1 - v0) - (9 + 6)) <= 0.01, p["ad"]
 
 
 # ----------------------------------------------------------------------------- kural yok
