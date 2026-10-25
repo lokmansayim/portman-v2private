@@ -11,8 +11,9 @@ GORSELLER = [
     ['gorsel/ev_on_sag.jpg', 'Ön-sağdan: cumba ile ana çatının dere hattı, iç köşede dere ve iniş'],
     ['gorsel/ev_arka_sol.jpg', 'Arka-soldan: kalkan, alın sacı ve inişler'],
     ['gorsel/ev_catisiz.jpg', 'Çatısız: oda oda dizilim, iç kapılar, pencereler ve dış kapı'],
-    ['gorsel/cati_katman.jpg', 'Çatı katmanları: makas, aşık, OSB, nem bariyeri ve trapez sac'],
+    ['gorsel/cati_katman.jpg', 'Çatı katmanları: makas, aşık, trapez sac; tavanda 10 cm cam yünü'],
     ['gorsel/ic_kose.jpg', 'Cumbanın sağı: cumba deresi iç köşede ön dereye bağlanır; inişler duvar ve veranda kolonu boyunca'],
+    ['gorsel/bas_detay.jpg', 'Baş makas detayı: betopan makasa dayanır, alt ucu baş makas omegasının dış kanalına oturur'],
     ['gorsel/ev_render_pafta.jpg', 'Hepsi tek paftada'],
 ] if '--gorsel' in args else []
 s = open(os.path.join(D, 'kabuk.html'), encoding='utf-8').read().replace('__SCRIPT__', open(os.path.join(D, 'sahne.js'), encoding='utf-8').read())

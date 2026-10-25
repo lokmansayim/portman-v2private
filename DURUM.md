@@ -16,11 +16,12 @@ Yeni pencere için hazırlıklar:
   - Yeni: cumba (MKS09–12, iki dere hattı), OSB + nem bariyeri + trapez, ters mahya, üç kalkan, veranda (A, B, C).
   - Blender render'ları (6 görünüm, pafta, 19 adım karesi); GLB; 1:50 basılabilir maket (gövde + çıkarılabilir çatı, kapalı STL).
   - Çıktılar Mac klasöründe (33 dosya: rehber + `gorsel/`, GLB, maket STL, `BENİOKU.md`; kaynak dosyalara dokunulmadı).
-  - Özel artefakt: https://claude.ai/artifact/7B6xsSZsnAKhf3HoSpWZV2 (sürüm 1).
+  - Özel artefakt: https://claude.ai/artifact/7B6xsSZsnAKhf3HoSpWZV2 (sürüm 2, akşam düzeltmeleriyle).
 - **Kullanıcı adımları:** rehber Yerelde çalışıyor (Mac klasörü ve özel artefakt). Maket Yerelde çalışıyor (STL kapalı; baskı denenmedi). Herkese açık yayın Çalışmıyor.
 - **PK-01 düzeltmesi:** makas kartında eksik virgül, makasa dokununca kart açılmıyordu. `2026-10-24_montaj_rehberi/rehber/template.html`'de düzeltildi; artefakt sürüm 11.
 - **Devir:** `docs/devir/2026-10-25_Rehber_62m2_Devri.md`.
-- **Bekleyen (Lokman):** OSB dizilimi (OSB paftası boş); trapezde paftada çizili olmayan 7 kesim parçası; kalkan köşe dolguları; alın sacı ~11 cm; dere iç köşesi; maket ölçeği ve baskı yönü.
+- **Akşam düzeltmeleri (Lokman):** OSB ve nem bariyeri yok (trapez doğrudan aşıkta); makas uçlarına artan betopan; cephe fugalı (6 × 2 cm); baş makas detayı (betopan omeganın dış kanalında, Lokman çizimi); iç duvar üstlerine 60'lık omega; ters tavan alçıpanı (yeni adım 14); 10 cm rulo cam yünü (yeni adım 16, serilir gibi). Rehber 19 adım; render, GLB ve maket yeniden üretildi; Mac klasörü ve artefakt güncellendi.
+- **Bekleyen (Lokman):** trapezde paftada çizili olmayan 7 kesim parçası; alın sacı ~10 cm; dere iç köşesi; fuga derinliği; omega kanat ölçüleri; alçıpan ve cam yünü dizilimi; maket ölçeği ve baskı yönü.
 
 **24 Ekim 2026 öğle eki (deneme · montaj rehberi, render, Alpha Mini; iş emri yok, canlı değişmedi):**
 - **Yapıldı (dal `claude/montaj-rehberi-devir`; `deneme/2026-10-24_montaj_rehberi/`):**

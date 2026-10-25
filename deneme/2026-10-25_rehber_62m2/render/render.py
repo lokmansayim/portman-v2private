@@ -40,16 +40,16 @@ def eps():
     m, b = principled('eps', (0.95, 0.95, 0.94), 0.0, 0.95); return doku(m, b, 300, 0.5, voronoi=True)
 def boyali(ad, renk, puruz=0.42, metal=0.25):
     m, _ = principled(ad, renk, metal, puruz); return m
-def osb():
-    """OSB: yönlendirilmiş yonga; açık kahve, yonga dokusu (voronoi + gürültü)."""
-    m, b = principled('osb', (0.55, 0.40, 0.22), 0.0, 0.85)
-    nt = m.node_tree; g = nt.nodes.new('ShaderNodeNewGeometry'); v = nt.nodes.new('ShaderNodeTexVoronoi'); v.inputs['Scale'].default_value = 60
-    v.feature = 'F1'; cr = nt.nodes.new('ShaderNodeValToRGB')
-    cr.color_ramp.elements[0].color = (0.42, 0.29, 0.14, 1); cr.color_ramp.elements[1].color = (0.70, 0.54, 0.32, 1)
-    nt.links.new(g.outputs['Position'], v.inputs['Vector']); nt.links.new(v.outputs['Color'], cr.inputs['Fac']); nt.links.new(cr.outputs['Color'], b.inputs['Base Color'])
-    return doku(m, b, 140, 0.25, voronoi=True)
-def nem():
-    m, b = principled('nem_bariyeri', (0.62, 0.66, 0.70), 0.0, 0.75); return doku(m, b, 220, 0.12)
+def fuga():
+    """Cephe fugası: 2 cm oluğun dibi, koyu betopan."""
+    m, b = principled('fuga', (0.13, 0.13, 0.128), 0.0, 0.95); return doku(m, b, 380, 0.05)
+def izocam():
+    """Cam yünü şilte: sarı, lifli (gürültü + kabarık doku)."""
+    m, b = principled('izocam', (0.80, 0.60, 0.16), 0.0, 1.0)
+    nt = m.node_tree; g = nt.nodes.new('ShaderNodeNewGeometry'); t = nt.nodes.new('ShaderNodeTexNoise'); t.inputs['Scale'].default_value = 90; t.inputs['Detail'].default_value = 12
+    cr = nt.nodes.new('ShaderNodeValToRGB'); cr.color_ramp.elements[0].color = (0.62, 0.44, 0.10, 1); cr.color_ramp.elements[1].color = (0.90, 0.72, 0.26, 1)
+    nt.links.new(g.outputs['Position'], t.inputs['Vector']); nt.links.new(t.outputs['Fac'], cr.inputs['Fac']); nt.links.new(cr.outputs['Color'], b.inputs['Base Color'])
+    return doku(m, b, 160, 0.6)
 def cam():
     m, b = principled('cam', (0.92, 0.95, 0.97), 0.0, 0.0)
     b.inputs['Transmission Weight'].default_value = 1.0; b.inputs['IOR'].default_value = 1.5
@@ -68,7 +68,9 @@ YENI = {
     'pvc': boyali('pvc_antrasit', (0.11, 0.115, 0.125), 0.38, 0.05),
     'glass': cam(),
     'cdoor': boyali('celik_kapi', (0.06, 0.065, 0.07), 0.4, 0.4),
-    'osb': osb(), 'nem': nem(),
+    'fuga': fuga(),
+    'alcipan': boyali('alcipan', (0.88, 0.88, 0.86), 0.9, 0.0), 'alcipan_y': boyali('alcipan_yesil', (0.62, 0.74, 0.58), 0.9, 0.0),
+    'boardex': doku(*principled('boardex', (0.66, 0.65, 0.61), 0.0, 0.92), 300, 0.06), 'izocam': izocam(),
     'roof': TRAPEZ, 'ridge': ANTRASIT, 'trim': ANTRASIT, 'gutter': ANTRASIT,
 }
 def adim(o):
@@ -132,21 +134,28 @@ KAM = {  # konum, hedef, objektif (mm), güneş (azimut, yükseklik)
     'catisiz':  ((-7.2, -13.0, 13.0), (0.0, -0.6, 0.6), 32, (-50, 55)),
     'cati_katman': ((10.0, 12.5, 8.6), (1.6, 1.4, 2.9), 38, (60, 48)),
     'ic_kose':  ((5.6, -8.2, 2.7), (1.4, -3.3, 2.4), 40, (-35, 42)),
+    'bas_kesit': ((-4.46, -2.9, 2.52), (-4.46, -1.5, 2.52), 135, (-115, 32)),   # sol kalkan, plan y = 150'de kesit: makas, baş makas omegası, betopan, duvar
 }
-ROOF_ADIM = set(range(8, 18))
 if kip == 'gorunum':
     kp, kh, lens, (az, yuk) = KAM[sec]
-    gizle = set(range(8, 18)) if sec == 'catisiz' else set()
+    gizle = set(range(8, 19)) if sec == 'catisiz' else set()   # 8–18: omegalar, saçak, makaslar, kalkan, tavan, aşık, izolasyon, trapez, alın ve dere
     for o in nesneler:
         if adim(o) in gizle: o.hide_render = True
-    if sec == 'cati_katman':   # arka yüzde basamaklı kesit: trapez → nem bariyeri → OSB → aşık ve makas
-        kes = {'roof': 0.6, 'ridge': 0.6, 'osb': 3.0}
+    if sec == 'cati_katman':   # arka yüzde basamaklı kesit: trapez sac → omega aşık → makas; tavanda cam yünü (bu projede OSB ve nem bariyeri yok)
+        kes = {'roof': 0.6, 'ridge': 0.6, 'asik': 3.0}
         for o in nesneler:
             k, c = ANAHTAR[o.name], merkez(o)
             if k in kes and c.y > 0 and c.x > kes[k]: o.hide_render = True
-            if k == 'nem' and c.y > 0:   # tek parça: kutuyla kes
-                bpy.ops.mesh.primitive_cube_add(size=1, location=(1.8 + 5, 3, 3)); kk = bpy.context.active_object; kk.scale = (10, 6, 6); kk.hide_render = True; kk.hide_viewport = True
-                md = o.modifiers.new('kes', 'BOOLEAN'); md.operation = 'DIFFERENCE'; md.object = kk; md.solver = 'EXACT'
+    if sec == 'bas_kesit':   # gerçek kesit: düzlemi (y = −1,5) kesen nesneler boolean ile kesilir, önündekiler gizlenir
+        YK, PX, PZ = -1.5, (-5.0, -3.6), (2.0, 3.1)
+        bpy.ops.mesh.primitive_cube_add(size=1, location=(-4.3, YK - 5, 2.5)); kk = bpy.context.active_object; kk.scale = (4, 10, 4); kk.hide_render = True; kk.hide_viewport = True
+        for o in nesneler:
+            bb = [o.matrix_world @ Vector(c) for c in o.bound_box]
+            x0, x1 = min(v.x for v in bb), max(v.x for v in bb); y0, y1 = min(v.y for v in bb), max(v.y for v in bb); z0, z1 = min(v.z for v in bb), max(v.z for v in bb)
+            if x1 < PX[0] or x0 > PX[1] or z1 < PZ[0] or z0 > PZ[1]: continue
+            if y1 < YK: o.hide_render = True
+            elif y0 < YK:
+                md = o.modifiers.new('kesit', 'BOOLEAN'); md.operation = 'DIFFERENCE'; md.object = kk; md.solver = 'EXACT'
     kam.data.lens = lens; bak(kp, kh); gunes(az, yuk)
     sc.render.resolution_x, sc.render.resolution_y = int(1600 * olcek), int(1000 * olcek)
     sc.render.filepath = cikti
@@ -163,10 +172,27 @@ else:   # adım adım: o adıma kadarki parçalar, yeni parçalar turuncu; kamer
     gunes(-35, 46)
     sc.render.resolution_x, sc.render.resolution_y = int(1280 * olcek), int(800 * olcek)
     os.makedirs(cikti, exist_ok=True)
+    from mathutils import Matrix
+    IZO = [o for o in nesneler if ANAHTAR[o.name] == 'izocam']
+    IZO_ADIM = adim(IZO[0]) if IZO else None
+    rulo = []; MW0 = {}
     for A in ADIMLAR:
         ust = N if A == 0 else A
+        for r in rulo or []: bpy.data.objects.remove(r, do_unlink=True)
+        rulo = []
+        for o in IZO:
+            if o.name in MW0: o.matrix_world = MW0[o.name]
+        if A == IZO_ADIM:   # serer gibi: son iki şerit kısmen serili, uçlarında rulo
+            for o, e in zip(sorted(IZO, key=lambda q: -merkez(q).x)[:2], (0.4, 0.72)):
+                MW0[o.name] = o.matrix_world.copy()
+                bb = [o.matrix_world @ Vector(c) for c in o.bound_box]; x0, x1 = min(v.x for v in bb), max(v.x for v in bb)
+                y0, y1 = min(v.y for v in bb), max(v.y for v in bb); z0 = min(v.z for v in bb)
+                o.matrix_world = Matrix.Translation((0, y0, 0)) @ Matrix.Scale(e, 4, (0, 1, 0)) @ Matrix.Translation((0, -y0, 0)) @ o.matrix_world
+                R = (22 + (9 - 22) * e) / 100
+                bpy.ops.mesh.primitive_cylinder_add(radius=R, depth=x1 - x0 - 0.01, vertices=48, location=((x0 + x1) / 2, y0 + e * (y1 - y0), z0 + R), rotation=(0, math.pi / 2, 0))
+                r = bpy.context.active_object; r.data.materials.append(VURGU); bpy.ops.object.shade_smooth(); rulo.append(r)
         for o, s, mats in kayit:
-            o.hide_render = s > ust or (A == N and s in {9, 10, 11, 12, 13, 14, 15, 16, 17})
+            o.hide_render = s > ust or (A == N and 9 <= s < N)   # son adım: çatı gizli (rehberdeki gibi)
             for i, sl in enumerate(o.material_slots):
                 yeni = mats[i]
                 if A > 0 and s == A and mats[i] is not None and not mats[i].name.startswith('cam'): yeni = VURGU

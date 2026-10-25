@@ -18,6 +18,7 @@ fs.writeFileSync(tmp, `<!doctype html><html><head><meta charset="utf-8"><style>b
       p.obj.visible = true; p.obj.position.y = p.y;
       if (p.anim && p.anim.swing) p.obj.rotation.y = p.anim.swing[1];
       const c = p.obj.clone(true); c.name = `s${p.step}_${i}`;
+      const gec = []; c.traverse(o => { if (o.userData && o.userData.gecici) gec.push(o); }); gec.forEach(o => o.parent && o.parent.remove(o));   // serme rulosu gibi geçici parçalar modele girmez
       c.traverse(o => { o.visible = true; if (o.isMesh) { const m = o.material.clone(); m.emissiveIntensity = 0; m.emissive.set(0); m.name = o.material.name; adlar.add(m.name); o.material = m; } });
       c.updateMatrix(); root.add(c);
     });

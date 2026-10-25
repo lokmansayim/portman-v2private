@@ -195,12 +195,22 @@ omega_duvar = [
     dict(tur='bas', o='v', perp=5, a0=0, a1=600, out=-1, yer='sol duvar, MKS01 altı'),
     dict(tur='bas', o='v', perp=895, a0=0, a1=600, out=1, yer='sağ duvar, MKS08 altı'),
     dict(tur='bas', o='h', perp=-145, a0=0, a1=574.75, out=-1, yer='veranda ön kirişi, MKS09 altı'),
+    # 60'lık duvar omegası: iç duvarların üstü (Lokman 25.10.2026); kapı üstlerinden ve H'lardan kesintisiz geçer.
+    # Listede 60'lık duvar omegası toplamı 127,64 m = tavan omegası 111,8 m + iç duvar üstleri ~15 m.
+    dict(tur='ic', o='h', perp=276.25, a0=10, a1=259, out=1, yer='salon ile yatak odası 1 arası'),
+    dict(tur='ic', o='h', perp=276.25, a0=504, a1=890, out=1, yer='salon ile yatak odası 2 arası'),
+    dict(tur='ic', o='v', perp=256, a0=279.25, a1=590, out=1, yer='yatak odası 1 ile banyo ve hol arası'),
+    dict(tur='ic', o='v', perp=507, a0=279.25, a1=590, out=1, yer='banyo ve hol ile yatak odası 2 arası'),
+    dict(tur='ic', o='h', perp=401.75, a0=259, a1=504, out=1, yer='hol ile banyo arası'),
 ]
 
 # Makaslar (SketchUp modeli: MKS01–08 ana çatı, y boyunca −30…630; MKS09–10 cumba, x boyunca −30…604,8; MKS11–12 cumba ara makası)
+# Baş makaslar (MKS01, MKS08, MKS09): dış yüzü baş makas omegasının dış kanadıyla aynı hizada; betopan makasa dayanır,
+# alt ucu omeganın dış kanalına oturur (Lokman çizimi 25.10.2026). Kanat duvar dış yüzünün 1,1 mm dışında → makas ekseni 4 − 0,11.
+BAS_DIS = 0.11
 makas = [dict(ad=f'MKS{i + 1:02d}', aile='ana', rol='bas' if i in (0, 7) else 'orta', konum=c, bas=-30, son=630)
-         for i, c in enumerate([5, 130.5, 256, 381.5, 507, 632.5, 758, 895])]
-makas += [dict(ad='MKS09', aile='cumba', rol='bas', konum=-146, bas=-30, son=604.75),
+         for i, c in enumerate([4 - BAS_DIS, 130.5, 256, 381.5, 507, 632.5, 758, 896 + BAS_DIS])]
+makas += [dict(ad='MKS09', aile='cumba', rol='bas', konum=-146 - BAS_DIS, bas=-30, son=604.75),
           dict(ad='MKS10', aile='cumba', rol='orta', konum=-34, bas=-30, son=604.75),
           dict(ad='MKS11', aile='ara', rol='ara', konum=91, bas=111.4, son=463.5, yuz=87),
           dict(ad='MKS12', aile='ara', rol='ara', konum=191, bas=207.6, son=367.2, yuz=187)]

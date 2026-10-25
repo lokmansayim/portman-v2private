@@ -1,6 +1,6 @@
 """62 m² prefabrik (beşik + cumba) · 3D yazıcı için basılabilir maket (1:50).
 Rehberin verisinden (data.json) iki kapalı (watertight) parça üretir:
-  gövde: zemin plağı, dış ve iç duvarlar (pencere ve kapı boşluklu), köşe direkleri, veranda kolon ve kirişleri
+  gövde: zemin plağı, dış ve iç duvarlar (pencere ve kapı boşluklu, dış cephede fuga olukları), köşe direkleri, veranda kolon ve kirişleri
   çatı:  ana çatı + cumba; duvar üstünden (250 cm) çatı yüzeyine kadar dolu çatı arası ve saçak taşkınlı çatı kabuğu,
          trapez hadveleri; gövdenin üstüne oturur, çıkarılınca odalar görünür.
 Birim: çıktı mm (1:50 → 1 cm = 0,2 mm). Kullanım: python maket.py <data.json> <çıktı klasörü> [ölçek_payda=50] [dosya_öneki=maket62]"""
@@ -23,12 +23,23 @@ def zarf(pts): return trimesh.convex.convex_hull(np.array(pts))
 
 # ---------- Gövde ----------
 govde = [kutu(-12, D['dis'][0] + 12, -162, D['dis'][1] + 12, -12, 0)]          # zemin plağı (veranda dahil), 12 cm
+# Cephe fugası (pafta: fugalı duvar detayı): alttan 6 × 38 cm + 2 cm fuga. Maket için oluk 2,5 cm yüksek, 1,5 cm derin (1:50'de 0,5 × 0,3 mm)
+FUGA = [38, 78, 118, 158, 198, 238]; FUGA_H, FUGA_D = 2.5, 1.5
 for p in D['panels']:
-    x0, y0, x1, y1 = p['rect']; pano = kutu(x0, x1, y0, y1, 0, H); op = p['op']
+    x0, y0, x1, y1 = p['rect']; pano = kutu(x0, x1, y0, y1, 0, H); op = p['op']; kes = []
     if op:
         a0, a1, s, top = op['a0'], op['a1'], op['s'], op['top']
-        bos = kutu(a0, a1, y0 - 1, y1 + 1, max(s, -1), top) if p['o'] == 'h' else kutu(x0 - 1, x1 + 1, a0, a1, max(s, -1), top)
-        pano = fark(pano, [bos])
+        kes.append(kutu(a0, a1, y0 - 1, y1 + 1, max(s, -1), top) if p['o'] == 'h' else kutu(x0 - 1, x1 + 1, a0, a1, max(s, -1), top))
+    if p['duvar'] == 'dis':   # dış yüz: binanın ortasından uzak taraf
+        for f in FUGA:
+            z0, z1 = f - (FUGA_H - 2) / 2, f + 2 + (FUGA_H - 2) / 2
+            if p['o'] == 'h':
+                yy = (y0 - 1, y0 + FUGA_D) if (y0 + y1) / 2 < D['dis'][1] / 2 else (y1 - FUGA_D, y1 + 1)
+                kes.append(kutu(x0 - 0.5, x1 + 0.5, *yy, z0, z1))
+            else:
+                xx = (x0 - 1, x0 + FUGA_D) if (x0 + x1) / 2 < D['dis'][0] / 2 else (x1 - FUGA_D, x1 + 1)
+                kes.append(kutu(*xx, y0 - 0.5, y1 + 0.5, z0, z1))
+    if kes: pano = fark(pano, kes)
     govde.append(pano)
 for k in D['posts']:
     x0, y0, x1, y1 = k['rect']; govde.append(kutu(x0, x1, y0, y1, 0, H))
@@ -57,7 +68,7 @@ YUZ = {
     'CR':  dict(E=(604.75, 0), d=(-1, 0), R=CU, poly=[(287.375, -180.2), (606.05, -180.2), (606.05, VSR(606.05)), (287.375, 300)]),
 }
 def zs(Y, x, y): return TB + HEEL + ((x - Y['E'][0]) * Y['d'][0] + (y - Y['E'][1]) * Y['d'][1]) * Y['R']['tan']   # aşık oturma yüzü
-KAL = 8.0   # çatı kabuğu: oturma yüzünden trapez tepesine ~8 cm (eğime dik)
+KAL = 7.0   # çatı kabuğu: oturma yüzünden trapez tepesine ~7 cm (eğime dik; OSB ve nem bariyeri yok, trapez doğrudan aşıkta)
 def kirp(P, x0, x1, y0, y1):   # dışbükey çokgeni dikdörtgenle kırp
     def k(P, f, ic):
         out = []
