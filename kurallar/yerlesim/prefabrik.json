@@ -184,7 +184,7 @@
     "deger": {
      "duy": "kapalı odanın tavanında: oda uzun ekseni boyunca tavan noktası sayısınca eşit şeride bölünür, her nokta kendi şeridinin ortasında (tek noktada tavanın ortası); duydan sonra glop",
      "glop_veranda": "açık mahalde evin duvarında (açık mahalle kapalı kısmın ortak sınırı), giriş kapısının iki yanına yarı yarıya; her yanda boşluklar dışındaki boyda eşit aralıkla",
-     "anahtar": "odanın kapısının kol tarafında (menteşenin öbür ucu), odanın içindeki yüzde; birden çok anahtar yan yana; kol tarafı odaya düşmezse menteşe tarafı; geçişte (kanatsız) aynı uç",
+     "anahtar": "odanın kapısının kol tarafında (menteşenin öbür ucu), odanın içindeki yüzde; birden çok anahtar yan yana; kol tarafı odanın içinde bitince ya da bir açıklığa varınca kalan anahtarlar menteşe tarafına (orada içe açılan kanadın arkasında kalabilir; uyarı yazmaz); geçişte (kanatsız) aynı uç",
      "kapi": "odanın kapısı: giriş kapısı odaya açılıyorsa o, değilse komşusunun en çok kapısı olduğu kapı (sirkülasyon: hol, salon); eşitlikte planın sırası. Anahtar o kapının yanına sığmazsa sıradaki kapıya; hiçbirine sığmazsa (ya da odanın kapısı yoksa) uzun duvara, uyarıyla",
      "priz": "odanın iki uzun duvarında (uzun eksene paralel, iki yandaki en uzun kenar), sırayla bir o yana bir bu yana; tekli, çiftli, uydu sırası; her duvarda kapı ve pencere boşlukları dışındaki boyda eşit aralıkla",
      "sigorta_kutusu": "giriş kapısının kapalı odaya bakan iç yüzünde, kapının ortasında, kapının üstünde (karar E)",

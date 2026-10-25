@@ -6,9 +6,11 @@
 - Hakemin K3 kapısı geçer (K2'nin altı satırı ve metresi); dokuz elektrik satırı bilgidir, paftayla yan yana. K2 parçaları K3 modelinde aynen.
 - Oda oda: PK-01'in odaları; birden çok takım (salon 2, yaşam alanı 3, veranda 2: glop 4, çiftli anahtar 2); açık mutfakta tezgahın 4 prizi.
 - Yer (varsayım): duy ve glop odasının içinde, anahtar kapının kol tarafında, sigorta kutusu giriş kapısının üstünde iç yüzde, zil dışarıda,
-  veranda globu evin duvarında kapının iki yanında; duvardaki nokta açıklığın önünde değil. Gösterim, ölçü ve kot sayıyı değiştirmez.
+  veranda globu evin duvarında kapının iki yanında; duvardaki nokta açıklığın önünde değil; takımlı odada tavan noktaları eşit şeritlerde;
+  zil önce kol tarafında; anahtar sirkülasyon kapısında. Gösterim, ölçü ve kot sayıyı değiştirmez.
 - Kural yok ve uyarılar: en uzak mesafe "sigortadan" değilse kablo kurulmaz; kapısız oda, salonsuz ev (uydu), mutfaksız ve salonsuz ev
-  (tezgah; sayı yine liste üretecininki). Elektrik İş Emri'siz kurulmaz.
+  (tezgah), giriş kapısız ev, sigorta kutusu tavanda, zile dışarıda yer yok, uzun duvarlarda yer yok (sayı yine liste üretecininki).
+  Elektrik İş Emri'siz kurulmaz.
 - Komut: yerleşim planlarının altıncı sayfası elektrik planı; oda tablosunun (`k3_oda_tablosu.py`) toplamı paftanın ve modelin sayımı;
   EL kodlarının kilidi, GlobalId ev kimliğinden.
 """
@@ -329,7 +331,7 @@ def test_noktalar_odasinda_ve_acikligin_onunde_degil(ad, DK):
 
 
 def test_yerler_pk01(DK):
-    """PK-01 (kapılar: dış kapı 278,75–368,75 x duvarında, menteşe 368,75'te; hol–banyo 290–372, menteşe 372'de; hol–yatak 1 ve hol–yatak 2
+    """PK-01 (kapılar: dış kapı 278,75–368,75 x duvarında, menteşe 278,75'te, kol 368,75'te; hol–banyo 290–372, menteşe 372'de; hol–yatak 1 ve hol–yatak 2
     630–712, menteşe 630'da; hol–mutfak ve hol–salon 525–607, menteşe 607'de)."""
     E = _katman(_oku(MOTOR_VERI / "PK01.json"), DK)
     yer = {}
@@ -357,6 +359,57 @@ def test_yerler_pk01(DK):
     assert g[0][0] < 278.75 and g[1][0] > 368.75 and all(z == 210 for *_, z in g)
     # prizler odanın iki uzun duvarında, sırayla
     assert sorted(round(k[0]) for k in yer["priz_tekli", "YATAK ODASI 1"]) == [10, 193]
+
+
+def test_takimli_odada_tavan_noktalari_seritlerinde(DK):
+    """Birden çok tavan noktası (takımlı oda) odanın uzun ekseninde eşit şeritlere birer birer; hepsi odanın içinde (bir yere yığılmaz)."""
+    coklu = {}
+    for ad, yol in IS_EMIRLERI.items():
+        E = _katman(_oku(yol), DK)
+        poly = {o["ad"]: Polygon(o["poligon"]) for o in E["odalar"] if o["poligon"]}
+        tavan = {}
+        for p in E["parcalar"]:
+            if p["bilgi"].get("Yer") == "tavan":
+                k = p["geo"]["kutu"]
+                tavan.setdefault(p["bilgi"]["Mahal"], []).append(((k[0] + k[3]) / 2, (k[1] + k[4]) / 2))
+        for mahal, xy in tavan.items():
+            x0, y0, x1, y1 = poly[mahal].bounds
+            uzun_x = (x1 - x0) >= (y1 - y0)
+            a0, L = (x0, x1 - x0) if uzun_x else (y0, y1 - y0)
+            serit = sorted(int(((x if uzun_x else y) - a0) // (L / len(xy))) for x, y in xy)
+            assert serit == list(range(len(xy))), (ad, mahal, xy)
+            assert all(poly[mahal].contains(Point(q)) for q in xy), (ad, mahal, xy)
+            if len(xy) > 1:
+                coklu[ad, mahal] = len(xy)
+    assert coklu == {("ALTIN", "SALON"): 2, ("P6001", "YASAM ALANI"): 2, ("P6001_ayna_x", "YASAM ALANI"): 2, ("P6001_ayna_y", "YASAM ALANI"): 2,
+                     ("YAN_VERANDALI", "SALON"): 2, ("TEST01", "YASAM ALANI"): 3, ("TEST02", "SALON"): 2, ("TEST03", "YASAM ALANI"): 3}
+
+
+def test_zil_once_kol_tarafinda(DK):
+    """Giriş kapısının iki yanı da dışarıdaysa zil kol tarafında. Dokuz evin hiçbirinde iki yan birden boş değil; PK-01'de veranda ön cephe
+    boyunca uzatılınca (mutfak verandanın arkasında kalır) menteşe tarafı da verandanın içine düşer."""
+    ie = _oku(MOTOR_VERI / "PK01.json")
+    for m in ie["mahaller"]:
+        if m["ad"] == "MUTFAK":
+            m["konum_cm"] = [[10, 381.5, 261, 795]]
+        if m["ad"] == "VERANDA":
+            m["konum_cm"] = [[10, 795, 590, 995]]
+    E = _katman(ie, DK)
+    z = [p for p in E["parcalar"] if p["parca"] == "zil"]
+    assert [(p["bilgi"]["Yer"], (p["geo"]["kutu"][0] + p["geo"]["kutu"][3]) / 2) for p in z] == [("giriş kapısının dışı, kol tarafı", 398.75)]
+    assert E["uyarilar"] == []
+
+
+def test_anahtar_sirkulasyon_kapisinda(DK):
+    """Odanın birden çok kapısı varsa anahtar komşusunun en çok kapısı olan kapıda (sirkülasyon), planın sırasında önce gelen kapıda değil:
+    PK-01'e yatak odası 1 ile mutfak arasında (planın ilk açıklığı) bir kapı eklenince ikisinin anahtarı yine hol kapısında."""
+    ie = _oku(MOTOR_VERI / "PK01.json")
+    ie["acikliklar"].insert(0, {"tur": "ic_kapi", "olcu": 82, "arasi": ["YATAK ODASI 1", "MUTFAK"]})
+    E = _katman(ie, DK)
+    a = {p["bilgi"]["Mahal"]: p["aciklama"] for p in E["parcalar"] if p["parca"] == "anahtar_tekli"}
+    assert a["YATAK ODASI 1"] == "YATAK ODASI 1, kapının kol tarafı, y boyunca 722"
+    assert a["MUTFAK"] == "MUTFAK, kapının kol tarafı, y boyunca 515"
+    assert E["uyarilar"] == []
 
 
 def test_gosterim_olcu_kot_sayiyi_degistirmez(DK):
@@ -403,6 +456,58 @@ def test_salonsuz_ve_mutfaksiz_ev(DK):
         "mutfak ayrı mahal değil, açık mutfağın odası (salon) da yok; tezgahın prizleri konmadı (liste üreteci de yazmaz)",
         "salon türünde oda yok; uydu prizi YATAK ODASI 1 odasına konuldu"]
     assert _kuraldan(E) == _liste(ikisi)
+
+
+def test_giris_kapisiz_ev(DK):
+    """Giriş kapısı yoksa sigorta kutusu ve zil ilk kapalı odanın uzun duvarına (yedek yer, uyarı); kablonun en uzak mesafesi kapalı kısmın
+    köşegeni (liste üretecindeki gibi); sayılar ve metreler liste üretecininki."""
+    ie = _oku(MOTOR_VERI / "PK01.json")
+    ie["acikliklar"] = [a for a in ie["acikliklar"] if a["tur"] != "dis_kapi"]
+    E = _katman(ie, DK)
+    assert [u["metin"] for u in E["uyarilar"]] == [
+        "VERANDA: kapısı yok; 1 anahtar uzun duvara konuldu",
+        "giriş kapısı yok; sigorta kutusu ve zil YATAK ODASI 1 odasının uzun duvarına konuldu"]
+    assert {(p["parca"], p["bilgi"]["Mahal"], p["bilgi"]["Yer"]) for p in E["parcalar"] if p["parca"] in ("sigorta_kutusu", "zil")} == {
+        ("sigorta_kutusu", "YATAK ODASI 1", "yedek yer"), ("zil", "YATAK ODASI 1", "yedek yer")}
+    assert {k["nereden"] for k in E["kablo"]} == {"giriş kapısı yok: kapalı kısmın köşegeni"}
+    assert _kuraldan(E) == _liste(ie)
+
+
+def test_sigorta_kutusu_tavana_dayanir(DK):
+    ie = _oku(MOTOR_VERI / "PK01.json")
+    plan = ifc_uret.hazirla(ie)
+    plan["bina"]["duvar_h"] = 230
+    E = EL.katman(ie, plan, *DK)
+    assert [u["metin"] for u in E["uyarilar"]] == ["sigorta kutusu kapının üstüne sığmadı; tavana dayandı"]
+    assert [p["geo"]["kutu"][5] for p in E["parcalar"] if p["parca"] == "sigorta_kutusu"] == [230.0]
+
+
+def test_zile_disarida_yer_yok(DK, monkeypatch):
+    """Giriş kapısının dış yüzü baştan başa açıklık sayılırsa zil kol tarafında kalır, uyarıyla (sayı yine kural)."""
+    asil = EL._bosluklar
+    monkeypatch.setattr(EL, "_bosluklar", lambda P, yon, yuz: [(-1e6, 1e6)] if (yon, round(yuz, 2)) == ("x", 200.0) else asil(P, yon, yuz))
+    E = _katman(_oku(MOTOR_VERI / "PK01.json"), DK)
+    assert "giriş kapısının iki yanında da dışarıda yer yok; zil kol tarafına konuldu" in [u["metin"] for u in E["uyarilar"]]
+    z = [p for p in E["parcalar"] if p["parca"] == "zil"]
+    assert [(p["bilgi"]["Yer"], (p["geo"]["kutu"][0] + p["geo"]["kutu"][3]) / 2) for p in z] == [("giriş kapısının dışı, kol tarafı", 398.75)]
+    assert E["toplam"]["zil"] == 1
+
+
+def test_duvar_yerleri_notlari(monkeypatch):
+    """Bir uzun duvarda açıklık dışında yer yoksa noktaları öbür duvara; hiçbirinde yoksa her duvar kendi noktalarını açıklık gözetmeden
+    alır ve not bunu söyler (öbür duvara geçti demez)."""
+    duvarlar = [("x", 0.0, 0.0, 300.0, 1), ("x", 400.0, 0.0, 300.0, -1)]
+    O = {"bosluk_payi": 10}
+    monkeypatch.setattr(EL, "_bosluklar", lambda P, yon, yuz: [])
+    y, n = EL._duvar_yerleri(duvarlar, 3, None, O, 4)
+    assert ([(q[1], q[3]) for q in y], n) == ([(0.0, 77.0), (400.0, 150.0), (0.0, 223.0)], "")
+    monkeypatch.setattr(EL, "_bosluklar", lambda P, yon, yuz: [(-1e6, 1e6)] if yuz == 0.0 else [])
+    y, n = EL._duvar_yerleri(duvarlar, 3, None, O, 4)
+    assert [q[1] for q in y] == [400.0] * 3 and n == "bir uzun duvarda açıklık dışında yer yok; noktaları öbür duvara konuldu"
+    monkeypatch.setattr(EL, "_bosluklar", lambda P, yon, yuz: [(-1e6, 1e6)])
+    y, n = EL._duvar_yerleri(duvarlar, 3, None, O, 4)
+    assert ([(q[1], q[3]) for q in y], n) == ([(0.0, 75.0), (400.0, 150.0), (0.0, 225.0)],
+                                              "uzun duvarlarda açıklık dışında yer yok; noktalar açıklık gözetilmeden konuldu")
 
 
 def test_elektrik_is_emri_ister(komut, tmp_path):

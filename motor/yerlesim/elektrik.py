@@ -473,10 +473,10 @@ def _duvar_yerleri(duvarlar, m: int, P, O: dict, yari: float, yer: str = "uzun d
     serbest = [_serbest(a0 + yari, a1 - yari, _bosluklar(P, yon, yuz), O["bosluk_payi"] + yari) for yon, yuz, a0, a1, ic in duvarlar]
     hedef = [i % W for i in range(m)]
     not_ = ""
+    j = next((j for j in range(W) if serbest[j]), None)                   # yeri olan ilk duvar; açıklık gözetilmeyen duvar yer sayılmaz
     for i in range(W):
         if serbest[i] or i not in hedef:
             continue
-        j = next((j for j in range(W) if serbest[j]), None)
         if j is None:
             serbest[i] = [(duvarlar[i][2], duvarlar[i][3])]
             not_ = "uzun duvarlarda açıklık dışında yer yok; noktalar açıklık gözetilmeden konuldu"

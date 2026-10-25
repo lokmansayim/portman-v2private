@@ -19,6 +19,8 @@
   olmayan bir çatıdan tür türetmez.
 - **Kartı olmayan parça sayılmaz:** hiçbir karta uymayan parça "kural yok" yazar; iki karta uyan parçada model üretilmez. Görünüm (üçlü H'nin
   yüz görünümü), bileşen (makasın çubukları) ve kartsız olduğu bildirilen parçalar (çatı yüzü, alın, zemin betonu, boşluk) ayrı listelenir.
+- **K2 ve K3 katmanları** (`motor/yerlesim/`): komut İş Emri'yle çatı ve tavan katmanlarını (K2) ve elektriği (K3) de kurar; beşinci çıktı
+  `<kod>_yerlesim_planlari.pdf` (beş çatı ve tavan planı, altıncı sayfa elektrik planı).
 
 LLM yok, ağ yok. Sayım kodda; Bonsai bakma yeridir.
 """
