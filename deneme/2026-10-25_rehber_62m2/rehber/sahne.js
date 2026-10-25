@@ -21,7 +21,9 @@ const CU = { L: -30, R: 604.75, M: 287.375, tan: 108.5 / 317.375 };
 const ysR = (R, s) => TB + HEEL + (s <= R.M ? s - R.L : R.R - s) * R.tan;   // üst başlık dış çizgisi = aşık oturma yüzü (cm)
 // Çatı katmanları, aşık oturma yüzünden eğime dik (cm): aşık 3, ters mahya, trapez doğrudan aşıkta (hadve 3,5).
 // Bu projede OSB ve nem bariyeri yok (Lokman, 25.10.2026; paftadaki "OSB + nem bariyeri" notu geçersiz).
-const AH = 3.0 + SAC, TM0 = AH + 0.02, TM1 = TM0 + 0.1, TR0 = TM1 + 0.02, TR1 = TR0 + 0.1, RIBH = 3.5, PTOP = TR1 + RIBH + 0.1;
+// Trapez 27/200-6 (Lokman: 100 cm kapatır, 0,5 mm; ölçüler UMS Metal ve Assan Panel 27/200): hadve 27 mm, adım 200 mm, tepe 42 mm, taban 74 mm, 6 hadve
+const RIBH = 2.7, RIB_UST = 4.2, RIB_TABAN = 7.4, RIB_KENAR = 4.5;   // RIB_KENAR: kalkan kenarındaki hadvenin ekseni, levha kenarından
+const AH = 3.0 + SAC, TM0 = AH + 0.02, TM1 = TM0 + 0.1, TR0 = TM1 + 0.02, TR1 = TR0 + 0.05, PTOP = TR1 + RIBH + 0.1;   // trapez 0,5 mm
 // Cephe fugası (pafta: fugalı duvar detayı): alttan 6 × 38 cm betopan + 2 cm fuga, üstte 10 cm bant; oluk 5 mm derin
 const FUGA = [38, 78, 118, 158, 198, 238], FUGA_H = 2, FUGA_D = 0.5;
 const N = 19;
@@ -584,7 +586,7 @@ function sermeAyarla(S, e) {   // e: 0 → 1 serilen oran
 }
 
 /* 17 · Ters mahya, trapez sac, mahya (trapez doğrudan aşıkların üstünde) */
-const RIB = (() => { const s = new THREE.Shape(); s.moveTo(-0.04, 0); s.lineTo(0.04, 0); s.lineTo(0.015, RIBH / 100); s.lineTo(-0.015, RIBH / 100); s.closePath(); return s; })();
+const RIB = (() => { const s = new THREE.Shape(), a = RIB_TABAN / 200, u = RIB_UST / 200; s.moveTo(-a, 0); s.lineTo(a, 0); s.lineTo(u, RIBH / 100); s.lineTo(-u, RIBH / 100); s.closePath(); return s; })();
 {
   let ro = 0;
   // Ters mahya (dere hattı sacı): iki dere hattında, her iki yüzde 20 cm, aşıkların üstünde, trapezin altında
@@ -599,22 +601,21 @@ const RIB = (() => { const s = new THREE.Shape(); s.moveTo(-0.04, 0); s.lineTo(0
     const g = Y.grup(); g.add(levha(Q, TM0, TM1, mat('ridge', 17)));
     add(17, g, ro++ * 0.3, { kod: null, ad: 'Ters mahya (dere hattı)', satir: [['Bu parça', `${Y.ad}, ${k === 'MFR' || k === 'CR' ? 'sağ' : 'sol'} dere hattı · ${Math.round(el)} cm`], ['Görev', 'iki yüzün kesiştiği iç köşede suyu saçağa indirir; trapez sac bunun üstünde kesilir'], ['Liste', '(ANTRASİT) TERS MAHYA L 2800 · 4 adet + kenar kutusu 8']] });
   });
-  // Trapez sac (80 cm kapatır): pafta yerleri + paftada çizili olmayan kesim parçaları; hadveler ~20 cm aralık, iki kalkan kenarında birer hadve
+  // Trapez sac 27/200-6: 100 cm kapatır, 0,5 mm (Lokman). Paftadaki dizilim 80'lik levhaya göre; model 100'lük levhayla yeniden dizildi.
+  // Levhalar kalkan kenarından (cumbada ön saçaktan) başlar; son levha enine kesilir, dere ve mahya hattında açıyla kesilir.
+  const dizi = (bas, son, yon) => { const out = []; for (let v = bas; yon * (son - v) > 0.5; v += yon * 100) out.push(yon > 0 ? [v, Math.min(son, v + 100)] : [Math.max(son, v - 100), v]); return out; };
   const SERIT = {
-    MB: { ad: 350, tam: Array.from({ length: 12 }, (_, k) => [-30.2 + k * 960.4 / 12, -30.2 + (k + 1) * 960.4 / 12]), ek: [] },
-    MFR: { ad: 350, tam: Array.from({ length: 7 }, (_, k) => [930.2 - (k + 1) * 80, 930.2 - k * 80]), ek: [[287.375, 370.2]] },
-    MFL: { ad: 350, tam: [[-30.2, 49.8], [49.8, 129.8]], ek: [[129.8, 209.8], [209.8, 287.375]] },
-    CL: { ad: 340, tam: Array.from({ length: 4 }, (_, k) => [-180.2 + k * 80, -100.2 + k * 80]), ek: [[139.8, 219.8], [219.8, 300]] },
-    CR: { ad: 340, tam: Array.from({ length: 4 }, (_, k) => [-180.2 + k * 80, -100.2 + k * 80]), ek: [[139.8, 219.8], [219.8, 300]] },
+    MB: { ad: 350, iv: dizi(-30.2, 930.2, 1) }, MFR: { ad: 350, iv: dizi(930.2, 287.375, -1) }, MFL: { ad: 350, iv: dizi(-30.2, 287.375, 1) },
+    CL: { ad: 340, iv: dizi(-180.2, 300, 1) }, CR: { ad: 340, iv: dizi(-180.2, 300, 1) },
   };
-  const RX = Array.from({ length: 49 }, (_, k) => -30.2 + 4.5 + k * (960.4 - 9) / 48);     // ana çatı hadveleri (plan x)
+  const RX = Array.from({ length: 49 }, (_, k) => -30.2 + 4.5 + k * (960.4 - 9) / 48);     // ana çatı hadveleri (plan x), ~20 cm adım; iki kalkan kenarında birer hadve
   const RY = Array.from({ length: 25 }, (_, k) => -180.2 + 4.5 + k * 20).filter(y => y < 300);   // cumba hadveleri (plan y)
   let so = 0;
   Object.entries(YUZ).forEach(([k, Y]) => {
     const S = SERIT[k], cumba = k[0] === 'C';
     const tAt = v => cumba ? Y.tOf(Y.E[0], v) : Y.tOf(v, Y.E[1]);
     const ribs = (cumba ? RY : RX).map(tAt);
-    [...S.tam.map(iv => [iv, false]), ...S.ek.map(iv => [iv, true])].forEach(([[v0, v1], ek]) => {
+    S.iv.forEach(([v0, v1]) => {
       const [t0, t1] = [tAt(v0), tAt(v1)].sort((a, b) => a - b);
       const Q = kirp(dikd(-1.35, Y.R.SL + 2, t0, t1), Y.P); if (!Q) return;
       const g = Y.grup(), m = mat('roof', 17); g.add(levha(Q, TR0, TR1, m));
@@ -624,12 +625,13 @@ const RIB = (() => { const s = new THREE.Shape(); s.moveTo(-0.04, 0); s.lineTo(0
         const rb = mesh(new THREE.ExtrudeGeometry(RIB, { depth: (iv[1] - iv[0]) / 100, bevelEnabled: false }), m);
         rb.rotation.y = Math.PI / 2; rb.position.set(iv[0] / 100, TR1 / 100, tc / 100); g.add(rb);
       });
-      const kes = kirp(dikd(-1.35, Y.R.SL + 2, t0, t1), [[-1e4, -1e4], [1e4, -1e4], [1e4, 1e4], [-1e4, 1e4]]);
-      const tamMi = !ek && Math.abs(Math.abs(alan(Q)) - Math.abs(alan(kes))) < 200;
-      add(17, g, 10 + so++ * 0.22, { kod: null, ad: ek ? 'Trapez sac · kesim parçası' : `Trapez sac ${S.ad} × 80`, satir: [
-        ['Bu parça', `${Y.ad} · ${ek ? 'mahya ile dere hattı arasındaki üçgen bölge' : tamMi ? 'tam levha' : 'dere hattında açıyla kesilir'}`],
-        ['Durum', ek ? 'paftada çizili değil; kesim artığından kapatıldı (varsayım, teyit bekler)' : `paftada çizili (${cumba ? 'cumba: 4 + 4 × 340' : 'ana çatı: 12 + 7 + 2 × 350'})`],
-        ['Renk', 'antrasit · 80 cm kapatır'], ['Liste', 'TRAPEZ SAC 3500 · 21 adet, 3400 · 8 adet']] });
+      const en = Math.abs(v1 - v0), kes = kirp(dikd(-1.35, Y.R.SL + 2, t0, t1), [[-1e4, -1e4], [1e4, -1e4], [1e4, 1e4], [-1e4, 1e4]]);
+      const acili = Math.abs(Math.abs(alan(Q)) - Math.abs(alan(kes))) > 450, oran = Math.abs(alan(Q)) / (100 * (Y.R.SL + 3.35));
+      const durum = !acili && en > 99.5 ? 'tam levha' : [en < 99.5 ? `enine kesilmiş (${fmtc(en)} cm)` : '', acili ? 'dere ya da mahya hattında açıyla kesilir' : ''].filter(Boolean).join(', ');
+      add(17, g, 10 + so++ * 0.22, { kod: null, ad: oran < 0.45 ? 'Trapez sac · kesim parçası' : `Trapez sac ${S.ad} × 100`, satir: [
+        ['Bu parça', `${Y.ad} · ${durum}`],
+        ['Profil', '27/200-6: hadve 27 mm, adım 200 mm, tepe 42 / taban 74 mm; 6 hadve, 100 cm kapatır; 0,5 mm (Lokman)'],
+        ['Dizilim', 'modelde 100’lük levhayla; paftadaki dizilim 80’lik levhaya göre çizilmiş'], ['Renk', 'antrasit'], ['Liste', 'TRAPEZ SAC 3500 · 21 adet, 3400 · 8 adet']] });
     });
   });
   // Mahya: ana mahya (x boyunca) ve cumba mahyası (y boyunca), hadve tepelerinin üstünde
@@ -650,8 +652,9 @@ KALKAN.forEach(G => ['A', 'B'].forEach(end => {
   K.lev(G.ob + SAC, ot, -3 - SAC, -3);                       // tırnak (Z'nin alt kanadının altında) + saçak altı
   const uz = G.altUc[end] ? 16.5 : 0, KU = rake(G, end, mat('trim', 18), uz);
   KU.lev(ot, ot + SAC, -3 - SAC, PTOP);                      // alın: saçak altından trapezin kenar hadvesinin üstüne
-  KU.lev(ot - 6.2, ot + SAC, PTOP - 0.1, PTOP);             // kıvrım: kenar hadvesinin tepesinin üstünden içeri
-  KU.egik(ot - 6.2, PTOP - 0.1, ot - 8.3, TR1 + 0.6);       // hadveyi kavrayan kıvrım: hadvenin iç yüzü boyunca aşağı
+  const k1 = RIB_KENAR + RIB_UST / 2 - 0.2, k2 = RIB_KENAR + RIB_TABAN / 2 - 0.1;   // kenar hadvesinin tepe ve taban iç kenarı (alın yüzünden)
+  KU.lev(ot - k1, ot + SAC, PTOP - 0.1, PTOP);             // kıvrım: kenar hadvesinin tepesinin üstünden içeri
+  KU.egik(ot - k1, PTOP - 0.1, ot - k2, TR1 + 0.5);        // hadveyi kavrayan kıvrım: hadvenin iç yüzü boyunca aşağı
   const nm = `${G.ad} · ${end === 'A' ? 'ön/sol' : 'arka/sağ'} yüz`;
   add(18, KU.w, to++ * 0.5, { kod: null, ad: 'Alın sacı', satir: [['Bu parça', `${nm} · alın ve üst kıvrımlar${uz ? ', alt uçta derenin önüne kadar' : ''}`], ['Kaynak', 'Lokman çizimleri (24.10.2026)']] });
   add(18, K.w, to++ * 0.5, { kod: null, ad: 'Alın sacı', satir: [['Bu parça', `${nm} · L ${Math.round(K.Ls)} cm`], ['Profil', "tırnak 3 (baş makas Z'sine) → saçak altı 30 → alın → hadve üstünden kıvrım → hadveyi kavrayan kıvrım"], ['Bu proje', `alın yüksekliği trapezin kenar hadvesine göre ~${fmt(PTOP + 3.1, 0)} cm (PK-01’de sandviç panelle 13 cm); teyit bekler`], ['Liste', '( ANTRASİT) ALIN SACI (30\'LUK) 300 × 2500 · 10 adet']] });
@@ -803,8 +806,8 @@ const STEPS = [
     rows: [R(null, 'Aşık (omega) L 4200', '43 adet', 'liste'), I('Paftada', '57 parça · 154 m'), I('Kesit', '87 × 30 mm, sac 1 mm'), R(null, 'C kapama', '6 kalkan kenarı', 'model')] },
   { t: 'Çatı izolasyonu (10 cm rulo cam yünü)', p: 'Çatı kapanmadan önce 10 cm rulo cam yünü (Izocam) aşıkların arasından indirilip tavanın üstüne serilir. Her makas aralığına bir şerit gelir: rulo ön duvarın üstünden başlar, açılarak arka duvara kadar serilir. Rulo eni 120 cm, makas aralığı 125,5 cm. Cumbanın (verandanın) üstü de boş kalmaz: orada makas yönünde, yatay serilir.',
     extra: [R(null, 'Çatı izolasyonu (Izocam-Knauf) 100 mm · 9,6 m² / paket', '7 paket', 'liste'), I('Modelde', `${parts.filter(q => q.step === 16).length} şerit · ≈ ${fmt(parts.filter(q => q.step === 16).reduce((t, q) => t + q.obj.children[0].geometry.parameters.width * q.obj.children[0].geometry.parameters.depth, 0), 0)} m²`)] },
-  { t: 'Trapez sac, mahya ve ters mahya', p: 'İki dere (vadi) hattına önce ters mahya döşenir. Ana çatıya 350’lik, cumbaya 340’lık antrasit trapez sac (80 cm kapatır) doğrudan aşıkların üstüne serilip vidalanır (bu projede OSB ve nem bariyeri yok); dere hattında açıyla kesilir. Paftadaki 29 levhanın dışında kalan, mahya ile dere arasındaki üçgen bölgeler kesim artıklarından kapatılır (paftada çizili değil). Mahyalar trapez sac mahyasıyla kapatılır.',
-    rows: [R(null, 'Trapez sac 350 × 80', '21 adet', 'liste'), R(null, 'Trapez sac 340 × 80', '8 adet', 'liste'), R(null, 'Trapez sac mahyası L 800', '25 adet', 'liste'), R(null, 'Ters mahya L 2800', '4 adet', 'liste'), R(null, 'Ters mahya kenar kutusu', '8 adet', 'liste')] },
+  { t: 'Trapez sac, mahya ve ters mahya', p: 'İki dere (vadi) hattına önce ters mahya döşenir. Ana çatıya 350’lik, cumbaya 340’lık antrasit 27/200 trapez sac (0,5 mm; hadve 27 mm, adım 200 mm; 100 cm kapatır) doğrudan aşıkların üstüne serilip vidalanır (bu projede OSB ve nem bariyeri yok); dere hattında açıyla kesilir. Levhalar kalkan kenarından başlayarak dizilir; paftadaki dizilim 80’lik levhaya göre çizildiği için model 100’lük levhayla yeniden dizildi. Mahyalar trapez sac mahyasıyla kapatılır.',
+    rows: [R(null, 'Trapez sac L 3500 (ana çatı)', '21 adet', 'liste'), R(null, 'Trapez sac L 3400 (cumba)', '8 adet', 'liste'), I('Modelde', `${parts.filter(q => q.step === 17 && /^Trapez sac/.test(q.obj.userData.info.ad)).length} levha · 100 cm kapatır, 0,5 mm`), R(null, 'Trapez sac mahyası L 800', '25 adet', 'liste'), R(null, 'Ters mahya L 2800', '4 adet', 'liste'), R(null, 'Ters mahya kenar kutusu', '8 adet', 'liste')] },
   { t: 'Alın sacı, dere ve iniş', p: 'Alın sacı (antrasit) üç kalkanın eğik kenarlarına takılır: tırnağı baş makas Z’sine girer, saçak altı aşıkların altını kapatır, üstte trapezin kenar hadvesini kavrar; alt ucu derenin alnını kapatır. Dört saçağa K kesitli dere asılır; cumbanın sağında ön dereyle iç köşe yapar. 7 iniş borusu kaz boynuyla duvara ya da veranda kolonuna döner ve kelepçeyle iner.',
     rows: [R(null, 'Alın sacı 300 × 2500', '10 adet', 'liste'), R(null, 'Metal dere L 4000', '5 adet', 'liste'), I('Dere (pafta)', '4 hat · 16,4 m'), R(null, 'İniş takımı', '7 adet', 'pafta'), R(null, 'Dere kapağı', '8 adet', 'liste')] },
   { t: 'Kapı ve pencereler', p: 'Antrasit PVC pencereler (2 × 120/120 çift açılım, 1 × 120/80 sürgülü, 2 × 180/180 çift açılım, 1 × 60/60 vasistas) ve prefabrik çelik dış kapı (90 × 200, sağ) yerine konur. İç kapılar alıcıya ait; modelde yerlerini ve açılış yönlerini göstermek için çizildi. Bu adımda çatı, tavan ve izolasyon gizlenir; düğmeyle geri açılır.',
@@ -825,7 +828,7 @@ STEPS.forEach((st, i) => {
     R(null, 'Saçak omegası · duvar omegası · baş makas omegası', '7 · 4 · 8', 'liste'), R(null, 'Saçak sacı', '8 adet', 'liste'),
     R(null, 'Baş makas betopanı', '6 adet', 'pafta'), R(null, 'Tavan omegası', '45 · 111,8 m', 'pafta'), R(null, '60’lık duvar omegası (tavan + iç duvar)', '36 adet', 'liste'),
     R(null, 'Tavan alçıpanı beyaz · yeşil · veranda boardex', '17 · 2 · 4', 'liste'), R(null, 'Aşık L 4200', '43 adet', 'liste'), R(null, 'Çatı izolasyonu 100 mm (rulo)', '7 paket', 'liste'),
-    R(null, 'Trapez sac 350 / 340', '21 / 8 adet', 'liste'), R(null, 'Mahya · ters mahya', '25 · 4', 'liste'),
+    R(null, 'Trapez sac 3500 / 3400 (100 cm kapatır, 0,5 mm)', '21 / 8 adet', 'liste'), R(null, 'Mahya · ters mahya', '25 · 4', 'liste'),
     R(null, 'Alın sacı', '10 adet', 'liste'), R(null, 'Dere ve iniş', '4 hat · 7 iniş', 'pafta'), R(null, 'Çelik dübel', '21 adet', 'liste'),
     ['grp', 'Kapı ve pencere'], ...pick(['K-', 'P-'], ['PVC']),
   ];

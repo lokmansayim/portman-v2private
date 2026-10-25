@@ -68,7 +68,7 @@ YUZ = {
     'CR':  dict(E=(604.75, 0), d=(-1, 0), R=CU, poly=[(287.375, -180.2), (606.05, -180.2), (606.05, VSR(606.05)), (287.375, 300)]),
 }
 def zs(Y, x, y): return TB + HEEL + ((x - Y['E'][0]) * Y['d'][0] + (y - Y['E'][1]) * Y['d'][1]) * Y['R']['tan']   # aşık oturma yüzü
-KAL = 7.0   # çatı kabuğu: oturma yüzünden trapez tepesine ~7 cm (eğime dik; OSB ve nem bariyeri yok, trapez doğrudan aşıkta)
+KAL = 4.0   # çatı kabuğu: aşık oturma yüzünden trapez levhasına ~3,4 cm + 0,6 (eğime dik; OSB ve nem bariyeri yok); hadveler bunun üstünde
 def kirp(P, x0, x1, y0, y1):   # dışbükey çokgeni dikdörtgenle kırp
     def k(P, f, ic):
         out = []
@@ -92,7 +92,7 @@ for ad, Y in YUZ.items():
     for r in TABAN:
         Q = kirp(gen, *r)
         if Q: cati.append(zarf([(x, y, H) for x, y in Q] + [(x, y, zs(Y, x, y) + 0.5) for x, y in Q]))   # çatı arası (dolu)
-# Trapez hadveleri: ana çatıda eğim boyunca (x'te ~20 cm aralık), cumbada y'de 20 cm; yüz çokgenine kırpılır
+# Trapez hadveleri (27/200): ana çatıda eğim boyunca (x'te ~20 cm aralık), cumbada y'de 20 cm; yüz çokgenine kırpılır
 def hadve(Y, u, eksen):
     c = Y['R']['cos']; P = Y['poly']; xs = []
     for i in range(len(P)):
@@ -102,7 +102,7 @@ def hadve(Y, u, eksen):
     if len(xs) < 2: return None
     v0, v1 = min(xs) + 6, max(xs) - 6   # uçlar yüz kenarından (dere hattında açılı) içeride kalsın
     if v1 - v0 < 15: return None
-    w0, w1, h = 3.5, 1.5, 3.5
+    w0, w1, h = 3.7, 2.1, 2.7   # 27/200: taban 74, tepe 42 mm, hadve 27 mm
     pts = []
     for v in (v0, v1):
         for du, dh in ((-w0, 0), (w0, 0), (-w1, h), (w1, h)):

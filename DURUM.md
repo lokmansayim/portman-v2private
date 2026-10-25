@@ -21,7 +21,7 @@ Yeni pencere için hazırlıklar:
 - **PK-01 düzeltmesi:** makas kartında eksik virgül, makasa dokununca kart açılmıyordu. `2026-10-24_montaj_rehberi/rehber/template.html`'de düzeltildi; artefakt sürüm 11.
 - **Devir:** `docs/devir/2026-10-25_Rehber_62m2_Devri.md`.
 - **Akşam düzeltmeleri (Lokman):** OSB ve nem bariyeri yok (trapez doğrudan aşıkta); makas uçlarına artan betopan; cephe fugalı (6 × 2 cm); baş makas detayı (betopan omeganın dış kanalında, Lokman çizimi); iç duvar üstlerine 60'lık omega; ters tavan alçıpanı (yeni adım 14); 10 cm rulo cam yünü (yeni adım 16, serilir gibi; cumbada yatay). Gece: 100'lük omegalar 10,5 cm dış duvara yaslı, baş makas omegası ölçüleri, 60'lık omega 6,5 cm, büyük pencere yanlarında fuga, "Adımı render göster" kaldırıldı. Rehber 19 adım; render, GLB ve maket yeniden üretildi; Mac klasörü ve artefakt güncellendi.
-- **Bekleyen (Lokman):** trapezde paftada çizili olmayan 7 kesim parçası; alın sacı ~10 cm; dere iç köşesi; fuga derinliği; U dudağı; maket ölçeği ve baskı yönü.
+- **Bekleyen (Lokman):** trapez 100'lük dizilim (cumbada 10 parça, listede 8); alın sacı ~9 cm; dere iç köşesi; fuga derinliği; U dudağı; maket ölçeği ve baskı yönü.
 
 **24 Ekim 2026 öğle eki (deneme · montaj rehberi, render, Alpha Mini; iş emri yok, canlı değişmedi):**
 - **Yapıldı (dal `claude/montaj-rehberi-devir`; `deneme/2026-10-24_montaj_rehberi/`):**

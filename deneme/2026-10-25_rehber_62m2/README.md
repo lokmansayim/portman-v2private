@@ -40,7 +40,7 @@ Bir bayi projesinin (900 × 600 cm, veranda üstünde cumba) montaj rehberi. Kay
 - **Cumba.** İkinci beşik, ana çatıya dik.
   - Mahyası ana mahyayla aynı yükseklikte; iki dere (vadi) hattı var.
   - MKS09 veranda ön kirişinde, MKS10 yan kirişlerde. MKS11–12 ara makaslar: ana makasların üst başlığına oturur.
-- **Çatı katmanları.** Trapez (80 cm kapatır) doğrudan aşıkların üstünde; ters mahya; trapez sac mahyası. OSB ve nem bariyeri yok (Lokman, 25 Ekim akşamı; paftadaki not bu projede geçerli değil).
+- **Çatı katmanları.** Trapez 27/200-6 (100 cm kapatır, 0,5 mm; hadve 27, adım 200, tepe 42 / taban 74 mm) doğrudan aşıkların üstünde; levhalar 100'lükle yeniden dizildi (paftadaki 80'lik); ters mahya; trapez sac mahyası. OSB ve nem bariyeri yok (Lokman, 25 Ekim akşamı; paftadaki not bu projede geçerli değil).
 - **Cephe fugası.** Dış panoların dış betopanında 6 sıra 2 cm fuga (alttan 38 cm'de bir, üstte 10 cm bant; pafta: fugalı duvar detayı). Modelde 5 mm derin oluk; malzeme anahtarı `fuga`. Makette 0,5 × 0,3 mm oluk.
 - **Makas uçları.** Kalkanlarda iki 125 × 250 betopanın dışında kalan uçlara, betopanların eğimle kesilen artanı döşenir (Lokman, 25 Ekim akşamı).
 - **100'lük omegalar ve baş makas detayı (Lokman çizimi ve ölçüleri, 25 Ekim).** Pano 8 + 84 (EPS) + 8 mm = 100 mm; H sacı 1,2 mm, kanat uçları ezilmiş kıvrımla 2 mm (`HS`); H sırtı gövdenin iki yanına 5'er cm, 100'lük ve 60'lıkta aynı. 100'lük omegalar 10,5 cm = 2 + 100 + 2 mm + 1 mm, dış kanat H kanadına yaslı, içteki aralıklar silikonize mastik (modelde boşluk). Baş makas omegası: derinlik 3 cm, içte 3 cm açık yanak, dışta 1 cm U yanak; 8 mm betopan U'ya girer, makasa dayanır; baş makaslar dış kanatla aynı hizada (`build_data.py` `BAS_DIS` = 0,3). Z değişmedi.
@@ -56,9 +56,9 @@ Bir bayi projesinin (900 × 600 cm, veranda üstünde cumba) montaj rehberi. Kay
 
 ## Varsayımlar (Lokman'ın teyidini bekler)
 
-1. **Trapez kesim parçaları.** Paftadaki 29 levhanın dışında 7 üçgen kesim parçası (mahya ile dere arası).
+1. **Trapez dizilimi.** 100'lük levhayla kalkan kenarından; cumbada 10 parça (listede 8).
 2. **Kesitler.** PK-01'deki köşe, Z, C kapama, saçak ve alın sacı kesitleri aynen alındı.
-3. **Alın sacı.** Trapez kenar hadvesine göre ~10 cm (OSB olmadığı için trapez 1,2 cm aşağıda).
+3. **Alın sacı.** Trapez kenar hadvesine göre ~9 cm (OSB yok, hadve 27 mm).
 4. **Dere iç köşesi.** Cumba sağ deresi ön dereye iç köşede bağlanır.
 5. **Fuga derinliği.** Paftada yok; modelde 5 mm.
 

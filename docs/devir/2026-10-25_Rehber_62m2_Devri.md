@@ -43,8 +43,8 @@ Lokman'ın Mac'indeki proje klasörü (DWG, SKP, yükleme listesi) okunarak PK-0
 
 ## Teyit bekleyenler (Lokman)
 
-1. Trapezde paftada çizili olmayan 7 üçgen kesim parçası (mahya ile dere arası).
-2. Alın sacı yüksekliği ~10 cm (trapez kenar hadvesine göre; PK-01'de 13).
+1. Trapez dizilimi: 27/200-6, 100 cm kapatır, 0,5 mm (Lokman); levhalar 100'lükle yeniden dizildi, cumbada 10 parça (listede 8).
+2. Alın sacı yüksekliği ~9 cm (27 mm hadveye göre; PK-01'de 13).
 3. Cumba sağ deresinin ön dereye iç köşede bağlanması.
 4. PK-01'den aynen alınan kesitler: köşe, Z, C kapama, saçak ve alın sacı.
 5. Fuga derinliği (paftada yok; modelde 5 mm).
