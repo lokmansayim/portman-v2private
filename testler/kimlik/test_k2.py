@@ -489,9 +489,9 @@ def test_komut_yerlesim_planlari(tmp_path):
     import pymupdf
     d = pymupdf.open(tmp_path / "PK01_yerlesim_planlari.pdf")
     metin = [p.get_text() for p in d]
-    assert len(d) == 5
+    assert len(d) == 6                                                    # K3: altıncı sayfa elektrik planı (test_k3.py)
     for i, baslik in enumerate(("TAVAN OMEGA YERLEŞİM PLANI", "MAKAS VE DERE YERLEŞİM PLANI", "BAŞ MAKAS BETOPAN YERLEŞİMİ",
-                                "AŞIK YERLEŞİM PLANI", "ÇATI KAPLAMASI YERLEŞİM PLANI")):
+                                "AŞIK YERLEŞİM PLANI", "ÇATI KAPLAMASI YERLEŞİM PLANI", "ELEKTRİK YERLEŞİM PLANI")):
         assert f"PK01 · {baslik}" in metin[i], baslik
     assert "24 parça, 58,46 m" in metin[0] and "42 parça, 148,40 m" in metin[3] and "22 panel" in metin[4] and "4 levha" in metin[2]
     assert d.metadata.get("creationDate", "") == ""

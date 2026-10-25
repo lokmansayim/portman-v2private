@@ -1,4 +1,5 @@
-"""K2'nin beş yerleşim planı, kart modelinin IFC'sinden çizilir: tavan omega, makas ve dere, baş makas betopanı, aşık, çatı kaplaması.
+"""K2'nin beş yerleşim planı ve K3'ün elektrik planı, kart modelinin IFC'sinden çizilir: tavan omega, makas ve dere, baş makas betopanı,
+aşık, çatı kaplaması; sayımda elektrik varsa (komut her zaman kurar) altıncı sayfa elektrik yerleşim planıdır.
 
 Her şekil modeldeki parçanın kendi geometrisinden (dünya koordinatı) ve özellik setinden okunur; planlar yerleşim kurallarının çıktısından
 değil modelden gelir. Sayılar (adet, metre, kesim) sayımdandır (`<kod>_kart_sayim.json`). Antet bizimdir; paftanın anteti ve adları
@@ -23,7 +24,11 @@ OMEGA_YER = {"duvar_ekseni": "iç duvar ekseninde", "duvar_yuzu": "duvar yüzün
 YUZ = {"sol": "sol", "sag": "sağ"}
 # sayfanın katmanları: kural yokta katmanın adı (`motor.yerlesim`), parça adının öneki ve uyarının katmanı
 SAYFA = {1: (("tavan omegası",), ("OMEGA_",)), 2: (("dere ve iniş", "iniş"), ("DERE_", "INIS_")), 3: (("baş makas betopanı",), ("BETOPAN_",)),
-         4: (("aşık",), ("ASIK_",)), 5: (("çatı kaplaması",), ("KAPLAMA_",))}
+         4: (("aşık",), ("ASIK_",)), 5: (("çatı kaplaması",), ("KAPLAMA_",)),
+         6: (("elektrik", "elektrik noktaları", "kablo_priz", "kablo_aydinlatma"),
+             ("DUY_", "GLOP_", "ANAHTAR_", "PRIZ_", "UYDU_", "ZIL_", "SIGORTA_", "KABLO_"))}
+ELEKTRIK_RENK = {"EL-01": "#c0392b", "EL-02": "#c0392b", "EL-03": "#1e8449", "EL-04": "#1e8449", "EL-05": "#1f4e9c", "EL-06": "#1f4e9c",
+                 "EL-07": "#7d3c98", "EL-08": "#ca6f1e", "EL-09": "#111111", "EL-10": "#1f4e9c", "EL-11": "#e67e22"}
 
 
 def _sayi(x: float, n: int = 2) -> str:
@@ -100,7 +105,8 @@ def _notlar(fig, say: dict, sayfa: int):
                  fontsize=11, color="#b03a2e", fontweight="bold", va="top")
     satir = [f"Kurulmadı: {x['parca']}: {x['neden']}" for x in say["kural_yok"]
              if x["parca"] in adlar or str(x["parca"]).startswith(onekler)]
-    satir += [f"Uyarı: {u['metin']}" for u in say.get("yerlesim", {}).get("uyarilar", []) if u["katman"] in adlar]
+    satir += [f"Uyarı: {u['metin']}" for u in say.get("yerlesim", {}).get("uyarilar", []) + say.get("elektrik", {}).get("uyarilar", [])
+              if u["katman"] in adlar]
     if satir:
         fig.text(0.76, 0.30, "\n".join(textwrap.fill(s, 46) for s in satir[:8]) + ("\n…" if len(satir) > 8 else ""), fontsize=8.5,
                  va="top", ha="left", color="#b03a2e")
@@ -246,4 +252,81 @@ def ciz(model_yolu: Path, say: dict, yol: Path, kod: str) -> Path:
             _cerceve(ax, f"{kod} · {baslik}", alt)
             _notlar(fig, say, sayfa)
             pdf.savefig(fig); plt.close(fig)
+
+        # 6 · elektrik (K3)
+        if "elektrik" in say:
+            fig, ax = plt.subplots(figsize=(16.54, 11.69))
+            _elektrik(ax, m, say, plt)
+            _cerceve(ax, f"{kod} · ELEKTRİK YERLEŞİM PLANI", alt.replace("(İE-15 K2)", "(İE-15 K3)"))
+            _lejant(fig, _elektrik_lejanti(say))
+            _notlar(fig, say, 6)
+            pdf.savefig(fig); plt.close(fig)
     return yol
+
+
+def _elektrik(ax, m: dict, say: dict, plt) -> None:
+    """Noktalar modeldeki parçaların yerinden (kutunun plandaki ortası; duvardakiler okunsun diye odaya doğru 14 cm içeride çizilir, zil
+    anahtarın üstüne düşebildiği için 32 cm); oda adları sayımın oda özetinden; kablo çizgisi modeldeki çubuktan."""
+    from shapely.geometry import LineString, Point, Polygon
+    from shapely.ops import polylabel, unary_union
+    _duvarlar(ax, m, dolgu=True)
+    duvar = unary_union(m["duvar"])
+
+    def ice(x0, y0, x1, y1, a=14):                               # duvardaki kutunun ince ekseninde duvardan uzak yan
+        cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+        if (x1 - x0) <= (y1 - y0):
+            return (cx + (a if duvar.distance(Point(x0, cy)) < duvar.distance(Point(x1, cy)) else -a), cy)
+        return (cx, cy + (a if duvar.distance(Point(cx, y0)) < duvar.distance(Point(cx, y1)) else -a))
+    for o in say["elektrik"]["odalar"]:
+        if o["poligon"]:                                          # ad, odanın ortasıyla alt duvarının arasında (tavandaki noktanın altında)
+            pg = Polygon(o["poligon"])
+            c = polylabel(pg, tolerance=1)
+            alt_ = min(y for x, y in LineString([(c.x, c.y), (c.x, pg.bounds[1] - 1)]).intersection(pg).coords)
+            ek = f"{o['takim']} takım" if o["takim"] else o["kaynak"].split(" + ")[0]
+            ax.text(c.x, (c.y + alt_) / 2, f"{o['ad']}\n{_sayi(o['alan_m2'])} m² · {ek}", fontsize=7.5, ha="center", va="center", color="#666")
+    for kod in ("EL-10", "EL-11"):
+        for p in m["k2"].get(kod, []):
+            v = p["v"][:, :2]
+            i, j = np.unravel_index(np.argmax(((v[:, None, :] - v[None, :, :]) ** 2).sum(-1)), (len(v), len(v)))
+            ax.plot([v[i, 0], v[j, 0]], [v[i, 1], v[j, 1]], ls="--", lw=1.4, color=ELEKTRIK_RENK[kod], alpha=0.8)
+    for kod, ps in sorted(m["k2"].items()):
+        if not kod.startswith("EL-") or kod in ("EL-10", "EL-11"):
+            continue
+        r = ELEKTRIK_RENK[kod]
+        for p in ps:
+            x0, y0 = p["v"][:, :2].min(0); x1, y1 = p["v"][:, :2].max(0)
+            cx, cy = ice(x0, y0, x1, y1, 32 if kod == "EL-08" else 14) if p["p"].get("Yer") != "tavan" else ((x0 + x1) / 2, (y0 + y1) / 2)
+            if kod == "EL-01":
+                ax.add_patch(plt.Rectangle((cx - 12, cy - 12), 24, 24, color=r))
+            elif kod == "EL-02":
+                ax.add_patch(plt.Circle((cx, cy), 11, fc="white", ec=r, lw=1.6))
+                ax.plot([cx - 8, cx + 8], [cy - 8, cy + 8], color=r, lw=1.2); ax.plot([cx - 8, cx + 8], [cy + 8, cy - 8], color=r, lw=1.2)
+            elif kod in ("EL-03", "EL-04"):
+                ax.add_patch(plt.Circle((cx, cy), 6, color=r))
+                for k in range(1 if kod == "EL-03" else 2):
+                    ax.plot([cx + 4 + 5 * k, cx + 12 + 5 * k], [cy + 4, cy + 14], color=r, lw=1.4)
+            elif kod == "EL-09":
+                ax.add_patch(plt.Rectangle((x0, y0), max(x1 - x0, 6), max(y1 - y0, 6), color=r))
+                ax.text(cx, cy + 14, "SİGORTA", fontsize=6.5, ha="center", va="bottom", color=r, fontweight="bold")
+            else:
+                yazi = {"EL-05": "U", "EL-06": "UU", "EL-07": "TV", "EL-08": "Z"}[kod]
+                ax.text(cx, cy, yazi, fontsize=8, ha="center", va="center", color=r, fontweight="bold",
+                        bbox={"boxstyle": "round,pad=0.15", "fc": "white", "ec": r, "lw": 0.8})
+
+
+def _elektrik_lejanti(say: dict) -> list[str]:
+    E = say["elektrik"]
+    satir = ["Sayılar kuraldan (Lokman, 18 Ekim;", f"oda ve veranda takımı, her {E['degerler']['oda_kurali']['takim_m2']:g} m²'ye".replace(".", ","),
+             "bir takım; banyo, mutfak, hol kitaptan).",
+             "Yerler varsayım (plan §6).", ""]
+    isaret = {"EL-01": "■", "EL-02": "⊗", "EL-03": "●╱", "EL-04": "●╱╱", "EL-05": "U", "EL-06": "UU", "EL-07": "TV", "EL-08": "Z", "EL-09": "▬"}
+    for k in say["kartlar"]:
+        if k["kod"] in isaret:
+            satir.append(f"{isaret[k['kod']]}  {k['ad']}: {k['adet']}")
+    satir.append("")
+    for x in E["kablo"]:
+        kart = "EL-10" if x["parca"] == "kablo_priz" else "EL-11"
+        ad = next(k["ad"] for k in say["kartlar"] if k["kod"] == kart)
+        satir += [f"- - {ad}: {x['metre']} m", f"    {x['hat']} hattı: {x['w_otomat']} W otomat × {_sayi(x['en_uzak_m'])} m",
+                  f"    + {x['noktalar']} nokta × {_sayi(x['nokta_basina_m'], 0)} m, yukarı"]
+    return satir

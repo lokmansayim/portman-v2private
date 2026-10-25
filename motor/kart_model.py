@@ -19,6 +19,8 @@
   olmayan bir çatıdan tür türetmez.
 - **Kartı olmayan parça sayılmaz:** hiçbir karta uymayan parça "kural yok" yazar; iki karta uyan parçada model üretilmez. Görünüm (üçlü H'nin
   yüz görünümü), bileşen (makasın çubukları) ve kartsız olduğu bildirilen parçalar (çatı yüzü, alın, zemin betonu, boşluk) ayrı listelenir.
+- **K2 ve K3 katmanları** (`motor/yerlesim/`): komut İş Emri'yle çatı ve tavan katmanlarını (K2) ve elektriği (K3) de kurar; beşinci çıktı
+  `<kod>_yerlesim_planlari.pdf` (beş çatı ve tavan planı, altıncı sayfa elektrik planı).
 
 LLM yok, ağ yok. Sayım kodda; Bonsai bakma yeridir.
 """
@@ -249,9 +251,10 @@ def _yerlesim_anahtarlari(kart: dict, p: dict, tavan: str) -> list[str]:
     return list(dict.fromkeys(anahtarlar))
 
 
-def _k2(f, kartlar: dict, yerlesim: dict, liste_kurallari: dict, is_emri: dict, plan: dict, surum: str, kaynak: str) -> dict:
+def _k2(f, kartlar: dict, yerlesim: dict, liste_kurallari: dict, is_emri: dict, plan: dict, surum: str, kaynak: str,
+        elektrik: bool = False) -> dict:
     """Yerleşim katmanlarını (`motor/yerlesim/`) kart modeline ekler. Dönen: sınıflandırma kayıtları (rol "kart"), kural yok, kesim planı,
-    sabit paketler ve yerleşimin özeti."""
+    sabit paketler ve yerleşimin özeti. `elektrik` ise K3'ün elektrik katmanı da eklenir (`motor/yerlesim/elektrik.py`); özeti ayrıdır."""
     from motor import yerlesim as Y
     from motor.yerlesim import kesim, yaz
 
@@ -259,21 +262,32 @@ def _k2(f, kartlar: dict, yerlesim: dict, liste_kurallari: dict, is_emri: dict, 
     g, D = sonuc["girdi"], sonuc["degerler"]
     kural_yok = list(sonuc["kural_yok"])
     sira: Counter = Counter()
-    eslesen = []
-    for p in sonuc["parcalar"]:
-        uyan = yerlesim_kartlari(p, kartlar)
-        if len(uyan) > 1:
-            raise ValueError(f"{p['kural']} / {p['parca']}: iki karta uyuyor ({', '.join(k['kod'] for k in uyan)}); kart dosyası düzeltilmeli")
-        sira[p["parca"]] += 1
-        ad = f"{Y.PARCA_ADI[p['parca']]}_{sira[p['parca']]:03d}"
-        if not uyan:
-            kural_yok.append({"parca": ad, "sinif": "—", "neden": f"{p['kural']} kuralının \"{p['parca']}\" parçasına uyan kart yok"})
-            continue
-        k = uyan[0]
-        eslesen.append(dict(p, ad=ad, kart=k, sinif=k["yerlesim"]["sinif"], pafta=_yerlesim_anahtarlari(k, p, g["tavan"])))
-    turler = {k["kod"]: _tur_olustur(f, k, surum) for k in kartlar["kartlar"] if any(p["kart"] is k for p in eslesen)}
-    elemanlar = yaz.yaz(f, eslesen, turler, kaynak, PARCA_SETI, str(is_emri.get("is_emri_no", "")))
-    kayitlar = [{"e": e, "rol": "kart", "kart": p["kart"], "pafta": p["pafta"], "k2": p} for e, p in zip(elemanlar, eslesen)]
+
+    def esle(parcalar: list[dict]) -> list[dict]:
+        out = []
+        for p in parcalar:
+            uyan = yerlesim_kartlari(p, kartlar)
+            if len(uyan) > 1:
+                raise ValueError(f"{p['kural']} / {p['parca']}: iki karta uyuyor ({', '.join(k['kod'] for k in uyan)}); kart dosyası düzeltilmeli")
+            sira[p["parca"]] += 1
+            ad = f"{Y.PARCA_ADI[p['parca']]}_{sira[p['parca']]:03d}"
+            if not uyan:
+                kural_yok.append({"parca": ad, "sinif": "—", "neden": f"{p['kural']} kuralının \"{p['parca']}\" parçasına uyan kart yok"})
+                continue
+            k = uyan[0]
+            out.append(dict(p, ad=ad, kart=k, sinif=k["yerlesim"]["sinif"], pafta=_yerlesim_anahtarlari(k, p, g["tavan"])))
+        return out
+    eslesen = esle(sonuc["parcalar"])
+    E, el_eslesen = None, []
+    if elektrik:
+        from motor.yerlesim import elektrik as EL
+        E = EL.katman(is_emri, plan, D[Y.ELEKTRIK], yerlesim["kurallar"][Y.ELEKTRIK])
+        kural_yok += E["kural_yok"]
+        el_eslesen = esle(E["parcalar"])
+    hepsi = eslesen + el_eslesen
+    turler = {k["kod"]: _tur_olustur(f, k, surum) for k in kartlar["kartlar"] if any(p["kart"] is k for p in hepsi)}
+    elemanlar = yaz.yaz(f, hepsi, turler, kaynak, PARCA_SETI, str(is_emri.get("is_emri_no", "")))
+    kayitlar = [{"e": e, "rol": "kart", "kart": p["kart"], "pafta": p["pafta"], "k2": p} for e, p in zip(elemanlar, hepsi)]
 
     kitap = Y.kitap_oku(liste_kurallari)
     kesim_plani, sabit = {}, {}
@@ -293,7 +307,13 @@ def _k2(f, kartlar: dict, yerlesim: dict, liste_kurallari: dict, is_emri: dict, 
             "parcalar": [{"parca": p["ad"], "kart": p["kart"]["kod"], "kural": p["kural"], **({"boy_cm": p["boy_cm"]} if "boy_cm" in p else {}),
                           **({"alan_m2": p["alan_m2"]} if "alan_m2" in p else {}), "bilgi": p["bilgi"], "aciklama": p["aciklama"]} for p in eslesen],
             "degerler": {ad: D[ad] for ad in Y.KURALLAR}}
-    return {"kayitlar": kayitlar, "kural_yok": kural_yok, "kesim_plani": kesim_plani, "sabit": sabit, "yerlesim": ozet}
+    out = {"kayitlar": kayitlar, "kural_yok": kural_yok, "kesim_plani": kesim_plani, "sabit": sabit, "yerlesim": ozet}
+    if E is not None:
+        out["elektrik"] = {"toplam": E["toplam"], "kablo": E["kablo"], "uyarilar": E["uyarilar"], "odalar": E["odalar"],
+                           "noktalar": [{"parca": p["ad"], "kart": p["kart"]["kod"], "pafta": p["pafta"], **({"boy_cm": p["boy_cm"]} if "boy_cm" in p else {}),
+                                         "bilgi": p["bilgi"], "aciklama": p["aciklama"]} for p in el_eslesen],
+                           "degerler": D[Y.ELEKTRIK]}
+    return out
 
 
 # ----------------------------------------------------------------------------- kart modeli
@@ -344,9 +364,10 @@ def _eski_turu_kaldir(f, t) -> None:
 
 
 def kart_modeli(ifc_yolu: Path, cikti_yolu: Path, cati_tipi: str, kartlar: dict | None = None, yerlesim: dict | None = None,
-                liste_kurallari: dict | None = None, is_emri: dict | None = None, plan: dict | None = None) -> dict:
+                liste_kurallari: dict | None = None, is_emri: dict | None = None, plan: dict | None = None, elektrik: bool = False) -> dict:
     """Bugünkü IFC → kart modeli. Bugünkü IFC'ye yazılmaz. `cati_tipi` İş Emri'nin `cati.tip`'i. Dönen: sayım (JSON'a yazılacak biçimde).
-    `is_emri` ve `plan` (`motor.ifc_uret.hazirla(is_emri)`) verilirse K2'nin çatı ve tavan katmanları da eklenir; verilmezse model K1'inkidir."""
+    `is_emri` ve `plan` (`motor.ifc_uret.hazirla(is_emri)`) verilirse K2'nin çatı ve tavan katmanları da eklenir; verilmezse model K1'inkidir.
+    `elektrik` ise K3'ün elektrik katmanı da eklenir (İş Emri gerekir); komut (`uret`) her zaman ekler."""
     kartlar = kartlar or _oku(KARTLAR)
     yerlesim = yerlesim or _oku(YERLESIM)
     liste_kurallari = liste_kurallari or _oku(LISTE_KURALLARI)
@@ -390,10 +411,12 @@ def kart_modeli(ifc_yolu: Path, cikti_yolu: Path, cati_tipi: str, kartlar: dict 
             _api("pset.edit_pset", f, pset=ps, properties={"Rol": "görünüm", "Asil": s["asil"].Name, "AsilGlobalId": s["asil"].GlobalId,
                                                         "Not": s["neden"], "Kaynak": kaynak})
     k2 = None
+    if elektrik and is_emri is None:
+        raise ValueError("K3'ün elektrik katmanı İş Emri ister (`is_emri` ve `plan`)")
     if is_emri is not None:
         if plan is None:
             raise ValueError("K2 katmanları için `plan` gerekir (`motor.ifc_uret.hazirla(is_emri)`)")
-        k2 = _k2(f, kartlar, yerlesim, liste_kurallari, is_emri, plan, surum, kaynak)
+        k2 = _k2(f, kartlar, yerlesim, liste_kurallari, is_emri, plan, surum, kaynak, elektrik)
         sinif = sinif + k2["kayitlar"]
     cikti_yolu = Path(cikti_yolu)
     cikti_yolu.parent.mkdir(parents=True, exist_ok=True)
@@ -417,7 +440,7 @@ def sayim(sinif: list[dict], kartlar: dict, yerlesim: dict, makas_aralik_cm: flo
          for s in sinif if s["rol"] == "kart" and "h" in s]
     sabit = (k2 or {}).get("sabit", {})
     out = {
-        "aciklama": "İE-15 kart sayımı (K1; K2 ile çatı ve tavan): her parça kartına bağlı; kartsız parça sayılmaz. Boyla alınan kartta metre ve kesim "
+        "aciklama": "İE-15 kart sayımı (K1; K2 ile çatı ve tavan; K3 ile elektrik): her parça kartına bağlı; kartsız parça sayılmaz. Boyla alınan kartta metre ve kesim "
                     "planı, sabit pakette liste kuralının adedi. Paftayla kıyas hakemin işidir (`testler/kimlik/hakem/kiyas.py`).",
         "bugunku_ifc": Path(ifc_yolu).name, "bugunku_ifc_sha256": hashlib.sha256(Path(ifc_yolu).read_bytes()).hexdigest(),
         "kart_modeli": Path(model_yolu).name,
@@ -436,6 +459,8 @@ def sayim(sinif: list[dict], kartlar: dict, yerlesim: dict, makas_aralik_cm: flo
     }
     if k2 is not None:
         out |= {"kesim_plani": k2["kesim_plani"], "sabit": sabit, "yerlesim": k2["yerlesim"]}
+        if "elektrik" in k2:
+            out["elektrik"] = k2["elektrik"]
     return out
 
 
@@ -511,7 +536,7 @@ def uret(ie: dict, klasor: Path, kod: str) -> dict:
     bugunku = klasor / f"{kod}.ifc"
     ozet = ifc_uret.uret(ie, bugunku)
     say = kart_modeli(bugunku, klasor / f"{kod}_model.ifc", ie.get("cati", {}).get("tip", "besik"),    # ifc_uret'in varsayılanı
-                      is_emri=ie, plan=ifc_uret.hazirla(ie))
+                      is_emri=ie, plan=ifc_uret.hazirla(ie), elektrik=True)
     say["sema_hatasi"] = {"bugunku_ifc": ozet["sema_hatasi"], "kart_modeli": ifc_uret.ozet(klasor / f"{kod}_model.ifc")["sema_hatasi"]}
     (klasor / f"{kod}_kart_sayim.json").write_text(json.dumps(say, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     katalog_excel(_oku(KARTLAR), say, klasor / f"{kod}_kart_katalogu.xlsx")
@@ -534,7 +559,7 @@ def main(argv: list[str] | None = None) -> int:
           f"şema hatası {say['sema_hatasi']}")
     for x in say["kural_yok"]:
         print(f"kural yok: {x['parca']}: {x['neden']}")
-    for u in say.get("yerlesim", {}).get("uyarilar", []):
+    for u in say.get("yerlesim", {}).get("uyarilar", []) + say.get("elektrik", {}).get("uyarilar", []):
         print(f"uyarı ({u['katman']}): {u['metin']}")
     return 1 if say["kural_yok"] or any(say["sema_hatasi"].values()) else 0
 
