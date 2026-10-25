@@ -367,10 +367,10 @@ function serit(o, perp, out) {   // hat çerçevesi: yerel x hattan dışa, yere
 
 /* 9 · Saçak sacı: tırnak 3 → saçak altı 30 → alın 13 → makasa doğru kıvrım 10 */
 const SACAK = [
-  { ad: 'arka saçak', o: 'h', face: 600, out: 1, a0: -30.2, a1: 930.2, f0: -0.4, f1: 900.4, R: AN },
-  { ad: 'ön saçak (cumbanın sağı)', o: 'h', face: 0, out: -1, a0: 604.95, a1: 930.2, f0: 604.95, f1: 900.4, R: AN },
-  { ad: 'cumba sol saçağı', o: 'v', face: 0, out: -1, a0: -180.2, a1: -30.2, f0: -150.4, f1: -30.2, R: CU },
-  { ad: 'cumba sağ saçağı', o: 'v', face: 574.75, out: 1, a0: -180.2, a1: 0, f0: -150.4, f1: -30.2, R: CU },
+  { ad: 'arka saçak', o: 'h', face: 600, out: 1, a0: -30.2, a1: 930.2, f0: -30.2, f1: 930.2, R: AN },
+  { ad: 'ön saçak (cumbanın sağı)', o: 'h', face: 0, out: -1, a0: 604.95, a1: 930.2, f0: 604.95, f1: 930.2, R: AN },
+  { ad: 'cumba sol saçağı', o: 'v', face: 0, out: -1, a0: -180.2, a1: -30.2, f0: -180.2, f1: -30.2, R: CU },
+  { ad: 'cumba sağ saçağı', o: 'v', face: 574.75, out: 1, a0: -180.2, a1: 0, f0: -180.2, f1: -30.2, R: CU },
 ];
 {
   let to = 0;
@@ -683,24 +683,27 @@ D.dere.hatlar.forEach((h, i) => {
   add(18, g, 30 + i, { kod: null, ad: 'Galvaniz eksiz oluk (dere)', satir: [['Bu parça', `${h.ad} hat · ${fmtc(h.a1 - h.a0)} cm (paftada ${fmtc(h.pafta)}) · iki ucunda kapak`], ['Kesit', 'K profil, 15 × 11,4 cm (38’lik açınım), boyalı antrasit'], ['Pafta', 'Makas ve dere planı: 4 hat, 16,4 m'], ['Liste', '( ANTRASİT ) METAL DERE L 4000 · 5 adet; dere kapağı 8, dere kelepçesi 40']] });
 });
 D.dere.inisler.forEach((p, i) => {
-  // İniş aparatı → kaz boynu (2 açık dirsek) → duvar ya da kolon boyunca boru, 2 kelepçe → alt kapalı dirsek
-  const h = HAT[p.hat], S = dereSerit(h), w = S.yeni(), m = mat('gutter', 18), ust = DERE_ALT / 100;
+  // İniş aparatı derenin ucunda, alın sacının hemen altında (Lokman'ın fotoğrafları); kaz boynu (2 açık dirsek) çapraz iner ve köşede
+  // duvara ya da veranda kolonuna döner; boru duvar boyunca 2 kelepçeyle iner, altta kapalı dirsek. Ortadaki inişte ağız borunun hizasında.
+  const h = HAT[p.hat], S = dereSerit(h), w = S.yeni(), m = mat('gutter', 18), ust = DERE_ALT;   // cm
   const kolon = p.duvar === 'veranda kolonu';
-  const yuzU = h.yon === 'x' ? (p.yuz - h.kenar) * h.out : (p.yuz - h.kenar) * h.out;   // duvar yüzünün yerel x'i (dışa pozitif)
-  const s = kolon ? -145 : Math.min(D.dis[0] - 12, Math.max(12, p.s)), zz = S.zOf(s) / 100;
-  const gx = SAC + 0.03 + 7.5, wx = yuzU + 4;
-  const boru = (x1, y1, x2, y2) => { const dx = (x2 - x1) / 100, dy = y2 - y1, c = mesh(new THREE.BoxGeometry(0.06, Math.hypot(dx, dy), 0.08), m); c.position.set((x1 + x2) / 200, (y1 + y2) / 2, zz); c.rotation.z = Math.atan2(dy, dx) - Math.PI / 2; w.add(c); };
-  const dirsek = (x, y) => { const d = mesh(new THREE.BoxGeometry(0.064, 0.064, 0.084), m); d.position.set(x / 100, y, zz); w.add(d); };
-  const ap = mesh(new THREE.BoxGeometry(0.07, 0.05, 0.09), m); ap.position.set(gx / 100, ust - 0.025, zz); w.add(ap);
-  boru(gx, ust - 0.05, gx, ust - 0.14); dirsek(gx, ust - 0.14);
-  boru(gx, ust - 0.14, wx, ust - 0.40); dirsek(wx, ust - 0.40);
-  boru(wx, ust - 0.40, wx, 0.16); dirsek(wx, 0.16);
-  boru(wx, 0.16, wx + 12, 0.06);
-  [0.8, 1.8].forEach(hh => {
-    const k = mesh(new THREE.BoxGeometry(0.066, 0.02, 0.088), m); k.position.set(wx / 100, hh, zz); w.add(k);
-    w.add(lb(yuzU, wx - 3, hh * 100 - 1, hh * 100 + 1, zz * 100 - 1, zz * 100 + 1, m));
+  const yuzU = (p.yuz - h.kenar) * h.out;   // duvar yüzünün yerel x'i (dışa pozitif)
+  const sw = kolon ? -145 : Math.min(D.dis[0] - 12, Math.max(12, p.s));                 // boru: duvarda ya da kolonda
+  const so = Math.min(Math.max(h.a0, h.a1) - 6, Math.max(Math.min(h.a0, h.a1) + 6, p.s));   // ağız: derenin içinde, uca yakın
+  const zo = S.zOf(so), zw = S.zOf(sw), gx = SAC + 0.03 + 7.5, wx = yuzU + 4;
+  const V = (x, y, z) => new THREE.Vector3(x / 100, y / 100, z / 100);
+  const boru = (a, b) => { const d = new THREE.Vector3().subVectors(b, a), c = mesh(new THREE.BoxGeometry(0.06, d.length(), 0.08), m);
+    c.position.copy(a).add(b).multiplyScalar(0.5); c.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.clone().normalize()); w.add(c); };
+  const dirsek = v => { const d = mesh(new THREE.BoxGeometry(0.064, 0.064, 0.084), m); d.position.copy(v); w.add(d); };
+  const ap = mesh(new THREE.BoxGeometry(0.07, 0.05, 0.09), m); ap.position.copy(V(gx, ust - 2.5, zo)); w.add(ap);
+  const yatay = Math.hypot(gx - wx, zo - zw), dus = Math.max(26, yatay);   // kaz boynu ~45°
+  const A = V(gx, ust - 5, zo), B = V(gx, ust - 14, zo), C = V(wx, ust - 14 - dus, zw), Dd = V(wx, 16, zw);
+  boru(A, B); dirsek(B); boru(B, C); dirsek(C); boru(C, Dd); dirsek(Dd); boru(Dd, V(wx + 12, 6, zw));
+  [80, 180].forEach(hh => {
+    const k = mesh(new THREE.BoxGeometry(0.066, 0.02, 0.088), m); k.position.copy(V(wx, hh, zw)); w.add(k);
+    w.add(lb(yuzU, wx - 3, hh - 1, hh + 1, zw - 1, zw + 1, m));
   });
-  add(18, w, 40 + i * 0.4, { kod: null, ad: 'İniş borusu (dikdörtgen, oluklu)', satir: [['Bu parça', `${h.ad} hattı · ${p.duvar} boyunca`], ['Kesit', 'yaklaşık 8 × 6 cm, boyalı antrasit; bina ile birlikte iner'], ['Takım', 'iniş aparatı · 2 açık dirsek (kaz boynu) · boru L 3000 · 2 kelepçe · kapalı dirsek'], ['Pafta', '7 iniş'], ['Liste', 'iniş borusu 7, açık dirsek 14, kapalı dirsek 7, kelepçe 14']] });
+  add(18, w, 40 + i * 0.4, { kod: null, ad: 'İniş borusu (dikdörtgen, oluklu)', satir: [['Bu parça', `${h.ad} hattı · ${p.duvar} boyunca`], ['Ağız', so === sw ? 'borunun hizasında' : 'derenin ucunda, alın sacının altında; kaz boynu çapraz iner'], ['Kesit', 'yaklaşık 8 × 6 cm, boyalı antrasit; bina ile birlikte iner'], ['Takım', 'iniş aparatı · 2 açık dirsek (kaz boynu) · boru L 3000 · 2 kelepçe · kapalı dirsek'], ['Pafta', '7 iniş'], ['Liste', 'iniş borusu 7, açık dirsek 14, kapalı dirsek 7, kelepçe 14']] });
 });
 
 /* 19 · İç kapılar (K-01 kanadı; bu projede iç kapılar alıcıya ait) */

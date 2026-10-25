@@ -135,6 +135,11 @@ KAM = {  # konum, hedef, objektif (mm), güneş (azimut, yükseklik)
     'cati_katman': ((10.0, 12.5, 8.6), (1.6, 1.4, 2.9), 38, (60, 48)),
     'ic_kose':  ((5.6, -8.2, 2.7), (1.4, -3.3, 2.4), 40, (-35, 42)),
     'bas_kesit': ((-4.46, -2.9, 2.52), (-4.46, -1.5, 2.52), 135, (-115, 32)),   # sol kalkan, plan y = 150'de kesit: makas, baş makas omegası, betopan, duvar
+    # saçak sacı ile alın sacının birleşimi: arka-sol köşe (sol kalkan, arka saçak), dört açı
+    'kose_dis':   ((-6.05, 4.65, 2.2), (-4.78, 3.28, 2.52), 40, (135, 32)),
+    'kose_yan':   ((-6.6, 2.55, 2.62), (-4.78, 3.25, 2.54), 45, (160, 30)),
+    'kose_ust':   ((-5.7, 4.35, 3.55), (-4.76, 3.24, 2.56), 40, (135, 45)),
+    'kose_alt':   ((-5.15, 3.75, 1.98), (-4.72, 3.22, 2.49), 32, (135, 32)),
 }
 if kip == 'gorunum':
     kp, kh, lens, (az, yuk) = KAM[sec]

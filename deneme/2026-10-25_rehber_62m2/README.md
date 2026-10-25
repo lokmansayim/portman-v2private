@@ -19,7 +19,7 @@ Bir bayi projesinin (900 × 600 cm, veranda üstünde cumba) montaj rehberi. Kay
    - Oda sırası (Lokman): Yatak 1 → banyo → hol → yatak 2 → salon-mutfak.
 3. **Sayfa:** `python rehber/uret.py <çıktı.html> --proje "<başlık>" [--gorsel]`.
    - Girdi: `kabuk.html` (PK-01 rehberinin arayüzü) + `sahne.js` (Three.js 0.160 sahnesi).
-   - 19 adım, 421 parça. Kartı olmayan parçalarda yükleme listesindeki ad yazar.
+   - 19 adım, 418 parça. Kartı olmayan parçalarda yükleme listesindeki ad yazar.
 4. **Model ve kameralar:** `node test/export.js <rehber.html> <model.glb>`.
    - Parça adları `s{adım}_{sıra}`, malzeme adları anahtar; kimlik kartı `extras`'ta.
    - Adım kameraları `model_kamera.json`'a yazılır.
@@ -27,6 +27,7 @@ Bir bayi projesinin (900 × 600 cm, veranda üstünde cumba) montaj rehberi. Kay
    - `gorunum <ad> <png> 64 1.0` — altı görünüm: `on_sol`, `on_sag`, `arka_sol`, `catisiz`, `cati_katman`, `ic_kose`;
    - `adim hepsi <klasör> 24 1.0` — 20 kare (genel bakış + 19 adım). Rehberde "Adımı render göster" kaldırıldı (Lokman, 25 Ekim gece); kip betikte duruyor, `hepsi.sh` çağırmıyor.
    - `gorunum bas_kesit …` — baş makas kesiti (plan y = 150'de gerçek kesit: düzlemi kesen nesneler boolean ile kesilir).
+   - `gorunum kose_dis|kose_yan|kose_ust|kose_alt …` — arka-sol köşede saçak sacı, alın sacı ve dere birleşimi (inceleme için; galeride yok).
 6. **Maket:** `python maket/maket.py rehber/data.json <klasör> 50 <önek>` → 1:50 kapalı STL.
    - Parçalar: gövde ve çıkarılabilir çatı, 4 köşe tırnağı.
    - Bağımlılık: `trimesh`, `manifold3d`.
@@ -48,6 +49,7 @@ Bir bayi projesinin (900 × 600 cm, veranda üstünde cumba) montaj rehberi. Kay
 - **İç duvar omegası.** İç duvar üstlerine 60'lık duvar omegası: 6,5 cm açıklık (6 cm pano + H sacları), 3 cm derinlik, 3 cm kulaklar (`omega_duvar` `tur='ic'`, 375'lik parçalar, kapı üstlerinden kesintisiz).
 - **Ters tavan (adım 14).** Tavan omegalarının altına 12,5 mm alçıpan 120 × 250 (banyoda yeşil), verandada boardex 120 × 240.
 - **Çatı izolasyonu (adım 16).** 10 cm rulo cam yünü, her makas aralığına bir şerit; cumbada (veranda) makas yönünde yatay iki şerit; rehberde rulo açılarak serilir (`anim.serme`; rulo `userData.gecici`, GLB'ye girmez).
+- **Saçak, alın ve dere birleşimi** (Lokman'ın gönderdiği ev fotoğraflarına göre). İniş ağzı derenin ucunda, alın sacının altında; kaz boynu çapraz inip köşede duvara (cumbada veranda kolonuna) döner. Saçak sacının alnı derenin bütün boyunca köşeye kadar uzar (`SACAK` `f0`/`f1`); alın sacının alt ucu derenin ucunu kapatır.
 - **Genel çatı yüzü sistemi.**
   - Her yüz yerel s (eğim boyunca), t (saçak boyunca), n (dik) koordinatlarında kurulur.
   - Levhalar dışbükey çokgen kırpmayla dere hattında kesilir.
@@ -59,7 +61,7 @@ Bir bayi projesinin (900 × 600 cm, veranda üstünde cumba) montaj rehberi. Kay
 1. **Trapez dizilimi.** 100'lük levhayla kalkan kenarından; cumbada 10 parça (listede 8).
 2. **Kesitler.** PK-01'deki köşe, Z, C kapama, saçak ve alın sacı kesitleri aynen alındı.
 3. **Alın sacı.** Trapez kenar hadvesine göre ~9 cm (OSB yok, hadve 27 mm).
-4. **Dere iç köşesi.** Cumba sağ deresi ön dereye iç köşede bağlanır.
+4. **Dere iç köşesi.** Cumba sağ deresi ön dereye iç köşede bağlanır. Köşede saçak altı ile kalkan saçak altı arasında modelde ince bir yarık var; sahadaki kapanışı soruldu.
 5. **Fuga derinliği.** Paftada yok; modelde 5 mm.
 
 6. **Baş makas omegasının U dudağı** ~2 cm (ölçü verilmedi).

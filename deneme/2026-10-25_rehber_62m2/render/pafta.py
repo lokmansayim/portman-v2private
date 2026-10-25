@@ -57,7 +57,7 @@ if os.path.exists(os.path.join(RD, 'son_bas_kesit.png')):
     NOK = [((X(3.7), -1.5, 2.525), 'Baş makas (alt başlık)', (1180, 470), True),
            ((X(-0.8), -1.5, 2.4695), 'Baş makas omegası: dış U yanak', (520, 840), False),
            ((X(-0.7), -1.5, 2.60), 'Baş makas betopanı (8 mm)', (520, 150), False),
-           ((X(5.0), -1.5, 2.43), 'Pano: 8 mm betopan + 84 mm strafor + 8 mm betopan', (520, 950), False),
+           ((X(5.0), -1.5, 2.43), 'Pano: 8 + 84 (EPS) + 8 mm', (520, 950), False),
            ((X(16), -1.5, 2.57), 'Cam yünü 10 cm', (1180, 200), True),
            ((X(18), -1.5, 2.461), 'Ters tavan alçıpanı', (1180, 880), True)]
     for p, metin, kutu, sag in NOK:
