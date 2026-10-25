@@ -9,6 +9,8 @@ Lokman'ın Mac'indeki proje klasörü (DWG, SKP, yükleme listesi) okunarak PK-0
 - **Rehber.** 18 adım, 420 parça, kimlik kartlı.
   - Oda sırası (Lokman): Yatak 1 → banyo → hol → yatak 2 → salon-mutfak.
   - Başlıkta bayi adı Lokman'ın seçimiyle var. Özel artefakt ve Mac klasörü; depoda `__PROJE__`.
+  - Özel artefakt: https://claude.ai/artifact/7B6xsSZsnAKhf3HoSpWZV2 (sürüm 1, render'lar `gorsel/` altında).
+  - Mac klasörü: `Montaj Rehberi/` (html + `gorsel/`), `3B Model/`, `3D Yazıcı Maket/`, `BENİOKU.md`.
 - **Render.** 6 görünüm (ön-sol, ön-sağ, arka-sol, çatısız, çatı katmanları, iç köşe), etiketli pafta, 19 adım karesi.
 - **Model ve maket.**
   - GLB: 420 parça, kart bilgisi `extras`'ta.

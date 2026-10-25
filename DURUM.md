@@ -15,7 +15,8 @@ Yeni pencere için hazırlıklar:
   - Oda sırası Lokman'ın: Yatak 1 → banyo → hol → yatak 2 → salon-mutfak.
   - Yeni: cumba (MKS09–12, iki dere hattı), OSB + nem bariyeri + trapez, ters mahya, üç kalkan, veranda (A, B, C).
   - Blender render'ları (6 görünüm, pafta, 19 adım karesi); GLB; 1:50 basılabilir maket (gövde + çıkarılabilir çatı, kapalı STL).
-  - Çıktılar Mac klasöründe; özel artefakt.
+  - Çıktılar Mac klasöründe (33 dosya: rehber + `gorsel/`, GLB, maket STL, `BENİOKU.md`; kaynak dosyalara dokunulmadı).
+  - Özel artefakt: https://claude.ai/artifact/7B6xsSZsnAKhf3HoSpWZV2 (sürüm 1).
 - **Kullanıcı adımları:** rehber Yerelde çalışıyor (Mac klasörü ve özel artefakt). Maket Yerelde çalışıyor (STL kapalı; baskı denenmedi). Herkese açık yayın Çalışmıyor.
 - **PK-01 düzeltmesi:** makas kartında eksik virgül, makasa dokununca kart açılmıyordu. `2026-10-24_montaj_rehberi/rehber/template.html`'de düzeltildi; artefakt sürüm 11.
 - **Devir:** `docs/devir/2026-10-25_Rehber_62m2_Devri.md`.

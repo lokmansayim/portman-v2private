@@ -85,6 +85,7 @@ def merkez(o):
     bb = [o.matrix_world @ Vector(c) for c in o.bound_box]
     return Vector((sum(v.x for v in bb) / 8, sum(v.y for v in bb) / 8, sum(v.z for v in bb) / 8))
 nesneler = [o for o in bpy.data.objects if o.type == 'MESH' and adim(o) is not None]
+ANAHTAR = {o.name: anahtar(o) for o in nesneler}   # rehberdeki malzeme anahtarı (değiştirmeden önce)
 for o in nesneler:
     for s in o.material_slots:
         if s.material:
@@ -141,7 +142,7 @@ if kip == 'gorunum':
     if sec == 'cati_katman':   # arka yüzde basamaklı kesit: trapez → nem bariyeri → OSB → aşık ve makas
         kes = {'roof': 0.6, 'ridge': 0.6, 'osb': 3.0}
         for o in nesneler:
-            k, c = anahtar(o), merkez(o)
+            k, c = ANAHTAR[o.name], merkez(o)
             if k in kes and c.y > 0 and c.x > kes[k]: o.hide_render = True
             if k == 'nem' and c.y > 0:   # tek parça: kutuyla kes
                 bpy.ops.mesh.primitive_cube_add(size=1, location=(1.8 + 5, 3, 3)); kk = bpy.context.active_object; kk.scale = (10, 6, 6); kk.hide_render = True; kk.hide_viewport = True
