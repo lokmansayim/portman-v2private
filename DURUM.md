@@ -15,7 +15,7 @@ Yeni pencere için hazırlıklar:
 - **Sonuç (ÇP-06):** çelik panel grubu 51 parça, 2.122 kg (duvar paneli 26, kolon-kiriş 4, makas 12 + 1, çatı paneli 2, boy C profil 6); paftada D26, K4, M13, C2, listeyle aynı; Excel ve PDF aynı cevap. Bir baytı değişen liste okunmadan durur.
 - **Açık dört proje okundu** (› IE-16 › Açık beş projenin hakem cevabı): ÇP-03 101 parça 2.522,58 kg, ÇP-07 98 parça 2.847 kg, ÇP-13 52 parça 1.936,87 kg, ÇP-14 80 parça 3.059,29 kg. Paftayla liste ÇP-07 ve ÇP-14'te aynı; ÇP-03'te 3 çerçeve kirişinin paftada etiketi yok; ÇP-13'ün makas, çatı ve baca sayfalarında etiket metin değil.
 - **Kullanıcı adımları:** PR-1 Yerelde çalışıyor. PR-2, PR-3, PR-4 Çalışmıyor.
-- **Kanıt:** › IE-16 Kanıt (25 Ekim · PR-1).
+- **Kanıt:** › IE-16 Kanıt (25 Ekim · PR-1, `2ff77d2`): `pytest -q testler` 1459 geçti, 298 atlandı; `dogrula.py --hizli` referansla aynı; kaynaklı çelik tam koşusu 126 geçti.
 - **Bekleyen (Lokman):** hakem PR'ının onayı. Sonra PR-2 (hedef örnek; ilk kart: listede tavan omegası ve aşık var, kitap "çelikte yok" diyor).
 
 **24 Ekim 2026 öğle eki (İE-15 · KH-3, PK-01'in elektrik sayfasının hakemi; `docs/is_emirleri/IE-15.md` › Değişiklik (KH-3)):**
