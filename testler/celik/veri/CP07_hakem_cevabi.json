@@ -1,0 +1,209 @@
+{
+ "kod": "ÇP-07",
+ "m2": 80,
+ "liste_sha256": "6974f6a6cc6bfc3ffd0f6ac98284f5b42429d9f2af64bb69032e2ca3fe5c30f3",
+ "pafta_sha256": "78f3314e5f9fa9914e0277d44e6938eed4fe69d25ed4dbec5f348528fe9c473d",
+ "celik": {
+  "satirlar": [
+   {
+    "tur": "duvar_paneli",
+    "harf": "D",
+    "boyut": "140X1,2",
+    "adet": 15,
+    "kg": 1103
+   },
+   {
+    "tur": "duvar_paneli",
+    "harf": "D",
+    "boyut": "80X1,2",
+    "adet": 11,
+    "kg": 536
+   },
+   {
+    "tur": "makas",
+    "harf": "M",
+    "boyut": "80X1,2",
+    "adet": 4,
+    "kg": 194
+   },
+   {
+    "tur": "cati_paneli",
+    "harf": "C",
+    "boyut": "80X1,2",
+    "adet": 5,
+    "kg": 194
+   },
+   {
+    "tur": "makas",
+    "harf": "M",
+    "boyut": "80X0,8",
+    "adet": 30,
+    "kg": 473
+   },
+   {
+    "tur": "cati_paneli",
+    "harf": "C",
+    "boyut": "80X0,8",
+    "adet": 12,
+    "kg": 118
+   },
+   {
+    "tur": "baca_paneli",
+    "harf": "B",
+    "boyut": "80X0,8",
+    "adet": 8,
+    "kg": 98
+   },
+   {
+    "tur": "kolon_kiris",
+    "harf": "K",
+    "boyut": "80X1,2",
+    "adet": 7,
+    "kg": 131
+   },
+   {
+    "tur": "c_profil",
+    "harf": null,
+    "boyut": "80X1,2",
+    "adet": 3,
+    "kg": null
+   },
+   {
+    "tur": "c_profil",
+    "harf": null,
+    "boyut": "80X0,8",
+    "adet": 3,
+    "kg": null
+   }
+  ],
+  "turler": {
+   "duvar_paneli": {
+    "harf": "D",
+    "adet": 26,
+    "kg": 1639.0
+   },
+   "makas": {
+    "harf": "M",
+    "adet": 34,
+    "kg": 667.0
+   },
+   "cati_paneli": {
+    "harf": "C",
+    "adet": 17,
+    "kg": 312.0
+   },
+   "baca_paneli": {
+    "harf": "B",
+    "adet": 8,
+    "kg": 98.0
+   },
+   "kolon_kiris": {
+    "harf": "K",
+    "adet": 7,
+    "kg": 131.0
+   },
+   "c_profil": {
+    "harf": null,
+    "adet": 6,
+    "kg": null
+   }
+  },
+  "toplam": {
+   "adet": 98,
+   "kg": 2847
+  }
+ },
+ "pafta": {
+  "D": {
+   "tur": "duvar_paneli",
+   "adet": 26,
+   "onekler": {
+    "D": {
+     "adet": 26,
+     "en_buyuk": 26,
+     "eksik": [],
+     "yinelenen": []
+    }
+   },
+   "sayfalar": [
+    2
+   ]
+  },
+  "K": {
+   "tur": "kolon_kiris",
+   "adet": 7,
+   "onekler": {
+    "K": {
+     "adet": 7,
+     "en_buyuk": 7,
+     "eksik": [],
+     "yinelenen": []
+    }
+   },
+   "sayfalar": [
+    2
+   ]
+  },
+  "M": {
+   "tur": "makas",
+   "adet": 34,
+   "onekler": {
+    "MK": {
+     "adet": 34,
+     "en_buyuk": 36,
+     "eksik": [
+      1,
+      14
+     ],
+     "yinelenen": []
+    }
+   },
+   "sayfalar": [
+    3
+   ]
+  },
+  "C": {
+   "tur": "cati_paneli",
+   "adet": 17,
+   "onekler": {
+    "Ç": {
+     "adet": 17,
+     "en_buyuk": 18,
+     "eksik": [
+      10
+     ],
+     "yinelenen": []
+    }
+   },
+   "sayfalar": [
+    3
+   ]
+  },
+  "B": {
+   "tur": "baca_paneli",
+   "adet": 8,
+   "onekler": {
+    "B": {
+     "adet": 8,
+     "en_buyuk": 8,
+     "eksik": [],
+     "yinelenen": []
+    }
+   },
+   "sayfalar": [
+    2
+   ]
+  }
+ },
+ "pafta_uyarilari": [
+  "MK: eksik numara MK01, MK14",
+  "Ç: eksik numara Ç10"
+ ],
+ "pafta_liste": {
+  "duvar_paneli": "aynı",
+  "kolon_kiris": "aynı",
+  "makas": "aynı",
+  "cati_paneli": "aynı",
+  "baca_paneli": "aynı"
+ }
+}
