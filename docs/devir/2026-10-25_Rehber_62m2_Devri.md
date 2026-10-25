@@ -33,7 +33,7 @@ Lokman'ın Mac'indeki proje klasörü (DWG, SKP, yükleme listesi) okunarak PK-0
 1. **Nem bariyeri ve OSB yok.** OSB/nem adımı (eski 15) çıktı; trapez doğrudan aşıkların üstünde, alın sacı ~10 cm. Paftadaki "OSB + nem bariyeri" notu bu projede geçerli değil.
 2. **Makas uçlarına artan betopan.** Kalkan uç dolguları, 125 × 250'lerin eğimle kesilen artanından; artık varsayım değil.
 3. **Cephe fugalı.** Dış panolarda alttan 6 × (38 + 2 cm fuga), üstte 10 cm bant (pafta 6, fugalı duvar detayı). Modelde 5 mm oluk, makette 0,5 × 0,3 mm.
-4. **Baş makas detayı ve 100'lük omegalar (Lokman çizimi ve ölçüleri).** 100'lük omegalar 10,5 cm, dış kanat dış duvara tam yaslı, içte 5 mm (silikonize mastik). Baş makas omegası: 3 cm derinlik, içte 3 cm açık yanak, dışta 1 cm U yanak; 8 mm betopan U'ya girer, makasa dayanır. Baş makaslar 1 mm dışarı (dış kanatla aynı hiza). Z önceki çizimdeki gibi.
+4. **Baş makas detayı ve 100'lük omegalar (Lokman çizimi ve ölçüleri).** Pano 8 + 84 (EPS) + 8 mm; H kanadı 2 mm (1,2 mm sac, ezilmiş kıvrım). 100'lük omegalar 10,5 cm = 2 + 100 + 2 + 1 mm, dış kanat H kanadına yaslı, içteki aralıklar silikonize mastik. Baş makas omegası: 3 cm derinlik, içte 3 cm açık yanak, dışta 1 cm U yanak; 8 mm betopan U'ya girer, makasa dayanır. Baş makaslar 3 mm dışarı (dış kanatla aynı hiza). Z önceki çizimdeki gibi.
 5. **İç duvar üstlerine 60'lık duvar omegası:** 6,5 cm açıklık, 3 cm derinlik, 3 cm kulaklar (listede 60'lık omega toplamı 127,64 m = tavan 111,8 + iç duvar ~15).
 5b. **Büyük pencereler:** DVR (251 × 250 çelik karkas) pencere yanları da fugalı.
 6. **Ters tavan alçıpanı** tavan omegalarından sonra (yeni adım 14; banyoda yeşil; verandada listedeki boardex).

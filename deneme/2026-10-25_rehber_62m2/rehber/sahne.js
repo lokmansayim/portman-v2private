@@ -28,8 +28,10 @@ const N = 19;
 // 100'lük omegalar (Lokman 25.10.2026): üst 10,5 cm; dış kanat dış duvarın (verandada kirişin) dış yüzüne tam yaslanır,
 // içte kalan 5 mm aralığa silikonize mastik (modelde boşluk). Baş makas omegası: derinlik 3 cm, içte 3 cm açık yanak,
 // dışta 1 cm U yanak; 8 mm baş makas betopanı U'ya girer ve makasa dayanır.
-const OM100 = 10.5, BAS_KANAT = 3, BAS_U = 1, BAS_DUDAK = 2, BET_T = 0.8;
-const BAS_DIS = SAC;   // makasın dış yüzü = omeganın dış kanadının dış yüzü (duvar dış yüzünün 1 mm dışında)
+// Pano: 8 mm betopan + 84 mm strafor (EPS) + 8 mm betopan = 100 mm. H sacı 1,2 mm; kanat uçlarında kıvrım ezildiği için kanat 2 mm (Lokman).
+// 100'lük omega 10,5 cm = 2 + 100 + 2 mm H kanadı + 1 mm; dış kanadı H kanadına yaslanır, panonun yüzüyle arasında 2 mm kalır.
+const HS = 0.2, OM100 = 10.5, BAS_KANAT = 3, BAS_U = 1, BAS_DUDAK = 2, BET_T = 0.8;
+const BAS_DIS = HS + SAC;   // makasın dış yüzü = omeganın dış kanadının dış yüzü (duvar dış yüzünün 3 mm dışında)
 
 /* ---------- Sahne ---------- */
 const vp = $('viewport');
@@ -259,15 +261,15 @@ D.panels.forEach(p => {
 D.hs.forEach(h => {
   const s = h.step, g = new THREE.Group(), dis = h.t > 8;
   const m = mat('steel', s), a = h.o === 'h' ? h.xy[0] : h.xy[1], perp = h.o === 'h' ? h.xy[1] : h.xy[0];
-  const fl = dis ? 5 : 3;                       // başlık yarı genişliği: H 100 → 10 cm, H 60 → 6 cm
+  const fl = dis ? 5 : 3;                       // başlık yarı genişliği: H 100 → 10 cm, H 60 → 6 cm; kanat 2 mm (1,2 mm sac, uçta ezilmiş kıvrım)
   const plate = (a0, a1, c0, c1) => g.add(h.o === 'h' ? bp(a0, a1, c0, c1, 0, H, m) : bp(c0, c1, a0, a1, 0, H, m));
   const sgn = h.stub ? (h.o === 'h' ? h.stub[1] : h.stub[0]) : 0;
   [[perp - h.t / 2, -1], [perp + h.t / 2, 1]].forEach(([f, side]) => {
-    const c = side < 0 ? [f - SAC, f] : [f, f + SAC];
+    const c = side < 0 ? [f - HS, f] : [f, f + HS];
     if (h.stub && side === sgn) {              // 3'lü H: iç duvarın girdiği yüzde boşluk + iç duvarın iki yüzünde 5 cm kol
       const gap = h.stub_t / 2, s0 = f, s1 = f + side * 5;
       plate(a - fl, a - gap, ...c); plate(a + gap, a + fl, ...c);
-      [a - gap - SAC, a + gap].forEach(x0 => g.add(h.o === 'h' ? bp(x0, x0 + SAC, Math.min(s0, s1), Math.max(s0, s1), 0, H, m) : bp(Math.min(s0, s1), Math.max(s0, s1), x0, x0 + SAC, 0, H, m)));
+      [a - gap - HS, a + gap].forEach(x0 => g.add(h.o === 'h' ? bp(x0, x0 + HS, Math.min(s0, s1), Math.max(s0, s1), 0, H, m) : bp(Math.min(s0, s1), Math.max(s0, s1), x0, x0 + HS, 0, H, m)));
     } else plate(a - fl, a + fl, ...c);
   });
   if (h.card === 'H-01' || h.card === 'H-04') {  // kulak: makas bağlantısı
@@ -275,7 +277,7 @@ D.hs.forEach(h => {
   }
   const out = h.o === 'v' ? (perp < D.dis[0] / 2 ? -1 : 1) : (perp > D.dis[1] / 2 ? 1 : -1);
   if (h.tur === 'ozel_c') {                     // C: veranda kirişinin bağlandığı bağlantı levhası, dış yüzde
-    const c0 = perp + out * (h.t / 2 + SAC), c1 = c0 + out * 0.6;
+    const c0 = perp + out * (h.t / 2 + HS), c1 = c0 + out * 0.6;
     g.add(bp(a - 7, a + 7, Math.min(c0, c1), Math.max(c0, c1), H - 16, H, m));
   }
   const yer = { dubelli_kulakli: 'dış duvar, makasa denk gelen ek', dubelli: 'dış duvar, makasa denk gelmeyen ek', standart: 'iç duvar eki', uclu_dubelli_kulakli: 'dış duvar T’si, makasa denk', uclu_dubelli: 'dış duvar T’si', uclu_standart: 'iç duvar T’si', ozel_c: 'ön duvar eki; veranda kirişi buna bağlanır (paftada C)' }[h.tur];
@@ -284,8 +286,8 @@ D.hs.forEach(h => {
     const f0 = perp + out * h.t / 2, md = mat('dubel', s), d = new THREE.Group();
     const rng = (u0, u1) => [Math.min(perp + out * u0, perp + out * u1), Math.max(perp + out * u0, perp + out * u1)];
     const box = ([c0, c1], h0, h1) => d.add(h.o === 'h' ? bp(a - 2, a + 2, c0, c1, h0, h1, md) : bp(c0, c1, a - 2, a + 2, h0, h1, md));
-    box(rng(h.t / 2 + 0.45, h.t / 2 + 0.75), 0, 7.3);
-    box(rng(h.t / 2 + 0.45, h.t / 2 + 4.75), 0, 0.3);
+    box(rng(h.t / 2 + HS + 0.35, h.t / 2 + HS + 0.65), 0, 7.3);
+    box(rng(h.t / 2 + HS + 0.35, h.t / 2 + HS + 4.65), 0, 0.3);
     add(s, d, h.order + 0.2, { kod: null, ad: 'Çelik dübel (köşebent)', satir: [['Bu parça', 'dübelli H’nın dibinde, dış yüzde'], ['Bağlantı', 'H’ya 1×M6 8.8 cıvata, zemine ankraj'], ['Liste', 'ÇELİK DÜBEL · 21 adet (dübelli H adedi kadar) + şase pul 21']] });
   }
 });
@@ -334,7 +336,7 @@ function serit(o, perp, out) {   // hat çerçevesi: yerel x hattan dışa, yere
   D.omega_duvar.forEach(sg => {
     const ic = sg.tur === 'ic', PL = ic ? 375 : 250;
     const bas = sg.tur === 'bas', S = serit(sg.o, sg.perp, sg.out), n = Math.ceil((sg.a1 - sg.a0) / PL - 1e-6);
-    const [uI, uD] = ic ? [-3.25, 3.25] : [5 - OM100, 5];   // iç ve dış kanadın iç yüzü (yerel x dışa); 100'lükte dış kanat duvar dış yüzünde
+    const [uI, uD] = ic ? [-3.25, 3.25] : [5 + HS - OM100, 5 + HS];   // iç ve dış kanadın iç yüzü (yerel x dışa); 100'lükte dış kanat H kanadının dış yüzünde
     for (let k = 0; k < n; k++) {
       const a0 = sg.a0 + k * PL, a1 = Math.min(sg.a1, a0 + PL), [z0, z1] = [S.zOf(a0 + 0.2), S.zOf(a1 - 0.2)].sort((p, q) => p - q);
       const g = S.yeni(), m = mat('frame', 8), b = (u0, u1, h0, h1) => g.add(lb(u0, u1, h0, h1, z0, z1, m));
@@ -352,8 +354,8 @@ function serit(o, perp, out) {   // hat çerçevesi: yerel x hattan dışa, yere
       else { b(uI - SAC, uI, H - 6, H); b(uD, uD + SAC, H - 6, H); }
       const ad = { sacak: '100’lük saçak omegası', duvar: '100’lük duvar omegası', bas: 'Baş makas omegası', ic: '60’lık duvar omegası (iç duvar üstü)' }[sg.tur];
       const ls = { sacak: '100 × 2500 · 7 adet (makas saçaklarının altı: 1525 cm)', duvar: '100 × 2500 · 4 adet (saçak ve baş makas omegası gelmeyen yerler)', bas: 'L 2500 · 8 adet · fabrikada hazırlanır', ic: "60'LIK DUVAR OMEGASI 60 × 3750 · 36 adet (iç duvar üstleri ve ters tavan; listede toplam 127,64 m)" }[sg.tur];
-      const kesit = { sacak: 'üst 10,5 cm, dış kanat duvarın dış yüzüne tam yaslanır, içteki 5 mm aralığa silikonize mastik; içte ~6 cm kanat + 4 cm ayak, dışta eğik ~6 cm kanat; sac 1 mm (kanat ölçüleri yaklaşık)', duvar: 'üst 10,5 cm, dış kanat duvarın dış yüzüne tam yaslanır, içteki 5 mm aralığa silikonize mastik; iki yanda ~6 cm kanat; sac 1 mm (kanat ölçüleri yaklaşık)',
-        bas: `üst 10,5 cm, dış kanat duvarın (verandada kirişin) dış yüzüne tam yaslanır; derinlik ${BAS_KANAT} cm; içte 3 cm açık yanak; dışta ${BAS_U} cm U yanak: 8 mm baş makas betopanı bu U’ya girer, betopan makasa dayanır; makas dış kanatla aynı hizada; içteki aralığa silikonize mastik; sac 1 mm (Lokman, 25.10.2026; U dudağı ~${BAS_DUDAK} cm varsayım)`,
+      const kesit = { sacak: 'üst 10,5 cm (2 + 100 + 2 mm H kanatları), dış kanat dışarıda tam yaslanır, içteki aralıklara silikonize mastik; içte ~6 cm kanat + 4 cm ayak, dışta eğik ~6 cm kanat; sac 1 mm (kanat ölçüleri yaklaşık)', duvar: 'üst 10,5 cm (2 + 100 + 2 mm H kanatları), dış kanat dışarıda tam yaslanır, içteki aralıklara silikonize mastik; iki yanda ~6 cm kanat; sac 1 mm (kanat ölçüleri yaklaşık)',
+        bas: `üst 10,5 cm (2 + 100 + 2 mm H kanatları), dış kanat dışarıda tam yaslanır; derinlik ${BAS_KANAT} cm; içte 3 cm açık yanak; dışta ${BAS_U} cm U yanak: 8 mm baş makas betopanı bu U’ya girer, betopan makasa dayanır; makas dış kanatla aynı hizada; içteki aralığa silikonize mastik; sac 1 mm (Lokman, 25.10.2026; U dudağı ~${BAS_DUDAK} cm varsayım)`,
         ic: '6,5 cm açıklık (6 cm pano + iki yanda H sacı 2 + 2 mm), derinlik 3 cm, iki yanda 3 cm kulak; kapı üstlerinden ve H’lardan kesintisiz geçer; sac 1 mm (Lokman, 25.10.2026)' }[sg.tur];
       add(8, g, oo++ * 0.6, { kod: null, ad, satir: [['Bu parça', `${sg.yer} · L ${fmtc(a1 - a0)} cm`], ['Kesit', kesit], ['Liste', ls], ...(ic ? [['Kaynak', 'Lokman, 25.10.2026: iç duvarların üstüne 60’lık omega']] : [])] });
     }
@@ -783,7 +785,7 @@ const STEPS = [
     rows: [R(null, '100’lük alt çerçeve 100 × 3750', '8 adet', 'liste'), R(null, '60’lık alt çerçeve 60 × 2500', '7 adet', 'liste'), I('Dış duvar hattı', `${fmt(D.alt_m.dis)} m`), I('İç duvar hattı', `${fmt(D.alt_m.ic)} m`)] },
   ...D.rooms.map(r => ({ t: `${r.ad} (${fmt(r.m2, 2)} m²)`, p: roomText[r.id], room: r.id })),
   { t: 'Veranda kolon ve kirişleri', p: 'Verandanın iki ön köşesine ve ortasına flanşlı kutu profil kolon (100 × 100 × 2400, 3 mm) dikilir; üstlerine 574,75 cm’lik ön kiriş (B) bağlanır. Üç kısa kiriş (140 cm, 4 mm) ön kirişi binaya bağlar: soldaki özel köşe direği A’ya, öbür ikisi ön duvardaki özel H’lara (C). Cumba makasları bu kirişlere oturur.' },
-  { t: 'Saçak, duvar ve baş makas omegası', p: 'Makasların oturacağı hatlara omega geçirilir. 100’lük omegalar 10,5 cm’dir: dış kanat dış duvara tam yaslanır, içte kalan 5 mm aralığa silikonize mastik sıkılır. Arka duvar, ön duvarın sağ kısmı ve veranda yan kirişleri üstüne 100’lük saçak omegası (ters U, dışta eğik kanat); ön duvarın cumba altında kalan kısmına 100’lük duvar omegası; üç baş makasın altına baş makas omegası (fabrikada hazırlanır): 10,5 cm, dış kanadı duvara tam yaslı, 3 cm derinlik, içte 3 cm açık yanak, dışta baş makas betopanının gireceği 1 cm U yanak. İç duvarların üstüne 60’lık duvar omegası geçirilir (6,5 cm açıklık, 3 cm derinlik, 3 cm kulaklar); kapı üstlerinden kesintisiz geçer.',
+  { t: 'Saçak, duvar ve baş makas omegası', p: 'Makasların oturacağı hatlara omega geçirilir. 100’lük omegalar 10,5 cm’dir (100 mm pano + iki yanda 2 mm H kanadı): dış kanat dışarıda tam yaslanır, içte kalan aralıklara silikonize mastik sıkılır. Arka duvar, ön duvarın sağ kısmı ve veranda yan kirişleri üstüne 100’lük saçak omegası (ters U, dışta eğik kanat); ön duvarın cumba altında kalan kısmına 100’lük duvar omegası; üç baş makasın altına baş makas omegası (fabrikada hazırlanır): 10,5 cm, dış kanadı duvara tam yaslı, 3 cm derinlik, içte 3 cm açık yanak, dışta baş makas betopanının gireceği 1 cm U yanak. İç duvarların üstüne 60’lık duvar omegası geçirilir (6,5 cm açıklık, 3 cm derinlik, 3 cm kulaklar); kapı üstlerinden kesintisiz geçer.',
     rows: [R(null, '100’lük saçak omegası 100 × 2500', '7 adet', 'liste'), R(null, '100’lük duvar omegası 100 × 2500', '4 adet', 'liste'), R(null, 'Baş makas omegası L 2500', '8 adet', 'liste'), R(null, '60’lık duvar omegası (iç duvar üstü)', `${parts.filter(q => q.step === 8 && q.obj.userData.info.ad.startsWith('60’lık')).length} parça · ${fmt(D.omega_duvar.filter(o => o.tur === 'ic').reduce((a, o) => a + o.a1 - o.a0, 0) / 100)} m`, 'model'), I('Sac', '1 mm')] },
   { t: 'Saçak sacı', p: 'Makaslardan önce takılır. 3 cm tırnağı saçak omegasının üstüne girer, makas oturunca altında sıkışır; 30 cm saçak altı, 13 cm alın ve makasa doğru 10 cm kıvrım. Dört saçak var: arka, ön (cumbanın sağı) ve cumbanın iki yanı; cumbanın sağında ön saçakla iç köşe yapar.',
     rows: [R(null, 'Saçak sacı (antrasit, 30’luk) 300 × 2500', '8 adet', 'liste'), I('Menfezli', '3 adet'), I('Profil', '3 + 30 + 13 + 10 cm'), I('Sac', '1 mm')] },

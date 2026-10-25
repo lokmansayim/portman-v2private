@@ -54,10 +54,10 @@ if os.path.exists(os.path.join(RD, 'son_bas_kesit.png')):
     B = ac('son_bas_kesit.png'); db = ImageDraw.Draw(B); s = B.width / 1600
     KP, KH, LN = (-4.46, -2.9, 2.52), (-4.46, -1.5, 2.52), 135
     X = lambda x: x / 100 - 4.5
-    NOK = [((X(3.4), -1.5, 2.525), 'Baş makas (alt başlık)', (1180, 470), True),
-           ((X(-1.1), -1.5, 2.4695), 'Baş makas omegası: dış U yanak', (520, 840), False),
-           ((X(-1.0), -1.5, 2.60), 'Baş makas betopanı (8 mm)', (520, 150), False),
-           ((X(5.0), -1.5, 2.43), 'Duvar panosu (10 cm)', (520, 950), False),
+    NOK = [((X(3.7), -1.5, 2.525), 'Baş makas (alt başlık)', (1180, 470), True),
+           ((X(-0.8), -1.5, 2.4695), 'Baş makas omegası: dış U yanak', (520, 840), False),
+           ((X(-0.7), -1.5, 2.60), 'Baş makas betopanı (8 mm)', (520, 150), False),
+           ((X(5.0), -1.5, 2.43), 'Pano: 8 mm betopan + 84 mm strafor + 8 mm betopan', (520, 950), False),
            ((X(16), -1.5, 2.57), 'Cam yünü 10 cm', (1180, 200), True),
            ((X(18), -1.5, 2.461), 'Ters tavan alçıpanı', (1180, 880), True)]
     for p, metin, kutu, sag in NOK:

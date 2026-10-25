@@ -206,9 +206,9 @@ omega_duvar = [
 
 # Makaslar (SketchUp modeli: MKS01–08 ana çatı, y boyunca −30…630; MKS09–10 cumba, x boyunca −30…604,8; MKS11–12 cumba ara makası)
 # Baş makaslar (MKS01, MKS08, MKS09): dış yüzü baş makas omegasının dış kanadıyla aynı hizada; 8 mm betopan makasa dayanır,
-# alt ucu omeganın dış U yanağına girer (Lokman 25.10.2026). 100'lük omega 10,5 cm, dış kanadı duvarın dış yüzüne tam yaslı;
-# kanat sacı 1 mm → makasın dış yüzü duvar dış yüzünün 0,1 cm dışında → makas ekseni 4 − 0,1.
-BAS_DIS = 0.1
+# alt ucu omeganın dış U yanağına girer (Lokman 25.10.2026). 100'lük omega 10,5 cm = 2 + 100 + 2 mm (H kanatları 2 mm) + 1 mm;
+# dış kanadı H kanadının dış yüzüne yaslı, kanat sacı 1 mm → makasın dış yüzü duvar dış yüzünün 0,3 cm dışında → makas ekseni 4 − 0,3.
+BAS_DIS = 0.3
 makas = [dict(ad=f'MKS{i + 1:02d}', aile='ana', rol='bas' if i in (0, 7) else 'orta', konum=c, bas=-30, son=630)
          for i, c in enumerate([4 - BAS_DIS, 130.5, 256, 381.5, 507, 632.5, 758, 896 + BAS_DIS])]
 makas += [dict(ad='MKS09', aile='cumba', rol='bas', konum=-146 - BAS_DIS, bas=-30, son=604.75),
