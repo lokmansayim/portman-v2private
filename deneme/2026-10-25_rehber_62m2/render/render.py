@@ -65,7 +65,7 @@ YENI = {
     'box': boyali('veranda', (0.09, 0.095, 0.10), 0.45, 0.3),
     'kasa': boyali('kasa', (0.86, 0.86, 0.84), 0.5, 0.0),
     'door': boyali('ic_kapi', (0.62, 0.53, 0.40), 0.55, 0.0),
-    'pvc': boyali('pvc_antrasit', (0.11, 0.115, 0.125), 0.38, 0.05),
+    'pvc': boyali('pvc_antrasit', (0.0395, 0.0482, 0.0545), 0.38, 0.05),   # antrasit gri RAL 7016 (#383E42; Lokman 26.10.2026)
     'glass': cam(),
     'cdoor': boyali('celik_kapi', (0.06, 0.065, 0.07), 0.4, 0.4),
     'fuga': fuga(),
@@ -143,6 +143,8 @@ KAM = {  # konum, hedef, objektif (mm), güneş (azimut, yükseklik)
     # Lokman'ın yakın fotoğrafının açısı (26.10.2026): arka-sağ köşe, kalkan yüzünün önünden yukarı bakış
     'foto_kose':  ((5.6, 3.5, 1.6), (4.5, 3.02, 2.35), 16, (135, 32)),
     'foto_yakin': ((5.12, 3.6, 1.95), (4.55, 3.12, 2.7), 20, (135, 32)),
+    # ön cephedeki 180/180 pencere (DVR01), Lokman çizimi 26.10.2026: 178 × 178, 4 bölme
+    'pencere_180': ((-2.2, -6.4, 1.25), (-2.57, -3.0, 1.12), 40, (200, 35)),
 }
 if kip == 'gorunum':
     kp, kh, lens, (az, yuk) = KAM[sec]

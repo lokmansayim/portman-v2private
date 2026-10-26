@@ -51,6 +51,7 @@ Bir bayi projesinin (900 × 600 cm, veranda üstünde cumba) montaj rehberi. Kay
 - **Ters tavan (adım 12).** Tavan omegalarının altına 12,5 mm alçıpan 120 × 250 (banyoda yeşil), verandada boardex 120 × 240.
 - **Çatı izolasyonu (adım 13, aşıklardan önce).** 10 cm rulo cam yünü, her makas aralığına bir şerit; cumbada (veranda) makas yönünde yatay iki şerit; rehberde rulo açılarak serilir (`anim.serme`; rulo `userData.gecici`, GLB'ye girmez).
 - **Saçak, alın ve dere birleşimi** (Lokman'ın gönderdiği ev fotoğraflarına göre). Köşede iniş ağzı derenin uç kısmında, borunun hizasında; kaz boynu duvara (cumbada veranda kolonuna) dik döner, boru köşe direği kaplamasının (13 cm) yanından iner. Saçak sacının alnı derenin bütün boyunca köşeye kadar uzar (`SACAK` `f0`/`f1`); saçak altı baş makasın betopanına dayanıp kesilir (`t0`/`t1`); alın sacının saçak altı kolu makasın topuğunda biter, alın yüzü dereyi de içine alacak kadar geniştir ve derenin ucunu kapatır; ek parça yok (Lokman'ın işaretli fotoğrafları, 26 Ekim).
+- **Pencereler ve 20. adım (26 Ekim).** Antrasit gri (RAL 7016). 180/180: Lokman çizimi, 178 × 178 + 1'er cm pervaz payı, 4 bölme (iki yan sabit, ortadaki iki kanat içe açılır, ortada kayıt yok), dış pervaz. 20. adımda kanatlar ve kapılar sırayla açılıp kapanır (`anim.ackapa`: `don` düşey menteşe, `devir` vasistas, `kay` sürgü; dinlenme hâli kapalı, GLB kapalı hâlde).
 - **Genel çatı yüzü sistemi.**
   - Her yüz yerel s (eğim boyunca), t (saçak boyunca), n (dik) koordinatlarında kurulur.
   - Levhalar dışbükey çokgen kırpmayla dere hattında kesilir.

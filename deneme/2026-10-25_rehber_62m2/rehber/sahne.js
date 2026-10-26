@@ -88,7 +88,7 @@ const BASE = {
   box:      { color: 0x6f7a83, roughness: 0.45, metalness: 0.55 },
   kasa:     { color: 0xf4f3ef, roughness: 0.6 },
   door:     { color: 0xd6c6aa, roughness: 0.65 },
-  pvc:      { color: 0x40474e, roughness: 0.4, metalness: 0.1 },      // antrasit PVC (yükleme listesi)
+  pvc:      { color: 0x383e42, roughness: 0.4, metalness: 0.1 },      // antrasit gri PVC (RAL 7016; Lokman 26.10.2026)
   glass:    { color: 0x9cc3dc, roughness: 0.05, metalness: 0.1, transparent: true, opacity: 0.38 },
   cdoor:    { color: 0x3e464e, roughness: 0.45, metalness: 0.35 },
   truss:    { color: 0xb3bcc3, roughness: 0.4, metalness: 0.6 },
@@ -590,6 +590,13 @@ const ROLL_R0 = 22, ROLL_R1 = 9;   // rulo yarıçapı: başta ve sonda (cm)
       ['Serme', 'makas yönünde (yatay); rulo sol yan kirişten sağa açılır, veranda tavanının (boardex) üstüne serilir']]);
   });
 }
+function ackapaAyarla(L, a) {   // a: 0 kapalı → 1 açık
+  L.forEach(m => {
+    if (m.tip === 'don') m.el.rotation.y = (m.taban || 0) + m.max * a;
+    else if (m.tip === 'devir') m.el.rotation[m.ax] = m.max * a;
+    else m.el.position[m.ax] = m.p0 + m.max * a;
+  });
+}
 function sermeAyarla(S, e) {   // e: 0 → 1 serilen oran
   S.sr.scale.z = Math.max(0.002, e); S.sr.position.z = -S.L * e / 200;
   const R = ROLL_R0 + (ROLL_R1 - ROLL_R0) * e;
@@ -710,7 +717,7 @@ D.dere.inisler.forEach((p, i) => {
   add(16, w, 4 + i * 0.5, { kod: null, ad: 'İniş borusu (dikdörtgen, oluklu)', satir: [['Bu parça', `${h.ad} hattı · ${p.duvar} boyunca`], ['Ağız', kolon ? 'kolonun hizasında; kaz boynu kolona dik döner' : (p.s < 17 || p.s > D.dis[0] - 17) ? 'derenin köşe ucunda, borunun hizasında; kaz boynu duvara dik döner, boru köşe direğinin yanından iner (Lokman’ın fotoğrafları)' : 'borunun hizasında; kaz boynu duvara dik döner'], ['Kesit', 'yaklaşık 8 × 6 cm, boyalı antrasit; bina ile birlikte iner'], ['Takım', 'iniş aparatı · 2 açık dirsek (kaz boynu) · boru L 3000 · 2 kelepçe · kapalı dirsek'], ['Pafta', '7 iniş'], ['Liste', 'iniş borusu 7, açık dirsek 14, kapalı dirsek 7, kelepçe 14']] });
 });
 
-/* 19 · İç kapılar (K-01 kanadı; bu projede iç kapılar alıcıya ait) */
+/* 20 · İç kapılar (K-01 kanadı; bu projede iç kapılar alıcıya ait) */
 D.doors.forEach((d, i) => {
   const g = new THREE.Group();
   g.position.set(X(d.hinge[0]), 0, Z(d.hinge[1]));
@@ -720,32 +727,78 @@ D.doors.forEach((d, i) => {
   const a0 = Math.atan2(d.closed[1], d.closed[0]);
   let da = Math.atan2(d.open[1], d.open[0]) - a0; da = Math.atan2(Math.sin(da), Math.cos(da));
   g.rotation.y = a0;
-  add(20, g, i, { kod: 'K-01', ad: kart('K-01'), satir: [['Oda', roomName(d.room)], ['Bu proje', 'iç kapılar alıcıya ait; yer ve açılış yönü paftadan'], ...kartSat('K-01')] }, { swing: [a0, a0 + da * 0.62] });
+  add(20, g, i, { kod: 'K-01', ad: kart('K-01'), satir: [['Oda', roomName(d.room)], ['Bu proje', 'iç kapılar alıcıya ait; yer ve açılış yönü paftadan'], ...kartSat('K-01')] }, { ackapa: [{ el: g, tip: 'don', taban: a0, max: da * 0.9 }] });
 });
-/* 19 · Pencereler ve dış kapı */
+/* 20 · Pencereler ve dış kapı (antrasit gri; 20. adımda kanatlar ve kapılar sırayla açılıp kapanır, Lokman 26.10.2026) */
 {
   const WC = { '120/120': 'P-01' }, WAD = { '120/80': 'PVC pencere 120/80 (sürgülü)', '180/180': 'PVC pencere 180/180 (çift açılım)', '60/60': 'PVC vasistas 60/60' };
   const WL = { '120/120': 'PVC DOĞRAMA … ÇİFT AÇILIM 120 × 120 · 2 adet', '120/80': 'PVC DOĞRAMA … SÜRGÜLÜ 120 × 80 · 1 adet', '180/180': 'PVC DOĞRAMA … ÇİFT AÇILIM 180 × 180 · 2 adet', '60/60': 'PVC DOĞRAMA … VASİSTAS 60 × 60 · 1 adet' };
-  let wo = 5;
+  let wo = 3;
   D.panels.filter(p => p.op && (p.op.kind === 'win' || p.op.kind === 'door_ext')).forEach(p => {
     const [x0, y0, x1, y1] = p.rect, op = p.op, g = new THREE.Group(), c = p.o === 'h' ? (y0 + y1) / 2 : (x0 + x1) / 2;
-    const box = (a0, a1, d0, d1, h0, h1, m, sh = true) => { const o = p.o === 'h' ? bp(a0, a1, d0, d1, h0, h1, m) : bp(d0, d1, a0, a1, h0, h1, m); o.castShadow = sh; g.add(o); };
+    const out = p.o === 'h' ? (c > D.dis[1] / 2 ? 1 : -1) : (c > D.dis[0] / 2 ? 1 : -1), ic = -out;   // ic: odanın içine doğru (plan)
+    const kutu = (hedef, a0, a1, d0, d1, h0, h1, m, sh = true) => {
+      const o = p.o === 'h' ? bp(a0, a1, d0, d1, h0, h1, m) : bp(d0, d1, a0, a1, h0, h1, m); o.castShadow = sh;
+      if (hedef !== g) o.position.sub(hedef.position);
+      hedef.add(o);
+    };
+    const box = (...a) => kutu(g, ...a);
+    const mentese = (al, ac, h) => { const v = new THREE.Group(); const [px, py] = p.o === 'h' ? [al, ac] : [ac, al]; v.position.set(X(px), h / 100, Z(py)); g.add(v); return v; };
+    // hareket: don = düşey menteşede içe döner, devir = alttan içe devrilir (vasistas), kay = duvar boyunca kayar
+    const don = (v, yon, max = 1.25) => ({ el: v, tip: 'don', max: max * (p.o === 'h' ? yon * ic : -ic * yon) });
+    const devir = (v, max = 0.3) => ({ el: v, tip: 'devir', ax: p.o === 'h' ? 'x' : 'z', max: max * -ic });
+    const kay = (v, d) => ({ el: v, tip: 'kay', ax: p.o === 'h' ? 'x' : 'z', p0: v.position[p.o === 'h' ? 'x' : 'z'], max: (p.o === 'h' ? 1 : -1) * d / 100 });
     const { a0, a1, s: sill, top } = op, f = 5, dpt = 3.5;
-    const fm = mat(op.kind === 'win' ? 'pvc' : 'cdoor', 20);
+    const fm = mat(op.kind === 'win' ? 'pvc' : 'cdoor', 20), gm = mat('glass', 20);
+    const kanatKur = (v, b0, b1, d, i0, i1, kf) => {   // kanat çerçevesi (köşelerde üst üste binmeden) + cam
+      kutu(v, b0, b0 + kf, d - 3.25, d + 3.25, i0, i1, fm); kutu(v, b1 - kf, b1, d - 3.25, d + 3.25, i0, i1, fm);
+      kutu(v, b0 + kf, b1 - kf, d - 3.25, d + 3.25, i1 - kf, i1, fm); kutu(v, b0 + kf, b1 - kf, d - 3.25, d + 3.25, i0, i0 + kf, fm);
+      kutu(v, b0 + kf, b1 - kf, d - 0.3, d + 0.3, i0 + kf, i1 - kf, gm, false);
+    };
+    if (op.size === '180/180') {   // Lokman çizimi (26.10.2026): 178 × 178 (iki yanda 1'er cm pervaz payı), 4 bölme: iki yanda sabit, ortada iki açılır kanat
+      const dis = c + out * p.t / 2;
+      const W0 = a0 + 1, W1 = a1 - 1, H0 = sill + 1, H1 = top - 1, ff = 5, mw = 8, bw = (W1 - W0 - 2 * ff - 2 * mw) / 4, kf = 4.5;
+      box(W0, W0 + ff, c - dpt, c + dpt, H0, H1, fm); box(W1 - ff, W1, c - dpt, c + dpt, H0, H1, fm);
+      box(W0 + ff, W1 - ff, c - dpt, c + dpt, H1 - ff, H1, fm); box(W0 + ff, W1 - ff, c - dpt, c + dpt, H0, H0 + ff, fm);
+      const bay = k => W0 + ff + k * bw + (k >= 1 ? mw : 0) + (k >= 3 ? mw : 0), i0 = H0 + ff, i1 = H1 - ff, d = c + ic * 0.6;
+      [1, 3].forEach(k => box(bay(k) - mw, bay(k), c - dpt, c + dpt, i0, i1, fm));   // sabit bölmelerle kanatlar arasındaki kayıtlar; ortada kayıt yok, kanatlar birbirine kapanır
+      const hk = [];
+      [0, 1, 2, 3].forEach(k => {
+        const b0 = bay(k), b1 = b0 + bw;
+        if (k === 1 || k === 2) {   // açılır kanatlar: ortada buluşur, menteşeler dış kayıtlarda, içe açılır (Lokman'ın gönderdiği görsel)
+          const hinge = k === 1 ? b0 : b1, v = mentese(hinge, d + ic * 3.25, 0);
+          kanatKur(v, b0, b1, d, i0, i1, kf); hk.push(don(v, k === 1 ? 1 : -1, 1.2));
+        } else box(b0, b1, c - 0.3, c + 0.3, i0, i1, gm, false);   // sabit cam
+      });
+      const pv = 5, pt = 0.6, e0 = Math.min(dis, dis + out * pt), e1 = Math.max(dis, dis + out * pt);   // dış pervaz: 1 cm payın ve kasanın 1 cm'sinin üstüne biner
+      box(a0 - 3, a0 + 2, e0, e1, sill - 3, top + 3, fm); box(a1 - 2, a1 + 3, e0, e1, sill - 3, top + 3, fm);
+      box(a0 + 2, a1 - 2, e0, e1, top - 2, top + 3, fm); box(a0 + 2, a1 - 2, e0, e1, sill - 3, sill + 2, fm);
+      add(20, g, wo++, { kod: null, ad: WAD[op.size], satir: [['Bu parça', `boşluk 180 × 180 · pencere 178 × 178 (iki yanda 1’er cm pervaz payı) · eşik ${op.s} cm`], ['Bölme', '4 bölme: iki yanda sabit cam, ortada iki açılır kanat (çift açılım)'], ['Renk', 'antrasit gri, iç ve dış'], ['Pervaz', 'orta kayıttan, dıştan biner; içte pervaz matik'], ['Not', 'verilen ölçüler iç ölçüdür'], ['Oda', roomName(p.room)], ['Liste', WL[op.size]], ['Kaynak', 'Lokman çizimi 180/180 (26.10.2026)']] }, { ackapa: hk });
+      return;
+    }
     box(a0, a0 + f, c - dpt, c + dpt, sill, top, fm); box(a1 - f, a1, c - dpt, c + dpt, sill, top, fm);
-    box(a0, a1, c - dpt, c + dpt, top - f, top, fm);
+    box(a0 + f, a1 - f, c - dpt, c + dpt, top - f, top, fm);
     if (op.kind === 'win') {
-      box(a0, a1, c - dpt, c + dpt, sill, sill + f, fm);
-      const wide = a1 - a0 > 100, am = (a0 + a1) / 2;
-      if (wide) box(am - 3, am + 3, c - dpt + 0.5, c + dpt - 0.5, sill + f, top - f, fm);
+      box(a0 + f, a1 - f, c - dpt, c + dpt, sill, sill + f, fm);
+      const wide = a1 - a0 > 100, am = (a0 + a1) / 2, i0 = sill + f, i1 = top - f, hk = [];
+      if (wide) box(am - 3, am + 3, c - dpt + 0.5, c + dpt - 0.5, i0, i1, fm);
       const panes = wide ? [[a0 + f, am - 3], [am + 3, a1 - f]] : [[a0 + f, a1 - f]];
-      panes.forEach(([b0, b1]) => box(b0, b1, c - 0.3, c + 0.3, sill + f, top - f, mat('glass', 20), false));
+      panes.forEach(([b0, b1], j) => {
+        if (op.size === '60/60') {   // vasistas: alttan içe devrilir
+          const v = mentese((b0 + b1) / 2, c + ic * 3.25, i0); kanatKur(v, b0, b1, c + ic * 0.6, i0, i1, 4); hk.push(devir(v, 0.3));
+        } else if (op.size === '120/80' && j === 1) {   // sürgülü: ikinci kanat içten öbürünün önüne kayar
+          const v = mentese(0, 0, 0); kanatKur(v, b0, b1, c + ic * 4.2, i0, i1, 3.5); hk.push(kay(v, -(b1 - b0) * 0.8));
+        } else if (op.size === '120/120' && j === 0) {   // çift açılım: dış kayıttaki menteşede içe döner
+          const v = mentese(b0, c + ic * 3.85, 0); kanatKur(v, b0, b1, c + ic * 0.6, i0, i1, 4); hk.push(don(v, 1, 1.2));
+        } else box(b0, b1, c - 0.3, c + 0.3, i0, i1, gm, false);
+      });
       const kod = WC[op.size] || null;
-      add(20, g, wo++, { kod, ad: kart(kod, WAD[op.size]), satir: [['Bu parça', `${op.size} · eşik ${op.s} cm · antrasit, pervaz matik`], ['Oda', roomName(p.room)], ['Liste', WL[op.size]], ...kartSat(kod)] });
-    } else {
-      box(a0 + f, a1 - f, c - 2.25, c + 2.25, 0, top - f, mat('cdoor', 20));
-      const hx = a0 + f + 6; box(hx, hx + 2.5, c - 4.5, c + 4.5, 98, 112, mat('steel', 20));
-      add(20, g, wo++, { kod: 'K-02', ad: kart('K-02'), satir: [['Bu parça', `boşluk ${Math.round(a1 - a0)} × ${top} cm · kanat 90 × 200, sağ`], ['Oda', roomName(p.room)], ['Liste', 'PREFABRİK ÇELİK KAPI ( SAĞ ) 90 × 200 · 1 adet'], ...kartSat('K-02')] });
+      add(20, g, wo++, { kod, ad: kart(kod, WAD[op.size]), satir: [['Bu parça', `${op.size} · eşik ${op.s} cm · antrasit gri, pervaz matik`], ['Oda', roomName(p.room)], ['Liste', WL[op.size]], ...kartSat(kod)] }, hk.length ? { ackapa: hk } : undefined);
+    } else {   // çelik dış kapı (sağ): kolu solda, menteşe sağda; içe açılır
+      const v = mentese(a1 - f, c + ic * 2.25, 0);
+      kutu(v, a0 + f, a1 - f, c - 2.25, c + 2.25, 0, top - f, mat('cdoor', 20));
+      const hx = a0 + f + 6; kutu(v, hx, hx + 2.5, c - 4.5, c + 4.5, 98, 112, mat('steel', 20));
+      add(20, g, wo++, { kod: 'K-02', ad: kart('K-02'), satir: [['Bu parça', `boşluk ${Math.round(a1 - a0)} × ${top} cm · kanat 90 × 200, sağ`], ['Oda', roomName(p.room)], ['Liste', 'PREFABRİK ÇELİK KAPI ( SAĞ ) 90 × 200 · 1 adet'], ...kartSat('K-02')] }, { ackapa: [don(v, -1, 1.35)] });
     }
   });
 }
@@ -767,6 +820,7 @@ const timing = byStep.map((list, s) => {
   const maxO = list.reduce((a, p) => Math.max(a, p.order), 0), oda = s >= ODA0 && s <= ODA1;
   const per = oda ? 0.34 : 0.14;
   if (list.some(p => p.anim && p.anim.serme)) return { stagger: 1.1, dur: 2.6, total: maxO * 1.1 + 2.6 };   // rulo serme: yavaş, sırayla
+  if (list.some(p => p.anim && p.anim.ackapa)) return { stagger: 0.75, dur: 3.2, total: maxO * 0.75 + 3.2 };   // kanatlar ve kapılar: sırayla açılıp kapanır
   const stagger = maxO > 0 ? Math.min(per, (oda ? 4.6 : 2.6) / maxO) : 0;
   return { stagger, dur: 0.6, total: maxO * stagger + 0.6 };
 });
@@ -820,7 +874,7 @@ const STEPS = [
     rows: [R(null, 'Trapez sac L 3500 (ana çatı)', '21 adet', 'liste'), R(null, 'Trapez sac L 3400 (cumba)', '8 adet', 'liste'), I('Modelde', `${parts.filter(q => q.step === 18 && /^Trapez sac/.test(q.obj.userData.info.ad)).length} levha · 100 cm kapatır, 0,5 mm`), R(null, 'Trapez sac mahyası L 800', '25 adet', 'liste')] },
   { t: 'Alın sacları', p: 'Alın sacı (antrasit) üç kalkanın eğik kenarlarına, trapezden sonra takılır: tırnağı baş makas Z’sine girer, saçak altı kolu aşıkların altını kapatır ve makasın topuğunda kesilir; üstte trapezin kenar hadvesini kavrar. Alın yüzü dereyi de içine alacak kadar geniştir: köşede saçak sacının alnıyla birleşir ve derenin ucunu kapatır (ayrı parça yok).',
     rows: [R(null, 'Alın sacı 300 × 2500', '10 adet', 'liste')] },
-  { t: 'Kapı ve pencereler', p: 'Antrasit PVC pencereler (2 × 120/120 çift açılım, 1 × 120/80 sürgülü, 2 × 180/180 çift açılım, 1 × 60/60 vasistas) ve prefabrik çelik dış kapı (90 × 200, sağ) yerine konur. İç kapılar alıcıya ait; modelde yerlerini ve açılış yönlerini göstermek için çizildi. Bu adımda çatı, tavan ve izolasyon gizlenir; düğmeyle geri açılır.',
+  { t: 'Kapı ve pencereler', p: 'Antrasit gri (RAL 7016) PVC pencereler (2 × 120/120 çift açılım, 1 × 120/80 sürgülü, 2 × 180/180 çift açılım, 1 × 60/60 vasistas) ve prefabrik çelik dış kapı (90 × 200, sağ) yerine konur. İç kapılar alıcıya ait; modelde yerlerini ve açılış yönlerini göstermek için çizildi. Bu adımda çatı, tavan ve izolasyon gizlenir; düğmeyle geri açılır. Bu adımda kanatlar ve kapılar sırayla açılıp kapanır: 180/180’lerde iki yan bölme sabit, ortadaki iki kanat içe açılır; sürgülü kanat kayar, vasistas içe devrilir.',
     extra: [I('İç kapılar', 'alıcıya ait')] },
 ];
 STEPS.forEach((st, i) => {
@@ -892,7 +946,7 @@ function applyVisibility() {
 function goTo(i, animate = true) {
   cur = Math.max(0, Math.min(N, i));
   cutaway = cur === N;
-  for (const p of parts) { p.obj.visible = true; p.obj.position.y = p.y; if (p.anim && p.anim.swing) p.obj.rotation.y = p.anim.swing[1]; if (p.anim && p.anim.serme) sermeAyarla(p.anim.serme, 1); }
+  for (const p of parts) { p.obj.visible = true; p.obj.position.y = p.y; if (p.anim && p.anim.ackapa) ackapaAyarla(p.anim.ackapa, 0); if (p.anim && p.anim.serme) sermeAyarla(p.anim.serme, 1); }
   Object.entries(roomPatch).forEach(([s, g]) => g.visible = +s === cur);
   applyVisibility();
   animating = cur > 0 && animate && !reduced;
@@ -1031,7 +1085,7 @@ function tick() {
       p.obj.visible = true;
       if (k < 1) all = false;
       const e = easeOut(Math.min(1, k));
-      if (p.anim && p.anim.swing) p.obj.rotation.y = p.anim.swing[0] + (p.anim.swing[1] - p.anim.swing[0]) * e;
+      if (p.anim && p.anim.ackapa) { const q = Math.min(1, k); ackapaAyarla(p.anim.ackapa, q < 0.25 ? 0 : Math.sin(Math.PI * (q - 0.25) / 0.75)); p.obj.position.y = p.y + (1 - easeOut(Math.min(1, q / 0.25))) * DROP[cur]; }
       else if (p.anim && p.anim.serme) sermeAyarla(p.anim.serme, easeInOut(Math.min(1, k)));
       else p.obj.position.y = p.y + (1 - e) * DROP[cur];
     }
@@ -1056,4 +1110,4 @@ resize();
 goTo(0, false);
 flyTo(0, true);
 tick();
-window.__montaj = { goTo, parts, STEPS, camera, THREE, controls, preset, N, serme: e => parts.forEach(p => p.anim && p.anim.serme && sermeAyarla(p.anim.serme, e)), kamera: (p, t) => { tween = null; camera.position.set(...p); if (controls) { controls.target.set(...t); controls.update(); } } };
+window.__montaj = { goTo, parts, STEPS, camera, THREE, controls, preset, N, serme: e => parts.forEach(p => p.anim && p.anim.serme && sermeAyarla(p.anim.serme, e)), ackapa: a => parts.forEach(p => p.anim && p.anim.ackapa && ackapaAyarla(p.anim.ackapa, a)), kamera: (p, t) => { tween = null; camera.position.set(...p); if (controls) { controls.target.set(...t); controls.update(); } } };
