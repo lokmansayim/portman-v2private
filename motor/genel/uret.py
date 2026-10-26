@@ -188,11 +188,13 @@ def uret(tanim_yolu: Path, hedef: Path, is_emri_no: str | None = None, revizyon:
                     karkas_paftasi = karkas_pafta.ciz(t, hedef, kod)
                 except (Exception, SystemExit) as e:
                     hatalar.append(f"duvar panelleri paftası: {type(e).__name__}: {str(e)[:200]}")
-                # 2d) makas yerleşim planı (İE-16 PR-3b): aynı koşulla; çatısız tanımda çizilmez
+                # 2d) makas yerleşim planı (İE-16 PR-3b): aynı koşulla; çatısız tanımda ve çatı kuralı (`makas`) olmayan eski kural kopyasında
+                # (PR-3a'nın listesi o günkü kopyayla yeniden üretilirken) çizilmez
                 if t.get("cati"):
                     try:
-                        from . import makas_pafta
-                        makas_paftasi = makas_pafta.ciz(t, hedef, kod, yontem=yontem)
+                        from . import karkas, makas_pafta
+                        if "makas" in karkas.oku():
+                            makas_paftasi = makas_pafta.ciz(t, hedef, kod, yontem=yontem)
                     except (Exception, SystemExit) as e:
                         hatalar.append(f"makas yerleşim paftası: {type(e).__name__}: {str(e)[:200]}")
         # 3) yükleme listesi (girdi + liste)

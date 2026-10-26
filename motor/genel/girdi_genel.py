@@ -638,8 +638,15 @@ def girdi(y: dict, c: dict, m: dict, kur: dict, kaynak: str) -> dict:
     # satırındadır (`celik_modeli.ek_satirlar`; KT-02, 9 Ekim 2026). Eski tanımlarda bütün kirişler "kiris" grubundadır.
     kirisler = [k for k in t.get("kirisler", []) if k.get("celik_grubu", "kiris") == "kiris"]
     makas = ct.get("makaslar") or {}
-    # karkas kuralında makas adedi kuraldan (İE-16 PR-3b): tanımdaki `cati.makaslar` (paftadan okunmuş) kuralda okunmaz
-    makas_adedi = (cm["makas"]["adet"] if kural_k and "makas" in cm else sum(v.get("adet", 0) for v in makas.values())) or None
+    # çatı karkas kuralında makas adedi yalnız kuraldan (İE-16 PR-3b): tanımdaki `cati.makaslar` (paftadan okunmuş) okunmaz; kural makas
+    # kurmadıysa adet yok, çatı çeliği motorun ortalamasıyla ve uyarıyla. Çatı kuralı olmayan kural kopyasında (PR-3a) tanımdan.
+    cati_k = m["karkas"]["cati"] if kural_k else None
+    if cati_k is not None:
+        makas_adedi = cm["makas"]["adet"] if "makas" in cm else None
+        if makas_adedi is None:
+            uyari.append("karkas kuralı: makas kurulmadı; çatı çeliği motorun ortalamasıyla (tanımdaki makas yerleri kuralda okunmaz)")
+    else:
+        makas_adedi = sum(v.get("adet", 0) for v in makas.values()) or None
     dis_prof, dis_pb, dis_mn = model("dis", None if tahmin else gr["dis"]["adet"], sinif["dis"]["profil"])
     ic_prof, ic_pb, ic_mn = model("ic", None if tahmin else gr["ic"]["adet"], sinif["ic"]["profil"]) if gr.get("ic") else (None, {}, "")
     # dikme, kiriş, makas ve çatı panelinin profili tanımda yazmaz: model varsa modeldeki, yoksa kuraldaki varsayılan et kalınlığı
@@ -863,7 +870,8 @@ def girdi(y: dict, c: dict, m: dict, kur: dict, kaynak: str) -> dict:
         "bayi": {"gruplar": {"Sıhhi tesisat": bool(kapsam.get("sihhi_tesisat", True)), "Elektrik": bool(kapsam.get("elektrik", True))},
                  "not": "kapsam: projenin teknik özellikleri ve açıklama notları (alıcıya ait olanlar listeye girmez)"},
         "uyarilar": uyari + ([m["tavan_omegasi_uyarisi"]] if m.get("tavan_omegasi_uyarisi") else [])
-                    + ([f"karkas kuralı: {u}" for u in m["karkas"]["uyarilar"]] if kural_k else []),
+                    + ([f"karkas kuralı: {u}" for u in m["karkas"]["uyarilar"] + ((m["karkas"]["cati"] or {}).get("uyarilar") or [])]
+                       if kural_k else []),
     }
     return g
 

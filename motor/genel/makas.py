@@ -15,7 +15,8 @@ kaynağıyla. Tanımdaki `cati.makaslar` (paftadan okunmuş makas yerleri) bu ku
    Tek eğimli ailenin ucu: düzlem orada tam derinlikteyse duvarın iç yüzü; değilse (kırma ya da vadi) tam derinliğin bittiği yer.
 3. **Makas çizgisi.** Konumda makas yönünde: ailenin iki düzlemi (her biri mahyanın kendi yanında) ve kırma yüzleri içinde, mahyayı
    içeren bitişik parça. Ucunda tek eğimli bir düzlem ya da (ana ailede) kanadın düzlemi sürüyorsa, vadiyi geçip ailenin o yandaki
-   saçak hizasına kadar uzanır. Üstü çatı yüzeyi, altı duvar üstü (`duvar_ustu`). `en_kisa_cm`'den kısa çizgi makas olmaz.
+   saçak hizasına kadar uzanır. Üstü çatı yüzeyi, altı duvar üstü (`duvar_ustu`). Konumda mahyayı içeren parça yoksa (çizgi
+   mahyaya varmıyor) en uzun parça alınır ve makas kısa sayılır. `en_kisa_cm`'den kısa çizgi makas olmaz, uyarı yazılır.
 4. **Kısa makas ve çapraz.** Kırma ucunun şeridinde (uç duvardan ilk makasa) kırma yüzünün yönünde, tek eğimli düzlemin kırma
    üçgeninde ailenin yönünde; aralık yine en çok `aralik_cm`, uçlardaki konum düşer (köşede çapraz var). Her kırma çizgisinde (kırma
    yüzüyle ailesi ya da tek eğimli düzlemle komşusu arasında) bir çapraz makas.
@@ -25,7 +26,10 @@ kaynağıyla. Tanımdaki `cati.makaslar` (paftadan okunmuş makas yerleri) bu ku
 6. **Paneller.** Çatı paneli (tanımda `ust_yapi: cati_paneli` düzlemler), yöntem A'nın çatı üstü paneli ve tavan paneli duvar
    paneli kuralıyla kurulur (`karkas.uyeler`; panelin uzun kenarı başlık, dikmeler `dikme_araligi_cm` arayla kısa kenar boyunca).
    Çatı paneli düzlemin açılımında saçak boyunca `cati_paneli_adedi` eşit panele bölünür; çatı üstü paneli saçak boyunca `bolme`
-   hedefiyle; tavan paneli ana ailenin makas aralıklarında, mahallerin içinde.
+   hedefiyle; tavan paneli ana ailenin makas aralıklarında, mahallerin içinde (makas kalınlığından dar şerit panel olmaz).
+7. **Uyarılar.** Kuralın yedeğe düştüğü ya da bir şey koymadığı her yer `uyarilar`a yazılır (aileye bağlanmayan kırma yüzü, ailesiz
+   çatı, saçağı bulunamayan kırma ucu, tek parça kesilmeyen kırma şeridi, kısa çizgi, tavan panelinin küçük ve dar parçaları); girdi
+   bunları "karkas kuralı: …" uyarısı olarak taşır, makas paftası basar.
 
 Hesapta LLM yoktur: aynı tanım ve aynı kural aynı sonucu verir. Ölçüler cm; boylar m.
 """
@@ -76,16 +80,23 @@ def aileler(c: dict) -> tuple[dict, list[dict], list[dict], list[str]]:
     adli = {d["ad"]: d for d in dzs}
     kn = [e for e in c["kenarlar"] if all(a in adli for a in e["duzlemler"])]
     aile: list[dict] = []
+    mahyalar: dict[tuple, list[dict]] = {}        # aynı iki düzlemin mahya kenarları (ilk görülme sırasıyla)
     for e in kn:
-        if e["tur"] != "mahya":
-            continue
-        a, b = e["duzlemler"]
+        if e["tur"] == "mahya":
+            mahyalar.setdefault(tuple(sorted(e["duzlemler"])), []).append(e)
+    for es in mahyalar.values():
+        a, b = es[0]["duzlemler"]
         ex = _eksen(adli[a])
         ie = _i(_oteki(ex))
-        p, q = tuple(e["p"]), tuple(e["q"])
-        if p[ie] > q[ie]:
-            p, q = q, p
-        aile.append({"tur": "besik", "duzlemler": [a, b], "uc": (p, q), "eksen": ex})
+        parca = sorted((tuple(sorted((tuple(e["p"]), tuple(e["q"])), key=lambda v: v[ie])) for e in es), key=lambda pq: pq[0][ie])
+        uclar = [list(parca[0])]
+        for p, q in parca[1:]:                    # uç uca kenarlar tek mahya (çokgende mahyanın üstünde fazladan köşe)
+            if _esit(p, uclar[-1][1]):
+                uclar[-1][1] = q
+            else:
+                uclar.append([p, q])
+        for p, q in uclar:
+            aile.append({"tur": "besik", "duzlemler": [a, b], "uc": (p, q), "eksen": ex})
     kolda = {x for k in aile for x in k["duzlemler"]}
     dibi = {e["duzlemler"][0] for e in kn if e["tur"] == "duvar_dibi"}
     for a in adli:
@@ -160,7 +171,8 @@ def _esit_bol(a0: float, a1: float, dus0: bool, dus1: bool, S: float) -> list[fl
     return ks[1 if dus0 else 0: len(ks) - (1 if dus1 else 0)]
 
 
-def _besik_konumlar(y: dict, adli: dict, kn: list[dict], aile: list[dict], k: dict, sacak: float, S: float, kal: float):
+def _besik_konumlar(y: dict, adli: dict, kn: list[dict], aile: list[dict], k: dict, sacak: float, S: float, kal: float,
+                    uyari: list[str]):
     ex = k["eksen"]; ee = _oteki(ex)
     ie = _i(ee)
     bb = unary_union([adli[a]["cokgen"] for a in k["takim"]]).bounds
@@ -171,7 +183,11 @@ def _besik_konumlar(y: dict, adli: dict, kn: list[dict], aile: list[dict], k: di
         if i in k["kirma_yuzu"]:
             H = k["kirma_yuzu"][i]
             sac = [e for e in kn if e["tur"] == "sacak" and e["duzlemler"] == [H] and abs(e["p"][ie] - e["q"][ie]) < 1]
-            uc = max(sac, key=lambda e: e["plan_boy"])["p"][ie] if sac else u[ie] + isaret * 10 * sacak
+            if sac:
+                uc = max(sac, key=lambda e: e["plan_boy"])["p"][ie]
+            else:
+                uc = u[ie] + isaret * 10 * sacak
+                uyari.append(f"makas: {'/'.join(k['duzlemler'])} ailesinin {H} kırma yüzünde saçak bulunamadı; uç mahyanın ucundan 10 × saçak")
             uclar.append((_ic_yuz(_duvar(y, uc, ee, ex, bant, sacak + 15), isaret, uc - isaret * sacak), True, "kırma"))
         elif "alin" in turler:
             uclar.append((_ic_yuz(_duvar(y, u[ie], ee, ex, bant, sacak + 15), isaret, u[ie]), False, "alın"))
@@ -319,7 +335,7 @@ def _besik_cizgi(adli: dict, k: dict, a: float, bb, uzanan: list[str]):
                 else:
                     s1 = yeni
                 break
-    return {"s0": s0, "s1": s1, **_profil(adli, ex, a, s0, s1, kapsam)}
+    return {"s0": s0, "s1": s1, "mahyali": bool(icinde), **_profil(adli, ex, a, s0, s1, kapsam)}
 
 
 def _tek_cizgi(adli: dict, ad: str, ex: str, a: float, bb, sinir: tuple[float, float] | None = None):
@@ -368,15 +384,26 @@ def _kayit(tur: str, aile: str, ex: str, a: float, cz: dict, duvar_ustu: float, 
 
 
 def makaslar(t: dict, c: dict, y: dict, k: dict) -> dict:
-    """Makaslar (tam, kısa, çapraz) ve ailelerin kaydı."""
+    """Makaslar (tam, kısa, çapraz), ailelerin kaydı ve uyarılar. Beşik ailede çizgisi mahyaya varmayan makas kısa sayılır;
+    `en_kisa_cm`'den kısa çizgide makas konmaz ve uyarı yazılır (sessiz düşme yok)."""
     mk = _d(k, "makas")
     S, kal, en_kisa = mk["aralik_cm"], mk["kalinlik_cm"], mk["en_kisa_cm"]
     panel = _d(k, "makas_uyeleri")["panel_cm"]
     sacak = t["cati"].get("sacak", 30.0)
     duvar_ustu = t["cati"].get("duvar_ustu", 270.0)
     adli, kn, aile, serbest = aileler(c)
+    uyari: list[str] = [f"makas: {H} kırma yüzü hiçbir aileye bağlanmadı; o yüzde kısa makas ve çapraz yok" for H in serbest]
     if not aile:
-        return {"makaslar": [], "aileler": [], "baglanmayan_kirma_yuzleri": serbest}
+        uyari.append("makas: çatıda makas ailesi bulunamadı; makas yok")
+        return {"makaslar": [], "aileler": [], "baglanmayan_kirma_yuzleri": serbest, "uyarilar": uyari}
+
+    def koy(tur, aile_ad, eksen, a_, cz):
+        if cz and cz["s1"] - cz["s0"] >= en_kisa:
+            out.append(_kayit(tur, aile_ad, eksen, a_, cz, duvar_ustu, panel))
+        else:
+            boy = 0.0 if not cz else cz["s1"] - cz["s0"]
+            uyari.append(f"makas: {aile_ad} ailesinde {a_:.1f} konumunda {'kısa makas' if tur == 'kisa' else 'makas'} çizgisi {boy:.1f} cm "
+                         f"(en kısa {en_kisa:g}): makas yok")
     bb = unary_union([d["cokgen"] for d in adli.values()]).bounds
     tekler = [x["duzlemler"][0] for x in aile if x["tur"] == "tek"]
     out, kayit = [], []
@@ -384,12 +411,11 @@ def makaslar(t: dict, c: dict, y: dict, k: dict) -> dict:
         ex = f["eksen"]; ee = _oteki(ex)
         ad = "/".join(f["duzlemler"])
         if f["tur"] == "besik":
-            ks, nedenler, uclar = _besik_konumlar(y, adli, kn, aile, f, sacak, S, kal)
+            ks, nedenler, uclar = _besik_konumlar(y, adli, kn, aile, f, sacak, S, kal, uyari)
             uzanan = tekler + [x for kk in f["kanatlari"] for x in kk["takim"]]
             for a_ in ks:
                 cz = _besik_cizgi(adli, f, a_, bb, uzanan)
-                if cz and cz["s1"] - cz["s0"] >= en_kisa:
-                    out.append(_kayit("makas", ad, ex, a_, cz, duvar_ustu, panel))
+                koy("makas" if cz and cz["mahyali"] else "kisa", ad, ex, a_, cz)
             for i, H in sorted(f["kirma_yuzu"].items()):     # kırma ucunun şeridi: kırma yüzünün yönünde kısa makaslar
                 w = uclar[i]
                 a1 = ks[0] if i == 0 else ks[-1]
@@ -397,24 +423,20 @@ def makaslar(t: dict, c: dict, y: dict, k: dict) -> dict:
                 ln = LineString([(w, hb[1] - 1), (w, hb[3] + 1)]) if ee == "x" else LineString([(hb[0] - 1, w), (hb[2] + 1, w)])
                 kes = ln.intersection(adli[H]["cokgen"])
                 if kes.is_empty or kes.geom_type != "LineString":
+                    uyari.append(f"makas: {ad} ailesinin {H} kırma yüzünde uç duvar çizgisi yüzü tek parça kesmiyor ({kes.geom_type}); "
+                                 "o şeritte kısa makas yok")
                     continue
                 cc = [q[_i(ex)] for q in kes.coords]
                 for pos in _esit_bol(min(cc), max(cc), True, True, S):
-                    cz = _tek_cizgi(adli, H, ee, pos, bb, (-math.inf, a1) if i == 0 else (a1, math.inf))
-                    if cz and cz["s1"] - cz["s0"] >= en_kisa:
-                        out.append(_kayit("kisa", H, ee, pos, cz, duvar_ustu, panel))
+                    koy("kisa", H, ee, pos, _tek_cizgi(adli, H, ee, pos, bb, (-math.inf, a1) if i == 0 else (a1, math.inf)))
         else:
             ks, nedenler, ucgen = _tek_konumlar(y, adli, kn, f, sacak, S, kal)
             uclar = (ks[0], ks[-1])
             for a_ in ks:
-                cz = _tek_cizgi(adli, f["duzlemler"][0], ex, a_, bb)
-                if cz and cz["s1"] - cz["s0"] >= en_kisa:
-                    out.append(_kayit("makas", ad, ex, a_, cz, duvar_ustu, panel))
+                koy("makas", ad, ex, a_, _tek_cizgi(adli, f["duzlemler"][0], ex, a_, bb))
             for b, cpos in ucgen:                             # kırma üçgeni: ailenin yönünde kısa makaslar
                 for pos in _esit_bol(min(b, cpos), max(b, cpos), True, True, S):
-                    cz = _tek_cizgi(adli, f["duzlemler"][0], ex, pos, bb)
-                    if cz and cz["s1"] - cz["s0"] >= en_kisa:
-                        out.append(_kayit("kisa", ad, ex, pos, cz, duvar_ustu, panel))
+                    koy("kisa", ad, ex, pos, _tek_cizgi(adli, f["duzlemler"][0], ex, pos, bb))
         kayit.append({"aile": ad, "tur": f["tur"], "eksen": f["eksen"], "ana": f["ana"], "uclar": list(nedenler),
                       "konumlar": [round(v, 2) for v in ks], "kirma_yuzleri": [f["kirma_yuzu"][i] for i in sorted(f["kirma_yuzu"])],
                       "kanatlari": ["/".join(x["duzlemler"]) for x in f["kanatlari"]]})
@@ -438,7 +460,7 @@ def makaslar(t: dict, c: dict, y: dict, k: dict) -> dict:
                     "s": [[round(v, 2) for v in e["p"]], [round(v, 2) for v in e["q"]]], "acik_cm": round(L, 2),
                     "h_en_cok_cm": round(z1 - duvar_ustu, 2), "uyeler_m": {ad: round(v, 4) for ad, v in u.items()},
                     "profil_boyu_m": round(sum(u.values()), 4)})
-    return {"makaslar": out, "aileler": kayit, "baglanmayan_kirma_yuzleri": serbest}
+    return {"makaslar": out, "aileler": kayit, "baglanmayan_kirma_yuzleri": serbest, "uyarilar": uyari}
 
 
 # ──────────────────────────────────────────────────────────────── paneller ──
@@ -514,10 +536,15 @@ def ust_panelleri(c: dict, k: dict) -> list[dict]:
     return out
 
 
-def tavan_panelleri(c: dict, y: dict, k: dict, mk: dict) -> list[dict]:
+def tavan_panelleri(c: dict, y: dict, k: dict, mk: dict, uyari: list[str]) -> list[dict]:
     """Yöntem A'nın tavan panelleri: ana ailenin makas aralıkları (uç duvarlara kadar) şerit; şerit her mahalle (ve verandayla)
-    kesilir, her parça bir panel. Çatı paneli altındaki mahal ve çatısız veranda hariç."""
+    kesilir, her parça bir panel. Çatı paneli altındaki mahal ve çatısız veranda hariç. Ana aile birden çok olabilir (en büyük
+    düzlem birden çok mahyaya katılırsa, ör. cumba): hepsinin konumları şerit sınırıdır. Makas kalınlığından (`kalinlik_cm`) dar şerit
+    iki makasın arasında ya da makasın altında kalır, panel olmaz. 100 cm²'den küçük parça panel olmaz, kısa kenarı
+    `dikme_araligi_cm`'den kısa parça panel olur; ikisi de uyarı yazar."""
     tp = _d(k, "tavan_paneli")
+    kal = _d(k, "makas")["kalinlik_cm"]
+    S = _d(k, "dikme_araligi_cm")
     makasli = unary_union([d["cokgen"] for d in c["duzlemler"] if d.get("ust_yapi") != "cati_paneli"])
     panelli = [d["cokgen"] for d in c["duzlemler"] if d.get("ust_yapi") == "cati_paneli"]
     bolgeler = [b for b in y["bolgeler"].values() if b["sinif"] in ("ic", "ek", "veranda")
@@ -534,7 +561,7 @@ def tavan_panelleri(c: dict, y: dict, k: dict, mk: dict) -> list[dict]:
     sinirlar = [v for v in sinirlar if lo - EPS <= v <= hi + EPS]
     out = []
     for a0, a1 in zip(sinirlar, sinirlar[1:]):
-        if a1 - a0 < 1.0:
+        if a1 - a0 <= kal + EPS:
             continue
         bb = tavan_geo.bounds
         serit = box(a0, bb[1] - 1, a1, bb[3] + 1) if ee == "x" else box(bb[0] - 1, a0, bb[2] + 1, a1)
@@ -542,7 +569,13 @@ def tavan_panelleri(c: dict, y: dict, k: dict, mk: dict) -> list[dict]:
             p = serit.intersection(b["net"])
             for g in ([p] if p.geom_type == "Polygon" else list(getattr(p, "geoms", []))):
                 if g.geom_type != "Polygon" or g.area < 100.0:
+                    if g.area > 0:
+                        uyari.append(f"tavan paneli: {b['ad']} mahalinde {a0:.1f}–{a1:.1f} şeridinde {g.area:.0f} cm² parça: panel yok")
                     continue
+                en = min(g.bounds[2] - g.bounds[0], g.bounds[3] - g.bounds[1])
+                if en < S:
+                    uyari.append(f"tavan paneli: {b['ad']} mahalinde {a0:.1f}–{a1:.1f} şeridinde parçanın kısa kenarı {en:.1f} cm "
+                                 f"(dikme aralığı {S:g}): panel kuruldu")
                 u = panel_uyeleri(g, k, capraz=tp["capraz"])
                 out.append({"mahal": b["ad"], "serit": [round(a0, 2), round(a1, 2)],
                             "olcu_cm": [round(g.bounds[2] - g.bounds[0], 2), round(g.bounds[3] - g.bounds[1], 2)],
@@ -554,9 +587,11 @@ def kur(t: dict, y: dict, k: dict, yontem: str | None = None) -> dict:
     """Çatının karkas kaydı: makaslar, çatı panelleri ve (yöntem A: `yontem == "panel"`) çatı üstü ve tavan panelleri."""
     c = cati_genel.cati_kur(t["cati"])
     mk = makaslar(t, c, y, k)
+    uyari = list(mk["uyarilar"])
     out = {"makaslar": mk["makaslar"], "aileler": mk["aileler"], "baglanmayan_kirma_yuzleri": mk["baglanmayan_kirma_yuzleri"],
            "cati_panelleri": cati_panelleri(c, y, k)}
     if yontem == "panel":
         out["ust_panelleri"] = ust_panelleri(c, k)
-        out["tavan_panelleri"] = tavan_panelleri(c, y, k, mk)
+        out["tavan_panelleri"] = tavan_panelleri(c, y, k, mk, uyari)
+    out["uyarilar"] = uyari
     return out

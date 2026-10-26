@@ -102,15 +102,69 @@ def test_baca_ve_cati_paneli_kt01_modeliyle():
     ("CP06", {"makas": 13, "kisa": 1, "capraz": 1}),
     ("CP14", {"makas": 24}),
     ("CP07", {"makas": 11, "kisa": 11, "capraz": 6}),
-    ("CP03", {"makas": 12, "kisa": 8, "capraz": 4}),
+    ("CP03", {"makas": 8, "kisa": 12, "capraz": 4}),
 ])
 def test_acik_projelerde_dizilim(kod, beklenen):
     """Türlerin sayısı kuralın bugünkü sonucu (gerileme). Paftayla kıyas İE-16 › PR-3b'de: ÇP-13 16/16, ÇP-06 15 (paftada 13 M + cumbada
-    2 C), ÇP-14 24 (26), ÇP-07 28 (34), ÇP-03 24 (14 makas + 13 makas paneli; tasarım başka)."""
+    2 C), ÇP-14 24 (26), ÇP-07 28 (34), ÇP-03 24 (14 makas + 13 makas paneli; tasarım başka). ÇP-03'ün 12 kısasının 4'ü beşik ailede
+    çizgisi mahyaya varmayan makas (geometri hakemi 1. tur)."""
     t, c, y = _yukle(PROJELER / TANIMLAR[kod])
     m = makas.makaslar(t, c, y, KURAL)["makaslar"]
     assert Counter(x["tur"] for x in m) == beklenen
     assert all(x["acik_cm"] >= makas._d(KURAL, "makas")["en_kisa_cm"] for x in m if x["tur"] != "capraz")
+
+
+def test_uyarilar():
+    """Kuralın yedeğe düştüğü ya da bir şey koymadığı yer sessiz geçmez: açık beşte yalnız ÇP-03'te üç uyarı (uzanım ucunda iki ailede
+    15,2 cm'lik çizgi, makas yok; salonda kısa kenarı 15,5 cm tavan paneli); öteki dördünde uyarı yok. Mahyaya varmayan beşik makas kısa."""
+    for kod in TANIMLAR:
+        t, c, y = _yukle(PROJELER / TANIMLAR[kod])
+        u = makas.kur(t, y, KURAL, "panel" if kod == "CP03" else None)["uyarilar"]
+        if kod != "CP03":
+            assert u == [], (kod, u)
+            continue
+        assert len(u) == 3 and sum("15.2 cm (en kısa 40): makas yok" in x for x in u) == 2 and "kısa kenarı 15.5 cm" in u[2], u
+        m = makas.makaslar(t, c, y, KURAL)
+        besik = {f["aile"] for f in m["aileler"] if f["tur"] == "besik"}
+        assert sum(1 for x in m["makaslar"] if x["tur"] == "kisa" and x["aile"] in besik) == 4
+
+
+def test_mahyadaki_fazla_kose_aileyi_ikilemez():
+    """Mahyanın üstündeki fazladan köşe (aynı doğru üzerinde) mahyayı iki kenara böler; aile yine tek, makaslar aynı (geometri hakemi 1. tur)."""
+    t, c, y = _yukle(PROJELER / TANIMLAR["CP06"])
+    t2 = copy.deepcopy(t)
+    d = {x["ad"]: x for x in t2["cati"]["duzlemler"]}
+    d["batı"]["plan"].insert(3, [450.0, 600.0])
+    d["doğu"]["plan"].append([450.0, 600.0])
+    c2 = cati_genel.cati_kur(t2["cati"])
+    assert sum(1 for e in c2["kenarlar"] if e["tur"] == "mahya") == sum(1 for e in c["kenarlar"] if e["tur"] == "mahya") + 1
+    a, b = makas.makaslar(t, c, y, KURAL), makas.makaslar(t2, c2, yapi.kur(t2), KURAL)
+    assert a["makaslar"] == b["makaslar"] and [f["aile"] for f in a["aileler"]] == [f["aile"] for f in b["aileler"]]
+
+
+def test_ailesiz_catida_makas_yok_ve_tanima_donulmez(monkeypatch):
+    """Kural makas kuramazsa (aile yok) uyarı yazılır; yükleme girdisinde makas adedi yok ve tanımdaki `cati.makaslar`'a dönülmez,
+    çatı çeliği motorun ortalamasıyla ve uyarıyla."""
+    gercek = makas.aileler
+    monkeypatch.setattr(makas, "aileler", lambda c: (*gercek(c)[:2], [], []))
+    g = _girdi(PROJELER / TANIMLAR["CP06"])
+    assert "panel_adedi" not in g["celik"]["cati"]
+    assert "karkas kuralı: makas: çatıda makas ailesi bulunamadı; makas yok" in g["uyarilar"]
+    assert any(u.startswith("karkas kuralı: makas kurulmadı;") for u in g["uyarilar"])
+
+
+def test_eski_kural_kopyasinda_eski_davranis(monkeypatch):
+    """PR-3b'nin anahtarları olmayan kural kopyası (PR-3a'nın `setler/a3683af36f42b92d.json`'u): baca ve çatı kuralı kurulmaz, makas adedi
+    tanımdan (ÇP-06 13); liste o günkü kuralla yeniden üretilebilir."""
+    eski = PROJELER / "setler" / "a3683af36f42b92d.json"
+    k = karkas.oku(eski)
+    assert "makas" not in k and "baca" not in k
+    t, c, y = _yukle(PROJELER / TANIMLAR["CP13"])
+    kk = karkas.kur(y, t, k)
+    assert kk["bacalar"] == [] and kk["cati"] is None
+    monkeypatch.setenv("PORTMAN_KARKAS", str(eski))
+    ce = _girdi(PROJELER / TANIMLAR["CP06"])["celik"]
+    assert ce["cati"]["panel_adedi"] == 13 and ce["cati"]["not"].endswith("adet modelden (13 makas)")
 
 
 def test_ana_catinin_makas_sayisi_paftadaki_gibi():
@@ -194,4 +248,26 @@ def test_makas_paftasi(tmp_path):
     t = json.loads((PROJELER / TANIMLAR["CP07"]).read_text(encoding="utf-8"))
     r = makas_pafta.ciz(t, tmp_path, "CP07")
     assert r["makas"] == {"makas": 11, "kisa": 11, "capraz": 6} and (r["cati_paneli"], r["baca"]) == (4, 2)
-    assert (tmp_path / r["png"]).stat().st_size > 0 and (tmp_path / r["pdf"]).stat().st_size > 0
+    assert (tmp_path / r["png"]).stat().st_size > 0 and (tmp_path / r["pdf"]).stat().st_size > 0 and r["uyari"] == 0
+
+
+@pytest.mark.parametrize("kod", ["CP07", "CP13", "CP14"])
+def test_cati_paneli_planda_acilimdaki_sirayla(kod):
+    """Paftadaki çatı paneli şeritleri (Ç01…) tablodaki sırayla aynı: her şerit, açılımdaki aynı sıradaki panelin yerinde (açılımın saçak
+    ekseni u = p · sag, `cati_genel`; plandaki u aralığı açılımdakiyle aynı) ve ölçüsünde (geometri hakemi 1. tur: sag eksi yöndeyken
+    sıra tersti)."""
+    t, c, y = _yukle(PROJELER / TANIMLAR[kod])
+    adli = {d["ad"]: d for d in c["duzlemler"]}
+    acilim = [(dz["ad"], g) for dz in c["duzlemler"] if dz.get("ust_yapi") == "cati_paneli"
+              for g in makas._saciga_bol(makas._acilim(dz), int(dz.get("cati_paneli_adedi", 1)))]
+    ters = 0
+    for x, r, (ad, g) in zip(makas_pafta.cati_paneli_planlari(c), makas.cati_panelleri(c, y, KURAL), acilim, strict=True):
+        dz = adli[x["duzlem"]]
+        assert r["duzlem"] == x["duzlem"] == ad
+        pts = list(x["cokgen"].exterior.coords)
+        u = [p[0] * dz["sag"][0] + p[1] * dz["sag"][1] for p in pts]
+        v = [p[0] * dz["yukari"][0] + p[1] * dz["yukari"][1] for p in pts]
+        assert (min(u), max(u)) == (pytest.approx(g.bounds[0], abs=0.05), pytest.approx(g.bounds[2], abs=0.05))
+        assert (max(u) - min(u), (max(v) - min(v)) * dz["kok"]) == (pytest.approx(r["olcu_cm"][0], abs=0.05), pytest.approx(r["olcu_cm"][1], abs=0.05))
+        ters += dz["sag"][0] + dz["sag"][1] < 0
+    assert (ters > 0) == (kod in ("CP07", "CP13"))     # sag eksi yönde: ÇP-07'nin verandası (dört panel; eski sıra burada tersti), ÇP-13 tek panel

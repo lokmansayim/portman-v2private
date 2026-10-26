@@ -16,6 +16,7 @@ from .toplam import sum  # noqa: A001 — 3.11 toplama sırası her Python sür�
 import argparse
 import json
 import sys
+import textwrap
 from pathlib import Path
 
 import matplotlib
@@ -55,7 +56,8 @@ def adlar(ck: dict) -> list[dict]:
 
 
 def cati_paneli_planlari(c: dict) -> list[dict]:
-    """Çatı panelli düzlemin planı saçak boyunca `cati_paneli_adedi` eşit şeride (açılımdaki eşit bölmenin plandaki karşılığı)."""
+    """Çatı panelli düzlemin planı saçak boyunca `cati_paneli_adedi` eşit şeride (açılımdaki eşit bölmenin plandaki karşılığı). Sıra
+    açılımdaki gibi: açılımın saçak ekseni u = p · sag (`cati_genel`), şeritler u'ya göre sıralanır (tablodaki sırayla aynı)."""
     out, j = [], 0
     for dz in c["duzlemler"]:
         if dz.get("ust_yapi") != "cati_paneli":
@@ -63,13 +65,14 @@ def cati_paneli_planlari(c: dict) -> list[dict]:
         n = int(dz.get("cati_paneli_adedi", 1))
         x0, y0, x1, y1 = dz["cokgen"].bounds
         sacak_x = makas._eksen(dz) == "y"                  # eğim y yönündeyse saçak x boyunca
+        parcalar = []
         for i in range(n):
             serit = (box(x0 + (x1 - x0) * i / n, y0 - 1, x0 + (x1 - x0) * (i + 1) / n, y1 + 1) if sacak_x else
                      box(x0 - 1, y0 + (y1 - y0) * i / n, x1 + 1, y0 + (y1 - y0) * (i + 1) / n))
-            p = dz["cokgen"].intersection(serit)
-            for g in ciz_genel._cokgenler(p):
-                j += 1
-                out.append({"ad": f"Ç{j:02d}", "duzlem": dz["ad"], "cokgen": g})
+            parcalar += ciz_genel._cokgenler(dz["cokgen"].intersection(serit))
+        for g in sorted(parcalar, key=lambda g: g.centroid.x * dz["sag"][0] + g.centroid.y * dz["sag"][1]):
+            j += 1
+            out.append({"ad": f"Ç{j:02d}", "duzlem": dz["ad"], "cokgen": g})
     return out
 
 
@@ -141,6 +144,10 @@ def tablo(ax, ms: list[dict], cps: list[dict], ck: dict, kk: dict, profil: str) 
     for anahtar, ad in (("ust_panelleri", "Çatı üstü paneli (yöntem A)"), ("tavan_panelleri", "Tavan paneli (yöntem A)")):
         if ck.get(anahtar):
             sat += ["", f"{ad}: {len(ck[anahtar])} panel, toplam {tr(sum(x['profil_boyu_m'] for x in ck[anahtar]), 1)} m"]
+    if ck.get("uyarilar"):                                    # kuralın yedeğe düştüğü ya da bir şey koymadığı yerler (makas.py › Uyarılar)
+        sat += ["", f"Uyarılar ({len(ck['uyarilar'])}):"]
+        for u in ck["uyarilar"]:
+            sat += textwrap.wrap(u, 78, initial_indent="• ", subsequent_indent="  ")
     ax.text(0.0, 1.0, "\n".join(sat), ha="left", va="top", fontsize=5.9 if len(sat) > 60 else 6.5, family="DejaVu Sans Mono", linespacing=1.3,
             transform=ax.transAxes)
 
@@ -158,6 +165,8 @@ def ciz(t: dict, hedef: Path, kod: str, kural_k: dict | None = None, yontem: str
     yontem = yontem or girdi_genel.cati_yontemi(t["cati"], kur)
     kk = karkas.kur(y, t, k, yontem)
     ck = kk["cati"]
+    if ck is None:
+        raise SystemExit("Makas yerleşim planı: karkas kuralında çatı kuralı (`makas`) yok.")
     c = cati_genel.cati_kur(t["cati"])
     ms = adlar(ck)
     cps = cati_paneli_planlari(c)
@@ -181,7 +190,8 @@ def ciz(t: dict, hedef: Path, kod: str, kural_k: dict | None = None, yontem: str
                                            "CreationDate": None, "ModDate": None}) as pp:
         pp.savefig(fig, facecolor="white")
     plt.close(fig)
-    return {"png": png_ad, "pdf": pdf_ad, "makas": say, "cati_paneli": len(cps), "baca": len(kk["bacalar"]), "kural": kk["kural"]}
+    return {"png": png_ad, "pdf": pdf_ad, "makas": say, "cati_paneli": len(cps), "baca": len(kk["bacalar"]), "uyari": len(ck["uyarilar"]),
+            "kural": kk["kural"]}
 
 
 def main() -> int:

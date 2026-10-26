@@ -210,7 +210,8 @@ def kur(y: dict, t: dict, k: dict, yontem: str | None = None) -> dict:
         kirisler.append({"ad": kr["ad"], "boy_cm": boy, "profil_boyu_m": round(kir * boy / 100, 4)})
     return {"kural": {"yol": _goreli(k["_yol"]), "sha256": k["_sha256"], "sema": k.get("sema")},
             "paneller": paneller, "kolonlar": kolonlar, "kirisler": kirisler, "uyarilar": uyarilar,
-            "bacalar": bacalar(y, t, k), "cati": makas.kur(t, y, k, yontem) if t.get("cati") else None}
+            # PR-3b'nin anahtarları (`baca`, `makas`) olmayan eski kural kopyasında eski davranış sürer (baca ve çatı motorun ortalamasıyla)
+            "bacalar": bacalar(y, t, k) if "baca" in k else [], "cati": makas.kur(t, y, k, yontem) if t.get("cati") and "makas" in k else None}
 
 
 def _goreli(p: str) -> str:
