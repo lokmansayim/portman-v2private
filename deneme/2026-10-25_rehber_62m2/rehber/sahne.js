@@ -263,13 +263,13 @@ D.panels.forEach(p => {
 D.hs.forEach(h => {
   const s = h.step, g = new THREE.Group(), dis = h.t > 8;
   const m = mat('steel', s), a = h.o === 'h' ? h.xy[0] : h.xy[1], perp = h.o === 'h' ? h.xy[1] : h.xy[0];
-  const fl = 5;                                 // sırt: gövdenin iki yanına 5'er cm, 100'lük ve 60'lık H'da aynı (Lokman); kanat 2 mm (1,2 mm sac, uçta ezilmiş kıvrım)
+  const fl = 2.5;                               // sırt genişliği toplam 5 cm (gövdenin iki yanına 2,5), 100'lük ve 60'lık H'da aynı (Lokman, 26.10.2026; çizimde 43,92 mm); kanat 2 mm (1,2 mm sac, uçta ezilmiş kıvrım)
   const plate = (a0, a1, c0, c1) => g.add(h.o === 'h' ? bp(a0, a1, c0, c1, 0, H, m) : bp(c0, c1, a0, a1, 0, H, m));
   const sgn = h.stub ? (h.o === 'h' ? h.stub[1] : h.stub[0]) : 0;
   [[perp - h.t / 2, -1], [perp + h.t / 2, 1]].forEach(([f, side]) => {
     const c = side < 0 ? [f - HS, f] : [f, f + HS];
-    if (h.stub && side === sgn) {              // 3'lü H: iç duvarın girdiği yüzde boşluk + iç duvarın iki yüzünde 5 cm kol
-      const gap = h.stub_t / 2, s0 = f, s1 = f + side * 5;
+    if (h.stub && side === sgn) {              // 3'lü H: iç duvarın girdiği yüzde boşluk + iç duvarın iki yüzünde sırt kadar kol
+      const gap = h.stub_t / 2, s0 = f, s1 = f + side * fl;
       plate(a - fl, a - gap, ...c); plate(a + gap, a + fl, ...c);
       [a - gap - HS, a + gap].forEach(x0 => g.add(h.o === 'h' ? bp(x0, x0 + HS, Math.min(s0, s1), Math.max(s0, s1), 0, H, m) : bp(Math.min(s0, s1), Math.max(s0, s1), x0, x0 + HS, 0, H, m)));
     } else plate(a - fl, a + fl, ...c);
@@ -459,6 +459,16 @@ function rake(G, end, m, uzat = 0) {
       o.position.z = G.oT / 100;
       const w = cerceve(G.r, ...G.O); w.add(o);
       add(12, w, bo++ * 0.5, { kod: null, ad: dolgu ? 'Baş makas betopanı · makas ucu' : 'Baş makas betopanı', satir: dolgu ? [['Bu parça', `${fmtc(Math.abs(b - a))} cm · ${G.ad}, makas ucu (iki betopanın dışında kalan üçgen)`], ['Malzeme', '125 × 250 betopanların eğimle kesilen artanından'], ['Oturma', 'alt ucu baş makas omegasının dış U yanağında; 8 mm'], ['Kaynak', 'Lokman, 25.10.2026: makas uçlarına artan betopan döşenir']] : [['Bu parça', `125 × 250 × 8 mm · ${G.ad}`], ['Pafta', 'Baş makas betopan yerleşimi: 3 kalkan × 2 = 6 adet'], ['Oturma', 'makasa dayanır, alt ucu baş makas omegasının dış U yanağına girer; aralığa silikon mastik (Lokman, 25.10.2026)'], ['Not', 'fabrikada hazırlanır; eğimle kesilen artanı makas uçlarına döşenir']] });
+    });
+    // Makasın duvar dışında kalan ucu (saçak tarafı, ~30 cm): saçak altından makasın üstüne artan betopan (Lokman, 26.10.2026:
+    // "baş makasların uçlarında hâlâ kaplanmamış alan var; saçak sacı ile alın sacının birleştiği yerin boş kalmasının sebebi o")
+    ['A', 'B'].forEach(end => {
+      const sE = G.uc[end], dir = Math.sign(G.sm - sE), a = G.duvar[end], b = sE + dir * 0.2, yt = s => (G.h(s) - 0.2) / 100, alt = (TB - 0.05) / 100;
+      const sh = new THREE.Shape(); sh.moveTo(a / 100, alt); sh.lineTo(b / 100, alt); sh.lineTo(b / 100, yt(b)); sh.lineTo(a / 100, yt(a)); sh.closePath();
+      const o = mesh(new THREE.ExtrudeGeometry(sh, { depth: BET_T / 100, bevelEnabled: false }), mat('betopan', 12));
+      o.position.z = G.oT / 100;
+      const w = cerceve(G.r, ...G.O); w.add(o);
+      add(12, w, bo++ * 0.5, { kod: null, ad: 'Baş makas betopanı · saçak ucu', satir: [['Bu parça', `${fmtc(Math.abs(b - a))} cm · ${G.ad}, ${end === 'A' ? 'ön/sol' : 'arka/sağ'} uç: makasın duvar dışında kalan ucu`], ['Oturma', 'altı saçak sacının saçak altında, üstü makasın üst başlığında; dışında baş makas Z’si ve alın sacı'], ['Malzeme', '125 × 250 betopanların artanından; 8 mm'], ['Görev', 'saçak sacı ile alın sacının birleştiği köşeyi kapatır'], ['Kaynak', 'Lokman, 26.10.2026']] });
     });
     ['A', 'B'].forEach(end => {   // Baş makas Z'si: makas ve betopan üstünden geçer, betopanın dış yüzünden 3 cm iner, altta 3 cm dışarı kıvrılır
       const K = rake(G, end, mat('frame', 12));

@@ -19,7 +19,7 @@ Bir bayi projesinin (900 × 600 cm, veranda üstünde cumba) montaj rehberi. Kay
    - Oda sırası (Lokman): Yatak 1 → banyo → hol → yatak 2 → salon-mutfak.
 3. **Sayfa:** `python rehber/uret.py <çıktı.html> --proje "<başlık>" [--gorsel]`.
    - Girdi: `kabuk.html` (PK-01 rehberinin arayüzü) + `sahne.js` (Three.js 0.160 sahnesi).
-   - 19 adım, 418 parça. Kartı olmayan parçalarda yükleme listesindeki ad yazar.
+   - 19 adım, 424 parça. Kartı olmayan parçalarda yükleme listesindeki ad yazar.
 4. **Model ve kameralar:** `node test/export.js <rehber.html> <model.glb>`.
    - Parça adları `s{adım}_{sıra}`, malzeme adları anahtar; kimlik kartı `extras`'ta.
    - Adım kameraları `model_kamera.json`'a yazılır.
@@ -35,6 +35,7 @@ Bir bayi projesinin (900 × 600 cm, veranda üstünde cumba) montaj rehberi. Kay
    - `node test/serme.js <html> <klasör> 16 <ms,…> [kamera]` ve `node test/serme2.js <html> <png> <oran> <kamera>` — rulo serme animasyonu;
    - `node test/test.js <html> <klasör> "0;6;11;16"` — ekran görüntüleri;
    - `node test/kartlar.js <html>` — her parçanın kart satırları.
+   - `node test/gal.js <html> <önek>` — render galerisi açılıyor mu, görseller yükleniyor mu; "Adımı render göster" düğmesi yok mu.
 
 ## Bu projede yeni olanlar (PK-01'e göre)
 
@@ -43,8 +44,8 @@ Bir bayi projesinin (900 × 600 cm, veranda üstünde cumba) montaj rehberi. Kay
   - MKS09 veranda ön kirişinde, MKS10 yan kirişlerde. MKS11–12 ara makaslar: ana makasların üst başlığına oturur.
 - **Çatı katmanları.** Trapez 27/200-6 (100 cm kapatır, 0,5 mm; hadve 27, adım 200, tepe 42 / taban 74 mm) doğrudan aşıkların üstünde; levhalar 100'lükle yeniden dizildi (paftadaki 80'lik); ters mahya; trapez sac mahyası. OSB ve nem bariyeri yok (Lokman, 25 Ekim akşamı; paftadaki not bu projede geçerli değil).
 - **Cephe fugası.** Dış panoların dış betopanında 6 sıra 2 cm fuga (alttan 38 cm'de bir, üstte 10 cm bant; pafta: fugalı duvar detayı). Modelde 5 mm derin oluk; malzeme anahtarı `fuga`. Makette 0,5 × 0,3 mm oluk.
-- **Makas uçları.** Kalkanlarda iki 125 × 250 betopanın dışında kalan uçlara, betopanların eğimle kesilen artanı döşenir (Lokman, 25 Ekim akşamı).
-- **100'lük omegalar ve baş makas detayı (Lokman çizimi ve ölçüleri, 25 Ekim).** Pano 8 + 84 (EPS) + 8 mm = 100 mm; H sacı 1,2 mm, kanat uçları ezilmiş kıvrımla 2 mm (`HS`); H sırtı gövdenin iki yanına 5'er cm, 100'lük ve 60'lıkta aynı. 100'lük omegalar 10,5 cm = 2 + 100 + 2 mm + 1 mm, dış kanat H kanadına yaslı, içteki aralıklar silikonize mastik (modelde boşluk). Saçak omegası (Lokman çizimi): içte 3 cm kanat + içe 3 cm ayak, dışta 3 cm kanat ve eğik dudak; duvar omegası iki yanda 3 cm. Baş makas omegası: derinlik 3 cm, içte 3 cm açık yanak, dışta 1 cm U yanak; 8 mm betopan U'ya girer, makasa dayanır; baş makaslar dış kanatla aynı hizada (`build_data.py` `BAS_DIS` = 0,3). Z değişmedi.
+- **Makas uçları.** Kalkanlarda iki 125 × 250 betopanın dışında kalan uçlara, betopanların eğimle kesilen artanı döşenir (Lokman, 25 Ekim akşamı). Makasın duvar dışında kalan ~30 cm'lik ucu da saçak altından makasın üstüne kaplanır (26 Ekim).
+- **100'lük omegalar ve baş makas detayı (Lokman çizimi ve ölçüleri, 25 Ekim).** Pano 8 + 84 (EPS) + 8 mm = 100 mm; H sacı 1,2 mm, kanat uçları ezilmiş kıvrımla 2 mm (`HS`); H sırt genişliği toplam 5 cm (gövdenin iki yanına 2,5 cm; Lokman'ın çiziminde 43,92 mm), 100'lük ve 60'lıkta aynı. 100'lük omegalar 10,5 cm = 2 + 100 + 2 mm + 1 mm, dış kanat H kanadına yaslı, içteki aralıklar silikonize mastik (modelde boşluk). Saçak omegası (Lokman çizimi): içte 3 cm kanat + içe 3 cm ayak, dışta 3 cm kanat ve eğik dudak; duvar omegası iki yanda 3 cm. Baş makas omegası: derinlik 3 cm, içte 3 cm açık yanak, dışta 1 cm U yanak; 8 mm betopan U'ya girer, makasa dayanır; baş makaslar dış kanatla aynı hizada (`build_data.py` `BAS_DIS` = 0,3). Z değişmedi.
 - **Büyük pencereler.** 180/180 pencereli çelik karkas panelde (DVR, 251 × 250) pencere yanları da betopan kaplı ve fugalı.
 - **İç duvar omegası.** İç duvar üstlerine 60'lık duvar omegası: 6,5 cm açıklık (6 cm pano + H sacları), 3 cm derinlik, 3 cm kulaklar (`omega_duvar` `tur='ic'`, 375'lik parçalar, kapı üstlerinden kesintisiz).
 - **Ters tavan (adım 14).** Tavan omegalarının altına 12,5 mm alçıpan 120 × 250 (banyoda yeşil), verandada boardex 120 × 240.
@@ -61,7 +62,7 @@ Bir bayi projesinin (900 × 600 cm, veranda üstünde cumba) montaj rehberi. Kay
 1. **Trapez dizilimi.** 100'lük levhayla kalkan kenarından; cumbada 10 parça (listede 8).
 2. **Kesitler.** PK-01'deki köşe, Z, C kapama, saçak ve alın sacı kesitleri aynen alındı.
 3. **Alın sacı.** Trapez kenar hadvesine göre ~9 cm (OSB yok, hadve 27 mm).
-4. **Dere iç köşesi.** Cumba sağ deresi ön dereye iç köşede bağlanır. Köşede ayrı bir parça yok (Lokman'ın yakın fotoğrafı): kalkan saçak altı saçak sacının saçak altına dayanır, arada ince bir derz kalır. Modelde kalkan saçak altı duvar hizasında saçak altından ~17 cm yukarıda (makas topuğu SketchUp modelinden), köşede bir cep açılıyor; sahada nasıl kapandığı teyit bekler.
+4. **Dere iç köşesi.** Cumba sağ deresi ön dereye iç köşede bağlanır. Köşede ayrı bir parça yok (Lokman'ın yakın fotoğrafı): kalkan saçak altı saçak sacının saçak altına dayanır, arada ince bir derz kalır. Köşedeki boşluk baş makasın duvar dışındaki ucu kaplanınca kapanır (Lokman, 26 Ekim: "baş makasların uçlarında hâlâ kaplanmamış alan var"; `Baş makas betopanı · saçak ucu`, 6 parça).
 5. **Fuga derinliği.** Paftada yok; modelde 5 mm.
 
 6. **Baş makas omegasının U dudağı** ~2 cm (ölçü verilmedi).

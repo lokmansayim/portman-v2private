@@ -6,14 +6,14 @@ Dal: `claude/montaj-rehberi-devir`. Betikler: `deneme/2026-10-25_rehber_62m2/` (
 
 Lokman'ın Mac'indeki proje klasörü (DWG, SKP, yükleme listesi) okunarak PK-01 rehberinin aynısı bu proje için kuruldu. Bütün çıktılar o klasörde.
 
-- **Rehber.** 19 adım, 418 parça, kimlik kartlı (gece düzeltmelerinden sonra; ilk sürüm 18 adım, 420 parça).
+- **Rehber.** 19 adım, 424 parça, kimlik kartlı (gece düzeltmelerinden sonra; ilk sürüm 18 adım, 420 parça).
   - Oda sırası (Lokman): Yatak 1 → banyo → hol → yatak 2 → salon-mutfak.
   - Başlıkta bayi adı Lokman'ın seçimiyle var. Özel artefakt ve Mac klasörü; depoda `__PROJE__`.
   - Özel artefakt: https://claude.ai/artifact/7B6xsSZsnAKhf3HoSpWZV2 (sürüm 2, akşam düzeltmeleriyle; render'lar `gorsel/` altında).
   - Mac klasörü: `Montaj Rehberi/` (html + `gorsel/`), `3B Model/`, `3D Yazıcı Maket/`, `BENİOKU.md`.
 - **Render.** 7 görünüm (ön-sol, ön-sağ, arka-sol, çatısız, çatı katmanları, iç köşe, baş makas kesiti), etiketli pafta. "Adımı render göster" Lokman'ın isteğiyle kaldırıldı.
 - **Model ve maket.**
-  - GLB: 418 parça, kart bilgisi `extras`'ta (rehberdeki cam yünü ruloları geçici, GLB'ye girmez).
+  - GLB: 424 parça, kart bilgisi `extras`'ta (rehberdeki cam yünü ruloları geçici, GLB'ye girmez).
   - 1:50 maket: gövde ve çıkarılabilir çatı, kapalı STL, 4 köşe tırnağı. Lokman sonra 3D yazıcıda basacak.
 - **Yükleme listesiyle karşılaştırma:** pano, H, köşe, veranda, makas, trapez, pencere ve kapı adetleri listeyle aynı. Tablo proje klasöründeki `BENİOKU.md`'de.
 
@@ -31,9 +31,9 @@ Lokman'ın Mac'indeki proje klasörü (DWG, SKP, yükleme listesi) okunarak PK-0
 ## Akşam düzeltmeleri (Lokman, 25 Ekim)
 
 1. **Nem bariyeri ve OSB yok.** OSB/nem adımı (eski 15) çıktı; trapez doğrudan aşıkların üstünde, alın sacı ~10 cm. Paftadaki "OSB + nem bariyeri" notu bu projede geçerli değil.
-2. **Makas uçlarına artan betopan.** Kalkan uç dolguları, 125 × 250'lerin eğimle kesilen artanından; artık varsayım değil.
+2. **Makas uçlarına artan betopan.** Kalkan uç dolguları, 125 × 250'lerin eğimle kesilen artanından; artık varsayım değil. 26 Ekim: baş makasın duvar dışında kalan ucu da (saçak tarafı) kaplanır; saçak sacı ile alın sacının birleştiği köşedeki boşluk bundandı (Lokman).
 3. **Cephe fugalı.** Dış panolarda alttan 6 × (38 + 2 cm fuga), üstte 10 cm bant (pafta 6, fugalı duvar detayı). Modelde 5 mm oluk, makette 0,5 × 0,3 mm.
-4. **Baş makas detayı ve 100'lük omegalar (Lokman çizimi ve ölçüleri).** Pano 8 + 84 (EPS) + 8 mm; H kanadı 2 mm (1,2 mm sac, ezilmiş kıvrım); H sırtı iki yana 5'er cm (100'lük ve 60'lık). 100'lük omegalar 10,5 cm = 2 + 100 + 2 + 1 mm, dış kanat H kanadına yaslı, içteki aralıklar silikonize mastik. Baş makas omegası: 3 cm derinlik, içte 3 cm açık yanak, dışta 1 cm U yanak; 8 mm betopan U'ya girer, makasa dayanır. Baş makaslar 3 mm dışarı (dış kanatla aynı hiza). Z önceki çizimdeki gibi.
+4. **Baş makas detayı ve 100'lük omegalar (Lokman çizimi ve ölçüleri).** Pano 8 + 84 (EPS) + 8 mm; H kanadı 2 mm (1,2 mm sac, ezilmiş kıvrım); H sırt genişliği toplam 5 cm (gövdenin iki yanına 2,5 cm; Lokman'ın çiziminde 43,92 mm), 100'lük ve 60'lıkta aynı. 100'lük omegalar 10,5 cm = 2 + 100 + 2 + 1 mm, dış kanat H kanadına yaslı, içteki aralıklar silikonize mastik. Baş makas omegası: 3 cm derinlik, içte 3 cm açık yanak, dışta 1 cm U yanak; 8 mm betopan U'ya girer, makasa dayanır. Baş makaslar 3 mm dışarı (dış kanatla aynı hiza). Z önceki çizimdeki gibi.
 5. **İç duvar üstlerine 60'lık duvar omegası:** 6,5 cm açıklık, 3 cm derinlik, 3 cm kulaklar (listede 60'lık omega toplamı 127,64 m = tavan 111,8 + iç duvar ~15).
 5b. **Büyük pencereler:** DVR (251 × 250 çelik karkas) pencere yanları da fugalı.
 6. **Ters tavan alçıpanı** tavan omegalarından sonra (yeni adım 14; banyoda yeşil; verandada listedeki boardex).
@@ -50,7 +50,6 @@ Lokman'ın Mac'indeki proje klasörü (DWG, SKP, yükleme listesi) okunarak PK-0
 4. PK-01'den aynen alınan kesitler: köşe, Z, C kapama, saçak ve alın sacı.
 5. Fuga derinliği (paftada yok; modelde 5 mm).
 6. Baş makas omegasının U dudağı ~2 cm (ölçü verilmedi).
-7. Köşede ayrı bir parça yok (Lokman'ın yakın fotoğrafı): kalkan saçak altı saçak sacının saçak altına dayanır, arada ince bir derz kalır. Modelde kalkan saçak altı duvar hizasında saçak altından ~17 cm yukarıda (makas topuğu SketchUp modelinden), köşede bir cep açılıyor; sahada nasıl kapandığı teyit bekler.
 
 Teyit edilenler: omega ölçüleri, alçıpan ve cam yünü dizilimi (Lokman, 25 Ekim gece).
 
