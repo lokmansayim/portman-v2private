@@ -274,7 +274,7 @@ def _hesapla(g: dict, k: dict) -> dict:
             mk = model_kg(x)
             ekle("Çelik panel", "Çatı makas panelleri", x["profil"].replace("x", " × "), x.get("panel_adedi") or kural_adet, x["plan_m2"], birim="m²",
                  kg=mk[0] if mk else x["plan_m2"] * birim,
-                 formul=(mk[1] + ("; adet modelden" if x.get("panel_adedi") else "; adet çatı tipine göre sabit")) if mk else
+                 formul=(mk[1] + (("; adet makas kuralından" if ce.get("karkas") else "; adet modelden") if x.get("panel_adedi") else "; adet çatı tipine göre sabit")) if mk else
                         (f"saçak dahil çatı planı × {tr(birim)} kg/m² (motorun proje ortalaması); adet çatı tipine göre sabit" if not x.get("panel_adedi") else
                          f"saçak dahil çatı planı × {tr(birim)} kg/m² (motorun proje ortalaması); adet modelden (motorda çatı tipine göre sabit: {kural_adet})"),
                  durum=mk[2] if mk else "motor",
@@ -302,7 +302,12 @@ def _hesapla(g: dict, k: dict) -> dict:
                 if not ce.get(anahtar):
                     continue
                 pk = deg(ck, kural)
-                if oturum:
+                ap = (ce.get("a_panelleri") or {}).get({"tavan_paneli": "tavan_paneli", "cati_paneli": "ust_paneli"}[kural])
+                mk = model_kg(ap) if ap else None
+                if mk:          # karkas kuralı (İE-16 PR-3b): adet ve profil boyu kuraldan; 100 m² oranı kullanılmaz
+                    ekle("Çelik panel", ad, ap["profil"].replace("x", " × "), ap["adet"], ap["profil_boyu_m"], birim="m", kg=mk[0],
+                         formul=f"{mk[1]}; adet karkas kuralından ({aciklama} {tr(ce[anahtar], 1)} m²)", durum=mk[2], not_=ap.get("not"))
+                elif oturum:
                     ekle("Çelik panel", ad, "roll form çelik", tavan(oturum / 100 * pk["adet_100m2"]), oturum, birim="m²", kg=oturum / 100 * pk["kg_100m2"],
                          formul=f"çatının örttüğü oturum alanı ÷ 100 × {tr(pk['kg_100m2'])} kg; adet: ÷ 100 × {pk['adet_100m2']}, yukarı ({aciklama} {tr(ce[anahtar], 1)} m²)",
                          durum=ck[kural]["durum"],

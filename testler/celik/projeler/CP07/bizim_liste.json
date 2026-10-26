@@ -14,8 +14,8 @@
  "karkas_kurali": {
   "yol": "kurallar/karkas/celik_karkas.json",
   "sema": "portman.celik_karkas/0.1-taslak",
-  "sha256": "a3683af36f42b92d9669c570fd08f0866e6e912f8e9d9c9e3a5af1849060932a",
-  "kopya": "testler/celik/projeler/setler/a3683af36f42b92d.json"
+  "sha256": "1f2e2858b447f06a6ece8fb4a0e58960a2895ccea6a2e0b158ed34672bc5c7e9",
+  "kopya": "testler/celik/projeler/setler/1f2e2858b447f06a.json"
  },
  "yontem": {
   "kod": "omega_asik",
@@ -28,11 +28,11 @@
  "satirlar": [
   {"grup": "Çelik panel", "kalem": "Dış cephe duvar panelleri", "boyut": "140 × 45 × 1,2", "adet": 15, "kg": 1150.01, "durum": "varsayim", "tur": "duvar_paneli"},
   {"grup": "Çelik panel", "kalem": "İç cephe duvar panelleri", "boyut": "80 × 45 × 1,2", "adet": 10, "kg": 534.09, "durum": "varsayim", "tur": "duvar_paneli"},
-  {"grup": "Çelik panel", "kalem": "Baca karkası", "boyut": "80 × 45 × 0,8", "adet": 8, "kg": 55.83, "durum": "varsayim", "tur": "baca_paneli"},
+  {"grup": "Çelik panel", "kalem": "Baca karkası", "boyut": "80 × 45 × 0,8", "adet": 8, "kg": 81.06, "durum": "varsayim", "tur": "baca_paneli"},
   {"grup": "Çelik panel", "kalem": "Veranda dikmeleri (kolon paneli)", "boyut": "80 × 45 × 1,2", "adet": 4, "kg": 57.27, "durum": "varsayim", "tur": "kolon_kiris"},
   {"grup": "Çelik panel", "kalem": "Kirişler (kiriş paneli)", "boyut": "80 × 45 × 1,2", "adet": 3, "kg": 54.51, "durum": "varsayim", "tur": "kolon_kiris"},
-  {"grup": "Çelik panel", "kalem": "Çatı makas panelleri", "boyut": "80 × 45 × 0,8", "adet": 34, "kg": 681.31, "durum": "motor", "tur": "makas"},
-  {"grup": "Çelik panel", "kalem": "Çatı paneli (veranda ve sundurma çatıları)", "boyut": "roll form çelik", "adet": 4, "kg": 64.86, "durum": "varsayim", "tur": "cati_paneli"},
+  {"grup": "Çelik panel", "kalem": "Çatı makas panelleri", "boyut": "80 × 45 × 0,8", "adet": 28, "kg": 488.93, "durum": "varsayim", "tur": "makas"},
+  {"grup": "Çelik panel", "kalem": "Çatı paneli (veranda ve sundurma çatıları)", "boyut": "80 × 45 × 1,2", "adet": 4, "kg": 152.62, "durum": "varsayim", "tur": "cati_paneli"},
   {"grup": "Çelik panel", "kalem": "Boy C profil", "boyut": "80 × 45 × 0,8", "adet": 3, "kg": 15, "durum": "motor", "tur": "c_profil"},
   {"grup": "Çelik panel", "kalem": "Boy C profil", "boyut": "80 × 45 × 1,2", "adet": 3, "kg": 15, "durum": "motor", "tur": "c_profil"},
   {"grup": "METAL AKSAM GRUBU", "kalem": "Saçak sacı (30'luk)", "boyut": "L 2500", "adet": 19, "kg": null, "durum": "lokman", "bizim_grup": "Metal aksam", "liste_adi": "SAÇAK SAÇI (30'LUK) (ANTRASİT)"},

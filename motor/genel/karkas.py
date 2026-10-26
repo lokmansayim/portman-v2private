@@ -15,6 +15,9 @@ Yalnız tanım isterse çalışır (`"karkas": "kural"`); istemeyen tanımın ç
    açıklığın kestiği boy düşülür); çapraz ve birleşim payı (yükseklik × (a + b × boy), m; yazılı kurallar adedini vermez, KT-01'in
    karkas modelinden).
 4. **Kolon ve kiriş:** kolon yüksekliği × `kolon.profil_m_m`, kirişin boyu × `kiris.profil_m_m` (KT-01'in karkas modelinden).
+5. **Baca** (İE-16 PR-3b): dört dar panel, ikisi bacanın dış ölçüsünde, ikisi aralarında (profil derinliği kadar dar); yükseklik bacanın
+   üst kotu. Üyeler: iki başlık, ızgara dikmeleri, her `baca.kusak_araligi_cm`'de kuşak; çapraz yok (KT-01'in baca panelleri).
+6. **Çatı** (İE-16 PR-3b): makaslar, çatı paneli, yöntem A'nın çatı üstü ve tavan panelleri `makas.py`'de.
 
 Hesapta LLM yoktur: aynı tanım ve aynı kural aynı sonucu verir.
 
@@ -32,11 +35,11 @@ import os
 import sys
 from pathlib import Path
 
-from . import yapi
+from . import makas, yapi
 
 KOK = Path(__file__).resolve().parents[2]
 KURAL = KOK / "kurallar" / "karkas" / "celik_karkas.json"
-DUVAR_SINIFLARI = ("dis", "ic", "ek", "korkuluk")      # karkas kuralının duvar panelleri; baca ve makas PR-3b'de
+DUVAR_SINIFLARI = ("dis", "ic", "ek", "korkuluk")      # karkas kuralının duvar panelleri; baca ve çatı ayrı (`bacalar`, `makas.py`)
 TOL = 1.0                                                # cm; uç uca değme ve aynı hat toleransı
 
 
@@ -147,8 +150,33 @@ def uyeler(L: float, H: float, acik: list[tuple[float, float, float, float]], k:
     return u
 
 
-def kur(y: dict, t: dict, k: dict) -> dict:
-    """Paneller (D01…), kolonlar ve kirişler; her biri üyeleri ve profil boyuyla."""
+def bacalar(y: dict, t: dict, k: dict) -> list[dict]:
+    """Bacaların panelleri: her bacada dört dar panel (iki dış ölçüde, iki profil derinliği kadar dar), üyeleri ve profil boyuyla."""
+    b = d(k, "baca")
+    S = d(k, "dikme_araligi_cm")
+    out = []
+    for w in y["duvarlar"]:
+        if w["sinif"] != "baca" or not w.get("ust_kot"):        # metrajdaki gibi: üst kotu yazmayan baca çatıyı delmez, satırı yok
+            continue
+        profil = _profil(w, t["duvar_siniflari"])
+        derinlik = float(profil.split("x")[0]) / 10 if profil else 8.0
+        H = float(w["ust_kot"])
+        x0, y0, x1, y1 = w["kutu"]
+        paneller = []
+        for L in (x1 - x0, x1 - x0, y1 - y0 - 2 * derinlik, y1 - y0 - 2 * derinlik):
+            n_dikme = int(L // S) + 1 + (1 if L - (L // S) * S > TOL else 0)
+            u = {"baslik": 2 * L / 100, "dikme": n_dikme * H / 100,
+                 "kusak": L / 100 * len([z for z in range(int(b["kusak_araligi_cm"]), int(H), int(b["kusak_araligi_cm"]))
+                                         if z < H - d(k, "kusak_ust_payi_cm")])}
+            paneller.append({"boy_cm": round(L, 2), "yukseklik_cm": round(H, 2), "uyeler_m": {a: round(v, 4) for a, v in u.items()},
+                             "profil_boyu_m": round(sum(u.values()), 4)})
+        out.append({"ad": w["ad"], "profil": profil, "paneller": paneller, "profil_boyu_m": round(sum(p["profil_boyu_m"] for p in paneller), 4)})
+    return out
+
+
+def kur(y: dict, t: dict, k: dict, yontem: str | None = None) -> dict:
+    """Paneller (D01…), kolonlar, kirişler, bacalar ve çatı; her biri üyeleri ve profil boyuyla. `yontem` çatının yöntemi
+    (`girdi_genel.cati_yontemi`); "panel" (A) ise çatı üstü ve tavan panelleri de kurulur."""
     paneller = []
     for ks in kosular(y, t):
         acik = _acikliklar(y, ks)
@@ -181,7 +209,8 @@ def kur(y: dict, t: dict, k: dict) -> dict:
         boy = max(bx1 - bx0, by1 - by0)
         kirisler.append({"ad": kr["ad"], "boy_cm": boy, "profil_boyu_m": round(kir * boy / 100, 4)})
     return {"kural": {"yol": _goreli(k["_yol"]), "sha256": k["_sha256"], "sema": k.get("sema")},
-            "paneller": paneller, "kolonlar": kolonlar, "kirisler": kirisler, "uyarilar": uyarilar}
+            "paneller": paneller, "kolonlar": kolonlar, "kirisler": kirisler, "uyarilar": uyarilar,
+            "bacalar": bacalar(y, t, k), "cati": makas.kur(t, y, k, yontem) if t.get("cati") else None}
 
 
 def _goreli(p: str) -> str:
@@ -246,6 +275,22 @@ def gruplar(kk: dict, y: dict, t: dict, k: dict, kg_m: dict) -> dict:
         out["kolon"] = kayit(len(kk["kolonlar"]), sum(x["profil_boyu_m"] for x in kk["kolonlar"]), None)
     if kk["kirisler"]:
         out["kiris"] = kayit(len(kk["kirisler"]), sum(x["profil_boyu_m"] for x in kk["kirisler"]), None)
+    if kk["bacalar"]:
+        if len({x["profil"] for x in kk["bacalar"]}) > 1:
+            raise SystemExit("Karkas kuralı: bacalarda birden çok profil; listede bacanın tek satırı var")
+        out["baca"] = kayit(4 * len(kk["bacalar"]), sum(x["profil_boyu_m"] for x in kk["bacalar"]), kk["bacalar"][0]["profil"])
+    ck = kk.get("cati")
+    if ck:
+        if ck["makaslar"]:               # profil tanımda yazmaz: kitabın çatı et kalınlığı (`girdi_genel`)
+            out["makas"] = kayit(len(ck["makaslar"]), sum(x["profil_boyu_m"] for x in ck["makaslar"]), None)
+        if ck["cati_panelleri"]:
+            pr = {x["profil"] for x in ck["cati_panelleri"]}
+            if len(pr) > 1:
+                raise SystemExit(f"Karkas kuralı: çatı panellerinde birden çok profil ({', '.join(sorted(pr))}); listede çatı panelinin tek satırı var")
+            out["cati_paneli"] = kayit(len(ck["cati_panelleri"]), sum(x["profil_boyu_m"] for x in ck["cati_panelleri"]), pr.pop())
+        for grup, anahtar in (("ust_paneli", "ust_panelleri"), ("tavan_paneli", "tavan_panelleri")):
+            if ck.get(anahtar):
+                out[grup] = kayit(len(ck[anahtar]), sum(x["profil_boyu_m"] for x in ck[anahtar]), None)
     return out
 
 
@@ -253,15 +298,24 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("tanim", type=Path)
     ap.add_argument("--kural", type=Path, default=None, help="karkas kuralı (varsayılan: kurallar/karkas/celik_karkas.json ya da PORTMAN_KARKAS)")
+    ap.add_argument("--yontem", choices=("panel", "omega_asik"), default=None, help="çatı yöntemi (varsayılan: tanımdaki); panel ise tavan ve çatı üstü panelleri de")
     ap.add_argument("--json", type=Path, default=None)
     a = ap.parse_args()
     t = json.loads(a.tanim.read_text(encoding="utf-8"))
     k = oku(a.kural)
-    kk = kur(yapi.kur(t), t, k)
+    kk = kur(yapi.kur(t), t, k, a.yontem or (t.get("cati") or {}).get("yontem"))
     for p in kk["paneller"]:
         print(f"{p['ad']} {p['sinif']:8s} {p['boy_cm']:7.1f} × {p['yukseklik_cm']:5.1f}  {p['profil_boyu_m']:7.2f} m  {', '.join(p['acikliklar'])}")
     for x in kk["kolonlar"] + kk["kirisler"]:
         print(f"{x['ad']} {x['profil_boyu_m']:7.2f} m")
+    for x in kk["bacalar"]:
+        print(f"{x['ad']} baca {x['profil']}  {x['profil_boyu_m']:7.2f} m  ({len(x['paneller'])} panel)")
+    ck = kk["cati"] or {}
+    for x in ck.get("makaslar", []):
+        print(f"makas {x['tur']:7s} {x['aile']:14s} {x['eksen'] or '-'} {x['konum'] if x['konum'] is not None else '-':>7}  açıklık {x['acik_cm']:6.1f}  {x['profil_boyu_m']:6.2f} m")
+    for anahtar in ("cati_panelleri", "ust_panelleri", "tavan_panelleri"):
+        if ck.get(anahtar):
+            print(f"{anahtar}: {len(ck[anahtar])} panel, {sum(x['profil_boyu_m'] for x in ck[anahtar]):.2f} m")
     for u in kk["uyarilar"]:
         print("  UYARI:", u)
     if a.json:
