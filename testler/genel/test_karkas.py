@@ -109,6 +109,23 @@ def test_hedefi_asan_panel_uyari_olarak_yazilir():
     assert g["celik"]["karkas"]["uyarilar"] == kk["uyarilar"]
 
 
+def test_kural_modunda_satirlar_kaynagi_dogru_yazar():
+    """Kural modunda kolon ve kirişin adedi tanımdan, profil boyu kuraldan (model yok); formül türetilmiş birim ağırlığı kg'ı veren haneyle yazar."""
+    from motor.genel import yukleme
+    t = json.loads((KOK / "testler" / "celik" / "projeler" / "CP03" / "CP03.json").read_text(encoding="utf-8"))
+    kur = kurallar_oku.oku()
+    y = yapi.kur(t)
+    c = cati_genel.cati_kur(t["cati"], kur)
+    g = girdi_genel.girdi(y, c, girdi_genel.metraj(y, c, kur), kur, "test")
+    satir = {s["kalem"]: s for s in yukleme.hesapla(g, kur)["satirlar"] if s.get("grup") == "Çelik panel"}
+    assert "modelden" not in satir["Veranda dikmeleri (kolon paneli)"]["not"] and "tanımdan" in satir["Veranda dikmeleri (kolon paneli)"]["not"]
+    assert "modelden" not in satir["Kirişler (kiriş paneli)"]["not"] + satir["Kirişler (kiriş paneli)"]["formul"]
+    dis = satir["Dış cephe duvar panelleri"]
+    assert "× 2,225 kg/m" in dis["formul"]
+    boy = float(dis["formul"].split("profil boyu ")[1].split(" m")[0].replace(",", "."))
+    assert round(boy * 2.225, 2) == pytest.approx(dis["kg"], abs=0.01)
+
+
 def test_aciksiz_panelin_uyeleri():
     """366 × 270, açıklıksız: yedi dikme (0, 61, … 366), iki başlık, iki kuşak (122, 244), çapraz payı."""
     u = karkas.uyeler(366.0, 270.0, [], KURAL)

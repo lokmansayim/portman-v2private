@@ -223,7 +223,7 @@ def _hesapla(g: dict, k: dict) -> dict:
                 birim = profil_kg.get(x.get("profil"), x.get("birim_kg_m"))
                 if x.get("profil_boyu_m") is None or birim is None:
                     return None
-                return (x["profil_boyu_m"] * birim, f"karkas kuralının profil boyu {tr(x['profil_boyu_m'])} m × {tr(birim)} kg/m"
+                return (x["profil_boyu_m"] * birim, f"karkas kuralının profil boyu {tr(x['profil_boyu_m'])} m × {tr(birim, 2 if x.get('profil') in profil_kg else 3)} kg/m"
                         + ("" if x.get("profil") in profil_kg else " (birim ağırlık karkas kuralında türetilmiş)"), "varsayim")
             if x.get("profil_boyu_m") is None or x.get("profil") not in profil_kg:
                 return None
@@ -264,7 +264,7 @@ def _hesapla(g: dict, k: dict) -> dict:
             mk = model_kg(x)
             ekle("Çelik panel", "Veranda kirişleri (kiriş paneli)" if "adet" not in x else "Kirişler (kiriş paneli)", x["profil"].replace("x", " × "), x.get("adet", kural_adet), x["boy_m"], birim="m",
                  kg=mk[0] if mk else (None if birim is None else x["boy_m"] * birim),
-                 formul=(mk[1] + ("; adet modelden" if "adet" in x else "; adet = boy ÷ 4")) if mk else
+                 formul=(mk[1] + (("; adet tanımdan" if ce.get("karkas") else "; adet modelden") if "adet" in x else "; adet = boy ÷ 4")) if mk else
                         (f"kiriş boyu × {tr(birim)} kg/m; adet = boy ÷ 4" if "adet" not in x else f"kiriş boyu × {tr(birim)} kg/m; adet modelden (kural: boy ÷ 4 = {kural_adet})"),
                  durum=mk[2] if mk else "motor", not_=x.get("not"))
         x = ce.get("cati")

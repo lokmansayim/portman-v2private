@@ -684,9 +684,10 @@ def girdi(y: dict, c: dict, m: dict, kur: dict, kaynak: str) -> dict:
                 **ic_pb} if gr.get("ic") else None),
         "ek_duvarlar": ek_duvarlar,
         "dikme": ({"profil": dikme_prof, "adet": len(dikmeler), "boy_m": dikmeler[0]["yukseklik"] / 100,
-                   "not": t.get("dikme_notu", "modelden"), **dikme_pb} if dikmeler else None),
+                   "not": t.get("dikme_notu", "adet ve yükseklik tanımdan; profil boyu karkas kuralından" if kural_k else "modelden"), **dikme_pb} if dikmeler else None),
         "kiris": ({"profil": kiris_prof, "boy_m": round(sum(max(k["kutu"][2] - k["kutu"][0], k["kutu"][3] - k["kutu"][1]) for k in kirisler) / 100, 2),
-                   **({} if tahmin else {"adet": len(kirisler), "not": "kiriş boyu ve adedi modelden (" + ", ".join(k["ad"] for k in kirisler) + ")"}),
+                   **({} if tahmin else {"adet": len(kirisler), "not": "kiriş boyu ve adedi " + ("tanımdan" if kural_k else "modelden") + " (" + ", ".join(k["ad"] for k in kirisler) + ")"
+                                                                   + ("; profil boyu karkas kuralından" if kural_k else "")}),
                    **kiris_pb} if kirisler else None),
         "cati": {"tip": ct["tip"], "profil": makas_prof, "plan_m2": round(mc["makasli_plan_m2"], 2),
                  "oturum_m2": round(m["oturum_m2"] - ((pv_m2 if pv else m["ek_oturum_m2"]) if celik_a and yontem == "panel" and mc["panelli_plan_m2"] else 0.0)

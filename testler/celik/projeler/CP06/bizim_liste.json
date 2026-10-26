@@ -14,8 +14,8 @@
  "karkas_kurali": {
   "yol": "kurallar/karkas/celik_karkas.json",
   "sema": "portman.celik_karkas/0.1-taslak",
-  "sha256": "9660b3a862f50413a6a8cb2b68dc3cec95a1a4f704199362a4a03101a8b98ad0",
-  "kopya": "testler/celik/projeler/setler/9660b3a862f50413.json"
+  "sha256": "a3683af36f42b92d9669c570fd08f0866e6e912f8e9d9c9e3a5af1849060932a",
+  "kopya": "testler/celik/projeler/setler/a3683af36f42b92d.json"
  },
  "yontem": {
   "kod": "omega_asik",
