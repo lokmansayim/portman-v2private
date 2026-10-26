@@ -659,26 +659,19 @@ const RIB = (() => { const s = new THREE.Shape(), a = RIB_TABAN / 200, u = RIB_U
 
 /* 18 · Alın sacı (3 kalkan), dere ve iniş */
 let to = 0;
+const ALIN_ALT = -3 - SAC - 6;   // Lokman, 26.10.2026: ayrı alt uç parçası yok; alın sacı dereyi de içine alacak kadar geniş (saçak altından 6 cm aşağı)
 KALKAN.forEach(G => ['A', 'B'].forEach(end => {
   const K = rake(G, end, mat('trim', 18)), ot = G.oTip;
   K.lev(G.ob + SAC, ot, -3 - SAC, -3);                       // tırnak (Z'nin alt kanadının altında) + saçak altı
   const uz = G.altUc[end] ? 16.5 : 0, KU = rake(G, end, mat('trim', 18), uz);
-  KU.lev(ot, ot + SAC, -3 - SAC, PTOP);                      // alın: saçak altından trapezin kenar hadvesinin üstüne
+  KU.lev(ot, ot + SAC, ALIN_ALT, PTOP);                      // alın: saçak altının 6 cm altından trapezin kenar hadvesinin üstüne; köşede dereyi de içine alır
   const k1 = RIB_KENAR + RIB_UST / 2 - 0.2, k2 = RIB_KENAR + RIB_TABAN / 2 - 0.1;   // kenar hadvesinin tepe ve taban iç kenarı (alın yüzünden)
   KU.lev(ot - k1, ot + SAC, PTOP - 0.1, PTOP);             // kıvrım: kenar hadvesinin tepesinin üstünden içeri
   KU.egik(ot - k1, PTOP - 0.1, ot - k2, TR1 + 0.5);        // hadveyi kavrayan kıvrım: hadvenin iç yüzü boyunca aşağı
   const nm = `${G.ad} · ${end === 'A' ? 'ön/sol' : 'arka/sağ'} yüz`;
-  add(18, KU.w, to++ * 0.5, { kod: null, ad: 'Alın sacı', satir: [['Bu parça', `${nm} · alın ve üst kıvrımlar${uz ? ', alt uçta derenin önüne kadar' : ''}`], ['Kaynak', 'Lokman çizimleri (24.10.2026)']] });
-  add(18, K.w, to++ * 0.5, { kod: null, ad: 'Alın sacı', satir: [['Bu parça', `${nm} · L ${Math.round(K.Ls)} cm`], ['Profil', "tırnak 3 (baş makas Z'sine) → saçak altı 30 → alın → hadve üstünden kıvrım → hadveyi kavrayan kıvrım"], ['Uçta', 'saçak altı kolu makasın topuğuna dayanır, orada kesilir; alın yüzü ve üst kıvrım derenin ucunu kapatmak için devam eder (Lokman, 26.10.2026)'], ['Bu proje', `alın yüksekliği trapezin kenar hadvesine göre ~${fmt(PTOP + 3.1, 0)} cm (PK-01’de sandviç panelle 13 cm); teyit bekler`], ['Liste', '( ANTRASİT) ALIN SACI (30\'LUK) 300 × 2500 · 10 adet']] });
-  if (G.altUc[end]) {   // alt uç: saçak ucundan derenin önüne kadar iner, alttan düz kesilir; derenin kapağını kapatır
-    const sE = G.uc[end], dir = Math.sign(G.sm - sE), sT = sE - dir * 0.2, sd = sT - dir * 16.5, sw = G.duvar[end];
-    const alt = TB - 0.05 - SAC - 0.1, ust = s => G.h(s) + PTOP / G.R.cos;
-    const sh = new THREE.Shape(); sh.moveTo(sw / 100, alt / 100); sh.lineTo(sd / 100, alt / 100); sh.lineTo(sd / 100, ust(sd) / 100); sh.lineTo(sw / 100, ust(sw) / 100); sh.closePath();
-    const pl = mesh(new THREE.ExtrudeGeometry(sh, { depth: SAC / 100, bevelEnabled: false }), mat('trim', 18));
-    pl.position.z = (ot - SAC) / 100;
-    const w = cerceve(G.r, ...G.O); w.add(pl);
-    add(18, w, to++ * 0.5, { kod: null, ad: 'Alın sacı · alt uç', satir: [['Bu parça', `${G.ad} · ${end === 'A' ? 'ön/sol' : 'arka/sağ'} köşe`], ['Görev', 'saçak ucundan derenin önüne kadar iner, alttan düz kesilir; derenin kapağını kapatır'], ['Kaynak', 'Lokman, fotoğraflar (24.10.2026)']] });
-  }
+  add(18, KU.w, to++ * 0.5, { kod: null, ad: 'Alın sacı', satir: [['Bu parça', `${nm} · alın ve üst kıvrımlar${uz ? '; köşede derenin ucunu da içine alacak kadar uzar' : ''}`], ['Alın', `~${fmt(PTOP - ALIN_ALT, 0)} cm: trapezin kenar hadvesinden saçak altının 6 cm altına; dereyi de içine alır, ayrı alt uç parçası yok (Lokman, 26.10.2026)`], ['Kaynak', 'Lokman çizimleri (24.10.2026)']] });
+  add(18, K.w, to++ * 0.5, { kod: null, ad: 'Alın sacı', satir: [['Bu parça', `${nm} · L ${Math.round(K.Ls)} cm`], ['Profil', "tırnak 3 (baş makas Z'sine) → saçak altı 30 → alın → hadve üstünden kıvrım → hadveyi kavrayan kıvrım"], ['Uçta', 'saçak altı kolu makasın topuğuna dayanır, orada kesilir; alın yüzü ve üst kıvrım derenin ucunu kapatmak için devam eder (Lokman, 26.10.2026)'], ['Bu proje', `alın ~${fmt(PTOP - ALIN_ALT, 0)} cm: kenar hadvesinden dereyi de içine alacak kadar aşağı (Lokman, 26.10.2026; PK-01’de sandviç panelle 13 cm); kesin ölçü teyit bekler`], ['Liste', '( ANTRASİT) ALIN SACI (30\'LUK) 300 × 2500 · 10 adet']] });
+  // Ayrı alt uç parçası yok (Lokman, 26.10.2026): alın sacının kendisi dereyi de içine alacak kadar geniş
 }));
 // Dere: galvaniz eksiz oluk, K kesit (38'lik açınım), boyalı antrasit; sırtı saçak sacının alnına asılır
 const DERE_K = [[0, 11.4], [0, 0], [9, 0], [10, 0.8], [10.6, 2.6], [12, 3.6], [13, 5.6], [13.4, 8.6], [14.6, 10.2], [15, 11.4], [14, 11.4]];
@@ -823,7 +816,7 @@ const STEPS = [
     extra: [R(null, 'Çatı izolasyonu (Izocam-Knauf) 100 mm · 9,6 m² / paket', '7 paket', 'liste'), I('Modelde', `${parts.filter(q => q.step === 16).length} şerit · ≈ ${fmt(parts.filter(q => q.step === 16).reduce((t, q) => t + q.obj.children[0].geometry.parameters.width * q.obj.children[0].geometry.parameters.depth, 0), 0)} m²`)] },
   { t: 'Trapez sac, mahya ve ters mahya', p: 'İki dere (vadi) hattına önce ters mahya döşenir. Ana çatıya 350’lik, cumbaya 340’lık antrasit 27/200 trapez sac (0,5 mm; hadve 27 mm, adım 200 mm; 100 cm kapatır) doğrudan aşıkların üstüne serilip vidalanır (bu projede OSB ve nem bariyeri yok); dere hattında açıyla kesilir. Levhalar kalkan kenarından başlayarak dizilir; paftadaki dizilim 80’lik levhaya göre çizildiği için model 100’lük levhayla yeniden dizildi. Mahyalar trapez sac mahyasıyla kapatılır.',
     rows: [R(null, 'Trapez sac L 3500 (ana çatı)', '21 adet', 'liste'), R(null, 'Trapez sac L 3400 (cumba)', '8 adet', 'liste'), I('Modelde', `${parts.filter(q => q.step === 17 && /^Trapez sac/.test(q.obj.userData.info.ad)).length} levha · 100 cm kapatır, 0,5 mm`), R(null, 'Trapez sac mahyası L 800', '25 adet', 'liste'), R(null, 'Ters mahya L 2800', '4 adet', 'liste'), R(null, 'Ters mahya kenar kutusu', '8 adet', 'liste')] },
-  { t: 'Alın sacı, dere ve iniş', p: 'Alın sacı (antrasit) üç kalkanın eğik kenarlarına takılır: tırnağı baş makas Z’sine girer, saçak altı aşıkların altını kapatır, üstte trapezin kenar hadvesini kavrar; alt ucu derenin alnını kapatır. Dört saçağa K kesitli dere asılır; cumbanın sağında ön dereyle iç köşe yapar. 7 iniş borusu kaz boynuyla duvara ya da veranda kolonuna döner ve kelepçeyle iner.',
+  { t: 'Alın sacı, dere ve iniş', p: 'Alın sacı (antrasit) üç kalkanın eğik kenarlarına takılır: tırnağı baş makas Z’sine girer, saçak altı aşıkların altını kapatır, üstte trapezin kenar hadvesini kavrar; alın yüzü dereyi de içine alacak kadar geniştir, köşede derenin ucunu kapatır (ayrı parça yok). Dört saçağa K kesitli dere asılır; cumbanın sağında ön dereyle iç köşe yapar. 7 iniş borusu kaz boynuyla duvara ya da veranda kolonuna döner ve kelepçeyle iner.',
     rows: [R(null, 'Alın sacı 300 × 2500', '10 adet', 'liste'), R(null, 'Metal dere L 4000', '5 adet', 'liste'), I('Dere (pafta)', '4 hat · 16,4 m'), R(null, 'İniş takımı', '7 adet', 'pafta'), R(null, 'Dere kapağı', '8 adet', 'liste')] },
   { t: 'Kapı ve pencereler', p: 'Antrasit PVC pencereler (2 × 120/120 çift açılım, 1 × 120/80 sürgülü, 2 × 180/180 çift açılım, 1 × 60/60 vasistas) ve prefabrik çelik dış kapı (90 × 200, sağ) yerine konur. İç kapılar alıcıya ait; modelde yerlerini ve açılış yönlerini göstermek için çizildi. Bu adımda çatı, tavan ve izolasyon gizlenir; düğmeyle geri açılır.',
     extra: [I('İç kapılar', 'alıcıya ait')] },

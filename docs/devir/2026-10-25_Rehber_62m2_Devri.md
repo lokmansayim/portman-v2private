@@ -6,14 +6,14 @@ Dal: `claude/montaj-rehberi-devir`. Betikler: `deneme/2026-10-25_rehber_62m2/` (
 
 Lokman'ın Mac'indeki proje klasörü (DWG, SKP, yükleme listesi) okunarak PK-01 rehberinin aynısı bu proje için kuruldu. Bütün çıktılar o klasörde.
 
-- **Rehber.** 19 adım, 424 parça, kimlik kartlı (gece düzeltmelerinden sonra; ilk sürüm 18 adım, 420 parça).
+- **Rehber.** 19 adım, 419 parça, kimlik kartlı (gece düzeltmelerinden sonra; ilk sürüm 18 adım, 420 parça).
   - Oda sırası (Lokman): Yatak 1 → banyo → hol → yatak 2 → salon-mutfak.
   - Başlıkta bayi adı Lokman'ın seçimiyle var. Özel artefakt ve Mac klasörü; depoda `__PROJE__`.
   - Özel artefakt: https://claude.ai/artifact/7B6xsSZsnAKhf3HoSpWZV2 (sürüm 2, akşam düzeltmeleriyle; render'lar `gorsel/` altında).
   - Mac klasörü: `Montaj Rehberi/` (html + `gorsel/`), `3B Model/`, `3D Yazıcı Maket/`, `BENİOKU.md`.
 - **Render.** 7 görünüm (ön-sol, ön-sağ, arka-sol, çatısız, çatı katmanları, iç köşe, baş makas kesiti), etiketli pafta. "Adımı render göster" Lokman'ın isteğiyle kaldırıldı.
 - **Model ve maket.**
-  - GLB: 424 parça, kart bilgisi `extras`'ta (rehberdeki cam yünü ruloları geçici, GLB'ye girmez).
+  - GLB: 419 parça, kart bilgisi `extras`'ta (rehberdeki cam yünü ruloları geçici, GLB'ye girmez).
   - 1:50 maket: gövde ve çıkarılabilir çatı, kapalı STL, 4 köşe tırnağı. Lokman sonra 3D yazıcıda basacak.
 - **Yükleme listesiyle karşılaştırma:** pano, H, köşe, veranda, makas, trapez, pencere ve kapı adetleri listeyle aynı. Tablo proje klasöründeki `BENİOKU.md`'de.
 
@@ -25,7 +25,7 @@ Lokman'ın Mac'indeki proje klasörü (DWG, SKP, yükleme listesi) okunarak PK-0
 - **Çatı.**
   - Katmanlar: makas → aşık → cam yünü → trapez 27/200-6 (100 cm kapatır, 0,5 mm). OSB ve nem bariyeri yok (Lokman, akşam).
   - Ters mahya ve trapez sac mahyası.
-- **Kalkan.** Üç kalkan; kalkan parçaları (betopan, Z, C kapama, alın sacı, alt uç) genel bir kalkan çerçevesiyle kurulur.
+- **Kalkan.** Üç kalkan; kalkan parçaları (betopan, Z, C kapama, alın sacı) genel bir kalkan çerçevesiyle kurulur; ayrı alt uç parçası yok (26 Ekim).
 - **Duvar.** Ön duvarda iki betopan kaplı çelik karkas duvar (DVR01/02); iç duvar–dış duvar birleşiminde çektirme U'su.
 
 ## Akşam düzeltmeleri (Lokman, 25 Ekim)
@@ -38,14 +38,14 @@ Lokman'ın Mac'indeki proje klasörü (DWG, SKP, yükleme listesi) okunarak PK-0
 5b. **Büyük pencereler:** DVR (251 × 250 çelik karkas) pencere yanları da fugalı.
 6. **Ters tavan alçıpanı** tavan omegalarından sonra (yeni adım 14; banyoda yeşil; verandada listedeki boardex).
 7. **10 cm rulo cam yünü** çatı kapanmadan (yeni adım 16): her makas aralığına bir şerit, cumbada makas yönünde yatay iki şerit; rehberde rulo açılarak serilir, kamera bütün şeritleri gösterir.
-8. **Saçak, alın ve dere birleşimi** (Lokman'ın gönderdiği ev fotoğrafları, gece; 26 Ekim'deki yakın fotoğrafla düzeltildi). Köşede iniş ağzı derenin uç kısmında, borunun hizasında; kaz boynu duvara (cumbada veranda kolonuna) dik döner, boru köşe direği kaplamasının yanından iner. Saçak sacının alnı derenin boyunca köşeye kadar uzar; alın sacının alt ucu derenin ucunu kapatır. Köşe (Lokman'ın işaretli fotoğrafı, 26 Ekim): saçak sacının saçak altı baş makasa dayanır ve orada kesilir, alın ve kıvrımı köşeye kadar sürer; makasın duvar dışındaki ucu (topuk ve eğimli taraf) kaplı olarak alın sacına kadar gider; alın sacının saçak altı kolu makasın topuğuna dayanıp kesilir, alın yüzü ve üst kıvrımı derenin ucunu kapatır.
+8. **Saçak, alın, makas ve dere köşesi** (Lokman'ın ev fotoğrafları ve işaretli çizimleri, 25–26 Ekim): ek parça yok, hepsi doğal duruşunda. Saçak sacının saçak altı baş makasa dayanıp kesilir, alnı ve kıvrımı köşeye kadar sürer; alın sacının saçak altı kolu makasın topuğunda kesilir, alın yüzü ve üst kıvrımı derenin ucunu içine alacak kadar geniş (~15 cm); makasın duvar dışındaki ucu betopanla kaplı. Köşe inişinde ağız borunun hizasında, kaz boynu duvara dik, boru köşe direği kaplamasının yanından iner. 9. **H sırtı** toplam 5 cm (gövdenin iki yanına 2,5; Lokman'ın çiziminde 43,92 mm).
 
 1 ve 2'yi "nem bariyeri ve OSB yok" ve "makas uçlarına artan betopanları döşe" cümlelerinin, gönderilen teyit listesinin 1. ve 3. maddesine cevap olduğu okumasıyla yaptım; Lokman'a söylendi.
 
 ## Teyit bekleyenler (Lokman)
 
 1. Trapez dizilimi: 27/200-6, 100 cm kapatır, 0,5 mm (Lokman); levhalar 100'lükle yeniden dizildi, cumbada 10 parça (listede 8).
-2. Alın sacı yüksekliği ~9 cm (27 mm hadveye göre; PK-01'de 13).
+2. Alın sacı ~15 cm: köşede dereyi içine alacak en az genişlik (Lokman, 26 Ekim: "dereyi de içine alacak şekilde genişleyecek"); kesin ölçü.
 3. Cumba sağ deresinin ön dereye iç köşede bağlanması.
 4. PK-01'den aynen alınan kesitler: köşe, Z, C kapama, saçak ve alın sacı.
 5. Fuga derinliği (paftada yok; modelde 5 mm).

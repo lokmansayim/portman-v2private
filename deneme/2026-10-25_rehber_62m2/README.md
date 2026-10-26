@@ -19,7 +19,7 @@ Bir bayi projesinin (900 × 600 cm, veranda üstünde cumba) montaj rehberi. Kay
    - Oda sırası (Lokman): Yatak 1 → banyo → hol → yatak 2 → salon-mutfak.
 3. **Sayfa:** `python rehber/uret.py <çıktı.html> --proje "<başlık>" [--gorsel]`.
    - Girdi: `kabuk.html` (PK-01 rehberinin arayüzü) + `sahne.js` (Three.js 0.160 sahnesi).
-   - 19 adım, 424 parça. Kartı olmayan parçalarda yükleme listesindeki ad yazar.
+   - 19 adım, 419 parça. Kartı olmayan parçalarda yükleme listesindeki ad yazar.
 4. **Model ve kameralar:** `node test/export.js <rehber.html> <model.glb>`.
    - Parça adları `s{adım}_{sıra}`, malzeme adları anahtar; kimlik kartı `extras`'ta.
    - Adım kameraları `model_kamera.json`'a yazılır.
@@ -50,18 +50,18 @@ Bir bayi projesinin (900 × 600 cm, veranda üstünde cumba) montaj rehberi. Kay
 - **İç duvar omegası.** İç duvar üstlerine 60'lık duvar omegası: 6,5 cm açıklık (6 cm pano + H sacları), 3 cm derinlik, 3 cm kulaklar (`omega_duvar` `tur='ic'`, 375'lik parçalar, kapı üstlerinden kesintisiz).
 - **Ters tavan (adım 14).** Tavan omegalarının altına 12,5 mm alçıpan 120 × 250 (banyoda yeşil), verandada boardex 120 × 240.
 - **Çatı izolasyonu (adım 16).** 10 cm rulo cam yünü, her makas aralığına bir şerit; cumbada (veranda) makas yönünde yatay iki şerit; rehberde rulo açılarak serilir (`anim.serme`; rulo `userData.gecici`, GLB'ye girmez).
-- **Saçak, alın ve dere birleşimi** (Lokman'ın gönderdiği ev fotoğraflarına göre). Köşede iniş ağzı derenin uç kısmında, borunun hizasında; kaz boynu duvara (cumbada veranda kolonuna) dik döner, boru köşe direği kaplamasının (13 cm) yanından iner. Saçak sacının alnı derenin bütün boyunca köşeye kadar uzar (`SACAK` `f0`/`f1`); saçak altı baş makasın betopanına dayanıp kesilir (`t0`/`t1`); alın sacının saçak altı kolu makasın topuğunda biter, alın yüzü ve alt ucu derenin ucunu kapatır (Lokman'ın işaretli fotoğrafı, 26 Ekim).
+- **Saçak, alın ve dere birleşimi** (Lokman'ın gönderdiği ev fotoğraflarına göre). Köşede iniş ağzı derenin uç kısmında, borunun hizasında; kaz boynu duvara (cumbada veranda kolonuna) dik döner, boru köşe direği kaplamasının (13 cm) yanından iner. Saçak sacının alnı derenin bütün boyunca köşeye kadar uzar (`SACAK` `f0`/`f1`); saçak altı baş makasın betopanına dayanıp kesilir (`t0`/`t1`); alın sacının saçak altı kolu makasın topuğunda biter, alın yüzü dereyi de içine alacak kadar geniştir ve derenin ucunu kapatır; ek parça yok (Lokman'ın işaretli fotoğrafları, 26 Ekim).
 - **Genel çatı yüzü sistemi.**
   - Her yüz yerel s (eğim boyunca), t (saçak boyunca), n (dik) koordinatlarında kurulur.
   - Levhalar dışbükey çokgen kırpmayla dere hattında kesilir.
-- **Kalkan çerçevesi.** Üç kalkan için genel: baş makas betopanı, Z, C kapama, alın sacı ve alt uç.
+- **Kalkan çerçevesi.** Üç kalkan için genel: baş makas betopanı (makas uçları dahil), Z, C kapama ve alın sacı. Ayrı alt uç parçası yok (Lokman, 26 Ekim): alın sacı dereyi de içine alacak kadar geniş (`ALIN_ALT`).
 - **Veranda.** Kolonlar, kirişler, özel köşe direği A ve özel H (C).
 
 ## Varsayımlar (Lokman'ın teyidini bekler)
 
 1. **Trapez dizilimi.** 100'lük levhayla kalkan kenarından; cumbada 10 parça (listede 8).
 2. **Kesitler.** PK-01'deki köşe, Z, C kapama, saçak ve alın sacı kesitleri aynen alındı.
-3. **Alın sacı.** Trapez kenar hadvesine göre ~9 cm (OSB yok, hadve 27 mm).
+3. **Alın sacı.** ~15 cm: kenar hadvesinden saçak altının 6 cm altına, köşede dereyi içine alacak kadar; kesin ölçü teyit bekler.
 4. **Dere iç köşesi.** Cumba sağ deresi ön dereye iç köşede bağlanır. Köşede ayrı bir parça yok (Lokman'ın yakın fotoğrafı): kalkan saçak altı saçak sacının saçak altına dayanır, arada ince bir derz kalır. Köşedeki boşluk baş makasın duvar dışındaki ucu kaplanınca kapanır (Lokman, 26 Ekim: "baş makasların uçlarında hâlâ kaplanmamış alan var"; `Baş makas betopanı · saçak ucu`, 6 parça).
 5. **Fuga derinliği.** Paftada yok; modelde 5 mm.
 
