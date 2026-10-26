@@ -129,6 +129,58 @@ def test_uyarilar():
         assert sum(1 for x in m["makaslar"] if x["tur"] == "kisa" and x["aile"] in besik) == 4
 
 
+def test_yedek_ve_dusme_uyarilari(monkeypatch):
+    """Açık beşte çalışmayan uyarı yolları gerçek geometriyle (geometri hakemi 2. tur): ucunda duvar bulunamayan aile (ÇP-06'nın kuzey
+    duvarı yok), saçağı bulunamayan kırma yüzü ve tek parça kesilmeyen kırma şeridi (ÇP-03'ün ön yüzü), aileye bağlanmayan kırma yüzü."""
+    from shapely.affinity import translate
+    t, c, y = _yukle(PROJELER / TANIMLAR["CP06"])
+    assert makas.makaslar(t, c, y, KURAL)["uyarilar"] == []
+    y2 = dict(y, duvarlar=[w for w in y["duvarlar"] if w["ad"] != "W03"])
+    assert makas.makaslar(t, c, y2, KURAL)["uyarilar"] == ["makas: batı/doğu ailesinin alın ucunda duvar bulunamadı; uç 1027.0 (mahyanın ucu)"]
+    t, c, y = _yukle(PROJELER / TANIMLAR["CP03"])
+    c2 = dict(c, kenarlar=[e for e in c["kenarlar"] if not (e["tur"] == "sacak" and e["duzlemler"] == ["ön"])])
+    assert "makas: ön sol/sağ ailesinin ön kırma yüzünde saçak bulunamadı; uç mahyanın ucundan 10 × saçak" in makas.makaslar(t, c2, y, KURAL)["uyarilar"]
+    c3 = dict(c, duzlemler=[dict(d, cokgen=translate(d["cokgen"], 0, 1e5)) if d["ad"] == "ön" else d for d in c["duzlemler"]])
+    assert any(u.startswith("makas: ön sol/sağ ailesinin ön kırma yüzünde uç duvar çizgisi yüzü tek parça kesmiyor (boş)")
+               for u in makas.makaslar(t, c3, y, KURAL)["uyarilar"])
+    gercek = makas.aileler
+    monkeypatch.setattr(makas, "aileler", lambda c_: (*gercek(c_)[:3], ["ön"]))
+    assert makas.makaslar(t, c, y, KURAL)["uyarilar"][0] == "makas: ön kırma yüzü hiçbir aileye bağlanmadı; o yüzde kısa makas ve çapraz yok"
+
+
+@pytest.mark.parametrize("kod, beklenen", [
+    ("CP06", []),
+    ("CP07", ["Salon 376.8–481.9", "Yatak Odası 702.1–809.8"]),
+    ("CP13", ["Banyo 575.0–683.0"]),
+    ("CP14", ["Banyo 601.7–719.2"]),
+])
+def test_tavan_paneli_makastan_dar_serit_ve_parca(kod, beklenen):
+    """Yöntem A öteki dört açık projede (bilgi; listeleri B): makas kalınlığından dar şerit (ÇP-06 235–243, ÇP-13 243–251: iki makas sırt
+    sırta) panel olmaz ve uyarı yazmaz; kısa kenarı makas kalınlığından dar parça panel olmaz, uyarı yazar (geometri hakemi 2. tur)."""
+    t, c, y = _yukle(PROJELER / TANIMLAR[kod])
+    a = makas.kur(t, y, KURAL, "panel")
+    kal = makas._d(KURAL, "makas")["kalinlik_cm"]
+    sinirlar = sorted({v for f in a["aileler"] if f["ana"] and f["tur"] == "besik" for v in f["konumlar"]})
+    dar = [(p, q) for p, q in zip(sinirlar, sinirlar[1:]) if q - p <= kal + makas.EPS]
+    assert bool(dar) == (kod in ("CP06", "CP13"))
+    assert all(p["serit"][1] - p["serit"][0] > kal + makas.EPS and min(p["olcu_cm"]) > kal + makas.EPS for p in a["tavan_panelleri"])
+    yok = [u for u in a["uyarilar"] if u.endswith("panel yok")]
+    assert [u.split(" mahalinde ")[0][len("tavan paneli: "):] + " " + u.split(" mahalinde ")[1].split(" ")[0] for u in yok] == beklenen
+
+
+def test_tavan_paneli_kurulamazsa_uyari_ve_oran(monkeypatch):
+    """Kural tavan panelini kuramazsa (ana beşik aile yok) uyarı yazılır; yükleme girdisinde satır kitabın oranına sessizce dönmez."""
+    t, c, y = _yukle(PROJELER / TANIMLAR["CP03"])
+    mk = makas.makaslar(t, c, y, KURAL)
+    u: list[str] = []
+    assert makas.tavan_panelleri(c, y, KURAL, dict(mk, aileler=[dict(f, ana=False) for f in mk["aileler"]]), u) == []
+    assert u == ["tavan paneli: ana beşik aile yok; tavan paneli kurulmadı"]
+    monkeypatch.setattr(makas, "tavan_panelleri", lambda *a: [])
+    g = _girdi(PROJELER / TANIMLAR["CP03"])
+    assert set(g["celik"]["a_panelleri"]) == {"ust_paneli"}
+    assert "karkas kuralı: tavan paneli kurulmadı; satır kitabın oranıyla (100 m² için kg, oturum alanına)" in g["uyarilar"]
+
+
 def test_mahyadaki_fazla_kose_aileyi_ikilemez():
     """Mahyanın üstündeki fazladan köşe (aynı doğru üzerinde) mahyayı iki kenara böler; aile yine tek, makaslar aynı (geometri hakemi 1. tur)."""
     t, c, y = _yukle(PROJELER / TANIMLAR["CP06"])
@@ -165,6 +217,17 @@ def test_eski_kural_kopyasinda_eski_davranis(monkeypatch):
     monkeypatch.setenv("PORTMAN_KARKAS", str(eski))
     ce = _girdi(PROJELER / TANIMLAR["CP06"])["celik"]
     assert ce["cati"]["panel_adedi"] == 13 and ce["cati"]["not"].endswith("adet modelden (13 makas)")
+
+
+def test_uret_eski_kural_kopyasinda_makas_paftasi_cizilmez(tmp_path):
+    """`uret` eski kural kopyasıyla (çatı kuralı yok) makas paftasını çizmeye kalkmaz, üretim geçer (PR-3a'nın listeleri o kopyayla
+    `liste_yap`'tan yeniden üretilir; geometri hakemi 2. tur: koruma testsizdi). Bugünkü kuralla pafta manifest'te."""
+    from motor.genel import uret
+    eski = uret.uret(PROJELER / TANIMLAR["CP13"], tmp_path / "eski", perspektif=False, bayi=False,
+                     karkas_yolu=PROJELER / "setler" / "a3683af36f42b92d.json")
+    assert eski["passed"] and "makaslar" not in eski and "duvar_panelleri" in eski
+    yeni = uret.uret(PROJELER / TANIMLAR["CP13"], tmp_path / "yeni", perspektif=False, bayi=False)
+    assert yeni["passed"] and yeni["makaslar"]["makas"] == {"makas": 14, "kisa": 1, "capraz": 1}
 
 
 def test_ana_catinin_makas_sayisi_paftadaki_gibi():
@@ -241,6 +304,16 @@ def test_karkas_istemeyen_tanimda_cati_kurali_yok():
     assert ce["cati"]["panel_adedi"] == 13 and "a_panelleri" not in ce and "karkas" not in ce
     with pytest.raises(SystemExit):
         makas_pafta.ciz(t, KOK, "CP06")
+
+
+def test_makas_paftasi_uyarilari_basar(tmp_path, monkeypatch):
+    """Makas paftası kuralın uyarılarını tablonun altında basar (ÇP-03, yöntem A: üç)."""
+    yazilan = []
+    gercek = makas_pafta.tablo
+    monkeypatch.setattr(makas_pafta, "tablo", lambda ax, *a: (gercek(ax, *a), yazilan.append(ax.texts[-1].get_text())))
+    t = json.loads((PROJELER / TANIMLAR["CP03"]).read_text(encoding="utf-8"))
+    r = makas_pafta.ciz(t, tmp_path, "CP03", yontem="panel")
+    assert r["uyari"] == 3 and "Uyarılar (3):" in yazilan[0] and yazilan[0].count("• ") == 3 and "panel kuruldu" in yazilan[0]
 
 
 def test_makas_paftasi(tmp_path):

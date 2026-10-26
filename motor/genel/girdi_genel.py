@@ -684,6 +684,9 @@ def girdi(y: dict, c: dict, m: dict, kur: dict, kaynak: str) -> dict:
             if grup in cm:
                 prof, pbx, mn = model(grup, None, None, f"80x45x{ev['cati']}")
                 a_panelleri[grup] = {"adet": cm[grup]["adet"], "profil": prof, "not": "adet ve profil boyu karkas kuralından" + mn, **pbx}
+            elif cati_k is not None:                       # kural bu paneli kuramadı: satır kitabın oranıyla, sessiz değil
+                uyari.append(f"karkas kuralı: {'çatı üstü' if grup == 'ust_paneli' else 'tavan'} paneli kurulmadı; satır kitabın oranıyla "
+                             "(100 m² için kg, oturum alanına)")
     # modeldeki öteki gruplar (`celik_modeli.ek_satirlar`: {grup, ad, not}): her biri ayrı satır, profil ve boy modelden (KT-02, 9 Ekim 2026:
     # kırma uçlarının çatı panelleri, veranda destekleri, 1,5 mm kiriş). Bir kiriş bu gruplardan birine yazılmışsa grubun panel adedi o kirişlerin sayısıdır.
     ek_satirlar = []
