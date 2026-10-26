@@ -26,7 +26,7 @@ const RIBH = 2.7, RIB_UST = 4.2, RIB_TABAN = 7.4, RIB_KENAR = 4.5;   // RIB_KENA
 const AH = 3.0 + SAC, TM0 = AH + 0.02, TM1 = TM0 + 0.1, TR0 = TM1 + 0.02, TR1 = TR0 + 0.05, PTOP = TR1 + RIBH + 0.1;   // trapez 0,5 mm
 // Cephe fugası (pafta: fugalı duvar detayı): alttan 6 × 38 cm betopan + 2 cm fuga, üstte 10 cm bant; oluk 5 mm derin
 const FUGA = [38, 78, 118, 158, 198, 238], FUGA_H = 2, FUGA_D = 0.5;
-const N = 19;
+const N = 20;   // adım sırası Lokman, 26.10.2026
 // 100'lük omegalar (Lokman 25.10.2026): üst 10,5 cm; dış kanat dış duvarın (verandada kirişin) dış yüzüne tam yaslanır,
 // içte kalan 5 mm aralığa silikonize mastik (modelde boşluk). Baş makas omegası: derinlik 3 cm, içte 3 cm açık yanak,
 // dışta 1 cm U yanak; 8 mm baş makas betopanı U'ya girer ve makasa dayanır.
@@ -379,7 +379,7 @@ const SACAK = [
     const S = serit(e.o, e.face, e.out), n = Math.ceil((e.a1 - e.a0) / 250 - 1e-6);
     for (let k = 0; k < n; k++) {
       const a0 = e.a0 + k * 250, a1 = Math.min(e.a1, a0 + 250), [z0, z1] = [S.zOf(a0), S.zOf(a1)].sort((p, q) => p - q);
-      const g = S.yeni(), m = mat('trim', 9);
+      const g = S.yeni(), m = mat('trim', 15);
       const t0 = Math.max(a0, e.t0), t1 = Math.min(a1, e.t1);         // saçak altı baş makasın betopanına dayanır, orada kesilir (Lokman, 26.10.2026)
       if (t1 > t0) { const [u0, u1] = [S.zOf(t0), S.zOf(t1)].sort((p, q) => p - q); g.add(lb(-2.8, 30.2, hs - SAC, hs, u0, u1, m)); }   // tırnak + saçak altı
       const f0 = Math.max(a0, e.f0), f1 = Math.min(a1, e.f1);
@@ -389,7 +389,7 @@ const SACAK = [
         const fl = lb(-5, 5, -SAC / 2, SAC / 2, y0, y1, m);             // makasa doğru 10 cm kıvrım: aşığın üstünden trapezin altına
         fl.position.x = (30.2 - 5 * e.R.cos) / 100; fl.position.y = (ht + 5 * e.R.sin) / 100; fl.rotation.z = -e.R.th; g.add(fl);
       }
-      add(9, g, to++ * 0.5, { kod: null, ad: 'Saçak sacı', satir: [['Bu parça', `${e.ad} · L ${fmtc(a1 - a0)} cm`], ['Profil', 'tırnak 3 → saçak altı 30 → alın 13 → makasa doğru kıvrım 10; açınım ≈ 56 cm'], ['Sıra', 'saçak omegasından sonra, makaslardan önce'], ['Uçta', 'saçak altı baş makasın (betopanının) hizasında kesilir; alın ve kıvrım köşeye, alın sacına kadar devam eder (Lokman, 26.10.2026)'], ['Liste', '(ANTRASİT) SAÇAK SACI (30\'LUK) 300 × 2500 · 8 adet (3 adedi menfezli)']] });
+      add(15, g, to++ * 0.5, { kod: null, ad: 'Saçak sacı', satir: [['Bu parça', `${e.ad} · L ${fmtc(a1 - a0)} cm`], ['Profil', 'tırnak 3 → saçak altı 30 → alın 13 → makasa doğru kıvrım 10; açınım ≈ 56 cm'], ['Sıra', 'aşıklardan sonra, dereden önce (Lokman, 26.10.2026)'], ['Uçta', 'saçak altı baş makasın (betopanının) hizasında kesilir; alın ve kıvrım köşeye, alın sacına kadar devam eder (Lokman, 26.10.2026)'], ['Liste', '(ANTRASİT) SAÇAK SACI (30\'LUK) 300 × 2500 · 8 adet (3 adedi menfezli)']] });
     }
   });
 }
@@ -416,7 +416,7 @@ function araMakas(s0, s1, zb, nps, m) {   // cumba ara makası: alt başlığı 
   return g;
 }
 D.makas.forEach((mk, i) => {
-  const ana = mk.aile === 'ana', ara = mk.aile === 'ara', step = ana ? 10 : 11, m = mat('truss', step);
+  const ana = mk.aile === 'ana', ara = mk.aile === 'ara', step = 9, m = mat('truss', step);
   let g, P = 0;
   if (ana) { const r = makasKur(AN, mk.bas, mk.son, [2.7, 597.3], 9, 38.9, m); g = r.g; P = r.P; }
   else if (!ara) { const r = makasKur(CU, mk.bas, mk.son, [2.7, 572.05], 9, 38.86, m); g = r.g; P = r.P; }
@@ -425,7 +425,7 @@ D.makas.forEach((mk, i) => {
   const kod = ara ? null : mk.rol === 'bas' ? 'MA-01' : 'MA-02';
   const yer = ana ? `x = ${fmtc(mk.konum)} cm (sol dış yüzden)` : `y = ${fmtc(mk.konum)} cm (ön duvarın ${mk.konum < 0 ? 'önünde' : 'arkasında'})`;
   const span = mk.son - mk.bas;
-  add(step, w, ana ? i : i - 8, { kod, ad: kart(kod, 'Cumba ara makası'), satir: [
+  add(step, w, i, { kod, ad: kart(kod, 'Cumba ara makası'), satir: [
     ['Bu parça', `${mk.ad} · ${ara ? `L ${fmtc(span)} cm, ana makasların üst başlıklarına oturur` : `açıklık ${fmtc(span)} cm`}`], ['Yer', yer],
     ['Çatı', ana ? 'ana beşik · eğim 18,2° · tepe 118,5 cm' : 'cumba · eğim 18,9° · mahya ana mahyayla aynı yükseklikte'],
     ...(ara ? [['Görev', 'cumba yüzlerinin dere (vadi) hattına kadar uzanan kısmını taşır']] : [['İç çubuklar', `Warren, 18 çapraz · göz ${fmt(P)} cm · 10 cm topuk, duvar hizasında dikme`]]),
@@ -456,42 +456,42 @@ function rake(G, end, m, uzat = 0) {
       const sh = new THREE.Shape(), yt = s => (G.h(s) - 0.2) / 100;
       const alt = (H - BAS_KANAT) / 100;   // alt ucu baş makas omegasının dış kanalında
       sh.moveTo(a / 100, alt); sh.lineTo(b / 100, alt); sh.lineTo(b / 100, yt(b)); sh.lineTo(a / 100, yt(a)); sh.closePath();
-      const o = mesh(new THREE.ExtrudeGeometry(sh, { depth: BET_T / 100, bevelEnabled: false }), mat('betopan', 12));
+      const o = mesh(new THREE.ExtrudeGeometry(sh, { depth: BET_T / 100, bevelEnabled: false }), mat('betopan', 10));
       o.position.z = G.oT / 100;
       const w = cerceve(G.r, ...G.O); w.add(o);
-      add(12, w, bo++ * 0.5, { kod: null, ad: dolgu ? 'Baş makas betopanı · makas ucu' : 'Baş makas betopanı', satir: dolgu ? [['Bu parça', `${fmtc(Math.abs(b - a))} cm · ${G.ad}, makas ucu (iki betopanın dışında kalan üçgen)`], ['Malzeme', '125 × 250 betopanların eğimle kesilen artanından'], ['Oturma', 'alt ucu baş makas omegasının dış U yanağında; 8 mm'], ['Kaynak', 'Lokman, 25.10.2026: makas uçlarına artan betopan döşenir']] : [['Bu parça', `125 × 250 × 8 mm · ${G.ad}`], ['Pafta', 'Baş makas betopan yerleşimi: 3 kalkan × 2 = 6 adet'], ['Oturma', 'makasa dayanır, alt ucu baş makas omegasının dış U yanağına girer; aralığa silikon mastik (Lokman, 25.10.2026)'], ['Not', 'fabrikada hazırlanır; eğimle kesilen artanı makas uçlarına döşenir']] });
+      add(10, w, bo++ * 0.5, { kod: null, ad: dolgu ? 'Baş makas betopanı · makas ucu' : 'Baş makas betopanı', satir: dolgu ? [['Bu parça', `${fmtc(Math.abs(b - a))} cm · ${G.ad}, makas ucu (iki betopanın dışında kalan üçgen)`], ['Malzeme', '125 × 250 betopanların eğimle kesilen artanından'], ['Oturma', 'alt ucu baş makas omegasının dış U yanağında; 8 mm'], ['Kaynak', 'Lokman, 25.10.2026: makas uçlarına artan betopan döşenir']] : [['Bu parça', `125 × 250 × 8 mm · ${G.ad}`], ['Pafta', 'Baş makas betopan yerleşimi: 3 kalkan × 2 = 6 adet'], ['Oturma', 'makasa dayanır, alt ucu baş makas omegasının dış U yanağına girer; aralığa silikon mastik (Lokman, 25.10.2026)'], ['Not', 'fabrikada hazırlanır; eğimle kesilen artanı makas uçlarına döşenir']] });
     });
     // Makasın duvar dışında kalan ucu (saçak tarafı, ~30 cm): saçak altından makasın üstüne artan betopan (Lokman, 26.10.2026:
     // "baş makasların uçlarında hâlâ kaplanmamış alan var; saçak sacı ile alın sacının birleştiği yerin boş kalmasının sebebi o")
     ['A', 'B'].forEach(end => {
       const sE = G.uc[end], dir = Math.sign(G.sm - sE), a = G.duvar[end], b = sE + dir * 0.2, yt = s => (G.h(s) - 0.2) / 100, alt = (TB - 0.05 - SAC) / 100;
       const sh = new THREE.Shape(); sh.moveTo(a / 100, alt); sh.lineTo(b / 100, alt); sh.lineTo(b / 100, yt(b)); sh.lineTo(a / 100, yt(a)); sh.closePath();
-      const o = mesh(new THREE.ExtrudeGeometry(sh, { depth: BET_T / 100, bevelEnabled: false }), mat('betopan', 12));
+      const o = mesh(new THREE.ExtrudeGeometry(sh, { depth: BET_T / 100, bevelEnabled: false }), mat('betopan', 10));
       o.position.z = G.oT / 100;
       const w = cerceve(G.r, ...G.O); w.add(o);
-      add(12, w, bo++ * 0.5, { kod: null, ad: 'Baş makas betopanı · saçak ucu', satir: [['Bu parça', `${fmtc(Math.abs(b - a))} cm · ${G.ad}, ${end === 'A' ? 'ön/sol' : 'arka/sağ'} uç: makasın duvar dışında kalan ucu`], ['Oturma', 'altı saçak sacının saçak altında, üstü makasın üst başlığında; dışında baş makas Z’si ve alın sacı'], ['Malzeme', '125 × 250 betopanların artanından; 8 mm'], ['Görev', 'saçak sacı ile alın sacının birleştiği köşeyi kapatır'], ['Kaynak', 'Lokman, 26.10.2026']] });
+      add(10, w, bo++ * 0.5, { kod: null, ad: 'Baş makas betopanı · saçak ucu', satir: [['Bu parça', `${fmtc(Math.abs(b - a))} cm · ${G.ad}, ${end === 'A' ? 'ön/sol' : 'arka/sağ'} uç: makasın duvar dışında kalan ucu`], ['Oturma', 'altı saçak sacının saçak altında, üstü makasın üst başlığında; dışında baş makas Z’si ve alın sacı'], ['Malzeme', '125 × 250 betopanların artanından; 8 mm'], ['Görev', 'saçak sacı ile alın sacının birleştiği köşeyi kapatır'], ['Kaynak', 'Lokman, 26.10.2026']] });
     });
     ['A', 'B'].forEach(end => {   // Baş makas Z'si: makas ve betopan üstünden geçer, betopanın dış yüzünden 3 cm iner, altta 3 cm dışarı kıvrılır
-      const K = rake(G, end, mat('frame', 12));
+      const K = rake(G, end, mat('frame', 10));
       K.lev(G.oT - 8, G.ob + 0.1, -SAC, 0); K.lev(G.ob, G.ob + SAC, -3, 0); K.lev(G.ob, G.ob + 3.1, -3, -3 + SAC);
-      add(12, K.w, 20 + bo++ * 0.5, { kod: null, ad: "Baş makas Z'si", satir: [['Bu parça', `${G.ad} · ${end === 'A' ? 'ön/sol' : 'arka/sağ'} yüz · L ${Math.round(K.Ls)} cm`], ['Kesit', 'üst kanat makas ve betopan üstünde · 3 cm çentik · 3 cm dış kanat; sac 1 mm'], ['Liste', "BAŞ MAKAS Z'Sİ L 2800 · 8 adet · fabrikada hazırlanır"], ['Kaynak', 'Lokman çizimi (24.10.2026, PK-01 kalkan kesiti)']] });
+      add(10, K.w, 20 + bo++ * 0.5, { kod: null, ad: "Baş makas Z'si", satir: [['Bu parça', `${G.ad} · ${end === 'A' ? 'ön/sol' : 'arka/sağ'} yüz · L ${Math.round(K.Ls)} cm`], ['Kesit', 'üst kanat makas ve betopan üstünde · 3 cm çentik · 3 cm dış kanat; sac 1 mm'], ['Liste', "BAŞ MAKAS Z'Sİ L 2800 · 8 adet · fabrikada hazırlanır"], ['Kaynak', 'Lokman çizimi (24.10.2026, PK-01 kalkan kesiti)']] });
     });
   });
 }
 
 /* 13 · Tavan omegaları (ters tavan): odalarda makaslara dik, verandada cumba makaslarına dik */
 D.omega.forEach((o, i) => {
-  const m = mat('tomega', 13), len = o.son - o.bas, obj = mesh(omegaGeo(len, true), m);
+  const m = mat('tomega', 11), len = o.son - o.bas, obj = mesh(omegaGeo(len, true), m);
   if (o.yon === 'y') obj.position.set(X(o.konum), TB / 100, Z(o.son));
   else { obj.rotation.y = Math.PI / 2; obj.position.set(X(o.bas), TB / 100, Z(o.konum)); }
-  add(13, obj, i * 0.5, { kod: null, ad: "60'lık duvar omegası (ters tavan)", satir: [['Bu parça', `L ${fmtc(len)} cm · ${o.oda === 'veranda' ? 'veranda' : roomName(o.oda)}`], ['Kesit', '110 × 35 mm, üst 65, sac 1 mm'], ['Pafta', 'Tavan omega yerleşim planı: 45 parça, 111,8 m'], ['Liste', "60'LIK DUVAR OMEGASI 60 × 3750 · 36 adet (iç duvar üstleriyle birlikte)"]] });
+  add(11, obj, i * 0.5, { kod: null, ad: "60'lık duvar omegası (ters tavan)", satir: [['Bu parça', `L ${fmtc(len)} cm · ${o.oda === 'veranda' ? 'veranda' : roomName(o.oda)}`], ['Kesit', '110 × 35 mm, üst 65, sac 1 mm'], ['Pafta', 'Tavan omega yerleşim planı: 45 parça, 111,8 m'], ['Liste', "60'LIK DUVAR OMEGASI 60 × 3750 · 36 adet (iç duvar üstleriyle birlikte)"]] });
 });
 
 /* 14 · Ters tavan kaplaması: odalarda 12,5 mm alçıpan (banyoda yeşil), verandada boardex; tavan omegalarının altına vidalanır (Lokman: omegalardan sonra) */
 const TAVAN_ALT = TB - 3.5;   // tavan omegası şapkasının altı
 {
   let ao = 0;
-  const koy = (x0, x1, y0, y1, key, info) => add(14, bp(x0 + 0.15, x1 - 0.15, y0 + 0.15, y1 - 0.15, TAVAN_ALT - 1.25, TAVAN_ALT, mat(key, 14)), ao++ * 0.3, info);
+  const koy = (x0, x1, y0, y1, key, info) => add(12, bp(x0 + 0.15, x1 - 0.15, y0 + 0.15, y1 - 0.15, TAVAN_ALT - 1.25, TAVAN_ALT, mat(key, 12)), ao++ * 0.3, info);
   D.rooms.forEach(r => r.rects.forEach(([x0, y0, x1, y1]) => {
     const yesil = r.id === 'banyo';
     for (let xa = x0; x1 - xa > 2; xa += 120) for (let ya = y0; y1 - ya > 2; ya += 250) {   // 120 × 250, uzun kenarı omegalara dik (y boyunca)
@@ -547,16 +547,16 @@ Object.values(YUZ).forEach(Y => {
       pf.forEach((p, j) => { const l = j === pf.length - 1 ? L - acc : Math.min(p, L - acc); if (l > 1) cuts.push([acc, acc + l, p]); acc += l; });
       cuts.forEach(([u0, u1, p]) => {
         const t0 = bas[k] === 'max' ? iv[1] - u1 : iv[0] + u0, len = u1 - u0;
-        const g = Y.grup(), o = mesh(omegaGeo(len, false), mat('asik', 15)); o.position.set(sr / 100, 0, t0 / 100); g.add(o);
-        add(15, g, ao++ * 0.18, { kod: null, ad: 'Aşık (omega)', satir: [['Bu parça', `${Y.ad}, ${r + 1}. sıra · paftada L ${fmtc(p)} cm`], ['Kesit', '87 × 30 mm, üst 35, sac 1 mm'], ['Sıra yeri', `saçaktan eğim boyunca ${fmtc(sr)} cm`], ['Liste', 'AŞIK L 4200 · 43 adet (10 cm bindirme)']] });
+        const g = Y.grup(), o = mesh(omegaGeo(len, false), mat('asik', 14)); o.position.set(sr / 100, 0, t0 / 100); g.add(o);
+        add(14, g, ao++ * 0.18, { kod: null, ad: 'Aşık (omega)', satir: [['Bu parça', `${Y.ad}, ${r + 1}. sıra · paftada L ${fmtc(p)} cm`], ['Kesit', '87 × 30 mm, üst 35, sac 1 mm'], ['Sıra yeri', `saçaktan eğim boyunca ${fmtc(sr)} cm`], ['Liste', 'AŞIK L 4200 · 43 adet (10 cm bindirme)']] });
       });
     });
   });
   // C kapama: kalkan saçağında aşık uçlarını kapatır
   KALKAN.forEach(G => ['A', 'B'].forEach(end => {
-    const K = rake(G, end, mat('asik', 15));
+    const K = rake(G, end, mat('asik', 14));
     K.lev(G.oTip - 0.2, G.oTip - 0.2 + SAC, -2.9, AH); K.lev(G.oTip - 2.2, G.oTip - 0.2, AH, AH + SAC); K.lev(G.oTip - 2.2, G.oTip - 0.2, -2.9, -2.9 + SAC);
-    add(15, K.w, 200 + ao++ * 0.18, { kod: null, ad: 'C kapama', satir: [['Bu parça', `${G.ad} · L ${Math.round(K.Ls)} cm`], ['Görev', 'aşık uçlarını kapatır; alın sacı bunun önüne gelir'], ['Kaynak', 'Lokman çizimi (24.10.2026, PK-01 kalkan kesiti)']] });
+    add(14, K.w, 200 + ao++ * 0.18, { kod: null, ad: 'C kapama', satir: [['Bu parça', `${G.ad} · L ${Math.round(K.Ls)} cm`], ['Görev', 'aşık uçlarını kapatır; alın sacı bunun önüne gelir'], ['Kaynak', 'Lokman çizimi (24.10.2026, PK-01 kalkan kesiti)']] });
   }));
 }
 
@@ -564,14 +564,14 @@ Object.values(YUZ).forEach(Y => {
    Her makas aralığına bir şerit; rulo ön duvardan arka duvara açılır (rehberde serilirken gösterilir). */
 const ROLL_R0 = 22, ROLL_R1 = 9;   // rulo yarıçapı: başta ve sonda (cm)
 {
-  const T = 10, h0 = TB + 0.1, m = mat('izocam', 16);
+  const T = 10, h0 = TB + 0.1, m = mat('izocam', 13);
   // şerit: başlangıç noktası (plan), serilme yönü ('y' ön → arka, 'x' sol → sağ), en, boy
   const serit = (px, py, yon, w, L, sira, ad, satir) => {
     const g = new THREE.Group(); g.position.set(X(px), h0 / 100, Z(py)); if (yon === 'x') g.rotation.y = -Math.PI / 2;   // yerel −z serilme yönü
     const sr = mesh(new THREE.BoxGeometry(w / 100, T / 100, L / 100), m); sr.position.set(0, T / 200, -L / 200); g.add(sr);
     const rp = new THREE.Group(); rp.visible = false; rp.userData.gecici = true; g.add(rp);   // rulo (yalnız serilirken)
     const rc = mesh(new THREE.CylinderGeometry(ROLL_R0 / 100, ROLL_R0 / 100, (w - 1) / 100, 28), m); rc.rotation.z = Math.PI / 2; rp.add(rc);
-    add(16, g, sira, { kod: null, ad, satir: [...satir, ['Kaynak', 'Lokman, 25.10.2026'], ['Liste', 'ÇATI İZOLASYONU (IZOCAM-KNAUF) 100 mm · 9,6 m² / paket · 7 paket']] }, { serme: { sr, rp, rc, L } });
+    add(13, g, sira, { kod: null, ad, satir: [...satir, ['Kaynak', 'Lokman, 25.10.2026'], ['Liste', 'ÇATI İZOLASYONU (IZOCAM-KNAUF) 100 mm · 9,6 m² / paket · 7 paket']] }, { serme: { sr, rp, rc, L } });
   };
   // ana çatı: her makas aralığına bir şerit, ön duvardan arka duvara
   const ANA = D.makas.filter(m => m.aile === 'ana').map(m => m.konum).sort((a, b) => a - b);
@@ -630,7 +630,7 @@ const RIB = (() => { const s = new THREE.Shape(), a = RIB_TABAN / 200, u = RIB_U
     S.iv.forEach(([v0, v1]) => {
       const [t0, t1] = [tAt(v0), tAt(v1)].sort((a, b) => a - b);
       const Q = kirp(dikd(-1.35, Y.R.SL + 2, t0, t1), Y.P); if (!Q) return;
-      const g = Y.grup(), m = mat('roof', 17); g.add(levha(Q, TR0, TR1, m));
+      const g = Y.grup(), m = mat('roof', 18); g.add(levha(Q, TR0, TR1, m));
       ribs.forEach(tc => {
         if (tc < t0 - 0.01 || tc >= t1 - 0.01) return;   // levha sınırındaki hadve tek levhaya
         const iv = aralik(Q, 1, Math.min(Math.max(tc, t0 + 0.05), t1 - 0.05)); if (!iv || iv[1] - iv[0] < 4) return;
@@ -640,7 +640,7 @@ const RIB = (() => { const s = new THREE.Shape(), a = RIB_TABAN / 200, u = RIB_U
       const en = Math.abs(v1 - v0), kes = kirp(dikd(-1.35, Y.R.SL + 2, t0, t1), [[-1e4, -1e4], [1e4, -1e4], [1e4, 1e4], [-1e4, 1e4]]);
       const acili = Math.abs(Math.abs(alan(Q)) - Math.abs(alan(kes))) > 450, oran = Math.abs(alan(Q)) / (100 * (Y.R.SL + 3.35));
       const durum = !acili && en > 99.5 ? 'tam levha' : [en < 99.5 ? `enine kesilmiş (${fmtc(en)} cm)` : '', acili ? 'dere ya da mahya hattında açıyla kesilir' : ''].filter(Boolean).join(', ');
-      add(17, g, 10 + so++ * 0.22, { kod: null, ad: oran < 0.45 ? 'Trapez sac · kesim parçası' : `Trapez sac ${S.ad} × 100`, satir: [
+      add(18, g, so++ * 0.22, { kod: null, ad: oran < 0.45 ? 'Trapez sac · kesim parçası' : `Trapez sac ${S.ad} × 100`, satir: [
         ['Bu parça', `${Y.ad} · ${durum}`],
         ['Profil', '27/200-6: hadve 27 mm, adım 200 mm, tepe 42 / taban 74 mm; 6 hadve, 100 cm kapatır; 0,5 mm (Lokman)'],
         ['Dizilim', 'modelde 100’lük levhayla; paftadaki dizilim 80’lik levhaya göre çizilmiş'], ['Renk', 'antrasit'], ['Liste', 'TRAPEZ SAC 3500 · 21 adet, 3400 · 8 adet']] });
@@ -650,9 +650,9 @@ const RIB = (() => { const s = new THREE.Shape(), a = RIB_TABAN / 200, u = RIB_U
   const top = ysR(AN, AN.M) + (PTOP + 0.8) / AN.cos;
   [[AN, Math.PI / 2, [0, 0], AN.M, [-30.2, 930.2], 'ana mahya'], [CU, Math.PI, [CU.M, 0], 0, [-180.2, 300], 'cumba mahyası']].forEach(([R, r, O, s0, [z0, z1], ad], j) => {
     [1, -1].forEach((side, i) => {
-      const w = cerceve(r, ...O), zz = j ? [z0, z1] : [z0, z1], o = lb(-13, 13, -0.3, 0.3, zz[0], zz[1], mat('ridge', 17));
+      const w = cerceve(r, ...O), zz = j ? [z0, z1] : [z0, z1], o = lb(-13, 13, -0.3, 0.3, zz[0], zz[1], mat('ridge', 18));
       o.position.x = (s0 - side * R.cos * 12) / 100; o.position.y = (top - R.sin * 12 + 1) / 100; o.rotation.z = side * R.th; w.add(o);
-      add(17, w, 80 + j * 2 + i, { kod: null, ad: 'Trapez sac mahyası', satir: [['Bu parça', `${ad} · ${fmtc(z1 - z0)} cm`], ['Liste', 'TRAPEZ SAC MAHYASI L 800 · 25 adet; mahya bandı 4 rulo']] });
+      add(18, w, 9 + (j * 2 + i) * 0.3, { kod: null, ad: 'Trapez sac mahyası', satir: [['Bu parça', `${ad} · ${fmtc(z1 - z0)} cm`], ['Liste', 'TRAPEZ SAC MAHYASI L 800 · 25 adet; mahya bandı 4 rulo']] });
     });
   });
 }
@@ -661,16 +661,16 @@ const RIB = (() => { const s = new THREE.Shape(), a = RIB_TABAN / 200, u = RIB_U
 let to = 0;
 const ALIN_ALT = -3 - SAC - 6;   // Lokman, 26.10.2026: ayrı alt uç parçası yok; alın sacı dereyi de içine alacak kadar geniş (saçak altından 6 cm aşağı)
 KALKAN.forEach(G => ['A', 'B'].forEach(end => {
-  const K = rake(G, end, mat('trim', 18)), ot = G.oTip;
+  const K = rake(G, end, mat('trim', 19)), ot = G.oTip;
   K.lev(G.ob + SAC, ot, -3 - SAC, -3);                       // tırnak (Z'nin alt kanadının altında) + saçak altı
-  const uz = G.altUc[end] ? 16.5 : 0, KU = rake(G, end, mat('trim', 18), uz);
+  const uz = G.altUc[end] ? 16.5 : 0, KU = rake(G, end, mat('trim', 19), uz);
   KU.lev(ot, ot + SAC, ALIN_ALT, PTOP);                      // alın: saçak altının 6 cm altından trapezin kenar hadvesinin üstüne; köşede dereyi de içine alır
   const k1 = RIB_KENAR + RIB_UST / 2 - 0.2, k2 = RIB_KENAR + RIB_TABAN / 2 - 0.1;   // kenar hadvesinin tepe ve taban iç kenarı (alın yüzünden)
   KU.lev(ot - k1, ot + SAC, PTOP - 0.1, PTOP);             // kıvrım: kenar hadvesinin tepesinin üstünden içeri
   KU.egik(ot - k1, PTOP - 0.1, ot - k2, TR1 + 0.5);        // hadveyi kavrayan kıvrım: hadvenin iç yüzü boyunca aşağı
   const nm = `${G.ad} · ${end === 'A' ? 'ön/sol' : 'arka/sağ'} yüz`;
-  add(18, KU.w, to++ * 0.5, { kod: null, ad: 'Alın sacı', satir: [['Bu parça', `${nm} · alın ve üst kıvrımlar${uz ? '; köşede derenin ucunu da içine alacak kadar uzar' : ''}`], ['Alın', `~${fmt(PTOP - ALIN_ALT, 0)} cm: trapezin kenar hadvesinden saçak altının 6 cm altına; dereyi de içine alır, ayrı alt uç parçası yok (Lokman, 26.10.2026)`], ['Kaynak', 'Lokman çizimleri (24.10.2026)']] });
-  add(18, K.w, to++ * 0.5, { kod: null, ad: 'Alın sacı', satir: [['Bu parça', `${nm} · L ${Math.round(K.Ls)} cm`], ['Profil', "tırnak 3 (baş makas Z'sine) → saçak altı 30 → alın → hadve üstünden kıvrım → hadveyi kavrayan kıvrım"], ['Uçta', 'saçak altı kolu makasın topuğuna dayanır, orada kesilir; alın yüzü ve üst kıvrım derenin ucunu kapatmak için devam eder (Lokman, 26.10.2026)'], ['Bu proje', `alın ~${fmt(PTOP - ALIN_ALT, 0)} cm: kenar hadvesinden dereyi de içine alacak kadar aşağı (Lokman, 26.10.2026; PK-01’de sandviç panelle 13 cm); kesin ölçü teyit bekler`], ['Liste', '( ANTRASİT) ALIN SACI (30\'LUK) 300 × 2500 · 10 adet']] });
+  add(19, KU.w, to++ * 0.5, { kod: null, ad: 'Alın sacı', satir: [['Bu parça', `${nm} · alın ve üst kıvrımlar${uz ? '; köşede derenin ucunu da içine alacak kadar uzar' : ''}`], ['Alın', `~${fmt(PTOP - ALIN_ALT, 0)} cm: trapezin kenar hadvesinden saçak altının 6 cm altına; dereyi de içine alır, ayrı alt uç parçası yok (Lokman, 26.10.2026)`], ['Kaynak', 'Lokman çizimleri (24.10.2026)']] });
+  add(19, K.w, to++ * 0.5, { kod: null, ad: 'Alın sacı', satir: [['Bu parça', `${nm} · L ${Math.round(K.Ls)} cm`], ['Profil', "tırnak 3 (baş makas Z'sine) → saçak altı 30 → alın → hadve üstünden kıvrım → hadveyi kavrayan kıvrım"], ['Uçta', 'saçak altı kolu makasın topuğuna dayanır, orada kesilir; alın yüzü ve üst kıvrım derenin ucunu kapatmak için devam eder (Lokman, 26.10.2026)'], ['Bu proje', `alın ~${fmt(PTOP - ALIN_ALT, 0)} cm: kenar hadvesinden dereyi de içine alacak kadar aşağı (Lokman, 26.10.2026; PK-01’de sandviç panelle 13 cm); kesin ölçü teyit bekler`], ['Liste', '( ANTRASİT) ALIN SACI (30\'LUK) 300 × 2500 · 10 adet']] });
   // Ayrı alt uç parçası yok (Lokman, 26.10.2026): alın sacının kendisi dereyi de içine alacak kadar geniş
 }));
 // Dere: galvaniz eksiz oluk, K kesit (38'lik açınım), boyalı antrasit; sırtı saçak sacının alnına asılır
@@ -679,17 +679,17 @@ const DERE_ALT = TB - 0.05 + 13 - 0.4 - 11.4;   // üstü alının 4 mm altında
 const HAT = Object.fromEntries(D.dere.hatlar.map(h => [h.ad, h]));
 const dereSerit = h => serit(h.yon === 'x' ? 'h' : 'v', h.kenar, h.out);   // yerel x dışa: 0 = saçak sacının alnı
 D.dere.hatlar.forEach((h, i) => {
-  const S = dereSerit(h), g = S.yeni(), m = mat('gutter', 18), [z0, z1] = [S.zOf(h.a0), S.zOf(h.a1)].sort((p, q) => p - q), L = (z1 - z0) / 100;
+  const S = dereSerit(h), g = S.yeni(), m = mat('gutter', 16), [z0, z1] = [S.zOf(h.a0), S.zOf(h.a1)].sort((p, q) => p - q), L = (z1 - z0) / 100;
   const sh = thick(DERE_K.map(([u, v]) => [u + SAC + 0.03, v]), 0.05);
   const k = mesh(new THREE.ExtrudeGeometry(sh, { depth: L, bevelEnabled: false }), m); k.position.set(0, DERE_ALT / 100, z0 / 100); g.add(k);
   const kap = new THREE.Shape(); DERE_K.slice(0, 10).forEach(([u, v], j) => j ? kap.lineTo((u + SAC + 0.03) / 100, v / 100) : kap.moveTo((u + SAC + 0.03) / 100, v / 100)); kap.closePath();
   [z0 / 100 - 0.001, z1 / 100].forEach(zz => { const c = mesh(new THREE.ExtrudeGeometry(kap, { depth: 0.001, bevelEnabled: false }), m); c.position.set(0, DERE_ALT / 100, zz); g.add(c); });
-  add(18, g, 30 + i, { kod: null, ad: 'Galvaniz eksiz oluk (dere)', satir: [['Bu parça', `${h.ad} hat · ${fmtc(h.a1 - h.a0)} cm (paftada ${fmtc(h.pafta)}) · iki ucunda kapak`], ['Kesit', 'K profil, 15 × 11,4 cm (38’lik açınım), boyalı antrasit'], ['Pafta', 'Makas ve dere planı: 4 hat, 16,4 m'], ['Liste', '( ANTRASİT ) METAL DERE L 4000 · 5 adet; dere kapağı 8, dere kelepçesi 40']] });
+  add(16, g, i, { kod: null, ad: 'Galvaniz eksiz oluk (dere)', satir: [['Bu parça', `${h.ad} hat · ${fmtc(h.a1 - h.a0)} cm (paftada ${fmtc(h.pafta)}) · iki ucunda kapak`], ['Kesit', 'K profil, 15 × 11,4 cm (38’lik açınım), boyalı antrasit'], ['Pafta', 'Makas ve dere planı: 4 hat, 16,4 m'], ['Liste', '( ANTRASİT ) METAL DERE L 4000 · 5 adet; dere kapağı 8, dere kelepçesi 40']] });
 });
 D.dere.inisler.forEach((p, i) => {
   // Lokman'ın fotoğrafları (25–26.10.2026): köşede iniş aparatı derenin uç kısmında, borunun tam hizasında; kaz boynu (2 açık dirsek)
   // duvara (verandada kolona) dik döner; boru köşe direği kaplamasının (13 cm) hemen yanından 2 kelepçeyle iner, altta kapalı dirsek.
-  const h = HAT[p.hat], S = dereSerit(h), w = S.yeni(), m = mat('gutter', 18), ust = DERE_ALT;   // cm
+  const h = HAT[p.hat], S = dereSerit(h), w = S.yeni(), m = mat('gutter', 16), ust = DERE_ALT;   // cm
   const kolon = p.duvar === 'veranda kolonu';
   const yuzU = (p.yuz - h.kenar) * h.out;   // duvar yüzünün yerel x'i (dışa pozitif)
   const sw = kolon ? -145 : Math.min(D.dis[0] - 17, Math.max(17, p.s));                 // boru: köşe direği kaplamasının yanında ya da kolonda
@@ -707,20 +707,20 @@ D.dere.inisler.forEach((p, i) => {
     const k = mesh(new THREE.BoxGeometry(0.066, 0.02, 0.088), m); k.position.copy(V(wx, hh, zw)); w.add(k);
     w.add(lb(yuzU, wx - 3, hh - 1, hh + 1, zw - 1, zw + 1, m));
   });
-  add(18, w, 40 + i * 0.4, { kod: null, ad: 'İniş borusu (dikdörtgen, oluklu)', satir: [['Bu parça', `${h.ad} hattı · ${p.duvar} boyunca`], ['Ağız', kolon ? 'kolonun hizasında; kaz boynu kolona dik döner' : (p.s < 17 || p.s > D.dis[0] - 17) ? 'derenin köşe ucunda, borunun hizasında; kaz boynu duvara dik döner, boru köşe direğinin yanından iner (Lokman’ın fotoğrafları)' : 'borunun hizasında; kaz boynu duvara dik döner'], ['Kesit', 'yaklaşık 8 × 6 cm, boyalı antrasit; bina ile birlikte iner'], ['Takım', 'iniş aparatı · 2 açık dirsek (kaz boynu) · boru L 3000 · 2 kelepçe · kapalı dirsek'], ['Pafta', '7 iniş'], ['Liste', 'iniş borusu 7, açık dirsek 14, kapalı dirsek 7, kelepçe 14']] });
+  add(16, w, 4 + i * 0.5, { kod: null, ad: 'İniş borusu (dikdörtgen, oluklu)', satir: [['Bu parça', `${h.ad} hattı · ${p.duvar} boyunca`], ['Ağız', kolon ? 'kolonun hizasında; kaz boynu kolona dik döner' : (p.s < 17 || p.s > D.dis[0] - 17) ? 'derenin köşe ucunda, borunun hizasında; kaz boynu duvara dik döner, boru köşe direğinin yanından iner (Lokman’ın fotoğrafları)' : 'borunun hizasında; kaz boynu duvara dik döner'], ['Kesit', 'yaklaşık 8 × 6 cm, boyalı antrasit; bina ile birlikte iner'], ['Takım', 'iniş aparatı · 2 açık dirsek (kaz boynu) · boru L 3000 · 2 kelepçe · kapalı dirsek'], ['Pafta', '7 iniş'], ['Liste', 'iniş borusu 7, açık dirsek 14, kapalı dirsek 7, kelepçe 14']] });
 });
 
 /* 19 · İç kapılar (K-01 kanadı; bu projede iç kapılar alıcıya ait) */
 D.doors.forEach((d, i) => {
   const g = new THREE.Group();
   g.position.set(X(d.hinge[0]), 0, Z(d.hinge[1]));
-  const leaf = mesh(new THREE.BoxGeometry(0.80, 1.96, 0.04), mat('door', 19));
+  const leaf = mesh(new THREE.BoxGeometry(0.80, 1.96, 0.04), mat('door', 20));
   leaf.position.set(0.41, 0.98, 0); g.add(leaf);
-  const kn = mesh(new THREE.BoxGeometry(0.025, 0.12, 0.08), mat('steel', 19)); kn.position.set(0.72, 1.02, 0); g.add(kn);
+  const kn = mesh(new THREE.BoxGeometry(0.025, 0.12, 0.08), mat('steel', 20)); kn.position.set(0.72, 1.02, 0); g.add(kn);
   const a0 = Math.atan2(d.closed[1], d.closed[0]);
   let da = Math.atan2(d.open[1], d.open[0]) - a0; da = Math.atan2(Math.sin(da), Math.cos(da));
   g.rotation.y = a0;
-  add(19, g, i, { kod: 'K-01', ad: kart('K-01'), satir: [['Oda', roomName(d.room)], ['Bu proje', 'iç kapılar alıcıya ait; yer ve açılış yönü paftadan'], ...kartSat('K-01')] }, { swing: [a0, a0 + da * 0.62] });
+  add(20, g, i, { kod: 'K-01', ad: kart('K-01'), satir: [['Oda', roomName(d.room)], ['Bu proje', 'iç kapılar alıcıya ait; yer ve açılış yönü paftadan'], ...kartSat('K-01')] }, { swing: [a0, a0 + da * 0.62] });
 });
 /* 19 · Pencereler ve dış kapı */
 {
@@ -731,7 +731,7 @@ D.doors.forEach((d, i) => {
     const [x0, y0, x1, y1] = p.rect, op = p.op, g = new THREE.Group(), c = p.o === 'h' ? (y0 + y1) / 2 : (x0 + x1) / 2;
     const box = (a0, a1, d0, d1, h0, h1, m, sh = true) => { const o = p.o === 'h' ? bp(a0, a1, d0, d1, h0, h1, m) : bp(d0, d1, a0, a1, h0, h1, m); o.castShadow = sh; g.add(o); };
     const { a0, a1, s: sill, top } = op, f = 5, dpt = 3.5;
-    const fm = mat(op.kind === 'win' ? 'pvc' : 'cdoor', 19);
+    const fm = mat(op.kind === 'win' ? 'pvc' : 'cdoor', 20);
     box(a0, a0 + f, c - dpt, c + dpt, sill, top, fm); box(a1 - f, a1, c - dpt, c + dpt, sill, top, fm);
     box(a0, a1, c - dpt, c + dpt, top - f, top, fm);
     if (op.kind === 'win') {
@@ -739,13 +739,13 @@ D.doors.forEach((d, i) => {
       const wide = a1 - a0 > 100, am = (a0 + a1) / 2;
       if (wide) box(am - 3, am + 3, c - dpt + 0.5, c + dpt - 0.5, sill + f, top - f, fm);
       const panes = wide ? [[a0 + f, am - 3], [am + 3, a1 - f]] : [[a0 + f, a1 - f]];
-      panes.forEach(([b0, b1]) => box(b0, b1, c - 0.3, c + 0.3, sill + f, top - f, mat('glass', 19), false));
+      panes.forEach(([b0, b1]) => box(b0, b1, c - 0.3, c + 0.3, sill + f, top - f, mat('glass', 20), false));
       const kod = WC[op.size] || null;
-      add(19, g, wo++, { kod, ad: kart(kod, WAD[op.size]), satir: [['Bu parça', `${op.size} · eşik ${op.s} cm · antrasit, pervaz matik`], ['Oda', roomName(p.room)], ['Liste', WL[op.size]], ...kartSat(kod)] });
+      add(20, g, wo++, { kod, ad: kart(kod, WAD[op.size]), satir: [['Bu parça', `${op.size} · eşik ${op.s} cm · antrasit, pervaz matik`], ['Oda', roomName(p.room)], ['Liste', WL[op.size]], ...kartSat(kod)] });
     } else {
-      box(a0 + f, a1 - f, c - 2.25, c + 2.25, 0, top - f, mat('cdoor', 19));
-      const hx = a0 + f + 6; box(hx, hx + 2.5, c - 4.5, c + 4.5, 98, 112, mat('steel', 19));
-      add(19, g, wo++, { kod: 'K-02', ad: kart('K-02'), satir: [['Bu parça', `boşluk ${Math.round(a1 - a0)} × ${top} cm · kanat 90 × 200, sağ`], ['Oda', roomName(p.room)], ['Liste', 'PREFABRİK ÇELİK KAPI ( SAĞ ) 90 × 200 · 1 adet'], ...kartSat('K-02')] });
+      box(a0 + f, a1 - f, c - 2.25, c + 2.25, 0, top - f, mat('cdoor', 20));
+      const hx = a0 + f + 6; box(hx, hx + 2.5, c - 4.5, c + 4.5, 98, 112, mat('steel', 20));
+      add(20, g, wo++, { kod: 'K-02', ad: kart('K-02'), satir: [['Bu parça', `boşluk ${Math.round(a1 - a0)} × ${top} cm · kanat 90 × 200, sağ`], ['Oda', roomName(p.room)], ['Liste', 'PREFABRİK ÇELİK KAPI ( SAĞ ) 90 × 200 · 1 adet'], ...kartSat('K-02')] });
     }
   });
 }
@@ -770,7 +770,7 @@ const timing = byStep.map((list, s) => {
   const stagger = maxO > 0 ? Math.min(per, (oda ? 4.6 : 2.6) / maxO) : 0;
   return { stagger, dur: 0.6, total: maxO * stagger + 0.6 };
 });
-const DROP = [0, 0.3, 1.4, 1.4, 1.4, 1.4, 1.4, 1.2, 0.6, 0.6, 1.4, 1.2, 0.8, 0.5, -0.5, 0.7, 0, 0.9, 0.6, 0];   // 14: alçıpan aşağıdan yukarı
+const DROP = [0, 0.3, 1.4, 1.4, 1.4, 1.4, 1.4, 1.2, 0.6, 1.4, 0.8, 0.5, -0.5, 0, 0.7, 0.6, 0.6, 0.9, 0.9, 0.6, 0];   // 12: alçıpan aşağıdan yukarı
 
 function cardRows(steps) {
   const c = new Map();
@@ -798,26 +798,28 @@ const STEPS = [
   { t: 'Veranda kolon ve kirişleri', p: 'Verandanın iki ön köşesine ve ortasına flanşlı kutu profil kolon (100 × 100 × 2400, 3 mm) dikilir; üstlerine 574,75 cm’lik ön kiriş (B) bağlanır. Üç kısa kiriş (140 cm, 4 mm) ön kirişi binaya bağlar: soldaki özel köşe direği A’ya, öbür ikisi ön duvardaki özel H’lara (C). Cumba makasları bu kirişlere oturur.' },
   { t: 'Saçak, duvar ve baş makas omegası', p: 'Makasların oturacağı hatlara omega geçirilir. 100’lük omegalar 10,5 cm’dir (100 mm pano + iki yanda 2 mm H kanadı): dış kanat dışarıda tam yaslanır, içte kalan aralıklara silikonize mastik sıkılır. Arka duvar, ön duvarın sağ kısmı ve veranda yan kirişleri üstüne 100’lük saçak omegası (içte 3 cm kanat ve ayak, dışta 3 cm kanat ve eğik dudak); ön duvarın cumba altında kalan kısmına 100’lük duvar omegası; üç baş makasın altına baş makas omegası (fabrikada hazırlanır): 10,5 cm, dış kanadı duvara tam yaslı, 3 cm derinlik, içte 3 cm açık yanak, dışta baş makas betopanının gireceği 1 cm U yanak. İç duvarların üstüne 60’lık duvar omegası geçirilir (6,5 cm açıklık, 3 cm derinlik, 3 cm kulaklar); kapı üstlerinden kesintisiz geçer.',
     rows: [R(null, '100’lük saçak omegası 100 × 2500', '7 adet', 'liste'), R(null, '100’lük duvar omegası 100 × 2500', '4 adet', 'liste'), R(null, 'Baş makas omegası L 2500', '8 adet', 'liste'), R(null, '60’lık duvar omegası (iç duvar üstü)', `${parts.filter(q => q.step === 8 && q.obj.userData.info.ad.startsWith('60’lık')).length} parça · ${fmt(D.omega_duvar.filter(o => o.tur === 'ic').reduce((a, o) => a + o.a1 - o.a0, 0) / 100)} m`, 'model'), I('Sac', '1 mm')] },
-  { t: 'Saçak sacı', p: 'Makaslardan önce takılır. 3 cm tırnağı saçak omegasının üstüne girer, makas oturunca altında sıkışır; 30 cm saçak altı, 13 cm alın ve makasa doğru 10 cm kıvrım. Dört saçak var: arka, ön (cumbanın sağı) ve cumbanın iki yanı; cumbanın sağında ön saçakla iç köşe yapar.',
-    rows: [R(null, 'Saçak sacı (antrasit, 30’luk) 300 × 2500', '8 adet', 'liste'), I('Menfezli', '3 adet'), I('Profil', '3 + 30 + 13 + 10 cm'), I('Sac', '1 mm')] },
-  { t: 'Ana çatı makasları', p: '8 makas (MKS01–08) 125,5 cm aralıkla, her biri bir kulaklı H ya da DVR karkası hizasında: iki uçta baş makas (MKS01, MKS08), arada 6 orta makas. Açıklık 660 cm (2 × 30 saçak), eğim 18,2°, tepe 118,5 cm. Alpha Mini düzeni: 10 cm topuk, duvar hizasında dikme, Warren zikzak. Ön uçları cumbanın altında kalır.',
-    extra: [I('Açıklık', '660 cm'), I('Eğim', '18,2° · tepe 118,5 cm'), I('Makas aralığı', '125,5 cm (son göz 137)'), I('İç çubuk', 'Warren · 9 göz')] },
-  { t: 'Cumba makasları', p: 'Cumba, verandanın üstünden ana çatıya dik uzanan ikinci beşiktir; mahyası ana mahyayla aynı yükseklikte. MKS09 veranda ön kirişine (cumbanın baş makası), MKS10 yan kirişlere oturur. MKS11 ve MKS12 ara makaslardır: ana makasların üst başlıklarına oturur ve iki yüzün kesiştiği dere (vadi) hattına doğru kısalır. Açıklık 634,75 cm, eğim 18,9°.',
-    extra: [I('Açıklık', '634,75 cm'), I('Eğim', '18,9° · tepe 118,5 cm'), I('Aralık', '104 · 117 · 92 cm (pafta)')] },
+  { t: 'Ana çatı ve cumba makasları', p: 'Ana çatı: 8 makas (MKS01–08) 125,5 cm aralıkla, her biri bir kulaklı H ya da DVR karkası hizasında: iki uçta baş makas (MKS01, MKS08), arada 6 orta makas. Açıklık 660 cm (2 × 30 saçak), eğim 18,2°, tepe 118,5 cm. Alpha Mini düzeni: 10 cm topuk, duvar hizasında dikme, Warren zikzak. Ön uçları cumbanın altında kalır. Cumba, verandanın üstünden ana çatıya dik uzanan ikinci beşiktir; mahyası ana mahyayla aynı yükseklikte. MKS09 veranda ön kirişine (cumbanın baş makası), MKS10 yan kirişlere oturur. MKS11 ve MKS12 ara makaslardır: ana makasların üst başlıklarına oturur ve iki yüzün kesiştiği dere (vadi) hattına doğru kısalır.',
+    extra: [I('Ana çatı', 'açıklık 660 cm · eğim 18,2° · tepe 118,5 cm'), I('Makas aralığı', '125,5 cm (son göz 137)'), I('İç çubuk', 'Warren · 9 göz'), I('Cumba', 'açıklık 634,75 cm · eğim 18,9°'), I('Cumba aralığı', '104 · 117 · 92 cm (pafta)')] },
   { t: 'Baş makas betopanı ve Z', p: 'Üç kalkan var: ana çatının iki ucu (MKS01, MKS08) ve cumbanın önü (MKS09). Her kalkanın dış yüzü iki 125 × 250 betopanla kapatılır: betopan (8 mm) makasa dayanır, alt ucu baş makas omegasının dış U yanağına girer; aralıklara silikon mastik sıkılır. Betopanların eğimle kesilen artanı iki uçtaki makas uçlarına döşenir. Üstüne baş makas Z’si gelir: makasın ve betopanın üstünden geçer, betopanın dış yüzünden 3 cm iner ve dışarı kıvrılır; alın sacının tırnağı buna girer.',
     rows: [R(null, 'Baş makas betopanı 125 × 250 × 8 mm', '6 adet', 'pafta'), R(null, 'Baş makas Z’si L 2800', '8 adet', 'liste'), I('Makas uçları', 'artan betopandan (6 parça)')] },
   { t: 'Tavan omegaları', p: 'Ters tavan için omegalar makas alt başlıklarının altına, şapkası aşağı bağlanır: odalarda 60 cm aralıkla makaslara dik, verandada 60 cm aralıkla cumba makaslarına dik. Kesit 110 × 35 mm, sac 1 mm.',
     rows: [R(null, 'Tavan omegası', '45 parça · 111,8 m', 'pafta'), R(null, '60’lık duvar omegası 60 × 3750', '36 adet (iç duvar üstleriyle)', 'liste'), I('Veranda', '10 × 140 cm')] },
   { t: 'Ters tavan alçıpanı', p: 'Tavan omegalarından sonra ters tavan kaplanır: 12,5 mm alçıpan levhalar (120 × 250) uzun kenarı omegalara dik olacak biçimde alttan vidalanır. Banyoda yeşil (ıslak hacim) alçıpan kullanılır. Verandanın tavanı boardex (120 × 240), kirişlerin arasında.',
     extra: [R(null, 'Tavan alçıpanı beyaz 12,5 × 1200 × 2500', '17 adet', 'liste'), R(null, 'Tavan alçıpanı yeşil (ıslak hacim)', '2 adet', 'liste'), R(null, 'Veranda tavanı boardex 12,5 × 1200 × 2400', '4 adet', 'liste'), R(null, 'Alçıpan vidası 3,5 × 35', '1250 adet', 'liste')] },
+  { t: 'Çatı izolasyonu (10 cm rulo cam yünü)', p: 'Aşıklardan önce, ters tavanın üstüne 10 cm rulo cam yünü (Izocam) serilir. Her makas aralığına bir şerit gelir: rulo ön duvarın üstünden başlar, açılarak arka duvara kadar serilir. Rulo eni 120 cm, makas aralığı 125,5 cm. Cumbanın (verandanın) üstü de boş kalmaz: orada makas yönünde, yatay serilir.',
+    extra: [R(null, 'Çatı izolasyonu (Izocam-Knauf) 100 mm · 9,6 m² / paket', '7 paket', 'liste'), I('Modelde', `${parts.filter(q => q.step === 13).length} şerit · ≈ ${fmt(parts.filter(q => q.step === 13).reduce((t, q) => t + q.obj.children[0].geometry.parameters.width * q.obj.children[0].geometry.parameters.depth, 0), 0)} m²`)] },
   { t: 'Omega aşıklar', p: 'Aşıklar 60 cm aralıkla makasların üst başlıklarına vidalanır; iki yüzün mahya aşıkları arasında 20 cm. Ana çatının arka yüzünde 7 sıra (410 + 410 + 140), ön yüzde cumbanın iki yanında; cumbanın her yüzünde 7 sıra, dere hattında kesilir. Kalkan saçaklarında aşık uçları C kapamayla kapatılır.',
     rows: [R(null, 'Aşık (omega) L 4200', '43 adet', 'liste'), I('Paftada', '57 parça · 154 m'), I('Kesit', '87 × 30 mm, sac 1 mm'), R(null, 'C kapama', '6 kalkan kenarı', 'model')] },
-  { t: 'Çatı izolasyonu (10 cm rulo cam yünü)', p: 'Çatı kapanmadan önce 10 cm rulo cam yünü (Izocam) aşıkların arasından indirilip tavanın üstüne serilir. Her makas aralığına bir şerit gelir: rulo ön duvarın üstünden başlar, açılarak arka duvara kadar serilir. Rulo eni 120 cm, makas aralığı 125,5 cm. Cumbanın (verandanın) üstü de boş kalmaz: orada makas yönünde, yatay serilir.',
-    extra: [R(null, 'Çatı izolasyonu (Izocam-Knauf) 100 mm · 9,6 m² / paket', '7 paket', 'liste'), I('Modelde', `${parts.filter(q => q.step === 16).length} şerit · ≈ ${fmt(parts.filter(q => q.step === 16).reduce((t, q) => t + q.obj.children[0].geometry.parameters.width * q.obj.children[0].geometry.parameters.depth, 0), 0)} m²`)] },
-  { t: 'Trapez sac, mahya ve ters mahya', p: 'İki dere (vadi) hattına önce ters mahya döşenir. Ana çatıya 350’lik, cumbaya 340’lık antrasit 27/200 trapez sac (0,5 mm; hadve 27 mm, adım 200 mm; 100 cm kapatır) doğrudan aşıkların üstüne serilip vidalanır (bu projede OSB ve nem bariyeri yok); dere hattında açıyla kesilir. Levhalar kalkan kenarından başlayarak dizilir; paftadaki dizilim 80’lik levhaya göre çizildiği için model 100’lük levhayla yeniden dizildi. Mahyalar trapez sac mahyasıyla kapatılır.',
-    rows: [R(null, 'Trapez sac L 3500 (ana çatı)', '21 adet', 'liste'), R(null, 'Trapez sac L 3400 (cumba)', '8 adet', 'liste'), I('Modelde', `${parts.filter(q => q.step === 17 && /^Trapez sac/.test(q.obj.userData.info.ad)).length} levha · 100 cm kapatır, 0,5 mm`), R(null, 'Trapez sac mahyası L 800', '25 adet', 'liste'), R(null, 'Ters mahya L 2800', '4 adet', 'liste'), R(null, 'Ters mahya kenar kutusu', '8 adet', 'liste')] },
-  { t: 'Alın sacı, dere ve iniş', p: 'Alın sacı (antrasit) üç kalkanın eğik kenarlarına takılır: tırnağı baş makas Z’sine girer, saçak altı aşıkların altını kapatır, üstte trapezin kenar hadvesini kavrar; alın yüzü dereyi de içine alacak kadar geniştir, köşede derenin ucunu kapatır (ayrı parça yok). Dört saçağa K kesitli dere asılır; cumbanın sağında ön dereyle iç köşe yapar. 7 iniş borusu kaz boynuyla duvara ya da veranda kolonuna döner ve kelepçeyle iner.',
-    rows: [R(null, 'Alın sacı 300 × 2500', '10 adet', 'liste'), R(null, 'Metal dere L 4000', '5 adet', 'liste'), I('Dere (pafta)', '4 hat · 16,4 m'), R(null, 'İniş takımı', '7 adet', 'pafta'), R(null, 'Dere kapağı', '8 adet', 'liste')] },
+  { t: 'Saçak sacı', p: 'Aşıklardan sonra takılır. 3 cm tırnağı saçak omegasının üstüne, makasın altına girer; 30 cm saçak altı, 13 cm alın ve makasa doğru 10 cm kıvrım. Dört saçak var: arka, ön (cumbanın sağı) ve cumbanın iki yanı; cumbanın sağında ön saçakla iç köşe yapar. Saçak altı baş makasın hizasında kesilir; alın ve kıvrım köşeye, alın sacına kadar devam eder.',
+    rows: [R(null, 'Saçak sacı (antrasit, 30’luk) 300 × 2500', '8 adet', 'liste'), I('Menfezli', '3 adet'), I('Profil', '3 + 30 + 13 + 10 cm'), I('Sac', '1 mm')] },
+  { t: 'Dere ve inişler', p: 'Dört saçağa K kesitli galvaniz dere asılır: sırtı saçak sacının alnına; cumbanın sağında ön dereyle iç köşe yapar. 7 iniş borusu: köşelerde ağız borunun hizasında, kaz boynu duvara (cumbada veranda kolonuna) dik döner, boru köşe direği kaplamasının yanından kelepçeyle iner.',
+    rows: [R(null, 'Metal dere L 4000', '5 adet', 'liste'), I('Dere (pafta)', '4 hat · 16,4 m'), R(null, 'İniş takımı', '7 adet', 'pafta'), R(null, 'Dere kapağı', '8 adet', 'liste')] },
+  { t: 'Ters mahya', p: 'Trapez saclardan önce iki dere (vadi) hattına, cumbanın ana çatıyla birleştiği yere ters mahya döşenir: iki yüzün suyu bu oluğa toplanıp ön dereye akar.',
+    rows: [R(null, 'Ters mahya L 2800', '4 adet', 'liste'), R(null, 'Ters mahya kenar kutusu', '8 adet', 'liste')] },
+  { t: 'Trapez sac ve mahya', p: 'Ters mahyadan sonra ana çatıya 350’lik, cumbaya 340’lık antrasit 27/200 trapez sac (0,5 mm; hadve 27 mm, adım 200 mm; 100 cm kapatır) doğrudan aşıkların üstüne serilip vidalanır (bu projede OSB ve nem bariyeri yok); dere hattında açıyla kesilir. Levhalar kalkan kenarından başlayarak dizilir; paftadaki dizilim 80’lik levhaya göre çizildiği için model 100’lük levhayla yeniden dizildi. Mahyalar trapez sac mahyasıyla kapatılır.',
+    rows: [R(null, 'Trapez sac L 3500 (ana çatı)', '21 adet', 'liste'), R(null, 'Trapez sac L 3400 (cumba)', '8 adet', 'liste'), I('Modelde', `${parts.filter(q => q.step === 18 && /^Trapez sac/.test(q.obj.userData.info.ad)).length} levha · 100 cm kapatır, 0,5 mm`), R(null, 'Trapez sac mahyası L 800', '25 adet', 'liste')] },
+  { t: 'Alın sacları', p: 'Alın sacı (antrasit) üç kalkanın eğik kenarlarına, trapezden sonra takılır: tırnağı baş makas Z’sine girer, saçak altı kolu aşıkların altını kapatır ve makasın topuğunda kesilir; üstte trapezin kenar hadvesini kavrar. Alın yüzü dereyi de içine alacak kadar geniştir: köşede saçak sacının alnıyla birleşir ve derenin ucunu kapatır (ayrı parça yok).',
+    rows: [R(null, 'Alın sacı 300 × 2500', '10 adet', 'liste')] },
   { t: 'Kapı ve pencereler', p: 'Antrasit PVC pencereler (2 × 120/120 çift açılım, 1 × 120/80 sürgülü, 2 × 180/180 çift açılım, 1 × 60/60 vasistas) ve prefabrik çelik dış kapı (90 × 200, sağ) yerine konur. İç kapılar alıcıya ait; modelde yerlerini ve açılış yönlerini göstermek için çizildi. Bu adımda çatı, tavan ve izolasyon gizlenir; düğmeyle geri açılır.',
     extra: [I('İç kapılar', 'alıcıya ait')] },
 ];
@@ -841,7 +843,7 @@ STEPS.forEach((st, i) => {
     ['grp', 'Kapı ve pencere'], ...pick(['K-', 'P-'], ['PVC']),
   ];
 }
-const NAMES = ['Genel bakış', 'Alt çerçeve', ...D.rooms.map(r => r.ad), 'Veranda', 'Duvar üstü omegaları', 'Saçak sacı', 'Ana çatı makasları', 'Cumba makasları', 'Baş makas betopanı ve Z', 'Tavan omegaları', 'Ters tavan alçıpanı', 'Omega aşıklar', 'Çatı izolasyonu', 'Trapez sac ve mahya', 'Alın sacı ve dere', 'Kapı ve pencereler'];
+const NAMES = ['Genel bakış', 'Alt çerçeve', ...D.rooms.map(r => r.ad), 'Veranda', 'Saçak, duvar ve baş makas omegası', 'Ana çatı ve cumba makasları', 'Baş makas betopanı ve Z', 'Tavan omegaları', 'Ters tavan alçıpanı', 'Çatı izolasyonu', 'Aşıklar', 'Saçak sacı', 'Dere ve inişler', 'Ters mahya', 'Trapez sac ve mahya', 'Alın sacları', 'Kapı ve pencereler'];
 
 /* ---------- Kamera ---------- */
 function roomCenter(id) {
@@ -857,10 +859,10 @@ function preset(step, aspZorla) {
     const P = {
       0: [[0, 1.4, 0.7], 0.62, 0.34, 16.5], 1: [[0, 0, 0.6], 0.45, 1.05, 13.5], 7: [[X(300), 1.2, Z(-60)], 0.55, 0.42, 8.5],
       8: [[0, 2.3, 0.6], 0.62, 0.55, 13.5],
-      9: [[X(740), 2.45, Z(-20)], 0.7, 0.16, 5.2],
-      10: [[0, 2.4, 0.2], 0.95, 0.55, 14.5], 11: [[X(287), 2.8, Z(-20)], 0.55, 0.45, 9.5], 12: [[X(250), 2.9, Z(150)], -0.55, 0.24, 11.5],
-      13: [[0, 2.3, 0.6], 0.55, 1.28, 12.5], 14: [[0, 2.3, 0.6], 0.55, 1.28, 12.5], 15: [[0, 3.0, 0.6], 0.95, 0.6, 14],
-      16: [[X(450), 2.5, Z(300)], 2.5, 0.95, 12.5], 17: [[0, 2.6, 0.6], 0.62, 0.5, 15.5], 18: [[0, 2.0, 0.6], -0.62, 0.28, 14.5], 19: [[0, 0.8, 0.6], 0.5, 1.0, 13],
+      9: [[0, 2.4, 0.2], 0.95, 0.55, 14.5], 10: [[X(250), 2.9, Z(150)], -0.55, 0.24, 11.5],
+      11: [[0, 2.3, 0.6], 0.55, 1.28, 12.5], 12: [[0, 2.3, 0.6], 0.55, 1.28, 12.5], 13: [[X(450), 2.5, Z(300)], 2.5, 0.95, 12.5],
+      14: [[0, 3.0, 0.6], 0.95, 0.6, 14], 15: [[X(740), 2.45, Z(-20)], 0.7, 0.16, 5.2], 16: [[0, 2.0, 0.6], -0.62, 0.28, 14.5],
+      17: [[X(287), 3.2, Z(40)], 0.55, 0.75, 10.5], 18: [[0, 2.6, 0.6], 0.62, 0.5, 15.5], 19: [[0, 2.6, 0.6], -0.62, 0.34, 14.5], 20: [[0, 0.8, 0.6], 0.5, 1.0, 13],
     }[step];
     [t, az, el, dist] = P;
   }
@@ -880,7 +882,7 @@ function flyTo(step, instant = false) {
 
 /* ---------- Akış ---------- */
 let cur = 0, stepT0 = 0, stepEnd = 0, animating = false, playing = false, cutaway = false;
-const ROOF_STEPS = [9, 10, 11, 12, 13, 14, 15, 16, 17, 18];
+const ROOF_STEPS = [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19];
 function applyVisibility() {
   const upto = cur === 0 ? N : cur;
   for (let s = 1; s <= N; s++) groups[s].visible = s <= upto && !(cutaway && ROOF_STEPS.includes(s));

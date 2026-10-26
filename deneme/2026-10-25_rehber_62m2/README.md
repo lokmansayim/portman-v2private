@@ -19,7 +19,7 @@ Bir bayi projesinin (900 × 600 cm, veranda üstünde cumba) montaj rehberi. Kay
    - Oda sırası (Lokman): Yatak 1 → banyo → hol → yatak 2 → salon-mutfak.
 3. **Sayfa:** `python rehber/uret.py <çıktı.html> --proje "<başlık>" [--gorsel]`.
    - Girdi: `kabuk.html` (PK-01 rehberinin arayüzü) + `sahne.js` (Three.js 0.160 sahnesi).
-   - 19 adım, 419 parça. Kartı olmayan parçalarda yükleme listesindeki ad yazar.
+   - 20 adım (sıra Lokman'ın, 26 Ekim), 419 parça. Kartı olmayan parçalarda yükleme listesindeki ad yazar.
 4. **Model ve kameralar:** `node test/export.js <rehber.html> <model.glb>`.
    - Parça adları `s{adım}_{sıra}`, malzeme adları anahtar; kimlik kartı `extras`'ta.
    - Adım kameraları `model_kamera.json`'a yazılır.
@@ -48,8 +48,8 @@ Bir bayi projesinin (900 × 600 cm, veranda üstünde cumba) montaj rehberi. Kay
 - **100'lük omegalar ve baş makas detayı (Lokman çizimi ve ölçüleri, 25 Ekim).** Pano 8 + 84 (EPS) + 8 mm = 100 mm; H sacı 1,2 mm, kanat uçları ezilmiş kıvrımla 2 mm (`HS`); H sırt genişliği toplam 5 cm (gövdenin iki yanına 2,5 cm; Lokman'ın çiziminde 43,92 mm), 100'lük ve 60'lıkta aynı. 100'lük omegalar 10,5 cm = 2 + 100 + 2 mm + 1 mm, dış kanat H kanadına yaslı, içteki aralıklar silikonize mastik (modelde boşluk). Saçak omegası (Lokman çizimi): içte 3 cm kanat + içe 3 cm ayak, dışta 3 cm kanat ve eğik dudak; duvar omegası iki yanda 3 cm. Baş makas omegası: derinlik 3 cm, içte 3 cm açık yanak, dışta 1 cm U yanak; 8 mm betopan U'ya girer, makasa dayanır; baş makaslar dış kanatla aynı hizada (`build_data.py` `BAS_DIS` = 0,3). Z değişmedi.
 - **Büyük pencereler.** 180/180 pencereli çelik karkas panelde (DVR, 251 × 250) pencere yanları da betopan kaplı ve fugalı.
 - **İç duvar omegası.** İç duvar üstlerine 60'lık duvar omegası: 6,5 cm açıklık (6 cm pano + H sacları), 3 cm derinlik, 3 cm kulaklar (`omega_duvar` `tur='ic'`, 375'lik parçalar, kapı üstlerinden kesintisiz).
-- **Ters tavan (adım 14).** Tavan omegalarının altına 12,5 mm alçıpan 120 × 250 (banyoda yeşil), verandada boardex 120 × 240.
-- **Çatı izolasyonu (adım 16).** 10 cm rulo cam yünü, her makas aralığına bir şerit; cumbada (veranda) makas yönünde yatay iki şerit; rehberde rulo açılarak serilir (`anim.serme`; rulo `userData.gecici`, GLB'ye girmez).
+- **Ters tavan (adım 12).** Tavan omegalarının altına 12,5 mm alçıpan 120 × 250 (banyoda yeşil), verandada boardex 120 × 240.
+- **Çatı izolasyonu (adım 13, aşıklardan önce).** 10 cm rulo cam yünü, her makas aralığına bir şerit; cumbada (veranda) makas yönünde yatay iki şerit; rehberde rulo açılarak serilir (`anim.serme`; rulo `userData.gecici`, GLB'ye girmez).
 - **Saçak, alın ve dere birleşimi** (Lokman'ın gönderdiği ev fotoğraflarına göre). Köşede iniş ağzı derenin uç kısmında, borunun hizasında; kaz boynu duvara (cumbada veranda kolonuna) dik döner, boru köşe direği kaplamasının (13 cm) yanından iner. Saçak sacının alnı derenin bütün boyunca köşeye kadar uzar (`SACAK` `f0`/`f1`); saçak altı baş makasın betopanına dayanıp kesilir (`t0`/`t1`); alın sacının saçak altı kolu makasın topuğunda biter, alın yüzü dereyi de içine alacak kadar geniştir ve derenin ucunu kapatır; ek parça yok (Lokman'ın işaretli fotoğrafları, 26 Ekim).
 - **Genel çatı yüzü sistemi.**
   - Her yüz yerel s (eğim boyunca), t (saçak boyunca), n (dik) koordinatlarında kurulur.

@@ -6,7 +6,7 @@ Dal: `claude/montaj-rehberi-devir`. Betikler: `deneme/2026-10-25_rehber_62m2/` (
 
 Lokman'ın Mac'indeki proje klasörü (DWG, SKP, yükleme listesi) okunarak PK-01 rehberinin aynısı bu proje için kuruldu. Bütün çıktılar o klasörde.
 
-- **Rehber.** 19 adım, 419 parça, kimlik kartlı (gece düzeltmelerinden sonra; ilk sürüm 18 adım, 420 parça).
+- **Rehber.** 20 adım (sıra Lokman'ın, 26 Ekim: makaslar tek adım, izolasyon aşıklardan önce, saçak sacı aşıklardan sonra, dere ve inişler ile alın sacları ayrı, ters mahya trapezden önce), 419 parça, kimlik kartlı (gece düzeltmelerinden sonra; ilk sürüm 18 adım, 420 parça).
   - Oda sırası (Lokman): Yatak 1 → banyo → hol → yatak 2 → salon-mutfak.
   - Başlıkta bayi adı Lokman'ın seçimiyle var. Özel artefakt ve Mac klasörü; depoda `__PROJE__`.
   - Özel artefakt: https://claude.ai/artifact/7B6xsSZsnAKhf3HoSpWZV2 (sürüm 2, akşam düzeltmeleriyle; render'lar `gorsel/` altında).
@@ -36,8 +36,8 @@ Lokman'ın Mac'indeki proje klasörü (DWG, SKP, yükleme listesi) okunarak PK-0
 4. **Baş makas detayı ve 100'lük omegalar (Lokman çizimi ve ölçüleri).** Pano 8 + 84 (EPS) + 8 mm; H kanadı 2 mm (1,2 mm sac, ezilmiş kıvrım); H sırt genişliği toplam 5 cm (gövdenin iki yanına 2,5 cm; Lokman'ın çiziminde 43,92 mm), 100'lük ve 60'lıkta aynı. 100'lük omegalar 10,5 cm = 2 + 100 + 2 + 1 mm, dış kanat H kanadına yaslı, içteki aralıklar silikonize mastik. Baş makas omegası: 3 cm derinlik, içte 3 cm açık yanak, dışta 1 cm U yanak; 8 mm betopan U'ya girer, makasa dayanır. Baş makaslar 3 mm dışarı (dış kanatla aynı hiza). Z önceki çizimdeki gibi.
 5. **İç duvar üstlerine 60'lık duvar omegası:** 6,5 cm açıklık, 3 cm derinlik, 3 cm kulaklar (listede 60'lık omega toplamı 127,64 m = tavan 111,8 + iç duvar ~15).
 5b. **Büyük pencereler:** DVR (251 × 250 çelik karkas) pencere yanları da fugalı.
-6. **Ters tavan alçıpanı** tavan omegalarından sonra (yeni adım 14; banyoda yeşil; verandada listedeki boardex).
-7. **10 cm rulo cam yünü** çatı kapanmadan (yeni adım 16): her makas aralığına bir şerit, cumbada makas yönünde yatay iki şerit; rehberde rulo açılarak serilir, kamera bütün şeritleri gösterir.
+6. **Ters tavan alçıpanı** tavan omegalarından sonra (adım 12; banyoda yeşil; verandada listedeki boardex).
+7. **10 cm rulo cam yünü** çatı kapanmadan (adım 13): her makas aralığına bir şerit, cumbada makas yönünde yatay iki şerit; rehberde rulo açılarak serilir, kamera bütün şeritleri gösterir.
 8. **Saçak, alın, makas ve dere köşesi** (Lokman'ın ev fotoğrafları ve işaretli çizimleri, 25–26 Ekim): ek parça yok, hepsi doğal duruşunda. Saçak sacının saçak altı baş makasa dayanıp kesilir, alnı ve kıvrımı köşeye kadar sürer; alın sacının saçak altı kolu makasın topuğunda kesilir, alın yüzü ve üst kıvrımı derenin ucunu içine alacak kadar geniş (~15 cm); makasın duvar dışındaki ucu betopanla kaplı. Köşe inişinde ağız borunun hizasında, kaz boynu duvara dik, boru köşe direği kaplamasının yanından iner. 9. **H sırtı** toplam 5 cm (gövdenin iki yanına 2,5; Lokman'ın çiziminde 43,92 mm).
 
 1 ve 2'yi "nem bariyeri ve OSB yok" ve "makas uçlarına artan betopanları döşe" cümlelerinin, gönderilen teyit listesinin 1. ve 3. maddesine cevap olduğu okumasıyla yaptım; Lokman'a söylendi.

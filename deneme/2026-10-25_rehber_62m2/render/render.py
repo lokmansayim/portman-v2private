@@ -146,7 +146,7 @@ KAM = {  # konum, hedef, objektif (mm), güneş (azimut, yükseklik)
 }
 if kip == 'gorunum':
     kp, kh, lens, (az, yuk) = KAM[sec]
-    gizle = set(range(8, 19)) if sec == 'catisiz' else set()   # 8–18: omegalar, saçak, makaslar, kalkan, tavan, aşık, izolasyon, trapez, alın ve dere
+    gizle = set(range(8, 20)) if sec == 'catisiz' else set()   # 8–19: omegalar, makaslar, kalkan, tavan, izolasyon, aşık, saçak, dere, ters mahya, trapez, alın (sıra Lokman, 26.10.2026)
     for o in nesneler:
         if adim(o) in gizle: o.hide_render = True
     if sec == 'cati_katman':   # arka yüzde basamaklı kesit: trapez sac → omega aşık → makas; tavanda cam yünü (bu projede OSB ve nem bariyeri yok)
