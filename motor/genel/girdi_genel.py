@@ -710,7 +710,8 @@ def girdi(y: dict, c: dict, m: dict, kur: dict, kaynak: str) -> dict:
         **({"ek_satirlar": ek_satirlar} if ek_satirlar else {}),
         # karkas kuralı (İE-16 PR-3a): kuralın kaydı ve paneller (yerleşim paftası ve kıyas için); yalnız tanım isterse
         **({"karkas": {"kural": m["karkas"]["kural"], "paneller": [{k_: p_[k_] for k_ in ("ad", "sinif", "boy_cm", "yukseklik_cm", "profil_boyu_m")}
-                                                                   for p_ in m["karkas"]["paneller"]]}} if kural_k else {}),
+                                                                   for p_ in m["karkas"]["paneller"]],
+                       "uyarilar": m["karkas"]["uyarilar"]}} if kural_k else {}),
     }
     if cm and set(cm) - kullanilan:
         raise SystemExit("Karkas modelinde tanımda karşılığı olmayan grup var: " + ", ".join(sorted(set(cm) - kullanilan)) + " (`celik_modeli.gruplar`).")
@@ -844,7 +845,8 @@ def girdi(y: dict, c: dict, m: dict, kur: dict, kaynak: str) -> dict:
         **({"renk": _renk(t["renk"], kur)} if t.get("renk") else {}),
         "bayi": {"gruplar": {"Sıhhi tesisat": bool(kapsam.get("sihhi_tesisat", True)), "Elektrik": bool(kapsam.get("elektrik", True))},
                  "not": "kapsam: projenin teknik özellikleri ve açıklama notları (alıcıya ait olanlar listeye girmez)"},
-        "uyarilar": uyari + ([m["tavan_omegasi_uyarisi"]] if m.get("tavan_omegasi_uyarisi") else []),
+        "uyarilar": uyari + ([m["tavan_omegasi_uyarisi"]] if m.get("tavan_omegasi_uyarisi") else [])
+                    + ([f"karkas kuralı: {u}" for u in m["karkas"]["uyarilar"]] if kural_k else []),
     }
     return g
 

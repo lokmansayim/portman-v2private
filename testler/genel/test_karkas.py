@@ -78,7 +78,8 @@ def test_140_birim_agirligi_kitabin_yontemiyle():
 
 
 @pytest.mark.parametrize("boy,adet", [(100, 1), (366, 1), (366.5, 2), (732, 2), (733, 3), (1098, 3)])
-def test_bolme_en_cok_366_esit_panel(boy, adet):
+def test_aciksiz_kosu_hedef_366_esit_panel(boy, adet):
+    assert karkas.d(KURAL, "bolme") == {"hedef_cm": 366}
     p = karkas.bol({"bas": 50.0, "son": 50.0 + boy}, [], KURAL)
     assert len(p) == adet and p[0][0] == 50.0 and p[-1][1] == 50.0 + boy
     assert max(b - a for a, b in p) - min(b - a for a, b in p) < 0.2 and all(b - a <= 366 for a, b in p)
@@ -88,6 +89,24 @@ def test_ek_yeri_acikligin_yakin_kenarina_kayar():
     # 600'lük koşu iki panel: ek yeri 300; 280–380 arası açıklık → yakın kenar 280
     assert karkas.bol({"bas": 0.0, "son": 600.0}, [{"a0": 280.0, "a1": 380.0}], KURAL) == [(0.0, 280.0), (280.0, 600.0)]
     assert karkas.bol({"bas": 0.0, "son": 600.0}, [{"a0": 220.0, "a1": 310.0}], KURAL) == [(0.0, 310.0), (310.0, 600.0)]
+    # 720'lik koşu: ek yeri 360, 300–370 kapısı → yakın kenar 370; ilk panel 370 (hedefi aşar, `kur` uyarı yazar)
+    assert karkas.bol({"bas": 0.0, "son": 720.0}, [{"a0": 300.0, "a1": 370.0}], KURAL) == [(0.0, 370.0), (370.0, 720.0)]
+
+
+def test_hedefi_asan_panel_uyari_olarak_yazilir():
+    """Ek yeri kapının kenarına kayınca panel 366'yı aşar (ÇP-14'te hol–veranda duvarı, 411,4 cm): sessiz kalmaz, kayıtta ve girdide uyarı."""
+    t = json.loads((KOK / "testler" / "celik" / "projeler" / "CP14" / "CP14.json").read_text(encoding="utf-8"))
+    kk = karkas.kur(yapi.kur(t), t, KURAL)
+    asan = [p for p in kk["paneller"] if p["boy_cm"] > 366 + karkas.TOL]
+    assert asan and len(kk["uyarilar"]) == len(asan)
+    assert all(p["ad"] in u and str(p["boy_cm"]) in u for p, u in zip(asan, kk["uyarilar"]))
+    kur = kurallar_oku.oku()
+    y = yapi.kur(t)
+    c = cati_genel.cati_kur(t["cati"], kur)
+    m = girdi_genel.metraj(y, c, kur)
+    g = girdi_genel.girdi(y, c, m, kur, "test")
+    assert [u for u in g["uyarilar"] if u.startswith("karkas kuralı: ")] == ["karkas kuralı: " + u for u in kk["uyarilar"]]
+    assert g["celik"]["karkas"]["uyarilar"] == kk["uyarilar"]
 
 
 def test_aciksiz_panelin_uyeleri():

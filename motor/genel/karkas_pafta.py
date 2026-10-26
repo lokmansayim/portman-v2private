@@ -2,8 +2,9 @@
 """Duvar panelleri yerleşim planı (İE-16 PR-3a): karkas kuralının bölmesi pafta olarak.
 
 Yalnız tanım karkas kuralını isterse çizilir (`"karkas": "kural"`; `uret` çağırır); istemeyen tanımın çizim seti değişmez. Açık
-paftalardaki düzen: planın üstünde her duvar paneli adıyla (D01…) ve boyuyla, panel ekleri duvarı kesen çizgiyle; kolon ve kirişler
-K01… (önce kolonlar, sonra kirişler; tanımdaki sırayla). Yanında panel tablosu: sınıf, profil, boy × yükseklik, açıklıklar, profil boyu.
+paftalardaki düzen: planın üstünde her duvar paneli adıyla (D01…) ve boyuyla (komşu paneller iki tonla); kolon ve kirişler K01… (önce
+kolonlar, sonra kirişler; tanımdaki sırayla). Yanında panel tablosu: sınıf, profil, boy × yükseklik, açıklıklar, profil boyu. Bölmenin
+hedef boyunu aşan paneller başlığın altında uyarı olarak yazılır.
 Bölme ve adlar `karkas.kur`'dan gelir; bu modül hesap yapmaz, yalnız çizer.
 
     python -m motor.genel.karkas_pafta tanim.json <çıktı klasörü>
@@ -142,6 +143,8 @@ def ciz(t: dict, hedef: Path, kod: str, kural: dict | None = None) -> dict:
                  fontsize=12, weight="bold", x=0.02, ha="left", y=0.975)
     fig.text(0.02, 0.945, f"Duvar paneli {sum(sayi.values())} ({ozet}). Ölçüler cm; panelin yanındaki sayı boyu. "
              f"Kural: {kk['kural']['yol']} (sha {kk['kural']['sha256'][:12]}).", fontsize=8.4, ha="left")
+    if kk["uyarilar"]:                                                 # hedef boyu aşan paneller (ek yeri açıklığın kenarına kaydı)
+        fig.text(0.02, 0.928, "Uyarı: " + "; ".join(kk["uyarilar"]), fontsize=8.0, ha="left", color="#a33a00", wrap=True)
     png_ad, pdf_ad = dosya_adlari(kod)
     hedef = Path(hedef)
     fig.savefig(hedef / png_ad, facecolor="white")
@@ -149,7 +152,7 @@ def ciz(t: dict, hedef: Path, kod: str, kural: dict | None = None) -> dict:
                                            "CreationDate": None, "ModDate": None}) as pp:
         pp.savefig(fig, facecolor="white")
     plt.close(fig)
-    return {"png": png_ad, "pdf": pdf_ad, "duvar_paneli": sayi, "kolon_kiris": len(ks), "kural": kk["kural"]}
+    return {"png": png_ad, "pdf": pdf_ad, "duvar_paneli": sayi, "kolon_kiris": len(ks), "kural": kk["kural"], "uyarilar": kk["uyarilar"]}
 
 
 def main() -> int:

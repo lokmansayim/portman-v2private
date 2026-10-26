@@ -3,7 +3,7 @@
  "kod": "ÇP-07",
  "tanim": {
   "yol": "testler/celik/projeler/CP07/CP07.json",
-  "sha256": "9cf602192cf4de4f0933acf59f7e31be02c05c08ab4c3ded855b433c90854a9b"
+  "sha256": "0b7cd8da05dbd1031b8f2e29133d36de31f7a75beca0ed907d2624fd9a37f94c"
  },
  "kural_seti": {
   "yol": "kurallar/liste/kurallar.json",
@@ -14,8 +14,8 @@
  "karkas_kurali": {
   "yol": "kurallar/karkas/celik_karkas.json",
   "sema": "portman.celik_karkas/0.1-taslak",
-  "sha256": "94fa1687df29741f3e1023a5823711e3ad18f3011dc6738ed973d6eb595c2732",
-  "kopya": "testler/celik/projeler/setler/94fa1687df29741f.json"
+  "sha256": "9660b3a862f50413a6a8cb2b68dc3cec95a1a4f704199362a4a03101a8b98ad0",
+  "kopya": "testler/celik/projeler/setler/9660b3a862f50413.json"
  },
  "yontem": {
   "kod": "omega_asik",

@@ -3,7 +3,8 @@
 Paftadan panel panel yazılmış tanımda (PR-2'nin ÇP-06'sı; bankadaki KT-01 = ÇP-13, KT-03 = ÇP-07) aynı hattaki uç uca paneller tek duvar
 olur (karkas kuralının koşusu: `motor/genel/karkas.py` › `kosular`); duvarlar W01… adını alır. Açıklıklar yeni duvarına yazılır; metinlerdeki
 panel adları (D01…) duvarın adına çevrilir. Karkas modeli (`celik_modeli`) çıkarılır, `karkas: "kural"` yazılır: panel bölmesi tanımda
-yoktur, kuraldan gelir. Geometri (kutuların birleşimi), mahaller, açıklıklar ve çatı aynı kalır.
+yoktur, kuraldan gelir. Kaynağın `okunmayanlar` notuna, onun kaynak tanımı anlattığı eklenir. Geometri (kutuların birleşimi), mahaller,
+açıklıklar ve çatı aynı kalır.
 
     python3 -m testler.celik.projeler.bolmesiz <kaynak tanım> <çıktı> --kod ÇP-07 --ad "…" --cizim "…"
 
@@ -58,6 +59,9 @@ def bolmesiz(t: dict, kaynak_yolu: str, kod: str, ad: str, cizim: str) -> dict:
     out["kaynak"] = {**{k: _cevir(v, harita) for k, v in t.get("kaynak", {}).items() if k != "cizim"}, "cizim": cizim,
                      "bolmesiz": f"{kaynak_yolu} tanımının bölmesiz yazımı (testler/celik/projeler/bolmesiz.py): aynı hattaki uç uca paneller tek duvar "
                                  "(W01…); panel bölmesi tanımda yok, karkas kuralından (`karkas: kural`). Karkas modeli (`celik_modeli`) çıkarıldı."}
+    if "okunmayanlar" in out["kaynak"]:              # kaynağın notu kendi okunuşunu anlatır (ör. "çelik ağırlığı ortalamadan"); bu yazımda ağırlık kuraldan
+        out["kaynak"]["okunmayanlar"] += (" [Bölmesiz yazım: bu not kaynak tanımın okunuşunu anlatır; bu yazımda duvar, kolon ve kiriş panellerinin "
+                                          "bölmesi ve ağırlığı karkas kuralından gelir.]")
     out["duvarlar"] = yeni_duvarlar + kalan
     for a in out.get("acikliklar", []):
         a["duvar"] = harita.get(a["duvar"], a["duvar"])

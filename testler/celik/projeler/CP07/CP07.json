@@ -7,7 +7,7 @@
  "birim": "cm",
  "kat": "zemin",
  "kaynak": {
-  "okunmayanlar": "Bu tanım, kendi listemiz dondurulduktan (9 Ekim 2026 23:55) ve gerçek listeyle kıyaslandıktan sonra düzeltilmiş halidir. Paftalardaki adetler (çatı kaplaması, tavan omegası, aşık, dere inişi) yine girdi değil; makas adedi paftadaki numaralardan, saçak çizgileri paftadaki çizimden düzeltildi.",
+  "okunmayanlar": "Bu tanım, kendi listemiz dondurulduktan (9 Ekim 2026 23:55) ve gerçek listeyle kıyaslandıktan sonra düzeltilmiş halidir. Paftalardaki adetler (çatı kaplaması, tavan omegası, aşık, dere inişi) yine girdi değil; makas adedi paftadaki numaralardan, saçak çizgileri paftadaki çizimden düzeltildi. [Bölmesiz yazım: bu not kaynak tanımın okunuşunu anlatır; bu yazımda duvar, kolon ve kiriş panellerinin bölmesi ve ağırlığı karkas kuralından gelir.]",
   "koordinat": "Köken verandanın batı dış çizgisi; binanın güney dış yüzü y = 0,2. +x doğu, +y kuzey (paftada kuzey işareti yok; çizimin üstü kuzey alındı). Veranda batıda, salonun güneyinde; giriş doğuda, sundurmadan.",
   "cizim": "ÇP-07 = KT-03 (aynı proje; montaj paftasının panel sayfası ve plan ölçüleri aynı, 25 Ekim 2026). Bankadaki KT-03 tanımı (modeller/KT03.json; 9 Ekim 2026'da projenin montaj paftasından okundu, kıyastan sonra düzeltildi).",
   "bolmesiz": "modeller/KT03.json tanımının bölmesiz yazımı (testler/celik/projeler/bolmesiz.py): aynı hattaki uç uca paneller tek duvar (W01…); panel bölmesi tanımda yok, karkas kuralından (`karkas: kural`). Karkas modeli (`celik_modeli`) çıkarıldı."

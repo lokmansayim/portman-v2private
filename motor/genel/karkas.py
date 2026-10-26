@@ -7,8 +7,8 @@ Yalnız tanım isterse çalışır (`"karkas": "kural"`); istemeyen tanımın ç
 
 1. **Koşu.** Aynı sınıf, aynı doğrultu, aynı hat (kalınlık), aynı profil ve yükseklikteki, uç uca değen duvarlar tek koşudur: tanım
    duvarı nasıl yazmış olursa olsun (bölmeli ya da bölmesiz) koşu aynıdır. Eğik üst kotlu duvar kendi başına koşudur.
-2. **Bölme.** Koşu, en çok `bolme.en_cok_cm` boyunda eşit panellere bölünür; ek yeri bir açıklığın içine düşerse açıklığın yakın kenarına
-   kayar.
+2. **Bölme.** Koşu `ceil(boy / bolme.hedef_cm)` eşit panele bölünür; ek yeri bir açıklığın içine düşerse açıklığın yakın kenarına
+   kayar. Panel bu yüzden hedef boyu aşabilir: aşan her panel kayda (`uyarilar`) ve paftaya yazılır, sessiz kalmaz.
 3. **Üyeler** (panel başına, cm): alt ve üst başlık; ızgara dikmeleri (panel başından `dikme_araligi_cm` arayla, uçta da bir dikme);
    açıklığın içine düşen ızgara dikmesi kırpıktır (lentonun üstü ve denizliğin altı); açıklığın kenarında, yarım aralık içinde tam dikme
    yoksa kenar dikmesi; açıklığın başlık levhası (net + `levha_payi_cm`) ve pencerede denizlik levhası; kuşaklar (`kusak_kotlari_cm`,
@@ -97,11 +97,12 @@ def _acikliklar(y: dict, kosu: dict) -> list[dict]:
 
 
 def bol(kosu: dict, acik: list[dict], k: dict) -> list[tuple[float, float]]:
-    """Koşunun panelleri [(baş, son)], mutlak konum (cm). Eşit bölme; açıklığın içine düşen ek yeri yakın kenara kayar."""
+    """Koşunun panelleri [(baş, son)], mutlak konum (cm). Eşit bölme; açıklığın içine düşen ek yeri yakın kenara kayar (panel hedef
+    boyu aşabilir; `kur` aşanı `uyarilar`'a yazar)."""
     b = d(k, "bolme")
     bas, son = kosu["bas"], kosu["son"]
     L = son - bas
-    n = max(1, math.ceil(L / b["en_cok_cm"] - 1e-9))
+    n = max(1, math.ceil(L / b["hedef_cm"] - 1e-9))
     ekler = []
     for i in range(1, n):
         j = bas + L * i / n
@@ -161,6 +162,9 @@ def kur(y: dict, t: dict, k: dict) -> dict:
                              "acikliklar": [a["ad"] for a in acik if a["a1"] > p0 + TOL and a["a0"] < p1 - TOL],
                              "uyeler_m": {ad: round(v, 4) for ad, v in u.items()}, "profil_boyu_m": round(sum(u.values()), 4)})
     _adlandir(paneller)
+    hedef = d(k, "bolme")["hedef_cm"]
+    uyarilar = [f"{p['ad']} ({', '.join(p['kosu'])}): panel {p['boy_cm']} cm, bölmenin hedefi {hedef} cm; ek yeri açıklığın kenarına kaydı"
+                for p in paneller if p["boy_cm"] > hedef + TOL]
     kol = d(k, "kolon")["profil_m_m"]
     kolonlar = [{"ad": w["ad"], "yukseklik_cm": yapi._yukseklik(w), "profil_boyu_m": round(kol * yapi._yukseklik(w) / 100, 4)}
                 for w in y["duvarlar"] if w["sinif"] == "kolon"]
@@ -173,7 +177,7 @@ def kur(y: dict, t: dict, k: dict) -> dict:
         boy = max(bx1 - bx0, by1 - by0)
         kirisler.append({"ad": kr["ad"], "boy_cm": boy, "profil_boyu_m": round(kir * boy / 100, 4)})
     return {"kural": {"yol": _goreli(k["_yol"]), "sha256": k["_sha256"], "sema": k.get("sema")},
-            "paneller": paneller, "kolonlar": kolonlar, "kirisler": kirisler}
+            "paneller": paneller, "kolonlar": kolonlar, "kirisler": kirisler, "uyarilar": uyarilar}
 
 
 def _goreli(p: str) -> str:
@@ -249,6 +253,8 @@ def main() -> int:
         print(f"{p['ad']} {p['sinif']:8s} {p['boy_cm']:7.1f} × {p['yukseklik_cm']:5.1f}  {p['profil_boyu_m']:7.2f} m  {', '.join(p['acikliklar'])}")
     for x in kk["kolonlar"] + kk["kirisler"]:
         print(f"{x['ad']} {x['profil_boyu_m']:7.2f} m")
+    for u in kk["uyarilar"]:
+        print("  UYARI:", u)
     if a.json:
         a.json.write_text(json.dumps(kk, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     return 0

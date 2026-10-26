@@ -3,7 +3,7 @@
  "kod": "ÇP-13",
  "tanim": {
   "yol": "testler/celik/projeler/CP13/CP13.json",
-  "sha256": "cae88e59f835a68268fde1119000c521d3b09b48de649f82f81a53df1b1bfe15"
+  "sha256": "7049bca4dbef9f72fd5ee0c3650d1793a509c785d2677c413f6592d934d6ae92"
  },
  "kural_seti": {
   "yol": "kurallar/liste/kurallar.json",
@@ -14,8 +14,8 @@
  "karkas_kurali": {
   "yol": "kurallar/karkas/celik_karkas.json",
   "sema": "portman.celik_karkas/0.1-taslak",
-  "sha256": "94fa1687df29741f3e1023a5823711e3ad18f3011dc6738ed973d6eb595c2732",
-  "kopya": "testler/celik/projeler/setler/94fa1687df29741f.json"
+  "sha256": "9660b3a862f50413a6a8cb2b68dc3cec95a1a4f704199362a4a03101a8b98ad0",
+  "kopya": "testler/celik/projeler/setler/9660b3a862f50413.json"
  },
  "yontem": {
   "kod": "omega_asik",
