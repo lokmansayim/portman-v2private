@@ -65,3 +65,11 @@ Makas kartında eksik virgül yüzünden makasa dokununca kart açılmıyordu (`
 - Maketin baskısı Lokman'da. Önce ölçek (1:50) ve baskı yönü denenir.
 - VPS yayını (kart 104): iki rehber (PK-01 ve bu proje) aynı paketle yayınlanabilir.
   - Herkese açık sürümde başlık kod ya da model adı olur; iç notlar temizlenir (`2026-10-24_Rehber_Yayin_Devri.md`).
+
+## Güncelleme · 26 Ekim 2026 sabah · herkese açık yayın
+
+62 m² rehberi https://rehber.portatifev.com'da yayında; PK-01'in yerine geçti. PK-01 sunucuda `onceki` sürüm olarak duruyor.
+
+- Paket ve deneme: `yayin/paketle.py`, `yayin/dene.py`.
+- Ayrıntı ve kanıt: `docs/devir/2026-10-24_Rehber_Yayin_Devri.md` › Kapanış ve `DURUM.md` › 26 Ekim sabah eki.
+- Rehberde değişiklik olursa yeni paket üretilir ve aynı betikle yayına alınır.

@@ -76,3 +76,29 @@ Render oturumunun çıktısı: son görünümler ve rehbere eklenmiş galeri. Ha
 - Pafta görselindeki "Lokman'ın çizimleri" ibaresi ve kartlardaki "Lokman çizimi", "Lokman, fotoğraflar", "teyit bekliyor" notları.
 - `__PROJE__` adı.
 - Galeri `GORSELLER` dizisi, şablonda.
+
+## Kapanış · 25–26 Ekim 2026
+
+**Durum: Canlıda çalışıyor** → https://rehber.portatifev.com
+
+**Kararlar (Lokman, 25 Ekim):**
+- Adres alt alan adı, VPS'te; başlıkta kod; arama motorlarına kapalı (noindex).
+- 26 Ekim 10:11: 62 m² Beşik + Cumba rehberi PK-01'in yerine.
+
+**Sunucu:**
+- Betik `vps/rehber_yayin.sh`; tek dosya kurulum `<rehber>/yayin/cikti/rehber_kur.sh`.
+- Koşturma, Mac'ten: `ssh portman-vps 'timeout 300 bash -s -- --dene|--uygula|--geri' < rehber_kur.sh > çıktı.txt 2>&1`.
+- `portman.conf` ve Portman servisleri değişmez.
+
+**Paketler:**
+- PK-01: `deneme/2026-10-24_montaj_rehberi/yayin/` (`paketle.py`, `dene.py`).
+- 62 m²: `deneme/2026-10-25_rehber_62m2/yayin/`.
+- 62 m² paketi esbuild ile yorumsuz yazılır: `paketle.py --npm <npm pack> --esbuild <yol>`. Gereken npm paketleri: three@0.160.0, @fontsource/barlow-condensed, ibm-plex-mono ve source-sans-3, esbuild@0.23.1.
+
+**Sürümler (sunucuda):**
+- `20261025191940`: PK-01, `onceki`.
+- `20261026103836`: 62 m², `guncel`.
+
+**Dikkat:**
+- İlk `--uygula` DNS denetimindeki `::ffff:` hatasıyla durmuştu; hiçbir şey değişmedi, betik düzeltildi (`5285247`).
+- Yeni rehber yayını: aynı paketleyiciyle yeni `rehber_kur.sh`, önce `--dene`, sonra `--uygula`.
