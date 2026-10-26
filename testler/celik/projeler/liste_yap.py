@@ -2,8 +2,9 @@
 
 Hakemin (`testler/celik/kiyas.py`) okuduğu tek listemizi kurar. Liste elle yazılmaz: tanım genel motordan geçer (LLM yok), motorun yükleme
 listesinin satırları yazılış sözlüğüyle (`sozluk.json`) listenin yazılışına çevrilir; adet ve kg motorundur. Çelik panel satırlarına hakemin
-türü (`tur`) yazılır; bilinmeyen çelik satırı aracı durdurur. Kıyas, açık beş listenin yöntemiyle (B: tavan omegası ve aşık) yapılır;
-bayiye giden liste kitabın yöntemiyle (A) ayrıca üretilir, kıyasa girmez.
+türü (`tur`) yazılır; bilinmeyen çelik satırı aracı durdurur. Kıyas, projenin paftasındaki yöntemle yapılır: ÇP-06, ÇP-07, ÇP-13 ve
+ÇP-14'te tavan omegası ve aşık (B, varsayılan), ÇP-03'te makas, tavan paneli ve çatı paneli (A, `--yontem panel`; İE-16 PR-3a: PR-2'de beşi
+de B sanılmıştı); bayiye giden liste kitabın yöntemiyle (A) ayrıca üretilir, kıyasa girmez.
 
 Liste girdileriyle yeniden üretilebilir (`test_listeler.py`): tanım ve sözlük öneren ağacındadır, değişince liste yeniden üretilir; kural seti
 kitaptadır (başkası değiştirebilir), bu yüzden listeyle birlikte içerik adresli kopyası `setler/<sha256 ilk 16>.json` donar
@@ -13,6 +14,9 @@ yalnız motorun satırından gelir (kitabın `renkli_kalemler` kuralı), adı mo
 bizim kalemimizde olmayan bir renk sözcüğü yazamaz (`ad_renk_denetimi`, `RENKLER`).
 
     python3 -m testler.celik.projeler.liste_yap testler/celik/projeler/CP06/CP06.json [--yontem omega_asik] [--set kurallar/liste/kurallar.json]
+        [--karkas kurallar/karkas/celik_karkas.json]
+
+Tanım karkas kuralını isterse (`karkas: kural`; İE-16 PR-3a) kuralın dosyası da kural seti gibi içerik adresli kopyasıyla donar (`setler/`).
 
 Çıktı tanımın yanındaki `bizim_liste.json`; `--motor-cikti <klasör>` motorun bütün çıktısını (plan, çizim seti, IFC, liste) o klasörde bırakır.
 """
@@ -36,6 +40,7 @@ BURADA = Path(__file__).resolve().parent
 KOK = BURADA.parents[2]
 SOZLUK = BURADA / "sozluk.json"
 VARSAYILAN_SET = KOK / "kurallar" / "liste" / "kurallar.json"
+VARSAYILAN_KARKAS = KOK / "kurallar" / "karkas" / "celik_karkas.json"   # karkas kuralı (İE-16 PR-3a); yalnız tanım `karkas: kural` isterse
 SETLER = BURADA / "setler"
 SAYI = re.compile(r"\d+(?:[.,]\d+)?")  # hakemin anahtarındaki sayı (testler/celik/kiyas.py)
 # adda denetlenen renk sözcükleri (katlanmış); kapalı liste, dışındaki renk yazımı incelemede bakılır (sozluk.json › açıklama)
@@ -45,6 +50,8 @@ RENKLER = {"ANTRASIT", "GRI", "FUME", "KIRMIZI", "BORDO", "BEYAZ", "SIYAH", "YES
 # motorun çelik panel satırları → hakemin türleri (testler/celik/oku.py › HARF)
 CELIK_TURLERI = [
     (r"^(Dış|İç) cephe duvar panelleri$", "duvar_paneli"),
+    (r"^Müştemilat duvar panelleri$", "duvar_paneli"),                       # ÇP-13 (= KT-01; İE-16 PR-3a): müştemilat ve veranda duvarları
+    (r"^Veranda (korkuluğu|duvarı \(giriş çerçevesi\))", "duvar_paneli"),   # hakemde D (DUVAR, KORKULUK)
     (r"^Veranda dikmeleri \(kolon paneli\)$", "kolon_kiris"),
     (r"^Kirişler \(kiriş paneli", "kolon_kiris"),
     (r"^Çatı makas panelleri$", "makas"),
@@ -160,9 +167,9 @@ def cevir(s: dict, sozluk: dict) -> dict:
     return out
 
 
-def motor(tanim: Path, cikti: Path, yontem: str, kural_seti: Path) -> Path:
+def motor(tanim: Path, cikti: Path, yontem: str, kural_seti: Path, karkas: Path | None = None) -> Path:
     komut = [sys.executable, "-m", "motor.genel.uret", str(tanim), str(cikti), "--set", str(kural_seti), "--yontem", yontem,
-             "--perspektifsiz", "--bayisiz"]
+             "--perspektifsiz", "--bayisiz"] + (["--karkas", str(karkas)] if karkas else [])
     r = subprocess.run(komut, cwd=KOK, capture_output=True, text=True)
     if r.returncode != 0:
         raise SystemExit(f"genel motor başarısız ({r.returncode}): {(r.stdout + r.stderr)[-2000:]}")
@@ -186,7 +193,7 @@ def set_kaydi(kural_seti: Path, yaz: bool = True) -> dict:
             "kopya": kopya.relative_to(KOK).as_posix()}
 
 
-def liste(tanim: Path, yukleme: Path, yontem: str, kural_kaydi: dict, sozluk_yolu: Path = SOZLUK) -> dict:
+def liste(tanim: Path, yukleme: Path, yontem: str, kural_kaydi: dict, sozluk_yolu: Path = SOZLUK, karkas_kaydi: dict | None = None) -> dict:
     t = json.loads(Path(tanim).read_text(encoding="utf-8"))
     y = json.loads(Path(yukleme).read_text(encoding="utf-8"))
     sozluk = json.loads(Path(sozluk_yolu).read_text(encoding="utf-8"))
@@ -200,6 +207,7 @@ def liste(tanim: Path, yukleme: Path, yontem: str, kural_kaydi: dict, sozluk_yol
         "kod": t["kod"],
         "tanim": {"yol": Path(tanim).resolve().relative_to(KOK).as_posix(), "sha256": sha256(tanim)},
         "kural_seti": kural_kaydi,
+        **({"karkas_kurali": karkas_kaydi} if karkas_kaydi else {}),
         "yontem": {"kod": y["yontem"], "ad": y.get("yontem_adi")},
         "sozluk": {"surum": sozluk["surum"], "sha256": sha256(sozluk_yolu)},
         "satirlar": satirlar,
@@ -218,6 +226,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("tanim", type=Path)
     ap.add_argument("--yontem", choices=("omega_asik", "panel"), default="omega_asik")
     ap.add_argument("--set", type=Path, default=VARSAYILAN_SET)
+    ap.add_argument("--karkas", type=Path, default=VARSAYILAN_KARKAS, help="karkas kuralı (yalnız tanım `karkas: kural` isterse)")
     ap.add_argument("--motor-cikti", type=Path, help="motorun çıktısını bu klasörde bırak (yoksa geçici klasör)")
     ap.add_argument("--cikti", type=Path, help="liste dosyası (varsayılan: tanımın yanındaki bizim_liste.json)")
     a = ap.parse_args(argv)
@@ -225,9 +234,13 @@ def main(argv: list[str] | None = None) -> int:
     hedef = (a.cikti or tanim.parent / "bizim_liste.json").resolve()
     kayit = set_kaydi(a.set.resolve(), yaz=hedef.is_relative_to(BURADA))
     calisan = KOK / kayit["kopya"] if (KOK / kayit["kopya"]).exists() else a.set.resolve()
+    # karkas kuralı (yalnız tanım isterse): kural seti gibi içerik adresli kopyası listeyle donar, motor o kopyayla koşar
+    kk = (set_kaydi(a.karkas.resolve(), yaz=hedef.is_relative_to(BURADA))
+          if json.loads(tanim.read_text(encoding="utf-8")).get("karkas") == "kural" else None)
+    kk_calisan = (KOK / kk["kopya"] if (KOK / kk["kopya"]).exists() else a.karkas.resolve()) if kk else None
     with tempfile.TemporaryDirectory() as gecici:
         klasor = a.motor_cikti.resolve() if a.motor_cikti else Path(gecici)
-        veri = liste(tanim, motor(tanim, klasor, a.yontem, calisan), a.yontem, kayit)
+        veri = liste(tanim, motor(tanim, klasor, a.yontem, calisan, kk_calisan), a.yontem, kayit, karkas_kaydi=kk)
     yaz(veri, hedef)
     celik = [s for s in veri["satirlar"] if "tur" in s]
     print(f"{veri['kod']}: {len(veri['satirlar'])} satır ({len(celik)} çelik, {round(sum(s['kg'] or 0 for s in celik), 2)} kg; "

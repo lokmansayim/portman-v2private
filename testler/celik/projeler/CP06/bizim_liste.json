@@ -2,14 +2,20 @@
  "aciklama": "Kendi listemiz (öneren, İE-16): Yapı Tanımı genel motordan geçti, satırlar yazılış sözlüğüyle listenin yazılışına çevrildi (`testler/celik/projeler/liste_yap.py`); adet ve kg motorundur. Hakem bu dosyayı yalnız bu yoldan ve commit'li okur.",
  "kod": "ÇP-06",
  "tanim": {
-  "yol": "testler/celik/projeler/CP06/CP06.json",
-  "sha256": "f3697162624d161d6946d1be0247a4a4d07a240414af38ade05a524aa5b88b7c"
+  "yol": "testler/celik/projeler/CP06/CP06_kural.json",
+  "sha256": "aead5521522d1a0ecd27c83bf5fff41cc0964c01f601311e039784b154f6ec35"
  },
  "kural_seti": {
   "yol": "kurallar/liste/kurallar.json",
   "sema": "portman.yukleme_kurallari/0.20-taslak",
   "sha256": "51e813a5107a047f625c95592126cddb90d4e22215c27bf0dff490405ec6117b",
   "kopya": "testler/celik/projeler/setler/51e813a5107a047f.json"
+ },
+ "karkas_kurali": {
+  "yol": "kurallar/karkas/celik_karkas.json",
+  "sema": "portman.celik_karkas/0.1-taslak",
+  "sha256": "a3683af36f42b92d9669c570fd08f0866e6e912f8e9d9c9e3a5af1849060932a",
+  "kopya": "testler/celik/projeler/setler/a3683af36f42b92d.json"
  },
  "yontem": {
   "kod": "omega_asik",
@@ -20,10 +26,10 @@
   "sha256": "2f3a7a20c94710eb3aa7376bc254176433acb7146d9e2d911534a45200816867"
  },
  "satirlar": [
-  {"grup": "Çelik panel", "kalem": "Dış cephe duvar panelleri", "boyut": "80 × 45 × 1,2", "adet": 16, "kg": 771.32, "durum": "motor", "tur": "duvar_paneli"},
-  {"grup": "Çelik panel", "kalem": "İç cephe duvar panelleri", "boyut": "80 × 45 × 1,2", "adet": 10, "kg": 449.71, "durum": "motor", "tur": "duvar_paneli"},
-  {"grup": "Çelik panel", "kalem": "Veranda dikmeleri (kolon paneli)", "boyut": "80 × 45 × 1,2", "adet": 1, "kg": 15.41, "durum": "motor", "tur": "kolon_kiris"},
-  {"grup": "Çelik panel", "kalem": "Kirişler (kiriş paneli)", "boyut": "80 × 45 × 1,2", "adet": 3, "kg": 65.5, "durum": "motor", "tur": "kolon_kiris"},
+  {"grup": "Çelik panel", "kalem": "Dış cephe duvar panelleri", "boyut": "80 × 45 × 1,2", "adet": 14, "kg": 813.13, "durum": "varsayim", "tur": "duvar_paneli"},
+  {"grup": "Çelik panel", "kalem": "İç cephe duvar panelleri", "boyut": "80 × 45 × 1,2", "adet": 8, "kg": 475.83, "durum": "varsayim", "tur": "duvar_paneli"},
+  {"grup": "Çelik panel", "kalem": "Veranda dikmeleri (kolon paneli)", "boyut": "80 × 45 × 1,2", "adet": 1, "kg": 14.82, "durum": "varsayim", "tur": "kolon_kiris"},
+  {"grup": "Çelik panel", "kalem": "Kirişler (kiriş paneli)", "boyut": "80 × 45 × 1,2", "adet": 3, "kg": 61.1, "durum": "varsayim", "tur": "kolon_kiris"},
   {"grup": "Çelik panel", "kalem": "Çatı makas panelleri", "boyut": "80 × 45 × 0,8", "adet": 13, "kg": 568.11, "durum": "motor", "tur": "makas"},
   {"grup": "Çelik panel", "kalem": "Boy C profil", "boyut": "80 × 45 × 0,8", "adet": 3, "kg": 15, "durum": "motor", "tur": "c_profil"},
   {"grup": "Çelik panel", "kalem": "Boy C profil", "boyut": "80 × 45 × 1,2", "adet": 3, "kg": 15, "durum": "motor", "tur": "c_profil"},
@@ -87,8 +93,8 @@
   {"grup": "VİDA GRUBU", "kalem": "Trapez vida (5,5 × 25)", "boyut": "adet", "adet": 1000, "kg": null, "durum": "excel", "bizim_grup": "Vida", "liste_adi": "( 5.5 X 25 ) TRAPEZ VİDA (AŞIK+OMEGA+KÖŞEBENT)"},
   {"grup": "VİDA GRUBU", "kalem": "Trapez vida (5,5 × 60)", "boyut": "adet", "adet": 250, "kg": null, "durum": "motor", "bizim_grup": "Vida", "liste_adi": "( 5.5 X 60 ) TRAPEZ VİDA (TRAPEZ SAC / METAL KİREMİT)"},
   {"grup": "VİDA GRUBU", "kalem": "Trapez vida (5,5 × 110; sandviç panel)", "boyut": "adet", "adet": 750, "kg": null, "durum": "motor", "bizim_grup": "Vida", "liste_adi": "( 5.5X 110) TRAPEZ VİDA ( SANDVİÇ PANEL)"},
-  {"grup": "DEPO GRUBU", "kalem": "Çelik dübel (klipsli)", "boyut": "adet", "adet": 52, "kg": null, "durum": "motor", "bizim_grup": "Vida", "liste_adi": "ÇELİK DÜBEL ( KLİPSLİ )"},
-  {"grup": "VİDA GRUBU", "kalem": "Şase pul", "boyut": "adet", "adet": 52, "kg": null, "durum": "motor", "bizim_grup": "Vida"},
+  {"grup": "DEPO GRUBU", "kalem": "Çelik dübel (klipsli)", "boyut": "adet", "adet": 44, "kg": null, "durum": "motor", "bizim_grup": "Vida", "liste_adi": "ÇELİK DÜBEL ( KLİPSLİ )"},
+  {"grup": "VİDA GRUBU", "kalem": "Şase pul", "boyut": "adet", "adet": 44, "kg": null, "durum": "motor", "bizim_grup": "Vida"},
   {"grup": "DEPO GRUBU", "kalem": "8'lik trapez uç", "boyut": "adet", "adet": 6, "kg": null, "durum": "motor", "bizim_grup": "Vida", "liste_adi": "8 LİK TRAPEZ UÇ"},
   {"grup": "DEPO GRUBU", "kalem": "PH2 uç", "boyut": "adet", "adet": 6, "kg": null, "durum": "motor", "bizim_grup": "Vida", "liste_adi": "PH2 UÇ"},
   {"grup": "DEPO GRUBU", "kalem": "230'luk kesme taşı", "boyut": "adet", "adet": 6, "kg": null, "durum": "lokman", "bizim_grup": "Vida", "liste_adi": "230 LUK KESME TAŞI"},

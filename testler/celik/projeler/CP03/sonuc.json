@@ -1,0 +1,45 @@
+{
+ "aciklama": "Çelik hakeminin sonucu (İE-16). Yalnız tutanlar: çelik kg kapısının sonucu (farkı yalnız geçtiyse), adedi tutan çelik türleri ve adedi tutan öteki satırlar (anahtar ve bizim adedimiz). Tutmayan satırların gerçek değeri depoya girmez; sayilar kıyasın özetidir.",
+ "kod": "ÇP-03",
+ "tarih": "2026-10-26",
+ "kiyas_commit": "5893831e628536cc86bce97275c3d109deee5b89",
+ "bizim_liste": {
+  "yol": "testler/celik/projeler/CP03/bizim_liste.json",
+  "commit": "5185f691fdd59d30cd41625e73daef5935f1adfc"
+ },
+ "muhur": {
+  "sha256": "7f343b5e4ae429626889ddcb14da93d747cf0992864dd7e3bd4bdf3c58634d4d",
+  "bayt": 180390,
+  "durum": "acik",
+  "kayit_durumu": "acik",
+  "liste_sayfasi": 0,
+  "muhur_commit": "a31afcd1d6ccfcbcbb24be72d94c03203747fe57"
+ },
+ "celik_kg_kapisi": {
+  "sonuc": "geçmedi",
+  "pay_yuzde": 3.0,
+  "kapi_disi": [],
+  "kapi_disi_bizim_kg": null,
+  "fark_yuzde": null
+ },
+ "celik_turleri_tutan": [
+  {
+   "tur": "kolon_kiris",
+   "adet": 10
+  },
+  {
+   "tur": "c_profil",
+   "adet": 6
+  }
+ ],
+ "sayilar": {
+  "aynı": 0,
+  "farklı": 4,
+  "adet okunamadı": 0,
+  "bizde yok": 6,
+  "bizde fazla": 34
+ },
+ "tutanlar": [
+
+ ]
+}

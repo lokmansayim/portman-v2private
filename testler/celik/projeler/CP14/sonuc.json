@@ -1,0 +1,64 @@
+{
+ "aciklama": "Çelik hakeminin sonucu (İE-16). Yalnız tutanlar: çelik kg kapısının sonucu (farkı yalnız geçtiyse), adedi tutan çelik türleri ve adedi tutan öteki satırlar (anahtar ve bizim adedimiz). Tutmayan satırların gerçek değeri depoya girmez; sayilar kıyasın özetidir.",
+ "kod": "ÇP-14",
+ "tarih": "2026-10-26",
+ "kiyas_commit": "e308f83749167378daa3e7eb70f4ed5b3bce2577",
+ "bizim_liste": {
+  "yol": "testler/celik/projeler/CP14/bizim_liste.json",
+  "commit": "706a05ea36cc09d1d9b3d37fed6cf3d72171e1c6"
+ },
+ "muhur": {
+  "sha256": "4b884c7c27bf3bd509f618c504ededb3611346fa15b5d4ee763742160c8bc406",
+  "bayt": 182026,
+  "durum": "acik",
+  "kayit_durumu": "acik",
+  "liste_sayfasi": 0,
+  "muhur_commit": "a31afcd1d6ccfcbcbb24be72d94c03203747fe57"
+ },
+ "celik_kg_kapisi": {
+  "sonuc": "geçmedi",
+  "pay_yuzde": 3.0,
+  "kapi_disi": [
+   "c_profil"
+  ],
+  "kapi_disi_bizim_kg": 30.0,
+  "fark_yuzde": null
+ },
+ "celik_turleri_tutan": [
+  {
+   "tur": "kolon_kiris",
+   "adet": 6
+  },
+  {
+   "tur": "makas",
+   "adet": 26
+  },
+  {
+   "tur": "cati_paneli",
+   "adet": 5
+  },
+  {
+   "tur": "c_profil",
+   "adet": 6
+  }
+ ],
+ "sayilar": {
+  "aynı": 10,
+  "farklı": 10,
+  "adet okunamadı": 0,
+  "bizde yok": 61,
+  "bizde fazla": 74
+ },
+ "tutanlar": [
+  {"grup": "KAPI VE PENCERE", "ad": "MELAMIN KAPI 80 LIK KANAT", "olcu": [90.0, 214.0], "adet": 6},
+  {"grup": "ELEKTRIK", "ad": "YUVARLAK GLOP", "olcu": [], "adet": 3},
+  {"grup": "ELEKTRIK", "ad": "AMPUL", "olcu": [], "adet": 11},
+  {"grup": "ELEKTRIK", "ad": "UYDU KABLO", "olcu": [], "adet": 25},
+  {"grup": "ELEKTRIK", "ad": "BESLEME KABLOSU SIGORTA KUTULARI ARASI", "olcu": [], "adet": 5},
+  {"grup": "ELEKTRIK", "ad": "BESLEME KABLO BORUSU", "olcu": [], "adet": 5},
+  {"grup": "ELEKTRIK", "ad": "ZIL", "olcu": [], "adet": 1},
+  {"grup": "ELEKTRIK", "ad": "SIGORTA KUTUSU", "olcu": [12.0], "adet": 1},
+  {"grup": "VIDA", "ad": "5 5X 110 TRAPEZ VIDA SANDVIC PANEL", "olcu": [], "adet": 1000},
+  {"grup": "VIDA", "ad": "CIRPI IPI", "olcu": [], "adet": 1}
+ ]
+}

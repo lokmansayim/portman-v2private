@@ -1,5 +1,5 @@
 """İE-16 PR-2 · hedef örnek ÇP-06 (öneren tarafı): Yapı Tanımı bugünkü genel motor ve kural kitabıyla geçer, panel adedi tanıma paftadan
-yazıldı (girdi), listemiz hakemin türleriyle okunur. Listenin yeniden üretimi ve sözlüğün sayı kuralı `test_listeler.py`'de; hakemin
+yazıldı (girdi), listemiz hakemin türleriyle okunur. PR-3a'dan beri listemiz panelli tanımın bölmesiz yazımından (`CP06_kural.json`). Listenin yeniden üretimi ve sözlüğün sayı kuralı `test_listeler.py`'de; hakemin
 kendisi `testler/celik/test_celik_hakem.py`'dedir (değişmez)."""
 from __future__ import annotations
 
@@ -53,10 +53,13 @@ def test_panel_adetleri_paftadan_yazildi():
 
 
 def test_bizim_liste_hakemin_turleriyle_okunur():
+    """İE-16 PR-3a'dan beri listemiz bölmesiz tanımdan (`CP06_kural.json`, `karkas: kural`): duvar paneli adedi karkas kuralının bölmesidir
+    (22; paftada 26: kıyasın sonucu, girdi değil). PR-2'de liste panelli tanımdandı (26, paftadan girdi); gerekçe İE-16 › PR-3a."""
     b = json.loads(BIZIM.read_text(encoding="utf-8"))
+    assert b["tanim"]["yol"] == "testler/celik/projeler/CP06/CP06_kural.json" and b["karkas_kurali"]["yol"] == "kurallar/karkas/celik_karkas.json"
     bc = kiyas.bizim_celik(b["satirlar"])
     assert set(bc["turler"]) == {"duvar_paneli", "kolon_kiris", "makas", "c_profil"}
-    assert (bc["turler"]["duvar_paneli"]["adet"], bc["turler"]["kolon_kiris"]["adet"], bc["turler"]["makas"]["adet"]) == (26, 4, 13)
+    assert (bc["turler"]["duvar_paneli"]["adet"], bc["turler"]["kolon_kiris"]["adet"], bc["turler"]["makas"]["adet"]) == (22, 4, 13)
     assert all(oku.celik_grubu_mu(s["grup"]) == ("tur" in s) for s in b["satirlar"])
 
 
