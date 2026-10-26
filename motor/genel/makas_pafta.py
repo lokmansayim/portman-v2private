@@ -173,23 +173,25 @@ def ciz(t: dict, hedef: Path, kod: str, kural_k: dict | None = None, yontem: str
     if len(cps) != len(ck["cati_panelleri"]):
         raise SystemExit(f"Makas yerleşim planı: çatı panelinin plandaki bölmesi ({len(cps)}) kuralınkiyle ({len(ck['cati_panelleri'])}) aynı değil")
     profil = f"80x45x{kur['celik']['et_kalinligi_varsayilan']['deger']['cati']}"     # makasın profili tanımda yazmaz (`girdi_genel`)
-    fig = plt.figure(figsize=(16.5, 11.7), dpi=140)                    # A3 yatay
-    gs = GridSpec(1, 2, figure=fig, width_ratios=[2.2, 1.0], wspace=0.02)
-    plan(fig.add_subplot(gs[0, 0]), y, c, ms, cps, kk)
-    tablo(fig.add_subplot(gs[0, 1]), ms, cps, ck, kk, profil)
     say = {tur: sum(1 for x in ms if x["tur"] == tur) for tur in TUR_ADI}
     ozet = " · ".join(f"{TUR_ADI[tur]} {n}" for tur, n in say.items() if n)
-    fig.suptitle(f"{t['kod']} · MAKAS YERLEŞİM PLANI   —   TASLAK · makas dizilimi karkas kuralından · üretim projesi değildir",
-                 fontsize=12, weight="bold", x=0.02, ha="left", y=0.975)
-    fig.text(0.02, 0.945, f"Makas {len(ms)} ({ozet}); çatı paneli {len(cps)}; baca {len(kk['bacalar'])}. Ölçüler cm; makasın konumu ortası. "
-             f"Kural: {kk['kural']['yol']} (sha {kk['kural']['sha256'][:12]}).", fontsize=8.4, ha="left")
     png_ad, pdf_ad = dosya_adlari(kod)
     hedef = Path(hedef)
-    fig.savefig(hedef / png_ad, facecolor="white")
-    with PdfPages(hedef / pdf_ad, metadata={"Title": f"{t['kod']} makaslar", "Creator": "Portman", "Producer": "Portman",
-                                           "CreationDate": None, "ModDate": None}) as pp:
-        pp.savefig(fig, facecolor="white")
-    plt.close(fig)
+    fig = plt.figure(figsize=(16.5, 11.7), dpi=140)                    # A3 yatay
+    try:                                                               # hata olsa da şekil kapanır (uret uzun ömürlü işçide koşar)
+        gs = GridSpec(1, 2, figure=fig, width_ratios=[2.2, 1.0], wspace=0.02)
+        plan(fig.add_subplot(gs[0, 0]), y, c, ms, cps, kk)
+        tablo(fig.add_subplot(gs[0, 1]), ms, cps, ck, kk, profil)
+        fig.suptitle(f"{t['kod']} · MAKAS YERLEŞİM PLANI   —   TASLAK · makas dizilimi karkas kuralından · üretim projesi değildir",
+                     fontsize=12, weight="bold", x=0.02, ha="left", y=0.975)
+        fig.text(0.02, 0.945, f"Makas {len(ms)} ({ozet}); çatı paneli {len(cps)}; baca {len(kk['bacalar'])}. Ölçüler cm; makasın konumu ortası. "
+                 f"Kural: {kk['kural']['yol']} (sha {kk['kural']['sha256'][:12]}).", fontsize=8.4, ha="left")
+        fig.savefig(hedef / png_ad, facecolor="white")
+        with PdfPages(hedef / pdf_ad, metadata={"Title": f"{t['kod']} makaslar", "Creator": "Portman", "Producer": "Portman",
+                                               "CreationDate": None, "ModDate": None}) as pp:
+            pp.savefig(fig, facecolor="white")
+    finally:
+        plt.close(fig)
     return {"png": png_ad, "pdf": pdf_ad, "makas": say, "cati_paneli": len(cps), "baca": len(kk["bacalar"]), "uyari": len(ck["uyarilar"]),
             "kural": kk["kural"]}
 

@@ -670,6 +670,9 @@ def girdi(y: dict, c: dict, m: dict, kur: dict, kaynak: str) -> dict:
     cv_cevre = sum(geo.length for geo in cv.values()) / 100
     if cv:
         veranda_tavani -= cv_m2
+    if kural_k and "cati_paneli" in cm and cm["cati_paneli"]["adet"] != cp_adet:   # kuralın bölmesi düzlemin biçimiyle bir parça fazla ya da eksik
+        uyari.append(f"karkas kuralı: çatı paneli tanımda {cp_adet}, kuralın bölmesinde {cm['cati_paneli']['adet']} (düzlemin biçimi); kuralınki yazıldı")
+        cp_adet = cm["cati_paneli"]["adet"]
     cp_prof, cp_pb, cp_mn = model("cati_paneli", cp_adet, None, f"80x45x{ev['cati']}") if mc["panelli_plan_m2"] else (None, {}, "")
     # karkas kuralının makas, yöntem A paneli kayıtları (İE-16 PR-3b): adet ve profil boyu kuraldan
     makas_notu = ""

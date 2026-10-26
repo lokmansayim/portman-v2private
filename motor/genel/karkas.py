@@ -304,7 +304,11 @@ def main() -> int:
     a = ap.parse_args()
     t = json.loads(a.tanim.read_text(encoding="utf-8"))
     k = oku(a.kural)
-    kk = kur(yapi.kur(t), t, k, a.yontem or (t.get("cati") or {}).get("yontem"))
+    yontem = a.yontem
+    if yontem is None and t.get("cati"):                  # girdi ve paftayla aynı: tanımdaki, yoksa kitabın (`girdi_genel.cati_yontemi`)
+        from . import girdi_genel, kural
+        yontem = girdi_genel.cati_yontemi(t["cati"], kural.oku())
+    kk = kur(yapi.kur(t), t, k, yontem)
     for p in kk["paneller"]:
         print(f"{p['ad']} {p['sinif']:8s} {p['boy_cm']:7.1f} × {p['yukseklik_cm']:5.1f}  {p['profil_boyu_m']:7.2f} m  {', '.join(p['acikliklar'])}")
     for x in kk["kolonlar"] + kk["kirisler"]:
@@ -317,7 +321,7 @@ def main() -> int:
     for anahtar in ("cati_panelleri", "ust_panelleri", "tavan_panelleri"):
         if ck.get(anahtar):
             print(f"{anahtar}: {len(ck[anahtar])} panel, {sum(x['profil_boyu_m'] for x in ck[anahtar]):.2f} m")
-    for u in kk["uyarilar"]:
+    for u in kk["uyarilar"] + ck.get("uyarilar", []):
         print("  UYARI:", u)
     if a.json:
         a.json.write_text(json.dumps(kk, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
