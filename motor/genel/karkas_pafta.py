@@ -2,9 +2,9 @@
 """Duvar panelleri yerleşim planı (İE-16 PR-3a): karkas kuralının bölmesi pafta olarak.
 
 Yalnız tanım karkas kuralını isterse çizilir (`"karkas": "kural"`; `uret` çağırır); istemeyen tanımın çizim seti değişmez. Açık
-paftalardaki düzen: planın üstünde her duvar paneli adıyla (D01…) ve boyuyla (komşu paneller iki tonla); kolon ve kirişler K01… (önce
-kolonlar, sonra kirişler; tanımdaki sırayla). Yanında panel tablosu: sınıf, profil, boy × yükseklik, açıklıklar, profil boyu. Bölmenin
-hedef boyunu aşan paneller başlığın altında uyarı olarak yazılır.
+paftalardaki düzen: planın üstünde her duvar paneli adıyla (D01…) ve boyuyla (komşu paneller iki tonla); kolon ve kirişler tanımdaki
+adlarıyla (kaynak paftadaki adlar; önce kolonlar, sonra kirişler). Yanında panel tablosu: sınıf, profil, boy × yükseklik, açıklıklar, profil boyu. Bölmenin
+hedef boyunu aşan ve ek yerinin kaymasıyla kısa kalan paneller başlığın altında uyarı olarak yazılır.
 Bölme ve adlar `karkas.kur`'dan gelir; bu modül hesap yapmaz, yalnız çizer.
 
     python -m motor.genel.karkas_pafta tanim.json <çıktı klasörü>
@@ -41,7 +41,7 @@ def _kutu(ax, k, fc, ec="#333", lw=0.5, z=4, hatch=None):
 
 
 def kolon_kiris(y: dict, t: dict, kk: dict) -> list[dict]:
-    """K01…: önce kolonlar, sonra kirişler (tanımdaki sırayla)."""
+    """Önce kolonlar, sonra kirişler (tanımdaki sırayla), tanımdaki adlarıyla: tanım adları kaynak paftadan yazılır, pafta onları değiştirmez."""
     out = []
     for x in kk["kolonlar"]:
         out.append({"tur": "kolon", "tanim_adi": x["ad"], "kutu": y["adli"][x["ad"]]["kutu"], "olcu": f"h {ciz_genel.sade(x['yukseklik_cm'])}",
@@ -49,13 +49,13 @@ def kolon_kiris(y: dict, t: dict, kk: dict) -> list[dict]:
     kutular = {kr["ad"]: kr["kutu"] for kr in t.get("kirisler", [])}
     for x in kk["kirisler"]:
         out.append({"tur": "kiriş", "tanim_adi": x["ad"], "kutu": kutular[x["ad"]], "olcu": f"L {ciz_genel.sade(x['boy_cm'])}", "profil_boyu_m": x["profil_boyu_m"]})
-    for i, x in enumerate(out, 1):
-        x["ad"] = f"K{i:02d}"
+    for x in out:
+        x["ad"] = x["tanim_adi"]
     return out
 
 
 def plan(ax, y: dict, t: dict, kk: dict, ks: list[dict]) -> None:
-    """Plan: mahaller soluk, duvar panelleri renkli (komşular iki tonla), adlar ve boylar; kolon ve kirişler K01…."""
+    """Plan: mahaller soluk, duvar panelleri renkli (komşular iki tonla), adlar ve boylar; kolon ve kirişler tanımdaki adlarıyla."""
     for b in y["bolgeler"].values():
         if b["sinif"] == "dis":
             continue

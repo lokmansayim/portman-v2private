@@ -124,7 +124,7 @@ def uyeler(L: float, H: float, acik: list[tuple[float, float, float, float]], k:
         xs.append(L)
     tam = []
     for x in xs:
-        ic = [a for a in acik if a[0] - 0.5 < x < a[1] + 0.5]
+        ic = [a for a in acik if a[0] + 0.5 < x < a[1] - 0.5]      # açıklığın kenarındaki (±0,5 cm) dikme tam boydur: kenar dikmesi odur
         if ic:
             a0, a1, z0, z1 = ic[0]
             u["kirpik"] += max(H - z1, 0.0) + z0
@@ -158,13 +158,17 @@ def kur(y: dict, t: dict, k: dict) -> dict:
             u = uyeler(p1 - p0, H, ap, k)
             x0, y0, x1, y1 = (p0, ks["hat"][0], p1, ks["hat"][1]) if ks["yon"] == "x" else (ks["hat"][0], p0, ks["hat"][1], p1)
             paneller.append({"sinif": ks["sinif"], "profil": ks["profil"], "kosu": ks["duvarlar"], "bas": round(p0, 2), "son": round(p1, 2),
+                             "_kosunun_parcasi": p0 > ks["bas"] + TOL or p1 < ks["son"] - TOL,
                              "boy_cm": round(p1 - p0, 2), "yukseklik_cm": round(H, 2), "kutu": [round(v, 2) for v in (x0, y0, x1, y1)],
                              "acikliklar": [a["ad"] for a in acik if a["a1"] > p0 + TOL and a["a0"] < p1 - TOL],
                              "uyeler_m": {ad: round(v, 4) for ad, v in u.items()}, "profil_boyu_m": round(sum(u.values()), 4)})
     _adlandir(paneller)
     hedef = d(k, "bolme")["hedef_cm"]
+    S = d(k, "dikme_araligi_cm")
     uyarilar = [f"{p['ad']} ({', '.join(p['kosu'])}): panel {p['boy_cm']} cm, bölmenin hedefi {hedef} cm; ek yeri açıklığın kenarına kaydı"
                 for p in paneller if p["boy_cm"] > hedef + TOL]
+    uyarilar += [f"{p['ad']} ({', '.join(p['kosu'])}): panel {p['boy_cm']} cm, bir dikme aralığından ({S} cm) kısa; ek yeri açıklığın kenarına kaydı"
+                 for p in paneller if p.pop("_kosunun_parcasi") and p["boy_cm"] < S - TOL]
     kol = d(k, "kolon")["profil_m_m"]
     kolonlar = [{"ad": w["ad"], "yukseklik_cm": yapi._yukseklik(w), "profil_boyu_m": round(kol * yapi._yukseklik(w) / 100, 4)}
                 for w in y["duvarlar"] if w["sinif"] == "kolon"]
@@ -223,14 +227,19 @@ def gruplar(kk: dict, y: dict, t: dict, k: dict, kg_m: dict) -> dict:
     out: dict[str, dict] = {}
     for s in ("dis", "ic", "ek"):
         ps = [p for p in kk["paneller"] if p["sinif"] == s]
+        if len({p["profil"] for p in ps}) > 1:       # listede sınıf başına tek satır, tek birim ağırlık: karışık profil sessizce tek profille tartılmaz
+            raise SystemExit(f"Karkas kuralı: {s} sınıfında birden çok profil ({', '.join(sorted(str(p['profil']) for p in ps if p['profil']))}); "
+                             "listede sınıfın tek satırı var")
         if ps:
-            out[s] = kayit(len(ps), sum(p["profil_boyu_m"] for p in ps), ps[0]["profil"] if len({p["profil"] for p in ps}) == 1 else None)
+            out[s] = kayit(len(ps), sum(p["profil_boyu_m"] for p in ps), ps[0]["profil"])
     kork = [w for w in y["duvarlar"] if w["sinif"] == "korkuluk"]
     profiller = sorted({w.get("profil") or sinif["korkuluk"]["profil"] for w in kork}, reverse=True)
     for tprof in profiller:
         dl = {w["ad"] for w in kork if (w.get("profil") or sinif["korkuluk"]["profil"]) == tprof}
         tam_boy = all(yapi._yukseklik(w) >= 200 for w in kork if w["ad"] in dl)
         grup = "korkuluk" if len(profiller) == 1 or not tam_boy else "giris_cercevesi"
+        if grup in out:                              # iki profil aynı gruba düşerse ikincisi birincisini ezmez
+            raise SystemExit(f"Karkas kuralı: korkuluk sınıfının iki profili aynı gruba ({grup}) düşüyor; listede grubun tek satırı var")
         ps = [p for p in kk["paneller"] if p["sinif"] == "korkuluk" and set(p["kosu"]) <= dl]
         out[grup] = kayit(len(ps), sum(p["profil_boyu_m"] for p in ps), tprof)
     if kk["kolonlar"]:

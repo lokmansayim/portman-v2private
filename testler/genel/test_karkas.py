@@ -109,6 +109,35 @@ def test_hedefi_asan_panel_uyari_olarak_yazilir():
     assert g["celik"]["karkas"]["uyarilar"] == kk["uyarilar"]
 
 
+def test_kisa_kalan_panel_uyari_olarak_yazilir(monkeypatch):
+    """Ek yeri açıklığın kenarına kayınca koşunun ucunda bir dikme aralığından kısa panel kalabilir (700'lük koşu, 20–690 açıklık: ek
+    yeri 350'den 20'ye): sessiz kalmaz. Koşunun kendisi kısaysa (ÇP-14'ün 50 cm'lik cumba yanları) uyarı yok."""
+    assert karkas.bol({"bas": 0.0, "son": 700.0}, [{"a0": 20.0, "a1": 690.0}], KURAL) == [(0.0, 20.0), (20.0, 700.0)]
+    t = json.loads((KOK / "testler" / "celik" / "projeler" / "CP14" / "CP14.json").read_text(encoding="utf-8"))
+    kk = karkas.kur(yapi.kur(t), t, KURAL)
+    assert any(p["boy_cm"] < 61 for p in kk["paneller"]) and not any("kısa" in u for u in kk["uyarilar"])
+    assert all("_kosunun_parcasi" not in p for p in kk["paneller"])
+    bol = karkas.bol
+    monkeypatch.setattr(karkas, "bol", lambda ks, acik, k: [(ks["bas"], ks["bas"] + 20.0), (ks["bas"] + 20.0, ks["son"])]
+                        if ks["son"] - ks["bas"] > 300 else bol(ks, acik, k))
+    kk = karkas.kur(yapi.kur(t), t, KURAL)
+    kisa = [p for p in kk["paneller"] if p["boy_cm"] == 20.0]
+    assert kisa and len([u for u in kk["uyarilar"] if "bir dikme aralığından (61 cm) kısa" in u]) == len(kisa)
+
+
+def test_gruplar_karisik_profili_ve_ezilen_grubu_durdurur():
+    """Listede sınıf ve grup başına tek satır var: karışık profil sessizce tek profille tartılmaz, ikinci korkuluk profili birinciyi ezmez."""
+    pan = lambda sinif, profil, kosu: {"sinif": sinif, "profil": profil, "kosu": [kosu], "profil_boyu_m": 1.0}
+    bos = {"kolonlar": [], "kirisler": []}
+    t = {"duvar_siniflari": {"korkuluk": {"profil": "80x45x0,8"}}}
+    with pytest.raises(SystemExit, match="birden çok profil"):
+        karkas.gruplar({"paneller": [pan("dis", "80x45x1,2", "W1"), pan("dis", "140x45x1,2", "W2")], **bos}, {"duvarlar": []}, t, KURAL, {})
+    y = {"duvarlar": [{"ad": "R1", "sinif": "korkuluk", "profil": "80x45x0,8", "yukseklik": 90},
+                      {"ad": "R2", "sinif": "korkuluk", "profil": "80x45x1,2", "yukseklik": 100}]}
+    with pytest.raises(SystemExit, match="aynı gruba"):
+        karkas.gruplar({"paneller": [pan("korkuluk", "80x45x0,8", "R1"), pan("korkuluk", "80x45x1,2", "R2")], **bos}, y, t, KURAL, {})
+
+
 def test_kural_modunda_satirlar_kaynagi_dogru_yazar():
     """Kural modunda kolon ve kirişin adedi tanımdan, profil boyu kuraldan (model yok); formül türetilmiş birim ağırlığı kg'ı veren haneyle yazar."""
     from motor.genel import yukleme
@@ -145,6 +174,15 @@ def test_pencereli_panelin_uyeleri():
     assert u["kenar_dikmesi"] == pytest.approx(2 * 2.40)
     assert u["lento_denizlik"] == pytest.approx(2 * 1.10)
     assert u["kusak"] == pytest.approx(2.44 - 1.00)
+
+
+def test_acikligin_kenarindaki_dikme_tam_boydur():
+    """150 × 270, panel pencerenin kenarında bitiyor (100–150, alt 70, üst 200; ek yeri açıklığın kenarına kayınca olur): 150'deki uç
+    dikme kenar dikmesidir, tam boy, bir kez; kırpık yalnız 122'de; 100'e yarım aralık içinde tam dikme yok, bir kenar dikmesi."""
+    u = karkas.uyeler(150.0, 270.0, [(100.0, 150.0, 70.0, 200.0)], KURAL)
+    assert u["dikme"] == pytest.approx(3 * 2.70)                    # 0, 61, 150
+    assert u["kirpik"] == pytest.approx(0.70 + 0.70)                # 122
+    assert u["kenar_dikmesi"] == pytest.approx(2.70)                # 100
 
 
 def test_kosu_tanimin_yazimindan_bagimsiz():

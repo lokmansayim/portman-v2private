@@ -26,7 +26,7 @@
   "sha256": "2f3a7a20c94710eb3aa7376bc254176433acb7146d9e2d911534a45200816867"
  },
  "satirlar": [
-  {"grup": "Çelik panel", "kalem": "Dış cephe duvar panelleri", "boyut": "80 × 45 × 1,2", "adet": 13, "kg": 767.58, "durum": "varsayim", "tur": "duvar_paneli"},
+  {"grup": "Çelik panel", "kalem": "Dış cephe duvar panelleri", "boyut": "80 × 45 × 1,2", "adet": 13, "kg": 763.1, "durum": "varsayim", "tur": "duvar_paneli"},
   {"grup": "Çelik panel", "kalem": "İç cephe duvar panelleri", "boyut": "80 × 45 × 1,2", "adet": 7, "kg": 346.19, "durum": "varsayim", "tur": "duvar_paneli"},
   {"grup": "Çelik panel", "kalem": "Müştemilat duvar panelleri", "boyut": "80 × 45 × 0,8", "adet": 4, "kg": 139.5, "durum": "varsayim", "tur": "duvar_paneli"},
   {"grup": "Çelik panel", "kalem": "Veranda duvarı (giriş çerçevesi)", "boyut": "80 × 45 × 1,2", "adet": 1, "kg": 28.94, "durum": "varsayim", "tur": "duvar_paneli"},
