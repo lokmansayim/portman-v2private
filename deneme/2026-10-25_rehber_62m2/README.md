@@ -20,6 +20,7 @@ Bir bayi projesinin (900 × 600 cm, veranda üstünde cumba) montaj rehberi. Kay
 3. **Sayfa:** `python rehber/uret.py <çıktı.html> --proje "<başlık>" [--gorsel]`.
    - Girdi: `kabuk.html` (PK-01 rehberinin arayüzü) + `sahne.js` (Three.js 0.160 sahnesi).
    - 20 adım (sıra Lokman'ın, 26 Ekim), 419 parça. Kartı olmayan parçalarda yükleme listesindeki ad yazar.
+   - `rehber/gorsel/`: galerinin 8 görseli, herkese açık sürüm için bayi adsız (pafta başlığı "62 m² Beşik + Cumba"; 26 Ekim render'ları). Sayfa `--gorsel` ile bunlara `gorsel/…` göreli yoluyla bağlanır.
 4. **Model ve kameralar:** `node test/export.js <rehber.html> <model.glb>`.
    - Parça adları `s{adım}_{sıra}`, malzeme adları anahtar; kimlik kartı `extras`'ta.
    - Adım kameraları `model_kamera.json`'a yazılır.
