@@ -38,7 +38,7 @@ Lokman'ın Mac'indeki proje klasörü (DWG, SKP, yükleme listesi) okunarak PK-0
 5b. **Büyük pencereler:** DVR (251 × 250 çelik karkas) pencere yanları da fugalı.
 6. **Ters tavan alçıpanı** tavan omegalarından sonra (yeni adım 14; banyoda yeşil; verandada listedeki boardex).
 7. **10 cm rulo cam yünü** çatı kapanmadan (yeni adım 16): her makas aralığına bir şerit, cumbada makas yönünde yatay iki şerit; rehberde rulo açılarak serilir, kamera bütün şeritleri gösterir.
-8. **Saçak, alın ve dere birleşimi** (Lokman'ın gönderdiği ev fotoğrafları, gece; 26 Ekim'deki yakın fotoğrafla düzeltildi). Köşede iniş ağzı derenin uç kısmında, borunun hizasında; kaz boynu duvara (cumbada veranda kolonuna) dik döner, boru köşe direği kaplamasının yanından iner. Saçak sacının alnı derenin boyunca köşeye kadar uzar; alın sacının alt ucu derenin ucunu kapatır.
+8. **Saçak, alın ve dere birleşimi** (Lokman'ın gönderdiği ev fotoğrafları, gece; 26 Ekim'deki yakın fotoğrafla düzeltildi). Köşede iniş ağzı derenin uç kısmında, borunun hizasında; kaz boynu duvara (cumbada veranda kolonuna) dik döner, boru köşe direği kaplamasının yanından iner. Saçak sacının alnı derenin boyunca köşeye kadar uzar; alın sacının alt ucu derenin ucunu kapatır. Köşe (Lokman'ın işaretli fotoğrafı, 26 Ekim): saçak sacının saçak altı baş makasa dayanır ve orada kesilir, alın ve kıvrımı köşeye kadar sürer; makasın duvar dışındaki ucu (topuk ve eğimli taraf) kaplı olarak alın sacına kadar gider; alın sacının saçak altı kolu makasın topuğuna dayanıp kesilir, alın yüzü ve üst kıvrımı derenin ucunu kapatır.
 
 1 ve 2'yi "nem bariyeri ve OSB yok" ve "makas uçlarına artan betopanları döşe" cümlelerinin, gönderilen teyit listesinin 1. ve 3. maddesine cevap olduğu okumasıyla yaptım; Lokman'a söylendi.
 

@@ -367,10 +367,10 @@ function serit(o, perp, out) {   // hat çerçevesi: yerel x hattan dışa, yere
 
 /* 9 · Saçak sacı: tırnak 3 → saçak altı 30 → alın 13 → makasa doğru kıvrım 10 */
 const SACAK = [
-  { ad: 'arka saçak', o: 'h', face: 600, out: 1, a0: -30.2, a1: 930.2, f0: -30.2, f1: 930.2, R: AN },
-  { ad: 'ön saçak (cumbanın sağı)', o: 'h', face: 0, out: -1, a0: 604.95, a1: 930.2, f0: 604.95, f1: 930.2, R: AN },
-  { ad: 'cumba sol saçağı', o: 'v', face: 0, out: -1, a0: -180.2, a1: -30.2, f0: -180.2, f1: -30.2, R: CU },
-  { ad: 'cumba sağ saçağı', o: 'v', face: 574.75, out: 1, a0: -180.2, a1: 0, f0: -180.2, f1: -30.2, R: CU },
+  { ad: 'arka saçak', o: 'h', face: 600, out: 1, a0: -30.2, a1: 930.2, f0: -30.2, f1: 930.2, t0: -1.1, t1: 901.1, R: AN },
+  { ad: 'ön saçak (cumbanın sağı)', o: 'h', face: 0, out: -1, a0: 604.95, a1: 930.2, f0: 604.95, f1: 930.2, t0: 604.95, t1: 901.1, R: AN },
+  { ad: 'cumba sol saçağı', o: 'v', face: 0, out: -1, a0: -180.2, a1: -30.2, f0: -180.2, f1: -30.2, t0: -151.1, t1: -30.2, R: CU },
+  { ad: 'cumba sağ saçağı', o: 'v', face: 574.75, out: 1, a0: -180.2, a1: 0, f0: -180.2, f1: -30.2, t0: -151.1, t1: 0, R: CU },
 ];
 {
   let to = 0;
@@ -380,7 +380,8 @@ const SACAK = [
     for (let k = 0; k < n; k++) {
       const a0 = e.a0 + k * 250, a1 = Math.min(e.a1, a0 + 250), [z0, z1] = [S.zOf(a0), S.zOf(a1)].sort((p, q) => p - q);
       const g = S.yeni(), m = mat('trim', 9);
-      g.add(lb(-2.8, 30.2, hs - SAC, hs, z0, z1, m));                 // tırnak + saçak altı
+      const t0 = Math.max(a0, e.t0), t1 = Math.min(a1, e.t1);         // saçak altı baş makasın betopanına dayanır, orada kesilir (Lokman, 26.10.2026)
+      if (t1 > t0) { const [u0, u1] = [S.zOf(t0), S.zOf(t1)].sort((p, q) => p - q); g.add(lb(-2.8, 30.2, hs - SAC, hs, u0, u1, m)); }   // tırnak + saçak altı
       const f0 = Math.max(a0, e.f0), f1 = Math.min(a1, e.f1);
       if (f1 > f0) {
         const [y0, y1] = [S.zOf(f0), S.zOf(f1)].sort((p, q) => p - q);
@@ -388,7 +389,7 @@ const SACAK = [
         const fl = lb(-5, 5, -SAC / 2, SAC / 2, y0, y1, m);             // makasa doğru 10 cm kıvrım: aşığın üstünden trapezin altına
         fl.position.x = (30.2 - 5 * e.R.cos) / 100; fl.position.y = (ht + 5 * e.R.sin) / 100; fl.rotation.z = -e.R.th; g.add(fl);
       }
-      add(9, g, to++ * 0.5, { kod: null, ad: 'Saçak sacı', satir: [['Bu parça', `${e.ad} · L ${fmtc(a1 - a0)} cm`], ['Profil', 'tırnak 3 → saçak altı 30 → alın 13 → makasa doğru kıvrım 10; açınım ≈ 56 cm'], ['Sıra', 'saçak omegasından sonra, makaslardan önce'], ['Liste', '(ANTRASİT) SAÇAK SACI (30\'LUK) 300 × 2500 · 8 adet (3 adedi menfezli)']] });
+      add(9, g, to++ * 0.5, { kod: null, ad: 'Saçak sacı', satir: [['Bu parça', `${e.ad} · L ${fmtc(a1 - a0)} cm`], ['Profil', 'tırnak 3 → saçak altı 30 → alın 13 → makasa doğru kıvrım 10; açınım ≈ 56 cm'], ['Sıra', 'saçak omegasından sonra, makaslardan önce'], ['Uçta', 'saçak altı baş makasın (betopanının) hizasında kesilir; alın ve kıvrım köşeye, alın sacına kadar devam eder (Lokman, 26.10.2026)'], ['Liste', '(ANTRASİT) SAÇAK SACI (30\'LUK) 300 × 2500 · 8 adet (3 adedi menfezli)']] });
     }
   });
 }
@@ -463,7 +464,7 @@ function rake(G, end, m, uzat = 0) {
     // Makasın duvar dışında kalan ucu (saçak tarafı, ~30 cm): saçak altından makasın üstüne artan betopan (Lokman, 26.10.2026:
     // "baş makasların uçlarında hâlâ kaplanmamış alan var; saçak sacı ile alın sacının birleştiği yerin boş kalmasının sebebi o")
     ['A', 'B'].forEach(end => {
-      const sE = G.uc[end], dir = Math.sign(G.sm - sE), a = G.duvar[end], b = sE + dir * 0.2, yt = s => (G.h(s) - 0.2) / 100, alt = (TB - 0.05) / 100;
+      const sE = G.uc[end], dir = Math.sign(G.sm - sE), a = G.duvar[end], b = sE + dir * 0.2, yt = s => (G.h(s) - 0.2) / 100, alt = (TB - 0.05 - SAC) / 100;
       const sh = new THREE.Shape(); sh.moveTo(a / 100, alt); sh.lineTo(b / 100, alt); sh.lineTo(b / 100, yt(b)); sh.lineTo(a / 100, yt(a)); sh.closePath();
       const o = mesh(new THREE.ExtrudeGeometry(sh, { depth: BET_T / 100, bevelEnabled: false }), mat('betopan', 12));
       o.position.z = G.oT / 100;
@@ -668,7 +669,7 @@ KALKAN.forEach(G => ['A', 'B'].forEach(end => {
   KU.egik(ot - k1, PTOP - 0.1, ot - k2, TR1 + 0.5);        // hadveyi kavrayan kıvrım: hadvenin iç yüzü boyunca aşağı
   const nm = `${G.ad} · ${end === 'A' ? 'ön/sol' : 'arka/sağ'} yüz`;
   add(18, KU.w, to++ * 0.5, { kod: null, ad: 'Alın sacı', satir: [['Bu parça', `${nm} · alın ve üst kıvrımlar${uz ? ', alt uçta derenin önüne kadar' : ''}`], ['Kaynak', 'Lokman çizimleri (24.10.2026)']] });
-  add(18, K.w, to++ * 0.5, { kod: null, ad: 'Alın sacı', satir: [['Bu parça', `${nm} · L ${Math.round(K.Ls)} cm`], ['Profil', "tırnak 3 (baş makas Z'sine) → saçak altı 30 → alın → hadve üstünden kıvrım → hadveyi kavrayan kıvrım"], ['Bu proje', `alın yüksekliği trapezin kenar hadvesine göre ~${fmt(PTOP + 3.1, 0)} cm (PK-01’de sandviç panelle 13 cm); teyit bekler`], ['Liste', '( ANTRASİT) ALIN SACI (30\'LUK) 300 × 2500 · 10 adet']] });
+  add(18, K.w, to++ * 0.5, { kod: null, ad: 'Alın sacı', satir: [['Bu parça', `${nm} · L ${Math.round(K.Ls)} cm`], ['Profil', "tırnak 3 (baş makas Z'sine) → saçak altı 30 → alın → hadve üstünden kıvrım → hadveyi kavrayan kıvrım"], ['Uçta', 'saçak altı kolu makasın topuğuna dayanır, orada kesilir; alın yüzü ve üst kıvrım derenin ucunu kapatmak için devam eder (Lokman, 26.10.2026)'], ['Bu proje', `alın yüksekliği trapezin kenar hadvesine göre ~${fmt(PTOP + 3.1, 0)} cm (PK-01’de sandviç panelle 13 cm); teyit bekler`], ['Liste', '( ANTRASİT) ALIN SACI (30\'LUK) 300 × 2500 · 10 adet']] });
   if (G.altUc[end]) {   // alt uç: saçak ucundan derenin önüne kadar iner, alttan düz kesilir; derenin kapağını kapatır
     const sE = G.uc[end], dir = Math.sign(G.sm - sE), sT = sE - dir * 0.2, sd = sT - dir * 16.5, sw = G.duvar[end];
     const alt = TB - 0.05 - SAC - 0.1, ust = s => G.h(s) + PTOP / G.R.cos;
