@@ -9,8 +9,8 @@ Liste: prefabrik Motor'un listesi (`motor/prefabrik_liste.py`, satırda `olcu`) 
 satırın kg'ı × fiyat, öteki kalemlerde adet × fiyat.
 
 Fiyat uydurulmaz: defterde `onay: false` olan fiyat (yedek kaynaktan öneri) yalnız `--oneri` ile uygulanır ve "öneri" diye
-işaretlenir; fiyatı olmayan satır boş kalır, özette sayılır. Basit yöntemin m² fiyatı defterde yoksa `--m2-fiyat` ile verilir;
-verilmezse fark hesaplanmaz. `--esik` verilirse fark eşiği aşınca UYARI yazar (Z-10: eşik dışında mühendis inceler; eşik henüz
+işaretlenir; fiyatı olmayan satır boş kalır, özette sayılır. Defterde kaydı olan anahtar yalnız kendi kaydıyla fiyatlanır, banda
+düşmez. Basit yöntemin m² fiyatı defterde henüz yok: `--alan` ve `--m2-fiyat` ile verilir; verilmezse fark hesaplanmaz. `--esik` verilirse fark eşiği aşınca UYARI yazar (Z-10: eşik dışında mühendis inceler; eşik henüz
 kararla konmadı, varsayılan yok).
 """
 from __future__ import annotations
@@ -34,22 +34,22 @@ def anahtar(s: dict, hat: str) -> str:
 
 
 def _sayilar(olcu: str) -> list[float]:
-    return [float(x.replace(",", ".")) for x in re.findall(r"\d+(?:,\d+)?", olcu or "")]
+    return [float(x.replace(",", ".")) for x in re.findall(r"\d+(?:[.,]\d+)?", olcu or "")]
 
 
-def bant_fiyati(s: dict, bantlar: list[dict], oneri: bool) -> tuple[float, dict, dict] | None:
-    """Pano eni bandı: "<kalınlık> × <en> × <yükseklik>" ölçüsünde en, kalemin aralıklarından birine düşerse o fiyat."""
+def bant_bul(s: dict, bantlar: list[dict]) -> tuple[dict, dict] | None:
+    """Pano eni bandı: "<kalınlık> × <en> × <yükseklik>" ölçüsünde en, kalemin aralıklarından birine düşerse (bant, aralık).
+    Onaya bakmaz; aralığın `onay`ını çağıran değerlendirir."""
+    n = _sayilar(s.get("olcu", ""))
+    if len(n) != 3:
+        return None
     for b in bantlar:
-        if b["kalem"] != s.get("kalem"):
+        if b["kalem"] != s.get("kalem") or n[0] != b["kalinlik_mm"] or n[2] != b["yukseklik_mm"]:
             continue
-        n = _sayilar(s.get("olcu", ""))
-        if len(n) != 3 or n[0] != b["kalinlik_mm"] or n[2] != b["yukseklik_mm"]:
-            return None
-        en = n[1]
         for a in b["araliklar"]:
             alt, ust = a["en_mm"]
-            if (en > alt if a.get("alt_haric") else en >= alt) and en <= ust and (a["onay"] or oneri):
-                return a["fiyat"], b, a
+            if (n[1] > alt if a.get("alt_haric") else n[1] >= alt) and n[1] <= ust:
+                return b, a
     return None
 
 
@@ -78,15 +78,21 @@ def fiyatla(L: dict, defter: dict, hat: str | None = None, oneri: bool = False) 
         g = kalemler.get(k)
         fiyat = tutar = None
         durum, kaynak, birim = "fiyat yok", None, (g or {}).get("birim") or s.get("birim")
-        if g and g.get("fiyat") is not None and (g["onay"] or oneri):
-            fiyat, kaynak, durum = g["fiyat"], g["kaynak"], ("onaylı" if g["onay"] else "öneri")
-        elif hat == "prefabrik" and (b := bant_fiyati(s, H.get("bantlar") or [], oneri)):
-            fiyat, kaynak, durum = b[0], b[1]["kaynak"], ("onaylı bant" if b[2]["onay"] else "öneri bant")
-        elif g is None:
+        if g is not None:                                          # defterde kaydı olan anahtar kendi kaydıyla; banda düşmez
+            if g.get("fiyat") is not None and (g["onay"] or oneri):
+                fiyat, kaynak, durum = g["fiyat"], g["kaynak"], ("onaylı" if g["onay"] else "öneri")
+            elif g.get("fiyat") is not None:
+                durum = "öneri, onay bekliyor"
+        elif hat == "prefabrik" and (b := bant_bul(s, H.get("bantlar") or [])):
+            if b[1]["onay"] or oneri:
+                fiyat, kaynak, durum = b[1]["fiyat"], b[0]["kaynak"], ("onaylı bant" if b[1]["onay"] else "öneri bant")
+            else:
+                durum = "öneri bant, onay bekliyor"
+        else:
             durum = "defterde yok"
-        elif g.get("fiyat") is not None:
-            durum = "öneri, onay bekliyor"
         miktar = s.get("kg") if birim == "kg" else s.get("adet")
+        if fiyat is not None and miktar is None:                    # fiyat var, miktar yok: satır onaylı görünmesin
+            durum = f"{durum}; {'kg' if birim == 'kg' else 'adet'} yok"
         if fiyat is not None and miktar is not None:
             tutar = round(miktar * fiyat, 2)
             toplam += tutar
@@ -97,7 +103,9 @@ def fiyatla(L: dict, defter: dict, hat: str | None = None, oneri: bool = False) 
             grup = f"{s['grup']} {s['grup_adi']}" if s.get("grup_adi") else str(s.get("grup"))
             gruplar[grup] = round(gruplar.get(grup, 0.0) + tutar, 2)
         elif miktar != 0:                                          # adedi 0 olan satır sessiz geçer; adedi yok (kural yok) olan sayılır
-            fiyatsiz.append({"sira": i, "anahtar": k, "miktar": miktar, "durum": durum if miktar is not None else f"{durum}; adet yok"})
+            if miktar is None and fiyat is None:
+                durum = f"{durum}; {'kg' if birim == 'kg' else 'adet'} yok"
+            fiyatsiz.append({"sira": i, "anahtar": k, "miktar": miktar, "durum": durum})
         satirlar.append({"sira": i, "grup": s.get("grup"), "kalem": s["kalem"], "olcu": s.get("boyut") if hat == "celik" else s.get("olcu"),
                          "birim": birim, "adet": s.get("adet"), "kg": s.get("kg"), "birim_fiyat": fiyat, "tutar": tutar,
                          "durum": durum, "kaynak": kaynak})
@@ -125,7 +133,7 @@ def excel_yaz(R: dict, yol: Path, baslik: str) -> None:
     for c in ws[2]: c.font = Font(bold=True)
     for s in R["satirlar"]:
         ws.append([s["sira"], s["grup"], s["kalem"], s["olcu"], s["birim"], s["adet"], s["kg"], s["birim_fiyat"], s["tutar"], s["durum"], s["kaynak"]])
-        if not s["durum"].startswith("onaylı"):
+        if s["tutar"] is None or not s["durum"].startswith("onaylı"):
             for c in ws[ws.max_row]: c.fill = sari
     o = R["ozet"]
     ws.append([]); ws.append(["", "", "TOPLAM", "", "", "", "", "", o["toplam"], f"fiyatsız satır {len(o['fiyatsiz'])}"])
@@ -163,7 +171,7 @@ def main(argv=None) -> int:
         print(f"  basit yöntem: {m['alan_m2']} m² × {m['m2_fiyat']:,.2f} = {m['basit_toplam']:,.2f} · liste yöntemi farkı %{m['fark_yuzde']}"
               + (f" · UYARI: eşik %{m['esik_yuzde']} aşıldı, mühendis incelemeli" if m["uyari"] else ""))
     else:
-        print("  basit yöntem: m² fiyatı verilmedi (defterde yok), fark hesaplanmadı")
+        print("  basit yöntem: alan ve m² fiyatı verilmedi (defterde m² fiyatı yok), fark hesaplanmadı")
     if o.json:
         Path(o.json).parent.mkdir(parents=True, exist_ok=True)
         Path(o.json).write_text(json.dumps(R, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")

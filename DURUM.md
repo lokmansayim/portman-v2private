@@ -14,7 +14,7 @@ Yeni pencere için hazırlıklar:
 - **Yapıldı:**
   - `kurallar/fiyat/defter_2026-10.json`: prefabrik 130 kalem (121 onaylı, 1 öneri, 8 fiyatsız; pano eni bandı, 627,5 mm sınırı Patron 22:08); çelik 99 kalem (60 onaylı, 35 öneri, 4 fiyatsız).
   - `araclar/fiyatla.py`: liste × fiyat; onaysız fiyat yalnız `--oneri` ile; adet düzeltmesi; basit yöntem farkı ve eşik; JSON ve Excel.
-  - `testler/test_fiyat_defteri.py`: 21 test. Defterde kişisel veri yok (desenle denetlenir).
+  - `testler/test_fiyat_defteri.py`: 23 test. Defterde kişisel veri yok (desenle denetlenir).
 - **Sonuç:** TK-01 (Patron'un düzeltmesiyle) asma 425.203,13 TL, ters 423.932,13 TL, teklif çalışmasının r05'iyle aynı. Açık sekiz projede satırların %64–91'i onaylı fiyatla. Çelikte onaylı fiyatla Ç8201 58/90, Ç8801 60/93 satır; önerilerle 88/90, 89/93.
 - **Kullanıcı adımları:** T1 (prefabrik listesi) **Yerelde çalışıyor**; T2 (çelik), T3 (basit yöntem farkı), T4 (Patron defteri görür ve düzeltir) **Kısmen**; T5 (teklif belgesi), T6 (bayiye teklif) **Çalışmıyor**.
 - **Bekleyen:** PR'ın `main`'e birleştirilmesi (Lokman). Kalan fiyatlar teklif çalışmasından Patron'a sorulur, gelince defter r02. Basit yöntemin m² fiyatları ve eşik, KDV durumu, iki listenin çelikte de kullanılması Patron'un kararı.

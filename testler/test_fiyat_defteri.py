@@ -4,6 +4,7 @@ Defterin biçimi, kişisel veri olmaması, onay kuralı (onaysız fiyat yalnız 
 satırının atlanması, düzeltme ve basit yöntem kıyası. Kör test projelerinin Motor listeleri (`testler/kor/projeler/*/bizim_liste.json`)
 defterle fiyatlanır: tutar = miktar × birim fiyat, toplam satırların toplamı.
 """
+import copy
 import json
 import re
 import sys
@@ -89,6 +90,37 @@ def test_pano_eni_bandi(defter, olcu, fiyat):
     s = F.fiyatla(L, defter)["satirlar"][0]
     assert s["birim_fiyat"] == fiyat, s
     assert s["durum"] == ("onaylı bant" if fiyat else "defterde yok")
+
+
+def test_bant_onayi_ve_kayitli_anahtar(defter):
+    D = copy.deepcopy(defter)
+    H = D["hatlar"]["prefabrik"]
+    kalem = "100'lük yapıştırma dolu pano"
+    H["bantlar"].insert(0, {"kalem": kalem, "kalinlik_mm": 100, "yukseklik_mm": 2800, "kaynak": "EKIM87", "araliklar": [
+        {"en_mm": [627.5, 1250], "alt_haric": True, "fiyat": 2300, "onay": False, "dayanak": "deneme"}]})
+    H["kalemler"][f"{kalem} | 100 × 1000 × 2500"] = {"fiyat": None, "birim": "adet", "kaynak": None, "kaynak_satir": None,
+                                                     "kaynak_kalem": "", "durum": "kaynakta yok", "onay": False, "not": ""}
+    L = {"satirlar": [_pre(kalem, "100 × 700 × 2500", 1),      # ilk bant başka yükseklikte: sonraki bant da denenir
+                      _pre(kalem, "100 × 700 × 2800", 1),      # onaysız bant
+                      _pre(kalem, "100 × 1000 × 2500", 1),     # kendi kaydı fiyatsız: banda düşmez
+                      _pre(kalem, "100 × 627.5 × 2500", 1)]}   # noktalı ondalık
+    a, b, c, d = F.fiyatla(L, D)["satirlar"]
+    assert (a["birim_fiyat"], a["durum"]) == (2100, "onaylı bant")
+    assert (b["birim_fiyat"], b["durum"]) == (None, "öneri bant, onay bekliyor")
+    assert (c["birim_fiyat"], c["durum"]) == (None, "fiyat yok")
+    assert (d["birim_fiyat"], d["durum"]) == (1050, "onaylı bant")
+    b2 = F.fiyatla(L, D, oneri=True)["satirlar"][1]
+    assert (b2["birim_fiyat"], b2["durum"]) == (2300, "öneri bant")
+
+
+def test_miktari_olmayan_fiyatli_satir(defter):
+    C = defter["hatlar"]["celik"]
+    kg_k = next(k for k, g in C["kalemler"].items() if g["birim"] == "kg" and g["fiyat"])
+    kalem, boyut = kg_k.split(" | ")
+    R = F.fiyatla({"satirlar": [{"grup": "Çelik panel", "kalem": kalem, "boyut": boyut, "adet": 8, "kg": None}]}, defter, oneri=True)
+    s = R["satirlar"][0]
+    assert s["tutar"] is None and s["durum"] == "öneri; kg yok"                  # eksik olan kg yazılır
+    assert [f["durum"] for f in R["ozet"]["fiyatsiz"]] == ["öneri; kg yok"]
 
 
 def test_celik_kg_ve_toplam_satiri(defter):
