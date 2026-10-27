@@ -676,7 +676,7 @@
   "Çatı: 1. sayfada görünüş yok; dört omuz bütün ayak izinin üstünde, mahya uzun kenar boyunca, eğim %33 (kuralın varsayılanı).",
   "Veranda kirişleri (KRS1–KRS4) 1. sayfada ayrıca çizili değil: verandanın açık kenarlarına yazıldı (kör kural); dikmeler plandaki karelerden.",
   "Holün yaşama mekânına açılan ucu (W05 ile W08 arası, 113) bir duvar hattında değil (W06 ile W09 40 cm kaydık): kiriş yazılmadı (kör kural: duvar hattındaki kapısız açıklığa kiriş).",
-  "Mahal alanları: sayfada dış duvar dış çizgiden yaklaşık 9 cm çizili; tanımda karkas iç yüzü 8 + 3 cm içeride (kör kural): odalar etiketten %1,2–1,6 küçük.",
+  "Mahal alanları: sayfada dış duvar dış çizgiden yaklaşık 9 cm çizili; tanımda karkas iç yüzü 8 + 3 cm içeride (kör kural): odalar etiketten %0,8–1,6 küçük.",
   "Giriş kapısının kanadı 100 çizili; boşluk 95 × 210 (açık beşteki gibi). İç kapı boşlukları 90 × 214, kanat 80.",
   "Çatı kaplaması OSB + nem bariyeri + metal kiremit; genel motor hesaplamadığı için sandviç panel yazıldı (`cati.kaplama_kaynak`): kaplama satırları tutmaz.",
   "Kirişlerin ve duvar panellerinin et kalınlığı paftada yazmıyor (1,2: kitabın varsayılanı)."
