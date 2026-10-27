@@ -377,7 +377,7 @@
    "mahal": "Müşteri Karşılama Alanı ve Hol",
    "etiket": "230/200 + Üçgen Pencere (Mermerli)",
    "not": "üstündeki üçgen pencere (178; pencere detayı) cumbanın kalkanında: genel motor kalkanda pencere kurmuyor",
-   "bas": 111.6
+   "bas": 108.7
   },
   {
    "ad": "K1",
@@ -519,7 +519,7 @@
  "cati": {
   "tip": "besik_cumba",
   "tip_adi": "beşik + güneyde 1 cumba (mahya doğu–batı)",
-  "tip_kaynak": "teknik özellikler: çatı şekli 'Beşik + Cumba'. 1. sayfada çatı görünüşü yok. Güney cephedeki 230/200 penceresinin üstünde üçgen pencere var (pencere detayında beşgen: iki yanı eşit eğik, tepesi ortada) ve ortası güney duvarının batı parçasının ortasında (226,6; parça 0–448,6): cumbanın alnı orada. Bu yüzden ana mahya doğu–batı (güney yüzü saçak), cumba güney cephenin batı parçasının üstünde (karkas 0–448,6), cephe hizasında (çıkmasız), mahyası ana çatının güney yüzüne girip biter (cati_cumba'nın kuralı); çatı üreticisi çıkmasız cumbayı kurmadığı için düzlemler tanımda (eşit eğim, 45° vadiler). Veranda ana çatının altında",
+  "tip_kaynak": "teknik özellikler: çatı şekli 'Beşik + Cumba'. 1. sayfada çatı görünüşü yok. Güney cephedeki 230/200 penceresinin üstünde üçgen pencere var (pencere detayında beşgen: iki yanı eşit eğik, tepesi ortada) ve ortası güney duvarının batı parçasının ortasında (pencerenin ortası 223,7; parçanın, 0–448,6, ortası 224,3): cumbanın alnı orada. Bu yüzden ana mahya doğu–batı (güney yüzü saçak), cumba güney cephenin batı parçasının üstünde (karkas 0–448,6), cephe hizasında (çıkmasız), mahyası ana çatının güney yüzüne girip biter (cati_cumba'nın kuralı); çatı üreticisi çıkmasız cumbayı kurmadığı için düzlemler tanımda (eşit eğim, 45° vadiler). Veranda ana çatının altında",
   "sacak": 30,
   "topuk": 10,
   "duvar_ustu": 270,
@@ -713,7 +713,7 @@
   "Üçgen pencere (pencere detayında 178 tabanlı beşgen, 1 adet) cumbanın kalkanında: genel motor kalkanda pencere kurmuyor; listede yok.",
   "Müşteri karşılama alanı 'yüksek üçgen tavanlı': genel motor tavanı her mahalde duvar üstünde (270) düz kuruyor; o alanın tavanı ve makas biçimi tutmayabilir.",
   "Hol ile müşteri karşılama alanı arasında duvar yok: bir mahal; holün açıklığının kirişi (KRS4) sayfada tek çizgi, kör kuralla duvar hattındaki kapısız açıklığa yazıldı.",
-  "Holde tek bir düşey çizgi var (x ≈ 514): duvar sayılmadı (holün 2,36 m²'si tam genişlikle tutuyor; çizginin ne olduğu sayfada yazmıyor).",
+  "Holde tek bir düşey çizgi var (x ≈ 514): holün 113 ölçüsünün ölçü çizgisi (iki ucunda ölçü işareti, yanında 113), duvar değil (holün 2,36 m²'si tam genişlikle tutuyor).",
   "Saçak kuralın uzlaşımıyla karkas yüzünden 30 (açık beşteki gibi); sayfada saçak ölçüsü yok.",
   "Mahal alanları kaplanmış yüzler arası: sayfa 140'lık dış duvarın iç çizgisini karkas iç yüzünde (3 + 14) çiziyor; tanımın alanı etiketten iç kaplama kadar küçük.",
   "Pencere alt kotları etikette yok: 200 − yükseklik (lento 70; KT-01 ve ÇP-06'daki gibi); 120/200, 180/200 ve 230/200 için alt kot 0.",

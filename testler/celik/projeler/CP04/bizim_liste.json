@@ -3,7 +3,7 @@
  "kod": "ÇP-04",
  "tanim": {
   "yol": "testler/celik/projeler/CP04/CP04.json",
-  "sha256": "a89975825d84cdf400bd34d5883de81717fd74448b94571b3ae47c166bea6258"
+  "sha256": "d3e441e1a40af6eb9c0f0578da0b8f65611aa901919fbfba345f52465e884888"
  },
  "kural_seti": {
   "yol": "kurallar/liste/kurallar.json",
