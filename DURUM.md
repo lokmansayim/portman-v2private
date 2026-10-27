@@ -9,6 +9,12 @@ Yeni pencere için hazırlıklar:
 - Dış çizim denetimi: `deneme/2026-09-30_asama2/kos.py --dxf`.
 - Mac'te `24_Astra_Cizimler/`.
 
+**27 Ekim 2026 gece eki (Pano satır 12 · CI'a canlının Python'u 3.12; dal `claude/project-thread-xbdfzd`, `main` `4bab1d4`'ten; PR #51 birleşti, 21:04 UTC):**
+- **Neden:** İE-17 oturumu Python 3.13'te `testler/kimlik/test_k3b.py::test_kesim_yuvarlamasi_liste_uretecinin`'i kırmızı gördü. Canlı sunucu 3.12.3, CI ve `ortam_kur.sh` 3.11. CIO (21:18 UTC): önce 3.12'de tam koşu ölçülsün, sonra test ön koşulu ve 3.12 CI işi tek PR'da.
+- **Ölçüm (yerel, `main` `4bab1d4`, Python 3.12.3 + `vps/gereksinimler.txt`, dört parça):** harness 22/22, referansla aynı (DXF 18/18, PDF 18/18, genel motor izleri 173/173), pytest 1934 geçti, 25 atlandı (fazladan atlanan vtk testi, sunucu setinde beklenen), **1 düştü: yalnız bu test**. Sebep: 3.12'den beri `sum()` float'ları telafili topluyor; dört hattın toplamı 3.11'de 1000,0000000000001, 3.12+'da tam 1000,0; testin "gürültü var" ön koşulu düşüyor. Ürün sonucu (`kesim.toplam_karti`, `kenar_karti`) 3.11, 3.12, 3.13'te aynı.
+- **Yapıldı:** test değişikliği (gerekçe `docs/is_emirleri/IE-15.md` › K3b kanıtı): gürültülü toplam sabit verildi, ürün davranışı değişmez, pay 0 mutasyonu iki sürümde de düşüyor. `.github/workflows/dogrulama.yml`: dört iş 3.11 ve 3.12'de (3.12 işleri `vps/gereksinimler.txt` ile), sekiz iş.
+- **Bekleyen (Lokman):** PR'ın `main`'e birleştirilmesi (test değişikliği içerir).
+
 **27 Ekim 2026 gece eki (Görev 7 · Kapı 10 yedekten geri yükleme ve Kapı 12 sürüm geri dönüş tatbikatı; pano satır 13, satır 14 Kapı 11 bağlı; `docs/notlar/2026-10-27_Kapi10_12_tatbikat.md`):**
 - **Canlı (27 Ekim 21:16 UTC, Lokman Mac'ten; komutlar PF `Altyapi_Tatbikat/2026-10-27_tatbikat_komutlari.md`):** Kapı 10: 27 Ekim gece yedeği Drive'dan Mac'te çözüldü, deneme veritabanında 18 tablo canlıyla AYNI, şema 8, deneme veritabanı ve sunucudaki geçici dump silindi. Kapı 12: `v2026.10.16 → v2026.10.15 → v2026.10.16`, sağlık iki yönde 200, göç yok, nginx değişmedi, nabız zamanlayıcısı geri açıldı, `== çıkış 0`; servisler her geçişte ~1 sn durdu. Ücret yok. Kod değişmedi (sunucu betikleri `v2026.10.16` = `main`; yerelde `test_surum.py` 23 geçti).
 - **rehber.portatifev.com (satır 116):** Mac'ten `HTTP/2 200`. "Çalışmıyor" raporu dalın `6b899b4`'üne bakmıştı; yayın kaydı `claude/montaj-rehberi-devir` `19ccb89`'da (dal `main`'e birleşmedi).
