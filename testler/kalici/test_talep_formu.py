@@ -69,6 +69,10 @@ def test_talep_formu_secenekleri_cozumleyiciyle_ayni():
     assert [x["id"] for c in cocuklar if c["type"] == "CheckboxGroup" for x in c["data-source"]] == list(TF.NEYI)
     # sema ile aynı değerler: veranda konumu ve çatı tipi Talep'te geçerli
     Talep.model_validate({"niyet": "yeni_talep", "guven": "yuksek", "ozet": "x", "veranda": {"konum": "kose"}, "cati": {"tip": "tek_egimli"}})
+    # kartın izinli varsayılanları (depo; göç 009'un CHECK'leri) formun seçenekleriyle aynı
+    from depo import Depo
+    assert Depo.VARSAYILAN_ALANLARI == {"yapi_turu": tuple(TF.YAPI), "kat_sayisi": tuple(int(x) for x in TF.KAT), "cati": tuple(TF.CATI),
+                                        "veranda": tuple(TF.VERANDA)}
 
 
 def _cevap(**alan) -> str:

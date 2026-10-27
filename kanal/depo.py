@@ -21,8 +21,6 @@ import psycopg
 from psycopg.rows import dict_row
 from psycopg.types.json import Jsonb
 
-import talep_formu as TF
-
 GOC_DIR = Path(__file__).resolve().parent / "goc"
 KIRA_SN = 600                 # worker.STALE_S ile aynı: bu süre ilerlemeyen iş sahipsiz sayılır
 EN_COK_DENEME = 3             # D-03: kirası dolan iş en çok bu kadar kez alınır
@@ -733,8 +731,10 @@ class Depo:
                 "bolge = EXCLUDED.bolge, rol = EXCLUDED.rol, aktif = EXCLUDED.aktif, kaynak = EXCLUDED.kaynak, guncellendi = now() "
                 f"RETURNING {self._BAYI_SUTUNLAR}", alanlar).fetchone()
 
-    VARSAYILAN_ALANLARI = {"yapi_turu": tuple(TF.YAPI), "kat_sayisi": tuple(int(x) for x in TF.KAT), "cati": tuple(TF.CATI),
-                           "veranda": tuple(TF.VERANDA)}             # formun seçenekleri (göç 009'un CHECK'leri de bunlar)
+    # formun seçenekleri (`talep_formu`; testte karşılaştırılır) ve göç 009'un CHECK'leri; depo `talep_formu`'nu içe aktarmaz (Kapı M
+    # paketi gibi yalnız depo.py'li kurulumlar)
+    VARSAYILAN_ALANLARI = {"yapi_turu": ("prefabrik", "celik"), "kat_sayisi": (1, 2), "cati": ("besik", "tek_egimli", "kirma", "teras"),
+                           "veranda": ("on", "yan", "arka", "kose")}
 
     @staticmethod
     def _varsayilanlar(c, numara) -> dict:
