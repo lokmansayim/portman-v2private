@@ -15,7 +15,7 @@ Yeni pencere için hazırlıklar:
 - **Yapıldı (kitap 0.20-taslak):** duvar izolasyonu (mineral yün) yeniden listede, yalıtılan duvar yoksa satır yok (C1.1); çatı şiltesi İzocam 80 mm, 9,00 m² (C1.6); "Metal tahta" (C1.9); 2026 adları (takım, NYM kablo 3 × 2,5, W otomat sigorta 16 A, kaçak akım rölesi ikili) ve renk adın başında (C3); C1 teyitleri ve C2 notu kaynaklarda. **Canlıya kurulunca bayiye giden çelik listesi bunlarla değişir** (ayrı onay).
 - **Sonuç (toplam çelik kg kapısı ±%3):** **ÇP-14 geçti (+%0,93)**, türlerin farkları birbirini götürerek; ÇP-13 +%3,04, ÇP-06 −%12,83, ÇP-07 −%13,18, ÇP-03 −%9,42 (PR-3b: +%5,85, +%4,73, −%11,42, −%11,54, −%12,2). Ev duvarı paneli 108 ↔ pafta 116. Kalan farklar: kolon-kiriş (140'lık ve 1,5 mm kuralda yok), kırma ve vadi bölgesinin çatı panelleri ve birleşim makasları, ÇP-06'nın cumbası.
 - **Kullanıcı adımları:** PR-3 **Kısmen** (3a, 3b, 3c yerelde; kapı beşin birinde geçti).
-- **Kanıt:** › IE-16 Kanıt (PR-3c).
+- **Kanıt:** › IE-16 Kanıt (PR-3c): son kodla tam doğrulama (harness 22/22, referansla aynı, pytest 1936 geçti, 24 atlandı), kaynaklı çelik testleri 253 geçti; sır taraması, kod incelemesi ve geometri hakeminin iki turu.
 - **Bekleyen (Lokman):** PR'ın `main`'e birleştirilmesi (birleştirme commit'iyle). Sonra PR-4 (kör dokuz).
 
 **26 Ekim 2026 eki (İE-16 · PR-3b, çatı karkas kuralı; `docs/is_emirleri/IE-16.md` › Değişiklik (PR-3b)):**
