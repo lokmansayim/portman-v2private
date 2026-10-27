@@ -393,8 +393,12 @@ def cati_plani_ciz(ax, plan: G.Plan, ie: dict, yazi: float = 1.0) -> bool:
 # ─────────────────────────────────────────────────────────────────── perspektif ──
 def perspektif_uret(ie: dict, hedef: Path, govde: str) -> dict:
     """Motor'un IFC'si (pano ekleri dahil) → iki perspektif PNG. Ayrı süreçte: VTK çökmesi ya da zaman aşımı sayfayı düşürmez. Ekran yoksa
-    ve `xvfb-run` varsa onunla (yerel); sunucuda OSMesa'lı VTK doğrudan çizer."""
+    ve `xvfb-run` varsa onunla (yerel); sunucuda OSMesa'lı VTK doğrudan çizer. Beşik dışı çatıda (beşik + cumba, kırma) IFC'nin çatısı
+    yok: perspektif çizilmez, neden yazılır (İE-17 PR-1b)."""
     from importlib.util import find_spec
+    from .cati_prefabrik import TIPLER, TIP_ADI
+    if (ie.get("cati") or {}).get("tip") in TIPLER:
+        return {"durum": "ÇİZİLEMEDİ", "neden": f"{TIP_ADI[ie['cati']['tip']]} çatı perspektifte henüz çizilmiyor (İE-17 PR-1b)"}
     try:
         if find_spec("vtk") is None:
             return {"durum": "ÇİZİLEMEDİ", "neden": "VTK kurulu değil"}

@@ -647,7 +647,7 @@ class Cizici:
         hy = float(t["kat_yuksekligi"])
         for k, taraf in enumerate(("on", "arka", "sol", "sag")):              # görünüşün adı altında (`gorunus_ciz`)
             DG.gorunus_ciz(C, S, taraf, hy, k * adim, top - hy, DG.gorunus_olcusu(S, taraf))
-        self.text(f"Çatı: {t['cati'].get('tip_adi', '')} | eğim %{fmt(float(self.plan.is_emri['cati']['egim_yuzde']))} | ölçüler cm",
+        self.text(f"Çatı: {_cati_adi(self.plan.is_emri['cati'])} | eğim %{fmt(float(self.plan.is_emri['cati']['egim_yuzde']))} | ölçüler cm",
                   (2 * adim, top - hy - 150), 15, "ON_YAZI")
 
     def ciz_ozellik_tablosu(self, ox, oy, satirlar):
@@ -681,12 +681,14 @@ class Cizici:
 # ---------------------------------------------------------------------- üretim akışı
 
 def _cati_adi(cati: dict) -> str:
-    """Özellik tablosundaki çatı adı: beşikte eski yazım (bayt bayt aynı), beşik dışında paftanın yazımı (İE-17; `sunum.CATI_SEKLI`)."""
+    """Özellik tablosundaki çatı adı: beşik + cumba ve kırmada paftanın yazımı (İE-17; `sunum.CATI_SEKLI`), başka her tipte eski yazım
+    (beşik DXF'i bayt bayt aynı)."""
+    from .cati_prefabrik import TIPLER
     tip = cati.get("tip", "besik")
-    if tip == "besik":
-        return tip.capitalize()
-    from .sunum import CATI_SEKLI
-    return CATI_SEKLI.get(tip, tip)
+    if tip in TIPLER:
+        from .sunum import CATI_SEKLI
+        return CATI_SEKLI[tip]
+    return tip.capitalize()
 
 
 def uret(is_emri: dict, cikti_dir: Path, ad_govde: str | None = None, pdf_hatada: bool = False) -> dict:
@@ -722,11 +724,13 @@ def uret(is_emri: dict, cikti_dir: Path, ad_govde: str | None = None, pdf_hatada
     _rise = float(_cati.get("topuk_cm", 10)) + (W + 2 * float(_cati.get("sacak_cm", 30))) / 2 * float(_cati.get("egim_yuzde", 33)) / 100.0
     kay = (max(0.0, _rise - 147.445) if _yeni else 0.0) + py["alt"]   # İE-11: eski İş Emri'nde pafta yerleşimi değişmez; BK-14: ön veranda kadar aşağı
     kay2 = kay + max(0.0, float(yapi.get("duvar_yuksekligi_cm", 250)) - 250.0)     # 280 / 300'de ön görünüş uzar, alt yazılar iner
-    if (is_emri.get("cati") or {}).get("tip", "besik") == "besik":
+    from .cati_prefabrik import TIPLER as _PREFABRIK_CATI
+    _dort = (is_emri.get("cati") or {}).get("tip", "besik") in _PREFABRIK_CATI
+    if _dort:                                               # İE-17: beşik + cumba, kırma → dört görünüş (çizim setinin görünüşü)
+        c.ciz_gorunusler(-600.0 - kay, gap)
+    else:                                                   # beşik (ve başka her tip) bugünkü gibi
         c.ciz_on_gorunus(0.0, -600.0 - kay)
         c.ciz_cati_profili(gap, -550.0 - kay)
-    else:                                                   # İE-17: beşik + cumba, kırma → dört görünüş (çizim setinin görünüşü)
-        c.ciz_gorunusler(-600.0 - kay, gap)
     hy = yapi.get("duvar_yuksekligi_cm", 250); cati = is_emri.get("cati", {})
     _olculer = {p.acilim.olcu for p in plan.panolar if p.acilim and p.acilim.tur == "pencere"}
     _pencere_satiri = "PVC doğrama; " + ", ".join(f"{e}×{b}" for e, b in sorted((k.en, k.boy) for k in map(G.pencere_kurali, _olculer)))
@@ -746,7 +750,7 @@ def uret(is_emri: dict, cikti_dir: Path, ad_govde: str | None = None, pdf_hatada
     c.text(LABEL, (cx, H + 320 + py["ust"]), 23, "PORTMAN_INFO")
     c.text(f"PORTMAN | {is_emri.get('talep',{}).get('bayi',{}).get('ad','')} / {is_emri.get('talep',{}).get('musteri_adi','')} | İş Emri {is_emri.get('is_emri_no','')} r{int(is_emri.get('revizyon',1)):02d}", (cx, H + 275 + py["ust"]), 20, "PORTMAN_INFO")
     c.text(f"Duvar: {fmt(G.T_DIS)} / {fmt(G.T_IC)} cm | Yükseklik: {fmt(hy)} cm | Pano: 125,5 cm | Çatı: %{fmt(float(cati.get('egim_yuzde',33)))}", (cx, -1090 - kay2), 18, "PORTMAN_INFO")
-    c.text("Kural kaydı v1.4.3 ile üretildi. " + ("Yan görünüş ve üretim/statik hesabı" if (cati.get("tip", "besik") == "besik") else "Üretim/statik hesabı")
+    c.text("Kural kaydı v1.4.3 ile üretildi. " + ("Üretim/statik hesabı" if _dort else "Yan görünüş ve üretim/statik hesabı")
            + " bu taslağın kapsamında değildir.", (cx, -1130 - kay2), 14, "PORTMAN_INFO")
     c.text("Portman motor v1.1 | Üretim: " + time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()), (cx, -1165 - kay2), 13, "PORTMAN_INFO")
     for i, u in enumerate(plan.uyarilar[:4] + pafta_uyarilari):

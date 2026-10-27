@@ -177,8 +177,13 @@ def model_motor(ie: dict) -> dict:
     from . import geometry as G
     from shapely.geometry import LineString, Point, box
     from shapely.ops import unary_union
+    from .cati_prefabrik import TIPLER, TIP_ADI
+    c = ie.get("cati") or {}
+    if c.get("tip") in TIPLER:                                  # İE-17: yanlış sayı yazılmaz (beşik kuralı tek yön sayılırdı)
+        raise ValueError(f"prefabrik liste: {TIP_ADI[c['tip']]} ana çatının çatı satırları bu sürümde yok (cumba İE-17 PR-1b; "
+                         f"kırmada kitapta prefabrik kural yok); liste yazılmaz")
     plan = G.kur(json.loads(json.dumps(ie)))
-    y = ie["yapi"]; c = ie.get("cati") or {}
+    y = ie["yapi"]
     mx = c.get("makas_ekseni", "x") == "x"                     # makaslar x'i geçiyorsa saçak duvarları y yönünde koşar
     eave_yon = "y" if mx else "x"
     panolar, ekler = [], []

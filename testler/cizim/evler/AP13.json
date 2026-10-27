@@ -191,7 +191,7 @@
   ],
   "cati": {
     "tip": "besik_cumba",
-    "egim_yuzde": 32.49,
+    "egim_yuzde": 32.88,
     "sacak_cm": 30,
     "topuk_cm": 10,
     "makas_yonu": "kisa_kenar",
@@ -223,7 +223,7 @@
     "Yatay iç duvarlar paftadaki yerinde (ek aks): y 276 (paftada 273–279 ve veranda duvarı 271–281) ve 464,25 (461,25–467,25).",
     "Veranda ızgaranın içinde (ana çatının altında), açık kenarları ön ve sağ; ön-sağ köşede 10 × 10 dikme (paftada kesikli kiriş bandı).",
     "Pencere ve kapılar panoda (dizilim.pencere: pano); paftadaki yerlerine en çok 20 cm. Motor'un 15 cm'lik parçası (veranda duvarının arka ucu) uyarı olarak kalır; pano dizilimi montaj rehberinin işi (İE-18).",
-    "Çatı: ana beşiğin mahyası x boyunca (makaslar derinliği geçer; makas planı M1–M7), ön-sol odanın üstünde çapraz cumba; paftada 0–386,5 (cumba kesiti 446,5 = 386,5 + 2 × 30 saçak), burada odanın duvarıyla 0–391,5 (duvar 5 cm sağda, yukarıdaki madde); eğim 18° = %32,49 (iki kesit de 18°); topuk 10, saçak 30.",
+    "Çatı: ana beşiğin mahyası x boyunca (makaslar derinliği geçer; makas planı M1–M7), ön-sol odanın üstünde çapraz cumba; paftada 0–386,5 (cumba kesiti 446,5 = 386,5 + 2 × 30 saçak), burada odanın duvarıyla 0–391,5 (duvar 5 cm sağda, yukarıdaki madde); eğim %32,88 (18,2°): paftanın kesitlerinde yazı 18°, ölçüler 18,2° (mahya 149,4 = 10 topuk + 424 × 0,3288; cumba 83,4 = 10 + 223,25 × 0,3288; 18°'de 147,8 ve 82,5 olurdu); çizilen geometri ölçülerden, AP-16'nın yazısı da 18,2°; topuk 10, saçak 30.",
     "Kapı genişlikleri paftada yazılı değil: dış kapı 90, iç kapı 82 (Motor'un ölçüsü); menteşe kapı mantığıyla (dizilim.kapi: mantik)."
   ],
   "eksikler": []

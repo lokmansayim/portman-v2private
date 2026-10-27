@@ -724,7 +724,12 @@ def ifc_bom(yol: Path):
 
 
 def uret(ie: dict, yol: Path, baslik: str | None = None) -> dict:
-    """İş Emri → IFC dosyası. Dönen özet: sınıf sayıları ve şema hatası sayısı (0 beklenir)."""
+    """İş Emri → IFC dosyası. Dönen özet: sınıf sayıları ve şema hatası sayısı (0 beklenir). Beşik dışı ana çatı (beşik + cumba, kırma)
+    IFC'de henüz kurulmaz: çatı beşik kurulurdu (yanlış çatı), hata verir (İE-17 PR-1b; çatı planı ve görünüşler Örnek Şablon paftasında)."""
+    from .cati_prefabrik import TIPLER, TIP_ADI
+    tip = (ie.get("cati") or {}).get("tip")
+    if tip in TIPLER:
+        raise ValueError(f"IFC: {TIP_ADI[tip]} ana çatı bu sürümde kurulmuyor (İE-17 PR-1b)")
     girdi = hazirla(ie)
     u = IfcUretici(girdi, baslik or f"Portman — {ie.get('is_emri_no', '')} r{int(ie.get('revizyon') or 1):02d}")
     yol = Path(yol); yol.parent.mkdir(parents=True, exist_ok=True)
