@@ -6,7 +6,7 @@ LLM planı yeniden yazmaz (eski `plan_uretici.duzenle` kalktı). İşlemler:
 - `kapi_ekle` / `kapi_kaldir` {mahal, mahal_b ('dis' = dış kapı)}
 - `pencere_ekle` / `pencere_kaldir` {mahal, cephe?, olcu?}
 - `cati_tipi` {tip: besik|kirma}; `dis_karkas_140`
-- `oda_ekle` {islev, mahal?}: yalnız ebeveyn banyosu (BK-15): banyo yatak odasının köşesinden kesilir, kapısı o odadan; sığmazsa oda bir
+- `oda_ekle` {islev, mahal?}: yalnız ebeveyn banyosu (BK-15; islev `ebeveyn_banyosu`, ya da `banyo` ve mahal bir yatak odası): banyo yatak odasının köşesinden kesilir, kapısı o odadan; sığmazsa oda bir
   kenarından büyütülüp yeniden denenir (ev en az büyüyen yönde). Öteki oda istekleri gerekçesiyle `uygulanamayan`'a.
 Çevrilemeyen istek `uygulanamayan`'a bayinin sözüyle (sessiz düşme yok). Kodun uygulayamadığı işlem de oraya gerekçesiyle yazılır.
 "Uygulanan" metni kodun hesapladığı farktır (`plan_uretici.plan_farki`).
@@ -58,7 +58,8 @@ class Islem(BaseModel):
     olcu: Optional[Literal["120x120", "120x180", "60x40", "120x100", "120x160", "160x120", "160x180", "180x180", "80x120", "120x50",
                            "80x180", "60x60"]] = None
     tip: Optional[Literal["besik", "kirma"]] = None
-    islev: Optional[Literal["banyo", "yatak_odasi", "salon", "mutfak", "hol", "depo"]] = Field(None, description="oda_ekle: yeni odanın işlevi")
+    islev: Optional[Literal["ebeveyn_banyosu", "banyo", "yatak_odasi", "salon", "mutfak", "hol", "depo"]] = Field(
+        None, description="oda_ekle: yeni odanın işlevi; yatak odasının içinden açılan banyo ebeveyn_banyosu")
     alinti: str = Field("", description="Bayinin bu işleme karşılık gelen sözü")
 
 
@@ -73,9 +74,9 @@ yazmazsın: isteği aşağıdaki işlemlere çevirirsin; uygulamayı ve denetimi
 İşlemler: oda_buyut / oda_kucult (mahal, yon: G ön, K arka, B sol, D sağ; cm — bayi sayı vermediyse 50), kapi_ekle / kapi_kaldir (mahal,
 mahal_b; dış kapı için mahal_b "dis" ve istenirse cephe — dış kapıyı başka cepheye almak da kapi_ekle'dir), pencere_ekle / pencere_kaldir
 (mahal, cephe, olcu), cati_tipi (tip), dis_karkas_140, oda_ekle (islev, mahal).
-- oda_ekle: ebeveyn banyosu (yatak odasının içinden açılan banyo) için islev banyo, mahal o yatak odası; bayi hangi oda demediyse mahal'i
-  boş bırak. Başka oda istenirse (yatak odası, mutfak, kiler, holden açılan ortak banyo) de oda_ekle yaz: islev'i ve odanın açılacağı
-  mahali (ör. Hol) yaz.
+- oda_ekle: ebeveyn banyosu (yatak odasının içinden açılan banyo) için islev ebeveyn_banyosu, mahal o yatak odası; bayi hangi oda
+  demediyse mahal'i boş bırak. Başka oda istenirse (yatak odası, mutfak, kiler; holden açılan ya da yeri söylenmemiş ikinci banyo için
+  islev banyo) de oda_ekle yaz: islev'i ve odanın açılacağı mahali (ör. Hol) yaz.
 - Mahal adlarını tablodaki gibi yaz. Yalnız bayinin bu mesajda istediğini yaz; söylenmeyeni ekleme.
 - Pencere cephesini mahalin tablodaki dış cephelerinden seç. Çatı tipi yalnız besik ya da kirma olabilir; L, cumba ve başka çatı biçimlerini
   `uygulanamayan`'a yaz.
@@ -290,8 +291,6 @@ KAPI_DUVARI_CM = 100                    # yatak odasının var olan kapısı iç
 PENCERE_PAYI_CM = 35                    # cephe koşusundan pencereye kalan (köşe ve duvar payları; denetçide 130 cm koşuya 97 cm sığar)
 BUYUME = tuple((yon, cm) for yon in "GKBD" for cm in (100, 150, 200, 250))
 EN_COK_DENETIM = 12                     # bir yerleşimde denetçiye giden en çok aday (denetim ~0,15 sn)
-EBEVEYN_SOZU = ("ebeveyn", "yatak", "oda", "master")  # oda söylenmediyse bayinin sözünde yatak odası banyosu geçmeli ("bir banyo daha"
-                                                     # ortak ikinci banyo olabilir; geometri hakemi 27.10 ikinci tur)
 EBEVEYN_ADI = "Ebeveyn Banyo"           # "Ebeveyn Banyosu" ~2 m'lik banyoda plan görselinin sabit yazısına sığmıyor, duvarı aşıyordu
 
 
@@ -462,11 +461,14 @@ def _denetle(q: dict, talep: dict, kod: str, onceki: dict) -> dict:
 
 
 def _ebeveyn_banyosu(p: dict, o: dict) -> tuple[dict | None, str | None]:
-    """`oda_ekle`: yalnız banyo ve yalnız yatak odasının içinden. Oda söylenmediyse en büyük yatak odası (eşitlikte plandaki ilk). Odaya
+    """`oda_ekle`: yalnız banyo ve yalnız yatak odasının içinden: islev `ebeveyn_banyosu` ya da `banyo` ve mahal bir yatak odası. Yeri
+    söylenmemiş `banyo` ortak ikinci banyo olabilir, uygulanmaz (ayrımı LLM'in işlevi yapar, kod bayinin sözünü taramaz; geometri hakemi
+    üçüncü tur: söz taraması boş alıntıda meşru isteği düşürüyor, "oda sayısı" gibi cümleleri ebeveyn sanıyordu). Oda söylenmediyse en
+    büyük yatak odası (eşitlikte plandaki ilk). Odaya
     sığmazsa (oda en küçüğün altına düşer, kollar daralır, pencere ya da kapı yeri kalmaz) oda bir kenarından 100–250 cm büyütülüp yeniden
     denenir (`_oda_kenari`: dış cephede ev büyür, iç kenarda komşu küçülür); geçenlerden evi en az büyüten, eşitlikte G, K, B, D sırası."""
     islev = o.get("islev")
-    if islev != "banyo":
+    if islev not in ("ebeveyn_banyosu", "banyo"):
         return None, f"{ISLEV_ADI.get(islev, 'yeni oda')} ekleme otomatik yapılamıyor (yalnız yatak odasının içinden ebeveyn banyosu eklenebiliyor)"
     if o.get("mahal"):
         m = next((x for x in p["mahaller"] if x["ad"] == o["mahal"]), None)
@@ -474,9 +476,9 @@ def _ebeveyn_banyosu(p: dict, o: dict) -> tuple[dict | None, str | None]:
             return None, f"'{o['mahal']}' adlı mahal yok"
         if m["islev"] != "yatak_odasi":
             return None, f"banyo yalnız bir yatak odasının içinden eklenebiliyor ({m['ad']} yatak odası değil)"
+    elif islev == "banyo":
+        return None, "banyonun hangi odadan açılacağı belli değil (yalnız yatak odasının içinden ebeveyn banyosu eklenebiliyor)"
     else:
-        if not any(s in (o.get("alinti") or "").casefold() for s in EBEVEYN_SOZU):
-            return None, "banyonun hangi odadan açılacağı belli değil (yalnız yatak odasının içinden ebeveyn banyosu eklenebiliyor)"
         yataklar = [x for x in p["mahaller"] if x["islev"] == "yatak_odasi"]
         if not yataklar:
             return None, "planda yatak odası yok"

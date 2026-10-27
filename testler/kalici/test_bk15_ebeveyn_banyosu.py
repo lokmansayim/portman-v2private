@@ -35,7 +35,7 @@ def test_o1_rehberdeki_konusma_ebeveyn_banyosu_r02(depo, wa, uretici, duzenleyic
     plan = d["uretilen_plan"]["plan"]
     assert {k: plan[k] for k in ("dis_olcu", "mahaller")} == {k: ornek("rehber_3arti1_90")[k] for k in ("dis_olcu", "mahaller")}
 
-    duzenleyici["cevap"] = {"islemler": [{"op": "oda_ekle", "islev": "banyo", "alinti": "Ebeveyn banyosu ekleyelim"}], "uygulanamayan": []}
+    duzenleyici["cevap"] = {"islemler": [{"op": "oda_ekle", "islev": "ebeveyn_banyosu", "alinti": "Ebeveyn banyosu ekleyelim"}], "uygulanamayan": []}
     assert depo.mesaj_kaydet(mesaj("Ebeveyn banyosu ekleyelim", talep("revizyon", ozet="revizyon"), bayi=BAYI_KART))
     [r] = isle_hepsi(depo, URETIM)
     assert r["eylem"] == "is_emri", r
