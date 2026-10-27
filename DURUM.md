@@ -9,13 +9,15 @@ Yeni pencere için hazırlıklar:
 - Dış çizim denetimi: `deneme/2026-09-30_asama2/kos.py --dxf`.
 - Mac'te `24_Astra_Cizimler/`.
 
-**27 Ekim 2026 gece eki (İE-17 · PR-1; `docs/is_emirleri/IE-17.md`):**
+**27 Ekim 2026 gece eki (İE-17 · PR-1, yeniden kuruldu; `docs/is_emirleri/IE-17.md`):**
+- **Dayanak:** Lokman 21:06 Örnek Şablonu reddetti ("en son canlıda kullandığımız versiyonunu al"); CIO 21:13: prefabrik çıktısı canlıdaki `dxf_out` ön onay PDF'i ve `bayi_gorseli` plan görseli, genel motordan yalnız çatı geometrisi. Yeni plan CIO'nun onayıyla ("Onaylı, bu sırayla başla."). İlk sürüm (köprünün paftası, çizim setinin görünüşü) geçersiz.
 - **Yapıldı:**
   - `motor/cati_prefabrik.py` (yeni): prefabrik İş Emri'nin beşik dışı çatısı (`besik_cumba`: bir çapraz cumba; `kirma`, uç yüzler farklı eğimle `kirma_egimleri`), genel motorun çatı üreticisiyle ve onun denetimiyle. Tanınmayan alan ve farklı cumba eğimi hata verir (yanlış çatı çizilmez).
-  - Görünüş ve pafta BK-14'ün köprüsünden (`motor/sablon_kopru.py`): ızgara içindeki veranda, beşik dışı çatı. Bayi paftası iki sayfa: 1. sayfada plan, ön ve sol yan görünüş; 2. sayfada çatı planı ve dört görünüş.
-  - Canlı DXF'te (`dxf_out`) yalnız beşik dışı çatıda dört görünüş; beşikte DXF bayt bayt aynı.
+  - `motor/cephe_gorunus.py` (yeni): dört cephenin duvar, derz ve açıklıkları Motor'un planından (ön görünüşün kuralı); çatı çizgileri çatının düzlemlerinin izdüşümü.
+  - `motor/dxf_out.py`: yalnız beşik dışı çatıda ÖN, ARKA, SOL, SAĞ GÖRÜNÜŞ - ÇALIŞMA ön görünüşün canlı biçimiyle yan yana, sonra ana çatının profili ve çatının yazısı. Beşikte DXF bayt bayt aynı.
   - Frenler (A4 perspektif, A5 cumbanın liste satırları PR-1b'ye): beşik dışı çatıda perspektif "ÇİZİLEMEDİ", liste komutu yazmaz. IFC ve `model_motor` bugünkü gibi, çünkü İE-15'in kimlik akışı onları kullanıyor.
   - İş Emri'leri `testler/cizim/evler/AP13.json`, `AP16.json`, `AP01.json` (paftadan; kişi ve bayi adı yok). AP-22 PR-2'ye geçti (veranda ve cumba 62,8 cm öne çıkıntılı).
+  - Testler `testler/cizim/` (22 + 22 + 16) `cephe_gorunus` ve `dxf_out.uret` üzerine yeniden yazıldı.
 - **Kullanıcı adımları:**
   - A1 (AP-13) **Kısmen**: paftayla farklar kıyas tablosunda; Lokman'ın görsel kabulü bekleniyor.
   - A2 (dört görünüş) **Yerelde çalışıyor**.
@@ -23,8 +25,8 @@ Yeni pencere için hazırlıklar:
   - A4, A5 **Çalışmıyor** (PR-1b, frenli).
   - A6 (gerileme freni) **Yerelde çalışıyor**.
   - A7 (PR-2) **Çalışmıyor**.
-- **Kanıt:** tam doğrulama (`054d77a`): harness 22/22, referans aynı. pytest 2024 geçti; 1 düştü, `test_k3b::test_kesim_yuvarlamasi_liste_uretecinin`, `main`'de de düşüyor (Python 3.13'ün `sum()`'ı; bu işe bağlı değil). Geometri hakemi 1. turun dört bulgusu kapandı. Sır taraması temiz.
-- **Bekleyen (Lokman):** yan yana görselle (proje dosyaları `Prefabrik_28_Olcum/IE-17/IE17_yan_yana.png`) görsel kabul; `main`'e birleştirme (önce PR #50).
+- **Kanıt:** › İE-17 Kanıt.
+- **Bekleyen (Lokman):** yan yana görselle (proje dosyaları `Prefabrik_28_Olcum/IE-17/IE17_on_onay_yan_yana.png`) görsel kabul; `main`'e birleştirme (önce PR #50).
 
 **27 Ekim 2026 akşam eki (İE-17 · plan; `docs/is_emirleri/IE-17.md`):**
 - **Dayanak:** 28 AIPrefabrik evin motor ölçümü (proje dosyaları `Prefabrik_28_Olcum/`): bugün 27 tek katlı evin 3'ü çiziliyor (AP-04, AP-19 = PK-01, AP-21), hiçbirinde dört görünüş yok; engellerin başında beşik dışı çatı (14 ev). Lokman 27 Ekim 16:31 UTC kartı: yol haritasına 1. adımla (çatı ve görünüş) başla. Numara CIO'dan (16:32).
