@@ -1,0 +1,1753 @@
+{
+ "sema": "portman.altin_set/0.1",
+ "aciklama": "İE-19 altın set, açık dilim. Harness'in 22 vakası beyin/testler/'den okunur (burada yalnız beklenen okumaları); kör dilim depo dışında (mühür kor_muhur.json). Alanlar testler/altin/OKU.md'de.",
+ "harness_okuma": {
+  "1": {
+   "adim": "katalog_kodu",
+   "okuma": {
+    "niyet": "yeni_talep",
+    "katalog_kodu": "P6001",
+    "varyantlar": [
+     {
+      "tur": "ayna_x",
+      "aciklama": "aynalanmış hali",
+      "parametreler": {}
+     }
+    ]
+   },
+   "okuma_kabul": {
+    "niyet": [
+     "revizyon"
+    ]
+   }
+  },
+  "2": {
+   "adim": "eksik_bilgi",
+   "okuma": {
+    "niyet": "yeni_talep",
+    "oda_programi": "2+1",
+    "alan_m2": 60,
+    "veranda": {
+     "istiyor": true
+    }
+   }
+  },
+  "3": {
+   "adim": "katalog_kodu",
+   "okuma": {
+    "niyet": "yeni_talep",
+    "katalog_kodu": "P6001"
+   }
+  },
+  "4": {
+   "adim": "bilgi_tam",
+   "okuma": {
+    "niyet": "yeni_talep",
+    "yapi_turu": "prefabrik",
+    "kat_sayisi": 1,
+    "oda_programi": "2+1",
+    "pano": {
+     "nx": 6,
+     "ny": 8
+    }
+   }
+  },
+  "5": {
+   "adim": "selam_soru",
+   "okuma": {
+    "niyet": "soru"
+   }
+  },
+  "6": {
+   "adim": "onay_eski",
+   "okuma": {
+    "niyet": "onay"
+   }
+  },
+  "7": {
+   "adim": "eksik_bilgi",
+   "okuma": {
+    "niyet": "yeni_talep",
+    "oda_programi": "1+0",
+    "dis_olcu": {
+     "en_m": 4,
+     "boy_m": 7
+    },
+    "veranda": {
+     "istiyor": true,
+     "konum": "on"
+    },
+    "cati": {
+     "kaplama": "trapez sac",
+     "renk": "kırmızı"
+    }
+   }
+  },
+  "8": {
+   "adim": "katalog_kodu",
+   "okuma": {
+    "niyet": "yeni_talep",
+    "katalog_kodu": "P8501",
+    "varyantlar": [
+     {
+      "tur": "ayna_x",
+      "aciklama": "mirror",
+      "parametreler": {}
+     }
+    ]
+   },
+   "okuma_kabul": {
+    "niyet": [
+     "revizyon"
+    ]
+   }
+  },
+  "9": {
+   "adim": "katalog_kodu",
+   "okuma": {
+    "niyet": "yeni_talep",
+    "katalog_kodu": "P6001",
+    "pencereler": [
+     {
+      "mahal": "yatak odası 1",
+      "olcu": "120x180"
+     }
+    ]
+   },
+   "okuma_kabul": {
+    "niyet": [
+     "revizyon"
+    ]
+   }
+  },
+  "10": {
+   "adim": "selam_soru",
+   "okuma": {
+    "niyet": "selam"
+   }
+  },
+  "11": {
+   "adim": "eksik_bilgi",
+   "okuma": {
+    "niyet": "yeni_talep",
+    "oda_programi": "3+1"
+   }
+  },
+  "12": {
+   "adim": "eksik_bilgi",
+   "okuma": {
+    "niyet": "yeni_talep",
+    "yapi_turu": "celik",
+    "alan_m2": 95
+   }
+  },
+  "13": {
+   "adim": "kayitsiz_kapsam",
+   "okuma": {
+    "niyet": "soru"
+   }
+  },
+  "14": {
+   "adim": "katalog_kodu",
+   "okuma": {
+    "niyet": "yeni_talep",
+    "katalog_kodu": "P6001",
+    "varyantlar": [
+     {
+      "tur": "ayna_y",
+      "aciklama": "ön arka ters çevir",
+      "parametreler": {}
+     }
+    ]
+   },
+   "okuma_kabul": {
+    "niyet": [
+     "revizyon"
+    ]
+   }
+  },
+  "15": {
+   "adim": "selam_soru",
+   "okuma": {
+    "niyet": "diger"
+   }
+  },
+  "16": {
+   "adim": "katalog_kodu",
+   "okuma": {
+    "niyet": "yeni_talep",
+    "katalog_kodu": "P6001",
+    "varyantlar": [
+     {
+      "tur": "ayna_x",
+      "aciklama": "aynalı",
+      "parametreler": {}
+     }
+    ],
+    "pencereler": [
+     {
+      "mahal": "yatak odası 1",
+      "olcu": "120x180"
+     }
+    ]
+   },
+   "okuma_kabul": {
+    "niyet": [
+     "revizyon"
+    ]
+   }
+  },
+  "17": {
+   "adim": "katalog_kodu",
+   "okuma": {
+    "niyet": "yeni_talep",
+    "katalog_kodu": "P6001",
+    "pencereler": [
+     {
+      "mahal": "yatak odası 1",
+      "olcu": "120x180",
+      "islem": "ekle"
+     }
+    ]
+   },
+   "okuma_kabul": {
+    "niyet": [
+     "revizyon"
+    ]
+   }
+  },
+  "18": {
+   "adim": "katalog_kodu",
+   "okuma": {
+    "niyet": "yeni_talep",
+    "katalog_kodu": "P6001",
+    "pencereler": [
+     {
+      "mahal": "yatak odası 1",
+      "olcu": "120x180"
+     }
+    ]
+   },
+   "okuma_kabul": {
+    "niyet": [
+     "revizyon"
+    ]
+   }
+  },
+  "19": {
+   "adim": "katalog_kodu",
+   "okuma": {
+    "niyet": "yeni_talep",
+    "katalog_kodu": "P6001",
+    "pencereler": [
+     {
+      "mahal": "yatak odası 1",
+      "olcu": "120x180",
+      "islem": "ekle"
+     }
+    ]
+   },
+   "okuma_kabul": {
+    "niyet": [
+     "revizyon"
+    ]
+   }
+  },
+  "20": {
+   "adim": "katalog_kodu",
+   "okuma": {
+    "niyet": "yeni_talep",
+    "katalog_kodu": "P6001",
+    "pencereler": [
+     {
+      "mahal": "yatak odası 1",
+      "olcu": "120x180"
+     }
+    ]
+   },
+   "okuma_kabul": {
+    "niyet": [
+     "revizyon"
+    ]
+   }
+  },
+  "21": {
+   "adim": "secim",
+   "okuma": {
+    "niyet": "diger"
+   },
+   "okuma_kabul": {
+    "niyet": [
+     "revizyon",
+     "yeni_talep",
+     "diger"
+    ]
+   }
+  },
+  "22": {
+   "adim": "katalog_kodu",
+   "okuma": {
+    "niyet": "yeni_talep",
+    "katalog_kodu": "P6001",
+    "pencereler": [
+     {
+      "mahal": "yatak odası 1",
+      "olcu": "120x180"
+     }
+    ]
+   },
+   "okuma_kabul": {
+    "niyet": [
+     "revizyon"
+    ]
+   }
+  }
+ },
+ "senaryolar": [
+  {
+   "id": "A",
+   "ad": "Ç8801: çatı seti, seçim, pencere, iki adaylı okuma sorusu, çatı L, onay, yeni talep (prova kartı)",
+   "adimlar": [
+    {
+     "id": "A01",
+     "adim": "katalog_kodu",
+     "mesaj": "Ç8801",
+     "kaynak": "canlı WhatsApp · prova kartı, 13–14 Ekim (İE-08, BK-08 madde 7)",
+     "okuma": {
+      "niyet": "yeni_talep",
+      "katalog_kodu": "Ç8801"
+     },
+     "karar": {
+      "eylem": "secenek",
+      "secenek": [
+       "Ç8801",
+       "Ç8801K",
+       "Ç8801L"
+      ]
+     },
+     "anlam": "Ç8801 istiyor; çatısı söylenmedi",
+     "not": "Katalog modelinin çatı varyantları varsa çatı seti (katalog, K, L) tek görselde."
+    },
+    {
+     "id": "A02",
+     "adim": "secim",
+     "dugme": "s:{set}:Ç8801K",
+     "kaynak": "canlı WhatsApp · prova kartı, 13–14 Ekim (İE-08, BK-08 madde 7)",
+     "karar": {
+      "eylem": "is_emri",
+      "plan_kodu": "Ç8801K",
+      "revizyon": 1
+     },
+     "anlam": "seçim düğmesi: Ç8801-K"
+    },
+    {
+     "id": "A03",
+     "adim": "revizyon",
+     "mesaj": "mutfak penceresi 120x120 olsun",
+     "kaynak": "canlı WhatsApp · prova kartı, 13–14 Ekim (İE-08, BK-08 madde 7)",
+     "okuma": {
+      "niyet": "revizyon",
+      "pencereler": [
+       {
+        "mahal": "mutfak",
+        "olcu": "120x120"
+       }
+      ]
+     },
+     "karar": {
+      "eylem": "is_emri",
+      "plan_kodu": "Ç8801K",
+      "revizyon": 2,
+      "degisiklikler": [
+       "pencere_olcu:P5"
+      ]
+     },
+     "anlam": "mutfak penceresi 120x120"
+    },
+    {
+     "id": "A04",
+     "adim": "revizyon",
+     "mesaj": "salondaki sol taraftaki pencere 120x180 olsun",
+     "kaynak": "canlı WhatsApp · prova kartı, 13–14 Ekim (İE-08, BK-08 madde 7)",
+     "okuma": {
+      "niyet": "revizyon",
+      "pencereler": [
+       {
+        "mahal": "salon",
+        "olcu": "120x180",
+        "duvar": "sol"
+       }
+      ]
+     },
+     "karar": {
+      "eylem": "sor",
+      "soru_alani": "okuma"
+     },
+     "anlam": "salonun sol penceresi 120x180; salonda iki aday pencere var",
+     "not": "İki aday: hangisi olduğunu görselle ve numarayla sorar."
+    },
+    {
+     "id": "A05",
+     "adim": "secim",
+     "mesaj": "1",
+     "kaynak": "canlı WhatsApp · prova kartı, 13–14 Ekim (İE-08, BK-08 madde 7)",
+     "okuma": {
+      "niyet": "diger"
+     },
+     "karar": {
+      "eylem": "is_emri",
+      "plan_kodu": "Ç8801K",
+      "revizyon": 3,
+      "degisiklikler": [
+       "pencere_olcu:P5",
+       "pencere_olcu:P3"
+      ]
+     },
+     "okuma_kabul": {
+      "niyet": [
+       "revizyon",
+       "yeni_talep",
+       "diger"
+      ]
+     },
+     "anlam": "okuma sorusuna cevap: 1. pencere"
+    },
+    {
+     "id": "A06",
+     "adim": "revizyon",
+     "mesaj": "çatı L olsun",
+     "kaynak": "canlı WhatsApp · prova kartı, 13–14 Ekim (İE-08, BK-08 madde 7)",
+     "okuma": {
+      "niyet": "revizyon",
+      "varyantlar": [
+       {
+        "tur": "cati_degistir",
+        "aciklama": "çatı L olsun",
+        "parametreler": {
+         "tip": "L"
+        }
+       }
+      ]
+     },
+     "karar": {
+      "eylem": "is_emri",
+      "plan_kodu": "Ç8801L",
+      "revizyon": 4,
+      "degisiklikler": [
+       "pencere_olcu:P5",
+       "pencere_olcu:P3",
+       "cati_varyanti:Ç8801L"
+      ]
+     },
+     "anlam": "çatı varyantı L"
+    },
+    {
+     "id": "A07",
+     "adim": "onay_eski",
+     "dugme": "o:{is_emri}:{rev}",
+     "kaynak": "canlı WhatsApp · prova kartı, 13–14 Ekim (İE-08, BK-08 madde 7)",
+     "karar": {
+      "eylem": "cevapla",
+      "gerekce": "plan onaylandı"
+     },
+     "anlam": "Onayla düğmesi (r04)"
+    },
+    {
+     "id": "A08",
+     "adim": "bilgi_tam",
+     "mesaj": "88 m² 2+1 çelik",
+     "kaynak": "canlı WhatsApp · prova kartı, 13–14 Ekim (İE-08, BK-08 madde 7)",
+     "okuma": {
+      "niyet": "yeni_talep",
+      "yapi_turu": "celik",
+      "oda_programi": "2+1",
+      "alan_m2": 88
+     },
+     "karar": {
+      "eylem": "secenek",
+      "secenek": [
+       "Ç8801",
+       "Ç8801K",
+       "Ç8801L"
+      ]
+     },
+     "anlam": "yeni talep: çelik, 2+1, 88 m²",
+     "not": "Kat ve çatı yazılmadı; çatı seti bunları kapsıyor (canlıda kabul, 14 Ekim)."
+    },
+    {
+     "id": "A09",
+     "adim": "secim",
+     "mesaj": "K olsun",
+     "kaynak": "yazılmış (rehber §2: butona basmak zorunda değilsiniz)",
+     "okuma": {
+      "niyet": "yeni_talep"
+     },
+     "karar": {
+      "eylem": "is_emri",
+      "plan_kodu": "Ç8801K",
+      "revizyon": 1
+     },
+     "okuma_kabul": {
+      "niyet": [
+       "revizyon",
+       "diger"
+      ]
+     },
+     "anlam": "setten K varyantını seçiyor"
+    }
+   ]
+  },
+  {
+   "id": "B",
+   "ad": "3+1 çelik, çatı yazılmadı",
+   "adimlar": [
+    {
+     "id": "B01",
+     "adim": "eksik_bilgi",
+     "mesaj": "95 m² 3+1 tek kat çelik",
+     "kaynak": "canlı WhatsApp · 16 Ekim (İE-14, T1)",
+     "okuma": {
+      "niyet": "yeni_talep",
+      "yapi_turu": "celik",
+      "kat_sayisi": 1,
+      "oda_programi": "3+1",
+      "alan_m2": 95
+     },
+     "karar": {
+      "eylem": "sor",
+      "soru_alani": "cati"
+     },
+     "anlam": "çelik, tek kat, 3+1, 95 m²; çatı eksik",
+     "not": "Rehber: beş bilgiden eksik olanı sorar (çatı). Canlıda bugün doğrudan yeni plan üretimine gidiyor (D-18)."
+    }
+   ]
+  },
+  {
+   "id": "C",
+   "ad": "Ç8801K: dış duvar 140",
+   "adimlar": [
+    {
+     "id": "C01",
+     "adim": "katalog_kodu",
+     "mesaj": "Ç8801K",
+     "kaynak": "canlı WhatsApp · 15–16 Ekim (İE-14 canlıya alma, G3)",
+     "okuma": {
+      "niyet": "yeni_talep",
+      "katalog_kodu": "Ç8801K"
+     },
+     "karar": {
+      "eylem": "is_emri",
+      "plan_kodu": "Ç8801K",
+      "revizyon": 1
+     },
+     "anlam": "Ç8801-K istiyor (çatı seçili)"
+    },
+    {
+     "id": "C02",
+     "adim": "revizyon",
+     "mesaj": "dış duvarlar 140 olsun",
+     "kaynak": "canlı WhatsApp · 15–16 Ekim (İE-14 canlıya alma, G3)",
+     "okuma": {
+      "niyet": "revizyon",
+      "varyantlar": [
+       {
+        "tur": "diger",
+        "aciklama": "dış duvarlar 140 olsun",
+        "parametreler": {}
+       }
+      ]
+     },
+     "karar": {
+      "eylem": "is_emri",
+      "plan_kodu": "Ç8801K",
+      "revizyon": 2,
+      "degisiklikler": [
+       "dis_karkas_140:"
+      ]
+     },
+     "okuma_kabul": {
+      "varyantlar": [
+       []
+      ]
+     },
+     "anlam": "dış duvarlar 140'lık karkas"
+    }
+   ]
+  },
+  {
+   "id": "D",
+   "ad": "P6001 aynalı: Revize et, iki pencere revizyonu, eski düğme, onay",
+   "adimlar": [
+    {
+     "id": "D01",
+     "adim": "katalog_kodu",
+     "mesaj": "Yeni talep: P6001 aynalı olsun",
+     "kaynak": "canlı WhatsApp · 30 Eylül (İE-02/İE-04 canlı denemesi)",
+     "okuma": {
+      "niyet": "yeni_talep",
+      "katalog_kodu": "P6001",
+      "varyantlar": [
+       {
+        "tur": "ayna_x",
+        "aciklama": "aynalı",
+        "parametreler": {}
+       }
+      ]
+     },
+     "karar": {
+      "eylem": "is_emri",
+      "plan_kodu": "P6001",
+      "revizyon": 1,
+      "gerekce": "aynalandı"
+     },
+     "okuma_kabul": {
+      "niyet": [
+       "revizyon"
+      ]
+     },
+     "anlam": "P6001'in aynası"
+    },
+    {
+     "id": "D02",
+     "adim": "revizyon",
+     "dugme": "r:{is_emri}:{rev}",
+     "kaynak": "canlı WhatsApp · 30 Eylül (İE-02/İE-04 canlı denemesi)",
+     "karar": {
+      "eylem": "sor",
+      "soru_alani": "revizyon_ne"
+     },
+     "anlam": "Revize et düğmesi"
+    },
+    {
+     "id": "D03",
+     "adim": "revizyon",
+     "mesaj": "yatak odası 1 penceresi 120x120 olsun",
+     "kaynak": "canlı WhatsApp · 30 Eylül (İE-02/İE-04 canlı denemesi)",
+     "okuma": {
+      "niyet": "revizyon",
+      "pencereler": [
+       {
+        "mahal": "yatak odası 1",
+        "olcu": "120x120"
+       }
+      ]
+     },
+     "karar": {
+      "eylem": "is_emri",
+      "plan_kodu": "P6001",
+      "revizyon": 2,
+      "gerekce": "YATAK ODASI 1 penceresi 120x120"
+     },
+     "anlam": "yatak odası 1 penceresi 120x120"
+    },
+    {
+     "id": "D04",
+     "adim": "revizyon",
+     "mesaj": "yatak odası 1 penceresi 120x180 olsun",
+     "kaynak": "canlı WhatsApp · 30 Eylül (İE-02/İE-04 canlı denemesi)",
+     "okuma": {
+      "niyet": "revizyon",
+      "pencereler": [
+       {
+        "mahal": "yatak odası 1",
+        "olcu": "120x180"
+       }
+      ]
+     },
+     "karar": {
+      "eylem": "is_emri",
+      "plan_kodu": "P6001",
+      "revizyon": 3,
+      "gerekce": "YATAK ODASI 1 penceresi 120x180"
+     },
+     "anlam": "aynı pencere bu kez 120x180"
+    },
+    {
+     "id": "D05",
+     "adim": "onay_eski",
+     "dugme": "o:{is_emri}:{rev_onceki}",
+     "kaynak": "canlı WhatsApp · 30 Eylül (İE-02/İE-04 canlı denemesi)",
+     "karar": {
+      "eylem": "cevapla",
+      "gerekce": "eski buton"
+     },
+     "anlam": "eski planın (r02) Onayla düğmesi",
+     "not": "Rehber: eski düğme çalışmaz, güncel planı hatırlatır."
+    },
+    {
+     "id": "D06",
+     "adim": "onay_eski",
+     "dugme": "o:{is_emri}:{rev}",
+     "kaynak": "canlı WhatsApp · 30 Eylül (İE-02/İE-04 canlı denemesi)",
+     "karar": {
+      "eylem": "cevapla",
+      "gerekce": "plan onaylandı"
+     },
+     "anlam": "güncel planın Onayla düğmesi"
+    }
+   ]
+  },
+  {
+   "id": "F",
+   "ad": "P6001 aynalı: yazıyla onay, ikinci proje",
+   "adimlar": [
+    {
+     "id": "F01",
+     "adim": "katalog_kodu",
+     "mesaj": "P6001 aynalı",
+     "kaynak": "canlı WhatsApp · 10 Ekim 13:57 (rehber §7)",
+     "okuma": {
+      "niyet": "yeni_talep",
+      "katalog_kodu": "P6001",
+      "varyantlar": [
+       {
+        "tur": "ayna_x",
+        "aciklama": "aynalı",
+        "parametreler": {}
+       }
+      ]
+     },
+     "karar": {
+      "eylem": "is_emri",
+      "plan_kodu": "P6001",
+      "revizyon": 1,
+      "gerekce": "aynalandı"
+     },
+     "okuma_kabul": {
+      "niyet": [
+       "revizyon"
+      ]
+     },
+     "anlam": "P6001'in aynası"
+    },
+    {
+     "id": "F02",
+     "adim": "onay_eski",
+     "mesaj": "Onaylıyorum",
+     "kaynak": "yazılmış (rehber §2: \"Onaylıyorum\")",
+     "okuma": {
+      "niyet": "onay"
+     },
+     "karar": {
+      "eylem": "cevapla",
+      "gerekce": "plan onaylandı"
+     },
+     "anlam": "planı onaylıyor"
+    },
+    {
+     "id": "F03",
+     "adim": "onay_eski",
+     "mesaj": "Başka bir müşteri için 6x8 pano 2+1 tek kat prefabrik beşik çatı",
+     "kaynak": "yazılmış (rehber §1: aynı anda tek proje)",
+     "okuma": {
+      "niyet": "yeni_talep",
+      "yapi_turu": "prefabrik",
+      "kat_sayisi": 1,
+      "oda_programi": "2+1",
+      "pano": {
+       "nx": 6,
+       "ny": 8
+      },
+      "cati": {
+       "tip": "besik"
+      }
+     },
+     "karar": {
+      "eylem": "is_emri",
+      "plan_kodu": "GRID-6x8",
+      "revizyon": 1
+     },
+     "anlam": "ikinci proje: önceki taslak kapanır, yeni proje r01"
+    }
+   ]
+  },
+  {
+   "id": "E",
+   "ad": "rehber §3: 3+1 çelik, çatı sorusu, kırma",
+   "adimlar": [
+    {
+     "id": "E01",
+     "adim": "eksik_bilgi",
+     "mesaj": "Tek kat çelik, 3+1, 90 m² civarı. Muğla.",
+     "kaynak": "rehber §3 örnek konuşma",
+     "okuma": {
+      "niyet": "yeni_talep",
+      "yapi_turu": "celik",
+      "kat_sayisi": 1,
+      "oda_programi": "3+1",
+      "alan_m2": 90
+     },
+     "karar": {
+      "eylem": "sor",
+      "soru_alani": "cati"
+     },
+     "anlam": "çelik, tek kat, 3+1, ~90 m²; çatı eksik (il ilk taslakta gerekmez)",
+     "not": "Rehber: \"Çatı nasıl olsun?\" [Beşik] [Kırma]. Bugün doğrudan yeni plan üretimine gidiyor."
+    },
+    {
+     "id": "E02",
+     "adim": "bilgi_tam",
+     "mesaj": "Kırma",
+     "kaynak": "rehber §3 örnek konuşma",
+     "okuma": {
+      "niyet": "yeni_talep",
+      "cati": {
+       "tip": "kirma"
+      }
+     },
+     "karar": {
+      "eylem": "cevapla",
+      "plan_uretimi": true
+     },
+     "okuma_kabul": {
+      "niyet": [
+       "revizyon",
+       "diger"
+      ]
+     },
+     "anlam": "çatı kırma",
+     "not": "3+1 bankada yok: yeni plan üretimi; sonuç (yeni plan + bankadan en yakınlar) seçenek olarak gelir (D-18)."
+    }
+   ]
+  },
+  {
+   "id": "G",
+   "ad": "Ç8201: rehberdeki oda ekleme",
+   "adimlar": [
+    {
+     "id": "G01",
+     "adim": "katalog_kodu",
+     "mesaj": "Ç8201 istiyorum",
+     "kaynak": "yazılmış (rehber §1: katalog kodu)",
+     "okuma": {
+      "niyet": "yeni_talep",
+      "katalog_kodu": "Ç8201"
+     },
+     "karar": {
+      "eylem": "is_emri",
+      "plan_kodu": "Ç8201",
+      "revizyon": 1
+     },
+     "anlam": "Ç8201 istiyor (çatı varyantı yok)"
+    },
+    {
+     "id": "G02",
+     "adim": "revizyon",
+     "mesaj": "Ebeveyn banyosu ekleyelim.",
+     "kaynak": "rehber §3 örnek konuşma",
+     "okuma": {
+      "niyet": "revizyon",
+      "varyantlar": [
+       {
+        "tur": "oda_ekle",
+        "aciklama": "ebeveyn banyosu ekleyelim",
+        "parametreler": {}
+       }
+      ]
+     },
+     "karar": {
+      "eylem": "is_emri",
+      "plan_kodu": "Ç8201",
+      "revizyon": 2
+     },
+     "anlam": "ebeveyn banyosu ekle (oda ekleme)",
+     "not": "Rehber: R2 planı, değişen yer işaretli. Bugün oda ekleme yok (pano 115, BK-15)."
+    }
+   ]
+  },
+  {
+   "id": "S",
+   "ad": "selam, fiyat ve süre, alakasız",
+   "adimlar": [
+    {
+     "id": "S01",
+     "adim": "selam_soru",
+     "mesaj": "Merhabalar, hayırlı işler",
+     "kaynak": "yazılmış",
+     "okuma": {
+      "niyet": "selam"
+     },
+     "karar": {
+      "eylem": "cevapla",
+      "gerekce": "selam"
+     },
+     "anlam": "selam"
+    },
+    {
+     "id": "S02",
+     "adim": "selam_soru",
+     "mesaj": "Teslim süresi ne kadar?",
+     "kaynak": "yazılmış",
+     "okuma": {
+      "niyet": "soru"
+     },
+     "karar": {
+      "eylem": "cevapla",
+      "gerekce": "genel soru"
+     },
+     "anlam": "süre sorusu"
+    },
+    {
+     "id": "S03",
+     "adim": "selam_soru",
+     "mesaj": "Nakliye Muğla'ya ne kadar tutar?",
+     "kaynak": "yazılmış",
+     "okuma": {
+      "niyet": "soru"
+     },
+     "karar": {
+      "eylem": "cevapla",
+      "gerekce": "genel soru"
+     },
+     "anlam": "nakliye fiyatı sorusu"
+    },
+    {
+     "id": "S04",
+     "adim": "selam_soru",
+     "mesaj": "Abi maç kaç kaç bitti",
+     "kaynak": "yazılmış",
+     "okuma": {
+      "niyet": "diger"
+     },
+     "karar": {
+      "eylem": "cevapla",
+      "gerekce": "anlaşılmadı"
+     },
+     "anlam": "alakasız"
+    }
+   ]
+  },
+  {
+   "id": "Y1",
+   "ad": "kayıtsız numara",
+   "adimlar": [
+    {
+     "id": "Y01",
+     "adim": "kayitsiz_kapsam",
+     "mesaj": "Merhaba, prefabrik ev bakıyorum fiyat alabilir miyim",
+     "kaynak": "yazılmış (rehber §1: yalnız kayıtlı bayi)",
+     "okuma": {
+      "niyet": "soru",
+      "yapi_turu": "prefabrik"
+     },
+     "karar": {
+      "eylem": "yonlendir",
+      "gerekce": "kayıtsız numara"
+     },
+     "gonderen": "KAYITSIZ-901",
+     "anlam": "kayıtlı olmayan numara"
+    }
+   ]
+  },
+  {
+   "id": "Y2",
+   "ad": "kapsam dışı: cami",
+   "adimlar": [
+    {
+     "id": "Y02",
+     "adim": "kayitsiz_kapsam",
+     "mesaj": "Köye 150 m² çelik cami yapılacak, çizebilir misiniz?",
+     "kaynak": "yazılmış (rehber §1: cami kapsam dışı)",
+     "okuma": {
+      "niyet": "yeni_talep",
+      "yapi_turu": "celik",
+      "alan_m2": 150
+     },
+     "karar": {
+      "eylem": "yonlendir"
+     },
+     "anlam": "cami: kapsam dışı, PortatifEv'e yönlendirilir"
+    }
+   ]
+  },
+  {
+   "id": "Y3",
+   "ad": "kapsam dışı: satış ofisi",
+   "adimlar": [
+    {
+     "id": "Y03",
+     "adim": "kayitsiz_kapsam",
+     "mesaj": "Şantiyeye 6x3 satış ofisi lazım",
+     "kaynak": "yazılmış (rehber §1: satış ofisi kapsam dışı)",
+     "okuma": {
+      "niyet": "yeni_talep",
+      "dis_olcu": {
+       "en_m": 3,
+       "boy_m": 6
+      }
+     },
+     "karar": {
+      "eylem": "yonlendir"
+     },
+     "anlam": "satış ofisi: kapsam dışı"
+    }
+   ]
+  },
+  {
+   "id": "Y4",
+   "ad": "kapsam dışı: iki katlı çelik",
+   "adimlar": [
+    {
+     "id": "Y04",
+     "adim": "kayitsiz_kapsam",
+     "mesaj": "İki katlı çelik villa 160 m² 4+1",
+     "kaynak": "yazılmış (D-26: pilot tek katlı)",
+     "okuma": {
+      "niyet": "yeni_talep",
+      "yapi_turu": "celik",
+      "kat_sayisi": 2,
+      "oda_programi": "4+1",
+      "alan_m2": 160
+     },
+     "karar": {
+      "eylem": "yonlendir"
+     },
+     "anlam": "iki katlı: pilot kapsamı dışında, Lokman Bey'e"
+    }
+   ]
+  },
+  {
+   "id": "Y5",
+   "ad": "kapsam dışı: dubleks prefabrik",
+   "adimlar": [
+    {
+     "id": "Y05",
+     "adim": "kayitsiz_kapsam",
+     "mesaj": "Dubleks prefabrik 3+1 120 m² istiyorum",
+     "kaynak": "yazılmış (D-26: pilot tek katlı)",
+     "okuma": {
+      "niyet": "yeni_talep",
+      "yapi_turu": "prefabrik",
+      "kat_sayisi": 2,
+      "oda_programi": "3+1",
+      "alan_m2": 120
+     },
+     "karar": {
+      "eylem": "yonlendir"
+     },
+     "anlam": "dubleks: pilot kapsamı dışında"
+    }
+   ]
+  },
+  {
+   "id": "X1",
+   "ad": "eksik: yalnız oda",
+   "adimlar": [
+    {
+     "id": "X01",
+     "adim": "eksik_bilgi",
+     "mesaj": "2+1 ev istiyorum",
+     "kaynak": "yazılmış (rehber §1: beş bilgi)",
+     "okuma": {
+      "niyet": "yeni_talep",
+      "oda_programi": "2+1"
+     },
+     "karar": {
+      "eylem": "sor",
+      "soru_alani": [
+       "yapi_turu",
+       "kat_sayisi",
+       "dis_olcu",
+       "cati"
+      ]
+     },
+     "anlam": "2+1; yapı türü, kat, alan, çatı eksik"
+    }
+   ]
+  },
+  {
+   "id": "X2",
+   "ad": "eksik: yalnız yapı türü",
+   "adimlar": [
+    {
+     "id": "X02",
+     "adim": "eksik_bilgi",
+     "mesaj": "Çelik ev istiyoruz",
+     "kaynak": "yazılmış (rehber §1: beş bilgi)",
+     "okuma": {
+      "niyet": "yeni_talep",
+      "yapi_turu": "celik"
+     },
+     "karar": {
+      "eylem": "sor",
+      "soru_alani": [
+       "kat_sayisi",
+       "oda_programi",
+       "dis_olcu",
+       "cati"
+      ]
+     },
+     "anlam": "çelik; kat, oda, alan, çatı eksik"
+    }
+   ]
+  },
+  {
+   "id": "X3",
+   "ad": "eksik: alan ve yapı türü",
+   "adimlar": [
+    {
+     "id": "X03",
+     "adim": "eksik_bilgi",
+     "mesaj": "100 metrekare prefabrik",
+     "kaynak": "yazılmış (rehber §1: beş bilgi)",
+     "okuma": {
+      "niyet": "yeni_talep",
+      "yapi_turu": "prefabrik",
+      "alan_m2": 100
+     },
+     "karar": {
+      "eylem": "sor",
+      "soru_alani": [
+       "kat_sayisi",
+       "oda_programi",
+       "cati"
+      ]
+     },
+     "anlam": "prefabrik 100 m²; kat, oda, çatı eksik"
+    }
+   ]
+  },
+  {
+   "id": "X4",
+   "ad": "eksik: alan",
+   "adimlar": [
+    {
+     "id": "X04",
+     "adim": "eksik_bilgi",
+     "mesaj": "Tek katlı 3+1 prefabrik istiyorum, kırma çatı",
+     "kaynak": "yazılmış (rehber §1: beş bilgi)",
+     "okuma": {
+      "niyet": "yeni_talep",
+      "yapi_turu": "prefabrik",
+      "kat_sayisi": 1,
+      "oda_programi": "3+1",
+      "cati": {
+       "tip": "kirma"
+      }
+     },
+     "karar": {
+      "eylem": "sor",
+      "soru_alani": "dis_olcu"
+     },
+     "anlam": "alan ya da dış ölçü eksik"
+    }
+   ]
+  },
+  {
+   "id": "X5",
+   "ad": "eksik: yalnız alan",
+   "adimlar": [
+    {
+     "id": "X05",
+     "adim": "eksik_bilgi",
+     "mesaj": "Müşterim 70 m² civarı bir şey istiyor",
+     "kaynak": "yazılmış (rehber §1: beş bilgi)",
+     "okuma": {
+      "niyet": "yeni_talep",
+      "alan_m2": 70
+     },
+     "karar": {
+      "eylem": "sor",
+      "soru_alani": [
+       "yapi_turu",
+       "kat_sayisi",
+       "oda_programi",
+       "cati"
+      ]
+     },
+     "anlam": "~70 m²; yapı türü, kat, oda, çatı eksik"
+    }
+   ]
+  },
+  {
+   "id": "X6",
+   "ad": "eksik: çelikte alan",
+   "adimlar": [
+    {
+     "id": "X06",
+     "adim": "eksik_bilgi",
+     "mesaj": "3+1 tek kat çelik ev, beşik çatı",
+     "kaynak": "yazılmış (rehber §1: beş bilgi)",
+     "okuma": {
+      "niyet": "yeni_talep",
+      "yapi_turu": "celik",
+      "kat_sayisi": 1,
+      "oda_programi": "3+1",
+      "cati": {
+       "tip": "besik"
+      }
+     },
+     "karar": {
+      "eylem": "sor",
+      "soru_alani": "dis_olcu"
+     },
+     "anlam": "alan ya da dış ölçü eksik"
+    }
+   ]
+  },
+  {
+   "id": "X7",
+   "ad": "eksik: oda",
+   "adimlar": [
+    {
+     "id": "X07",
+     "adim": "eksik_bilgi",
+     "mesaj": "8x10 çelik ev tek kat kırma çatı",
+     "kaynak": "yazılmış (rehber §1: beş bilgi)",
+     "okuma": {
+      "niyet": "yeni_talep",
+      "yapi_turu": "celik",
+      "kat_sayisi": 1,
+      "dis_olcu": {
+       "en_m": 8,
+       "boy_m": 10
+      },
+      "cati": {
+       "tip": "kirma"
+      }
+     },
+     "karar": {
+      "eylem": "sor",
+      "soru_alani": "oda_programi"
+     },
+     "anlam": "oda programı eksik"
+    }
+   ]
+  },
+  {
+   "id": "X8",
+   "ad": "eksik: prefabrikte çatı",
+   "adimlar": [
+    {
+     "id": "X08",
+     "adim": "eksik_bilgi",
+     "mesaj": "120 m² 3+1 prefabrik, tek kat",
+     "kaynak": "yazılmış (rehber §1: beş bilgi)",
+     "okuma": {
+      "niyet": "yeni_talep",
+      "yapi_turu": "prefabrik",
+      "kat_sayisi": 1,
+      "oda_programi": "3+1",
+      "alan_m2": 120
+     },
+     "karar": {
+      "eylem": "sor",
+      "soru_alani": "cati"
+     },
+     "anlam": "çatı eksik"
+    }
+   ]
+  },
+  {
+   "id": "T1",
+   "ad": "Ç8801 kırma: seçim \"2\", olumsuz cümle",
+   "adimlar": [
+    {
+     "id": "T01",
+     "adim": "bilgi_tam",
+     "mesaj": "Tek kat çelik 2+1, 88 m², kırma çatı",
+     "kaynak": "yazılmış (rehber §1 örneği)",
+     "okuma": {
+      "niyet": "yeni_talep",
+      "yapi_turu": "celik",
+      "kat_sayisi": 1,
+      "oda_programi": "2+1",
+      "alan_m2": 88,
+      "cati": {
+       "tip": "kirma"
+      }
+     },
+     "karar": {
+      "eylem": "secenek",
+      "secenek_icerir": [
+       "Ç8801K"
+      ]
+     },
+     "anlam": "beş bilgi tam: çelik, tek kat, 2+1, 88 m², kırma"
+    },
+    {
+     "id": "T02",
+     "adim": "secim",
+     "mesaj": "2",
+     "kaynak": "yazılmış (rehber §2: numarayla seçim)",
+     "okuma": {
+      "niyet": "diger"
+     },
+     "karar": {
+      "eylem": "is_emri",
+      "plan_kodu": "Ç8801K",
+      "revizyon": 1
+     },
+     "okuma_kabul": {
+      "niyet": [
+       "yeni_talep",
+       "revizyon"
+      ]
+     },
+     "anlam": "setten 2. seçenek (Ç8801-K)"
+    },
+    {
+     "id": "T03",
+     "adim": "revizyon",
+     "mesaj": "mutfak penceresi 120x120 olmasın",
+     "kaynak": "depo (cumleler t06)",
+     "okuma": {
+      "niyet": "revizyon",
+      "pencereler": [
+       {
+        "mahal": "mutfak",
+        "olcu": "120x120"
+       }
+      ]
+     },
+     "karar": {
+      "eylem": "sor",
+      "mesaj_icermez": [
+       "Uygulanan"
+      ]
+     },
+     "okuma_kabul": {
+      "pencereler": [
+       []
+      ]
+     },
+     "anlam": "olumsuz cümle: pencere değişmez",
+     "not": "Olumsuz cümle değişiklik sayılmaz; plan değişmeden ne istendiği sorulur."
+    }
+   ]
+  },
+  {
+   "id": "T04s",
+   "ad": "Ç8801K: oda büyütme",
+   "adimlar": [
+    {
+     "id": "T04h",
+     "hazirlik": true,
+     "mesaj": "Ç8801K",
+     "okuma": {
+      "niyet": "yeni_talep",
+      "katalog_kodu": "Ç8801K"
+     }
+    },
+    {
+     "id": "T04",
+     "adim": "revizyon",
+     "mesaj": "salonu büyütelim",
+     "kaynak": "depo (cumleler s02)",
+     "okuma": {
+      "niyet": "revizyon",
+      "varyantlar": [
+       {
+        "tur": "olcu_degistir",
+        "aciklama": "salonu büyütelim",
+        "parametreler": {}
+       }
+      ]
+     },
+     "karar": {
+      "eylem": [
+       "is_emri",
+       "sor"
+      ]
+     },
+     "okuma_kabul": {
+      "varyantlar": [
+       [
+        {
+         "tur": "diger",
+         "aciklama": "salonu büyütelim",
+         "parametreler": {}
+        }
+       ],
+       [
+        {
+         "tur": "oda_ekle",
+         "aciklama": "salonu büyütelim",
+         "parametreler": {}
+        }
+       ]
+      ]
+     },
+     "anlam": "salonu büyüt (ne kadar yazılmadı)",
+     "not": "Rehber: revizyon aynı projenin R2'si olarak gelir; miktar yoksa sorar. Bugün Lokman Bey'e yönlendiriyor."
+    }
+   ]
+  },
+  {
+   "id": "T05s",
+   "ad": "Ç8801K: pencere ekleme",
+   "adimlar": [
+    {
+     "id": "T05h",
+     "hazirlik": true,
+     "mesaj": "Ç8801K",
+     "okuma": {
+      "niyet": "yeni_talep",
+      "katalog_kodu": "Ç8801K"
+     }
+    },
+    {
+     "id": "T05",
+     "adim": "revizyon",
+     "mesaj": "WC'ye 80x50 pencere yapalım",
+     "kaynak": "depo (cumleler t10)",
+     "okuma": {
+      "niyet": "revizyon",
+      "varyantlar": [
+       {
+        "tur": "pencere_ekle",
+        "aciklama": "WC'ye 80x50 pencere",
+        "parametreler": {
+         "mahal": "WC",
+         "yeni": "80x50"
+        }
+       }
+      ]
+     },
+     "karar": {
+      "eylem": [
+       "is_emri",
+       "sor"
+      ]
+     },
+     "okuma_kabul": {
+      "pencereler": [
+       [
+        {
+         "mahal": "WC",
+         "olcu": null
+        }
+       ]
+      ]
+     },
+     "anlam": "WC'ye yeni pencere (ekleme)",
+     "not": "Rehber: revizyonla pencere eklenir. Bugün çelikte yalnız ölçü değişiyor, ekleme yönlendiriliyor."
+    }
+   ]
+  },
+  {
+   "id": "T06s",
+   "ad": "Ç8801K: kapı ölçüsü",
+   "adimlar": [
+    {
+     "id": "T06h",
+     "hazirlik": true,
+     "mesaj": "Ç8801K",
+     "okuma": {
+      "niyet": "yeni_talep",
+      "katalog_kodu": "Ç8801K"
+     }
+    },
+    {
+     "id": "T06",
+     "adim": "revizyon",
+     "mesaj": "mutfak kapısı 90x200 olsun",
+     "kaynak": "depo (cumleler t32)",
+     "okuma": {
+      "niyet": "revizyon",
+      "varyantlar": [
+       {
+        "tur": "kapi_degistir",
+        "aciklama": "mutfak kapısı 90x200",
+        "parametreler": {}
+       }
+      ]
+     },
+     "karar": {
+      "eylem": [
+       "is_emri",
+       "sor"
+      ],
+      "mesaj_icermez": [
+       "Uygulanan: mutfak penceresi"
+      ]
+     },
+     "anlam": "kapı ölçüsü değişikliği (pencere değil)",
+     "not": "Rehber: revizyonda kapı da değişir. Bugün yönlendiriliyor."
+    }
+   ]
+  },
+  {
+   "id": "T2",
+   "ad": "82 m² beşik verandalı: seti dışından kodla seçim",
+   "adimlar": [
+    {
+     "id": "T07",
+     "adim": "bilgi_tam",
+     "mesaj": "Tek kat çelik 2+1 82 m² beşik çatı, verandalı",
+     "kaynak": "yazılmış (rehber §1 örneği)",
+     "okuma": {
+      "niyet": "yeni_talep",
+      "yapi_turu": "celik",
+      "kat_sayisi": 1,
+      "oda_programi": "2+1",
+      "alan_m2": 82,
+      "cati": {
+       "tip": "besik"
+      },
+      "veranda": {
+       "istiyor": true
+      }
+     },
+     "karar": {
+      "eylem": "secenek",
+      "secenek_icerir": [
+       "Ç8201"
+      ]
+     },
+     "anlam": "beş bilgi tam: çelik, tek kat, 2+1, 82 m², beşik, veranda"
+    },
+    {
+     "id": "T08",
+     "adim": "secim",
+     "mesaj": "KT-02 olsun",
+     "kaynak": "yazılmış (rehber §2: kodla seçim)",
+     "okuma": {
+      "niyet": "yeni_talep",
+      "katalog_kodu": "KT02"
+     },
+     "karar": {
+      "eylem": "is_emri",
+      "plan_kodu": "KT02",
+      "revizyon": 1
+     },
+     "anlam": "KT-02 seçiyor"
+    }
+   ]
+  },
+  {
+   "id": "T3",
+   "ad": "6x8 pano prefabrik beşik",
+   "adimlar": [
+    {
+     "id": "T09",
+     "adim": "bilgi_tam",
+     "mesaj": "6x8 pano tek kat 2+1 prefabrik, beşik çatı",
+     "kaynak": "yazılmış (harness 4'ün çatılı biçimi)",
+     "okuma": {
+      "niyet": "yeni_talep",
+      "yapi_turu": "prefabrik",
+      "kat_sayisi": 1,
+      "oda_programi": "2+1",
+      "pano": {
+       "nx": 6,
+       "ny": 8
+      },
+      "cati": {
+       "tip": "besik"
+      }
+     },
+     "karar": {
+      "eylem": "is_emri",
+      "plan_kodu": "GRID-6x8",
+      "revizyon": 1
+     },
+     "anlam": "6x8 pano, 2+1, tek kat, beşik"
+    }
+   ]
+  },
+  {
+   "id": "T4",
+   "ad": "prefabrik serbest ölçü",
+   "adimlar": [
+    {
+     "id": "T10",
+     "adim": "bilgi_tam",
+     "mesaj": "7x9 m tek kat 2+1 prefabrik beşik çatı",
+     "kaynak": "yazılmış (rehber §1: yeni proje)",
+     "okuma": {
+      "niyet": "yeni_talep",
+      "yapi_turu": "prefabrik",
+      "kat_sayisi": 1,
+      "oda_programi": "2+1",
+      "dis_olcu": {
+       "en_m": 7,
+       "boy_m": 9
+      },
+      "cati": {
+       "tip": "besik"
+      }
+     },
+     "karar": {
+      "eylem": [
+       "is_emri",
+       "secenek"
+      ]
+     },
+     "anlam": "7x9 m, 2+1, tek kat, beşik",
+     "not": "Rehber: yeni projede Portman taslağı çizer. Bugün prefabrikte serbest ölçüye plan yok (yönlendiriyor)."
+    }
+   ]
+  },
+  {
+   "id": "T5",
+   "ad": "3+1 çelik kırma: yeni plan üretimi",
+   "adimlar": [
+    {
+     "id": "T11",
+     "adim": "bilgi_tam",
+     "mesaj": "Tek kat çelik 3+1 110 m² kırma çatı",
+     "kaynak": "yazılmış (rehber §1 örneği)",
+     "okuma": {
+      "niyet": "yeni_talep",
+      "yapi_turu": "celik",
+      "kat_sayisi": 1,
+      "oda_programi": "3+1",
+      "alan_m2": 110,
+      "cati": {
+       "tip": "kirma"
+      }
+     },
+     "karar": {
+      "eylem": "cevapla",
+      "plan_uretimi": true
+     },
+     "anlam": "beş bilgi tam; bankada 3+1 yok → yeni plan"
+    }
+   ]
+  },
+  {
+   "id": "T6",
+   "ad": "99 m² kırma: \"üçüncü\"",
+   "adimlar": [
+    {
+     "id": "T12",
+     "adim": "bilgi_tam",
+     "mesaj": "Tek katlı çelik, 2+1, 99 m², kırma çatı",
+     "kaynak": "yazılmış (rehber §1 örneği)",
+     "okuma": {
+      "niyet": "yeni_talep",
+      "yapi_turu": "celik",
+      "kat_sayisi": 1,
+      "oda_programi": "2+1",
+      "alan_m2": 99,
+      "cati": {
+       "tip": "kirma"
+      }
+     },
+     "karar": {
+      "eylem": "secenek",
+      "secenek_icerir": [
+       "KT01"
+      ]
+     },
+     "anlam": "beş bilgi tam: 99 m²"
+    },
+    {
+     "id": "T13",
+     "adim": "secim",
+     "mesaj": "üçüncü",
+     "kaynak": "yazılmış (rehber §2: numarayla seçim)",
+     "okuma": {
+      "niyet": "diger"
+     },
+     "karar": {
+      "eylem": "is_emri",
+      "revizyon": 1
+     },
+     "okuma_kabul": {
+      "niyet": [
+       "yeni_talep",
+       "revizyon"
+      ]
+     },
+     "anlam": "setten 3. seçenek"
+    }
+   ]
+  },
+  {
+   "id": "T7",
+   "ad": "prefabrik 60 m² beşik verandalı",
+   "adimlar": [
+    {
+     "id": "T14",
+     "adim": "bilgi_tam",
+     "mesaj": "Tek kat prefabrik 2+1 60 m² beşik çatı ön veranda",
+     "kaynak": "yazılmış (rehber §1 örneği)",
+     "okuma": {
+      "niyet": "yeni_talep",
+      "yapi_turu": "prefabrik",
+      "kat_sayisi": 1,
+      "oda_programi": "2+1",
+      "alan_m2": 60,
+      "cati": {
+       "tip": "besik"
+      },
+      "veranda": {
+       "istiyor": true,
+       "konum": "on"
+      }
+     },
+     "karar": {
+      "eylem": [
+       "secenek",
+       "sor"
+      ],
+      "soru_alani": [
+       "secenek",
+       "model_veya_olcu"
+      ]
+     },
+     "anlam": "beş bilgi tam: prefabrik 60 m²",
+     "not": "Rehber: en çok üç seçenek. Prefabrikte seçenek seti yok; bugün katalog önerisini yazıyla sunuyor."
+    }
+   ]
+  },
+  {
+   "id": "K1",
+   "ad": "katalog kodu ve değişiklik (rehber)",
+   "adimlar": [
+    {
+     "id": "K01",
+     "adim": "katalog_kodu",
+     "mesaj": "P9401, salon penceresi büyük olsun.",
+     "kaynak": "rehber §1 örneği",
+     "okuma": {
+      "niyet": "yeni_talep",
+      "katalog_kodu": "P9401",
+      "pencereler": [
+       {
+        "mahal": "salon",
+        "olcu": null
+       }
+      ]
+     },
+     "karar": {
+      "eylem": [
+       "is_emri",
+       "sor"
+      ]
+     },
+     "okuma_kabul": {
+      "niyet": [
+       "revizyon"
+      ]
+     },
+     "anlam": "P9401; salon penceresi büyüsün (ölçü yok)",
+     "not": "Rehber: kodu ve değişikliği yazın. Ölçü yoksa ölçüyü sorar. Bugün P9401'in çizim şablonu yok (yönlendiriyor)."
+    }
+   ]
+  },
+  {
+   "id": "K2",
+   "ad": "katalogda olmayan kod",
+   "adimlar": [
+    {
+     "id": "K02",
+     "adim": "katalog_kodu",
+     "mesaj": "P1234 istiyorum",
+     "kaynak": "yazılmış",
+     "okuma": {
+      "niyet": "yeni_talep",
+      "katalog_kodu": "P1234"
+     },
+     "karar": {
+      "eylem": "sor",
+      "soru_alani": "katalog_kodu"
+     },
+     "anlam": "katalogda olmayan kod"
+    }
+   ]
+  }
+ ]
+}

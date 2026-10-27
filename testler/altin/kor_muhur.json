@@ -1,0 +1,18 @@
+{
+ "aciklama": "İE-19 kör dilimin mührü. Dilim depo dışında (proje klasörü Altin_Set/kor/vakalar.json); araç mühür tutmazsa koşmaz.",
+ "sha256": "69e014b0e122a26cd68efedb536cedb5991fb5da08a7e23e06f6f56e010b697c",
+ "bayt": 9874,
+ "vaka_sayisi": 20,
+ "adim": {
+  "bilgi_tam": 3,
+  "eksik_bilgi": 4,
+  "katalog_kodu": 3,
+  "kayitsiz_kapsam": 1,
+  "onay_eski": 1,
+  "revizyon": 4,
+  "secim": 2,
+  "selam_soru": 2
+ },
+ "tarih": "2026-10-27",
+ "onay": "Lokman'ın onayı bekliyor (onay_tablosu_kor.xlsx)"
+}

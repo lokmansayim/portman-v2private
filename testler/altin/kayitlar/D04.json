@@ -1,0 +1,55 @@
+{
+ "id": "D04",
+ "talep": {
+  "niyet": "revizyon",
+  "katalog_kodu": null,
+  "yapi_turu": null,
+  "kat_sayisi": null,
+  "oda_programi": null,
+  "alan_m2": null,
+  "dis_olcu": null,
+  "pano": null,
+  "veranda": null,
+  "cati": null,
+  "yukseklik_cm": null,
+  "pencereler": [
+   {
+    "mahal": "yatak odası 1",
+    "olcu": "120x180",
+    "adet": null,
+    "duvar": null,
+    "islem": "degistir"
+   }
+  ],
+  "dis_kapi": null,
+  "ic_kapi": null,
+  "varyantlar": [
+   {
+    "tur": "pencere_degistir",
+    "aciklama": "yatak odası 1 penceresi 120x180 olsun",
+    "parametreler": {
+     "mahal": "yatak odası 1",
+     "eski": null,
+     "yeni": "120x180"
+    }
+   }
+  ],
+  "bina_ozellikleri": {},
+  "ozel_istekler": [],
+  "musteri": {
+   "ad": "Ahmet Bey",
+   "telefon": null,
+   "sevk_adresi": null
+  },
+  "belirsizlikler": [],
+  "guven": "yuksek",
+  "ozet": "Gönderilen ön onay planında yatak odası 1 penceresinin 120x180 olarak değiştirilmesini istiyorsunuz."
+ },
+ "meta": {
+  "backend": "anthropic",
+  "model": "claude-opus-5-5",
+  "girdi_token": 5430,
+  "cikti_token": 356,
+  "sure_ms": 3077
+ }
+}
