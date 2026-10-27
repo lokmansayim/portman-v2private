@@ -303,7 +303,12 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
             try:
                 yol, sha = nasil_calisir_pdf()
                 ekle_satir(giden_belge(gelen, yol, "Portman_Nasil_calisir.pdf", "Portman · Nasıl çalışır?", 0, "", 0, sha))
-                ekle("Talebinizi bu sohbete yazabilirsiniz; örnek: \"Tek kat çelik, 2+1, 88 m² civarı, beşik çatı.\"")
+                if form_kimligi(settings, "talep"):            # İE-20 PR-2: aynı satır [Talep formu] düğmeli
+                    import talep_formu as TF
+                    ekle_satir(giden_form(gelen, NASIL_TALEP.replace("yazabilirsiniz", "yazabilir ya da formu doldurabilirsiniz"), 0, "talep",
+                                          settings, TF.talep_tokeni(satir_id(gelen["id"], 0)[4:16]), TF.ekran_verisi(bayi, None)))
+                else:
+                    ekle(NASIL_TALEP)
             except Exception as e:
                 log("nasıl çalışır PDF'i üretilemedi:", type(e).__name__)
                 ekle("Bilgi sayfasını şu an gönderemedim; Lokman Bey'e iletiyorum. Talebinizi bu sohbete yazabilirsiniz.")
@@ -314,7 +319,9 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
             patrona(f"Portman: {kim} bilgi penceresini açtı. Panelden yazabilirsiniz.", sablon=True)
             sonuc.update(eylem="cevapla", gerekce="şablon cevabı: bilgi penceresi açıldı", buton=reply_id)
         return {"satirlar": satirlar, "sonuc": sonuc}
-    medya = gelen.get("type") in GORSEL_TURLERI and gorsel_acik(settings)      # İE-20: çizim okunur (kalıcı akış dosyayı indirip okur)
+    form = gelen.get("form") if isinstance(gelen.get("form"), dict) else None    # İE-20 PR-2: talep ya da revizyon formunun cevabı
+    medya = gorsel_acik(settings) and (gelen.get("type") in GORSEL_TURLERI      # İE-20: çizim okunur (kalıcı akış dosyayı indirip okur)
+                                       or (form is not None and form.get("tur") == "talep" and bool(form.get("dosyalar"))))
     if not medya and (gelen.get("type") not in GELEN_YAZILI or not ((gelen.get("text") or "").strip() or gelen.get("reply_id"))):
         ekle("Şu an yalnız yazılı talepleri işleyebiliyorum. Talebinizi yazıyla iletirseniz (örn. \"P6001 aynalı\" ya da \"7x4 m, 2+1, ön verandalı\") ön onay planını hazırlarım."
              + ("" if patron_mu else " Gönderdiğiniz dosyayı Lokman Bey'e ilettim."))
@@ -328,6 +335,25 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
     if katalog is None:
         katalog = katalog_nesnesi(settings)
     metin_kural = gelen.get("text") or ""
+    fc = None; form_on = ""
+    if form is not None:
+        fc = (cikarim or {}).get("form") or form_cikarimi(gelen, k.d, giden_bul)
+        if fc is not None and fc.get("durum") != "talep":
+            return _form_cevabi(gelen, k, fc, sonuc, satirlar, ekle, patrona, kim)
+        if fc is not None and medya:
+            fc, medya, form_on, cikarim = _form_okumasi(fc, cikarim, gelen, patrona, kim)
+        if fc is None:                                # revizyon formunun açıklaması okunur; dosyası Patron'a (işaretli plan otomatik okunmaz)
+            if form.get("dosyalar"):
+                patrona(f"Portman: {kim} revizyon formuna dosya ekledi; panelden bakabilirsiniz.")
+        elif not medya:
+            metin_kural = ""                          # formun özeti kural katmanına bayinin sözü diye gitmez
+            if form.get("dosyalar") and not form_on:
+                patrona(f"Portman: {kim} talep formuna dosya ekledi (çizim okuması kapalı); panelden bakabilirsiniz.")
+            k.d.pop("cizim_okuma", None)              # formla gelen talep açık çizim okumasının yerine geçer
+            if k.d.get("son_soru_alani") == "cizim_okuma":
+                k.d["son_soru_alani"] = None
+            if k.d.get("asama") == "revizyon" or (k.d.get("asama") == "topluyor" and (k.d.get("taslak") or {}).get("katalog_kodu")):
+                k.sifirla(); k.not_dus("kural", "talep formu: önceki taslak kapandı, formdaki talep yeni talep")
     etk = None
     if gelen.get("reply_id"):
         etk = (cikarim or {}).get("etkilesim") or ET.coz(gelen, k.d, giden_bul)
@@ -349,6 +375,9 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
         if etk is not None:
             from beyin.sema import Talep
             talep, meta = Talep.model_validate(etk["talep"]), {"backend": "etkilesim", "kimlik": etk["kimlik"], "tur": etk["tur"]}
+        elif fc is not None and not medya:            # İE-20 PR-2: talep formu, LLM'siz
+            from beyin.sema import Talep
+            talep, meta = Talep.model_validate(fc["talep"]), {"backend": "form", "tur": "talep"}
         elif medya:                                 # İE-20: okuma kalıcı akışta yapıldı (`gorsel_oku`); talep yalnız kayıt için
             from beyin.sema import Talep
             g = (cikarim or {}).get("gorsel") or {"durum": "dosya_yok"}
@@ -458,7 +487,11 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
         sonuc["is_emri_no"] = no; sonuc["revizyon"] = rev; sonuc["cizim"] = cizim
         if motor_adi == "genel" and not cizim["passed"]:
             return _cizim_hatasi(k, d0, karar, talep, meta, cizim, ie, settings, sonuc, satirlar, ekle, patrona, kim, patron_mu)
-    metin = karar.mesaj
+    metin = form_on + karar.mesaj
+    if form is not None:
+        sonuc["form"] = {"tur": form.get("tur"), "durum": (fc or {}).get("durum") or "okundu", "dosya": len(form.get("dosyalar") or [])}
+        if fc is not None and not medya and (fc.get("talep") or {}).get("ozel_istekler") and karar.eylem in ("is_emri", "secenek"):
+            metin += "\n\n" + FORM_NOTU
     # PDF başlığındaki özet: soru düğmesinin cevabıysa ("kısa cevap: 2") talebin özeti (kapanış incelemesi 13.10)
     ozet_baslik = ((k.d.get("taslak") or {}).get("ozet") or "") if meta.get("tur") == "soru" else (talep.ozet or "")
     if karar.is_emri and ((karar.is_emri.get("yapi") or {}).get("bu_revizyon") or (karar.is_emri.get("talep") or {}).get("metin_koddan")):
@@ -518,6 +551,9 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
         ekle_satir(giden_gorsel(gelen, Path(g["file"]), g["filename"], metin, 0, g["sha256"]))
     elif butonlar:
         ekle_satir(giden_etkilesim(gelen, metin, 0, butonlar=butonlar))
+    elif katman and (fs := form_sunusu(gelen, karar, k, bayi, settings)) is not None:     # İE-20 PR-2: aynı metin + form düğmesi
+        ekle_satir(giden_form(gelen, metin, 0, fs[0], settings, fs[1], fs[2], is_emri_no=fs[3], revizyon=fs[4]))
+        sonuc["form_sunuldu"] = fs[0]
     else:
         ekle(metin)
     if cizim_ek.get("patrona"):
@@ -540,6 +576,35 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
                 sablon=True, is_emri_no=sonuc.get("is_emri_no"))
     return {"satirlar": satirlar, "sonuc": sonuc, **({"plan_uretimi": pu_kayit} if pu_kayit else {}),
             **({"okuma_kiyasi": okuma_k} if okuma_k else {})}
+
+
+def _form_cevabi(gelen: dict, k, fc: dict, sonuc: dict, satirlar: list, ekle, patrona, kim: str) -> dict:
+    """İE-20 PR-2: LLM'siz form cevabı (eski ya da tanınmayan form, boş ya da yalnız dosyalı revizyon formu). Plan değişmez."""
+    k.not_dus("gelen", f"form: {(gelen.get('form') or {}).get('tur')}", {"niyet": "form", "guven": "yuksek"})
+    if fc["durum"] in ("bos", "dosya"):
+        k.d["son_soru_alani"] = "revizyon_ne"          # bayinin yazısı revizyon olarak okunur (bugünkü yol)
+    k.not_dus("giden", fc["mesaj"], {"eylem": "sor" if fc["durum"] in ("bos", "dosya") else "cevapla", "gerekce": f"form: {fc['durum']}"})
+    k.kaydet()
+    ekle(fc["mesaj"])
+    if fc["durum"] == "dosya":
+        patrona(f"Portman: {kim} revizyon formuna dosya ekledi ({fc.get('no')} r{int(fc.get('rev') or 0):02d}); panelden bakabilirsiniz.")
+    sonuc.update(eylem="sor" if fc["durum"] in ("bos", "dosya") else "cevapla", gerekce=f"form: {fc['durum']}", asama=k.d.get("asama"),
+                 form={"tur": (gelen.get("form") or {}).get("tur"), "durum": fc["durum"], "dosya": len((gelen.get("form") or {}).get("dosyalar") or [])})
+    return {"satirlar": satirlar, "sonuc": sonuc}
+
+
+def _form_okumasi(fc: dict, cikarim: dict | None, gelen: dict, patrona, kim: str) -> tuple:
+    """Talep formunun dosyası okunduysa: plan okunduysa çizim yolu (okumanın boş bıraktığı yapı tipi ve kat formdan); okunamadıysa
+    (plan değil, dosya inmedi, türü okunmuyor, okuma hatası) formun bilgileriyle devam. Dönen: (fc, medya, ön not, cikarim)."""
+    g = (cikarim or {}).get("gorsel") or {"durum": "dosya_yok"}
+    o = g.get("okuma") or {}
+    if g.get("durum") == "tamam" and o.get("tur") == "plan":
+        t = fc.get("talep") or {}
+        o = {**o, **{a: t[a] for a in ("yapi_turu", "kat_sayisi") if t.get(a) and not o.get(a)}}
+        return fc, True, "", {**(cikarim or {}), "gorsel": {**g, "okuma": o}}
+    if g.get("durum") != "tamam":
+        patrona(f"Portman: {kim} talep formuna dosya ekledi ama okunamadı ({g.get('durum')}); panelden bakabilirsiniz.")
+    return fc, False, "Formdaki dosyadan plan çıkaramadım; formdaki bilgilerle devam ediyorum. ", cikarim
 
 
 def _cizim_hatasi(k, d0: dict, karar, talep, meta: dict, cizim: dict, ie: dict, settings: dict, sonuc: dict, satirlar: list, ekle, patrona,
@@ -641,6 +706,83 @@ def secenek_satirlari(gelen: dict, karar, katalog, metin: str, proje_koku: Path 
             {"id": f"s:{st['id']}:{a['kod']}", "baslik": SC.kisa_ad(a), "aciklama": SC.aciklama(a)} for a in adaylar]}]}
         rows.append(giden_etkilesim(gelen, f"{len(adaylar)} seçeneğin tamamı, puanlarıyla listede.", 0, liste=liste))
     return rows
+
+
+# ───────────────────────── İE-20 PR-2: talep formu ve revizyon formu (WhatsApp Flow) ─────────────────────────
+FORM_SORULARI = ("oda_programi", "dis_olcu", "model_veya_olcu")      # eksik bilgi sorusu: aynı metin + [Talep formu]
+FORM_CEVAPLARI = ("selam", "anlaşılmadı")                            # karşılık: "hangi model ya da ölçü?" metni + [Talep formu]
+FORM_NOTU = "Formdaki notunuz plana özel istek olarak yazıldı; planı değiştirmesi gereken bir istekse planı gördükten sonra yazın."
+NASIL_TALEP = "Talebinizi bu sohbete yazabilirsiniz; örnek: \"Tek kat çelik, 2+1, 88 m² civarı, beşik çatı.\""
+
+
+def form_kimligi(settings: dict, tur: str) -> str | None:
+    """Sunulacak formun Meta kimliği (`talep_formu.<tur>_flow_id`); form kapalıysa, kimlik yoksa ya da mesaj katmanı kapalıysa None
+    (bugünkü metin gider)."""
+    import talep_formu as TF
+    a = settings.get("talep_formu") or {}
+    fid = str(a.get(f"{tur}_flow_id") or "")
+    return fid if a.get("acik") is True and settings.get("mesaj_katmani") and TF.FLOW_ID.match(fid) else None
+
+
+def giden_form(gelen: dict, metin: str, sira: int, tur: str, settings: dict, token: str, veri: dict, is_emri_no: str | None = None,
+               revizyon: int | None = None) -> dict:
+    """Formu açan düğmeli mesaj (Flow; gövde sorunun metni). `form_kimligi` None değilken çağrılır."""
+    import talep_formu as TF
+    r = giden_metin(gelen, metin[:WA_GOVDE], sira)
+    i = TF.etkilesim(tur, _kes(metin, WA_GOVDE), form_kimligi(settings, tur), token, veri, (settings.get("talep_formu") or {}).get("taslak", True) is not False)
+    r.update(kind="interactive", interactive=i, is_emri_no=is_emri_no, revizyon=revizyon)
+    return r
+
+
+def form_sunusu(gelen: dict, karar, k, bayi: dict | None, settings: dict) -> tuple | None:
+    """Bu cevap formla mı gitsin: (tur, token, veri, is_emri_no, rev) ya da None. Eksik bilgi sorusu, selam ve "anlayamadım" → talep formu
+    (açık taslağın bilgileri ve kartın varsayılanları seçili); "Neyi değiştirelim?" → revizyon formu (planın numarası)."""
+    import talep_formu as TF
+    son = k.d.get("son_is_emri") or {}
+    if karar.soru_alani == "revizyon_ne" and karar.eylem == "sor" and son.get("is_emri_no") and form_kimligi(settings, "revizyon"):
+        no, rev = str(son["is_emri_no"]), int(son.get("revizyon") or 1)
+        return ("revizyon", TF.revizyon_tokeni(no, rev), {"plan": f"{no} r{rev:02d} planı için değişikliğinizi yazın; isterseniz dosya da ekleyin."},
+                no, rev)
+    if ((karar.eylem == "sor" and karar.soru_alani in FORM_SORULARI) or (karar.eylem == "cevapla" and karar.gerekce in FORM_CEVAPLARI)) \
+            and form_kimligi(settings, "talep"):
+        taslak = k.d.get("taslak") if k.d.get("asama") == "topluyor" else None
+        return "talep", TF.talep_tokeni(satir_id(gelen["id"], 0)[4:16]), TF.ekran_verisi(bayi, taslak), None, None
+    return None
+
+
+def form_cikarimi(gelen: dict, d: dict | None, giden_bul=None) -> dict | None:
+    """Form cevabının LLM'siz çözümü (kalıcı akışta işten önce; iş satırına yazılır). None: revizyon formunun açıklaması bayinin yazısı
+    gibi okunacak (bugünkü yol, LLM). Dönen `durum`: talep (talep formu → Talep) | eski | bilinmiyor | bos | dosya (LLM'siz cevap, `mesaj`)."""
+    import talep_formu as TF
+    oz = gelen.get("form") or {}
+    d = d or {}
+    ctx = gelen.get("context_id")
+    satir = giden_bul(ctx) if ctx and giden_bul is not None else None
+    if oz.get("tur") not in ("talep", "revizyon") or (satir is not None and TF.satir_tokeni(satir) != oz.get("token")):
+        return {"durum": "bilinmiyor", "mesaj": "Bu formu tanıyamadım; isteğinizi yazarak iletirseniz devam ederim."}
+    if oz["tur"] == "talep":
+        return {"durum": "talep", "talep": TF.talep(oz), "dosya": bool(oz.get("dosyalar"))}
+    m = TF.TOKEN.match(oz.get("token") or "")
+    no, rev = m.group(2), int(m.group(3) or 0)
+    ie = d.get("son_is_emri") or {}
+    guncel = (str(ie.get("is_emri_no") or ""), int(ie.get("revizyon") or 0))
+    if (no, rev) != guncel or d.get("asama") not in ("onay_bekliyor", "revizyon"):
+        return {"durum": "eski", "no": no, "rev": rev,
+                "mesaj": f"Bu form {no} r{rev:02d} planına ait; " + (f"güncel plan {guncel[0]} r{guncel[1]:02d}. " if guncel[0] else "şu an açık bir plan yok. ")
+                         + "Değişikliği yazarak iletirseniz devam ederim."}
+    if (oz.get("alanlar") or {}).get("aciklama"):
+        return None
+    if oz.get("dosyalar"):
+        return {"durum": "dosya", "no": no, "rev": rev,
+                "mesaj": "Dosyanızı Lokman Bey'e ilettim. Değişikliği kısaca yazarsanız (örn. \"mutfak penceresi 120x120\") planı hemen güncellerim."}
+    return {"durum": "bos", "no": no, "rev": rev,
+            "mesaj": "Neyi nasıl değiştirelim? Kısaca yazmanız yeterli; örneğin \"mutfak penceresi 120x120\" ya da \"veranda arkada olsun\"."}
+
+
+def form_dosyasi_okunur(cikarim: dict | None, settings: dict) -> bool:
+    """Talep formunun dosyası PR-1'in okumasından geçer mi (görsel okuma açıkken)."""
+    fc = (cikarim or {}).get("form") or {}
+    return fc.get("durum") == "talep" and bool(fc.get("dosya")) and gorsel_acik(settings)
 
 
 # ───────────────────────── İE-20: görsel ve PDF ile talep ─────────────────────────

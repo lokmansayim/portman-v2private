@@ -414,6 +414,22 @@ def bayiler_sayfasi(p: Panel, oturum: dict) -> str:
     return sayfa("Bayiler", govde, p, oturum)
 
 
+VARSAYILAN_SECENEKLERI = (("yapi_turu", "Yapı tipi", (("prefabrik", "Prefabrik"), ("celik", "Çelik"))),
+                          ("kat_sayisi", "Kat", (("1", "Tek kat"), ("2", "İki kat"))),
+                          ("cati", "Çatı", (("besik", "Beşik"), ("tek_egimli", "Tek eğimli"), ("kirma", "Kırma"), ("teras", "Teras"))),
+                          ("veranda", "Veranda", (("on", "Önde"), ("yan", "Yanda"), ("arka", "Arkada"), ("kose", "Köşede"))))
+
+
+def varsayilan_alanlari(v: dict) -> str:
+    """İE-20 PR-2 (satır 61): talep formunun bu bayide seçili geleceği değerler; boş = sabit varsayılan (prefabrik, tek kat, beşik, önde)."""
+    out = "<fieldset><legend>Talep formu varsayılanları</legend>"
+    for ad, etiket, secenekler in VARSAYILAN_SECENEKLERI:
+        sec = '<option value="">(yok)</option>' + "".join(f'<option value="{a}"{" selected" if str(v.get(ad) or "") == a else ""}>{e(b)}</option>'
+                                                         for a, b in secenekler)
+        out += f'<label>{etiket}<select name="v_{ad}">{sec}</select></label>'
+    return out + "</fieldset>"
+
+
 def bayi_formu(p: Panel, oturum: dict, d: dict, yeni: bool, hata: str | None = None) -> str:
     def alan(ad, etiket, deger, salt_okunur=False):
         ek = " readonly" if salt_okunur else ""
@@ -426,6 +442,7 @@ def bayi_formu(p: Panel, oturum: dict, d: dict, yeni: bool, hata: str | None = N
               + f'<label>Rol<select name="rol">{secenekler}</select></label>'
               + alan("kod", "Kod (boşsa türetilir: PATRON ya da B + son 4 hane)", d.get("kod"))
               + f'<label><input type="checkbox" name="aktif" value="1"{" checked" if d.get("aktif", True) else ""}> Aktif</label>'
+              + varsayilan_alanlari(d.get("varsayilanlar") or {})
               + '<button>Kaydet</button> <a href="/panel/bayiler">vazgeç</a></form>')
     return sayfa("Yeni bayi" if yeni else f"Bayi · {d.get('numara')}", govde, p, oturum)
 
@@ -507,13 +524,16 @@ def bayi_kaydet(p: Panel, oturum: dict, i: Istek, numara: str | None) -> tuple:
     f = i.form()
     yeni = numara is None
     d = {"numara": (f.get("numara") or "").strip() if yeni else numara, "ad": f.get("ad", ""), "hitap": f.get("hitap", ""), "firma": f.get("firma", ""),
-         "bolge": f.get("bolge", ""), "rol": f.get("rol", "bayi"), "kod": f.get("kod", ""), "aktif": f.get("aktif") == "1"}
+         "bolge": f.get("bolge", ""), "rol": f.get("rol", "bayi"), "kod": f.get("kod", ""), "aktif": f.get("aktif") == "1",
+         "varsayilanlar": {a: f.get(f"v_{a}") or None for a, _e, _s in VARSAYILAN_SECENEKLERI}}
     try:
         if yeni and not _NUMARA.fullmatch(d["numara"]):
             raise ValueError("numara geçersiz: yalnız rakam, ülke koduyla 8–15 hane")
         if yeni and p.depo.bayi_oku(d["numara"]):
             raise ValueError("bu numara zaten kayıtlı; listeden açıp düzenleyin")
         p.depo.bayi_yaz(d["numara"], ad=d["ad"], kod=d["kod"] or None, hitap=d["hitap"], firma=d["firma"], bolge=d["bolge"], rol=d["rol"], aktif=d["aktif"], kaynak="panel")
+        if any(f"v_{a}" in f for a, _e, _s in VARSAYILAN_SECENEKLERI):            # İE-20 PR-2: form varsayılanları (alanlar formdaysa)
+            p.depo.bayi_varsayilanlari_yaz(d["numara"], **d["varsayilanlar"])
     except ValueError as hata:
         return _html(400, bayi_formu(p, oturum, d, yeni, str(hata)))
     log("bayi kaydedildi", maske(d["numara"]), "yeni" if yeni else "güncelleme")
@@ -695,7 +715,7 @@ def isle(p: Panel, i: Istek) -> tuple:
             return 404, b"yok", "text/plain; charset=utf-8", []
         if i.metod == "POST":
             return bayi_kaydet(p, oturum, i, numara)
-        return _html(200, bayi_formu(p, oturum, dict(b), False))
+        return _html(200, bayi_formu(p, oturum, {**dict(b), "varsayilanlar": p.depo.bayi_varsayilanlari(b["numara"])}, False))
     if i.yol.startswith("/panel/konusma/"):
         numara = i.yol[len("/panel/konusma/"):]
         islem = None

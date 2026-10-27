@@ -143,7 +143,15 @@ def bir_is(depo: Depo, settings: dict, sahip: str | None = None) -> dict | None:
     yazili = gelen.get("type") in W.GELEN_YAZILI and (bool((gelen.get("text") or "").strip()) or bool(gelen.get("reply_id")))
     cikarim = j.get("cikarim")
     muhendis_mu = (gelen.get("role") or "bayi") == "muhendis"      # İE-08 8b: mühendis kartının mesajı LLM'siz (kanal/muhendis.py)
-    gorsel = gelen.get("type") in W.GORSEL_TURLERI and W.gorsel_acik(settings) and not muhendis_mu
+    if isinstance(gelen.get("form"), dict) and not muhendis_mu and "form" not in (cikarim or {}):
+        # İE-20 PR-2: talep formu (ve eski, boş ya da yalnız dosyalı revizyon formu) LLM'siz çözülür; revizyon formunun açıklaması
+        # (None) bayinin yazısı gibi aşağıda okunur
+        fc = W.form_cikarimi(gelen, d, depo.giden_satiri)
+        if fc is not None:
+            cikarim = {**(cikarim or {}), "form": fc}
+            if not depo.cikarim_kaydet(j["id"], sahip, cikarim):
+                return {"durum": "atildi", "is_id": j["id"], "neden": "kira kaybedildi (form kaydı)"}
+    gorsel = (gelen.get("type") in W.GORSEL_TURLERI or W.form_dosyasi_okunur(cikarim, settings)) and W.gorsel_acik(settings) and not muhendis_mu
     if gorsel and "gorsel" not in (cikarim or {}):
         # İE-20: plan resmi ya da PDF; dosyayı gönderici indirir (ajanın WhatsApp anahtarı yok): inene kadar beklenir, sonra okunur
         # (LLM, 1 çağrı). Okuma iş satırına yazılır: yeniden denenen iş dosyayı yeniden okutmaz.
