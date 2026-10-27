@@ -4,6 +4,8 @@
 # komutların aynısı (Beyin harness'i 22 vaka, tam referans gerilemesi `testler/referans/dogrula.py`, bütün pytest'ler), dört
 # paralel işe bölünmüş. Tek işte 21–37 dk sürüyordu (pytest tek çekirdekte 17–28 dk); bölününce en uzun iş ~10–12 dk.
 # Ortam her işte `ortam_kur.sh` ile kurulur. `ortam_kur.sh --dogrula`'ya adım eklenirse burası da güncellenir.
+# İki Python'da koşar: 3.11 (oturumların yerel ortamı, araclar/gereksinimler.txt) ve 3.12 (canlı sunucu 3.12.3; üstüne
+# vps/gereksinimler.txt: numpy 2.5.4, vtk). 3.12'den beri sum() float'ları telafili toplar; sürüme bağlı farkı burada görürüz.
 # Biri kırmızıysa PR'da kırmızı çarpı yanar; hangi iş, hangi test düştü koşu kaydında.
 #
 # Sınırlar:
@@ -33,25 +35,27 @@ defaults:
 
 jobs:
   dogrula:
-    name: ${{ matrix.ad }}
+    name: ${{ matrix.ad }} · ${{ matrix.python }}
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
+        python: ["3.11", "3.12"]
+        parca: [referans, kalici, genel_motor, kalan]
         include:
-          - ad: harness + referans
-            parca: referans
+          - parca: referans
+            ad: harness + referans
           # Postgres'li kalıcı akış testleri; Postgres yoksa atlanmazlar, iş kırmızı olur.
-          - ad: testler (kalıcı akış)
-            parca: pytest
+          - parca: kalici
+            ad: testler (kalıcı akış)
             yollar: testler/kalici
-          - ad: testler (genel motor, motor)
-            parca: pytest
+          - parca: genel_motor
+            ad: testler (genel motor, motor)
             yollar: testler/genel testler/motor
           # Kalan her şey: yeni bir test klasörü eklenince kendiliğinden buraya düşer.
-          - ad: testler (kalan)
-            parca: pytest
+          - parca: kalan
+            ad: testler (kalan)
             yollar: testler --ignore=testler/kalici --ignore=testler/genel --ignore=testler/motor
     steps:
       # Tam geçmiş: hakem ve mühür testleri git geçmişini okur, sığ klonda durur.
@@ -59,15 +63,20 @@ jobs:
         with:
           fetch-depth: 0
 
-      # Yerel ortamla aynı Python (araclar/gereksinimler.txt 3.11 için sabit).
       - uses: actions/setup-python@v6
         with:
-          python-version: "3.11"
+          python-version: ${{ matrix.python }}
 
+      # Sanal ortam önce bu Python'la açılır; ortam_kur.sh var olanı kullanır (yoksa python3.11'i arar).
       - name: Ortam (bash araclar/ortam_kur.sh)
         run: |
           sudo git config --system --add safe.directory "$GITHUB_WORKSPACE"
+          sudo env "PATH=$PATH" HOME=/root python -m venv /root/.cache/portman-venv
           sudo env "PATH=$PATH" HOME=/root bash araclar/ortam_kur.sh
+          if [[ "${{ matrix.python }}" == 3.12 ]]; then
+            sudo env "PATH=$PATH" HOME=/root /root/.cache/portman-venv/bin/python -m pip install -q -r vps/gereksinimler.txt
+          fi
+          sudo /root/.cache/portman-venv/bin/python -c "import sys, numpy; print('-- Python', sys.version.split()[0], '· numpy', numpy.__version__); sys.exit(sys.version_info[:2] != tuple(map(int, '${{ matrix.python }}'.split('.'))))"
 
       - name: ${{ matrix.ad }}
         env:
