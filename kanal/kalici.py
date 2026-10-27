@@ -143,6 +143,14 @@ def bir_is(depo: Depo, settings: dict, sahip: str | None = None) -> dict | None:
     yazili = gelen.get("type") in W.GELEN_YAZILI and (bool((gelen.get("text") or "").strip()) or bool(gelen.get("reply_id")))
     cikarim = j.get("cikarim")
     muhendis_mu = (gelen.get("role") or "bayi") == "muhendis"      # İE-08 8b: mühendis kartının mesajı LLM'siz (kanal/muhendis.py)
+    gorsel = gelen.get("type") in W.GORSEL_TURLERI and W.gorsel_acik(settings) and not muhendis_mu
+    if gorsel and "gorsel" not in (cikarim or {}):
+        # İE-20: plan resmi ya da PDF; dosyayı gönderici indirir (ajanın WhatsApp anahtarı yok): inene kadar beklenir, sonra okunur
+        # (LLM, 1 çağrı). Okuma iş satırına yazılır: yeniden denenen iş dosyayı yeniden okutmaz.
+        cikarim = {**(cikarim or {}), "gorsel": W.gorsel_oku(gelen, settings, medya_bekle(depo, gelen, settings))
+                   if gelen.get("bayi") else {"durum": "atlandi", "neden": "kayıtsız gönderen"}}
+        if not depo.cikarim_kaydet(j["id"], sahip, cikarim):
+            return {"durum": "atildi", "is_id": j["id"], "neden": "kira kaybedildi (okuma kaydı)"}
     if yazili and cikarim is None and not muhendis_mu:
         if gelen.get("reply_id"):                    # İE-04: buton/liste cevabı; LLM çağrılmaz, kimlik kayıtla doğrulanır
             etk = ET.coz(gelen, d, depo.giden_satiri)
@@ -170,7 +178,7 @@ def bir_is(depo: Depo, settings: dict, sahip: str | None = None) -> dict | None:
             def ara_gonder(metin: str) -> dict | None:    # İE-14 (inceleme C7): "hazırlıyorum" uzun üretimden önce, ayrılmış sırayla gider
                 s = W.giden_metin(gelen, metin, depo.ERKEN_SIRA)
                 return s if depo.ara_satir_yaz(j["id"], sahip, gelen["id"], s) else None
-            cikti = W.isle(gelen, settings, k=k, cikarim=cikarim if yazili else None, proje_koku=hazirlik, giden_bul=depo.giden_satiri, katalog=katalog,
+            cikti = W.isle(gelen, settings, k=k, cikarim=cikarim if (yazili or gorsel) else None, proje_koku=hazirlik, giden_bul=depo.giden_satiri, katalog=katalog,
                            ek_kaydet=ek_kaydet, ara_gonder=ara_gonder)
             # Onay denetimi kuralın sonucuna bakar: hangi yoldan olursa olsun (ör. süresi dolan D-01 sorusundan sonra) bir onay
             # kaydedildiyse, onay bayinin gördüğü revizyona bağlanabiliyor mu diye sınanır; bağlanamıyorsa onay yazılmaz.
@@ -208,6 +216,29 @@ def bir_is(depo: Depo, settings: dict, sahip: str | None = None) -> dict | None:
     shutil.rmtree(hazirlik, ignore_errors=True)
     return {"durum": "basarisiz" if cikti.get("hata") else "bitti", "is_id": j["id"], "mesaj_id": gelen["id"],
             "eylem": cikti["sonuc"].get("eylem"), "gerekce": cikti["sonuc"].get("gerekce"), "giden": len(cikti["satirlar"]), **kayit}
+
+
+MEDYA_BEKLE_SN = 60                 # İE-20: gelen dosyanın indirilmesi beklenir (gönderici her turda indirir; çoğu birkaç saniye)
+DOSYA_KAYDI_SN = 10                 # webhook mesajı ve dosya kaydını ayrı yazar: dosya kaydı bu kadar beklenir
+
+
+def medya_bekle(depo: Depo, gelen: dict, settings: dict, uyu=time.sleep) -> dict | None:
+    """İE-20: gelen mesajın dosyası indirilene kadar bekler ve kaydını döner ({yol, mime, boyut, sha256, …}). Dosya kaydı
+    `DOSYA_KAYDI_SN` içinde gelmezse (webhook mesajı önce, dosya kaydını hemen sonra yazar; kayıtsız gönderenin medya sınırında
+    hiç yazılmaz), gönderici üç denemede indiremediyse ya da süre dolduysa None. Ajan WhatsApp'a bağlanmaz: indirme göndericinin işidir."""
+    bekle = float((settings.get("gorsel_okuma") or {}).get("bekle_sn", MEDYA_BEKLE_SN))
+    gecen = 0.0                                     # beklenen süre (saniyelik uykular)
+    while True:
+        d = depo.mesajin_dosyasi(gelen["id"])
+        if d is None:
+            if gecen >= min(bekle, DOSYA_KAYDI_SN):
+                return None
+        elif d.get("yol") and Path(d["yol"]).is_file():
+            return d
+        elif int(d.get("deneme") or 0) >= 3 or gecen >= bekle:
+            return None
+        uyu(1.0)
+        gecen += 1.0
 
 
 def _yol_degistir(x, eski: str, yeni: str):
