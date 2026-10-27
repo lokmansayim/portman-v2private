@@ -1,0 +1,55 @@
+{
+ "_aciklama": "İE-20: TK-01 bayi çiziminin (PF Teklif_Calisma/TK-01/girdi; depoya girmez) beklenen okuması. Elle yazıldı: doğru okumanın teklif çalışmasındaki karşılığı (is_emri_r01/r04). Gerçek LLM okuması Patron onayıyla ayrıca denenir; bu dosya kodun (denetim, İş Emri'ne çeviri, teyit metni) testidir.",
+ "tur": "plan",
+ "yapi_turu": null,
+ "kat_sayisi": 1,
+ "giris_kenari": "alt",
+ "dis_olcu": {"yatay_cm": 898, "dusey_cm": 888},
+ "zincirler": [
+  {"kenar": "ust", "olculer_cm": [261, 126, 188, 324], "toplam_cm": 898, "kapsam": "govde"},
+  {"kenar": "sol", "olculer_cm": [130, 382, 507, 181], "toplam_cm": 1199, "kapsam": "veranda_dahil"},
+  {"kenar": "sag", "olculer_cm": [130, 382, 251, 256, 181], "toplam_cm": 1199, "kapsam": "veranda_dahil"},
+  {"kenar": "alt", "olculer_cm": [392, 116, 392], "toplam_cm": 898, "kapsam": "govde"}
+ ],
+ "odalar": [
+  {"ad": "YATAK ODASI 1", "islev": "yatak_odasi", "alan_m2": 11.5, "dikdortgenler": [[0, 0, 261, 382], [261, 256, 387, 382]]},
+  {"ad": "E. BANYO", "islev": "banyo", "alan_m2": 3, "dikdortgenler": [[261, 0, 387, 256]]},
+  {"ad": "BANYO", "islev": "banyo", "alan_m2": 5, "dikdortgenler": [[387, 0, 575, 256]]},
+  {"ad": "YATAK ODASI 2", "islev": "yatak_odasi", "alan_m2": 13, "dikdortgenler": [[575, 0, 898, 256], [508, 256, 898, 382]]},
+  {"ad": "HOL", "islev": "hol", "alan_m2": 6, "dikdortgenler": [[387, 256, 508, 758]]},
+  {"ad": "ANTRE", "islev": "antre", "alan_m2": null, "dikdortgenler": [[387, 758, 508, 888]]},
+  {"ad": "SALON", "islev": "salon", "alan_m2": 19.5, "dikdortgenler": [[0, 382, 387, 888]]},
+  {"ad": "YATAK ODASI 3", "islev": "yatak_odasi", "alan_m2": 9.5, "dikdortgenler": [[508, 382, 898, 633]]},
+  {"ad": "MUTFAK", "islev": "mutfak", "alan_m2": 9.5, "dikdortgenler": [[508, 633, 898, 888]]}
+ ],
+ "kapilar": [
+  {"arasinda": ["DIŞ", "ANTRE"], "kenar": "alt"},
+  {"arasinda": ["ANTRE", "HOL"]},
+  {"arasinda": ["HOL", "BANYO"]},
+  {"arasinda": ["HOL", "YATAK ODASI 1"]},
+  {"arasinda": ["HOL", "YATAK ODASI 2"]},
+  {"arasinda": ["HOL", "YATAK ODASI 3"]},
+  {"arasinda": ["HOL", "SALON"]},
+  {"arasinda": ["HOL", "MUTFAK"]},
+  {"arasinda": ["YATAK ODASI 1", "E. BANYO"]}
+ ],
+ "pencereler": [
+  {"oda": "YATAK ODASI 1", "kenar": "ust", "olcu": "120x180"},
+  {"oda": "E. BANYO", "kenar": "ust", "olcu": "60x40"},
+  {"oda": "BANYO", "kenar": "ust", "olcu": "60x40"},
+  {"oda": "YATAK ODASI 2", "kenar": "sag", "olcu": "120x120"},
+  {"oda": "YATAK ODASI 3", "kenar": "sag", "olcu": "120x120"},
+  {"oda": "SALON", "kenar": "sol", "olcu": "120x180"},
+  {"oda": "SALON", "kenar": "alt", "olcu": "120x180"},
+  {"oda": "MUTFAK", "kenar": "alt", "olcu": "120x180"}
+ ],
+ "verandalar": [
+  {"kenar": "alt", "bas_cm": 256, "bit_cm": 642, "derinlik_cm": 181, "alan_m2": 8},
+  {"kenar": "ust", "bas_cm": 0, "bit_cm": 261, "derinlik_cm": 130, "alan_m2": 3}
+ ],
+ "cati": {"tip": "besik", "mahya": "giristen_arkaya"},
+ "duvar_yuksekligi_cm": 250,
+ "tahminler": ["banyoların derinliği 256 cm", "antre holün sonunda 130 cm"],
+ "emin_olunamayanlar": [],
+ "ozet": "Tek katlı, 3+1, 898 × 888 cm gövde, önde ve arkada veranda, beşik çatı."
+}
