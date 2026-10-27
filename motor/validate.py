@@ -26,7 +26,8 @@ def dogrula(doc, plan: G.Plan, is_emri: dict) -> dict:
     msp = doc.modelspace(); W, H = plan.W, plan.H
     WALL_LAYERS = {G.katman("IC_DUVAR_60"), G.katman("DIS_DUVAR_100")}
     KOSE_LAYERS = {G.katman("KOSE_PROFIL_60"), G.katman("KOSE_PROFIL_100")}
-    limit = W + 150.0   # ana plan bölgesi (kopya sağda +300)
+    sag_pay = max([0.0] + [v["rect"][2] - W for v in plan.dis_verandalar])     # BK-14: sağda taşan veranda; kopya o kadar sağda
+    limit = W + 150.0 + sag_pay   # ana plan bölgesi (kopya sağda +300)
     hatalar = []
     # İE-11: boşluğu panoda kaydırılmış açıklıklar (kapı mantığı); anahtar yoksa hepsi 0 → eski denetim
     _r3 = lambda r: tuple(round(v, 3) for v in r)
@@ -89,8 +90,9 @@ def dogrula(doc, plan: G.Plan, is_emri: dict) -> dict:
         if max(abs(a - b) for a, b in zip(ext, fp_plan.bounds)) > 1e-6:
             hatalar.append(f"Duvarların kutusu {ext} Plan ayak izi {fp_plan.bounds} ile uyuşmuyor")
         tum = unary_union([fp_plan] + [m.poly for m in plan.mahaller.values() if m.acik]).bounds
-        if max(abs(a - b) for a, b in zip(tum, (0, 0, W, H))) > 1e-6:
-            hatalar.append(f"Dış ölçüler {tum} beklenen (0,0,{W},{H})")
+        bek = unary_union([box(0, 0, W, H)] + [box(*v["rect"]) for v in plan.dis_verandalar]).bounds   # BK-14: taşan veranda dahil
+        if max(abs(a - b) for a, b in zip(tum, bek)) > 1e-6:
+            hatalar.append(f"Dış ölçüler {tum} beklenen ({','.join(f'{v:g}' for v in bek)})" if plan.dis_verandalar else f"Dış ölçüler {tum} beklenen (0,0,{W},{H})")
     elif max(abs(a - b) for a, b in zip(ext, (0, 0, W, H))) > 1e-6:                   # eski kural (anahtarsız İş Emri; bayt bayt)
         hatalar.append(f"Dış ölçüler {ext} beklenen (0,0,{W},{H})")
     # net alanlar (ana plan)

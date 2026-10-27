@@ -31,6 +31,7 @@ from collections import Counter
 from pathlib import Path
 
 from . import geometry as G
+from . import veranda as VR
 
 KOK = Path(__file__).resolve().parents[1]
 ETIKET = {"on": "ÖN (GİRİŞ)", "arka": "ARKA", "sol": "SOL", "sag": "SAĞ"}
@@ -256,6 +257,16 @@ def plan_ciz(ax, plan: G.Plan, yazi: float = 1.0) -> dict:
     # ölçü zincirleri (dış yüzden) ve dış ölçüler
     z = zincirler(plan)
     olc = lambda p1, p2, v, kay, yatay=True: CG.olcu(ax, p1, p2, _f(v), kay, yatay=yatay, fs=fs(5.2))
+    for v in plan.dis_verandalar:                  # BK-14: taşan verandanın eni (dış kenarın 24 cm dışında, yazı verandaya doğru) ve derinliği
+        vx0, vy0, vx1, vy1 = v["rect"]
+        if v["cephe"] in ("on", "arka"):
+            yy, k = (vy0 - 24, 3) if v["cephe"] == "on" else (vy1 + 24, -3)
+            olc((vx0, yy), (vx1, yy), vx1 - vx0, k)
+            olc((vx1 + 24, vy0), (vx1 + 24, vy1), vy1 - vy0, 4, yatay=False)
+        else:
+            xx, k = (vx0 - 24, 4) if v["cephe"] == "sol" else (vx1 + 24, -4)
+            olc((xx, vy0), (xx, vy1), vy1 - vy0, k, yatay=False)
+            olc((vx0, vy1 + 24), (vx1, vy1 + 24), vx1 - vx0, 3)
     for a_, b_ in zip(z["alt"], z["alt"][1:]):
         olc((a_, by0 - 52), (b_, by0 - 52), b_ - a_, 3)
     olc((bx0, by0 - 92), (bx1, by0 - 92), bx1 - bx0, 3)
@@ -316,7 +327,7 @@ def cati_tanimi(plan: G.Plan, ie: dict) -> dict | None:
     s = float(c.get("sacak_cm", 30)); eg = float(c.get("egim_yuzde", 33)) / 100.0; top = float(c.get("topuk_cm", 10))
     H0 = float(ie.get("yapi", {}).get("duvar_yuksekligi_cm", 250))
     zs = H0 + top
-    x0, y0, x1, y1 = sinirlar(plan)
+    x0, y0, x1, y1 = G.govde_kutusu(plan)                     # taşan veranda ana çatının altında değil, kendi çatısı var (BK-14)
     if c.get("makas_ekseni", "x") == "x":
         xm = (x0 + x1) / 2
         dz = [{"ad": "sol", "plan": [[x0 - s, y0 - s], [xm, y0 - s], [xm, y1 + s], [x0 - s, y1 + s]], "yukari": [1, 0], "egim": eg, "sacak_kotu": zs, "sacak": {"x": x0 - s}},
@@ -339,12 +350,23 @@ def cati_plani_ciz(ax, plan: G.Plan, ie: dict, yazi: float = 1.0) -> bool:
         ax.axis("off")
         return False
     dz = tanim["duzlemler"]
-    xs = [p[0] for d in dz for p in d["plan"]]; ys = [p[1] for d in dz for p in d["plan"]]
+    vc = [VR.cati(v, ie) for v in plan.dis_verandalar]                # BK-14: taşan verandaların kendi çatısı, ana çatının altında
+    xs = [p[0] for d in dz + [d for c_ in vc for d in c_["duzlemler"]] for p in d["plan"]]
+    ys = [p[1] for d in dz + [d for c_ in vc for d in c_["duzlemler"]] for p in d["plan"]]
     X0, X1, Y0, Y1 = min(xs), max(xs), min(ys), max(ys)
+    for c_ in vc:
+        for d in c_["duzlemler"]:
+            ax.add_patch(MplPolygon(d["plan"], closed=True, fc="#9aa1ab", ec="#2f343c", lw=0.6, zorder=0.5))
+        if c_["mahya"]:
+            (vx0, vy0), (vx1, vy1) = c_["mahya"]
+            ax.plot([vx0, vx1], [vy0, vy1], color="#1c1f24", lw=1.0, zorder=0.8)
     for d in dz:
         ax.add_patch(MplPolygon(d["plan"], closed=True, fc="#8a919c", ec="#2f343c", lw=0.7, zorder=1))
     hat = list(bina_cizgisi(plan).exterior.coords)
     ax.plot([p[0] for p in hat], [p[1] for p in hat], color="white", lw=0.6, ls=(0, (4, 2.5)), zorder=3)
+    for v in plan.dis_verandalar:
+        vx0, vy0, vx1, vy1 = v["rect"]
+        ax.plot([vx0, vx1, vx1, vx0, vx0], [vy0, vy0, vy1, vy1, vy0], color="white", lw=0.5, ls=(0, (4, 2.5)), zorder=0.9)
     ortak = sorted({tuple(p) for p in dz[0]["plan"]} & {tuple(p) for p in dz[1]["plan"]})       # mahya: iki düzlemin ortak kenarı
     (mx0, my0), (mx1, my1) = ortak[0], ortak[-1]
     ax.plot([mx0, mx1], [my0, my1], color="#1c1f24", lw=1.4, zorder=4)
