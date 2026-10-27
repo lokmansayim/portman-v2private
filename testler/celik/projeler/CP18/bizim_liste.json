@@ -3,7 +3,7 @@
  "kod": "ÇP-18",
  "tanim": {
   "yol": "testler/celik/projeler/CP18/CP18.json",
-  "sha256": "36466ccf15008766c0a6321f4f4e9155f40c88be197f94c47da119ff801af7ef"
+  "sha256": "c2d9dafab99f91694810c5a2e7a5753ddb52c10d12954405c8ed68963c96f187"
  },
  "kural_seti": {
   "yol": "kurallar/liste/kurallar.json",
