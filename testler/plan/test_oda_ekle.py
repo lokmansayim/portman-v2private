@@ -3,7 +3,10 @@ bir kenarından büyütülür (ev en az büyüyen yönde). Öteki oda istekleri 
 kayıtlı işlem listesini oynatır.
 
 Örnekler (`testler/plan/ornekler/`): `rehber_3arti1_90` bayi rehberindeki konuşmanın ilk planı ("Tek kat çelik, 3+1, 90 m² civarı", kırma;
-`plan_uretici.uret`'in birinci adayı, 27.10.2026); `buyume_2arti1_70` banyonun odaya sığmadığı plan (70 m² 2+1 beşik, birinci aday).
+`plan_uretici.uret`'in birinci adayı, 27.10.2026); `buyume_2arti1_70` banyonun odaya sığmadığı plan (70 m² 2+1 beşik, birinci aday);
+`veranda_on_3arti1` ön şeridi veranda olan, elle kurulmuş 3+1 (geometri hakemi, ikinci tur).
+
+Yatak odasının gövdesi (`govde_gercek`) kodun tahmininden değil, motorun net bölgesinden ölçülür (denetçinin kullandığı yapı).
 """
 from __future__ import annotations
 
@@ -35,16 +38,24 @@ def mahal(p, ad):
     return next((m for m in p["mahaller"] if m["ad"] == ad), None)
 
 
-def govde_net(p, ad) -> float:
-    """Yatak odasının kayıtlı dikdörtgenlerinden en büyük net kısa kenar (eksen → net: iç yüz 5,25, dış yüz 10,5 cm; 80'lik karkas)."""
-    W, H = p["dis_olcu"]["en"], p["dis_olcu"]["boy"]
-    pay = lambda a, b, ust: (10.5 if a == 0 else 5.25) + (10.5 if b == ust else 5.25)      # noqa: E731
-    return max(min(r[2] - r[0] - pay(r[0], r[2], W), r[3] - r[1] - pay(r[1], r[3], H)) for r in mahal(p, ad)["dikdortgenler"])
+def govde_gercek(p, ad) -> float:
+    """Mahalin gövdesi motorun net bölgesinden: net çokgenin içine sığan eksene paralel dikdörtgenlerden kısa kenarı en büyük olanın kısa
+    kenarı (köşeler çokgenin köşe çizgilerinde). Plan denetçiden geçmeli (yapı onun tanımından kurulur)."""
+    from itertools import combinations
+    from shapely.geometry import box
+    from beyin.varyant import _kur
+    d = denetle(p)
+    assert d["gecerli"], d["ihlaller"]
+    net = _kur(d["tanim"])["bolgeler"][ad]["net"].buffer(0)
+    koseler = [c for g in getattr(net, "geoms", [net]) for c in g.exterior.coords]
+    xs, ys = sorted({round(c[0], 3) for c in koseler}), sorted({round(c[1], 3) for c in koseler})
+    return max((min(x1 - x0, y1 - y0) for x0, x1 in combinations(xs, 2) for y0, y1 in combinations(ys, 2)
+                if net.buffer(0.01).contains(box(x0, y0, x1, y1))), default=0.0)
 
 
 def test_hedef_ornek_rehberdeki_konusma():
     """Rehber Bölüm 3: "Ebeveyn banyosu ekleyelim" → R2. Yatak Odası 3 (345 × 495) köşesine banyo kesilince odanın gövdesi 3 m'nin altına
-    iner; oda ön cepheden 100 cm büyütülür (ev en az büyüyen yönde, O2 (a)) ve banyo var olan banyonun yanına (ıslak hacimler yan yana)
+    iner; oda ön (giriş) cephesinden 100 cm büyütülür (salon-mutfak da öne uzar) (ev en az büyüyen yönde, O2 (a)) ve banyo var olan banyonun yanına (ıslak hacimler yan yana)
     kesilir; vasistası yan cephede (giriş cephesinde değil), kapısı odadan; odanın penceresi yerinde. Ev büyüdüğü açıkça yazılır (CIO 27.10)."""
     p = ornek("rehber_3arti1_90")
     assert PI._banyo_kes(p, "Yatak Odası 3", "Ebeveyn Banyo") is None             # odaya sığmıyor (gövde kuralı)
@@ -57,7 +68,7 @@ def test_hedef_ornek_rehberdeki_konusma():
     assert mahal(q, "Ebeveyn Banyo") == {"ad": "Ebeveyn Banyo", "islev": "banyo", "dikdortgenler": [[585, 390, 800, 595]]}
     assert mahal(q, "Yatak Odası 3")["dikdortgenler"] == [[455, 0, 800, 390], [455, 390, 585, 595]]
     assert mahal(q, "Banyo")["dikdortgenler"] == [[585, 595, 800, 805]]                  # yeni banyo y = 595'te var olan banyoya bitişik
-    assert govde_net(q, "Yatak Odası 3") >= 300
+    assert govde_gercek(q, "Yatak Odası 3") >= 300
     assert {"arasinda": ["Yatak Odası 3", "Ebeveyn Banyo"]} in q["kapilar"]
     assert {"mahal": "Ebeveyn Banyo", "cephe": "D", "olcu": "60x40", "adet": 1} in q["pencereler"]
     # var olan kapılar ve pencereler aynen; öteki yatak odaları yalnız kayar (ölçüleri aynı)
@@ -79,12 +90,12 @@ def test_bayinin_soyledigi_yatak_odasi():
                          "Yatak Odası 1 16,8 → 16,4 m²", "Yatak Odası 2 16,8 → 20,8 m²", "Ebeveyn Banyo eklendi (4,4 m²)",
                          "pencere eklendi: Ebeveyn Banyo sol 60/40", "kapı eklendi: Ebeveyn Banyo – Yatak Odası 1"]
     assert mahal(s["plan"], "Yatak Odası 3") == mahal(ornek("rehber_3arti1_90"), "Yatak Odası 3")
-    assert govde_net(s["plan"], "Yatak Odası 1") >= 300
+    assert govde_gercek(s["plan"], "Yatak Odası 1") >= 300
 
 
 def test_ikinci_ebeveyn_banyosu_ayri_adla():
-    h = {"islemler": [{"op": "oda_ekle", "islev": "banyo", "alinti": "a"},
-                      {"op": "oda_ekle", "islev": "banyo", "mahal": "Yatak Odası 1", "alinti": "b"}], "uygulanamayan": []}
+    h = {"islemler": [{"op": "oda_ekle", "islev": "banyo", "alinti": "Ebeveyn banyosu ekleyelim"},
+                      {"op": "oda_ekle", "islev": "banyo", "mahal": "Yatak Odası 1", "alinti": "1. yatak odasına da banyo"}], "uygulanamayan": []}
     s = PI.duzenle(ornek("rehber_3arti1_90"), "x", P3, hazir=h)
     assert s["durum"] == "gecerli"
     assert mahal(s["plan"], "Ebeveyn Banyo 2") and {"arasinda": ["Yatak Odası 1", "Ebeveyn Banyo 2"]} in s["plan"]["kapilar"]
@@ -102,7 +113,7 @@ def test_sigmayan_odada_ev_en_az_buyuyen_yonde_buyur():
     assert s["fark"] == ["dış ölçü 700×1000 → 700×1200 cm", "ebeveyn banyosu için ev 200 cm büyüdü (boy 1000 → 1200 cm)",
                          "Yatak Odası 1 11,9 → 14,5 m²", "Yatak Odası 2 11,9 → 18,9 m²", "Ebeveyn Banyo eklendi (4,4 m²)",
                          "pencere eklendi: Ebeveyn Banyo sol 60/40", "kapı eklendi: Ebeveyn Banyo – Yatak Odası 1"]
-    assert denetle(s["plan"], {"oda_programi": "2+1"})["gecerli"] and govde_net(s["plan"], "Yatak Odası 1") >= 300
+    assert denetle(s["plan"], {"oda_programi": "2+1"})["gecerli"] and govde_gercek(s["plan"], "Yatak Odası 1") >= 300
     # en az büyüme: daha küçük bir büyümeyle (her yön, 100–250 cm) denetçiden geçen yerleşim yok
     brut = lambda x: x["dis_olcu"]["en"] * x["dis_olcu"]["boy"]       # noqa: E731
     secilen = brut(s["plan"]) - brut(p)
@@ -120,7 +131,7 @@ def test_l_odanin_govdesi_dar_kenar_kuralina_uyar():
     for ad in ("Yatak Odası 1", "Yatak Odası 3"):
         g, _ = PI._oda_kenari(p, ad, "G" if ad == "Yatak Odası 3" else "K", 100)
         q = PI._banyo_kes(g, ad, "Ebeveyn Banyo")
-        assert q is not None and govde_net(q, ad) >= 300, ad
+        assert q is not None and govde_gercek(q, ad) >= 300, ad
 
 
 def test_ortak_banyo_korunur():
@@ -185,7 +196,7 @@ def test_baska_oda_uygulanamaz_plan_aynen(islem, gerekce):
 
 
 def test_oda_ekleme_oteki_islemlerle_birlikte():
-    h = {"islemler": [{"op": "oda_ekle", "islev": "banyo", "alinti": "a"},
+    h = {"islemler": [{"op": "oda_ekle", "islev": "banyo", "alinti": "Ebeveyn banyosu ekleyelim"},
                       {"op": "pencere_ekle", "mahal": "Yatak Odası 1", "cephe": "K", "olcu": "120x120", "alinti": "b"},
                       {"op": "oda_ekle", "islev": "yatak_odasi", "alinti": "bir yatak odası daha"}], "uygulanamayan": []}
     s = PI.duzenle(ornek("rehber_3arti1_90"), "x", P3, hazir=h)
@@ -239,3 +250,74 @@ def test_once_sonra_gorselinde_mahal_yazisi_odaya_sigar(tmp_path, monkeypatch):
     OG.once_sonra(once["tanim"], s["tanim"], tmp_path, "YENI", [], 1, 2, perspektif=False, baslik="r02")
     assert tasan == []
     assert any(b["ad"] == "Ebeveyn Banyo" for b in y1["bolgeler"].values())
+
+
+def test_sonraki_islem_l_odanin_govdesini_daraltamaz():
+    """Geometri hakemi ikinci tur, B1: banyo kesildikten sonra gelen işlem (ön şeridi kısaltan `oda_kucult`) L odanın gövdesini 300'ün
+    altına indiremez; denetçi sınır kutusundan ölçtüğü için görmüyordu. İşlem gerekçesiyle düşer, banyo kalır; sonraki revizyonda da aynı."""
+    kucult = lambda ad: {"op": "oda_kucult", "mahal": ad, "yon": "G", "cm": 100, "alinti": f"{ad} önden 1 m kısalsın"}     # noqa: E731
+    for ad in ("Yatak Odası 3", "Salon - Mutfak"):
+        s = PI.duzenle(ornek("rehber_3arti1_90"), "x", P3, hazir={"islemler": [ekle(islev="banyo")["islemler"][0], kucult(ad)], "uygulanamayan": []})
+        assert s["durum"] == "gecerli" and mahal(s["plan"], "Ebeveyn Banyo") and s["plan"]["dis_olcu"] == {"en": 800, "boy": 1225}
+        [u] = s["uygulanamayan"]
+        assert u == f"{ad} önden 1 m kısalsın: Yatak Odası 3 gövdesi 274 cm, en az 300 cm", u
+        assert govde_gercek(s["plan"], "Yatak Odası 3") >= 300
+    r2 = s["plan"]
+    s = PI.duzenle(r2, "x", P3, hazir={"islemler": [kucult("Yatak Odası 3")], "uygulanamayan": []})
+    assert s["durum"] == "uygulanamadi" and s["plan"] is None and s["uygulanamayan"] == ["Yatak Odası 3 önden 1 m kısalsın: Yatak Odası 3 gövdesi 274 cm, en az 300 cm"]
+    assert PI._dar_govdeler(r2, r2) == [] and PI._govde(r2, "Yatak Odası 3") == govde_gercek(r2, "Yatak Odası 3")
+
+
+@pytest.mark.parametrize("karkas", [80, 140])
+def test_verandaya_bakan_yuz_dis_duvar(karkas):
+    """Geometri hakemi ikinci tur, B2: verandaya bakan yüz dış duvardır (net payı 80'likte 10,5, 140'lıkta 16,5 cm); iç sayılınca gövde
+    5–11 cm fazla çıkıyor, net 293–299 cm'lik L oda geçiyordu. Kodun gövde ölçüsü motorun net bölgesiyle aynı."""
+    p = ornek("veranda_on_3arti1")
+    if karkas == 140:
+        p["dis_karkas"] = 140
+    s = PI.duzenle(p, "x", P3, hazir=ekle(islev="banyo", mahal="Yatak Odası 1"))
+    assert s["durum"] == "gecerli" and mahal(s["plan"], "Ebeveyn Banyo")
+    g = govde_gercek(s["plan"], "Yatak Odası 1")
+    assert g >= 300 and PI._govde(s["plan"], "Yatak Odası 1") == pytest.approx(g)
+    assert mahal(s["plan"], "Veranda") == mahal(p, "Veranda")
+
+
+def test_buyume_satiri_son_plana_gore():
+    """Geometri hakemi ikinci tur, B3: "ev büyüdü" satırı son plandaki dış ölçüye göre yazılır. Sonraki işlem büyümeyi geri alırsa (arka
+    odalar 1 m kısalır, ev yine 800 × 1125) bayiye "ev büyüdü" gitmez."""
+    h = {"islemler": [ekle(islev="banyo")["islemler"][0],
+                      {"op": "oda_kucult", "mahal": "Yatak Odası 1", "yon": "K", "cm": 100, "alinti": "arka odalar 1 m kısalsın"}], "uygulanamayan": []}
+    s = PI.duzenle(ornek("rehber_3arti1_90"), "x", P3, hazir=h)
+    assert s["durum"] == "gecerli" and s["plan"]["dis_olcu"] == {"en": 800, "boy": 1125} and mahal(s["plan"], "Ebeveyn Banyo")
+    assert not any(f.startswith("dış ölçü") or "büyüdü" in f for f in s["fark"])
+    assert "Ebeveyn Banyo eklendi (4,4 m²)" in s["fark"] and "Yatak Odası 1 16,8 → 12,8 m²" in s["fark"]
+    e, y = {"dis_olcu": {"en": 800, "boy": 1125}, "mahaller": []}, {"dis_olcu": {"en": 800, "boy": 1175}, "mahaller": []}
+    assert PI._duzenlenen_odalar(e, y, [], [("boy", 1125, 1225)]) == []                       # 100 büyüdü, 50 geri alındı: satır yok
+    assert PI._duzenlenen_odalar(e, y, [], [("boy", 1125, 1175)]) == ["ebeveyn banyosu için ev 50 cm büyüdü (boy 1125 → 1175 cm)"]
+
+
+@pytest.mark.parametrize("alinti", ["Bir banyo daha ekleyelim", "İkinci banyo olsun"])
+def test_yeri_soylenmemis_banyo_ebeveyn_sanilmaz(alinti):
+    """Geometri hakemi ikinci tur: yeri söylenmemiş "bir banyo daha" ortak ikinci banyo olabilir; bayinin sözünde ebeveyn ya da yatak odası
+    geçmiyorsa kod ebeveyn banyosu eklemez, gerekçesiyle "uygulanamadı" (plan aynen geçerli)."""
+    s = PI.duzenle(ornek("rehber_3arti1_90"), "x", P3, hazir=ekle(islev="banyo", alinti=alinti))
+    assert s["durum"] == "uygulanamadi" and s["plan"] is None
+    assert s["uygulanamayan"] == [f"{alinti}: banyonun hangi odadan açılacağı belli değil (yalnız yatak odasının içinden ebeveyn banyosu eklenebiliyor)"]
+
+
+@pytest.mark.parametrize("alinti", ["Ebeveyn banyosu olsun", "Yatak odasına banyo", "Odanın içine banyo", "Master banyo"])
+def test_yatak_odasi_banyosu_sozleri(alinti):
+    s = PI.duzenle(ornek("veranda_on_3arti1"), "x", P3, hazir=ekle(islev="banyo", alinti=alinti))
+    assert s["durum"] == "gecerli" and {"arasinda": ["Yatak Odası 1", "Ebeveyn Banyo"]} in s["plan"]["kapilar"]
+
+
+def test_kurallara_uymayan_ara_planda_arama_yapilmaz(monkeypatch):
+    """Başlangıç planı kurallara uymuyorsa (aynı mesajdaki önceki işlemin ara hâli) hiçbir aday uymaz: arama yapılmaz, tek denetimle
+    gerekçeli döner (geometri hakemi ikinci tur: 140'lık duvarla kuralı bozulmuş planda arama bir dakikayı buluyordu)."""
+    p = ornek("rehber_3arti1_90")
+    p["pencereler"] = [x for x in p["pencereler"] if x["mahal"] != "Banyo"]          # banyonun zorunlu penceresi yok
+    sayac = []
+    gercek = PI.denetle
+    monkeypatch.setattr(PI, "denetle", lambda *a, **k: sayac.append(1) or gercek(*a, **k))
+    q, olmayan = PI.uygula(p, ekle(islev="banyo")["islemler"])
+    assert q == p and olmayan == ["Ebeveyn banyosu ekleyelim: planın bu hâli kurallara uymadığı için banyo eklenemedi"] and len(sayac) == 1

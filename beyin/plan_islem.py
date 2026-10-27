@@ -290,11 +290,55 @@ KAPI_DUVARI_CM = 100                    # yatak odasının var olan kapısı iç
 PENCERE_PAYI_CM = 35                    # cephe koşusundan pencereye kalan (köşe ve duvar payları; denetçide 130 cm koşuya 97 cm sığar)
 BUYUME = tuple((yon, cm) for yon in "GKBD" for cm in (100, 150, 200, 250))
 EN_COK_DENETIM = 12                     # bir yerleşimde denetçiye giden en çok aday (denetim ~0,15 sn)
+EBEVEYN_SOZU = ("ebeveyn", "yatak", "oda", "master")  # oda söylenmediyse bayinin sözünde yatak odası banyosu geçmeli ("bir banyo daha"
+                                                     # ortak ikinci banyo olabilir; geometri hakemi 27.10 ikinci tur)
 EBEVEYN_ADI = "Ebeveyn Banyo"           # "Ebeveyn Banyosu" ~2 m'lik banyoda plan görselinin sabit yazısına sığmıyor, duvarı aşıyordu
 
 
 def _alan(r: list) -> int:
     return (r[2] - r[0]) * (r[3] - r[1])
+
+
+def _netci(p: dict, ad: str):
+    """`ad` mahalinin içindeki eksenden bir dikdörtgenin net eni ve boyu: her yüzün payı o yüzün ötesine göre — mahalin kendisi 0, başka iç
+    mahal 5,25, dışarısı ya da veranda dış duvar yüzü (karkas/10 + 2,5: 80'likte 10,5, 140'lıkta 16,5); karışık yüzde büyüğü. `ayri`: mahalin
+    içinden ayrılacak (banyo) kutu, ona bakan yüz iç duvardır; `oda=False`: dikdörtgen mahalden ayrı bir oda (banyo), mahale bakan yüzü de iç
+    duvar. Önceki tahmin yalnız 0, en ve boy çizgisini dış sayıyordu; verandaya bakan yüz iç sayılınca gövde 5–11 cm fazla çıkıyordu
+    (geometri hakemi 27.10 ikinci tur, B2)."""
+    from shapely.geometry import box
+    from shapely.ops import unary_union
+    dis_pay = (p.get("dis_karkas") or 80) / 10 + 2 * 1.25
+    kendi = unary_union([box(*r) for x in p["mahaller"] if x["ad"] == ad for r in x["dikdortgenler"]])
+    ic = unary_union([box(*r) for x in p["mahaller"] if x["ad"] != ad and x["islev"] != "veranda" for r in x["dikdortgenler"]])
+
+    def pay(s, ayri, oda: bool) -> float:
+        a, k, i = s.area, s.intersection(kendi).area, s.intersection(ic).area
+        if ayri is not None:
+            j = s.intersection(ayri).area
+            k, i = k - j, i + j
+        if not oda:
+            k, i = 0.0, i + k
+        return max(0.0, IC_PAY if i > 0.01 else 0.0, dis_pay if a - k - i > 0.01 else 0.0)
+
+    def net(r, ayri=None, oda: bool = True) -> tuple[float, float]:
+        x0, y0, x1, y1 = r
+        bb = box(*ayri) if ayri is not None else None
+        return (x1 - x0 - pay(box(x0 - 1, y0, x0, y1), bb, oda) - pay(box(x1, y0, x1 + 1, y1), bb, oda),
+                y1 - y0 - pay(box(x0, y0 - 1, x1, y0), bb, oda) - pay(box(x0, y1, x1, y1 + 1), bb, oda))
+    return net
+
+
+def _govde(p: dict, ad: str) -> float:
+    """Mahalin gövdesi: içine sığan eksenden dikdörtgenlerin (köşeler mahalin kendi çizgilerinde) en büyük net dar kenarı. Denetçi dar kenarı
+    net bölgenin sınır kutusundan ölçer; L odada bu, kesmeden önceki ölçüdür."""
+    from itertools import combinations
+    from shapely.geometry import box
+    from shapely.ops import unary_union
+    rs = next(x for x in p["mahaller"] if x["ad"] == ad)["dikdortgenler"]
+    oda, net = unary_union([box(*r) for r in rs]), _netci(p, ad)
+    xs, ys = sorted({r[0] for r in rs} | {r[2] for r in rs}), sorted({r[1] for r in rs} | {r[3] for r in rs})
+    return max((min(net([x0, y0, x1, y1])) for x0, x1 in combinations(xs, 2) for y0, y1 in combinations(ys, 2)
+                if box(x0, y0, x1, y1).difference(oda).area <= 0.01), default=0.0)
 
 
 def _banyo_kes(p: dict, yatak: str, ad: str) -> dict | None:
@@ -307,7 +351,7 @@ def _banyo_kes(p: dict, yatak: str, ad: str) -> dict | None:
     odalarında da gövde ≥ 305 cm)."""
     k = kurallar()["odalar"]
     W, H = p["dis_olcu"]["en"], p["dis_olcu"]["boy"]
-    dis_pay = (p.get("dis_karkas") or 80) / 10 + 2 * 1.25        # dış duvar yüzü: karkas + iki kaplama (plan_derle; 140'lık içe kalınlaşır)
+    net = _netci(p, yatak)
     cizgi = [{r[e] for x in p["mahaller"] for r in x["dikdortgenler"]} | {r[e + 2] for x in p["mahaller"] for r in x["dikdortgenler"]}
              | {0, (W, H)[e]} for e in (0, 1)]
     giris = {kp.get("cephe") for kp in p["kapilar"] if "dis" in kp["arasinda"] and kp.get("cephe")}
@@ -316,7 +360,6 @@ def _banyo_kes(p: dict, yatak: str, ad: str) -> dict | None:
     i = max(range(len(m["dikdortgenler"])), key=lambda j: _alan(m["dikdortgenler"][j]))
     x0, y0, x1, y1 = m["dikdortgenler"][i]
     toplam = sum(_alan(r) for r in m["dikdortgenler"])
-    pay = lambda a, b, ust: (dis_pay if a == 0 else IC_PAY) + (dis_pay if b == ust else IC_PAY)      # noqa: E731
     adaylar = []
     for w, h in BANYO_OLCULERI:
         if x1 - x0 - w < KOL_CM or y1 - y0 - h < KOL_CM or toplam - w * h < k["yatak_odasi"]["en_az_m2"] * 1e4:
@@ -327,13 +370,12 @@ def _banyo_kes(p: dict, yatak: str, ad: str) -> dict | None:
             cephe = {c for c, var in zip("BDGK", (b[0] == 0, b[2] == W, b[1] == 0, b[3] == H)) if var}
             if not cephe:                                                         # vasistas dış cepheden
                 continue
-            nw, nh = w - pay(b[0], b[2], W), h - pay(b[1], b[3], H)
+            nw, nh = net(b, oda=False)
             if nw * nh < k["banyo"]["en_az_m2"] * 1e4 or min(nw, nh) < k["banyo"]["dar_kenar_cm"]:
                 continue
             serit = [x0, y0 + h, x1, y1] if ky == 0 else [x0, y0, x1, y1 - h]      # L'nin iki iç dikdörtgeni: banyo satırları dışı,
             kolon = [x0 + w, y0, x1, y1] if kx == 0 else [x0, y0, x1 - w, y1]      # banyo sütunları dışı
-            govde = max(min(r[2] - r[0] - pay(r[0], r[2], W), r[3] - r[1] - pay(r[1], r[3], H)) for r in (serit, kolon))
-            if govde < k["yatak_odasi"]["dar_kenar_cm"]:
+            if max(min(net(r, ayri=b)) for r in (serit, kolon)) < k["yatak_odasi"]["dar_kenar_cm"]:
                 continue
             if any(0 < abs(a - c) <= KISA_PARCA_CM for e in (0, 1) for a in (b[e], b[e + 2]) for c in cizgi[e]):
                 continue
@@ -357,7 +399,7 @@ def _banyo_kes(p: dict, yatak: str, ad: str) -> dict | None:
                for pc in p["pencereler"] if pc["mahal"] == yatak):
             continue
         _yeniden_ac(q)
-        if not {yatak, ad} <= {pc["mahal"] for pc in q["pencereler"]}:
+        if not {yatak, ad} <= {pc["mahal"] for pc in q["pencereler"]} or _govde(q, yatak) < k["yatak_odasi"]["dar_kenar_cm"]:
             continue
         n += 1
         if denetle(q)["gecerli"]:
@@ -393,11 +435,29 @@ def _ortak_banyo(p: dict) -> bool:
     return False
 
 
+def _dar_govdeler(q: dict, onceki: dict) -> list[str]:
+    """Birden çok dikdörtgenli (L) yatak odasının gövdesi dar kenar kuralının altındaysa ve revizyonla daraldıysa (ya da oda yeniyse) ihlal.
+    Denetçi dar kenarı sınır kutusundan ölçer; banyo kesildikten sonra gelen işlem (ör. ön şeridi kısaltan `oda_kucult`) L odanın gövdesini
+    daraltabiliyordu (geometri hakemi 27.10 ikinci tur, B1). Tek dikdörtgenli odayı denetçi doğru ölçer."""
+    sinir = kurallar()["odalar"]["yatak_odasi"]["dar_kenar_cm"]
+    out = []
+    for m in q["mahaller"]:
+        if m["islev"] != "yatak_odasi" or len(m["dikdortgenler"]) < 2:
+            continue
+        g = _govde(q, m["ad"])
+        o = next((x for x in onceki["mahaller"] if x["ad"] == m["ad"] and x["islev"] == "yatak_odasi"), None)
+        if g + 1e-6 < sinir and (o is None or _govde(onceki, m["ad"]) > g + 1e-6):
+            out.append(f"{m['ad']} gövdesi {g:.0f} cm, en az {sinir} cm (net; L odanın en geniş iç dikdörtgeni, yatak odası kuralı)")
+    return out
+
+
 def _denetle(q: dict, talep: dict, kod: str, onceki: dict) -> dict:
-    """Revizyonun denetimi: denetçi (oda programıyla) ve ortak banyonun korunması."""
+    """Revizyonun denetimi: denetçi (oda programıyla), ortak banyonun korunması ve L yatak odasının gövdesi."""
     d = denetle(q, {"oda_programi": talep.get("oda_programi")}, kod=kod)
-    if d["gecerli"] and _ortak_banyo(onceki) and not _ortak_banyo(q):
-        d = {**d, "gecerli": False, "tanim": None, "ihlaller": [ORTAK_BANYO]}
+    if d["gecerli"]:
+        ihlal = ([ORTAK_BANYO] if _ortak_banyo(onceki) and not _ortak_banyo(q) else []) + _dar_govdeler(q, onceki)
+        if ihlal:
+            d = {**d, "gecerli": False, "tanim": None, "ihlaller": ihlal}
     return d
 
 
@@ -415,27 +475,27 @@ def _ebeveyn_banyosu(p: dict, o: dict) -> tuple[dict | None, str | None]:
         if m["islev"] != "yatak_odasi":
             return None, f"banyo yalnız bir yatak odasının içinden eklenebiliyor ({m['ad']} yatak odası değil)"
     else:
+        if not any(s in (o.get("alinti") or "").casefold() for s in EBEVEYN_SOZU):
+            return None, "banyonun hangi odadan açılacağı belli değil (yalnız yatak odasının içinden ebeveyn banyosu eklenebiliyor)"
         yataklar = [x for x in p["mahaller"] if x["islev"] == "yatak_odasi"]
         if not yataklar:
             return None, "planda yatak odası yok"
         m = max(yataklar, key=lambda x: sum(_alan(r) for r in x["dikdortgenler"]))
     adlar = {x["ad"] for x in p["mahaller"]}
     ad = next(a for a in [EBEVEYN_ADI] + [f"{EBEVEYN_ADI} {j}" for j in range(2, 10)] if a not in adlar)
+    if not denetle(p)["gecerli"]:             # başlangıç kurallara uymuyorsa hiçbir aday uymaz; arama boşuna bir dakikayı buluyordu (aynı mesajdaki
+        return None, "planın bu hâli kurallara uymadığı için banyo eklenemedi"     # önceki işlemin ara hâli; geometri hakemi ikinci tur, süre)
     q = _banyo_kes(p, m["ad"], ad)
     if q is not None:
         return q, None
     brut = lambda x: x["dis_olcu"]["en"] * x["dis_olcu"]["boy"]       # noqa: E731
-    adaylar = []
-    for sira, (yon, cm) in enumerate(BUYUME):
-        if adaylar and adaylar[-1][2] == yon:                           # bu yönde en küçük büyüme bulundu
-            continue
-        g, _ = _oda_kenari(p, m["ad"], yon, cm)
-        q = _banyo_kes(g, m["ad"], ad) if g is not None else None
+    buyutulmus = [(brut(g) - brut(p), sira, g) for sira, (yon, cm) in enumerate(BUYUME) for g in [_oda_kenari(p, m["ad"], yon, cm)[0]]
+                  if g is not None]
+    for _, _, g in sorted(buyutulmus, key=lambda t: t[:2]):            # evi en az büyüten (eşitlikte G, K, B, D ve küçük cm) ilk geçen
+        q = _banyo_kes(g, m["ad"], ad)
         if q is not None:
-            adaylar.append((brut(q) - brut(p), sira, yon, q))
-    if not adaylar:
-        return None, f"{m['ad']} içine sığmıyor; odayı büyüterek de yerleştiremedim"
-    return min(adaylar, key=lambda t: t[:2])[3], None
+            return q, None
+    return None, f"{m['ad']} içine sığmıyor; odayı büyüterek de yerleştiremedim"
 
 
 IHLAL_TURU = re.compile(r"^(dış kapı|kapı|pencere|çatı|geometri):\s*")       # yalnız tek ad; "kapı yayları çakışıyor:" cümledir, kalır
@@ -506,7 +566,12 @@ def _duzenlenen_odalar(eski: dict, yeni: dict, fark: list[str], buyumeler: list 
     (büyütmede duvarı kayıp L olan yatak odası; geometri hakemi 27.10, bulgu 3); bu satır mahal satırlarının ardına girer."""
     from beyin.plan_uretici import _tr
     i = next((j + 1 for j, f in enumerate(fark) if f.startswith("dış ölçü ")), 0)
-    fark = fark[:i] + [f"ebeveyn banyosu için ev {c - a} cm büyüdü ({e} {a} → {c} cm)" for e, a, c in filter(None, buyumeler or [])] + fark[i:]
+    kalan, satir = {e: yeni["dis_olcu"][e] - eski["dis_olcu"][e] for e in ("en", "boy")}, []
+    for e, a, c in filter(None, buyumeler or []):
+        if 0 < c - a <= kalan[e]:                       # büyüme son planda duruyorsa (sonraki işlem geri almadıysa; hakem ikinci tur B3)
+            satir.append(f"ebeveyn banyosu için ev {c - a} cm büyüdü ({e} {a} → {c} cm)")
+            kalan[e] -= c - a
+    fark = fark[:i] + satir + fark[i:]
     em = {m["ad"]: m for m in eski["mahaller"]}
     olcu = lambda m: sorted((r[2] - r[0], r[3] - r[1]) for r in m["dikdortgenler"])        # noqa: E731
     ek = [f"{m['ad']} yeniden düzenlendi ({_tr(sum(_alan(r) for r in m['dikdortgenler']) / 1e4)} m²)" for m in yeni["mahaller"]
