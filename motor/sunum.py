@@ -389,111 +389,6 @@ def cati_plani_ciz(ax, plan: G.Plan, ie: dict, yazi: float = 1.0) -> bool:
     return True
 
 
-# ─────────────────────────────────────────────────────────────────── görünüşler ──
-GORUNUS_BASLIK = {"on": "ÖN GÖRÜNÜŞ", "sag": "SAĞ YAN GÖRÜNÜŞ", "arka": "ARKA GÖRÜNÜŞ", "sol": "SOL YAN GÖRÜNÜŞ"}
-_DIS_NORMAL = {"on": "-y", "arka": "+y", "sol": "-x", "sag": "+x"}
-CATI_RENGI, CATI_KENAR = "#8a919c", "#2f343c"
-
-
-def gorunus_ciz(ax, plan: G.Plan, ie: dict, taraf: str, yazi: float = 1.0) -> None:
-    """İki boyutlu görünüş (BK-14; Lokman 27 Ekim: "görünüşler nerede"): dış duvarlar, o cepheye bakan pencere, kapı ve pano ekleri, ana çatı
-    (bakış mahyaya paralelse kalkan, dikse saçak bandı), dikmeler ve veranda kirişleri, taşan verandanın çatısı (`veranda.gorunus_parcalari`).
-    Uzaktan yakına boyanır, gizli çizgi yoktur. Ölçüler cm: duvar yüksekliği ve mahyanın duvar üstünden yüksekliği."""
-    from matplotlib.patches import Polygon as MplPolygon
-    from .genel import ciz_genel as CG
-    fs = lambda pt: pt * yazi
-    H0 = VR.duvar_ustu(ie); c = ie.get("cati") or {}
-    s = float(c.get("sacak_cm", 30)); eg = float(c.get("egim_yuzde", 33)) / 100.0; zs = H0 + float(c.get("topuk_cm", 10))
-    izdusum = VR.izdusum(taraf)
-    ciz = []                                                            # (derinlik, sıra, fonksiyon)
-    yama = lambda pts, **kw: (lambda: ax.add_patch(MplPolygon(pts, closed=True, **kw)))
-    # dış duvarlar ve köşeler
-    for d in plan.duvarlar:
-        if d.tur != "dis":
-            continue
-        bakan = G.disari_yon(plan, d) == _DIS_NORMAL[taraf]
-        for p in d.panolar:
-            u0, u1, dd = izdusum(*p.rect())
-            ciz.append((dd, 0, yama([(u0, 0), (u1, 0), (u1, H0), (u0, H0)], fc="white", ec="#3a3a3a", lw=0.5, zorder=1)))
-            if not bakan:
-                continue
-            a = p.acilim
-            if a is not None:
-                g = p.gap()
-                g0, g1, _ = izdusum(*g)
-                if a.tur == "pencere":
-                    k = G.pencere_kurali(a.olcu)
-                    ciz.append((dd, 1, yama([(g0, k.esik), (g1, k.esik), (g1, k.esik + k.boy), (g0, k.esik + k.boy)], fc=CAM, ec=CERCEVE, lw=0.6)))
-                elif a.tur == "dis_kapi":
-                    ciz.append((dd, 1, yama([(g0, 0), (g1, 0), (g1, G.PENCERE_UST_KOTU_CM), (g0, G.PENCERE_UST_KOTU_CM)], fc=KAPI_RENGI, ec="#4a2a18", lw=0.6)))
-    for k in plan.koseler:
-        if k.tur != "dis":
-            continue
-        u0, u1, dd = izdusum(*k.rect)
-        ciz.append((dd, 0, yama([(u0, 0), (u1, 0), (u1, H0), (u0, H0)], fc="#e6e6e6", ec="#3a3a3a", lw=0.5)))
-    # ana çatı (gövde kutusu üstünde; taşan veranda hariç)
-    gx0, gy0, gx1, gy1 = G.govde_kutusu(plan)
-    mahya_y = VR.ana_mahya_yonu(ie) == "y"
-    kalkan = (taraf in ("on", "arka")) == mahya_y
-    a0, a1 = (gx0, gx1) if mahya_y else (gy0, gy1)                    # makasın geçtiği açıklık
-    besik = c.get("tip", "besik") == "besik"                           # Motor'un çatısı beşik (IFC, çatı planı); başka tip çizilmez
-    zm = zs + ((a1 - a0) / 2 + s) * eg if besik else zs
-    U0, U1, dmin = izdusum(gx0 - s, gy0 - s, gx1 + s, gy1 + s)
-    if not besik:
-        ciz.append((dmin, 2, lambda: ax.text((U0 + U1) / 2, zs + 12, f"çatı ({c.get('tip')}) görünüşte çizilmedi", ha="center", va="bottom",
-                                             fontsize=fs(5.2), color="#8a8a8a", style="italic")))
-    elif kalkan:
-        um = (U0 + U1) / 2
-        w0, w1, _ = izdusum(gx0, gy0, gx1, gy1)
-        zw = lambda u: zs + (min(u - U0, U1 - u)) * eg
-        ciz.append((dmin + s, 0.5, yama([(w0, H0), (w1, H0), (w1, zw(w1) - 6), (um, zm - 6), (w0, zw(w0) - 6)], fc="white", ec="#3a3a3a", lw=0.5)))
-        ciz.append((dmin, 2, lambda: ax.plot([U0, um, U1], [zs, zm, zs], color=CATI_KENAR, lw=2.0, solid_capstyle="butt", zorder=3)))
-    else:
-        ciz.append((dmin, 2, yama([(U0, zs), (U1, zs), (U1, zm), (U0, zm)], fc=CATI_RENGI, ec=CATI_KENAR, lw=0.6)))
-    # gövdenin dikmeleri ve açık kenarları (ızgara içindeki veranda; PK-01)
-    kolon = {r for v in plan.dis_verandalar for r in v["kolonlar"]}
-    dis_kenar = {e for v in plan.dis_verandalar for e in v["kenarlar"]}
-    for r in plan.dikmeler:
-        if r in kolon:
-            continue
-        u0, u1, dd = izdusum(*r)
-        ciz.append((dd, 1, yama([(u0, 0), (u1, 0), (u1, H0), (u0, H0)], fc="#3a3a3a", ec="none")))
-    for e in plan.acik_kenarlar:
-        if tuple(e[:4]) in dis_kenar:
-            continue
-        u0, u1, dd = izdusum(*e[:4])
-        if u1 - u0 > 1:
-            ciz.append((dd, 1, yama([(u0, H0 - 10), (u1, H0 - 10), (u1, H0), (u0, H0)], fc="#3a3a3a", ec="none")))
-    # taşan verandalar
-    parcalar = VR.gorunus_parcalari(plan, ie, taraf)
-    for p in parcalar:
-        if p["tur"] in ("kolon", "kiris"):
-            ciz.append((p["derinlik"], 1, yama(p["u"], fc="#3a3a3a", ec="none")))
-        elif p["tur"] == "alin":
-            ciz.append((p["derinlik"], 0.5, yama(p["u"], fc="white", ec="#3a3a3a", lw=0.5)))
-        elif p.get("kalkan"):
-            ciz.append((p["derinlik"], 2, (lambda q: lambda: ax.plot([a for a, _ in q], [b for _, b in q], color=CATI_KENAR, lw=1.6,
-                                                                       solid_capstyle="butt", zorder=3))(p["u"])))
-        else:
-            ciz.append((p["derinlik"], 2, yama(p["u"], fc=CATI_RENGI, ec=CATI_KENAR, lw=0.6)))
-    for i, (_, _, f) in enumerate(sorted(ciz, key=lambda t: (-t[0], t[1]))):  # uzaktan yakına; aynı derinlikte duvar, açıklık, çatı
-        r = f()
-        for a in (r if isinstance(r, list) else [r]):
-            a.set_zorder(1 + i * 1e-3)
-    tum_u = [U0, U1] + [u for p in parcalar for u, _ in p["u"]]
-    z_ust = max([zm] + [z for p in parcalar for _, z in p["u"]])
-    ul, ur = min(tum_u), max(tum_u)
-    ax.plot([ul - 20, ur + 20], [0, 0], color="#222", lw=1.4, zorder=4)
-    CG.olcu(ax, (ul - 34, 0), (ul - 34, H0), _f(H0), -4, yatay=False, fs=fs(5.2))
-    if besik:
-        CG.olcu(ax, (ul - 34, H0), (ul - 34, zm), _f(zm - H0), -4, yatay=False, fs=fs(5.2))
-    ax.set_xlim(ul - 90, ur + 25)
-    ax.set_ylim(-25, z_ust + 25)
-    ax.set_aspect("equal")
-    ax.set_anchor("N")
-    ax.axis("off")
-
-
 # ─────────────────────────────────────────────────────────────────── perspektif ──
 def perspektif_uret(ie: dict, hedef: Path, govde: str) -> dict:
     """Motor'un IFC'si (pano ekleri dahil) → iki perspektif PNG. Ayrı süreçte: VTK çökmesi ya da zaman aşımı sayfayı düşürmez. Ekran yoksa
@@ -572,10 +467,6 @@ def bilesik_ciz(fig, kutu: tuple, plan: G.Plan, ie: dict, persp: dict, say: dict
                                                                                          ec="#bbbbbb", lw=0.6, ls=(0, (3, 2))))
             ax.text(0.5, 0.5, "perspektif çizilemedi", ha="center", va="center", fontsize=7 * yazi, color="#8a8a8a", transform=ax.transAxes)
 
-    def cizim(a0, b0, a1, b1, taraf):
-        yazi_pt((a0 + a1) / 2, b0 + 5, GORUNUS_BASLIK[taraf], 7.0, ha="center", va="center", weight="bold", color="#222")
-        gorunus_ciz(eksen(a0, b0 + 12, a1, b1), plan, ie, taraf, yazi=yazi)
-
     not_satirlari = ["Pano dizilimi (125,5 cm aks):", f"   {say['pano_dis']} dış + {say['pano_ic']} iç pano", "H birleştirme profili:",
                      f"   {say['h_pano_eki']} pano eki + {say['h_uclu']} üçlü", f"Köşe {say['kose']}" + (f" · dikme {say['dikme']}" if say["dikme"] else ""),
                      "Açık renkli çentik: H profili", "   (dışarıdan 5 cm, eke ortalı)", "Ölçüler cm, dış yüzden;", "   iç duvarda aks.",
@@ -591,27 +482,22 @@ def bilesik_ciz(fig, kutu: tuple, plan: G.Plan, ie: dict, persp: dict, say: dict
         cati_plani_ciz(eksen(x0, y0 + 12, x0 + w_cati, cati_alt), plan, ie, yazi=yazi)
         for i, s in enumerate(not_satirlari):
             yazi_pt(x0 + 2, cati_alt + 12 + i * 9.6, s, 5.6, ha="left", va="center", color="#333")
-        # sağ sütun: ön ve sağ yan görünüş (BK-14), altında iki perspektif
-        h_g, h_p = 0.2 * (H - 3 * gap), 0.3 * (H - 3 * gap)
-        b0 = y0
-        for taraf in ("on", "sag"):
-            cizim(x1 - w_p, b0, x1, b0 + h_g, taraf); b0 += h_g + gap
-        for ad, baslik in GORUNUMLER:
-            resim(x1 - w_p, b0, x1, b0 + h_p, ad, baslik); b0 += h_p + gap
+        h_slot = (H - gap) / 2
+        for i, (ad, baslik) in enumerate(GORUNUMLER):
+            b0 = y0 + i * (h_slot + gap)
+            resim(x1 - w_p, b0, x1, b0 + h_slot, ad, baslik)
     else:                                                              # yatay plan
         h_plan = 0.6 * H
         ax_plan = eksen(x0, y0, x1 - 0.2 * W, y0 + h_plan)
         for i, s in enumerate(not_satirlari):
             yazi_pt(x1 - 0.2 * W + 6, y0 + 20 + i * 9.6, s, 5.6, ha="left", va="center", color="#333")
         b0 = y0 + h_plan + gap
-        w_cati = 0.18 * W; w_p = (W - w_cati - 4 * gap) / 4
+        w_cati = 0.22 * W; w_p = (W - w_cati - 2 * gap) / 2
         yazi_pt(x0 + w_cati / 2, b0 + 5, "ÇATI PLANI", 7.0, ha="center", va="center", weight="bold", color="#222")
         cati_plani_ciz(eksen(x0, b0 + 12, x0 + w_cati, y1), plan, ie, yazi=yazi)
-        a0 = x0 + w_cati + gap                                          # ön ve sağ yan görünüş (BK-14), sonra iki perspektif
-        for taraf in ("on", "sag"):
-            cizim(a0, b0, a0 + w_p, y1, taraf); a0 += w_p + gap
-        for ad, baslik in GORUNUMLER:
-            resim(a0, b0, a0 + w_p, y1, ad, baslik); a0 += w_p + gap
+        for i, (ad, baslik) in enumerate(GORUNUMLER):
+            a0 = x0 + w_cati + gap + i * (w_p + gap)
+            resim(a0, b0, a0 + w_p, y1, ad, baslik)
     return plan_ciz(ax_plan, plan, yazi=yazi)
 
 

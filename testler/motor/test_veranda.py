@@ -2,7 +2,8 @@
 
 Motor önceden yalnız pano ızgarasının içindeki verandayı çiziyordu; gövdenin dışına taşan veranda (TK-01: önde 386 × 181, arkada 261 × 130)
 girdide yer bulamıyordu. Şimdi veranda gövdenin dış yüzüne dışarıdan eklenir: açık mahal, üç açık kenar (kiriş), iki dış köşede dikme ve
-kendi çatısı. Plan, DXF ve doğrulama, bayi paftası (çatı planı, ön ve sağ yan görünüş), IFC ve yükleme listesi aynı geometriden. Liste
+kendi çatısı. Plan, DXF ve doğrulama, bayi paftası (plan ve çatı planı), IFC ve yükleme listesi aynı geometriden; görünüşler canlı
+Örnek Şablon paftasından (`motor/sablon_kopru.py`, `test_sablon_kopru.py`). Liste
 TK-01'in geçici yolundaki listeyle (gövde Motor'dan, verandalar elle; `Teklif_Calisma/TK-01/gecici_r01`) bütün satırlarda aynı adeti verir;
 burada o değerler sabit. `verandalar` yoksa hiçbiri devreye girmez (referans gerilemesi bayt bayt aynı). Bu bir Motor kilididir, paftaya
 uygunluk kanıtı değildir.
@@ -244,7 +245,7 @@ def test_bayi_paftasi_verandali(tmp_path):
     assert o["teslim"] is True
     with pymupdf.open(tmp_path / "TK01_bayi.pdf") as d:
         metin = " ".join(w[4] for w in d[0].get_text("words"))
-    for s in ("ÖN VERANDA", "ARKA VERANDA", "ÖN GÖRÜNÜŞ", "SAĞ YAN GÖRÜNÜŞ", "ÇATI PLANI", "386", "181", "130", "1199"):
+    for s in ("ÖN VERANDA", "ARKA VERANDA", "ÇATI PLANI", "386", "181", "130", "1199"):
         assert s in metin, s
     oz = _oku(tmp_path / "TK01_bayi_ozet.json")
     assert oz["sayimlar"]["dikme"] == 4 and oz["sayimlar"]["oturum_m2"] == pytest.approx(90.12)
