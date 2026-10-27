@@ -1,0 +1,40 @@
+{
+ "id": "K02",
+ "talep": {
+  "niyet": "yeni_talep",
+  "katalog_kodu": "P1234",
+  "yapi_turu": null,
+  "kat_sayisi": null,
+  "oda_programi": null,
+  "alan_m2": null,
+  "dis_olcu": null,
+  "pano": null,
+  "veranda": null,
+  "cati": null,
+  "yukseklik_cm": null,
+  "pencereler": [],
+  "dis_kapi": null,
+  "ic_kapi": null,
+  "varyantlar": [],
+  "bina_ozellikleri": {},
+  "ozel_istekler": [],
+  "musteri": {
+   "ad": "Ahmet Bey",
+   "telefon": null,
+   "sevk_adresi": null
+  },
+  "belirsizlikler": [
+   "Talebin türü (plan, teklif veya çizim) belirtilmemiş",
+   "Modelde herhangi bir değişiklik istenip istenmediği belirtilmemiş"
+  ],
+  "guven": "orta",
+  "ozet": "P1234 katalog modelini istiyorsunuz."
+ },
+ "meta": {
+  "backend": "anthropic",
+  "model": "claude-opus-5-5",
+  "girdi_token": 5368,
+  "cikti_token": 276,
+  "sure_ms": 2929
+ }
+}

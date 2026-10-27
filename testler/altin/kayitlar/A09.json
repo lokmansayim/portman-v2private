@@ -1,0 +1,37 @@
+{
+ "id": "A09",
+ "talep": {
+  "niyet": "yeni_talep",
+  "katalog_kodu": null,
+  "yapi_turu": null,
+  "kat_sayisi": null,
+  "oda_programi": null,
+  "alan_m2": null,
+  "dis_olcu": null,
+  "pano": null,
+  "veranda": null,
+  "cati": null,
+  "yukseklik_cm": null,
+  "pencereler": [],
+  "dis_kapi": null,
+  "ic_kapi": null,
+  "varyantlar": [],
+  "bina_ozellikleri": {},
+  "ozel_istekler": [
+   "K olsun"
+  ],
+  "musteri": null,
+  "belirsizlikler": [
+   "Bayi \"K olsun\" dedi; bu, sorulan 'secenek' sorusuna cevap gibi görünüyor ama \"K\" harfinin hangi seçeneğe denk geldiği mesajdan anlaşılmıyor (örneğin kırma çatı ya da listedeki K şıkkı olabilir)."
+  ],
+  "guven": "dusuk",
+  "ozet": "88 m² 2+1 çelik yapı talebinizde, sorulan seçenek için \"K\" seçeneğini istiyorsunuz."
+ },
+ "meta": {
+  "backend": "anthropic",
+  "model": "claude-opus-5-5",
+  "girdi_token": 5446,
+  "cikti_token": 535,
+  "sure_ms": 6055
+ }
+}
