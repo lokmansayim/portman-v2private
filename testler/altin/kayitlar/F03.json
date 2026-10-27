@@ -1,0 +1,41 @@
+{
+ "id": "F03",
+ "talep": {
+  "niyet": "yeni_talep",
+  "katalog_kodu": null,
+  "yapi_turu": "prefabrik",
+  "kat_sayisi": 1,
+  "oda_programi": "2+1",
+  "alan_m2": null,
+  "dis_olcu": null,
+  "pano": {
+   "nx": 6.0,
+   "ny": 8.0
+  },
+  "veranda": null,
+  "cati": {
+   "tip": "besik",
+   "egim_yuzde": null,
+   "kaplama": null,
+   "renk": null
+  },
+  "yukseklik_cm": null,
+  "pencereler": [],
+  "dis_kapi": null,
+  "ic_kapi": null,
+  "varyantlar": [],
+  "bina_ozellikleri": {},
+  "ozel_istekler": [],
+  "musteri": null,
+  "belirsizlikler": [],
+  "guven": "yuksek",
+  "ozet": "Başka bir müşteri için 6x8 pano, 2+1, tek katlı, beşik çatılı prefabrik ev için plan istiyorsunuz."
+ },
+ "meta": {
+  "backend": "anthropic",
+  "model": "claude-opus-5-5",
+  "girdi_token": 5396,
+  "cikti_token": 416,
+  "sure_ms": 3534
+ }
+}

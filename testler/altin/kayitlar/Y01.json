@@ -1,0 +1,35 @@
+{
+ "id": "Y01",
+ "talep": {
+  "niyet": "soru",
+  "katalog_kodu": null,
+  "yapi_turu": "prefabrik",
+  "kat_sayisi": null,
+  "oda_programi": null,
+  "alan_m2": null,
+  "dis_olcu": null,
+  "pano": null,
+  "veranda": null,
+  "cati": null,
+  "yukseklik_cm": null,
+  "pencereler": [],
+  "dis_kapi": null,
+  "ic_kapi": null,
+  "varyantlar": [],
+  "bina_ozellikleri": {},
+  "ozel_istekler": [],
+  "musteri": null,
+  "belirsizlikler": [
+   "Model, ölçü veya alan belirtilmemiş; fiyat için hangi model/ölçü istendiği bilinmiyor"
+  ],
+  "guven": "orta",
+  "ozet": "Prefabrik ev için fiyat bilgisi istiyorsunuz."
+ },
+ "meta": {
+  "backend": "anthropic",
+  "model": "claude-opus-5-5",
+  "girdi_token": 5361,
+  "cikti_token": 228,
+  "sure_ms": 2249
+ }
+}

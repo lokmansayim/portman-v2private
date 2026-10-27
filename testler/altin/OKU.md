@@ -11,7 +11,7 @@ iş emri `docs/is_emirleri/IE-19.md`. Kabul satırı: her sürüm öncesi kör d
 | `vakalar.json` | açık dilim: 58 yeni vaka (konuşmalar halinde) + harness'in 22 vakasının beklenen okuması |
 | `baz.json` | açık 80 vakanın bugünkü sonucu (gerileme kapısı) |
 | `kor_muhur.json` | kör dilimin mührü (SHA-256, bayt, vaka sayısı, adım dağılımı); dilimin kendisi depoda yok |
-| `kayitlar/` | açık vakaların kayıtlı LLM okumaları (`<id>.json`; ücretli kayıtla gelir; bugün yok) |
+| `kayitlar/` | açık 53 mesajın kayıtlı LLM okuması (`<id>.json`; claude-opus-5-5, 27 Ekim 2026 ücretli kayıt) |
 | `test_altin_set.py` | pytest: biçim, dağılım, gerileme kapısı, harness'le tutarlılık, kör mühür kuralı, ücretli kaydın freni |
 
 Harness'in 22 vakası (`beyin/testler/`) olduğu gibi okunur, kopyalanmaz ve değişmez; `vakalar.json` yalnız onların beklenen okumasını
@@ -44,9 +44,10 @@ rehber esastır (D-27) ve not düşülür. Beklenen değeri Lokman onaylar (onay
 - **Uçtan uca:** kayıtlı okuma → karar; senaryonun bütün mesajlarının kaydı varsa.
 - **Güvenlik sayacı:** soru, yönlendirme ya da cevap beklenirken plan üretilen (İş Emri, seçenek seti ya da yeni plan üretimi) vaka.
 
-Bugün kaydı olan yalnız harness'in 22 vakası (Eylül). Yeni vakaların okuması ücretli kayıtla gelir (pano 22 ve 92; Lokman'ın onayıyla);
-açık vakalarınki `kayitlar/`a (depoya), kör dilimin `<KLASÖR>/kayitlar/`a. Kayıt gelince baz çizgisi yeniden yazılır (okuma sayıları
-artar; kapı bunu ister). Karar katmanı bayinin ham metnini alır (worker ve harness gibi); LLM'e giden metin numarası maskeli.
+Harness'in 22 vakasının kaydı Eylül'den (`beyin/testler/`); yeni vakaların okuması 27 Ekim 2026'da canlı modelle (claude-opus-5-5)
+ücretli kayıtla geldi (pano 22; Lokman'ın onayıyla): açık 53 mesaj `kayitlar/`da (depoda), kör 20 mesaj `<KLASÖR>/kayitlar/`da.
+Baz çizgisi kayıtlarla yeniden yazıldı; pytest de aynı kayıtları okur. Model kıyası (pano 92, Sonnet 5.5) proje klasöründe
+(`Altin_Set/model_kiyas/`), depoya girmez. Yeni vaka eklenince kaydı aynı komutla alınır (var olan kayıt yeniden çağrılmaz). Karar katmanı bayinin ham metnini alır (worker ve harness gibi); LLM'e giden metin numarası maskeli.
 
 ## Komutlar
 

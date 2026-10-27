@@ -36,7 +36,7 @@ def senaryolar():
 
 @pytest.fixture(scope="module")
 def sonuc(senaryolar):
-    kay = A.harness_kayitlari()
+    kay = {**A.harness_kayitlari(), **A.kayit_dizininden(A.KAYITLAR)}      # aracın okuduğu kayıtlar (`kos.main` gibi)
     kk = A.kos(senaryolar, "K")
     return {"kk": kk, "o": A.okuma_olcusu(A.vakalar(senaryolar), kay), "uu": A.kos(senaryolar, "U", kay)}
 
