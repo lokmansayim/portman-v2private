@@ -3,7 +3,7 @@
  "kod": "ÇP-19",
  "tanim": {
   "yol": "testler/celik/projeler/CP19/CP19.json",
-  "sha256": "6b32b814266db3f797d0160cd3b2754f13b40abcbf57be13d305531df9503db0"
+  "sha256": "1a0b4e90e38f776b4162c9c46595c1e606f6718335dbaa2030ff15bbc2e27334"
  },
  "kural_seti": {
   "yol": "kurallar/liste/kurallar.json",
