@@ -355,7 +355,8 @@
    "uzanti": ".pdf",
    "bayt": 245860,
    "sha256": "f676aa3f1dcaad04654bbaeb084fb6dfc74bfcb1e9048fad9d04521567906fe1",
-   "durum": "kor"
+   "durum": "kor",
+   "not": "çizim için pafta görüldü (İE-17, 27 Ekim 2026: montaj paftası çatı ve görünüş çizimine kaynak); liste kapalı, açılmadı"
   },
   {
    "kod": [
@@ -415,7 +416,8 @@
    "uzanti": ".pdf",
    "bayt": 239623,
    "sha256": "3e8ad249871f4e495d460e2d93c54faec9770b6456c9d79760601659e025cd8c",
-   "durum": "kor"
+   "durum": "kor",
+   "not": "çizim için pafta görüldü (İE-17, 27 Ekim 2026: montaj paftası çatı ve görünüş çizimine kaynak); liste kapalı, açılmadı"
   },
   {
    "kod": [
