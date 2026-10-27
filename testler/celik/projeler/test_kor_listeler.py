@@ -23,6 +23,7 @@ KOK = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(KOK))
 from testler.celik import kiyas  # noqa: E402
 from testler.celik.projeler import liste_yap  # noqa: E402
+from testler.celik.projeler.test_listeler import kural_kopyalari, sozluk_kurallari  # noqa: E402
 
 BURADA = Path(__file__).resolve().parent
 ACIK_BES = ["CP03", "CP06", "CP07", "CP13", "CP14"]
@@ -55,6 +56,10 @@ def _kopya(kayit: dict) -> Path:
 
 def _git_show(commit: str, yol: Path) -> bytes:
     r = subprocess.run(["git", "-C", str(KOK), "show", f"{commit}:{yol.relative_to(KOK).as_posix()}"], capture_output=True)
+    if r.returncode != 0:
+        sig = subprocess.run(["git", "-C", str(KOK), "rev-parse", "--is-shallow-repository"], capture_output=True, text=True)
+        if sig.stdout.strip() == "true":         # sığ klonda açılış commit'i olmayabilir; tam klonda yokluğu hatadır
+            pytest.skip(f"sığ klon: {commit} yok")
     assert r.returncode == 0, r.stderr.decode()
     return r.stdout
 
@@ -64,11 +69,11 @@ def test_kor_liste_donar(yol, tmp_path):
     b = oku(yol)
     tanim = KOK / b["tanim"]["yol"]
     assert tanim.parent == yol.parent and b["tanim"]["sha256"] == sha(tanim), "tanım değişti"
-    kopya, sozluk = _kopya(b["kural_seti"]), _kopya(b["sozluk"])
-    assert oku(kopya).get("sema") == b["kural_seti"]["sema"] and oku(sozluk)["surum"] == b["sozluk"]["surum"]
+    kopya, kk_kopya = kural_kopyalari(b, tanim)
+    sozluk = _kopya(b["sozluk"])
+    assert oku(sozluk)["surum"] == b["sozluk"]["surum"]
     kk = b.get("karkas_kurali")
-    assert kk and oku(tanim).get("karkas") == "kural"
-    kk_kopya = _kopya(kk)
+    assert kk_kopya is not None, "kör tanım karkası kuraldan"
     acilis = (MUHUR.get("acilislar") or {}).get(b["kod"])
     if acilis:                       # açıldı: yeniden üretilmez; açılış kaydındaki commit'in baytları
         c = acilis["liste_commit"]
@@ -82,18 +87,7 @@ def test_kor_liste_donar(yol, tmp_path):
 
 @pytest.mark.parametrize("yol", KOR, ids=[p.parent.name for p in KOR])
 def test_donan_sozluk_kurallari(yol):
-    b = oku(yol)
-    s = oku(KOK / b["sozluk"]["kopya"])
-    izinli = {"bizim", "ad", "olcu", "grup", "renkli", "not"}
-    for k in s["kalemler"]:
-        assert set(k) <= izinli, k
-        olcu = k.get("olcu", "")
-        assert set(re.findall(r"\{([^}]*)\}", olcu)) <= {"0", "1", "2", "a0", "a1"}, k
-        assert not re.search(r"\d", re.sub(r"\{a?\d\}", "", olcu)), f"ölçü yazılışında sabit sayı: {k}"
-        assert not re.search(r"\d", k.get("grup", "")), k
-    assert not any(re.search(r"\d", g) for g in s["gruplar"].values())
-    for satir in b["satirlar"]:
-        assert sum(1 for k in s["kalemler"] if re.search(k["bizim"], satir["kalem"])) <= 1, satir["kalem"]
+    sozluk_kurallari(oku(_kopya(oku(yol)["sozluk"])), [yol])
 
 
 @pytest.mark.parametrize("yol", KOR, ids=[p.parent.name for p in KOR])

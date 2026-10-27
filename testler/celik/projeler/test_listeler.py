@@ -30,13 +30,10 @@ def test_listeler_var():
     assert [p.parent.name for p in LISTELER] == ["CP03", "CP06", "CP07", "CP13", "CP14"]
 
 
-@pytest.mark.parametrize("yol", LISTELER, ids=[p.parent.name for p in LISTELER])
-def test_liste_girdilerinden_yeniden_uretilir(yol, tmp_path):
-    """Tanım ve sözlük öneren ağacında: değiştiyse liste yeniden üretilir. Kural seti listeyle donan kopyasından okunur (kitap sonra değişse de)."""
-    b = json.loads(yol.read_text(encoding="utf-8"))
-    tanim, ks = KOK / b["tanim"]["yol"], b["kural_seti"]
-    assert tanim.parent == yol.parent and b["tanim"]["sha256"] == sha(tanim), "tanım değişti: liste liste_yap ile yeniden üretilir"
-    assert b["sozluk"]["sha256"] == sha(liste_yap.SOZLUK), "sözlük değişti: liste liste_yap ile yeniden üretilir"
+def kural_kopyalari(b: dict, tanim: Path) -> tuple[Path, Path | None]:
+    """Listenin kural seti ve (tanım isterse) karkas kuralı kaydı: yolları kitabın yerinde, kopyaları `setler/`'de içerik adresli
+    (`test_kor_listeler.py` de çağırır)."""
+    ks = b["kural_seti"]
     assert ks["yol"].startswith("kurallar/liste/") and (KOK / ks["yol"]).is_file(), ks["yol"]
     kopya = KOK / ks["kopya"]
     assert kopya.parent == liste_yap.SETLER and kopya.name == ks["sha256"][:16] + ".json" and sha(kopya) == ks["sha256"]
@@ -50,12 +47,12 @@ def test_liste_girdilerinden_yeniden_uretilir(yol, tmp_path):
         kk_kopya = KOK / kk["kopya"]
         assert kk_kopya.parent == liste_yap.SETLER and kk_kopya.name == kk["sha256"][:16] + ".json" and sha(kk_kopya) == kk["sha256"]
         assert json.loads(kk_kopya.read_text(encoding="utf-8")).get("sema") == kk["sema"]
-    yukleme = liste_yap.motor(tanim, tmp_path, b["yontem"]["kod"], kopya, kk_kopya)
-    assert liste_yap.liste(tanim, yukleme, b["yontem"]["kod"], ks, karkas_kaydi=kk) == b
+    return kopya, kk_kopya
 
 
-def test_sozluk_adet_tasimaz_olcuye_sayi_yazmaz():
-    s = json.loads(liste_yap.SOZLUK.read_text(encoding="utf-8"))
+def sozluk_kurallari(s: dict, listeler: list[Path]) -> None:
+    """Sözlük adet taşımaz, ölçüye sabit sayı yazmaz, iki kalem bir satırı tutmaz; METAL kalemleri motorun tek dere sistemi
+    (`test_kor_listeler.py` donan sözlükle de çağırır)."""
     izinli = {"bizim", "ad", "olcu", "grup", "renkli", "not"}
     for k in s["kalemler"]:
         assert set(k) <= izinli, k
@@ -64,13 +61,30 @@ def test_sozluk_adet_tasimaz_olcuye_sayi_yazmaz():
         assert not re.search(r"\d", re.sub(r"\{a?\d\}", "", olcu)), f"ölçü yazılışında sabit sayı: {k}"
         assert not re.search(r"\d", k.get("grup", "")), k
     assert not any(re.search(r"\d", g) for g in s["gruplar"].values())
-    for yol in LISTELER:
+    for yol in listeler:
         satirlar = json.loads(yol.read_text(encoding="utf-8"))["satirlar"]
         for satir in satirlar:
             assert sum(1 for k in s["kalemler"] if re.search(k["bizim"], satir["kalem"])) <= 1, satir["kalem"]
         # METAL: motorun tek dere sistemi (sözlüğün notu); motor başka dere yazarsa bu kalemler ayrılır
         if any((x.get("liste_adi") or "").startswith("METAL ") and x["kalem"] != "Metal dere" for x in satirlar):
             assert any(x["kalem"] == "Metal dere" for x in satirlar), yol
+
+
+@pytest.mark.parametrize("yol", LISTELER, ids=[p.parent.name for p in LISTELER])
+def test_liste_girdilerinden_yeniden_uretilir(yol, tmp_path):
+    """Tanım ve sözlük öneren ağacında: değiştiyse liste yeniden üretilir. Kural seti listeyle donan kopyasından okunur (kitap sonra değişse de)."""
+    b = json.loads(yol.read_text(encoding="utf-8"))
+    tanim, ks = KOK / b["tanim"]["yol"], b["kural_seti"]
+    assert tanim.parent == yol.parent and b["tanim"]["sha256"] == sha(tanim), "tanım değişti: liste liste_yap ile yeniden üretilir"
+    assert b["sozluk"]["sha256"] == sha(liste_yap.SOZLUK), "sözlük değişti: liste liste_yap ile yeniden üretilir"
+    kopya, kk_kopya = kural_kopyalari(b, tanim)
+    kk = b.get("karkas_kurali")
+    yukleme = liste_yap.motor(tanim, tmp_path, b["yontem"]["kod"], kopya, kk_kopya)
+    assert liste_yap.liste(tanim, yukleme, b["yontem"]["kod"], ks, karkas_kaydi=kk) == b
+
+
+def test_sozluk_adet_tasimaz_olcuye_sayi_yazmaz():
+    sozluk_kurallari(json.loads(liste_yap.SOZLUK.read_text(encoding="utf-8")), LISTELER)
 
 
 ALCIPAN = {"grup": "İç cephe kaplama", "kalem": "Duvar alçıpan beyaz", "boyut": "1200 × 2500", "adet": 57, "kg": None, "durum": "excel"}

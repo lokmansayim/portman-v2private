@@ -183,15 +183,21 @@ def motor(tanim: Path, cikti: Path, yontem: str, kural_seti: Path, karkas: Path 
     return yollar[0]
 
 
-def set_kaydi(kural_seti: Path, yaz: bool = True) -> dict:
-    """Kural setinin kaydı ve listeyle donan içerik adresli kopyası (`setler/`; yalnız liste depoya yazılırken); kopya varsa baytları aynı olmalı."""
-    h = sha256(kural_seti)
+def _icerik_kopyasi(yol: Path, yaz: bool) -> tuple[str, Path]:
+    """Dosyanın SHA-256'sı ve listeyle donan içerik adresli kopyası (`setler/`; yalnız liste depoya yazılırken); kopya varsa baytları aynı olmalı."""
+    h = sha256(yol)
     kopya = SETLER / f"{h[:16]}.json"
     if not kopya.exists() and yaz:
         SETLER.mkdir(exist_ok=True)
-        shutil.copyfile(kural_seti, kopya)
+        shutil.copyfile(yol, kopya)
     elif kopya.exists() and sha256(kopya) != h:
-        raise SystemExit(f"{kopya} başka bir setin kopyası")
+        raise SystemExit(f"{kopya} başka bir dosyanın kopyası")
+    return h, kopya
+
+
+def set_kaydi(kural_seti: Path, yaz: bool = True) -> dict:
+    """Kural setinin kaydı ve listeyle donan içerik adresli kopyası."""
+    h, kopya = _icerik_kopyasi(kural_seti, yaz)
     ks = json.loads(Path(kural_seti).read_text(encoding="utf-8"))
     return {"yol": Path(kural_seti).resolve().relative_to(KOK).as_posix(), "sema": ks.get("sema"), "sha256": h,
             "kopya": kopya.relative_to(KOK).as_posix()}
@@ -204,24 +210,23 @@ def sozluk_donar_mi(kod: str) -> bool:
 
 
 def sozluk_kaydi(sozluk_yolu: Path = SOZLUK, yaz: bool = True) -> dict:
-    """Sözlüğün listeyle donan içerik adresli kopyası (`setler/`; yalnız liste depoya yazılırken); kopya varsa baytları aynı olmalı."""
-    h = sha256(sozluk_yolu)
-    kopya = SETLER / f"{h[:16]}.json"
-    if not kopya.exists() and yaz:
-        SETLER.mkdir(exist_ok=True)
-        shutil.copyfile(sozluk_yolu, kopya)
-    elif kopya.exists() and sha256(kopya) != h:
-        raise SystemExit(f"{kopya} başka bir dosyanın kopyası")
+    """Sözlüğün kaydı ve listeyle donan içerik adresli kopyası."""
+    h, kopya = _icerik_kopyasi(sozluk_yolu, yaz)
     return {"surum": json.loads(Path(sozluk_yolu).read_text(encoding="utf-8"))["surum"], "sha256": h, "kopya": kopya.relative_to(KOK).as_posix()}
 
 
 def liste(tanim: Path, yukleme: Path, yontem: str, kural_kaydi: dict, sozluk_yolu: Path = SOZLUK, karkas_kaydi: dict | None = None,
           sozluk_donmus: dict | None = None) -> dict:
-    """`sozluk_donmus` (kör ve kapalı proje): sözlüğün donan kopyasının kaydı; sözlük o kopyadan okunur."""
+    """`sozluk_donmus` (kör ve kapalı proje): sözlüğün donan kopyasının kaydı; sözlük o kopyadan okunur (kopyanın baytları kaydın
+    SHA-256'sıyla aynı olmalı; ayrıca başka bir sözlük verilemez)."""
     t = json.loads(Path(tanim).read_text(encoding="utf-8"))
     y = json.loads(Path(yukleme).read_text(encoding="utf-8"))
     if sozluk_donmus:
+        if Path(sozluk_yolu) != SOZLUK:
+            raise SystemExit("sözlük ya donmuş kopyadan ya verilen dosyadan okunur, ikisi birden değil")
         sozluk_yolu = KOK / sozluk_donmus["kopya"]
+        if sha256(sozluk_yolu) != sozluk_donmus["sha256"]:
+            raise SystemExit(f"{sozluk_donmus['kopya']} donmuş sözlüğün kaydıyla aynı değil")
     sozluk = json.loads(Path(sozluk_yolu).read_text(encoding="utf-8"))
     if y["yontem"] != yontem:
         raise SystemExit(f"motorun listesi {y['yontem']} yöntemiyle; istenen {yontem}")
