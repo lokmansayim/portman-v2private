@@ -1,8 +1,9 @@
 """İE-17 · Prefabrik evin beşik dışı çatısı: İş Emri'nin `cati` alanı → genel motorun çatı biçimi (düzlemler, kalkanlar).
 
-Lokman, 27 Ekim 2026: çizim biçimi canlıdaki çizim setinden, değerler prefabrikten. Bu modül çatı geometrisini kendisi kurmaz; genel motorun
-çatı üreticisini (`genel.cati_uretici.uret`: `cati_cumba`, `cati_kirma`) prefabrik değerleriyle çağırır ve sonucu onun denetiminden
-(`cati_uretici.denetle`: `cati_genel.cati_kur`, düzlemler saçaklı ayak izini boşluksuz ve örtüşmesiz örter, desteksiz üst kenar yok) geçirir.
+Lokman ve CIO, 27 Ekim 2026: çıktı biçimi canlı ön onay PDF'i (`dxf_out`), genel motordan yalnız çatı geometrisi, değerler prefabrikten.
+Bu modül çatı geometrisini kendisi kurmaz; genel motorun çatı üreticisini (`genel.cati_uretici.uret`: `cati_cumba`, `cati_kirma`)
+prefabrik değerleriyle çağırır ve sonucu onun denetiminden (`cati_uretici.denetle`: `cati_genel.cati_kur`, düzlemler saçaklı ayak izini
+boşluksuz ve örtüşmesiz örter, desteksiz üst kenar yok) geçirir.
 Denetim bulgu verirse çatı çizilmez, hata söylenir (yanlış çatı çizilmez); tanınmayan alan da (ör. kırmada `cumbalar`, cumbada başka
 eğim) yok sayılmaz, hata verir.
 
@@ -27,7 +28,7 @@ from . import geometry as G
 
 TIPLER = ("besik_cumba", "kirma")
 TIP_ADI = {"besik_cumba": "beşik + cumba", "kirma": "kırma"}
-UST_PAY_CM = 14.0                  # ifc_uret: sac düzlemin 10 cm üstünde, 4 cm (köprünün beşik çatısıyla aynı)
+UST_PAY_CM = 14.0                  # ifc_uret: sac düzlemin 10 cm üstünde, 4 cm (pano Motor'unun beşik IFC'siyle aynı)
 CEPHE_YAN = {"on": "G", "arka": "K", "sol": "B", "sag": "D"}
 ALANLAR = {"tip", "egim_yuzde", "sacak_cm", "topuk_cm", "makas_ekseni", "makas_yonu"}   # her tipte; tanınmayan alan yok sayılmaz
 TIP_ALANI = {"besik_cumba": {"cumbalar"}, "kirma": {"kirma_egimleri"}}
@@ -103,8 +104,8 @@ def _kirma_farkli(kutu: tuple, mahya: str, e: float, uc: dict, b: dict, k: dict)
 
 
 def cati(plan: G.Plan, ie: dict) -> dict:
-    """Beşik dışı ana çatı → genel motorun `cati` biçimi. Dönen sözlük köprünün beşik çatısıyla aynı anahtarlarda (`tip`, `tip_adi`,
-    `sacak`, `topuk`, `duvar_ustu`, `ust_pay`, `duzlemler`, `kalkanlar`)."""
+    """Beşik dışı ana çatı → genel motorun `cati` biçimi. Dönen sözlük `sunum.cati_tanimi`'nin beşik çatısının anahtarlarında,
+    ek olarak `tip_adi`, `ust_pay` ve `kalkanlar` (`cati_genel.cati_kur` ve `cephe_gorunus` okur)."""
     from .genel import cati_uretici as CU
     c = ie.get("cati") or {}
     tip = c.get("tip", "besik")

@@ -2,7 +2,8 @@
 
 Açılan evlerin İş Emri'leri `testler/cizim/evler/` altında (montaj paftasından okundu; kişi ve bayi adı yok). Burada sayılar paftanın
 çatısıyla sabit: düzlem, vadi ve kalkan sayısı, eğim, mahya kotu, kırmanın uç yüzleri. Düzlemlerin saçaklı ayak izini boşluksuz ve
-örtüşmesiz örtmesi `cati_uretici.denetle`'den. Beşik bugünkü kuralla (`sunum.cati_tanimi`) ve çeliğin çağrısı (mahya verilmeden) aynı.
+örtüşmesiz örtmesi `cati_uretici.denetle`'den. Beşik bu modüle girmez (`sunum.cati_tanimi` ve `dxf_out.ciz_on_gorunus` bugünkü gibi);
+çeliğin çağrısı (mahya verilmeden) aynı. Yanlış ya da eksik çatı değeri canlı ön onay PDF'ini (`dxf_out.uret`) durdurur.
 """
 from __future__ import annotations
 import collections
@@ -15,7 +16,7 @@ import pytest
 
 KOK = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(KOK))
-from motor import cati_prefabrik as CP, geometry as G, sablon_kopru as K, sunum  # noqa: E402
+from motor import cati_prefabrik as CP, cephe_gorunus as CG, dxf_out, geometry as G, sunum  # noqa: E402
 from motor.genel import cati_genel, cati_uretici as CU  # noqa: E402
 
 EVLER = KOK / "testler" / "cizim" / "evler"
@@ -92,8 +93,8 @@ def test_ap01_kirma_farkli_uc_egimleri():
 def test_besik_bugunku_kuralla():
     ie = _ie("PK01")
     plan = G.kur(copy.deepcopy(ie))
-    # beşikte köprünün düzlemleri `sunum.cati_tanimi`'ninkiler aynen (kalkanları köprü ekler; BK-14); `cati_prefabrik` çağrılmaz
-    assert K.cati(plan, copy.deepcopy(ie))["duzlemler"] == sunum.cati_tanimi(plan, copy.deepcopy(ie))["duzlemler"]
+    # beşik `sunum.cati_tanimi`'nin (iki düzlem, P6001); `cati_prefabrik` beşiği kurmaz, dört görünüş de çizilmez (`test_acilan_evler`)
+    assert len(sunum.cati_tanimi(plan, copy.deepcopy(ie))["duzlemler"]) == 2
     with pytest.raises(CP.PrefabrikCatiHatasi, match="besik"):
         CP.cati(plan, ie)
 
@@ -121,13 +122,14 @@ def test_celik_cagrisi_mahyasiz_ayni():
     (lambda c: c.update(kirma_egimleri={"sol": 30, "sag": 30}), "beşik \\+ cumba çatıda tanınmayan alan: kirma_egimleri"),
 ])
 def test_cumba_hatalari(degis, mesaj):
-    # yanlış çatı çizilmez: eksik ya da desteklenmeyen değer hata verir, köprü durur
+    # yanlış çatı çizilmez: eksik ya da desteklenmeyen değer hata verir, görünüş de durur
     ie = _ie("AP13")
     degis(ie["cati"])
     with pytest.raises(CP.PrefabrikCatiHatasi, match=mesaj):
         _cati(ie)
-    with pytest.raises(K.KopruHatasi):
-        K.tanim(copy.deepcopy(ie))
+    if ie["cati"]["tip"] in CP.TIPLER:
+        with pytest.raises(CP.PrefabrikCatiHatasi, match=mesaj):
+            CG.cati_cizgileri(G.kur(copy.deepcopy(ie)), ie, "on")
 
 
 def test_cumba_egimi_ana_catiyla_ayni_yazilabilir():
@@ -143,8 +145,15 @@ def test_kirma_tanimayan_alan_hata():
     ie["cati"]["cumbalar"] = [{"cephe": "on", "bas_cm": 0, "bit_cm": 300, "cikinti_cm": 0}]
     with pytest.raises(CP.PrefabrikCatiHatasi, match="kırma çatıda tanınmayan alan: cumbalar"):
         _cati(ie)
-    with pytest.raises(K.KopruHatasi, match="tanınmayan alan"):
-        K.tanim(copy.deepcopy(ie))
+
+
+def test_yanlis_cati_on_onay_pdfini_durdurur(tmp_path):
+    # canlı yol: `dxf_out.uret` dört görünüşü çizerken çatıyı kurar; hata yutulmaz, PDF çıkmaz (beşikle çizilmez)
+    ie = _ie("AP13")
+    ie["cati"]["cumbalar"][0]["egim_yuzde"] = 44
+    with pytest.raises(CP.PrefabrikCatiHatasi, match="cumba eğimi ana çatıdan farklı"):
+        dxf_out.uret(copy.deepcopy(ie), tmp_path)
+    assert not list(tmp_path.glob("*.pdf"))
 
 
 @pytest.mark.parametrize("uc, mesaj", [({"on": 32.5, "arka": 36.2}, "sol, sag için"), ({"sol": 5, "sag": 36.2}, "aralık dışı"),

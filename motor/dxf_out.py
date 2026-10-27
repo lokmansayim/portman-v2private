@@ -614,9 +614,9 @@ class Cizici:
         self.text("ÖN GÖRÜNÜŞ - ÇALIŞMA", (W / 2 + ox, top + rise + 100), 26, "ON_YAZI")
         self.text(f"Pencere üst kotu {fmt(hy - lento)} cm | Lento {fmt(lento)} cm | Bina yüksekliği {fmt(hy)} cm", (W / 2 + ox, bot - 150), 15, "ON_YAZI")
 
-    def ciz_cati_profili(self, ox, oy):
+    def ciz_cati_profili(self, ox, oy, en=None, alt_yazi=None):
         plan, msp = self.plan, self.msp
-        W = plan.W; cati = plan.is_emri.get("cati", {})
+        W = plan.W if en is None else en; cati = plan.is_emri.get("cati", {})     # İE-17: beşik dışı çatıda makasın geçtiği boy (`en`)
         egim = float(cati.get("egim_yuzde", 33)) / 100.0; sacak = float(cati.get("sacak_cm", 30)); topuk = float(cati.get("topuk_cm", 10))
         tw = W + 2 * sacak; rise = topuk + (tw / 2) * egim
         xl, xr, xm = ox - sacak, ox + W + sacak, ox + W / 2
@@ -631,28 +631,67 @@ class Cizici:
         self.text("TOPUK", (xl - 53, oy + 53), 14, "CATI_YAZI")
         self.text("ÇATI PROFİLİ - TOPUK VE SAÇAK", (xm, oy + rise + 130), 25, "CATI_YAZI")
         self.text(f"İki yanda {fmt(sacak)} cm saçak | İki uçta {fmt(topuk)} cm topuk | Eğim %{fmt(egim*100)} (derece değil)", (xm, oy + rise + 95), 17, "CATI_YAZI")
-        self.text("Makas kısa kenarı geçer; mahya uzun kenar boyunca uzanır. Ölçüler cm.", (xm, oy - 180), 16, "CATI_YAZI")
+        self.text(alt_yazi or "Makas kısa kenarı geçer; mahya uzun kenar boyunca uzanır. Ölçüler cm.", (xm, oy - 180), 16, "CATI_YAZI")
 
     def ciz_gorunusler(self, top):
-        """İE-17: beşik dışı çatıda (beşik + cumba, kırma) ön görünüş ve çatı profilinin yerine dört görünüş, yan yana; adım çizim setininki
-        (`dxf_genel.ciz`: görünüşün eni + 110 ölçü payı + 250 ara; yan görünüşün eni evin derinliğinden, ön görünüşünki genişliğinden). Biçim
-        canlıdaki çizim setinin görünüş kuralı (`dxf_genel.gorunus_ciz`: yüzeyler yakından uzağa örtülür, gizli çizgi yok; zemin, genişlik,
-        duvar ve tepe yüksekliği). Yüzeyler Örnek Şablon köprüsünün Yapı Tanımı'ndan (`sablon_kopru.tanim`: pano Motor'unun planı, açıklık
-        kotları üst 200 / eşik 200 − boy, çatı `cati_prefabrik`). Duvar üstü `top`; beşikte çağrılmaz (beşik DXF'i bayt bayt aynı)."""
-        import copy as _copy
-        from . import sablon_kopru as SK
-        from .genel import cati_genel, dxf_genel as DG, sahne as SH, yapi as Y
-        t = SK.tanim(_copy.deepcopy(self.plan.is_emri))
-        S = SH.sahne_kur(Y.kur(t), cati_genel.cati_kur(t["cati"]))
-        C = DG._Cizer(self.msp, {"duvar": "ON_GORUNUS", "aciklik": "ON_DOGRAMA", "olcu": "ON_OLCU", "yazi": "ON_YAZI", "cati": "ON_CATI"})
-        hy = float(t["kat_yuksekligi"])
-        ox = 0.0
-        for taraf in ("on", "arka", "sol", "sag"):                            # görünüşün adı altında (`gorunus_ciz`)
-            g = DG.gorunus_olcusu(S, taraf)
-            DG.gorunus_ciz(C, S, taraf, hy, ox, top - hy, g)
-            ox += (g["u1"] - g["u0"]) + 110.0 + 250.0
-        self.text(f"Çatı: {_cati_adi(self.plan.is_emri['cati'])} | eğim %{fmt(float(self.plan.is_emri['cati']['egim_yuzde']))} | ölçüler cm",
-                  ((ox - 250.0) / 2, top - hy - 150), 15, "ON_YAZI")
+        """İE-17: beşik dışı çatıda (beşik + cumba, kırma) ön görünüş canlı biçimiyle ve yanına aynı biçimle arka, sol ve sağ görünüş; en sonda
+        ana çatının profili (Lokman ve CIO, 27 Ekim 21:13: prefabrik çıktısı bu ön onay PDF'i; genel motordan yalnız çatı geometrisi).
+        Biçim `ciz_on_gorunus`'unki: duvarın dikdörtgeni, pano derzleri, kaynak pencere ve kapı blokları, saçak altı çizgisi ve topuk,
+        ölçüler (çatı ve duvar eni, duvar yüksekliği, tepe, en soldaki pencerenin eşiği ve lentosu), % eğim, ON_* katmanları. Geometri
+        `cephe_gorunus`'tan: duvar ve açıklıklar Motor'un planından, çatı çizgileri `cati_prefabrik`'in düzlemlerinin izdüşümü. Görünüşler
+        yan yana, saçak uçları arası 360 (sağdaki ölçüler 110, ara 250). Beşikte çağrılmaz (beşik DXF'i bayt bayt aynı). Duvar üstü `top`."""
+        from . import cephe_gorunus as CG
+        plan, msp, ie = self.plan, self.msp, self.plan.is_emri
+        hy = float(ie["yapi"].get("duvar_yuksekligi_cm", 250)); cati = ie["cati"]
+        topuk = float(cati.get("topuk_cm", 10)); sacak = float(cati.get("sacak_cm", 30))
+        bot = top - hy; lento = hy - PENCERE_UST_KOTU
+        ox, xr = 0.0, 0.0
+        for k, taraf in enumerate(CG.TARAFLAR):
+            g, r = CG.cephe(plan, taraf), CG.cati_cizgileri(plan, ie, taraf)
+            if k:
+                ox = xr + 360.0 - r["u0"]
+            W = g["en"]
+            msp.add_lwpolyline([(ox, bot), (W + ox, bot), (W + ox, top), (ox, top)], close=True, dxfattribs={"layer": "ON_GORUNUS"})
+            for u in g["derz"]:
+                msp.add_line((u + ox, bot), (u + ox, top), dxfattribs={"layer": "ON_DERZ"})
+            for a in g["acikliklar"]:
+                w, h = a["u1"] - a["u0"], a["z1"] - a["z0"]
+                if a["tur"] == "pencere":
+                    msp.add_blockref("kaynak-on-pencere", (a["u0"] + ox, bot + a["z0"]), dxfattribs={"xscale": w / 77.101, "yscale": h / 116.017, "layer": "ON_DOGRAMA"})
+                else:
+                    msp.add_blockref("kaynak-on-kapi", (a["u0"] + ox, bot), dxfattribs={"xscale": w / 68.697, "yscale": h / 133.557, "layer": "ON_DOGRAMA"})
+            xl, xr = r["u0"] + ox, r["u1"] + ox
+            msp.add_line((xl, top), (xr, top), dxfattribs={"layer": "ON_CATI"})
+            msp.add_line((xl, top), (xl, top + topuk), dxfattribs={"layer": "ON_TOPUK"}); msp.add_line((xr, top), (xr, top + topuk), dxfattribs={"layer": "ON_TOPUK"})
+            for c in r["cizgiler"]:
+                msp.add_lwpolyline([(u + ox, bot + z) for u, z in c], dxfattribs={"layer": "ON_CATI"})
+            tu, tz = r["tepe"]; rise = tz - hy
+            self.dim((xl, top), (xr, top), (0, bot - 110), 0, "ON_OLCU"); self.dim((ox, bot), (W + ox, bot), (0, bot - 67), 0, "ON_OLCU")
+            self.dim((W + ox, bot), (W + ox, top), (W + 77 + ox, 0), 90, "ON_OLCU"); self.dim((xr, top), (tu + ox, bot + tz), (W + 77 + ox, 0), 90, "ON_OLCU")
+            pen = [a for a in g["acikliklar"] if a["tur"] == "pencere"]
+            if pen:
+                a = pen[0]
+                self.dim((a["u0"] + ox, bot), (a["u0"] + ox, bot + a["z0"]), (a["u0"] - 33 + ox, 0), 90, "ON_OLCU")
+                self.dim((a["u0"] + ox, bot + a["z1"]), (a["u0"] + ox, top), (a["u0"] - 33 + ox, 0), 90, "ON_OLCU")
+            for u, z, e in r["egimler"]:
+                self.text("%" + fmt(e * 100), (u + ox, bot + z + 30), 18, "ON_YAZI")
+            self.text(f"{CG.AD[taraf]} GÖRÜNÜŞ - ÇALIŞMA", (W / 2 + ox, top + rise + 100), 26, "ON_YAZI")
+            if taraf == "on":
+                self.text(f"Pencere üst kotu {fmt(hy - lento)} cm | Lento {fmt(lento)} cm | Bina yüksekliği {fmt(hy)} cm", (W / 2 + ox, bot - 150), 15, "ON_YAZI")
+        x0, y0, x1, y1 = G.govde_kutusu(plan)
+        mx = cati.get("makas_ekseni", "x") == "x"
+        en, boy = (x1 - x0, y1 - y0) if mx else (y1 - y0, x1 - x0)
+        op = xr + 360.0 + sacak + 63.0
+        self.ciz_cati_profili(op, top + 50.0, en=en, alt_yazi=f"Makas {fmt(en)} cm'yi geçer; mahya {fmt(boy)} cm boyunca uzanır. Ölçüler cm.")
+        e = float(cati["egim_yuzde"])
+        if cati["tip"] == "kirma":
+            uc = cati.get("kirma_egimleri") or {}
+            yan = {"sol": "sol", "sag": "sağ", "on": "ön", "arka": "arka"}
+            ek = "uç yüzler " + " · ".join(f"{yan[k]} %{fmt(float(v))}" for k, v in uc.items()) if uc else f"dört yüz %{fmt(e)}"
+        else:
+            u = cati["cumbalar"][0]
+            ek = f"cumba {CG.AD[u['cephe']].lower()} cephede {fmt(float(u['bas_cm']))}–{fmt(float(u['bit_cm']))} cm, eğim ana çatıyla aynı (%{fmt(e)})"
+        self.text(f"{_cati_adi(cati)} çatı | {ek}", (op + en / 2, top + 50.0 - 210), 16, "CATI_YAZI")
 
     def ciz_ozellik_tablosu(self, ox, oy, satirlar):
         msp = self.msp; w1, w2, rh = 300.0, 640.0, 34.0; n = len(satirlar) + 1
@@ -725,12 +764,13 @@ def uret(is_emri: dict, cikti_dir: Path, ad_govde: str | None = None, pdf_hatada
     for i, s in enumerate(notlar):
         c.text(s, (gap + W / 2, -145 - py["alt"] - 30 * i), 13, "ODA_ADLARI")
     _cati = is_emri.get("cati", {})
-    _rise = float(_cati.get("topuk_cm", 10)) + (W + 2 * float(_cati.get("sacak_cm", 30))) / 2 * float(_cati.get("egim_yuzde", 33)) / 100.0
-    kay = (max(0.0, _rise - 147.445) if _yeni else 0.0) + py["alt"]   # İE-11: eski İş Emri'nde pafta yerleşimi değişmez; BK-14: ön veranda kadar aşağı
-    kay2 = kay + max(0.0, float(yapi.get("duvar_yuksekligi_cm", 250)) - 250.0)     # 280 / 300'de ön görünüş uzar, alt yazılar iner
     from .cati_prefabrik import TIPLER as _PREFABRIK_CATI
     _dort = (is_emri.get("cati") or {}).get("tip", "besik") in _PREFABRIK_CATI
-    if _dort:                                               # İE-17: beşik + cumba, kırma → dört görünüş (çizim setinin görünüşü)
+    _en = W if (not _dort or _cati.get("makas_ekseni", "x") == "x") else H     # İE-17: beşik dışında makasın geçtiği boy
+    _rise = float(_cati.get("topuk_cm", 10)) + (_en + 2 * float(_cati.get("sacak_cm", 30))) / 2 * float(_cati.get("egim_yuzde", 33)) / 100.0
+    kay = (max(0.0, _rise - 147.445) if _yeni else 0.0) + py["alt"]   # İE-11: eski İş Emri'nde pafta yerleşimi değişmez; BK-14: ön veranda kadar aşağı
+    kay2 = kay + max(0.0, float(yapi.get("duvar_yuksekligi_cm", 250)) - 250.0)     # 280 / 300'de ön görünüş uzar, alt yazılar iner
+    if _dort:                                               # İE-17: beşik + cumba, kırma → dört görünüş ve profil, ön görünüşün biçimiyle
         c.ciz_gorunusler(-600.0 - kay)
     else:                                                   # beşik (ve başka her tip) bugünkü gibi
         c.ciz_on_gorunus(0.0, -600.0 - kay)
