@@ -34,6 +34,8 @@ def _pre(kalem, olcu, adet, grup="1001"):
 def test_defter_bicimi(defter):
     assert defter["sema"] == "portman.fiyat_defteri/1"
     assert set(defter["hatlar"]) == {"prefabrik", "celik"}
+    for v in defter["kaynaklar"].values():                                      # kısa ad liste ve tarih: çıktının kaynak sütunu
+        assert re.search(r"\d{2}\.\d{2}\.\d{4}$", v["kisa"]), v
     for hat, H in defter["hatlar"].items():
         assert H["kalemler"], hat
         for k, g in H["kalemler"].items():
@@ -70,6 +72,7 @@ def test_birebir_anahtar_ve_onay_kurali(defter):
     R = F.fiyatla(L, defter)
     a, b = R["satirlar"]
     assert a["durum"] == "onaylı" and a["tutar"] == round(3 * pre[onayli]["fiyat"], 2)
+    assert a["kaynak_adi"] == defter["kaynaklar"][pre[onayli]["kaynak"]]["kisa"]       # kaynak sütununda liste ve tarih
     assert b["tutar"] is None and b["durum"] == "öneri, onay bekliyor"            # fiyat uydurulmaz: onaysız öneri varsayılan olarak girmez
     assert [f["anahtar"] for f in R["ozet"]["fiyatsiz"]] == [onaysiz]
     R2 = F.fiyatla(L, defter, oneri=True)
@@ -118,9 +121,9 @@ def test_miktari_olmayan_fiyatli_satir(defter):
     kg_k = next(k for k, g in C["kalemler"].items() if g["birim"] == "kg" and g["fiyat"])
     kalem, boyut = kg_k.split(" | ")
     R = F.fiyatla({"satirlar": [{"grup": "Çelik panel", "kalem": kalem, "boyut": boyut, "adet": 8, "kg": None}]}, defter, oneri=True)
-    s = R["satirlar"][0]
-    assert s["tutar"] is None and s["durum"] == "öneri; kg yok"                  # eksik olan kg yazılır
-    assert [f["durum"] for f in R["ozet"]["fiyatsiz"]] == ["öneri; kg yok"]
+    s, beklenen = R["satirlar"][0], ("onaylı" if C["kalemler"][kg_k]["onay"] else "öneri") + "; kg yok"
+    assert s["tutar"] is None and s["durum"] == beklenen                          # onaylı görünmez, eksik olan kg yazılır
+    assert [f["durum"] for f in R["ozet"]["fiyatsiz"]] == [beklenen]
 
 
 def test_celik_kg_ve_toplam_satiri(defter):

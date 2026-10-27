@@ -1,25 +1,28 @@
 {
  "sema": "portman.fiyat_defteri/1",
- "surum": "2026-10-27",
+ "surum": "2026-10-27-r02",
  "aciklama": "Yükleme listesi × birim fiyat (İE-13, Z-10'un liste yöntemi). Anahtar Motor'un liste satırı: prefabrikte 'kalem | olcu' (motor/prefabrik_liste.py), çelikte 'kalem | boyut' (motor/genel yükleme listesi). Fiyat uydurulmaz: kaynağı olmayan kalemde fiyat boş kalır.",
  "para_birimi": "TL",
  "kdv": "kaynak listelerde yazmıyor",
- "onay_kurali": "onay true: Patron'un verdiği listeden (patron_verdi) ya da onayladığı öneriden, kalemin kendisi için. onay false: öneri (yakın ürün, hesap ya da Patron'un vermediği kaynak); araclar/fiyatla.py bunları yalnız --oneri ile uygular. Kaynak sırası (Patron, TK-01'de): önce EKIM87, yoksa HAZ, ikisinde de yoksa CTKB; birebir eşleşme yakından önce.",
+ "onay_kurali": "onay true: Patron'un verdiği listeden (patron_verdi) ya da onayladığı öneriden, kalemin kendisi için. onay false: öneri (yakın ürün, hesap ya da Patron'un vermediği kaynak); araclar/fiyatla.py bunları yalnız --oneri ile uygular. Kaynak sırası (Patron, TK-01'de): önce EKIM87, yoksa HAZ, ikisinde de yoksa CTKB; birebir eşleşme yakından önce. Patron'un 27 Ekim 22:00 kararı ('son listeler') genel kaynaktır: iki listeden birebir eşleşen kalem çelikte de onaylı (r02).",
  "kaynaklar": {
   "EKIM87": {
    "ad": "87 m² tek kat prefabrik yükleme listesi (birim fiyat sütunu)",
+   "kisa": "87 m² listesi, 14.10.2026",
    "tarih": "2026-10-14",
    "patron_verdi": true,
    "not": "Patron 27 Ekim 2026 22:01'de TK-01 için verdi ('fiyatları buradan eşleştir'); dosyadaki kişi, yer ve hazırlayan bilgisi deftere alınmadı. kaynak_satir dosyanın satır numarası."
   },
   "HAZ": {
    "ad": "Malzeme listesi (kodlu birim fiyat)",
+   "kisa": "Haziran malzeme listesi, 16.06.2026",
    "tarih": "2026-06-16",
    "patron_verdi": true,
    "not": "Patron 27 Ekim 2026 22:11'de verdi ('listede olmayanları da buradan alabilirsin'). kaynak_satir TK-01 satırlarında dosyanın satır numarası, çelik satırlarında ürün kodu."
   },
   "CTKB": {
    "ad": "Çelik tek kat fiyatlandırma tablosu (CTKB V1.0)",
+   "kisa": "Eylül çelik tablosu, 01.09.2026",
    "tarih": "2026-09-01",
    "patron_verdi": false,
    "not": "Drive 'AI İçin Hesaplamalar'; kalem birim fiyatları, pencere fiyat tablosu, çatı kaplaması m² fiyatı, çelik panel kg fiyatı. Yalnız iki listede olmayan kalemde öneri."
@@ -1712,8 +1715,8 @@
      ],
      "kaynak_kalem": "80X45X12 profil (merdiven duvarı, döşeme kirişi, kaset) kg fiyatı",
      "durum": "eşleşti",
-     "onay": false,
-     "not": "CTKB çelik panel 50 TL/kg; Haziran 47–48 TL/kg."
+     "onay": true,
+     "not": "CTKB çelik panel 50 TL/kg; Haziran 47–48 TL/kg.; Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
     },
     "İç cephe duvar panelleri | 80 × 45 × 1,2": {
      "fiyat": 59,
@@ -1726,8 +1729,8 @@
      ],
      "kaynak_kalem": "80X45X12 profil kg fiyatı",
      "durum": "eşleşti",
-     "onay": false,
-     "not": "CTKB çelik panel 50 TL/kg; Haziran 47–48 TL/kg."
+     "onay": true,
+     "not": "CTKB çelik panel 50 TL/kg; Haziran 47–48 TL/kg.; Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
     },
     "Veranda dikmeleri (kolon paneli) | 80 × 45 × 1,2": {
      "fiyat": 59,
@@ -1738,8 +1741,8 @@
      ],
      "kaynak_kalem": "Balkon kolon 80X45X12 kg fiyatı",
      "durum": "eşleşti",
-     "onay": false,
-     "not": "CTKB çelik panel 50 TL/kg; Haziran 47–48 TL/kg."
+     "onay": true,
+     "not": "CTKB çelik panel 50 TL/kg; Haziran 47–48 TL/kg.; Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
     },
     "Veranda kirişleri (kiriş paneli) | 80 × 45 × 1,2": {
      "fiyat": 59,
@@ -1751,8 +1754,8 @@
      ],
      "kaynak_kalem": "Balkon kiriş 80X45X12 kg fiyatı",
      "durum": "eşleşti",
-     "onay": false,
-     "not": "CTKB çelik panel 50 TL/kg; Haziran 47–48 TL/kg."
+     "onay": true,
+     "not": "CTKB çelik panel 50 TL/kg; Haziran 47–48 TL/kg.; Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
     },
     "Çatı makas panelleri | 80 × 45 × 0,8": {
      "fiyat": 59,
@@ -1763,8 +1766,8 @@
      ],
      "kaynak_kalem": "Makas 80x45x08 kg fiyatı",
      "durum": "eşleşti",
-     "onay": false,
-     "not": "CTKB çelik panel 50 TL/kg; Haziran 47–48 TL/kg."
+     "onay": true,
+     "not": "CTKB çelik panel 50 TL/kg; Haziran 47–48 TL/kg.; Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
     },
     "Tavan paneli (makas arası) | roll form çelik": {
      "fiyat": 59,
@@ -1799,8 +1802,8 @@
      ],
      "kaynak_kalem": "Makas 80x45x08 kg fiyatı",
      "durum": "eşleşti",
-     "onay": false,
-     "not": "CTKB çelik panel 50 TL/kg; Haziran 47–48 TL/kg."
+     "onay": true,
+     "not": "CTKB çelik panel 50 TL/kg; Haziran 47–48 TL/kg.; Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
     },
     "Boy C profil | 80 × 45 × 1,2": {
      "fiyat": 59,
@@ -1813,8 +1816,8 @@
      ],
      "kaynak_kalem": "80X45X12 profil kg fiyatı",
      "durum": "eşleşti",
-     "onay": false,
-     "not": "CTKB çelik panel 50 TL/kg; Haziran 47–48 TL/kg."
+     "onay": true,
+     "not": "CTKB çelik panel 50 TL/kg; Haziran 47–48 TL/kg.; Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
     },
     "Saçaklar için Boardex | 12,5 × 1200 × 2400": {
      "fiyat": 635,
@@ -1825,8 +1828,8 @@
      ],
      "kaynak_kalem": "Veranda-sundurma-balkon tavan Boardex 12,5×1200×2400",
      "durum": "eşleşti",
-     "onay": false,
-     "not": "CTKB 630 (8 mm yazılı)."
+     "onay": true,
+     "not": "CTKB 630 (8 mm yazılı).; Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
     },
     "Saçak yüzü için Boardex | 12,5 × 1200 × 2400": {
      "fiyat": 635,
@@ -1837,8 +1840,8 @@
      ],
      "kaynak_kalem": "Veranda-sundurma-balkon tavan Boardex 12,5×1200×2400",
      "durum": "eşleşti",
-     "onay": false,
-     "not": "CTKB 630 (8 mm yazılı)."
+     "onay": true,
+     "not": "CTKB 630 (8 mm yazılı).; Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
     },
     "Köşebent | L 2500": {
      "fiyat": 59,
@@ -1861,8 +1864,8 @@
      ],
      "kaynak_kalem": "Veranda-sundurma-balkon tavan Boardex 12,5×1200×2400",
      "durum": "eşleşti",
-     "onay": false,
-     "not": ""
+     "onay": true,
+     "not": "Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
     },
     "Veranda tavanı (Boardex) | 12,5 × 1200 × 2400": {
      "fiyat": 635,
@@ -1873,8 +1876,8 @@
      ],
      "kaynak_kalem": "Veranda-sundurma-balkon tavan Boardex 12,5×1200×2400",
      "durum": "eşleşti",
-     "onay": false,
-     "not": ""
+     "onay": true,
+     "not": "Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
     },
     "Duvar alçıpan beyaz | 1200 × 2500": {
      "fiyat": 245,
@@ -1941,8 +1944,8 @@
      "kaynak_satir": "ÇG24",
      "kaynak_kalem": "Knauf mineral yün paket 8,64 m²",
      "durum": "eşleşti",
-     "onay": false,
-     "not": "CTKB Knauf IBP037 8,64 m² 900; Ekim 'mineral yün' 900 (ölçüsüz)."
+     "onay": true,
+     "not": "CTKB Knauf IBP037 8,64 m² 900; Ekim 'mineral yün' 900 (ölçüsüz).; Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
     },
     "Tek kat panel | L 4330 · 100 cm kapatır": {
      "fiyat": 1310.92,
@@ -2091,8 +2094,8 @@
      "kaynak_satir": "KP4",
      "kaynak_kalem": "Melamin kapı sağ/sol 90/214",
      "durum": "eşleşti",
-     "onay": false,
-     "not": "CTKB 5.000."
+     "onay": true,
+     "not": "CTKB 5.000.; Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
     },
     "Kompozit çelik kapı | 90 × 210": {
      "fiyat": 5000,
@@ -2141,8 +2144,8 @@
      "kaynak_satir": "KP13",
      "kaynak_kalem": "PVC pencere + pervaz + matik + çift açılım 180/180",
      "durum": "eşleşti",
-     "onay": false,
-     "not": "CTKB'de 180×180 çift açılım iki satır: 15.000 ve 20.000."
+     "onay": true,
+     "not": "CTKB'de 180×180 çift açılım iki satır: 15.000 ve 20.000.; Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
     },
     "Tijli duy | adet": {
      "fiyat": 20,
@@ -2369,8 +2372,8 @@
      ],
      "kaynak_kalem": "Kaçak akım rölesi (dörtlü)",
      "durum": "eşleşti",
-     "onay": false,
-     "not": "Ekim listesinde dörtlü, CTKB'de ikili; ikisi de 2.000."
+     "onay": true,
+     "not": "Ekim listesinde dörtlü, CTKB'de ikili; ikisi de 2.000.; Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
     },
     "RYSB pul başlı (3,9 × 32) | adet": {
      "fiyat": 0.7,
@@ -2403,8 +2406,8 @@
      "kaynak_satir": "VG2",
      "kaynak_kalem": "OSB ve yalıpan (3,9×32)",
      "durum": "eşleşti",
-     "onay": false,
-     "not": "CTKB 0,70; Ekim 16 mm betopan ve kapı kolu vidası (3,9×32) 0,70."
+     "onay": true,
+     "not": "CTKB 0,70; Ekim 16 mm betopan ve kapı kolu vidası (3,9×32) 0,70.; Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
     },
     "Pencere vidası (4,8 × 70) | adet": {
      "fiyat": 1.9,
@@ -2427,8 +2430,8 @@
      ],
      "kaynak_kalem": "(5,5×25) trapez vida (aşık+omega)",
      "durum": "eşleşti",
-     "onay": false,
-     "not": "CTKB çelik panel için 2,30."
+     "onay": true,
+     "not": "CTKB çelik panel için 2,30.; Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
     },
     "Trapez vida (5,5 × 60) | adet": {
      "fiyat": 3,
@@ -2643,8 +2646,8 @@
      ],
      "kaynak_kalem": "Klozet (duvara sıfır) takım",
      "durum": "eşleşti",
-     "onay": false,
-     "not": "Haziran 3.500."
+     "onay": true,
+     "not": "Haziran 3.500.; Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
     },
     "Banyo dolabı | takım": {
      "fiyat": 4500,
@@ -2653,8 +2656,8 @@
      "kaynak_satir": "ST24",
      "kaynak_kalem": "Banyo dolabı",
      "durum": "eşleşti",
-     "onay": false,
-     "not": "CTKB fiyatsız."
+     "onay": true,
+     "not": "CTKB fiyatsız.; Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
     },
     "Banyo batarya grubu | takım": {
      "fiyat": 3500,
@@ -2665,8 +2668,8 @@
      ],
      "kaynak_kalem": "Banyo batarya grubu takım",
      "durum": "eşleşti",
-     "onay": false,
-     "not": ""
+     "onay": true,
+     "not": "Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
     },
     "Taharet musluğu 20 mm | adet": {
      "fiyat": 50,
@@ -2675,8 +2678,8 @@
      "kaynak_satir": "ST6",
      "kaynak_kalem": "Taharet musluğu 20 mm",
      "durum": "eşleşti",
-     "onay": false,
-     "not": "Ekim listesinde batarya grubunun içinde."
+     "onay": true,
+     "not": "Ekim listesinde batarya grubunun içinde.; Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
     },
     "Dış cephe boyası | kova 17,5 kg": {
      "fiyat": 3500,
@@ -2771,8 +2774,8 @@
      ],
      "kaynak_kalem": "Veranda-sundurma-balkon tavan Boardex 12,5×1200×2400",
      "durum": "eşleşti",
-     "onay": false,
-     "not": "CTKB 225."
+     "onay": true,
+     "not": "CTKB 225.; Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
     },
     "Alın kapama | L 2500": {
      "fiyat": 345,
@@ -2813,8 +2816,8 @@
      "kaynak_satir": "ÇG19",
      "kaynak_kalem": "Antrasit ters mahya L 2800",
      "durum": "eşleşti",
-     "onay": false,
-     "not": "CTKB ters mahya fiyatsız."
+     "onay": true,
+     "not": "CTKB ters mahya fiyatsız.; Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
     },
     "Ters mahya kenar kutusu | L 21 × 40 × 21 × 2800": {
      "fiyat": null,

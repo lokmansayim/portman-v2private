@@ -12,12 +12,12 @@ Yeni pencere için hazırlıklar:
 **27 Ekim 2026 gece eki (İE-13 · PR-1, fiyat defteri; Kurulum Panosu satır 62; `docs/is_emirleri/IE-13.md`):**
 - **Karar ve onay:** Patron 22:00 UTC kartı "Son listeler, ön dolu Excel"; fiyat kaynakları Patron'un TK-01 için verdiği iki liste (22:01 87 m² listesi, 22:11 Haziran listesi). CIO 22:11: çelik kalemleri deftere girer, dosya sınırı `kurallar/fiyat/`, `araclar/fiyatla.py`, `testler/test_fiyat_defteri.py`, İE-13 ve DURUM. Motor, Beyin, kanal, referans ve canlı değişmedi.
 - **Yapıldı:**
-  - `kurallar/fiyat/defter_2026-10.json`: prefabrik 130 kalem (121 onaylı, 1 öneri, 8 fiyatsız; pano eni bandı, 627,5 mm sınırı Patron 22:08); çelik 99 kalem (60 onaylı, 35 öneri, 4 fiyatsız).
+  - `kurallar/fiyat/defter_2026-10.json`: prefabrik 130 kalem (121 onaylı, 1 öneri, 8 fiyatsız; pano eni bandı, 627,5 mm sınırı Patron 22:08); çelik 99 kalem (r02: 83 onaylı, 12 öneri, 4 fiyatsız; iki listeden birebir eşleşen 23 kalem CIO 22:32 ile onaylı, Patron'un "son listeler" kararı genel kaynak).
   - `araclar/fiyatla.py`: liste × fiyat; onaysız fiyat yalnız `--oneri` ile; adet düzeltmesi; basit yöntem farkı ve eşik; JSON ve Excel.
   - `testler/test_fiyat_defteri.py`: 23 test. Defterde kişisel veri yok (desenle denetlenir).
-- **Sonuç:** TK-01 (Patron'un düzeltmesiyle) asma 425.203,13 TL, ters 423.932,13 TL, teklif çalışmasının r05'iyle aynı. Açık sekiz projede satırların %64–91'i onaylı fiyatla. Çelikte onaylı fiyatla Ç8201 58/90, Ç8801 60/93 satır; önerilerle 88/90, 89/93.
+- **Sonuç:** TK-01 (Patron'un düzeltmesiyle) asma 425.203,13 TL, ters 423.932,13 TL, teklif çalışmasının r05'iyle aynı. Açık sekiz projede satırların %64–91'i onaylı fiyatla. Çelikte onaylı fiyatla Ç8201 79/90, Ç8801 79/93 satır; önerilerle 88/90, 89/93. Çıktının Kaynak sütununda liste ve tarih.
 - **Kullanıcı adımları:** T1 (prefabrik listesi) **Yerelde çalışıyor**; T2 (çelik), T3 (basit yöntem farkı), T4 (Patron defteri görür ve düzeltir) **Kısmen**; T5 (teklif belgesi), T6 (bayiye teklif) **Çalışmıyor**.
-- **Bekleyen:** PR'ın `main`'e birleştirilmesi (Lokman). Kalan fiyatlar teklif çalışmasından Patron'a sorulur, gelince defter r02. Basit yöntemin m² fiyatları ve eşik, KDV durumu, iki listenin çelikte de kullanılması Patron'un kararı.
+- **Bekleyen:** PR'ın `main`'e birleştirilmesi (Lokman). Kalan fiyatlar teklif çalışmasından Patron'a sorulur, gelince defter r02. Basit yöntemin m² fiyatları, eşik ve KDV pilottan önce Patron'a tek kartta.
 
 **27 Ekim 2026 gece eki (Pano satır 12 · CI'a canlının Python'u 3.12; dal `claude/project-thread-xbdfzd`, `main` `4bab1d4`'ten; PR #51 birleşti, 21:04 UTC):**
 - **Neden:** İE-17 oturumu Python 3.13'te `testler/kimlik/test_k3b.py::test_kesim_yuvarlamasi_liste_uretecinin`'i kırmızı gördü. Canlı sunucu 3.12.3, CI ve `ortam_kur.sh` 3.11. CIO (21:18 UTC): önce 3.12'de tam koşu ölçülsün, sonra test ön koşulu ve 3.12 CI işi tek PR'da.

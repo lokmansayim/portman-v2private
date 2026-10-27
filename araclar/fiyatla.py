@@ -108,7 +108,7 @@ def fiyatla(L: dict, defter: dict, hat: str | None = None, oneri: bool = False) 
             fiyatsiz.append({"sira": i, "anahtar": k, "miktar": miktar, "durum": durum})
         satirlar.append({"sira": i, "grup": s.get("grup"), "kalem": s["kalem"], "olcu": s.get("boyut") if hat == "celik" else s.get("olcu"),
                          "birim": birim, "adet": s.get("adet"), "kg": s.get("kg"), "birim_fiyat": fiyat, "tutar": tutar,
-                         "durum": durum, "kaynak": kaynak})
+                         "durum": durum, "kaynak": kaynak, "kaynak_adi": (defter["kaynaklar"].get(kaynak) or {}).get("kisa") if kaynak else None})
     return {"hat": hat, "defter_surumu": defter.get("surum"), "oneri_dahil": oneri, "satirlar": satirlar,
             "ozet": {"toplam": round(toplam, 2), "onayli_fiyatlarla": round(onayli, 2), "onerilerle": round(oneri_toplam, 2),
                      "satir": len(satirlar), "fiyatli": sum(1 for x in satirlar if x["tutar"] is not None),
@@ -132,7 +132,8 @@ def excel_yaz(R: dict, yol: Path, baslik: str) -> None:
     ws.append(["Sıra", "Grup", "Kalem", "Ölçü", "Birim", "Adet", "kg", "Birim fiyat", "Tutar", "Durum", "Kaynak"])
     for c in ws[2]: c.font = Font(bold=True)
     for s in R["satirlar"]:
-        ws.append([s["sira"], s["grup"], s["kalem"], s["olcu"], s["birim"], s["adet"], s["kg"], s["birim_fiyat"], s["tutar"], s["durum"], s["kaynak"]])
+        ws.append([s["sira"], s["grup"], s["kalem"], s["olcu"], s["birim"], s["adet"], s["kg"], s["birim_fiyat"], s["tutar"], s["durum"],
+                   s.get("kaynak_adi") or s["kaynak"]])
         if s["tutar"] is None or not s["durum"].startswith("onaylı"):
             for c in ws[ws.max_row]: c.fill = sari
     o = R["ozet"]
@@ -141,7 +142,7 @@ def excel_yaz(R: dict, yol: Path, baslik: str) -> None:
     if R.get("m2"):
         m = R["m2"]
         ws.append(["", "", f"Basit yöntem: {m['alan_m2']} m² × {m['m2_fiyat']}", "", "", "", "", "", m["basit_toplam"], f"fark %{m['fark_yuzde']}"])
-    for col, w in zip("ABCDEFGHIJK", (6, 14, 46, 24, 7, 8, 9, 11, 12, 14, 9)):
+    for col, w in zip("ABCDEFGHIJK", (6, 14, 46, 24, 7, 8, 9, 11, 12, 14, 32)):
         ws.column_dimensions[col].width = w
     yol.parent.mkdir(parents=True, exist_ok=True)
     wb.save(yol)
