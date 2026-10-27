@@ -1,0 +1,42 @@
+{
+ "_aciklama": "İE-20: elle yazılmış basit okuma (2+1, 7,73 × 8,88 m, dört kollu birleşimsiz, verandasız): bugünkü Pano Motor'uyla uçtan uca çizim testi.",
+ "tur": "plan",
+ "yapi_turu": "prefabrik",
+ "kat_sayisi": 1,
+ "giris_kenari": "alt",
+ "dis_olcu": {"yatay_cm": 773, "dusey_cm": 888},
+ "zincirler": [
+  {"kenar": "ust", "olculer_cm": [387, 126, 260], "toplam_cm": 773, "kapsam": "govde"},
+  {"kenar": "sol", "olculer_cm": [382, 506], "toplam_cm": 888, "kapsam": "govde"}
+ ],
+ "odalar": [
+  {"ad": "YATAK ODASI 1", "islev": "yatak_odasi", "alan_m2": 14.5, "dikdortgenler": [[0, 0, 387, 382]]},
+  {"ad": "BANYO", "islev": "banyo", "alan_m2": 3, "dikdortgenler": [[387, 0, 513, 256]]},
+  {"ad": "YATAK ODASI 2", "islev": "yatak_odasi", "alan_m2": 9.5, "dikdortgenler": [[513, 0, 773, 382]]},
+  {"ad": "HOL", "islev": "hol", "alan_m2": 7.5, "dikdortgenler": [[387, 256, 513, 888]]},
+  {"ad": "SALON", "islev": "salon", "alan_m2": 19, "dikdortgenler": [[0, 382, 387, 888]]},
+  {"ad": "MUTFAK", "islev": "mutfak", "alan_m2": 12.5, "dikdortgenler": [[513, 382, 773, 888]]}
+ ],
+ "kapilar": [
+  {"arasinda": ["DIŞ", "HOL"], "kenar": "alt"},
+  {"arasinda": ["HOL", "BANYO"]},
+  {"arasinda": ["HOL", "YATAK ODASI 1"]},
+  {"arasinda": ["HOL", "YATAK ODASI 2"]},
+  {"arasinda": ["HOL", "SALON"]},
+  {"arasinda": ["HOL", "MUTFAK"]}
+ ],
+ "pencereler": [
+  {"oda": "YATAK ODASI 1", "kenar": "ust", "olcu": "120x120"},
+  {"oda": "BANYO", "kenar": "ust", "olcu": "60x40"},
+  {"oda": "YATAK ODASI 2", "kenar": "ust", "olcu": "120x120"},
+  {"oda": "SALON", "kenar": "sol", "olcu": "120x180"},
+  {"oda": "SALON", "kenar": "alt", "olcu": "120x180"},
+  {"oda": "MUTFAK", "kenar": "sag", "olcu": "120x120"}
+ ],
+ "verandalar": [],
+ "cati": {"tip": "besik", "mahya": "giristen_arkaya"},
+ "duvar_yuksekligi_cm": 250,
+ "tahminler": [],
+ "emin_olunamayanlar": [],
+ "ozet": "Tek katlı prefabrik 2+1, 7,73 × 8,88 m."
+}
