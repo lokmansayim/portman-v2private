@@ -13,6 +13,7 @@ Yeni pencere için hazırlıklar:
 - **Karar ve onay:** plan PF `Celik_Cizim_Kurallari/PR-4/plan.md`, Lokman 27 Ekim 14:36 UTC kartı "Planla başla (dokuzu birden)". Kural ve kod `3ef60d8`'de donuk; hakem değişmedi; mühüre yalnız ekleme. Kör listeler açılmadı.
 - **Yapıldı:** sayfa denetimi aracı (`kor_sayfa.py`: 1. sayfa etiketsiz mi, yöntem A/B, kat; açık beşte doğru); kör listenin sözlüğü listeyle donar, açılıştan sonra yeniden üretilmez (`liste_yap.py`, `test_kor_listeler.py`); ÇP-20, ÇP-18, ÇP-19 ve ÇP-17'nin (önceden görülmüş: KT-02) tanımı yalnız 1. sayfadan, listemiz her biri kendi commit'inde; planlar 1. sayfayla yan yana PF `PR-4/kor_tanimlar/`.
 - **ÇP-12:** paftada müşteri onay sayfası yok (1. sayfa etiketli): tanım yazılamıyor, kör kalır.
+- **Kanıt:** › IE-16 Kanıt (PR-4a): tam doğrulama (harness 22/22, referansla aynı, pytest 1952 geçti, 29 atlandı), sonraki commit'lerde hızlı gerileme referansla aynı; sır taraması temiz; geometri hakemi 2. tur "Kurallara uygun"; kod incelemesinin yedi düzeltmesi (listeler değişmedi).
 - **Kullanıcı adımları:** PR-4 **Çalışmıyor** (ölçüm yok; dört tanım ve listemiz commit'li).
 - **Bekleyen (Lokman):** büyük beş paftanın (ÇP-02, 04, 08, 09, 11) Mac'e indirilmesi (14:38 mesajı); sonra açılış kartı (geri alınmaz) ve PR-4b.
 
