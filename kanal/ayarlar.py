@@ -33,6 +33,10 @@ VARSAYILAN = {
     # verir; LLM aynı mesajı gölgede okur, iki okuma okuma_kiyaslari'na yazılır; mesaj başına 1 ücretli çağrı) · "acik" (LLM-önce karar).
     # Geriye uyum: `acik: true` ve `mod` yoksa "acik".
     "llm_once_revizyon": {"acik": False, "model": "claude-opus-5-5", "effort": "low", "timeout_s": 60},   # `mod` yok = kapali (inceleme C5)
+    # İE-20: bayinin plan resmi, el çizimi ya da PDF'i okunur (LLM yalnız okur; çizim başına 1, her düzeltme 1 ücretli çağrı); okunan
+    # bayiye [Doğru] [Düzelt] ile gösterilir. `bekle_sn`: gönderici dosyayı indirene kadar ajanın beklediği en uzun süre. Kapalıyken bugünkü
+    # cevap ("yalnız yazılı talepleri işleyebiliyorum").
+    "gorsel_okuma": {"acik": False, "model": "claude-opus-5-5", "effort": "medium", "timeout_s": 180, "max_tokens": 8000, "bekle_sn": 60},
 }
 ANAHTARLAR = tuple(VARSAYILAN)
 SABLON_ANAHTARLARI = ("sablon_patron_bildirim", "sablon_bayi_dosyalar_hazir", "sablon_muhendis_kontrol", "sablon_muhendis_hatirlatma",
@@ -52,7 +56,7 @@ def oku(veri) -> dict:
         return a
     if isinstance(d, dict):
         for k, v in d.items():
-            if k in ("llm", "plan_uretimi", "llm_once_revizyon") and isinstance(v, dict):
+            if k in ("llm", "plan_uretimi", "llm_once_revizyon", "gorsel_okuma") and isinstance(v, dict):
                 a[k] = {**a[k], **v}
             else:
                 a[k] = v
