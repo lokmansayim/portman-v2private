@@ -1,0 +1,42 @@
+{
+ "_aciklama": "İE-20: elle yazılmış çelik okuma (2+1, 11,00 × 8,50 m, verandasız): İE-14 plan denetçisinin oda kurallarına uyan, çelik yolunu (G5) deneyen örnek.",
+ "tur": "plan",
+ "yapi_turu": "celik",
+ "kat_sayisi": 1,
+ "giris_kenari": "alt",
+ "dis_olcu": {"yatay_cm": 1100, "dusey_cm": 850},
+ "zincirler": [
+  {"kenar": "ust", "olculer_cm": [400, 240, 460], "toplam_cm": 1100, "kapsam": "govde"},
+  {"kenar": "sol", "olculer_cm": [400, 450], "toplam_cm": 850, "kapsam": "govde"}
+ ],
+ "odalar": [
+  {"ad": "YATAK ODASI 1", "islev": "yatak_odasi", "alan_m2": 16, "dikdortgenler": [[0, 0, 400, 400]]},
+  {"ad": "BANYO", "islev": "banyo", "alan_m2": 7.2, "dikdortgenler": [[400, 0, 640, 300]]},
+  {"ad": "YATAK ODASI 2", "islev": "yatak_odasi", "alan_m2": 18.4, "dikdortgenler": [[640, 0, 1100, 400]]},
+  {"ad": "HOL", "islev": "hol", "alan_m2": 13.2, "dikdortgenler": [[400, 300, 640, 850]]},
+  {"ad": "SALON", "islev": "salon", "alan_m2": 18, "dikdortgenler": [[0, 400, 400, 850]]},
+  {"ad": "MUTFAK", "islev": "mutfak", "alan_m2": 20.7, "dikdortgenler": [[640, 400, 1100, 850]]}
+ ],
+ "kapilar": [
+  {"arasinda": ["DIŞ", "HOL"], "kenar": "alt"},
+  {"arasinda": ["HOL", "BANYO"]},
+  {"arasinda": ["HOL", "SALON"]},
+  {"arasinda": ["HOL", "MUTFAK"]},
+  {"arasinda": ["SALON", "YATAK ODASI 1"]},
+  {"arasinda": ["MUTFAK", "YATAK ODASI 2"]}
+ ],
+ "pencereler": [
+  {"oda": "YATAK ODASI 1", "kenar": "ust", "olcu": "120x120"},
+  {"oda": "BANYO", "kenar": "ust", "olcu": "60x40"},
+  {"oda": "YATAK ODASI 2", "kenar": "ust", "olcu": "120x120"},
+  {"oda": "SALON", "kenar": "sol", "olcu": "120x180"},
+  {"oda": "SALON", "kenar": "alt", "olcu": "120x180"},
+  {"oda": "MUTFAK", "kenar": "sag", "olcu": "120x120"}
+ ],
+ "verandalar": [],
+ "cati": {"tip": "besik", "mahya": "giristen_arkaya"},
+ "duvar_yuksekligi_cm": 280,
+ "tahminler": [],
+ "emin_olunamayanlar": [],
+ "ozet": "Tek katlı çelik 2+1, 11,00 × 8,50 m."
+}
