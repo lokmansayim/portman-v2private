@@ -110,7 +110,7 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | İE | İE-17 | 28 prefabrik evin çizimi, 1. adım: çatı ve dört görünüş genel motordan (hedef AP-13) | alındı (27.10; CIO) |
 | İE | İE-18 | montaj rehberi | alındı (CIO) |
 | İE | İE-19 | altın set | alındı (CIO) |
-| İE | İE-20 | talep formu ve görsel | alındı (CIO) |
+| İE | İE-20 | görsel ve PDF ile talep, talep ve revizyon formu (WhatsApp Flow); pano satır 83, 110, 61 | alındı (27.10; `claude/project-thread-l5mh7r`) |
 | İE | **İE-21** | — | **sıradaki boş** |
 | BK | BK-01–BK-08 | bu depo; BK-08 8a sonrası temizlik (`bk-08-8a-temizlik`) | yazıldı |
 | BK | BK-09 | metin ve çizim düzeltmeleri, G1 (`bk-09-metin-cizim`, `bk-09-cizim-g1`) | alındı (14.10) |

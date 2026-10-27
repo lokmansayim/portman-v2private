@@ -1,7 +1,8 @@
 """İE-04 · Gelen buton ve liste cevaplarının çözümü (kanal v1.3).
 
 Kimlik dilbilgisi (docs/is_emirleri/IE-04-mesaj-katmani.md): s:<set>:<kod> seçim · o:<is_emri_no>:<rev> onay ·
-r:<is_emri_no>:<rev> revizyon isteği · q:<alan>:<deger> bekleyen sorunun kısa cevabı.
+r:<is_emri_no>:<rev> revizyon isteği · q:<alan>:<deger> bekleyen sorunun kısa cevabı · c:<iz>:d|z çizim okumasının teyidi (İE-20:
+Doğru / Düzelt; <iz> konuşmadaki `cizim_okuma.iz`).
 
 Kural: görünen başlık metni tek başına seçim kimliği sayılmaz. Kimlik çözülür; cevabın verildiği giden mesaj (context_id →
 giden satırı) bulunabiliyorsa kimliğin o mesajın butonları arasında olduğu doğrulanır; sonra güncellik denetlenir. Güncel
@@ -11,7 +12,7 @@ deterministik bir Talep'e çevrilir. Serbest metin bu dosyaya girmez (LLM yolu d
 from __future__ import annotations
 import re
 
-BUTON_ID = re.compile(r"^(s|o|r|q):([^:]{1,120}):([^:]{1,60})$")
+BUTON_ID = re.compile(r"^(s|o|r|q|c):([^:]{1,120}):([^:]{1,60})$")
 KISA_CEVAP = {  # q:<alan>:<deger> → kural katmanının okuyacağı metin
     "pencere_islem": {"degistir": "değiştir", "ekle": "ekle"},
     "yeni_mi_degisiklik": {"yeni": "yeni", "degisiklik": "değişiklik"},
@@ -93,6 +94,21 @@ def coz(gelen: dict, d: dict | None, giden_bul=None) -> dict:
                     "talep": _talep("onay", f"{a} r{rev:02d} onaylandı (buton)"), "not": f"onay butonu: {a} r{rev:02d}"}
         return {"gecerli": True, "tur": "revize", "kimlik": kimlik, "metin": "revize et",
                 "talep": _talep("red", f"{a} r{rev:02d} için değişiklik istendi (buton)"), "not": f"revizyon butonu: {a} r{rev:02d}"}
+    if tur == "c":                                   # İE-20: çizim okumasının teyidi
+        co = d.get("cizim_okuma") or {}
+        if b not in ("d", "z"):
+            return {"gecerli": False, "kimlik": kimlik, "neden": "bilinmeyen çizim cevabı", "mesaj": "Bu cevabı tanıyamadım; lütfen yazarak cevaplayın."}
+        if co.get("iz") != a or co.get("durum") not in (("teyit", "duzeltme") if b == "d" else ("teyit", "soru", "duzeltme")):
+            neden = "eski çizim okuması" if co.get("iz") != a else f"çizim okuması {co.get('durum')}"
+            mesaj = ("Bu düğme çiziminizin daha önceki bir okumasına ait; güncel okumayı az önce gönderdim, oradan cevaplayın ya da yazın."
+                     if co.get("iz") != a and co.get("durum") in ("teyit", "soru", "duzeltme") else
+                     "Bu çizim okuması artık açık değil" + (f"; güncel plan {guncel[0]} r{guncel[1]:02d}" if guncel[0] else "") + ". İsteğinizi yazın.")
+            return {"gecerli": False, "kimlik": kimlik, "neden": neden, "mesaj": mesaj}
+        if b == "d":
+            return {"gecerli": True, "tur": "cizim", "secim": "d", "kimlik": kimlik, "metin": "doğru",
+                    "talep": _talep("onay", "çizim okuması doğru (buton)"), "not": "çizim teyit butonu: doğru"}
+        return {"gecerli": True, "tur": "cizim", "secim": "z", "kimlik": kimlik, "metin": "düzelt",
+                "talep": _talep("diger", "çizim okuması düzeltilecek (buton)"), "not": "çizim teyit butonu: düzelt"}
     # q: bekleyen sorunun kısa cevabı
     if d.get("son_soru_alani") != a:
         return {"gecerli": False, "kimlik": kimlik, "neden": "soru artık askıda değil",
