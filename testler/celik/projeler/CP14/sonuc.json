@@ -2,10 +2,10 @@
  "aciklama": "Çelik hakeminin sonucu (İE-16). Yalnız tutanlar: çelik kg kapısının sonucu (farkı yalnız geçtiyse), adedi tutan çelik türleri ve adedi tutan öteki satırlar (anahtar ve bizim adedimiz). Tutmayan satırların gerçek değeri depoya girmez; sayilar kıyasın özetidir.",
  "kod": "ÇP-14",
  "tarih": "2026-10-27",
- "kiyas_commit": "820faec5698711e892dca472597a2624ca6726a6",
+ "kiyas_commit": "545346c207a5578c2053ac158dbf77ace72d9541",
  "bizim_liste": {
   "yol": "testler/celik/projeler/CP14/bizim_liste.json",
-  "commit": "2711977eeefa1ad93be1827d19048c9105042844"
+  "commit": "9af9a47e1264437cd89c1921945ac94427a41434"
  },
  "muhur": {
   "sha256": "4b884c7c27bf3bd509f618c504ededb3611346fa15b5d4ee763742160c8bc406",
@@ -16,13 +16,13 @@
   "muhur_commit": "a31afcd1d6ccfcbcbb24be72d94c03203747fe57"
  },
  "celik_kg_kapisi": {
-  "sonuc": "geçmedi",
+  "sonuc": "geçti",
   "pay_yuzde": 3.0,
   "kapi_disi": [
    "c_profil"
   ],
   "kapi_disi_bizim_kg": 30.0,
-  "fark_yuzde": null
+  "fark_yuzde": 0.93
  },
  "celik_turleri_tutan": [
   {
@@ -43,7 +43,7 @@
   "farklı": 10,
   "adet okunamadı": 0,
   "bizde yok": 61,
-  "bizde fazla": 74
+  "bizde fazla": 75
  },
  "tutanlar": [
   {"grup": "KAPI VE PENCERE", "ad": "MELAMIN KAPI 80 LIK KANAT", "olcu": [90.0, 214.0], "adet": 6},
