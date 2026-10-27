@@ -128,11 +128,14 @@ def plan(ax, y: dict, c: dict, ms: list[dict], cps: list[dict], kk: dict) -> Non
 def tablo(ax, ms: list[dict], cps: list[dict], ck: dict, kk: dict, profil: str) -> None:
     ax.axis("off")
     tr = ciz_genel.tr
+    kalin = [x for x in ms if x.get("et") not in (None, profil.rsplit("x", 1)[-1])]   # tek açıklığı sınırı aşan makas (`makas_eti`, İE-16 PR-3c)
     sat = [f"{'Ad':4s} {'Tür':14s} {'Aile':24s} {'Açıklık':>8s} {'h':>6s} {'Profil boyu':>11s}"]
     for x in ms:
         sat.append(f"{x['ad']:4s} {TUR_ADI[x['tur']]:14s} {x['aile'][:24]:24s} {ciz_genel.sade(x['acik_cm']):>8s} {ciz_genel.sade(x['h_en_cok_cm']):>6s} "
-                   f"{tr(x['profil_boyu_m'], 2) + ' m':>11s}")
-    sat += ["", f"Makas {len(ms)} · profil {profil.replace('x', ' × ')} · toplam {tr(sum(x['profil_boyu_m'] for x in ms), 1)} m"]
+                   f"{tr(x['profil_boyu_m'], 2) + ' m':>11s}" + (f"  et {x['et']}" if x in kalin else ""))
+    sat += ["", f"Makas {len(ms)} · profil {profil.replace('x', ' × ')}"
+            + (f" ({len(kalin)} makas {kalin[0]['et']} mm: tek açıklığı sınırı aşıyor)" if kalin else "")
+            + f" · toplam {tr(sum(x['profil_boyu_m'] for x in ms), 1)} m"]
     if ck["cati_panelleri"]:
         sat += ["", f"{'Ad':4s} {'Düzlem':14s} {'Profil':14s} {'Ölçü (açılım)':>15s} {'Profil boyu':>11s}"]
         for x, r in zip(cps, ck["cati_panelleri"]):

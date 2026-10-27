@@ -488,7 +488,8 @@ def _hesapla(g: dict, k: dict) -> dict:
     if (di.get("listede", True) or yz) and not (di.get("bos_yazilmaz") and yal_net <= 0):
         ekle("İç cephe kaplama", "Duvar izolasyonu", "paket 8,64 m²", tavan(yal_net * (1 + yz) / deg(k, "yalitim_paket_m2")), yal_net, yal_brut,
              formul="dış duvar × kat sayısı (80 mm karkasta 1, 140 mm'de 2) + iç duvar − boşluklar; " + (f"× {tr(1 + yz)} " if yz else "") + "÷ 8,64",
-             durum=SABLON if yz else "uydurma", not_=f"dış duvar {kat_sayisi} kat")
+             durum=SABLON if yz else "uydurma", not_=f"dış duvar {kat_sayisi} kat"
+             + ("; mineral yün, listede (Lokman, 27 Ekim 2026); adet formülü 2025 listelerinden" if di.get("bos_yazilmaz") else ""))
 
     # ── Çatı kaplaması (seçenek) ────────────────────────────────────────────
     sacak = c["sacak_boyu_toplam_m"]
@@ -769,8 +770,9 @@ def _hesapla(g: dict, k: dict) -> dict:
             silte -= sd
         silte_kat = c.get("silte_kat", 1)
         si_mm = sb.get("cati_izolasyonu_kalinligi_mm")       # Eylül 2026 şablonu: "çatı izolasyonu 100 mm"; 2025 listelerinde "çatı şiltesi 80 mm"
-        sa = tr(deg(k, "silte_adet_m2"), 1)                   # paket alanı (0.20: İzocam 80 mm, 9,0; önceki setlerde 9,6)
-        ekle("Çatı kaplamaları", f"Çatı izolasyonu {si_mm} mm" if si_mm else "Çatı şiltesi 80 mm", f"{sa} m²/adet", silte_kat * tavan(silte / deg(k, "silte_adet_m2")), silte,
+        sa_m2 = sb.get("silte_adet_m2") or deg(k, "silte_adet_m2")   # paket alanı: kitapta 0.20'de İzocam 80 mm, 9,0 (önceki setlerde 9,6); şablonda 100 mm, 9,6
+        sa = tr(sa_m2, 1)
+        ekle("Çatı kaplamaları", f"Çatı izolasyonu {si_mm} mm" if si_mm else "Çatı şiltesi 80 mm", f"{sa} m²/adet", silte_kat * tavan(silte / sa_m2), silte,
              formul=(f"(çatı boyu × (bina eni + 0,20) − çatısız veranda {tr(sd, 2)} m²) ÷ {sa}" if sd else f"çatı boyu × (bina eni + 0,20) ÷ {sa}")
                     + (f" × {silte_kat} kat" if silte_kat > 1 else ""), durum=SABLON if si_mm else "uydurma",
              not_=(f"Eylül 2026 şablonu: kalem 'çatı izolasyonu {si_mm} mm'; 2025 listelerinde 'çatı şiltesi 80 mm'. Adet formülü aynı "

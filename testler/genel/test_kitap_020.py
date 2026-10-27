@@ -63,6 +63,16 @@ def test_cati_siltesi_izocam_80(cp06):
     assert yeni["adet"] == math.ceil(yeni["olcu"] / 9.0 - 1e-9) and eski["adet"] == math.ceil(eski["olcu"] / 9.6 - 1e-9)
 
 
+def test_sablon_katmaninin_izolasyonu_100_mm_paketiyle():
+    """Eylül 2026 şablonunun 'çatı izolasyonu 100 mm' satırı 100 mm'lik rulonun paketiyle (9,6; şablondaki formül ÷ 9,6), kitabın 80 mm'liği
+    9,0 olsa da. Duvar izolasyonunun notu Lokman'ın 27 Ekim kararını söyler."""
+    g, L = _liste(PROJELER / "CP06" / "CP06_kural.json", K20)
+    gs = json.loads(json.dumps(g)); gs["sablon"] = "2026"
+    s = _satir(yukleme.hesapla(gs, K20), "Çatı izolasyonu 100 mm")
+    assert s["boyut"] == "9,6 m²/adet" and s["formul"].endswith("÷ 9,6") and s["adet"] == math.ceil(s["olcu"] / 9.6 - 1e-9)
+    assert "Lokman, 27 Ekim 2026" in _satir(L, "Duvar izolasyonu")["not"]
+
+
 def test_liste_adlari_2026(cp06):
     """C1.9 ve C3: listede yazılan ad (`liste_adi`) 2026 listelerindeki gibi; iç ad ve adet aynı. 0.19'da bu satırlarda yazılan ad yok."""
     L20, L19 = cp06["0.20"][1], cp06["0.19"][1]

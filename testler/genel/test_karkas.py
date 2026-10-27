@@ -121,6 +121,19 @@ def test_eklemler_koseyi_saymaz():
     assert sum(len(karkas.eklemler(y, ks)) for ks in karkas.kosular(y, t)) > 0
 
 
+def test_cok_yakin_iki_oda_bolmesi_uyari(monkeypatch):
+    """İki ucu oda bölmesi olan kısa panel paftada da var (ÇP-14'ün 50–51 cm'lik sekizi; uyarı yok), ama iki profil derinliğinden kısası
+    (karşılıklı iki duvarın ekseni birbirine çok yakın) sessiz kalmaz: kayıtta uyarı."""
+    t = json.loads((CP06 / "CP06_kural.json").read_text(encoding="utf-8"))
+    y = yapi.kur(t)
+    assert karkas.kur(y, t, KURAL)["uyarilar"] == []
+    gercek = karkas.eklemler
+    monkeypatch.setattr(karkas, "eklemler", lambda y_, ks: sorted(e + [e[0] + 8.0]) if (e := gercek(y_, ks)) else e)
+    kk = karkas.kur(y, t, KURAL)
+    kisa = [p for p in kk["paneller"] if p["boy_cm"] == 8.0]
+    assert kisa and len([u for u in kk["uyarilar"] if "iki profil derinliğinden" in u and "panel 8.0 cm" in u]) == len(kisa)
+
+
 def test_ek_yeri_acikligin_yakin_kenarina_kayar():
     # eski kopya (366): 600'lük koşu iki panel: ek yeri 300; 280–380 arası açıklık → yakın kenar 280
     assert karkas.bol({"bas": 0.0, "son": 600.0}, [{"a0": 280.0, "a1": 380.0}], ESKI) == [(0.0, 280.0), (280.0, 600.0)]

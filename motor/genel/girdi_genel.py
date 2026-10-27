@@ -682,8 +682,10 @@ def girdi(y: dict, c: dict, m: dict, kur: dict, kaynak: str) -> dict:
     makas_notu = ""
     if kural_k and "makas" in cm:
         say = {}
+        kalin_et = cm["makas_kalin"]["profil"].rsplit("x", 1)[-1] if "makas_kalin" in cm else None   # kalın makaslar ayrı satırda, notta sayılmaz
         for x in m["karkas"]["cati"]["makaslar"]:
-            say[x["tur"]] = say.get(x["tur"], 0) + 1
+            if kalin_et is None or x.get("et") != kalin_et:
+                say[x["tur"]] = say.get(x["tur"], 0) + 1
         makas_notu = ", ".join(f"{n} {ad}" for tur, ad in (("makas", "tam"), ("kisa", "kısa"), ("capraz", "kırma çaprazı")) if (n := say.get(tur)))
     a_panelleri = {}
     if kural_k and yontem == "panel":

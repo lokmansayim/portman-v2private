@@ -232,8 +232,14 @@ def kur(y: dict, t: dict, k: dict, yontem: str | None = None) -> dict:
     S = d(k, "dikme_araligi_cm")
     uyarilar = [f"{p['ad']} ({', '.join(p['kosu'])}): panel {p['boy_cm']} cm, bölmenin " + ("en uzunu" if b.get("oda_bolmesi") else "hedefi")
                 + f" {hedef} cm; ek yeri açıklığın kenarına kaydı" for p in paneller if p["boy_cm"] > hedef + TOL]
-    uyarilar += [f"{p['ad']} ({', '.join(p['kosu'])}): panel {p['boy_cm']} cm, bir dikme aralığından ({S} cm) kısa; ek yeri açıklığın kenarına kaydı"
-                 for p in paneller if p.pop("_kosunun_parcasi") and p["boy_cm"] < S - TOL]
+    for p in paneller:
+        der = float(p["profil"].split("x")[0]) / 10 if p["profil"] else 8.0
+        if p.pop("_kosunun_parcasi"):
+            if p["boy_cm"] < S - TOL:
+                uyarilar.append(f"{p['ad']} ({', '.join(p['kosu'])}): panel {p['boy_cm']} cm, bir dikme aralığından ({S} cm) kısa; ek yeri açıklığın kenarına kaydı")
+        elif p["boy_cm"] < 2 * der - TOL:   # iki ucu oda bölmesi: kısa panel paftada da var, ama iki profil derinliğinden kısası iki bağlantının çakışması
+            uyarilar.append(f"{p['ad']} ({', '.join(p['kosu'])}): panel {p['boy_cm']} cm, iki profil derinliğinden ({2 * der:g} cm) kısa; "
+                            "iki ucundaki oda bölmesi birbirine çok yakın")
     kol = d(k, "kolon")["profil_m_m"]
     kolonlar = [{"ad": w["ad"], "yukseklik_cm": yapi._yukseklik(w), "profil_boyu_m": round(kol * yapi._yukseklik(w) / 100, 4)}
                 for w in y["duvarlar"] if w["sinif"] == "kolon"]

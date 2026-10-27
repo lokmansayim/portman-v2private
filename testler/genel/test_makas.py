@@ -13,6 +13,7 @@ from __future__ import annotations
 import copy
 import json
 import math
+import re
 import sys
 from collections import Counter
 from pathlib import Path
@@ -427,10 +428,30 @@ def test_kalin_makas_ayri_satir(tmp_path, monkeypatch):
     monkeypatch.setenv("PORTMAN_KARKAS", str(yol))
     es = [x for x in _girdi(PROJELER / TANIMLAR["CP06"])["celik"]["ek_satirlar"] if x["ad"].startswith("Çatı makas panelleri")]
     assert [(x["ad"], x["panel_adedi"], x["profil"]) for x in es] == [("Çatı makas panelleri (1,2 mm)", len(kalin), "80x45x1,2")]
+    ce = _girdi(PROJELER / TANIMLAR["CP06"])["celik"]["cati"]                 # ince satırın notu kalınları saymaz
+    assert ce["panel_adedi"] == len(kk["cati"]["makaslar"]) - len(kalin) == sum(int(n) for n in re.findall(r"(\d+) ", ce["not"].split(":", 1)[1]))
+    from motor.genel import makas_pafta                                           # makas paftasının tablosunda kalın makasın eti
+    yazi = []
+    ax = type("Ax", (), {"axis": lambda s, *a: None, "transAxes": None, "text": lambda s, x, y_, m, **kw: yazi.append(m)})()
+    makas_pafta.tablo(ax, makas_pafta.adlar(kk["cati"]), [], kk["cati"], kk, "80x45x0,8")
+    assert sum(1 for s in yazi[0].splitlines() if s.endswith("et 1,2")) == len(kalin) and f"({len(kalin)} makas 1,2 mm" in yazi[0]
     assert liste_yap.celik_turu("Çatı makas panelleri (1,2 mm)") == liste_yap.celik_turu("Çatı makas panelleri") == "makas"
     hepsi = {**kk, "cati": {**kk["cati"], "makaslar": [{**x, "et": "1,2"} for x in kk["cati"]["makaslar"]]}}
     g = karkas.gruplar(hepsi, y, t, k, {})
     assert "makas_kalin" not in g and g["makas"]["profil"] == "80x45x1,2"
+
+
+def test_cati_ustu_panelinin_kucuk_parcasi_panel_olmaz():
+    """Kırma yüzünün köşesinde ızgaranın kestiği uç (kısa kenarı makas kalınlığından dar ya da 100 cm²'den küçük) panel olmaz, uyarı yazar.
+    Üçgen yüz 1000 × 360: saçak boyunca 2, eğim boyunca 2 parça; eğik kenar orta çizgiyi 510'da keser, sağ üst gözde 18 cm²'lik uç kalır."""
+    from shapely.geometry import Polygon
+    c = {"duzlemler": [{"ad": "kırma", "ust_yapi": None, "acilim": Polygon([(0, 0), (1000, 0), (20, 360)])}]}
+    uyari = []
+    up = makas.ust_panelleri(c, KURAL, uyari)
+    assert len(up) == 3 and all(min(p["olcu_cm"]) > 8 for p in up)
+    assert len(uyari) == 1 and uyari[0].startswith("çatı üstü paneli: kırma düzleminde 18 cm² parça")
+    uyari = []
+    assert len(makas.ust_panelleri(c, ESKI, uyari)) == 3 and uyari == []          # eski kopya: saçak boyunca 366'ya göre üç şerit, süzgeç yok
 
 
 def test_cati_paneli_adedi_tanimda_yoksa_kuraldan():

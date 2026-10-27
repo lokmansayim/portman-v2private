@@ -8,8 +8,8 @@
  "kural_seti": {
   "yol": "kurallar/liste/kurallar.json",
   "sema": "portman.yukleme_kurallari/0.20-taslak",
-  "sha256": "151f0be88e9ffa12ad741ca5e199cbe1ba07806d20fd8ef1f7e9d587dcc0253a",
-  "kopya": "testler/celik/projeler/setler/151f0be88e9ffa12.json"
+  "sha256": "a01cbf2a810c8e7fcede59dcf2ed9b86c31b815977456b8753da8afbaae506ea",
+  "kopya": "testler/celik/projeler/setler/a01cbf2a810c8e7f.json"
  },
  "karkas_kurali": {
   "yol": "kurallar/karkas/celik_karkas.json",
