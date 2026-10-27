@@ -9,6 +9,12 @@ Yeni pencere için hazırlıklar:
 - Dış çizim denetimi: `deneme/2026-09-30_asama2/kos.py --dxf`.
 - Mac'te `24_Astra_Cizimler/`.
 
+**27 Ekim 2026 gece eki (Pano satır 12 · CI'a canlının Python'u 3.12; dal `claude/project-thread-xbdfzd`, `main` `4bab1d4`'ten; PR #51 birleşti, 21:04 UTC):**
+- **Neden:** İE-17 oturumu Python 3.13'te `testler/kimlik/test_k3b.py::test_kesim_yuvarlamasi_liste_uretecinin`'i kırmızı gördü. Canlı sunucu 3.12.3, CI ve `ortam_kur.sh` 3.11. CIO (21:18 UTC): önce 3.12'de tam koşu ölçülsün, sonra test ön koşulu ve 3.12 CI işi tek PR'da.
+- **Ölçüm (yerel, `main` `4bab1d4`, Python 3.12.3 + `vps/gereksinimler.txt`, dört parça):** harness 22/22, referansla aynı (DXF 18/18, PDF 18/18, genel motor izleri 173/173), pytest 1934 geçti, 25 atlandı (fazladan atlanan vtk testi, sunucu setinde beklenen), **1 düştü: yalnız bu test**. Sebep: 3.12'den beri `sum()` float'ları telafili topluyor; dört hattın toplamı 3.11'de 1000,0000000000001, 3.12+'da tam 1000,0; testin "gürültü var" ön koşulu düşüyor. Ürün sonucu (`kesim.toplam_karti`, `kenar_karti`) 3.11, 3.12, 3.13'te aynı.
+- **Yapıldı:** test değişikliği (gerekçe `docs/is_emirleri/IE-15.md` › K3b kanıtı): gürültülü toplam sabit verildi, ürün davranışı değişmez, pay 0 mutasyonu iki sürümde de düşüyor. `.github/workflows/dogrulama.yml`: dört iş 3.11 ve 3.12'de (3.12 işleri `vps/gereksinimler.txt` ile), sekiz iş.
+- **Bekleyen (Lokman):** PR'ın `main`'e birleştirilmesi (test değişikliği içerir).
+
 **27 Ekim 2026 akşam eki (Pano satır 12 · GitHub Actions doğrulaması; dal `claude/project-thread-xbdfzd`, `main` `3ef60d8`'den; PR #51):**
 - **Karar ve onay:** plan PF `CI_Dogrulama/plan.md`, Lokman 27 Ekim 16:51 UTC kartı "Planla kur". Motor, Beyin, kanal, testler, kurallar, referans ve canlı değişmedi.
 - **Yapıldı:** `.github/workflows/dogrulama.yml`: her PR'da, `main`'e her push'ta ve elle `bash araclar/ortam_kur.sh --dogrula`'nın komutları (harness, tam referans, bütün pytest, yerel Postgres 16; root ile, Python 3.11, tam git geçmişi), dört paralel işte: harness + referans · kalıcı akış (Postgres yoksa kırmızı) · genel motor + motor · kalan testler (yeni klasör kendiliğinden buraya). Secrets yok, yalnız okuma izni. Kaynaklı testler (`PORTMAN_CELIK_KAYNAK`, `PORTMAN_PAFTA_DIZINI`, `PORTMAN_KOR_*`) burada atlanır; gerçek dosyalar GitHub'a yüklenmez.
