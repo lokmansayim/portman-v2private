@@ -27,6 +27,7 @@ import ifcopenshell.api
 from ifcopenshell.util.shape_builder import ShapeBuilder
 
 from . import geometry as G
+from . import veranda as VR
 from .dxf_out import Cizici
 from .katalog import Katalog
 
@@ -147,6 +148,8 @@ def hazirla(ie: dict) -> dict:
                           **({"makas_ekseni": cati["makas_ekseni"]} if "makas_ekseni" in cati else {}), "renk": "antrasit"}},
         "panolar": panolar, "acikliklar": acikliklar, "baglantilar": baglantilar, "odalar": odalar, "veranda": veranda, "tefris": [],
         **({"pano_ekleri": pano_ekleri} if pano_ekleri else {}),
+        **({"dis_verandalar": [{"ad": v["ad"], "cephe": v["cephe"], "rect": [_r(t) for t in v["rect"]], "cati": VR.cati(v, ie)}
+                               for v in plan.dis_verandalar]} if plan.dis_verandalar else {}),     # BK-14: dikme ve kiriş baglantilar'da
         "kanit": {"motor_uyarilari": plan.uyarilar}, "uyari": [],
     }
 
@@ -585,6 +588,51 @@ class IfcUretici:
         self._temsil(pl, self._prizma_xz([(x0, H0), (x1, H0), (x1, zt(x1)), (xm, zt(xm)), (x0, zt(x0))], yv, yv + 8), "fiber")
         self._pset(pl, "PortatifEv_Kapsam", {"BOMKalem": "Çatı alın dolgusu (üçgen) — kural teyit edilecek"})
 
+    def dis_verandalar(self):
+        """BK-14: gövdeden taşan verandanın zemini (kapsam dışı beton), çatısı ve kalkan alın dolgusu. Dikme ve kirişleri Motor DXF'inin BOM
+        bloklarından `baglantilar`'da gelir. Çatı düzlemleri `veranda.cati`'den (bayi paftasının çatı planı ve görünüşüyle aynı); kesit ana
+        çatınınki gibi duvar üstü + 10 cm'de, 4 cm sac."""
+        H0 = self.G["bina"]["duvar_h"]; t = 4.0
+        for i, v in enumerate(self.G.get("dis_verandalar", []), start=1):
+            x0, y0, x1, y1 = v["rect"]; C = v["cati"]
+            X0, Y0, X1, Y1 = C["kutu"]; zs, zm, eg, s = C["sacak_kotu"], C["mahya_kotu"], C["egim"], C["sacak"]
+            z = self._urun("IfcSlab", f"VERANDA_ZEMINI_{i}", predefined="FLOOR")
+            self._yerlestir(z); self._temsil(z, self._prizma_xy([(x0, y0), (x1, y0), (x1, y1), (x0, y1)], -15, 0), "beton")
+            self._pset(z, "PortatifEv_Kapsam", {"BOMKalem": f"{v['ad']} zemini — kapsam dışı (bayi/saha)", "KapsamDisi": True})
+            roof = self._urun("IfcRoof", f"VERANDA_CATISI_{i}", predefined="GABLE_ROOF" if C["tip"] == "besik" else "SHED_ROOF")
+            self._yerlestir(roof)
+            self._pset(roof, "PortatifEv_Cati", {"Veranda": v["ad"], "Egim_yuzde": round(eg * 100, 2), "Sacak_cm": s, "Mahya_cm": round(zm, 1)})
+            boyuna = v["cephe"] in ("on", "arka")              # mahya y boyunca: kesit x–z düzleminde
+            parcalar = []
+            for j, dz in enumerate(C["duzlemler"]):
+                xs = [p[0] for p in dz["plan"]]; ys = [p[1] for p in dz["plan"]]
+                ux, uy = dz["yukari"]
+                if ux:                                          # eğim x boyunca
+                    a0, a1 = (min(xs), max(xs)) if ux > 0 else (max(xs), min(xs))
+                    k = [(a0, zs + 10), (a1, zs + 10 + abs(a1 - a0) * eg), (a1, zs + 10 + abs(a1 - a0) * eg + t), (a0, zs + 10 + t)]
+                    g = self._prizma_xz(k, min(ys), max(ys))
+                else:                                           # eğim y boyunca
+                    a0, a1 = (min(ys), max(ys)) if uy > 0 else (max(ys), min(ys))
+                    k = [(a0, zs + 10), (a1, zs + 10 + abs(a1 - a0) * eg), (a1, zs + 10 + abs(a1 - a0) * eg + t), (a0, zs + 10 + t)]
+                    g = self._prizma_yz(k, min(xs), max(xs))
+                sl = self._urun("IfcSlab", f"VERANDA_CATI_{i}_{j + 1}", predefined="ROOF", kapsa=False)
+                self._yerlestir(sl); self._temsil(sl, g, "sac")
+                self._pset(sl, "PortatifEv_Kapsam", {"BOMKalem": f"Trapez çatı sacı (antrasit) — {v['ad']}"})
+                parcalar.append(sl)
+            api("aggregate.assign_object", self.f, relating_object=roof, products=parcalar)
+            if C["tip"] == "besik":                             # dış kenardaki kalkan: kirişin üstünden mahyaya üçgen dolgu
+                if boyuna:
+                    xm = (x0 + x1) / 2; zt = lambda x: zs + (min(x - x0, x1 - x) + s) * eg
+                    ya = y0 if v["cephe"] == "on" else y1 - 8
+                    g = self._prizma_xz([(x0, H0), (x1, H0), (x1, zt(x1)), (xm, zt(xm)), (x0, zt(x0))], ya, ya + 8)
+                else:
+                    ym = (y0 + y1) / 2; zt = lambda y: zs + (min(y - y0, y1 - y) + s) * eg
+                    xa = x0 if v["cephe"] == "sol" else x1 - 8
+                    g = self._prizma_yz([(y0, H0), (y1, H0), (y1, zt(y1)), (ym, zt(ym)), (y0, zt(y0))], xa, xa + 8)
+                pl = self._urun("IfcPlate", f"VERANDA_ALIN_{i}", predefined="SHEET")
+                self._yerlestir(pl); self._temsil(pl, g, "fiber")
+                self._pset(pl, "PortatifEv_Kapsam", {"BOMKalem": "Çatı alın dolgusu (üçgen) — kural teyit edilecek"})
+
     def baglantilar(self):
         """Köşe / üçlü H / veranda dikmesi / veranda profili (Motor DXF BOM bloklarının plan kutusu).
         Bağlantı ve dikmelerde 250 cm yalnız 3B gösterimdir (kesim boyu değil). Veranda profili: kot varsayım (duvar üstü 10 cm bant)."""
@@ -623,6 +671,8 @@ class IfcUretici:
 
     def calistir(self, yol: Path):
         self.panolar(); self.baglantilar(); self.pano_ekleri(); self.mahaller(); self.doseme(); self.cati(); self.veranda()
+        if self.G.get("dis_verandalar"):
+            self.dis_verandalar()
         self.f.write(str(yol))
         return yol
 

@@ -317,5 +317,29 @@
   "kalemler": [],
   "kaynak": "test girdisi"
  },
- "dikmeler": []
+ "dikmeler": [],
+ "verandalar": [
+  {
+   "ad": "ÖN VERANDA",
+   "cephe": "on",
+   "bas_cm": 256,
+   "bit_cm": 642,
+   "derinlik_cm": 181,
+   "cati": {
+    "tip": "besik",
+    "egim_yuzde": 27.5
+   }
+  },
+  {
+   "ad": "ARKA VERANDA",
+   "cephe": "arka",
+   "bas_cm": 0,
+   "bit_cm": 261,
+   "derinlik_cm": 130,
+   "cati": {
+    "tip": "besik",
+    "egim_yuzde": 27.5
+   }
+  }
+ ]
 }
