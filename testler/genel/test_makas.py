@@ -474,8 +474,9 @@ def test_ust_kotu_yazmayan_baca_uyari():
         w.pop("ust_kot", None)
     kk = karkas.kur(yapi.kur(t), t, KURAL)
     assert kk["bacalar"] == [] and len([u for u in kk["uyarilar"] if "bacanın üst kotu tanımda yazmıyor" in u]) == len(bacalar)
-    assert not any("bacanın üst kotu" in u for u in karkas.kur(yapi.kur(t), t, karkas.oku(KOK / "testler" / "celik" / "projeler" / "setler"
-                                                                                                  / "a3683af36f42b92d.json"))["uyarilar"])
+    for eski in ("a3683af36f42b92d", "7940e1d20cc18652"):                       # PR-3a ve PR-3b'nin kopyaları: eski davranış (uyarısız düşer)
+        kk = karkas.kur(yapi.kur(t), t, karkas.oku(KOK / "testler" / "celik" / "projeler" / "setler" / f"{eski}.json"))
+        assert kk["bacalar"] == [] and not any("bacanın üst kotu" in u for u in kk["uyarilar"])
 
 
 def test_cati_ustu_panelinin_kucuk_parcasi_panel_olmaz():

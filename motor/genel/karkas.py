@@ -240,7 +240,8 @@ def kur(y: dict, t: dict, k: dict, yontem: str | None = None) -> dict:
         elif p["boy_cm"] < 2 * der - TOL:   # iki ucu oda bölmesi: kısa panel paftada da var, ama iki profil derinliğinden kısası iki bağlantının çakışması
             uyarilar.append(f"{p['ad']} ({', '.join(p['kosu'])}): panel {p['boy_cm']} cm, iki profil derinliğinden ({2 * der:g} cm) kısa; "
                             "iki ucundaki oda bölmesi birbirine çok yakın")
-    if "baca" in k:                      # üst kotu yazmayan baca çatıyı delmez (metrajdaki gibi): satırı ve paftası yok, sessiz değil
+    # üst kotu yazmayan baca çatıyı delmez (metrajdaki gibi): satırı ve paftası yok, sessiz değil (PR-3c'nin anahtarıyla; eski kopyada eski davranış)
+    if "ust_pay_cm" in k.get("baca", {}).get("deger", {}):
         uyarilar += [f"{w['ad']}: bacanın üst kotu tanımda yazmıyor; baca listede ve paftada yok (üst kot tanım yazılırken: çatının en üst "
                      f"kotu + {d(k, 'baca')['ust_pay_cm']:g} cm, `baca.ust_pay_cm`)" for w in y["duvarlar"] if w["sinif"] == "baca" and not w.get("ust_kot")]
     kol = d(k, "kolon")["profil_m_m"]
