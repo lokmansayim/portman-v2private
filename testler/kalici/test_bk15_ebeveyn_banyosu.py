@@ -42,8 +42,10 @@ def test_o1_rehberdeki_konusma_ebeveyn_banyosu_r02(depo, wa, uretici, duzenleyic
     assert duzenleyici["cagri"] == 1 and duzenleyici["metin"] == "Ebeveyn banyosu ekleyelim"
     rev = son_rev(depo)
     y = rev["is_emri"]["yapi"]
-    assert rev["rev"] == 2 and y["uygulanan"] == ["Yatak Odası 3 17,1 → 12,7 m²", "Ebeveyn Banyo eklendi (4,4 m²)",
-                                                  "pencere eklendi: Ebeveyn Banyo sağ 60/40", "kapı eklendi: Ebeveyn Banyo – Yatak Odası 3"]
+    assert rev["rev"] == 2 and y["uygulanan"] == [
+        "dış ölçü 800×1125 → 800×1225 cm", "ebeveyn banyosu için ev 100 cm büyüdü (boy 1125 → 1225 cm)", "Salon - Mutfak 28,2 → 32,7 m²",
+        "Yatak Odası 3 17,1 → 16,1 m²", "Ebeveyn Banyo eklendi (4,4 m²)", "pencere eklendi: Ebeveyn Banyo sağ 60/40",
+        "kapı eklendi: Ebeveyn Banyo – Yatak Odası 3"]
     assert any(m["ad"] == "Ebeveyn Banyo" and m["islev"] == ["banyo"] for m in y["tanim"]["mahaller"])
     # r02: önce–sonra görseli, pafta PDF'i (gerçek genel motor), bayiye giden satır
     assert rev["ekler"]["gorsel"]["kaynak"] == "once_sonra" and Path(rev["ekler"]["gorsel"]["file"]).is_file()
@@ -54,6 +56,7 @@ def test_o1_rehberdeki_konusma_ebeveyn_banyosu_r02(depo, wa, uretici, duzenleyic
     assert "Ebeveyn Banyo" in ozet["mahal_etiket_cm"]                                  # paftada etiketli (plan yazıları çizgi olarak basılır)
     govde = sorgu(depo, "SELECT govde FROM giden WHERE kind = 'interactive' ORDER BY olusturuldu DESC")[0]["govde"]
     assert "Uygulanan:" in govde and "Ebeveyn Banyo eklendi (4,4 m²)" in govde and "uygulayamadım" not in govde
+    assert "ebeveyn banyosu için ev 100 cm büyüdü" in govde                                # ev büyüdüyse bayiye açıkça (CIO 27.10)
     d, _ = depo.konusma_oku(NUMARA_A)
     assert any(m["ad"] == "Ebeveyn Banyo" for m in d["uretilen_plan"]["plan"]["mahaller"])
     assert NUMARA_A not in json.dumps(sorgu(depo, "SELECT sonuc FROM isler")[-1]["sonuc"])

@@ -302,7 +302,9 @@ def _banyo_kes(p: dict, yatak: str, ad: str) -> dict | None:
     elemeden (oda en küçüğü ve kollar, dış cephe, banyonun net alanı ve dar kenarı, 15 cm parça) geçer ve sıralanır: önce var olan banyoya
     bitişik (ıslak hacimler yan yana, tesisat), sonra penceresi giriş cephesinde olmayan, sonra küçük ölçü; eşitlikte köşe sırası. Kapı duvarı
     ve pencere denetiminden sonra denetçiden geçen ilk aday alınır. Yatak odasının pencereleri yerinde kalır: penceresinin cephesini daraltan
-    aday atılır (pencere başka cepheye taşınmaz)."""
+    aday atılır (pencere başka cepheye taşınmaz). Kalan L odanın gövdesi (en büyük iç dikdörtgeni) yatak odasının dar kenar kuralını netten
+    sağlar: denetçi dar kenarı sınır kutusundan ölçer, kesmeden önceki ölçüyü görürdü (geometri hakemi 27.10, bulgu 1; bankadaki L yatak
+    odalarında da gövde ≥ 305 cm)."""
     k = kurallar()["odalar"]
     W, H = p["dis_olcu"]["en"], p["dis_olcu"]["boy"]
     dis_pay = (p.get("dis_karkas") or 80) / 10 + 2 * 1.25        # dış duvar yüzü: karkas + iki kaplama (plan_derle; 140'lık içe kalınlaşır)
@@ -327,6 +329,11 @@ def _banyo_kes(p: dict, yatak: str, ad: str) -> dict | None:
                 continue
             nw, nh = w - pay(b[0], b[2], W), h - pay(b[1], b[3], H)
             if nw * nh < k["banyo"]["en_az_m2"] * 1e4 or min(nw, nh) < k["banyo"]["dar_kenar_cm"]:
+                continue
+            serit = [x0, y0 + h, x1, y1] if ky == 0 else [x0, y0, x1, y1 - h]      # L'nin iki iç dikdörtgeni: banyo satırları dışı,
+            kolon = [x0 + w, y0, x1, y1] if kx == 0 else [x0, y0, x1 - w, y1]      # banyo sütunları dışı
+            govde = max(min(r[2] - r[0] - pay(r[0], r[2], W), r[3] - r[1] - pay(r[1], r[3], H)) for r in (serit, kolon))
+            if govde < k["yatak_odasi"]["dar_kenar_cm"]:
                 continue
             if any(0 < abs(a - c) <= KISA_PARCA_CM for e in (0, 1) for a in (b[e], b[e + 2]) for c in cizgi[e]):
                 continue
@@ -358,6 +365,40 @@ def _banyo_kes(p: dict, yatak: str, ad: str) -> dict | None:
         if n >= EN_COK_DENETIM:
             return None
     return None
+
+
+ORTAK_BANYO = "ortak banyo kalmıyor: banyolardan birine yatak odasından geçmeden ulaşılmalı"
+
+
+def _ortak_banyo(p: dict) -> bool:
+    """Banyolardan en az birine girişten yatak odasından geçmeden ulaşılıyor mu (kapı grafiği, veranda dış; denetçinin erişim ölçütü). Denetçi
+    bunu yalnız tek banyoda arar; revizyon ikinci banyo eklediğinde ortak banyo kapı işlemleriyle kaybolmasın (geometri hakemi 27.10, bulgu 2)."""
+    ver = {m["ad"] for m in p["mahaller"] if m["islev"] == "veranda"}
+    yatak = {m["ad"] for m in p["mahaller"] if m["islev"] == "yatak_odasi"}
+    banyo = {m["ad"] for m in p["mahaller"] if m["islev"] == "banyo"}
+    komsu: dict[str, set[str]] = {}
+    for kp in p["kapilar"]:
+        a, b = ["dis" if x in ver else x for x in (kp["arasinda"] + ["", ""])[:2]]
+        komsu.setdefault(a, set()).add(b)
+        komsu.setdefault(b, set()).add(a)
+    gor, sira = {"dis"}, ["dis"]
+    while sira:
+        u = sira.pop()
+        if u in banyo:
+            return True
+        for v in sorted(komsu.get(u, ())):
+            if v not in gor and v not in yatak:
+                gor.add(v)
+                sira.append(v)
+    return False
+
+
+def _denetle(q: dict, talep: dict, kod: str, onceki: dict) -> dict:
+    """Revizyonun denetimi: denetçi (oda programıyla) ve ortak banyonun korunması."""
+    d = denetle(q, {"oda_programi": talep.get("oda_programi")}, kod=kod)
+    if d["gecerli"] and _ortak_banyo(onceki) and not _ortak_banyo(q):
+        d = {**d, "gecerli": False, "tanim": None, "ihlaller": [ORTAK_BANYO]}
+    return d
 
 
 def _ebeveyn_banyosu(p: dict, o: dict) -> tuple[dict | None, str | None]:
@@ -418,10 +459,11 @@ def _kisa(ihlal: str, sinir: int) -> str:
     return t if len(t) <= sinir else t[:sinir].rsplit(" ", 1)[0] + "…"
 
 
-def _sirayla(plan: dict, islemler: list[dict], talep: dict, kod: str) -> tuple[dict, dict | None, list[str], list[dict], bool]:
+def _sirayla(plan: dict, islemler: list[dict], talep: dict, kod: str,
+             buyume: dict | None = None) -> tuple[dict, dict | None, list[str], list[dict], bool]:
     """İşlemleri sırayla tek tek uygular ve denetler; geçmeyenler bir tur daha denenir (sonraki işlemin mümkün kıldığı erken işlem, ör. hol
     genişleyince sığan pencere; hakem ikinci tur). Dönüş: (plan, son geçen denetim ya da None, uygulanamayan, uygulanan işlemler,
-    denetçiden geçmeyen işlem var mı)."""
+    denetçiden geçmeyen işlem var mı). `buyume` verilirse uygulanan oda eklemesinin dış ölçüye etkisi işleme göre yazılır."""
     p, son, kalan, bekleyen, olmayan, kurala = plan, None, [], list(islemler), [], False
     for _ in range(2):
         olmayan, sonraki, kurala = [], [], False                 # son turun sonucu geçerli
@@ -433,8 +475,10 @@ def _sirayla(plan: dict, islemler: list[dict], talep: dict, kod: str) -> tuple[d
                 continue
             if _ayni(q, p):                                      # plan zaten öyle: düşen istek değil
                 continue
-            d = denetle(q, {"oda_programi": talep.get("oda_programi")}, kod=kod)
+            d = _denetle(q, talep, kod, plan)
             if d["gecerli"]:
+                if buyume is not None and o["op"] == "oda_ekle":
+                    buyume[id(o)] = _buyume(p, q)
                 p, son = q, d
                 kalan.append(o)
             else:
@@ -448,6 +492,29 @@ def _sirayla(plan: dict, islemler: list[dict], talep: dict, kod: str) -> tuple[d
     return p, son, olmayan, kalan, kurala
 
 
+def _buyume(once: dict, sonra: dict) -> tuple[str, int, int] | None:
+    """Oda eklemenin evi büyütmesi: (en|boy, önce, sonra) cm; büyümediyse None."""
+    for e in ("en", "boy"):
+        if sonra["dis_olcu"][e] != once["dis_olcu"][e]:
+            return e, once["dis_olcu"][e], sonra["dis_olcu"][e]
+    return None
+
+
+def _duzenlenen_odalar(eski: dict, yeni: dict, fark: list[str], buyumeler: list | None = None) -> list[str]:
+    """Oda eklemenin farkı: ev büyüdüyse nedeni dış ölçü satırının ardına açıkça yazılır ("ebeveyn banyosu için ev 100 cm büyüdü"; CIO
+    27.10: fiyatı teklif adımı yeniden hesaplar). Biçimi değişen ama alanı `plan_farki` eşiğinin (0,25 m²) altında değişen oda da yazılır
+    (büyütmede duvarı kayıp L olan yatak odası; geometri hakemi 27.10, bulgu 3); bu satır mahal satırlarının ardına girer."""
+    from beyin.plan_uretici import _tr
+    i = next((j + 1 for j, f in enumerate(fark) if f.startswith("dış ölçü ")), 0)
+    fark = fark[:i] + [f"ebeveyn banyosu için ev {c - a} cm büyüdü ({e} {a} → {c} cm)" for e, a, c in filter(None, buyumeler or [])] + fark[i:]
+    em = {m["ad"]: m for m in eski["mahaller"]}
+    olcu = lambda m: sorted((r[2] - r[0], r[3] - r[1]) for r in m["dikdortgenler"])        # noqa: E731
+    ek = [f"{m['ad']} yeniden düzenlendi ({_tr(sum(_alan(r) for r in m['dikdortgenler']) / 1e4)} m²)" for m in yeni["mahaller"]
+          if m["ad"] in em and olcu(m) != olcu(em[m["ad"]]) and not any(f.startswith(m["ad"] + " ") for f in fark)]
+    i = next((j for j, f in enumerate(fark) if f.startswith(("pencere ", "kapı ", "dış kapı", "dış duvarlar", "çatı "))), len(fark))
+    return fark[:i] + ek + fark[i:]
+
+
 def duzenle(plan: dict, metin: str, talep: dict, ayar: dict | None = None, hazir: dict | None = None, kod: str = "YENI") -> dict:
     """Yeni planın revizyonu: oku → uygula → denetle (alan ±%10 revizyonda aranmaz; oda programı korunur). Dönüş (karar sözleşmesi):
     {durum: gecerli|gecersiz|bos|uygulanamadi|hata, plan, tanim, ozet, fark, uygulanamayan, islemler, cagri, girdi_token, cikti_token, hata, ihlaller}."""
@@ -458,12 +525,15 @@ def duzenle(plan: dict, metin: str, talep: dict, ayar: dict | None = None, hazir
          "hata": o["hata"], "ihlaller": [], "denemeler": []}
     if o["durum"] != "tamam":
         return s
-    yeni, olmayan, kalan = plan, [], []                       # işlem işlem (uygula(plan, hepsi) ile aynı sonuç): uygulanan kimlikle izlenir
+    yeni, olmayan, kalan, buyume = plan, [], [], {}          # işlem işlem (uygula(plan, hepsi) ile aynı sonuç): uygulanan kimlikle izlenir
     for x in o["islemler"]:
+        once = yeni
         yeni, n = uygula(yeni, [x])
         olmayan += n
         if not n:
             kalan.append(x)
+            if x["op"] == "oda_ekle":
+                buyume[id(x)] = _buyume(once, yeni)
     s["uygulanamayan"] += olmayan
     if _ayni(yeni, plan):                                       # yazılışı farklı, içeriği aynı plan yeniden çizilmez (hakem 16.10)
         s["ihlaller"] = ["uygulanacak işlem kalmadı"]
@@ -471,14 +541,15 @@ def duzenle(plan: dict, metin: str, talep: dict, ayar: dict | None = None, hazir
         # cephe) "uygulanamadi" — bayiye istek adıyla yazılır, plan aynen geçerli ve onaylanabilir kalır (Lokman 15.10, karar 3)
         s["durum"] = "uygulanamadi" if s["uygulanamayan"] else "bos"
         return s
-    d = denetle(yeni, {"oda_programi": talep.get("oda_programi")}, kod=kod)
+    d = _denetle(yeni, talep, kod, plan)
     s["denemeler"] = [{"plan": yeni, "gecerli": d["gecerli"], "ihlaller": d["ihlaller"]}]
     if not d["gecerli"]:
         s["ihlaller"] = d["ihlaller"][:8]
         # birlikte kurallara uymadı: işlemler sırayla tek tek denenir; geçen uygulanır, geçmeyen bayinin sözü ve kısa gerekçesiyle yazılır
         # (geometri hakemi 15.10, Önemli 2: pencere cepheye değer ama sığmaz; büyütme bir kapıyı sığmaz kılar). Hiçbiri geçmezse plan aynen,
         # istek gerekçesiyle "uygulanamadi" (Lokman 16.10, canlı deneme G: konuşma kapanmaz; `kurala_uymayan` ile karar Patron'a bilgi verir)
-        yeni, d, olmayan, kalan, kurala = _sirayla(plan, o["islemler"], talep, kod)
+        buyume = {}
+        yeni, d, olmayan, kalan, kurala = _sirayla(plan, o["islemler"], talep, kod, buyume)
         s["uygulanamayan"], s["kurala_uymayan"] = list(o["uygulanamayan"]) + olmayan, kurala
         if d is None:
             s["durum"] = "uygulanamadi" if s["uygulanamayan"] else "gecersiz"
@@ -486,6 +557,8 @@ def duzenle(plan: dict, metin: str, talep: dict, ayar: dict | None = None, hazir
         s["denemeler"].append({"plan": yeni, "gecerli": True, "ihlaller": [], "sirayla": True})
         s["ihlaller"] = []
     s.update(durum="gecerli", plan=yeni, tanim=d["tanim"], ozet=d["ozet"], fark=plan_farki(plan, yeni))
+    if any(x["op"] == "oda_ekle" for x in kalan):
+        s["fark"] = _duzenlenen_odalar(plan, yeni, s["fark"], [buyume.get(id(x)) for x in kalan if x["op"] == "oda_ekle"])
     if any(x["op"] in ("oda_buyut", "oda_kucult") and not x.get("cm") for x in kalan):
         s["fark"].append("ölçü söylenmediği için 50 cm alındı")       # varsayım bayiye yazılır (inceleme G10)
     return s
