@@ -89,3 +89,8 @@ jobs:
             # shellcheck disable=SC2086
             R PORTMAN_TEST_PG="$PG" "$PY" -m pytest -q -rfE -p no:cacheprovider $YOLLAR
           fi
+
+      # Testler root ile koştu; işin sonundaki checkout temizliği .git/index'i okuyabilsin (yoksa sarı uyarı düşer).
+      - name: Çalışma klasörünün sahipliği
+        if: always()
+        run: sudo chown -R "$(id -u):$(id -g)" "$GITHUB_WORKSPACE"
