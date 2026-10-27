@@ -1,0 +1,51 @@
+# Portman · otomatik doğrulama (Kurulum Panosu satır 12; Araştırma yol haritası KT1).
+#
+# Her PR'da ve main'e her push'ta oturumların kullandığı komutun aynısı koşar: `bash araclar/ortam_kur.sh --dogrula`
+# (Beyin harness'i 22 vaka, tam referans gerilemesi `testler/referans/dogrula.py`, bütün pytest'ler, yerel Postgres 16).
+# Biri kırmızıysa betik sıfırdan farklı çıkar ve PR'da kırmızı çarpı yanar.
+#
+# Sınırlar:
+# - Canlıya, LLM'e, WhatsApp'a bağlanmaz; sır kullanmaz (secrets yok, yalnız okuma izni).
+# - Kaynaklı testler (PORTMAN_CELIK_KAYNAK, PORTMAN_PAFTA_DIZINI, PORTMAN_KOR_*: Drive'daki gerçek paftalar ve listeler)
+#   burada atlanır; o dosyalar GitHub'a yüklenmez. Onlar oturumda kaynaklı koşuyla doğrulanır.
+# - Betik oturumlardaki gibi root ile koşar (Postgres kümesini ayrı `pgtest` kullanıcısıyla kurar, kurulum testleri bunu ister).
+name: Doğrulama
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Aynı PR'a yeni push gelince eski koşu durur (dakika boşa gitmez).
+concurrency:
+  group: dogrulama-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  dogrula:
+    name: harness + referans + testler
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      # Tam geçmiş: hakem ve mühür testleri git geçmişini okur, sığ klonda durur.
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      # Yerel ortamla aynı Python (araclar/gereksinimler.txt 3.11 için sabit).
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Tam doğrulama (bash araclar/ortam_kur.sh --dogrula)
+        run: |
+          sudo git config --system --add safe.directory "$GITHUB_WORKSPACE"
+          sudo env "PATH=$PATH" HOME=/root TMPDIR="$RUNNER_TEMP" bash araclar/ortam_kur.sh --dogrula
+
+      - name: Kırmızıysa pytest günlüğünün sonu
+        if: failure()
+        run: sudo tail -n 300 "$RUNNER_TEMP"/portman-pytest.* || true
