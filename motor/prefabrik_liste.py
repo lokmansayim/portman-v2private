@@ -285,12 +285,14 @@ def _veranda_catilari(plan, ie: dict) -> list[dict]:
     """BK-14: taşan verandanın çatısı, açık çatı parçası olarak (pafta kipindeki PK-03, PK-06, TS-01 sundurması gibi). Beşiğin mahyası cepheye
     diktir (`veranda.cati`): açıklık cephe boyunca en, boy derinlik; kalkanı dış kenarda (1), altı açık. Mahyası ana çatının mahyasına paralelse
     (veranda ana çatının kalkan yüzünde, TK-01) dere içi yok, mahya ve iki saçak derinlik + saçak; ana çatının saçak yüzündeyse çapraz beşiktir,
-    mahya ana çatının yüzüne kadar uzar (5.1'in dere hesabıyla aynı yatay), saçaklar ana çatının saçak hattına kadar. Tek eğim dışarı iner:
+    mahya ana çatının yüzüne kadar uzar (5.1'in dere hesabıyla aynı yatay), saçaklar ana çatının saçak hattına kadar (iki saçak farklıysa
+    farkı kadar; geometri hakemi, 27 Ekim). Tek eğim dışarı iner:
     açıklık derinlik, boy en; tek saçak hattı dış kenarda, iki yan saçakla."""
     from . import veranda as VR
     if not plan.dis_verandalar:
         return []
     ana_eg = float((ie.get("cati") or {}).get("egim_yuzde", 33)) / 100
+    ana_s = float((ie.get("cati") or {}).get("sacak_cm", 30))
     ana_mahya = VR.ana_mahya_yonu(ie)
     out = []
     for v in plan.dis_verandalar:
@@ -299,11 +301,11 @@ def _veranda_catilari(plan, ie: dict) -> list[dict]:
         if c["tip"] == "besik":
             mahya = "y" if v["cephe"] in ("on", "arka") else "x"
             capraz = mahya != ana_mahya
-            if capraz:
+            if capraz:                                     # saçak hattı dış kenardan ana çatının saçak hattına; mahya ana çatının yüzüne
                 b = (en / 2 + s) * (c["egim_yuzde"] / 100) / max(ana_eg, 1e-6)
                 out.append({"ad": ad, "tip": "besik", "aciklik_cm": en, "boy_cm": derin, "egim_yuzde": float(c["egim_yuzde"]), "sacak_cm": s,
-                            "kalkan": 1, "capraz": True, "acik": True, "mahya_boy_cm": round(derin + b, 2),
-                            "sacak_hatlari_m": [round(derin / 100, 3)] * 2,
+                            "kalkan": 1, "capraz": True, "acik": True, "mahya_boy_cm": round(derin + s - ana_s + b, 2),
+                            "sacak_hatlari_m": [round((derin + s - ana_s) / 100, 3)] * 2,
                             "not": "Motor (BK-14): ana çatının saçak yüzüne dik beşik; mahya ana çatının yüzüne kadar"})
             else:
                 out.append({"ad": ad, "tip": "besik", "aciklik_cm": en, "boy_cm": derin, "egim_yuzde": float(c["egim_yuzde"]), "sacak_cm": s,

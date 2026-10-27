@@ -357,8 +357,9 @@ class Cizici:
             for (x0, y0, x1, y1) in plan.dikmeler:
                 self.yerlestir(name, kod, (x0, y0), 0.0, "MONTAJ_STANDART" if montaj else "VERANDA_DIKME", rol, ox, oy)
         # veranda profili (her açık kenar bir blok: dış yüz + 10 cm içeri, kesik çizgi)
+        dis_ad = {v["ad"] for v in plan.dis_verandalar}
         for ad, m in plan.mahaller.items():
-            if not m.acik: continue
+            if not m.acik or ad in dis_ad: continue         # BK-14: taşan verandanın kenarları aşağıda (gövde çizgisi profil değil)
             ring = list(m.poly.simplify(0.0).exterior.coords)
             segs = []
             for (ax_, ay_), (bx_, by_) in zip(ring, ring[1:]):
@@ -384,11 +385,12 @@ class Cizici:
                         blk.add_line((xa, sy), (xb, sy), dxfattribs={"layer": "0", "color": 256, "lineweight": 25})
                 self.yerlestir(name, kod, (x0, y0), 0.0, "MONTAJ_STANDART" if montaj else "VERANDA_PROFIL_100", rol, ox, oy)
         for v in plan.dis_verandalar:                       # BK-14: taşan veranda; iç çizgi kirişin iç yüzü (Plan `kirisler`)
-            for (x0, y0, x1, y1), (kx0, ky0, kx1, ky1) in zip(v["kenarlar"], v["kirisler"]):
+            for j, ((x0, y0, x1, y1), (kx0, ky0, kx1, ky1)) in enumerate(zip(v["kenarlar"], v["kirisler"])):
                 vertical = abs(x0 - x1) < 1e-9
                 boy = (y1 - y0) if vertical else (x1 - x0)
                 kod = self.kat.veranda_profil(boy, "YAN" if vertical else "ON")
-                name = f"BOM_{kod}_VERANDA_{'YAN' if vertical else 'ON'}_{mm_tag(boy)}_{v['cephe'].upper()}"
+                # kenar sırası (dış, yan 1, yan 2) adda: iki yanın boyu aynı, iç çizgisi zıt yönde (geometri hakemi, 27 Ekim)
+                name = f"BOM_{kod}_VERANDA_{'YAN' if vertical else 'ON'}_{mm_tag(boy)}_{v['cephe'].upper()}_{('DIS', 'YAN1', 'YAN2')[j]}"
                 if name not in self.doc.blocks:
                     blk = self.doc.blocks.new(name)
                     ic = [(kx0, ky0, kx1, ky1)]

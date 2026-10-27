@@ -79,6 +79,19 @@ def test_veranda_dogrulamadan_gecer(tmp_path):
         assert blok in dxf, blok
 
 
+def test_veranda_profili_kiris_yerinde(plan):
+    """DXF'in veranda profili blokları (BOM ve IFC kirişleri bunlardan): her verandada üç, kutusu Plan'ın kirişiyle aynı; gövde duvarının
+    içine profil düşmez, iki yanın iç çizgisi verandanın içinde (geometri hakemi, 27 Ekim: eski döngü gövde çizgisini de profil sayıyordu,
+    aynı adlı iki yan bloğu bir yanın kaymasıyla çiziliyordu)."""
+    from motor import ifc_uret
+    g = ifc_uret.hazirla(_ie())
+    profil = sorted(tuple(b["rect"]) for b in g["baglantilar"] if b["tur"] == "veranda_profil")
+    kiris = sorted(tuple(round(t, 2) for t in k) for v in plan.dis_verandalar for k in v["kirisler"])
+    assert profil == kiris and len(profil) == 6
+    assert sum(b["tur"] == "dikme" for b in g["baglantilar"]) == 4
+    assert g["veranda"] is None and [v["net_m2"] for v in g["dis_verandalar"]] == [pytest.approx(6.9866), pytest.approx(3.393)]
+
+
 def test_veranda_listesi():
     N = PL.model_motor(_ie())
     assert (N["W"], N["D"], N["brut_m2"]) == (898.0, 1199.0, 90.122)       # brüt gövde + veranda; dış kutunun boş köşeleri sayılmaz
@@ -147,6 +160,46 @@ def test_veranda_saçak_yuzunde_uyarir_ve_capraz():
     assert (tek["tip"], tek["aciklik_cm"], tek["boy_cm"], tek["kalkan"], tek["sacak_hatlari_m"]) == ("tek_yon", 150.0, 300.0, 0, [3.6])
 
 
+def test_kalkan_yaninda_cati_tasmasi_uyarir(plan):
+    """Kalkan yanındaki veranda çatısı ana çatının saçağının üstüne çıkarsa uyarı (K16). TK-01'in kendi çatıları altında: ön 70 cm aşağıda,
+    arkanın sol yüzü ana çatının sol yüzüyle aynı düzlemde (0)."""
+    assert [round(VR.ana_catiya_tasma(plan, plan.is_emri, v), 1) for v in plan.dis_verandalar] == [-70.4, 0.0]
+    for cati, cm in (({"tip": "tek_yon", "egim_yuzde": 27.5}, "44"), ({"tip": "besik", "egim_yuzde": 40}, "20")):
+        ie = _ie(); ie["verandalar"][1]["cati"] = cati
+        u = [x for x in G.kur(ie).uyarilar if x.startswith("Veranda")]
+        assert len(u) == 1 and "ARKA VERANDA" in u[0] and f"yüzünü {cm} cm aşıyor" in u[0], u
+
+
+def test_capraz_besik_farkli_sacak():
+    """Saçak yüzündeki beşikte saçak hattı dış kenardan ana çatının saçak hattına, mahya ana çatının yüzüne: veranda saçağı 50, ana 30."""
+    v = {"ad": "SAĞ VERANDA", "cephe": "sag", "bas_cm": 100, "bit_cm": 400, "derinlik_cm": 150, "cati": {"tip": "besik", "egim_yuzde": 27.5, "sacak_cm": 50}}
+    c = PL.model_motor(_ie([v]))["cati"][1]
+    assert c["capraz"] is True and c["sacak_hatlari_m"] == [1.7, 1.7] and c["mahya_boy_cm"] == pytest.approx(150 + 20 + 200)
+
+
+def test_ayna_verandayi_cevirir():
+    """Varyant aynası (`beyin.varyant.ayna`, pano birimli İş Emri) verandayı da çevirir: cephe ve cephe boyunca konum. P6001 (773 × 763)."""
+    from beyin import varyant
+    p6001 = _oku(KOK / "is_emri" / "P6001_2plus1_6x6.json")
+    for v, x, y in (({"ad": "ARKA V", "cephe": "arka", "bas_cm": 50, "bit_cm": 350, "derinlik_cm": 150},
+                     (423.0, 763.0, 723.0, 913.0), (50.0, -150.0, 350.0, 0.0)),
+                    ({"ad": "SOL V", "cephe": "sol", "bas_cm": 300, "bit_cm": 500, "derinlik_cm": 120},
+                     (773.0, 300.0, 893.0, 500.0), (-120.0, 263.0, 0.0, 463.0))):
+        ie = json.loads(json.dumps(p6001)); ie["verandalar"] = [v]
+        assert G.kur(varyant.ayna(ie, "x")).dis_verandalar[0]["rect"] == x
+        assert G.kur(varyant.ayna(ie, "y")).dis_verandalar[0]["rect"] == y
+
+
+def test_bayi_plan_gorseli_verandayi_kirpmaz(tmp_path):
+    """Canlı yolun plan görseli (`bayi_gorseli.plan_gorseli`) çerçeveyi taşan verandayla genişletir (geometri hakemi: ön veranda
+    kırpılıyordu); veranda yoksa çerçeve gövde ± 120, eskisi gibi."""
+    from PIL import Image
+    from motor import bayi_gorseli
+    yol = bayi_gorseli.plan_gorseli(_ie(), tmp_path / "tk01.png")
+    w, h = Image.open(yol).size
+    assert w == 1400 and h == pytest.approx(1400 * (1199 + 2 * 120 + 90) / (898 + 2 * 120), abs=1)
+
+
 def test_bayi_paftasi_verandali(tmp_path):
     import pymupdf
     ie = _ie()
@@ -171,3 +224,5 @@ def test_ifc_veranda_catisi(tmp_path):
     adlar = {e.Name for e in f.by_type("IfcRoof")} | {e.Name for e in f.by_type("IfcSlab")} | {e.Name for e in f.by_type("IfcPlate")}
     for ad in ("VERANDA_CATISI_1", "VERANDA_CATISI_2", "VERANDA_ZEMINI_1", "VERANDA_CATI_1_1", "VERANDA_CATI_1_2", "VERANDA_ALIN_1"):
         assert ad in adlar, ad
+    mekan = {e.Name: e.LongName for e in f.by_type("IfcSpace")}
+    assert mekan.get("M-VERANDA-1") == "ÖN VERANDA" and mekan.get("M-VERANDA-2") == "ARKA VERANDA" and "M-VERANDA" not in mekan

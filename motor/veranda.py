@@ -7,7 +7,8 @@ yalnız ondan türeyen çizim geometrisini verir; DXF'in ön görünüşü (`dxf
 Çatı: beşiğin mahyası cepheye diktir, kalkanı verandanın dış kenarındadır; tek eğim duvardan dışarı iner. Saçak dış kenarda ve iki yanda
 `sacak_cm`; çatı cephenin hizasında biter (ana çatının saçağının altında kalır). Saçak kotu ana çatıyla aynı (duvar üstü + topuk), eğim
 verandanın kendi eğimi. Mahyası ana çatının saçak kotunu aşan ve ana çatının saçak yanına (kalkan değil) dayanan veranda çatısında
-iki çatının birleşimi (dere) çizilmez, uyarı düşer (`uyarilar`).
+iki çatının birleşimi (dere) çizilmez; kalkan yanında ana çatının saçağının üstüne çıkan veranda çatısında da birleşim çizilmez. İkisinde
+de uyarı düşer (`uyarilar`).
 """
 from __future__ import annotations
 
@@ -59,8 +60,41 @@ def cati(v: dict, ie: dict) -> dict:
             "egim": eg, "sacak": s}
 
 
+def kot(dz: dict, x: float, y: float) -> float:
+    """Çatı düzleminin (genel motorun `duzlemler` biçimi) plandaki (x, y) noktasındaki kotu: saçak kenarında saçak kotu, yukarı yönde eğimle."""
+    ux, uy = dz["yukari"]
+    alt = min(px * ux + py * uy for px, py in dz["plan"])
+    return dz["sacak_kotu"] + dz["egim"] * (x * ux + y * uy - alt)
+
+
+def ana_catiya_tasma(plan: G.Plan, ie: dict, v: dict) -> float | None:
+    """Veranda çatısının, planda ana çatıyla üst üste geldiği yerde (ana çatının saçak bandı) ana çatının yüzünün en çok kaç cm üstüne
+    çıktığı. Negatif ya da sıfır: altında ya da aynı düzlemde (TK-01 arka verandasının sol yüzü ana çatının sol yüzünün devamı). Üst üste
+    gelmiyorsa ya da ana çatı beşik değilse None. İki düzlem farkı her kesişim çokgeninde doğrusal: en büyüğü köşelerde."""
+    from shapely.geometry import Polygon
+    from . import sunum                                 # burada: sunum bu modülü içe aktarır
+    ana = sunum.cati_tanimi(plan, ie)
+    if ana is None:
+        return None
+    en = None
+    for dv in cati(v, ie)["duzlemler"]:
+        pv = Polygon(dv["plan"])
+        for dm in ana["duzlemler"]:
+            k = pv.intersection(Polygon(dm["plan"]))
+            for g in getattr(k, "geoms", [k]):
+                if g.is_empty or g.geom_type != "Polygon" or g.area < 1e-6:
+                    continue
+                for x, y in g.exterior.coords:
+                    f = kot(dv, x, y) - kot(dm, x, y)
+                    en = f if en is None else max(en, f)
+    return en
+
+
 def uyarilar(plan: G.Plan, ie: dict) -> list[str]:
-    """Çizimde sadeleştirilen birleşimler (K16: Motor kendi uyarısını düşürmez)."""
+    """Çizimde sadeleştirilen birleşimler (K16: Motor kendi uyarısını düşürmez). Veranda çatısı ana çatının saçak yanına dayanıp mahyası
+    saçağın üstüne çıkıyorsa iki çatının birleşimi (dere) çizilmez. Kalkan yanındaki veranda çatısı da ana çatının kalkan saçağının üstüne
+    çıkabilir (dik eğim, tek eğimin yüksek ucu): planda üst üste geldikleri bantta ana çatının yüzünü 0,5 cm'den çok aşarsa uyarı (geometri
+    hakemi, 27 Ekim)."""
     out = []
     ana = ie.get("cati") or {}
     zs_ana = duvar_ustu(ie) + float(ana.get("topuk_cm", 10))
@@ -72,6 +106,11 @@ def uyarilar(plan: G.Plan, ie: dict) -> list[str]:
                        ("mahyası saçağın üstünde; iki çatının birleşimi (dere) çizimde yok, listede çapraz beşiğin deresi sayılır (5.1)"
                         if v["cati"]["tip"] == "besik" else
                         "yüksek ucu saçağın üstünde; iki çatının birleşimi çizimde yok, kural kitabında yok"))
+            continue
+        t = ana_catiya_tasma(plan, ie, v)
+        if t is not None and t > 0.5:
+            out.append(f"Veranda {v['ad']}: çatısı ana çatının kalkan saçağının altında kalmıyor, yüzünü {t:.0f} cm aşıyor; iki çatının "
+                       f"birleşimi çizimde yok, kural kitabında yok")
     return out
 
 

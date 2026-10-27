@@ -124,7 +124,10 @@ def hazirla(ie: dict) -> dict:
             pano_ekleri.append({"duvar": k["duvar"], "cins": k["cins"], "rect": [_r(v) for v in rect]})
 
     odalar, veranda = [], None
+    dis_ad = {v["ad"] for v in plan.dis_verandalar}
     for ad, m in plan.mahaller.items():
+        if ad in dis_ad:
+            continue                                       # BK-14: taşan veranda kendi alanıyla `dis_verandalar`'da
         poly = m.poly.simplify(0.0)
         pl = polylabel(poly, tolerance=1.0)
         kayit = {"ad": ad, "etiket_m2": etiket.get("".join(ad.split())), "net_m2": _r(m.alan_m2, 4), "etiket_xy": [_r(pl.x), _r(pl.y)],
@@ -148,7 +151,9 @@ def hazirla(ie: dict) -> dict:
                           **({"makas_ekseni": cati["makas_ekseni"]} if "makas_ekseni" in cati else {}), "renk": "antrasit"}},
         "panolar": panolar, "acikliklar": acikliklar, "baglantilar": baglantilar, "odalar": odalar, "veranda": veranda, "tefris": [],
         **({"pano_ekleri": pano_ekleri} if pano_ekleri else {}),
-        **({"dis_verandalar": [{"ad": v["ad"], "cephe": v["cephe"], "rect": [_r(t) for t in v["rect"]], "cati": VR.cati(v, ie)}
+        **({"dis_verandalar": [{"ad": v["ad"], "cephe": v["cephe"], "rect": [_r(t) for t in v["rect"]], "cati": VR.cati(v, ie),
+                                "net_m2": _r(plan.mahaller[v["ad"]].alan_m2, 4),
+                                "etiket_m2": etiket.get("".join(v["ad"].split()))}
                                for v in plan.dis_verandalar]} if plan.dis_verandalar else {}),     # BK-14: dikme ve kiriş baglantilar'da
         "kanit": {"motor_uyarilari": plan.uyarilar}, "uyari": [],
     }
@@ -596,6 +601,12 @@ class IfcUretici:
         for i, v in enumerate(self.G.get("dis_verandalar", []), start=1):
             x0, y0, x1, y1 = v["rect"]; C = v["cati"]
             X0, Y0, X1, Y1 = C["kutu"]; zs, zm, eg, s = C["sacak_kotu"], C["mahya_kotu"], C["egim"], C["sacak"]
+            sp = self._urun("IfcSpace", f"M-VERANDA-{i}", predefined="EXTERNAL", kapsa=False, LongName=v["ad"])
+            api("aggregate.assign_object", self.f, relating_object=self.kat, products=[sp])
+            self._yerlestir(sp); self._temsil(sp, self._prizma_xy([(x0, y0), (x1, y0), (x1, y1), (x0, y1)], 0, H0), "mahal")
+            self._qto(sp, "Qto_SpaceBaseQuantities", {"NetFloorArea": v["net_m2"]})
+            self._pset(sp, "PortatifEv_Mahal", {"CizimNetAlan_m2": v["net_m2"], "BayiEtiketAlan_m2": v["etiket_m2"] or 0.0,
+                                                "BinaDisinaTasma_cm": round(y1 - y0 if v["cephe"] in ("on", "arka") else x1 - x0, 1)})
             z = self._urun("IfcSlab", f"VERANDA_ZEMINI_{i}", predefined="FLOOR")
             self._yerlestir(z); self._temsil(z, self._prizma_xy([(x0, y0), (x1, y0), (x1, y1), (x0, y1)], -15, 0), "beton")
             self._pset(z, "PortatifEv_Kapsam", {"BOMKalem": f"{v['ad']} zemini — kapsam dışı (bayi/saha)", "KapsamDisi": True})
