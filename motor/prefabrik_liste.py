@@ -277,8 +277,9 @@ def model_motor(ie: dict) -> dict:
             "kod": y.get("referans_model")}
 
 
-def _kucuk(ad: str) -> str:
-    return ad.replace("I", "ı").replace("İ", "i").lower()
+def _kucuk(x) -> str:
+    """Türkçe küçük harf: "İ" → "i", "I" → "ı" (`motor/yerlesim/girdi.kucuk` ile aynı)."""
+    return str(x).replace("İ", "i").replace("I", "ı").lower()
 
 
 def _veranda_catilari(plan, ie: dict) -> list[dict]:
@@ -464,7 +465,7 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
     ASMA_OMEGA_ARALIK_M, TERS_OMEGA_ARALIK_M = r("tavan_omegasi_aralik_m.asma"), _ortak(k, "tavan_omegasi_aralik_m")   # ters: kitabın 0,60
     TAVAN_H_ARALIK_M = r("tavan_h_aralik_m")
     ps_ = r("pencere_sinifi")
-    kucuk = lambda x: str(x).replace("İ", "i").replace("I", "ı").lower()
+    kucuk = _kucuk
     oz = {kucuk(kk): kucuk(v) for kk, v in (N.get("ozellikler") or {}).items()}
     alici = [kucuk(x) for x in ((N.get("alici_ait") or {}).get("kalemler") or [])]
     pencere_alici = any("pencere" in x for x in alici) or "alıcı" in oz.get("pencere rengi", "")

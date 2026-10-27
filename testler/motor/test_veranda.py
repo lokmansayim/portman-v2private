@@ -160,6 +160,37 @@ def test_veranda_saçak_yuzunde_uyarir_ve_capraz():
     assert (tek["tip"], tek["aciklik_cm"], tek["boy_cm"], tek["kalkan"], tek["sacak_hatlari_m"]) == ("tek_yon", 150.0, 300.0, 0, [3.6])
 
 
+def test_alin_dolgusu_cati_cizgisinde(plan):
+    """Beşik verandanın kalkan dolgusunun üst köşeleri kolon yüzünde çatı çizgisinde (saçak kotu + saçak × eğim), IFC'deki gibi (kod incelemesi)."""
+    alin = [x for x in VR.gorunus_parcalari(plan, plan.is_emri, "on") if x["tur"] == "alin" and x["veranda"] == "ÖN VERANDA"][0]
+    assert alin["u"] == [(256.0, 250.0), (642.0, 250.0), (642.0, pytest.approx(268.25)), (449.0, pytest.approx(321.325)), (256.0, pytest.approx(268.25))]
+
+
+def test_sol_veranda_profil_rolu_ve_aks_payi(tmp_path):
+    """Sol verandada dış kenar düşeydir ama ön profildir (rol kenardan); aks tablosu olmayan planda (P6001) aks yazıları taşan verandanın
+    dışında (kod incelemesi)."""
+    import ezdxf
+    ie = _ie([{"ad": "SOL VERANDA", "cephe": "sol", "bas_cm": 100, "bit_cm": 300, "derinlik_cm": 120}])
+    m = dxf_out.uret(ie, tmp_path / "sol", pdf_hatada=False)
+    assert m["validation_passed"] is True
+    bloklar = {b.name for b in ezdxf.readfile(next((tmp_path / "sol").glob("*.dxf"))).blocks if "_VERANDA_" in b.name and "_SOL_" in b.name}
+    assert {b.rsplit("_", 1)[1] for b in bloklar} == {"DIS", "YAN1", "YAN2"}
+    assert [b for b in bloklar if b.endswith("_DIS")][0].split("_VERANDA_")[1].startswith("ON_2000p0_")
+    assert all(b.split("_VERANDA_")[1].startswith("YAN_1200p0_") for b in bloklar if not b.endswith("_DIS"))
+    p6001 = _oku(KOK / "is_emri" / "P6001_2plus1_6x6.json")
+    p6001["verandalar"] = [{"ad": "ARKA V", "cephe": "arka", "bas_cm": 50, "bit_cm": 350, "derinlik_cm": 150}]
+    m = dxf_out.uret(p6001, tmp_path / "p6001", pdf_hatada=False)
+    assert m["validation_passed"] is True
+    doc = ezdxf.readfile(next((tmp_path / "p6001").glob("*.dxf")))
+    harf = [e for e in doc.modelspace().query("TEXT") if e.dxf.layer == "AKS_YAZI" and e.dxf.text == "A"]
+    assert harf and all(e.dxf.insert.y >= 763 + 150 + 60 - 1e-6 for e in harf)     # H + veranda + 60; önceden H + 60 (verandanın içi)
+
+
+def test_varsayilan_cati_uyarisi_adi_bozmaz():
+    u = [x for x in G.kur(_ie([{"ad": "E. VERANDA", "cephe": "on", "bas_cm": 0, "bit_cm": 200, "derinlik_cm": 150}])).uyarilar if x.startswith("Veranda")]
+    assert u[0].startswith("Veranda E. VERANDA: çatısı İş Emri'nde yok") and "%27,5" in u[0]
+
+
 def test_kalkan_yaninda_cati_tasmasi_uyarir(plan):
     """Kalkan yanındaki veranda çatısı ana çatının saçağının üstüne çıkarsa uyarı (K16). TK-01'in kendi çatıları altında: ön 70 cm aşağıda,
     arkanın sol yüzü ana çatının sol yüzüyle aynı düzlemde (0)."""

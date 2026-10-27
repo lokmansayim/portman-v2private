@@ -968,7 +968,8 @@ def _dis_verandalar(plan: "Plan", is_emri: dict) -> None:
         cati = {"tip": tip, "egim_yuzde": float(c.get("egim_yuzde", ana.get("egim_yuzde", 33))),
                 "sacak_cm": float(c.get("sacak_cm", ana.get("sacak_cm", 30))), "topuk_cm": float(ana.get("topuk_cm", 10))}
         if varsayim:
-            plan.uyarilar.append(f"Veranda {ad}: çatısı İş Emri'nde yok; beşik, ana çatının eğimi (%{cati['egim_yuzde']:g}) alındı".replace(".", ","))
+            eg_yazi = f"{cati['egim_yuzde']:g}".replace(".", ",")
+            plan.uyarilar.append(f"Veranda {ad}: çatısı İş Emri'nde yok; beşik, ana çatının eğimi (%{eg_yazi}) alındı")
         yan0, yan1 = (dis[0], ic[0]), (dis[1], ic[1])
         kenarlar = [(min(p[0] for p in e), min(p[1] for p in e), max(p[0] for p in e), max(p[1] for p in e)) for e in (dis, yan0, yan1)]
         kirisler = [kutu.intersection(LineString([e[:2], e[2:]]).buffer(k, cap_style=2)).bounds for e in kenarlar]   # açık kenarda, içeride 10'luk
@@ -981,6 +982,16 @@ def _dis_verandalar(plan: "Plan", is_emri: dict) -> None:
                                     "kenarlar": kenarlar, "kirisler": kirisler, "cati": cati})
     from . import veranda as VR                                 # burada: veranda bu modülü içe aktarır
     plan.uyarilar.extend(VR.uyarilar(plan, is_emri))
+
+
+def disari_yon(plan: "Plan", d) -> str | None:
+    """Dış duvarın dışa bakan yönü: dışarı ya da açık mahal olan yan (DXF ön görünüşü ve bayi paftasının görünüşleri aynı kuralı kullanır)."""
+    for k, a, b in d.edges:
+        ma, mb = plan.mahaller.get(a), plan.mahaller.get(b)
+        a_out = (a == OUT) or (ma is not None and ma.acik); b_out = (b == OUT) or (mb is not None and mb.acik)
+        if a_out and not b_out: return "-x" if d.yon == "y" else "-y"
+        if b_out and not a_out: return "+x" if d.yon == "y" else "+y"
+    return None
 
 
 def govde_kutusu(plan: "Plan") -> tuple:

@@ -77,15 +77,14 @@ def ayna(is_emri: dict, eksen: str) -> dict:
             s["duvar"] = (DUVAR_X if eksen == "x" else DUVAR_Y).get(s["duvar"], s["duvar"])
 
     # 5) dikmeler (cm): özgün plan ölçüleriyle
+    plan = G.kur(is_emri) if (ie.get("dikmeler") or ie.get("verandalar")) else None   # verandanın konumu da bu planla (geçersiz girdi burada düşer)
     if ie.get("dikmeler"):
-        plan = G.kur(is_emri)
         W, H = plan.W, plan.H
         ie["dikmeler"] = [([W - x - 10.0, y] if eksen == "x" else [x, H - y - 10.0]) for x, y in ie["dikmeler"]]
 
     # 5b) gövdeden taşan verandalar (BK-14; cm, gerçek çerçeve): cephe aynalanır, cephe boyunca konum mahaller ve dikmeler gibi planın
     # ölçüsüne göre çevrilir (x → W − x; ayak izine göre değil: ızgara içi veranda bir kenarı boydan boya kaplarsa ayak izi dar kalır)
     if ie.get("verandalar"):
-        plan = G.kur(is_emri)
         for v in ie["verandalar"]:
             boyuna = v.get("cephe") in ("on", "arka")              # konum x boyunca
             if (eksen == "x") == boyuna:

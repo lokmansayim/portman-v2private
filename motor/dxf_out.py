@@ -388,9 +388,10 @@ class Cizici:
             for j, ((x0, y0, x1, y1), (kx0, ky0, kx1, ky1)) in enumerate(zip(v["kenarlar"], v["kirisler"])):
                 vertical = abs(x0 - x1) < 1e-9
                 boy = (y1 - y0) if vertical else (x1 - x0)
-                kod = self.kat.veranda_profil(boy, "YAN" if vertical else "ON")
+                rol_ = "ON" if j == 0 else "YAN"            # profilin rolü kenardan (dış kenar ön profil), yönden değil: sol / sağ verandada dış kenar düşey
+                kod = self.kat.veranda_profil(boy, rol_)
                 # kenar sırası (dış, yan 1, yan 2) adda: iki yanın boyu aynı, iç çizgisi zıt yönde (geometri hakemi, 27 Ekim)
-                name = f"BOM_{kod}_VERANDA_{'YAN' if vertical else 'ON'}_{mm_tag(boy)}_{v['cephe'].upper()}_{('DIS', 'YAN1', 'YAN2')[j]}"
+                name = f"BOM_{kod}_VERANDA_{rol_}_{mm_tag(boy)}_{v['cephe'].upper()}_{('DIS', 'YAN1', 'YAN2')[j]}"
                 if name not in self.doc.blocks:
                     blk = self.doc.blocks.new(name)
                     ic = [(kx0, ky0, kx1, ky1)]
@@ -445,13 +446,13 @@ class Cizici:
             for i in range(int(plan.nx * 2) + 1):
                 if i % 2: continue
                 x = G.X(i / 2)
-                msp.add_line((x + ox, -35 + oy), (x + ox, H + 41 + oy), dxfattribs={"layer": "AKS"})
-                self.text(chr(ord("A") + i // 2), (x + ox, H + 60 + oy), 14, "AKS_YAZI")
+                msp.add_line((x + ox, -35 - alt + oy), (x + ox, H + 41 + ust + oy), dxfattribs={"layer": "AKS"})   # BK-14: taşan veranda payı
+                self.text(chr(ord("A") + i // 2), (x + ox, H + 60 + ust + oy), 14, "AKS_YAZI")
             for j in range(int(plan.ny * 2) + 1):
                 if j % 2: continue
                 y = G.Y(j / 2)
-                msp.add_line((-35 + ox, y + oy), (W + 35 + ox, y + oy), dxfattribs={"layer": "AKS"})
-                self.text(str(j // 2 + 1), (-53 + ox, y + oy), 14, "AKS_YAZI")
+                msp.add_line((-35 - sol + ox, y + oy), (W + 35 + sag + ox, y + oy), dxfattribs={"layer": "AKS"})
+                self.text(str(j // 2 + 1), (-53 - sol + ox, y + oy), 14, "AKS_YAZI")
         # ölçüler
         self.dim((ox, oy), (W + ox, oy), (0, -85 - alt + oy), 0)
         self.dim((ox, oy), (ox, H + oy), (-115 - sol + ox, 0), 90)
@@ -562,12 +563,7 @@ class Cizici:
 
     # ------------------------------------------------------------------ ön görünüş / çatı / tablo
     def _disari_yon(self, d):
-        for k, a, b in d.edges:
-            ma, mb = self.plan.mahaller.get(a), self.plan.mahaller.get(b)
-            a_out = (a == G.OUT) or (ma is not None and ma.acik); b_out = (b == G.OUT) or (mb is not None and mb.acik)
-            if a_out and not b_out: return "-x" if d.yon == "y" else "-y"
-            if b_out and not a_out: return "+x" if d.yon == "y" else "+y"
-        return None
+        return G.disari_yon(self.plan, d)
 
     def ciz_on_gorunus(self, ox, top):
         plan, msp = self.plan, self.msp

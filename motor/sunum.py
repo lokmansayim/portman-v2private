@@ -395,18 +395,6 @@ _DIS_NORMAL = {"on": "-y", "arka": "+y", "sol": "-x", "sag": "+x"}
 CATI_RENGI, CATI_KENAR = "#8a919c", "#2f343c"
 
 
-def _disari(plan: G.Plan, d) -> str | None:
-    """Dış duvarın dışa bakan yönü (dxf_out `_disari_yon` ile aynı kural): dışarı ya da açık mahal olan yan."""
-    for k, a, b in d.edges:
-        ma, mb = plan.mahaller.get(a), plan.mahaller.get(b)
-        a_out = a == G.OUT or (ma is not None and ma.acik); b_out = b == G.OUT or (mb is not None and mb.acik)
-        if a_out and not b_out:
-            return "-x" if d.yon == "y" else "-y"
-        if b_out and not a_out:
-            return "+x" if d.yon == "y" else "+y"
-    return None
-
-
 def gorunus_ciz(ax, plan: G.Plan, ie: dict, taraf: str, yazi: float = 1.0) -> None:
     """İki boyutlu görünüş (BK-14; Lokman 27 Ekim: "görünüşler nerede"): dış duvarlar, o cepheye bakan pencere, kapı ve pano ekleri, ana çatı
     (bakış mahyaya paralelse kalkan, dikse saçak bandı), dikmeler ve veranda kirişleri, taşan verandanın çatısı (`veranda.gorunus_parcalari`).
@@ -416,20 +404,14 @@ def gorunus_ciz(ax, plan: G.Plan, ie: dict, taraf: str, yazi: float = 1.0) -> No
     fs = lambda pt: pt * yazi
     H0 = VR.duvar_ustu(ie); c = ie.get("cati") or {}
     s = float(c.get("sacak_cm", 30)); eg = float(c.get("egim_yuzde", 33)) / 100.0; zs = H0 + float(c.get("topuk_cm", 10))
-    u_of = {"on": lambda x, y: x, "arka": lambda x, y: -x, "sol": lambda x, y: -y, "sag": lambda x, y: y}[taraf]
-    d_of = {"on": lambda x, y: y, "arka": lambda x, y: -y, "sol": lambda x, y: x, "sag": lambda x, y: -x}[taraf]
-
-    def izdusum(x0, y0, x1, y1):
-        us = [u_of(x, y) for x in (x0, x1) for y in (y0, y1)]
-        return min(us), max(us), min(d_of(x, y) for x in (x0, x1) for y in (y0, y1))
-
+    izdusum = VR.izdusum(taraf)
     ciz = []                                                            # (derinlik, sıra, fonksiyon)
     yama = lambda pts, **kw: (lambda: ax.add_patch(MplPolygon(pts, closed=True, **kw)))
     # dış duvarlar ve köşeler
     for d in plan.duvarlar:
         if d.tur != "dis":
             continue
-        bakan = _disari(plan, d) == _DIS_NORMAL[taraf]
+        bakan = G.disari_yon(plan, d) == _DIS_NORMAL[taraf]
         for p in d.panolar:
             u0, u1, dd = izdusum(*p.rect())
             ciz.append((dd, 0, yama([(u0, 0), (u1, 0), (u1, H0), (u0, H0)], fc="white", ec="#3a3a3a", lw=0.5, zorder=1)))
@@ -454,9 +436,13 @@ def gorunus_ciz(ax, plan: G.Plan, ie: dict, taraf: str, yazi: float = 1.0) -> No
     mahya_y = VR.ana_mahya_yonu(ie) == "y"
     kalkan = (taraf in ("on", "arka")) == mahya_y
     a0, a1 = (gx0, gx1) if mahya_y else (gy0, gy1)                    # makasın geçtiği açıklık
-    zm = zs + ((a1 - a0) / 2 + s) * eg
+    besik = c.get("tip", "besik") == "besik"                           # Motor'un çatısı beşik (IFC, çatı planı); başka tip çizilmez
+    zm = zs + ((a1 - a0) / 2 + s) * eg if besik else zs
     U0, U1, dmin = izdusum(gx0 - s, gy0 - s, gx1 + s, gy1 + s)
-    if kalkan:
+    if not besik:
+        ciz.append((dmin, 2, lambda: ax.text((U0 + U1) / 2, zs + 12, f"çatı ({c.get('tip')}) görünüşte çizilmedi", ha="center", va="bottom",
+                                             fontsize=fs(5.2), color="#8a8a8a", style="italic")))
+    elif kalkan:
         um = (U0 + U1) / 2
         w0, w1, _ = izdusum(gx0, gy0, gx1, gy1)
         zw = lambda u: zs + (min(u - U0, U1 - u)) * eg
@@ -479,7 +465,8 @@ def gorunus_ciz(ax, plan: G.Plan, ie: dict, taraf: str, yazi: float = 1.0) -> No
         if u1 - u0 > 1:
             ciz.append((dd, 1, yama([(u0, H0 - 10), (u1, H0 - 10), (u1, H0), (u0, H0)], fc="#3a3a3a", ec="none")))
     # taşan verandalar
-    for p in VR.gorunus_parcalari(plan, ie, taraf):
+    parcalar = VR.gorunus_parcalari(plan, ie, taraf)
+    for p in parcalar:
         if p["tur"] in ("kolon", "kiris"):
             ciz.append((p["derinlik"], 1, yama(p["u"], fc="#3a3a3a", ec="none")))
         elif p["tur"] == "alin":
@@ -493,13 +480,15 @@ def gorunus_ciz(ax, plan: G.Plan, ie: dict, taraf: str, yazi: float = 1.0) -> No
         r = f()
         for a in (r if isinstance(r, list) else [r]):
             a.set_zorder(1 + i * 1e-3)
-    tum_u = [U0, U1] + [u for p in VR.gorunus_parcalari(plan, ie, taraf) for u, _ in p["u"]]
+    tum_u = [U0, U1] + [u for p in parcalar for u, _ in p["u"]]
+    z_ust = max([zm] + [z for p in parcalar for _, z in p["u"]])
     ul, ur = min(tum_u), max(tum_u)
     ax.plot([ul - 20, ur + 20], [0, 0], color="#222", lw=1.4, zorder=4)
     CG.olcu(ax, (ul - 34, 0), (ul - 34, H0), _f(H0), -4, yatay=False, fs=fs(5.2))
-    CG.olcu(ax, (ul - 34, H0), (ul - 34, zm), _f(zm - H0), -4, yatay=False, fs=fs(5.2))
+    if besik:
+        CG.olcu(ax, (ul - 34, H0), (ul - 34, zm), _f(zm - H0), -4, yatay=False, fs=fs(5.2))
     ax.set_xlim(ul - 90, ur + 25)
-    ax.set_ylim(-25, zm + 25)
+    ax.set_ylim(-25, z_ust + 25)
     ax.set_aspect("equal")
     ax.set_anchor("N")
     ax.axis("off")

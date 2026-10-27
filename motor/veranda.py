@@ -114,18 +114,26 @@ def uyarilar(plan: G.Plan, ie: dict) -> list[str]:
     return out
 
 
-def gorunus_parcalari(plan: G.Plan, ie: dict, taraf: str) -> list[dict]:
-    """`taraf` (on | arka | sol | sag) görünüşündeki veranda parçaları: [{"tur": kolon | kiris | cati | alin, "u": [(u, z), ...], "derinlik": d}].
-    u görünüşün yatay ekseni (bakanın soldan sağa), z kot; `derinlik` bakana uzaklık sırası için (büyük = uzak). Kolon 0 … duvar üstü − 10,
-    kiriş duvar üstü − 10 … duvar üstü (IFC ile aynı)."""
-    H0 = duvar_ustu(ie)
+def izdusum(taraf: str):
+    """`taraf` (on | arka | sol | sag) görünüşünün izdüşümü: plandaki kutu (x0, y0, x1, y1) → (u0, u1, derinlik). u görünüşün yatay ekseni
+    (bakanın soldan sağa), derinlik bakana uzaklık sırası için (küçük = yakın). Bayi paftasının görünüşü de bunu kullanır."""
     u_of = {"on": lambda x, y: x, "arka": lambda x, y: -x, "sol": lambda x, y: -y, "sag": lambda x, y: y}[taraf]
     d_of = {"on": lambda x, y: y, "arka": lambda x, y: -y, "sol": lambda x, y: x, "sag": lambda x, y: -x}[taraf]
 
     def kutu_u(x0, y0, x1, y1):
         us = [u_of(x, y) for x in (x0, x1) for y in (y0, y1)]
-        ds = [d_of(x, y) for x in (x0, x1) for y in (y0, y1)]
-        return min(us), max(us), min(ds)
+        return min(us), max(us), min(d_of(x, y) for x in (x0, x1) for y in (y0, y1))
+    kutu_u.u = u_of                                     # nokta izdüşümü (tek eğimin dış ucu)
+    return kutu_u
+
+
+def gorunus_parcalari(plan: G.Plan, ie: dict, taraf: str) -> list[dict]:
+    """`taraf` (on | arka | sol | sag) görünüşündeki veranda parçaları: [{"tur": kolon | kiris | cati | alin, "u": [(u, z), ...], "derinlik": d}].
+    u görünüşün yatay ekseni (bakanın soldan sağa), z kot; `derinlik` bakana uzaklık sırası için (büyük = uzak). Kolon 0 … duvar üstü − 10,
+    kiriş duvar üstü − 10 … duvar üstü (IFC ile aynı)."""
+    H0 = duvar_ustu(ie)
+    kutu_u = izdusum(taraf)
+    u_of = kutu_u.u
 
     out = []
     for v in plan.dis_verandalar:
@@ -143,7 +151,8 @@ def gorunus_parcalari(plan: G.Plan, ie: dict, taraf: str) -> list[dict]:
         if C["tip"] == "besik":
             if boyuna:
                 um = (u0 + u1) / 2
-                out.append({"tur": "alin", "u": [(u0 + C["sacak"], H0), (u1 - C["sacak"], H0), (u1 - C["sacak"], zs), (um, zm), (u0 + C["sacak"], zs)],
+                zk = zs + C["sacak"] * C["egim"]                # kolon yüzünde çatı çizgisi (saçak ucunda zs); IFC'nin alın dolgusuyla aynı
+                out.append({"tur": "alin", "u": [(u0 + C["sacak"], H0), (u1 - C["sacak"], H0), (u1 - C["sacak"], zk), (um, zm), (u0 + C["sacak"], zk)],
                             "derinlik": dd, "veranda": v["ad"]})
                 out.append({"tur": "cati", "u": [(u0, zs), (um, zm), (u1, zs)], "kalkan": True, "derinlik": dd - 0.1, "veranda": v["ad"]})
             else:
