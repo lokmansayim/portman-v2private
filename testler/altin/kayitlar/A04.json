@@ -1,0 +1,54 @@
+{
+ "id": "A04",
+ "talep": {
+  "niyet": "revizyon",
+  "katalog_kodu": "Ç8801-K",
+  "yapi_turu": null,
+  "kat_sayisi": null,
+  "oda_programi": null,
+  "alan_m2": null,
+  "dis_olcu": null,
+  "pano": null,
+  "veranda": null,
+  "cati": null,
+  "yukseklik_cm": null,
+  "pencereler": [
+   {
+    "mahal": "salon",
+    "olcu": "120x180",
+    "adet": null,
+    "duvar": "sol",
+    "islem": "degistir"
+   }
+  ],
+  "dis_kapi": null,
+  "ic_kapi": null,
+  "varyantlar": [
+   {
+    "tur": "pencere_degistir",
+    "aciklama": "salondaki sol taraftaki pencere 120x180 olsun",
+    "parametreler": {
+     "mahal": "salon",
+     "duvar": "sol",
+     "eski": null,
+     "yeni": "120x180"
+    }
+   }
+  ],
+  "bina_ozellikleri": {},
+  "ozel_istekler": [],
+  "musteri": null,
+  "belirsizlikler": [
+   "\"Sol taraf\" bakış yönüne göre (içeriden/dışarıdan, ön cepheden) farklı anlaşılabilir"
+  ],
+  "guven": "yuksek",
+  "ozet": "Ç8801-K ön onay planında salonun sol duvarındaki pencerenin 120x180 olmasını istiyorsunuz."
+ },
+ "meta": {
+  "backend": "anthropic",
+  "model": "claude-opus-5-5",
+  "girdi_token": 5477,
+  "cikti_token": 437,
+  "sure_ms": 4197
+ }
+}

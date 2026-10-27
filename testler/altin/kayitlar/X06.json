@@ -1,0 +1,44 @@
+{
+ "id": "X06",
+ "talep": {
+  "niyet": "yeni_talep",
+  "katalog_kodu": null,
+  "yapi_turu": "celik",
+  "kat_sayisi": 1,
+  "oda_programi": "3+1",
+  "alan_m2": null,
+  "dis_olcu": null,
+  "pano": null,
+  "veranda": null,
+  "cati": {
+   "tip": "besik",
+   "egim_yuzde": null,
+   "kaplama": null,
+   "renk": null
+  },
+  "yukseklik_cm": null,
+  "pencereler": [],
+  "dis_kapi": null,
+  "ic_kapi": null,
+  "varyantlar": [],
+  "bina_ozellikleri": {},
+  "ozel_istekler": [],
+  "musteri": {
+   "ad": "Ahmet Bey",
+   "telefon": null,
+   "sevk_adresi": null
+  },
+  "belirsizlikler": [
+   "Ölçü, alan veya katalog kodu belirtilmemiş."
+  ],
+  "guven": "orta",
+  "ozet": "3+1, tek katlı, beşik çatılı çelik ev için plan/teklif istiyorsunuz."
+ },
+ "meta": {
+  "backend": "anthropic",
+  "model": "claude-opus-5-5",
+  "girdi_token": 5380,
+  "cikti_token": 342,
+  "sure_ms": 2990
+ }
+}

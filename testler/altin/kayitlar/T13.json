@@ -1,0 +1,35 @@
+{
+ "id": "T13",
+ "talep": {
+  "niyet": "yeni_talep",
+  "katalog_kodu": null,
+  "yapi_turu": null,
+  "kat_sayisi": null,
+  "oda_programi": null,
+  "alan_m2": null,
+  "dis_olcu": null,
+  "pano": null,
+  "veranda": null,
+  "cati": null,
+  "yukseklik_cm": null,
+  "pencereler": [],
+  "dis_kapi": null,
+  "ic_kapi": null,
+  "varyantlar": [],
+  "bina_ozellikleri": {},
+  "ozel_istekler": [],
+  "musteri": null,
+  "belirsizlikler": [
+   "Bayi yalnız 'üçüncü' yazdı; sunulan seçenek listesinin üçüncü maddesi olarak eşleştirilmeli, hangi seçenek olduğu mesajda yok."
+  ],
+  "guven": "dusuk",
+  "ozet": "Sunulan seçeneklerden üçüncüsünü seçtiniz."
+ },
+ "meta": {
+  "backend": "anthropic",
+  "model": "claude-opus-5-5",
+  "girdi_token": 5465,
+  "cikti_token": 354,
+  "sure_ms": 3550
+ }
+}

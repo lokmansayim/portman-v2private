@@ -1,0 +1,58 @@
+{
+ "id": "D03",
+ "talep": {
+  "niyet": "revizyon",
+  "katalog_kodu": null,
+  "yapi_turu": null,
+  "kat_sayisi": null,
+  "oda_programi": null,
+  "alan_m2": null,
+  "dis_olcu": null,
+  "pano": null,
+  "veranda": null,
+  "cati": null,
+  "yukseklik_cm": null,
+  "pencereler": [
+   {
+    "mahal": "yatak odası 1",
+    "olcu": "120x120",
+    "adet": null,
+    "duvar": null,
+    "islem": "degistir"
+   }
+  ],
+  "dis_kapi": null,
+  "ic_kapi": null,
+  "varyantlar": [
+   {
+    "tur": "pencere_degistir",
+    "aciklama": "yatak odası 1 penceresi 120x120 olsun",
+    "parametreler": {
+     "mahal": "yatak odası 1",
+     "eski": null,
+     "yeni": "120x120"
+    }
+   }
+  ],
+  "bina_ozellikleri": {},
+  "ozel_istekler": [],
+  "musteri": {
+   "ad": null,
+   "telefon": null,
+   "sevk_adresi": null
+  },
+  "belirsizlikler": [
+   "Hangi plan/katalog modeline ait olduğu mesajda belirtilmemiş",
+   "Pencerenin hangi duvarda olduğu belirtilmemiş"
+  ],
+  "guven": "orta",
+  "ozet": "Önceki plandaki yatak odası 1 penceresinin 120x120 olarak değiştirilmesini istiyorsunuz."
+ },
+ "meta": {
+  "backend": "anthropic",
+  "model": "claude-opus-5-5",
+  "girdi_token": 5379,
+  "cikti_token": 428,
+  "sure_ms": 3831
+ }
+}
