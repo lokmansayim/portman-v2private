@@ -430,7 +430,7 @@ def metraj(y: dict, c: dict, kur: dict) -> dict:
             raise SystemExit("Tanımda hem karkas modeli (`celik_modeli`) hem karkas kuralı (`karkas: kural`) var; biri seçilir.")
         from . import karkas
         kk_kural = karkas.oku()
-        m["karkas"] = karkas.kur(y, t, kk_kural)
+        m["karkas"] = karkas.kur(y, t, kk_kural, cati_yontemi(t["cati"], kur))
         m["celik_modeli"] = karkas.gruplar(m["karkas"], y, t, kk_kural, kur["celik"]["profil_kg_m"]["deger"])
     # sigorta kutusundan kapalı kısmın en uzak köşesine kuş uçuşu mesafe: kutu, tanımda yeri yazmıyorsa binanın dış kapısında sayılır
     kutu_yeri = (t.get("elektrik") or {}).get("sigorta_kutusu")
@@ -638,7 +638,15 @@ def girdi(y: dict, c: dict, m: dict, kur: dict, kaynak: str) -> dict:
     # satırındadır (`celik_modeli.ek_satirlar`; KT-02, 9 Ekim 2026). Eski tanımlarda bütün kirişler "kiris" grubundadır.
     kirisler = [k for k in t.get("kirisler", []) if k.get("celik_grubu", "kiris") == "kiris"]
     makas = ct.get("makaslar") or {}
-    makas_adedi = sum(v.get("adet", 0) for v in makas.values()) or None
+    # çatı karkas kuralında makas adedi yalnız kuraldan (İE-16 PR-3b): tanımdaki `cati.makaslar` (paftadan okunmuş) okunmaz; kural makas
+    # kurmadıysa adet yok, çatı çeliği motorun ortalamasıyla ve uyarıyla. Çatı kuralı olmayan kural kopyasında (PR-3a) tanımdan.
+    cati_k = m["karkas"]["cati"] if kural_k else None
+    if cati_k is not None:
+        makas_adedi = cm["makas"]["adet"] if "makas" in cm else None
+        if makas_adedi is None:
+            uyari.append("karkas kuralı: makas kurulmadı; çatı çeliği motorun ortalamasıyla (tanımdaki makas yerleri kuralda okunmaz)")
+    else:
+        makas_adedi = sum(v.get("adet", 0) for v in makas.values()) or None
     dis_prof, dis_pb, dis_mn = model("dis", None if tahmin else gr["dis"]["adet"], sinif["dis"]["profil"])
     ic_prof, ic_pb, ic_mn = model("ic", None if tahmin else gr["ic"]["adet"], sinif["ic"]["profil"]) if gr.get("ic") else (None, {}, "")
     # dikme, kiriş, makas ve çatı panelinin profili tanımda yazmaz: model varsa modeldeki, yoksa kuraldaki varsayılan et kalınlığı
@@ -662,7 +670,26 @@ def girdi(y: dict, c: dict, m: dict, kur: dict, kaynak: str) -> dict:
     cv_cevre = sum(geo.length for geo in cv.values()) / 100
     if cv:
         veranda_tavani -= cv_m2
+    if kural_k and "cati_paneli" in cm and cm["cati_paneli"]["adet"] != cp_adet:   # kuralın bölmesi düzlemin biçimiyle bir parça fazla ya da eksik
+        uyari.append(f"karkas kuralı: çatı paneli tanımda {cp_adet}, kuralın bölmesinde {cm['cati_paneli']['adet']} (düzlemin biçimi); kuralınki yazıldı")
+        cp_adet = cm["cati_paneli"]["adet"]
     cp_prof, cp_pb, cp_mn = model("cati_paneli", cp_adet, None, f"80x45x{ev['cati']}") if mc["panelli_plan_m2"] else (None, {}, "")
+    # karkas kuralının makas, yöntem A paneli kayıtları (İE-16 PR-3b): adet ve profil boyu kuraldan
+    makas_notu = ""
+    if kural_k and "makas" in cm:
+        say = {}
+        for x in m["karkas"]["cati"]["makaslar"]:
+            say[x["tur"]] = say.get(x["tur"], 0) + 1
+        makas_notu = ", ".join(f"{n} {ad}" for tur, ad in (("makas", "tam"), ("kisa", "kısa"), ("capraz", "kırma çaprazı")) if (n := say.get(tur)))
+    a_panelleri = {}
+    if kural_k and yontem == "panel":
+        for grup in ("ust_paneli", "tavan_paneli"):
+            if grup in cm:
+                prof, pbx, mn = model(grup, None, None, f"80x45x{ev['cati']}")
+                a_panelleri[grup] = {"adet": cm[grup]["adet"], "profil": prof, "not": "adet ve profil boyu karkas kuralından" + mn, **pbx}
+            elif cati_k is not None:                       # kural bu paneli kuramadı: satır kitabın oranıyla, sessiz değil
+                uyari.append(f"karkas kuralı: {'çatı üstü' if grup == 'ust_paneli' else 'tavan'} paneli kurulmadı; satır kitabın oranıyla "
+                             "(100 m² için kg, oturum alanına)")
     # modeldeki öteki gruplar (`celik_modeli.ek_satirlar`: {grup, ad, not}): her biri ayrı satır, profil ve boy modelden (KT-02, 9 Ekim 2026:
     # kırma uçlarının çatı panelleri, veranda destekleri, 1,5 mm kiriş). Bir kiriş bu gruplardan birine yazılmışsa grubun panel adedi o kirişlerin sayısıdır.
     ek_satirlar = []
@@ -692,7 +719,8 @@ def girdi(y: dict, c: dict, m: dict, kur: dict, kaynak: str) -> dict:
         "cati": {"tip": ct["tip"], "profil": makas_prof, "plan_m2": round(mc["makasli_plan_m2"], 2),
                  "oturum_m2": round(m["oturum_m2"] - ((pv_m2 if pv else m["ek_oturum_m2"]) if celik_a and yontem == "panel" and mc["panelli_plan_m2"] else 0.0)
                                     - (cv_m2 if cv else 0.0), 2),
-                 **({"panel_adedi": makas_adedi, "not": f"plan: makaslı çatının saçak dahil planı; adet modelden ({makas_adedi} makas)"} if makas_adedi else {}),
+                 **({"panel_adedi": makas_adedi, "not": (f"makas kuralından: {makas_notu}" if kural_k and "makas" in cm else
+                                                         f"plan: makaslı çatının saçak dahil planı; adet modelden ({makas_adedi} makas)")} if makas_adedi else {}),
                  **makas_pb},
         "tavan_paneli_m2": (round(sum(o["alan_m2"] for o in m["odalar"] if not (celik_a and o["cati_paneli_altinda"])) + m["veranda_brut_m2"]
                                   - (pv_m2 if celik_a else 0.0) - (cv_m2 if cv else 0.0), 2) if yontem == "panel" else None),
@@ -709,6 +737,7 @@ def girdi(y: dict, c: dict, m: dict, kur: dict, kaynak: str) -> dict:
                                     "ek yapının çatısı çatı paneliyle kapatılır (proje notu); 100 m² için verilen ağırlık ek yapının oturum alanına oranlandı; adet modelden",
                              **cp_pb}) if mc["panelli_plan_m2"] else None),
         **({"ek_satirlar": ek_satirlar} if ek_satirlar else {}),
+        **({"a_panelleri": a_panelleri} if a_panelleri else {}),
         # karkas kuralı (İE-16 PR-3a): kuralın kaydı ve paneller (yerleşim paftası ve kıyas için); yalnız tanım isterse
         **({"karkas": {"kural": m["karkas"]["kural"], "paneller": [{k_: p_[k_] for k_ in ("ad", "sinif", "boy_cm", "yukseklik_cm", "profil_boyu_m")}
                                                                    for p_ in m["karkas"]["paneller"]],
@@ -847,7 +876,8 @@ def girdi(y: dict, c: dict, m: dict, kur: dict, kaynak: str) -> dict:
         "bayi": {"gruplar": {"Sıhhi tesisat": bool(kapsam.get("sihhi_tesisat", True)), "Elektrik": bool(kapsam.get("elektrik", True))},
                  "not": "kapsam: projenin teknik özellikleri ve açıklama notları (alıcıya ait olanlar listeye girmez)"},
         "uyarilar": uyari + ([m["tavan_omegasi_uyarisi"]] if m.get("tavan_omegasi_uyarisi") else [])
-                    + ([f"karkas kuralı: {u}" for u in m["karkas"]["uyarilar"]] if kural_k else []),
+                    + ([f"karkas kuralı: {u}" for u in m["karkas"]["uyarilar"] + ((m["karkas"]["cati"] or {}).get("uyarilar") or [])]
+                       if kural_k else []),
     }
     return g
 
