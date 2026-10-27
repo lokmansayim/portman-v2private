@@ -56,12 +56,13 @@ def test_bizim_liste_hakemin_turleriyle_okunur():
     """İE-16 PR-3a'dan beri listemiz bölmesiz tanımdan (`CP06_kural.json`, `karkas: kural`): duvar paneli adedi karkas kuralının bölmesidir
     (22; paftada 26: kıyasın sonucu, girdi değil). PR-2'de liste panelli tanımdandı (26, paftadan girdi); gerekçe İE-16 › PR-3a.
     PR-3b'den beri makas adedi de kuralın dizilimidir (15: 13 tam, 1 kısa, 1 kırma çaprazı; paftada 13 M ve cumbada 2 C: kıyasın sonucu);
-    PR-3a'da tanımdaki `cati.makaslar`dı (13, paftadan girdi); gerekçe İE-16 › PR-3b."""
+    PR-3a'da tanımdaki `cati.makaslar`dı (13, paftadan girdi); gerekçe İE-16 › PR-3b. PR-3c'den beri panel oda bölmesinde biter (Lokman,
+    27 Ekim 2026): 20 (PR-3a/3b'nin 366 cm kuralıyla 22)."""
     b = json.loads(BIZIM.read_text(encoding="utf-8"))
     assert b["tanim"]["yol"] == "testler/celik/projeler/CP06/CP06_kural.json" and b["karkas_kurali"]["yol"] == "kurallar/karkas/celik_karkas.json"
     bc = kiyas.bizim_celik(b["satirlar"])
     assert set(bc["turler"]) == {"duvar_paneli", "kolon_kiris", "makas", "c_profil"}
-    assert (bc["turler"]["duvar_paneli"]["adet"], bc["turler"]["kolon_kiris"]["adet"], bc["turler"]["makas"]["adet"]) == (22, 4, 15)
+    assert (bc["turler"]["duvar_paneli"]["adet"], bc["turler"]["kolon_kiris"]["adet"], bc["turler"]["makas"]["adet"]) == (20, 4, 15)
     assert all(oku.celik_grubu_mu(s["grup"]) == ("tur" in s) for s in b["satirlar"])
 
 

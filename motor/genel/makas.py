@@ -27,6 +27,10 @@ kaynağıyla. Tanımdaki `cati.makaslar` (paftadan okunmuş makas yerleri) bu ku
    paneli kuralıyla kurulur (`karkas.uyeler`; panelin uzun kenarı başlık, dikmeler `dikme_araligi_cm` arayla kısa kenar boyunca).
    Çatı paneli düzlemin açılımında saçak boyunca `cati_paneli_adedi` eşit panele bölünür; çatı üstü paneli saçak boyunca `bolme`
    hedefiyle; tavan paneli ana ailenin makas aralıklarında, mahallerin içinde (makas kalınlığından dar şerit ve parça panel olmaz).
+   PR-3c (Lokman, 27 Ekim 2026; yeni anahtarlar, eski kural kopyasında eski davranış): çatı paneli ve çatı üstü panelinde çapraz yok;
+   adedi tanımda yazmayan açık alan çatı paneli saçak boyunca `cati_paneli.en_cm_acik_alan` (180); çatı üstü paneli eğim boyunca `ust_paneli.en_cm`, saçak
+   boyunca beş makas aralığı (`ust_paneli`); tavan panelinin uzun kenarı en çok `tavan_paneli.en_uzun_cm` (tırın 13,60 m'si); tek
+   açıklığı `makas_eti.tek_aciklik_en_cok_cm`'yi (8 m) aşan makas kalın sacdan (`makas_eti`, `tek_aciklik`).
 7. **Uyarılar.** Kuralın yedeğe düştüğü ya da bir şey koymadığı her yer `uyarilar`a yazılır (aileye bağlanmayan kırma yüzü, ailesiz
    çatı, ucunda duvar bulunamayan aile (ana saçağın ezdiği uç hariç: sonucu değiştirmez), saçağı bulunamayan kırma ucu, tek parça
    kesilmeyen kırma şeridi, kısa çizgi, kurulamayan tavan paneli, tavan panelinin küçük ve dar parçaları); girdi bunları "karkas kuralı:
@@ -536,20 +540,34 @@ def _saciga_bol(pol: Polygon, n: int) -> list[Polygon]:
     return out
 
 
+def ek_yapi_mi(dz: dict, y: dict) -> bool:
+    """Çatı panelli düzlem bir ek yapıyı (müştemilat) mı örtüyor; değilse açık alan (veranda, sundurma)."""
+    return any(b["sinif"] == "ek" and dz["cokgen"].contains(b["net"].representative_point()) for b in y["bolgeler"].values())
+
+
+def cati_paneli_adedi(dz: dict, k: dict, y: dict) -> int:
+    """Çatı panelli düzlemin panel adedi: tanımda yazıyorsa (`cati_paneli_adedi`) o; yazmıyorsa açık alanın düzleminde kuralda
+    `en_cm_acik_alan` varsa (İE-16 PR-3c; Lokman, 27 Ekim 2026: 60 cm arayla C profil, 180 cm genişlik) açılımın saçak boyu ÷ o, yukarı;
+    yoksa (ek yapı ya da eski kural kopyası) 1. Liste (`cati_panelleri`) ve pafta (`makas_pafta.cati_paneli_planlari`) bunu okur."""
+    en = _d(k, "cati_paneli").get("en_cm_acik_alan")
+    if dz.get("cati_paneli_adedi") or not en or ek_yapi_mi(dz, y):
+        return int(dz.get("cati_paneli_adedi", 1))
+    pol = _acilim(dz)
+    return max(1, math.ceil((pol.bounds[2] - pol.bounds[0]) / en - 1e-9))
+
+
 def cati_panelleri(c: dict, y: dict, k: dict) -> list[dict]:
     """Tanımda çatı paneli yazan düzlemler (`ust_yapi: cati_paneli`): açılım saçak boyunca eşit panellere. Adet tanımda yazıyorsa
-    (`cati_paneli_adedi`; açık projede paftadan) o; yazmıyorsa kuraldan: düzlem tek panel, saçak boyu `en_uzun_cm`'yi aşarsa eşit bölünür
-    (İE-16 PR-3c; Lokman, 27 Ekim 2026: "ne kadar uzun olursa o kadar iyidir", tırın boyu). Kuralda `capraz: false` ise çapraz yok."""
+    (`cati_paneli_adedi`; açık projede paftadan) o; yazmıyorsa kuraldan (`cati_paneli_adedi`). Kuralda `capraz: false` ise çapraz yok
+    (İE-16 PR-3c)."""
     cp = _d(k, "cati_paneli")
     out = []
     for dz in c["duzlemler"]:
         if dz.get("ust_yapi") != "cati_paneli":
             continue
-        ek_yapi = any(b["sinif"] == "ek" and dz["cokgen"].contains(b["net"].representative_point()) for b in y["bolgeler"].values())
+        ek_yapi = ek_yapi_mi(dz, y)
         et = cp["et_ek_yapi"] if ek_yapi else cp["et_acik_alan"]
-        pol = _acilim(dz)
-        n = dz.get("cati_paneli_adedi") or (max(1, math.ceil((pol.bounds[2] - pol.bounds[0]) / cp["en_uzun_cm"] - 1e-9)) if "en_uzun_cm" in cp else 1)
-        for j, p in enumerate(_saciga_bol(pol, int(n)), 1):
+        for j, p in enumerate(_saciga_bol(_acilim(dz), cati_paneli_adedi(dz, k, y)), 1):
             u = panel_uyeleri(p, k, capraz=cp.get("capraz", True))
             out.append({"duzlem": dz["ad"], "sira": j, "ortu": "ek yapı" if ek_yapi else "açık alan", "profil": f"80x45x{et}",
                         "olcu_cm": [round(p.bounds[2] - p.bounds[0], 2), round(p.bounds[3] - p.bounds[1], 2)],

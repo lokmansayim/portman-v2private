@@ -1219,9 +1219,10 @@ def _hesapla(g: dict, k: dict) -> dict:
                 for s in S:
                     if s["kalem"] in kalemler:
                         s["renk"] = g["renk"][anahtar]
-                        if basta:
-                            ad = s.get("liste_adi") or s["kalem"]
-                            s["liste_adi"], s["renk_adda"] = s["renk"][:1].upper() + s["renk"][1:] + " " + ad[:1].lower() + ad[1:], True
+                        if basta:                     # Türkçe büyük-küçük harf (i/İ, ı/I); kısaltma (OUTWEAR) küçülmez
+                            ad, r = s.get("liste_adi") or s["kalem"], s["renk"]
+                            ad = (ad[:1].replace("İ", "i").replace("I", "ı").lower() + ad[1:]) if ad[1:2].islower() else ad
+                            s["liste_adi"], s["renk_adda"] = r[:1].replace("i", "İ").replace("ı", "I").upper() + r[1:] + " " + ad, True
 
     # ── bayi kuralı: gruplar ────────────────────────────────────────────────
     gruplar = {**deg(k, "bayi_kurali")["varsayilan_gruplar"], **(g.get("bayi") or {}).get("gruplar", {})}

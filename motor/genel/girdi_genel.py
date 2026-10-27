@@ -671,7 +671,11 @@ def girdi(y: dict, c: dict, m: dict, kur: dict, kaynak: str) -> dict:
     if cv:
         veranda_tavani -= cv_m2
     if kural_k and "cati_paneli" in cm and cm["cati_paneli"]["adet"] != cp_adet:   # kuralın bölmesi düzlemin biçimiyle bir parça fazla ya da eksik
-        uyari.append(f"karkas kuralı: çatı paneli tanımda {cp_adet}, kuralın bölmesinde {cm['cati_paneli']['adet']} (düzlemin biçimi); kuralınki yazıldı")
+        if all("cati_paneli_adedi" in dz for dz in ct["duzlemler"] if dz.get("ust_yapi") == "cati_paneli"):
+            uyari.append(f"karkas kuralı: çatı paneli tanımda {cp_adet}, kuralın bölmesinde {cm['cati_paneli']['adet']} (düzlemin biçimi); kuralınki yazıldı")
+        else:                                              # adet tanımda yazmıyor (kör proje): kuralın boy sınırından (İE-16 PR-3c)
+            uyari.append(f"karkas kuralı: çatı paneli adedi tanımda yazmıyor (düzlem başına 1 sayılırdı); kuralın bölmesinde "
+                         f"{cm['cati_paneli']['adet']}, kuralınki yazıldı")
         cp_adet = cm["cati_paneli"]["adet"]
     cp_prof, cp_pb, cp_mn = model("cati_paneli", cp_adet, None, f"80x45x{ev['cati']}") if mc["panelli_plan_m2"] else (None, {}, "")
     # karkas kuralının makas, yöntem A paneli kayıtları (İE-16 PR-3b): adet ve profil boyu kuraldan

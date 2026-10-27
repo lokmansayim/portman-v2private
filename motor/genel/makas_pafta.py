@@ -55,14 +55,15 @@ def adlar(ck: dict) -> list[dict]:
     return out
 
 
-def cati_paneli_planlari(c: dict) -> list[dict]:
-    """Çatı panelli düzlemin planı saçak boyunca `cati_paneli_adedi` eşit şeride (açılımdaki eşit bölmenin plandaki karşılığı). Sıra
-    açılımdaki gibi: açılımın saçak ekseni u = p · sag (`cati_genel`), şeritler u'ya göre sıralanır (tablodaki sırayla aynı)."""
+def cati_paneli_planlari(c: dict, k: dict | None = None, y: dict | None = None) -> list[dict]:
+    """Çatı panelli düzlemin planı saçak boyunca panel adedince eşit şeride (açılımdaki eşit bölmenin plandaki karşılığı; adet
+    `makas.cati_paneli_adedi`, kural ve yapı verilmezse tanımdaki `cati_paneli_adedi`). Sıra açılımdaki gibi: açılımın saçak ekseni u = p · sag
+    (`cati_genel`), şeritler u'ya göre sıralanır (tablodaki sırayla aynı)."""
     out, j = [], 0
     for dz in c["duzlemler"]:
         if dz.get("ust_yapi") != "cati_paneli":
             continue
-        n = int(dz.get("cati_paneli_adedi", 1))
+        n = makas.cati_paneli_adedi(dz, k, y) if k and y else int(dz.get("cati_paneli_adedi", 1))
         x0, y0, x1, y1 = dz["cokgen"].bounds
         sacak_x = makas._eksen(dz) == "y"                  # eğim y yönündeyse saçak x boyunca
         parcalar = []
@@ -169,7 +170,7 @@ def ciz(t: dict, hedef: Path, kod: str, kural_k: dict | None = None, yontem: str
         raise SystemExit("Makas yerleşim planı: karkas kuralında çatı kuralı (`makas`) yok.")
     c = cati_genel.cati_kur(t["cati"])
     ms = adlar(ck)
-    cps = cati_paneli_planlari(c)
+    cps = cati_paneli_planlari(c, k, y)
     if len(cps) != len(ck["cati_panelleri"]):
         raise SystemExit(f"Makas yerleşim planı: çatı panelinin plandaki bölmesi ({len(cps)}) kuralınkiyle ({len(ck['cati_panelleri'])}) aynı değil")
     profil = f"80x45x{kur['celik']['et_kalinligi_varsayilan']['deger']['cati']}"     # makasın profili tanımda yazmaz (`girdi_genel`)

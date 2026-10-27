@@ -3,6 +3,8 @@
 Kuraldaki modelden gelen katsayılar (çapraz payı, kolon, kiriş) KT-01'in karkas modelinden yeniden hesaplanır; türetilmiş 140'lık birim
 ağırlığı kitabın yöntemiyle yeniden türetilir. Bölme ve üyeler elle hesaplanmış küçük örneklerle; koşu, tanımın panelli ya da bölmesiz
 yazılmasından bağımsızdır. Karkas istemeyen tanımda kural hiç çağrılmaz (bugünkü çıktı bayt bayt aynı: altın testler ve `dogrula.py`).
+PR-3c (Lokman, 27 Ekim 2026): panel oda bölmesinde biter (`bolme.oda_bolmesi`), 140'lık motorun ortalamasıyla (`profil_kg_m_ek` boş).
+PR-3a/3b'nin davranışı (366 cm hedefi, türetilmiş 2,225 kg/m) eski kural kopyasıyla (`ESKI`) aynen sınanır.
 """
 from __future__ import annotations
 import json
@@ -17,6 +19,8 @@ sys.path.insert(0, str(KOK))
 from motor.genel import cati_genel, girdi_genel, karkas, kural as kurallar_oku, yapi  # noqa: E402
 
 KURAL = karkas.oku(karkas.KURAL)
+ESKI_YOL = KOK / "testler" / "celik" / "projeler" / "setler" / "7940e1d20cc18652.json"   # PR-3b'nin kural kopyası (366 cm, 2,225 kg/m)
+ESKI = karkas.oku(ESKI_YOL)
 KT01 = KOK / "modeller" / "KT01.json"
 PROFIL_BOYLARI = KOK / "deneme" / "2026-10-06_kor_test" / "tanim" / "KT01_profil_boylari.json"
 CP06 = KOK / "testler" / "celik" / "projeler" / "CP06"
@@ -71,32 +75,68 @@ def test_kolon_ve_kiris_katsayilari_kt01_modelinden():
 
 
 def test_140_birim_agirligi_kitabin_yontemiyle():
+    """PR-3a'nın türetilmiş değeri (eski kopyada durur) ve PR-3c'nin kuralı: 140'lığın birim ağırlığı yok, motorun ortalaması (A4)."""
     kitap = kurallar_oku.oku()["celik"]["profil_kg_m"]["deger"]["80x45x1,2"]
     acilim_mm = kitap / (1.2 * 7.85) * 1000                 # 80 × 45 × 1,2'nin açılımı
     assert round(acilim_mm, 1) == 176.2
-    assert round((acilim_mm + 140 - 80) * 1.2 * 7.85 / 1000, 3) == karkas.d(KURAL, "profil_kg_m_ek")["140x45x1,2"]
+    assert round((acilim_mm + 140 - 80) * 1.2 * 7.85 / 1000, 3) == karkas.d(ESKI, "profil_kg_m_ek")["140x45x1,2"]
+    assert karkas.d(KURAL, "profil_kg_m_ek") == {} and KURAL["profil_kg_m_ek"]["durum"] == "lokman"
 
 
 @pytest.mark.parametrize("boy,adet", [(100, 1), (366, 1), (366.5, 2), (732, 2), (733, 3), (1098, 3)])
 def test_aciksiz_kosu_hedef_366_esit_panel(boy, adet):
-    assert karkas.d(KURAL, "bolme") == {"hedef_cm": 366}
-    p = karkas.bol({"bas": 50.0, "son": 50.0 + boy}, [], KURAL)
+    """Eski kopya (PR-3a/3b): koşu ceil(boy ÷ 366) eşit panel."""
+    assert karkas.d(ESKI, "bolme") == {"hedef_cm": 366}
+    p = karkas.bol({"bas": 50.0, "son": 50.0 + boy}, [], ESKI)
     assert len(p) == adet and p[0][0] == 50.0 and p[-1][1] == 50.0 + boy
     assert max(b - a for a, b in p) - min(b - a for a, b in p) < 0.2 and all(b - a <= 366 for a, b in p)
 
 
+@pytest.mark.parametrize("boy,adet", [(100, 1), (516, 1), (516.5, 2), (1032, 2), (1033, 3)])
+def test_bolmesiz_kosu_en_uzun_516_esit_panel(boy, adet):
+    """PR-3c (A1, A5): oda bölmesi olmayan koşu 516'yı aşarsa eşit bölünür; 5 m'lik salon cephesi tek panel."""
+    assert karkas.d(KURAL, "bolme") == {"oda_bolmesi": True, "en_uzun_cm": 516}
+    p = karkas.bol({"bas": 50.0, "son": 50.0 + boy}, [], KURAL)
+    assert len(p) == adet and p[0][0] == 50.0 and p[-1][1] == 50.0 + boy
+    assert max(b - a for a, b in p) - min(b - a for a, b in p) < 0.2 and all(b - a <= 516 for a, b in p)
+
+
+def test_panel_oda_bolmesinde_biter():
+    """PR-3c (A1): koşu ona dik bağlanan her duvarın ekseninde bölünür; her bölme kendi içinde 516'ya göre. Açıklığa düşen ek yeri yakın
+    kenara kayar. Eski kopyada bağlantı noktası sayılmaz (366'ya göre eşit)."""
+    ks = {"bas": 0.0, "son": 1200.0}
+    assert karkas.bol(ks, [], KURAL, [300.0]) == [(0.0, 300.0), (300.0, 750.0), (750.0, 1200.0)]
+    assert karkas.bol(ks, [], KURAL, [300.0, 800.0]) == [(0.0, 300.0), (300.0, 800.0), (800.0, 1200.0)]
+    assert karkas.bol(ks, [{"a0": 260.0, "a1": 320.0}], KURAL, [300.0]) == [(0.0, 320.0), (320.0, 760.0), (760.0, 1200.0)]
+    assert karkas.bol(ks, [], ESKI, [300.0]) == karkas.bol(ks, [], ESKI) == [(0.0, 300.0), (300.0, 600.0), (600.0, 900.0), (900.0, 1200.0)]
+
+
+def test_eklemler_koseyi_saymaz():
+    """Bağlantı noktası: koşuya dik dış, iç ya da ek duvarın ekseni; koşunun ucuna dik duvarın kendi kalınlığından yakın olan (köşe) sayılmaz."""
+    t = json.loads((CP06 / "CP06_kural.json").read_text(encoding="utf-8"))
+    y = yapi.kur(t)
+    for ks in karkas.kosular(y, t):
+        for j in karkas.eklemler(y, ks):
+            assert ks["bas"] < j < ks["son"]
+    assert sum(len(karkas.eklemler(y, ks)) for ks in karkas.kosular(y, t)) > 0
+
+
 def test_ek_yeri_acikligin_yakin_kenarina_kayar():
-    # 600'lük koşu iki panel: ek yeri 300; 280–380 arası açıklık → yakın kenar 280
-    assert karkas.bol({"bas": 0.0, "son": 600.0}, [{"a0": 280.0, "a1": 380.0}], KURAL) == [(0.0, 280.0), (280.0, 600.0)]
-    assert karkas.bol({"bas": 0.0, "son": 600.0}, [{"a0": 220.0, "a1": 310.0}], KURAL) == [(0.0, 310.0), (310.0, 600.0)]
+    # eski kopya (366): 600'lük koşu iki panel: ek yeri 300; 280–380 arası açıklık → yakın kenar 280
+    assert karkas.bol({"bas": 0.0, "son": 600.0}, [{"a0": 280.0, "a1": 380.0}], ESKI) == [(0.0, 280.0), (280.0, 600.0)]
+    assert karkas.bol({"bas": 0.0, "son": 600.0}, [{"a0": 220.0, "a1": 310.0}], ESKI) == [(0.0, 310.0), (310.0, 600.0)]
     # 720'lik koşu: ek yeri 360, 300–370 kapısı → yakın kenar 370; ilk panel 370 (hedefi aşar, `kur` uyarı yazar)
-    assert karkas.bol({"bas": 0.0, "son": 720.0}, [{"a0": 300.0, "a1": 370.0}], KURAL) == [(0.0, 370.0), (370.0, 720.0)]
+    assert karkas.bol({"bas": 0.0, "son": 720.0}, [{"a0": 300.0, "a1": 370.0}], ESKI) == [(0.0, 370.0), (370.0, 720.0)]
+    # PR-3c: 1100'lük bölmesiz koşu üç panel (ek yerleri 366,7 ve 733,3); 330–400 kapısı → yakın kenar 400 (en uzunu aşmaz)
+    assert karkas.bol({"bas": 0.0, "son": 1100.0}, [{"a0": 330.0, "a1": 400.0}], KURAL)[0] == (0.0, 400.0)
 
 
-def test_hedefi_asan_panel_uyari_olarak_yazilir():
-    """Ek yeri kapının kenarına kayınca panel 366'yı aşar (ÇP-14'te hol–veranda duvarı, 411,4 cm): sessiz kalmaz, kayıtta ve girdide uyarı."""
+def test_hedefi_asan_panel_uyari_olarak_yazilir(monkeypatch):
+    """Ek yeri kapının kenarına kayınca panel 366'yı aşar (eski kopya; ÇP-14'te hol–veranda duvarı, 411,4 cm): sessiz kalmaz, kayıtta ve
+    girdide uyarı."""
+    monkeypatch.setenv("PORTMAN_KARKAS", str(ESKI_YOL))
     t = json.loads((KOK / "testler" / "celik" / "projeler" / "CP14" / "CP14.json").read_text(encoding="utf-8"))
-    kk = karkas.kur(yapi.kur(t), t, KURAL)
+    kk = karkas.kur(yapi.kur(t), t, ESKI)
     asan = [p for p in kk["paneller"] if p["boy_cm"] > 366 + karkas.TOL]
     assert asan and len(kk["uyarilar"]) == len(asan)
     assert all(p["ad"] in u and str(p["boy_cm"]) in u for p, u in zip(asan, kk["uyarilar"]))
@@ -114,13 +154,14 @@ def test_kisa_kalan_panel_uyari_olarak_yazilir(monkeypatch):
     yeri 350'den 20'ye): sessiz kalmaz. Koşunun kendisi kısaysa (ÇP-14'ün 50 cm'lik cumba yanları) uyarı yok."""
     assert karkas.bol({"bas": 0.0, "son": 700.0}, [{"a0": 20.0, "a1": 690.0}], KURAL) == [(0.0, 20.0), (20.0, 700.0)]
     t = json.loads((KOK / "testler" / "celik" / "projeler" / "CP14" / "CP14.json").read_text(encoding="utf-8"))
-    kk = karkas.kur(yapi.kur(t), t, KURAL)
-    assert any(p["boy_cm"] < 61 for p in kk["paneller"]) and not any("kısa" in u for u in kk["uyarilar"])
-    assert all("_kosunun_parcasi" not in p for p in kk["paneller"])
+    for k in (ESKI, KURAL):
+        kk = karkas.kur(yapi.kur(t), t, k)
+        assert any(p["boy_cm"] < 61 for p in kk["paneller"]) and not any("kısa" in u for u in kk["uyarilar"])
+        assert all("_kosunun_parcasi" not in p for p in kk["paneller"])
     bol = karkas.bol
-    monkeypatch.setattr(karkas, "bol", lambda ks, acik, k: [(ks["bas"], ks["bas"] + 20.0), (ks["bas"] + 20.0, ks["son"])]
-                        if ks["son"] - ks["bas"] > 300 else bol(ks, acik, k))
-    kk = karkas.kur(yapi.kur(t), t, KURAL)
+    monkeypatch.setattr(karkas, "bol", lambda ks, acik, k, eklem=(): [(ks["bas"], ks["bas"] + 20.0), (ks["bas"] + 20.0, ks["son"])]
+                        if ks["son"] - ks["bas"] > 300 else bol(ks, acik, k, eklem))
+    kk = karkas.kur(yapi.kur(t), t, ESKI)
     kisa = [p for p in kk["paneller"] if p["boy_cm"] == 20.0]
     assert kisa and len([u for u in kk["uyarilar"] if "bir dikme aralığından (61 cm) kısa" in u]) == len(kisa)
 
@@ -138,18 +179,27 @@ def test_gruplar_karisik_profili_ve_ezilen_grubu_durdurur():
         karkas.gruplar({"paneller": [pan("korkuluk", "80x45x0,8", "R1"), pan("korkuluk", "80x45x1,2", "R2")], **bos}, y, t, KURAL, {})
 
 
-def test_kural_modunda_satirlar_kaynagi_dogru_yazar():
-    """Kural modunda kolon ve kirişin adedi tanımdan, profil boyu kuraldan (model yok); formül türetilmiş birim ağırlığı kg'ı veren haneyle yazar."""
+def test_kural_modunda_satirlar_kaynagi_dogru_yazar(monkeypatch):
+    """Kural modunda kolon ve kirişin adedi tanımdan, profil boyu kuraldan (model yok). 140'lık dış duvar: eski kopyada formül türetilmiş
+    birim ağırlığı kg'ı veren haneyle yazar; PR-3c'de (A4) kitabın hükmü, motorun ortalaması (duvar boyu × kg/m)."""
     from motor.genel import yukleme
     t = json.loads((KOK / "testler" / "celik" / "projeler" / "CP03" / "CP03.json").read_text(encoding="utf-8"))
     kur = kurallar_oku.oku()
-    y = yapi.kur(t)
-    c = cati_genel.cati_kur(t["cati"], kur)
-    g = girdi_genel.girdi(y, c, girdi_genel.metraj(y, c, kur), kur, "test")
-    satir = {s["kalem"]: s for s in yukleme.hesapla(g, kur)["satirlar"] if s.get("grup") == "Çelik panel"}
+
+    def satirlar():
+        y = yapi.kur(t)
+        c = cati_genel.cati_kur(t["cati"], kur)
+        g = girdi_genel.girdi(y, c, girdi_genel.metraj(y, c, kur), kur, "test")
+        return {s["kalem"]: s for s in yukleme.hesapla(g, kur)["satirlar"] if s.get("grup") == "Çelik panel"}
+
+    satir = satirlar()
     assert "modelden" not in satir["Veranda dikmeleri (kolon paneli)"]["not"] and "tanımdan" in satir["Veranda dikmeleri (kolon paneli)"]["not"]
     assert "modelden" not in satir["Kirişler (kiriş paneli)"]["not"] + satir["Kirişler (kiriş paneli)"]["formul"]
     dis = satir["Dış cephe duvar panelleri"]
+    assert dis["durum"] == "motor" and "motorun proje ortalaması" in dis["formul"] and "2,225" not in dis["formul"]
+    assert "birim ağırlığı kuralda yok: motorun ortalaması kullanıldı" in dis["not"]
+    monkeypatch.setenv("PORTMAN_KARKAS", str(ESKI_YOL))
+    dis = satirlar()["Dış cephe duvar panelleri"]
     assert "× 2,225 kg/m" in dis["formul"]
     boy = float(dis["formul"].split("profil boyu ")[1].split(" m")[0].replace(",", "."))
     assert round(boy * 2.225, 2) == pytest.approx(dis["kg"], abs=0.01)
@@ -190,14 +240,16 @@ def test_kosu_tanimin_yazimindan_bagimsiz():
     panelli = json.loads((CP06 / "CP06.json").read_text(encoding="utf-8"))
     bolmesiz = json.loads((CP06 / "CP06_kural.json").read_text(encoding="utf-8"))
 
-    def ozet(t):
-        kk = karkas.kur(yapi.kur(t), t, KURAL)
-        return [{k: p[k] for k in ("ad", "sinif", "profil", "bas", "son", "kutu", "yukseklik_cm", "uyeler_m", "profil_boyu_m")} for p in kk["paneller"]]
+    def ozet(t, k):
+        kk = karkas.kur(yapi.kur(t), t, k)
+        return [{a: p[a] for a in ("ad", "sinif", "profil", "bas", "son", "kutu", "yukseklik_cm", "uyeler_m", "profil_boyu_m")} for p in kk["paneller"]]
 
     kp, kb = karkas.kosular(yapi.kur(panelli), panelli), karkas.kosular(yapi.kur(bolmesiz), bolmesiz)
     assert [(k["sinif"], k["yon"], k["hat"], k["bas"], k["son"]) for k in kp] == [(k["sinif"], k["yon"], k["hat"], k["bas"], k["son"]) for k in kb]
-    assert ozet(panelli) == ozet(bolmesiz)
-    assert sum(1 for p in ozet(bolmesiz) if p["sinif"] in ("dis", "ic")) == 22
+    # ev duvarı paneli: eski kopya (366) 22, PR-3c (oda bölmesi) 20; paftada 26 (İE-16 › PR-3c)
+    for k, n in ((ESKI, 22), (KURAL, 20)):
+        assert ozet(panelli, k) == ozet(bolmesiz, k)
+        assert sum(1 for p in ozet(bolmesiz, k) if p["sinif"] in ("dis", "ic")) == n
 
 
 def test_karkas_istemeyen_tanimda_kural_cagrilmaz(monkeypatch):
@@ -233,7 +285,7 @@ def test_duvar_panelleri_paftasi_belirlenimci(tmp_path):
     (tmp_path / "a").mkdir(); (tmp_path / "b").mkdir()
     r = karkas_pafta.ciz(t, tmp_path / "a", "CP03", KURAL)
     karkas_pafta.ciz(t, tmp_path / "b", "CP03", KURAL)
-    assert r["duvar_paneli"]["dis"] == 13 and r["kolon_kiris"] == 10 and r["kural"]["sha256"] == KURAL["_sha256"]
+    assert r["duvar_paneli"]["dis"] == 10 and r["kolon_kiris"] == 10 and r["kural"]["sha256"] == KURAL["_sha256"]
     for ad in (r["png"], r["pdf"]):
         assert (tmp_path / "a" / ad).read_bytes() == (tmp_path / "b" / ad).read_bytes(), ad
     panelli = json.loads((CP06 / "CP06.json").read_text(encoding="utf-8"))
@@ -244,7 +296,7 @@ def test_duvar_panelleri_paftasi_belirlenimci(tmp_path):
 def test_uret_paftayi_yalniz_kuralda_yazar(tmp_path):
     from motor.genel import uret
     m = uret.uret(CP06 / "CP06_kural.json", tmp_path / "kural", perspektif=False, bayi=False)
-    assert m["passed"] and m["duvar_panelleri"]["duvar_paneli"] == {"dis": 14, "ic": 8, "ek": 0, "korkuluk": 0}
+    assert m["passed"] and m["duvar_panelleri"]["duvar_paneli"] == {"dis": 11, "ic": 9, "ek": 0, "korkuluk": 0}
     assert (tmp_path / "kural" / "CP06_duvar_panelleri.png").is_file() and (tmp_path / "kural" / "CP06_duvar_panelleri.pdf").is_file()
     m = uret.uret(CP06 / "CP06.json", tmp_path / "panelli", perspektif=False, bayi=False)
     assert m["passed"] and "duvar_panelleri" not in m and not list((tmp_path / "panelli").glob("*duvar_panelleri*"))
