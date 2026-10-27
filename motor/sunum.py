@@ -39,6 +39,7 @@ GORUNUMLER = (("perspektif_on_sag", "ÖN-SAĞ PERSPEKTİF"), ("perspektif_arka_s
 PERSPEKTIF_UZAKLIK = 1.55            # kamera uzaklığı (yapı köşegeninin katı); genel motorun 1,35'i bu planlarda saçağı kesiyordu
 PERSPEKTIF_ZAMAN_ASIMI_S = 240
 PNG_SINIRI = 5 * 1024 * 1024         # WhatsApp görsel sınırı
+CATI_SEKLI = {"besik": "Beşik", "besik_cumba": "Beşik + Cumba", "kirma": "Kırma"}   # İE-17: paftanın teknik özellik tablosundaki yazım
 MAHAL_ISLEVI = {"antre_hol": "hol", "hol": "hol", "koridor": "hol", "salon": "salon", "mutfak": "mutfak", "yatak_odasi": "yatak_odasi",
                 "calisma": "yatak_odasi", "giyinme": "yatak_odasi", "banyo": "banyo", "wc": "banyo", "depo": "depo", "teknik": "depo"}
 DUVAR_RENGI = {"dis": "#3a3a3a", "ic": "#6b6b6b"}
@@ -119,8 +120,8 @@ def ozellikler(ie: dict, say: dict) -> tuple[dict, list[str]]:
     duvar = lambda cm: f"{float(cm) * 10:.0f} mm" + (f" {panel}" if panel else "")
     oz = {"Bina Yüksekliği": f"{float(y.get('duvar_yuksekligi_cm', 250)) * 10:.0f} mm",
           "Dış Duvarlar": duvar(kal.get("dis", 10)), "İç Duvarlar": duvar(kal.get("ic", 6)), "Panel Türü": panel or "...",
-          "Çatı Şekli": oz_ie.pop("Çatı Şekli", None) or {"besik": "Beşik"}.get(c.get("tip"), "..."),
-          "Çatı Eğimi": f"%{float(c['egim_yuzde']):g}" if "egim_yuzde" in c else "...",
+          "Çatı Şekli": oz_ie.pop("Çatı Şekli", None) or CATI_SEKLI.get(c.get("tip"), "..."),
+          "Çatı Eğimi": f"%{float(c['egim_yuzde']):g}".replace(".", ",") if "egim_yuzde" in c else "...",   # İE-17: paftadan %32,49'
           "Çatı Kaplaması": oz_ie.pop("Çatı Kaplaması", None) or "...", "Çatı Kaplama Rengi": oz_ie.pop("Çatı Kaplama Rengi", None) or "...",
           "Dış Kapı": oz_ie.pop("Dış Kapı", None) or (f"{len(say['dis_kapi'])} adet ({_olculer(say['dis_kapi'])})" if say["dis_kapi"] else "..."),
           "İç Kapılar": (f"{say['ic_kapi']} adet" + (f" ({oz_ie.pop('İç Kapılar')})" if oz_ie.get("İç Kapılar") else "")) if say["ic_kapi"] else (oz_ie.pop("İç Kapılar", None) or "..."),

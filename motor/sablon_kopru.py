@@ -10,7 +10,8 @@ Bu modül geometri kurmaz. Pano Motor'unun kurduğu planı (`G.kur`: duvarlar, k
 (`sablon_pafta.pafta_pdf`) onu çizer: 1. sayfa sol yan görünüş + plan + ön görünüş + bina özellikleri, 2. sayfa çatı planı ve dört görünüş.
 
 Değerler İş Emri'nden: kat yüksekliği `duvar_yuksekligi_cm` (250 / 280 / 300, D-14); açıklık üst kotu 200, eşik 200 − boy (BK-13); eğim,
-saçak ve topuk `cati`'dan. Genel motorun varsayımları (kat 270, %33) buraya girmez. Çatıyı tek yer kurar (`cati`); beşik dışı çatı İE-17'nin.
+saçak ve topuk `cati`'dan. Genel motorun varsayımları (kat 270, %33) buraya girmez. Çatıyı tek yer kurar (`cati`); beşik dışı çatıyı
+`cati_prefabrik` verir (İE-17).
 """
 from __future__ import annotations
 
@@ -45,10 +46,17 @@ def cati(plan: G.Plan, ie: dict) -> dict:
     birleşimi şablonda yok). Kalkanlar: ana çatının iki alnı (dış duvarın dış yüzünde, duvarlar arasında) ve beşik veranda çatısının dış
     kenardaki alnı (kirişin üstü, kolon dış yüzleri arasında); genel motordaki gibi saçak payı alına girmez. Kaplama kalınlığı pano Motor'unun
     IFC'siyle aynı (`ust_pay`: düzlemin 10 cm üstünde 4 cm sac)."""
-    from . import sunum, veranda as VR
+    from . import cati_prefabrik as CP, sunum, veranda as VR
+    if (ie.get("cati") or {}).get("tip", "besik") != "besik":     # İE-17: beşik + cumba, kırma; düzlemler genel motorun çatı üreticisinden
+        if plan.dis_verandalar:
+            raise KopruHatasi("Beşik dışı ana çatıyla taşan veranda şablon paftasında çizilmez (iki çatının birleşimi; İE-17 PR-1 kapsamı dışı)")
+        try:
+            return CP.cati(plan, ie)
+        except CP.PrefabrikCatiHatasi as e:
+            raise KopruHatasi(str(e))
     c = sunum.cati_tanimi(plan, ie)
     if c is None:
-        raise KopruHatasi(f"Çatı tipi şablon paftasında yok: {(ie.get('cati') or {}).get('tip')} (yalnız beşik; İE-17)")
+        raise KopruHatasi(f"Çatı tipi şablon paftasında yok: {(ie.get('cati') or {}).get('tip')}")
     c = copy.deepcopy(c)
     x0, y0, x1, y1 = G.govde_kutusu(plan)
     if (ie.get("cati") or {}).get("makas_ekseni", "x") == "x":     # mahya y boyunca: alınlar ön ve arka dış yüzde
