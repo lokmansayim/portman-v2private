@@ -3,7 +3,7 @@
  "kod": "ÇP-20",
  "tanim": {
   "yol": "testler/celik/projeler/CP20/CP20.json",
-  "sha256": "3a6514115d5cf183f6ec2625cff6877321239927281175a69dab16a83fb174c5"
+  "sha256": "a90d960b0ef7b8eb2a24fa623a7cf47baa20b12b7d68aae2edf47d1b36144859"
  },
  "kural_seti": {
   "yol": "kurallar/liste/kurallar.json",

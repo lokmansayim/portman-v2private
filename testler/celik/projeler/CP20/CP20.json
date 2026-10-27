@@ -810,7 +810,7 @@
     "not": "kuzey cumbanın alnı"
    }
   ],
-  "egim_kaynak": "iki görünüşte 18° yazılı → tan 18° = 0,3249; duvar üstü 270 (bina yüksekliği 2700 mm); saçak 30, topuk 10 kuralın varsayılanı",
+  "egim_kaynak": "iki görünüşte 18° yazılı → tan 18° = 0,3249; duvar üstü 270 (bina yüksekliği 2700 mm); saçak 30 (karkas yüzünden; görünüşlerde kaplamalı yüzden 30), topuk 10 kuralın varsayılanı",
   "yontem": "omega_asik",
   "yontem_kaynak": "paftada 'omega' ya da 'aşık' sözcüğü geçen sayfa var (sayfa denetimi aracı; sayfa açılmadı): yöntem B",
   "kaplama": "sandvic_panel",
@@ -820,6 +820,8 @@
   "Kör tanım: yalnız 1. sayfadan. Panel bölmeleri, makaslar ve çatı paneli kuraldan; paftanın panel sayfaları açılmadı.",
   "Çatı: ikinci cumba kuzeyde varsayıldı (görünüşte tek cumba çizili; teknik özellik 'çift cumba'); cumbalar çıkmasız, eğimleri ana çatınınki (18°).",
   "Verandanın güneydoğu köşe dikmesi (KLN1) ve veranda kirişleri (KRS1, KRS2) 1. sayfada ayrıca çizili değil: verandanın açık kenarlarına yazıldı (kör kural).",
+  "Holün salona açılan kapısız açıklığının kirişi (KRS3, 115,6) 1. sayfada çizili değil: W09–W08 duvar hattındaki kapısız açıklığa yazıldı (kör kural: duvar hattındaki kapısız açıklığa kiriş).",
+  "Saçak: görünüşlerde kaplamalı yüzden 30 (850,8 = 790,8 + 2 × 30; 697,5 = 637,5 + 2 × 30); tanımda kuralın uzlaşımıyla karkas yüzünden 30 (açık beşteki gibi): her saçak 3 cm kısa.",
   "Pencere alt kotları etikette yok: 200 − yükseklik (lento 70; KT-01 ve ÇP-06'daki gibi).",
   "İç kapı boşlukları 90 × 214, kanat 80 (açık beşteki gibi); 1. sayfada kanat 78 çizili.",
   "Kirişlerin ve duvar panellerinin et kalınlığı paftada yazmıyor (1,2: kitabın varsayılanı)."
