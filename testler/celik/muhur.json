@@ -296,6 +296,12 @@
    "tarih": "2026-10-27",
    "dayanak": "kor_sayfa (yalnız kat ve merdiven sözcükleri): 7. ve 8. sayfa \"1. KAT DUVAR\", 10. sayfa \"1. KAT TAVAN\" (mühürün kat ayrımı); 1. sayfa \"1. KAT PLANI\", 4. sayfa \"MERDİVEN\"",
    "pafta_sha256": "f71eaa0725a8e3dcd12f19209319b1c672906e2e3e3dbae8e5093c9381ad1e65"
+  },
+  "ÇP-11": {
+   "kat": "çift",
+   "tarih": "2026-10-27",
+   "dayanak": "kor_sayfa (yalnız kat ve merdiven sözcükleri): 7. ve 8. sayfa \"1. KAT DUVAR\", 10. sayfa \"1. KAT TAVAN\" (mühürün kat ayrımı); 1. sayfa \"1. KAT PLANI\" ve \"MERDİVEN\"",
+   "pafta_sha256": "b26b25c267f473af3d7d7b6e0e3e4b6926b8c8903bb9aaa523aef17a05c8b5a8"
   }
  },
  "dosyalar": [
