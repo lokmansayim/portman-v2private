@@ -278,6 +278,12 @@
    "tarih": "2026-10-27",
    "dayanak": "kor_sayfa (yalnız kat ve merdiven sözcükleri): 3. ve 4. sayfa \"1. KAT\" (4. sayfa \"1. KAT PLANI\"), 2. sayfa \"MERDİVEN\"",
    "pafta_sha256": "e5b86089cb4787765a35073da223ef1757b373ac0364294a77103cc246661d40"
+  },
+  "ÇP-04": {
+   "kat": "tek",
+   "tarih": "2026-10-27",
+   "dayanak": "kor_sayfa (yalnız kat ve merdiven sözcükleri): hiçbir sayfada \"1. KAT\", başka kat ya da merdiven sözcüğü yok (2. ve 3. sayfa \"ZEMİN KAT\")",
+   "pafta_sha256": "fd6f4c316b0c1870448dd9d3cde4a9a4f59cecbf42d3187ba28a9d9947454bc5"
   }
  },
  "dosyalar": [
