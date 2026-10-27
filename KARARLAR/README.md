@@ -107,14 +107,20 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | İE | İE-14 | talepten plana (14a: tek kat çelik; LLM-önce üretim ve revizyon) | alındı (14.10; `ie-14-talepten-plana`) |
 | İE | İE-15 | kimlik kartlı model: yerleşim planları ve adetler aynı modelden (D-24; KH-1, K1, KH-2, K2, KH-3, K3; eski `ie-11-pr2-kor-test` dalındaki "İE-15 · LLM'li katman" o dal birleşmeden önce yeni numara alır) | alındı (19.10; `claude/project-thread-far6rz`) |
 | İE | İE-16 | çelik hattı: çelik projeleri ve çelik çizim kuralları (D-25; PR-1 hakem ve mühür, PR-2 hedef örnek, PR-3 çizim kuralları, PR-4 kör ölçüm) | alındı (25.10; `claude/project-thread-1ff0ou`) |
-| İE | **İE-17** | — | **sıradaki boş** |
+| İE | İE-17 | 28 prefabrik evin çizimi, 1. adım: çatı ve dört görünüş genel motordan (hedef AP-13) | alındı (27.10; CIO) |
+| İE | İE-18 | montaj rehberi | alındı (CIO) |
+| İE | İE-19 | altın set | alındı (CIO) |
+| İE | İE-20 | talep formu ve görsel | alındı (CIO) |
+| İE | **İE-21** | — | **sıradaki boş** |
 | BK | BK-01–BK-08 | bu depo; BK-08 8a sonrası temizlik (`bk-08-8a-temizlik`) | yazıldı |
 | BK | BK-09 | metin ve çizim düzeltmeleri, G1 (`bk-09-metin-cizim`, `bk-09-cizim-g1`) | alındı (14.10) |
 | BK | BK-10 | 8b sonrası düzeltmeler (DXF `.txt` notu, geç gelen Excel, Patron'a Excel bağlantısı, çelikte kapı değişikliği; `docs/devir/2026-10-14_IE-08_8b_Devri.md` › Sıradaki; CIO'nun Notion defterinde D-19 ile: 24 saat kapanış kuralı) | ayrıldı |
 | BK | BK-11 | `ortam_kur.sh` Postgres'i kurtarma bitene kadar dener (`bk-11-postgres-bekleme`) | alındı (16.10) |
 | BK | BK-12 | prefabrik hattını `main`'e alma (D-23; `bk-12-prefabrik-main`; PR-1, PR-R, PR-K, PR-2, PR-3, PR-4) | alındı (17.10) |
 | BK | BK-13 | Pano Motor'unun pencere kataloğu (`bk-13-pencere-katalogu`; T76 ve açık evlerin ölçüleri, eşik, panodan geniş pencere) | alındı (23.10) |
-| BK | **BK-14** | — | **sıradaki boş** |
+| BK | BK-14 | taşan veranda ve "+" duvar birleşimi (PR #50) | alındı (27.10; CIO) |
+| BK | BK-15 | revizyonda ebeveyn banyosu ve oda ekleme isteğinin doğru gerekçesi (pano satır 115, madde 3; `claude/project-thread-0c8rv2`) | alındı (27.10; CIO) |
+| BK | **BK-16** | — | **sıradaki boş** |
 
 ## 27 Eylülde Lokman'ın verdiği kararlar
 
