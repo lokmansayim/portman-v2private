@@ -83,7 +83,8 @@ def test_ap01_kirma_farkli_uc_egimleri():
     assert len(mahya) == 1 and mahya[0]["plan_boy"] == pytest.approx(438.7, abs=0.1)
     assert max(mahya[0]["kot"]) == pytest.approx(250 + 10 + 174.9, abs=0.05)
     assert collections.Counter(k["tur"] for k in ck["kenarlar"]) == {"sacak": 4, "kirma": 4, "mahya": 1}
-    # mahyanın uçları paftanın makas planıyla: sol kırma duvardan 509'da, sağ 459'da varıyor (burada saçaklı kenardan; 508,2 ve 453,1)
+    # mahyanın uçları paftanın yazılı eğimleriyle (kodun değeri, paftanın ölçüsü değil): sol kırma duvardan 508,2'de (makas planında 509),
+    # sağ 453,1'de (makas planında 459; paftanın %36,2'si ölçüyle %35,8 verir; fark İE-17 › Kaynak paftayla kıyas)
     xs = sorted(p[0] for k in mahya for p in (k["p"], k["q"]))
     assert xs == [pytest.approx(508.2, abs=0.1), pytest.approx(946.9, abs=0.1)]
 
@@ -115,6 +116,9 @@ def test_celik_cagrisi_mahyasiz_ayni():
     (lambda c: c["cumbalar"][0].update(bit_cm=900), "cephe 763"),
     (lambda c: c["cumbalar"][0].update(cephe="sol", bit_cm=391.5), "paralel kenara"),
     (lambda c: c.update(tip="teras"), "prefabrik çatıda yok"),
+    (lambda c: c["cumbalar"][0].update(egim_yuzde=44), "cumba eğimi ana çatıdan farklı \\(%44 ↔ %32,88\\)"),   # PK-03 gibi; kapsam dışı
+    (lambda c: c["cumbalar"][0].update(renk="antrasit"), "cumbada tanınmayan alan: renk"),
+    (lambda c: c.update(kirma_egimleri={"sol": 30, "sag": 30}), "beşik \\+ cumba çatıda tanınmayan alan: kirma_egimleri"),
 ])
 def test_cumba_hatalari(degis, mesaj):
     # yanlış çatı çizilmez: eksik ya da desteklenmeyen değer hata verir, köprü durur
@@ -123,6 +127,23 @@ def test_cumba_hatalari(degis, mesaj):
     with pytest.raises(CP.PrefabrikCatiHatasi, match=mesaj):
         _cati(ie)
     with pytest.raises(K.KopruHatasi):
+        K.tanim(copy.deepcopy(ie))
+
+
+def test_cumba_egimi_ana_catiyla_ayni_yazilabilir():
+    ie = _ie("AP13")
+    yaz = copy.deepcopy(ie)
+    yaz["cati"]["cumbalar"][0]["egim_yuzde"] = 32.88
+    assert _cati(yaz)[0] == _cati(ie)[0]
+
+
+def test_kirma_tanimayan_alan_hata():
+    # kırmaya yazılan cumba yok sayılmaz (dört düzlemli kırma sessizce çizilmez)
+    ie = _ie("AP01")
+    ie["cati"]["cumbalar"] = [{"cephe": "on", "bas_cm": 0, "bit_cm": 300, "cikinti_cm": 0}]
+    with pytest.raises(CP.PrefabrikCatiHatasi, match="kırma çatıda tanınmayan alan: cumbalar"):
+        _cati(ie)
+    with pytest.raises(K.KopruHatasi, match="tanınmayan alan"):
         K.tanim(copy.deepcopy(ie))
 
 
@@ -135,14 +156,15 @@ def test_kirma_uc_egimi_hatalari(uc, mesaj):
         _cati(ie)
 
 
-def test_liste_ifc_perspektif_frenleri(tmp_path):
-    # İE-17 PR-1: beşik dışı ana çatının listesi ve IFC'si yok; beşik kuralıyla yanlış sayı ya da yanlış çatı yazılmaz (A4, A5 PR-1b)
-    from motor import ifc_uret, prefabrik_liste as PL
+def test_liste_ve_perspektif_frenleri(tmp_path, capsys):
+    # İE-17 PR-1: beşik dışı ana çatının yükleme listesi ve perspektifi yazılmaz; beşik kuralıyla yanlış sayı ya da yanlış çatı çıkmaz (A4, A5
+    # PR-1b). Motor'un IFC'si ve `model_motor` bugünkü gibi (çatı beşik kurulur): İE-15'in kimlik akışı bunu bilir, beşik dışında çatı
+    # katmanları "kural yok" ve komut 1 döner (`testler/kimlik`: kırma çatı vakaları)
+    from motor import prefabrik_liste as PL
     for ad in ("AP13", "AP01"):
-        ie = _ie(ad)
-        with pytest.raises(ValueError, match="liste yazılmaz"):
-            PL.model_motor(copy.deepcopy(ie))
-        with pytest.raises(ValueError, match="IFC"):
-            ifc_uret.uret(copy.deepcopy(ie), tmp_path / f"{ad}.ifc")
-        assert sunum.perspektif_uret(copy.deepcopy(ie), tmp_path, ad)["durum"] == "ÇİZİLEMEDİ"
+        (tmp_path / f"{ad}.json").write_text(json.dumps(_ie(ad), ensure_ascii=False), encoding="utf-8")
+        assert PL.main([str(tmp_path / f"{ad}.json"), str(tmp_path / ad)]) == 1 and not (tmp_path / ad).exists()
+        assert "liste yazılmaz" in capsys.readouterr().err
+        assert sunum.perspektif_uret(_ie(ad), tmp_path, ad)["durum"] == "ÇİZİLEMEDİ"
     assert PL.model_motor(_ie("PK01"))["cati"][0]["tip"] == "besik"                 # beşik aynen
+    assert PL.main([str(VERI / "PK01.json"), str(tmp_path / "PK01")]) == 0 and (tmp_path / "PK01" / "PK01_liste.json").exists()

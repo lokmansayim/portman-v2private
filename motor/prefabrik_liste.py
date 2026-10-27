@@ -177,13 +177,8 @@ def model_motor(ie: dict) -> dict:
     from . import geometry as G
     from shapely.geometry import LineString, Point, box
     from shapely.ops import unary_union
-    from .cati_prefabrik import TIPLER, TIP_ADI
-    c = ie.get("cati") or {}
-    if c.get("tip") in TIPLER:                                  # İE-17: yanlış sayı yazılmaz (beşik kuralı tek yön sayılırdı)
-        raise ValueError(f"prefabrik liste: {TIP_ADI[c['tip']]} ana çatının çatı satırları bu sürümde yok (cumba İE-17 PR-1b; "
-                         f"kırmada kitapta prefabrik kural yok); liste yazılmaz")
     plan = G.kur(json.loads(json.dumps(ie)))
-    y = ie["yapi"]
+    y = ie["yapi"]; c = ie.get("cati") or {}
     mx = c.get("makas_ekseni", "x") == "x"                     # makaslar x'i geçiyorsa saçak duvarları y yönünde koşar
     eave_yon = "y" if mx else "x"
     panolar, ekler = [], []
@@ -1222,7 +1217,15 @@ def main(argv: list[str] | None = None) -> int:
     a = ap.parse_args(argv)
     if bool(a.yapi) == bool(a.is_emri):
         ap.error("ya İş Emri ya --yapi verilir")
-    N = model_pafta(json.loads(a.yapi.read_text(encoding="utf-8"))) if a.yapi else model_motor(json.loads(a.is_emri.read_text(encoding="utf-8")))
+    ie = json.loads(a.is_emri.read_text(encoding="utf-8")) if a.is_emri else None
+    if ie is not None:
+        from .cati_prefabrik import TIPLER, TIP_ADI
+        tip = (ie.get("cati") or {}).get("tip")
+        if tip in TIPLER:                                       # İE-17: beşik kuralı tek yön sayardı; yanlış sayı yazılmaz (A5 PR-1b)
+            print(f"prefabrik liste: {TIP_ADI[tip]} ana çatının çatı satırları bu sürümde yok (cumba İE-17 PR-1b; kırmada kitapta "
+                  f"prefabrik kural yok); liste yazılmaz", file=sys.stderr)
+            return 1
+    N = model_pafta(json.loads(a.yapi.read_text(encoding="utf-8"))) if a.yapi else model_motor(ie)
     pafta = json.loads(a.pafta.read_text(encoding="utf-8")) if a.pafta else None
     L = liste(N, kurallari_oku(), pafta)
     a.cikti.mkdir(parents=True, exist_ok=True)

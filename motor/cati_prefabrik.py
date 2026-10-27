@@ -3,7 +3,8 @@
 Lokman, 27 Ekim 2026: çizim biçimi canlıdaki çizim setinden, değerler prefabrikten. Bu modül çatı geometrisini kendisi kurmaz; genel motorun
 çatı üreticisini (`genel.cati_uretici.uret`: `cati_cumba`, `cati_kirma`) prefabrik değerleriyle çağırır ve sonucu onun denetiminden
 (`cati_uretici.denetle`: `cati_genel.cati_kur`, düzlemler saçaklı ayak izini boşluksuz ve örtüşmesiz örter, desteksiz üst kenar yok) geçirir.
-Denetim bulgu verirse çatı çizilmez, hata söylenir (yanlış çatı çizilmez).
+Denetim bulgu verirse çatı çizilmez, hata söylenir (yanlış çatı çizilmez); tanınmayan alan da (ör. kırmada `cumbalar`, cumbada başka
+eğim) yok sayılmaz, hata verir.
 
 Değerler İş Emri'nden: eğim (`egim_yuzde`, paftadan; burada varsayılan yok), saçak (`sacak_cm`, 30), topuk (`topuk_cm`, 10), duvar üstü
 `yapi.duvar_yuksekligi_cm` (250 / 280 / 300, D-14). Ayak izi Motor'un gövde dikdörtgeni (`G.govde_kutusu`). Mahya `makas_ekseni`'nden
@@ -13,8 +14,9 @@ Değerler İş Emri'nden: eğim (`egim_yuzde`, paftadan; burada varsayılan yok)
 Tipler:
 - `besik`: bu modülde değil; `sunum.cati_tanimi` aynen (P6001 ve bugünkü paftalar).
 - `besik_cumba`: ana beşik ve ona dik küçük beşik (çapraz cumba; AP-13, 16, 22). `cumbalar`: bir giriş {cephe on | arka | sol | sag,
-  `bas_cm`–`bit_cm` cephe boyunca dış yüzden (on / arka: x, sol / sag: y; taşan verandayla aynı), `cikinti_cm` 0}. Cumba ana mahyaya
-  paralel cephede olur; alnı o cephenin duvarında. Çıkıntılı cumba ve paralel cumba (AP-15, 09) PR-2.
+  `bas_cm`–`bit_cm` cephe boyunca dış yüzden (on / arka: x, sol / sag: y; taşan verandayla aynı), `cikinti_cm` 0, `egim_yuzde` yazılırsa
+  ana çatınınki}. Cumba ana mahyaya paralel cephede olur; alnı o cephenin duvarında. Çıkıntılı cumba ve paralel cumba (AP-15, 09) PR-2;
+  farklı eğimli cumba (PK-03) kapsam dışı.
 - `kirma`: dört düzlem, kalkan yok; mahya uzun kenar boyunca (AP-01). Uçtaki iki kırma yüzünün eğimi paftada ana yüzlerden farklıysa
   `kirma_egimleri` {sol, sag} (mahya x boyunca) ya da {on, arka} (mahya y boyunca), yüzde: kırma çizgileri 45° olmaz, mahya o yana kayar
   (AP-01: ana %33, sol %32,5, sağ %36,2). Verilmezse eşit eğim (`genel.cati_kirma`, kırmalar 45°).
@@ -27,6 +29,9 @@ TIPLER = ("besik_cumba", "kirma")
 TIP_ADI = {"besik_cumba": "beşik + cumba", "kirma": "kırma"}
 UST_PAY_CM = 14.0                  # ifc_uret: sac düzlemin 10 cm üstünde, 4 cm (köprünün beşik çatısıyla aynı)
 CEPHE_YAN = {"on": "G", "arka": "K", "sol": "B", "sag": "D"}
+ALANLAR = {"tip", "egim_yuzde", "sacak_cm", "topuk_cm", "makas_ekseni", "makas_yonu"}   # her tipte; tanınmayan alan yok sayılmaz
+TIP_ALANI = {"besik_cumba": {"cumbalar"}, "kirma": {"kirma_egimleri"}}
+CUMBA_ALANLARI = {"cephe", "bas_cm", "bit_cm", "cikinti_cm", "egim_yuzde"}
 
 
 class PrefabrikCatiHatasi(G.IsEmriHatasi):
@@ -40,6 +45,13 @@ def _cumba(c: dict, kutu: tuple) -> list[float]:
     if len(cs) != 1:
         raise PrefabrikCatiHatasi(f"beşik + cumba: bir cumba yazılır ({len(cs)} yazılmış; çift cumba yol haritasında sonra)")
     u = cs[0]
+    fazla = sorted(set(u) - CUMBA_ALANLARI)
+    if fazla:
+        raise PrefabrikCatiHatasi(f"cumbada tanınmayan alan: {', '.join(fazla)} (yok sayılmaz; yanlış çatı çizilmez)")
+    if u.get("egim_yuzde") is not None and float(u["egim_yuzde"]) != float(c["egim_yuzde"]):
+        yuzde = lambda v: f"%{float(v):g}".replace(".", ",")
+        raise PrefabrikCatiHatasi(f"cumba eğimi ana çatıdan farklı ({yuzde(u['egim_yuzde'])} ↔ {yuzde(c['egim_yuzde'])}): genel motorun "
+                                  f"cumbası ana çatının eğimiyle kurulur; farklı eğimli cumba bu sürümde çizilmez")
     cephe = u.get("cephe")
     if cephe not in CEPHE_YAN:
         raise PrefabrikCatiHatasi(f"cumba cephesi on, arka, sol ya da sag olur: {cephe}")
@@ -98,6 +110,9 @@ def cati(plan: G.Plan, ie: dict) -> dict:
     tip = c.get("tip", "besik")
     if tip not in TIPLER:
         raise PrefabrikCatiHatasi(f"çatı tipi '{tip}' prefabrik çatıda yok (beşik `sunum.cati_tanimi`; {', '.join(TIPLER)} burada)")
+    fazla = sorted(set(c) - ALANLAR - TIP_ALANI[tip])
+    if fazla:
+        raise PrefabrikCatiHatasi(f"{TIP_ADI[tip]} çatıda tanınmayan alan: {', '.join(fazla)} (yok sayılmaz; yanlış çatı çizilmez)")
     if c.get("egim_yuzde") is None:
         raise PrefabrikCatiHatasi(f"{TIP_ADI[tip]} çatının eğimi paftadan yazılır (`cati.egim_yuzde`; varsayılan yok)")
     k = dict(CU.kurallar())

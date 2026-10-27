@@ -98,3 +98,17 @@ def test_canli_dxf_dort_gorunus(ad, tmp_path):
         assert s in yazi, s
     for s in ("ÖN GÖRÜNÜŞ - ÇALIŞMA", "ÇATI PROFİLİ"):                       # beşiğin ön görünüşü ve profili çizilmez
         assert s not in yazi, s
+    # dört görünüş yan yana, birbirine binmeden (adım görünüşün kendi eninden; yan görünüşün eni evin derinliği): görünüş katmanlarının
+    # varlıkları x'te dört ayrık küme, sırası ön, arka, sol, sağ; aralar en az 200
+    from ezdxf import bbox
+    ara = sorted(((b.extmin.x, b.extmax.x, e) for e in doc.modelspace()
+                 if e.dxf.layer.startswith("ON_") and not (e.dxftype() == "TEXT" and e.dxf.text.startswith("Çatı:"))
+                 for b in [bbox.extents([e])] if b.has_data), key=lambda t: t[:2])
+    kume = []
+    for a, b, e in ara:
+        if kume and a <= kume[-1][1] + 200:
+            kume[-1][1] = max(kume[-1][1], b); kume[-1][2].append(e)
+        else:
+            kume.append([a, b, [e]])
+    assert [[x.dxf.text for x in k[2] if x.dxftype() == "TEXT" and "GÖRÜNÜŞ" in x.dxf.text] for k in kume] == \
+        [["ÖN (GİRİŞ) GÖRÜNÜŞ"], ["ARKA GÖRÜNÜŞ"], ["SOL GÖRÜNÜŞ"], ["SAĞ GÖRÜNÜŞ"]]

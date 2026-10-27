@@ -150,9 +150,10 @@ def test_ana_catiyi_asan_veranda_catisi_hata():
 
 
 def test_besik_disi_cati_hata():
+    # İE-17: beşik dışı ana çatı köprüde var (`cati_prefabrik`); TK-01'in taşan verandasıyla birleşimi yok (PR-2), köprü durur
     ie = _ie()
     ie["cati"]["tip"] = "kirma"
-    with pytest.raises(K.KopruHatasi):
+    with pytest.raises(K.KopruHatasi, match="Beşik dışı ana çatıyla taşan veranda"):
         K.tanim(copy.deepcopy(ie))
 
 
