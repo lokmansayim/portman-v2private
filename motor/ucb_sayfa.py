@@ -7,7 +7,7 @@ makası ve tavanı gizler (örtü IfcSlab ROOF olduğu için eski sayfa gizlemiy
 düğmeler altta, en az 44 px. Prefabrik (pano Motor'u) ve çelik (genel motor) IFC'si aynı sayfayı verir.
 """
 from __future__ import annotations
-import html, json
+import html, json, re
 from pathlib import Path
 
 import ifcopenshell
@@ -18,7 +18,7 @@ RENK = {"IfcWall": [0.86, 0.86, 0.84], "IfcWindow": [0.45, 0.70, 0.92], "IfcDoor
         "IfcRoof": [0.55, 0.30, 0.25], "IfcSpace": [0.95, 0.85, 0.55], "IfcColumn": [0.40, 0.35, 0.30], "IfcBeam": [0.40, 0.35, 0.30],
         "IfcMember": [0.60, 0.55, 0.45], "IfcPlate": [0.80, 0.78, 0.72]}      # IFC'de malzeme yoksa
 ATLA = {"IfcOpeningElement", "IfcSite", "IfcBuilding", "IfcBuildingStorey", "IfcProject"}
-CATI_ADI = ("CATI", "ALIN", "KALKAN", "MAKAS")      # iki motorun çatı parçası adları (ifc_uret, genel/ifc_genel)
+CATI_ADI = re.compile(r"^(VERANDA_)?(CATI|ALIN|KALKAN|MAKAS)")   # iki motorun çatı parçası adları (ifc_uret, genel/ifc_genel); VERANDA_KIRIS_ALIN_* kiriştir
 
 SAYFA = """<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>__BASLIK__ · 3D</title>
@@ -58,16 +58,17 @@ const DIS=new THREE.Vector3(sz.x*1.1,sz.y*1.6,sz.z*1.3),UST=new THREE.Vector3(0,
 function bak(v){yon=v;const vf=cam.fov*Math.PI/180,hf=2*Math.atan(Math.tan(vf/2)*cam.aspect),d=R/Math.sin(Math.min(vf,hf)/2)*1.05;
  cam.position.copy(c).add(v.clone().normalize().multiplyScalar(d));cam.near=d/200;cam.far=d*20;cam.updateProjectionMatrix();ctl.target.copy(c);ctl.update();}
 function boyut(){const w=cv.clientWidth,h=cv.clientHeight;r.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();}
-window.addEventListener('resize',()=>{boyut();bak(yon);});boyut();bak(DIS);
+let elle=false;   // bayi çevirdi ya da yaklaştırdıysa ekran boyu değişince (araç çubuğu, yön) görünüşü sıfırlama
+window.addEventListener('resize',()=>{boyut();if(!elle)bak(yon);});boyut();bak(DIS);
 const ray=new THREE.Raycaster(),pt=new THREE.Vector2();let secili=null;
 function sec(x,y){pt.x=(x/cv.clientWidth)*2-1;pt.y=-(y/cv.clientHeight)*2+1;ray.setFromCamera(pt,cam);const h=ray.intersectObjects(odalar,false);
  if(secili){secili.material.opacity=0.22;}if(h.length){secili=h[0].object;secili.material.opacity=0.55;const d=secili.userData;document.getElementById('s').textContent=d.ad+(d.alan?(' · '+String(d.alan).replace('.',',')+' m²'):'');}}
 let sx=0,sy=0;cv.addEventListener('pointerdown',e=>{sx=e.clientX;sy=e.clientY;});cv.addEventListener('pointerup',e=>{if(Math.hypot(e.clientX-sx,e.clientY-sy)<6)sec(e.clientX,e.clientY);});
 const bc=document.getElementById('cati'),bd=document.getElementById('don');
 bc.onclick=()=>{const acik=bc.getAttribute('aria-pressed')!=='true';for(const m of catilar)m.visible=!acik;bc.setAttribute('aria-pressed',String(acik));bc.textContent=acik?'Çatıyı kapat':'Çatıyı aç';};
-document.getElementById('ust').onclick=()=>bak(UST);document.getElementById('dis').onclick=()=>bak(DIS);
+document.getElementById('ust').onclick=()=>{elle=false;bak(UST);};document.getElementById('dis').onclick=()=>{elle=false;bak(DIS);};
 function don(a){ctl.autoRotate=a;bd.setAttribute('aria-pressed',String(a));bd.textContent=a?'Durdur':'Döndür';}
-bd.onclick=()=>don(!ctl.autoRotate);ctl.addEventListener('start',()=>{if(ctl.autoRotate)don(false);});
+bd.onclick=()=>don(!ctl.autoRotate);ctl.addEventListener('start',()=>{elle=true;if(ctl.autoRotate)don(false);});
 (function an(){requestAnimationFrame(an);ctl.update();r.render(sc,cam);})();
 </script></body></html>
 """
@@ -84,7 +85,7 @@ def _cati_mi(e) -> bool:
         if a.is_a("IfcRoof") or (a.is_a("IfcElementAssembly") and str(getattr(a, "PredefinedType", "") or "") == "TRUSS"):
             return True
         a = ue.get_aggregate(a)
-    return (e.Name or "").upper().startswith(CATI_ADI)
+    return bool(CATI_ADI.search((e.Name or "").upper()))
 
 
 def _renkler(sinif: str, geo, n_ucgen: int, i: list) -> tuple[list, list, list]:
@@ -93,8 +94,13 @@ def _renkler(sinif: str, geo, n_ucgen: int, i: list) -> tuple[list, list, list]:
     mats, ids = list(geo.materials or []), list(geo.material_ids or [])
     if not mats or len(ids) != n_ucgen or sinif == "IfcSpace":
         return [RENK.get(sinif, [0.7, 0.7, 0.7]) + [1.0]], [[0, len(i), 0]], i
+    if any(not 0 <= k < len(mats) for k in ids):             # biçemsiz yüz (-1): sınıf rengi, yüz kaybolmasın
+        ids = [k if 0 <= k < len(mats) else len(mats) for k in ids]
+        mats = mats + [None]
     renk = []
     for m in mats:
+        if m is None:
+            renk.append(RENK.get(sinif, [0.7, 0.7, 0.7]) + [1.0]); continue
         t = getattr(m, "transparency", 0.0)
         t = 0.0 if t is None or t != t else float(t)          # NaN: saydamlık yazılmamış
         renk.append([round(x, 3) for x in m.diffuse.components[:3]] + [round(max(0.0, min(1.0, 1.0 - t)), 2)])

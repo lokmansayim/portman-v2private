@@ -1,7 +1,7 @@
 """İE-21 · bayiye 3D sayfası: yayın (kanal/ucb_yayin.py), sayfa modeli (motor/ucb_sayfa.py), nginx yolu (vps/nginx/portman.conf),
 yayın dizini (vps/nginx_uygula.sh) ve canlı açılış betiği (vps/ucb_ac.sh, PM_TEST). LLM, WhatsApp, Postgres ve canlı yok.
 nginx sınaması yerel nginx varsa koşar (yoksa atlanır): depodaki yapılandırma kendi sertifikasıyla, ayrı portlarda; sayfa 200 + CSP,
-anahtarsız / bilinmeyen / başka dosya 404, POST 403, sonundaki / düşmüşse 301, anahtar günlüğe girmez.
+anahtarsız / bilinmeyen / başka dosya 404, POST 405, sonundaki / düşmüşse 301, anahtar erişim ve hata günlüğüne girmez.
 
 Koşum: python -m pytest testler/test_ucb.py -q
 """
@@ -129,6 +129,29 @@ def test_celik_cati_ve_tavan_gizlenir():
     assert [e for e in m if e["sinif"] == "IfcSpace"]
 
 
+def test_cati_adlari_ve_tipleri():
+    """Taşan verandanın alın dolgusu (VERANDA_ALIN, topluluksuz levha) da çatıyla gizlenir; duvar, pencere ve kapı gizlenmez."""
+    import ifcopenshell
+    from motor import ucb_sayfa as US
+    f = ifcopenshell.file(schema="IFC4")
+    yap = lambda sinif, ad, **k: f.create_entity(sinif, GlobalId=ifcopenshell.guid.new(), Name=ad, **k)
+    assert US._cati_mi(yap("IfcPlate", "VERANDA_ALIN")) and US._cati_mi(yap("IfcPlate", "ALIN_ON")) and US._cati_mi(yap("IfcMember", "MAKAS_01_UST_ON"))
+    assert US._cati_mi(yap("IfcSlab", "ZEMIN_X", PredefinedType="ROOF")) and US._cati_mi(yap("IfcCovering", "TAVAN_M01", PredefinedType="CEILING"))
+    assert not any(US._cati_mi(yap(c, ad)) for c, ad in (("IfcWall", "PANO_01"), ("IfcWall", "DKB"), ("IfcWindow", "PENCERE_P1"), ("IfcDoor", "KAPI_K1"),
+                                                         ("IfcSlab", "ZEMIN"), ("IfcBeam", "VERANDA_KIRIS_ON"),
+                                                         ("IfcBeam", "VERANDA_KIRIS_ALIN_Y0"), ("IfcColumn", "VERANDA_DIKME_1")))
+
+
+def test_bicemsiz_yuz_sinif_rengiyle_kalir():
+    """Yüzlerin bir kısmı biçemsiz (-1) ise o yüzler kaybolmaz: sınıf rengiyle ayrı grup."""
+    from types import SimpleNamespace as N
+    from motor import ucb_sayfa as US
+    geo = N(materials=[N(diffuse=N(components=(0.2, 0.2, 0.2)), transparency=float("nan"))], material_ids=[0, -1, 0])
+    renk, gruplar, i = US._renkler("IfcWall", geo, 3, list(range(9)))
+    assert len(renk) == 2 and renk[0] == [0.2, 0.2, 0.2, 1.0] and renk[1] == US.RENK["IfcWall"] + [1.0]
+    assert gruplar == [[0, 6, 0], [6, 3, 1]] and sorted(i) == list(range(9))
+
+
 def test_sayfa_dis_agsiz(p6001_sayfa):
     html = p6001_sayfa.read_text(encoding="utf-8")
     assert "THREE" in html and "OrbitControls" in html and "Çatıyı aç" in html and "Üstten" in html
@@ -231,7 +254,7 @@ def nginx_sunucu(tmp_path_factory, p6001_sayfa):
         pytest.skip(f"nginx başlatılamadı: {r.stderr.strip()[-200:]}")
     time.sleep(0.5)
     ctx = ssl.create_default_context(cafile=str(le / "fullchain.pem")); ctx.check_hostname = False
-    yield {"port": p443, "ctx": ctx, "anahtar": anahtar, "sayfa": p6001_sayfa, "log": d / "access.log"}
+    yield {"port": p443, "ctx": ctx, "anahtar": anahtar, "sayfa": p6001_sayfa, "log": d / "access.log", "hata_log": d / "error.log"}
     subprocess.run(["nginx", "-e", str(d / "error.log"), "-c", str(d / "nginx.conf"), "-s", "stop"], capture_output=True)
 
 
@@ -255,6 +278,10 @@ def test_nginx_yalniz_anahtarli_sayfayi_sunar(nginx_sunucu):
     for yol in ("/3d/", "/3d", f"/3d/{'A' * 22}/", f"/3d/{k}/x.ifc", f"/3d/{k}/.index.html.yeni", f"/3d/{k}x/", "/settings.json", "/3d/../settings.json",
                 "/3d/%2e%2e/settings.json", "/projects/gizli.json", f"/yayin/3d/{k}/index.html"):
         assert _iste(s, yol)[0] == 404, yol
-    assert _iste(s, f"/3d/{k}/", "POST")[0] == 403
+    assert _iste(s, f"/3d/{k}/", "POST")[0] == 405
+    for _ in range(60):                                                         # hız sınırı (pm_genel 30/sn + 20): 503, günlüğe satır yok
+        _iste(s, f"/3d/{'B' * 22}/")
     time.sleep(0.2)
-    assert k not in s["log"].read_text(encoding="utf-8").replace(f"/yayin/3d/{k}/", "")    # /3d/ yolları günlüğe anahtarsız
+    assert k not in s["log"].read_text(encoding="utf-8").replace(f"/yayin/3d/{k}/", "")    # /3d/ yolları erişim günlüğüne anahtarsız
+    hata = s["hata_log"].read_text(encoding="utf-8") if s["hata_log"].exists() else ""
+    assert k not in hata and "B" * 22 not in hata and "A" * 22 not in hata, hata[-500:]   # hata günlüğüne de (404, 405, 503)

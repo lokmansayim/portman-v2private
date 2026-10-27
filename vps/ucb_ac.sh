@@ -7,7 +7,7 @@
 #   1. yayın dizini data/yayin/3d (portman, 755) ve data'dan geçiş (o+x); 2. nginx'te 443 bloğu ve /3d/ konumu;
 #   3. depodaki P6001 İş Emri'nden ajanın koduyla örnek sayfa üretilir ve yayımlanır (portman kullanıcısıyla; izinler ajanınkiyle aynı);
 #   4. sunucunun kendisinden https://<alan>/3d/<anahtar>/ = 200, CSP başlığı var, gelen baytlar yayımlananla aynı; anahtarsız yol,
-#      bilinmeyen anahtar ve başka dosya adı 404, POST 403; 5. ayar ucb_taban_url = https://<alan>/3d (servisler her turda okur).
+#      bilinmeyen anahtar ve başka dosya adı 404, POST 405; 5. ayar ucb_taban_url = https://<alan>/3d (servisler her turda okur).
 # Sonda örnek adres yazılır: Lokman telefonda açar (sayfa P6001 referans planıdır; kişi ve bayi verisi yok). Bundan sonra her planda bayiye
 # "3D'yi aç" düğmeli bir mesaj daha gider. LLM çağrısı yok, WhatsApp mesajı yok. Kapatırken ayar null olur; yayımlanmış sayfalar durur
 # (silmek ayrı onay ister).
@@ -68,8 +68,8 @@ else
   grep -qi "^content-security-policy: default-src 'none'" "$GEC/baslik" || dur "CSP başlığı yok"
   grep -qi '^content-type: text/html' "$GEC/baslik" || dur "içerik türü text/html değil"
   K2="$(kod "/3d/")"; K3="$(kod "/3d/AAAAAAAAAAAAAAAAAAAAAA/")"; K4="$(kod "/3d/$ANAHTAR/ornek.ifc")"; K5="$(kod "/3d/$ANAHTAR/" "" "" -X POST)"
-  [ "$K2" = "404" ] && [ "$K3" = "404" ] && [ "$K4" = "404" ] && [ "$K5" = "403" ] \
-    || dur "beklenmeyen yanıt: anahtarsız $K2, bilinmeyen anahtar $K3, başka dosya $K4 (404 bekleniyordu), POST $K5 (403 bekleniyordu)"
+  [ "$K2" = "404" ] && [ "$K3" = "404" ] && [ "$K4" = "404" ] && [ "$K5" = "405" ] \
+    || dur "beklenmeyen yanıt: anahtarsız $K2, bilinmeyen anahtar $K3, başka dosya $K4 (404 bekleniyordu), POST $K5 (405 bekleniyordu)"
   echo "   örnek 200, baytlar aynı, CSP var · anahtarsız $K2 · bilinmeyen anahtar $K3 · başka dosya $K4 · POST $K5"
 fi
 

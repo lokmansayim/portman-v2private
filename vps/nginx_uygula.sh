@@ -6,7 +6,7 @@
 #   farklıysa → eski dosyayı portman.conf.onceki-<zaman> olarak saklar (silmez), yenisini yazar, nginx -t; geçerse reload;
 #               düşerse eski dosya geri konur ve "UYARI" ile çıkış 1 (nginx'e dokunulmaz; sürüm etkin kalır).
 # geri_don.sh nginx'i geri almaz (bilerek): sınır yalnız büyür; önceki sürüm aynı yapılandırmayla çalışır.
-# İE-21: yapılandırmadan önce 3D yayın dizinini açar (data/yayin/3d, portman, 755; kanal/ucb_yayin.py yazar, nginx /3d/<anahtar>/ ile sunar)
+# İE-21: yapılandırma yazılınca (ya da değişmediyse) 3D yayın dizinini açar (data/yayin/3d, portman, 755; kanal/ucb_yayin.py yazar, nginx /3d/<anahtar>/ ile sunar)
 # ve nginx'in data'dan geçebilmesi için data'ya o+x verir (liste yok). Servisler UMask 0077 ile yazar; data'nın kökünde portman'ın olup
 # başkasına açık kalmış bir şey varsa (yayin dışında) o izinleri kapatılır; sahibi başkası olan açık girdinin (ör. root'un ayar.sh ile
 # yazdığı settings.json, sır içermez) yalnız adı yazılır, dokunulmaz (servis okuyamaz olmasın). Her sürümde aynı sonucu verir; data yoksa atlanır.
@@ -18,18 +18,18 @@ ETC="${PM_ETC:-/etc/portman}"; NGINX_DIR="${PM_NGINX_DIR:-/etc/nginx}"; LE_DIR="
 SYSTEMCTL="${PM_SYSTEMCTL:-systemctl}"; TEST="${PM_TEST:-}"; DATA="${PM_DATA:-/opt/portman/data}"; KULLANICI="${PM_KULLANICI:-portman}"
 ALAN="${PM_ALAN:-$(cat "$ETC/alan" 2>/dev/null || true)}"
 dur() { echo "UYARI: $*" >&2; echo "nginx: değişmedi"; exit 1; }
+yayin_hazirla() {   # İE-21; yalnız yapılandırma başarıyla yazıldıktan (ya da değişmediği görüldükten) sonra
+  if [ ! -d "$DATA" ]; then echo "yayın: $DATA yok, 3D yayın dizini atlandı"; return 0; fi
+  if [ -z "$TEST" ]; then install -d -m 755 -o "$KULLANICI" -g "$KULLANICI" "$DATA/yayin" "$DATA/yayin/3d"; else install -d -m 755 "$DATA/yayin" "$DATA/yayin/3d"; fi
+  chmod o+x "$DATA"
+  local kapandi acik
+  kapandi="$(find "$DATA" -mindepth 1 -maxdepth 1 ! -name yayin -user "$KULLANICI" -perm /o=rwx -printf '%f ' -exec chmod o-rwx {} + 2>/dev/null || true)"
+  acik="$(find "$DATA" -mindepth 1 -maxdepth 1 ! -name yayin ! -user "$KULLANICI" -perm /o=rwx -printf '%f ' 2>/dev/null || true)"
+  echo "yayın: $DATA/yayin/3d hazır (755; data $(stat -c %a "$DATA"))${kapandi:+ · başkasına açıktı, kapatıldı: ${kapandi% }}${acik:+ · sahibi $KULLANICI değil, dokunulmadı: ${acik% }}"
+}
 SABLON="$SURUM_DIZINI/vps/nginx/portman.conf"
 [ -f "$SABLON" ] || dur "şablon yok: $SABLON"
 [[ "$ALAN" =~ ^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$ ]] || dur "alan adı okunamadı ($ETC/alan ya da PM_ALAN)"
-if [ -d "$DATA" ]; then
-  if [ -z "$TEST" ]; then install -d -m 755 -o "$KULLANICI" -g "$KULLANICI" "$DATA/yayin" "$DATA/yayin/3d"; else install -d -m 755 "$DATA/yayin" "$DATA/yayin/3d"; fi
-  chmod o+x "$DATA"
-  KAPANDI="$(find "$DATA" -mindepth 1 -maxdepth 1 ! -name yayin -user "$KULLANICI" -perm /o=rwx -printf '%f ' -exec chmod o-rwx {} + 2>/dev/null || true)"
-  ACIK="$(find "$DATA" -mindepth 1 -maxdepth 1 ! -name yayin ! -user "$KULLANICI" -perm /o=rwx -printf '%f ' 2>/dev/null || true)"
-  echo "yayın: $DATA/yayin/3d hazır (755; data $(stat -c %a "$DATA"))${KAPANDI:+ · başkasına açıktı, kapatıldı: ${KAPANDI% }}${ACIK:+ · sahibi $KULLANICI değil, dokunulmadı: ${ACIK% }}"
-else
-  echo "yayın: $DATA yok, 3D yayın dizini atlandı"
-fi
 HEDEF="$NGINX_DIR/sites-available/portman.conf"
 SERT="$LE_DIR/live/$ALAN/fullchain.pem"
 install -d -m 755 "$NGINX_DIR/sites-available" "$NGINX_DIR/sites-enabled"
@@ -40,6 +40,7 @@ if [ -f "$HEDEF" ] && cmp -s "$HEDEF" "$YENI"; then
   rm -f "$YENI"
   [ -L "$NGINX_DIR/sites-enabled/portman.conf" ] || { ln -sfn "$HEDEF" "$NGINX_DIR/sites-enabled/portman.conf"; echo "nginx: sites-enabled bağı eksikti, yeniden kuruldu (reload gerekir: systemctl reload nginx)"; }
   echo "nginx: değişiklik yok ($HEDEF sürümdeki yapılandırmayla aynı; $BLOK)"
+  yayin_hazirla
   exit 0
 fi
 YEDEK=""
@@ -62,5 +63,6 @@ if [ -z "$TEST" ]; then
     dur "nginx yeniden yüklenemedi (systemctl status nginx); önceki dosya geri kondu${YEDEK:+ ($YEDEK)}, çalışan nginx değişmedi"
   fi
 fi
+yayin_hazirla
 PANEL="$(grep -o 'location /panel/.*client_max_body_size [0-9]*m' "$HEDEF" | grep -o '[0-9]*m$' || true)"
 echo "nginx: uygulandı ($BLOK; /panel/ ${PANEL:-yok (443 bloğu yok)}$([ -n "$TEST" ] && echo '; PM_TEST: nginx -t ve reload atlandı' || echo '; nginx -t tamam, yeniden yüklendi')) · yedek: ${YEDEK:-yok (ilk yazım)}"

@@ -1275,7 +1275,7 @@ def ekler_uret(ie: dict, hedef: Path, v: dict, settings: dict, m: dict | None = 
         try:
             ekler["ucb"] = _ucb_eki(hedef / ad, hedef, no, rev, settings)
         except Exception as e:
-            ekler["ucb_hata"] = f"{type(e).__name__}: {str(e)[:200]}"
+            ekler["ucb_hata"] = maske_numaralar(f"{type(e).__name__}: {str(e)[:200]}")
     except Exception as e:
         ekler["ifc_hata"] = f"{type(e).__name__}: {str(e)[:200]}"
     return ekler
