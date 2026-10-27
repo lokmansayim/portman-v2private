@@ -15,8 +15,8 @@ Yeni pencere için hazırlıklar:
   - "+" birleşimde kısa iç duvar ikiye bölünür, uyarı yazılır. Bu kural yalnız yeni anahtarlı İş Emri'nde çalışır ve sıraya, aynaya, ek akslara bağlı değildir.
   - İş Emri'ne `verandalar` anahtarı eklendi: gövdeden taşan veranda. Plan, teknik pafta ve doğrulama, bayi paftası, IFC ve yükleme listesi bu anahtarı okur. Bayi paftasının çatı planı ve perspektifleri veranda çatılarını gösterir.
   - Patron 16:43 r03'ü reddetti: görünüşler `motor/sunum.py`'de sıfırdan yazılmıştı, eğim (%27,5) ve pencereler hatalıydı. O görünüş kodu kaldırıldı. Yeni `motor/sablon_kopru.py`: Motor'un planı canlıdaki Örnek Şablon paftasıyla çizilir (sol yan + ön görünüş, plan, bina özellikleri; 2. sayfa çatı planı + dört görünüş); geometri Motor'da (D-12), değerler İş Emri'nden, eğim kitaptan %33. Canlı yola bağlı değil.
-  - Testler: `testler/motor/test_arti_birlesim.py` (7), `testler/motor/test_veranda.py` (24), `testler/motor/test_sablon_kopru.py` (8).
-- **TK-01 r04** (`Teklif_Calisma/TK-01/cikti_r04/`; r03 reddedildi): Örnek Şablon paftası (2 sayfa) ve bayi çizimiyle yan yana görsel, WhatsApp plan görseli, teknik pafta, iki liste (asma 131, ters 129 satır). Ölçü zincirleri bayi çizimiyle aynı; r03'e göre listede yalnız çatı panellerinin boyu değişti (%33).
+  - Testler: `testler/motor/test_arti_birlesim.py` (7), `testler/motor/test_veranda.py` (24), `testler/motor/test_sablon_kopru.py` (10).
+- **TK-01 r04** (`Teklif_Calisma/TK-01/cikti_r04/`; r03 reddedildi): Örnek Şablon paftası (2 sayfa) ve bayi çizimiyle yan yana görsel, WhatsApp plan görseli, teknik pafta, iki liste (asma 131, ters 129 satır). Ölçü zincirinin noktaları bayi çizimiyle aynı (üç parçada 1 cm yuvarlama farkı); r03'e göre listede yalnız çatı panellerinin boyu değişti (%33).
 - **Kullanıcı adımları** (› BK-14):
   - B1 (TK-01'in gövdesi aynen) Yerelde çalışıyor; açık: bayi paftasında "E. BANYO" yazısı kapı yayına biniyor.
   - B2 (bugünkü çıktılar aynı) Yerelde çalışıyor.

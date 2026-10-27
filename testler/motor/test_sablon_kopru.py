@@ -62,6 +62,9 @@ def test_cati_ve_verandalar(tanim):
     assert [k["ad"] for k in c["kalkanlar"]] == ["ön kalkan", "arka kalkan", "ön veranda alnı", "arka veranda alnı"]
     assert collections.Counter(d["sinif"] for d in tanim["duvarlar"]) == {"ic": 10, "dis": 4, "kolon": 4}
     assert len(tanim["kirisler"]) == 6
+    # alınlar duvarlar (verandada kolonların dış yüzleri) arasında, saçak payı alına girmez (genel motordaki gibi; geometri hakemi)
+    assert [k["aralik"] for k in c["kalkanlar"]] == [[0.0, 898.0], [0.0, 898.0], [256.0, 642.0], [0.0, 261.0]]
+    assert c["ust_pay"] == 14.0                                                 # ifc_uret: düzlemin 10 cm üstünde 4 cm sac
     ver = {m["ad"]: m["poligon"] for m in tanim["mahaller"] if m["sinif"] == "veranda"}
     assert ver == {"ÖN VERANDA": [[256.0, -181.0], [642.0, -181.0], [642.0, 0.0], [256.0, 0.0]],
                    "ARKA VERANDA": [[0.0, 888.0], [261.0, 888.0], [261.0, 1018.0], [0.0, 1018.0]]}
@@ -71,10 +74,13 @@ def test_pafta_iki_sayfa_ve_zincirler(pafta):
     import pymupdf
     hedef, o = pafta
     assert o["olcek_1e"] == 126 and o["dis_olcu_cm"] == [898.0, 1199.0] and o["oturum_m2"] == pytest.approx(90.12)
-    # bayi çizimiyle aynı zincirler (arka 324 ↔ 323: aks 574,75, yarım yukarı); önde verandanın köşeleri ve hol duvarları (bayi 392 | 116 | 392)
+    # bayi çizimiyle aynı noktalar; şablonun kuralı (parçalar tam sayı, toplamları dış ölçü) üç parçada 1 cm fark verir: arka 323 ↔ 324 (aks
+    # 574,75), sol ve sağ 381 ↔ 382 (bayinin zincirleri 899 ve 1200 tutuyor). Önde verandanın köşeleri ve hol duvarları (bayi 392 | 116 | 392)
     assert o["zincirler_cm"] == {"arka": [261, 126, 188, 323], "on": [256, 131, 125, 130, 256], "sol": [181, 507, 381, 130],
                                  "sag": [181, 256, 251, 381, 130]}
-    assert o["kontrol_notlari"] == []                                         # kolon halkasının 10 cm'lik kırıntısı yok
+    assert [n for n in o["kontrol_notlari"] if n.get("kaynak") != "motor"] == []    # kolon halkasının 10 cm'lik kırıntısı yok
+    assert [n["not"] for n in o["kontrol_notlari"] if n.get("kaynak") == "motor"] == K.G.kur(_ie()).uyarilar   # K16: Motor'un uyarısı düşmez
+    assert o["teslim"] is True and o["dogrulama"]["passed"] is True and o["tepe_cm"] == pytest.approx(432.07, abs=0.05)
     assert o["ozellikler"]["Çatı Eğimi"] == "%33" and o["ozellikler"]["Çatı Şekli"] == "Beşik"
     with pymupdf.open(hedef / "TK01_pafta.pdf") as d:
         assert d.page_count == 2
@@ -93,7 +99,7 @@ def test_l_oda_yazisi_kolda(tanim, pafta):
     _, o = pafta
     net = yapi.kur(tanim)["bolgeler"]["YATAK ODASI 1"]["net"]
     assert net.envelope.area - net.area > 1e4
-    assert o["mahal_etiket_cm"]["YATAK ODASI 1"] == [155.0, 579.5] and net.contains(Point(155.0, 579.5))
+    assert o["mahal_etiket_cm"]["YATAK ODASI 1"] == [157.5, 579.5] and net.contains(Point(157.5, 579.5))
 
 
 def test_yazi_cakismasi(tmp_path):
@@ -126,6 +132,21 @@ def test_zincir_sarmalayici_geri_alinir(pafta):
     with K._zincir_siluetten():
         assert ciz_genel.zincirler is not asil
     assert ciz_genel.zincirler is asil
+
+
+def test_dogrulanmayan_plan_hatali_adla(tmp_path):
+    # K23: Motor'un doğrulaması geçmezse teslim adı yok
+    o = K.pafta(_ie(), tmp_path, dogrulama={"passed": False, "errors": ["deneme"]})
+    assert o["teslim"] is False and o["dosyalar"] == ["TK01_pafta.HATALI.pdf", "TK01_pafta_sablon.HATALI.png"]
+    assert not (tmp_path / "TK01_pafta.pdf").exists() and (tmp_path / "TK01_pafta.HATALI.pdf").exists()
+
+
+def test_ana_catiyi_asan_veranda_catisi_hata():
+    # K16: ön veranda %80'de ana çatının (%33) yüzünü 20 cm aşar (Motor uyarır); kırpılıp "saçak altında" sayılmaz, köprü durur
+    ie = _ie()
+    ie["verandalar"][0]["cati"]["egim_yuzde"] = 80
+    with pytest.raises(K.KopruHatasi, match="aşıyor"):
+        K.tanim(ie)
 
 
 def test_besik_disi_cati_hata():

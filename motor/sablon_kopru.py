@@ -40,25 +40,30 @@ def _ad(s: str) -> str:
 # ─────────────────────────────────────────────────────────────────── çatı ──
 def cati(plan: G.Plan, ie: dict) -> dict:
     """Çatı: genel motorun `cati` biçimi (düzlemler, kalkanlar, gizli kenarlar). Ana çatı `sunum.cati_tanimi`'nin düzlemleri aynen; taşan
-    verandaların çatısı `veranda.cati`'nın düzlemleri, ana çatının saçağının altında kalan kısmı kırpılarak (planda üst üste binmesin). Kalkanlar:
-    ana çatının iki alnı (dış duvarın dış yüzünde) ve beşik veranda çatısının dış kenardaki alnı (kirişin üstü)."""
+    verandaların çatısı `veranda.cati`'nın düzlemleri, ana çatının saçağının altında kalan kısmı kırpılarak (planda üst üste binmesin). Veranda
+    çatısı ana çatının yüzünü aşıyorsa (`veranda.ana_catiya_tasma`, Motor'un uyarısı) kırpma yanlış olur: köprü durur (K16; iki çatının
+    birleşimi şablonda yok). Kalkanlar: ana çatının iki alnı (dış duvarın dış yüzünde, duvarlar arasında) ve beşik veranda çatısının dış
+    kenardaki alnı (kirişin üstü, kolon dış yüzleri arasında); genel motordaki gibi saçak payı alına girmez. Kaplama kalınlığı pano Motor'unun
+    IFC'siyle aynı (`ust_pay`: düzlemin 10 cm üstünde 4 cm sac)."""
     from . import sunum, veranda as VR
     c = sunum.cati_tanimi(plan, ie)
     if c is None:
         raise KopruHatasi(f"Çatı tipi şablon paftasında yok: {(ie.get('cati') or {}).get('tip')} (yalnız beşik; İE-17)")
     c = copy.deepcopy(c)
-    H0 = c["duvar_ustu"]
     x0, y0, x1, y1 = G.govde_kutusu(plan)
-    s = c["sacak"]
     if (ie.get("cati") or {}).get("makas_ekseni", "x") == "x":     # mahya y boyunca: alınlar ön ve arka dış yüzde
-        kalkan = [{"ad": "ön kalkan", "eksen": "y", "konum": y0, "aralik": [x0 - s, x1 + s], "ic": "kuzey", "ust": ["sol", "sağ"]},
-                  {"ad": "arka kalkan", "eksen": "y", "konum": y1, "aralik": [x0 - s, x1 + s], "ic": "guney", "ust": ["sol", "sağ"]}]
+        kalkan = [{"ad": "ön kalkan", "eksen": "y", "konum": y0, "aralik": [x0, x1], "ic": "kuzey", "ust": ["sol", "sağ"]},
+                  {"ad": "arka kalkan", "eksen": "y", "konum": y1, "aralik": [x0, x1], "ic": "guney", "ust": ["sol", "sağ"]}]
     else:
-        kalkan = [{"ad": "sol kalkan", "eksen": "x", "konum": x0, "aralik": [y0 - s, y1 + s], "ic": "dogu", "ust": ["ön", "arka"]},
-                  {"ad": "sağ kalkan", "eksen": "x", "konum": x1, "aralik": [y0 - s, y1 + s], "ic": "bati", "ust": ["ön", "arka"]}]
+        kalkan = [{"ad": "sol kalkan", "eksen": "x", "konum": x0, "aralik": [y0, y1], "ic": "dogu", "ust": ["ön", "arka"]},
+                  {"ad": "sağ kalkan", "eksen": "x", "konum": x1, "aralik": [y0, y1], "ic": "bati", "ust": ["ön", "arka"]}]
     ana = unary_union([Polygon(d["plan"]) for d in c["duzlemler"]])
     gizli = []
     for v in plan.dis_verandalar:
+        t = VR.ana_catiya_tasma(plan, ie, v)
+        if t is not None and t > 0.5:
+            raise KopruHatasi(f"Veranda {v['ad']}: çatısı ana çatının yüzünü {t:.0f} cm aşıyor; iki çatının birleşimi şablon paftasında "
+                              f"çizilmez (Motor'un uyarısı)")
         vc = VR.cati(v, ie)
         on = v["ad"].lower()
         adlar = []
@@ -79,11 +84,12 @@ def cati(plan: G.Plan, ie: dict) -> dict:
                 if ana.boundary.buffer(0.05).contains(box(min(a[0], b[0]), min(a[1], b[1]), max(a[0], b[0]) + 1e-6, max(a[1], b[1]) + 1e-6)):
                     gizli.append({"duzlem": ad, "p": a, "q": b, "tur": "gizli", "not": "ana çatının saçağının altında"})
         if vc["tip"] == "besik" and adlar:
-            vx0, vy0, vx1, vy1 = v["rect"]; X0, Y0, X1, Y1 = vc["kutu"]
-            k = {"on": ("y", vy0, [X0, X1], "kuzey"), "arka": ("y", vy1, [X0, X1], "guney"),
-                 "sol": ("x", vx0, [Y0, Y1], "dogu"), "sag": ("x", vx1, [Y0, Y1], "bati")}[v["cephe"]]
+            vx0, vy0, vx1, vy1 = v["rect"]
+            k = {"on": ("y", vy0, [vx0, vx1], "kuzey"), "arka": ("y", vy1, [vx0, vx1], "guney"),
+                 "sol": ("x", vx0, [vy0, vy1], "dogu"), "sag": ("x", vx1, [vy0, vy1], "bati")}[v["cephe"]]
             kalkan.append({"ad": f"{on} alnı", "eksen": k[0], "konum": k[1], "aralik": k[2], "ic": k[3], "ust": adlar})
     c["kalkanlar"] = kalkan
+    c["ust_pay"] = 14.0                                  # ifc_uret: sac düzlemin 10 cm üstünde, 4 cm (genel motorun 7'si çeliğin aşık + paneli)
     if gizli:
         c["kenar_ozel"] = gizli
     c["tip_adi"] = "beşik"
@@ -126,7 +132,7 @@ def _oda(plan: G.Plan, nokta) -> str | None:
 # ──────────────────────────────────────────────────────────────── tanım ──
 def tanim(ie: dict) -> dict:
     """İş Emri → genel motorun Yapı Tanımı biçimi (yalnız çizim biçimi için). Geometri pano Motor'undan (`G.kur`)."""
-    from . import bayi_gorseli as BG, ifc_uret, sunum
+    from . import bayi_gorseli as BG, ifc_uret, sunum, veranda as VR
     ie = copy.deepcopy(ie)
     plan = G.kur(copy.deepcopy(ie))
     hz = ifc_uret.hazirla(copy.deepcopy(ie))
@@ -188,10 +194,10 @@ def tanim(ie: dict) -> dict:
                       "poligon": [[vx0, vy0], [vx1, vy0], [vx1, vy1], [vx0, vy1]], "etiket_m2": round(v["net_m2"], 2) if v.get("net_m2") else None})
         for j, (kx0, ky0, kx1, ky1) in enumerate(v["kirisler"]):
             yatay = (kx1 - kx0) >= (ky1 - ky0)
-            kirisler.append({"ad": f"{_ad(v['ad'])} kiriş {j + 1}", "kutu": [kx0, ky0, kx1, ky1], "alt": H0 - 10.0, "ust": H0,
+            kirisler.append({"ad": f"{_ad(v['ad'])} kiriş {j + 1}", "kutu": [kx0, ky0, kx1, ky1], "alt": H0 - VR.KIRIS_CM, "ust": H0,
                              "acik": [[kx0, kx1] if yatay else [ky0, ky1]], "bolge": "veranda"})
     for i, (dx0, dy0, dx1, dy1) in enumerate(plan.dikmeler):
-        duvarlar.append({"ad": f"KLN{i + 1}", "sinif": "kolon", "kutu": [dx0, dy0, dx1, dy1], "yukseklik": H0 - 10.0, "kaplama_yuksekligi": H0 - 10.0})
+        duvarlar.append({"ad": f"KLN{i + 1}", "sinif": "kolon", "kutu": [dx0, dy0, dx1, dy1], "yukseklik": H0 - VR.KIRIS_CM, "kaplama_yuksekligi": H0 - VR.KIRIS_CM})
     for w in duvarlar:
         w.pop("_yon", None)
     for e in acl:                                     # mahal adları tanımdaki yazımla
@@ -309,15 +315,19 @@ def _etiket_yerleri(t: dict, ozet: dict) -> dict[str, list[float]]:
 
 
 # ──────────────────────────────────────────────────────────────── pafta ──
-def pafta(ie: dict, hedef: Path, bilgi: dict | None = None) -> dict:
+def pafta(ie: dict, hedef: Path, bilgi: dict | None = None, dogrulama: dict | None = None) -> dict:
     """İş Emri → canlıdaki Örnek Şablon paftası: `<kod>_pafta.pdf` (2 sayfa) ve `<kod>_pafta_sablon.png` (1. sayfa). Bina özellikleri ve
-    özel istekler prefabrik paftanın kuralından (`sunum.ozellikler`), antet `sunum.bayi_paftasi` ile aynı."""
+    özel istekler prefabrik paftanın kuralından (`sunum.ozellikler`), antet `sunum.bayi_paftasi` ile aynı. K23: Motor'un DXF doğrulaması
+    (`sunum.motor_dogrulamasi`; verilmezse burada koşulur) geçmezse dosyalar `.HATALI` adıyla yazılır, `teslim` yanlış. Motor'un uyarıları
+    (`plan.uyarilar`) özetin `kontrol_notlari`'na eklenir (K16)."""
     import matplotlib
     from . import sunum
     from .genel import sablon_pafta as SP
     from .genel.uret import matplotlib_sabitle
     t = tanim(ie)
     plan = G.kur(copy.deepcopy(ie))
+    dogrulama = dogrulama if dogrulama is not None else sunum.motor_dogrulamasi(copy.deepcopy(ie))
+    gecti = dogrulama.get("passed") is True
     say = sunum.sayimlar(plan)
     oz, diger = sunum.ozellikler(ie, say)
     kod = t["kod"]; no = ie.get("is_emri_no") or kod; rev = int(ie.get("revizyon") or 1)
@@ -342,6 +352,15 @@ def pafta(ie: dict, hedef: Path, bilgi: dict | None = None) -> dict:
                 m["etiket_yeri"] = yer[m["ad"]]
         o = ciz()
     (hedef / f"{govde}_yapi_tanimi.json").write_text(json.dumps(t, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    o["kontrol_notlari"] = list(o.get("kontrol_notlari") or []) + [{"kaynak": "motor", "not": u} for u in plan.uyarilar]
+    o["dogrulama"] = dogrulama; o["teslim"] = gecti
+    if not gecti:                                     # K23: doğrulanmayan plan teslim adıyla yazılmaz
+        dosyalar = []
+        for ad in o["dosyalar"]:
+            yeni = ad.replace("_pafta.pdf", "_pafta.HATALI.pdf").replace("_pafta_sablon.png", "_pafta_sablon.HATALI.png")
+            (hedef / ad).replace(hedef / yeni); dosyalar.append(yeni)
+        o["dosyalar"] = dosyalar
+    (hedef / f"{govde}_pafta_ozet.json").write_text(json.dumps(o, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     return o
 
 
