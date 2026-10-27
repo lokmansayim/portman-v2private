@@ -27,9 +27,13 @@ kaynağıyla. Tanımdaki `cati.makaslar` (paftadan okunmuş makas yerleri) bu ku
    paneli kuralıyla kurulur (`karkas.uyeler`; panelin uzun kenarı başlık, dikmeler `dikme_araligi_cm` arayla kısa kenar boyunca).
    Çatı paneli düzlemin açılımında saçak boyunca `cati_paneli_adedi` eşit panele bölünür; çatı üstü paneli saçak boyunca `bolme`
    hedefiyle; tavan paneli ana ailenin makas aralıklarında, mahallerin içinde (makas kalınlığından dar şerit ve parça panel olmaz).
+   PR-3c (Lokman, 27 Ekim 2026; yeni anahtarlar, eski kural kopyasında eski davranış): çatı paneli ve çatı üstü panelinde çapraz yok;
+   adedi tanımda yazmayan açık alan çatı paneli saçak boyunca `cati_paneli.en_cm_acik_alan` (180); çatı üstü paneli eğim boyunca en çok `ust_paneli.en_cm`, saçak
+   boyunca en çok beş makas aralığı, eşit bölünür (`ust_paneli`); tavan panelinin uzun kenarı en çok `tavan_paneli.en_uzun_cm` (tırın 13,60 m'si); tek
+   açıklığı `makas_eti.tek_aciklik_en_cok_cm`'yi (8 m) aşan makas kalın sacdan (`makas_eti`, `tek_aciklik`).
 7. **Uyarılar.** Kuralın yedeğe düştüğü ya da bir şey koymadığı her yer `uyarilar`a yazılır (aileye bağlanmayan kırma yüzü, ailesiz
    çatı, ucunda duvar bulunamayan aile (ana saçağın ezdiği uç hariç: sonucu değiştirmez), saçağı bulunamayan kırma ucu, tek parça
-   kesilmeyen kırma şeridi, kısa çizgi, kurulamayan tavan paneli, tavan panelinin küçük ve dar parçaları); girdi bunları "karkas kuralı:
+   kesilmeyen kırma şeridi, kısa çizgi, kurulamayan tavan paneli, tavan panelinin ve çatı üstü panelinin küçük ve dar parçaları); girdi bunları "karkas kuralı:
    …" uyarısı olarak taşır (kurulamayan yöntem A panelinin satırı kitabın oranıyla), makas paftası basar.
 
 Hesapta LLM yoktur: aynı tanım ve aynı kural aynı sonucu verir. Ölçüler cm; boylar m.
@@ -520,8 +524,27 @@ def panel_uyeleri(pol: Polygon, k: dict, capraz: bool = True) -> dict[str, float
     return u
 
 
+def izgara_uyeleri(pol: Polygon, aralik: float) -> dict[str, float]:
+    """Çatı üstü panelinin üyeleri (m; İE-16 PR-3c): çevre; saçağa paralel ara C profiller, eğim boyunca `aralik` arayla (makasa dik:
+    Lokman, 27 Ekim 2026, "aşık görevi görüyor … her makasa 90 derecelik açı ile bağlanır", "genişlikte 60 cm arayla C profil"); eğime
+    paralel ara profiller, saçak boyunca aynı arayla (ÇP-03'ün çatı paneli paftasında profiller iki yönde 60 cm'lik ızgara). Son aralık
+    1 cm'den kısaysa o profil kenardır. Kuşak ve çapraz yok."""
+    x0, y0, x1, y1 = pol.bounds
+
+    def ara(bas, son, cizgi):
+        return sum(cizgi(bas + aralik * j).intersection(pol).length for j in range(1, int(math.ceil((son - bas - 1.0) / aralik - 1e-9))))
+    return {"cevre": pol.length / 100,
+            "makasa_dik": ara(y0, y1, lambda v: LineString([(x0 - 1, v), (x1 + 1, v)])) / 100,
+            "egime_paralel": ara(x0, x1, lambda u: LineString([(u, y0 - 1), (u, y1 + 1)])) / 100}
+
+
 def _acilim(dz: dict) -> Polygon:
     return dz["acilim"] if dz["acilim"].is_valid else dz["acilim"].buffer(0)
+
+
+def _parcalar(p) -> list[Polygon]:
+    """Kesişimin çokgen parçaları (1 cm²'den büyük)."""
+    return [g for g in ([p] if p.geom_type == "Polygon" else list(getattr(p, "geoms", []))) if g.geom_type == "Polygon" and g.area > 1.0]
 
 
 def _saciga_bol(pol: Polygon, n: int) -> list[Polygon]:
@@ -529,43 +552,107 @@ def _saciga_bol(pol: Polygon, n: int) -> list[Polygon]:
     x0, y0, x1, y1 = pol.bounds
     out = []
     for j in range(n):
-        p = pol.intersection(box(x0 + (x1 - x0) * j / n, y0 - 1, x0 + (x1 - x0) * (j + 1) / n, y1 + 1))
-        for g in ([p] if p.geom_type == "Polygon" else list(getattr(p, "geoms", []))):
-            if g.geom_type == "Polygon" and g.area > 1.0:
-                out.append(g)
+        out += _parcalar(pol.intersection(box(x0 + (x1 - x0) * j / n, y0 - 1, x0 + (x1 - x0) * (j + 1) / n, y1 + 1)))
     return out
 
 
+def ek_yapi_mi(dz: dict, y: dict) -> bool:
+    """Çatı panelli düzlem bir ek yapıyı (müştemilat) mı örtüyor; değilse açık alan (veranda, sundurma)."""
+    return any(b["sinif"] == "ek" and dz["cokgen"].contains(b["net"].representative_point()) for b in y["bolgeler"].values())
+
+
+def cati_paneli_adedi(dz: dict, k: dict, y: dict) -> int:
+    """Çatı panelli düzlemin panel adedi: tanımda yazıyorsa (`cati_paneli_adedi`) o; yazmıyorsa açık alanın düzleminde kuralda
+    `en_cm_acik_alan` varsa (İE-16 PR-3c; Lokman, 27 Ekim 2026: 60 cm arayla C profil, 180 cm genişlik) açılımın saçak boyu ÷ o, yukarı;
+    yoksa (ek yapı ya da eski kural kopyası) 1. Liste (`cati_panelleri`) ve pafta (`makas_pafta.cati_paneli_planlari`) bunu okur."""
+    en = _d(k, "cati_paneli").get("en_cm_acik_alan")
+    if dz.get("cati_paneli_adedi") or not en or ek_yapi_mi(dz, y):
+        return int(dz.get("cati_paneli_adedi", 1))
+    pol = _acilim(dz)
+    return max(1, math.ceil((pol.bounds[2] - pol.bounds[0]) / en - 1e-9))
+
+
 def cati_panelleri(c: dict, y: dict, k: dict) -> list[dict]:
-    """Tanımda çatı paneli yazan düzlemler (`ust_yapi: cati_paneli`): açılım saçak boyunca `cati_paneli_adedi` eşit panele."""
+    """Tanımda çatı paneli yazan düzlemler (`ust_yapi: cati_paneli`): açılım saçak boyunca eşit panellere. Adet tanımda yazıyorsa
+    (`cati_paneli_adedi`; açık projede paftadan) o; yazmıyorsa kuraldan (`cati_paneli_adedi`). Kuralda `capraz: false` ise çapraz yok
+    (İE-16 PR-3c)."""
     cp = _d(k, "cati_paneli")
     out = []
     for dz in c["duzlemler"]:
         if dz.get("ust_yapi") != "cati_paneli":
             continue
-        ek_yapi = any(b["sinif"] == "ek" and dz["cokgen"].contains(b["net"].representative_point()) for b in y["bolgeler"].values())
+        ek_yapi = ek_yapi_mi(dz, y)
         et = cp["et_ek_yapi"] if ek_yapi else cp["et_acik_alan"]
-        for j, p in enumerate(_saciga_bol(_acilim(dz), int(dz.get("cati_paneli_adedi", 1))), 1):
-            u = panel_uyeleri(p, k)
+        for j, p in enumerate(_saciga_bol(_acilim(dz), cati_paneli_adedi(dz, k, y)), 1):
+            u = panel_uyeleri(p, k, capraz=cp.get("capraz", True))
             out.append({"duzlem": dz["ad"], "sira": j, "ortu": "ek yapı" if ek_yapi else "açık alan", "profil": f"80x45x{et}",
                         "olcu_cm": [round(p.bounds[2] - p.bounds[0], 2), round(p.bounds[3] - p.bounds[1], 2)],
                         "uyeler_m": {a: round(v, 4) for a, v in u.items()}, "profil_boyu_m": round(sum(u.values()), 4)})
     return out
 
 
-def ust_panelleri(c: dict, k: dict) -> list[dict]:
-    """Yöntem A'nın çatı üstü panelleri: makaslı her düzlemin açılımı saçak boyunca `bolme` hedefiyle eşit panellere."""
-    hedef = _d(k, "bolme")["hedef_cm"]
+def _izgaraya_bol(pol: Polygon, nu: int, nv: int) -> list[Polygon]:
+    """Açılımdaki çokgen saçak boyunca (u) nu, eğim boyunca (v) nv eşit parçaya; sıra saçaktan yukarı, soldan sağa."""
+    x0, y0, x1, y1 = pol.bounds
+    out = []
+    for i in range(nv):
+        for j in range(nu):
+            out += _parcalar(pol.intersection(box(x0 + (x1 - x0) * j / nu, y0 + (y1 - y0) * i / nv, x0 + (x1 - x0) * (j + 1) / nu,
+                                                  y0 + (y1 - y0) * (i + 1) / nv)))
+    return out
+
+
+def ust_panelleri(c: dict, k: dict, uyari: list[str] | None = None) -> list[dict]:
+    """Yöntem A'nın çatı üstü panelleri, makaslı her düzlemin açılımında. Kuralda `ust_paneli` varsa (İE-16 PR-3c; Lokman, 27 Ekim
+    2026): panel makaslara dik bağlanır, aşık görevi görür; eğim boyunca en çok `en_cm` (60 cm arayla üç C profil: 180), saçak boyunca
+    en çok `boy_makas_araligi` makas aralığı (`makas.aralik_cm` ile), ikisinde de eşit bölünür; kırma yüzü ayrı düzlemdir (kırıldığı
+    yerden kesilir); `capraz: false` ise çapraz yok; `profil_araligi_cm` varsa üyeler ızgarayla (`izgara_uyeleri`: makasa dik ve eğime paralel
+    C profiller, iki yönde aynı arayla), yoksa duvar paneli kuralıyla (`panel_uyeleri`). Kısa kenarı makas kalınlığından dar ya da 100 cm²'den küçük parça (kırma yüzünün
+    köşesinde ızgaranın kestiği uç) panel olmaz, uyarı yazar (tavan panelindeki gibi). Yoksa (PR-3b'nin kural kopyası) açılım saçak
+    boyunca `bolme` hedefiyle eşit panellere."""
+    up = k.get("ust_paneli", {}).get("deger")
+    kal = _d(k, "makas")["kalinlik_cm"]
     out = []
     for dz in c["duzlemler"]:
         if dz.get("ust_yapi") == "cati_paneli":
             continue
         pol = _acilim(dz)
-        n = max(1, math.ceil((pol.bounds[2] - pol.bounds[0]) / hedef - 1e-9))
-        for j, p in enumerate(_saciga_bol(pol, n), 1):
-            u = panel_uyeleri(p, k)
+        if up:
+            boy = up["boy_makas_araligi"] * _d(k, "makas")["aralik_cm"]
+            nu = max(1, math.ceil((pol.bounds[2] - pol.bounds[0]) / boy - 1e-9))
+            nv = max(1, math.ceil((pol.bounds[3] - pol.bounds[1]) / up["en_cm"] - 1e-9))
+            parcalar = []
+            for p in _izgaraya_bol(pol, nu, nv):
+                en = min(p.bounds[2] - p.bounds[0], p.bounds[3] - p.bounds[1])
+                if p.area < 100.0 or en <= kal + EPS:
+                    if uyari is not None:
+                        uyari.append(f"çatı üstü paneli: {dz['ad']} düzleminde {p.area:.0f} cm² parça, kısa kenarı {en:.1f} cm "
+                                     f"(makas kalınlığı {kal:g} cm, en küçük parça 100 cm²): panel yok")
+                    continue
+                parcalar.append(p)
+        else:
+            hedef = _d(k, "bolme")["hedef_cm"]
+            parcalar = _saciga_bol(pol, max(1, math.ceil((pol.bounds[2] - pol.bounds[0]) / hedef - 1e-9)))
+        for j, p in enumerate(parcalar, 1):
+            u = (izgara_uyeleri(p, up["profil_araligi_cm"]) if up and "profil_araligi_cm" in up else
+                 panel_uyeleri(p, k, capraz=up.get("capraz", True) if up else True))
             out.append({"duzlem": dz["ad"], "sira": j, "olcu_cm": [round(p.bounds[2] - p.bounds[0], 2), round(p.bounds[3] - p.bounds[1], 2)],
                         "uyeler_m": {a: round(v, 4) for a, v in u.items()}, "profil_boyu_m": round(sum(u.values()), 4)})
+    return out
+
+
+def _uzunu_bol(g: Polygon, en_uzun: float | None) -> list[Polygon]:
+    """Uzun kenarı `en_uzun`'u aşan parça o kenar boyunca eşit parçalara (tavan paneli; tırın boyu, İE-16 PR-3c); sınır yoksa kendisi."""
+    x0, y0, x1, y1 = g.bounds
+    L = max(x1 - x0, y1 - y0)
+    if not en_uzun or L <= en_uzun + EPS:
+        return [g]
+    n = math.ceil(L / en_uzun - 1e-9)
+    kutular = ([box(x0 + (x1 - x0) * j / n, y0 - 1, x0 + (x1 - x0) * (j + 1) / n, y1 + 1) for j in range(n)] if x1 - x0 >= y1 - y0 else
+               [box(x0 - 1, y0 + (y1 - y0) * j / n, x1 + 1, y0 + (y1 - y0) * (j + 1) / n) for j in range(n)])
+    out = []
+    for kb in kutular:
+        out += _parcalar(g.intersection(kb))
     return out
 
 
@@ -621,12 +708,13 @@ def tavan_panelleri(c: dict, y: dict, k: dict, mk: dict, uyari: list[str]) -> li
                 if en < S:
                     uyari.append(f"tavan paneli: {b['ad']} mahalinde {a0:.1f}–{a1:.1f} şeridinde parçanın kısa kenarı {en:.1f} cm "
                                  f"(dikme aralığı {S:g}): panel kuruldu")
-                ic = g.buffer(-EPS)
-                kesilen = sum(1 for ln in cizgiler if ln.intersection(ic).length > EPS)
-                u = panel_uyeleri(g, k, capraz=tp["capraz"])
-                out.append({"mahal": b["ad"], "serit": [round(a0, 2), round(a1, 2)], "kesilen_makas": kesilen,
-                            "olcu_cm": [round(g.bounds[2] - g.bounds[0], 2), round(g.bounds[3] - g.bounds[1], 2)],
-                            "uyeler_m": {a: round(v, 4) for a, v in u.items()}, "profil_boyu_m": round(sum(u.values()), 4)})
+                for g in _uzunu_bol(g, tp.get("en_uzun_cm")):
+                    ic = g.buffer(-EPS)
+                    kesilen = sum(1 for ln in cizgiler if ln.intersection(ic).length > EPS)
+                    u = panel_uyeleri(g, k, capraz=tp["capraz"])
+                    out.append({"mahal": b["ad"], "serit": [round(a0, 2), round(a1, 2)], "kesilen_makas": kesilen,
+                                "olcu_cm": [round(g.bounds[2] - g.bounds[0], 2), round(g.bounds[3] - g.bounds[1], 2)],
+                                "uyeler_m": {a: round(v, 4) for a, v in u.items()}, "profil_boyu_m": round(sum(u.values()), 4)})
     kesen = [p for p in out if p["kesilen_makas"]]
     if kesen:                                             # şeritler yalnız ana ailenin makaslarıyla: dik ailenin altındaki panel makası keser
         uyari.append(f"tavan paneli: {len(kesen)} panel başka makasların alt başlığını kesiyor (toplam {sum(p['kesilen_makas'] for p in kesen)} "
@@ -634,15 +722,56 @@ def tavan_panelleri(c: dict, y: dict, k: dict, mk: dict, uyari: list[str]) -> li
     return out
 
 
+def tek_aciklik(x: dict, y: dict, t: dict) -> float | None:
+    """Makasın altında desteksiz en uzun aralık (cm): makas çizgisini kesen oda duvarları (dış, iç, ek), kolonlar ve kirişler destektir;
+    destekler arasındaki en büyük aralık. Uçlardaki saçak (son destekten öte) aralık değildir. Kırma çaprazı (eksensiz) ya da ikiden az
+    desteği olan makas için yok."""
+    if x["eksen"] is None or x["konum"] is None:
+        return None
+    ex, a = x["eksen"], x["konum"]
+    s0, s1 = x["s"]
+    ie = _i(_oteki(ex))                              # makasın konumunun ekseni (makasa dik)
+    destek = []
+    for w in y["duvarlar"]:
+        if w["sinif"] not in ("dis", "ic", "ek", "kolon"):
+            continue
+        kt = w["kutu"]
+        if w["sinif"] != "kolon" and w["yon"] == ex:  # makasa paralel duvar taşımaz
+            continue
+        if kt[ie] - EPS <= a <= kt[ie + 2] + EPS:
+            destek.append((kt[_i(ex)] + kt[_i(ex) + 2]) / 2)
+    for kr in t.get("kirisler", []):
+        kt = kr["kutu"]
+        if (kt[ie + 2] - kt[ie]) > (kt[_i(ex) + 2] - kt[_i(ex)]) and kt[ie] - EPS <= a <= kt[ie + 2] + EPS:
+            destek.append((kt[_i(ex)] + kt[_i(ex) + 2]) / 2)
+    destek = sorted(v for v in set(round(v, 1) for v in destek) if s0 - EPS <= v <= s1 + EPS)
+    return max((q - p for p, q in zip(destek, destek[1:])), default=None) if len(destek) > 1 else None
+
+
+TUR_ADI_UYARI = {"makas": "tam", "kisa": "kısa", "capraz": "kırma çaprazı"}
+
+
 def kur(t: dict, y: dict, k: dict, yontem: str | None = None) -> dict:
-    """Çatının karkas kaydı: makaslar, çatı panelleri ve (yöntem A: `yontem == "panel"`) çatı üstü ve tavan panelleri."""
+    """Çatının karkas kaydı: makaslar, çatı panelleri ve (yöntem A: `yontem == "panel"`) çatı üstü ve tavan panelleri. Kuralda `makas_eti`
+    varsa (İE-16 PR-3c) her makasın desteksiz en uzun aralığı (`tek_aciklik_cm`) ve et kalınlığı (`et`) yazılır."""
     c = cati_genel.cati_kur(t["cati"])
     mk = makaslar(t, c, y, k)
     uyari = list(mk["uyarilar"])
+    me = k.get("makas_eti", {}).get("deger")
+    if me:
+        for x in mk["makaslar"]:
+            ta = tek_aciklik(x, y, t)
+            x["tek_aciklik_cm"] = None if ta is None else round(ta, 1)
+            x["et"] = me["kalin"] if ta is not None and ta > me["tek_aciklik_en_cok_cm"] + EPS else me["ince"]
+            if ta is None and x["acik_cm"] > me["tek_aciklik_en_cok_cm"] + EPS:     # ölçülemeyen tek açıklık sınırı aşabilir: sessiz değil
+                uyari.append(f"makas eti: {x['aile']} ailesinde {TUR_ADI_UYARI.get(x['tur'], x['tur'])} makasın"
+                             + (f" ({x['konum']:g})" if x.get("konum") is not None else "")
+                             + f" tek açıklığı ölçülemedi (desteği bulunamadı); açıklığı {x['acik_cm']:g} cm, sınır "
+                             f"{me['tek_aciklik_en_cok_cm']:g}; {me['ince']} sayıldı")
     out = {"makaslar": mk["makaslar"], "aileler": mk["aileler"], "baglanmayan_kirma_yuzleri": mk["baglanmayan_kirma_yuzleri"],
            "cati_panelleri": cati_panelleri(c, y, k)}
     if yontem == "panel":
-        out["ust_panelleri"] = ust_panelleri(c, k)
+        out["ust_panelleri"] = ust_panelleri(c, k, uyari)
         out["tavan_panelleri"] = tavan_panelleri(c, y, k, mk, uyari)
     out["uyarilar"] = uyari
     return out

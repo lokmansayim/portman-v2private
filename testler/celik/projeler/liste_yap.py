@@ -54,7 +54,7 @@ CELIK_TURLERI = [
     (r"^Veranda (korkuluğu|duvarı \(giriş çerçevesi\))", "duvar_paneli"),   # hakemde D (DUVAR, KORKULUK)
     (r"^Veranda dikmeleri \(kolon paneli\)$", "kolon_kiris"),
     (r"^Kirişler \(kiriş paneli", "kolon_kiris"),
-    (r"^Çatı makas panelleri$", "makas"),
+    (r"^Çatı makas panelleri( \(\d+,\d+ mm\))?$", "makas"),              # İE-16 PR-3c: tek açıklığı 8 m'yi aşan makaslar ayrı satır
     (r"^Tavan paneli \(makas arası\)$", "tavan_paneli"),
     (r"^Çatı paneli \(", "cati_paneli"),
     (r"^Baca karkası$", "baca_paneli"),

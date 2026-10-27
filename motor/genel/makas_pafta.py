@@ -55,14 +55,15 @@ def adlar(ck: dict) -> list[dict]:
     return out
 
 
-def cati_paneli_planlari(c: dict) -> list[dict]:
-    """Çatı panelli düzlemin planı saçak boyunca `cati_paneli_adedi` eşit şeride (açılımdaki eşit bölmenin plandaki karşılığı). Sıra
-    açılımdaki gibi: açılımın saçak ekseni u = p · sag (`cati_genel`), şeritler u'ya göre sıralanır (tablodaki sırayla aynı)."""
+def cati_paneli_planlari(c: dict, k: dict | None = None, y: dict | None = None) -> list[dict]:
+    """Çatı panelli düzlemin planı saçak boyunca panel adedince eşit şeride (açılımdaki eşit bölmenin plandaki karşılığı; adet
+    `makas.cati_paneli_adedi`, kural ve yapı verilmezse tanımdaki `cati_paneli_adedi`). Sıra açılımdaki gibi: açılımın saçak ekseni u = p · sag
+    (`cati_genel`), şeritler u'ya göre sıralanır (tablodaki sırayla aynı)."""
     out, j = [], 0
     for dz in c["duzlemler"]:
         if dz.get("ust_yapi") != "cati_paneli":
             continue
-        n = int(dz.get("cati_paneli_adedi", 1))
+        n = makas.cati_paneli_adedi(dz, k, y) if k and y else int(dz.get("cati_paneli_adedi", 1))
         x0, y0, x1, y1 = dz["cokgen"].bounds
         sacak_x = makas._eksen(dz) == "y"                  # eğim y yönündeyse saçak x boyunca
         parcalar = []
@@ -127,11 +128,14 @@ def plan(ax, y: dict, c: dict, ms: list[dict], cps: list[dict], kk: dict) -> Non
 def tablo(ax, ms: list[dict], cps: list[dict], ck: dict, kk: dict, profil: str) -> None:
     ax.axis("off")
     tr = ciz_genel.tr
+    kalin = [x for x in ms if x.get("et") not in (None, profil.rsplit("x", 1)[-1])]   # tek açıklığı sınırı aşan makas (`makas_eti`, İE-16 PR-3c)
     sat = [f"{'Ad':4s} {'Tür':14s} {'Aile':24s} {'Açıklık':>8s} {'h':>6s} {'Profil boyu':>11s}"]
     for x in ms:
         sat.append(f"{x['ad']:4s} {TUR_ADI[x['tur']]:14s} {x['aile'][:24]:24s} {ciz_genel.sade(x['acik_cm']):>8s} {ciz_genel.sade(x['h_en_cok_cm']):>6s} "
-                   f"{tr(x['profil_boyu_m'], 2) + ' m':>11s}")
-    sat += ["", f"Makas {len(ms)} · profil {profil.replace('x', ' × ')} · toplam {tr(sum(x['profil_boyu_m'] for x in ms), 1)} m"]
+                   f"{tr(x['profil_boyu_m'], 2) + ' m':>11s}" + (f"  et {x['et']}" if x in kalin else ""))
+    sat += ["", f"Makas {len(ms)} · profil {profil.replace('x', ' × ')}"
+            + (f" ({len(kalin)} makas {kalin[0]['et']} mm: tek açıklığı sınırı aşıyor)" if kalin else "")
+            + f" · toplam {tr(sum(x['profil_boyu_m'] for x in ms), 1)} m"]
     if ck["cati_panelleri"]:
         sat += ["", f"{'Ad':4s} {'Düzlem':14s} {'Profil':14s} {'Ölçü (açılım)':>15s} {'Profil boyu':>11s}"]
         for x, r in zip(cps, ck["cati_panelleri"]):
@@ -169,7 +173,7 @@ def ciz(t: dict, hedef: Path, kod: str, kural_k: dict | None = None, yontem: str
         raise SystemExit("Makas yerleşim planı: karkas kuralında çatı kuralı (`makas`) yok.")
     c = cati_genel.cati_kur(t["cati"])
     ms = adlar(ck)
-    cps = cati_paneli_planlari(c)
+    cps = cati_paneli_planlari(c, k, y)
     if len(cps) != len(ck["cati_panelleri"]):
         raise SystemExit(f"Makas yerleşim planı: çatı panelinin plandaki bölmesi ({len(cps)}) kuralınkiyle ({len(ck['cati_panelleri'])}) aynı değil")
     profil = f"80x45x{kur['celik']['et_kalinligi_varsayilan']['deger']['cati']}"     # makasın profili tanımda yazmaz (`girdi_genel`)

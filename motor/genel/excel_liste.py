@@ -75,7 +75,7 @@ def xlsx_yaz(liste: dict, hedef: Path, kaynak: str = "", set_adi: str | None = N
                 yaz(ws, r, j, grup if j == 1 else None, KALIN, D_GRUP, DUZ)
             r += 1
         toplam = str(x.get("kalem") or "").startswith("Toplam")
-        kalem = (x.get("liste_adi") or x.get("kalem") or "") + (f" ({x['renk']})" if x.get("renk") else "")
+        kalem = (x.get("liste_adi") or x.get("kalem") or "") + (f" ({x['renk']})" if x.get("renk") and not x.get("renk_adda") else "")
         not_ = (x.get("not") or "") + (((". " if x.get("not") else "") + f"Bugünkü kurallarla: {x['bugunku_adet']}") if "bugunku_adet" in x else "")
         if not toplam:
             sira += 1
