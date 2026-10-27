@@ -322,3 +322,74 @@ def test_ayar_kapandiktan_sonra_gelen_form_cevabi_yine_llmsiz(depo, wa, tmp_path
     form_cevabi(depo, tmp_path, "tf:oncekiform", PLAN, None)
     [r] = isle_hepsi(depo, s)
     assert r["eylem"] == "is_emri" and tek(depo, "SELECT cikarim FROM isler")["cikarim"]["form"]["durum"] == "talep"
+
+
+# ─── kod incelemesi (27.10): açık taslak, panel kaydı ───
+def nasil_calisir_formu(depo, wa, s) -> tuple[dict, str]:
+    """"Nasıl çalışır?" cevabındaki form: taslaktan doldurulmaz (token'da ':1' yok)."""
+    g = mesaj("Nasıl çalışır?", None, bayi=BAYI_KART, tur="button")
+    g["reply_id"] = S.BILGI_NASIL; g["reply_kind"] = "button"
+    assert depo.mesaj_kaydet(g)
+    isle_hepsi(depo, s)
+    return form_satiri(depo, wa)
+
+
+def test_taslaktan_doldurulmamis_form_acik_taslaga_karismaz(depo, wa, tmp_path):
+    """Bayi taslağı görmediği formu gönderdiyse (selam, "Nasıl çalışır?") açık taslak kapanır: eski oda programı plana sızmaz."""
+    s = ayar(tmp_path)
+    satir, _ = soru_al(depo, wa, s)                                          # taslak: 2+1; form taslaktan dolu
+    assert parametreler(satir)["flow_token"].endswith(":1")
+    satir, dis = nasil_calisir_formu(depo, wa, s)
+    token = parametreler(satir)["flow_token"]
+    assert TF.TOKEN.match(token).group(3) is None and parametreler(satir)["flow_action_payload"]["data"]["oda"] == ""
+    form_cevabi(depo, tmp_path, token, {a: v for a, v in PLAN.items() if a != "oda"}, dis)
+    [r] = isle_hepsi(depo, s)
+    assert r["eylem"] == "sor" and "oda_programi" in r["gerekce"], r                # 2+1 taslaktan gelmedi
+    d, _ = depo.konusma_oku(NUMARA_A)
+    assert (d["taslak"] or {}).get("oda_programi") is None
+    assert any("önceki taslak kapandı" in str(n) for n in d.get("gecmis") or [])
+
+
+def test_taslaktan_doldurulmus_form_taslagi_tamamlar(depo, wa, tmp_path, hizli_motor):
+    """Soruyla gelen form taslağın bilgileriyle doluydu: bayinin boş bıraktığı alan taslaktan tamamlanır."""
+    s = ayar(tmp_path)
+    satir, dis = soru_al(depo, wa, s)
+    form_cevabi(depo, tmp_path, parametreler(satir)["flow_token"], {a: v for a, v in PLAN.items() if a != "oda"}, dis)
+    [r] = isle_hepsi(depo, s)
+    assert r["eylem"] == "is_emri", r                                       # oda programı formda yoktu: taslaktaki 2+1
+    fc = tek(depo, "SELECT cikarim FROM isler ORDER BY id DESC LIMIT 1")["cikarim"]["form"]
+    assert fc["taslaga"] is True and fc["talep"].get("oda_programi") is None
+
+
+def test_panelde_gecersiz_varsayilan_karti_yazdirmaz(depo, kanal_dizini):
+    from test_panel import AYAR_P, DOGRU, NUMARA_Y, SIR, Istemci, _csrf_oturum
+    import panel as PN
+    pn = PN.Panel(depo=depo, veri=kanal_dizini, sir=SIR, parola=PN.parola_ozeti(DOGRU), ayar_oku=lambda: dict(AYAR_P))
+    c = Istemci(pn)
+    c.giris(DOGRU)
+    csrf = _csrf_oturum(c)
+    alanlar = {"csrf": csrf, "numara": NUMARA_Y, "ad": "Deneme Bayi Y", "rol": "bayi", "aktif": "1", "v_yapi_turu": "celik", "v_kat_sayisi": "",
+               "v_cati": "kubbe", "v_veranda": "arka"}
+    kod, _, _ = c.git("POST", "/panel/bayi/yeni", alanlar)
+    assert kod == 400 and depo.bayi_oku(NUMARA_Y) is None                     # kart da yazılmadı (yarım kayıt yok)
+    kod, _, _ = c.git("POST", "/panel/bayi/yeni", {**alanlar, "v_cati": "kirma"})
+    assert kod == 302 and depo.bayi_varsayilanlari(NUMARA_Y) == {"yapi_turu": "celik", "cati": "kirma", "veranda": "arka"}
+    # panelin seçenekleri kartın izinli değerleri (formun seçenekleri) ile aynı
+    assert {a: tuple(x for x, _ in sec) for a, _e, sec in PN.VARSAYILAN_SECENEKLERI} == \
+        {a: tuple(str(x) for x in izinli) for a, izinli in depo.VARSAYILAN_ALANLARI.items()}
+
+
+def test_formdaki_dosya_okununca_not_okumaya_gitmez_bayiye_soylenir(depo, wa, tmp_path, monkeypatch):
+    """Çizim esas alınır: okumaya formun özeti gider (not gitmez; LLM'e giden metin), not otomatik uygulanmaz ve bayiye ayrı satırla söylenir."""
+    from beyin import gorsel_okuma as GO
+    sozler, asil = [], GO.oku
+    monkeypatch.setattr(GO, "oku", lambda yol, mime, metin="", **kw: (sozler.append(metin), asil(yol, mime, metin, **kw))[1])
+    s = ayar(tmp_path, okuma={**BASIT, "yapi_turu": None}, gorsel=True)
+    satir, dis = soru_al(depo, wa, s)
+    form_cevabi(depo, tmp_path, parametreler(satir)["flow_token"], {**PLAN, "not": "Salon geniş olsun"}, dis, dosya="image/jpeg")
+    [r] = isle_hepsi(depo, s)
+    assert r["gerekce"] == "çizim okundu: teyit", r
+    assert sozler == ["Talep formu: prefabrik, tek kat, 2+1, 7,73 × 10,14 m, beşik çatı, veranda önde"]
+    x = bayiye(depo)
+    assert [y["kind"] for y in x] == ["text", "interactive"] and x[0]["govde"] == W.FORM_NOTU_CIZIM
+    assert not x[1]["govde"].startswith(W.FORM_NOTU_CIZIM)

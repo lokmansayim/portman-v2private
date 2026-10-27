@@ -176,3 +176,32 @@ def test_webhook_satiri_form_cevabi():
 def test_satir_tokeni():
     satir = W.giden_form({"id": "wamid.G1", "sender": "900000000101"}, "x", 1, "revizyon", FORM, "rv:TF-1:1", {"plan": "p"})
     assert TF.satir_tokeni(satir) == "rv:TF-1:1" and TF.satir_tokeni({"kind": "text"}) is None
+
+
+def test_form_mesaji_govdesi_ve_sunus_kurali():
+    """Kod incelemesi (27.10): form düğmeli mesaj metnin satır sonlarını korur; gövdeye (1024) sığmayan metin formla gitmez (bugünkü düz
+    metin, kesilmez). Talep formunun token'ı taslaktan doldurulduysa ':1' taşır (cevap açık taslağı tamamlar), doldurulmadıysa taşımaz."""
+    from types import SimpleNamespace as NS
+    gelen = {"id": "wamid.SORU1", "sender": "900000000101"}
+    r = W.giden_form(gelen, "Birinci satır.\n\nİkinci satır.", 0, "talep", FORM, "tf:abc", TF.ekran_verisi(None, None))
+    assert r["interactive"]["body"]["text"] == "Birinci satır.\n\nİkinci satır."
+    assert M.mesaj_yuku(r, "900000000101")["interactive"]["body"]["text"] == "Birinci satır.\n\nİkinci satır."
+
+    class K:
+        def __init__(self, d):
+            self.d = d
+    soru = NS(eylem="sor", soru_alani="dis_olcu", gerekce="eksik: dis_olcu")
+    bos = K({"asama": "yeni", "taslak": {}})
+    dolu = K({"asama": "topluyor", "taslak": {"oda_programi": "2+1"}})
+    fs = W.form_sunusu(gelen, soru, bos, None, FORM, "Dış ölçü?")
+    assert fs[0] == "talep" and TF.TOKEN.match(fs[1]).group(3) is None
+    fs = W.form_sunusu(gelen, soru, dolu, None, FORM, "Dış ölçü?")
+    assert fs[1].endswith(":1") and fs[2]["oda"] == "2+1"
+    assert W.form_sunusu(gelen, soru, dolu, None, FORM, "x" * (W.WA_GOVDE + 1)) is None
+    rev = NS(eylem="sor", soru_alani="revizyon_ne", gerekce="revizyon")
+    k = K({"asama": "onay_bekliyor", "son_is_emri": {"is_emri_no": "IE-2610-0001", "revizyon": 2}})
+    fs = W.form_sunusu(gelen, rev, k, None, FORM, "Neyi değiştirelim?")
+    assert fs[:2] == ("revizyon", "rv:IE-2610-0001:2") and fs[3:] == ("IE-2610-0001", 2)
+    # aynı planın formu güncel sayılır (sunuş ve çözüm aynı revizyonu okur)
+    g = {"form": {"tur": "revizyon", "token": fs[1], "alanlar": {"neyi": ["pencere"]}, "dosyalar": []}}
+    assert W.form_cikarimi(g, k.d)["durum"] == "bos"

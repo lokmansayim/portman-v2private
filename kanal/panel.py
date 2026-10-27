@@ -531,8 +531,11 @@ def bayi_kaydet(p: Panel, oturum: dict, i: Istek, numara: str | None) -> tuple:
             raise ValueError("numara geçersiz: yalnız rakam, ülke koduyla 8–15 hane")
         if yeni and p.depo.bayi_oku(d["numara"]):
             raise ValueError("bu numara zaten kayıtlı; listeden açıp düzenleyin")
+        varsayilan = any(f"v_{a}" in f for a, _e, _s in VARSAYILAN_SECENEKLERI)   # İE-20 PR-2: form varsayılanları (alanlar formdaysa)
+        if varsayilan:
+            p.depo.varsayilan_denetle(d["varsayilanlar"])                          # kart yazılmadan önce (yarım kayıt yok)
         p.depo.bayi_yaz(d["numara"], ad=d["ad"], kod=d["kod"] or None, hitap=d["hitap"], firma=d["firma"], bolge=d["bolge"], rol=d["rol"], aktif=d["aktif"], kaynak="panel")
-        if any(f"v_{a}" in f for a, _e, _s in VARSAYILAN_SECENEKLERI):            # İE-20 PR-2: form varsayılanları (alanlar formdaysa)
+        if varsayilan:
             p.depo.bayi_varsayilanlari_yaz(d["numara"], **d["varsayilanlar"])
     except ValueError as hata:
         return _html(400, bayi_formu(p, oturum, d, yeni, str(hata)))

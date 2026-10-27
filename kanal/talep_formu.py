@@ -18,7 +18,7 @@ from pathlib import Path
 FORMLAR = Path(__file__).resolve().parent / "formlar"
 EKRAN = {"talep": "TALEP", "revizyon": "REVIZYON"}
 DUGME = {"talep": "Talep formu", "revizyon": "Revizyon formu"}          # flow_cta (≤ 20)
-TOKEN = re.compile(r"^(tf|rv):([^:\s]{1,80})(?::([0-9]{1,3}))?$")       # tf:<iz> talep · rv:<İş Emri no>:<rev> revizyon
+TOKEN = re.compile(r"^(tf|rv):([^:\s]{1,80})(?::([0-9]{1,3}))?$")       # tf:<iz>[:1] talep · rv:<İş Emri no>:<rev> revizyon
 FLOW_ID = re.compile(r"^[0-9]{1,40}$")
 MEDYA_ID = re.compile(r"^[0-9]{1,40}$")
 CEVAP_EN_COK = 64 * 1024                       # response_json (dize) üst sınırı
@@ -38,8 +38,10 @@ def tanim(tur: str) -> dict:
     return json.loads((FORMLAR / f"{tur}.json").read_text(encoding="utf-8"))
 
 
-def talep_tokeni(iz: str) -> str:
-    return f"tf:{iz}"
+def talep_tokeni(iz: str, taslaktan: bool = False) -> str:
+    """Form açık taslağın bilgileriyle dolu sunulduysa `tf:<iz>:1` (cevabı taslağı tamamlar), değilse `tf:<iz>` (cevabı açık taslağı
+    kapatır: bayi görmediği bilgiyle plan çizilmez)."""
+    return f"tf:{iz}:1" if taslaktan else f"tf:{iz}"
 
 
 def revizyon_tokeni(no: str, rev: int) -> str:
