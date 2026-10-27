@@ -556,6 +556,35 @@ def _kur(is_emri: dict) -> Plan:
             d.p0, d.p1 = d.a0, d.a1
             duvarlar.append(d); wid += 1
 
+    # ---------------- dört kollu (+) birleşim (BK-14): iki duvar aynı noktadan geçiyorsa ve orada hiçbir duvar bitmiyorsa kısa olan
+    # (eşitse düşey) o noktada ikiye bölünür; iki ucu aşağıdaki T kuralıyla geçen duvarın yüzünde biter. Önceden iki duvar da geçiyordu,
+    # birleşim karesi iki kez doluyordu (doğrulama "Duvar çakışması"); + birleşimi olan İş Emri bugüne kadar çizilemiyordu (TK-01)
+    while True:
+        uclar = {((d.n0, d.hat) if d.yon == "x" else (d.hat, d.n0)) for d in duvarlar} | \
+                {((d.n1, d.hat) if d.yon == "x" else (d.hat, d.n1)) for d in duvarlar}
+        arti = None
+        for dx in (d for d in duvarlar if d.yon == "x"):
+            for dy in (d for d in duvarlar if d.yon == "y"):
+                P = (dy.hat, dx.hat)
+                if dx.n0 < dy.hat < dx.n1 and dy.n0 < dx.hat < dy.n1 and P not in uclar:
+                    arti = (dx, dy, P); break
+            if arti: break
+        if arti is None:
+            break
+        dx, dy, P = arti
+        if "dis" in (dx.tur, dy.tur) and dx.tur != dy.tur:
+            bol = dy if dx.tur == "dis" else dx                   # dış duvar geçer
+        else:
+            bol = dx if (dx.n1 - dx.n0) < (dy.n1 - dy.n0) else dy  # uzun duvar geçer; eşitse düşey bölünür
+        k = P[0] if bol.yon == "x" else P[1]
+        yeni = Duvar(id=wid, yon=bol.yon, hat=bol.hat, c=bol.c, h=bol.h, tur=bol.tur, cevre=bol.cevre, govde_yonu=bol.govde_yonu,
+                     n0=k, n1=bol.n1, edges=[e for e in bol.edges if e[0] >= k])
+        bol.edges = [e for e in bol.edges if e[0] < k]; bol.n1 = k
+        bol.p0, bol.p1 = bol.a0, bol.a1; yeni.p0, yeni.p1 = yeni.a0, yeni.a1
+        duvarlar.append(yeni); wid += 1
+        uyarilar.append(f"Aks noktası {P}: dört kollu birleşim; duvar {bol.id} ikiye bölündü ({bol.id}, {yeni.id}), uçları geçen duvarın "
+                        f"({(dy if bol is dx else dx).id}) yüzünde; birleşim profili kural kitabında yok")
+
     # ---------------- birleşimler (nokta tabanlı)
     def pt_of_end(d, uc):
         n = d.n0 if uc == 0 else d.n1
