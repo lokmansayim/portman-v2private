@@ -162,6 +162,20 @@ def test_hedefi_asan_panel_uyari_olarak_yazilir(monkeypatch):
     assert g["celik"]["karkas"]["uyarilar"] == kk["uyarilar"]
 
 
+def test_en_uzunu_asan_panel_uyari_bugunku_kuralla(tmp_path):
+    """Bugünkü kuralla (oda bölmesi): bölme sınırı düşürülmüş kopyada (400) ÇP-14'ün hol–veranda duvarının ek yeri kapının kenarına kayar,
+    panel 411,4 cm: uyarı yazar (sayı ve ad)."""
+    d = json.loads(karkas.KURAL.read_text(encoding="utf-8"))
+    d["bolme"]["deger"]["en_uzun_cm"] = 400
+    yol = tmp_path / "kural.json"
+    yol.write_text(json.dumps(d, ensure_ascii=False), encoding="utf-8")
+    t = json.loads((KOK / "testler" / "celik" / "projeler" / "CP14" / "CP14.json").read_text(encoding="utf-8"))
+    kk = karkas.kur(yapi.kur(t), t, karkas.oku(yol))
+    asan = [p for p in kk["paneller"] if p["boy_cm"] > 400 + karkas.TOL]
+    uy = [u for u in kk["uyarilar"] if "bölmenin en uzunu 400 cm" in u]
+    assert [p["boy_cm"] for p in asan] == [411.4] and len(uy) == 1 and asan[0]["ad"] in uy[0]
+
+
 def test_kisa_kalan_panel_uyari_olarak_yazilir(monkeypatch):
     """Ek yeri açıklığın kenarına kayınca koşunun ucunda bir dikme aralığından kısa panel kalabilir (700'lük koşu, 20–690 açıklık: ek
     yeri 350'den 20'ye): sessiz kalmaz. Koşunun kendisi kısaysa (ÇP-14'ün 50 cm'lik cumba yanları) uyarı yok."""

@@ -14,8 +14,8 @@
  "karkas_kurali": {
   "yol": "kurallar/karkas/celik_karkas.json",
   "sema": "portman.celik_karkas/0.1-taslak",
-  "sha256": "c193c54976c4fc38bd973ccc4b7cf7e117afd93d9594e5b615f3150f9b7ffd3b",
-  "kopya": "testler/celik/projeler/setler/c193c54976c4fc38.json"
+  "sha256": "8a051c8ff1a5d96837e2af285606b46e0f24a62d6b927a7eea2f621ed7841c33",
+  "kopya": "testler/celik/projeler/setler/8a051c8ff1a5d968.json"
  },
  "yontem": {
   "kod": "panel",
@@ -31,7 +31,7 @@
   {"grup": "Çelik panel", "kalem": "Kirişler (kiriş paneli)", "boyut": "80 × 45 × 1,2", "adet": 5, "kg": 143.0, "durum": "varsayim", "tur": "kolon_kiris"},
   {"grup": "Çelik panel", "kalem": "Çatı makas panelleri", "boyut": "80 × 45 × 0,8", "adet": 24, "kg": 360.53, "durum": "varsayim", "tur": "makas"},
   {"grup": "Çelik panel", "kalem": "Tavan paneli (makas arası)", "boyut": "80 × 45 × 0,8", "adet": 12, "kg": 257.39, "durum": "varsayim", "tur": "tavan_paneli"},
-  {"grup": "Çelik panel", "kalem": "Çatı paneli (makas üstü, sırt 80 mm)", "boyut": "80 × 45 × 0,8", "adet": 25, "kg": 359.44, "durum": "varsayim", "tur": "cati_paneli"},
+  {"grup": "Çelik panel", "kalem": "Çatı paneli (makas üstü, sırt 80 mm)", "boyut": "80 × 45 × 0,8", "adet": 25, "kg": 427.63, "durum": "varsayim", "tur": "cati_paneli"},
   {"grup": "Çelik panel", "kalem": "Boy C profil", "boyut": "80 × 45 × 0,8", "adet": 3, "kg": 15, "durum": "motor", "tur": "c_profil"},
   {"grup": "Çelik panel", "kalem": "Boy C profil", "boyut": "80 × 45 × 1,2", "adet": 3, "kg": 15, "durum": "motor", "tur": "c_profil"},
   {"grup": "METAL AKSAM GRUBU", "kalem": "Saçaklar için Boardex", "boyut": "12,5 × 1200 × 2400", "adet": 4, "kg": null, "durum": "uydurma", "bizim_grup": "Metal aksam"},
