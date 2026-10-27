@@ -512,6 +512,25 @@
    ],
    "bolge": "veranda",
    "not": "giriş girintisinin güney cephedeki ağzı (131): W01 ile W05 aynı hatta, arası kapısız; uçları W02'nin ve W04'ün içinde"
+  },
+  {
+   "ad": "KRS2",
+   "kutu": [
+    311.0,
+    438.8,
+    458.0,
+    446.7
+   ],
+   "alt": 240,
+   "ust": 270,
+   "acik": [
+    [
+     319.0,
+     450.0
+    ]
+   ],
+   "bolge": "Hol",
+   "not": "holün geçtiği kapısız açıklık (131): W13 ile W14 aynı hatta, arası kapısız; uçları W09'un ve W10'un içinde"
   }
  ],
  "lento": 70,
@@ -786,6 +805,7 @@
   "Önceden görülmüş: dış ölçü ve çatı 2 Ekim'deki 81 m² modelle aynı (o modelin panel dökümü depoda); ölçüm 'önceden görülmüş' satırında, gerçek kör sayılmaz.",
   "Çatı: doğudaki cumbanın görünüşü kaydırılmış çizili; iki cumbanın saçakları girintinin üstünde buluşacak biçimde kuruldu (batıdaki 0–322, doğudaki 382–894, karkas).",
   "Giriş girintisi veranda gibi sayıldı (1,86 m², karkas); ağzındaki kiriş (KRS1) 1. sayfada çizili değil: W01–W05 duvar hattındaki kapısız açıklığa yazıldı (kör kural).",
+  "Holün W13–W14 hattını geçtiği yerdeki kiriş (KRS2) 1. sayfada çizili değil: duvar hattındaki kapısız açıklığa yazıldı (kör kural; hattın iki yanı da hol).",
   "Girintinin yan duvarlarının içerideki devamı (W09, W10) girinti duvarlarının hizasında: sayfada dış çizgiden anma kalınlığında çizili, 3 cm kaydı (hol karkasta 131 geniş, sayfada 125).",
   "Saçak: görünüşlerde kaplamalı yüzden 30 (960 = 900 + 2 × 30); tanımda kuralın uzlaşımıyla karkas yüzünden 30 (açık beşteki gibi): her saçak 3 cm kısa.",
   "Mahal alanları: sayfa dış duvarı dış çizgiden anma kalınlığında çiziyor, tanım karkas iç yüzünü kalınlık + 3 cm içeri koyuyor (kör kural).",
