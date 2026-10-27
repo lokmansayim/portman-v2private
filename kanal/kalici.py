@@ -219,22 +219,26 @@ def bir_is(depo: Depo, settings: dict, sahip: str | None = None) -> dict | None:
 
 
 MEDYA_BEKLE_SN = 60                 # İE-20: gelen dosyanın indirilmesi beklenir (gönderici her turda indirir; çoğu birkaç saniye)
+DOSYA_KAYDI_SN = 10                 # webhook mesajı ve dosya kaydını ayrı yazar: dosya kaydı bu kadar beklenir
 
 
 def medya_bekle(depo: Depo, gelen: dict, settings: dict, uyu=time.sleep) -> dict | None:
-    """İE-20: gelen mesajın dosyası indirilene kadar bekler ve kaydını döner ({yol, mime, boyut, sha256, …}). Kayıt yoksa (medya sınırı)
-    ya da gönderici üç denemede indiremediyse ya da süre dolduysa None. Ajan WhatsApp'a bağlanmaz: indirme göndericinin işidir."""
+    """İE-20: gelen mesajın dosyası indirilene kadar bekler ve kaydını döner ({yol, mime, boyut, sha256, …}). Dosya kaydı
+    `DOSYA_KAYDI_SN` içinde gelmezse (webhook mesajı önce, dosya kaydını hemen sonra yazar; kayıtsız gönderenin medya sınırında
+    hiç yazılmaz), gönderici üç denemede indiremediyse ya da süre dolduysa None. Ajan WhatsApp'a bağlanmaz: indirme göndericinin işidir."""
     bekle = float((settings.get("gorsel_okuma") or {}).get("bekle_sn", MEDYA_BEKLE_SN))
-    bitis = time.time() + bekle
+    gecen = 0.0                                     # beklenen süre (saniyelik uykular)
     while True:
         d = depo.mesajin_dosyasi(gelen["id"])
         if d is None:
-            return None
-        if d.get("yol") and Path(d["yol"]).is_file():
+            if gecen >= min(bekle, DOSYA_KAYDI_SN):
+                return None
+        elif d.get("yol") and Path(d["yol"]).is_file():
             return d
-        if int(d.get("deneme") or 0) >= 3 or time.time() >= bitis:
+        elif int(d.get("deneme") or 0) >= 3 or gecen >= bekle:
             return None
         uyu(1.0)
+        gecen += 1.0
 
 
 def _yol_degistir(x, eski: str, yeni: str):

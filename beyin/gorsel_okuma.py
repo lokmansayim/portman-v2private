@@ -38,6 +38,9 @@ ISLEVLER = ("salon", "mutfak", "yatak_odasi", "banyo", "wc", "hol", "antre", "de
 GORSEL_MIME = ("image/jpeg", "image/png", "image/webp", "image/gif")
 PDF_MIME = "application/pdf"
 EN_BUYUK_BAYT = 20 * 1024 * 1024        # Messages API'nin istek sınırının altında (base64 büyütür)
+RESIM_B64_SINIRI = 5 * 1024 * 1024     # Messages API: resim başına 5 MB (base64); büyüğü küçültülerek gider
+RESIM_KENAR_SINIRI = 8000              # Messages API: resmin kenarı en çok 8000 px
+RESIM_KENAR = 2576                     # küçültülen resmin uzun kenarı (modelin en yüksek çözünürlüğü; üstünü API zaten küçültür)
 # Kod denetiminin eşikleri (ayarla değişebilir; `denetle(ayar=…)`)
 ESIK = {"zincir_cm": 3.0,               # zincir toplamı ile yazılı toplam / dış ölçü farkı: bu kadarına not, üstüne soru
         "alan_m2": 0.6, "alan_oran": 0.12,   # yazılı m² ile okunan dikdörtgenlerin alanı: ikisinden büyüğü kadar fark olağan (duvar payı)
@@ -163,11 +166,40 @@ class Duzeltme(BaseModel):
 
 # ───────────────────────── LLM (yalnız okur) ─────────────────────────
 def dosya_blogu(yol: Path, mime: str) -> dict:
-    """Messages API içerik bloğu: resim ya da PDF (base64)."""
-    veri = base64.standard_b64encode(Path(yol).read_bytes()).decode("ascii")
+    """Messages API içerik bloğu: resim ya da PDF (base64). API sınırını aşan resim küçültülür (`_resim_sigdir`)."""
+    ham = Path(yol).read_bytes()
     if mime == PDF_MIME:
-        return {"type": "document", "source": {"type": "base64", "media_type": PDF_MIME, "data": veri}}
-    return {"type": "image", "source": {"type": "base64", "media_type": mime, "data": veri}}
+        return {"type": "document", "source": {"type": "base64", "media_type": PDF_MIME, "data": base64.standard_b64encode(ham).decode("ascii")}}
+    ham, mime = _resim_sigdir(ham, mime)
+    return {"type": "image", "source": {"type": "base64", "media_type": mime, "data": base64.standard_b64encode(ham).decode("ascii")}}
+
+
+def _b64_boyu(n: int) -> int:
+    return 4 * ((n + 2) // 3)
+
+
+def _resim_sigdir(ham: bytes, mime: str) -> tuple[bytes, str]:
+    """API sınırına (5 MB base64, kenar 8000 px) sığan resim aynen gider; aşan resim uzun kenarı en çok 2576 px JPEG'e küçültülür
+    (sığmazsa kenar %20 kısaltılarak yinelenir). Açılamayan resim aynen gider: API'nin hatası okuma hatası olur (bayiye ve Patron'a)."""
+    import io
+    from PIL import Image, ImageOps
+    try:
+        im = Image.open(io.BytesIO(ham))
+        en, boy = im.size
+    except Exception:
+        return ham, mime
+    if _b64_boyu(len(ham)) <= RESIM_B64_SINIRI and max(en, boy) <= RESIM_KENAR_SINIRI:
+        return ham, mime
+    im = ImageOps.exif_transpose(im).convert("RGB")
+    kenar = RESIM_KENAR
+    while True:
+        o = min(1.0, kenar / max(im.size))
+        k = im.resize((max(1, round(im.width * o)), max(1, round(im.height * o))), Image.LANCZOS) if o < 1 else im
+        b = io.BytesIO()
+        k.save(b, "JPEG", quality=85)
+        if _b64_boyu(b.tell()) <= RESIM_B64_SINIRI or kenar < 800:
+            return b.getvalue(), "image/jpeg"
+        kenar = int(kenar * 0.8)
 
 
 def okunabilir_mi(mime: str | None, boyut: int | None) -> str | None:
@@ -303,7 +335,7 @@ def kanonik(okuma: dict | CizimOkumasi) -> dict:
     notlar = []
     giris = o.giris_kenari
     if giris is None:
-        dk = next((k.kenar for k in o.kapilar if _dis_mi(k) and k.kenar), None)
+        dk = next((k.kenar for k in o.kapilar if _dis_mi(k, o) and k.kenar), None)
         giris = dk or "alt"
         notlar.append("giriş cephesi " + ("giriş kapısından" if dk else "yazmadığı için çizimin alt kenarı") + " alındı")
     Wc, Hc, nereden = _govde_olcusu(o)
@@ -326,12 +358,19 @@ def kanonik(okuma: dict | CizimOkumasi) -> dict:
         ver.append({"cephe": c, "bas": bas, "bit": bit, "derinlik": d, "alan_m2": v.alan_m2, "rect": [x0, y0, x1, y1]})
     return {"W": W, "H": H, "giris": giris, "odalar": odalar,
             "pencereler": [{"oda": p.oda, "cephe": cephe[p.kenar], "olcu": p.olcu, "adet": p.adet} for p in o.pencereler],
-            "kapilar": [{"arasinda": list(k.arasinda), "dis": _dis_mi(k), "cephe": cephe[k.kenar] if k.kenar else None} for k in o.kapilar],
+            "kapilar": [{"arasinda": list(k.arasinda), "dis": _dis_mi(k, o), "cephe": cephe[k.kenar] if k.kenar else None} for k in o.kapilar],
             "verandalar": ver, "notlar": notlar}
 
 
-def _dis_mi(k: KapiOkuma) -> bool:
-    return any(_norm(a) in ("dis", "disari", "giris") for a in k.arasinda)
+def _disari(ad: str, oda_adlari: set[str]) -> bool:
+    """Kapının bu ucu dışarı mı: "DIŞ", "DIŞARI"; "GİRİŞ" yalnız o adda oda yoksa (girişi oda diye yazan plan çok)."""
+    n = _norm(ad)
+    return n in ("dis", "disari") or (n == "giris" and n not in oda_adlari)
+
+
+def _dis_mi(k: KapiOkuma, o: CizimOkumasi) -> bool:
+    adlar = {_norm(m.ad) for m in o.odalar}
+    return any(_disari(a, adlar) for a in k.arasinda)
 
 
 def _norm(s: str) -> str:
@@ -441,8 +480,10 @@ def denetle(okuma: dict, ayar: dict | None = None, bk14: bool | None = None) -> 
             sor.append(f"\"{p['oda']}\" penceresinin hangi odaya ait olduğunu bulamadım.")
     for k in kan["kapilar"]:
         for a in k["arasinda"]:
-            if _norm(a) not in bilinen and _norm(a) not in ("dis", "disari", "giris"):
+            if _norm(a) not in bilinen and not _disari(a, bilinen):
                 sor.append(f"\"{a}\" kapısının hangi odaya açıldığını bulamadım.")
+        if k["dis"] and not any(_norm(a) in bilinen for a in k["arasinda"]):
+            sor.append("Giriş kapısının hangi odaya açıldığını bulamadım.")
     if not any(k["dis"] for k in kan["kapilar"]):
         sor.append("Giriş kapısını çizimde göremedim; hangi odadan giriliyor?")
     if sor or sonuc["cizilemez"]:
@@ -540,8 +581,6 @@ def is_emri_prefabrik(kan: dict, o: CizimOkumasi, bk14: bool | None = None, esik
         kaymalar.append(abs(a - v))
         return a
     mahaller = []
-    sirali = sorted(kan["odalar"], key=lambda x: (min(r[1] for r in x["rects"]), min(r[0] for r in x["rects"])))
-    sira = {x["ad"]: i for i, x in enumerate(sirali)}
     for x in kan["odalar"]:
         rects = []
         for r in x["rects"]:
@@ -552,7 +591,7 @@ def is_emri_prefabrik(kan: dict, o: CizimOkumasi, bk14: bool | None = None, esik
                 sor.append(f"{_oda_adi(x['ad'])} pano ızgarasına oturtunca kayboluyor (yarım panodan dar); ölçüsünü yazar mısınız?")
                 continue
             rects.append(q)
-        mahaller.append({"ad": tr_buyuk(x["ad"]), "tur": TUR[x["islev"]], "konum_cm": rects, "_sira": sira[x["ad"]]})
+        mahaller.append({"ad": tr_buyuk(x["ad"]), "tur": TUR[x["islev"]], "konum_cm": rects})
     if sor:
         return None, sor, cz, nt
     # oturtmadan sonra oda alanı: okunan (dış duvarda dış yüzden) ile oturtulan (aynı çerçevede) kıyaslanır
@@ -590,8 +629,6 @@ def is_emri_prefabrik(kan: dict, o: CizimOkumasi, bk14: bool | None = None, esik
             a, b, c, d = sahip[(u - 1, w - 1)], sahip[(u, w - 1)], sahip[(u - 1, w)], sahip[(u, w)]
             if a != b and c != d and a != c and b != d:
                 arti.append(sorted({a, b, c, d}))
-    for m in mahaller:
-        m.pop("_sira")
     ad_haritasi = {_norm(x["ad"]): tr_buyuk(x["ad"]) for x in kan["odalar"]}
     kenar_degeri = {"sol": ("x", xs[0]), "sag": ("x", xs[-1]), "arka": ("y", ys[0]), "on": ("y", ys[-1])}
 
@@ -627,7 +664,10 @@ def is_emri_prefabrik(kan: dict, o: CizimOkumasi, bk14: bool | None = None, esik
     kapilar = sorted(kan["kapilar"], key=lambda k: not k["dis"])
     for k in kapilar:
         if k["dis"]:
-            ic = next(ad_haritasi[_norm(a)] for a in k["arasinda"] if _norm(a) in ad_haritasi)
+            ic = next((ad_haritasi[_norm(a)] for a in k["arasinda"] if _norm(a) in ad_haritasi), None)
+            if ic is None:
+                sor.append("Giriş kapısının hangi odaya açıldığını bulamadım.")
+                continue
             cephe = k["cephe"] or next((c for c in ("on", "sol", "sag", "arka") if disa_bakar(ic, c)), None)
             if cephe is None or not disa_bakar(ic, cephe):
                 sor.append(f"Giriş kapısını {_oda_adi(ic)} için okudum ama oda dış duvara değmiyor; giriş hangi odadan?")
@@ -668,7 +708,7 @@ def is_emri_prefabrik(kan: dict, o: CizimOkumasi, bk14: bool | None = None, esik
         sacak = _yuvarla(float(o.cati.sacak_cm))
         nt.append(f"saçak çizimdeki gibi {_tr(sacak, 1)} cm (standardımız {_tr(kural['sacak_cm'], 1)} cm)")
     farkli = sorted({f"{_tr(k.genislik_cm, 1)} cm" for k in o.kapilar
-                     if k.genislik_cm and abs(k.genislik_cm - KAPI_CM["dis" if _dis_mi(k) else "ic"]) > 2})
+                     if k.genislik_cm and abs(k.genislik_cm - KAPI_CM["dis" if _dis_mi(k, o) else "ic"]) > 2})
     if farkli:
         nt.append(f"kapılar prefabrik standardında: giriş {KAPI_CM['dis']}, iç {KAPI_CM['ic']} cm (çizimde {', '.join(farkli)} yazıyordu)")
     verandalar = []
@@ -794,7 +834,10 @@ def plan_celik(kan: dict, o: CizimOkumasi) -> tuple[dict | None, list[str], list
     kapilar = []
     for k in kan["kapilar"]:
         if k["dis"]:
-            ic = next(ad_haritasi[_norm(a)] for a in k["arasinda"] if _norm(a) in ad_haritasi)
+            ic = next((ad_haritasi[_norm(a)] for a in k["arasinda"] if _norm(a) in ad_haritasi), None)
+            if ic is None:
+                sor.append("Giriş kapısının hangi odaya açıldığını bulamadım.")
+                continue
             kapilar.append({"arasinda": ["dis", ic], **({"cephe": cephe_harf[k["cephe"]]} if k["cephe"] else {})})
         else:
             kapilar.append({"arasinda": [ad_haritasi[_norm(a)] for a in k["arasinda"]]})
@@ -813,12 +856,6 @@ def plan_celik(kan: dict, o: CizimOkumasi) -> tuple[dict | None, list[str], list
 # ───────────────────────── bayiye ─────────────────────────
 ISLEV_ADI = {"salon": "salon", "mutfak": "mutfak", "yatak_odasi": "yatak odası", "banyo": "banyo", "wc": "WC", "hol": "hol",
              "antre": "antre", "depo": "depo", "calisma": "çalışma odası", "giyinme": "giyinme odası"}
-
-
-def ozet_satirlari(okuma: dict, den: dict) -> list[str]:
-    """Okunanın bayiye kısa özeti (madde madde): okunanlar, sonra varsayımlar."""
-    okunan, varsayim = _ozet(okuma, den)
-    return okunan + varsayim
 
 
 def _ozet(okuma: dict, den: dict) -> tuple[list[str], list[str]]:

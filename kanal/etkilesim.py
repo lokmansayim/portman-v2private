@@ -98,7 +98,7 @@ def coz(gelen: dict, d: dict | None, giden_bul=None) -> dict:
         co = d.get("cizim_okuma") or {}
         if b not in ("d", "z"):
             return {"gecerli": False, "kimlik": kimlik, "neden": "bilinmeyen çizim cevabı", "mesaj": "Bu cevabı tanıyamadım; lütfen yazarak cevaplayın."}
-        if co.get("iz") != a or co.get("durum") not in (("teyit",) if b == "d" else ("teyit", "soru")):
+        if co.get("iz") != a or co.get("durum") not in (("teyit", "duzeltme") if b == "d" else ("teyit", "soru", "duzeltme")):
             neden = "eski çizim okuması" if co.get("iz") != a else f"çizim okuması {co.get('durum')}"
             mesaj = ("Bu düğme çiziminizin daha önceki bir okumasına ait; güncel okumayı az önce gönderdim, oradan cevaplayın ya da yazın."
                      if co.get("iz") != a and co.get("durum") in ("teyit", "soru", "duzeltme") else

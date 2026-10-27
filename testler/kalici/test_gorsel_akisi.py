@@ -403,7 +403,26 @@ def test_medya_bekle_inene_kadar_bekler(depo, tmp_path):
     for _ in range(3):
         depo.gelen_dosya_hatasi(depo.mesajin_dosyasi(g2["id"])["id"], "deneme")
     assert kalici.medya_bekle(depo, g2, {"gorsel_okuma": {"bekle_sn": 30}}, uyu=lambda sn: None) is None   # üç denemede inmedi
-    assert kalici.medya_bekle(depo, {"id": "wamid.YOK"}, {}, uyu=lambda sn: None) is None                  # kayıt yok
+    uyunan.clear()
+    assert kalici.medya_bekle(depo, {"id": "wamid.YOK"}, {}, uyu=uyunan.append) is None                    # kayıt hiç gelmedi
+    assert len(uyunan) == kalici.DOSYA_KAYDI_SN
+
+
+def test_medya_bekle_dosya_kaydi_mesajdan_sonra_gelir(depo, tmp_path):
+    """Webhook mesajı ve dosya kaydını ayrı yazar; ajan araya girerse dosya kaydı beklenir (inceleme bulgusu, 27 Ekim)."""
+    g = mesaj("", None, bayi=BAYI_KART, tur="image")
+    g["media_id"] = "MEDYA" + g["id"][-6:]
+    assert depo.mesaj_kaydet(g)
+    yol = tmp_path / "sonra.jpg"
+
+    def uyu(sn):
+        if depo.mesajin_dosyasi(g["id"]) is None:                        # webhook dosya kaydını şimdi yazdı, gönderici indirdi
+            depo.gelen_dosya_ekle(g["id"], g["media_id"], "plan.jpg", "image/jpeg")
+            yol.write_bytes(b"\xff\xd8\xff")
+            depo.gelen_dosya_indirildi(depo.mesajin_dosyasi(g["id"])["id"], str(yol), "image/jpeg", 3,
+                                       hashlib.sha256(b"\xff\xd8\xff").hexdigest())
+    d = kalici.medya_bekle(depo, g, {"gorsel_okuma": {"bekle_sn": 30}}, uyu=uyu)
+    assert d and d["yol"] == str(yol)
 
 
 def test_ilgisiz_yazi_okumayi_kapatir_soru_kapatmaz(depo, wa, tmp_path, hizli_motor):
@@ -456,3 +475,42 @@ def test_revizyonda_yeni_varsayim_bayiye_yazilir(depo, wa, tmp_path, hizli_motor
     assert r["eylem"] == "is_emri", r
     m = [x for x in bayiye(depo) if x["kind"] == "interactive"][0]["govde"]
     assert m.startswith("Uygulanan: mutfağa öne pencere; pencereler değişti. Varsaydığım: ölçüsü yazmayan pencereler: 120x120 (Mutfak).")
+
+
+def test_duzelt_dugmesinden_sonra_dogru_dugmesi_plan(depo, wa, tmp_path, hizli_motor):
+    """[Düzelt]'e yanlışlıkla basan bayi aynı mesajın [Doğru]'suyla planı alır; yazıyla "doğru" demekle aynı (inceleme, 27 Ekim)."""
+    s = ayar(tmp_path, BASIT)
+    _, dis = teyit_al(depo, wa, tmp_path, s)
+    d, _ = depo.konusma_oku(NUMARA_A)
+    iz = d["cizim_okuma"]["iz"]
+    for _ in range(2):                                                   # iki kez [Düzelt]: ikisi de "Neyi düzelteyim?"
+        assert depo.mesaj_kaydet(buton(f"c:{iz}:z", context_id=dis))
+        [r] = isle_hepsi(depo, s)
+        assert r["eylem"] == "sor" and "Neyi düzelteyim?" in bayiye(depo)[0]["govde"]
+    assert depo.mesaj_kaydet(buton(f"c:{iz}:d", context_id=dis))
+    [r] = isle_hepsi(depo, s)
+    assert r["eylem"] == "is_emri" and sorgu(depo, "SELECT count(*) AS n FROM revizyonlar")[0]["n"] == 1
+
+
+def test_ayar_kapaninca_acik_okuma_llm_siz_kapanir(depo, wa, tmp_path, hizli_motor, monkeypatch):
+    """Ayar kapanınca açık okumaya gelen yazı LLM'le düzeltilmez (ücretli çağrı yok), bugünkü yoldan işlenir; okumanın düğmesi plan
+    çizmez, bayiye çizimden talebin kapalı olduğu yazılır (G7; inceleme, 27 Ekim)."""
+    monkeypatch.setattr(W, "gorsel_duzelt", lambda *a, **k: pytest.fail("ayar kapalıyken düzeltme çağrısı"))
+    kapali = ayar(tmp_path, BASIT, acik=False)
+    _, dis = teyit_al(depo, wa, tmp_path, ayar(tmp_path, BASIT))
+    d, _ = depo.konusma_oku(NUMARA_A)
+    assert depo.mesaj_kaydet(buton(f"c:{d['cizim_okuma']['iz']}:d", context_id=dis))
+    [r] = isle_hepsi(depo, kapali)
+    assert r["eylem"] == "cevapla" and r["gerekce"] == "çizim okuması kapalı"
+    assert bayiye(depo)[0]["govde"].startswith("Çizimden talep şu an kapalı.")
+    d, _ = depo.konusma_oku(NUMARA_A)
+    assert "cizim_okuma" not in d and sorgu(depo, "SELECT count(*) AS n FROM revizyonlar")[0]["n"] == 0
+    kalici.gonder(depo, wa)
+    teyit_al(depo, wa, tmp_path, ayar(tmp_path, BASIT))                  # yeni okuma açık; ayar kapanır, bayi yazar
+    yaz(depo, "salon 20 m² olsun", talep("diger", "salon 20 m²"))
+    [r] = isle_hepsi(depo, kapali)
+    assert r.get("eylem") != "hata" and "Düzelttim" not in " ".join(x["govde"] or "" for x in bayiye(depo))
+    d, _ = depo.konusma_oku(NUMARA_A)
+    assert "cizim_okuma" not in d
+    j = sorgu(depo, "SELECT cikarim FROM isler ORDER BY id DESC")[0]["cikarim"] or {}
+    assert "gorsel_duzeltme" not in j

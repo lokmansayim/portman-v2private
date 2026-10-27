@@ -316,6 +316,27 @@ def test_dosya_blogu_ve_okunabilirlik(tmp_path):
     assert "büyük" in GO.okunabilir_mi("image/png", GO.EN_BUYUK_BAYT + 1)
 
 
+def test_api_sinirini_asan_resim_kucultulur(tmp_path):
+    """Messages API resim başına 5 MB (base64) ve 8000 px kabul eder; büyük tarama küçültülür, sığan resim aynen gider (inceleme, 27 Ekim)."""
+    import base64, io, random
+    from PIL import Image
+    rnd = random.Random(7)
+    buyuk = tmp_path / "tarama.png"                                      # gürültülü 1600x1600 PNG: ~7,7 MB
+    Image.frombytes("RGB", (1600, 1600), bytes(rnd.getrandbits(8) for _ in range(1600 * 1600 * 3))).save(buyuk)
+    assert buyuk.stat().st_size * 4 / 3 > GO.RESIM_B64_SINIRI
+    b = GO.dosya_blogu(buyuk, "image/png")
+    assert b["source"]["media_type"] == "image/jpeg" and len(b["source"]["data"]) <= GO.RESIM_B64_SINIRI
+    uzun = tmp_path / "uzun.png"                                         # küçük dosya ama kenar 9000 px
+    Image.new("RGB", (9000, 300), "white").save(uzun)
+    u = GO.dosya_blogu(uzun, "image/png")
+    im = Image.open(io.BytesIO(base64.b64decode(u["source"]["data"])))
+    assert u["source"]["media_type"] == "image/jpeg" and max(im.size) == GO.RESIM_KENAR
+    kucuk = tmp_path / "kucuk.png"
+    Image.new("RGB", (1200, 800), "white").save(kucuk)
+    assert GO.dosya_blogu(kucuk, "image/png")["source"] == {
+        "type": "base64", "media_type": "image/png", "data": base64.standard_b64encode(kucuk.read_bytes()).decode("ascii")}
+
+
 def test_numara_llm_e_maskeli_gider(monkeypatch):
     gonderilen = {}
 
@@ -427,3 +448,22 @@ def test_celik_katalog_disi_pencere_sorulur_yildiz_okunur():
     o["pencereler"][3]["olcu"] = "120x180"
     d = GO.denetle(o)
     assert d["cevrim"] and [p["olcu"] for p in d["cevrim"]["plan"]["pencereler"] if p["mahal"] == "Salon"] == ["120x180", "120x180"]
+
+
+def test_giris_adli_oda_ve_disari_acilan_giris():
+    """Planda "GİRİŞ" adlı oda olabilir: o odanın iç kapıları iç kapıdır, giriş kapısı "DIŞ" tarafındandır. "GİRİŞ" adlı oda yoksa
+    ["DIŞ", "GİRİŞ"] okunan kapının odası sorulur, çökmez (inceleme, 27 Ekim)."""
+    o = json.loads(json.dumps(BASIT, ensure_ascii=False).replace('"HOL"', '"GİRİŞ"'))
+    d = GO.denetle(o)
+    assert d["sorular"] == [] and d["cevrim"] is not None
+    kapilar = [a for a in d["cevrim"]["is_emri"]["acikliklar"] if a["tur"] in ("dis_kapi", "ic_kapi")]
+    assert [a["arasi"] for a in kapilar if a["tur"] == "dis_kapi"] == [["__DIS__", "GİRİŞ"]]
+    assert sum(a["tur"] == "ic_kapi" for a in kapilar) == 5
+    o2 = json.loads(json.dumps(BASIT))
+    o2["kapilar"][0]["arasinda"] = ["DIŞ", "GİRİŞ"]
+    d2 = GO.denetle(o2)
+    assert d2["cevrim"] is None and "Giriş kapısının hangi odaya açıldığını bulamadım." in d2["sorular"]
+    k = GO.kanonik(o2)
+    k["kapilar"][0]["arasinda"] = ["DIŞ", "DIŞARI"]                     # doğrudan çeviri de soru döner
+    _, sor, _, _ = GO.is_emri_prefabrik(k, GO.CizimOkumasi.model_validate(o2))
+    assert "Giriş kapısının hangi odaya açıldığını bulamadım." in sor

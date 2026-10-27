@@ -653,6 +653,12 @@ def gorsel_acik(settings: dict) -> bool:
     return gorsel_ayari(settings).get("acik") is True
 
 
+def _esik(settings: dict) -> dict:
+    """Ayardaki denetim eşikleri (`gorsel_okuma.ESIK` anahtarları); yazmayan eşik varsayılanından."""
+    from beyin import gorsel_okuma as GO
+    return {a: v for a, v in gorsel_ayari(settings).items() if a in GO.ESIK}
+
+
 def _llm_ayari(ayar: dict) -> dict:
     return {a: ayar[a] for a in ("backend", "model", "effort", "timeout_s", "max_tokens") if a in ayar}
 
@@ -725,10 +731,21 @@ def cizim_karari(gelen: dict, settings: dict, k, talep, etk, medya: bool, cikari
       - [Doğru] (ya da teyit beklerken "doğru/onaylıyorum") → plan: prefabrikte İş Emri (`karar._is_emri_uret`), çelikte İE-14 yolu
       - [Düzelt] → "neyi düzelteyim?"; teyit ya da soru beklerken yazı → düzeltme (LLM okur, kod yeniden denetler)
       - okumadan çizilmiş prefabrik planın revizyonu (yazı) → okuma güncellenir, kod denetler, plan yeniden çizilir (değişen bayiye)."""
-    from beyin import karar as KR
+    from beyin import karar as KR, gorsel_okuma as GO
     co = k.d.get("cizim_okuma")
     if medya:
         return _cizim_medya(gelen, settings, k, (cikarim or {}).get("gorsel") or {"durum": "dosya_yok"}, bayi, proje_koku)
+    if not gorsel_acik(settings):          # ayar kapandı: açık okuma kapanır, yazı bugünkü yoldan; LLM'le düzeltme ve çizim yok (G7)
+        if co:
+            k.d.pop("cizim_okuma", None)
+            if k.d.get("son_soru_alani") == "cizim_okuma":
+                k.d["son_soru_alani"] = None
+        if etk is not None and etk.get("tur") == "cizim":
+            k.not_dus("gelen", f"buton {etk.get('kimlik')}", {"niyet": "buton", "guven": "yuksek"})
+            return KR._bitir(k, KR.Karar(eylem="cevapla", gerekce="çizim okuması kapalı",
+                                         mesaj="Çizimden talep şu an kapalı. Talebinizi yazıyla iletirseniz (örn. \"7x4 m, 2+1, ön verandalı\") "
+                                               "ön onay planını hazırlarım.")), {}
+        return None
     if etk is not None and etk.get("tur") == "cizim":
         if etk.get("secim") == "d":
             return _cizim_plani(gelen, settings, k, katalog, bayi, proje_koku)
@@ -741,7 +758,7 @@ def cizim_karari(gelen: dict, settings: dict, k, talep, etk, medya: bool, cikari
     if etk is not None or not co or not (gelen.get("text") or "").strip():
         return None
     son = k.d.get("son_is_emri") or {}
-    okumadan = (son.get("talep") or {}).get("kaynak") == "cizim-okuma" and (son.get("yapi") or {}).get("sistem") == "prefabrik"
+    okumadan = (son.get("talep") or {}).get("kaynak") == GO.KAYNAK and (son.get("yapi") or {}).get("sistem") == "prefabrik"
     if co.get("durum") in ("teyit", "soru", "duzeltme"):
         if talep.niyet == "onay" and (co["durum"] == "teyit" or (co["durum"] == "duzeltme" and not co.get("sorular"))):
             return _cizim_plani(gelen, settings, k, katalog, bayi, proje_koku)     # [Düzelt]'den sonra "doğru": okuma yeniden denetlenir
@@ -764,8 +781,7 @@ def _cizim_sonucu(gelen: dict, settings: dict, k, okuma: dict, dosya: dict | Non
                   bas: str = "", revizyon: bool = False, kayit: dict | None = None) -> tuple:
     """Okuma → kod denetimi → bayiye teyit, soru ya da çizilemez (görseliyle). Konuşmaya `cizim_okuma` yazılır."""
     from beyin import karar as KR, gorsel_okuma as GO
-    ayar = gorsel_ayari(settings)
-    den = GO.denetle(okuma, ayar={a: ayar[a] for a in GO.ESIK if a in ayar})
+    den = GO.denetle(okuma, ayar=_esik(settings))
     iz = hashlib.sha256(f"{mesaj_id}|{json.dumps(okuma, sort_keys=True)}".encode()).hexdigest()[:10]
     gorsel = _cizim_gorseli(gelen, okuma, den, proje_koku) if settings.get("mesaj_katmani") and den.get("kanonik") and (den["kanonik"] or {}).get("W") else None
     co = {"iz": iz, "okuma": okuma, "sorular": list(den["sorular"]), "dosya": dosya, "mesaj_id": mesaj_id, "revizyon": revizyon,
@@ -842,8 +858,9 @@ def _cizim_duzeltme(gelen: dict, settings: dict, k, talep, cikarim: dict | None,
         return KR._bitir(k, KR.Karar(eylem="cevapla", gerekce="çizim okuması: bayi vazgeçti",
                                      mesaj="Tamam, çizimden okumayı bıraktım. Yeni bir plan için yazabilir ya da çizim gönderebilirsiniz.")), {"kayit": kayit}
     yeni = dz["okuma"]
-    fark = list(dict.fromkeys(list(dz.get("degisenler") or []) + GO.degisenler(co["okuma"], yeni)))
-    if not GO.degisenler(co["okuma"], yeni):
+    ds = GO.degisenler(co["okuma"], yeni)
+    fark = list(dict.fromkeys(list(dz.get("degisenler") or []) + ds))
+    if not ds:
         msg = ("İstediğiniz değişikliği okumaya işleyemedim; neyi değiştirelim? Örneğin \"salon 20 m²\" ya da \"mutfak penceresi 120x120\"."
                if revizyon and co.get("durum") == "cizildi" else
                "Yazdığınızdan okumada değişecek bir şey çıkaramadım. Neyi düzelteyim? Örneğin \"salon 20 m²\" ya da \"veranda solda\".")
@@ -852,7 +869,7 @@ def _cizim_duzeltme(gelen: dict, settings: dict, k, talep, cikarim: dict | None,
     bas = "Düzelttim: " + "; ".join(fark[:4]) + ".\n\n"
     if revizyon and co.get("durum") == "cizildi":
         # okumadan çizilmiş planın revizyonu: kod denetimi temizse plan doğrudan yeniden çizilir (planın kendisi teyittir)
-        esik = {a: v for a, v in gorsel_ayari(settings).items() if a in GO.ESIK}
+        esik = _esik(settings)
         den = GO.denetle(yeni, ayar=esik)
         if den.get("cevrim") and not den["sorular"] and not den["cizilemez"]:
             # planın kendisi teyittir; ama bu değişiklikle gelen yeni varsayımlar (ızgara kayması, ölçüsüz pencere …) bayiye yazılır (K21)
@@ -885,7 +902,7 @@ def _cizim_plani(gelen: dict, settings: dict, k, katalog, bayi, proje_koku: Path
     co = dict(k.d["cizim_okuma"])
     k.not_dus("gelen", "çizim okuması: doğru", {"niyet": "onay", "guven": "yuksek"})
     if den is None:
-        den = GO.denetle(co["okuma"], ayar={a: v for a, v in gorsel_ayari(settings).items() if a in GO.ESIK})
+        den = GO.denetle(co["okuma"], ayar=_esik(settings))
     ek = {"kayit": {**(kayit or {}), "iz": co.get("iz"), "cizim": True}}
     if den["sorular"] or den["cizilemez"] or not den.get("cevrim"):       # teyitten sonra değişen durum (ör. Motor sürümü): yeniden sunulur
         return _cizim_sonucu(gelen, settings, k, co["okuma"], co.get("dosya"), bayi, proje_koku, co.get("mesaj_id") or gelen["id"],
