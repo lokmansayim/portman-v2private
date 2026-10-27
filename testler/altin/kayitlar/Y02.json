@@ -1,0 +1,43 @@
+{
+ "id": "Y02",
+ "talep": {
+  "niyet": "yeni_talep",
+  "katalog_kodu": null,
+  "yapi_turu": "celik",
+  "kat_sayisi": null,
+  "oda_programi": null,
+  "alan_m2": 150.0,
+  "dis_olcu": null,
+  "pano": null,
+  "veranda": null,
+  "cati": null,
+  "yukseklik_cm": null,
+  "pencereler": [],
+  "dis_kapi": null,
+  "ic_kapi": null,
+  "varyantlar": [],
+  "bina_ozellikleri": {},
+  "ozel_istekler": [
+   "cami olarak kullanılacak"
+  ],
+  "musteri": {
+   "ad": "Ahmet Bey",
+   "telefon": null,
+   "sevk_adresi": null
+  },
+  "belirsizlikler": [
+   "Yapı konut değil cami; katalog dışı bir kullanım olabilir",
+   "Ölçü, kat sayısı ve çatı tipi belirtilmemiş",
+   "Sevk adresi (köy) belirtilmemiş"
+  ],
+  "guven": "orta",
+  "ozet": "Köye yapılacak 150 m² çelik cami için çizim istiyorsunuz."
+ },
+ "meta": {
+  "backend": "anthropic",
+  "model": "claude-opus-5-5",
+  "girdi_token": 5388,
+  "cikti_token": 369,
+  "sure_ms": 3477
+ }
+}
