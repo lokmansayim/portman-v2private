@@ -3,7 +3,7 @@
  "kod": "ÇP-08",
  "tanim": {
   "yol": "testler/celik/projeler/CP08/CP08.json",
-  "sha256": "c9afaf405f44cd085708200e586c8922ac09f3d915b9085c16fc87cb472ce6cd"
+  "sha256": "c064bce333fef2497fc55c5bfae96b8d224ceb81629b733cbd5f56e891fa9864"
  },
  "kural_seti": {
   "yol": "kurallar/liste/kurallar.json",
