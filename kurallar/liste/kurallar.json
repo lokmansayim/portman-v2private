@@ -1,6 +1,6 @@
 {
   "sema": "portman.yukleme_kurallari/0.20-taslak",
-  "aciklama": "Çelik (A1) ve çatı (A5) yükleme listesi için katsayılar. Her değerin kaynağı ve durumu yanında. durum: lokman = Lokman'ın söylediği kural (tarih ve saat kaynakta); muhendis = PortatifEv'in inşaat mühendisi Ubeydullah'ın verdiği kural ya da değer (cevaplarını Lokman 3 Ekim 2026 18:14'te ve 4 Ekim 2026 01:24'te iletti); excel = PortatifEv'in yükleme listesi çalışma kitaplarındaki formül ya da not; motor = PortatifEv'in Excel hesaplama motorundaki (CTKBF V1.1) formül, not ya da ortalama; liste = gerçek listedeki boyut, formül ya da uygulama (hangi liste olduğu kaynakta yazar); uydurma = gerçek listelerdeki adetleri tutturan kural, teyit bekliyor; varsayim = Claude'un varsayımı, teyit bekliyor; soru = kural bilinmiyor: satır geçici bir hesapla yazılır, Lokman'a sorulur. `sablon_2026` ayrı bir katmandır: Eylül 2026 tarihli gerçek listenin şablonunda ve o projenin paftalarında, bu dosyadaki kurallardan farklı olan her şey. Varsayılan hesaba girmez; `yukleme.py --sablon 2026` ile denenir ve o değerlerle hesaplanan liste satırlarının durumu `sablon` olur (karar Lokman'ın). Lokman'ın söylediği ile mühendisin söylediği çelişirse Lokman'ınki geçerlidir (4 Ekim 2026 15:18: en iyi bilgiyi kendisinin vereceğini söyledi). Sürüm 0.13 (7 Ekim 2026): Lokman'ın kör test sorularına 07:45'te verdiği cevaplar ve 08:02 düzeltmeleri işlendi: çelikte çatı yöntemi kesin (çatı ve tavan paneli; omega ve aşık yalnız prefabrikte), bindirmeler 20 cm, veranda tavanı çelikte Boardex, duvar izolasyonu listede yok, sandviç panel kapaması dere boyundan, ters mahya kenar kutusu, acil müdahale kapağı, mastik, kablo mesafesi, panel boyu yuvarlaması, iniş eşiği (öneri). Önceki set `kural_setleri/0.12.json`dadır: 7 Ekim 03:46 kıyası onunla yeniden üretilir. `sablon_2026` katmanı artık karar beklemiyor: Eylül 2026 listesinin uygulamasını kıyas için saklar. Sürüm 0.14 (8 Ekim 2026): Lokman'ın 00:45 cevapları işlendi: iniş eşiği (9 m dere boyu) ve sandviç panel kapaması hesabı onaylandı; panel boyu hesabı kapandı (boyda 3 cm'e kadar fark tolere edilebilir); çatı ve tavan panelli beşik çatıda kalkan kenarı Boardex (çatı kaplamasının üstüne gelecek malzeme soruldu); çatının duvara dayandığı kenara özel mahya; pencereler alıcıya aitse mastik yazılmaz; sigorta kutusunun yeri (giriş kapısı) onaylandı; listede levha üreticinin yazdığı adla. Önceki set `kural_setleri/0.13.json`dadır. Sürüm 0.15 (8 Ekim 2026): Lokman'ın 07:23 cevapları işlendi: çatı ve tavan panelli beşik çatıda kalkan kenarının üstüne alın kapama (makasın eğimli kenarı boyunca, L 2500; kırma çatıda yok); kalkan kenarının Boardex'i yalnız makasın eğimli kenarının yüzü; trapez vidada parça C profiller sayılmaz; özel mahyanın kullanıldığı yerler. Önceki set `kural_setleri/0.14.json`dadır. Sürüm 0.16 (9 Ekim 2026): Lokman'ın ikinci kör test (KT-02) cevapları işlendi: 80 × 45 × 1,5 profilin birim ağırlığı 2,07 kg/m. Açık sundurmanın bina alanına girmesi (Lokman, 22:22: \"evet girsin\") hesaptaki uygulamaydı; değişen değer yok. Önceki set `kural_setleri/0.15.json`dadır. Sürüm 0.17 (9 Ekim 2026 22:44): veranda korkuluğunun kaplaması (`korkuluk_kaplamasi`): varsayılan Boardex; iç ve dış yüz kendi ölçüleriyle, üstü 8 cm. Önceki set `kural_setleri/0.16.json`dadır.",
+  "aciklama": "Çelik (A1) ve çatı (A5) yükleme listesi için katsayılar. Her değerin kaynağı ve durumu yanında. durum: lokman = Lokman'ın söylediği kural (tarih ve saat kaynakta); muhendis = PortatifEv'in inşaat mühendisi Ubeydullah'ın verdiği kural ya da değer (cevaplarını Lokman 3 Ekim 2026 18:14'te ve 4 Ekim 2026 01:24'te iletti); excel = PortatifEv'in yükleme listesi çalışma kitaplarındaki formül ya da not; motor = PortatifEv'in Excel hesaplama motorundaki (CTKBF V1.1) formül, not ya da ortalama; liste = gerçek listedeki boyut, formül ya da uygulama (hangi liste olduğu kaynakta yazar); uydurma = gerçek listelerdeki adetleri tutturan kural, teyit bekliyor; varsayim = Claude'un varsayımı, teyit bekliyor; soru = kural bilinmiyor: satır geçici bir hesapla yazılır, Lokman'a sorulur. `sablon_2026` ayrı bir katmandır: Eylül 2026 tarihli gerçek listenin şablonunda ve o projenin paftalarında, bu dosyadaki kurallardan farklı olan her şey. Varsayılan hesaba girmez; `yukleme.py --sablon 2026` ile denenir ve o değerlerle hesaplanan liste satırlarının durumu `sablon` olur (karar Lokman'ın). Lokman'ın söylediği ile mühendisin söylediği çelişirse Lokman'ınki geçerlidir (4 Ekim 2026 15:18: en iyi bilgiyi kendisinin vereceğini söyledi). Sürüm 0.13 (7 Ekim 2026): Lokman'ın kör test sorularına 07:45'te verdiği cevaplar ve 08:02 düzeltmeleri işlendi: çelikte çatı yöntemi kesin (çatı ve tavan paneli; omega ve aşık yalnız prefabrikte), bindirmeler 20 cm, veranda tavanı çelikte Boardex, duvar izolasyonu listede yok, sandviç panel kapaması dere boyundan, ters mahya kenar kutusu, acil müdahale kapağı, mastik, kablo mesafesi, panel boyu yuvarlaması, iniş eşiği (öneri). Önceki set `kural_setleri/0.12.json`dadır: 7 Ekim 03:46 kıyası onunla yeniden üretilir. `sablon_2026` katmanı artık karar beklemiyor: Eylül 2026 listesinin uygulamasını kıyas için saklar. Sürüm 0.14 (8 Ekim 2026): Lokman'ın 00:45 cevapları işlendi: iniş eşiği (9 m dere boyu) ve sandviç panel kapaması hesabı onaylandı; panel boyu hesabı kapandı (boyda 3 cm'e kadar fark tolere edilebilir); çatı ve tavan panelli beşik çatıda kalkan kenarı Boardex (çatı kaplamasının üstüne gelecek malzeme soruldu); çatının duvara dayandığı kenara özel mahya; pencereler alıcıya aitse mastik yazılmaz; sigorta kutusunun yeri (giriş kapısı) onaylandı; listede levha üreticinin yazdığı adla. Önceki set `kural_setleri/0.13.json`dadır. Sürüm 0.15 (8 Ekim 2026): Lokman'ın 07:23 cevapları işlendi: çatı ve tavan panelli beşik çatıda kalkan kenarının üstüne alın kapama (makasın eğimli kenarı boyunca, L 2500; kırma çatıda yok); kalkan kenarının Boardex'i yalnız makasın eğimli kenarının yüzü; trapez vidada parça C profiller sayılmaz; özel mahyanın kullanıldığı yerler. Önceki set `kural_setleri/0.14.json`dadır. Sürüm 0.16 (9 Ekim 2026): Lokman'ın ikinci kör test (KT-02) cevapları işlendi: 80 × 45 × 1,5 profilin birim ağırlığı 2,07 kg/m. Açık sundurmanın bina alanına girmesi (Lokman, 22:22: \"evet girsin\") hesaptaki uygulamaydı; değişen değer yok. Önceki set `kural_setleri/0.15.json`dadır. Sürüm 0.17 (9 Ekim 2026 22:44): veranda korkuluğunun kaplaması (`korkuluk_kaplamasi`): varsayılan Boardex; iç ve dış yüz kendi ölçüleriyle, üstü 8 cm. Önceki set `kural_setleri/0.16.json`dadır. Sürüm 0.20-taslak (27 Ekim 2026, İE-16 PR-3c): Lokman'ın 27 Ekim 10:33 cevapları işlendi: duvar izolasyonu (mineral yün) yeniden listede; çatı şiltesi İzocam 80 mm rulosu (9,00 m²); ters mahya kenar kutusunun listedeki adı 'Metal tahta'; 2026 listelerinin adları (takım, NYM kablo, W otomat, kaçak akım rölesi) ve renk adın başında (`renk_adin_basinda`). Önceki set `setler/0.19.json`dadır.",
   "zayiat": {
     "boardex": {
       "deger": 0.08,
@@ -56,9 +56,9 @@
     "kaynak": "Duvar izolasyonu: paket / 8,64 m²"
   },
   "silte_adet_m2": {
-    "deger": 9.6,
-    "durum": "liste",
-    "kaynak": "Çatı şiltesi 80 mm: 9,6 m²/adet Lokman, 7 Ekim 2026 07:45 (C1 l): \"Doğrusu 80mm ama listelerde yine boardexde olduğu gibi hatalı girilmiş\". Eylül 2026 listesindeki 'çatı izolasyonu 100 mm' alınmadı."
+    "deger": 9.0,
+    "durum": "lokman",
+    "kaynak": "Çatı şiltesi 80 mm: 9,6 m²/adet Lokman, 7 Ekim 2026 07:45 (C1 l): \"Doğrusu 80mm ama listelerde yine boardexde olduğu gibi hatalı girilmiş\". Eylül 2026 listesindeki 'çatı izolasyonu 100 mm' alınmadı. Lokman, 27 Ekim 2026 10:33 (İE-16 PR-3c kural soruları, C1.6): \"Önemli değil yine İzocam sitesine gir serme rulo çatı şiltesi ne ise onu baz al\". İzocam'ın Çatı Şiltesi teknik föyünde (27 Ekim 2026'da okundu) Çatı Şiltesi 80 mm rulosu 120 × 750 cm: paket 9,00 m². Listelerdeki 9,6 m²'lik paket İzocam'da 100 mm'lik rulonun alanı."
   },
   "parca_boyu_m": {
     "mahya": {
@@ -259,7 +259,7 @@
       "trapez_5_5x25_c_profil_dahil": false
     },
     "durum": "excel",
-    "kaynak": "Yükleme listesi çalışma kitabının vida notları: 1 alçıpan ya da Boardex için 40; 1 OSB için 40; 1 pencere için 20; trapez (5,5 × 25): aşık 10, omega (375) 10, omega (240) 6, çelik panel 10, köşebent 6. Excel hesaplama motoru (CTKBF V1.1): RYSB = m² × 7,5; OSB vidası = OSB × 40 + priz × 4 + saçak sacı × 4 + dere kelepçesi × 3; 5,5 × 60 = m² × 2,5; panel vidası = panel boyu ÷ 200 × adet; çelik dübel = duvar paneli × 2; şase pul = dübel; uçlar = m² ÷ 15; inox taş = m² ÷ 10; 'genelde 250 katları gönderilir'. İki gerçek listeyle (62 ve 105 m²) karşılaştırma docs/sartname/yukleme_listesi_yontemi.md içinde. Kesme taşı motorda m² × 0,02; 62 ve 105 m² listelerde m² ÷ 15'e denk (5 ve 7): katsayı bu iki listeye bakılarak seçildi Lokman, 7 Ekim 2026 07:45: levha başına 40 yeterli (şablondaki 50 alınmadı). Trapez vida (5,5 × 25): \"Omega ve aşık için koyulmayacak sadece çelik birleşim yerlerine kaç panel varsa sağına soluna 5 ile çarp\" (panel başına 10; çalışma kitabının notundaki 'çelik panel 10' ile aynı). Lokman, 7 Ekim 2026 08:02: \"köşebenti çıkarma sadece mevcut kurala uy\": köşebent terimi duruyor. Uygulama: aşık, tavan omegası ve saçak omegası terimleri sıfırlandı (önce 10, 10 ve 6); çelik panel × 10 ve köşebent × 6 duruyor. Kesme taşı: \"hiç önemli değil formül ne veriyorsa yeterli\". Parça C profiller (`trapez_5_5x25_c_profil_dahil`; 7 Ekim 2026): Eylül 2026 listesindeki 1800, o listenin kendi adetleriyle aşık 54 × 10 + tavan omegası 47 × 6 + (46 panel + 6 parça C profil) × 10 + köşebent 76 × 6 = 1798'den geliyor: şablon parça C profilleri de panel gibi sayıyor. Katalog modelinin hattında (panel adedi tahmin) toplam zaten onları içeriyordu; modelden sayılan panellerde içermiyordu. İki hat aynı sayımı yapsın diye parça C profiller panel sayısına eklenir. Lokman'ın tarifi \"kaç panel varsa\" diyor: parça C profillerin sayılıp sayılmayacağı soruldu. Anahtar iki hattı da yönetir (`trapez_5_5x25_c_profil_dahil`): açıkken modelden sayılan panellere parça C profiller eklenir; kapatılırsa katalog modelinin toplamından düşülür (Ç8201: 1044 → 984; liste 1250 → 1000). Lokman, 8 Ekim 2026 00:45: parça C profil sorusu anlaşılmadı (\"soruyu anlamadım\"); örnekle yeniden soruldu. Uygulama değişmedi. Lokman, 8 Ekim 2026 07:23 (örnekle yeniden sorulan soruya): \"C profiller hiç önemli değil öylesine gönderiyoruz göz ardı et\". Parça C profiller vida hesabında sayılmaz (`trapez_5_5x25_c_profil_dahil: false`); listede satırları durur (gönderiliyor). Ç8201: 1044 → 984, liste 1250 → 1000. Eylül 2026 listesindeki 1800 o listenin uygulaması (`sablon_2026` katmanında duruyor)."
+    "kaynak": "Yükleme listesi çalışma kitabının vida notları: 1 alçıpan ya da Boardex için 40; 1 OSB için 40; 1 pencere için 20; trapez (5,5 × 25): aşık 10, omega (375) 10, omega (240) 6, çelik panel 10, köşebent 6. Excel hesaplama motoru (CTKBF V1.1): RYSB = m² × 7,5; OSB vidası = OSB × 40 + priz × 4 + saçak sacı × 4 + dere kelepçesi × 3; 5,5 × 60 = m² × 2,5; panel vidası = panel boyu ÷ 200 × adet; çelik dübel = duvar paneli × 2; şase pul = dübel; uçlar = m² ÷ 15; inox taş = m² ÷ 10; 'genelde 250 katları gönderilir'. İki gerçek listeyle (62 ve 105 m²) karşılaştırma docs/sartname/yukleme_listesi_yontemi.md içinde. Kesme taşı motorda m² × 0,02; 62 ve 105 m² listelerde m² ÷ 15'e denk (5 ve 7): katsayı bu iki listeye bakılarak seçildi Lokman, 7 Ekim 2026 07:45: levha başına 40 yeterli (şablondaki 50 alınmadı). Trapez vida (5,5 × 25): \"Omega ve aşık için koyulmayacak sadece çelik birleşim yerlerine kaç panel varsa sağına soluna 5 ile çarp\" (panel başına 10; çalışma kitabının notundaki 'çelik panel 10' ile aynı). Lokman, 7 Ekim 2026 08:02: \"köşebenti çıkarma sadece mevcut kurala uy\": köşebent terimi duruyor. Uygulama: aşık, tavan omegası ve saçak omegası terimleri sıfırlandı (önce 10, 10 ve 6); çelik panel × 10 ve köşebent × 6 duruyor. Kesme taşı: \"hiç önemli değil formül ne veriyorsa yeterli\". Parça C profiller (`trapez_5_5x25_c_profil_dahil`; 7 Ekim 2026): Eylül 2026 listesindeki 1800, o listenin kendi adetleriyle aşık 54 × 10 + tavan omegası 47 × 6 + (46 panel + 6 parça C profil) × 10 + köşebent 76 × 6 = 1798'den geliyor: şablon parça C profilleri de panel gibi sayıyor. Katalog modelinin hattında (panel adedi tahmin) toplam zaten onları içeriyordu; modelden sayılan panellerde içermiyordu. İki hat aynı sayımı yapsın diye parça C profiller panel sayısına eklenir. Lokman'ın tarifi \"kaç panel varsa\" diyor: parça C profillerin sayılıp sayılmayacağı soruldu. Anahtar iki hattı da yönetir (`trapez_5_5x25_c_profil_dahil`): açıkken modelden sayılan panellere parça C profiller eklenir; kapatılırsa katalog modelinin toplamından düşülür (Ç8201: 1044 → 984; liste 1250 → 1000). Lokman, 8 Ekim 2026 00:45: parça C profil sorusu anlaşılmadı (\"soruyu anlamadım\"); örnekle yeniden soruldu. Uygulama değişmedi. Lokman, 8 Ekim 2026 07:23 (örnekle yeniden sorulan soruya): \"C profiller hiç önemli değil öylesine gönderiyoruz göz ardı et\". Parça C profiller vida hesabında sayılmaz (`trapez_5_5x25_c_profil_dahil: false`); listede satırları durur (gönderiliyor). Ç8201: 1044 → 984, liste 1250 → 1000. Eylül 2026 listesindeki 1800 o listenin uygulaması (`sablon_2026` katmanında duruyor). Lokman, 27 Ekim 2026 10:33 (İE-16 PR-3c kural soruları, C1.2–C1.3): levha başına 40 ve trapez vida kuralı \"onaylıyorum\"."
   },
   "inis": {
     "deger": {
@@ -677,7 +677,7 @@
       "osb": 11
     },
     "durum": "lokman",
-    "kaynak": "Ubeydullah (inşaat mühendisi), üçüncü cevaplar (Lokman 4 Ekim 2026 12:14'te iletti): \"Boardex 12.5 mm. OSB 11 mm.\" Lokman 2 Ekim'de de Boardex ve alçıpan için 12,5 mm, OSB için 11 mm demişti. 2025 tarihli gerçek listelerde Boardex 8 mm, OSB 9 mm yazıyor; Excel motorunda Boardex 8 mm, OSB 11 mm. Lokman, 7 Ekim 2026 07:45 (C1 k): Boardex'in doğrusu 12,5 mm; listelerdeki 8 mm hatalı girilmiş; marka Aygips (Aytaş). Üreticinin belgeleri 7 Ekim 2026'da okundu: Aytaş Alçı OUTWEAR dış cephe levhasının performans beyanında (TS EN 15283-1+A1) ölçü 1200 × (2000–3600) × 12,5 mm; sistem kitabında kalınlık 12,5 ve 15 mm. 8 mm seçeneği yok. Listelerdeki ve Excel motorundaki 8 mm veri giriş hatasıdır. Listede yazılan ad 8 Ekim 2026'dan beri üreticinin adı (`urun_adlari`)."
+    "kaynak": "Ubeydullah (inşaat mühendisi), üçüncü cevaplar (Lokman 4 Ekim 2026 12:14'te iletti): \"Boardex 12.5 mm. OSB 11 mm.\" Lokman 2 Ekim'de de Boardex ve alçıpan için 12,5 mm, OSB için 11 mm demişti. 2025 tarihli gerçek listelerde Boardex 8 mm, OSB 9 mm yazıyor; Excel motorunda Boardex 8 mm, OSB 11 mm. Lokman, 7 Ekim 2026 07:45 (C1 k): Boardex'in doğrusu 12,5 mm; listelerdeki 8 mm hatalı girilmiş; marka Aygips (Aytaş). Üreticinin belgeleri 7 Ekim 2026'da okundu: Aytaş Alçı OUTWEAR dış cephe levhasının performans beyanında (TS EN 15283-1+A1) ölçü 1200 × (2000–3600) × 12,5 mm; sistem kitabında kalınlık 12,5 ve 15 mm. 8 mm seçeneği yok. Listelerdeki ve Excel motorundaki 8 mm veri giriş hatasıdır. Listede yazılan ad 8 Ekim 2026'dan beri üreticinin adı (`urun_adlari`). Lokman, 27 Ekim 2026 10:33 (İE-16 PR-3c kural soruları, C1.5): 12,5 mm (\"mühendis sehven 8mm yazmış\"). Kapandı."
   },
   "kapama_aparati": {
     "deger": {
@@ -893,10 +893,11 @@
   },
   "duvar_izolasyonu": {
     "deger": {
-      "listede": false
+      "listede": true,
+      "bos_yazilmaz": true
     },
     "durum": "lokman",
-    "kaynak": "Lokman, 7 Ekim 2026 07:45 (C1 h): \"Duvar izolasyonu göndermiyoruz yok say\". Lokman, 7 Ekim 2026 08:02: satırın listeden çıkarılması soruldu: \"evet çıkar\". Dört gerçek listede (2025 tarihli üçü ve Eylül 2026) duvar izolasyonu satırı var; Lokman'ın kararıyla listeden çıktı. Hesabı (`yalitim_paket_m2`, `yalitim_kat`) duruyor: `listede` açılırsa geri gelir."
+    "kaynak": "Lokman, 7 Ekim 2026 07:45 (C1 h): \"Duvar izolasyonu göndermiyoruz yok say\". Lokman, 7 Ekim 2026 08:02: satırın listeden çıkarılması soruldu: \"evet çıkar\". Dört gerçek listede (2025 tarihli üçü ve Eylül 2026) duvar izolasyonu satırı var; Lokman'ın kararıyla listeden çıktı. Hesabı (`yalitim_paket_m2`, `yalitim_kat`) duruyor: `listede` açılırsa geri gelir. Lokman, 27 Ekim 2026 10:33 (İE-16 PR-3c kural soruları, C1.1): \"ben izolasyon derken mineral yünden bahsediyorsan imkansız bunu kesin göndeririz sadece çelik karkas değilse sürme izolasyondan bahsediyorsan göndermiyoruz doğrudur\". 7 Ekim kararının yerine geçer: satır (mineral yün, paket 8,64 m²) yeniden listede; 7 Ekim'de çıkarılan sürme izolasyon değil, mineral yündü (dört gerçek listedeki satır). Yalıtılan duvarı olmayan iş (yalnız çelik karkas) satır yazmaz (`bos_yazilmaz`). Hesap aynı: dış duvar × kat (`yalitim_kat`) + iç duvar − boşluklar, ÷ `yalitim_paket_m2`."
   },
   "sandvic_kapama": {
     "deger": {
@@ -905,7 +906,7 @@
       "olcu": "sacak_toplami"
     },
     "durum": "lokman",
-    "kaynak": "Lokman, 7 Ekim 2026 07:45 (C1 i): \"Aslında dere boyu ile aynı oradan yola çıkabilirsin yani binanı çatı eğiminin olduğu tarafa her zaman dere ve sandviç panel kapama gelir şöyle bizde saçaklar 30'ar cm ona göre sen bir hesap geliştir\". Lokman, 7 Ekim 2026 08:02: parça boyu \"en son 2500 dü diye biliyorum\". Geliştirilen hesap (teyit bekliyor): kapama boyu = saçak kenarlarının toplamı (dere boyu; cephe + iki uçta 30 cm saçak); adet = boy ÷ (2,5 − 0,20 bindirme), yukarı: dere hesabıyla aynı yapıda. Çatı panelli ek yapının saçağı da sayılır (orada dere yok ama sandviç panelin ucu var; Eylül 2026 listesinde de sayılmış). Excel motorunda ve Eylül 2026 listesinde parça L 2800 (÷ 2,6); 2025 listelerinde L 2500 ve bindirmesiz (her saçak kenarı ÷ 2,5, ayrı ayrı yukarı). Durum `varsayim`: kapamanın dere boyunca gittiği ve parça boyu Lokman'ın sözü; adet hesabı (toplam boy, 20 cm bindirme, ek yapının saçağı) Claude'un geliştirdiği hesaptır ve teyit bekliyor. Lokman, 8 Ekim 2026 00:45: hesap onaylandı (\"evet uygun\"); durum `lokman` oldu.",
+    "kaynak": "Lokman, 7 Ekim 2026 07:45 (C1 i): \"Aslında dere boyu ile aynı oradan yola çıkabilirsin yani binanı çatı eğiminin olduğu tarafa her zaman dere ve sandviç panel kapama gelir şöyle bizde saçaklar 30'ar cm ona göre sen bir hesap geliştir\". Lokman, 7 Ekim 2026 08:02: parça boyu \"en son 2500 dü diye biliyorum\". Geliştirilen hesap (teyit bekliyor): kapama boyu = saçak kenarlarının toplamı (dere boyu; cephe + iki uçta 30 cm saçak); adet = boy ÷ (2,5 − 0,20 bindirme), yukarı: dere hesabıyla aynı yapıda. Çatı panelli ek yapının saçağı da sayılır (orada dere yok ama sandviç panelin ucu var; Eylül 2026 listesinde de sayılmış). Excel motorunda ve Eylül 2026 listesinde parça L 2800 (÷ 2,6); 2025 listelerinde L 2500 ve bindirmesiz (her saçak kenarı ÷ 2,5, ayrı ayrı yukarı). Durum `varsayim`: kapamanın dere boyunca gittiği ve parça boyu Lokman'ın sözü; adet hesabı (toplam boy, 20 cm bindirme, ek yapının saçağı) Claude'un geliştirdiği hesaptır ve teyit bekliyor. Lokman, 8 Ekim 2026 00:45: hesap onaylandı (\"evet uygun\"); durum `lokman` oldu. Lokman, 27 Ekim 2026 10:33 (İE-16 PR-3c kural soruları, C1.7): \"Dönem dönem değişiyor fazla gitsin önemli değil 2500 al\": parça L 2500 kesinleşti.",
     "satir_notu": "kapama dere boyunca gider (Lokman, 7 Ekim 07:45); parça L 2500 (08:02), 20 cm bindirme; hesap onaylandı (8 Ekim 00:45)"
   },
   "kablo_en_uzak_mesafe": {
@@ -954,7 +955,7 @@
       },
       "230'luk kesme taşı": {
         "durum": "lokman",
-        "not": "önemli değil; formül ne veriyorsa yeterli (Lokman, 7 Ekim 07:45). Formül iki 2025 listesinden; Excel motorunda m² × 0,02"
+        "not": "önemli değil; formül ne veriyorsa yeterli (Lokman, 7 Ekim 07:45). Formül iki 2025 listesinden; Excel motorunda m² × 0,02; 27 Ekim 2026'da yeniden onaylandı"
       },
       "Silikonize mastik": {
         "durum": "lokman",
@@ -966,7 +967,7 @@
       }
     },
     "durum": "lokman",
-    "kaynak": "Lokman, 7 Ekim 2026 07:45 ve 08:02 cevaplarıyla durumu ya da notu değişen kalemler. `not` satırın notunun yerine geçer, `not_eki` sonuna eklenir, `durum` satırın durumunu değiştirir; adet ve formül burada değişmez. `--sablon 2026` katmanından gelen satırlara uygulanmaz."
+    "kaynak": "Lokman, 7 Ekim 2026 07:45 ve 08:02 cevaplarıyla durumu ya da notu değişen kalemler. `not` satırın notunun yerine geçer, `not_eki` sonuna eklenir, `durum` satırın durumunu değiştirir; adet ve formül burada değişmez. `--sablon 2026` katmanından gelen satırlara uygulanmaz. Lokman, 27 Ekim 2026 10:33 (İE-16 PR-3c kural soruları, C1.4): kesme taşı formülü \"onaylıyorum\"."
   },
   "yontem_a_alin_kaplamasi": {
     "deger": {
@@ -999,13 +1000,53 @@
         [
           "Boardex",
           "OUTWEAR Dış Cephe Levhası"
+        ],
+        [
+          "Ters mahya kenar kutusu",
+          "Metal tahta"
+        ],
+        [
+          "Tekli anahtar",
+          "Tekli anahtar takım"
+        ],
+        [
+          "Çiftli anahtar",
+          "Çiftli anahtar takım"
+        ],
+        [
+          "Tekli priz",
+          "Tekli priz takım"
+        ],
+        [
+          "Çiftli priz",
+          "Çiftli priz takım"
+        ],
+        [
+          "Uydu prizi",
+          "Uydu prizi takım"
+        ],
+        [
+          "NYM kablo (3 × 2,5)",
+          "NYM kablo 3 × 2,5"
+        ],
+        [
+          "NYM kablo (2 × 1,5)",
+          "NYM kablo 2 × 1,5"
+        ],
+        [
+          "W otomat (sigorta)",
+          "W otomat sigorta 16 A"
+        ],
+        [
+          "Kaçak akım rölesi",
+          "Kaçak akım rölesi ikili"
         ]
       ],
       "uretici": "Aytaş Alçı",
       "sirketteki_ad": "Boardex"
     },
     "durum": "lokman",
-    "kaynak": "Lokman, 8 Ekim 2026 00:45 (listeye hangi ad yazılsın sorusuna): \"üreticide ne yazıyorsa onu yaz\". Üreticinin ürün sayfasında ad 'OUTWEAR Dış Cephe Levhası' (Aytaş Alçı; sayfa 8 Ekim 2026'da okundu). Uygulama: liste satırında yazılan ad (`liste_adi`) üreticinin adıyla kurulur: `degistir` listesindeki ilk eşleşen sözcük grubu değiştirilir. Hesabın iç anahtarı (`kalem`) ve formül metinleri şirketteki adla ('Boardex') kalır; gerçek listelerle karşılaştırma o adla yapılır. Üretici ya da ürün değişirse yalnız bu kural değişir."
+    "kaynak": "Lokman, 8 Ekim 2026 00:45 (listeye hangi ad yazılsın sorusuna): \"üreticide ne yazıyorsa onu yaz\". Üreticinin ürün sayfasında ad 'OUTWEAR Dış Cephe Levhası' (Aytaş Alçı; sayfa 8 Ekim 2026'da okundu). Uygulama: liste satırında yazılan ad (`liste_adi`) üreticinin adıyla kurulur: `degistir` listesindeki ilk eşleşen sözcük grubu değiştirilir. Hesabın iç anahtarı (`kalem`) ve formül metinleri şirketteki adla ('Boardex') kalır; gerçek listelerle karşılaştırma o adla yapılır. Üretici ya da ürün değişirse yalnız bu kural değişir. Lokman, 27 Ekim 2026 10:33 (İE-16 PR-3c kural soruları): C1.9 ters mahya kenar kutusu \"Sonradan ekledik mühendis böyle bir isim vermiş asıl adı metal tahta\"; C3 2026 listelerindeki adlar (takım, NYM kablo 3 × 2,5, W otomat sigorta 16 A, kaçak akım rölesi ikili, renk başta) \"aynen böyle yaza\". Adlar açık beşin 2026 listelerinden; adet ve hesap değişmez, iç anahtar (`kalem`) aynı kalır. Kapının yönü (SAĞ/SOL) tanımda yok, yazılmıyor."
   },
   "korkuluk_kaplamasi": {
     "deger": {
@@ -1039,7 +1080,7 @@
       }
     },
     "durum": "lokman",
-    "kaynak": "Lokman, 10 Ekim 2026 10:18 (KT-03'ün 1. sorusu: veranda ve sundurmanın tek eğimli panel çatısının kenarları KT-03'ün listesindeki gibi mi olsun?): \"Yüklediğim görsellere bak aslında yanlarda boardex kaplanacak ama yandan sandviç panel kötü görünmesin diye biz orayı özel bükümlü kapama yapıyoruz\"; saçak için \"Saçakta yüklediğim görsellere bak\"; eğik kenar için \"Eğik kenar dediğim gibi adını sundurma kapama diyelim\"; 'kenarda Boardex şeridi yok, tavan saçağıyla birlikte Boardex' için \"Evet\". 10:29'da beş fotoğraf geldi (montaj aşamasında, Boardex'i boyanmamış iki katlı bir çelik yapı; verandanın tek eğimli panel çatısı): saçakta dere var; yanlarda sandviç panelin kenarını açık renk özel bükümlü bir kapama örtüyor; veranda tavanı Boardex'le saçağın ucuna kadar gidiyor. 10:37'de KT-01'in (müştemilatlı yapı) yapılmış halinin üç fotoğrafı geldi: müştemilatın panel çatısında panelin ucundaki köpük açıkta, kenarlar düz bantla bitirilmiş. Müştemilatın da veranda ve sundurma gibi olup olmayacağı sorulunca 10:39: \"hayır istediğim o 5 görseldeki gibi olması çok güzel duruyor insan gibi anlayabilir misin bilmiyorum ama\". Okuma: bütün tek eğimli çatı panelli çatılar (veranda, sundurma, müştemilat) beş fotoğraftaki gibi biter; Lokman'a yazıldı. Uygulama: saçakta dere (dere hattı, kapak ve iniş kuralları öteki saçaklardaki gibi) ve özel büküm saçak sacı; yanlarda (eğik kenarlar) sundurma kapama. Parça boyu KT-03'ün Eylül 2026 listesinden: 'SIFIR ALIN SACI (SUNDURMA VE VERANDA)' L 2500 (5,2 ÷ 2,5 → 3), 'ÖZEL BÜKÜM SAÇAK SAÇI' L 2500 (3). Bindirme 20 cm (Lokman, 7 Ekim 2026 07:45: sac parçalarında 20 cm). Kenarda Boardex şeridi yok. Veranda ve sundurmanın tavanı çatının planıyla (saçağıyla) Boardex. Müştemilat kapalı bir yapı, tavanı içeride: saçağının ve yanlarının altı Boardex kalır (KT-01 listesindeki şeridin alt payı, 15 cm), yüzü kapamayla kapanır (Claude'un okuması; Lokman, 10 Ekim 2026 11:39: \"evet doğru anladın\"). Önceki kural (`ek_yapi_ve_korkuluk.cati_panelli_cati`, KT-01'in Eylül 2026 listesinden): dere, saçak sacı ve alın sacı yok, kenarlar 10 + 15 cm Boardex. KT-03'ün listesinde: metal dere 13, dere kapağı 4, iniş 11 (ana çatıda 8, verandada 2, sundurmada 1), sıfır alın sacı 3, özel büküm saçak sacı 3, veranda ve sundurma tavanı Boardex 7, dış cephe Boardex 39.",
+    "kaynak": "Lokman, 10 Ekim 2026 10:18 (KT-03'ün 1. sorusu: veranda ve sundurmanın tek eğimli panel çatısının kenarları KT-03'ün listesindeki gibi mi olsun?): \"Yüklediğim görsellere bak aslında yanlarda boardex kaplanacak ama yandan sandviç panel kötü görünmesin diye biz orayı özel bükümlü kapama yapıyoruz\"; saçak için \"Saçakta yüklediğim görsellere bak\"; eğik kenar için \"Eğik kenar dediğim gibi adını sundurma kapama diyelim\"; 'kenarda Boardex şeridi yok, tavan saçağıyla birlikte Boardex' için \"Evet\". 10:29'da beş fotoğraf geldi (montaj aşamasında, Boardex'i boyanmamış iki katlı bir çelik yapı; verandanın tek eğimli panel çatısı): saçakta dere var; yanlarda sandviç panelin kenarını açık renk özel bükümlü bir kapama örtüyor; veranda tavanı Boardex'le saçağın ucuna kadar gidiyor. 10:37'de KT-01'in (müştemilatlı yapı) yapılmış halinin üç fotoğrafı geldi: müştemilatın panel çatısında panelin ucundaki köpük açıkta, kenarlar düz bantla bitirilmiş. Müştemilatın da veranda ve sundurma gibi olup olmayacağı sorulunca 10:39: \"hayır istediğim o 5 görseldeki gibi olması çok güzel duruyor insan gibi anlayabilir misin bilmiyorum ama\". Okuma: bütün tek eğimli çatı panelli çatılar (veranda, sundurma, müştemilat) beş fotoğraftaki gibi biter; Lokman'a yazıldı. Uygulama: saçakta dere (dere hattı, kapak ve iniş kuralları öteki saçaklardaki gibi) ve özel büküm saçak sacı; yanlarda (eğik kenarlar) sundurma kapama. Parça boyu KT-03'ün Eylül 2026 listesinden: 'SIFIR ALIN SACI (SUNDURMA VE VERANDA)' L 2500 (5,2 ÷ 2,5 → 3), 'ÖZEL BÜKÜM SAÇAK SAÇI' L 2500 (3). Bindirme 20 cm (Lokman, 7 Ekim 2026 07:45: sac parçalarında 20 cm). Kenarda Boardex şeridi yok. Veranda ve sundurmanın tavanı çatının planıyla (saçağıyla) Boardex. Müştemilat kapalı bir yapı, tavanı içeride: saçağının ve yanlarının altı Boardex kalır (KT-01 listesindeki şeridin alt payı, 15 cm), yüzü kapamayla kapanır (Claude'un okuması; Lokman, 10 Ekim 2026 11:39: \"evet doğru anladın\"). Önceki kural (`ek_yapi_ve_korkuluk.cati_panelli_cati`, KT-01'in Eylül 2026 listesinden): dere, saçak sacı ve alın sacı yok, kenarlar 10 + 15 cm Boardex. KT-03'ün listesinde: metal dere 13, dere kapağı 4, iniş 11 (ana çatıda 8, verandada 2, sundurmada 1), sıfır alın sacı 3, özel büküm saçak sacı 3, veranda ve sundurma tavanı Boardex 7, dış cephe Boardex 39. Lokman, 27 Ekim 2026 10:33 (İE-16 PR-3c kural soruları, C2): müştemilat saçağına dere \"evet dere konur sadece o proje özelinde ucuz olsun diye koymamıştık\". Kural doğru; ÇP-13 listesinde dere o projeye özel olarak yok.",
     "satir_notu_sacak": "tek eğimli çatı panelli çatının saçağında, derenin altında (Lokman, 10 Ekim 2026: beş fotoğraftaki gibi). Parça L 2500 (KT-03 listesi), 20 cm bindirme",
     "satir_notu_yan": "tek eğimli çatı panelli çatının eğik kenarlarında sandviç panelin kenarını örter; adı Lokman'ın (10 Ekim 2026: \"adını sundurma kapama diyelim\"). Parça L 2500 (KT-03 listesi), 20 cm bindirme"
   },
@@ -1064,6 +1105,11 @@
       "listede": false
     },
     "durum": "lokman",
-    "kaynak": "Lokman, 10 Ekim 2026 10:18 (KT-03'ün 4. sorusu: bacanın içi bizdeyse baca başına baca borusu, T, kör tapa, maşon ve şapka mı?): \"Bunu çok yapmıyoruz sadece karkasını yapıyoruz göz ardı et\". Bacanın yalnız karkası (baca panelleri) ve çatı üstü kaplaması listeye girer. KT-03'ün listesinde iki bacaya birer takım vardı: baca borusu (4,3 m), T, kör tapa, maşon, şapka (40 × 40)."
+    "kaynak": "Lokman, 10 Ekim 2026 10:18 (KT-03'ün 4. sorusu: bacanın içi bizdeyse baca başına baca borusu, T, kör tapa, maşon ve şapka mı?): \"Bunu çok yapmıyoruz sadece karkasını yapıyoruz göz ardı et\". Bacanın yalnız karkası (baca panelleri) ve çatı üstü kaplaması listeye girer. KT-03'ün listesinde iki bacaya birer takım vardı: baca borusu (4,3 m), T, kör tapa, maşon, şapka (40 × 40). Lokman, 27 Ekim 2026 10:33 (İE-16 PR-3c kural soruları, C1.8): \"maşon T bunlar su tesisatı için bacayı yok say\". Kural aynı."
+  },
+  "renk_adin_basinda": {
+    "deger": true,
+    "durum": "lokman",
+    "kaynak": "Lokman, 27 Ekim 2026 10:33 (İE-16 PR-3c kural soruları, C3): \"aynen böyle yaza\". 2026 listelerinde renk kalemin adının başında yazıyor (ör. 'Antrasit metal dere'); önceki setlerde adın sonunda parantez içinde. Hangi kalemlere renk yazıldığı `renkli_kalemler`'de, değişmedi. Anahtar yoksa eski yazım sürer."
   }
 }

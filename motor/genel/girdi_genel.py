@@ -699,6 +699,10 @@ def girdi(y: dict, c: dict, m: dict, kur: dict, kaynak: str) -> dict:
         ek_satirlar.append({"ad": es["ad"], "profil": prof, "panel_adedi": cm[es["grup"]]["adet"],
                             "not": (es.get("not") or "panel adedi ve profil boyu modelden") + (" (" + ", ".join(k["ad"] for k in kg_kiris) + ")" if kg_kiris else "") + mn,
                             **pbx})
+    if kural_k and "makas_kalin" in cm:              # tek açıklığı 8 m'yi aşan makaslar (karkas kuralı `makas_eti`, İE-16 PR-3c): ayrı satır
+        prof, pbx, mn = model("makas_kalin", None, None)
+        ek_satirlar.append({"ad": f"Çatı makas panelleri ({prof.split('x')[-1]} mm)", "profil": prof, "panel_adedi": cm["makas_kalin"]["adet"],
+                            "not": "tek açıklığı 8 m'yi aşan makaslar (Lokman, 27 Ekim 2026); adet ve profil boyu karkas kuralından" + mn, **pbx})
     kayip = sorted({k.get("celik_grubu") for k in t.get("kirisler", []) if k.get("celik_grubu", "kiris") != "kiris"}
                    - {es["grup"] for es in (t.get("celik_modeli") or {}).get("ek_satirlar", [])})
     if kayip:

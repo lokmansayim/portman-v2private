@@ -483,7 +483,9 @@ def _hesapla(g: dict, k: dict) -> dict:
         yal_net = yal_brut - g["yalitim"]["bosluk_m2"]
     yz = sb.get("yalitim_zayiat", 0.0)                    # Eylül 2026 şablonunda × 1,05; bugünkü kuralda zayiat yok
     # Kural (Lokman, 7 Ekim 2026 07:45): duvar izolasyonu gönderilmiyor; listede yok. Şablon katmanında (o listenin uygulaması) satır durur.
-    if (kural_degeri("duvar_izolasyonu") or {}).get("listede", True) or yz:
+    # 0.20 (Lokman, 27 Ekim 2026): mineral yün gönderilir, listede; yalıtılan duvarı olmayan iş ("sadece çelik") satır yazmaz (`bos_yazilmaz`).
+    di = kural_degeri("duvar_izolasyonu") or {}
+    if (di.get("listede", True) or yz) and not (di.get("bos_yazilmaz") and yal_net <= 0):
         ekle("İç cephe kaplama", "Duvar izolasyonu", "paket 8,64 m²", tavan(yal_net * (1 + yz) / deg(k, "yalitim_paket_m2")), yal_net, yal_brut,
              formul="dış duvar × kat sayısı (80 mm karkasta 1, 140 mm'de 2) + iç duvar − boşluklar; " + (f"× {tr(1 + yz)} " if yz else "") + "÷ 8,64",
              durum=SABLON if yz else "uydurma", not_=f"dış duvar {kat_sayisi} kat")
@@ -767,8 +769,9 @@ def _hesapla(g: dict, k: dict) -> dict:
             silte -= sd
         silte_kat = c.get("silte_kat", 1)
         si_mm = sb.get("cati_izolasyonu_kalinligi_mm")       # Eylül 2026 şablonu: "çatı izolasyonu 100 mm"; 2025 listelerinde "çatı şiltesi 80 mm"
-        ekle("Çatı kaplamaları", f"Çatı izolasyonu {si_mm} mm" if si_mm else "Çatı şiltesi 80 mm", "9,6 m²/adet", silte_kat * tavan(silte / deg(k, "silte_adet_m2")), silte,
-             formul=(f"(çatı boyu × (bina eni + 0,20) − çatısız veranda {tr(sd, 2)} m²) ÷ 9,6" if sd else "çatı boyu × (bina eni + 0,20) ÷ 9,6")
+        sa = tr(deg(k, "silte_adet_m2"), 1)                   # paket alanı (0.20: İzocam 80 mm, 9,0; önceki setlerde 9,6)
+        ekle("Çatı kaplamaları", f"Çatı izolasyonu {si_mm} mm" if si_mm else "Çatı şiltesi 80 mm", f"{sa} m²/adet", silte_kat * tavan(silte / deg(k, "silte_adet_m2")), silte,
+             formul=(f"(çatı boyu × (bina eni + 0,20) − çatısız veranda {tr(sd, 2)} m²) ÷ {sa}" if sd else f"çatı boyu × (bina eni + 0,20) ÷ {sa}")
                     + (f" × {silte_kat} kat" if silte_kat > 1 else ""), durum=SABLON if si_mm else "uydurma",
              not_=(f"Eylül 2026 şablonu: kalem 'çatı izolasyonu {si_mm} mm'; 2025 listelerinde 'çatı şiltesi 80 mm'. Adet formülü aynı "
                    "(şablonda: çatı taban alanı, 30 cm saçak payıyla, ÷ 9,6)") if si_mm else None)
@@ -1210,11 +1213,15 @@ def _hesapla(g: dict, k: dict) -> dict:
         bilinmeyen = sorted(set(g["renk"]) - set(deg(k, "renkli_kalemler"))) if isinstance(g["renk"], dict) else ["(sözlük değil)"]
         if bilinmeyen:
             raise SystemExit(f"Girdideki `renk` alanında bilinmeyen anahtar: {', '.join(bilinmeyen)} (beklenen: {', '.join(deg(k, 'renkli_kalemler'))}).")
+        basta = kural_degeri("renk_adin_basinda")         # 0.20 (Lokman, 27 Ekim 2026, C3): 2026 listelerindeki gibi renk adın başında
         for anahtar, kalemler in deg(k, "renkli_kalemler").items():
             if g["renk"].get(anahtar):
                 for s in S:
                     if s["kalem"] in kalemler:
                         s["renk"] = g["renk"][anahtar]
+                        if basta:
+                            ad = s.get("liste_adi") or s["kalem"]
+                            s["liste_adi"], s["renk_adda"] = s["renk"][:1].upper() + s["renk"][1:] + " " + ad[:1].lower() + ad[1:], True
 
     # ── bayi kuralı: gruplar ────────────────────────────────────────────────
     gruplar = {**deg(k, "bayi_kurali")["varsayilan_gruplar"], **(g.get("bayi") or {}).get("gruplar", {})}
@@ -1290,7 +1297,7 @@ def md_yaz(sonuc: dict, ad: str) -> str:
         olcu = "" if x["olcu"] is None else f"{x['olcu']:.1f} {x['birim']}".replace(".", ",")
         kg = "" if x["kg"] is None else f"{x['kg']:.0f}"
         not_ = (x["not"] or "") + (((". " if x["not"] else "") + f"Bugünkü kurallarla: {x['bugunku_adet']}") if "bugunku_adet" in x else "")
-        satir.append(f"| {x['grup']} | {x.get('liste_adi') or x['kalem']}{' (' + x['renk'] + ')' if x.get('renk') else ''} | {x['boyut']} | {'' if x['adet'] is None else x['adet']} | {olcu} | {kg} | {x['formul']} | {x['durum']} | {not_} |")
+        satir.append(f"| {x['grup']} | {x.get('liste_adi') or x['kalem']}{' (' + x['renk'] + ')' if x.get('renk') and not x.get('renk_adda') else ''} | {x['boyut']} | {'' if x['adet'] is None else x['adet']} | {olcu} | {kg} | {x['formul']} | {x['durum']} | {not_} |")
     return "\n".join(satir) + "\n"
 
 
