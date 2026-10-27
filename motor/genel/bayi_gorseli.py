@@ -35,9 +35,9 @@ def musteri_projesi(t: dict) -> bool:
 def _bayi_duzelt(fig, ax, y: dict, sinir: tuple[float, float, float, float]) -> None:
     """Çizimden sonra ölçülerek (Lokman'ın göz denetimi, 13.10.2026; KT-02 "25,1" / "22,4", "SUNDURMA"):
     (1) dar parçanın sayısı okun uçlarına biniyorsa bir sıra **içeri** (plana doğru) alınır; aynı yandaki ardışık dar parçalarda dönüşümlü
-    iki sıra (dışarı alınsa genel ölçünün sayısına binerdi); (2) mahal adı ya da m² yazısı mahalin eninden genişse küçülür (en az 5,5 pt)."""
+    iki sıra (dışarı alınsa genel ölçünün sayısına binerdi); (2) mahal adı ya da m² yazısı mahalin eninden genişse küçülür (en az 5,5 pt;
+    `dar_mahal_yazisi`)."""
     from matplotlib.text import Annotation
-    from .ciz_genel import tr
     ex0, ey0, ex1, ey1 = sinir
     fig.canvas.draw(); r = fig.canvas.get_renderer(); inv = ax.transData.inverted()
 
@@ -82,8 +82,17 @@ def _bayi_duzelt(fig, ax, y: dict, sinir: tuple[float, float, float, float]) -> 
             t.set_ha("left"); t.set_position((mx + bas + birim * (0 if n % 2 else 1), y_))
         else:                                                 # sağ zincir: sayı çizginin sağında (dışarı): soluna (içeri)
             t.set_ha("right"); t.set_position((mx - bas - birim * (0 if n % 2 else 1), y_))
+    dar_mahal_yazisi(ax, y, r)
+
+
+def dar_mahal_yazisi(ax, y: dict, r) -> None:
+    """Dar mahalde ad / m² yazısı küçülür (yazının hizasındaki gerçek genişliğe göre; en az 5,5 pt). Çizim bittikten sonra, son ölçekle
+    çağrılır: bayi plan görseli (`_bayi_duzelt`) ve önce–sonra / okuma panelleri (BK-15: "EBEVEYN BANYO" 2 m'lik odadan taşıyordu)."""
+    from matplotlib.text import Annotation
     from shapely.geometry import LineString
-    for ad, b in y["bolgeler"].items():                       # dar mahalde ad / m² yazısı küçülür (yazının hizasındaki gerçek genişliğe göre)
+    from .ciz_genel import tr
+    inv = ax.transData.inverted()
+    for ad, b in y["bolgeler"].items():
         if b.get("sinif") == "dis":
             continue
         mx0, my0, mx1, my1 = b["net"].bounds
@@ -95,7 +104,8 @@ def _bayi_duzelt(fig, ax, y: dict, sinir: tuple[float, float, float, float]) -> 
                 continue
             kesit = b["net"].intersection(LineString([(mx0 - 1, py), (mx1 + 1, py)]))      # mahalin yazı hizasındaki eni (L biçimi, dik duvar)
             izin = (kesit.length if not kesit.is_empty else (mx1 - mx0)) - 6.0
-            k = veri_kutu(s.get_window_extent(r)); en = k[2] - k[0]
+            bb = s.get_window_extent(r)
+            (a, _), (c, _) = inv.transform([[bb.x0, bb.y0], [bb.x1, bb.y1]]); en = abs(c - a)
             if en > izin > 0:
                 s.set_fontsize(max(5.5, s.get_fontsize() * izin / en))
 

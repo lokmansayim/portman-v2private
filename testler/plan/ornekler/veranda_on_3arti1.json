@@ -1,0 +1,13 @@
+{"dis_olcu": {"en": 800, "boy": 1390},
+ "mahaller": [
+  {"ad": "Veranda", "islev": "veranda", "ortu": "cati", "dikdortgenler": [[0, 0, 800, 225]]},
+  {"ad": "Salon - Mutfak", "islev": "salon", "dikdortgenler": [[0, 225, 455, 765]]},
+  {"ad": "Yatak Odası 1", "islev": "yatak_odasi", "dikdortgenler": [[455, 225, 800, 765]]},
+  {"ad": "Banyo", "islev": "banyo", "dikdortgenler": [[575, 765, 800, 970]]},
+  {"ad": "Hol", "islev": "hol", "dikdortgenler": [[0, 765, 575, 970]]},
+  {"ad": "Yatak Odası 2", "islev": "yatak_odasi", "dikdortgenler": [[0, 970, 400, 1390]]},
+  {"ad": "Yatak Odası 3", "islev": "yatak_odasi", "dikdortgenler": [[400, 970, 800, 1390]]}],
+ "kapilar": [{"arasinda": ["Veranda", "Salon - Mutfak"]}, {"arasinda": ["Salon - Mutfak", "Hol"]}, {"arasinda": ["Hol", "Yatak Odası 1"]}, {"arasinda": ["Hol", "Banyo"]}, {"arasinda": ["Hol", "Yatak Odası 2"]}, {"arasinda": ["Hol", "Yatak Odası 3"]}],
+ "pencereler": [{"mahal": "Salon - Mutfak", "cephe": "B", "olcu": "120x180", "adet": 1}, {"mahal": "Yatak Odası 1", "cephe": "D", "olcu": "120x120", "adet": 1}, {"mahal": "Banyo", "cephe": "D", "olcu": "60x40", "adet": 1}, {"mahal": "Yatak Odası 2", "cephe": "K", "olcu": "120x120", "adet": 1}, {"mahal": "Yatak Odası 3", "cephe": "K", "olcu": "120x120", "adet": 1}],
+ "cati": {"tip": "kirma"},
+ "gerekce": "Elle kurulmuş 3+1, ön şerit veranda (geometri hakemi, BK-15 ikinci tur): verandaya bakan yüz dış duvardır; denetçiden geçer"}

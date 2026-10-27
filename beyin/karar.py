@@ -826,8 +826,17 @@ def _celik_degisiklikler(k: Konusma, katalog: Katalog, aday: dict, t: dict, once
             return _bitir(k, Karar(eylem="yonlendir", gerekce="çelik revizyonunda otomatik yapılamayan istek (cümle bayiye söylendi)",
                                     mesaj=f"\"{_kisalt(baska[0].strip(' ,.;'))}\" isteği çelik modelde otomatik yapılamıyor (otomatik yapabildiklerim: "
                                           "pencere ölçüsü, çatı katalog/K/L, dış duvarlar 140'lık). " + YONLENDIRME))
-    # 3) pencere ekleme ya da kaldırma: 8a'da yalnız ölçü (ölçü yazılmış olsa da mevcut pencere değiştirilmez)
+    # 3) pencere ekleme ya da kaldırma: 8a'da yalnız ölçü (ölçü yazılmış olsa da mevcut pencere değiştirilmez). Pencere sözü taşımayan ekleme
+    #    cümlesi oda eklemedir ("bir yatak odası daha ekleyelim"; BK-15): gerekçe ve mesaj odayı söyler, pencereyi değil
     if r["ekle_kaldir"]:
+        ek = [p for p in r["parcalar"] if p["tur"] == "ekle_kaldir"]
+        oda = any(not (p.get("isaret") or {}).get("pencere") for p in ek)
+        pencere = any((p.get("isaret") or {}).get("pencere") for p in ek)
+        if oda:
+            return _bitir(k, Karar(eylem="yonlendir", gerekce="çelik katalog modelinde oda ekleme/kaldırma otomatik yapılamıyor"
+                                                               + (" (pencere ekleme/kaldırma da: 8a yalnız ölçü)" if pencere else ""),
+                                    mesaj="Oda ekleme ya da kaldırma " + ("ve pencere ekleme ya da kaldırma " if pencere else "")
+                                          + "çelik modelde otomatik yapılamıyor. " + YONLENDIRME))
         return _bitir(k, Karar(eylem="yonlendir", gerekce="çelikte pencere ekleme/kaldırma otomatik yapılamıyor (8a: yalnız ölçü)",
                                 mesaj="Pencere ekleme ya da kaldırma çelik modelde otomatik yapılamıyor; mevcut pencerenin ölçüsünü değiştirebilirim. " + YONLENDIRME))
     # 4) olumsuz/soru biçimli ya da belirsiz cümle, okunamayan çatı isteği → sor (K21). İlk planda yalnız gerçek değişiklik soruları:

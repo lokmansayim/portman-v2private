@@ -1,0 +1,35 @@
+{
+ "id": "A05",
+ "talep": {
+  "niyet": "onay",
+  "katalog_kodu": "Ç8801-K",
+  "yapi_turu": null,
+  "kat_sayisi": null,
+  "oda_programi": null,
+  "alan_m2": null,
+  "dis_olcu": null,
+  "pano": null,
+  "veranda": null,
+  "cati": null,
+  "yukseklik_cm": null,
+  "pencereler": [],
+  "dis_kapi": null,
+  "ic_kapi": null,
+  "varyantlar": [],
+  "bina_ozellikleri": {},
+  "ozel_istekler": [],
+  "musteri": null,
+  "belirsizlikler": [
+   "Bayi yalnızca \"1\" yazdı; bu yanıt okuma sorusuna onay (1. seçenek) olarak yorumlandı, teyit edilmeli."
+  ],
+  "guven": "dusuk",
+  "ozet": "Ç8801-K ön onay planında salonun sol duvarındaki pencerenin 120x180 olmasına ilişkin okumayı \"1\" yanıtıyla onayladığınızı anlıyoruz."
+ },
+ "meta": {
+  "backend": "anthropic",
+  "model": "claude-opus-5-5",
+  "girdi_token": 5515,
+  "cikti_token": 453,
+  "sure_ms": 4673
+ }
+}

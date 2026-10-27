@@ -1,0 +1,55 @@
+{
+ "id": "T05",
+ "talep": {
+  "niyet": "revizyon",
+  "katalog_kodu": null,
+  "yapi_turu": null,
+  "kat_sayisi": null,
+  "oda_programi": null,
+  "alan_m2": null,
+  "dis_olcu": null,
+  "pano": null,
+  "veranda": null,
+  "cati": null,
+  "yukseklik_cm": null,
+  "pencereler": [
+   {
+    "mahal": "WC",
+    "olcu": null,
+    "adet": 1,
+    "duvar": null,
+    "islem": "degistir"
+   }
+  ],
+  "dis_kapi": null,
+  "ic_kapi": null,
+  "varyantlar": [
+   {
+    "tur": "pencere_degistir",
+    "aciklama": "WC'ye 80x50 pencere yapalım",
+    "parametreler": {
+     "mahal": "WC",
+     "eski": null,
+     "yeni": "80x50"
+    }
+   }
+  ],
+  "bina_ozellikleri": {},
+  "ozel_istekler": [],
+  "musteri": null,
+  "belirsizlikler": [
+   "80x50 pencere ölçüsü standart pencere listesinde yok.",
+   "WC'deki mevcut pencerenin mi değiştirileceği yoksa yeni pencere mi ekleneceği belirtilmemiş.",
+   "Pencerenin hangi duvara konacağı belirtilmemiş."
+  ],
+  "guven": "orta",
+  "ozet": "Ön onay planında WC'ye 80x50 ölçüsünde pencere yapılmasını istiyorsunuz."
+ },
+ "meta": {
+  "backend": "anthropic",
+  "model": "claude-opus-5-5",
+  "girdi_token": 5439,
+  "cikti_token": 640,
+  "sure_ms": 6415
+ }
+}
