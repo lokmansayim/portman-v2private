@@ -154,3 +154,22 @@ def test_besik_disi_cati_hata():
     ie["cati"]["tip"] = "kirma"
     with pytest.raises(K.KopruHatasi):
         K.tanim(copy.deepcopy(ie))
+
+
+def test_izgara_ici_veranda_pk01(tmp_path):
+    # İE-17: PK-01'in verandası ızgaranın içinde (ana çatının altında). Mahal poligonla, kirişler açık kenarlarda (kolona kadar, dışarıdan
+    # içeri 10 cm, duvar üstünden 10 cm aşağı), kolon Motor'un dikmesi; pafta iki sayfa ve teslim adıyla.
+    ie = json.loads((KOK / "testler" / "motor" / "veri" / "PK01.json").read_text(encoding="utf-8"))
+    t = K.tanim(copy.deepcopy(ie))
+    v = [m for m in t["mahaller"] if m["sinif"] == "veranda"]
+    assert [(m["ad"], m["etiket_m2"]) for m in v] == [("VERANDA", 6.68)]
+    assert [(k["kutu"], k["alt"], k["ust"]) for k in t["kirisler"]] == [([261.0, 0.0, 590.0, 10.0], 240.0, 250.0),
+                                                                        ([590.0, 5.0, 600.0, 205.0], 240.0, 250.0)]
+    assert [d["kutu"] for d in t["duvarlar"] if d["sinif"] == "kolon"] == [[590.0, 0.0, 600.0, 10.0]]
+    import pymupdf
+    o = K.pafta(ie, tmp_path, bilgi={"tarih": "27.10.2026"})
+    assert o["teslim"] is True
+    with pymupdf.open(tmp_path / "PK01_pafta.pdf") as d:
+        assert d.page_count == 2
+        s1 = " ".join(w[4] for w in d[0].get_text("words")); s2 = " ".join(w[4] for w in d[1].get_text("words"))
+    assert "VERANDA" in s1 and "ÇATI PLANI" in s2

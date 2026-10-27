@@ -20,7 +20,7 @@ import json
 import sys
 from pathlib import Path
 
-from shapely.geometry import Polygon, box
+from shapely.geometry import Point, Polygon, box
 from shapely.ops import unary_union
 
 from . import geometry as G
@@ -129,6 +129,50 @@ def _oda(plan: G.Plan, nokta) -> str | None:
     return None
 
 
+def _gomme_veranda(plan: G.Plan, gomme: list, mahal: list, H0: float) -> list[dict]:
+    """İE-17: ızgara içindeki açık mahaller (veranda; PK-01) mahal listesine poligonla girer; açık kenarları (`plan.acik_kenarlar`, taşan
+    verandanınkiler hariç) aynı hatta birleşip kiriş olur: dış çizgiden içeri `KIRIS_CM`, kotu duvar üstünden `KIRIS_CM` aşağı (taşan
+    verandanın kirişiyle aynı). Dikmeler `plan.dikmeler`'den (kolon). Dönen: kirişler."""
+    from . import veranda as VR
+    if not gomme:
+        return []
+    dis_kenar = {tuple(e[:4]) for v in plan.dis_verandalar for e in v["kenarlar"]}
+    hatlar: dict[tuple, list] = {}
+    for e in plan.acik_kenarlar:
+        if tuple(e[:4]) in dis_kenar:
+            continue
+        x0, y0, x1, y1 = e[:4]
+        if abs(y1 - y0) < 1e-6:
+            hatlar.setdefault(("x", round(y0, 4)), []).append(tuple(sorted((x0, x1))))
+        elif abs(x1 - x0) < 1e-6:
+            hatlar.setdefault(("y", round(x0, 4)), []).append(tuple(sorted((y0, y1))))
+        else:
+            raise KopruHatasi(f"Açık kenar eksene paralel değil: {e[:4]}")
+    kirisler = []
+    for m in gomme:
+        mahal.append({"ad": _ad(m.ad), "sinif": "veranda", "islev": ["veranda"],
+                      "poligon": [[round(a, 4), round(b, 4)] for a, b in list(m.poly.exterior.coords)[:-1]], "etiket_m2": round(m.alan_m2, 2)})
+    govde = unary_union([m.poly for m in gomme])
+    for (yon, c), parcalar in sorted(hatlar.items()):
+        parcalar.sort()
+        birlesik = [list(parcalar[0])]
+        for a0, a1 in parcalar[1:]:
+            if a0 <= birlesik[-1][1] + 0.5:
+                birlesik[-1][1] = max(birlesik[-1][1], a1)
+            else:
+                birlesik.append([a0, a1])
+        for a0, a1 in birlesik:
+            orta = (a0 + a1) / 2
+            arti = govde.contains(Point(orta, c + 1) if yon == "x" else Point(c + 1, orta))   # kiriş verandanın içine doğru
+            if yon == "x":
+                kutu = [a0, c, a1, c + VR.KIRIS_CM] if arti else [a0, c - VR.KIRIS_CM, a1, c]
+            else:
+                kutu = [c, a0, c + VR.KIRIS_CM, a1] if arti else [c - VR.KIRIS_CM, a0, c, a1]
+            kirisler.append({"ad": f"veranda kirişi {len(kirisler) + 1}", "kutu": [round(v, 4) for v in kutu], "alt": H0 - VR.KIRIS_CM, "ust": H0,
+                             "acik": [[round(a0, 4), round(a1, 4)]], "bolge": "veranda"})
+    return kirisler
+
+
 # ──────────────────────────────────────────────────────────────── tanım ──
 def tanim(ie: dict) -> dict:
     """İş Emri → genel motorun Yapı Tanımı biçimi (yalnız çizim biçimi için). Geometri pano Motor'undan (`G.kur`)."""
@@ -171,11 +215,15 @@ def tanim(ie: dict) -> dict:
     mahal = []
     oda_hz = {o["ad"]: o for o in hz["odalar"]}
     dis_ad = {v["ad"] for v in plan.dis_verandalar}
+    gomme = []
     for m in plan.mahaller.values():
         if m.ad in dis_ad:
             continue
-        if m.acik:
-            raise KopruHatasi(f"Izgara içindeki açık mahal ({m.ad}) şablon köprüsünde yok; taşan veranda `verandalar` ile yazılır")
+        if m.acik or m.tur in G.ACIK_MAHAL_TURLERI:   # İE-17: ızgara içindeki veranda (PK-01 gibi) ana çatının altında; kirişi açık kenarlarda
+            if m.poly is None:
+                raise KopruHatasi(f"Açık mahalin poligonu yok: {m.ad}")
+            gomme.append(m)
+            continue
         o = oda_hz.get(m.ad)
         if o is None:
             raise KopruHatasi(f"Mahalin poligonu yok: {m.ad}")
@@ -196,6 +244,7 @@ def tanim(ie: dict) -> dict:
             yatay = (kx1 - kx0) >= (ky1 - ky0)
             kirisler.append({"ad": f"{_ad(v['ad'])} kiriş {j + 1}", "kutu": [kx0, ky0, kx1, ky1], "alt": H0 - VR.KIRIS_CM, "ust": H0,
                              "acik": [[kx0, kx1] if yatay else [ky0, ky1]], "bolge": "veranda"})
+    kirisler += _gomme_veranda(plan, gomme, mahal, H0)
     for i, (dx0, dy0, dx1, dy1) in enumerate(plan.dikmeler):
         duvarlar.append({"ad": f"KLN{i + 1}", "sinif": "kolon", "kutu": [dx0, dy0, dx1, dy1], "yukseklik": H0 - VR.KIRIS_CM, "kaplama_yuksekligi": H0 - VR.KIRIS_CM})
     for w in duvarlar:
