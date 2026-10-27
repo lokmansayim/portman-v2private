@@ -26,13 +26,13 @@ BASLIK = [f"{CG.AD[t]} GÖRÜNÜŞ - ÇALIŞMA" for t in CG.TARAFLAR]
 # ev: (özellik tablosunun çatı satırı, mahya − duvar üstü (paftanın kesiti), profilin ve çatının alt yazısı)
 BEKLENEN = {
     "AP13": ("Beşik + Cumba — %32,88 eğim, 30 cm saçak, 10 cm topuk", 149.4,
-             ["Makas 788 cm'yi geçer; mahya 763 cm boyunca uzanır. Ölçüler cm.",
+             ["Makas 788 cm'yi geçer; ana mahya 823 cm (alın saçaklarıyla), cumbanın mahyası 225,75 cm. Ölçüler cm.",
               "Beşik + Cumba çatı | cumba ön cephede 0–391,5 cm, eğim ana çatıyla aynı (%32,88)"]),
     "AP16": ("Beşik + Cumba — %32,88 eğim, 30 cm saçak, 10 cm topuk", 170.86,
-             ["Makas 918,5 cm'yi geçer; mahya 763 cm boyunca uzanır. Ölçüler cm.",
+             ["Makas 918,5 cm'yi geçer; ana mahya 823 cm (alın saçaklarıyla), cumbanın mahyası 225,75 cm. Ölçüler cm.",
               "Beşik + Cumba çatı | cumba ön cephede 0–391,5 cm, eğim ana çatıyla aynı (%32,88)"]),
     "AP01": ("Kırma — %33 eğim, 30 cm saçak, 10 cm topuk", 184.9,
-             ["Makas 1000 cm'yi geçer; mahya 1400 cm boyunca uzanır. Ölçüler cm.",
+             ["Makas 1000 cm'yi geçer; mahya 438,7 cm, kırma uçları arası. Ölçüler cm.",
               "Kırma çatı | uç yüzler sol %32,5 · sağ %36,2"]),
 }
 

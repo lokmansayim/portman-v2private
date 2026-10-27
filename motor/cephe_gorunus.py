@@ -60,6 +60,15 @@ def cephe(plan: G.Plan, taraf: str) -> dict:
     return {"en": en, "derz": sorted(v for v in us if 1e-6 < v < en - 1e-6), "acikliklar": sorted(ac, key=lambda k: k["u0"])}
 
 
+def mahya_boylari(plan: G.Plan, ie: dict) -> list[float]:
+    """Çatının mahyalarının plandaki boyları, büyükten küçüğe (`cati_genel.cati_kur` kenarları): beşik + cumbada ana mahya (alın saçaklarıyla)
+    ve cumbanın mahyası (saçağından ana çatıya girdiği yere), kırmada kırma uçları arası."""
+    from . import cati_prefabrik as CP
+    from .genel import cati_genel
+    ck = cati_genel.cati_kur(CP.cati(plan, ie))
+    return sorted((round(float(k["plan_boy"]), 2) for k in ck["kenarlar"] if k["tur"] == "mahya"), reverse=True)
+
+
 def cati_cizgileri(plan: G.Plan, ie: dict, taraf: str) -> dict:
     """Çatının bu cephedeki çizgileri: {"cizgiler": [[(u, z), ...]], "egimler": [(u, z, eğim)], "u0", "u1": saçak uçları, "tepe": (u, z),
     "sacak_kotu"}. z zeminden (duvar üstü + topuk saçak ucunda)."""

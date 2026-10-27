@@ -145,6 +145,17 @@ def test_kirma_uc_yuzleri(cati_ev):
         assert r[t]["tepe"] == (pytest.approx(500.0), pytest.approx(434.9, abs=0.01)), t
 
 
+def test_mahya_boylari(cati_ev):
+    # profilin alt yazısı bunu yazar: beşik + cumbada ana mahya gövde boyu + iki alın saçağı, cumbanınki saçağından ana çatının yüzüne
+    # (genişliğin yarısı + saçak); kırmada kırma uçları arası (gövde boyu değil)
+    ad, ie, plan, r = cati_ev
+    x0, y0, x1, y1 = G.govde_kutusu(plan)
+    if ie["cati"]["tip"] == "kirma":
+        assert CG.mahya_boylari(plan, ie) == [pytest.approx(946.85 - 508.15, abs=0.01)]
+    else:
+        assert CG.mahya_boylari(plan, ie) == [pytest.approx(x1 - x0 + 60), pytest.approx(391.5 / 2 + 30)]
+
+
 def test_besik_ve_tasan_veranda_burada_cizilmez():
     # beşik bugünkü ön görünüşüyle çizilir (`dxf_out.ciz_on_gorunus`, bayt bayt aynı); beşik dışı çatıyla taşan veranda PR-2'de
     ie = _ie("PK01")

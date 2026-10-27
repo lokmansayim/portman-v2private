@@ -680,9 +680,14 @@ class Cizici:
                 self.text(f"Pencere üst kotu {fmt(hy - lento)} cm | Lento {fmt(lento)} cm | Bina yüksekliği {fmt(hy)} cm", (W / 2 + ox, bot - 150), 15, "ON_YAZI")
         x0, y0, x1, y1 = G.govde_kutusu(plan)
         mx = cati.get("makas_ekseni", "x") == "x"
-        en, boy = (x1 - x0, y1 - y0) if mx else (y1 - y0, x1 - x0)
+        en = (x1 - x0) if mx else (y1 - y0)
         op = xr + 360.0 + sacak + 63.0
-        self.ciz_cati_profili(op, top + 50.0, en=en, alt_yazi=f"Makas {fmt(en)} cm'yi geçer; mahya {fmt(boy)} cm boyunca uzanır. Ölçüler cm.")
+        m = CG.mahya_boylari(plan, ie)                       # mahyanın gerçek boyu (kırmada gövde boyu değil; geometri hakemi, 3. tur)
+        if cati["tip"] == "kirma":
+            mahya = f"mahya {fmt(m[0])} cm, kırma uçları arası"
+        else:
+            mahya = f"ana mahya {fmt(m[0])} cm (alın saçaklarıyla), cumbanın mahyası {fmt(m[1])} cm"
+        self.ciz_cati_profili(op, top + 50.0, en=en, alt_yazi=f"Makas {fmt(en)} cm'yi geçer; {mahya}. Ölçüler cm.")
         e = float(cati["egim_yuzde"])
         if cati["tip"] == "kirma":
             uc = cati.get("kirma_egimleri") or {}
