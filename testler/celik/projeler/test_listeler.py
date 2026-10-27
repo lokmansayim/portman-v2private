@@ -16,7 +16,9 @@ sys.path.insert(0, str(KOK))
 from testler.celik.projeler import liste_yap  # noqa: E402
 
 BURADA = Path(__file__).resolve().parent
-LISTELER = sorted(BURADA.glob("*/bizim_liste.json"))
+# açık beşin listeleri; kör ve kapalı projelerin listeleri (sözlükleri listeyle donar; İE-16 PR-4) `test_kor_listeler.py`'de
+LISTELER = sorted(p for p in BURADA.glob("*/bizim_liste.json")
+                  if not liste_yap.sozluk_donar_mi(json.loads(p.read_text(encoding="utf-8"))["kod"]))
 
 
 def sha(p: Path) -> str:
