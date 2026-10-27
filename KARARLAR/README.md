@@ -107,7 +107,11 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | İE | İE-14 | talepten plana (14a: tek kat çelik; LLM-önce üretim ve revizyon) | alındı (14.10; `ie-14-talepten-plana`) |
 | İE | İE-15 | kimlik kartlı model: yerleşim planları ve adetler aynı modelden (D-24; KH-1, K1, KH-2, K2, KH-3, K3; eski `ie-11-pr2-kor-test` dalındaki "İE-15 · LLM'li katman" o dal birleşmeden önce yeni numara alır) | alındı (19.10; `claude/project-thread-far6rz`) |
 | İE | İE-16 | çelik hattı: çelik projeleri ve çelik çizim kuralları (D-25; PR-1 hakem ve mühür, PR-2 hedef örnek, PR-3 çizim kuralları, PR-4 kör ölçüm) | alındı (25.10; `claude/project-thread-1ff0ou`) |
-| İE | **İE-17** | — | **sıradaki boş** |
+| İE | İE-17 | 28 ev çizimi: prefabrik çatı ve görünüş (CIO, 27.10) | ayrıldı (27.10) |
+| İE | İE-18 | montaj rehberleri (CIO, 27.10; 28 ev çizimine bağlı) | ayrıldı (27.10) |
+| İE | İE-19 | altın set 100: bayi cümleleri, beklenen okuma ve karar, kör dilim (pano 51; bağlı 22 ve 92) | alındı (27.10; `claude/project-thread-ssawjb`) |
+| İE | İE-20 | WhatsApp talep formu ve görsel (CIO, 27.10; pano 110, 61, 83) | ayrıldı (27.10) |
+| İE | **İE-21** | — | **sıradaki boş** |
 | BK | BK-01–BK-08 | bu depo; BK-08 8a sonrası temizlik (`bk-08-8a-temizlik`) | yazıldı |
 | BK | BK-09 | metin ve çizim düzeltmeleri, G1 (`bk-09-metin-cizim`, `bk-09-cizim-g1`) | alındı (14.10) |
 | BK | BK-10 | 8b sonrası düzeltmeler (DXF `.txt` notu, geç gelen Excel, Patron'a Excel bağlantısı, çelikte kapı değişikliği; `docs/devir/2026-10-14_IE-08_8b_Devri.md` › Sıradaki; CIO'nun Notion defterinde D-19 ile: 24 saat kapanış kuralı) | ayrıldı |
