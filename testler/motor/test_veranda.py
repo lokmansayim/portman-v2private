@@ -2,8 +2,8 @@
 
 Motor önceden yalnız pano ızgarasının içindeki verandayı çiziyordu; gövdenin dışına taşan veranda (TK-01: önde 386 × 181, arkada 261 × 130)
 girdide yer bulamıyordu. Şimdi veranda gövdenin dış yüzüne dışarıdan eklenir: açık mahal, üç açık kenar (kiriş), iki dış köşede dikme ve
-kendi çatısı. Plan, DXF ve doğrulama, bayi paftası (plan ve çatı planı), IFC ve yükleme listesi aynı geometriden; görünüşler canlı
-Örnek Şablon paftasından (`motor/sablon_kopru.py`, `test_sablon_kopru.py`). Liste
+kendi çatısı. Plan, DXF ve doğrulama (ön görünüş ve çatı profili dahil), bayi paftası (plan ve çatı planı), IFC ve yükleme listesi aynı
+geometriden; bayiye canlıdaki gibi teknik pafta (`dxf_out`) ve plan görseli (`bayi_gorseli`) gider. Liste
 TK-01'in geçici yolundaki listeyle (gövde Motor'dan, verandalar elle; `Teklif_Calisma/TK-01/gecici_r01`) bütün satırlarda aynı adeti verir;
 burada o değerler sabit. `verandalar` yoksa hiçbiri devreye girmez (referans gerilemesi bayt bayt aynı). Bu bir Motor kilididir, paftaya
 uygunluk kanıtı değildir.
