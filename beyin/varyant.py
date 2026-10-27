@@ -82,14 +82,15 @@ def ayna(is_emri: dict, eksen: str) -> dict:
         W, H = plan.W, plan.H
         ie["dikmeler"] = [([W - x - 10.0, y] if eksen == "x" else [x, H - y - 10.0]) for x, y in ie["dikmeler"]]
 
-    # 5b) gövdeden taşan verandalar (BK-14; cm, gerçek çerçeve): cephe aynalanır, cephe boyunca konum gövdenin dış yüzüne göre çevrilir
+    # 5b) gövdeden taşan verandalar (BK-14; cm, gerçek çerçeve): cephe aynalanır, cephe boyunca konum mahaller ve dikmeler gibi planın
+    # ölçüsüne göre çevrilir (x → W − x; ayak izine göre değil: ızgara içi veranda bir kenarı boydan boya kaplarsa ayak izi dar kalır)
     if ie.get("verandalar"):
-        fx0, fy0, fx1, fy1 = G.kur(is_emri).footprint().bounds
+        plan = G.kur(is_emri)
         for v in ie["verandalar"]:
             boyuna = v.get("cephe") in ("on", "arka")              # konum x boyunca
             if (eksen == "x") == boyuna:
-                a, b = (fx0, fx1) if boyuna else (fy0, fy1)
-                v["bas_cm"], v["bit_cm"] = a + b - float(v["bit_cm"]), a + b - float(v["bas_cm"])
+                L = plan.W if boyuna else plan.H
+                v["bas_cm"], v["bit_cm"] = L - float(v["bit_cm"]), L - float(v["bas_cm"])
             v["cephe"] = (DUVAR_X if eksen == "x" else DUVAR_Y).get(v.get("cephe"), v.get("cephe"))
 
     # 6) giriş cephesi / varsayımlar / no

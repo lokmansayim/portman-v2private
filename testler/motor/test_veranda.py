@@ -188,6 +188,12 @@ def test_ayna_verandayi_cevirir():
         ie = json.loads(json.dumps(p6001)); ie["verandalar"] = [v]
         assert G.kur(varyant.ayna(ie, "x")).dis_verandalar[0]["rect"] == x
         assert G.kur(varyant.ayna(ie, "y")).dis_verandalar[0]["rect"] == y
+    # ayak izi simetrik değil (ızgara içi veranda sağ kenarı boydan boya kaplar): konum planın ölçüsüne göre, ayak izine göre değil (hakem 2. tur)
+    yan = _oku(KOK / "is_emri" / "YAN_VERANDALI_2plus1_6x8p5.json")
+    for m in yan["mahaller"]:
+        m["konum_pano"] = {"VERANDA": [[5, 0, 6, 8.5]], "SALON": [[2.5, 4, 5, 8.5]]}.get(m["ad"], m["konum_pano"])
+    yan["verandalar"] = [{"ad": "ARKA V", "cephe": "arka", "bas_cm": 100, "bit_cm": 400, "derinlik_cm": 150}]
+    assert G.kur(varyant.ayna(yan, "x")).dis_verandalar[0]["rect"] == (373.0, 1076.75, 673.0, 1226.75)   # W 773: sağdan 100 içeride
 
 
 def test_bayi_plan_gorseli_verandayi_kirpmaz(tmp_path):
