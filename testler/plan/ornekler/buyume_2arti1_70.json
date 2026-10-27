@@ -1,0 +1,11 @@
+{"dis_olcu": {"en": 700, "boy": 1000},
+ "mahaller": [
+  {"ad": "Salon - Mutfak", "islev": "salon", "dikdortgenler": [[0, 0, 700, 450], [0, 450, 220, 660]]},
+  {"ad": "Yatak Odası 1", "islev": "yatak_odasi", "dikdortgenler": [[0, 660, 350, 1000]]},
+  {"ad": "Yatak Odası 2", "islev": "yatak_odasi", "dikdortgenler": [[350, 660, 700, 1000]]},
+  {"ad": "Banyo", "islev": "banyo", "dikdortgenler": [[485, 450, 700, 660]]},
+  {"ad": "Hol", "islev": "hol", "dikdortgenler": [[220, 450, 485, 660]]}],
+ "kapilar": [{"arasinda": ["dis", "Salon - Mutfak"], "cephe": "G"}, {"arasinda": ["Salon - Mutfak", "Hol"]}, {"arasinda": ["Hol", "Yatak Odası 1"]}, {"arasinda": ["Hol", "Yatak Odası 2"]}, {"arasinda": ["Hol", "Banyo"]}],
+ "pencereler": [{"mahal": "Salon - Mutfak", "cephe": "G", "olcu": "120x180", "adet": 1}, {"mahal": "Salon - Mutfak", "cephe": "B", "olcu": "120x120", "adet": 1}, {"mahal": "Yatak Odası 1", "cephe": "K", "olcu": "120x120", "adet": 1}, {"mahal": "Yatak Odası 2", "cephe": "K", "olcu": "120x120", "adet": 1}, {"mahal": "Banyo", "cephe": "D", "olcu": "60x40", "adet": 1}],
+ "cati": {"tip": "besik"},
+ "gerekce": "çözücü: gündüz bandı G"}
