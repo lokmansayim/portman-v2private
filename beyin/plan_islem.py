@@ -6,6 +6,8 @@ LLM planı yeniden yazmaz (eski `plan_uretici.duzenle` kalktı). İşlemler:
 - `kapi_ekle` / `kapi_kaldir` {mahal, mahal_b ('dis' = dış kapı)}
 - `pencere_ekle` / `pencere_kaldir` {mahal, cephe?, olcu?}
 - `cati_tipi` {tip: besik|kirma}; `dis_karkas_140`
+- `oda_ekle` {islev, mahal?}: yalnız ebeveyn banyosu (BK-15): banyo yatak odasının köşesinden kesilir, kapısı o odadan; sığmazsa oda bir
+  kenarından büyütülüp yeniden denenir (ev en az büyüyen yönde). Öteki oda istekleri gerekçesiyle `uygulanamayan`'a.
 Çevrilemeyen istek `uygulanamayan`'a bayinin sözüyle (sessiz düşme yok). Kodun uygulayamadığı işlem de oraya gerekçesiyle yazılır.
 "Uygulanan" metni kodun hesapladığı farktır (`plan_uretici.plan_farki`).
 """
@@ -19,10 +21,10 @@ from typing import Literal, Optional
 from pydantic import BaseModel, Field, ValidationError
 
 from beyin import numara
-from beyin.plan_denetim import denetle
+from beyin.plan_denetim import ISLEV_ADI, denetle, kurallar
 from beyin.plan_cozucu import cepheler
 from beyin.plan_sema import PENCERE_OLCULERI
-from beyin.plan_uyarlama import _kesitler, uzat
+from beyin.plan_uyarlama import _kesitler, _komsu_mu, _yeniden_ac, uzat
 
 ARAC_ADI = "plan_islemleri_kaydet"
 ARAC_ACIKLAMA = "Bayinin yeni plan revizyon isteğini koordinatsız işlemlere çevir. Yalnız bu araçla cevap ver."
@@ -31,7 +33,7 @@ YONLER = {"G": (1, -1), "K": (1, 1), "B": (0, -1), "D": (0, 1)}       # (eksen i
 YON_SOZU = {"G": "ön", "K": "arka", "B": "sol", "D": "sağ"}           # bayiye giden gerekçede (PROMPT'taki sözcükler)
 ISLEM_SOZU = {"oda_buyut": "oda büyütme", "oda_kucult": "oda küçültme", "kapi_ekle": "kapı ekleme", "kapi_kaldir": "kapı kaldırma",
               "pencere_ekle": "pencere ekleme", "pencere_kaldir": "pencere kaldırma", "cati_tipi": "çatı tipi değişikliği",
-              "dis_karkas_140": "dış duvarların 140'lık olması"}
+              "dis_karkas_140": "dış duvarların 140'lık olması", "oda_ekle": "oda ekleme"}
 
 
 def _soz(o: dict) -> str:
@@ -46,7 +48,8 @@ def _dis_cepheler(p: dict) -> dict[str, list[str]]:
 
 
 class Islem(BaseModel):
-    op: Literal["oda_buyut", "oda_kucult", "kapi_ekle", "kapi_kaldir", "pencere_ekle", "pencere_kaldir", "cati_tipi", "dis_karkas_140"]
+    op: Literal["oda_buyut", "oda_kucult", "kapi_ekle", "kapi_kaldir", "pencere_ekle", "pencere_kaldir", "cati_tipi", "dis_karkas_140",
+                "oda_ekle"]
     mahal: Optional[str] = None
     mahal_b: Optional[str] = Field(None, description="Kapının öbür yanı; dış kapı için 'dis'")
     yon: Optional[Literal["G", "K", "B", "D"]] = Field(None, description="Hangi yana büyüsün/küçülsün: G ön, K arka, B sol, D sağ")
@@ -55,6 +58,7 @@ class Islem(BaseModel):
     olcu: Optional[Literal["120x120", "120x180", "60x40", "120x100", "120x160", "160x120", "160x180", "180x180", "80x120", "120x50",
                            "80x180", "60x60"]] = None
     tip: Optional[Literal["besik", "kirma"]] = None
+    islev: Optional[Literal["banyo", "yatak_odasi", "salon", "mutfak", "hol", "depo"]] = Field(None, description="oda_ekle: yeni odanın işlevi")
     alinti: str = Field("", description="Bayinin bu işleme karşılık gelen sözü")
 
 
@@ -68,7 +72,10 @@ yazmazsın: isteği aşağıdaki işlemlere çevirirsin; uygulamayı ve denetimi
 
 İşlemler: oda_buyut / oda_kucult (mahal, yon: G ön, K arka, B sol, D sağ; cm — bayi sayı vermediyse 50), kapi_ekle / kapi_kaldir (mahal,
 mahal_b; dış kapı için mahal_b "dis" ve istenirse cephe — dış kapıyı başka cepheye almak da kapi_ekle'dir), pencere_ekle / pencere_kaldir
-(mahal, cephe, olcu), cati_tipi (tip), dis_karkas_140.
+(mahal, cephe, olcu), cati_tipi (tip), dis_karkas_140, oda_ekle (islev, mahal).
+- oda_ekle: ebeveyn banyosu (yatak odasının içinden açılan banyo) için islev banyo, mahal o yatak odası; bayi hangi oda demediyse mahal'i
+  boş bırak. Başka oda istenirse (yatak odası, mutfak, kiler, holden açılan ortak banyo) de oda_ekle yaz: islev'i ve odanın açılacağı
+  mahali (ör. Hol) yaz.
 - Mahal adlarını tablodaki gibi yaz. Yalnız bayinin bu mesajda istediğini yaz; söylenmeyeni ekleme.
 - Pencere cephesini mahalin tablodaki dış cephelerinden seç. Çatı tipi yalnız besik ya da kirma olabilir; L, cumba ve başka çatı biçimlerini
   `uygulanamayan`'a yaz.
@@ -264,7 +271,130 @@ def uygula(plan: dict, islemler: list[dict]) -> tuple[dict, list[str]]:
             p["cati"].pop("mahya_yonu", None)
         elif op == "dis_karkas_140":
             p["dis_karkas"] = 140
+        elif op == "oda_ekle":
+            q, neden = _ebeveyn_banyosu(p, o)
+            if q is None:
+                olmayan.append(f"{_soz(o)}: {neden}")
+            else:
+                p = q
     return p, olmayan
+
+
+# ── oda ekleme: ebeveyn banyosu (BK-15) ──────────────────────────────────────────────────────────────────────────────────
+IC_PAY = 5.25                           # eksen → net, iç duvar yüzü (yarım karkas 8 + alçıpan 1,25; denetçideki 10,5'in yarısı)
+KISA_PARCA_CM = 15                      # "çelikte 15 cm parça çıkmaz" (D-10; denetçideki sınır)
+BANYO_OLCULERI = sorted(((w, h) for w in range(200, 265, 5) for h in range(200, 265, 5)), key=lambda t: (t[0] * t[1], abs(t[0] - t[1]), t))
+KOSELER = ((0, 0), (1, 0), (0, 1), (1, 1))  # (x0 | x1, y0 | y1) köşesi; sabit sıra
+KOL_CM = 100                            # banyonun yanında kalan yatak odası kolu (eksenden; geçit)
+KAPI_DUVARI_CM = 100                    # yatak odasının var olan kapısı için kalan ortak duvar (iç kapı 90)
+PENCERE_PAYI_CM = 35                    # cephe koşusundan pencereye kalan (köşe ve duvar payları; denetçide 130 cm koşuya 97 cm sığar)
+BUYUME = tuple((yon, cm) for yon in "GKBD" for cm in (100, 150, 200, 250))
+EN_COK_DENETIM = 12                     # bir yerleşimde denetçiye giden en çok aday (denetim ~0,15 sn)
+EBEVEYN_ADI = "Ebeveyn Banyo"           # "Ebeveyn Banyosu" ~2 m'lik banyoda plan görselinin sabit yazısına sığmıyor, duvarı aşıyordu
+
+
+def _alan(r: list) -> int:
+    return (r[2] - r[0]) * (r[3] - r[1])
+
+
+def _banyo_kes(p: dict, yatak: str, ad: str) -> dict | None:
+    """Banyoyu yatak odasının ana dikdörtgeninin bir köşesinden keser (oda L olur, kapı odadan, vasistas `_yeniden_ac`'tan). Adaylar ucuz ön
+    elemeden (oda en küçüğü ve kollar, dış cephe, banyonun net alanı ve dar kenarı, 15 cm parça) geçer ve sıralanır: önce var olan banyoya
+    bitişik (ıslak hacimler yan yana, tesisat), sonra penceresi giriş cephesinde olmayan, sonra küçük ölçü; eşitlikte köşe sırası. Kapı duvarı
+    ve pencere denetiminden sonra denetçiden geçen ilk aday alınır. Yatak odasının pencereleri yerinde kalır: penceresinin cephesini daraltan
+    aday atılır (pencere başka cepheye taşınmaz)."""
+    k = kurallar()["odalar"]
+    W, H = p["dis_olcu"]["en"], p["dis_olcu"]["boy"]
+    dis_pay = (p.get("dis_karkas") or 80) / 10 + 2 * 1.25        # dış duvar yüzü: karkas + iki kaplama (plan_derle; 140'lık içe kalınlaşır)
+    cizgi = [{r[e] for x in p["mahaller"] for r in x["dikdortgenler"]} | {r[e + 2] for x in p["mahaller"] for r in x["dikdortgenler"]}
+             | {0, (W, H)[e]} for e in (0, 1)]
+    giris = {kp.get("cephe") for kp in p["kapilar"] if "dis" in kp["arasinda"] and kp.get("cephe")}
+    banyolar = [x for x in p["mahaller"] if x["islev"] == "banyo"]
+    m = next(x for x in p["mahaller"] if x["ad"] == yatak)
+    i = max(range(len(m["dikdortgenler"])), key=lambda j: _alan(m["dikdortgenler"][j]))
+    x0, y0, x1, y1 = m["dikdortgenler"][i]
+    toplam = sum(_alan(r) for r in m["dikdortgenler"])
+    pay = lambda a, b, ust: (dis_pay if a == 0 else IC_PAY) + (dis_pay if b == ust else IC_PAY)      # noqa: E731
+    adaylar = []
+    for w, h in BANYO_OLCULERI:
+        if x1 - x0 - w < KOL_CM or y1 - y0 - h < KOL_CM or toplam - w * h < k["yatak_odasi"]["en_az_m2"] * 1e4:
+            continue
+        for sira, (kx, ky) in enumerate(KOSELER):
+            b = [x0 if kx == 0 else x1 - w, y0 if ky == 0 else y1 - h]
+            b += [b[0] + w, b[1] + h]
+            cephe = {c for c, var in zip("BDGK", (b[0] == 0, b[2] == W, b[1] == 0, b[3] == H)) if var}
+            if not cephe:                                                         # vasistas dış cepheden
+                continue
+            nw, nh = w - pay(b[0], b[2], W), h - pay(b[1], b[3], H)
+            if nw * nh < k["banyo"]["en_az_m2"] * 1e4 or min(nw, nh) < k["banyo"]["dar_kenar_cm"]:
+                continue
+            if any(0 < abs(a - c) <= KISA_PARCA_CM for e in (0, 1) for a in (b[e], b[e + 2]) for c in cizgi[e]):
+                continue
+            islak = any(_komsu_mu({"dikdortgenler": [b]}, x, 60) for x in banyolar)
+            adaylar.append(((not islak, bool(cephe & giris), w * h, abs(w - h), w, sira), b, kx, ky))
+    n = 0
+    for _, b, kx, ky in sorted(adaylar, key=lambda t: t[0]):
+        w, h = b[2] - b[0], b[3] - b[1]
+        q = copy.deepcopy(p)
+        mm = next(x for x in q["mahaller"] if x["ad"] == yatak)
+        serit = [x0, y0 + h, x1, y1] if ky == 0 else [x0, y0, x1, y1 - h]          # banyo satırları dışında tam en
+        yan = [b[2], b[1], x1, b[3]] if kx == 0 else [x0, b[1], b[0], b[3]]         # banyonun yanı
+        mm["dikdortgenler"] = mm["dikdortgenler"][:i] + mm["dikdortgenler"][i + 1:] + [serit, yan]
+        q["mahaller"].append({"ad": ad, "islev": "banyo", "dikdortgenler": [b]})
+        q["kapilar"].append({"arasinda": [yatak, ad]})
+        komsular = {x for kp in p["kapilar"] if yatak in kp["arasinda"] for x in kp["arasinda"] if x not in ("dis", yatak)}
+        if any(not _komsu_mu(mm, x, KAPI_DUVARI_CM) for x in q["mahaller"] if x["ad"] in komsular):
+            continue
+        ce = cepheler(q["mahaller"], W, H).get(yatak, {})
+        if any(ce.get(pc["cephe"], 0) < int(pc["olcu"].split("x")[0]) * int(pc.get("adet") or 1) + PENCERE_PAYI_CM
+               for pc in p["pencereler"] if pc["mahal"] == yatak):
+            continue
+        _yeniden_ac(q)
+        if not {yatak, ad} <= {pc["mahal"] for pc in q["pencereler"]}:
+            continue
+        n += 1
+        if denetle(q)["gecerli"]:
+            return q
+        if n >= EN_COK_DENETIM:
+            return None
+    return None
+
+
+def _ebeveyn_banyosu(p: dict, o: dict) -> tuple[dict | None, str | None]:
+    """`oda_ekle`: yalnız banyo ve yalnız yatak odasının içinden. Oda söylenmediyse en büyük yatak odası (eşitlikte plandaki ilk). Odaya
+    sığmazsa (oda en küçüğün altına düşer, kollar daralır, pencere ya da kapı yeri kalmaz) oda bir kenarından 100–250 cm büyütülüp yeniden
+    denenir (`_oda_kenari`: dış cephede ev büyür, iç kenarda komşu küçülür); geçenlerden evi en az büyüten, eşitlikte G, K, B, D sırası."""
+    islev = o.get("islev")
+    if islev != "banyo":
+        return None, f"{ISLEV_ADI.get(islev, 'yeni oda')} ekleme otomatik yapılamıyor (yalnız yatak odasının içinden ebeveyn banyosu eklenebiliyor)"
+    if o.get("mahal"):
+        m = next((x for x in p["mahaller"] if x["ad"] == o["mahal"]), None)
+        if m is None:
+            return None, f"'{o['mahal']}' adlı mahal yok"
+        if m["islev"] != "yatak_odasi":
+            return None, f"banyo yalnız bir yatak odasının içinden eklenebiliyor ({m['ad']} yatak odası değil)"
+    else:
+        yataklar = [x for x in p["mahaller"] if x["islev"] == "yatak_odasi"]
+        if not yataklar:
+            return None, "planda yatak odası yok"
+        m = max(yataklar, key=lambda x: sum(_alan(r) for r in x["dikdortgenler"]))
+    adlar = {x["ad"] for x in p["mahaller"]}
+    ad = next(a for a in [EBEVEYN_ADI] + [f"{EBEVEYN_ADI} {j}" for j in range(2, 10)] if a not in adlar)
+    q = _banyo_kes(p, m["ad"], ad)
+    if q is not None:
+        return q, None
+    brut = lambda x: x["dis_olcu"]["en"] * x["dis_olcu"]["boy"]       # noqa: E731
+    adaylar = []
+    for sira, (yon, cm) in enumerate(BUYUME):
+        if adaylar and adaylar[-1][2] == yon:                           # bu yönde en küçük büyüme bulundu
+            continue
+        g, _ = _oda_kenari(p, m["ad"], yon, cm)
+        q = _banyo_kes(g, m["ad"], ad) if g is not None else None
+        if q is not None:
+            adaylar.append((brut(q) - brut(p), sira, yon, q))
+    if not adaylar:
+        return None, f"{m['ad']} içine sığmıyor; odayı büyüterek de yerleştiremedim"
+    return min(adaylar, key=lambda t: t[:2])[3], None
 
 
 IHLAL_TURU = re.compile(r"^(dış kapı|kapı|pencere|çatı|geometri):\s*")       # yalnız tek ad; "kapı yayları çakışıyor:" cümledir, kalır
