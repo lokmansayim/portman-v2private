@@ -9,6 +9,13 @@ Yeni pencere için hazırlıklar:
 - Dış çizim denetimi: `deneme/2026-09-30_asama2/kos.py --dxf`.
 - Mac'te `24_Astra_Cizimler/`.
 
+**27 Ekim 2026 akşam eki (Pano satır 12 · GitHub Actions doğrulaması; dal `claude/project-thread-xbdfzd`, `main` `3ef60d8`'den; PR #51):**
+- **Karar ve onay:** plan PF `CI_Dogrulama/plan.md`, Lokman 27 Ekim 16:51 UTC kartı "Planla kur". Motor, Beyin, kanal, testler, kurallar, referans ve canlı değişmedi.
+- **Yapıldı:** `.github/workflows/dogrulama.yml`: her PR'da, `main`'e her push'ta ve elle `bash araclar/ortam_kur.sh --dogrula` (harness, tam referans, bütün pytest, yerel Postgres 16; root ile, Python 3.11, tam git geçmişi). Secrets yok, yalnız okuma izni. Kaynaklı testler (`PORTMAN_CELIK_KAYNAK`, `PORTMAN_PAFTA_DIZINI`, `PORTMAN_KOR_*`) burada atlanır; gerçek dosyalar GitHub'a yüklenmez.
+- **Kanıt (PR #51):** 1. koşu yeşil (harness 22/22, referansla aynı, 1936 geçti, 24 atlandı; 21 dk); kasıtlı bozma (oda kapısı yaslaması 11,5 → 12,5 cm) kırmızı (4 test düştü: `test_pk01_motor_kilidi` ve `test_k3`'ün üç anahtar yeri; referans bunu görmedi, P6001 yolunda değil; 37 dk); geri alma koşusu PR'da.
+- **Sınır:** koşu 21–37 dk (pytest 17–28 dk). "Kırmızıysa birleştirme yok" GitHub'a zorlatılmadı (korumalı dal ayrı ayar); birleştirmeden önce PR'daki tike bakılır.
+- **Bekleyen (Lokman):** PR'ın `main`'e birleştirilmesi. Birleşince açık PR'lar bir sonraki push'ta doğrulamayı kendiliğinden alır.
+
 **27 Ekim 2026 öğle eki (İE-16 · PR-3c, Lokman'ın 17 kural cevabı; `docs/is_emirleri/IE-16.md` › Değişiklik (PR-3c)):**
 - **Karar ve onay:** cevaplar Lokman 27 Ekim 10:33 UTC (aynen PF `Celik_Cizim_Kurallari/PR-3/3c/kural_cevaplari.md`); plan `PR-3/3c/plan.md`, kart 10:48 "Planla kur". Hakem ve mühür değişmedi; altın testler (kitap 0.19 pimi) ve prefabrik (kitap seti 0.19) değişmedi; canlı değişmedi.
 - **Yapıldı (karkas kuralı, yalnız `karkas: kural` tanımda; eski kopyalar eski davranışı verir):** panel oda bölmesinde biter, bölme 516 cm'yi aşarsa eşit bölünür (A1, A5); çatı panelinde ve çatı üstü panelinde çapraz yok (A3); 140'lık duvar motorun ortalamasıyla (A4; planda "parçalardan" yazmıştım, cevabın sözüyle kuruldu, beyanlı); makas tek açıklıkta 8 m'yi aşarsa 1,2 mm, ayrı satır (B5; açık beşte hiçbiri); çatı üstü paneli 180 cm × beş makas aralığı, C profiller makasa dik 60 cm arayla ve eğime paralel aynı arayla (B7, B9; ÇP-03 paftasındaki ızgara); adedi tanımda yazmayan açık alan çatı paneli 180 cm'lik, ek yapınınki tek panel (B9; planda "tek panel" yazmıştım, cevaptaki 180 cm ve açık paftalar 3/3, beyanlı); tavan paneli en çok 13,60 m (B6); baca üst payı 50 cm, tanım yazılırken (B8). B1–B4 kayıtta; Alpha mini üretim dosyası çalışması canlıdan sonra.
