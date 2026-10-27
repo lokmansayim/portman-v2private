@@ -5,11 +5,15 @@ kareler ve bir tür dışarıda bırakılınca hata), baca ve çatı panelinin p
 Dizilim açık beş projenin tanımında: türlerin sayısı kuralın bugünkü sonucudur (paftayla kıyası İE-16 › PR-3b'de; burada gerileme),
 kuralın kaynak metnindeki ana çatı sayıları paftanınkiyle aynı. Karkas istemeyen tanımda kural hiç çağrılmaz (bugünkü çıktı bayt bayt
 aynı: altın testler ve `dogrula.py`).
+PR-3c (Lokman, 27 Ekim 2026): çatı panelinde ve çatı üstü panelinde çapraz yok, çatı üstü paneli 180 cm × beş makas aralığı, adedi
+tanımda yazmayan çatı paneli 180 cm'lik, tavan paneli en çok 13,60 m, tek açıklığı 8 m'yi aşan makas 1,2 mm. PR-3b'nin davranışı eski
+kural kopyasıyla (`ESKI`) aynen sınanır.
 """
 from __future__ import annotations
 import copy
 import json
 import math
+import re
 import sys
 from collections import Counter
 from pathlib import Path
@@ -21,6 +25,8 @@ sys.path.insert(0, str(KOK))
 from motor.genel import cati_genel, girdi_genel, karkas, kural as kurallar_oku, makas, makas_pafta, yapi  # noqa: E402
 
 KURAL = karkas.oku(karkas.KURAL)
+ESKI_YOL = KOK / "testler" / "celik" / "projeler" / "setler" / "7940e1d20cc18652.json"   # PR-3b'nin kural kopyası
+ESKI = karkas.oku(ESKI_YOL)
 KT01 = KOK / "modeller" / "KT01.json"
 PROFIL_BOYLARI = KOK / "deneme" / "2026-10-06_kor_test" / "tanim" / "KT01_profil_boylari.json"
 PROJELER = KOK / "testler" / "celik" / "projeler"
@@ -86,15 +92,18 @@ def test_panel_boyu_kt01_modelinden_yeniden_hesaplanir():
 
 def test_baca_ve_cati_paneli_kt01_modeliyle():
     """Baca: dört panel, ikisi dış ölçüde (KT-01 BACA1 10,487 m), ikisi profil derinliği kadar dar (BACA2 9,687); kural 10,536 ve 9,736.
-    Çatı paneli: müştemilatın tek paneli (MPNL1 68,889 m, 546 × 337); kural 70,79 (+%2,8), et ek yapıda 0,8."""
+    Çatı paneli: müştemilatın tek paneli (MPNL1 68,889 m, 546 × 337); PR-3b'nin kuralıyla (çaprazlı) 70,79 (+%2,8), et ek yapıda 0,8.
+    PR-3c'de çatı panelinde çapraz yok (A3): 55,54 m (−%19,4; modeldeki panelde çapraz payı kadar profil var, İE-16 › PR-3c)."""
     t, c, y = _yukle(KT01)
     b = karkas.bacalar(y, t, KURAL)
     assert len(b) == 1 and [p["profil_boyu_m"] for p in b[0]["paneller"]] == [10.536, 10.536, 9.736, 9.736]
     pb = json.loads(PROFIL_BOYLARI.read_text(encoding="utf-8"))
     assert (pb["BACA1"]["boy_m"], pb["BACA2"]["boy_m"]) == (10.487, 9.687)
-    cp = makas.cati_panelleri(c, y, KURAL)
-    assert len(cp) == 1 and cp[0]["olcu_cm"] == [546.0, 337.04] and cp[0]["profil"] == "80x45x0,8" and cp[0]["ortu"] == "ek yapı"
-    assert round((cp[0]["profil_boyu_m"] / pb["MPNL1"]["boy_m"] - 1) * 100, 1) == 2.8 and round(cp[0]["profil_boyu_m"], 2) == 70.79
+    for k, capraz, boy, fark in ((ESKI, True, 70.79, 2.8), (KURAL, False, 55.54, -19.4)):
+        cp = makas.cati_panelleri(c, y, k)
+        assert len(cp) == 1 and cp[0]["olcu_cm"] == [546.0, 337.04] and cp[0]["profil"] == "80x45x0,8" and cp[0]["ortu"] == "ek yapı"
+        assert ("capraz" in cp[0]["uyeler_m"]) == capraz
+        assert round((cp[0]["profil_boyu_m"] / pb["MPNL1"]["boy_m"] - 1) * 100, 1) == fark and round(cp[0]["profil_boyu_m"], 2) == boy
 
 
 @pytest.mark.parametrize("kod, beklenen", [
@@ -291,13 +300,32 @@ def test_konumlar_esit_aralikli_en_cok_kural_araligi():
 
 
 def test_yontem_a_panelleri_yalniz_panel_yontemiyle():
-    """Çatı üstü ve tavan paneli yalnız yöntem A'da kurulur; tavan panelinde çapraz yok (`tavan_paneli.capraz`)."""
+    """Çatı üstü ve tavan paneli yalnız yöntem A'da kurulur; tavan panelinde çapraz yok (`tavan_paneli.capraz`). PR-3b'nin kopyasında çatı
+    üstü paneli saçak boyunca 366'lık şeritler, çaprazlı (ÇP-03 14); PR-3c'de eğim boyunca 180 cm, saçak boyunca beş makas aralığı (625),
+    çaprazsız (B7, B9; ÇP-03 25, paftada 20)."""
     t, c, y = _yukle(PROJELER / TANIMLAR["CP03"])
-    a = makas.kur(t, y, KURAL, "panel")
-    b = makas.kur(t, y, KURAL, "omega_asik")
-    assert (len(a["ust_panelleri"]), len(a["tavan_panelleri"])) == (14, 12)
-    assert "ust_panelleri" not in b and "tavan_panelleri" not in b and a["makaslar"] == b["makaslar"]
-    assert all("capraz" not in p["uyeler_m"] for p in a["tavan_panelleri"]) and all("capraz" in p["uyeler_m"] for p in a["ust_panelleri"])
+    for k, n_ust, capraz in ((ESKI, 14, True), (KURAL, 25, False)):
+        a = makas.kur(t, y, k, "panel")
+        b = makas.kur(t, y, k, "omega_asik")
+        assert (len(a["ust_panelleri"]), len(a["tavan_panelleri"])) == (n_ust, 12)
+        assert "ust_panelleri" not in b and "tavan_panelleri" not in b and a["makaslar"] == b["makaslar"]
+        assert all("capraz" not in p["uyeler_m"] for p in a["tavan_panelleri"])
+        assert all(("capraz" in p["uyeler_m"]) == capraz for p in a["ust_panelleri"])
+    up = karkas.d(KURAL, "ust_paneli")
+    boy = up["boy_makas_araligi"] * makas._d(KURAL, "makas")["aralik_cm"]
+    assert (up["en_cm"], boy) == (180, 625)
+    assert all(p["olcu_cm"][0] <= boy + 0.01 and p["olcu_cm"][1] <= up["en_cm"] + 0.01 for p in a["ust_panelleri"])
+    assert all(set(p["uyeler_m"]) == {"cevre", "makasa_dik", "egime_paralel"} for p in a["ust_panelleri"])
+
+
+def test_cati_ustu_paneli_izgara():
+    """Çatı üstü panelinin üyeleri (PR-3c): çevre, makasa dik C profiller eğim boyunca 60 cm arayla (B7, B9) ve eğime paralel profiller saçak
+    boyunca aynı arayla (ÇP-03 paftasında iki yönde 60 cm'lik ızgara). 300 × 180: çevre 9,6; makasa dik 60 ve 120'de 2 × 3; eğime paralel
+    60…240'ta 4 × 1,8. Son aralık 1 cm'den kısaysa o profil kenardır (300 × 120,5: makasa dik yalnız 60'ta)."""
+    from shapely.geometry import box
+    assert makas.izgara_uyeleri(box(0, 0, 300, 180), 60) == pytest.approx({"cevre": 9.6, "makasa_dik": 6.0, "egime_paralel": 7.2})
+    assert makas.izgara_uyeleri(box(0, 0, 300, 120.5), 60)["makasa_dik"] == pytest.approx(3.0)
+    assert karkas.d(KURAL, "ust_paneli")["profil_araligi_cm"] == 60 and "ust_paneli" not in ESKI      # eski kopya: duvar paneli kuralıyla
 
 
 def _girdi(yol: Path) -> dict:
@@ -316,7 +344,7 @@ def test_gruplar_ve_yukleme_girdisi():
     t = json.loads((PROJELER / TANIMLAR["CP03"]).read_text(encoding="utf-8"))
     y = yapi.kur(t)
     g = karkas.gruplar(karkas.kur(y, t, KURAL, "panel"), y, t, KURAL, kur["celik"]["profil_kg_m"]["deger"])
-    assert (g["makas"]["adet"], g["ust_paneli"]["adet"], g["tavan_paneli"]["adet"]) == (24, 14, 12)
+    assert (g["makas"]["adet"], g["ust_paneli"]["adet"], g["tavan_paneli"]["adet"]) == (24, 25, 12)
     t = json.loads((PROJELER / TANIMLAR["CP13"]).read_text(encoding="utf-8"))
     y = yapi.kur(t)
     g = karkas.gruplar(karkas.kur(y, t, KURAL), y, t, KURAL, kur["celik"]["profil_kg_m"]["deger"])
@@ -326,7 +354,7 @@ def test_gruplar_ve_yukleme_girdisi():
     ce = _girdi(PROJELER / TANIMLAR["CP06"])["celik"]
     assert ce["cati"]["panel_adedi"] == 15 and ce["cati"]["not"] == "makas kuralından: 13 tam, 1 kısa, 1 kırma çaprazı"
     ce = _girdi(PROJELER / TANIMLAR["CP03"])["celik"]
-    assert {k: v["adet"] for k, v in ce["a_panelleri"].items()} == {"ust_paneli": 14, "tavan_paneli": 12}
+    assert {k: v["adet"] for k, v in ce["a_panelleri"].items()} == {"ust_paneli": 25, "tavan_paneli": 12}
 
 
 def test_karkas_istemeyen_tanimda_cati_kurali_yok(tmp_path):
@@ -378,3 +406,113 @@ def test_cati_paneli_planda_acilimdaki_sirayla(kod):
         assert (max(u) - min(u), (max(v) - min(v)) * dz["kok"]) == (pytest.approx(r["olcu_cm"][0], abs=0.05), pytest.approx(r["olcu_cm"][1], abs=0.05))
         ters += dz["sag"][0] + dz["sag"][1] < 0
     assert (ters > 0) == (kod in ("CP07", "CP13"))     # sag eksi yönde: ÇP-07'nin verandası (dört panel; eski sıra burada tersti), ÇP-13 tek panel
+
+
+@pytest.mark.parametrize("kod, en_uzun", [("CP06", 548.0), ("CP03", 645.0), ("CP07", 540.4), ("CP13", 518.0), ("CP14", 534.0)])
+def test_makasin_tek_acikligi_ve_eti(kod, en_uzun):
+    """PR-3c (B5): makasın altında desteksiz en uzun aralık (dış, iç, ek duvar, kolon ve makasa dik kiriş destektir); 8 m'yi aşarsa 1,2 mm.
+    Açık beşte ana makaslar 9,55 m'ye varsa da desteksiz aralık en çok 6,45 m: hepsi 0,8. Eski kopyada et yazılmaz."""
+    t, c, y = _yukle(PROJELER / TANIMLAR[kod])
+    m = makas.kur(t, y, KURAL, "panel" if kod == "CP03" else None)["makaslar"]
+    ta = [x["tek_aciklik_cm"] for x in m if x["tek_aciklik_cm"] is not None]
+    assert max(ta) == en_uzun and all(x["et"] == "0,8" for x in m)
+    assert all(x["tek_aciklik_cm"] is None or x["tek_aciklik_cm"] <= x["acik_cm"] + 0.1 for x in m)
+    assert not any("et" in x or "tek_aciklik_cm" in x for x in makas.kur(t, y, ESKI)["makaslar"])
+
+
+def test_olculemeyen_tek_aciklik_sessiz_degil(monkeypatch):
+    """Tek açıklığı ölçülemeyen makas (iki desteği bulunamayan, kırma çaprazı) ince sayılır; açıklığı sınırı aşıyorsa uyarı yazar. Açık beşte
+    ölçülemeyenlerin açıklığı sınırın altında: uyarı yok."""
+    t, c, y = _yukle(PROJELER / TANIMLAR["CP06"])
+    assert not any(u.startswith("makas eti:") for u in makas.kur(t, y, KURAL)["uyarilar"])
+    monkeypatch.setattr(makas, "tek_aciklik", lambda x, y_, t_: None)
+    m = makas.kur(t, y, KURAL)
+    uzun = [x for x in m["makaslar"] if x["acik_cm"] > 800]
+    assert uzun and all(x["et"] == "0,8" for x in m["makaslar"])
+    assert len([u for u in m["uyarilar"] if u.startswith("makas eti:") and "ölçülemedi" in u]) == len(uzun)
+
+
+def test_kalin_makas_ayri_satir(tmp_path, monkeypatch):
+    """Tek açıklığı sınırı aşan makas kuralın kalın etiyle ayrı grup (`makas_kalin`) ve listede ayrı satır ('Çatı makas panelleri (1,2 mm)');
+    hepsi kalınsa makas satırının kendisi kalın. Sınır 5 m'ye indirilmiş kopyayla ÇP-06: 548 ve 518 cm'lik açıklıklar kalın."""
+    from testler.celik.projeler import liste_yap
+    d = json.loads(karkas.KURAL.read_text(encoding="utf-8"))
+    d["makas_eti"]["deger"]["tek_aciklik_en_cok_cm"] = 500
+    yol = tmp_path / "kural.json"
+    yol.write_text(json.dumps(d, ensure_ascii=False), encoding="utf-8")
+    k = karkas.oku(yol)
+    t, c, y = _yukle(PROJELER / TANIMLAR["CP06"])
+    kk = karkas.kur(y, t, k)
+    kalin = [x for x in kk["cati"]["makaslar"] if x["et"] == "1,2"]
+    assert kalin and all(x["tek_aciklik_cm"] > 500 for x in kalin)
+    g = karkas.gruplar(kk, y, t, k, kurallar_oku.oku()["celik"]["profil_kg_m"]["deger"])
+    assert g["makas_kalin"]["adet"] == len(kalin) and g["makas_kalin"]["profil"] == "80x45x1,2"
+    assert g["makas"]["adet"] + g["makas_kalin"]["adet"] == len(kk["cati"]["makaslar"])
+    monkeypatch.setenv("PORTMAN_KARKAS", str(yol))
+    es = [x for x in _girdi(PROJELER / TANIMLAR["CP06"])["celik"]["ek_satirlar"] if x["ad"].startswith("Çatı makas panelleri")]
+    assert [(x["ad"], x["panel_adedi"], x["profil"]) for x in es] == [("Çatı makas panelleri (1,2 mm)", len(kalin), "80x45x1,2")]
+    ce = _girdi(PROJELER / TANIMLAR["CP06"])["celik"]["cati"]                 # ince satırın notu kalınları saymaz
+    assert ce["panel_adedi"] == len(kk["cati"]["makaslar"]) - len(kalin) == sum(int(n) for n in re.findall(r"(\d+) ", ce["not"].split(":", 1)[1]))
+    from motor.genel import makas_pafta                                           # makas paftasının tablosunda kalın makasın eti
+    yazi = []
+    ax = type("Ax", (), {"axis": lambda s, *a: None, "transAxes": None, "text": lambda s, x, y_, m, **kw: yazi.append(m)})()
+    makas_pafta.tablo(ax, makas_pafta.adlar(kk["cati"]), [], kk["cati"], kk, "80x45x0,8")
+    assert sum(1 for s in yazi[0].splitlines() if s.endswith("et 1,2")) == len(kalin) and f"({len(kalin)} makas 1,2 mm" in yazi[0]
+    assert liste_yap.celik_turu("Çatı makas panelleri (1,2 mm)") == liste_yap.celik_turu("Çatı makas panelleri") == "makas"
+    hepsi = {**kk, "cati": {**kk["cati"], "makaslar": [{**x, "et": "1,2"} for x in kk["cati"]["makaslar"]]}}
+    g = karkas.gruplar(hepsi, y, t, k, {})
+    assert "makas_kalin" not in g and g["makas"]["profil"] == "80x45x1,2"
+
+
+def test_ust_kotu_yazmayan_baca_uyari():
+    """Üst kotu tanımda yazmayan baca listeden ve paftadan düşer (metrajdaki gibi), sessiz değil: karkas kaydında uyarı (B8'in 50 cm'si tanım
+    yazılırken uygulanır)."""
+    t = json.loads((PROJELER / "CP13" / "CP13.json").read_text(encoding="utf-8"))
+    bacalar = [w for w in t["duvarlar"] if w.get("sinif") == "baca"]
+    assert bacalar and not any("bacanın üst kotu" in u for u in karkas.kur(yapi.kur(t), t, KURAL)["uyarilar"])
+    for w in bacalar:
+        w.pop("ust_kot", None)
+    kk = karkas.kur(yapi.kur(t), t, KURAL)
+    assert kk["bacalar"] == [] and len([u for u in kk["uyarilar"] if "bacanın üst kotu tanımda yazmıyor" in u]) == len(bacalar)
+    for eski in ("a3683af36f42b92d", "7940e1d20cc18652"):                       # PR-3a ve PR-3b'nin kopyaları: eski davranış (uyarısız düşer)
+        kk = karkas.kur(yapi.kur(t), t, karkas.oku(KOK / "testler" / "celik" / "projeler" / "setler" / f"{eski}.json"))
+        assert kk["bacalar"] == [] and not any("bacanın üst kotu" in u for u in kk["uyarilar"])
+
+
+def test_cati_ustu_panelinin_kucuk_parcasi_panel_olmaz():
+    """Kırma yüzünün köşesinde ızgaranın kestiği uç (kısa kenarı makas kalınlığından dar ya da 100 cm²'den küçük) panel olmaz, uyarı yazar.
+    Üçgen yüz 1000 × 360: saçak boyunca 2, eğim boyunca 2 parça; eğik kenar orta çizgiyi 510'da keser, sağ üst gözde 18 cm²'lik uç kalır."""
+    from shapely.geometry import Polygon
+    c = {"duzlemler": [{"ad": "kırma", "ust_yapi": None, "acilim": Polygon([(0, 0), (1000, 0), (20, 360)])}]}
+    uyari = []
+    up = makas.ust_panelleri(c, KURAL, uyari)
+    assert len(up) == 3 and all(min(p["olcu_cm"]) > 8 for p in up)
+    assert len(uyari) == 1 and uyari[0].startswith("çatı üstü paneli: kırma düzleminde 18 cm² parça")
+    uyari = []
+    assert len(makas.ust_panelleri(c, ESKI, uyari)) == 3 and uyari == []          # eski kopya: saçak boyunca 366'ya göre üç şerit, süzgeç yok
+
+
+def test_cati_paneli_adedi_tanimda_yoksa_kuraldan():
+    """PR-3c (B9): adedi tanımda yazmayan açık alan çatı paneli (kör proje) saçak boyunca 180 cm'lik; açık paftalarla: ÇP-14 verandası 5
+    (paftada 5), ÇP-07 verandası 3 (3) ve sundurması 1 (1). Ek yapının çatı paneli tek panel (ÇP-13 = KT-01 müştemilatı; tanımda adet
+    yazmıyor). Liste ve makas paftası aynı adedi okur. Eski kopyada düzlem başına 1."""
+    for kod in ("CP07", "CP14"):
+        t = json.loads((PROJELER / TANIMLAR[kod]).read_text(encoding="utf-8"))
+        yazili = [dz.pop("cati_paneli_adedi") for dz in t["cati"]["duzlemler"] if "cati_paneli_adedi" in dz]
+        c, y = cati_genel.cati_kur(t["cati"]), yapi.kur(t)
+        assert len(makas.cati_panelleri(c, y, KURAL)) == len(makas_pafta.cati_paneli_planlari(c, KURAL, y)) == sum(yazili)
+        assert len(makas.cati_panelleri(c, y, ESKI)) == len(makas_pafta.cati_paneli_planlari(c)) == len(yazili)
+    t, c, y = _yukle(PROJELER / TANIMLAR["CP07"])
+    assert len(makas.cati_panelleri(c, y, KURAL)) == len(makas_pafta.cati_paneli_planlari(c, KURAL, y)) == 4    # yazılı adet (3 + 1) geçer
+    t, c, y = _yukle(PROJELER / TANIMLAR["CP13"])
+    dz = next(dz for dz in c["duzlemler"] if dz.get("ust_yapi") == "cati_paneli")
+    assert "cati_paneli_adedi" not in dz and makas.ek_yapi_mi(dz, y) and makas.cati_paneli_adedi(dz, KURAL, y) == 1
+
+
+def test_tavan_paneli_en_uzun_13_60():
+    """PR-3c (B6): uzun kenarı tırın 13,60 m'sini aşan tavan paneli o kenar boyunca eşit bölünür; sınır yoksa (eski kopya) bölünmez."""
+    from shapely.geometry import box
+    assert karkas.d(KURAL, "tavan_paneli")["en_uzun_cm"] == 1360 and "en_uzun_cm" not in karkas.d(ESKI, "tavan_paneli")
+    p = makas._uzunu_bol(box(0, 0, 3000, 110), 1360)
+    assert len(p) == 3 and all(abs(g.bounds[2] - g.bounds[0] - 1000) < 0.01 for g in p)
+    assert len(makas._uzunu_bol(box(0, 0, 110, 1360), 1360)) == 1 and len(makas._uzunu_bol(box(0, 0, 3000, 110), None)) == 1

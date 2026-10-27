@@ -7,8 +7,11 @@ Yalnız tanım isterse çalışır (`"karkas": "kural"`); istemeyen tanımın ç
 
 1. **Koşu.** Aynı sınıf, aynı doğrultu, aynı hat (kalınlık), aynı profil ve yükseklikteki, uç uca değen duvarlar tek koşudur: tanım
    duvarı nasıl yazmış olursa olsun (bölmeli ya da bölmesiz) koşu aynıdır. Eğik üst kotlu duvar kendi başına koşudur.
-2. **Bölme.** Koşu `ceil(boy / bolme.hedef_cm)` eşit panele bölünür; ek yeri bir açıklığın içine düşerse açıklığın yakın kenarına
-   kayar. Panel bu yüzden hedef boyu aşabilir: aşan her panel kayda (`uyarilar`) ve paftaya yazılır, sessiz kalmaz.
+2. **Bölme** (İE-16 PR-3c; Lokman, 27 Ekim 2026: "duvar panelini her bir oda bölmesinde bitiririz"). Panel her oda bölmesinde biter:
+   koşu, ona dik bağlanan her oda duvarının ekseninde bölünür (`eklemler`); pencere ve kapı panelin içinde kalır. İki bölme arası
+   `bolme.en_uzun_cm`'den uzunsa eşit bölünür. Ek yeri bir açıklığın içine düşerse açıklığın yakın kenarına kayar; panel bu yüzden sınırı
+   aşabilir: aşan her panel kayda (`uyarilar`) ve paftaya yazılır, sessiz kalmaz. Eski kural kopyalarında (`bolme.hedef_cm`, PR-3a) koşu
+   `ceil(boy / hedef_cm)` eşit panele bölünür.
 3. **Üyeler** (panel başına, cm): alt ve üst başlık; ızgara dikmeleri (panel başından `dikme_araligi_cm` arayla, uçta da bir dikme);
    açıklığın içine düşen ızgara dikmesi kırpıktır (lentonun üstü ve denizliğin altı); açıklığın kenarında, yarım aralık içinde tam dikme
    yoksa kenar dikmesi; açıklığın başlık levhası (net + `levha_payi_cm`) ve pencerede denizlik levhası; kuşaklar (`kusak_kotlari_cm`,
@@ -99,21 +102,51 @@ def _acikliklar(y: dict, kosu: dict) -> list[dict]:
     return sorted((a for a in y["acikliklar"] if a["duvar"] in adlar), key=lambda a: a["a0"])
 
 
-def bol(kosu: dict, acik: list[dict], k: dict) -> list[tuple[float, float]]:
-    """Koşunun panelleri [(baş, son)], mutlak konum (cm). Eşit bölme; açıklığın içine düşen ek yeri yakın kenara kayar (panel hedef
-    boyu aşabilir; `kur` aşanı `uyarilar`'a yazar)."""
+def eklemler(y: dict, kosu: dict) -> list[float]:
+    """Koşuya dik bağlanan oda duvarlarının (dış, iç, ek; korkuluk değil) eksenleri, koşu doğrultusunda mutlak konum (cm). Koşunun ucunda
+    (köşede) bağlanan duvar sayılmaz: ekseni uca, kendi kalınlığından yakınsa köşedir. Bölmenin `oda_bolmesi` kuralı (İE-16 PR-3c)."""
+    h0, h1 = kosu["hat"]
+    out = set()
+    for w in y["duvarlar"]:
+        if w["sinif"] not in ("dis", "ic", "ek") or w["yon"] == kosu["yon"]:
+            continue
+        x0, y0, x1, y1 = w["kutu"]
+        eks, (e0, e1) = ((x0 + x1) / 2, (y0, y1)) if kosu["yon"] == "x" else ((y0 + y1) / 2, (x0, x1))
+        kal = (x1 - x0) if kosu["yon"] == "x" else (y1 - y0)
+        if e1 < h0 - TOL or e0 > h1 + TOL:                   # koşunun hattına değmiyor
+            continue
+        if kosu["bas"] + kal + TOL < eks < kosu["son"] - kal - TOL:
+            out.add(round(eks, 1))
+    return sorted(out)
+
+
+def _kaydir(j: float, acik: list[dict]) -> float:
+    """Açıklığın içine düşen ek yeri açıklığın yakın kenarına kayar."""
+    for a in acik:
+        if a["a0"] < j < a["a1"]:
+            j = a["a0"] if j - a["a0"] <= a["a1"] - j else a["a1"]
+    return j
+
+
+def bol(kosu: dict, acik: list[dict], k: dict, eklem: list[float] = ()) -> list[tuple[float, float]]:
+    """Koşunun panelleri [(baş, son)], mutlak konum (cm); açıklığın içine düşen ek yeri yakın kenara kayar (panel sınırı aşabilir; `kur`
+    aşanı `uyarilar`'a yazar). Kuralın `bolme` anahtarı:
+    - `oda_bolmesi` (İE-16 PR-3c; Lokman, 27 Ekim 2026): panel her oda bölmesinde biter (`eklem`: koşuya dik bağlanan duvarların ekseni);
+      pencere ve kapı panelin içinde kalır; iki eklem arası `en_uzun_cm`'den uzunsa eşit bölünür.
+    - `hedef_cm` (PR-3a; eski kural kopyaları): koşu `ceil(boy / hedef_cm)` eşit panele bölünür, eklem okunmaz."""
     b = d(k, "bolme")
     bas, son = kosu["bas"], kosu["son"]
-    L = son - bas
-    n = max(1, math.ceil(L / b["hedef_cm"] - 1e-9))
+    if b.get("oda_bolmesi"):
+        sinirlar, uzun = [bas] + [round(_kaydir(j, acik), 1) for j in eklem] + [son], b["en_uzun_cm"]
+    else:
+        sinirlar, uzun = [bas, son], b["hedef_cm"]
     ekler = []
-    for i in range(1, n):
-        j = bas + L * i / n
-        for a in acik:
-            if a["a0"] < j < a["a1"]:
-                j = a["a0"] if j - a["a0"] <= a["a1"] - j else a["a1"]
-        ekler.append(round(j, 1))
-    noktalar = [bas] + sorted(set(ekler)) + [son]
+    for s0, s1 in zip(sinirlar, sinirlar[1:]):
+        L = s1 - s0
+        n = max(1, math.ceil(L / uzun - 1e-9))
+        ekler += [round(_kaydir(s0 + L * i / n, acik), 1) for i in range(1, n)]
+    noktalar = sorted(set(sinirlar[1:-1] + ekler))
+    noktalar = [bas] + [j for j in noktalar if bas < j < son] + [son]
     return [(p0, p1) for p0, p1 in zip(noktalar, noktalar[1:]) if p1 - p0 > TOL]
 
 
@@ -181,22 +214,36 @@ def kur(y: dict, t: dict, k: dict, yontem: str | None = None) -> dict:
     for ks in kosular(y, t):
         acik = _acikliklar(y, ks)
         H = yapi._yukseklik(ks["_ilk"]) if len(ks["duvarlar"]) == 1 else float(ks["yukseklik"])
-        for p0, p1 in bol(ks, acik, k):
+        ekl = eklemler(y, ks) if d(k, "bolme").get("oda_bolmesi") else []
+        sabit = {ks["bas"], ks["son"], *ekl}            # oda bölmesindeki kısa panel paftada da var: kaymayla kısa kalan uyarı yazar
+        for p0, p1 in bol(ks, acik, k, ekl):
             ap = [(max(a["a0"], p0) - p0, min(a["a1"], p1) - p0, a["z0"], a["z1"]) for a in acik if a["a1"] > p0 + TOL and a["a0"] < p1 - TOL]
             u = uyeler(p1 - p0, H, ap, k)
             x0, y0, x1, y1 = (p0, ks["hat"][0], p1, ks["hat"][1]) if ks["yon"] == "x" else (ks["hat"][0], p0, ks["hat"][1], p1)
             paneller.append({"sinif": ks["sinif"], "profil": ks["profil"], "kosu": ks["duvarlar"], "bas": round(p0, 2), "son": round(p1, 2),
-                             "_kosunun_parcasi": p0 > ks["bas"] + TOL or p1 < ks["son"] - TOL,
+                             "_kosunun_parcasi": (p0 > ks["bas"] + TOL or p1 < ks["son"] - TOL)
+                                                 and not (any(abs(p0 - v) < TOL for v in sabit) and any(abs(p1 - v) < TOL for v in sabit)),
                              "boy_cm": round(p1 - p0, 2), "yukseklik_cm": round(H, 2), "kutu": [round(v, 2) for v in (x0, y0, x1, y1)],
                              "acikliklar": [a["ad"] for a in acik if a["a1"] > p0 + TOL and a["a0"] < p1 - TOL],
                              "uyeler_m": {ad: round(v, 4) for ad, v in u.items()}, "profil_boyu_m": round(sum(u.values()), 4)})
     _adlandir(paneller)
-    hedef = d(k, "bolme")["hedef_cm"]
+    b = d(k, "bolme")
+    hedef = b["en_uzun_cm"] if b.get("oda_bolmesi") else b["hedef_cm"]
     S = d(k, "dikme_araligi_cm")
-    uyarilar = [f"{p['ad']} ({', '.join(p['kosu'])}): panel {p['boy_cm']} cm, bölmenin hedefi {hedef} cm; ek yeri açıklığın kenarına kaydı"
-                for p in paneller if p["boy_cm"] > hedef + TOL]
-    uyarilar += [f"{p['ad']} ({', '.join(p['kosu'])}): panel {p['boy_cm']} cm, bir dikme aralığından ({S} cm) kısa; ek yeri açıklığın kenarına kaydı"
-                 for p in paneller if p.pop("_kosunun_parcasi") and p["boy_cm"] < S - TOL]
+    uyarilar = [f"{p['ad']} ({', '.join(p['kosu'])}): panel {p['boy_cm']} cm, bölmenin " + ("en uzunu" if b.get("oda_bolmesi") else "hedefi")
+                + f" {hedef} cm; ek yeri açıklığın kenarına kaydı" for p in paneller if p["boy_cm"] > hedef + TOL]
+    for p in paneller:
+        der = float(p["profil"].split("x")[0]) / 10 if p["profil"] else 8.0
+        if p.pop("_kosunun_parcasi"):
+            if p["boy_cm"] < S - TOL:
+                uyarilar.append(f"{p['ad']} ({', '.join(p['kosu'])}): panel {p['boy_cm']} cm, bir dikme aralığından ({S} cm) kısa; ek yeri açıklığın kenarına kaydı")
+        elif p["boy_cm"] < 2 * der - TOL:   # iki ucu oda bölmesi: kısa panel paftada da var, ama iki profil derinliğinden kısası iki bağlantının çakışması
+            uyarilar.append(f"{p['ad']} ({', '.join(p['kosu'])}): panel {p['boy_cm']} cm, iki profil derinliğinden ({2 * der:g} cm) kısa; "
+                            "iki ucundaki oda bölmesi birbirine çok yakın")
+    # üst kotu yazmayan baca çatıyı delmez (metrajdaki gibi): satırı ve paftası yok, sessiz değil (PR-3c'nin anahtarıyla; eski kopyada eski davranış)
+    if "ust_pay_cm" in k.get("baca", {}).get("deger", {}):
+        uyarilar += [f"{w['ad']}: bacanın üst kotu tanımda yazmıyor; baca listede ve paftada yok (üst kot tanım yazılırken: çatının en üst "
+                     f"kotu + {d(k, 'baca')['ust_pay_cm']:g} cm, `baca.ust_pay_cm`)" for w in y["duvarlar"] if w["sinif"] == "baca" and not w.get("ust_kot")]
     kol = d(k, "kolon")["profil_m_m"]
     kolonlar = [{"ad": w["ad"], "yukseklik_cm": yapi._yukseklik(w), "profil_boyu_m": round(kol * yapi._yukseklik(w) / 100, 4)}
                 for w in y["duvarlar"] if w["sinif"] == "kolon"]
@@ -283,7 +330,13 @@ def gruplar(kk: dict, y: dict, t: dict, k: dict, kg_m: dict) -> dict:
     ck = kk.get("cati")
     if ck:
         if ck["makaslar"]:               # profil tanımda yazmaz: kitabın çatı et kalınlığı (`girdi_genel`)
-            out["makas"] = kayit(len(ck["makaslar"]), sum(x["profil_boyu_m"] for x in ck["makaslar"]), None)
+            ince = [x for x in ck["makaslar"] if x.get("et") in (None, d(k, "makas_eti")["ince"] if "makas_eti" in k else None)]
+            kalin = [x for x in ck["makaslar"] if x not in ince]
+            if ince:
+                out["makas"] = kayit(len(ince), sum(x["profil_boyu_m"] for x in ince), None)
+            if kalin:                    # tek açıklığı 8 m'yi aşan makas (`makas_eti`, İE-16 PR-3c): ayrı satır; hepsi kalınsa makas satırı odur
+                out["makas" if not ince else "makas_kalin"] = kayit(len(kalin), sum(x["profil_boyu_m"] for x in kalin),
+                                                                     f"80x45x{d(k, 'makas_eti')['kalin']}")
         if ck["cati_panelleri"]:
             pr = {x["profil"] for x in ck["cati_panelleri"]}
             if len(pr) > 1:
@@ -317,7 +370,8 @@ def main() -> int:
         print(f"{x['ad']} baca {x['profil']}  {x['profil_boyu_m']:7.2f} m  ({len(x['paneller'])} panel)")
     ck = kk["cati"] or {}
     for x in ck.get("makaslar", []):
-        print(f"makas {x['tur']:7s} {x['aile']:14s} {x['eksen'] or '-'} {x['konum'] if x['konum'] is not None else '-':>7}  açıklık {x['acik_cm']:6.1f}  {x['profil_boyu_m']:6.2f} m")
+        print(f"makas {x['tur']:7s} {x['aile']:14s} {x['eksen'] or '-'} {x['konum'] if x['konum'] is not None else '-':>7}  açıklık {x['acik_cm']:6.1f}  {x['profil_boyu_m']:6.2f} m"
+              + (f"  tek açıklık {x['tek_aciklik_cm'] if x['tek_aciklik_cm'] is not None else '-'}  et {x['et']}" if "et" in x else ""))
     for anahtar in ("cati_panelleri", "ust_panelleri", "tavan_panelleri"):
         if ck.get(anahtar):
             print(f"{anahtar}: {len(ck[anahtar])} panel, {sum(x['profil_boyu_m'] for x in ck[anahtar]):.2f} m")

@@ -8,14 +8,14 @@
  "kural_seti": {
   "yol": "kurallar/liste/kurallar.json",
   "sema": "portman.yukleme_kurallari/0.20-taslak",
-  "sha256": "51e813a5107a047f625c95592126cddb90d4e22215c27bf0dff490405ec6117b",
-  "kopya": "testler/celik/projeler/setler/51e813a5107a047f.json"
+  "sha256": "a01cbf2a810c8e7fcede59dcf2ed9b86c31b815977456b8753da8afbaae506ea",
+  "kopya": "testler/celik/projeler/setler/a01cbf2a810c8e7f.json"
  },
  "karkas_kurali": {
   "yol": "kurallar/karkas/celik_karkas.json",
   "sema": "portman.celik_karkas/0.1-taslak",
-  "sha256": "7940e1d20cc18652d9996761830e50bb93628356558bc13f685e69218660e41c",
-  "kopya": "testler/celik/projeler/setler/7940e1d20cc18652.json"
+  "sha256": "8a051c8ff1a5d96837e2af285606b46e0f24a62d6b927a7eea2f621ed7841c33",
+  "kopya": "testler/celik/projeler/setler/8a051c8ff1a5d968.json"
  },
  "yontem": {
   "kod": "omega_asik",
@@ -26,8 +26,8 @@
   "sha256": "2f3a7a20c94710eb3aa7376bc254176433acb7146d9e2d911534a45200816867"
  },
  "satirlar": [
-  {"grup": "Çelik panel", "kalem": "Dış cephe duvar panelleri", "boyut": "80 × 45 × 1,2", "adet": 14, "kg": 813.13, "durum": "varsayim", "tur": "duvar_paneli"},
-  {"grup": "Çelik panel", "kalem": "İç cephe duvar panelleri", "boyut": "80 × 45 × 1,2", "adet": 8, "kg": 475.83, "durum": "varsayim", "tur": "duvar_paneli"},
+  {"grup": "Çelik panel", "kalem": "Dış cephe duvar panelleri", "boyut": "80 × 45 × 1,2", "adet": 11, "kg": 762.86, "durum": "varsayim", "tur": "duvar_paneli"},
+  {"grup": "Çelik panel", "kalem": "İç cephe duvar panelleri", "boyut": "80 × 45 × 1,2", "adet": 9, "kg": 496.31, "durum": "varsayim", "tur": "duvar_paneli"},
   {"grup": "Çelik panel", "kalem": "Veranda dikmeleri (kolon paneli)", "boyut": "80 × 45 × 1,2", "adet": 1, "kg": 14.82, "durum": "varsayim", "tur": "kolon_kiris"},
   {"grup": "Çelik panel", "kalem": "Kirişler (kiriş paneli)", "boyut": "80 × 45 × 1,2", "adet": 3, "kg": 61.1, "durum": "varsayim", "tur": "kolon_kiris"},
   {"grup": "Çelik panel", "kalem": "Çatı makas panelleri", "boyut": "80 × 45 × 0,8", "adet": 15, "kg": 484.69, "durum": "varsayim", "tur": "makas"},
@@ -47,6 +47,7 @@
   {"grup": "İÇ CEPHE KAPLAMA GRUBU", "kalem": "Tavan alçıpan beyaz", "boyut": "1200x2500", "adet": 24, "kg": null, "durum": "motor", "bizim_grup": "İç cephe kaplama", "liste_adi": "Beyaz Alçıpan (TAVAN)", "bizim_boyut": "1200 × 2500"},
   {"grup": "İÇ CEPHE KAPLAMA GRUBU", "kalem": "Tavan alçıpan yeşil", "boyut": "1200x2500", "adet": 3, "kg": null, "durum": "lokman", "bizim_grup": "İç cephe kaplama", "liste_adi": "Yeşil Alçıpan (TAVAN)", "bizim_boyut": "1200 × 2500"},
   {"grup": "İÇ CEPHE KAPLAMA GRUBU", "kalem": "İç duvar OSB 11 mm", "boyut": "11x1220x2440", "adet": 67, "kg": null, "durum": "excel", "bizim_grup": "İç cephe kaplama", "liste_adi": "Osb TAM", "bizim_boyut": "1220 × 2440"},
+  {"grup": "İÇ CEPHE KAPLAMA GRUBU", "kalem": "Duvar izolasyonu", "boyut": "paket 8,64 m²", "adet": 17, "kg": null, "durum": "uydurma", "bizim_grup": "İç cephe kaplama"},
   {"grup": "ÇATI KAPLAMALARI GRUBU", "kalem": "Sandviç panel", "boyut": "L:5080", "adet": 18, "kg": null, "durum": "varsayim", "bizim_grup": "Çatı kaplamaları", "liste_adi": "SANDVİÇ PANEL (100 CM KAPATIR) (ANTRASİT)", "bizim_boyut": "L 5080 · 100 cm kapatır"},
   {"grup": "ÇATI KAPLAMALARI GRUBU", "kalem": "Sandviç panel", "boyut": "L:2980", "adet": 3, "kg": null, "durum": "varsayim", "bizim_grup": "Çatı kaplamaları", "liste_adi": "SANDVİÇ PANEL (100 CM KAPATIR) (ANTRASİT)", "bizim_boyut": "L 2980 · 100 cm kapatır"},
   {"grup": "ÇATI KAPLAMALARI GRUBU", "kalem": "Sandviç panel", "boyut": "L:2800", "adet": 7, "kg": null, "durum": "varsayim", "bizim_grup": "Çatı kaplamaları", "liste_adi": "SANDVİÇ PANEL (100 CM KAPATIR) (ANTRASİT)", "bizim_boyut": "L 2800 · 100 cm kapatır"},
@@ -57,7 +58,7 @@
   {"grup": "ÇATI KAPLAMALARI GRUBU", "kalem": "Ters mahya kenar kutusu", "boyut": "L 21 × 40 × 21 × 2800", "adet": 4, "kg": null, "durum": "lokman", "bizim_grup": "Çatı kaplamaları", "liste_adi": "TERS MAHYA KENAR KUTULARI"},
   {"grup": "ÇATI KAPLAMALARI GRUBU", "kalem": "Mahya bandı", "boyut": "rulo / 10 m", "adet": 3, "kg": null, "durum": "muhendis", "bizim_grup": "Çatı kaplamaları", "liste_adi": "İZOLASYON BANDI (MAHYA,BACA VS.)"},
   {"grup": "DEPO GRUBU", "kalem": "Acil müdahale kapağı", "boyut": "adet", "adet": 1, "kg": null, "durum": "lokman", "bizim_grup": "Çatı kaplamaları", "liste_adi": "ACİL MÜDAHELE KAPAĞI"},
-  {"grup": "ÇATI KAPLAMALARI GRUBU", "kalem": "Çatı şiltesi 80 mm", "boyut": "9,6 m²/adet", "adet": 11, "kg": null, "durum": "uydurma", "bizim_grup": "Çatı kaplamaları"},
+  {"grup": "ÇATI KAPLAMALARI GRUBU", "kalem": "Çatı şiltesi 80 mm", "boyut": "9,0 m²/adet", "adet": 11, "kg": null, "durum": "uydurma", "bizim_grup": "Çatı kaplamaları"},
   {"grup": "DERE GRUBU", "kalem": "Metal dere", "boyut": "L 4000", "adet": 7, "kg": null, "durum": "motor", "bizim_grup": "Dere", "liste_adi": "METAL DERE (ANTRASİT)"},
   {"grup": "DERE GRUBU", "kalem": "Dere iniş borusu", "boyut": "L 3000", "adet": 6, "kg": null, "durum": "lokman", "bizim_grup": "Dere", "liste_adi": "METAL İNİŞ BORUSU (ANTRASİT)"},
   {"grup": "DERE GRUBU", "kalem": "Dere iniş aparatı", "boyut": "adet", "adet": 6, "kg": null, "durum": "motor", "bizim_grup": "Dere", "liste_adi": "DERE İNİŞ APARATI (ZIVANA)"},
@@ -93,8 +94,8 @@
   {"grup": "VİDA GRUBU", "kalem": "Trapez vida (5,5 × 25)", "boyut": "adet", "adet": 1000, "kg": null, "durum": "excel", "bizim_grup": "Vida", "liste_adi": "( 5.5 X 25 ) TRAPEZ VİDA (AŞIK+OMEGA+KÖŞEBENT)"},
   {"grup": "VİDA GRUBU", "kalem": "Trapez vida (5,5 × 60)", "boyut": "adet", "adet": 250, "kg": null, "durum": "motor", "bizim_grup": "Vida", "liste_adi": "( 5.5 X 60 ) TRAPEZ VİDA (TRAPEZ SAC / METAL KİREMİT)"},
   {"grup": "VİDA GRUBU", "kalem": "Trapez vida (5,5 × 110; sandviç panel)", "boyut": "adet", "adet": 750, "kg": null, "durum": "motor", "bizim_grup": "Vida", "liste_adi": "( 5.5X 110) TRAPEZ VİDA ( SANDVİÇ PANEL)"},
-  {"grup": "DEPO GRUBU", "kalem": "Çelik dübel (klipsli)", "boyut": "adet", "adet": 44, "kg": null, "durum": "motor", "bizim_grup": "Vida", "liste_adi": "ÇELİK DÜBEL ( KLİPSLİ )"},
-  {"grup": "VİDA GRUBU", "kalem": "Şase pul", "boyut": "adet", "adet": 44, "kg": null, "durum": "motor", "bizim_grup": "Vida"},
+  {"grup": "DEPO GRUBU", "kalem": "Çelik dübel (klipsli)", "boyut": "adet", "adet": 40, "kg": null, "durum": "motor", "bizim_grup": "Vida", "liste_adi": "ÇELİK DÜBEL ( KLİPSLİ )"},
+  {"grup": "VİDA GRUBU", "kalem": "Şase pul", "boyut": "adet", "adet": 40, "kg": null, "durum": "motor", "bizim_grup": "Vida"},
   {"grup": "DEPO GRUBU", "kalem": "8'lik trapez uç", "boyut": "adet", "adet": 6, "kg": null, "durum": "motor", "bizim_grup": "Vida", "liste_adi": "8 LİK TRAPEZ UÇ"},
   {"grup": "DEPO GRUBU", "kalem": "PH2 uç", "boyut": "adet", "adet": 6, "kg": null, "durum": "motor", "bizim_grup": "Vida", "liste_adi": "PH2 UÇ"},
   {"grup": "DEPO GRUBU", "kalem": "230'luk kesme taşı", "boyut": "adet", "adet": 6, "kg": null, "durum": "lokman", "bizim_grup": "Vida", "liste_adi": "230 LUK KESME TAŞI"},

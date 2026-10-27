@@ -671,15 +671,21 @@ def girdi(y: dict, c: dict, m: dict, kur: dict, kaynak: str) -> dict:
     if cv:
         veranda_tavani -= cv_m2
     if kural_k and "cati_paneli" in cm and cm["cati_paneli"]["adet"] != cp_adet:   # kuralın bölmesi düzlemin biçimiyle bir parça fazla ya da eksik
-        uyari.append(f"karkas kuralı: çatı paneli tanımda {cp_adet}, kuralın bölmesinde {cm['cati_paneli']['adet']} (düzlemin biçimi); kuralınki yazıldı")
+        if all("cati_paneli_adedi" in dz for dz in ct["duzlemler"] if dz.get("ust_yapi") == "cati_paneli"):
+            uyari.append(f"karkas kuralı: çatı paneli tanımda {cp_adet}, kuralın bölmesinde {cm['cati_paneli']['adet']} (düzlemin biçimi); kuralınki yazıldı")
+        else:                                              # adet tanımda yazmıyor (kör proje): kuralın boy sınırından (İE-16 PR-3c)
+            uyari.append(f"karkas kuralı: çatı paneli adedi tanımda yazmıyor (düzlem başına 1 sayılırdı); kuralın bölmesinde "
+                         f"{cm['cati_paneli']['adet']}, kuralınki yazıldı")
         cp_adet = cm["cati_paneli"]["adet"]
     cp_prof, cp_pb, cp_mn = model("cati_paneli", cp_adet, None, f"80x45x{ev['cati']}") if mc["panelli_plan_m2"] else (None, {}, "")
     # karkas kuralının makas, yöntem A paneli kayıtları (İE-16 PR-3b): adet ve profil boyu kuraldan
     makas_notu = ""
     if kural_k and "makas" in cm:
         say = {}
+        kalin_et = cm["makas_kalin"]["profil"].rsplit("x", 1)[-1] if "makas_kalin" in cm else None   # kalın makaslar ayrı satırda, notta sayılmaz
         for x in m["karkas"]["cati"]["makaslar"]:
-            say[x["tur"]] = say.get(x["tur"], 0) + 1
+            if kalin_et is None or x.get("et") != kalin_et:
+                say[x["tur"]] = say.get(x["tur"], 0) + 1
         makas_notu = ", ".join(f"{n} {ad}" for tur, ad in (("makas", "tam"), ("kisa", "kısa"), ("capraz", "kırma çaprazı")) if (n := say.get(tur)))
     a_panelleri = {}
     if kural_k and yontem == "panel":
@@ -699,6 +705,10 @@ def girdi(y: dict, c: dict, m: dict, kur: dict, kaynak: str) -> dict:
         ek_satirlar.append({"ad": es["ad"], "profil": prof, "panel_adedi": cm[es["grup"]]["adet"],
                             "not": (es.get("not") or "panel adedi ve profil boyu modelden") + (" (" + ", ".join(k["ad"] for k in kg_kiris) + ")" if kg_kiris else "") + mn,
                             **pbx})
+    if kural_k and "makas_kalin" in cm:              # tek açıklığı 8 m'yi aşan makaslar (karkas kuralı `makas_eti`, İE-16 PR-3c): ayrı satır
+        prof, pbx, mn = model("makas_kalin", None, None)
+        ek_satirlar.append({"ad": f"Çatı makas panelleri ({prof.split('x')[-1]} mm)", "profil": prof, "panel_adedi": cm["makas_kalin"]["adet"],
+                            "not": "tek açıklığı 8 m'yi aşan makaslar (Lokman, 27 Ekim 2026); adet ve profil boyu karkas kuralından" + mn, **pbx})
     kayip = sorted({k.get("celik_grubu") for k in t.get("kirisler", []) if k.get("celik_grubu", "kiris") != "kiris"}
                    - {es["grup"] for es in (t.get("celik_modeli") or {}).get("ek_satirlar", [])})
     if kayip:
