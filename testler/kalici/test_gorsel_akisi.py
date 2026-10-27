@@ -140,7 +140,8 @@ def test_desteklenmeyen_dosya_turu(depo, tmp_path):
     cizim_gonder(depo, tmp_path, tur="document", mime="application/zip")
     [r] = isle_hepsi(depo, s)
     assert r["eylem"] == "cevapla" and "türü okunmuyor" in r["gerekce"]
-    assert "Bu dosya türünü okuyamıyorum" in bayiye(depo)[0]["govde"]
+    assert "Bu dosya türünü okuyamıyorum" in bayiye(depo)[0]["govde"] and "Lokman Bey'e ilettim" in bayiye(depo)[0]["govde"]
+    assert any("okunamayan bir dosya" in p["govde"] and "application/zip" in p["govde"] for p in patrona(depo))
 
 
 def test_dosya_inmediyse_alamadim_ve_patron(depo, tmp_path):
@@ -215,7 +216,7 @@ def test_g4_yaziyla_dogru(depo, wa, tmp_path, hizli_motor):
 
 
 def test_g4_tk01_bk14_yokken_cizilemez_bayiye_ve_patrona(depo, tmp_path, monkeypatch):
-    monkeypatch.setattr(GO, "veranda_destegi_var", lambda: False)
+    monkeypatch.setattr(GO, "bk14_var", lambda: False)
     s = ayar(tmp_path, TK01)
     cizim_gonder(depo, tmp_path)
     [r] = isle_hepsi(depo, s)
@@ -230,7 +231,7 @@ def test_g4_tk01_bk14_yokken_cizilemez_bayiye_ve_patrona(depo, tmp_path, monkeyp
 
 def test_g4_tk01_bk14_ile_teklif_r04_geometrisi(depo, wa, tmp_path, monkeypatch, hizli_motor):
     """Hedef örnek: TK-01 okunur, teyit edilir; İş Emri teklif çalışmasının r04'üyle (bayiye giden r03 paftası) geometri olarak aynı."""
-    monkeypatch.setattr(GO, "veranda_destegi_var", lambda: True)
+    monkeypatch.setattr(GO, "bk14_var", lambda: True)
     s = ayar(tmp_path, TK01)
     satir, dis = teyit_al(depo, wa, tmp_path, s)
     assert "Veranda: önde 3,86 × 1,81 m, arkada 2,61 × 1,30 m." in satir["govde"]
@@ -254,6 +255,8 @@ def test_g3_duzelt_dugmesi_sonra_yazi_yeniden_teyit_eski_dugme_gecersiz(depo, wa
     assert depo.mesaj_kaydet(buton(f"c:{eski}:z", context_id=dis))
     [r] = isle_hepsi(depo, s)
     assert r["eylem"] == "sor" and "Neyi düzelteyim?" in bayiye(depo)[0]["govde"]
+    d, _ = depo.konusma_oku(NUMARA_A)
+    assert d["cizim_okuma"]["durum"] == "duzeltme"
     yeni = json.loads(json.dumps(BASIT))
     next(x for x in yeni["odalar"] if x["ad"] == "SALON")["alan_m2"] = 20
     s = ayar(tmp_path, BASIT, {"niyet": "duzeltme", "okuma": yeni, "degisenler": ["salon 20 m²"]})
@@ -423,3 +426,33 @@ def test_ilgisiz_yazi_okumayi_kapatir_soru_kapatmaz(depo, wa, tmp_path, hizli_mo
     assert "cizim_okuma" not in d and r["gerekce"] != "çizim okundu: teyit"
     j = sorgu(depo, "SELECT cikarim FROM isler ORDER BY id DESC")[0]["cikarim"]
     assert j["gorsel_duzeltme"]["niyet"] == "baska_talep"
+
+
+def test_duzeltten_sonra_dogru_yazisi_plan(depo, wa, tmp_path, hizli_motor):
+    """[Düzelt]'e basıp vazgeçen bayi "doğru" yazarsa okuma yeniden denetlenir ve plan çizilir (sorusu olan okumada çizilmez)."""
+    s = ayar(tmp_path, BASIT)
+    _, dis = teyit_al(depo, wa, tmp_path, s)
+    d, _ = depo.konusma_oku(NUMARA_A)
+    assert depo.mesaj_kaydet(buton(f"c:{d['cizim_okuma']['iz']}:z", context_id=dis))
+    isle_hepsi(depo, s)
+    yaz(depo, "yok yok doğru, onaylıyorum", talep("onay", "okuma doğru"))
+    [r] = isle_hepsi(depo, s)
+    assert r["eylem"] == "is_emri"
+
+
+def test_revizyonda_yeni_varsayim_bayiye_yazilir(depo, wa, tmp_path, hizli_motor):
+    """Okumadan çizilmiş planın revizyonu teyitsiz yeniden çizilir; değişiklikle gelen yeni varsayım (ölçüsüz pencere) mesajda yazar."""
+    s = ayar(tmp_path, BASIT)
+    _, dis = teyit_al(depo, wa, tmp_path, s)
+    d, _ = depo.konusma_oku(NUMARA_A)
+    assert depo.mesaj_kaydet(buton(f"c:{d['cizim_okuma']['iz']}:d", context_id=dis))
+    isle_hepsi(depo, s)
+    yeni = json.loads(json.dumps(BASIT))
+    yeni["pencereler"].append({"oda": "MUTFAK", "kenar": "alt", "olcu": None})
+    s = ayar(tmp_path, BASIT, {"niyet": "duzeltme", "okuma": yeni, "degisenler": ["mutfağa öne pencere"]})
+    time.sleep(1.1)
+    yaz(depo, "mutfağa öne bir pencere ekleyin", talep("revizyon", "mutfağa pencere"))
+    [r] = isle_hepsi(depo, s)
+    assert r["eylem"] == "is_emri", r
+    m = [x for x in bayiye(depo) if x["kind"] == "interactive"][0]["govde"]
+    assert m.startswith("Uygulanan: mutfağa öne pencere; pencereler değişti. Varsaydığım: ölçüsü yazmayan pencereler: 120x120 (Mutfak).")

@@ -26,6 +26,7 @@ from typing import Literal, Optional
 from pydantic import BaseModel, Field
 
 from beyin import llm, numara
+from motor.geometry import MOD, PANO_YUKSEKLIKLERI_CM as PANO_YUKSEKLIKLERI, T_DIS    # Pano Motor'unun ölçüleri (kopya yok)
 
 KAYNAK = "cizim-okuma"                  # İş Emri `talep.kaynak`: plan bayinin çiziminden okundu (revizyon da okumadan sürer)
 ARAC_ADI = "cizim_oku"
@@ -43,10 +44,8 @@ ESIK = {"zincir_cm": 3.0,               # zincir toplamı ile yazılı toplam / 
         "ortu_m2": 1.0,                 # odaların örtmediği gövde alanı
         "cakisma_m2": 0.3,              # iki odanın üst üste bindiği alan
         "pano_cm": 10.0}                # prefabrik: oda sınırı en yakın pano aksına bu kadar uzaksa oturtulur, ötesi sorulur
-# Pano Motor'unun ölçüleri (motor/geometry.py; buraya kopya: beyin Motor'u içe aktarmadan çevirir, test eşitliği denetler)
-MOD = 125.5
-T_DIS = 10.0
-PANO_YUKSEKLIKLERI = (250, 280, 300)
+KISA_PANO_CM = 20.0                     # Pano Motor'u bundan kısa panoyu uyarıyla, duvar kalınlığından kısasını hatayla çizer (motor/geometry,
+                                        # motor/validate): ızgaranın kesilmiş ucu bundan kısaysa dış ölçü sorulur
 KAPI_CM = {"dis": 90, "ic": 82}         # TK-01 teklif çalışmasının çalışma kabulü (dış 90, iç 82)
 PENCERE_VARSAYILAN = {"banyo": "60x40", "wc": "60x40"}     # ölçüsü yazmayan pencere; başka odalarda 120x120 (bayiye yazılır)
 TUR = {"salon": "salon", "mutfak": "mutfak", "yatak_odasi": "yatak_odasi", "banyo": "banyo", "wc": "wc", "hol": "antre_hol",
@@ -72,12 +71,12 @@ Kurallar:
   (ANTRE). `alan_m2` yalnız çizimde yazıyorsa. `dikdortgenler` oda sınırları (duvar ekseni); sınırları zincirlerin noktalarından al
   (zincir parçalarının birikimli toplamı); L biçimli oda birden çok dikdörtgen. Ölçüsü yazmayan bir sınırı oranla tahmin ettiysen
   `tahminler`e kısa yaz (ör. "banyo derinliği 256 cm").
-- `kapilar`: iki oda arasındaki her kapı (`arasinda` iki oda adı); giriş kapısı `["DIŞ", "<oda>"]` ve `kenar`. `pencereler`: oda, çizimin
-  hangi kenarında, yazılıysa ölçü ("ENxBOY", cm; ör. 120x180).
+- `kapilar`: iki oda arasındaki her kapı (`arasinda` iki oda adı); giriş kapısı `["DIŞ", "<oda>"]` ve `kenar`; genişliği yazılıysa
+  `genislik_cm`. `pencereler`: oda, çizimin hangi kenarında, yazılıysa ölçü ("ENxBOY", cm; ör. 120x180).
 - `verandalar`: gövdenin dışındaki açık veranda: gövdenin hangi kenarında, kenar boyunca nerede başlayıp bittiği (üst/alt kenarda gövdenin
   sol dış yüzünden, sol/sağ kenarda üst dış yüzünden, cm) ve derinliği.
 - `cati`: görünüş varsa çatı tipi; giriş cephesinin görünüşünde üçgen alın görünüyorsa mahya girişten arkaya ("giristen_arkaya"),
-  görünmüyorsa "girise_paralel". `duvar_yuksekligi_cm` görünüşte yazıyorsa.
+  görünmüyorsa "girise_paralel"; eğim (%) ve saçak (cm) yalnız yazılıysa. `duvar_yuksekligi_cm` görünüşte yazıyorsa.
 - `yapi_turu` (prefabrik / çelik) ve `kat_sayisi` yalnız çizimde ya da bayinin mesajında yazıyorsa.
 - Okuyamadığın ve tahmin de edemediğin her şeyi `emin_olunamayanlar`a kısa, bayiye sorulabilecek biçimde yaz. Uydurma."""
 
@@ -113,6 +112,7 @@ class Oda(BaseModel):
 class KapiOkuma(BaseModel):
     arasinda: list[str] = Field(..., min_length=2, max_length=2, description="İki oda adı; giriş kapısı için ['DIŞ', '<oda>']")
     kenar: Optional[Literal["ust", "alt", "sol", "sag"]] = Field(None, description="Yalnız dış kapı: çizimin hangi kenarında")
+    genislik_cm: Optional[float] = Field(None, description="Kapı genişliği yalnız çizimde yazıyorsa, cm")
 
 
 class PencereOkuma(BaseModel):
@@ -133,6 +133,8 @@ class VerandaOkuma(BaseModel):
 class CatiOkuma(BaseModel):
     tip: Optional[Literal["besik", "kirma", "tek_egimli", "teras"]] = None
     mahya: Optional[Literal["giristen_arkaya", "girise_paralel"]] = None
+    egim_yuzde: Optional[float] = Field(None, description="Çatı eğimi yalnız görünüşte yazıyorsa, yüzde")
+    sacak_cm: Optional[float] = Field(None, description="Saçak taşması yalnız çizimde yazıyorsa, cm")
 
 
 class CizimOkumasi(BaseModel):
@@ -267,16 +269,29 @@ def _govde_olcusu(o: CizimOkumasi) -> tuple[float | None, float | None, str | No
     """Gövdenin çizimdeki (yatay, düşey) ölçüsü: yazılı toplam; yoksa gövde zincirinin toplamı; yoksa odaların kapsadığı. Üçüncü değer:
     yazılı değilse nereden alındığı (bayiye yazılır)."""
     W, H = o.dis_olcu.yatay_cm, o.dis_olcu.dusey_cm
-    nereden = None
-    if not W or not H:
-        zin = {z.kenar: sum(z.olculer_cm) for z in o.zincirler if z.kapsam == "govde"}
-        W = W or zin.get("ust") or zin.get("alt")
-        H = H or zin.get("sol") or zin.get("sag")
-        nereden = "ölçü zincirlerinden"
-    if (not W or not H) and o.odalar:
-        W = W or max(r[2] for x in o.odalar for r in x.dikdortgenler)
-        H = H or max(r[3] for x in o.odalar for r in x.dikdortgenler)
-        nereden = "odaların ölçülerinden"
+    kaynak = []
+    zin = {}
+    for z in o.zincirler:
+        if z.kapsam == "govde":
+            zin.setdefault(z.kenar, float(z.toplam_cm or sum(z.olculer_cm)))    # yazılı toplam varsa o (parçaların farkı ayrıca sorulur)
+    for ad, kenarlar, deger in (("W", ("ust", "alt"), W), ("H", ("sol", "sag"), H)):
+        if deger:
+            continue
+        z = next((zin[k] for k in kenarlar if zin.get(k)), None)
+        if z is None and o.odalar:
+            i = 2 if ad == "W" else 3
+            z = max(r[i] for x in o.odalar for r in x.dikdortgenler)
+            kaynak.append(("eni" if ad == "W" else "boyu", "odaların ölçülerinden"))
+        elif z is not None:
+            kaynak.append(("eni" if ad == "W" else "boyu", "ölçü zincirinden"))
+        if ad == "W":
+            W = z
+        else:
+            H = z
+    if len(kaynak) == 2 and kaynak[0][1] == kaynak[1][1]:
+        nereden = kaynak[0][1].replace("zincirinden", "zincirlerinden")
+    else:
+        nereden = ", ".join(f"{b} {k}" for b, k in kaynak) or None
     return (float(W) if W else None), (float(H) if H else None), nereden
 
 
@@ -293,7 +308,7 @@ def kanonik(okuma: dict | CizimOkumasi) -> dict:
         notlar.append("giriş cephesi " + ("giriş kapısından" if dk else "yazmadığı için çizimin alt kenarı") + " alındı")
     Wc, Hc, nereden = _govde_olcusu(o)
     if nereden:
-        notlar.append(f"dış ölçü yazmıyordu, {nereden} alındı")
+        notlar.append(f"dış ölçü yazmıyordu: {nereden} alındı")
     if not Wc or not Hc:
         return {"W": None, "H": None, "giris": giris, "odalar": [], "pencereler": [], "kapilar": [], "verandalar": [], "notlar": notlar}
     W, H = (Wc, Hc) if giris in ("alt", "ust") else (Hc, Wc)
@@ -341,7 +356,7 @@ def _tr(v: float, n: int = 2) -> str:
 
 
 # ───────────────────────── denetim (kod karar verir) ─────────────────────────
-def denetle(okuma: dict, ayar: dict | None = None, veranda_destegi: bool | None = None) -> dict:
+def denetle(okuma: dict, ayar: dict | None = None, bk14: bool | None = None) -> dict:
     """Okumanın kod denetimi ve plana çevirisi. Dönüş: {plan_mi, yapi_turu, sorular[], cizilemez[], notlar[], tahminler[], odalar[],
     kanonik, cevrim}. `sorular` bayiye sorulur (teyit yok); `cizilemez` Motor'un bugün çizemediği (bayiye söylenir, Patron'a gider);
     `notlar` bayiye yazılan ama soru olmayanlar (küçük zincir farkı, ızgaraya oturtma, varsayılanlar). `cevrim`: prefabrikte
@@ -433,9 +448,9 @@ def denetle(okuma: dict, ayar: dict | None = None, veranda_destegi: bool | None 
     if sor or sonuc["cizilemez"]:
         return sonuc
     if sonuc["yapi_turu"] == "celik":
-        plan, cz, nt = plan_celik(kan, o)
-        sonuc["cizilemez"].extend(cz); notlar.extend(nt)
-        if not cz:
+        plan, sr, cz, nt = plan_celik(kan, o)
+        sor.extend(sr); sonuc["cizilemez"].extend(cz); notlar.extend(nt)
+        if not sr and not cz:
             from beyin import plan_denetim
             d = plan_denetim.denetle(plan, {}, kod="CIZIM")          # İE-14 denetçisi: oda kuralları, geometri, açıklıklar, çatı
             if d.get("gecerli"):
@@ -443,7 +458,7 @@ def denetle(okuma: dict, ayar: dict | None = None, veranda_destegi: bool | None 
             else:
                 sonuc["cizilemez"].extend(f"çelik plan kuralı: {x}" for x in (d.get("ihlaller") or [])[:3])
         return sonuc
-    ie, sr, cz, nt = is_emri_prefabrik(kan, o, veranda_destegi=veranda_destegi, tol=e["pano_cm"])
+    ie, sr, cz, nt = is_emri_prefabrik(kan, o, bk14=bk14, esik=e)
     sor.extend(sr); sonuc["cizilemez"].extend(cz); notlar.extend(nt)
     if not sr and not cz:
         sonuc["cevrim"] = {"is_emri": ie}
@@ -462,8 +477,9 @@ def _oda_adi(ad: str) -> str:
 
 
 # ───────────────────────── prefabrik: okuma → İş Emri ─────────────────────────
-def veranda_destegi_var() -> bool:
-    """Pano Motor'u gövdeden taşan verandayı çizebiliyor mu (BK-14, PR #50)? Birleşmeden verandalı plan çizilmez (sapmalı plan yok)."""
+def bk14_var() -> bool:
+    """Pano Motor'u gövdeden taşan verandayı ve dört kollu (+) iç duvar birleşimini çizebiliyor mu (BK-14, PR #50; ikisi aynı PR'da)?
+    Birleşmeden bunları taşıyan plan çizilmez (sapmalı plan yok; + birleşimde Motor doğrulamadan düşer)."""
     try:
         from motor import geometry as G
         return hasattr(G, "_dis_verandalar")
@@ -479,32 +495,49 @@ def pano_akslari(uzunluk: float, bas: float) -> tuple[float, list[float]]:
     return n, [bas + MOD / 2 * k for k in range(int(round(2 * n)))] + [son]
 
 
-def is_emri_prefabrik(kan: dict, o: CizimOkumasi, veranda_destegi: bool | None = None, tol: float = ESIK["pano_cm"]
+def is_emri_prefabrik(kan: dict, o: CizimOkumasi, bk14: bool | None = None, esik: dict | None = None
                       ) -> tuple[dict | None, list[str], list[str], list[str]]:
     """Kanonik okuma → Pano Motor'u İş Emri şablonu (numarasız; `karar._is_emri_uret` numara ve künyeyi yazar). Teklif çalışmasının
     kuralları (TK-01 r04): dış ölçüye kesilmiş ızgara, oda sınırları yarım pano akslarına (en çok `tol` cm kayma; bayiye yazılır),
     dizilim arka-sol, ızgaraya hizalı, oda ortası pencere, kapı mantığı; dış kapı 90, iç kapı 82; çatı kural kitabından (eğim %33, saçak 30,
     topuk 10). Dönüş: (şablon | None, sorular, çizilemezler, notlar)."""
+    e = {**ESIK, **(esik or {})}
+    tol = e["pano_cm"]
     sor, cz, nt = [], [], []
     W, H = float(kan["W"]), float(kan["H"])
     nx, xs = pano_akslari(W, T_DIS)
     ny, ys = pano_akslari(H, T_DIS / 2)
     if nx < 2 or ny < 2:
         return None, [], [f"gövde {_m(W)} × {_m(H)} m pano ızgarası için çok küçük"], []
+    # ızgaranın kesilmiş ucu: yarım adımlı ızgarada son tam aks ile dış ölçü arası panodur; çok kısaysa Motor çizemez (sessiz yuvarlama yok)
+    for cephe, n, eks, uc in (("ön cephesi", nx, xs, T_DIS), ("yan cephesi", ny, ys, T_DIS / 2)):
+        kalan = eks[-1] - eks[-2]
+        if n % 1 and kalan < KISA_PANO_CM - 1e-9:
+            alt, ust = math.floor(eks[-2] + uc), math.floor(eks[-2] + MOD / 2 + uc)
+            sor.append(f"Gövdenin {cephe} {_m(eks[-1] + uc)} m; pano ızgarasında sonda {_tr(kalan, 1)} cm'lik pano kalıyor, bu ölçü "
+                       f"prefabrikte olmuyor. En yakın ölçüler {_m(alt)} m ve {_m(ust)} m; hangisiyle çizeyim?")
+    if sor:
+        return None, sor, cz, nt
     kaymalar = []
 
     def yasla(v: float, eksen: list[float], uz: float, ad: str) -> float | None:
+        """Okunan sınır → yarım pano aksı. Dış duvarın içindeki değer (0–10 cm, uz−10–uz) duvarın kendisidir, kayma sayılmaz."""
         if v <= T_DIS + tol:
+            kaymalar.append(max(0.0, v - T_DIS))
             return eksen[0]
         if v >= uz - T_DIS - tol:
+            kaymalar.append(max(0.0, uz - T_DIS - v))
             return eksen[-1]
         a = min(eksen[1:-1], key=lambda t: abs(t - v)) if len(eksen) > 2 else None
         if a is None or abs(a - v) > tol + 1e-9:
             sor.append(f"{_oda_adi(ad)} sınırı ({_tr(v, 1)} cm) pano ızgarasına oturmuyor; en yakın pano aksı {_tr(a, 2)} cm. "
                        "Öyle çizebilir miyim?")
             return None
-        if abs(a - v) > 2:
-            kaymalar.append(abs(a - v))
+        if eksen[-1] - a < KISA_PANO_CM - 1e-9:
+            sor.append(f"{_oda_adi(ad)} sınırı ({_tr(v, 1)} cm) dış duvara {_tr(eksen[-1] - a, 1)} cm kalıyor; pano ızgarasında bu kadar "
+                       "kısa pano olmuyor. Sınır nerede olsun?")
+            return None
+        kaymalar.append(abs(a - v))
         return a
     mahaller = []
     sirali = sorted(kan["odalar"], key=lambda x: (min(r[1] for r in x["rects"]), min(r[0] for r in x["rects"])))
@@ -522,8 +555,22 @@ def is_emri_prefabrik(kan: dict, o: CizimOkumasi, veranda_destegi: bool | None =
         mahaller.append({"ad": tr_buyuk(x["ad"]), "tur": TUR[x["islev"]], "konum_cm": rects, "_sira": sira[x["ad"]]})
     if sor:
         return None, sor, cz, nt
-    if kaymalar:
-        nt.append(f"oda sınırlarını pano ızgarasına oturttum (en çok {_tr(max(kaymalar), 1)} cm kayma)")
+    # oturtmadan sonra oda alanı: okunan (dış duvarda dış yüzden) ile oturtulan (aynı çerçevede) kıyaslanır
+    degisen = []
+    for x, m in zip(kan["odalar"], mahaller):
+        dis = [[0.0 if q[0] == xs[0] else q[0], 0.0 if q[1] == ys[0] else q[1], W if q[2] == xs[-1] else q[2], H if q[3] == ys[-1] else q[3]]
+               for q in m["konum_cm"]]
+        once, sonra = _alan(x["rects"]), _alan(dis)
+        if abs(sonra - once) > max(e["alan_m2"], e["alan_oran"] * once):
+            sor.append(f"{_oda_adi(x['ad'])} pano ızgarasına oturtunca {_tr(once, 1)} m² yerine {_tr(sonra, 1)} m² oluyor; öyle çizebilir miyim?")
+        elif abs(sonra - once) >= 0.2:
+            degisen.append((abs(sonra - once), f"{_oda_adi(x['ad'])} {_tr(once, 1)} → {_tr(sonra, 1)} m²"))
+    if sor:
+        return None, sor, cz, nt
+    kayma = max(kaymalar or [0.0])
+    if kayma > 0.5 or degisen:
+        nt.append("oda sınırlarını pano ızgarasına oturttum (en çok " + _tr(kayma, 1) + " cm kayma"
+                  + (f"; en çok değişen {max(degisen)[1]}" if degisen else "") + ")")
     # ızgaranın her yarım hücresi tek odaya (Motor da denetler; burada bayiye anlaşılır soru)
     sahip: dict[tuple[int, int], str] = {}
     for m in mahaller:
@@ -537,6 +584,12 @@ def is_emri_prefabrik(kan: dict, o: CizimOkumasi, veranda_destegi: bool | None =
     if len(sahip) != (len(xs) - 1) * (len(ys) - 1):
         sor.append("Pano ızgarasına oturtunca gövdede hiçbir odaya ait olmayan bir bölüm kalıyor; orası neresi?")
         return None, sor, cz, nt
+    arti = []                                   # dört kollu (+) iç duvar birleşimi: aks noktasının dört yanında da duvar var
+    for u in range(1, len(xs) - 1):
+        for w in range(1, len(ys) - 1):
+            a, b, c, d = sahip[(u - 1, w - 1)], sahip[(u, w - 1)], sahip[(u - 1, w)], sahip[(u, w)]
+            if a != b and c != d and a != c and b != d:
+                arti.append(sorted({a, b, c, d}))
     for m in mahaller:
         m.pop("_sira")
     ad_haritasi = {_norm(x["ad"]): tr_buyuk(x["ad"]) for x in kan["odalar"]}
@@ -558,14 +611,19 @@ def is_emri_prefabrik(kan: dict, o: CizimOkumasi, veranda_destegi: bool | None =
         olcu = (p.get("olcu") or "").lower().replace(" ", "").replace("*", "x").replace("×", "x") or None
         if olcu is None:
             olcu = PENCERE_VARSAYILAN.get(_islev(kan, ad), "120x120")
-            varsayilan.append(f"{_oda_adi(ad)} {olcu}")
+            varsayilan.append((olcu, _oda_adi(ad)))
         elif not pencere_gecerli(olcu):
             sor.append(f"{_oda_adi(ad)} penceresinin ölçüsünü ({p.get('olcu')}) okuyamadım; eni ve boyu kaç cm?")
             continue
         for _ in range(int(p.get("adet") or 1)):
             acik.append({"tur": "pencere", "olcu": olcu, "mahal": ad, "duvar": p["cephe"]})
-    if varsayilan:
-        nt.append("ölçüsü yazmayan pencereler: " + ", ".join(varsayilan))
+    if varsayilan:                              # ölçüye göre gruplu: "120x120 (Salon 2, Mutfak), 60x40 (Banyo)"
+        gruplar: dict[str, list[str]] = {}
+        for olcu, ad in varsayilan:
+            gruplar.setdefault(olcu, []).append(ad)
+        nt.append("ölçüsü yazmayan pencereler: " + ", ".join(
+            f"{olcu} (" + ", ".join(ad + (f" {n}" if (n := adlar.count(ad)) > 1 else "") for ad in dict.fromkeys(adlar)) + ")"
+            for olcu, adlar in gruplar.items()))
     kapilar = sorted(kan["kapilar"], key=lambda k: not k["dis"])
     for k in kapilar:
         if k["dis"]:
@@ -588,7 +646,7 @@ def is_emri_prefabrik(kan: dict, o: CizimOkumasi, veranda_destegi: bool | None =
     if hy is None:
         hy = 250
         nt.append("duvar yüksekliği yazmıyordu, 2,50 m aldım")
-    elif int(round(hy)) not in PANO_YUKSEKLIKLERI:
+    elif not any(abs(hy - h) < 0.5 for h in PANO_YUKSEKLIKLERI):
         sor.append(f"Duvar yüksekliğini {_m(hy)} m okudum; prefabrikte 2,50 / 2,80 / 3,00 m var, hangisi olsun?")
         return None, sor, cz, nt
     tip = o.cati.tip or "besik"
@@ -601,18 +659,32 @@ def is_emri_prefabrik(kan: dict, o: CizimOkumasi, veranda_destegi: bool | None =
         makas = "x" if o.cati.mahya == "giristen_arkaya" else "y"
     else:
         makas = "x" if W <= H + 50 else "y"
+        nt.append("mahya yönü görünmüyordu, " + ("girişten arkaya" if makas == "x" else "girişe paralel") + " aldım")
+    egim, sacak = kural["egim_yuzde"], kural["sacak_cm"]
+    if o.cati.egim_yuzde is not None and abs(o.cati.egim_yuzde - egim) > 0.5:
+        egim = _yuvarla(float(o.cati.egim_yuzde))
+        nt.append(f"çatı eğimi çizimdeki gibi %{_tr(egim, 1)} (standardımız %{_tr(kural['egim_yuzde'], 1)})")
+    if o.cati.sacak_cm is not None and abs(o.cati.sacak_cm - sacak) > 0.5:
+        sacak = _yuvarla(float(o.cati.sacak_cm))
+        nt.append(f"saçak çizimdeki gibi {_tr(sacak, 1)} cm (standardımız {_tr(kural['sacak_cm'], 1)} cm)")
+    farkli = sorted({f"{_tr(k.genislik_cm, 1)} cm" for k in o.kapilar
+                     if k.genislik_cm and abs(k.genislik_cm - KAPI_CM["dis" if _dis_mi(k) else "ic"]) > 2})
+    if farkli:
+        nt.append(f"kapılar prefabrik standardında: giriş {KAPI_CM['dis']}, iç {KAPI_CM['ic']} cm (çizimde {', '.join(farkli)} yazıyordu)")
     verandalar = []
     for i, v in enumerate(kan["verandalar"]):
         ad = f"{VERANDA_ADI[v['cephe']]} VERANDA"
         verandalar.append({"ad": ad, "cephe": v["cephe"], "bas_cm": _yuvarla(v["bas"]), "bit_cm": _yuvarla(v["bit"]),
-                           "derinlik_cm": _yuvarla(v["derinlik"]), "cati": {"tip": "besik", "egim_yuzde": kural["egim_yuzde"]}})
+                           "derinlik_cm": _yuvarla(v["derinlik"]), "cati": {"tip": "besik", "egim_yuzde": egim}})
     if len({v["ad"] for v in verandalar}) != len(verandalar):
         for i, v in enumerate(verandalar, 1):
             v["ad"] = f"{v['ad']} {i}"
-    if verandalar and veranda_destegi is None:
-        veranda_destegi = veranda_destegi_var()
-    if verandalar and not veranda_destegi:
+    if (verandalar or arti) and bk14 is None:
+        bk14 = bk14_var()
+    if verandalar and not bk14:
         cz.append("gövdenin dışına taşan veranda")
+    if arti and not bk14:
+        cz.append("dört kollu duvar birleşimi (" + ", ".join(" / ".join(_oda_adi(x) for x in k) for k in arti[:2]) + ")")
     if cz:
         return None, sor, cz, nt
     ie = {
@@ -627,7 +699,7 @@ def is_emri_prefabrik(kan: dict, o: CizimOkumasi, veranda_destegi: bool | None =
         "mahaller": mahaller,
         "acik_sinirlar": [],
         "acikliklar": acik,
-        "cati": {"tip": "besik", "egim_yuzde": kural["egim_yuzde"], "sacak_cm": kural["sacak_cm"], "topuk_cm": 10, "makas_yonu": "kisa_kenar",
+        "cati": {"tip": "besik", "egim_yuzde": egim, "sacak_cm": sacak, "topuk_cm": 10, "makas_yonu": "kisa_kenar",
                  "makas_ekseni": makas},
         "cikti": {"pdf": True, "dxf": True, "pafta": "A2",
                   "icerik": ["aksli_plan", "alanli_kopya", "montaj_kopyasi", "on_gorunus", "cati_profili", "ozellik_tablosu"]},
@@ -678,10 +750,10 @@ def _cati_kurali() -> dict:
 
 
 # ───────────────────────── çelik: okuma → plan şeması (İE-14) ─────────────────────────
-def plan_celik(kan: dict, o: CizimOkumasi) -> tuple[dict | None, list[str], list[str]]:
+def plan_celik(kan: dict, o: CizimOkumasi) -> tuple[dict | None, list[str], list[str], list[str]]:
     """Kanonik okuma → İE-14 plan şeması (köken güneybatı dış köşe, +y kuzey = arka, 5 cm ızgara). Veranda şerit olarak mahal olur
-    (denetçi kuralına uymazsa çizilemez). Dönüş: (plan, çizilemezler, notlar). Plan denetimi (`plan_denetim.denetle`) `denetle`de."""
-    nt, cz = [], []
+    (denetçi kuralına uymazsa çizilemez). Dönüş: (plan, sorular, çizilemezler, notlar). Plan denetimi (`plan_denetim.denetle`) `denetle`de."""
+    nt, cz, sor = [], [], []
     W, H = kan["W"], kan["H"]
     vy = list(kan["verandalar"])
     xmin = min([0.0] + [v["rect"][0] for v in vy]); xmax = max([W] + [v["rect"][2] for v in vy])
@@ -710,11 +782,14 @@ def plan_celik(kan: dict, o: CizimOkumasi) -> tuple[dict | None, list[str], list
     from beyin.plan_sema import PENCERE_OLCULERI
     pencereler = []
     for p in kan["pencereler"]:
-        olcu = (p.get("olcu") or "").lower().replace(" ", "").replace("×", "x") or None
-        if olcu not in PENCERE_OLCULERI:
-            yeni = "60x40" if _islev(kan, tr_buyuk(p["oda"])) in ("banyo", "wc") else "120x120"
-            nt.append(f"{ad_haritasi[_norm(p['oda'])]} penceresi {yeni}" + (f" ({p.get('olcu')} çelik ölçülerinde yok)" if olcu else ""))
-            olcu = yeni
+        olcu = (p.get("olcu") or "").lower().replace(" ", "").replace("×", "x").replace("*", "x") or None
+        if olcu is None:
+            olcu = "60x40" if _islev(kan, tr_buyuk(p["oda"])) in ("banyo", "wc") else "120x120"
+            nt.append(f"ölçüsü yazmayan {ad_haritasi[_norm(p['oda'])]} penceresi {olcu}")
+        elif olcu not in PENCERE_OLCULERI:
+            sor.append(f"{ad_haritasi[_norm(p['oda'])]} penceresini {p.get('olcu')} okudum; çelikte pencere ölçüleri "
+                       f"{', '.join(PENCERE_OLCULERI)}. Hangisi olsun?")
+            continue
         pencereler.append({"mahal": ad_haritasi[_norm(p["oda"])], "cephe": cephe_harf[p["cephe"]], "olcu": olcu, "adet": int(p.get("adet") or 1)})
     kapilar = []
     for k in kan["kapilar"]:
@@ -732,7 +807,7 @@ def plan_celik(kan: dict, o: CizimOkumasi) -> tuple[dict | None, list[str], list
     plan = {"dis_olcu": {"en": en, "boy": boy}, "mahaller": mahaller, "kapilar": kapilar, "pencereler": pencereler,
             "cati": {"tip": tip if tip in ("besik", "kirma") else "besik", **({"mahya_yonu": mahya} if mahya and tip == "besik" else {})},
             "gerekce": "bayi çiziminden okundu (İE-20)"}
-    return plan, cz, nt
+    return plan, sor, cz, nt
 
 
 # ───────────────────────── bayiye ─────────────────────────
@@ -741,7 +816,13 @@ ISLEV_ADI = {"salon": "salon", "mutfak": "mutfak", "yatak_odasi": "yatak odası"
 
 
 def ozet_satirlari(okuma: dict, den: dict) -> list[str]:
-    """Okunanın bayiye kısa özeti (madde madde)."""
+    """Okunanın bayiye kısa özeti (madde madde): okunanlar, sonra varsayımlar."""
+    okunan, varsayim = _ozet(okuma, den)
+    return okunan + varsayim
+
+
+def _ozet(okuma: dict, den: dict) -> tuple[list[str], list[str]]:
+    """(okunanlar, varsayımlar): varsayımlar (kodun notları ve LLM'in oranla aldıkları) bayiye her zaman gider (K21)."""
     o = CizimOkumasi.model_validate(okuma)
     kan = den.get("kanonik") or kanonik(o)
     s = []
@@ -785,35 +866,50 @@ def ozet_satirlari(okuma: dict, den: dict) -> list[str]:
         s.append(_bas_buyuk(", ".join(kp) + "."))
     if den.get("zincir_tutuyor") and not any("küçük farkla" in n for n in den.get("notlar") or []) and o.zincirler:
         s.append("Ölçü zincirleri toplamla tutuyor.")
-    for n in den.get("notlar") or []:
-        s.append(_bas_buyuk(n) + ".")
+    v = [_bas_buyuk(n) + "." for n in den.get("notlar") or []]
     if den.get("tahminler"):
-        s.append("Ölçüsü yazmayanları oranla aldım: " + "; ".join(den["tahminler"][:4]) + ".")
-    return s
+        v.append("Ölçüsü yazmayanları oranla aldım: " + "; ".join(den["tahminler"]) + ".")
+    return s, v
 
 
-def teyit_metni(okuma: dict, den: dict, gorsel_var: bool = True, on: str = "") -> str:
-    """[Doğru] [Düzelt] mesajının gövdesi (≤ 1000; WhatsApp gövde ve altyazı sınırı 1024). `on`: başa ek ("Düzelttim: …")."""
+MESAJ_SINIRI = 1000             # düğmeli mesajın gövdesi ve görsel altyazısı (WhatsApp 1024)
+METIN_SINIRI = 4000             # düz metin mesajı (WhatsApp 4096)
+
+
+def teyit_metni(okuma: dict, den: dict, gorsel_var: bool = True, on: str = "") -> tuple[str, str | None]:
+    """[Doğru] [Düzelt] mesajı: (gövde ≤ 1000, önden giden ek metin ya da None). `on`: başa ek ("Düzelttim: …")."""
     son = ("\n\nOkuduğum yerleşim görselde. " if gorsel_var else "\n\n") + "Doğru mu? Düzeltme varsa yazmanız yeterli."
-    return _sigdir(on + "Çiziminizden şunları okudum:\n", ozet_satirlari(okuma, den), son)
+    return _parcala(on, okuma, den, son)
 
 
-def soru_metni(okuma: dict, den: dict, gorsel_var: bool = True, on: str = "") -> str:
-    """Emin olunamayanlar varken (teyit yok): okunan + sorular (≤ 1000)."""
+def soru_metni(okuma: dict, den: dict, gorsel_var: bool = True, on: str = "") -> tuple[str, str | None]:
+    """Emin olunamayanlar varken (teyit yok): okunan + sorular; (gövde, ek metin)."""
     sorular = list(dict.fromkeys(den.get("sorular") or []))
     son = "\n\nŞunlardan emin olamadım:\n" + "\n".join(f"{i}. {q}" for i, q in enumerate(sorular[:5], 1)) + \
           ("\n\nOkuduğum yerleşim görselde." if gorsel_var else "") + "\nDoğrusunu yazar mısınız?"
-    return _sigdir(on + "Çiziminizden şunları okudum:\n", ozet_satirlari(okuma, den), son)
+    return _parcala(on, okuma, den, son)
 
 
-def cizilemez_metni(okuma: dict, den: dict, on: str = "", ek: str = "") -> str:
-    """Motor'un bugün çizemediği okuma: okunan + neden (≤ 1000). `ek`: sona (yönlendirme cümlesi)."""
+def cizilemez_metni(okuma: dict, den: dict, on: str = "", ek: str = "") -> tuple[str, str | None]:
+    """Motor'un bugün çizemediği okuma: okunan + neden; (gövde, ek metin). `ek`: sona (yönlendirme cümlesi)."""
     neden = "; ".join(str(x) for x in den.get("cizilemez") or [])
     son = f"\n\nBu planı şu an otomatik çizemiyorum: {neden}." + ek
-    return _sigdir(on + "Çiziminizden şunları okudum:\n", ozet_satirlari(okuma, den), son)
+    return _parcala(on, okuma, den, son)
 
 
-def _sigdir(bas: str, satirlar: list[str], son: str, sinir: int = 1000) -> str:
+def _parcala(on: str, okuma: dict, den: dict, son: str) -> tuple[str, str | None]:
+    """Gövde sığarsa tek mesaj. Sığmazsa varsayımlar önden ayrı bir metin mesajında gider (hiçbiri düşmez; K21), gövdede okunanlar
+    ve bunu söyleyen bir satır kalır."""
+    bas = on + "Çiziminizden şunları okudum:\n"
+    okunan, varsayim = _ozet(okuma, den)
+    tam = bas + "\n".join(f"• {x}" for x in okunan + varsayim) + son
+    if len(tam) <= MESAJ_SINIRI or not varsayim:
+        return _sigdir(bas, okunan + varsayim, son), None
+    ek = "Çiziminizi okurken varsaydıklarım:\n" + "\n".join(f"• {x}" for x in varsayim)
+    return _sigdir(bas, okunan, "\n• Varsaydıklarımı bir önceki mesajda yazdım." + son), ek[:METIN_SINIRI]
+
+
+def _sigdir(bas: str, satirlar: list[str], son: str, sinir: int = MESAJ_SINIRI) -> str:
     """Özet satırları sığmazsa sondan atılır; baş ve son (soru, teyit cümlesi) her zaman kalır."""
     govde = [f"• {x}" for x in satirlar]
     while govde and len(bas + "\n".join(govde) + son) > sinir:

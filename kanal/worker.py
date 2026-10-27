@@ -472,6 +472,8 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
     # ── İE-04: satır türü karara göre; yalnız settings.mesaj_katmani açıkken (hosting v1.3). Kapalıyken bugünkü metin + PDF.
     # Metin yolu her zaman kalır (buton yalnız kısayoldur).
     katman = bool(settings.get("mesaj_katmani"))
+    if cizim_ek.get("on_metin"):                  # İE-20: okumanın varsayımları gövdeye sığmadı; düğmeli mesajdan önce ayrı metin
+        ekle(cizim_ek["on_metin"])
     butonlar = [(b["id"], b["baslik"]) for b in (karar.butonlar or [])] or \
                ([tuple(x) for x in SORU_BUTONLARI[karar.soru_alani]] if karar.eylem == "sor" and karar.soru_alani in SORU_BUTONLARI else [])
     if not katman:
@@ -741,8 +743,8 @@ def cizim_karari(gelen: dict, settings: dict, k, talep, etk, medya: bool, cikari
     son = k.d.get("son_is_emri") or {}
     okumadan = (son.get("talep") or {}).get("kaynak") == "cizim-okuma" and (son.get("yapi") or {}).get("sistem") == "prefabrik"
     if co.get("durum") in ("teyit", "soru", "duzeltme"):
-        if talep.niyet == "onay" and co["durum"] == "teyit":
-            return _cizim_plani(gelen, settings, k, katalog, bayi, proje_koku)
+        if talep.niyet == "onay" and (co["durum"] == "teyit" or (co["durum"] == "duzeltme" and not co.get("sorular"))):
+            return _cizim_plani(gelen, settings, k, katalog, bayi, proje_koku)     # [Düzelt]'den sonra "doğru": okuma yeniden denetlenir
         if talep.niyet in ("selam", "soru") or (talep.niyet == "yeni_talep" and talep.katalog_kodu):
             if talep.niyet == "yeni_talep":                    # başka bir talep: okuma kapanır, mesaj bugünkü yoldan
                 k.d.pop("cizim_okuma", None); k.d["son_soru_alani"] = None
@@ -773,19 +775,21 @@ def _cizim_sonucu(gelen: dict, settings: dict, k, okuma: dict, dosya: dict | Non
     if den["cizilemez"]:
         co["durum"] = "devredildi"
         k.d["son_soru_alani"] = None
-        mesaj = GO.cizilemez_metni(okuma, den, on=bas, ek=" " + KR.YONLENDIRME)
+        mesaj, ek["on_metin"] = GO.cizilemez_metni(okuma, den, on=bas, ek=" " + KR.YONLENDIRME)
         return KR._bitir(k, KR.Karar(eylem="yonlendir", gerekce="çizim okundu, otomatik çizilemez: " + "; ".join(den["cizilemez"])[:200],
                                      mesaj=mesaj)), ek
     if den["sorular"]:
         co["durum"] = "soru"
         k.d["son_soru_alani"] = "cizim_okuma"
+        mesaj, ek["on_metin"] = GO.soru_metni(okuma, den, gorsel_var=gorsel is not None, on=bas)
         return KR._bitir(k, KR.Karar(eylem="sor", soru_alani="cizim_okuma", gerekce=f"çizim okuması: {len(den['sorular'])} soru",
-                                     mesaj=GO.soru_metni(okuma, den, gorsel_var=gorsel is not None, on=bas))), ek
+                                     mesaj=mesaj)), ek
     co["durum"] = "teyit"
     k.d["son_soru_alani"] = "cizim_okuma"
     butonlar = [{"id": f"c:{iz}:d", "baslik": "Doğru"}, {"id": f"c:{iz}:z", "baslik": "Düzelt"}]
+    mesaj, ek["on_metin"] = GO.teyit_metni(okuma, den, gorsel_var=gorsel is not None, on=bas)
     return KR._bitir(k, KR.Karar(eylem="sor", soru_alani="cizim_okuma", gerekce="çizim okundu: teyit", butonlar=butonlar,
-                                 mesaj=GO.teyit_metni(okuma, den, gorsel_var=gorsel is not None, on=bas))), ek
+                                 mesaj=mesaj)), ek
 
 
 def _cizim_medya(gelen: dict, settings: dict, k, g: dict, bayi, proje_koku: Path | None) -> tuple:
@@ -799,8 +803,11 @@ def _cizim_medya(gelen: dict, settings: dict, k, g: dict, bayi, proje_koku: Path
         return KR._bitir(k, KR.Karar(eylem="cevapla", gerekce="çizim: dosya indirilemedi",
                                      mesaj="Gönderdiğiniz dosyayı alamadım; yeniden gönderebilir misiniz? Talebinizi yazıyla da iletebilirsiniz.")), \
             {"kayit": kayit, "patrona": f"Portman: {maske(gelen['sender'])} dosya gönderdi ama indirilemedi; panelden bakabilirsiniz."}
-    if g.get("durum") == "desteklenmiyor":
-        return KR._bitir(k, KR.Karar(eylem="cevapla", gerekce="çizim: dosya türü okunmuyor", mesaj=g.get("neden") or "")), {"kayit": kayit}
+    if g.get("durum") == "desteklenmiyor":                    # bugünkü gibi dosya Patron'a da bildirilir (panelde)
+        tur = (g.get("dosya") or {}).get("mime") or gelen.get("type")
+        return KR._bitir(k, KR.Karar(eylem="cevapla", gerekce="çizim: dosya türü okunmuyor",
+                                     mesaj=(g.get("neden") or "") + " Gönderdiğiniz dosyayı Lokman Bey'e ilettim.")), \
+            {"kayit": kayit, "patrona": f"Portman: {maske(gelen['sender'])} okunamayan bir dosya gönderdi (tür: {tur}); panelden bakabilirsiniz."}
     okuma = g.get("okuma") or {}
     if okuma.get("tur") != "plan":
         return KR._bitir(k, KR.Karar(eylem="cevapla", gerekce=f"çizim: plan değil ({okuma.get('tur')})",
@@ -845,11 +852,20 @@ def _cizim_duzeltme(gelen: dict, settings: dict, k, talep, cikarim: dict | None,
     bas = "Düzelttim: " + "; ".join(fark[:4]) + ".\n\n"
     if revizyon and co.get("durum") == "cizildi":
         # okumadan çizilmiş planın revizyonu: kod denetimi temizse plan doğrudan yeniden çizilir (planın kendisi teyittir)
-        den = GO.denetle(yeni, ayar={a: v for a, v in gorsel_ayari(settings).items() if a in GO.ESIK})
+        esik = {a: v for a, v in gorsel_ayari(settings).items() if a in GO.ESIK}
+        den = GO.denetle(yeni, ayar=esik)
         if den.get("cevrim") and not den["sorular"] and not den["cizilemez"]:
+            # planın kendisi teyittir; ama bu değişiklikle gelen yeni varsayımlar (ızgara kayması, ölçüsüz pencere …) bayiye yazılır (K21)
+            eski = GO.denetle(co["okuma"], ayar=esik)
+            yeni_var = [n for n in den["notlar"] + den["tahminler"] if n not in eski["notlar"] + eski["tahminler"]]
             co.update(okuma=yeni, sorular=[], revizyon=True)
-            return _cizim_plani(gelen, settings, k, katalog, bayi, proje_koku, den=den, on_not="Uygulanan: " + "; ".join(fark[:4]) + ". ",
-                                kayit=kayit)
+            var = "Varsaydığım: " + "; ".join(yeni_var) + ". " if yeni_var else ""
+            uzun = len(var) > 300                                   # düğmeli mesajın gövdesine sığmayacaksa önden ayrı metin
+            karar, ek = _cizim_plani(gelen, settings, k, katalog, bayi, proje_koku, den=den,
+                                     on_not="Uygulanan: " + "; ".join(fark[:4]) + ". " + ("" if uzun else var), kayit=kayit)
+            if uzun:
+                ek["on_metin"] = ("Bu değişiklikte varsaydıklarım:\n" + "\n".join(f"• {x}" for x in yeni_var))[:GO.METIN_SINIRI]
+            return karar, ek
     return _cizim_sonucu(gelen, settings, k, yeni, co.get("dosya"), bayi, proje_koku, gelen["id"], bas=bas, revizyon=revizyon, kayit=kayit)
 
 

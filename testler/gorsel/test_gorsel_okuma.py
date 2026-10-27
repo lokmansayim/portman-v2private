@@ -94,7 +94,7 @@ def geometri(ie: dict) -> dict:
 # ─── G1/G4 hedef örneği: TK-01 ───
 def test_tk01_okumasi_teklif_r04_geometrisini_verir():
     """Kabul: TK-01'in okumasından çıkan İş Emri, teklif çalışmasında elle yazılan İş Emri'yle (r04) geometri olarak aynı."""
-    d = GO.denetle(TK01, veranda_destegi=True)
+    d = GO.denetle(TK01, bk14=True)
     assert d["sorular"] == [] and d["cizilemez"] == []
     ie = d["cevrim"]["is_emri"]
     assert geometri(ie) == geometri(TK01_BEKLENEN)
@@ -103,25 +103,29 @@ def test_tk01_okumasi_teklif_r04_geometrisini_verir():
     assert ie["is_emri_no"] == "" and ie["revizyon"] == 0          # numara ve künye `karar._is_emri_uret`te
 
 
-def test_tk01_veranda_destegi_yoksa_cizilmez():
-    """BK-14 (PR #50) birleşmeden gövdeden taşan veranda çizilemez: sapmalı plan yerine bayiye ve Patron'a söylenir."""
-    d = GO.denetle(TK01, veranda_destegi=False)
+def test_tk01_bk14_yoksa_cizilmez():
+    """BK-14 (PR #50) birleşmeden gövdeden taşan veranda ve dört kollu iç duvar birleşimi çizilemez (main Motor'u + birleşimde doğrulamadan
+    düşer): sapmalı plan yerine bayiye ve Patron'a söylenir."""
+    d = GO.denetle(TK01, bk14=False)
     assert d["cevrim"] is None and d["sorular"] == []
-    assert d["cizilemez"] == ["gövdenin dışına taşan veranda"]
-    m = GO.cizilemez_metni(TK01, d)
-    assert "otomatik çizemiyorum" in m and "veranda" in m and len(m) <= 1024
+    assert d["cizilemez"][0] == "gövdenin dışına taşan veranda"
+    assert d["cizilemez"][1].startswith("dört kollu duvar birleşimi (") and len(d["cizilemez"]) == 2
+    m, ek = GO.cizilemez_metni(TK01, d)
+    assert "otomatik çizemiyorum" in m and "veranda" in m and len(m) <= 1000 and ek is None
+    yalniz = {**TK01, "verandalar": []}
+    assert GO.denetle(yalniz, bk14=False)["cizilemez"] == [d["cizilemez"][1]]
 
 
 def test_tk01_teyit_metni():
-    d = GO.denetle(TK01, veranda_destegi=True)
-    m = GO.teyit_metni(TK01, d)
-    assert len(m) <= 1024
+    d = GO.denetle(TK01, bk14=True)
+    m, ek = GO.teyit_metni(TK01, d)
+    assert len(m) <= 1000 and ek is None
     for parca in ("Tek katlı prefabrik, gövde 8,98 × 8,88 m, duvar 2,50 m, beşik çatı.",
                   "salon 19,5 m²", "mutfak 9,5 m²", "3 yatak odası (11,5 / 13 / 9,5 m²)", "e. banyo 3 m²", "banyo 5 m²",
                   "Veranda: önde 3,86 × 1,81 m, arkada 2,61 × 1,30 m.", "8 pencere, giriş kapısı önde.",
                   "Yapı tipi yazmıyordu, prefabrik aldım.", "banyoların derinliği 256 cm", "Okuduğum yerleşim görselde. Doğru mu?"):
         assert parca in m, parca
-    assert "Okuduğum yerleşim görselde" not in GO.teyit_metni(TK01, d, gorsel_var=False)
+    assert "Okuduğum yerleşim görselde" not in GO.teyit_metni(TK01, d, gorsel_var=False)[0]
 
 
 @pytest.mark.parametrize("giris", ["ust", "sol", "sag"])
@@ -129,10 +133,10 @@ def test_dondurulmus_cizim_ayni_is_emrini_verir(giris):
     """Çizimin yönü (giriş üstte, solda, sağda) planı değiştirmez: kanonik çerçeve giriş altta."""
     o = dondur(TK01, giris)
     assert o != TK01
-    d = GO.denetle(o, veranda_destegi=True)
+    d = GO.denetle(o, bk14=True)
     assert d["sorular"] == [] and d["cizilemez"] == [], (d["sorular"], d["cizilemez"])
     a = d["cevrim"]["is_emri"]
-    b = GO.denetle(TK01, veranda_destegi=True)["cevrim"]["is_emri"]
+    b = GO.denetle(TK01, bk14=True)["cevrim"]["is_emri"]
     assert geometri(a) == geometri(b) and a["yapi"] == b["yapi"]
 
 
@@ -141,15 +145,15 @@ def test_tutmayan_zincir_sorulur():
     o = copy.deepcopy(TK01)
     z = next(z for z in o["zincirler"] if z["kenar"] == "ust")
     z["olculer_cm"][0] += 20
-    d = GO.denetle(o, veranda_destegi=True)
+    d = GO.denetle(o, bk14=True)
     assert d["cevrim"] is None
     assert any(s.startswith("Üstteki ölçü zinciri") and "hangisi doğru?" in s for s in d["sorular"]), d["sorular"]
-    m = GO.soru_metni(o, d)
+    m, _ = GO.soru_metni(o, d)
     assert "Şunlardan emin olamadım" in m and "Doğrusunu yazar mısınız?" in m and len(m) <= 1024
 
 
 def test_kucuk_zincir_farki_not_olur():
-    d = GO.denetle(TK01, veranda_destegi=True)
+    d = GO.denetle(TK01, bk14=True)
     assert any("küçük farkla tutuyor" in n for n in d["notlar"])
     assert d["zincir_tutuyor"] is True
 
@@ -238,7 +242,7 @@ def test_varsayilanlar_not_olur():
     d = GO.denetle(o)
     assert d["sorular"] == [] and d["cizilemez"] == []
     for n in ("yapı tipi yazmıyordu, prefabrik aldım", "duvar yüksekliği yazmıyordu, 2,50 m aldım", "çatı tipi görünmüyordu, beşik aldım",
-              "ölçüsü yazmayan pencereler: Banyo 60x40"):
+              "ölçüsü yazmayan pencereler: 60x40 (Banyo)"):
         assert n in d["notlar"], (n, d["notlar"])
     ie = d["cevrim"]["is_emri"]
     assert ie["yapi"]["duvar_yuksekligi_cm"] == 250
@@ -269,7 +273,7 @@ def test_celik_okuma_plan_denetciden_gecer():
     banyo = next(m for m in plan["mahaller"] if m["islev"] == "banyo")
     assert banyo["dikdortgenler"] == [[400, 550, 640, 850]]            # köken güneybatı: arka (çizimin üstü) kuzey
     assert d["cevrim"]["tanim"]
-    assert "Tek katlı çelik, gövde 11,00 × 8,50 m" in GO.teyit_metni(CELIK, d)
+    assert "Tek katlı çelik, gövde 11,00 × 8,50 m" in GO.teyit_metni(CELIK, d)[0]
 
 
 def test_celik_kurala_uymayan_oda_cizilemez():
@@ -326,7 +330,100 @@ def test_numara_llm_e_maskeli_gider(monkeypatch):
 # ─── okunan yerleşimin görseli ───
 @pytest.mark.parametrize("okuma", [TK01, BASIT, CELIK], ids=["TK01", "BASIT", "CELIK"])
 def test_yerlesim_gorseli(tmp_path, okuma):
-    d = GO.denetle(okuma, veranda_destegi=True)
+    d = GO.denetle(okuma, bk14=True)
     yol = GO.yerlesim_gorseli(okuma, d, tmp_path / "g" / "okunan_yerlesim.png")
     assert yol.is_file() and yol.read_bytes()[:8] == b"\x89PNG\r\n\x1a\n" and yol.stat().st_size > 20_000
     assert GO.yerlesim_gorseli(okuma, d, tmp_path / "h.png").read_bytes() == yol.read_bytes()      # belirlenimci
+
+
+# ─── geometri hakemi (27 Ekim): ızgaranın ucu, dış ölçünün kaynağı, varsayımların bayiye ulaşması ───
+def iki_oda(W: float, H: float, sinir: float) -> dict:
+    return {"tur": "plan", "yapi_turu": "prefabrik", "giris_kenari": "alt", "dis_olcu": {"yatay_cm": W, "dusey_cm": H},
+            "odalar": [{"ad": "SALON", "islev": "salon", "dikdortgenler": [[0, 0, sinir, H]]},
+                       {"ad": "MUTFAK", "islev": "mutfak", "dikdortgenler": [[sinir, 0, W, H]]}],
+            "kapilar": [{"arasinda": ["DIŞ", "SALON"], "kenar": "alt"}, {"arasinda": ["SALON", "MUTFAK"]}],
+            "pencereler": [{"oda": "SALON", "kenar": "sol", "olcu": "120x120"}, {"oda": "MUTFAK", "kenar": "sag", "olcu": "120x120"}],
+            "cati": {"tip": "besik", "mahya": "giristen_arkaya"}, "duvar_yuksekligi_cm": 250}
+
+
+def test_pano_izgarasinin_kisa_ucu_sorulur():
+    """9,00 m: yarım adımlı ızgarada sonda 1,5 cm'lik pano kalır, Motor çizemez → teyit yerine soru (en yakın iki ölçüyle)."""
+    d = GO.denetle(iki_oda(900, 763, 386.5))
+    assert d["cevrim"] is None
+    assert any("ön cephesi 9,00 m" in s and "sonda 1,5 cm'lik pano" in s and "8,98 m ve 9,61 m" in s for s in d["sorular"]), d["sorular"]
+    assert GO.denetle(iki_oda(898, 763, 386.5))["cevrim"] is not None
+    d = GO.denetle(iki_oda(898, 770, 386.5))
+    assert any("yan cephesi 7,70 m" in s for s in d["sorular"]), d["sorular"]
+
+
+def test_dis_duvara_cok_yakin_sinir_sorulur():
+    """Tam adımlı ızgarada son yarım aks dış duvara 2,75 cm: oraya oturan oda sınırı Motor'un çizemeyeceği pano bırakır."""
+    d = GO.denetle(iki_oda(713, 763, 692))
+    assert d["cevrim"] is None
+    assert any("Salon sınırı (692 cm) dış duvara 2,8 cm kalıyor" in s for s in d["sorular"]), d["sorular"]
+
+
+def test_dis_olcu_yazmiyorsa_zincirin_yazili_toplami():
+    o = copy.deepcopy(TK01)
+    o["dis_olcu"] = {"yatay_cm": None, "dusey_cm": None}
+    d = GO.denetle(o, bk14=True)
+    assert d["kanonik"]["W"] == 898 and d["kanonik"]["H"] == 888, (d["kanonik"]["W"], d["kanonik"]["H"])
+    assert "dış ölçü yazmıyordu: eni ölçü zincirinden, boyu odaların ölçülerinden alındı" in d["notlar"]   # yan zincirler verandayı kapsıyor
+    o["zincirler"] = [{**z, "kapsam": "govde", "olculer_cm": [382, 506], "toplam_cm": 888} if z["kenar"] == "sol" else z for z in o["zincirler"]]
+    assert "dış ölçü yazmıyordu: ölçü zincirlerinden alındı" in GO.denetle(o, bk14=True)["notlar"]
+    assert geometri(d["cevrim"]["is_emri"]) == geometri(GO.denetle(TK01, bk14=True)["cevrim"]["is_emri"])
+
+
+def test_sigmayan_varsayimlar_ayri_mesajda_gider():
+    o = copy.deepcopy(TK01)
+    for p in o["pencereler"]:
+        p["olcu"] = None
+    o["tahminler"] += [f"{i}. tahmin: bu ölçü çizimde yazmıyordu, komşu odanın ölçüsünden ve çizimin oranından aldım" for i in range(1, 5)]
+    d = GO.denetle(o, bk14=True)
+    m, ek = GO.teyit_metni(o, d)
+    assert ek is not None and len(m) <= 1000 and "Varsaydıklarımı bir önceki mesajda yazdım." in m and m.endswith("yazmanız yeterli.")
+    for n in d["notlar"]:
+        assert GO._bas_buyuk(n) in ek, n
+    for t in d["tahminler"]:
+        assert t in ek, t
+    assert "Ölçüsü yazmayan pencereler: 120x120 (Yatak Odası 1, Yatak Odası 2, Yatak Odası 3, Salon 2, Mutfak), 60x40 (E. Banyo, Banyo)." in ek
+    assert "4. tahmin" in ek
+
+
+def test_izgaraya_oturtunca_alan_cok_degisirse_sorulur_azsa_yazilir():
+    o = copy.deepcopy(BASIT)
+    for x in o["odalar"]:
+        x["alan_m2"] = None
+        for r in x["dikdortgenler"]:
+            r[:] = [395 if v == 387 else 503 if v == 513 else v for v in r]
+    next(z for z in o["zincirler"] if z["kenar"] == "ust")["olculer_cm"] = [395, 108, 270]
+    d = GO.denetle(o)
+    assert d["cevrim"] is None
+    assert any(s.startswith("Hol pano ızgarasına oturtunca 6,8 m² yerine 7,9 m² oluyor") for s in d["sorular"]), d["sorular"]
+    d = GO.denetle(BASIT)
+    assert "oda sınırlarını pano ızgarasına oturttum (en çok 1 cm kayma)" in d["notlar"], d["notlar"]
+
+
+def test_mahya_egim_sacak_ve_kapi_varsayimlari_yazilir():
+    o = copy.deepcopy(BASIT)
+    o["cati"] = {"tip": "besik", "mahya": None, "egim_yuzde": 25, "sacak_cm": 50}
+    o["kapilar"][0]["genislik_cm"] = 100
+    d = GO.denetle(o)
+    assert d["sorular"] == [] and d["cizilemez"] == []
+    for n in ("mahya yönü görünmüyordu, girişten arkaya aldım", "çatı eğimi çizimdeki gibi %25 (standardımız %33)",
+              "saçak çizimdeki gibi 50 cm (standardımız 30 cm)", "kapılar prefabrik standardında: giriş 90, iç 82 cm (çizimde 100 cm yazıyordu)"):
+        assert n in d["notlar"], (n, d["notlar"])
+    c = d["cevrim"]["is_emri"]["cati"]
+    assert (c["egim_yuzde"], c["sacak_cm"], c["makas_ekseni"]) == (25, 50, "x")
+
+
+def test_celik_katalog_disi_pencere_sorulur_yildiz_okunur():
+    o = copy.deepcopy(CELIK)
+    o["pencereler"][3]["olcu"] = "125x125"
+    o["pencereler"][4]["olcu"] = "120*180"
+    d = GO.denetle(o)
+    assert d["cevrim"] is None
+    assert [s for s in d["sorular"] if "125x125" in s and "Hangisi olsun?" in s], d["sorular"]
+    o["pencereler"][3]["olcu"] = "120x180"
+    d = GO.denetle(o)
+    assert d["cevrim"] and [p["olcu"] for p in d["cevrim"]["plan"]["pencereler"] if p["mahal"] == "Salon"] == ["120x180", "120x180"]
