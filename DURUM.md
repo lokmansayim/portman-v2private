@@ -11,11 +11,12 @@ Yeni pencere için hazırlıklar:
 
 **27 Ekim 2026 akşam eki (İE-16 · PR-4a, kör dokuzda bizim yanımız; `docs/is_emirleri/IE-16.md` › Değişiklik (PR-4a)):**
 - **Karar ve onay:** plan PF `Celik_Cizim_Kurallari/PR-4/plan.md`, Lokman 27 Ekim 14:36 UTC kartı "Planla başla (dokuzu birden)". Kural ve kod `3ef60d8`'de donuk; hakem değişmedi; mühüre yalnız ekleme. Kör listeler açılmadı.
-- **Yapıldı:** sayfa denetimi aracı (`kor_sayfa.py`: 1. sayfa etiketsiz mi, yöntem A/B, kat; açık beşte doğru); kör listenin sözlüğü listeyle donar, açılıştan sonra yeniden üretilmez (`liste_yap.py`, `test_kor_listeler.py`); ÇP-20, ÇP-18, ÇP-19 ve ÇP-17'nin (önceden görülmüş: KT-02) tanımı yalnız 1. sayfadan, listemiz her biri kendi commit'inde; planlar 1. sayfayla yan yana PF `PR-4/kor_tanimlar/`.
-- **ÇP-12:** paftada müşteri onay sayfası yok (1. sayfa etiketli): tanım yazılamıyor, kör kalır.
+- **Yapıldı:** sayfa denetimi aracı (`kor_sayfa.py`: 1. sayfa etiketsiz mi, yöntem A/B, kat; açık beşte doğru); kör listenin sözlüğü listeyle donar, açılıştan sonra yeniden üretilmez (`liste_yap.py`, `test_kor_listeler.py`); ÇP-20, ÇP-18, ÇP-19, ÇP-17 (önceden görülmüş: KT-02), ÇP-08 (önceden görülmüş: 2 Ekim'deki 81 m² model) ve ÇP-04'ün (yöntem A) tanımı yalnız 1. sayfadan, listemiz her biri kendi commit'inde; planlar 1. sayfayla yan yana PF `PR-4/kor_tanimlar/`.
+- **Büyük beş (22:00 UTC, Lokman'ın Mac'indeki Drive'dan):** ilk indirme kayıtları ve kat kayıtları mühürde, her biri ayrı commit; ÇP-02, 09, 11 çift katlı → kapalı (D-26), ölçülmez; ÇP-04 ve ÇP-08 tek.
+- **ÇP-12:** paftada müşteri onay sayfası yok (1. sayfa etiketli): tanım yazılamıyor, kör kalır. Ölçülecek kör altı: ÇP-04, 08, 17, 18, 19, 20.
 - **Kanıt:** › IE-16 Kanıt (PR-4a): tam doğrulama (harness 22/22, referansla aynı, pytest 1952 geçti, 29 atlandı), sonraki commit'lerde hızlı gerileme referansla aynı; sır taraması temiz; geometri hakemi 2. tur "Kurallara uygun"; kod incelemesinin yedi düzeltmesi (listeler değişmedi).
-- **Kullanıcı adımları:** PR-4 **Çalışmıyor** (ölçüm yok; dört tanım ve listemiz commit'li).
-- **Bekleyen (Lokman):** büyük beş paftanın (ÇP-02, 04, 08, 09, 11) Mac'e indirilmesi (14:38 mesajı); sonra açılış kartı (geri alınmaz) ve PR-4b.
+- **Kullanıcı adımları:** PR-4 **Çalışmıyor** (ölçüm yok; altı tanım ve listemiz commit'li).
+- **Bekleyen:** ÇP-04 ve ÇP-08 için geometri hakemi ve doğrulama; sonra açılış kartı Lokman'a (geri alınmaz) ve PR-4b. ~~Büyük beş paftanın Mac'e indirilmesi~~ (27 Ekim 22:00 UTC).
 
 **27 Ekim 2026 öğle eki (İE-16 · PR-3c, Lokman'ın 17 kural cevabı; `docs/is_emirleri/IE-16.md` › Değişiklik (PR-3c)):**
 - **Karar ve onay:** cevaplar Lokman 27 Ekim 10:33 UTC (aynen PF `Celik_Cizim_Kurallari/PR-3/3c/kural_cevaplari.md`); plan `PR-3/3c/plan.md`, kart 10:48 "Planla kur". Hakem ve mühür değişmedi; altın testler (kitap 0.19 pimi) ve prefabrik (kitap seti 0.19) değişmedi; canlı değişmedi.
