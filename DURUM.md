@@ -12,7 +12,7 @@ Yeni pencere için hazırlıklar:
 **27 Ekim 2026 akşam eki (İE-18 · her prefabrik ev için montaj rehberi; plan; `docs/is_emirleri/IE-18.md`):**
 - **Dayanak:** Lokman 27 Ekim 16:40 UTC: "her bir prefabrik projesinin aynı şekilde RAG gibi eğitecek şekilde Rehberini yapacağız". Numara CIO'dan (İE-18); defterde İE-17 ayrıldı, İE-18 alındı, sıradaki boş İE-19.
 - **Plan:** rehber evin montaj paftasından kodla kurulur (okuyucu `main`'deki hakem okuyucusu, değiştirilmeden); verisi adsız proje kaydı (`hafiza/prefabrik/`) = doğrulanmış örnek. Hedef AP-08 (PK-07). Kör evler: rehber yalnız paftadan, liste kör protokolüyle ve Patron'un açılış kaydıyla açılmadan "doğrulanmış" olmaz; ölçümde evin kendi kaydı dışarıda. K05 aynen (eğitim yok, vektör RAG yok; benzer ev özelliklerle kodda).
-- **Bekleyen (Lokman):** planın onayı. Kod ve çizim onaydan sonra. Canlı, motor ve kurallar değişmedi.
+- **Beklemede (Lokman, 27 Ekim 16:48 UTC: "önce 28 projenin çizimi bitsin"):** plan kartı geri çekildi, kod yazılmadı. Yeni yön: motor bir evi çizebildiğinde rehberi motorun kendi modelinden çıkar, pafta katmanıyla kıyaslanır; tutan evin kaydı doğrulanmış örnek olur (çatı geometrisi iki kez yazılmaz). Başlama koşulu: İE-17'nin ilk evleri `main`'de. Canlı, motor ve kurallar değişmedi.
 
 **27 Ekim 2026 öğle eki (İE-16 · PR-3c, Lokman'ın 17 kural cevabı; `docs/is_emirleri/IE-16.md` › Değişiklik (PR-3c)):**
 - **Karar ve onay:** cevaplar Lokman 27 Ekim 10:33 UTC (aynen PF `Celik_Cizim_Kurallari/PR-3/3c/kural_cevaplari.md`); plan `PR-3/3c/plan.md`, kart 10:48 "Planla kur". Hakem ve mühür değişmedi; altın testler (kitap 0.19 pimi) ve prefabrik (kitap seti 0.19) değişmedi; canlı değişmedi.
