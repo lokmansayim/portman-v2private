@@ -9,6 +9,11 @@ Yeni pencere için hazırlıklar:
 - Dış çizim denetimi: `deneme/2026-09-30_asama2/kos.py --dxf`.
 - Mac'te `24_Astra_Cizimler/`.
 
+**27 Ekim 2026 akşam eki (İE-18 · her prefabrik ev için montaj rehberi; plan; `docs/is_emirleri/IE-18.md`):**
+- **Dayanak:** Lokman 27 Ekim 16:40 UTC: "her bir prefabrik projesinin aynı şekilde RAG gibi eğitecek şekilde Rehberini yapacağız". Numara CIO'dan (İE-18); defterde İE-17 ayrıldı, İE-18 alındı, sıradaki boş İE-19.
+- **Plan:** rehber evin montaj paftasından kodla kurulur (okuyucu `main`'deki hakem okuyucusu, değiştirilmeden); verisi adsız proje kaydı (`hafiza/prefabrik/`) = doğrulanmış örnek. Hedef AP-08 (PK-07). Kör evler: rehber yalnız paftadan, liste kör protokolüyle ve Patron'un açılış kaydıyla açılmadan "doğrulanmış" olmaz; ölçümde evin kendi kaydı dışarıda. K05 aynen (eğitim yok, vektör RAG yok; benzer ev özelliklerle kodda).
+- **Bekleyen (Lokman):** planın onayı. Kod ve çizim onaydan sonra. Canlı, motor ve kurallar değişmedi.
+
 **27 Ekim 2026 öğle eki (İE-16 · PR-3c, Lokman'ın 17 kural cevabı; `docs/is_emirleri/IE-16.md` › Değişiklik (PR-3c)):**
 - **Karar ve onay:** cevaplar Lokman 27 Ekim 10:33 UTC (aynen PF `Celik_Cizim_Kurallari/PR-3/3c/kural_cevaplari.md`); plan `PR-3/3c/plan.md`, kart 10:48 "Planla kur". Hakem ve mühür değişmedi; altın testler (kitap 0.19 pimi) ve prefabrik (kitap seti 0.19) değişmedi; canlı değişmedi.
 - **Yapıldı (karkas kuralı, yalnız `karkas: kural` tanımda; eski kopyalar eski davranışı verir):** panel oda bölmesinde biter, bölme 516 cm'yi aşarsa eşit bölünür (A1, A5); çatı panelinde ve çatı üstü panelinde çapraz yok (A3); 140'lık duvar motorun ortalamasıyla (A4; planda "parçalardan" yazmıştım, cevabın sözüyle kuruldu, beyanlı); makas tek açıklıkta 8 m'yi aşarsa 1,2 mm, ayrı satır (B5; açık beşte hiçbiri); çatı üstü paneli 180 cm × beş makas aralığı, C profiller makasa dik 60 cm arayla ve eğime paralel aynı arayla (B7, B9; ÇP-03 paftasındaki ızgara); adedi tanımda yazmayan açık alan çatı paneli 180 cm'lik, ek yapınınki tek panel (B9; planda "tek panel" yazmıştım, cevaptaki 180 cm ve açık paftalar 3/3, beyanlı); tavan paneli en çok 13,60 m (B6); baca üst payı 50 cm, tanım yazılırken (B8). B1–B4 kayıtta; Alpha mini üretim dosyası çalışması canlıdan sonra.
