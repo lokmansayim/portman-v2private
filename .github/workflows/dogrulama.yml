@@ -1,0 +1,96 @@
+# Portman · otomatik doğrulama (Kurulum Panosu satır 12; Araştırma yol haritası KT1).
+#
+# Her PR'da ve main'e her push'ta oturumların tam doğrulaması koşar: `bash araclar/ortam_kur.sh --dogrula`'nın 4. adımındaki
+# komutların aynısı (Beyin harness'i 22 vaka, tam referans gerilemesi `testler/referans/dogrula.py`, bütün pytest'ler), dört
+# paralel işe bölünmüş. Tek işte 21–37 dk sürüyordu (pytest tek çekirdekte 17–28 dk); bölününce en uzun iş ~10–12 dk.
+# Ortam her işte `ortam_kur.sh` ile kurulur. `ortam_kur.sh --dogrula`'ya adım eklenirse burası da güncellenir.
+# Biri kırmızıysa PR'da kırmızı çarpı yanar; hangi iş, hangi test düştü koşu kaydında.
+#
+# Sınırlar:
+# - Canlıya, LLM'e, WhatsApp'a bağlanmaz; sır kullanmaz (secrets yok, yalnız okuma izni).
+# - Kaynaklı testler (PORTMAN_CELIK_KAYNAK, PORTMAN_PAFTA_DIZINI, PORTMAN_KOR_*: Drive'daki gerçek paftalar ve listeler)
+#   burada atlanır; o dosyalar GitHub'a yüklenmez. Onlar oturumda kaynaklı koşuyla doğrulanır.
+# - Oturumlardaki gibi root ile koşar (Postgres kümesini ayrı `pgtest` kullanıcısıyla kurar, kurulum testleri bunu ister).
+name: Doğrulama
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Aynı PR'a yeni push gelince eski koşu durur (dakika boşa gitmez).
+concurrency:
+  group: dogrulama-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  dogrula:
+    name: ${{ matrix.ad }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - ad: harness + referans
+            parca: referans
+          # Postgres'li kalıcı akış testleri; Postgres yoksa atlanmazlar, iş kırmızı olur.
+          - ad: testler (kalıcı akış)
+            parca: pytest
+            yollar: testler/kalici
+          - ad: testler (genel motor, motor)
+            parca: pytest
+            yollar: testler/genel testler/motor
+          # Kalan her şey: yeni bir test klasörü eklenince kendiliğinden buraya düşer.
+          - ad: testler (kalan)
+            parca: pytest
+            yollar: testler --ignore=testler/kalici --ignore=testler/genel --ignore=testler/motor
+    steps:
+      # Tam geçmiş: hakem ve mühür testleri git geçmişini okur, sığ klonda durur.
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      # Yerel ortamla aynı Python (araclar/gereksinimler.txt 3.11 için sabit).
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Ortam (bash araclar/ortam_kur.sh)
+        run: |
+          sudo git config --system --add safe.directory "$GITHUB_WORKSPACE"
+          sudo env "PATH=$PATH" HOME=/root bash araclar/ortam_kur.sh
+
+      - name: ${{ matrix.ad }}
+        env:
+          YOLLAR: ${{ matrix.yollar }}
+        run: |
+          R() { sudo env "PATH=$PATH" HOME=/root TMPDIR="$RUNNER_TEMP" "$@"; }
+          PY=/root/.cache/portman-venv/bin/python
+          PG="host=127.0.0.1 port=55432 user=postgres"
+          if [[ "${{ matrix.parca }}" == referans ]]; then
+            # Referans harness'ten önce: dogrula.py ağacı geçici kopyada koşar, harness'in beyin/testler'e yazdıkları ona girmez.
+            # "SONUÇ: referansla aynı" beklenir (çıkış 1 = fark, 2 = referans bozuk).
+            R "$PY" testler/referans/dogrula.py
+            R "$PY" -m beyin.harness | tail -1
+          else
+            if [[ "$YOLLAR" == testler/kalici ]]; then
+              R "$PY" -c "import psycopg; psycopg.connect('$PG dbname=postgres', connect_timeout=10).close()" \
+                || { echo "DUR: Postgres yok; kalıcı akış testleri atlanırdı"; exit 1; }
+            fi
+            # shellcheck disable=SC2086
+            R PORTMAN_TEST_PG="$PG" "$PY" -m pytest -q -rfE -p no:cacheprovider $YOLLAR
+          fi
+
+      # Testler root ile koştu; işin sonundaki checkout temizliği .git/index'i okuyabilsin (yoksa sarı uyarı düşer).
+      - name: Çalışma klasörünün sahipliği
+        if: always()
+        run: sudo chown -R "$(id -u):$(id -g)" "$GITHUB_WORKSPACE"
