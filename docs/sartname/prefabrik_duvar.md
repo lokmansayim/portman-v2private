@@ -44,6 +44,15 @@ Kaynak: Lokman'ın anlattıkları (1–2, 6 ve 12 Ekim 2026). Astra dönemindeki
 - **Veranda duvarı:** çevrede olmayan dış düşey duvar aksa ortalıdır. Anahtar: `dis_dusey_duvar: cevre_aks_disinda`.
 - Hepsi PK-01 montaj paftasının vektörleriyle ölçüldü (`deneme/2026-10-13_pk_01/pafta_oku.py`). Motor bu planda 50 panonun 50'sini, 38 H işaretinin 38'ini paftayla aynı veriyor.
 
+## Köşe, ızgara ve kapı yeri (İE-17; on montaj paftası, 27 Ekim 2026)
+
+- **Köşe kuralı:** makasın oturduğu iki duvar köşeden geçer; 5 × 10'luk köşe parçası onların, panoları köşe aksından başlar (5 + 125,5k). Öteki iki duvar araya girer, panoları iç yüzden başlar (10 + 125,5k). İç duvarlar aynı ızgarada. Makas x'i geçiyorsa (PK-01) bugünkü ızgara; y'yi geçiyorsa (AP-13, 16, 01) x ve y yer değiştirir. Anahtar: `yapi.kisa_kenar: y` (köşe 10 cm o yönde). Açık evlerin sekizinde de aynı (AP-01…05, 07, 08, 19).
+- **Kesilmiş son pano** ızgaranın sondan bir önceki aksından başlar, önünde gerekirse yarım pano (AP paftaları). Anahtar: `dizilim.son_pano: son_aks`.
+- **Ekler tam akslarda:** AP paftalarında pano ekleri yalnız tam akslarda; iç duvar T'de bölünmez. Anahtar: `dizilim.hiza: tam_izgara`.
+- **Kapının panodaki yeri** paftadan paftaya değişiyor (40 kapı): AP-13, AP-16, AP-08'de ortada, PK-01'de menteşe ucunda 11,5, AP-01'de ikisi de. Anahtar: `dizilim.kapi_yeri` `mentese_ucu` (varsayılan) | `ortada`; kapının kendi `kapi_yeri`'si dizilimi ezer (yalnız `kapi: mantik` ile).
+- **Kapının panosu** çoğu zaman ortak duvarın bir ucundaki kavşaktan tam pano başlar; duvarın geri kalanı ızgarada. Anahtar: açıklıkta `duvar_ucu` (on | arka | sol | sag; gerçek cephe adı).
+- Kalan farklar ve ölçümler: İE-17 › Köşe ve ızgara kuralı; testler `testler/cizim/test_pafta_kiyasi.py` (paftadan ölçülen değerler).
+
 ## Aks dışı duvar ve dış duvar T bölmesi (PK-01; İE-11)
 
 - Gerçek projede bir duvar 125,5 ızgarasının dışında olabilir (PK-01: hol/salon ön duvarı arkadan 795). `yapi.ek_akslar_cm` ile aks tablosuna eklenir; mahaller `konum_cm` ile aks sınırlarıyla verilir (aks olmayan değer hata). Ek aks paftada ana aks sayılır.

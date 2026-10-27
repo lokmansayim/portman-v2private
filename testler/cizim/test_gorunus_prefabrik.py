@@ -113,16 +113,16 @@ def test_cati_sacak_ve_tepe(cati_ev):
 
 
 def test_besik_cumba_on_gorunusu(cati_ev):
-    # AP-13 ve AP-16: ön cephede 0–391,5 cumba; alnın tepesi cumbanın ortasında, topuk + (391,5 / 2 + saçak) × eğim; iki kenarı ana eğimle
+    # AP-13 ve AP-16: ön cephede 0–386,5 cumba (paftanın cumba kesiti); alnın tepesi cumbanın ortasında, topuk + (386,5 / 2 + saçak) × eğim; iki kenarı ana eğimle
     # yandan; arka görünüşte yalnız ana çatının arka yüzü (eğim yazısı yok); yan görünüşlerde ana kalkanın üçgeni, eğim iki yanda
     ad, ie, plan, r = cati_ev
     if ie["cati"]["tip"] != "besik_cumba":
         pytest.skip("kırma")
     e = float(ie["cati"]["egim_yuzde"]) / 100
-    apex = (195.75, 260.0 + (391.5 / 2 + 30.0) * e)
+    apex = (193.25, 260.0 + (386.5 / 2 + 30.0) * e)
     noktalar = {p for c in r["on"]["cizgiler"] for p in c}
     assert any(abs(u - apex[0]) < 0.01 and abs(z - apex[1]) < 0.01 for u, z in noktalar), ad
-    assert [round(x[2], 4) for x in r["on"]["egimler"]] == [round(e, 4)] * 2 and all(x[0] < 391.5 for x in r["on"]["egimler"])
+    assert [round(x[2], 4) for x in r["on"]["egimler"]] == [round(e, 4)] * 2 and all(x[0] < 386.5 for x in r["on"]["egimler"])
     assert r["arka"]["egimler"] == [] and len(r["arka"]["cizgiler"]) == 1
     for t in ("sol", "sag"):
         assert [round(x[2], 4) for x in r[t]["egimler"]] == [round(e, 4)] * 2, (ad, t)
@@ -153,7 +153,7 @@ def test_mahya_boylari(cati_ev):
     if ie["cati"]["tip"] == "kirma":
         assert CG.mahya_boylari(plan, ie) == [pytest.approx(946.85 - 508.15, abs=0.01)]
     else:
-        assert CG.mahya_boylari(plan, ie) == [pytest.approx(x1 - x0 + 60), pytest.approx(391.5 / 2 + 30)]
+        assert CG.mahya_boylari(plan, ie) == [pytest.approx(x1 - x0 + 60), pytest.approx(386.5 / 2 + 30)]
 
 
 def test_besik_ve_tasan_veranda_burada_cizilmez():

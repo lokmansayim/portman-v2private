@@ -45,13 +45,13 @@ def test_ap13_besik_cumba():
     assert [d["ad"] for d in c["duzlemler"]] == ["ana güney", "ana kuzey", "cumba doğu", "cumba batı"]
     assert {d["egim"] for d in c["duzlemler"]} == {0.3288} and all("ust_pay" not in d for d in c["duzlemler"])
     assert [(k["ad"], k["aralik"]) for k in c["kalkanlar"]] == [("batı kalkanı", [0.0, 788.0]), ("doğu kalkanı", [0.0, 788.0]),
-                                                                 ("cumbanın güney kalkanı", [0.0, 391.5])]
+                                                                 ("cumbanın güney kalkanı", [0.0, 386.5])]
     assert _kenar(c) == {"alin": 6, "vadi": 2, "mahya": 2, "sacak": 2}
-    assert CU.denetle(c, [list(kutu), [0.0, 0.0, 391.5, 0.0]]) == []
-    # mahya kotu paftanın kesitiyle: duvar üstünden 149,4 (10 topuk + 424 × 0,3288); cumbanın mahyası 83,4 (burada cumba 5 cm geniş:
-    # duvarı Motor'un ızgarasında, İş Emri'nin varsayımı; +0,8)
+    assert CU.denetle(c, [list(kutu), [0.0, 0.0, 386.5, 0.0]]) == []
+    # mahya kotu paftanın kesitiyle: duvar üstünden 149,4 (10 topuk + 424 × 0,3288); cumbanın mahyası 83,4 (10 + 223,25 × 0,3288; cumba
+    # paftadaki gibi 0–386,5: odanın duvarı İE-17 köşe kuralıyla paftadaki yerinde)
     kot = sorted({round(max(k["kot"]), 1) for k in cati_genel.cati_kur(c)["kenarlar"] if k["tur"] == "mahya"})
-    assert kot == [pytest.approx(250 + 83.4 + 0.8, abs=0.1), pytest.approx(250 + 149.4, abs=0.1)]
+    assert kot == [pytest.approx(250 + 83.4, abs=0.1), pytest.approx(250 + 149.4, abs=0.1)]
 
 
 def test_ap16_besik_cumba():
