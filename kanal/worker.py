@@ -501,10 +501,11 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
         ekle_satir(giden_belge(gelen, Path(cizim["pdf"]), ad, f"{no} r{rev:02d} · ÖN ONAYA SUNULAN TASLAK · {ozet_baslik}".strip(),
                                0, no, rev, cizim["pdf_sha256"]))
         ucb = ekler.get("ucb")
-        if ucb and ucb.get("url"):
-            ekle_satir(giden_etkilesim(gelen, f"{no} r{rev:02d} planının basit 3D modeli. Tarayıcıda açılır; odalara dokunarak gezebilirsiniz.", 0,
-                                       baglanti={"metin": "3D'de gez", "url": ucb["url"]}, tur="cevap", is_emri_no=no, revizyon=rev))
-        # ucb_taban_url yoksa 3D sayfası yalnız kayıtta (revizyonlar.ekler) durur; bayiye söz veren bir mesaj gönderilmez (barınak kararı ayrı)
+        if ucb and ucb.get("url"):                  # İE-21: rehberin "3D'yi aç" düğmesi (metin kanal/sablonlar.py)
+            import sablonlar as S
+            ekle_satir(giden_etkilesim(gelen, S.ucb_metni(no, rev), 0, baglanti={"metin": S.UCB_DUGME, "url": ucb["url"]},
+                                       tur="cevap", is_emri_no=no, revizyon=rev))
+        # ucb_taban_url boşsa ya da yayın dizini yoksa 3D sayfası yalnız kayıtta (revizyonlar.ekler) durur; bayiye söz veren mesaj gönderilmez
     elif butonlar and karar.soru_alani == "okuma" and len((k.d.get("okuma_bekleyen") or {}).get("adaylar") or []) == 2:
         # İE-08 A4: "1 / 2 / Hiçbiri" — iki okuma tek görselde numaralı (görsel üretilemezse düğmeler metinle gider; akış durmaz).
         # "Görselde işaretledim" cümlesi yalnız görsel gerçekten giderse (kapanış incelemesi 13.10)
@@ -1198,11 +1199,20 @@ def liste_exceli(json_yolu: Path, hedef: Path, no: str, rev: int, set_yolu=None)
         return {"hata": maske_numaralar(f"{type(e).__name__}: {str(e)[:200]}")}
 
 
+def _ucb_eki(ifc: Path, hedef: Path, no: str, rev: int, settings: dict) -> dict:
+    """İE-21: IFC'den tek dosyalık 3D sayfası (kayıtta `<rev>/3d/index.html`) ve yayın kopyası. Bağlantı yalnız `ucb_taban_url` doluysa ve
+    yayın dizini varsa gelir (`kanal/ucb_yayin.py`; adres rastgele anahtarlı, İş Emri numarası taşımaz)."""
+    from motor import ucb_sayfa as US
+    import ucb_yayin as UY
+    html = US.uret(ifc, hedef / "3d" / "index.html", baslik=f"{no} r{rev:02d}")
+    return {"dosya": str(html), "sha256": _sha(html), **UY.yayinla(html, settings, KANAL / "yayin" / "3d")}
+
+
 def ekler_uret(ie: dict, hedef: Path, v: dict, settings: dict, m: dict | None = None) -> dict:
     """Aynı İş Emri revizyonundan türetilen ekler: {"gorsel": {...}, "ifc": {...}, "ucb": {...}}. Her biri ayrı denenir; üretilemeyen
     ek akışı durdurmaz (satır metinle gider) ve 'hata' ile kaydedilir. Motor'un DXF/PDF'ine dokunulmaz.
     İE-08 çelik (manifest `m`, motor genel): görsel = `<kod>_bayi_gorsel.png` (plan + çatı planı + perspektifler; yoksa `plan_bayi.png`),
-    IFC genel motorun IFC'si; 3D sayfası yok (kapsam dışı). Yükleme listesi klasörde kalır, bayiye gitmez."""
+    IFC genel motorun IFC'si; 3D sayfası o IFC'den (İE-21). Yükleme listesi klasörde kalır, bayiye gitmez."""
     ekler: dict = {}
     no, rev = ie.get("is_emri_no", ""), int(ie.get("revizyon") or 1)
     if (ie.get("yapi") or {}).get("sistem") == "celik" and m is not None:
@@ -1219,6 +1229,11 @@ def ekler_uret(ie: dict, hedef: Path, v: dict, settings: dict, m: dict | None = 
                             **{k: (oz.get("urunler") or {}).get(x) for k, x in (("duvar", "IfcWall"), ("pencere", "IfcWindow"), ("kapi", "IfcDoor"), ("mahal", "IfcSpace"))}}
         else:
             ekler["ifc_hata"] = "IFC üretilmedi"
+        if ekler.get("ifc"):
+            try:
+                ekler["ucb"] = _ucb_eki(Path(ekler["ifc"]["dosya"]), hedef, no, rev, settings)
+            except Exception as e:
+                ekler["ucb_hata"] = maske_numaralar(f"{type(e).__name__}: {str(e)[:200]}")
         if m.get("yukleme_json"):
             ekler["yukleme_listesi"] = {"dosya": str(hedef / m["yukleme_json"]), "bayiye_gider": False}
             excel = liste_exceli(hedef / m["yukleme_json"], hedef, no, rev, m.get("set"))   # İE-08 8b (D-17): mühendise gider, bayiye gitmez
@@ -1258,10 +1273,7 @@ def ekler_uret(ie: dict, hedef: Path, v: dict, settings: dict, m: dict | None = 
         ekler["ifc"] = {"dosya": str(hedef / ad), "sha256": _sha(hedef / ad), **{k: oz.get(k) for k in ("duvar", "pencere", "kapi", "mahal", "sema_hatasi")},
                         **({"cati_uyari": oz["cati"]["uyari"]} if (oz.get("cati") or {}).get("uyari") else {})}   # makas yeri uyarısı (BK-12 PR-R, K16)
         try:
-            from motor import ucb_sayfa as US
-            html = US.uret(hedef / ad, hedef / "3d" / "index.html", baslik=f"{no} r{rev:02d}")
-            taban = str(settings.get("ucb_taban_url") or "").rstrip("/")
-            ekler["ucb"] = {"dosya": str(html), "sha256": _sha(html), "url": f"{taban}/{no}/r{rev:02d}/" if taban else None}
+            ekler["ucb"] = _ucb_eki(hedef / ad, hedef, no, rev, settings)
         except Exception as e:
             ekler["ucb_hata"] = f"{type(e).__name__}: {str(e)[:200]}"
     except Exception as e:

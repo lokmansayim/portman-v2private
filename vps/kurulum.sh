@@ -68,10 +68,12 @@ yerel_soketler() {
 # ───────── gömülü dosyalar (vps/systemd, vps/nginx, vps/sshd, vps/fail2ban, vps/logrotate ile birebir aynı) ─────────
 nginx_sablon() { cat <<'EOF'
 # Portman · nginx sitesi (İE-06). kurulum.sh __ALAN__ yerine alan adını yazar; sertifika yoksa 443 bloğunu (BASLA..BITIS) çıkarır.
-# Dışa açık yollar yalnız: /webhook (Meta), /saglik (dış izleyici), /panel/ (yönetici). Gerisi 404. Erişim günlüğünde sorgu dizesi yok
-# (hub.verify_token GET sorgusunda gelir; $uri onu içermez); /panel/ yolları günlüğe hiç yazılmaz (URL'de numara var; K09).
+# Dışa açık yollar yalnız: /webhook (Meta), /saglik (dış izleyici), /panel/ (yönetici), /3d/<anahtar>/ (bayiye 3D sayfası, İE-21). Gerisi 404.
+# Erişim günlüğünde sorgu dizesi yok (hub.verify_token GET sorgusunda gelir; $uri onu içermez); /panel/ yolları günlüğe hiç yazılmaz
+# (URL'de numara var; K09); /3d/ yolları anahtarsız yazılır (adresteki anahtar sayfanın tek kilididir).
 # Ubuntu 24.04'ün nginx'i 1.24: "http2 on;" yönergesi yok, http2 listen parametresiyle verilir.
 log_format pm_kisa '$remote_addr $request_method $uri $status $body_bytes_sent $request_time';
+log_format pm_3d '$remote_addr $request_method /3d/- $status $body_bytes_sent $request_time';
 limit_req_zone $binary_remote_addr zone=pm_giris:1m rate=10r/m;
 limit_req_zone $binary_remote_addr zone=pm_genel:10m rate=30r/s;
 
@@ -117,6 +119,25 @@ server {
     location = /panel/giris { limit_req zone=pm_giris burst=5 nodelay; access_log off; proxy_pass http://127.0.0.1:8082; }
     location /panel/ { limit_req zone=pm_genel burst=50 nodelay; access_log off; client_max_body_size 12m; proxy_pass http://127.0.0.1:8082; }   # İE-07: panelden PDF (10 MiB)
     location = /panel { return 301 /panel/; }
+    # İE-21: /3d/<22 karakterlik rastgele anahtar>/ → /opt/portman/data/yayin/3d/<anahtar>/index.html (kanal/ucb_yayin.py yazar; dizini
+    # vps/nginx_uygula.sh açar). Yalnız GET/HEAD, statik, liste yok, başka dosya adı yok. Sayfa dışarıya bağlanamaz (CSP; three.js gömülü).
+    # root (alias değil): index modülünün /3d/<anahtar>/index.html iç yönlendirmesi aynı konuma yeniden düşer. Konumda add_header olduğu
+    # için sunucu düzeyindeki başlıklar miras gelmez; burada yinelenir.
+    location ~ "^/3d/[A-Za-z0-9_-]{22}/(index\.html)?$" {
+        limit_req zone=pm_genel burst=20 nodelay;
+        limit_except GET { deny all; }
+        access_log /var/log/nginx/portman.access.log pm_3d;
+        root /opt/portman/data/yayin;
+        charset utf-8;
+        add_header Content-Security-Policy "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'" always;
+        add_header Strict-Transport-Security "max-age=31536000" always;
+        add_header X-Content-Type-Options nosniff always;
+        add_header X-Frame-Options DENY always;
+        add_header Referrer-Policy no-referrer always;
+        add_header X-Robots-Tag "noindex, nofollow" always;
+    }
+    location ~ "^/3d/([A-Za-z0-9_-]{22})$" { access_log /var/log/nginx/portman.access.log pm_3d; return 301 /3d/$1/; }   # sonundaki / düşmüşse
+    location /3d/ { access_log /var/log/nginx/portman.access.log pm_3d; return 404; }       # öteki /3d/ yolları; anahtar günlüğe girmez
     location / { return 404; }
 }
 # --443-BITIS--
@@ -363,9 +384,11 @@ if [ -z "$TEST" ]; then
 fi
 install -d -m 755 "$KOK" "$KOK/surumler" "$KOK/kaynak" "$WEBROOT"
 install -d -m 750 "$KOK/data" "$KOK/data/projects" "$KOK/data/nabiz" "$KOK/logs"
+install -d -m 755 "$KOK/data/yayin" "$KOK/data/yayin/3d"     # İE-21: bayiye 3D sayfası; nginx data'dan geçer (o+x, liste yok; nginx_uygula.sh aynı)
+chmod 751 "$KOK/data"
 install -d -m 700 "$ETC"
 if [ -z "$TEST" ]; then chown -R "$KULLANICI:$KULLANICI" "$KOK/data" "$KOK/logs"; fi
-echo "   $KOK/{surumler,data,logs,kaynak} · $ETC (700) · ACME kökü $WEBROOT"
+echo "   $KOK/{surumler,data,logs,kaynak} · 3D yayın $KOK/data/yayin/3d · $ETC (700) · ACME kökü $WEBROOT"
 
 echo "== [3/9] dağıtım anahtarı (GitHub deploy key, yalnız okuma)"
 if [ ! -f "$ETC/deploy_key" ]; then
