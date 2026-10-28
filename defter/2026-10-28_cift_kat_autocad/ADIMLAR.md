@@ -88,8 +88,14 @@ Biçim: `A### · saat · başlık` — Ne / Nerede / Sonuç / Durum (yapıldı �
 - Yan ürün: `Guncel_Sablon_2024_kopya.dxf` (157 MB, staging denemesi için kopya; gereksiz, Lokman silebilir). Git dışı: iki DXF, envanter.json/md, kumeler.json.
 - Durum: yapıldı.
 
-### A019 · — · Blok kütüphanesini AutoCAD'de yeni pencerede aç; Lokman'a "hangi ev" sorusu
-- Durum: bekliyor.
+### A019 · 11:44 · Blok kütüphanesi AutoCAD'de yeni pencerede açıldı
+- Ne: 278 bloklu 17 MB kütüphane AutoCAD'ce reddedildi (dinamik blok artıkları). Yalnız 66 yapı/tefriş/elektrik bloğu ile `sablon_bloklari_yapi.dxf` (audit 0 hata) → geometri taban noktasından ~94 m uzaktaydı → her blok sol-alt köşesine normalize edildi → **`sablon_inceleme/sablon_bloklari_yapi_v2.dxf`** (540 KB). Model alanında blok kartı: 6 sütun, her blok + "ad [en × boy]" etiketi.
+- Sonuç: AutoCAD'de ikinci sekme `sablon_bloklari_yapi_v2` açık (kaydedilmedi; adı/yeri Lokman'ın). Erişim ve tam kontrol bu arada iki kez yeniden istendi (cihaz tarafı sıfırlanıyor).
+- Durum: yapıldı.
+
+### A020 · — · Lokman'a tek soru: yeni pencerede hangi ev, hangi blok adları
+- Soru: Lokman'ın evi (763 × 706, Motor'un pano dizilimi) Şablon 2024 blok adlarıyla mı kurulsun (eşleşmeyen panolar şablonun ad kuralıyla yeni blok: "100'LÜK 62,5'LİK PANO", "100'LÜK 125'LİK (120x125) PENCERELİ PANO"…), yoksa önce şablondaki İDA 86,5 m² çift kat örneği mi incelensin?
+- Durum: bekliyor (Lokman).
 
 ### A009 · — · Soru 1 (giriş kapısı)
 - Durum: bekliyor.
