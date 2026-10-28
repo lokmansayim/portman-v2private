@@ -5,7 +5,10 @@ const { chromium } = require('playwright');
 const fs = require('fs');
 (async () => {
   const [html, out] = process.argv.slice(2);
-  const b = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
+  // TMPDIR /tmp: Playwright Chromium'u --disable-dev-shm-usage ile açar, paylaşılan bellek TMPDIR'a yazılır. Sayfa ve GPU süreçleri yetkisiz
+  // (root olsa da CapEff 0) çalışır; CI'da TMPDIR=$RUNNER_TEMP /home/runner (750) altında, oraya yazamazlar. GPU (SwiftShader) da açılmazsa
+  // yazılımla çizime düşen sayfa çöker ("Page crashed", 28 Ekim). İz GPU'dan bağımsızdır (GPU'suz iz aynı).
+  const b = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'], env: { ...process.env, TMPDIR: '/tmp' } });
   const p = await b.newPage({ viewport: { width: 1200, height: 800 } });
   const T = process.env.THREE_DIR;
   await p.route('https://cdn.jsdelivr.net/npm/three@0.160.0/**', r => r.fulfill({ path: T + '/' + r.request().url().replace('https://cdn.jsdelivr.net/npm/three@0.160.0/', ''), contentType: 'application/javascript' }));
