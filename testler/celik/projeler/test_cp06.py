@@ -68,9 +68,12 @@ def test_bizim_liste_hakemin_turleriyle_okunur():
 
 @pytest.mark.skipif(not KAYNAK, reason="tam koşu: PORTMAN_CELIK_KAYNAK=<klasör> (dosyalar Drive kimliğiyle adlı)")
 def test_sonuc_hakemin_ciktisi():
-    """`sonuc.json` elle düzenlenmez: hakem bugünkü listemizle yeniden koşunca tarih ve kıyas commit'i dışında aynı kayıt çıkar."""
+    """`sonuc.json` elle düzenlenmez: hakem bugünkü listemizle yeniden koşunca tarih ve kıyas commit'i dışında aynı kayıt çıkar. Mühürün
+    commit'i sonuçtan sonra ilerlemiş olabilir (yalnız ekleme; İE-16 PR-4b): `test_sonuclar.muhur_commit_denetle`."""
+    from testler.celik.projeler.test_sonuclar import muhur_commit_denetle
     k = kiyas.kiyasla(BIZIM, Path(KAYNAK) / "1C8D2vCGZDTwqKA2eBnSyjtJ1iyKg3U9T.xlsx", Path(KAYNAK) / "13qR8PNSlt1eWtWpsqX8WwFmwoMJv89g8.pdf")
     yeni, kayitli = kiyas.sonuc_kaydi(k), json.loads(SONUC.read_text(encoding="utf-8"))
     for d in (yeni, kayitli):
         d.pop("tarih"), d.pop("kiyas_commit")
+    muhur_commit_denetle(yeni, kayitli)
     assert yeni == kayitli
