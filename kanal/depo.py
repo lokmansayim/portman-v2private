@@ -731,6 +731,44 @@ class Depo:
                 "bolge = EXCLUDED.bolge, rol = EXCLUDED.rol, aktif = EXCLUDED.aktif, kaynak = EXCLUDED.kaynak, guncellendi = now() "
                 f"RETURNING {self._BAYI_SUTUNLAR}", alanlar).fetchone()
 
+    # formun seçenekleri (`talep_formu`; testte karşılaştırılır) ve göç 009'un CHECK'leri; depo `talep_formu`'nu içe aktarmaz (Kapı M
+    # paketi gibi yalnız depo.py'li kurulumlar)
+    VARSAYILAN_ALANLARI = {"yapi_turu": ("prefabrik", "celik"), "kat_sayisi": (1, 2), "cati": ("besik", "tek_egimli", "kirma", "teras"),
+                           "veranda": ("on", "yan", "arka", "kose")}
+
+    @staticmethod
+    def _varsayilanlar(c, numara) -> dict:
+        r = c.execute("SELECT yapi_turu, kat_sayisi, cati, veranda FROM bayi_varsayilanlari WHERE numara = %s", (str(numara or ""),)).fetchone()
+        return {a: v for a, v in (r or {}).items() if v is not None}
+
+    def bayi_varsayilanlari(self, numara) -> dict:
+        """İE-20 PR-2 (göç 009): kartın talep formu varsayılanları; yoksa {}. Boş alan dönmez."""
+        with self.baglan() as c:
+            return self._varsayilanlar(c, numara)
+
+    @classmethod
+    def varsayilan_denetle(cls, degerler: dict) -> dict:
+        """Kartın form varsayılanları: yalnız bilinen alan ve değer (boş = varsayılan yok); geçersizse ValueError. Panel kartı yazmadan önce
+        de çağırır (yarım kayıt olmasın)."""
+        v = {}
+        for a, izinli in cls.VARSAYILAN_ALANLARI.items():
+            x = degerler.get(a)
+            x = int(x) if a == "kat_sayisi" and str(x or "").isdigit() else (x or None)
+            if x is not None and x not in izinli:
+                raise ValueError(f"{a} geçersiz: {x!r}")
+            v[a] = x
+        return v
+
+    def bayi_varsayilanlari_yaz(self, numara, **degerler) -> dict:
+        """Kartın form varsayılanlarını yazar (`varsayilan_denetle`). Kart önce yazılmış olmalı."""
+        v = self.varsayilan_denetle(degerler)
+        with self.baglan() as c, c.transaction():
+            c.execute("INSERT INTO bayi_varsayilanlari (numara, yapi_turu, kat_sayisi, cati, veranda) VALUES (%s, %s, %s, %s, %s) "
+                      "ON CONFLICT (numara) DO UPDATE SET yapi_turu = EXCLUDED.yapi_turu, kat_sayisi = EXCLUDED.kat_sayisi, cati = EXCLUDED.cati, "
+                      "veranda = EXCLUDED.veranda, guncellendi = now()",
+                      (str(numara), v["yapi_turu"], v["kat_sayisi"], v["cati"], v["veranda"]))
+        return {a: x for a, x in v.items() if x is not None}
+
     def test_kartlari(self) -> list[str]:
         """BK-07: rol='test' kartlarının numaraları (aktif ya da pasif; gönderici bunlardan doğan ya da bunlara giden satırı tutar)."""
         with self.baglan() as c:
@@ -744,11 +782,14 @@ class Depo:
     def gelen_bayisi(self, numara) -> dict | None:
         """Gelen satırın 'bayi' alanı (feature.php pm_kanal_bayi biçimi: kod, ad, firma, rol; İE-08: numara = bayi kartının anahtarı,
         D-09 antet numarası yalnız buradan okunur); kayıtlı ve aktif değilse None."""
-        b = self.bayi_oku(numara)
-        if not b or not b["aktif"]:
-            return None
-        return {"kod": b["kod"] or ("PATRON" if b["rol"] == "patron" else "B" + str(numara)[-4:]), "ad": b["ad"] or str(numara),
+        with self.baglan() as c:
+            b = c.execute(f"SELECT {self._BAYI_SUTUNLAR} FROM bayiler WHERE numara = %s", (str(numara or ""),)).fetchone()
+            if not b or not b["aktif"]:
+                return None
+            v = self._varsayilanlar(c, numara)      # İE-20 PR-2: talep formunun seçili değerleri (yalnız tanımlıysa); aynı bağlantı
+        kart = {"kod": b["kod"] or ("PATRON" if b["rol"] == "patron" else "B" + str(numara)[-4:]), "ad": b["ad"] or str(numara),
                 "firma": b["firma"] or "", "rol": b["rol"], "numara": str(b["numara"]), "hitap": b["hitap"] or ""}     # İE-08 8b M5: hitap (D-06)
+        return {**kart, "varsayilanlar": v} if v else kart
 
     # ───────────────────────── İE-06: webhook olayları, durum bildirimi, gönderim yardımcıları ─────────────────────────
     def olay_kaydet(self, anahtar: str, tur: str) -> bool:

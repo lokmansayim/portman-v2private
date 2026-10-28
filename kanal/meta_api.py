@@ -23,7 +23,8 @@ GRAPH = "https://graph.facebook.com"
 GRAPH_SURUM_VARSAYILAN = "v23.0"
 # WhatsApp Cloud API sınırları (feature.php PM_KANAL_WA ile aynı)
 SINIR = {"buton": 3, "buton_baslik": 20, "buton_id": 256, "liste_dugme": 20, "liste_satir": 10, "satir_baslik": 24,
-         "satir_aciklama": 72, "satir_id": 200, "bolum_baslik": 24, "govde": 1024, "altbilgi": 60, "baslik_metin": 60, "cta_metin": 20}
+         "satir_aciklama": 72, "satir_id": 200, "bolum_baslik": 24, "govde": 1024, "altbilgi": 60, "baslik_metin": 60, "cta_metin": 20,
+         "flow_cta": 20, "flow_token": 200, "flow_veri": 4000}
 METIN_EN_COK = 4000
 BELGE_ALTYAZI = 1000
 GORSEL_ALTYAZI = 1024
@@ -38,6 +39,7 @@ _NUMARA = re.compile(r"^[1-9][0-9]{7,14}$")      # pm_contact: ülke koduyla 8�
 _WAMID = re.compile(r"^wamid\.[A-Za-z0-9=_\-+/]{1,294}$")
 _CTA_URL = re.compile(r"^https://[^\s\"'<>]{4,1900}$")
 _MEDYA_ID = re.compile(r"^[0-9]{1,40}$")
+_EKRAN = re.compile(r"^[A-Z][A-Z0-9_]{0,63}$")   # Flow ekran kimliği
 
 
 class MetaHatasi(RuntimeError):
@@ -135,6 +137,18 @@ def cevap_kimligi(m: dict) -> tuple[str | None, str | None]:
     return kimlik, tur
 
 
+def form_cevabi(m: dict) -> dict | str | None:
+    """İE-20 PR-2: WhatsApp Flow cevabı (interactive.type == "nfm_reply") → response_json (dize ya da sözlük; çözümü kanal/talep_formu.py);
+    başka mesajda None."""
+    if str(m.get("type") or "") != "interactive" or not isinstance(m.get("interactive"), dict):
+        return None
+    i = m["interactive"]
+    if i.get("type") != "nfm_reply" or not isinstance(i.get("nfm_reply"), dict):
+        return None
+    rj = i["nfm_reply"].get("response_json")
+    return rj if isinstance(rj, (str, dict)) else {}
+
+
 def medya_bilgisi(m: dict) -> tuple[str | None, str | None, str | None]:
     """(media_id, filename, mime) — gelen medya mesajı için; başka türde (None, None, None)."""
     kind = str(m.get("type") or "")
@@ -206,7 +220,7 @@ def etkilesim_yuku(satir: dict, baslik_medya_id: str | None) -> dict:
     i = satir.get("interactive") if isinstance(satir.get("interactive"), dict) else {}
     tip = str(i.get("type") or "")
     govde = str(((i.get("body") or {}).get("text") if isinstance(i.get("body"), dict) else None) or satir.get("body") or "").strip()
-    if tip not in ("button", "list", "cta_url"):
+    if tip not in ("button", "list", "cta_url", "flow"):
         raise EtkilesimGecersiz("interactive_invalid: type")
     if govde == "" or len(govde) > L["govde"]:
         raise EtkilesimGecersiz("interactive_invalid: body")
@@ -268,6 +282,20 @@ def etkilesim_yuku(satir: dict, baslik_medya_id: str | None) -> dict:
         if not 1 <= n <= L["liste_satir"]:
             raise EtkilesimGecersiz("interactive_invalid: rows")
         out["action"] = {"button": dugme, "sections": bolumler}
+    elif tip == "flow":                             # İE-20 PR-2: uç noktasız form (Flow); ekran verisi navigate yükünde
+        p = a.get("parameters") if isinstance(a.get("parameters"), dict) else {}
+        cta = str(p.get("flow_cta") or ""); token = str(p.get("flow_token") or "")
+        yuk_ = p.get("flow_action_payload") if isinstance(p.get("flow_action_payload"), dict) else {}
+        veri = yuk_.get("data") if isinstance(yuk_.get("data"), dict) else {}
+        if not _MEDYA_ID.match(str(p.get("flow_id") or "")) or cta == "" or len(cta) > L["flow_cta"] or token == "" or len(token) > L["flow_token"] \
+                or p.get("flow_action") != "navigate" or not _EKRAN.match(str(yuk_.get("screen") or "")) \
+                or len(json.dumps(veri, ensure_ascii=False)) > L["flow_veri"] or p.get("mode") not in (None, "draft"):
+            raise EtkilesimGecersiz("interactive_invalid: flow")
+        par = {"flow_message_version": "3", "flow_token": token, "flow_id": str(p["flow_id"]), "flow_cta": cta, "flow_action": "navigate",
+               "flow_action_payload": {"screen": str(yuk_["screen"]), **({"data": veri} if veri else {})}}
+        if p.get("mode") == "draft":
+            par["mode"] = "draft"
+        out["action"] = {"name": "flow", "parameters": par}
     else:
         p = a.get("parameters") if isinstance(a.get("parameters"), dict) else {}
         url = str(p.get("url") or ""); metin = str(p.get("display_text") or "")

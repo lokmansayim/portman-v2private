@@ -116,6 +116,22 @@ def test_tk01_bk14_yoksa_cizilmez():
     assert GO.denetle(yalniz, bk14=False)["cizilemez"] == [d["cizilemez"][1]]
 
 
+def test_tk01_bugunku_motorda_cizilir(tmp_path):
+    """BK-14 (PR #50) `main`'de: TK-01'in okuması kendiliğinden açılır (`bk14_var`), İş Emri gerçek Pano Motor'unda çizilir ve doğrulamadan
+    geçer; tek uyarı dört kollu birleşimin profili (kural kitabında yok, BK-14)."""
+    from motor import dxf_out
+    assert GO.bk14_var() is True
+    d = GO.denetle(TK01)
+    assert d["sorular"] == [] and d["cizilemez"] == [] and geometri(d["cevrim"]["is_emri"]) == geometri(TK01_BEKLENEN)
+    ie = json.loads(json.dumps(d["cevrim"]["is_emri"]))
+    ie.update(is_emri_no="PM-TEST-TK01", revizyon=1, talep={"bayi_kodu": "TST", "kaynak": GO.KAYNAK})
+    sonuc = dxf_out.uret(ie, tmp_path / "plan")
+    v = json.loads((tmp_path / "plan" / "validation.json").read_text(encoding="utf-8"))
+    assert v["passed"] is True, v.get("errors")
+    assert [w for w in v["warnings"] if "dört kollu birleşim" not in w] == [], v["warnings"]
+    assert (tmp_path / "plan" / sonuc["pdf"]).stat().st_size > 10_000
+
+
 def test_tk01_teyit_metni():
     d = GO.denetle(TK01, bk14=True)
     m, ek = GO.teyit_metni(TK01, d)
@@ -375,6 +391,64 @@ def test_pano_izgarasinin_kisa_ucu_sorulur():
     assert GO.denetle(iki_oda(898, 763, 386.5))["cevrim"] is not None
     d = GO.denetle(iki_oda(898, 770, 386.5))
     assert any("yan cephesi 7,70 m" in s for s in d["sorular"]), d["sorular"]
+
+
+def test_makas_y_ise_kisa_kenar_y_izgara_aynasi_motor_cizer(tmp_path):
+    """İE-17 köşe kuralı: makas y'yi geçiyorsa `yapi.kisa_kenar: y`, ızgara x ↔ y aynası (x aksları dış duvarın ekseninden, y iç
+    yüzden); Motor kısa kenar uyarısı vermeden çizer (önde taşan verandayla)."""
+    from motor import dxf_out
+    x = GO.denetle(iki_oda(898, 763, 386.5))["cevrim"]["is_emri"]
+    o = iki_oda(763, 898, 381.5); o["cati"]["mahya"] = "girise_paralel"
+    o["verandalar"] = [{"kenar": "alt", "bas_cm": 0, "bit_cm": 381.5, "derinlik_cm": 200}]      # taşan veranda (BK-14) kısa kenar y'de
+    d = GO.denetle(o)
+    assert d["sorular"] == [] and d["cizilemez"] == [], (d["sorular"], d["cizilemez"])
+    y = d["cevrim"]["is_emri"]
+    assert (x["yapi"]["kisa_kenar"], x["cati"]["makas_ekseni"]) == ("x", "x")
+    assert (y["yapi"]["kisa_kenar"], y["cati"]["makas_ekseni"]) == ("y", "y")
+    assert y["yapi"]["grid"] == {"x_pano": x["yapi"]["grid"]["y_pano"], "y_pano": x["yapi"]["grid"]["x_pano"]}
+    assert [m["konum_cm"] for m in x["mahaller"]] == [[[10, 5, 386.5, 758]], [[386.5, 5, 888, 758]]]
+    assert [m["konum_cm"] for m in y["mahaller"]] == [[[5, 10, 381.5, 888]], [[381.5, 10, 758, 888]]]
+    ie = json.loads(json.dumps(y))
+    ie.update(is_emri_no="PM-TEST-CIZIM", revizyon=1, talep={"bayi_kodu": "TST", "kaynak": GO.KAYNAK})
+    dxf_out.uret(ie, tmp_path / "plan")
+    v = json.loads((tmp_path / "plan" / "validation.json").read_text(encoding="utf-8"))
+    assert v["passed"] is True, v.get("errors")
+    assert not any("kisa_kenar" in w for w in v.get("warnings", [])), v["warnings"]
+
+
+def mahyasiz(W: float, H: float) -> dict:
+    o = iki_oda(W, H, 386.5); o["cati"]["mahya"] = None
+    return GO.denetle(o)
+
+
+def test_mahya_gorunmuyorsa_makas_izgaraya_oturan_yon_varsayim_bayiye():
+    """Geometri hakemi (28 Ekim): mahya görünmeyen çizimde makas ızgarayı da belirler. Önce W ≤ H + 50 → x; o yönde soru çıkıp öteki
+    yönde plan çiziliyorsa öteki, notla; ikisinde de çizilmiyorsa soru, varsayım mesajda (K21). Önerilen ölçüyü seçen bayiye yeni soru
+    çıkmaz (makas eşiği dönse de)."""
+    d = mahyasiz(898, 763)                     # ilk yön y (8,98 > 7,63 + 0,50): x ızgarası 5 cm'den, 8,98 oturmaz; x yönünde çizilir
+    assert d["sorular"] == [] and d["cevrim"]["is_emri"]["yapi"]["kisa_kenar"] == "x"
+    assert d["notlar"] == ["mahya yönü görünmüyordu, girişten arkaya aldım (gövde ölçüleri pano ızgarasına bu yönde oturuyor)"]
+    d = mahyasiz(900, 763)                     # iki yönde de 9,00 m oturmaz
+    assert d["cevrim"] is None and any("ön cephesi 9,00 m" in s and "8,88 m ve 9,51 m" in s for s in d["sorular"]), d["sorular"]
+    assert "mahya yönü görünmüyordu, girişe paralel aldım" in d["notlar"]
+    m, _ = GO.soru_metni(iki_oda(900, 763, 386.5), d)
+    assert "Mahya yönü görünmüyordu, girişe paralel aldım." in m and m.index("Mahya yönü") < m.index("emin olamadım")
+    d = mahyasiz(774, 783)
+    assert any("ön cephesi 7,74 m" in s and "7,73 m ve 8,35 m" in s for s in d["sorular"]), d["sorular"]
+    assert "mahya yönü görünmüyordu, girişten arkaya aldım" in d["notlar"]
+    for W in (773, 835):                       # önerilen iki ölçü; 8,35 > 7,83 + 0,50 olsa da soru yok
+        d = mahyasiz(W, 783)
+        assert d["sorular"] == [] and d["cevrim"]["is_emri"]["yapi"]["kisa_kenar"] == "x", (W, d["sorular"])
+    # hakem 2. tur: öteki yönde ızgara oturuyor ama plan başka nedenle duruyorsa ölçü "olmuyor" diye sorulmaz, asıl soru ya da neden gider
+    o = iki_oda(898, 763, 386.5); o["cati"]["mahya"] = None; o["duvar_yuksekligi_cm"] = 260
+    d = GO.denetle(o)
+    assert d["sorular"] == ["Duvar yüksekliğini 2,60 m okudum; prefabrikte 2,50 / 2,80 / 3,00 m var, hangisi olsun?"], d["sorular"]
+    assert d["notlar"] == ["mahya yönü görünmüyordu, girişten arkaya aldım (gövde ölçüleri pano ızgarasına bu yönde oturuyor)"]
+    o = iki_oda(898, 763, 386.5); o["cati"] = {"tip": "kirma", "mahya": None}
+    d = GO.denetle(o)
+    assert d["sorular"] == [] and d["cizilemez"] == ["kırma çatı (prefabrikte bugün beşik çiziyorum)"], (d["sorular"], d["cizilemez"])
+    o = iki_oda(205, 700, 72.75); o["cati"]["mahya"] = None; o["duvar_yuksekligi_cm"] = 260     # x yönünde ızgara "çok küçük"
+    assert GO.denetle(o)["sorular"] == ["Duvar yüksekliğini 2,60 m okudum; prefabrikte 2,50 / 2,80 / 3,00 m var, hangisi olsun?"]
 
 
 def test_dis_duvara_cok_yakin_sinir_sorulur():
