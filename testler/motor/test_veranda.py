@@ -118,6 +118,19 @@ def test_veranda_giris_nisinin_onunde(tmp_path):
     assert sum(k["adet"] for k in bom if k["kod"].startswith("V")) == len(N["veranda_kenarlari_cm"]) + len(N["nis_agizlari_cm"])   # 7 profil
 
 
+def test_nis_agzi_yalniz_tek_yuzu_acik_mahalde():
+    """Listede niş, geometrinin tanımıyla: tek yüzü açık, dikmesiz açık mahal (geometri hakemi 2. tur, 28 Ekim). Katalogdaki köşe
+    verandası (iki yüzü açık) taşan veranda eklenince de verandanın kuralıyla sayılır; nişin ağız kirişi plandaki dikmelerden bağımsız."""
+    ie = _oku(KOK / "is_emri" / "P6001_2plus1_6x6.json")
+    ie["verandalar"] = [{"ad": "V", "cephe": "arka", "bas_cm": 0, "bit_cm": 300, "derinlik_cm": 150}]
+    N = PL.model_motor(ie)
+    assert "nis_agizlari_cm" not in N and N["veranda_kenarlari_cm"] == [439.25, 251.0, 300.0, 150.0, 150.0]   # L 4292,5 ve 2410, eskisi gibi
+    nis = _nisli()
+    del nis["verandalar"]
+    N = PL.model_motor(nis)
+    assert N["veranda_kenarlari_cm"] == [] and N["nis_agizlari_cm"] == [125.5]
+
+
 @pytest.mark.parametrize("girdi, v", [
     ("nis", {"ad": "V", "cephe": "on", "bas_cm": 400, "bit_cm": 500, "derinlik_cm": 150}),   # iki iç köşesi nişin ağzında, havada
     ("nis", {"ad": "V", "cephe": "on", "bas_cm": 450, "bit_cm": 700, "derinlik_cm": 150}),   # bir iç köşesi nişin ağzında

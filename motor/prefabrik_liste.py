@@ -233,24 +233,27 @@ def model_motor(ie: dict) -> dict:
         return {"ad": m.ad, "tur": m.tur, "alan_m2": m.alan_m2, "en_cm": en, "derin_cm": derin}
     kirisler, nis_agizlari = [], []
     dis_ad = {v["ad"] for v in plan.dis_verandalar}
-    if plan.dikmeler and acik:
-        for v in acik:
-            if v.ad in dis_ad:
-                continue                                       # BK-14: taşan verandanın üç açık kenarı aşağıda, kenar kenar
-            vx0, vy0, vx1, vy1 = v.poly.bounds
-            if not any(v.poly.buffer(11.0).intersects(box(*k)) for k in plan.dikmeler):
-                # BK-14 ek: dikmesiz açık mahal giriş nişidir; ağzı duvardan duvara, kiriş aks arası (ağız parçaları akstan başlar, ortası mahalde)
-                agiz = [LineString([(x0, y0), (x1, y1)]) for (x0, y0, x1, y1, *_r) in plan.acik_kenarlar
-                        if v.poly.buffer(1.0).contains(Point((x0 + x1) / 2, (y0 + y1) / 2))]
-                if agiz:
-                    birlesik = linemerge(unary_union(agiz))
-                    nis_agizlari += [round(g.length, 2) for g in getattr(birlesik, "geoms", [birlesik])]
-                continue
-            yanlar = set()
-            for (x0, y0, x1, y1, *_r) in plan.acik_kenarlar:
-                if v.poly.buffer(1.0).contains(LineString([(x0, y0), (x1, y1)])):
-                    yanlar.add("x" if abs(y1 - y0) < 1e-6 else "y")
-            kirisler += [((vx1 - vx0) if e == "x" else (vy1 - vy0)) for e in sorted(yanlar)]
+    for v in acik:
+        if v.ad in dis_ad:
+            continue                                           # BK-14: taşan verandanın üç açık kenarı aşağıda, kenar kenar
+        agiz = [LineString([(x0, y0), (x1, y1)]) for (x0, y0, x1, y1, *_r) in plan.acik_kenarlar
+                if v.poly.buffer(1.0).contains(Point((x0 + x1) / 2, (y0 + y1) / 2))]   # ağız parçaları akstan başlar, ortası mahalde
+        birlesik = linemerge(unary_union(agiz)) if agiz else None
+        if (birlesik is not None and birlesik.geom_type == "LineString"
+                and min(len({round(q[0], 6) for q in birlesik.coords}), len({round(q[1], 6) for q in birlesik.coords})) == 1
+                and not any(v.poly.buffer(11.0).intersects(box(*k)) for k in plan.dikmeler)):
+            # BK-14 ek: tek yüzü açık, dikmesiz açık mahal giriş nişidir (geometrinin tanımı: yanı da açık köşe verandası niş değil);
+            # ağzı duvardan duvara, kiriş aks arası; plandaki öteki dikmelerden bağımsız
+            nis_agizlari.append(round(birlesik.length, 2))
+            continue
+        if not plan.dikmeler:
+            continue
+        vx0, vy0, vx1, vy1 = v.poly.bounds
+        yanlar = set()
+        for (x0, y0, x1, y1, *_r) in plan.acik_kenarlar:
+            if v.poly.buffer(1.0).contains(LineString([(x0, y0), (x1, y1)])):
+                yanlar.add("x" if abs(y1 - y0) < 1e-6 else "y")
+        kirisler += [((vx1 - vx0) if e == "x" else (vy1 - vy0)) for e in sorted(yanlar)]
     for v in plan.dis_verandalar:                              # BK-14: dış kenar ve iki yan (TK-01 geçici yolu, PK-03/PK-06 paftası gibi)
         kirisler += [max(x1 - x0, y1 - y0) for (x0, y0, x1, y1) in v["kenarlar"]]
     t_dis = 2 * next(d.h for d in plan.duvarlar if d.tur == "dis")
