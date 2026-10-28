@@ -417,6 +417,89 @@ if SABLON_KOSE in hedef.blocks and ESKI_KOSE in hedef.blocks:
     try: hedef.blocks.delete_block(ESKI_KOSE, safe=True)
     except Exception as ex: print("eski köşe bloğu silinemedi (başka yerde kullanılıyor):", str(ex)[:80])
 
+# 4e) KIYAS KOPYASI (Lokman 14:00 "çizimi sağa kaydır, dış ölçüleri ver; planı pano yerleşiminin dışında tekrar yana al, asıl planla
+#     kıyaslayalım"): her katın planı x = 3300 / 4400'e kopyalanır (Motor'un aks ve pano ölçüleri olmadan); plandaki gibi dış ve oda
+#     ölçü zincirleri (duvar yüzünden yüzüne) ve "PLAN ↔ ÇİZİM" listesi eklenir. Zincirler duvar bantlarından otomatik ölçülür.
+hedef.layers.add("KIYAS_OLCU", color=5) if "KIYAS_OLCU" not in hedef.layers else None
+KIYAS_X = {"ZEMİN KAT": 3300.0, "1. KAT": 4400.0}
+PLAN_DEGERLERI = {   # Lokman'ın planındaki ölçüler (28.10 görseli), zincir sırasıyla
+    "ZEMİN KAT": [("Arka sıra (ODA | kova | WC)", "327 | 200 | 196"), ("Üst dış (sol | çıkma | sağ)", "337 | 220 | 206"),
+                  ("Sol: ODA / SALON derinliği", "287 / 389"), ("Sağ: WC / WC holü / MUTFAK / BALKON", "125 / 152 / 254 / 165"),
+                  ("Orta sıra (SALON | MUTFAK)", "457 | 276"), ("Ön (SALON | BALKON)", "406 | 337"), ("Dış", "763 × 706")],
+    "1. KAT":    [("Arka sıra (ODA 1 | kova | BANYO)", "327 | 200 | 196"), ("Üst dış (sol | çıkma | sağ)", "337 | 220 | 206"), ("Dış", "763 × 706")],
+}
+
+def _bantlar(kopya):
+    """Kopyadaki pano bloklarından duvar bantları: (x0, y0, x1, y1)."""
+    from ezdxf import bbox as _bb
+    out = []
+    for e in kopya:
+        if e.dxftype() != "INSERT": continue
+        ad = e.dxf.name; L = pano_boyu_ad(ad); x, y = e.dxf.insert.x, e.dxf.insert.y; r = e.dxf.rotation % 360
+        if L is None: continue                                   # köşe direği, H, veranda: bant değil
+        if abs(r) < 1e-6:        out.append((x, y, x + 10, y + L))          # dik bant
+        elif abs(r - 270) < 1e-6: out.append((x, y - 10, x + L, y))         # yatay, sol uçtan
+        elif abs(r - 90) < 1e-6:  out.append((x - L, y, x, y + 10))         # yatay, sağ uçtan
+    return out
+
+def _zincir(noktalar, taban, yatay, kat="KIYAS_OLCU"):
+    """Ardışık noktalar arasında ölçü zinciri (yatay: x listesi, taban y; dikey: y listesi, taban x)."""
+    for a_, b_ in zip(noktalar, noktalar[1:]):
+        if b_ - a_ < 0.5: continue
+        if yatay: dim = H.add_linear_dim(base=(a_, taban), p1=(a_, taban), p2=(b_, taban), dimstyle="PORTMAN", dxfattribs={"layer": kat})
+        else:     dim = H.add_linear_dim(base=(taban, a_), p1=(taban, a_), p2=(taban, b_), angle=90, dimstyle="PORTMAN", dxfattribs={"layer": kat})
+        dim.render()
+
+def _kesen_noktalar(bantlar, sabit, yatay, lo, hi):
+    """Yatay probe (y = sabit): dik bantların x aralıkları; dikey probe (x = sabit): yatay bantların y aralıkları → sıralı sınır noktaları."""
+    ar = []
+    for x0, y0, x1, y1 in bantlar:
+        if yatay and y0 - 1e-6 <= sabit <= y1 + 1e-6 and (x1 - x0) <= 10.01: ar.append((x0, x1))
+        if not yatay and x0 - 1e-6 <= sabit <= x1 + 1e-6 and (y1 - y0) <= 10.01: ar.append((y0, y1))
+    ar.sort(); birles = []
+    for a_, b_ in ar:
+        if birles and a_ <= birles[-1][1] + 1e-6: birles[-1] = (birles[-1][0], max(birles[-1][1], b_))
+        else: birles.append((a_, b_))
+    pts = [lo] + [v for ab in birles for v in ab] + [hi]
+    pts = sorted(set(round(v, 2) for v in pts if lo - 1e-6 <= v <= hi + 1e-6))
+    return pts
+
+for kat_adi, _, dx in KATLAR:
+    kx = KIYAS_X[kat_adi]; kay = kx - dx
+    kopya = []
+    for e in list(H):
+        if e.dxftype() == "DIMENSION" or e.dxf.layer in ("AKS", "AKS_YAZI", "OLCULER", "OZEL_PANEL_OLCU_CM", "MALZEME_KARTI", "SABLON_KARTI",
+                                                          "KESIT", "KESIT_KIRIS", "KESIT_BETOPAN", "KESIT_CATI", "KOSE_SUREKLI_100", "KIYAS_OLCU"):
+            continue
+        p = None
+        for alan in ("insert", "start", "center"):
+            if e.dxf.hasattr(alan): p = e.dxf.get(alan); break
+        if p is None and e.dxftype() == "LWPOLYLINE":
+            pts = list(e.get_points()); p = pts[0] if pts else None
+        if p is None or not (dx - 160 <= p[0] <= dx + 900 and -120 <= p[1] <= 960): continue
+        if e.dxftype() in ("TEXT", "MTEXT") and p[1] > 838: continue     # başlık ve notlar kopyaya girmez (ölçülerle çakışır)
+        c = e.copy(); H.add_entity(c)
+        try: c.translate(kay, 0, 0)
+        except Exception: pass
+        kopya.append(c)
+    bant = _bantlar(kopya)
+    # dış zincirler (üst: gövde | çıkma | gövde; alt: ön duvar | balkon) ve toplam
+    XA_, XB_ = kx + 318.75, kx + 579.75
+    _zincir([kx, XA_, XB_, kx + 763], 871.5, True); _zincir([kx, kx + 763], 905, True)
+    _zincir([kx, kx + 454.25, kx + 763], -45, True); _zincir([0, 706], kx - 45, False); _zincir([0, 831.5], kx + 763 + 45, False)
+    # iç sıralar: y = 650 (arka sıra), y = 250 (orta), y = 60 (ön); x = 160 (sol odalar), x = 449,25 (kova), x = 700 (sağ odalar)
+    for yk, taban in ((650.0, 660.0), (250.0, 260.0), (60.0, 70.0)):
+        _zincir(_kesen_noktalar(bant, yk, True, kx, kx + 763), taban, True)
+    for xk, taban in ((kx + 160.0, kx + 170.0), (kx + 449.25, kx + 459.25), (kx + 700.0, kx + 710.0)):
+        _zincir(_kesen_noktalar(bant, xk, False, 0, 831.5), taban, False)
+    H.add_text(f"{kat_adi} · KIYAS KOPYASI (Lokman 14:00): aks/pano ölçüleri yok, duvar yüzünden yüzüne zincirler; asıl planla karşılaştırma için",
+               height=9, dxfattribs={"layer": "KIYAS_OLCU"}).set_placement((kx, 945))
+    yy = 930
+    for ad_, deger in PLAN_DEGERLERI.get(kat_adi, []):
+        H.add_text(f"PLAN · {ad_}: {deger}", height=6, dxfattribs={"layer": "KIYAS_OLCU"}).set_placement((kx + 790, yy)); yy -= 10
+    H.add_text("Çizim değerleri zincirlerde (pano aksından: 125,5 ızgarası + 100'lük duvarlar). Fark = ızgaraya oturtma.", height=6,
+               dxfattribs={"layer": "KIYAS_OLCU"}).set_placement((kx + 790, yy - 4))
+
 # 5) kesit / kat kotları (kısa kenar y=706; makas y'yi geçer → beşik profil bu kesitte)
 KX, KY = 0.0, -900.0
 derinlik = 706.0

@@ -181,5 +181,10 @@ Biçim: `A### · saat · başlık` — Ne / Nerede / Sonuç / Durum (yapıldı �
 - Soru 2b (zeminde kovanın önü) cevapsız kaldı; yeniden sorulacak.
 - Durum: yapıldı.
 
+### A038 · 14:00–14:14 · Lokman: "Çizimi sağa kaydır, dış ölçüleri ver; planı pano yerleşiminin dışında yana al, asıl planla kıyaslayalım" + "PDF olarak ver, sohbetten düzeltmeleri yapayım"
+- Yapılan: üreticide 4e) KIYAS KOPYASI — her katın planı x = 3300 / 4400'e kopyalanır (aks, pano ölçüsü, başlık ve notlar hariç); duvar bantlarından otomatik ölçü zincirleri (`_bantlar`, `_kesen_noktalar`, `_zincir`): dış (üst 318,75 | 261 | 183,25; alt 454,25 | 308,75; 763; 706; 831,5), arka sıra 10 | 308,75 | 10 | 241 | 10 | 173,25 | 10, orta 497 | 10 | 236, ön 434,25 | 10 | 308,75, sol 308,75 / 367,25, sağ 120,5 / 178,25 / 241 / 126,25; sağ üstte "PLAN · …" listesi (Lokman'ın değerleri). Katman KIYAS_OLCU (mavi).
+- PDF: `pdf_yap.py` → `Portman_IE22-CK01_CIFT_KAT_sablon_bloklu_r01.pdf` (5 sayfa A3 yatay, beyaz zemin, raster 140 dpi, 1,2 MB; vektör 12 MB oluyordu): 1–2 kıyas kopyaları, 3–4 akslı pano planları, 5 kesit + kart. Sohbete gönderildi, Mac'e kopyalandı. DXF md5 f32553ac…
+- Durum: yapıldı. Lokman PDF üstünden düzeltme verecek.
+
 ### A035 · — · Sıradaki: Soru 2b (zeminde kovaya giriş: önü açık mı, planda ön duvar çizili) → Soru 4 (Fransız pencere) → 5 (çıkma çatısı) → 6 → 7 → 8 (et) → 9 → İş Emri JSON → Motor (PR-1: bulgu 7–8)
 - Durum: bekliyor (Lokman).
