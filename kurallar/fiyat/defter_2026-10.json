@@ -1,0 +1,2875 @@
+{
+ "sema": "portman.fiyat_defteri/1",
+ "surum": "2026-10-27-r02",
+ "aciklama": "Yükleme listesi × birim fiyat (İE-13, Z-10'un liste yöntemi). Anahtar Motor'un liste satırı: prefabrikte 'kalem | olcu' (motor/prefabrik_liste.py), çelikte 'kalem | boyut' (motor/genel yükleme listesi). Fiyat uydurulmaz: kaynağı olmayan kalemde fiyat boş kalır.",
+ "para_birimi": "TL",
+ "kdv": "kaynak listelerde yazmıyor",
+ "onay_kurali": "onay true: Patron'un verdiği listeden (patron_verdi) ya da onayladığı öneriden, kalemin kendisi için. onay false: öneri (yakın ürün, hesap ya da Patron'un vermediği kaynak); araclar/fiyatla.py bunları yalnız --oneri ile uygular. Kaynak sırası (Patron, TK-01'de): önce EKIM87, yoksa HAZ, ikisinde de yoksa CTKB; birebir eşleşme yakından önce. Patron'un 27 Ekim 22:00 kararı ('son listeler') genel kaynaktır: iki listeden birebir eşleşen kalem çelikte de onaylı (r02).",
+ "kaynaklar": {
+  "EKIM87": {
+   "ad": "87 m² tek kat prefabrik yükleme listesi (birim fiyat sütunu)",
+   "kisa": "87 m² listesi, 14.10.2026",
+   "tarih": "2026-10-14",
+   "patron_verdi": true,
+   "not": "Patron 27 Ekim 2026 22:01'de TK-01 için verdi ('fiyatları buradan eşleştir'); dosyadaki kişi, yer ve hazırlayan bilgisi deftere alınmadı. kaynak_satir dosyanın satır numarası."
+  },
+  "HAZ": {
+   "ad": "Malzeme listesi (kodlu birim fiyat)",
+   "kisa": "Haziran malzeme listesi, 16.06.2026",
+   "tarih": "2026-06-16",
+   "patron_verdi": true,
+   "not": "Patron 27 Ekim 2026 22:11'de verdi ('listede olmayanları da buradan alabilirsin'). kaynak_satir TK-01 satırlarında dosyanın satır numarası, çelik satırlarında ürün kodu."
+  },
+  "CTKB": {
+   "ad": "Çelik tek kat fiyatlandırma tablosu (CTKB V1.0)",
+   "kisa": "Eylül çelik tablosu, 01.09.2026",
+   "tarih": "2026-09-01",
+   "patron_verdi": false,
+   "not": "Drive 'AI İçin Hesaplamalar'; kalem birim fiyatları, pencere fiyat tablosu, çatı kaplaması m² fiyatı, çelik panel kg fiyatı. Yalnız iki listede olmayan kalemde öneri."
+  }
+ },
+ "hatlar": {
+  "prefabrik": {
+   "anahtar": "kalem | olcu",
+   "ornek_proje": "TK-01 (asma ve ters tavan listelerinin birleşimi, 130 kalem)",
+   "kalemler": {
+    "100'lük yapıştırma dolu pano | 100 × 1250 × 2500": {
+     "fiyat": 2100,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      11
+     ],
+     "kaynak_kalem": "100'LÜK YAPIŞTIRMA DOLU PANO | 100x1250x2500",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "100'lük yapıştırma dolu pano | 100 × 1245 × 2500": {
+     "fiyat": 2100,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      11,
+      12
+     ],
+     "kaynak_kalem": "100'LÜK YAPIŞTIRMA DOLU PANO | 100x1250x2500; 100'LÜK YAPIŞTIRMA DOLU PANO | 100x1190x2500",
+     "durum": "bant",
+     "onay": true,
+     "not": "1190 ve 1250 enli pano 2100"
+    },
+    "100'lük yapıştırma dolu pano | 100 × 640 × 2500": {
+     "fiyat": 2100,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      18,
+      19
+     ],
+     "kaynak_kalem": "100'LÜK YAPIŞTIRMA DOLU PANO | 100x805x2500; 100'LÜK YAPIŞTIRMA DOLU PANO | 100x595x2500",
+     "durum": "öneri onaylı",
+     "onay": true,
+     "not": "kaynakta 595 yarım (1050), 805 tam (2100); 62,75'ten geniş → tam; Patron 27 Ekim 22:08 \"evet uygula\""
+    },
+    "100'lük yapıştırma dolu pano | 100 × 635 × 2500": {
+     "fiyat": 2100,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      18,
+      19
+     ],
+     "kaynak_kalem": "100'LÜK YAPIŞTIRMA DOLU PANO | 100x805x2500; 100'LÜK YAPIŞTIRMA DOLU PANO | 100x595x2500",
+     "durum": "öneri onaylı",
+     "onay": true,
+     "not": "kaynakta 595 yarım (1050), 805 tam (2100); 62,75'ten geniş → tam; Patron 27 Ekim 22:08 \"evet uygula\""
+    },
+    "100'lük yapıştırma dolu pano | 100 × 625 × 2500": {
+     "fiyat": 1050,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      18,
+      19
+     ],
+     "kaynak_kalem": "100'LÜK YAPIŞTIRMA DOLU PANO | 100x805x2500; 100'LÜK YAPIŞTIRMA DOLU PANO | 100x595x2500",
+     "durum": "öneri onaylı",
+     "onay": true,
+     "not": "kaynakta 595 yarım (1050), 805 tam (2100); 62,75'e kadar → yarım; Patron 27 Ekim 22:08 \"evet uygula\""
+    },
+    "100'lük yapıştırma dolu pano | 100 × 620 × 2500": {
+     "fiyat": 1050,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      18,
+      19
+     ],
+     "kaynak_kalem": "100'LÜK YAPIŞTIRMA DOLU PANO | 100x805x2500; 100'LÜK YAPIŞTIRMA DOLU PANO | 100x595x2500",
+     "durum": "öneri onaylı",
+     "onay": true,
+     "not": "kaynakta 595 yarım (1050), 805 tam (2100); 62,75'e kadar → yarım; Patron 27 Ekim 22:08 \"evet uygula\""
+    },
+    "100'lük yapıştırma dolu pano | 100 × 610 × 2500": {
+     "fiyat": 1050,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      18,
+      19
+     ],
+     "kaynak_kalem": "100'LÜK YAPIŞTIRMA DOLU PANO | 100x805x2500; 100'LÜK YAPIŞTIRMA DOLU PANO | 100x595x2500",
+     "durum": "öneri onaylı",
+     "onay": true,
+     "not": "kaynakta 595 yarım (1050), 805 tam (2100); 62,75'e kadar → yarım; Patron 27 Ekim 22:08 \"evet uygula\""
+    },
+    "100'lük yapıştırma dolu vasistaslı pano (60/40) | 100 × 1250 × 2500": {
+     "fiyat": 2100,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      24
+     ],
+     "kaynak_kalem": "100'LÜK YAPIŞTIRMA DOLU VASİSTASLI PANO (60/40) | 100x1250x2500",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "60'lık karkaslı + kasalı pano | 60 × 1250 × 2500": {
+     "fiyat": 2550,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      44
+     ],
+     "kaynak_kalem": "60'LIK KARKASLI + KASALI PANOLAR | 60x1250x2500",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "60'lık karkaslı + kasalı pano | 60 × 1220 × 2500": {
+     "fiyat": 2550,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      45
+     ],
+     "kaynak_kalem": "60'LIK KARKASLI + KASALI PANOLAR | 60x1220x2500",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "60'lık karkaslı + kasalı pano | 60 × 1190 × 2500": {
+     "fiyat": 2550,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      45,
+      46
+     ],
+     "kaynak_kalem": "60'LIK KARKASLI + KASALI PANOLAR | 60x1220x2500; 60'LIK KARKASLI + KASALI PANOLAR | 60x1070x2500",
+     "durum": "bant",
+     "onay": true,
+     "not": "1070 ve 1220 enli pano 2550"
+    },
+    "60'lık yapıştırma dolu pano | 60 × 1250 × 2500": {
+     "fiyat": 1800,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      25
+     ],
+     "kaynak_kalem": "60'LIK YAPIŞTIRMA DOLU PANO | 60x1250x2500",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "60'lık yapıştırma dolu pano | 60 × 1245 × 2500": {
+     "fiyat": 1800,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      25,
+      32
+     ],
+     "kaynak_kalem": "60'LIK YAPIŞTIRMA DOLU PANO | 60x1250x2500; 60'LIK YAPIŞTIRMA DOLU PANO | 60x645x2500",
+     "durum": "bant",
+     "onay": true,
+     "not": "645–1250 enli pano 1800"
+    },
+    "60'lık yapıştırma dolu pano | 60 × 1220 × 2500": {
+     "fiyat": 1800,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      25,
+      32
+     ],
+     "kaynak_kalem": "60'LIK YAPIŞTIRMA DOLU PANO | 60x1250x2500; 60'LIK YAPIŞTIRMA DOLU PANO | 60x645x2500",
+     "durum": "bant",
+     "onay": true,
+     "not": "645–1250 enli pano 1800"
+    },
+    "60'lık yapıştırma dolu pano | 60 × 1200 × 2500": {
+     "fiyat": 1800,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      25,
+      32
+     ],
+     "kaynak_kalem": "60'LIK YAPIŞTIRMA DOLU PANO | 60x1250x2500; 60'LIK YAPIŞTIRMA DOLU PANO | 60x645x2500",
+     "durum": "bant",
+     "onay": true,
+     "not": "645–1250 enli pano 1800"
+    },
+    "60'lık yapıştırma dolu pano | 60 × 1195 × 2500": {
+     "fiyat": 1800,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      25,
+      32
+     ],
+     "kaynak_kalem": "60'LIK YAPIŞTIRMA DOLU PANO | 60x1250x2500; 60'LIK YAPIŞTIRMA DOLU PANO | 60x645x2500",
+     "durum": "bant",
+     "onay": true,
+     "not": "645–1250 enli pano 1800"
+    },
+    "60'lık yapıştırma dolu pano | 60 × 1190 × 2500": {
+     "fiyat": 1800,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      25,
+      32
+     ],
+     "kaynak_kalem": "60'LIK YAPIŞTIRMA DOLU PANO | 60x1250x2500; 60'LIK YAPIŞTIRMA DOLU PANO | 60x645x2500",
+     "durum": "bant",
+     "onay": true,
+     "not": "645–1250 enli pano 1800"
+    },
+    "60'lık yapıştırma dolu pano | 60 × 595 × 2500": {
+     "fiyat": 900,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      32,
+      33
+     ],
+     "kaynak_kalem": "60'LIK YAPIŞTIRMA DOLU PANO | 60x645x2500; 60'LIK YAPIŞTIRMA DOLU PANO | 60x510x2500",
+     "durum": "öneri onaylı",
+     "onay": true,
+     "not": "kaynakta 510 yarım (900), 645 tam (1800); 62,75'e kadar → yarım; Patron 27 Ekim 22:08 \"evet uygula\""
+    },
+    "Karkaslı çelik kapı panosu | 100 × 1250 × 2500": {
+     "fiyat": 2200,
+     "birim": "adet",
+     "kaynak": "HAZ",
+     "kaynak_satir": [
+      39
+     ],
+     "kaynak_kalem": "YK27 100'LÜK KARKASLI DOLU ÇELİK KAPI PANOSU (95/205) | 100x1250X2500",
+     "durum": "ikinci kaynak",
+     "onay": true,
+     "not": "87 m² listesinde: kaynakta yalnız 3105 enli karkaslı duvar panosu (4300)"
+    },
+    "Pencere alt panel (120/120) | 100 × 1250 × 800": {
+     "fiyat": 700,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      41
+     ],
+     "kaynak_kalem": "PENCERE ALT PANEL (120/120) | 100x1250x800",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Pencere alt panel (120/180) | 100 × 1250 × 200": {
+     "fiyat": 210,
+     "birim": "adet",
+     "kaynak": "HAZ",
+     "kaynak_satir": [
+      33
+     ],
+     "kaynak_kalem": "YK19 100'LÜK KARKASLI DOLU PENCERE ALT PANEL (120/180) | 100*1250*200",
+     "durum": "ikinci kaynak",
+     "onay": true,
+     "not": "87 m² listesinde: kaynakta 800 (700) ve 1000 (1000) boylu alt panel var, 200 yok"
+    },
+    "Pencere üst panel | 100 × 1250 × 500": {
+     "fiyat": 420,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      40
+     ],
+     "kaynak_kalem": "PENCERE ÜST PANEL | 100x1250x500",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "10'luk köşe direği 100 × 100 | 100 × 100 × 2500": {
+     "fiyat": 773,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      57
+     ],
+     "kaynak_kalem": "10LUK KÖŞE DİREĞİ | 100x100x2500",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "6'lık köşe direği 60 × 60 | 60 × 60 × 2500": {
+     "fiyat": 545,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      60
+     ],
+     "kaynak_kalem": "6LIK KÖŞE DİREĞİ | 60x60x2500",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Köşebent | L 2500": {
+     "fiyat": 59,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      62
+     ],
+     "kaynak_kalem": "KÖŞEBENT | L:2500",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Özel kutu profil (kolon) 100 × 100 | L 2500": {
+     "fiyat": 2083,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      65
+     ],
+     "kaynak_kalem": "KUTU PROFİL (KOLON) (3 MM) (FLANŞLAR ŞANTİYEDE KAYNATILACAKTIR.) | 100*100*6000",
+     "durum": "öneri onaylı",
+     "onay": true,
+     "not": "kaynakta yalnız 6 m tam boy kolon (5000); boyla orantılı; Patron 27 Ekim 22:08 \"evet uygula\""
+    },
+    "Kutu profil (kiriş) 100 × 100 | L 3760": {
+     "fiyat": 3133,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      63,
+      64
+     ],
+     "kaynak_kalem": "KUTU PROFİL (KİRİŞ) (4 MM) | 100*100*2217,5; KUTU PROFİL (KİRİŞ) (4 MM) (TAM BOY) | 100*100*6000",
+     "durum": "öneri onaylı",
+     "onay": true,
+     "not": "kaynakta 2217,5 kesim (2000) ve 6 m tam boy (5000); 6 m'nin fiyatından boyla orantılı; Patron 27 Ekim 22:08 \"evet uygula\""
+    },
+    "Kutu profil (kiriş) 100 × 100 | L 1710": {
+     "fiyat": 1425,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      63,
+      64
+     ],
+     "kaynak_kalem": "KUTU PROFİL (KİRİŞ) (4 MM) | 100*100*2217,5; KUTU PROFİL (KİRİŞ) (4 MM) (TAM BOY) | 100*100*6000",
+     "durum": "öneri onaylı",
+     "onay": true,
+     "not": "kaynakta 2217,5 kesim (2000) ve 6 m tam boy (5000); 6 m'nin fiyatından boyla orantılı; Patron 27 Ekim 22:08 \"evet uygula\""
+    },
+    "Kutu profil (kiriş) 100 × 100 | L 2510": {
+     "fiyat": 2092,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      63,
+      64
+     ],
+     "kaynak_kalem": "KUTU PROFİL (KİRİŞ) (4 MM) | 100*100*2217,5; KUTU PROFİL (KİRİŞ) (4 MM) (TAM BOY) | 100*100*6000",
+     "durum": "öneri onaylı",
+     "onay": true,
+     "not": "kaynakta 2217,5 kesim (2000) ve 6 m tam boy (5000); 6 m'nin fiyatından boyla orantılı; Patron 27 Ekim 22:08 \"evet uygula\""
+    },
+    "Kutu profil (kiriş) 100 × 100 | L 1200": {
+     "fiyat": 1000,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      63,
+      64
+     ],
+     "kaynak_kalem": "KUTU PROFİL (KİRİŞ) (4 MM) | 100*100*2217,5; KUTU PROFİL (KİRİŞ) (4 MM) (TAM BOY) | 100*100*6000",
+     "durum": "öneri onaylı",
+     "onay": true,
+     "not": "kaynakta 2217,5 kesim (2000) ve 6 m tam boy (5000); 6 m'nin fiyatından boyla orantılı; Patron 27 Ekim 22:08 \"evet uygula\""
+    },
+    "H 100 (dış pano eki) | 100 × 100 × 2500": {
+     "fiyat": 342.0,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      68,
+      69
+     ],
+     "kaynak_kalem": "H (DÜBELLİ&KULAKLI) | 100*100*2500; H (DÜBELLİ ) | 100*100*2500",
+     "durum": "öneri onaylı",
+     "onay": true,
+     "not": "kaynakta kulaklı 351, dübelli 331; listenin adayı kulaklı 11 / dübelli 9 → ortalama; Patron 27 Ekim 22:08 \"evet uygula\""
+    },
+    "H standart 60 (iç pano eki) | 60 × 60 × 2500": {
+     "fiyat": 311,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      70
+     ],
+     "kaynak_kalem": "H (STANDART ) | 60*60*2500",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "3'lü H 100 × 100 × 60 (dış duvar T'si) | L 2500": {
+     "fiyat": 427.25,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      71,
+      72
+     ],
+     "kaynak_kalem": "3 LÜ H (DÜBELLİ VE KULAKLI) | 100*100*60*2500; 3 LÜ H (DÜBELLİ) | 100*100*60*2500",
+     "durum": "öneri onaylı",
+     "onay": true,
+     "not": "kaynakta kulaklı 446, dübelli 416; listenin adayı kulaklı 3 / dübelli 5 → ortalama; Patron 27 Ekim 22:08 \"evet uygula\""
+    },
+    "3'lü H standart 60 (iç T) | L 2500": {
+     "fiyat": 389,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      73
+     ],
+     "kaynak_kalem": "3 LÜ H (STANDART) | 60*60*2500",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Özel pencere karkası (120×120) (100'lük çektirme U'su + 100'lük H geçen) | 1200 × 1200": {
+     "fiyat": 515,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      77
+     ],
+     "kaynak_kalem": "ÖZEL PENCERE KARKASI (120X120) (100 LÜK ÇEKTİRME U SU + 100 LÜK H GEÇEN) - X | 1200*1200",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Özel pencere karkası (120×180) (100'lük çektirme U'su + 100'lük H geçen) | 1200 × 1800": {
+     "fiyat": null,
+     "birim": "adet",
+     "kaynak": null,
+     "kaynak_satir": null,
+     "kaynak_kalem": "",
+     "durum": "kaynakta yok",
+     "onay": false,
+     "not": "87 m² listesinde: kaynakta 120×120 (515) ve 120×100 (151) var, 120×180 yok; Haziran listesinde: yalnız 250/180 karkaslı özel pencere panosu (satır 34, 4250); Özel pencere karkası iki listede de yok."
+    },
+    "Çektirme U'su 100 | 100 × 2440": {
+     "fiyat": 148,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      75
+     ],
+     "kaynak_kalem": "ÇEKTİRME U'SU (100 LÜK) | 100*2440",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "100'lük pencere U'su H geçen | L 2500": {
+     "fiyat": 128,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      76
+     ],
+     "kaynak_kalem": "100'LÜK PENCERE U SU H GEÇEN | L:2500",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Çektirme U'su 60 | 60 × 2440": {
+     "fiyat": 128,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      74
+     ],
+     "kaynak_kalem": "ÇEKTİRME U'SU (60 LIK) | 60*2440",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "60'lık duvar omegası (asma dizme tavan) | 60 × 3750": {
+     "fiyat": 278,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      79
+     ],
+     "kaynak_kalem": "60'LIK DUVAR OMEGASI - ZEMIN KAT | 60*3750",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "100'lük duvar omegası | 100 × 2500": {
+     "fiyat": 197,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      81
+     ],
+     "kaynak_kalem": "100'LÜK DUVAR OMEGASI | 100*2500",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "100'lük saçak omegası | 100 × 2500": {
+     "fiyat": 197,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      83
+     ],
+     "kaynak_kalem": "100'LÜK SAÇAK OMEGASI | 100*2500",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Saçak sacı (30'luk, 3'ü menfezli) | 300 × 2500": {
+     "fiyat": 345,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      84
+     ],
+     "kaynak_kalem": "(ANTRASİT) SAÇAK SACI (30'LUK) (4 ADET MENFEZLİ OLACAK) | 300*2500",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": "kaynakta antrasit, 4'ü menfezli"
+    },
+    "Alın sacı (30'luk) | 300 × 2500": {
+     "fiyat": 345,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      85
+     ],
+     "kaynak_kalem": "( ANTRASİT ) ALIN SACI (30'LUK) | 300*2500",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": "kaynakta antrasit"
+    },
+    "Baş makas omegası | L 2500": {
+     "fiyat": 198,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      86
+     ],
+     "kaynak_kalem": "BAŞ MAKAS OMEGASI | L:2500",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Baş makas Z'si | L 2800": {
+     "fiyat": 123,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      87
+     ],
+     "kaynak_kalem": "BAŞ MAKAS Z'Sİ | L:2800",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Baş makas betopanı | 1250 × 2500": {
+     "fiyat": 667,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      90
+     ],
+     "kaynak_kalem": "BAŞ MAKAS BETOPANI | 1250*2500",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "100'lük alt çerçeve | 100 × 3750": {
+     "fiyat": 248,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      92
+     ],
+     "kaynak_kalem": "100'LÜK ALT ÇERÇEVE | 100*3750",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "60'lık alt çerçeve | 60 × 3750": {
+     "fiyat": 318,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      93
+     ],
+     "kaynak_kalem": "60'LIK ALT ÇERÇEVE | 60*2500",
+     "durum": "öneri onaylı",
+     "onay": true,
+     "not": "kaynakta 60 × 2500 (212); boyla orantılı; Patron 27 Ekim 22:08 \"evet uygula\""
+    },
+    "Prefabrik çelik kapı (SOL) | 900 × 2000": {
+     "fiyat": 7500,
+     "birim": "adet",
+     "kaynak": "HAZ",
+     "kaynak_satir": [
+      106
+     ],
+     "kaynak_kalem": "KP1 ÇELİK KAPI / SAĞ,SOL STANDART | 95*205",
+     "durum": "ikinci kaynak",
+     "onay": true,
+     "not": "87 m² listesinde: kaynakta dış kapı yok; kaynakta standart çelik kapı 95 × 205 (Motor'un 90'lık dış kapısı çalışma kabulü)"
+    },
+    "Amerikan kapı (80'lik kanat) (SAĞ) | 82 × 196": {
+     "fiyat": 2500,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      127
+     ],
+     "kaynak_kalem": "AMERİKAN KAPI ( 80 LİK KANAT ) (SAĞ) | 82*196",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Amerikan kapı (80'lik kanat) (SOL) | 82 × 196": {
+     "fiyat": 2500,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      128
+     ],
+     "kaynak_kalem": "AMERİKAN KAPI ( 80 LİK KANAT ) (SOL) | 82*196",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "PVC pencere | 120/120": {
+     "fiyat": 5500,
+     "birim": "adet",
+     "kaynak": "HAZ",
+     "kaynak_satir": [
+      117
+     ],
+     "kaynak_kalem": "KP12 PVC PENCERE+PERVAZ+MATİK+ÇİFT AÇILIM * 2 | 120/120",
+     "durum": "ikinci kaynak",
+     "onay": true,
+     "not": "87 m² listesinde: kaynakta 120×120 PVC doğrama satırı fiyatsız; kaynakta çift açılım (panjursuz, beyaz); panjurlu antrasit 8500"
+    },
+    "PVC pencere | 120/180": {
+     "fiyat": 9500,
+     "birim": "adet",
+     "kaynak": "HAZ",
+     "kaynak_satir": [
+      119
+     ],
+     "kaynak_kalem": "KP14 PVC PENCERE+PERVAZ+MATİK+ÇİFT AÇILIM * 2 | 120/180",
+     "durum": "ikinci kaynak",
+     "onay": true,
+     "not": "87 m² listesinde: kaynakta 120×180 PVC doğrama yok; kaynakta çift açılım (beyaz); antrasit 11000"
+    },
+    "PVC vasistas | 60/40": {
+     "fiyat": 2300,
+     "birim": "adet",
+     "kaynak": "HAZ",
+     "kaynak_satir": [
+      136
+     ],
+     "kaynak_kalem": "KP31 PVC VASİSTAS | 60/40",
+     "durum": "ikinci kaynak",
+     "onay": true,
+     "not": "87 m² listesinde: kaynakta 60×40 vasistas satırı fiyatsız"
+    },
+    "Tavan beyaz alçıpan | 1200 × 2500": {
+     "fiyat": 245,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      111
+     ],
+     "kaynak_kalem": "(ASMA / TERS) TAVAN BEYAZ ALÇIPAN | 12,5*1200*2500",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Tavan yeşil alçıpan | 1200 × 2500": {
+     "fiyat": 345,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      112
+     ],
+     "kaynak_kalem": "(ASMA / TERS) TAVAN YEŞİL ALÇIPAN | 12,5*1200*2500",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Tavan H'ı L 1185 (asma dizme tavan) | adet": {
+     "fiyat": 47,
+     "birim": "adet",
+     "kaynak": "HAZ",
+     "kaynak_satir": [
+      269
+     ],
+     "kaynak_kalem": "DG1 TAVAN H'I | L:1185",
+     "durum": "ikinci kaynak",
+     "onay": true,
+     "not": ""
+    },
+    "PVC omega kapak L 3750 (asma dizme tavan) | adet": {
+     "fiyat": 75,
+     "birim": "adet",
+     "kaynak": "HAZ",
+     "kaynak_satir": [
+      270
+     ],
+     "kaynak_kalem": "DG2 PVC OMEGA KAPAK | 110*3750",
+     "durum": "ikinci kaynak",
+     "onay": true,
+     "not": ""
+    },
+    "Çatı şiltesi / izolasyonu (9,6 m²/paket) | paket": {
+     "fiyat": 700,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      107
+     ],
+     "kaynak_kalem": "ÇATI İZOLASYONU (IZOCAM-KNAUF) 100 mm | 9,6 m² / Paket",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Makas (baş) · ana çatı | açıklık 8980": {
+     "fiyat": null,
+     "birim": "adet",
+     "kaynak": null,
+     "kaynak_satir": null,
+     "kaynak_kalem": "",
+     "durum": "kaynakta yok",
+     "onay": false,
+     "not": "87 m² listesinde: kaynakta makas kg ile (59/kg); TK-01 listesinde makas adetle, ağırlık yok; Haziran listesinde de makas kg ile (satır 188, 48/kg); Kaynaklar kg fiyatı veriyor (Ekim 59, Eyl 50, Haz 48 TL/kg); adet fiyatı için makas ağırlığı gerekir. Kıyas: 87 m² listede bütün makaslar 515 kg × 59 = 30.385 TL."
+    },
+    "Makas (orta) · ana çatı | açıklık 8980": {
+     "fiyat": null,
+     "birim": "adet",
+     "kaynak": null,
+     "kaynak_satir": null,
+     "kaynak_kalem": "",
+     "durum": "kaynakta yok",
+     "onay": false,
+     "not": "87 m² listesinde: kaynakta makas kg ile (59/kg); TK-01 listesinde makas adetle, ağırlık yok; Haziran listesinde de makas kg ile (satır 188, 48/kg); Kaynaklar kg fiyatı veriyor (Ekim 59, Eyl 50, Haz 48 TL/kg); adet fiyatı için makas ağırlığı gerekir. Kıyas: 87 m² listede bütün makaslar 515 kg × 59 = 30.385 TL."
+    },
+    "Yavru makas · ön veranda çatısı | L 4460": {
+     "fiyat": null,
+     "birim": "adet",
+     "kaynak": null,
+     "kaynak_satir": null,
+     "kaynak_kalem": "",
+     "durum": "kaynakta yok",
+     "onay": false,
+     "not": "87 m² listesinde: kaynakta makas kg ile (59/kg); TK-01 listesinde makas adetle, ağırlık yok; Haziran listesinde de makas kg ile (satır 188, 48/kg); Kaynaklar kg fiyatı veriyor (Ekim 59, Eyl 50, Haz 48 TL/kg); adet fiyatı için makas ağırlığı gerekir. Kıyas: 87 m² listede bütün makaslar 515 kg × 59 = 30.385 TL."
+    },
+    "Yavru makas · arka veranda çatısı | L 3210": {
+     "fiyat": null,
+     "birim": "adet",
+     "kaynak": null,
+     "kaynak_satir": null,
+     "kaynak_kalem": "",
+     "durum": "kaynakta yok",
+     "onay": false,
+     "not": "87 m² listesinde: kaynakta makas kg ile (59/kg); TK-01 listesinde makas adetle, ağırlık yok; Haziran listesinde de makas kg ile (satır 188, 48/kg); Kaynaklar kg fiyatı veriyor (Ekim 59, Eyl 50, Haz 48 TL/kg); adet fiyatı için makas ağırlığı gerekir. Kıyas: 87 m² listede bütün makaslar 515 kg × 59 = 30.385 TL."
+    },
+    "Aşık | L 4200": {
+     "fiyat": 242,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      95
+     ],
+     "kaynak_kalem": "AŞIK | L:4200",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Tek kat çatı paneli · ana çatı | L 5100": {
+     "fiyat": 1544.04,
+     "birim": "adet",
+     "kaynak": "HAZ",
+     "kaynak_satir": [
+      197
+     ],
+     "kaynak_kalem": "ÇG1 ANTRESİT GRİ TEK KAT PANEL(87 CM KAPATIR) * 1 | L=5450",
+     "durum": "ikinci kaynak",
+     "onay": true,
+     "not": "87 m² listesinde: kaynakta yalnız sandviç panel; tek kat panel yok; kaynakta antrasit tek kat panel L 5450 (1650); boyla orantılı (5100 mm); Haziran paneli 87 cm kapatır, Motor adedi 1 m ile sayar (kitap P3)"
+    },
+    "Tek kat çatı paneli · ön veranda çatısı | L 2400": {
+     "fiyat": 726.61,
+     "birim": "adet",
+     "kaynak": "HAZ",
+     "kaynak_satir": [
+      197
+     ],
+     "kaynak_kalem": "ÇG1 ANTRESİT GRİ TEK KAT PANEL(87 CM KAPATIR) * 1 | L=5450",
+     "durum": "ikinci kaynak",
+     "onay": true,
+     "not": "87 m² listesinde: kaynakta yalnız sandviç panel; tek kat panel yok; kaynakta antrasit tek kat panel L 5450 (1650); boyla orantılı (2400 mm); Haziran paneli 87 cm kapatır, Motor adedi 1 m ile sayar (kitap P3)"
+    },
+    "Tek kat çatı paneli · arka veranda çatısı | L 1750": {
+     "fiyat": 529.82,
+     "birim": "adet",
+     "kaynak": "HAZ",
+     "kaynak_satir": [
+      197
+     ],
+     "kaynak_kalem": "ÇG1 ANTRESİT GRİ TEK KAT PANEL(87 CM KAPATIR) * 1 | L=5450",
+     "durum": "ikinci kaynak",
+     "onay": true,
+     "not": "87 m² listesinde: kaynakta yalnız sandviç panel; tek kat panel yok; kaynakta antrasit tek kat panel L 5450 (1650); boyla orantılı (1750 mm); Haziran paneli 87 cm kapatır, Motor adedi 1 m ile sayar (kitap P3)"
+    },
+    "Metal kiremit mahyası | L 2800": {
+     "fiyat": 345,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      103
+     ],
+     "kaynak_kalem": "(ANTRASİT) METAL KİREMİT MAHYASI | L: 2800",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": "kaynakta antrasit"
+    },
+    "Mahya bandı | rulo 10 m": {
+     "fiyat": 125,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      106
+     ],
+     "kaynak_kalem": "MAHYA BANDI | RULO/ 10 M",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Tijli duy | adet": {
+     "fiyat": 20,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      152
+     ],
+     "kaynak_kalem": "TİJLİ DUY | ADET",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Yuvarlak glop | adet": {
+     "fiyat": 45,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      153
+     ],
+     "kaynak_kalem": "YUVARLAK GLOP | ADET",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Ampul | adet": {
+     "fiyat": 18,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      154
+     ],
+     "kaynak_kalem": "AMPUL | ADET",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Tekli anahtar (takım) | adet": {
+     "fiyat": 90,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      161
+     ],
+     "kaynak_kalem": "TEKLİ ANAHTAR ( TAKIM ) | ADET",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Çiftli anahtar (takım) | adet": {
+     "fiyat": 90,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      162
+     ],
+     "kaynak_kalem": "ÇİFTLİ ANAHTAR ( TAKIM ) | ADET",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Tekli priz (takım) | adet": {
+     "fiyat": 90,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      164
+     ],
+     "kaynak_kalem": "TEKLİ PRİZ ( TAKIM ) | ADET",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Çiftli priz (takım) | adet": {
+     "fiyat": 90,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      165
+     ],
+     "kaynak_kalem": "ÇİFTLİ PRİZ (TAKIM) | ADET",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Uydu prizi (takım) | adet": {
+     "fiyat": 90,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      166
+     ],
+     "kaynak_kalem": "UYDU PRİZİ ( TAKIM ) | ADET",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Zil | adet": {
+     "fiyat": 90,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      167
+     ],
+     "kaynak_kalem": "ZİL | ADET",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Sigorta kutusu (12'li) | adet": {
+     "fiyat": 315,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      170
+     ],
+     "kaynak_kalem": "SİGORTA KUTUSU | 12 Lİ",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Buat kasa | adet": {
+     "fiyat": 14,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      168
+     ],
+     "kaynak_kalem": "BUAT KASA | ADET",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "NYM kablo 3 × 2,5 | metre": {
+     "fiyat": 70,
+     "birim": "m",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      155
+     ],
+     "kaynak_kalem": "NYM KABLO (3 x 2.5) | METRE",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "NYM kablo 2 × 1,5 | metre": {
+     "fiyat": 35,
+     "birim": "m",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      157
+     ],
+     "kaynak_kalem": "NYM KABLO (2 x 1.5) | METRE",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Uydu kablo | metre": {
+     "fiyat": 15,
+     "birim": "m",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      158
+     ],
+     "kaynak_kalem": "UYDU KABLO | METRE",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Besleme kablosu | metre": {
+     "fiyat": 125,
+     "birim": "m",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      159
+     ],
+     "kaynak_kalem": "BESLEME KABLOSU ( SİGORTA KUTULARI ARASI ) | METRE",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Besleme kablo borusu | metre": {
+     "fiyat": null,
+     "birim": "m",
+     "kaynak": null,
+     "kaynak_satir": null,
+     "kaynak_kalem": "",
+     "durum": "kaynakta yok",
+     "onay": false,
+     "not": "87 m² listesinde: kaynakta satır fiyatsız; Haziran listesinde yok; Eylül tablosunda satır var, fiyat boş."
+    },
+    "İzole bant | adet": {
+     "fiyat": 12,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      171
+     ],
+     "kaynak_kalem": "İZOLE BANT | Adet",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Kaçak akım rölesi (ikili) | adet": {
+     "fiyat": 2000,
+     "birim": "adet",
+     "kaynak": "CTKB",
+     "kaynak_satir": null,
+     "kaynak_kalem": "Kaçak akım rölesi (ikili)",
+     "durum": "yedek öneri",
+     "onay": false,
+     "not": "87 m² listesinde: kaynakta yalnız dörtlü (2000); Haziran listesinde yok"
+    },
+    "W otomat 16 A | adet": {
+     "fiyat": 125,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      169
+     ],
+     "kaynak_kalem": "W OTOMAT (SİGORTA) | 16 Amper",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "16 mm betopan ve kapı kolu vidası (3,9 × 32) | adet": {
+     "fiyat": 0.7,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      141
+     ],
+     "kaynak_kalem": "16 MM BETOPAN VE KAPI KOLLARI ( 3.9 x 32) | Adet",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Trapez vida 5,5 × 76 (tek kat panel) | adet": {
+     "fiyat": 3,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      143,
+      144,
+      145
+     ],
+     "kaynak_kalem": "( 5.5 x 25 ) TRAPEZ VİDA (AŞIK+OMEGA+KÖŞEBENT) | Adet; ( 5.5 x 60 ) TRAPEZ VİDA (TRAPEZ SAC / METAL KİREMİT) | Adet; ( 5.5x 110) TRAPEZ VİDA ( SANDVİÇ PANEL) | Adet",
+     "durum": "öneri onaylı",
+     "onay": true,
+     "not": "kaynakta 5,5 × 25, 60 ve 110 trapez vidanın hepsi 3; 5,5 × 76 yok; Patron 27 Ekim 22:08 \"evet uygula\""
+    },
+    "Prefabrik pencere vidası (4,8 × 70) | adet": {
+     "fiyat": 1.9,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      142
+     ],
+     "kaynak_kalem": "PREFABRİK PENCERELER ( 4.8 x 70 ) | Adet",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Trapez vida 5,5 × 60 (trapez sac / metal kiremit) | adet": {
+     "fiyat": 3,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      144
+     ],
+     "kaynak_kalem": "( 5.5 x 60 ) TRAPEZ VİDA (TRAPEZ SAC / METAL KİREMİT) | Adet",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "230'luk kesme taşı | adet": {
+     "fiyat": 155,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      148
+     ],
+     "kaynak_kalem": "230 LUK KESME TAŞI | ADET",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Çırpı ipi | adet": {
+     "fiyat": null,
+     "birim": "adet",
+     "kaynak": null,
+     "kaynak_satir": null,
+     "kaynak_kalem": "",
+     "durum": "kaynakta yok",
+     "onay": false,
+     "not": "87 m² listesinde: kaynakta satır fiyatsız; Haziran listesinde yok; Fiyat boş."
+    },
+    "8'lik trapez uç | adet": {
+     "fiyat": 55,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      146
+     ],
+     "kaynak_kalem": "8 LİK TRAPEZ UÇ | ADET",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "PH2 uç | adet": {
+     "fiyat": 155,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      147
+     ],
+     "kaynak_kalem": "PH2 UÇ | ADET",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "İnox taş | adet": {
+     "fiyat": 155,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      149
+     ],
+     "kaynak_kalem": "İNOX TAŞ | ADET",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Alçıpan vidası | adet": {
+     "fiyat": 0.7,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      140
+     ],
+     "kaynak_kalem": "ALÇIPAN VİDASI ( 3.5 x 35 ) | Adet",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "RYSB pul başlı vida | adet": {
+     "fiyat": 0.7,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      139
+     ],
+     "kaynak_kalem": "RYSB PUL BAŞLI ( 3.9 x 32 ) | Adet",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "PVC plastik betopan H'ı | adet": {
+     "fiyat": 45,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      134
+     ],
+     "kaynak_kalem": "PVC PLASTİK BETOPAN H' I | 60X3000",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Acil müdahale kapağı | adet": {
+     "fiyat": 800,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      135
+     ],
+     "kaynak_kalem": "ACİL MÜDAHELE KAPAĞI | ADET",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Şase pul | adet": {
+     "fiyat": 55,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      137
+     ],
+     "kaynak_kalem": "ŞASE PUL | ADET",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Çelik dübel | adet": {
+     "fiyat": 15,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      136
+     ],
+     "kaynak_kalem": "ÇELİK DÜBEL | ADET",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Temiz su borusu | L 4000": {
+     "fiyat": 255,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      174
+     ],
+     "kaynak_kalem": "TEMİZ SU BORUSU | L : 4000",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Normal dirsek 20 mm | adet": {
+     "fiyat": 45,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      175
+     ],
+     "kaynak_kalem": "NORMAL DİRSEK 20mm | Adet",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Kulaklı dirsek 20 mm | adet": {
+     "fiyat": 45,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      176
+     ],
+     "kaynak_kalem": "KULAKLI DİRSEK 20mm | Adet",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Düz T 20 mm | adet": {
+     "fiyat": 45,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      177
+     ],
+     "kaynak_kalem": "DÜZ T 20mm | Adet",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Maşon 20 mm | adet": {
+     "fiyat": 45,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      178
+     ],
+     "kaynak_kalem": "MAŞON 20mm | Adet",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "İç dişli T 20 mm | adet": {
+     "fiyat": 45,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      179
+     ],
+     "kaynak_kalem": "İÇ DİŞLİ T 20mm | Adet",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Atlama parçası yarım parmak | adet": {
+     "fiyat": 45,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      180
+     ],
+     "kaynak_kalem": "ATLAMA PARÇASI YARIM PARMAK | Adet",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Vitrifiye ve batarya (duş teknesi, klozet, lavabo, batarya grubu) | takım": {
+     "fiyat": 12500,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      181,
+      182,
+      183,
+      184
+     ],
+     "kaynak_kalem": "DUŞTEKNESİ | TAKIM; KLOZET (DUVARA SIFIR) | TAKIM; AYAKLI LAVABO | TAKIM; BANYO BATARYA GRUBU (LAVABO BATARYASI, BANYO BATARYASI, DUŞ BAŞLIĞI, TAHARET MUSLUĞU) | TAKIM",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": "dört kalemin toplamı (duş teknesi, klozet, ayaklı lavabo, batarya grubu)"
+    },
+    "Metal dere | L 4000": {
+     "fiyat": 400,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      117
+     ],
+     "kaynak_kalem": "(ANTRASİT) METAL DERE | L:4000",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": "kaynakta antrasit"
+    },
+    "Dere kelepçesi | adet": {
+     "fiyat": 12,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      125
+     ],
+     "kaynak_kalem": "DERE KELEPÇESİ | ADET",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Metal dere inişi aparatı | adet": {
+     "fiyat": 45,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      118
+     ],
+     "kaynak_kalem": "METAL DERE İNİŞİ APARATI | ADET",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "70 mm PVC dere iniş borusu | L 2000": {
+     "fiyat": 155,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      120
+     ],
+     "kaynak_kalem": "70 MM PVC DERE İNİŞ BORUSU | L:2000",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "70 mm PVC dere iniş borusu | L 500": {
+     "fiyat": 45,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      121
+     ],
+     "kaynak_kalem": "70 MM PVC DERE İNİŞ BORUSU | L:500",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Açık dirsek | adet": {
+     "fiyat": 45,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      122
+     ],
+     "kaynak_kalem": "AÇIK DİRSEK | ADET",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Kapalı dirsek | adet": {
+     "fiyat": 45,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      123
+     ],
+     "kaynak_kalem": "KAPALI DİRSEK | ADET",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "PVC iniş kelepçesi | adet": {
+     "fiyat": 12,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      124
+     ],
+     "kaynak_kalem": "PVC İNİŞ KELEPÇESİ | ADET",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Dere kapağı | adet": {
+     "fiyat": 45,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      119
+     ],
+     "kaynak_kalem": "(ANTRASİT) DERE KAPAĞI | ADET",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": "kaynakta antrasit"
+    },
+    "Dış cephe boya (17,5 kg kova) | kova": {
+     "fiyat": 3500,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      191
+     ],
+     "kaynak_kalem": "Dış Cephe Boya (Polisan - 4840 / CD - 8110 Köpük Beyazı) | Kova (17,5 KG)",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "İç cephe boya (17,5 kg kova) | kova": {
+     "fiyat": 3500,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      192
+     ],
+     "kaynak_kalem": "İç Cephe Boya (Polisan - 6610/Cİ-6610 Yeni Kuğu) | Kova (17,5 KG)",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Kenarlar için boya | 10 kg": {
+     "fiyat": null,
+     "birim": "adet",
+     "kaynak": null,
+     "kaynak_satir": null,
+     "kaynak_kalem": "",
+     "durum": "kaynakta yok",
+     "onay": false,
+     "not": "87 m² listesinde: kaynakta yalnız 2,5 kg beyaz yağlı boya (550); Haziran listesinde: yalnız 3 kg selülozik yağlı (satır 329, 200) ve metal aksam boyası (satır 328, 600); 10 kg yok; Haziran'da 3 kg selülozik yağlı boya 200, 3 kg metal aksam boyası 600."
+    },
+    "Tavan boya (17,5 kg kova) | kova": {
+     "fiyat": 800,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      193
+     ],
+     "kaynak_kalem": "Tavan Boya | Kova (17,5 KG)",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Astar (17,5 kg kova) | kova": {
+     "fiyat": 700,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      194
+     ],
+     "kaynak_kalem": "Astar | Kova (17,5 KG)",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "Silikonize mastik | adet": {
+     "fiyat": 45,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      197,
+      198
+     ],
+     "kaynak_kalem": "Silikonize Mastik (Kahverengi) | Adet; Silikonize Mastik (Beyaz) | Adet",
+     "durum": "öneri onaylı",
+     "onay": true,
+     "not": "kaynakta kahverengi 45 (pencere adedi kadar), beyaz 32; TK-01 satırı pencere adedi kadar; Patron 27 Ekim 22:08 \"evet uygula\""
+    },
+    "Dayson (çatı renginde) | adet": {
+     "fiyat": 255,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      199
+     ],
+     "kaynak_kalem": "Dayson (Antrasit) | Adet",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": "kaynakta antrasit; TK-01 çatısı antrasit"
+    },
+    "Poliüretan köpük | adet": {
+     "fiyat": 255,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      200
+     ],
+     "kaynak_kalem": "Poliüretan Köpük | Adet",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": ""
+    },
+    "60'lık tavan omegası (ters tavan) | 60 × 3750": {
+     "fiyat": 278,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      79
+     ],
+     "kaynak_kalem": "60'LIK DUVAR OMEGASI - ZEMIN KAT | 60*3750",
+     "durum": "öneri onaylı",
+     "onay": true,
+     "not": "kaynakta tavan omegası yok; aynı 60 × 3750 omega duvar omegası olarak 278; Patron 27 Ekim 22:08 \"evet uygula\""
+    }
+   },
+   "bantlar": [
+    {
+     "kalem": "100'lük yapıştırma dolu pano",
+     "kalinlik_mm": 100,
+     "yukseklik_mm": 2500,
+     "kaynak": "EKIM87",
+     "araliklar": [
+      {
+       "en_mm": [
+        627.5,
+        1250
+       ],
+       "alt_haric": true,
+       "fiyat": 2100,
+       "onay": true,
+       "dayanak": "Ekim listesinde 805–1250 en 2.100; 627,5'ten geniş tam (Patron 27 Ekim 22:08)"
+      },
+      {
+       "en_mm": [
+        340,
+        627.5
+       ],
+       "alt_haric": false,
+       "fiyat": 1050,
+       "onay": true,
+       "dayanak": "Ekim listesinde 340–595 en 1.050; 627,5'e kadar yarım (Patron 27 Ekim 22:08)"
+      },
+      {
+       "en_mm": [
+        225,
+        225
+       ],
+       "alt_haric": false,
+       "fiyat": 525,
+       "onay": true,
+       "dayanak": "Ekim listesinde 225 en 525"
+      }
+     ]
+    },
+    {
+     "kalem": "60'lık yapıştırma dolu pano",
+     "kalinlik_mm": 60,
+     "yukseklik_mm": 2500,
+     "kaynak": "EKIM87",
+     "araliklar": [
+      {
+       "en_mm": [
+        627.5,
+        1250
+       ],
+       "alt_haric": true,
+       "fiyat": 1800,
+       "onay": true,
+       "dayanak": "Ekim listesinde 645–1250 en 1.800; 627,5'ten geniş tam (Patron 27 Ekim 22:08)"
+      },
+      {
+       "en_mm": [
+        350,
+        627.5
+       ],
+       "alt_haric": false,
+       "fiyat": 900,
+       "onay": true,
+       "dayanak": "Ekim listesinde 350–510 en 900; 627,5'e kadar yarım (Patron 27 Ekim 22:08)"
+      },
+      {
+       "en_mm": [
+        175,
+        320
+       ],
+       "alt_haric": false,
+       "fiyat": 450,
+       "onay": true,
+       "dayanak": "Ekim listesinde 175–320 en 450"
+      }
+     ]
+    },
+    {
+     "kalem": "60'lık karkaslı + kasalı pano",
+     "kalinlik_mm": 60,
+     "yukseklik_mm": 2500,
+     "kaynak": "EKIM87",
+     "araliklar": [
+      {
+       "en_mm": [
+        1070,
+        1250
+       ],
+       "alt_haric": false,
+       "fiyat": 2550,
+       "onay": true,
+       "dayanak": "Ekim listesinde 1070–1250 en 2.550"
+      }
+     ]
+    }
+   ],
+   "atla": []
+  },
+  "celik": {
+   "anahtar": "kalem | boyut",
+   "ornek_proje": "Ç8201 ve Ç8801 (genel motor, birleşim)",
+   "kg_notu": "birim 'kg' olan kalemde tutar satırın kg'ı × fiyat",
+   "kalemler": {
+    "Dış cephe duvar panelleri | 80 × 45 × 1,2": {
+     "fiyat": 59,
+     "birim": "kg",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      52,
+      54,
+      55
+     ],
+     "kaynak_kalem": "80X45X12 profil (merdiven duvarı, döşeme kirişi, kaset) kg fiyatı",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": "CTKB çelik panel 50 TL/kg; Haziran 47–48 TL/kg.; Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
+    },
+    "İç cephe duvar panelleri | 80 × 45 × 1,2": {
+     "fiyat": 59,
+     "birim": "kg",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      52,
+      54,
+      55
+     ],
+     "kaynak_kalem": "80X45X12 profil kg fiyatı",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": "CTKB çelik panel 50 TL/kg; Haziran 47–48 TL/kg.; Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
+    },
+    "Veranda dikmeleri (kolon paneli) | 80 × 45 × 1,2": {
+     "fiyat": 59,
+     "birim": "kg",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      48
+     ],
+     "kaynak_kalem": "Balkon kolon 80X45X12 kg fiyatı",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": "CTKB çelik panel 50 TL/kg; Haziran 47–48 TL/kg.; Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
+    },
+    "Veranda kirişleri (kiriş paneli) | 80 × 45 × 1,2": {
+     "fiyat": 59,
+     "birim": "kg",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      49,
+      50
+     ],
+     "kaynak_kalem": "Balkon kiriş 80X45X12 kg fiyatı",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": "CTKB çelik panel 50 TL/kg; Haziran 47–48 TL/kg.; Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
+    },
+    "Çatı makas panelleri | 80 × 45 × 0,8": {
+     "fiyat": 59,
+     "birim": "kg",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      96
+     ],
+     "kaynak_kalem": "Makas 80x45x08 kg fiyatı",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": "CTKB çelik panel 50 TL/kg; Haziran 47–48 TL/kg.; Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
+    },
+    "Tavan paneli (makas arası) | roll form çelik": {
+     "fiyat": 59,
+     "birim": "kg",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      96
+     ],
+     "kaynak_kalem": "Makas 80x45x08 kg fiyatı",
+     "durum": "yakın",
+     "onay": false,
+     "not": "Roll form panelin ayrı fiyatı yok. CTKB çelik panel 50 TL/kg."
+    },
+    "Çatı paneli (makas üstü, sırt 80 mm) | roll form çelik": {
+     "fiyat": 59,
+     "birim": "kg",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      96
+     ],
+     "kaynak_kalem": "Makas 80x45x08 kg fiyatı",
+     "durum": "yakın",
+     "onay": false,
+     "not": "Roll form panelin ayrı fiyatı yok. CTKB çelik panel 50 TL/kg."
+    },
+    "Boy C profil | 80 × 45 × 0,8": {
+     "fiyat": 59,
+     "birim": "kg",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      96
+     ],
+     "kaynak_kalem": "Makas 80x45x08 kg fiyatı",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": "CTKB çelik panel 50 TL/kg; Haziran 47–48 TL/kg.; Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
+    },
+    "Boy C profil | 80 × 45 × 1,2": {
+     "fiyat": 59,
+     "birim": "kg",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      52,
+      54,
+      55
+     ],
+     "kaynak_kalem": "80X45X12 profil kg fiyatı",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": "CTKB çelik panel 50 TL/kg; Haziran 47–48 TL/kg.; Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
+    },
+    "Saçaklar için Boardex | 12,5 × 1200 × 2400": {
+     "fiyat": 635,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      109
+     ],
+     "kaynak_kalem": "Veranda-sundurma-balkon tavan Boardex 12,5×1200×2400",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": "CTKB 630 (8 mm yazılı).; Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
+    },
+    "Saçak yüzü için Boardex | 12,5 × 1200 × 2400": {
+     "fiyat": 635,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      109
+     ],
+     "kaynak_kalem": "Veranda-sundurma-balkon tavan Boardex 12,5×1200×2400",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": "CTKB 630 (8 mm yazılı).; Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
+    },
+    "Köşebent | L 2500": {
+     "fiyat": 59,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      62
+     ],
+     "kaynak_kalem": "L 2500",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": ""
+    },
+    "Dış cephe Boardex | 12,5 × 1200 × 2400": {
+     "fiyat": 635,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      109
+     ],
+     "kaynak_kalem": "Veranda-sundurma-balkon tavan Boardex 12,5×1200×2400",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": "Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
+    },
+    "Veranda tavanı (Boardex) | 12,5 × 1200 × 2400": {
+     "fiyat": 635,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      109
+     ],
+     "kaynak_kalem": "Veranda-sundurma-balkon tavan Boardex 12,5×1200×2400",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": "Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
+    },
+    "Duvar alçıpan beyaz | 1200 × 2500": {
+     "fiyat": 245,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      111
+     ],
+     "kaynak_kalem": "Tavan beyaz alçıpan 12,5×1200×2500",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": "Aynı levha; CTKB duvar alçıpan beyaz 225."
+    },
+    "Duvar alçıpan yeşil | 1200 × 2500": {
+     "fiyat": 345,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      112
+     ],
+     "kaynak_kalem": "Tavan yeşil alçıpan 12,5×1200×2500",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": "Aynı levha; CTKB duvar alçıpan yeşil 325."
+    },
+    "Tavan alçıpan beyaz | 1200 × 2500": {
+     "fiyat": 245,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      111
+     ],
+     "kaynak_kalem": "Tavan beyaz alçıpan 12,5×1200×2500",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": "CTKB 225."
+    },
+    "Tavan alçıpan yeşil | 1200 × 2500": {
+     "fiyat": 345,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      112
+     ],
+     "kaynak_kalem": "Tavan yeşil alçıpan 12,5×1200×2500",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": "CTKB 325."
+    },
+    "OSB (TV ve mutfak dolabı arkası takviyesi) | 11 × 1220 × 2440": {
+     "fiyat": 640,
+     "birim": "adet",
+     "kaynak": "CTKB",
+     "kaynak_satir": null,
+     "kaynak_kalem": "İç duvar OSB 1220×2440 t 11",
+     "durum": "eşleşti",
+     "onay": false,
+     "not": "Haziran 9 mm OSB 550."
+    },
+    "Duvar izolasyonu | paket 8,64 m²": {
+     "fiyat": 930,
+     "birim": "adet",
+     "kaynak": "HAZ",
+     "kaynak_satir": "ÇG24",
+     "kaynak_kalem": "Knauf mineral yün paket 8,64 m²",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": "CTKB Knauf IBP037 8,64 m² 900; Ekim 'mineral yün' 900 (ölçüsüz).; Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
+    },
+    "Tek kat panel | L 4330 · 100 cm kapatır": {
+     "fiyat": 1310.92,
+     "birim": "adet",
+     "kaynak": "HAZ",
+     "kaynak_satir": "ÇG1",
+     "kaynak_kalem": "Antrasit tek kat panel (87 cm kapatır) L 5450 = 1.650",
+     "durum": "hesap",
+     "onay": false,
+     "not": "TK-01'deki kuralla boyla orantılı: 1.650 × 4330 ÷ 5450. CTKB m² fiyatı 350 ile 1.515,50."
+    },
+    "Metal kiremit mahyası | L 2800": {
+     "fiyat": 345,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      103
+     ],
+     "kaynak_kalem": "Metal kiremit mahyası L 2800",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": "CTKB 245."
+    },
+    "Mahya bandı | rulo / 10 m": {
+     "fiyat": 125,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      106
+     ],
+     "kaynak_kalem": "Mahya bandı rulo 10 m",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": "CTKB 900."
+    },
+    "Acil müdahale kapağı | adet": {
+     "fiyat": 800,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      135
+     ],
+     "kaynak_kalem": "Acil müdahale kapağı",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": "CTKB 700."
+    },
+    "Çatı şiltesi 80 mm | 9,0 m²/adet": {
+     "fiyat": 700,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      107
+     ],
+     "kaynak_kalem": "Çatı izolasyonu 100 mm, 9,6 m²/paket",
+     "durum": "yakın",
+     "onay": false,
+     "not": "Ölçü farklı (80 mm, 9,0 m²); TK-01'de 9,6 m² paket 700 onaylı. CTKB 900."
+    },
+    "Metal dere | L 4000": {
+     "fiyat": 400,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      117
+     ],
+     "kaynak_kalem": "Metal dere L 4000",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": "CTKB 445."
+    },
+    "Dere iniş borusu | L 3000": {
+     "fiyat": 550,
+     "birim": "adet",
+     "kaynak": "CTKB",
+     "kaynak_satir": null,
+     "kaynak_kalem": "Metal dere iniş borusu L 3000",
+     "durum": "eşleşti",
+     "onay": false,
+     "not": "Ekim listesinde PVC iniş borusu L 2000 155."
+    },
+    "Dere iniş aparatı | adet": {
+     "fiyat": 45,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      118
+     ],
+     "kaynak_kalem": "Metal dere inişi aparatı",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": ""
+    },
+    "Açık dirsek | adet": {
+     "fiyat": 45,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      122
+     ],
+     "kaynak_kalem": "Açık dirsek",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": ""
+    },
+    "Kapalı dirsek | adet": {
+     "fiyat": 45,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      123
+     ],
+     "kaynak_kalem": "Kapalı dirsek",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": ""
+    },
+    "İniş kelepçesi | adet": {
+     "fiyat": 12,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      124
+     ],
+     "kaynak_kalem": "PVC iniş kelepçesi",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": "CTKB metal iniş kelepçesi 12."
+    },
+    "Dere kelepçesi | adet": {
+     "fiyat": 12,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      125
+     ],
+     "kaynak_kalem": "Dere kelepçesi",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": ""
+    },
+    "Melamin kapı (80'lik kanat) | 90 × 214": {
+     "fiyat": 4100,
+     "birim": "adet",
+     "kaynak": "HAZ",
+     "kaynak_satir": "KP4",
+     "kaynak_kalem": "Melamin kapı sağ/sol 90/214",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": "CTKB 5.000.; Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
+    },
+    "Kompozit çelik kapı | 90 × 210": {
+     "fiyat": 5000,
+     "birim": "adet",
+     "kaynak": "CTKB",
+     "kaynak_satir": null,
+     "kaynak_kalem": "Kompozit çelik kapı (sol) 90×210",
+     "durum": "eşleşti",
+     "onay": false,
+     "not": "Haziran'da kompozit yok; standart çelik kapı 95×205 7.500 (TK-01'in dış kapısına onaylı)."
+    },
+    "PVC pencere | 120/180": {
+     "fiyat": 9500,
+     "birim": "adet",
+     "kaynak": "HAZ",
+     "kaynak_satir": "KP14",
+     "kaynak_kalem": "PVC pencere + pervaz + matik + çift açılım 120/180",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": "CTKB 10.000."
+    },
+    "PVC vasistas | 60/40": {
+     "fiyat": 2300,
+     "birim": "adet",
+     "kaynak": "HAZ",
+     "kaynak_satir": "KP31",
+     "kaynak_kalem": "PVC vasistas 60/40",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": "CTKB 2.500."
+    },
+    "PVC pencere | 120/100": {
+     "fiyat": 10000,
+     "birim": "adet",
+     "kaynak": "CTKB",
+     "kaynak_satir": null,
+     "kaynak_kalem": "Beyaz 120×100 çift açılım",
+     "durum": "eşleşti",
+     "onay": false,
+     "not": "Haziran'da 120/100 yalnız panjurlu antrasit (8.000); CTKB'de 120×100 sürgülü 20.000."
+    },
+    "PVC pencere | 180/180": {
+     "fiyat": 11500,
+     "birim": "adet",
+     "kaynak": "HAZ",
+     "kaynak_satir": "KP13",
+     "kaynak_kalem": "PVC pencere + pervaz + matik + çift açılım 180/180",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": "CTKB'de 180×180 çift açılım iki satır: 15.000 ve 20.000.; Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
+    },
+    "Tijli duy | adet": {
+     "fiyat": 20,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      152
+     ],
+     "kaynak_kalem": "Tijli duy",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": "CTKB 45."
+    },
+    "Yuvarlak glop | adet": {
+     "fiyat": 45,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      153
+     ],
+     "kaynak_kalem": "Yuvarlak glop",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": ""
+    },
+    "Ampul | adet": {
+     "fiyat": 18,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      154
+     ],
+     "kaynak_kalem": "Ampul",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": "CTKB 45."
+    },
+    "Tekli anahtar | adet": {
+     "fiyat": 90,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      161
+     ],
+     "kaynak_kalem": "Tekli anahtar (takım)",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": ""
+    },
+    "Çiftli anahtar | adet": {
+     "fiyat": 90,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      162
+     ],
+     "kaynak_kalem": "Çiftli anahtar (takım)",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": ""
+    },
+    "Tekli priz | adet": {
+     "fiyat": 90,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      164
+     ],
+     "kaynak_kalem": "Tekli priz (takım)",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": ""
+    },
+    "Çiftli priz | adet": {
+     "fiyat": 90,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      165
+     ],
+     "kaynak_kalem": "Çiftli priz (takım)",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": ""
+    },
+    "Uydu prizi | adet": {
+     "fiyat": 90,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      166
+     ],
+     "kaynak_kalem": "Uydu prizi (takım)",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": ""
+    },
+    "W otomat (sigorta) | adet": {
+     "fiyat": 125,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      169
+     ],
+     "kaynak_kalem": "W otomat (sigorta) 16 A",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": ""
+    },
+    "NYM kablo (3 × 2,5) | metre": {
+     "fiyat": 70,
+     "birim": "metre",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      155
+     ],
+     "kaynak_kalem": "NYM kablo 3×2,5",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": ""
+    },
+    "NYM kablo (2 × 1,5) | metre": {
+     "fiyat": 35,
+     "birim": "metre",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      157
+     ],
+     "kaynak_kalem": "NYM kablo 2×1,5",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": ""
+    },
+    "Buat kasa | adet": {
+     "fiyat": 14,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      168
+     ],
+     "kaynak_kalem": "Buat kasa",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": ""
+    },
+    "Uydu kablo | metre": {
+     "fiyat": 15,
+     "birim": "metre",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      158
+     ],
+     "kaynak_kalem": "Uydu kablo",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": "CTKB 35."
+    },
+    "Besleme kablosu (sigorta kutuları arası) | metre": {
+     "fiyat": 125,
+     "birim": "metre",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      159
+     ],
+     "kaynak_kalem": "Besleme kablosu (sigorta kutuları arası)",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": "CTKB 210."
+    },
+    "Besleme kablo borusu | metre": {
+     "fiyat": null,
+     "birim": "metre",
+     "kaynak": null,
+     "kaynak_satir": [
+      160
+     ],
+     "kaynak_kalem": "Besleme kablo borusu, fiyatsız",
+     "durum": "kaynakta yok",
+     "onay": false,
+     "not": "Üç listede de fiyatsız."
+    },
+    "Zil | adet": {
+     "fiyat": 90,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      167
+     ],
+     "kaynak_kalem": "Zil",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": "CTKB 800."
+    },
+    "Sigorta kutusu (12'li) | adet": {
+     "fiyat": 315,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      170
+     ],
+     "kaynak_kalem": "Sigorta kutusu 12'li",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": "CTKB 215."
+    },
+    "İzole bant | adet": {
+     "fiyat": 12,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      171
+     ],
+     "kaynak_kalem": "İzole bant",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": ""
+    },
+    "Kaçak akım rölesi | adet": {
+     "fiyat": 2000,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      172
+     ],
+     "kaynak_kalem": "Kaçak akım rölesi (dörtlü)",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": "Ekim listesinde dörtlü, CTKB'de ikili; ikisi de 2.000.; Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
+    },
+    "RYSB pul başlı (3,9 × 32) | adet": {
+     "fiyat": 0.7,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      139
+     ],
+     "kaynak_kalem": "RYSB pul başlı (3,9×32)",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": ""
+    },
+    "Alçıpan vidası (3,5 × 35) | adet": {
+     "fiyat": 0.7,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      140
+     ],
+     "kaynak_kalem": "Alçıpan vidası (3,5×35)",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": ""
+    },
+    "OSB ve yalıpan vidası (3,9 × 32) | adet": {
+     "fiyat": 0.55,
+     "birim": "adet",
+     "kaynak": "HAZ",
+     "kaynak_satir": "VG2",
+     "kaynak_kalem": "OSB ve yalıpan (3,9×32)",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": "CTKB 0,70; Ekim 16 mm betopan ve kapı kolu vidası (3,9×32) 0,70.; Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
+    },
+    "Pencere vidası (4,8 × 70) | adet": {
+     "fiyat": 1.9,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      142
+     ],
+     "kaynak_kalem": "Prefabrik pencereler (4,8×70)",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": ""
+    },
+    "Trapez vida (5,5 × 25) | adet": {
+     "fiyat": 3,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      143
+     ],
+     "kaynak_kalem": "(5,5×25) trapez vida (aşık+omega)",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": "CTKB çelik panel için 2,30.; Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
+    },
+    "Trapez vida (5,5 × 60) | adet": {
+     "fiyat": 3,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      144
+     ],
+     "kaynak_kalem": "(5,5×60) trapez vida (trapez sac / metal kiremit)",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": "CTKB 2,90."
+    },
+    "Trapez vida (5,5 × 76; tek kat panel) | adet": {
+     "fiyat": 3,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      143,
+      144,
+      145
+     ],
+     "kaynak_kalem": "Trapez vidalar 3",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": "TK-01'de öneri onaylı (öteki trapez vidalar gibi 3)."
+    },
+    "Çelik dübel (klipsli) | adet": {
+     "fiyat": 15,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      136
+     ],
+     "kaynak_kalem": "Çelik dübel",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": ""
+    },
+    "Şase pul | adet": {
+     "fiyat": 55,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      137
+     ],
+     "kaynak_kalem": "Şase pul",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": ""
+    },
+    "8'lik trapez uç | adet": {
+     "fiyat": 55,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      146
+     ],
+     "kaynak_kalem": "8'lik trapez uç",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": "CTKB 65."
+    },
+    "PH2 uç | adet": {
+     "fiyat": 155,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      147
+     ],
+     "kaynak_kalem": "PH2 uç",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": "CTKB 45."
+    },
+    "230'luk kesme taşı | adet": {
+     "fiyat": 155,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      148
+     ],
+     "kaynak_kalem": "230'luk kesme taşı",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": ""
+    },
+    "İnox taş | adet": {
+     "fiyat": 155,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      149
+     ],
+     "kaynak_kalem": "İnox taş",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": "CTKB 55."
+    },
+    "Çırpı ipi | adet": {
+     "fiyat": null,
+     "birim": "adet",
+     "kaynak": null,
+     "kaynak_satir": [
+      150
+     ],
+     "kaynak_kalem": "Çırpı ipi, fiyatsız",
+     "durum": "kaynakta yok",
+     "onay": false,
+     "not": "Üç listede de fiyatsız."
+    },
+    "Temiz su borusu | L 4000": {
+     "fiyat": 255,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      174
+     ],
+     "kaynak_kalem": "Temiz su borusu L 4000",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": "CTKB 155."
+    },
+    "Normal dirsek 20 mm | adet": {
+     "fiyat": 45,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      175
+     ],
+     "kaynak_kalem": "Normal dirsek 20 mm",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": ""
+    },
+    "Kulaklı dirsek 20 mm | adet": {
+     "fiyat": 45,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      176
+     ],
+     "kaynak_kalem": "Kulaklı dirsek 20 mm",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": ""
+    },
+    "Düz T 20 mm | adet": {
+     "fiyat": 45,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      177
+     ],
+     "kaynak_kalem": "Düz T 20 mm",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": ""
+    },
+    "Maşon 20 mm | adet": {
+     "fiyat": 45,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      178
+     ],
+     "kaynak_kalem": "Maşon 20 mm",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": ""
+    },
+    "İç dişli T 20 mm | adet": {
+     "fiyat": 45,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      179
+     ],
+     "kaynak_kalem": "İç dişli T 20 mm",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": ""
+    },
+    "Atlama parçası (yarım parmak) | adet": {
+     "fiyat": 45,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      180
+     ],
+     "kaynak_kalem": "Atlama parçası yarım parmak",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": ""
+    },
+    "Duşakabin (90 × 90) | takım": {
+     "fiyat": 4000,
+     "birim": "adet",
+     "kaynak": "HAZ",
+     "kaynak_satir": "ST9",
+     "kaynak_kalem": "Duşakabin",
+     "durum": "yakın",
+     "onay": false,
+     "not": "Ekim listesinde yalnız duş teknesi 2.500; CTKB fiyatsız."
+    },
+    "Klozet | takım": {
+     "fiyat": 5000,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      182
+     ],
+     "kaynak_kalem": "Klozet (duvara sıfır) takım",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": "Haziran 3.500.; Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
+    },
+    "Banyo dolabı | takım": {
+     "fiyat": 4500,
+     "birim": "adet",
+     "kaynak": "HAZ",
+     "kaynak_satir": "ST24",
+     "kaynak_kalem": "Banyo dolabı",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": "CTKB fiyatsız.; Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
+    },
+    "Banyo batarya grubu | takım": {
+     "fiyat": 3500,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      184
+     ],
+     "kaynak_kalem": "Banyo batarya grubu takım",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": "Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
+    },
+    "Taharet musluğu 20 mm | adet": {
+     "fiyat": 50,
+     "birim": "adet",
+     "kaynak": "HAZ",
+     "kaynak_satir": "ST6",
+     "kaynak_kalem": "Taharet musluğu 20 mm",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": "Ekim listesinde batarya grubunun içinde.; Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
+    },
+    "Dış cephe boyası | kova 17,5 kg": {
+     "fiyat": 3500,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      191
+     ],
+     "kaynak_kalem": "Dış cephe boya kova 17,5 kg",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": ""
+    },
+    "İç cephe boyası | kova 17,5 kg": {
+     "fiyat": 3500,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      192
+     ],
+     "kaynak_kalem": "İç cephe boya kova 17,5 kg",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": ""
+    },
+    "Tavan boyası | kova 17,5 kg": {
+     "fiyat": 800,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      193
+     ],
+     "kaynak_kalem": "Tavan boya kova 17,5 kg",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": "CTKB 900."
+    },
+    "Astar | kova 17,5 kg": {
+     "fiyat": 700,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      194
+     ],
+     "kaynak_kalem": "Astar kova 17,5 kg",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": ""
+    },
+    "Silikonize mastik | adet": {
+     "fiyat": 45,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      197
+     ],
+     "kaynak_kalem": "Silikonize mastik (kahverengi)",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": "Beyaz 32."
+    },
+    "Dayson | adet": {
+     "fiyat": 255,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      199
+     ],
+     "kaynak_kalem": "Dayson (antrasit)",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": "CTKB 225."
+    },
+    "Poliüretan köpük | adet": {
+     "fiyat": 255,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      200
+     ],
+     "kaynak_kalem": "Poliüretan köpük",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": "CTKB 225."
+    },
+    "Alın (kalkan kenarı) için Boardex | 12,5 × 1200 × 2400": {
+     "fiyat": 635,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      109
+     ],
+     "kaynak_kalem": "Veranda-sundurma-balkon tavan Boardex 12,5×1200×2400",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": "CTKB 225.; Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
+    },
+    "Alın kapama | L 2500": {
+     "fiyat": 345,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      104
+     ],
+     "kaynak_kalem": "Sandviç panel kapaması L 2800",
+     "durum": "yakın",
+     "onay": false,
+     "not": "Boy farklı (2800). CTKB sandviç panel kapaması L 2800 = 245; tek kat panel kapaması fiyatsız."
+    },
+    "Tek kat panel | L 3740 · 100 cm kapatır": {
+     "fiyat": 1132.29,
+     "birim": "adet",
+     "kaynak": "HAZ",
+     "kaynak_satir": "ÇG1",
+     "kaynak_kalem": "Antrasit tek kat panel (87 cm kapatır) L 5450 = 1.650",
+     "durum": "hesap",
+     "onay": false,
+     "not": "TK-01'deki kuralla boyla orantılı: 1.650 × 3740 ÷ 5450. CTKB m² fiyatı 350 ile 1.309."
+    },
+    "Tek kat panel | L 2480 · 100 cm kapatır": {
+     "fiyat": 750.83,
+     "birim": "adet",
+     "kaynak": "HAZ",
+     "kaynak_satir": "ÇG1",
+     "kaynak_kalem": "Antrasit tek kat panel (87 cm kapatır) L 5450 = 1.650",
+     "durum": "hesap",
+     "onay": false,
+     "not": "TK-01'deki kuralla boyla orantılı: 1.650 × 2480 ÷ 5450. CTKB m² fiyatı 350 ile 868."
+    },
+    "Ters mahya | L 2800": {
+     "fiyat": 189,
+     "birim": "adet",
+     "kaynak": "HAZ",
+     "kaynak_satir": "ÇG19",
+     "kaynak_kalem": "Antrasit ters mahya L 2800",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": "CTKB ters mahya fiyatsız.; Onay: Patron'un 27 Ekim 22:00 kararı ('son listeler') çelikte de genel kaynak (r02)"
+    },
+    "Ters mahya kenar kutusu | L 21 × 40 × 21 × 2800": {
+     "fiyat": null,
+     "birim": "adet",
+     "kaynak": null,
+     "kaynak_satir": null,
+     "kaynak_kalem": "Ters mahya kenar kutuları, fiyatsız",
+     "durum": "kaynakta yok",
+     "onay": false,
+     "not": ""
+    },
+    "Dere kapağı | adet": {
+     "fiyat": 45,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      119
+     ],
+     "kaynak_kalem": "Dere kapağı",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": ""
+    },
+    "PVC pencere | 80/180": {
+     "fiyat": null,
+     "birim": "adet",
+     "kaynak": null,
+     "kaynak_satir": null,
+     "kaynak_kalem": "",
+     "durum": "kaynakta yok",
+     "onay": false,
+     "not": "80×180 hiçbir listede yok."
+    },
+    "PVC pencere | 120/120": {
+     "fiyat": 5500,
+     "birim": "adet",
+     "kaynak": "HAZ",
+     "kaynak_satir": "KP12",
+     "kaynak_kalem": "PVC pencere + pervaz + matik + çift açılım 120/120",
+     "durum": "TK-01 onaylı kalemle aynı",
+     "onay": true,
+     "not": "CTKB 10.000."
+    }
+   },
+   "bantlar": [],
+   "atla": [
+    "Toplam (adedi ve kg'ı bilinenler)"
+   ]
+  }
+ },
+ "m2_yontemi": {
+  "fiyatlar": [],
+  "not": "Basit yöntemin m² fiyatları henüz yok (Patron verir); araç --m2-fiyat ile alır."
+ }
+}
