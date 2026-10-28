@@ -1,6 +1,6 @@
 """İE-13 · Fiyat defteri (`kurallar/fiyat/defter_2026-10.json`) ve liste × fiyat aracı (`araclar/fiyatla.py`).
 
-Defterin biçimi, kişisel veri olmaması, onay kuralı (onaysız fiyat yalnız --oneri ile), pano eni bandı, kg'lı kalem, özet
+Defterin biçimi, kişisel veri olmaması, onay kuralı (onaysız fiyat yalnız --oneri ile), pano eni bandı, kiriş boy önerisi, kg'lı kalem, özet
 satırının atlanması, düzeltme ve basit yöntem kıyası. Kör test projelerinin Motor listeleri (`testler/kor/projeler/*/bizim_liste.json`)
 defterle fiyatlanır: tutar = miktar × birim fiyat, toplam satırların toplamı.
 """
@@ -52,6 +52,8 @@ def test_defter_bicimi(defter):
             assert b["kaynak"] in defter["kaynaklar"]
             for a in b["araliklar"]:
                 assert a["en_mm"][0] <= a["en_mm"][1] and a["fiyat"] > 0 and a["dayanak"]
+        for b in H.get("boy_onerileri") or []:                  # boy önerisi hep öneri: onay kalemin kendisi içindir
+            assert b["kaynak"] in defter["kaynaklar"] and b["boy_mm"] > 0 and b["fiyat"] > 0 and b["onay"] is False and b["dayanak"]
 
 
 def test_defterde_kisisel_veri_yok():
@@ -93,6 +95,27 @@ def test_pano_eni_bandi(defter, olcu, fiyat):
     s = F.fiyatla(L, defter)["satirlar"][0]
     assert s["birim_fiyat"] == fiyat, s
     assert s["durum"] == ("onaylı bant" if fiyat else "defterde yok")
+
+
+def test_kiris_boy_onerisi(defter):
+    """CIO, 28 Ekim: kaydı olmayan kiriş boyu 6 m tam boyun fiyatından boyla orantılı öneri alır (tam TL'ye yarım yukarı). Yöntem defterdeki
+    onaylı kiriş boylarını aynen verir (Patron 27 Ekim 22:08); yeni boy onay bekler, varsayılan toplama girmez, satırda ve özette durur."""
+    K = "Kutu profil (kiriş) 100 × 100"
+    pre = defter["hatlar"]["prefabrik"]
+    onayli = {k.split(" | ")[1]: g["fiyat"] for k, g in pre["kalemler"].items() if k.startswith(K + " | ")}
+    assert onayli == {"L 3760": 3133, "L 1710": 1425, "L 2510": 2092, "L 1200": 1000}
+    for olcu, fiyat in onayli.items():
+        assert F.boy_onerisi_bul(_pre(K, olcu, 1), pre["boy_onerileri"])[1] == fiyat, olcu
+    L = {"satirlar": [_pre(K, "L 3860", 1), _pre(K, "L 1255", 2), _pre(K, "L 3760", 1), _pre(K, "100 × 100", 1)]}
+    R = F.fiyatla(L, defter)
+    a, b, c, d = R["satirlar"]
+    assert (a["birim_fiyat"], a["tutar"], a["durum"], a["oneri_fiyat"]) == (None, None, "öneri boy, onay bekliyor", 3217.0)
+    assert (b["oneri_fiyat"], c["durum"], c["tutar"], d["durum"]) == (1046.0, "onaylı", 3133, "defterde yok")   # kaydı olan kendi kaydıyla
+    assert "oneri_fiyat" not in c and "oneri_fiyat" not in d
+    assert R["ozet"]["toplam"] == 3133 and R["ozet"]["oneri_bekleyen"] == {"satir": 2, "tutar": 3217 + 2 * 1046}
+    R2 = F.fiyatla(L, defter, oneri=True)
+    assert [x["durum"] for x in R2["satirlar"][:2]] == ["öneri boy"] * 2 and R2["ozet"]["onerilerle"] == 3217 + 2 * 1046
+    assert R2["ozet"]["oneri_bekleyen"] == {"satir": 0, "tutar": 0}
 
 
 def test_bant_onayi_ve_kayitli_anahtar(defter):

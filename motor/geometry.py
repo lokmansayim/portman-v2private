@@ -1001,7 +1001,8 @@ def _dis_verandalar(plan: "Plan", is_emri: dict) -> None:
     köşede 10 × 10 dikme. Konum gerçek çerçevede (ön altta; `dizilim.baslangic` arka-sol olsa da, `dikmeler` gibi): `cephe` on | arka | sol | sag,
     `bas_cm`–`bit_cm` cephe boyunca dış yüzden (on / arka: x, sol / sag: y), `derinlik_cm` dış yüzden dışarı. Çatı `cati` {tip besik | tek_yon,
     egim_yuzde, sacak_cm}: beşiğin mahyası cepheye dik, kalkanı dış kenarda; tek eğim duvardan dışarı iner. `cati` yazılmamışsa beşik ve ana
-    çatının eğimi alınır, uyarı düşer (K21). Gövde cephesine tam oturmayan, gövdeye ya da başka mahale binen veranda açık hata."""
+    çatının eğimi alınır, uyarı düşer (K21). Gövde cephesine tam oturmayan (gövdedeki açık mahalin, ör. giriş nişinin, ağzı cephe sayılır),
+    gövdeye ya da başka mahale binen veranda açık hata."""
     liste = is_emri.get("verandalar") or []
     if not liste:
         return
@@ -1010,6 +1011,15 @@ def _dis_verandalar(plan: "Plan", is_emri: dict) -> None:
     fp = plan.footprint()
     sinir = fp.boundary
     fx0, fy0, fx1, fy1 = fp.bounds
+    from shapely.geometry import LineString, Point
+    nisler = []                                     # BK-14 ek: gövdedeki açık mahallerin (giriş nişi) açık kenarları, mahal mahal
+    for m in plan.mahaller.values():
+        if m.acik and m.poly is not None:
+            tampon = m.poly.buffer(1.0)
+            ag = [LineString([(x0, y0), (x1, y1)]) for (x0, y0, x1, y1) in plan.acik_kenarlar
+                  if tampon.contains(Point((x0 + x1) / 2, (y0 + y1) / 2))]
+            if ag:
+                nisler.append(unary_union(ag))
     ana = is_emri.get("cati") or {}
     k = VERANDA_KOLON_CM
     for v in liste:
@@ -1040,9 +1050,16 @@ def _dis_verandalar(plan: "Plan", is_emri: dict) -> None:
             rect, ic, dis = (fx1, bas, fx1 + d, bit), ((fx1, bas), (fx1, bit)), ((fx1 + d, bas), (fx1 + d, bit))
             kolonlar = [(fx1 + d - k, bas), (fx1 + d - k, bit - k)]
         kutu = box(*rect)
-        from shapely.geometry import LineString
-        if LineString(ic).difference(sinir.buffer(1e-6)).length > 1e-6:
-            raise IsEmriHatasi(f"Veranda {ad}: {cephe} cephesinde {bas:g}–{bit:g} cm gövdenin dış yüzüne tam oturmuyor")
+        cizgi = LineString(ic)
+        bosluk = cizgi.difference(sinir.buffer(1e-6))
+        if bosluk.length > 1e-6:
+            # nişin ağzı dış yüz sayılır, yalnız şöyleyse: verandanın iki iç köşesi duvarda, nişin bütün açık kenarı verandanın iç kenarında
+            # (yanı da açık ızgara verandası niş değildir) ve boşluğun tamamı nişlerin ağzı
+            agiz = [n for n in nisler if n.intersection(bosluk.buffer(1e-6)).length > 1e-6]
+            if not (agiz and all(sinir.distance(Point(q)) < 1e-6 for q in ic)
+                    and all(n.difference(cizgi.buffer(1e-6)).length < 1e-6 for n in agiz)
+                    and bosluk.difference(unary_union(agiz).buffer(1e-6)).length < 1e-6):
+                raise IsEmriHatasi(f"Veranda {ad}: {cephe} cephesinde {bas:g}–{bit:g} cm gövdenin dış yüzüne tam oturmuyor")
         if kutu.intersection(fp).area > 1e-6:
             raise IsEmriHatasi(f"Veranda {ad} gövdeye biniyor")
         for m in plan.mahaller.values():
