@@ -325,6 +325,9 @@ def mutfak_ust_duvari(dx: float, kat_adi: str):
     for e in list(H.query("INSERT")):
         if abs(e.dxf.insert.y - y) < 0.01 and abs(e.dxf.rotation % 360 - 270) < 0.01 and dx + 512 - 0.01 <= e.dxf.insert.x <= dx + 753 and pano_boyu_ad(e.dxf.name):
             say(kart_adi(e.dxf.name), kat_adi, -1); H.delete_entity(e)
+    for e in list(H.query("DIMENSION")):                     # Motor'un bu duvara ait özel pano ölçüleri (eski diziliş) kalkar
+        q = e.dxf.defpoint
+        if 370 <= q.y <= 400 and dx + 505 <= q.x <= dx + 760 and e.dxf.layer == "OZEL_PANEL_OLCU_CM": H.delete_entity(e)
     kapi_kaynak = "100'LÜK 125'LİK KAPILI PANO(82'LİK) [SAG ALT]"      # mutfağa (−y) açılır, menteşe batı ucunda
     if kapi_kaynak not in hedef.blocks: print("mutfak üst duvarı: kapı bloğu yok", kapi_kaynak); return
     H.add_blockref(kapi_kaynak, (dx + 512.0, y), dxfattribs={"rotation": 270, "layer": "IC_DUVAR_100"}); say(kart_adi(kapi_kaynak), kat_adi, 1)

@@ -223,5 +223,10 @@ Biçim: `A### · saat · başlık` — Ne / Nerede / Sonuç / Durum (yapıldı �
 - A4 v6 gönderildi; Mac'e kopya.
 - Durum: yapıldı.
 
+### A045 · 15:03 · Lokman: "bir de akslı çizim ver; 2 çizim ayrı ayrı: pano pano ve ölçü ölçü teyit edeceğim"
+- `a4_dis_olcu.py` iki sayfa: 1) dış ölçüler (kıyas kopyası), 2) akslı pano planı (x 0…: akslar A–G/1–7, pano zincirleri, özel pano ölçüleri, bloklar, profiller; notlar gizli). Mutfak üst duvarının eski özel pano ölçüleri (Motor'un 57,75/67,75) `mutfak_ust_duvari` içinde silinir.
+- v7 gönderildi; Mac'e kopya.
+- Durum: yapıldı.
+
 ### A035 · — · Sıradaki: Soru 2b (zeminde kovaya giriş: önü açık mı, planda ön duvar çizili) → Soru 4 (Fransız pencere) → 5 (çıkma çatısı) → 6 → 7 → 8 (et) → 9 → İş Emri JSON → Motor (PR-1: bulgu 7–8)
 - Durum: bekliyor (Lokman).
