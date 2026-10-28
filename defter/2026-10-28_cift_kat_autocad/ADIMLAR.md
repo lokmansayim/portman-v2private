@@ -171,5 +171,9 @@ Biçim: `A### · saat · başlık` — Ne / Nerede / Sonuç / Durum (yapıldı �
 - Kontrol (ezdxf PNG): ilk iç pano 125,50, sağ son panolar 115,50, başlık "763 × 706 (10 + 5 × 125,5 + 115,5 + 10)", kova aksta, çıkma ve köşeler yerinde, dış kapılar şablon çizimi.
 - Durum: yapıldı.
 
+### A036 · 13:53 · Lokman: "Aksları daha belirsiz, tireleri daha aralıklı çiz"
+- Yapılan: AKS ve AKS_YAZI katmanları koyu gri (ACI 8); yeni çizgi tipi `AKS_SEYREK` (50 çizgi · 25 boşluk · nokta · 25 boşluk; Motor'unki CENTER, LTSCALE 1'de sık); aks çizgileri BYLAYER. DXF yeniden üretildi (md5 822ab858…), Mac'e kopyalandı, AutoCAD'de açıldı (13:56).
+- Durum: yapıldı.
+
 ### A035 · — · Sıradaki: Soru 2b (zeminde kovaya giriş: önü açık mı, planda ön duvar çizili) → Soru 4 (Fransız pencere) → 5 (çıkma çatısı) → 6 → 7 → 8 (et) → 9 → İş Emri JSON → Motor (PR-1: bulgu 7–8)
 - Durum: bekliyor (Lokman).

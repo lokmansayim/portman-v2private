@@ -493,7 +493,7 @@ $SKPOLY
   9
 $TDCREATE
  40
-2461342.575474537
+2461342.579259259
   9
 $TDUCREATE
  40
@@ -501,7 +501,7 @@ $TDUCREATE
   9
 $TDUPDATE
  40
-2461342.575497685
+2461342.579282407
   9
 $TDUUPDATE
  40
@@ -553,7 +553,7 @@ $SPLINESEGS
   9
 $HANDSEED
   5
-29E9
+29EA
   9
 $SURFTAB1
  70
@@ -933,11 +933,11 @@ $PSTYLEMODE
   9
 $FINGERPRINTGUID
   2
-{2BE11004-A42C-4B45-8C08-891A1C28B703}
+{18EB58C2-3E1A-4E0A-AA41-1BA332CFFA01}
   9
 $VERSIONGUID
   2
-{9D354066-FCCA-4F76-8A0C-944958B21704}
+{FAFAEB55-ABCF-41BF-8239-1B41A18D32B9}
   9
 $EXTNAMES
 290
@@ -1327,9 +1327,9 @@ ISM
   0
 CLASS
   1
-ACDBPLACEHOLDER
+LAYOUT
   2
-AcDbPlaceHolder
+AcDbLayout
   3
 ObjectDBX Classes
  90
@@ -1343,9 +1343,9 @@ ObjectDBX Classes
   0
 CLASS
   1
-LAYOUT
+ACDBPLACEHOLDER
   2
-AcDbLayout
+AcDbPlaceHolder
   3
 ObjectDBX Classes
  90
@@ -1473,7 +1473,7 @@ LTYPE
 100
 AcDbSymbolTable
  70
-9
+10
   0
 LTYPE
   5
@@ -1679,6 +1679,36 @@ AcDbSymbolTableRecord
 100
 AcDbLinetypeTableRecord
   2
+ACAD_ISO07W100
+ 70
+0
+  3
+ISO dot . . . . . . . . . . . . . . . . . . . .
+ 72
+65
+ 73
+2
+ 40
+3.0
+ 49
+0.0
+ 74
+0
+ 49
+-3.0
+ 74
+0
+  0
+LTYPE
+  5
+291D
+330
+2
+100
+AcDbSymbolTableRecord
+100
+AcDbLinetypeTableRecord
+  2
 HIDDEN
  70
 0
@@ -1701,7 +1731,7 @@ Hidden __ __ __ __ __ __ __ __ __ __ __ __ __ _
   0
 LTYPE
   5
-291D
+29E5
 330
 2
 100
@@ -1709,23 +1739,31 @@ AcDbSymbolTableRecord
 100
 AcDbLinetypeTableRecord
   2
-ACAD_ISO07W100
+AKS_SEYREK
  70
 0
   3
-ISO dot . . . . . . . . . . . . . . . . . . . .
+Aks: ____ . ____ . (seyrek)
  72
 65
  73
-2
+4
  40
-3.0
+100.0
+ 49
+50.0
+ 74
+0
+ 49
+-25.0
+ 74
+0
  49
 0.0
  74
 0
  49
--3.0
+-25.0
  74
 0
   0
@@ -2139,15 +2177,13 @@ AcDbSymbolTableRecord
 100
 AcDbLayerTableRecord
   2
-NET_ALAN_GEOMETRISI
+OLCULER
  70
 0
  62
--6
+7
   6
 Continuous
-290
-0
 370
 -3
 390
@@ -2158,198 +2194,6 @@ Continuous
 LAYER
   5
 D07
-330
-1
-100
-AcDbSymbolTableRecord
-100
-AcDbLayerTableRecord
-  2
-PENCERE
- 70
-0
- 62
-10
-  6
-Continuous
-370
--3
-390
-13
-347
-21
-  0
-LAYER
-  5
-D08
-330
-1
-100
-AcDbSymbolTableRecord
-100
-AcDbLayerTableRecord
-  2
-AKS
- 70
-0
- 62
-4
-  6
-CENTER
-370
--3
-390
-13
-347
-21
-  0
-LAYER
-  5
-D09
-330
-1
-100
-AcDbSymbolTableRecord
-100
-AcDbLayerTableRecord
-  2
-IC_UCLU_H_100
- 70
-0
- 62
-3
-  6
-Continuous
-370
--3
-390
-13
-347
-21
-  0
-LAYER
-  5
-D0A
-330
-1
-100
-AcDbSymbolTableRecord
-100
-AcDbLayerTableRecord
-  2
-VERANDA_DIKME
- 70
-0
- 62
-1
-  6
-Continuous
-370
--3
-390
-13
-347
-21
-  0
-LAYER
-  5
-D0B
-330
-1
-100
-AcDbSymbolTableRecord
-100
-AcDbLayerTableRecord
-  2
-ACIK_SINIR
- 70
-0
- 62
-8
-  6
-DASHED
-370
--3
-390
-13
-347
-21
-  0
-LAYER
-  5
-D0C
-330
-1
-100
-AcDbSymbolTableRecord
-100
-AcDbLayerTableRecord
-  2
-ODA_ADLARI
- 70
-0
- 62
-7
-  6
-Continuous
-370
--3
-390
-13
-347
-21
-  0
-LAYER
-  5
-D0D
-330
-1
-100
-AcDbSymbolTableRecord
-100
-AcDbLayerTableRecord
-  2
-IC_KAPILAR
- 70
-0
- 62
-7
-  6
-Continuous
-370
--3
-390
-13
-347
-21
-  0
-LAYER
-  5
-D0E
-330
-1
-100
-AcDbSymbolTableRecord
-100
-AcDbLayerTableRecord
-  2
-VERANDA_PROFIL_100
- 70
-0
- 62
-1
-  6
-VERANDA_KESIK
-370
--3
-390
-13
-347
-21
-  0
-LAYER
-  5
-D0F
 330
 1
 100
@@ -2373,6 +2217,200 @@ Continuous
   0
 LAYER
   5
+D08
+330
+1
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
+  2
+VERANDA_PROFIL_100
+ 70
+0
+ 62
+1
+  6
+VERANDA_KESIK
+370
+-3
+390
+13
+347
+21
+  0
+LAYER
+  5
+D09
+330
+1
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
+  2
+AKS
+ 70
+0
+ 62
+8
+  6
+AKS_SEYREK
+370
+-3
+390
+13
+347
+21
+  0
+LAYER
+  5
+D0A
+330
+1
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
+  2
+ACIK_SINIR
+ 70
+0
+ 62
+8
+  6
+DASHED
+370
+-3
+390
+13
+347
+21
+  0
+LAYER
+  5
+D0B
+330
+1
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
+  2
+AKS_YAZI
+ 70
+0
+ 62
+8
+  6
+Continuous
+370
+-3
+390
+13
+347
+21
+  0
+LAYER
+  5
+D0C
+330
+1
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
+  2
+PENCERE
+ 70
+0
+ 62
+10
+  6
+Continuous
+370
+-3
+390
+13
+347
+21
+  0
+LAYER
+  5
+D0D
+330
+1
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
+  2
+NET_ALAN_GEOMETRISI
+ 70
+0
+ 62
+-6
+  6
+Continuous
+290
+0
+370
+-3
+390
+13
+347
+21
+  0
+LAYER
+  5
+D0E
+330
+1
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
+  2
+IC_KAPILAR
+ 70
+0
+ 62
+7
+  6
+Continuous
+370
+-3
+390
+13
+347
+21
+  0
+LAYER
+  5
+D0F
+330
+1
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
+  2
+IC_UCLU_H_100
+ 70
+0
+ 62
+3
+  6
+Continuous
+370
+-3
+390
+13
+347
+21
+  0
+LAYER
+  5
 D10
 330
 1
@@ -2381,7 +2419,7 @@ AcDbSymbolTableRecord
 100
 AcDbLayerTableRecord
   2
-OLCULER
+ODA_ADLARI
  70
 0
  62
@@ -2405,11 +2443,11 @@ AcDbSymbolTableRecord
 100
 AcDbLayerTableRecord
   2
-AKS_YAZI
+VERANDA_DIKME
  70
 0
  62
-4
+1
   6
 Continuous
 370
@@ -2453,32 +2491,6 @@ AcDbSymbolTableRecord
 100
 AcDbLayerTableRecord
   2
-KAPI-PLAN
- 70
-0
- 62
-7
-  6
-Continuous
-370
--3
-390
-F
-347
-EE
-348
-0
-  0
-LAYER
-  5
-1E2F
-330
-1
-100
-AcDbSymbolTableRecord
-100
-AcDbLayerTableRecord
-  2
 PANO
  70
 0
@@ -2497,7 +2509,7 @@ EE
   0
 LAYER
   5
-2912
+1E2F
 330
 1
 100
@@ -2505,13 +2517,13 @@ AcDbSymbolTableRecord
 100
 AcDbLayerTableRecord
   2
-0 max ref boşluk pano
+KAPI-PLAN
  70
 0
  62
-1
+7
   6
-ACAD_ISO07W100
+Continuous
 370
 -3
 390
@@ -2523,7 +2535,7 @@ EE
   0
 LAYER
   5
-2913
+2912
 330
 1
 100
@@ -2549,6 +2561,32 @@ EE
   0
 LAYER
   5
+2913
+330
+1
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
+  2
+VİTRİFİYE
+ 70
+0
+ 62
+3
+  6
+Continuous
+370
+9
+390
+F
+347
+EE
+348
+0
+  0
+LAYER
+  5
 2914
 330
 1
@@ -2557,15 +2595,15 @@ AcDbSymbolTableRecord
 100
 AcDbLayerTableRecord
   2
-FDŞEBEKEPANO
+www.proje-yardim.com
  70
 0
  62
-3
+7
   6
 Continuous
 370
-30
+-3
 390
 F
 347
@@ -2583,15 +2621,15 @@ AcDbSymbolTableRecord
 100
 AcDbLayerTableRecord
   2
-DOĞRAMA
+2
  70
 0
  62
-2
+1
   6
 Continuous
 370
-20
+-3
 390
 F
 347
@@ -2609,15 +2647,15 @@ AcDbSymbolTableRecord
 100
 AcDbLayerTableRecord
   2
-KAPI-PEN
+DOĞRAMA
  70
 0
  62
-3
+2
   6
 Continuous
 370
-9
+20
 390
 F
 347
@@ -2661,15 +2699,15 @@ AcDbSymbolTableRecord
 100
 AcDbLayerTableRecord
   2
-VİTRİFİYE
+1
  70
 0
  62
-3
+1
   6
 Continuous
 370
-9
+-3
 390
 F
 347
@@ -2687,13 +2725,13 @@ AcDbSymbolTableRecord
 100
 AcDbLayerTableRecord
   2
-www.proje-yardim.com
+0 max ref boşluk pano
  70
 0
  62
-7
+1
   6
-Continuous
+ACAD_ISO07W100
 370
 -3
 390
@@ -2713,15 +2751,15 @@ AcDbSymbolTableRecord
 100
 AcDbLayerTableRecord
   2
-1
+KAPI-PEN
  70
 0
  62
-1
+3
   6
 Continuous
 370
--3
+9
 390
 F
 347
@@ -2739,15 +2777,15 @@ AcDbSymbolTableRecord
 100
 AcDbLayerTableRecord
   2
-2
+FDŞEBEKEPANO
  70
 0
  62
-1
+3
   6
 Continuous
 370
--3
+30
 390
 F
 347
@@ -3555,7 +3593,7 @@ Comic Sans MS.ttf
   0
 STYLE
   5
-29E5
+29E6
 330
 5
 100
@@ -3639,7 +3677,7 @@ ACAD
   0
 APPID
   5
-29E6
+29E7
 330
 3
 100
@@ -3653,7 +3691,7 @@ HATCHBACKGROUNDCOLOR
   0
 APPID
   5
-29E7
+29E8
 330
 3
 100
@@ -3813,7 +3851,7 @@ Standard
 290
 0
 340
-29E5
+29E6
 371
 -2
 372
@@ -3951,7 +3989,7 @@ EZDXF
 290
 0
 340
-29E5
+29E6
 342
 47
 371
@@ -4091,7 +4129,7 @@ EZ_M_100_H25_CM
 290
 0
 340
-29E5
+29E6
 371
 -2
 372
@@ -4229,7 +4267,7 @@ EZ_M_50_H25_CM
 290
 0
 340
-29E5
+29E6
 371
 -2
 372
@@ -4367,7 +4405,7 @@ EZ_M_25_H25_CM
 290
 0
 340
-29E5
+29E6
 371
 -2
 372
@@ -4505,7 +4543,7 @@ EZ_M_20_H25_CM
 290
 0
 340
-29E5
+29E6
 371
 -2
 372
@@ -4643,7 +4681,7 @@ EZ_M_10_H25_CM
 290
 0
 340
-29E5
+29E6
 371
 -2
 372
@@ -4781,7 +4819,7 @@ EZ_M_5_H25_CM
 290
 0
 340
-29E5
+29E6
 371
 -2
 372
@@ -4919,7 +4957,7 @@ EZ_M_1_H25_CM
 290
 0
 340
-29E5
+29E6
 371
 -2
 372
@@ -5057,7 +5095,7 @@ EZ_RADIUS
 290
 0
 340
-29E5
+29E6
 342
 52
 371
@@ -5197,7 +5235,7 @@ EZ_RADIUS_INSIDE
 290
 0
 340
-29E5
+29E6
 342
 52
 371
@@ -5339,7 +5377,7 @@ EZ_CURVED
 290
 0
 340
-29E5
+29E6
 371
 -2
 372
@@ -5477,7 +5515,7 @@ PORTMAN
 290
 0
 340
-29E5
+29E6
 342
 47
 371
@@ -223207,7 +223245,7 @@ CREATED_BY_EZDXF
   3
 WRITTEN_BY_EZDXF
 350
-29E8
+29E9
   0
 DICTIONARYVAR
   5
@@ -223219,11 +223257,11 @@ DictionaryVariables
 280
 0
   1
-1.4.4 @ 2026-10-28T10:48:41.682494+00:00
+1.4.4 @ 2026-10-28T10:54:08.465482+00:00
   0
 DICTIONARYVAR
   5
-29E8
+29E9
 330
 2D
 100
@@ -223231,7 +223269,7 @@ DictionaryVariables
 280
 0
   1
-1.4.4 @ 2026-10-28T10:48:43.206626+00:00
+1.4.4 @ 2026-10-28T10:54:10.003286+00:00
   0
 ENDSEC
   0

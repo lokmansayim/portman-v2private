@@ -491,6 +491,16 @@ if KUTUPHANE.exists():
         boy = f" [{bb.size.x:.1f} x {bb.size.y:.1f}]" if bb.has_data else ""
         H.add_text(n + boy, height=4.5, dxfattribs={"layer": "SABLON_KARTI"}).set_placement((x, yy-14))
 
+# Akslar silik ve seyrek tireli (Lokman 13:53 "aksları daha belirsiz, tireleri daha aralıklı çiz"): Motor AKS katmanı cyan + CENTER
+# (LTSCALE 1'de sık). Burada katman koyu gri (ACI 8), çizgi tipi AKS_SEYREK: 50 çizgi – 25 boşluk – nokta – 25 boşluk; aks yazıları da gri.
+if "AKS_SEYREK" not in hedef.linetypes:
+    hedef.linetypes.add("AKS_SEYREK", pattern=[100.0, 50.0, -25.0, 0.0, -25.0], description="Aks: ____ . ____ . (seyrek)")
+for ad_, lt_ in (("AKS", "AKS_SEYREK"), ("AKS_YAZI", "Continuous")):
+    if ad_ in hedef.layers:
+        L_ = hedef.layers.get(ad_); L_.color = 8; L_.dxf.linetype = lt_
+for e in H.query('LINE[layer=="AKS"]'):
+    e.dxf.linetype = "BYLAYER"; e.dxf.color = 256; e.dxf.ltscale = 1.0
+
 # Türkçe harfler: AutoCAD'in txt.shx'i İ/Ş/—'yi "?" basar → bütün yazılar Arial (TrueType) stiline
 if "ARIAL_TR" not in hedef.styles:
     hedef.styles.new("ARIAL_TR", dxfattribs={"font": "arial.ttf"})
