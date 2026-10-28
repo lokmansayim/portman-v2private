@@ -116,6 +116,22 @@ def test_tk01_bk14_yoksa_cizilmez():
     assert GO.denetle(yalniz, bk14=False)["cizilemez"] == [d["cizilemez"][1]]
 
 
+def test_tk01_bugunku_motorda_cizilir(tmp_path):
+    """BK-14 (PR #50) `main`'de: TK-01'in okuması kendiliğinden açılır (`bk14_var`), İş Emri gerçek Pano Motor'unda çizilir ve doğrulamadan
+    geçer; tek uyarı dört kollu birleşimin profili (kural kitabında yok, BK-14)."""
+    from motor import dxf_out
+    assert GO.bk14_var() is True
+    d = GO.denetle(TK01)
+    assert d["sorular"] == [] and d["cizilemez"] == [] and geometri(d["cevrim"]["is_emri"]) == geometri(TK01_BEKLENEN)
+    ie = json.loads(json.dumps(d["cevrim"]["is_emri"]))
+    ie.update(is_emri_no="PM-TEST-TK01", revizyon=1, talep={"bayi_kodu": "TST", "kaynak": GO.KAYNAK})
+    sonuc = dxf_out.uret(ie, tmp_path / "plan")
+    v = json.loads((tmp_path / "plan" / "validation.json").read_text(encoding="utf-8"))
+    assert v["passed"] is True, v.get("errors")
+    assert [w for w in v["warnings"] if "dört kollu birleşim" not in w] == [], v["warnings"]
+    assert (tmp_path / "plan" / sonuc["pdf"]).stat().st_size > 10_000
+
+
 def test_tk01_teyit_metni():
     d = GO.denetle(TK01, bk14=True)
     m, ek = GO.teyit_metni(TK01, d)
@@ -375,6 +391,31 @@ def test_pano_izgarasinin_kisa_ucu_sorulur():
     assert GO.denetle(iki_oda(898, 763, 386.5))["cevrim"] is not None
     d = GO.denetle(iki_oda(898, 770, 386.5))
     assert any("yan cephesi 7,70 m" in s for s in d["sorular"]), d["sorular"]
+
+
+def test_makas_y_ise_kisa_kenar_y_izgara_aynasi_motor_cizer(tmp_path):
+    """İE-17 köşe kuralı: makas y'yi geçiyorsa `yapi.kisa_kenar: y`, ızgara x ↔ y aynası (x aksları dış duvarın ekseninden, y iç
+    yüzden); Motor kısa kenar uyarısı vermeden çizer. Mahya görünmüyorsa makas kısa yönü geçer, ızgara o yönün köşesiyle denetlenir."""
+    from motor import dxf_out
+    x = GO.denetle(iki_oda(898, 763, 386.5))["cevrim"]["is_emri"]
+    o = iki_oda(763, 898, 381.5); o["cati"]["mahya"] = "girise_paralel"
+    d = GO.denetle(o)
+    assert d["sorular"] == [] and d["cizilemez"] == [], (d["sorular"], d["cizilemez"])
+    y = d["cevrim"]["is_emri"]
+    assert (x["yapi"]["kisa_kenar"], x["cati"]["makas_ekseni"]) == ("x", "x")
+    assert (y["yapi"]["kisa_kenar"], y["cati"]["makas_ekseni"]) == ("y", "y")
+    assert y["yapi"]["grid"] == {"x_pano": x["yapi"]["grid"]["y_pano"], "y_pano": x["yapi"]["grid"]["x_pano"]}
+    assert [m["konum_cm"] for m in x["mahaller"]] == [[[10, 5, 386.5, 758]], [[386.5, 5, 888, 758]]]
+    assert [m["konum_cm"] for m in y["mahaller"]] == [[[5, 10, 381.5, 888]], [[381.5, 10, 758, 888]]]
+    ie = json.loads(json.dumps(y))
+    ie.update(is_emri_no="PM-TEST-CIZIM", revizyon=1, talep={"bayi_kodu": "TST", "kaynak": GO.KAYNAK})
+    dxf_out.uret(ie, tmp_path / "plan")
+    v = json.loads((tmp_path / "plan" / "validation.json").read_text(encoding="utf-8"))
+    assert v["passed"] is True, v.get("errors")
+    assert not any("kisa_kenar" in w for w in v.get("warnings", [])), v["warnings"]
+    o = iki_oda(898, 763, 386.5); o["cati"]["mahya"] = None            # geniş gövde: makas y, x ızgarası 5 cm'den → 8,98 m oturmaz
+    d = GO.denetle(o)
+    assert d["cevrim"] is None and any("ön cephesi 8,98 m" in s and "8,88 m ve 9,51 m" in s for s in d["sorular"]), d["sorular"]
 
 
 def test_dis_duvara_cok_yakin_sinir_sorulur():
