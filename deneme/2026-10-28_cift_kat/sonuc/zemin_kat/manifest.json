@@ -1,0 +1,39 @@
+{
+  "is_emri_no": "IE22-CK01-ZEMIN",
+  "revizyon": 1,
+  "generated_at": 1793171581,
+  "duration_s": 28.8,
+  "dxf": "Portman_IE22-CK01-ZEMIN_r01.dxf",
+  "pdf": "Portman_IE22-CK01-ZEMIN_r01.pdf",
+  "dxf_sha256": "cdacc3be155f64ddf267b1fd34e59ca6750916b11999df5a8be0d8400decdd2e",
+  "pdf_sha256": "4fd646d5da9a97895ce2622ce31df5fa0e759af827b4cd47dbeb1f0be80fbdc2",
+  "tani_pdf": null,
+  "pdf_skipped_reason": null,
+  "validation_passed": true,
+  "warnings": [],
+  "generator": "portman-motor-v1.1",
+  "generator_sha256": {
+    "geometry.py": "0298296213ecf47f650d27adde88268b477ef8ad75be2dc4193ca08d25c823a2",
+    "dxf_out.py": "5b74664407db39e60bb4a4caddbd106ff95fbb04a18ce12f00aa9459f506e843",
+    "validate.py": "d5e535f7c5cf2ed6224a3585666b6f6630e63165556a14a57700732c6636f7c3",
+    "katalog.py": "8525853517e4d11f6b82718f8b02a13c3d9817ee8c85c47dd941e61b7ba7b18a"
+  },
+  "reference_dxf_sha256": "22cc9304106725f555afc59223433b8383fbe3a19ba8ff4a3b40eb23b61fab66",
+  "pdf_generated_from_reopened_dxf": true,
+  "yeni_kodlar": [
+    "D09",
+    "D10",
+    "I12",
+    "D11",
+    "P04",
+    "D12",
+    "D13",
+    "P05",
+    "D14",
+    "D15",
+    "D16",
+    "D17",
+    "V05",
+    "V06"
+  ]
+}

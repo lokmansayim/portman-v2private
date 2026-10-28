@@ -1,0 +1,30 @@
+﻿Kod;Grup;Malzeme;Ölçü (mm);Adet;Birim;Not
+B01;Bağlantı ve veranda;İç köşe bağlantısı;30×60;2;adet;Plandaki kesit. Profil türü ve kesim boyu tanımlı değil.
+B02;Bağlantı ve veranda;100×50 köşe bağlantısı;50×100;6;adet;5 dış köşe + 1 veranda iç köşesi. Profil kesim boyu tanımlı değil.
+B03;Bağlantı ve veranda;Üçlü H bağlantı;60;3;adet;"60 mm iç duvar bağlantısı; kesim boyu tanımlı değil."
+B04;Bağlantı ve veranda;Veranda dikmesi;100×100;1;adet;"Şematik plan izi 100×100 mm; profil ürünü ve boyu teyit edilmeli."
+D01;Dış duvar panoları;Dolu pano;1255×100×2500;11;adet;
+D03;Dış duvar panoları;120×180 pencereli pano;1255×100×2500;2;adet;"Pencere ayrı kalem; pano tek parça sayıldı."
+D04;Dış duvar panoları;60×40 vasistaslı pano;1255×100×2500;1;adet;"Pencere ayrı kalem; pano tek parça sayıldı."
+D06;Dış duvar panoları;Özel dolu pano;627.5×100×2500;3;adet;
+D09;Dış duvar panoları;120×125 pencereli pano;1255.0×100×2500;3;adet;"Pencere ayrı kalem; pano tek parça sayıldı. Portman motor tarafından otomatik tahsis edildi; teyit edilmeli."
+D10;Dış duvar panoları;Özel dolu pano;931.2×100×2500;1;adet;"Portman motor tarafından otomatik tahsis edildi; teyit edilmeli."
+D11;Dış duvar panoları;Özel dolu pano;323.8×100×2500;1;adet;"Portman motor tarafından otomatik tahsis edildi; teyit edilmeli."
+D12;Dış duvar panoları;Özel dolu pano;1212.5×100×2500;1;adet;"Portman motor tarafından otomatik tahsis edildi; teyit edilmeli."
+D13;Dış duvar panoları;Özel dolu pano;642.5×100×2500;1;adet;"Portman motor tarafından otomatik tahsis edildi; teyit edilmeli."
+D14;Dış duvar panoları;Özel dolu pano;612.5×100×2500;1;adet;"Portman motor tarafından otomatik tahsis edildi; teyit edilmeli."
+D15;Dış duvar panoları;Dış kapılı özel pano;1162.5×100×2500;1;adet;"Portman motor tarafından otomatik tahsis edildi; teyit edilmeli."
+D16;Dış duvar panoları;Özel dolu pano;577.5×100×2500;1;adet;"Portman motor tarafından otomatik tahsis edildi; teyit edilmeli."
+I01;İç duvar panoları;Dolu pano;1255×60×2500;5;adet;
+I02;İç duvar panoları;Özel dolu pano;1205×60×2500;2;adet;
+I03;İç duvar panoları;Kademe dolu panosu;597.5×60×2500;5;adet;
+I06;İç duvar panoları;Özel dolu pano;627.5×60×2500;1;adet;
+I09;İç duvar panoları;Özel dolu pano;577.5×60×2500;1;adet;
+I11;İç duvar panoları;İç kapılı pano;1255.0×60×2500;4;adet;"Doğrama ayrıca sayılır; pano tek adet."
+K01;Kapı ve pencereler;İç kapı;820;4;adet;"820 mm plandaki açıklıktır; ürün eni/boyu ve açılış yönü siparişte teyit edilmeli."
+K03;Kapı ve pencereler;Dış kapı 90;900.0;1;adet;"900 mm plandaki açıklıktır; ürün ölçüsü siparişte teyit edilmeli."
+P02;Kapı ve pencereler;Pencere 120×180;1200×1800;2;adet;"Ölçü en × yükseklik; eşik 200 mm."
+P03;Kapı ve pencereler;Vasistas 60×40;600×400;1;adet;"Ölçü en × yükseklik; eşik 1600 mm."
+P04;Kapı ve pencereler;Pencere 120×125;1200×1250;3;adet;"Ölçü en × yükseklik; eşik 750 mm. Portman motor tarafından otomatik tahsis edildi; teyit edilmeli."
+V05;Bağlantı ve veranda;Veranda ön profil gösterimi;3137.5×100;1;adet;"Dış sınır boyu; gerçek profil kesiti/kesim boyu teyit edilmeli."
+V06;Bağlantı ve veranda;Veranda yan profil gösterimi;1262.5×100;1;adet;"Dış sınır boyu; gerçek profil kesiti/kesim boyu teyit edilmeli."

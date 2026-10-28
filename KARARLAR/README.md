@@ -111,7 +111,9 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | İE | İE-18 | montaj rehberleri (CIO, 27.10; 28 ev çizimine bağlı) | alındı (CIO) |
 | İE | İE-19 | altın set 100: bayi cümleleri, beklenen okuma ve karar, kör dilim (pano 51; bağlı 22 ve 92) | alındı (27.10; `claude/project-thread-ssawjb`) |
 | İE | İE-20 | görsel ve PDF ile talep, talep ve revizyon formu (WhatsApp Flow); pano satır 83, 110, 61 | alındı (27.10; `claude/project-thread-l5mh7r`) |
-| İE | **İE-21** | — | **sıradaki boş** |
+| İE | İE-21 | bayiye 3D sayfası ("3D'yi aç" düğmesi; PR #61, `claude/project-thread-i09lws`) | alındı (27.10; CIO); belge `docs/is_emirleri/IE-21.md` |
+| İE | İE-22 | çift kat prefabrik: iki kat planı, merdiven, çıkma ve balkon; Lokman'ın 28.10 kuralı (fark yalnız merdiven, döşeme ve çatı aynı); `claude/loving-ptolemy-s3j4oc` | alındı (28.10; plan, onay bekliyor) |
+| İE | **İE-23** | — | **sıradaki boş** |
 | BK | BK-01–BK-08 | bu depo; BK-08 8a sonrası temizlik (`bk-08-8a-temizlik`) | yazıldı |
 | BK | BK-09 | metin ve çizim düzeltmeleri, G1 (`bk-09-metin-cizim`, `bk-09-cizim-g1`) | alındı (14.10) |
 | BK | BK-10 | 8b sonrası düzeltmeler (DXF `.txt` notu, geç gelen Excel, Patron'a Excel bağlantısı, çelikte kapı değişikliği; `docs/devir/2026-10-14_IE-08_8b_Devri.md` › Sıradaki; CIO'nun Notion defterinde D-19 ile: 24 saat kapanış kuralı) | ayrıldı |

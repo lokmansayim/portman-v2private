@@ -1,0 +1,288 @@
+{
+  "is_emri_no": "IE22-CK01-ZEMIN",
+  "revizyon": 1,
+  "talep": {
+    "bayi": {
+      "kod": "CK01",
+      "ad": "Bayi CK-01"
+    },
+    "musteri_adi": "CK-01 zemin kat",
+    "metin": "İE-22 çift kat prefabrik, ZEMİN KAT taslağı (28 Ekim 2026). Lokman'ın iki kat planından (gövde 763 × 706, merdiven çıkması arkada 220 × 125, balkon önde sağda 337 × 165) pano ızgarasına uyarlandı. Konumlar cm, aks; x sol dış yüzden; dizilim arka-sol olduğundan mahallerin y'si arka dış yüzden. Bu taslak yalnız GÖVDEYİ çizer: merdiven çıkması (arkaya 125,5) ve balkonun gövdeden taşan 30 cm'i Motor'da henüz yok (İE-22 PR-1)."
+  },
+  "yapi": {
+    "sistem": "prefabrik",
+    "kat_sayisi": 1,
+    "duvar_yuksekligi_cm": 250,
+    "duvar_kalinligi_cm": {
+      "dis": 10,
+      "ic": 6
+    },
+    "olcu_kaynagi": "dis_olcu",
+    "dis_olcu_cm": {
+      "x": 763,
+      "y": 706
+    },
+    "referans_model": "CK-01",
+    "grid": {
+      "x_pano": 6,
+      "y_pano": 5.5
+    },
+    "kisa_kenar": "y",
+    "giris_cephesi": "on",
+    "dis_dusey_duvar": "cevre_aks_disinda",
+    "dizilim": {
+      "baslangic": "arka-sol",
+      "hiza": "tam_izgara",
+      "dis_duvar_t_bolme": false,
+      "pencere": "oda_ortasi",
+      "kapi": "mantik",
+      "kose": "oda",
+      "son_pano": "son_aks",
+      "kapi_yeri": "ortada"
+    },
+    "ek_akslar_cm": {
+      "x": [],
+      "y": []
+    }
+  },
+  "mahaller": [
+    {
+      "ad": "ODA",
+      "tur": "yatak_odasi",
+      "konum_cm": [
+        [
+          5,
+          10,
+          318.75,
+          323.75
+        ]
+      ]
+    },
+    {
+      "ad": "SALON",
+      "tur": "salon",
+      "konum_cm": [
+        [
+          5,
+          323.75,
+          444.25,
+          696
+        ],
+        [
+          444.25,
+          323.75,
+          507,
+          574.75
+        ]
+      ]
+    },
+    {
+      "ad": "MERDİVEN",
+      "tur": "hol",
+      "konum_cm": [
+        [
+          318.75,
+          10,
+          569.75,
+          135.5
+        ]
+      ]
+    },
+    {
+      "ad": "HOL",
+      "tur": "hol",
+      "konum_cm": [
+        [
+          318.75,
+          135.5,
+          569.75,
+          323.75
+        ]
+      ]
+    },
+    {
+      "ad": "WC",
+      "tur": "wc",
+      "konum_cm": [
+        [
+          569.75,
+          10,
+          758,
+          135.5
+        ]
+      ]
+    },
+    {
+      "ad": "WC HOLÜ",
+      "tur": "hol",
+      "konum_cm": [
+        [
+          569.75,
+          135.5,
+          758,
+          323.75
+        ]
+      ]
+    },
+    {
+      "ad": "MUTFAK",
+      "tur": "mutfak",
+      "konum_cm": [
+        [
+          507,
+          323.75,
+          758,
+          574.75
+        ]
+      ]
+    },
+    {
+      "ad": "BALKON",
+      "tur": "balkon",
+      "konum_cm": [
+        [
+          444.25,
+          574.75,
+          758,
+          696
+        ]
+      ]
+    }
+  ],
+  "acik_sinirlar": [
+    [
+      "MERDİVEN",
+      "HOL"
+    ]
+  ],
+  "acikliklar": [
+    {
+      "tur": "pencere",
+      "olcu": "120x125",
+      "mahal": "ODA",
+      "duvar": "sol"
+    },
+    {
+      "tur": "pencere",
+      "olcu": "120x125",
+      "mahal": "SALON",
+      "duvar": "sol",
+      "pano": 0
+    },
+    {
+      "tur": "pencere",
+      "olcu": "120x180",
+      "mahal": "SALON",
+      "duvar": "on"
+    },
+    {
+      "tur": "pencere",
+      "olcu": "60x125",
+      "mahal": "MUTFAK",
+      "duvar": "on",
+      "pano": 1
+    },
+    {
+      "tur": "pencere",
+      "olcu": "60x40",
+      "mahal": "WC",
+      "duvar": "arka"
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "HOL",
+        "ODA"
+      ],
+      "pano": 0
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "HOL",
+        "SALON"
+      ],
+      "pano": 0
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "HOL",
+        "WC HOLÜ"
+      ],
+      "pano": 0
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "WC HOLÜ",
+        "WC"
+      ],
+      "pano": 0
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "WC HOLÜ",
+        "MUTFAK"
+      ],
+      "pano": 0
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "SALON",
+        "MUTFAK"
+      ],
+      "pano": 0
+    }
+  ],
+  "dikmeler": [
+    [
+      753,
+      0
+    ]
+  ],
+  "cati": {
+    "tip": "besik",
+    "egim_yuzde": 33,
+    "sacak_cm": 30,
+    "topuk_cm": 10,
+    "makas_yonu": "kisa_kenar",
+    "makas_ekseni": "y"
+  },
+  "cikti": {
+    "pdf": true,
+    "dxf": true,
+    "pafta": "A2",
+    "icerik": [
+      "aksli_plan",
+      "alanli_kopya",
+      "montaj_kopyasi",
+      "on_gorunus",
+      "cati_profili",
+      "ozellik_tablosu"
+    ]
+  },
+  "varsayimlar": [
+    "Izgara: x 6 tam pano (763 = 6 × 125,5 + 10; makas y'yi geçtiğinden ön ve arka duvar köşeden, x aksları 5 + 125,5k), y 5,5 pano ölçüye kesim (706: y aksları iç yüzden 10 + 125,5k, kesilmiş son pano önde 574,75–696 = 121,25).",
+    "Plandaki duvarlar en yakın yarım pano aksına taşındı: ODA/merdiven duvarı 342 → 318,75; merdiven/WC duvarı 552 → 569,75 (merdiven kutusu 2 pano = 245 iç; 1,5 pano = 182 seçilirse salon–mutfak ve hol–WC holü duvarları 507'de çakışıp dört kollu birleşim doğuruyor); ODA/SALON ve hol/salon duvarı 302 → 323,75; merdiven altı duvarı 150 → 135,5; SALON/MUTFAK duvarı 472 → 507 ve balkonun sol duvarı 421 → 444,25 (plandaki 51 cm kademe 62,75 oldu; holden salona kapı tam aks panosuna ancak böyle sığıyor); MUTFAK ön duvarı 566 → 574,75. Sapmalar İE-22 belgesinde tabloyla.",
+    "Merdiven çıkması (arkaya 125,5, 318,75–507 arası) bu taslakta YOK: Motor çıkma çizmiyor. MERDİVEN mahali yalnız gövdedeki 125,5'lik parçayı gösterir; merdivenin kendisi çizilmez (İE-22 PR-1).",
+    "Balkon gövdenin içinde açık mahal (444,25–758 × 574,75–696); plandaki 30 cm'lik taşma (706 → 736) bu taslakta yok. Ön-sağ köşede 10 × 10 dikme.",
+    "Pencereler D-15 ile odaya ortalı (dizilim.pencere: oda_ortasi); mutfak ön penceresi plandaki yere göre sağdaki panoda (pano 1). Fransız pencere 120/200 Motor'un sınırında (boy ≤ 180) olmadığından 120x180 alındı; 120/125 standart pencere 120x125 (eşik 75).",
+    "Giriş kapısı planda çizili değil; eklenmedi (eksikler). Kapılar iç 82 (K04), panoda ortada, kapı mantığıyla (D-15).",
+    "Çatı tek kat gibi beşik, %33, saçak 30, topuk 10; makas kısa kenarı (y, 706) geçer. Merdiven çıkmasının çatısı sorulacak.",
+    "Salonun sol penceresi odaya ortalanınca (oda_ortasi) pencereli pano kesilmiş son panonun derzine 0,625 cm kala bitiyor ve Motor 0,6 cm'lik kıymık pano üretip doğrulamada düşüyordu; bu taslakta pencere ızgara panosunda (pano 0, 386,5–512; plandaki yerinden 51 cm arkada). Motor'un bu kenar durumu İE-22'de bulgu olarak yazıldı."
+  ],
+  "eksikler": [
+    "Giriş kapısının yeri (planda yok).",
+    "Merdiven çıkması ve merdiven (kol eni, rıht, sahanlık).",
+    "Balkonun 30 cm'lik taşması ve balkon döşemesi/korkuluğu."
+  ]
+}

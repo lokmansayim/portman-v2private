@@ -1,0 +1,37 @@
+{
+  "is_emri_no": "IE22-CK01-KAT1",
+  "revizyon": 1,
+  "generated_at": 1793171464,
+  "duration_s": 18.78,
+  "dxf": "Portman_IE22-CK01-KAT1_r01.dxf",
+  "pdf": "Portman_IE22-CK01-KAT1_r01.pdf",
+  "dxf_sha256": "59188f9f52012d8f536d3b52de0551d1565e23de02c4d237ccab72a206a8a81a",
+  "pdf_sha256": "728038485ceb60f44c427e9639a768ad23bce99fe63d39da6360321928bd0bca",
+  "tani_pdf": null,
+  "pdf_skipped_reason": null,
+  "validation_passed": true,
+  "warnings": [],
+  "generator": "portman-motor-v1.1",
+  "generator_sha256": {
+    "geometry.py": "0298296213ecf47f650d27adde88268b477ef8ad75be2dc4193ca08d25c823a2",
+    "dxf_out.py": "5b74664407db39e60bb4a4caddbd106ff95fbb04a18ce12f00aa9459f506e843",
+    "validate.py": "d5e535f7c5cf2ed6224a3585666b6f6630e63165556a14a57700732c6636f7c3",
+    "katalog.py": "8525853517e4d11f6b82718f8b02a13c3d9817ee8c85c47dd941e61b7ba7b18a"
+  },
+  "reference_dxf_sha256": "22cc9304106725f555afc59223433b8383fbe3a19ba8ff4a3b40eb23b61fab66",
+  "pdf_generated_from_reopened_dxf": true,
+  "yeni_kodlar": [
+    "D09",
+    "P04",
+    "D10",
+    "D11",
+    "D12",
+    "D13",
+    "D14",
+    "D15",
+    "K03",
+    "D16",
+    "V05",
+    "V06"
+  ]
+}

@@ -1,0 +1,91 @@
+{
+ "kod": "CK-01",
+ "is_emri_no": "IE22-CK01-ZEMIN",
+ "revizyon": 1,
+ "dogrulama": {
+  "passed": true,
+  "errors": []
+ },
+ "teslim": true,
+ "sayfa_pt": [
+  842.0,
+  595.0
+ ],
+ "sayimlar": {
+  "pano_dis": 27,
+  "pano_ic": 17,
+  "h_pano_eki": 31,
+  "h_uclu": 2,
+  "kose": 6,
+  "dikme": 1,
+  "pencere": [
+   "60/125",
+   "120/180",
+   "120/125",
+   "120/125"
+  ],
+  "vasistas": [
+   "60/40"
+  ],
+  "ic_kapi": 6,
+  "dis_kapi": [],
+  "oda_programi": "1+1",
+  "oturum_m2": 53.87
+ },
+ "ozellikler": {
+  "Bina Yüksekliği": "2500 mm",
+  "Dış Duvarlar": "100 mm",
+  "İç Duvarlar": "60 mm",
+  "Panel Türü": "...",
+  "Çatı Şekli": "Beşik",
+  "Çatı Eğimi": "%33",
+  "Çatı Kaplaması": "...",
+  "Çatı Kaplama Rengi": "...",
+  "Dış Kapı": "...",
+  "İç Kapılar": "6 adet",
+  "Pencereler": "4 adet (2 × 120/125, 1 × 120/180, 1 × 60/125)",
+  "Vasistaslar": "1 adet (1 × 60/40)",
+  "Dış Boya Rengi": "...",
+  "İç Boya Rengi": "...",
+  "Köşe ve Söveler": "..."
+ },
+ "ozel_istekler": [],
+ "zincirler_cm": {
+  "alt": [
+   0.0,
+   449.25,
+   507.0,
+   763.0
+  ],
+  "ust": [
+   0.0,
+   318.75,
+   569.75,
+   763.0
+  ],
+  "sol": [
+   0.0,
+   382.25,
+   706.0
+  ],
+  "sag": [
+   0.0,
+   126.25,
+   382.25,
+   570.5,
+   706.0
+  ]
+ },
+ "dis_olcu_cm": [
+  763.0,
+  706.0
+ ],
+ "perspektif": {
+  "durum": "ÇİZİLMEDİ",
+  "neden": "perspektifsiz istendi"
+ },
+ "dosyalar": [
+  "CK01_bayi.pdf",
+  "CK01_plan_bayi.png"
+ ]
+}
