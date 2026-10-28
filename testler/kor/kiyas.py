@@ -12,7 +12,8 @@ Sıra her koşuda aynı; bir adım tutmazsa araç `Durdu` ile durur ve sonrakine
 4. **Okuma** (`oku.py`): başlık bloğu, telefon, personel ve imza satırları okunmaz.
 5. **Eşleme ve otomatik sonuç** (`esle.py`, `sozluk.json`).
 6. **İnsan sınıfı** (`--siniflar`): farkın nedeni araçtan çıkmaz; sınıfı yazılmamış fark "sınıflanmadı" sayılır.
-7. **Rapor** (md, xlsx): kod, m² ve satırlar. Ad, bayi adı ve dosya adı yazılmaz; telefona benzeyen her şey maskelenir.
+7. **Rapor** (md, xlsx): kod, m² ve satırlar. Ad, bayi adı ve dosya adı yazılmaz; telefona benzeyen her şey maskelenir. Mühür kaydının
+   notu (ör. AP-13 ve AP-16'da "çizim için pafta görüldü", İE-17) sonuçta ve raporun mühür satırında yazar.
 
 Kaynak dosya depo dışında durur. Depoya yalnız tutan satırlar girer (`sonuc.json`: anahtar, adet, sonuç; Lokman, 23 Ekim 2026,
 kart "Yalnız tutanlar"): tutan satırın adedi zaten bizim adedimizdir, tutmayan satırların gerçek değeri raporda, proje klasöründe kalır.
@@ -275,7 +276,7 @@ def sonuc_kaydi(k: dict) -> dict:
         "kiyas_commit": k["kiyas_commit"],
         "bizim_liste": {"yol": k["liste"]["yol"], "commit": k["liste"]["commit"], "uretici_surum": k["bizim"].get("uretici_surum")},
         "muhur": {"sha256": k["kayit"]["sha256"], "bayt": k["kayit"]["bayt"], "durum": k["kayit"]["durum"],
-                  "muhur_commit": k["muhur"]["commit"]},
+                  "muhur_commit": k["muhur"]["commit"], **({"not": k["kayit"]["not"]} if k["kayit"].get("not") else {})},
         "sozluk": {"surum": k["sozluk"]["surum"], "commit": k["sozluk"]["commit"],
                    "acilistan_sonra_degisti": k["acilis"]["sozluk_degisti"]},
         "sayilar": k["esle"]["sayilar"],
@@ -347,7 +348,8 @@ def _ozet_satirlari(k: dict) -> list[tuple[str, str]]:
            ("Brüt alan", f"{_sayi(round(m2, 2))} m²" if m2 else "—"),
            ("Kendi listemiz", f"{k['liste']['yol']} · commit {k['liste']['commit'][:7]} ({k['liste']['tarih']})"),
            ("Üreteç", _surum(b.get("uretici_surum"))),
-           ("Mühür", f"SHA-256 {k['kayit']['sha256'][:12]}… · {k['kayit']['bayt']} bayt · durum {k['kayit']['durum']}"),
+           ("Mühür", f"SHA-256 {k['kayit']['sha256'][:12]}… · {k['kayit']['bayt']} bayt · durum {k['kayit']['durum']}"
+                     + (f" · {maske(k['kayit']['not'])}" if k["kayit"].get("not") else "")),
            ("Sözlük", f"{_surum(k['sozluk']['surum'])} · commit {k['sozluk']['commit'][:7]}"
                       + (" · AÇILIŞTAN SONRA DEĞİŞTİ (açılışta " + str(k["acilis"].get("sozluk_commit"))[:7] + ")"
                          if k["acilis"].get("sozluk_degisti") else "")),
