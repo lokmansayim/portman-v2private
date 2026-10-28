@@ -491,8 +491,8 @@ def test_adsiz_toplam_satiri_grubun_sonundaysa_toplamdir(tmp_path):
     ([*CELIK, (None, "80X45", 21, 874)], "TOPLAM satırı okunamadı"),
 ])
 def test_adsiz_satir_toplam_degilse_durur(tmp_path, satirlar, neden):
-    """Adsız satır yalnız grubun sonunda, tek ve adlı TOPLAM yokken toplamdır; tutmuyorsa, arada ise ya da adet ve kg dışında hücresi
-    varsa toplam sayılmaz ve okuma durur."""
+    """Adsız satır yalnız grubun sonunda, tek ve adlı TOPLAM yokken toplamdır; tutmuyorsa, arada ise, adlı TOPLAM'la ya da iki kez
+    geliyorsa okuma durur. Adet ve kg dışında hücresi olan adsız satır toplam sayılmaz (eskisi gibi atlanır): başka TOPLAM yoksa durur."""
     yol = tmp_path / "liste.xlsx"
     _liste_satirli(yol, satirlar)
     with pytest.raises(oku.OkumaHatasi, match=neden):
@@ -508,11 +508,13 @@ def test_toplam_tek_satirin_kg_ini_disarida_birakiyorsa_satirlar_esas(tmp_path):
     assert {t: (x["adet"], x["kg"]) for t, x in c["turler"].items()} == _beklenen_celik()
 
 
-@pytest.mark.parametrize("adet,kg", [(21, 874 - 44 - 60), (21, 874 + 44), (21, 874 - 43), (20, 874 - 44)])
-def test_toplamin_baska_uyusmazligi_yine_durur(tmp_path, adet, kg):
-    """İki satır eksik, bir satır fazla, hiçbir satıra denk gelmeyen eksik ya da adedi de tutmayan TOPLAM: okuma durur."""
+@pytest.mark.parametrize("celik,adet,kg", [(CELIK, 21, 874 - 44 - 60), (CELIK, 21, 874 + 44), (CELIK, 21, 874 - 43),
+                                           (CELIK, 20, 874 - 44), (CELIK[:1], 6, 0)])
+def test_toplamin_baska_uyusmazligi_yine_durur(tmp_path, celik, adet, kg):
+    """İki satır eksik, bir satır fazla, hiçbir satıra denk gelmeyen eksik, adedi de tutmayan ya da kg'ı sıfır TOPLAM (tek satırlı grupta
+    "bir satır eksik" sayılmaz): okuma durur."""
     yol = tmp_path / "liste.xlsx"
-    _liste_satirli(yol, [*CELIK, ("TOPLAM", None, adet, kg)])
+    _liste_satirli(yol, [*celik, ("TOPLAM", None, adet, kg)])
     with pytest.raises(oku.OkumaHatasi, match="TOPLAM satırı satırlarla tutmuyor"):
         oku.oku(yol, ".xlsx")
 
@@ -521,7 +523,7 @@ def test_veranda_destegi_kolon_kiristir():
     """ÇP-17'nin satırı: veranda desteği kolon-kiriş (K); veranda duvarı duvar paneli kalır."""
     assert oku.tur("VERANDA DESTEK") == oku.tur("Veranda desteği") == oku.tur("VERANDA DESTEK PANELİ") == "kolon_kiris"
     assert oku.tur("VERANDA DUVAR") == "duvar_paneli"
-    with pytest.raises(oku.OkumaHatasi, match="türü bilinmiyor"):
+    with pytest.raises(oku.OkumaHatasi, match="türü bilinmiyor: 'DESTEK'"):
         oku.tur("DESTEK")
 
 
@@ -668,8 +670,8 @@ def test_adedi_okunamayan_tur_tutan_sayilmaz(depo):
 
 
 def test_liste_uyarisi_rapora_ve_sonuc_kaydina_yalniz_varsa_girer(depo, tmp_path):
-    """İE-16 PR-5: okuyucunun liste uyarısı (TOPLAM bir satırı dışarıda bırakıyor) sonuç kaydına ve rapora yazılır; uyarı yoksa kayıtta
-    alan yok (PR-4b'ye kadar yazılmış sonuçlar aynı kalır)."""
+    """İE-16 PR-5: okuyucunun liste uyarısı (TOPLAM bir satırı dışarıda bırakıyor) sonuç kaydına, rapora ve açık listenin cevabına yazılır;
+    uyarı yoksa kayıtta alan yok (PR-4b'ye kadar yazılmış sonuçlar ve açık beşin cevabı aynı kalır)."""
     k = K.kiyasla(depo["bizim"]("DN01"), depo["acik"], kok=depo["kok"])
     assert k["celik"]["liste_uyarilari"] == [] and "liste_uyarilari" not in K.sonuc_kaydi(k)
     K.rapor_md(k, tmp_path / "r0.md")
@@ -679,6 +681,12 @@ def test_liste_uyarisi_rapora_ve_sonuc_kaydina_yalniz_varsa_girer(depo, tmp_path
     assert s["liste_uyarilari"] == [oku.TOPLAM_BIR_SATIR_EKSIK] and list(s).index("liste_uyarilari") == list(s).index("celik_kg_kapisi") + 1
     K.rapor_md(k, tmp_path / "r1.md")
     assert f"| Liste uyarıları | {oku.TOPLAM_BIR_SATIR_EKSIK} |" in (tmp_path / "r1.md").read_text(encoding="utf-8")
+    c = K.cevap("DN-01", depo["acik"], kok=depo["kok"])          # açık listenin cevabı da (yalnız varsa)
+    assert "liste_uyarilari" not in K.cevap_json(c)
+    c["celik"]["liste_uyarilari"] = [oku.TOPLAM_BIR_SATIR_EKSIK]
+    assert K.cevap_json(c)["liste_uyarilari"] == [oku.TOPLAM_BIR_SATIR_EKSIK]
+    K.cevap_md(c, tmp_path / "c.md")
+    assert f"Liste uyarıları: {oku.TOPLAM_BIR_SATIR_EKSIK}." in (tmp_path / "c.md").read_text(encoding="utf-8")
 
 
 def test_sonuc_kaydi_okunan_sayfayi_yazar(depo):

@@ -63,7 +63,8 @@ def celik_grubu_mu(grup) -> bool:
 SOZLUK = {"DUVAR", "PANEL", "PANELI", "PANELLERI", "PANELLER", "KOLON", "KIRIS", "MAKAS", "MAKASI", "MAKASLARI", "MAKASLAR", "CATI",
           "TAVAN", "BOY", "C", "PROFIL", "PROFILI", "IC", "DIS", "VERANDA", "SUNDURMA", "KAPI", "PENCERE", "BASLIK", "LENTO", "ARA",
           "UST", "ALT", "BAS", "YAN", "ON", "ARKA", "KOSE", "DERE", "ASIK", "OMEGA", "GRUBU", "TOPLAM", "ZEMIN", "KAT", "CEPHE",
-          "PARCA", "CERCEVE", "MUSTEMILAT", "KORKULUK", "BACA", "VEANDA", "DIKME", "DIKMELERI", "ARASI", "USTU", "SIRT", "MM"}
+          "PARCA", "CERCEVE", "MUSTEMILAT", "KORKULUK", "BACA", "VEANDA", "DIKME", "DIKMELERI", "ARASI", "USTU", "SIRT", "MM",
+          "DESTEK", "DESTEGI"}
 
 
 def guvenli(ad) -> str:
@@ -279,7 +280,8 @@ def _ozet(c: dict) -> dict:
         raise OkumaHatasi("çelik panel grubunun TOPLAM satırı okunamadı")
     kapsam = "bütün satırlar" if T["adet"] == adet else "kg'lı satırlar" if T["adet"] == adet_kgli else None
     uyarilar = []
-    if kapsam is not None and abs(T["kg"] - kg) > KG_PAYI and any(abs(kg - T["kg"] - s["kg"]) <= KG_PAYI for s in out if s["kg"]):
+    if (kapsam is not None and T["kg"] > KG_PAYI and abs(T["kg"] - kg) > KG_PAYI
+            and any(abs(kg - T["kg"] - s["kg"]) <= KG_PAYI for s in out if s["kg"])):
         uyarilar.append(TOPLAM_BIR_SATIR_EKSIK)          # listenin formülü bir satırı dışarıda bırakmış (PR-5): satırlar esas
     elif kapsam is None or abs(T["kg"] - kg) > KG_PAYI:
         raise OkumaHatasi(f"çelik panel TOPLAM satırı satırlarla tutmuyor: liste {T['adet']} adet {T['kg']} kg, satırlar {adet} adet "

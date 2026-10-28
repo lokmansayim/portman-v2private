@@ -22,7 +22,8 @@ Sıra her koşuda aynı; bir adım tutmazsa araç `Durdu` ile durur ve sonrakine
    verilmişse etiket sayıları listenin tür adetleriyle ve bizimkiyle yan yana (bilgi; etiketi metin olmayan türde "paftada etiket yok").
 6. **Rapor** (md): kod, m², satırlar. Ad, bayi adı ve dosya adı yazılmaz; telefona benzeyen her şey maskelenir. Sonuç kaydı kıyastaki
    durumu (çift çıkan kör proje `kapali`), kayıttaki durumu ve okunan Excel sayfasını yazar. Okuyucunun liste uyarısı varsa (İE-16 PR-5:
-   listenin TOPLAM'ı bir satırı dışarıda bırakıyor) rapora ve sonuç kaydına (`liste_uyarilari`; yalnız varsa) yazılır.
+   listenin TOPLAM'ı bir satırı dışarıda bırakıyor) rapora, sonuç kaydına ve açık listenin cevabına (`liste_uyarilari`; yalnız varsa)
+   yazılır.
 
 Kaynak dosyalar depo dışında durur. Depoya yalnız tutan satırlar ve kapının sonucu girer (`sonuc.json`; prefabrik kör testinin kuralı,
 Lokman 23 Ekim 2026 "Yalnız tutanlar").
@@ -542,6 +543,8 @@ def cevap_md(c: dict, yol: Path) -> None:
     L += _ust(c) + ["", "## Çelik panel grubu (listeden) ve panel etiketleri (paftadan)", ""] + _celik_md(c, False)
     if c.get("etiket"):
         L += ["", f"Pafta uyarıları: {'; '.join(c['etiket']['uyarilar']) or 'yok'}."]
+    if c["celik"].get("liste_uyarilari"):
+        L += ["", f"Liste uyarıları: {'; '.join(c['celik']['liste_uyarilari'])}."]
     L += ["", "## Listenin öteki grupları (satır sayısı; içerik bu sayfaya yazılmaz)", "", "| Grup | Satır |", "|---|---|"]
     L += [f"| {maske(g)} | {n} |" for g, n in c["grup_satirlari"].items() if not oku.celik_grubu_mu(g)]
     Path(yol).write_text("\n".join(L) + "\n", encoding="utf-8")
@@ -553,7 +556,8 @@ def cevap_json(c: dict) -> dict:
                       "turler": c["celik"]["turler"], "toplam": c["celik"]["toplam"]},
             "pafta": c["etiket"] and {h: {k: v for k, v in x.items()} for h, x in c["etiket"]["turler"].items()},
             "pafta_uyarilari": c["etiket"] and c["etiket"]["uyarilar"],
-            "pafta_liste": {r["tur"]: r["pafta_liste"] for r in c["tablo"] if r["pafta_liste"]}}
+            "pafta_liste": {r["tur"]: r["pafta_liste"] for r in c["tablo"] if r["pafta_liste"]},
+            **({"liste_uyarilari": c["celik"]["liste_uyarilari"]} if c["celik"].get("liste_uyarilari") else {})}
 
 
 def rapor_md(k: dict, yol: Path) -> None:
