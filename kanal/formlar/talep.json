@@ -1,0 +1,53 @@
+{
+  "version": "7.3",
+  "screens": [
+    {
+      "id": "TALEP",
+      "title": "Talep formu",
+      "terminal": true,
+      "success": true,
+      "data": {
+        "bilinen": {"type": "string", "__example__": "Bildiğiniz kadarını doldurmanız yeterli; eksik kalanı sohbette sorarım."},
+        "yapi": {"type": "string", "__example__": "prefabrik"},
+        "kat": {"type": "string", "__example__": "1"},
+        "oda": {"type": "string", "__example__": "2+1"},
+        "alan": {"type": "string", "__example__": "60"},
+        "en": {"type": "string", "__example__": "7"},
+        "boy": {"type": "string", "__example__": "9"},
+        "cati": {"type": "string", "__example__": "besik"},
+        "veranda": {"type": "string", "__example__": "on"}
+      },
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          {"type": "TextBody", "text": "${data.bilinen}"},
+          {"type": "RadioButtonsGroup", "name": "yapi", "label": "Yapı tipi", "required": true, "init-value": "${data.yapi}",
+           "data-source": [{"id": "prefabrik", "title": "Prefabrik"}, {"id": "celik", "title": "Çelik"}]},
+          {"type": "RadioButtonsGroup", "name": "kat", "label": "Kat", "required": true, "init-value": "${data.kat}",
+           "data-source": [{"id": "1", "title": "Tek kat"}, {"id": "2", "title": "İki kat"}]},
+          {"type": "Dropdown", "name": "oda", "label": "Oda programı", "required": true, "init-value": "${data.oda}",
+           "data-source": [{"id": "1+0", "title": "Tek oda (1+0)"}, {"id": "1+1", "title": "1+1"}, {"id": "2+1", "title": "2+1"},
+                           {"id": "3+1", "title": "3+1"}, {"id": "4+1", "title": "4+1"}, {"id": "5+1", "title": "5+1"}]},
+          {"type": "TextInput", "name": "alan", "label": "Yaklaşık alan (m²)", "input-type": "number", "required": false,
+           "init-value": "${data.alan}", "helper-text": "Dış ölçüyü yazarsanız boş bırakabilirsiniz"},
+          {"type": "TextInput", "name": "en", "label": "Kısa kenar (m)", "input-type": "number", "required": false, "init-value": "${data.en}"},
+          {"type": "TextInput", "name": "boy", "label": "Uzun kenar (m)", "input-type": "number", "required": false, "init-value": "${data.boy}"},
+          {"type": "RadioButtonsGroup", "name": "cati", "label": "Çatı", "required": true, "init-value": "${data.cati}",
+           "data-source": [{"id": "besik", "title": "Beşik"}, {"id": "tek_egimli", "title": "Tek eğimli"}, {"id": "kirma", "title": "Kırma"},
+                           {"id": "teras", "title": "Teras (düz)"}]},
+          {"type": "RadioButtonsGroup", "name": "veranda", "label": "Veranda", "required": true, "init-value": "${data.veranda}",
+           "data-source": [{"id": "on", "title": "Önde"}, {"id": "yan", "title": "Yanda"}, {"id": "arka", "title": "Arkada"}, {"id": "kose", "title": "Köşede"}]},
+          {"type": "TextArea", "name": "not", "label": "Not", "required": false, "max-length": "600", "helper-text": "Varsa özel isteğiniz"},
+          {"type": "DocumentPicker", "name": "dosya", "label": "Çizim ya da plan (isteğe bağlı)",
+           "description": "El çizimi, plan resmi ya da PDF; tek dosya, en çok 20 MB", "min-uploaded-documents": 0, "max-uploaded-documents": 1,
+           "max-file-size-kb": 20480, "allowed-mime-types": ["image/jpeg", "image/png", "image/webp", "application/pdf"]},
+          {"type": "Footer", "label": "Gönder",
+           "on-click-action": {"name": "complete", "payload": {"yapi": "${form.yapi}", "kat": "${form.kat}", "oda": "${form.oda}",
+                                                                "alan": "${form.alan}", "en": "${form.en}", "boy": "${form.boy}",
+                                                                "cati": "${form.cati}", "veranda": "${form.veranda}", "not": "${form.not}",
+                                                                "dosya": "${form.dosya}"}}}
+        ]
+      }
+    }
+  ]
+}

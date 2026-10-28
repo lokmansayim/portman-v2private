@@ -1679,17 +1679,10 @@
       }
      },
      "karar": {
-      "eylem": [
-       "secenek",
-       "sor"
-      ],
-      "soru_alani": [
-       "secenek",
-       "model_veya_olcu"
-      ]
+      "eylem": "secenek"
      },
      "anlam": "beş bilgi tam: prefabrik 60 m²",
-     "not": "Rehber: en çok üç seçenek. Prefabrikte seçenek seti yok; bugün katalog önerisini yazıyla sunuyor."
+     "not": "Rehber §2: yakın projede en çok üç seçenek, görselli (D-27). Bugün katalog önerisini yazıyla sunup modeli ya da ölçüyü soruyor; bu adımı karşılamıyor (onay tablosu 28 Ekim, sıkılaştırma)."
     }
    ]
   },

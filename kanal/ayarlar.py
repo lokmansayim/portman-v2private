@@ -37,6 +37,10 @@ VARSAYILAN = {
     # bayiye [Doğru] [Düzelt] ile gösterilir. `bekle_sn`: gönderici dosyayı indirene kadar ajanın beklediği en uzun süre. Kapalıyken bugünkü
     # cevap ("yalnız yazılı talepleri işleyebiliyorum").
     "gorsel_okuma": {"acik": False, "model": "claude-opus-5-5", "effort": "medium", "timeout_s": 180, "max_tokens": 8000, "bekle_sn": 60},
+    # İE-20 PR-2: talep formu ve revizyon formu (WhatsApp Flow, uç noktasız; kanal/formlar/). Meta'da kurulan formların kimlikleri
+    # (`talep_flow_id`, `revizyon_flow_id`; rakam). `taslak`: true iken form yayımlanmamış (taslak) kipte gönderilir, yalnız WhatsApp
+    # Manager'daki test numaralarında açılır. Kapalıyken (ya da kimlik yokken) bugünkü metin; gelen form cevabı her durumda LLM'siz işlenir.
+    "talep_formu": {"acik": False, "talep_flow_id": None, "revizyon_flow_id": None, "taslak": True},
 }
 ANAHTARLAR = tuple(VARSAYILAN)
 SABLON_ANAHTARLARI = ("sablon_patron_bildirim", "sablon_bayi_dosyalar_hazir", "sablon_muhendis_kontrol", "sablon_muhendis_hatirlatma",
@@ -56,7 +60,7 @@ def oku(veri) -> dict:
         return a
     if isinstance(d, dict):
         for k, v in d.items():
-            if k in ("llm", "plan_uretimi", "llm_once_revizyon", "gorsel_okuma") and isinstance(v, dict):
+            if k in ("llm", "plan_uretimi", "llm_once_revizyon", "gorsel_okuma", "talep_formu") and isinstance(v, dict):
                 a[k] = {**a[k], **v}
             else:
                 a[k] = v
