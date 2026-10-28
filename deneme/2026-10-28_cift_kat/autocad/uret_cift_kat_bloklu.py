@@ -27,7 +27,7 @@ ANA = (-160, -120, 900, 960)   # Motor DXF'inde ana (akslı) planın bölgesi, c
 
 SABLONDA_VAR = {  # Şablon 2024'te bire bir bulunan adlar
     "100'LÜK 125'LİK PANO", "100'LÜK 125'LİK (60x40) VASİSTASLI PANO", "100'LÜK 125'LİK (120x100) PENCERELİ PANO",
-    "100'LÜK 125'LİK KAPILI PANO(80'LİK)", "100'LÜK 117'LİK PANO", "60X60 3 LÜ H BAĞLANTI DİREĞİ",
+    "100'LÜK 125'LİK KAPILI PANO(80'LİK)", "100'LÜK 117'LİK PANO", "60X60 3 LÜ H BAĞLANTI DİREĞİ", "100X100 DIŞ KÖŞE DİREĞİ",
 }
 
 def en_yaz(cm: float) -> str:
@@ -73,10 +73,87 @@ def kart_adi(ad: str) -> str:
 hedef = ezdxf.new("R2018"); hedef.header["$INSUNITS"] = 5; hedef.header["$LTSCALE"] = 1.0
 H = hedef.modelspace()
 for ad, renk in [("CIFT_KAT_NOT", 1), ("CIFT_KAT_CERCEVE", 8), ("KESIT", 7), ("KESIT_KIRIS", 30), ("KESIT_BETOPAN", 3),
-                 ("KESIT_CATI", 1), ("KOSE_SUREKLI_100", 6), ("MALZEME_KARTI", 7), ("SABLON_KARTI", 9)]:
+                 ("KESIT_CATI", 1), ("KOSE_SUREKLI_100", 6), ("MALZEME_KARTI", 7), ("SABLON_KARTI", 9),
+                 ("MERDIVEN", 4), ("MERDIVEN_DUVAR", 7)]:
     hedef.layers.add(ad, color=renk)
 if "DASHED" not in hedef.linetypes:
     hedef.linetypes.add("DASHED", pattern=[20.0, 12.5, -7.5])
+kut = ezdxf.readfile(str(KUTUPHANE)) if KUTUPHANE.exists() else None
+
+
+def merdiven_ciz(dx: float, kat1: bool):
+    """Lokman'ın planındaki merdiven, bire bir (28.10 13:00 "Aynı buradaki gibi çiz"; zemin ve 1. kat planları aynı çizim).
+    Kutu: iç 200 × (125 gövdede + 10 duvar bandı + 115 çıkma) = 250 iç [planda 260 yazılı; 125'lik çıkma dışla ölçülmüş: 10 cm fark not],
+    dış 220, duvar 10; sol duvar x 337–347, sağ 547–557 (ODA 327 + 10; WC 196 + 10 = 763 ✓); ön duvar y 561–571 (hol 152, WC 125 ile aynı hiza);
+    çıkma 706–831 (dış). Merdiven: çift kollu U, kol 100; sağ kol 5 düz basamak (25), çıkmada 6 dönel basamak (180°), sol kol 5 düz → 16 rıht;
+    başlangıç dairesi sağ kolda önde, yürüme çizgisi 150 → 200 → 50 → ok önde (üst kata önden varır).
+    1. kat: ön açık (holle birleşir), çıkmanın arka duvarında 120/125 standart pencere (plan)."""
+    L, D = "MERDIVEN", "MERDIVEN_DUVAR"
+    X0, Y0, W, DER = dx + 347.0, 571.0, 200.0, 250.0
+    def duvar(x0, y0, x1, y1):
+        H.add_lwpolyline([(x0, y0), (x1, y0), (x1, y1), (x0, y1), (x0, y0)], dxfattribs={"layer": D})
+    duvar(X0 - 10, Y0 - 10, X0, Y0 + DER + 10)            # sol duvar (561 → 831)
+    duvar(X0 + W, Y0 - 10, X0 + W + 10, Y0 + DER + 10)    # sağ duvar
+    duvar(X0 - 10, Y0 + DER, X0 + W + 10, Y0 + DER + 10)  # çıkmanın arka duvarı (821–831)
+    if not kat1:
+        duvar(X0 - 10, Y0 - 10, X0 + W + 10, Y0)          # ön duvar: planda zeminde çizili (giriş açıklığı planda yok → soru)
+    def cz(x0, y0, x1, y1):
+        H.add_line((X0 + x0, Y0 + y0), (X0 + x1, Y0 + y1), dxfattribs={"layer": L})
+    cz(100, 0, 100, DER)                                   # kol ayırıcı orta çizgi
+    for y in (25, 50, 75, 100, 125):                       # 5 düz basamak (iki kol üst üste görünür: tam genişlik)
+        cz(0, y, 200, y)
+    cz(0, 135, 200, 135)                                   # gövde dış yüz hizası (706): dönel basamakların başlangıcı
+    for x, y in ((0, 195), (35, DER), (100, DER), (165, DER), (200, 195)):   # 6 dönel basamak, merkez (100, 135)
+        cz(100, 135, x, y)
+    H.add_circle((X0 + 150, Y0 + 15), 12, dxfattribs={"layer": L})          # başlangıç (sağ kol)
+    cz(150, 27, 150, 200); cz(150, 200, 50, 200); cz(50, 200, 50, 30)        # yürüme çizgisi
+    H.add_lwpolyline([(X0 + 35, Y0 + 30), (X0 + 65, Y0 + 30), (X0 + 50, Y0), (X0 + 35, Y0 + 30)], dxfattribs={"layer": L})  # ok (varış)
+    if kat1:
+        H.add_lwpolyline([(X0 + 40, Y0 + DER), (X0 + 160, Y0 + DER), (X0 + 160, Y0 + DER + 10), (X0 + 40, Y0 + DER + 10), (X0 + 40, Y0 + DER)],
+                         dxfattribs={"layer": "CIFT_KAT_NOT"})
+        H.add_text("120/125 STANDART PENCERE (plan, 1. kat)", height=4.5, dxfattribs={"layer": "CIFT_KAT_NOT"}).set_placement((X0 + 42, Y0 + DER + 14))
+    H.add_text("MERDİVEN · plan bire bir (Lokman 13:00): iç 200 × 250 (planda 260 yazılı), dış 220, çıkma 125 · çift kollu U, kol 100, "
+               "5 + 6 dönel + 5 = 16 rıht (282/16 = 17,6), basamak 25", height=4.5, dxfattribs={"layer": L}).set_placement((X0 - 10, Y0 + DER + 28))
+    H.add_text("Duvarlar planda 337/557 (220 dış); pano aksı 318,75/569,75 (245 iç) → Motor'a işlerken karar (Soru 9 ile)", height=4.5,
+               dxfattribs={"layer": L}).set_placement((X0 - 10, Y0 + DER + 20))
+
+
+def sablon_kapili_pano(hedef_blok: str, kapi: float = 90.0, en: float = 125.5, mentese: str = "SAG"):
+    """Güncel Şablon 2024'ün '100'LÜK 125'LİK KAPILI PANO(80'LİK)' çizimini (10'luk pano bandı, H profilli kasa, kanat, yay)
+    kapı genişliğine ve pano enine uyarlayıp hedef bloğun içeriği yapar (Lokman 13:02: "dış kapıda güncel şablon 2024'te var").
+    Kapı genişlemesi: açıklık kenarları ±(kapi−80)/2, kanat ve yay +(kapi−80); pano kısalması uçlardan (t = (125,5 − en)/2); SOL: ayna."""
+    KAYNAK = "100'LÜK 125'LİK KAPILI PANO(80'LİK)"
+    if kut is None or KAYNAK not in kut.blocks or hedef_blok not in hedef.blocks:
+        print("şablon kapılı pano uygulanamadı:", hedef_blok); return False
+    tmp = ezdxf.new("R2018"); i1 = Importer(kut, tmp); i1.import_block(KAYNAK); i1.finalize()
+    hb = hedef.blocks.get(hedef_blok)
+    for e in list(hb): hb.delete_entity(e)
+    i2 = Importer(tmp, hedef); i2.import_entities(list(tmp.blocks.get(KAYNAK)), hb); i2.finalize()
+    hb.base_point = (0, 0, 0)
+    d, t, uz = (kapi - 80) / 2, (125.5 - en) / 2, kapi - 80
+    def xk(x):
+        if x < 62.75: return (x - d if x > 0.01 else t) - t
+        return (x + d if x < 125.49 else 125.5 - t) - t
+    def ay(x): return en - x if mentese == "SOL" else x
+    for e in hb:
+        tt = e.dxftype()
+        if tt == "LINE":
+            s, b = e.dxf.start, e.dxf.end; ys, yb = s.y - 1, b.y - 1
+            if e.dxf.layer == "KAPI-PLAN":
+                if ys > 50: ys += uz
+                if yb > 50: yb += uz
+            e.dxf.start = (ay(xk(s.x)), ys, 0); e.dxf.end = (ay(xk(b.x)), yb, 0)
+        elif tt == "ARC":
+            c = e.dxf.center; e.dxf.center = (ay(xk(c.x)), c.y - 1, 0)
+            if e.dxf.radius > 30: e.dxf.radius += uz
+            if mentese == "SOL":
+                sa, ea = e.dxf.start_angle, e.dxf.end_angle
+                e.dxf.start_angle, e.dxf.end_angle = 180 - ea, 180 - sa
+        elif tt == "CIRCLE":
+            c = e.dxf.center; e.dxf.center = (ay(xk(c.x)), c.y - 1, 0)
+        elif tt == "LWPOLYLINE":
+            e.set_points([(ay(xk(x)), y - 1) for x, y, *_ in e.get_points()], format="xy")
+    return True
 
 sayim = OrderedDict()   # kart adı → {kat: adet}
 yeni_adlar = set(); aciklamalar = []
@@ -122,8 +199,11 @@ for kat_adi, yol, dx in KATLAR:
                 if k in ("dimblk", "dimblk1", "dimblk2", "dimldrblk") and v:
                     try: ARROWS.create_block(hedef.blocks, v)
                     except Exception: pass
+                if k == "dimrnd": continue      # Motor'da 0.0 yazılı; ezdxf 0'ı "tam sayıya yuvarla" sayıyor (125,5 → 126)
                 try: td.dxf.set(k, v)
                 except Exception as ex: print("dimstyle alanı atlandı", k, v, str(ex)[:60])
+            td.dxf.discard("dimrnd")
+            td.dxf.dimdec, td.dxf.dimzin, td.dxf.dimdsep = 2, 0, 44   # Lokman 13:15: virgülden sonra iki basamak (125,50), ayraç virgül
     for st in kaynak.styles:
         if st.dxf.name not in hedef.styles:
             try: hedef.styles.new(st.dxf.name, dxfattribs={"font": st.dxf.font})
@@ -157,10 +237,8 @@ for kat_adi, yol, dx in KATLAR:
     # 4) kat başlığı ve çerçeve
     H.add_text(f"{kat_adi} · 763 × 706 · Şablon 2024 blok adlarıyla · İE-22 (28.10.2026)", height=12,
                dxfattribs={"layer": "CIFT_KAT_NOT"}).set_placement((dx, 945))
-    # merdiven çıkması ve balkon taşması (Motor'da yok) — konumlar İş Emri'nden, y önden
-    H.add_lwpolyline([(dx+318.75, 706), (dx+569.75, 706), (dx+569.75, 831.5), (dx+318.75, 831.5), (dx+318.75, 706)],
-                     dxfattribs={"layer": "CIFT_KAT_NOT", "linetype": "DASHED"})
-    H.add_text("MERDİVEN ÇIKMASI 125,5 (Motor'da yok · Soru 2/5)", height=6, dxfattribs={"layer": "CIFT_KAT_NOT"}).set_placement((dx+322, 838))
+    # merdiven kutusu + merdiven, Lokman'ın planı bire bir (13:00); balkon taşması (Motor'da yok) kesik çizgi — y önden
+    merdiven_ciz(dx, kat1=(dx > 0))
     H.add_lwpolyline([(dx+444.25, 0), (dx+763, 0), (dx+763, -30), (dx+444.25, -30), (dx+444.25, 0)],
                      dxfattribs={"layer": "CIFT_KAT_NOT", "linetype": "DASHED"})
     H.add_text("BALKON TAŞMASI 30 (Motor'da yok · Soru 7)", height=6, dxfattribs={"layer": "CIFT_KAT_NOT"}).set_placement((dx+446, -44))
@@ -168,8 +246,41 @@ for kat_adi, yol, dx in KATLAR:
 # 4b) Giriş kapısı (Lokman 28.10 12:34, Soru 1): sağ cephe, WC HOLÜ, 90'lık, içeri açılır. Motor bunu kendisi çiziyor:
 #     BOM_D18_1255p0_DIS_K02 @ (763, 445) rot 90, iç sembol BOM_K03_DIS_KAPI_ACIKLIK900 (sınır kutusu 668,8–764,1 × 445–570,5).
 #     12:45'te "Motor sembolü çizmedi (bulgu 7)" diye elle kırmızı kapı çizilmişti; yanlıştı — ad değiştirme iç sembolü bozduğu için
-#     görünmüyordu (A023'te düzeltildi). Elle kapı 13:05'te kaldırıldı; yalnız kısa bir not kalır.
-H.add_text("GİRİŞ 90 (Lokman 28.10 · Motor çizdi: BOM_D18 K02)", height=5, dxfattribs={"layer": "CIFT_KAT_NOT"}).set_placement((763.0 - 150, 445.0 + 17.75 - 12))
+#     görünmüyordu (A023'te düzeltildi). Elle kapı 13:05'te kaldırıldı.
+# 4c) Dış kapı çizimi Güncel Şablon 2024'ten (Lokman 13:02 "dış kapıda güncel şablon 2024'te var"): dış kapılı pano bloklarının
+#     içeriği Motor'un Astra sembolü yerine şablonun kapılı pano çizimi (90'a ve pano enine uyarlanmış). Adlar aynı kalır.
+for blok, kapi, en, mentese in [("100'LÜK 125'LİK KAPILI PANO(90'LIK)", 90, 125.5, "SAG"),
+                                 ("100'LÜK 116.25'LİK KAPILI PANO(90'LIK) [SOL]", 90, 116.25, "SOL")]:
+    if sablon_kapili_pano(blok, kapi, en, mentese): print("şablon kapılı pano uygulandı:", blok)
+H.add_text("GİRİŞ 90 · Şablon 2024 kapılı pano çizimi (Lokman 13:02); kanat ve kasa şablondan, 90'a uyarlandı", height=5,
+           dxfattribs={"layer": "CIFT_KAT_NOT"}).set_placement((763.0 - 150, 445.0 + 17.75 - 12))
+
+# 4d) Köşeler 100×100 kutu profil (Lokman 12:09 ve 13:13 "köşeler 100*100 kutu profil olacak demiştim"): Motor'un 5×10 köşe
+#     parçası yerine Güncel Şablon 2024'ün "100X100 DIŞ KÖŞE DİREĞİ" bloğu (10×10 kırmızı kutu + pano başlangıç çıkıntıları);
+#     blok köşe yönüne göre aynalanır (şablon bloğunun varsayılan yönü: kutu (0,2.5)–(10,12.5), çıkıntılar aşağı ve sağa).
+ESKI_KOSE, SABLON_KOSE = "100X100 SÜREKLİ DIŞ KÖŞE DİREĞİ (5320)", "100X100 DIŞ KÖŞE DİREĞİ"
+if kut is not None and SABLON_KOSE in kut.blocks and ESKI_KOSE in hedef.blocks:
+    i3 = Importer(kut, hedef); i3.import_block(SABLON_KOSE); i3.finalize()
+    hedef.blocks.get(SABLON_KOSE).base_point = (0, 0, 0)
+    KOSELER = {(0.0, 0.0): (0.0, 12.5, 1, -1),            # ön-sol: duvarlar yukarı ve sağa
+               (0.0, 696.0): (0.0, 693.5, 1, 1),          # arka-sol: aşağı ve sağa
+               (758.0, 696.0): (763.0, 693.5, -1, 1),     # arka-sağ: aşağı ve sola
+               (758.0, 126.25): (763.0, 138.75, -1, -1),  # sağ duvar – balkon arka duvarı: yukarı ve sola
+               (439.25, 126.25): (439.25, 123.75, 1, 1),  # salon sağ duvarı – balkon arka duvarı: aşağı ve sağa
+               (444.25, 0.0): (449.25, 12.5, -1, -1)}     # salon sağ duvarı – ön duvar: yukarı ve sola
+    n_kose = 0
+    for e in list(H.query("INSERT")):
+        if e.dxf.name != ESKI_KOSE: continue
+        kat_dx = 1100.0 if e.dxf.insert.x >= 1000 else 0.0
+        key = (round(e.dxf.insert.x - kat_dx, 2), round(e.dxf.insert.y, 2))
+        if key not in KOSELER: print("köşe eşlenemedi:", key); continue
+        ix, iy, xs, ys = KOSELER[key]
+        H.add_blockref(SABLON_KOSE, (kat_dx + ix, iy), dxfattribs={"xscale": xs, "yscale": ys, "layer": e.dxf.layer})
+        H.delete_entity(e); n_kose += 1
+    print("köşe direği şablon bloğuyla değiştirildi:", n_kose)
+    sayim.pop(kart_adi(ESKI_KOSE), None)
+    try: hedef.blocks.delete_block(ESKI_KOSE, safe=True)
+    except Exception as ex: print("eski köşe bloğu silinemedi (başka yerde kullanılıyor):", str(ex)[:80])
 
 # 5) kesit / kat kotları (kısa kenar y=706; makas y'yi geçer → beşik profil bu kesitte)
 KX, KY = 0.0, -900.0
@@ -212,7 +323,7 @@ for ad in sorted(sayim, key=lambda s: (0 if s.startswith("100'L") else 1 if s.st
     H.add_text(durum, height=5.5, dxfattribs={"layer": "MALZEME_KARTI"}).set_placement((MX+650, y))
     satirlar.append((ad, c, top, durum)); y -= 11
 # ortak parçalar
-H.add_text("ORTAK: 100X100 SÜREKLİ DIŞ KÖŞE DİREĞİ (5320) — kat kat sayılmaz, bir kez: planda 6 köşe (L gövde) → 6 adet", height=5.5,
+H.add_text("ORTAK: 100X100 DIŞ KÖŞE DİREĞİ (şablon bloğu; kutu profil, sürekli iki kat boyu 5320 R02) — kat kat sayılmaz: 6 köşe → 6 adet", height=5.5,
            dxfattribs={"layer": "MALZEME_KARTI"}).set_placement((MX, y-6))
 H.add_text("Not: kapılı panolarda [SAĞ ÜST] vb. ek kanat yönüdür, malzeme adına girmez; 'yeni (kural)' = şablonda yok, şablonun ad kuralıyla türetildi.",
            height=5, dxfattribs={"layer": "MALZEME_KARTI"}).set_placement((MX, y-20))
@@ -276,7 +387,9 @@ L = ["# Malzeme kartı · İE-22 çift kat, Şablon 2024 blok adları (28 Ekim 2
      "| Blok / malzeme | " + " | ".join(k for k, _, _ in KATLAR) + " | Toplam | Şablonda |", "|---|---:|---:|---:|---|"]
 for ad, c, top, durum in satirlar:
     L.append(f"| {ad} | " + " | ".join(str(c.get(k, 0)) for k, _, _ in KATLAR) + f" | {top} | {durum} |")
-L.append("| ORTAK · 100X100 SÜREKLİ DIŞ KÖŞE DİREĞİ (5320) | — | — | 6 | yeni (R02 CK-B01) |")
-L.append("\nMotor'da olmayıp çizimde kesik çizgiyle işaretlenenler: merdiven çıkması (arkaya 125,5), balkon taşması (30). Merdivenin kendisi: Soru 3.")
+L.append("| ORTAK · 100X100 DIŞ KÖŞE DİREĞİ (kutu profil, sürekli iki kat boyu 5320; Lokman 12:09/13:13) | — | — | 6 | var (şablon bloğu; '2X100X100 DIŞ KÖŞE DİREĞİ' varyantı da var) |")
+L.append("\nMotor'da olmayıp çizimde elle olanlar: merdiven kutusu ve merdiven (Lokman'ın planı bire bir, 13:00: iç 200 × 250, çıkma 125, "
+         "çift kollu U kol 100, 5+6+5 = 16 rıht; katman MERDIVEN/MERDIVEN_DUVAR, blok değil), balkon taşması 30 (kesik çizgi). "
+         "Dış kapılı panoların çizimi Güncel Şablon 2024'ün kapılı pano bloğundan (13:02); iç kapılar henüz Motor'un Astra sembolü.")
 (CIKTI / "Portman_IE22-CK01_CIFT_KAT_malzeme_karti.md").write_text("\n".join(L) + "\n", encoding="utf-8")
 print("kart yazıldı;", len(satirlar), "satır")

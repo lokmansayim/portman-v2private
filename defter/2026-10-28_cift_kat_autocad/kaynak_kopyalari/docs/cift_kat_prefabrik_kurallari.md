@@ -68,10 +68,10 @@ arasındaki fark merdiven; geriye kalan, döşeme, çatı birebir aynı"). `R02`
 | # | Kural | Durum |
 |---|---|---|
 | 6.1 | Merdiven, çift katı tek kattan ayıran tek elemandır (Lokman). Motor'da bugün merdiven yoktur; R02'de de çizilmemişti ("üst kat girişi çözümsüz"). İE-22 merdiveni İş Emri'ne ekler. | Lokman, 28.10 · Bugünkü kod |
-| 6.2 | Bu evde merdiven kendi kutusunda: planda 200 × 260 iç, arkaya 125 çıkma; taslakta kutu **2 pano eni (245 iç)**, derinlik gövdede 1 pano + çıkma 1 pano (125,5); çıkma Motor'da yok, taslak yalnız gövdedeki parçayı gösterir. | Kabul (ızgara uyarlaması) · **Soru 2** (merdiven kutusu 2 pano mu 1,5 pano mu?) |
-| 6.3 | Kol eni, rıht, basamak, sahanlık, korkuluk: planda yok. | **Soru 3** |
+| 6.2 | Merdiven kutusu **planın aynısı** (Lokman 28.10 13:00 "Aynı buradaki gibi çiz"): iç 200 × 260 yazılı (hesapla 125 gövde + 10 duvar bandı + 115 çıkma = 250; 10 cm fark teyit ister), dış 220, duvar 10; duvarlar x 337/557 (ODA 327 + 10; WC 196 + 10 = 763 ✓); ön duvar y 561–571 (hol 152, WC'nin ön duvarıyla aynı hiza); çıkma arkaya 125 (dış). Pano aksına (318,75/569,75, 245 iç) oturmuyor → Motor'a işlerken iç panolar kesilir ya da kutu aksa çekilir: **Soru 9 ile karar**. Motor taslağı hâlâ 2 pano (245). | Lokman 13:00 (AutoCAD çiziminde bire bir) · Motor: Soru 9 |
+| 6.3 | Merdiven planın aynısı (13:00): **çift kollu U**, kol 100 (2 × 100 = 200 iç); sağ kol 5 düz basamak (25), çıkmada **6 dönel basamak** (180°, merkez gövde dış yüz hizasında kutu ortası), sol kol 5 düz → **16 rıht** (282/16 = 17,6); başlangıç sağ kolda önde (daire), üst kata sol koldan önden varış (ok). Sahanlık yok (dönel). Korkuluk planda yok. | Lokman 13:00 · korkuluk açık |
 | 6.4 | Merdiven boşluğu üst kat döşemesinde açık kalır; merdiven mahali her iki katta aynı yerde. Merdivenle hol arası duvarsız (açık sınır). | Kabul (plandan) |
-| 6.5 | Üst katta merdiven kutusunun arka duvarında 120/125 pencere (planda var); zemin katta o duvarda açıklık yok. | Plandan |
+| 6.5 | Üst katta merdiven kutusunun arka duvarında 120/125 pencere (planda var); zemin katta o duvarda açıklık yok. Üst katta kutunun önü hole açık; zemin katta planda ön duvar çizili (giriş açıklığı planda yok → **Soru 2b**). | Plandan |
 
 ## 7. Balkon ve açık mahaller
 
@@ -85,7 +85,7 @@ arasındaki fark merdiven; geriye kalan, döşeme, çatı birebir aynı"). `R02`
 
 | # | Kural | Durum |
 |---|---|---|
-| 8.1 | R02: dört dış köşede **100 × 100 × 5320 mm sürekli köşe profili** (iki kata bölünmez, sayımda bir kez). Lokman'ın kuralı değil. | R02 (veri) · **Soru 8** |
+| 8.1 | Dış köşelerde **100 × 100 kutu profil** köşe direği, iki kat boyu sürekli (Lokman 12:09, 13:13 "köşeler 100*100 kutu profil olacak demiştim"); R02: 100 × 100 × 5320 (sayımda bir kez). Çizimde Güncel Şablon 2024'ün `100X100 DIŞ KÖŞE DİREĞİ` bloğu (10×10 kırmızı kutu + pano çıkıntıları; şablonda `2X100X100 DIŞ KÖŞE DİREĞİ` varyantı da var). Et kalınlığı tanımsız. | Lokman · et kalınlığı **Soru 8** |
 | 8.2 | Sayım kat kat yapılır (zemin, üst), ortak parçalar (sürekli köşe profili, çatı) bir kez; her kat kendi pano, kapı, pencere, H ve köşe parçalarıyla. Kapılı/pencereli pano tek pano sayılır, doğrama ayrı. | R02 + tek kat (v1.4.3) · Kabul |
 | 8.3 | Prefabrik yükleme listesi kuralları (`motor/prefabrik_liste.py`, `kurallar/liste/prefabrik.json`) kat başına koşar; döşeme ve merdiven satırları yeni kural ister. | Kabul · Soru 6 |
 
@@ -129,8 +129,8 @@ panosunda (plandakinden 51 cm arkada).
 ## 11. Sorular (Lokman'a; cevap kurala girer)
 
 1. ~~**Giriş kapısı** nerede?~~ **Cevaplandı 28.10 12:34** (§12): sağ cephe, WC holü, 90, içeri açılır.
-2. **Merdiven kutusu** 2 pano (245 iç) mı, 1,5 pano (182 iç; dört kollu birleşim ya da mutfak 180) mı?
-3. **Merdiven**: kol eni, rıht/basamak sayısı (kat farkı ≈ 282 cm), sahanlık, korkuluk; dönüş yönü planda sağa.
+2. ~~**Merdiven kutusu** 2 pano mı 1,5 pano mı?~~ **Cevaplandı 13:00:** planın aynısı, 200 iç / 220 dış (§12). Açık: **2b** zemin katta merdivene giriş (ön duvar planda çizili); pano aksı uyumu Soru 9'da.
+3. ~~**Merdiven** ölçüleri~~ **Cevaplandı 13:00 (plandan):** çift kollu U, kol 100, 5 + 6 dönel + 5 = 16 rıht, basamak 25 (§12). Açık: korkuluk.
 4. **Fransız pencere 120/200**: 120x180 mi, döşemeden başlayan 120x200 doğrama mı (Motor sınırı 180; yeni kural ister)?
 5. **Merdiven çıkmasının çatısı**: arka cumba, ana çatının uzatılması, tek eğim?
 6. **Ara kat**: yükseklik ve malzeme (R02: 300 çelik kiriş + 20 Betopan = 320 mm; toplam 5320); 100'lük alt çerçeve üst katta var mı; liste satırları.
@@ -146,4 +146,8 @@ Lokman'ın cevapları bu belgeye tarihli eklenir; kural haline gelen madde `.cla
 |---|---|---|---|
 | 28.10.2026 12:09 | **Soru 8** (köşe profili) ve **1.1 / 2.8** (ızgara) | "Çift katın tek kattan en büyük farkı köşe direkleri **100×100 profil**; **pano dizilimi aynı**." Astra'yla yapılmış 150 m² çift kat (R02, 12.500 × 6.000, döşeme detaylarına kadar) Mac'te; referans alınacak. | 8.1: dört dış köşede 100×100 sürekli köşe direği (R02'deki 100 × 100 × 5320 ile uyumlu; et kalınlığı hâlâ **Soru**). 2.8 teyit: iki katta ızgara ve pano dizilimi tek katla aynı. Şablon 2024 notu da aynı yönde: köşe direkleri kutu profil, tek parça, ankrajlı (`deneme/2026-10-28_cift_kat/autocad/sablon_inceleme/RAPOR.md` §4). |
 | 28.10.2026 12:34 | **Soru 1** (giriş kapısı) | Plan görselinde kırmızı daireyle işaretledi: giriş kapısı **sağ cephede, WC holünün (WC ile mutfak arasındaki 152'lik hol) sağ dış duvarında**, ~90'lık, **içeri açılır**. | 3.6 kapandı: `zemin_kat.json`'a `{"tur":"dis_kapi","olcu":90,"arasi":["__DIS__","WC HOLÜ"],"duvar":"sag","pano":0}` eklendi; Motor zemin katı yeniden üretti (validation_passed True, kapı 7, BOM K03 dış kapı 90 ×1). Motor kapıyı **kendisi çizdi**: `BOM_D18_1255p0_DIS_K02` @ (763, 445) rot 90, açıklık panoda ortada (462,75–552,75), menteşe HOL tarafında (üst), kanat WC holüne süpürür. (12:45'te "Motor sembolü çizmedi" diye elle kırmızı kapı çizilmişti; yanlış bulguydu — üreticinin ad değiştirmesi iç sembolü bozmuştu; 13:05'te kaldırıldı, Motor bulgusu **yazılmadı**.) Menteşe yönü sorulmadı; Lokman düzeltme turunda söyler. |
+| 28.10.2026 13:00 | **Soru 2 ve 3** (merdiven kutusu ve merdiven) | Planda merdiveni kırmızı daireyle işaretleyip "**Aynı buradaki gibi çiz**" dedi. | 6.2–6.3: kutu iç 200 × 260 yazılı (hesapla 250), dış 220, çıkma 125, duvarlar 337/557; çift kollu U, kol 100, 5 + 6 dönel + 5 = 16 rıht, basamak 25; zemin ve 1. kat aynı çizim (1. katta ön açık, arka duvarda 120/125 pencere). AutoCAD çizimine bire bir işlendi (`MERDIVEN` / `MERDIVEN_DUVAR` katmanları, üretici `merdiven_ciz`). Motor'a işlenmesi pano aksı kararını bekler (Soru 9). |
+| 28.10.2026 13:02 | Dış kapı çizimi | "Dış kapıda Güncel Şablon 2024'te var." | Dış kapılı panoların çizimi Motor'un Astra sembolü yerine şablonun `100'LÜK 125'LİK KAPILI PANO(80'LİK)` çizimi (10'luk pano bandı, H profilli kasa, kanat, yay) 90'a ve pano enine uyarlanarak (`sablon_kapili_pano`); adlar aynı (`100'LÜK 125'LİK KAPILI PANO(90'LIK)`, `100'LÜK 116.25'LİK KAPILI PANO(90'LIK) [SOL]`). Şablondaki serbest dış kapı bloğu `100 LÜK ÇELİK KAPI 90X120` (100 cm'lik pano) çizgi duvarlı projelerde kullanılıyor; blok mantıklı örnek (86,5 m² İDA) 125'lik kapılı panoyu kullanıyor. İç kapılar henüz Motor sembolü (sırası gelince). |
+| 28.10.2026 13:13 | **Soru 8** (köşe profili) | "Köşeler 100*100 kutu profil olacak demiştim." | 8.1: çizimde köşeler şablonun `100X100 DIŞ KÖŞE DİREĞİ` bloğu (6 köşe × 2 kat, aynı sürekli profil; köşe yönüne göre aynalı). Motor'un 5×10 köşe parçası kalktı. Et kalınlığı hâlâ soru. |
+| 28.10.2026 13:15 | Ölçü biçimi | "Ölçülendirmede 125.5 yani virgülden sonra 2 rakam olsun, çünkü 126 gösteriyor." | Çizimde ölçü stili `dimdec 2, dimzin 0, dimdsep ','` → 125,50 / 763,00. (Neden 126'ydı: Motor'un stilinde `dimrnd 0` açık yazılı; ezdxf bunu tam sayıya yuvarlama sayıyor; üretici o alanı atıyor. Motor'un kendi PDF/DXF'i etkilenmedi; Motor'a taşınması K02 kapsamı, ayrı iş.) |
 | 28.10.2026 | Blok adları (K03) | "Her blok malzeme kartındaki gibi isim isim olsun" (Güncel Şablon 2024 blok mantığı). | Yeni çift kat çizimi Şablon 2024 blok adlarıyla (`100'LÜK 125'LİK PANO`, `100'LÜK 125'LİK (120x100) PENCERELİ PANO`, `100X100 DIŞ KÖŞE DİREĞİ`…); Motor eşleme taslağı RAPOR §2. K03 kararı Lokman'da. |

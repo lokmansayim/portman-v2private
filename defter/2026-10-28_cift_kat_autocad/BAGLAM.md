@@ -33,10 +33,12 @@ Merdiven çıkması (arkaya 125,5), merdivenin kendisi, balkonun 30 cm taşması
 - **Soru 1 kapandı (Lokman 12:34):** giriş kapısı sağ cephede, WC holünün sağ dış duvarında, 90, içeri açılır → `zemin_kat.json`'da `dis_kapi`, Motor yeniden üretti (validation True). Motor kapıyı kendisi çiziyor (`BOM_D18…_K02` rot 90); "Motor çizmedi (bulgu 7)" yanlış bulguydu, geri alındı (A025). **İE-22'de bulgu 7 yok.**
 - AutoCAD'de açık sekmeler (12:57): Güncel Şablon 2024 (değişiklik işaretli, **kaydedilmeyecek**), sablon_bloklari_yapi_v2, R02 (salt okunur), yeni çift kat r01 (13:05 sürümü, kırmızı elle kapı yok).
 - AutoCAD yolu: `Cmd+O` → **ekran görüntüsüyle kutunun açıldığı doğrulanır** → `Cmd+Shift+G` → yol → Enter → Open; komut satırına boşluklu yol yazılmaz; komut yazmadan önce doğru sekme doğrulanır (ERASE olayı A021, "Unknown command" olayı A025).
-- `autocad/` klasöründe AutoCAD'in yazdığı `…r01.dwg` (253 KB) + `.bak` var (eski sürüm; git dışı). Kaynak DXF bulutla aynı. Silmek Lokman'ın.
+- `autocad/` klasöründe AutoCAD'in yazdığı `…r01.dwg` + `.bak` var (AutoCAD kendi yazıyor; git dışı). Kaynak DXF bulutla aynı. Silmek Lokman'ın.
+- **13:00–13:15 kararları:** merdiven planın aynısı (kural belgesi 6.2–6.3; çizimde `merdiven_ciz`); dış kapılar şablonun kapılı pano çizimiyle (`sablon_kapili_pano`); köşeler şablonun `100X100 DIŞ KÖŞE DİREĞİ` bloğu (12 insert, aynalı); ölçüler iki ondalık virgüllü (dimrnd atıldı). Üretici: `python3 uret_cift_kat_bloklu.py` (autocad klasöründe), ~1 dk.
+- Pano aksı ↔ plan ölçüsü çatışması (merdiven duvarları 337/557 vs 318,75/569,75) açık; Soru 9 ile birlikte karar.
 
 ## Açık sorular (sırayla sorulacak; cevaplar kural belgesi §12'ye)
-~~1 giriş kapısı~~ (12:34 cevaplandı) · **2 merdiven kutusu 2 / 1,5 pano (sırada)** · 3 merdiven ölçüleri · 4 Fransız pencere 120/200 · 5 çıkmanın çatısı · 6 ara kat ·
+~~1 giriş kapısı~~ (12:34) · ~~2 merdiven kutusu~~ ~~3 merdiven ölçüleri~~ (13:00 "aynı buradaki gibi": 200 iç, U, kol 100, 16 rıht) · **2b zeminde merdivene giriş (sırada)** · 3 merdiven ölçüleri · 4 Fransız pencere 120/200 · 5 çıkmanın çatısı · 6 ara kat ·
 7 balkon taşması · 8 sürekli köşe profili · 9 706 / 710,25.
 Ayrıca: "Şablon 2024" (150 MB `Guncel_Sablon_2024.dxf`, depoda değil, Lokman'ın klasöründe; K03 blok adları beklemede) — çizim mantığı
 ne demek: katman/blok şeması mı, yoksa "kuralla çiz, sonra düzelt" sırası mı? Sırası gelince tek soru.

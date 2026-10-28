@@ -128,6 +128,31 @@ Biçim: `A### · saat · başlık` — Ne / Nerede / Sonuç / Durum (yapıldı �
 - Olay: Cmd+O kutusu açılmadan yol komut satırına yazıldı (R02 sekmesi, "Unknown command"); hiçbir komut çalışmadı, Esc ile temizlendi. Ders: Cmd+O'dan sonra ekran görüntüsüyle kutu doğrulanmadan yazılmaz.
 - Durum: yapıldı.
 
-### A026 · — · Sıradaki: Soru 2 (merdiven kutusu 2 pano / 1,5 pano) → Soru 3 (merdiven ölçüleri) → … → "çiz"
-- Elde: çift kollu U 252×281 (kol 126 ≈ 1 pano), tek kollu düz 375×122,5; taslak kutu 2 pano = 245 iç + arkaya 125,5 çıkma; 1,5 pano dört kollu birleşim doğurur (Motor bulgu 5).
+### A026 · 13:00–13:25 · Soru 2 ve 3 cevaplandı: "Aynı buradaki gibi çiz" (plandaki merdiven, kırmızı daire) → AutoCAD'e bire bir çizildi
+- Ne: Lokman merdiveni planda işaretledi. Okunan: kutu iç 200 × 260 yazılı (hesapla 125 gövde + 10 + 115 çıkma = 250), dış 220, duvarlar 337/557, ön duvar 561–571 (hol 152), çıkma 125; çift kollu U, kol 100, sağ kol 5 düz basamak (25), çıkmada 6 dönel (180°), sol kol 5 düz → 16 rıht; daire = başlangıç sağ kolda önde, ok = üst kata sol koldan önden varış. 1. kat planı aynı çizim; ön açık, çıkma arka duvarında 120/125 pencere. Zemin katta ön duvar çizili (giriş açıklığı planda yok → **Soru 2b**).
+- Yapılan: `uret_cift_kat_bloklu.py` → `merdiven_ciz(dx, kat1)`: katmanlar `MERDIVEN` (4) ve `MERDIVEN_DUVAR` (7); eski kesik "MERDİVEN ÇIKMASI" yer tutucusu kalktı. Motor'un ızgara duvarları (318,75/569,75) olduğu gibi duruyor; iki duvar yan yana görünüyor → pano aksı kararı Soru 9'a bırakıldı (not çizimde).
+- Kural belgesi: 6.2, 6.3, 6.5 güncellendi; §11'de 2 ve 3 kapatıldı; §12'ye 13:00 satırı.
+- Durum: yapıldı (AutoCAD'de 4. sekmede görüldü, 13:26).
+
+### A027 · 13:02 · Lokman: "Dış kapıda Güncel Şablon 2024'te var" → dış kapılar şablon çizimiyle
+- Ne: şablonda kapı blokları: `100 LÜK ÇELİK KAPI 90X120` (100 cm'lik pano, 84 açıklık, kanat + yay; çizgi duvarlı 17 projede), `100'LÜK 125'LİK KAPILI PANO(80'LİK)` (blok mantıklı 86,5 m² İDA örneğinde), `KAPI90` (sade sembol), `iç kapı`/`çelik kapı1` (1.400 varlık, ağır).
+- Yapılan: `sablon_kapili_pano(blok, kapi, en, mentese)`: şablonun 125'lik kapılı panosu 90'a (açıklık kenarları ±5, kanat ve yay +10) ve pano enine (116,25: uçlardan 4,625) uyarlanıp Motor'un dış kapılı pano bloklarının içeriği oldu (`…(90'LIK)` ve `…116.25…[SOL]`, aynalı). Pano bandı y 0–10'a hizalandı. İç kapılar henüz Motor sembolü.
+- Durum: yapıldı.
+
+### A028 · 13:13 · Lokman: "Köşeler 100*100 kutu profil olacak demiştim" → köşeler şablon bloğu
+- Ne: çizimde köşe bloğunun adı 100X100'dü ama geometrisi Motor'un 5×10 parçasıydı (haklı). Şablonda `100X100 DIŞ KÖŞE DİREĞİ` (10×10 kırmızı kutu + 2,5'lik pano çıkıntıları; `2X100X100 DIŞ/İÇ KÖŞE DİREĞİ` varyantları) hazır.
+- Yapılan: 6 köşe × 2 kat = 12 insert şablon bloğuyla değiştirildi (köşe yönüne göre x/y aynalama tablosu `KOSELER`); eski blok silindi; kartta ORTAK satırı "var (şablon bloğu)". Et kalınlığı hâlâ Soru 8.
+- Durum: yapıldı (ön-sol, arka-sağ, balkon köşeleri görsel denetimden geçti).
+
+### A029 · 13:15 · Lokman: "ölçülendirmede 125.5, virgülden sonra 2 rakam olsun; 126 gösteriyor"
+- Neden 126: Motor'un PORTMAN ölçü stilinde `dimrnd 0.0` açık yazılı; ezdxf 1.4.4 `xround(v, 0)` ile tam sayıya yuvarlıyor (yeni belgede stil dimrnd'siz → "125,5" çıkıyor; denendi). Motor'un kendi çıktısı etkilenmiyor (yazıyı kendisi basıyor).
+- Yapılan: üreticide stil kopyalanırken `dimrnd` atılıyor; `dimdec 2, dimzin 0, dimdsep ','` → "125,50", "763,00", "116,25". 69 ölçü yeniden üretildi.
+- Durum: yapıldı (AutoCAD'de görüldü).
+
+### A030 · 13:24 · Erişim ve AutoCAD
+- Bilgisayar erişimi cihaz tarafında yine sıfırlandı → AutoCAD 2026 erişimi + tam kontrol yeniden istendi, verildi. AutoCAD penceresi başka Space'teydi → `bring_to_current_space` (99) ile geldi.
+- Cmd+W → Don't Save → Cmd+O (ilk basış yine yutuldu, ikinci açtı; ekran görüntüsüyle doğrulandı) → Cmd+Shift+G → yol → Open. `autocad/…r01.dwg` 254 KB'a değişti: AutoCAD bu DWG'yi kendi yazıyor (Don't Save'e rağmen; otomatik kayıt olabilir). Git dışı; kaynak DXF md5 bulutla aynı (7e419c47…).
+- Durum: yapıldı.
+
+### A031 · — · Sıradaki: Soru 2b (zeminde merdivene giriş: ön duvar açık mı?) → Soru 4 (Fransız pencere) → 5 → 6 → 7 → 8 (et) → 9 (ölçü sadakati + pano aksı) → İş Emri JSON → Motor
 - Durum: bekliyor (Lokman).

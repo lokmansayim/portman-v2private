@@ -30,10 +30,9 @@ Blok adı = malzeme adı. Geometri Motor'un panoları (Astra v1.4.3), adlar Gün
 | 60'LIK 57.75'LİK PANO | 1 | 1 | 2 | yeni (kural) |
 | 60'LIK 59.75'LİK PANO | 4 | 5 | 9 | yeni (kural) |
 | 60'LIK 62.75'LİK PANO | 0 | 1 | 1 | yeni (kural) |
-| 100X100 SÜREKLİ DIŞ KÖŞE DİREĞİ (5320) | 6 | 6 | 12 | yeni |
 | 100X100 VERANDA DİKMESİ | 1 | 1 | 2 | yeni |
 | 60X30 İÇ KÖŞE BAĞLANTISI | 0 | 2 | 2 | yeni |
 | 60X60 3 LÜ H BAĞLANTI DİREĞİ | 4 | 3 | 7 | var |
-| ORTAK · 100X100 SÜREKLİ DIŞ KÖŞE DİREĞİ (5320) | — | — | 6 | yeni (R02 CK-B01) |
+| ORTAK · 100X100 DIŞ KÖŞE DİREĞİ (kutu profil, sürekli iki kat boyu 5320; Lokman 12:09/13:13) | — | — | 6 | var (şablon bloğu; '2X100X100 DIŞ KÖŞE DİREĞİ' varyantı da var) |
 
-Motor'da olmayıp çizimde kesik çizgiyle işaretlenenler: merdiven çıkması (arkaya 125,5), balkon taşması (30). Merdivenin kendisi: Soru 3.
+Motor'da olmayıp çizimde elle olanlar: merdiven kutusu ve merdiven (Lokman'ın planı bire bir, 13:00: iç 200 × 250, çıkma 125, çift kollu U kol 100, 5+6+5 = 16 rıht; katman MERDIVEN/MERDIVEN_DUVAR, blok değil), balkon taşması 30 (kesik çizgi). Dış kapılı panoların çizimi Güncel Şablon 2024'ün kapılı pano bloğundan (13:02); iç kapılar henüz Motor'un Astra sembolü.
