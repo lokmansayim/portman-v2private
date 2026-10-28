@@ -59,6 +59,7 @@ CELIK_TURLERI = [
     (r"^Veranda dikmeleri \(kolon paneli\)$", "kolon_kiris"),
     (r"^Kirişler \(kiriş paneli", "kolon_kiris"),
     (r"^Çatı makas panelleri( \(\d+,\d+ mm\))?$", "makas"),              # İE-16 PR-3c: tek açıklığı 8 m'yi aşan makaslar ayrı satır
+    (r"^Ara paneller \(kırma yüzü\)$", "makas"),                         # İE-16 PR-6b: kırma ucunun ara panelleri (B1); ÇP-03 ve ÇP-19'da "MAKAS PANELİ"
     (r"^Tavan paneli \(makas arası\)$", "tavan_paneli"),
     (r"^Çatı paneli \(", "cati_paneli"),
     (r"^Baca karkası$", "baca_paneli"),
