@@ -12,7 +12,7 @@
         100,
         null
       ],
-      "adet": 6,
+      "adet": 7,
       "birim": "adet",
       "not": "5 dış köşe + 1 veranda iç köşesi. Profil kesim boyu tanımlı değil."
     },
@@ -38,7 +38,7 @@
         null,
         null
       ],
-      "adet": 4,
+      "adet": 2,
       "birim": "adet",
       "not": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli."
     },
@@ -246,7 +246,7 @@
         100,
         2500
       ],
-      "adet": 5,
+      "adet": 4,
       "birim": "adet",
       "not": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli."
     },
@@ -285,7 +285,7 @@
         100,
         2500
       ],
-      "adet": 2,
+      "adet": 1,
       "birim": "adet",
       "not": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli."
     },

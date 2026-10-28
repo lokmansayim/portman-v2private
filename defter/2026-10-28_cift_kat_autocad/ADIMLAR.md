@@ -195,5 +195,13 @@ Biçim: `A### · saat · başlık` — Ne / Nerede / Sonuç / Durum (yapıldı �
 - Yapılan: `ck_izgara/zemin_kat.json`: HOL–WC HOLÜ kapısı kaldırıldı; ODA (`duvar_ucu: on`), WC (`sag`), WC HOLÜ–MUTFAK (`sol`), SALON–MUTFAK (`on`) — pano dizini kaldırılarak; Motor zemin validation True. Üretici: çıkma 251 dış (`merdiven_ciz`), kıyas kopyasında yalnız dış ölçüler (üst 323,75 | 251 | 188,25; 763; sol/sağ 706; çıkma 125,5 iki yanda; 831,5; alt 454,25 | 308,75; taşma 30 gerçek çizgi). `a4_dis_olcu.py` → `Portman_IE22-CK01_ZEMIN_dis_olculer_A4.pdf` (A4 yatay, H simgeleri/notlar/köşe kutuları/akslar gizli; `draw_layout(filter_func)`, `draw_entities` beyaz zeminde beyazı çevirmiyor). Sohbete gönderildi, Mac'e kopyalandı.
 - Durum: yapıldı; Lokman dış ölçüleri sıra sıra düzeltecek.
 
+### A041 · 14:41–14:50 · Lokman: "profiller yok" · "kova dıştan dışa 271" · "WC holünden girince karşında duvar var" · "balkon kiriş çizgisini 40 dışarı al"
+- Profiller: A4 betiğinde KOSE_PROFIL_100 ve üçlü H katmanlarını gizlemiştim → açıldı (hata bendeydi). Lokman: "beni çok yordun, GPT Astra 6.0 açık ara daha iyiydi."
+- Kova 271: kova duvarlarının iç yüzleri akslarda (313,75–323,75 ve 574,75–584,75 bantları), iç 251 = 2 pano; çıkma arka duvarı 2 tam pano, dış 271 × 125,5. Üreticide `cift_kat_izgara` nokta kuralına iki bant eklendi; dik bantlar 313,75 → 0, 564,75 → +10; bu duvarlara değen yatay panolar uç kurallarıyla uzatıldı/kısaltıldı (`uzat_blok`, yeni `kisalt_bas`); H ve iç köşe parçaları duvar eksenine; arka duvar yan parçaları 52,75.
+- HOL–WC HOLÜ: önceki PDF okumam (taralı = duvar) yanlıştı; giriş kapısının karşısı açık olmalı → `acik_sinirlar` += [HOL, WC HOLÜ]; Motor zemin validation True.
+- Balkon: kiriş çizgisi 40 dışarıda (planda "40"; ben 30 okumuştum) → kesik kutu ve kıyas çizgisi 40, kural belgesi 7.2.
+- A4 v3 gönderildi (üst 313,75 | 271 | 178,25). DXF/PDF/JSON Mac'e kopyalandı.
+- Durum: yapıldı; dış ölçüler sıra sıra Lokman'da.
+
 ### A035 · — · Sıradaki: Soru 2b (zeminde kovaya giriş: önü açık mı, planda ön duvar çizili) → Soru 4 (Fransız pencere) → 5 (çıkma çatısı) → 6 → 7 → 8 (et) → 9 → İş Emri JSON → Motor (PR-1: bulgu 7–8)
 - Durum: bekliyor (Lokman).
