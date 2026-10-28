@@ -151,6 +151,27 @@ def test_ozet_ve_kosullar(cikti, T, tmp_path):
     assert r[1].value == "DENEME 1" and not r[3].value
 
 
+def test_is_emrindeki_teklif_bolumu(tmp_path):
+    """D-28: proje kararı İş Emri'nde. `teklif.tavan` seçenekleri, `teklif.kosullar` koşulları verir; komut satırı üstüne yazar; bilinmeyen
+    koşul adı durur."""
+    ie = _oku(IE)
+    ie["teklif"] = {"tavan": ["asma", "ters"], "kosullar": {"Ödeme şekli": "DENEME İE"}}
+    (tmp_path / "ie.json").write_text(json.dumps(ie, ensure_ascii=False), encoding="utf-8")
+    assert TK.main([str(tmp_path / "ie.json"), str(tmp_path / "a")]) == 0
+    J = _oku(tmp_path / "a" / "TK01_teklif.json")
+    assert [s["ad"] for s in J["secenekler"]] == ["Asma tavan", "Ters tavan"]
+    assert [s["fiyat"]["ozet"]["toplam"] for s in J["secenekler"]] == [419771.13, 418500.13]      # Motor teklif bölümünü okumaz
+    assert J["kosullar"] == {"Teslim süresi": None, "Ödeme şekli": "DENEME İE"}
+    (tmp_path / "k.json").write_text(json.dumps({"kosullar": {"Ödeme şekli": "DENEME DOSYA"}}, ensure_ascii=False), encoding="utf-8")
+    assert TK.main([str(tmp_path / "ie.json"), str(tmp_path / "b"), "--tavan", "ters", "--kosullar", str(tmp_path / "k.json")]) == 0
+    J = _oku(tmp_path / "b" / "TK01_teklif.json")
+    assert [s["ad"] for s in J["secenekler"]] == ["Ters tavan"] and J["kosullar"]["Ödeme şekli"] == "DENEME DOSYA"
+    ie["teklif"]["kosullar"] = {"Teslim suresi": "x"}
+    (tmp_path / "ie.json").write_text(json.dumps(ie, ensure_ascii=False), encoding="utf-8")
+    with pytest.raises(SystemExit):
+        TK.main([str(tmp_path / "ie.json"), str(tmp_path / "c")])
+
+
 def test_fiyat_kaynagi(cikti, T):
     """Fiyat kaynağı sayfası her anahtarı bir kez, defterdeki kaydıyla yazar (bant: defterin bandı)."""
     ws = load_workbook(cikti / "TK01_teklif.xlsx")["Fiyat kaynağı"]

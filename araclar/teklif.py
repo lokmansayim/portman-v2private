@@ -6,10 +6,14 @@ Liste dosyası almaz: listeyi İş Emri'nden Motor'la kendisi üretir (`motor/pr
 düzeltilmiş liste giremez, adet düzeltmesi yoktur: düzeltme kural kitabına ya da İş Emri'ne işlenir (D-28). Fiyat `araclar/fiyatla.py`
 ile defterden; fiyat uydurulmaz, fiyatı olmayan satır boş kalır ve sayılır. LLM yok, ağ yok.
 
-- Seçenekler: `--tavan asma,ters` her seçenekte İş Emri'nin tavanını değiştirir (TK-01: Patron 27 Ekim 13:49, asma tavanla fiyat, ters
-  tavanla da); verilmezse İş Emri'nin kendi tavanıyla tek seçenek.
-- Teklif koşulları (teslim süresi, ödeme şekli): `kurallar/teklif/kosullar.json`; `--kosullar` projeye özel dosyayla üstüne yazar. Değer
-  yoksa hücre sarı kalır ve "Patron'dan" yazar (Patron 28 Ekim 06:51: bayiye süre ve ödeme "teklifle birlikte bildirilir").
+- Proje kararları İş Emri'ndedir (D-28): isteğe bağlı `teklif` bölümü, `{"tavan": ["asma", "ters"], "kosullar": {...}}`. Motor bu
+  bölümü okumaz.
+- Seçenekler: İş Emri'nin `teklif.tavan`'ı ya da `--tavan asma,ters` (komut satırı İş Emri'nin üstüne yazar) her seçenekte İş Emri'nin
+  tavanını değiştirir (TK-01: Patron 27 Ekim 13:49, asma tavanla fiyat, ters tavanla da); ikisi de yoksa İş Emri'nin kendi tavanıyla tek
+  seçenek.
+- Teklif koşulları (teslim süresi, ödeme şekli): genel değer `kurallar/teklif/kosullar.json`, üstüne İş Emri'nin `teklif.kosullar`'ı, onun
+  üstüne `--kosullar` dosyası. Değer yoksa hücre sarı kalır ve "Patron'dan" yazar; değer uydurulmaz (Patron 28 Ekim 06:51: bayiye süre ve
+  ödeme "teklifle birlikte bildirilir").
 - Excel düzeni Patron'un yükleme listesinin düzeni (28 Ekim 06:40–06:41): grup adı sütun değil, grubun üstünde başlık satırı ve altında
   ara toplam; tek "Adet" sütunu; ölçüsü birim olan satırda (adet, metre, kova …) ölçü boş, birim o. Sayfalar: Özet, her seçenek bir
   sayfa, Fiyat kaynağı. Liste sayfasını `fiyatla.py --excel` de bu modülün yazıcısıyla yazar (tek yazıcı).
@@ -64,6 +68,7 @@ def kaynak_durumu(s: dict, defter: dict, hat: str) -> tuple[str, dict | None]:
 
 
 def secenekler(ie: dict, tavan: list[str] | None) -> list[tuple[str, dict]]:
+    tavan = tavan or (ie.get("teklif") or {}).get("tavan")
     if not tavan:
         t = (ie.get("ozellikler") or {}).get("Tavan")
         return [(f"{t} tavan" if t else "Teklif", {})]
@@ -73,10 +78,17 @@ def secenekler(ie: dict, tavan: list[str] | None) -> list[tuple[str, dict]]:
     return [(f"{TAVAN[t]} tavan", {"Tavan": TAVAN[t]}) for t in tavan]
 
 
-def kosullari_oku(ek: Path | str | None = None) -> dict:
+def kosullari_oku(ek: Path | str | None = None, ie: dict | None = None) -> dict:
+    """Genel koşullar, üstüne İş Emri'nin `teklif.kosullar`'ı, onun üstüne `ek` dosyası. Genel dosyada olmayan koşul adı durur (yazım
+    hatası yeni satır açmasın)."""
     K = dict(json.loads(KOSULLAR.read_text(encoding="utf-8"))["kosullar"])
+    katmanlar = [((ie or {}).get("teklif") or {}).get("kosullar") or {}]
     if ek:
-        K.update(json.loads(Path(ek).read_text(encoding="utf-8")).get("kosullar") or {})
+        katmanlar.append(json.loads(Path(ek).read_text(encoding="utf-8")).get("kosullar") or {})
+    for k in katmanlar:
+        if bilinmeyen := sorted(set(k) - set(K)):
+            raise SystemExit(f"DUR: bilinmeyen teklif koşulu {bilinmeyen}; bilinenler {sorted(K)}")
+        K.update(k)
     return K
 
 
@@ -266,7 +278,7 @@ def main(argv: list[str] | None = None) -> int:
     secim = secenekler(ie, [t.strip() for t in o.tavan.split(",")] if o.tavan else None)
     defter = F.oku(o.defter)
     try:
-        T = uret(ie, defter, secim, kosullari_oku(o.kosullar), o.oneri)
+        T = uret(ie, defter, secim, kosullari_oku(o.kosullar, ie), o.oneri)
     except PL.ListeYazilmaz as e:
         print(f"teklif: {e.neden}", file=sys.stderr)
         return 1
