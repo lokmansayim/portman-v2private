@@ -37,5 +37,6 @@ Kapanış, "çalışıyor" demenin kanıtını üretir. Sıra sabittir; bir adı
 - `git push -u origin <iş dalı>`. **main'e push ve merge yok.**
 
 ## 6. PR ve özet
-- `gh` varsa taslak PR aç: `gh pr create --draft --base main --title "<KOD> · <başlık>" --body-file <geçici dosya>`; yoksa karşılaştırma bağlantısını yaz (`https://github.com/lokmansayim/portman-v2private/compare/main...<dal>`).
+- Taslak PR aç: `gh pr create --draft --base main --title "<KOD> · <başlık>" --body-file <geçici dosya>` ya da GitHub MCP `create_pull_request` (`draft: true`); ikisi de yoksa karşılaştırma bağlantısını yaz (`https://github.com/lokmansayim/portman-v2private/compare/main...<dal>`). GitHub doğrulaması taslakta koşmaz (dakika, `AGENTS.md` › Değişiklik disiplini).
+- Birleştirme onayı alınınca (ya da onay sorulmadan hemen önce): güncel `main`'i dala al, PR'ı hazır yap (`gh pr ready` ya da MCP `update_pull_request`, `draft: false`), "Doğrulama sonucu" yeşil olunca birleştir; kırmızıysa düzelt, birleştirme yok.
 - Lokman'a 6 satırlık özet: ne değişti, kanıt sayıları, inceleme bulguları, kalan riskler, onayını bekleyen şeyler, sıradaki iş. Son cümle: **"main'e birleştirme senin onayınla."**
