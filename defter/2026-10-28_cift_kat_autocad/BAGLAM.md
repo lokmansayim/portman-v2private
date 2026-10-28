@@ -25,7 +25,13 @@
 Merdiven çıkması (arkaya 125,5), merdivenin kendisi, balkonun 30 cm taşması, iki kat tek dosyada, ara kat, Fransız pencere 120/200.
 
 ## Karar verilenler (bu oturum)
-- Git bulutta, Mac'e kopya (Lokman "evet devam et", 10:54).
+- Git bulutta, Mac'e kopya (Lokman "evet devam et", 10:54). Silme izni yok; `.lock` ve kopya dosyalar kalır.
+- Tam kontrol (fare/klavye) Lokman'ın isteğiyle (11:04); cihaz tarafı sıfırlanınca erişim yeniden istenir.
+- **Kural (Lokman 12:09):** çift katta köşe direkleri 100×100 profil, pano dizilimi tek katla aynı (kural belgesi §12).
+- **Blok adları:** Güncel Şablon 2024 kuralı (`<kalınlık>'LÜK <en>'LİK … PANO`; ondalık nokta, AutoCAD virgül kabul etmez). Yeni çizim: `deneme/2026-10-28_cift_kat/autocad/Portman_IE22-CK01_CIFT_KAT_sablon_bloklu_r01.dxf` (üretici `uret_cift_kat_bloklu.py`; yeniden koş: `python3 uret_cift_kat_bloklu.py` o klasörde).
+- Referanslar: Şablon 2024 envanteri `autocad/sablon_inceleme/RAPOR.md`; Astra R02 `ref_prefabrik/cift_kat_R02/` (merdiveni yok); merdiven `autocad/merdiven/MERDIVEN_VARYASYONLARI.md`; pencere `autocad/PENCERE_VARYASYONLARI.md`.
+- AutoCAD'de açık sekmeler (12:35): Güncel Şablon 2024 (değişiklik işaretli, **kaydedilmeyecek**), sablon_bloklari_yapi_v2, R02 (salt okunur), yeni çift kat r01.
+- AutoCAD yolu: `Cmd+O` → `Cmd+Shift+G` → yol → Enter → Open; komut satırına boşluklu yol yazılmaz; komut yazmadan önce doğru sekme doğrulanır (ERASE olayı, A021).
 
 ## Açık sorular (sırayla sorulacak; cevaplar kural belgesi §12'ye)
 1 giriş kapısı · 2 merdiven kutusu 2 / 1,5 pano · 3 merdiven ölçüleri · 4 Fransız pencere 120/200 · 5 çıkmanın çatısı · 6 ara kat ·

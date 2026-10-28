@@ -139,3 +139,10 @@ panosunda (plandakinden 51 cm arkada).
 9. **Ölçü sadakati**: gövde 706 korunup son pano kesilsin mi (bugünkü taslak), yoksa 5,5 tam pano = 710,25 mi?
 
 Lokman'ın cevapları bu belgeye tarihli eklenir; kural haline gelen madde `.claude/rules/motor-cizim.md`'ye ve gerekirse `KARARLAR/`'a geçer (D-07, K21).
+
+## 12. Cevaplar ve kararlar (tarihli)
+
+| Tarih | Soru / madde | Lokman'ın sözü | Kurala etkisi |
+|---|---|---|---|
+| 28.10.2026 12:09 | **Soru 8** (köşe profili) ve **1.1 / 2.8** (ızgara) | "Çift katın tek kattan en büyük farkı köşe direkleri **100×100 profil**; **pano dizilimi aynı**." Astra'yla yapılmış 150 m² çift kat (R02, 12.500 × 6.000, döşeme detaylarına kadar) Mac'te; referans alınacak. | 8.1: dört dış köşede 100×100 sürekli köşe direği (R02'deki 100 × 100 × 5320 ile uyumlu; et kalınlığı hâlâ **Soru**). 2.8 teyit: iki katta ızgara ve pano dizilimi tek katla aynı. Şablon 2024 notu da aynı yönde: köşe direkleri kutu profil, tek parça, ankrajlı (`deneme/2026-10-28_cift_kat/autocad/sablon_inceleme/RAPOR.md` §4). |
+| 28.10.2026 | Blok adları (K03) | "Her blok malzeme kartındaki gibi isim isim olsun" (Güncel Şablon 2024 blok mantığı). | Yeni çift kat çizimi Şablon 2024 blok adlarıyla (`100'LÜK 125'LİK PANO`, `100'LÜK 125'LİK (120x100) PENCERELİ PANO`, `100X100 DIŞ KÖŞE DİREĞİ`…); Motor eşleme taslağı RAPOR §2. K03 kararı Lokman'da. |

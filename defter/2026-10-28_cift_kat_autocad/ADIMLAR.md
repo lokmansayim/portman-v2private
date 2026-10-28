@@ -93,8 +93,28 @@ Biçim: `A### · saat · başlık` — Ne / Nerede / Sonuç / Durum (yapıldı �
 - Sonuç: AutoCAD'de ikinci sekme `sablon_bloklari_yapi_v2` açık (kaydedilmedi; adı/yeri Lokman'ın). Erişim ve tam kontrol bu arada iki kez yeniden istendi (cihaz tarafı sıfırlanıyor).
 - Durum: yapıldı.
 
-### A020 · — · Lokman'a tek soru: yeni pencerede hangi ev, hangi blok adları
-- Soru: Lokman'ın evi (763 × 706, Motor'un pano dizilimi) Şablon 2024 blok adlarıyla mı kurulsun (eşleşmeyen panolar şablonun ad kuralıyla yeni blok: "100'LÜK 62,5'LİK PANO", "100'LÜK 125'LİK (120x125) PENCERELİ PANO"…), yoksa önce şablondaki İDA 86,5 m² çift kat örneği mi incelensin?
+### A020 · 12:09 · Lokman'ın cevabı: Astra R02 (150 m²) + kural "köşe direkleri 100×100, pano dizilimi aynı"
+- Ne: Lokman: "Astra'yla 150 m² çift katı döşeme detaylarına kadar yapmıştık; tek kattan en büyük fark köşe direkleri 100×100 profil, pano dizilimi aynı." Sonra (12:12): "Astra'nınki de yarım, merdiven yok."
+- Sonuç: kural belgesi §12'ye tarihli yazıldı (Soru 8 kısmen, 2.8 teyit). Depodaki `ref_prefabrik/cift_kat_R02/` okundu (12.500 × 6.000, 59 pano/kat, kat kotları 0/250/280/282/532, 4 × 100×100×5320 sürekli köşe). Mac'teki R02 DWG (`~/Documents/Codex/2026-09-12/me/outputs/…R02.dwg`) AutoCAD'de **salt okunur** açıldı (3. sekme).
+- Durum: yapıldı.
+
+### A021 · 12:18–12:34 · Yeni çizim: `autocad/Portman_IE22-CK01_CIFT_KAT_sablon_bloklu_r01.dxf` (üretici `uret_cift_kat_bloklu.py`)
+- Ne: Motor'un iki kat DXF'inden ana plan bölgesi (bloklar, yazılar, akslar, 69 ölçü) alındı; BOM_* blokları **Şablon 2024 ad kuralına** çevrildi (geometri Motor'un); 1. kat x+1100'de; merdiven çıkması ve balkon taşması kesik çizgiyle; altta kısa kenar kesiti (kat kotları, 100×100 sürekli köşe, %33 çatı); sağda malzeme kartı (29 satır, kat kat); en altta Şablon 2024 blok kartı (66 blok). Malzeme kartı md: `…_malzeme_karti.md`.
+- Düzeltilen hatalar (sırayla): kütüphane bloklarında taban noktası sıfırlanmamıştı (geometri 1,4 M uzakta) → `base_point=(0,0,0)`; Importer aynı adlı bloğu "…0" ile kopyalıyordu → birleştirildi; **AutoCAD blok adında virgül kabul etmiyor** ("93,12" → "93.12"; şablon da nokta kullanır); Importer DIMSTYLE taşımıyor ve ölçülerin geometri bloğu boş kalıyordu → PORTMAN stili elle kopyalandı, ölçüler `render()` ile yeniden üretildi (69/69); kesit planın üstüne biniyordu → y −900'e alındı.
+- **Olay:** DXF'i açarken tıklama boşa gitti, yazdığım "ZOOM / E" R02 sekmesinde **ERASE** olarak başladı; hiçbir nesne seçilmeden Esc ile iptal edildi, R02 salt okunur (zarar yok). Ders: dosya açıldığı sekmede doğrulanmadan komut yazılmaz.
+- Sonuç: 4. sekmede açık, Lokman'ın ekranında. 
+- Durum: yapıldı (r01; Lokman'ın düzeltmeleri bekleniyor).
+
+### A022 · 12:16 · Lokman: merdiven varyasyonları Drive'da "CADler"
+- Ne: Drive `CADler` (100+ dosya) tarandı; 10 merdiven dosyası indirildi (`indirilen/cadler/`, bulut). Eski DXF'ler ondalık virgüllü → düzeltilerek okundu.
+- Sonuç: 2 sade prefabrik merdiven planı (çift kollu U 252×281, kol 126, 8+8 × 25; tek kollu düz 375×122,5, 15 × 25) → `autocad/merdiven/`; 6 çelik merdiven panel çizimi (ARK/LCAD); `Merdiven.dwg` AutoCAD'de bakılacak. Belge: `autocad/merdiven/MERDIVEN_VARYASYONLARI.md` (adlar maskeli).
+- Durum: yapıldı.
+
+### A023 · 12:17 · Lokman: "pencere varyasyonlarını da bir yere topla"
+- Sonuç: `autocad/PENCERE_VARYASYONLARI.md` — bu evdekiler (120/125, 60/125, 60/40, 120/200 Fransız), Motor (BK-13), R02, Şablon 2024'teki 40 ölçü etiketi (120/120 ×363, 60/40 ×139, 120/180 ×105, 120/100 ×65, 160/180, 80/120…; kapı ölçüleri ayrıldı), pencere blokları, sipariş paftası notu ("verilen ölçüler iç ölçülerdir…"), PORTATİFEV 150 pencere listesi (POZ 1–5).
+- Durum: yapıldı.
+
+### A024 · — · Sıradaki: Soru 1 (giriş kapısı) → "çiz" → İş Emri JSON → Motor
 - Durum: bekliyor (Lokman).
 
 ### A009 · — · Soru 1 (giriş kapısı)
