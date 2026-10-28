@@ -12,8 +12,8 @@ Sen Portman'ın geliştiricisisin; sahibi Lokman kod yazmaz. Bu komut yeni bir i
 ## Adımlar
 
 1. **Kodu ve dalı belirle.** `$ARGUMENTS`'ın ilk sözcüğü koddur: `İE-NN` ürün işi, `BK-NN` bakım. Dal adı küçük harf ve tire ile: `ie-NN-kisa-ad` ya da `bk-NN-kisa-ad`. Kod daha önce kullanılmışsa (`ls docs/is_emirleri` ve `KARARLAR/README.md › Numara defteri`; öteki dallardaki numaralar yalnız defterde görünür) dur ve sor. Alınan kod deftere aynı commit'te yazılır.
-2. **Temeli seç.** Varsayılan `main`. Üstüne kurulacağı açık bir iş dalı varsa (DURUM'daki aktif iş) onu söyle ve nedenini yaz; `git fetch` sonrası `git checkout -b <dal> origin/<temel>`.
-3. **Kapsamı oku.** `DURUM.md` (en yeni iş dalındaki), `KARARLAR/README.md`'nin "Açık kararlar" bölümü ve ilgili `.claude/rules/` dosyası. Bu iş bir açık karara dayanıyorsa önce o kararın Lokman tarafından verilmesi gerekir; belgede "Önce karar gerekir" diye yaz ve dur.
+2. **Temeli seç.** Varsayılan `main`. Üstüne kurulacağı açık bir iş dalı varsa (`docs/durum/`'daki en yeni eklerde yazan aktif iş) onu söyle ve nedenini yaz; `git fetch` sonrası `git checkout -b <dal> origin/<temel>`.
+3. **Kapsamı oku.** `docs/durum/`'daki en yeni ekler (açık iş dallarındakiler dahil), `KARARLAR/README.md`'nin "Açık kararlar" bölümü ve ilgili `.claude/rules/` dosyası. Bu iş bir açık karara dayanıyorsa önce o kararın Lokman tarafından verilmesi gerekir; belgede "Önce karar gerekir" diye yaz ve dur.
 4. **Belgeyi yaz:** `docs/is_emirleri/<KOD>.md`, `docs/is_emirleri/BK-01.md` biçiminde:
    - Başlık: `# <KOD> · <başlık>`; dal, temel commit, onay satırı ("Onay: Lokman, <tarih> (plan)").
    - **Amaç** — neyi, neden; neyin değişmeyeceği.
