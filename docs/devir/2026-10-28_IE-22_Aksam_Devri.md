@@ -56,6 +56,13 @@ iç köşe | 125,5 | köşe | çıkma 125,5 | köşe. 11 WC ön **[Tahmin]** 125
 5. Oturum sonu: `DURUM.md`, devir notu, commit, push; Mac'e kopya. Lokman'ın silmesi için: `autocad/Guncel_Sablon_2024_kopya.dxf` (157 MB, git dışı),
    AutoCAD'in yazdığı `…r01.dwg` / `.bak`.
 
+## Doğrulama (16:45)
+
+`dogrula.py --hizli` (ortam `araclar/ortam_kur.sh` ile kuruldu, sanal ortam): harness 22/22 AYNI, referans girdiler 78/78, motor altınları AYNI, sır taraması
+AYNI; **`genel_c8801` PNG izleri FARKLI** (6 PNG, `plan_png_sha256`; DXF/PDF/JSON/IFC izleri AYNI). Aynı koşu dalın tabanı `d0ce8cb`'de (main, dokunulmamış,
+ayrı worktree) **aynı farkı veriyor** → fark bu bulut kabının çizim ortamından (yazı tipi / matplotlib 3.11.2 PNG baytları), bu daldan değil; dalda
+`motor/`, `kurallar/`, `modeller/`, `testler/` tabana göre değişmedi (diff boş). Yeni oturum Mac'te ya da CI'da yeniden koşmalı; yeniden dondurma gerekmez.
+
 ## Kurallar (hatırlatma)
 
 Türkçe; her adım iki cümle; onay gereken yerde tek soru; Lokman kısa mesaj ister, uzun listede ipi kaçırır (16:18: liste değil ekran); kişi/bayi adı ve
