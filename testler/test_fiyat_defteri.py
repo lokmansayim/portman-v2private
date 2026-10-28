@@ -67,7 +67,13 @@ def test_defterde_kisisel_veri_yok():
 
 
 def test_birebir_anahtar_ve_onay_kurali(defter):
+    """Onaylı kalem toplama girer, onaysız öneri yalnız `--oneri` ile. Defter r04'te prefabrik hatta fiyatlı öneri kalmadı (Lokman 28 Ekim
+    13:27 TK-01'in önerilerini onayladı); kural, defterin kopyasına konan bir öneri kalemiyle sınanır."""
+    defter = copy.deepcopy(defter)
     pre = defter["hatlar"]["prefabrik"]["kalemler"]
+    if not any(not g["onay"] and g["fiyat"] is not None for g in pre.values()):
+        pre["Deneme önerisi | adet"] = {"fiyat": 150, "birim": "adet", "kaynak": "CTKB", "kaynak_satir": None, "kaynak_kalem": "Deneme",
+                                       "durum": "yedek öneri", "onay": False, "not": "test kalemi"}
     onayli = next(k for k, g in pre.items() if g["onay"])
     onaysiz = next(k for k, g in pre.items() if not g["onay"] and g["fiyat"] is not None)
     L = {"satirlar": [_pre(*onayli.split(" | "), 3), _pre(*onaysiz.split(" | "), 2)]}
@@ -99,22 +105,23 @@ def test_pano_eni_bandi(defter, olcu, fiyat):
 
 def test_kiris_boy_onerisi(defter):
     """CIO, 28 Ekim: kaydı olmayan kiriş boyu 6 m tam boyun fiyatından boyla orantılı öneri alır (tam TL'ye yarım yukarı). Yöntem defterdeki
-    onaylı kiriş boylarını aynen verir (Patron 27 Ekim 22:08); yeni boy onay bekler, varsayılan toplama girmez, satırda ve özette durur."""
+    onaylı kiriş boylarını aynen verir (Patron 27 Ekim 22:08; 28 Ekim 13:27'de onaylanan 3860, 2610, 1255 dahil, defter r04); yeni boy onay
+    bekler, varsayılan toplama girmez, satırda ve özette durur."""
     K = "Kutu profil (kiriş) 100 × 100"
     pre = defter["hatlar"]["prefabrik"]
     onayli = {k.split(" | ")[1]: g["fiyat"] for k, g in pre["kalemler"].items() if k.startswith(K + " | ")}
-    assert onayli == {"L 3760": 3133, "L 1710": 1425, "L 2510": 2092, "L 1200": 1000}
+    assert onayli == {"L 3760": 3133, "L 1710": 1425, "L 2510": 2092, "L 1200": 1000, "L 3860": 3217, "L 2610": 2175, "L 1255": 1046}
     for olcu, fiyat in onayli.items():
         assert F.boy_onerisi_bul(_pre(K, olcu, 1), pre["boy_onerileri"])[1] == fiyat, olcu
-    L = {"satirlar": [_pre(K, "L 3860", 1), _pre(K, "L 1255", 2), _pre(K, "L 3760", 1), _pre(K, "100 × 100", 1)]}
+    L = {"satirlar": [_pre(K, "L 3960", 1), _pre(K, "L 1355", 2), _pre(K, "L 3760", 1), _pre(K, "100 × 100", 1)]}
     R = F.fiyatla(L, defter)
     a, b, c, d = R["satirlar"]
-    assert (a["birim_fiyat"], a["tutar"], a["durum"], a["oneri_fiyat"]) == (None, None, "öneri boy, onay bekliyor", 3217.0)
-    assert (b["oneri_fiyat"], c["durum"], c["tutar"], d["durum"]) == (1046.0, "onaylı", 3133, "defterde yok")   # kaydı olan kendi kaydıyla
+    assert (a["birim_fiyat"], a["tutar"], a["durum"], a["oneri_fiyat"]) == (None, None, "öneri boy, onay bekliyor", 3300.0)
+    assert (b["oneri_fiyat"], c["durum"], c["tutar"], d["durum"]) == (1129.0, "onaylı", 3133, "defterde yok")   # kaydı olan kendi kaydıyla
     assert "oneri_fiyat" not in c and "oneri_fiyat" not in d
-    assert R["ozet"]["toplam"] == 3133 and R["ozet"]["oneri_bekleyen"] == {"satir": 2, "tutar": 3217 + 2 * 1046}
+    assert R["ozet"]["toplam"] == 3133 and R["ozet"]["oneri_bekleyen"] == {"satir": 2, "tutar": 3300 + 2 * 1129}
     R2 = F.fiyatla(L, defter, oneri=True)
-    assert [x["durum"] for x in R2["satirlar"][:2]] == ["öneri boy"] * 2 and R2["ozet"]["onerilerle"] == 3217 + 2 * 1046
+    assert [x["durum"] for x in R2["satirlar"][:2]] == ["öneri boy"] * 2 and R2["ozet"]["onerilerle"] == 3300 + 2 * 1129
     assert R2["ozet"]["oneri_bekleyen"] == {"satir": 0, "tutar": 0}
 
 
