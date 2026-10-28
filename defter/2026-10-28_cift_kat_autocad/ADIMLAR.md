@@ -228,5 +228,11 @@ Biçim: `A### · saat · başlık` — Ne / Nerede / Sonuç / Durum (yapıldı �
 - v7 gönderildi; Mac'e kopya.
 - Durum: yapıldı.
 
+### A046 · 15:18–15:35 · Lokman dizilim veriyor: arka sıra (10|2,5p|10|1,5p|10|1p+105,5|10), sol taraf (10|3p|2p|58,5|10), balkon 40 serbest
+- Arka sıra 773 ediyor; 763'te özel 95,5 → 95,5 ile çizildi, soruldu. Kova 1,5 pano (iç 188,25), her köşesinde profil.
+- Yöntem değişti: Motor'un zemin planını yamamak bırakıldı; `zemin_dizilimden()` Motor planını (akslar hariç) silip `ZEMIN` sözlüğündeki duvar dizilerinden kurar: dış duvarlar (sol/arka: Lokman; sağ/ön/balkon arka: Motor dizilimi), iç duvarlar (ODA/SALON–HOL/SALON–mutfak üstü tek hat 381,5–391,5; salon/mutfak 507–517; kova yanları; WC önü; çıkma arkası), profiller (köşe bloğu, yönlü), kapılar (ODA [SOL ALT], HOL–SALON [SAG ÜST], mutfak [SAG ALT · sola yaslı], WC [SOL ÜST · sola yaslı], giriş 90, balkon 90 [SOL]), pencereler (120/125 ×2 sol, 120/180 ön, 60/40 WC, 60/125 balkon), balkon kirişleri 40 dışarı, merdiven, oda adları, pano pano zincirler. Şablon tarzı dış kapı blokları x yönlü (dik duvarda rot 90), ön cepheye bakan yatay panolar rot 90 (sembol dışa). 115,5'lik vasistaslı 125,5'e uzatıldı.
+- A4 v8 (2 sayfa) gönderildi; kural belgesi §12 15:18 satırı. 1. kat hâlâ Motor dizilimi (Lokman verecek).
+- Durum: yapıldı.
+
 ### A035 · — · Sıradaki: Soru 2b (zeminde kovaya giriş: önü açık mı, planda ön duvar çizili) → Soru 4 (Fransız pencere) → 5 (çıkma çatısı) → 6 → 7 → 8 (et) → 9 → İş Emri JSON → Motor (PR-1: bulgu 7–8)
 - Durum: bekliyor (Lokman).
