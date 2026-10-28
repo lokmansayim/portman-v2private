@@ -76,6 +76,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-15](D-15.md) | Prefabrikte kapı ve pencere yerleşimi mantıkla: pencere odaya ortalı (ızgara ≤ ¼ pano kaçıyorsa kalır), oda kapıları bölmeye yaslı ve kanatları birbirine doğru, menteşe dayanaklı uçta; PK-01 paftasıyla ölçülü; LLM değil kod | 13.10 08:53 |
 | [D-16](D-16.md) | BK-09 çizim düzeltmeleri: kapı yayını kesen mahal etiketi oda içinde kaydırılır; pafta 2. sayfada TASLAK ayrı yazı; KT başlığında ve liste adında m² koddan (brüt oturum, model dosyası aynen); G1 ölçü zinciri eşiği `max(12,5; dış kaplama + en kalın dış duvar + 1)`; çentiğe değen dar sayı zincirin dış yanında; yazı denetimi kapı yayı ve sayfa dışı; referans `2026-10-14` bu kararla yeniden donduruldu | 14.10 (Lokman, BK-09 planı) |
 | [D-17](D-17.md) | Yükleme listesi Excel'i her çelik çizimde sunucuda üretilir (`kanal/worker.liste_exceli`, `uret` dışında; altın değişmez), bayi onaylayınca mühendise gider, bayiye gitmez; `openpyxl` + `et-xmlfile` sunucu listesinde; D-11'in "yalnız kabul paketinde" maddesi değişti | 14.10 (Lokman, Görev 4b ve 8b planı) |
+| [D-28](D-28.md) | Üretim kuralı: her çıktı (çizim, liste, rehber, teklif) `main`'deki tek koddan üretilir, elle ya da oturum betiğiyle değil; her çıktının Lokman onaylı hedef örneği depoda durur; kod değişince CI hedefle kıyaslar, fark varsa birleşmez; LLM yalnız okur (bilinen istisna D-18). Bugünkü açıklar dosyada (A1–A10) | 28.10 (Lokman 06:39) |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
 
@@ -98,7 +99,8 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-25 | çelik hattı prefabrikle yan yana başlar (25.10 08:42 ve 08:43; "çakışma ve bozulma olmayacak ise"); uygulaması İE-16 | kaydı CIO'nun Notion defterinde ve Kurulum Panosu'nda (satır 106); `KARARLAR/`'da dosyası yok |
 | D | D-26 | pilot kapsamı: tek katlı prefabrik ve tek katlı çelik ikisi birden kesin çalışır; dubleks ve çift kat canlıdan sonra (25.10 08:58) | kaydı CIO'nun Notion defterinde ve Kurulum Panosu'nda (satır 107); `KARARLAR/`'da dosyası yok |
 | D | D-27 | canlıya geçiş şartı: başlangıçta kurulan rehberdeki her şey çalışır duruma gelir, sonra canlı (pilot); teklif ve fiyat dahil (25.10 09:09); "rehber"in "Portman Bayi Rehberi ve Süreç Taslağı" (6 Ekim) olduğu CIO çıkarımı, Patron teyidini bekliyor | kaydı CIO'nun Notion defterinde ve Kurulum Panosu'nda (satır 109); `KARARLAR/`'da dosyası yok |
-| D | **D-28** | — | **sıradaki boş** |
+| D | D-28 | üretim kuralı: tek kod, onaylı hedef örnek, otomatik kıyas, LLM yalnız okur (`AGENTS.md`; CIO önerisi, Lokman 28.10 06:39) | yazıldı (28.10; `claude/project-thread-6y3ngi`) |
+| D | **D-29** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model bankası ve yeni model üretimi; P6001 güncellemesi | ayrıldı (pilottan sonra) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | `main`'e BK-12 ile (PR-1: motor ve bayi paftası; liste ve mühür kıyası sonraki PR'larda) |

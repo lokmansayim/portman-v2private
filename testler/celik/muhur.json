@@ -202,6 +202,42 @@
   "ÇP-06": {
    "tarih": "2026-10-25",
    "dayanak": "hedef örnek önerisi için plan aşamasında, Lokman'ın 25 Ekim 09:10 kartından ve bu mühürden önce açıldı (yalnız yükleme listesi Excel'i); kör sayılmaz. Hedef örnek ve açık dört proje kartla onaylandı (\"Evet, 4 açık + kalanı kör\")"
+  },
+  "ÇP-04": {
+   "karar": "Lokman, 28 Ekim 2026 06:26 UTC açılış kartı (\"Kör listeler açılsın ve PR-4a main'e birleşsin mi?\"): \"Altısı açılsın, birleşsin\" (ÇP-04, 08, 17, 18, 19, 20)",
+   "tarih": "2026-10-28",
+   "sha256": "caa7079fd5854d0263775d21e90a0f31bb5e1a7674274a9ab96218324d502b3a",
+   "liste_commit": "2dc0ea34c9c55a403ab11bad391c9d8b505a69bb"
+  },
+  "ÇP-08": {
+   "karar": "Lokman, 28 Ekim 2026 06:26 UTC açılış kartı (\"Kör listeler açılsın ve PR-4a main'e birleşsin mi?\"): \"Altısı açılsın, birleşsin\" (ÇP-04, 08, 17, 18, 19, 20)",
+   "tarih": "2026-10-28",
+   "sha256": "93278cd1d685ad22eaba5075ea94a258528206fcec683b404b676a19660f8d74",
+   "liste_commit": "03c91db112cdbf9b0c0d04ba5b11616eb730eadf"
+  },
+  "ÇP-17": {
+   "karar": "Lokman, 28 Ekim 2026 06:26 UTC açılış kartı (\"Kör listeler açılsın ve PR-4a main'e birleşsin mi?\"): \"Altısı açılsın, birleşsin\" (ÇP-04, 08, 17, 18, 19, 20)",
+   "tarih": "2026-10-28",
+   "sha256": "551b7d6817e4924f6605596d9e003d3c7f78fe514faa98201163e885edd839e1",
+   "liste_commit": "3c5f63850db18bfbf4f3bc669242419c8a7a8987"
+  },
+  "ÇP-18": {
+   "karar": "Lokman, 28 Ekim 2026 06:26 UTC açılış kartı (\"Kör listeler açılsın ve PR-4a main'e birleşsin mi?\"): \"Altısı açılsın, birleşsin\" (ÇP-04, 08, 17, 18, 19, 20)",
+   "tarih": "2026-10-28",
+   "sha256": "f33cf798debc73d405f2417e294480cf4625ce3d7afa1b3e8f7fb1aa8dbb10c1",
+   "liste_commit": "1ebe8b4ec2f5afbf752c77d3f705469b34665973"
+  },
+  "ÇP-19": {
+   "karar": "Lokman, 28 Ekim 2026 06:26 UTC açılış kartı (\"Kör listeler açılsın ve PR-4a main'e birleşsin mi?\"): \"Altısı açılsın, birleşsin\" (ÇP-04, 08, 17, 18, 19, 20)",
+   "tarih": "2026-10-28",
+   "sha256": "47f86cbd7c05925acbfeddd6d824fd0c3a7ccad5ffe2d7a75c245229cb0ad3ac",
+   "liste_commit": "e25b8238ef8e15bd9b09e15e8cf3c53a0a3973c3"
+  },
+  "ÇP-20": {
+   "karar": "Lokman, 28 Ekim 2026 06:26 UTC açılış kartı (\"Kör listeler açılsın ve PR-4a main'e birleşsin mi?\"): \"Altısı açılsın, birleşsin\" (ÇP-04, 08, 17, 18, 19, 20)",
+   "tarih": "2026-10-28",
+   "sha256": "03ca18cb78fa6293dd4e6ea70e8948bbb12ec2aaee2e8f27a13cecbc38caf1bb",
+   "liste_commit": "d05f00f6d17bf2376f03f27f224fcb0a0059de45"
   }
  },
  "ilk_indirmeler": {
@@ -240,9 +276,106 @@
    "bayt": 3285243,
    "drive_degisme": "2026-09-23T13:55:18.881Z",
    "tarih": "2026-10-25"
+  },
+  "15VNEWsYIS5YkLQt-oZAx72fG50lISQ8w": {
+   "sha256": "e5b86089cb4787765a35073da223ef1757b373ac0364294a77103cc246661d40",
+   "bayt": 6843629,
+   "drive_degisme": "2026-01-14T09:30:48Z",
+   "tarih": "2026-10-27"
+  },
+  "1VwaFbxsxXF6DjX8IKxMpq4Lc1jZeGsOF": {
+   "sha256": "fd6f4c316b0c1870448dd9d3cde4a9a4f59cecbf42d3187ba28a9d9947454bc5",
+   "bayt": 7987250,
+   "drive_degisme": "2026-05-21T12:10:58Z",
+   "tarih": "2026-10-27"
+  },
+  "18Rws1B5tDUh1vgeCvQqvOFI1v_HlxjsS": {
+   "sha256": "de3e561ab1d8d7f0e731aaa1e03afe150c58df4b21f1e590a5004a3d4766af78",
+   "bayt": 6443154,
+   "drive_degisme": "2026-02-23T11:21:56Z",
+   "tarih": "2026-10-27"
+  },
+  "1l7AZLzFXaBg90eF724Aa2C7j_vJczcH4": {
+   "sha256": "f71eaa0725a8e3dcd12f19209319b1c672906e2e3e3dbae8e5093c9381ad1e65",
+   "bayt": 10612970,
+   "drive_degisme": "2026-03-18T08:43:20Z",
+   "tarih": "2026-10-27"
+  },
+  "1GeFlrNUOJ3bhzvotvfnr3Wuw2lBnvY6y": {
+   "sha256": "b26b25c267f473af3d7d7b6e0e3e4b6926b8c8903bb9aaa523aef17a05c8b5a8",
+   "bayt": 7017691,
+   "drive_degisme": "2026-08-19T09:48:08.703Z",
+   "tarih": "2026-10-27"
+  },
+  "14dOpzdq6dCELz4yFXQk95EaMGUTAkhaX": {
+   "sha256": "caa7079fd5854d0263775d21e90a0f31bb5e1a7674274a9ab96218324d502b3a",
+   "bayt": 189220,
+   "drive_degisme": "2026-05-20T11:59:56Z",
+   "tarih": "2026-10-28"
+  },
+  "1-JHGZQqFmLwxHuSipHu0gFUeP7odywNI": {
+   "sha256": "93278cd1d685ad22eaba5075ea94a258528206fcec683b404b676a19660f8d74",
+   "bayt": 334758,
+   "drive_degisme": "2026-02-23T11:34:00Z",
+   "tarih": "2026-10-28"
+  },
+  "1eQt3zw3_qle61Hj2xejqn49i47ldP7aJ": {
+   "sha256": "551b7d6817e4924f6605596d9e003d3c7f78fe514faa98201163e885edd839e1",
+   "bayt": 186835,
+   "drive_degisme": "2026-08-07T08:43:43.093Z",
+   "tarih": "2026-10-28"
+  },
+  "1vP2LiZ07AuT_54NAzSwFN59eZe6I5WB9": {
+   "sha256": "f33cf798debc73d405f2417e294480cf4625ce3d7afa1b3e8f7fb1aa8dbb10c1",
+   "bayt": 181415,
+   "drive_degisme": "2026-04-11T15:49:58Z",
+   "tarih": "2026-10-28"
+  },
+  "1DC8Hbp6EmEtflhCVPaAQxi9lLZAPy01a": {
+   "sha256": "47f86cbd7c05925acbfeddd6d824fd0c3a7ccad5ffe2d7a75c245229cb0ad3ac",
+   "bayt": 185910,
+   "drive_degisme": "2026-04-19T11:01:12Z",
+   "tarih": "2026-10-28"
+  },
+  "1hKULVPsowv8vEfTbOuuG1UQt2cfQWAA6": {
+   "sha256": "03ca18cb78fa6293dd4e6ea70e8948bbb12ec2aaee2e8f27a13cecbc38caf1bb",
+   "bayt": 26225,
+   "drive_degisme": "2026-05-21T10:38:44Z",
+   "tarih": "2026-10-28"
   }
  },
- "kat_kayitlari": {},
+ "kat_kayitlari": {
+  "ÇP-02": {
+   "kat": "çift",
+   "tarih": "2026-10-27",
+   "dayanak": "kor_sayfa (yalnız kat ve merdiven sözcükleri): 3. ve 4. sayfa \"1. KAT\" (4. sayfa \"1. KAT PLANI\"), 2. sayfa \"MERDİVEN\"",
+   "pafta_sha256": "e5b86089cb4787765a35073da223ef1757b373ac0364294a77103cc246661d40"
+  },
+  "ÇP-04": {
+   "kat": "tek",
+   "tarih": "2026-10-27",
+   "dayanak": "kor_sayfa (yalnız kat ve merdiven sözcükleri): hiçbir sayfada \"1. KAT\", başka kat ya da merdiven sözcüğü yok (2. ve 3. sayfa \"ZEMİN KAT\")",
+   "pafta_sha256": "fd6f4c316b0c1870448dd9d3cde4a9a4f59cecbf42d3187ba28a9d9947454bc5"
+  },
+  "ÇP-08": {
+   "kat": "tek",
+   "tarih": "2026-10-27",
+   "dayanak": "kor_sayfa (yalnız kat ve merdiven sözcükleri): hiçbir sayfada \"1. KAT\", başka kat ya da merdiven sözcüğü yok (2., 3. ve 7. sayfa \"ZEMİN KAT\")",
+   "pafta_sha256": "de3e561ab1d8d7f0e731aaa1e03afe150c58df4b21f1e590a5004a3d4766af78"
+  },
+  "ÇP-09": {
+   "kat": "çift",
+   "tarih": "2026-10-27",
+   "dayanak": "kor_sayfa (yalnız kat ve merdiven sözcükleri): 7. ve 8. sayfa \"1. KAT DUVAR\", 10. sayfa \"1. KAT TAVAN\" (mühürün kat ayrımı); 1. sayfa \"1. KAT PLANI\", 4. sayfa \"MERDİVEN\"",
+   "pafta_sha256": "f71eaa0725a8e3dcd12f19209319b1c672906e2e3e3dbae8e5093c9381ad1e65"
+  },
+  "ÇP-11": {
+   "kat": "çift",
+   "tarih": "2026-10-27",
+   "dayanak": "kor_sayfa (yalnız kat ve merdiven sözcükleri): 7. ve 8. sayfa \"1. KAT DUVAR\", 10. sayfa \"1. KAT TAVAN\" (mühürün kat ayrımı); 1. sayfa \"1. KAT PLANI\" ve \"MERDİVEN\"",
+   "pafta_sha256": "b26b25c267f473af3d7d7b6e0e3e4b6926b8c8903bb9aaa523aef17a05c8b5a8"
+  }
+ },
  "dosyalar": [
   {
    "kod": "ÇP-01",

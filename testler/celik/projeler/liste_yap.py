@@ -17,6 +17,9 @@ bizim kalemimizde olmayan bir renk sözcüğü yazamaz (`ad_renk_denetimi`, `REN
         [--karkas kurallar/karkas/celik_karkas.json]
 
 Tanım karkas kuralını isterse (`karkas: kural`; İE-16 PR-3a) kuralın dosyası da kural seti gibi içerik adresli kopyasıyla donar (`setler/`).
+Mühürde kör ya da kapalı olan projenin listesinde yazılış sözlüğü de içerik adresli kopyasıyla donar ve liste o kopyayla yeniden üretilir
+(İE-16 PR-4; plan `Celik_Cizim_Kurallari/PR-4/plan.md`, PR-2'nin açık sorusu): ölçüm, listenin yazıldığı günkü kuralın ve sözlüğün ölçümüdür;
+sözlük sonra değişse de kör liste değişmez. Açık beşin ve hedef örneğin listesi bugünkü sözlükle üretilir (değişmedi).
 
 Çıktı tanımın yanındaki `bizim_liste.json`; `--motor-cikti <klasör>` motorun bütün çıktısını (plan, çizim seti, IFC, liste) o klasörde bırakır.
 """
@@ -42,6 +45,7 @@ SOZLUK = BURADA / "sozluk.json"
 VARSAYILAN_SET = KOK / "kurallar" / "liste" / "kurallar.json"
 VARSAYILAN_KARKAS = KOK / "kurallar" / "karkas" / "celik_karkas.json"   # karkas kuralı (İE-16 PR-3a); yalnız tanım `karkas: kural` isterse
 SETLER = BURADA / "setler"
+DONAN_SOZLUK = ("kor", "kapali")   # mühürdeki proje durumu: bu projelerin listesinde sözlük listeyle donar (İE-16 PR-4)
 SAYI = re.compile(r"\d+(?:[.,]\d+)?")  # hakemin anahtarındaki sayı (testler/celik/kiyas.py)
 # adda denetlenen renk sözcükleri (katlanmış); kapalı liste, dışındaki renk yazımı incelemede bakılır (sozluk.json › açıklama)
 RENKLER = {"ANTRASIT", "GRI", "FUME", "KIRMIZI", "BORDO", "BEYAZ", "SIYAH", "YESIL", "MAVI", "LACIVERT", "KAHVE", "KAHVERENGI", "SARI",
@@ -179,23 +183,50 @@ def motor(tanim: Path, cikti: Path, yontem: str, kural_seti: Path, karkas: Path 
     return yollar[0]
 
 
-def set_kaydi(kural_seti: Path, yaz: bool = True) -> dict:
-    """Kural setinin kaydı ve listeyle donan içerik adresli kopyası (`setler/`; yalnız liste depoya yazılırken); kopya varsa baytları aynı olmalı."""
-    h = sha256(kural_seti)
+def _icerik_kopyasi(yol: Path, yaz: bool) -> tuple[str, Path]:
+    """Dosyanın SHA-256'sı ve listeyle donan içerik adresli kopyası (`setler/`; yalnız liste depoya yazılırken); kopya varsa baytları aynı olmalı."""
+    h = sha256(yol)
     kopya = SETLER / f"{h[:16]}.json"
     if not kopya.exists() and yaz:
         SETLER.mkdir(exist_ok=True)
-        shutil.copyfile(kural_seti, kopya)
+        shutil.copyfile(yol, kopya)
     elif kopya.exists() and sha256(kopya) != h:
-        raise SystemExit(f"{kopya} başka bir setin kopyası")
+        raise SystemExit(f"{kopya} başka bir dosyanın kopyası")
+    return h, kopya
+
+
+def set_kaydi(kural_seti: Path, yaz: bool = True) -> dict:
+    """Kural setinin kaydı ve listeyle donan içerik adresli kopyası."""
+    h, kopya = _icerik_kopyasi(kural_seti, yaz)
     ks = json.loads(Path(kural_seti).read_text(encoding="utf-8"))
     return {"yol": Path(kural_seti).resolve().relative_to(KOK).as_posix(), "sema": ks.get("sema"), "sha256": h,
             "kopya": kopya.relative_to(KOK).as_posix()}
 
 
-def liste(tanim: Path, yukleme: Path, yontem: str, kural_kaydi: dict, sozluk_yolu: Path = SOZLUK, karkas_kaydi: dict | None = None) -> dict:
+def sozluk_donar_mi(kod: str) -> bool:
+    """Projenin mühürdeki durumu kör ya da kapalıysa listesinin sözlüğü listeyle donar."""
+    m = json.loads(kiyas.MUHUR.read_text(encoding="utf-8"))
+    return (m["projeler"].get(kod) or {}).get("durum") in DONAN_SOZLUK
+
+
+def sozluk_kaydi(sozluk_yolu: Path = SOZLUK, yaz: bool = True) -> dict:
+    """Sözlüğün kaydı ve listeyle donan içerik adresli kopyası."""
+    h, kopya = _icerik_kopyasi(sozluk_yolu, yaz)
+    return {"surum": json.loads(Path(sozluk_yolu).read_text(encoding="utf-8"))["surum"], "sha256": h, "kopya": kopya.relative_to(KOK).as_posix()}
+
+
+def liste(tanim: Path, yukleme: Path, yontem: str, kural_kaydi: dict, sozluk_yolu: Path = SOZLUK, karkas_kaydi: dict | None = None,
+          sozluk_donmus: dict | None = None) -> dict:
+    """`sozluk_donmus` (kör ve kapalı proje): sözlüğün donan kopyasının kaydı; sözlük o kopyadan okunur (kopyanın baytları kaydın
+    SHA-256'sıyla aynı olmalı; ayrıca başka bir sözlük verilemez)."""
     t = json.loads(Path(tanim).read_text(encoding="utf-8"))
     y = json.loads(Path(yukleme).read_text(encoding="utf-8"))
+    if sozluk_donmus:
+        if Path(sozluk_yolu) != SOZLUK:
+            raise SystemExit("sözlük ya donmuş kopyadan ya verilen dosyadan okunur, ikisi birden değil")
+        sozluk_yolu = KOK / sozluk_donmus["kopya"]
+        if sha256(sozluk_yolu) != sozluk_donmus["sha256"]:
+            raise SystemExit(f"{sozluk_donmus['kopya']} donmuş sözlüğün kaydıyla aynı değil")
     sozluk = json.loads(Path(sozluk_yolu).read_text(encoding="utf-8"))
     if y["yontem"] != yontem:
         raise SystemExit(f"motorun listesi {y['yontem']} yöntemiyle; istenen {yontem}")
@@ -209,7 +240,7 @@ def liste(tanim: Path, yukleme: Path, yontem: str, kural_kaydi: dict, sozluk_yol
         "kural_seti": kural_kaydi,
         **({"karkas_kurali": karkas_kaydi} if karkas_kaydi else {}),
         "yontem": {"kod": y["yontem"], "ad": y.get("yontem_adi")},
-        "sozluk": {"surum": sozluk["surum"], "sha256": sha256(sozluk_yolu)},
+        "sozluk": sozluk_donmus or {"surum": sozluk["surum"], "sha256": sha256(sozluk_yolu)},
         "satirlar": satirlar,
     }
 
@@ -238,9 +269,14 @@ def main(argv: list[str] | None = None) -> int:
     kk = (set_kaydi(a.karkas.resolve(), yaz=hedef.is_relative_to(BURADA))
           if json.loads(tanim.read_text(encoding="utf-8")).get("karkas") == "kural" else None)
     kk_calisan = (KOK / kk["kopya"] if (KOK / kk["kopya"]).exists() else a.karkas.resolve()) if kk else None
+    kod = json.loads(tanim.read_text(encoding="utf-8"))["kod"]
+    # kör ve kapalı proje: sözlük de listeyle donar; depo dışına yazılan denemede kopya yazılmaz, sözlük bugünkü dosyadan okunur
+    sd = sozluk_kaydi(yaz=hedef.is_relative_to(BURADA)) if sozluk_donar_mi(kod) else None
+    if sd and not (KOK / sd["kopya"]).exists():
+        sd = None
     with tempfile.TemporaryDirectory() as gecici:
         klasor = a.motor_cikti.resolve() if a.motor_cikti else Path(gecici)
-        veri = liste(tanim, motor(tanim, klasor, a.yontem, calisan, kk_calisan), a.yontem, kayit, karkas_kaydi=kk)
+        veri = liste(tanim, motor(tanim, klasor, a.yontem, calisan, kk_calisan), a.yontem, kayit, karkas_kaydi=kk, sozluk_donmus=sd)
     yaz(veri, hedef)
     celik = [s for s in veri["satirlar"] if "tur" in s]
     print(f"{veri['kod']}: {len(veri['satirlar'])} satır ({len(celik)} çelik, {round(sum(s['kg'] or 0 for s in celik), 2)} kg; "
