@@ -452,6 +452,79 @@ def test_bilinmeyen_celik_satiri_durur(tmp_path):
         oku.oku(yol, ".xlsx")
 
 
+# İE-16 PR-5 (Lokman, 28 Ekim 2026, "Üç öneri gibi"; beyan İE-16 › Değişiklik (PR-5)): açılan dört kör listenin üç biçimi.
+
+def _liste_satirli(yol: Path, satirlar) -> None:
+    """`_liste_xlsx_b` şablonu, çelik grubunun satırları elle (ad, boyut, adet, kg; ad None ise hücre boş), ardından öteki grup."""
+    import openpyxl
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    for c, v in enumerate(("ÇELİK PANEL GRUBU", "BOYUT", "ADET", "KG"), 1):
+        ws.cell(10, c, v)
+    n = 11
+    for x in satirlar:
+        for c, v in enumerate(x, 1):
+            if v is not None:
+                ws.cell(n, c, v)
+        n += 1
+    for c, v in enumerate(("METAL AKSAM GRUBU", "BOYUT", "ADET"), 1):
+        ws.cell(n, c, v)
+    ws.cell(n + 1, 1, OTEKI[0][1]), ws.cell(n + 1, 2, OTEKI[0][2]), ws.cell(n + 1, 3, OTEKI[0][3])
+    wb.save(str(yol))
+
+
+def test_adsiz_toplam_satiri_grubun_sonundaysa_toplamdir(tmp_path):
+    """ÇP-20'nin biçimi: grubun son satırından sonra adı boş, yalnız adet ve kg dolu satır; sağlama aynen."""
+    yol = tmp_path / "liste.xlsx"
+    _liste_satirli(yol, [*CELIK, (None, None, 21, 874)])
+    c = oku.oku(yol, ".xlsx")["celik"]
+    assert c["toplam"] == {"adet": 21, "kg": 874} and c["toplam_kapsami"] == "bütün satırlar" and c["liste_uyarilari"] == []
+    assert {t: (x["adet"], x["kg"]) for t, x in c["turler"].items()} == _beklenen_celik()
+
+
+@pytest.mark.parametrize("satirlar,neden", [
+    ([*CELIK, (None, None, 21, 900)], "TOPLAM satırı satırlarla tutmuyor"),
+    ([*CELIK[:2], (None, None, 8, 284), *CELIK[2:]], "satırların arasında"),
+    ([*CELIK, ("TOPLAM", None, 21, 874), (None, None, 21, 874)], "adlı bir TOPLAM"),
+    ([*CELIK, (None, None, 21, 874), (None, None, 21, 874)], "birden çok"),
+    ([*CELIK, (None, "80X45", 21, 874)], "TOPLAM satırı okunamadı"),
+])
+def test_adsiz_satir_toplam_degilse_durur(tmp_path, satirlar, neden):
+    """Adsız satır yalnız grubun sonunda, tek ve adlı TOPLAM yokken toplamdır; tutmuyorsa, arada ise ya da adet ve kg dışında hücresi
+    varsa toplam sayılmaz ve okuma durur."""
+    yol = tmp_path / "liste.xlsx"
+    _liste_satirli(yol, satirlar)
+    with pytest.raises(oku.OkumaHatasi, match=neden):
+        oku.oku(yol, ".xlsx")
+
+
+def test_toplam_tek_satirin_kg_ini_disarida_birakiyorsa_satirlar_esas(tmp_path):
+    """ÇP-18'in biçimi: TOPLAM'ın adedi satırlarınki, kg'ı tam bir satırın (kolon-kiriş, 44) kg'ı kadar eksik: satırlar esas, uyarı yazılır."""
+    yol = tmp_path / "liste.xlsx"
+    _liste_satirli(yol, [*CELIK, ("TOPLAM", None, 21, 874 - 44)])
+    c = oku.oku(yol, ".xlsx")["celik"]
+    assert c["toplam"] == {"adet": 21, "kg": 874} and c["liste_uyarilari"] == [oku.TOPLAM_BIR_SATIR_EKSIK]
+    assert {t: (x["adet"], x["kg"]) for t, x in c["turler"].items()} == _beklenen_celik()
+
+
+@pytest.mark.parametrize("adet,kg", [(21, 874 - 44 - 60), (21, 874 + 44), (21, 874 - 43), (20, 874 - 44)])
+def test_toplamin_baska_uyusmazligi_yine_durur(tmp_path, adet, kg):
+    """İki satır eksik, bir satır fazla, hiçbir satıra denk gelmeyen eksik ya da adedi de tutmayan TOPLAM: okuma durur."""
+    yol = tmp_path / "liste.xlsx"
+    _liste_satirli(yol, [*CELIK, ("TOPLAM", None, adet, kg)])
+    with pytest.raises(oku.OkumaHatasi, match="TOPLAM satırı satırlarla tutmuyor"):
+        oku.oku(yol, ".xlsx")
+
+
+def test_veranda_destegi_kolon_kiristir():
+    """ÇP-17'nin satırı: veranda desteği kolon-kiriş (K); veranda duvarı duvar paneli kalır."""
+    assert oku.tur("VERANDA DESTEK") == oku.tur("Veranda desteği") == oku.tur("VERANDA DESTEK PANELİ") == "kolon_kiris"
+    assert oku.tur("VERANDA DUVAR") == "duvar_paneli"
+    with pytest.raises(oku.OkumaHatasi, match="türü bilinmiyor"):
+        oku.tur("DESTEK")
+
+
 def test_pafta_etiketleri(tmp_path):
     yol = tmp_path / "pafta.pdf"
     _pafta_pdf(yol, [["D01", "D02", "D03", "D05", "K01", "DN01", "MD1", "AD01", "D01A", "M01", "M2", "M3"], ["M01", "M02", "C01", "C02"],
@@ -592,6 +665,20 @@ def test_adedi_okunamayan_tur_tutan_sayilmaz(depo):
     s = K.sonuc_kaydi(K.kiyasla(depo["bizim"]("DN01"), depo["acik"], kok=depo["kok"]))
     assert "tavan_paneli" not in {x["tur"] for x in s["celik_turleri_tutan"]}
     assert all(x["adet"] is not None for x in s["celik_turleri_tutan"])
+
+
+def test_liste_uyarisi_rapora_ve_sonuc_kaydina_yalniz_varsa_girer(depo, tmp_path):
+    """İE-16 PR-5: okuyucunun liste uyarısı (TOPLAM bir satırı dışarıda bırakıyor) sonuç kaydına ve rapora yazılır; uyarı yoksa kayıtta
+    alan yok (PR-4b'ye kadar yazılmış sonuçlar aynı kalır)."""
+    k = K.kiyasla(depo["bizim"]("DN01"), depo["acik"], kok=depo["kok"])
+    assert k["celik"]["liste_uyarilari"] == [] and "liste_uyarilari" not in K.sonuc_kaydi(k)
+    K.rapor_md(k, tmp_path / "r0.md")
+    assert "Liste uyarıları" not in (tmp_path / "r0.md").read_text(encoding="utf-8")
+    k["celik"]["liste_uyarilari"] = [oku.TOPLAM_BIR_SATIR_EKSIK]
+    s = K.sonuc_kaydi(k)
+    assert s["liste_uyarilari"] == [oku.TOPLAM_BIR_SATIR_EKSIK] and list(s).index("liste_uyarilari") == list(s).index("celik_kg_kapisi") + 1
+    K.rapor_md(k, tmp_path / "r1.md")
+    assert f"| Liste uyarıları | {oku.TOPLAM_BIR_SATIR_EKSIK} |" in (tmp_path / "r1.md").read_text(encoding="utf-8")
 
 
 def test_sonuc_kaydi_okunan_sayfayi_yazar(depo):

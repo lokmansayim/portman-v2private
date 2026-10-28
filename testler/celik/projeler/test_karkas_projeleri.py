@@ -63,9 +63,13 @@ def test_pr2_tanimi_karkassiz_durur():
 @pytest.mark.skipif(not KAYNAK, reason="tam koşu: PORTMAN_CELIK_KAYNAK=<klasör> (dosyalar Drive kimliğiyle adlı)")
 @pytest.mark.parametrize("proje", sorted(KAYNAKLAR))
 def test_sonuc_hakemin_ciktisi(proje):
+    """Mühürün commit'i sonuçtan sonra ilerlemiş olabilir (yalnız ekleme; İE-16 PR-4a'dan beri): `test_sonuclar.muhur_commit_denetle`
+    (İE-16 PR-5, beyan)."""
+    from testler.celik.projeler.test_sonuclar import muhur_commit_denetle
     liste, pafta = KAYNAKLAR[proje]
     k = kiyas.kiyasla(BURADA / proje / "bizim_liste.json", Path(KAYNAK) / liste, Path(KAYNAK) / pafta)
     yeni, kayitli = kiyas.sonuc_kaydi(k), json.loads((BURADA / proje / "sonuc.json").read_text(encoding="utf-8"))
     for d in (yeni, kayitli):
         d.pop("tarih"), d.pop("kiyas_commit")
+    muhur_commit_denetle(yeni, kayitli)
     assert yeni == kayitli

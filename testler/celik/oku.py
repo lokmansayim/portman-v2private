@@ -9,10 +9,16 @@ TOPLAM yazısı boyut sütununa taşabilir. Bu dosya o grup için ayrıca okur:
 - satırların kg sütununu (Excel'de grubun başlık satırındaki kg başlığının sütunu; PDF'te kg başlığının altındaki sayı); Excel'deki formül
   sonucu üç basamağa yuvarlanır (125.71999… → 125.72, PDF'teki yazıyla aynı);
 - grubun TOPLAM satırını: kg toplamı satırlarınkiyle aynı değilse okuma durur; adet toplamı ya bütün satırların ya kg'ı yazılı satırların
-  toplamıdır (`toplam_kapsami`), ikisi de değilse durur (listenin kendi sağlaması);
+  toplamıdır (`toplam_kapsami`), ikisi de değilse durur (listenin kendi sağlaması). İE-16 PR-5'ten beri (Lokman, 28 Ekim 2026; beyan
+  İE-16 › Değişiklik (PR-5)) iki biçim daha:
+  - Excel'de adı boş, yalnız adet ve kg hücresi dolu satır grubun son satırından sonra gelirse TOPLAM sayılır (sağlama aynen); satırların
+    arasındaysa ya da adlı bir TOPLAM da varsa okuma durur;
+  - TOPLAM'ın kg'ı satırların toplamından tam bir satırın kg'ı kadar eksikse (listenin formülü o satırı dışarıda bırakmış) satırlar esas
+    alınır ve `liste_uyarilari`'na yazılır; başka her kg uyuşmazlığında okuma durur;
 - iki okumanın aynılığını: bu dosyanın çelik satırları (ad, boyut, adet) prefabrik okuyucunun aynı gruptaki satırlarıyla bire bir aynı
   olmalı, değilse okuma durur.
-Çelik panel satırları türe ayrılır (`TURLER`; paftadaki etiket harfiyle): duvar paneli ve korkuluk (D), kolon-kiriş paneli (K), makas (M),
+Çelik panel satırları türe ayrılır (`TURLER`; paftadaki etiket harfiyle): duvar paneli ve korkuluk (D), kolon-kiriş paneli ve veranda
+desteği (K; veranda desteği PR-5'ten beri, Lokman 28 Ekim 2026), makas (M),
 çatı paneli (C), tavan paneli (T), baca paneli (B), boy C profil (paftada etiketi yok). Türü bilinmeyen ya da iki türe uyan, adedi
 okunamayan satır okumayı durdurur; kg'ı okunamayan satır da durdurur, yalnız boy C profilin kg'ı boş olabilir (`KG_SIZ`; o türün kg'ı
 `None` kalır, sıfır sayılmaz; `kgsiz_turler`). Sessiz sayı yok. Hata iletisinde satırın adı yalnız çelik sözcükleriyle yazılır (`guvenli`).
@@ -31,7 +37,7 @@ CELIK_GRUBU = "CELIK PANEL"          # ASCII'ye katlanmış grup adında aranır
 TOPLAM = "TOPLAM"
 TURLER = (  # (tür, paftadaki harf, katlanmış adda desen; ayraç içi açıklama türe bakılmadan önce atılır)
     ("duvar_paneli", "D", r"\bDUVAR|\bKORKULUK"),
-    ("kolon_kiris", "K", r"\bKOLON|\bKIRIS"),
+    ("kolon_kiris", "K", r"\bKOLON|\bKIRIS|\bVERANDA DESTE[KG]"),
     ("makas", "M", r"\bMAKAS"),
     ("cati_paneli", "C", r"^(?!.*\bMAKAS).*\bCATI\b.*\bPANEL"),
     ("tavan_paneli", "T", r"^(?!.*\bMAKAS).*\bTAVAN\b.*\bPANEL"),
@@ -42,6 +48,7 @@ HARF = {t: h for t, h, _ in TURLER}
 KG_BASLIKLARI = ("KG", "AGIRLIK", "AGIRLIK (KG)", "AGIRLIK(KG)")
 KG_SIZ = ("c_profil",)               # kg'ı yazılmayabilen tek tür (listeler boy C profilin kg'ını kimi zaman boş bırakır)
 KG_PAYI = 0.5                        # TOPLAM sağlamasında yuvarlama payı (kg)
+TOPLAM_BIR_SATIR_EKSIK = "listenin çelik TOPLAM satırı bir satırın kg'ını dışarıda bırakıyor; satırlar esas alındı"
 
 
 def katla(t) -> str:
@@ -126,7 +133,7 @@ def _excel_baslik(hucre: dict) -> dict | None:
 
 
 def _excel_celik(ws) -> dict | None:
-    satirlar, toplam, kol = [], None, None
+    satirlar, toplam, kol, adsiz = [], None, None, None
     sinir = min(ws.max_row or kor_oku.EXCEL_SATIR_SINIRI, kor_oku.EXCEL_SATIR_SINIRI)
     for r in ws.iter_rows(min_row=1, max_row=sinir, max_col=kor_oku.EXCEL_SUTUN_SINIRI):
         hucre = {c.column: c.value for c in r if c.value is not None and str(c.value).strip() != ""}
@@ -146,11 +153,20 @@ def _excel_celik(ws) -> dict | None:
             continue
         ad = hucre.get(kol["ad"])
         if ad is None:
+            if set(hucre) == {kol["adet"], kol["kg"]} and None not in (_sayi(hucre[kol["adet"]]), _sayi(hucre[kol["kg"]])):
+                if adsiz is not None:
+                    raise OkumaHatasi("çelik panel grubunda adı boş birden çok adet-kg satırı var")
+                adsiz = {"adet": _sayi(hucre[kol["adet"]]), "kg": _sayi(hucre[kol["kg"]]), "sira": len(satirlar)}
             continue
         satirlar.append({"ad": re.sub(r"\s+", " ", str(ad)).strip(), "boyut": _yazi(hucre.get(kol["boyut"])),
                          "adet": _sayi(hucre.get(kol["adet"])), "kg": _kg(hucre.get(kol["kg"]))})
     if kol is None:
         return None
+    if adsiz is not None:                                # adı boş adet-kg satırı: yalnız grubun sonundaysa ve adlı TOPLAM yoksa TOPLAM
+        if adsiz["sira"] != len(satirlar) or toplam is not None:
+            raise OkumaHatasi("çelik panel grubunda adı boş bir adet-kg satırı " +
+                              ("satırların arasında" if adsiz["sira"] != len(satirlar) else "ve adlı bir TOPLAM satırı var"))
+        toplam = {"adet": adsiz["adet"], "kg": adsiz["kg"]}
     return {"satirlar": satirlar, "toplam": toplam}
 
 
@@ -245,7 +261,8 @@ def pdf_celik(yol: Path) -> dict:
 
 def _ozet(c: dict) -> dict:
     """Türler ve toplam; TOPLAM satırı listenin kendi sağlamasıdır. Kg'ı boş satır yalnız boy C profilde olabilir (`KG_SIZ`); o zaman
-    TOPLAM'ın adedi ya bütün satırların ya kg'lı satırların toplamıdır, hangisi olduğu `toplam_kapsami`'na yazılır."""
+    TOPLAM'ın adedi ya bütün satırların ya kg'lı satırların toplamıdır, hangisi olduğu `toplam_kapsami`'na yazılır. Adedi tutan TOPLAM'ın
+    kg'ı tam bir satırın kg'ı kadar eksikse satırlar esas alınır (`liste_uyarilari`; İE-16 PR-5)."""
     out = []
     for s in c["satirlar"]:
         t = tur(s["ad"])
@@ -261,7 +278,10 @@ def _ozet(c: dict) -> dict:
     if not T or T.get("adet") is None or T.get("kg") is None:
         raise OkumaHatasi("çelik panel grubunun TOPLAM satırı okunamadı")
     kapsam = "bütün satırlar" if T["adet"] == adet else "kg'lı satırlar" if T["adet"] == adet_kgli else None
-    if kapsam is None or abs(T["kg"] - kg) > KG_PAYI:
+    uyarilar = []
+    if kapsam is not None and abs(T["kg"] - kg) > KG_PAYI and any(abs(kg - T["kg"] - s["kg"]) <= KG_PAYI for s in out if s["kg"]):
+        uyarilar.append(TOPLAM_BIR_SATIR_EKSIK)          # listenin formülü bir satırı dışarıda bırakmış (PR-5): satırlar esas
+    elif kapsam is None or abs(T["kg"] - kg) > KG_PAYI:
         raise OkumaHatasi(f"çelik panel TOPLAM satırı satırlarla tutmuyor: liste {T['adet']} adet {T['kg']} kg, satırlar {adet} adet "
                           f"(kg'lı {adet_kgli}) {kg} kg")
     turler = {}
@@ -270,7 +290,7 @@ def _ozet(c: dict) -> dict:
         x["adet"] += s["adet"]
         x["kg"] = None if (x["kg"] is None or s["kg"] is None) else round(x["kg"] + s["kg"], 3)
     return {"satirlar": out, "toplam": {"adet": adet, "kg": kg}, "turler": turler, "toplam_kapsami": kapsam,
-            "kgsiz_turler": sorted({s["tur"] for s in out if s["kg"] is None})}
+            "kgsiz_turler": sorted({s["tur"] for s in out if s["kg"] is None}), "liste_uyarilari": uyarilar}
 
 
 def _ayni_satirlar(celik: list[dict], kor: list[dict]) -> None:
