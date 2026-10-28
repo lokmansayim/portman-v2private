@@ -10,7 +10,6 @@ Bu dosya her ajanın okuduğu ortak kuraldır. Claude'a özgü oturum akışı `
 ## Kurallar (Lokman; değişmez)
 
 - **Gizli bilgi yazdırılmaz.** Anahtar, token ve parola çıktıya, belgeye, commit'e ya da sohbete girmez.
-- **Kişisel veri maskelenir.** Telefon numaraları maskelenir. Dışarı aktarımlarda kişi adları da maskelenir, bayi adları dahil.
 - **Ayrı onay gerekenler.** Her biri için Lokman'ın açık onayı gerekir:
   - sunucu ya da canlı değişiklik;
   - ücretli deneme (LLM çağrısı, WhatsApp mesajı);

@@ -27,6 +27,6 @@ Sen Portman'ın geliştiricisisin; sahibi Lokman kod yazmaz. Bu komut yeni bir i
 
 ## Kurallar
 
-- Belgede kişi adı (bayi, müşteri) ve sır olmaz; gerekiyorsa maskele.
+- Belgede sır (anahtar, parola, token) olmaz.
 - Plan 1 oturumda bitmeyecek kadar büyükse ikiye böl ve ikinci parçayı "sonraki iş emri" diye yaz.
 - Lokman'ın onayı "evet/başla/onaylıyorum" gibi açık bir cümledir; sessizlik onay değildir.

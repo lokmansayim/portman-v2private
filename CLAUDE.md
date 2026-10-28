@@ -21,7 +21,7 @@ Ortak kurallar yukarıdaki `AGENTS.md`'den gelir; burada yalnız Claude'a özgü
 | `/kapanis` | Doğrulama → kanıt → DURUM → commit/push → `/code-review` → PR özeti |
 | `/sahip-ozeti` | Lokman için 10 satırlık durum: canlıda ne var, bekleyen onaylar, açık riskler |
 
-Hakemler (`.claude/agents/`): `geometri-hakemi` (Motor/İş Emri değişikliklerini kurallara karşı inceler), `kvkk-denetcisi` (diff'te sır ve kişisel veri arar). Kapanışta ikisi de koşturulur. **Lokman (16 Ekim 2026):** `kvkk-denetcisi` şimdilik yalnız **sır taraması** olarak koşar (anahtar, parola, token; "anahtar ve parola hiçbir yere yazılmaz" kuralının otomatik freni); KVKK maddelerini (telefon, kişi ve bayi adı) raporlamaz. Mevcut maskeleme kodu olduğu gibi kalır; pilottan önce, gerçek bayi verisi gelmeden bir kez toplu bakılır.
+Hakem (`.claude/agents/`): `geometri-hakemi` (Motor/İş Emri değişikliklerini kurallara karşı inceler); kapanışta Motor, İş Emri ya da `beyin/varyant.py` değiştiyse koşturulur. `kvkk-denetcisi` ve KVKK denetimi 28 Ekim 2026'da Patron kararıyla kaldırıldı (D-13, BK-17): kapanışta kişisel veri denetimi yok; sır freni `sir_koruma.py` hook'u ve `dogrula.py` sır taramasıdır.
 
 ## Frenler (hook; `.claude/settings.json`)
 

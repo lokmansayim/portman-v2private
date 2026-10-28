@@ -19,10 +19,10 @@ Kapanış, "çalışıyor" demenin kanıtını üretir. Sıra sabittir; bir adı
 - Beklenen fark yok: `dogrula.py` "SONUÇ: fark yok" demeli (İE-08, 12.10'dan beri `kapi_d_dogrula.sh:25` yanlış pozitifi `kos.py`'de beklenen). Herhangi bir FARKLI varsa iş kapanmaz; kaynağını bul.
 - Harness sonucu (22/22), referans (AYNI), pytest (N geçti) sayılarını not et.
 
-## 3. Bağımsız inceleme (iki hakem + hazır inceleme)
+## 3. Bağımsız inceleme (hakem + hazır inceleme)
 - `/code-review` koş; bulguları doğruluk etkisine göre ayır (düzeltilecek / isteğe bağlı).
 - `motor/`, `is_emri/` ya da `beyin/varyant.py` değiştiyse **geometri-hakemi** subagent'ını diff üstünde koştur.
-- Her kapanışta **kvkk-denetcisi** subagent'ını diff ve yeni dosyalar üstünde koştur; bulgu varsa maskele. Lokman (16.10): şimdilik yalnız sır taraması (anahtar, parola, token) iste, KVKK maddelerini raporlatma; pilottan önce bir kez toplu bakılır (`CLAUDE.md` › Hakemler).
+- Sır taraması ajanla değil, iki frenle: `sir_koruma.py` hook'u (yazımda anahtar, token, parola engeli) ve 2. adımdaki `dogrula.py` sır taraması (beklenmeyen 0). KVKK denetimi (`kvkk-denetcisi`) 28 Ekim 2026'da kaldırıldı (Patron; D-13, BK-17): kişisel veri bulgusu aranmaz, raporlanmaz.
 - Düzeltme gerekiyorsa yap, 2. adımı tekrarla.
 
 ## 4. Kanıt ve belge

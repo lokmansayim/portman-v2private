@@ -52,7 +52,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [Z-05](Z-05.md) | Birincil model Claude Opus 5.5, model geçidi arkasında (29.09'dan beri canlıda) | Başka bir model (açık ya da yerel dahil) PortmanBench'te aynı skoru daha ucuza alırsa |
 | [Z-06](Z-06.md) | Tek sunucu, GPU yok | Ölçülen render süresi ya da kuyruk beklemesi işi tıkarsa ya da günlük talep 50'yi geçerse |
 | [Z-07](Z-07.md) | BIM çıktısı IFC4 (açık ISO standardı) | Bir araç ya da müşteri başka bir IFC sürümü gerektirirse |
-| [Z-08](Z-08.md) | Kişisel veri sunucuda, LLM'e takma adla · **D-06 ile daraltıldı (11.10): bayi adı ve hitabı istisna** | Hukuki görüş başka bir şey söylerse |
+| [Z-08](Z-08.md) | Kişisel veri sunucuda, LLM'e takma adla · **D-06 ile daraltıldı (11.10): bayi adı ve hitabı istisna** · **Kaldırıldı (28.10; Patron, D-13, BK-17)** | — (kaldırıldı; D-13) |
 | [Z-09](Z-09.md) | Ayda bir alan taraması: BenchCAD, Text2CAD-Bench, plan üretimi, IFC ve görsel modeller; her ayın 1'inde planlı görev | Süreç kararı; bir varsayımı bozan gelişme ilgili kararı açar |
 | [Z-10](Z-10.md) | Çift doğrulama: her teklif iki bağımsız yöntemle hesaplanır, modelden kesin metraj (IFC) ve CTKBF mantığıyla parametrik tahmin (Python); kalem grubu eşik dışındaysa ön onay durur, mühendis inceler | İki yöntem gerçek yükleme listelerinde aynı hatayı paylaşırsa; eşikler PortmanBench ile ayarlanır |
 
@@ -72,6 +72,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-10](D-10.md) | Bayi paftasının 1. sayfasında 8b mühendis kabulüne kadar antet üstünde "TASLAK" (`pafta_sablonu.json › taslak_ibaresi`); 15 cm kuralı: "Çelikte 15 cm parça çıkmaz", kısa parça komşusuna katılır ve mühendise kontrol notu düşer (`pafta_ozet.json › kontrol_notlari`); yedi aday `gecerli` kayıtta, bayiye sunulma mühendisin K-A10 kabulüyle; KT-01 etiket yeri ve baca derinliği; `bayi_gorsel.png` (plan + çatı planı + iki perspektif); referans bu kararla yeniden donduruldu | 12.10 akşam |
 | [D-11](D-11.md) | Geliştirme döneminde çelik adayların bayiye sunulma kabulünü (K-A10) Lokman verir (kabul kaydında kim = Lokman, dayanak D-11; metinlerde "kabul eden"); 8b mühendis teknik kontrolü aynen; genel motor düzenlenebilir DXF üretir (plan + dört görünüş, katmanlı, cm), yükleme listesi Excel'i yalnız kabul paketinde (openpyxl sunucuda yok); DXF ve Excel çıktıdır, kaynak değil: düzeltme tanıma (D-07) ya da kural kitabına işlenir, yeniden üretilir | 13.10 sabah |
 | [D-12](D-12.md) | Prefabrik hattı: çelikten ayrı pano motoru (125,5 aks; genişletilecek olan bu), standart duvar 100 / 60 mm (160 / 100 yalnız müşteri seçeneği), P6001 gerileme çapasıdır doğruluk kanıtı değil (bilinen hata: veranda ve salon penceresi; doğru kaynakla yeni dosyada yeniden çizilir), referanslar gerçek yükleme listeli projelerden kör testle, Astra R02 referans model değil | 12.10 22:49 / 23:10 |
+| [D-13](D-13.md) | KVKK denetimi kaldırıldı: `kvkk-denetcisi` silindi, `AGENTS.md` "Kişisel veri maskelenir" maddesi ve Z-08 kalktı; sır kuralı (K09), `sir_koruma.py` ve `kos.py` sır taraması aynen; üründeki numara maskesi kodu değişmedi (Patron; BK-12 PR-K açılmaz) | 28.10 |
 | [D-14](D-14.md) | Prefabrik pano yüksekliği yalnız 250 / 280 / 300 cm (%80 / %19 / %1); Motor başka değeri reddeder (K21); 250 dışı yükseklik yeni kod yolundan (pano kodu 2800/3000, lento h − 200 çıkarımı), 250'lik çıktılar bayt bayt aynı; doğrulama kuralını değiştirmez | 13.10 07:28 |
 | [D-15](D-15.md) | Prefabrikte kapı ve pencere yerleşimi mantıkla: pencere odaya ortalı (ızgara ≤ ¼ pano kaçıyorsa kalır), oda kapıları bölmeye yaslı ve kanatları birbirine doğru, menteşe dayanaklı uçta; PK-01 paftasıyla ölçülü; LLM değil kod | 13.10 08:53 |
 | [D-16](D-16.md) | BK-09 çizim düzeltmeleri: kapı yayını kesen mahal etiketi oda içinde kaydırılır; pafta 2. sayfada TASLAK ayrı yazı; KT başlığında ve liste adında m² koddan (brüt oturum, model dosyası aynen); G1 ölçü zinciri eşiği `max(12,5; dış kaplama + en kalın dış duvar + 1)`; çentiğe değen dar sayı zincirin dış yanında; yazı denetimi kapı yayı ve sayfa dışı; referans `2026-10-14` bu kararla yeniden donduruldu | 14.10 (Lokman, BK-09 planı) |
@@ -86,7 +87,7 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 |---|---|---|---|
 | D | D-01–D-11 | bu depo (`main`); D-10 ve D-11 İE-08'in | yazıldı |
 | D | D-12, D-14, D-15 | prefabrik hattının kararları (dallarda D-10, D-12, D-13 adıyla yazılmıştı): ayrı pano motoru (100 / 60, P6001 çapa), pano yüksekliği 250 / 280 / 300, kapı ve pencere yerleşimi | yazıldı (BK-12 PR-1; `bk-12-prefabrik-main`) |
-| D | D-13 | kişisel veri esnetme (dalda D-11; Lokman 12.10 23:10) | ayrıldı (BK-12 PR-K, Patron onayıyla; AGENTS.md ve `kvkk-denetcisi` ile birlikte) |
+| D | D-13 | KVKK denetiminin kaldırılması: Z-08 ve `AGENTS.md` "Kişisel veri maskelenir" kuralı kalktı, `kvkk-denetcisi` silindi; sır kuralı (K09) ve `sir_koruma.py` aynen (Patron, 28.10). Numara önce "kişisel veri esnetme (BK-12 PR-K)" için ayrılmıştı; PR-K açılmaz | yazıldı (28.10; BK-17) |
 | D | D-16 | BK-09 PR-2: çizim düzeltmeleri (KT-02 kapı yayı, 2. sayfa TASLAK, KT başlığında m², G1) ve referansın yeniden dondurulması | yazıldı (14.10) |
 | D | D-17 | İE-08 8b: yükleme listesi Excel'i sunucuda üretilir ve mühendise gider (D-11'in "yalnız kabul paketinde" maddesini değiştirir) | yazıldı (14.10; `ie-08-8b-muhendis`) |
 | D | D-18 | İE-14: yeni üretilen çelik plan bayiye TASLAK gider; plan üretimi ve revizyon için ek LLM çağrısı (K05 istisnası) | yazıldı (14.10; `ie-14-talepten-plana`) |
@@ -123,7 +124,8 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | BK | BK-14 | taşan veranda ve "+" duvar birleşimi (PR #50) | alındı (27.10; CIO) |
 | BK | BK-15 | revizyonda ebeveyn banyosu ve oda ekleme isteğinin doğru gerekçesi (pano satır 115, madde 3; `claude/project-thread-0c8rv2`) | alındı (27.10; CIO) |
 | BK | BK-16 | kalıcı akış sağlık testinin saniye sınırı yanlış kırmızısı (`test_saglik`, sabit nabız saati; CI koşu #60; `claude/project-thread-ro859m`) | alındı (28.10; CIO) |
-| BK | **BK-17** | — | **sıradaki boş** |
+| BK | BK-17 | KVKK denetiminin tamamen kaldırılması (Patron 28.10; D-13; `claude/tender-planck-seo86o`) | alındı (28.10) |
+| BK | **BK-18** | — | **sıradaki boş** |
 
 ## 27 Eylülde Lokman'ın verdiği kararlar
 
