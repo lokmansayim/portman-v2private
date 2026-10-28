@@ -229,8 +229,10 @@ def _eskiyi_tasi(klasor: Path) -> str | None:
     hedef.mkdir(parents=True, exist_ok=True)
     for p in eski:
         h = hedef / p.name
-        if h.exists():                                   # aynı gün ikinci üretim: üzerine yazılmaz
-            h = hedef / f"{p.stem}_{dt.datetime.now(dt.timezone.utc):%H%M%S}{p.suffix}"
+        n = 1
+        while h.exists():                                # aynı gün ikinci üretim: üzerine yazılmaz
+            h = hedef / f"{p.stem}_{dt.datetime.now(dt.timezone.utc):%H%M%S}_{n}{p.suffix}"
+            n += 1
         shutil.move(str(p), str(h))
     return tarih
 
@@ -241,10 +243,8 @@ def paket(m: dict, kok: Path, gecici: Path, glb: bool = False, kayit_: dict | No
     kod = m["kod"]
     tur = "prefabrik"
     klasor = kok / tur / kod
-    gec = gecici / kod
-    if gec.exists():
-        shutil.rmtree(gec)
-    gec.mkdir(parents=True)
+    gecici.mkdir(parents=True, exist_ok=True)
+    gec = Path(tempfile.mkdtemp(prefix=f"{kod}_", dir=gecici))     # her koşuya yeni klasör; eskisi silinmez
     durum: dict[str, str] = {}
     notlar: list[str] = []
     yaz: dict[str, Path] = {}
@@ -295,7 +295,10 @@ def paket(m: dict, kok: Path, gecici: Path, glb: bool = False, kayit_: dict | No
                 notlar.append(f"Liste{' (' + s + ' tavan)' if s else ''}: {Ls['ozet']['satir']} satır, kural yok {Ls['ozet']['kural_yok']}; "
                               f"üretici {Ls['uretici_surum'].split(' ')[0]}, kural seti {ks.get('kitap_seti', '')} ({ks.get('ortak', '')})")
         # kart modeli
-        km = kart_modeli(ie, gec, kart_kodu)
+        try:
+            km = kart_modeli(ie, gec, kart_kodu)
+        except Exception as e:                                          # noqa: BLE001 — hata nedenle yazılır, öteki modeller sürer
+            km = {"neden": f"kart modeli hata verdi ({type(e).__name__}: {str(e)[:160]})"}
         if "neden" in km:
             durum[ad("model", "ifc")] = durum[ad("montaj_paftasi", "pdf")] = f"Yok: {km['neden']}"
             km = None
@@ -311,8 +314,14 @@ def paket(m: dict, kok: Path, gecici: Path, glb: bool = False, kayit_: dict | No
         elif not L:
             durum[ad("montaj_rehberi", "html")] = durum[ad("model", "glb")] = "Yok: liste yok (rehberin listeden gelen parçaları ve adetleri)"
         else:
-            Lr = L.get("asma") or next(iter(L.values()))
-            rh = rehber(km, kart_kodu, ie, Lr, kod, gec, glb)
+            s_r = "asma" if "asma" in L else next(iter(L))
+            ie_r = copy.deepcopy(ie)
+            if s_r:                                     # rehberin tavanı adetlerini aldığı listeninki (listeler() gibi)
+                ie_r.setdefault("ozellikler", {})["Tavan"] = s_r.capitalize()
+            try:
+                rh = rehber(km, kart_kodu, ie_r, L[s_r], kod, gec, glb)
+            except Exception as e:                                      # noqa: BLE001 — hata nedenle yazılır, öteki modeller sürer
+                rh = {"neden": f"rehber üreteci hata verdi ({type(e).__name__}: {str(e)[:160]})"}
             if "neden" in rh:
                 durum[ad("montaj_rehberi", "html")] = durum[ad("model", "glb")] = f"Yok: {rh['neden']}"
                 rh = None

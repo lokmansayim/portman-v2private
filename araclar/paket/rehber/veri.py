@@ -734,8 +734,8 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
     asik = {"ML": {"sira": [s for s, _ in sorted(AL)], "pafta": [p for _, p in sorted(AL)], "bas": "min"},
             "MR": {"sira": [s for s, _ in sorted(AR)], "pafta": [p for _, p in sorted(AR)], "bas": "max"}}
     for v in VR:
-        Lp = v["M"] - v["kutu"][0]
         for yan in ("L", "R"):
+            Lp = v["M"] - v["kutu"][0] if yan == "L" else v["kutu"][2] - v["M"]     # yüzün yatay açıklığı (mahyadan saçağa)
             dev = v["sol_devam"] if yan == "L" else v["sag_devam"]
             if dev:                                     # ana yüzün devamı: ana sıraların veranda mahyasının altında kalanları + mahya sırası
                 ana = AL if yan == "L" else AR
@@ -842,9 +842,10 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
                         "tip": "vasistas" if vas else "acilir", "karkas": karkas}
     pr_renk = kucuk(OZ.get("pencere rengi", "") or "")
     pvc_beyaz = not pr_renk or "beyaz" in pr_renk or "alıcı" in pr_renk
-    dk = satirlar("Prefabrik çelik kapı")
-    dk_yon = re.search(r"\((SAĞ|SOL)\)", dk[0]["kalem"]).group(1).lower().replace("sag", "sağ") if dk else None
-    dk_alici = "alıcı" in kucuk(OZ.get("dış kapı", ""))
+    # dış kapı alıcıya aitse liste satırı 0 adetle yazılır: rehber kapıyı "alıcıya ait" gösterir
+    dk = [] if "alıcı" in kucuk(OZ.get("dış kapı", "")) else [s for s in satirlar("Prefabrik çelik kapı") if s.get("adet")]
+    dk_m = re.search(r"\((SAĞ|SOL)\)", dk[0]["kalem"]) if dk else None
+    dk_yon = dk_m.group(1).lower() if dk_m else "yönü planda"
 
     # ---------- yazılar ----------
     SAYI = {"n_ic": adet("Amerikan kapı"), "n_pen": adet("PVC pencere"), "n_vas": adet("PVC vasistas")}
@@ -1141,7 +1142,7 @@ def kiyas(kart: Path, kart_kodu: str, L: list[dict]) -> list[dict]:
     out = []
     for ad, g in grup.items():
         satir = [x for x in L if tutar(x, ad)]
-        liste = sum(x["adet"] for x in satir) if satir else None
+        liste = sum(x["adet"] or 0 for x in satir) if satir else None
         model = sum(k.get("sabit", k["adet"]) for k in g)
         for i, k in enumerate(g):
             yol = KT.get(k["kod"], {}).get("sayim")

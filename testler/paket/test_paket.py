@@ -185,7 +185,7 @@ def test_saglama(paketler, kod):
     d = _rehber_verisi(kok / "prefabrik" / kod / f"{kod}_montaj_rehberi.html")
     r = SAGLAMA[kod]
     c = _kart_sayisi(d)
-    model = {k["kod"]: k["adet"] for k in json.loads(next((gec / kod / "kart").glob("*_kart_sayim.json")).read_text(encoding="utf-8"))["kartlar"]}
+    model = {k["kod"]: k["adet"] for k in json.loads(next(gec.glob(f"{kod}_*/kart/*_kart_sayim.json")).read_text(encoding="utf-8"))["kartlar"]}
     assert dict(c) == {k: model[k] for k in c}
     ortak = [k for k in c if k in r["kartlar"]]            # 24 Ekim PK-01 rehberinde veranda kolonu ve kirişi kartsızdı
     assert len(ortak) >= 18 and {k: c[k] for k in ortak} == {k: r["kartlar"][k] for k in ortak}
@@ -244,3 +244,7 @@ def test_eski_tasinir_silinmez(tmp_path):
     assert (k / "_eski" / tarih / "AP-99_bilgi.md").read_text(encoding="utf-8") == "eski"
     assert (k / "_eski" / tarih / "_betik" / "x.py").exists()
     assert U._eskiyi_tasi(k) is None
+    for yeni in ("ikinci", "üçüncü"):                     # aynı gün yeniden üretim: önceki arşiv üzerine yazılmaz
+        (k / "AP-99_bilgi.md").write_text(yeni, encoding="utf-8")
+        assert U._eskiyi_tasi(k) == tarih
+    assert sorted(p.read_text(encoding="utf-8") for p in (k / "_eski" / tarih).glob("AP-99_bilgi*.md")) == sorted(["eski", "ikinci", "üçüncü"])

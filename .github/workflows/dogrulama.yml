@@ -121,6 +121,11 @@ jobs:
               R "$PY" -c "import psycopg; psycopg.connect('$PG dbname=postgres', connect_timeout=10).close()" \
                 || { echo "DUR: Postgres yok; kalıcı akış testleri atlanırdı"; exit 1; }
             fi
+            # Rehber izi testleri (62 m² kıyası) araç yoksa atlanırdı; burada atlanmasınlar: kurulum eksikse iş kırmızı.
+            if [[ "${{ matrix.parca }}" == kalan ]]; then
+              R "$PY" -c "import sys; from araclar.paket.rehber import iz; h = iz.hazir(); print('-- rehber izi:', h or 'hazır'); sys.exit(1 if h else 0)" \
+                || { echo "DUR: rehber izi için three.js ya da Playwright yok; 62 m² kıyası atlanırdı"; exit 1; }
+            fi
             # shellcheck disable=SC2086
             R PORTMAN_TEST_PG="$PG" "$PY" -m pytest -q -rfE -p no:cacheprovider $YOLLAR
           fi
