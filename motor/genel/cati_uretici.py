@@ -105,7 +105,7 @@ def _geri(c: dict, islemler: list, merkez: list) -> dict:
 def uret(ayak_izi, tip: str = "besik", mahya: str | None = None, egim_yuzde: float | None = None,
          duvar_ustu: float = 270, kural: dict | None = None) -> dict:
     """Ayak izi üstüne çatı. Beşik ve kırma: tek dikdörtgen (x0, y0, x1, y1; dış yüzler), `mahya` "x" ya da "y". Cumba: [ana, cumba]
-    (cumba ana gövdenin bir uzun kenarına bitişik). L: [blok, kanat] (kanat bloğun bir kısa kenarına bitişik, onu boydan boya örter).
+    (cumba ana gövdenin bir uzun kenarına bitişik; `mahya` verilirse ona paralel kenara, İE-17). L: [blok, kanat] (kanat bloğun bir kısa kenarına bitişik, onu boydan boya örter).
     Tipe göre üretici ayrı modüldedir (`cati_besik`, `cati_kirma`, `cati_cumba`, `cati_l`); ortak sayılar kural tablosundan."""
     k = kural or kurallar()
     if tip not in k["tipler"]:
@@ -145,7 +145,10 @@ def uret(ayak_izi, tip: str = "besik", mahya: str | None = None, egim_yuzde: flo
         yan = _kenar(ana, parca) if tip == "cumba" else _kenar_l(ana, parca)
         if tip == "cumba" and yan:                           # cumba ana gövdenin uzun kenarına bitişir (mahya uzun kenar boyunca; inceleme G5)
             en_, boy_ = ana[2] - ana[0], ana[3] - ana[1]
-            if (yan in ("G", "K") and en_ < boy_) or (yan in ("B", "D") and boy_ < en_):
+            if mahya in ("x", "y"):                          # İE-17: verilen mahya geçerli (prefabrikte paftadan; AP-13'te kısa kenar boyunca)
+                if (yan in ("G", "K")) != (mahya == "x"):
+                    raise CatiHatasi("beşik + cumba: cumba ana mahyaya paralel kenara bitişik olmalı")
+            elif (yan in ("G", "K") and en_ < boy_) or (yan in ("B", "D") and boy_ < en_):
                 raise CatiHatasi("beşik + cumba: cumba ana gövdenin uzun kenarına bitişik olmalı")
         islemler = (DONUS_CUMBA if tip == "cumba" else DONUS_L).get(yan or "")
         if islemler is None:

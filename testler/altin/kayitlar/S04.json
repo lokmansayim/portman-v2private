@@ -1,0 +1,37 @@
+{
+ "id": "S04",
+ "talep": {
+  "niyet": "diger",
+  "katalog_kodu": null,
+  "yapi_turu": null,
+  "kat_sayisi": null,
+  "oda_programi": null,
+  "alan_m2": null,
+  "dis_olcu": null,
+  "pano": null,
+  "veranda": null,
+  "cati": null,
+  "yukseklik_cm": null,
+  "pencereler": [],
+  "dis_kapi": null,
+  "ic_kapi": null,
+  "varyantlar": [],
+  "bina_ozellikleri": {},
+  "ozel_istekler": [],
+  "musteri": {
+   "ad": null,
+   "telefon": null,
+   "sevk_adresi": null
+  },
+  "belirsizlikler": [],
+  "guven": "yuksek",
+  "ozet": "Mesajınız maç sonucuyla ilgili; herhangi bir plan veya teklif talebi yok."
+ },
+ "meta": {
+  "backend": "anthropic",
+  "model": "claude-opus-5-5",
+  "girdi_token": 5373,
+  "cikti_token": 166,
+  "sure_ms": 2059
+ }
+}

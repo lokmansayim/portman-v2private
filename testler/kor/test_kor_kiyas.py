@@ -282,6 +282,15 @@ def test_kor_liste_acilis_kaydiyla_acilir(depo, tmp_path):
     assert "AÇILIŞTAN SONRA DEĞİŞTİ" in (tmp_path / "r.md").read_text(encoding="utf-8")
 
 
+def test_muhur_notu_sonucta_ve_raporda(depo, tmp_path):
+    # İE-17: paftası çizime kullanılan kör evin kaydında not; kıyas yapılırsa sonuç ve rapor yazar (kayıt açılmaz, durum değişmez)
+    _muhur_degistir(depo, **{"not": "çizim için pafta görüldü"})
+    k = K.kiyasla(depo["pd"], depo["kaynak"], kok=depo["kok"])
+    assert K.sonuc_kaydi(k)["muhur"]["not"] == "çizim için pafta görüldü"
+    K.rapor_md(k, tmp_path / "r.md")
+    assert "durum acik · çizim için pafta görüldü" in (tmp_path / "r.md").read_text(encoding="utf-8")
+
+
 @pytest.mark.parametrize("dosya", ["testler/kor/sozluk.json", "testler/kor/projeler/DN01/proje.json"])
 def test_sozluk_ve_proje_kaydi_okumadan_once_denetlenir(depo, okunmaz, dosya):
     """Bizim yanımız (sözlük, proje kaydı) gerçek liste okunmadan önce commit'li olmalı (adım 1)."""
@@ -415,6 +424,15 @@ def test_kor19_ve_ap10_acilis_kaydi_olmadan_reddedilir(muhur):
             K.acilabilir_mi(r, muhur, kod, liste)
         assert e.value.adim == 3, kod
     assert not set(KOR19 + ["AP-10"]) & set(muhur["acilislar"])
+
+
+def test_cizim_icin_pafta_gorulen_kor_liste_kapali(muhur):
+    # CIO 27 Ekim 22:43: AP-13 ve AP-16'nın montaj paftası İE-17 çizimine kullanıldı; kör listelerinin kaydında not, liste kapalı
+    for kod in ("AP-13", "AP-16"):
+        r = [r for r in muhur["dosyalar"] if kod in r["kod"]]
+        assert {(x["tur"], x["durum"]) for x in r} == {("montaj paftası", "kaynak"), (K.LISTE, "kor")}, kod
+        liste = next(x for x in r if x["tur"] == K.LISTE)
+        assert liste["not"].startswith("çizim için pafta görüldü") and kod not in muhur["acilislar"], kod
 
 
 def test_acik_sekiz_projenin_listesi_acik_kayitta(muhur):

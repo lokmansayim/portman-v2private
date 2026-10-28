@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -50,6 +51,7 @@ for anahtar, deger in (("enabled", True), ("enabled_at", int(time.time()) - 3600
                        ("llm", {"backend": "manuel", "model": "test", "timeout_s": 5}), ("patron_teknik_not", True), ("mesaj_katmani", True),
                        ("ucb_taban_url", "https://ornek.invalid/portman/3d"), ("kayitsiz_cevap", CEVAP)):
     AY.yaz(VERI, anahtar, deger)
+(VERI / "yayin" / "3d").mkdir(parents=True)        # İE-21: sunucuda vps/nginx_uygula.sh açar (nginx /3d/<anahtar>/)
 (VERI / "self-test-result.json").write_text('{"state": "skipped", "not": "e2e: öz-test ayrı (vps/oz_test.sh)"}', encoding="utf-8")
 
 dbad = "e2ev_" + uuid.uuid4().hex[:8]
@@ -173,7 +175,10 @@ try:
     ok(kinds == ["interactive", "document", "interactive", "text"], f"giden satırları (son metin: Patron teknik notu): {kinds}")
     rev = q("SELECT is_emri_no, rev, ekler, durum FROM revizyonlar")[0]
     no = rev["is_emri_no"]
-    ok(rev["ekler"]["ifc"]["sema_hatasi"] == 0 and rev["ekler"]["ucb"]["url"] == f"https://ornek.invalid/portman/3d/{no}/r01/", "Postgres: ekler (IFC şema 0, 3D url)")
+    u1 = rev["ekler"]["ucb"]
+    ok(rev["ekler"]["ifc"]["sema_hatasi"] == 0 and re.fullmatch(r"https://ornek\.invalid/portman/3d/[A-Za-z0-9_-]{22}/", u1["url"] or "") and no not in u1["url"]
+       and (VERI / "yayin" / "3d" / u1["anahtar"] / "index.html").read_bytes() == Path(u1["dosya"]).read_bytes(),
+       "Postgres: ekler (IFC şema 0, 3D url rastgele anahtarlı; sayfa data/yayin/3d'de bayt bayt aynı)")
     pdf_yol = depo.cikti_yolu(PATRON, no, 1)
     ok(pdf_yol and Path(pdf_yol).is_file() and Path(pdf_yol).read_bytes()[:4] == b"%PDF" and str(VERI / "projects") in pdf_yol, "PDF data/projects altında")
     say = gonder()
@@ -185,7 +190,8 @@ try:
     ok(g[0]["interactive"]["header"]["image"]["id"] == "1001" and len(g[0]["interactive"]["action"]["buttons"]) == 2
        and g[0].get("biz_opaque_callback_data") == ilk[0]["id"], "buton mesajı: medya kimlikli başlık görseli, 2 buton, satır kimliği (biz_opaque_callback_data)")
     ok(sorted(b["reply"]["id"] for b in g[0]["interactive"]["action"]["buttons"]) == sorted([f"o:{no}:1", f"r:{no}:1"]), "butonlar: o:/r: kimlikleri revizyonla aynı")
-    ok(g[2]["interactive"]["action"]["parameters"]["url"].endswith(f"/{no}/r01/") and g[1]["document"]["id"] == "1002", "bağlantı butonu 3D url; PDF medya kimliğiyle")
+    ok(g[2]["interactive"]["action"]["parameters"] == {"display_text": "3D'yi aç", "url": u1["url"]} and g[1]["document"]["id"] == "1002",
+       "\"3D'yi aç\" düğmesi 3D url'siyle; PDF medya kimliğiyle")
     ok(all(r["dis_id"] and r["dis_id"].startswith("wamid.OUT") for r in ilk), "Postgres: dört satırın wamid'i kayıtlı")
     buton_wamid = ilk[0]["dis_id"]; pdf = ilk[1]
 
@@ -387,16 +393,18 @@ try:
        and "mahaller" not in r9["is_emri"] and r9["is_emri"]["bilgi"]["bayi_telefonu"] == BAYI and "kunye" not in r9["is_emri"],
        "revizyon r01: zarf yapi.sistem celik, tanım gömülü değil, antet numarası bayi kartından (D-09)")
     ok(Path(r9["pdf_yolu"]).is_file() and Path(r9["pdf_yolu"]).name == "C8801K_pafta.pdf" and str(VERI / "projects") in r9["pdf_yolu"]
-       and r9["ekler"]["gorsel"]["filename"] == "C8801K_bayi_gorsel.png" and r9["ekler"]["ifc"]["sema_hatasi"] == 0 and "ucb" not in r9["ekler"],
-       "pafta PDF ve bayi görseli data/projects altında; IFC şema 0; 3D yok")
+       and r9["ekler"]["gorsel"]["filename"] == "C8801K_bayi_gorsel.png" and r9["ekler"]["ifc"]["sema_hatasi"] == 0
+       and (VERI / "yayin" / "3d" / r9["ekler"]["ucb"]["anahtar"] / "index.html").read_bytes() == Path(r9["ekler"]["ucb"]["dosya"]).read_bytes(),
+       "pafta PDF ve bayi görseli data/projects altında; IFC şema 0; 3D sayfası genel motorun IFC'sinden, yayımlandı (İE-21)")
     import fitz
     with fitz.open(r9["pdf_yolu"]) as d9:
         s9w = [w[4] for w in d9[0].get_text("words")]
         ok(len(d9) == 2 and "TASLAK" in s9w and BAYI in s9w and "Deneme" in s9w, "PDF 2 sayfa; 1. sayfada TASLAK, antette bayinin adı ve kart numarası")
     k9b = q("SELECT kind, satir FROM giden WHERE mesaj_id = 'wamid.E2EC2' ORDER BY sira")
-    ok([x["kind"] for x in k9b][:2] == ["interactive", "document"] and k9b[1]["satir"]["filename"] == f"Portman_{r9['is_emri_no']}_r01.pdf"
-       and sorted(b["reply"]["id"] for b in k9b[0]["satir"]["interactive"]["action"]["buttons"]) == sorted([f"o:{r9['is_emri_no']}:1", f"r:{r9['is_emri_no']}:1"]),
-       "satırlar: Onayla/Revize et + bayi görseli, PDF Portman_<no>_r01.pdf adıyla")
+    ok([x["kind"] for x in k9b][:3] == ["interactive", "document", "interactive"] and k9b[1]["satir"]["filename"] == f"Portman_{r9['is_emri_no']}_r01.pdf"
+       and sorted(b["reply"]["id"] for b in k9b[0]["satir"]["interactive"]["action"]["buttons"]) == sorted([f"o:{r9['is_emri_no']}:1", f"r:{r9['is_emri_no']}:1"])
+       and k9b[2]["satir"]["interactive"]["action"]["parameters"]["url"] == r9["ekler"]["ucb"]["url"],
+       "satırlar: Onayla/Revize et + bayi görseli, PDF Portman_<no>_r01.pdf adıyla, \"3D'yi aç\" düğmesi")
     say = gonder()
     t9 = sahte.tipler()[-(say.get("kabul_edildi") or 0) * 2:]
     ok(say.get("kabul_edildi") >= 2 and "interactive/button" in t9 and "document" in t9, f"Meta: bayi görseli + düğmeler ve PDF gitti ({t9})")

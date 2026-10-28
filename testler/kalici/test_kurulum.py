@@ -92,6 +92,9 @@ def test_kurulum_kosar_gomulu_dosyalar_ayni_ikinci_kosu_korur(ortam):
     assert r.returncode == 0, out[-3000:]
     for p in ("surumler", "kaynak", "data/projects", "data/nabiz", "logs"):
         assert (d["kok"] / p).is_dir()
+    # İE-21: 3D yayın dizini 755; data'dan yalnız geçilir (751), proje kayıtları kapalı kalır
+    assert (d["kok"] / "data" / "yayin" / "3d").stat().st_mode & 0o777 == 0o755 and (d["kok"] / "data").stat().st_mode & 0o777 == 0o751
+    assert (d["kok"] / "data" / "projects").stat().st_mode & 0o777 == 0o750
     assert (d["etc"].stat().st_mode & 0o777) == 0o700 and d["webroot"].is_dir()
     # dağıtım anahtarı: yalnız açık anahtar ekranda
     ozel, acik = (d["etc"] / "deploy_key").read_text(), (d["etc"] / "deploy_key.pub").read_text().strip()

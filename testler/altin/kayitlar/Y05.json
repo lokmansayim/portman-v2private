@@ -1,0 +1,40 @@
+{
+ "id": "Y05",
+ "talep": {
+  "niyet": "yeni_talep",
+  "katalog_kodu": null,
+  "yapi_turu": "prefabrik",
+  "kat_sayisi": 2,
+  "oda_programi": "3+1",
+  "alan_m2": 120.0,
+  "dis_olcu": null,
+  "pano": null,
+  "veranda": null,
+  "cati": null,
+  "yukseklik_cm": null,
+  "pencereler": [],
+  "dis_kapi": null,
+  "ic_kapi": null,
+  "varyantlar": [],
+  "bina_ozellikleri": {},
+  "ozel_istekler": [],
+  "musteri": {
+   "ad": "Ahmet Bey",
+   "telefon": null,
+   "sevk_adresi": null
+  },
+  "belirsizlikler": [
+   "120 m²'nin toplam alan mı yoksa kat başına alan mı olduğu belirtilmemiş",
+   "Dış ölçü veya katalog kodu verilmemiş"
+  ],
+  "guven": "orta",
+  "ozet": "120 m² alanlı, dubleks (iki katlı), 3+1 prefabrik ev için plan/teklif istiyorsunuz."
+ },
+ "meta": {
+  "backend": "anthropic",
+  "model": "claude-opus-5-5",
+  "girdi_token": 5383,
+  "cikti_token": 386,
+  "sure_ms": 3504
+ }
+}

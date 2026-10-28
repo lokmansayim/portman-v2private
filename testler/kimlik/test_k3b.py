@@ -244,8 +244,12 @@ def test_kesim_yuvarlamasi_liste_uretecinin():
     for kenar in (560.0, 560.0001, 347.5043, 560.0000000000001):
         assert kesim.kenar_karti([kenar] * 4, 280.0)["stok"] == 4 * PL.TAVAN(kenar / 280.0), kenar
     assert kesim.toplam_karti([2000.0001], 250.0)["stok"] == 9 and kesim.kenar_karti([560.0001], 280.0)["stok"] == 3
-    assert sum([298.6, 106.6, 82.6, 512.2]) > 1000 and kesim.toplam_karti([298.6, 106.6, 82.6, 512.2], 250.0)["stok"] == 4
-    assert sum([284.1, 119.1, 234.2, 282.6]) > 920 and kesim.toplam_karti([284.1, 119.1, 234.2, 282.6], 250.0, 20.0)["stok"] == 4
+    # Gürültülü toplam sabit verilir: Python 3.12'den beri sum() float'ları telafili toplar, dört hattın toplamı 3.11'de 1000,0000000000001,
+    # 3.12+'da (canlı 3.12.3) tam 1000,0 çıkar; gürültü sum()'a bırakılırsa ön koşul sürüme göre değişir.
+    assert 1000.0000000000001 > 1000 and kesim.toplam_karti([1000.0000000000001], 250.0)["stok"] == 4
+    assert 920.0000000000001 > 920 and kesim.toplam_karti([920.0000000000001], 250.0, 20.0)["stok"] == 4
+    assert kesim.toplam_karti([298.6, 106.6, 82.6, 512.2], 250.0)["stok"] == 4
+    assert kesim.toplam_karti([284.1, 119.1, 234.2, 282.6], 250.0, 20.0)["stok"] == 4
     assert kesim.kenar_karti([560.0000000000001], 280.0)["stok"] == 2
 
 
