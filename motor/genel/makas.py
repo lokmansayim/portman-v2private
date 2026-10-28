@@ -35,6 +35,11 @@ kaynağıyla. Tanımdaki `cati.makaslar` (paftadan okunmuş makas yerleri) bu ku
    çatı, ucunda duvar bulunamayan aile (ana saçağın ezdiği uç hariç: sonucu değiştirmez), saçağı bulunamayan kırma ucu, tek parça
    kesilmeyen kırma şeridi, kısa çizgi, kurulamayan tavan paneli, tavan panelinin ve çatı üstü panelinin küçük ve dar parçaları); girdi bunları "karkas kuralı:
    …" uyarısı olarak taşır (kurulamayan yöntem A panelinin satırı kitabın oranıyla), makas paftası basar.
+8. **Ara panel** (İE-16 PR-6b; Lokman, 27 Ekim 2026, B1; kuralda `ara_paneli` varsa). Beşik ailenin kırma ucunda makasların arası
+   panelle örtülür (`ara_panelleri`): kırma yüzü ana makas aralıklarında, uç şeridinde kısa makas aralıklarında, ailenin düzlemleri uç
+   şeridinde köşe üçgeni olarak. Böyle bir uçta kırma çaprazı yalnız uç şeridinde, saçak köşesinden ilk ana makasa uzanır (öte yanda
+   kırma çizgisi ana makasların üstündeki ara panellerdedir; ÇP-03, 07, 17 ve 19'un paftalarında köşe makası kısa). Liste ayrı satır
+   yazar, makas paftası planda çizer.
 
 Hesapta LLM yoktur: aynı tanım ve aynı kural aynı sonucu verir. Ölçüler cm; boylar m.
 """
@@ -417,6 +422,25 @@ def _kayit(tur: str, aile: str, ex: str, a: float, cz: dict, duvar_ustu: float, 
             "uyeler_m": {ad: round(v, 4) for ad, v in u.items()}, "profil_boyu_m": round(sum(u.values()), 4)}
 
 
+def kirma_seritleri(adli: dict, aile: list[dict], kayit: list[dict]) -> dict:
+    """Beşik ailenin kırma uçları (İE-16 PR-6b): {(aile adı, kırma yüzü): {ee, i, duzlemler, icte, serit}}. `icte`: kırma yüzünün altından
+    geçen ana makasların konumları (ee ekseninde); `serit`: uç şeridi, saçaktan ilk ana makasa. Altından ana makas geçmeyen kırma yüzü yok."""
+    konum = {x["aile"]: sorted(x["konumlar"]) for x in kayit}
+    out = {}
+    for f in aile:
+        if f["tur"] != "besik":
+            continue
+        ad = "/".join(f["duzlemler"])
+        ee = _oteki(f["eksen"]); ie = _i(ee)
+        for i, H in sorted(f["kirma_yuzu"].items()):
+            hb = adli[H]["cokgen"].bounds
+            icte = [v for v in konum[ad] if hb[ie] + EPS < v < hb[ie + 2] - EPS]
+            if icte:
+                out[(ad, H)] = {"ee": ee, "i": i, "duzlemler": f["duzlemler"], "icte": icte,
+                                "serit": (hb[ie], icte[0]) if i == 0 else (icte[-1], hb[ie + 2])}
+    return out
+
+
 def makaslar(t: dict, c: dict, y: dict, k: dict) -> dict:
     """Makaslar (tam, kısa, çapraz), ailelerin kaydı ve uyarılar. Beşik ailede çizgisi mahyaya varmayan makas kısa sayılır;
     `en_kisa_cm`'den kısa çizgide makas konmaz ve uyarı yazılır (sessiz düşme yok)."""
@@ -474,7 +498,9 @@ def makaslar(t: dict, c: dict, y: dict, k: dict) -> dict:
         kayit.append({"aile": ad, "tur": f["tur"], "eksen": f["eksen"], "ana": f["ana"], "uclar": list(nedenler),
                       "konumlar": [round(v, 2) for v in ks], "kirma_yuzleri": [f["kirma_yuzu"][i] for i in sorted(f["kirma_yuzu"])],
                       "kanatlari": ["/".join(x["duzlemler"]) for x in f["kanatlari"]]})
-    # çaprazlar: kırma çizgisi boyunca, saçak köşesinden tepeye
+    # çaprazlar: kırma çizgisi boyunca, saçak köşesinden tepeye. Ara panelli kırma ucunda (kuralda `ara_paneli`, İE-16 PR-6b) yalnız uç
+    # şeridinde: saçak köşesinden ilk ana makasa; öte yanda kırma çizgisi ana makasların üstündeki ara panellerde biter (ÇP-03, 07, 17, 19)
+    seritler = kirma_seritleri(adli, aile, kayit) if "ara_paneli" in k else {}
     for e in kn:
         if e["tur"] != "kirma":
             continue
@@ -486,14 +512,28 @@ def makaslar(t: dict, c: dict, y: dict, k: dict) -> dict:
             continue
         L = e["plan_boy"]
         z0, z1 = e["kot"]
+        p_, q_ = e["p"], e["q"]
         if z0 > z1:
-            z0, z1 = z1, z0
+            z0, z1, p_, q_ = z1, z0, q_, p_
+        sr = next((v for (fa, H), v in seritler.items() if H in (a_, b_) and ({a_, b_} - {H}) <= set(v["duzlemler"])), None)
+        kirpildi = False
+        if sr:
+            ie = _i(sr["ee"])
+            kes = sr["serit"][1] if sr["i"] == 0 else sr["serit"][0]   # şeridin saçağa uzak sınırı: ilk ana makas
+            if (p_[ie] - kes) * (q_[ie] - kes) < 0:
+                t_ = (kes - p_[ie]) / (q_[ie] - p_[ie])
+                L, z1 = L * t_, z0 + (z1 - z0) * t_
+                q_ = (p_[0] + (q_[0] - p_[0]) * t_, p_[1] + (q_[1] - p_[1]) * t_)
+                kirpildi = True
+            else:
+                uyari.append(f"makas: {a_}/{b_} kırma çizgisi uç şeridinin sınırını ({kes:.1f}) kesmiyor: çapraz kırpılmadı, tepeye uzanır")
         n = max(2, int(math.ceil(L / ADIM)) + 1)
         ss = [L * j / (n - 1) for j in range(n)]
         zz = [z0 + (z1 - z0) * s / L for s in ss]
         u = uyeler(ss, zz, duvar_ustu, panel)
+        uc = [p_, q_] if kirpildi else [e["p"], e["q"]]              # kırpılmayan çaprazın kaydı anahtarsız kuralla aynı
         out.append({"tur": "capraz", "aile": "/".join(e["duzlemler"]), "eksen": None, "konum": None,
-                    "s": [[round(v, 2) for v in e["p"]], [round(v, 2) for v in e["q"]]], "acik_cm": round(L, 2),
+                    "s": [[round(v, 2) for v in uc[0]], [round(v, 2) for v in uc[1]]], "acik_cm": round(L, 2),
                     "h_en_cok_cm": round(z1 - duvar_ustu, 2), "uyeler_m": {ad: round(v, 4) for ad, v in u.items()},
                     "profil_boyu_m": round(sum(u.values()), 4)})
     return {"makaslar": out, "aileler": kayit, "baglanmayan_kirma_yuzleri": serbest, "uyarilar": uyari}
@@ -641,6 +681,77 @@ def ust_panelleri(c: dict, k: dict, uyari: list[str] | None = None) -> list[dict
     return out
 
 
+def _serit(ee: str, a0: float, a1: float, bb) -> Polygon:
+    """ee ekseninde [a0, a1] arası, öteki eksende çatının bütününü kapsayan şerit."""
+    return box(a0, bb[1] - 1, a1, bb[3] + 1) if ee == "x" else box(bb[0] - 1, a0, bb[2] + 1, a1)
+
+
+def ara_panelleri(c: dict, k: dict, mk: dict, uyari: list[str]) -> list[dict]:
+    """Kırma ucunun ara panelleri (İE-16 PR-6b; Lokman, 27 Ekim 2026, B1: "özel çatıların makas aralarında tam çatı panelinin altına
+    gelecek şekilde ara panel kullanırız"). Beşik ailenin her kırma ucunda makasların arası panelle örtülür, planda:
+    kırma yüzünün ana makas aralıklarındaki parçaları (`kirma_yuzu`; makaslar kırma yüzünün altından kırpılarak geçer), uç şeridinde
+    (saçaktan ilk ana makasa) kırma yüzünün kısa makas aralıklarındaki parçaları (`uc_seridi`) ve ailenin iki düzleminin uç şeridindeki
+    köşe üçgenleri (`kose`; kırma çizgisiyle ilk ana makas arası). Parçanın açılımı panelin ölçüsüdür; üyeler çatı üstü panelinin
+    ızgarasıyla (`izgara_uyeleri`, `profil_araligi_cm`). Kısa kenarı makas kalınlığından dar ya da 100 cm²'den küçük parça panel olmaz,
+    uyarı yazar. Tek eğimli ailenin kırma üçgeni (yalnız kısa makas; ÇP-06, ÇP-13) ve vadi bu kuralda yok. Kuralda `ara_paneli` yoksa
+    (eski kural kopyaları) boş."""
+    ap = k.get("ara_paneli", {}).get("deger")
+    if not ap:
+        return []
+    kal = _d(k, "makas")["kalinlik_cm"]
+    adli, _, aile, _ = aileler(c)
+    if not adli:
+        return []
+    bb = unary_union([d["cokgen"] for d in adli.values()]).bounds
+    out = []
+
+    def ekle(ad_aile, ad_dz, bolge, g):
+        dz = adli[ad_dz]
+        ac = Polygon([dz["yuz"](p) for p in g.exterior.coords])
+        en = min(ac.bounds[2] - ac.bounds[0], ac.bounds[3] - ac.bounds[1])
+        if ac.area < 100.0 or en <= kal + EPS:
+            uyari.append(f"ara panel: {ad_aile} ailesinin {ad_dz} düzleminde {ac.area:.0f} cm² parça, kısa kenarı {en:.1f} cm "
+                         f"(makas kalınlığı {kal:g} cm, en küçük parça 100 cm²): panel yok")
+            return
+        u = izgara_uyeleri(ac, ap["profil_araligi_cm"])
+        out.append({"aile": ad_aile, "duzlem": ad_dz, "bolge": bolge, "profil": f"80x45x{ap['et']}",
+                    "olcu_cm": [round(ac.bounds[2] - ac.bounds[0], 2), round(ac.bounds[3] - ac.bounds[1], 2)],
+                    "plan": [[round(x, 2), round(y_, 2)] for x, y_ in g.exterior.coords[:-1]],
+                    "uyeler_m": {a: round(v, 4) for a, v in u.items()}, "profil_boyu_m": round(sum(u.values()), 4)})
+    seritler = kirma_seritleri(adli, aile, mk["aileler"])
+    for f in aile:
+        if f["tur"] != "besik" or not f["kirma_yuzu"]:
+            continue
+        ad = "/".join(f["duzlemler"])
+        ex = f["eksen"]; ee = _oteki(ex)
+        ie, ix = _i(ee), _i(ex)
+        for i, H in sorted(f["kirma_yuzu"].items()):
+            hp = adli[H]["cokgen"]
+            hb = hp.bounds
+            sr = seritler.get((ad, H))
+            if not sr:
+                uyari.append(f"ara panel: {ad} ailesinin {H} kırma yüzünün altından ana makas geçmiyor; o uçta ara panel yok")
+                continue
+            icte = sr["icte"]
+            # kırma yüzü, ana makas aralıklarında; tepesi (son makastan öte) de bir parça
+            sinir = icte + [hb[ie + 2]] if i == 0 else [hb[ie]] + icte
+            for a0, a1 in zip(sinir, sinir[1:]):
+                for g in _parcalar(hp.intersection(_serit(ee, a0, a1, bb))):
+                    ekle(ad, H, "kirma_yuzu", g)
+            s0, s1 = sr["serit"]                                           # uç şeridi: saçaktan ilk ana makasa
+            kisa = sorted(x["konum"] for x in mk["makaslar"] if x["tur"] == "kisa" and x["aile"] == H)
+            kes = [hb[ix]] + [v for v in kisa if hb[ix] < v < hb[ix + 2]] + [hb[ix + 2]]
+            for b0, b1 in zip(kes, kes[1:]):
+                kb = box(b0, s0, b1, s1) if ex == "x" else box(s0, b0, s1, b1)
+                for g in _parcalar(hp.intersection(kb)):
+                    ekle(ad, H, "uc_seridi", g)
+            for A in f["duzlemler"]:                                       # köşe üçgenleri: ailenin düzlemleri uç şeridinde, kırma yüzüne bitişik
+                for g in _parcalar(adli[A]["cokgen"].intersection(_serit(ee, s0, s1, bb))):
+                    if g.distance(hp) < 1.0:
+                        ekle(ad, A, "kose", g)
+    return out
+
+
 def _uzunu_bol(g: Polygon, en_uzun: float | None) -> list[Polygon]:
     """Uzun kenarı `en_uzun`'u aşan parça o kenar boyunca eşit parçalara (tavan paneli; tırın boyu, İE-16 PR-3c); sınır yoksa kendisi."""
     x0, y0, x1, y1 = g.bounds
@@ -770,6 +881,8 @@ def kur(t: dict, y: dict, k: dict, yontem: str | None = None) -> dict:
                              f"{me['tek_aciklik_en_cok_cm']:g}; {me['ince']} sayıldı")
     out = {"makaslar": mk["makaslar"], "aileler": mk["aileler"], "baglanmayan_kirma_yuzleri": mk["baglanmayan_kirma_yuzleri"],
            "cati_panelleri": cati_panelleri(c, y, k)}
+    if "ara_paneli" in k:                  # İE-16 PR-6b: kırma ucunun ara panelleri; anahtarı olmayan kural kopyasında kayıt aynı
+        out["ara_panelleri"] = ara_panelleri(c, k, mk, uyari)
     if yontem == "panel":
         out["ust_panelleri"] = ust_panelleri(c, k, uyari)
         out["tavan_panelleri"] = tavan_panelleri(c, y, k, mk, uyari)

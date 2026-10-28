@@ -709,6 +709,11 @@ def girdi(y: dict, c: dict, m: dict, kur: dict, kaynak: str) -> dict:
         prof, pbx, mn = model("makas_kalin", None, None)
         ek_satirlar.append({"ad": f"Çatı makas panelleri ({prof.split('x')[-1]} mm)", "profil": prof, "panel_adedi": cm["makas_kalin"]["adet"],
                             "not": "tek açıklığı 8 m'yi aşan makaslar (Lokman, 27 Ekim 2026); adet ve profil boyu karkas kuralından" + mn, **pbx})
+    if kural_k and "ara_paneli" in cm:               # kırma ucunun ara panelleri (karkas kuralı `ara_paneli`, İE-16 PR-6b): ayrı satır
+        prof, pbx, mn = model("ara_paneli", None, None)
+        ek_satirlar.append({"ad": "Ara paneller (kırma ucu)", "profil": prof, "panel_adedi": cm["ara_paneli"]["adet"],
+                            "not": "kırma ucunda makasların arası (Lokman, 27 Ekim 2026: \"özel çatıların makas aralarında … ara panel\"); "
+                                   "adet ve profil boyu karkas kuralından" + mn, **pbx})
     kayip = sorted({k.get("celik_grubu") for k in t.get("kirisler", []) if k.get("celik_grubu", "kiris") != "kiris"}
                    - {es["grup"] for es in (t.get("celik_modeli") or {}).get("ek_satirlar", [])})
     if kayip:
