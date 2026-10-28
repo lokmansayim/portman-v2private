@@ -14,8 +14,8 @@
  "karkas_kurali": {
   "yol": "kurallar/karkas/celik_karkas.json",
   "sema": "portman.celik_karkas/0.1-taslak",
-  "sha256": "8a051c8ff1a5d96837e2af285606b46e0f24a62d6b927a7eea2f621ed7841c33",
-  "kopya": "testler/celik/projeler/setler/8a051c8ff1a5d968.json"
+  "sha256": "93507ffa642f5d8a63b42475a35227e9e45be8a76e160effaf6c0d60ed11aaa1",
+  "kopya": "testler/celik/projeler/setler/93507ffa642f5d8a.json"
  },
  "yontem": {
   "kod": "omega_asik",
@@ -31,8 +31,9 @@
   {"grup": "Çelik panel", "kalem": "Baca karkası", "boyut": "80 × 45 × 0,8", "adet": 8, "kg": 81.06, "durum": "varsayim", "tur": "baca_paneli"},
   {"grup": "Çelik panel", "kalem": "Veranda dikmeleri (kolon paneli)", "boyut": "80 × 45 × 1,2", "adet": 4, "kg": 57.27, "durum": "varsayim", "tur": "kolon_kiris"},
   {"grup": "Çelik panel", "kalem": "Kirişler (kiriş paneli)", "boyut": "80 × 45 × 1,2", "adet": 3, "kg": 54.51, "durum": "varsayim", "tur": "kolon_kiris"},
-  {"grup": "Çelik panel", "kalem": "Çatı makas panelleri", "boyut": "80 × 45 × 0,8", "adet": 28, "kg": 488.93, "durum": "varsayim", "tur": "makas"},
+  {"grup": "Çelik panel", "kalem": "Çatı makas panelleri", "boyut": "80 × 45 × 0,8", "adet": 28, "kg": 427.58, "durum": "varsayim", "tur": "makas"},
   {"grup": "Çelik panel", "kalem": "Çatı paneli (veranda ve sundurma çatıları)", "boyut": "80 × 45 × 1,2", "adet": 4, "kg": 121.05, "durum": "varsayim", "tur": "cati_paneli"},
+  {"grup": "Çelik panel", "kalem": "Ara paneller (kırma yüzü)", "boyut": "80 × 45 × 0,8", "adet": 25, "kg": 237.53, "durum": "varsayim", "tur": "makas"},
   {"grup": "Çelik panel", "kalem": "Boy C profil", "boyut": "80 × 45 × 0,8", "adet": 3, "kg": 15, "durum": "motor", "tur": "c_profil"},
   {"grup": "Çelik panel", "kalem": "Boy C profil", "boyut": "80 × 45 × 1,2", "adet": 3, "kg": 15, "durum": "motor", "tur": "c_profil"},
   {"grup": "METAL AKSAM GRUBU", "kalem": "Saçak sacı (30'luk)", "boyut": "L 2500", "adet": 19, "kg": null, "durum": "lokman", "bizim_grup": "Metal aksam", "liste_adi": "SAÇAK SAÇI (30'LUK) (ANTRASİT)"},
@@ -101,7 +102,7 @@
   {"grup": "VİDA GRUBU", "kalem": "Alçıpan vidası (3,5 × 35)", "boyut": "adet", "adet": 5750, "kg": null, "durum": "excel", "bizim_grup": "Vida", "liste_adi": "ALÇIPAN VİDASI ( 3.5 X 35 )"},
   {"grup": "VİDA GRUBU", "kalem": "OSB ve yalıpan vidası (3,9 × 32)", "boyut": "adet", "adet": 3500, "kg": null, "durum": "motor", "bizim_grup": "Vida", "liste_adi": "OSB VE YALIPAN ( 3.9 X 32)"},
   {"grup": "VİDA GRUBU", "kalem": "Pencere vidası (4,8 × 70)", "boyut": "adet", "adet": 140, "kg": null, "durum": "excel", "bizim_grup": "Vida"},
-  {"grup": "VİDA GRUBU", "kalem": "Trapez vida (5,5 × 25)", "boyut": "adet", "adet": 1250, "kg": null, "durum": "excel", "bizim_grup": "Vida", "liste_adi": "( 5.5 X 25 ) TRAPEZ VİDA (AŞIK+OMEGA+KÖŞEBENT)"},
+  {"grup": "VİDA GRUBU", "kalem": "Trapez vida (5,5 × 25)", "boyut": "adet", "adet": 1500, "kg": null, "durum": "excel", "bizim_grup": "Vida", "liste_adi": "( 5.5 X 25 ) TRAPEZ VİDA (AŞIK+OMEGA+KÖŞEBENT)"},
   {"grup": "VİDA GRUBU", "kalem": "Trapez vida (5,5 × 60)", "boyut": "adet", "adet": 250, "kg": null, "durum": "motor", "bizim_grup": "Vida", "liste_adi": "( 5.5 X 60 ) TRAPEZ VİDA (TRAPEZ SAC / METAL KİREMİT)"},
   {"grup": "VİDA GRUBU", "kalem": "Trapez vida (5,5 × 110; sandviç panel)", "boyut": "adet", "adet": 750, "kg": null, "durum": "motor", "bizim_grup": "Vida", "liste_adi": "( 5.5X 110) TRAPEZ VİDA ( SANDVİÇ PANEL)"},
   {"grup": "DEPO GRUBU", "kalem": "Çelik dübel (klipsli)", "boyut": "adet", "adet": 46, "kg": null, "durum": "motor", "bizim_grup": "Vida", "liste_adi": "ÇELİK DÜBEL ( KLİPSLİ )"},
