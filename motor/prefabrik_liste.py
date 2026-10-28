@@ -56,7 +56,7 @@ ISARET_YOLU = KOK / "kurallar" / "liste" / "prefabrik_isaret.json"
 TEK_KAYNAK = "Tek kaynak (zayıf)"
 ISARETLI = ("pencere_u_h_gecen", "omega_kapak")   # satırı `zayif(...)` ile yazılan kurallar (BK-12 PR-2c)
 
-SURUM = "1.6 (28 Ekim 2026; vitrifiye banyo başına, varsayım (İE-13 PR-2); nişin ağzındaki kiriş (BK-14 ek); 1.5, 22 Ekim: kör test üreteci 7.3, kurallar kural kitabında; orta iniş 9 m, kitapla farklı on yedi kalemde kitap; PK-07 hedef örnek; T76 cevapları; 100'lük duvar omegası kirişlerin de üstünde; elektrik oda kuralı)"
+SURUM = "1.6 (28 Ekim 2026; vitrifiye banyo başına, varsayım (İE-13 PR-2); nişin ağzındaki kiriş (BK-14 ek); taşan verandanın dış kirişi kolonun dış yüzünden dış yüzüne (Lokman, kart 28 Ekim); 1.5, 22 Ekim: kör test üreteci 7.3, kurallar kural kitabında; orta iniş 9 m, kitapla farklı on yedi kalemde kitap; PK-07 hedef örnek; T76 cevapları; 100'lük duvar omegası kirişlerin de üstünde; elektrik oda kuralı)"
 GRUPLAR = {"1001": "Panel", "1002": "Metal aksam", "1003": "Kapı ve pencere", "1004": "Tavan", "1005": "Makas", "1006": "Çatı",
            "1007": "Elektrik", "1008": "Vida", "1009": "Depo", "1010": "Sıhhi tesisat", "1011": "Dere", "1012": "Boya"}
 TAVAN = lambda x: int(math.ceil(x - 1e-9))
@@ -254,7 +254,9 @@ def model_motor(ie: dict) -> dict:
             if v.poly.buffer(1.0).contains(LineString([(x0, y0), (x1, y1)])):
                 yanlar.add("x" if abs(y1 - y0) < 1e-6 else "y")
         kirisler += [((vx1 - vx0) if e == "x" else (vy1 - vy0)) for e in sorted(yanlar)]
+    dis_kenar_sira = []                                        # taşan verandanın dış kenarının `veranda_kenarlari_cm`'deki sırası
     for v in plan.dis_verandalar:                              # BK-14: dış kenar ve iki yan (TK-01 geçici yolu, PK-03/PK-06 paftası gibi)
+        dis_kenar_sira.append(len(kirisler))                   # `kenarlar`: dış, yan 1, yan 2
         kirisler += [max(x1 - x0, y1 - y0) for (x0, y0, x1, y1) in v["kenarlar"]]
     t_dis = 2 * next(d.h for d in plan.duvarlar if d.tur == "dis")
     brut = W * D
@@ -279,7 +281,8 @@ def model_motor(ie: dict) -> dict:
     return {"kaynak": "Motor", "H0": float(y.get("duvar_yuksekligi_cm", 250)), "W": W, "D": D, "brut_m2": round(brut / 1e4, 3),
             "dis_cevre_m": dis_duvar_m, "ic_kalan_dis_duvar_m": ic_kalan_m, "ic_kirisler_cm": ic_kirisler, "t_dis": t_dis, "panolar": panolar, "ekler": ekler,
             "koseler": dict(Counter("dis" if kk.tur == "dis" else "ic" for kk in plan.koseler)), "dikmeler": len(plan.dikmeler),
-            "veranda_kenarlari_cm": kirisler, **({"nis_agizlari_cm": nis_agizlari} if nis_agizlari else {}), "kapali": [oda(m) for m in kapali], "acik": [{**oda(m), "tur": "veranda"} for m in acik],
+            "veranda_kenarlari_cm": kirisler, **({"veranda_dis_kenar_sira": dis_kenar_sira} if dis_kenar_sira else {}),
+            **({"nis_agizlari_cm": nis_agizlari} if nis_agizlari else {}), "kapali": [oda(m) for m in kapali], "acik": [{**oda(m), "tur": "veranda"} for m in acik],
             "sigorta_en_uzak": en_uzak,
             "cati": [{"ad": "ana çatı", "tip": c.get("tip", "besik"), "aciklik_cm": aciklik, "boy_cm": bina_boyu,
                       "egim_yuzde": float(c.get("egim_yuzde", 33)), "sacak_cm": float(c.get("sacak_cm", 30)), "kalkan": 2,
@@ -579,12 +582,20 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
             ekle("1002", "Özel kutu profil (kolon) 100 × 100", f"L {mm(L_k)}", n_k, "Sayım", "veranda dikmesi" + (" (boy paftadan, O4)" if N.get("kolon_boylari_cm") else ""))
         # profil vidalama aparatı yazılmaz: kolonlu beş Portatifev listesinde yok, yalnız PK-01'de 2 ("ekstradan ekledik"; BK-12 PR-2c)
     kirisler = N.get("veranda_kirisleri_cm")
-    kiris_formul = "paftadan okunan kiriş boyu"
-    if kirisler is None:                                        # Motor kipi açık kenarları verir; kiriş = açık kenar − 10
-        kirisler = [x - r("veranda_kirisi_eksik_cm") for x in N.get("veranda_kenarlari_cm", [])]
-        kiris_formul = f"açık kenar dış ölçüsü − {mm(r('veranda_kirisi_eksik_cm'))}"
-    for L_ in kirisler:
-        ekle("1002", "Kutu profil (kiriş) 100 × 100", f"L {mm(L_)}", 1, "Liste kuralı", kiris_formul, "PK-01'de tuttu")
+    if kirisler is not None:
+        kirisler = [(L_, "paftadan okunan kiriş boyu", "PK-01'de tuttu") for L_ in kirisler]
+    else:                                                       # Motor kipi açık kenarları verir; kiriş = açık kenar − 10
+        dis_sira = set(N.get("veranda_dis_kenar_sira") or [])
+        kirisler = []
+        for i, x in enumerate(N.get("veranda_kenarlari_cm", [])):
+            if i in dis_sira:                                   # taşan verandanın iki kolon arasındaki dış kirişi (Lokman, kart 28 Ekim)
+                e = r("tasan_veranda_dis_kirisi_eksik_cm")
+                kirisler.append((x - e, "taşan verandanın dış kenarı, kolonun dış yüzünden dış yüzüne" + (f" − {mm(e)}" if e else ""),
+                                 "Lokman, kart 28 Ekim: dış yüzden dış yüze"))
+            else:
+                kirisler.append((x - r("veranda_kirisi_eksik_cm"), f"açık kenar dış ölçüsü − {mm(r('veranda_kirisi_eksik_cm'))}", "PK-01'de tuttu"))
+    for L_, kiris_formul, kiris_notu in kirisler:
+        ekle("1002", "Kutu profil (kiriş) 100 × 100", f"L {mm(L_)}", 1, "Liste kuralı", kiris_formul, kiris_notu)
     for L_ in N.get("nis_agizlari_cm") or []:                  # BK-14 ek: giriş nişinin ağzı; dikmesi yok, kiriş duvardan duvara
         ekle("1002", "Kutu profil (kiriş) 100 × 100", f"L {mm(L_)}", 1, "Liste kuralı", "nişin ağzı, duvardan duvara (aks arası)",
              "duvarsız açıklığa kiriş gelir, aks arası (Lokman, kart 22 Ekim); nişe uygulanması yorum (BK-14 ek)")

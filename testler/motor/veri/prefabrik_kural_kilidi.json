@@ -257,6 +257,7 @@
   "prefabrik.siparis_boyu.modul_siparis_mm": 1250,
   "prefabrik.siparis_boyu.modul_tolerans_cm": 0.06,
   "prefabrik.siparis_boyu.yuvarlama_mm": 5,
+  "prefabrik.tasan_veranda_dis_kirisi_eksik_cm": 0,
   "prefabrik.tavan_alcipani.islak_ek": 1,
   "prefabrik.tavan_alcipani.kuru_ek": 2,
   "prefabrik.tavan_h_aralik_m": 0.625,

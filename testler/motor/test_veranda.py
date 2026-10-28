@@ -161,10 +161,12 @@ def test_veranda_profili_kiris_yerinde(plan):
 
 
 def test_veranda_listesi():
+    """TK-01 listesi. Taşan verandanın dış kirişi kolonların dış yüzünden dış yüzüne, açık kenar boyunda (Lokman, kart 28 Ekim, "A: dış
+    yüzden dış yüze": 3760 / 2510 → 3860 / 2610); iki yan kiriş açık kenar − 10 (1710, 1200), eskisi gibi."""
     N = PL.model_motor(_ie())
     assert (N["W"], N["D"], N["brut_m2"]) == (898.0, 1199.0, 90.122)       # brüt gövde + veranda; dış kutunun boş köşeleri sayılmaz
     assert N["dis_cevre_m"] == pytest.approx(35.72) and N["ic_kalan_dis_duvar_m"] == pytest.approx(6.47) and N["dikmeler"] == 4
-    assert N["veranda_kenarlari_cm"] == [386.0, 181.0, 181.0, 261.0, 130.0, 130.0]
+    assert N["veranda_kenarlari_cm"] == [386.0, 181.0, 181.0, 261.0, 130.0, 130.0] and N["veranda_dis_kenar_sira"] == [0, 3]
     ana, on, arka = N["cati"]
     assert (ana["aciklik_cm"], ana["boy_cm"], ana["makas_kosu_cm"]) == (898.0, 888.0, 868.0)
     assert {k: on[k] for k in ("ad", "tip", "aciklik_cm", "boy_cm", "kalkan", "capraz", "acik", "mahya_boy_cm", "sacak_hatlari_m", "makas_kosu_cm")} == \
@@ -175,7 +177,9 @@ def test_veranda_listesi():
     L = PL.liste(N)
     sat = lambda kalem: [(s["olcu"], s["adet"]) for s in L["satirlar"] if s["kalem"] == kalem]
     assert sat("Özel kutu profil (kolon) 100 × 100") == [("L 2500", 4)]
-    assert sat("Kutu profil (kiriş) 100 × 100") == [(f"L {x}", 1) for x in (3760, 1710, 1710, 2510, 1200, 1200)]
+    assert sat("Kutu profil (kiriş) 100 × 100") == [(f"L {x}", 1) for x in (3860, 1710, 1710, 2610, 1200, 1200)]
+    formul = [s["formul"] for s in L["satirlar"] if s["kalem"] == "Kutu profil (kiriş) 100 × 100"]
+    assert [f.startswith("taşan verandanın dış kenarı") for f in formul] == [True, False, False, True, False, False]
     assert sat("Yavru makas · ön veranda çatısı") == [("L 4460", 3)] and sat("Yavru makas · arka veranda çatısı") == [("L 3210", 2)]
     assert sat("Metal dere") == [("L 4000", 7)]
     assert L["ozet"]["satir"] == 131
