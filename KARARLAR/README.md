@@ -120,7 +120,8 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | BK | BK-13 | Pano Motor'unun pencere kataloğu (`bk-13-pencere-katalogu`; T76 ve açık evlerin ölçüleri, eşik, panodan geniş pencere) | alındı (23.10) |
 | BK | BK-14 | taşan veranda ve "+" duvar birleşimi (PR #50) | alındı (27.10; CIO) |
 | BK | BK-15 | revizyonda ebeveyn banyosu ve oda ekleme isteğinin doğru gerekçesi (pano satır 115, madde 3; `claude/project-thread-0c8rv2`) | alındı (27.10; CIO) |
-| BK | **BK-16** | — | **sıradaki boş** |
+| BK | BK-16 | odaya ortalanan pencereli panonun derz kıymığı: 15 cm'den kısa kalan parça komşu panoya katılır, uyarı; uçta açık hata (İE-22 taslağının bulgusu; `claude/kind-babbage-y6bsjl`) | alındı (28.10) |
+| BK | **BK-17** | — | **sıradaki boş** |
 
 ## 27 Eylülde Lokman'ın verdiği kararlar
 

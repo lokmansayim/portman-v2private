@@ -1,0 +1,277 @@
+{
+  "is_emri_no": "BK16-CK01-ZEMIN",
+  "revizyon": 1,
+  "talep": {
+    "bayi": {
+      "kod": "CK01",
+      "ad": "Bayi CK-01"
+    },
+    "musteri_adi": "CK-01 zemin kat",
+    "metin": "BK-16 Motor kilidi (28 Ekim 2026): İE-22 taslağının CK-01 zemin katı; salonun sol penceresi odaya ortalı (pano dizini yok). Gövde 763 × 706, dizilim arka-sol (mahallerin y'si arka dış yüzden), ızgara x 6 tam pano, y 5,5 pano ölçüye kesim (son aks 696)."
+  },
+  "yapi": {
+    "sistem": "prefabrik",
+    "kat_sayisi": 1,
+    "duvar_yuksekligi_cm": 250,
+    "duvar_kalinligi_cm": {
+      "dis": 10,
+      "ic": 6
+    },
+    "olcu_kaynagi": "dis_olcu",
+    "dis_olcu_cm": {
+      "x": 763,
+      "y": 706
+    },
+    "referans_model": "CK-01",
+    "grid": {
+      "x_pano": 6,
+      "y_pano": 5.5
+    },
+    "kisa_kenar": "y",
+    "giris_cephesi": "on",
+    "dis_dusey_duvar": "cevre_aks_disinda",
+    "dizilim": {
+      "baslangic": "arka-sol",
+      "hiza": "tam_izgara",
+      "dis_duvar_t_bolme": false,
+      "pencere": "oda_ortasi",
+      "kapi": "mantik",
+      "kose": "oda",
+      "son_pano": "son_aks",
+      "kapi_yeri": "ortada"
+    },
+    "ek_akslar_cm": {
+      "x": [],
+      "y": []
+    }
+  },
+  "mahaller": [
+    {
+      "ad": "ODA",
+      "tur": "yatak_odasi",
+      "konum_cm": [
+        [
+          5,
+          10,
+          318.75,
+          323.75
+        ]
+      ]
+    },
+    {
+      "ad": "SALON",
+      "tur": "salon",
+      "konum_cm": [
+        [
+          5,
+          323.75,
+          444.25,
+          696
+        ],
+        [
+          444.25,
+          323.75,
+          507,
+          574.75
+        ]
+      ]
+    },
+    {
+      "ad": "MERDİVEN",
+      "tur": "hol",
+      "konum_cm": [
+        [
+          318.75,
+          10,
+          569.75,
+          135.5
+        ]
+      ]
+    },
+    {
+      "ad": "HOL",
+      "tur": "hol",
+      "konum_cm": [
+        [
+          318.75,
+          135.5,
+          569.75,
+          323.75
+        ]
+      ]
+    },
+    {
+      "ad": "WC",
+      "tur": "wc",
+      "konum_cm": [
+        [
+          569.75,
+          10,
+          758,
+          135.5
+        ]
+      ]
+    },
+    {
+      "ad": "WC HOLÜ",
+      "tur": "hol",
+      "konum_cm": [
+        [
+          569.75,
+          135.5,
+          758,
+          323.75
+        ]
+      ]
+    },
+    {
+      "ad": "MUTFAK",
+      "tur": "mutfak",
+      "konum_cm": [
+        [
+          507,
+          323.75,
+          758,
+          574.75
+        ]
+      ]
+    },
+    {
+      "ad": "BALKON",
+      "tur": "balkon",
+      "konum_cm": [
+        [
+          444.25,
+          574.75,
+          758,
+          696
+        ]
+      ]
+    }
+  ],
+  "acik_sinirlar": [
+    [
+      "MERDİVEN",
+      "HOL"
+    ]
+  ],
+  "acikliklar": [
+    {
+      "tur": "pencere",
+      "olcu": "120x125",
+      "mahal": "ODA",
+      "duvar": "sol"
+    },
+    {
+      "tur": "pencere",
+      "olcu": "120x125",
+      "mahal": "SALON",
+      "duvar": "sol"
+    },
+    {
+      "tur": "pencere",
+      "olcu": "120x180",
+      "mahal": "SALON",
+      "duvar": "on"
+    },
+    {
+      "tur": "pencere",
+      "olcu": "60x125",
+      "mahal": "MUTFAK",
+      "duvar": "on",
+      "pano": 1
+    },
+    {
+      "tur": "pencere",
+      "olcu": "60x40",
+      "mahal": "WC",
+      "duvar": "arka"
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "HOL",
+        "ODA"
+      ],
+      "pano": 0
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "HOL",
+        "SALON"
+      ],
+      "pano": 0
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "HOL",
+        "WC HOLÜ"
+      ],
+      "pano": 0
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "WC HOLÜ",
+        "WC"
+      ],
+      "pano": 0
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "WC HOLÜ",
+        "MUTFAK"
+      ],
+      "pano": 0
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "SALON",
+        "MUTFAK"
+      ],
+      "pano": 0
+    }
+  ],
+  "dikmeler": [
+    [
+      753,
+      0
+    ]
+  ],
+  "cati": {
+    "tip": "besik",
+    "egim_yuzde": 33,
+    "sacak_cm": 30,
+    "topuk_cm": 10,
+    "makas_yonu": "kisa_kenar",
+    "makas_ekseni": "y"
+  },
+  "cikti": {
+    "pdf": true,
+    "dxf": true,
+    "pafta": "A2",
+    "icerik": [
+      "aksli_plan",
+      "alanli_kopya",
+      "montaj_kopyasi",
+      "on_gorunus",
+      "cati_profili",
+      "ozellik_tablosu"
+    ]
+  },
+  "varsayimlar": [
+    "Kaynak: İE-22 taslağı `deneme/2026-10-28_cift_kat/zemin_kat.json` (dal claude/loving-ptolemy-s3j4oc, 705a5e3); yalnız salonun sol penceresinin `pano: 0` satırı kaldırıldı ve iş emri numarası değişti.",
+    "Salon y 323,75–696 (net 326,75–696, orta 511,375): pencereli pano 448,625–574,125; kesilmiş son panonun derzi 574,75 → kalan 0,625 cm (BK-16 kuralı: kalan parça komşu panoya katılır, uyarı yazılır).",
+    "Merdiven çıkması, balkon taşması ve giriş kapısı bu kilitte yok (İE-22'nin işi)."
+  ]
+}

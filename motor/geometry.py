@@ -36,6 +36,9 @@ PENCERE_PANO_PAYI_CM = 4.0              # açıklık panodan en az 4 cm dar
 KAPI_GENISLIK = {"ic_kapi": 82.0, "dis_kapi": 97.0, "gecis": 82.0}
 # İE-11 (PK-01 montaj paftası, 13.10.2026; yalnız `dizilim.pencere` / `dizilim.kapi` anahtarıyla):
 PENCERE_ORTALAMA_ESIGI_CM = MOD / 4.0   # oda ortası ızgara panosunun ortasından en çok ¼ pano kaçıyorsa ızgara kalır (paftada 6 pencerenin 4'ü), yoksa pencereli pano odaya ortalanır
+PENCERE_DERZ_ESIGI_CM = 15.0            # BK-16 (28.10.2026, K21): odaya ortalanan pencereli pano komşu derze bundan az kala bitiyorsa aradaki parça pano olmaz; derz kalkar,
+#                                         parça derzin ötesindeki panoya katılır ve uyarı yazılır (D-10'un "15 cm parça çıkmaz" kuralıyla aynı sayı; Lokman'ın kararıyla değişir).
+#                                         Derzin ötesinde pano yoksa (duvar ucu) ya da o pano kapı / pencere panosuysa açık hata (`_pencere_kiymigi_kat`)
 KAPI_YASLAMA_CM = 11.5                  # oda kapısı boşluğu menteşe tarafındaki pano ucundan 11,5 cm içeride (paftada 4 kapı: 11,3 / 11,3 / 11,6 / 11,5)
 ACIK_MAHAL_TURLERI = {"veranda", "balkon", "sundurma", "teras"}
 
@@ -804,6 +807,7 @@ def _kur(is_emri: dict) -> Plan:
             if did == d.id:
                 pts = [pts[0]] + sorted(set([q for q in pts[1:-1] if not (q0 - 1e-9 < q < q1 + 1e-9)]
                                             + [q for q in (q0, q1) if pts[0] + 1e-9 < q < pts[-1] - 1e-9])) + [pts[-1]]
+        korunan = [(q0, q1) for did, q0, q1 in kapi_hedef.values() if did == d.id]   # BK-16: açıklık panoları kıymık yutmaz (kapı panoları; pencere panoları sırayla eklenir)
         for i, hedef in pencere_hedef.items():                # İE-11 `dizilim.pencere: oda_ortasi`
             did, mrk, lo, hi, _ = hedef
             if did != d.id:
@@ -812,13 +816,15 @@ def _kur(is_emri: dict) -> Plan:
             lo_p, hi_p = max(lo, d.p0), min(hi, d.p1)
             parca = next(((a, b) for a, b in zip(pts, pts[1:]) if a - 1e-9 <= mrk <= b + 1e-9 and a >= lo_p - 1e-6 and b <= hi_p + 1e-6), None)
             if parca and abs((parca[0] + parca[1]) / 2.0 - mrk) <= PENCERE_ORTALAMA_ESIGI_CM + 1e-6 and parca[1] - parca[0] >= w + 4 - 1e-9:
-                hedef[4] = parca[0]; continue                  # ızgara panosu oda ortasına yeterince yakın: ek kesim yok
+                hedef[4] = parca[0]; korunan.append(parca); continue   # ızgara panosu oda ortasına yeterince yakın: ek kesim yok
             q0, q1 = mrk - MOD / 2.0, mrk + MOD / 2.0
             if q0 < lo_p - 1e-6 or q1 > hi_p + 1e-6:
                 uyarilar.append(f"Pencere {acikliklar[i].get('mahal')} {acikliklar[i].get('olcu')}: oda duvarı 125,5'lik pencereli panoya dar; ızgara panosunda kaldı")
                 continue
             pts = [pts[0]] + sorted(set([q for q in pts[1:-1] if not (q0 - 1e-9 < q < q1 + 1e-9)] + [q for q in (q0, q1) if pts[0] + 1e-9 < q < pts[-1] - 1e-9])) + [pts[-1]]
             hedef[4] = q0
+            pts = _pencere_kiymigi_kat(pts, q0, q1, korunan, acikliklar[i], uyarilar)   # BK-16 (K21): derze 15 cm'den az kalan parça pano olmaz
+            korunan.append((q0, q1))
         d.panolar = [Pano(d, pts[i], pts[i + 1]) for i in range(len(pts) - 1)]
         for p in d.panolar:
             if p.boy < 20 - 1e-9:
@@ -1160,6 +1166,39 @@ def _oda_net_araligi(duvarlar, d, lo, hi):
         if abs(w.c - hi) <= w.h + 1e-6:
             hi = min(hi, w.c - w.h)
     return lo, hi
+
+
+def _pencere_kiymigi_kat(pts: list, q0: float, q1: float, korunan: list, ac: dict, uyarilar: list) -> list:
+    """BK-16 (K21, sessiz yuvarlama yok): odaya ortalanan pencereli pano [q0, q1] bir komşu derze PENCERE_DERZ_ESIGI_CM'den az kala
+    bitiyorsa aradaki parça pano olmaz (CK-01 zemin kat: 0,625 cm'lik pano doğrulamayı düşürüyordu). O derz kalkar, parça derzin ötesindeki
+    panoya katılır ve uyarı yazılır; pencereli pano yerinde kalır (D-15). Derzin ötesinde pano yoksa (duvar ucu) ya da o pano korunan bir
+    açıklık panosuysa (kapı panosu, önce yerleşen pencereli pano; uzatılınca açıklık panoda ortalanmaz) açık hata: pencere `pano` diziniyle
+    yerleştirilir. `pts` duvarın derz listesi (uçlar dâhil, sıralı); sayılar İş Emri çerçevesinde (arka-solda arkadan)."""
+    ad = f"Pencere {ac.get('mahal')} {ac.get('olcu')}"
+    for ileri in (True, False):
+        if ileri:
+            otesi = [q for q in pts if q > q1 + 1e-9]
+            if not otesi:
+                continue
+            derz = min(otesi); kalan = derz - q1
+        else:
+            otesi = [q for q in pts if q < q0 - 1e-9]
+            if not otesi:
+                continue
+            derz = max(otesi); kalan = q0 - derz
+        if kalan >= PENCERE_DERZ_ESIGI_CM - 1e-9:
+            continue
+        ucta = abs(derz - (pts[-1] if ileri else pts[0])) < 1e-9
+        korunuyor = any(abs((s if ileri else e) - derz) < 1e-6 for s, e in korunan)
+        if ucta or korunuyor:
+            raise IsEmriHatasi(f"{ad}: odaya ortalanan pencereli pano ({q0:g}–{q1:g}) {'duvar ucuna' if ucta else 'kapı / pencere panosuna'} "
+                               f"{kalan:g} cm kala bitiyor; {kalan:g} cm'lik pano yapılmaz ve kalan parçanın katılacağı komşu pano yok. "
+                               f"Pencereyi `pano` diziniyle yerleştirin (BK-16)")
+        pts = [q for q in pts if abs(q - derz) > 1e-9]
+        komsu = (min(q for q in pts if q > q1 + 1e-9) - q1) if ileri else (q0 - max(q for q in pts if q < q0 - 1e-9))
+        uyarilar.append(f"{ad}: odaya ortalanan pencereli pano ({q0:g}–{q1:g}) derze {kalan:g} cm kala bitiyordu; kalan parça komşu panoya katıldı "
+                        f"(ek {derz:g} → {(q1 if ileri else q0):g}, komşu pano {komsu:g} cm; BK-16)")
+    return pts
 
 
 def _dayanak(duvarlar, d, e, isaret) -> bool:
