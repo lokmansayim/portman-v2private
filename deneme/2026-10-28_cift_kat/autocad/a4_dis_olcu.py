@@ -10,7 +10,7 @@ from ezdxf.addons.drawing.matplotlib import MatplotlibBackend
 K = pathlib.Path(__file__).resolve().parent
 d = ezdxf.readfile(str(K / "Portman_IE22-CK01_CIFT_KAT_sablon_bloklu_r01.dxf"))
 msp = d.modelspace(); ctx = RenderContext(d)
-GIZLI = {"IC_UCLU_H_100", "DIS_UCLU_H_100", "CIFT_KAT_NOT", "KOSE_PROFIL_100", "AKS", "AKS_YAZI", "OLCULER", "OZEL_PANEL_OLCU_CM"}
+GIZLI = {"CIFT_KAT_NOT", "AKS", "AKS_YAZI", "OLCULER", "OZEL_PANEL_OLCU_CM"}   # profiller (köşe 100×100, üçlü H) görünür — Lokman 14:41
 x0, y0, x1, y1 = 3300 - 100, -110, 3300 + 763 + 120, 960
 def suzgec(e):
     if e.dxf.layer in GIZLI: return False
