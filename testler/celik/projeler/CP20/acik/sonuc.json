@@ -2,10 +2,10 @@
  "aciklama": "Çelik hakeminin sonucu (İE-16). Yalnız tutanlar: çelik kg kapısının sonucu (farkı yalnız geçtiyse), adedi tutan çelik türleri ve adedi tutan öteki satırlar (anahtar ve bizim adedimiz). Tutmayan satırların gerçek değeri depoya girmez; sayilar kıyasın özetidir.",
  "kod": "ÇP-20",
  "tarih": "2026-10-28",
- "kiyas_commit": "e516a2efa520c8bbe3152480a12b85236d88c8c6",
+ "kiyas_commit": "75e59db26015b22eeb2af54c65a565df93ba2198",
  "bizim_liste": {
   "yol": "testler/celik/projeler/CP20/acik/bizim_liste.json",
-  "commit": "f7463f353e8c8832908fa91307f107a3f60edfb1"
+  "commit": "8155cb12ac1316afa28d9077f1187c0ce4b18ce1"
  },
  "muhur": {
   "sha256": "03ca18cb78fa6293dd4e6ea70e8948bbb12ec2aaee2e8f27a13cecbc38caf1bb",
