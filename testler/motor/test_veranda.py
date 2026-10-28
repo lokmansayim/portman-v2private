@@ -80,6 +80,37 @@ def test_veranda_dogrulamadan_gecer(tmp_path):
         assert blok in dxf, blok
 
 
+def _nisli() -> dict:
+    """TK-01 r06 (Patron 28 Ekim 08:01, "dış kapı 1 pano içeride"): ANTRE kapalı oda değil, önü açık giriş nişi; dış kapı niş ile hol arasında."""
+    ie = _ie()
+    for m in ie["mahaller"]:
+        if m["ad"] == "ANTRE":
+            m["ad"], m["tur"] = "GİRİŞ", "veranda"
+    ie["acikliklar"] = [a for a in ie["acikliklar"] if a.get("arasi") != ["ANTRE", "HOL"]]
+    for a in ie["acikliklar"]:
+        if a["tur"] == "dis_kapi":
+            a["arasi"] = ["GİRİŞ", "HOL"]
+            del a["duvar"]
+    return ie
+
+
+def test_veranda_giris_nisinin_onunde(tmp_path):
+    """Ön verandanın iç kenarı nişin ağzında gövdenin dış yüzüne değil nişe değer; nişin ağzı cephe sayılır. Nişsiz hâli değişmez
+    (test_veranda_geometrisi); boş bırakılmış hücre zaten hata, girinti yalnız açık mahalle olur."""
+    p = G.kur(_nisli())
+    assert p.dis_verandalar[0]["rect"] == (256.0, -181.0, 642.0, 0.0)
+    assert p.mahaller["GİRİŞ"].acik and p.mahaller["GİRİŞ"].alan_m2 == pytest.approx(1.44375)
+    kapi = [q for q in p.panolar if q.acilim and q.acilim.tur == "dis_kapi"]
+    assert len(kapi) == 1 and kapi[0].acilim.arasi == ("GİRİŞ", "HOL") and kapi[0].gap() == (404.25, 125.0, 494.25, 135.0)  # bir pano içeride
+    m = dxf_out.uret(_nisli(), tmp_path, pdf_hatada=False)
+    assert m["validation_passed"] is True, m.get("errors")
+    assert _oku(tmp_path / "validation.json")["rooms_m2"]["GİRİŞ"] == pytest.approx(1.44375)
+    bos = _nisli()
+    bos["mahaller"] = [x for x in bos["mahaller"] if x["ad"] != "GİRİŞ"]
+    with pytest.raises(G.IsEmriHatasi, match="boş hücreler"):
+        G.kur(bos)
+
+
 def test_veranda_profili_kiris_yerinde(plan):
     """DXF'in veranda profili blokları (BOM ve IFC kirişleri bunlardan): her verandada üç, kutusu Plan'ın kirişiyle aynı; gövde duvarının
     içine profil düşmez, iki yanın iç çizgisi verandanın içinde (geometri hakemi, 27 Ekim: eski döngü gövde çizgisini de profil sayıyordu,

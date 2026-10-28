@@ -1001,7 +1001,8 @@ def _dis_verandalar(plan: "Plan", is_emri: dict) -> None:
     köşede 10 × 10 dikme. Konum gerçek çerçevede (ön altta; `dizilim.baslangic` arka-sol olsa da, `dikmeler` gibi): `cephe` on | arka | sol | sag,
     `bas_cm`–`bit_cm` cephe boyunca dış yüzden (on / arka: x, sol / sag: y), `derinlik_cm` dış yüzden dışarı. Çatı `cati` {tip besik | tek_yon,
     egim_yuzde, sacak_cm}: beşiğin mahyası cepheye dik, kalkanı dış kenarda; tek eğim duvardan dışarı iner. `cati` yazılmamışsa beşik ve ana
-    çatının eğimi alınır, uyarı düşer (K21). Gövde cephesine tam oturmayan, gövdeye ya da başka mahale binen veranda açık hata."""
+    çatının eğimi alınır, uyarı düşer (K21). Gövde cephesine tam oturmayan (gövdedeki açık mahalin, ör. giriş nişinin, ağzı cephe sayılır),
+    gövdeye ya da başka mahale binen veranda açık hata."""
     liste = is_emri.get("verandalar") or []
     if not liste:
         return
@@ -1010,6 +1011,7 @@ def _dis_verandalar(plan: "Plan", is_emri: dict) -> None:
     fp = plan.footprint()
     sinir = fp.boundary
     fx0, fy0, fx1, fy1 = fp.bounds
+    nis = unary_union([m.poly for m in plan.mahaller.values() if m.acik and m.poly is not None])   # gövdedeki açık mahal (giriş nişi)
     ana = is_emri.get("cati") or {}
     k = VERANDA_KOLON_CM
     for v in liste:
@@ -1041,7 +1043,7 @@ def _dis_verandalar(plan: "Plan", is_emri: dict) -> None:
             kolonlar = [(fx1 + d - k, bas), (fx1 + d - k, bit - k)]
         kutu = box(*rect)
         from shapely.geometry import LineString
-        if LineString(ic).difference(sinir.buffer(1e-6)).length > 1e-6:
+        if LineString(ic).difference(sinir.buffer(1e-6)).difference(nis.buffer(1e-6)).length > 1e-6:   # nişin ağzı da dış yüz sayılır
             raise IsEmriHatasi(f"Veranda {ad}: {cephe} cephesinde {bas:g}–{bit:g} cm gövdenin dış yüzüne tam oturmuyor")
         if kutu.intersection(fp).area > 1e-6:
             raise IsEmriHatasi(f"Veranda {ad} gövdeye biniyor")
