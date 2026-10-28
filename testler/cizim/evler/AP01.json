@@ -1,0 +1,389 @@
+{
+  "is_emri_no": "IE17-AP01",
+  "revizyon": 2,
+  "talep": {
+    "bayi": {
+      "kod": "AP01",
+      "ad": "Bayi AP-01"
+    },
+    "musteri_adi": "AP-01",
+    "metin": "İE-17 açılan ev: AP-01 (140 m², kırma çatı) montaj paftasından okundu (27 Ekim 2026). Konumlar cm, aks; x sol dış yüzden; dizilim arka-sol olduğundan mahallerin y'si arka dış yüzden (Motor'un kuralı), dikmeler ve cepheler gerçek çerçevede (ön: veranda ve giriş)."
+  },
+  "yapi": {
+    "sistem": "prefabrik",
+    "kat_sayisi": 1,
+    "duvar_yuksekligi_cm": 250,
+    "duvar_kalinligi_cm": {
+      "dis": 10,
+      "ic": 6
+    },
+    "olcu_kaynagi": "dis_olcu",
+    "dis_olcu_cm": {
+      "x": 1400,
+      "y": 1000
+    },
+    "referans_model": "AP-01",
+    "grid": {
+      "x_pano": 11.5,
+      "y_pano": 8
+    },
+    "kisa_kenar": "y",
+    "giris_cephesi": "on",
+    "dis_dusey_duvar": "cevre_aks_disinda",
+    "dizilim": {
+      "baslangic": "arka-sol",
+      "hiza": "tam_izgara",
+      "dis_duvar_t_bolme": false,
+      "pencere": "oda_ortasi",
+      "kapi": "mantik",
+      "kapi_yeri": "ortada",
+      "kose": "oda",
+      "son_pano": "son_aks"
+    },
+    "ek_akslar_cm": {
+      "x": [],
+      "y": [
+        569.75
+      ]
+    }
+  },
+  "mahaller": [
+    {
+      "ad": "SALON",
+      "tur": "salon",
+      "konum_cm": [
+        [
+          5,
+          569.75,
+          632.5,
+          990
+        ]
+      ]
+    },
+    {
+      "ad": "VERANDA",
+      "tur": "veranda",
+      "konum_cm": [
+        [
+          632.5,
+          700.25,
+          1395,
+          990
+        ]
+      ]
+    },
+    {
+      "ad": "HOL VE KORİDOR",
+      "tur": "hol",
+      "konum_cm": [
+        [
+          318.75,
+          386.5,
+          946.25,
+          569.75
+        ],
+        [
+          632.5,
+          569.75,
+          946.25,
+          700.25
+        ]
+      ]
+    },
+    {
+      "ad": "MUTFAK",
+      "tur": "mutfak",
+      "konum_cm": [
+        [
+          946.25,
+          386.5,
+          1395,
+          700.25
+        ]
+      ]
+    },
+    {
+      "ad": "EBV BANYO 1",
+      "tur": "banyo",
+      "konum_cm": [
+        [
+          5,
+          323.75,
+          130.5,
+          569.75
+        ]
+      ]
+    },
+    {
+      "ad": "GENEL BANYO",
+      "tur": "banyo",
+      "konum_cm": [
+        [
+          130.5,
+          386.5,
+          318.75,
+          569.75
+        ]
+      ]
+    },
+    {
+      "ad": "YATAK ODASI 1",
+      "tur": "yatak_odasi",
+      "konum_cm": [
+        [
+          5,
+          10,
+          444.25,
+          323.75
+        ],
+        [
+          130.5,
+          323.75,
+          444.25,
+          386.5
+        ]
+      ]
+    },
+    {
+      "ad": "YATAK ODASI 2",
+      "tur": "yatak_odasi",
+      "konum_cm": [
+        [
+          444.25,
+          10,
+          820.75,
+          386.5
+        ]
+      ]
+    },
+    {
+      "ad": "EBV BANYO 2",
+      "tur": "banyo",
+      "konum_cm": [
+        [
+          820.75,
+          10,
+          946.25,
+          261
+        ]
+      ]
+    },
+    {
+      "ad": "EBV BANYO 3",
+      "tur": "banyo",
+      "konum_cm": [
+        [
+          946.25,
+          10,
+          1071.75,
+          261
+        ]
+      ]
+    },
+    {
+      "ad": "YATAK ODASI 3",
+      "tur": "yatak_odasi",
+      "konum_cm": [
+        [
+          1071.75,
+          10,
+          1395,
+          386.5
+        ],
+        [
+          820.75,
+          261,
+          1071.75,
+          386.5
+        ]
+      ]
+    }
+  ],
+  "acik_sinirlar": [],
+  "acikliklar": [
+    {
+      "tur": "pencere",
+      "olcu": "120x180",
+      "mahal": "SALON",
+      "duvar": "on"
+    },
+    {
+      "tur": "pencere",
+      "olcu": "120x180",
+      "mahal": "MUTFAK",
+      "duvar": "on"
+    },
+    {
+      "tur": "pencere",
+      "olcu": "60x40",
+      "mahal": "EBV BANYO 1",
+      "duvar": "sol"
+    },
+    {
+      "tur": "pencere",
+      "olcu": "120x120",
+      "mahal": "YATAK ODASI 1",
+      "duvar": "arka",
+      "pano": 1
+    },
+    {
+      "tur": "pencere",
+      "olcu": "120x120",
+      "mahal": "YATAK ODASI 2",
+      "duvar": "arka",
+      "pano": 0
+    },
+    {
+      "tur": "pencere",
+      "olcu": "60x40",
+      "mahal": "EBV BANYO 2",
+      "duvar": "arka"
+    },
+    {
+      "tur": "pencere",
+      "olcu": "60x40",
+      "mahal": "EBV BANYO 3",
+      "duvar": "arka"
+    },
+    {
+      "tur": "pencere",
+      "olcu": "120x120",
+      "mahal": "YATAK ODASI 3",
+      "duvar": "sag"
+    },
+    {
+      "tur": "dis_kapi",
+      "olcu": 90,
+      "arasi": [
+        "VERANDA",
+        "HOL VE KORİDOR"
+      ],
+      "pano": 1
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "HOL VE KORİDOR",
+        "SALON"
+      ],
+      "duvar_ucu": "arka"
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "HOL VE KORİDOR",
+        "MUTFAK"
+      ]
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "HOL VE KORİDOR",
+        "GENEL BANYO"
+      ]
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "HOL VE KORİDOR",
+        "YATAK ODASI 1"
+      ],
+      "duvar_ucu": "sol"
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "HOL VE KORİDOR",
+        "YATAK ODASI 2"
+      ],
+      "duvar_ucu": "sag"
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "HOL VE KORİDOR",
+        "YATAK ODASI 3"
+      ],
+      "duvar_ucu": "sol"
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "YATAK ODASI 1",
+        "EBV BANYO 1"
+      ]
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "YATAK ODASI 2",
+        "EBV BANYO 2"
+      ],
+      "kapi_yeri": "mentese_ucu"
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "YATAK ODASI 3",
+        "EBV BANYO 3"
+      ],
+      "kapi_yeri": "mentese_ucu"
+    }
+  ],
+  "dikmeler": [
+    [
+      941.25,
+      0
+    ],
+    [
+      1390,
+      0
+    ]
+  ],
+  "cati": {
+    "tip": "kirma",
+    "egim_yuzde": 33,
+    "kirma_egimleri": {
+      "sol": 32.5,
+      "sag": 36.2
+    },
+    "sacak_cm": 30,
+    "topuk_cm": 10,
+    "makas_yonu": "kisa_kenar",
+    "makas_ekseni": "y"
+  },
+  "cikti": {
+    "pdf": true,
+    "dxf": true,
+    "pafta": "A2",
+    "icerik": [
+      "aksli_plan",
+      "alanli_kopya",
+      "montaj_kopyasi",
+      "on_gorunus",
+      "cati_profili",
+      "ozellik_tablosu"
+    ]
+  },
+  "eksikler": [],
+  "varsayimlar": [
+    "Köşe ve ızgara (İE-17 kuralı; on montaj paftasında aynı): makas y'yi (1000 cm) geçer, kısa kenar y (yapi.kisa_kenar: y). Makasın oturduğu ön ve arka duvar köşeden geçer, x ızgarası duvar ekseninden (5 + 125,5k); yan duvarlar araya girer, y ızgarası iç yüzden (10 + 125,5k). İç duvarlar aynı ızgarada, paftadaki yerlerinde (en çok 1,5 cm: paftanın ölçek payı).",
+    "Pano dizilimi arkadan (dizilim.baslangic: arka-sol): mahallerin y'si arka dış yüzden; dikmeler ve açıklıkların cepheleri gerçek çerçevede. Kesilmiş son pano önde, ızgaranın sondan bir önceki aksından başlar (son_pano: son_aks); ekler yalnız tam akslarda, iç duvar T'de bölünmez (hiza: tam_izgara; paftada ekler tam aksta).",
+    "İç duvarlar paftadaki yerinde: x 130,5 · 318,75 · 444,25 · 632,5 · 820,75 · 946,25 · 1071,75; önden y 299,75 (hol ve mutfağın veranda duvarı, 10 cm) · 430,25 (salonun duvarı; ızgara dışında, ek aks: arkadan 569,75) · 613,5 (koridor) · 676,25 · 739.",
+    "Veranda ızgaranın içinde (ana çatının altında), açık kenarları ön ve sağ; dikmeler önde orta (x 941,25–951,25: hol–mutfak duvarının hizası) ve ön-sağ köşede, 10 × 10. Paftadaki veranda içindeki kesikli kiriş (orta dikmeden duvara) ve genel banyodaki tesisat kutusu çizilmez.",
+    "Pencereler oda ortasında (dizilim.pencere: oda_ortasi); yatak odası 1 ve 2'nin arka pencereleri paftadaki ızgara panosunda (pano dizini: oda ortasından 32 ve 63 cm kaçık, paftada da öyle). Paftadaki yerlerine en çok 2,3 cm.",
+    "Kapılar panoda ortada (dizilim.kapi_yeri: ortada; paftada kapının söveleri pano ucundan 19–27 cm), menteşe kapı mantığıyla (dizilim.kapi: mantik). Ortak duvarın bir ucundaki kavşaktan tam panoyla başlayan kapılar duvar_ucu ile (paftadaki yer). Kapı genişlikleri paftada yazılı değil: dış kapı 90, iç kapı 82 (Motor'un ölçüsü). Yatak odası 2 ve 3'ün banyo kapıları paftada menteşe ucunda (kapi_yeri: mentese_ucu, söve 11,5 cm).",
+    "Paftayla bilinen küçük farklar: sağdaki üç yatay duvarda (veranda, koridor ve banyoların önü) 946–1072 arasında bir ek: paftada T'den tam pano (946,25 + 1071,75), Motor'da tam aksta (1009); genel banyo ve mutfak kapılı panolarının başı 2,5 cm (paftada tam pano kavşağın yüzünden); veranda iç köşesinde köşe parçası 5 cm. Kapılar paftadaki yerlerine en çok 6 cm (paftada kapı panonun ortasından 1–6 cm); alanlar paftayla en çok 0,4 m² farklı.",
+    "Odalar: paftada üç 'EBV BANYO' (ebeveyn banyosu) ve üç 'YATAK OD.'; burada EBV BANYO 1–3 (1: yatak odası 1'in, solda; 2 ve 3: yatak odası 2 ve 3'ün, arkada) ve YATAK ODASI 1–3.",
+    "Çatı: kırma (paftada 'Dörtomuz Çatı'), mahya x boyunca (uzun kenar 1400); ana yüzler %33, sol kırma yüzü %32,5, sağ %36,2 (paftanın çatı şekli); saçak 30 (paftanın çatı alanı 163 m²: 1460 × 1060 plan, eğik yüzey), topuk 10. Makas planında sol kırma mahyaya duvardan 509'da, sağdaki 459'da varıyor; burada saçaklı kenardan çizilince 508,2 ve 453,1."
+  ]
+}

@@ -107,7 +107,7 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | İE | İE-14 | talepten plana (14a: tek kat çelik; LLM-önce üretim ve revizyon) | alındı (14.10; `ie-14-talepten-plana`) |
 | İE | İE-15 | kimlik kartlı model: yerleşim planları ve adetler aynı modelden (D-24; KH-1, K1, KH-2, K2, KH-3, K3; eski `ie-11-pr2-kor-test` dalındaki "İE-15 · LLM'li katman" o dal birleşmeden önce yeni numara alır) | alındı (19.10; `claude/project-thread-far6rz`) |
 | İE | İE-16 | çelik hattı: çelik projeleri ve çelik çizim kuralları (D-25; PR-1 hakem ve mühür, PR-2 hedef örnek, PR-3 çizim kuralları, PR-4 kör ölçüm) | alındı (25.10; `claude/project-thread-1ff0ou`) |
-| İE | İE-17 | 28 prefabrik evin çizimi, 1. adım: çatı ve dört görünüş genel motordan (hedef AP-13) | alındı (27.10; CIO) |
+| İE | İE-17 | prefabrik evlerin çatısı ve dört görünüşü (28 ev çizim yol haritasının 1. adımı; PR-1 çapraz cumba ve kırma, PR-2 paralel cumba) | alındı (27.10; CIO ayırdı; `claude/project-thread-wwx1p0`) |
 | İE | İE-18 | montaj rehberleri (CIO, 27.10; 28 ev çizimine bağlı) | alındı (CIO) |
 | İE | İE-19 | altın set 100: bayi cümleleri, beklenen okuma ve karar, kör dilim (pano 51; bağlı 22 ve 92) | alındı (27.10; `claude/project-thread-ssawjb`) |
 | İE | İE-20 | görsel ve PDF ile talep, talep ve revizyon formu (WhatsApp Flow); pano satır 83, 110, 61 | alındı (27.10; `claude/project-thread-l5mh7r`) |
