@@ -15,10 +15,11 @@ Yeni pencere için hazırlıklar:
 - **Yapıldı:**
   - `motor/geometry.py`: İş Emri anahtarları `yapi.kisa_kenar`, `dizilim.son_pano`, `dizilim.hiza: tam_izgara`, `dizilim.kapi_yeri`, açıklıkta `duvar_ucu` ve `kapi_yeri`. Anahtarsız İş Emri aynen.
   - AP-13, AP-16, AP-01 paftadan yeniden: duvarlar paftadaki eksende, pencere en çok 0,3 / 1,6 / 2,3, kapı 2,4 / 4,2 / 6,0 cm; cumba 0–386,5.
-  - Testler: `testler/motor/test_ie17_kose.py` (Motor kilidi, 20), `testler/cizim/test_pafta_kiyasi.py` (paftadan ölçülen değerler, 12).
+  - Testler: `testler/motor/test_ie17_kose.py` (Motor kilidi, 28), `testler/cizim/test_pafta_kiyasi.py` (paftadan ölçülen değerler, 12).
   - AP-13 ve AP-16'nın kör kaydına "çizim için pafta görüldü" notu (`testler/kor/muhur.json`; liste kapalı).
+  - Geometri hakemi 4. tur: beş bulgu (yeni anahtarlarda sessiz yutma, kısa kenar ile makas çelişkisi, belge sayıları) düzeltildi; son bakış "Kurallara uygun". Makas y + `kisa_kenar` x uyarı; İE-20'nin üreticisi bunu PR #54'ten sonra ayrı PR'da düzeltecek.
 - **Kullanıcı adımları:** A1 (AP-13) ve A3 (AP-16, AP-01) **Kısmen** (görsel kabul bekleniyor; yan yana `Prefabrik_28_Olcum/IE-17/IE17_on_onay_yan_yana_r2.png`); A2, A6 **Yerelde çalışıyor**; A4, A5, A7 **Çalışmıyor** (PR-1b, PR-2).
-- **Kanıt:** › İE-17 Kanıt.
+- **Kanıt:** tam doğrulama `9c86e3d` (harness 22/22, referans 18/18 AYNI, pytest 2181 geçti, 30 atlandı); CI 8/8 yeşil; sır taraması temiz; › İE-17 Kanıt.
 - **Bekleyen (Lokman):** görsel kabul; `main`'e birleştirme (önce PR #50). Eski iki yan yana görselin silinmesi ayrı onayla.
 
 **27 Ekim 2026 gece eki (İE-17 · PR-1, yeniden kuruldu; `docs/is_emirleri/IE-17.md`):**
