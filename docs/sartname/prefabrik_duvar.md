@@ -46,10 +46,10 @@ Kaynak: Lokman'ın anlattıkları (1–2, 6 ve 12 Ekim 2026). Astra dönemindeki
 
 ## Köşe, ızgara ve kapı yeri (İE-17; on montaj paftası, 27 Ekim 2026)
 
-- **Köşe kuralı:** makasın oturduğu iki duvar köşeden geçer; 5 × 10'luk köşe parçası onların, panoları köşe aksından başlar (5 + 125,5k). Öteki iki duvar araya girer, panoları iç yüzden başlar (10 + 125,5k). İç duvarlar aynı ızgarada. Makas x'i geçiyorsa (PK-01) bugünkü ızgara; y'yi geçiyorsa (AP-13, 16, 01) x ve y yer değiştirir. Anahtar: `yapi.kisa_kenar: y` (köşe 10 cm o yönde). Açık evlerin sekizinde de aynı (AP-01…05, 07, 08, 19).
+- **Köşe kuralı:** makasın oturduğu iki duvar köşeden geçer; 5 × 10'luk köşe parçası onların, panoları köşe aksından başlar (5 + 125,5k). Öteki iki duvar araya girer, panoları iç yüzden başlar (10 + 125,5k). İç duvarlar aynı ızgarada. Makas x'i geçiyorsa (PK-01) bugünkü ızgara; y'yi geçiyorsa (AP-13, 16, 01) x ve y yer değiştirir. Anahtar: `yapi.kisa_kenar: y` (köşe 10 cm o yönde); yalnız `cati.makas_ekseni: y` ile yazılır (öteki hata), makas y'yi geçip `kisa_kenar` x kalırsa Motor uyarır. Açık evlerin sekizinde de aynı (AP-01…05, 07, 08, 19).
 - **Kesilmiş son pano** ızgaranın sondan bir önceki aksından başlar, önünde gerekirse yarım pano (AP paftaları). Anahtar: `dizilim.son_pano: son_aks`.
 - **Ekler tam akslarda:** AP paftalarında pano ekleri yalnız tam akslarda; iç duvar T'de bölünmez. Anahtar: `dizilim.hiza: tam_izgara`.
-- **Kapının panodaki yeri** paftadan paftaya değişiyor (40 kapı): AP-13, AP-16, AP-08'de ortada, PK-01'de menteşe ucunda 11,5, AP-01'de ikisi de. Anahtar: `dizilim.kapi_yeri` `mentese_ucu` (varsayılan) | `ortada`; kapının kendi `kapi_yeri`'si dizilimi ezer (yalnız `kapi: mantik` ile).
+- **Kapının panodaki yeri** paftadan paftaya değişiyor (sekiz paftada 45 kapı): AP-13, AP-16, AP-08'de ortada, PK-01'de menteşe ucunda (11,5 = 82'lik kapı boşluğunun kenarından pano ucuna, İE-11'in PK-01 ölçüsü; paftanın kapı yayından okunan menteşe noktası boşluk kenarından 1–2 cm içeride, AP-19'da 13,3–13,5), AP-01'de ikisi de. Anahtar: `dizilim.kapi_yeri` `mentese_ucu` (varsayılan) | `ortada`; kapının kendi `kapi_yeri`'si dizilimi ezer (yalnız `kapi: mantik` ile).
 - **Kapının panosu** çoğu zaman ortak duvarın bir ucundaki kavşaktan tam pano başlar; duvarın geri kalanı ızgarada. Anahtar: açıklıkta `duvar_ucu` (on | arka | sol | sag; gerçek cephe adı).
 - Kalan farklar ve ölçümler: İE-17 › Köşe ve ızgara kuralı; testler `testler/cizim/test_pafta_kiyasi.py` (paftadan ölçülen değerler).
 

@@ -10,6 +10,7 @@ menteşe ucunda) ayrıca kilitlenir.
 - `dizilim.hiza: tam_izgara`: ekler yalnız tam akslarda, iç duvar T'de bölünmez.
 - `dizilim.kapi_yeri: ortada` (ya da kapının kendi `kapi_yeri`'si): oda kapısı panoda ortada; varsayılan menteşe ucunda 11,5.
 - `acikliklar[].duvar_ucu`: kapının panosu ortak duvarın o ucundaki kavşaktan başlayan tam pano.
+- K21: `kisa_kenar: y` makas y'siz hata, makas y + `kisa_kenar` x uyarı; `dizilim` kapalı küme; `kapi_yeri` yalnız oda kapısında.
 """
 from __future__ import annotations
 import copy
@@ -72,6 +73,41 @@ def test_kisa_kenar_y_izgara_ve_dis_kose(ad, W, H):
     assert on.p0 == 5.0 and _derz(plan, "x", 5.0)[:2] == [130.5, 256.0]
     sol = _duvar(plan, "y", 5.0)                                                      # sol duvar araya girer: iç yüzden
     assert (sol.p0, sol.p1) == (10.0, H - 10)
+
+
+def test_kisa_kenar_makasi_izler():
+    # köşe makasın oturduğu duvarlarda (on pafta): kisa_kenar y makas y'siz hata; makas y + kisa_kenar x (eski İş Emri'leri) uyarı
+    ie = _ie("AP13")
+    ie["cati"]["makas_ekseni"] = "x"
+    with pytest.raises(G.IsEmriHatasi, match="kisa_kenar: y yalnız makas y'yi geçerken"):
+        _kur(ie)
+    assert G.KISA_KENAR == "x"
+    p6 = json.loads((KOK / "is_emri" / "P6001_2plus1_6x6.json").read_text(encoding="utf-8"))
+    assert not any("kisa_kenar x" in u for u in _kur(p6).uyarilar)
+    p6["cati"]["makas_ekseni"] = "y"
+    assert any(u.startswith("Makas y'yi geçiyor ama kisa_kenar x") for u in _kur(p6).uyarilar)
+    assert not any("kisa_kenar x" in u for u in _kur(_ie("AP13")).uyarilar)
+
+
+def test_kisa_kenar_geometri_anahtari():
+    ie = json.loads((KOK / "is_emri" / "P6001_2plus1_6x6.json").read_text(encoding="utf-8"))
+    assert ie["yapi"]["kisa_kenar"] == "x" and not G.geometri_anahtari_var(ie)
+    ie["yapi"]["kisa_kenar"] = "y"
+    assert G.geometri_anahtari_var(ie)                                                # ızgara değişir: doğrulama yeni yolun kuralıyla
+
+
+@pytest.mark.parametrize("degis, mesaj", [
+    (lambda ie: ie["yapi"]["dizilim"].update(sonpano="son_aks"), "dizilim'de bilinmeyen anahtar: sonpano"),
+    (lambda ie: ie["yapi"]["dizilim"].update(kisa_kenar="y"), "dizilim'de bilinmeyen anahtar: kisa_kenar"),
+    (lambda ie: ie["yapi"].update(son_pano=ie["yapi"]["dizilim"].pop("son_pano")), "son_pano yapi.dizilim altında yazılır"),
+    (lambda ie: ie["yapi"].update(kapi_yeri="ortada"), "kapi_yeri yapi.dizilim altında yazılır"),
+])
+def test_dizilim_anahtari_yerinde(degis, mesaj):
+    # K21: bilinmeyen ya da bir düzey kayık dizilim anahtarı sessizce varsayılana düşmez
+    ie = _ie("AP16")
+    degis(ie)
+    with pytest.raises(G.IsEmriHatasi, match=mesaj):
+        _kur(ie)
 
 
 def test_kisa_kenar_bilinmeyen_hata_ve_sifirlanir():
@@ -140,6 +176,7 @@ def test_kapinin_kendi_yeri_dizilimi_ezer():
     (lambda ie: ie["yapi"]["dizilim"].update(kapi="is_emri"), "yalnız dizilim.kapi: mantik"),
     (lambda ie: ie["acikliklar"][0].update(kapi_yeri="ortada"), "yalnız kapıda"),
     (lambda ie: next(a for a in ie["acikliklar"] if a["tur"] == "ic_kapi").update(kapi_yeri="yarim"), "mentese_ucu \\| ortada"),
+    (lambda ie: next(a for a in ie["acikliklar"] if a["tur"] == "dis_kapi").update(kapi_yeri="mentese_ucu"), "yalnız oda kapısında"),
 ])
 def test_kapi_yeri_hatalari(degis, mesaj):
     ie = _ie("AP13")

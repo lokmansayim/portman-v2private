@@ -72,6 +72,7 @@ def pencere_yazisi(olcu: str) -> str:
 
 
 YENI_ANAHTARLAR = ("duvar_kalinligi_cm", "dis_olcu_cm", "dizilim", "ek_akslar_cm")   # İE-11 (6 Ekim denemesi + genişletme)
+DIZILIM_ANAHTARLARI = frozenset({"baslangic", "hiza", "dis_duvar_t_bolme", "pencere", "kapi", "kose", "kapi_yeri", "son_pano"})   # İE-11, İE-17
 
 
 PANO_YUKSEKLIKLERI_CM = (250.0, 280.0, 300.0)   # Lokman 13.10.2026 07:28: %80 / %19 / %1; başka ölçü yok (kurallar/model/duvar_tipleri.json PE-DIS-100.pano)
@@ -81,7 +82,8 @@ def geometri_anahtari_var(is_emri: dict) -> bool:
     """İE-11 geometri anahtarlarından biri varsa True (yükseklik hariç). Doğrulamanın dış ölçü / açık kenar kuralı buna bağlıdır:
     yükseklik planın geometrisini ve dolayısıyla hangi geometrinin kabul edileceğini değiştirmez (geometri hakemi 2. tur, önemli 1)."""
     yapi = is_emri.get("yapi", {})
-    return any(k in yapi for k in YENI_ANAHTARLAR) or any("konum_cm" in m for m in is_emri.get("mahaller", [])) \
+    return any(k in yapi for k in YENI_ANAHTARLAR) or yapi.get("kisa_kenar", "x") != "x" \
+        or any("konum_cm" in m for m in is_emri.get("mahaller", [])) \
         or any(("konum_cm" in a) or ("hizalama" in a) or ("duvar_ucu" in a) for a in is_emri.get("acikliklar", [])) \
         or bool(is_emri.get("verandalar"))
     # `acikliklar[].dograma` geometri anahtarı değildir (kod incelemesi D1): yalnız BOM işaretini etkiler, kendi varlığıyla çalışır
@@ -409,6 +411,9 @@ def _kur(is_emri: dict) -> Plan:
     if yapi.get("kisa_kenar", "x") not in ("x", "y"):
         raise IsEmriHatasi(f"kisa_kenar bilinmiyor: {yapi.get('kisa_kenar')} (x | y; köşe 10 cm o yönde)")
     KISA_KENAR = yapi.get("kisa_kenar", "x")
+    makas_ekseni = (is_emri.get("cati") or {}).get("makas_ekseni", "x")   # İE-17 (on montaj paftası): köşe makasın oturduğu duvarlarda
+    if KISA_KENAR == "y" and makas_ekseni != "y":
+        raise IsEmriHatasi(f"kisa_kenar: y yalnız makas y'yi geçerken (cati.makas_ekseni: y); makas_ekseni {makas_ekseni}")
     if yapi.get("ozel_pano") and any(abs(float(v)) > 1e-9 for v in yapi["ozel_pano"].values()):
         raise IsEmriHatasi("v1 özel pano (ruhsat ölçüsü) desteklemiyor")
     nx, ny = float(yapi["grid"]["x_pano"]), float(yapi["grid"]["y_pano"])
@@ -418,6 +423,12 @@ def _kur(is_emri: dict) -> Plan:
     olcu_ayarla(yapi.get("dis_olcu_cm"), nx, ny)
     # İE-11: dizilim başlangıcı ve aks tablosu
     dizilim = yapi.get("dizilim") or {}
+    _yanlis = sorted(set(dizilim) - DIZILIM_ANAHTARLARI)        # İE-17 (K21): bilinmeyen ya da bir düzey kayık anahtar sessizce yutulmaz
+    if _yanlis:
+        raise IsEmriHatasi(f"dizilim'de bilinmeyen anahtar: {', '.join(_yanlis)} ({' | '.join(sorted(DIZILIM_ANAHTARLARI))})")
+    _yanlis = sorted(DIZILIM_ANAHTARLARI & set(yapi))
+    if _yanlis:
+        raise IsEmriHatasi(f"{', '.join(_yanlis)} yapi.dizilim altında yazılır, yapi altında okunmaz")
     baslangic = dizilim.get("baslangic", "on-sol")
     if baslangic not in ("on-sol", "arka-sol"):
         raise IsEmriHatasi(f"dizilim.baslangic bilinmiyor: {baslangic} (on-sol | arka-sol)")
@@ -456,6 +467,9 @@ def _kur(is_emri: dict) -> Plan:
     if son_pano not in ("kosu", "son_aks"):                 # ızgaranın sondan bir önceki aksından başlar, gerekirse önünde yarım pano; montaj paftası)
         raise IsEmriHatasi(f"dizilim.son_pano bilinmiyor: {son_pano} (kosu | son_aks)")
     uyarilar = []
+    if KISA_KENAR == "x" and makas_ekseni == "y":
+        uyarilar.append("Makas y'yi geçiyor ama kisa_kenar x: montaj paftalarında köşe makasın oturduğu duvarlardadır; "
+                        "pano ızgarası iki yönde 5 cm kayık olabilir, kisa_kenar: y doğrulanmalı")
 
     # ---------------- mahaller
     mahaller: dict[str, Mahal] = {}
@@ -847,6 +861,8 @@ def _kur(is_emri: dict) -> Plan:
                 cand = _edges_of_room_side(duvarlar, b if a == OUT else a, NORMAL[ac["duvar"]])
             if not cand:
                 raise IsEmriHatasi(f"{a}–{b} arasında duvar yok: {ac}")
+            if "kapi_yeri" in ac and tur != "ic_kapi":                          # K21: kapı yeri kuralı yalnız oda kapısında çalışır
+                raise IsEmriHatasi(f"kapi_yeri yalnız oda kapısında (ic_kapi) yazılır: {ac}")
             if ac.get("kapi_yeri") not in (None, "mentese_ucu", "ortada"):    # K21: bilinmeyen değer sessizce yutulmaz
                 raise IsEmriHatasi(f"Kapıda kapi_yeri yalnız mentese_ucu | ortada olabilir: {ac}")
             acl = Acilim(tur, str(int(w)) if w == int(w) else str(w), w, None, arasi=(a, b), mentese=ac.get("mentese", "sag"),
