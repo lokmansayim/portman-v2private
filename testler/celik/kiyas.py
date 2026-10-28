@@ -21,7 +21,9 @@ Sıra her koşuda aynı; bir adım tutmazsa araç `Durdu` ile durur ve sonrakine
    anahtar grup, ad ve ölçüdeki sayılar; bizim satır `liste_adi` taşıyorsa ad yerine o; adedi okunamayan satır "aynı" sayılmaz). Pafta
    verilmişse etiket sayıları listenin tür adetleriyle ve bizimkiyle yan yana (bilgi; etiketi metin olmayan türde "paftada etiket yok").
 6. **Rapor** (md): kod, m², satırlar. Ad, bayi adı ve dosya adı yazılmaz; telefona benzeyen her şey maskelenir. Sonuç kaydı kıyastaki
-   durumu (çift çıkan kör proje `kapali`), kayıttaki durumu ve okunan Excel sayfasını yazar.
+   durumu (çift çıkan kör proje `kapali`), kayıttaki durumu ve okunan Excel sayfasını yazar. Okuyucunun liste uyarısı varsa (İE-16 PR-5:
+   listenin TOPLAM'ı bir satırı dışarıda bırakıyor) rapora, sonuç kaydına ve açık listenin cevabına (`liste_uyarilari`; yalnız varsa)
+   yazılır.
 
 Kaynak dosyalar depo dışında durur. Depoya yalnız tutan satırlar ve kapının sonucu girer (`sonuc.json`; prefabrik kör testinin kuralı,
 Lokman 23 Ekim 2026 "Yalnız tutanlar").
@@ -471,6 +473,7 @@ def sonuc_kaydi(k: dict) -> dict:
         "celik_kg_kapisi": {"sonuc": k["kapi"]["sonuc"], "pay_yuzde": k["kapi"].get("pay_yuzde"), "kapi_disi": k["kapi"]["kapi_disi"],
                             "kapi_disi_bizim_kg": k["kapi"].get("kapi_disi_bizim_kg"),
                             "fark_yuzde": k["kapi"].get("fark_yuzde") if k["kapi"]["sonuc"] == "geçti" else None},
+        **({"liste_uyarilari": k["celik"]["liste_uyarilari"]} if k["celik"].get("liste_uyarilari") else {}),
         "celik_turleri_tutan": [{"tur": r["tur"], "adet": r["bizim_adet"]} for r in k["tablo"]
                                 if r["bizim_adet"] is not None and r["bizim_adet"] == r["gercek_adet"]],
         "sayilar": k["satir"]["sayilar"],
@@ -540,6 +543,8 @@ def cevap_md(c: dict, yol: Path) -> None:
     L += _ust(c) + ["", "## Çelik panel grubu (listeden) ve panel etiketleri (paftadan)", ""] + _celik_md(c, False)
     if c.get("etiket"):
         L += ["", f"Pafta uyarıları: {'; '.join(c['etiket']['uyarilar']) or 'yok'}."]
+    if c["celik"].get("liste_uyarilari"):
+        L += ["", f"Liste uyarıları: {'; '.join(c['celik']['liste_uyarilari'])}."]
     L += ["", "## Listenin öteki grupları (satır sayısı; içerik bu sayfaya yazılmaz)", "", "| Grup | Satır |", "|---|---|"]
     L += [f"| {maske(g)} | {n} |" for g, n in c["grup_satirlari"].items() if not oku.celik_grubu_mu(g)]
     Path(yol).write_text("\n".join(L) + "\n", encoding="utf-8")
@@ -551,7 +556,8 @@ def cevap_json(c: dict) -> dict:
                       "turler": c["celik"]["turler"], "toplam": c["celik"]["toplam"]},
             "pafta": c["etiket"] and {h: {k: v for k, v in x.items()} for h, x in c["etiket"]["turler"].items()},
             "pafta_uyarilari": c["etiket"] and c["etiket"]["uyarilar"],
-            "pafta_liste": {r["tur"]: r["pafta_liste"] for r in c["tablo"] if r["pafta_liste"]}}
+            "pafta_liste": {r["tur"]: r["pafta_liste"] for r in c["tablo"] if r["pafta_liste"]},
+            **({"liste_uyarilari": c["celik"]["liste_uyarilari"]} if c["celik"].get("liste_uyarilari") else {})}
 
 
 def rapor_md(k: dict, yol: Path) -> None:
@@ -563,7 +569,10 @@ def rapor_md(k: dict, yol: Path) -> None:
     L = [f"# Çelik hakemi kıyası · {k['kod']}", "",
          "Araç: `testler/celik/kiyas.py kiyas` (İE-16 PR-1). Ad, bayi adı ve dosya adı yazılmaz; listenin başlık bloğu okunmadı.", ""]
     L += _ust(k) + [f"| Kendi listemiz | {k['liste']['yol']} · commit {k['liste']['commit'][:7]} ({k['liste']['tarih']}) |",
-                    f"| Çelik kg kapısı | {kapi} |", "", "## Çelik panel grubu", ""] + _celik_md(k, True)
+                    f"| Çelik kg kapısı | {kapi} |"]
+    if k["celik"].get("liste_uyarilari"):
+        L.append(f"| Liste uyarıları | {'; '.join(k['celik']['liste_uyarilari'])} |")
+    L += ["", "## Çelik panel grubu", ""] + _celik_md(k, True)
     s = k["satir"]["sayilar"]
     L += ["", f"## Öteki gruplar satır satır (bilgi): aynı {s['aynı']}, farklı {s['farklı']}, adet okunamadı {s['adet okunamadı']}, "
               f"bizde yok {s['bizde yok']}, "
