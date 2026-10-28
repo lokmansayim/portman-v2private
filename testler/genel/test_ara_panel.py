@@ -1,8 +1,9 @@
 """İE-16 PR-6b · kırma ucunun ara panelleri (`makas.ara_panelleri`; Lokman, 27 Ekim 2026, B1: "özel çatıların makas aralarında tam
 çatı panelinin altına gelecek şekilde ara panel kullanırız") ve uç şeridinde kısalan kırma çaprazı.
 
-- Sayılar kuralın bugünkü sonucu (gerileme). Paftayla kıyası İE-16 › Değişiklik (PR-6b): ÇP-19 21 (paftada P1–P20), ÇP-17 23 (PNL01–26),
-  ÇP-03 18 (MKP01–13), ÇP-07 25 (paftada kırma yüzünde Ç panelleri; uç şeridinde panel yok). Kırma ucu olmayan beşte ara panel yok.
+- Sayılar kuralın bugünkü sonucu (gerileme). Paftayla kıyası İE-16 › Değişiklik (PR-6b): ÇP-03 18 (paftada MKP01–13), ÇP-07 25 (paftada
+  kırma yüzünde Ç panelleri; uç şeridinde panel yok); açılan ÇP-17 ve ÇP-19'unki proje dosyasında (açılan listenin ve paftanın değerleri
+  depoya girmez). Kırma ucu olmayan altı projede ara panel yok.
 - Geometri: parçalar kendi düzleminin içinde ve birbirine binmez; kırma yüzünün parçaları yüzü bütünüyle örter (panel olmayan küçük parça
   uyarı yazar).
 - Kırma çaprazı uç şeridinde: saçak köşesinden ilk ana makasa. Çapraz dışındaki makaslar anahtarsız kuralla aynı.
@@ -121,8 +122,8 @@ def _girdi(kod: str) -> dict:
 
 
 def test_liste_satiri_ve_hakem_turu(monkeypatch):
-    """Gruplar ve yükleme girdisi: ara panel ayrı satır, adet ve profil boyu karkas kuralından; hakemde makas türü (ÇP-03 ve ÇP-19'un
-    listelerinde "makas panelleri"). Anahtarsız kural kopyasında satır yok."""
+    """Gruplar ve yükleme girdisi: ara panel ayrı satır, adet ve profil boyu karkas kuralından; hakemde makas türü (ÇP-03'ün
+    listesinde "makas paneli"). Anahtarsız kural kopyasında satır yok."""
     from testler.celik.projeler import liste_yap
     kur = kurallar_oku.oku()
     t, _, y = _yukle("CP19")
