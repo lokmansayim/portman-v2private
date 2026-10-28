@@ -245,5 +245,13 @@ Biçim: `A### · saat · başlık` — Ne / Nerede / Sonuç / Durum (yapıldı �
 - A4 v10 gönderildi; kural belgesi §12 15:53 satırı. Bilinen: balkon arka duvarındaki 105,5 pencereli panonun "60/125" yazısı baş aşağı (115,5'lik kaynak bloğun yazı yönü), ölçüye etkisi yok.
 - Durum: yapıldı.
 
+### A049 · 29.10 00:12–00:28 · Lokman AutoCAD'de düzeltti → ölçüldü → v11 onun düzeniyle üretildi ve AutoCAD'de açıldı
+- Lokman 18:16 "AutoCAD ekranına bak, bazı düzeltmeler yaptım"; 00:12 "öncelikli dış ölçüler, sonra akslar çok önemli"; 00:19 "sen çiz; 6 üçlü H hatalıydı; mevcut motorla mı manuel mi?" (cevap: Motor değil, `uret_cift_kat_bloklu.py` dizilimden; Motor bulgu 7–9); 00:22 "adım adım; önce olanı çiz, ben bakıp söyleyeceğim".
+- Çizimi piksel yerine dosyadan okumak için AutoCAD'de SAVEAS → `…r01_lokman_0013.dxf` (dialog yoluyla; **komut satırında boşluklu yol Enter sayılır**: "Save drawing as" satırına yazılan yol "Claude"da kesildi, "Unknown command PORTMAN", kaydetmedi — FILEDIA 1 + Save As penceresi kullanıldı). Dosya buluta alındı, v10 ile varlık varlık kıyas (INSERT ad/konum/dönüş, LINE, DIM): 114 silinen, 100 eklenen.
+- Okunan: y aksları önden (135,5…637,5); x'e 323,75 / 449,25 / 700,25; iç duvarlar aks ortalı; kova 318,75–328,75 / 507–517 (aks-aks 188,25); giriş 62,75 niş (kapı 386,5–512, aks 700,25); WC arka elle 1 pano + 110,5; iki hatta 637,5–647,5 boşluk; H'lar ve salon/mutfak duvarı silinmiş; sol ön balkon dikmesi eklenmiş.
+- Üretici: `ZEMIN` yeniden (sol aynı; arka 10|2p+57,75|P2|178,25|P2|vasistas|110,5|10; sağ arkadan 10|62,75|116,25|P|niş 115,5|P|115,5|125,5|P; `nis_ust`/`nis_alt`/`nis_kapi` (115,5'lik kapılı pano şablondan uyarlanır); `salon_sag` 125,5 + iç köşe; `balkon_arka` 57,75|kapı|T|105,5 (y 130,5); `oda_salon` 3×125,5|kapı|kapı ayna|T|47,75; `salon_mutfak` 637,5'te; `kova_sol` kapı|53,5|125,5|…; `kova_sag` iç köşe|125,5|…; `wc_on` kapı|110,5; `cikma_arka` 125,5|52,75). Motor aksları silinip `AKS_X`/`AKS_Y` listesinden çizilir (C1, D1, F1 ek akslar). Üçlü H: (5,386,5) (323,75,386,5) (642,5,386,5) (642,5,135,5) (758,570,5). `_bantlar` x yönlü kapılı blokları doğru ölçer.
+- AutoCAD: yanlışlıkla `lokman_0013` salt okunur ikinci kez açıldı (liste satırı kaydı), kapatıldı; r01 Cmd+Shift+G ile açıldı, ZOOM W; kontrol bırakıldı 00:28. Açık soru: salon/mutfak duvarı 637,5–647,5 mi (mutfak 105,5) 512 mi.
+- Durum: yapıldı (Lokman bakacak).
+
 ### A035 · — · Sıradaki: Soru 2b (zeminde kovaya giriş: önü açık mı, planda ön duvar çizili) → Soru 4 (Fransız pencere) → 5 (çıkma çatısı) → 6 → 7 → 8 (et) → 9 → İş Emri JSON → Motor (PR-1: bulgu 7–8)
 - Durum: bekliyor (Lokman).
