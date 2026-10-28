@@ -239,5 +239,11 @@ Biçim: `A### · saat · başlık` — Ne / Nerede / Sonuç / Durum (yapıldı �
 - A4 v9 gönderildi; kural belgesi §12 15:49 satırı.
 - Durum: yapıldı.
 
+### A048 · 15:53–16:02 · Lokman: giriş kapısı yarım pano öne · mutfakta 100×50 iç köşe · WC'de profil hatalı · dış köşe yönleri yanlış · akslar balkon çizgisi gibi
+- `ZEMIN["sag"]`: 10 | 125,5 | 62,75 | giriş 90 | 125,5 | 120,5 | 10 (kapı yarım pano öne). Yeni eleman `("ickose",)`: blok `100X50 İÇ KÖŞE BAĞLANTISI` (10×5, katman IC_KOSE_PROFIL_100 sarı); `kova_sag` bununla başlar, mutfak/balkon köşesindeki profil de bununla değişti.
+- Profiller yönlü: `P(xs, ys)` (çıkıntı: xs +1 sağa/−1 sola, ys +1 aşağı/−1 yukarı), `P2(a, b)` T birleşimi (iki blok, üç kol); bir dizide çizilen köşe öteki dizide `BOS10` (10 boşluk) ile geçilir — her köşe bir kez. (753, 126,25) ayrı çağrısı kaldırıldı (çiftti). Aks çizgi tipi AKS_SEYREK deseni DASHED ile aynı yapıldı (12,5–7,5), gri kaldı.
+- A4 v10 gönderildi; kural belgesi §12 15:53 satırı. Bilinen: balkon arka duvarındaki 105,5 pencereli panonun "60/125" yazısı baş aşağı (115,5'lik kaynak bloğun yazı yönü), ölçüye etkisi yok.
+- Durum: yapıldı.
+
 ### A035 · — · Sıradaki: Soru 2b (zeminde kovaya giriş: önü açık mı, planda ön duvar çizili) → Soru 4 (Fransız pencere) → 5 (çıkma çatısı) → 6 → 7 → 8 (et) → 9 → İş Emri JSON → Motor (PR-1: bulgu 7–8)
 - Durum: bekliyor (Lokman).

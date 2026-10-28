@@ -193,7 +193,7 @@ ESKI_KOSE, SABLON_KOSE = "100X100 SÜREKLİ DIŞ KÖŞE DİREĞİ (5320)", "100X
 if kut is not None and SABLON_KOSE in kut.blocks:          # şablonun köşe direği bloğu baştan hedefte (çıkma köşeleri de kullanır)
     _i = Importer(kut, hedef); _i.import_block(SABLON_KOSE); _i.finalize()
     hedef.blocks.get(SABLON_KOSE).base_point = (0, 0, 0)
-for _ad, _renk in [("DIS_DUVAR_100", 7), ("IC_DUVAR_100", 7), ("KOSE_PROFIL_100", 1)]:
+for _ad, _renk in [("DIS_DUVAR_100", 7), ("IC_DUVAR_100", 7), ("KOSE_PROFIL_100", 1), ("IC_KOSE_PROFIL_100", 2)]:
     if _ad not in hedef.layers: hedef.layers.add(_ad, color=_renk)
 
 
@@ -524,15 +524,18 @@ if SABLON_KOSE in hedef.blocks and ESKI_KOSE in hedef.blocks:
 #     (akslar hariç) silinir ve bu veriden yeniden kurulur. Dizilim listeleri: ("pano", boy, blok adı) | ("profil",) | ("acik", boy).
 DOLU = lambda L: ("pano", L, f"100'LÜK {en_yaz(L)}'LİK PANO")
 PRF = ("profil",)
+P = lambda xs, ys: ("profil", xs, ys)            # çıkıntı yönü: xs +1 sağa / −1 sola, ys +1 aşağı / −1 yukarı
+P2 = lambda a, b: ("profil2", a, b)             # T birleşimi: iki yönlü (üç kol)
+BOS10 = ("acik", 10.0)                          # köşe başka duvar dizisinde çizildi
 ZEMIN = {
   # dış duvarlar: (başlangıç x, y, yön, dizi); yön "+x": bant y..y+10, x artar; "+y": bant x..x+10, y artar
-  "sol":   (0.0, 0.0, "+y", [PRF, DOLU(125.5), ("pano", 125.5, "100'LÜK 125'LİK (120x125) PENCERELİ PANO"), DOLU(125.5),       # 10 + 3 pano (SALON)
-                             DOLU(125.5), ("pano", 125.5, "100'LÜK 125'LİK (120x125) PENCERELİ PANO"), DOLU(58.5), PRF]),       # + 2 pano + 58,5 (ODA) + 10 = 706
-  "arka":  (0.0, 696.0, "+x", [PRF, DOLU(125.5), DOLU(125.5), DOLU(62.75), PRF, ("acik", 188.25), PRF,                           # 10 + 2,5 pano | 10 + 1,5 pano kova + 10
-                             ("pano", 125.5, "100'LÜK 125'LİK (60x40) VASİSTASLI PANO"), DOLU(95.5), PRF]),                     # | 1 pano + 95,5 + 10 = 763
-  "sag":   (753.0, 706.0, "-y", [PRF, DOLU(125.5), ("pano", 125.5, "100'LÜK 125'LİK KAPILI PANO(90'LIK)"), DOLU(125.5), DOLU(125.5),  # Motor dizilimi (arkadan)
-                             DOLU(57.75), PRF]),                                                                                   # … 136,25'te balkon duvarı profili
-  "on":    (0.0, 0.0, "+x", [PRF, DOLU(125.5), ("pano", 125.5, "100'LÜK 125'LİK (120x180) PENCERELİ PANO"), DOLU(125.5), DOLU(57.75), PRF]),  # 444,25'te salon sağ duvarı profili
+  "sol":   (0.0, 0.0, "+y", [P(1, -1), DOLU(125.5), ("pano", 125.5, "100'LÜK 125'LİK (120x125) PENCERELİ PANO"), DOLU(125.5),       # 10 + 3 pano (SALON)
+                             DOLU(125.5), ("pano", 125.5, "100'LÜK 125'LİK (120x125) PENCERELİ PANO"), DOLU(58.5), P(1, 1)]),   # + 2 pano + 58,5 (ODA) + 10 = 706
+  "arka":  (0.0, 696.0, "+x", [BOS10, DOLU(125.5), DOLU(125.5), DOLU(62.75), P2((-1, -1), (-1, 1)), ("acik", 188.25), P2((1, -1), (1, 1)),   # 10 + 2,5 pano | 10 + 1,5 pano kova + 10
+                             ("pano", 125.5, "100'LÜK 125'LİK (60x40) VASİSTASLI PANO"), DOLU(95.5), BOS10]),                   # | 1 pano + 95,5 + 10 = 763; uç köşeler sol/sağ dizilerinde
+  "sag":   (753.0, 706.0, "-y", [P(-1, 1), DOLU(125.5), DOLU(62.75), ("pano", 125.5, "100'LÜK 125'LİK KAPILI PANO(90'LIK)"), DOLU(125.5),  # Lokman 15:53: giriş kapısı yarım pano içeri (öne)
+                             DOLU(120.5), P(-1, -1)]),                                                                             # arkadan: 10|125,5|62,75|kapı|125,5|120,5|10 → 136,25 balkon profili
+  "on":    (0.0, 0.0, "+x", [BOS10, DOLU(125.5), ("pano", 125.5, "100'LÜK 125'LİK (120x180) PENCERELİ PANO"), DOLU(125.5), DOLU(57.75), P(-1, -1)]),  # 444,25'te salon sağ duvarı profili (yukarı, sola)
   "salon_sag": (444.25, 10.0, "+y", [DOLU(116.25)]),                                                                              # salon sağ dış duvarı 10→126,25
   "balkon_arka": (454.25, 126.25, "+x", [DOLU(57.75), ("acik", 10.0), ("pano", 125.5, "100'LÜK 125'LİK KAPILI PANO(90'LIK) [SOL]"),
                              ("pano", 105.5, "100'LÜK 105.5'LİK (60x125) PENCERELİ PANO")]),                                    # 454,25→512 | T 512–522 | kapı 522–647,5 | 105,5 → 753
@@ -542,8 +545,8 @@ ZEMIN = {
                              # Lokman 15:51: ODA/SALON'u bölen duvar yalnız H'lerle, profil yok; 5 × 125,5 (2'si kapı), T'de 10, mutfak bitişi 105,5 → 10→753
                              # mutfak kapısı = hol–salon kapısının salon/mutfak duvarına (T) göre aynası (15:49), ayrı ölçü yok
   "salon_mutfak": (512.0, 136.25, "+y", [DOLU(125.5), DOLU(119.75)]),                                                              # 136,25→381,5; aks 517
-  "kova_sol": (323.75, 391.5, "+y", [("pano", 125.5, "100'LÜK 125'LİK KAPILI PANO(82'LİK) [SOL ALT]"), DOLU(179.0), PRF, DOLU(125.5), PRF]),  # 391,5→696, profil, çıkma 706→831,5, profil
-  "kova_sag": (522.0, 565.5, "+y", [PRF, DOLU(120.5), PRF, DOLU(125.5), PRF]),                                                     # 565,5 profil, 575,5→696, profil, çıkma, profil
+  "kova_sol": (323.75, 391.5, "+y", [("pano", 125.5, "100'LÜK 125'LİK KAPILI PANO(82'LİK) [SOL ALT]"), DOLU(179.0), BOS10, DOLU(125.5), P(1, 1)]),  # 391,5→696, (profil arka dizisinde), çıkma 706→831,5, arka köşe
+  "kova_sag": (522.0, 565.5, "+y", [("ickose",), DOLU(125.5), BOS10, DOLU(125.5), P(-1, 1)]),                                       # WC önü köşesi 100×50 iç köşe (Lokman 15:53), 570,5→696, (profil arka dizisinde), çıkma, arka köşe
   "wc_on":  (532.0, 565.5, "+x", [("pano", 125.5, "100'LÜK 125'LİK KAPILI PANO(82'LİK) [SOL ÜST]"), DOLU(95.5)]),     # 532→753
   "cikma_arka": (333.75, 831.5, "+x", [DOLU(125.5), DOLU(62.75)]),                                                                  # 333,75→522
 }
@@ -614,10 +617,19 @@ def zemin_dizilimden(kat_adi="ZEMİN KAT"):
         dis = ad in ("sol", "arka", "sag", "on", "salon_sag", "balkon_arka", "cikma_arka") or ad.startswith("kova")
         kat = {"layer": "DIS_DUVAR_100" if dis else "IC_DUVAR_100"}
         for el in dizi:
-            if el[0] == "profil":
-                if yon == "+x":   profil(x, y, 1, 1); x += 10
-                elif yon == "+y": profil(x, y, 1, 1); y += 10
-                else:             profil(x, y - 10, 1, 1); y -= 10          # -y: yukarıdan aşağı
+            if el[0] == "ickose":                                   # 100×50 iç köşe parçası (10 × 5): bant yönünde 5 ilerler
+                ik = pano_blogu("100X50 İÇ KÖŞE BAĞLANTISI", 5.0)  # 10 × 5 dikdörtgen
+                if yon == "+x":   H.add_blockref(ik, (x, y + 10), dxfattribs={"rotation": 270, "layer": "IC_KOSE_PROFIL_100"}); x += 5
+                elif yon == "+y": H.add_blockref(ik, (x, y), dxfattribs={"layer": "IC_KOSE_PROFIL_100"}); y += 5
+                else:             H.add_blockref(ik, (x, y - 5), dxfattribs={"layer": "IC_KOSE_PROFIL_100"}); y -= 5
+                say("100X50 İÇ KÖŞE BAĞLANTISI", kat_adi, 1)
+            elif el[0] in ("profil", "profil2"):
+                yonler = [(el[1], el[2])] if el[0] == "profil" and len(el) == 3 else ([el[1], el[2]] if el[0] == "profil2" else [(1, 1)])
+                px, py = (x, y) if yon in ("+x", "+y") else (x, y - 10)
+                for xs_, ys_ in yonler: profil(px, py, xs_, ys_)
+                if yon == "+x": x += 10
+                elif yon == "+y": y += 10
+                else: y -= 10
             elif el[0] == "acik":
                 if yon == "+x": x += el[1]
                 elif yon == "+y": y += el[1]
@@ -647,7 +659,8 @@ def zemin_dizilimden(kat_adi="ZEMİN KAT"):
         rot, ix, iy = {"+x": (0, cx - 5, cy - 5), "+y": (90, cx + 5, cy - 5), "-x": (180, cx + 5, cy + 5), "-y": (270, cx - 5, cy + 5)}[govde]
         H.add_blockref(HB, (ix, iy), dxfattribs={"rotation": rot, "layer": "IC_UCLU_H_100"}); say(HB, kat_adi, 1)
     ucluH(5, 386.5, "+x"); ucluH(328.75, 386.5, "+y"); ucluH(517, 386.5, "-y"); ucluH(517, 131.25, "+y"); ucluH(758, 386.5, "-x"); ucluH(758, 570.5, "-x")
-    profil(444.25, 126.25, 1, 1)                                             # salon sağ duvarı – balkon arka duvarı iç köşesi
+    H.add_blockref(pano_blogu("100X50 İÇ KÖŞE BAĞLANTISI", 5.0), (444.25, 126.25), dxfattribs={"layer": "IC_KOSE_PROFIL_100"})   # mutfak/balkon iç köşesi 100×50 (Lokman 15:53)
+    say("100X50 İÇ KÖŞE BAĞLANTISI", kat_adi, 1)
     # balkon kirişleri 40 dışarıda (serbest ölçü — Lokman 15:23) ve köşe dikmesi
     on_ad, yan_ad = f"100'LÜK VERANDA PROFİLİ {en_yaz(308.75)} (ÖN)", f"100'LÜK VERANDA PROFİLİ {en_yaz(166.25)} (YAN)"
     for ad_, L_, dik_ in ((on_ad, 308.75, False), (yan_ad, 166.25, True)):
@@ -659,7 +672,7 @@ def zemin_dizilimden(kat_adi="ZEMİN KAT"):
     H.add_blockref(on_ad, (454.25, -40), dxfattribs={"layer": "VERANDA_PROFIL_100"}); say(on_ad, kat_adi, 1)
     H.add_blockref(yan_ad, (753.0, -40), dxfattribs={"layer": "VERANDA_PROFIL_100"}); say(yan_ad, kat_adi, 1)
     H.add_blockref("100X100 VERANDA DİKMESİ", (753.0, -40), dxfattribs={"layer": "VERANDA_DIKME"}); say("100X100 VERANDA DİKMESİ", kat_adi, 1)
-    profil(753.0, 126.25, -1, 1)                                             # sağ duvar – balkon arka duvarı köşesi
+    # sağ duvar – balkon arka duvarı köşesi (753, 126,25): 'sag' dizisinin son P(-1,-1) elemanı çizer (yukarı + sola çıkıntılı)
     # merdiven (kova iç 333,75→522 × 570,5→696 + çıkma 706→831,5)
     L_ = "MERDIVEN"; XI0, XI1 = 333.75, 522.0; XM = (XI0 + XI1) / 2; YON, YC0, YC1 = 570.5, 706.0, 831.5
     def cz(x0_, y0_, x1_, y1_): H.add_line((x0_, y0_), (x1_, y1_), dxfattribs={"layer": L_})
@@ -852,10 +865,10 @@ if KUTUPHANE.exists():
         boy = f" [{bb.size.x:.1f} x {bb.size.y:.1f}]" if bb.has_data else ""
         H.add_text(n + boy, height=4.5, dxfattribs={"layer": "SABLON_KARTI"}).set_placement((x, yy-14))
 
-# Akslar silik ve seyrek tireli (Lokman 13:53 "aksları daha belirsiz, tireleri daha aralıklı çiz"): Motor AKS katmanı cyan + CENTER
-# (LTSCALE 1'de sık). Burada katman koyu gri (ACI 8), çizgi tipi AKS_SEYREK: 50 çizgi – 25 boşluk – nokta – 25 boşluk; aks yazıları da gri.
+# Akslar silik (Lokman 13:53 "aksları daha belirsiz"), deseni balkon çizgisi gibi (Lokman 15:57 "aks çizgilerini balkon çizgisi gibi yap,
+# aralıkları çok açık ve uzun olmuş; silik olması iyi"): katman koyu gri (ACI 8), çizgi tipi AKS_SEYREK = DASHED deseni (12,5 çizgi – 7,5 boşluk).
 if "AKS_SEYREK" not in hedef.linetypes:
-    hedef.linetypes.add("AKS_SEYREK", pattern=[100.0, 50.0, -25.0, 0.0, -25.0], description="Aks: ____ . ____ . (seyrek)")
+    hedef.linetypes.add("AKS_SEYREK", pattern=[20.0, 12.5, -7.5], description="Aks: __ __ __ (balkon çizgisi gibi)")
 for ad_, lt_ in (("AKS", "AKS_SEYREK"), ("AKS_YAZI", "Continuous")):
     if ad_ in hedef.layers:
         L_ = hedef.layers.get(ad_); L_.color = 8; L_.dxf.linetype = lt_
