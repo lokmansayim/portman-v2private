@@ -176,7 +176,7 @@ def pencere_olcusu(olcu: str) -> tuple[int, int]:
 def model_motor(ie: dict) -> dict:
     from . import geometry as G
     from shapely.geometry import LineString, Point, box
-    from shapely.ops import unary_union
+    from shapely.ops import linemerge, unary_union
     plan = G.kur(json.loads(json.dumps(ie)))
     y = ie["yapi"]; c = ie.get("cati") or {}
     mx = c.get("makas_ekseni", "x") == "x"                     # makaslar x'i geçiyorsa saçak duvarları y yönünde koşar
@@ -231,16 +231,24 @@ def model_motor(ie: dict) -> dict:
         x0, y0, x1, y1 = m.poly.bounds
         en, derin = ((y1 - y0), (x1 - x0)) if mx else ((x1 - x0), (y1 - y0))
         return {"ad": m.ad, "tur": m.tur, "alan_m2": m.alan_m2, "en_cm": en, "derin_cm": derin}
-    kirisler = []
+    kirisler, nis_agizlari = [], []
     dis_ad = {v["ad"] for v in plan.dis_verandalar}
     if plan.dikmeler and acik:
         for v in acik:
             if v.ad in dis_ad:
                 continue                                       # BK-14: taşan verandanın üç açık kenarı aşağıda, kenar kenar
             vx0, vy0, vx1, vy1 = v.poly.bounds
+            if not any(v.poly.buffer(11.0).intersects(box(*k)) for k in plan.dikmeler):
+                # BK-14 ek: dikmesiz açık mahal giriş nişidir; ağzı duvardan duvara, kiriş aks arası (ağız parçaları akstan başlar, ortası mahalde)
+                agiz = [LineString([(x0, y0), (x1, y1)]) for (x0, y0, x1, y1, *_r) in plan.acik_kenarlar
+                        if v.poly.buffer(1.0).contains(Point((x0 + x1) / 2, (y0 + y1) / 2))]
+                if agiz:
+                    birlesik = linemerge(unary_union(agiz))
+                    nis_agizlari += [round(g.length, 2) for g in getattr(birlesik, "geoms", [birlesik])]
+                continue
             yanlar = set()
-            for (x0, y0, x1, y1, *_r) in plan.acik_kenarlar:     # parçanın ortası mahalde (nişin ağız parçaları akstan başlar, net alanı taşar)
-                if v.poly.buffer(1.0).contains(Point((x0 + x1) / 2, (y0 + y1) / 2)):
+            for (x0, y0, x1, y1, *_r) in plan.acik_kenarlar:
+                if v.poly.buffer(1.0).contains(LineString([(x0, y0), (x1, y1)])):
                     yanlar.add("x" if abs(y1 - y0) < 1e-6 else "y")
             kirisler += [((vx1 - vx0) if e == "x" else (vy1 - vy0)) for e in sorted(yanlar)]
     for v in plan.dis_verandalar:                              # BK-14: dış kenar ve iki yan (TK-01 geçici yolu, PK-03/PK-06 paftası gibi)
@@ -268,7 +276,7 @@ def model_motor(ie: dict) -> dict:
     return {"kaynak": "Motor", "H0": float(y.get("duvar_yuksekligi_cm", 250)), "W": W, "D": D, "brut_m2": round(brut / 1e4, 3),
             "dis_cevre_m": dis_duvar_m, "ic_kalan_dis_duvar_m": ic_kalan_m, "ic_kirisler_cm": ic_kirisler, "t_dis": t_dis, "panolar": panolar, "ekler": ekler,
             "koseler": dict(Counter("dis" if kk.tur == "dis" else "ic" for kk in plan.koseler)), "dikmeler": len(plan.dikmeler),
-            "veranda_kenarlari_cm": kirisler, "kapali": [oda(m) for m in kapali], "acik": [{**oda(m), "tur": "veranda"} for m in acik],
+            "veranda_kenarlari_cm": kirisler, **({"nis_agizlari_cm": nis_agizlari} if nis_agizlari else {}), "kapali": [oda(m) for m in kapali], "acik": [{**oda(m), "tur": "veranda"} for m in acik],
             "sigorta_en_uzak": en_uzak,
             "cati": [{"ad": "ana çatı", "tip": c.get("tip", "besik"), "aciklik_cm": aciklik, "boy_cm": bina_boyu,
                       "egim_yuzde": float(c.get("egim_yuzde", 33)), "sacak_cm": float(c.get("sacak_cm", 30)), "kalkan": 2,
@@ -574,6 +582,9 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
         kiris_formul = f"açık kenar dış ölçüsü − {mm(r('veranda_kirisi_eksik_cm'))}"
     for L_ in kirisler:
         ekle("1002", "Kutu profil (kiriş) 100 × 100", f"L {mm(L_)}", 1, "Liste kuralı", kiris_formul, "PK-01'de tuttu")
+    for L_ in N.get("nis_agizlari_cm") or []:                  # BK-14 ek: giriş nişinin ağzı; dikmesi yok, kiriş duvardan duvara
+        ekle("1002", "Kutu profil (kiriş) 100 × 100", f"L {mm(L_)}", 1, "Liste kuralı", "nişin ağzı, duvardan duvara (aks arası)",
+             "duvarsız açıklığa kiriş gelir, aks arası (Lokman, kart 22 Ekim); nişe uygulanması yorum (BK-14 ek)")
     for L_ in N.get("ic_kirisler_cm") or []:                    # paftadaki yeşil kesikli profil (Lokman, 21 Ekim 16:22); Motor'da duvarsız sınır
         ekle("1002", "Kutu profil (kiriş) 100 × 100", f"L {mm(L_)}", 1, "Liste kuralı",
              "duvarsız sınırın boyu (İş Emri'nde açık sınır, aks arası)" if N["kaynak"] == "Motor" else "paftadan okunan kiriş boyu (çatı kenarında değil: duvarsız açıklık)",

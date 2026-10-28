@@ -107,12 +107,15 @@ def test_veranda_giris_nisinin_onunde(tmp_path):
     nis = [d for d in p.duvarlar if any(box(*q.rect()).intersects(box(391.5, 0.0, 507.0, 125.0).buffer(-0.5).buffer(6)) for q in d.panolar)]
     assert len(nis) == 3 and all(d.tur == "dis" and 2 * d.h == 10.0 for d in nis)                # iki yan ve kapının duvarı
     N = PL.model_motor(_nisli())
-    assert N["veranda_kenarlari_cm"] == [115.5, 386.0, 181.0, 181.0, 261.0, 130.0, 130.0]   # nişin ağzı + iki taşan verandanın kenarları
+    assert N["veranda_kenarlari_cm"] == [386.0, 181.0, 181.0, 261.0, 130.0, 130.0] and N["nis_agizlari_cm"] == [125.5]   # ağız aks arası
+    L = PL.liste(N)
+    agiz = [s for s in L["satirlar"] if s["kalem"].startswith("Kutu profil (kiriş)") and s["olcu"] == "L 1255"]
+    assert len(agiz) == 1 and agiz[0]["adet"] == 1
     m = dxf_out.uret(_nisli(), tmp_path, pdf_hatada=False)
     assert m["validation_passed"] is True, m.get("errors")
     assert _oku(tmp_path / "validation.json")["rooms_m2"]["GİRİŞ"] == pytest.approx(1.44375)
     bom = _oku(tmp_path / "bom.json")["kalemler"]
-    assert sum(k["adet"] for k in bom if k["kod"].startswith("V")) == len(N["veranda_kenarlari_cm"])
+    assert sum(k["adet"] for k in bom if k["kod"].startswith("V")) == len(N["veranda_kenarlari_cm"]) + len(N["nis_agizlari_cm"])   # 7 profil
 
 
 @pytest.mark.parametrize("girdi, v", [
