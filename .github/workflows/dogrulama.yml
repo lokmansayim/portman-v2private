@@ -1,12 +1,22 @@
 # Portman · otomatik doğrulama (Kurulum Panosu satır 12; Araştırma yol haritası KT1).
 #
-# Her PR'da ve main'e her push'ta oturumların tam doğrulaması koşar: `bash araclar/ortam_kur.sh --dogrula`'nın 4. adımındaki
+# Hazır (taslak olmayan) her PR'da ve main'e her push'ta oturumların tam doğrulaması koşar: `bash araclar/ortam_kur.sh --dogrula`'nın 4. adımındaki
 # komutların aynısı (Beyin harness'i 22 vaka, tam referans gerilemesi `testler/referans/dogrula.py`, bütün pytest'ler), dört
 # paralel işe bölünmüş. Tek işte 21–37 dk sürüyordu (pytest tek çekirdekte 17–28 dk); bölününce en uzun iş ~10–12 dk.
 # Ortam her işte `ortam_kur.sh` ile kurulur. `ortam_kur.sh --dogrula`'ya adım eklenirse burası da güncellenir.
-# İki Python'da koşar: 3.11 (oturumların yerel ortamı, araclar/gereksinimler.txt) ve 3.12 (canlı sunucu 3.12.3; üstüne
+# İki Python: 3.11 (oturumların yerel ortamı, araclar/gereksinimler.txt) ve 3.12 (canlı sunucu 3.12.3; üstüne
 # vps/gereksinimler.txt: numpy 2.5.4, vtk). 3.12'den beri sum() float'ları telafili toplar; sürüme bağlı farkı burada görürüz.
 # Biri kırmızıysa PR'da kırmızı çarpı yanar; hangi iş, hangi test düştü koşu kaydında.
+#
+# Dakika (28 Ekim 2026; Patron: "kullanım hakkı çok çabuk doluyor"; döküm docs/notlar/2026-10-28_ci_dakika.md): sekiz işli
+# bir koşu ~86 dk tutuyordu, 27–28 Ekim'de 14 saatte 49 koşu ~3.100 dk. Doğrulamanın içeriği aynı; değişen ne zaman ve kaç
+# Python'da koştuğu:
+# - Taslak PR'da koşmaz; PR "Ready for review" yapılınca koşar (AGENTS.md › Değişiklik disiplini). Taslak PR birleştirilemez.
+# - PR'da yalnız canlının Python'u 3.12 (dört iş). main'e her push'ta ve elle koşuda (workflow_dispatch) 3.11 + 3.12 (sekiz
+#   iş). Yalnız 3.11'de düşen bir hata PR'da görülmez; oturumun yerel tam doğrulaması (3.11) ya da main koşusu görür.
+# - Belge değişikliği de koşar (paths-ignore yok): referans adımının sır taraması belgeleri de tarar, IE-16.md'deki mühür izi
+#   pytest'te sınanır.
+# - Dal korumasında zorunlu tutulacak denetim tek: "Doğrulama sonucu" (iş sayısı ve adları değişse de adı aynı kalır).
 #
 # Sınırlar:
 # - Canlıya, LLM'e, WhatsApp'a bağlanmaz; sır kullanmaz (secrets yok, yalnız okuma izni).
@@ -17,6 +27,8 @@ name: Doğrulama
 
 on:
   pull_request:
+    # ready_for_review: taslak PR hazır yapılınca doğrulama o an koşar.
+    types: [opened, synchronize, reopened, ready_for_review]
   push:
     branches: [main]
   workflow_dispatch:
@@ -36,12 +48,15 @@ defaults:
 jobs:
   dogrula:
     name: ${{ matrix.ad }} · ${{ matrix.python }}
+    # Taslak PR'da atlanır (dakika harcamaz); push'ta pull_request olayı yoktur, koşar.
+    if: ${{ !github.event.pull_request.draft }}
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
-        python: ["3.11", "3.12"]
+        # PR'da yalnız canlının Python'u; main'e push'ta ve elle koşuda iki sürüm.
+        python: ${{ fromJSON(github.event_name == 'pull_request' && '["3.12"]' || '["3.11", "3.12"]') }}
         parca: [referans, kalici, genel_motor, kalan]
         include:
           - parca: referans
@@ -103,3 +118,19 @@ jobs:
       - name: Çalışma klasörünün sahipliği
         if: always()
         run: sudo chown -R "$(id -u):$(id -g)" "$GITHUB_WORKSPACE"
+
+  # Dal korumasında zorunlu tutulacak tek denetim (D-28 › A7): bütün doğrulama işleri yeşilse yeşil. always(): iş düşse ya da
+  # koşu iptal edilse de koşar ve kırmızı yanar; atlansaydı "skipped" dal korumasında geçer sayılırdı. Taslakta koşmaz.
+  sonuc:
+    name: Doğrulama sonucu
+    needs: dogrula
+    if: ${{ always() && !github.event.pull_request.draft }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Bütün doğrulama işleri yeşil mi
+        env:
+          SONUC: ${{ needs.dogrula.result }}
+        run: |
+          echo "doğrulama işleri: $SONUC"
+          [[ "$SONUC" == success ]]

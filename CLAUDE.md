@@ -10,7 +10,8 @@ Ortak kurallar yukarıdaki `AGENTS.md`'den gelir; burada yalnız Claude'a özgü
 2. **Güncel durumu ve aktif işi oku.** `DURUM.md`'nin başında aktif iş emri ve dalı yazar; o dala geç. `main`'deki DURUM geride olabilir; en yeni iş dalındaki DURUM esastır.
 3. **Ortamı kur:** `bash araclar/ortam_kur.sh` (gerileme için `--dogrula`).
 4. **Yeni işe Plan modunda başla.** Plan Lokman'ın onayından sonra uygulanır; iş emri belgesi `/is-emri` ile açılır. Diff'i tek cümleyle anlatılabilen küçük düzeltmelerde plan atlanabilir.
-5. **Lokman'a anlatım.** Her adımda ne yapıldığı iki cümleyle Türkçe söylenir; onayı gereken yerde tek soru sorulur; beklemeye düşülmez, kendi başına devam edilir.
+5. **Üretim kuralı (D-28, `AGENTS.md`).** Bayiye, mühendise ya da Lokman'a gidecek bir çıktıyı (çizim, liste, rehber, teklif) yalnız `main`'e girmiş kodla üret. Oturumun kendi betiğiyle, proje dosyalarındaki bir araçla ya da elle düzeltilmiş çıktı teslim edilmez; eksik varsa önce kod düzeltilir. Hedef örnek ve kıyas testi yoksa o çıktı için "çalışıyor" yazılmaz.
+6. **Lokman'a anlatım.** Her adımda ne yapıldığı iki cümleyle Türkçe söylenir; onayı gereken yerde tek soru sorulur; beklemeye düşülmez, kendi başına devam edilir.
 
 ## Komutlar (skill)
 
