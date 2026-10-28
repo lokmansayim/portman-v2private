@@ -432,8 +432,8 @@
   },
   "vitrifiye_banyo_basina": {
    "deger": 1,
-   "durum": "lokman",
-   "kaynak": "Lokman, 27 Ekim 2026 22:00 (TK-01 teklifi): \"evet 2 takım olacak\" (banyo ve E. banyo); banyo türündeki her hacme bir takım (duş teknesi, klozet, lavabo, batarya). Ayrı WC ya da lavabo hacmi tam takım değildir: o evde satırın adedi \"Kural yok\" kalır, aday banyo sayısı. Genellemesi İE-13 PR-2'de, Patron onayıyla (D-28: düzeltme kurala işlenir)."
+   "durum": "varsayim",
+   "kaynak": "Varsayım, onay bekliyor. Dayanak Lokman, 27 Ekim 2026 22:00 (TK-01 teklifi): \"evet 2 takım olacak\" (banyo ve E. banyo); genellemesi banyo türündeki her hacme bir takım (duş teknesi, klozet, lavabo, batarya). Ayrı WC ya da lavabo hacmi tam takım değildir: o evde satırın adedi \"Kural yok\" kalır, aday banyo sayısı. Genelleme İE-13 PR-2'de yazıldı, Patron onaylayınca durum lokman olur (D-28: düzeltme kurala işlenir)."
   },
   "vitrifiye_aday": {
    "deger": 1,
@@ -574,7 +574,7 @@
    ],
    "tur": "yontem",
    "karar_bekliyor": false,
-   "not": "Takımın adetleri kitaptan. Prefabrik ev başına bir takım yazar (O17; PK-03, PK-05, PK-07 birebir), kitap ıslak hacim başına. Vitrifiye prefabrikte banyo başına bir takım (`vitrifiye_banyo_basina`, Lokman 27 Ekim; ayrı WC ya da lavabo hacmi olan evde \"Kural yok\"), kitapta dört satır; kitabın taharet musluğu (vitrifiye listedeyse ıslak hacim × 4, Lokman, 10 Ekim) bu yüzden prefabrikte yok."
+   "not": "Takımın adetleri kitaptan. Prefabrik ev başına bir takım yazar (O17; PK-03, PK-05, PK-07 birebir), kitap ıslak hacim başına. Vitrifiye prefabrikte banyo başına bir takım (`vitrifiye_banyo_basina`, Lokman 27 Ekim; ayrı WC ya da lavabo hacmi olan evde \"Kural yok\"), kitapta dört satır; kitabın taharet musluğu (vitrifiye listedeyse ıslak hacim × 4, Lokman, 10 Ekim) prefabrikte ayrı satır değil: prefabrik vitrifiye takımının batarya grubu taharet musluğunu içerir (87 m² yükleme listesi, 14 Ekim: \"BANYO BATARYA GRUBU (LAVABO BATARYASI, BANYO BATARYASI, DUŞ BAŞLIĞI, TAHARET MUSLUĞU)\"; fiyat defterinde vitrifiye satırının kaynak kalemi)."
   },
   {
    "konu": "Kapı boşlukları",

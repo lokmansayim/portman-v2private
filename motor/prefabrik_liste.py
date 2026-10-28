@@ -56,7 +56,7 @@ ISARET_YOLU = KOK / "kurallar" / "liste" / "prefabrik_isaret.json"
 TEK_KAYNAK = "Tek kaynak (zayıf)"
 ISARETLI = ("pencere_u_h_gecen", "omega_kapak")   # satırı `zayif(...)` ile yazılan kurallar (BK-12 PR-2c)
 
-SURUM = "1.5 (22 Ekim 2026; kör test üreteci 7.3, kurallar kural kitabında; orta iniş 9 m, kitapla farklı on yedi kalemde kitap; PK-07 hedef örnek; T76 cevapları; 100'lük duvar omegası kirişlerin de üstünde; elektrik oda kuralı)"
+SURUM = "1.6 (28 Ekim 2026; vitrifiye banyo başına, varsayım (İE-13 PR-2); 1.5, 22 Ekim: kör test üreteci 7.3, kurallar kural kitabında; orta iniş 9 m, kitapla farklı on yedi kalemde kitap; PK-07 hedef örnek; T76 cevapları; 100'lük duvar omegası kirişlerin de üstünde; elektrik oda kuralı)"
 GRUPLAR = {"1001": "Panel", "1002": "Metal aksam", "1003": "Kapı ve pencere", "1004": "Tavan", "1005": "Makas", "1006": "Çatı",
            "1007": "Elektrik", "1008": "Vida", "1009": "Depo", "1010": "Sıhhi tesisat", "1011": "Dere", "1012": "Boya"}
 TAVAN = lambda x: int(math.ceil(x - 1e-9))
@@ -1101,7 +1101,7 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
             ekle("1010", kalem, "takım", None, "Kural yok", f"banyo {n_banyo}; {', '.join(diger)} hacminin takımı kuralda yok", kaynak,
                  aday=n_banyo * vit_b or r("vitrifiye_aday"), aday_notu=f"banyo başına {vit_b} takım ({', '.join(diger)} hariç; banyosuz evde PK-07'nin 1'i)")
         else:
-            ekle("1010", kalem, "takım", n_banyo * vit_b, "Kural (Lokman 27.10)", f"banyo {n_banyo} × {vit_b}", kaynak,
+            ekle("1010", kalem, "takım", n_banyo * vit_b, "Kural (varsayım; TK-01, Lokman 27.10)", f"banyo {n_banyo} × {vit_b}", kaynak,
                  aday=r("vitrifiye_aday"), aday_notu=f"PK-07 (dört satır × 1): ev başına {r('vitrifiye_aday')} takım")
     else:
         ekle("1010", "Sıhhi tesisat grubu", "—", None, "Kural yok", "—", "ıslak hacim yok")
