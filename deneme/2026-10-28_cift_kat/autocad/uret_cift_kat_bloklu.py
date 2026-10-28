@@ -59,7 +59,9 @@ def uzat_blok(doc, ad: str, yeni_boy: float) -> str:
 
 def kisalt_bas(doc, ad: str, kes: float) -> str:
     """Pano bloğunun BAŞINDAN (yerel y = 0 ucu) kes cm keser: geometri −kes kaydırılır, 0'ın altına düşen köşeler 0'a çekilir."""
-    eski = pano_boyu(ad); yeni_boy = eski - kes; yeni_ad = ad.replace(boy_kodu(eski), boy_kodu(yeni_boy)) + "_B"
+    eski = pano_boyu(ad); yeni_boy = eski - kes
+    m_ = re.match(r"BOM_([DI])(\d+)_", ad)                     # ad kalıbı bozulmasın: kod 9x (BOM_I16_ → BOM_I96_), boy kodu yeni
+    yeni_ad = (f"BOM_{m_.group(1)}9{int(m_.group(2)) % 10}_" + ad[m_.end():]).replace(boy_kodu(eski), boy_kodu(yeni_boy))
     if yeni_ad in doc.blocks: return yeni_ad
     kb = doc.blocks.get(ad); nb = doc.blocks.new(yeni_ad)
     for e in kb:
@@ -286,6 +288,51 @@ def balkon_kirisi(dx: float, eklenen: list, kat_adi: str, tasma: float = 40.0):
     H.add_blockref(dikme, (dx + 753.0, -tasma), dxfattribs={"layer": "VERANDA_DIKME"}); say(dikme, kat_adi, 1)
 
 
+def kapiyi_yasla(insert_xy, rot, pay: float = 11.5, kat_adi: str = ""):
+    """Lokman 14:58 "mutfak kapısını da sola yasla": Motor 'dayanak yok' deyip kapıyı panoda ortada bıraktı (İE-22 bulgu 9).
+    Verilen yerleşimdeki kapılı pano bloğunun açıklığı yerel 0 ucuna (rot 270'te sol uç) `pay` cm kala kaydırılır: jamb'lar
+    [0, pay] ve [pay + kapı, boy]; iç kapı sembolü aynı miktarda kayar. Yeni blok adı "… [SOLA YASLI]"."""
+    for e in list(H.query("INSERT")):
+        if abs(e.dxf.insert.x - insert_xy[0]) > 0.01 or abs(e.dxf.insert.y - insert_xy[1]) > 0.01 or abs(e.dxf.rotation % 360 - rot) > 0.01: continue
+        ad = e.dxf.name
+        if "KAPILI PANO" not in ad: continue
+        boy = pano_boyu_ad(ad); kb = hedef.blocks.get(ad)
+        polys = [k for k in kb if k.dxftype() == "LWPOLYLINE"]
+        if len(polys) != 2 or boy is None: print("yaslama: beklenmeyen blok", ad); return
+        ilk = min(polys, key=lambda k: max(y for _, y, *__ in k.get_points()))
+        eski_pay = max(y for _, y, *__ in ilk.get_points()); delta = pay - eski_pay
+        yeni_ad = kart_adi(ad) + " [SOLA YASLI]"
+        if yeni_ad not in hedef.blocks:
+            nb = hedef.blocks.new(yeni_ad)
+            for k in kb:
+                c = k.copy(); nb.add_entity(c)
+                if c.dxftype() == "LWPOLYLINE":
+                    c.set_points([(x, y + delta if y > 0.01 and y < boy - 0.01 else y) for x, y, *_ in c.get_points()], format="xy")
+                else:
+                    try: c.translate(0, delta, 0)
+                    except Exception: pass
+            yeni_adlar.add(kart_adi(yeni_ad))
+        say(kart_adi(ad), kat_adi, -1); e.dxf.name = yeni_ad; say(kart_adi(yeni_ad), kat_adi, 1)
+        print("kapı sola yaslandı:", ad, "→", yeni_ad, "delta", round(delta, 2)); return
+    print("yaslama: kapı bulunamadı", insert_xy)
+
+
+def mutfak_ust_duvari(dx: float, kat_adi: str):
+    """Lokman 14:56 + 14:58: mutfak kapısı balkon kapısıyla aynı hizada VE sola (salon/mutfak duvarına) yaslı → kapılı pano
+    512–637,5 (hol tarafı; HOL–WC HOLÜ açık olduğundan tek hol), açıklık 11,5 payla; kalan 637,5–753 dolu 115,5.
+    Motor bunu yapamıyor: HOL–MUTFAK ortak duvar parçası 57,75 (kapı sığmıyor), WC HOLÜ–MUTFAK parçası 584,75'ten başlıyor (bulgu 9)."""
+    y = 387.25
+    for e in list(H.query("INSERT")):
+        if abs(e.dxf.insert.y - y) < 0.01 and abs(e.dxf.rotation % 360 - 270) < 0.01 and dx + 512 - 0.01 <= e.dxf.insert.x <= dx + 753 and pano_boyu_ad(e.dxf.name):
+            say(kart_adi(e.dxf.name), kat_adi, -1); H.delete_entity(e)
+    kapi_kaynak = "100'LÜK 125'LİK KAPILI PANO(82'LİK) [SAG ALT]"      # mutfağa (−y) açılır, menteşe batı ucunda
+    if kapi_kaynak not in hedef.blocks: print("mutfak üst duvarı: kapı bloğu yok", kapi_kaynak); return
+    H.add_blockref(kapi_kaynak, (dx + 512.0, y), dxfattribs={"rotation": 270, "layer": "IC_DUVAR_100"}); say(kart_adi(kapi_kaynak), kat_adi, 1)
+    kapiyi_yasla((dx + 512.0, y), 270, 11.5, kat_adi)
+    dolu = pano_blogu("100'LÜK 115.5'LİK PANO", 115.5)
+    H.add_blockref(dolu, (dx + 637.5, y), dxfattribs={"rotation": 270, "layer": "IC_DUVAR_100"}); say(dolu, kat_adi, 1)
+
+
 def pano_boyu_ad(ad: str):
     """Şablon adından pano boyu: 100'LÜK 115.5'LİK PANO → 115.5; 125'LİK → 125.5."""
     m = re.match(r"(?:100'LÜK|60'LIK) ([\d.]+)'LİK", ad)
@@ -431,6 +478,8 @@ for kat_adi, yol, dx in KATLAR:
     merdiven_ciz(dx, kat1=(dx > 0), eklenen=eklenen, kat_adi=kat_adi)
     balkon_kirisi(dx, eklenen, kat_adi)
     H.add_text("BALKON KİRİŞLERİ 40 DIŞARIDA (Lokman 14:43/14:50; Motor'un veranda profilleri taşındı; Motor'da kural yok)", height=6, dxfattribs={"layer": "CIFT_KAT_NOT"}).set_placement((dx+456, -64))
+
+mutfak_ust_duvari(0.0, "ZEMİN KAT")     # zemin: mutfak kapısı sola yaslı ve balkon kapısıyla aynı sütunda (Lokman 14:56/14:58); 125,5'lik [SAG ALT] bloğu 1. kattan gelir
 
 # 4b) Giriş kapısı (Lokman 28.10 12:34, Soru 1): sağ cephe, WC HOLÜ, 90'lık, içeri açılır. Motor bunu kendisi çiziyor:
 #     BOM_D18_1255p0_DIS_K02 @ (763, 445) rot 90, iç sembol BOM_K03_DIS_KAPI_ACIKLIK900 (sınır kutusu 668,8–764,1 × 445–570,5).

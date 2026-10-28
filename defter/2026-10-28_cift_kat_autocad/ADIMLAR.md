@@ -217,5 +217,11 @@ Biçim: `A### · saat · başlık` — Ne / Nerede / Sonuç / Durum (yapıldı �
 - A4 v5 gönderildi; Mac'e kopya.
 - Durum: yapıldı.
 
+### A044 · 14:58–15:08 · Lokman: "mutfak kapısını da sola yasla"
+- "Sola yaslı" + "balkon kapısıyla aynı hiza" birlikte: kapılı pano 512–637,5 (salon/mutfak duvarına bitişik, açıklık 11,5 payla), kalan 637,5–753 dolu 115,5. Motor bunu kuramıyor: HOL–MUTFAK ortak parça 57,75 (kapı sığmaz), WC HOLÜ–MUTFAK parçası 584,75'ten başlıyor; `kapi_yeri: mentese_ucu` için "dayanak yok" diyor → **bulgu 9**. Çizimde `mutfak_ust_duvari` (döngü sonrası; 125,5'lik [SAG ALT] bloğu 1. kattan geliyor) + `kapiyi_yasla` (açıklığı yerel 0 ucuna 11,5 kala kaydırır, iç sembol de kayar; "[SOLA YASLI]" blok).
+- Yan düzeltme: `kisalt_bas` yeni blok adını BOM kalıbında tutar (BOM_I16_ → BOM_I96_), "_B" eki adlandırmayı bozuyordu.
+- A4 v6 gönderildi; Mac'e kopya.
+- Durum: yapıldı.
+
 ### A035 · — · Sıradaki: Soru 2b (zeminde kovaya giriş: önü açık mı, planda ön duvar çizili) → Soru 4 (Fransız pencere) → 5 (çıkma çatısı) → 6 → 7 → 8 (et) → 9 → İş Emri JSON → Motor (PR-1: bulgu 7–8)
 - Durum: bekliyor (Lokman).
