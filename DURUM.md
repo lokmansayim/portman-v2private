@@ -11,10 +11,10 @@ Yeni pencere için hazırlıklar:
 
 **28 Ekim 2026 sabah eki (İE-19 · altın set onay tabloları; `docs/is_emirleri/IE-19.md` › Onay tabloları):**
 
-- **Yapıldı:** Lokman (06:34 UTC) onay tablolarını Claude'a bıraktı. Her satır rehberle (Claude Docs 85. sürüm, Resimli Bayi Rehberi) ve kararlarla (D-18, D-26, D-27, İE-08 kapanışı) karşılaştırıldı; işaret kaynağıyla "Claude önerisi" sütunlarında (PF `Altin_Set/onay_tablosu.xlsx`, `kor/onay_tablosu_kor.xlsx`). Açık 58: 56 doğru, 1 düzeltme (T14), 1 rehberde yok (S02). Kör 20: 19 doğru, 1 rehberde yok; kör dosyası ve mühür değişmedi.
+- **Yapıldı:** Lokman (06:34 UTC) onay tablolarını Claude'a bıraktı. Her satır rehberle (Claude Docs 85. sürüm, Resimli Bayi Rehberi) ve kararlarla (D-18, D-26, D-27, İE-08 kapanışı) karşılaştırıldı; işaret kaynağıyla "Claude önerisi" sütunlarında (PF `Altin_Set/onay_tablosu.xlsx`, `kor/onay_tablosu_kor.xlsx`). Açık 58: 57 doğru, 1 düzeltme (T14). Kör 20: 20 doğru; kör dosyası ve mühür değişmedi. Rehberde olmayan tek konu (teslim süresi ve ödeme) Lokman'ın kararıyla (06:51, kart): "Teklifle birlikte bildirilir"; teklif formuna bu iki satır gerekir (teklif çalışmasına iletildi).
 - **T14 (sıkılaştırma):** prefabrik 60 m² beş bilgi tam; beklenen yalnız "en çok üç seçenek" (rehber §2, D-27). Önceki beklenen yazıyla katalog önerisini de kabul ediyordu. Karar 66 → 65/80, uçtan uca 65 → 64/80; baz çizgisinde yalnız T14 değişti. Bugün çalışmayan açık 15.
 - **Model kararı (pano 92):** Lokman 05:54 "opus kalsın"; canlı model Opus 5.5 kalır, `llm.py` işi yok.
-- **Bekliyor (Lokman):** turuncu 5 satıra göz (B01, T14, A08, F03, Y04) ve tek soru: bayi teslim süresini ya da ödeme şeklini sorarsa Portman ne desin (bugün "teklifle gelir"). Sonra birleştirme onayı.
+- **Bekliyor (Lokman):** turuncu 5 satıra göz (B01, T14, A08, F03, Y04) ve birleştirme onayı.
 
 **27 Ekim 2026 gece, geç eki (İE-17 · PR-1, köşe ve ızgara kuralı; `docs/is_emirleri/IE-17.md` › Köşe ve ızgara kuralı):**
 - **Dayanak:** CIO 22:37 (Patron'un kuralı: sapmalı plan teklif olarak sunulmaz; açıklıkların pano ızgarasına oturuşu paftayla kıyaslanıp kural bulunsun, "bilinen fark, düzeltiliyor" diye gösterilsin) ve 22:43 ("Onaylı, PR #54 içinde"; şartlar: kural açık evlerde tabloyla; AP-13 ve AP-16'nın kör kaydına not).
