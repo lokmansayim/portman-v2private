@@ -439,6 +439,14 @@ def test_mahya_gorunmuyorsa_makas_izgaraya_oturan_yon_varsayim_bayiye():
     for W in (773, 835):                       # önerilen iki ölçü; 8,35 > 7,83 + 0,50 olsa da soru yok
         d = mahyasiz(W, 783)
         assert d["sorular"] == [] and d["cevrim"]["is_emri"]["yapi"]["kisa_kenar"] == "x", (W, d["sorular"])
+    # hakem 2. tur: öteki yönde ızgara oturuyor ama plan başka nedenle duruyorsa ölçü "olmuyor" diye sorulmaz, asıl soru ya da neden gider
+    o = iki_oda(898, 763, 386.5); o["cati"]["mahya"] = None; o["duvar_yuksekligi_cm"] = 260
+    d = GO.denetle(o)
+    assert d["sorular"] == ["Duvar yüksekliğini 2,60 m okudum; prefabrikte 2,50 / 2,80 / 3,00 m var, hangisi olsun?"], d["sorular"]
+    assert d["notlar"] == ["mahya yönü görünmüyordu, girişten arkaya aldım (ölçüler pano ızgarasına bu yönde oturuyor)"]
+    o = iki_oda(898, 763, 386.5); o["cati"] = {"tip": "kirma", "mahya": None}
+    d = GO.denetle(o)
+    assert d["sorular"] == [] and d["cizilemez"] == ["kırma çatı (prefabrikte bugün beşik çiziyorum)"], (d["sorular"], d["cizilemez"])
 
 
 def test_dis_duvara_cok_yakin_sinir_sorulur():

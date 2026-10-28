@@ -541,6 +541,24 @@ def pano_akslari(uzunluk: float, bas: float) -> tuple[float, list[float]]:
     return n, [bas + MOD / 2 * k for k in range(int(round(2 * n)))] + [son]
 
 
+def _izgara(W: float, H: float, makas: str) -> tuple[float, list[float], float, list[float], list[str]]:
+    """Makas eksenine göre pano ızgarası: (nx, x aksları, ny, y aksları, kısa uç soruları). Köşe 10 cm kısa kenar (= makas) yönünde."""
+    bx, by = (T_DIS, T_DIS / 2) if makas == "x" else (T_DIS / 2, T_DIS)
+    nx, xs = pano_akslari(W, bx)
+    ny, ys = pano_akslari(H, by)
+    sor = []
+    if nx < 2 or ny < 2:
+        return nx, xs, ny, ys, sor
+    # ızgaranın kesilmiş ucu: yarım adımlı ızgarada son tam aks ile dış ölçü arası panodur; çok kısaysa Motor çizemez (sessiz yuvarlama yok)
+    for cephe, n, eks, uc in (("ön cephesi", nx, xs, bx), ("yan cephesi", ny, ys, by)):
+        kalan = eks[-1] - eks[-2]
+        if n % 1 and kalan < KISA_PANO_CM - 1e-9:
+            alt, ust = math.floor(eks[-2] + uc), math.floor(eks[-2] + MOD / 2 + uc)
+            sor.append(f"Gövdenin {cephe} {_m(eks[-1] + uc)} m; pano ızgarasında sonda {_tr(kalan, 1)} cm'lik pano kalıyor, bu ölçü "
+                       f"prefabrikte olmuyor. En yakın ölçüler {_m(alt)} m ve {_m(ust)} m; hangisiyle çizeyim?")
+    return nx, xs, ny, ys, sor
+
+
 def is_emri_prefabrik(kan: dict, o: CizimOkumasi, bk14: bool | None = None, esik: dict | None = None, makas: str | None = None
                       ) -> tuple[dict | None, list[str], list[str], list[str]]:
     """Kanonik okuma → Pano Motor'u İş Emri şablonu (numarasız; `karar._is_emri_uret` numara ve künyeyi yazar). Teklif çalışmasının
@@ -549,16 +567,19 @@ def is_emri_prefabrik(kan: dict, o: CizimOkumasi, bk14: bool | None = None, esik
     topuk 10). `makas`: mahya görünmeyen çizimde denenen makas ekseni (iç kullanım). Dönüş: (şablon | None, sorular, çizilemezler, notlar)."""
     W, H = float(kan["W"]), float(kan["H"])
     if makas is None and not o.cati.mahya:
-        # mahya görünmüyor: makas ızgarayı da belirler (kısa kenar, İE-17). Önce W ≤ H + 50 → x; o yönde soru çıkıyor ama öteki yönde
-        # plan çiziliyorsa öteki (not bayiye gider); çizilmiyorsa ilk yönün soruları, varsayımla birlikte (K21)
+        # mahya görünmüyor: makas ızgarayı da belirler (kısa kenar, İE-17). Önce PR-1'in kuralı (W ≤ H + 50 → x), sonra öteki yön; plan
+        # hangisinde çiziliyorsa o (öteki yönse not bayiye gider). İkisinde de çizilmiyorsa ızgarası oturan yönün soruları ya da nedenleri
+        # (önce ilk yön; ızgarası oturan ölçü "olmuyor" diye sorulmaz), hiçbiri oturmuyorsa ilk yönünkiler; mahya varsayımı notta (K21)
         ilk = "x" if W <= H + 50 else "y"
-        sonuc = is_emri_prefabrik(kan, o, bk14, esik, makas=ilk)
-        if sonuc[1]:
-            obur = is_emri_prefabrik(kan, o, bk14, esik, makas="y" if ilk == "x" else "x")
-            if obur[0] is not None:
-                return obur
-            if not any(n.startswith("mahya yönü") for n in sonuc[3]):
-                sonuc[3].append(_mahya_notu(ilk))
+        sonuclar = {}
+        for m in (ilk, "y" if ilk == "x" else "x"):
+            sonuclar[m] = is_emri_prefabrik(kan, o, bk14, esik, makas=m)
+            if sonuclar[m][0] is not None:
+                return sonuclar[m]
+        sec = next((m for m in sonuclar if not _izgara(W, H, m)[4]), ilk)
+        sonuc = sonuclar[sec]
+        if not any(n.startswith("mahya yönü") for n in sonuc[3]):
+            sonuc[3].append(_mahya_notu(sec, oturan=sec != ilk))
         return sonuc
     e = {**ESIK, **(esik or {})}
     tol = e["pano_cm"]
@@ -566,18 +587,9 @@ def is_emri_prefabrik(kan: dict, o: CizimOkumasi, bk14: bool | None = None, esik
     # İE-17 köşe kuralı: makasın oturduğu iki duvar köşeden geçer; kısa kenar makasın geçtiği yöndür (`yapi.kisa_kenar`), köşe 10 cm o yönde
     if o.cati.mahya:
         makas = "x" if o.cati.mahya == "giristen_arkaya" else "y"
-    bx, by = (T_DIS, T_DIS / 2) if makas == "x" else (T_DIS / 2, T_DIS)
-    nx, xs = pano_akslari(W, bx)
-    ny, ys = pano_akslari(H, by)
+    nx, xs, ny, ys, sor = _izgara(W, H, makas)
     if nx < 2 or ny < 2:
         return None, [], [f"gövde {_m(W)} × {_m(H)} m pano ızgarası için çok küçük"], []
-    # ızgaranın kesilmiş ucu: yarım adımlı ızgarada son tam aks ile dış ölçü arası panodur; çok kısaysa Motor çizemez (sessiz yuvarlama yok)
-    for cephe, n, eks, uc in (("ön cephesi", nx, xs, bx), ("yan cephesi", ny, ys, by)):
-        kalan = eks[-1] - eks[-2]
-        if n % 1 and kalan < KISA_PANO_CM - 1e-9:
-            alt, ust = math.floor(eks[-2] + uc), math.floor(eks[-2] + MOD / 2 + uc)
-            sor.append(f"Gövdenin {cephe} {_m(eks[-1] + uc)} m; pano ızgarasında sonda {_tr(kalan, 1)} cm'lik pano kalıyor, bu ölçü "
-                       f"prefabrikte olmuyor. En yakın ölçüler {_m(alt)} m ve {_m(ust)} m; hangisiyle çizeyim?")
     if sor:
         return None, sor, cz, nt
     kaymalar = []
