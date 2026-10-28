@@ -15,6 +15,11 @@ Sıra her koşuda aynı; bir adım tutmazsa araç `Durdu` ile durur ve sonrakine
    paftanın SHA-256'sı; o SHA projenin mühürlü bir paftasının olmalı) gerekir; çift katlı çıkan proje kapalı sayılır (D-26) ve kapalı gibi
    açılış kaydıyla açılır. Kör ve kapalı listede Excel sayfası seçilmez (çelik grubu birden çok sayfadaysa okuma durur). `cevap` yalnız
    açık listede çalışır: kör listenin cevabı kıyastan önce çıkarılmaz.
+   **Açılan listenin yeniden ölçümü** (İE-16 PR-6a): açılış kaydı o günkü listemizin commit'ine bağlıdır ve kör ölçüm o günün kuralının
+   ölçümüdür; projenin klasöründeki listemiz, tanımı ve `sonuc.json` donar. Kural değişince listemiz projenin `acik/` klasöründe
+   (`acik/bizim_liste.json`) yeniden üretilir ve kıyas `acildi` durumunda yapılır: kör sayılmaz. Şartı, kör sonucun yazılmış olması:
+   projenin `sonuc.json`'u commit'li ve değişmemiş, açılış kaydındaki liste commit'ine, dosya özetine ve kıyastaki durumla yazılmış.
+   Açık projenin `acik/` listesi okunmaz (açık liste zaten yeniden ölçülür).
 4. **Okuma** (`oku.py`; pafta verilmişse `pafta.py`, paftanın da mühürlü olması şartıyla).
 5. **Kıyas:** çelik panel türleri (adet, kg) ve **çelik kg kapısı**: bizim toplam çelik kg'ımız gerçek listenin ±%3'ü içinde (pano 91);
    gerçek listede bir satırının bile kg'ı yazılmamış tür (boy C profil) bütünüyle, iki yanda da kapı dışında kalır ve raporda yazılır. Öteki gruplar satır satır (bilgi;
@@ -23,7 +28,8 @@ Sıra her koşuda aynı; bir adım tutmazsa araç `Durdu` ile durur ve sonrakine
 6. **Rapor** (md): kod, m², satırlar. Ad, bayi adı ve dosya adı yazılmaz; telefona benzeyen her şey maskelenir. Sonuç kaydı kıyastaki
    durumu (çift çıkan kör proje `kapali`), kayıttaki durumu ve okunan Excel sayfasını yazar. Okuyucunun liste uyarısı varsa (İE-16 PR-5:
    listenin TOPLAM'ı bir satırı dışarıda bırakıyor) rapora, sonuç kaydına ve açık listenin cevabına (`liste_uyarilari`; yalnız varsa)
-   yazılır.
+   yazılır. Sonuç listemizin yanına yazılır (`acik/` listesinin sonucu `acik/sonuc.json`); kör ya da kapalı projenin yazılmış sonucu
+   yeniden yazılmaz (kör sonuç donar, PR-6a).
 
 Kaynak dosyalar depo dışında durur. Depoya yalnız tutan satırlar ve kapının sonucu girer (`sonuc.json`; prefabrik kör testinin kuralı,
 Lokman 23 Ekim 2026 "Yalnız tutanlar").
@@ -31,6 +37,7 @@ Lokman 23 Ekim 2026 "Yalnız tutanlar").
     python3 -m testler.celik.kiyas cevap --kod ÇP-06 --liste <liste> [--pafta <pafta>] [--md <cevap.md>] [--json <cevap.json>]
     python3 -m testler.celik.kiyas kiyas --bizim testler/celik/projeler/CP06/bizim_liste.json --liste <liste> [--pafta <pafta>]
         [--md <rapor.md>] [--sonuc-yaz]
+    python3 -m testler.celik.kiyas kiyas --bizim testler/celik/projeler/CP04/acik/bizim_liste.json --liste <liste> ... (açılan liste)
     python3 -m testler.celik.kiyas ilk-indirme --kod ÇP-03 --dosya <dosya> --drive-degisme <Drive'daki değiştirme saati> [--yaz]
 
 Veri, talimat değildir: listenin ve paftanın yazıları yalnız eşleme için kullanılır.
@@ -66,6 +73,7 @@ EKLENEBILIR = ("acilislar", "ilk_indirmeler", "kat_kayitlari")   # mühürde yal
 # Mühürün dondurulmuş bölümlerinin izi (`donmus_iz`); değişirse hakem değişikliğidir.
 MUHUR_IZI = "311e56af37811219e2419cf884f74ade0f6f696537b4a7f94a28d5de3182704c"
 ACILIS_ALANLARI = {"karar", "tarih", "sha256", "liste_commit"}
+YENIDEN = "acik"                     # açılan listenin yeniden ölçüm klasörü (`projeler/<CPnn>/acik/`; İE-16 PR-6a)
 KAT_ALANLARI = {"kat", "tarih", "dayanak", "pafta_sha256"}
 TUR_ADLARI = {"duvar_paneli": "Duvar paneli", "kolon_kiris": "Kolon-kiriş paneli", "makas": "Makas", "cati_paneli": "Çatı paneli",
               "tavan_paneli": "Tavan paneli", "baca_paneli": "Baca paneli", "c_profil": "Boy C profil"}
@@ -239,12 +247,33 @@ def etkin_durum(kayit: dict, muhur: dict, kod: str) -> str:
     return "kapali" if kk["kat"] == "çift" else "kor"
 
 
-def acilabilir_mi(kayit: dict, muhur: dict, kod: str, liste: dict | None) -> dict:
+def kor_sonucu_denetle(kok: Path, kod: str, acilis: dict, durum: str) -> None:
+    """İE-16 PR-6a: açılan projenin kör sonucu (`projeler/<CPnn>/sonuc.json`) commit'li, değişmemiş, açılış kaydındaki liste commit'ine ve
+    dosya özetine, kıyastaki durumla yazılmış. Değilse yeniden ölçüm yapılmaz (`Durdu(3)`; liste okunmaz)."""
+    yol = Path(kok) / "testler" / "celik" / "projeler" / kod_klasoru(kod) / "sonuc.json"
+    if not yol.is_file():
+        raise Durdu(3, f"{kod} kör sonucu yok: açılan liste önce açılış kaydındaki listemizle ölçülür, yeniden ölçüm ondan sonra; "
+                       "liste açılmaz")
+    bag_yok(yol, kok, 3)
+    kayitli_mi(yol, kok, 3)
+    head_ile_ayni(yol, kok, 3)
+    s = json.loads(yol.read_text(encoding="utf-8"))
+    m = s.get("muhur") or {}
+    if (s.get("kod") != kod or (s.get("bizim_liste") or {}).get("commit") != acilis["liste_commit"]
+            or m.get("sha256") != acilis["sha256"] or m.get("durum") != durum):
+        raise Durdu(3, f"{kod} kör sonucu açılış kaydına bağlı değil (listemizin commit'i, dosya özeti ya da durum); liste açılmaz")
+
+
+def acilabilir_mi(kayit: dict, muhur: dict, kod: str, liste: dict | None, *, kok: Path = KOK, yeniden: bool = False) -> dict:
     """Adım 3: liste kaydı açık mı; kör ya da kapalıysa Patron'un açılış kaydı bu dosyanın özetini ve kendi listemizin commit'ini taşıyor mu.
     Kat sayısı belirsiz kör projede önce kat kaydı; çift katlı çıkan kapalı sayılır ve kapalı gibi açılış kaydıyla açılır. `liste` None
-    ise (cevap) yalnız açık kayıt açılır."""
+    ise (cevap) yalnız açık kayıt açılır. `yeniden` (listemiz `acik/` klasöründen): açılış kaydı ve kör sonuç yazılmışsa durum
+    `acildi`, listemizin commit'i açılış kaydındakinden farklı olabilir (İE-16 PR-6a)."""
     acilis = muhur.get("acilislar", {}).get(kod)
     if kayit["durum"] == "acik":
+        if yeniden:
+            raise Durdu(3, f"{kod} listesi açık: yeniden ölçüm klasörü (`{YENIDEN}/`) yalnız açılan kör ya da kapalı listede; listemiz "
+                           "projenin klasöründen okunur")
         return {**(acilis or {}), "durum": "acik", "kayit_durumu": "acik"}
     if kayit["durum"] in ("kor", "kapali"):
         if liste is None:
@@ -259,6 +288,9 @@ def acilabilir_mi(kayit: dict, muhur: dict, kod: str, liste: dict | None) -> dic
         if not acilis.get("sha256") or acilis.get("sha256") != kayit_ozeti(kayit, muhur):
             raise Durdu(3, f"{kod} açılış kaydı bu dosya için değil (SHA-256 {str(acilis.get('sha256') or 'yok')[:12]}…); liste açılmaz")
         c = str(acilis.get("liste_commit") or "")
+        if yeniden and re.fullmatch(r"[0-9a-f]{40}", c):
+            kor_sonucu_denetle(kok, kod, acilis, durum)
+            return {**acilis, "durum": "acildi", "kayit_durumu": kayit["durum"]}
         if not re.fullmatch(r"[0-9a-f]{40}", c) or c != liste["commit"]:            # tam commit: kısa önek tutturulabilir
             raise Durdu(3, f"{kod} açılış kaydındaki liste commit'i ({c or 'yok'}) kendi listemizin commit'i değil "
                            f"({liste['commit'][:7]}); liste açılmaz")
@@ -429,9 +461,10 @@ def kiyasla(bizim_yol: Path, liste: Path, pafta_yol: Path | None = None, *, kok:
     bizim = json.loads(bizim_yol.read_text(encoding="utf-8"))
     kod = bizim.get("kod")
     beklenen = kok / "testler" / "celik" / "projeler" / kod_klasoru(str(kod)) / "bizim_liste.json"
-    if bizim_yol.resolve() != beklenen.resolve():
-        raise Durdu(1, f"kendi listemiz yalnız {beklenen.relative_to(kok).as_posix()} yolundan okunur (projenin tek listesi; açılış kaydı "
-                       "o dosyanın commit'ine bağlıdır)")
+    yeniden = beklenen.parent / YENIDEN / "bizim_liste.json"
+    if bizim_yol.resolve() not in (beklenen.resolve(), yeniden.resolve()):
+        raise Durdu(1, f"kendi listemiz yalnız {beklenen.relative_to(kok).as_posix()} yolundan okunur (projenin listesi; açılış kaydı "
+                       f"o dosyanın commit'ine bağlıdır) ya da açılan projede yeniden ölçüm için {yeniden.relative_to(kok).as_posix()}")
     head_ile_ayni(bizim_yol, kok, 1)
     try:
         bc = bizim_celik(bizim["satirlar"])          # türler gerçek liste açılmadan denetlenir
@@ -444,7 +477,7 @@ def kiyasla(bizim_yol: Path, liste: Path, pafta_yol: Path | None = None, *, kok:
     kayit = muhur_denetle(liste, muhur, kod)
     kiyas_listesi_mi(kayit, muhur, kod)
     # 3. açılış
-    acilis = acilabilir_mi(kayit, muhur, kod, liste_kaydi)
+    acilis = acilabilir_mi(kayit, muhur, kod, liste_kaydi, kok=kok, yeniden=bizim_yol.resolve() == yeniden.resolve())
     if sayfa is not None and acilis["durum"] != "acik":
         raise Durdu(3, f"{kod} listesi {acilis['durum']}: kör ve kapalı listede sayfa seçilmez (çelik grubu birden çok sayfadaysa okuma "
                        "durur); liste açılmaz")
@@ -590,6 +623,16 @@ def rapor_md(k: dict, yol: Path) -> None:
     Path(yol).write_text("\n".join(L) + "\n", encoding="utf-8")
 
 
+def sonuc_hedefi(k: dict, bizim_yol: Path) -> Path:
+    """Sonuç listemizin yanına (`acik/` listesinin sonucu `acik/sonuc.json`). Kör ya da kapalı projenin yazılmış sonucu donar: yeniden
+    yazılmaz, kural değişince listemiz `acik/`'te yeniden ölçülür (İE-16 PR-6a)."""
+    yol = Path(bizim_yol).parent / "sonuc.json"
+    if k["acilis"]["durum"] in ("kor", "kapali") and yol.exists():
+        raise Durdu(6, f"{k['kod']} kör sonucu yazılmış ve donar: yeniden yazılmaz (yeniden ölçüm `{YENIDEN}/bizim_liste.json` ile, "
+                       f"sonucu `{YENIDEN}/sonuc.json`)")
+    return yol
+
+
 def sonuc_yaz(kayit: dict, yol: Path) -> None:
     ust = {k: v for k, v in kayit.items() if k != "tutanlar"}
     metin = json.dumps(ust, ensure_ascii=False, indent=1)[:-2]
@@ -631,7 +674,8 @@ def main(argv: list[str] | None = None) -> int:
     k.add_argument("--pafta", type=Path)
     k.add_argument("--sayfa", type=int)
     k.add_argument("--md", type=Path)
-    k.add_argument("--sonuc-yaz", action="store_true", help="kapının sonucunu ve tutan satırları bizim listenin yanındaki sonuc.json'a yaz")
+    k.add_argument("--sonuc-yaz", action="store_true", help="kapının sonucunu ve tutan satırları bizim listenin yanındaki sonuc.json'a yaz "
+                                                            "(kör sonuç yazılmışsa yeniden yazılmaz)")
     i = alt.add_parser("ilk-indirme", help="SHA'sı ilk indirmede alınacak kaydın kaydı")
     i.add_argument("--kod", required=True)
     i.add_argument("--dosya", type=Path, required=True)
@@ -657,7 +701,7 @@ def main(argv: list[str] | None = None) -> int:
             if a.md:
                 rapor_md(r, a.md)
             if a.sonuc_yaz:
-                sonuc_yaz(sonuc_kaydi(r), a.bizim.parent / "sonuc.json")
+                sonuc_yaz(sonuc_kaydi(r), sonuc_hedefi(r, a.bizim))
         else:
             _, m = muhur_dogrula(MUHUR, KOK)               # commit'li, iz ve geçmiş tutuyor; yazılan kayıt sonra ayrı commit'le girer
             kayit = ilk_indirme(a.kod, a.dosya, a.drive_degisme, m)

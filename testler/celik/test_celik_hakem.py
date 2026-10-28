@@ -2,7 +2,8 @@
 
 Her koşuda: gerçek mühür kaydının yapısı (ad yok, durumlar, çift katlar kapalı), açık dört projenin yazılı kuraldan yeniden kurulması, kör ve
 kapalı listelerin açılış kaydı olmadan reddedilmesi; uydurma çelik listesi (Excel ve PDF) ve uydurma pafta ile okuyucular; geçici bir depoda
-aracın sırası (bizim yanımız kayıtlı → mühür → açılış) ve kapının sınırı. Kaynak dosya gerekmez.
+aracın sırası (bizim yanımız kayıtlı → mühür → açılış) ve kapının sınırı. Kaynak dosya gerekmez. İE-16 PR-6a: açılan listenin yeniden
+ölçümü (`acik/` klasörü, durum `acildi`) yalnız kör sonuç açılış kaydına bağlı yazılmışsa; kör sonuç yeniden yazılmaz.
 
 Açık beş projenin (hedef ÇP-06 ve açık dört) hakem cevapları `veri/CPnn_hakem_cevabi.json`'da: her koşuda mühürle ve kendi içinde tutarlı.
 Tam koşu (`PORTMAN_CELIK_KAYNAK=<klasör>`; dosyalar Drive kimliğiyle adlı, ör. `<drive_id>.xlsx`): beş projenin kıyas listesi (Excel) ve
@@ -952,6 +953,135 @@ def test_acilis_sonradan_degistirilirse_durur(depo, okunmaz):
     with pytest.raises(Durdu) as e:
         K.kiyasla(depo["bizim"]("DN02"), depo["kor"], kok=depo["kok"])
     assert e.value.adim == 2 and "yalnız ekleme" in e.value.neden
+
+
+# İE-16 PR-6a: açılan listenin yeniden ölçümü (kör sonuç donar; yeniden ölçüm `acik/` klasöründe, durum `acildi`)
+
+BIZIM_YENI = [{**s, "kg": s["kg"] + 10} if s.get("malzeme") == "Makas" else s for s in BIZIM]
+
+
+def _commit(depo, mesaj):
+    _git(depo["kok"], "add", ".")
+    _git(depo["kok"], "commit", "-q", "-m", mesaj)
+
+
+def _kor_olc(depo):
+    """DN-02 açılış kaydıyla ölçülür, kör sonucu yazılır ve commit'lenir (`kiyas --sonuc-yaz` gibi)."""
+    _ac(depo)
+    k = K.kiyasla(depo["bizim"]("DN02"), depo["kor"], kok=depo["kok"])
+    K.sonuc_yaz(K.sonuc_kaydi(k), K.sonuc_hedefi(k, depo["bizim"]("DN02")))
+    _commit(depo, "kör sonuç")
+    return depo["cel"] / "projeler" / "DN02" / "sonuc.json"
+
+
+def _yeniden_liste(depo, ad="DN02", kod="DN-02"):
+    y = depo["cel"] / "projeler" / ad / K.YENIDEN / "bizim_liste.json"
+    y.parent.mkdir(exist_ok=True)
+    y.write_text(json.dumps({"kod": kod, "satirlar": BIZIM_YENI}, ensure_ascii=False), encoding="utf-8")
+    _commit(depo, "yeniden ölçüm listesi")
+    return y
+
+
+def _okunmasin(monkeypatch):
+    def dur(*a, **k):
+        raise AssertionError("dosya okundu")
+    monkeypatch.setattr(K.oku, "oku", dur)
+    monkeypatch.setattr(K.pafta, "etiketler", dur)
+
+
+def test_acilan_liste_acik_klasorunde_yeniden_olculur(depo, tmp_path):
+    kor = _kor_olc(depo)
+    once = kor.read_bytes()
+    y = _yeniden_liste(depo)
+    k = K.kiyasla(y, depo["kor"], depo["pafta2"], kok=depo["kok"])
+    acilis = _oku(depo["muhur"])["acilislar"]["DN-02"]
+    assert (k["acilis"]["durum"], k["acilis"]["kayit_durumu"]) == ("acildi", "kor")
+    assert k["liste"]["commit"] != acilis["liste_commit"], "yeniden ölçümde listemiz açılış kaydındakinden farklı commit'te"
+    s = K.sonuc_kaydi(k)
+    assert s["muhur"]["durum"] == "acildi" and s["bizim_liste"]["yol"].endswith("DN02/acik/bizim_liste.json")
+    hedef = K.sonuc_hedefi(k, y)
+    assert hedef == y.parent / "sonuc.json"
+    K.sonuc_yaz(s, hedef)
+    _commit(depo, "yeniden ölçüm sonucu")
+    assert K.sonuc_hedefi(K.kiyasla(y, depo["kor"], kok=depo["kok"]), y) == hedef, "yeniden ölçümün sonucu yeniden yazılabilir"
+    assert kor.read_bytes() == once, "kör sonuç değişmez"
+    K.rapor_md(k, tmp_path / "r.md")
+    assert "durum acildi (kayıtta kor)" in (tmp_path / "r.md").read_text(encoding="utf-8")
+
+
+def test_kor_sonuc_donar(depo):
+    """Kör ya da kapalı projenin yazılmış sonucu yeniden yazılmaz; açık projenin sonucu her ölçümde yazılır."""
+    _kor_olc(depo)
+    k = K.kiyasla(depo["bizim"]("DN02"), depo["kor"], kok=depo["kok"])
+    with pytest.raises(Durdu) as e:
+        K.sonuc_hedefi(k, depo["bizim"]("DN02"))
+    assert e.value.adim == 6 and "donar" in e.value.neden
+    a = K.kiyasla(depo["bizim"]("DN01"), depo["acik"], kok=depo["kok"])
+    K.sonuc_yaz(K.sonuc_kaydi(a), K.sonuc_hedefi(a, depo["bizim"]("DN01")))
+    _commit(depo, "açık sonuç")
+    assert K.sonuc_hedefi(a, depo["bizim"]("DN01")) == depo["bizim"]("DN01").parent / "sonuc.json"
+
+
+def test_acilistan_sonra_projenin_listesi_degisirse_yine_durur(depo, monkeypatch):
+    """Yeniden ölçüm yalnız `acik/` klasöründen: projenin kendi listesi açılıştan sonra değişirse kıyas eskisi gibi durur."""
+    _kor_olc(depo)
+    depo["bizim"]("DN02").write_text(json.dumps({"kod": "DN-02", "satirlar": BIZIM_YENI}, ensure_ascii=False), encoding="utf-8")
+    _commit(depo, "listemiz değişti")
+    _okunmasin(monkeypatch)
+    with pytest.raises(Durdu) as e:
+        K.kiyasla(depo["bizim"]("DN02"), depo["kor"], kok=depo["kok"])
+    assert e.value.adim == 3 and "liste commit'i" in e.value.neden
+
+
+def test_yeniden_olcum_kor_sonuc_olmadan_durur(depo, okunmaz):
+    _ac(depo)
+    y = _yeniden_liste(depo)
+    with pytest.raises(Durdu) as e:
+        K.kiyasla(y, depo["kor"], depo["pafta2"], kok=depo["kok"])
+    assert e.value.adim == 3 and "kör sonucu yok" in e.value.neden
+
+
+def test_yeniden_olcum_acilis_kaydi_olmadan_durur(depo, okunmaz):
+    y = _yeniden_liste(depo)
+    with pytest.raises(Durdu) as e:
+        K.kiyasla(y, depo["kor"], kok=depo["kok"])
+    assert e.value.adim == 3 and "açılış kaydı yok" in e.value.neden
+
+
+@pytest.mark.parametrize("bozuk", [
+    lambda s: s["bizim_liste"].update(commit="0" * 40),     # başka listeyle yazılmış
+    lambda s: s["muhur"].update(sha256="0" * 64),           # başka dosyanın sonucu
+    lambda s: s["muhur"].update(durum="acik"),              # kör ölçümün durumu değil
+    lambda s: s.update(kod="DN-01"),                        # başka projenin
+], ids=["liste_commit", "ozet", "durum", "kod"])
+def test_kor_sonuc_acilisa_bagli_degilse_durur(depo, monkeypatch, bozuk):
+    kor = _kor_olc(depo)
+    s = _oku(kor)
+    bozuk(s)
+    kor.write_text(json.dumps(s, ensure_ascii=False), encoding="utf-8")
+    _commit(depo, "bozuk kör sonuç")
+    y = _yeniden_liste(depo)
+    _okunmasin(monkeypatch)
+    with pytest.raises(Durdu) as e:
+        K.kiyasla(y, depo["kor"], kok=depo["kok"])
+    assert e.value.adim == 3 and "bağlı değil" in e.value.neden
+
+
+def test_kor_sonuc_commitsiz_degismisse_durur(depo, monkeypatch):
+    kor = _kor_olc(depo)
+    y = _yeniden_liste(depo)
+    kor.write_text(kor.read_text(encoding="utf-8") + " ", encoding="utf-8")
+    _okunmasin(monkeypatch)
+    with pytest.raises(Durdu) as e:
+        K.kiyasla(y, depo["kor"], kok=depo["kok"])
+    assert e.value.adim == 3 and "değişmiş" in e.value.neden
+
+
+def test_acik_projede_yeniden_olcum_klasoru_okunmaz(depo, okunmaz):
+    y = _yeniden_liste(depo, "DN01", "DN-01")
+    with pytest.raises(Durdu) as e:
+        K.kiyasla(y, depo["acik"], kok=depo["kok"])
+    assert e.value.adim == 3 and "listesi açık" in e.value.neden
 
 
 @pytest.mark.parametrize("kat,pafta_ad,adim,beklenen", [
