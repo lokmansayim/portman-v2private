@@ -15,8 +15,8 @@
 - Mac yolu: `~/Desktop/Claude Portman Çalışması/30_IE06/depo/`.
 
 ## Beş satırda kural (ayrıntı `kaynak_kopyalari/docs/cift_kat_prefabrik_kurallari.md`)
-1. Çift kat = tek kat kuralları + merdiven. Döşeme ve çatı birebir aynı (Lokman 28.10).
-2. Pano aksı 125,5 cm; yarım pano 62,75. Dış duvar 10 cm, iç 6 cm. Pano yüksekliği 250.
+1. Çift kat = tek kat kuralları + merdiven. Döşeme ve çatı birebir aynı (Lokman 28.10). Köşeler 100×100 kutu profil, iki kat boyu.
+2. Pano aksı 125,5 cm; yarım pano 62,75. **Çift katta akslar köşe kolonunun iç yüzünden 10 + 125,5k (iki yönde)**; dış duvar 10, **iç duvar da 10** (13:32). Pano yüksekliği 250.
 3. Bu ev: gövde 763 × 706; x 6 tam pano, y 5,5 pano (son pano önde 121,25 kesik). Dizilim arka-sol. Makas y'yi geçer.
 4. Pencere üst kotu 200, eşik = 200 − boy; 120/125 → eşik 75. Dış kapı 90, iç 82, yükseklik 200.
 5. Çatı beşik %33, saçak 30, topuk 10. Her pano ekinde H profili; dört kollu (+) birleşimden kaçınılır.
@@ -35,7 +35,8 @@ Merdiven çıkması (arkaya 125,5), merdivenin kendisi, balkonun 30 cm taşması
 - AutoCAD yolu: `Cmd+O` → **ekran görüntüsüyle kutunun açıldığı doğrulanır** → `Cmd+Shift+G` → yol → Enter → Open; komut satırına boşluklu yol yazılmaz; komut yazmadan önce doğru sekme doğrulanır (ERASE olayı A021, "Unknown command" olayı A025).
 - `autocad/` klasöründe AutoCAD'in yazdığı `…r01.dwg` + `.bak` var (AutoCAD kendi yazıyor; git dışı). Kaynak DXF bulutla aynı. Silmek Lokman'ın.
 - **13:00–13:15 kararları:** merdiven planın aynısı (kural belgesi 6.2–6.3; çizimde `merdiven_ciz`); dış kapılar şablonun kapılı pano çizimiyle (`sablon_kapili_pano`); köşeler şablonun `100X100 DIŞ KÖŞE DİREĞİ` bloğu (12 insert, aynalı); ölçüler iki ondalık virgüllü (dimrnd atıldı). Üretici: `python3 uret_cift_kat_bloklu.py` (autocad klasöründe), ~1 dk.
-- Pano aksı ↔ plan ölçüsü çatışması (merdiven duvarları 337/557 vs 318,75/569,75) açık; Soru 9 ile birlikte karar.
+- **13:30–13:32 (Lokman):** çift kat aks kuralı = Astra R02: akslar köşe kolonunun iç yüzünden 10 + 125,5k (x'te 5 cm kayma, son pano 115,5; kural belgesi 2.10); merdiven kovası pano aksında (2 pano, 323,75/574,75; planın 337/557'si yanlıştı, kalktı); iç duvarlar 100'lük (2.9). Çizim kaynağı artık `deneme/2026-10-28_cift_kat/ck_izgara/` (Motor 753'lük gövde + iç 10, deneme betiği Motor'un "iç = dış" sınırını atlıyor); üretici `cift_kat_izgara` ile içleri +5, sağ dış duvarı +10 kaydırır. Motor bulguları İE-22 7 (iç = dış kalınlık reddi) ve 8 (çift kat aks kuralı yok).
+- Zemin: HOL–WC HOLÜ kapısı HOL'e açılıyor (10'luk duvarla 168'lik holde 90 + 82 sığmadı); düzeltme turunda karar.
 
 ## Açık sorular (sırayla sorulacak; cevaplar kural belgesi §12'ye)
 ~~1 giriş kapısı~~ (12:34) · ~~2 merdiven kutusu~~ ~~3 merdiven ölçüleri~~ (13:00 "aynı buradaki gibi": 200 iç, U, kol 100, 16 rıht) · **2b zeminde merdivene giriş (sırada)** · 3 merdiven ölçüleri · 4 Fransız pencere 120/200 · 5 çıkmanın çatısı · 6 ara kat ·

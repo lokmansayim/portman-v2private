@@ -154,5 +154,22 @@ Biçim: `A### · saat · başlık` — Ne / Nerede / Sonuç / Durum (yapıldı �
 - Cmd+W → Don't Save → Cmd+O (ilk basış yine yutuldu, ikinci açtı; ekran görüntüsüyle doğrulandı) → Cmd+Shift+G → yol → Open. `autocad/…r01.dwg` 254 KB'a değişti: AutoCAD bu DWG'yi kendi yazıyor (Don't Save'e rağmen; otomatik kayıt olabilir). Git dışı; kaynak DXF md5 bulutla aynı (7e419c47…).
 - Durum: yapıldı.
 
-### A031 · — · Sıradaki: Soru 2b (zeminde merdivene giriş: ön duvar açık mı?) → Soru 4 (Fransız pencere) → 5 → 6 → 7 → 8 (et) → 9 (ölçü sadakati + pano aksı) → İş Emri JSON → Motor
+### A032 · 13:30 · Lokman: "Astra'nın çift kat kurallarına bak; aksları bir taraftan aç (125,50, 5 köşe profil farkı); merdiven kovası ile oda duvarlarını şaşırmışsın"
+- Okunan (`ref_prefabrik/cift_kat_R02/*.md`, `r02_data.json` notları, `astra_v1_4_3/prefabrik-cizim-kurallari.md`): R02'de akslar **sol üst kolonun iç yüzünden** 1255 ilerler (X 100, 1355 … 12400; cephe 100 + 9 × 1255 + 1005 + 100); tek katta makas yönünde aks 5 + 125,5k (köşe parçası 5 × 10). Çift katta köşe kolonu 10 → x aksları +5 kayar, son pano 115,5; y zaten 10'dan başlıyor.
+- Hata kabul: 13:00'teki kutuyu planın 337/557'sine çizmiştim; oda duvarları (Motor ızgarası) yanında ikinci duvar oluşmuştu. Doğrusu: kova = Motor'un MERDİVEN mahali (2 pano, akslar 323,75 / 574,75), çıkma 1 pano, merdiven düzeni plandaki gibi (U, 5 + 6 + 5).
+- Yapılan: `ck_izgara/` — Motor gövde x = 753 (= 763 − 10) ile üretildi (mahal/dikme koordinatları 758 → 748, 763 → 753); üreticide `cift_kat_izgara`: nokta kuralı x < 5 → 0, 5..10 → 10, içler +5, sağ iç yüz 743 → 753, son aks 748 → 753, dış yüz 753 → 763; bloklar: dik panolar yerleşim x'ine, yatay panolar uca göre; iç yatay duvarın ilk panosu 120,5 → 125,5 (`uzat_blok`), sağa dayanan son iç pano 110,5 → 115,5. Başlık 763'e düzeltildi. Çıkma: yan 115,5 ×2, arka 125,5 + 115,5 (1. katta 120/125 pencereli), köşeler şablon bloğu; gövde arka duvarının kova açıklığındaki 3 pano kalktı, yanlar 57,75 kesik. Kural belgesi 2.10 (yeni), 6.2–6.3; İE-22 bulgu 8.
+- Durum: yapıldı.
+
+### A033 · 13:32 · Lokman: "güncel şablondaki gibi içler 100'lük olacak"
+- Motor `duvar_kalinligi_cm.ic = 10` → `IsEmriHatasi` "Dış ve iç duvar aynı kalınlıkta: katman adları ayrışmıyor (deneme sınırı)" → deneme betiğinde `kalinlik_ayarla` ve `katman` (KOSE_PROFIL_60 → IC_KOSE_PROFIL_100) atlandı; Motor kodu değişmedi. **İE-22 bulgu 7.**
+- Zemin doğrulama düştü: "Kapı kanatları çakışıyor: HOL–WC HOLÜ / __DIS__–WC HOLÜ" (10'luk duvarla WC holü 168 iç; 90 + 82 > 168). Menteşe 'sol' çözmedi (aynı hat); HOL–WC HOLÜ kapısı `arasi` ters çevrilerek HOL'e açıldı → geçti. 1. kat geçti. Lokman düzeltme turunda karar verir.
+- Adlar: iç panolar `100'LÜK …`; `BOM_B05_UCLU_H_100` → `100X100 3 LÜ H BAĞLANTI DİREĞİ`, `BOM_B02_IC_KOSE_100x50` → `2X100X100 İÇ KÖŞE DİREĞİ` (şablonda var). Aynı ada düşen iç/dış dolu panolar (aynı dikdörtgen) birleştirildi ("{I15}" ekleri kalktı). Kural belgesi 2.9, §12 13:32.
+- Durum: yapıldı.
+
+### A034 · 13:48–13:52 · Yeniden üretim ve AutoCAD
+- `uret_cift_kat_bloklu.py` → 111 blok, 621 varlık, 70 ölçü, audit 0; md5 1736a183…; kart 25 satır (125'lik 31, 57,75'lik 17, 115,5'lik 8…). Mac'e kopyalandı; AutoCAD'de eski sekme Don't Save, yeni açıldı, zemin kat + çıkma ekranda (13:52).
+- Kontrol (ezdxf PNG): ilk iç pano 125,50, sağ son panolar 115,50, başlık "763 × 706 (10 + 5 × 125,5 + 115,5 + 10)", kova aksta, çıkma ve köşeler yerinde, dış kapılar şablon çizimi.
+- Durum: yapıldı.
+
+### A035 · — · Sıradaki: Soru 2b (zeminde kovaya giriş: önü açık mı, planda ön duvar çizili) → Soru 4 (Fransız pencere) → 5 (çıkma çatısı) → 6 → 7 → 8 (et) → 9 → İş Emri JSON → Motor (PR-1: bulgu 7–8)
 - Durum: bekliyor (Lokman).

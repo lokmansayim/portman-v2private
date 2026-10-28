@@ -1,0 +1,199 @@
+{
+  "passed": true,
+  "errors": [],
+  "outer_cm": [
+    753.0,
+    706.0
+  ],
+  "panel_grid": [
+    6.0,
+    5.5
+  ],
+  "units": "cm",
+  "panel_count": 43,
+  "corner_count": 6,
+  "windows": 5,
+  "doors": 7,
+  "openings": [
+    {
+      "kind": "pencere",
+      "name": "BOM_D09_1155p0_DIS_P03",
+      "gap": [
+        660.25,
+        696.0,
+        720.25,
+        706.0
+      ],
+      "length": 60.0
+    },
+    {
+      "kind": "kapi",
+      "name": "BOM_I13_1105p0_IC_K01_SOL_UST",
+      "gap": [
+        646.75,
+        565.5,
+        728.75,
+        575.5
+      ],
+      "length": 82.0
+    },
+    {
+      "kind": "kapi",
+      "name": "BOM_I16_1255p0_IC_K01_SAG_UST",
+      "gap": [
+        403.25,
+        377.25,
+        485.25,
+        387.25
+      ],
+      "length": 82.0
+    },
+    {
+      "kind": "kapi",
+      "name": "BOM_I13_1105p0_IC_K01_SAG_UST",
+      "gap": [
+        646.75,
+        377.25,
+        728.75,
+        387.25
+      ],
+      "length": 82.0
+    },
+    {
+      "kind": "pencere",
+      "name": "BOM_D10_1155p0_DIS_P60x125",
+      "gap": [
+        660.25,
+        126.25,
+        720.25,
+        136.25
+      ],
+      "length": 60.0
+    },
+    {
+      "kind": "pencere",
+      "name": "BOM_D03_1255p0_DIS_P02",
+      "gap": [
+        133.25,
+        0.0,
+        253.25,
+        10.000000000000007
+      ],
+      "length": 120.0
+    },
+    {
+      "kind": "pencere",
+      "name": "BOM_D12_1255p0_DIS_P120x125",
+      "gap": [
+        0.0,
+        196.75,
+        10.0,
+        316.75
+      ],
+      "length": 120.0
+    },
+    {
+      "kind": "pencere",
+      "name": "BOM_D12_1255p0_DIS_P120x125",
+      "gap": [
+        0.0,
+        481.625,
+        10.0,
+        601.625
+      ],
+      "length": 120.0
+    },
+    {
+      "kind": "kapi",
+      "name": "BOM_I16_1255p0_IC_K01_SOL_UST",
+      "gap": [
+        313.75,
+        466.75,
+        323.75,
+        548.75
+      ],
+      "length": 82.0
+    },
+    {
+      "kind": "kapi",
+      "name": "BOM_I16_1255p0_IC_K01_SAG_ALT",
+      "gap": [
+        502.0,
+        215.75,
+        512.0,
+        297.75
+      ],
+      "length": 82.0
+    },
+    {
+      "kind": "kapi",
+      "name": "BOM_I16_1255p0_IC_K01_SOL_UST",
+      "gap": [
+        564.75,
+        466.75,
+        574.75,
+        548.75
+      ],
+      "length": 82.0
+    },
+    {
+      "kind": "kapi",
+      "name": "BOM_D17_1255p0_DIS_K02",
+      "gap": [
+        743.0,
+        462.75,
+        753.0,
+        552.75
+      ],
+      "length": 90.0
+    }
+  ],
+  "rooms_m2": {
+    "ODA": 9.378281,
+    "SALON": 17.276481,
+    "MERDİVEN": 3.14505,
+    "HOL": 4.295825,
+    "WC": 2.027413,
+    "WC HOLÜ": 2.999056,
+    "MUTFAK": 5.5671,
+    "BALKON": 3.834844
+  },
+  "h_connectors": 4,
+  "footprint_diff_cm2": 0.0,
+  "wall_overlap": true,
+  "altin": null,
+  "warnings": [],
+  "scope": "Ön onay taslağı; statik, üretim, BOM veya yeni oda tasarımı değildir",
+  "saved_dxf_audit_errors": 0,
+  "saved_dxf_audit_fixes": 0,
+  "bom_counts_from_file": {
+    "B02": 6,
+    "B04": 1,
+    "B05": 4,
+    "D01": 12,
+    "D03": 1,
+    "D06": 3,
+    "D09": 1,
+    "D10": 1,
+    "D11": 1,
+    "D12": 2,
+    "D13": 1,
+    "D14": 1,
+    "D15": 1,
+    "D16": 1,
+    "D17": 1,
+    "I12": 5,
+    "I13": 2,
+    "I14": 1,
+    "I15": 5,
+    "I16": 4,
+    "K01": 6,
+    "K03": 1,
+    "P02": 1,
+    "P03": 1,
+    "P04": 1,
+    "P05": 2,
+    "V05": 1,
+    "V06": 1
+  }
+}
