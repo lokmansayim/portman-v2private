@@ -465,7 +465,7 @@ try:
         AY.yaz(VERI, a11, d11)
     gonder()                                                                                       # r03 bayiye gider (onay ona bağlanır)
     no11 = q("SELECT is_emri_no FROM revizyonlar WHERE gonderen = %s ORDER BY id DESC LIMIT 1", BAYI)[0]["is_emri_no"]
-    r03_wamid = q("SELECT dis_id FROM giden WHERE mesaj_id = 'wamid.E2ER3' AND kind = 'interactive'")[0]["dis_id"]
+    r03_wamid = q("SELECT dis_id FROM giden WHERE mesaj_id = 'wamid.E2ER3' AND kind = 'interactive' ORDER BY sira")[0]["dis_id"]
     time.sleep(1.2)
     kod, c = webhook(yuk([buton(BAYI, f"o:{no11}:3", "Onayla", r03_wamid, mid="wamid.E2EM1")]))
     ok(c.get("mesaj") == {"sahiplenildi": 1} and ajan() == 0, "ajan: bayinin Onayla düğmesi işlendi")
@@ -494,7 +494,7 @@ try:
     ok(say.get("kabul_edildi") == 5 and [y["type"] for y in m11b] == ["image", "document", "document", "document", "interactive"]
        and belge11 == [f"Portman_{no11}_r03.pdf", f"Portman_{no11}_r03_yukleme_listesi.xlsx", f"Portman_{no11}_r03.dxf"],
        f"Meta: mühendise görsel, TASLAK pafta, Excel, DXF ve iki düğme ({belge11})")
-    dug_wamid = q("SELECT dis_id FROM giden WHERE mesaj_id = 'wamid.E2EM2' AND kind = 'interactive'")[0]["dis_id"]
+    dug_wamid = q("SELECT dis_id FROM giden WHERE mesaj_id = 'wamid.E2EM2' AND kind = 'interactive' ORDER BY sira")[0]["dis_id"]
     time.sleep(1.2)
     kod, c = webhook(yuk([buton(MUH, f"muh:patron:{no11}:3", "Patron'a gönder", dug_wamid, mid="wamid.E2EM3")]))
     ok(c.get("mesaj") == {"sahiplenildi": 1} and ajan() == 0, "ajan: mühendisin 'Patron'a gönder' düğmesi")
@@ -536,7 +536,7 @@ try:
        and k12[1]["satir"]["interactive"]["action"]["buttons"][0]["reply"]["title"] == "1. Yeni plan", "önce 'hazırlıyorum', sonra görselli 3 düğmeli set")
     say = gonder()
     ok(say.get("kabul_edildi") == 2 and sahte.gidenler()[-1]["type"] == "interactive", "Meta: metin + seçenek görseli gitti")
-    set12 = q("SELECT dis_id FROM giden WHERE mesaj_id = 'wamid.E2EP1' AND kind = 'interactive'")[0]["dis_id"]
+    set12 = q("SELECT dis_id FROM giden WHERE mesaj_id = 'wamid.E2EP1' AND kind = 'interactive' ORDER BY sira")[0]["dis_id"]
     time.sleep(1.2)
     kod, c = webhook(yuk([buton(BAYI, f"s:{s12['id']}:{yeni12}", "1. Yeni plan", set12, mid="wamid.E2EP2")]))
     ok(c.get("mesaj") == {"sahiplenildi": 1} and ajan() == 0, "ajan: 'Yeni plan' düğmesi işlendi (gerçek genel motor)")
