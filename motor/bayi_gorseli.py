@@ -41,10 +41,13 @@ def plan_gorseli(ie: dict, yol: Path, v: dict | None = None, genislik_px: int = 
     W, H = plan.W, plan.H
     rooms = (v or {}).get("rooms_m2") or {}
     pay = 120.0                                  # ölçü çizgileri için kenar payı (cm)
+    bx0, by0, bx1, by1 = 0.0, 0.0, W, H          # çerçeve: gövde ve taşan verandalar (BK-14; veranda yoksa gövde, eskisi gibi)
+    for v_ in plan.dis_verandalar:
+        x0, y0, x1, y1 = v_["rect"]; bx0, by0, bx1, by1 = min(bx0, x0), min(by0, y0), max(bx1, x1), max(by1, y1)
     fig_w = genislik_px / 100
-    fig = plt.figure(figsize=(fig_w, fig_w * (H + 2 * pay + 90) / (W + 2 * pay)), dpi=100)
+    fig = plt.figure(figsize=(fig_w, fig_w * (by1 - by0 + 2 * pay + 90) / (bx1 - bx0 + 2 * pay)), dpi=100)
     ax = fig.add_axes([0, 0, 1, 1]); ax.set_aspect("equal"); ax.axis("off")
-    ax.set_xlim(-pay, W + pay); ax.set_ylim(-pay - 60, H + pay + 30)
+    ax.set_xlim(bx0 - pay, bx1 + pay); ax.set_ylim(by0 - pay - 60, by1 + pay + 30)
     # mahaller
     for ad, m in plan.mahaller.items():
         poly = m.poly
@@ -100,17 +103,17 @@ def plan_gorseli(ie: dict, yol: Path, v: dict | None = None, genislik_px: int = 
     for (x0, y0, x1, y1) in plan.dikmeler:
         ax.add_patch(Rectangle((x0, y0), x1 - x0, y1 - y0, facecolor="#6b5b45", edgecolor="#6b5b45", zorder=4))
     # dış ölçüler
-    oy = -pay * 0.55
+    oy = by0 - pay * 0.55
     ax.annotate("", xy=(0, oy), xytext=(W, oy), arrowprops=dict(arrowstyle="|-|", color=OLCU, lw=1.0, mutation_scale=4), zorder=6)
     ax.text(W / 2, oy - 12, f"{_fmt(W)} cm", ha="center", va="top", fontsize=9.5, color=OLCU, zorder=6)
-    ox = -pay * 0.55
+    ox = bx0 - pay * 0.55
     ax.annotate("", xy=(ox, 0), xytext=(ox, H), arrowprops=dict(arrowstyle="|-|", color=OLCU, lw=1.0, mutation_scale=4), zorder=6)
     ax.text(ox - 12, H / 2, f"{_fmt(H)} cm", ha="right", va="center", fontsize=9.5, color=OLCU, rotation=90, zorder=6)
     # başlık ve not
     no = ie.get("is_emri_no", ""); rev = int(ie.get("revizyon") or 1)
-    ax.text(W / 2, H + pay * 0.55, f"{no} · r{rev:02d} · {plan.nx:g}×{plan.ny:g} pano ({_fmt(W)}×{_fmt(H)} cm)", ha="center", va="center", fontsize=11,
+    ax.text(W / 2, by1 + pay * 0.55, f"{no} · r{rev:02d} · {plan.nx:g}×{plan.ny:g} pano ({_fmt(W)}×{_fmt(H)} cm)", ha="center", va="center", fontsize=11,
             color="#1f1f1f", fontweight="bold", zorder=6)
-    ax.text(W / 2, -pay - 42, "Şematik kat planı · net alanlar m² · ölçüler cm · üretim çizimi değildir; ölçülü plan PDF'te", ha="center", va="center",
+    ax.text(W / 2, by0 - pay - 42, "Şematik kat planı · net alanlar m² · ölçüler cm · üretim çizimi değildir; ölçülü plan PDF'te", ha="center", va="center",
             fontsize=8, color="#666666", zorder=6)
     yol = Path(yol); yol.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(yol, dpi=100, facecolor="white"); plt.close(fig)

@@ -1,0 +1,146 @@
+"""İE-17 · Paftaya uygunluk: açılan üç evin Motor planı, montaj paftasından ölçülen değerlerle (`pafta_olcu.json`).
+
+Bu bir Motor kilidi değil, pafta sayılarıdır (test politikası; İE-11'deki PK-01 testleri gibi): paftanın vektör çiziminden okunan duvar
+parçaları, pencere ve kapı boşlukları, köşe parçaları (ad ve antet okunmadı). Pafta kendi ölçeğiyle çizilmiş (dış kutusu 762 × 917 gibi,
+binde 1–2 fark); değerler paftanın dış kutusundan Motor'un dış ölçüsüne ölçeklenir. Kalan farklar tek tek aşağıda (`BILINEN_*`), gerekçesi
+İş Emri'nin `varsayimlar`ında ve İE-17 › Kanıt'ta; yeni bir fark çıkarsa da biri kapanırsa da test düşer.
+"""
+from __future__ import annotations
+import copy
+import json
+import sys
+from pathlib import Path
+
+import pytest
+
+KOK = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(KOK))
+from motor import geometry as G  # noqa: E402
+
+EVLER = KOK / "testler" / "cizim" / "evler"
+PAFTA = json.loads((KOK / "testler" / "cizim" / "pafta_olcu.json").read_text(encoding="utf-8"))
+EV = ("AP01", "AP13", "AP16")
+DERZ_PAYI = 2.0          # cm: paftanın okunuşu ve ölçeği (eşdeğer derz)
+
+# Paftada olup Motor'un çizmediği duvar parçaları: (yön, eksen)
+BILINEN_FAZLA_DUVAR = {"AP01": {("x", 476.5), ("y", 176.3)}}          # genel banyodaki tesisat kutusu
+# Ek farkları: (yön, eksen) → (yalnız Motor'da, yalnız paftada; cm)
+BILINEN_DERZ = {
+    "AP01": {
+        ("x", 299.75): ([1009.0], [946.2, 1071.8]),   # veranda duvarı: paftada mutfak duvarının T'sinden tam pano, Motor'da tam aksta
+        ("x", 613.5): ([1009.0], [1071.8]),           # koridor duvarı: aynı
+        ("x", 739.0): ([883.5, 1009.0], [946.2]),     # banyoların önü: paftada iki banyonun arasındaki T'de ek
+        ("y", 318.75): ([488.0], [485.0]),            # genel banyo kapılı panosunun başı: paftada tam pano kavşağın yüzünden (2,5–3)
+        ("y", 946.25): ([362.5, 488.0], [359.5, 485.0]),   # mutfak duvarı: aynı
+    },
+    "AP13": {
+        ("y", 256.0): ([338.75], [341.9]),            # banyo–salon duvarı: paftada yarım pano bölmenin yüzünden (3)
+    },
+    "AP16": {
+        ("x", 218.25): ([568.75, 694.25], []),        # mutfağın veranda penceresi paftada 251'lik tek pencereli panoda
+    },
+}
+# Köşe parçası farkları (Motor, pafta; yuvarlak cm): iç L köşelerde 1–5 cm; paftadaki tesisat kutusunun köşesi
+BILINEN_KOSE = {
+    "AP01": ([(628, 295, 632, 305)], [(173, 476, 179, 479), (627, 300, 637, 305)]),    # veranda iç köşesi: paftada parça 10 × 5 (Motor 5 × 10)
+    "AP13": ([], []),
+    "AP16": ([(253, 658, 259, 660), (378, 466, 384, 469)], [(256, 655, 259, 660), (382, 466, 385, 472)]),   # iki iç L köşe, 3 cm
+}
+PAY = {"pencere": 3.0, "kapi": 6.5}   # paftadaki yerine en çok (cm); paftada kapı panonun ortasından ±6 (AP-01 yatak odası 3: 6,0)
+
+
+def _plan(ad: str) -> G.Plan:
+    return G.kur(copy.deepcopy(json.loads((EVLER / f"{ad}.json").read_text(encoding="utf-8"))))
+
+
+def _olcekli(ad: str, plan: G.Plan) -> dict:
+    """Paftanın değerleri Motor'un dış ölçüsüne ölçekli: x yönündeki uzunluklar W / kutu x, y yönündekiler H / kutu y."""
+    p = PAFTA[ad]
+    sx, sy = plan.W / p["kutu"][0], plan.H / p["kutu"][1]
+    eksen = lambda yon, c: c * (sy if yon == "x" else sx)           # x boyunca uzanan duvarın ekseni y'dedir
+    boy = lambda yon, a: a * (sx if yon == "x" else sy)
+    return {
+        "duvarlar": [(w["yon"], eksen(w["yon"], w["c"]), w["t"], [(boy(w["yon"], a), boy(w["yon"], b)) for a, b in w["parcalar"]])
+                     for w in p["duvarlar"]],
+        "acikliklar": [(tur, y, eksen(y, c), boy(y, m)) for tur, k in (("pencere", "pencereler"), ("kapi", "kapilar"))
+                       for y, c, m, w in p[k]],
+        "koseler": [(x0 * sx, y0 * sy, x1 * sx, y1 * sy) for x0, y0, x1, y1 in p["koseler"]],
+    }
+
+
+@pytest.fixture(scope="module", params=EV)
+def ev(request):
+    plan = _plan(request.param)
+    return request.param, plan, _olcekli(request.param, plan)
+
+
+def _esi(d: G.Duvar, pafta: dict) -> list:
+    return [w for w in pafta["duvarlar"] if w[0] == d.yon and abs(w[2] - 2 * d.h) < 1 and abs(w[1] - d.c) <= 1.0
+            and min(w[3][-1][1], d.p1) - max(w[3][0][0], d.p0) > 20]
+
+
+def test_duvarlar_paftadaki_yerde(ev):
+    # her Motor duvarının paftada aynı yönde, aynı kalınlıkta, ekseni en çok 1 cm ötede eşi var; paftanın her duvar parçası bir Motor
+    # duvarının üstünde (bilinen fazlalar dışında)
+    ad, plan, pafta = ev
+    assert [d.id for d in plan.duvarlar if not _esi(d, pafta)] == [], ad
+    fazla = set()
+    for yon, c, t, parcalar in pafta["duvarlar"]:
+        for a, b in parcalar:
+            m = (a + b) / 2
+            if not any(d.yon == yon and abs(d.c - c) <= 1.0 and d.p0 - 3 <= m <= d.p1 + 3 for d in plan.duvarlar):
+                fazla.add((yon, round(c, 1)))
+    assert fazla == BILINEN_FAZLA_DUVAR.get(ad, set()), ad
+
+
+def test_derzler_paftayla(ev):
+    # pano ekleri: duvarın kendi aralığında paftanın ekleriyle aynı (DERZ_PAYI); kalan farklar bilinen listede, tam olarak
+    ad, plan, pafta = ev
+    fark = {}
+    for d in plan.duvarlar:
+        w = min(_esi(d, pafta), key=lambda w: abs(w[1] - d.c))
+        motor = [p.a1 for p in d.panolar[:-1]]
+        pd = [b for a, b in w[3][:-1] if d.p0 + 2 < b < d.p1 - 2]
+        ym = [x for x in motor if not any(abs(x - y) <= DERZ_PAYI for y in pd)]
+        yp = [y for y in pd if not any(abs(x - y) <= DERZ_PAYI for x in motor)]
+        if ym or yp:
+            fark[(d.yon, round(d.c, 2))] = (ym, yp)
+    beklenen = BILINEN_DERZ[ad]
+    assert sorted(fark) == sorted(beklenen), (ad, fark)
+    for k, (ym, yp) in fark.items():
+        bm, bp = beklenen[k]
+        assert ym == pytest.approx(bm) and yp == pytest.approx(bp, abs=0.6), (ad, k, ym, yp)
+
+
+def test_acikliklar_paftadaki_yerde(ev):
+    # her pencere ve kapı paftadaki eşinin yerinde (pencere en çok 3, kapı 6,5 cm); paftada eşsiz açıklık yok
+    ad, plan, pafta = ev
+    kalan = list(pafta["acikliklar"])
+    for d in plan.duvarlar:
+        for p in d.panolar:
+            a = p.acilim
+            if not a or a.tur == "gecis":
+                continue
+            tur = "pencere" if a.tur == "pencere" else "kapi"
+            m = (p.a0 + p.a1) / 2 + a.kayma
+            aday = [x for x in kalan if x[0] == tur and x[1] == d.yon and abs(x[2] - d.c) <= 6]
+            assert aday, (ad, tur, d.id, m)
+            x = min(aday, key=lambda x: abs(x[3] - m))
+            assert abs(x[3] - m) <= PAY[tur], (ad, tur, d.id, round(m, 2), round(x[3], 2))
+            kalan.remove(x)
+    assert kalan == [], ad
+
+
+def test_koseler_paftayla(ev):
+    # köşe parçaları paftadakiyle en çok 1,5 cm; iç L köşelerdeki küçük farklar bilinen listede
+    ad, plan, pafta = ev
+    motor = [tuple(k.rect) for k in plan.koseler]
+    pk = list(pafta["koseler"])
+    ym = []
+    for r in motor:
+        e = next((q for q in pk if all(abs(u - v) <= 1.5 for u, v in zip(r, q))), None)
+        if e is None:
+            ym.append(tuple(round(v) for v in r))
+        else:
+            pk.remove(e)
+    assert (sorted(ym), sorted(tuple(round(v) for v in q) for q in pk)) == BILINEN_KOSE[ad], ad
