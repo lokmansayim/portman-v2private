@@ -491,6 +491,20 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         # Kolonsuz gömme veranda giriş nişidir (TK-01 r06): iki yanı ve arkası gövde duvarı, açık kenarındaki kiriş iki yandaki duvarı bağlar
         nis = not kol
         gad = "giriş nişi" if nis else "veranda"
+        if nis:                                 # nişin ağzındaki kiriş aks arası (liste üreteci, BK-14 ek: duvarsız açıklığa kiriş, aks arası)
+            uz = []
+            for b in kir:
+                r = list(b["rect"])
+                yat = r[2] - r[0] > r[3] - r[1]
+                for (yon, c, t, tur) in hat:            # kirişin ucuna yüzüyle değen duvarın aksına kadar
+                    if tur == "dis" and yon == ("y" if yat else "x"):
+                        i0, i1 = (0, 2) if yat else (1, 3)
+                        if abs(c + t / 2 - r[i0]) < 0.6:
+                            r[i0] = c
+                        elif abs(c - t / 2 - r[i1]) < 0.6:
+                            r[i1] = c
+                uz.append(dict(b, rect=r))
+            kir = uz
 
         def kenar(r):
             if r[2] - r[0] > r[3] - r[1]:
