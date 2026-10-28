@@ -139,20 +139,43 @@ def test_secenek_akisi_butonla(depo, wa, hizli_motor):
     assert tek(depo, "SELECT durum FROM revizyonlar WHERE rev = 2")["durum"] == "onaylandi"
 
 
-def test_ucb_baglanti_butonu_ayarla_gelir(depo, wa, hizli_motor):
+def test_ucb_baglanti_butonu_ayarla_gelir(depo, wa, hizli_motor, kanal_dizini):
+    """İE-21: ayar dolu ve yayın dizini varken sayfa rastgele anahtarlı adrese bayt bayt kopyalanır, bayiye "3D'yi aç" düğmesi gider.
+    Adres İş Emri numarası taşımaz (eski biçim …/3d/<no>/r01/ tahmin edilebilirdi; kodsuz bayide numara telefonun son dört hanesini taşır)."""
+    import re
+    import sablonlar as S
+    import ucb_yayin as UY
+    (kanal_dizini / "yayin" / "3d").mkdir(parents=True)
     g = mesaj("TEST01 olsun", talep(ozet="TEST01", katalog_kodu="TEST01"))
     depo.mesaj_kaydet(g)
     [r] = isle_hepsi(depo, KATMAN_3D)
     assert r["eylem"] == "is_emri"
     kalici.gonder(depo, wa)
     rev = tek(depo, "SELECT is_emri_no, ekler FROM revizyonlar")
-    assert rev["ekler"]["ucb"]["url"] == f"https://ornek.invalid/portman/3d/{rev['is_emri_no']}/r01/"
+    ucb = rev["ekler"]["ucb"]
+    assert re.fullmatch(r"https://ornek\.invalid/portman/3d/[A-Za-z0-9_-]{22}/", ucb["url"]) and UY.ANAHTAR.fullmatch(ucb["anahtar"])
+    assert rev["is_emri_no"] not in ucb["url"] and ucb["url"] == f"https://ornek.invalid/portman/3d/{ucb['anahtar']}/"
+    yayin = kanal_dizini / "yayin" / "3d" / ucb["anahtar"] / "index.html"
+    assert yayin.read_bytes() == Path(ucb["dosya"]).read_bytes() and yayin.stat().st_mode & 0o777 == 0o644
+    assert yayin.parent.stat().st_mode & 0o777 == 0o755 and not list(yayin.parent.glob(".*"))
     kinds = [x["kind"] for x in wa.gonderilen]
     assert kinds == ["interactive", "document", "interactive"]
     cta = gonderilen_satir(depo, "interactive")["satir"]["interactive"]
-    assert cta["type"] == "cta_url" and cta["action"]["parameters"]["url"].endswith("/r01/")
-    html = Path(rev["ekler"]["ucb"]["dosya"]).read_text(encoding="utf-8")
+    assert cta["type"] == "cta_url" and cta["action"]["parameters"] == {"display_text": S.UCB_DUGME, "url": ucb["url"]}
+    assert cta["body"]["text"] == S.ucb_metni(rev["is_emri_no"], 1) and "tek parmakla çevirin" in cta["body"]["text"]
+    html = Path(ucb["dosya"]).read_text(encoding="utf-8")
     assert "YATAK ODASI 1" in html and "THREE" in html and "cdnjs" not in html   # gömülü three.js; dış ağ yok
+
+
+def test_ucb_yayin_dizini_yoksa_baglanti_gitmez(depo, wa, hizli_motor):
+    """İE-21: ayar dolu ama yayın dizini yok (nginx_uygula.sh koşmamış) → bozuk bağlantı gönderilmez; sayfa kayıtta, sebep ekte."""
+    depo.mesaj_kaydet(mesaj("TEST01 olsun", talep(ozet="TEST01", katalog_kodu="TEST01")))
+    [r] = isle_hepsi(depo, KATMAN_3D)
+    assert r["eylem"] == "is_emri"
+    kalici.gonder(depo, wa)
+    ucb = tek(depo, "SELECT ekler FROM revizyonlar")["ekler"]["ucb"]
+    assert ucb["url"] is None and "yayın dizini yok" in ucb["yayin_hata"] and Path(ucb["dosya"]).is_file()
+    assert [x["kind"] for x in wa.gonderilen] == ["interactive", "document"]
 
 
 def test_serbest_metin_yolu_acik(depo, wa, hizli_motor):
