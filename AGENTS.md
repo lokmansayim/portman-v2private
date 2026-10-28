@@ -1,7 +1,7 @@
 # Portman · ortak çalışma kuralları (Claude, Codex ve her ajan için)
 
-Portman, PortatifEv bayilerinin WhatsApp taleplerini plan çizimine çeviren sistemdir:
-WhatsApp → hosting kanalı → VPS ajanı → Beyin (LLM anlar, kod karar verir) → Motor (İş Emri → DXF/PDF, BOM) → bayiye plan.
+Portman, PortatifEv bayilerinin WhatsApp taleplerini plan çizimine, yükleme listesine ve teklife çeviren sistemdir:
+WhatsApp → VPS'teki kanal (webhook, Postgres kuyruğu; D-05) → Beyin (LLM okur, kod karar verir) → Motor (İş Emri → DXF/PDF, görsel, IFC, liste) → bayiye plan.
 
 Sahibi Lokman'dır; geliştirici değildir. Kodu asistan yazar. Kayıt, ödeme, parola ve dosya seçimini Lokman yapar; VPS komutlarını da kendi Mac'inde o çalıştırır. Yazışma Türkçe yapılır. Öncelik sırası: doğruluk, fiyat, hız.
 
@@ -29,6 +29,17 @@ Bu dosya her ajanın okuduğu ortak kuraldır. Claude'a özgü oturum akışı `
 - **İlerleme bildirimi.** İlerleme test sayısıyla değil, iş emrindeki kullanıcı adımlarıyla bildirilir (İE-04: A1–A6). Durum şunlardan biridir: Çalışmıyor, Kısmen, Yerelde çalışıyor, Canlıda çalışıyor.
 - **Kanıt.** Kanıt olmadan "çalışıyor" yazılmaz. Motor'un `passed` sonucu kaynağa uygunluk değildir.
 - **P6001.** Referans ve gerileme testidir. Harness, altın testler, `testler/referans/` ve `deneme/2026-09-23/yeniden_kos.py` çıktıları değişmemeli.
+
+## Üretim kuralı: tek kod, onaylı hedef örnek, otomatik kıyas (D-28; Lokman, 28 Ekim 2026)
+
+Bağlayıcıdır; her iş, her oturum ve her ajan için geçerlidir.
+
+1. **Tek kod.** Bayiye, mühendise ya da Lokman'a giden her çıktı (çizim, yükleme listesi, montaj rehberi, teklif) depodaki tek bir koddan, `main`'e girmiş bir komutla üretilir. Hiçbir oturum çıktıyı elle, kendi betiğiyle ya da depo dışındaki bir araçla üretmez; üretilmiş çıktıyı elle düzeltmez. Düzeltme koda, kural kitabına (`kurallar/`) ya da girdiye (İş Emri, Yapı Tanımı) işlenir ve çıktı yeniden üretilir. Aynı sayıyı (ör. bir parçanın adedi) iki kod üretiyorsa biri kaynaktır, öteki onu okur.
+2. **Onaylı hedef örnek.** Her çıktı türünün Lokman'ın onayladığı bir hedef örneği depoda durur: girdisi, beklenen çıktısı, onayın tarihi ve dayanağı. Onaylanmamış örnek "hedef" diye anılmaz; Motor'un `passed` demesi onay değildir.
+3. **Otomatik kıyas.** Çıktıyı üreten kod değişince CI (`.github/workflows/dogrulama.yml`) çıktıyı hedef örnekle kıyaslar. Fark varsa CI kırmızıdır ve iş `main`'e birleşmez. Fark bilerek yapıldıysa hedef örnek yalnız Lokman'ın onayıyla ve gerekçeli kararla yeniden dondurulur (D-02); testi geçirmek için hedef değiştirilmez.
+4. **LLM yalnız okur.** LLM bayinin mesajını, çizimini ya da görselini okur ve kalıba yazar; ölçüyü, koordinatı, adedi, fiyatı ve kararı kod verir. Bilinen istisna D-18'dir (İE-14 plan üretiminde çözücü plan bulamazsa LLM oda programını ve yerleşim ipucunu yeniden önerir; yerleşimi yine kod kurar, denetçi karar verir); sürüp sürmeyeceği Lokman'ın kararıdır.
+
+Bugün bu dört maddeyi karşılamayan yerler `KARARLAR/D-28.md` › "Bugünkü açıklar" tablosundadır. Bir çıktı türü bu dört maddeyi karşılamadan onun için "çalışıyor" yazılmaz; açığı kapatan iş tablodaki satırı günceller.
 
 ## Depo düzeni
 
@@ -62,5 +73,6 @@ Bu dosya her ajanın okuduğu ortak kuraldır. Claude'a özgü oturum akışı `
 
 - Her iş emrinin kendi dalı olur (`ie-NN-…`, `bk-NN-…`); `main`'e birleştirme yalnız Lokman'ın açık onayıyla, PR üzerinden.
 - İş emri belgesi (`docs/is_emirleri/<KOD>.md`) amaç, kullanıcı adımları, değişiklik, kapsam dışı, sınırlar ve kanıt bölümleriyle yazılır; kanıt tarihli komut ve sonuçtur.
+- Çıktı üreten ya da değiştiren iş (D-28) belgesinde üç şeyi yazar: çıktıyı üreten komut, Lokman'ın onayladığı hedef örneğin depodaki yeri, onu kıyaslayan test. Kıyas testi CI'da koşmuyorsa (kaynağı depo dışında) nedeni ve kaynaklı koşunun kanıtı yazılır.
 - Referans yalnız gerekçeli bir kararla yeniden dondurulur (D-02); yalnız testi geçirmek için referans güncellenmez.
 - Dondurulmuş kayıtlar (`SHA256SUMS`, `KARARLAR.md`, `testler/referans/2026-*`) elle değiştirilmez; yeni karar `KARARLAR/`'a yeni dosya olarak eklenir.
