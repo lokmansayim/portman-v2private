@@ -28,7 +28,7 @@ Yeni pencere için hazırlıklar:
 - **PR-4a = PR #59 birleşti** (28 Ekim 06:52 UTC, `main` `8cda8fc`, birleştirme commit'i).
 - **PR-4b (ölçüm):** hakem ÇP-04 ve ÇP-19'u okudu, ikisinde de toplam çelik kg kapısı (±%3) geçmedi (satır isabeti 12/83 ve 5/69); ÇP-08, 17, 18, 20'nin listesinde hakem adım 4'te durdu (kg sütunu yok, satır türü bilinmiyor, toplam çelişiyor, toplam yok). `test_sonuclar.py` bütün sonuç kayıtlarını denetler. › IE-16 Kör ölçüm sonucu.
 - **Kullanıcı adımları:** PR-4 **Kısmen**.
-- **Bekleyen:** PR-4b'nin `main`'e birleştirilmesi (Lokman); dört listeyi okumak hakem değişikliği ister (beyan ve Lokman'ın onayı). ~~Büyük beş paftanın Mac'e indirilmesi~~ (27 Ekim 22:00 UTC).
+- **Bekleyen:** ~~PR-4b'nin `main`'e birleştirilmesi~~ (PR #64; Lokman 28 Ekim 07:32 UTC kartı "Birleşsin", birleştirme commit'iyle); dört listeyi okumak hakem değişikliği ister (beyan ve Lokman'ın onayı). ~~Büyük beş paftanın Mac'e indirilmesi~~ (27 Ekim 22:00 UTC).
 
 **27 Ekim 2026 gece, geç eki (İE-17 · PR-1, köşe ve ızgara kuralı; `docs/is_emirleri/IE-17.md` › Köşe ve ızgara kuralı):**
 - **Dayanak:** CIO 22:37 (Patron'un kuralı: sapmalı plan teklif olarak sunulmaz; açıklıkların pano ızgarasına oturuşu paftayla kıyaslanıp kural bulunsun, "bilinen fark, düzeltiliyor" diye gösterilsin) ve 22:43 ("Onaylı, PR #54 içinde"; şartlar: kural açık evlerde tabloyla; AP-13 ve AP-16'nın kör kaydına not).
