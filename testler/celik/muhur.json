@@ -220,6 +220,12 @@
    "tarih": "2026-10-28",
    "sha256": "551b7d6817e4924f6605596d9e003d3c7f78fe514faa98201163e885edd839e1",
    "liste_commit": "3c5f63850db18bfbf4f3bc669242419c8a7a8987"
+  },
+  "ÇP-18": {
+   "karar": "Lokman, 28 Ekim 2026 06:26 UTC açılış kartı (\"Kör listeler açılsın ve PR-4a main'e birleşsin mi?\"): \"Altısı açılsın, birleşsin\" (ÇP-04, 08, 17, 18, 19, 20)",
+   "tarih": "2026-10-28",
+   "sha256": "f33cf798debc73d405f2417e294480cf4625ce3d7afa1b3e8f7fb1aa8dbb10c1",
+   "liste_commit": "1ebe8b4ec2f5afbf752c77d3f705469b34665973"
   }
  },
  "ilk_indirmeler": {
