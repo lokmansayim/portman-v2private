@@ -634,13 +634,17 @@ def _ac(depo, sha=None, commit=None):
     _muhur_degistir(depo, lambda m: m["acilislar"].update({"DN-02": a}))
 
 
-@pytest.fixture
-def okunmaz(monkeypatch):
+def _okunmasin(monkeypatch):
     """Okuyucu çağrılırsa test düşer: mühür ya da açılış tutmadığında dosya içeriği okunmamalı."""
     def dur(*a, **k):
         raise AssertionError("dosya okundu")
     monkeypatch.setattr(K.oku, "oku", dur)
     monkeypatch.setattr(K.pafta, "etiketler", dur)
+
+
+@pytest.fixture
+def okunmaz(monkeypatch):
+    _okunmasin(monkeypatch)
 
 
 def test_kiyas_acik_liste(depo, tmp_path):
@@ -965,11 +969,15 @@ def _commit(depo, mesaj):
     _git(depo["kok"], "commit", "-q", "-m", mesaj)
 
 
-def _kor_olc(depo):
-    """DN-02 açılış kaydıyla ölçülür, kör sonucu yazılır ve commit'lenir (`kiyas --sonuc-yaz` gibi)."""
+def _kor_olc(depo, bozuk=None):
+    """DN-02 açılış kaydıyla ölçülür, kör sonucu yazılır ve commit'lenir (`kiyas --sonuc-yaz` gibi). `bozuk`: kayıt yazılmadan önce
+    değiştirilir (bir kez yazılmış ama açılışa bağlı olmayan sonuç)."""
     _ac(depo)
     k = K.kiyasla(depo["bizim"]("DN02"), depo["kor"], kok=depo["kok"])
-    K.sonuc_yaz(K.sonuc_kaydi(k), K.sonuc_hedefi(k, depo["bizim"]("DN02")))
+    s = K.sonuc_kaydi(k)
+    if bozuk:
+        bozuk(s)
+    K.sonuc_yaz(s, K.sonuc_hedefi(k, depo["bizim"]("DN02"), kok=depo["kok"]))
     _commit(depo, "kör sonuç")
     return depo["cel"] / "projeler" / "DN02" / "sonuc.json"
 
@@ -982,15 +990,13 @@ def _yeniden_liste(depo, ad="DN02", kod="DN-02"):
     return y
 
 
-def _okunmasin(monkeypatch):
-    def dur(*a, **k):
-        raise AssertionError("dosya okundu")
-    monkeypatch.setattr(K.oku, "oku", dur)
-    monkeypatch.setattr(K.pafta, "etiketler", dur)
-
-
-def test_acilan_liste_acik_klasorunde_yeniden_olculur(depo, tmp_path):
+@pytest.mark.parametrize("kat,kor_durumu", [("tek", "kor"), ("çift", "kapali")])
+def test_acilan_liste_acik_klasorunde_yeniden_olculur(depo, tmp_path, kat, kor_durumu):
+    """Kör (tek kat) ve kapalı (çift kat, D-26) proje: kör sonucun durumu kıyastaki durum, yeniden ölçümünki `acildi`."""
+    if kat != "tek":
+        _muhur_degistir(depo, lambda m: m["projeler"]["DN-02"].update(kat=kat))
     kor = _kor_olc(depo)
+    assert _oku(kor)["muhur"]["durum"] == kor_durumu
     once = kor.read_bytes()
     y = _yeniden_liste(depo)
     k = K.kiyasla(y, depo["kor"], depo["pafta2"], kok=depo["kok"])
@@ -999,27 +1005,42 @@ def test_acilan_liste_acik_klasorunde_yeniden_olculur(depo, tmp_path):
     assert k["liste"]["commit"] != acilis["liste_commit"], "yeniden ölçümde listemiz açılış kaydındakinden farklı commit'te"
     s = K.sonuc_kaydi(k)
     assert s["muhur"]["durum"] == "acildi" and s["bizim_liste"]["yol"].endswith("DN02/acik/bizim_liste.json")
-    hedef = K.sonuc_hedefi(k, y)
+    hedef = K.sonuc_hedefi(k, y, kok=depo["kok"])
     assert hedef == y.parent / "sonuc.json"
     K.sonuc_yaz(s, hedef)
     _commit(depo, "yeniden ölçüm sonucu")
-    assert K.sonuc_hedefi(K.kiyasla(y, depo["kor"], kok=depo["kok"]), y) == hedef, "yeniden ölçümün sonucu yeniden yazılabilir"
+    assert K.sonuc_hedefi(K.kiyasla(y, depo["kor"], kok=depo["kok"]), y, kok=depo["kok"]) == hedef, "yeniden ölçümün sonucu yeniden yazılabilir"
     assert kor.read_bytes() == once, "kör sonuç değişmez"
     K.rapor_md(k, tmp_path / "r.md")
     assert "durum acildi (kayıtta kor)" in (tmp_path / "r.md").read_text(encoding="utf-8")
 
 
-def test_kor_sonuc_donar(depo):
-    """Kör ya da kapalı projenin yazılmış sonucu yeniden yazılmaz; açık projenin sonucu her ölçümde yazılır."""
-    _kor_olc(depo)
+@pytest.mark.parametrize("sil", [False, True], ids=["duruyor", "silindi"])
+def test_kor_sonuc_donar(depo, sil):
+    """Kör ya da kapalı projenin yazılmış sonucu yeniden yazılmaz (silinmiş olsa da: geçmişte commit'li); açık projenin sonucu her
+    ölçümde yazılır."""
+    kor = _kor_olc(depo)
+    if sil:
+        kor.unlink()
+        _commit(depo, "kör sonuç silindi")
     k = K.kiyasla(depo["bizim"]("DN02"), depo["kor"], kok=depo["kok"])
     with pytest.raises(Durdu) as e:
-        K.sonuc_hedefi(k, depo["bizim"]("DN02"))
+        K.sonuc_hedefi(k, depo["bizim"]("DN02"), kok=depo["kok"])
     assert e.value.adim == 6 and "donar" in e.value.neden
     a = K.kiyasla(depo["bizim"]("DN01"), depo["acik"], kok=depo["kok"])
-    K.sonuc_yaz(K.sonuc_kaydi(a), K.sonuc_hedefi(a, depo["bizim"]("DN01")))
+    K.sonuc_yaz(K.sonuc_kaydi(a), K.sonuc_hedefi(a, depo["bizim"]("DN01"), kok=depo["kok"]))
     _commit(depo, "açık sonuç")
-    assert K.sonuc_hedefi(a, depo["bizim"]("DN01")) == depo["bizim"]("DN01").parent / "sonuc.json"
+    assert K.sonuc_hedefi(a, depo["bizim"]("DN01"), kok=depo["kok"]) == depo["bizim"]("DN01").parent / "sonuc.json"
+
+
+def test_donmus_kor_sonucta_rapor_da_yazilmaz(depo, tmp_path, monkeypatch):
+    """`kiyas --md … --sonuc-yaz` donmuş kör sonuçta rapor yazılmadan durur (yeni bir kör ölçüm gibi görünen rapor kalmaz)."""
+    _kor_olc(depo)
+    kiyasla, hedefi = K.kiyasla, K.sonuc_hedefi
+    monkeypatch.setattr(K, "kiyasla", lambda *a, **k: kiyasla(*a, **k, kok=depo["kok"]))
+    monkeypatch.setattr(K, "sonuc_hedefi", lambda k, y: hedefi(k, y, kok=depo["kok"]))
+    r = K.main(["kiyas", "--bizim", str(depo["bizim"]("DN02")), "--liste", str(depo["kor"]), "--md", str(tmp_path / "r.md"), "--sonuc-yaz"])
+    assert r == 2 and not (tmp_path / "r.md").exists()
 
 
 def test_acilistan_sonra_projenin_listesi_degisirse_yine_durur(depo, monkeypatch):
@@ -1055,16 +1076,40 @@ def test_yeniden_olcum_acilis_kaydi_olmadan_durur(depo, okunmaz):
     lambda s: s.update(kod="DN-01"),                        # başka projenin
 ], ids=["liste_commit", "ozet", "durum", "kod"])
 def test_kor_sonuc_acilisa_bagli_degilse_durur(depo, monkeypatch, bozuk):
-    kor = _kor_olc(depo)
-    s = _oku(kor)
-    bozuk(s)
-    kor.write_text(json.dumps(s, ensure_ascii=False), encoding="utf-8")
-    _commit(depo, "bozuk kör sonuç")
+    _kor_olc(depo, bozuk)
     y = _yeniden_liste(depo)
     _okunmasin(monkeypatch)
     with pytest.raises(Durdu) as e:
         K.kiyasla(y, depo["kor"], kok=depo["kok"])
     assert e.value.adim == 3 and "bağlı değil" in e.value.neden
+
+
+@pytest.mark.parametrize("bozuk,neden", [
+    (lambda kor: kor.write_text(kor.read_text(encoding="utf-8").replace('"kod"', '"kod_"'), encoding="utf-8"), "ayrı sürüm"),
+    (lambda kor: kor.unlink(), "kör sonucu yok"),
+], ids=["degisti", "silindi"])
+def test_kor_sonuc_sonradan_commitlenerek_degistirilemez(depo, monkeypatch, bozuk, neden):
+    """Kör sonuç bir kez yazılır: sonradan değiştirilip commit'lense de (ya da silinse de) yeniden ölçüm yapılmaz."""
+    kor = _kor_olc(depo)
+    bozuk(kor)
+    _commit(depo, "kör sonuç değişti")
+    y = _yeniden_liste(depo)
+    _okunmasin(monkeypatch)
+    with pytest.raises(Durdu) as e:
+        K.kiyasla(y, depo["kor"], kok=depo["kok"])
+    assert e.value.adim == 3 and neden in e.value.neden
+
+
+@pytest.mark.parametrize("icerik", ["[]", "{", '{"kod": "DN-02", "bizim_liste": "x"}'], ids=["liste", "yarim", "bicim"])
+def test_kor_sonuc_okunamazsa_durur(depo, okunmaz, icerik):
+    _ac(depo)
+    kor = depo["cel"] / "projeler" / "DN02" / "sonuc.json"
+    kor.write_text(icerik, encoding="utf-8")
+    _commit(depo, "okunamayan kör sonuç")
+    y = _yeniden_liste(depo)
+    with pytest.raises(Durdu) as e:
+        K.kiyasla(y, depo["kor"], kok=depo["kok"])
+    assert e.value.adim == 3 and "okunamadı" in e.value.neden
 
 
 def test_kor_sonuc_commitsiz_degismisse_durur(depo, monkeypatch):

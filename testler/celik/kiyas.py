@@ -154,14 +154,24 @@ def kod_klasoru(kod: str) -> str:
     return kod.replace("Ç", "C").replace("-", "")
 
 
+def proje_klasoru(kok: Path, kod: str) -> Path:
+    """Öneren tarafın proje klasörü: listemiz, tanımı ve sonucu (`testler/celik/projeler/CP06/`)."""
+    return Path(kok) / "testler" / "celik" / "projeler" / kod_klasoru(kod)
+
+
+def _sig_sinirda(kok: Path, yol: str) -> bool:
+    """Depo sığ klon ve dosya sınırdaki bir commit'te var: dosyanın geçmişi eksik."""
+    if _git(kok, "rev-parse", "--is-shallow-repository").stdout.strip() != "true":
+        return False
+    sinir = Path(kok) / _git(kok, "rev-parse", "--git-path", "shallow").stdout.strip()
+    return any(_git(kok, "cat-file", "-e", f"{c}:{yol}").returncode == 0 for c in (sinir.read_text().split() if sinir.is_file() else []))
+
+
 def gecmis_denetle(kok: Path, yol: str) -> None:
     """Mühürün bütün geçmişi: dosyayı değiştiren her commit ve her birleştirme (`--full-history`), her ebeveyniyle; eklenebilir bölümlerde
     yalnız ekleme. Sığ klonda sınırdaki bir commit'te dosya varsa geçmiş eksiktir: araç durur."""
-    if _git(kok, "rev-parse", "--is-shallow-repository").stdout.strip() == "true":
-        sinir = Path(kok) / _git(kok, "rev-parse", "--git-path", "shallow").stdout.strip()
-        for c in (sinir.read_text().split() if sinir.is_file() else []):
-            if _git(kok, "cat-file", "-e", f"{c}:{yol}").returncode == 0:
-                raise Durdu(2, "depo sığ klon ve mühürün geçmişi sınırın ötesinde (`git fetch --unshallow` sonra yeniden); araç durdu")
+    if _sig_sinirda(kok, yol):
+        raise Durdu(2, "depo sığ klon ve mühürün geçmişi sınırın ötesinde (`git fetch --unshallow` sonra yeniden); araç durdu")
     def bozuk(neden):
         raise Durdu(2, f"mühürün geçmişi okunamadı ({neden}); araç durdu")
     r = _git(kok, "rev-list", "--full-history", "--parents", "HEAD", "--", yol)
@@ -247,20 +257,39 @@ def etkin_durum(kayit: dict, muhur: dict, kod: str) -> str:
     return "kapali" if kk["kat"] == "çift" else "kor"
 
 
+def tek_surum(kok: Path, yol: Path, adim: int) -> None:
+    """Dosya git geçmişinin bütününde (birleştirmeler ve her ebeveyn dahil) tek sürümlü: bir kez yazılmış, sonra değişmemiş (silinip
+    başka içerikle yeniden yazılmamış). Sığ klonda geçmiş sınırın ötesindeyse araç durur."""
+    rel = Path(yol).resolve().relative_to(Path(kok).resolve()).as_posix()
+    if _sig_sinirda(kok, rel):
+        raise Durdu(adim, f"depo sığ klon ve {Path(yol).name} geçmişi sınırın ötesinde (`git fetch --unshallow` sonra yeniden); araç durdu")
+    commitler = _git(kok, "rev-list", "--full-history", "HEAD", "--", rel).stdout.split()
+    sorgu = "".join(f"{c}:{rel}\n" for c in commitler)
+    r = subprocess.run(["git", "-C", str(kok), "cat-file", "--batch-check=%(objectname)"], input=sorgu, capture_output=True, text=True)
+    surumler = {b for b in r.stdout.splitlines() if not b.endswith("missing")}
+    if r.returncode != 0 or len(surumler) != 1:
+        raise Durdu(adim, f"{rel} geçmişinde {len(surumler)} ayrı sürüm var: bir kez yazılır, sonra değişmez; araç durdu")
+
+
 def kor_sonucu_denetle(kok: Path, kod: str, acilis: dict, durum: str) -> None:
-    """İE-16 PR-6a: açılan projenin kör sonucu (`projeler/<CPnn>/sonuc.json`) commit'li, değişmemiş, açılış kaydındaki liste commit'ine ve
-    dosya özetine, kıyastaki durumla yazılmış. Değilse yeniden ölçüm yapılmaz (`Durdu(3)`; liste okunmaz)."""
-    yol = Path(kok) / "testler" / "celik" / "projeler" / kod_klasoru(kod) / "sonuc.json"
+    """İE-16 PR-6a: açılan projenin kör sonucu (`projeler/<CPnn>/sonuc.json`) commit'li, değişmemiş, geçmişinde tek sürümlü (bir kez yazılmış),
+    açılış kaydındaki liste commit'ine ve dosya özetine, kıyastaki durumla yazılmış. Değilse yeniden ölçüm yapılmaz (`Durdu(3)`; liste
+    okunmaz)."""
+    yol = proje_klasoru(kok, kod) / "sonuc.json"
     if not yol.is_file():
         raise Durdu(3, f"{kod} kör sonucu yok: açılan liste önce açılış kaydındaki listemizle ölçülür, yeniden ölçüm ondan sonra; "
                        "liste açılmaz")
     bag_yok(yol, kok, 3)
     kayitli_mi(yol, kok, 3)
     head_ile_ayni(yol, kok, 3)
-    s = json.loads(yol.read_text(encoding="utf-8"))
-    m = s.get("muhur") or {}
-    if (s.get("kod") != kod or (s.get("bizim_liste") or {}).get("commit") != acilis["liste_commit"]
-            or m.get("sha256") != acilis["sha256"] or m.get("durum") != durum):
+    tek_surum(kok, yol, 3)
+    try:
+        s = json.loads(yol.read_text(encoding="utf-8"))
+        bagli = (s["kod"] == kod and s["bizim_liste"]["commit"] == acilis["liste_commit"] and s["muhur"]["sha256"] == acilis["sha256"]
+                 and s["muhur"]["durum"] == durum)
+    except (ValueError, KeyError, TypeError) as e:
+        raise Durdu(3, f"{kod} kör sonucu okunamadı ({type(e).__name__}); liste açılmaz") from None
+    if not bagli:
         raise Durdu(3, f"{kod} kör sonucu açılış kaydına bağlı değil (listemizin commit'i, dosya özeti ya da durum); liste açılmaz")
 
 
@@ -288,11 +317,13 @@ def acilabilir_mi(kayit: dict, muhur: dict, kod: str, liste: dict | None, *, kok
         if not acilis.get("sha256") or acilis.get("sha256") != kayit_ozeti(kayit, muhur):
             raise Durdu(3, f"{kod} açılış kaydı bu dosya için değil (SHA-256 {str(acilis.get('sha256') or 'yok')[:12]}…); liste açılmaz")
         c = str(acilis.get("liste_commit") or "")
-        if yeniden and re.fullmatch(r"[0-9a-f]{40}", c):
+        if not re.fullmatch(r"[0-9a-f]{40}", c):                                   # tam commit: kısa önek tutturulabilir
+            raise Durdu(3, f"{kod} açılış kaydındaki liste commit'i ({c or 'yok'}) tam commit değil; liste açılmaz")
+        if yeniden:                                                                 # listemiz açılıştan sonra `acik/`'te yeniden üretildi
             kor_sonucu_denetle(kok, kod, acilis, durum)
             return {**acilis, "durum": "acildi", "kayit_durumu": kayit["durum"]}
-        if not re.fullmatch(r"[0-9a-f]{40}", c) or c != liste["commit"]:            # tam commit: kısa önek tutturulabilir
-            raise Durdu(3, f"{kod} açılış kaydındaki liste commit'i ({c or 'yok'}) kendi listemizin commit'i değil "
+        if c != liste["commit"]:
+            raise Durdu(3, f"{kod} açılış kaydındaki liste commit'i ({c}) kendi listemizin commit'i değil "
                            f"({liste['commit'][:7]}); liste açılmaz")
         return {**acilis, "durum": durum, "kayit_durumu": kayit["durum"]}
     raise Durdu(3, f"kayıt durumu {kayit['durum']}: liste değil")
@@ -460,7 +491,7 @@ def kiyasla(bizim_yol: Path, liste: Path, pafta_yol: Path | None = None, *, kok:
     liste_kaydi = kayitli_mi(bizim_yol, kok, 1)
     bizim = json.loads(bizim_yol.read_text(encoding="utf-8"))
     kod = bizim.get("kod")
-    beklenen = kok / "testler" / "celik" / "projeler" / kod_klasoru(str(kod)) / "bizim_liste.json"
+    beklenen = proje_klasoru(kok, str(kod)) / "bizim_liste.json"
     yeniden = beklenen.parent / YENIDEN / "bizim_liste.json"
     if bizim_yol.resolve() not in (beklenen.resolve(), yeniden.resolve()):
         raise Durdu(1, f"kendi listemiz yalnız {beklenen.relative_to(kok).as_posix()} yolundan okunur (projenin listesi; açılış kaydı "
@@ -479,7 +510,8 @@ def kiyasla(bizim_yol: Path, liste: Path, pafta_yol: Path | None = None, *, kok:
     # 3. açılış
     acilis = acilabilir_mi(kayit, muhur, kod, liste_kaydi, kok=kok, yeniden=bizim_yol.resolve() == yeniden.resolve())
     if sayfa is not None and acilis["durum"] != "acik":
-        raise Durdu(3, f"{kod} listesi {acilis['durum']}: kör ve kapalı listede sayfa seçilmez (çelik grubu birden çok sayfadaysa okuma "
+        raise Durdu(3, f"{kod} listesi {acilis['durum']}: kör, kapalı ve açılan listede sayfa seçilmez (açılan liste kör ölçümdeki gibi "
+                       "okunur; çelik grubu birden çok sayfadaysa okuma "
                        "durur); liste açılmaz")
     pk, etiket = _pafta(pafta_yol, muhur, kod)
     # 4. okuma
@@ -623,11 +655,13 @@ def rapor_md(k: dict, yol: Path) -> None:
     Path(yol).write_text("\n".join(L) + "\n", encoding="utf-8")
 
 
-def sonuc_hedefi(k: dict, bizim_yol: Path) -> Path:
-    """Sonuç listemizin yanına (`acik/` listesinin sonucu `acik/sonuc.json`). Kör ya da kapalı projenin yazılmış sonucu donar: yeniden
-    yazılmaz, kural değişince listemiz `acik/`'te yeniden ölçülür (İE-16 PR-6a)."""
+def sonuc_hedefi(k: dict, bizim_yol: Path, *, kok: Path = KOK) -> Path:
+    """Sonuç listemizin yanına (`acik/` listesinin sonucu `acik/sonuc.json`). Kör ya da kapalı projenin sonucu bir kez yazılır ve donar:
+    dosya duruyorsa ya da geçmişte commit'lenmişse (silinmiş olsa da) yeniden yazılmaz; kural değişince listemiz `acik/`'te yeniden
+    ölçülür (İE-16 PR-6a)."""
     yol = Path(bizim_yol).parent / "sonuc.json"
-    if k["acilis"]["durum"] in ("kor", "kapali") and yol.exists():
+    rel = os.path.relpath(yol.absolute(), Path(kok).absolute())
+    if k["acilis"]["durum"] in ("kor", "kapali") and (yol.exists() or _git(kok, "rev-list", "-1", "HEAD", "--", rel).stdout.strip()):
         raise Durdu(6, f"{k['kod']} kör sonucu yazılmış ve donar: yeniden yazılmaz (yeniden ölçüm `{YENIDEN}/bizim_liste.json` ile, "
                        f"sonucu `{YENIDEN}/sonuc.json`)")
     return yol
@@ -698,10 +732,11 @@ def main(argv: list[str] | None = None) -> int:
             kp = r["kapi"]
             print(f"{r['kod']}: çelik kg kapısı {kp['sonuc']}" + (f" (fark {kp['fark_yuzde']} %)" if "fark_yuzde" in kp else "")
                   + f"; öteki satırlar {r['satir']['sayilar']}")
+            hedef = sonuc_hedefi(r, a.bizim) if a.sonuc_yaz else None      # donmuş kör sonuçta rapor da yazılmadan durur
             if a.md:
                 rapor_md(r, a.md)
-            if a.sonuc_yaz:
-                sonuc_yaz(sonuc_kaydi(r), sonuc_hedefi(r, a.bizim))
+            if hedef:
+                sonuc_yaz(sonuc_kaydi(r), hedef)
         else:
             _, m = muhur_dogrula(MUHUR, KOK)               # commit'li, iz ve geçmiş tutuyor; yazılan kayıt sonra ayrı commit'le girer
             kayit = ilk_indirme(a.kod, a.dosya, a.drive_degisme, m)
