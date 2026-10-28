@@ -202,6 +202,12 @@
   "ÇP-06": {
    "tarih": "2026-10-25",
    "dayanak": "hedef örnek önerisi için plan aşamasında, Lokman'ın 25 Ekim 09:10 kartından ve bu mühürden önce açıldı (yalnız yükleme listesi Excel'i); kör sayılmaz. Hedef örnek ve açık dört proje kartla onaylandı (\"Evet, 4 açık + kalanı kör\")"
+  },
+  "ÇP-04": {
+   "karar": "Lokman, 28 Ekim 2026 06:26 UTC açılış kartı (\"Kör listeler açılsın ve PR-4a main'e birleşsin mi?\"): \"Altısı açılsın, birleşsin\" (ÇP-04, 08, 17, 18, 19, 20)",
+   "tarih": "2026-10-28",
+   "sha256": "caa7079fd5854d0263775d21e90a0f31bb5e1a7674274a9ab96218324d502b3a",
+   "liste_commit": "2dc0ea34c9c55a403ab11bad391c9d8b505a69bb"
   }
  },
  "ilk_indirmeler": {
