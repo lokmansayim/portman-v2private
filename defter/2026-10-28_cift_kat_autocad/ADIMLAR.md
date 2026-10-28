@@ -114,8 +114,20 @@ Biçim: `A### · saat · başlık` — Ne / Nerede / Sonuç / Durum (yapıldı �
 - Sonuç: `autocad/PENCERE_VARYASYONLARI.md` — bu evdekiler (120/125, 60/125, 60/40, 120/200 Fransız), Motor (BK-13), R02, Şablon 2024'teki 40 ölçü etiketi (120/120 ×363, 60/40 ×139, 120/180 ×105, 120/100 ×65, 160/180, 80/120…; kapı ölçüleri ayrıldı), pencere blokları, sipariş paftası notu ("verilen ölçüler iç ölçülerdir…"), PORTATİFEV 150 pencere listesi (POZ 1–5).
 - Durum: yapıldı.
 
-### A024 · — · Sıradaki: Soru 1 (giriş kapısı) → "çiz" → İş Emri JSON → Motor
-- Durum: bekliyor (Lokman).
+### A024 · 12:34–12:52 · Soru 1 cevaplandı: giriş kapısı sağ cephede, WC holünde, 90, içeri açılır
+- Ne: Lokman plan görselinde kırmızı daireyle işaretledi (WC ile mutfak arasındaki 152'lik holün sağ dış duvarı). Kural belgesi §12'ye tarihli satır, 3.6 "Kabul", §11'de soru kapatıldı.
+- İş Emri: `deneme/2026-10-28_cift_kat/zemin_kat.json` → `{"tur":"dis_kapi","olcu":90,"arasi":["__DIS__","WC HOLÜ"],"duvar":"sag","pano":0}`; `eksikler`'den giriş kapısı çıktı; eski varsayım satırı düzeltildi. Motor yeniden üretti: `sonuc/zemin_kat/` validation_passed **True**, kapı 7, BOM K03 dış kapı 90 ×1.
+- Sonuç: Motor kapıyı kendisi çizdi — `BOM_D18_1255p0_DIS_K02` @ (763, 445) rot 90, iç sembol `BOM_K03_DIS_KAPI_ACIKLIK900`; açıklık 462,75–552,75, menteşe üstte (HOL tarafı), kanat WC holüne süpürür. AutoCAD'de 4. sekmede yakınlaştırılıp görüldü (12:57).
+- Durum: yapıldı. Açık: menteşe yönü (düzeltme turunda).
 
-### A009 · — · Soru 1 (giriş kapısı)
-- Durum: bekliyor.
+### A025 · 12:45 → 13:05 · YANLIŞ BULGU DÜZELTİLDİ: "Motor dış kapı sembolünü çizmedi (bulgu 7)" doğru değildi
+- Ne: 12:45'te blok adlı çizimde kapı görünmeyince "Motor çizmiyor" diye elle kırmızı kapı (çizgi + yay + etiket) eklenmiş, İE-22'ye bulgu 7 yazılması planlanmıştı. 13:00'te Motor DXF'i ezdxf ile denetlendi: kapılı pano bloğu ve iç sembol var (sınır kutusu 668,8–764,1 × 445–570,5). Görünmemesinin nedeni üreticinin eski sürümünde değişmeyen adlara "{K03}" eki eklemesiydi; o ek iç kapı bloğunun bağını koparıyordu (A023 sonunda "ad aynıysa atla" düzeltmesiyle geçti).
+- Yapılan: `uret_cift_kat_bloklu.py` 4b bölümünden elle kapı çıkarıldı; yalnız "GİRİŞ 90 (Lokman 28.10 · Motor çizdi: BOM_D18 K02)" notu kaldı. DXF yeniden üretildi (115 blok, 602 varlık, audit 0, md5 bb1b9d44…), Mac'e kopyalandı; AutoCAD'de eski sekme "Don't Save" ile kapatılıp yenisi açıldı. **İE-22'ye bulgu 7 yazılmadı.**
+- Ders: "Motor çizmedi" demeden önce Motor'un kendi DXF'ine bakılır; üretici (benim ara katmanım) ile Motor karıştırılmaz.
+- Yan bulgu: `autocad/` klasöründe AutoCAD'in yazdığı `Portman_IE22-CK01_CIFT_KAT_sablon_bloklu_r01.dwg` (253 KB) ve `.bak` var — bir ara "Save" basılmış (kırmızı kapılı eski sürüm). Kaynak DXF bozulmadı (md5 bulutla aynı). İkisi git dışında (*.dwg, *.bak); silmek Lokman'ın.
+- Olay: Cmd+O kutusu açılmadan yol komut satırına yazıldı (R02 sekmesi, "Unknown command"); hiçbir komut çalışmadı, Esc ile temizlendi. Ders: Cmd+O'dan sonra ekran görüntüsüyle kutu doğrulanmadan yazılmaz.
+- Durum: yapıldı.
+
+### A026 · — · Sıradaki: Soru 2 (merdiven kutusu 2 pano / 1,5 pano) → Soru 3 (merdiven ölçüleri) → … → "çiz"
+- Elde: çift kollu U 252×281 (kol 126 ≈ 1 pano), tek kollu düz 375×122,5; taslak kutu 2 pano = 245 iç + arkaya 125,5 çıkma; 1,5 pano dört kollu birleşim doğurur (Motor bulgu 5).
+- Durum: bekliyor (Lokman).

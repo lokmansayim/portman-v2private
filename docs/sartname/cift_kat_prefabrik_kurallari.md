@@ -42,7 +42,7 @@ arasındaki fark merdiven; geriye kalan, döşeme, çatı birebir aynı"). `R02`
 | 3.3 | Plandaki "120/200 Fransız pencere": boy 200, Motor'un sınırı 180'i aşıyor (üst kot 200 → eşik 0 = kapı gibi). Taslakta **120x180 (eşik 20)** alındı. | **Soru 4** (Fransız pencere nedir: 120x180 mi, döşemeden başlayan 120x200 doğrama mı, balkon kapısı mı?) |
 | 3.4 | Pencere odaya ortalı (`pencere: oda_ortasi`; ızgara panosu oda ortasından en çok ¼ pano kaçıyorsa ızgara kalır); kapı mantıkla: dayanaklı panoda, menteşe o uçta, oda kapısı bölmeye 11,5 cm yaslı, dış kapı panoda ortada. | Tek kat (D-15) |
 | 3.5 | Dış kapı 90, iç kapı 82 (çalışma kabulü, K04 açık). Kapı yüksekliği çizimde 200 (katalogda ürün yüksekliği yok). | Tek kat (K04, v1.4.3) |
-| 3.6 | Giriş kapısı planda çizili değil; taslağa eklenmedi, uydurulmadı. | **Soru 1** |
+| 3.6 | Giriş kapısı sağ cephede, WC holünün sağ dış duvarında, 90'lık, içeri açılır (Lokman 28.10 12:34; §12). Panoda ortada; menteşe yönü düzeltme turunda. | Kabul (Soru 1 kapandı) |
 | 3.7 | Üst kattan balkona kapı dış kapıdır (balkon açık mahal); planda ODA 2'nin balkona bakan yan duvarında. | Kabul (plandan) |
 
 ## 4. Çatı (tek kattan aynen; Lokman: "çatı birebir aynı")
@@ -128,7 +128,7 @@ panosunda (plandakinden 51 cm arkada).
 
 ## 11. Sorular (Lokman'a; cevap kurala girer)
 
-1. **Giriş kapısı** nerede? Planda çizili değil (merdiven kutusunun arka duvarı mı, salonun Fransız penceresi mi, balkon tarafı mı).
+1. ~~**Giriş kapısı** nerede?~~ **Cevaplandı 28.10 12:34** (§12): sağ cephe, WC holü, 90, içeri açılır.
 2. **Merdiven kutusu** 2 pano (245 iç) mı, 1,5 pano (182 iç; dört kollu birleşim ya da mutfak 180) mı?
 3. **Merdiven**: kol eni, rıht/basamak sayısı (kat farkı ≈ 282 cm), sahanlık, korkuluk; dönüş yönü planda sağa.
 4. **Fransız pencere 120/200**: 120x180 mi, döşemeden başlayan 120x200 doğrama mı (Motor sınırı 180; yeni kural ister)?
@@ -145,4 +145,5 @@ Lokman'ın cevapları bu belgeye tarihli eklenir; kural haline gelen madde `.cla
 | Tarih | Soru / madde | Lokman'ın sözü | Kurala etkisi |
 |---|---|---|---|
 | 28.10.2026 12:09 | **Soru 8** (köşe profili) ve **1.1 / 2.8** (ızgara) | "Çift katın tek kattan en büyük farkı köşe direkleri **100×100 profil**; **pano dizilimi aynı**." Astra'yla yapılmış 150 m² çift kat (R02, 12.500 × 6.000, döşeme detaylarına kadar) Mac'te; referans alınacak. | 8.1: dört dış köşede 100×100 sürekli köşe direği (R02'deki 100 × 100 × 5320 ile uyumlu; et kalınlığı hâlâ **Soru**). 2.8 teyit: iki katta ızgara ve pano dizilimi tek katla aynı. Şablon 2024 notu da aynı yönde: köşe direkleri kutu profil, tek parça, ankrajlı (`deneme/2026-10-28_cift_kat/autocad/sablon_inceleme/RAPOR.md` §4). |
+| 28.10.2026 12:34 | **Soru 1** (giriş kapısı) | Plan görselinde kırmızı daireyle işaretledi: giriş kapısı **sağ cephede, WC holünün (WC ile mutfak arasındaki 152'lik hol) sağ dış duvarında**, ~90'lık, **içeri açılır**. | 3.6 kapandı: `zemin_kat.json`'a `{"tur":"dis_kapi","olcu":90,"arasi":["__DIS__","WC HOLÜ"],"duvar":"sag","pano":0}` eklendi; Motor zemin katı yeniden üretti (validation_passed True, kapı 7, BOM K03 dış kapı 90 ×1). Motor kapıyı **kendisi çizdi**: `BOM_D18_1255p0_DIS_K02` @ (763, 445) rot 90, açıklık panoda ortada (462,75–552,75), menteşe HOL tarafında (üst), kanat WC holüne süpürür. (12:45'te "Motor sembolü çizmedi" diye elle kırmızı kapı çizilmişti; yanlış bulguydu — üreticinin ad değiştirmesi iç sembolü bozmuştu; 13:05'te kaldırıldı, Motor bulgusu **yazılmadı**.) Menteşe yönü sorulmadı; Lokman düzeltme turunda söyler. |
 | 28.10.2026 | Blok adları (K03) | "Her blok malzeme kartındaki gibi isim isim olsun" (Güncel Şablon 2024 blok mantığı). | Yeni çift kat çizimi Şablon 2024 blok adlarıyla (`100'LÜK 125'LİK PANO`, `100'LÜK 125'LİK (120x100) PENCERELİ PANO`, `100X100 DIŞ KÖŞE DİREĞİ`…); Motor eşleme taslağı RAPOR §2. K03 kararı Lokman'da. |

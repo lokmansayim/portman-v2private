@@ -1,12 +1,12 @@
 {
   "is_emri_no": "IE22-CK01-ZEMIN",
   "revizyon": 1,
-  "generated_at": 1793171581,
-  "duration_s": 28.8,
+  "generated_at": 1793181337,
+  "duration_s": 19.33,
   "dxf": "Portman_IE22-CK01-ZEMIN_r01.dxf",
   "pdf": "Portman_IE22-CK01-ZEMIN_r01.pdf",
-  "dxf_sha256": "cdacc3be155f64ddf267b1fd34e59ca6750916b11999df5a8be0d8400decdd2e",
-  "pdf_sha256": "4fd646d5da9a97895ce2622ce31df5fa0e759af827b4cd47dbeb1f0be80fbdc2",
+  "dxf_sha256": "ce06e8f58ee08495511042e568575eaa9666a73c8fb548e60eefc85523697ea8",
+  "pdf_sha256": "09b960ed0541f6cbf8973c879278acf655320dbeed0be3a66e72836f30b244ff",
   "tani_pdf": null,
   "pdf_skipped_reason": null,
   "validation_passed": true,
@@ -33,6 +33,8 @@
     "D15",
     "D16",
     "D17",
+    "D18",
+    "K03",
     "V05",
     "V06"
   ]

@@ -89,6 +89,8 @@ for kat_adi, yol, dx in KATLAR:
     for b in list(kaynak.blocks):
         if not b.name.startswith("BOM_"): continue
         yeni, tur = sablon_adi(b.name)
+        if yeni == b.name:          # ad değişmiyorsa (kapı/pencere sembolleri) dokunma
+            continue
         esleme[b.name] = yeni
         if yeni not in SABLONDA_VAR and tur == "pano": yeni_adlar.add(kart_adi(yeni))
         if yeni in kaynak.blocks:      # aynı ada iki geometri (ör. kanat yönü eklerinden sonra olmamalı)
@@ -162,6 +164,12 @@ for kat_adi, yol, dx in KATLAR:
     H.add_lwpolyline([(dx+444.25, 0), (dx+763, 0), (dx+763, -30), (dx+444.25, -30), (dx+444.25, 0)],
                      dxfattribs={"layer": "CIFT_KAT_NOT", "linetype": "DASHED"})
     H.add_text("BALKON TAŞMASI 30 (Motor'da yok · Soru 7)", height=6, dxfattribs={"layer": "CIFT_KAT_NOT"}).set_placement((dx+446, -44))
+
+# 4b) Giriş kapısı (Lokman 28.10 12:34, Soru 1): sağ cephe, WC HOLÜ, 90'lık, içeri açılır. Motor bunu kendisi çiziyor:
+#     BOM_D18_1255p0_DIS_K02 @ (763, 445) rot 90, iç sembol BOM_K03_DIS_KAPI_ACIKLIK900 (sınır kutusu 668,8–764,1 × 445–570,5).
+#     12:45'te "Motor sembolü çizmedi (bulgu 7)" diye elle kırmızı kapı çizilmişti; yanlıştı — ad değiştirme iç sembolü bozduğu için
+#     görünmüyordu (A023'te düzeltildi). Elle kapı 13:05'te kaldırıldı; yalnız kısa bir not kalır.
+H.add_text("GİRİŞ 90 (Lokman 28.10 · Motor çizdi: BOM_D18 K02)", height=5, dxfattribs={"layer": "CIFT_KAT_NOT"}).set_placement((763.0 - 150, 445.0 + 17.75 - 12))
 
 # 5) kesit / kat kotları (kısa kenar y=706; makas y'yi geçer → beşik profil bu kesitte)
 KX, KY = 0.0, -900.0
@@ -242,6 +250,17 @@ if KUTUPHANE.exists():
         boy = f" [{bb.size.x:.1f} x {bb.size.y:.1f}]" if bb.has_data else ""
         H.add_text(n + boy, height=4.5, dxfattribs={"layer": "SABLON_KARTI"}).set_placement((x, yy-14))
 
+# Türkçe harfler: AutoCAD'in txt.shx'i İ/Ş/—'yi "?" basar → bütün yazılar Arial (TrueType) stiline
+if "ARIAL_TR" not in hedef.styles:
+    hedef.styles.new("ARIAL_TR", dxfattribs={"font": "arial.ttf"})
+for e in H.query("TEXT MTEXT"):
+    e.dxf.style = "ARIAL_TR"
+for b in hedef.blocks:
+    for e in b.query("TEXT MTEXT"):
+        e.dxf.style = "ARIAL_TR"
+for ds in hedef.dimstyles:
+    try: ds.dxf.dimtxsty = "ARIAL_TR"
+    except Exception: pass
 print("audit öncesi DIMENSION:", len(H.query("DIMENSION")))
 aud = hedef.audit()
 print("audit hata", len(aud.errors), "düzeltme", len(aud.fixes))

@@ -2,7 +2,7 @@
 B02;Bağlantı ve veranda;100×50 köşe bağlantısı;50×100;6;adet;5 dış köşe + 1 veranda iç köşesi. Profil kesim boyu tanımlı değil.
 B03;Bağlantı ve veranda;Üçlü H bağlantı;60;4;adet;"60 mm iç duvar bağlantısı; kesim boyu tanımlı değil."
 B04;Bağlantı ve veranda;Veranda dikmesi;100×100;1;adet;"Şematik plan izi 100×100 mm; profil ürünü ve boyu teyit edilmeli."
-D01;Dış duvar panoları;Dolu pano;1255×100×2500;12;adet;
+D01;Dış duvar panoları;Dolu pano;1255×100×2500;11;adet;
 D03;Dış duvar panoları;120×180 pencereli pano;1255×100×2500;1;adet;"Pencere ayrı kalem; pano tek parça sayıldı."
 D04;Dış duvar panoları;60×40 vasistaslı pano;1255×100×2500;1;adet;"Pencere ayrı kalem; pano tek parça sayıldı."
 D06;Dış duvar panoları;Özel dolu pano;627.5×100×2500;3;adet;
@@ -15,6 +15,7 @@ D14;Dış duvar panoları;Özel dolu pano;328.8×100×2500;1;adet;"Portman motor
 D15;Dış duvar panoları;Özel dolu pano;926.2×100×2500;1;adet;"Portman motor tarafından otomatik tahsis edildi; teyit edilmeli."
 D16;Dış duvar panoları;Özel dolu pano;1162.5×100×2500;1;adet;"Portman motor tarafından otomatik tahsis edildi; teyit edilmeli."
 D17;Dış duvar panoları;Özel dolu pano;577.5×100×2500;1;adet;"Portman motor tarafından otomatik tahsis edildi; teyit edilmeli."
+D18;Dış duvar panoları;Dış kapılı pano;1255.0×100×2500;1;adet;"Portman motor tarafından otomatik tahsis edildi; teyit edilmeli."
 I01;İç duvar panoları;Dolu pano;1255×60×2500;5;adet;
 I02;İç duvar panoları;Özel dolu pano;1205×60×2500;1;adet;
 I03;İç duvar panoları;Kademe dolu panosu;597.5×60×2500;4;adet;
@@ -22,6 +23,7 @@ I09;İç duvar panoları;Özel dolu pano;577.5×60×2500;1;adet;
 I11;İç duvar panoları;İç kapılı pano;1255.0×60×2500;4;adet;"Doğrama ayrıca sayılır; pano tek adet."
 I12;İç duvar panoları;İç kapılı özel pano;1205.0×60×2500;2;adet;"Portman motor tarafından otomatik tahsis edildi; teyit edilmeli."
 K01;Kapı ve pencereler;İç kapı;820;6;adet;"820 mm plandaki açıklıktır; ürün eni/boyu ve açılış yönü siparişte teyit edilmeli."
+K03;Kapı ve pencereler;Dış kapı 90;900.0;1;adet;"900 mm plandaki açıklıktır; ürün ölçüsü siparişte teyit edilmeli."
 P02;Kapı ve pencereler;Pencere 120×180;1200×1800;1;adet;"Ölçü en × yükseklik; eşik 200 mm."
 P03;Kapı ve pencereler;Vasistas 60×40;600×400;1;adet;"Ölçü en × yükseklik; eşik 1600 mm."
 P04;Kapı ve pencereler;Pencere 60×125;600×1250;1;adet;"Ölçü en × yükseklik; eşik 750 mm. Portman motor tarafından otomatik tahsis edildi; teyit edilmeli."

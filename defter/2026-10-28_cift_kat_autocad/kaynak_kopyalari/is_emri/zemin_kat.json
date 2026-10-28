@@ -241,6 +241,16 @@
         "MUTFAK"
       ],
       "pano": 0
+    },
+    {
+      "tur": "dis_kapi",
+      "olcu": 90,
+      "arasi": [
+        "__DIS__",
+        "WC HOLÜ"
+      ],
+      "duvar": "sag",
+      "pano": 0
     }
   ],
   "dikmeler": [
@@ -276,12 +286,12 @@
     "Merdiven çıkması (arkaya 125,5, 318,75–507 arası) bu taslakta YOK: Motor çıkma çizmiyor. MERDİVEN mahali yalnız gövdedeki 125,5'lik parçayı gösterir; merdivenin kendisi çizilmez (İE-22 PR-1).",
     "Balkon gövdenin içinde açık mahal (444,25–758 × 574,75–696); plandaki 30 cm'lik taşma (706 → 736) bu taslakta yok. Ön-sağ köşede 10 × 10 dikme.",
     "Pencereler D-15 ile odaya ortalı (dizilim.pencere: oda_ortasi); mutfak ön penceresi plandaki yere göre sağdaki panoda (pano 1). Fransız pencere 120/200 Motor'un sınırında (boy ≤ 180) olmadığından 120x180 alındı; 120/125 standart pencere 120x125 (eşik 75).",
-    "Giriş kapısı planda çizili değil; eklenmedi (eksikler). Kapılar iç 82 (K04), panoda ortada, kapı mantığıyla (D-15).",
+    "Kapılar iç 82 (K04), panoda ortada, kapı mantığıyla (D-15).",
     "Çatı tek kat gibi beşik, %33, saçak 30, topuk 10; makas kısa kenarı (y, 706) geçer. Merdiven çıkmasının çatısı sorulacak.",
-    "Salonun sol penceresi odaya ortalanınca (oda_ortasi) pencereli pano kesilmiş son panonun derzine 0,625 cm kala bitiyor ve Motor 0,6 cm'lik kıymık pano üretip doğrulamada düşüyordu; bu taslakta pencere ızgara panosunda (pano 0, 386,5–512; plandaki yerinden 51 cm arkada). Motor'un bu kenar durumu İE-22'de bulgu olarak yazıldı."
+    "Salonun sol penceresi odaya ortalanınca (oda_ortasi) pencereli pano kesilmiş son panonun derzine 0,625 cm kala bitiyor ve Motor 0,6 cm'lik kıymık pano üretip doğrulamada düşüyordu; bu taslakta pencere ızgara panosunda (pano 0, 386,5–512; plandaki yerinden 51 cm arkada). Motor'un bu kenar durumu İE-22'de bulgu olarak yazıldı.",
+    "Giriş kapısı (Lokman 28.10 12:34, plandaki işaretle): sağ cephede, WC holünün sağ dış duvarında, WC'ye yakın panoda (arkadan pano 0), 90'lık, içeri açılır. Motor'da __DIS__–WC HOLÜ, duvar: sag."
   ],
   "eksikler": [
-    "Giriş kapısının yeri (planda yok).",
     "Merdiven çıkması ve merdiven (kol eni, rıht, sahanlık).",
     "Balkonun 30 cm'lik taşması ve balkon döşemesi/korkuluğu."
   ]

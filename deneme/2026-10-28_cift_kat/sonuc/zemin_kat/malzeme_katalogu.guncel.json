@@ -530,6 +530,30 @@
       "note": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli.",
       "unit": "adet"
     },
+    "D18": {
+      "code": "D18",
+      "group": "Dış duvar panoları",
+      "label": "Dış kapılı pano",
+      "dimensions_mm": [
+        1255.0,
+        100,
+        2500
+      ],
+      "note": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli.",
+      "unit": "adet"
+    },
+    "K03": {
+      "code": "K03",
+      "group": "Kapı ve pencereler",
+      "label": "Dış kapı 90",
+      "dimensions_mm": [
+        900.0,
+        null,
+        null
+      ],
+      "note": "900 mm plandaki açıklıktır; ürün ölçüsü siparişte teyit edilmeli.",
+      "unit": "adet"
+    },
     "V05": {
       "code": "V05",
       "group": "Bağlantı ve veranda",
