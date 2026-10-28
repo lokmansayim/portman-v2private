@@ -28,7 +28,7 @@ Kapanış, "çalışıyor" demenin kanıtını üretir. Sıra sabittir; bir adı
 ## 4. Kanıt ve belge
 - İş emri belgesinin **Kanıt** bölümüne tarih-saat, komut ve sonuç satırlarını yaz (BK-01 biçimi). "Çalışıyor" yalnız bu satırlarla yazılır.
 - **Üretim kuralı (D-28):** iş bir çıktıyı (çizim, liste, rehber, teklif) üretiyor ya da değiştiriyorsa üç soruyu yanıtla: çıktı `main`'e girecek tek bir komutla mı üretildi (oturum betiği ya da elle düzeltme yok); Lokman'ın onayladığı hedef örnek depoda nerede; hangi test onu CI'da kıyaslıyor. Biri "yok"sa iş kapanmaz ya da açık `KARARLAR/D-28.md` › "Bugünkü açıklar" tablosuna satır olarak yazılır.
-- `DURUM.md`: dosyanın başına tarihli bir ek paragraf (dal, iş kodu, yapılan, gerileme sonucu, sınırlar, bekleyen onay). Bu dal `main` dışındaysa "ie-NN birleşirken bu paragraf elle taşınır" notunu koru.
+- Durum eki: yeni dosya `docs/durum/<YYYY-MM-DD>_<HHMM>_<KOD>.md` (UTC saat; dal, iş kodu, yapılan, gerileme sonucu, sınırlar, bekleyen onay). Aynı işin önceki ekini güncelleyebilirsin; başka işin ekine ve `DURUM.md`'ye dokunma (ortak satırlar her birleşmede çakışıyordu, 28 Ekim 2026).
 - Pencere dolmak üzereyse `docs/devir/<tarih>_<kod>.md` devir notu yaz (nerede kalındı, sıradaki adım, bilinen tuzaklar).
 
 ## 5. Commit ve push
