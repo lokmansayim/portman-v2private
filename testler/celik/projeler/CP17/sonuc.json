@@ -1,0 +1,49 @@
+{
+ "aciklama": "Çelik hakeminin sonucu (İE-16). Yalnız tutanlar: çelik kg kapısının sonucu (farkı yalnız geçtiyse), adedi tutan çelik türleri ve adedi tutan öteki satırlar (anahtar ve bizim adedimiz). Tutmayan satırların gerçek değeri depoya girmez; sayilar kıyasın özetidir.",
+ "kod": "ÇP-17",
+ "tarih": "2026-10-28",
+ "kiyas_commit": "be55c8341beedc52e293ef2784f4da094bca1ed9",
+ "bizim_liste": {
+  "yol": "testler/celik/projeler/CP17/bizim_liste.json",
+  "commit": "3c5f63850db18bfbf4f3bc669242419c8a7a8987"
+ },
+ "muhur": {
+  "sha256": "551b7d6817e4924f6605596d9e003d3c7f78fe514faa98201163e885edd839e1",
+  "bayt": 186835,
+  "durum": "kor",
+  "kayit_durumu": "kor",
+  "liste_sayfasi": 0,
+  "muhur_commit": "558dfc49b54370cf15bb7c1d533d9246b96abdd6"
+ },
+ "celik_kg_kapisi": {
+  "sonuc": "geçmedi",
+  "pay_yuzde": 3.0,
+  "kapi_disi": [],
+  "kapi_disi_bizim_kg": null,
+  "fark_yuzde": null
+ },
+ "celik_turleri_tutan": [
+  {
+   "tur": "duvar_paneli",
+   "adet": 18
+  }
+ ],
+ "sayilar": {
+  "aynı": 9,
+  "farklı": 10,
+  "adet okunamadı": 0,
+  "bizde yok": 58,
+  "bizde fazla": 54
+ },
+ "tutanlar": [
+  {"grup": "ELEKTRIK", "ad": "UYDU KABLO", "olcu": [], "adet": 25},
+  {"grup": "ELEKTRIK", "ad": "BESLEME KABLOSU SIGORTA KUTULARI ARASI", "olcu": [], "adet": 5},
+  {"grup": "ELEKTRIK", "ad": "BESLEME KABLO BORUSU", "olcu": [], "adet": 5},
+  {"grup": "ELEKTRIK", "ad": "ZIL", "olcu": [], "adet": 1},
+  {"grup": "ELEKTRIK", "ad": "SIGORTA KUTUSU", "olcu": [12.0], "adet": 1},
+  {"grup": "ELEKTRIK", "ad": "IZOLE BANT", "olcu": [], "adet": 6},
+  {"grup": "VIDA", "ad": "5 5 X 60 TRAPEZ VIDA TRAPEZ SAC METAL KIREMIT", "olcu": [], "adet": 250},
+  {"grup": "VIDA", "ad": "5 5X 110 TRAPEZ VIDA SANDVIC PANEL", "olcu": [], "adet": 750},
+  {"grup": "VIDA", "ad": "CIRPI IPI", "olcu": [], "adet": 1}
+ ]
+}
