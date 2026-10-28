@@ -29,7 +29,7 @@ KOK = Path(__file__).resolve().parents[1]
 if str(KOK) not in sys.path:
     sys.path.insert(0, str(KOK))
 from araclar import fiyatla as F  # noqa: E402
-from araclar.liste_excel import RENK, TL, _stil, buyuk, eksik, gorunen, liste_sayfasi  # noqa: E402,F401
+from araclar.liste_excel import RENK, TL, _stil, buyuk, eksik, gorunen, liste_sayfasi, tl_yazi  # noqa: E402,F401
 from motor import prefabrik_liste as PL  # noqa: E402
 
 KOSULLAR = KOK / "kurallar" / "teklif" / "kosullar.json"
@@ -47,6 +47,9 @@ def kaynak_durumu(s: dict, defter: dict, hat: str) -> tuple[str, dict | None]:
         alt, ust = b[1]["en_mm"]
         return "bant", {"fiyat": b[1]["fiyat"], "kaynak": b[0]["kaynak"], "kaynak_satir": b[0].get("kaynak_satir"),
                         "kaynak_kalem": b[0].get("kaynak_kalem"), "onay": b[1]["onay"], "not": f"pano eni bandı {alt:g}–{ust:g} mm"}
+    if hat == "prefabrik" and (bo := F.boy_onerisi_bul(s, H.get("boy_onerileri") or [])):
+        return "boy önerisi", {"fiyat": bo[1], "kaynak": bo[0]["kaynak"], "kaynak_satir": bo[0].get("kaynak_satir"),
+                               "kaynak_kalem": bo[0].get("kaynak_kalem"), "onay": bo[0]["onay"], "not": bo[0].get("dayanak")}
     return "defterde yok", None
 
 
@@ -95,6 +98,25 @@ def uret(ie: dict, defter: dict, secim: list[tuple[str, dict]], kosullar: dict, 
 
 # ── Excel ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 
+def uyari(o: dict) -> str:
+    """Özet'te toplamın yanındaki uyarı (CIO, 28 Ekim): fiyatsız satır varsa toplam eksiktir; onay bekleyen önerilerin tutarı ayrıca."""
+    if not o["fiyatsiz"]:
+        return ""
+    b = o.get("oneri_bekleyen") or {}
+    return (f"{len(o['fiyatsiz'])} satır fiyatsız, toplam eksik"
+            + (f"; {b['satir']} satırda onay bekleyen öneri var, onaylanırsa +{tl_yazi(b['tutar'])} TL" if b.get("satir") else ""))
+
+
+def oneri_nedeni(f: dict, kayit: dict) -> str | None:
+    """Fiyatı olmayan satırın Neden'i, onay bekleyen öneri varsa (sarı; toplama girmez): önerinin dayanağı defterdeki kaydın notu, boy
+    önerisinde yöntem, bantta bant."""
+    if f.get("oneri_fiyat") is None:
+        return None
+    yol = (kayit.get("not") or "defterdeki öneri") if kayit else ("tam boyun fiyatından boyla orantılı" if f["durum"].startswith("öneri boy")
+                                                                  else "pano eni bandı")
+    return f"öneri birim fiyat {tl_yazi(f['oneri_fiyat'])} TL ({yol}); onay bekliyor, toplama girmedi"
+
+
 def excel_yaz(T: dict, defter: dict, yol: Path) -> None:
     from openpyxl import Workbook
     Alignment, Border, Font, dolgu, Side = _stil()
@@ -108,7 +130,7 @@ def excel_yaz(T: dict, defter: dict, yol: Path) -> None:
         return _kd[a]
     def durum_renk(s: dict) -> str | None:
         if s["birim_fiyat"] is None:
-            return "gri"
+            return "sari" if s.get("oneri_fiyat") is not None else "gri"   # onay bekleyen öneri: sarı, toplama girmez
         if s["durum"].startswith("öneri"):                  # onaysız öneri (yalnız --oneri ile)
             return "öneri"
         d = kd(s)[0]
@@ -117,7 +139,8 @@ def excel_yaz(T: dict, defter: dict, yol: Path) -> None:
     kimlik = f"{T['is_emri_no']} r{T['revizyon']:02d}" if isinstance(T.get("revizyon"), int) else str(T.get("is_emri_no"))
     acik = (f"İş Emri {kimlik}; liste Motor'dan, fiyat defterden ({T['defter_surumu']}"
             + ("; onaysız öneriler dahil" if T["oneri_dahil"] else "") + "). Fiyatı boş satır toplama girmez. "
-            "Birim fiyat rengi: turuncu onaylı öneri, mavi Haziran malzeme listesi, gri fiyat yok. Gri satır: Motor'da kuralı yok.")
+            "Birim fiyat rengi: turuncu onaylı öneri, mavi Haziran malzeme listesi, sarı onay bekleyen öneri (Not'ta; toplama girmez), gri fiyat yok. "
+            "Gri satır: Motor'da kuralı yok.")
     for sec in T["secenekler"]:
         liste_sayfasi(wb.create_sheet(sec["ad"]), sec["fiyat"], f"{T['kod']} · teklif · {sec['ad']} · TASLAK", acik, durum_renk)
 
@@ -125,12 +148,14 @@ def excel_yaz(T: dict, defter: dict, yol: Path) -> None:
     oz.append([f"{T['kod']} · teklif · TASLAK"]); oz["A1"].font = Font(bold=True, size=13)
     oz.append([acik]); oz["A2"].alignment = Alignment(wrap_text=True, vertical="top"); oz.merge_cells("A2:D2"); oz.row_dimensions[2].height = 32
     oz.append([])
-    oz.append(["Seçenek", "Toplam", "Fiyatsız satır", "Satır"])
+    oz.append(["Seçenek", "Toplam", "Fiyatsız satır", "Satır", "Uyarı"])
     for c in oz[oz.max_row]: c.font = B
     for sec in T["secenekler"]:
         o = sec["fiyat"]["ozet"]
-        oz.append([sec["ad"], o["toplam"], len(o["fiyatsiz"]), f"{o['satir']} satır, {o['fiyatli']} fiyatlı"])
+        oz.append([sec["ad"], o["toplam"], len(o["fiyatsiz"]), f"{o['satir']} satır, {o['fiyatli']} fiyatlı", uyari(o)])
         oz.cell(oz.max_row, 2).number_format = TL; oz.cell(oz.max_row, 2).font = B
+        if o["fiyatsiz"]:                                   # CIO, 28 Ekim: toplamın eksik olduğu toplamın yanında belirgin
+            oz.cell(oz.max_row, 5).font = Font(bold=True, color="C00000"); oz.cell(oz.max_row, 5).fill = dolgu["sari"]
     if len(T["secenekler"]) == 2:
         a, b = (s["fiyat"]["ozet"]["toplam"] for s in T["secenekler"])
         oz.append([f"Fark ({T['secenekler'][1]['ad']} − {T['secenekler'][0]['ad']})", round(b - a, 2)]); oz.cell(oz.max_row, 2).number_format = TL
@@ -164,9 +189,9 @@ def excel_yaz(T: dict, defter: dict, yol: Path) -> None:
             if f["anahtar"] in goruldu: continue
             goruldu.add(f["anahtar"])
             kayit = defter["hatlar"]["prefabrik"]["kalemler"].get(f["anahtar"]) or {}
-            neden = eksik(satir[f["sira"]]) or kayit.get("not") or f["durum"]
+            neden = eksik(satir[f["sira"]]) or oneri_nedeni(f, kayit) or kayit.get("not") or f["durum"]
             oz.append([f["anahtar"].replace(" | ", " · ")] + [a.get(f["anahtar"]) for a in adet] + bos + [neden])
-            oz.cell(oz.max_row, 1).fill = dolgu["gri"]
+            oz.cell(oz.max_row, 1).fill = dolgu["sari" if f.get("oneri_fiyat") is not None else "gri"]
     oz.append([])
     oz.append(["Kaynaklar: " + "; ".join(v["kisa"] for v in defter["kaynaklar"].values() if v.get("patron_verdi")) + " (Patron'un verdiği listeler)."])
     for col, w in zip("ABCDE", (58, 16, 16, 22, 90)): oz.column_dimensions[col].width = w

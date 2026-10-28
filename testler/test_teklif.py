@@ -40,12 +40,12 @@ def T(cikti):
 
 
 def test_tk01_toplamlar(T):
-    """İş Emri r05, defter 2026-10-27-r02, adet düzeltmesi olmadan. Vitrifiye ıslak hacim başına bir takım (banyo ve E. banyo: 2; Lokman
+    """İş Emri r05, defter 2026-10-28-r03 (r02'ye yalnız kiriş boy önerisi eklendi), adet düzeltmesi olmadan. Vitrifiye ıslak hacim başına bir takım (banyo ve E. banyo: 2; Lokman
     27 Ekim 22:00). İlk hâli teklif çalışmasının r06'sıyla aynıydı (asma 419.771,13, ters 418.500,13, 9 satır fiyatsız; PR-2 kabulü). Lokman
     28 Ekim kartında (A, dış yüzden dış yüze) taşan verandaların dış kirişi 3760 / 2510'dan 3860 / 2610'a uzadı; bu iki boyun fiyatı
     defterde yok (onay kalemin kendisi içindir), 11 satır fiyatsız, toplam iki kirişin eski fiyatı (3.133 + 2.092) kadar düştü."""
     assert T["kod"] == "TK-01" and T["is_emri_no"] == "PM-TK01-80M2" and T["revizyon"] == 5
-    assert T["defter_surumu"] == "2026-10-27-r02" and not T["oneri_dahil"]
+    assert T["defter_surumu"] == "2026-10-28-r03" and not T["oneri_dahil"]
     ozet = {s["ad"]: s["fiyat"]["ozet"] for s in T["secenekler"]}
     assert list(ozet) == ["Asma tavan", "Ters tavan"]
     assert ozet["Asma tavan"]["toplam"] == 414546.13 and ozet["Ters tavan"]["toplam"] == 413275.13
@@ -53,6 +53,9 @@ def test_tk01_toplamlar(T):
     assert (ozet["Ters tavan"]["satir"], ozet["Ters tavan"]["fiyatli"], len(ozet["Ters tavan"]["fiyatsiz"])) == (129, 118, 11)
     kiris = [(x["olcu"], x["birim_fiyat"]) for x in T["secenekler"][0]["fiyat"]["satirlar"] if x["kalem"] == "Kutu profil (kiriş) 100 × 100"]
     assert kiris == [("L 3860", None), ("L 1710", 1425), ("L 1710", 1425), ("L 2610", None), ("L 1200", 1000), ("L 1200", 1000)]
+    oneri = {f["anahtar"]: f["oneri_fiyat"] for f in ozet["Asma tavan"]["fiyatsiz"] if "oneri_fiyat" in f}   # sarı, toplama girmez (CIO, 28 Ekim)
+    assert oneri == {"Kutu profil (kiriş) 100 × 100 | L 3860": 3217, "Kutu profil (kiriş) 100 × 100 | L 2610": 2175, "Kaçak akım rölesi (ikili) | adet": 2000}
+    assert ozet["Asma tavan"]["oneri_bekleyen"] == ozet["Ters tavan"]["oneri_bekleyen"] == {"satir": 3, "tutar": 7392}
     vit = [x for x in T["secenekler"][0]["fiyat"]["satirlar"] if x["kalem"].startswith("Vitrifiye")]
     assert [(x["adet"], x["birim_fiyat"], x["tutar"]) for x in vit] == [(2, 12500, 25000)]
     for s in T["secenekler"]:
@@ -162,8 +165,15 @@ def test_ozet_ve_kosullar(cikti, T, tmp_path):
     for k in ("Teslim süresi", "Ödeme şekli"):
         assert rows[k][1].value is None and rows[k][1].fill.fgColor.rgb.endswith("FFF2A8") and rows[k][3].value == "Patron'dan"
     assert rows["Asma tavan"][1].value == 414546.13 and rows["Ters tavan"][1].value == 413275.13
+    for k in ("Asma tavan", "Ters tavan"):                  # CIO, 28 Ekim: toplamın yanında belirgin uyarı
+        u = rows[k][4]
+        assert u.value == "11 satır fiyatsız, toplam eksik; 3 satırda onay bekleyen öneri var, onaylanırsa +7.392 TL"
+        assert u.font.b and u.font.color.rgb.endswith("C00000")
+    sari = {r[0].value: r[4].value for r in oz.iter_rows() if r[0].fill.fgColor.rgb.endswith("FFF2A8") and r[0].value}
+    assert sari["Kutu profil (kiriş) 100 × 100 · L 3860"].startswith("öneri birim fiyat 3.217 TL (tam boyun fiyatından boyla orantılı)")
+    assert sari["Kaçak akım rölesi (ikili) · adet"].startswith("öneri birim fiyat 2.000 TL (87 m² listesinde") and len(sari) == 3
     fiyatsiz = [r[0].value for r in oz.iter_rows() if r[0].fill.fgColor.rgb.endswith("E7E7E7") and r[0].value]
-    assert len(fiyatsiz) == 11 and not any(v.startswith("Vitrifiye") for v in fiyatsiz) and any(v.startswith("Makas (baş)") for v in fiyatsiz)
+    assert len(fiyatsiz) == 8 and not any(v.startswith("Vitrifiye") for v in fiyatsiz) and any(v.startswith("Makas (baş)") for v in fiyatsiz)
     (tmp_path / "k.json").write_text(json.dumps({"kosullar": {"Teslim süresi": "DENEME 1", "Ödeme şekli": "DENEME 2"}}, ensure_ascii=False), encoding="utf-8")
     assert TK.main([str(IE), str(tmp_path / "c"), "--kosullar", str(tmp_path / "k.json")]) == 0
     J = _oku(tmp_path / "c" / "TK01_teklif.json")

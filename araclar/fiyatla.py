@@ -5,11 +5,13 @@
 
 Liste: prefabrik Motor'un listesi (`motor/prefabrik_liste.py`, satırda `olcu`) ya da genel motorun yükleme listesi
 (`python -m motor.genel.uret` → `<kod>_yukleme.json`, satırda `boyut`); hat satırlardan anlaşılır. Anahtar defterdeki gibi
-"kalem | ölçü" (çelikte "kalem | boyut"). Önce birebir anahtar, yoksa (prefabrikte) pano eni bandı. Birimi `kg` olan kalemde tutar
-satırın kg'ı × fiyat, öteki kalemlerde adet × fiyat.
+"kalem | ölçü" (çelikte "kalem | boyut"). Önce birebir anahtar, yoksa (prefabrikte) pano eni bandı, o da yoksa boy önerisi (kesilen
+profilin tam boyunun fiyatından boyla orantılı; `boy_onerileri`). Birimi `kg` olan kalemde tutar satırın kg'ı × fiyat, öteki kalemlerde
+adet × fiyat.
 
 Fiyat uydurulmaz: defterde `onay: false` olan fiyat (yedek kaynaktan öneri) yalnız `--oneri` ile uygulanır ve "öneri" diye
-işaretlenir; fiyatı olmayan satır boş kalır, özette sayılır. Defterde kaydı olan anahtar yalnız kendi kaydıyla fiyatlanır, banda
+işaretlenir; fiyatı olmayan satır boş kalır, özette sayılır. Uygulanmayan önerinin birim fiyatı satırda `oneri_fiyat` olarak durur
+(toplama girmez; teklif sarı gösterir, özette `oneri_bekleyen`). Defterde kaydı olan anahtar yalnız kendi kaydıyla fiyatlanır, banda
 düşmez. Basit yöntemin m² fiyatı defterde henüz yok: `--alan` ve `--m2-fiyat` ile verilir; verilmezse fark hesaplanmaz. `--esik` verilirse fark eşiği aşınca UYARI yazar (Z-10: eşik dışında mühendis inceler; eşik henüz
 kararla konmadı, varsayılan yok).
 """
@@ -53,6 +55,19 @@ def bant_bul(s: dict, bantlar: list[dict]) -> tuple[dict, dict] | None:
     return None
 
 
+def boy_onerisi_bul(s: dict, oneriler: list[dict]) -> tuple[dict, float] | None:
+    """Kesilen profilin boyu (ölçü "L <mm>"): kaydın tam boy fiyatından boyla orantılı birim fiyat, tam TL'ye yarım yukarı (kayıt, fiyat).
+    Defterdeki onaylı kiriş boyları (1200, 1710, 2510, 3760) bu yöntemle hesaplanmıştı; kaydı olmayan boy için yalnız öneridir."""
+    olcu = (s.get("olcu") or "").strip()
+    if not re.fullmatch(r"L \d+(?:[.,]\d+)?", olcu):
+        return None
+    n = _sayilar(olcu)[0]
+    for b in oneriler:
+        if b["kalem"] == s.get("kalem"):
+            return b, float(int(b["fiyat"] * n / b["boy_mm"] + 0.5))
+    return None
+
+
 def duzelt(L: dict, duzeltmeler: list[dict], hat: str) -> dict:
     """Patron'un adet düzeltmeleri (teklif çalışmasının duzeltmeler.json biçimi: [{"anahtar", "adet", ...}]) listenin kopyasına."""
     L = json.loads(json.dumps(L))
@@ -71,23 +86,29 @@ def fiyatla(L: dict, defter: dict, hat: str | None = None, oneri: bool = False) 
     kalemler, atla = H["kalemler"], set(H.get("atla") or [])
     satirlar, gruplar, fiyatsiz = [], {}, []
     toplam = onayli = oneri_toplam = 0.0
+    bekleyen = {"satir": 0, "tutar": 0.0}                       # uygulanmayan öneriler (toplama girmez)
     for i, s in enumerate(L["satirlar"], 1):
         if s.get("kalem") in atla:
             continue
         k = anahtar(s, hat)
         g = kalemler.get(k)
-        fiyat = tutar = None
+        fiyat = tutar = oneri_fiyat = None
         durum, kaynak, birim = "fiyat yok", None, (g or {}).get("birim") or s.get("birim")
         if g is not None:                                          # defterde kaydı olan anahtar kendi kaydıyla; banda düşmez
             if g.get("fiyat") is not None and (g["onay"] or oneri):
                 fiyat, kaynak, durum = g["fiyat"], g["kaynak"], ("onaylı" if g["onay"] else "öneri")
             elif g.get("fiyat") is not None:
-                durum = "öneri, onay bekliyor"
+                durum, oneri_fiyat = "öneri, onay bekliyor", g["fiyat"]
         elif hat == "prefabrik" and (b := bant_bul(s, H.get("bantlar") or [])):
             if b[1]["onay"] or oneri:
                 fiyat, kaynak, durum = b[1]["fiyat"], b[0]["kaynak"], ("onaylı bant" if b[1]["onay"] else "öneri bant")
             else:
-                durum = "öneri bant, onay bekliyor"
+                durum, oneri_fiyat = "öneri bant, onay bekliyor", b[1]["fiyat"]
+        elif hat == "prefabrik" and (bo := boy_onerisi_bul(s, H.get("boy_onerileri") or [])):
+            if bo[0]["onay"] or oneri:
+                fiyat, kaynak, durum = bo[1], bo[0]["kaynak"], ("onaylı boy" if bo[0]["onay"] else "öneri boy")
+            else:
+                durum, oneri_fiyat = "öneri boy, onay bekliyor", bo[1]
         else:
             durum = "defterde yok"
         miktar = s.get("kg") if birim == "kg" else s.get("adet")
@@ -105,14 +126,18 @@ def fiyatla(L: dict, defter: dict, hat: str | None = None, oneri: bool = False) 
         elif miktar != 0:                                          # adedi 0 olan satır sessiz geçer; adedi yok (kural yok) olan sayılır
             if miktar is None and fiyat is None:
                 durum = f"{durum}; {'kg' if birim == 'kg' else 'adet'} yok"
-            fiyatsiz.append({"sira": i, "anahtar": k, "miktar": miktar, "durum": durum})
+            fiyatsiz.append({"sira": i, "anahtar": k, "miktar": miktar, "durum": durum, **({"oneri_fiyat": oneri_fiyat} if oneri_fiyat is not None else {})})
+            if oneri_fiyat is not None and miktar is not None:
+                bekleyen["satir"] += 1
+                bekleyen["tutar"] += miktar * oneri_fiyat
         satirlar.append({"sira": i, "grup": s.get("grup"), "grup_adi": s.get("grup_adi"), "kalem": s["kalem"], "olcu": s.get("boyut") if hat == "celik" else s.get("olcu"),
                          "birim": birim, "adet": s.get("adet"), "kg": s.get("kg"), "birim_fiyat": fiyat, "tutar": tutar,
-                         "durum": durum, "kaynak": kaynak, "kaynak_adi": (defter["kaynaklar"].get(kaynak) or {}).get("kisa") if kaynak else None})
+                         "durum": durum, "kaynak": kaynak, "kaynak_adi": (defter["kaynaklar"].get(kaynak) or {}).get("kisa") if kaynak else None,
+                         **({"oneri_fiyat": oneri_fiyat} if oneri_fiyat is not None else {})})
     return {"hat": hat, "defter_surumu": defter.get("surum"), "oneri_dahil": oneri, "satirlar": satirlar,
             "ozet": {"toplam": round(toplam, 2), "onayli_fiyatlarla": round(onayli, 2), "onerilerle": round(oneri_toplam, 2),
                      "satir": len(satirlar), "fiyatli": sum(1 for x in satirlar if x["tutar"] is not None),
-                     "fiyatsiz": fiyatsiz, "gruplar": gruplar}}
+                     "fiyatsiz": fiyatsiz, "oneri_bekleyen": {"satir": bekleyen["satir"], "tutar": round(bekleyen["tutar"], 2)}, "gruplar": gruplar}}
 
 
 def m2_kiyasi(liste_toplami: float, alan: float, m2_fiyat: float, esik: float | None = None) -> dict:

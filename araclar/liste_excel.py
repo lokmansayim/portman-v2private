@@ -27,6 +27,18 @@ def gorunen(olcu: str | None, birim: str | None) -> tuple[str, str]:
     return olcu, BIRIM.get(birim, birim or "")
 
 
+def tl_yazi(x: float) -> str:
+    """Türkçe tutar yazısı: 3217 → "3.217", 1045.5 → "1.045,50"."""
+    y = f"{x:,.2f}".replace(",", " ").replace(".", ",").replace(" ", ".")
+    return y[:-3] if y.endswith(",00") else y
+
+
+def fiyat_notu(s: dict) -> str:
+    """Fiyatı olmayan satırın Not'u: uygulanmayan öneri varsa birim fiyatıyla (toplama girmez)."""
+    o = s.get("oneri_fiyat")
+    return "fiyat yok" if o is None else f"fiyat yok; öneri {tl_yazi(o)} TL, onay bekliyor (toplama girmedi)"
+
+
 def eksik(s: dict) -> str | None:
     """Satırın miktarı yoksa nedeni (Not sütunu, gri satır, Özet'in Neden'i hep buradan): adet ya da kg'lı kalemde kg."""
     if s.get("birim") == "kg":
@@ -65,7 +77,7 @@ def liste_sayfasi(ws, R: dict, baslik: str, aciklama: str, renk=None, kaynak_sut
         for s in ss:
             olcu, birim = gorunen(s.get("olcu"), s.get("birim"))
             neden = eksik(s)
-            notu = neden or ("fiyat yok" if s["birim_fiyat"] is None else "")
+            notu = neden or (fiyat_notu(s) if s["birim_fiyat"] is None else "")
             ws.append([s["kalem"], olcu, birim, s.get("adet")] + ([s.get("kg")] if kg else []) + [s["birim_fiyat"], s["tutar"], notu]
                       + ([s["durum"], s.get("kaynak_adi") or s.get("kaynak")] if kaynak_sutunu else []))
             r = ws[ws.max_row]
