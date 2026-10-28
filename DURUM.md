@@ -16,7 +16,8 @@ Yeni pencere için hazırlıklar:
 - **ÇP-12:** paftada müşteri onay sayfası yok (1. sayfa etiketli): tanım yazılamıyor, kör kalır. Ölçülecek kör altı: ÇP-04, 08, 17, 18, 19, 20.
 - **Kanıt:** › IE-16 Kanıt (PR-4a): tam doğrulama (harness 22/22, referansla aynı, pytest 1952 geçti, 29 atlandı), sonraki commit'lerde hızlı gerileme referansla aynı; sır taraması temiz; geometri hakemi 2. tur "Kurallara uygun" (ÇP-17…20); ÇP-04 ve ÇP-08'de 1. tur kapanmadı (ÇP-08 holün geçtiği duvar hattına kiriş yazılmamıştı; düzeltildi, +9 kg), 2. tur "Kurallara uygun"; kod incelemesinin yedi düzeltmesi (listeler değişmedi); CI PR #59'da yeşil.
 - **Kullanıcı adımları:** PR-4 **Çalışmıyor** (ölçüm yok; altı tanım ve listemiz commit'li).
-- **Bekleyen:** açılış kartı Lokman'a (geri alınmaz) ve PR-4b. ~~Büyük beş paftanın Mac'e indirilmesi~~ (27 Ekim 22:00 UTC).
+- **Açılış (Lokman, 28 Ekim 06:26 UTC, "Altısı açılsın, birleşsin"):** altı projenin listesi okunmadan indirildi; ilk indirme ve açılış kayıtları mühürde, her biri ayrı commit.
+- **Bekleyen:** PR-4a'nın `main`'e birleştirilmesi (birleştirme commit'i; kartla onaylı), sonra PR-4b (kıyas, `sonuc.json`, tablo). ~~Büyük beş paftanın Mac'e indirilmesi~~ (27 Ekim 22:00 UTC).
 
 **27 Ekim 2026 gece eki (Pano satır 12 · CI'a canlının Python'u 3.12; dal `claude/project-thread-xbdfzd`, `main` `4bab1d4`'ten; PR #51 birleşti, 21:04 UTC):**
 - **Neden:** İE-17 oturumu Python 3.13'te `testler/kimlik/test_k3b.py::test_kesim_yuvarlamasi_liste_uretecinin`'i kırmızı gördü. Canlı sunucu 3.12.3, CI ve `ortam_kur.sh` 3.11. CIO (21:18 UTC): önce 3.12'de tam koşu ölçülsün, sonra test ön koşulu ve 3.12 CI işi tek PR'da.
