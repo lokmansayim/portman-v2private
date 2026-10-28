@@ -986,7 +986,7 @@ def _kur(is_emri: dict) -> Plan:
     if ayna_y:
         _aynala_y(plan, ny2)
     if kapi_kurali == "mantik":
-        _kapi_mantigi(plan, kapi_yeri)
+        _kapi_mantigi(plan, kapi_yeri, kapi_yeri_yazili="kapi_yeri" in dizilim)
     _dis_verandalar(plan, is_emri)
     return plan
 
@@ -1176,7 +1176,7 @@ def _dayanak(duvarlar, d, e, isaret) -> bool:
     return False
 
 
-def _kapi_mantigi(plan: "Plan", kapi_yeri: str = "mentese_ucu") -> None:
+def _kapi_mantigi(plan: "Plan", kapi_yeri: str = "mentese_ucu", kapi_yeri_yazili: bool = False) -> None:
     """İE-11 `dizilim.kapi: mantik` (Lokman 13.10.2026: "iç oda kapılarının kanatları birbirine doğru açılır"; PK-01 montaj paftası).
     Gerçek çerçevede, aynadan sonra koşar. Her kapı için:
       1. Pano: İş Emri dizin vermediyse aday panolardan, ucunda açılma tarafına dik duvar (dayanak) olan seçilir (kanat duvara yaslanır).
@@ -1185,6 +1185,7 @@ def _kapi_mantigi(plan: "Plan", kapi_yeri: str = "mentese_ucu") -> None:
       3. Oda kapısı (iç kapı) menteşe ucuna kayar: boşluk o pano ucundan KAPI_YASLAMA_CM içeride. Dış kapı panoda ortada kalır (pafta).
          `dizilim.kapi_yeri: ortada` (İE-17; AP-13, AP-16 paftaları) oda kapısını da panoda ortada bırakır; 1. ve 2. adım aynı.
          Kapının kendi `kapi_yeri`'si dizilimin değerini ezer (AP-01 paftası: yedi kapı ortada, iki banyo kapısı menteşe ucunda).
+         Açıkça yazılmış "mentese_ucu" dayanaksız panoda uygulanamazsa uyarı yazılır (K21); yazılmamış varsayılan eskisi gibi sessiz.
     İş Emri menteşe yazdıysa ve kural farklı diyorsa İş Emri geçerli, uyarı yazılır."""
     duvarlar = plan.duvarlar
     tum = [(d, p) for d in duvarlar for p in d.panolar]
@@ -1247,8 +1248,11 @@ def _kapi_mantigi(plan: "Plan", kapi_yeri: str = "mentese_ucu") -> None:
                 uc = 0 if d0 else 1
             else:
                 uc = None
-            if uc is None:
-                continue                                        # dayanak yok: İş Emri menteşesi ve ortalı kapı kalır
+            if uc is None:                                      # dayanak yok: İş Emri menteşesi ve ortalı kapı kalır
+                if acl.tur == "ic_kapi" and (acl.kapi_yeri or (kapi_yeri if kapi_yeri_yazili else None)) == "mentese_ucu":
+                    plan.uyarilar.append(f"Kapı {'–'.join(acl.arasi)}: kapi_yeri mentese_ucu yazılı ama panonun iki ucunda da dayanak yok; "
+                                         "kapı panoda ortada kaldı")
+                continue
             # menteşe adı: açılma yönünde yürürken sol / sağ (`mentese_ucu`, `kapi_varyanti` ile aynı sözleşme)
             acl.mentese = "sol"
             kural = "sol" if mentese_ucu(acl) == uc else "sag"

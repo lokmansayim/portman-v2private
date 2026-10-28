@@ -10,7 +10,7 @@ menteşe ucunda) ayrıca kilitlenir.
 - `dizilim.hiza: tam_izgara`: ekler yalnız tam akslarda, iç duvar T'de bölünmez.
 - `dizilim.kapi_yeri: ortada` (ya da kapının kendi `kapi_yeri`'si): oda kapısı panoda ortada; varsayılan menteşe ucunda 11,5.
 - `acikliklar[].duvar_ucu`: kapının panosu ortak duvarın o ucundaki kavşaktan başlayan tam pano.
-- K21: `kisa_kenar: y` makas y'siz hata, makas y + `kisa_kenar` x uyarı; `dizilim` kapalı küme; `kapi_yeri` yalnız oda kapısında.
+- K21: `kisa_kenar: y` makas y'siz hata, makas y + `kisa_kenar` x uyarı; `dizilim` kapalı küme; `kapi_yeri` yalnız oda kapısında; yazılı "mentese_ucu" dayanaksız panoda uyarı.
 """
 from __future__ import annotations
 import copy
@@ -169,6 +169,21 @@ def test_kapinin_kendi_yeri_dizilimi_ezer():
     for a, b, kayik in [("YATAK ODASI 2", "EBV BANYO 2", True), ("YATAK ODASI 3", "EBV BANYO 3", True), ("HOL VE KORİDOR", "SALON", False)]:
         d, p = _kapi(plan, a, b)
         assert (abs(p.acilim.kayma) == pytest.approx((p.boy - 82) / 2 - G.KAPI_YASLAMA_CM)) if kayik else p.acilim.kayma == 0.0, (a, b)
+
+
+def test_yazili_mentese_ucu_dayanaksiz_uyari():
+    # K21: açıkça yazılmış "mentese_ucu" dayanaksız panoda uygulanamaz → uyarı (AP-13 salon–yatak odası 1 kapısının panosunda dayanak yok);
+    # anahtar yazılmamışsa varsayılan eskisi gibi sessiz (İE-11)
+    uyari = lambda ie: [u for u in _kur(ie).uyarilar if "dayanak yok" in u]
+    ie = _ie("AP13")
+    assert uyari(ie) == []                                                            # ortada: uyarı yok
+    ie["yapi"]["dizilim"]["kapi_yeri"] = "mentese_ucu"
+    assert uyari(ie) == ["Kapı SALON+MUTFAK–YATAK ODASI 1: kapi_yeri mentese_ucu yazılı ama panonun iki ucunda da dayanak yok; "
+                         "kapı panoda ortada kaldı"]
+    del ie["yapi"]["dizilim"]["kapi_yeri"]
+    assert uyari(ie) == []
+    next(a for a in ie["acikliklar"] if a.get("arasi") == ["SALON+MUTFAK", "YATAK ODASI 1"]).update(kapi_yeri="mentese_ucu")
+    assert len(uyari(ie)) == 1                                                        # kapının kendi anahtarı da yazılı sayılır
 
 
 @pytest.mark.parametrize("degis, mesaj", [
