@@ -7,7 +7,7 @@ Blok adı = malzeme adı. Geometri Motor'un panoları (Astra v1.4.3), adlar Gün
 | 100'LÜK 115.5'LİK (60x125) PENCERELİ PANO | 1 | 0 | 1 | yeni (kural) |
 | 100'LÜK 115.5'LİK (60x40) VASİSTASLI PANO | 1 | 1 | 2 | yeni (kural) |
 | 100'LÜK 115.5'LİK K01_SAG_ALT_B PANO | 1 | 0 | 1 | yeni (kural) |
-| 100'LÜK 115.5'LİK KAPILI PANO(82'LİK) | 1 | 0 | 1 | yeni (kural) |
+| 100'LÜK 115.5'LİK K01_SOL_ALT_KAYM77p5 PANO | 1 | 0 | 1 | yeni (kural) |
 | 100'LÜK 115.5'LİK PANO | 0 | 2 | 2 | yeni (kural) |
 | 100'LÜK 116.25'LİK KAPILI PANO(90'LIK) | 0 | 1 | 1 | yeni (kural) |
 | 100'LÜK 116.25'LİK PANO | 1 | 0 | 1 | yeni (kural) |

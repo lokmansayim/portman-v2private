@@ -215,8 +215,8 @@
       "tur": "ic_kapi",
       "olcu": 82,
       "arasi": [
-        "WC",
-        "WC HOLÜ"
+        "WC HOLÜ",
+        "WC"
       ],
       "duvar_ucu": "sol",
       "kapi_yeri": "mentese_ucu"
@@ -238,7 +238,7 @@
         "BALKON",
         "MUTFAK"
       ],
-      "duvar_ucu": "sol"
+      "pano": 0
     },
     {
       "tur": "dis_kapi",
@@ -292,7 +292,9 @@
     "Lokman 28.10 14:31 (PDF işaretleri): HOL–WC HOLÜ kapısı kaldırıldı (planda duvar); ODA, WC, mutfak ve salon–mutfak kapıları işaretlediği köşelere bitişik panolara (duvar_ucu), menteşe köşede (kapı mantığı).",
     "Lokman 28.10 14:43: HOL–WC HOLÜ arası açık sınır (duvar yok): dış kapıdan giren holden eve girer.",
     "Lokman 28.10 14:49: mutfaktaki kapı salona değil balkona açılır → SALON–MUTFAK iç kapısı kaldırıldı, MUTFAK–BALKON dış kapısı 90 (SALON/MUTFAK duvarına bitişik uçta, içeri açılır).",
-    "Lokman 28.10 14:51: WC kapısı WC'den hole açılır, sola, sol duvara yaslı (duvar_ucu sol, kapi_yeri mentese_ucu); mutfak kapısı sol duvara yaslı; ODA kapısı köşeye yaslı."
+    "Lokman 28.10 14:51: WC kapısı WC'den hole açılır, sola, sol duvara yaslı (duvar_ucu sol, kapi_yeri mentese_ucu); mutfak kapısı sol duvara yaslı; ODA kapısı köşeye yaslı.",
+    "Lokman 28.10 14:55: WC kapısı WC'nin içine açılır (dışına değil), sol duvara yaslı.",
+    "Lokman 28.10 14:56: balkon kapısı mutfak kapısıyla aynı hizada (aynı pano sütunu 512–637,5; pano 0)."
   ],
   "eksikler": [
     "Merdiven çıkması ve merdiven (kol eni, rıht, sahanlık).",

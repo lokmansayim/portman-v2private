@@ -211,5 +211,11 @@ Biçim: `A### · saat · başlık` — Ne / Nerede / Sonuç / Durum (yapıldı �
 - Üretici: silinmiş varlıklara dokunma hatası (`is_alive`) düzeltildi. A4 v4 gönderildi; Mac'e kopyalandı.
 - Durum: yapıldı; kanat çakışması Lokman'ın kararında.
 
+### A043 · 14:55–15:02 · Lokman: "10 cm kolonları belirtmene gerek yok" · "WC kapısı WC'nin içine" · "mutfak kapısını balkon kapısıyla aynı hizaya al"
+- Kıyas zincirinde çıkma yalnız net 125,5 (kolon 10'ları ölçülenmez). WC kapısı `arasi` [WC HOLÜ, WC] (içeri), sol duvara yaslı (mentese_ucu çalıştı: kova/WC duvarı dayanak) → doğrulama geçti (kanat çakışması kalktı).
+- Balkon kapısı: `duvar_ucu: sol` Motor'da balkon arka duvarının SOL ucunu (salon sağ duvarı, 449,25) aldığından kapı salon/mutfak duvarının üstüne düşmüştü (bulgu: duvar_ucu, mahal sınırını değil duvar ucunu alıyor) → `pano: 0` ile 512–637,5 sütunu; mutfak üst kapısıyla aynı sütun (ikisi de panoda ortada, merkez 574,75). pano 1 pencereyle çakışıyor.
+- A4 v5 gönderildi; Mac'e kopya.
+- Durum: yapıldı.
+
 ### A035 · — · Sıradaki: Soru 2b (zeminde kovaya giriş: önü açık mı, planda ön duvar çizili) → Soru 4 (Fransız pencere) → 5 (çıkma çatısı) → 6 → 7 → 8 (et) → 9 → İş Emri JSON → Motor (PR-1: bulgu 7–8)
 - Durum: bekliyor (Lokman).

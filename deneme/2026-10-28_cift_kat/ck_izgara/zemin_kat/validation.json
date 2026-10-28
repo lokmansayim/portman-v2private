@@ -1,8 +1,6 @@
 {
-  "passed": false,
-  "errors": [
-    "Kapı kanatları çakışıyor: WC–WC HOLÜ / __DIS__–WC HOLÜ"
-  ],
+  "passed": true,
+  "errors": [],
   "outer_cm": [
     753.0,
     706.0
@@ -30,11 +28,11 @@
     },
     {
       "kind": "kapi",
-      "name": "BOM_I12_1205p0_IC_K01_SAG_ALT",
+      "name": "BOM_I12_1205p0_IC_K01_SOL_ALT_KAYM77p5",
       "gap": [
-        594.0,
+        586.25,
         565.5,
-        676.0,
+        668.25,
         575.5
       ],
       "length": 82.0
@@ -154,7 +152,6 @@
   "wall_overlap": true,
   "altin": null,
   "warnings": [
-    "Kapı WC–WC HOLÜ: kapi_yeri mentese_ucu yazılı ama panonun iki ucunda da dayanak yok; kapı panoda ortada kaldı",
     "Kapı WC HOLÜ–MUTFAK: kapi_yeri mentese_ucu yazılı ama panonun iki ucunda da dayanak yok; kapı panoda ortada kaldı"
   ],
   "scope": "Ön onay taslağı; statik, üretim, BOM veya yeni oda tasarımı değildir",

@@ -542,8 +542,8 @@ for kat_adi, _, dx in KATLAR:
     _zincir([kx, kx + 454.25, kx + 763], -90, True)                # alt: ön duvar | balkon (kiriş dış yüzüne kadar)
     _zincir([0, 706], kx - 40, False)                              # sol: 706
     _zincir([0, 706], kx + 763 + 40, False)                        # sağ: 706
-    _zincir([706, 831.5, 841.5], XB_ + 40, False)                  # çıkma: net pano 125,5 + köşe profili 10 (sağ yan)
-    _zincir([706, 831.5, 841.5], XA_ - 40, False)                  # çıkma: net pano 125,5 + köşe profili 10 (sol yan)
+    _zincir([706, 831.5], XB_ + 40, False)                         # çıkma: net pano 125,5 (10'luk kolonlar ölçülenmez — Lokman 14:55)
+    _zincir([706, 831.5], XA_ - 40, False)
     _zincir([0, 841.5], kx + 763 + 80, False)                      # çıkmayla toplam 841,5
     _zincir([-40, 0], kx + 454.25 - 40, False)                     # balkon kiriş çizgisi 40 dışarıda (Lokman 14:43)
     H.add_text(f"{kat_adi} · DIŞ ÖLÇÜLER (dış yüzden dış yüze) · Lokman 14:36: iç ölçüler yok, sıra sıra",
