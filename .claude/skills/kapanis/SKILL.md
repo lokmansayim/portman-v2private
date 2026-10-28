@@ -27,7 +27,8 @@ Kapanış, "çalışıyor" demenin kanıtını üretir. Sıra sabittir; bir adı
 
 ## 4. Kanıt ve belge
 - İş emri belgesinin **Kanıt** bölümüne tarih-saat, komut ve sonuç satırlarını yaz (BK-01 biçimi). "Çalışıyor" yalnız bu satırlarla yazılır.
-- `DURUM.md`: dosyanın başına tarihli bir ek paragraf (dal, iş kodu, yapılan, gerileme sonucu, sınırlar, bekleyen onay). Bu dal `main` dışındaysa "ie-NN birleşirken bu paragraf elle taşınır" notunu koru.
+- **Üretim kuralı (D-28):** iş bir çıktıyı (çizim, liste, rehber, teklif) üretiyor ya da değiştiriyorsa üç soruyu yanıtla: çıktı `main`'e girecek tek bir komutla mı üretildi (oturum betiği ya da elle düzeltme yok); Lokman'ın onayladığı hedef örnek depoda nerede; hangi test onu CI'da kıyaslıyor. Biri "yok"sa iş kapanmaz ya da açık `KARARLAR/D-28.md` › "Bugünkü açıklar" tablosuna satır olarak yazılır.
+- Durum eki: yeni dosya `docs/durum/<YYYY-MM-DD>_<HHMM>_<KOD>.md` (UTC saat; dal, iş kodu, yapılan, gerileme sonucu, sınırlar, bekleyen onay). Aynı işin önceki ekini güncelleyebilirsin; başka işin ekine ve `DURUM.md`'ye dokunma (ortak satırlar her birleşmede çakışıyordu, 28 Ekim 2026).
 - Pencere dolmak üzereyse `docs/devir/<tarih>_<kod>.md` devir notu yaz (nerede kalındı, sıradaki adım, bilinen tuzaklar).
 
 ## 5. Commit ve push
@@ -36,5 +37,6 @@ Kapanış, "çalışıyor" demenin kanıtını üretir. Sıra sabittir; bir adı
 - `git push -u origin <iş dalı>`. **main'e push ve merge yok.**
 
 ## 6. PR ve özet
-- `gh` varsa taslak PR aç: `gh pr create --draft --base main --title "<KOD> · <başlık>" --body-file <geçici dosya>`; yoksa karşılaştırma bağlantısını yaz (`https://github.com/lokmansayim/portman-v2private/compare/main...<dal>`).
+- Taslak PR aç: `gh pr create --draft --base main --title "<KOD> · <başlık>" --body-file <geçici dosya>` ya da GitHub MCP `create_pull_request` (`draft: true`); ikisi de yoksa karşılaştırma bağlantısını yaz (`https://github.com/lokmansayim/portman-v2private/compare/main...<dal>`). GitHub doğrulaması taslakta koşmaz (dakika, `AGENTS.md` › Değişiklik disiplini).
+- Birleştirme onayı alınınca (ya da onay sorulmadan hemen önce): güncel `main`'i dala al, PR'ı hazır yap (`gh pr ready` ya da MCP `update_pull_request`, `draft: false`), "Doğrulama sonucu" yeşil olunca birleştir; kırmızıysa düzelt, birleştirme yok.
 - Lokman'a 6 satırlık özet: ne değişti, kanıt sayıları, inceleme bulguları, kalan riskler, onayını bekleyen şeyler, sıradaki iş. Son cümle: **"main'e birleştirme senin onayınla."**
