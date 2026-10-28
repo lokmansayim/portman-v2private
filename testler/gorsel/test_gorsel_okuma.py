@@ -395,10 +395,11 @@ def test_pano_izgarasinin_kisa_ucu_sorulur():
 
 def test_makas_y_ise_kisa_kenar_y_izgara_aynasi_motor_cizer(tmp_path):
     """İE-17 köşe kuralı: makas y'yi geçiyorsa `yapi.kisa_kenar: y`, ızgara x ↔ y aynası (x aksları dış duvarın ekseninden, y iç
-    yüzden); Motor kısa kenar uyarısı vermeden çizer. Mahya görünmüyorsa makas kısa yönü geçer, ızgara o yönün köşesiyle denetlenir."""
+    yüzden); Motor kısa kenar uyarısı vermeden çizer (önde taşan verandayla)."""
     from motor import dxf_out
     x = GO.denetle(iki_oda(898, 763, 386.5))["cevrim"]["is_emri"]
     o = iki_oda(763, 898, 381.5); o["cati"]["mahya"] = "girise_paralel"
+    o["verandalar"] = [{"kenar": "alt", "bas_cm": 0, "bit_cm": 381.5, "derinlik_cm": 200}]      # taşan veranda (BK-14) kısa kenar y'de
     d = GO.denetle(o)
     assert d["sorular"] == [] and d["cizilemez"] == [], (d["sorular"], d["cizilemez"])
     y = d["cevrim"]["is_emri"]
@@ -413,9 +414,31 @@ def test_makas_y_ise_kisa_kenar_y_izgara_aynasi_motor_cizer(tmp_path):
     v = json.loads((tmp_path / "plan" / "validation.json").read_text(encoding="utf-8"))
     assert v["passed"] is True, v.get("errors")
     assert not any("kisa_kenar" in w for w in v.get("warnings", [])), v["warnings"]
-    o = iki_oda(898, 763, 386.5); o["cati"]["mahya"] = None            # geniş gövde: makas y, x ızgarası 5 cm'den → 8,98 m oturmaz
-    d = GO.denetle(o)
-    assert d["cevrim"] is None and any("ön cephesi 8,98 m" in s and "8,88 m ve 9,51 m" in s for s in d["sorular"]), d["sorular"]
+
+
+def mahyasiz(W: float, H: float) -> dict:
+    o = iki_oda(W, H, 386.5); o["cati"]["mahya"] = None
+    return GO.denetle(o)
+
+
+def test_mahya_gorunmuyorsa_makas_izgaraya_oturan_yon_varsayim_bayiye():
+    """Geometri hakemi (28 Ekim): mahya görünmeyen çizimde makas ızgarayı da belirler. Önce W ≤ H + 50 → x; o yönde soru çıkıp öteki
+    yönde plan çiziliyorsa öteki, notla; ikisinde de çizilmiyorsa soru, varsayım mesajda (K21). Önerilen ölçüyü seçen bayiye yeni soru
+    çıkmaz (makas eşiği dönse de)."""
+    d = mahyasiz(898, 763)                     # ilk yön y (8,98 > 7,63 + 0,50): x ızgarası 5 cm'den, 8,98 oturmaz; x yönünde çizilir
+    assert d["sorular"] == [] and d["cevrim"]["is_emri"]["yapi"]["kisa_kenar"] == "x"
+    assert d["notlar"] == ["mahya yönü görünmüyordu, girişten arkaya aldım (ölçüler pano ızgarasına bu yönde oturuyor)"]
+    d = mahyasiz(900, 763)                     # iki yönde de 9,00 m oturmaz
+    assert d["cevrim"] is None and any("ön cephesi 9,00 m" in s and "8,88 m ve 9,51 m" in s for s in d["sorular"]), d["sorular"]
+    assert "mahya yönü görünmüyordu, girişe paralel aldım" in d["notlar"]
+    m, _ = GO.soru_metni(iki_oda(900, 763, 386.5), d)
+    assert "Mahya yönü görünmüyordu, girişe paralel aldım." in m and m.index("Mahya yönü") < m.index("emin olamadım")
+    d = mahyasiz(774, 783)
+    assert any("ön cephesi 7,74 m" in s and "7,73 m ve 8,35 m" in s for s in d["sorular"]), d["sorular"]
+    assert "mahya yönü görünmüyordu, girişten arkaya aldım" in d["notlar"]
+    for W in (773, 835):                       # önerilen iki ölçü; 8,35 > 7,83 + 0,50 olsa da soru yok
+        d = mahyasiz(W, 783)
+        assert d["sorular"] == [] and d["cevrim"]["is_emri"]["yapi"]["kisa_kenar"] == "x", (W, d["sorular"])
 
 
 def test_dis_duvara_cok_yakin_sinir_sorulur():
