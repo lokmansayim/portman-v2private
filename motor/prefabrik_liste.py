@@ -1184,6 +1184,28 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
                      "pafta_katmanli": sum(s["pafta"] is not None for s in satirlar), "aday_li": sum(s["aday"] is not None for s in satirlar)}}
 
 
+class ListeYazilmaz(Exception):
+    """İş Emri'nden liste yazılmaz; `neden` kullanıcıya yazılır (paket "Yok: neden", komut satırı çıkış 1)."""
+
+    def __init__(self, neden: str):
+        super().__init__(neden)
+        self.neden = neden
+
+
+def is_emrinden(ie: dict, kurallar: dict | None = None, pafta: dict | None = None, ozellikler: dict | None = None) -> dict:
+    """İş Emri → liste (Motor kipi). Komut satırı, paket üreteci (İE-18) ve teklif (İE-13 PR-2) listeyi buradan alır; ikinci bir yol yazılmaz
+    (D-28). `ozellikler` İş Emri'nin özelliklerini yalnız kopyada değiştirir (ör. teklifin tavan seçenekleri: {"Tavan": "Ters"})."""
+    from .cati_prefabrik import TIPLER, TIP_ADI
+    tip = (ie.get("cati") or {}).get("tip")
+    if tip in TIPLER:                                           # İE-17: beşik kuralı tek yön sayardı; yanlış sayı yazılmaz (A5 PR-1b)
+        raise ListeYazilmaz(f"{TIP_ADI[tip]} ana çatının çatı satırları bu sürümde yok (cumba İE-17 PR-1b; kırmada kitapta "
+                            f"prefabrik kural yok); liste yazılmaz")
+    if ozellikler:
+        ie = json.loads(json.dumps(ie))
+        ie["ozellikler"] = {**(ie.get("ozellikler") or {}), **ozellikler}
+    return liste(model_motor(ie), kurallar or kurallari_oku(), pafta)
+
+
 def xlsx(L: dict, yol: Path) -> None:
     from openpyxl import Workbook
     from openpyxl.styles import Alignment, Font, PatternFill
@@ -1217,17 +1239,15 @@ def main(argv: list[str] | None = None) -> int:
     a = ap.parse_args(argv)
     if bool(a.yapi) == bool(a.is_emri):
         ap.error("ya İş Emri ya --yapi verilir")
-    ie = json.loads(a.is_emri.read_text(encoding="utf-8")) if a.is_emri else None
-    if ie is not None:
-        from .cati_prefabrik import TIPLER, TIP_ADI
-        tip = (ie.get("cati") or {}).get("tip")
-        if tip in TIPLER:                                       # İE-17: beşik kuralı tek yön sayardı; yanlış sayı yazılmaz (A5 PR-1b)
-            print(f"prefabrik liste: {TIP_ADI[tip]} ana çatının çatı satırları bu sürümde yok (cumba İE-17 PR-1b; kırmada kitapta "
-                  f"prefabrik kural yok); liste yazılmaz", file=sys.stderr)
-            return 1
-    N = model_pafta(json.loads(a.yapi.read_text(encoding="utf-8"))) if a.yapi else model_motor(ie)
     pafta = json.loads(a.pafta.read_text(encoding="utf-8")) if a.pafta else None
-    L = liste(N, kurallari_oku(), pafta)
+    if a.yapi:
+        L = liste(model_pafta(json.loads(a.yapi.read_text(encoding="utf-8"))), kurallari_oku(), pafta)
+    else:
+        try:
+            L = is_emrinden(json.loads(a.is_emri.read_text(encoding="utf-8")), pafta=pafta)
+        except ListeYazilmaz as e:
+            print(f"prefabrik liste: {e.neden}", file=sys.stderr)
+            return 1
     a.cikti.mkdir(parents=True, exist_ok=True)
     kod = (L["kod"] or "PK").replace("-", "")
     (a.cikti / f"{kod}_liste.json").write_text(json.dumps(L, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
