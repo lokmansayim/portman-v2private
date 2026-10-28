@@ -262,11 +262,13 @@ def paket(m: dict, kok: Path, gecici: Path, glb: bool = False, kayit_: dict | No
         # çizim
         try:
             cz = cizim(ie, gec)
+            # K23 ve canlı akış (`kanal/worker.py`): doğrulama geçmezse bayiye ne PDF ne plan görseli gider; DXF denetim için yazılır.
             if cz["pdf"]:
                 yaz[ad("bayi_paftasi", "pdf")] = cz["pdf"]
+                yaz[ad("plan", "png")] = cz["png"]
             else:
                 durum[ad("bayi_paftasi", "pdf")] = f"Yok: {cz['neden']}"
-            yaz[ad("plan", "png")] = cz["png"]
+                durum[ad("plan", "png")] = "Yok: Motor'un doğrulaması geçmedi; canlıdaki gibi plan görseli de yazılmaz"
             yaz[ad("cizim", "dxf")] = cz["dxf"]
             g = cz["gorunusler"]
             if len(g) >= 4:
