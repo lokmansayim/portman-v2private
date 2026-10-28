@@ -1,6 +1,8 @@
 {
-  "passed": true,
-  "errors": [],
+  "passed": false,
+  "errors": [
+    "Kapı kanatları çakışıyor: WC–WC HOLÜ / __DIS__–WC HOLÜ"
+  ],
   "outer_cm": [
     753.0,
     706.0
@@ -28,11 +30,11 @@
     },
     {
       "kind": "kapi",
-      "name": "BOM_I13_1205p0_IC_K01_SOL_UST",
+      "name": "BOM_I12_1205p0_IC_K01_SAG_ALT",
       "gap": [
-        641.75,
+        594.0,
         565.5,
-        723.75,
+        676.0,
         575.5
       ],
       "length": 82.0
@@ -60,8 +62,19 @@
       "length": 82.0
     },
     {
+      "kind": "kapi",
+      "name": "BOM_D10_1255p0_DIS_K02_SOL",
+      "gap": [
+        524.75,
+        126.25,
+        614.75,
+        136.25
+      ],
+      "length": 90.0
+    },
+    {
       "kind": "pencere",
-      "name": "BOM_D10_1155p0_DIS_P60x125",
+      "name": "BOM_D11_1155p0_DIS_P60x125",
       "gap": [
         660.25,
         126.25,
@@ -83,7 +96,7 @@
     },
     {
       "kind": "pencere",
-      "name": "BOM_D12_1255p0_DIS_P120x125",
+      "name": "BOM_D13_1255p0_DIS_P120x125",
       "gap": [
         0.0,
         196.75,
@@ -94,7 +107,7 @@
     },
     {
       "kind": "pencere",
-      "name": "BOM_D12_1255p0_DIS_P120x125",
+      "name": "BOM_D13_1255p0_DIS_P120x125",
       "gap": [
         0.0,
         481.625,
@@ -105,29 +118,18 @@
     },
     {
       "kind": "kapi",
-      "name": "BOM_I13_1205p0_IC_K01_SOL_ALT",
+      "name": "BOM_I12_1205p0_IC_K01_SOL_ALT_KAYM77p5",
       "gap": [
         313.75,
-        406.5,
+        398.75,
         323.75,
-        488.5
+        480.75
       ],
       "length": 82.0
     },
     {
       "kind": "kapi",
-      "name": "BOM_I13_1205p0_IC_K01_SAG_ALT",
-      "gap": [
-        502.0,
-        155.5,
-        512.0,
-        237.5
-      ],
-      "length": 82.0
-    },
-    {
-      "kind": "kapi",
-      "name": "BOM_D17_1255p0_DIS_K02",
+      "name": "BOM_D10_1255p0_DIS_K02",
       "gap": [
         743.0,
         462.75,
@@ -151,7 +153,10 @@
   "footprint_diff_cm2": 0.0,
   "wall_overlap": true,
   "altin": null,
-  "warnings": [],
+  "warnings": [
+    "Kapı WC–WC HOLÜ: kapi_yeri mentese_ucu yazılı ama panonun iki ucunda da dayanak yok; kapı panoda ortada kaldı",
+    "Kapı WC HOLÜ–MUTFAK: kapi_yeri mentese_ucu yazılı ama panonun iki ucunda da dayanak yok; kapı panoda ortada kaldı"
+  ],
   "scope": "Ön onay taslağı; statik, üretim, BOM veya yeni oda tasarımı değildir",
   "saved_dxf_audit_errors": 0,
   "saved_dxf_audit_fixes": 0,
@@ -159,27 +164,27 @@
     "B02": 7,
     "B04": 1,
     "B05": 2,
-    "D01": 12,
+    "D01": 11,
     "D03": 1,
     "D06": 3,
     "D09": 1,
-    "D10": 1,
+    "D10": 2,
     "D11": 1,
-    "D12": 2,
-    "D13": 1,
+    "D12": 1,
+    "D13": 2,
     "D14": 1,
     "D15": 1,
     "D16": 1,
     "D17": 1,
     "I12": 2,
-    "I13": 3,
+    "I13": 2,
     "I14": 1,
-    "I15": 4,
+    "I15": 5,
     "I16": 2,
-    "I17": 3,
-    "I18": 1,
-    "K01": 5,
-    "K03": 1,
+    "I17": 2,
+    "I18": 2,
+    "K01": 4,
+    "K03": 2,
     "P02": 1,
     "P03": 1,
     "P04": 1,

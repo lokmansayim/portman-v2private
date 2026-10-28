@@ -203,5 +203,13 @@ Biçim: `A### · saat · başlık` — Ne / Nerede / Sonuç / Durum (yapıldı �
 - A4 v3 gönderildi (üst 313,75 | 271 | 178,25). DXF/PDF/JSON Mac'e kopyalandı.
 - Durum: yapıldı; dış ölçüler sıra sıra Lokman'da.
 
+### A042 · 14:48–14:58 · Lokman: çıkma yan panosu net 125,5 · mutfak kapısı balkona · balkon KİRİŞLERİ 40 dışarı (mavi çizgi değil) · WC kapısı sola/dışarı, sol duvara yaslı · mutfak kapısı sol duvara yaslı
+- Çıkma: yan pano 125,5 (706–831,5) + arka köşe profili 10 → dış 841,5 (YC1); arka duvar bandı 831,5–841,5; kıyas zinciri 125,5 | 10.
+- Mutfak kapısı: SALON–MUTFAK iç kapısı kaldırıldı → BALKON–MUTFAK dış kapısı 90, SALON/MUTFAK duvarına bitişik uçta, mutfağa açılır.
+- Balkon kirişleri: Motor'un veranda profil blokları (ön 303,75 → 308,75 @ y −40; yan 126,25 → 166,25, −40'tan; dikme (753, −40)) `balkon_kirisi`; mavi çizgi ve kesik kutu kaldırıldı; ölçü 40 kaldı. İlk anlayışım (ayrı çizgi) yanlıştı.
+- WC kapısı: `arasi` [WC, WC HOLÜ] (hole açılır), `duvar_ucu: sol`, `kapi_yeri: mentese_ucu`; mutfak ve ODA kapıları `mentese_ucu`. **Motor:** WC ve mutfak kapılarında "panonun iki ucunda da dayanak yok; kapı ortada kaldı" uyarısı (açık sınır / 10'luk duvarla dayanak bulunamıyor → PR-1 bulgusu 9) ve **doğrulama düştü**: "Kapı kanatları çakışıyor: WC–WC HOLÜ / __DIS__–WC HOLÜ" (hole açılan WC kapısı ile giriş kapısının kanatları 168'lik holde çakışıyor). DXF yine yazıldı; A4 v4 bundan. Lokman'a söylendi.
+- Üretici: silinmiş varlıklara dokunma hatası (`is_alive`) düzeltildi. A4 v4 gönderildi; Mac'e kopyalandı.
+- Durum: yapıldı; kanat çakışması Lokman'ın kararında.
+
 ### A035 · — · Sıradaki: Soru 2b (zeminde kovaya giriş: önü açık mı, planda ön duvar çizili) → Soru 4 (Fransız pencere) → 5 (çıkma çatısı) → 6 → 7 → 8 (et) → 9 → İş Emri JSON → Motor (PR-1: bulgu 7–8)
 - Durum: bekliyor (Lokman).

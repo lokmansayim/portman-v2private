@@ -11,7 +11,7 @@ K = pathlib.Path(__file__).resolve().parent
 d = ezdxf.readfile(str(K / "Portman_IE22-CK01_CIFT_KAT_sablon_bloklu_r01.dxf"))
 msp = d.modelspace(); ctx = RenderContext(d)
 GIZLI = {"CIFT_KAT_NOT", "AKS", "AKS_YAZI", "OLCULER", "OZEL_PANEL_OLCU_CM"}   # profiller (köşe 100×100, üçlü H) görünür — Lokman 14:41
-x0, y0, x1, y1 = 3300 - 100, -110, 3300 + 763 + 120, 960
+x0, y0, x1, y1 = 3300 - 100, -110, 3300 + 763 + 130, 975
 def suzgec(e):
     if e.dxf.layer in GIZLI: return False
     p = None

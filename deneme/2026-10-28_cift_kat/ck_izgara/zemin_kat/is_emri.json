@@ -199,7 +199,8 @@
         "HOL",
         "ODA"
       ],
-      "duvar_ucu": "on"
+      "duvar_ucu": "on",
+      "kapi_yeri": "mentese_ucu"
     },
     {
       "tur": "ic_kapi",
@@ -214,28 +215,30 @@
       "tur": "ic_kapi",
       "olcu": 82,
       "arasi": [
-        "WC HOLÜ",
-        "WC"
+        "WC",
+        "WC HOLÜ"
       ],
-      "duvar_ucu": "sag"
+      "duvar_ucu": "sol",
+      "kapi_yeri": "mentese_ucu"
     },
     {
       "tur": "ic_kapi",
       "olcu": 82,
       "arasi": [
         "WC HOLÜ",
+        "MUTFAK"
+      ],
+      "duvar_ucu": "sol",
+      "kapi_yeri": "mentese_ucu"
+    },
+    {
+      "tur": "dis_kapi",
+      "olcu": 90,
+      "arasi": [
+        "BALKON",
         "MUTFAK"
       ],
       "duvar_ucu": "sol"
-    },
-    {
-      "tur": "ic_kapi",
-      "olcu": 82,
-      "arasi": [
-        "SALON",
-        "MUTFAK"
-      ],
-      "duvar_ucu": "on"
     },
     {
       "tur": "dis_kapi",
@@ -287,7 +290,9 @@
     "Giriş kapısı (Lokman 28.10 12:34, plandaki işaretle): sağ cephede, WC holünün sağ dış duvarında, WC'ye yakın panoda (arkadan pano 0), 90'lık, içeri açılır. Motor'da __DIS__–WC HOLÜ, duvar: sag.",
     "Çift kat ızgara denemesi (28.10 13:35): gövde x 753 (= 763 − 10) ve iç duvar 10 ile üretildi; AutoCAD çiziminde sağ dış duvar +10, içler +5 kaydırılarak R02 kuralı (akslar köşe kolonu iç yüzünden 10 + 125,5k) elde edilir. Motor'da kural yok (İE-22 PR-1).",
     "Lokman 28.10 14:31 (PDF işaretleri): HOL–WC HOLÜ kapısı kaldırıldı (planda duvar); ODA, WC, mutfak ve salon–mutfak kapıları işaretlediği köşelere bitişik panolara (duvar_ucu), menteşe köşede (kapı mantığı).",
-    "Lokman 28.10 14:43: HOL–WC HOLÜ arası açık sınır (duvar yok): dış kapıdan giren holden eve girer."
+    "Lokman 28.10 14:43: HOL–WC HOLÜ arası açık sınır (duvar yok): dış kapıdan giren holden eve girer.",
+    "Lokman 28.10 14:49: mutfaktaki kapı salona değil balkona açılır → SALON–MUTFAK iç kapısı kaldırıldı, MUTFAK–BALKON dış kapısı 90 (SALON/MUTFAK duvarına bitişik uçta, içeri açılır).",
+    "Lokman 28.10 14:51: WC kapısı WC'den hole açılır, sola, sol duvara yaslı (duvar_ucu sol, kapi_yeri mentese_ucu); mutfak kapısı sol duvara yaslı; ODA kapısı köşeye yaslı."
   ],
   "eksikler": [
     "Merdiven çıkması ve merdiven (kol eni, rıht, sahanlık).",
