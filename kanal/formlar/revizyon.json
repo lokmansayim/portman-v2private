@@ -1,0 +1,30 @@
+{
+  "version": "7.3",
+  "screens": [
+    {
+      "id": "REVIZYON",
+      "title": "Revizyon formu",
+      "terminal": true,
+      "success": true,
+      "data": {
+        "plan": {"type": "string", "__example__": "TF-2026-0001 r01 planı için değişikliğinizi yazın."}
+      },
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          {"type": "TextBody", "text": "${data.plan}"},
+          {"type": "CheckboxGroup", "name": "neyi", "label": "Neyi değiştirelim?", "required": false,
+           "data-source": [{"id": "oda", "title": "Oda yerleşimi"}, {"id": "pencere", "title": "Pencere"}, {"id": "kapi", "title": "Kapı"},
+                           {"id": "veranda", "title": "Veranda"}, {"id": "olcu", "title": "Ölçü"}, {"id": "cati", "title": "Çatı"}]},
+          {"type": "TextArea", "name": "aciklama", "label": "Açıklama", "required": false, "max-length": "600",
+           "helper-text": "Örn. mutfak penceresi 120x120 olsun"},
+          {"type": "DocumentPicker", "name": "dosya", "label": "Dosya (isteğe bağlı)",
+           "description": "İşaretlediğiniz plan ya da yeni çizim; tek dosya, en çok 20 MB", "min-uploaded-documents": 0, "max-uploaded-documents": 1,
+           "max-file-size-kb": 20480, "allowed-mime-types": ["image/jpeg", "image/png", "image/webp", "application/pdf"]},
+          {"type": "Footer", "label": "Gönder",
+           "on-click-action": {"name": "complete", "payload": {"neyi": "${form.neyi}", "aciklama": "${form.aciklama}", "dosya": "${form.dosya}"}}}
+        ]
+      }
+    }
+  ]
+}
