@@ -16,13 +16,12 @@ ile defterden; fiyat uydurulmaz, fiyatı olmayan satır boş kalır ve sayılır
   ödeme "teklifle birlikte bildirilir").
 - Excel düzeni Patron'un yükleme listesinin düzeni (28 Ekim 06:40–06:41): grup adı sütun değil, grubun üstünde başlık satırı ve altında
   ara toplam; tek "Adet" sütunu; ölçüsü birim olan satırda (adet, metre, kova …) ölçü boş, birim o. Sayfalar: Özet, her seçenek bir
-  sayfa, Fiyat kaynağı. Liste sayfasını `fiyatla.py --excel` de bu modülün yazıcısıyla yazar (tek yazıcı).
+  sayfa, Fiyat kaynağı. Liste sayfasının yazıcısı `araclar/liste_excel.py`; `fiyatla.py --excel` de onu kullanır (tek yazıcı).
 """
 from __future__ import annotations
 
 import argparse
 import json
-import re
 import sys
 from pathlib import Path
 
@@ -30,27 +29,11 @@ KOK = Path(__file__).resolve().parents[1]
 if str(KOK) not in sys.path:
     sys.path.insert(0, str(KOK))
 from araclar import fiyatla as F  # noqa: E402
+from araclar.liste_excel import RENK, TL, _stil, buyuk, eksik, gorunen, liste_sayfasi  # noqa: E402,F401
 from motor import prefabrik_liste as PL  # noqa: E402
 
 KOSULLAR = KOK / "kurallar" / "teklif" / "kosullar.json"
 TAVAN = {"asma": "Asma", "ters": "Ters"}
-BIRIM = {"m": "metre"}
-TL = "#,##0.00"
-RENK = {"sari": "FFF2A8", "gri": "E7E7E7", "baslik": "D9E1F2", "cizgi": "8EA9DB",
-        "öneri onaylı": "FCE4D6", "ikinci kaynak": "DDEBF7", "öneri": "FFF2A8"}
-
-
-def buyuk(s: str) -> str:
-    """Türkçe büyük harf: "Elektrik" → "ELEKTRİK", "Sıhhi" → "SIHHİ" (str.upper i'yi I yapar)."""
-    return s.replace("i", "İ").replace("ı", "I").upper()
-
-
-def gorunen(olcu: str | None, birim: str | None) -> tuple[str, str]:
-    """(ölçü, birim): ölçü yalnız birim sözcüğüyse (adet, metre, kova, paket, takım) ölçü boş kalır, birim o olur."""
-    olcu = olcu or ""
-    if re.search(r"\d", olcu):
-        return olcu, BIRIM.get(birim, birim or "")
-    return "", olcu or BIRIM.get(birim, birim or "")
 
 
 def kaynak_durumu(s: dict, defter: dict, hat: str) -> tuple[str, dict | None]:
@@ -69,8 +52,10 @@ def kaynak_durumu(s: dict, defter: dict, hat: str) -> tuple[str, dict | None]:
 
 def secenekler(ie: dict, tavan: list[str] | None) -> list[tuple[str, dict]]:
     tavan = tavan or (ie.get("teklif") or {}).get("tavan")
-    if not tavan:
-        t = (ie.get("ozellikler") or {}).get("Tavan")
+    if isinstance(tavan, str):                                  # İş Emri'nde "asma,ters" de olur (komut satırı gibi)
+        tavan = [t.strip() for t in tavan.split(",") if t.strip()]
+    if not tavan:                                               # Motor özellik adını küçük harfle okur; etiket de öyle
+        t = next((v for k, v in (ie.get("ozellikler") or {}).items() if PL._kucuk(k) == "tavan"), None)
         return [(f"{t} tavan" if t else "Teklif", {})]
     bilinmeyen = [t for t in tavan if t not in TAVAN]
     if bilinmeyen or len(set(tavan)) != len(tavan):
@@ -84,7 +69,10 @@ def kosullari_oku(ek: Path | str | None = None, ie: dict | None = None) -> dict:
     K = dict(json.loads(KOSULLAR.read_text(encoding="utf-8"))["kosullar"])
     katmanlar = [((ie or {}).get("teklif") or {}).get("kosullar") or {}]
     if ek:
-        katmanlar.append(json.loads(Path(ek).read_text(encoding="utf-8")).get("kosullar") or {})
+        d = json.loads(Path(ek).read_text(encoding="utf-8"))
+        if not isinstance(d, dict) or not isinstance(d.get("kosullar"), dict):
+            raise SystemExit(f'DUR: {ek}: koşullar {{"kosullar": {{...}}}} biçiminde verilir (kurallar/teklif/kosullar.json gibi)')
+        katmanlar.append(d["kosullar"])
     for k in katmanlar:
         if bilinmeyen := sorted(set(k) - set(K)):
             raise SystemExit(f"DUR: bilinmeyen teklif koşulu {bilinmeyen}; bilinenler {sorted(K)}")
@@ -106,91 +94,32 @@ def uret(ie: dict, defter: dict, secim: list[tuple[str, dict]], kosullar: dict, 
 
 
 # ── Excel ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-def _stil():
-    from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
-    dolgu = {k: PatternFill("solid", fgColor=v) for k, v in RENK.items()}
-    return Alignment, Border, Font, dolgu, Side
-
-
-def liste_sayfasi(ws, satirlar: list[dict], baslik: str, aciklama: str, renk=None, kaynak_sutunu: bool = False) -> float:
-    """Fiyatlı liste sayfası (`fiyatla.fiyatla`'nın satırları). Grup başlık satırı + satırlar + ara toplam; en altta genel toplam.
-    `renk(satır)` birim fiyat hücresinin dolgusunu (RENK anahtarı) verir. `kaynak_sutunu`: fiyatla.py'nin defter görünümü için
-    Durum ve Kaynak sütunları. Döner: genel toplam."""
-    Alignment, Border, Font, dolgu, Side = _stil()
-    kg = any(s.get("kg") is not None for s in satirlar)
-    sutun = ["Ölçü", "Birim", "Adet"] + (["kg"] if kg else []) + ["Birim fiyat", "Tutar", "Not"] + (["Durum", "Kaynak"] if kaynak_sutunu else [])
-    n = 1 + len(sutun)
-    i_bf, i_tut, i_not = (sutun.index(x) + 2 for x in ("Birim fiyat", "Tutar", "Not"))    # sayfadaki sütun (1'den; A Kalem)
-    ws.append([baslik]); ws["A1"].font = Font(bold=True, size=13)
-    ws.append([aciklama]); ws["A2"].alignment = Alignment(wrap_text=True, vertical="top")
-    ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=n); ws.row_dimensions[2].height = 32
-    gruplar: dict[str, list[dict]] = {}                     # grup ilk göründüğü sırada, grup içinde Motor'un sırası
-    for s in satirlar:
-        gruplar.setdefault(s.get("grup_adi") or str(s.get("grup") or ""), []).append(s)
-    toplam, fiyatsiz = 0.0, 0
-    for ad, ss in gruplar.items():
-        ws.append([]); ws.append([buyuk(ad), *sutun])
-        for c in ws[ws.max_row]:
-            c.font = Font(bold=True); c.fill = dolgu["baslik"]
-        ara = 0.0
-        for s in ss:
-            olcu, birim = gorunen(s.get("olcu"), s.get("birim"))
-            miktar = s.get("kg") if s.get("birim") == "kg" else s.get("adet")
-            if s["tutar"] is not None:
-                ara += s["tutar"]
-            elif miktar != 0:
-                fiyatsiz += 1
-            notu = "Motor'da kuralı yok, adet yok" if s.get("adet") is None and s.get("birim") != "kg" else ("fiyat yok" if s["birim_fiyat"] is None else "")
-            ws.append([s["kalem"], olcu, birim, s.get("adet")] + ([s.get("kg")] if kg else []) + [s["birim_fiyat"], s["tutar"], notu]
-                      + ([s["durum"], s.get("kaynak_adi") or s.get("kaynak")] if kaynak_sutunu else []))
-            r = ws[ws.max_row]
-            r[i_bf - 1].number_format = r[i_tut - 1].number_format = TL
-            k = renk(s) if renk else None
-            if s.get("adet") is None and s.get("birim") != "kg":
-                for c in r: c.fill = dolgu["gri"]
-            elif k:
-                r[i_bf - 1].fill = dolgu[k]
-        toplam += ara
-        ws.append([f"{ad} toplamı"] + [""] * (i_tut - 2) + [round(ara, 2)])
-        r = ws[ws.max_row]; r[0].font = r[i_tut - 1].font = Font(bold=True); r[i_tut - 1].number_format = TL
-        for c in r[:n]: c.border = Border(top=Side(style="thin", color=RENK["cizgi"]))
-    ws.append([])
-    ws.append(["GENEL TOPLAM (fiyatı olan satırlar)"] + [""] * (i_tut - 2) + [round(toplam, 2), f"fiyatı olmayan satır: {fiyatsiz}"])
-    r = ws[ws.max_row]; r[0].font = r[i_tut - 1].font = Font(bold=True, size=12); r[i_tut - 1].number_format = TL
-    for col, w in zip("ABCDEFGHIJ", [62, 20, 9, 8] + ([9] if kg else []) + [13, 14, 30] + ([16, 30] if kaynak_sutunu else [])):
-        ws.column_dimensions[col].width = w
-    for row in ws.iter_rows(min_row=3):
-        for c in row:
-            if c.column in (3, 4): c.alignment = Alignment(horizontal="center")
-            elif c.column >= i_not: c.alignment = Alignment(wrap_text=True, vertical="top")
-    ws.freeze_panes = "A3"
-    ws.page_setup.orientation = "landscape"; ws.sheet_properties.pageSetUpPr.fitToPage = True
-    ws.page_setup.fitToWidth, ws.page_setup.fitToHeight = 1, 0
-    return round(toplam, 2)
-
 
 def excel_yaz(T: dict, defter: dict, yol: Path) -> None:
     from openpyxl import Workbook
     Alignment, Border, Font, dolgu, Side = _stil()
     B = Font(bold=True)
     kaynak_kisa = {k: v.get("kisa") for k, v in defter["kaynaklar"].items()}
+    _kd: dict[str, tuple[str, dict | None]] = {}
+    def kd(s: dict) -> tuple[str, dict | None]:             # defterdeki yeri, anahtar başına bir kez
+        a = F.anahtar(s, "prefabrik")
+        if a not in _kd:
+            _kd[a] = kaynak_durumu(s, defter, "prefabrik")
+        return _kd[a]
     def durum_renk(s: dict) -> str | None:
         if s["birim_fiyat"] is None:
             return "gri"
         if s["durum"].startswith("öneri"):                  # onaysız öneri (yalnız --oneri ile)
             return "öneri"
-        d = kaynak_durumu(s, defter, "prefabrik")[0]
+        d = kd(s)[0]
         return d if d in ("öneri onaylı", "ikinci kaynak") else None
     wb = Workbook(); oz = wb.active; oz.title = "Özet"
     kimlik = f"{T['is_emri_no']} r{T['revizyon']:02d}" if isinstance(T.get("revizyon"), int) else str(T.get("is_emri_no"))
     acik = (f"İş Emri {kimlik}; liste Motor'dan, fiyat defterden ({T['defter_surumu']}"
             + ("; onaysız öneriler dahil" if T["oneri_dahil"] else "") + "). Fiyatı boş satır toplama girmez. "
             "Birim fiyat rengi: turuncu onaylı öneri, mavi Haziran malzeme listesi, gri fiyat yok. Gri satır: Motor'da kuralı yok.")
-    toplamlar = []
     for sec in T["secenekler"]:
-        ws = wb.create_sheet(sec["ad"])
-        toplamlar.append(liste_sayfasi(ws, sec["fiyat"]["satirlar"], f"{T['kod']} · teklif · {sec['ad']} · TASLAK", acik, durum_renk))
-        assert abs(toplamlar[-1] - sec["fiyat"]["ozet"]["toplam"]) < 0.01, (sec["ad"], toplamlar[-1], sec["fiyat"]["ozet"]["toplam"])
+        liste_sayfasi(wb.create_sheet(sec["ad"]), sec["fiyat"], f"{T['kod']} · teklif · {sec['ad']} · TASLAK", acik, durum_renk)
 
     # Özet
     oz.append([f"{T['kod']} · teklif · TASLAK"]); oz["A1"].font = Font(bold=True, size=13)
@@ -218,7 +147,7 @@ def excel_yaz(T: dict, defter: dict, yol: Path) -> None:
     sayim = [{} for _ in T["secenekler"]]
     for i, sec in enumerate(T["secenekler"]):
         for s in sec["fiyat"]["satirlar"]:
-            d = kaynak_durumu(s, defter, "prefabrik")[0]
+            d = kd(s)[0]
             sayim[i][d] = sayim[i].get(d, 0) + 1
     for d in sorted({d for c in sayim for d in c}, key=lambda d: (d in ("kaynakta yok", "defterde yok"), d)):
         oz.append([d] + [c.get(d, 0) for c in sayim])
@@ -228,13 +157,14 @@ def excel_yaz(T: dict, defter: dict, yol: Path) -> None:
     oz.append(["Fiyatı olmayan satırlar"] + [f"{s['ad']} adedi" for s in T["secenekler"]] + bos + ["Neden"])
     for c in oz[oz.max_row]: c.font = B
     adet = [{F.anahtar(s, "prefabrik"): s["adet"] for s in sec["fiyat"]["satirlar"]} for sec in T["secenekler"]]
-    goruldu = []
+    goruldu = set()
     for sec in T["secenekler"]:
+        satir = {x["sira"]: x for x in sec["fiyat"]["satirlar"]}
         for f in sec["fiyat"]["ozet"]["fiyatsiz"]:
             if f["anahtar"] in goruldu: continue
-            goruldu.append(f["anahtar"])
+            goruldu.add(f["anahtar"])
             kayit = defter["hatlar"]["prefabrik"]["kalemler"].get(f["anahtar"]) or {}
-            neden = "Motor'da kuralı yok, adet yok" if f["miktar"] is None else (kayit.get("not") or f["durum"])
+            neden = eksik(satir[f["sira"]]) or kayit.get("not") or f["durum"]
             oz.append([f["anahtar"].replace(" | ", " · ")] + [a.get(f["anahtar"]) for a in adet] + bos + [neden])
             oz.cell(oz.max_row, 1).fill = dolgu["gri"]
     oz.append([])
@@ -249,12 +179,12 @@ def excel_yaz(T: dict, defter: dict, yol: Path) -> None:
     fk.append(["Fiyatın defterdeki kaydı (kurallar/fiyat). Satır numarası kaynak listedeki Excel satırıdır."]); fk["A1"].font = B
     fk.append(["Kalem", "Ölçü"] + [f"{s['ad']} adedi" for s in T["secenekler"]] + ["Durum", "Birim fiyat", "Kaynak", "Kaynaktaki satır", "Kaynaktaki kalem", "Not"])
     for c in fk[2]: c.font = B
-    sira = []
+    sira: dict[str, dict] = {}                              # anahtar ilk göründüğü sırada
     for sec in T["secenekler"]:
         for s in sec["fiyat"]["satirlar"]:
-            if F.anahtar(s, "prefabrik") not in [F.anahtar(x, "prefabrik") for x in sira]: sira.append(s)
-    for s in sira:
-        a = F.anahtar(s, "prefabrik"); d, g = kaynak_durumu(s, defter, "prefabrik"); g = g or {}
+            sira.setdefault(F.anahtar(s, "prefabrik"), s)
+    for a, s in sira.items():
+        d, g = kd(s); g = g or {}
         fk.append([s["kalem"], s["olcu"]] + [x.get(a) for x in adet] + [d, g.get("fiyat"), kaynak_kisa.get(g.get("kaynak")) or "",
                    ", ".join(map(str, g.get("kaynak_satir") or [])), g.get("kaynak_kalem") or "", g.get("not") or ""])
         if d in RENK: fk.cell(fk.max_row, len(T["secenekler"]) + 3).fill = dolgu[d]

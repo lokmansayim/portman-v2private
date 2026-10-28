@@ -1201,8 +1201,9 @@ class ListeYazilmaz(Exception):
 
 
 def is_emrinden(ie: dict, kurallar: dict | None = None, pafta: dict | None = None, ozellikler: dict | None = None) -> dict:
-    """İş Emri → liste (Motor kipi). Komut satırı, paket üreteci (İE-18) ve teklif (İE-13 PR-2) listeyi buradan alır; ikinci bir yol yazılmaz
-    (D-28). `ozellikler` İş Emri'nin özelliklerini yalnız kopyada değiştirir (ör. teklifin tavan seçenekleri: {"Tavan": "Ters"})."""
+    """İş Emri → liste (Motor kipi). Komut satırı ve teklif (İE-13 PR-2) listeyi buradan alır, paket üreteci (İE-18) de buradan alır; yeni
+    bir yol yazılmaz (D-28). `ozellikler` İş Emri'nin özelliklerini yalnız kopyada değiştirir (ör. teklifin tavan seçenekleri: {"Tavan":
+    "Ters"}); Motor özellik adını küçük harfle okuduğu için aynı adın başka yazılışı ("tavan") düşer."""
     from .cati_prefabrik import TIPLER, TIP_ADI
     tip = (ie.get("cati") or {}).get("tip")
     if tip in TIPLER:                                           # İE-17: beşik kuralı tek yön sayardı; yanlış sayı yazılmaz (A5 PR-1b)
@@ -1210,7 +1211,8 @@ def is_emrinden(ie: dict, kurallar: dict | None = None, pafta: dict | None = Non
                             f"prefabrik kural yok); liste yazılmaz")
     if ozellikler:
         ie = json.loads(json.dumps(ie))
-        ie["ozellikler"] = {**(ie.get("ozellikler") or {}), **ozellikler}
+        yeni = {_kucuk(k) for k in ozellikler}
+        ie["ozellikler"] = {**{k: v for k, v in (ie.get("ozellikler") or {}).items() if _kucuk(k) not in yeni}, **ozellikler}
     return liste(model_motor(ie), kurallar or kurallari_oku(), pafta)
 
 

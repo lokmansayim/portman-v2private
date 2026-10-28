@@ -124,14 +124,14 @@ def m2_kiyasi(liste_toplami: float, alan: float, m2_fiyat: float, esik: float | 
 
 
 def excel_yaz(R: dict, yol: Path, baslik: str) -> None:
-    """Fiyatlı liste, teklifin liste sayfasıyla aynı yazıcıdan (`araclar/teklif.liste_sayfasi`; tek düzen, İE-13 PR-2) ve Durum, Kaynak
-    sütunlarıyla. Birim fiyatı öneri ya da fiyatsız olan satırın birim fiyat hücresi sarı."""
+    """Fiyatlı liste, teklifin liste sayfasıyla aynı yazıcıdan (`araclar/liste_excel.liste_sayfasi`; tek düzen, İE-13 PR-2) ve Durum,
+    Kaynak sütunlarıyla. Birim fiyatı öneri ya da fiyatsız olan satırın birim fiyat hücresi sarı."""
     from openpyxl import Workbook
     if str(KOK) not in sys.path:
         sys.path.insert(0, str(KOK))
-    from araclar.teklif import liste_sayfasi
+    from araclar.liste_excel import liste_sayfasi
     wb = Workbook(); ws = wb.active; ws.title = "Fiyatlı liste"
-    liste_sayfasi(ws, R["satirlar"], baslik, f"Defter {R['defter_surumu']}; fiyatı boş satır toplama girmez.",
+    liste_sayfasi(ws, R, baslik, f"Defter {R['defter_surumu']}; fiyatı boş satır toplama girmez.",
                   lambda s: "sari" if s["tutar"] is None or not s["durum"].startswith("onaylı") else None, kaynak_sutunu=True)
     if R.get("m2"):
         m = R["m2"]

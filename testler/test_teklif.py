@@ -74,6 +74,8 @@ def test_is_emrinden_kopya_ve_komut_satiri(tmp_path):
     ie = _oku(IE); once = json.dumps(ie, sort_keys=True)
     L = PL.is_emrinden(ie, ozellikler={"Tavan": "Ters"})
     assert json.dumps(ie, sort_keys=True) == once and L["girdi_ozeti"]["tavan"] == "ters"
+    kucuk = json.loads(once); kucuk["ozellikler"] = {"tavan": "Asma"}             # başka yazılışı düşer, seçenek geçer
+    assert PL.is_emrinden(kucuk, ozellikler={"Tavan": "Ters"})["girdi_ozeti"]["tavan"] == "ters"
     assert PL.main([str(IE), str(tmp_path)]) == 0
     K = _oku(tmp_path / "TK01_liste.json")
     assert [(x["kalem"], x["olcu"], x["adet"]) for x in K["satirlar"]] == [(x["kalem"], x["olcu"], x["adet"]) for x in PL.is_emrinden(ie)["satirlar"]]
@@ -124,8 +126,10 @@ def test_excel_duzeni(cikti, T):
                 assert rows[j][0] == x["kalem"] and rows[j][3] == x["adet"] and rows[j][4] == x["birim_fiyat"] and rows[j][5] == x["tutar"]
                 olcu, birim = TK.gorunen(x["olcu"], x["birim"])
                 assert (rows[j][1] or "", rows[j][2]) == (olcu, birim)
-                if not any(c.isdigit() for c in x["olcu"]):
-                    assert not rows[j][1]                                       # "adet", "kova", "metre": ölçü boş, birim o
+                if x["olcu"] in ("adet", "kova", "metre", "paket", "takım"):
+                    assert not rows[j][1] and rows[j][2] == x["olcu"]          # ölçü boş, birim o
+                elif not any(c.isdigit() for c in x["olcu"]):
+                    assert rows[j][1] == x["olcu"] and rows[j][2]              # "—": ölçü yerinde, birim kaybolmaz
                 ara += x["tutar"] or 0
             assert rows[son][5] == round(ara, 2), rows[son]
         assert next(satirlar, None) is None
@@ -180,6 +184,11 @@ def test_is_emrindeki_teklif_bolumu(tmp_path):
     assert TK.main([str(tmp_path / "ie.json"), str(tmp_path / "b"), "--tavan", "ters", "--kosullar", str(tmp_path / "k.json")]) == 0
     J = _oku(tmp_path / "b" / "TK01_teklif.json")
     assert [s["ad"] for s in J["secenekler"]] == ["Ters tavan"] and J["kosullar"]["Ödeme şekli"] == "DENEME DOSYA"
+    (tmp_path / "duz.json").write_text(json.dumps({"Ödeme şekli": "sarmalayıcısız"}, ensure_ascii=False), encoding="utf-8")
+    with pytest.raises(SystemExit):                                           # sessizce yok sayılmaz
+        TK.main([str(tmp_path / "ie.json"), str(tmp_path / "c"), "--kosullar", str(tmp_path / "duz.json")])
+    assert TK.secenekler({"teklif": {"tavan": "asma, ters"}}, None) == [("Asma tavan", {"Tavan": "Asma"}), ("Ters tavan", {"Tavan": "Ters"})]
+    assert TK.secenekler({"ozellikler": {"tavan": "Ters"}}, None) == [("Ters tavan", {})]    # Motor gibi küçük harfle
     ie["teklif"]["kosullar"] = {"Teslim suresi": "x"}
     (tmp_path / "ie.json").write_text(json.dumps(ie, ensure_ascii=False), encoding="utf-8")
     with pytest.raises(SystemExit):
