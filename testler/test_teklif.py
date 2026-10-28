@@ -133,6 +133,20 @@ def test_excel_duzeni(cikti, T):
         assert genel[5] == s["fiyat"]["ozet"]["toplam"] and genel[6] == f"fiyatı olmayan satır: {len(s['fiyat']['ozet']['fiyatsiz'])}"
 
 
+def test_vitrifiye_banyo_basina():
+    """Kural `vitrifiye_banyo_basina` (Lokman 27 Ekim, TK-01): banyo türündeki her hacme bir takım; ayrı WC ya da lavabo hacmi olan evde
+    adet uydurulmaz ("Kural yok", aday banyo sayısı); alıcıya aitse 0."""
+    vit = lambda ie: next(s for s in PL.is_emrinden(ie)["satirlar"] if s["kalem"].startswith("Vitrifiye"))
+    ie = _oku(IE)
+    assert (vit(ie)["adet"], vit(ie)["formul"]) == (2, "banyo 2 × 1")
+    wc = json.loads(json.dumps(ie))
+    next(m for m in wc["mahaller"] if m["ad"] == "E. BANYO")["tur"] = "wc"
+    s = vit(wc)
+    assert (s["adet"], s["dayanak"], s["aday"]) == (None, "Kural yok", 1) and "wc" in s["formul"]
+    al = json.loads(json.dumps(ie)); al["alici_ait"] = {"kalemler": ["vitrifiye"]}
+    assert (vit(al)["adet"], vit(al)["dayanak"]) == (0, "İş Emri")
+
+
 def test_ozet_ve_kosullar(cikti, T, tmp_path):
     """Koşul değeri yoksa sarı "Patron'dan"; projeye özel dosya verilince değer yazılır, sarı kalkar."""
     oz = load_workbook(cikti / "TK01_teklif.xlsx")["Özet"]
