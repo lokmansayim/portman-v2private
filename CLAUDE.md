@@ -7,7 +7,7 @@ Ortak kurallar yukarıdaki `AGENTS.md`'den gelir; burada yalnız Claude'a özgü
 ## Oturum başında
 
 1. **Devir notunu oku.** `docs/devir/` altındaki en yeni not, nerede kalındığını ve sırayı söyler.
-2. **Güncel durumu ve aktif işi oku.** `DURUM.md`'nin başında aktif iş emri ve dalı yazar; o dala geç. `main`'deki DURUM geride olabilir; en yeni iş dalındaki DURUM esastır.
+2. **Güncel durumu ve aktif işi oku.** `docs/durum/`'daki en yeni ekler (dosya adı tarih-saatle başlar, en yenisi en sonda) aktif işi ve dalı söyler; o dala geç. `main`'e girmemiş ekler açık iş dallarındadır (`git fetch` sonrası `git ls-tree --name-only origin/<dal> docs/durum/`). 28 Ekim 2026'dan önceki durum `DURUM.md`'dedir.
 3. **Ortamı kur:** `bash araclar/ortam_kur.sh` (gerileme için `--dogrula`).
 4. **Yeni işe Plan modunda başla.** Plan Lokman'ın onayından sonra uygulanır; iş emri belgesi `/is-emri` ile açılır. Diff'i tek cümleyle anlatılabilen küçük düzeltmelerde plan atlanabilir.
 5. **Üretim kuralı (D-28, `AGENTS.md`).** Bayiye, mühendise ya da Lokman'a gidecek bir çıktıyı (çizim, liste, rehber, teklif) yalnız `main`'e girmiş kodla üret. Oturumun kendi betiğiyle, proje dosyalarındaki bir araçla ya da elle düzeltilmiş çıktı teslim edilmez; eksik varsa önce kod düzeltilir. Hedef örnek ve kıyas testi yoksa o çıktı için "çalışıyor" yazılmaz.
@@ -36,7 +36,7 @@ Hook'lar talimat değil koddur: kuralı yorumlayarak aşılamaz. Bir hook'u değ
 - **Commit kimliği:** `git -c user.name="Claude" -c user.email="noreply@anthropic.com" commit`. Mesajın sonuna oturumun verdiği Co-Authored-By ve Claude-Session satırları eklenir.
 - **Push.** Oturum sonunda izlenmeyen dosyalar da commit'lenip iş dalına push edilir.
 - **Dallar.** Her iş emrinin kendi dalı olur. `main`'e birleştirme yalnız Lokman'ın açık onayıyla yapılır.
-- **Oturum sonu.** Her oturumun son adımı `DURUM.md`'yi güncellemektir (`/kapanis` bunu yapar). Pencere değişecekse `docs/devir/`'e bir not yazılır.
+- **Oturum sonu.** Her oturumun son adımı `docs/durum/`'a tarihli bir ek dosyası yazmaktır (`/kapanis` bunu yapar); `DURUM.md`'ye ek yazılmaz (her PR aynı satırları değiştirdiği için çakışıyordu). Pencere değişecekse `docs/devir/`'e bir not yazılır.
 
 ## Yerler
 
