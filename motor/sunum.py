@@ -31,6 +31,7 @@ from collections import Counter
 from pathlib import Path
 
 from . import geometry as G
+from . import veranda as VR
 
 KOK = Path(__file__).resolve().parents[1]
 ETIKET = {"on": "ÖN (GİRİŞ)", "arka": "ARKA", "sol": "SOL", "sag": "SAĞ"}
@@ -38,6 +39,7 @@ GORUNUMLER = (("perspektif_on_sag", "ÖN-SAĞ PERSPEKTİF"), ("perspektif_arka_s
 PERSPEKTIF_UZAKLIK = 1.55            # kamera uzaklığı (yapı köşegeninin katı); genel motorun 1,35'i bu planlarda saçağı kesiyordu
 PERSPEKTIF_ZAMAN_ASIMI_S = 240
 PNG_SINIRI = 5 * 1024 * 1024         # WhatsApp görsel sınırı
+CATI_SEKLI = {"besik": "Beşik", "besik_cumba": "Beşik + Cumba", "kirma": "Kırma"}   # İE-17: paftanın teknik özellik tablosundaki yazım
 MAHAL_ISLEVI = {"antre_hol": "hol", "hol": "hol", "koridor": "hol", "salon": "salon", "mutfak": "mutfak", "yatak_odasi": "yatak_odasi",
                 "calisma": "yatak_odasi", "giyinme": "yatak_odasi", "banyo": "banyo", "wc": "banyo", "depo": "depo", "teknik": "depo"}
 DUVAR_RENGI = {"dis": "#3a3a3a", "ic": "#6b6b6b"}
@@ -118,8 +120,8 @@ def ozellikler(ie: dict, say: dict) -> tuple[dict, list[str]]:
     duvar = lambda cm: f"{float(cm) * 10:.0f} mm" + (f" {panel}" if panel else "")
     oz = {"Bina Yüksekliği": f"{float(y.get('duvar_yuksekligi_cm', 250)) * 10:.0f} mm",
           "Dış Duvarlar": duvar(kal.get("dis", 10)), "İç Duvarlar": duvar(kal.get("ic", 6)), "Panel Türü": panel or "...",
-          "Çatı Şekli": oz_ie.pop("Çatı Şekli", None) or {"besik": "Beşik"}.get(c.get("tip"), "..."),
-          "Çatı Eğimi": f"%{float(c['egim_yuzde']):g}" if "egim_yuzde" in c else "...",
+          "Çatı Şekli": oz_ie.pop("Çatı Şekli", None) or CATI_SEKLI.get(c.get("tip"), "..."),
+          "Çatı Eğimi": f"%{float(c['egim_yuzde']):g}".replace(".", ",") if "egim_yuzde" in c else "...",   # İE-17: paftadan %32,49'
           "Çatı Kaplaması": oz_ie.pop("Çatı Kaplaması", None) or "...", "Çatı Kaplama Rengi": oz_ie.pop("Çatı Kaplama Rengi", None) or "...",
           "Dış Kapı": oz_ie.pop("Dış Kapı", None) or (f"{len(say['dis_kapi'])} adet ({_olculer(say['dis_kapi'])})" if say["dis_kapi"] else "..."),
           "İç Kapılar": (f"{say['ic_kapi']} adet" + (f" ({oz_ie.pop('İç Kapılar')})" if oz_ie.get("İç Kapılar") else "")) if say["ic_kapi"] else (oz_ie.pop("İç Kapılar", None) or "..."),
@@ -256,6 +258,16 @@ def plan_ciz(ax, plan: G.Plan, yazi: float = 1.0) -> dict:
     # ölçü zincirleri (dış yüzden) ve dış ölçüler
     z = zincirler(plan)
     olc = lambda p1, p2, v, kay, yatay=True: CG.olcu(ax, p1, p2, _f(v), kay, yatay=yatay, fs=fs(5.2))
+    for v in plan.dis_verandalar:                  # BK-14: taşan verandanın eni (dış kenarın 24 cm dışında, yazı verandaya doğru) ve derinliği
+        vx0, vy0, vx1, vy1 = v["rect"]
+        if v["cephe"] in ("on", "arka"):
+            yy, k = (vy0 - 24, 3) if v["cephe"] == "on" else (vy1 + 24, -3)
+            olc((vx0, yy), (vx1, yy), vx1 - vx0, k)
+            olc((vx1 + 24, vy0), (vx1 + 24, vy1), vy1 - vy0, 4, yatay=False)
+        else:
+            xx, k = (vx0 - 24, 4) if v["cephe"] == "sol" else (vx1 + 24, -4)
+            olc((xx, vy0), (xx, vy1), vy1 - vy0, k, yatay=False)
+            olc((vx0, vy1 + 24), (vx1, vy1 + 24), vx1 - vx0, 3)
     for a_, b_ in zip(z["alt"], z["alt"][1:]):
         olc((a_, by0 - 52), (b_, by0 - 52), b_ - a_, 3)
     olc((bx0, by0 - 92), (bx1, by0 - 92), bx1 - bx0, 3)
@@ -316,7 +328,7 @@ def cati_tanimi(plan: G.Plan, ie: dict) -> dict | None:
     s = float(c.get("sacak_cm", 30)); eg = float(c.get("egim_yuzde", 33)) / 100.0; top = float(c.get("topuk_cm", 10))
     H0 = float(ie.get("yapi", {}).get("duvar_yuksekligi_cm", 250))
     zs = H0 + top
-    x0, y0, x1, y1 = sinirlar(plan)
+    x0, y0, x1, y1 = G.govde_kutusu(plan)                     # taşan veranda ana çatının altında değil, kendi çatısı var (BK-14)
     if c.get("makas_ekseni", "x") == "x":
         xm = (x0 + x1) / 2
         dz = [{"ad": "sol", "plan": [[x0 - s, y0 - s], [xm, y0 - s], [xm, y1 + s], [x0 - s, y1 + s]], "yukari": [1, 0], "egim": eg, "sacak_kotu": zs, "sacak": {"x": x0 - s}},
@@ -339,12 +351,23 @@ def cati_plani_ciz(ax, plan: G.Plan, ie: dict, yazi: float = 1.0) -> bool:
         ax.axis("off")
         return False
     dz = tanim["duzlemler"]
-    xs = [p[0] for d in dz for p in d["plan"]]; ys = [p[1] for d in dz for p in d["plan"]]
+    vc = [VR.cati(v, ie) for v in plan.dis_verandalar]                # BK-14: taşan verandaların kendi çatısı, ana çatının altında
+    xs = [p[0] for d in dz + [d for c_ in vc for d in c_["duzlemler"]] for p in d["plan"]]
+    ys = [p[1] for d in dz + [d for c_ in vc for d in c_["duzlemler"]] for p in d["plan"]]
     X0, X1, Y0, Y1 = min(xs), max(xs), min(ys), max(ys)
+    for c_ in vc:
+        for d in c_["duzlemler"]:
+            ax.add_patch(MplPolygon(d["plan"], closed=True, fc="#9aa1ab", ec="#2f343c", lw=0.6, zorder=0.5))
+        if c_["mahya"]:
+            (vx0, vy0), (vx1, vy1) = c_["mahya"]
+            ax.plot([vx0, vx1], [vy0, vy1], color="#1c1f24", lw=1.0, zorder=0.8)
     for d in dz:
         ax.add_patch(MplPolygon(d["plan"], closed=True, fc="#8a919c", ec="#2f343c", lw=0.7, zorder=1))
     hat = list(bina_cizgisi(plan).exterior.coords)
     ax.plot([p[0] for p in hat], [p[1] for p in hat], color="white", lw=0.6, ls=(0, (4, 2.5)), zorder=3)
+    for v in plan.dis_verandalar:
+        vx0, vy0, vx1, vy1 = v["rect"]
+        ax.plot([vx0, vx1, vx1, vx0, vx0], [vy0, vy0, vy1, vy1, vy0], color="white", lw=0.5, ls=(0, (4, 2.5)), zorder=0.9)
     ortak = sorted({tuple(p) for p in dz[0]["plan"]} & {tuple(p) for p in dz[1]["plan"]})       # mahya: iki düzlemin ortak kenarı
     (mx0, my0), (mx1, my1) = ortak[0], ortak[-1]
     ax.plot([mx0, mx1], [my0, my1], color="#1c1f24", lw=1.4, zorder=4)
@@ -370,8 +393,12 @@ def cati_plani_ciz(ax, plan: G.Plan, ie: dict, yazi: float = 1.0) -> bool:
 # ─────────────────────────────────────────────────────────────────── perspektif ──
 def perspektif_uret(ie: dict, hedef: Path, govde: str) -> dict:
     """Motor'un IFC'si (pano ekleri dahil) → iki perspektif PNG. Ayrı süreçte: VTK çökmesi ya da zaman aşımı sayfayı düşürmez. Ekran yoksa
-    ve `xvfb-run` varsa onunla (yerel); sunucuda OSMesa'lı VTK doğrudan çizer."""
+    ve `xvfb-run` varsa onunla (yerel); sunucuda OSMesa'lı VTK doğrudan çizer. Beşik dışı çatıda (beşik + cumba, kırma) IFC'nin çatısı
+    yok: perspektif çizilmez, neden yazılır (İE-17 PR-1b)."""
     from importlib.util import find_spec
+    from .cati_prefabrik import TIPLER, TIP_ADI
+    if (ie.get("cati") or {}).get("tip") in TIPLER:
+        return {"durum": "ÇİZİLEMEDİ", "neden": f"{TIP_ADI[ie['cati']['tip']]} çatı perspektifte henüz çizilmiyor (İE-17 PR-1b)"}
     try:
         if find_spec("vtk") is None:
             return {"durum": "ÇİZİLEMEDİ", "neden": "VTK kurulu değil"}

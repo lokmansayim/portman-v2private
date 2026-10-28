@@ -22,6 +22,15 @@ def _cm_pt(ax, fig, span_cm: float) -> float:
     return (span_cm + 300.0) / (ax.get_position().width * fig.get_figwidth() * 72)
 
 
+def _yazilari_sigdir(fig, paneller) -> None:
+    """Dar mahalde ad / m² yazısı küçülür (`bayi_gorseli.dar_mahal_yazisi`, bayi plan görseliyle aynı kural). `tight_layout`tan sonra,
+    son ölçekle çağrılır. BK-15: "EBEVEYN BANYO" önce–sonra panelinde 2 m'lik odadan taşıyordu (plan_bayi.png'de küçülüyordu)."""
+    from .bayi_gorseli import dar_mahal_yazisi
+    fig.canvas.draw(); r = fig.canvas.get_renderer()
+    for ax, y in paneller:
+        dar_mahal_yazisi(ax, y, r)
+
+
 def _plan(ax, fig, y: dict, baslik: str, daireler=(), vurgu_dis: bool = False, kesik: bool = False) -> None:
     """Plan + işaretler. daireler: [(açıklık adı, numara | None)]. Panel bayi plan görseliyle aynı ölçekte (11 × 9 inç; yazılar binmesin,
     `testler/genel/test_okuma_gorseli.py` mürekkep kutusuyla denetler). Numara rozeti dairenin çevresinde, yazılara binmeyen ilk yere
@@ -117,6 +126,7 @@ def okumalar(t: dict, adaylar: list[dict], hedef: Path, kod: str, olcu=None, set
             _plan(ax, fig, y, f"{i} · {a.get('aciklama', a['aciklik'])}{olcu_s}", daireler=[(a["aciklik"], i)])
         fig.suptitle("Hangi pencere? 1 ya da 2 (ya da Hiçbiri)", fontsize=15, weight="bold", color=MAVI, y=0.995)
         fig.tight_layout(rect=(0, 0, 1, 0.985))
+        _yazilari_sigdir(fig, [(ax, y) for ax in axs[:, 0]])
         fig.savefig(yol, bbox_inches="tight", facecolor="white")
         plt.close(fig)
 
@@ -153,6 +163,8 @@ def once_sonra(t_once: dict, t_sonra: dict, hedef: Path, kod: str, degisen: list
             _plan(axs[1], fig, y1, f"SONRA · r{int(rev_sonra):02d}", daireler=pencereler, vurgu_dis=dis140)
         fig.suptitle(baslik or (f"Değişiklik: {anlatim}" if anlatim else f"r{int(rev_sonra):02d}"), fontsize=15, weight="bold", color=MAVI, y=0.995)
         fig.tight_layout(rect=(0, 0, 1, 0.985))
+        if not yalniz_cati:
+            _yazilari_sigdir(fig, [(axs[0], y0), (axs[1], y1)])
         fig.savefig(ust, bbox_inches="tight", facecolor="white")
         plt.close(fig)
 

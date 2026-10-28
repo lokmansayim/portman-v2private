@@ -59,6 +59,14 @@ BAYI_BILGI_CEVABI = "Teşekkürler, bilgiyi bu sohbetten iletiyoruz."
 DOSYA_YUK_ONEKI = "dosya:"                  # bayinin hızlı yanıt düğmesi: payload "dosya:<is_emri_no>"
 BAYI_DOSYA_CEVABI = "Teşekkürler, dosyalarınızı bu sohbetten iletiyoruz."     # Lokman onayı, 11.10.2026 (ekleme B); aynen kalır
 VARSAYILAN_HITAP = "Sayın Bayimiz"
+# İE-21 · 3D bağlantısı (Bayi Rehberi §2 "Bilmeniz gerekenler": "3D'yi aç" butonu modeli telefonun tarayıcısında açar; tek parmakla
+# çevirir, iki parmakla yaklaştırırsınız). Şablon değil: planla aynı turda, 24 saat penceresinde giden bağlantı butonu (cta_url; düğme ≤ 20).
+UCB_DUGME = "3D'yi aç"
+UCB_METNI = "{no} r{rev:02d} planının 3D modeli. Telefonunuzun tarayıcısında açılır: tek parmakla çevirin, iki parmakla yaklaştırın."
+
+
+def ucb_metni(is_emri_no: str, rev: int) -> str:
+    return UCB_METNI.format(no=is_emri_no, rev=int(rev))
 
 
 def satir_id(gelen_id: str, sira: int) -> str:

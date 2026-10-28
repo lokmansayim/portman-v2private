@@ -1,0 +1,345 @@
+{
+ "is_emri_no": "PM-TK01-80M2",
+ "revizyon": 1,
+ "talep": {
+  "bayi": {
+   "kod": "TK01",
+   "ad": "Bayi TK-01"
+  },
+  "musteri_adi": "TK-01",
+  "metin": "BK-14 test girdisi: bayi çiziminden 3+1, 898 × 888; iki banyonun alt duvarı ile holün sol duvarı dört kollu birleşimde buluşur."
+ },
+ "yapi": {
+  "sistem": "prefabrik",
+  "kat_sayisi": 1,
+  "duvar_yuksekligi_cm": 250,
+  "duvar_kalinligi_cm": {
+   "dis": 10,
+   "ic": 6
+  },
+  "olcu_kaynagi": "dis_olcu",
+  "dis_olcu_cm": {
+   "x": 898,
+   "y": 888
+  },
+  "referans_model": "TK-01",
+  "grid": {
+   "x_pano": 7,
+   "y_pano": 7
+  },
+  "kisa_kenar": "x",
+  "giris_cephesi": "on",
+  "dis_dusey_duvar": "cevre_aks_disinda",
+  "dizilim": {
+   "baslangic": "arka-sol",
+   "hiza": "izgara",
+   "dis_duvar_t_bolme": true,
+   "pencere": "oda_ortasi",
+   "kapi": "mantik",
+   "kose": "oda"
+  },
+  "ek_akslar_cm": {
+   "x": [],
+   "y": []
+  }
+ },
+ "mahaller": [
+  {
+   "ad": "YATAK ODASI 1",
+   "tur": "yatak_odasi",
+   "konum_cm": [
+    [
+     10,
+     5,
+     261,
+     381.5
+    ],
+    [
+     261,
+     256,
+     386.5,
+     381.5
+    ]
+   ]
+  },
+  {
+   "ad": "E. BANYO",
+   "tur": "banyo",
+   "konum_cm": [
+    [
+     261,
+     5,
+     386.5,
+     256
+    ]
+   ]
+  },
+  {
+   "ad": "BANYO",
+   "tur": "banyo",
+   "konum_cm": [
+    [
+     386.5,
+     5,
+     574.75,
+     256
+    ]
+   ]
+  },
+  {
+   "ad": "YATAK ODASI 2",
+   "tur": "yatak_odasi",
+   "konum_cm": [
+    [
+     574.75,
+     5,
+     888,
+     256
+    ],
+    [
+     512,
+     256,
+     888,
+     381.5
+    ]
+   ]
+  },
+  {
+   "ad": "HOL",
+   "tur": "antre_hol",
+   "konum_cm": [
+    [
+     386.5,
+     256,
+     512,
+     758
+    ]
+   ]
+  },
+  {
+   "ad": "ANTRE",
+   "tur": "antre_hol",
+   "konum_cm": [
+    [
+     386.5,
+     758,
+     512,
+     883
+    ]
+   ]
+  },
+  {
+   "ad": "SALON",
+   "tur": "salon",
+   "konum_cm": [
+    [
+     10,
+     381.5,
+     386.5,
+     883
+    ]
+   ]
+  },
+  {
+   "ad": "YATAK ODASI 3",
+   "tur": "yatak_odasi",
+   "konum_cm": [
+    [
+     512,
+     381.5,
+     888,
+     632.5
+    ]
+   ]
+  },
+  {
+   "ad": "MUTFAK",
+   "tur": "mutfak",
+   "konum_cm": [
+    [
+     512,
+     632.5,
+     888,
+     883
+    ]
+   ]
+  }
+ ],
+ "acik_sinirlar": [],
+ "acikliklar": [
+  {
+   "tur": "pencere",
+   "olcu": "120x180",
+   "mahal": "YATAK ODASI 1",
+   "duvar": "arka"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "60x40",
+   "mahal": "E. BANYO",
+   "duvar": "arka"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "60x40",
+   "mahal": "BANYO",
+   "duvar": "arka"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "YATAK ODASI 2",
+   "duvar": "sag"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "YATAK ODASI 3",
+   "duvar": "sag"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x180",
+   "mahal": "SALON",
+   "duvar": "sol"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x180",
+   "mahal": "SALON",
+   "duvar": "on"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x180",
+   "mahal": "MUTFAK",
+   "duvar": "on"
+  },
+  {
+   "tur": "dis_kapi",
+   "olcu": 90,
+   "arasi": [
+    "__DIS__",
+    "ANTRE"
+   ],
+   "duvar": "on"
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "ANTRE",
+    "HOL"
+   ]
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "BANYO"
+   ]
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "YATAK ODASI 1"
+   ]
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "YATAK ODASI 2"
+   ]
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "YATAK ODASI 3"
+   ]
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "SALON"
+   ]
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "MUTFAK"
+   ]
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "YATAK ODASI 1",
+    "E. BANYO"
+   ]
+  }
+ ],
+ "cati": {
+  "tip": "besik",
+  "egim_yuzde": 27.5,
+  "sacak_cm": 30,
+  "topuk_cm": 10,
+  "makas_yonu": "kisa_kenar",
+  "makas_ekseni": "x"
+ },
+ "cikti": {
+  "pdf": true,
+  "dxf": true,
+  "pafta": "A2",
+  "icerik": [
+   "aksli_plan",
+   "alanli_kopya",
+   "montaj_kopyasi",
+   "on_gorunus",
+   "cati_profili",
+   "ozellik_tablosu"
+  ]
+ },
+ "ozellikler": {
+  "Çatı Şekli": "Beşik"
+ },
+ "alici_ait": {
+  "kalemler": [],
+  "kaynak": "test girdisi"
+ },
+ "dikmeler": [],
+ "verandalar": [
+  {
+   "ad": "ÖN VERANDA",
+   "cephe": "on",
+   "bas_cm": 256,
+   "bit_cm": 642,
+   "derinlik_cm": 181,
+   "cati": {
+    "tip": "besik",
+    "egim_yuzde": 27.5
+   }
+  },
+  {
+   "ad": "ARKA VERANDA",
+   "cephe": "arka",
+   "bas_cm": 0,
+   "bit_cm": 261,
+   "derinlik_cm": 130,
+   "cati": {
+    "tip": "besik",
+    "egim_yuzde": 27.5
+   }
+  }
+ ]
+}

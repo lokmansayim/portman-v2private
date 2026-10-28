@@ -25,6 +25,7 @@ except ImportError:  # eski PyMuPDF
 from shapely.geometry import box
 
 from . import geometry as G
+from . import veranda as VR
 from .katalog import Katalog, pencere_turu
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -292,9 +293,18 @@ class Cizici:
         self.bom_kayit.append((rol, kod, bname, round(ins[0] + ox, 3), round(ins[1] + oy, 3)))
         return e
 
+    def paylar(self) -> dict:
+        """BK-14: taşan verandanın gövde kutusu (0, 0, W, H) dışına çıktığı pay (cm; alt, ust, sol, sag). Veranda yoksa hepsi 0."""
+        W, H = self.plan.W, self.plan.H
+        rs = [v["rect"] for v in self.plan.dis_verandalar]
+        return {"alt": max([0.0] + [-r[1] for r in rs]), "ust": max([0.0] + [r[3] - H for r in rs]),
+                "sol": max([0.0] + [-r[0] for r in rs]), "sag": max([0.0] + [r[2] - W for r in rs])}
+
     def ciz_plan(self, ox: float, oy: float, rol: str, baslik: str, altbaslik: str):
         plan, msp = self.plan, self.msp
         W, H = plan.W, plan.H
+        py = self.paylar()
+        alt, ust, sol, sag = py["alt"], py["ust"], py["sol"], py["sag"]
         aks, alanlar, montaj = (rol == "ANA"), (rol == "KOPYA"), (rol == "MONTAJ")
         for d in plan.duvarlar:
             for p in d.panolar:
@@ -347,8 +357,9 @@ class Cizici:
             for (x0, y0, x1, y1) in plan.dikmeler:
                 self.yerlestir(name, kod, (x0, y0), 0.0, "MONTAJ_STANDART" if montaj else "VERANDA_DIKME", rol, ox, oy)
         # veranda profili (her açık kenar bir blok: dış yüz + 10 cm içeri, kesik çizgi)
+        dis_ad = {v["ad"] for v in plan.dis_verandalar}
         for ad, m in plan.mahaller.items():
-            if not m.acik: continue
+            if not m.acik or ad in dis_ad: continue         # BK-14: taşan verandanın kenarları aşağıda (gövde çizgisi profil değil)
             ring = list(m.poly.simplify(0.0).exterior.coords)
             segs = []
             for (ax_, ay_), (bx_, by_) in zip(ring, ring[1:]):
@@ -373,6 +384,26 @@ class Cizici:
                         blk.add_line((0, 0), (boy, 0), dxfattribs={"layer": "0", "color": 256, "lineweight": 25})
                         blk.add_line((xa, sy), (xb, sy), dxfattribs={"layer": "0", "color": 256, "lineweight": 25})
                 self.yerlestir(name, kod, (x0, y0), 0.0, "MONTAJ_STANDART" if montaj else "VERANDA_PROFIL_100", rol, ox, oy)
+        for v in plan.dis_verandalar:                       # BK-14: taşan veranda; iç çizgi kirişin iç yüzü (Plan `kirisler`)
+            for j, ((x0, y0, x1, y1), (kx0, ky0, kx1, ky1)) in enumerate(zip(v["kenarlar"], v["kirisler"])):
+                vertical = abs(x0 - x1) < 1e-9
+                boy = (y1 - y0) if vertical else (x1 - x0)
+                rol_ = "ON" if j == 0 else "YAN"            # profilin rolü kenardan (dış kenar ön profil), yönden değil: sol / sağ verandada dış kenar düşey
+                kod = self.kat.veranda_profil(boy, rol_)
+                # kenar sırası (dış, yan 1, yan 2) adda: iki yanın boyu aynı, iç çizgisi zıt yönde (geometri hakemi, 27 Ekim)
+                name = f"BOM_{kod}_VERANDA_{rol_}_{mm_tag(boy)}_{v['cephe'].upper()}_{('DIS', 'YAN1', 'YAN2')[j]}"
+                if name not in self.doc.blocks:
+                    blk = self.doc.blocks.new(name)
+                    ic = [(kx0, ky0, kx1, ky1)]
+                    if vertical:
+                        sx = (kx1 - x0) if abs(kx0 - x0) < 1e-9 else (kx0 - x0)
+                        blk.add_line((0, 0), (0, boy), dxfattribs={"layer": "0", "color": 256, "lineweight": 25})
+                        blk.add_line((sx, 0), (sx, boy), dxfattribs={"layer": "0", "color": 256, "lineweight": 25})
+                    else:
+                        sy = (ky1 - y0) if abs(ky0 - y0) < 1e-9 else (ky0 - y0)
+                        blk.add_line((0, 0), (boy, 0), dxfattribs={"layer": "0", "color": 256, "lineweight": 25})
+                        blk.add_line((0, sy), (boy, sy), dxfattribs={"layer": "0", "color": 256, "lineweight": 25})
+                self.yerlestir(name, kod, (x0, y0), 0.0, "MONTAJ_STANDART" if montaj else "VERANDA_PROFIL_100", rol, ox, oy)
         for (x0, y0, x1, y1) in self._merge_lines(plan.acik_sinir_cizgileri):
             msp.add_line((x0 + ox, y0 + oy), (x1 + ox, y1 + oy), dxfattribs={"layer": "ACIK_SINIR"})
         # mahaller
@@ -383,8 +414,11 @@ class Cizici:
                 e = msp.add_lwpolyline([(x + ox, y + oy) for x, y in list(poly.exterior.coords)[:-1]], close=True, dxfattribs={"layer": "NET_ALAN_GEOMETRISI"})
                 e.set_xdata("PORTMAN_ROOM", [(1000, ad)])
             # etiket, mahalin en büyük dikdörtgen parçasının (aks gridinde) ortasına; L biçimli mahalde koridora değil geniş parçaya
-            r_big = max(m.rects, key=lambda r: (r[2] - r[0]) * (r[3] - r[1]))
-            etiket_poly = box(G.X(r_big[0]), G.Y(r_big[1]), G.X(r_big[2]), G.Y(r_big[3])).intersection(poly)
+            if m.rects:
+                r_big = max(m.rects, key=lambda r: (r[2] - r[0]) * (r[3] - r[1]))
+                etiket_poly = box(G.X(r_big[0]), G.Y(r_big[1]), G.X(r_big[2]), G.Y(r_big[3])).intersection(poly)
+            else:                                           # BK-14: taşan veranda (ızgarada değil)
+                etiket_poly = poly
             if etiket_poly.is_empty or etiket_poly.area < 1.0: etiket_poly = poly
             bx0, by0, bx1, by1 = etiket_poly.bounds
             cx, cy = (bx0 + bx1) / 2, (by0 + by1) / 2
@@ -403,33 +437,47 @@ class Cizici:
                 self.text(ad, (cx + ox, cy + oy), h, "ODA_ADLARI" if not montaj else "MONTAJ_YAZI", rot=rot)
         if aks and G.ana_akslar("x") is not None:          # İE-11: aks tablosu → ana akslar (tam pano + ek aks + uç); ek aks "2′" gibi, numara kaydırmaz
             for x, ad in zip(G.ana_akslar("x"), G.ana_aks_etiketleri("x")):
-                msp.add_line((x + ox, -35 + oy), (x + ox, H + 41 + oy), dxfattribs={"layer": "AKS"})
-                self.text(ad, (x + ox, H + 60 + oy), 14, "AKS_YAZI")
+                msp.add_line((x + ox, -35 - alt + oy), (x + ox, H + 41 + ust + oy), dxfattribs={"layer": "AKS"})
+                self.text(ad, (x + ox, H + 60 + ust + oy), 14, "AKS_YAZI")
             for y, ad in zip(G.ana_akslar("y"), G.ana_aks_etiketleri("y")):
-                msp.add_line((-35 + ox, y + oy), (W + 35 + ox, y + oy), dxfattribs={"layer": "AKS"})
-                self.text(ad, (-53 + ox, y + oy), 14, "AKS_YAZI")
+                msp.add_line((-35 - sol + ox, y + oy), (W + 35 + sag + ox, y + oy), dxfattribs={"layer": "AKS"})
+                self.text(ad, (-53 - sol + ox, y + oy), 14, "AKS_YAZI")
         elif aks:
             for i in range(int(plan.nx * 2) + 1):
                 if i % 2: continue
                 x = G.X(i / 2)
-                msp.add_line((x + ox, -35 + oy), (x + ox, H + 41 + oy), dxfattribs={"layer": "AKS"})
-                self.text(chr(ord("A") + i // 2), (x + ox, H + 60 + oy), 14, "AKS_YAZI")
+                msp.add_line((x + ox, -35 - alt + oy), (x + ox, H + 41 + ust + oy), dxfattribs={"layer": "AKS"})   # BK-14: taşan veranda payı
+                self.text(chr(ord("A") + i // 2), (x + ox, H + 60 + ust + oy), 14, "AKS_YAZI")
             for j in range(int(plan.ny * 2) + 1):
                 if j % 2: continue
                 y = G.Y(j / 2)
-                msp.add_line((-35 + ox, y + oy), (W + 35 + ox, y + oy), dxfattribs={"layer": "AKS"})
-                self.text(str(j // 2 + 1), (-53 + ox, y + oy), 14, "AKS_YAZI")
+                msp.add_line((-35 - sol + ox, y + oy), (W + 35 + sag + ox, y + oy), dxfattribs={"layer": "AKS"})
+                self.text(str(j // 2 + 1), (-53 - sol + ox, y + oy), 14, "AKS_YAZI")
         # ölçüler
-        self.dim((ox, oy), (W + ox, oy), (0, -85 + oy), 0)
-        self.dim((ox, oy), (ox, H + oy), (-115 + ox, 0), 90)
+        self.dim((ox, oy), (W + ox, oy), (0, -85 - alt + oy), 0)
+        self.dim((ox, oy), (ox, H + oy), (-115 - sol + ox, 0), 90)
+        if alt or ust:                                      # BK-14: verandalarla genel derinlik
+            self.dim((ox, -alt + oy), (ox, H + ust + oy), (-160 - sol + ox, 0), 90)
+        if sol or sag:
+            self.dim((-sol + ox, oy), (W + sag + ox, oy), (0, -130 - alt + oy), 0)
         if not montaj:
             if G.ana_akslar("x") is not None:               # İE-11
                 xs, ys = G.ana_akslar("x"), G.ana_akslar("y")
             else:
                 xs = [G.X(i / 2) for i in range(0, int(plan.nx * 2) + 1, 2)] + ([G.X(plan.nx)] if int(plan.nx * 2) % 2 else [])
                 ys = [G.Y(j / 2) for j in range(0, int(plan.ny * 2) + 1, 2)] + ([G.Y(plan.ny)] if int(plan.ny * 2) % 2 else [])
-            for a, b in zip(xs, xs[1:]): self.dim((a + ox, H + oy), (b + ox, H + oy), (0, H + 102 + oy), 0)
-            for a, b in zip(ys, ys[1:]): self.dim((W + ox, a + oy), (W + ox, b + oy), (W + 81 + ox, 0), 90)
+            for a, b in zip(xs, xs[1:]): self.dim((a + ox, H + oy), (b + ox, H + oy), (0, H + 102 + ust + oy), 0)
+            for a, b in zip(ys, ys[1:]): self.dim((W + ox, a + oy), (W + ox, b + oy), (W + 81 + sag + ox, 0), 90)
+            for v in plan.dis_verandalar:                   # BK-14: taşan verandanın eni ve derinliği
+                vx0, vy0, vx1, vy1 = v["rect"]
+                if v["cephe"] in ("on", "arka"):
+                    self.dim((vx0 + ox, (vy0 if v["cephe"] == "on" else vy1) + oy), (vx1 + ox, (vy0 if v["cephe"] == "on" else vy1) + oy),
+                             (0, (vy0 - 40 if v["cephe"] == "on" else vy1 + 40) + oy), 0)
+                    self.dim((vx1 + ox, vy0 + oy), (vx1 + ox, vy1 + oy), (vx1 + 40 + ox, 0), 90)
+                else:
+                    self.dim(((vx0 if v["cephe"] == "sol" else vx1) + ox, vy0 + oy), ((vx0 if v["cephe"] == "sol" else vx1) + ox, vy1 + oy),
+                             ((vx0 - 40 if v["cephe"] == "sol" else vx1 + 40) + ox, 0), 90)
+                    self.dim((vx0 + ox, vy1 + oy), (vx1 + ox, vy1 + oy), (0, vy1 + 40 + oy), 0)
             for d in plan.duvarlar:
                 for p in d.panolar:
                     if abs(p.boy - G.MOD) < 1e-6: continue
@@ -441,7 +489,7 @@ class Cizici:
                         side = 1 if d.c < H / 2 else -1; yd = r[3] + 40 if side > 0 else r[1] - 40
                         self.dim((r[0] + ox, r[1] + oy if side > 0 else r[3] + oy), (r[2] + ox, r[1] + oy if side > 0 else r[3] + oy), (0, yd + oy), 0, "OZEL_PANEL_OLCU_CM")
             for ad, m in plan.mahaller.items():
-                if not m.acik: continue
+                if not m.acik or not m.cells: continue      # taşan veranda (BK-14) yukarıda ölçülü
                 us = [u for u, v in m.cells]; vs = [v for u, v in m.cells]
                 x0, x1 = G.X(min(us) / 2), G.X((max(us) + 1) / 2); y0, y1 = G.Y(min(vs) / 2), G.Y((max(vs) + 1) / 2)
                 # dar açık mahalde (tek pano şeridi) ölçü çizgisi plan dışına alınır; yazılarla çakışmasın
@@ -460,12 +508,12 @@ class Cizici:
                 pos = (cx + ox + 16 + hh / 2 + 13, cy + oy) if rot else (cx + ox, cy + oy + (hh / 2 + 24 + (14 if alanlar else 0)))
                 self.text(f"{fmt((x1 - x0) / G.MOD)} x {fmt((y1 - y0) / G.MOD)} aks modülü", pos, 13, "ODA_ADLARI", rot=rot)
         if montaj:
-            self.text("Mor: standart dışı pano (gerçek uçtan uca boy ölçülü) | Beyaz: standart 125,5 cm pano | Ölçüler cm", (W / 2 + ox, -145 + oy), 13, "MONTAJ_YAZI")
-            self.text("Pencere etiketi: malzeme kodu + en×yükseklik | Montaj kopyası BOM'a sayılmaz", (W / 2 + ox, -175 + oy), 13, "MONTAJ_YAZI")
-        self.text(baslik, (W / 2 + ox, H + 206 + oy), 24, "ODA_ADLARI")
+            self.text("Mor: standart dışı pano (gerçek uçtan uca boy ölçülü) | Beyaz: standart 125,5 cm pano | Ölçüler cm", (W / 2 + ox, -145 - alt + oy), 13, "MONTAJ_YAZI")
+            self.text("Pencere etiketi: malzeme kodu + en×yükseklik | Montaj kopyası BOM'a sayılmaz", (W / 2 + ox, -175 - alt + oy), 13, "MONTAJ_YAZI")
+        self.text(baslik, (W / 2 + ox, H + 206 + ust + oy), 24, "ODA_ADLARI")
         # İE-11: dar yapıda (PK-01 600 cm) alt başlık komşu plana taşıyordu; yeni anahtarlı İş Emri'nde yazı sığacak boya iner (eski yol 15 sabit)
         h_alt = 15 if not G.yeni_anahtar_var(plan.is_emri) else max(9, min(15, int((W + 200) / (max(1, len(altbaslik)) * 0.75))))   # planlar W+300 aralıklı; harf ≈ 0,75·h
-        self.text(altbaslik, (W / 2 + ox, H + 168 + oy), h_alt, "ODA_ADLARI")
+        self.text(altbaslik, (W / 2 + ox, H + 168 + ust + oy), h_alt, "ODA_ADLARI")
 
     _FONT = None
 
@@ -515,12 +563,7 @@ class Cizici:
 
     # ------------------------------------------------------------------ ön görünüş / çatı / tablo
     def _disari_yon(self, d):
-        for k, a, b in d.edges:
-            ma, mb = self.plan.mahaller.get(a), self.plan.mahaller.get(b)
-            a_out = (a == G.OUT) or (ma is not None and ma.acik); b_out = (b == G.OUT) or (mb is not None and mb.acik)
-            if a_out and not b_out: return "-x" if d.yon == "y" else "-y"
-            if b_out and not a_out: return "+x" if d.yon == "y" else "+y"
-        return None
+        return G.disari_yon(self.plan, d)
 
     def ciz_on_gorunus(self, ox, top):
         plan, msp = self.plan, self.msp
@@ -559,12 +602,21 @@ class Cizici:
             p = min(pen, key=lambda q: q.gap()[0]); g = p.gap(); h = p.acilim.yukseklik; ust = hy - lento; alt = ust - h
             self.dim((g[0] + ox, bot), (g[0] + ox, bot + alt), (g[0] - 33 + ox, 0), 90, "ON_OLCU"); self.dim((g[0] + ox, bot + ust), (g[0] + ox, top), (g[0] - 33 + ox, 0), 90, "ON_OLCU")
         self.text("%" + fmt(egim * 100), (W / 4 + ox, top + rise / 2 + 30), 18, "ON_YAZI"); self.text("%" + fmt(egim * 100), (3 * W / 4 + ox, top + rise / 2 + 30), 18, "ON_YAZI")
+        on_veranda = {v["ad"] for v in plan.dis_verandalar if v["cephe"] != "arka"}   # BK-14: önde ve yanda taşan veranda; arkadaki gövdenin ardında
+        for p in VR.gorunus_parcalari(plan, plan.is_emri, "on") if on_veranda else []:
+            if p["veranda"] not in on_veranda:
+                continue
+            pts = [(u + ox, bot + z) for u, z in p["u"]]
+            if p.get("kalkan"):
+                msp.add_lwpolyline(pts, dxfattribs={"layer": "ON_CATI"})
+            else:
+                msp.add_lwpolyline(pts, close=True, dxfattribs={"layer": "ON_CATI" if p["tur"] == "cati" else "ON_GORUNUS"})
         self.text("ÖN GÖRÜNÜŞ - ÇALIŞMA", (W / 2 + ox, top + rise + 100), 26, "ON_YAZI")
         self.text(f"Pencere üst kotu {fmt(hy - lento)} cm | Lento {fmt(lento)} cm | Bina yüksekliği {fmt(hy)} cm", (W / 2 + ox, bot - 150), 15, "ON_YAZI")
 
-    def ciz_cati_profili(self, ox, oy):
+    def ciz_cati_profili(self, ox, oy, en=None, alt_yazi=None):
         plan, msp = self.plan, self.msp
-        W = plan.W; cati = plan.is_emri.get("cati", {})
+        W = plan.W if en is None else en; cati = plan.is_emri.get("cati", {})     # İE-17: beşik dışı çatıda makasın geçtiği boy (`en`)
         egim = float(cati.get("egim_yuzde", 33)) / 100.0; sacak = float(cati.get("sacak_cm", 30)); topuk = float(cati.get("topuk_cm", 10))
         tw = W + 2 * sacak; rise = topuk + (tw / 2) * egim
         xl, xr, xm = ox - sacak, ox + W + sacak, ox + W / 2
@@ -579,7 +631,72 @@ class Cizici:
         self.text("TOPUK", (xl - 53, oy + 53), 14, "CATI_YAZI")
         self.text("ÇATI PROFİLİ - TOPUK VE SAÇAK", (xm, oy + rise + 130), 25, "CATI_YAZI")
         self.text(f"İki yanda {fmt(sacak)} cm saçak | İki uçta {fmt(topuk)} cm topuk | Eğim %{fmt(egim*100)} (derece değil)", (xm, oy + rise + 95), 17, "CATI_YAZI")
-        self.text("Makas kısa kenarı geçer; mahya uzun kenar boyunca uzanır. Ölçüler cm.", (xm, oy - 180), 16, "CATI_YAZI")
+        self.text(alt_yazi or "Makas kısa kenarı geçer; mahya uzun kenar boyunca uzanır. Ölçüler cm.", (xm, oy - 180), 16, "CATI_YAZI")
+
+    def ciz_gorunusler(self, top):
+        """İE-17: beşik dışı çatıda (beşik + cumba, kırma) ön görünüş canlı biçimiyle ve yanına aynı biçimle arka, sol ve sağ görünüş; en sonda
+        ana çatının profili (Lokman ve CIO, 27 Ekim 21:13: prefabrik çıktısı bu ön onay PDF'i; genel motordan yalnız çatı geometrisi).
+        Biçim `ciz_on_gorunus`'unki: duvarın dikdörtgeni, pano derzleri, kaynak pencere ve kapı blokları, saçak altı çizgisi ve topuk,
+        ölçüler (çatı ve duvar eni, duvar yüksekliği, tepe, en soldaki pencerenin eşiği ve lentosu), % eğim, ON_* katmanları. Geometri
+        `cephe_gorunus`'tan: duvar ve açıklıklar Motor'un planından, çatı çizgileri `cati_prefabrik`'in düzlemlerinin izdüşümü. Görünüşler
+        yan yana, saçak uçları arası 360 (sağdaki ölçüler 110, ara 250). Beşikte çağrılmaz (beşik DXF'i bayt bayt aynı). Duvar üstü `top`."""
+        from . import cephe_gorunus as CG
+        plan, msp, ie = self.plan, self.msp, self.plan.is_emri
+        hy = float(ie["yapi"].get("duvar_yuksekligi_cm", 250)); cati = ie["cati"]
+        topuk = float(cati.get("topuk_cm", 10)); sacak = float(cati.get("sacak_cm", 30))
+        bot = top - hy; lento = hy - PENCERE_UST_KOTU
+        ox, xr = 0.0, 0.0
+        for k, taraf in enumerate(CG.TARAFLAR):
+            g, r = CG.cephe(plan, taraf), CG.cati_cizgileri(plan, ie, taraf)
+            if k:
+                ox = xr + 360.0 - r["u0"]
+            W = g["en"]
+            msp.add_lwpolyline([(ox, bot), (W + ox, bot), (W + ox, top), (ox, top)], close=True, dxfattribs={"layer": "ON_GORUNUS"})
+            for u in g["derz"]:
+                msp.add_line((u + ox, bot), (u + ox, top), dxfattribs={"layer": "ON_DERZ"})
+            for a in g["acikliklar"]:
+                w, h = a["u1"] - a["u0"], a["z1"] - a["z0"]
+                if a["tur"] == "pencere":
+                    msp.add_blockref("kaynak-on-pencere", (a["u0"] + ox, bot + a["z0"]), dxfattribs={"xscale": w / 77.101, "yscale": h / 116.017, "layer": "ON_DOGRAMA"})
+                else:
+                    msp.add_blockref("kaynak-on-kapi", (a["u0"] + ox, bot), dxfattribs={"xscale": w / 68.697, "yscale": h / 133.557, "layer": "ON_DOGRAMA"})
+            xl, xr = r["u0"] + ox, r["u1"] + ox
+            msp.add_line((xl, top), (xr, top), dxfattribs={"layer": "ON_CATI"})
+            msp.add_line((xl, top), (xl, top + topuk), dxfattribs={"layer": "ON_TOPUK"}); msp.add_line((xr, top), (xr, top + topuk), dxfattribs={"layer": "ON_TOPUK"})
+            for c in r["cizgiler"]:
+                msp.add_lwpolyline([(u + ox, bot + z) for u, z in c], dxfattribs={"layer": "ON_CATI"})
+            tu, tz = r["tepe"]; rise = tz - hy
+            self.dim((xl, top), (xr, top), (0, bot - 110), 0, "ON_OLCU"); self.dim((ox, bot), (W + ox, bot), (0, bot - 67), 0, "ON_OLCU")
+            self.dim((W + ox, bot), (W + ox, top), (W + 77 + ox, 0), 90, "ON_OLCU"); self.dim((xr, top), (tu + ox, bot + tz), (W + 77 + ox, 0), 90, "ON_OLCU")
+            pen = [a for a in g["acikliklar"] if a["tur"] == "pencere"]
+            if pen:
+                a = pen[0]
+                self.dim((a["u0"] + ox, bot), (a["u0"] + ox, bot + a["z0"]), (a["u0"] - 33 + ox, 0), 90, "ON_OLCU")
+                self.dim((a["u0"] + ox, bot + a["z1"]), (a["u0"] + ox, top), (a["u0"] - 33 + ox, 0), 90, "ON_OLCU")
+            for u, z, e in r["egimler"]:
+                self.text("%" + fmt(e * 100), (u + ox, bot + z + 30), 18, "ON_YAZI")
+            self.text(f"{CG.AD[taraf]} GÖRÜNÜŞ - ÇALIŞMA", (W / 2 + ox, top + rise + 100), 26, "ON_YAZI")
+            if taraf == "on":
+                self.text(f"Pencere üst kotu {fmt(hy - lento)} cm | Lento {fmt(lento)} cm | Bina yüksekliği {fmt(hy)} cm", (W / 2 + ox, bot - 150), 15, "ON_YAZI")
+        x0, y0, x1, y1 = G.govde_kutusu(plan)
+        mx = cati.get("makas_ekseni", "x") == "x"
+        en = (x1 - x0) if mx else (y1 - y0)
+        op = xr + 360.0 + sacak + 63.0
+        m = CG.mahya_boylari(plan, ie)                       # mahyanın gerçek boyu (kırmada gövde boyu değil; geometri hakemi, 3. tur)
+        if cati["tip"] == "kirma":
+            mahya = f"mahya {fmt(m[0])} cm, kırma uçları arası"
+        else:
+            mahya = f"ana mahya {fmt(m[0])} cm (alın saçaklarıyla), cumbanın mahyası {fmt(m[1])} cm"
+        self.ciz_cati_profili(op, top + 50.0, en=en, alt_yazi=f"Makas {fmt(en)} cm'yi geçer; {mahya}. Ölçüler cm.")
+        e = float(cati["egim_yuzde"])
+        if cati["tip"] == "kirma":
+            uc = cati.get("kirma_egimleri") or {}
+            yan = {"sol": "sol", "sag": "sağ", "on": "ön", "arka": "arka"}
+            ek = "uç yüzler " + " · ".join(f"{yan[k]} %{fmt(float(v))}" for k, v in uc.items()) if uc else f"dört yüz %{fmt(e)}"
+        else:
+            u = cati["cumbalar"][0]
+            ek = f"cumba {CG.AD[u['cephe']].lower()} cephede {fmt(float(u['bas_cm']))}–{fmt(float(u['bit_cm']))} cm, eğim ana çatıyla aynı (%{fmt(e)})"
+        self.text(f"{_cati_adi(cati)} çatı | {ek}", (op + en / 2, top + 50.0 - 210), 16, "CATI_YAZI")
 
     def ciz_ozellik_tablosu(self, ox, oy, satirlar):
         msp = self.msp; w1, w2, rh = 300.0, 640.0, 34.0; n = len(satirlar) + 1
@@ -611,6 +728,17 @@ class Cizici:
 
 # ---------------------------------------------------------------------- üretim akışı
 
+def _cati_adi(cati: dict) -> str:
+    """Özellik tablosundaki çatı adı: beşik + cumba ve kırmada paftanın yazımı (İE-17; `sunum.CATI_SEKLI`), başka her tipte eski yazım
+    (beşik DXF'i bayt bayt aynı)."""
+    from .cati_prefabrik import TIPLER
+    tip = cati.get("tip", "besik")
+    if tip in TIPLER:
+        from .sunum import CATI_SEKLI
+        return CATI_SEKLI[tip]
+    return tip.capitalize()
+
+
 def uret(is_emri: dict, cikti_dir: Path, ad_govde: str | None = None, pdf_hatada: bool = False) -> dict:
     """İş Emri → DXF (kaydet, yeniden aç, doğrula) → PDF. Doğrulama GEÇMEZSE teslim edilebilir PDF üretilmez (denetim bulgusu F08);
     pdf_hatada=True yalnız tanı için '<ad>.HATALI.pdf' yazar. Dönen manifest'te 'pdf' o zaman None, 'validation_passed' False."""
@@ -626,7 +754,8 @@ def uret(is_emri: dict, cikti_dir: Path, ad_govde: str | None = None, pdf_hatada
     stem = ad_govde or f"Portman_{is_emri.get('is_emri_no','IS')}_r{int(is_emri.get('revizyon',1)):02d}"
     baslik = f"{plan.is_emri.get('talep',{}).get('musteri_adi','')} | {_grid_yazi(yapi, ' x ', ' PANO')} | {fmt(W)} × {fmt(H)} cm"
     icerik = is_emri.get("cikti", {}).get("icerik", [])
-    gap = W + 300.0
+    py = c.paylar()                                         # BK-14: taşan veranda yoksa hepsi 0 (yerleşim aynı)
+    gap = W + 300.0 + py["sol"] + py["sag"]
     c.ciz_plan(0.0, 0.0, "ANA", "KAT PLANI — AKSLI", baslik + " | Model ve ölçüler: cm | 125,5 cm aks düzeni")
     c.ciz_plan(gap, 0.0, "KOPYA", "KAT PLANI — NET ALANLAR", baslik + " | Net alanlar oda adının altında, m²")
     montaj = ("montaj_kopyasi" in icerik) or True
@@ -638,13 +767,19 @@ def uret(is_emri: dict, cikti_dir: Path, ad_govde: str | None = None, pdf_hatada
               "Net alanlar kapı eşikleri hariç; veranda alanı açık dış kenarlara kadardır.",
               "Açık mahal sınırları bitişik duvar yüzünün devamı kabul edildi."]
     for i, s in enumerate(notlar):
-        c.text(s, (gap + W / 2, -145 - 30 * i), 13, "ODA_ADLARI")
+        c.text(s, (gap + W / 2, -145 - py["alt"] - 30 * i), 13, "ODA_ADLARI")
     _cati = is_emri.get("cati", {})
-    _rise = float(_cati.get("topuk_cm", 10)) + (W + 2 * float(_cati.get("sacak_cm", 30))) / 2 * float(_cati.get("egim_yuzde", 33)) / 100.0
-    kay = max(0.0, _rise - 147.445) if _yeni else 0.0   # İE-11: eski İş Emri'nde pafta yerleşimi değişmez
+    from .cati_prefabrik import TIPLER as _PREFABRIK_CATI
+    _dort = (is_emri.get("cati") or {}).get("tip", "besik") in _PREFABRIK_CATI
+    _en = W if (not _dort or _cati.get("makas_ekseni", "x") == "x") else H     # İE-17: beşik dışında makasın geçtiği boy
+    _rise = float(_cati.get("topuk_cm", 10)) + (_en + 2 * float(_cati.get("sacak_cm", 30))) / 2 * float(_cati.get("egim_yuzde", 33)) / 100.0
+    kay = (max(0.0, _rise - 147.445) if _yeni else 0.0) + py["alt"]   # İE-11: eski İş Emri'nde pafta yerleşimi değişmez; BK-14: ön veranda kadar aşağı
     kay2 = kay + max(0.0, float(yapi.get("duvar_yuksekligi_cm", 250)) - 250.0)     # 280 / 300'de ön görünüş uzar, alt yazılar iner
-    c.ciz_on_gorunus(0.0, -600.0 - kay)
-    c.ciz_cati_profili(gap, -550.0 - kay)
+    if _dort:                                               # İE-17: beşik + cumba, kırma → dört görünüş ve profil, ön görünüşün biçimiyle
+        c.ciz_gorunusler(-600.0 - kay)
+    else:                                                   # beşik (ve başka her tip) bugünkü gibi
+        c.ciz_on_gorunus(0.0, -600.0 - kay)
+        c.ciz_cati_profili(gap, -550.0 - kay)
     hy = yapi.get("duvar_yuksekligi_cm", 250); cati = is_emri.get("cati", {})
     _olculer = {p.acilim.olcu for p in plan.panolar if p.acilim and p.acilim.tur == "pencere"}
     _pencere_satiri = "PVC doğrama; " + ", ".join(f"{e}×{b}" for e, b in sorted((k.en, k.boy) for k in map(G.pencere_kurali, _olculer)))
@@ -653,18 +788,19 @@ def uret(is_emri: dict, cikti_dir: Path, ad_govde: str | None = None, pdf_hatada
     tab = [("Bina / pano grid", f"{_grid_yazi(yapi, ' × ', ' pano')} — {fmt(W)} × {fmt(H)} cm"),
            ("Sistem", "Prefabrik panel (8 mm fibercement)"), ("Duvar yüksekliği", f"{fmt(hy)} cm"), ("Dış duvar / iç duvar", f"{G._mm(G.T_DIS)} mm / {G._mm(G.T_IC)} mm"),
            ("Pano modülü", "125,5 cm (isteğe bağlı yarım pano 62,75 cm)"),
-           ("Çatı", f"{cati.get('tip','besik').capitalize()} — %{fmt(float(cati.get('egim_yuzde',33)))} eğim, {fmt(float(cati.get('sacak_cm',30)))} cm saçak, {fmt(float(cati.get('topuk_cm',10)))} cm topuk"),
+           ("Çatı", f"{_cati_adi(cati)} — %{fmt(float(cati.get('egim_yuzde',33)))} eğim, {fmt(float(cati.get('sacak_cm',30)))} cm saçak, {fmt(float(cati.get('topuk_cm',10)))} cm topuk"),
            ("Pencereler", "PVC doğrama; katalog 120×120 / 120×180 / 60×40" if _olculer <= set(G.PENCERE_OLCULERI) else _pencere_satiri),
            ("Kapılar", "Dış: çelik kapı; iç: Amerikan panel kapı"),
            ("Kat sayısı", str(yapi.get("kat_sayisi", 1))), ("Revizyon", f"r{int(is_emri.get('revizyon',1)):02d}")]
     if is_emri.get("ozellikler"):                       # İE-11: paftanın teknik özellikleri İş Emri'nden (PK-01: "Dış Kapı: Alıcıya ait")
         tab = [r for r in tab if r[0] not in ("Pencereler", "Kapılar")] + [(str(k), str(v)) for k, v in is_emri["ozellikler"].items()]
-    c.ciz_ozellik_tablosu((3 if montaj else 2) * gap, H + 140, tab)
+    c.ciz_ozellik_tablosu((3 if montaj else 2) * gap, H + 140 + py["ust"], tab)
     cx = ((3 if montaj else 2) * gap - 300) / 2
-    c.text(LABEL, (cx, H + 320), 23, "PORTMAN_INFO")
-    c.text(f"PORTMAN | {is_emri.get('talep',{}).get('bayi',{}).get('ad','')} / {is_emri.get('talep',{}).get('musteri_adi','')} | İş Emri {is_emri.get('is_emri_no','')} r{int(is_emri.get('revizyon',1)):02d}", (cx, H + 275), 20, "PORTMAN_INFO")
+    c.text(LABEL, (cx, H + 320 + py["ust"]), 23, "PORTMAN_INFO")
+    c.text(f"PORTMAN | {is_emri.get('talep',{}).get('bayi',{}).get('ad','')} / {is_emri.get('talep',{}).get('musteri_adi','')} | İş Emri {is_emri.get('is_emri_no','')} r{int(is_emri.get('revizyon',1)):02d}", (cx, H + 275 + py["ust"]), 20, "PORTMAN_INFO")
     c.text(f"Duvar: {fmt(G.T_DIS)} / {fmt(G.T_IC)} cm | Yükseklik: {fmt(hy)} cm | Pano: 125,5 cm | Çatı: %{fmt(float(cati.get('egim_yuzde',33)))}", (cx, -1090 - kay2), 18, "PORTMAN_INFO")
-    c.text("Kural kaydı v1.4.3 ile üretildi. Yan görünüş ve üretim/statik hesabı bu taslağın kapsamında değildir.", (cx, -1130 - kay2), 14, "PORTMAN_INFO")
+    c.text("Kural kaydı v1.4.3 ile üretildi. " + ("Üretim/statik hesabı" if _dort else "Yan görünüş ve üretim/statik hesabı")
+           + " bu taslağın kapsamında değildir.", (cx, -1130 - kay2), 14, "PORTMAN_INFO")
     c.text("Portman motor v1.1 | Üretim: " + time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()), (cx, -1165 - kay2), 13, "PORTMAN_INFO")
     for i, u in enumerate(plan.uyarilar[:4] + pafta_uyarilari):
         c.text("UYARI: " + u, (cx, -1200 - kay2 - 25 * i), 12, "PORTMAN_INFO")
