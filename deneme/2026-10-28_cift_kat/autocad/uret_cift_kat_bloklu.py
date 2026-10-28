@@ -534,12 +534,14 @@ ZEMIN = {
                              DOLU(57.75), PRF]),                                                                                   # … 136,25'te balkon duvarı profili
   "on":    (0.0, 0.0, "+x", [PRF, DOLU(125.5), ("pano", 125.5, "100'LÜK 125'LİK (120x180) PENCERELİ PANO"), DOLU(125.5), DOLU(57.75), PRF]),  # 444,25'te salon sağ duvarı profili
   "salon_sag": (444.25, 10.0, "+y", [DOLU(116.25)]),                                                                              # salon sağ dış duvarı 10→126,25
-  "balkon_arka": (454.25, 126.25, "+x", [DOLU(57.75), ("pano", 125.5, "100'LÜK 125'LİK KAPILI PANO(90'LIK) [SOL]"),
-                             ("pano", 115.5, "100'LÜK 115.5'LİK (60x125) PENCERELİ PANO")]),                                    # 454,25→753; 753'te sağ profil
+  "balkon_arka": (454.25, 126.25, "+x", [DOLU(57.75), ("acik", 10.0), ("pano", 125.5, "100'LÜK 125'LİK KAPILI PANO(90'LIK) [SOL]"),
+                             ("pano", 105.5, "100'LÜK 105.5'LİK (60x125) PENCERELİ PANO")]),                                    # 454,25→512 | T 512–522 | kapı 522–647,5 | 105,5 → 753
   # iç duvarlar (100'lük)
-  "oda_salon": (10.0, 381.5, "+x", [DOLU(125.5), DOLU(125.5), DOLU(62.75), PRF, ("pano", 125.5, "100'LÜK 125'LİK KAPILI PANO(82'LİK) [SAG ÜST]"),
-                             DOLU(47.75), ("acik", 10.0), ("pano", 125.5, "100'LÜK 125'LİK KAPILI PANO(82'LİK) [SAG ALT]"), DOLU(110.5)]),  # 10→753; kova sol profili 323,75; T 507–517
-  "salon_mutfak": (507.0, 136.25, "+y", [DOLU(125.5), DOLU(119.75)]),                                                              # 136,25→381,5
+  "oda_salon": (10.0, 381.5, "+x", [DOLU(125.5), DOLU(125.5), DOLU(125.5), ("pano", 125.5, "100'LÜK 125'LİK KAPILI PANO(82'LİK) [SAG ÜST]"),
+                             ("acik", 10.0), ("pano", 125.5, "100'LÜK 125'LİK KAPILI PANO(82'LİK) [SAG ÜST · AYNA]"), DOLU(105.5)]),
+                             # Lokman 15:51: ODA/SALON'u bölen duvar yalnız H'lerle, profil yok; 5 × 125,5 (2'si kapı), T'de 10, mutfak bitişi 105,5 → 10→753
+                             # mutfak kapısı = hol–salon kapısının salon/mutfak duvarına (T) göre aynası (15:49), ayrı ölçü yok
+  "salon_mutfak": (512.0, 136.25, "+y", [DOLU(125.5), DOLU(119.75)]),                                                              # 136,25→381,5; aks 517
   "kova_sol": (323.75, 391.5, "+y", [("pano", 125.5, "100'LÜK 125'LİK KAPILI PANO(82'LİK) [SOL ALT]"), DOLU(179.0), PRF, DOLU(125.5), PRF]),  # 391,5→696, profil, çıkma 706→831,5, profil
   "kova_sag": (522.0, 565.5, "+y", [PRF, DOLU(120.5), PRF, DOLU(125.5), PRF]),                                                     # 565,5 profil, 575,5→696, profil, çıkma, profil
   "wc_on":  (532.0, 565.5, "+x", [("pano", 125.5, "100'LÜK 125'LİK KAPILI PANO(82'LİK) [SOL ÜST]"), DOLU(95.5)]),     # 532→753
@@ -573,6 +575,14 @@ def zemin_dizilimden(kat_adi="ZEMİN KAT"):
         H.add_blockref(SABLON_KOSE, (ix, iy), dxfattribs={"xscale": xs, "yscale": ys, "layer": "KOSE_PROFIL_100"})
     def blok(ad, L):
         if ad not in hedef.blocks:
+            if "(60x125) PENCERELİ" in ad and "100'LÜK 115.5'LİK (60x125) PENCERELİ PANO" in hedef.blocks:   # 115,5'lik pencereliyi 105,5'e kısalt
+                kb = hedef.blocks.get("100'LÜK 115.5'LİK (60x125) PENCERELİ PANO"); nb = hedef.blocks.new(ad)
+                polys = [k for k in kb if k.dxftype() == "LWPOLYLINE"]
+                son = max(polys, key=lambda k: max(y for _, y, *__ in k.get_points()))
+                for k in kb:
+                    c = k.copy(); nb.add_entity(c)
+                    if k is son: c.set_points([(x, (L if abs(y - 115.5) < 1e-6 else y)) for x, y, *_ in k.get_points()], format="xy")
+                yeni_adlar.add(ad); return ad
             if "VASİSTASLI" in ad and "100'LÜK 115.5'LİK (60x40) VASİSTASLI PANO" in hedef.blocks:     # 115,5'lik vasistaslıyı 125,5'e uzat
                 kb = hedef.blocks.get("100'LÜK 115.5'LİK (60x40) VASİSTASLI PANO"); nb = hedef.blocks.new(ad)
                 polys = [k for k in kb if k.dxftype() == "LWPOLYLINE"]
@@ -585,6 +595,18 @@ def zemin_dizilimden(kat_adi="ZEMİN KAT"):
             return pano_blogu(f"100'LÜK {en_yaz(L)}'LİK PANO", L)
         return ad
     X_YONLU = lambda ad: "KAPILI PANO(90'LIK)" in ad          # şablon tarzı dış kapı: geometri yerel x boyunca (bant y 0–10)
+    def ayna_blok(kaynak_ad, L):                               # pano bloğunu boyu boyunca aynalar (menteşe ucu değişir): y → L − y, iç sembol yscale −1
+        yeni = kaynak_ad[:-1] + " · AYNA]" if kaynak_ad.endswith("]") else kaynak_ad + " [AYNA]"
+        if yeni in hedef.blocks or kaynak_ad not in hedef.blocks: return yeni
+        kb = hedef.blocks.get(kaynak_ad); nb = hedef.blocks.new(yeni)
+        from ezdxf.math import Matrix44
+        M = Matrix44.scale(1, -1, 1) @ Matrix44.translate(0, L, 0)
+        for k in kb:
+            c = k.copy(); nb.add_entity(c)
+            if c.dxftype() == "LWPOLYLINE": c.set_points([(x, L - y) for x, y, *_ in c.get_points()], format="xy")
+            else: c.transform(M)                                   # dönük INSERT'te yansıma: ezdxf dönüş/ölçek/ekstrüzyonu ayarlar
+        return yeni
+    ayna_blok("100'LÜK 125'LİK KAPILI PANO(82'LİK) [SAG ÜST]", 125.5)
     ON_YUZLU = {"on", "balkon_arka"}                            # ön cepheye bakan yatay duvarlar: sembol dışa baksın (rot 90, Motor gibi)
     zincirler = {}
     for ad, (x0, y0, yon, dizi) in ZEMIN.items():
@@ -617,7 +639,15 @@ def zemin_dizilimden(kat_adi="ZEMİN KAT"):
             noktalar.append(x if yon == "+x" else y)
         zincirler[ad] = noktalar
     # sola yaslı kapı varyantları (açıklık 11,5 payla) — bloklar yoksa üretici yaslar
-    kapiyi_yasla((517.0, 391.5), 270, 11.5, kat_adi); kapiyi_yasla((532.0, 575.5), 270, 11.5, kat_adi)
+    kapiyi_yasla((532.0, 575.5), 270, 11.5, kat_adi)           # WC kapısı sola yaslı; mutfak kapısı aynadan (yaslama yok)
+    # üçlü H (T birleşimleri; Lokman 15:51 "sadece H ile böl"): şablon bloğu kutu 0–10 × 0–10, kulaklar +x → gövde yönüne döndürülür
+    HB = "100X100 3 LÜ H BAĞLANTI DİREĞİ"
+    def ucluH(cx, cy, govde):
+        if HB not in hedef.blocks: return
+        rot, ix, iy = {"+x": (0, cx - 5, cy - 5), "+y": (90, cx + 5, cy - 5), "-x": (180, cx + 5, cy + 5), "-y": (270, cx - 5, cy + 5)}[govde]
+        H.add_blockref(HB, (ix, iy), dxfattribs={"rotation": rot, "layer": "IC_UCLU_H_100"}); say(HB, kat_adi, 1)
+    ucluH(5, 386.5, "+x"); ucluH(328.75, 386.5, "+y"); ucluH(517, 386.5, "-y"); ucluH(517, 131.25, "+y"); ucluH(758, 386.5, "-x"); ucluH(758, 570.5, "-x")
+    profil(444.25, 126.25, 1, 1)                                             # salon sağ duvarı – balkon arka duvarı iç köşesi
     # balkon kirişleri 40 dışarıda (serbest ölçü — Lokman 15:23) ve köşe dikmesi
     on_ad, yan_ad = f"100'LÜK VERANDA PROFİLİ {en_yaz(308.75)} (ÖN)", f"100'LÜK VERANDA PROFİLİ {en_yaz(166.25)} (YAN)"
     for ad_, L_, dik_ in ((on_ad, 308.75, False), (yan_ad, 166.25, True)):

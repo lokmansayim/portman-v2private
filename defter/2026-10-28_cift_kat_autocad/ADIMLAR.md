@@ -234,5 +234,10 @@ Biçim: `A### · saat · başlık` — Ne / Nerede / Sonuç / Durum (yapıldı �
 - A4 v8 (2 sayfa) gönderildi; kural belgesi §12 15:18 satırı. 1. kat hâlâ Motor dizilimi (Lokman verecek).
 - Durum: yapıldı.
 
+### A047 · 15:49–15:58 · Lokman: mutfak kapısı = hol–salon kapısının aynası (ölçüsüz) · ODA/SALON hattı yalnız H, profil yok, 5 × 125,5 (2 kapı) + T + 105,5
+- `ZEMIN["oda_salon"]`: 125,5 ×3 | kapı [SAG ÜST] | T 10 | kapı [SAG ÜST · AYNA] | 105,5; `salon_mutfak` 512–522; `balkon_arka` 57,75 | T | kapı 90 | 105,5 pencereli (115,5'likten kısaltıldı). `ayna_blok`: pano bloğunu boyu boyunca yansıtır (dönük iç INSERT için `Matrix44.scale(1,−1) @ translate(0,L)`; ilk denemede yscale −1 ile dönüş bozulmuştu). Üçlü H şablon bloğu T'lere yönlü (`ucluH`: kulaklar gövde yönüne). Kova sol profili bu hattan kalktı.
+- A4 v9 gönderildi; kural belgesi §12 15:49 satırı.
+- Durum: yapıldı.
+
 ### A035 · — · Sıradaki: Soru 2b (zeminde kovaya giriş: önü açık mı, planda ön duvar çizili) → Soru 4 (Fransız pencere) → 5 (çıkma çatısı) → 6 → 7 → 8 (et) → 9 → İş Emri JSON → Motor (PR-1: bulgu 7–8)
 - Durum: bekliyor (Lokman).
