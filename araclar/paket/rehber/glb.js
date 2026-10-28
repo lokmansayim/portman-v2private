@@ -18,7 +18,11 @@ const fs = require('fs');
     const adimlar = M.STEPS.map(s => s.name);
     const grup = adimlar.map((ad, i) => { const g = new THREE.Group(); g.name = String(i).padStart(2, '0') + ' ' + ad; root.add(g); return g; });
     M.parts.forEach(pt => {
-      const o = pt.obj.clone(true); o.visible = true; o.position.y = 0;
+      // parçanın yerindeki yüksekliği (`pt.y`; sahnede düşme animasyonu bunun üstünden oynar). Eskiden 0'a çekiliyordu: kökü yüksekte
+      // duran parçalar (çatı kaplaması, aşık, cam yünü, dere …) GLB'de yere düşüyordu.
+      const o = pt.obj.clone(true); o.visible = true; o.position.y = pt.y;
+      const gecici = []; o.traverse(c => { if (c.userData && c.userData.gecici) gecici.push(c); });   // serilirken görünen rulo
+      gecici.forEach(c => c.parent && c.parent.remove(c));
       const i = pt.obj.userData.info || {};
       o.name = (i.kod ? i.kod + ' ' : '') + (i.ad || '');
       o.userData = { kod: i.kod || null, ad: i.ad || null, adim: pt.step, adim_adi: adimlar[pt.step] };
