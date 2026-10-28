@@ -78,11 +78,22 @@ jobs:
           fi
           sudo /root/.cache/portman-venv/bin/python -c "import sys, numpy; print('-- Python', sys.version.split()[0], '· numpy', numpy.__version__); sys.exit(sys.version_info[:2] != tuple(map(int, '${{ matrix.python }}'.split('.'))))"
 
+      # Montaj rehberinin 62 m² kıyası (D-28 A1, `testler/paket/test_rehber.py`): şablon + 62'nin verisi = onaylı 62 sayfası. İz için
+      # three.js 0.160.0 ve Playwright'ın Chromium'u; yoksa test atlanırdı, burada kurulur ve testler kalan işte koşar.
+      - name: Rehber izi için three.js ve Playwright
+        if: matrix.parca == 'kalan'
+        run: |
+          JS="$RUNNER_TEMP/js"
+          npm install --no-audit --no-fund --prefix "$JS" three@0.160.0 playwright@1.63.0
+          PLAYWRIGHT_BROWSERS_PATH="$RUNNER_TEMP/pw" "$JS/node_modules/.bin/playwright" install --with-deps chromium
+          { echo "THREE_DIR=$JS/node_modules/three"; echo "NODE_PATH=$JS/node_modules"; echo "PLAYWRIGHT_BROWSERS_PATH=$RUNNER_TEMP/pw"; } >> "$GITHUB_ENV"
+
       - name: ${{ matrix.ad }}
         env:
           YOLLAR: ${{ matrix.yollar }}
         run: |
-          R() { sudo env "PATH=$PATH" HOME=/root TMPDIR="$RUNNER_TEMP" "$@"; }
+          R() { sudo env "PATH=$PATH" HOME=/root TMPDIR="$RUNNER_TEMP" THREE_DIR="${THREE_DIR:-}" NODE_PATH="${NODE_PATH:-}" \
+                  PLAYWRIGHT_BROWSERS_PATH="${PLAYWRIGHT_BROWSERS_PATH:-}" "$@"; }
           PY=/root/.cache/portman-venv/bin/python
           PG="host=127.0.0.1 port=55432 user=postgres"
           if [[ "${{ matrix.parca }}" == referans ]]; then
