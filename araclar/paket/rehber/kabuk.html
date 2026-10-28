@@ -1,0 +1,192 @@
+<title>__KISA__ Montaj Rehberi</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:wght@400;600&display=swap">
+<style>
+/* Layout: tek ekran uygulama — solda adım kartı + adım listesi, sağda büyük 3D sahne; telefonda sahne üstte, kart altta */
+:root{
+  --bg:#E8ECEF; --surface:#F7F9FA; --ink:#16222D; --muted:#5A6772; --line:#CDD5DB;
+  --accent:#D98E04; --accent-ink:#7A4D00; --on-accent:#1E1400; --scene:#D8DFE4; --ground:#C4CCC6;
+  --f-display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --f-body:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F161C; --surface:#162029; --ink:#E4EAEE; --muted:#93A1AC; --line:#283541;
+    --accent:#F0A824; --accent-ink:#F5CC7A; --on-accent:#1E1400; --scene:#131C23; --ground:#1B252D;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F161C; --surface:#162029; --ink:#E4EAEE; --muted:#93A1AC; --line:#283541;
+  --accent:#F0A824; --accent-ink:#F5CC7A; --on-accent:#1E1400; --scene:#131C23; --ground:#1B252D;
+  color-scheme:dark;
+}
+html{box-sizing:border-box;height:100%}
+*,*::before,*::after{box-sizing:inherit}
+body{height:100%;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+.app{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr);gap:12px;
+  padding-block:12px;padding-left:max(16px, env(safe-area-inset-left,0px));padding-right:max(16px, env(safe-area-inset-right,0px))}
+
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 24px}
+.brand{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px;min-width:0}
+.mark{font-family:var(--f-display);font-weight:700;font-size:15px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-ink)}
+.brand h1{font-family:var(--f-display);font-weight:600;font-size:28px;line-height:1;margin:0;letter-spacing:.01em}
+.chip{font-family:var(--f-mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:2px 8px;align-self:center}
+.spec{display:flex;flex-wrap:wrap;gap:6px 8px}
+.spec span{font-family:var(--f-mono);font-size:12.5px;font-variant-numeric:tabular-nums;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:5px 9px;white-space:nowrap}
+
+.body{display:grid;grid-template-columns:minmax(300px,360px) minmax(0,1fr);gap:16px;min-height:0}
+.panel{display:flex;flex-direction:column;gap:14px;min-height:0;min-width:0;overflow:auto;padding-right:2px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.card h2{font-family:var(--f-display);font-weight:600;font-size:30px;line-height:1.05;margin:4px 0 8px;text-wrap:balance}
+.card p{margin:0 0 14px;max-width:60ch}
+.card h3{font-family:var(--f-display);font-weight:600;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 2px}
+.parts{list-style:none;margin:0;padding:0}
+.parts li{display:grid;grid-template-columns:auto 1fr auto;align-items:baseline;gap:4px 10px;padding:6px 0;border-top:1px dashed var(--line);font-size:14px}
+.parts li:first-child{border-top:0}
+.parts li.grp{display:block;border-top:0;padding:12px 0 2px;font-family:var(--f-display);font-weight:600;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.parts .k{font-family:var(--f-mono);font-size:11px;color:var(--accent-ink);background:color-mix(in srgb,var(--accent) 15%,transparent);border-radius:4px;padding:1px 5px;white-space:nowrap}
+.parts .k.none{color:var(--muted);background:color-mix(in srgb,var(--ink) 7%,transparent)}
+.parts .v{font-family:var(--f-mono);font-size:13px;font-variant-numeric:tabular-nums;text-align:right;max-width:58%;justify-self:end}
+.src{font-style:normal;font-family:var(--f-mono);font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-left:4px}
+
+.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:1px}
+.steps button{width:100%;display:grid;grid-template-columns:30px 1fr;align-items:baseline;text-align:left;background:none;border:0;border-radius:6px;padding:5px 8px;color:var(--ink);font:inherit;font-size:14px;cursor:pointer}
+.steps button:hover{background:color-mix(in srgb,var(--ink) 6%,transparent)}
+.steps .n{font-family:var(--f-mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.steps .done .n{color:var(--accent-ink)}
+.steps button[aria-current="step"]{background:color-mix(in srgb,var(--accent) 18%,transparent);font-weight:600}
+.steps button[aria-current="step"] .n{color:var(--accent-ink)}
+.steps .sec{font-family:var(--f-display);font-weight:600;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:8px 8px 2px}
+.note{font-size:12.5px;line-height:1.45;color:var(--muted);margin:0;max-width:60ch}
+
+.stage{position:relative;border-radius:12px;overflow:hidden;background:var(--scene);border:1px solid var(--line);min-height:0}
+#viewport{position:absolute;inset:0}
+#viewport canvas{display:block;width:100%;height:100%;touch-action:none}
+.glass{background:color-mix(in srgb,var(--surface) 88%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid var(--line)}
+.badge{position:absolute;top:12px;left:12px;border-radius:8px;padding:6px 10px;max-width:calc(100% - 140px)}
+.badge .bn{font-family:var(--f-mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);display:block}
+.badge .bt{font-family:var(--f-display);font-weight:600;font-size:18px;line-height:1.1}
+.tools{position:absolute;top:12px;right:12px;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.hint{font-family:var(--f-mono);font-size:11px;color:var(--muted);border-radius:6px;padding:4px 8px}
+.tog{font-family:var(--f-display);font-weight:600;font-size:14px;letter-spacing:.03em;border-radius:999px;padding:5px 12px;color:var(--ink);cursor:pointer}
+.tog[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);border-color:transparent}
+.info{position:absolute;left:12px;bottom:116px;width:min(320px,calc(100% - 24px));border-radius:10px;padding:12px 14px 12px;box-shadow:0 8px 24px rgba(10,20,30,.16)}
+.info .ik{font-family:var(--f-mono);font-size:12px;color:var(--accent-ink)}
+.info .ik.none{color:var(--muted)}
+.info h4{font-family:var(--f-display);font-weight:600;font-size:19px;line-height:1.15;margin:2px 28px 6px 0}
+.info dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-size:13px}
+.info dt{color:var(--muted)}
+.info dd{margin:0;min-width:0;overflow-wrap:anywhere}
+.info .x{position:absolute;top:6px;right:6px;width:30px;height:30px;border:0;border-radius:6px;background:none;color:var(--muted);font-size:20px;line-height:1;cursor:pointer}
+.dock{position:absolute;left:12px;right:12px;bottom:12px;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
+.progress{display:flex;gap:3px;width:min(560px,100%);pointer-events:auto}
+.progress button{flex:1;height:16px;border:0;background:none;padding:5px 0;cursor:pointer}
+.progress button::before{content:"";display:block;height:6px;border-radius:3px;background:color-mix(in srgb,var(--ink) 18%,transparent)}
+.progress button.room::before{background:color-mix(in srgb,var(--ink) 26%,transparent)}
+.progress button.on::before{background:color-mix(in srgb,var(--accent) 70%,transparent)}
+.progress button.cur::before{background:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 35%,transparent)}
+.controls{display:flex;gap:6px;border-radius:999px;padding:5px;pointer-events:auto;box-shadow:0 6px 18px rgba(10,20,30,.12)}
+.ctl{font-family:var(--f-display);font-weight:600;font-size:16px;letter-spacing:.03em;min-height:40px;padding:6px 14px;border-radius:999px;border:0;background:transparent;color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.ctl:hover{background:color-mix(in srgb,var(--ink) 7%,transparent)}
+.ctl.primary{background:var(--accent);color:var(--on-accent);min-width:132px;justify-content:center}
+.ctl.primary:hover{background:color-mix(in srgb,var(--accent) 88%,white)}
+.ctl:disabled{opacity:.35;cursor:default;background:transparent}
+.ctl svg{width:14px;height:14px;fill:currentColor}
+.gal{position:absolute;inset:0;z-index:5;display:flex;flex-direction:column;background:var(--scene)}
+.gal[hidden]{display:none}
+.gal .gx{position:absolute;top:10px;right:10px;z-index:1}
+.gal figure{flex:1;min-height:0;margin:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:52px 16px 6px}
+.gal figure img{max-width:100%;max-height:calc(100% - 30px);object-fit:contain;border-radius:8px;box-shadow:0 8px 24px rgba(10,20,30,.16)}
+.gal figcaption{font-size:13px;line-height:1.35;color:var(--muted);margin-top:8px;text-align:center;max-width:70ch}
+.gal .thumbs{display:flex;gap:8px;padding:6px 12px 12px;overflow-x:auto}
+.gal .thumbs>:first-child{margin-left:auto}.gal .thumbs>:last-child{margin-right:auto}
+.gal .thumbs button{flex:0 0 auto;border:2px solid transparent;border-radius:8px;padding:0;background:none;cursor:pointer}
+.gal .thumbs button[aria-current="true"]{border-color:var(--accent)}
+.gal .thumbs img{display:block;width:92px;height:58px;object-fit:cover;border-radius:6px}
+.nogl{position:absolute;inset:0;display:grid;place-items:center;padding:24px;text-align:center;color:var(--muted)}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+@media (max-width:760px){
+  html,body,.app{height:auto}
+  .body{grid-template-columns:1fr}
+  .stage{order:-1;height:min(68vh,560px);min-height:360px}
+  .panel{overflow:visible}
+  .hint{display:none}
+  .ctl .lbl{display:none}
+  .ctl.primary{min-width:110px}
+  .brand h1{font-size:24px}
+  .info{bottom:108px}
+}
+@media (prefers-reduced-motion: reduce){ *{transition:none!important} }
+</style>
+
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <span class="mark">PortatifEv</span>
+      <h1>__PROJE__ · Montaj Rehberi</h1>
+      <span class="chip">__CHIP__</span>
+    </div>
+    <div class="spec">
+      __SPEC__
+    </div>
+  </header>
+
+  <main class="body">
+    <aside class="panel">
+      <section class="card" aria-live="polite">
+        <div class="eyebrow" id="eyebrow"></div>
+        <h2 id="stepTitle"></h2>
+        <p id="stepText"></p>
+        <h3 id="partsHead"></h3>
+        <ul class="parts" id="stepParts"></ul>
+      </section>
+      <ol class="steps" id="stepList"></ol>
+      <p class="note">__NOTE__</p>
+    </aside>
+
+    <section class="stage" aria-label="3D montaj sahnesi">
+      <div id="viewport"></div>
+      <div class="badge glass"><span class="bn" id="badgeNo"></span><span class="bt" id="badgeTitle"></span></div>
+      <div class="tools">
+        <button class="tog glass" id="roofTog" type="button" aria-pressed="false">Çatıyı gizle</button>
+        <button class="tog glass" id="galTog" type="button" aria-haspopup="dialog">Render görselleri</button>
+        <div class="hint glass">Parçaya dokun: kimlik kartı</div>
+      </div>
+      <div class="info glass" id="info" hidden>
+        <button class="x" id="infoX" type="button" aria-label="Kartı kapat">×</button>
+        <div class="ik" id="infoK"></div>
+        <h4 id="infoT"></h4>
+        <dl id="infoD"></dl>
+      </div>
+      <div class="gal" id="gal" role="dialog" aria-label="Render görselleri" hidden>
+        <button class="tog glass gx" id="galX" type="button">Kapat</button>
+        <figure><img id="galImg" alt=""><figcaption id="galCap"></figcaption></figure>
+        <div class="thumbs" id="galThumbs"></div>
+      </div>
+      <div class="dock">
+        <div class="progress" id="progress" role="group" aria-label="Adımlar"></div>
+        <div class="controls glass">
+          <button class="ctl" id="prev" type="button" aria-label="Önceki adım"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10.5 2 4.5 8l6 6V2z"/></svg><span class="lbl">Önceki</span></button>
+          <button class="ctl primary" id="play" type="button"></button>
+          <button class="ctl" id="next" type="button" aria-label="Sonraki adım"><span class="lbl">Sonraki</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 2l6 6-6 6V2z"/></svg></button>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script type="application/json" id="pafta">__DATA__</script>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+__SCRIPT__</script>
