@@ -175,5 +175,11 @@ Biçim: `A### · saat · başlık` — Ne / Nerede / Sonuç / Durum (yapıldı �
 - Yapılan: AKS ve AKS_YAZI katmanları koyu gri (ACI 8); yeni çizgi tipi `AKS_SEYREK` (50 çizgi · 25 boşluk · nokta · 25 boşluk; Motor'unki CENTER, LTSCALE 1'de sık); aks çizgileri BYLAYER. DXF yeniden üretildi (md5 822ab858…), Mac'e kopyalandı, AutoCAD'de açıldı (13:56).
 - Durum: yapıldı.
 
+### A037 · 13:57 · Lokman (planda iki kırmızı kare, "Profil"): "Çizdiğim yerlere profil koy"
+- Yer: çıkma yan duvarlarının gövde arka duvarıyla birleştiği iki nokta (çizimde 318,75–328,75 × 696–706 ve 569,75–579,75 × 696–706).
+- Yapılan: `merdiven_ciz` içinde şablonun `100X100 DIŞ KÖŞE DİREĞİ` bloğu iki katta da bu noktalara (T'nin iki kolu için ikişer aynalı yerleşim, aynı kutu); kart ORTAK satırı 10 (6 gövde + 2 çıkma arka + 2 birleşim). DXF md5 1435b1fc…, Mac'e kopyalandı, AutoCAD'de görüldü (14:00). Kural belgesi §12 13:57, 6.2.
+- Soru 2b (zeminde kovanın önü) cevapsız kaldı; yeniden sorulacak.
+- Durum: yapıldı.
+
 ### A035 · — · Sıradaki: Soru 2b (zeminde kovaya giriş: önü açık mı, planda ön duvar çizili) → Soru 4 (Fransız pencere) → 5 (çıkma çatısı) → 6 → 7 → 8 (et) → 9 → İş Emri JSON → Motor (PR-1: bulgu 7–8)
 - Durum: bekliyor (Lokman).

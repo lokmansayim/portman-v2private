@@ -29,6 +29,6 @@ Blok adı = malzeme adı. Geometri Motor'un panoları (Astra v1.4.3), adlar Gün
 | 100X100 3 LÜ H BAĞLANTI DİREĞİ | 4 | 3 | 7 | var |
 | 100X100 VERANDA DİKMESİ | 1 | 1 | 2 | yeni |
 | 2X100X100 İÇ KÖŞE DİREĞİ | 0 | 2 | 2 | var |
-| ORTAK · 100X100 DIŞ KÖŞE DİREĞİ (kutu profil, sürekli iki kat boyu 5320; Lokman 12:09/13:13) | — | — | 6 | var (şablon bloğu; '2X100X100 DIŞ KÖŞE DİREĞİ' varyantı da var) |
+| ORTAK · 100X100 DIŞ KÖŞE DİREĞİ (kutu profil, sürekli iki kat boyu 5320; Lokman 12:09/13:13) — 6 gövde köşesi + 2 çıkma arka köşesi + 2 çıkma–gövde birleşimi (13:57) | — | — | 10 | var (şablon bloğu; '2X100X100 DIŞ KÖŞE DİREĞİ' varyantı da var) |
 
 Çift kat ızgarası (Lokman 13:30; Astra R02): akslar köşe kolonunun iç yüzünden 10 + 125,5k; cephe 10 + 5 × 125,5 + 115,5 + 10 = 763. Motor 753'lük gövdeyle üretti, üretici sol dış duvarı yerinde bırakıp içleri +5, sağ dış duvarı +10 kaydırdı (Motor'da kural yok, İE-22 PR-1). İç duvarlar 100'lük (13:32); Motor 'iç = dış kalınlık' sınırını deneme betiği atladı (bulgu). Merdiven kovası pano aksında (2 pano, iç 241) + çıkma 1 pano; çıkma panoları ve kesik panolar elle (yukarıda sayılı); merdiven çizgileri MERDIVEN katmanı. Dış kapılar şablonun kapılı pano çizimi (13:02); köşeler şablonun 100X100 DIŞ KÖŞE DİREĞİ bloğu (13:13); iç kapılar henüz Motor'un Astra sembolü. Sağ dış duvara komşu mahallerin m² yazıları Motor'un (753'e göre): 5 cm dar, yaklaşık.

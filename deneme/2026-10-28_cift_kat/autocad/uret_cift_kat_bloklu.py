@@ -207,6 +207,11 @@ def merdiven_ciz(dx: float, kat1: bool, eklenen: list, kat_adi: str):
     if SABLON_KOSE in hedef.blocks:
         H.add_blockref(SABLON_KOSE, (XA - 5, YC1 - 12.5), dxfattribs={"layer": "KOSE_PROFIL_100"})                       # arka-sol: aşağı, sağa
         H.add_blockref(SABLON_KOSE, (XB + 5, YC1 - 12.5), dxfattribs={"xscale": -1, "layer": "KOSE_PROFIL_100"})         # arka-sağ: aşağı, sola
+        # Lokman 13:57 (planda kırmızı kareler, "Profil"): çıkma yan duvarlarının gövde arka duvarıyla birleştiği iki noktaya 100×100 profil
+        H.add_blockref(SABLON_KOSE, (XA + 5, YC0 + 2.5), dxfattribs={"xscale": -1, "yscale": -1, "layer": "KOSE_PROFIL_100"})   # sol birleşim: yukarı, sola
+        H.add_blockref(SABLON_KOSE, (XA - 5, YC0 + 2.5), dxfattribs={"yscale": -1, "layer": "KOSE_PROFIL_100"})                  # sol birleşim: yukarı, sağa (T'nin öteki kolu)
+        H.add_blockref(SABLON_KOSE, (XB - 5, YC0 + 2.5), dxfattribs={"yscale": -1, "layer": "KOSE_PROFIL_100"})                  # sağ birleşim: yukarı, sağa
+        H.add_blockref(SABLON_KOSE, (XB + 5, YC0 + 2.5), dxfattribs={"xscale": -1, "yscale": -1, "layer": "KOSE_PROFIL_100"})   # sağ birleşim: yukarı, sola
     # --- merdiven çizgileri
     def cz(x0, y0, x1, y1): H.add_line((x0, y0), (x1, y1), dxfattribs={"layer": L})
     XM = (XI0 + XI1) / 2                          # kol ayırıcı (449,25 + dx)
@@ -453,7 +458,7 @@ for ad in sorted(sayim, key=lambda s: (0 if s.startswith("100'L") else 1 if s.st
     H.add_text(durum, height=5.5, dxfattribs={"layer": "MALZEME_KARTI"}).set_placement((MX+650, y))
     satirlar.append((ad, c, top, durum)); y -= 11
 # ortak parçalar
-H.add_text("ORTAK: 100X100 DIŞ KÖŞE DİREĞİ (şablon bloğu; kutu profil, sürekli iki kat boyu 5320 R02) — kat kat sayılmaz: 6 köşe → 6 adet", height=5.5,
+H.add_text("ORTAK: 100X100 DIŞ KÖŞE DİREĞİ (şablon bloğu; kutu profil, sürekli iki kat boyu 5320 R02) — kat kat sayılmaz: 6 gövde köşesi + 2 çıkma arka köşesi + 2 çıkma–gövde birleşimi (Lokman 13:57) = 10", height=5.5,
            dxfattribs={"layer": "MALZEME_KARTI"}).set_placement((MX, y-6))
 H.add_text("Not: kapılı panolarda [SAĞ ÜST] vb. ek kanat yönüdür, malzeme adına girmez; 'yeni (kural)' = şablonda yok, şablonun ad kuralıyla türetildi.",
            height=5, dxfattribs={"layer": "MALZEME_KARTI"}).set_placement((MX, y-20))
@@ -527,7 +532,7 @@ L = ["# Malzeme kartı · İE-22 çift kat, Şablon 2024 blok adları (28 Ekim 2
      "| Blok / malzeme | " + " | ".join(k for k, _, _ in KATLAR) + " | Toplam | Şablonda |", "|---|---:|---:|---:|---|"]
 for ad, c, top, durum in satirlar:
     L.append(f"| {ad} | " + " | ".join(str(c.get(k, 0)) for k, _, _ in KATLAR) + f" | {top} | {durum} |")
-L.append("| ORTAK · 100X100 DIŞ KÖŞE DİREĞİ (kutu profil, sürekli iki kat boyu 5320; Lokman 12:09/13:13) | — | — | 6 | var (şablon bloğu; '2X100X100 DIŞ KÖŞE DİREĞİ' varyantı da var) |")
+L.append("| ORTAK · 100X100 DIŞ KÖŞE DİREĞİ (kutu profil, sürekli iki kat boyu 5320; Lokman 12:09/13:13) — 6 gövde köşesi + 2 çıkma arka köşesi + 2 çıkma–gövde birleşimi (13:57) | — | — | 10 | var (şablon bloğu; '2X100X100 DIŞ KÖŞE DİREĞİ' varyantı da var) |")
 L.append("\nÇift kat ızgarası (Lokman 13:30; Astra R02): akslar köşe kolonunun iç yüzünden 10 + 125,5k; cephe 10 + 5 × 125,5 + 115,5 + 10 = 763. "
          "Motor 753'lük gövdeyle üretti, üretici sol dış duvarı yerinde bırakıp içleri +5, sağ dış duvarı +10 kaydırdı (Motor'da kural yok, İE-22 PR-1). "
          "İç duvarlar 100'lük (13:32); Motor 'iç = dış kalınlık' sınırını deneme betiği atladı (bulgu). Merdiven kovası pano aksında (2 pano, iç 241) + çıkma 1 pano; "
