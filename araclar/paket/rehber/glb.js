@@ -19,7 +19,7 @@ const fs = require('fs');
     const grup = adimlar.map((ad, i) => { const g = new THREE.Group(); g.name = String(i).padStart(2, '0') + ' ' + ad; root.add(g); return g; });
     M.parts.forEach(pt => {
       // parçanın yerindeki yüksekliği (`pt.y`; sahnede düşme animasyonu bunun üstünden oynar). Eskiden 0'a çekiliyordu: kökü yüksekte
-      // duran parçalar (çatı kaplaması, aşık, cam yünü, dere …) GLB'de yere düşüyordu.
+      // duran parçalar (TK-01'de veranda kirişleri, tavan omegaları ve H'lar, alçıpan, cam yünü, aşıklar, çatı kaplaması) GLB'de yere düşüyordu.
       const o = pt.obj.clone(true); o.visible = true; o.position.y = pt.y;
       const gecici = []; o.traverse(c => { if (c.userData && c.userData.gecici) gecici.push(c); });   // serilirken görünen rulo
       gecici.forEach(c => c.parent && c.parent.remove(c));
@@ -29,6 +29,9 @@ const fs = require('fs');
       o.traverse(m => { if (m.isMesh) { m.material = m.material.clone(); m.material.emissiveIntensity = 0; } });
       grup[pt.step].add(o);
     });
+    // temel plak (sahnenin `concrete` kutusu, adım değil): render onu GLB'den alır, ölçüsü ikinci kez yazılmaz
+    let sahne = M.parts[0].obj; while (sahne.parent) sahne = sahne.parent;
+    sahne.children.filter(c => c.isMesh && c.material && c.material.name === 'concrete').forEach(c => { const z = c.clone(); z.name = 'Temel plak'; root.add(z); });
     const ab = await new GLTFExporter().parseAsync(root, { binary: true, onlyVisible: false });
     let s = ''; const u = new Uint8Array(ab); for (let k = 0; k < u.length; k += 0x8000) s += String.fromCharCode.apply(null, u.subarray(k, k + 0x8000));
     return btoa(s);

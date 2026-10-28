@@ -1,13 +1,13 @@
 """İE-18 · Rehberin render görselleri (62 m² rehberinin "Render görselleri" galerisi): rehberin 3B modeli (`glb.js`'in GLB'si) Blender
 Cycles ile birkaç açıdan. 62 m²'nin betiğinden (dal `claude/montaj-rehberi-devir` `6b899b4`, `deneme/2026-10-25_rehber_62m2/render/
 render.py`) genelleştirildi: kamera evin kutusundan, malzeme rehberin malzeme anahtarından (renk GLB'den, doku ve pürüz anahtardan),
-temel plak ve gizlenecek adımlar `sahne.json`'dan. Bilgisayara bağlı değil; LLM yok, ağ yok.
+temel plak GLB'den (rehberin sahnesindeki plak), gizlenecek adımlar `sahne.json`'dan. Bilgisayara bağlı değil; LLM yok, ağ yok.
 
     <bpy kurulu python> araclar/paket/rehber/render.py <model.glb> <sahne.json> <klasör> [örnek] [ölçek]
 
-`sahne.json` (`render_sahnesi()`, `uret.py`): {"dis": [x, y], "zemin": [x0, x1, y0, y1] (cm), "catisiz": [gizlenen adımlar],
-"gorunumler": [ad, ...]}. Çıktı: `<klasör>/<ad>.png`, her biri bittiğinde `RENDER_BITTI <ad>` yazar; çatı katmanlarında
-etiket yerleri `<klasör>/cati_katman.json` ({anahtar: [x, y] piksel}: kaplama, aşık, cam yünü, makas).
+`sahne.json` (`galeri.sahne`): {"catisiz": [gizlenen adımlar], "gorunumler": [ad, ...]}. Çıktı: `<klasör>/<ad>.png`, her biri
+bittiğinde `RENDER_BITTI <ad>` yazar; çatı katmanlarında etiket yerleri `<klasör>/cati_katman.json` ({anahtar: [x, y] piksel}: kaplama,
+aşık, cam yünü, makas). Etiket noktası o türün kameradan görünen bir yüzeyidir (kameradan atılan ışın önce o türe çarpar).
 """
 import json
 import math
@@ -109,8 +109,11 @@ def main(glb, sahne_yolu, cikti, ornek=64, olcek=1.0):
         return Vector((sum(v.x for v in bb) / 8, sum(v.y for v in bb) / 8, sum(v.z for v in bb) / 8))
 
     nesneler = [o for o in bpy.data.objects if o.type == "MESH" and adim(o) is not None]
+    plak = [o for o in bpy.data.objects if o.type == "MESH" and adim(o) is None and anahtar(o) == "concrete"]   # `glb.js`: rehberin plağı
     ANAHTAR = {o.name: anahtar(o) for o in nesneler}
     YENI = malzemeler()
+    for o in plak:
+        o.material_slots[0].material = YENI["concrete"]
     for o in nesneler:
         for s in o.material_slots:
             if not s.material:
@@ -131,12 +134,9 @@ def main(glb, sahne_yolu, cikti, ornek=64, olcek=1.0):
     cx, cy, sx, sy = (x0 + x1) / 2, (y0 + y1) / 2, x1 - x0, y1 - y0
     D = math.hypot(sx, sy)
 
-    # temel plak (rehberdeki gibi, 12 cm) ve sonsuz zemin
-    W, H = S["dis"]
-    zx0, zx1, zy0, zy1 = S["zemin"]
-    bpy.ops.mesh.primitive_cube_add(size=1, location=((zx0 + zx1) / 200 - W / 200, (zy0 + zy1) / 200 - H / 200, -0.06))
-    t = bpy.context.active_object; t.scale = ((zx1 - zx0) / 100, (zy1 - zy0) / 100, 0.12); t.data.materials.append(YENI["concrete"])
-    bpy.ops.mesh.primitive_plane_add(size=600, location=(0, 0, -0.121)); z = bpy.context.active_object
+    # sonsuz zemin temel plağın (GLB'den) hemen altında
+    alt = min([(o.matrix_world @ Vector(c)).z for o in plak for c in o.bound_box] or [0.0])
+    bpy.ops.mesh.primitive_plane_add(size=600, location=(0, 0, alt - 0.001)); z = bpy.context.active_object
     z.data.materials.append(principled("zemin", (0.66, 0.66, 0.64), 0.0, 0.8)[0])
 
     # ışık: güneş + gri gradyan ortam (62 m² ile aynı)
@@ -193,22 +193,35 @@ def main(glb, sahne_yolu, cikti, ornek=64, olcek=1.0):
         bpy.context.view_layer.update()      # kameranın matrix_world'ü yenilensin (etiket yerleri bu kameradan izdüşülür)
         sc.render.filepath = os.path.join(cikti, f"{ad}.png")
         if ad == "cati_katman":
+            # etiket: o türün kameradan görünen yüzeyi, hedef bölgeye en yakını. Yüzeylerden kameraya ışın; ilk çarptığı parça o türdense
+            # nokta görünür (gizli parçalar ışına girmesin diye görünümde de gizlenir)
+            for o in nesneler:
+                o.hide_viewport = o.hide_render
+            bpy.context.view_layer.update()
+            dg = bpy.context.evaluated_depsgraph_get()
             etiket = {}
-            hedefler = {"roof": (cx + 0.2 * sx, cy - 0.15 * sy, None), "asik": (cx + 0.2 * sx, cy + 0.25 * sy, None),
-                        "izocam": (cx + 0.22 * sx, cy + 0.3 * sy, None), "truss": (cx + 0.42 * sx, cy + 0.3 * sy, 0.5)}
-            for k, (tx, ty, tz) in hedefler.items():
+            hedefler = {"roof": (cx + 0.2 * sx, cy - 0.15 * sy), "asik": (cx + 0.2 * sx, cy + 0.25 * sy),
+                        "izocam": (cx + 0.22 * sx, cy + 0.3 * sy), "truss": (cx + 0.42 * sx, cy + 0.3 * sy)}
+            for k, (tx, ty) in hedefler.items():
                 eniyi = None
                 for o in nesneler:
                     if ANAHTAR[o.name] != k or o.hide_render:
                         continue
-                    bb = [o.matrix_world @ Vector(c) for c in o.bound_box]
-                    lo = [min(v[i] for v in bb) for i in range(3)]; hi = [max(v[i] for v in bb) for i in range(3)]
-                    p = Vector((min(max(tx, lo[0]), hi[0]), min(max(ty, lo[1]), hi[1]), hi[2] if tz is None else lo[2] + tz * (hi[2] - lo[2])))
-                    uz_ = (p.x - tx) ** 2 + (p.y - ty) ** 2
-                    if eniyi is None or uz_ < eniyi[0]:
-                        eniyi = (uz_, p)
+                    yuz = o.data.polygons
+                    for i in range(0, len(yuz), max(1, len(yuz) // 24)):
+                        p = o.matrix_world @ yuz[i].center
+                        yon = p - kam.location
+                        var, yer, _n, _i, vurulan, _m = sc.ray_cast(dg, kam.location, yon.normalized(), distance=yon.length + 0.02)
+                        if not var or ANAHTAR.get(vurulan.name) != k:
+                            continue
+                        v = world_to_camera_view(sc, kam, yer)
+                        if not (0.06 < v.x < 0.94 and 0.08 < v.y < 0.92 and v.z > 0):
+                            continue
+                        uz_ = (yer.x - tx) ** 2 + (yer.y - ty) ** 2
+                        if eniyi is None or uz_ < eniyi[0]:
+                            eniyi = (uz_, v)
                 if eniyi:
-                    v = world_to_camera_view(sc, kam, eniyi[1])
+                    v = eniyi[1]
                     etiket[k] = [round(v.x * sc.render.resolution_x), round((1 - v.y) * sc.render.resolution_y)]
             json.dump(etiket, open(os.path.join(cikti, "cati_katman.json"), "w"))
         bpy.ops.render.render(write_still=True)

@@ -11,6 +11,7 @@ import base64
 import io
 import json
 import os
+import re
 import subprocess
 from pathlib import Path
 
@@ -24,25 +25,33 @@ class Yok(Exception):
 
 
 def sahne(d: dict) -> dict:
-    """`render.py`'nin sahnesi rehberin verisinden: dış ölçü, temel plak, çatısız görünüşte gizlenen adımlar (çatıyı kuran adımlar:
-    duvar ve baş makas omegasından alın sacına; 62 m²'de 8–19, Lokman'ın sırası)."""
+    """`render.py`'nin sahnesi rehberin verisinden: çatısız görünüşte gizlenen adımlar (çatıyı kuran adımlar: duvar ve baş makas
+    omegasından alın sacına; 62 m²'de 8–19, Lokman'ın sırası). Ölçüler ve temel plak GLB'den."""
     S = d["S"]
-    return {"dis": d["dis"], "zemin": d["zemin"], "catisiz": list(range(S["omega"], S["alin"] + 1)), "gorunumler": list(GORUNUMLER)}
+    return {"catisiz": list(range(S["omega"], S["alin"] + 1)), "gorunumler": list(GORUNUMLER)}
 
 
 def _kaplama(d: dict) -> str:
     return ((d.get("kaplama") or {}).get("metin") or {}).get("say_onek") or "Çatı kaplaması"
 
 
+def _izo(d: dict) -> str:
+    """Cam yünü ve kalınlığı rehberin verisindeki addan (`izo.ana.ad`); sayı burada yazılmaz."""
+    ad = ((d.get("izo") or {}).get("ana") or {}).get("ad") or ""
+    k = re.search(r"\d+(?:[.,]\d+)? cm", ad)
+    return f"Cam yünü {k.group(0)}" if k else "Cam yünü"
+
+
 def basliklar(d: dict) -> dict[str, str]:
     kap = _kaplama(d)
     tavan = {"asma": "asma tavanın", "ters": "ters tavanın"}.get((d.get("tavan") or {}).get("tip"), "tavanın")
+    ver = "veranda, " if "veranda" in d["S"] else ""            # verandasız evde yazılmaz
     return {
         "on_sol": "Ön-soldan: montajı biten ev (ham malzeme; boya ve sıva yok)",
-        "on_sag": "Ön-sağdan: veranda, saçak, dere ve inişler",
+        "on_sag": f"Ön-sağdan: {ver}saçak, dere ve inişler",
         "arka_sol": "Arka-soldan: kalkan, alın sacı ve inişler",
         "catisiz": "Çatısız: oda oda dizilim, iç kapılar, pencereler ve dış kapı",
-        "cati_katman": f"Çatı katmanları: makas, omega aşık, {kap.lower()}; {tavan} üstünde 10 cm cam yünü",
+        "cati_katman": f"Çatı katmanları: makas, omega aşık, {kap.lower()}; {tavan} üstünde {_izo(d).lower()}",
         "pafta": "Hepsi tek paftada",
     }
 
@@ -57,7 +66,7 @@ def etiketle(im, yerler: dict, d: dict):
     """Çatı katmanları görseline etiketler (62 m²'nin paftasındaki gibi: noktadan kutuya çizgi)."""
     from PIL import ImageDraw
     kap = _kaplama(d)
-    metin = {"roof": f"{kap} (doğrudan aşıkta)", "asik": "Omega aşık", "izocam": "Cam yünü 10 cm (rulo)", "truss": "Makas"}
+    metin = {"roof": f"{kap} (doğrudan aşıkta)", "asik": "Omega aşık", "izocam": f"{_izo(d)} (rulo)", "truss": "Makas"}
     dr = ImageDraw.Draw(im); f = _font(max(14, im.width // 70))
     W = im.width
     kutular = []
@@ -123,6 +132,8 @@ def uret(glb: Path, d: dict, gec: Path, ornek: int = 64, olcek: float = 1.0, zam
                            capture_output=True, text=True, timeout=zaman)
     except subprocess.TimeoutExpired:
         raise Yok(f"Blender {zaman} sn'de bitmedi") from None
+    except OSError as e:                                     # BLENDER_PY yanlış yolu gösteriyor ya da çalıştırılamıyor
+        raise Yok(f"BLENDER_PY çalıştırılamadı ({type(e).__name__}: {e})") from None
     eksik = [a for a in GORUNUMLER if not (k / f"{a}.png").exists()]
     if r.returncode != 0 or eksik:
         raise Yok(f"Blender hata verdi ({r.returncode}; eksik {', '.join(eksik) or '—'}): {(r.stderr or r.stdout).strip()[-200:]}")

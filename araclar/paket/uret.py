@@ -217,16 +217,19 @@ def rehber(km: dict, kart_kodu: str, ie: dict, L: dict, kod: str, gec: Path, glb
         else:
             out["glb_neden"] = f"GLB yazılamadı: {(r.stderr or r.stdout).strip()[-200:]}"
     if not render:
-        out["galeri_neden"] = "render görselleri bu koşuda istenmedi (`--render` yok)"
+        pass                                            # galerisiz sayfa öncekiyle aynı; `bilgi.md`'ye not düşmez
     elif "glb" not in out:
         out["galeri_neden"] = f"render görselleri GLB'siz çizilemez ({out['glb_neden']})"
     else:
         from araclar.paket.rehber import galeri
         try:
-            out["galeri"] = galeri.uret(out["glb"], d, gec)
-            sayfa.yaz(d, html, out["galeri"])
+            g = galeri.uret(out["glb"], d, gec)
+            sayfa.yaz(d, html, g)
+            out["galeri"] = g
         except galeri.Yok as e:
             out["galeri_neden"] = f"render görselleri yazılamadı: {e}"
+        except Exception as e:                          # noqa: BLE001 — galerinin hatası rehberi düşürmez (galerisiz sayfa yazılı kalır)
+            out["galeri_neden"] = f"render görselleri yazılamadı ({type(e).__name__}: {str(e)[:160]})"
     return out
 
 
@@ -431,8 +434,9 @@ def paket(m: dict, kok: Path, gecici: Path, glb: bool = False, kayit_: dict | No
                     else:
                         durum[ad("model", "glb")] = f"Yok: {rh['glb_neden']}"
                     d = rh["veri"]
-                    notlar.append(f"Render görselleri: {len(rh['galeri'])} görsel sayfada (Blender Cycles; 62 m² rehberinin galerisi gibi)" if "galeri" in rh
-                                  else f"Render görselleri yok: {rh['galeri_neden']}")
+                    if "galeri" in rh or "galeri_neden" in rh:
+                        notlar.append(f"Render görselleri: {len(rh['galeri'])} görsel sayfada (Blender Cycles; 62 m² rehberinin galerisi gibi)" if "galeri" in rh
+                                      else f"Render görselleri yok: {rh['galeri_neden']}")
                     notlar.append(f"Rehber (62 m² rehberinin şablonu, D-28): {d['N']} adım, {len(d['rooms'])} oda, {len(d['panels'])} pano, {len(d['hs'])} H, "
                                   f"{len(d['posts'])} köşe direği, {len(d['makas'])} makas; motorun modelinde olmayanlar kuraldan (kartlarında yazar); adetler " +
                                   ("asma tavanlı listeyle" if "asma" in L else "İş Emri'nin tavanıyla yazılan listeyle"))

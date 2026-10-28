@@ -1,8 +1,9 @@
 """İE-18 · Rehberin "Render görselleri" galerisi (`araclar/paket/rehber/galeri.py`, `render.py`) ve GLB'nin parça yükseklikleri.
 
-Galeri 62 m² rehberindeki gibi: sahne rehberin verisinden (çatısız görünüşte gizlenen adımlar 62'de 8–19, Lokman'ın sırası), görseller
+Galeri 62 m² rehberindeki gibi: sahne rehberin verisinden (çatısız görünüşte gizlenen adımlar 62'de 8–19, Lokman'ın sırası), başlıklar
+verinin adımlarından ve adlarından (veranda, cam yününün kalınlığı), temel plak GLB'den; görseller
 sayfaya gömülü, galerisiz sayfa öncekiyle bayt bayt aynı (hedef örneğin izi değişmez). Blender (`BLENDER_PY`) varsa küçük bir render
-denemesi; yoksa o test atlanır (CI'da Blender yok). GLB testi Node, Playwright ve three.js 0.160.0 (`THREE_DIR`) ister.
+denemesi; yoksa o test atlanır (CI'da Blender yok). GLB testi Node, Playwright ve three.js 0.160.0 (`THREE_DIR`) ister; CI'ın "kalan" işinde koşar.
 """
 from __future__ import annotations
 
@@ -27,10 +28,24 @@ R62 = json.loads((KOK / "testler" / "paket" / "rehber62" / "veri.json").read_tex
 def test_sahne_62_ile_ayni():
     """62 m²'nin render betiği çatısız görünüşte 8–19. adımları gizliyordu (duvar omegasından alın sacına); kural verinin adımlarından aynı."""
     s = galeri.sahne(R62)
-    assert s["catisiz"] == list(range(8, 20))
-    assert s["dis"] == [900, 600] and s["zemin"] == [-12, 912, -162, 612]
+    assert s == {"catisiz": list(range(8, 20)), "gorunumler": list(galeri.GORUNUMLER)}
     b = galeri.basliklar(R62)
-    assert b["cati_katman"].startswith("Çatı katmanları: makas, omega aşık, trapez sac; ters tavanın üstünde")
+    assert b["cati_katman"] == "Çatı katmanları: makas, omega aşık, trapez sac; ters tavanın üstünde cam yünü 10 cm"   # kalınlık verinin adından
+    assert b["on_sag"] == "Ön-sağdan: veranda, saçak, dere ve inişler"
+    d = json.loads(json.dumps(R62)); d["S"].pop("veranda")                      # verandasız ev: başlıkta veranda yok
+    assert galeri.basliklar(d)["on_sag"] == "Ön-sağdan: saçak, dere ve inişler"
+    d["izo"]["ana"]["ad"] = "Çatı izolasyonu · 5 cm rulo cam yünü"
+    assert galeri.basliklar(d)["cati_katman"].endswith("cam yünü 5 cm")
+
+
+def test_blender_yoksa_galeri_yok(tmp_path, monkeypatch):
+    """BLENDER_PY yoksa ya da çalıştırılamıyorsa galeri `Yok` (rehber düşmez, neden `bilgi.md`'ye)."""
+    monkeypatch.delenv("BLENDER_PY", raising=False)
+    with pytest.raises(galeri.Yok, match="BLENDER_PY"):
+        galeri.uret(tmp_path / "x.glb", R62, tmp_path)
+    monkeypatch.setenv("BLENDER_PY", str(tmp_path / "yok" / "python"))
+    with pytest.raises(galeri.Yok, match="çalıştırılamadı"):
+        galeri.uret(tmp_path / "x.glb", R62, tmp_path)
 
 
 def test_sayfa_galerisiz_ayni_galerili_gomulu():
@@ -96,6 +111,8 @@ def test_glb_parcalar_yerinde(tmp_path):
         gi = next(i for i, n in enumerate(nodes) if re.fullmatch(r"\d\d " + ad + ".*", n.get("name", "")))
         alt = alt_y(gi, dunya(gi))
         assert 2.4 < alt < 6, (ad, alt)            # duvar 250 cm'nin üstünde (eskiden 0'a düşüyordu)
+    pi = next(i for i, n in enumerate(nodes) if n.get("name") == "Temel plak")       # render plağı GLB'den alır
+    assert G["materials"][G["meshes"][nodes[pi]["mesh"]]["primitives"][0]["material"]]["name"] == "concrete" and alt_y(pi, dunya(pi)) < 0
     izo = {i for i, m in enumerate(G["materials"]) if m.get("name") == "izocam"}
     serit = sum(1 for me in G["meshes"] for pr in me["primitives"] if pr.get("material") in izo)
     assert serit == 7                             # TK-01'de 7 şerit (rehberin "Modelde 7 şerit"i); rulolar da yazılınca 14'tü
@@ -120,3 +137,11 @@ def test_render_kucuk(tmp_path):
     assert sorted(p.stem for p in k.glob("*.png")) == sorted(galeri.GORUNUMLER)
     yer = json.loads((k / "cati_katman.json").read_text(encoding="utf-8"))
     assert set(yer) == {"roof", "asik", "izocam", "truss"} and all(0 <= x <= 320 and 0 <= y <= 200 for x, y in yer.values())
+    from PIL import Image                         # etiket noktası o parçanın görünen yüzünde: cam yünü sarı, kaplama koyu
+    im = Image.open(k / "cati_katman.png").convert("RGB")
+    renk = lambda x, y: [sum(im.getpixel((x + i, y + j))[c] for i in (-1, 0, 1) for j in (-1, 0, 1)) / 9 for c in range(3)]
+    r, g, b = renk(*yer["izocam"])
+    assert r > b + 40, (r, g, b)
+    ust = renk(8, 8)                              # sol üst köşe: gökyüzü
+    r, g, b = renk(*yer["roof"])
+    assert max(r, g, b) < min(ust) - 60 and abs(r - b) < 20, ((r, g, b), ust)   # antrasit kaplama: koyu ve gri (sarı değil)
