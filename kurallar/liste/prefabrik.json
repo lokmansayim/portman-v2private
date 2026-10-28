@@ -437,8 +437,8 @@
   },
   "vitrifiye_banyo_basina": {
    "deger": 1,
-   "durum": "varsayim",
-   "kaynak": "Varsayım, onay bekliyor. Dayanak Lokman, 27 Ekim 2026 22:00 (TK-01 teklifi): \"evet 2 takım olacak\" (banyo ve E. banyo); genellemesi banyo türündeki her hacme bir takım (duş teknesi, klozet, lavabo, batarya). Ayrı WC ya da lavabo hacmi tam takım değildir: o evde satırın adedi \"Kural yok\" kalır, aday banyo sayısı. Genelleme İE-13 PR-2'de yazıldı, Patron onaylayınca durum lokman olur (D-28: düzeltme kurala işlenir)."
+   "durum": "lokman",
+   "kaynak": "Lokman, 27 Ekim 2026 22:00 (TK-01 teklifi): \"evet 2 takım olacak\" (banyo ve E. banyo); genellemesi banyo türündeki her hacme bir takım (duş teknesi, klozet, lavabo, batarya). Ayrı WC ya da lavabo hacmi tam takım değildir: o evde satırın adedi \"Kural yok\" kalır, aday banyo sayısı. Genelleme İE-13 PR-2'de yazıldı (varsayım); Lokman 28 Ekim 2026 13:27 \"ne varsa onaylıyorum\" ile onayladı, durum lokman (İE-13 PR-3)."
   },
   "vitrifiye_aday": {
    "deger": 1,

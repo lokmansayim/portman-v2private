@@ -1,6 +1,6 @@
 {
  "sema": "portman.fiyat_defteri/1",
- "surum": "2026-10-28-r03",
+ "surum": "2026-10-28-r04",
  "aciklama": "Yükleme listesi × birim fiyat (İE-13, Z-10'un liste yöntemi). Anahtar Motor'un liste satırı: prefabrikte 'kalem | olcu' (motor/prefabrik_liste.py), çelikte 'kalem | boyut' (motor/genel yükleme listesi). Fiyat uydurulmaz: kaynağı olmayan kalemde fiyat boş kalır.",
  "para_birimi": "TL",
  "kdv": "kaynak listelerde yazmıyor",
@@ -409,6 +409,42 @@
      "durum": "öneri onaylı",
      "onay": true,
      "not": "kaynakta 2217,5 kesim (2000) ve 6 m tam boy (5000); 6 m'nin fiyatından boyla orantılı; Patron 27 Ekim 22:08 \"evet uygula\""
+    },
+    "Kutu profil (kiriş) 100 × 100 | L 3860": {
+     "fiyat": 3217,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      64
+     ],
+     "kaynak_kalem": "KUTU PROFİL (KİRİŞ) (4 MM) (TAM BOY) | 100*100*6000",
+     "durum": "öneri onaylı",
+     "onay": true,
+     "not": "6 m tam boyun fiyatından (5000) boyla orantılı (boy önerisi); Patron 28 Ekim 13:27 \"ne varsa onaylıyorum\" (TK-01 teklifinde onay bekleyen öneriler)"
+    },
+    "Kutu profil (kiriş) 100 × 100 | L 2610": {
+     "fiyat": 2175,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      64
+     ],
+     "kaynak_kalem": "KUTU PROFİL (KİRİŞ) (4 MM) (TAM BOY) | 100*100*6000",
+     "durum": "öneri onaylı",
+     "onay": true,
+     "not": "6 m tam boyun fiyatından (5000) boyla orantılı (boy önerisi); Patron 28 Ekim 13:27 \"ne varsa onaylıyorum\" (TK-01 teklifinde onay bekleyen öneriler)"
+    },
+    "Kutu profil (kiriş) 100 × 100 | L 1255": {
+     "fiyat": 1046,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      64
+     ],
+     "kaynak_kalem": "KUTU PROFİL (KİRİŞ) (4 MM) (TAM BOY) | 100*100*6000",
+     "durum": "öneri onaylı",
+     "onay": true,
+     "not": "6 m tam boyun fiyatından (5000) boyla orantılı (boy önerisi); Patron 28 Ekim 13:27 \"ne varsa onaylıyorum\" (TK-01 teklifinde onay bekleyen öneriler)"
     },
     "H 100 (dış pano eki) | 100 × 100 × 2500": {
      "fiyat": 342.0,
@@ -1087,12 +1123,14 @@
     "Kaçak akım rölesi (ikili) | adet": {
      "fiyat": 2000,
      "birim": "adet",
-     "kaynak": "CTKB",
-     "kaynak_satir": null,
-     "kaynak_kalem": "Kaçak akım rölesi (ikili)",
-     "durum": "yedek öneri",
-     "onay": false,
-     "not": "87 m² listesinde: kaynakta yalnız dörtlü (2000); Haziran listesinde yok"
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      172
+     ],
+     "kaynak_kalem": "Kaçak akım rölesi (dörtlü)",
+     "durum": "öneri onaylı",
+     "onay": true,
+     "not": "yakın ürün: 87 m² listesinde ikili yok, dörtlü 2.000 (satır 172); CTKB'de ikili 2.000; Haziran listesinde yok. Önce yedek öneriydi (CTKB); Patron 28 Ekim 13:27 \"ne varsa onaylıyorum\" (TK-01 teklifinde onay bekleyen öneriler)"
     },
     "W otomat 16 A | adet": {
      "fiyat": 125,
@@ -1708,7 +1746,7 @@
      ],
      "kaynak_kalem": "KUTU PROFİL (KİRİŞ) (4 MM) (TAM BOY) | 100*100*6000",
      "onay": false,
-     "dayanak": "Kaydı olmayan kiriş boyu için öneri: 6 m tam boyun fiyatından boyla orantılı, tam TL'ye yarım yukarı. Defterdeki onaylı kiriş boyları (1200, 1710, 2510, 3760) bu yöntemle (Patron 27 Ekim 22:08 \"evet uygula\"); onay kalemin kendisi içindir, yeni boy onay bekler (CIO, 28 Ekim: fiyatı olmayan kiriş sarı öneriyle gösterilsin)."
+     "dayanak": "Kaydı olmayan kiriş boyu için öneri: 6 m tam boyun fiyatından boyla orantılı, tam TL'ye yarım yukarı. Defterdeki onaylı kiriş boyları bu yöntemle: 1200, 1710, 2510, 3760 (Patron 27 Ekim 22:08 \"evet uygula\"), 1255, 2610, 3860 (Patron 28 Ekim 13:27); onay kalemin kendisi içindir, yeni boy onay bekler (CIO, 28 Ekim: fiyatı olmayan kiriş sarı öneriyle gösterilsin)."
     }
    ],
    "atla": []
