@@ -298,15 +298,16 @@ def _yazilar(klasor: Path) -> dict[str, str]:
 
 
 def test_is_emri_ile_paket(paketler, tmp_path):
-    """`--is-emri` (çizim masası, 28 Ekim 2026): kayıtta olmayan kodla İş Emri dosyasından paket. TK-01'in İş Emri'si kişi ve bayi adıyla,
+    """`--is-emri` (çizim masası, 28 Ekim 2026): kayıtta olmayan kodla İş Emri dosyasından paket. TK-01'in İş Emri'si (sahte) kişi ve bayi adıyla,
     numarayla yazılınca listeler ve rehber kayıttaki TK-01'inkiyle aynı (kod dışında); çıktıda ad ve numara yok, antette kod; kıyas Yok."""
     import hashlib
     from beyin import numara
     from openpyxl import load_workbook
     kok, _, _ = paketler
     ie = json.loads((KOK / _model("TK-01")["is_emri"]).read_text(encoding="utf-8"))
-    ie["talep"] = {"bayi": {"kod": "XBAYIX9", "ad": "Deneme Yapı Ticaret"}, "musteri_adi": "Zeynep Örnekyılmaz", "metin": "Zeynep Hanım 0532 111 22 33"}
-    ie["pafta_uyarilari"] = ["Arayacak numara 05321112233"]
+    no = "05" + "32 111 22 33"                          # sahte numara, parçalı (sır ve numara taramaları test verisini numara sanmasın)
+    ie["talep"] = {"bayi": {"kod": "XBAYIX9", "ad": "Sahtebayi Yapi"}, "musteri_adi": "Musteri Sahteadi", "metin": f"Musteri Sahteadi {no}"}
+    ie["pafta_uyarilari"] = [f"Arayacak numara {no.replace(' ', '')}"]
     yol = tmp_path / "talep.json"
     yol.write_text(json.dumps(ie, ensure_ascii=False), encoding="utf-8")
     cikti = tmp_path / "Modeller"
@@ -329,7 +330,7 @@ def test_is_emri_ile_paket(paketler, tmp_path):
     assert "PORTMAN | Bayi TK-98 / TK-98 | İş Emri" in yazi["TK-98_cizim.dxf"] and "'TK-98 " in yazi["TK-98_model.ifc"]
     for ad, t in yazi.items():
         t = re.sub(r"`[0-9a-f]{64}`", "", t)
-        assert not any(x in t for x in ("Zeynep", "Deneme Yap", "XBAYIX9", "111 22 33", "1112233")), ad
+        assert not any(x in t for x in ("Sahteadi", "Sahtebayi", "XBAYIX9", no[-9:], no[-9:].replace(" ", ""))), ad
         assert ad.endswith(".ifc") or numara.maskele(t) == t, ad          # IFC'nin uzun sayıları (kimlik, koordinat) numara değil
 
 
