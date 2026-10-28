@@ -192,26 +192,27 @@ def merdiven_ciz(dx: float, kat1: bool, eklenen: list, kat_adi: str):
             if Lp and x < XB + 5 - 1e-6 and x + Lp > XA - 5 + 1e-6: sil.append(e)
     for e in sil:
         say(kart_adi(e.dxf.name), kat_adi, -1); H.delete_entity(e)
-    kesik = pano_blogu("100'LÜK 57.75'LİK PANO", 57.75)
-    for x in (dx + 261.0, XB + 5):
+    kesik = pano_blogu("100'LÜK 62.75'LİK PANO", 62.75)          # çıkma dış yüzleri akslarda (251 dış): yanlar yarım pano
+    for x in (dx + 261.0, XB):
         H.add_blockref(kesik, (x, YC0), dxfattribs={"rotation": 270, "layer": "DIS_DUVAR_100"}); say(kesik, kat_adi, 1)
     # --- çıkma duvarları (dış pano, 10): yanlar 115,5 dik, arka 125,5 + 115,5 yatay; 1. katta arka solda 120/125 pencereli
     yan = pano_blogu("100'LÜK 115.5'LİK PANO", 115.5)
-    for x in (XA - 5, XB - 5):
+    for x in (XA, XB - 10):                                        # yan duvar bantları XA..XA+10 ve XB−10..XB (dış 251)
         H.add_blockref(yan, (x, YC0), dxfattribs={"layer": "DIS_DUVAR_100"}); say(yan, kat_adi, 1)
     arka1 = "100'LÜK 125'LİK (120x125) PENCERELİ PANO" if kat1 else "100'LÜK 125'LİK PANO"
     if arka1 not in hedef.blocks: arka1 = pano_blogu("100'LÜK 125'LİK PANO", 125.5)
-    H.add_blockref(arka1, (XA + 5, YC1), dxfattribs={"rotation": 270, "layer": "DIS_DUVAR_100"}); say(arka1, kat_adi, 1)
-    H.add_blockref(yan, (XA + 5 + 125.5, YC1), dxfattribs={"rotation": 270, "layer": "DIS_DUVAR_100"}); say(yan, kat_adi, 1)
+    arka2 = pano_blogu("100'LÜK 105.5'LİK PANO", 105.5)            # 231 iç = 125,5 + 105,5
+    H.add_blockref(arka1, (XA + 10, YC1), dxfattribs={"rotation": 270, "layer": "DIS_DUVAR_100"}); say(arka1, kat_adi, 1)
+    H.add_blockref(arka2, (XA + 10 + 125.5, YC1), dxfattribs={"rotation": 270, "layer": "DIS_DUVAR_100"}); say(arka2, kat_adi, 1)
     # --- çıkma köşe direkleri (şablon bloğu; iki kat boyu sürekli varsayımı, Soru 5/8)
     if SABLON_KOSE in hedef.blocks:
-        H.add_blockref(SABLON_KOSE, (XA - 5, YC1 - 12.5), dxfattribs={"layer": "KOSE_PROFIL_100"})                       # arka-sol: aşağı, sağa
-        H.add_blockref(SABLON_KOSE, (XB + 5, YC1 - 12.5), dxfattribs={"xscale": -1, "layer": "KOSE_PROFIL_100"})         # arka-sağ: aşağı, sola
+        H.add_blockref(SABLON_KOSE, (XA, YC1 - 12.5), dxfattribs={"layer": "KOSE_PROFIL_100"})                           # arka-sol: aşağı, sağa
+        H.add_blockref(SABLON_KOSE, (XB, YC1 - 12.5), dxfattribs={"xscale": -1, "layer": "KOSE_PROFIL_100"})             # arka-sağ: aşağı, sola
         # Lokman 13:57 (planda kırmızı kareler, "Profil"): çıkma yan duvarlarının gövde arka duvarıyla birleştiği iki noktaya 100×100 profil
-        H.add_blockref(SABLON_KOSE, (XA + 5, YC0 + 2.5), dxfattribs={"xscale": -1, "yscale": -1, "layer": "KOSE_PROFIL_100"})   # sol birleşim: yukarı, sola
-        H.add_blockref(SABLON_KOSE, (XA - 5, YC0 + 2.5), dxfattribs={"yscale": -1, "layer": "KOSE_PROFIL_100"})                  # sol birleşim: yukarı, sağa (T'nin öteki kolu)
-        H.add_blockref(SABLON_KOSE, (XB - 5, YC0 + 2.5), dxfattribs={"yscale": -1, "layer": "KOSE_PROFIL_100"})                  # sağ birleşim: yukarı, sağa
-        H.add_blockref(SABLON_KOSE, (XB + 5, YC0 + 2.5), dxfattribs={"xscale": -1, "yscale": -1, "layer": "KOSE_PROFIL_100"})   # sağ birleşim: yukarı, sola
+        H.add_blockref(SABLON_KOSE, (XA + 10, YC0 + 2.5), dxfattribs={"xscale": -1, "yscale": -1, "layer": "KOSE_PROFIL_100"})  # sol birleşim (XA..XA+10): yukarı, sola
+        H.add_blockref(SABLON_KOSE, (XA, YC0 + 2.5), dxfattribs={"yscale": -1, "layer": "KOSE_PROFIL_100"})                      # sol birleşim: yukarı, sağa
+        H.add_blockref(SABLON_KOSE, (XB - 10, YC0 + 2.5), dxfattribs={"yscale": -1, "layer": "KOSE_PROFIL_100"})                 # sağ birleşim (XB−10..XB): yukarı, sağa
+        H.add_blockref(SABLON_KOSE, (XB, YC0 + 2.5), dxfattribs={"xscale": -1, "yscale": -1, "layer": "KOSE_PROFIL_100"})       # sağ birleşim: yukarı, sola
     # --- merdiven çizgileri
     def cz(x0, y0, x1, y1): H.add_line((x0, y0), (x1, y1), dxfattribs={"layer": L})
     XM = (XI0 + XI1) / 2                          # kol ayırıcı (449,25 + dx)
@@ -226,7 +227,7 @@ def merdiven_ciz(dx: float, kat1: bool, eklenen: list, kat_adi: str):
     ytop = YON + 0.8 * (yarka - YON)
     cz(XR, YON + 27, XR, ytop); cz(XR, ytop, XL, ytop); cz(XL, ytop, XL, YON + 30)
     H.add_lwpolyline([(XL - 15, YON + 30), (XL + 15, YON + 30), (XL, YON), (XL - 15, YON + 30)], dxfattribs={"layer": L})
-    H.add_text(f"MERDİVEN KOVASI 2 pano (akslar 323,75 / 574,75; iç {XI1 - XI0:.0f}) + çıkma 1 pano · çift kollu U, kol {(XI1 - XI0) / 2:.2f}, "
+    H.add_text(f"MERDİVEN KOVASI 2 pano (akslar 323,75 / 574,75; iç {XI1 - XI0:.0f}) + çıkma dış 251 × 125,5 (Lokman 14:31; yan duvar dış yüzü aksta, kova duvarıyla 5 cm kademe) · çift kollu U, kol {(XI1 - XI0) / 2:.2f}, "
                "5 + 6 dönel + 5 = 16 rıht (282/16 = 17,6), basamak 25 — düzen Lokman'ın planından (13:00), ölçüler pano aksından (13:30)",
                height=4.5, dxfattribs={"layer": L}).set_placement((XA - 10, YC1 + 20))
     H.add_text("Çıkma duvarları akslara ortalı 10'luk dış pano; arka duvar ek yerlerinde (261→318,75 ve 579,75→637,5 kesik panolar) H simgesi yok · "
@@ -484,21 +485,25 @@ for kat_adi, _, dx in KATLAR:
         kopya.append(c)
     bant = _bantlar(kopya)
     # dış zincirler (üst: gövde | çıkma | gövde; alt: ön duvar | balkon) ve toplam
-    XA_, XB_ = kx + 318.75, kx + 579.75
-    _zincir([kx, XA_, XB_, kx + 763], 871.5, True); _zincir([kx, kx + 763], 905, True)
-    _zincir([kx, kx + 454.25, kx + 763], -45, True); _zincir([0, 706], kx - 45, False); _zincir([0, 831.5], kx + 763 + 45, False)
-    # iç sıralar: y = 650 (arka sıra), y = 250 (orta), y = 60 (ön); x = 160 (sol odalar), x = 449,25 (kova), x = 700 (sağ odalar)
-    for yk, taban in ((650.0, 660.0), (250.0, 260.0), (60.0, 70.0)):
-        _zincir(_kesen_noktalar(bant, yk, True, kx, kx + 763), taban, True)
-    for xk, taban in ((kx + 160.0, kx + 170.0), (kx + 449.25, kx + 459.25), (kx + 700.0, kx + 710.0)):
-        _zincir(_kesen_noktalar(bant, xk, False, 0, 831.5), taban, False)
-    H.add_text(f"{kat_adi} · KIYAS KOPYASI (Lokman 14:00): aks/pano ölçüleri yok, duvar yüzünden yüzüne zincirler; asıl planla karşılaştırma için",
+    # yalnız DIŞ ölçüler (Lokman 14:36 "iç ölçüleri boş ver"): dış yüzden dış yüze, her kenar ayrı ayrı; çıkma 251 × 125,5
+    XA_, XB_ = kx + 323.75, kx + 574.75
+    _zincir([kx, XA_, XB_, kx + 763], 866, True)                   # üst: sol gövde | çıkma | sağ gövde (çıkma arka dış yüzü 831,5 + 35)
+    _zincir([kx, kx + 763], 900, True)                             # toplam 763
+    _zincir([kx, kx + 454.25, kx + 763], -70, True)                # alt: ön duvar | balkon (dikmeye kadar)
+    _zincir([0, 706], kx - 40, False)                              # sol: 706
+    _zincir([0, 706], kx + 763 + 40, False)                        # sağ: 706
+    _zincir([706, 831.5], XB_ + 40, False)                         # çıkma derinliği 125,5 (sağ yan)
+    _zincir([706, 831.5], XA_ - 40, False)                         # çıkma derinliği 125,5 (sol yan)
+    _zincir([0, 831.5], kx + 763 + 80, False)                      # çıkmayla toplam 831,5
+    _zincir([-30, 0], kx + 454.25 - 40, False)                     # balkon taşması 30 (planda var; Lokman 14:31 gerçek çizgi)
+    H.add_text(f"{kat_adi} · DIŞ ÖLÇÜLER (dış yüzden dış yüze) · Lokman 14:36: iç ölçüler yok, sıra sıra",
                height=9, dxfattribs={"layer": "KIYAS_OLCU"}).set_placement((kx, 945))
     yy = 930
     for ad_, deger in PLAN_DEGERLERI.get(kat_adi, []):
         H.add_text(f"PLAN · {ad_}: {deger}", height=6, dxfattribs={"layer": "KIYAS_OLCU"}).set_placement((kx + 790, yy)); yy -= 10
     H.add_text("Çizim değerleri zincirlerde (pano aksından: 125,5 ızgarası + 100'lük duvarlar). Fark = ızgaraya oturtma.", height=6,
                dxfattribs={"layer": "KIYAS_OLCU"}).set_placement((kx + 790, yy - 4))
+    H.add_lwpolyline([(kx + 454.25, 0), (kx + 454.25, -30), (kx + 763, -30), (kx + 763, 0)], dxfattribs={"layer": "KIYAS_OLCU"})   # balkon taşması 30, gerçek çizgi
 
 # 5) kesit / kat kotları (kısa kenar y=706; makas y'yi geçer → beşik profil bu kesitte)
 KX, KY = 0.0, -900.0

@@ -195,7 +195,7 @@
         "HOL",
         "ODA"
       ],
-      "pano": 0
+      "duvar_ucu": "on"
     },
     {
       "tur": "ic_kapi",
@@ -211,18 +211,9 @@
       "olcu": 82,
       "arasi": [
         "WC HOLÜ",
-        "HOL"
-      ],
-      "pano": 0
-    },
-    {
-      "tur": "ic_kapi",
-      "olcu": 82,
-      "arasi": [
-        "WC HOLÜ",
         "WC"
       ],
-      "pano": 0
+      "duvar_ucu": "sag"
     },
     {
       "tur": "ic_kapi",
@@ -231,7 +222,7 @@
         "WC HOLÜ",
         "MUTFAK"
       ],
-      "pano": 0
+      "duvar_ucu": "sol"
     },
     {
       "tur": "ic_kapi",
@@ -240,7 +231,7 @@
         "SALON",
         "MUTFAK"
       ],
-      "pano": 0
+      "duvar_ucu": "on"
     },
     {
       "tur": "dis_kapi",
@@ -291,7 +282,7 @@
     "Salonun sol penceresi odaya ortalanınca (oda_ortasi) pencereli pano kesilmiş son panonun derzine 0,625 cm kala bitiyor ve Motor 0,6 cm'lik kıymık pano üretip doğrulamada düşüyordu; bu taslakta pencere ızgara panosunda (pano 0, 386,5–512; plandaki yerinden 51 cm arkada). Motor'un bu kenar durumu İE-22'de bulgu olarak yazıldı.",
     "Giriş kapısı (Lokman 28.10 12:34, plandaki işaretle): sağ cephede, WC holünün sağ dış duvarında, WC'ye yakın panoda (arkadan pano 0), 90'lık, içeri açılır. Motor'da __DIS__–WC HOLÜ, duvar: sag.",
     "Çift kat ızgara denemesi (28.10 13:35): gövde x 753 (= 763 − 10) ve iç duvar 10 ile üretildi; AutoCAD çiziminde sağ dış duvar +10, içler +5 kaydırılarak R02 kuralı (akslar köşe kolonu iç yüzünden 10 + 125,5k) elde edilir. Motor'da kural yok (İE-22 PR-1).",
-    "HOL–WC HOLÜ kapısı HOL'e açılır (13:42): iç duvar 10 olunca WC holü 168 iç; karşılıklı 90 + 82 kanat sığmadı (validate 'kanatlar çakışıyor'). Lokman düzeltme turunda karar verir."
+    "Lokman 28.10 14:31 (PDF işaretleri): HOL–WC HOLÜ kapısı kaldırıldı (planda duvar); ODA, WC, mutfak ve salon–mutfak kapıları işaretlediği köşelere bitişik panolara (duvar_ucu), menteşe köşede (kapı mantığı)."
   ],
   "eksikler": [
     "Merdiven çıkması ve merdiven (kol eni, rıht, sahanlık).",

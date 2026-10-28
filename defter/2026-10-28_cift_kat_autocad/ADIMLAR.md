@@ -186,5 +186,14 @@ Biçim: `A### · saat · başlık` — Ne / Nerede / Sonuç / Durum (yapıldı �
 - PDF: `pdf_yap.py` → `Portman_IE22-CK01_CIFT_KAT_sablon_bloklu_r01.pdf` (5 sayfa A3 yatay, beyaz zemin, raster 140 dpi, 1,2 MB; vektör 12 MB oluyordu): 1–2 kıyas kopyaları, 3–4 akslı pano planları, 5 kesit + kart. Sohbete gönderildi, Mac'e kopyalandı. DXF md5 f32553ac…
 - Durum: yapıldı. Lokman PDF üstünden düzeltme verecek.
 
+### A039 · 14:24 · Lokman (fotoğraf): "Ekran bu şekilde kaldı, bir şey yapmama izin vermiyor"
+- Tam ekran kontrolü ve AutoCAD erişimi bende kaldığı için masaüstü uygulaması kilitli görünüyordu → `computer_release_full_control` + `computer_app_release`. Ders: AutoCAD adımı bitince kontrol bırakılır.
+- Durum: yapıldı.
+
+### A040 · 14:31–14:45 · Lokman'ın PDF işaretleri (`scratchpad/duz/`), "dış ölçüleri yanlış vermişsin, temiz tek tek ver", "iç ölçüleri boş ver; bir A4'e yalnız dış ölçüler ve zemin kat; sıra sıra"
+- Okunan işaretler (zemin, sayfa 1): iç dikey zincirler (x = 160 / 700 probe) karalanmış — gövde dışına taşan "125,50" parçaları yanlıştı (probe çıkma seviyesine kadar gidiyordu); çıkma üstüne "251", yanına "125,5cm" → çıkma dış 251 × 125,5 (yan duvar dış yüzleri akslarda; kova duvarıyla 5 cm kademe, arka duvar yan parçaları 62,75); HOL–ODA kapısı çarpı, ODA/SALON duvarına bitişik köşeye yeni yay; WC kapısı WC'ye açılır, menteşe sağ köşede; HOL–WC HOLÜ duvarı taralı → kapı yok (plandaki gibi duvar); WC HOLÜ–MUTFAK kapısı çarpı → SALON/MUTFAK duvarına bitişik uca; SALON–MUTFAK kapısı balkon arka duvarına bitişik uca; balkon taşması kesik/notlu kutu çarpı → gerçek çizgi; giriş kapısı yanında çarpı/işaret (anlaşılmadı, sorulacak). Lokman: "hem senin yanlış çizimlerin var (daha fazla) hem bayinin çizimlerinde hatalar var."
+- Yapılan: `ck_izgara/zemin_kat.json`: HOL–WC HOLÜ kapısı kaldırıldı; ODA (`duvar_ucu: on`), WC (`sag`), WC HOLÜ–MUTFAK (`sol`), SALON–MUTFAK (`on`) — pano dizini kaldırılarak; Motor zemin validation True. Üretici: çıkma 251 dış (`merdiven_ciz`), kıyas kopyasında yalnız dış ölçüler (üst 323,75 | 251 | 188,25; 763; sol/sağ 706; çıkma 125,5 iki yanda; 831,5; alt 454,25 | 308,75; taşma 30 gerçek çizgi). `a4_dis_olcu.py` → `Portman_IE22-CK01_ZEMIN_dis_olculer_A4.pdf` (A4 yatay, H simgeleri/notlar/köşe kutuları/akslar gizli; `draw_layout(filter_func)`, `draw_entities` beyaz zeminde beyazı çevirmiyor). Sohbete gönderildi, Mac'e kopyalandı.
+- Durum: yapıldı; Lokman dış ölçüleri sıra sıra düzeltecek.
+
 ### A035 · — · Sıradaki: Soru 2b (zeminde kovaya giriş: önü açık mı, planda ön duvar çizili) → Soru 4 (Fransız pencere) → 5 (çıkma çatısı) → 6 → 7 → 8 (et) → 9 → İş Emri JSON → Motor (PR-1: bulgu 7–8)
 - Durum: bekliyor (Lokman).

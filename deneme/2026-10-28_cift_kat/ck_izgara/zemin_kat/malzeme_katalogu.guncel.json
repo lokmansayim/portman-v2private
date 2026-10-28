@@ -415,7 +415,7 @@
       "group": "İç duvar panoları",
       "label": "Özel dolu pano",
       "dimensions_mm": [
-        577.5,
+        477.5,
         100,
         2500
       ],
@@ -427,7 +427,7 @@
       "group": "İç duvar panoları",
       "label": "İç kapılı özel pano",
       "dimensions_mm": [
-        1105.0,
+        1205.0,
         100,
         2500
       ],
@@ -464,6 +464,18 @@
       "label": "İç kapılı pano",
       "dimensions_mm": [
         1255.0,
+        100,
+        2500
+      ],
+      "note": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli.",
+      "unit": "adet"
+    },
+    "I17": {
+      "code": "I17",
+      "group": "İç duvar panoları",
+      "label": "Özel dolu pano",
+      "dimensions_mm": [
+        627.5,
         100,
         2500
       ],
@@ -560,6 +572,18 @@
       "label": "Özel dolu pano",
       "dimensions_mm": [
         1162.5,
+        100,
+        2500
+      ],
+      "note": "Portman motor tarafından otomatik tahsis edildi; teyit edilmeli.",
+      "unit": "adet"
+    },
+    "I18": {
+      "code": "I18",
+      "group": "İç duvar panoları",
+      "label": "Özel dolu pano",
+      "dimensions_mm": [
+        577.5,
         100,
         2500
       ],

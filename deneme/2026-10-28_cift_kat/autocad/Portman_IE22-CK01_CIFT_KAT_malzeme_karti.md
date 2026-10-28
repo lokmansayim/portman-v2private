@@ -4,24 +4,26 @@ Blok adı = malzeme adı. Geometri Motor'un panoları (Astra v1.4.3), adlar Gün
 
 | Blok / malzeme | ZEMİN KAT | 1. KAT | Toplam | Şablonda |
 |---|---:|---:|---:|---|
+| 100'LÜK 105.5'LİK PANO | 1 | 1 | 2 | yeni (kural) |
 | 100'LÜK 115.5'LİK (60x125) PENCERELİ PANO | 1 | 0 | 1 | yeni (kural) |
 | 100'LÜK 115.5'LİK (60x40) VASİSTASLI PANO | 1 | 1 | 2 | yeni (kural) |
-| 100'LÜK 115.5'LİK KAPILI PANO(82'LİK) | 2 | 0 | 2 | yeni (kural) |
-| 100'LÜK 115.5'LİK PANO | 3 | 5 | 8 | yeni (kural) |
+| 100'LÜK 115.5'LİK PANO | 2 | 4 | 6 | yeni (kural) |
 | 100'LÜK 116.25'LİK KAPILI PANO(90'LIK) | 0 | 1 | 1 | yeni (kural) |
 | 100'LÜK 116.25'LİK PANO | 1 | 0 | 1 | yeni (kural) |
+| 100'LÜK 120.5'LİK KAPILI PANO(82'LİK) | 2 | 0 | 2 | yeni (kural) |
 | 100'LÜK 121.25'LİK PANO | 1 | 1 | 2 | yeni (kural) |
 | 100'LÜK 125'LİK (120x125) PENCERELİ PANO | 2 | 3 | 5 | yeni (kural) |
 | 100'LÜK 125'LİK (120x180) PENCERELİ PANO | 1 | 2 | 3 | yeni (kural) |
-| 100'LÜK 125'LİK KAPILI PANO(82'LİK) | 4 | 4 | 8 | yeni (kural) |
+| 100'LÜK 125'LİK KAPILI PANO(82'LİK) | 3 | 4 | 7 | yeni (kural) |
 | 100'LÜK 125'LİK KAPILI PANO(90'LIK) | 1 | 0 | 1 | yeni (kural) |
 | 100'LÜK 125'LİK PANO | 16 | 15 | 31 | var |
 | 100'LÜK 31'LİK PANO | 0 | 1 | 1 | yeni (kural) |
 | 100'LÜK 31.75'LİK PANO | 0 | 1 | 1 | yeni (kural) |
 | 100'LÜK 33.88'LİK PANO | 1 | 0 | 1 | yeni (kural) |
-| 100'LÜK 57.75'LİK PANO | 8 | 9 | 17 | yeni (kural) |
+| 100'LÜK 47.75'LİK PANO | 2 | 0 | 2 | yeni (kural) |
+| 100'LÜK 57.75'LİK PANO | 3 | 7 | 10 | yeni (kural) |
 | 100'LÜK 60.25'LİK PANO | 0 | 1 | 1 | yeni (kural) |
-| 100'LÜK 62.75'LİK PANO | 3 | 3 | 6 | yeni (kural) |
+| 100'LÜK 62.75'LİK PANO | 8 | 5 | 13 | yeni (kural) |
 | 100'LÜK 65.25'LİK PANO | 0 | 1 | 1 | yeni (kural) |
 | 100'LÜK 91.62'LİK PANO | 1 | 0 | 1 | yeni (kural) |
 | 100'LÜK VERANDA PROFİLİ 126.25 (YAN) | 1 | 1 | 2 | yeni |
