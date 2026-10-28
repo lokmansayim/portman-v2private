@@ -29,6 +29,7 @@ for _yol in (KOD.parent, KOD):
 import ayarlar as AY                                  # noqa: E402
 import meta_api as M                                  # noqa: E402
 import nabiz as NB                                    # noqa: E402
+import talep_formu as TF                              # noqa: E402
 from depo import Depo, kimlik_izi, maske             # noqa: E402
 
 SURUM = "kanal-v2.0"
@@ -71,11 +72,16 @@ def kuyruk_satiri(m: dict, mid: str, gonderen: str, tur: str, ts: int, adlar: di
     ctx = (m.get("context") or {}).get("id") if isinstance(m.get("context"), dict) else None
     reply, reply_kind = M.cevap_kimligi(m)
     medya_id, dosya_adi, _mime = M.medya_bilgisi(m)
-    return {"id": mid, "context_id": str(ctx) if ctx and M.wamid_gecerli(str(ctx)) else None, "reply_id": reply, "reply_kind": reply_kind,
-            "sender": gonderen, "name": str(adlar.get(gonderen) or "")[:120], "role": (bayi or {}).get("rol") or "bayi", "bayi": bayi,
-            "type": tur, "text": M.gelen_metin(m)[:M.METIN_EN_COK], "media_id": medya_id, "filename": dosya_adi, "timestamp": ts,
-            "received_at": simdi, "phone_number_id": pnid, "source": "Meta imzalı webhook", "mode": str(ayar.get("mode") or "patron"),
-            "state": "queued", "attempts": 0, "result": None, "error": None, "updated_at": simdi}
+    satir = {"id": mid, "context_id": str(ctx) if ctx and M.wamid_gecerli(str(ctx)) else None, "reply_id": reply, "reply_kind": reply_kind,
+             "sender": gonderen, "name": str(adlar.get(gonderen) or "")[:120], "role": (bayi or {}).get("rol") or "bayi", "bayi": bayi,
+             "type": tur, "text": M.gelen_metin(m)[:M.METIN_EN_COK], "media_id": medya_id, "filename": dosya_adi, "timestamp": ts,
+             "received_at": simdi, "phone_number_id": pnid, "source": "Meta imzalı webhook", "mode": str(ayar.get("mode") or "patron"),
+             "state": "queued", "attempts": 0, "result": None, "error": None, "updated_at": simdi}
+    rj = M.form_cevabi(m)
+    if rj is not None:                             # İE-20 PR-2: talep ya da revizyon formunun cevabı; metin panel için özet
+        satir["form"] = TF.cevap_ozeti(rj)
+        satir["text"] = TF.metin(satir["form"])[:M.METIN_EN_COK]
+    return satir
 
 
 def izinli_mi(bayi: dict | None, mode: str) -> bool:
@@ -113,11 +119,14 @@ def mesaj_isle(k: Kanal, m: dict, adlar: dict, ayar: dict, simdi: int) -> str:
         sonuc = ("kayitsiz" + ("+cevap" if r["cevap"] else "")) if r["yeni"] else "tekrar"
     # Medya: yalnız görsel ve belge indirilir (video, ses, çıkartma yalnız kayıt). Kayıtsız gönderen için 24 saatte en çok
     # KAYITSIZ_MEDYA_SINIRI dosya (disk ve Meta indirme kotası; hattı bilen herkes dosya yollayabilir).
-    if sonuc != "tekrar" and medya_id and tur in MEDYA_INDIRILEN:
-        if sonuc == "sahiplenildi" or k.depo.gelen_dosya_sayisi(gonderen, 24) < KAYITSIZ_MEDYA_SINIRI:
-            k.depo.gelen_dosya_ekle(mid, medya_id, dosya_adi, mime)
-        else:
-            sonuc += "+medya_siniri"
+    dosyalar = [(medya_id, dosya_adi, mime)] if medya_id and tur in MEDYA_INDIRILEN else []
+    dosyalar += [(d["id"], d.get("file_name"), d.get("mime_type")) for d in (satir.get("form") or {}).get("dosyalar") or []]   # formdaki dosya
+    if sonuc != "tekrar":
+        for medya_id, dosya_adi, mime in dosyalar:
+            if sonuc == "sahiplenildi" or k.depo.gelen_dosya_sayisi(gonderen, 24) < KAYITSIZ_MEDYA_SINIRI:
+                k.depo.gelen_dosya_ekle(mid, medya_id, dosya_adi, mime)
+            elif not sonuc.endswith("+medya_siniri"):
+                sonuc += "+medya_siniri"
     log("mesaj", kimlik_izi(mid), "kimden", maske(gonderen), "tür", tur, "→", sonuc)
     return sonuc
 
