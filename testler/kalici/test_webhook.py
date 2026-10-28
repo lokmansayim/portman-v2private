@@ -6,6 +6,7 @@ import hashlib
 import json
 import time
 from io import BytesIO
+from types import SimpleNamespace
 
 import pytest
 
@@ -272,7 +273,11 @@ def test_failed_bildirimi_hata_yazar_ve_opaque_ile_eslesme(app, depo, wa):
 
 
 # ───────────────────────── sağlık ve hata yolu ─────────────────────────
-def test_saglik(app, kanal, depo):
+def test_saglik(app, kanal, depo, monkeypatch):
+    # Nabız saati bu saniyeye sabit (BK-16): "zaman" saniyeye kesildiği için yazma ile okuma arasında saniye sınırı
+    # geçilirse taze nabız 1 sn görünürdü (CI koşu #60). Beklenti değişmedi: taze nabız 0 sn.
+    an = float(int(time.time()))
+    monkeypatch.setattr(NB, "time", SimpleNamespace(time=lambda: an))
     kod, govde = istek(app, "GET", "/saglik")
     j = json.loads(govde)
     assert kod == 503 and j["ok"] is False and j["postgres"] is True and any("agent" in s for s in j["sorunlar"])
@@ -290,7 +295,7 @@ def test_saglik(app, kanal, depo):
     assert kod == 503 and "nabiz: sertifika: 9 gün kaldı (certbot renew)" in json.loads(govde)["sorunlar"]
     NB.yaz(kanal.veri, "nabiz", sorunlar=[])
     assert istek(app, "GET", "/saglik")[0] == 200
-    (kanal.veri / "nabiz" / "nabiz.json").write_text(json.dumps({"zaman": int(time.time()) - 1000, "ad": "nabiz", "sorunlar": []}))
+    (kanal.veri / "nabiz" / "nabiz.json").write_text(json.dumps({"zaman": int(an) - 1000, "ad": "nabiz", "sorunlar": []}))
     kod, govde = istek(app, "GET", "/saglik")
     assert kod == 503 and any(s.startswith("nabiz.sh:") for s in json.loads(govde)["sorunlar"])
 
