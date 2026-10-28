@@ -4,13 +4,14 @@ Yükleme listesi × birim fiyat: Z-10'un liste yöntemi. Araç `araclar/fiyatla.
 
 ## Dosya
 
-`defter_2026-10.json` (sürüm `2026-10-27-r02`). Fiyatlar TL. KDV durumu kaynak listelerde yazmıyor.
+`defter_2026-10.json` (sürüm `2026-10-28-r03`; r03 yalnız kiriş boy önerisini ekledi, fiyatı onaylı satırların hiçbiri değişmedi). Fiyatlar TL. KDV durumu kaynak listelerde yazmıyor.
 
 | Alan | İçerik |
 |---|---|
 | `kaynaklar` | Her kaynağın `kisa` adı (liste ve tarih) aracın çıktısında Kaynak sütununa yazılır. `EKIM87`: 87 m² yükleme listesi, 14 Ekim 2026. `HAZ`: malzeme listesi, 16 Haziran 2026. Patron ikisini 27 Ekim'de verdi (`patron_verdi`). `CTKB`: Eylül 2026 çelik tablosu; yalnız öneri kaynağı. |
 | `hatlar.prefabrik.kalemler` | Anahtar `kalem \| olcu`, `motor/prefabrik_liste.py`'nin satırı. Örnek proje TK-01'dir: asma ve ters tavan listelerinin birleşimi, 130 kalem. |
 | `hatlar.prefabrik.bantlar` | Pano eni bandı. Birebir anahtar yoksa en, Ekim listesinde görülen aralığa düşerse o fiyat alınır. 627,5 mm tam/yarım sınırı Patron'un 27 Ekim 22:08 onayıdır. |
+| `hatlar.prefabrik.boy_onerileri` | Kesilen profilin kaydı olmayan boyu (ölçü "L <mm>") için öneri: tam boyun fiyatından boyla orantılı, tam TL'ye yarım yukarı. Bugün yalnız kutu profil kiriş (6 m 5.000 TL). Hep `onay: false`: yalnız `--oneri` ile toplama girer; girmezse satırda `oneri_fiyat` olarak durur ve teklif onu sarı gösterir. |
 | `hatlar.celik.kalemler` | Anahtar `kalem \| boyut`, genel motorun yükleme listesi satırı. Ç8201 ile Ç8801'in birleşimidir, 99 kalem. Birimi `kg` olan kalemde tutar satırın kg'ı × fiyat. |
 | `hatlar.celik.atla` | Listedeki özet satırı ("Toplam …"). Fiyatlanmaz, iki kez sayılmaz. |
 | `m2_yontemi` | Basit yöntemin (alan × m² fiyatı) fiyatları. Henüz yok, araç `--m2-fiyat` ile alır. |

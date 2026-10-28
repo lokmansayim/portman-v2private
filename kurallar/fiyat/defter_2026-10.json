@@ -1,6 +1,6 @@
 {
  "sema": "portman.fiyat_defteri/1",
- "surum": "2026-10-27-r02",
+ "surum": "2026-10-28-r03",
  "aciklama": "Yükleme listesi × birim fiyat (İE-13, Z-10'un liste yöntemi). Anahtar Motor'un liste satırı: prefabrikte 'kalem | olcu' (motor/prefabrik_liste.py), çelikte 'kalem | boyut' (motor/genel yükleme listesi). Fiyat uydurulmaz: kaynağı olmayan kalemde fiyat boş kalır.",
  "para_birimi": "TL",
  "kdv": "kaynak listelerde yazmıyor",
@@ -1695,6 +1695,20 @@
        "dayanak": "Ekim listesinde 1070–1250 en 2.550"
       }
      ]
+    }
+   ],
+   "boy_onerileri": [
+    {
+     "kalem": "Kutu profil (kiriş) 100 × 100",
+     "boy_mm": 6000,
+     "fiyat": 5000,
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      64
+     ],
+     "kaynak_kalem": "KUTU PROFİL (KİRİŞ) (4 MM) (TAM BOY) | 100*100*6000",
+     "onay": false,
+     "dayanak": "Kaydı olmayan kiriş boyu için öneri: 6 m tam boyun fiyatından boyla orantılı, tam TL'ye yarım yukarı. Defterdeki onaylı kiriş boyları (1200, 1710, 2510, 3760) bu yöntemle (Patron 27 Ekim 22:08 \"evet uygula\"); onay kalemin kendisi içindir, yeni boy onay bekler (CIO, 28 Ekim: fiyatı olmayan kiriş sarı öneriyle gösterilsin)."
     }
    ],
    "atla": []

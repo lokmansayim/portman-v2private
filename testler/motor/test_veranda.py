@@ -18,6 +18,7 @@ import pytest
 KOK = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(KOK))
 from motor import dxf_out, geometry as G, prefabrik_liste as PL, sunum, veranda as VR  # noqa: E402
+from shapely.geometry import box  # noqa: E402
 
 TK01 = KOK / "testler" / "motor" / "veri" / "TK01.json"
 PK01 = KOK / "testler" / "motor" / "veri" / "PK01.json"
@@ -80,6 +81,72 @@ def test_veranda_dogrulamadan_gecer(tmp_path):
         assert blok in dxf, blok
 
 
+def _nisli() -> dict:
+    """TK-01 r06 (Patron 28 Ekim 08:01, "dış kapı 1 pano içeride"): ANTRE kapalı oda değil, önü açık giriş nişi; dış kapı niş ile hol arasında."""
+    ie = _ie()
+    for m in ie["mahaller"]:
+        if m["ad"] == "ANTRE":
+            m["ad"], m["tur"] = "GİRİŞ", "veranda"
+    ie["acikliklar"] = [a for a in ie["acikliklar"] if a.get("arasi") != ["ANTRE", "HOL"]]
+    for a in ie["acikliklar"]:
+        if a["tur"] == "dis_kapi":
+            a["arasi"] = ["GİRİŞ", "HOL"]
+            del a["duvar"]
+    return ie
+
+
+def test_veranda_giris_nisinin_onunde(tmp_path):
+    """Ön verandanın iç kenarı nişin ağzında gövdenin dış yüzüne değil nişe değer; nişin ağzı cephe sayılır. Nişin üç yanı dış duvar
+    (10 cm), kapı bir pano içeride; ağızdaki kiriş listede ve teknik paftanın BOM'unda aynı (7 profil). Nişsiz hâli değişmez
+    (test_veranda_geometrisi)."""
+    p = G.kur(_nisli())
+    assert p.dis_verandalar[0]["rect"] == (256.0, -181.0, 642.0, 0.0)
+    assert p.mahaller["GİRİŞ"].acik and p.mahaller["GİRİŞ"].alan_m2 == pytest.approx(1.44375)
+    kapi = [q for q in p.panolar if q.acilim and q.acilim.tur == "dis_kapi"]
+    assert len(kapi) == 1 and kapi[0].acilim.arasi == ("GİRİŞ", "HOL") and kapi[0].gap() == (404.25, 125.0, 494.25, 135.0)  # bir pano içeride
+    nis = [d for d in p.duvarlar if any(box(*q.rect()).intersects(box(391.5, 0.0, 507.0, 125.0).buffer(-0.5).buffer(6)) for q in d.panolar)]
+    assert len(nis) == 3 and all(d.tur == "dis" and 2 * d.h == 10.0 for d in nis)                # iki yan ve kapının duvarı
+    N = PL.model_motor(_nisli())
+    assert N["veranda_kenarlari_cm"] == [386.0, 181.0, 181.0, 261.0, 130.0, 130.0] and N["nis_agizlari_cm"] == [125.5]   # ağız aks arası
+    L = PL.liste(N)
+    agiz = [s for s in L["satirlar"] if s["kalem"].startswith("Kutu profil (kiriş)") and s["olcu"] == "L 1255"]
+    assert len(agiz) == 1 and agiz[0]["adet"] == 1
+    m = dxf_out.uret(_nisli(), tmp_path, pdf_hatada=False)
+    assert m["validation_passed"] is True, m.get("errors")
+    assert _oku(tmp_path / "validation.json")["rooms_m2"]["GİRİŞ"] == pytest.approx(1.44375)
+    bom = _oku(tmp_path / "bom.json")["kalemler"]
+    assert sum(k["adet"] for k in bom if k["kod"].startswith("V")) == len(N["veranda_kenarlari_cm"]) + len(N["nis_agizlari_cm"])   # 7 profil
+
+
+def test_nis_agzi_yalniz_tek_yuzu_acik_mahalde():
+    """Listede niş, geometrinin tanımıyla: tek yüzü açık, dikmesiz açık mahal (geometri hakemi 2. tur, 28 Ekim). Katalogdaki köşe
+    verandası (iki yüzü açık) taşan veranda eklenince de verandanın kuralıyla sayılır; nişin ağız kirişi plandaki dikmelerden bağımsız."""
+    ie = _oku(KOK / "is_emri" / "P6001_2plus1_6x6.json")
+    ie["verandalar"] = [{"ad": "V", "cephe": "arka", "bas_cm": 0, "bit_cm": 300, "derinlik_cm": 150}]
+    N = PL.model_motor(ie)
+    assert "nis_agizlari_cm" not in N and N["veranda_kenarlari_cm"] == [439.25, 251.0, 300.0, 150.0, 150.0]   # L 4292,5 ve 2410, eskisi gibi
+    nis = _nisli()
+    del nis["verandalar"]
+    N = PL.model_motor(nis)
+    assert N["veranda_kenarlari_cm"] == [] and N["nis_agizlari_cm"] == [125.5]
+
+
+@pytest.mark.parametrize("girdi, v", [
+    ("nis", {"ad": "V", "cephe": "on", "bas_cm": 400, "bit_cm": 500, "derinlik_cm": 150}),   # iki iç köşesi nişin ağzında, havada
+    ("nis", {"ad": "V", "cephe": "on", "bas_cm": 450, "bit_cm": 700, "derinlik_cm": 150}),   # bir iç köşesi nişin ağzında
+    ("pk01", {"ad": "V", "cephe": "on", "bas_cm": 300, "bit_cm": 580, "derinlik_cm": 150}),  # köşedeki ızgara verandasının önünde
+    ("pk01", {"ad": "V", "cephe": "sag", "bas_cm": 20, "bit_cm": 180, "derinlik_cm": 150}),  # ... ve yanında
+    ("pk01", {"ad": "V", "cephe": "sag", "bas_cm": 50, "bit_cm": 400, "derinlik_cm": 150}),
+])
+def test_veranda_nis_disinda_oturmuyor(girdi, v):
+    """Nişin ağzı yalnız verandanın iki iç köşesi duvardaysa ve nişin bütün açık kenarı verandanın iç kenarındaysa dış yüz sayılır
+    (geometri hakemi, 28 Ekim); öteki boşluklar eskisi gibi hata."""
+    ie = _nisli() if girdi == "nis" else _oku(PK01)
+    ie["verandalar"] = [v]
+    with pytest.raises(G.IsEmriHatasi, match="tam oturmuyor"):
+        G.kur(ie)
+
+
 def test_veranda_profili_kiris_yerinde(plan):
     """DXF'in veranda profili blokları (BOM ve IFC kirişleri bunlardan): her verandada üç, kutusu Plan'ın kirişiyle aynı; gövde duvarının
     içine profil düşmez, iki yanın iç çizgisi verandanın içinde (geometri hakemi, 27 Ekim: eski döngü gövde çizgisini de profil sayıyordu,
@@ -94,10 +161,12 @@ def test_veranda_profili_kiris_yerinde(plan):
 
 
 def test_veranda_listesi():
+    """TK-01 listesi. Taşan verandanın dış kirişi kolonların dış yüzünden dış yüzüne, açık kenar boyunda (Lokman, kart 28 Ekim, "A: dış
+    yüzden dış yüze": 3760 / 2510 → 3860 / 2610); iki yan kiriş açık kenar − 10 (1710, 1200), eskisi gibi."""
     N = PL.model_motor(_ie())
     assert (N["W"], N["D"], N["brut_m2"]) == (898.0, 1199.0, 90.122)       # brüt gövde + veranda; dış kutunun boş köşeleri sayılmaz
     assert N["dis_cevre_m"] == pytest.approx(35.72) and N["ic_kalan_dis_duvar_m"] == pytest.approx(6.47) and N["dikmeler"] == 4
-    assert N["veranda_kenarlari_cm"] == [386.0, 181.0, 181.0, 261.0, 130.0, 130.0]
+    assert N["veranda_kenarlari_cm"] == [386.0, 181.0, 181.0, 261.0, 130.0, 130.0] and N["veranda_dis_kenar_sira"] == [0, 3]
     ana, on, arka = N["cati"]
     assert (ana["aciklik_cm"], ana["boy_cm"], ana["makas_kosu_cm"]) == (898.0, 888.0, 868.0)
     assert {k: on[k] for k in ("ad", "tip", "aciklik_cm", "boy_cm", "kalkan", "capraz", "acik", "mahya_boy_cm", "sacak_hatlari_m", "makas_kosu_cm")} == \
@@ -108,7 +177,9 @@ def test_veranda_listesi():
     L = PL.liste(N)
     sat = lambda kalem: [(s["olcu"], s["adet"]) for s in L["satirlar"] if s["kalem"] == kalem]
     assert sat("Özel kutu profil (kolon) 100 × 100") == [("L 2500", 4)]
-    assert sat("Kutu profil (kiriş) 100 × 100") == [(f"L {x}", 1) for x in (3760, 1710, 1710, 2510, 1200, 1200)]
+    assert sat("Kutu profil (kiriş) 100 × 100") == [(f"L {x}", 1) for x in (3860, 1710, 1710, 2610, 1200, 1200)]
+    formul = [s["formul"] for s in L["satirlar"] if s["kalem"] == "Kutu profil (kiriş) 100 × 100"]
+    assert [f.startswith("taşan verandanın dış kenarı") for f in formul] == [True, False, False, True, False, False]
     assert sat("Yavru makas · ön veranda çatısı") == [("L 4460", 3)] and sat("Yavru makas · arka veranda çatısı") == [("L 3210", 2)]
     assert sat("Metal dere") == [("L 4000", 7)]
     assert L["ozet"]["satir"] == 131

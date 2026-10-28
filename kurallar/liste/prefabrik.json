@@ -104,7 +104,12 @@
   "veranda_kirisi_eksik_cm": {
    "deger": 10,
    "durum": "pafta",
-   "kaynak": "Veranda kirişi açık kenarın dış ölçüsü − 10 cm (PK-01'de tuttu)."
+   "kaynak": "Veranda kirişi açık kenarın dış ölçüsü − 10 cm (PK-01'de tuttu). Taşan verandanın (BK-14) iki kolon arasındaki dış kirişi bu kurala değil `tasan_veranda_dis_kirisi_eksik_cm`'ye uyar; yan kirişleri buna uyar."
+  },
+  "tasan_veranda_dis_kirisi_eksik_cm": {
+   "deger": 0,
+   "durum": "lokman",
+   "kaynak": "Lokman, 28 Ekim 2026, kart \"Veranda kirişi kolona nasıl oturuyor\": A, dış yüzden dış yüze. Taşan verandanın (BK-14) iki kolon arasındaki dış kirişi kolonların dış yüzünden dış yüzüne uzanır, açık kenar boyu kadar (TK-01: 386 ve 261 cm). Verandanın iki yan kirişi ve gövdenin içindeki veranda `veranda_kirisi_eksik_cm`'de kalır (PK-01'in gerçek listesi 324 ve 190)."
   },
   "cektirme_u_100": {
    "deger": 2,
@@ -430,6 +435,11 @@
    "durum": "aday",
    "kaynak": "\"VİDA BİLGİ\" sayfası (PK-06): 8'lik trapez uç ve PH2 uç = inox taş ÷ 2, aşağı (yalnız PK-06 4 tuttu; PK-01…05 4–6)."
   },
+  "vitrifiye_banyo_basina": {
+   "deger": 1,
+   "durum": "varsayim",
+   "kaynak": "Varsayım, onay bekliyor. Dayanak Lokman, 27 Ekim 2026 22:00 (TK-01 teklifi): \"evet 2 takım olacak\" (banyo ve E. banyo); genellemesi banyo türündeki her hacme bir takım (duş teknesi, klozet, lavabo, batarya). Ayrı WC ya da lavabo hacmi tam takım değildir: o evde satırın adedi \"Kural yok\" kalır, aday banyo sayısı. Genelleme İE-13 PR-2'de yazıldı, Patron onaylayınca durum lokman olur (D-28: düzeltme kurala işlenir)."
+  },
   "vitrifiye_aday": {
    "deger": 1,
    "durum": "aday",
@@ -569,7 +579,7 @@
    ],
    "tur": "yontem",
    "karar_bekliyor": false,
-   "not": "Takımın adetleri kitaptan. Prefabrik ev başına bir takım yazar (O17; PK-03, PK-05, PK-07 birebir), kitap ıslak hacim başına. Vitrifiye prefabrikte \"Kural yok\" (aday 1 takım), kitapta dört satır; kitabın taharet musluğu (vitrifiye listedeyse ıslak hacim × 4, Lokman, 10 Ekim) bu yüzden prefabrikte yok."
+   "not": "Takımın adetleri kitaptan. Prefabrik ev başına bir takım yazar (O17; PK-03, PK-05, PK-07 birebir), kitap ıslak hacim başına. Vitrifiye prefabrikte banyo başına bir takım (`vitrifiye_banyo_basina`, Lokman 27 Ekim; ayrı WC ya da lavabo hacmi olan evde \"Kural yok\"), kitapta dört satır; kitabın taharet musluğu (vitrifiye listedeyse ıslak hacim × 4, Lokman, 10 Ekim) prefabrikte ayrı satır değil: prefabrik vitrifiye takımının batarya grubu taharet musluğunu içerir (87 m² yükleme listesi, 14 Ekim: \"BANYO BATARYA GRUBU (LAVABO BATARYASI, BANYO BATARYASI, DUŞ BAŞLIĞI, TAHARET MUSLUĞU)\"; fiyat defterinde vitrifiye satırının kaynak kalemi)."
   },
   {
    "konu": "Kapı boşlukları",
