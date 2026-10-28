@@ -2,7 +2,7 @@
 numara yok, çizim ve liste canlıdaki işlevlerin çıktısıyla aynı, rehber kart modeliyle ve eski rehberle aynı adetler (sağlama).
 
 Rehber 62 m² rehberinin şablonundan (D-28; şablonun 62'yi aynen verdiğini `test_rehber.py` sınar). Sağlama (`veri/saglama.json`):
-AP-19'da (PK-01) 24 Ekim rehberinin paftadan okunmuş parçaları (kart başına) ve oda sırası, TK-01'de İş Emri r05'in rehberi. Pano, H,
+AP-19'da (PK-01) 24 Ekim rehberinin paftadan okunmuş parçaları (kart başına) ve oda sırası, TK-01'de İş Emri r06'nın rehberi. Pano, H,
 köşe direği, makas, kapı ve veranda adetleri veriden (kart modeliyle aynı); bütün kartlar sayfanın izinden (Node, Playwright ve
 three.js 0.160.0 varsa; yoksa o test atlanır). LLM yok, ağ yok; GLB bu testte üretilmez.
 """
@@ -154,14 +154,14 @@ def test_cizim_canlidakiyle_ayni(paketler, tmp_path, kod):
 
 
 def test_liste_canlidakiyle_ayni(paketler):
-    """TK-01'in iki listesi liste üretecinin satırlarıyla aynı (teklif r05'in listeleri: asma 131, ters 129 satır)."""
+    """TK-01'in iki listesi liste üretecinin satırlarıyla aynı (teklif r06'nın listeleri: asma 133, ters 131 satır; komut satırı ve teklifle
+    aynı yol, `is_emrinden`)."""
     from openpyxl import load_workbook
     from motor import prefabrik_liste as PL
     kok, _, _ = paketler
     ie = json.loads((KOK / _model("TK-01")["is_emri"]).read_text(encoding="utf-8"))
-    for s, n in (("asma", 131), ("ters", 129)):
-        j = copy.deepcopy(ie); j["ozellikler"]["Tavan"] = s.capitalize()
-        L = PL.liste(PL.model_motor(j), PL.kurallari_oku())
+    for s, n in (("asma", 133), ("ters", 131)):
+        L = PL.is_emrinden(copy.deepcopy(ie), ozellikler={"Tavan": s.capitalize()})
         ws = load_workbook(kok / "prefabrik" / "TK-01" / f"TK-01_yukleme_listesi_{s}.xlsx").active
         satir = [r[1:5] for r in ws.iter_rows(min_row=3, values_only=True)]
         assert len(satir) == n == len(L["satirlar"])
@@ -200,7 +200,8 @@ def test_saglama(paketler, kod):
 @pytest.mark.parametrize("kod", ["TK-01", "AP-19"])
 def test_kiris_boyu_listeden(paketler, kod):
     """D-28 madde 1: kirişin kartındaki boy ve "Liste" satırı yükleme listesinden; kartların boyları listedeki kiriş satırlarıyla bire bir
-    (TK-01 r05: dış kiriş 376 / 251, yan 171 / 120; AP-19: 324 / 190; çizimde dış kiriş ve AP-19'unkiler açık kenar boyunca)."""
+    (TK-01 r06: dış kiriş 386 / 261 kolonların dış yüzünden dış yüzüne, yan 171 / 120, nişin ağzı 125,5; AP-19: 324 / 190, çizimde açık kenar
+    boyunca)."""
     import re
     from openpyxl import load_workbook
     kok, _, _ = paketler
@@ -218,6 +219,10 @@ def test_kiris_boyu_listeden(paketler, kod):
         assert k["liste"].startswith(f"Kutu profil (kiriş) 100 × 100 {olcu} · "), (k["bu"], k["liste"])
         kart[olcu] += 1
     assert kart and kart == liste
+    if kod == "TK-01":                                    # Patron 28 Ekim (karar kartı A): liste ile çizim aynı boy, kartta fark notu yok
+        assert sorted(k["bu"] for v in d["verandalar"] for k in v["kiris"] if " · dış kiriş · " in k["bu"]) == [
+            "arka veranda · dış kiriş · L 261 cm (kolonların üstünde)", "ön veranda · dış kiriş · L 386 cm (kolonların üstünde)"]
+        assert not any("çizimde" in k["bu"] for v in d["verandalar"] for k in v["kiris"])
 
 
 @pytest.mark.skipif(iz.hazir() is not None, reason=f"rehber izi: {iz.hazir()}")
