@@ -8,7 +8,7 @@
   uyarı yazar).
 - Kırma çaprazı uç şeridinde: saçak köşesinden ilk ana makasa. Çapraz dışındaki makaslar anahtarsız kuralla aynı.
 - Anahtarı olmayan kural kopyası (bugünkü listelerin `setler/8a051c8ff1a5d968.json`'u) ara panel kurmaz, çaprazı eskisi gibi tepeye uzatır.
-- Liste ayrı satır yazar ("Ara paneller (kırma yüzü)", hakemde makas türü); makas paftası çizer.
+- Liste ayrı satır yazar ("Ara paneller (kırma ucu)", hakemde makas türü); makas paftası çizer.
 """
 from __future__ import annotations
 
@@ -66,7 +66,8 @@ def test_ara_panel_sayilari(kod):
 @pytest.mark.parametrize("kod", sorted(SAYILAR))
 def test_parcalar_duzlemin_icinde_ve_binmez(kod):
     """Her parça kendi düzleminin içinde, iki parça birbirine binmez; kırma yüzünün parçaları (kırma yüzü ve uç şeridi) yüzün alanını
-    örter, eksik kalan yalnız panel olmayan küçük parça (uyarısı yazılı: ÇP-19'un kuzey ucunda 69 cm²)."""
+    örter, eksik kalan yalnız panel olmayan küçük parça (uyarısı yazılı: ÇP-19'un kuzey ucunda planda 69, açılımda 73 cm²); uyarısız
+    düzlemde açık 1 cm²'den (kesişimin attığı kırıntı) küçük."""
     t, c, y = _yukle(kod)
     r = makas.kur(t, y, KURAL, YONTEM.get(kod))
     adli = {d["ad"]: d for d in c["duzlemler"]}
@@ -78,9 +79,9 @@ def test_parcalar_duzlemin_icinde_ve_binmez(kod):
     kucuk = [u for u in r["uyarilar"] if u.startswith("ara panel:")]
     for H in {x["duzlem"] for x, _ in ps if x["bolge"] != "kose"}:
         eksik = adli[H]["cokgen"].area - sum(p.area for x, p in ps if x["duzlem"] == H)
-        assert -0.5 < eksik < 100.0 * (1 + sum(f" {H} düzleminde " in u for u in kucuk)), (H, eksik)
+        assert -0.5 < eksik < 1.0 + 100.0 * sum(f" {H} düzleminde " in u for u in kucuk), (H, eksik)
     if kod == "CP19":
-        assert kucuk == ["ara panel: batı/doğu ailesinin kuzey düzleminde 69 cm² parça, kısa kenarı 8.8 cm (makas kalınlığı 8 cm, en küçük "
+        assert kucuk == ["ara panel: batı/doğu ailesinin kuzey düzleminde 73 cm² parça, kısa kenarı 8.8 cm (makas kalınlığı 8 cm, en küçük "
                          "parça 100 cm²): panel yok"]
     else:
         assert kucuk == []
@@ -114,6 +115,24 @@ def test_kirma_ucunda_ana_makas_yoksa_uyari(monkeypatch):
         f"ara panel: batı/doğu ailesinin {H} kırma yüzünün altından ana makas geçmiyor; o uçta ara panel yok" for H in ("güney", "kuzey")]
 
 
+def test_capraz_ilk_ana_makasi_kesmezse_uyari(monkeypatch):
+    """Şerit bulunduğu hâlde kırma çizgisi şeridin sınırını (ilk ana makas) kesmiyorsa çapraz kırpılmaz, kaydı anahtarsız kuralla aynı
+    kalır ve uyarı yazar (sessiz düşme yok)."""
+    gercek = makas.kirma_seritleri
+
+    def uzak(*a):
+        s = gercek(*a)
+        for v in s.values():
+            v["serit"] = (1e6, 1e6 + 1)
+        return s
+    monkeypatch.setattr(makas, "kirma_seritleri", uzak)
+    t, _, y = _yukle("CP19")
+    yeni, eski = makas.kur(t, y, KURAL), makas.kur(t, y, ONCEKI)
+    cy, ce = ([x for x in m["makaslar"] if x["tur"] == "capraz"] for m in (yeni, eski))
+    assert cy == ce and cy
+    assert len([u for u in yeni["uyarilar"] if "çapraz kırpılmadı" in u]) == len(cy)
+
+
 def _girdi(kod: str) -> dict:
     kur = kurallar_oku.oku()
     t, _, y = _yukle(kod)
@@ -132,9 +151,9 @@ def test_liste_satiri_ve_hakem_turu(monkeypatch):
     ap = kk["cati"]["ara_panelleri"]
     assert g["ara_paneli"]["adet"] == len(ap) == 21 and g["ara_paneli"]["profil"] == "80x45x0,8"
     assert round(g["ara_paneli"]["profil_boyu_m"], 3) == round(sum(x["profil_boyu_m"] for x in ap), 3)
-    es = [x for x in _girdi("CP19")["celik"]["ek_satirlar"] if x["ad"] == "Ara paneller (kırma yüzü)"]
+    es = [x for x in _girdi("CP19")["celik"]["ek_satirlar"] if x["ad"] == "Ara paneller (kırma ucu)"]
     assert [(x["panel_adedi"], x["profil"]) for x in es] == [(21, "80x45x0,8")] and "karkas kuralından" in es[0]["not"]
-    assert liste_yap.celik_turu("Ara paneller (kırma yüzü)") == "makas"
+    assert liste_yap.celik_turu("Ara paneller (kırma ucu)") == "makas"
     monkeypatch.setenv("PORTMAN_KARKAS", str(PROJELER / "setler" / "8a051c8ff1a5d968.json"))
     assert not [x for x in _girdi("CP19")["celik"].get("ek_satirlar", []) if x["ad"].startswith("Ara panel")]
     assert "ara_paneli" not in karkas.gruplar(karkas.kur(y, t, ONCEKI), y, t, ONCEKI, kur["celik"]["profil_kg_m"]["deger"])

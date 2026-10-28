@@ -516,6 +516,7 @@ def makaslar(t: dict, c: dict, y: dict, k: dict) -> dict:
         if z0 > z1:
             z0, z1, p_, q_ = z1, z0, q_, p_
         sr = next((v for (fa, H), v in seritler.items() if H in (a_, b_) and ({a_, b_} - {H}) <= set(v["duzlemler"])), None)
+        kirpildi = False
         if sr:
             ie = _i(sr["ee"])
             kes = sr["serit"][1] if sr["i"] == 0 else sr["serit"][0]   # şeridin saçağa uzak sınırı: ilk ana makas
@@ -523,11 +524,14 @@ def makaslar(t: dict, c: dict, y: dict, k: dict) -> dict:
                 t_ = (kes - p_[ie]) / (q_[ie] - p_[ie])
                 L, z1 = L * t_, z0 + (z1 - z0) * t_
                 q_ = (p_[0] + (q_[0] - p_[0]) * t_, p_[1] + (q_[1] - p_[1]) * t_)
+                kirpildi = True
+            else:
+                uyari.append(f"makas: {a_}/{b_} kırma çizgisi uç şeridinin sınırını ({kes:.1f}) kesmiyor: çapraz kırpılmadı, tepeye uzanır")
         n = max(2, int(math.ceil(L / ADIM)) + 1)
         ss = [L * j / (n - 1) for j in range(n)]
         zz = [z0 + (z1 - z0) * s / L for s in ss]
         u = uyeler(ss, zz, duvar_ustu, panel)
-        uc = [p_, q_] if sr else [e["p"], e["q"]]                    # anahtarı olmayan kural kopyasında kayıt aynı
+        uc = [p_, q_] if kirpildi else [e["p"], e["q"]]              # kırpılmayan çaprazın kaydı anahtarsız kuralla aynı
         out.append({"tur": "capraz", "aile": "/".join(e["duzlemler"]), "eksen": None, "konum": None,
                     "s": [[round(v, 2) for v in uc[0]], [round(v, 2) for v in uc[1]]], "acik_cm": round(L, 2),
                     "h_en_cok_cm": round(z1 - duvar_ustu, 2), "uyeler_m": {ad: round(v, 4) for ad, v in u.items()},
@@ -705,8 +709,8 @@ def ara_panelleri(c: dict, k: dict, mk: dict, uyari: list[str]) -> list[dict]:
         dz = adli[ad_dz]
         ac = Polygon([dz["yuz"](p) for p in g.exterior.coords])
         en = min(ac.bounds[2] - ac.bounds[0], ac.bounds[3] - ac.bounds[1])
-        if g.area < 100.0 or en <= kal + EPS:
-            uyari.append(f"ara panel: {ad_aile} ailesinin {ad_dz} düzleminde {g.area:.0f} cm² parça, kısa kenarı {en:.1f} cm "
+        if ac.area < 100.0 or en <= kal + EPS:
+            uyari.append(f"ara panel: {ad_aile} ailesinin {ad_dz} düzleminde {ac.area:.0f} cm² parça, kısa kenarı {en:.1f} cm "
                          f"(makas kalınlığı {kal:g} cm, en küçük parça 100 cm²): panel yok")
             return
         u = izgara_uyeleri(ac, ap["profil_araligi_cm"])

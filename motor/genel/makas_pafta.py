@@ -114,6 +114,7 @@ def plan(ax, y: dict, c: dict, ms: list[dict], cps: list[dict], kk: dict, aps: l
     konan: list[tuple[float, float]] = []
     for x in aps:                                             # ara panelin adı makasın adından önce yerleşir
         r = SPolygon(x["plan"]).representative_point()
+        konan.append((r.x, r.y))
         ax.text(r.x, r.y, x["ad"], ha="center", va="center", fontsize=5.0, color="#2f5f28", zorder=8.5,
                 bbox=dict(fc="white", ec="none", pad=0.3, alpha=0.8))
     for x in ms:
