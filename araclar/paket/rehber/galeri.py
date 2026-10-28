@@ -24,6 +24,12 @@ class Yok(Exception):
     """Galeri yazılamadı; `str(e)` nedendir."""
 
 
+def _yolsuz(t: str) -> str:
+    """`bilgi.md`'ye giden hata metninde ev klasörü (kullanıcı adını taşır) `~` olur."""
+    ev = str(Path.home())
+    return t.replace(ev, "~") if ev not in ("", "/") else t
+
+
 def sahne(d: dict) -> dict:
     """`render.py`'nin sahnesi rehberin verisinden: çatısız görünüşte gizlenen adımlar (çatıyı kuran adımlar: duvar ve baş makas
     omegasından alın sacına; 62 m²'de 8–19, Lokman'ın sırası). Ölçüler ve temel plak GLB'den."""
@@ -133,10 +139,10 @@ def uret(glb: Path, d: dict, gec: Path, ornek: int = 64, olcek: float = 1.0, zam
     except subprocess.TimeoutExpired:
         raise Yok(f"Blender {zaman} sn'de bitmedi") from None
     except OSError as e:                                     # BLENDER_PY yanlış yolu gösteriyor ya da çalıştırılamıyor
-        raise Yok(f"BLENDER_PY çalıştırılamadı ({type(e).__name__}: {e})") from None
+        raise Yok(f"BLENDER_PY çalıştırılamadı ({type(e).__name__}: {_yolsuz(str(e))})") from None
     eksik = [a for a in GORUNUMLER if not (k / f"{a}.png").exists()]
     if r.returncode != 0 or eksik:
-        raise Yok(f"Blender hata verdi ({r.returncode}; eksik {', '.join(eksik) or '—'}): {(r.stderr or r.stdout).strip()[-200:]}")
+        raise Yok(f"Blender hata verdi ({r.returncode}; eksik {', '.join(eksik) or '—'}): {_yolsuz((r.stderr or r.stdout).strip()[-200:])}")
     basl = basliklar(d)
     res = {a: Image.open(k / f"{a}.png").convert("RGB") for a in GORUNUMLER}
     yer = k / "cati_katman.json"

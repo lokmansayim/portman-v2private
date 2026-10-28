@@ -46,6 +46,10 @@ def test_blender_yoksa_galeri_yok(tmp_path, monkeypatch):
     monkeypatch.setenv("BLENDER_PY", str(tmp_path / "yok" / "python"))
     with pytest.raises(galeri.Yok, match="çalıştırılamadı"):
         galeri.uret(tmp_path / "x.glb", R62, tmp_path)
+    monkeypatch.setattr(galeri.Path, "home", classmethod(lambda c: tmp_path))      # ev klasörü (kullanıcı adı) nedene girmez
+    with pytest.raises(galeri.Yok) as e:
+        galeri.uret(tmp_path / "x.glb", R62, tmp_path)
+    assert str(tmp_path) not in str(e.value) and "~/yok/python" in str(e.value)
 
 
 def test_sayfa_galerisiz_ayni_galerili_gomulu():
