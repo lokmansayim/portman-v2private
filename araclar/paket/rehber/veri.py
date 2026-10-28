@@ -447,20 +447,21 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
     def icinde_kutu(r, k):
         return r[0] >= k[0] - 0.5 and r[2] <= k[2] + 0.5 and r[1] >= k[1] - 0.5 and r[3] <= k[3] + 0.5
 
-    # Kirişin kesim boyu listeden (D-28 madde 1: aynı parçanın boyunu iki kod ayrı üretmez). Liste üreteci veranda kirişini "açık kenar dış ölçüsü
-    # − 10" (kural kitabı `veranda_kirisi_eksik_cm`, PK-01'de tuttu), nişin kirişini aks arası sayar; kart o satırı okur. Kirişin kolona nasıl
-    # oturduğu kitapta yok: çizim Motor'un planındaki boyda (açık kenar boyunca) kalır, kart farkı yazar.
+    # Kirişin kesim boyu listeden (D-28 madde 1: aynı parçanın boyunu iki kod ayrı üretmez): kart listede çizimdeki boyun satırını, yoksa kural
+    # kitabının "açık kenar dış ölçüsü − 10" satırını (`veranda_kirisi_eksik_cm`, PK-01'de tuttu) okur; nişin kirişi aks arası. Patron 28 Ekim
+    # (karar kartı A): taşan verandanın dış kirişi kolonların dış yüzünden dış yüzüne (TK-01 386, 261), çizim böyle; liste bunu yazana kadar kart
+    # listedeki boyu ve çizimle farkını gösterir.
     EKSIK = _pr(kurallari_oku()["prefabrik"], "veranda_kirisi_eksik_cm")
 
     def kiris_boyu(acik, cizim):
-        """(kartta yazan boy, Liste satırı, ek not). `acik`: açık kenarın dış ölçüsü (None: nişin kirişi, aks arası); `cizim`: çizimdeki boy (cm)."""
-        L_ = cizim if acik is None else acik - EKSIK
-        olcu = f"L {round(L_ * 10)}"
-        if not satirlar("Kutu profil (kiriş)", olcu):
-            return cizim, f"listede kiriş {olcu} satırı yok", ""
-        fark = "" if abs(L_ - cizim) < 0.6 else (f"; kesim boyu listeden (açık kenar dış ölçüsü − {fmtc(EKSIK)} cm, kural kitabı); kolona nasıl oturduğu "
-                                                  f"kitapta yok, çizimde açık kenar boyunca ({fmtc(cizim)} cm)")
-        return L_, ls("Kutu profil (kiriş)", olcu), fark
+        """(kartta yazan boy, Liste satırı, ek not). `acik`: açık kenarın dış ölçüsü (None: nişin kirişi, aks arası); `cizim`: çizimdeki boy (cm).
+        Önce çizimdeki boyun satırı, yoksa açık kenar − kitabın eksiği."""
+        for L_ in [cizim] + ([] if acik is None else [acik - EKSIK]):
+            olcu = f"L {round(L_ * 10)}"
+            if satirlar("Kutu profil (kiriş)", olcu):
+                fark = "" if abs(L_ - cizim) < 0.6 else f"; boy listeden (kural kitabı: açık kenar dış ölçüsü − {fmtc(EKSIK)} cm), çizimde {fmtc(cizim)} cm"
+                return L_, ls("Kutu profil (kiriş)", olcu), fark
+        return cizim, f"listede kiriş L {round(cizim * 10)} satırı yok", ""
 
     verandalar, VR, GVK = [], [], None          # VR: çatı ve yerleşim için taşan veranda kaydı; GVK: gömme veranda
     for vi, v in enumerate(VER):
