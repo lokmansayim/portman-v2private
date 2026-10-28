@@ -10,10 +10,18 @@ const fs = require('fs');
   const T = process.env.THREE_DIR;
   await p.route('https://cdn.jsdelivr.net/npm/three@0.160.0/**', r => r.fulfill({ path: T + '/' + r.request().url().replace('https://cdn.jsdelivr.net/npm/three@0.160.0/', ''), contentType: 'application/javascript' }));
   await p.route('https://fonts.googleapis.com/**', r => r.fulfill({ body: '', contentType: 'text/css' }));
-  const hatalar = [];
+  const hatalar = [], kayit = [];
   p.on('pageerror', e => hatalar.push(String(e)));
-  await p.goto('file://' + html);
-  await p.waitForFunction(() => window.__montaj, null, { timeout: 60000 });
+  // Sayfa açılamazsa nedeni görünsün (CI'da "Page crashed"): çökme ve konsoldaki hata ve uyarılar stderr'e, iz.py hatayla birlikte gösterir
+  p.on('crash', () => kayit.push('sayfa çöktü'));
+  p.on('console', m => { if (m.type() === 'error' || m.type() === 'warning') kayit.push(`konsol ${m.type()}: ${m.text()}`); });
+  try {
+    await p.goto('file://' + html);
+    await p.waitForFunction(() => window.__montaj, null, { timeout: 60000 });
+  } catch (e) {
+    console.error(kayit.concat(hatalar).join('\n'));
+    throw e;
+  }
   const iz = await p.evaluate(() => {
     const M = window.__montaj, THREE = M.THREE, $ = id => document.getElementById(id);
     M.goTo(0, false);

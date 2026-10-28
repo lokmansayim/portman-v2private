@@ -30,9 +30,12 @@ def hazir() -> str | None:
 
 
 def al(html: Path, cikti: Path) -> dict:
-    r = subprocess.run(["node", str(JS), str(Path(html).resolve()), str(Path(cikti).resolve())], capture_output=True, text=True, timeout=600)
+    # DEBUG=pw:browser: tarayıcının kendi stderr'i (çökme satırı) node'un stderr'ine düşer; iz alınamazsa hatayla gösterilir
+    r = subprocess.run(["node", str(JS), str(Path(html).resolve()), str(Path(cikti).resolve())], capture_output=True, text=True, timeout=600,
+                       env={**os.environ, "DEBUG": os.environ.get("DEBUG") or "pw:browser"})
     if r.returncode:
-        raise RuntimeError(r.stderr[-2000:])
+        tarayici = [s for s in r.stderr.splitlines() if ("[err]" in s or "[out]" in s) and "dbus" not in s]
+        raise RuntimeError("\n".join(tarayici[-80:]) + "\n" + r.stderr[-2500:])
     return json.loads(Path(cikti).read_text(encoding="utf-8"))
 
 
