@@ -57,7 +57,7 @@ Bugün bu dört maddeyi karşılamayan yerler `KARARLAR/D-28.md` › "Bugünkü 
 | `KARARLAR/` | K01–K25, Z-01–Z-10, D-01…; açık kararlar `KARARLAR/README.md`'de. Kökteki `KARARLAR.md` dondurulmuş günlüktür |
 | `testler/` | Referans (dondurulmuş), kalıcı akış (Postgres) ve bilinen hata testleri |
 | `deneme/` | Tarihli denemeler; canlıda değil |
-| `araclar/` | Yerel ortam kurulumu (`ortam_kur.sh`); aday araçları (İE-04/İE-08): `aday_kaydet.py` (prefabrik İş Emri ya da `--motor genel` Yapı Tanımı → `beyin/veri/adaylar.json` + `is_emri/adaylar/<kod>.png`), `kabul_paketi.py` (kabul edene yedi modelin paftası, çizim seti, listesi, kısa parça notları; D-11'den beri DXF ve Excel liste), `aday_kabul.py` (K-A10 kabul kaydı; sunucuda `vps/ie08_adaylar.sh`) |
+| `araclar/` | Yerel ortam kurulumu (`ortam_kur.sh`); aday araçları (İE-04/İE-08): `aday_kaydet.py` (prefabrik İş Emri ya da `--motor genel` Yapı Tanımı → `beyin/veri/adaylar.json` + `is_emri/adaylar/<kod>.png`), `kabul_paketi.py` (kabul edene yedi modelin paftası, çizim seti, listesi, kısa parça notları; D-11'den beri DXF ve Excel liste), `aday_kabul.py` (K-A10 kabul kaydı; sunucuda `vps/ie08_adaylar.sh`); `paket/` (İE-18: `python -m araclar.paket <KOD|hepsi> <çıktı>`, her modelin paketi PF `Modeller/` düzeninde: canlı çizim, liste, kimlik kartlı model, montaj paftası, montaj rehberi, kıyas, `bilgi.md`, `ozet.xlsx`; kayıt `paket/modeller.json`) |
 | `hosting/` | Hosting'teki canlı dosyaların kayıt kopyası; pakete girmez |
 | `.claude/` | Ajan ayarları: `rules/` (alan kuralları), `skills/` (komutlar), `agents/` (hakemler), `hooks/` (frenler), `settings.json` (izinler) |
 
