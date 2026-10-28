@@ -427,7 +427,7 @@ def test_mahya_gorunmuyorsa_makas_izgaraya_oturan_yon_varsayim_bayiye():
     çıkmaz (makas eşiği dönse de)."""
     d = mahyasiz(898, 763)                     # ilk yön y (8,98 > 7,63 + 0,50): x ızgarası 5 cm'den, 8,98 oturmaz; x yönünde çizilir
     assert d["sorular"] == [] and d["cevrim"]["is_emri"]["yapi"]["kisa_kenar"] == "x"
-    assert d["notlar"] == ["mahya yönü görünmüyordu, girişten arkaya aldım (ölçüler pano ızgarasına bu yönde oturuyor)"]
+    assert d["notlar"] == ["mahya yönü görünmüyordu, girişten arkaya aldım (gövde ölçüleri pano ızgarasına bu yönde oturuyor)"]
     d = mahyasiz(900, 763)                     # iki yönde de 9,00 m oturmaz
     assert d["cevrim"] is None and any("ön cephesi 9,00 m" in s and "8,88 m ve 9,51 m" in s for s in d["sorular"]), d["sorular"]
     assert "mahya yönü görünmüyordu, girişe paralel aldım" in d["notlar"]
@@ -443,10 +443,12 @@ def test_mahya_gorunmuyorsa_makas_izgaraya_oturan_yon_varsayim_bayiye():
     o = iki_oda(898, 763, 386.5); o["cati"]["mahya"] = None; o["duvar_yuksekligi_cm"] = 260
     d = GO.denetle(o)
     assert d["sorular"] == ["Duvar yüksekliğini 2,60 m okudum; prefabrikte 2,50 / 2,80 / 3,00 m var, hangisi olsun?"], d["sorular"]
-    assert d["notlar"] == ["mahya yönü görünmüyordu, girişten arkaya aldım (ölçüler pano ızgarasına bu yönde oturuyor)"]
+    assert d["notlar"] == ["mahya yönü görünmüyordu, girişten arkaya aldım (gövde ölçüleri pano ızgarasına bu yönde oturuyor)"]
     o = iki_oda(898, 763, 386.5); o["cati"] = {"tip": "kirma", "mahya": None}
     d = GO.denetle(o)
     assert d["sorular"] == [] and d["cizilemez"] == ["kırma çatı (prefabrikte bugün beşik çiziyorum)"], (d["sorular"], d["cizilemez"])
+    o = iki_oda(205, 700, 72.75); o["cati"]["mahya"] = None; o["duvar_yuksekligi_cm"] = 260     # x yönünde ızgara "çok küçük"
+    assert GO.denetle(o)["sorular"] == ["Duvar yüksekliğini 2,60 m okudum; prefabrikte 2,50 / 2,80 / 3,00 m var, hangisi olsun?"]
 
 
 def test_dis_duvara_cok_yakin_sinir_sorulur():

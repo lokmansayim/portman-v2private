@@ -530,7 +530,7 @@ def bk14_var() -> bool:
 
 def _mahya_notu(makas: str, oturan: bool = False) -> str:
     return ("mahya yönü görünmüyordu, " + ("girişten arkaya" if makas == "x" else "girişe paralel") + " aldım"
-            + (" (ölçüler pano ızgarasına bu yönde oturuyor)" if oturan else ""))
+            + (" (gövde ölçüleri pano ızgarasına bu yönde oturuyor)" if oturan else ""))
 
 
 def pano_akslari(uzunluk: float, bas: float) -> tuple[float, list[float]]:
@@ -576,7 +576,7 @@ def is_emri_prefabrik(kan: dict, o: CizimOkumasi, bk14: bool | None = None, esik
             sonuclar[m] = is_emri_prefabrik(kan, o, bk14, esik, makas=m)
             if sonuclar[m][0] is not None:
                 return sonuclar[m]
-        sec = next((m for m in sonuclar if not _izgara(W, H, m)[4]), ilk)
+        sec = next((m for m in sonuclar if (g := _izgara(W, H, m))[0] >= 2 and g[2] >= 2 and not g[4]), ilk)
         sonuc = sonuclar[sec]
         if not any(n.startswith("mahya yönü") for n in sonuc[3]):
             sonuc[3].append(_mahya_notu(sec, oturan=sec != ilk))
