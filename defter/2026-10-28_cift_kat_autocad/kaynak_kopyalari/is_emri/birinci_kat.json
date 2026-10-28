@@ -1,0 +1,276 @@
+{
+  "is_emri_no": "IE22-CK01-KAT1",
+  "revizyon": 1,
+  "talep": {
+    "bayi": {
+      "kod": "CK01",
+      "ad": "Bayi CK-01"
+    },
+    "musteri_adi": "CK-01 birinci kat",
+    "metin": "İE-22 çift kat prefabrik, 1. KAT taslağı (28 Ekim 2026). Zemin katla aynı gövde (763 × 706), aynı ızgara, aynı merdiven çıkması ve balkon; yalnız iç bölmeler ve açıklıklar farklı. Konumlar cm, aks; x sol dış yüzden; dizilim arka-sol olduğundan mahallerin y'si arka dış yüzden. Bu taslak yalnız GÖVDEYİ çizer (çıkma ve balkon taşması İE-22 PR-1)."
+  },
+  "yapi": {
+    "sistem": "prefabrik",
+    "kat_sayisi": 1,
+    "duvar_yuksekligi_cm": 250,
+    "duvar_kalinligi_cm": {
+      "dis": 10,
+      "ic": 6
+    },
+    "olcu_kaynagi": "dis_olcu",
+    "dis_olcu_cm": {
+      "x": 763,
+      "y": 706
+    },
+    "referans_model": "CK-01",
+    "grid": {
+      "x_pano": 6,
+      "y_pano": 5.5
+    },
+    "kisa_kenar": "y",
+    "giris_cephesi": "on",
+    "dis_dusey_duvar": "cevre_aks_disinda",
+    "dizilim": {
+      "baslangic": "arka-sol",
+      "hiza": "tam_izgara",
+      "dis_duvar_t_bolme": false,
+      "pencere": "oda_ortasi",
+      "kapi": "mantik",
+      "kose": "oda",
+      "son_pano": "son_aks",
+      "kapi_yeri": "ortada"
+    },
+    "ek_akslar_cm": {
+      "x": [],
+      "y": []
+    }
+  },
+  "mahaller": [
+    {
+      "ad": "ODA 1",
+      "tur": "yatak_odasi",
+      "konum_cm": [
+        [
+          5,
+          10,
+          318.75,
+          261
+        ]
+      ]
+    },
+    {
+      "ad": "ODA 2",
+      "tur": "yatak_odasi",
+      "konum_cm": [
+        [
+          5,
+          261,
+          318.75,
+          696
+        ],
+        [
+          318.75,
+          574.75,
+          444.25,
+          696
+        ]
+      ]
+    },
+    {
+      "ad": "MERDİVEN",
+      "tur": "hol",
+      "konum_cm": [
+        [
+          318.75,
+          10,
+          569.75,
+          135.5
+        ]
+      ]
+    },
+    {
+      "ad": "HOL",
+      "tur": "hol",
+      "konum_cm": [
+        [
+          318.75,
+          135.5,
+          569.75,
+          386.5
+        ]
+      ]
+    },
+    {
+      "ad": "BANYO",
+      "tur": "banyo",
+      "konum_cm": [
+        [
+          569.75,
+          10,
+          758,
+          323.75
+        ]
+      ]
+    },
+    {
+      "ad": "ODA 3",
+      "tur": "yatak_odasi",
+      "konum_cm": [
+        [
+          569.75,
+          323.75,
+          758,
+          574.75
+        ],
+        [
+          318.75,
+          386.5,
+          569.75,
+          574.75
+        ]
+      ]
+    },
+    {
+      "ad": "BALKON",
+      "tur": "balkon",
+      "konum_cm": [
+        [
+          444.25,
+          574.75,
+          758,
+          696
+        ]
+      ]
+    }
+  ],
+  "acik_sinirlar": [
+    [
+      "MERDİVEN",
+      "HOL"
+    ]
+  ],
+  "acikliklar": [
+    {
+      "tur": "pencere",
+      "olcu": "120x125",
+      "mahal": "ODA 1",
+      "duvar": "sol"
+    },
+    {
+      "tur": "pencere",
+      "olcu": "120x125",
+      "mahal": "ODA 2",
+      "duvar": "sol"
+    },
+    {
+      "tur": "pencere",
+      "olcu": "120x180",
+      "mahal": "ODA 2",
+      "duvar": "on"
+    },
+    {
+      "tur": "pencere",
+      "olcu": "120x180",
+      "mahal": "ODA 3",
+      "duvar": "on",
+      "pano": 0
+    },
+    {
+      "tur": "pencere",
+      "olcu": "120x125",
+      "mahal": "MERDİVEN",
+      "duvar": "arka"
+    },
+    {
+      "tur": "pencere",
+      "olcu": "60x40",
+      "mahal": "BANYO",
+      "duvar": "arka"
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "HOL",
+        "ODA 1"
+      ],
+      "pano": 0
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "HOL",
+        "ODA 2"
+      ],
+      "pano": 0
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "HOL",
+        "ODA 3"
+      ],
+      "pano": 0
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "HOL",
+        "BANYO"
+      ],
+      "pano": 0
+    },
+    {
+      "tur": "dis_kapi",
+      "olcu": 90,
+      "arasi": [
+        "ODA 2",
+        "BALKON"
+      ],
+      "pano": 0
+    }
+  ],
+  "dikmeler": [
+    [
+      753,
+      0
+    ]
+  ],
+  "cati": {
+    "tip": "besik",
+    "egim_yuzde": 33,
+    "sacak_cm": 30,
+    "topuk_cm": 10,
+    "makas_yonu": "kisa_kenar",
+    "makas_ekseni": "y"
+  },
+  "cikti": {
+    "pdf": true,
+    "dxf": true,
+    "pafta": "A2",
+    "icerik": [
+      "aksli_plan",
+      "alanli_kopya",
+      "montaj_kopyasi",
+      "on_gorunus",
+      "cati_profili",
+      "ozellik_tablosu"
+    ]
+  },
+  "varsayimlar": [
+    "Izgara ve dış ölçü zemin katla aynı (763 × 706; x 6 pano, y 5,5 pano ölçüye kesim).",
+    "Plandaki duvarlar en yakın yarım pano aksına: ODA 1/ODA 2 duvarı 242 → 261; merdiven kutusu zemin katla aynı (318,75–569,75); banyo sol duvarı 552 → 569,75 ve alt duvarı 306 → 323,75; holün alt duvarı (ODA 3 girintisi) 359 → 386,5; ODA 2'nin ön uzantısı ile balkon duvarı 421 → 444,25; ODA 3 ön duvarı 566 → 574,75. ODA 3 plandaki gibi L biçimli (holün altındaki girinti dahil).",
+    "Merdiven çıkması bu taslakta YOK (Motor çıkma çizmiyor); merdivenin arka penceresi (120/125) çıkmanın arka duvarı yerine gövdenin arka duvarında gösterildi.",
+    "Balkon gövdenin içinde açık mahal; ODA 2'den balkona kapı (dış kapı 90, balkonun sol duvarında, plandaki gibi); ODA 3'ten balkona Fransız pencere (120x180). 30 cm'lik taşma yok.",
+    "Fransız pencere 120/200 → 120x180 (Motor sınırı); 120/125 → 120x125; 60/40 → 60x40.",
+    "Çatı zemin katla aynı tanım: beşik %33, saçak 30, topuk 10, makas y'yi geçer (tek kat gibi; Lokman 28.10: fark yalnız merdiven, döşeme ve çatı aynı)."
+  ],
+  "eksikler": [
+    "Merdiven çıkması ve merdivenin üst kat sahanlığı.",
+    "Balkonun taşması, döşemesi, korkuluğu ve alt kattaki balkonla ilişkisi (dikme/konsol).",
+    "Ara kat (zemin tavanı / 1. kat döşemesi) sistemi ve yüksekliği."
+  ]
+}

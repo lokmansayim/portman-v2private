@@ -1,0 +1,141 @@
+# Çift kat prefabrik · kural çıktısı (İE-22, 28 Ekim 2026)
+
+Lokman'ın isteği (28 Ekim 2026): "çift kat prefabrik için kurala aldığın her şeyi en sonunda bana çıktı olarak ver." Bu belge o çıktıdır:
+bugün iki katlı prefabrik için **kurala alınan her madde**, kaynağı ve durumu ile. Kaynaklar: Lokman'ın 28 Ekim sözleri; prefabrik çizim
+kuralları v1.4.3 (`ref_prefabrik/astra_v1_4_3/prefabrik-cizim-kurallari.md`, K02); tek kat prefabrik Motor'unun bugünkü kuralları
+(`.claude/rules/motor-cizim.md`: İE-11, İE-12, İE-17, D-12, D-14, D-15, BK-13, BK-14); Astra'nın çift kat R02 kaydı
+(`ref_prefabrik/cift_kat_R02/`; **veri**, kural değil, D-12); pilot kapsamı D-26. Ev: Lokman'ın 28 Ekim'de gönderdiği iki kat planı (zemin ve 1. kat).
+
+**Durum sözlüğü.** `Lokman` = Lokman'ın açık sözü, kesin. `Tek kat` = tek kat prefabrik kuralı, çift kata aynen (Lokman 28.10: "çift kat ile tek kat
+arasındaki fark merdiven; geriye kalan, döşeme, çatı birebir aynı"). `R02` = Astra'nın 12 Eylül çift kat kaydından alınan değer; teyit bekler.
+`Kabul` = bu taslak için çalışma kabulü; Lokman değiştirebilir. `Soru` = kural yok, uydurulmadı (K21); Lokman'ın cevabıyla kurala girer.
+
+## 1. Kat ilkesi
+
+| # | Kural | Durum |
+|---|---|---|
+| 1.1 | İki katlı prefabrik, tek katlı prefabrikin kurallarıyla çizilir. **Tek fark merdivendir.** Döşeme ve çatı tek katla birebir aynıdır. | Lokman, 28.10 |
+| 1.2 | Her katın planı ayrı bir kat planıdır (zemin kat, 1. kat); iki kat aynı gövdeyi, aynı pano ızgarasını, aynı dış köşeleri ve aynı merdiven kutusunu paylaşır; iç bölmeler ve açıklıklar katta farklı olabilir. | Kabul (plandan: iki katın dış ölçüleri, merdiven kutusu ve balkonu aynı yerde) |
+| 1.3 | Çift kat canlıya pilottan sonra gider; pilot tek katlı prefabrik ve tek katlı çeliktir. Yerelde geliştirme ve çizim serbesttir. | D-26 (25.10) |
+| 1.4 | Beyin bugün 2 katlı planı "çizilemez" diye işaretler (`beyin/gorsel_okuma.py`); Motor `kat_sayisi ≠ 1` İş Emri'ni açık hatayla reddeder. Çift kat İE-22 ile açılır; o güne kadar bayiye otomatik çizilmez. | Bugünkü kod |
+
+## 2. Gövde ve pano ızgarası (tek kattan aynen)
+
+| # | Kural | Durum |
+|---|---|---|
+| 2.1 | Model birimi cm, gerçek boyut; tam pano ve aks aralığı **125,5 cm**; isteğe bağlı iç duvar adımı yarım pano **62,75**. | Tek kat (v1.4.3) |
+| 2.2 | Dış duvar **100 mm**, iç duvar **60 mm** (160/100 yalnız müşteri seçeneği). | Tek kat (D-12) |
+| 2.3 | Pano yüksekliği yalnız **250 / 280 / 300**; her katta aynı kural. Bu evde 250. | Tek kat (D-14) · Kabul (250) |
+| 2.4 | Makasın oturduğu iki duvar köşeden geçer (o yönde dış ölçü = pano × 125,5 + 10, akslar duvar ekseninden 5 + 125,5k); kalkan duvarları araya girer (dış ölçü = pano × 125,5 + 20, akslar iç yüzden 10 + 125,5k). İş Emri'nde `yapi.kisa_kenar`. | Tek kat (İE-17, on montaj paftası) |
+| 2.5 | Bu evde makas derinliği (y, 706) geçer: x = 6 tam pano (763 = 6 × 125,5 + 10 — planın dış eni pano düzenine tam oturuyor), y ölçüye kesim (706 = 5,5 pano ızgarası, kesilmiş son pano önde 121,25). | Kabul (plandan) |
+| 2.6 | Dış ölçü verildiyse yapı o ölçüde kesilir, tam panoya yuvarlanmaz; kesilen özel pano dizilimin son ucunda. Dizilim arkadan ve soldan (`arka-sol`): kesilmiş pano önde ve sağda. | Tek kat (6.10 kuralı, İE-11) · Kabul (arka-sol; arka duvar tam panolu, ön cephe kesimli) |
+| 2.7 | Pano ekleri yalnız tam akslarda, iç duvar T'de bölünmez (`hiza: tam_izgara`); kesilmiş son pano ızgaranın sondan bir önceki aksından başlar (`son_pano: son_aks`). | Tek kat (İE-17, AP paftaları) |
+| 2.8 | İki katta da ızgara aynıdır: üst katın panoları zemin katın pano eklerinin tam üstüne gelir (düşey yükler ve köşe profili için). | Kabul (R02'de de böyle: "iki kat aynı plan, aynı aks ızgarası") · Lokman'ın teyidi gerekir |
+| 2.9 | Her pano ekinde H profili (dışarıdan 5 cm, eke ortalı); gerçek iç köşede 30×60 köşe parçası; T birleşiminde üçlü H; dört kollu (+) birleşim kural kitabında yok, kaçınılır (BK-14 yalnız uyarıyla izin verir). | Tek kat (v1.4.3, İE-12, BK-14) |
+
+## 3. Kapı ve pencere (tek kattan aynen)
+
+| # | Kural | Durum |
+|---|---|---|
+| 3.1 | Pencere ölçüsü "ENxBOY" tam cm; en 30–247, boy 20–180; **üst kot 200**, eşik = 200 − boy. Panodan geniş pencere (en > 121,5) 251'lik pencereli panoda. | Tek kat (BK-13) |
+| 3.2 | Plandaki "120/125 standart pencere" → 120x125 (eşik 75); "60/125" → 60x125 (eşik 75); "60/40" → 60x40 (eşik 160). | Kabul (plandaki yazıdan; katalogda 120x125 yoktu, BK-13 serbest ölçüye izin verir) |
+| 3.3 | Plandaki "120/200 Fransız pencere": boy 200, Motor'un sınırı 180'i aşıyor (üst kot 200 → eşik 0 = kapı gibi). Taslakta **120x180 (eşik 20)** alındı. | **Soru 4** (Fransız pencere nedir: 120x180 mi, döşemeden başlayan 120x200 doğrama mı, balkon kapısı mı?) |
+| 3.4 | Pencere odaya ortalı (`pencere: oda_ortasi`; ızgara panosu oda ortasından en çok ¼ pano kaçıyorsa ızgara kalır); kapı mantıkla: dayanaklı panoda, menteşe o uçta, oda kapısı bölmeye 11,5 cm yaslı, dış kapı panoda ortada. | Tek kat (D-15) |
+| 3.5 | Dış kapı 90, iç kapı 82 (çalışma kabulü, K04 açık). Kapı yüksekliği çizimde 200 (katalogda ürün yüksekliği yok). | Tek kat (K04, v1.4.3) |
+| 3.6 | Giriş kapısı planda çizili değil; taslağa eklenmedi, uydurulmadı. | **Soru 1** |
+| 3.7 | Üst kattan balkona kapı dış kapıdır (balkon açık mahal); planda ODA 2'nin balkona bakan yan duvarında. | Kabul (plandan) |
+
+## 4. Çatı (tek kattan aynen; Lokman: "çatı birebir aynı")
+
+| # | Kural | Durum |
+|---|---|---|
+| 4.1 | Çatı üst katın duvarlarının üstüne tek kattaki gibi oturur: beşik, iki yüzde **%33** (derece değil), iki yanda **30 cm** yatay saçak, uçta **10 cm** dik topuk; mahya yüksekliği = 10 + (saçaklı açıklık / 2) × 0,33. Ana makas kısa kenarı geçer. | Lokman 28.10 + tek kat (v1.4.3) |
+| 4.2 | Bu evde makas y'yi (706) geçer, mahya x boyunca; saçaklarla açıklık 766, mahya 10 + 383 × 0,33 = 136,4 (Motor çıktısında 145,8: Motor saçağı 823'e göre, 763 + 60, hesaplıyor; prefabrik çatıda hangi açıklığın esas olduğu İE-17'de kıyas tablosuyla). | Kabul · İE-17 kıyası |
+| 4.3 | Prefabrik çatı yöntemi B: tavan omegası, aşık, alın sacı, saçak sacı (çelikteki panel yöntemi değil); yükleme listesi kuralları `kurallar/liste/prefabrik.json`. Çift katta çatı satırları tek kattaki gibi, yalnız üst kat için. | Tek kat (Lokman 7.10, BK-12) |
+| 4.4 | Merdiven kutusu arkaya 1 pano çıkıyor: ana çatı onu örtmez. Çıkmanın çatısı (arka cumba mı, ana çatının uzatılması mı, tek eğimli mi) kuralda yok. | **Soru 5** |
+| 4.5 | Çatı tek kattaki gibi IFC'de ve görünüşte; çift katta ön görünüş iki kat yüksekliğinde (2 × 250 + ara kat). | Kabul |
+
+## 5. Döşeme ve ara kat (Lokman: "döşeme birebir aynı")
+
+| # | Kural | Durum |
+|---|---|---|
+| 5.1 | Döşeme tek kattaki ile birebir aynıdır: katlar arasında yeni bir döşeme kuralı yazılmaz. | Lokman, 28.10 |
+| 5.2 | Ara kat kotu ve kalınlığı: R02'de zemin duvarı 0–2500, çelik kiriş bölgesi 2500–2800 (300), Betopan 2800–2820 (20), üst duvar 2820–5320; toplam **5320 mm**. Kesit, açıklık hesabı ve kiriş adedi R02'de tanımlı değil ("taşıyıcı detay değil"). | R02 (veri) · **Soru 6** (ara kat yüksekliği ve malzemesi: 320 mm doğru mu; 100'lük alt çerçeve üst katta da var mı?) |
+| 5.3 | Üst kat döşemesinin yükleme listesi satırları (ara kat kirişi, Betopan, alt çerçeve) tek katın taban satırlarıyla aynı kuraldan mı sayılır? | **Soru 6** |
+
+## 6. Merdiven (tek fark)
+
+| # | Kural | Durum |
+|---|---|---|
+| 6.1 | Merdiven, çift katı tek kattan ayıran tek elemandır (Lokman). Motor'da bugün merdiven yoktur; R02'de de çizilmemişti ("üst kat girişi çözümsüz"). İE-22 merdiveni İş Emri'ne ekler. | Lokman, 28.10 · Bugünkü kod |
+| 6.2 | Bu evde merdiven kendi kutusunda: planda 200 × 260 iç, arkaya 125 çıkma; taslakta kutu **2 pano eni (245 iç)**, derinlik gövdede 1 pano + çıkma 1 pano (125,5); çıkma Motor'da yok, taslak yalnız gövdedeki parçayı gösterir. | Kabul (ızgara uyarlaması) · **Soru 2** (merdiven kutusu 2 pano mu 1,5 pano mu?) |
+| 6.3 | Kol eni, rıht, basamak, sahanlık, korkuluk: planda yok. | **Soru 3** |
+| 6.4 | Merdiven boşluğu üst kat döşemesinde açık kalır; merdiven mahali her iki katta aynı yerde. Merdivenle hol arası duvarsız (açık sınır). | Kabul (plandan) |
+| 6.5 | Üst katta merdiven kutusunun arka duvarında 120/125 pencere (planda var); zemin katta o duvarda açıklık yok. | Plandan |
+
+## 7. Balkon ve açık mahaller
+
+| # | Kural | Durum |
+|---|---|---|
+| 7.1 | Balkon açık mahaldir (`balkon`); açık kenarları planda çift sıra kırmızı kesik çizgiyle gösterilir (veranda profili kuralı); net alan açık dış kenara kadar. | Tek kat (v1.4.3, Motor) |
+| 7.2 | Balkon iki katta aynı yerde: gövdenin ön sağ girintisinde (mutfağın / ODA 3'ün önünde), planda 337 × 165, gövde önünden 30 cm taşıyor. Taslakta gövdenin içindeki parça (taşma yok). | Kabul · **Soru 7** (taşma 30 cm kalacak mı; üst balkonun döşemesi ve korkuluğu; alt balkon köşesinde dikme mi konsol mu?) |
+| 7.3 | Balkonun ön sağ köşesinde 10 × 10 dikme (tek kattaki veranda kuralı). | Kabul |
+
+## 8. Düşey taşıyıcı ve sayım
+
+| # | Kural | Durum |
+|---|---|---|
+| 8.1 | R02: dört dış köşede **100 × 100 × 5320 mm sürekli köşe profili** (iki kata bölünmez, sayımda bir kez). Lokman'ın kuralı değil. | R02 (veri) · **Soru 8** |
+| 8.2 | Sayım kat kat yapılır (zemin, üst), ortak parçalar (sürekli köşe profili, çatı) bir kez; her kat kendi pano, kapı, pencere, H ve köşe parçalarıyla. Kapılı/pencereli pano tek pano sayılır, doğrama ayrı. | R02 + tek kat (v1.4.3) · Kabul |
+| 8.3 | Prefabrik yükleme listesi kuralları (`motor/prefabrik_liste.py`, `kurallar/liste/prefabrik.json`) kat başına koşar; döşeme ve merdiven satırları yeni kural ister. | Kabul · Soru 6 |
+
+## 9. Çizim çıktısı
+
+| # | Kural | Durum |
+|---|---|---|
+| 9.1 | Her kat için ön onay PDF'indeki üçlü (akslı plan, net alanlı kopya, saha montaj planı) ve DXF; ön görünüş iki katlı, çatı profili tek. DXF cm, AutoCAD'de açılır; blok ve katman adları tek kattaki gibi (Astra v1.4.3 şeması, K03). | Tek kat (İE-12, K02, K03) · Kabul (iki katın tek dosyada yan yana mı, ayrı mı: İE-22 PR-1'de) |
+| 9.2 | DXF yeniden açılıp doğrulanmadan PDF yok (K23); doğrulama geçmezse yalnız `.HATALI.pdf`. Çift katta iki katın doğrulaması ayrı ayrı geçer. | Tek kat (K23) |
+| 9.3 | Antette kat sayısı 2, kat adı; bayi paftasında TASLAK (D-10). | Kabul |
+
+## 10. Bu evin ızgara uyarlaması (plan → taslak)
+
+Plandaki ölçüler duvar aksı, cm. Taslakta x sol dış yüzden, y arka dış yüzden (dizilim arka-sol). Sapma = taslak − plan.
+
+| Öğe | Planda | Taslakta | Sapma |
+|---|---|---|---|
+| Gövde (dış) | 763 × 706 | 763 × 706 | 0 (x 6 pano tam; y 5,5 pano, kesilmiş son pano 121,25) |
+| Merdiven kutusu sol duvarı (x) | 342 | 318,75 | −23,25 |
+| Merdiven kutusu sağ duvarı (x) | 552 | 569,75 | +17,75 (kutu iç eni 200 → 245) |
+| Merdiven çıkması (arkaya) | 125 | 125,5 (Motor'da yok) | +0,5 |
+| Zemin: ODA/SALON ve hol/salon duvarı (y) | 302 | 323,75 | +21,75 |
+| Zemin: merdiven altı / WC duvarı (y) | 150 | 135,5 | −14,5 |
+| Zemin: SALON/MUTFAK duvarı (x) | 472 | 507 | +35 |
+| Balkonun sol duvarı (x, iki kat) | 421 | 444,25 | +23,25 (kademe 51 → 62,75) |
+| Mutfak / ODA 3 ön duvarı (y) | 566 | 574,75 | +8,75 |
+| Balkon derinliği (dış yüzden) | 165 (30 taşma dahil) | 116,25 (taşma yok) | −48,75 |
+| 1. kat: ODA 1/ODA 2 duvarı (y) | 242 | 261 | +19 |
+| 1. kat: banyo alt duvarı (y) | 306 | 323,75 | +17,75 |
+| 1. kat: holün alt duvarı, ODA 3 girintisi (y) | 359 | 386,5 | +27,5 |
+
+Net alanlar (m², kapı eşikleri hariç; plan → Motor): zemin ODA 9,38 → 9,50 · SALON 17,00 → 17,42 · MUTFAK 7,13 → 5,90 · BALKON 5,93 → 3,96 (taşma yok) ·
+HOL 4,47 · WC 2,21 · WC HOLÜ 3,29 · MERDİVEN (gövde parçası) 3,15; 1. kat ODA 1 7,42 → 7,58 · ODA 2 15,66 → 14,67 · ODA 3 8,80 → 8,93 · BANYO 5,70 → 5,60 ·
+HOL 6,00 · BALKON 5,93 → 3,96.
+
+Neden 2 pano merdiven kutusu: 1,5 pano (182 iç) seçilince salon–mutfak duvarı ile hol–WC holü duvarı aynı aksta (507) çakışıp dört kollu birleşim
+doğuruyor (kural kitabında yok); 2 pano ile her birleşim T ve köşe. Bedeli: WC sütunu ve banyo 196 → 180, mutfak 276 → 243. Salon penceresi
+odaya ortalanınca Motor kesilmiş son panonun derzine 0,6 cm kala bitip kıymık pano üretti (Motor bulgusu, İE-22'de); taslakta pencere ızgara
+panosunda (plandakinden 51 cm arkada).
+
+## 11. Sorular (Lokman'a; cevap kurala girer)
+
+1. **Giriş kapısı** nerede? Planda çizili değil (merdiven kutusunun arka duvarı mı, salonun Fransız penceresi mi, balkon tarafı mı).
+2. **Merdiven kutusu** 2 pano (245 iç) mı, 1,5 pano (182 iç; dört kollu birleşim ya da mutfak 180) mı?
+3. **Merdiven**: kol eni, rıht/basamak sayısı (kat farkı ≈ 282 cm), sahanlık, korkuluk; dönüş yönü planda sağa.
+4. **Fransız pencere 120/200**: 120x180 mi, döşemeden başlayan 120x200 doğrama mı (Motor sınırı 180; yeni kural ister)?
+5. **Merdiven çıkmasının çatısı**: arka cumba, ana çatının uzatılması, tek eğim?
+6. **Ara kat**: yükseklik ve malzeme (R02: 300 çelik kiriş + 20 Betopan = 320 mm; toplam 5320); 100'lük alt çerçeve üst katta var mı; liste satırları.
+7. **Balkon**: 30 cm taşma kalacak mı; üst balkon döşemesi/korkuluğu; alt köşede dikme mi konsol mu?
+8. **Düşey köşe profili**: 100 × 100 × 5320 sürekli (R02) doğru mu; et kalınlığı?
+9. **Ölçü sadakati**: gövde 706 korunup son pano kesilsin mi (bugünkü taslak), yoksa 5,5 tam pano = 710,25 mi?
+
+Lokman'ın cevapları bu belgeye tarihli eklenir; kural haline gelen madde `.claude/rules/motor-cizim.md`'ye ve gerekirse `KARARLAR/`'a geçer (D-07, K21).
