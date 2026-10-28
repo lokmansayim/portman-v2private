@@ -170,7 +170,7 @@ echo "   sağlık: sürüm $ETIKET, Postgres bağlı · ${SON:0:300}"
 
 echo "-- [7/7] nginx yapılandırması (BK-07: sürümdeki vps/nginx/portman.conf; nginx -t, yedek, reload; hata sürümü düşürmez)"
 if [ -f "$HEDEF/vps/nginx_uygula.sh" ]; then
-  PM_ETC="$ETC" PM_SYSTEMCTL="$SYSTEMCTL" PM_TEST="$TEST" bash "$HEDEF/vps/nginx_uygula.sh" "$HEDEF" 2>&1 | sed 's/^/   /' || echo "   UYARI: nginx yapılandırması uygulanamadı; sürüm etkin, eski nginx yapılandırması duruyor (bash $HEDEF/vps/nginx_uygula.sh $HEDEF)" >&2
+  PM_ETC="$ETC" PM_SYSTEMCTL="$SYSTEMCTL" PM_TEST="$TEST" PM_DATA="$KOK/data" bash "$HEDEF/vps/nginx_uygula.sh" "$HEDEF" 2>&1 | sed 's/^/   /' || echo "   UYARI: nginx yapılandırması uygulanamadı; sürüm etkin, eski nginx yapılandırması duruyor (bash $HEDEF/vps/nginx_uygula.sh $HEDEF)" >&2
 else
   echo "   nginx_uygula.sh bu sürümde yok; atlandı"
 fi
