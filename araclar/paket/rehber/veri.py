@@ -447,6 +447,21 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
     def icinde_kutu(r, k):
         return r[0] >= k[0] - 0.5 and r[2] <= k[2] + 0.5 and r[1] >= k[1] - 0.5 and r[3] <= k[3] + 0.5
 
+    # Kirişin kesim boyu listeden (D-28 madde 1: aynı parçanın boyunu iki kod ayrı üretmez). Liste üreteci veranda kirişini "açık kenar dış ölçüsü
+    # − 10" (kural kitabı `veranda_kirisi_eksik_cm`, PK-01'de tuttu), nişin kirişini aks arası sayar; kart o satırı okur. Kirişin kolona nasıl
+    # oturduğu kitapta yok: çizim Motor'un planındaki boyda (açık kenar boyunca) kalır, kart farkı yazar.
+    EKSIK = _pr(kurallari_oku()["prefabrik"], "veranda_kirisi_eksik_cm")
+
+    def kiris_boyu(acik, cizim):
+        """(kartta yazan boy, Liste satırı, ek not). `acik`: açık kenarın dış ölçüsü (None: nişin kirişi, aks arası); `cizim`: çizimdeki boy (cm)."""
+        L_ = cizim if acik is None else acik - EKSIK
+        olcu = f"L {round(L_ * 10)}"
+        if not satirlar("Kutu profil (kiriş)", olcu):
+            return cizim, f"listede kiriş {olcu} satırı yok", ""
+        fark = "" if abs(L_ - cizim) < 0.6 else (f"; kesim boyu listeden (açık kenar dış ölçüsü − {fmtc(EKSIK)} cm, kural kitabı); kolona nasıl oturduğu "
+                                                  f"kitapta yok, çizimde açık kenar boyunca ({fmtc(cizim)} cm)")
+        return L_, ls("Kutu profil (kiriş)", olcu), fark
+
     verandalar, VR, GVK = [], [], None          # VR: çatı ve yerleşim için taşan veranda kaydı; GVK: gömme veranda
     for vi, v in enumerate(VER):
         vk = v["rect"]
@@ -462,21 +477,24 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         kirisler = []
         for b in bas_k:
             r = b["rect"]
-            kirisler.append({"rect": [_r(t) for t in r], "bu": f"{kucuk(ad)} · dış kiriş · L {fmtc(r[2] - r[0])} cm (kolonların üstünde)"})
+            Lk, lst, fark = kiris_boyu(r[2] - r[0], r[2] - r[0])
+            kirisler.append({"rect": [_r(t) for t in r], "bu": f"{kucuk(ad)} · dış kiriş · L {fmtc(Lk)} cm (kolonların üstünde){fark}", "liste": lst})
         for b in sorted(yan_k, key=lambda b: b["rect"][0]):
             r = list(b["rect"])
+            acik = r[3] - r[1]
             for q in bas_k:                      # yan kiriş dış kirişin iç yüzünde başlar (kesişmesin)
                 if on:
                     r[1] = max(r[1], q["rect"][3])
                 else:
                     r[3] = min(r[3], q["rect"][1])
             yer = "sol" if r[0] < (vk[0] + vk[2]) / 2 else "sağ"
-            kirisler.append({"rect": [_r(t) for t in r], "bu": f"{kucuk(ad)} · {yer} yan kiriş · L {fmtc(r[3] - r[1])} cm: dış kirişi gövdeye bağlar"})
+            Lk, lst, fark = kiris_boyu(acik, r[3] - r[1])
+            kirisler.append({"rect": [_r(t) for t in r], "bu": f"{kucuk(ad)} · {yer} yan kiriş · L {fmtc(Lk)} cm: dış kirişi gövdeye bağlar{fark}", "liste": lst})
         verandalar.append({
             "kolon": [{"rect": [_r(t) for t in b["rect"]], "order": len(verandalar) * 10 + i,
                        "bu": f"{kucuk(ad)} · {'sol' if b['rect'][0] < (vk[0] + vk[2]) / 2 else 'sağ'} kolon · 100 × 100 × {fmt(H * 10)}",
                        "liste": ls("Özel kutu profil (kolon)")} for i, b in enumerate(sorted(kol, key=lambda b: b["rect"][0]))],
-            "kiris": [dict(k, order=len(verandalar) * 10 + len(kol) + i, liste=ls("Kutu profil (kiriş)")) for i, k in enumerate(kirisler)],
+            "kiris": [dict(k, order=len(verandalar) * 10 + len(kol) + i) for i, k in enumerate(kirisler)],
         })
         VR.append({"ad": ad, "on": on, "rect": vk, "dis_y": dis_y, "kutu": kc, "M": v["cati"]["mahya"][0][0], "R": rk,
                    "kolon": [b["rect"] for b in kol], "bas_k": [b["rect"] for b in bas_k], "yan_k": [r for r in (k["rect"] for k in kirisler[len(bas_k):])],
@@ -514,14 +532,18 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         def kose(r):
             return f"{'ön' if r[1] < DY / 2 else 'arka'} {'sol' if r[0] < W / 2 else 'sağ'} köşe"
         o0 = len(verandalar) * 10
+
+        def gv_kiris(i, b):
+            r = b["rect"]
+            Lc = max(r[2] - r[0], r[3] - r[1])
+            Lk, lst, fark = kiris_boyu(None if nis else Lc, Lc)
+            return {"rect": [_r(t) for t in r], "order": o0 + len(kol) + i, "liste": lst,
+                    "bu": f"{gad} · {kenar(r)} · L {fmtc(Lk)} cm: {'iki yandaki duvarı bağlar' if nis else 'kolonu gövdeye bağlar'}, duvar üstü kotunda; "
+                          f"üstüne omega ve ana çatının makasları gelir{fark}"}
         verandalar.append({
             "kolon": [{"rect": [_r(t) for t in b["rect"]], "order": o0 + i, "bu": f"veranda · {kose(b['rect'])} kolonu · 100 × 100 × {fmt(H * 10)}",
                        "liste": ls("Özel kutu profil (kolon)")} for i, b in enumerate(sorted(kol, key=lambda b: (b["rect"][1], b["rect"][0])))],
-            "kiris": [{"rect": [_r(t) for t in b["rect"]], "order": o0 + len(kol) + i,
-                       "bu": f"{gad} · {kenar(b['rect'])} · L {fmtc(max(b['rect'][2] - b['rect'][0], b['rect'][3] - b['rect'][1]))} cm: "
-                             f"{'iki yandaki duvarı bağlar' if nis else 'kolonu gövdeye bağlar'}, duvar üstü kotunda; üstüne omega ve ana çatının makasları gelir",
-                       "liste": ls("Kutu profil (kiriş)")}
-                      for i, b in enumerate(sorted(kir, key=lambda b: (b["rect"][1], b["rect"][0])))],
+            "kiris": [gv_kiris(i, b) for i, b in enumerate(sorted(kir, key=lambda b: (b["rect"][1], b["rect"][0])))],
         })
         GVK = {"vk": vk, "kol": len(kol), "kir": [kenar(b["rect"]) for b in kir], "m2": GV.get("net_m2"), "nis": nis}
 

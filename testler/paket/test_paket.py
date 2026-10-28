@@ -197,6 +197,29 @@ def test_saglama(paketler, kod):
         assert [(len(v["kolon"]), len(v["kiris"])) for v in d["verandalar"]] == [(1, 2)]
 
 
+@pytest.mark.parametrize("kod", ["TK-01", "AP-19"])
+def test_kiris_boyu_listeden(paketler, kod):
+    """D-28 madde 1: kirişin kartındaki boy ve "Liste" satırı yükleme listesinden; kartların boyları listedeki kiriş satırlarıyla bire bir
+    (TK-01 r05: dış kiriş 376 / 251, yan 171 / 120; AP-19: 324 / 190; çizimde dış kiriş ve AP-19'unkiler açık kenar boyunca)."""
+    import re
+    from openpyxl import load_workbook
+    kok, _, _ = paketler
+    d = _rehber_verisi(kok / "prefabrik" / kod / f"{kod}_montaj_rehberi.html")
+    ad = f"{kod}_yukleme_listesi_asma.xlsx" if kod == "TK-01" else f"{kod}_yukleme_listesi.xlsx"
+    ws = load_workbook(kok / "prefabrik" / kod / ad).active
+    liste = Counter()
+    for r in ws.iter_rows(min_row=3, values_only=True):
+        if (r[1] or "").startswith("Kutu profil (kiriş)"):
+            liste[r[2]] += r[3]
+    kart = Counter()
+    for k in (k for v in d["verandalar"] for k in v["kiris"]):
+        L_ = float(re.search(r"· L ([\d,]+) cm", k["bu"]).group(1).replace(",", "."))
+        olcu = f"L {round(L_ * 10)}"
+        assert k["liste"].startswith(f"Kutu profil (kiriş) 100 × 100 {olcu} · "), (k["bu"], k["liste"])
+        kart[olcu] += 1
+    assert kart and kart == liste
+
+
 @pytest.mark.skipif(iz.hazir() is not None, reason=f"rehber izi: {iz.hazir()}")
 @pytest.mark.parametrize("kod", ["TK-01", "AP-19"])
 def test_rehber_izi(paketler, tmp_path, kod):
