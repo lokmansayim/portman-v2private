@@ -11,15 +11,17 @@ kodu yoktur: `motor.dxf_out.uret` (ön onay PDF'i ve DXF), `motor.bayi_gorseli.p
 katmanı ve kör test sonucu; gerçek liste açılmaz) ve kart başına model–liste tablosundan.
 
 - Motor bir şeyi yapamıyorsa (doğrulama freni, beşik dışı çatıda liste ya da kart modeli, rehberin kuramadığı ev) dosya yazılmaz;
-  `bilgi.md`'de "Yok: neden" yazar. Her dosya için Var ya da Yok.
+  `bilgi.md`'de "Yok: neden" yazar. Her dosya için Var ya da Yok. Doğrulama geçmezse (K23) ya da Motor çizemezse teslim çıktısı
+  (bayi PDF'i, plan görseli, liste, model, montaj paftası, rehber) hiç yazılmaz; DXF denetim için yazılır.
 - Kör model: kıyas yok (gerçek liste kör protokolüyle açılmadan girmez). Kaynak dosyalar (paftalar, DWG, gerçek liste) kopyalanmaz;
   `bilgi.md` yalnız mühürdeki kimliklerini (bayt, SHA-256, Drive kimliği) taşır. Kişi ve bayi adı yazılmaz.
 - Yeniden üretimde klasördeki eski dosyalar `_eski/<eski üretimin tarihi>/`'ne taşınır; hiçbir şey silinmez.
 - GLB (`--glb`): `rehber/glb.js` Playwright ile; three.js 0.160.0 `THREE_DIR` ortam değişkeninin gösterdiği klasörden (npm `three`).
-- Kayıtta olmayan ev (`--is-emri`; çizim masasının yeni talepleri, 28 Ekim 2026): model satırı İş Emri'nden kurulur, küme "teklif".
-  Kayıttaki bir teklif projesine (TK-01) yeni revizyon da verilebilir; kayıttaki öteki modellerin İş Emri'si kayıttan gelir (kıyasları
-  ona bağlı). Tavan seçenekleri teklifle aynı işlevden (`araclar/teklif.secenekler`): `--tavan`, yoksa İş Emri'nin `teklif.tavan`'ı,
-  yoksa kayıttaki satırınki, yoksa İş Emri'nin kendi tavanı. Çıktıdan önce İş Emri'nin kopyasında kişi ve bayi adı yerine kod yazılır,
+- Kayıtta olmayan ev (`--is-emri`; çizim masasının yeni talepleri, 28 Ekim 2026): model satırı İş Emri'nden kurulur, küme "teklif";
+  gövde, m² ve verandalar Motor'un planından (`kimlik`), çatı İş Emri'nden. Kayıttaki bir teklif projesine (TK-01) yeni revizyon da
+  verilebilir, kimliği yine o İş Emri'nden; kayıttaki öteki modellerin İş Emri'si kayıttan gelir (kıyasları ona bağlı). Tavan
+  seçenekleri teklifle aynı işlevden (`araclar/teklif.secenekler`): `--tavan`, yoksa İş Emri'nin `teklif.tavan`'ı, yoksa kayıttaki
+  satırınki, yoksa İş Emri'nin kendi tavanı. Çıktıdan önce İş Emri'nin kopyasında kişi ve bayi adı yerine kod yazılır,
   metinlerdeki telefon numaraları maskelenir (`beyin/numara.py`); serbest metindeki adlar tanınmaz, İş Emri'ne ad yazılmaz.
 
 LLM yok, ağ yok (GLB'de three.js yerelden).
@@ -103,41 +105,55 @@ def _maskele(ie: dict, kod: str) -> dict:
     return ie
 
 
+def kimlik(ie: dict) -> dict:
+    """Model satırının kimlik alanları İş Emri'nden ve Motor'un planından (D-28 madde 1: ölçü ve m² Motor'un; `dis_olcu_cm` isteğe
+    bağlı, ızgara İş Emri'sinde yok): gövde kutusu (`geometry.govde_kutusu`, taşan veranda hariç), taşan veranda (cephe, en, derinlik),
+    gömme açık mahaller (m²), çatı (tip, eğim, kaplama). Motor kuramazsa gövde yerine nedeni yazar; paket Motor'un hatasını ayrıca yazar."""
+    from motor import geometry as G
+    from motor.cati_prefabrik import TIP_ADI
+    c, oz = ie.get("cati") or {}, ie.get("ozellikler") or {}
+    kap = ", ".join(str(oz[k]).lower() for k in ("Çatı Kaplaması", "Çatı Kaplama Rengi") if oz.get(k))
+    kap = kap.replace(", ", " (", 1) + ")" if ", " in kap else kap
+    tip_adi = {"besik": "beşik"} | TIP_ADI
+    tip, eg = c.get("tip", "besik"), c.get("egim_yuzde")                  # Motor'un varsayılanı beşik, eğim kitaptan
+    out = {"cati": f"{tip_adi.get(tip, tip)}" + (f" %{eg:g}" if eg is not None else " (eğim kitaptan)") + (f", {kap}" if kap else "")}
+    try:
+        plan = G.kur(copy.deepcopy(ie))
+    except Exception as e:                                              # noqa: BLE001 — neden satıra yazılır
+        return out | {"m2": "—", "govde": f"Motor İş Emri'ni kuramadı ({type(e).__name__}: {str(e)[:120]})", "veranda": "—"}
+    x0, y0, x1, y1 = G.govde_kutusu(plan)
+    gx, gy = round(x1 - x0, 2), round(y1 - y0, 2)
+    yon = {"on": "önde", "arka": "arkada", "sol": "solda", "sag": "sağda"}
+    tasan = [f"{yon.get(v['cephe'], v['cephe'])} {v['en']:g} × {v['derinlik']:g}" for v in plan.dis_verandalar]
+    dis = {v["ad"] for v in plan.dis_verandalar}
+    gomme = [f"{m.alan_m2:.1f}".replace(".", ",") for m in plan.mahaller.values() if m.acik and m.ad not in dis]
+    ver = (["taşan: " + ", ".join(tasan)] if tasan else []) + (["gömme " + ", ".join(gomme) + " m²"] if gomme else [])
+    return out | {"m2": f"{gx * gy / 1e4:.0f}", "govde": f"dış ölçü {gx:g} × {gy:g}", "veranda": "; ".join(ver) or "yok"}
+
+
 def talep_modeli(kod: str, yol: Path, tavan: list[str] | None, kayit_: dict) -> tuple[dict, dict]:
-    """`--is-emri`: İş Emri dosyasından model satırı ve maskeli İş Emri. Kayıttaki teklif projesinin satırı korunur (kimlik alanları),
-    yalnız İş Emri'si değişir; kayıtta yoksa satır İş Emri'nden kurulur. Dönen: (model, İş Emri)."""
+    """`--is-emri`: İş Emri dosyasından model satırı ve maskeli İş Emri. Kimlik (gövde, m², veranda, çatı) her zaman bu İş Emri'nden
+    (`kimlik`); kayıttaki teklif projesinden yalnız takma ad ve, İş Emri'nde ya da `--tavan`'da yoksa, tavan seçenekleri gelir.
+    Dönen: (model, İş Emri)."""
     import hashlib
     from araclar import teklif
-    from motor.cati_prefabrik import TIP_ADI
     if not KOD_DESENI.fullmatch(kod):
         raise SystemExit(f"DUR: kod {kod!r}; iki büyük harf, tire, iki rakam (TK-02 gibi)")
     yol = Path(yol)
     ham = yol.read_bytes()
     ie = json.loads(ham.decode("utf-8"))
     kayitta = next((x for x in kayit_["modeller"] if x["kod"] == kod), None)
+    if kayitta is not None and kayitta["kume"] != "teklif":
+        raise SystemExit(f"DUR: {kod} kayıtta {kayitta['kume']} model; İş Emri'si ve kıyası kayıttan gelir (`--is-emri` olmadan koşun)")
     secim = [o["Tavan"].lower() for _, o in teklif.secenekler(ie, tavan) if o] or (kayitta or {}).get("tavan_secenekleri")
     try:
         goster = str(yol.resolve().relative_to(KOK))
     except ValueError:
         goster = str(yol)
     komut = f"python -m araclar.paket {kod} <Modeller klasörü> --is-emri {goster}" + (f" --tavan {','.join(tavan)}" if tavan else "")
-    if kayitta is not None:
-        if kayitta["kume"] != "teklif":
-            raise SystemExit(f"DUR: {kod} kayıtta {kayitta['kume']} model; İş Emri'si ve kıyası kayıttan gelir (`--is-emri` olmadan koşun)")
-        m = copy.deepcopy(kayitta)
-    else:
-        y, c, oz = ie["yapi"], ie.get("cati") or {}, ie.get("ozellikler") or {}
-        x_, y_ = y["dis_olcu_cm"]["x"], y["dis_olcu_cm"]["y"]
-        yon = {"on": "önde", "arka": "arkada", "sol": "solda", "sag": "sağda"}
-        ver = [f"{yon.get(v.get('cephe'), v.get('cephe'))} {v['bit_cm'] - v['bas_cm']:g} × {v['derinlik_cm']:g}" for v in ie.get("verandalar") or []]
-        kap = ", ".join(str(oz[k]).lower() for k in ("Çatı Kaplaması", "Çatı Kaplama Rengi") if oz.get(k))
-        kap = kap.replace(", ", " (", 1) + ")" if ", " in kap else kap
-        tip_adi = {"besik": "beşik"} | TIP_ADI
-        m = {"kod": kod, "takma": None, "kume": "teklif", "m2": f"{x_ * y_ / 1e4:.0f}", "govde": f"dış ölçü {x_:g} × {y_:g}",
-             "veranda": ("taşan: " + ", ".join(ver)) if ver else "İş Emri'nde taşan veranda yok",
-             "cati": f"{tip_adi.get(c.get('tip'), c.get('tip'))} %{c.get('egim_yuzde')}" + (f", {kap}" if kap else ""),
-             "pencere_ic_duvar": "—", "engel": "—", "adim": "teklif", "kor_test": None, "hakem": None}
-    m.update({"is_emri": goster, "tavan_secenekleri": secim, "komut": komut, "girdi_sha256": hashlib.sha256(ham).hexdigest()})
+    m = {"kod": kod, "takma": (kayitta or {}).get("takma"), "kume": "teklif", **kimlik(ie), "pencere_ic_duvar": "—", "engel": "—",
+         "adim": "teklif", "kor_test": None, "hakem": None,
+         "is_emri": goster, "tavan_secenekleri": secim, "komut": komut, "girdi_sha256": hashlib.sha256(ham).hexdigest()}
     return m, _maskele(ie, kod)
 
 
@@ -314,6 +330,7 @@ def paket(m: dict, kok: Path, gecici: Path, glb: bool = False, kayit_: dict | No
     kart_kodu = kod.replace("-", "")
     km = rh = None
     L = {}
+    teslim_yok = None                                   # K23: doğrulamadan geçmeyen İş Emri'nden teslim çıktısı (liste, model, pafta, rehber) yok
     if ie is None:
         neden = ("İş Emri depoda yok; motor bu evi bugün çizebilir, ölçüm İş Emri'si yazılınca üretilir" if m["adim"] == "0" else
                  f"çizilemiyor, yol haritası adım {m['adim']} ({kayit_['adimlar'].get(m['adim'], '')})")
@@ -330,6 +347,7 @@ def paket(m: dict, kok: Path, gecici: Path, glb: bool = False, kayit_: dict | No
             else:
                 durum[ad("bayi_paftasi", "pdf")] = f"Yok: {cz['neden']}"
                 durum[ad("plan", "png")] = "Yok: Motor'un doğrulaması geçmedi; canlıdaki gibi plan görseli de yazılmaz"
+                teslim_yok = "Motor'un doğrulaması geçmedi (K23); İş Emri düzeltilip yeniden üretilir, DXF denetim için yazıldı"
             yaz[ad("cizim", "dxf")] = cz["dxf"]
             g = cz["gorunusler"]
             if len(g) >= 4:
@@ -342,63 +360,69 @@ def paket(m: dict, kok: Path, gecici: Path, glb: bool = False, kayit_: dict | No
         except Exception as e:                                          # noqa: BLE001 — Motor'un hatası nedenle yazılır
             for kalem, uz in (("bayi_paftasi", "pdf"), ("plan", "png"), ("cizim", "dxf"), ("gorunusler", "pdf")):
                 durum[ad(kalem, uz)] = f"Yok: Motor çizemedi ({type(e).__name__}: {str(e)[:160]})"
-        # liste
-        L = listeler(ie, m.get("tavan_secenekleri"))
-        if "neden" in L:
-            durum[ad("yukleme_listesi", "xlsx")] = f"Yok: {L['neden']}"
-            L = {}
+            teslim_yok = "Motor çizemedi, doğrulama yapılamadı (K23)"
+        if teslim_yok:
+            # K23 ve canlı akış: doğrulamadan geçmeyen (ya da Motor'un çizemediği) İş Emri'nden teslim çıktısı yok; DXF denetim için
+            for kalem, uz in (("yukleme_listesi", "xlsx"), ("model", "ifc"), ("montaj_paftasi", "pdf"), ("montaj_rehberi", "html"), ("model", "glb")):
+                durum[ad(kalem, uz)] = f"Yok: {teslim_yok}"
         else:
-            from motor import prefabrik_liste as PL
-            for s, Ls in L.items():
-                PL.xlsx(Ls, gec / f"liste_{s or 'tek'}.xlsx")
-                yaz[ad("yukleme_listesi", "xlsx", s)] = gec / f"liste_{s or 'tek'}.xlsx"
-                ks = Ls.get("kural_seti") or {}
-                notlar.append(f"Liste{' (' + s + ' tavan)' if s else ''}: {Ls['ozet']['satir']} satır, kural yok {Ls['ozet']['kural_yok']}; "
-                              f"üretici {Ls['uretici_surum'].split(' ')[0]}, kural seti {ks.get('kitap_seti', '')} ({ks.get('ortak', '')})")
-        # kart modeli
-        try:
-            km = kart_modeli(ie, gec, kart_kodu)
-        except Exception as e:                                          # noqa: BLE001 — hata nedenle yazılır, öteki modeller sürer
-            km = {"neden": f"kart modeli hata verdi ({type(e).__name__}: {str(e)[:160]})"}
-        if "neden" in km:
-            durum[ad("model", "ifc")] = durum[ad("montaj_paftasi", "pdf")] = f"Yok: {km['neden']}"
-            km = None
-        else:
-            yaz[ad("model", "ifc")] = km["ifc"]
-            yaz[ad("montaj_paftasi", "pdf")] = km["pdf"]
-            if km["kural_yok"]:
-                notlar.append(f"Kart modeli: {len(km['kural_yok'])} parça \"kural yok\" (montaj paftası bu parçalarda tam değil): " +
-                              "; ".join(f"{x['parca']}: {x['neden']}" for x in km["kural_yok"]))
-        # rehber
-        if km is None:
-            durum[ad("montaj_rehberi", "html")] = durum[ad("model", "glb")] = durum[ad("model", "ifc")]
-        elif not L:
-            durum[ad("montaj_rehberi", "html")] = durum[ad("model", "glb")] = "Yok: liste yok (rehberin listeden gelen parçaları ve adetleri)"
-        else:
-            s_r = "asma" if "asma" in L else next(iter(L))
-            ie_r = copy.deepcopy(ie)
-            if s_r:                                     # rehberin tavanı adetlerini aldığı listeninki (listeler() gibi)
-                ie_r.setdefault("ozellikler", {})["Tavan"] = s_r.capitalize()
-            try:
-                rh = rehber(km, kart_kodu, ie_r, L[s_r], kod, gec, glb)
-            except Exception as e:                                      # noqa: BLE001 — hata nedenle yazılır, öteki modeller sürer
-                rh = {"neden": f"rehber üreteci hata verdi ({type(e).__name__}: {str(e)[:160]})"}
-            if "neden" in rh:
-                durum[ad("montaj_rehberi", "html")] = durum[ad("model", "glb")] = f"Yok: {rh['neden']}"
-                rh = None
+            # liste
+            L = listeler(ie, m.get("tavan_secenekleri"))
+            if "neden" in L:
+                durum[ad("yukleme_listesi", "xlsx")] = f"Yok: {L['neden']}"
+                L = {}
             else:
-                yaz[ad("montaj_rehberi", "html")] = rh["html"]
-                if "glb" in rh:
-                    yaz[ad("model", "glb")] = rh["glb"]
+                from motor import prefabrik_liste as PL
+                for s, Ls in L.items():
+                    PL.xlsx(Ls, gec / f"liste_{s or 'tek'}.xlsx")
+                    yaz[ad("yukleme_listesi", "xlsx", s)] = gec / f"liste_{s or 'tek'}.xlsx"
+                    ks = Ls.get("kural_seti") or {}
+                    notlar.append(f"Liste{' (' + s + ' tavan)' if s else ''}: {Ls['ozet']['satir']} satır, kural yok {Ls['ozet']['kural_yok']}; "
+                                  f"üretici {Ls['uretici_surum'].split(' ')[0]}, kural seti {ks.get('kitap_seti', '')} ({ks.get('ortak', '')})")
+            # kart modeli
+            try:
+                km = kart_modeli(ie, gec, kart_kodu)
+            except Exception as e:                                          # noqa: BLE001 — hata nedenle yazılır, öteki modeller sürer
+                km = {"neden": f"kart modeli hata verdi ({type(e).__name__}: {str(e)[:160]})"}
+            if "neden" in km:
+                durum[ad("model", "ifc")] = durum[ad("montaj_paftasi", "pdf")] = f"Yok: {km['neden']}"
+                km = None
+            else:
+                yaz[ad("model", "ifc")] = km["ifc"]
+                yaz[ad("montaj_paftasi", "pdf")] = km["pdf"]
+                if km["kural_yok"]:
+                    notlar.append(f"Kart modeli: {len(km['kural_yok'])} parça \"kural yok\" (montaj paftası bu parçalarda tam değil): " +
+                                  "; ".join(f"{x['parca']}: {x['neden']}" for x in km["kural_yok"]))
+            # rehber
+            if km is None:
+                durum[ad("montaj_rehberi", "html")] = durum[ad("model", "glb")] = durum[ad("model", "ifc")]
+            elif not L:
+                durum[ad("montaj_rehberi", "html")] = durum[ad("model", "glb")] = "Yok: liste yok (rehberin listeden gelen parçaları ve adetleri)"
+            else:
+                s_r = "asma" if "asma" in L else next(iter(L))
+                ie_r = copy.deepcopy(ie)
+                if s_r:                                     # rehberin tavanı adetlerini aldığı listeninki (listeler() gibi)
+                    ie_r.setdefault("ozellikler", {})["Tavan"] = s_r.capitalize()
+                try:
+                    rh = rehber(km, kart_kodu, ie_r, L[s_r], kod, gec, glb)
+                except Exception as e:                                      # noqa: BLE001 — hata nedenle yazılır, öteki modeller sürer
+                    rh = {"neden": f"rehber üreteci hata verdi ({type(e).__name__}: {str(e)[:160]})"}
+                if "neden" in rh:
+                    durum[ad("montaj_rehberi", "html")] = durum[ad("model", "glb")] = f"Yok: {rh['neden']}"
+                    rh = None
                 else:
-                    durum[ad("model", "glb")] = f"Yok: {rh['glb_neden']}"
-                d = rh["veri"]
-                notlar.append(f"Rehber (62 m² rehberinin şablonu, D-28): {d['N']} adım, {len(d['rooms'])} oda, {len(d['panels'])} pano, {len(d['hs'])} H, "
-                              f"{len(d['posts'])} köşe direği, {len(d['makas'])} makas; motorun modelinde olmayanlar kuraldan (kartlarında yazar); adetler " +
-                              ("asma tavanlı listeyle" if "asma" in L else "İş Emri'nin tavanıyla yazılan listeyle"))
+                    yaz[ad("montaj_rehberi", "html")] = rh["html"]
+                    if "glb" in rh:
+                        yaz[ad("model", "glb")] = rh["glb"]
+                    else:
+                        durum[ad("model", "glb")] = f"Yok: {rh['glb_neden']}"
+                    d = rh["veri"]
+                    notlar.append(f"Rehber (62 m² rehberinin şablonu, D-28): {d['N']} adım, {len(d['rooms'])} oda, {len(d['panels'])} pano, {len(d['hs'])} H, "
+                                  f"{len(d['posts'])} köşe direği, {len(d['makas'])} makas; motorun modelinde olmayanlar kuraldan (kartlarında yazar); adetler " +
+                                  ("asma tavanlı listeyle" if "asma" in L else "İş Emri'nin tavanıyla yazılan listeyle"))
     # kıyas
     kiyas_yolu = gec / "kiyas.xlsx"
-    neden = kiyas(m, km, rh, kiyas_yolu) if ie is not None else durum[ad("model", "ifc")][5:]
+    neden = kiyas(m, km, rh, kiyas_yolu) if ie is not None and not teslim_yok else durum[ad("model", "ifc")][5:]
     if neden:
         durum[ad("kiyas", "xlsx")] = f"Yok: {neden}"
     else:
@@ -439,7 +463,9 @@ def bilgi_md(m, kayit_, durum, notlar, dd, tarih, eski, ie, yaz) -> str:
     if ie is not None:
         y = ie["yapi"]; c = ie.get("cati") or {}
         s += [f"| İş Emri | `{m['is_emri']}` ({ie.get('is_emri_no')} r{int(ie.get('revizyon', 1)):02d}) |",
-              f"| Dış ölçü (İş Emri) | {y['dis_olcu_cm']['x']} × {y['dis_olcu_cm']['y']} cm, duvar {y['duvar_yuksekligi_cm']} cm |",
+              f"| Dış ölçü (İş Emri) | " + (f"{y['dis_olcu_cm']['x']} × {y['dis_olcu_cm']['y']} cm" if y.get("dis_olcu_cm") else
+                                           f"yazılı değil (ızgaradan; Motor: {m['govde']})") +
+              f", duvar {y.get('duvar_yuksekligi_cm', '250 (varsayılan)')} cm |",
               f"| Çatı (İş Emri) | {c.get('tip')}, %{c.get('egim_yuzde')}, saçak {c.get('sacak_cm')}, topuk {c.get('topuk_cm')} |"]
         oz = ie.get("ozellikler") or {}
         if oz:

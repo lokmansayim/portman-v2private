@@ -320,7 +320,8 @@ def test_is_emri_ile_paket(paketler, tmp_path):
     assert "teklif projesi" in durum["TK-98_kiyas.xlsx"]
     bilgi = (b / "TK-98_bilgi.md").read_text(encoding="utf-8")
     assert "--is-emri" in bilgi and hashlib.sha256(yol.read_bytes()).hexdigest() in bilgi
-    assert "| Veranda | taşan: önde 386 × 181, arkada 261 × 130 |" in bilgi and "| Çatı (paftada) | beşik %33, tek kat panel (antrasit) |" in bilgi
+    assert "| Veranda | taşan: önde 386 × 181, arkada 261 × 130; gömme 1,4 m² |" in bilgi and "| Çatı (paftada) | beşik %33, tek kat panel (antrasit) |" in bilgi
+    assert "| Dış ölçü (İş Emri) | 898 × 888 cm, duvar 250 cm |" in bilgi
     for s in ("asma", "ters"):                          # başlık satırında üretim saati var
         sat = lambda p: list(load_workbook(p).active.iter_rows(min_row=2, values_only=True))
         assert sat(b / f"TK-98_yukleme_listesi_{s}.xlsx") == sat(a / f"TK-01_yukleme_listesi_{s}.xlsx"), s
@@ -335,18 +336,66 @@ def test_is_emri_ile_paket(paketler, tmp_path):
 
 
 def test_is_emri_kimlik_ve_frenler(tmp_path):
-    """Model satırı İş Emri'nden; kayıttaki teklif projesinde satır ve tavan seçenekleri kayıttan. Tek ev, kod deseni, kayıttaki açık ya da
-    kör model, bilinmeyen tavan ve `--is-emri`'siz `--tavan` durdurur; klasöre bir şey yazılmaz."""
+    """Model satırı İş Emri'nden ve Motor'un planından; kayıttaki teklif projesinden yalnız takma ad ve tavan seçenekleri. Tek ev, kod deseni,
+    kayıttaki açık ya da kör model, bilinmeyen tavan ve `--is-emri`'siz `--tavan` durdurur; klasöre bir şey yazılmaz."""
     yol = KOK / _model("TK-01")["is_emri"]
     k = U.kayit()
     m, ie = U.talep_modeli("TK-97", yol, None, k)
     assert (m["kume"], m["m2"], m["govde"], m["adim"], m["tavan_secenekleri"]) == ("teklif", "80", "dış ölçü 898 × 888", "teklif", None)
+    assert (m["veranda"], m["cati"]) == ("taşan: önde 386 × 181, arkada 261 × 130; gömme 1,4 m²", "beşik %33, tek kat panel (antrasit)")
     assert ie["talep"] == {"bayi": {"kod": "TK97", "ad": "Bayi TK-97"}, "musteri_adi": "TK-97"}
-    m, _ = U.talep_modeli("TK-01", yol, None, k)
-    assert m["tavan_secenekleri"] == ["asma", "ters"] and m["veranda"] == _model("TK-01")["veranda"]
+    m1, _ = U.talep_modeli("TK-01", yol, None, k)
+    assert m1["tavan_secenekleri"] == ["asma", "ters"]
+    ayni = ("takma", "kume", "m2", "govde", "veranda", "cati", "adim", "girdi_sha256")
+    assert {a: m1[a] for a in ayni} == {a: m[a] for a in ayni}
     assert U.talep_modeli("TK-97", yol, ["ters"], k)[0]["tavan_secenekleri"] == ["ters"]
     for argv in (["hepsi", "--is-emri", str(yol)], ["AP-19", "--is-emri", str(yol)], ["tk2", "--is-emri", str(yol)], ["TK-2", "--is-emri", str(yol)],
                  ["TK-97", "--is-emri", str(yol), "--tavan", "alçı"], ["AP-19", "--tavan", "asma"], ["TK-97"]):
         with pytest.raises(SystemExit):
             U.main([argv[0], str(tmp_path / "M"), *argv[1:]])
     assert not (tmp_path / "M").exists()
+
+
+def test_is_emri_revizyonu_kimlikte(tmp_path):
+    """Kayıttaki teklif projesine yeni revizyon: kimlik satırı kayıttan değil, verilen İş Emri'nden (geometri hakemi, 28 Ekim 2026: ön veranda
+    derinliği 250, eğim %25 ile TK-01 satırı eski ölçüleri yazıyordu)."""
+    ie = json.loads((KOK / _model("TK-01")["is_emri"]).read_text(encoding="utf-8"))
+    on = next(v for v in ie["verandalar"] if v["cephe"] == "on")
+    on["derinlik_cm"] = 250; ie["cati"]["egim_yuzde"] = 25
+    yol = tmp_path / "r07.json"; yol.write_text(json.dumps(ie, ensure_ascii=False), encoding="utf-8")
+    m, _ = U.talep_modeli("TK-01", yol, None, U.kayit())
+    assert "önde 386 × 250" in m["veranda"] and m["cati"].startswith("beşik %25") and m["tavan_secenekleri"] == ["asma", "ters"]
+
+
+@pytest.mark.parametrize("ad", sorted(str(p.relative_to(KOK)) for g in ("is_emri/**/*.json", "beyin/testler/is_emri_*.json", "araclar/paket/girdi/*.json",
+                                                                         "testler/motor/veri/*.json", "testler/cizim/evler/*.json")
+                                      for p in KOK.glob(g) if "yapi" in json.loads(p.read_text(encoding="utf-8"))))
+def test_is_emri_dis_olcusuz(ad):
+    """`yapi.dis_olcu_cm` isteğe bağlı (İE-11): ızgara İş Emri'sinde dış ölçü ve m² Motor'un gövdesinden, `bilgi.md` satırı da (KeyError yok)."""
+    m, ie = U.talep_modeli("TK-96", KOK / ad, None, U.kayit())
+    assert re.fullmatch(r"dış ölçü [\d.]+ × [\d.]+", m["govde"]) and m["m2"].isdigit(), m["govde"]
+    import datetime as dt
+    b = U.bilgi_md(m, U.kayit(), {}, [], {"dal": "d", "commit": "c", "temiz": True}, dt.datetime(2026, 10, 28), None, ie, {})
+    satir = next(x for x in b.splitlines() if x.startswith("| Dış ölçü (İş Emri) |"))
+    assert ("yazılı değil (ızgaradan; Motor: " + m["govde"] + ")" in satir) != bool(ie["yapi"].get("dis_olcu_cm")), satir
+
+
+@pytest.mark.parametrize("hal", ["dogrulanmadi", "cizemedi"])
+def test_k23_teslim_ciktisi_yok(tmp_path, monkeypatch, hal):
+    """K23: Motor'un doğrulaması geçmezse (ya da Motor çizemezse) bayi PDF'i, plan görseli, liste, model, montaj paftası ve rehber yazılmaz;
+    DXF denetim için yazılır (geometri hakemi, 28 Ekim 2026: montaj paftası yazılıyordu)."""
+    gercek = U.cizim
+
+    def sahte(ie, gec):
+        if hal == "cizemedi":
+            raise ValueError("deneme")
+        cz = gercek(ie, gec)
+        return cz | {"pdf": None, "neden": "Motor'un doğrulaması geçmedi; teslim PDF'i üretilmedi (deneme)"}
+    monkeypatch.setattr(U, "cizim", sahte)
+    m, ie = U.talep_modeli("TK-95", KOK / _model("TK-01")["is_emri"], ["asma", "ters"], U.kayit())
+    r = U.paket(m, tmp_path / "M", tmp_path / "gec", ie=ie)
+    var = {a.split("_", 1)[1] for a, v in r["dosyalar"].items() if v == "Var"}
+    assert var == ({"bilgi.md", "cizim.dxf"} if hal == "dogrulanmadi" else {"bilgi.md"})
+    assert sorted(p.name for p in (tmp_path / "M" / "prefabrik" / "TK-95").iterdir()) == sorted(f"TK-95_{x}" for x in var)
+    for a in ("yukleme_listesi.xlsx", "model.ifc", "montaj_paftasi.pdf", "montaj_rehberi.html", "model.glb", "kiyas.xlsx"):
+        assert "K23" in r["dosyalar"][f"TK-95_{a}"], a
