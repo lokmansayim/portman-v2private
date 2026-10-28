@@ -172,7 +172,8 @@ def test_secim_r01_genel_motor_satirlar_ve_zarf(depo, wa, hizli_genel):
     assert "mahaller" not in ie and "duvarlar" not in ie                            # tanım gömülmez
     assert ie["yapi"]["tanim_sha256"] == hashlib.sha256((KOK / "modeller" / "C8801K.json").read_bytes()).hexdigest()
     assert ie["bilgi"]["bayi_adi"] == "Deneme Bayi A" and ie["bilgi"]["bayi_telefonu"] == NUMARA_A and "kunye" not in ie     # D-09: kart numarası, gönderici kimliği yok
-    assert rev["ekler"]["gorsel"]["filename"] == "C8801K_bayi_gorsel.png" and rev["ekler"]["ifc"]["sema_hatasi"] == 0 and "ucb" not in rev["ekler"]
+    assert rev["ekler"]["gorsel"]["filename"] == "C8801K_bayi_gorsel.png" and rev["ekler"]["ifc"]["sema_hatasi"] == 0
+    assert "ucb" not in rev["ekler"] and rev["ekler"]["ucb_hata"]       # İE-21: sahte IFC'den 3D sayfası çıkmaz; akış durmaz (gerçek motorla aşağıda)
     assert rev["ekler"]["yukleme_listesi"]["bayiye_gider"] is False
     satirlar = sorgu(depo, "SELECT kind, satir, revizyon_id FROM giden WHERE mesaj_id = (SELECT kaynak_mesaj_id FROM revizyonlar) ORDER BY sira")
     assert [s["kind"] for s in satirlar] == ["interactive", "document"] and all(s["revizyon_id"] for s in satirlar)
@@ -279,6 +280,8 @@ def test_gercek_genel_motor_r01_pdf_antet_taslak(depo, wa):
     assert "krem" in s1 and "antrasit" in s1                                   # bayinin söylediği özellik satıra, özel istek listeye (K21)
     assert rev["ekler"]["gorsel"]["filename"] == "C8801K_bayi_gorsel.png" and Path(rev["ekler"]["gorsel"]["file"]).stat().st_size <= 5 * 1024 * 1024
     assert rev["ekler"]["ifc"]["sema_hatasi"] == 0 and Path(rev["ekler"]["yukleme_listesi"]["dosya"]).is_file()
+    u = rev["ekler"]["ucb"]                                                    # İE-21: 3D sayfası genel motorun IFC'sinden; ayar yok → bağlantı yok
+    assert u["url"] is None and "yayin_hata" not in u and "IfcSpace" in Path(u["dosya"]).read_text(encoding="utf-8")
     kalici.gonder(depo, wa)
     assert [g["kind"] for g in wa.gonderilen] == ["interactive", "document"]
     assert NUMARA_A not in json.dumps(sorgu(depo, "SELECT sonuc FROM isler")[0]["sonuc"])
