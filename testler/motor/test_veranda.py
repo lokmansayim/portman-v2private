@@ -18,6 +18,7 @@ import pytest
 KOK = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(KOK))
 from motor import dxf_out, geometry as G, prefabrik_liste as PL, sunum, veranda as VR  # noqa: E402
+from shapely.geometry import box  # noqa: E402
 
 TK01 = KOK / "testler" / "motor" / "veri" / "TK01.json"
 PK01 = KOK / "testler" / "motor" / "veri" / "PK01.json"
@@ -95,20 +96,39 @@ def _nisli() -> dict:
 
 
 def test_veranda_giris_nisinin_onunde(tmp_path):
-    """Ön verandanın iç kenarı nişin ağzında gövdenin dış yüzüne değil nişe değer; nişin ağzı cephe sayılır. Nişsiz hâli değişmez
-    (test_veranda_geometrisi); boş bırakılmış hücre zaten hata, girinti yalnız açık mahalle olur."""
+    """Ön verandanın iç kenarı nişin ağzında gövdenin dış yüzüne değil nişe değer; nişin ağzı cephe sayılır. Nişin üç yanı dış duvar
+    (10 cm), kapı bir pano içeride; ağızdaki kiriş listede ve teknik paftanın BOM'unda aynı (7 profil). Nişsiz hâli değişmez
+    (test_veranda_geometrisi)."""
     p = G.kur(_nisli())
     assert p.dis_verandalar[0]["rect"] == (256.0, -181.0, 642.0, 0.0)
     assert p.mahaller["GİRİŞ"].acik and p.mahaller["GİRİŞ"].alan_m2 == pytest.approx(1.44375)
     kapi = [q for q in p.panolar if q.acilim and q.acilim.tur == "dis_kapi"]
     assert len(kapi) == 1 and kapi[0].acilim.arasi == ("GİRİŞ", "HOL") and kapi[0].gap() == (404.25, 125.0, 494.25, 135.0)  # bir pano içeride
+    nis = [d for d in p.duvarlar if any(box(*q.rect()).intersects(box(391.5, 0.0, 507.0, 125.0).buffer(-0.5).buffer(6)) for q in d.panolar)]
+    assert len(nis) == 3 and all(d.tur == "dis" and 2 * d.h == 10.0 for d in nis)                # iki yan ve kapının duvarı
+    N = PL.model_motor(_nisli())
+    assert N["veranda_kenarlari_cm"] == [115.5, 386.0, 181.0, 181.0, 261.0, 130.0, 130.0]   # nişin ağzı + iki taşan verandanın kenarları
     m = dxf_out.uret(_nisli(), tmp_path, pdf_hatada=False)
     assert m["validation_passed"] is True, m.get("errors")
     assert _oku(tmp_path / "validation.json")["rooms_m2"]["GİRİŞ"] == pytest.approx(1.44375)
-    bos = _nisli()
-    bos["mahaller"] = [x for x in bos["mahaller"] if x["ad"] != "GİRİŞ"]
-    with pytest.raises(G.IsEmriHatasi, match="boş hücreler"):
-        G.kur(bos)
+    bom = _oku(tmp_path / "bom.json")["kalemler"]
+    assert sum(k["adet"] for k in bom if k["kod"].startswith("V")) == len(N["veranda_kenarlari_cm"])
+
+
+@pytest.mark.parametrize("girdi, v", [
+    ("nis", {"ad": "V", "cephe": "on", "bas_cm": 400, "bit_cm": 500, "derinlik_cm": 150}),   # iki iç köşesi nişin ağzında, havada
+    ("nis", {"ad": "V", "cephe": "on", "bas_cm": 450, "bit_cm": 700, "derinlik_cm": 150}),   # bir iç köşesi nişin ağzında
+    ("pk01", {"ad": "V", "cephe": "on", "bas_cm": 300, "bit_cm": 580, "derinlik_cm": 150}),  # köşedeki ızgara verandasının önünde
+    ("pk01", {"ad": "V", "cephe": "sag", "bas_cm": 20, "bit_cm": 180, "derinlik_cm": 150}),  # ... ve yanında
+    ("pk01", {"ad": "V", "cephe": "sag", "bas_cm": 50, "bit_cm": 400, "derinlik_cm": 150}),
+])
+def test_veranda_nis_disinda_oturmuyor(girdi, v):
+    """Nişin ağzı yalnız verandanın iki iç köşesi duvardaysa ve nişin bütün açık kenarı verandanın iç kenarındaysa dış yüz sayılır
+    (geometri hakemi, 28 Ekim); öteki boşluklar eskisi gibi hata."""
+    ie = _nisli() if girdi == "nis" else _oku(PK01)
+    ie["verandalar"] = [v]
+    with pytest.raises(G.IsEmriHatasi, match="tam oturmuyor"):
+        G.kur(ie)
 
 
 def test_veranda_profili_kiris_yerinde(plan):

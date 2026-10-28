@@ -56,7 +56,7 @@ ISARET_YOLU = KOK / "kurallar" / "liste" / "prefabrik_isaret.json"
 TEK_KAYNAK = "Tek kaynak (zayıf)"
 ISARETLI = ("pencere_u_h_gecen", "omega_kapak")   # satırı `zayif(...)` ile yazılan kurallar (BK-12 PR-2c)
 
-SURUM = "1.6 (28 Ekim 2026; vitrifiye banyo başına, varsayım (İE-13 PR-2); 1.5, 22 Ekim: kör test üreteci 7.3, kurallar kural kitabında; orta iniş 9 m, kitapla farklı on yedi kalemde kitap; PK-07 hedef örnek; T76 cevapları; 100'lük duvar omegası kirişlerin de üstünde; elektrik oda kuralı)"
+SURUM = "1.6 (28 Ekim 2026; vitrifiye banyo başına, varsayım (İE-13 PR-2); nişin ağzındaki kiriş (BK-14 ek); 1.5, 22 Ekim: kör test üreteci 7.3, kurallar kural kitabında; orta iniş 9 m, kitapla farklı on yedi kalemde kitap; PK-07 hedef örnek; T76 cevapları; 100'lük duvar omegası kirişlerin de üstünde; elektrik oda kuralı)"
 GRUPLAR = {"1001": "Panel", "1002": "Metal aksam", "1003": "Kapı ve pencere", "1004": "Tavan", "1005": "Makas", "1006": "Çatı",
            "1007": "Elektrik", "1008": "Vida", "1009": "Depo", "1010": "Sıhhi tesisat", "1011": "Dere", "1012": "Boya"}
 TAVAN = lambda x: int(math.ceil(x - 1e-9))
@@ -239,8 +239,8 @@ def model_motor(ie: dict) -> dict:
                 continue                                       # BK-14: taşan verandanın üç açık kenarı aşağıda, kenar kenar
             vx0, vy0, vx1, vy1 = v.poly.bounds
             yanlar = set()
-            for (x0, y0, x1, y1, *_r) in plan.acik_kenarlar:
-                if v.poly.buffer(1.0).contains(LineString([(x0, y0), (x1, y1)])):
+            for (x0, y0, x1, y1, *_r) in plan.acik_kenarlar:     # parçanın ortası mahalde (nişin ağız parçaları akstan başlar, net alanı taşar)
+                if v.poly.buffer(1.0).contains(Point((x0 + x1) / 2, (y0 + y1) / 2)):
                     yanlar.add("x" if abs(y1 - y0) < 1e-6 else "y")
             kirisler += [((vx1 - vx0) if e == "x" else (vy1 - vy0)) for e in sorted(yanlar)]
     for v in plan.dis_verandalar:                              # BK-14: dış kenar ve iki yan (TK-01 geçici yolu, PK-03/PK-06 paftası gibi)
