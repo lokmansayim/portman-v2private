@@ -53,6 +53,7 @@ Bugün bu dört maddeyi karşılamayan yerler `KARARLAR/D-28.md` › "Bugünkü 
 | `docs/is_emirleri/` | İş emirleri (İE: ürün işi, BK: bakım); her birinin kabul koşulu içinde |
 | `docs/raporlar/`, `docs/notlar/` | Tarihli raporlar ve notlar |
 | `docs/devir/` | Oturum devir notları |
+| `docs/durum/` | Oturum ekleri (28 Ekim 2026'dan beri `DURUM.md`'nin yerine): her oturum yeni bir dosya, `<YYYY-MM-DD>_<HHMM>_<KOD>.md` (UTC). Ayrı dosya, açık PR'lar birbiriyle çakışmasın diye; eski durum `DURUM.md`'de |
 | `KARARLAR/` | K01–K25, Z-01–Z-10, D-01…; açık kararlar `KARARLAR/README.md`'de. Kökteki `KARARLAR.md` dondurulmuş günlüktür |
 | `testler/` | Referans (dondurulmuş), kalıcı akış (Postgres) ve bilinen hata testleri |
 | `deneme/` | Tarihli denemeler; canlıda değil |
