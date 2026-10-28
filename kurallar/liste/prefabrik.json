@@ -430,6 +430,11 @@
    "durum": "aday",
    "kaynak": "\"VİDA BİLGİ\" sayfası (PK-06): 8'lik trapez uç ve PH2 uç = inox taş ÷ 2, aşağı (yalnız PK-06 4 tuttu; PK-01…05 4–6)."
   },
+  "vitrifiye_islak_hacim_basina": {
+   "deger": 1,
+   "durum": "lokman",
+   "kaynak": "Lokman, 27 Ekim 2026 22:00 (TK-01 teklifi): \"evet 2 takım olacak\" (banyo ve E. banyo); ıslak hacim (islak_hacim türleri) başına bir takım. Genellemesi İE-13 PR-2'de, Patron onayıyla (D-28: düzeltme kurala işlenir)."
+  },
   "vitrifiye_aday": {
    "deger": 1,
    "durum": "aday",

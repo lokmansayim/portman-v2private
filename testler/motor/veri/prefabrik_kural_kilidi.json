@@ -311,6 +311,7 @@
   "prefabrik.vida.trapez_5560_yuvarlama": 100,
   "prefabrik.vida_aday_yuvarlama": 250,
   "prefabrik.vitrifiye_aday": 1,
+  "prefabrik.vitrifiye_islak_hacim_basina": 1,
   "prefabrik_isaret.omega_kapak": "tek_kaynak",
   "prefabrik_isaret.pencere_u_h_gecen": "tek_kaynak"
  },

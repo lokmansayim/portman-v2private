@@ -1092,9 +1092,11 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
             n = tk[anahtar]
             ekle("1010", kalem, olcu, n, "Kural (O17)", f"sabit takım (bir banyo): {n}", "PK-03, PK-05, PK-07 tuttu; PK-06 (üç ıslak nokta) boru 10, dirsek 20")
         vit_alici = any("vitrifiye" in x for x in alici)
-        ekle("1010", "Vitrifiye ve batarya (duş teknesi, klozet, lavabo, batarya grubu)", "takım", 0 if vit_alici else None, "İş Emri" if vit_alici else "Kural yok",
-             "alıcıya ait" if vit_alici else "—", "PK-07'de 4 satır × 1", aday=None if vit_alici else r("vitrifiye_aday"),
-             aday_notu="" if vit_alici else f"PK-07 (dört satır × 1): {r('vitrifiye_aday')} takım")
+        n_islak, vit_b = sum(1 for x in N["kapali"] if x["tur"] in ISLAK), r("vitrifiye_islak_hacim_basina")
+        ekle("1010", "Vitrifiye ve batarya (duş teknesi, klozet, lavabo, batarya grubu)", "takım", 0 if vit_alici else n_islak * vit_b,
+             "İş Emri" if vit_alici else "Kural (Lokman 27.10)", "alıcıya ait" if vit_alici else f"ıslak hacim {n_islak} × {vit_b}",
+             "PK-07'de 4 satır × 1 (bir banyo); TK-01 banyo ve E. banyo: 2 takım (Lokman, 27 Ekim 22:00)",
+             aday=None if vit_alici else r("vitrifiye_aday"), aday_notu="" if vit_alici else f"PK-07 (dört satır × 1): ev başına {r('vitrifiye_aday')} takım")
     else:
         ekle("1010", "Sıhhi tesisat grubu", "—", None, "Kural yok", "—", "ıslak hacim yok")
 

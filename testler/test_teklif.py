@@ -40,14 +40,17 @@ def T(cikti):
 
 
 def test_tk01_toplamlar(T):
-    """İş Emri r05, defter 2026-10-27-r02. Vitrifiye Motor'da kuralsız (adet yok): toplama girmez, fiyatsız sayılır."""
+    """İş Emri r05, defter 2026-10-27-r02: teklif çalışmasının r06'sıyla aynı (asma 419.771,13, ters 418.500,13), adet düzeltmesi olmadan.
+    Vitrifiye ıslak hacim başına bir takım (banyo ve E. banyo: 2; Lokman 27 Ekim 22:00), 9 satır fiyatsız (defterde fiyatı yok)."""
     assert T["kod"] == "TK-01" and T["is_emri_no"] == "PM-TK01-80M2" and T["revizyon"] == 5
     assert T["defter_surumu"] == "2026-10-27-r02" and not T["oneri_dahil"]
     ozet = {s["ad"]: s["fiyat"]["ozet"] for s in T["secenekler"]}
     assert list(ozet) == ["Asma tavan", "Ters tavan"]
-    assert ozet["Asma tavan"]["toplam"] == 394771.13 and ozet["Ters tavan"]["toplam"] == 393500.13
-    assert (ozet["Asma tavan"]["satir"], ozet["Asma tavan"]["fiyatli"], len(ozet["Asma tavan"]["fiyatsiz"])) == (131, 121, 10)
-    assert (ozet["Ters tavan"]["satir"], ozet["Ters tavan"]["fiyatli"], len(ozet["Ters tavan"]["fiyatsiz"])) == (129, 119, 10)
+    assert ozet["Asma tavan"]["toplam"] == 419771.13 and ozet["Ters tavan"]["toplam"] == 418500.13
+    assert (ozet["Asma tavan"]["satir"], ozet["Asma tavan"]["fiyatli"], len(ozet["Asma tavan"]["fiyatsiz"])) == (131, 122, 9)
+    assert (ozet["Ters tavan"]["satir"], ozet["Ters tavan"]["fiyatli"], len(ozet["Ters tavan"]["fiyatsiz"])) == (129, 120, 9)
+    vit = [x for x in T["secenekler"][0]["fiyat"]["satirlar"] if x["kalem"].startswith("Vitrifiye")]
+    assert [(x["adet"], x["birim_fiyat"], x["tutar"]) for x in vit] == [(2, 12500, 25000)]
     for s in T["secenekler"]:
         top = 0.0
         for x in s["fiyat"]["satirlar"]:
@@ -136,9 +139,9 @@ def test_ozet_ve_kosullar(cikti, T, tmp_path):
     rows = {r[0].value: r for r in oz.iter_rows() if r[0].value}
     for k in ("Teslim süresi", "Ödeme şekli"):
         assert rows[k][1].value is None and rows[k][1].fill.fgColor.rgb.endswith("FFF2A8") and rows[k][3].value == "Patron'dan"
-    assert rows["Asma tavan"][1].value == 394771.13 and rows["Ters tavan"][1].value == 393500.13
+    assert rows["Asma tavan"][1].value == 419771.13 and rows["Ters tavan"][1].value == 418500.13
     fiyatsiz = [r[0].value for r in oz.iter_rows() if r[0].fill.fgColor.rgb.endswith("E7E7E7") and r[0].value]
-    assert len(fiyatsiz) == 10 and any(v.startswith("Vitrifiye") for v in fiyatsiz)
+    assert len(fiyatsiz) == 9 and not any(v.startswith("Vitrifiye") for v in fiyatsiz) and any(v.startswith("Makas (baş)") for v in fiyatsiz)
     (tmp_path / "k.json").write_text(json.dumps({"kosullar": {"Teslim süresi": "DENEME 1", "Ödeme şekli": "DENEME 2"}}, ensure_ascii=False), encoding="utf-8")
     assert TK.main([str(IE), str(tmp_path / "c"), "--kosullar", str(tmp_path / "k.json")]) == 0
     J = _oku(tmp_path / "c" / "TK01_teklif.json")
