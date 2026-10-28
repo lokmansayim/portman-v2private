@@ -123,7 +123,9 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | BK | BK-14 | taşan veranda ve "+" duvar birleşimi (PR #50) | alındı (27.10; CIO) |
 | BK | BK-15 | revizyonda ebeveyn banyosu ve oda ekleme isteğinin doğru gerekçesi (pano satır 115, madde 3; `claude/project-thread-0c8rv2`) | alındı (27.10; CIO) |
 | BK | BK-16 | kalıcı akış sağlık testinin saniye sınırı yanlış kırmızısı (`test_saglik`, sabit nabız saati; CI koşu #60; `claude/project-thread-ro859m`) | alındı (28.10; CIO) |
-| BK | **BK-17** | — | **sıradaki boş** |
+| BK | BK-17 | KVKK denetiminin tamamen kaldırılması (Patron 28.10; D-13; `claude/tender-planck-seo86o`) | alındı (28.10) |
+| BK | BK-18 | Pano Motor'unda dış ve iç duvar aynı kalınlıkta (100 / 100; TK-02 "içlerde 100'lük"; `claude/project-thread-5p2lsc`) | alındı (28.10; CIO) |
+| BK | **BK-19** | — | **sıradaki boş** |
 
 ## 27 Eylülde Lokman'ın verdiği kararlar
 

@@ -99,12 +99,11 @@ def yeni_anahtar_var(is_emri: dict) -> bool:
 
 
 def kalinlik_ayarla(dis_cm: float, ic_cm: float) -> None:
-    """Deneme: dış / iç duvar kalınlığı (cm). Verilmezse 10 / 6."""
+    """Deneme: dış / iç duvar kalınlığı (cm). Verilmezse 10 / 6. Eşit kalınlık (100 / 100) BK-18'den beri çizilir: iç köşe profili
+    kendi katmanındadır (`katman`)."""
     global T_DIS, T_IC
     if not (6.0 <= ic_cm <= dis_cm <= 30.0):
         raise IsEmriHatasi(f"Duvar kalınlığı aralık dışı: dış {dis_cm} / iç {ic_cm} cm")
-    if dis_cm == ic_cm:
-        raise IsEmriHatasi("Dış ve iç duvar aynı kalınlıkta: katman adları ayrışmıyor (deneme sınırı)")
     T_DIS, T_IC = float(dis_cm), float(ic_cm)
 
 
@@ -127,9 +126,11 @@ def _mm(cm: float) -> str:
 
 
 def katman(ad: str) -> str:
-    """Kalınlık taşıyan katman adını geçerli kalınlığa çevirir (10 / 6 cm'de ad değişmez)."""
+    """Kalınlık taşıyan katman adını geçerli kalınlığa çevirir (10 / 6 cm'de ad değişmez). Dış ve iç aynı kalınlıktaysa (BK-18) iç köşe
+    profili `IC_KOSE_PROFIL_<mm>` olur; yoksa iki köşe aynı katmana düşer, dış ile iç köşe ayrışmaz."""
+    ic_kose = f"IC_KOSE_PROFIL_{_mm(T_IC)}" if T_IC == T_DIS else f"KOSE_PROFIL_{_mm(T_IC)}"
     return {"DIS_DUVAR_100": f"DIS_DUVAR_{_mm(T_DIS)}", "IC_DUVAR_60": f"IC_DUVAR_{_mm(T_IC)}",
-            "KOSE_PROFIL_100": f"KOSE_PROFIL_{_mm(T_DIS)}", "KOSE_PROFIL_60": f"KOSE_PROFIL_{_mm(T_IC)}",
+            "KOSE_PROFIL_100": f"KOSE_PROFIL_{_mm(T_DIS)}", "KOSE_PROFIL_60": ic_kose,
             "IC_UCLU_H_60": f"IC_UCLU_H_{_mm(T_IC)}", "DIS_UCLU_H_100": f"DIS_UCLU_H_{_mm(T_DIS)}"}.get(ad, ad)
 
 

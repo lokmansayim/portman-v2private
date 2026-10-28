@@ -155,7 +155,7 @@ def dogrula(doc, plan: G.Plan, is_emri: dict) -> dict:
         x, y, rot = e.dxf.insert.x, e.dxf.insert.y, e.dxf.rotation
         dx, dy = {0.0: (1, 0), 90.0: (0, 1), 180.0: (-1, 0), 270.0: (0, -1)}[rot % 360]
         # üç kanalda gerçek pano: gövde iki yanı ve kol yönünde; dış H'de kol sondası dış duvar gövdesini (T_DIS/2) aşar, gövde arkası da sınanır
-        kol = (G.T_DIS / 2.0 + 1.0) if dis else 4.0
+        kol = (G.T_DIS / 2.0 + 1.0) if dis else (G.T_IC / 2.0 + 1.0)   # iç: 60'lık duvarda 4 cm (eski sabit); BK-18: 100'lük iç duvarda 6 cm
         probes = [(x + dy, y - dx), (x - dy, y + dx), (x + kol * dx, y + kol * dy)] + ([(x - dx, y - dy)] if dis else [])
         ok = [any(r[0] - 1e-7 <= px <= r[2] + 1e-7 and r[1] - 1e-7 <= py <= r[3] + 1e-7 for r in rects) for px, py in probes]
         if not all(ok):

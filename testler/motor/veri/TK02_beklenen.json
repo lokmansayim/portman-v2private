@@ -1,0 +1,1342 @@
+{
+ "aciklama": "BK-18 · TK-02 ön onay çiziminin izi (doğrulama özeti + pano BOM'u) ve yükleme listesi satırları. Hedef örnek adayı; onay: Lokman'ın kabulü bekleniyor (D-28 madde 2).",
+ "girdi": "testler/motor/veri/TK02.json",
+ "iz": {
+  "dogrulama": {
+   "passed": true,
+   "errors": [],
+   "outer_cm": [
+    898.0,
+    888.0
+   ],
+   "panel_grid": [
+    7.0,
+    7.0
+   ],
+   "panel_count": 60,
+   "corner_count": 10,
+   "windows": 8,
+   "doors": 8,
+   "h_connectors": 10,
+   "h_connectors_dis": 6,
+   "footprint_diff_cm2": 0.0,
+   "warnings": [
+    "Aks noktası (6, 4): dört kollu birleşim; duvar 1 o noktada bölündü (1, 16), uçları geçen duvarın (11) yüzünde; birleşim profili kural kitabında yok"
+   ],
+   "rooms_m2": {
+    "YATAK ODASI 1": 10.4654,
+    "E. BANYO": 2.7835,
+    "BANYO": 4.2958,
+    "YATAK ODASI 2": 12.0221,
+    "HOL": 5.6826,
+    "GİRİŞ": 1.4438,
+    "SALON": 18.2592,
+    "YATAK ODASI 3": 8.9411,
+    "MUTFAK": 8.9225,
+    "ÖN VERANDA": 6.9866,
+    "ARKA VERANDA": 3.393
+   },
+   "openings": [
+    {
+     "kind": "pencere",
+     "name": "BOM_D03_1255p0_DIS_P02",
+     "gap": [
+      73.0,
+      878.0,
+      193.0,
+      888.0
+     ]
+    },
+    {
+     "kind": "pencere",
+     "name": "BOM_D04_1255p0_DIS_P03",
+     "gap": [
+      293.75,
+      878.0,
+      353.75,
+      888.0
+     ]
+    },
+    {
+     "kind": "pencere",
+     "name": "BOM_D04_1255p0_DIS_P03",
+     "gap": [
+      419.25,
+      878.0,
+      479.25,
+      888.0
+     ]
+    },
+    {
+     "kind": "kapi",
+     "name": "BOM_D12_1255p0_DIS_K02_SOL",
+     "gap": [
+      404.25,
+      125.0,
+      494.25,
+      135.0
+     ]
+    },
+    {
+     "kind": "pencere",
+     "name": "BOM_D03_1255p0_DIS_P02",
+     "gap": [
+      138.25,
+      0.0,
+      258.25,
+      10.0
+     ]
+    },
+    {
+     "kind": "pencere",
+     "name": "BOM_D03_1255p0_DIS_P02",
+     "gap": [
+      640.25,
+      0.0,
+      760.25,
+      10.0
+     ]
+    },
+    {
+     "kind": "pencere",
+     "name": "BOM_D03_1255p0_DIS_P02",
+     "gap": [
+      0.0,
+      195.75,
+      10.0,
+      315.75
+     ]
+    },
+    {
+     "kind": "kapi",
+     "name": "BOM_I16_1255p0_IC_K01_SAG_ALT_KAYM102p5",
+     "gap": [
+      256.0,
+      643.5,
+      266.0,
+      725.5
+     ]
+    },
+    {
+     "kind": "kapi",
+     "name": "BOM_I16_1255p0_IC_K01_SOL_UST_KAYP102p5",
+     "gap": [
+      381.5,
+      413.0,
+      391.5,
+      495.0
+     ]
+    },
+    {
+     "kind": "kapi",
+     "name": "BOM_I16_1255p0_IC_K01_SOL_ALT_KAYM102p5",
+     "gap": [
+      381.5,
+      518.0,
+      391.5,
+      600.0
+     ]
+    },
+    {
+     "kind": "kapi",
+     "name": "BOM_I17_1205p0_IC_K01_SAG_UST_KAYP77p5",
+     "gap": [
+      507.0,
+      162.0,
+      517.0,
+      244.0
+     ]
+    },
+    {
+     "kind": "kapi",
+     "name": "BOM_I16_1255p0_IC_K01_SAG_UST_KAYP102p5",
+     "gap": [
+      507.0,
+      413.0,
+      517.0,
+      495.0
+     ]
+    },
+    {
+     "kind": "kapi",
+     "name": "BOM_I17_1205p0_IC_K01_SAG_ALT_KAYM77p5",
+     "gap": [
+      507.0,
+      518.0,
+      517.0,
+      600.0
+     ]
+    },
+    {
+     "kind": "pencere",
+     "name": "BOM_D02_1255p0_DIS_P01",
+     "gap": [
+      888.0,
+      321.0,
+      898.0,
+      441.0
+     ]
+    },
+    {
+     "kind": "pencere",
+     "name": "BOM_D02_1255p0_DIS_P01",
+     "gap": [
+      888.0,
+      634.75,
+      898.0,
+      754.75
+     ]
+    },
+    {
+     "kind": "kapi",
+     "name": "BOM_I17_1205p0_IC_K01_SOL_ALT_KAYM77p5",
+     "gap": [
+      403.0,
+      627.0,
+      485.0,
+      637.0
+     ]
+    }
+   ]
+  },
+  "bom": [
+   {
+    "kod": "B02",
+    "malzeme": "100×50 köşe bağlantısı",
+    "olcu_mm": [
+     50,
+     100,
+     null
+    ],
+    "adet": 10,
+    "birim": "adet"
+   },
+   {
+    "kod": "B04",
+    "malzeme": "Veranda dikmesi",
+    "olcu_mm": [
+     100,
+     100,
+     null
+    ],
+    "adet": 4,
+    "birim": "adet"
+   },
+   {
+    "kod": "B05",
+    "malzeme": "Üçlü H bağlantı 100",
+    "olcu_mm": [
+     100.0,
+     null,
+     null
+    ],
+    "adet": 4,
+    "birim": "adet"
+   },
+   {
+    "kod": "B06",
+    "malzeme": "Üçlü H bağlantı dış 100×100",
+    "olcu_mm": [
+     100.0,
+     100.0,
+     null
+    ],
+    "adet": 6,
+    "birim": "adet"
+   },
+   {
+    "kod": "D01",
+    "malzeme": "Dolu pano",
+    "olcu_mm": [
+     1255,
+     100,
+     2500
+    ],
+    "adet": 10,
+    "birim": "adet"
+   },
+   {
+    "kod": "D02",
+    "malzeme": "120×120 pencereli pano",
+    "olcu_mm": [
+     1255,
+     100,
+     2500
+    ],
+    "adet": 2,
+    "birim": "adet"
+   },
+   {
+    "kod": "D03",
+    "malzeme": "120×180 pencereli pano",
+    "olcu_mm": [
+     1255,
+     100,
+     2500
+    ],
+    "adet": 4,
+    "birim": "adet"
+   },
+   {
+    "kod": "D04",
+    "malzeme": "60×40 vasistaslı pano",
+    "olcu_mm": [
+     1255,
+     100,
+     2500
+    ],
+    "adet": 2,
+    "birim": "adet"
+   },
+   {
+    "kod": "D06",
+    "malzeme": "Özel dolu pano",
+    "olcu_mm": [
+     627.5,
+     100,
+     2500
+    ],
+    "adet": 3,
+    "birim": "adet"
+   },
+   {
+    "kod": "D08",
+    "malzeme": "Özel dolu pano",
+    "olcu_mm": [
+     1205,
+     100,
+     2500
+    ],
+    "adet": 2,
+    "birim": "adet"
+   },
+   {
+    "kod": "D09",
+    "malzeme": "Özel dolu pano",
+    "olcu_mm": [
+     602.5,
+     100,
+     2500
+    ],
+    "adet": 1,
+    "birim": "adet"
+   },
+   {
+    "kod": "D10",
+    "malzeme": "Özel dolu pano",
+    "olcu_mm": [
+     652.5,
+     100,
+     2500
+    ],
+    "adet": 1,
+    "birim": "adet"
+   },
+   {
+    "kod": "D11",
+    "malzeme": "Özel dolu pano",
+    "olcu_mm": [
+     622.5,
+     100,
+     2500
+    ],
+    "adet": 1,
+    "birim": "adet"
+   },
+   {
+    "kod": "D12",
+    "malzeme": "Dış kapılı pano",
+    "olcu_mm": [
+     1255.0,
+     100,
+     2500
+    ],
+    "adet": 1,
+    "birim": "adet"
+   },
+   {
+    "kod": "D13",
+    "malzeme": "Özel dolu pano",
+    "olcu_mm": [
+     1250.0,
+     100,
+     2500
+    ],
+    "adet": 3,
+    "birim": "adet"
+   },
+   {
+    "kod": "D14",
+    "malzeme": "Özel dolu pano",
+    "olcu_mm": [
+     630.0,
+     100,
+     2500
+    ],
+    "adet": 1,
+    "birim": "adet"
+   },
+   {
+    "kod": "D15",
+    "malzeme": "Özel dolu pano",
+    "olcu_mm": [
+     625.0,
+     100,
+     2500
+    ],
+    "adet": 1,
+    "birim": "adet"
+   },
+   {
+    "kod": "D16",
+    "malzeme": "Özel dolu pano",
+    "olcu_mm": [
+     1200.0,
+     100,
+     2500
+    ],
+    "adet": 2,
+    "birim": "adet"
+   },
+   {
+    "kod": "I12",
+    "malzeme": "Özel dolu pano",
+    "olcu_mm": [
+     1155.0,
+     100,
+     2500
+    ],
+    "adet": 1,
+    "birim": "adet"
+   },
+   {
+    "kod": "I13",
+    "malzeme": "Dolu pano",
+    "olcu_mm": [
+     1255.0,
+     100,
+     2500
+    ],
+    "adet": 8,
+    "birim": "adet"
+   },
+   {
+    "kod": "I14",
+    "malzeme": "Özel dolu pano",
+    "olcu_mm": [
+     1205.0,
+     100,
+     2500
+    ],
+    "adet": 7,
+    "birim": "adet"
+   },
+   {
+    "kod": "I15",
+    "malzeme": "Özel dolu pano",
+    "olcu_mm": [
+     1250.0,
+     100,
+     2500
+    ],
+    "adet": 2,
+    "birim": "adet"
+   },
+   {
+    "kod": "I16",
+    "malzeme": "İç kapılı pano",
+    "olcu_mm": [
+     1255.0,
+     100,
+     2500
+    ],
+    "adet": 4,
+    "birim": "adet"
+   },
+   {
+    "kod": "I17",
+    "malzeme": "İç kapılı özel pano",
+    "olcu_mm": [
+     1205.0,
+     100,
+     2500
+    ],
+    "adet": 3,
+    "birim": "adet"
+   },
+   {
+    "kod": "I18",
+    "malzeme": "Özel dolu pano",
+    "olcu_mm": [
+     577.5,
+     100,
+     2500
+    ],
+    "adet": 1,
+    "birim": "adet"
+   },
+   {
+    "kod": "K01",
+    "malzeme": "İç kapı",
+    "olcu_mm": [
+     820,
+     null,
+     null
+    ],
+    "adet": 7,
+    "birim": "adet"
+   },
+   {
+    "kod": "K03",
+    "malzeme": "Dış kapı 90",
+    "olcu_mm": [
+     900.0,
+     null,
+     null
+    ],
+    "adet": 1,
+    "birim": "adet"
+   },
+   {
+    "kod": "P01",
+    "malzeme": "Pencere 120×120",
+    "olcu_mm": [
+     1200,
+     1200,
+     null
+    ],
+    "adet": 2,
+    "birim": "adet"
+   },
+   {
+    "kod": "P02",
+    "malzeme": "Pencere 120×180",
+    "olcu_mm": [
+     1200,
+     1800,
+     null
+    ],
+    "adet": 4,
+    "birim": "adet"
+   },
+   {
+    "kod": "P03",
+    "malzeme": "Vasistas 60×40",
+    "olcu_mm": [
+     600,
+     400,
+     null
+    ],
+    "adet": 2,
+    "birim": "adet"
+   },
+   {
+    "kod": "V05",
+    "malzeme": "Veranda ön profil gösterimi",
+    "olcu_mm": [
+     1155.0,
+     100,
+     null
+    ],
+    "adet": 1,
+    "birim": "adet"
+   },
+   {
+    "kod": "V06",
+    "malzeme": "Veranda ön profil gösterimi",
+    "olcu_mm": [
+     3860.0,
+     100,
+     null
+    ],
+    "adet": 1,
+    "birim": "adet"
+   },
+   {
+    "kod": "V07",
+    "malzeme": "Veranda yan profil gösterimi",
+    "olcu_mm": [
+     1810.0,
+     100,
+     null
+    ],
+    "adet": 2,
+    "birim": "adet"
+   },
+   {
+    "kod": "V08",
+    "malzeme": "Veranda ön profil gösterimi",
+    "olcu_mm": [
+     2610.0,
+     100,
+     null
+    ],
+    "adet": 1,
+    "birim": "adet"
+   },
+   {
+    "kod": "V09",
+    "malzeme": "Veranda yan profil gösterimi",
+    "olcu_mm": [
+     1300.0,
+     100,
+     null
+    ],
+    "adet": 2,
+    "birim": "adet"
+   }
+  ],
+  "liste": [
+   {
+    "grup": "1001",
+    "kalem": "100'lük karkaslı + kasalı pano",
+    "olcu": "100 × 1250 × 2500",
+    "adet": 4
+   },
+   {
+    "grup": "1001",
+    "kalem": "100'lük karkaslı + kasalı pano",
+    "olcu": "100 × 1200 × 2500",
+    "adet": 3
+   },
+   {
+    "grup": "1001",
+    "kalem": "100'lük yapıştırma dolu pano",
+    "olcu": "100 × 1250 × 2500",
+    "adet": 18
+   },
+   {
+    "grup": "1001",
+    "kalem": "100'lük yapıştırma dolu pano",
+    "olcu": "100 × 1245 × 2500",
+    "adet": 5
+   },
+   {
+    "grup": "1001",
+    "kalem": "100'lük yapıştırma dolu pano",
+    "olcu": "100 × 1200 × 2500",
+    "adet": 9
+   },
+   {
+    "grup": "1001",
+    "kalem": "100'lük yapıştırma dolu pano",
+    "olcu": "100 × 1195 × 2500",
+    "adet": 2
+   },
+   {
+    "grup": "1001",
+    "kalem": "100'lük yapıştırma dolu pano",
+    "olcu": "100 × 1150 × 2500",
+    "adet": 1
+   },
+   {
+    "grup": "1001",
+    "kalem": "100'lük yapıştırma dolu pano",
+    "olcu": "100 × 650 × 2500",
+    "adet": 1
+   },
+   {
+    "grup": "1001",
+    "kalem": "100'lük yapıştırma dolu pano",
+    "olcu": "100 × 625 × 2500",
+    "adet": 4
+   },
+   {
+    "grup": "1001",
+    "kalem": "100'lük yapıştırma dolu pano",
+    "olcu": "100 × 620 × 2500",
+    "adet": 2
+   },
+   {
+    "grup": "1001",
+    "kalem": "100'lük yapıştırma dolu pano",
+    "olcu": "100 × 600 × 2500",
+    "adet": 1
+   },
+   {
+    "grup": "1001",
+    "kalem": "100'lük yapıştırma dolu pano",
+    "olcu": "100 × 575 × 2500",
+    "adet": 1
+   },
+   {
+    "grup": "1001",
+    "kalem": "100'lük yapıştırma dolu vasistaslı pano (60/40)",
+    "olcu": "100 × 1250 × 2500",
+    "adet": 2
+   },
+   {
+    "grup": "1001",
+    "kalem": "Karkaslı çelik kapı panosu",
+    "olcu": "100 × 1250 × 2500",
+    "adet": 1
+   },
+   {
+    "grup": "1001",
+    "kalem": "Pencere alt panel (120/120)",
+    "olcu": "100 × 1250 × 800",
+    "adet": 2
+   },
+   {
+    "grup": "1001",
+    "kalem": "Pencere alt panel (120/180)",
+    "olcu": "100 × 1250 × 200",
+    "adet": 4
+   },
+   {
+    "grup": "1001",
+    "kalem": "Pencere üst panel",
+    "olcu": "100 × 1250 × 500",
+    "adet": 6
+   },
+   {
+    "grup": "1002",
+    "kalem": "10'luk köşe direği 100 × 100",
+    "olcu": "100 × 100 × 2500",
+    "adet": 10
+   },
+   {
+    "grup": "1002",
+    "kalem": "Köşebent",
+    "olcu": "L 2500",
+    "adet": 7
+   },
+   {
+    "grup": "1002",
+    "kalem": "Özel kutu profil (kolon) 100 × 100",
+    "olcu": "L 2500",
+    "adet": 4
+   },
+   {
+    "grup": "1002",
+    "kalem": "Kutu profil (kiriş) 100 × 100",
+    "olcu": "L 3860",
+    "adet": 1
+   },
+   {
+    "grup": "1002",
+    "kalem": "Kutu profil (kiriş) 100 × 100",
+    "olcu": "L 1710",
+    "adet": 1
+   },
+   {
+    "grup": "1002",
+    "kalem": "Kutu profil (kiriş) 100 × 100",
+    "olcu": "L 1710",
+    "adet": 1
+   },
+   {
+    "grup": "1002",
+    "kalem": "Kutu profil (kiriş) 100 × 100",
+    "olcu": "L 2610",
+    "adet": 1
+   },
+   {
+    "grup": "1002",
+    "kalem": "Kutu profil (kiriş) 100 × 100",
+    "olcu": "L 1200",
+    "adet": 1
+   },
+   {
+    "grup": "1002",
+    "kalem": "Kutu profil (kiriş) 100 × 100",
+    "olcu": "L 1200",
+    "adet": 1
+   },
+   {
+    "grup": "1002",
+    "kalem": "Kutu profil (kiriş) 100 × 100",
+    "olcu": "L 1255",
+    "adet": 1
+   },
+   {
+    "grup": "1002",
+    "kalem": "H 100 (dış pano eki)",
+    "olcu": "100 × 100 × 2500",
+    "adet": 20
+   },
+   {
+    "grup": "1002",
+    "kalem": "H standart 100 (iç pano eki)",
+    "olcu": "100 × 100 × 2500",
+    "adet": 13
+   },
+   {
+    "grup": "1002",
+    "kalem": "3'lü H 100 × 100 × 100 (dış duvar T'si)",
+    "olcu": "L 2500",
+    "adet": 6
+   },
+   {
+    "grup": "1002",
+    "kalem": "3'lü H standart 100 (iç T)",
+    "olcu": "L 2500",
+    "adet": 4
+   },
+   {
+    "grup": "1002",
+    "kalem": "Özel pencere karkası (120×120) (100'lük çektirme U'su + 100'lük H geçen)",
+    "olcu": "1200 × 1200",
+    "adet": 2
+   },
+   {
+    "grup": "1002",
+    "kalem": "Özel pencere karkası (120×180) (100'lük çektirme U'su + 100'lük H geçen)",
+    "olcu": "1200 × 1800",
+    "adet": 4
+   },
+   {
+    "grup": "1002",
+    "kalem": "Çektirme U'su 100",
+    "olcu": "100 × 2440",
+    "adet": 2
+   },
+   {
+    "grup": "1002",
+    "kalem": "100'lük pencere U'su H geçen",
+    "olcu": "L 2500",
+    "adet": 1
+   },
+   {
+    "grup": "1002",
+    "kalem": "Çektirme U'su 100 (iç duvar)",
+    "olcu": "100 × 2440",
+    "adet": 2
+   },
+   {
+    "grup": "1002",
+    "kalem": "60'lık duvar omegası (asma dizme tavan)",
+    "olcu": "60 × 3750",
+    "adet": 31
+   },
+   {
+    "grup": "1002",
+    "kalem": "100'lük duvar omegası",
+    "olcu": "100 × 2500",
+    "adet": 17
+   },
+   {
+    "grup": "1002",
+    "kalem": "100'lük saçak omegası",
+    "olcu": "100 × 2500",
+    "adet": 11
+   },
+   {
+    "grup": "1002",
+    "kalem": "Saçak sacı (30'luk, 3'ü menfezli)",
+    "olcu": "300 × 2500",
+    "adet": 12
+   },
+   {
+    "grup": "1002",
+    "kalem": "Alın sacı (30'luk)",
+    "olcu": "300 × 2500",
+    "adet": 13
+   },
+   {
+    "grup": "1002",
+    "kalem": "Baş makas omegası",
+    "olcu": "L 2500",
+    "adet": 8
+   },
+   {
+    "grup": "1002",
+    "kalem": "Baş makas Z'si",
+    "olcu": "L 2800",
+    "adet": 8
+   },
+   {
+    "grup": "1002",
+    "kalem": "Baş makas betopanı",
+    "olcu": "1250 × 2500",
+    "adet": 8
+   },
+   {
+    "grup": "1002",
+    "kalem": "100'lük alt çerçeve",
+    "olcu": "100 × 3750",
+    "adet": 19
+   },
+   {
+    "grup": "1003",
+    "kalem": "Prefabrik çelik kapı (SOL)",
+    "olcu": "900 × 2000",
+    "adet": 1
+   },
+   {
+    "grup": "1003",
+    "kalem": "Amerikan kapı (80'lik kanat) (SAĞ)",
+    "olcu": "82 × 196",
+    "adet": 3
+   },
+   {
+    "grup": "1003",
+    "kalem": "Amerikan kapı (80'lik kanat) (SOL)",
+    "olcu": "82 × 196",
+    "adet": 4
+   },
+   {
+    "grup": "1003",
+    "kalem": "PVC pencere",
+    "olcu": "120/120",
+    "adet": 2
+   },
+   {
+    "grup": "1003",
+    "kalem": "PVC pencere",
+    "olcu": "120/180",
+    "adet": 4
+   },
+   {
+    "grup": "1003",
+    "kalem": "PVC vasistas",
+    "olcu": "60/40",
+    "adet": 2
+   },
+   {
+    "grup": "1004",
+    "kalem": "Tavan beyaz alçıpan",
+    "olcu": "1200 × 2500",
+    "adet": 24
+   },
+   {
+    "grup": "1004",
+    "kalem": "Tavan yeşil alçıpan",
+    "olcu": "1200 × 2500",
+    "adet": 7
+   },
+   {
+    "grup": "1004",
+    "kalem": "Tavan H'ı L 1185 (asma dizme tavan)",
+    "olcu": "adet",
+    "adet": 96
+   },
+   {
+    "grup": "1004",
+    "kalem": "PVC omega kapak L 3750 (asma dizme tavan)",
+    "olcu": "adet",
+    "adet": 20
+   },
+   {
+    "grup": "1004",
+    "kalem": "Çatı şiltesi / izolasyonu (9,6 m²/paket)",
+    "olcu": "paket",
+    "adet": 10
+   },
+   {
+    "grup": "1005",
+    "kalem": "Makas (baş) · ana çatı",
+    "olcu": "açıklık 8980",
+    "adet": 2
+   },
+   {
+    "grup": "1005",
+    "kalem": "Makas (orta) · ana çatı",
+    "olcu": "açıklık 8980",
+    "adet": 6
+   },
+   {
+    "grup": "1005",
+    "kalem": "Yavru makas · ön veranda çatısı",
+    "olcu": "L 4460",
+    "adet": 3
+   },
+   {
+    "grup": "1005",
+    "kalem": "Yavru makas · arka veranda çatısı",
+    "olcu": "L 3210",
+    "adet": 2
+   },
+   {
+    "grup": "1005",
+    "kalem": "Aşık",
+    "olcu": "L 4200",
+    "adet": 51
+   },
+   {
+    "grup": "1006",
+    "kalem": "Tek kat çatı paneli · ana çatı",
+    "olcu": "L 5100",
+    "adet": 20
+   },
+   {
+    "grup": "1006",
+    "kalem": "Tek kat çatı paneli · ön veranda çatısı",
+    "olcu": "L 2400",
+    "adet": 5
+   },
+   {
+    "grup": "1006",
+    "kalem": "Tek kat çatı paneli · arka veranda çatısı",
+    "olcu": "L 1750",
+    "adet": 4
+   },
+   {
+    "grup": "1006",
+    "kalem": "Metal kiremit mahyası",
+    "olcu": "L 2800",
+    "adet": 6
+   },
+   {
+    "grup": "1006",
+    "kalem": "Mahya bandı",
+    "olcu": "rulo 10 m",
+    "adet": 2
+   },
+   {
+    "grup": "1007",
+    "kalem": "Tijli duy",
+    "olcu": "adet",
+    "adet": 7
+   },
+   {
+    "grup": "1007",
+    "kalem": "Yuvarlak glop",
+    "olcu": "adet",
+    "adet": 8
+   },
+   {
+    "grup": "1007",
+    "kalem": "Ampul",
+    "olcu": "adet",
+    "adet": 15
+   },
+   {
+    "grup": "1007",
+    "kalem": "Tekli anahtar (takım)",
+    "olcu": "adet",
+    "adet": 9
+   },
+   {
+    "grup": "1007",
+    "kalem": "Çiftli anahtar (takım)",
+    "olcu": "adet",
+    "adet": 3
+   },
+   {
+    "grup": "1007",
+    "kalem": "Tekli priz (takım)",
+    "olcu": "adet",
+    "adet": 19
+   },
+   {
+    "grup": "1007",
+    "kalem": "Çiftli priz (takım)",
+    "olcu": "adet",
+    "adet": 1
+   },
+   {
+    "grup": "1007",
+    "kalem": "Uydu prizi (takım)",
+    "olcu": "adet",
+    "adet": 1
+   },
+   {
+    "grup": "1007",
+    "kalem": "Zil",
+    "olcu": "adet",
+    "adet": 1
+   },
+   {
+    "grup": "1007",
+    "kalem": "Sigorta kutusu (12'li)",
+    "olcu": "adet",
+    "adet": 1
+   },
+   {
+    "grup": "1007",
+    "kalem": "Buat kasa",
+    "olcu": "adet",
+    "adet": 41
+   },
+   {
+    "grup": "1007",
+    "kalem": "NYM kablo 3 × 2,5",
+    "olcu": "metre",
+    "adet": 115
+   },
+   {
+    "grup": "1007",
+    "kalem": "NYM kablo 2 × 1,5",
+    "olcu": "metre",
+    "adet": 101
+   },
+   {
+    "grup": "1007",
+    "kalem": "Uydu kablo",
+    "olcu": "metre",
+    "adet": 25
+   },
+   {
+    "grup": "1007",
+    "kalem": "Besleme kablosu",
+    "olcu": "metre",
+    "adet": 5
+   },
+   {
+    "grup": "1007",
+    "kalem": "Besleme kablo borusu",
+    "olcu": "metre",
+    "adet": 5
+   },
+   {
+    "grup": "1007",
+    "kalem": "İzole bant",
+    "olcu": "adet",
+    "adet": 6
+   },
+   {
+    "grup": "1007",
+    "kalem": "Kaçak akım rölesi (ikili)",
+    "olcu": "adet",
+    "adet": 1
+   },
+   {
+    "grup": "1007",
+    "kalem": "W otomat 16 A",
+    "olcu": "adet",
+    "adet": 8
+   },
+   {
+    "grup": "1008",
+    "kalem": "16 mm betopan ve kapı kolu vidası (3,9 × 32)",
+    "olcu": "adet",
+    "adet": 500
+   },
+   {
+    "grup": "1008",
+    "kalem": "Trapez vida 5,5 × 76 (tek kat panel)",
+    "olcu": "adet",
+    "adet": 600
+   },
+   {
+    "grup": "1008",
+    "kalem": "Prefabrik pencere vidası (4,8 × 70)",
+    "olcu": "adet",
+    "adet": 160
+   },
+   {
+    "grup": "1008",
+    "kalem": "Trapez vida 5,5 × 60 (trapez sac / metal kiremit)",
+    "olcu": "adet",
+    "adet": 300
+   },
+   {
+    "grup": "1008",
+    "kalem": "230'luk kesme taşı",
+    "olcu": "adet",
+    "adet": 2
+   },
+   {
+    "grup": "1008",
+    "kalem": "Çırpı ipi",
+    "olcu": "adet",
+    "adet": 1
+   },
+   {
+    "grup": "1008",
+    "kalem": "8'lik trapez uç",
+    "olcu": "adet",
+    "adet": 7
+   },
+   {
+    "grup": "1008",
+    "kalem": "PH2 uç",
+    "olcu": "adet",
+    "adet": 7
+   },
+   {
+    "grup": "1008",
+    "kalem": "İnox taş",
+    "olcu": "adet",
+    "adet": 10
+   },
+   {
+    "grup": "1008",
+    "kalem": "Alçıpan vidası",
+    "olcu": "adet",
+    "adet": 1250
+   },
+   {
+    "grup": "1008",
+    "kalem": "RYSB pul başlı vida",
+    "olcu": "adet",
+    "adet": 700
+   },
+   {
+    "grup": "1009",
+    "kalem": "PVC plastik betopan H'ı",
+    "olcu": "adet",
+    "adet": 7
+   },
+   {
+    "grup": "1009",
+    "kalem": "Acil müdahale kapağı",
+    "olcu": "adet",
+    "adet": 1
+   },
+   {
+    "grup": "1009",
+    "kalem": "Şase pul",
+    "olcu": "adet",
+    "adet": 26
+   },
+   {
+    "grup": "1009",
+    "kalem": "Çelik dübel",
+    "olcu": "adet",
+    "adet": 26
+   },
+   {
+    "grup": "1010",
+    "kalem": "Temiz su borusu",
+    "olcu": "L 4000",
+    "adet": 6
+   },
+   {
+    "grup": "1010",
+    "kalem": "Normal dirsek 20 mm",
+    "olcu": "adet",
+    "adet": 15
+   },
+   {
+    "grup": "1010",
+    "kalem": "Kulaklı dirsek 20 mm",
+    "olcu": "adet",
+    "adet": 12
+   },
+   {
+    "grup": "1010",
+    "kalem": "Düz T 20 mm",
+    "olcu": "adet",
+    "adet": 6
+   },
+   {
+    "grup": "1010",
+    "kalem": "Maşon 20 mm",
+    "olcu": "adet",
+    "adet": 15
+   },
+   {
+    "grup": "1010",
+    "kalem": "İç dişli T 20 mm",
+    "olcu": "adet",
+    "adet": 6
+   },
+   {
+    "grup": "1010",
+    "kalem": "Atlama parçası yarım parmak",
+    "olcu": "adet",
+    "adet": 3
+   },
+   {
+    "grup": "1010",
+    "kalem": "Vitrifiye ve batarya (duş teknesi, klozet, lavabo, batarya grubu)",
+    "olcu": "takım",
+    "adet": 2
+   },
+   {
+    "grup": "1011",
+    "kalem": "Metal dere",
+    "olcu": "L 4000",
+    "adet": 7
+   },
+   {
+    "grup": "1011",
+    "kalem": "Dere kelepçesi",
+    "olcu": "adet",
+    "adet": 56
+   },
+   {
+    "grup": "1011",
+    "kalem": "Metal dere inişi aparatı",
+    "olcu": "adet",
+    "adet": 10
+   },
+   {
+    "grup": "1011",
+    "kalem": "70 mm PVC dere iniş borusu",
+    "olcu": "L 2000",
+    "adet": 10
+   },
+   {
+    "grup": "1011",
+    "kalem": "70 mm PVC dere iniş borusu",
+    "olcu": "L 500",
+    "adet": 10
+   },
+   {
+    "grup": "1011",
+    "kalem": "Açık dirsek",
+    "olcu": "adet",
+    "adet": 20
+   },
+   {
+    "grup": "1011",
+    "kalem": "Kapalı dirsek",
+    "olcu": "adet",
+    "adet": 10
+   },
+   {
+    "grup": "1011",
+    "kalem": "PVC iniş kelepçesi",
+    "olcu": "adet",
+    "adet": 20
+   },
+   {
+    "grup": "1011",
+    "kalem": "Dere kapağı",
+    "olcu": "adet",
+    "adet": 8
+   },
+   {
+    "grup": "1012",
+    "kalem": "Dış cephe boya (17,5 kg kova)",
+    "olcu": "kova",
+    "adet": 2
+   },
+   {
+    "grup": "1012",
+    "kalem": "İç cephe boya (17,5 kg kova)",
+    "olcu": "kova",
+    "adet": 2
+   },
+   {
+    "grup": "1012",
+    "kalem": "Kenarlar için boya",
+    "olcu": "10 kg",
+    "adet": 1
+   },
+   {
+    "grup": "1012",
+    "kalem": "Tavan boya (17,5 kg kova)",
+    "olcu": "kova",
+    "adet": 1
+   },
+   {
+    "grup": "1012",
+    "kalem": "Astar (17,5 kg kova)",
+    "olcu": "kova",
+    "adet": 1
+   },
+   {
+    "grup": "1012",
+    "kalem": "Silikonize mastik",
+    "olcu": "adet",
+    "adet": 8
+   },
+   {
+    "grup": "1012",
+    "kalem": "Dayson (çatı renginde)",
+    "olcu": "adet",
+    "adet": 6
+   },
+   {
+    "grup": "1012",
+    "kalem": "Poliüretan köpük",
+    "olcu": "adet",
+    "adet": 2
+   }
+  ]
+ }
+}
