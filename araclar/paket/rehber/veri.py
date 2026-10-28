@@ -449,8 +449,8 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
 
     # Kirişin kesim boyu listeden (D-28 madde 1: aynı parçanın boyunu iki kod ayrı üretmez): kart listede çizimdeki boyun satırını, yoksa kural
     # kitabının "açık kenar dış ölçüsü − 10" satırını (`veranda_kirisi_eksik_cm`, PK-01'de tuttu) okur; nişin kirişi aks arası. Patron 28 Ekim
-    # (karar kartı A): taşan verandanın dış kirişi kolonların dış yüzünden dış yüzüne (TK-01 386, 261), çizim böyle; liste bunu yazana kadar kart
-    # listedeki boyu ve çizimle farkını gösterir.
+    # (karar kartı A): taşan verandanın dış kirişi kolonların dış yüzünden dış yüzüne (TK-01 386, 261); çizim ve liste (İE-13 PR-2,
+    # `tasan_veranda_dis_kirisi_eksik_cm` = 0) böyle. Listede çizimdeki boy yoksa kart listedeki boyu ve çizimle farkını gösterir (AP-19).
     EKSIK = _pr(kurallari_oku()["prefabrik"], "veranda_kirisi_eksik_cm")
 
     def kiris_boyu(acik, cizim):

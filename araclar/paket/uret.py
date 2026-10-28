@@ -94,19 +94,13 @@ def cizim(ie: dict, gec: Path) -> dict:
 
 
 def listeler(ie: dict, secenekler: list[str] | None) -> dict:
-    """Liste üreteci (canlıdaki kurallar). Dönen: {seçenek ya da '': L} ya da {'neden': ...}."""
+    """Liste üreteci (canlıdaki kurallar), komut satırı ve teklifle aynı yoldan (`prefabrik_liste.is_emrinden`, D-28 madde 1; kırma ve cumba
+    çatının freni orada). Dönen: {seçenek ya da '': L} ya da {'neden': ...}."""
     from motor import prefabrik_liste as PL
-    from motor.cati_prefabrik import TIP_ADI, TIPLER
-    tip = (ie.get("cati") or {}).get("tip")
-    if tip in TIPLER:                                     # liste üretecinin kendi freni (main(): yanlış sayı yazılmaz)
-        return {"neden": f"{TIP_ADI[tip]} ana çatının çatı satırları liste üretecinde yok; liste yazılmaz (İE-17 PR-1b)"}
-    out = {}
-    for s in secenekler or [""]:
-        j = copy.deepcopy(ie)
-        if s:
-            j.setdefault("ozellikler", {})["Tavan"] = s.capitalize()
-        out[s] = PL.liste(PL.model_motor(j), PL.kurallari_oku())
-    return out
+    try:
+        return {s: PL.is_emrinden(copy.deepcopy(ie), ozellikler={"Tavan": s.capitalize()} if s else None) for s in secenekler or [""]}
+    except PL.ListeYazilmaz as e:
+        return {"neden": e.neden}
 
 
 def kart_modeli(ie: dict, gec: Path, kart_kodu: str) -> dict:

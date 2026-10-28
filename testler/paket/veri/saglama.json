@@ -1,7 +1,7 @@
 {
- "aciklama": "İE-18 sağlaması: paket üretecinin rehberi (62 m² rehberinin şablonu, D-28) kart başına şu adetleri vermeli. AP-19 (PK-01): 24 Ekim rehberinin paftadan okunmuş parçaları; yeni şablonla birebir aynı. TK-01: İş Emri r05'le şablonun verdiği (28 Ekim 2026, R1); 27 Ekim'deki r04'lü rehberle fark `r04_farki`nda. `kartlar` sayfanın izinden (Playwright + three.js gerekir); pano, H, köşe direği, makas, kapı ve veranda adetleri veriden de sınanır (kart modeliyle aynı).",
+ "aciklama": "İE-18 sağlaması: paket üretecinin rehberi (62 m² rehberinin şablonu, D-28) kart başına şu adetleri vermeli. AP-19 (PK-01): 24 Ekim rehberinin paftadan okunmuş parçaları; yeni şablonla birebir aynı. TK-01: İş Emri r06'yla şablonun verdiği (28 Ekim 2026, İE-13 PR-2 birleştikten sonra); r05'li rehberle fark `r05_farki`nda, 27 Ekim'deki r04'lü rehberle `r04_farki`nda. `kartlar` sayfanın izinden (Playwright + three.js gerekir); pano, H, köşe direği, makas, kapı ve veranda adetleri veriden de sınanır (kart modeliyle aynı).",
  "TK-01": {
-  "kaynak": "araclar/paket/girdi/TK01_r05.json (teklif r05, 28 Ekim 2026: dış kapının arkasında iç kapı yok) + 62 m² şablonu; liste asma tavan",
+  "kaynak": "araclar/paket/girdi/TK01_r06.json (teklif r06, Patron 28 Ekim 08:01 \"dış kapı 1 pano içeride\": ön verandanın ortasında giriş nişi; Motor'u İE-13 PR-2) + 62 m² şablonu; liste asma tavan",
   "adim": 22,
   "oda_sirasi": [
    "Yatak odası 1",
@@ -14,10 +14,10 @@
    "Salon"
   ],
   "kartlar": {
-   "AC-01": 5,
+   "AC-01": 9,
    "AC-02": 16,
    "AS-01": 79,
-   "B-01": 4,
+   "B-01": 8,
    "B-02": 2,
    "BT-01": 20,
    "CK-01": 12,
@@ -26,7 +26,7 @@
    "CK-04": 8,
    "CK-05": 8,
    "CK-06": 6,
-   "D-01": 23,
+   "D-01": 25,
    "D-02": 2,
    "D-03": 4,
    "D-04": 2,
@@ -35,27 +35,28 @@
    "DR-02": 10,
    "H-01": 9,
    "H-02": 11,
-   "H-03": 15,
+   "H-03": 13,
    "H-04": 3,
-   "H-05": 5,
+   "H-05": 3,
    "H-06": 4,
-   "I-01": 21,
+   "I-01": 19,
    "I-02": 7,
    "K-01": 7,
    "K-02": 1,
    "MA-01": 2,
    "MA-02": 6,
-   "OM-01": 28,
+   "OM-01": 30,
    "P-01": 2,
    "P-02": 4,
    "P-03": 2,
    "V-01": 4,
-   "V-02": 6
+   "V-02": 7
   },
   "yavru_makas": {
    "ön veranda": 3,
    "arka veranda": 2
   },
+  "r05_farki": "r05'li rehberden (28 Ekim, R1) fark giriş nişinden (dış kapı bir pano içeride): 100'lük pano D-01 23 → 25, 60'lık pano I-01 21 → 19, köşe direği B-01 4 → 8, alt çerçeve AC-01 5 → 9, H-05 5 → 3, H-03 15 → 13, OM-01 28 → 30, kiriş V-02 6 → 7 (nişin ağız kirişi, L 125,5). Adım 22, oda sırası ve yavru makaslar aynı; adetler kart modeliyle aynı.",
   "r04_farki": "27 Ekim rehberi (r04, kendi sahnesi): ANTRE ve ANTRE–HOL iç kapısı çıktı → K-01 8 → 7, I-02 8 → 7, H-03 13 → 15, H-06 6 → 4, AC-02 18 → 16, OM-01 30 → 28. Çatı parçaları 62'nin şablonuyla sayılır: saçak omegası, saçak ve alın sacı, Z, C kapama, mahya ve dere hat başına değil parça başına; aşık veranda çatılarıyla 79 (ana çatı 60, kart modeli); betopan 20 (ana kalkan 125'ten yüksek: dik şerit)."
  },
  "AP-19": {
