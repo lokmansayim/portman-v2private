@@ -4,7 +4,8 @@ numara yok, çizim ve liste canlıdaki işlevlerin çıktısıyla aynı, rehber 
 Rehber 62 m² rehberinin şablonundan (D-28; şablonun 62'yi aynen verdiğini `test_rehber.py` sınar). Sağlama (`veri/saglama.json`):
 AP-19'da (PK-01) 24 Ekim rehberinin paftadan okunmuş parçaları (kart başına) ve oda sırası, TK-01'de İş Emri r06'nın rehberi. Pano, H,
 köşe direği, makas, kapı ve veranda adetleri veriden (kart modeliyle aynı); bütün kartlar sayfanın izinden (Node, Playwright ve
-three.js 0.160.0 varsa; yoksa o test atlanır). LLM yok, ağ yok; GLB bu testte üretilmez.
+three.js 0.160.0 varsa; yoksa o test atlanır). Kayıtta olmayan ev `--is-emri` ile (çizim masası): kayıttaki TK-01'le aynı paket, adlar
+kodla, numaralar maskeli. LLM yok, ağ yok; GLB bu testte üretilmez.
 """
 from __future__ import annotations
 
@@ -276,3 +277,75 @@ def test_eski_tasinir_silinmez(tmp_path):
         (k / "AP-99_bilgi.md").write_text(yeni, encoding="utf-8")
         assert U._eskiyi_tasi(k) == tarih
     assert sorted(p.read_text(encoding="utf-8") for p in (k / "_eski" / tarih).glob("AP-99_bilgi*.md")) == sorted(["eski", "ikinci", "üçüncü"])
+
+
+def _yazilar(klasor: Path) -> dict[str, str]:
+    """Paketin okunur yazıları: md, html, Excel hücreleri, PDF metni, DXF yazıları, IFC (ham)."""
+    import ezdxf
+    import fitz
+    from openpyxl import load_workbook
+    out = {}
+    for p in klasor.iterdir():
+        if p.suffix in (".md", ".html", ".ifc"):
+            out[p.name] = p.read_text(encoding="utf-8", errors="replace")
+        elif p.suffix == ".xlsx":
+            out[p.name] = "\n".join(str(c) for ws in load_workbook(p).worksheets for r in ws.iter_rows(values_only=True) for c in r if c is not None)
+        elif p.suffix == ".pdf":
+            out[p.name] = "".join(s.get_text() for s in fitz.open(p))
+        elif p.suffix == ".dxf":
+            out[p.name] = "\n".join(e.dxf.text if e.dxftype() == "TEXT" else e.text for e in ezdxf.readfile(p).modelspace() if e.dxftype() in ("TEXT", "MTEXT"))
+    return out
+
+
+def test_is_emri_ile_paket(paketler, tmp_path):
+    """`--is-emri` (çizim masası, 28 Ekim 2026): kayıtta olmayan kodla İş Emri dosyasından paket. TK-01'in İş Emri'si kişi ve bayi adıyla,
+    numarayla yazılınca listeler ve rehber kayıttaki TK-01'inkiyle aynı (kod dışında); çıktıda ad ve numara yok, antette kod; kıyas Yok."""
+    import hashlib
+    from beyin import numara
+    from openpyxl import load_workbook
+    kok, _, _ = paketler
+    ie = json.loads((KOK / _model("TK-01")["is_emri"]).read_text(encoding="utf-8"))
+    ie["talep"] = {"bayi": {"kod": "XBAYIX9", "ad": "Deneme Yapı Ticaret"}, "musteri_adi": "Zeynep Örnekyılmaz", "metin": "Zeynep Hanım 0532 111 22 33"}
+    ie["pafta_uyarilari"] = ["Arayacak numara 05321112233"]
+    yol = tmp_path / "talep.json"
+    yol.write_text(json.dumps(ie, ensure_ascii=False), encoding="utf-8")
+    cikti = tmp_path / "Modeller"
+    assert U.main(["TK-98", str(cikti), "--is-emri", str(yol), "--tavan", "asma,ters", "--gecici", str(tmp_path / "gec")]) == 0
+    a, b = kok / "prefabrik" / "TK-01", cikti / "prefabrik" / "TK-98"
+    durum = _bilgi_durum(b / "TK-98_bilgi.md")
+    assert {k for k, v in durum.items() if v == "Var"} == {f"TK-98_{x}" for x in (
+        "bilgi.md", "bayi_paftasi.pdf", "plan.png", "cizim.dxf", "montaj_paftasi.pdf", "yukleme_listesi_asma.xlsx", "yukleme_listesi_ters.xlsx",
+        "model.ifc", "montaj_rehberi.html")}
+    assert "teklif projesi" in durum["TK-98_kiyas.xlsx"]
+    bilgi = (b / "TK-98_bilgi.md").read_text(encoding="utf-8")
+    assert "--is-emri" in bilgi and hashlib.sha256(yol.read_bytes()).hexdigest() in bilgi
+    assert "| Veranda | taşan: önde 386 × 181, arkada 261 × 130 |" in bilgi and "| Çatı (paftada) | beşik %33, tek kat panel (antrasit) |" in bilgi
+    for s in ("asma", "ters"):                          # başlık satırında üretim saati var
+        sat = lambda p: list(load_workbook(p).active.iter_rows(min_row=2, values_only=True))
+        assert sat(b / f"TK-98_yukleme_listesi_{s}.xlsx") == sat(a / f"TK-01_yukleme_listesi_{s}.xlsx"), s
+    html = (b / "TK-98_montaj_rehberi.html").read_text(encoding="utf-8")
+    assert html.replace("TK-98", "TK-01").replace("TK98", "TK01") == (a / "TK-01_montaj_rehberi.html").read_text(encoding="utf-8")
+    yazi = _yazilar(b)
+    assert "PORTMAN | Bayi TK-98 / TK-98 | İş Emri" in yazi["TK-98_cizim.dxf"] and "'TK-98 " in yazi["TK-98_model.ifc"]
+    for ad, t in yazi.items():
+        t = re.sub(r"`[0-9a-f]{64}`", "", t)
+        assert not any(x in t for x in ("Zeynep", "Deneme Yap", "XBAYIX9", "111 22 33", "1112233")), ad
+        assert ad.endswith(".ifc") or numara.maskele(t) == t, ad          # IFC'nin uzun sayıları (kimlik, koordinat) numara değil
+
+
+def test_is_emri_kimlik_ve_frenler(tmp_path):
+    """Model satırı İş Emri'nden; kayıttaki teklif projesinde satır ve tavan seçenekleri kayıttan. Tek ev, kod deseni, kayıttaki açık ya da
+    kör model, bilinmeyen tavan ve `--is-emri`'siz `--tavan` durdurur; klasöre bir şey yazılmaz."""
+    yol = KOK / _model("TK-01")["is_emri"]
+    k = U.kayit()
+    m, ie = U.talep_modeli("TK-97", yol, None, k)
+    assert (m["kume"], m["m2"], m["govde"], m["adim"], m["tavan_secenekleri"]) == ("teklif", "80", "dış ölçü 898 × 888", "teklif", None)
+    assert ie["talep"] == {"bayi": {"kod": "TK97", "ad": "Bayi TK-97"}, "musteri_adi": "TK-97"}
+    m, _ = U.talep_modeli("TK-01", yol, None, k)
+    assert m["tavan_secenekleri"] == ["asma", "ters"] and m["veranda"] == _model("TK-01")["veranda"]
+    assert U.talep_modeli("TK-97", yol, ["ters"], k)[0]["tavan_secenekleri"] == ["ters"]
+    for argv in (["hepsi", "--is-emri", str(yol)], ["AP-19", "--is-emri", str(yol)], ["tk2", "--is-emri", str(yol)], ["TK-2", "--is-emri", str(yol)],
+                 ["TK-97", "--is-emri", str(yol), "--tavan", "alçı"], ["AP-19", "--tavan", "asma"], ["TK-97"]):
+        with pytest.raises(SystemExit):
+            U.main([argv[0], str(tmp_path / "M"), *argv[1:]])
+    assert not (tmp_path / "M").exists()
