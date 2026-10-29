@@ -37,7 +37,8 @@ BILINEN_DERZ = {
         ("y", 256.0): ([338.75], [341.9]),            # banyo–salon duvarı: paftada yarım pano bölmenin yüzünden (3)
     },
     "AP16": {
-        ("x", 218.25): ([568.75, 694.25], []),        # mutfağın veranda penceresi paftada 251'lik tek pencereli panoda
+        ("x", 218.25): ([569.75, 695.25], []),        # mutfağın veranda penceresi paftada 251'lik tek pencereli panoda (D-29: Motor'da iki yanı
+                                                      # 62,75, ekler 1 cm kaydı; önceden 568,75 / 694,25)
     },
 }
 # Köşe parçası farkları (Motor, pafta; yuvarlak cm): iç L köşelerde 1–5 cm; paftadaki tesisat kutusunun köşesi

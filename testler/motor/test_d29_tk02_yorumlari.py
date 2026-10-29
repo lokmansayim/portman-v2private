@@ -6,9 +6,10 @@
    olarak sürer, kapı duvarı ona dik: T birleşimi, 3'lü H; kapı duvarı yan duvarların yüzleri arasında.
 3. Dış duvar T'sindeki 3'lü H kutusu çizilmez: "yeşil yeşil kutular ... bizde öyle birşey yok". Parça sayımda ve listede kalır.
 4. Plandaki pencere yazısı alttan ya da sağdan okunur: "önden bakınca arkadaki yatak odası 1'in 120/180 yazısı ters kalıyor".
+5. Özel pano ölçü yazıları üst üste binmez (TK-02 aday planında yatak odası 3'te 62,75 ile 125 üst üsteydi).
 
 Ön görünüşteki veranda saçak ve topuk çizgisi (aynı gün) `test_veranda.py::test_on_gorunuste_veranda_sacak_ve_topuk`'ta. 1–3 anahtarlı İş Emri'nde
-çalışır (o durum yalnız orada var); 4 P6001 dahil bütün planlarda (D-29 madde 6, Lokman 08:22: "takılıp kalma P6001'e").
+çalışır (o durum yalnız orada var); 4 ve 5 P6001 dahil bütün planlarda (D-29 madde 6, Lokman 08:22: "takılıp kalma P6001'e").
 """
 from __future__ import annotations
 import json
@@ -53,6 +54,14 @@ def test_pencere_iki_yani_yarim_pano(ie):
     assert arka[:3] == [(62.75, ""), (125.5, "P"), (62.75, "")], arka
 
 
+def test_uzak_ekte_oda_ortasi_kalir():
+    """Oda ortası en yakın ekten 5 cm'den çok kaçıyorsa pencere odanın ortasında kalır: kör PK-02'nin gerçek listesinde bu duvarda
+    42,25 / 83,25 var (mühendis 20,5 cm kaydırmamış; geometri hakemi). Kısa kaymada (TK-02: 0,25 ve 2,5 cm) yarım pano."""
+    plan = G.kur(_oku(KOK / "testler" / "kor" / "projeler" / "PK02" / "is_emri.json"))
+    b = _boylar(_duvar(plan, "y", 768.0))
+    assert [b[i - 1:i + 2] for i, x in enumerate(b) if x[1] == "P"][1] == [(42.25, ""), (125.5, "P"), (83.25, "")], b
+
+
 def test_pk01_paftasi_degismez():
     """İki yanı tam pano olmayan pencere odanın tam ortasında kalır (PK-01 paftası: 40,5 / 37,5 ve 60,25 / 60,25)."""
     plan = G.kur(_oku(VERI / "PK01.json"))
@@ -79,6 +88,19 @@ def test_nis_kapisinda_kose_yok_3lu_h(ie):
     adet = lambda bas: sum(r["adet"] for r in L["satirlar"] if r["kalem"].startswith(bas))
     assert adet("3'lü H 100 × 100") == sum(b.tur == "dis" for b in plan.h_baglantilar) == 8
     assert adet("10'luk köşe direği") + adet("6'lık köşe direği") == len(plan.koseler)
+
+
+def test_nis_t_yalniz_ayni_eksende(ie, tmp_path):
+    """Dış düşey duvar aks dışındaysa (varsayılan) nişin yan duvarı ile hol duvarı aynı eksende değil: niş T'si kurulmaz, köşe parçası kalır;
+    doğrulama geçer, çizimdeki ve listedeki dış duvar T'si 3'lü H sayısı aynı (geometri hakemi, önemli 3)."""
+    ie = json.loads(json.dumps(ie)); ie["yapi"].pop("dis_dusey_duvar")
+    plan = G.kur(json.loads(json.dumps(ie)))
+    assert G.uc_uca_ekler(plan) == []
+    m = dxf_out.uret(json.loads(json.dumps(ie)), tmp_path, pdf_hatada=False)
+    assert m["validation_passed"] is True, m.get("warnings")
+    L = PL.is_emrinden(json.loads(json.dumps(ie)))
+    adet = sum(r["adet"] for r in L["satirlar"] if r["kalem"].startswith("3'lü H 100 × 100"))
+    assert adet == sum(b.tur == "dis" for b in plan.h_baglantilar)
 
 
 def test_dogrulamadan_gecer_dis_h_kutusu_cizilmez(ie, tmp_path):
@@ -112,3 +134,23 @@ def test_pencere_yazisi_alttan_ya_da_sagdan_okunur(ie_hepsi, tmp_path):
     acilar = [round(t.dxf.rotation % 360.0, 3) for e in msp.query("INSERT") if "_P0" in e.dxf.name for t in yazilar(e)]
     assert acilar and all(a <= 90.0 + 1e-6 or a > 270.0 for a in acilar), acilar
     assert any(e.dxf.name.endswith("_Y") for e in msp.query("INSERT"))      # arka ve sol duvarın pencereleri çevrilmiş blokla
+
+
+@pytest.mark.parametrize("yol", [VERI / "TK02.json", TK01, VERI / "PK01.json", KOK / "is_emri" / "P6001_2plus1_6x6.json",
+                                 KOK / "is_emri" / "YAN_VERANDALI_2plus1_6x8p5.json", KOK / "is_emri" / "ALTIN_2plus1_6x8.json"],
+                         ids=lambda p: p.stem)
+def test_ozel_pano_olcu_yazilari_ust_uste_binmez(yol, tmp_path):
+    """Kat planı, net alan planı ve saha montaj planındaki özel pano ölçülerinin yazıları (gerçek yerleri, DIMENSION bloğundaki MTEXT)
+    birbirine binmez (D-29 madde 7). Önceki kodda TK-02'de 8 + 4, PK-01'de 4 + 2, Yan Verandalı 6×8,5'te 4 + 2 çakışma vardı."""
+    m = dxf_out.uret(_oku(yol), tmp_path, pdf_hatada=False)
+    msp = ezdxf.readfile(tmp_path / m["dxf"]).modelspace()
+    for kat in ("OZEL_PANEL_OLCU_CM", "MONTAJ_OZEL_OLCU"):
+        kutular = []
+        for e in msp.query(f"DIMENSION[layer=='{kat}']"):
+            for t in e.get_geometry_block().query("MTEXT"):
+                x, y = t.dxf.insert[0], t.dxf.insert[1]; w = dxf_out.Cizici.yazi_eni(t.text, t.dxf.char_height) / 2
+                kutular.append((t.text, (x - w, y - 7, x + w, y + 7) if abs(t.dxf.get("rotation", 0.0)) < 1e-6 else (x - 7, y - w, x + 7, y + w)))
+        assert kutular
+        cakisan = [(a[0], b[0], [round(v) for v in a[1]]) for i, a in enumerate(kutular) for b in kutular[i + 1:]
+                   if a[1][0] < b[1][2] and b[1][0] < a[1][2] and a[1][1] < b[1][3] and b[1][1] < a[1][3]]
+        assert not cakisan, (kat, cakisan)

@@ -341,6 +341,7 @@ class Cizici:
         py = self.paylar()
         alt, ust, sol, sag = py["alt"], py["ust"], py["sol"], py["sag"]
         aks, alanlar, montaj = (rol == "ANA"), (rol == "KOPYA"), (rol == "MONTAJ")
+        dolu: list = []                                       # bu planda konmuş özel pano ölçü yazılarının kutuları (`_ozel_olcu`)
         for d in plan.duvarlar:
             for p in d.panolar:
                 name, frame, kod = self.pano_blok(p)
@@ -361,14 +362,7 @@ class Cizici:
                     else:            ins, rot = ((r[2], r[1]), 90.0) if n == "-x" else ((r[0], r[3]), 270.0)
                 self.yerlestir(name, kod, ins, rot, layer, rol, ox, oy)
                 if montaj and not standart:
-                    if d.yon == "y":
-                        side = 1 if d.c < W / 2 else -1
-                        xd = r[2] + 40 if side > 0 else r[0] - 40
-                        self.dim((r[0] + ox if side > 0 else r[2] + ox, r[1] + oy), (r[0] + ox if side > 0 else r[2] + ox, r[3] + oy), (xd + ox, 0), 90, "MONTAJ_OZEL_OLCU")
-                    else:
-                        side = 1 if d.c < H / 2 else -1
-                        yd = r[3] + 40 if side > 0 else r[1] - 40
-                        self.dim((r[0] + ox, r[1] + oy if side > 0 else r[3] + oy), (r[2] + ox, r[1] + oy if side > 0 else r[3] + oy), (0, yd + oy), 0, "MONTAJ_OZEL_OLCU")
+                    self._ozel_olcu(d, r, W, H, ox, oy, "MONTAJ_OZEL_OLCU", dolu)
                 if montaj and p.acilim and p.acilim.tur == "pencere":
                     g = p.gap(); cx, cy = (g[0] + g[2]) / 2, (g[1] + g[3]) / 2
                     pkr = G.pencere_kurali(p.acilim.olcu); en, boy = pkr.en, pkr.boy; pk = self.dograma[p.acilim.olcu][1]
@@ -518,13 +512,7 @@ class Cizici:
             for d in plan.duvarlar:
                 for p in d.panolar:
                     if abs(p.boy - G.MOD) < 1e-6: continue
-                    r = p.rect()
-                    if d.yon == "y":
-                        side = 1 if d.c < W / 2 else -1; xd = r[2] + 40 if side > 0 else r[0] - 40
-                        self.dim((r[0] + ox if side > 0 else r[2] + ox, r[1] + oy), (r[0] + ox if side > 0 else r[2] + ox, r[3] + oy), (xd + ox, 0), 90, "OZEL_PANEL_OLCU_CM")
-                    else:
-                        side = 1 if d.c < H / 2 else -1; yd = r[3] + 40 if side > 0 else r[1] - 40
-                        self.dim((r[0] + ox, r[1] + oy if side > 0 else r[3] + oy), (r[2] + ox, r[1] + oy if side > 0 else r[3] + oy), (0, yd + oy), 0, "OZEL_PANEL_OLCU_CM")
+                    self._ozel_olcu(d, p.rect(), W, H, ox, oy, "OZEL_PANEL_OLCU_CM", dolu)
             for ad, m in plan.mahaller.items():
                 if not m.acik or not m.cells: continue      # taşan veranda (BK-14) yukarıda ölçülü
                 us = [u for u, v in m.cells]; vs = [v for u, v in m.cells]
@@ -591,6 +579,33 @@ class Cizici:
 
     def text(self, s, pos, h, layer, align=TextEntityAlignment.MIDDLE_CENTER, rot=0.0):
         self.msp.add_text(s, dxfattribs={"height": h, "layer": layer, "style": "PORTMAN", "rotation": rot}).set_placement(pos, align=align)
+
+    OZEL_OLCU_UZAKLIK_CM = (40, 25, 70, 100)
+
+    def _ozel_olcu(self, d, r, W, H, ox, oy, layer, dolu: list) -> None:
+        """Standart dışı panonun ölçüsü, duvarın iç yanında panodan 40 cm uzakta. Yazısı bu planda daha önce konmuş bir özel pano ölçü
+        yazısına biniyorsa ölçü çizgisi sırayla 25, 70, 100 cm'e çekilir (D-29 ek: TK-02 yatak odası 3'te 62,75 ile 125 üst üsteydi);
+        hiçbiri boş değilse 40'ta kalır. Yazının yeri ölçü stilinden: çizginin üstünde (dimtad 1, dimgap 4, yükseklik 14); 90°'lik ölçüde solunda."""
+        boy = (r[3] - r[1]) if d.yon == "y" else (r[2] - r[0])
+        yari_en = self.yazi_eni(f"{boy:.2f}".rstrip("0").rstrip(".").replace(".", ","), 14) / 2 + 2
+        ic = (1 if d.c < W / 2 else -1) if d.yon == "y" else (1 if d.c < H / 2 else -1)
+
+        def kutu(u):
+            if d.yon == "y":
+                x = (r[2] + u if ic > 0 else r[0] - u) - 4 - 7
+                return (x - 9, (r[1] + r[3]) / 2 - yari_en, x + 9, (r[1] + r[3]) / 2 + yari_en)
+            y = (r[3] + u if ic > 0 else r[1] - u) + 4 + 7
+            return ((r[0] + r[2]) / 2 - yari_en, y - 9, (r[0] + r[2]) / 2 + yari_en, y + 9)
+        u = next((u for u in self.OZEL_OLCU_UZAKLIK_CM
+                  if not any(k[0] < b[2] and b[0] < k[2] and k[1] < b[3] and b[1] < k[3] for k in [kutu(u)] for b in dolu)),
+                 self.OZEL_OLCU_UZAKLIK_CM[0])
+        dolu.append(kutu(u))
+        if d.yon == "y":
+            xd = r[2] + u if ic > 0 else r[0] - u; xk = r[0] if ic > 0 else r[2]
+            self.dim((xk + ox, r[1] + oy), (xk + ox, r[3] + oy), (xd + ox, 0), 90, layer)
+        else:
+            yd = r[3] + u if ic > 0 else r[1] - u; yk = r[1] if ic > 0 else r[3]
+            self.dim((r[0] + ox, yk + oy), (r[2] + ox, yk + oy), (0, yd + oy), 0, layer)
 
     def dim(self, p1, p2, base, angle, layer="OLCULER"):
         base = (p1[0], base[1]) if angle == 0 else (base[0], p1[1])

@@ -36,6 +36,8 @@ PENCERE_PANO_PAYI_CM = 4.0              # açıklık panodan en az 4 cm dar
 KAPI_GENISLIK = {"ic_kapi": 82.0, "dis_kapi": 97.0, "gecis": 82.0}
 # İE-11 (PK-01 montaj paftası, 13.10.2026; yalnız `dizilim.pencere` / `dizilim.kapi` anahtarıyla):
 PENCERE_ORTALAMA_ESIGI_CM = MOD / 4.0   # oda ortası ızgara panosunun ortasından en çok ¼ pano kaçıyorsa ızgara kalır (paftada 6 pencerenin 4'ü), yoksa pencereli pano odaya ortalanır
+PENCERE_YARIM_PANO_ESIGI_CM = 5.0     # D-29: oda ortası en yakın ekten en çok 5 cm kaçıyorsa pencereli pano eke ortalanır, iki yanı 62,75 (Lokman'ın örneği
+                                       # 0,25; bugünkü planlarda 0,25–2,5); daha çoksa odanın ortası (kör PK-02: 20,5 cm'de mühendis 42,25 / 83,25 bırakmış)
 KAPI_YASLAMA_CM = 11.5                  # oda kapısı boşluğu menteşe tarafındaki pano ucundan 11,5 cm içeride (paftada 4 kapı: 11,3 / 11,3 / 11,6 / 11,5)
 ACIK_MAHAL_TURLERI = {"veranda", "balkon", "sundurma", "teras"}
 
@@ -673,11 +675,12 @@ def _kur(is_emri: dict) -> Plan:
     Vs = lambda lst: [(d, uc) for d, uc in lst if d.yon == "y"]
 
     def _nis_t(ends):
-        """İki dış ve bir iç duvar ucu; dışlardan biri iç duvarla aynı hatta karşılıklı (hat sürüyor), öteki ona dik: ((hat dışı), (iç), (dik))."""
+        """İki dış ve bir iç duvar ucu; dışlardan biri iç duvarla aynı hatta ve aynı eksende karşılıklı (hat sürüyor), öteki ona dik:
+        ((hat dışı), (iç), (dik)). Eksenler ayrıysa (`dis_dusey_duvar` aks dışında) niş T'si yok, köşe parçası kalır (geometri hakemi)."""
         ext = [(d, uc) for d, uc in ends if d.tur == "dis"]; ic = [(d, uc) for d, uc in ends if d.tur == "ic"]
         if len(ends) != 3 or len(ext) != 2 or len(ic) != 1:
             return None
-        hat = [(e, ue) for e, ue in ext if e.yon == ic[0][0].yon and e.hat == ic[0][0].hat and ue != ic[0][1]]
+        hat = [(e, ue) for e, ue in ext if e.yon == ic[0][0].yon and e.hat == ic[0][0].hat and abs(e.c - ic[0][0].c) < 1e-6 and ue != ic[0][1]]
         dik = [(e, ue) for e, ue in ext if e.yon != ic[0][0].yon]
         return (hat[0], ic[0], dik[0]) if len(hat) == 1 and len(dik) == 1 else None
     # D-29: giriş nişinin kapı duvarı iki ucunda da böyle T yapar (yan duvarlar içeride sürer); verandanın iç köşesi (PK-01 paftası: kapı
@@ -841,10 +844,11 @@ def _kur(is_emri: dict) -> Plan:
             if parca and abs((parca[0] + parca[1]) / 2.0 - mrk) <= PENCERE_ORTALAMA_ESIGI_CM + 1e-6 and parca[1] - parca[0] >= w + 4 - 1e-9:
                 hedef[4] = parca[0]; continue                  # ızgara panosu oda ortasına yeterince yakın: ek kesim yok
             q0, q1 = mrk - MOD / 2.0, mrk + MOD / 2.0
-            # D-29 (Lokman, 29 Ekim 2026: "63 değil 627,5 mm"): oda ortasına ¼ pano içindeki ek, iki yanında tam pano varsa pencereli pano o eke
-            # ortalanır; iki yanı 62,75'lik yarım pano olur, artık köşe panosunda kalır. İki yanı tam pano değilse (PK-01 paftası) odanın ortası.
+            # D-29 (Lokman, 29 Ekim 2026: "63 değil 627,5 mm"): oda ortasına 5 cm içindeki ek, iki yanında tam pano varsa pencereli pano o eke
+            # ortalanır; iki yanı 62,75'lik yarım pano olur, artık köşe panosunda kalır. İki yanı tam pano değilse (PK-01 paftası) ya da ek
+            # uzaksa (kör PK-02) odanın ortası.
             ek = min(pts[1:-1], key=lambda a: abs(a - mrk), default=None)
-            if ek is not None and abs(ek - mrk) <= PENCERE_ORTALAMA_ESIGI_CM + 1e-6 and \
+            if ek is not None and abs(ek - mrk) <= PENCERE_YARIM_PANO_ESIGI_CM + 1e-6 and \
                     all(any(abs(q - b) < 1e-6 for q in pts) for b in (ek - MOD, ek + MOD)) and lo_p - 1e-6 <= ek - MOD and ek + MOD <= hi_p + 1e-6:
                 q0, q1 = ek - MOD / 2.0, ek + MOD / 2.0
             if q0 < lo_p - 1e-6 or q1 > hi_p + 1e-6:
