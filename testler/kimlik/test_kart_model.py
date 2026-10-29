@@ -56,7 +56,7 @@ ALICIYA_AIT = {"Prefabrik çelik kapı", "PVC pencere", "PVC vasistas"}
 K2_KARTLARI = {"OM-01": 0, "AS-01": 0, "KP-01": 0, "BT-01": 0, "DR-01": 0, "DR-02": 0, "SR-01": 0}    # bu dosyanın modelleri İş Emri'siz (K1)
 K3_KARTLARI = {f"EL-{i:02d}": 0 for i in range(1, 12)}    # K3 (elektrik) de İş Emri ister
 K3B_KARTLARI = {k: 0 for k in ("AC-01", "AC-02", "CK-01", "CK-02", "CK-03", "CK-04", "CK-05", "CK-06")}    # K3b (alt çerçeve, çatı kenarı) de
-IC100_KARTLARI = {k: 0 for k in ("D-06", "D-07", "H-07", "H-08", "H-09", "H-10")}    # İE-18 R1 ek 4: iç duvarı 100'lük evin kartları; PK-01 60'lık
+IC100_KARTLARI = {k: 0 for k in ("D-06", "D-07", "H-07", "H-08", "H-09", "H-10", "OM-02")}    # İE-18 R1 ek 4 ve D-32: iç duvarı 100'lük evin kartları; PK-01 60'lık
 KILIT_K1 = "94c253954968d2dee4023c097e47326281fe57998c92e347e2b48d24762e4d23"   # K1'de çıkan 25 kodun adlarıyla SHA'sı (PR #31)
 
 

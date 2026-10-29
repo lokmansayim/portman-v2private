@@ -480,8 +480,23 @@
    "pafta": [],
    "pafta_tavan": {"asma": "duvar_omegasi_asma", "ters": "tavan_omegasi"},
    "pafta_bilgi": {"alan": "Yer", "onek": "ayrinti.omega.konum"},
-   "yerlesim": {"kural": "tavan_omegasi_yerlesimi", "parca": "omega", "sinif": "IfcMember"},
-   "kaynak": {"durum": "lokman", "tarih": "2026-10-24", "dayanak": "Karar B (Lokman, kart 24 Ekim 06:17 \"Türe göre\"); PK-01 tavan omega planı (s. 6, 24 parça). Listede tavanın türüne göre iki ad, ürün aynı (kitap `parca_boyu_m.tavan_omegasi`, L 3750)"}
+   "yerlesim": {"kural": "tavan_omegasi_yerlesimi", "parca": "omega", "sinif": "IfcMember", "bilgi": {"Sirt_cm": null}},
+   "kaynak": {"durum": "lokman", "tarih": "2026-10-24", "dayanak": "Karar B (Lokman, kart 24 Ekim 06:17 \"Türe göre\"); PK-01 tavan omega planı (s. 6, 24 parça). Listede tavanın türüne göre iki ad, ürün aynı (kitap `parca_boyu_m.tavan_omegasi`, L 3750). Sırtı geniş parça (`Sirt_cm` bilgisi olan) bu kartta değil, OM-02'de"}
+  },
+  {
+   "kod": "OM-02",
+   "ad": "60'lık iç duvar üstü omegası (sırt 10,5) L 3750",
+   "liste": {"grup": "1002", "satirlar": ["60'lık iç duvar üstü omegası (sırt 10,5)"]},
+   "olcu": "60 × 3750; 60'lık omeganın ölçüsünde, sırtı 10,5 cm (100 mm pano + iki yanda 2 mm H kanadı + 1 mm); parça boyu parçada (tam parça 365, kesim planında)",
+   "birim": "adet",
+   "nerede": "İç duvarı 100'lük evde, asma dizme tavanda iç duvarların ekseninde, duvar boyunca (60'lık evde OM-01; ters tavanda 100'lük iç duvarın üstü 100'lük duvar omegası)",
+   "sayim": "boy_kesim",
+   "ifc": {"sinif": "IfcMemberType", "alt_tur": "MEMBER"},
+   "pafta": [],
+   "pafta_tavan": {"asma": "duvar_omegasi_asma", "ters": "tavan_omegasi"},
+   "pafta_bilgi": {"alan": "Yer", "onek": "ayrinti.omega.konum"},
+   "yerlesim": {"kural": "tavan_omegasi_yerlesimi", "parca": "omega", "sinif": "IfcMember", "bilgi": {"Yer": "duvar_ekseni", "Sirt_cm": 10.5}},
+   "kaynak": {"durum": "lokman", "tarih": "2026-10-29", "dayanak": "Lokman, 29 Ekim 13:12 (TK-02 montaj rehberi, 11. adım): \"60'lık omega ile tüm ölçüleri doğru ama sırt genişliği 10.5 cm olacak diğer omegalar gibi\" (D-32). Sırt kuralı `kurallar/liste/prefabrik.json › ic_duvar_ustu_omegasi`; satır adı liste üretecinden; gerçek listede henüz yok"}
   },
   {
    "kod": "AS-01",
