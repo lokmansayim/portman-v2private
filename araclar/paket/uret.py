@@ -1,7 +1,7 @@
 """İE-18 · Her model için düzenli paket: çizim, liste, kimlik kartlı model, montaj paftası, rehber, kıyas ve `bilgi.md`.
 
-    python -m araclar.paket <KOD|hepsi> <çıktı klasörü> [--glb] [--gecici <klasör>]
-    python -m araclar.paket <KOD> <çıktı klasörü> --is-emri <İş Emri.json> [--tavan asma,ters] [--glb] [--gecici <klasör>]
+    python -m araclar.paket <KOD|hepsi> <çıktı klasörü> [--glb] [--render] [--gecici <klasör>]
+    python -m araclar.paket <KOD> <çıktı klasörü> --is-emri <İş Emri.json> [--tavan asma,ters] [--glb] [--render] [--gecici <klasör>]
 
 Çıktı klasörü PF `Portman_Proje_Dosyalari/Modeller/` düzenindedir (`OKU_BENI.md`, CIO onayı 27 Ekim 2026 22:00 UTC):
 `prefabrik/<KOD>/<KOD>_<kalem>[_<seçenek>].<uzantı>` ve `hepsi` ile kökte `ozet.xlsx`. Üreteç canlıdaki işlevleri çağırır, kendi çizim
@@ -17,6 +17,8 @@ katmanı ve kör test sonucu; gerçek liste açılmaz) ve kart başına model–
   `bilgi.md` yalnız mühürdeki kimliklerini (bayt, SHA-256, Drive kimliği) taşır. Kişi ve bayi adı yazılmaz.
 - Yeniden üretimde klasördeki eski dosyalar `_eski/<eski üretimin tarihi>/`'ne taşınır; hiçbir şey silinmez.
 - GLB (`--glb`): `rehber/glb.js` Playwright ile; three.js 0.160.0 `THREE_DIR` ortam değişkeninin gösterdiği klasörden (npm `three`).
+- Render görselleri (`--render`, GLB'yi de yazar): rehberin galerisi 62 m²'deki gibi; `rehber/galeri.py` GLB'yi Blender Cycles'la
+  (`BLENDER_PY`: bpy kurulu Python) beş açıdan çizer, çatı katmanlarını etiketler, hepsini tek paftada toplar ve sayfaya gömer.
 - Kayıtta olmayan ev (`--is-emri`; çizim masasının yeni talepleri, 28 Ekim 2026): model satırı İş Emri'nden kurulur, küme "teklif";
   gövde, m² ve verandalar Motor'un planından (`kimlik`), çatı İş Emri'nden. Kayıttaki bir teklif projesine (TK-01) yeni revizyon da
   verilebilir, kimliği yine o İş Emri'nden; kayıttaki öteki modellerin İş Emri'si kayıttan gelir (kıyasları ona bağlı). Tavan
@@ -196,7 +198,7 @@ def kart_modeli(ie: dict, gec: Path, kart_kodu: str) -> dict:
             "kural_yok": say["kural_yok"], "sema_hatasi": say["sema_hatasi"], "uyarilar": say.get("yerlesim", {}).get("uyarilar", [])}
 
 
-def rehber(km: dict, kart_kodu: str, ie: dict, L: dict, kod: str, gec: Path, glb: bool) -> dict:
+def rehber(km: dict, kart_kodu: str, ie: dict, L: dict, kod: str, gec: Path, glb: bool, render: bool = False) -> dict:
     from araclar.paket.rehber import sayfa, veri
     try:
         d = veri.kur(copy.deepcopy(ie), km["klasor"], kart_kodu, L["satirlar"], kod)
@@ -215,6 +217,20 @@ def rehber(km: dict, kart_kodu: str, ie: dict, L: dict, kod: str, gec: Path, glb
             out["glb"] = gec / "model.glb"
         else:
             out["glb_neden"] = f"GLB yazılamadı: {(r.stderr or r.stdout).strip()[-200:]}"
+    if not render:
+        pass                                            # galerisiz sayfa öncekiyle aynı; `bilgi.md`'ye not düşmez
+    elif "glb" not in out:
+        out["galeri_neden"] = f"render görselleri GLB'siz çizilemez ({out['glb_neden']})"
+    else:
+        from araclar.paket.rehber import galeri
+        try:
+            g = galeri.uret(out["glb"], d, gec)
+            sayfa.yaz(d, html, g)
+            out["galeri"] = g
+        except galeri.Yok as e:
+            out["galeri_neden"] = f"render görselleri yazılamadı: {e}"
+        except Exception as e:                          # noqa: BLE001 — galerinin hatası rehberi düşürmez (galerisiz sayfa yazılı kalır)
+            out["galeri_neden"] = f"render görselleri yazılamadı ({type(e).__name__}: {str(e)[:160]})"
     return out
 
 
@@ -313,7 +329,8 @@ def _eskiyi_tasi(klasor: Path) -> str | None:
     return tarih
 
 
-def paket(m: dict, kok: Path, gecici: Path, glb: bool = False, kayit_: dict | None = None, ie: dict | None = None) -> dict:
+def paket(m: dict, kok: Path, gecici: Path, glb: bool = False, kayit_: dict | None = None, ie: dict | None = None,
+          render: bool = False) -> dict:
     """Bir modelin paketi; `ie` verilirse (`talep_modeli`'nin maskeli kopyası) İş Emri dosyadan okunmaz.
     Dönen: ozet satırı ({'kod', ..., 'dosyalar': {ad: 'Var' | 'Yok: ...'}})."""
     kayit_ = kayit_ or kayit()
@@ -405,7 +422,7 @@ def paket(m: dict, kok: Path, gecici: Path, glb: bool = False, kayit_: dict | No
                 if s_r:                                     # rehberin tavanı adetlerini aldığı listeninki (listeler() gibi)
                     ie_r.setdefault("ozellikler", {})["Tavan"] = s_r.capitalize()
                 try:
-                    rh = rehber(km, kart_kodu, ie_r, L[s_r], kod, gec, glb)
+                    rh = rehber(km, kart_kodu, ie_r, L[s_r], kod, gec, glb or render, render)
                 except Exception as e:                                      # noqa: BLE001 — hata nedenle yazılır, öteki modeller sürer
                     rh = {"neden": f"rehber üreteci hata verdi ({type(e).__name__}: {str(e)[:160]})"}
                 if "neden" in rh:
@@ -418,6 +435,9 @@ def paket(m: dict, kok: Path, gecici: Path, glb: bool = False, kayit_: dict | No
                     else:
                         durum[ad("model", "glb")] = f"Yok: {rh['glb_neden']}"
                     d = rh["veri"]
+                    if "galeri" in rh or "galeri_neden" in rh:
+                        notlar.append(f"Render görselleri: {len(rh['galeri'])} görsel sayfada (Blender Cycles; 62 m² rehberinin galerisi gibi)" if "galeri" in rh
+                                      else f"Render görselleri yok: {rh['galeri_neden']}")
                     notlar.append(f"Rehber (62 m² rehberinin şablonu, D-28): {d['N']} adım, {len(d['rooms'])} oda, {len(d['panels'])} pano, {len(d['hs'])} H, "
                                   f"{len(d['posts'])} köşe direği, {len(d['makas'])} makas; motorun modelinde olmayanlar kuraldan (kartlarında yazar); adetler " +
                                   ("asma tavanlı listeyle" if "asma" in L else "İş Emri'nin tavanıyla yazılan listeyle"))
@@ -531,6 +551,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("kod", help="model kodu (AP-19, TK-01) ya da 'hepsi'")
     ap.add_argument("cikti", type=Path, help="Modeller klasörü (prefabrik/<KOD>/ altına yazar)")
     ap.add_argument("--glb", action="store_true", help="rehberin GLB'sini de yaz (Playwright + THREE_DIR)")
+    ap.add_argument("--render", action="store_true", help="rehbere render görselleri (GLB + Blender: BLENDER_PY)")
     ap.add_argument("--gecici", type=Path, default=None, help="ara çıktıların klasörü (varsayılan: geçici klasör)")
     ap.add_argument("--is-emri", type=Path, default=None, help="kayıtta olmayan evin (ya da teklif projesinin yeni revizyonunun) İş Emri dosyası")
     ap.add_argument("--tavan", default=None, help="--is-emri ile: tavan seçenekleri, virgülle (asma,ters); teklifle aynı kural")
@@ -551,7 +572,7 @@ def main(argv: list[str] | None = None) -> int:
     gecici = a.gecici or Path(tempfile.mkdtemp(prefix="paket_"))
     satirlar = []
     for m in modeller:
-        r = paket(m, a.cikti, gecici, a.glb, k, ieler.get(m["kod"]))
+        r = paket(m, a.cikti, gecici, a.glb, k, ieler.get(m["kod"]), a.render)
         var = sum(1 for v in r["dosyalar"].values() if v == "Var")
         print(f"{r['kod']:6} {r['kume']:7} Var {var:2} / {len(r['dosyalar'])}" + (f"  (eskisi _eski/{r['eski']}/)" if r["eski"] else ""), flush=True)
         satirlar.append(r)
