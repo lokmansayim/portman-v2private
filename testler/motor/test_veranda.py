@@ -162,10 +162,11 @@ def test_veranda_profili_kiris_yerinde(plan):
 
 def test_veranda_listesi():
     """TK-01 listesi. Taşan verandanın dış kirişi kolonların dış yüzünden dış yüzüne, açık kenar boyunda (Lokman, kart 28 Ekim, "A: dış
-    yüzden dış yüze": 3760 / 2510 → 3860 / 2610); iki yan kiriş açık kenar − 10 (1710, 1200), eskisi gibi."""
+    yüzden dış yüze": 3760 / 2510 → 3860 / 2610); iki yan kiriş açık kenar − 10 (1710, 1200), eskisi gibi. Taşan verandaya bakan gövde
+    duvarı ana çatının kenarındadır, "çatı kenarına gelmeyen dış duvar"a girmez (D-32 madde 2, Lokman 29 Ekim 13:12: 6,47 → 0)."""
     N = PL.model_motor(_ie())
     assert (N["W"], N["D"], N["brut_m2"]) == (898.0, 1199.0, 90.122)       # brüt gövde + veranda; dış kutunun boş köşeleri sayılmaz
-    assert N["dis_cevre_m"] == pytest.approx(35.72) and N["ic_kalan_dis_duvar_m"] == pytest.approx(6.47) and N["dikmeler"] == 4
+    assert N["dis_cevre_m"] == pytest.approx(35.72) and N["ic_kalan_dis_duvar_m"] == 0.0 and N["dikmeler"] == 4
     assert N["veranda_kenarlari_cm"] == [386.0, 181.0, 181.0, 261.0, 130.0, 130.0] and N["veranda_dis_kenar_sira"] == [0, 3]
     ana, on, arka = N["cati"]
     assert (ana["aciklik_cm"], ana["boy_cm"], ana["makas_kosu_cm"]) == (898.0, 888.0, 868.0)
