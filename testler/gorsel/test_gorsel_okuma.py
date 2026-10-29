@@ -118,7 +118,8 @@ def test_tk01_bk14_yoksa_cizilmez():
 
 def test_tk01_bugunku_motorda_cizilir(tmp_path):
     """BK-14 (PR #50) `main`'de: TK-01'in okuması kendiliğinden açılır (`bk14_var`), İş Emri gerçek Pano Motor'unda çizilir ve doğrulamadan
-    geçer; tek uyarı dört kollu birleşimin profili (kural kitabında yok, BK-14)."""
+    geçer; uyarılar dört kollu birleşimin profili (kural kitabında yok, BK-14) ve D-30'un tam panoya tamamlaması (bayinin 898 × 888'i,
+    son panolar 125 → 898,5 × 888,5; Lokman 29 Ekim 10:48)."""
     from motor import dxf_out
     assert GO.bk14_var() is True
     d = GO.denetle(TK01)
@@ -128,7 +129,8 @@ def test_tk01_bugunku_motorda_cizilir(tmp_path):
     sonuc = dxf_out.uret(ie, tmp_path / "plan")
     v = json.loads((tmp_path / "plan" / "validation.json").read_text(encoding="utf-8"))
     assert v["passed"] is True, v.get("errors")
-    assert [w for w in v["warnings"] if "dört kollu birleşim" not in w] == [], v["warnings"]
+    assert [w for w in v["warnings"] if "dört kollu birleşim" not in w] == [
+        "Dış ölçü 898 × 888 → 898,5 × 888,5 cm: son pano (x: 125, y: 125 cm) 122 ve üzeri olduğu için tam panoya (125,5) tamamlandı (D-30)"], v["warnings"]
     assert (tmp_path / "plan" / sonuc["pdf"]).stat().st_size > 10_000
 
 

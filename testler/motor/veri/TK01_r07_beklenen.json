@@ -1,0 +1,2890 @@
+{
+ "aciklama": "BK-18 · ön onay çiziminin hedef örneği (D-28 madde 2): A4 PDF ve DXF içerik izi, doğrulama özeti, pano BOM'u, görünüş çizgileri ve yükleme listesi satırları.",
+ "girdi": "testler/motor/veri/TK01_r07.json",
+ "onay": "TK-01 r07 (aynı proje, iç 60, standart) ön onay çizimi. Lokman 29 Ekim 2026: 13:41 \"ikiside çizim motorunda kurallar halinde olsun\", 13:47 kat planı \"60'lık versiyonunda onaylıyorum\", 13:48 görünüşler \"sen onayla\" (D-31 madde 16).",
+ "iz": {
+  "dogrulama": {
+   "passed": true,
+   "errors": [],
+   "outer_cm": [
+    898.5,
+    888.5
+   ],
+   "panel_grid": [
+    7.0,
+    7.0
+   ],
+   "panel_count": 60,
+   "corner_count": 8,
+   "windows": 8,
+   "doors": 8,
+   "h_connectors": 12,
+   "h_connectors_dis": 8,
+   "footprint_diff_cm2": 0.0,
+   "warnings": [
+    "Dış ölçü 898 × 888 → 898,5 × 888,5 cm: son pano (x: 125, y: 125 cm) 122 ve üzeri olduğu için tam panoya (125,5) tamamlandı (D-30)",
+    "Aks noktası (6, 4): dört kollu birleşim; duvar 1 o noktada bölündü (1, 16), uçları geçen duvarın (11) yüzünde; birleşim profili kural kitabında yok"
+   ],
+   "rooms_m2": {
+    "YATAK ODASI 1": 10.6385,
+    "E. BANYO": 2.9038,
+    "BANYO": 4.4287,
+    "YATAK ODASI 2": 12.201,
+    "HOL": 5.9053,
+    "GİRİŞ": 1.4495,
+    "SALON": 18.4268,
+    "YATAK ODASI 3": 9.1508,
+    "MUTFAK": 9.0519,
+    "ÖN VERANDA": 6.9866,
+    "ARKA VERANDA": 3.458
+   },
+   "openings": [
+    {
+     "kind": "pencere",
+     "name": "BOM_D03_1255p0_DIS_P02_Y",
+     "gap": [
+      75.5,
+      878.5,
+      195.5,
+      888.5
+     ]
+    },
+    {
+     "kind": "pencere",
+     "name": "BOM_D04_1255p0_DIS_P03",
+     "gap": [
+      293.75,
+      878.5,
+      353.75,
+      888.5
+     ]
+    },
+    {
+     "kind": "pencere",
+     "name": "BOM_D04_1255p0_DIS_P03",
+     "gap": [
+      419.25,
+      878.5,
+      479.25,
+      888.5
+     ]
+    },
+    {
+     "kind": "kapi",
+     "name": "BOM_D05_1155p0_DIS_K02_SOL",
+     "gap": [
+      404.25,
+      125.5,
+      494.25,
+      135.5
+     ]
+    },
+    {
+     "kind": "pencere",
+     "name": "BOM_D03_1255p0_DIS_P02",
+     "gap": [
+      138.25,
+      0.0,
+      258.25,
+      10.0
+     ]
+    },
+    {
+     "kind": "pencere",
+     "name": "BOM_D03_1255p0_DIS_P02",
+     "gap": [
+      640.25,
+      0.0,
+      760.25,
+      10.0
+     ]
+    },
+    {
+     "kind": "pencere",
+     "name": "BOM_D03_1255p0_DIS_P02_Y",
+     "gap": [
+      0.0,
+      196.0,
+      10.0,
+      316.0
+     ]
+    },
+    {
+     "kind": "kapi",
+     "name": "BOM_I11_1255p0_IC_K01_SAG_ALT_KAYM102p5",
+     "gap": [
+      258.0,
+      644.0,
+      264.0,
+      726.0
+     ]
+    },
+    {
+     "kind": "kapi",
+     "name": "BOM_I11_1255p0_IC_K01_SOL_UST_KAYP102p5",
+     "gap": [
+      383.5,
+      413.5,
+      389.5,
+      495.5
+     ]
+    },
+    {
+     "kind": "kapi",
+     "name": "BOM_I11_1255p0_IC_K01_SOL_ALT_KAYM102p5",
+     "gap": [
+      383.5,
+      518.5,
+      389.5,
+      600.5
+     ]
+    },
+    {
+     "kind": "kapi",
+     "name": "BOM_I11_1255p0_IC_K01_SAG_UST_KAYP102p5",
+     "gap": [
+      509.0,
+      162.5,
+      515.0,
+      244.5
+     ]
+    },
+    {
+     "kind": "kapi",
+     "name": "BOM_I11_1255p0_IC_K01_SAG_UST_KAYP102p5",
+     "gap": [
+      509.0,
+      413.5,
+      515.0,
+      495.5
+     ]
+    },
+    {
+     "kind": "kapi",
+     "name": "BOM_I04_1225p0_IC_K01_SAG_ALT_KAYM87p5",
+     "gap": [
+      509.0,
+      518.5,
+      515.0,
+      600.5
+     ]
+    },
+    {
+     "kind": "pencere",
+     "name": "BOM_D02_1255p0_DIS_P01",
+     "gap": [
+      888.5,
+      321.5,
+      898.5,
+      441.5
+     ]
+    },
+    {
+     "kind": "pencere",
+     "name": "BOM_D02_1255p0_DIS_P01",
+     "gap": [
+      888.5,
+      635.25,
+      898.5,
+      755.25
+     ]
+    },
+    {
+     "kind": "kapi",
+     "name": "BOM_I04_1225p0_IC_K01_SOL_ALT_KAYM87p5",
+     "gap": [
+      401.0,
+      629.5,
+      483.0,
+      635.5
+     ]
+    }
+   ]
+  },
+  "bom": [
+   {
+    "kod": "B01",
+    "malzeme": "İç köşe bağlantısı",
+    "olcu_mm": [
+     30,
+     60,
+     null
+    ],
+    "adet": 2,
+    "birim": "adet"
+   },
+   {
+    "kod": "B02",
+    "malzeme": "100×50 köşe bağlantısı",
+    "olcu_mm": [
+     50,
+     100,
+     null
+    ],
+    "adet": 6,
+    "birim": "adet"
+   },
+   {
+    "kod": "B03",
+    "malzeme": "Üçlü H bağlantı",
+    "olcu_mm": [
+     60,
+     null,
+     null
+    ],
+    "adet": 4,
+    "birim": "adet"
+   },
+   {
+    "kod": "B04",
+    "malzeme": "Veranda dikmesi",
+    "olcu_mm": [
+     100,
+     100,
+     null
+    ],
+    "adet": 4,
+    "birim": "adet"
+   },
+   {
+    "kod": "B05",
+    "malzeme": "Üçlü H bağlantı dış 100×60",
+    "olcu_mm": [
+     100.0,
+     60.0,
+     null
+    ],
+    "adet": 8,
+    "birim": "adet"
+   },
+   {
+    "kod": "D01",
+    "malzeme": "Dolu pano",
+    "olcu_mm": [
+     1255,
+     100,
+     2500
+    ],
+    "adet": 15,
+    "birim": "adet"
+   },
+   {
+    "kod": "D02",
+    "malzeme": "120×120 pencereli pano",
+    "olcu_mm": [
+     1255,
+     100,
+     2500
+    ],
+    "adet": 2,
+    "birim": "adet"
+   },
+   {
+    "kod": "D03",
+    "malzeme": "120×180 pencereli pano",
+    "olcu_mm": [
+     1255,
+     100,
+     2500
+    ],
+    "adet": 4,
+    "birim": "adet"
+   },
+   {
+    "kod": "D04",
+    "malzeme": "60×40 vasistaslı pano",
+    "olcu_mm": [
+     1255,
+     100,
+     2500
+    ],
+    "adet": 2,
+    "birim": "adet"
+   },
+   {
+    "kod": "D05",
+    "malzeme": "Dış kapılı özel pano",
+    "olcu_mm": [
+     1155,
+     100,
+     2500
+    ],
+    "adet": 1,
+    "birim": "adet"
+   },
+   {
+    "kod": "D06",
+    "malzeme": "Özel dolu pano",
+    "olcu_mm": [
+     627.5,
+     100,
+     2500
+    ],
+    "adet": 8,
+    "birim": "adet"
+   },
+   {
+    "kod": "D08",
+    "malzeme": "Özel dolu pano",
+    "olcu_mm": [
+     1205,
+     100,
+     2500
+    ],
+    "adet": 2,
+    "birim": "adet"
+   },
+   {
+    "kod": "I01",
+    "malzeme": "Dolu pano",
+    "olcu_mm": [
+     1255,
+     60,
+     2500
+    ],
+    "adet": 11,
+    "birim": "adet"
+   },
+   {
+    "kod": "I02",
+    "malzeme": "Özel dolu pano",
+    "olcu_mm": [
+     1205,
+     60,
+     2500
+    ],
+    "adet": 3,
+    "birim": "adet"
+   },
+   {
+    "kod": "I03",
+    "malzeme": "Kademe dolu panosu",
+    "olcu_mm": [
+     597.5,
+     60,
+     2500
+    ],
+    "adet": 1,
+    "birim": "adet"
+   },
+   {
+    "kod": "I04",
+    "malzeme": "İç kapılı özel pano",
+    "olcu_mm": [
+     1225,
+     60,
+     2500
+    ],
+    "adet": 2,
+    "birim": "adet"
+   },
+   {
+    "kod": "I07",
+    "malzeme": "Özel dolu pano",
+    "olcu_mm": [
+     1225.0,
+     60,
+     2500
+    ],
+    "adet": 3,
+    "birim": "adet"
+   },
+   {
+    "kod": "I08",
+    "malzeme": "Özel dolu pano",
+    "olcu_mm": [
+     1195.0,
+     60,
+     2500
+    ],
+    "adet": 1,
+    "birim": "adet"
+   },
+   {
+    "kod": "I11",
+    "malzeme": "İç kapılı pano",
+    "olcu_mm": [
+     1255.0,
+     60,
+     2500
+    ],
+    "adet": 5,
+    "birim": "adet"
+   },
+   {
+    "kod": "K01",
+    "malzeme": "İç kapı",
+    "olcu_mm": [
+     820,
+     null,
+     null
+    ],
+    "adet": 7,
+    "birim": "adet"
+   },
+   {
+    "kod": "K03",
+    "malzeme": "Dış kapı 90",
+    "olcu_mm": [
+     900.0,
+     null,
+     null
+    ],
+    "adet": 1,
+    "birim": "adet"
+   },
+   {
+    "kod": "P01",
+    "malzeme": "Pencere 120×120",
+    "olcu_mm": [
+     1200,
+     1200,
+     null
+    ],
+    "adet": 2,
+    "birim": "adet"
+   },
+   {
+    "kod": "P02",
+    "malzeme": "Pencere 120×180",
+    "olcu_mm": [
+     1200,
+     1800,
+     null
+    ],
+    "adet": 4,
+    "birim": "adet"
+   },
+   {
+    "kod": "P03",
+    "malzeme": "Vasistas 60×40",
+    "olcu_mm": [
+     600,
+     400,
+     null
+    ],
+    "adet": 2,
+    "birim": "adet"
+   },
+   {
+    "kod": "V05",
+    "malzeme": "Veranda ön profil gösterimi",
+    "olcu_mm": [
+     1155.0,
+     100,
+     null
+    ],
+    "adet": 1,
+    "birim": "adet"
+   },
+   {
+    "kod": "V06",
+    "malzeme": "Veranda ön profil gösterimi",
+    "olcu_mm": [
+     3860.0,
+     100,
+     null
+    ],
+    "adet": 1,
+    "birim": "adet"
+   },
+   {
+    "kod": "V07",
+    "malzeme": "Veranda yan profil gösterimi",
+    "olcu_mm": [
+     1810.0,
+     100,
+     null
+    ],
+    "adet": 2,
+    "birim": "adet"
+   },
+   {
+    "kod": "V08",
+    "malzeme": "Veranda ön profil gösterimi",
+    "olcu_mm": [
+     2660.0,
+     100,
+     null
+    ],
+    "adet": 1,
+    "birim": "adet"
+   },
+   {
+    "kod": "V09",
+    "malzeme": "Veranda yan profil gösterimi",
+    "olcu_mm": [
+     1300.0,
+     100,
+     null
+    ],
+    "adet": 2,
+    "birim": "adet"
+   }
+  ],
+  "gorunusler": [
+   [
+    "ON_CATI",
+    false,
+    [
+     -30.0,
+     -801.707
+    ],
+    [
+     928.5,
+     -801.707
+    ]
+   ],
+   [
+    "ON_CATI",
+    false,
+    [
+     -30.0,
+     -791.708
+    ],
+    [
+     449.25,
+     -633.555
+    ]
+   ],
+   [
+    "ON_CATI",
+    false,
+    [
+     226.0,
+     -801.708
+    ],
+    [
+     672.0,
+     -801.708
+    ]
+   ],
+   [
+    "ON_CATI",
+    false,
+    [
+     226.0,
+     -791.708
+    ],
+    [
+     449.0,
+     -718.118
+    ],
+    [
+     672.0,
+     -791.708
+    ]
+   ],
+   [
+    "ON_CATI",
+    false,
+    [
+     449.25,
+     -633.555
+    ],
+    [
+     928.5,
+     -791.708
+    ]
+   ],
+   [
+    "ON_CATI",
+    false,
+    [
+     1368.5,
+     -801.707
+    ],
+    [
+     2327.0,
+     -801.707
+    ]
+   ],
+   [
+    "ON_CATI",
+    false,
+    [
+     1847.75,
+     -633.555
+    ],
+    [
+     1368.5,
+     -791.708
+    ]
+   ],
+   [
+    "ON_CATI",
+    false,
+    [
+     2001.0,
+     -801.708
+    ],
+    [
+     2327.0,
+     -801.708
+    ]
+   ],
+   [
+    "ON_CATI",
+    false,
+    [
+     2001.0,
+     -791.708
+    ],
+    [
+     2164.0,
+     -737.918
+    ],
+    [
+     2327.0,
+     -791.708
+    ]
+   ],
+   [
+    "ON_CATI",
+    false,
+    [
+     2327.0,
+     -791.708
+    ],
+    [
+     1847.75,
+     -633.555
+    ]
+   ],
+   [
+    "ON_CATI",
+    false,
+    [
+     2797.0,
+     -801.708
+    ],
+    [
+     2957.0,
+     -801.708
+    ]
+   ],
+   [
+    "ON_CATI",
+    false,
+    [
+     2797.0,
+     -791.708
+    ],
+    [
+     2927.0,
+     -791.708
+    ]
+   ],
+   [
+    "ON_CATI",
+    false,
+    [
+     2927.0,
+     -801.707
+    ],
+    [
+     3875.5,
+     -801.707
+    ]
+   ],
+   [
+    "ON_CATI",
+    false,
+    [
+     2927.0,
+     -737.918
+    ],
+    [
+     2797.0,
+     -737.918
+    ],
+    [
+     2797.0,
+     -791.708
+    ]
+   ],
+   [
+    "ON_CATI",
+    false,
+    [
+     3845.5,
+     -801.708
+    ],
+    [
+     4056.5,
+     -801.708
+    ]
+   ],
+   [
+    "ON_CATI",
+    false,
+    [
+     3875.5,
+     -791.708
+    ],
+    [
+     3875.5,
+     -633.555
+    ],
+    [
+     2927.0,
+     -633.555
+    ],
+    [
+     2927.0,
+     -791.708
+    ],
+    [
+     3875.5,
+     -791.708
+    ]
+   ],
+   [
+    "ON_CATI",
+    false,
+    [
+     3875.5,
+     -791.708
+    ],
+    [
+     4056.5,
+     -791.708
+    ],
+    [
+     4056.5,
+     -718.118
+    ],
+    [
+     3875.5,
+     -718.118
+    ]
+   ],
+   [
+    "ON_CATI",
+    false,
+    [
+     4526.5,
+     -801.708
+    ],
+    [
+     4737.5,
+     -801.708
+    ]
+   ],
+   [
+    "ON_CATI",
+    false,
+    [
+     4526.5,
+     -791.708
+    ],
+    [
+     4707.5,
+     -791.708
+    ]
+   ],
+   [
+    "ON_CATI",
+    false,
+    [
+     4707.5,
+     -801.707
+    ],
+    [
+     5656.0,
+     -801.707
+    ]
+   ],
+   [
+    "ON_CATI",
+    false,
+    [
+     4707.5,
+     -718.118
+    ],
+    [
+     4526.5,
+     -718.118
+    ],
+    [
+     4526.5,
+     -791.708
+    ]
+   ],
+   [
+    "ON_CATI",
+    false,
+    [
+     4707.5,
+     -633.555
+    ],
+    [
+     4707.5,
+     -791.708
+    ],
+    [
+     5656.0,
+     -791.708
+    ],
+    [
+     5656.0,
+     -633.555
+    ],
+    [
+     4707.5,
+     -633.555
+    ]
+   ],
+   [
+    "ON_CATI",
+    false,
+    [
+     5626.0,
+     -801.708
+    ],
+    [
+     5786.0,
+     -801.708
+    ]
+   ],
+   [
+    "ON_CATI",
+    false,
+    [
+     5656.0,
+     -791.708
+    ],
+    [
+     5786.0,
+     -791.708
+    ],
+    [
+     5786.0,
+     -737.918
+    ],
+    [
+     5656.0,
+     -737.918
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     10.0,
+     -1051.707
+    ],
+    [
+     10.0,
+     -801.707
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     135.5,
+     -1051.707
+    ],
+    [
+     135.5,
+     -801.707
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     261.0,
+     -1051.707
+    ],
+    [
+     261.0,
+     -801.707
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     381.5,
+     -1051.707
+    ],
+    [
+     381.5,
+     -801.707
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     391.5,
+     -1051.707
+    ],
+    [
+     391.5,
+     -801.707
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     507.0,
+     -1051.707
+    ],
+    [
+     507.0,
+     -801.707
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     517.0,
+     -1051.707
+    ],
+    [
+     517.0,
+     -801.707
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     637.5,
+     -1051.707
+    ],
+    [
+     637.5,
+     -801.707
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     763.0,
+     -1051.707
+    ],
+    [
+     763.0,
+     -801.707
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     888.5,
+     -1051.707
+    ],
+    [
+     888.5,
+     -801.707
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     1408.5,
+     -1051.707
+    ],
+    [
+     1408.5,
+     -801.707
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     1471.25,
+     -1051.707
+    ],
+    [
+     1471.25,
+     -801.707
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     1596.75,
+     -1051.707
+    ],
+    [
+     1596.75,
+     -801.707
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     1722.25,
+     -1051.707
+    ],
+    [
+     1722.25,
+     -801.707
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     1785.0,
+     -1051.707
+    ],
+    [
+     1785.0,
+     -801.707
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     1910.5,
+     -1051.707
+    ],
+    [
+     1910.5,
+     -801.707
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     2036.0,
+     -1051.707
+    ],
+    [
+     2036.0,
+     -801.707
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     2098.75,
+     -1051.707
+    ],
+    [
+     2098.75,
+     -801.707
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     2224.25,
+     -1051.707
+    ],
+    [
+     2224.25,
+     -801.707
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     2287.0,
+     -1051.707
+    ],
+    [
+     2287.0,
+     -801.707
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     2962.0,
+     -1051.707
+    ],
+    [
+     2962.0,
+     -801.707
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     2967.0,
+     -1051.707
+    ],
+    [
+     2967.0,
+     -801.707
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     3087.5,
+     -1051.707
+    ],
+    [
+     3087.5,
+     -801.707
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     3213.0,
+     -1051.707
+    ],
+    [
+     3213.0,
+     -801.707
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     3338.5,
+     -1051.707
+    ],
+    [
+     3338.5,
+     -801.707
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     3464.0,
+     -1051.707
+    ],
+    [
+     3464.0,
+     -801.707
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     3526.75,
+     -1051.707
+    ],
+    [
+     3526.75,
+     -801.707
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     3652.25,
+     -1051.707
+    ],
+    [
+     3652.25,
+     -801.707
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     3715.0,
+     -1051.707
+    ],
+    [
+     3715.0,
+     -801.707
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     3835.5,
+     -1051.707
+    ],
+    [
+     3835.5,
+     -801.707
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     3840.5,
+     -1051.707
+    ],
+    [
+     3840.5,
+     -801.707
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     4742.5,
+     -1051.707
+    ],
+    [
+     4742.5,
+     -801.707
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     4747.5,
+     -1051.707
+    ],
+    [
+     4747.5,
+     -801.707
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     4868.0,
+     -1051.707
+    ],
+    [
+     4868.0,
+     -801.707
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     4993.5,
+     -1051.707
+    ],
+    [
+     4993.5,
+     -801.707
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     5056.25,
+     -1051.707
+    ],
+    [
+     5056.25,
+     -801.707
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     5181.75,
+     -1051.707
+    ],
+    [
+     5181.75,
+     -801.707
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     5244.5,
+     -1051.707
+    ],
+    [
+     5244.5,
+     -801.707
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     5370.0,
+     -1051.707
+    ],
+    [
+     5370.0,
+     -801.707
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     5495.5,
+     -1051.707
+    ],
+    [
+     5495.5,
+     -801.707
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     5616.0,
+     -1051.707
+    ],
+    [
+     5616.0,
+     -801.707
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     5621.0,
+     -1051.707
+    ],
+    [
+     5621.0,
+     -801.707
+    ]
+   ],
+   [
+    "ON_GORUNUS",
+    true,
+    [
+     0.0,
+     -1051.708
+    ],
+    [
+     898.5,
+     -1051.708
+    ],
+    [
+     898.5,
+     -801.708
+    ],
+    [
+     0.0,
+     -801.708
+    ]
+   ],
+   [
+    "ON_GORUNUS",
+    true,
+    [
+     256.0,
+     -1051.708
+    ],
+    [
+     266.0,
+     -1051.708
+    ],
+    [
+     266.0,
+     -811.708
+    ],
+    [
+     256.0,
+     -811.708
+    ]
+   ],
+   [
+    "ON_GORUNUS",
+    true,
+    [
+     256.0,
+     -811.708
+    ],
+    [
+     266.0,
+     -811.708
+    ],
+    [
+     266.0,
+     -801.708
+    ],
+    [
+     256.0,
+     -801.708
+    ]
+   ],
+   [
+    "ON_GORUNUS",
+    true,
+    [
+     256.0,
+     -811.708
+    ],
+    [
+     642.0,
+     -811.708
+    ],
+    [
+     642.0,
+     -801.708
+    ],
+    [
+     256.0,
+     -801.708
+    ]
+   ],
+   [
+    "ON_GORUNUS",
+    true,
+    [
+     632.0,
+     -1051.708
+    ],
+    [
+     642.0,
+     -1051.708
+    ],
+    [
+     642.0,
+     -811.708
+    ],
+    [
+     632.0,
+     -811.708
+    ]
+   ],
+   [
+    "ON_GORUNUS",
+    true,
+    [
+     632.0,
+     -811.708
+    ],
+    [
+     642.0,
+     -811.708
+    ],
+    [
+     642.0,
+     -801.708
+    ],
+    [
+     632.0,
+     -801.708
+    ]
+   ],
+   [
+    "ON_GORUNUS",
+    true,
+    [
+     1398.5,
+     -1051.708
+    ],
+    [
+     2297.0,
+     -1051.708
+    ],
+    [
+     2297.0,
+     -801.708
+    ],
+    [
+     1398.5,
+     -801.708
+    ]
+   ],
+   [
+    "ON_GORUNUS",
+    true,
+    [
+     2031.0,
+     -1051.708
+    ],
+    [
+     2041.0,
+     -1051.708
+    ],
+    [
+     2041.0,
+     -811.708
+    ],
+    [
+     2031.0,
+     -811.708
+    ]
+   ],
+   [
+    "ON_GORUNUS",
+    true,
+    [
+     2031.0,
+     -811.708
+    ],
+    [
+     2041.0,
+     -811.708
+    ],
+    [
+     2041.0,
+     -801.708
+    ],
+    [
+     2031.0,
+     -801.708
+    ]
+   ],
+   [
+    "ON_GORUNUS",
+    true,
+    [
+     2031.0,
+     -811.708
+    ],
+    [
+     2297.0,
+     -811.708
+    ],
+    [
+     2297.0,
+     -801.708
+    ],
+    [
+     2031.0,
+     -801.708
+    ]
+   ],
+   [
+    "ON_GORUNUS",
+    true,
+    [
+     2287.0,
+     -1051.708
+    ],
+    [
+     2297.0,
+     -1051.708
+    ],
+    [
+     2297.0,
+     -811.708
+    ],
+    [
+     2287.0,
+     -811.708
+    ]
+   ],
+   [
+    "ON_GORUNUS",
+    true,
+    [
+     2287.0,
+     -811.708
+    ],
+    [
+     2297.0,
+     -811.708
+    ],
+    [
+     2297.0,
+     -801.708
+    ],
+    [
+     2287.0,
+     -801.708
+    ]
+   ],
+   [
+    "ON_GORUNUS",
+    true,
+    [
+     2827.0,
+     -1051.708
+    ],
+    [
+     2837.0,
+     -1051.708
+    ],
+    [
+     2837.0,
+     -811.708
+    ],
+    [
+     2827.0,
+     -811.708
+    ]
+   ],
+   [
+    "ON_GORUNUS",
+    true,
+    [
+     2827.0,
+     -811.708
+    ],
+    [
+     2837.0,
+     -811.708
+    ],
+    [
+     2837.0,
+     -801.708
+    ],
+    [
+     2827.0,
+     -801.708
+    ]
+   ],
+   [
+    "ON_GORUNUS",
+    true,
+    [
+     2827.0,
+     -811.708
+    ],
+    [
+     2957.0,
+     -811.708
+    ],
+    [
+     2957.0,
+     -801.708
+    ],
+    [
+     2827.0,
+     -801.708
+    ]
+   ],
+   [
+    "ON_GORUNUS",
+    true,
+    [
+     2957.0,
+     -1051.708
+    ],
+    [
+     3845.5,
+     -1051.708
+    ],
+    [
+     3845.5,
+     -801.708
+    ],
+    [
+     2957.0,
+     -801.708
+    ]
+   ],
+   [
+    "ON_GORUNUS",
+    true,
+    [
+     3845.5,
+     -811.708
+    ],
+    [
+     4026.5,
+     -811.708
+    ],
+    [
+     4026.5,
+     -801.708
+    ],
+    [
+     3845.5,
+     -801.708
+    ]
+   ],
+   [
+    "ON_GORUNUS",
+    true,
+    [
+     4016.5,
+     -1051.708
+    ],
+    [
+     4026.5,
+     -1051.708
+    ],
+    [
+     4026.5,
+     -811.708
+    ],
+    [
+     4016.5,
+     -811.708
+    ]
+   ],
+   [
+    "ON_GORUNUS",
+    true,
+    [
+     4016.5,
+     -811.708
+    ],
+    [
+     4026.5,
+     -811.708
+    ],
+    [
+     4026.5,
+     -801.708
+    ],
+    [
+     4016.5,
+     -801.708
+    ]
+   ],
+   [
+    "ON_GORUNUS",
+    true,
+    [
+     4556.5,
+     -1051.708
+    ],
+    [
+     4566.5,
+     -1051.708
+    ],
+    [
+     4566.5,
+     -811.708
+    ],
+    [
+     4556.5,
+     -811.708
+    ]
+   ],
+   [
+    "ON_GORUNUS",
+    true,
+    [
+     4556.5,
+     -811.708
+    ],
+    [
+     4566.5,
+     -811.708
+    ],
+    [
+     4566.5,
+     -801.708
+    ],
+    [
+     4556.5,
+     -801.708
+    ]
+   ],
+   [
+    "ON_GORUNUS",
+    true,
+    [
+     4556.5,
+     -811.708
+    ],
+    [
+     4737.5,
+     -811.708
+    ],
+    [
+     4737.5,
+     -801.708
+    ],
+    [
+     4556.5,
+     -801.708
+    ]
+   ],
+   [
+    "ON_GORUNUS",
+    true,
+    [
+     4737.5,
+     -1051.708
+    ],
+    [
+     5626.0,
+     -1051.708
+    ],
+    [
+     5626.0,
+     -801.708
+    ],
+    [
+     4737.5,
+     -801.708
+    ]
+   ],
+   [
+    "ON_GORUNUS",
+    true,
+    [
+     5626.0,
+     -811.708
+    ],
+    [
+     5756.0,
+     -811.708
+    ],
+    [
+     5756.0,
+     -801.708
+    ],
+    [
+     5626.0,
+     -801.708
+    ]
+   ],
+   [
+    "ON_GORUNUS",
+    true,
+    [
+     5746.0,
+     -1051.708
+    ],
+    [
+     5756.0,
+     -1051.708
+    ],
+    [
+     5756.0,
+     -811.708
+    ],
+    [
+     5746.0,
+     -811.708
+    ]
+   ],
+   [
+    "ON_GORUNUS",
+    true,
+    [
+     5746.0,
+     -811.708
+    ],
+    [
+     5756.0,
+     -811.708
+    ],
+    [
+     5756.0,
+     -801.708
+    ],
+    [
+     5746.0,
+     -801.708
+    ]
+   ],
+   [
+    "ON_TOPUK",
+    false,
+    [
+     -30.0,
+     -801.707
+    ],
+    [
+     -30.0,
+     -791.707
+    ]
+   ],
+   [
+    "ON_TOPUK",
+    false,
+    [
+     226.0,
+     -801.708
+    ],
+    [
+     226.0,
+     -791.708
+    ]
+   ],
+   [
+    "ON_TOPUK",
+    false,
+    [
+     672.0,
+     -801.708
+    ],
+    [
+     672.0,
+     -791.708
+    ]
+   ],
+   [
+    "ON_TOPUK",
+    false,
+    [
+     928.5,
+     -801.707
+    ],
+    [
+     928.5,
+     -791.707
+    ]
+   ],
+   [
+    "ON_TOPUK",
+    false,
+    [
+     1368.5,
+     -801.707
+    ],
+    [
+     1368.5,
+     -791.707
+    ]
+   ],
+   [
+    "ON_TOPUK",
+    false,
+    [
+     2001.0,
+     -801.708
+    ],
+    [
+     2001.0,
+     -791.708
+    ]
+   ],
+   [
+    "ON_TOPUK",
+    false,
+    [
+     2327.0,
+     -801.708
+    ],
+    [
+     2327.0,
+     -791.708
+    ]
+   ],
+   [
+    "ON_TOPUK",
+    false,
+    [
+     2327.0,
+     -801.707
+    ],
+    [
+     2327.0,
+     -791.707
+    ]
+   ],
+   [
+    "ON_TOPUK",
+    false,
+    [
+     2797.0,
+     -801.708
+    ],
+    [
+     2797.0,
+     -791.708
+    ]
+   ],
+   [
+    "ON_TOPUK",
+    false,
+    [
+     2927.0,
+     -801.707
+    ],
+    [
+     2927.0,
+     -791.707
+    ]
+   ],
+   [
+    "ON_TOPUK",
+    false,
+    [
+     2957.0,
+     -801.708
+    ],
+    [
+     2957.0,
+     -791.708
+    ]
+   ],
+   [
+    "ON_TOPUK",
+    false,
+    [
+     3845.5,
+     -801.708
+    ],
+    [
+     3845.5,
+     -791.708
+    ]
+   ],
+   [
+    "ON_TOPUK",
+    false,
+    [
+     3875.5,
+     -801.707
+    ],
+    [
+     3875.5,
+     -791.707
+    ]
+   ],
+   [
+    "ON_TOPUK",
+    false,
+    [
+     4056.5,
+     -801.708
+    ],
+    [
+     4056.5,
+     -791.708
+    ]
+   ],
+   [
+    "ON_TOPUK",
+    false,
+    [
+     4526.5,
+     -801.708
+    ],
+    [
+     4526.5,
+     -791.708
+    ]
+   ],
+   [
+    "ON_TOPUK",
+    false,
+    [
+     4707.5,
+     -801.707
+    ],
+    [
+     4707.5,
+     -791.707
+    ]
+   ],
+   [
+    "ON_TOPUK",
+    false,
+    [
+     4737.5,
+     -801.708
+    ],
+    [
+     4737.5,
+     -791.708
+    ]
+   ],
+   [
+    "ON_TOPUK",
+    false,
+    [
+     5626.0,
+     -801.708
+    ],
+    [
+     5626.0,
+     -791.708
+    ]
+   ],
+   [
+    "ON_TOPUK",
+    false,
+    [
+     5656.0,
+     -801.707
+    ],
+    [
+     5656.0,
+     -791.707
+    ]
+   ],
+   [
+    "ON_TOPUK",
+    false,
+    [
+     5786.0,
+     -801.708
+    ],
+    [
+     5786.0,
+     -791.708
+    ]
+   ]
+  ],
+  "liste": [
+   {
+    "grup": "1001",
+    "kalem": "100'lük yapıştırma dolu pano",
+    "olcu": "100 × 1250 × 2500",
+    "adet": 15
+   },
+   {
+    "grup": "1001",
+    "kalem": "100'lük yapıştırma dolu pano",
+    "olcu": "100 × 1200 × 2500",
+    "adet": 2
+   },
+   {
+    "grup": "1001",
+    "kalem": "100'lük yapıştırma dolu pano",
+    "olcu": "100 × 625 × 2500",
+    "adet": 8
+   },
+   {
+    "grup": "1001",
+    "kalem": "100'lük yapıştırma dolu vasistaslı pano (60/40)",
+    "olcu": "100 × 1250 × 2500",
+    "adet": 2
+   },
+   {
+    "grup": "1001",
+    "kalem": "60'lık karkaslı + kasalı pano",
+    "olcu": "60 × 1250 × 2500",
+    "adet": 5
+   },
+   {
+    "grup": "1001",
+    "kalem": "60'lık karkaslı + kasalı pano",
+    "olcu": "60 × 1220 × 2500",
+    "adet": 2
+   },
+   {
+    "grup": "1001",
+    "kalem": "60'lık yapıştırma dolu pano",
+    "olcu": "60 × 1250 × 2500",
+    "adet": 11
+   },
+   {
+    "grup": "1001",
+    "kalem": "60'lık yapıştırma dolu pano",
+    "olcu": "60 × 1220 × 2500",
+    "adet": 3
+   },
+   {
+    "grup": "1001",
+    "kalem": "60'lık yapıştırma dolu pano",
+    "olcu": "60 × 1200 × 2500",
+    "adet": 3
+   },
+   {
+    "grup": "1001",
+    "kalem": "60'lık yapıştırma dolu pano",
+    "olcu": "60 × 1190 × 2500",
+    "adet": 1
+   },
+   {
+    "grup": "1001",
+    "kalem": "60'lık yapıştırma dolu pano",
+    "olcu": "60 × 595 × 2500",
+    "adet": 1
+   },
+   {
+    "grup": "1001",
+    "kalem": "Karkaslı çelik kapı panosu",
+    "olcu": "100 × 1150 × 2500",
+    "adet": 1
+   },
+   {
+    "grup": "1001",
+    "kalem": "Pencere alt panel (120/120)",
+    "olcu": "100 × 1250 × 800",
+    "adet": 2
+   },
+   {
+    "grup": "1001",
+    "kalem": "Pencere alt panel (120/180)",
+    "olcu": "100 × 1250 × 200",
+    "adet": 4
+   },
+   {
+    "grup": "1001",
+    "kalem": "Pencere üst panel",
+    "olcu": "100 × 1250 × 500",
+    "adet": 6
+   },
+   {
+    "grup": "1002",
+    "kalem": "10'luk köşe direği 100 × 100",
+    "olcu": "100 × 100 × 2500",
+    "adet": 6
+   },
+   {
+    "grup": "1002",
+    "kalem": "6'lık köşe direği 60 × 60",
+    "olcu": "60 × 60 × 2500",
+    "adet": 2
+   },
+   {
+    "grup": "1002",
+    "kalem": "Köşebent",
+    "olcu": "L 2500",
+    "adet": 7
+   },
+   {
+    "grup": "1002",
+    "kalem": "Özel kutu profil (kolon) 100 × 100",
+    "olcu": "L 2500",
+    "adet": 4
+   },
+   {
+    "grup": "1002",
+    "kalem": "Kutu profil (kiriş) 100 × 100",
+    "olcu": "L 3860",
+    "adet": 1
+   },
+   {
+    "grup": "1002",
+    "kalem": "Kutu profil (kiriş) 100 × 100",
+    "olcu": "L 1710",
+    "adet": 1
+   },
+   {
+    "grup": "1002",
+    "kalem": "Kutu profil (kiriş) 100 × 100",
+    "olcu": "L 1710",
+    "adet": 1
+   },
+   {
+    "grup": "1002",
+    "kalem": "Kutu profil (kiriş) 100 × 100",
+    "olcu": "L 2660",
+    "adet": 1
+   },
+   {
+    "grup": "1002",
+    "kalem": "Kutu profil (kiriş) 100 × 100",
+    "olcu": "L 1200",
+    "adet": 1
+   },
+   {
+    "grup": "1002",
+    "kalem": "Kutu profil (kiriş) 100 × 100",
+    "olcu": "L 1200",
+    "adet": 1
+   },
+   {
+    "grup": "1002",
+    "kalem": "Kutu profil (kiriş) 100 × 100",
+    "olcu": "L 1255",
+    "adet": 1
+   },
+   {
+    "grup": "1002",
+    "kalem": "H 100 (dış pano eki)",
+    "olcu": "100 × 100 × 2500",
+    "adet": 20
+   },
+   {
+    "grup": "1002",
+    "kalem": "H standart 60 (iç pano eki)",
+    "olcu": "60 × 60 × 2500",
+    "adet": 13
+   },
+   {
+    "grup": "1002",
+    "kalem": "3'lü H 100 × 100 × 60 (dış duvar T'si)",
+    "olcu": "L 2500",
+    "adet": 8
+   },
+   {
+    "grup": "1002",
+    "kalem": "3'lü H standart 60 (iç T)",
+    "olcu": "L 2500",
+    "adet": 4
+   },
+   {
+    "grup": "1002",
+    "kalem": "Özel pencere karkası (120×120) (100'lük çektirme U'su + 100'lük H geçen)",
+    "olcu": "1200 × 1200",
+    "adet": 2
+   },
+   {
+    "grup": "1002",
+    "kalem": "Özel pencere karkası (120×180) (100'lük çektirme U'su + 100'lük H geçen)",
+    "olcu": "1200 × 1800",
+    "adet": 4
+   },
+   {
+    "grup": "1002",
+    "kalem": "Çektirme U'su 100",
+    "olcu": "100 × 2440",
+    "adet": 2
+   },
+   {
+    "grup": "1002",
+    "kalem": "100'lük pencere U'su H geçen",
+    "olcu": "L 2500",
+    "adet": 1
+   },
+   {
+    "grup": "1002",
+    "kalem": "Çektirme U'su 60",
+    "olcu": "60 × 2440",
+    "adet": 2
+   },
+   {
+    "grup": "1002",
+    "kalem": "60'lık duvar omegası (asma dizme tavan)",
+    "olcu": "60 × 3750",
+    "adet": 31
+   },
+   {
+    "grup": "1002",
+    "kalem": "100'lük duvar omegası",
+    "olcu": "100 × 2500",
+    "adet": 4
+   },
+   {
+    "grup": "1002",
+    "kalem": "100'lük saçak omegası",
+    "olcu": "100 × 2500",
+    "adet": 11
+   },
+   {
+    "grup": "1002",
+    "kalem": "Saçak sacı (30'luk, 3'ü menfezli)",
+    "olcu": "300 × 2500",
+    "adet": 12
+   },
+   {
+    "grup": "1002",
+    "kalem": "Alın sacı (30'luk)",
+    "olcu": "300 × 2500",
+    "adet": 13
+   },
+   {
+    "grup": "1002",
+    "kalem": "Baş makas omegası",
+    "olcu": "L 2500",
+    "adet": 8
+   },
+   {
+    "grup": "1002",
+    "kalem": "Baş makas Z'si",
+    "olcu": "L 2800",
+    "adet": 8
+   },
+   {
+    "grup": "1002",
+    "kalem": "Baş makas betopanı",
+    "olcu": "1250 × 2500",
+    "adet": 8
+   },
+   {
+    "grup": "1002",
+    "kalem": "100'lük alt çerçeve",
+    "olcu": "100 × 3750",
+    "adet": 11
+   },
+   {
+    "grup": "1002",
+    "kalem": "60'lık alt çerçeve",
+    "olcu": "60 × 3750",
+    "adet": 9
+   },
+   {
+    "grup": "1003",
+    "kalem": "Prefabrik çelik kapı (SOL)",
+    "olcu": "900 × 2000",
+    "adet": 1
+   },
+   {
+    "grup": "1003",
+    "kalem": "Amerikan kapı (80'lik kanat) (SAĞ)",
+    "olcu": "82 × 196",
+    "adet": 3
+   },
+   {
+    "grup": "1003",
+    "kalem": "Amerikan kapı (80'lik kanat) (SOL)",
+    "olcu": "82 × 196",
+    "adet": 4
+   },
+   {
+    "grup": "1003",
+    "kalem": "PVC pencere",
+    "olcu": "120/120",
+    "adet": 2
+   },
+   {
+    "grup": "1003",
+    "kalem": "PVC pencere",
+    "olcu": "120/180",
+    "adet": 4
+   },
+   {
+    "grup": "1003",
+    "kalem": "PVC vasistas",
+    "olcu": "60/40",
+    "adet": 2
+   },
+   {
+    "grup": "1004",
+    "kalem": "Tavan beyaz alçıpan",
+    "olcu": "1200 × 2500",
+    "adet": 24
+   },
+   {
+    "grup": "1004",
+    "kalem": "Tavan yeşil alçıpan",
+    "olcu": "1200 × 2500",
+    "adet": 7
+   },
+   {
+    "grup": "1004",
+    "kalem": "Tavan H'ı L 1185 (asma dizme tavan)",
+    "olcu": "adet",
+    "adet": 98
+   },
+   {
+    "grup": "1004",
+    "kalem": "PVC omega kapak L 3750 (asma dizme tavan)",
+    "olcu": "adet",
+    "adet": 20
+   },
+   {
+    "grup": "1004",
+    "kalem": "Çatı şiltesi / izolasyonu (9,6 m²/paket)",
+    "olcu": "paket",
+    "adet": 10
+   },
+   {
+    "grup": "1005",
+    "kalem": "Makas (baş) · ana çatı",
+    "olcu": "açıklık 8985",
+    "adet": 2
+   },
+   {
+    "grup": "1005",
+    "kalem": "Makas (orta) · ana çatı",
+    "olcu": "açıklık 8985",
+    "adet": 6
+   },
+   {
+    "grup": "1005",
+    "kalem": "Yavru makas · ön veranda çatısı",
+    "olcu": "L 4460",
+    "adet": 3
+   },
+   {
+    "grup": "1005",
+    "kalem": "Yavru makas · arka veranda çatısı",
+    "olcu": "L 3260",
+    "adet": 2
+   },
+   {
+    "grup": "1005",
+    "kalem": "Aşık",
+    "olcu": "L 4200",
+    "adet": 52
+   },
+   {
+    "grup": "1006",
+    "kalem": "Tek kat çatı paneli · ana çatı",
+    "olcu": "L 5100",
+    "adet": 20
+   },
+   {
+    "grup": "1006",
+    "kalem": "Tek kat çatı paneli · ön veranda çatısı",
+    "olcu": "L 2400",
+    "adet": 5
+   },
+   {
+    "grup": "1006",
+    "kalem": "Tek kat çatı paneli · arka veranda çatısı",
+    "olcu": "L 1770",
+    "adet": 4
+   },
+   {
+    "grup": "1006",
+    "kalem": "Metal kiremit mahyası",
+    "olcu": "L 2800",
+    "adet": 6
+   },
+   {
+    "grup": "1006",
+    "kalem": "Mahya bandı",
+    "olcu": "rulo 10 m",
+    "adet": 2
+   },
+   {
+    "grup": "1007",
+    "kalem": "Tijli duy",
+    "olcu": "adet",
+    "adet": 7
+   },
+   {
+    "grup": "1007",
+    "kalem": "Yuvarlak glop",
+    "olcu": "adet",
+    "adet": 8
+   },
+   {
+    "grup": "1007",
+    "kalem": "Ampul",
+    "olcu": "adet",
+    "adet": 15
+   },
+   {
+    "grup": "1007",
+    "kalem": "Tekli anahtar (takım)",
+    "olcu": "adet",
+    "adet": 9
+   },
+   {
+    "grup": "1007",
+    "kalem": "Çiftli anahtar (takım)",
+    "olcu": "adet",
+    "adet": 3
+   },
+   {
+    "grup": "1007",
+    "kalem": "Tekli priz (takım)",
+    "olcu": "adet",
+    "adet": 19
+   },
+   {
+    "grup": "1007",
+    "kalem": "Çiftli priz (takım)",
+    "olcu": "adet",
+    "adet": 1
+   },
+   {
+    "grup": "1007",
+    "kalem": "Uydu prizi (takım)",
+    "olcu": "adet",
+    "adet": 1
+   },
+   {
+    "grup": "1007",
+    "kalem": "Zil",
+    "olcu": "adet",
+    "adet": 1
+   },
+   {
+    "grup": "1007",
+    "kalem": "Sigorta kutusu (12'li)",
+    "olcu": "adet",
+    "adet": 1
+   },
+   {
+    "grup": "1007",
+    "kalem": "Buat kasa",
+    "olcu": "adet",
+    "adet": 41
+   },
+   {
+    "grup": "1007",
+    "kalem": "NYM kablo 3 × 2,5",
+    "olcu": "metre",
+    "adet": 115
+   },
+   {
+    "grup": "1007",
+    "kalem": "NYM kablo 2 × 1,5",
+    "olcu": "metre",
+    "adet": 101
+   },
+   {
+    "grup": "1007",
+    "kalem": "Uydu kablo",
+    "olcu": "metre",
+    "adet": 25
+   },
+   {
+    "grup": "1007",
+    "kalem": "Besleme kablosu",
+    "olcu": "metre",
+    "adet": 5
+   },
+   {
+    "grup": "1007",
+    "kalem": "Besleme kablo borusu",
+    "olcu": "metre",
+    "adet": 5
+   },
+   {
+    "grup": "1007",
+    "kalem": "İzole bant",
+    "olcu": "adet",
+    "adet": 6
+   },
+   {
+    "grup": "1007",
+    "kalem": "Kaçak akım rölesi (ikili)",
+    "olcu": "adet",
+    "adet": 1
+   },
+   {
+    "grup": "1007",
+    "kalem": "W otomat 16 A",
+    "olcu": "adet",
+    "adet": 8
+   },
+   {
+    "grup": "1008",
+    "kalem": "16 mm betopan ve kapı kolu vidası (3,9 × 32)",
+    "olcu": "adet",
+    "adet": 500
+   },
+   {
+    "grup": "1008",
+    "kalem": "Trapez vida 5,5 × 76 (tek kat panel)",
+    "olcu": "adet",
+    "adet": 600
+   },
+   {
+    "grup": "1008",
+    "kalem": "Prefabrik pencere vidası (4,8 × 70)",
+    "olcu": "adet",
+    "adet": 160
+   },
+   {
+    "grup": "1008",
+    "kalem": "Trapez vida 5,5 × 60 (trapez sac / metal kiremit)",
+    "olcu": "adet",
+    "adet": 300
+   },
+   {
+    "grup": "1008",
+    "kalem": "230'luk kesme taşı",
+    "olcu": "adet",
+    "adet": 2
+   },
+   {
+    "grup": "1008",
+    "kalem": "Çırpı ipi",
+    "olcu": "adet",
+    "adet": 1
+   },
+   {
+    "grup": "1008",
+    "kalem": "8'lik trapez uç",
+    "olcu": "adet",
+    "adet": 7
+   },
+   {
+    "grup": "1008",
+    "kalem": "PH2 uç",
+    "olcu": "adet",
+    "adet": 7
+   },
+   {
+    "grup": "1008",
+    "kalem": "İnox taş",
+    "olcu": "adet",
+    "adet": 10
+   },
+   {
+    "grup": "1008",
+    "kalem": "Alçıpan vidası",
+    "olcu": "adet",
+    "adet": 1250
+   },
+   {
+    "grup": "1008",
+    "kalem": "RYSB pul başlı vida",
+    "olcu": "adet",
+    "adet": 700
+   },
+   {
+    "grup": "1009",
+    "kalem": "PVC plastik betopan H'ı",
+    "olcu": "adet",
+    "adet": 7
+   },
+   {
+    "grup": "1009",
+    "kalem": "Acil müdahale kapağı",
+    "olcu": "adet",
+    "adet": 1
+   },
+   {
+    "grup": "1009",
+    "kalem": "Şase pul",
+    "olcu": "adet",
+    "adet": 28
+   },
+   {
+    "grup": "1009",
+    "kalem": "Çelik dübel",
+    "olcu": "adet",
+    "adet": 28
+   },
+   {
+    "grup": "1010",
+    "kalem": "Temiz su borusu",
+    "olcu": "L 4000",
+    "adet": 6
+   },
+   {
+    "grup": "1010",
+    "kalem": "Normal dirsek 20 mm",
+    "olcu": "adet",
+    "adet": 15
+   },
+   {
+    "grup": "1010",
+    "kalem": "Kulaklı dirsek 20 mm",
+    "olcu": "adet",
+    "adet": 12
+   },
+   {
+    "grup": "1010",
+    "kalem": "Düz T 20 mm",
+    "olcu": "adet",
+    "adet": 6
+   },
+   {
+    "grup": "1010",
+    "kalem": "Maşon 20 mm",
+    "olcu": "adet",
+    "adet": 15
+   },
+   {
+    "grup": "1010",
+    "kalem": "İç dişli T 20 mm",
+    "olcu": "adet",
+    "adet": 6
+   },
+   {
+    "grup": "1010",
+    "kalem": "Atlama parçası yarım parmak",
+    "olcu": "adet",
+    "adet": 3
+   },
+   {
+    "grup": "1010",
+    "kalem": "Vitrifiye ve batarya (duş teknesi, klozet, lavabo, batarya grubu)",
+    "olcu": "takım",
+    "adet": 2
+   },
+   {
+    "grup": "1011",
+    "kalem": "Metal dere",
+    "olcu": "L 4000",
+    "adet": 7
+   },
+   {
+    "grup": "1011",
+    "kalem": "Dere kelepçesi",
+    "olcu": "adet",
+    "adet": 56
+   },
+   {
+    "grup": "1011",
+    "kalem": "Metal dere inişi aparatı",
+    "olcu": "adet",
+    "adet": 10
+   },
+   {
+    "grup": "1011",
+    "kalem": "70 mm PVC dere iniş borusu",
+    "olcu": "L 2000",
+    "adet": 10
+   },
+   {
+    "grup": "1011",
+    "kalem": "70 mm PVC dere iniş borusu",
+    "olcu": "L 500",
+    "adet": 10
+   },
+   {
+    "grup": "1011",
+    "kalem": "Açık dirsek",
+    "olcu": "adet",
+    "adet": 20
+   },
+   {
+    "grup": "1011",
+    "kalem": "Kapalı dirsek",
+    "olcu": "adet",
+    "adet": 10
+   },
+   {
+    "grup": "1011",
+    "kalem": "PVC iniş kelepçesi",
+    "olcu": "adet",
+    "adet": 20
+   },
+   {
+    "grup": "1011",
+    "kalem": "Dere kapağı",
+    "olcu": "adet",
+    "adet": 8
+   },
+   {
+    "grup": "1012",
+    "kalem": "Dış cephe boya (17,5 kg kova)",
+    "olcu": "kova",
+    "adet": 2
+   },
+   {
+    "grup": "1012",
+    "kalem": "İç cephe boya (17,5 kg kova)",
+    "olcu": "kova",
+    "adet": 2
+   },
+   {
+    "grup": "1012",
+    "kalem": "Kenarlar için boya",
+    "olcu": "10 kg",
+    "adet": 1
+   },
+   {
+    "grup": "1012",
+    "kalem": "Tavan boya (17,5 kg kova)",
+    "olcu": "kova",
+    "adet": 1
+   },
+   {
+    "grup": "1012",
+    "kalem": "Astar (17,5 kg kova)",
+    "olcu": "kova",
+    "adet": 1
+   },
+   {
+    "grup": "1012",
+    "kalem": "Silikonize mastik",
+    "olcu": "adet",
+    "adet": 8
+   },
+   {
+    "grup": "1012",
+    "kalem": "Dayson (çatı renginde)",
+    "olcu": "adet",
+    "adet": 6
+   },
+   {
+    "grup": "1012",
+    "kalem": "Poliüretan köpük",
+    "olcu": "adet",
+    "adet": 2
+   }
+  ],
+  "pdf_izi": "20ec8daded00924ca28f78d9468ea9894359b53d25869eed1e74ea2072af954a",
+  "dxf_izi": "53a93c9246b85c9f08bdfe45242b7b95af99db80295d98abd674e864bbac8624"
+ }
+}

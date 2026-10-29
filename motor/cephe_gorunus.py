@@ -1,11 +1,12 @@
 """İE-17 · Prefabrik evin dört cephe görünüşünün geometrisi; çizimi canlı ön onay PDF'inin "ÇALIŞMA" görünüşü (`dxf_out.ciz_gorunusler`).
+D-31 (29 Ekim 2026): beşik çatı da dört görünüşte (düzlemler `sunum.cati_tanimi`'nden; taşan veranda yalnız beşikte).
 
 Lokman, 27 Ekim 2026 21:06; CIO 21:13: prefabrik bayiye canlıda `dxf_out`'un ön onay PDF'i ve `bayi_gorseli`'nin plan görseli gidiyordu;
 biçim bu ikisinden, genel motordan yalnız çatı ve görünüş geometrisi. Bu modül çizmez; `dxf_out` çizer.
 
 - Duvar, pano derzleri, pencere ve kapı Motor'un `Plan`'ından, ön görünüşün kuralıyla (`dxf_out.ciz_on_gorunus`): cephenin dış duvarları
-  dışarı yönü o cepheye bakanlar (`G.disari_yon`; açık mahale bakan duvar da), derzler panoların uçları ve dik dış duvarların yüzleri,
-  açıklık panonun boşluğunda (`Pano.gap`), üst kot 200, eşik 200 − boy (BK-13), kapı 0–200.
+  dışarı yönü o cepheye bakanlar (`G.disari_yon`; açık mahale bakan duvar da), derzler panoların uçları ve cepheye değen dik dış duvarların
+  yüzleri (`cepheye_deger`; D-31), açıklık panonun boşluğunda (`Pano.gap`), üst kot 200, eşik 200 − boy (BK-13), kapı 0–200.
 - Çatı çizgileri `cati_prefabrik`'in düzlemlerinden (`cati_genel.cati_kur`, genel motorun çatı üreticisi): bu cepheye dik izdüşüm. Bakana
   dönük düzlemin kenarları, önündeki dönük düzlemlerin örttüğü kısım atılarak; yandan görülen düzlem (bakış düzlemin içinde) çizgi olarak
   ve eğimi yazılarak; arkaya bakan düzlem çizilmez (gövdenin ve önündeki düzlemlerin arkasında). Kalkanlar çizilmez (üst kenarları çatının
@@ -34,18 +35,50 @@ def eksen(plan: G.Plan, taraf: str):
     return u, d, (x1 - x0) if taraf in ("on", "arka") else (y1 - y0)
 
 
+def cepheye_deger(d, cephe_duvarlari) -> bool:
+    """Cepheye dik dış duvar `d` bu cephenin bir dış duvarına değiyor mu: bir ucu o duvarın kalınlığının içinde ve ekseni o duvarın boyunca.
+    Değmeyen dik dış duvar (ör. öndeki giriş nişinin yan duvarı arka, sol ya da sağ görünüşte) derz vermez (D-31 madde 7; Lokman, 29 Ekim
+    2026 11:21: "2 WC'nin arasında sadece H var, 2 ek çizgi var": nişin yan duvarı arka cephedeki WC ara duvarıyla aynı eksendeydi)."""
+    e = 1e-6
+    return any(any(w.c - w.h - e <= uc <= w.c + w.h + e for uc in (d.p0, d.p1)) and w.p0 - d.h - e <= d.c <= w.p1 + d.h + e
+               for w in cephe_duvarlari)
+
+
+def gorunur(plan: G.Plan, d, dis: str) -> bool:
+    """`dis` yönüne bakan dış duvar o yandan görülüyor mu: önündeki şeritte (duvar yüzünden gövdenin kenarına) gövdenin kapalı kısmı duvarın
+    boyunu örtmüyorsa. Gövde = dış kutu − ızgaradaki açık mahaller (niş, köşe verandası). Öndeki giriş nişinin yan duvarları dışarı (nişe)
+    bakar ama yandan bakışta gövdenin ardında kalır; yan görünüşte derz ve doğrama vermez (D-31 madde 7)."""
+    from shapely.geometry import box
+    from shapely.ops import unary_union
+    x0, y0, x1, y1 = G.govde_kutusu(plan)
+    dis_v = {v["ad"] for v in plan.dis_verandalar}
+    acik = [m.poly for m in plan.mahaller.values() if m.acik and m.poly is not None and m.ad not in dis_v]
+    govde = box(x0, y0, x1, y1).difference(unary_union(acik)) if acik else box(x0, y0, x1, y1)
+    yuz = d.c + d.h if dis[0] == "+" else d.c - d.h
+    a, b = d.p0, d.p1
+    if d.yon == "y":
+        serit = box(yuz + 0.5, a, x1 + 1, b) if dis[0] == "+" else box(x0 - 1, a, yuz - 0.5, b)
+    else:
+        serit = box(a, yuz + 0.5, b, y1 + 1) if dis[0] == "+" else box(a, y0 - 1, b, yuz - 0.5)
+    ortu = govde.intersection(serit)
+    k = 1 if d.yon == "y" else 0                      # duvar boyunca eksen (y duvarında y); derinlik öteki eksende
+    parca = [g.bounds for g in getattr(ortu, "geoms", [ortu]) if not g.is_empty and g.area > 0]
+    golge = unary_union([box(r[k], 0, r[k + 2], 1) for r in parca if r[3 - k] - r[1 - k] >= 1.0])    # 1 cm'den ince şerit örtmez
+    return (b - a) - golge.intersection(box(a, 0, b, 1)).area >= 1.0
+
+
 def cephe(plan: G.Plan, taraf: str) -> dict:
-    """{"en": cephenin eni, "derz": [u], "acikliklar": [{"tur": pencere | dis_kapi, "u0", "u1", "z0", "z1"}]} (soldan sağa)."""
+    """{"en": cephenin eni, "derz": [u], "acikliklar": [{"tur": pencere | dis_kapi, "u0", "u1", "z0", "z1", "olcu", "acilis"}]} (soldan sağa)."""
     yon, dis = _YON[taraf]
     u, _, en = eksen(plan, taraf)
     uu = (lambda a: u(a, 0.0)) if yon == "x" else (lambda a: u(0.0, a))
-    duvarlar = [d for d in plan.duvarlar if d.tur == "dis" and d.yon == yon and G.disari_yon(plan, d) == dis]
+    duvarlar = [d for d in plan.duvarlar if d.tur == "dis" and d.yon == yon and G.disari_yon(plan, d) == dis and gorunur(plan, d, dis)]
     us = set()
     for d in duvarlar:
         for p in d.panolar:
             us.add(uu(p.a0)); us.add(uu(p.a1))
     for d in plan.duvarlar:
-        if d.tur == "dis" and d.yon != yon:
+        if d.tur == "dis" and d.yon != yon and cepheye_deger(d, duvarlar):
             us.add(uu(d.c - d.h)); us.add(uu(d.c + d.h))
     ac = []
     for d in duvarlar:
@@ -56,7 +89,8 @@ def cephe(plan: G.Plan, taraf: str) -> dict:
             g = p.gap()
             u0, u1 = sorted((uu(g[0]), uu(g[2])) if yon == "x" else (uu(g[1]), uu(g[3])))
             ust = G.PENCERE_UST_KOTU_CM
-            ac.append({"tur": a.tur, "u0": u0, "u1": u1, "z0": ust - a.yukseklik if a.tur == "pencere" else 0.0, "z1": ust})
+            ac.append({"tur": a.tur, "u0": u0, "u1": u1, "z0": ust - a.yukseklik if a.tur == "pencere" else 0.0, "z1": ust,
+                       "olcu": a.olcu if a.tur == "pencere" else None, "acilis": a.acilis})
     return {"en": en, "derz": sorted(v for v in us if 1e-6 < v < en - 1e-6), "acikliklar": sorted(ac, key=lambda k: k["u0"])}
 
 
@@ -76,9 +110,13 @@ def cati_cizgileri(plan: G.Plan, ie: dict, taraf: str) -> dict:
     from shapely.ops import unary_union
     from . import cati_prefabrik as CP
     from .genel import cati_genel
-    if plan.dis_verandalar:
+    if (ie.get("cati") or {}).get("tip", "besik") == "besik":       # D-31: beşik de dört görünüşte (Motor'un IFC'siyle aynı düzlemler);
+        from . import sunum                                          # taşan verandanın çatısı `dxf_out`'ta ayrı çizilir (`veranda`)
+        ck = cati_genel.cati_kur(sunum.cati_tanimi(plan, ie))
+    elif plan.dis_verandalar:
         raise CP.PrefabrikCatiHatasi("beşik dışı ana çatıyla taşan veranda görünüşte çizilmez (iki çatının birleşimi; İE-17 PR-2)")
-    ck = cati_genel.cati_kur(CP.cati(plan, ie))
+    else:
+        ck = cati_genel.cati_kur(CP.cati(plan, ie))
     u, d, _ = eksen(plan, taraf)
     bx, by = _BAKANA[taraf]
     donuk, yan = [], []

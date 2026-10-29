@@ -156,12 +156,15 @@ def test_cizim_canlidakiyle_ayni(paketler, tmp_path, kod):
 
 def test_liste_canlidakiyle_ayni(paketler):
     """TK-01'in iki listesi liste üretecinin satırlarıyla aynı (teklif r06'nın listeleri: asma 133, ters 131 satır; komut satırı ve teklifle
-    aynı yol, `is_emrinden`)."""
+    aynı yol, `is_emrinden`). D-29 (Lokman 29 Ekim, TK-02 yorumları) ile 128 / 126: pencerenin iki yanı 62,75'lik yarım pano (dolu panonun
+    dört boyu tek boya), giriş nişinde köşe direği yerine 3'lü H (10'luk köşe direği 8 → 6, dış T'si 3'lü H 6 → 8), kapılı pano 115,5.
+    D-30 (Lokman 29 Ekim 10:48) ile 125 / 123: dış ölçü 898,5 × 888,5, kesik son panolar (1245, 620) tam boya (1250, 625), makas açıklığı
+    8980 → 8985."""
     from openpyxl import load_workbook
     from motor import prefabrik_liste as PL
     kok, _, _ = paketler
     ie = json.loads((KOK / _model("TK-01")["is_emri"]).read_text(encoding="utf-8"))
-    for s, n in (("asma", 133), ("ters", 131)):
+    for s, n in (("asma", 125), ("ters", 123)):
         L = PL.is_emrinden(copy.deepcopy(ie), ozellikler={"Tavan": s.capitalize()})
         ws = load_workbook(kok / "prefabrik" / "TK-01" / f"TK-01_yukleme_listesi_{s}.xlsx").active
         satir = [r[1:5] for r in ws.iter_rows(min_row=3, values_only=True)]
@@ -328,7 +331,8 @@ def test_is_emri_ile_paket(paketler, tmp_path):
     html = (b / "TK-98_montaj_rehberi.html").read_text(encoding="utf-8")
     assert html.replace("TK-98", "TK-01").replace("TK98", "TK01") == (a / "TK-01_montaj_rehberi.html").read_text(encoding="utf-8")
     yazi = _yazilar(b)
-    assert "PORTMAN | Bayi TK-98 / TK-98 | İş Emri" in yazi["TK-98_cizim.dxf"] and "'TK-98 " in yazi["TK-98_model.ifc"]
+    # antette kime ait ve m² (D-31 madde 14, Lokman 29 Ekim 2026 13:13; önceden "PORTMAN | Bayi TK-98 / TK-98 | İş Emri")
+    assert "PORTMAN | Bayi TK-98 / TK-98 | 78,38 m² brüt · 72,71 m² net | İş Emri" in yazi["TK-98_cizim.dxf"] and "'TK-98 " in yazi["TK-98_model.ifc"]
     for ad, t in yazi.items():
         t = re.sub(r"`[0-9a-f]{64}`", "", t)
         assert not any(x in t for x in ("Sahteadi", "Sahtebayi", "XBAYIX9", no[-9:], no[-9:].replace(" ", ""))), ad
@@ -341,7 +345,7 @@ def test_is_emri_kimlik_ve_frenler(tmp_path):
     yol = KOK / _model("TK-01")["is_emri"]
     k = U.kayit()
     m, ie = U.talep_modeli("TK-97", yol, None, k)
-    assert (m["kume"], m["m2"], m["govde"], m["adim"], m["tavan_secenekleri"]) == ("teklif", "80", "dış ölçü 898 × 888", "teklif", None)
+    assert (m["kume"], m["m2"], m["govde"], m["adim"], m["tavan_secenekleri"]) == ("teklif", "80", "dış ölçü 898,5 × 888,5", "teklif", None)   # D-30
     assert (m["veranda"], m["cati"]) == ("taşan: önde 386 × 181, arkada 261 × 130; gömme 1,4 m²", "beşik %33, tek kat panel (antrasit)")
     assert ie["talep"] == {"bayi": {"kod": "TK97", "ad": "Bayi TK-97"}, "musteri_adi": "TK-97"}
     m1, _ = U.talep_modeli("TK-01", yol, None, k)
@@ -373,7 +377,7 @@ def test_is_emri_revizyonu_kimlikte(tmp_path):
 def test_is_emri_dis_olcusuz(ad):
     """`yapi.dis_olcu_cm` isteğe bağlı (İE-11): ızgara İş Emri'sinde dış ölçü ve m² Motor'un gövdesinden, `bilgi.md` satırı da (KeyError yok)."""
     m, ie = U.talep_modeli("TK-96", KOK / ad, None, U.kayit())
-    assert re.fullmatch(r"dış ölçü [\d.]+ × [\d.]+", m["govde"]) and m["m2"].isdigit(), m["govde"]
+    assert re.fullmatch(r"dış ölçü [\d,]+ × [\d,]+", m["govde"]) and m["m2"].isdigit(), m["govde"]      # D-30 ile 898,5: ondalık virgülle
     import datetime as dt
     b = U.bilgi_md(m, U.kayit(), {}, [], {"dal": "d", "commit": "c", "temiz": True}, dt.datetime(2026, 10, 28), None, ie, {})
     satir = next(x for x in b.splitlines() if x.startswith("| Dış ölçü (İş Emri) |"))
