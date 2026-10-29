@@ -249,7 +249,7 @@ def test_kiyas_pk01(paketler):
     for a in ("h_plani.dis", "h_plani.h_standart", "makas_bas", "makas_orta", "asik", "sandvic_panel", "bas_makas_betopan"):
         assert pafta[a][4] == "geçer", pafta[a]
     ozet = {r[0]: r[1] for r in wb["Gerçek liste (kör test)"].iter_rows(min_row=3, max_row=12, values_only=True)}
-    assert ozet["aynı"] == 60
+    assert ozet["aynı"] == 59              # D-32 (Lokman 29 Ekim 13:12 ve 21:12): baş makas omegası (gerçek 5) aday sütunundan tutuyor, 60 → 59
 
 
 def test_oda_sirasi():
