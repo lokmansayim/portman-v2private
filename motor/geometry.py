@@ -671,6 +671,19 @@ def _kur(is_emri: dict) -> Plan:
 
     Hs = lambda lst: [(d, uc) for d, uc in lst if d.yon == "x"]
     Vs = lambda lst: [(d, uc) for d, uc in lst if d.yon == "y"]
+
+    def _nis_t(ends):
+        """İki dış ve bir iç duvar ucu; dışlardan biri iç duvarla aynı hatta karşılıklı (hat sürüyor), öteki ona dik: ((hat dışı), (iç), (dik))."""
+        ext = [(d, uc) for d, uc in ends if d.tur == "dis"]; ic = [(d, uc) for d, uc in ends if d.tur == "ic"]
+        if len(ends) != 3 or len(ext) != 2 or len(ic) != 1:
+            return None
+        hat = [(e, ue) for e, ue in ext if e.yon == ic[0][0].yon and e.hat == ic[0][0].hat and ue != ic[0][1]]
+        dik = [(e, ue) for e, ue in ext if e.yon != ic[0][0].yon]
+        return (hat[0], ic[0], dik[0]) if len(hat) == 1 and len(dik) == 1 else None
+    # D-29: giriş nişinin kapı duvarı iki ucunda da böyle T yapar (yan duvarlar içeride sürer); verandanın iç köşesi (PK-01 paftası: kapı
+    # duvarının öteki ucu serbest) köşe parçasıyla kalır
+    nis_t = {P: m for P in ends_at if dis_t_bolme and not through_at.get(P) and (m := _nis_t(ends_at[P]))}
+    nis_t = {P: m for P, m in nis_t.items() if sum(1 for q in nis_t.values() if q[2][0] is m[2][0]) == 2}
     for P in set(ends_at) | set(through_at):
         ends = ends_at.get(P, []); thr = through_at.get(P, [])
         if not ends:
@@ -693,6 +706,19 @@ def _kur(is_emri: dict) -> Plan:
             continue
         ext = [(d, uc) for d, uc in ends if d.tur == "dis"]
         ic = [(d, uc) for d, uc in ends if d.tur == "ic"]
+        if P in nis_t:
+            # D-29 (Lokman, 29 Ekim 2026: "giriş kapısındaki hole açılan taraftaki köşe direklerini kaldır"): nişin yan duvarı (dış) iç duvar
+            # olarak sürüyor, kapı duvarı (dış) ona dik: T birleşimi, köşe parçası yok, 3'lü H. Dış T bölmesi gibi hattın iki duvarı kapı
+            # duvarının ekseninde buluşur, kapı duvarı hattın (dış duvarın) yüzünde biter.
+            (t, ut), (i_, ui), (d, uc) = nis_t[P]
+            for w, uw in ((t, ut), (i_, ui)):
+                if uw == 0: w.p0 = d.c
+                else:       w.p1 = d.c
+                w.uc_notu[uw] = f"T→{d.id}"
+            stop_at_face(d, uc, t); d.uc_notu[uc] = f"T→{t.id} (3'lü H)"
+            if d.yon == "x": h_bag.append(HBaglanti(t.c, d.c, 0.0 if uc == 0 else 180.0, "dis"))
+            else:            h_bag.append(HBaglanti(d.c, t.c, 90.0 if uc == 0 else 270.0, "dis"))
+            continue
         if Hs(ext) and Vs(ext):
             (Hw, H_uc), (Vw, V_uc) = Hs(ext)[0], Vs(ext)[0]
             L_kose(Hw, H_uc, Vw, V_uc, "dis")
@@ -815,6 +841,12 @@ def _kur(is_emri: dict) -> Plan:
             if parca and abs((parca[0] + parca[1]) / 2.0 - mrk) <= PENCERE_ORTALAMA_ESIGI_CM + 1e-6 and parca[1] - parca[0] >= w + 4 - 1e-9:
                 hedef[4] = parca[0]; continue                  # ızgara panosu oda ortasına yeterince yakın: ek kesim yok
             q0, q1 = mrk - MOD / 2.0, mrk + MOD / 2.0
+            # D-29 (Lokman, 29 Ekim 2026: "63 değil 627,5 mm"): oda ortasına ¼ pano içindeki ek, iki yanında tam pano varsa pencereli pano o eke
+            # ortalanır; iki yanı 62,75'lik yarım pano olur, artık köşe panosunda kalır. İki yanı tam pano değilse (PK-01 paftası) odanın ortası.
+            ek = min(pts[1:-1], key=lambda a: abs(a - mrk), default=None)
+            if ek is not None and abs(ek - mrk) <= PENCERE_ORTALAMA_ESIGI_CM + 1e-6 and \
+                    all(any(abs(q - b) < 1e-6 for q in pts) for b in (ek - MOD, ek + MOD)) and lo_p - 1e-6 <= ek - MOD and ek + MOD <= hi_p + 1e-6:
+                q0, q1 = ek - MOD / 2.0, ek + MOD / 2.0
             if q0 < lo_p - 1e-6 or q1 > hi_p + 1e-6:
                 uyarilar.append(f"Pencere {acikliklar[i].get('mahal')} {acikliklar[i].get('olcu')}: oda duvarı 125,5'lik pencereli panoya dar; ızgara panosunda kaldı")
                 continue
@@ -1184,7 +1216,10 @@ def _dayanak(duvarlar, d, e, isaret) -> bool:
     """İE-11 kapı mantığı: d duvarındaki pano ucunda (e, d boyunca cm) açılma tarafına (isaret ±1, d'ye dik eksende) giden dik bir duvar var mı?
     Kanat açıkken o duvara yaslanır."""
     for w in duvarlar:
-        if w.yon == d.yon or abs(w.c - e) > w.h + 1e-6:
+        # D-29: giriş nişinde hat dış duvarla başlayıp iç duvarla sürer; kapı duvarı dış duvarın yüzünde biter, hol duvarı (iç, ince) da
+        # dayanaktır: pay hattın en kalın duvarının yarısı (hat tek kalınlıktaysa eskisi gibi w.h)
+        h_hat = max(x.h for x in duvarlar if x.yon == w.yon and abs(x.c - w.c) < 1e-6)
+        if w.yon == d.yon or abs(w.c - e) > h_hat + 1e-6:
             continue
         lo_w, hi_w = min(w.p0, w.p1), max(w.p0, w.p1)
         if isaret > 0 and lo_w <= d.c + d.h + 1e-6 and hi_w > d.c + d.h + 1.0:
@@ -1369,6 +1404,22 @@ def pano_ekleri(plan: "Plan") -> list:
     for d in plan.duvarlar:
         for a, b in zip(d.panolar, d.panolar[1:]):
             e = a.a1
+            x, y = (e, d.c) if d.yon == "x" else (d.c, e)
+            uclu = any(abs(h.x - x) <= d.h + 3.5 and abs(h.y - y) <= d.h + 3.5 for h in plan.h_baglantilar)
+            cik.append({"duvar": d.tur, "yon": d.yon, "c": d.c, "h": d.h, "e": e, "x": x, "y": y, "cins": "uclu" if uclu else "pano_eki"})
+    return cik + uc_uca_ekler(plan)
+
+
+def uc_uca_ekler(plan: "Plan") -> list:
+    """D-29: aynı hatta uç uca gelen iki duvarın eki (giriş nişinin yan duvarı içeride hol duvarı olarak sürer; kapı duvarının T'si, 3'lü H).
+    `pano_ekleri`'nin biçimi; duvar türü ve yarım kalınlık dış olanınki. Böyle birleşim yoksa boş (bugünkü planlar aynı)."""
+    cik = []
+    for a in plan.duvarlar:
+        for b in plan.duvarlar:
+            if a is b or a.yon != b.yon or a.hat != b.hat or abs(a.c - b.c) > 1e-6 or abs(a.p1 - b.p0) > 1e-6 or not a.panolar or not b.panolar:
+                continue
+            d = a if a.tur == "dis" or b.tur != "dis" else b
+            e = a.p1
             x, y = (e, d.c) if d.yon == "x" else (d.c, e)
             uclu = any(abs(h.x - x) <= d.h + 3.5 and abs(h.y - y) <= d.h + 3.5 for h in plan.h_baglantilar)
             cik.append({"duvar": d.tur, "yon": d.yon, "c": d.c, "h": d.h, "e": e, "x": x, "y": y, "cins": "uclu" if uclu else "pano_eki"})

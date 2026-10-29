@@ -14,11 +14,11 @@
     7.0
    ],
    "panel_count": 60,
-   "corner_count": 10,
+   "corner_count": 8,
    "windows": 8,
    "doors": 8,
-   "h_connectors": 10,
-   "h_connectors_dis": 6,
+   "h_connectors": 12,
+   "h_connectors_dis": 8,
    "footprint_diff_cm2": 0.0,
    "warnings": [
     "Aks noktası (6, 4): dört kollu birleşim; duvar 1 o noktada bölündü (1, 16), uçları geçen duvarın (11) yüzünde; birleşim profili kural kitabında yok"
@@ -39,11 +39,11 @@
    "openings": [
     {
      "kind": "pencere",
-     "name": "BOM_D03_1255p0_DIS_P02",
+     "name": "BOM_D03_1255p0_DIS_P02_Y",
      "gap": [
-      73.0,
+      75.5,
       878.0,
-      193.0,
+      195.5,
       888.0
      ]
     },
@@ -69,7 +69,7 @@
     },
     {
      "kind": "kapi",
-     "name": "BOM_D12_1255p0_DIS_K02_SOL",
+     "name": "BOM_D05_1155p0_DIS_K02_SOL",
      "gap": [
       404.25,
       125.0,
@@ -99,12 +99,12 @@
     },
     {
      "kind": "pencere",
-     "name": "BOM_D03_1255p0_DIS_P02",
+     "name": "BOM_D03_1255p0_DIS_P02_Y",
      "gap": [
       0.0,
-      195.75,
+      195.5,
       10.0,
-      315.75
+      315.5
      ]
     },
     {
@@ -139,7 +139,7 @@
     },
     {
      "kind": "kapi",
-     "name": "BOM_I17_1205p0_IC_K01_SAG_UST_KAYP77p5",
+     "name": "BOM_I16_1255p0_IC_K01_SAG_UST_KAYP102p5",
      "gap": [
       507.0,
       162.0,
@@ -208,7 +208,7 @@
      100,
      null
     ],
-    "adet": 10,
+    "adet": 8,
     "birim": "adet"
    },
    {
@@ -241,7 +241,7 @@
      100.0,
      null
     ],
-    "adet": 6,
+    "adet": 8,
     "birim": "adet"
    },
    {
@@ -289,6 +289,17 @@
     "birim": "adet"
    },
    {
+    "kod": "D05",
+    "malzeme": "Dış kapılı özel pano",
+    "olcu_mm": [
+     1155,
+     100,
+     2500
+    ],
+    "adet": 1,
+    "birim": "adet"
+   },
+   {
     "kod": "D06",
     "malzeme": "Özel dolu pano",
     "olcu_mm": [
@@ -296,7 +307,7 @@
      100,
      2500
     ],
-    "adet": 3,
+    "adet": 7,
     "birim": "adet"
    },
    {
@@ -314,7 +325,7 @@
     "kod": "D09",
     "malzeme": "Özel dolu pano",
     "olcu_mm": [
-     602.5,
+     622.5,
      100,
      2500
     ],
@@ -325,77 +336,11 @@
     "kod": "D10",
     "malzeme": "Özel dolu pano",
     "olcu_mm": [
-     652.5,
-     100,
-     2500
-    ],
-    "adet": 1,
-    "birim": "adet"
-   },
-   {
-    "kod": "D11",
-    "malzeme": "Özel dolu pano",
-    "olcu_mm": [
-     622.5,
-     100,
-     2500
-    ],
-    "adet": 1,
-    "birim": "adet"
-   },
-   {
-    "kod": "D12",
-    "malzeme": "Dış kapılı pano",
-    "olcu_mm": [
-     1255.0,
-     100,
-     2500
-    ],
-    "adet": 1,
-    "birim": "adet"
-   },
-   {
-    "kod": "D13",
-    "malzeme": "Özel dolu pano",
-    "olcu_mm": [
      1250.0,
      100,
      2500
     ],
-    "adet": 3,
-    "birim": "adet"
-   },
-   {
-    "kod": "D14",
-    "malzeme": "Özel dolu pano",
-    "olcu_mm": [
-     630.0,
-     100,
-     2500
-    ],
-    "adet": 1,
-    "birim": "adet"
-   },
-   {
-    "kod": "D15",
-    "malzeme": "Özel dolu pano",
-    "olcu_mm": [
-     625.0,
-     100,
-     2500
-    ],
-    "adet": 1,
-    "birim": "adet"
-   },
-   {
-    "kod": "D16",
-    "malzeme": "Özel dolu pano",
-    "olcu_mm": [
-     1200.0,
-     100,
-     2500
-    ],
-    "adet": 2,
+    "adet": 5,
     "birim": "adet"
    },
    {
@@ -417,7 +362,7 @@
      100,
      2500
     ],
-    "adet": 8,
+    "adet": 9,
     "birim": "adet"
    },
    {
@@ -428,7 +373,7 @@
      100,
      2500
     ],
-    "adet": 7,
+    "adet": 6,
     "birim": "adet"
    },
    {
@@ -450,7 +395,7 @@
      100,
      2500
     ],
-    "adet": 4,
+    "adet": 5,
     "birim": "adet"
    },
    {
@@ -461,7 +406,7 @@
      100,
      2500
     ],
-    "adet": 3,
+    "adet": 2,
     "birim": "adet"
    },
    {
@@ -586,42 +531,414 @@
     "birim": "adet"
    }
   ],
+  "on_gorunus": [
+   [
+    "ON_CATI",
+    false,
+    [
+     -30.0,
+     -801.625
+    ],
+    [
+     928.0,
+     -801.625
+    ]
+   ],
+   [
+    "ON_CATI",
+    false,
+    [
+     -30.0,
+     -791.625
+    ],
+    [
+     449.0,
+     -633.555
+    ]
+   ],
+   [
+    "ON_CATI",
+    false,
+    [
+     226.0,
+     -801.625
+    ],
+    [
+     672.0,
+     -801.625
+    ]
+   ],
+   [
+    "ON_CATI",
+    false,
+    [
+     226.0,
+     -791.625
+    ],
+    [
+     449.0,
+     -718.035
+    ],
+    [
+     672.0,
+     -791.625
+    ]
+   ],
+   [
+    "ON_CATI",
+    false,
+    [
+     449.0,
+     -633.555
+    ],
+    [
+     928.0,
+     -791.625
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     10.0,
+     -1051.625
+    ],
+    [
+     10.0,
+     -801.625
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     135.5,
+     -1051.625
+    ],
+    [
+     135.5,
+     -801.625
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     261.0,
+     -1051.625
+    ],
+    [
+     261.0,
+     -801.625
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     381.5,
+     -1051.625
+    ],
+    [
+     381.5,
+     -801.625
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     391.5,
+     -1051.625
+    ],
+    [
+     391.5,
+     -801.625
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     507.0,
+     -1051.625
+    ],
+    [
+     507.0,
+     -801.625
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     517.0,
+     -1051.625
+    ],
+    [
+     517.0,
+     -801.625
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     637.5,
+     -1051.625
+    ],
+    [
+     637.5,
+     -801.625
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     763.0,
+     -1051.625
+    ],
+    [
+     763.0,
+     -801.625
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     888.0,
+     -1051.625
+    ],
+    [
+     888.0,
+     -801.625
+    ]
+   ],
+   [
+    "ON_GORUNUS",
+    true,
+    [
+     0.0,
+     -1051.625
+    ],
+    [
+     898.0,
+     -1051.625
+    ],
+    [
+     898.0,
+     -801.625
+    ],
+    [
+     0.0,
+     -801.625
+    ]
+   ],
+   [
+    "ON_GORUNUS",
+    true,
+    [
+     256.0,
+     -1051.625
+    ],
+    [
+     266.0,
+     -1051.625
+    ],
+    [
+     266.0,
+     -811.625
+    ],
+    [
+     256.0,
+     -811.625
+    ]
+   ],
+   [
+    "ON_GORUNUS",
+    true,
+    [
+     256.0,
+     -811.625
+    ],
+    [
+     266.0,
+     -811.625
+    ],
+    [
+     266.0,
+     -801.625
+    ],
+    [
+     256.0,
+     -801.625
+    ]
+   ],
+   [
+    "ON_GORUNUS",
+    true,
+    [
+     256.0,
+     -811.625
+    ],
+    [
+     642.0,
+     -811.625
+    ],
+    [
+     642.0,
+     -801.625
+    ],
+    [
+     256.0,
+     -801.625
+    ]
+   ],
+   [
+    "ON_GORUNUS",
+    true,
+    [
+     256.0,
+     -801.625
+    ],
+    [
+     642.0,
+     -801.625
+    ],
+    [
+     642.0,
+     -781.725
+    ],
+    [
+     449.0,
+     -718.035
+    ],
+    [
+     256.0,
+     -781.725
+    ]
+   ],
+   [
+    "ON_GORUNUS",
+    true,
+    [
+     632.0,
+     -1051.625
+    ],
+    [
+     642.0,
+     -1051.625
+    ],
+    [
+     642.0,
+     -811.625
+    ],
+    [
+     632.0,
+     -811.625
+    ]
+   ],
+   [
+    "ON_GORUNUS",
+    true,
+    [
+     632.0,
+     -811.625
+    ],
+    [
+     642.0,
+     -811.625
+    ],
+    [
+     642.0,
+     -801.625
+    ],
+    [
+     632.0,
+     -801.625
+    ]
+   ],
+   [
+    "ON_TOPUK",
+    false,
+    [
+     -30.0,
+     -801.625
+    ],
+    [
+     -30.0,
+     -791.625
+    ]
+   ],
+   [
+    "ON_TOPUK",
+    false,
+    [
+     226.0,
+     -801.625
+    ],
+    [
+     226.0,
+     -791.625
+    ]
+   ],
+   [
+    "ON_TOPUK",
+    false,
+    [
+     672.0,
+     -801.625
+    ],
+    [
+     672.0,
+     -791.625
+    ]
+   ],
+   [
+    "ON_TOPUK",
+    false,
+    [
+     928.0,
+     -801.625
+    ],
+    [
+     928.0,
+     -791.625
+    ]
+   ]
+  ],
   "liste": [
    {
     "grup": "1001",
     "kalem": "100'lük karkaslı + kasalı pano",
     "olcu": "100 × 1250 × 2500",
-    "adet": 4
+    "adet": 5
    },
    {
     "grup": "1001",
     "kalem": "100'lük karkaslı + kasalı pano",
     "olcu": "100 × 1200 × 2500",
-    "adet": 3
+    "adet": 2
    },
    {
     "grup": "1001",
     "kalem": "100'lük yapıştırma dolu pano",
     "olcu": "100 × 1250 × 2500",
-    "adet": 18
+    "adet": 19
    },
    {
     "grup": "1001",
     "kalem": "100'lük yapıştırma dolu pano",
     "olcu": "100 × 1245 × 2500",
-    "adet": 5
+    "adet": 7
    },
    {
     "grup": "1001",
     "kalem": "100'lük yapıştırma dolu pano",
     "olcu": "100 × 1200 × 2500",
-    "adet": 9
-   },
-   {
-    "grup": "1001",
-    "kalem": "100'lük yapıştırma dolu pano",
-    "olcu": "100 × 1195 × 2500",
-    "adet": 2
+    "adet": 8
    },
    {
     "grup": "1001",
@@ -632,25 +949,13 @@
    {
     "grup": "1001",
     "kalem": "100'lük yapıştırma dolu pano",
-    "olcu": "100 × 650 × 2500",
-    "adet": 1
-   },
-   {
-    "grup": "1001",
-    "kalem": "100'lük yapıştırma dolu pano",
     "olcu": "100 × 625 × 2500",
-    "adet": 4
+    "adet": 7
    },
    {
     "grup": "1001",
     "kalem": "100'lük yapıştırma dolu pano",
     "olcu": "100 × 620 × 2500",
-    "adet": 2
-   },
-   {
-    "grup": "1001",
-    "kalem": "100'lük yapıştırma dolu pano",
-    "olcu": "100 × 600 × 2500",
     "adet": 1
    },
    {
@@ -668,7 +973,7 @@
    {
     "grup": "1001",
     "kalem": "Karkaslı çelik kapı panosu",
-    "olcu": "100 × 1250 × 2500",
+    "olcu": "100 × 1150 × 2500",
     "adet": 1
    },
    {
@@ -693,7 +998,7 @@
     "grup": "1002",
     "kalem": "10'luk köşe direği 100 × 100",
     "olcu": "100 × 100 × 2500",
-    "adet": 10
+    "adet": 8
    },
    {
     "grup": "1002",
@@ -765,7 +1070,7 @@
     "grup": "1002",
     "kalem": "3'lü H 100 × 100 × 100 (dış duvar T'si)",
     "olcu": "L 2500",
-    "adet": 6
+    "adet": 8
    },
    {
     "grup": "1002",
@@ -1179,13 +1484,13 @@
     "grup": "1009",
     "kalem": "Şase pul",
     "olcu": "adet",
-    "adet": 26
+    "adet": 28
    },
    {
     "grup": "1009",
     "kalem": "Çelik dübel",
     "olcu": "adet",
-    "adet": 26
+    "adet": 28
    },
    {
     "grup": "1010",

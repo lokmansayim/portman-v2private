@@ -162,7 +162,8 @@ def test_veranda_profili_kiris_yerinde(plan):
 
 def test_veranda_listesi():
     """TK-01 listesi. Taşan verandanın dış kirişi kolonların dış yüzünden dış yüzüne, açık kenar boyunda (Lokman, kart 28 Ekim, "A: dış
-    yüzden dış yüze": 3760 / 2510 → 3860 / 2610); iki yan kiriş açık kenar − 10 (1710, 1200), eskisi gibi."""
+    yüzden dış yüze": 3760 / 2510 → 3860 / 2610); iki yan kiriş açık kenar − 10 (1710, 1200), eskisi gibi. Satır sayısı D-29'la (Lokman 29 Ekim,
+    pencerenin iki yanı 62,75'lik yarım pano) 131 → 128, ters tavanda 129 → 126: 100'lük dolu panonun dört boyu tek boya indi."""
     N = PL.model_motor(_ie())
     assert (N["W"], N["D"], N["brut_m2"]) == (898.0, 1199.0, 90.122)       # brüt gövde + veranda; dış kutunun boş köşeleri sayılmaz
     assert N["dis_cevre_m"] == pytest.approx(35.72) and N["ic_kalan_dis_duvar_m"] == pytest.approx(6.47) and N["dikmeler"] == 4
@@ -182,9 +183,9 @@ def test_veranda_listesi():
     assert [f.startswith("taşan verandanın dış kenarı") for f in formul] == [True, False, False, True, False, False]
     assert sat("Yavru makas · ön veranda çatısı") == [("L 4460", 3)] and sat("Yavru makas · arka veranda çatısı") == [("L 3210", 2)]
     assert sat("Metal dere") == [("L 4000", 7)]
-    assert L["ozet"]["satir"] == 131
+    assert L["ozet"]["satir"] == 128
     N["ozellikler"]["Tavan"] = "Ters"
-    assert PL.liste(N)["ozet"]["satir"] == 129
+    assert PL.liste(N)["ozet"]["satir"] == 126
 
 
 def test_verandasiz_ayni():
@@ -236,6 +237,30 @@ def test_alin_dolgusu_cati_cizgisinde(plan):
     """Beşik verandanın kalkan dolgusunun üst köşeleri kolon yüzünde çatı çizgisinde (saçak kotu + saçak × eğim), IFC'deki gibi (kod incelemesi)."""
     alin = [x for x in VR.gorunus_parcalari(plan, plan.is_emri, "on") if x["tur"] == "alin" and x["veranda"] == "ÖN VERANDA"][0]
     assert alin["u"] == [(256.0, 250.0), (642.0, 250.0), (642.0, pytest.approx(268.25)), (449.0, pytest.approx(321.325)), (256.0, pytest.approx(268.25))]
+
+
+def test_on_gorunuste_veranda_sacak_ve_topuk(plan, tmp_path):
+    """Lokman, 29 Ekim 2026 (TK-02): "Ön Veranda makasındaki saçak çizgisi ile topuk çizgisi çıkmamış". Veranda çatısı görünüşte ana çatı
+    gibi çizilir (BK-18 ek): duvar üstünde saçak ucundan saçak ucuna saçak altı çizgisi, iki uçta 10 cm topuk; kalkanın iki ucu topuğun
+    üstünde."""
+    import ezdxf
+    p = [x for x in VR.gorunus_parcalari(plan, plan.is_emri, "on") if x["veranda"] == "ÖN VERANDA"]
+    assert [x["u"] for x in p if x["tur"] == "sacak"] == [[(226.0, 250.0), (672.0, 250.0)]]
+    assert [x["u"] for x in p if x["tur"] == "topuk"] == [[(226.0, 250.0), (226.0, 260.0)], [(672.0, 250.0), (672.0, 260.0)]]
+    kalkan = [x["u"] for x in p if x.get("kalkan")][0]
+    assert (kalkan[0], kalkan[-1]) == ((226.0, 260.0), (672.0, 260.0))
+    m = dxf_out.uret(_ie(), tmp_path, pdf_hatada=False)
+    msp = ezdxf.readfile(tmp_path / m["dxf"]).modelspace()
+    nokta = lambda e: [(round(q[0], 3), round(q[1], 3)) for q in (e.get_points("xy") if e.dxftype() == "LWPOLYLINE" else (e.dxf.start, e.dxf.end))]
+    topuk = sorted(nokta(e) for e in msp if e.dxf.layer == "ON_TOPUK")
+    assert len(topuk) == 4 and all(a[0] == b[0] and b[1] - a[1] == pytest.approx(10.0) for a, b in topuk)   # ana çatının ve ön verandanın iki ucu
+    x0, alt, ust = topuk[0][0][0], topuk[0][0][1], topuk[0][1][1]
+    assert [round(t[0][0] - x0, 3) for t in topuk] == [0.0, 256.0, 702.0, 958.0]               # saçak uçları: ana −30 / 928, veranda 226 / 672
+    assert all(t[0][1] == alt and t[1][1] == ust for t in topuk)                                 # hepsi duvar üstünden saçak kotuna
+    cati = [nokta(e) for e in msp if e.dxf.layer == "ON_CATI"]
+    assert [topuk[1][0], topuk[2][0]] in cati                                                    # verandanın saçak altı çizgisi, uçtan uca
+    kal = [c for c in cati if len(c) == 3]
+    assert len(kal) == 1 and (kal[0][0], kal[0][-1]) == (topuk[1][1], topuk[2][1])              # kalkan topuğun üstünde
 
 
 def test_sol_veranda_profil_rolu_ve_aks_payi(tmp_path):

@@ -156,12 +156,13 @@ def test_cizim_canlidakiyle_ayni(paketler, tmp_path, kod):
 
 def test_liste_canlidakiyle_ayni(paketler):
     """TK-01'in iki listesi liste üretecinin satırlarıyla aynı (teklif r06'nın listeleri: asma 133, ters 131 satır; komut satırı ve teklifle
-    aynı yol, `is_emrinden`)."""
+    aynı yol, `is_emrinden`). D-29 (Lokman 29 Ekim, TK-02 yorumları) ile 128 / 126: pencerenin iki yanı 62,75'lik yarım pano (dolu panonun
+    dört boyu tek boya), giriş nişinde köşe direği yerine 3'lü H (10'luk köşe direği 8 → 6, dış T'si 3'lü H 6 → 8), kapılı pano 115,5."""
     from openpyxl import load_workbook
     from motor import prefabrik_liste as PL
     kok, _, _ = paketler
     ie = json.loads((KOK / _model("TK-01")["is_emri"]).read_text(encoding="utf-8"))
-    for s, n in (("asma", 133), ("ters", 131)):
+    for s, n in (("asma", 128), ("ters", 126)):
         L = PL.is_emrinden(copy.deepcopy(ie), ozellikler={"Tavan": s.capitalize()})
         ws = load_workbook(kok / "prefabrik" / "TK-01" / f"TK-01_yukleme_listesi_{s}.xlsx").active
         satir = [r[1:5] for r in ws.iter_rows(min_row=3, values_only=True)]

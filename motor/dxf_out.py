@@ -13,7 +13,7 @@ from collections import Counter
 from pathlib import Path
 
 import ezdxf
-from ezdxf import units
+from ezdxf import bbox as ebbox, units
 from ezdxf.math import Matrix44
 from ezdxf.addons import Importer
 from ezdxf.enums import TextEntityAlignment
@@ -182,6 +182,32 @@ class Cizici:
         name, kod = self.dograma[olcu]
         return name, kod, src, nat, bb
 
+    def _pencere_yazi_ters(self, olcu: str, rot: float) -> bool:
+        """D-29 (Lokman, 29 Ekim 2026: "önden bakınca arkadaki yatak odası 1'in 120/180 yazısı ters kalıyor"): pencereli pano `rot` ile
+        konunca ölçü yazısı baş aşağı (90° … 270°, sağdan ya da alttan okunmuyor) mu? Bütün çizimlerde (P6001 dahil; D-29 madde 6)."""
+        _, _, src, nat, _ = self._pencere_blok(olcu)
+        t0 = next((e.dxf.rotation for e in self.doc.blocks.get(src) if e.dxftype() == "TEXT"), None)
+        if t0 is None:
+            return False
+        a = (rot + (0.0 if nat == "V" else 270.0) + t0) % 360.0
+        return 90.0 + 1e-6 < a <= 270.0 + 1e-6
+
+    def _pencere_ters_blok(self, olcu: str) -> str:
+        """Pencere bloğunun ölçü yazısı kendi ortası çevresinde 180° çevrilmiş eşi (sembol aynı; ad `_Y`, malzeme kodu aynı)."""
+        dname, _, src, _, _ = self._pencere_blok(olcu)
+        ad = dname + "_Y"
+        if ad not in self.doc.blocks:
+            kblk = self.doc.blocks.new(src + "-y")
+            for e in self.doc.blocks.get(src):
+                c = e.copy()
+                if c.dxftype() == "TEXT":
+                    orta = ebbox.extents([e]).center
+                    c.dxf.rotation = (c.dxf.rotation + 180.0) % 360.0
+                    c.set_placement((orta.x, orta.y), align=TextEntityAlignment.MIDDLE_CENTER)
+                kblk.add_entity(c)
+            self.doc.blocks.new(ad).add_blockref(src + "-y", (0, 0), dxfattribs={"layer": "PENCERE"})
+        return ad
+
     def _dis_kapi_blok(self, w):
         key = f"dis{int(w)}"
         if key not in self.dograma:
@@ -196,7 +222,12 @@ class Cizici:
             return
         kod = self.kat.baglanti("uclu_h_dis"); self.h_blok_adi_dis = f"BOM_{kod}_UCLU_H_DIS_{G._mm(G.T_DIS)}x{G._mm(G.T_IC)}"; self.h_kod_dis = kod
         blk = self.doc.blocks.new(self.h_blok_adi_dis)
-        self._rect(blk, -G.T_DIS / 2.0, -G.T_IC / 2.0, G.T_DIS / 2.0, G.T_IC / 2.0)
+        # D-29 (Lokman, 29 Ekim 2026: "yeşil kutular ... bizde öyle bir şey yok"): kutu çizilmez. Gövde kapalı `DIS_UCLU_H_GOVDE` katmanında
+        # kalır: sayım (BOM, doğrulama) INSERT'ten, IFC'deki parçanın yeri bloğun kutusundan (`ifc_uret.hazirla`)
+        if "DIS_UCLU_H_GOVDE" not in self.doc.layers:
+            self.doc.layers.add("DIS_UCLU_H_GOVDE", color=3, linetype="Continuous").off()
+        x0, y0, x1, y1 = -G.T_DIS / 2.0, -G.T_IC / 2.0, G.T_DIS / 2.0, G.T_IC / 2.0
+        blk.add_lwpolyline([(x0, y0), (x1, y0), (x1, y1), (x0, y1)], close=True, dxfattribs={"layer": "DIS_UCLU_H_GOVDE", "color": 256})
         if G.katman("DIS_UCLU_H_100") not in self.doc.layers:          # katman yalnız dış üçlü H varken açılır (eski DXF'ler değişmez)
             self.doc.layers.add(G.katman("DIS_UCLU_H_100"), color=3, linetype="Continuous")
 
@@ -212,8 +243,9 @@ class Cizici:
     def _rect(self, blk, x0, y0, x1, y1):
         blk.add_lwpolyline([(x0, y0), (x1, y0), (x1, y1), (x0, y1)], close=True, dxfattribs={"layer": "0", "color": 256})
 
-    def pano_blok(self, p: G.Pano):
-        """(blok adı, çerçeve, malzeme kodu). Kanonik V çerçevesi: pano +y boyunca, kalınlık +x; dış kapı H çerçevesi."""
+    def pano_blok(self, p: G.Pano, yazi_ters: bool = False):
+        """(blok adı, çerçeve, malzeme kodu). Kanonik V çerçevesi: pano +y boyunca, kalınlık +x; dış kapı H çerçevesi. `yazi_ters` (D-29):
+        pencerenin ölçü yazısı 180° çevrilmiş blok (`_pencere_ters_blok`), ad `_Y` ile biter."""
         d = p.duvar; L = p.boy; t = 2 * d.h; dis = d.tur == "dis"
         ac = p.acilim
         kind = "DOLU" if ac is None else {"pencere": {"120x120": "P01", "120x180": "P02", "60x40": "P03"}.get(ac.olcu),
@@ -230,8 +262,9 @@ class Cizici:
         if dis_ayna:
             var = "SOL"
         kay = ac.kayma if ac is not None else 0.0                  # İE-11: boşluk panoda kaydırılmışsa blok geometrisi farklıdır
+        yazi_ters = yazi_ters and ac is not None and ac.tur == "pencere"
         name = f"BOM_{kod}_{mm_tag(L)}_{'DIS' if dis else 'IC'}_{kind}" + (f"_{var}" if var else "") \
-            + (f"_KAY{'M' if kay < 0 else 'P'}{mm_tag(abs(kay))}" if abs(kay) > 1e-9 else "")
+            + (f"_KAY{'M' if kay < 0 else 'P'}{mm_tag(abs(kay))}" if abs(kay) > 1e-9 else "") + ("_Y" if yazi_ters else "")
         frame = "H" if (ac is not None and ac.tur == "dis_kapi") else "V"
         if name in self.doc.blocks:
             return name, frame, kod
@@ -241,6 +274,8 @@ class Cizici:
         w = ac.genislik; s = (L - w) / 2.0 + kay                  # kay 0 → eski değer bit bit
         if ac.tur == "pencere":
             dname, _, src, nat, bb = self._pencere_blok(ac.olcu)
+            if yazi_ters:
+                dname = self._pencere_ters_blok(ac.olcu)
             self._rect(blk, 0, 0, t, s); self._rect(blk, 0, s + w, t, L)
             orta = (t - 10.0) / 2.0
             if nat == "V": ins, rot = (t - bb[2] - orta, s - bb[1]), 0.0
@@ -318,6 +353,8 @@ class Cizici:
                         n = p.acilim.disari_normal
                         if d.yon == "y": ins, rot = ((r[0], r[1]), 0.0) if n == "-x" else ((r[2], r[3]), 180.0)
                         else:            ins, rot = ((r[2], r[1]), 90.0) if n == "-y" else ((r[0], r[3]), 270.0)
+                        if self._pencere_yazi_ters(p.acilim.olcu, rot):
+                            name, frame, kod = self.pano_blok(p, yazi_ters=True)
                 else:
                     n = p.acilim.icine_normal
                     if d.yon == "x": ins, rot = ((r[0], r[1]), 0.0) if n == "+y" else ((r[2], r[3]), 180.0)
@@ -607,8 +644,8 @@ class Cizici:
             if p["veranda"] not in on_veranda:
                 continue
             pts = [(u + ox, bot + z) for u, z in p["u"]]
-            if p.get("kalkan"):
-                msp.add_lwpolyline(pts, dxfattribs={"layer": "ON_CATI"})
+            if p.get("kalkan") or p.get("acik"):                # BK-18 ek: saçak altı çizgisi ON_CATI'de, topuk ON_TOPUK'ta (ana çatınınki gibi)
+                msp.add_lwpolyline(pts, dxfattribs={"layer": "ON_TOPUK" if p["tur"] == "topuk" else "ON_CATI"})
             else:
                 msp.add_lwpolyline(pts, close=True, dxfattribs={"layer": "ON_CATI" if p["tur"] == "cati" else "ON_GORUNUS"})
         self.text("ÖN GÖRÜNÜŞ - ÇALIŞMA", (W / 2 + ox, top + rise + 100), 26, "ON_YAZI")
