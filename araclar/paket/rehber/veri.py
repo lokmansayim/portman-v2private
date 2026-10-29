@@ -16,6 +16,8 @@ yazıları kurulur; şema 62'nin verisiyle aynı (`testler/paket/rehber62/donust
   kalkanda 62 m²'deki gibi mahyadan iki yana 250'lik yatay levhalar, yüksek kalkanda 125'lik dik şeritler). Kartlarında kaynağı yazar.
 - **Kartlar**: pano, H, köşe direği, makas, kapı, pencere, veranda kolon ve kirişi kart modelinden; aşık, omegalar, saçak ve alın sacı,
   Z, C kapama, mahya, dere, iniş, betopan ve sandviç panel `kart_bag` ile kartına bağlanır (62 m²'nin verisinde yok, orada "kart yok").
+- **İç duvar kalınlığı** (İE-18 R1 ek 4): 60'lık ya da 100'lük (BK-18), liste üretecinin kuralıyla plandan; iç pano, alt çerçeve, çektirme
+  U'su ve iç köşe yazıları onunla, iç H'ların kartı kart modelinden (`metin.ic_kal`; 62 m²'nin verisinde yok, şablon 60'lık alır).
 
 Verandalar: gövdeden taşan (önde ya da arkada, ana çatıya paralel küçük beşik; TK-01) ve gövdenin içindeki (ana çatının altında, kolon
 ve kiriş; AP-19; kolonsuzsa giriş nişi: önü açık, kirişi iki yandaki duvarı bağlar; TK-01 r06). Rehberin kuramadığı ev `Desteklenmiyor` atar; paket üreteci bunu "Yok: neden" diye yazar: beşik dışı çatı, mahyası
@@ -28,7 +30,7 @@ import json
 import math
 import re
 import sys
-from collections import defaultdict
+from collections import Counter, defaultdict
 from pathlib import Path
 
 KOK = Path(__file__).resolve().parents[3]
@@ -189,6 +191,16 @@ def ifc_kutulari(ifc_yolu: Path, desen: str) -> dict[str, tuple]:
     return out
 
 
+def ifc_kart_kodlari(ifc_yolu: Path, desen: str) -> dict[str, str]:
+    """Kart modelinde adı desene uyan parçaların kart kodu (`PortatifEv_Parca.KartKodu`): {ad: kod}; kartı olmayan parça yok."""
+    import ifcopenshell
+    import ifcopenshell.util.element as ue
+    from motor.kart_model import PARCA_SETI
+
+    f = ifcopenshell.open(str(ifc_yolu))
+    return {p.Name: k for p in f.by_type("IfcProduct") if re.match(desen, p.Name or "") and (k := ue.get_psets(p).get(PARCA_SETI, {}).get("KartKodu"))}
+
+
 PI = 3.141592654     # dönüş açısı veride dokuz ondalıkla: 15 haneli π numara maskesine (`beyin/numara.py`) takılır; fark 4e-10 rad
 
 
@@ -224,6 +236,7 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         if v["cephe"] not in ("on", "arka") or c.get("tip") != "besik" or c["mahya"][0][0] != c["mahya"][1][0]:
             raise Desteklenmiyor(f"{v['ad']}: cephe {v['cephe']}, çatı {c.get('tip')}; rehber ön ve arka cephede ana çatıya paralel beşiği kurar")
     IFC = ifc_kutulari(kart / f"{kart_kodu}_model.ifc", r"^(MAKAS_\d+_ALT_BASLIK|ASIK_\d+|INIS_\d+)$")
+    KART_IFC = ifc_kart_kodlari(kart / f"{kart_kodu}_model.ifc", r"^(H_PANO_EKI_IC_\d+|BAGLANTI_B\d+_\d+)$")   # iç H'ların kartı modelden
 
     # ---------- liste ----------
     def satirlar(on, olcu=None):
@@ -317,6 +330,11 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         oge[oda].append(((cx, cy), 1, k))
 
     ic_panolar = [p for p in HZ["panolar"] if p["tur"] == "ic"]
+    # İç duvar kalınlığı (İş Emri `yapi.duvar_kalinligi_cm.ic`; BK-18'den beri 100'lük de olabilir). Satır adları liste üretecinin kuralıyla
+    # (`prefabrik_liste`: en sık iç pano kalınlığı, 100 mm ve üstü "100'lük"); iç duvarsız evde 60'lık.
+    IC_MM = Counter(round(p["kalinlik"] * 10) for p in ic_panolar).most_common(1)[0][0] if ic_panolar else 60
+    IC_100 = IC_MM >= 100
+    IC_KAL = "100'lük" if IC_100 else "60'lık"
 
     def stub_bul(o, a, perp, t):
         for p in ic_panolar:
@@ -344,8 +362,8 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         h = HT.get(GOR.get(ad_ifc, ad_ifc))
         if dis and h:
             card, tur = h["kart"], ("uclu_" if uclu else "") + h["tur"]
-        else:
-            card, tur = ("H-06", "uclu_standart") if uclu else ("H-03", "standart")
+        else:                                               # iç H: kartı modelden (60'lıkta H-03 / H-06, 100'lükte H-07 / H-10)
+            card, tur = KART_IFC.get(GOR.get(ad_ifc, ad_ifc)), "uclu_standart" if uclu else "standart"
         stub, stub_t = stub_bul(o, a, perp, t) if uclu else (None, None)
         xy = [_r(a), _r(perp)] if o == "h" else [_r(perp), _r(a)]
         k = {"xy": xy, "o": o, "t": t, "tur": tur, "card": card, "ad": None, "stub": stub, "stub_t": stub_t}
@@ -396,7 +414,7 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
             O = [x0 if dt[0] > 0 else x1, y0 if db[1] > 0 else y1]
             w, dep = g["kalinlik"], bt["kalinlik"]
             rect = [min(O[0], O[0] + dt[0] * dep), min(O[1], O[1] + db[1] * w), max(O[0], O[0] + dt[0] * dep), max(O[1], O[1] + db[1] * w)]
-        k = {"rect": [_r(v) for v in rect], "O": [_r(v) for v in O], "db": db, "dt": dt, "e": _r(e), **({"ic": True} if b["kod"] == "B01" else {}),
+        k = {"rect": [_r(v) for v in rect], "O": [_r(v) for v in O], "db": db, "dt": dt, "e": _r(e), **({"ic": True} if b["kod"] == "B01" else {"ic_yer": True} if "_IC_KOSE_" in b["blok"] else {}),
              "card": KK.get(b["kod"]), "id": f"K{len(posts) + 1}"}
         cx, cy = (rect[0] + rect[2]) / 2, (rect[1] + rect[3]) / 2
         oda = oda_sec([(cx + u, cy + v) for u in (-20, 20) for v in (-20, 20)])
@@ -915,7 +933,7 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         if c["pdis"]:
             t.append(f"{c['pdis']} dış pano (100'lük{', ' + str(c['pen']) + ' pencereli' if c['pen'] else ''})")
         if c["pic"]:
-            t.append(f"{c['pic']} iç pano (60'lık)")
+            t.append(f"{c['pic']} iç pano ({IC_KAL})")
         s = ("Dizilim bu odanın arka sol köşesinden başlar. " if ilk else "") + \
             ("Bu odayla " + ", ".join(t) + " kurulur" if t else "Bu odanın duvarları önceki odalarla kuruldu")
         if c["kap"]:
@@ -949,13 +967,14 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
     yavru = ", ".join(f"{kucuk(v['ad'])} {adet('Yavru makas · ' + kucuk(v['ad']) + ' çatısı')}" for v in VR)
     alcipan = {"yesil": ls("Tavan yeşil alçıpan"), "beyaz": ls("Tavan beyaz alçıpan")}
     metin = {
-        "alt_liste": {"dis": ls("100'lük alt çerçeve"), "ic": ls("60'lık alt çerçeve")},
+        "ic_kal": IC_KAL,
+        "alt_liste": {"dis": ls("100'lük alt çerçeve"), "ic": ls(f"{IC_KAL} alt çerçeve")},
         "dis_kapi": f"çelik kapı 90 × 200 ({dk_yon})" if dk else "dış kapı",
         "ic_kapi_boslugu": "Kapı boşluğu 82 × 200 (kasalı)",
         "dvr_kaynak": "—",
         "ozel_h_liste": "—",
         "dubel_ad": "Çelik dübel", "dubel_liste": f"{ls('Çelik dübel')} (dübelli H adedi kadar) + {ls('Şase pul', ad='şase pul')}",
-        "ceku_liste": ls("Çektirme U'su 60"),
+        "ceku_liste": ls("Çektirme U'su 100 (iç duvar)") if IC_100 else ls("Çektirme U'su 60"),
         "omega_liste": {"sacak": ls("100'lük saçak omegası"), "duvar": ls("100'lük duvar omegası"), "bas": ls("Baş makas omegası"),
                         "ic": ls("60'lık duvar omegası") if satirlar("60'lık duvar omegası") else ls("60'lık tavan omegası")},
         "sacak_liste": ls("Saçak sacı"),
@@ -1015,7 +1034,9 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
               "Oynat’a basınca montaj oda oda, {N} adımda gösterilir.",
          "head": "Kimlik kartına göre adetler", "kamera": K([0, 1.4, 0.3], 0.62, 0.36, 19.5)},
         {"ad": "Alt çerçeve", "t": "Alt çerçeve",
-         "p": "Zemin hazır olduktan sonra 100’lük alt çerçeve dış duvar hattına, 60’lık alt çerçeve iç duvar hattına serilip sabitlenir. Kapı boşluklarında çerçeve kesilir. Panolar bu çerçeveye oturur.",
+         "p": ("Zemin hazır olduktan sonra 100’lük alt çerçeve dış ve iç duvar hatlarına" if IC_100 else
+               "Zemin hazır olduktan sonra 100’lük alt çerçeve dış duvar hattına, 60’lık alt çerçeve iç duvar hattına") +
+              " serilip sabitlenir. Kapı boşluklarında çerçeve kesilir. Panolar bu çerçeveye oturur.",
          "kamera": K([0, 0, 0.3], 0.45, 1.05, 15.5),
          "rows": [x for x in (LR("100'lük alt çerçeve"), LR("60'lık alt çerçeve"), I("Dış duvar hattı", "{alt_dis} m"), I("İç duvar hattı", "{alt_ic} m")) if x]},
         *({"oda": r["id"]} for r in rooms),
@@ -1140,7 +1161,7 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         {"grp": "Kapı ve pencere"}, {"pre": ["K-", "P-"], "adlar": ["PVC"]},
     ]
     # kartı olan ama modelde tek tek yerleşmeyen parçalar (şablon rolü → kart; 62 m²'nin verisinde yok, orada "kart yok")
-    kart_bag = {"alt_dis": "AC-01", "alt_ic": "AC-02", "omega_sacak": "CK-01", "omega_ic": "OM-01", "sacak": "CK-02", "betopan": "BT-01",
+    kart_bag = {"alt_dis": "AC-01", "alt_ic": "AC-01" if IC_100 else "AC-02", "omega_sacak": "CK-01", "omega_ic": "OM-01", "sacak": "CK-02", "betopan": "BT-01",
                 "z": "CK-04", "tomega": "OM-01", "asik": "AS-01", "ckapama": "CK-05", "mahya": "CK-06", "alin": "CK-03", "dere": "DR-01",
                 "inis": "DR-02", **({"kaplama": "KP-01"} if SP else {})}
     kabuk = {
