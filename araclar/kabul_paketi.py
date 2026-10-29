@@ -11,7 +11,7 @@ D-11'in (13 Ekim 2026) iki düzenlenebilir biçimi: `*_cizim.dxf` (plan + dört 
 `*_yukleme.xlsx` (yükleme listesi; openpyxl yalnız yerelde, sunucuda yok). İkisi de çıktıdır, kaynak değil: düzeltme tanıma ya da kural
 kitabına işlenir, paket yeniden üretilir.
 Üstte `README.md`: model indeksi, kısa parça sayıları, kabul formu (kod listesi + not). Tanımlar `beyin/veri/adaylar.json`'dan
-(yoksa `modeller/`). Çizim kural setiyle (`--set`; yoksa güncel `kurallar.json`)."""
+(yoksa `modeller/`) ve İE-09'dan beri model bankasının kabul edilen modellerinden (`modeller/banka/`, `beyin/banka.py`). Çizim kural setiyle (`--set`; yoksa güncel `kurallar.json`)."""
 from __future__ import annotations
 import argparse, json, shutil, sys, time
 from pathlib import Path
@@ -56,6 +56,8 @@ def main(argv: list[str] | None = None) -> int:
             print("DUR: openpyxl yok; Excel yükleme listesi üretilemez (yerel: pip install -r araclar/gereksinimler.txt)"); return 2
     adaylar_yolu = KOK / "beyin" / "veri" / "adaylar.json"
     adaylar = [x for x in json.loads(adaylar_yolu.read_text(encoding="utf-8")) if x.get("motor") == "genel"] if adaylar_yolu.exists() else []
+    from beyin import banka                                                # İE-09 (D-20): atölyede kabul edilen modeller de (kod çakışması alınmaz)
+    adaylar += [x for x in banka.kayitlar() if x.get("motor") == "genel" and x["kod"] not in {y["kod"] for y in adaylar}]
     from beyin.katalog import Katalog
     istenen = {Katalog.kod_normalize(k) for k in a.kodlar.split(",") if k.strip()}
     if istenen:
