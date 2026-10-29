@@ -3,7 +3,8 @@ const { chromium } = require('playwright');
 const fs = require('fs');
 (async () => {
   const [html, out] = process.argv.slice(2);
-  const b = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
+  // TMPDIR /tmp: `iz.js`'teki gibi; yetkisiz sayfa süreçleri CI'da $RUNNER_TEMP'e yazamıyor, sayfa açılmıyordu (29 Ekim)
+  const b = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'], env: { ...process.env, TMPDIR: '/tmp' } });
   const p = await b.newPage({ viewport: { width: 1200, height: 800 } });
   const T = process.env.THREE_DIR;
   await p.route('https://cdn.jsdelivr.net/npm/three@0.160.0/**', r => r.fulfill({ path: T + '/' + r.request().url().replace('https://cdn.jsdelivr.net/npm/three@0.160.0/', ''), contentType: 'application/javascript' }));
