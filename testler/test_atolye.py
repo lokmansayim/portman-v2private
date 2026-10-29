@@ -1,5 +1,6 @@
-"""İE-09 · Model atölyesi (D-20): `araclar/atolye.py` adımları geçici bir bankada (deneme modeli Ç8801Z, Ç8801'in çatı varyantı),
-bankanın Katalog / İE-14 / aday kabulüne birleşmesi, kod çakışması, kör test engeli, metraj kapısı ve gün sonu sayımı.
+"""İE-09 · Model atölyesi (D-20): `araclar/atolye.py` adımları geçici bir bankada (deneme modeli Ç8801Z, Ç8801'in çatı varyantı; metraj
+kapısı için KT99, çelik hakeminin açık projesi ÇP-14'ün tanımı), bankanın Katalog / aday kabulüne birleşmesi (İE-14 uyarlamasına girmez,
+İE-09 PR-1), kod çakışması, kör test engeli, çelik hakeminden okunan metraj kapısı ve pim, gün sonu sayımı.
 
 Gerçek banka (`modeller/banka/`) ve kusur defteri değişmez: araç `--banka` ile geçici köke, defter geçici dosyaya yönlendirilir. Kabul
 kapısı (harness + pytest) burada koşmaz (`--kapisiz`, iç içe pytest olmasın); tam izler de koşmaz (`--izsiz`; `test_banka.py` sınar)."""
@@ -61,6 +62,10 @@ def test_kor_test_seti_acilmaz(tmp_path):
     excel = tmp_path / "AP-12 yukleme listesi.xlsx"
     excel.write_bytes(b"okunmaz")
     assert kos(banka, "ac", "Ç9901", "--ad", "deneme", "--kaynak-dosya", excel) == 2 and not (banka / "C9901").exists()
+    # çelik hattının proje kodu kartın kaynağına yazılır ama kör test engeline girmez (engel yalnız AIPrefabrik'in AP kodları)
+    assert A.kaynak_proje_kodu("ÇP-14") == A.kaynak_proje_kodu("cp14") == "ÇP-14" and A.kaynak_proje_kodu("AP-7") == "AP-07"
+    assert A.proje_kodu("ÇP-14") is None and A.kaynak_proje_kodu("KT04") is None
+    assert A.kor_test_engeli(Path("liste.xlsx"), proje="ÇP-14") is None
 
 
 def test_kod_cakismasi_ve_ayni_cati(atolye, tmp_path):
@@ -98,18 +103,12 @@ def test_kontrol_sayfasi(atolye):
         assert s in metin, s
 
 
-def test_metraj_kapisi_ve_kabul_sirasi(atolye, tmp_path):
-    banka = atolye["banka"]
-    excel = tmp_path / "gercek liste.xlsx"
-    import openpyxl
-    wb = openpyxl.Workbook(); wb.active["B2"] = 5300.0; wb.save(excel)          # bizimki ≈ 4990 kg: fark ≈ -%5,8
-    assert kos(banka, "metraj", "Ç8801Z", "--excel", excel, "--hucre", "Sheet!B2") == 1
-    k = kart(atolye)
-    assert k["durum"] == "beklemede" and k["metraj_testi"]["durum"] == "beklemede" and "openpyxl" in k["metraj_testi"]["gercek_kaynak"]
-    assert kos(banka, "kabul", "Ç8801Z", "--kapisiz", "--izsiz") == 2                                    # beklemede: kabul edilemez
-    bizim = k["metraj_testi"]["bizim_kg"]
-    assert kos(banka, "metraj", "Ç8801Z", "--excel", excel, "--kg", round(bizim * 1.02, 1)) == 0       # %2: geçer
-    assert kart(atolye)["durum"] == "kontrolde" and kart(atolye)["metraj_testi"]["durum"] == "gecti"
+def test_metraj_kapisi_hakem_olcumu_olmayan_modelde_kosulmaz(atolye):
+    # Ç8801Z'nin çelik hakemi ölçümü yok: başka projenin ölçümü ona yazılamaz (tanım hakemin ölçtüğü tanım değil); kart değişmez
+    once = kart(atolye)
+    assert kos(atolye["banka"], "metraj", "Ç8801Z", "--celik", "ÇP-14") == 2
+    assert kos(atolye["banka"], "metraj", "Ç8801Z", "--celik", "ÇP-99") == 2                              # hakemde böyle proje yok
+    assert kart(atolye) == once and once["metraj_testi"]["durum"] == "yok" and once["durum"] == "kontrolde"
 
 
 def test_kabul_banka_kaydi_ve_kontrol(atolye):
@@ -121,7 +120,7 @@ def test_kabul_banka_kaydi_ve_kontrol(atolye):
     t_yol.write_text(asil, encoding="utf-8")
     assert kos(banka, "kabul", "Ç8801Z", "--kapisiz", "--izsiz", "--tarih", "2026-10-17") == 0
     k = kart(atolye)
-    assert k["durum"] == "kabul" and k["kabul"]["karar"] == "D-11" and k["kabul"]["metraj_kapisi"] == "gecti"
+    assert k["durum"] == "kabul" and k["kabul"]["karar"] == "D-11" and k["kabul"]["metraj_kapisi"] == "yok"
     assert B.denetle(banka) == []
     kayit = B.kayitlar(banka)
     assert [x["kod"] for x in kayit] == ["Ç8801Z"] and kayit[0]["banka"] is True and kayit[0]["taban_model"] == "Ç8801"
@@ -196,16 +195,13 @@ def test_katalog_atolye_modelini_yalniz_acik_kabulle_gosterir(monkeypatch):
     assert {a["kod"] for a in k.gorunur_adaylar()} == {"Ç9902", "Ç8801"}
 
 
-def test_plan_uretici_bankasi_atolye_modelini_alir_varyanti_almaz(monkeypatch):
+def test_plan_uretici_bankasi_atolye_modelini_almaz(monkeypatch):
+    # İE-09 PR-1 (CIO, 29 Ekim): İE-14 uyarlaması atölye bankasını okumaz; canlıda `plan_uretimi` açık, K-A10 kaydı olmadan sessiz değişiklik yok
     from beyin import plan_uretici as PU
-    PU._banka.cache_clear()
-    monkeypatch.setattr(B, "kayitlar", lambda *x, **k: [])
-    cekirdek = [b["kod"] for b in PU._banka()]
-    assert cekirdek == ["Ç8801", "Ç8201", "KT01", "KT02", "KT03"]                              # çekirdek bankanın varyantsız planları
     monkeypatch.setattr(B, "kayitlar", lambda *x, **k: [_sahte("Ç9902"), _sahte("Ç8201V", taban="Ç8201")])
     PU._banka.cache_clear()
     try:
-        assert [b["kod"] for b in PU._banka()] == cekirdek + ["Ç9902"]                        # atölye modeli sonda; çatı varyantı yok
+        assert [b["kod"] for b in PU._banka()] == ["Ç8801", "Ç8201", "KT01", "KT02", "KT03"]      # yalnız çekirdek bankanın varyantsız planları
     finally:
         PU._banka.cache_clear()
 
@@ -215,3 +211,85 @@ def test_aday_kabul_atolye_kodunu_tanir(monkeypatch, capsys):
     monkeypatch.setattr(B, "kayitlar", lambda *x, **k: [_sahte("Ç9902")])
     assert aday_kabul.main(["--kodlar", "Ç9902,Ç8801", "--tarih", "2026-10-17", "--kuru"]) == 0
     assert "2 kayıt yazılacak (Ç9902, Ç8801)" in capsys.readouterr().out
+
+
+# ── metraj kapısı çelik hakeminden (İE-09 PR-1, D-28 madde 1): KT99 = ÇP-14'ün tanımı, kod ve ad dışında ────────────────────
+CP14 = KOK / "testler" / "celik" / "projeler" / "CP14" / "CP14.json"
+
+
+@pytest.fixture(scope="module")
+def hakemli(tmp_path_factory):
+    kok = tmp_path_factory.mktemp("hakemli")
+    (kok / "is_emri").mkdir()
+    banka = kok / "modeller" / "banka"
+    banka.mkdir(parents=True)
+    t = json.loads(CP14.read_text(encoding="utf-8"))
+    t["kod"], t["ad"] = "KT99", "Deneme (ÇP-14'ün tanımı)"
+    tp = kok / "KT99.json"
+    tp.write_text(json.dumps(t, ensure_ascii=False), encoding="utf-8")
+    assert kos(banka, "ac", "KT99", "--ad", t["ad"], "--tanim", tp, "--musteri-projesi", "--kaynak-metni", "atölye testi") == 0
+    assert kos(banka, "kaynak", "KT99", "--kaynagi", "test", "--proje", "KT04") == 2                     # proje kodu okunamaz
+    assert kos(banka, "kaynak", "KT99", "--kaynagi", "test", "--proje", "ÇP-14", "--brut-m2", "120") == 0
+    assert kos(banka, "metraj", "KT99", "--celik", "ÇP-14") == 0
+    assert kos(banka, "ciz", "KT99", "--cikti", kok / "cikti") == 0
+    return {"kok": kok, "banka": banka, "tanim": t}
+
+
+def kart99(ctx) -> dict:
+    return json.loads((ctx["banka"] / "KT99" / "kart.json").read_text(encoding="utf-8"))
+
+
+def test_hakem_olcumu_kapi_tur_tablosu_ve_pim(hakemli):
+    k = kart99(hakemli)
+    mt = k["metraj_testi"]
+    sonuc = json.loads((KOK / "testler" / "celik" / "projeler" / "CP14" / "sonuc.json").read_text(encoding="utf-8"))
+    assert k["durum"] == "kontrolde" and k["gosterim"] == "KT-99" and mt["kaynak"] == "celik_hakemi" and mt["proje"] == "ÇP-14"
+    assert mt["durum"] == "gecti" and mt["hakem_sonucu"] == "geçti" and mt["fark_yuzde"] == sonuc["celik_kg_kapisi"]["fark_yuzde"] == 0.93
+    assert mt["kapi_disi"] == ["c_profil"] and mt["yontem"]["kod"] == "omega_asik"
+    assert k["kaynak"]["tur"] == "proje" and k["kaynak"]["proje"] == "ÇP-14" and k["kaynak_degerleri"]["brut_m2"]["deger"] == 120
+    turler = {r["tur"]: r for r in mt["turler"]}
+    assert set(turler) >= {"duvar_paneli", "kolon_kiris", "makas", "cati_paneli"} and turler["makas"]["gercek_adet"] == 26
+    bizim = json.loads((KOK / "testler" / "celik" / "projeler" / "CP14" / "bizim_liste.json").read_text(encoding="utf-8"))
+    assert k["pim"]["kural_seti"]["yol"] == bizim["kural_seti"]["kopya"] and k["pim"]["karkas"]["yol"] == bizim["karkas_kurali"]["kopya"]
+    assert k["son_cizim"]["pim"] == k["pim"]                                                            # çizim ölçümdeki kural setiyle
+
+
+def test_hakem_olcumu_tanim_farkini_ve_gecmeyen_kapiyi_yakalar(hakemli):
+    t = dict(hakemli["tanim"], lento=hakemli["tanim"]["lento"] + 5)
+    assert A.celik_olcumu("ÇP-14", t)[0] is None and "farklı" in A.celik_olcumu("ÇP-14", t)[1]
+    olculen = json.loads((KOK / "testler" / "celik" / "projeler" / "CP06" / "bizim_liste.json").read_text(encoding="utf-8"))["tanim"]["yol"]
+    t06 = dict(json.loads((KOK / olculen).read_text(encoding="utf-8")), kod="KT98", ad="x")             # hedef örneğin karkas kurallı tanımı
+    o, sorun = A.celik_olcumu("ÇP-06", t06)
+    assert sorun is None and o["metraj_testi"]["durum"] == "beklemede" and o["metraj_testi"]["hakem_sonucu"] == "geçmedi"   # −%12,83
+
+
+def test_hakemli_kontrol_sayfasi(hakemli):
+    import pymupdf
+    pdf = Path(kart99(hakemli)["son_cizim"]["kontrol_pdf"])
+    with pymupdf.open(pdf if pdf.is_absolute() else KOK / pdf) as d:
+        metin = " ".join(d[0].get_text().split())
+    for s in ("KT-99", "gerçek proje ÇP-14", "çelik hakemi", "+%0,93", "Duvar paneli", "+%6,3", "Kolon-kiriş paneli", "−%14,9", "Makas",
+              "birbirini götürüyor", "panel"):
+        assert s in metin, s
+    assert "%-" not in metin                                                                             # işaret yüzde imisinden önce
+
+
+def test_hakemli_kabul_pim_ve_kontrol(hakemli, tmp_path):
+    import shutil
+    banka = hakemli["banka"]
+    # beklemede ya da pimden başka setle çizilmiş kart kabul edilmez (gerçek bankanın kopyasında)
+    kopya = tmp_path / "modeller" / "banka"
+    shutil.copytree(banka, kopya)
+    (tmp_path / "is_emri").mkdir()
+    k = kart99(hakemli)
+    for degisik in ({**k, "durum": "beklemede", "metraj_testi": {**k["metraj_testi"], "durum": "beklemede"}},
+                    {**k, "son_cizim": {**k["son_cizim"], "pim": None}}):
+        (kopya / "KT99" / "kart.json").write_text(json.dumps(degisik, ensure_ascii=False), encoding="utf-8")
+        assert kos(kopya, "kabul", "KT99", "--kapisiz", "--izsiz") == 2
+    assert kos(banka, "kabul", "KT99", "--kapisiz", "--izsiz", "--tarih", "2026-10-29") == 0
+    k = kart99(hakemli)
+    assert k["durum"] == "kabul" and k["kabul"]["metraj_kapisi"] == "gecti" and k["kabul"]["metraj_proje"] == "ÇP-14"
+    assert "çelik hakemi, ÇP-14" in k["aday"]["kaynak"]["dogrulama"] and k["aday"]["musteri_projesi"] is True and k["aday"]["sunum"]["ad"] == ""
+    kontrol = json.loads((banka / "KT99" / "kontrol.json").read_text(encoding="utf-8"))
+    assert kontrol["kural_seti"] == k["pim"]["kural_seti"]["yol"] and kontrol["karkas_kurali"] == k["pim"]["karkas"]["yol"]
+    assert B.denetle(banka) == [] and kos(banka, "kontrol", "KT99") == 0

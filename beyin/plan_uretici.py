@@ -29,14 +29,9 @@ YOL_ADI = {"uyarlama": "bankadaki bir modelden uyarlandı", "cozucu": "programda
 
 @lru_cache(maxsize=1)
 def _banka() -> tuple[dict, ...]:
-    """Bankadaki çelik adaylar, çatı varyantları ayıklanmış (aynı plan): {kod, katalog_m2, oda_programi, odalar, plan}. Kod iç kayıttır.
-    İE-09 (D-20): çekirdek bankanın (adaylar.json) ardından atölyede kabul edilen modeller (`beyin/banka.py`); atölyenin çatı varyantı
-    (`taban_model`) taban modelle aynı plan olduğu için girmez."""
-    from beyin import banka
+    """Bankadaki çelik adaylar, çatı varyantları ayıklanmış (aynı plan): {kod, katalog_m2, oda_programi, odalar, plan}. Kod iç kayıttır."""
     adaylar = json.loads(ADAYLAR.read_text(encoding="utf-8"))
     varyant = {v for a in adaylar for v in (a.get("varyantlar") or [])}
-    kodlar = {a["kod"] for a in adaylar}
-    adaylar += [a for a in banka.kayitlar() if not a.get("taban_model") and a["kod"] not in kodlar]
     out = []
     for a in adaylar:
         if a.get("motor") != "genel" or a.get("durum") == "test" or a["kod"] in varyant:

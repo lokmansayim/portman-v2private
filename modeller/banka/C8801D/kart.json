@@ -73,7 +73,7 @@
    "kaynak": "bankada Ç8801 kaydı (koddan; adaylar.json)"
   }
  },
- "durum": "kontrolde",
+ "durum": "ret",
  "metraj_testi": {
   "durum": "yok",
   "not": "referans yok: gerçek yükleme listesi (Excel) yok; metraj kapısı koşulmadı (kabul metraj doğrulaması sayılmaz)"
@@ -265,6 +265,11 @@
    "no": 2,
    "durum": "kontrolde",
    "passed": true
+  },
+  {
+   "zaman": "2026-10-30T02:05+0300",
+   "olay": "ret",
+   "neden": "Patron'a sunulmadı, kabul düştü (CIO 27 Ekim 2026 21:57; İE-09 PR-1): çatı varyantı (bugünkü çatı setinde bayiye ayrı sunulmaz) ve 17 Ekim'in eski çelik hesabıyla çizildi (İE-16 karkas kuralından önce); tanımı atölye testlerinin varyant girdisi olarak kalır, silinmedi"
   }
  ],
  "kabul": null,

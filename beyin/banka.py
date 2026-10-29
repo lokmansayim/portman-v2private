@@ -4,13 +4,13 @@
 `tanim.json` (Yapı Tanımı 0.5), `kart.json` (`portman.model_karti/0.1`; `araclar/atolye.py` yazar), `kontrol.json` (modelin kontrol
 dosyası) ve `kart.png` (aday kartı görseli). Referans girdi kalıpları (`modeller/*.json`) alt klasöre inmez: yeni model referansı değiştirmez.
 
-Okuyanlar: `beyin.katalog.Katalog` (adaylar.json'un ardından), `plan_uretici._banka` (İE-14 uyarlaması), `araclar/aday_kabul.py` (K-A10,
-sunucuda aynı betik) ve `araclar/kabul_paketi.py`. Canlı yolda hata fırlatılmaz: geçersiz kart (tanım yok, özet tutmuyor, kod çakışıyor)
+Okuyanlar: `beyin.katalog.Katalog` (adaylar.json'un ardından), `araclar/aday_kabul.py` (K-A10, sunucuda aynı betik) ve
+`araclar/kabul_paketi.py`. İE-14 uyarlaması (`plan_uretici._banka`) atölye bankasını okumaz (İE-09 PR-1, CIO 29 Ekim 2026: sunum yalnız Katalog'dan). Canlı yolda hata fırlatılmaz: geçersiz kart (tanım yok, özet tutmuyor, kod çakışıyor)
 alınmaz; `denetle()` bunları sayar, atölye ve `testler/genel/test_banka.py` boş liste bekler.
 
 Görünürlük (K-A10, D-20): atölye modeli bayiye yalnız kabul kaydı açıkça verilmişse sunulur; kabul kümesi verilmeyen Katalog'da (harness,
-yerel testler) görünmez. Çatı varyantı (`taban_model` dolu) bayiye ayrı model olarak sunulmaz ve İE-14 uyarlamasına girmez (taban modelle
-aynı plan): çatı setine girmesi ayrı iştir (bugünkü set katalog çatısı, K, L; WhatsApp'ta üç düğme)."""
+yerel testler) görünmez. Çatı varyantı (`taban_model` dolu) bayiye ayrı model olarak sunulmaz (taban modelle aynı plan): çatı setine
+girmesi ayrı iştir (bugünkü set katalog çatısı, K, L; WhatsApp'ta üç düğme)."""
 from __future__ import annotations
 
 import hashlib

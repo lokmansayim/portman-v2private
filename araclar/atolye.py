@@ -1,14 +1,14 @@
 """İE-09 · Model atölyesi (D-20; Görev 6e): kontrollü model üretimi ve banka hattı. Tarif `.claude/skills/atolye/SKILL.md`, iş emri
 `docs/is_emirleri/IE-09.md`. Araç canlı yola girmez, genel motoru yalnız çağırır; LLM yok.
 
-    python3 araclar/atolye.py ac <KOD> --ad "…" [--aile "tek kat çelik"] [--kat 1] [--kaynak-metni "…"] [--proje AP-NN]
+    python3 araclar/atolye.py ac <KOD> --ad "…" [--aile "tek kat çelik"] [--kat 1] [--kaynak-metni "…"] [--proje AP-NN|ÇP-NN]
                               [--kaynak-dosya <yol>[=etiket] …] [--musteri-projesi] [--tanim <Yapı Tanımı>]
     python3 araclar/atolye.py varyant <KOD> --taban Ç8801 --cati <çatı.json> --ad "…" [--kaynak-metni "…"]
     python3 araclar/atolye.py kaynak <KOD> --kaynagi "…" [--oda "AD=m²" …] [--brut-m2 N] [--oda-programi 2+1] [--pencere N] [--kapi N]
-                              [--cati-tipi T]
+                              [--cati-tipi T] [--proje AP-NN|ÇP-NN]
     python3 araclar/atolye.py ciz <KOD> [--cikti <klasör>]
     python3 araclar/atolye.py duzelt <KOD> --tur okuma|tercih|kural|motor --metin "…"
-    python3 araclar/atolye.py metraj <KOD> --excel <yol> (--hucre "Sayfa!F12" | --kg N) [--proje AP-NN]
+    python3 araclar/atolye.py metraj <KOD> --celik ÇP-NN
     python3 araclar/atolye.py kabul <KOD> [--kim Lokman] [--tarih YYYY-AA-GG] [--not "…"]
     python3 araclar/atolye.py ret <KOD> --neden "…"
     python3 araclar/atolye.py gunluk [--tarih YYYY-AA-GG]
@@ -20,8 +20,11 @@ Durum: `taslak` → (`ciz`) `kontrolde` → `kabul` ya da `ret`. Metraj kabul te
 olmalı). Kabul edilen tanım donar (D-07): değişirse `kontrol` düşer, yeni kod ya da sürüm gerekir.
 
 Kurallar (İE-09; CIO kıyası 16.10, Patron onaylı):
-- **Metraj kabul testi:** gerçek yükleme listesi (Excel) olan modelde çelik kg farkı ±%3'ü aşarsa model `beklemede`. Listesi olmayan
-  modelin kartında "metraj testi yok" yazar.
+- **Metraj kabul testi:** gerçek yükleme listesi olan modelde çelik kg farkı ±%3'ü aşarsa model `beklemede`. Listesi olmayan
+  modelin kartında "metraj testi yok" yazar. İE-09 PR-1'den (29 Ekim 2026) beri kapı tek koddan (D-28 madde 1, Z-03): atölye listeyi
+  kendisi okumaz, çelik hakeminin (İE-16, `testler/celik/`) o projede yazdığı sonucu okur (`metraj --celik`). Bankadaki tanım hakemin
+  ölçtüğü tanımla (kod ve ad dışında), kural seti ve karkas kuralı ölçümdekiyle aynı olmalı; açık projede kapı hakemin kendi
+  işlevleriyle yeniden hesaplanır ve tür tür tablo kontrol sayfasına girer. Model o ölçümdeki kural setiyle çizilir ve pimlenir.
 - **Kör test seti açılmaz:** AIPrefabrik'te yükleme listesi hiç açılmamış 20 proje (Mimari Rapor › 1.4) kaynak ya da kıyas olarak alınmaz.
   Açılmış listeler `KOR_TEST_ACIK`; AIPrefabrik'in bunun dışındaki her liste dosyası reddedilir (proje kodu okunamazsa da).
 - **Kaynak dosyalar depoya girmez:** karta yalnız etiket (sizin yazdığınız, kişi adı taşımayan), uzantı, boyut ve SHA-256 yazılır.
@@ -55,8 +58,13 @@ from beyin import banka as B  # noqa: E402
 DURUMLAR = ("taslak", "kontrolde", "beklemede", "kabul", "ret")
 DUZELTME_TURLERI = {"okuma": "kaynağı yanlış ya da eksik okudum", "tercih": "Lokman'ın kararı (çatı, ölçü, açıklık)",
                     "kural": "kural kitabında eksik ya da yanlış", "motor": "çizim ya da hesap kusuru (kusur defterine de)"}
-METRAJ_YOK = "referans yok: gerçek yükleme listesi (Excel) yok; metraj kapısı koşulmadı (kabul metraj doğrulaması sayılmaz)"
-METRAJ_ESIGI_YUZDE = 3.0            # Patron onaylı (Portman_Arastirma_Yol_Haritasi_2026-10-16.md › 3; CIO kıyası 16.10)
+METRAJ_YOK = "referans yok: modelin çelik hakemi ölçümü yok; metraj kapısı koşulmadı (kabul metraj doğrulaması sayılmaz)"
+METRAJ_ESIGI_YUZDE = 3.0            # Patron onaylı (Portman_Arastirma_Yol_Haritasi_2026-10-16.md › 3; CIO kıyası 16.10); hakemde KG_PAYI
+CELIK_PROJELER = KOK / "testler" / "celik" / "projeler"             # çelik hakeminin projeleri (İE-16; yalnız okunur)
+CELIK_CEVAPLAR = KOK / "testler" / "celik" / "veri"                 # açık projelerin hakem cevapları (İE-16 PR-1; yalnız okunur)
+CELIK_GRUBU = "Çelik panel"                                          # motorun yükleme listesindeki çelik grubu (motor/genel/yukleme.py)
+TOPLAM_SATIRI = "Toplam (adedi ve kg'ı bilinenler)"                  # motorun çelik grubundaki sağlama satırı (motor/genel/yukleme.py)
+TANIM_ESLIK_DISI = ("kod", "ad")                                     # bankadaki tanım hakemin ölçtüğü tanımdan yalnız bunlarda ayrılır
 # Mimari Rapor › 1.4 (14 Ekim): 28 AIPrefabrik projesinden yükleme listesi açılmış olanlar (AP-19 = PK-01, AP-08 = PK-07, AP-07 = TS-01,
 # AP-01…05 = E1–E5). Geri kalan 20'si kör test setidir: açılmaz.
 KOR_TEST_ACIK = frozenset({"AP-01", "AP-02", "AP-03", "AP-04", "AP-05", "AP-07", "AP-08", "AP-19"})
@@ -96,8 +104,8 @@ def kod_normalize(s: str) -> str:
 
 
 def gosterim(kod: str) -> str:
-    """Ç8801D → Ç8801-D (adaylar.json'daki varyant gösterimi gibi); başka kod olduğu gibi."""
-    m = re.fullmatch(r"(Ç\d{4})([A-Z])", kod)
+    """Ç8801D → Ç8801-D, KT04 → KT-04 (adaylar.json'daki gösterim gibi); başka kod olduğu gibi."""
+    m = re.fullmatch(r"(Ç\d{4})([A-Z])", kod) or re.fullmatch(r"(KT)(\d{2})", kod)
     return f"{m.group(1)}-{m.group(2)}" if m else kod
 
 
@@ -136,6 +144,12 @@ def olay(kart: dict, ad: str, **ayrinti) -> None:
 def proje_kodu(metin: str | None) -> str | None:
     m = re.search(r"\bAP[\s_-]?(\d{1,2})\b", str(metin or ""), re.IGNORECASE)
     return f"AP-{int(m.group(1)):02d}" if m else None
+
+
+def kaynak_proje_kodu(metin: str | None) -> str | None:
+    """Kartın kaynak projesi: AIPrefabrik (AP-NN) ya da çelik hattı (ÇP-NN, İE-16). Kör test engeli yalnız AP'ye bakar (`proje_kodu`)."""
+    m = re.search(r"(?<![a-zç])[ÇC]P[\s_-]?(\d{1,2})\b", str(metin or ""), re.IGNORECASE)
+    return proje_kodu(metin) or (f"ÇP-{int(m.group(1)):02d}" if m else None)
 
 
 def kor_test_engeli(yol: Path, proje: str | None = None) -> str | None:
@@ -189,21 +203,26 @@ def plan_izi(t: dict) -> str:
 
 # ── ölçüm (hızlı yol: yapı, çatı, metraj, liste; çizim yok) ──────────────────────────────────────────────────────────────
 def liste_ozeti(liste: dict) -> dict:
+    """Grup grup satır ve kg; çelik kg yalnız "Çelik panel" grubunun malzeme satırları. Motorun grup sağlaması (`TOPLAM_SATIRI`) malzeme
+    değildir, sayılmaz (İE-09 PR-1: 17 Ekim'deki özet onu da topluyordu, Ç8801-D'nin "4990,5 kg"ı 2 × 2495,25'ti)."""
     gruplar: dict[str, dict] = {}
     for s in liste.get("satirlar") or []:
         g = gruplar.setdefault(s.get("grup") or "?", {"satir": 0, "kg": 0.0})
         g["satir"] += 1
-        g["kg"] += float(s.get("kg") or 0)
-    celik = round(sum(float(s.get("kg") or 0) for s in liste.get("satirlar") or []), 2)
+        if s.get("kalem") != TOPLAM_SATIRI:
+            g["kg"] += float(s.get("kg") or 0)
+    celik = round((gruplar.get(CELIK_GRUBU) or {}).get("kg", 0.0), 2)
     return {"satir": len(liste.get("satirlar") or []), "celik_kg": celik, "iz": kanonik_sha(liste),
             "gruplar": {k: {"satir": v["satir"], "kg": round(v["kg"], 2)} for k, v in gruplar.items()}}
 
 
-def olc(t: dict, set_yolu: Path | None = None, liste: dict | None = None) -> dict:
-    """Tanımın ölçümü: dış ölçü, brüt oturum, odalar, açıklıklar, çatı; liste verilmezse yalnız-liste koşusuyla (≈ 1 sn)."""
+def olc(t: dict, set_yolu: Path | None = None, liste: dict | None = None, karkas_yolu: Path | None = None) -> dict:
+    """Tanımın ölçümü: dış ölçü, brüt oturum, odalar, açıklıklar, çatı; liste verilmezse yalnız-liste koşusuyla (≈ 1 sn). `karkas_yolu`
+    karkas kuralının dosyası (yalnız tanım `karkas: kural` isterse okunur; verilmezse güncel kural)."""
     from motor.genel import yapi, cati_genel, kural, girdi_genel
+    from motor.genel import uret as U
     from motor.genel.bayi_gorseli import oda_programi
-    with kural.secili(set_yolu):
+    with kural.secili(set_yolu), U.karkas_kurali(karkas_yolu):
         kur = kural.oku()
         y = yapi.kur(t)
         c = cati_genel.cati_kur(t["cati"], kur)
@@ -213,10 +232,9 @@ def olc(t: dict, set_yolu: Path | None = None, liste: dict | None = None) -> dic
         with tempfile.TemporaryDirectory() as tmp:
             tp = Path(tmp) / "tanim.json"
             tp.write_text(json.dumps(t, ensure_ascii=False), encoding="utf-8")
-            from motor.genel import uret as U
             with contextlib.redirect_stdout(sys.stderr):
                 U.uret(tp, Path(tmp) / "c", set_yolu=set_yolu, yontem="panel", perspektif=False, bayi=False, yalniz_liste=True,
-                       kaynak=f"Yapı Tanımı 0.5 ({t['kod']})")
+                       kaynak=f"Yapı Tanımı 0.5 ({t['kod']})", karkas_yolu=karkas_yolu)
             lp = Path(tmp) / "c" / f"{U.kod_govde(t)}_yukleme.json"
             liste = json.loads(lp.read_text(encoding="utf-8")) if lp.exists() else {"satirlar": []}
     acl = y["acikliklar"]
@@ -237,8 +255,16 @@ def _yeni_kart(kod: str, ad: str, aile: str, kat: int, kaynak: dict, musteri: bo
     return {"sema": B.KART_SEMASI, "kod": kod, "gosterim": gosterim(kod), "ad": ad, "aile": aile, "yapi_turu": "celik", "kat": kat,
             "musteri_projesi": musteri, "taban_model": taban, "varyant_turu": "cati" if taban else None, "varyantlar": [],
             "kaynak": kaynak, "kaynak_degerleri": {}, "durum": "taslak",
-            "metraj_testi": {"durum": "yok", "not": METRAJ_YOK}, "olcum": None, "son_cizim": None,
+            "metraj_testi": {"durum": "yok", "not": METRAJ_YOK}, "pim": None, "olcum": None, "son_cizim": None,
             "duzeltmeler": [], "gecmis": [], "kabul": None, "aday": None}
+
+
+def pim_yollari(kart: dict) -> tuple[Path | None, Path | None]:
+    """Kartın kural seti ve karkas kuralı pimi (metraj kapısının ölçüldüğü kopyalar; `metraj --celik` yazar): (set, karkas); pimsiz
+    kartta (None, None): çizim güncel kuralla, kontrol dosyası dondurulmuş setlerin en yenisiyle (`pim_seti`)."""
+    p = kart.get("pim") or {}
+    yol = lambda x: KOK / x["yol"] if x else None                        # noqa: E731
+    return yol(p.get("kural_seti")), yol(p.get("karkas"))
 
 
 def _kod_serbest(kod: str, banka_kok: Path) -> str | None:
@@ -270,7 +296,7 @@ def ac(a) -> int:
         if kod_normalize(str(t.get("kod"))) != kod:
             return dur(f"tanımın kodu {t.get('kod')!r}, kart {kod}")
     kart = _yeni_kart(kod, a.ad, a.aile, a.kat, {"tur": "proje" if a.proje or dosyalar else "istek", "metin": a.kaynak_metni,
-                                                 "proje": proje_kodu(a.proje), "dosyalar": dosyalar}, bool(a.musteri_projesi))
+                                                 "proje": kaynak_proje_kodu(a.proje), "dosyalar": dosyalar}, bool(a.musteri_projesi))
     olay(kart, "ac", kaynak=a.kaynak_metni)
     kart_yaz(kart, a.banka)
     if t is not None:
@@ -323,6 +349,10 @@ def kaynak(a) -> int:
         return dur("kart yok")
     if kart["durum"] in ("kabul", "ret"):
         return dur(f"kart {kart['durum']}; değişmez")
+    if a.proje is not None:
+        if not (pk := kaynak_proje_kodu(a.proje)):
+            return dur(f"proje kodu okunamadı: {a.proje!r} (AP-NN ya da ÇP-NN)")
+        kart["kaynak"] = {**(kart.get("kaynak") or {}), "tur": "proje", "proje": pk}
     kd = kart.setdefault("kaynak_degerleri", {})
     for s in a.oda or []:
         ad, _, m2 = s.partition("=")
@@ -330,7 +360,7 @@ def kaynak(a) -> int:
     for alan, v in (("brut_m2", a.brut_m2), ("oda_programi", a.oda_programi), ("pencere", a.pencere), ("kapi", a.kapi), ("cati_tipi", a.cati_tipi)):
         if v is not None:
             kd[alan] = {"deger": v, "kaynak": a.kaynagi}
-    olay(kart, "kaynak", kaynak=a.kaynagi)
+    olay(kart, "kaynak", kaynak=a.kaynagi, proje=kaynak_proje_kodu(a.proje))
     kart_yaz(kart, a.banka)
     print(f"{kart['gosterim']}: kaynak değerleri yazıldı ({a.kaynagi})")
     return 0
@@ -423,15 +453,9 @@ def denetimler(kart: dict, t: dict, m: dict, v: dict, olcum: dict, yazi: list[st
 
 
 def metraj_hesapla(kart: dict, olcum: dict) -> None:
-    mt = kart.get("metraj_testi") or {}
-    if mt.get("gercek_kg") is None:
+    """Metraj kapısı çizimden değil, çelik hakeminin ölçümünden gelir (`metraj --celik`); ölçümü olmayan kartta "yok"."""
+    if (kart.get("metraj_testi") or {}).get("kaynak") != "celik_hakemi":
         kart["metraj_testi"] = {"durum": "yok", "not": METRAJ_YOK}
-        return
-    bizim = float(olcum["liste"]["celik_kg"]); gercek = float(mt["gercek_kg"])
-    fark = round((bizim - gercek) / gercek * 100, 2) if gercek else None
-    mt.update(bizim_kg=round(bizim, 2), fark_yuzde=fark, esik_yuzde=METRAJ_ESIGI_YUZDE, liste_kural_seti=olcum["kural_seti"],
-              durum="gecti" if fark is not None and abs(fark) <= METRAJ_ESIGI_YUZDE else "beklemede")
-    kart["metraj_testi"] = mt
 
 
 def ciz(a) -> int:
@@ -451,13 +475,16 @@ def ciz(a) -> int:
     hedef = Path(a.cikti) / B.dosya_adi(kod) / f"c{no:02d}"
     if hedef.exists() and any(hedef.iterdir()):
         return dur(f"çıktı klasörü dolu: {hedef}")
+    if (e := _pim_denetle(kart)):
+        return dur(e)
+    set_yolu, karkas_yolu = pim_yollari(kart)
     rapor: dict = {}
     with yazi_denetimi(rapor), contextlib.redirect_stdout(sys.stderr):
-        m = U.uret(tp, hedef, is_emri_no=None, revizyon=None, set_yolu=None, yontem="panel", perspektif=a.perspektif, bayi=True,
-                   kaynak=f"Yapı Tanımı 0.5 ({gk}; İE-09 atölyesi)")
+        m = U.uret(tp, hedef, is_emri_no=None, revizyon=None, set_yolu=set_yolu, yontem="panel", perspektif=a.perspektif, bayi=True,
+                   kaynak=f"Yapı Tanımı 0.5 ({gk}; İE-09 atölyesi)", karkas_yolu=karkas_yolu)
     v = json.loads((hedef / "validation.json").read_text(encoding="utf-8"))
     liste = json.loads((hedef / f"{gk}_yukleme.json").read_text(encoding="utf-8")) if (hedef / f"{gk}_yukleme.json").exists() else {"satirlar": []}
-    olcum = olc(t, None, liste)
+    olcum = olc(t, set_yolu, liste, karkas_yolu)
     ozet_p = hedef / f"{gk}_pafta_ozet.json"
     kisa = (json.loads(ozet_p.read_text(encoding="utf-8")).get("kontrol_notlari") or []) if ozet_p.exists() else []
     dn = denetimler(kart, t, m, v, olcum, _yazi_bulgulari(rapor, gk), kisa, a.banka)
@@ -466,7 +493,8 @@ def ciz(a) -> int:
     kart["brut_m2"], kart["oda_programi"] = olcum["oturum_m2"], olcum["oda_programi"]
     kart["cati_tipi"] = t["cati"].get("tip")
     kart["cati_adi"] = cati_adi(t)
-    kart["son_cizim"] = {"no": no, "zaman": simdi(), "tanim_sha256": sha256(tp), "kural_seti": olcum["kural_seti"], "passed": bool(m.get("passed")),
+    kart["son_cizim"] = {"no": no, "zaman": simdi(), "tanim_sha256": sha256(tp), "kural_seti": olcum["kural_seti"], "pim": kart.get("pim"),
+                         "passed": bool(m.get("passed")),
                          "cikti": _goreli(hedef), "denetimler": dn, "sure_s": v.get("sure_s"), "perspektif": (v.get("perspektif") or {}).get("durum")}
     kart["durum"] = "beklemede" if kart["metraj_testi"]["durum"] == "beklemede" else "kontrolde"
     from araclar import atolye_sayfa
@@ -526,42 +554,113 @@ def kusur_yaz(kart: dict, metin: str) -> None:
         f.write(f"| {bugun()} | {kart['gosterim']} | {'c%02d' % no if no else '-'} | {metin.replace('|', '/')} | açık |\n")
 
 
+def _git(*args) -> str:
+    r = subprocess.run(["git", *args], cwd=str(KOK), capture_output=True, text=True)
+    return r.stdout.strip() if r.returncode == 0 else ""
+
+
+def _sadelestir(t: dict) -> dict:
+    return {k: v for k, v in t.items() if k not in TANIM_ESLIK_DISI}
+
+
+def _pim_kaydi(kayit: dict | None, ne: str) -> tuple[dict | None, str | None]:
+    """Hakemin listesindeki kural kaydından pim ({yol, sha256}; içerik adresli kopya): (pim, sorun)."""
+    if not kayit:
+        return None, None
+    kopya = KOK / str(kayit.get("kopya") or "")
+    if not kayit.get("kopya") or not kopya.is_file() or sha256(kopya) != kayit.get("sha256"):
+        return None, f"{ne} kopyası yok ya da özeti tutmuyor ({kayit.get('kopya')})"
+    return {"yol": kopya.relative_to(KOK).as_posix(), "sha256": kayit["sha256"], "sema": kayit.get("sema")}, None
+
+
+def _pim_denetle(kart: dict) -> str | None:
+    for ne, x in (("kural seti", (kart.get("pim") or {}).get("kural_seti")), ("karkas kuralı", (kart.get("pim") or {}).get("karkas"))):
+        if x and (not (KOK / x["yol"]).is_file() or sha256(KOK / x["yol"]) != x["sha256"]):
+            return f"pimdeki {ne} yok ya da değişti ({x['yol']})"
+    return None
+
+
+def celik_olcumu(proje: str, t: dict) -> tuple[dict | None, str | None]:
+    """Çelik hakeminin `proje`deki ölçümü bu tanım için geçerli mi; geçerliyse kartın metraj testi ve pimi: (kayıt, sorun).
+
+    Hakem yalnız okunur (Z-03): kendi listemiz (`bizim_liste.json`), hakemin sonucu (`sonuc.json`; `kiyas --sonuc-yaz` yazar) ve açık
+    projede hakemin cevabı (`veri/<CPnn>_hakem_cevabi.json`). Açılan projede yeniden ölçüm klasörü (`acik/`) önceliklidir (İE-16 PR-6a)."""
+    from testler.celik import kiyas
+    kok = CELIK_PROJELER / kiyas.kod_klasoru(proje)
+    klasor_ = kok / kiyas.YENIDEN if (kok / kiyas.YENIDEN / "sonuc.json").is_file() else kok
+    bl, sp = klasor_ / "bizim_liste.json", klasor_ / "sonuc.json"
+    if not bl.is_file() or not sp.is_file():
+        return None, f"{proje}: hakemin listesi ya da sonucu yok ({klasor_.relative_to(KOK).as_posix()})"
+    bizim, sonuc = json.loads(bl.read_text(encoding="utf-8")), json.loads(sp.read_text(encoding="utf-8"))
+    if bizim.get("kod") != proje or sonuc.get("kod") != proje:
+        return None, f"{proje}: listenin ya da sonucun kodu farklı"
+    # 1. ölçülen tanım bu tanım mı (kod ve ad dışında)
+    tk = KOK / str((bizim.get("tanim") or {}).get("yol") or "")
+    if not tk.is_file() or sha256(tk) != (bizim.get("tanim") or {}).get("sha256"):
+        return None, f"{proje}: hakemin listesi bugünkü tanımdan üretilmemiş (liste yeniden üretilmeli)"
+    if _sadelestir(json.loads(tk.read_text(encoding="utf-8"))) != _sadelestir(t):
+        return None, f"{proje}: bankadaki tanım hakemin ölçtüğü tanımdan farklı (yalnız {', '.join(TANIM_ESLIK_DISI)} ayrılabilir)"
+    # 2. sonuç bu listenin sonucu mu (liste, sonucun yazıldığı commit'ten beri değişmedi)
+    lc = (sonuc.get("bizim_liste") or {}).get("commit")
+    yol = bl.relative_to(KOK).as_posix()
+    if (sonuc.get("bizim_liste") or {}).get("yol") != yol or not lc or _git("rev-parse", f"{lc}:{yol}") != _git("hash-object", yol):
+        return None, f"{proje}: hakemin sonucu bugünkü listenin sonucu değil (liste sonuçtan sonra değişmiş ya da commit yok)"
+    # 3. pim: ölçümdeki kural seti ve karkas kuralı
+    ks, s1 = _pim_kaydi(bizim.get("kural_seti"), "kural seti")
+    kk, s2 = _pim_kaydi(bizim.get("karkas_kurali"), "karkas kuralı")
+    if s1 or s2 or ks is None:
+        return None, f"{proje}: {s1 or s2 or 'kural seti kaydı yok'}"
+    kapi = sonuc.get("celik_kg_kapisi") or {}
+    # 4. açık projede kapı hakemin işlevleriyle yeniden hesaplanır; tür tür tablo
+    turler, cevap_yolu = None, CELIK_CEVAPLAR / f"{kiyas.kod_klasoru(proje)}_hakem_cevabi.json"
+    if (sonuc.get("muhur") or {}).get("durum") == "acik" and cevap_yolu.is_file():
+        cv = json.loads(cevap_yolu.read_text(encoding="utf-8"))
+        if cv.get("liste_sha256") != (sonuc.get("muhur") or {}).get("sha256"):
+            return None, f"{proje}: hakemin cevabı sonuçtaki listeyle aynı liste değil"
+        gercek = {**cv["celik"], "kgsiz_turler": sorted({s["tur"] for s in cv["celik"]["satirlar"] if s["kg"] is None})}   # oku.turler gibi
+        bc = kiyas.bizim_celik(bizim["satirlar"])
+        yeni = kiyas.kapi(bc, gercek)
+        if yeni["sonuc"] != kapi.get("sonuc") or (kapi.get("fark_yuzde") is not None and yeni.get("fark_yuzde") != kapi["fark_yuzde"]):
+            return None, f"{proje}: hakemin sonucu yeniden hesaplanan kapıyla tutmuyor ({kapi.get('sonuc')} ↔ {yeni['sonuc']})"
+        turler = [{k: r[k] for k in ("tur", "ad", "harf", "bizim_adet", "gercek_adet", "bizim_kg", "gercek_kg")}
+                  for r in kiyas.celik_tablosu(gercek, bc, None)]
+        kapi = {**kapi, "fark_yuzde": yeni.get("fark_yuzde"), "bizim_kapi_kg": yeni.get("bizim_kapi_kg"), "gercek_kapi_kg": yeni.get("gercek_kapi_kg")}
+    durum = {"geçti": "gecti", "geçmedi": "beklemede"}.get(kapi.get("sonuc"), "beklemede")
+    kayit = {"durum": durum, "kaynak": "celik_hakemi", "proje": proje, "hakem_sonucu": kapi.get("sonuc"),
+             "neden": None if durum == "gecti" else (kapi.get("neden") or "çelik kg farkı ±%3'ü aşıyor"),
+             "fark_yuzde": kapi.get("fark_yuzde"), "esik_yuzde": kapi.get("pay_yuzde") or METRAJ_ESIGI_YUZDE,
+             "kapi_disi": kapi.get("kapi_disi") or [], "bizim_kapi_kg": kapi.get("bizim_kapi_kg"), "gercek_kapi_kg": kapi.get("gercek_kapi_kg"),
+             "turler": turler, "muhur_durumu": (sonuc.get("muhur") or {}).get("durum"), "liste_sha256": (sonuc.get("muhur") or {}).get("sha256"),
+             "sonuc": sp.relative_to(KOK).as_posix(), "sonuc_tarihi": sonuc.get("tarih"), "kiyas_commit": sonuc.get("kiyas_commit"),
+             "bizim_liste_commit": lc, "yontem": bizim.get("yontem"), "zaman": simdi()}
+    return {"metraj_testi": {k: v for k, v in kayit.items() if v is not None}, "pim": {"kural_seti": ks, "karkas": kk}}, None
+
+
 def metraj(a) -> int:
     kart = kart_oku(kod_normalize(a.kod), a.banka)
     if kart is None:
         return dur("kart yok")
     if kart["durum"] in ("kabul", "ret"):
         return dur(f"kart {kart['durum']}")
-    yol = Path(a.excel).expanduser()
-    if (e := kor_test_engeli(yol, a.proje or (kart.get("kaynak") or {}).get("proje"))):
-        return dur(e)
-    if not yol.is_file():
-        return dur(f"Excel yok: {yol.name}")
-    if (a.hucre is None) == (a.kg is None):
-        return dur("--hucre ya da --kg (biri)")
-    if a.hucre:
-        import openpyxl
-        sayfa, _, hucre = a.hucre.rpartition("!")
-        wb = openpyxl.load_workbook(yol, data_only=True, read_only=True)
-        ws = wb[sayfa] if sayfa else wb.worksheets[0]
-        deger = ws[hucre].value
-        wb.close()
-        if not isinstance(deger, (int, float)):
-            return dur(f"{a.hucre} sayı değil: {type(deger).__name__}")
-        gercek, kaynagi = float(deger), f"Excel hücresi {a.hucre} (koddan, openpyxl)"
-    else:
-        gercek, kaynagi = float(a.kg), "elle (Excel'den okunan değer; kaynağıyla kontrol sayfasında)"
-    kart["metraj_testi"] = {"durum": "hesaplanmadi", "gercek_kg": round(gercek, 2), "gercek_kaynak": kaynagi,
-                            "excel": {"etiket": a.etiket, "uzanti": yol.suffix.lower(), "sha256": sha256(yol)}, "zaman": simdi()}
-    if kart.get("olcum"):
-        metraj_hesapla(kart, kart["olcum"])
-        if kart["durum"] in ("kontrolde", "beklemede"):
-            kart["durum"] = "beklemede" if kart["metraj_testi"]["durum"] == "beklemede" else "kontrolde"
-    olay(kart, "metraj", durum=kart["metraj_testi"]["durum"], fark_yuzde=kart["metraj_testi"].get("fark_yuzde"))
-    kart_yaz(kart, a.banka)
+    tp = tanim_yolu(kart["kod"], a.banka)
+    if not tp.is_file():
+        return dur("tanim.json yok")
+    sonuc, sorun = celik_olcumu(a.celik.strip(), json.loads(tp.read_text(encoding="utf-8")))
+    if sorun:
+        return dur(sorun)
+    pim_degisti = kart.get("son_cizim") is not None and (kart["son_cizim"].get("pim") != sonuc["pim"])
+    kart.update(sonuc)
+    if pim_degisti:
+        kart["durum"] = "taslak"                                          # çizim başka kural setiyle: kabul edilen çizim pimle çizilmeli
+    elif kart["durum"] in ("kontrolde", "beklemede"):
+        kart["durum"] = "beklemede" if kart["metraj_testi"]["durum"] == "beklemede" else "kontrolde"
     mt = kart["metraj_testi"]
-    print(f"{kart['gosterim']}: metraj testi {mt['durum']}" + (f" · çelik bizim {mt['bizim_kg']:g} kg, gerçek {mt['gercek_kg']:g} kg, fark %{mt['fark_yuzde']:g}"
-                                                             f" (eşik ±%{METRAJ_ESIGI_YUZDE:g})" if mt.get("bizim_kg") is not None else " (çizimden sonra hesaplanır)"))
+    olay(kart, "metraj", durum=mt["durum"], proje=mt["proje"], fark_yuzde=mt.get("fark_yuzde"))
+    kart_yaz(kart, a.banka)
+    print(f"{kart['gosterim']}: metraj testi {mt['durum']} (çelik hakemi, {mt['proje']}: {mt['hakem_sonucu']}"
+          + (f", fark {isaretli(mt['fark_yuzde'])}" if mt.get("fark_yuzde") is not None else "") + f"; eşik ±%{mt['esik_yuzde']:g})"
+          + f" · pim {kart['pim']['kural_seti']['yol']}" + (f" + {kart['pim']['karkas']['yol']}" if kart["pim"].get("karkas") else "")
+          + (" · çizim başka kural setiyle: yeniden çizin" if pim_degisti else ""))
     return 0 if mt["durum"] != "beklemede" else 1
 
 
@@ -585,15 +684,16 @@ def pim_seti() -> Path:
     return setler[-1]
 
 
-def tam_izler(tp: Path, set_yolu: Path) -> dict[str, str]:
+def tam_izler(tp: Path, set_yolu: Path, karkas_yolu: Path | None = None) -> dict[str, str]:
     """Çizim setinin içerik izleri (PNG bayt, PDF içerik, JSON kanonik, IFC içerik, DXF içerik; `testler/referans/parmak_izi.genel_ozet`),
-    sabit üretim zamanıyla ve perspektifsiz, ayrı süreçte (referans koşusu gibi)."""
+    sabit üretim zamanıyla ve perspektifsiz, ayrı süreçte (referans koşusu gibi); karkas kuralı pimlenmişse o kopyayla."""
     sys.path.insert(0, str(KOK / "testler" / "referans"))
     from parmak_izi import genel_ozet
     with tempfile.TemporaryDirectory() as tmp:
         ortam = {**os.environ, "TEST_SABIT_ZAMAN": SABIT_ZAMAN, "PYTHONHASHSEED": "0",
                  "PYTHONPATH": os.pathsep.join([str(KOK / "testler" / "referans" / "sabit_zaman"), str(KOK)] + ([os.environ["PYTHONPATH"]] if os.environ.get("PYTHONPATH") else []))}
-        r = subprocess.run([sys.executable, "-m", "motor.genel.uret", str(tp), str(Path(tmp) / "c"), "--set", str(set_yolu), "--yontem", "panel", "--perspektifsiz"],
+        r = subprocess.run([sys.executable, "-m", "motor.genel.uret", str(tp), str(Path(tmp) / "c"), "--set", str(set_yolu), "--yontem", "panel", "--perspektifsiz"]
+                           + (["--karkas", str(karkas_yolu)] if karkas_yolu else []),
                            cwd=str(KOK), env=ortam, capture_output=True, text=True)
         if r.returncode != 0:
             raise RuntimeError(f"tam izler üretilemedi: {r.stdout[-300:]} {r.stderr[-300:]}")
@@ -603,12 +703,18 @@ def tam_izler(tp: Path, set_yolu: Path) -> dict[str, str]:
 
 
 def kontrol_kaydi(kart: dict, tp: Path, tam: bool = True) -> dict:
+    """Modelin kontrol dosyası: kartın pimi (metraj kapısının ölçüldüğü kural seti ve karkas kuralı) varsa onunla, yoksa dondurulmuş
+    setlerin en yenisiyle."""
     t = json.loads(tp.read_text(encoding="utf-8"))
-    pim = pim_seti()
-    k = {"sema": B.KONTROL_SEMASI, "kod": kart["kod"], "tanim_sha256": sha256(tp), "kural_seti": f"kurallar/liste/setler/{pim.name}",
-         "kural_seti_sha256": sha256(pim), "hizli": olc(t, pim)}
+    set_yolu, karkas_yolu = pim_yollari(kart)
+    pim = set_yolu or pim_seti()
+    k = {"sema": B.KONTROL_SEMASI, "kod": kart["kod"], "tanim_sha256": sha256(tp), "kural_seti": pim.relative_to(KOK).as_posix(),
+         "kural_seti_sha256": sha256(pim)}
+    if karkas_yolu:
+        k |= {"karkas_kurali": karkas_yolu.relative_to(KOK).as_posix(), "karkas_kurali_sha256": sha256(karkas_yolu)}
+    k["hizli"] = olc(t, pim, None, karkas_yolu)
     if tam:
-        k["tam"] = tam_izler(tp, pim)
+        k["tam"] = tam_izler(tp, pim, karkas_yolu)
     return k
 
 
@@ -638,9 +744,20 @@ def aday_kaydi(kart: dict, tp: Path, cizim: Path, banka_kok: Path) -> dict:
                      "perspektif": (v.get("perspektif") or {}).get("durum")},
             "kaynak": {"metin": (kart.get("kaynak") or {}).get("metin") or "", "dosya": gorece,
                        "dogrulama": f"İE-09 atölyesi, kontrol sayfası c{kart['son_cizim']['no']:02d} ({kart['kabul']['tarih']}); metraj kapısı: "
-                                     + {"gecti": "geçti (±%3)", "yok": "koşulmadı, referans yok"}.get(kart["metraj_testi"]["durum"], kart["metraj_testi"]["durum"]),
+                                     + metraj_metni(kart["metraj_testi"]),
                        "karar": "D-20; D-11"},
             "not": kart["kabul"].get("not") or ""}
+
+
+def isaretli(x) -> str:
+    """Yüzde farkı, işaret yüzde imisinden önce: +%0.93, −%12.83 (yoksa "…")."""
+    return "…" if x is None else ("−" if x < 0 else "+" if x > 0 else "") + f"%{abs(x):g}"
+
+
+def metraj_metni(mt: dict) -> str:
+    if mt.get("durum") == "gecti":
+        return f"geçti (çelik hakemi, {mt.get('proje')}, fark {isaretli(mt.get('fark_yuzde'))}, ±%{mt.get('esik_yuzde', METRAJ_ESIGI_YUZDE):g})"
+    return {"yok": "koşulmadı, referans yok"}.get(mt.get("durum"), str(mt.get("durum")))
 
 
 def kapilar() -> list[str]:
@@ -666,13 +783,17 @@ def kabul(a) -> int:
         return dur("kart yok")
     if kart["durum"] == "beklemede":
         mt = kart["metraj_testi"]
-        return dur(f"metraj kabul testi geçmedi (çelik fark %{mt.get('fark_yuzde')}, eşik ±%{METRAJ_ESIGI_YUZDE:g}): model beklemede, kabul edilemez")
+        return dur(f"metraj kabul testi geçmedi (çelik fark {isaretli(mt.get('fark_yuzde'))}, eşik ±%{METRAJ_ESIGI_YUZDE:g}): model beklemede, kabul edilemez")
     if kart["durum"] != "kontrolde":
         return dur(f"kart {kart['durum']}: kabul yalnız çizilip kontrole gönderilmiş modele ({'önce `ciz`' if kart['durum'] == 'taslak' else 'değişmez'})")
     tp = tanim_yolu(kod, a.banka)
     sc = kart.get("son_cizim") or {}
     if sc.get("tanim_sha256") != sha256(tp):
         return dur("tanım son çizimden sonra değişti: yeniden çizin, kontrol sayfasını gösterin")
+    if (e := _pim_denetle(kart)):
+        return dur(e)
+    if sc.get("pim") != kart.get("pim"):
+        return dur("son çizim kartın pimindeki kural setiyle çizilmedi: yeniden çizin, kontrol sayfasını gösterin")
     if (kart.get("metraj_testi") or {}).get("durum") == "beklemede":
         return dur("metraj kabul testi geçmedi: beklemede")
     kalan = [x for x in sc.get("denetimler") or [] if x["durum"] == "kaldı"]
@@ -693,7 +814,8 @@ def kabul(a) -> int:
     shutil.copyfile(gorsel, k / "kart.png")
     kart["durum"] = "kabul"
     kart["kabul"] = {"kim": a.kim, "tarih": a.tarih, "karar": "D-11" if a.kim == "Lokman" else None, "not": a.not_, "cizim": sc["no"],
-                     "kural_seti": kontrol["kural_seti"], "metraj_kapisi": kart["metraj_testi"]["durum"]}   # "yok": kabul metraj doğrulaması değildir
+                     "kural_seti": kontrol["kural_seti"], "metraj_kapisi": kart["metraj_testi"]["durum"],
+                     "metraj_proje": kart["metraj_testi"].get("proje")}   # "yok": kabul metraj doğrulaması değildir
     kart["aday"] = aday_kaydi(kart, tp, cizim, a.banka)
     olay(kart, "kabul", cizim=sc["no"])
     kart_yaz(kart, a.banka)
@@ -719,13 +841,17 @@ def _kontrol_farki(kart: dict, k: dict, tp: Path, tam: bool) -> list[str]:
     if not pim.is_file() or sha256(pim) != k.get("kural_seti_sha256"):
         f.append(f"kural seti pimi değişti ya da yok ({k['kural_seti']})")
         return f
+    karkas = KOK / k["karkas_kurali"] if k.get("karkas_kurali") else None
+    if karkas and (not karkas.is_file() or sha256(karkas) != k.get("karkas_kurali_sha256")):
+        f.append(f"karkas kuralı pimi değişti ya da yok ({k['karkas_kurali']})")
+        return f
     t = json.loads(tp.read_text(encoding="utf-8"))
-    yeni = olc(t, pim)
+    yeni = olc(t, pim, None, karkas)
     for alan, eski in k["hizli"].items():
         if yeni.get(alan) != eski:
             f.append(f"hızlı: {alan}")
     if tam and "tam" in k:
-        izler = tam_izler(tp, pim)
+        izler = tam_izler(tp, pim, karkas)
         for ad in sorted(set(izler) | set(k["tam"])):
             if izler.get(ad) != k["tam"].get(ad):
                 f.append(f"tam: {ad}" + (" (yok)" if ad not in izler else " (yeni)" if ad not in k["tam"] else ""))
@@ -816,12 +942,11 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--ad", required=True); p.add_argument("--aile", default=None); p.add_argument("--kaynak-metni", default="")
     p = alt.add_parser("kaynak"); p.add_argument("kod"); p.add_argument("--kaynagi", required=True); p.add_argument("--oda", action="append")
     p.add_argument("--brut-m2", type=float); p.add_argument("--oda-programi"); p.add_argument("--pencere", type=int); p.add_argument("--kapi", type=int)
-    p.add_argument("--cati-tipi")
+    p.add_argument("--cati-tipi"); p.add_argument("--proje", default=None, help="kartın kaynak projesi (AP-NN ya da ÇP-NN)")
     p = alt.add_parser("ciz"); p.add_argument("kod"); p.add_argument("--cikti", default=str(CIKTI_VARSAYILAN))
     p.add_argument("--perspektif", action="store_true", help="VTK varsa perspektifli bayi görseli")
     p = alt.add_parser("duzelt"); p.add_argument("kod"); p.add_argument("--tur", required=True, choices=sorted(DUZELTME_TURLERI)); p.add_argument("--metin", required=True)
-    p = alt.add_parser("metraj"); p.add_argument("kod"); p.add_argument("--excel", required=True); p.add_argument("--hucre"); p.add_argument("--kg", type=float)
-    p.add_argument("--proje", default=None); p.add_argument("--etiket", default="gerçek yükleme listesi")
+    p = alt.add_parser("metraj"); p.add_argument("kod"); p.add_argument("--celik", required=True, help="çelik hakeminin projesi (ÇP-NN)")
     p = alt.add_parser("kabul"); p.add_argument("kod"); p.add_argument("--kim", default="Lokman"); p.add_argument("--tarih", default=bugun())
     p.add_argument("--not", dest="not_", default=""); p.add_argument("--kapisiz", action="store_true", help=argparse.SUPPRESS)
     p.add_argument("--izsiz", action="store_true", help=argparse.SUPPRESS)

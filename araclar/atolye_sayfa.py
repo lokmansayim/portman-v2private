@@ -25,6 +25,7 @@ table { border-collapse: collapse; width: 100%; }
 td, th { border: 0.4px solid #9aa3ad; padding: 1.5px 3px; vertical-align: top; text-align: left; }
 th { background-color: #e8edf2; }
 .sag { text-align: right; }
+.nw { white-space: nowrap; }
 .gecti { color: #1d6b2f; font-weight: bold; }
 .uyari { color: #9a5b00; font-weight: bold; }
 .kaldi { color: #b0161b; font-weight: bold; }
@@ -49,6 +50,18 @@ def sayi(x, basamak: int = 2) -> str:
     s = f"{float(x):.{basamak}f}"
     s = s.rstrip("0").rstrip(".") if "." in s else s
     return s.replace(".", ",")
+
+
+def yuzde(x, basamak: int = 2) -> str:
+    """İşaretli yüzde, işaret yüzde imisinden önce: +%6,3 / −%14,9 (Türkçe yazım; "%-14,9" okunmuyordu)."""
+    if x is None:
+        return "…"
+    return ("−" if x < 0 else "+" if x > 0 else "") + "%" + sayi(abs(x), basamak)
+
+
+def yuzde_html(x, basamak: int = 2) -> str:
+    """`yuzde`, satır sonunda işaretten bölünmesin diye tek parça."""
+    return f"<span class='nw'>{yuzde(x, basamak)}</span>"
 
 
 def _sol(kart: dict) -> str:
@@ -76,10 +89,29 @@ def _sol(kart: dict) -> str:
                  "\"metraj kapısı koşulmadı\" yazılır; gerçek liste gelince kıyas yapılır.</p>")
     else:
         sinif = "gecti" if mt.get("durum") == "gecti" else "kaldi"
-        s.append(f"<p><span class='{sinif}'>{e(mt.get('durum'))}</span> · bizim {sayi(mt.get('bizim_kg'))} kg, gerçek {sayi(mt.get('gercek_kg'))} kg, fark "
-                 f"%{sayi(mt.get('fark_yuzde'))} · gerçek değerin kaynağı: {e(mt.get('gercek_kaynak'))}</p>")
+        yontem = (mt.get("yontem") or {}).get("ad") or "…"
+        s.append(f"<p><span class='{sinif}'>{e(mt.get('hakem_sonucu'))}</span> · çelik hakemi (İE-16), proje {e(mt.get('proje'))}, sonuç "
+                 f"{e(mt.get('sonuc_tarihi'))} · toplam çelik: bizim {sayi(mt.get('bizim_kapi_kg'), 1)} kg, gerçek liste {sayi(mt.get('gercek_kapi_kg'), 1)} kg, "
+                 f"fark <b>{yuzde_html(mt.get('fark_yuzde'))}</b> (eşik ±%{sayi(mt.get('esik_yuzde'))})"
+                 + (f" · kapı dışı: {e(', '.join(mt['kapi_disi']))} (gerçek listede kg yazılmamış)" if mt.get("kapi_disi") else "") + "</p>")
+        if mt.get("turler"):
+            s.append("<table><tr><th>Tür</th><th class='sag'>Bizim adet</th><th class='sag'>Liste adet</th><th class='sag'>Bizim kg</th>"
+                     "<th class='sag'>Liste kg</th><th class='sag'>Fark</th></tr>")
+            for r in mt["turler"]:
+                b, g = r.get("bizim_kg"), r.get("gercek_kg")
+                fark = yuzde_html(100 * (b - g) / g, 1) if b is not None and g else "kg yok" if g is None else "-"
+                s.append(f"<tr><td>{e(r['ad'])}</td><td class='sag'>{e(r.get('bizim_adet') if r.get('bizim_adet') is not None else '-')}</td>"
+                         f"<td class='sag'>{e(r.get('gercek_adet') if r.get('gercek_adet') is not None else '-')}</td>"
+                         f"<td class='sag'>{sayi(b, 1) if b is not None else '-'}</td><td class='sag'>{sayi(g, 1) if g is not None else '-'}</td>"
+                         f"<td class='sag'>{fark}</td></tr>")
+            s.append("</table><p class='uyari'>Toplam kapıdan geçiyor; türlerin farkları birbirini götürüyor olabilir. Kabulünüzü tür satırlarına "
+                     "bakarak verin.</p>")
+        s.append(f"<p>Kapı projenin paftasındaki yöntemle ölçüldü ({e(yontem)}). Bayiye giden liste kitabın yöntemiyle (A, panel) çıkar "
+                 f"(Lokman, 25 Ekim): onda çelik panel grubu <b>{sayi((o.get('liste') or {}).get('celik_kg'), 1)} kg</b>, çünkü tavan paneli ve makas "
+                 "üstü çatı paneli A'da çelik panel grubundadır; B'de yerlerinde tavan omegası ve aşık vardır (çelik grubunun dışında). "
+                 "Aşağıdaki liste özeti A'dır. Model ölçümdeki kural setiyle çizildi.</p>")
         if mt.get("durum") == "beklemede":
-            s.append("<p class='kaldi'>Eşik aşıldı: model beklemede, kabul edilemez.</p>")
+            s.append(f"<p class='kaldi'>Kapı geçmedi ({e(mt.get('neden'))}): model beklemede, kabul edilemez.</p>")
     s.append("</div>")
     lo = (o.get("liste") or {})
     s.append(f"<h2>Yükleme listesi özeti ({lo.get('satir', '…')} satır; kural seti {e(o.get('kural_seti'))})</h2><table><tr><th>Grup</th><th class='sag'>Satır</th>"
