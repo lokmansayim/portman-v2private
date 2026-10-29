@@ -84,9 +84,34 @@ def test_iki_tipten_ayni_icerik_tasinir():
     ic = _pano_tipi(f, "PE-IC-100", SANDVIC, {"id": "PE-IC-100", "Anma_mm": 100})
     kart = KM._api("root.create_entity", f, ifc_class="IfcWallType", name="100'lük yapıştırma dolu pano")
     kart.Tag = "D-01"
-    KM._duvar_turu_tasi(f, kart, [_duvar(f, "P1", ic), _duvar(f, "P2", dis), _duvar(f, "P3", ic)])
+    duvarlar = [_duvar(f, "P1", ic), _duvar(f, "P2", dis), _duvar(f, "P3", ic)]
+    oteki = _duvar(f, "P4", ic)                                    # başka kartın parçası (aynı eski tip): kullanımı değişmez
+    once = {w.Name: (u.LayerSetDirection, u.DirectionSense, u.OffsetFromReferenceLine)
+            for w in duvarlar for u in [ue.get_material(w, should_inherit=False)]}
+    assert all(ue.get_material(w, should_inherit=False).is_a("IfcMaterialLayerSetUsage") for w in duvarlar + [oteki])
+    KM._duvar_turu_tasi(f, kart, duvarlar)
     assert ue.get_material(kart) == ue.get_material(dis)
     assert ue.get_psets(kart)["PortatifEv_PanoTipi"] | {"id": None} == {"id": None, "Anma_mm": 100}
+    # IFC4: her parçanın katman kullanımı kartın katman dizisini gösterir (geometri hakemi, 29 Ekim); yön ve kaçıklık aynı
+    for w in duvarlar:
+        u = ue.get_material(w, should_inherit=False)
+        assert u.ForLayerSet == ue.get_material(kart) and (u.LayerSetDirection, u.DirectionSense, u.OffsetFromReferenceLine) == once[w.Name]
+    assert ue.get_material(oteki, should_inherit=False).ForLayerSet == ue.get_material(ic)
+
+
+def test_ortak_kullanim_duser():
+    """Kartın dışındaki bir parçayla ortak katman kullanımı taşınmaz (bugünkü IFC'de her duvarın kendi kullanımı var)."""
+    f = _dosya()
+    dis = _pano_tipi(f, "PE-DIS-100", SANDVIC, {"id": "PE-DIS-100", "Anma_mm": 100})
+    ic = _pano_tipi(f, "PE-IC-100", SANDVIC, {"id": "PE-IC-100", "Anma_mm": 100})
+    a, b, c = _duvar(f, "P1", dis), _duvar(f, "P2", ic), _duvar(f, "P3", ic)
+    u = ue.get_material(b, should_inherit=False)
+    for r in [r for r in f.get_inverse(ue.get_material(c, should_inherit=False)) if r.is_a("IfcRelAssociatesMaterial")]:
+        r.RelatingMaterial = u                                     # P2 ile P3 aynı kullanımı paylaşır
+    kart = KM._api("root.create_entity", f, ifc_class="IfcWallType", name="kart")
+    kart.Tag = "D-01"
+    with pytest.raises(ValueError, match="P2 parçasının katman kullanımı bu kartın dışındaki parçalarla ortak"):
+        KM._duvar_turu_tasi(f, kart, [a, b])
 
 
 @pytest.mark.parametrize("fark", ["katman", "set"])
@@ -169,3 +194,18 @@ def test_kod_kilidi_ic100(kartlar):
     assert hashlib.sha256(json.dumps(ilk, ensure_ascii=False, sort_keys=True).encode()).hexdigest() == KILIT_IC100
     assert _oku(KM.KARTLAR)["surum"] == "5"
 
+
+
+def test_ic_duvar_kalinligi_tek_kaynak():
+    """İç duvar kalınlığı ve satır adındaki yazısı liste üretecinin işlevlerinde (`ic_duvar_kalinligi_mm`, `kalinlik_adi`); rehber de
+    bunlardan okur (geometri hakemi, 29 Ekim: kural rehberde kopyalanmaz). İç duvarsız evde kural kitabının `PE-IC-60`'ı."""
+    N, K = PL.model_motor(_oku(KOK / "testler" / "motor" / "veri" / "TK01.json")), PL.kurallari_oku()
+    assert (PL.ic_duvar_kalinligi_mm(N, K), PL.kalinlik_adi(PL.ic_duvar_kalinligi_mm(N, K))) == (60, "60'lık")
+    for p in N["panolar"]:
+        if p["duvar"] == "ic":
+            p["kal_mm"] = 100
+    assert (PL.ic_duvar_kalinligi_mm(N, K), PL.kalinlik_adi(100)) == (100, "100'lük")
+    N["panolar"] = [p for p in N["panolar"] if p["duvar"] != "ic"]
+    assert PL.ic_duvar_kalinligi_mm(N, K) == 60
+    kaynak = (KOK / "araclar" / "paket" / "rehber" / "veri.py").read_text(encoding="utf-8")
+    assert "LU.ic_duvar_kalinligi_mm(" in kaynak and "LU.kalinlik_adi(" in kaynak and ">= 100" not in kaynak

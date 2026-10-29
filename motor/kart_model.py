@@ -388,7 +388,9 @@ def _pano_tipi_icerigi(tip) -> tuple:
 def _duvar_turu_tasi(f, t, duvarlar: list) -> None:
     """Duvar kartı eski pano tipinin katmanlarını ve `PortatifEv_PanoTipi` setini alır (parçanın özellikleri aynı kalır).
     İç duvarı 100'lük evde (BK-18) D kartının parçaları iki tipten gelir (`PE-DIS-100`, `PE-IC-100`); katmanları ve seti aynıysa kart
-    adı sıradaki ilk tipinkini alır, parçalar kendi katman kullanımını korur. İçerik farklıysa kart iki ürünü birden taşıyamaz."""
+    adı sıradaki ilk tipinkini alır. Öteki tipin parçalarının katman kullanımı (`IfcMaterialLayerSetUsage`) da kartın katman dizisini
+    gösterir (IFC4: kullanım türün dizisine bağlanır; yön ve kaçıklık aynı kalır, katmanlar aynı). İçerik farklıysa kart iki ürünü birden
+    taşıyamaz."""
     eski = sorted({ue.get_type(w) for w in duvarlar} - {None}, key=lambda x: x.Name or "")
     if not eski or len({_pano_tipi_icerigi(x) for x in eski}) != 1:
         raise ValueError(f"{t.Tag}: parçaları {len(eski)} ayrı pano tipinden geliyor ({', '.join(x.Name or '?' for x in eski)}); "
@@ -397,6 +399,16 @@ def _duvar_turu_tasi(f, t, duvarlar: list) -> None:
     malzeme = ue.get_material(eski)
     if malzeme is not None:
         _api("material.assign_material", f, products=[t], type=malzeme.is_a(), material=malzeme)
+    if malzeme is not None and malzeme.is_a("IfcMaterialLayerSet"):
+        kume = set(duvarlar)
+        for w in duvarlar:
+            u = ue.get_material(w, should_inherit=False)
+            if u is None or not u.is_a("IfcMaterialLayerSetUsage") or u.ForLayerSet == malzeme:
+                continue
+            kullanan = {o for r in f.get_inverse(u) if r.is_a("IfcRelAssociatesMaterial") for o in r.RelatedObjects}
+            if not kullanan <= kume:                                   # bugünkü IFC'de her duvarın kendi kullanımı var (ifc_uret)
+                raise ValueError(f"{t.Tag}: {w.Name} parçasının katman kullanımı bu kartın dışındaki parçalarla ortak; kart katman dizisini taşıyamaz")
+            u.ForLayerSet = malzeme
     pt = ue.get_psets(eski).get("PortatifEv_PanoTipi")
     if pt:
         ps = _api("pset.add_pset", f, product=t, name="PortatifEv_PanoTipi")

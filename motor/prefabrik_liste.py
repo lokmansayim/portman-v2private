@@ -173,6 +173,18 @@ def pencere_olcusu(olcu: str) -> tuple[int, int]:
 
 
 # ── geometri: Motor kipi ────────────────────────────────────────────────────────
+def ic_duvar_kalinligi_mm(N: dict, kurallar: dict) -> int:
+    """İç duvar kalınlığı (mm): iç panoların en sık kalınlığı; iç duvarsız evde kural kitabındaki `PE-IC-60` anma kalınlığı. Satır adları
+    bundan (6.1: iç duvar 100 mm olabilir, PK-07); montaj rehberi de buradan okur (İE-18 R1 ek 4, D-28 madde 1)."""
+    ic = [p["kal_mm"] for p in N["panolar"] if p["duvar"] == "ic"]
+    return Counter(ic).most_common(1)[0][0] if ic else _dt(kurallar["duvar_tipleri"], "tipler", "PE-IC-60", "anma_mm")
+
+
+def kalinlik_adi(kal_mm: int) -> str:
+    """Satır adındaki kalınlık: 100 mm ve üstü "100'lük", altı "60'lık" (6.1, PK-07)."""
+    return "100'lük" if kal_mm >= 100 else "60'lık"
+
+
 def model_motor(ie: dict) -> dict:
     from . import geometry as G
     from shapely.geometry import LineString, Point, box
@@ -532,11 +544,11 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
 
     # ── 1001 Panel ──────────────────────────────────────────────────────────
     fugali = "fugalı" in oz.get("açıklama", "") or "fugali" in oz.get("açıklama", "")
-    ic_kal = Counter(p["kal_mm"] for p in N["panolar"] if p["duvar"] == "ic").most_common(1)[0][0] if any(p["duvar"] == "ic" for p in N["panolar"]) else _dt(kurallar["duvar_tipleri"], "tipler", "PE-IC-60", "anma_mm")
+    ic_kal = ic_duvar_kalinligi_mm(N, kurallar)
     sayac = Counter()
     for p in N["panolar"]:
         kal_mm = p["kal_mm"]
-        kal = "100'lük" if kal_mm >= 100 else "60'lık"          # 6.1: iç duvar 100 mm olabilir (PK-07 özellik tablosu)
+        kal = kalinlik_adi(kal_mm)                              # 6.1: iç duvar 100 mm olabilir (PK-07 özellik tablosu)
         fg = " (FUGALI)" if (fugali and p["duvar"] == "dis") else ""   # O1: fugalı dış cephede dış panolar ayrı satır (PK-07)
         L = siparis(p["boy"], R); a = p["aciklik"]
         if a is None:
