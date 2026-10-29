@@ -8,13 +8,18 @@
   (`motor/prefabrik_liste.py`; TK-01'in İş Emri'nin modeli iç panolar 100 mm'ye çekilerek); her biri 60'lık karşılığının 60 → 100'ü.
 - Kod kilidi: ilk 57 satır donar (K1–K3b'nin 51'i + bu altı), yeni kod sona eklenir.
 
-TK-02'nin uçtan uca testi (kart modeli, liste ve rehber) BK-18 main'e girince eklenir: TK-02 bugün main'de çizilemiyor.
+TK-02'nin uçtan uca testi (BK-18 main'e girdikten sonra): kart adetleri listeyle, "kural yok" TK-01'inkiyle aynı, paket ve rehber
+(iç duvar üstü omegası OM-02, sırtı kuraldan; baş makas omegası saçaktan saçağa; D-32).
 """
 from __future__ import annotations
 
+import copy
 import hashlib
 import json
+import math
+import re
 import sys
+from collections import Counter
 from pathlib import Path
 
 import ifcopenshell
@@ -209,3 +214,72 @@ def test_ic_duvar_kalinligi_tek_kaynak():
     assert PL.ic_duvar_kalinligi_mm(N, K) == 60
     kaynak = (KOK / "araclar" / "paket" / "rehber" / "veri.py").read_text(encoding="utf-8")
     assert "LU.ic_duvar_kalinligi_mm(" in kaynak and "LU.kalinlik_adi(" in kaynak and ">= 100" not in kaynak
+
+
+# ----------------------------------------------------------------------------- TK-02 uçtan uca (BK-18 main'de)
+TK02 = KOK / "testler" / "motor" / "veri" / "TK02.json"
+IC_USTU = "60'lık iç duvar üstü omegası (sırt 10,5)"                     # D-32 madde 3
+
+
+def _kart_sayimi(ie: dict, klasor: Path, ad: str) -> dict:
+    from motor import ifc_uret
+    ifc_uret.uret(ie, klasor / f"{ad}.ifc")
+    return KM.kart_modeli(klasor / f"{ad}.ifc", klasor / f"{ad}_model.ifc", ie["cati"]["tip"], is_emri=ie, plan=ifc_uret.hazirla(ie),
+                          elektrik=True, kenar=True)
+
+
+@pytest.fixture(scope="module")
+def tk02(tmp_path_factory):
+    ie = _oku(TK02)
+    liste = Counter()
+    for s in PL.is_emrinden(copy.deepcopy(ie))["satirlar"]:
+        liste[s["kalem"]] += s["adet"]
+    return ie, _kart_sayimi(ie, tmp_path_factory.mktemp("tk02"), "TK02"), liste
+
+
+def test_tk02_kart_adetleri_listeyle(tk02, kartlar):
+    """TK-02 (TK-01 + iç 100, asma tavan): parça başına sayılan kartın adedi listedeki satırının adedi; iki kartın paylaştığı satırda (dış H
+    H-01/H-02, dış T H-08/H-09; dübelli & kulaklı ayrımı modelde) toplam. 60'lık iç kartlar 0. OM-02'nin parçaları iç duvar üstü satırını
+    verir (÷ 3,65, 60'lık omeganın böleni)."""
+    _, say, liste = tk02
+    adet = {k["kod"]: k for k in say["kartlar"]}
+    for grup in (["D-01"], ["D-06"], ["H-01", "H-02"], ["H-07"], ["H-08", "H-09"], ["H-10"], ["B-01"]):
+        assert sum(adet[k]["adet"] for k in grup) == sum(liste[s] for s in kartlar[grup[0]]["liste"]["satirlar"]) > 0, grup
+    assert all(adet[k]["adet"] == 0 for k in ("I-01", "I-02", "I-03", "H-03", "H-04", "H-05", "H-06"))
+    assert kartlar["OM-02"]["liste"]["satirlar"] == [IC_USTU] and liste[IC_USTU] > 0
+    assert math.ceil(adet["OM-02"]["metre"] / 3.65 - 1e-9) == liste[IC_USTU]
+
+
+def test_tk02_kural_yok_tk01_ile_ayni(tk02, tmp_path):
+    """TK-02'de "kural yok" yalnız TK-01'dekiler (taşan veranda parçaları, tek kat panel kaplaması, baş makas betopanı): iç duvarın 100'lük
+    olması kartsız parça bırakmaz."""
+    _, say, _ = tk02
+    from araclar.paket import uret as U
+    ie1 = _oku(KOK / next(m for m in U.kayit()["modeller"] if m["kod"] == "TK-01")["is_emri"])
+    ky = lambda s: sorted(x["parca"] for x in s["kural_yok"])                                       # noqa: E731
+    assert ky(say) == ky(_kart_sayimi(ie1, tmp_path, "TK01")) and len(ky(say)) == 10
+
+
+def test_tk02_paket_ve_rehber(tk02, tmp_path):
+    """`python -m araclar.paket TK-02 … --is-emri testler/motor/veri/TK02.json` (çizim masası): paket hatasız; rehberde iç duvar üstü
+    omegaları OM-02, sırtı kural dosyasından; baş makas omegalarının boyu listenin saçaktan saçağa boyu (D-32); genel listede yeni satır
+    listenin adediyle."""
+    from araclar.paket import uret as U
+    _, _, liste = tk02
+    cikti = tmp_path / "Modeller"
+    assert U.main(["TK-02", str(cikti), "--is-emri", str(TK02), "--gecici", str(tmp_path / "gec")]) == 0
+    b = cikti / "prefabrik" / "TK-02"
+    bilgi = (b / "TK-02_bilgi.md").read_text(encoding="utf-8")
+    for ad in ("montaj_rehberi.html", "model.ifc", "montaj_paftasi.pdf", "yukleme_listesi.xlsx", "bayi_paftasi.pdf"):
+        assert f"| `TK-02_{ad}` | Var |" in bilgi, ad
+    m = re.search(r'<script type="application/json" id="pafta">(.*?)</script>', (b / "TK-02_montaj_rehberi.html").read_text(encoding="utf-8"), re.S)
+    d = json.loads(m.group(1).replace("<\\/", "</"))
+    sirt = PL.kurallari_oku()["prefabrik"]["kurallar"]["ic_duvar_ustu_omegasi"]["deger"]["sirt_cm"]
+    ic = [o for o in d["omega_duvar"] if o["tur"] == "ic"]
+    assert ic and all(o["kart"] == "OM-02" and o["sirt"] == sirt for o in ic)
+    L = {s["kalem"]: s for s in PL.is_emrinden(_oku(TK02))["satirlar"]}
+    bas_m = float(re.search(r"saçak ucundan saçak ucuna ([\d,]+) m", L["Baş makas omegası"]["formul"]).group(1).replace(",", "."))
+    bas = [o for o in d["omega_duvar"] if o["tur"] == "bas"]
+    assert len(bas) == 4 and round(sum(o["a1"] - o["a0"] for o in bas) / 100, 2) == bas_m
+    genel = {r[1]: r[2] for r in d["genel"] if isinstance(r, list)}
+    assert genel[f"{IC_USTU} 60 × 3750"] == f"{liste[IC_USTU]} adet"
