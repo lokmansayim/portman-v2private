@@ -9,8 +9,10 @@ Akış (CIO planı ve kıyası, 29 Ekim 2026; proje dosyaları Bayi_Kaydi/plan.m
      karşılama şablonu ("Nasıl çalışır?" düğmeli) bayinin son mesajına bağlı gider. Reddet → kart açılmaz, bayiye (pencere açıksa) kısa
      metin; numara RED_BEKLEME_GUN gün yeni talep açmaz, Patron panelden reddi geri alabilir. Kart, talep ve satırlar işle aynı işlemde.
   4. Panel yedektir: aynı kararlar bayinin konuşma sayfasından (`karar_satirlari`; depo.kayit_karari_yaz).
-Frenler: gönderen başına 24 saatte en çok CEVAP_SINIRI bot cevabı; günde en çok `bayi_kaydi.gunluk_en_cok` yeni talep (aşılırsa bugünkü
-sabit cevap); cevapsız talep 24 saatte düşer; onay beklerken 24 saatte bir "onay bekliyor"; Patron'a talep başına tek bildirim.
+Frenler: gönderen başına 24 saatte en çok CEVAP_SINIRI bot cevabı (dolarsa konuşma durur: talep ilerlemez, soru sorulmadan durum
+atlanmaz; 24 saat sonra zaman aşımıyla baştan); günde en çok `bayi_kaydi.gunluk_en_cok` yeni talep (aşılırsa bugünkü sabit cevap);
+cevapsız talep 24 saatte düşer; onay beklerken 24 saatte bir "onay bekliyor" (talebin kendi zamanıyla, sabit cevabın sayacından ayrı);
+Patron'a talep başına tek bildirim.
 `bayi_kaydi.acik` kapalıyken (varsayılan) bu modül çağrılmaz ve davranış bugünküyle aynıdır.
 LLM çağrılmaz; numara Patron metnine yazılmaz (bayi kodu yazılır). Worker'ı yüklemez (webhook ve panel de kullanır).
 """
@@ -19,11 +21,11 @@ from __future__ import annotations
 import re
 
 import sablonlar as S
-from depo import metin_satiri
+from depo import kod_turet, metin_satiri
 
 YUK_ONEKI = "kayit:"                 # Patron'un düğmeleri: kayit:<onay|red>:<talep id>
 ISLEMLER = ("onay", "red")
-CEVAP_SINIRI = 4                     # gönderen başına 24 saatte en çok bot cevabı (kayıt soruları; olağan akış 3)
+CEVAP_SINIRI = 5                     # gönderen başına 24 saatte en çok bot cevabı (kayıt soruları; olağan akış 3, iki yeniden soru payı)
 ZAMAN_ASIMI_SN = 86400               # ad ya da firma beklenen talep bu kadar cevapsız kalırsa düşer; sonraki mesaj baştan başlar
 RED_BEKLEME_GUN = 30                 # reddedilen numara bu kadar gün yeni talep açmaz (CIO, 29.10); Patron panelden geri alabilir
 GUNLUK_EN_COK = 10                   # varsayılan: 24 saatte açılan yeni talep tavanı (ayar bayi_kaydi.gunluk_en_cok)
@@ -60,8 +62,8 @@ def kimlik(talep_id) -> str:
 
 
 def kod(numara: str) -> str:
-    """Kartın türetilen kodu: depo.bayi_yaz ile aynı ('B' + son 4 hane)."""
-    return "B" + str(numara or "")[-4:]
+    """Kartın türetilen kodu (depo.kod_turet: bayi_yaz ve onayla açılan kart aynı kuralı kullanır)."""
+    return kod_turet(numara)
 
 
 def _temiz(m) -> str:
@@ -90,32 +92,35 @@ def firma_coz(gelen: dict) -> str | None:
 # ───────────────────────── 1–2 · kayıtsız numaranın mesajları (webhook; depo.kayitsiz_mesaj_kaydet) ─────────────────────────
 def karar(b: dict, gelen: dict) -> dict:
     """Webhook adımı (saf; depo işlemin içinde çağırır). b: {"talep": numaranın son talebi ya da None (yas_sn: son güncellemeden beri,
-    karar_yas_sn: karardan beri), "cevap_24s": bu numaraya son 24 saatteki kayıt cevabı, "yeni_24s": son 24 saatte açılan talep,
-    "gunluk_en_cok"}. Dönen {"islem": "sabit"} ise mesaj bugünkü sabit cevap yolundan geçer; değilse {"islem": yeni | guncelle | bekliyor,
-    "durum", "ad"?, "firma"?, "cevap": bayiye metin ya da None, "patrona": bool, "kapat": düşen açık talebin id'si?}."""
+    karar_yas_sn: karardan beri, hatirlatma_yas_sn: son "onay bekliyor"dan beri), "cevap_24s": bu numaraya son 24 saatteki kayıt cevabı,
+    "yeni_24s": son 24 saatte açılan talep, "gunluk_en_cok"}. Dönen {"islem": "sabit"} ise mesaj bugünkü sabit cevap yolundan geçer;
+    {"islem": "sus"} ise cevap sınırı doldu, talep olduğu gibi kalır; değilse {"islem": yeni | guncelle | bekliyor, "durum", "ad"?,
+    "firma"?, "cevap": bayiye metin ya da None, "patrona": bool, "kapat": düşen açık talebin id'si?}."""
     t = b.get("talep")
     sus = int(b.get("cevap_24s") or 0) >= CEVAP_SINIRI
-
-    def cevap(m: str) -> str | None:
-        return None if sus else m
     if t is not None and t["durum"] == "reddedildi" and float(t.get("karar_yas_sn") or 0) < RED_BEKLEME_GUN * 86400:
         return {"islem": "sabit"}
     if t is not None and t["durum"] == "onay_bekliyor":
-        return {"islem": "bekliyor", "durum": "onay_bekliyor", "cevap": cevap(ONAY_BEKLIYOR), "patrona": False}
-    if t is None or t["durum"] not in ("ad", "firma") or float(t.get("yas_sn") or 0) >= ZAMAN_ASIMI_SN:
+        h = t.get("hatirlatma_yas_sn")
+        hatirlat = not sus and (h is None or float(h) >= 86400)
+        return {"islem": "bekliyor", "durum": "onay_bekliyor", "cevap": ONAY_BEKLIYOR if hatirlat else None, "patrona": False}
+    acik = t is not None and t["durum"] in ("ad", "firma") and float(t.get("yas_sn") or 0) < ZAMAN_ASIMI_SN
+    if sus:            # konuşma durur: soru sorulmadan durum atlanmaz (bayi firmanın sorulduğunu bilmeden talep ilerlemesin)
+        return {"islem": "sus", "durum": t["durum"], "cevap": None, "patrona": False} if acik else {"islem": "sabit"}
+    if not acik:
         if int(b.get("yeni_24s") or 0) >= int(b.get("gunluk_en_cok") or GUNLUK_EN_COK):
             return {"islem": "sabit"}
         kapat = t["id"] if t is not None and t["durum"] in ("ad", "firma") else None
-        return {"islem": "yeni", "durum": "ad", "cevap": cevap(SORU_AD), "patrona": False, "kapat": kapat}
+        return {"islem": "yeni", "durum": "ad", "cevap": SORU_AD, "patrona": False, "kapat": kapat}
     if t["durum"] == "ad":
         ad = ad_coz(gelen)
         if ad is None:
-            return {"islem": "guncelle", "durum": "ad", "cevap": cevap(SORU_AD_YENIDEN), "patrona": False}
-        return {"islem": "guncelle", "durum": "firma", "ad": ad, "cevap": cevap(SORU_FIRMA), "patrona": False}
+            return {"islem": "guncelle", "durum": "ad", "cevap": SORU_AD_YENIDEN, "patrona": False}
+        return {"islem": "guncelle", "durum": "firma", "ad": ad, "cevap": SORU_FIRMA, "patrona": False}
     firma = firma_coz(gelen)
     if firma is None:
-        return {"islem": "guncelle", "durum": "firma", "cevap": cevap(SORU_FIRMA_YENIDEN), "patrona": False}
-    return {"islem": "guncelle", "durum": "onay_bekliyor", "firma": firma, "cevap": cevap(TESEKKUR), "patrona": True}
+        return {"islem": "guncelle", "durum": "firma", "cevap": SORU_FIRMA_YENIDEN, "patrona": False}
+    return {"islem": "guncelle", "durum": "onay_bekliyor", "firma": firma, "cevap": TESEKKUR, "patrona": True}
 
 
 def _kes(m: str, n: int) -> str:
@@ -160,14 +165,16 @@ def patron_talep_satiri(gelen: dict, sira: int, talep: dict) -> dict:
 
 def satirlar(gelen: dict, talep: dict, k: dict) -> list[dict]:
     """Webhook adımının giden satırları (gelen mesaja bağlı): 1 bayiye cevap; talep tamamlandıysa 2 Patron'a düğmeli mesaj, 3 Patron şablonu
-    (pencere_kapaliysa: gönderici pencere açık ve düğmeli mesaj gittiyse 'sablon_gereksiz' yapar)."""
+    (pencere_kapaliysa ve kardes_dugmeli: gönderici pencere açık ve düğmeli mesaj gittiyse 'sablon_gereksiz' yapar)."""
     out = []
     if k.get("cevap"):
         out.append(metin_satiri(gelen, k["cevap"], 1, gelen["sender"], "kayit"))
     if k.get("patrona"):
         out.append(patron_talep_satiri(gelen, 2, talep))
-        out.append(S.sablon_satiri(gelen["id"], 3, "PATRON", "bildirim", S.PATRON_BILDIRIM, [kod(talep["numara"]), kimlik(talep["id"])],
-                                   f"konusma/{talep['numara']}", pencere_kapaliysa=True))
+        s = S.sablon_satiri(gelen["id"], 3, "PATRON", "bildirim", S.PATRON_BILDIRIM, [kod(talep["numara"]), kimlik(talep["id"])],
+                            f"konusma/{talep['numara']}", pencere_kapaliysa=True)
+        s["kardes_dugmeli"] = True                       # eşlik ettiği satır düğmeli (depo.kardes_metin_durumu)
+        out.append(s)
     return out
 
 
@@ -190,25 +197,26 @@ def adim(ayar: dict | None) -> Adim | None:
 
 
 # ───────────────────────── 3–4 · Patron'un kararı (ajan ve panel) ─────────────────────────
-def karar_satirlari(talep: dict, islem: str, kart_acilir: bool, kaynak: str = "sistem") -> list[dict]:
+def karar_satirlari(talep: dict, islem: str, kart_var: bool, kaynak: str = "sistem") -> list[dict]:
     """Karardan sonra bayiye giden satırlar; bayinin son mesajına (talep.son_mesaj_id) bağlanır (depo._cipa_satir_yaz kimlik ve sırayı
-    verir). Onay ve yeni kart: karşılama şablonu ({{1}} ad; hitap kartta boş). Red: kısa metin (pencere kapalıysa gönderici düşürür)."""
+    verir). Onay: karşılama şablonu ({{1}} ad; hitap kartta boş). Red: kısa metin (pencere kapalıysa gönderici düşürür). kart_var: kart
+    karardan önce (elle) açılmıştı; talep yalnız kapanır, bayiye bir şey gitmez."""
     cipa = {"id": talep["son_mesaj_id"], "sender": talep["numara"]}
+    if kart_var:
+        return []
     if islem == "onay":
-        if not kart_acilir:
-            return []
         return [S.bayi_karsilama_satiri(cipa["id"], 0, talep["numara"], {"ad": talep["ad"]}, kaynak=kaynak)]
     r = metin_satiri(cipa, RED_BAYIYE, 0, talep["numara"], "kayit")
     r["kaynak"] = kaynak
     return [r]
 
 
-def patron_sonuc_metni(talep: dict, islem: str, kart_acilir: bool, mod: str | None = None) -> str:
+def patron_sonuc_metni(talep: dict, islem: str, kart_var: bool, mod: str | None = None) -> str:
     etiket = f"{kod(talep['numara'])} · {talep['ad']} · {talep['firma']}"
+    if kart_var:
+        return f"{kimlik(talep['id'])}: bu numaranın kartı zaten var; talep kapatıldı, bayiye mesaj gönderilmedi."
     if islem == "red":
         return (f"Kayıt reddedildi: {etiket}. Bu numara {RED_BEKLEME_GUN} gün yeni kayıt talebi açmaz; panelden reddi geri alabilirsiniz.")
-    if not kart_acilir:
-        return f"{kimlik(talep['id'])}: bu numaranın kartı zaten var; talep kapatıldı, karşılama gönderilmedi."
     m = f"Kayıt açıldı: {etiket}. Bayiye karşılama şablonu gidiyor; hitap ve bölgeyi panelden yazabilirsiniz."
     if mod not in ("kayitli", "hepsi"):
         m += f" Not: kanal şu an '{mod}' modunda; bayinin mesajları mod 'kayitli' olunca işlenir."
@@ -243,10 +251,10 @@ def isle(depo, gelen: dict, settings: dict | None = None) -> dict:
         metin(f"{kimlik(tid)} zaten karara bağlandı ({DURUM_ADI.get(t['durum'], t['durum'])}).")
         out["sonuc"]["gerekce"] = "kayıt talebi zaten karara bağlandı"
         return out
-    kart_acilir = islem == "onay" and depo.bayi_oku(t["numara"]) is None
-    metin(patron_sonuc_metni(t, islem, kart_acilir, str((settings or {}).get("mode") or "patron")))
-    out["kayit_karari"] = {"id": tid, "islem": islem, "kart_acilir": kart_acilir}
-    cipa = karar_satirlari(t, islem, kart_acilir)
+    kart_var = depo.bayi_oku(t["numara"]) is not None
+    metin(patron_sonuc_metni(t, islem, kart_var, str((settings or {}).get("mode") or "patron")))
+    out["kayit_karari"] = {"id": tid, "islem": islem, "kart_var": kart_var}
+    cipa = karar_satirlari(t, islem, kart_var)
     if cipa:
         out["cipa_satirlari"] = [{"mesaj_id": t["son_mesaj_id"], "satirlar": cipa}]
     out["sonuc"]["gerekce"] = "kayıt onaylandı" if islem == "onay" else "kayıt reddedildi"

@@ -15,9 +15,12 @@ CREATE TABLE IF NOT EXISTS kayit_talepleri (
     karar_mesaj_id text,                                -- Patron'un düğme mesajı (WhatsApp'tan karar verildiyse)
     olusturuldu    timestamptz NOT NULL DEFAULT now(),
     guncellendi    timestamptz NOT NULL DEFAULT now(),
-    karar_zamani   timestamptz
+    karar_zamani   timestamptz,
+    hatirlatildi   timestamptz                          -- son "onay bekliyor" cevabı (24 saatte bir; kanal/kayit.py)
 );
 -- Numara başına tek açık talep (iki eşzamanlı mesaj ikinci talep açamaz).
 CREATE UNIQUE INDEX IF NOT EXISTS kayit_talepleri_acik ON kayit_talepleri (numara) WHERE durum IN ('ad', 'firma', 'onay_bekliyor');
 CREATE INDEX IF NOT EXISTS kayit_talepleri_numara ON kayit_talepleri (numara, id DESC);
 CREATE INDEX IF NOT EXISTS kayit_talepleri_olusturuldu ON kayit_talepleri (olusturuldu DESC);
+-- Kayıt cevaplarının numara başına 24 saatlik sayımı (her kayıtsız mesajda; tablo taramasız).
+CREATE INDEX IF NOT EXISTS giden_kayit_cevap ON giden (alici, olusturuldu) WHERE tur = 'kayit';

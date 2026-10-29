@@ -106,7 +106,7 @@ class GonderenMeta:
             if satir.get("pencere_kapaliysa") and acik:
                 # Eşlik eden metin satırı (aynı mesaj, aynı alıcı, daha küçük sıra) gerçekten gittiyse ücretli şablona gerek yok;
                 # metin düştüyse (belirsiz, gönderilmedi) şablon gider; metin hâlâ sıradaysa bu satır bekler.
-                metin_durumu = self.depo.kardes_metin_durumu(r["mesaj_id"], r["alici"], int(r.get("sira") or 0))
+                metin_durumu = self.depo.kardes_metin_durumu(r["mesaj_id"], r["alici"], int(r.get("sira") or 0), bool(satir.get("kardes_dugmeli")))
                 if metin_durumu == "kabul_edildi":
                     raise K.Gonderilmedi("Gönderilmedi: sablon_gereksiz (pencere açık, metin satırı gitti)")
                 if metin_durumu in ("bekliyor", "gonderiliyor"):

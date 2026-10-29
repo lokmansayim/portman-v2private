@@ -332,10 +332,11 @@ def ilk_temas_formu(p: Panel, oturum: dict, numara: str, b: dict | None, yazdi: 
     return out
 
 
-def kayit_karti(p: Panel, oturum: dict, numara: str) -> str:
-    """İE-22: numaranın WhatsApp'tan gelen son kayıt talebi; onay bekliyorsa [Onayla] [Reddet], reddedildiyse [Reddi geri al]."""
+def kayit_karti(p: Panel, oturum: dict, numara: str, kart_var: bool = False) -> str:
+    """İE-22: numaranın WhatsApp'tan gelen son kayıt talebi; onay bekliyorsa [Onayla] [Reddet], reddedildiyse [Reddi geri al]. Kart
+    sonradan elle açıldıysa (kart_var) yalnız onay bekleyen talep gösterilir: Onayla talebi kapatır, karşılama gitmez."""
     t = p.depo.son_kayit_talebi(numara)
-    if t is None:
+    if t is None or (kart_var and t["durum"] != "onay_bekliyor"):
         return ""
     csrf = p.csrf(oturum["n"])
     out = (f'<p class="durum">Kayıt talebi <b>{e(KY.kimlik(t["id"]))}</b> · {e(KY.DURUM_ADI.get(t["durum"], t["durum"]))} · ad: <b>{e(t["ad"] or "-")}</b>'
@@ -346,7 +347,8 @@ def kayit_karti(p: Panel, oturum: dict, numara: str) -> str:
         return (f'<form class="kart" method="post" action="/panel/konusma/{e(numara)}/{islem}"><input type="hidden" name="csrf" value="{csrf}">'
                 f'<input type="hidden" name="talep" value="{int(t["id"])}"><button>{e(etiket)}</button> <span class="durum">{e(aciklama)}</span></form>')
     if t["durum"] == "onay_bekliyor":
-        out += dugme("kayit_onay", "Onayla", "Bayi kartı açılır (aktif), bayiye karşılama şablonu gider (ücretli).")
+        out += dugme("kayit_onay", "Onayla", "Kart zaten var: talep kapanır, karşılama gitmez." if kart_var else
+                     "Bayi kartı açılır (aktif), bayiye karşılama şablonu gider (ücretli).")
         out += dugme("kayit_red", "Reddet", f"Kart açılmaz; bu numara {KY.RED_BEKLEME_GUN} gün yeni kayıt talebi açmaz.")
     elif t["durum"] == "reddedildi":
         out += dugme("kayit_geri_al", "Reddi geri al", "Talep yeniden onay bekler; sonra buradan ya da WhatsApp'tan onaylayabilirsiniz.")
@@ -397,7 +399,7 @@ def konusma_sayfasi(p: Panel, oturum: dict, numara: str, hata: str | None = None
     b = p.depo.bayi_oku(numara)
     if b:
         kart = (f'<p class="durum">Bayi: <b>{e(b["ad"] or "-")}</b> · kod {e(b["kod"] or "-")} · {e(b["rol"])} · {e(b["firma"] or "-")}'
-                f' · {"aktif" if b["aktif"] else "PASİF"} · <a href="/panel/bayi/{e(numara)}">düzenle</a></p>')
+                f' · {"aktif" if b["aktif"] else "PASİF"} · <a href="/panel/bayi/{e(numara)}">düzenle</a></p>') + kayit_karti(p, oturum, numara, kart_var=True)
     else:
         kart = f'<p class="durum">Kayıtsız numara · <a href="/panel/bayi/yeni?numara={e(numara)}">bayi olarak ekle</a></p>' + kayit_karti(p, oturum, numara)
     ogeler = []
@@ -703,7 +705,7 @@ def konusma_kayit(p: Panel, oturum: dict, i: Istek, numara: str, islem: str) -> 
         log("kayıt reddi geri alındı", maske(numara), KY.kimlik(t["id"]))
         return _yonlendir(f"/panel/konusma/{numara}")
     karar = "onay" if islem == "kayit_onay" else "red"
-    r = p.depo.kayit_karari_yaz(t["id"], karar, lambda tt, k, kart: KY.karar_satirlari(tt, k, kart, kaynak="panel"))
+    r = p.depo.kayit_karari_yaz(t["id"], karar, lambda tt, k, kart_var: KY.karar_satirlari(tt, k, kart_var, kaynak="panel"))
     if r["sonuc"] not in ("onaylandi", "reddedildi"):
         return _html(400, konusma_sayfasi(p, oturum, numara, hata=f"{KY.kimlik(t['id'])} zaten karara bağlandı."))
     log("kayıt kararı (panel)", maske(numara), KY.kimlik(t["id"]), r["sonuc"], "kart açıldı" if r["kart_acildi"] else "")

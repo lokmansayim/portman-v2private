@@ -132,22 +132,27 @@ def test_uc_adim_ve_patrona_talep(app, acik, depo, llmsiz):
 def test_gecersiz_cevap_ayni_soru_ve_cevap_siniri(app, acik, depo):
     assert yaz(app, NUMARA_X, "merhaba") == {"kayit:ad+cevap": 1}
     assert yaz(app, NUMARA_X, None, type="image", image={"id": "55501", "mime_type": "image/jpeg"}) == {"kayit:ad+cevap": 1}
-    assert yaz(app, NUMARA_X, "0532 123 45 67") == {"kayit:ad+cevap": 1}
+    assert yaz(app, NUMARA_X, "0500 000 00 00") == {"kayit:ad+cevap": 1}
     assert yaz(app, NUMARA_X, "x") == {"kayit:ad+cevap": 1}
+    assert yaz(app, NUMARA_X, "y") == {"kayit:ad+cevap": 1}
     govde = [r["govde"] for r in sorgu(depo, "SELECT govde FROM giden WHERE alici = %s ORDER BY olusturuldu", NUMARA_X)]
-    assert govde == [KY.SORU_AD] + [KY.SORU_AD_YENIDEN] * 3
-    # 24 saatte 4 cevap: sonrası sessiz, ama geçerli cevap talebi ilerletir
-    assert yaz(app, NUMARA_X, "y") == {"kayit:ad": 1}
-    assert yaz(app, NUMARA_X, "Ayşe Kaya") == {"kayit:firma": 1}
-    assert tek(depo, "SELECT count(*) AS n FROM giden WHERE alici = %s", NUMARA_X)["n"] == 4
-    with depo.baglan() as c:
+    assert govde == [KY.SORU_AD] + [KY.SORU_AD_YENIDEN] * 4
+    # 24 saatte 5 cevap: konuşma durur; geçerli cevap da talebi ilerletmez (firma sorulmadan "firma bekleniyor"a geçilmez; inceleme 29.10)
+    assert yaz(app, NUMARA_X, "Ayşe Kaya") == {"kayit:ad": 1}
+    assert (talep_satiri(depo)["durum"], talep_satiri(depo)["ad"]) == ("ad", "")
+    assert tek(depo, "SELECT count(*) AS n FROM giden WHERE alici = %s", NUMARA_X)["n"] == KY.CEVAP_SINIRI == 5
+    with depo.baglan() as c:                                          # 25 saat sessizlik: cevaplar ve talep eskidi
         c.execute("UPDATE giden SET olusturuldu = now() - interval '25 hours'")
+        c.execute("UPDATE kayit_talepleri SET guncellendi = now() - interval '25 hours'")
+    assert yaz(app, NUMARA_X, "Ayşe Kaya") == {"kayit:ad+cevap": 1}               # baştan: ad yeniden sorulur
+    assert [r["durum"] for r in sorgu(depo, "SELECT durum FROM kayit_talepleri ORDER BY id")] == ["zaman_asimi", "ad"]
+    assert yaz(app, NUMARA_X, "Ayşe Kaya") == {"kayit:firma+cevap": 1}
     assert yaz(app, NUMARA_X, "Kaya İnşaat") == {"kayit:onay_bekliyor+cevap": 1}
     assert talep_satiri(depo)["ad"] == "Ayşe Kaya"
     assert tek(depo, "SELECT count(*) AS n FROM giden WHERE alici = 'PATRON'")["n"] == 2
 
 
-@pytest.mark.parametrize("deger,ad_mi", [("Ahmet Yılmaz", True), ("Ali", True), ("Al", False), ("12345", False), ("Ahmet 0532 123 4567", False),
+@pytest.mark.parametrize("deger,ad_mi", [("Ahmet Yılmaz", True), ("Ali", True), ("Al", False), ("12345", False), ("Ahmet 0500 000 0000", False),
                                          ("www http://x.y", False), ("a@b.c Ahmet", False), ("A" * 81, False)])
 def test_ad_denetimi(deger, ad_mi):
     assert (KY.ad_coz({"type": "text", "text": deger}) is not None) is ad_mi
@@ -156,12 +161,15 @@ def test_ad_denetimi(deger, ad_mi):
 
 
 def test_onay_beklerken_24_saatte_bir_cevap_patrona_tek_bildirim(app, acik, depo):
+    with depo.baglan() as c:                                          # az önce sabit cevap almış numara: hatırlatma bu sayaçtan bağımsız
+        c.execute("INSERT INTO kayitsiz_cevaplar (gonderen, son) VALUES (%s, now())", (NUMARA_X,))
     talep_sonu(app)
     assert yaz(app, NUMARA_X, "ne oldu?") == {"kayit:onay_bekliyor+cevap": 1}
     assert yaz(app, NUMARA_X, "alo") == {"kayit:onay_bekliyor": 1}
     assert tek(depo, "SELECT govde FROM giden WHERE alici = %s ORDER BY olusturuldu DESC LIMIT 1", NUMARA_X)["govde"] == KY.ONAY_BEKLIYOR
+    assert tek(depo, "SELECT sayi FROM kayitsiz_cevaplar WHERE gonderen = %s", NUMARA_X)["sayi"] == 1    # kayıt sabit cevabın sayacını yemez
     with depo.baglan() as c:                                          # 25 saat geçti (cevap sınırı da sıfırlanır)
-        c.execute("UPDATE kayitsiz_cevaplar SET son = now() - interval '25 hours'")
+        c.execute("UPDATE kayit_talepleri SET hatirlatildi = hatirlatildi - interval '25 hours'")
         c.execute("UPDATE giden SET olusturuldu = olusturuldu - interval '25 hours'")
     assert yaz(app, NUMARA_X, "hâlâ bekliyorum") == {"kayit:onay_bekliyor+cevap": 1}
     assert tek(depo, "SELECT count(*) AS n FROM giden WHERE alici = 'PATRON'")["n"] == 2
@@ -280,7 +288,7 @@ def test_panel_karar_verirken_yaris_cakisma_ve_ikinci_tur(app, acik, depo, monke
 
     def araya_panel(depo_, gelen, settings=None):
         out = asil(depo_, gelen, settings)
-        depo_.kayit_karari_yaz(t["id"], "red", lambda tt, k, kart: KY.karar_satirlari(tt, k, kart, kaynak="panel"))
+        depo_.kayit_karari_yaz(t["id"], "red", lambda tt, k, kart_var: KY.karar_satirlari(tt, k, kart_var, kaynak="panel"))
         return out
     monkeypatch.setattr(KY, "isle", araya_panel)
     r = kalici.bir_is(depo, AYAR_K, "t")
@@ -301,6 +309,37 @@ def test_kart_onaydan_once_panelden_acildiysa_karsilama_gitmez(app, acik, depo):
     assert depo.bayi_oku(NUMARA_X)["ad"] == "Elle Açılan"                    # kart ezilmez
     assert "zaten var" in tek(depo, "SELECT govde FROM giden WHERE alici = %s", NUMARA_P)["govde"]
     assert tek(depo, "SELECT count(*) AS n FROM giden WHERE alici = %s AND kind = 'template'", NUMARA_X)["n"] == 0
+
+
+def test_kart_elle_acildiysa_panel_talebi_gosterir_red_bayiye_gitmez(app, acik, depo, pn):
+    """İnceleme (29.10): onay beklerken kart elle açılırsa talep askıda kalmaz; panel gösterir, karar talebi kapatır, bayiye bir şey gitmez."""
+    talep_sonu(app)
+    t = talep_satiri(depo)
+    depo.bayi_yaz(NUMARA_X, ad="Elle Açılan", rol="bayi")
+    c = Istemci(pn); c.giris(DOGRU)
+    assert "Onay bekleyen bayi kaydı: <b>1</b>".encode() in c.git("GET", "/panel/")[1]
+    kod, h, _ = c.git("GET", f"/panel/konusma/{NUMARA_X}")
+    assert "Bayi: <b>Elle Açılan</b>".encode() in h and f'action="/panel/konusma/{NUMARA_X}/kayit_red"'.encode() in h
+    assert "Kart zaten var: talep kapanır, karşılama gitmez.".encode() in h
+    post(app, yuk([dugme(NUMARA_P, f"kayit:red:{t['id']}", "Reddet")]))
+    [r] = isle_hepsi(depo)
+    assert r["gerekce"] == "kayıt reddedildi" and talep_satiri(depo)["durum"] == "reddedildi"
+    assert "zaten var" in tek(depo, "SELECT govde FROM giden WHERE alici = %s", NUMARA_P)["govde"]
+    assert tek(depo, "SELECT count(*) AS n FROM giden WHERE alici = %s AND sira >= 201", NUMARA_X)["n"] == 0      # red metni gitmedi
+    assert depo.bayi_oku(NUMARA_X)["ad"] == "Elle Açılan" and "Onay bekleyen bayi kaydı".encode() not in c.git("GET", "/panel/")[1]
+    assert b"kayit_geri_al" not in c.git("GET", f"/panel/konusma/{NUMARA_X}")[1]
+
+
+def test_kardes_dugmeli_yalniz_kayit_sablonunda(app, acik, depo):
+    """İnceleme (29.10): düğmeli satır yalnız kardes_dugmeli şablonda eşlik eden satır sayılır; öteki şablonlar eskisi gibi metne bakar."""
+    talep_sonu(app)
+    t = talep_satiri(depo)
+    with depo.baglan() as c:
+        c.execute("UPDATE giden SET durum = 'kabul_edildi' WHERE mesaj_id = %s AND sira = 2", (t["son_mesaj_id"],))
+    assert depo.kardes_metin_durumu(t["son_mesaj_id"], "PATRON", 3, True) == "kabul_edildi"
+    assert depo.kardes_metin_durumu(t["son_mesaj_id"], "PATRON", 3) is None
+    sablon = tek(depo, "SELECT satir FROM giden WHERE mesaj_id = %s AND sira = 3", t["son_mesaj_id"])["satir"]
+    assert sablon["kardes_dugmeli"] is True and sablon["pencere_kapaliysa"] is True
 
 
 def test_yabanci_ve_bozuk_dugme(app, acik, depo):
