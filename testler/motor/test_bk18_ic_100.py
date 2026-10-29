@@ -31,9 +31,9 @@ def _ie() -> dict:
 ON_KATMANLAR = ("ON_GORUNUS", "ON_DERZ", "ON_CATI", "ON_TOPUK")
 
 
-def _on_gorunus(dxf: Path) -> list:
-    """Ön görünüşün çizgileri (duvar, derz, çatı ve topuk; ölçü, yazı ve doğrama bloğu hariç): katman ve noktalar, sıralı (BK-18 ek; Lokman,
-    29 Ekim 2026, verandanın saçak ve topuk çizgisi)."""
+def _gorunusler(dxf: Path) -> list:
+    """Görünüşlerin çizgileri (duvar, derz, çatı ve topuk; ölçü, yazı ve doğrama bloğu hariç): katman ve noktalar, sıralı (BK-18 ek; Lokman,
+    29 Ekim 2026, verandanın saçak ve topuk çizgisi; D-31'den beri dört görünüş)."""
     out = []
     for e in ezdxf.readfile(dxf).modelspace():
         if e.dxf.layer in ON_KATMANLAR and e.dxftype() in ("LINE", "LWPOLYLINE"):
@@ -43,8 +43,8 @@ def _on_gorunus(dxf: Path) -> list:
 
 
 def _iz(cikti: Path) -> dict:
-    """Ön onay çiziminin izi: doğrulama özeti, pano BOM'u, ön görünüşün çizgileri ve yükleme listesinin satırları (üretim saati ve dosya adı
-    girmez)."""
+    """Ön onay çiziminin izi: doğrulama özeti, pano BOM'u, dört görünüşün çizgileri ve yükleme listesinin satırları (üretim saati ve dosya
+    adı girmez)."""
     v = json.loads((cikti / "validation.json").read_text(encoding="utf-8"))
     b = json.loads((cikti / "bom.json").read_text(encoding="utf-8"))
     m = json.loads((cikti / "manifest.json").read_text(encoding="utf-8"))
@@ -53,7 +53,7 @@ def _iz(cikti: Path) -> dict:
             | {"rooms_m2": {k: round(x, 4) for k, x in v["rooms_m2"].items()},
                "openings": [{"kind": o["kind"], "name": o["name"], "gap": [round(x, 3) for x in o["gap"]]} for o in v["openings"]]},
             "bom": [{k: r[k] for k in ("kod", "malzeme", "olcu_mm", "adet", "birim")} for r in b["kalemler"]],
-            "on_gorunus": _on_gorunus(cikti / m["dxf"]),
+            "gorunusler": _gorunusler(cikti / m["dxf"]),
             "liste": [{k: r[k] for k in ("grup", "kalem", "olcu", "adet")} for r in PL.is_emrinden(_ie())["satirlar"]]}
 
 

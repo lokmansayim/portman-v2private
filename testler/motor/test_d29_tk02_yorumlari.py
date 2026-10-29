@@ -10,6 +10,8 @@
 
 Ön görünüşteki veranda saçak ve topuk çizgisi (aynı gün) `test_veranda.py::test_on_gorunuste_veranda_sacak_ve_topuk`'ta. 1–3 anahtarlı İş Emri'nde
 çalışır (o durum yalnız orada var); 4 ve 5 P6001 dahil bütün planlarda (D-29 madde 6, Lokman 08:22: "takılıp kalma P6001'e").
+D-30 (aynı gün 10:48, son pano 122 ve üzeriyse tam pano): TK-01 ve TK-02 898 × 888 → 898,5 × 888,5; salonun "doğal olarak 125'e düşen"
+ilk panosu 125,5 oldu, arka duvarın ve niş kapı hattının ekseni 0,5 cm kaydı (883 → 883,5, 130 → 130,5); yarım panolar ve T'ler aynı.
 """
 from __future__ import annotations
 import json
@@ -49,8 +51,8 @@ def _boylar(d):
 def test_pencere_iki_yani_yarim_pano(ie):
     plan = G.kur(ie)
     sol = _boylar(_duvar(plan, "y", 5.0))                                   # salonun sol duvarı (Lokman'ın örneği)
-    assert sol[:5] == [(125.0, ""), (62.75, ""), (125.5, "P"), (62.75, ""), (125.5, "")], sol
-    arka = _boylar(_duvar(plan, "x", 883.0))                                # yatak odası 1'in arka penceresi
+    assert sol[:5] == [(125.5, ""), (62.75, ""), (125.5, "P"), (62.75, ""), (125.5, "")], sol     # D-30: ilk pano 125 → 125,5
+    arka = _boylar(_duvar(plan, "x", 883.5))                                # yatak odası 1'in arka penceresi (D-30: 883 → 883,5)
     assert arka[:3] == [(62.75, ""), (125.5, "P"), (62.75, "")], arka
 
 
@@ -78,12 +80,12 @@ def test_nis_kapisinda_kose_yok_3lu_h(ie):
     assert not [k for k in plan.koseler if k.rect[1] < d.c + d.h and k.rect[3] > d.c - d.h]   # kapı hattında köşe parçası yok
     assert len(plan.koseler) == 8                                            # nişin ağzındaki iki köşe kalır
     h = sorted((round(b.x, 3), round(b.y, 3), b.tur) for b in plan.h_baglantilar if abs(b.y - d.c) < 1e-6)
-    assert h == [(386.5, 130.0, "dis"), (512.0, 130.0, "dis")]
+    assert h == [(386.5, 130.5, "dis"), (512.0, 130.5, "dis")]              # D-30: kapı hattı 130 → 130,5
     ek = G.uc_uca_ekler(plan)
-    assert sorted((k["x"], k["y"], k["cins"]) for k in ek) == [(386.5, 130.0, "uclu"), (512.0, 130.0, "uclu")]
+    assert sorted((k["x"], k["y"], k["cins"]) for k in ek) == [(386.5, 130.5, "uclu"), (512.0, 130.5, "uclu")]
     for c in (386.5, 512.0):                                                 # yan duvar kapının ekseninde hol duvarına ek verir
-        uc = sorted((w.tur, w.p0, w.p1) for w in plan.duvarlar if w.yon == "y" and abs(w.c - c) < 1e-6 and 130.0 in (w.p0, w.p1))
-        assert [(t, a if t == "ic" else b) for t, a, b in uc] == [("dis", 130.0), ("ic", 130.0)] and uc[0][1] == 5.0, uc
+        uc = sorted((w.tur, w.p0, w.p1) for w in plan.duvarlar if w.yon == "y" and abs(w.c - c) < 1e-6 and 130.5 in (w.p0, w.p1))
+        assert [(t, a if t == "ic" else b) for t, a, b in uc] == [("dis", 130.5), ("ic", 130.5)] and uc[0][1] == 5.0, uc
     L = PL.is_emrinden(ie)
     adet = lambda bas: sum(r["adet"] for r in L["satirlar"] if r["kalem"].startswith(bas))
     assert adet("3'lü H 100 × 100") == sum(b.tur == "dis" for b in plan.h_baglantilar) == 8

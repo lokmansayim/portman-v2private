@@ -1,6 +1,6 @@
 {
  "is_emri_no": "PM-TK02-80M2",
- "revizyon": 1,
+ "revizyon": 3,
  "talep": {
   "bayi": {
    "kod": "TK02",
@@ -171,7 +171,8 @@
    "tur": "pencere",
    "olcu": "120x180",
    "mahal": "YATAK ODASI 1",
-   "duvar": "arka"
+   "duvar": "arka",
+   "acilis": "surgulu"
   },
   {
    "tur": "pencere",
@@ -314,13 +315,13 @@
  "pafta_uyarilari": [],
  "varsayimlar": [
   "Bayi çizimi TK-01'inkiyle aynı (aynı görsel); okuma TK-01 İş Emri r06'dan (Patron onaylı, 28 Ekim 10:35). Tek fark iç duvarlar 100'lük (Patron 28 Ekim 21:41: \"içlerde 100'lük\").",
-  "Ölçüler bayi çiziminden: gövde 898 × 888 cm, 7 × 7 pano (son panolar 0,5 cm kesik); oda sınırları çizimdeki zincirlerle 125,5 akslarına oturuyor.",
+  "Ölçüler bayi çiziminden: gövde 898 × 888 cm, 7 × 7 pano; iki yönde son pano 125 cm, 122 ve üzeri olduğu için Motor dış ölçüyü 898,5 × 888,5'e tamamlar (D-30, Lokman 29 Ekim 10:48); oda sınırları çizimdeki zincirlerle 125,5 akslarına oturuyor.",
   "Yatak odası 1 (11,5 m²) ve yatak odası 2 (13 m²) L biçimli: banyoların altında kalan parça odaya dahil (alanlar çizimle tutuyor).",
   "Dış kapı bir pano içeride (Patron 28 Ekim 08:01: \"dış kapı 1 pano içeride\"): holün başında, ön duvardan 125,5 cm içeride; öndeki pano açık giriş nişi (GİRİŞ, iki yanı salon ve mutfak duvarı, önü veranda). r05'te kapı ön duvara alınmıştı (yanlış okuma); r04'teki ANTRE ve ANTRE–HOL iç kapısı yok.",
   "Çatı eğimi %33: kural kitabı (kurallar/plan/oda_kurallari.json, çatı eğimi 33; saçak 30, topuk 10). r03'teki %27,5 bayi görünüşündeki 142 cm'den okunmuştu; Patron 27 Ekim 16:43 reddetti.",
-  "Yatak odası 1'in arka duvarındaki 120x180 pencere olarak çizildi (arka verandaya açılan kapı değil).",
+  "Yatak odası 1'in arka duvarındaki 120x180 pencere olarak çizildi; sürgülü, arka verandaya kapı gibi açılır (r03, Lokman 29 Ekim 11:57: \"arka verandadaki pencere aslında sürgülü kapı gibi kullanılıyor\"; D-31 madde 11). Ölçüsü, eşiği (20 cm) ve panosu pencereninki.",
   "Dış kapı 90, iç kapılar 82 (çalışma kabulü); kapıların panodaki yeri motorun kuralından.",
-  "Verandalar bayi çiziminden: önde 386 × 181 (gövdenin solundan 256–642), arkada 261 × 130 (solda 0–261); dış köşelerde 10 × 10 iki kolon, üç açık kenarda kiriş (BK-14).",
+  "Verandalar bayi çiziminden: önde 386 × 181 (gövdenin solundan 256–642), arkada 266 × 130 (solda 0–266; r02: sağ kolon C aksının üstünde, Lokman 29 Ekim 10:58 \"arka veranda sağ profili aksın üzerine al 266 cm olsun\"; r01'de 261, kolonun dış yüzü aksta); dış köşelerde 10 × 10 iki kolon, üç açık kenarda kiriş (BK-14).",
   "İki veranda çatısı da ana çatıya paralel küçük beşik, %33 (kitap), saçak 30 (ön görünüşteki gibi; arkanınki aynı varsayıldı).",
   "Çatı kaplaması Tek Kat Panel, antrasit; tavan asma (ters tavanlı liste ayrıca); hiçbir kalem alıcıya ait değil (TK-01'deki gibi; Patron 27 Ekim 13:49 ve 13:51)."
  ],
@@ -342,7 +343,7 @@
    "ad": "ARKA VERANDA",
    "cephe": "arka",
    "bas_cm": 0,
-   "bit_cm": 261,
+   "bit_cm": 266,
    "derinlik_cm": 130,
    "cati": {
     "tip": "besik",

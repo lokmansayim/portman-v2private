@@ -47,14 +47,17 @@ def test_tk01_toplamlar(T):
     Lokman 28 Ekim 13:27 "ne varsa onaylıyorum": defter r04'te bu öneriler onaylı kalem (kiriş 3.217 ve 2.175, röle 2.000; İE-13 PR-3),
     toplam 7.392 arttı, 8 satır fiyatsız, onay bekleyen öneri yok. Öneri gösterimi `test_oneri_gosterimi`'nde r03'ün iki kalemiyle sınanır.
     D-29 (Lokman 29 Ekim 07:54, TK-02 yorumu "63 değil 627,5 mm"): oda ortasındaki pencerenin iki yanı 62,75'lik yarım pano; 100'lük
-    dolu panonun dört boyu (640, 635, 625, 610) tek boya (625 × 7) indi: 3 satır az, toplam 2.100 TL az (421.938,13 → 419.838,13)."""
+    dolu panonun dört boyu (640, 635, 625, 610) tek boya (625 × 7) indi: 3 satır az, toplam 2.100 TL az (421.938,13 → 419.838,13).
+    D-30 (Lokman 29 Ekim 10:48, "122 ve üzeri biten tüm projeleri tam panoya tamamlar"): dış ölçü 898 × 888 → 898,5 × 888,5; kesik son
+    panolar (1245, 620, 1195) tam boya (1250, 625, 1200) ve makas açıklığı 8980 → 8985: asma 128 → 124, ters 126 → 122 satır; defterde
+    kesik boyla tam boyun fiyatı aynı (bant), toplam değişmedi."""
     assert T["kod"] == "TK-01" and T["is_emri_no"] == "PM-TK01-80M2" and T["revizyon"] == 5
     assert T["defter_surumu"] == "2026-10-28-r04" and not T["oneri_dahil"]
     ozet = {s["ad"]: s["fiyat"]["ozet"] for s in T["secenekler"]}
     assert list(ozet) == ["Asma tavan", "Ters tavan"]
     assert ozet["Asma tavan"]["toplam"] == 419838.13 and ozet["Ters tavan"]["toplam"] == 418567.13
-    assert (ozet["Asma tavan"]["satir"], ozet["Asma tavan"]["fiyatli"], len(ozet["Asma tavan"]["fiyatsiz"])) == (128, 120, 8)
-    assert (ozet["Ters tavan"]["satir"], ozet["Ters tavan"]["fiyatli"], len(ozet["Ters tavan"]["fiyatsiz"])) == (126, 118, 8)
+    assert (ozet["Asma tavan"]["satir"], ozet["Asma tavan"]["fiyatli"], len(ozet["Asma tavan"]["fiyatsiz"])) == (124, 116, 8)
+    assert (ozet["Ters tavan"]["satir"], ozet["Ters tavan"]["fiyatli"], len(ozet["Ters tavan"]["fiyatsiz"])) == (122, 114, 8)
     kiris = [(x["olcu"], x["birim_fiyat"]) for x in T["secenekler"][0]["fiyat"]["satirlar"] if x["kalem"] == "Kutu profil (kiriş) 100 × 100"]
     assert kiris == [("L 3860", 3217), ("L 1710", 1425), ("L 1710", 1425), ("L 2610", 2175), ("L 1200", 1000), ("L 1200", 1000)]
     roleler = [x["birim_fiyat"] for x in T["secenekler"][0]["fiyat"]["satirlar"] if x["kalem"] == "Kaçak akım rölesi (ikili)"]
@@ -246,7 +249,7 @@ def test_fiyat_kaynagi(cikti, T):
     rows = list(ws.iter_rows(min_row=3, values_only=True))
     anahtarlar = {F.anahtar(x, "prefabrik") for s in T["secenekler"] for x in s["fiyat"]["satirlar"]}
     assert len(rows) == len(anahtarlar) == len({f"{r[0]} | {r[1]}" for r in rows})
-    r = next(r for r in rows if r[0] == "60'lık karkaslı + kasalı pano" and r[1] == "60 × 1195 × 2500")
+    r = next(r for r in rows if r[0] == "60'lık karkaslı + kasalı pano" and r[1] == "60 × 1200 × 2500")   # D-30: 1195 → 1200
     assert (r[4], r[5]) == ("bant", 2550) and "bandı" in r[-1]
 
 

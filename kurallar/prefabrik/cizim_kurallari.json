@@ -1,0 +1,488 @@
+{
+ "sema": "portman.prefabrik_cizim_kurallari/1",
+ "aciklama": "Pano birimli prefabrik Motor'un ön onay çiziminin (dxf_out: DXF'te kat planı, net alan planı, saha montaj planı, dört görünüş; bayiye giden PDF tek sayfa dikey A4, PC-19) Lokman'dan gelen kuralları; tek liste (D-31 madde 8). Her satırda kararı, Lokman'ın sözü ve saati, kodda yeri ve onu kilitleyen test. Kural kodda durur; bu liste kodu yönetmez, kuralın nerede yazılı ve nerede sınandığını gösterir. Yeni bir çizim kuralı buraya satır olarak girer; satırın kodu, karar dosyası ve testi `testler/motor/test_prefabrik_cizim_kurallari.py` ile denetlenir.",
+ "ayri": "Çelik hattının çizim seti (kurallar/cizim/cizim_seti.json, Örnek Şablon paftası) prefabrikte kullanılmaz (Lokman, 27 Ekim 2026 21:13). Bu dosya testler/referans/dogrula.py'nin girdi kalıbında değildir: satır eklemek referansı değiştirmez, çizimi değiştiren kod değişikliği değiştirir.",
+ "eski_kurallar": "D-29'dan önceki prefabrik çizim kuralları (D-12, D-14, D-15, BK-13, BK-14, İE-11, İE-17) `.claude/rules/motor-cizim.md`'de ve kendi karar dosyalarında; bu listeye sırayla taşınır.",
+ "kurallar": [
+  {
+   "kod": "PC-01",
+   "baslik": "Veranda çatısında saçak altı ve topuk",
+   "kural": "Taşan verandanın çatısı görünüşte ana çatı gibi: duvar üstünde saçak ucundan saçak ucuna saçak altı çizgisi, iki uçta topuk (duvar üstü … saçak kotu); kalkanın iki ucu topuğun üstünde.",
+   "karar": "D-29",
+   "madde": 1,
+   "lokman": {
+    "tarih": "2026-10-29",
+    "saat": "07:44",
+    "soz": "Ön Veranda makasındaki saçak çizgisi ile topuk çizgisi çıkmamış"
+   },
+   "kod_yeri": [
+    "motor/veranda.py::gorunus_parcalari",
+    "motor/dxf_out.py::Cizici._veranda_gorunusu"
+   ],
+   "test": [
+    "testler/motor/test_veranda.py::test_on_gorunuste_veranda_sacak_ve_topuk"
+   ]
+  },
+  {
+   "kod": "PC-02",
+   "baslik": "Pencerenin iki yanı yarım pano",
+   "kural": "Oda ortasındaki pencere: oda ortasına en çok 5 cm uzaktaki ekin iki yanında tam pano varsa pencereli pano o eke ortalanır, iki yanı 62,75'lik yarım pano; yoksa pencere odanın tam ortasında (D-15).",
+   "karar": "D-29",
+   "madde": 2,
+   "lokman": {
+    "tarih": "2026-10-29",
+    "saat": "07:54",
+    "soz": "63 değil 627,5mm solundaki pano 62,75"
+   },
+   "kod_yeri": [
+    "motor/geometry.py::PENCERE_YARIM_PANO_ESIGI_CM"
+   ],
+   "sabitler": [
+    {
+     "yer": "motor/geometry.py::PENCERE_YARIM_PANO_ESIGI_CM",
+     "deger": 5.0
+    }
+   ],
+   "test": [
+    "testler/motor/test_d29_tk02_yorumlari.py::test_pencere_iki_yani_yarim_pano",
+    "testler/motor/test_d29_tk02_yorumlari.py::test_uzak_ekte_oda_ortasi_kalir",
+    "testler/motor/test_d29_tk02_yorumlari.py::test_pk01_paftasi_degismez"
+   ]
+  },
+  {
+   "kod": "PC-03",
+   "baslik": "Giriş nişinin kapı hattı T (3'lü H)",
+   "kural": "Nişin yan duvarı hol duvarı olarak aynı eksende sürüyorsa kapı duvarının iki ucunda köşe direği konmaz, 3'lü H (dış duvar T'si); kapı duvarı yan duvarların yüzleri arasında.",
+   "karar": "D-29",
+   "madde": 3,
+   "lokman": {
+    "tarih": "2026-10-29",
+    "saat": "07:52",
+    "soz": "giriş kapısındaki hole açılan taraftaki köşe direklerini kaldır"
+   },
+   "kod_yeri": [
+    "motor/geometry.py::uc_uca_ekler"
+   ],
+   "test": [
+    "testler/motor/test_d29_tk02_yorumlari.py::test_nis_kapisinda_kose_yok_3lu_h",
+    "testler/motor/test_d29_tk02_yorumlari.py::test_nis_t_yalniz_ayni_eksende"
+   ]
+  },
+  {
+   "kod": "PC-04",
+   "baslik": "Dış T'sindeki 3'lü H kutusu çizilmez",
+   "kural": "Dış duvar T'sindeki 3'lü H simgesinin gövdesi kapalı DIS_UCLU_H_GOVDE katmanında; parça BOM'da, doğrulamada, IFC'de ve listede sayılır.",
+   "karar": "D-29",
+   "madde": 4,
+   "lokman": {
+    "tarih": "2026-10-29",
+    "saat": "07:58",
+    "soz": "arka tarafta 3 lü birleşim noktalarında yeşil yeşil kutular var bunlar nedir onları kaldır bizde öyle birşey yok"
+   },
+   "kod_yeri": [
+    "motor/dxf_out.py::Cizici._h_blok_dis"
+   ],
+   "test": [
+    "testler/motor/test_d29_tk02_yorumlari.py::test_dogrulamadan_gecer_dis_h_kutusu_cizilmez"
+   ]
+  },
+  {
+   "kod": "PC-05",
+   "baslik": "Pencere yazısı alttan ya da sağdan okunur",
+   "kural": "Planda pencereli panonun ölçü yazısı baş aşağı düşüyorsa (90° … 270°) yazısı 180° çevrilmiş blok kullanılır; malzeme kodu aynı. Bütün planlarda, P6001 dahil.",
+   "karar": "D-29",
+   "madde": 5,
+   "lokman": {
+    "tarih": "2026-10-29",
+    "saat": "07:59",
+    "soz": "önden bakınca arkadaki yatak odası 1'in 120/180 yazısı ters kalıyor"
+   },
+   "kod_yeri": [
+    "motor/dxf_out.py::Cizici._pencere_yazi_ters"
+   ],
+   "test": [
+    "testler/motor/test_d29_tk02_yorumlari.py::test_pencere_yazisi_alttan_ya_da_sagdan_okunur"
+   ]
+  },
+  {
+   "kod": "PC-06",
+   "baslik": "Özel pano ölçü yazıları üst üste binmez",
+   "kural": "Standart dışı panonun ölçüsü panodan 40 cm içeride; yazısı başka bir özel pano ölçü yazısına biniyorsa ölçü çizgisi 25, 70, 100 cm'e çekilir. Kat planı, net alan planı ve saha montaj planında.",
+   "karar": "D-29",
+   "madde": 7,
+   "lokman": {
+    "tarih": "2026-10-29",
+    "saat": "08:22",
+    "soz": "biz düzelttikçe sende motorun kod durumunu düzelt takılıp kalma P6001'e"
+   },
+   "kod_yeri": [
+    "motor/dxf_out.py::Cizici._ozel_olcu",
+    "motor/dxf_out.py::Cizici.OZEL_OLCU_UZAKLIK_CM"
+   ],
+   "sabitler": [
+    {
+     "yer": "motor/dxf_out.py::Cizici.OZEL_OLCU_UZAKLIK_CM",
+     "deger": [
+      40,
+      25,
+      70,
+      100
+     ]
+    }
+   ],
+   "test": [
+    "testler/motor/test_d29_tk02_yorumlari.py::test_ozel_pano_olcu_yazilari_ust_uste_binmez"
+   ]
+  },
+  {
+   "kod": "PC-07",
+   "baslik": "Son pano 122 cm ve üzeriyse tam pano",
+   "kural": "Ölçüye kesimde bir yöndeki son pano 122 cm ya da daha uzunsa kesilmez, o yönde dış ölçü tam panoya (125,5) büyür; eski son aks ve dış ölçü yenisine eşlenir; plan uyarısı yazılır (ön onay çiziminin alt satırında).",
+   "karar": "D-30",
+   "madde": null,
+   "lokman": {
+    "tarih": "2026-10-29",
+    "saat": "10:48",
+    "soz": "122 ve üzeri biten tüm projeleri tam panoya tamamlar"
+   },
+   "kod_yeri": [
+    "motor/geometry.py::TAM_PANOYA_TAMAMLAMA_CM",
+    "motor/geometry.py::olcu_ayarla",
+    "motor/geometry.py::tamamla_cm"
+   ],
+   "sabitler": [
+    {
+     "yer": "motor/geometry.py::TAM_PANOYA_TAMAMLAMA_CM",
+     "deger": 122.0
+    }
+   ],
+   "test": [
+    "testler/motor/test_d30_tam_pano.py::test_tk02_tam_panoya_tamamlanir",
+    "testler/motor/test_d30_tam_pano.py::test_esik_122",
+    "testler/motor/test_d30_tam_pano.py::test_eski_kose_yenisine_eslenir",
+    "testler/motor/test_d30_tam_pano.py::test_tamamlanmayan_plan_ayni"
+   ]
+  },
+  {
+   "kod": "PC-08",
+   "baslik": "Beşik çatı da dört görünüş",
+   "kural": "Ön onay çiziminde beşik çatılı ev de ön, arka, sol ve sağ görünüşle çizilir (düzlemler Motor'un IFC'siyle aynı; DXF'te yan yana, PDF'te A4 yerleşimiyle, PC-19); kırma ve beşik + cumba eskisi gibi. Taşan verandalı kırma ya da cumba görünüşü hata verir (İE-17 PR-2).",
+   "karar": "D-31",
+   "madde": 1,
+   "lokman": {
+    "tarih": "2026-10-29",
+    "saat": "08:40",
+    "soz": "önce kat planı, onaydan sonra çatı ve görünüşler (sıra kuralı); CIO 11:07: beşik + taşan veranda için arka/sol/sağ görünüşleri PR #79'a katın"
+   },
+   "kod_yeri": [
+    "motor/dxf_out.py::Cizici.ciz_gorunusler",
+    "motor/cephe_gorunus.py::cati_cizgileri"
+   ],
+   "test": [
+    "testler/motor/test_d31_gorunus.py::test_besik_dort_gorunus_profil_yok",
+    "testler/cizim/test_acilan_evler.py::test_gorunusler_birbirine_binmez",
+    "testler/cizim/test_gorunus_prefabrik.py::test_besik_ve_tasan_veranda_burada_cizilmez"
+   ]
+  },
+  {
+   "kod": "PC-09",
+   "baslik": "Veranda çatısı ana çatının küçüğü",
+   "kural": "Taşan verandanın çatısı her görünüşte ana çatı gibi: saçak altı çizgisi, iki uçta topuk, iki eğim; eğim ve topuk ana çatınınkiyle aynı (% yazısı: PC-17). Karşı cephedeki veranda çizilmez; yandan bakışta ana çatının ardında kalan parça kırpılır.",
+   "karar": "D-31",
+   "madde": 2,
+   "lokman": {
+    "tarih": "2026-10-29",
+    "saat": "11:11",
+    "soz": "bu model için tıpa tıp aynısı sadece daha küçüğü eğim olarak aynı topuk aynı"
+   },
+   "kod_yeri": [
+    "motor/dxf_out.py::Cizici._veranda_gorunusu"
+   ],
+   "test": [
+    "testler/motor/test_d31_gorunus.py::test_veranda_catisi_ana_catinin_kucugu",
+    "testler/motor/test_d31_gorunus.py::test_karsi_veranda_cizilmez_yanda_kirpilir"
+   ]
+  },
+  {
+   "kod": "PC-10",
+   "baslik": "Veranda kalkanının ayrı çerçevesi yok",
+   "kural": "Kolon yüzlerinden çatıya çıkan dikey kenarlı alın çerçevesi görünüşte çizilmez; IFC'deki alın dolgusu aynen.",
+   "karar": "D-31",
+   "madde": 3,
+   "lokman": {
+    "tarih": "2026-10-29",
+    "saat": "11:09",
+    "soz": "veranda çatısının makaslarını ayrı çizmiştin onu da çizim kuralından kaldır"
+   },
+   "kod_yeri": [
+    "motor/veranda.py::gorunus_parcalari"
+   ],
+   "test": [
+    "testler/motor/test_veranda.py::test_gorunuste_alin_yok_kalkan_cati_cizgisinde",
+    "testler/motor/test_veranda.py::test_ifc_veranda_catisi"
+   ]
+  },
+  {
+   "kod": "PC-11",
+   "baslik": "Çatı profili çizilmez",
+   "kural": "\"ÇATI PROFİLİ - TOPUK VE SAÇAK\" çizimi ve altındaki yazılar bütün prefabrik paftalardan kalktı; ayrı veranda profili de çizilmez. CATI_* katmanları tanımlı ve boş.",
+   "karar": "D-31",
+   "madde": 4,
+   "lokman": {
+    "tarih": "2026-10-29",
+    "saat": "11:12",
+    "soz": "çatı profili topuk ve saçak tamamen kaldır bunlar gpt Astra'dan kalma şuan ihtiyacımız yok"
+   },
+   "kod_yeri": [
+    "motor/dxf_out.py::uret"
+   ],
+   "test": [
+    "testler/motor/test_d31_gorunus.py::test_besik_dort_gorunus_profil_yok",
+    "testler/cizim/test_acilan_evler.py::test_on_onay_pdf"
+   ]
+  },
+  {
+   "kod": "PC-12",
+   "baslik": "Aks çizgisi soluk gri ve kesik",
+   "kural": "Kat planında aks çizgisi AKS katmanında soluk gri (ACI 9) ve veranda kirişinin çizgi türüyle (VERANDA_KESIK, 12 cm çizgi / 18 cm boşluk).",
+   "karar": "D-31",
+   "madde": 5,
+   "lokman": {
+    "tarih": "2026-10-29",
+    "saat": "11:14",
+    "soz": "aks çizgilerini daha belli belirsiz yap ve tireleri veranda kirişi çizdiğimiz gibi olsun lakin rengi belli belirsiz olsun okunabilirlik açısından"
+   },
+   "kod_yeri": [
+    "motor/dxf_out.py::AKS_KATMANI"
+   ],
+   "sabitler": [
+    {
+     "yer": "motor/dxf_out.py::AKS_KATMANI",
+     "deger": [
+      "AKS",
+      9,
+      "VERANDA_KESIK"
+     ]
+    }
+   ],
+   "test": [
+    "testler/motor/test_d31_gorunus.py::test_aks_soluk_ve_kesik"
+   ]
+  },
+  {
+   "kod": "PC-13",
+   "baslik": "Banyo ve WC penceresi vasistas",
+   "kural": "60×40 pencere görünüşte tek kanat vasistas, üstten açılır: kasa, 3 cm içeride kanat, köşe gönyeleri, kanadın alt köşelerinden üst ortasına kırmızı kesik açılım çizgisi (Lokman'ın 11:23 pencere föyündeki 58 × 38 vasistas). Öteki pencereler kaynak ön pencere bloğuyla; plandaki simge değişmez.",
+   "karar": "D-31",
+   "madde": 6,
+   "lokman": {
+    "tarih": "2026-10-29",
+    "saat": "11:21",
+    "soz": "arka görünüşteki vasistas pencereler yani e.banyo ve banyonun pencereleri yukarıdan aşağıya doğru açılır yani yana doğru değil tek kanat olacak şekilde"
+   },
+   "kod_yeri": [
+    "motor/dxf_out.py::VASISTAS_OLCULERI",
+    "motor/dxf_out.py::VASISTAS_BLOK",
+    "motor/dxf_out.py::Cizici._vasistas_blok",
+    "motor/dxf_out.py::Cizici._on_pencere"
+   ],
+   "sabitler": [
+    {
+     "yer": "motor/dxf_out.py::VASISTAS_OLCULERI",
+     "deger": [
+      "60x40"
+     ]
+    },
+    {
+     "yer": "motor/dxf_out.py::VASISTAS_BLOK",
+     "deger": [
+      "on-vasistas",
+      60.0,
+      40.0,
+      3.0
+     ]
+    }
+   ],
+   "test": [
+    "testler/motor/test_d31_gorunus.py::test_vasistas_60x40",
+    "testler/cizim/test_acilan_evler.py::test_gorunuste_acikliklar_plandan"
+   ]
+  },
+  {
+   "kod": "PC-14",
+   "baslik": "Derz yalnız görünen ve cepheye değen duvardan",
+   "kural": "Görünüşte pano derzi ve doğrama yalnız o yandan görülen dış duvarlardan (önündeki şeritte gövdenin kapalı kısmı duvarı örtmüyorsa); dik dış duvarın yüzleri yalnız o cepheye değiyorsa derz verir. Giriş nişinin yan duvarları arka ve yan görünüşte derz vermez.",
+   "karar": "D-31",
+   "madde": 7,
+   "lokman": {
+    "tarih": "2026-10-29",
+    "saat": "11:21",
+    "soz": "ayrıca 2 WC nin arasında sadece H var 2 ek çizgi var onu anlamadım"
+   },
+   "kod_yeri": [
+    "motor/cephe_gorunus.py::gorunur",
+    "motor/cephe_gorunus.py::cepheye_deger",
+    "motor/cephe_gorunus.py::cephe"
+   ],
+   "test": [
+    "testler/motor/test_d31_gorunus.py::test_derz_yalniz_gorunen_duvardan"
+   ]
+  },
+  {
+   "kod": "PC-15",
+   "baslik": "Kurallar bu listede",
+   "kural": "Prefabrik ön onay çiziminin Lokman'dan gelen her kuralı bu listede satırdır: kararı, sözü ve saati, kodda yeri, testi. Liste testle denetlenir.",
+   "karar": "D-31",
+   "madde": 8,
+   "lokman": {
+    "tarih": "2026-10-29",
+    "saat": "11:15",
+    "soz": "repoya, kural dosyasına json veriye nereye kaydediyorsan kaydet ama bağlam kopmasın başa dönmeyelim"
+   },
+   "kod_yeri": [
+    "testler/motor/test_prefabrik_cizim_kurallari.py::test_kural_listesi_depoyla_ayni"
+   ],
+   "test": [
+    "testler/motor/test_prefabrik_cizim_kurallari.py::test_kural_listesi_depoyla_ayni"
+   ]
+  },
+  {
+   "kod": "PC-16",
+   "baslik": "Veranda kolonu görünüşte dolgulu",
+   "kural": "Taşan verandanın kolonu görünüşte soluk gri (ACI 9) dolguyla, duvarın önünde çizilir; gövdenin köşesiyle aynı hizadaki kolon (TK-02 arka verandanın sağ kolonu) duvarın köşe çizgileriyle karışmaz, görünür. Yandan bakışta üst üste düşen kolon ve kiriş bir kez çizilir.",
+   "karar": "D-31",
+   "madde": 9,
+   "lokman": {
+    "tarih": "2026-10-29",
+    "saat": "11:55",
+    "soz": "arka görünüşte arkadan binaya bakarken şuan benim baktığım gibi sağ tarafta ki direk mi eksik"
+   },
+   "kod_yeri": [
+    "motor/dxf_out.py::VERANDA_KOLON_DOLGU",
+    "motor/dxf_out.py::Cizici.ciz_gorunusler",
+    "motor/dxf_out.py::Cizici._veranda_gorunusu"
+   ],
+   "sabitler": [
+    {
+     "yer": "motor/dxf_out.py::VERANDA_KOLON_DOLGU",
+     "deger": 9
+    }
+   ],
+   "test": [
+    "testler/motor/test_d31_gorunus.py::test_veranda_kolonu_dolgulu"
+   ]
+  },
+  {
+   "kod": "PC-17",
+   "baslik": "Eğim yazısı yalnız ana çatıda, bir kez",
+   "kural": "Görünüşte % eğim yazısı ana çatıda tek tarafta (soldaki eğimde) bir kez yazılır; veranda çatısının eğimi ana çatınınkiyle aynıysa yazılmaz, farklıysa kendi çatısında bir kez. Kalkan görünüşünde (yan) eğim yazısı yok.",
+   "karar": "D-31",
+   "madde": 10,
+   "lokman": {
+    "tarih": "2026-10-29",
+    "saat": "11:55",
+    "soz": "%33 eğimi sadece ana çatıda tek tarafta belirtsen yeter"
+   },
+   "kod_yeri": [
+    "motor/dxf_out.py::Cizici.ciz_gorunusler",
+    "motor/dxf_out.py::Cizici._veranda_gorunusu"
+   ],
+   "test": [
+    "testler/motor/test_d31_gorunus.py::test_egim_yalniz_ana_catida_bir_kez",
+    "testler/motor/test_d31_gorunus.py::test_veranda_catisi_ana_catinin_kucugu"
+   ]
+  },
+  {
+   "kod": "PC-18",
+   "baslik": "Sürgülü pencere İş Emri'nden",
+   "kural": "İş Emri'nde açıklığa `acilis: \"surgulu\"` yazılan pencere görünüşte sürgülü çizilir: çift kasa, ortada bindirmeli iki kanat, sabit kanatta cam işareti, sürülen kanatta kırmızı yön oku (Lokman'ın föyündeki 197,5 sürgülü kapı). Ölçü, eşik, pano, plan simgesi, BOM ve liste değişmez; anahtar yalnız pencerede ve yalnız \"surgulu\" (K21). TK-02 r03: yatak odası 1'in arka verandaya açılan 120×180'i.",
+   "karar": "D-31",
+   "madde": 11,
+   "lokman": {
+    "tarih": "2026-10-29",
+    "saat": "11:57",
+    "soz": "birde arka verandadaki pencere aslında sürgülü kapı gibi kullanılıyor"
+   },
+   "kod_yeri": [
+    "motor/geometry.py::Acilim",
+    "motor/dxf_out.py::SURGULU_BLOK",
+    "motor/dxf_out.py::Cizici._surgulu_blok",
+    "motor/dxf_out.py::Cizici._on_pencere",
+    "motor/cephe_gorunus.py::cephe"
+   ],
+   "sabitler": [
+    {
+     "yer": "motor/dxf_out.py::SURGULU_BLOK",
+     "deger": [
+      "on-surgulu",
+      120.0,
+      180.0,
+      3.0
+     ]
+    }
+   ],
+   "test": [
+    "testler/motor/test_d31_gorunus.py::test_surgulu_pencere",
+    "testler/motor/test_d31_gorunus.py::test_surgulu_is_emrinde_ve_yalniz_gorunuste"
+   ]
+  },
+  {
+   "kod": "PC-19",
+   "baslik": "PDF tek sayfa dikey A4: görünüşler sığar, plan ortada",
+   "kural": "Ön onay PDF'i tek sayfa, dikey A4 (telefonda tek bakışta okunur). Üstte antet, ön ve arka görünüş; altta sol ve sağ görünüş; dördü aynı ölçekte ve geniş satır sayfa enini kenar boşluğuna (5 mm) kadar doldurur (en çok 1/100). Kat planı (aksli, başlıksız) iki bandın arasında kalan yerin ortasında, sığan en büyük ölçekle. Çizimler yeniden açılan DXF'ten bölge bölge basılır; DXF'in öteki çizimleri (net alanlar, saha montaj planı, teknik özellikler) PDF'e girmez. İş Emri'nin `cikti.pafta` alanı okunmaz.",
+   "karar": "D-31",
+   "madde": 12,
+   "lokman": {
+    "tarih": "2026-10-29",
+    "saat": "12:21",
+    "soz": "önce görünüşleri tam sığdır sonra ortaya kat planını al (12:01 A4 dikey, 12:17 cep telefonundan tek de okunması, 12:20 ikinci sayfayı artık tamamen kaldır)"
+   },
+   "kod_yeri": [
+    "motor/dxf_out.py::a4_yerlesim",
+    "motor/dxf_out.py::a4_bayi_sayfasi",
+    "motor/dxf_out.py::A4_BOLGELER",
+    "motor/dxf_out.py::Cizici._bolge",
+    "motor/dxf_out.py::uret"
+   ],
+   "sabitler": [
+    {
+     "yer": "motor/dxf_out.py::A4_DIKEY_MM",
+     "deger": [
+      210.0,
+      297.0
+     ]
+    },
+    {
+     "yer": "motor/dxf_out.py::A4_KENAR_MM",
+     "deger": 5.0
+    },
+    {
+     "yer": "motor/dxf_out.py::A4_GORUNUS_EN_BUYUK",
+     "deger": 0.1
+    }
+   ],
+   "test": [
+    "testler/motor/test_d31_gorunus.py::test_a4_bayi_sayfasi",
+    "testler/motor/test_d31_gorunus.py::test_a4_yerlesim"
+   ]
+  },
+  {
+   "kod": "PC-20",
+   "baslik": "A4'teki kat planında aks ölçü zinciri yok",
+   "kural": "A4 sayfasındaki kat planında 125,5'lik aks aralıklarının ölçü zinciri (üstte ve sağda) basılmaz; aks çizgileri ve harfleri, dış ölçüler, veranda, özel pano ve açık mahal ölçüleri kalır. Zincir DXF'te durur.",
+   "karar": "D-31",
+   "madde": 13,
+   "lokman": {
+    "tarih": "2026-10-29",
+    "saat": "12:20",
+    "soz": "1/200 'ün tam ortasındaki kat planının 125,5 pano ölçülerini tamamen kaldır"
+   },
+   "kod_yeri": [
+    "motor/dxf_out.py::Cizici.ciz_plan"
+   ],
+   "test": [
+    "testler/motor/test_d31_gorunus.py::test_a4_planda_aks_zinciri_yok"
+   ]
+  }
+ ]
+}

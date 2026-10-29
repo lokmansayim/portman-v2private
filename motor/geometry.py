@@ -21,6 +21,7 @@ T_DIS = 10.0         # dış duvar kalınlığı
 T_IC = 6.0           # iç duvar kalınlığı
 OUT = "__DIS__"      # bina dışı
 X_SON = Y_SON = None  # ölçüye kesimde son aksın yeri (cm); yoksa None
+TAMAMLAMA: dict = {}  # D-30: tam panoya tamamlanan yön → (eski son aks, yeni son aks, eski dış ölçü, yeni dış ölçü) (cm)
 KISA_KENAR = "x"     # İE-17: köşe 10 cm hangi yönde (`yapi.kisa_kenar`); "y" → x ızgarası duvar ekseninden, y iç yüzden (x ↔ y aynası)
 _AKS = {"x": None, "y": None}   # İE-11: aks tabloları (cm; dizin = yarım pano adımı). None → tekdüze ızgara (formül)
 _AKS_ANA = {"x": None, "y": None}   # İE-11: ana akslar (tam pano aksları + ek akslar + uç); çizimde aks çizgileri ve ölçü zinciri
@@ -36,6 +37,8 @@ PENCERE_PANO_PAYI_CM = 4.0              # açıklık panodan en az 4 cm dar
 KAPI_GENISLIK = {"ic_kapi": 82.0, "dis_kapi": 97.0, "gecis": 82.0}
 # İE-11 (PK-01 montaj paftası, 13.10.2026; yalnız `dizilim.pencere` / `dizilim.kapi` anahtarıyla):
 PENCERE_ORTALAMA_ESIGI_CM = MOD / 4.0   # oda ortası ızgara panosunun ortasından en çok ¼ pano kaçıyorsa ızgara kalır (paftada 6 pencerenin 4'ü), yoksa pencereli pano odaya ortalanır
+TAM_PANOYA_TAMAMLAMA_CM = 122.0      # D-30 (Lokman 29.10.2026 10:48): "122 ve üzeri biten tüm projeleri tam panoya tamamlar"; ölçüye kesimde son
+                                       # pano 122 cm ya da daha uzunsa kesilmez, dış ölçü tam panoya büyür (uyarıyla; K16)
 PENCERE_YARIM_PANO_ESIGI_CM = 5.0     # D-29: oda ortası en yakın ekten en çok 5 cm kaçıyorsa pencereli pano eke ortalanır, iki yanı 62,75 (Lokman'ın örneği
                                        # 0,25; bugünkü planlarda 0,25–2,5); daha çoksa odanın ortası (kör PK-02: 20,5 cm'de mühendis 42,25 / 83,25 bırakmış)
 KAPI_YASLAMA_CM = 11.5                  # oda kapısı boşluğu menteşe tarafındaki pano ucundan 11,5 cm içeride (paftada 4 kapı: 11,3 / 11,3 / 11,6 / 11,5)
@@ -109,18 +112,44 @@ def kalinlik_ayarla(dis_cm: float, ic_cm: float) -> None:
     T_DIS, T_IC = float(dis_cm), float(ic_cm)
 
 
-def olcu_ayarla(dis_olcu, nx: float, ny: float) -> None:
-    """Deneme: dış ölçü verilirse (cm) son aks yapının bitişine çekilir; son pano özel ölçülü olur. Verilmezse akslar tam modüldür."""
+def olcu_ayarla(dis_olcu, nx: float, ny: float) -> list[str]:
+    """Deneme: dış ölçü verilirse (cm) son aks yapının bitişine çekilir; son pano özel ölçülü olur. Verilmezse akslar tam modüldür.
+    D-30: son pano `TAM_PANOYA_TAMAMLAMA_CM` (122) ya da daha uzunsa kesilmez, o yönde dış ölçü tam panoya büyür; eski son aks ve eski dış
+    ölçü `tamamla_cm` ile yenisine eşlenir (mahal sınırı, veranda ve cumba ucu). Dönüş: plan uyarısı (sessiz yuvarlama yok, K16)."""
     global X_SON, Y_SON
     X_SON = Y_SON = None
+    TAMAMLAMA.clear()
     if not dis_olcu:
-        return
+        return []
     xs, ys = float(dis_olcu["x"]) - ilk_aks("x"), float(dis_olcu["y"]) - ilk_aks("y")
+    sonlar = {}
     for ad_, son, bas, n in (("x", xs, ilk_aks("x"), nx), ("y", ys, ilk_aks("y"), ny)):
         if not (bas + MOD * (n - 0.5) < son - 1e-9 and son <= bas + MOD * n + 1e-9):
             raise IsEmriHatasi(f"Dış ölçü ile grid uyuşmuyor ({ad_}): son aks {son:g} cm, grid {n:g} pano → son pano {son - bas - MOD * (n - 1):g} cm; "
                                f"kesilmiş son pano 62,75'ten büyük ve 125,5'ten küçük ya da eşit olmalı (tam yarım pano için grid'i yarım adımla yazın: {n - 0.5:g})")
-    X_SON, Y_SON = xs, ys
+        tam = bas + MOD * n
+        if son - bas - MOD * (n - 1) >= TAM_PANOYA_TAMAMLAMA_CM - 1e-9 and son < tam - 1e-9:
+            TAMAMLAMA[ad_] = (son, tam, float(dis_olcu[ad_]), float(dis_olcu[ad_]) + tam - son)
+            son = tam
+        sonlar[ad_] = son
+    X_SON, Y_SON = sonlar["x"], sonlar["y"]
+    if not TAMAMLAMA:
+        return []
+    f = lambda v: f"{v:g}".replace(".", ",")
+    olcu = lambda i: " × ".join(f(TAMAMLAMA[a][i]) if a in TAMAMLAMA else f(float(dis_olcu[a])) for a in ("x", "y"))
+    kalan = ", ".join(f"{a}: {f(TAMAMLAMA[a][0] - (TAMAMLAMA[a][1] - MOD))}" for a in ("x", "y") if a in TAMAMLAMA)
+    return [f"Dış ölçü {olcu(2)} → {olcu(3)} cm: son pano ({kalan} cm) 122 ve üzeri olduğu için tam panoya (125,5) tamamlandı (D-30)"]
+
+
+def tamamla_cm(v: float, yon: str) -> float:
+    """D-30: tam panoya tamamlanan yönde İş Emri'nin eski son aksı ve eski dış ölçüsü yenisine eşlenir; öteki değerler aynen."""
+    if yon in TAMAMLAMA:
+        eski_son, yeni_son, eski_dis, yeni_dis = TAMAMLAMA[yon]
+        if abs(float(v) - eski_son) < 1e-6:
+            return yeni_son
+        if abs(float(v) - eski_dis) < 1e-6:
+            return yeni_dis
+    return float(v)
 
 
 def _mm(cm: float) -> str:
@@ -195,6 +224,7 @@ def aks_durumu_sifirla() -> None:
     global _AKS, _AKS_ANA, _AKS_EK, X_SON, Y_SON, KISA_KENAR
     _AKS = {"x": None, "y": None}; _AKS_ANA = {"x": None, "y": None}; _AKS_EK = {"x": [], "y": []}
     X_SON = Y_SON = None
+    TAMAMLAMA.clear()
     KISA_KENAR = "x"
 
 
@@ -267,6 +297,7 @@ class Acilim:
     mentese_is_emri: Optional[str] = None   # İE-11: İş Emri'nin yazdığı menteşe (yoksa None); `kapi: mantik` kuralı bununla karşılaştırır
     pano_is_emri: Optional[int] = None      # İE-11: İş Emri'nin yazdığı pano dizini (yoksa None)
     kapi_yeri: Optional[str] = None         # İE-17: İş Emri'nin bu kapıya yazdığı yer ("mentese_ucu" | "ortada"); yoksa `dizilim.kapi_yeri`
+    acilis: Optional[str] = None            # D-31 madde 11: pencerenin açılışı; None (ölçünün bloğu) | "surgulu" (görünüşte sürgülü kanat)
 
 
 @dataclass
@@ -423,7 +454,7 @@ def _kur(is_emri: dict) -> Plan:
     nx2, ny2 = int(round(nx * 2)), int(round(ny * 2))
     if abs(nx2 - nx * 2) > 1e-9 or abs(ny2 - ny * 2) > 1e-9 or nx < 2 or ny < 2:
         raise IsEmriHatasi("Grid yarım pano adımında ve en az 2×2 olmalı")
-    olcu_ayarla(yapi.get("dis_olcu_cm"), nx, ny)
+    tamamlama_uyarisi = olcu_ayarla(yapi.get("dis_olcu_cm"), nx, ny)
     # İE-11: dizilim başlangıcı ve aks tablosu
     dizilim = yapi.get("dizilim") or {}
     _yanlis = sorted(set(dizilim) - DIZILIM_ANAHTARLARI)        # İE-17 (K21): bilinmeyen ya da bir düzey kayık anahtar sessizce yutulmaz
@@ -469,7 +500,7 @@ def _kur(is_emri: dict) -> Plan:
     son_pano = dizilim.get("son_pano", "kosu")             # İE-17: "kosu" (koşu başından 125,5; kalan son parça) | "son_aks" (kesilmiş son pano
     if son_pano not in ("kosu", "son_aks"):                 # ızgaranın sondan bir önceki aksından başlar, gerekirse önünde yarım pano; montaj paftası)
         raise IsEmriHatasi(f"dizilim.son_pano bilinmiyor: {son_pano} (kosu | son_aks)")
-    uyarilar = []
+    uyarilar = list(tamamlama_uyarisi)                    # D-30: tam panoya tamamlama söylenir
     if KISA_KENAR == "x" and makas_ekseni == "y":
         uyarilar.append("Makas y'yi geçiyor ama kisa_kenar x: montaj paftalarında köşe makasın oturduğu duvarlardadır; "
                         "pano ızgarası iki yönde 5 cm kayık olabilir, kisa_kenar: y doğrulanmalı")
@@ -482,7 +513,8 @@ def _kur(is_emri: dict) -> Plan:
         if ad in mahaller:
             raise IsEmriHatasi(f"Mahal adı tekrar ediyor: {ad}")
         if "konum_cm" in m:                                   # İE-11: cm sınırlar (akslar; dış yüzlerden)
-            rects = [[aks_dizini(r[0], "x") / 2, aks_dizini(r[1], "y") / 2, aks_dizini(r[2], "x") / 2, aks_dizini(r[3], "y") / 2] for r in m["konum_cm"]]
+            rects = [[aks_dizini(tamamla_cm(r[0], "x"), "x") / 2, aks_dizini(tamamla_cm(r[1], "y"), "y") / 2,
+                      aks_dizini(tamamla_cm(r[2], "x"), "x") / 2, aks_dizini(tamamla_cm(r[3], "y"), "y") / 2] for r in m["konum_cm"]]
         elif tablo:                                           # pano birimi → cm → tablo dizini
             rects = []
             for r in m["konum_pano"]:
@@ -944,6 +976,9 @@ def _kur(is_emri: dict) -> Plan:
         if ac.get("dograma") not in (None, "alıcıya ait"):    # K21: bilinmeyen değer sessizce yutulmaz
             raise IsEmriHatasi(f"Açıklıkta dograma yalnız \"alıcıya ait\" olabilir: {ac}")
         acl.dograma = ac.get("dograma")           # İE-11: "alıcıya ait" → boşluk var, doğrama blok olarak çizilir, BOM satırı işaretli (listeye girmez)
+        if ac.get("acilis") not in (None, "surgulu") or (ac.get("acilis") and tur != "pencere"):   # K21
+            raise IsEmriHatasi(f"Açıklıkta acilis yalnız pencerede ve \"surgulu\" olabilir: {ac}")
+        acl.acilis = ac.get("acilis")             # D-31 madde 11: geometri değil; görünüşün pencere bloğunu seçer
         p.acilim = acl
     # BK-13: komşu tam panoyla 251'lik pano. Bütün açıklıklar yerleştikten sonra: İş Emri'nin pano dizinleri ızgaraya göre kalır ve komşu kuralı
     # listede sonra yazılan açıklıkları da görür. Aynı duvardaki geniş pencereler dizilimin sonundan başına kurulur: her biri önce kendi sonraki
@@ -1069,7 +1104,8 @@ def _dis_verandalar(plan: "Plan", is_emri: dict) -> None:
         if tur not in ACIK_MAHAL_TURLERI:
             raise IsEmriHatasi(f"Veranda türü açık mahal değil: {tur} ({' | '.join(sorted(ACIK_MAHAL_TURLERI))})")
         try:
-            bas, bit, d = float(v["bas_cm"]), float(v["bit_cm"]), float(v["derinlik_cm"])
+            boyunca = "x" if v.get("cephe") in ("on", "arka") else "y"     # D-30: tam panoya tamamlanan yönde eski köşe yenisine
+            bas, bit, d = tamamla_cm(v["bas_cm"], boyunca), tamamla_cm(v["bit_cm"], boyunca), float(v["derinlik_cm"])
         except (KeyError, TypeError, ValueError):
             raise IsEmriHatasi(f"Verandada bas_cm, bit_cm ve derinlik_cm sayı olmalı: {v}") from None
         if bit - bas < 2 * k + 20 - 1e-9 or d < k + 20 - 1e-9:
