@@ -114,7 +114,7 @@ def test_veranda_giris_nisinin_onunde(tmp_path):
     assert len(agiz) == 1 and agiz[0]["adet"] == 1
     m = dxf_out.uret(_nisli(), tmp_path, pdf_hatada=False)
     assert m["validation_passed"] is True, m.get("errors")
-    assert _oku(tmp_path / "validation.json")["rooms_m2"]["GİRİŞ"] == pytest.approx(1.449525, abs=1e-4)
+    assert _oku(tmp_path / "validation.json")["rooms_m2"]["GİRİŞ"] == pytest.approx(1.449525)
     bom = _oku(tmp_path / "bom.json")["kalemler"]
     assert sum(k["adet"] for k in bom if k["kod"].startswith("V")) == len(N["veranda_kenarlari_cm"]) + len(N["nis_agizlari_cm"])   # 7 profil
 

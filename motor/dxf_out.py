@@ -960,14 +960,16 @@ def a4_bayi_sayfasi(doc, bolgeler: dict, cfg) -> bytes:
         y0, y1 = min(kutu[t].extmin.y for t in gor), max(kutu[t].extmax.y for t in gor)
         for t in gor:
             kutu[t] = BoundingBox2d([(kutu[t].extmin.x, y0), (kutu[t].extmax.x, y1)])
+    if "plan" not in kutu:
+        raise RuntimeError("A4 bayi sayfasında kat planı bölgesi yok")
     yer = a4_yerlesim({ad: (b.size.x, b.size.y) for ad, b in kutu.items()})
     pt = 72 / 25.4
     out = fitz.open()
     sayfa = out.new_page(width=A4_DIKEY_MM[0] * pt, height=A4_DIKEY_MM[1] * pt)
     for ad, b in kutu.items():
         x, y, w, h = yer[ad]
-        if w <= 0 or h <= 0:
-            continue
+        if w <= 0 or h <= 0:                                 # sessizce atlanmaz (geometri hakemi, 29 Ekim; K16)
+            raise RuntimeError(f"A4 bayi sayfasında {ad} bölgesine yer kalmadı ({w:.1f} × {h:.1f} mm)")
         with fitz.open("pdf", _bolge_pdf(doc, bolgeler[ad], b, w, h, cfg)) as parca:
             sayfa.show_pdf_page(fitz.Rect(x * pt, y * pt, (x + w) * pt, (y + h) * pt), parca, 0)
     return out.tobytes(garbage=3, deflate=True, no_new_id=True)

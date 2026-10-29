@@ -69,3 +69,42 @@ def test_tamamlanmayan_plan_ayni():
     for yol in (KOK / "is_emri" / "P6001_2plus1_6x6.json", KOK / "testler" / "motor" / "veri" / "PK01.json"):
         plan = G.kur(_oku(yol))
         assert not [u for u in plan.uyarilar if "D-30" in u] and G.TAMAMLAMA == {}
+
+
+def test_yarim_izgarada_kisa_son_parca_tamamlanmaz():
+    """Geometri hakemi (29 Ekim): yarım ızgarada ve `son_pano: kosu`da son pano koşu başından 125,5'lerle kalan parçadır (en çok 62,75);
+    Yan Verandalı 6×8,5'te y 1074,25'te son parça 60,25 cm, 122'den kısa → kesilir, tamamlama ve uyarı yok (eskiden 62,75'e tamamlanıyordu)."""
+    ie = _oku(KOK / "is_emri" / "YAN_VERANDALI_2plus1_6x8p5.json")
+    ie["yapi"]["dis_olcu_cm"] = {"x": 773, "y": 1074.25}
+    plan = G.kur(ie)
+    assert plan.H == 1074.25 and "y" not in G.TAMAMLAMA and not [u for u in plan.uyarilar if "D-30" in u]
+    sonlar = {round(d.panolar[-1].boy, 2) for d in plan.duvarlar if d.tur == "dis" and d.yon == "y" and abs(d.p1 - G.Y_SON) < 1e-6}
+    assert sonlar == {60.25}
+    # son_aks'ta son pano sondan bir önceki (yarım) akstan başlar: 60,25 + 62,75 = 123 → tamamlanır
+    assert G.olcu_ayarla({"x": 773, "y": 1074.25}, 6, 8.5, "son_aks") and G.TAMAMLAMA["y"][1] == pytest.approx(G.ilk_aks("y") + G.MOD * 8.5)
+    G.aks_durumu_sifirla()
+
+
+def test_arka_solda_yan_veranda_ucu_kayan_derzle_eslenir():
+    """Geometri hakemi (29 Ekim): dizilim arka-solda Motor y'yi arkadan sayar, tamamlama gerçek çerçevede öne düşer, iç y derzleri +0,5 kayar.
+    Sol verandanın ucu gerçek çerçevededir; ön köşesi (0) aynen kalır, iç derzdeki ucu (506,5) derzle birlikte 507'ye, arka köşesi 888 → 888,5."""
+    ie = _oku(TK02)
+    ie["verandalar"].append({"ad": "SOL VERANDA", "cephe": "sol", "bas_cm": 0, "bit_cm": 506.5, "derinlik_cm": 150})
+    plan = G.kur(ie)
+    sol = next(d for d in plan.duvarlar if d.tur == "dis" and d.yon == "y" and abs(d.c - 5.0) < 1e-6)
+    derzler = {round(sol.p0 + sum(p.boy for p in sol.panolar[:i]), 2) for i in range(1, len(sol.panolar))}
+    assert 507.0 in derzler and 506.5 not in derzler
+    v = next(v for v in plan.dis_verandalar if v["cephe"] == "sol")
+    assert (v["rect"][1], v["rect"][3]) == (0.0, 507.0)
+    assert G.tamamla_gercek_cm(0, "y") == 0.0 and G.tamamla_gercek_cm(888, "y") == 888.5 and G.tamamla_gercek_cm(898, "x") == 898.5
+    assert G.tamamla_gercek_cm(256, "x") == 256.0                       # x aynalanmaz: iç değer aynen
+
+
+def test_dikme_koseyle_kayar():
+    """Dikme (gerçek çerçeve, sol alt köşe) merkeziyle eşlenir: TK-02'nin sağ ön köşesindeki dikme x'te köşeyle 888 → 888,5'e kayar, y'de ön
+    yüzde (arka-solda tamamlama öne düşse de gerçek çerçevede ön yüz yerinde) 0 kalır; iç değer aynen."""
+    ie = _oku(TK02)
+    ie["dikmeler"] = [[888, 0], [256, 0]]
+    plan = G.kur(ie)
+    assert plan.dikmeler[:2] == [(888.5, 0.0, 898.5, 10.0), (256.0, 0.0, 266.0, 10.0)]
+    assert G.tamamla_gercek_cm(888, "x") == 888.5 and G.tamamla_gercek_cm(887.9, "x") == 887.9

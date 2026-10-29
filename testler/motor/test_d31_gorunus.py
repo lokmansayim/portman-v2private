@@ -136,6 +136,23 @@ def test_derz_yalniz_gorunen_duvardan():
         [5.0, 10.0, 130.5, 256.0, 381.5, 502.0, 507.0, 512.0, 632.5, 753.0, 758.0], [5.0, 10.0, 130.5, 256.0, 381.5, 507.0, 632.5, 753.0, 758.0]]
 
 
+@pytest.mark.parametrize("ev, arka, sol, dusen", [
+    ("AP01", [5.0, 10.0, 77.25, 140.0, 265.5, 328.25, 453.75, 579.25, 642.0, 767.5, 893.0, 1018.5, 1144.0, 1269.5, 1390.0, 1395.0],
+     [10.0, 135.5, 261.0, 386.5, 512.0, 637.5, 763.0, 888.5, 990.0], ((762.5, 772.5), (695.25, 705.25))),
+    ("AP13", [5.0, 10.0, 130.5, 256.0, 381.5, 507.0, 632.5, 753.0, 758.0],
+     [10.0, 135.5, 261.0, 386.5, 512.0, 637.5, 700.25, 778.0], ((376.5, 386.5), (507.0, 517.0))),
+    ("AP16", [5.0, 10.0, 130.5, 256.0, 381.5, 507.0, 632.5, 753.0, 758.0],
+     [10.0, 72.75, 198.25, 261.0, 386.5, 512.0, 637.5, 763.0, 825.75, 908.5], ((376.5, 386.5), (695.25, 705.25))),
+])
+def test_derz_cepheye_degmeyen_dik_duvar_ap(ev, arka, sol, dusen):
+    """Madde 7'nin kapsamı (geometri hakemi, 29 Ekim): kırma ve beşik + cumba AP evlerinde de cepheye değmeyen dik dış duvarın iki yüzü arka
+    ve sol görünüşte derz vermez (D-31'den önce veriyordu); ön ve sağ aynı. Düşen çizgiler o yandan görülmeyen duvarındır."""
+    p = G.kur(json.loads((KOK / "testler" / "cizim" / "evler" / f"{ev}.json").read_text(encoding="utf-8")))
+    d = {t: CG.cephe(p, t)["derz"] for t in CG.TARAFLAR}
+    assert (d["arka"], d["sol"]) == (arka, sol)
+    assert not set(dusen[0]) & set(d["arka"]) and not set(dusen[1]) & set(d["sol"])
+
+
 def _gorunus_cizici(ie):
     c = dxf_out.Cizici(G.kur(copy.deepcopy(ie)), Katalog())
     c.ciz_gorunusler(-600.0)
@@ -246,3 +263,13 @@ def test_a4_yerlesim():
     assert h == pytest.approx(alt - ust) or w == pytest.approx(W - 2 * k)                             # sığan en büyük
     assert all(k - 1e-9 <= r[0] and r[0] + r[2] <= W - k + 1e-9 and k - 1e-9 <= r[1] and r[1] + r[3] <= H - k + 1e-9
                for a, r in y.items() if a != "olcek")
+
+
+def test_a4_bolgesi_eksikse_pdf_yok(tk02):
+    """Kat planı bölgesi yoksa ya da bir bölgeye yer kalmazsa A4 sayfası sessizce eksik basılmaz (geometri hakemi, 29 Ekim; K16)."""
+    from ezdxf.addons.drawing import config
+    ie, _, _ = tk02
+    c = _gorunus_cizici(ie)                                             # yalnız dört görünüş: plan bölgesi yok
+    cfg = config.Configuration(background_policy=config.BackgroundPolicy.WHITE)
+    with pytest.raises(RuntimeError, match="kat planı bölgesi yok"):
+        dxf_out.a4_bayi_sayfasi(c.doc, c.bolgeler, cfg)

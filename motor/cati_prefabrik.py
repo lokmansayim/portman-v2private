@@ -59,7 +59,7 @@ def _cumba(c: dict, kutu: tuple) -> list[float]:
     if float(u.get("cikinti_cm", 0)) != 0:
         raise PrefabrikCatiHatasi("çıkıntılı cumba bu sürümde çizilmez (İE-17 PR-2)")
     yon = "x" if cephe in ("on", "arka") else "y"               # D-30: tam panoya tamamlanan yönde eski köşe yenisine
-    a, b = G.tamamla_cm(u["bas_cm"], yon), G.tamamla_cm(u["bit_cm"], yon)
+    a, b = G.tamamla_gercek_cm(u["bas_cm"], yon), G.tamamla_gercek_cm(u["bit_cm"], yon)
     boy = (x1 - x0) if cephe in ("on", "arka") else (y1 - y0)
     if not 0 <= a < b <= boy + 1e-6:
         raise PrefabrikCatiHatasi(f"cumba {cephe} cephesinde {a:g}–{b:g} cm; cephe {boy:g} cm")
