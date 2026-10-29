@@ -1,6 +1,7 @@
 """Portman motor v1.1 — DXF/PDF çıktısı (BOM bloklu).
 
-Plan (geometry.kur) → düzenlenebilir DXF (ezdxf) → yeniden aç → doğrula → A2 PDF (PyMuPDF).
+Plan (geometry.kur) → düzenlenebilir DXF (ezdxf) → yeniden aç → doğrula → PDF (PyMuPDF): tek sayfa, dikey A4 (ortada kat planı, üstte ön ve
+arka, altta sol ve sağ görünüş; D-31 madde 12). DXF'in öteki çizimleri (net alanlar, saha montaj planı, teknik özellikler) PDF'e girmez.
 Blok düzeni Yan Verandalı 6×8,5 (v1.4.3) örneğiyle aynıdır:
   - Üst seviye malzeme blokları: BOM_<kod>_… ; INSERT üzerinde AI_BOM XData = [kod, ANA|KOPYA|MONTAJ]
   - Kapı/pencere doğramaları pano bloğu içinde ayrı BOM_P0x_/BOM_K0x_ INSERT'idir (ayrıca sayılır)
@@ -13,8 +14,8 @@ from collections import Counter
 from pathlib import Path
 
 import ezdxf
-from ezdxf import units
-from ezdxf.math import Matrix44
+from ezdxf import bbox as ebbox, units
+from ezdxf.math import BoundingBox2d, Matrix44
 from ezdxf.addons import Importer
 from ezdxf.enums import TextEntityAlignment
 from ezdxf.addons.drawing import Frontend, RenderContext, config, layout, pymupdf
@@ -23,6 +24,7 @@ try:
 except ImportError:  # eski PyMuPDF
     import fitz
 from shapely.geometry import box
+from shapely.prepared import prep
 
 from . import geometry as G
 from . import veranda as VR
@@ -63,9 +65,27 @@ IC_KAPI_VARYANT = {   # kanonik V çerçevesi (pano +y, kalınlık +x), 125,5 pa
     "SAG_UST": ((-7912.93, -54227.719), 270.0, -1.0),
 }
 DIS_KAPI_KAYNAK = ("kaynak-dis-kapi", (-54272.601, -7068.569), 97.0, 54287.421, 0.57)
+# D-31 madde 6 (Lokman, 29 Ekim 2026 11:21–11:23): banyo ve WC'nin 60×40 penceresi görünüşte vasistas, tek kanat, üstten açılır ("yukarıdan
+# aşağıya doğru açılır, yana doğru değil"); sembol Lokman'ın pencere föyündeki 58 × 38 vasistas: kasa, 3 cm içeride kanat, köşelerde gönye
+# çizgisi, kanadın alt köşelerinden üst ortasına kesik açılım çizgisi (kırmızı, kaynak ön pencere bloğundaki gibi). Blok cm, 60 × 40.
+VASISTAS_OLCULERI = ("60x40",)
+# D-31 madde 9 (Lokman, 29 Ekim 2026 11:55: "arka görünüşte ... sağ taraftaki direk mi eksik"): taşan verandanın kolonu görünüşte soluk gri
+# dolgulu; gövdenin köşesiyle aynı hizadaki kolon (TK-02 arka) duvarın köşe çizgileriyle çakışıp görünmüyordu.
+VERANDA_KOLON_DOLGU = 9
+VASISTAS_BLOK = ("on-vasistas", 60.0, 40.0, 3.0)        # ad, doğal en, boy, kasa–kanat payı
+# D-31 madde 11 (Lokman, 29 Ekim 2026 11:57: "arka verandadaki pencere aslında sürgülü kapı gibi kullanılıyor"): İş Emri'nde
+# `acilis: "surgulu"` yazan pencere görünüşte sürgülü; sembol Lokman'ın föyündeki 197,5 × 197,5 sürgülü kapıdan: çift kasa, ortada bindirmeli
+# iki kanat, sabit kanatta cam işareti, sürülen kanatta yön oku (kırmızı, açılım çizgisi gibi). Blok cm, 120 × 180; ölçü ve pano değişmez.
+SURGULU_BLOK = ("on-surgulu", 120.0, 180.0, 3.0)          # ad, doğal en, boy, kasa payı
+# D-31 madde 14 (Lokman, 29 Ekim 2026 13:14: "görünüşlerdeki sadece ön görünüşde ve sağ görünüşde kodları göster diğerlerinden sil"): düşey
+# kot ölçüleri (duvar, tepe, pencere eşiği ve lentosu) yalnız ön ve sağ görünüşte; arka ve solda yatay ölçüler kalır.
+KOT_GORUNUSLERI = ("on", "sag")
+
+# D-31 madde 5 (Lokman, 29 Ekim 2026 11:14): aks çizgisi soluk gri (ACI 9) ve veranda kirişi gibi kesik (`VERANDA_KESIK`); okunabilirlik
+AKS_KATMANI = ("AKS", 9, "VERANDA_KESIK")
 
 LAYERS = [
-    ("AKS", 4, "CENTER"), ("AKS_YAZI", 4, "Continuous"), ("DIS_DUVAR_100", 30, "Continuous"), ("IC_DUVAR_60", 30, "Continuous"),
+    AKS_KATMANI, ("AKS_YAZI", 4, "Continuous"), ("DIS_DUVAR_100", 30, "Continuous"), ("IC_DUVAR_60", 30, "Continuous"),
     ("KOSE_PROFIL_100", 8, "Continuous"), ("KOSE_PROFIL_60", 8, "Continuous"), ("IC_UCLU_H_60", 3, "Continuous"),
     ("PENCERE", 10, "Continuous"), ("IC_KAPILAR", 7, "Continuous"), ("ODA_ADLARI", 7, "Continuous"), ("OLCULER", 7, "Continuous"),
     ("OZEL_PANEL_OLCU_CM", 3, "Continuous"), ("VERANDA_PROFIL_100", 1, "VERANDA_KESIK"), ("VERANDA_DIKME", 1, "Continuous"),
@@ -133,6 +153,11 @@ class Cizici:
         self._dograma_bloklari()
         self._h_blok()
         self.bom_kayit = []     # (rol, kod, blok, x, y)
+        self.bolgeler: dict[str, list[str]] = {}     # D-31 madde 12: A4 bayi sayfasının bölgeleri (ad → varlık handle'ları)
+
+    def _bolge(self, ad: str, n0: int) -> None:
+        """`n0`'dan sonra çizilen varlıklar A4 bayi sayfasının `ad` bölgesi (handle'lar kaydedilip yeniden açılan DXF'te aynı)."""
+        self.bolgeler.setdefault(ad, []).extend(e.dxf.handle for e in list(self.msp)[n0:])
 
     # ------------------------------------------------------------------ bloklar
     def _import_kaynak(self):
@@ -182,6 +207,32 @@ class Cizici:
         name, kod = self.dograma[olcu]
         return name, kod, src, nat, bb
 
+    def _pencere_yazi_ters(self, olcu: str, rot: float) -> bool:
+        """D-29 (Lokman, 29 Ekim 2026: "önden bakınca arkadaki yatak odası 1'in 120/180 yazısı ters kalıyor"): pencereli pano `rot` ile
+        konunca ölçü yazısı baş aşağı (90° … 270°, sağdan ya da alttan okunmuyor) mu? Bütün çizimlerde (P6001 dahil; D-29 madde 6)."""
+        _, _, src, nat, _ = self._pencere_blok(olcu)
+        t0 = next((e.dxf.rotation for e in self.doc.blocks.get(src) if e.dxftype() == "TEXT"), None)
+        if t0 is None:
+            return False
+        a = (rot + (0.0 if nat == "V" else 270.0) + t0) % 360.0
+        return 90.0 + 1e-6 < a <= 270.0 + 1e-6
+
+    def _pencere_ters_blok(self, olcu: str) -> str:
+        """Pencere bloğunun ölçü yazısı kendi ortası çevresinde 180° çevrilmiş eşi (sembol aynı; ad `_Y`, malzeme kodu aynı)."""
+        dname, _, src, _, _ = self._pencere_blok(olcu)
+        ad = dname + "_Y"
+        if ad not in self.doc.blocks:
+            kblk = self.doc.blocks.new(src + "-y")
+            for e in self.doc.blocks.get(src):
+                c = e.copy()
+                if c.dxftype() == "TEXT":
+                    orta = ebbox.extents([e]).center
+                    c.dxf.rotation = (c.dxf.rotation + 180.0) % 360.0
+                    c.set_placement((orta.x, orta.y), align=TextEntityAlignment.MIDDLE_CENTER)
+                kblk.add_entity(c)
+            self.doc.blocks.new(ad).add_blockref(src + "-y", (0, 0), dxfattribs={"layer": "PENCERE"})
+        return ad
+
     def _dis_kapi_blok(self, w):
         key = f"dis{int(w)}"
         if key not in self.dograma:
@@ -196,7 +247,12 @@ class Cizici:
             return
         kod = self.kat.baglanti("uclu_h_dis"); self.h_blok_adi_dis = f"BOM_{kod}_UCLU_H_DIS_{G._mm(G.T_DIS)}x{G._mm(G.T_IC)}"; self.h_kod_dis = kod
         blk = self.doc.blocks.new(self.h_blok_adi_dis)
-        self._rect(blk, -G.T_DIS / 2.0, -G.T_IC / 2.0, G.T_DIS / 2.0, G.T_IC / 2.0)
+        # D-29 (Lokman, 29 Ekim 2026: "yeşil kutular ... bizde öyle bir şey yok"): kutu çizilmez. Gövde kapalı `DIS_UCLU_H_GOVDE` katmanında
+        # kalır: sayım (BOM, doğrulama) INSERT'ten, IFC'deki parçanın yeri bloğun kutusundan (`ifc_uret.hazirla`)
+        if "DIS_UCLU_H_GOVDE" not in self.doc.layers:
+            self.doc.layers.add("DIS_UCLU_H_GOVDE", color=3, linetype="Continuous").off()
+        x0, y0, x1, y1 = -G.T_DIS / 2.0, -G.T_IC / 2.0, G.T_DIS / 2.0, G.T_IC / 2.0
+        blk.add_lwpolyline([(x0, y0), (x1, y0), (x1, y1), (x0, y1)], close=True, dxfattribs={"layer": "DIS_UCLU_H_GOVDE", "color": 256})
         if G.katman("DIS_UCLU_H_100") not in self.doc.layers:          # katman yalnız dış üçlü H varken açılır (eski DXF'ler değişmez)
             self.doc.layers.add(G.katman("DIS_UCLU_H_100"), color=3, linetype="Continuous")
 
@@ -212,8 +268,9 @@ class Cizici:
     def _rect(self, blk, x0, y0, x1, y1):
         blk.add_lwpolyline([(x0, y0), (x1, y0), (x1, y1), (x0, y1)], close=True, dxfattribs={"layer": "0", "color": 256})
 
-    def pano_blok(self, p: G.Pano):
-        """(blok adı, çerçeve, malzeme kodu). Kanonik V çerçevesi: pano +y boyunca, kalınlık +x; dış kapı H çerçevesi."""
+    def pano_blok(self, p: G.Pano, yazi_ters: bool = False):
+        """(blok adı, çerçeve, malzeme kodu). Kanonik V çerçevesi: pano +y boyunca, kalınlık +x; dış kapı H çerçevesi. `yazi_ters` (D-29):
+        pencerenin ölçü yazısı 180° çevrilmiş blok (`_pencere_ters_blok`), ad `_Y` ile biter."""
         d = p.duvar; L = p.boy; t = 2 * d.h; dis = d.tur == "dis"
         ac = p.acilim
         kind = "DOLU" if ac is None else {"pencere": {"120x120": "P01", "120x180": "P02", "60x40": "P03"}.get(ac.olcu),
@@ -230,8 +287,9 @@ class Cizici:
         if dis_ayna:
             var = "SOL"
         kay = ac.kayma if ac is not None else 0.0                  # İE-11: boşluk panoda kaydırılmışsa blok geometrisi farklıdır
+        yazi_ters = yazi_ters and ac is not None and ac.tur == "pencere"
         name = f"BOM_{kod}_{mm_tag(L)}_{'DIS' if dis else 'IC'}_{kind}" + (f"_{var}" if var else "") \
-            + (f"_KAY{'M' if kay < 0 else 'P'}{mm_tag(abs(kay))}" if abs(kay) > 1e-9 else "")
+            + (f"_KAY{'M' if kay < 0 else 'P'}{mm_tag(abs(kay))}" if abs(kay) > 1e-9 else "") + ("_Y" if yazi_ters else "")
         frame = "H" if (ac is not None and ac.tur == "dis_kapi") else "V"
         if name in self.doc.blocks:
             return name, frame, kod
@@ -241,6 +299,8 @@ class Cizici:
         w = ac.genislik; s = (L - w) / 2.0 + kay                  # kay 0 → eski değer bit bit
         if ac.tur == "pencere":
             dname, _, src, nat, bb = self._pencere_blok(ac.olcu)
+            if yazi_ters:
+                dname = self._pencere_ters_blok(ac.olcu)
             self._rect(blk, 0, 0, t, s); self._rect(blk, 0, s + w, t, L)
             orta = (t - 10.0) / 2.0
             if nat == "V": ins, rot = (t - bb[2] - orta, s - bb[1]), 0.0
@@ -305,7 +365,9 @@ class Cizici:
         W, H = plan.W, plan.H
         py = self.paylar()
         alt, ust, sol, sag = py["alt"], py["ust"], py["sol"], py["sag"]
-        aks, alanlar, montaj = (rol == "ANA"), (rol == "KOPYA"), (rol == "MONTAJ")
+        aks, montaj = (rol == "ANA"), (rol == "MONTAJ")
+        n0 = len(msp)
+        dolu: list = []                                       # bu planda konmuş özel pano ölçü yazılarının kutuları (`_ozel_olcu`)
         for d in plan.duvarlar:
             for p in d.panolar:
                 name, frame, kod = self.pano_blok(p)
@@ -318,20 +380,15 @@ class Cizici:
                         n = p.acilim.disari_normal
                         if d.yon == "y": ins, rot = ((r[0], r[1]), 0.0) if n == "-x" else ((r[2], r[3]), 180.0)
                         else:            ins, rot = ((r[2], r[1]), 90.0) if n == "-y" else ((r[0], r[3]), 270.0)
+                        if self._pencere_yazi_ters(p.acilim.olcu, rot):
+                            name, frame, kod = self.pano_blok(p, yazi_ters=True)
                 else:
                     n = p.acilim.icine_normal
                     if d.yon == "x": ins, rot = ((r[0], r[1]), 0.0) if n == "+y" else ((r[2], r[3]), 180.0)
                     else:            ins, rot = ((r[2], r[1]), 90.0) if n == "-x" else ((r[0], r[3]), 270.0)
                 self.yerlestir(name, kod, ins, rot, layer, rol, ox, oy)
                 if montaj and not standart:
-                    if d.yon == "y":
-                        side = 1 if d.c < W / 2 else -1
-                        xd = r[2] + 40 if side > 0 else r[0] - 40
-                        self.dim((r[0] + ox if side > 0 else r[2] + ox, r[1] + oy), (r[0] + ox if side > 0 else r[2] + ox, r[3] + oy), (xd + ox, 0), 90, "MONTAJ_OZEL_OLCU")
-                    else:
-                        side = 1 if d.c < H / 2 else -1
-                        yd = r[3] + 40 if side > 0 else r[1] - 40
-                        self.dim((r[0] + ox, r[1] + oy if side > 0 else r[3] + oy), (r[2] + ox, r[1] + oy if side > 0 else r[3] + oy), (0, yd + oy), 0, "MONTAJ_OZEL_OLCU")
+                    self._ozel_olcu(d, r, W, H, ox, oy, "MONTAJ_OZEL_OLCU", dolu)
                 if montaj and p.acilim and p.acilim.tur == "pencere":
                     g = p.gap(); cx, cy = (g[0] + g[2]) / 2, (g[1] + g[3]) / 2
                     pkr = G.pencere_kurali(p.acilim.olcu); en, boy = pkr.en, pkr.boy; pk = self.dograma[p.acilim.olcu][1]
@@ -407,7 +464,7 @@ class Cizici:
         for (x0, y0, x1, y1) in self._merge_lines(plan.acik_sinir_cizgileri):
             msp.add_line((x0 + ox, y0 + oy), (x1 + ox, y1 + oy), dxfattribs={"layer": "ACIK_SINIR"})
         # mahaller
-        etiketler = {}
+        etiketler, yerlesecek, nis_yazilari, zincir_h = {}, [], {}, set()
         for ad, m in plan.mahaller.items():
             poly = m.poly.simplify(0.0)
             if rol == "ANA":
@@ -426,15 +483,10 @@ class Cizici:
             if montaj: h = 18
             h, rot = self._etiket_sigdir(ad, etiket_poly, h)
             etiketler[ad] = (cx, cy, h, rot)
-            if alanlar:
-                if rot:
-                    self.text(ad, (cx + ox + 16, cy + oy), h, "ODA_ADLARI", rot=rot)
-                    self.text(f"{m.alan_m2:.2f}".replace(".", ",") + " m²", (cx + ox - 12, cy + oy), min(20, h), "ODA_ADLARI", rot=rot)
-                else:
-                    self.text(ad, (cx + ox, cy + oy + 14), h, "ODA_ADLARI")
-                    self.text(f"{m.alan_m2:.2f}".replace(".", ",") + " m²", (cx + ox, cy + oy - 18), min(20, h), "ODA_ADLARI")
-            else:
-                self.text(ad, (cx + ox, cy + oy), h, "ODA_ADLARI" if not montaj else "MONTAJ_YAZI", rot=rot)
+            if montaj:
+                self.text(ad, (cx + ox, cy + oy), h, "MONTAJ_YAZI", rot=rot)
+            else:                                           # D-31 madde 15 (Patron 13:21): akslı kat planında da her bölmenin adının altında net m²;
+                yerlesecek.append((ad, m, poly, cx, cy, h, rot))   # yazılar planın sonunda, ölçülere binmeyecek yere (`_mahal_etiketleri`)
         if aks and G.ana_akslar("x") is not None:          # İE-11: aks tablosu → ana akslar (tam pano + ek aks + uç); ek aks "2′" gibi, numara kaydırmaz
             for x, ad in zip(G.ana_akslar("x"), G.ana_aks_etiketleri("x")):
                 msp.add_line((x + ox, -35 - alt + oy), (x + ox, H + 41 + ust + oy), dxfattribs={"layer": "AKS"})
@@ -466,8 +518,12 @@ class Cizici:
             else:
                 xs = [G.X(i / 2) for i in range(0, int(plan.nx * 2) + 1, 2)] + ([G.X(plan.nx)] if int(plan.nx * 2) % 2 else [])
                 ys = [G.Y(j / 2) for j in range(0, int(plan.ny * 2) + 1, 2)] + ([G.Y(plan.ny)] if int(plan.ny * 2) % 2 else [])
+            n_z = len(msp)
             for a, b in zip(xs, xs[1:]): self.dim((a + ox, H + oy), (b + ox, H + oy), (0, H + 102 + ust + oy), 0)
             for a, b in zip(ys, ys[1:]): self.dim((W + ox, a + oy), (W + ox, b + oy), (W + 81 + sag + ox, 0), 90)
+            zincir_h = {e.dxf.handle for e in list(msp)[n_z:]}
+            if aks:
+                self._bolge("aks_zinciri", n_z)                   # D-31 madde 13: A4 sayfasının planında yok
             for v in plan.dis_verandalar:                   # BK-14: taşan verandanın eni ve derinliği
                 vx0, vy0, vx1, vy1 = v["rect"]
                 if v["cephe"] in ("on", "arka"):
@@ -481,13 +537,7 @@ class Cizici:
             for d in plan.duvarlar:
                 for p in d.panolar:
                     if abs(p.boy - G.MOD) < 1e-6: continue
-                    r = p.rect()
-                    if d.yon == "y":
-                        side = 1 if d.c < W / 2 else -1; xd = r[2] + 40 if side > 0 else r[0] - 40
-                        self.dim((r[0] + ox if side > 0 else r[2] + ox, r[1] + oy), (r[0] + ox if side > 0 else r[2] + ox, r[3] + oy), (xd + ox, 0), 90, "OZEL_PANEL_OLCU_CM")
-                    else:
-                        side = 1 if d.c < H / 2 else -1; yd = r[3] + 40 if side > 0 else r[1] - 40
-                        self.dim((r[0] + ox, r[1] + oy if side > 0 else r[3] + oy), (r[2] + ox, r[1] + oy if side > 0 else r[3] + oy), (0, yd + oy), 0, "OZEL_PANEL_OLCU_CM")
+                    self._ozel_olcu(d, p.rect(), W, H, ox, oy, "OZEL_PANEL_OLCU_CM", dolu)
             for ad, m in plan.mahaller.items():
                 if not m.acik or not m.cells: continue      # taşan veranda (BK-14) yukarıda ölçülü
                 us = [u for u, v in m.cells]; vs = [v for u, v in m.cells]
@@ -504,12 +554,15 @@ class Cizici:
                 elif dar and x0 <= G.X(0) + 1e-6: xb = -80.0
                 else: xb = x0 + 33.0
                 self.dim((x0 + ox, y0 + oy), (x0 + ox, y1 + oy), (xb + ox, 0), 90)
-                cx, cy, hh, rot = etiketler[ad]
-                pos = (cx + ox + 16 + hh / 2 + 13, cy + oy) if rot else (cx + ox, cy + oy + (hh / 2 + 24 + (14 if alanlar else 0)))
-                self.text(f"{fmt((x1 - x0) / G.MOD)} x {fmt((y1 - y0) / G.MOD)} aks modülü", pos, 13, "ODA_ADLARI", rot=rot)
+                nis_yazilari[ad] = f"{fmt((x1 - x0) / G.MOD)} x {fmt((y1 - y0) / G.MOD)} aks modülü"   # net alan planında adın üstünde (`_mahal_etiketleri`)
         if montaj:
             self.text("Mor: standart dışı pano (gerçek uçtan uca boy ölçülü) | Beyaz: standart 125,5 cm pano | Ölçüler cm", (W / 2 + ox, -145 - alt + oy), 13, "MONTAJ_YAZI")
             self.text("Pencere etiketi: malzeme kodu + en×yükseklik | Montaj kopyası BOM'a sayılmaz", (W / 2 + ox, -175 - alt + oy), 13, "MONTAJ_YAZI")
+        if yerlesecek:
+            self._mahal_etiketleri(yerlesecek, nis_yazilari, n0, ox, oy, aks, zincir_h)
+        if aks:                                               # D-31 madde 12–13: A4 sayfasının kat planı, başlıksız (antet sayfanın üstünde) ve
+            zincir = set(self.bolgeler.get("aks_zinciri", []))  # 125,5'lik aks ölçü zinciri olmadan
+            self.bolgeler["plan"] = [e.dxf.handle for e in list(msp)[n0:] if e.dxf.handle not in zincir]
         self.text(baslik, (W / 2 + ox, H + 206 + ust + oy), 24, "ODA_ADLARI")
         # İE-11: dar yapıda (PK-01 600 cm) alt başlık komşu plana taşıyordu; yeni anahtarlı İş Emri'nde yazı sığacak boya iner (eski yol 15 sabit)
         h_alt = 15 if not G.yeni_anahtar_var(plan.is_emri) else max(9, min(15, int((W + 200) / (max(1, len(altbaslik)) * 0.75))))   # planlar W+300 aralıklı; harf ≈ 0,75·h
@@ -524,6 +577,128 @@ class Cizici:
             import pymupdf
             cls._FONT = pymupdf.Font(fontfile=str(FONT_PATH))
         return cls._FONT.text_length(s, fontsize=h / 0.729)   # DejaVu büyük harf yüksekliği ≈ 0,729 em
+
+    ETIKET_ADIM_CM = 5.0
+
+    def _mahal_etiketleri(self, yerlesecek, nis_yazilari: dict, n0: int, ox: float, oy: float, aks: bool, zincir: set) -> None:
+        """Kat planı ve net alan planında mahal adı, altında net m² (D-31 madde 15; Patron 13:21: "SALON yazısının altına m² ... tüm
+        bölmeler için"). Yazı grubu mahalin içinde, ortasına en yakın ve bu planın ölçü çizgilerine, ölçü yazılarına ve öteki yazılarına
+        binmeyen yere konur (pencere ölçü yazısı dahil); öyle yer yoksa yazı küçülür (en az 14), yine yoksa en az binen yer seçilir; hiç sığmazsa
+        ortada 14 boyla ve plan uyarısıyla. Kapının kanat ve yay kutusundan
+        ikinci öncelikte kaçınılır. Aks ölçü zinciri (`zincir`; A4'te yok, madde 13) aks çizgisi gibi engel sayılmaz. 90° döndürülmüş yazıda m² okuma yönünde
+        altta (sağda). Açık nişin "1 x 1 aks modülü" yazısı yalnız net alan planında, adın üstünde; nişten geniş olduğundan engeli ikinci
+        önceliktedir. Akslı kat planında (A4) yazılmaz: m²'ye yer açar, aks bilgisi A4'te yok (madde 13)."""
+        sert, yumusak = [], []
+        for e in list(self.msp)[n0:]:
+            t = e.dxftype()
+            if e.dxf.handle in zincir: continue
+            if t == "TEXT":
+                sert.append(self._yazi_kutusu(e.dxf.text, e.dxf.align_point, e.dxf.height, e.dxf.rotation))
+            elif t == "DIMENSION":
+                for g in e.get_geometry_block():
+                    if g.dxftype() == "LINE": sert.append(self._cizgi_kutusu(g.dxf.start, g.dxf.end))
+                    elif g.dxftype() == "MTEXT": sert.append(self._yazi_kutusu(g.text, g.dxf.insert, g.dxf.char_height, g.dxf.get("rotation", 0.0)))
+            elif t == "INSERT":
+                for g in e.virtual_entities():
+                    if g.dxftype() != "INSERT": continue
+                    if g.dxf.layer == "IC_KAPILAR":
+                        k = self._blok_kutusu(g)
+                        if k: yumusak.append(k)
+                    elif g.dxf.layer == "PENCERE":              # pencere ölçü yazısı ("120/180") verandaya bakan duvarda mahalin içine düşer (hakem, 29 Ekim)
+                        sert.extend(self._pencere_yazilari(g))
+        for ad, m, poly, cx, cy, h, rot in yerlesecek:
+            alan = f"{m.alan_m2:.2f}".replace(".", ",") + " m²"
+            nis = None if aks else nis_yazilari.get(ad)
+            ic = poly.buffer(-3.0)
+            x0, y0, x1, y1 = poly.bounds
+            sinir = (x0 + ox - 200, y0 + oy - 50, x1 + ox + 200, y1 + oy + 50)
+            s_yakin = [k for k in sert if self._kesisir(k, sinir)]
+            y_yakin = [k for k in yumusak if self._kesisir(k, sinir)]
+            adim = self.ETIKET_ADIM_CM
+            adaylar = sorted(((x0 + i * adim, y0 + j * adim) for i in range(int((x1 - x0) / adim) + 1) for j in range(int((y1 - y0) / adim) + 1)),
+                             key=lambda p: ((p[0] - cx) ** 2 + (p[1] - cy) ** 2, p))
+            adaylar.insert(0, (cx, cy))
+            ic = prep(ic)
+            en_iyi = None
+            for hh in sorted({max(14.0, h * f) for f in (1.0, 0.9, 0.8, 0.7, 0.0)}, reverse=True):
+                grup0 = self._etiket_grubu(ad, alan, nis, 0.0, 0.0, hh, rot)       # yazı enleri bir kez; adaylarda kaydırılır
+                for px, py_ in adaylar:
+                    kutular = [(k[0] + px + ox, k[1] + py_ + oy, k[2] + px + ox, k[3] + py_ + oy) for k in grup0]
+                    puan = (sum(self._ortusme(k, o) for k in kutular[:2] for o in s_yakin),
+                            sum(self._ortusme(k, o) for k in kutular[:2] for o in y_yakin) + sum(self._ortusme(k, o) for k in kutular[2:] for o in s_yakin + y_yakin))
+                    if en_iyi is not None and puan >= en_iyi[0]: continue
+                    if not all(ic.contains(box(k[0] - ox, k[1] - oy, k[2] - ox, k[3] - oy)) for k in kutular[:2]): continue
+                    en_iyi = (puan, px, py_, hh)
+                    if puan == (0, 0): break
+                if en_iyi and en_iyi[0][0] == 0: break
+            if en_iyi is None:                                  # hiçbir aday mahale sığmadı: ortada en küçük boyla, uyarıyla (K16; hakem, 29 Ekim)
+                u = f"{ad}: adı ve m²'si mahalin içine sığmadı; ortasına 14 boyla yazıldı, duvara taşabilir"
+                if u not in self.plan.uyarilar: self.plan.uyarilar.append(u)
+            px, py_, hh = (en_iyi[1], en_iyi[2], en_iyi[3]) if en_iyi else (cx, cy, 14.0)
+            (ax, ay), (mx, my), np_ = self._etiket_yerleri(px, py_, hh, rot)
+            self.text(ad, (ax + ox, ay + oy), hh, "ODA_ADLARI", rot=rot)
+            self.text(alan, (mx + ox, my + oy), min(20, hh), "ODA_ADLARI", rot=rot)
+            if nis: self.text(nis, (np_[0] + ox, np_[1] + oy), 13, "ODA_ADLARI", rot=rot)
+
+    @classmethod
+    def _pencere_yazilari(cls, ins) -> list:
+        """Pencere bloğunun (iç içe: `BOM_P..` → kaynak pencere) yazılarının dünya kutuları."""
+        out = []
+        for y in ins.virtual_entities():
+            if y.dxftype() == "INSERT":
+                out.extend(cls._pencere_yazilari(y))
+            elif y.dxftype() == "TEXT":
+                bb = ebbox.extents([y])
+                if bb.has_data: out.append((bb.extmin.x, bb.extmin.y, bb.extmax.x, bb.extmax.y))
+        return out
+
+    _KAPI_KUTULARI: dict = {}
+
+    def _blok_kutusu(self, ins):
+        """Kapı INSERT'inin dünya kutusu. Kapı blokları kaynak DXF'in kapısından, adı açıklığı taşır (`BOM_K01_IC_KAPI_ACIKLIK820`);
+        blok kutusu ada göre bir kez hesaplanır (binlerce kısa çizgi, her planda yeniden ölçmek yavaş)."""
+        onbellek = self._KAPI_KUTULARI
+        ad = ins.dxf.name
+        if ad not in onbellek:
+            bb = ebbox.extents(self.doc.blocks[ad])
+            onbellek[ad] = (bb.extmin, bb.extmax) if bb.has_data else None
+        k = onbellek[ad]
+        if k is None: return None
+        m = ins.matrix44()
+        pts = [m.transform((x, y, 0.0)) for x in (k[0][0], k[1][0]) for y in (k[0][1], k[1][1])]
+        return (min(p[0] for p in pts), min(p[1] for p in pts), max(p[0] for p in pts), max(p[1] for p in pts))
+
+    @staticmethod
+    def _etiket_yerleri(cx, cy, h, rot):
+        """Ad, m² ve niş yazısının ortası: ad üstte, m² altta, niş yazısı adın üstünde (90°'de okuma yönünde: üst = −x)."""
+        if rot: return (cx - 14, cy), (cx + 18, cy), (cx - 14 - h / 2 - 22, cy)
+        return (cx, cy + 14), (cx, cy - 18), (cx, cy + 14 + h / 2 + 22)
+
+    @classmethod
+    def _etiket_grubu(cls, ad, alan, nis, cx, cy, h, rot):
+        (ax, ay), (mx, my), (nx, ny) = cls._etiket_yerleri(cx, cy, h, rot)
+        grup = [cls._yazi_kutusu(ad, (ax, ay), h, 90.0 if rot else 0.0), cls._yazi_kutusu(alan, (mx, my), min(20, h), 90.0 if rot else 0.0)]
+        if nis: grup.append(cls._yazi_kutusu(nis, (nx, ny), 13, 90.0 if rot else 0.0))
+        return grup
+
+    @classmethod
+    def _yazi_kutusu(cls, s, p, h, rot):
+        """Ortaya hizalı yazının kutusu (0° ya da 90°)."""
+        w = cls.yazi_eni(s, h) / 2
+        return (p[0] - h / 2, p[1] - w, p[0] + h / 2, p[1] + w) if abs((rot or 0.0) % 180.0 - 90.0) < 1e-6 else (p[0] - w, p[1] - h / 2, p[0] + w, p[1] + h / 2)
+
+    @staticmethod
+    def _cizgi_kutusu(a, b, kalinlik=1.5):
+        return (min(a[0], b[0]) - kalinlik, min(a[1], b[1]) - kalinlik, max(a[0], b[0]) + kalinlik, max(a[1], b[1]) + kalinlik)
+
+    @staticmethod
+    def _kesisir(a, b):
+        return a[0] < b[2] and b[0] < a[2] and a[1] < b[3] and b[1] < a[3]
+
+    @staticmethod
+    def _ortusme(a, b):
+        w = min(a[2], b[2]) - max(a[0], b[0]); h = min(a[3], b[3]) - max(a[1], b[1])
+        return w * h if w > 0 and h > 0 else 0.0
 
     @classmethod
     def _etiket_sigdir(cls, ad: str, poly, h: float):
@@ -555,6 +730,33 @@ class Cizici:
     def text(self, s, pos, h, layer, align=TextEntityAlignment.MIDDLE_CENTER, rot=0.0):
         self.msp.add_text(s, dxfattribs={"height": h, "layer": layer, "style": "PORTMAN", "rotation": rot}).set_placement(pos, align=align)
 
+    OZEL_OLCU_UZAKLIK_CM = (40, 25, 70, 100)
+
+    def _ozel_olcu(self, d, r, W, H, ox, oy, layer, dolu: list) -> None:
+        """Standart dışı panonun ölçüsü, duvarın iç yanında panodan 40 cm uzakta. Yazısı bu planda daha önce konmuş bir özel pano ölçü
+        yazısına biniyorsa ölçü çizgisi sırayla 25, 70, 100 cm'e çekilir (D-29 ek: TK-02 yatak odası 3'te 62,75 ile 125 üst üsteydi);
+        hiçbiri boş değilse 40'ta kalır. Yazının yeri ölçü stilinden: çizginin üstünde (dimtad 1, dimgap 4, yükseklik 14); 90°'lik ölçüde solunda."""
+        boy = (r[3] - r[1]) if d.yon == "y" else (r[2] - r[0])
+        yari_en = self.yazi_eni(f"{boy:.2f}".rstrip("0").rstrip(".").replace(".", ","), 14) / 2 + 2
+        ic = (1 if d.c < W / 2 else -1) if d.yon == "y" else (1 if d.c < H / 2 else -1)
+
+        def kutu(u):
+            if d.yon == "y":
+                x = (r[2] + u if ic > 0 else r[0] - u) - 4 - 7
+                return (x - 9, (r[1] + r[3]) / 2 - yari_en, x + 9, (r[1] + r[3]) / 2 + yari_en)
+            y = (r[3] + u if ic > 0 else r[1] - u) + 4 + 7
+            return ((r[0] + r[2]) / 2 - yari_en, y - 9, (r[0] + r[2]) / 2 + yari_en, y + 9)
+        u = next((u for u in self.OZEL_OLCU_UZAKLIK_CM
+                  if not any(k[0] < b[2] and b[0] < k[2] and k[1] < b[3] and b[1] < k[3] for k in [kutu(u)] for b in dolu)),
+                 self.OZEL_OLCU_UZAKLIK_CM[0])
+        dolu.append(kutu(u))
+        if d.yon == "y":
+            xd = r[2] + u if ic > 0 else r[0] - u; xk = r[0] if ic > 0 else r[2]
+            self.dim((xk + ox, r[1] + oy), (xk + ox, r[3] + oy), (xd + ox, 0), 90, layer)
+        else:
+            yd = r[3] + u if ic > 0 else r[1] - u; yk = r[1] if ic > 0 else r[3]
+            self.dim((r[0] + ox, yk + oy), (r[2] + ox, yk + oy), (0, yd + oy), 0, layer)
+
     def dim(self, p1, p2, base, angle, layer="OLCULER"):
         base = (p1[0], base[1]) if angle == 0 else (base[0], p1[1])
         d = self.msp.add_linear_dim(base=base, p1=p1, p2=p2, angle=angle, dimstyle="PORTMAN", dxfattribs={"layer": layer},
@@ -564,6 +766,58 @@ class Cizici:
     # ------------------------------------------------------------------ ön görünüş / çatı / tablo
     def _disari_yon(self, d):
         return G.disari_yon(self.plan, d)
+
+    def _vasistas_blok(self):
+        """Görünüşün vasistas pencere bloğu (`VASISTAS_BLOK`; D-31 madde 6); ilk kullanımda kurulur (vasistassız çizimde blok yok)."""
+        ad, en, boy, k = VASISTAS_BLOK
+        if ad in self.doc.blocks:
+            return ad
+        b = self.doc.blocks.new(ad)
+        kasa = [(0.0, 0.0), (en, 0.0), (en, boy), (0.0, boy)]
+        kanat = [(k, k), (en - k, k), (en - k, boy - k), (k, boy - k)]
+        b.add_lwpolyline(kasa, close=True, dxfattribs={"layer": "0", "color": 7})
+        b.add_lwpolyline(kanat, close=True, dxfattribs={"layer": "0", "color": 7})
+        for a, c in zip(kasa, kanat):                         # köşe gönyeleri
+            b.add_line(a, c, dxfattribs={"layer": "0", "color": 7})
+        tepe = (en / 2, boy - k)
+        for alt in ((k, k), (en - k, k)):                     # açılım: alt köşelerden üst ortaya, 6 kesik (dolu 0,5)
+            for i in range(6):
+                t0, t1 = i / 6, (i + 0.5) / 6
+                b.add_line((alt[0] + (tepe[0] - alt[0]) * t0, alt[1] + (tepe[1] - alt[1]) * t0),
+                           (alt[0] + (tepe[0] - alt[0]) * t1, alt[1] + (tepe[1] - alt[1]) * t1), dxfattribs={"layer": "0", "color": 1})
+        return ad
+
+    def _surgulu_blok(self):
+        """Görünüşün sürgülü pencere bloğu (`SURGULU_BLOK`; D-31 madde 11); ilk kullanımda kurulur."""
+        ad, en, boy, k = SURGULU_BLOK
+        if ad in self.doc.blocks:
+            return ad
+        b = self.doc.blocks.new(ad)
+        kutu = lambda x0, y0, x1, y1: b.add_lwpolyline([(x0, y0), (x1, y0), (x1, y1), (x0, y1)], close=True, dxfattribs={"layer": "0", "color": 7})
+        kutu(0.0, 0.0, en, boy); kutu(k / 2, k / 2, en - k / 2, boy - k / 2)                 # çift kasa
+        o, c = en / 2, 2.0                                                                  # orta, bindirme yarısı
+        for x0, x1 in ((k, o + c), (o - c, en - k)):                                        # iki kanat, ortada bindirmeli; her biri çift çizgi
+            kutu(x0, k, x1, boy - k); kutu(x0 + 2.5, k + 2.5, x1 - 2.5, boy - k - 2.5)
+        for d in (0.0, 6.0):                                                                # sabit kanatta (sol) cam işareti
+            b.add_line((o / 2 - 6 + d, boy / 2 - 8), (o / 2 + d, boy / 2 + 2), dxfattribs={"layer": "0", "color": 7})
+        y, x0, x1 = boy / 2, o + (en - k - o) * 0.25, o + (en - k - o) * 0.75               # sürülen kanatta (sağ) yön oku
+        b.add_line((x0, y), (x1, y), dxfattribs={"layer": "0", "color": 1})
+        b.add_line((x0, y - 3), (x0, y + 3), dxfattribs={"layer": "0", "color": 1})
+        for dy in (-2.5, 2.5):
+            b.add_line((x1, y), (x1 - 4, y + dy), dxfattribs={"layer": "0", "color": 1})
+        return ad
+
+    def _on_pencere(self, u0, z0, w, h, olcu, acilis=None):
+        """Görünüşte pencere: sürgülü bloğu (`acilis: surgulu`, D-31 madde 11), 60×40 vasistas bloğu (D-31 madde 6), öteki ölçüler kaynak ön
+        pencere bloğu (Güncel Şablon 2024); açıklığa ölçekli."""
+        if acilis == "surgulu":
+            _, en, boy, _ = SURGULU_BLOK
+            self.msp.add_blockref(self._surgulu_blok(), (u0, z0), dxfattribs={"xscale": w / en, "yscale": h / boy, "layer": "ON_DOGRAMA"})
+        elif olcu in VASISTAS_OLCULERI:
+            _, en, boy, _ = VASISTAS_BLOK
+            self.msp.add_blockref(self._vasistas_blok(), (u0, z0), dxfattribs={"xscale": w / en, "yscale": h / boy, "layer": "ON_DOGRAMA"})
+        else:
+            self.msp.add_blockref("kaynak-on-pencere", (u0, z0), dxfattribs={"xscale": w / 77.101, "yscale": h / 116.017, "layer": "ON_DOGRAMA"})
 
     def ciz_on_gorunus(self, ox, top):
         plan, msp = self.plan, self.msp
@@ -586,7 +840,7 @@ class Cizici:
                 g = p.gap(); x0, x1 = g[0], g[2]; w = x1 - x0
                 if p.acilim.tur == "pencere":
                     h = p.acilim.yukseklik; alt = hy - lento - h
-                    msp.add_blockref("kaynak-on-pencere", (x0 + ox, bot + alt), dxfattribs={"xscale": w / 77.101, "yscale": h / 116.017, "layer": "ON_DOGRAMA"})
+                    self._on_pencere(x0 + ox, bot + alt, w, h, p.acilim.olcu, p.acilim.acilis)
                 elif p.acilim.tur == "dis_kapi":
                     h = hy - lento
                     msp.add_blockref("kaynak-on-kapi", (x0 + ox, bot), dxfattribs={"xscale": w / 68.697, "yscale": h / 133.557, "layer": "ON_DOGRAMA"})
@@ -607,49 +861,77 @@ class Cizici:
             if p["veranda"] not in on_veranda:
                 continue
             pts = [(u + ox, bot + z) for u, z in p["u"]]
-            if p.get("kalkan"):
-                msp.add_lwpolyline(pts, dxfattribs={"layer": "ON_CATI"})
+            if p.get("kalkan") or p.get("acik"):                # BK-18 ek: saçak altı çizgisi ON_CATI'de, topuk ON_TOPUK'ta (ana çatınınki gibi)
+                msp.add_lwpolyline(pts, dxfattribs={"layer": "ON_TOPUK" if p["tur"] == "topuk" else "ON_CATI"})
             else:
                 msp.add_lwpolyline(pts, close=True, dxfattribs={"layer": "ON_CATI" if p["tur"] == "cati" else "ON_GORUNUS"})
         self.text("ÖN GÖRÜNÜŞ - ÇALIŞMA", (W / 2 + ox, top + rise + 100), 26, "ON_YAZI")
         self.text(f"Pencere üst kotu {fmt(hy - lento)} cm | Lento {fmt(lento)} cm | Bina yüksekliği {fmt(hy)} cm", (W / 2 + ox, bot - 150), 15, "ON_YAZI")
 
-    def ciz_cati_profili(self, ox, oy, en=None, alt_yazi=None):
-        plan, msp = self.plan, self.msp
-        W = plan.W if en is None else en; cati = plan.is_emri.get("cati", {})     # İE-17: beşik dışı çatıda makasın geçtiği boy (`en`)
-        egim = float(cati.get("egim_yuzde", 33)) / 100.0; sacak = float(cati.get("sacak_cm", 30)); topuk = float(cati.get("topuk_cm", 10))
-        tw = W + 2 * sacak; rise = topuk + (tw / 2) * egim
-        xl, xr, xm = ox - sacak, ox + W + sacak, ox + W / 2
-        lw = {"layer": "CATI_GORUNUS", "lineweight": 35}
-        msp.add_line((xl, oy), (xr, oy), dxfattribs=lw)
-        msp.add_line((xl, oy), (xl, oy + topuk), dxfattribs={**lw, "color": 1}); msp.add_line((xr, oy), (xr, oy + topuk), dxfattribs={**lw, "color": 1})
-        msp.add_line((xl, oy + topuk), (xm, oy + rise), dxfattribs=lw); msp.add_line((xm, oy + rise), (xr, oy + topuk), dxfattribs=lw)
-        self.dim((xl, oy), (xr, oy), (0, oy - 120), 0, "CATI_OLCU"); self.dim((xl, oy), (ox, oy), (0, oy - 60), 0, "CATI_OLCU")
-        self.dim((ox, oy), (ox + W, oy), (0, oy - 60), 0, "CATI_OLCU"); self.dim((ox + W, oy), (xr, oy), (0, oy - 60), 0, "CATI_OLCU")
-        self.dim((xl, oy), (xl, oy + topuk), (xl - 63, 0), 90, "CATI_OLCU"); self.dim((xr, oy), (xm, oy + rise), (xr + 74, 0), 90, "CATI_OLCU")
-        self.text("%" + fmt(egim * 100), (ox + W / 4, oy + rise / 2 + 35), 23, "CATI_YAZI"); self.text("%" + fmt(egim * 100), (ox + 3 * W / 4, oy + rise / 2 + 35), 23, "CATI_YAZI")
-        self.text("TOPUK", (xl - 53, oy + 53), 14, "CATI_YAZI")
-        self.text("ÇATI PROFİLİ - TOPUK VE SAÇAK", (xm, oy + rise + 130), 25, "CATI_YAZI")
-        self.text(f"İki yanda {fmt(sacak)} cm saçak | İki uçta {fmt(topuk)} cm topuk | Eğim %{fmt(egim*100)} (derece değil)", (xm, oy + rise + 95), 17, "CATI_YAZI")
-        self.text(alt_yazi or "Makas kısa kenarı geçer; mahya uzun kenar boyunca uzanır. Ölçüler cm.", (xm, oy - 180), 16, "CATI_YAZI")
+    def _veranda_gorunusu(self, taraf, r):
+        """D-31: taşan verandanın bu görünüşteki parçaları (`veranda.gorunus_parcalari`; u görünüşün yatayında, `cephe_gorunus.eksen` ile aynı
+        başlangıç, z zeminden). Veranda çatısı ana çatının küçüğü gibi: saçak altı çizgisi, iki uçta topuk, iki eğim; kolon ve kiriş (Lokman,
+        29 Ekim 2026 11:07–11:11: "tıpa tıp aynısı sadece daha küçüğü"). Eğim yazısı (`yazi`) yalnız ana çatınınkinden farklıysa, bir kez
+        (11:55: "%33 eğimi sadece ana çatıda tek tarafta belirtsen yeter"). Karşı cephedeki veranda gövdenin ardında
+        kalır, çizilmez. Veranda cephesi görünüşe dikse (yandan bakış) ana çatının görünüşteki siluetinin (`r`) örttüğü parça kırpılır: ana
+        çatının saçak bandı veranda çatısının üstünde ve bakana yakın (`veranda.ana_catiya_tasma`; aşarsa uyarı zaten düşer)."""
+        from shapely.geometry import LineString, MultiPoint
+        from . import cephe_gorunus as CG
+        plan, ie = self.plan, self.plan.is_emri
+        if not plan.dis_verandalar:
+            return []
+        karsi = {"on": "arka", "arka": "on", "sol": "sag", "sag": "sol"}
+        cephe = {v["ad"]: v["cephe"] for v in plan.dis_verandalar}
+        egim = {v["ad"]: float(v["cati"]["egim_yuzde"]) for v in plan.dis_verandalar}
+        ana_egim = float((ie.get("cati") or {}).get("egim_yuzde", 33))
+        uc, _, _ = CG.eksen(plan, taraf)
+        kay = uc(0.0, 0.0) - VR.izdusum(taraf).u(0.0, 0.0)
+        ortu = MultiPoint([p for c in r["cizgiler"] for p in c]).convex_hull
+        out, gorulen = [], set()
+        for p in VR.gorunus_parcalari(plan, ie, taraf):
+            if cephe[p["veranda"]] == karsi[taraf]:
+                continue
+            q = dict(p, u=[(u + kay, z) for u, z in p["u"]])
+            imza = (q["tur"], tuple(q["u"]))
+            if imza in gorulen:                                  # yandan bakışta üst üste düşen kolon ve kiriş bir kez
+                continue
+            gorulen.add(imza)
+            acik = bool(q.get("kalkan") or q.get("acik"))
+            hat = LineString(q["u"] if acik else q["u"] + q["u"][:1])
+            if cephe[p["veranda"]] != taraf and ortu.area > 1 and hat.intersects(ortu.buffer(-0.05)):
+                kalan = hat.difference(ortu)
+                out += [dict(q, u=[(round(a, 4), round(b, 4)) for a, b in g.coords], acik=True) for g in getattr(kalan, "geoms", [kalan])
+                        if g.geom_type == "LineString" and g.length > 0.5]
+                continue
+            out.append(q)
+            if q.get("kalkan") and abs(egim[p["veranda"]] - ana_egim) > 1e-6:   # D-31 madde 10: eğim ana çatınınkiyle aynıysa yazılmaz;
+                (a, za), (m, zm), _ = q["u"]                                     # farklıysa bir kez, sol eğimde
+                out.append({"tur": "yazi", "metin": "%" + fmt(egim[p["veranda"]]), "u": [((a + m) / 2, (za + zm) / 2 + 22)]})
+        return out
 
     def ciz_gorunusler(self, top):
-        """İE-17: beşik dışı çatıda (beşik + cumba, kırma) ön görünüş canlı biçimiyle ve yanına aynı biçimle arka, sol ve sağ görünüş; en sonda
-        ana çatının profili (Lokman ve CIO, 27 Ekim 21:13: prefabrik çıktısı bu ön onay PDF'i; genel motordan yalnız çatı geometrisi).
+        """İE-17: ön görünüş canlı biçimiyle ve yanına aynı biçimle arka, sol ve sağ görünüş (Lokman ve CIO, 27 Ekim 21:13: prefabrik çıktısı
+        bu ön onay PDF'i; genel motordan yalnız çatı geometrisi). Çatı profili (topuk ve saçak) çizilmez (D-31; Lokman, 29 Ekim 11:12).
         Biçim `ciz_on_gorunus`'unki: duvarın dikdörtgeni, pano derzleri, kaynak pencere ve kapı blokları, saçak altı çizgisi ve topuk,
         ölçüler (çatı ve duvar eni, duvar yüksekliği, tepe, en soldaki pencerenin eşiği ve lentosu), % eğim, ON_* katmanları. Geometri
         `cephe_gorunus`'tan: duvar ve açıklıklar Motor'un planından, çatı çizgileri `cati_prefabrik`'in düzlemlerinin izdüşümü. Görünüşler
-        yan yana, saçak uçları arası 360 (sağdaki ölçüler 110, ara 250). Beşikte çağrılmaz (beşik DXF'i bayt bayt aynı). Duvar üstü `top`."""
+        yan yana, saçak uçları arası 360 (sağdaki ölçüler 110, ara 250). Duvar üstü `top`.
+        D-31 (Lokman, 29 Ekim 2026; CIO 11:07): beşik de dört görünüşle (düzlemler `sunum.cati_tanimi`'nden); taşan veranda yalnız beşikte,
+        `_veranda_gorunusu` ile: ana çatının küçüğü gibi (saçak altı, topuk, iki eğim, % eğim), arkadaki veranda gövdenin ardında çizilmez;
+        60×40 pencere vasistas (`_on_pencere`); derz yalnız görünen ve cepheye değen duvarlardan (`cephe_gorunus.cephe`)."""
         from . import cephe_gorunus as CG
         plan, msp, ie = self.plan, self.msp, self.plan.is_emri
         hy = float(ie["yapi"].get("duvar_yuksekligi_cm", 250)); cati = ie["cati"]
         topuk = float(cati.get("topuk_cm", 10)); sacak = float(cati.get("sacak_cm", 30))
         bot = top - hy; lento = hy - PENCERE_UST_KOTU
-        ox, xr = 0.0, 0.0
+        ox, sag_uc = 0.0, 0.0
         for k, taraf in enumerate(CG.TARAFLAR):
+            n0 = len(msp)
             g, r = CG.cephe(plan, taraf), CG.cati_cizgileri(plan, ie, taraf)
+            vp = self._veranda_gorunusu(taraf, r)
+            sol_uc = min([r["u0"]] + [u for p in vp for u, _z in p["u"]])
             if k:
-                ox = xr + 360.0 - r["u0"]
+                ox = sag_uc + 360.0 - sol_uc
             W = g["en"]
             msp.add_lwpolyline([(ox, bot), (W + ox, bot), (W + ox, top), (ox, top)], close=True, dxfattribs={"layer": "ON_GORUNUS"})
             for u in g["derz"]:
@@ -657,7 +939,7 @@ class Cizici:
             for a in g["acikliklar"]:
                 w, h = a["u1"] - a["u0"], a["z1"] - a["z0"]
                 if a["tur"] == "pencere":
-                    msp.add_blockref("kaynak-on-pencere", (a["u0"] + ox, bot + a["z0"]), dxfattribs={"xscale": w / 77.101, "yscale": h / 116.017, "layer": "ON_DOGRAMA"})
+                    self._on_pencere(a["u0"] + ox, bot + a["z0"], w, h, a["olcu"], a.get("acilis"))
                 else:
                     msp.add_blockref("kaynak-on-kapi", (a["u0"] + ox, bot), dxfattribs={"xscale": w / 68.697, "yscale": h / 133.557, "layer": "ON_DOGRAMA"})
             xl, xr = r["u0"] + ox, r["u1"] + ox
@@ -665,38 +947,38 @@ class Cizici:
             msp.add_line((xl, top), (xl, top + topuk), dxfattribs={"layer": "ON_TOPUK"}); msp.add_line((xr, top), (xr, top + topuk), dxfattribs={"layer": "ON_TOPUK"})
             for c in r["cizgiler"]:
                 msp.add_lwpolyline([(u + ox, bot + z) for u, z in c], dxfattribs={"layer": "ON_CATI"})
+            for p in vp:
+                pts = [(u + ox, bot + z) for u, z in p["u"]]
+                if p["tur"] == "kolon" and not p.get("acik"):   # D-31 madde 9: kolon soluk dolgulu, duvarın önünde (köşedeki kolon görünsün)
+                    dolgu = msp.add_hatch(color=VERANDA_KOLON_DOLGU, dxfattribs={"layer": "ON_GORUNUS"})
+                    dolgu.paths.add_polyline_path(pts, is_closed=True)
+                if p["tur"] == "yazi":
+                    self.text(p["metin"], pts[0], 14, "ON_YAZI")
+                elif p.get("kalkan") or p.get("acik"):
+                    msp.add_lwpolyline(pts, dxfattribs={"layer": "ON_TOPUK" if p["tur"] == "topuk" else "ON_CATI"})
+                else:
+                    msp.add_lwpolyline(pts, close=p.get("kapali", True), dxfattribs={"layer": "ON_CATI" if p["tur"] == "cati" else "ON_GORUNUS"})
             tu, tz = r["tepe"]; rise = tz - hy
+            ud = max([W] + [u for p in vp for u, _z in p["u"]]) + 77      # sağdaki yükseklik ölçüleri verandanın da dışında
             self.dim((xl, top), (xr, top), (0, bot - 110), 0, "ON_OLCU"); self.dim((ox, bot), (W + ox, bot), (0, bot - 67), 0, "ON_OLCU")
-            self.dim((W + ox, bot), (W + ox, top), (W + 77 + ox, 0), 90, "ON_OLCU"); self.dim((xr, top), (tu + ox, bot + tz), (W + 77 + ox, 0), 90, "ON_OLCU")
+            if taraf in KOT_GORUNUSLERI:                          # D-31 madde 14
+                self.dim((W + ox, bot), (W + ox, top), (ud + ox, 0), 90, "ON_OLCU"); self.dim((xr, top), (tu + ox, bot + tz), (ud + ox, 0), 90, "ON_OLCU")
+            sag_uc = max(xr, ud + 33 + ox)
             pen = [a for a in g["acikliklar"] if a["tur"] == "pencere"]
-            if pen:
+            if pen and taraf in KOT_GORUNUSLERI:
                 a = pen[0]
                 self.dim((a["u0"] + ox, bot), (a["u0"] + ox, bot + a["z0"]), (a["u0"] - 33 + ox, 0), 90, "ON_OLCU")
                 self.dim((a["u0"] + ox, bot + a["z1"]), (a["u0"] + ox, top), (a["u0"] - 33 + ox, 0), 90, "ON_OLCU")
-            for u, z, e in r["egimler"]:
+            yazilan = set()
+            for u, z, e in r["egimler"]:                          # D-31 madde 10: aynı eğim görünüşte bir kez, soldaki yüzde
+                if round(e * 100, 2) in yazilan:
+                    continue
+                yazilan.add(round(e * 100, 2))
                 self.text("%" + fmt(e * 100), (u + ox, bot + z + 30), 18, "ON_YAZI")
             self.text(f"{CG.AD[taraf]} GÖRÜNÜŞ - ÇALIŞMA", (W / 2 + ox, top + rise + 100), 26, "ON_YAZI")
             if taraf == "on":
                 self.text(f"Pencere üst kotu {fmt(hy - lento)} cm | Lento {fmt(lento)} cm | Bina yüksekliği {fmt(hy)} cm", (W / 2 + ox, bot - 150), 15, "ON_YAZI")
-        x0, y0, x1, y1 = G.govde_kutusu(plan)
-        mx = cati.get("makas_ekseni", "x") == "x"
-        en = (x1 - x0) if mx else (y1 - y0)
-        op = xr + 360.0 + sacak + 63.0
-        m = CG.mahya_boylari(plan, ie)                       # mahyanın gerçek boyu (kırmada gövde boyu değil; geometri hakemi, 3. tur)
-        if cati["tip"] == "kirma":
-            mahya = f"mahya {fmt(m[0])} cm, kırma uçları arası"
-        else:
-            mahya = f"ana mahya {fmt(m[0])} cm (alın saçaklarıyla), cumbanın mahyası {fmt(m[1])} cm"
-        self.ciz_cati_profili(op, top + 50.0, en=en, alt_yazi=f"Makas {fmt(en)} cm'yi geçer; {mahya}. Ölçüler cm.")
-        e = float(cati["egim_yuzde"])
-        if cati["tip"] == "kirma":
-            uc = cati.get("kirma_egimleri") or {}
-            yan = {"sol": "sol", "sag": "sağ", "on": "ön", "arka": "arka"}
-            ek = "uç yüzler " + " · ".join(f"{yan[k]} %{fmt(float(v))}" for k, v in uc.items()) if uc else f"dört yüz %{fmt(e)}"
-        else:
-            u = cati["cumbalar"][0]
-            ek = f"cumba {CG.AD[u['cephe']].lower()} cephede {fmt(float(u['bas_cm']))}–{fmt(float(u['bit_cm']))} cm, eğim ana çatıyla aynı (%{fmt(e)})"
-        self.text(f"{_cati_adi(cati)} çatı | {ek}", (op + en / 2, top + 50.0 - 210), 16, "CATI_YAZI")
+            self._bolge(taraf, n0)                                # D-31 madde 12: A4 sayfasında üstte ön ve arka, altta sol ve sağ
 
     def ciz_ozellik_tablosu(self, ox, oy, satirlar):
         msp = self.msp; w1, w2, rh = 300.0, 640.0, 34.0; n = len(satirlar) + 1
@@ -727,6 +1009,104 @@ class Cizici:
 
 
 # ---------------------------------------------------------------------- üretim akışı
+
+# D-31 madde 12 (Lokman, 29 Ekim 2026 12:01: "bu dört çizimi üste ön ve arka altta sağ ve sol görünüşler ortada kat planı olacak şekilde A4
+# kağıdına dikey olarak tam sığdır yani telefonla açtığı anda görsün kat planını doğal olarak daha büyük çiz tam A4'ün ortasında sınırlara
+# dayanacak kadar üst ve alt tarafta kalan boşluklara da görünüşleri çiz"; 12:17 "en önemlisi cep telefonundan tek de okunması"; 12:20
+# "ikinci sayfayı artık tamamen kaldır ona ihtiyacımız yok"; 12:21 "önce görünüşleri tam sığdır sonra ortaya kat planını al"): PDF tek
+# sayfa, dikey A4. Üstte antet, ön ve arka görünüş, altta sol ve sağ görünüş; dördü aynı ölçekte, geniş satır sayfa enini kenar boşluğuna
+# kadar doldurur (en çok 1/100). Kat planı (aksli, başlıksız, aks ölçü zinciri olmadan: madde 13, 12:20 "kat planının 125,5 pano ölçülerini
+# tamamen kaldır") iki bandın arasında kalan yerin ortasında, sığan en büyük ölçekle. Plan ve görünüşler DXF'teki çizimin kendisi (yeniden
+# açılan DXF'ten); DXF değişmez, öteki çizimleri (net alanlar, saha montaj planı, teknik özellikler) PDF'e girmez.
+A4_DIKEY_MM = (210.0, 297.0)
+A4_KENAR_MM, A4_ARA_MM = 5.0, 2.5          # sayfa kenarı, bölgeler arası
+A4_GORUNUS_EN_BUYUK = 10.0 / 100           # mm / cm: görünüş ölçeği en çok 1/100 (küçük evde görünüş planı ezmesin)
+A4_ANTET_OLCEK = 10.0 / 130                # mm / cm: antetin iki satırı (23 ve 20 cm yazı) 1/130
+A4_PAY_CM = 10.0                           # bölge kutusunun her yanına (yazının şapkası ve noktası kırpılmasın)
+
+
+def _bolge_pdf(doc, handles, kutu, w_mm: float, h_mm: float, cfg) -> bytes:
+    """Yalnız `handles` varlıkları; `kutu` (model, cm) `w_mm × h_mm` sayfaya tam oturur (oran kutununki)."""
+    hs = set(handles)
+    backend = pymupdf.PyMuPdfBackend()
+    Frontend(RenderContext(doc), backend, config=cfg).draw_layout(doc.modelspace(), filter_func=lambda e: e.dxf.handle in hs)
+    return backend.get_pdf_bytes(layout.Page(w_mm, h_mm, layout.Units.mm, margins=layout.Margins.all(0)),
+                                 settings=layout.Settings(fit_page=True), render_box=kutu)
+
+
+def a4_yerlesim(kutular: dict) -> dict:
+    """A4 bayi sayfasının yerleşimi (mm; sol üst köşe 0, y aşağı): {ad: (x, y, en, boy)} ve {"olcek": {"plan", "gorunus", "antet"}} (mm / cm).
+    `kutular`: ad → (en, boy) cm; "plan" zorunlu; "antet", "on", "arka", "sol", "sag" olabilir. Önce görünüşler sayfa enine sığar, sonra plan
+    aradaki yerin ortasına (Lokman, 12:21)."""
+    W, H = A4_DIKEY_MM; k, g = A4_KENAR_MM, A4_ARA_MM
+    en_k = W - 2 * k
+    ust = [t for t in ("on", "arka") if t in kutular]; alt = [t for t in ("sol", "sag") if t in kutular]
+    sv = min([A4_GORUNUS_EN_BUYUK] + [(en_k - g * (len(s) - 1)) / sum(kutular[t][0] for t in s) for s in (ust, alt) if s])
+    aw, ah = kutular.get("antet", (0.0, 0.0))
+    sa = min(A4_ANTET_OLCEK, en_k / aw) if aw else 0.0
+    out = {"olcek": {"gorunus": sv, "antet": sa}}
+    y = k
+    if aw:
+        out["antet"] = ((W - aw * sa) / 2, y, aw * sa, ah * sa); y += ah * sa + g
+    for sira, ust_bant in ((ust, True), (alt, False)):
+        if not sira:
+            continue
+        eni = sum(kutular[t][0] for t in sira) * sv + g * (len(sira) - 1)
+        boy = max(kutular[t][1] for t in sira) * sv
+        x, yb = (W - eni) / 2, (y if ust_bant else H - k - boy)
+        for t in sira:
+            w, h = kutular[t][0] * sv, kutular[t][1] * sv
+            out[t] = (x, yb + (boy - h), w, h)                          # satırdakiler alt çizgiye hizalı
+            x += w + g
+        if ust_bant:
+            y += boy + g
+    y1 = (min(out[t][1] for t in alt) - g) if alt else H - k             # planın yeri: üst bandın altı ile alt bandın üstü arası
+    pw, ph = kutular["plan"]
+    sp = min(en_k / pw, (y1 - y) / ph)
+    out["plan"] = ((W - pw * sp) / 2, (y + y1 - ph * sp) / 2, pw * sp, ph * sp)
+    out["olcek"]["plan"] = sp
+    return out
+
+
+A4_BOLGELER = ("antet", "plan", "on", "arka", "sol", "sag")
+
+
+def a4_bayi_sayfasi(doc, bolgeler: dict, cfg) -> bytes:
+    """Tek sayfalı PDF: dikey A4 bayi sayfası (`a4_yerlesim`)."""
+    kutu = {}
+    for ad in A4_BOLGELER:
+        b = ebbox.extents([doc.entitydb[h] for h in bolgeler.get(ad, []) if h in doc.entitydb])
+        if b.has_data:
+            kutu[ad] = BoundingBox2d([b.extmin - (A4_PAY_CM, A4_PAY_CM, 0), b.extmax + (A4_PAY_CM, A4_PAY_CM, 0)])
+    gor = [t for t in ("on", "arka", "sol", "sag") if t in kutu]
+    if gor:                                                  # görünüşler aynı düşey aralıkla: duvar altı ve üstü dördünde aynı hizada
+        y0, y1 = min(kutu[t].extmin.y for t in gor), max(kutu[t].extmax.y for t in gor)
+        for t in gor:
+            kutu[t] = BoundingBox2d([(kutu[t].extmin.x, y0), (kutu[t].extmax.x, y1)])
+    if "plan" not in kutu:
+        raise RuntimeError("A4 bayi sayfasında kat planı bölgesi yok")
+    yer = a4_yerlesim({ad: (b.size.x, b.size.y) for ad, b in kutu.items()})
+    pt = 72 / 25.4
+    out = fitz.open()
+    sayfa = out.new_page(width=A4_DIKEY_MM[0] * pt, height=A4_DIKEY_MM[1] * pt)
+    for ad, b in kutu.items():
+        x, y, w, h = yer[ad]
+        if w <= 0 or h <= 0:                                 # sessizce atlanmaz (geometri hakemi, 29 Ekim; K16)
+            raise RuntimeError(f"A4 bayi sayfasında {ad} bölgesine yer kalmadı ({w:.1f} × {h:.1f} mm)")
+        with fitz.open("pdf", _bolge_pdf(doc, bolgeler[ad], b, w, h, cfg)) as parca:
+            sayfa.show_pdf_page(fitz.Rect(x * pt, y * pt, (x + w) * pt, (y + h) * pt), parca, 0)
+    return out.tobytes(garbage=3, deflate=True, no_new_id=True)
+
+
+def alan_yazisi(plan) -> str:
+    """D-31 madde 14 (Lokman, 29 Ekim 2026 13:13: "yukarıya m² ve kime ait olduğunu yaz"): antetteki alan. Brüt: kapalı gövdenin dış yüzleri
+    (niş ve veranda hariç; `sunum.bina_cizgisi`); net: kapalı odaların net alanları toplamı (açık mahal hariç; montaj rehberindeki m²)."""
+    from . import sunum
+    brut = sunum.bina_cizgisi(plan).area / 1e4
+    net = sum(m.alan_m2 for m in plan.mahaller.values() if not m.acik)
+    f2 = lambda v: f"{v:.2f}".replace(".", ",")
+    return f"{f2(brut)} m² brüt · {f2(net)} m² net"
+
 
 def _cati_adi(cati: dict) -> str:
     """Özellik tablosundaki çatı adı: beşik + cumba ve kırmada paftanın yazımı (İE-17; `sunum.CATI_SEKLI`), başka her tipte eski yazım
@@ -770,16 +1150,15 @@ def uret(is_emri: dict, cikti_dir: Path, ad_govde: str | None = None, pdf_hatada
         c.text(s, (gap + W / 2, -145 - py["alt"] - 30 * i), 13, "ODA_ADLARI")
     _cati = is_emri.get("cati", {})
     from .cati_prefabrik import TIPLER as _PREFABRIK_CATI
-    _dort = (is_emri.get("cati") or {}).get("tip", "besik") in _PREFABRIK_CATI
+    _dort = (is_emri.get("cati") or {}).get("tip", "besik") in _PREFABRIK_CATI + ("besik",)      # D-31: beşik de dört görünüş
     _en = W if (not _dort or _cati.get("makas_ekseni", "x") == "x") else H     # İE-17: beşik dışında makasın geçtiği boy
     _rise = float(_cati.get("topuk_cm", 10)) + (_en + 2 * float(_cati.get("sacak_cm", 30))) / 2 * float(_cati.get("egim_yuzde", 33)) / 100.0
     kay = (max(0.0, _rise - 147.445) if _yeni else 0.0) + py["alt"]   # İE-11: eski İş Emri'nde pafta yerleşimi değişmez; BK-14: ön veranda kadar aşağı
     kay2 = kay + max(0.0, float(yapi.get("duvar_yuksekligi_cm", 250)) - 250.0)     # 280 / 300'de ön görünüş uzar, alt yazılar iner
-    if _dort:                                               # İE-17: beşik + cumba, kırma → dört görünüş ve profil, ön görünüşün biçimiyle
+    if _dort:                                               # İE-17: beşik + cumba, kırma; D-31: beşik de → dört görünüş, ön görünüşün biçimiyle
         c.ciz_gorunusler(-600.0 - kay)
-    else:                                                   # beşik (ve başka her tip) bugünkü gibi
-        c.ciz_on_gorunus(0.0, -600.0 - kay)
-        c.ciz_cati_profili(gap, -550.0 - kay)
+    else:                                                   # başka her tip: yalnız ön görünüş
+        n0 = len(c.msp); c.ciz_on_gorunus(0.0, -600.0 - kay); c._bolge("on", n0)
     hy = yapi.get("duvar_yuksekligi_cm", 250); cati = is_emri.get("cati", {})
     _olculer = {p.acilim.olcu for p in plan.panolar if p.acilim and p.acilim.tur == "pencere"}
     _pencere_satiri = "PVC doğrama; " + ", ".join(f"{e}×{b}" for e, b in sorted((k.en, k.boy) for k in map(G.pencere_kurali, _olculer)))
@@ -796,8 +1175,13 @@ def uret(is_emri: dict, cikti_dir: Path, ad_govde: str | None = None, pdf_hatada
         tab = [r for r in tab if r[0] not in ("Pencereler", "Kapılar")] + [(str(k), str(v)) for k, v in is_emri["ozellikler"].items()]
     c.ciz_ozellik_tablosu((3 if montaj else 2) * gap, H + 140 + py["ust"], tab)
     cx = ((3 if montaj else 2) * gap - 300) / 2
+    n0 = len(c.msp)
     c.text(LABEL, (cx, H + 320 + py["ust"]), 23, "PORTMAN_INFO")
-    c.text(f"PORTMAN | {is_emri.get('talep',{}).get('bayi',{}).get('ad','')} / {is_emri.get('talep',{}).get('musteri_adi','')} | İş Emri {is_emri.get('is_emri_no','')} r{int(is_emri.get('revizyon',1)):02d}", (cx, H + 275 + py["ust"]), 20, "PORTMAN_INFO")
+    _talep = is_emri.get("talep", {})
+    _kim = " / ".join(v for v in (str(_talep.get("bayi", {}).get("ad", "")), str(_talep.get("musteri_adi", ""))) if v)
+    c.text(f"PORTMAN | {_kim} | {alan_yazisi(plan)} | İş Emri {is_emri.get('is_emri_no','')} r{int(is_emri.get('revizyon',1)):02d}",
+           (cx, H + 275 + py["ust"]), 20, "PORTMAN_INFO")         # D-31 madde 14: kime ait ve m² antette
+    c._bolge("antet", n0)                                   # D-31 madde 12: A4 sayfasının üstündeki iki satır
     c.text(f"Duvar: {fmt(G.T_DIS)} / {fmt(G.T_IC)} cm | Yükseklik: {fmt(hy)} cm | Pano: 125,5 cm | Çatı: %{fmt(float(cati.get('egim_yuzde',33)))}", (cx, -1090 - kay2), 18, "PORTMAN_INFO")
     c.text("Kural kaydı v1.4.3 ile üretildi. " + ("Üretim/statik hesabı" if _dort else "Yan görünüş ve üretim/statik hesabı")
            + " bu taslağın kapsamında değildir.", (cx, -1130 - kay2), 14, "PORTMAN_INFO")
@@ -846,9 +1230,7 @@ def uret(is_emri: dict, cikti_dir: Path, ad_govde: str | None = None, pdf_hatada
             pdf = cikti_dir / f"{stem}.HATALI.pdf"      # yalnız tanı; teslim edilmez
         backend = pymupdf.PyMuPdfBackend()
         cfg = config.Configuration(background_policy=config.BackgroundPolicy.WHITE, color_policy=config.ColorPolicy.COLOR, min_lineweight=0.15)
-        Frontend(RenderContext(saved), backend, config=cfg).draw_layout(saved.modelspace())
-        page = layout.Page(594, 420, layout.Units.mm, margins=layout.Margins.all(12))
-        pdf.write_bytes(backend.get_pdf_bytes(page, settings=layout.Settings(fit_page=True)))
+        pdf.write_bytes(a4_bayi_sayfasi(saved, c.bolgeler, cfg))
         with fitz.open(pdf) as document:
             if len(document) != 1 or not document[0].get_drawings():
                 raise RuntimeError("PDF boş veya tek sayfa değil")

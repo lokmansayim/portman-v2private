@@ -126,11 +126,12 @@ def kimlik(ie: dict) -> dict:
     x0, y0, x1, y1 = G.govde_kutusu(plan)
     gx, gy = round(x1 - x0, 2), round(y1 - y0, 2)
     yon = {"on": "önde", "arka": "arkada", "sol": "solda", "sag": "sağda"}
-    tasan = [f"{yon.get(v['cephe'], v['cephe'])} {v['en']:g} × {v['derinlik']:g}" for v in plan.dis_verandalar]
+    sy = lambda v: f"{v:g}".replace(".", ",")                           # D-30: 898,5 gibi buçuklu ölçü Türkçe yazılır
+    tasan = [f"{yon.get(v['cephe'], v['cephe'])} {sy(v['en'])} × {sy(v['derinlik'])}" for v in plan.dis_verandalar]
     dis = {v["ad"] for v in plan.dis_verandalar}
     gomme = [f"{m.alan_m2:.1f}".replace(".", ",") for m in plan.mahaller.values() if m.acik and m.ad not in dis]
     ver = (["taşan: " + ", ".join(tasan)] if tasan else []) + (["gömme " + ", ".join(gomme) + " m²"] if gomme else [])
-    return out | {"m2": f"{gx * gy / 1e4:.0f}", "govde": f"dış ölçü {gx:g} × {gy:g}", "veranda": "; ".join(ver) or "yok"}
+    return out | {"m2": f"{gx * gy / 1e4:.0f}", "govde": f"dış ölçü {sy(gx)} × {sy(gy)}", "veranda": "; ".join(ver) or "yok"}
 
 
 def talep_modeli(kod: str, yol: Path, tavan: list[str] | None, kayit_: dict) -> tuple[dict, dict]:

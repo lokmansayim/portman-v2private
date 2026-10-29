@@ -157,10 +157,13 @@ def test_mahya_boylari(cati_ev):
 
 
 def test_besik_ve_tasan_veranda_burada_cizilmez():
-    # beşik bugünkü ön görünüşüyle çizilir (`dxf_out.ciz_on_gorunus`, bayt bayt aynı); beşik dışı çatıyla taşan veranda PR-2'de
-    ie = _ie("PK01")
-    with pytest.raises(CP.PrefabrikCatiHatasi, match="besik"):
-        CG.cati_cizgileri(G.kur(copy.deepcopy(ie)), ie, "on")
+    # D-31 (Lokman ve CIO, 29 Ekim 2026 11:07): beşik de dört görünüşle, düzlemler `sunum.cati_tanimi`'nden (önceden beşik burada hata
+    # verirdi, yalnız `ciz_on_gorunus`'la ön görünüş çizilirdi); taşan verandalı beşik de çizilir. Beşik dışı çatıyla taşan veranda PR-2'de.
+    for kod in ("PK01", "TK01"):
+        ie = _ie(kod)
+        r = CG.cati_cizgileri(G.kur(copy.deepcopy(ie)), ie, "on")
+        e = float(ie["cati"]["egim_yuzde"]) / 100
+        assert r["cizgiler"] and r["u0"] == -30.0 and [x for _u, _z, x in r["egimler"]] == [pytest.approx(e)] * 2
     ie = _ie("TK01")
     plan = G.kur(copy.deepcopy(ie))
     assert plan.dis_verandalar
