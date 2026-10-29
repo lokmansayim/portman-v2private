@@ -534,7 +534,7 @@
   {
    "kod": "PC-23",
    "baslik": "Her bölmenin adının altında net m²",
-   "kural": "Kat planında (A4'teki akslı plan) ve net alan planında her bölmenin (oda, banyo, hol, giriş, veranda) adının altında net m²'si yazılır; 90° döndürülmüş adda m² okuma yönünde alttadır. Ad ve m² mahalin içinde, ortasına en yakın ve planın ölçü çizgilerine, ölçü yazılarına ve öteki yazılarına binmeyen yerdedir (yer yoksa yazı en az 14'e küçülür); kapı kanadı ve yayından ikinci öncelikte kaçınılır. Açık nişin \"1 x 1 aks modülü\" yazısı A4'teki planda yazılmaz, net alan planında durur.",
+   "kural": "Kat planında (A4'teki akslı plan) ve net alan planında her bölmenin (oda, banyo, hol, giriş, veranda) adının altında net m²'si yazılır; 90° döndürülmüş adda m² okuma yönünde alttadır. Ad ve m² mahalin içinde, ortasına en yakın ve planın ölçü çizgilerine, ölçü yazılarına ve öteki yazılarına (pencere ölçü yazısı dahil) binmeyen yerdedir (yer yoksa yazı en az 14'e küçülür; hiç sığmazsa ortada 14 boyla ve plan uyarısıyla); kapı kanadı ve yayından ikinci öncelikte kaçınılır. Açık nişin \"1 x 1 aks modülü\" yazısı A4'teki planda yazılmaz, net alan planında durur.",
    "karar": "D-31",
    "madde": 15,
    "lokman": {

@@ -583,7 +583,8 @@ class Cizici:
     def _mahal_etiketleri(self, yerlesecek, nis_yazilari: dict, n0: int, ox: float, oy: float, aks: bool, zincir: set) -> None:
         """Kat planı ve net alan planında mahal adı, altında net m² (D-31 madde 15; Patron 13:21: "SALON yazısının altına m² ... tüm
         bölmeler için"). Yazı grubu mahalin içinde, ortasına en yakın ve bu planın ölçü çizgilerine, ölçü yazılarına ve öteki yazılarına
-        binmeyen yere konur; öyle yer yoksa yazı küçülür (en az 14), yine yoksa en az binen yer seçilir. Kapının kanat ve yay kutusundan
+        binmeyen yere konur (pencere ölçü yazısı dahil); öyle yer yoksa yazı küçülür (en az 14), yine yoksa en az binen yer seçilir; hiç sığmazsa
+        ortada 14 boyla ve plan uyarısıyla. Kapının kanat ve yay kutusundan
         ikinci öncelikte kaçınılır. Aks ölçü zinciri (`zincir`; A4'te yok, madde 13) aks çizgisi gibi engel sayılmaz. 90° döndürülmüş yazıda m² okuma yönünde
         altta (sağda). Açık nişin "1 x 1 aks modülü" yazısı yalnız net alan planında, adın üstünde; nişten geniş olduğundan engeli ikinci
         önceliktedir. Akslı kat planında (A4) yazılmaz: m²'ye yer açar, aks bilgisi A4'te yok (madde 13)."""
@@ -598,8 +599,13 @@ class Cizici:
                     if g.dxftype() == "LINE": sert.append(self._cizgi_kutusu(g.dxf.start, g.dxf.end))
                     elif g.dxftype() == "MTEXT": sert.append(self._yazi_kutusu(g.text, g.dxf.insert, g.dxf.char_height, g.dxf.get("rotation", 0.0)))
             elif t == "INSERT":
-                yumusak.extend(k for g in e.virtual_entities() if g.dxftype() == "INSERT" and g.dxf.layer == "IC_KAPILAR"
-                               for k in [self._blok_kutusu(g)] if k)
+                for g in e.virtual_entities():
+                    if g.dxftype() != "INSERT": continue
+                    if g.dxf.layer == "IC_KAPILAR":
+                        k = self._blok_kutusu(g)
+                        if k: yumusak.append(k)
+                    elif g.dxf.layer == "PENCERE":              # pencere ölçü yazısı ("120/180") verandaya bakan duvarda mahalin içine düşer (hakem, 29 Ekim)
+                        sert.extend(self._pencere_yazilari(g))
         for ad, m, poly, cx, cy, h, rot in yerlesecek:
             alan = f"{m.alan_m2:.2f}".replace(".", ",") + " m²"
             nis = None if aks else nis_yazilari.get(ad)
@@ -625,11 +631,26 @@ class Cizici:
                     en_iyi = (puan, px, py_, hh)
                     if puan == (0, 0): break
                 if en_iyi and en_iyi[0][0] == 0: break
-            px, py_, hh = (en_iyi[1], en_iyi[2], en_iyi[3]) if en_iyi else (cx, cy, h)
+            if en_iyi is None:                                  # hiçbir aday mahale sığmadı: ortada en küçük boyla, uyarıyla (K16; hakem, 29 Ekim)
+                u = f"{ad}: adı ve m²'si mahalin içine sığmadı; ortasına 14 boyla yazıldı, duvara taşabilir"
+                if u not in self.plan.uyarilar: self.plan.uyarilar.append(u)
+            px, py_, hh = (en_iyi[1], en_iyi[2], en_iyi[3]) if en_iyi else (cx, cy, 14.0)
             (ax, ay), (mx, my), np_ = self._etiket_yerleri(px, py_, hh, rot)
             self.text(ad, (ax + ox, ay + oy), hh, "ODA_ADLARI", rot=rot)
             self.text(alan, (mx + ox, my + oy), min(20, hh), "ODA_ADLARI", rot=rot)
             if nis: self.text(nis, (np_[0] + ox, np_[1] + oy), 13, "ODA_ADLARI", rot=rot)
+
+    @classmethod
+    def _pencere_yazilari(cls, ins) -> list:
+        """Pencere bloğunun (iç içe: `BOM_P..` → kaynak pencere) yazılarının dünya kutuları."""
+        out = []
+        for y in ins.virtual_entities():
+            if y.dxftype() == "INSERT":
+                out.extend(cls._pencere_yazilari(y))
+            elif y.dxftype() == "TEXT":
+                bb = ebbox.extents([y])
+                if bb.has_data: out.append((bb.extmin.x, bb.extmin.y, bb.extmax.x, bb.extmax.y))
+        return out
 
     _KAPI_KUTULARI: dict = {}
 

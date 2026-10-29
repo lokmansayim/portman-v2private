@@ -316,7 +316,8 @@ def _biner(a, b):
 def test_her_bolmenin_adinin_altinda_net_m2(ev, rol):
     """Madde 15 (Lokman 13:21): kat planında (A4'teki akslı plan) ve net alan planında her bölmenin (oda, hol, giriş, veranda) adının
     altında net m²'si; 90°'lik yazıda okuma yönünde altta (+x). Ad ve m² mahalin içinde; A4 planında ölçü çizgisine, ölçü yazısına ve
-    öteki yazılara binmez (aks ölçü zinciri A4'te yok, sayılmaz). Nişin "aks modülü" yazısı A4 planında yok, net alan planında var."""
+    öteki yazılara (pencere ölçü yazısı dahil) binmez (aks ölçü zinciri A4'te yok, sayılmaz); net alan planında yazılara, pencere yazısına ve özel
+    pano ölçülerine binmez. Nişin "aks modülü" yazısı A4 planında yok, net alan planında var."""
     ie = json.loads(ODA_M2_EVLER[ev].read_text(encoding="utf-8"))
     plan = G.kur(copy.deepcopy(ie))
     c = dxf_out.Cizici(plan, Katalog())
@@ -340,10 +341,23 @@ def test_her_bolmenin_adinin_altinda_net_m2(ev, rol):
     nis = [t for t in yazilar if t.dxf.text.endswith("aks modülü")]
     acik_nis = [ad for ad, mm in plan.mahaller.items() if mm.acik and mm.cells]
     assert len(nis) == (0 if rol == "ANA" else len(acik_nis)), (ev, rol)
-    if rol != "ANA":
-        return
     etiket = [_kutu(t.dxf.text, t.dxf.align_point[0], t.dxf.align_point[1], t.dxf.height, t.dxf.rotation) for t in yazilar if t.dxf.handle in adlar]
-    engel = [_kutu(t.dxf.text, t.dxf.align_point[0], t.dxf.align_point[1], t.dxf.height, t.dxf.rotation) for t in yazilar if t.dxf.handle not in adlar]
+    engel = [_kutu(t.dxf.text, t.dxf.align_point[0], t.dxf.align_point[1], t.dxf.height, t.dxf.rotation) for t in yazilar
+             if t.dxf.handle not in adlar and t not in nis]
+    def pencere_yazilari(e):                             # pano bloğu → pencere bloğu → kaynak pencere bloğu → yazı (hakem, 29 Ekim)
+        for g in e.virtual_entities():
+            if g.dxftype() == "INSERT" and (g.dxf.layer == "PENCERE" or e.dxf.layer == "PENCERE"):
+                yield from pencere_yazilari(g)
+            elif g.dxftype() == "TEXT" and e.dxf.layer == "PENCERE":
+                yield g
+    pencere = [y for e in varlik if e.dxftype() == "INSERT" for y in pencere_yazilari(e)]
+    assert pencere or ev == "ALTIN", ev
+    pencere = [(lambda bb: (bb.extmin.x, bb.extmin.y, bb.extmax.x, bb.extmax.y))(ezdxf.bbox.extents([y])) for y in pencere]
+    engel.extend(pencere)
+    nis_k = [_kutu(t.dxf.text, t.dxf.align_point[0], t.dxf.align_point[1], t.dxf.height, t.dxf.rotation) for t in nis]
+    assert not [(k, o) for k in nis_k for o in pencere if _biner(k, o)], ev     # Yan 6×8,5'te "1 x 4 aks modülü" mutfak penceresinin yazısına biniyordu
+    if rol != "ANA":                                     # net alan planı DXF'te: aks zinciri ayrılamadığından yalnız yazılara ve özel pano ölçülerine karşı
+        varlik = [e for e in varlik if e.dxftype() == "DIMENSION" and e.dxf.layer == "OZEL_PANEL_OLCU_CM"]
     for e in varlik:
         if e.dxftype() != "DIMENSION": continue
         for g in e.get_geometry_block():
