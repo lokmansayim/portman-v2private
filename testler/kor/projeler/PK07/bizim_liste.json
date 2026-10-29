@@ -1,8 +1,8 @@
 {
  "is_emri_no": "PK-07 (kör test girdisi, pafta kipi)",
  "kod": "PK-07",
- "uretici_surum": "1.5 (22 Ekim 2026; kör test üreteci 7.3, kurallar kural kitabında; orta iniş 9 m, kitapla farklı on yedi kalemde kitap; PK-07 hedef örnek; T76 cevapları; 100'lük duvar omegası kirişlerin de üstünde; elektrik oda kuralı)",
- "uretildi": "2026-10-23 21:47:29 UTC",
+ "uretici_surum": "1.7 (29 Ekim 2026; baş makas omegası saçak ucundan saçak ucuna, taşan verandanın dış kirişindeki dahil; 100'lük iç duvarın üstü ayrı satırda, 60'lık ölçüde sırt 10,5 (Lokman 29 Ekim 13:12, D-32); 1.6, 28 Ekim: vitrifiye banyo başına (İE-13 PR-2; Lokman onayı 28 Ekim, PR-3); nişin ağzındaki kiriş (BK-14 ek); taşan verandanın dış kirişi kolonun dış yüzünden dış yüzüne (Lokman, kart 28 Ekim); 1.5, 22 Ekim: kör test üreteci 7.3, kurallar kural kitabında; orta iniş 9 m, kitapla farklı on yedi kalemde kitap; PK-07 hedef örnek; T76 cevapları; 100'lük duvar omegası kirişlerin de üstünde; elektrik oda kuralı)",
+ "uretildi": "2026-10-29 21:22:28 UTC",
  "kural_seti": {
   "prefabrik": "portman.prefabrik_liste/1.0",
   "ortak": "portman.yukleme_kurallari/0.19-taslak",
@@ -650,15 +650,15 @@
    "grup_adi": "Metal aksam",
    "kalem": "Baş makas omegası",
    "olcu": "L 2500",
-   "adet": 7,
+   "adet": 9,
    "birim": "adet",
-   "dayanak": "Kural (Portatifev)",
-   "formul": "baş makasların altı 15,70 m ÷ 2,5 (PK-01 dersi 5) (açık çatı parçası sayılmaz, N1)",
-   "kaynak": "PK-06 7 tuttu (N1)",
+   "dayanak": "Kural (Lokman 29.10 13:12, D-32)",
+   "formul": "baş makasların boyu saçak ucundan saçak ucuna 21,41 m ÷ 2,5 (kirişsiz açık çatı parçası sayılmaz, N1)",
+   "kaynak": "Şablon B: PK-02 7 tuttu",
    "pafta": null,
    "pafta_notu": "",
-   "aday": 9,
-   "aday_notu": "Şablon B (PK-02 7 ✓): saçaklı makas boyu 21,41 m ÷ 2,5"
+   "aday": 7,
+   "aday_notu": "önceki kural: baş makasların altındaki duvar 15,70 m ÷ 2,5 (PK-01 dersi 5, PK-06 7) (açık çatı parçası sayılmaz, N1)"
   },
   {
    "grup": "1002",
@@ -1670,15 +1670,15 @@
    "grup_adi": "Sıhhi tesisat",
    "kalem": "Vitrifiye ve batarya (duş teknesi, klozet, lavabo, batarya grubu)",
    "olcu": "takım",
-   "adet": null,
+   "adet": 1,
    "birim": "adet",
-   "dayanak": "Kural yok",
-   "formul": "—",
-   "kaynak": "PK-07'de 4 satır × 1",
+   "dayanak": "Kural (Lokman 27.10, banyo başına; onay 28.10)",
+   "formul": "banyo 1 × 1",
+   "kaynak": "PK-07'de 4 satır × 1 (bir banyo); TK-01 banyo ve E. banyo: 2 takım (Lokman, 27 Ekim 22:00)",
    "pafta": null,
    "pafta_notu": "",
    "aday": 1,
-   "aday_notu": "PK-07 (dört satır × 1): 1 takım"
+   "aday_notu": "PK-07 (dört satır × 1): ev başına 1 takım"
   },
   {
    "grup": "1011",
@@ -1923,8 +1923,8 @@
  ],
  "ozet": {
   "satir": 125,
-  "adetli": 123,
-  "kural_yok": 2,
+  "adetli": 124,
+  "kural_yok": 1,
   "pafta_katmanli": 11,
   "aday_li": 36
  }
