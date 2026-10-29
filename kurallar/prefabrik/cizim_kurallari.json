@@ -483,6 +483,93 @@
    "test": [
     "testler/motor/test_d31_gorunus.py::test_a4_planda_aks_zinciri_yok"
    ]
+  },
+  {
+   "kod": "PC-21",
+   "baslik": "Kot ölçüleri yalnız ön ve sağ görünüşte",
+   "kural": "Görünüşlerdeki düşey kot ölçüleri (duvar yüksekliği, çatı tepesi, pencere eşiği ve lentosu) yalnız ön ve sağ görünüşte yazılır; arka ve sol görünüşte yalnız yatay ölçüler kalır.",
+   "karar": "D-31",
+   "madde": 14,
+   "lokman": {
+    "tarih": "2026-10-29",
+    "saat": "13:14",
+    "soz": "görünüşlerdeki sadece ön görünüşde ve sağ görünüşde kodları göster diğerlerinden sil"
+   },
+   "kod_yeri": [
+    "motor/dxf_out.py::KOT_GORUNUSLERI",
+    "motor/dxf_out.py::Cizici.ciz_gorunusler"
+   ],
+   "sabitler": [
+    {
+     "yer": "motor/dxf_out.py::KOT_GORUNUSLERI",
+     "deger": [
+      "on",
+      "sag"
+     ]
+    }
+   ],
+   "test": [
+    "testler/motor/test_d31_gorunus.py::test_kot_yalniz_on_ve_sag_gorunuste"
+   ]
+  },
+  {
+   "kod": "PC-22",
+   "baslik": "Antette kime ait ve m²; alt yazılar A4'te yok",
+   "kural": "A4 sayfasının antetinin ikinci satırı: PORTMAN | bayi / müşteri (İş Emri'nin talebinden; boş olan yazılmaz) | brüt ve net m² | İş Emri no ve revizyon. Brüt: nişsiz kapalı gövdenin dış yüzleri (veranda hariç); net: kapalı odaların net alanları toplamı (montaj rehberindeki m²). Sayfanın altında kural kaydı, üretim saati ve uyarı satırları yoktur (DXF'te ve kayıtta durur).",
+   "karar": "D-31",
+   "madde": 14,
+   "lokman": {
+    "tarih": "2026-10-29",
+    "saat": "13:13",
+    "soz": "çizim ve görünüşlerdeki alttaki kural kaydı satırlarını sil yukarıya m² ve kime ait olduğun yaz"
+   },
+   "kod_yeri": [
+    "motor/dxf_out.py::alan_yazisi",
+    "motor/dxf_out.py::uret"
+   ],
+   "test": [
+    "testler/motor/test_d31_gorunus.py::test_antette_kime_ait_ve_m2"
+   ]
+  },
+  {
+   "kod": "PC-23",
+   "baslik": "Her bölmenin adının altında net m²",
+   "kural": "Kat planında (A4'teki akslı plan) ve net alan planında her bölmenin (oda, banyo, hol, giriş, veranda) adının altında net m²'si yazılır; 90° döndürülmüş adda m² okuma yönünde alttadır. Ad ve m² mahalin içinde, ortasına en yakın ve planın ölçü çizgilerine, ölçü yazılarına ve öteki yazılarına binmeyen yerdedir (yer yoksa yazı en az 14'e küçülür); kapı kanadı ve yayından ikinci öncelikte kaçınılır. Açık nişin \"1 x 1 aks modülü\" yazısı A4'teki planda yazılmaz, net alan planında durur.",
+   "karar": "D-31",
+   "madde": 15,
+   "lokman": {
+    "tarih": "2026-10-29",
+    "saat": "13:21",
+    "soz": "oda oda m² lerini verando hol gibi örneğin SALON yazısının altına m² de yazar mısın bunu tüm bölmeler için yap"
+   },
+   "kod_yeri": [
+    "motor/dxf_out.py::Cizici._mahal_etiketleri",
+    "motor/dxf_out.py::Cizici.ciz_plan"
+   ],
+   "test": [
+    "testler/motor/test_d31_gorunus.py::test_her_bolmenin_adinin_altinda_net_m2"
+   ]
+  },
+  {
+   "kod": "PC-24",
+   "baslik": "İç 60 ve iç 100 aynı kurallarla; iki hedef örnek",
+   "kural": "İç duvar kalınlığı İş Emri'nden gelir (`yapi.duvar_kalinligi_cm.ic`: 6 standart, 10); ön onay çiziminin bütün kuralları ikisinde de aynı çalışır. Aynı projenin iki hâli hedef örnektir: TK-02 (iç 100) ve TK-01 r07 (iç 60); ikisi yalnız iç kalınlıkta ayrışır, A4 PDF'leri ve izleri CI'da hedefle kıyaslanır. Görünüşler iç kalınlıktan bağımsızdır (iki hedefte aynı çizgiler).",
+   "karar": "D-31",
+   "madde": 16,
+   "lokman": {
+    "tarih": "2026-10-29",
+    "saat": "13:41",
+    "soz": "ikiside çizim motorunda kurallar halinde olsun"
+   },
+   "kod_yeri": [
+    "motor/geometry.py::kalinlik_ayarla",
+    "motor/dxf_out.py::uret"
+   ],
+   "test": [
+    "testler/motor/test_bk18_ic_100.py::test_hedef_ornek_izi",
+    "testler/motor/test_bk18_ic_100.py::test_iki_hedef_yalniz_ic_kalinlikta_ayrisir",
+    "testler/motor/test_bk18_ic_100.py::test_ic_60_ile_dis_aciklik_ve_akslar_ayni"
+   ]
   }
  ]
 }

@@ -70,9 +70,9 @@ def test_on_onay_pdf(cizim):
         assert yazi.count(s) == 1, s
     assert not [s for s in yazi if "PROFİLİ" in s or "cm'yi geçer" in s or " çatı | " in s]     # D-31: profil ve alt yazısı yok
     assert not [e for e in msp if e.dxf.layer.startswith("CATI_")]
-    # tepe ölçüsü (duvar üstünden) paftanın kesitiyle; dört görünüşte aynı sayı
+    # tepe ölçüsü (duvar üstünden) paftanın kesitiyle; D-31 madde 14'ten beri kot yalnız ön ve sağ görünüşte (önce dördünde)
     olcu = [round(e.get_measurement(), 2) for e in msp.query("DIMENSION") if e.dxf.layer == "ON_OLCU"]
-    assert olcu.count(pytest.approx(mahya, abs=0.05)) >= 4, olcu
+    assert olcu.count(pytest.approx(mahya, abs=0.05)) >= 2, olcu
 
 
 def test_gorunusler_birbirine_binmez(cizim):

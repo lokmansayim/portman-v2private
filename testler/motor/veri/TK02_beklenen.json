@@ -1,6 +1,7 @@
 {
- "aciklama": "BK-18 · TK-02 ön onay çiziminin izi (doğrulama özeti + pano BOM'u) ve yükleme listesi satırları. Hedef örnek adayı; onay: Lokman'ın kabulü bekleniyor (D-28 madde 2).",
+ "aciklama": "BK-18 · ön onay çiziminin hedef örneği (D-28 madde 2): A4 PDF ve DXF içerik izi, doğrulama özeti, pano BOM'u, görünüş çizgileri ve yükleme listesi satırları.",
  "girdi": "testler/motor/veri/TK02.json",
+ "onay": "TK-02 (iç 100) ön onay çizimi. Lokman 29 Ekim 2026: 11:01 kat planı, 12:24 r09 \"%100 onaylıyorum ... artık bu noktadan hareket edeceğiz\"; 13:13–13:21 madde 14–15 notları (r12); 13:48 \"sen onayla PR birleştir\" (D-31).",
  "iz": {
   "dogrulama": {
    "passed": true,
@@ -2830,6 +2831,8 @@
     "olcu": "adet",
     "adet": 2
    }
-  ]
+  ],
+  "pdf_izi": "8a731e6813700689db7118a8bffcf6f4040f012b9274ab7c92f6d1d5649d323a",
+  "dxf_izi": "9df3e933d3a26dab8c61b150d56e01c4dc15e7d71cf570e1e2ea87c193ed297e"
  }
 }

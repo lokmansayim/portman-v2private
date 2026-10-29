@@ -5,8 +5,11 @@ köşe profilini aynı katmana (`KOSE_PROFIL_100`) koyuyordu. Şimdi eşit kalı
 160 / 100'de katman adları ve çıktılar aynen kalır. Girdi `veri/TK02.json`: TK-01'in bayi çizimi (İş Emri r06 = `araclar/paket/girdi/TK01_r06.json`),
 iç duvarlar 100'lük (Patron, 28 Ekim 2026: "içlerde 100'lük").
 
-Hedef örnek adayı `veri/TK02_beklenen.json`: TK-02 ön onay PDF'inin çizim izi (doğrulama özeti ve pano BOM'u; üretim saati yok). Lokman'ın
-kabulüne kadar "aday"dır (D-28 madde 2); bilerek değişirse `python testler/motor/test_bk18_ic_100.py --yaz` ve gerekçe `docs/is_emirleri/BK-18.md`'ye.
+Hedef örnekler (D-28 madde 2; Lokman, 29 Ekim 2026 13:41: "ikiside çizim motorunda kurallar halinde olsun"): aynı projenin iki hâli,
+`veri/TK02.json` iç 100 (ön onay çizimi r09 onayı 12:24, madde 14–15 notları 13:13–13:21) ve `veri/TK01_r07.json` iç 60 (kat planı onayı 13:47,
+görünüşler 13:48 "sen onayla"). İzleri `veri/TK02_beklenen.json` ve `veri/TK01_r07_beklenen.json`: A4 ön onay PDF'inin ve DXF'in içerik izi,
+doğrulama özeti, pano BOM'u, görünüş çizgileri, yükleme listesi satırları (üretim saati yok). Bilerek değişirse Lokman'ın onayı ve gerekçeli
+kararla `python testler/motor/test_bk18_ic_100.py --yaz` (D-28 madde 3); gerekçe `docs/is_emirleri/BK-18.md`'ye.
 """
 from __future__ import annotations
 import json
@@ -14,6 +17,7 @@ import sys
 from pathlib import Path
 
 import ezdxf
+import pytest
 
 KOK = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(KOK))
@@ -21,7 +25,14 @@ from motor import dxf_out, geometry as G, prefabrik_liste as PL  # noqa: E402
 
 VERI = KOK / "testler" / "motor" / "veri"
 TK02 = VERI / "TK02.json"
-BEKLENEN = VERI / "TK02_beklenen.json"
+HEDEFLER = {   # girdi, beklenen iz, onay dayanağı
+    "TK02": (TK02, VERI / "TK02_beklenen.json",
+             "TK-02 (iç 100) ön onay çizimi. Lokman 29 Ekim 2026: 11:01 kat planı, 12:24 r09 \"%100 onaylıyorum ... artık bu noktadan hareket "
+             "edeceğiz\"; 13:13–13:21 madde 14–15 notları (r12); 13:48 \"sen onayla PR birleştir\" (D-31)."),
+    "TK01_r07": (VERI / "TK01_r07.json", VERI / "TK01_r07_beklenen.json",
+                 "TK-01 r07 (aynı proje, iç 60, standart) ön onay çizimi. Lokman 29 Ekim 2026: 13:41 \"ikiside çizim motorunda kurallar halinde "
+                 "olsun\", 13:47 kat planı \"60'lık versiyonunda onaylıyorum\", 13:48 görünüşler \"sen onayla\" (D-31 madde 16)."),
+}
 
 
 def _ie() -> dict:
@@ -42,9 +53,11 @@ def _gorunusler(dxf: Path) -> list:
     return sorted(out)
 
 
-def _iz(cikti: Path) -> dict:
-    """Ön onay çiziminin izi: doğrulama özeti, pano BOM'u, dört görünüşün çizgileri ve yükleme listesinin satırları (üretim saati ve dosya
-    adı girmez)."""
+def _iz(cikti: Path, ie: dict | None = None) -> dict:
+    """Ön onay çiziminin izi: A4 PDF'inin ve DXF'in içerik izi (`testler/referans/parmak_izi.py`; DXF'te üretim saati dışarıda), doğrulama
+    özeti, pano BOM'u, dört görünüşün çizgileri ve yükleme listesinin satırları (üretim saati ve dosya adı girmez)."""
+    sys.path.insert(0, str(KOK / "testler" / "referans"))
+    from parmak_izi import dxf_ozet, pdf_ozet
     v = json.loads((cikti / "validation.json").read_text(encoding="utf-8"))
     b = json.loads((cikti / "bom.json").read_text(encoding="utf-8"))
     m = json.loads((cikti / "manifest.json").read_text(encoding="utf-8"))
@@ -54,7 +67,8 @@ def _iz(cikti: Path) -> dict:
                "openings": [{"kind": o["kind"], "name": o["name"], "gap": [round(x, 3) for x in o["gap"]]} for o in v["openings"]]},
             "bom": [{k: r[k] for k in ("kod", "malzeme", "olcu_mm", "adet", "birim")} for r in b["kalemler"]],
             "gorunusler": _gorunusler(cikti / m["dxf"]),
-            "liste": [{k: r[k] for k in ("grup", "kalem", "olcu", "adet")} for r in PL.is_emrinden(_ie())["satirlar"]]}
+            "liste": [{k: r[k] for k in ("grup", "kalem", "olcu", "adet")} for r in PL.is_emrinden(ie or _ie())["satirlar"]],
+            "pdf_izi": pdf_ozet(cikti / m["pdf"]), "dxf_izi": dxf_ozet(cikti / m["dxf"])}
 
 
 def test_esit_kalinlik_kurulur():
@@ -140,16 +154,34 @@ def test_varsayilan_katman_adlari_degismez():
         G.kalinlik_ayarla(10.0, 6.0)
 
 
-def test_hedef_ornek_adayi_izi(tmp_path):
-    dxf_out.uret(_ie(), tmp_path, pdf_hatada=False)
-    assert _iz(tmp_path) == json.loads(BEKLENEN.read_text(encoding="utf-8"))["iz"]
+@pytest.mark.parametrize("ad", sorted(HEDEFLER))
+def test_hedef_ornek_izi(ad, tmp_path):
+    """Aynı kurallar iç 60 ve iç 100'de (D-31 madde 16): ikisinin ön onay çizimi Lokman'ın onayladığı hedef örnekle aynı."""
+    girdi, beklenen, _ = HEDEFLER[ad]
+    ie = json.loads(girdi.read_text(encoding="utf-8"))
+    m = dxf_out.uret(json.loads(json.dumps(ie)), tmp_path, pdf_hatada=False)
+    assert m["validation_passed"] is True and m["pdf"]
+    b = json.loads(beklenen.read_text(encoding="utf-8"))
+    assert b["girdi"] == girdi.relative_to(KOK).as_posix() and b["onay"]
+    assert _iz(tmp_path, ie) == b["iz"]
+
+
+def test_iki_hedef_yalniz_ic_kalinlikta_ayrisir():
+    a, b = (json.loads(HEDEFLER[k][0].read_text(encoding="utf-8")) for k in ("TK02", "TK01_r07"))
+    assert (a["yapi"]["duvar_kalinligi_cm"], b["yapi"]["duvar_kalinligi_cm"]) == ({"dis": 10, "ic": 10}, {"dis": 10, "ic": 6})
+    for x in (a, b):
+        for k in ("is_emri_no", "revizyon", "talep", "varsayimlar"): x.pop(k)
+        x["yapi"].pop("duvar_kalinligi_cm"); x["yapi"].pop("referans_model")
+    assert a == b
 
 
 if __name__ == "__main__" and "--yaz" in sys.argv:
     import tempfile
-    with tempfile.TemporaryDirectory() as t:
-        dxf_out.uret(_ie(), Path(t), pdf_hatada=False)
-        BEKLENEN.write_text(json.dumps({"aciklama": "BK-18 · TK-02 ön onay çiziminin izi (doğrulama özeti + pano BOM'u) ve yükleme listesi satırları. Hedef örnek adayı; "
-                                        "onay: Lokman'ın kabulü bekleniyor (D-28 madde 2).", "girdi": "testler/motor/veri/TK02.json", "iz": _iz(Path(t))},
-                                       ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
-    print("yazıldı:", BEKLENEN)
+    for ad, (girdi, beklenen, onay) in HEDEFLER.items():
+        ie = json.loads(girdi.read_text(encoding="utf-8"))
+        with tempfile.TemporaryDirectory() as t:
+            dxf_out.uret(json.loads(json.dumps(ie)), Path(t), pdf_hatada=False)
+            beklenen.write_text(json.dumps({"aciklama": "BK-18 · ön onay çiziminin hedef örneği (D-28 madde 2): A4 PDF ve DXF içerik izi, doğrulama özeti, "
+                                            "pano BOM'u, görünüş çizgileri ve yükleme listesi satırları.", "girdi": girdi.relative_to(KOK).as_posix(),
+                                            "onay": onay, "iz": _iz(Path(t), ie)}, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+        print("yazıldı:", beklenen)

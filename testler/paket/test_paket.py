@@ -331,7 +331,8 @@ def test_is_emri_ile_paket(paketler, tmp_path):
     html = (b / "TK-98_montaj_rehberi.html").read_text(encoding="utf-8")
     assert html.replace("TK-98", "TK-01").replace("TK98", "TK01") == (a / "TK-01_montaj_rehberi.html").read_text(encoding="utf-8")
     yazi = _yazilar(b)
-    assert "PORTMAN | Bayi TK-98 / TK-98 | İş Emri" in yazi["TK-98_cizim.dxf"] and "'TK-98 " in yazi["TK-98_model.ifc"]
+    # antette kime ait ve m² (D-31 madde 14, Lokman 29 Ekim 2026 13:13; önceden "PORTMAN | Bayi TK-98 / TK-98 | İş Emri")
+    assert "PORTMAN | Bayi TK-98 / TK-98 | 78,38 m² brüt · 72,71 m² net | İş Emri" in yazi["TK-98_cizim.dxf"] and "'TK-98 " in yazi["TK-98_model.ifc"]
     for ad, t in yazi.items():
         t = re.sub(r"`[0-9a-f]{64}`", "", t)
         assert not any(x in t for x in ("Sahteadi", "Sahtebayi", "XBAYIX9", no[-9:], no[-9:].replace(" ", ""))), ad

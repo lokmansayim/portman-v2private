@@ -273,3 +273,84 @@ def test_a4_bolgesi_eksikse_pdf_yok(tk02):
     cfg = config.Configuration(background_policy=config.BackgroundPolicy.WHITE)
     with pytest.raises(RuntimeError, match="kat planı bölgesi yok"):
         dxf_out.a4_bayi_sayfasi(c.doc, c.bolgeler, cfg)
+
+
+def test_kot_yalniz_on_ve_sag_gorunuste(tk02):
+    """Madde 14 (Lokman 13:14): düşey kot ölçüleri (duvar, tepe, pencere eşiği ve lentosu) yalnız ön ve sağ görünüşte; yatay ölçüler dördünde."""
+    ie, _, _ = tk02
+    c = _gorunus_cizici(ie)
+    kot = {t: [e for e in _bolge(c, t) if e.dxftype() == "DIMENSION" and abs(e.dxf.get("angle", 0) - 90) < 1e-6] for t in CG.TARAFLAR}
+    yatay = {t: [e for e in _bolge(c, t) if e.dxftype() == "DIMENSION" and abs(e.dxf.get("angle", 0)) < 1e-6] for t in CG.TARAFLAR}
+    assert {t: len(v) for t, v in kot.items()} == {"on": 4, "arka": 0, "sol": 0, "sag": 4}
+    assert all(len(v) == 2 for v in yatay.values())
+    assert dxf_out.KOT_GORUNUSLERI == ("on", "sag")
+
+
+def test_antette_kime_ait_ve_m2(tmp_path):
+    """Madde 14 (Lokman 13:13): antette kime ait (bayi / müşteri; boşu yazılmaz) ve m² (brüt: nişsiz gövdenin dış yüzü, net: kapalı odalar)."""
+    ie = _ie("TK02")
+    assert dxf_out.alan_yazisi(G.kur(copy.deepcopy(ie))) == "78,38 m² brüt · 71,45 m² net"
+    ie["talep"]["bayi"]["ad"], ie["talep"]["musteri_adi"] = "", "Müşteri A"
+    m = dxf_out.uret(ie, tmp_path)
+    doc = ezdxf.readfile(tmp_path / m["dxf"])
+    antet = [e.dxf.text for e in doc.modelspace().query("TEXT") if e.dxf.text.startswith("PORTMAN |")]
+    assert antet == ["PORTMAN | Müşteri A | 78,38 m² brüt · 71,45 m² net | İş Emri PM-TK02-80M2 r03"]
+
+
+ODA_M2_EVLER = {"TK02": VERI / "TK02.json", "TK01_r06": KOK / "araclar" / "paket" / "girdi" / "TK01_r06.json", "PK01": VERI / "PK01.json",
+                "P6001": KOK / "is_emri" / "P6001_2plus1_6x6.json", "YAN_VERANDALI": KOK / "is_emri" / "YAN_VERANDALI_2plus1_6x8p5.json",
+                "ALTIN": KOK / "is_emri" / "ALTIN_2plus1_6x8.json"}
+
+
+def _kutu(s, x, y, h, rot):
+    w = dxf_out.Cizici.yazi_eni(s, h) / 2
+    return (x - h / 2, y - w, x + h / 2, y + w) if abs(rot % 180 - 90) < 1e-6 else (x - w, y - h / 2, x + w, y + h / 2)
+
+
+def _biner(a, b):
+    return a[0] < b[2] and b[0] < a[2] and a[1] < b[3] and b[1] < a[3]
+
+
+@pytest.mark.parametrize("rol", ["ANA", "KOPYA"])
+@pytest.mark.parametrize("ev", sorted(ODA_M2_EVLER))
+def test_her_bolmenin_adinin_altinda_net_m2(ev, rol):
+    """Madde 15 (Lokman 13:21): kat planında (A4'teki akslı plan) ve net alan planında her bölmenin (oda, hol, giriş, veranda) adının
+    altında net m²'si; 90°'lik yazıda okuma yönünde altta (+x). Ad ve m² mahalin içinde; A4 planında ölçü çizgisine, ölçü yazısına ve
+    öteki yazılara binmez (aks ölçü zinciri A4'te yok, sayılmaz). Nişin "aks modülü" yazısı A4 planında yok, net alan planında var."""
+    ie = json.loads(ODA_M2_EVLER[ev].read_text(encoding="utf-8"))
+    plan = G.kur(copy.deepcopy(ie))
+    c = dxf_out.Cizici(plan, Katalog())
+    c.ciz_plan(0.0, 0.0, rol, "KAT PLANI", "")
+    varlik = [c.doc.entitydb[h] for h in c.bolgeler["plan"]] if rol == "ANA" else list(c.msp)
+    yazilar = [e for e in varlik if e.dxftype() == "TEXT"]
+    adlar = set()
+    for ad, m in plan.mahaller.items():
+        a = [t for t in yazilar if t.dxf.text == ad]
+        alan = f"{m.alan_m2:.2f}".replace(".", ",") + " m²"
+        b = [t for t in yazilar if t.dxf.text == alan and t.dxf.rotation == a[0].dxf.rotation] if len(a) == 1 else []
+        assert len(a) == 1 and b, (ev, rol, ad, alan)
+        (ax, ay), rot = (a[0].dxf.align_point[0], a[0].dxf.align_point[1]), a[0].dxf.rotation
+        altta = [t for t in b if (abs(t.dxf.align_point[0] - ax - 32) < 1e-6 and abs(t.dxf.align_point[1] - ay) < 1e-6 if rot
+                                  else abs(t.dxf.align_point[0] - ax) < 1e-6 and abs(ay - t.dxf.align_point[1] - 32) < 1e-6)]
+        assert len(altta) == 1, (ev, rol, ad)
+        for t in (a[0], altta[0]):
+            k = _kutu(t.dxf.text, t.dxf.align_point[0], t.dxf.align_point[1], t.dxf.height, t.dxf.rotation)
+            assert m.poly.contains(Point(k[0], k[1])) and m.poly.contains(Point(k[2], k[3])), (ev, rol, ad, t.dxf.text)
+            adlar.add(t.dxf.handle)
+    nis = [t for t in yazilar if t.dxf.text.endswith("aks modülü")]
+    acik_nis = [ad for ad, mm in plan.mahaller.items() if mm.acik and mm.cells]
+    assert len(nis) == (0 if rol == "ANA" else len(acik_nis)), (ev, rol)
+    if rol != "ANA":
+        return
+    etiket = [_kutu(t.dxf.text, t.dxf.align_point[0], t.dxf.align_point[1], t.dxf.height, t.dxf.rotation) for t in yazilar if t.dxf.handle in adlar]
+    engel = [_kutu(t.dxf.text, t.dxf.align_point[0], t.dxf.align_point[1], t.dxf.height, t.dxf.rotation) for t in yazilar if t.dxf.handle not in adlar]
+    for e in varlik:
+        if e.dxftype() != "DIMENSION": continue
+        for g in e.get_geometry_block():
+            if g.dxftype() == "LINE":
+                x0, y0, x1, y1 = g.dxf.start[0], g.dxf.start[1], g.dxf.end[0], g.dxf.end[1]
+                engel.append((min(x0, x1) - 1, min(y0, y1) - 1, max(x0, x1) + 1, max(y0, y1) + 1))
+            elif g.dxftype() == "MTEXT":
+                engel.append(_kutu(g.text, g.dxf.insert[0], g.dxf.insert[1], g.dxf.char_height, g.dxf.get("rotation", 0.0)))
+    binen = [(k, o) for k in etiket for o in engel if _biner(k, o)]
+    assert not binen, (ev, binen[:3])
