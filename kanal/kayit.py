@@ -128,10 +128,21 @@ def _kes(m: str, n: int) -> str:
     return m if len(m) <= n else m[:n - 1] + "…"
 
 
+def _govde(m: str, n: int) -> str:
+    """worker._govde ile aynı: satır sonları kalır (BK-10 F)."""
+    out: list[str] = []
+    for s in str(m or "").splitlines():
+        s = _temiz(s)
+        if s or (out and out[-1]):
+            out.append(s)
+    m = "\n".join(out).strip()
+    return m if len(m) <= n else m[:n - 1] + "…"
+
+
 def dugmeli_satir(gelen: dict, metin: str, sira: int, to: str, tur: str, butonlar: list[tuple[str, str]], altbilgi: str | None = None) -> dict:
     """Düğmeli satır: worker.giden_etkilesim (butonlu) ile aynı biçim (testle denetlenir); webhook worker'ı yüklemez."""
     r = metin_satiri(gelen, metin[:_WA_GOVDE], sira, to, tur)
-    i: dict = {"body": {"text": _kes(metin, _WA_GOVDE)}}
+    i: dict = {"body": {"text": _govde(metin, _WA_GOVDE)}}
     if altbilgi:
         i["footer"] = {"text": _kes(altbilgi, _WA_ALTBILGI)}
     i["type"] = "button"

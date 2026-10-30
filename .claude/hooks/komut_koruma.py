@@ -35,7 +35,10 @@ cwd = veri.get("cwd") or os.getcwd()
 BAS = r"(?:^|[\s;&|(`])"  # komut başı ya da zincir ayracı
 
 ENGEL = [
-    (BAS + r"(ssh|scp|sftp|rsync)\s", "VPS'e ve hosting'e asistan bağlanmaz. Betiği hazırla; Lokman kendi Mac'inden `ssh portman-vps 'bash -s' < betik` ile koşar, çıktıyı okursun (AGENTS.md › Sunucu erişimi)."),
+    (BAS + r"(ssh|scp|sftp|rsync)\s", ("VPS'e ve hosting'e asistan bağlanmaz. Betiği hazırla; Lokman kendi Mac'inden koşar, çıktı dosyaya yazılır, sen okursun "
+      "(AGENTS.md › Sunucu erişimi, BK-09). Sunucuda kopyası olan betik: `ssh -n portman-vps 'timeout 120 bash /opt/portman/guncel/vps/…' > çıktı.txt 2>&1` "
+      "(stdin'le gönderilmez); geçici betik: `ssh portman-vps 'timeout 300 bash -s' < betik > çıktı.txt 2>&1`; bir dakikadan uzun iş `setsid` ile "
+      "ayrılır, bitiş satırı sunucuda dosyaya yazılır; kendi geri dönüşü olan işe (`guncelle.sh`) `timeout` konmaz.")),
     (r"vps_komut", "`vps_komut` kapalı başlar ve açılmaz (K14)."),
     (r"\bgit\s+push\b[^\n|;&]*(\s-f\b|\s--force\b|\s--force-with-lease\b)", "Zorla push yasak; geçmiş yeniden yazılmaz."),
     (r"\bgit\s+push\b[^\n|;&]*(?:\s|:)main(?:\s|$)", "main'e doğrudan push yok. main'e birleştirme yalnız Lokman'ın onayıyla, PR üzerinden (AGENTS.md › Değişiklik disiplini)."),

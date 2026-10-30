@@ -363,6 +363,13 @@ class Depo:
             j = c.execute("SELECT * FROM isler WHERE id = %s FOR UPDATE", (is_kaydi["id"],)).fetchone()
             if j is None or j["durum"] != "isleniyor" or j["sahip"] != sahip:
                 raise KiraKaybi(f"iş {is_kaydi['id']}: artık bu işleyicide değil ({j['durum'] if j else 'yok'})")
+            ak = cikti.get("acik_is_kapanisi")         # BK-10 / D-19 (b): bayinin son mesajından 24 saat sonra açık iş kapanır; kayıt silinmez
+            if ak:
+                c.execute("UPDATE sorular SET durum = 'dustu', cevap_mesaj_id = %s, kapandi = now() WHERE gonderen = %s AND durum = 'acik'",
+                          (gelen["id"], gelen["sender"]))
+                c.execute("UPDATE secenek_setleri SET durum = 'dustu', kapandi = now() WHERE gonderen = %s AND durum = 'acik'", (gelen["sender"],))
+                if ak.get("proje_id"):
+                    c.execute("UPDATE revizyonlar SET durum = 'zaman_asimi' WHERE proje_id = %s AND durum = 'onay_bekliyor'", (ak["proje_id"],))
             # proje ve revizyon
             proje_id = d_yeni.get("proje_id")          # konusma sıfırlandıysa (yeni talep) yok: yeni proje açılır
             revizyon_id = None
@@ -1110,11 +1117,15 @@ class Depo:
     _KONTROL_SEC = ("SELECT k.*, extract(epoch FROM k.olusturuldu)::float8 AS t_olusturuldu, extract(epoch FROM k.sure_baslangici)::float8 AS t_baslangic, "
                     "extract(epoch FROM k.dosya_gonderildi)::float8 AS t_dosya, extract(epoch FROM k.karar_zamani)::float8 AS t_karar, "
                     "extract(epoch FROM k.son_hatirlatma)::float8 AS t_son_hatirlatma, extract(epoch FROM k.gecikme_bildirildi)::float8 AS t_gecikme, "
-                    "extract(epoch FROM k.patron_son_hatirlatma)::float8 AS t_patron_son FROM muhendis_kontrolleri k ")
+                    "extract(epoch FROM k.patron_son_hatirlatma)::float8 AS t_patron_son, "
+                    "extract(epoch FROM k.zaman_asimi)::float8 AS t_zaman_asimi, extract(epoch FROM k.yeniden_acildi)::float8 AS t_yeniden, "
+                    "extract(epoch FROM k.plan_degisti)::float8 AS t_plan_degisti FROM muhendis_kontrolleri k ")
     _KONTROL_ALANLARI = {"durum", "dosya_gonderildi", "karar_zamani", "son_hatirlatma", "hatirlatma_sayisi", "gecikme_bildirildi", "bekleyen",
-                         "not_", "listeler", "patron_durum", "patron_hatirlatma_sayisi", "patron_son_hatirlatma"}
+                         "not_", "listeler", "patron_durum", "patron_hatirlatma_sayisi", "patron_son_hatirlatma",
+                         "zaman_asimi", "yeniden_acildi", "plan_degisti", "sure_baslangici"}      # BK-10 (göç 011)
     SIMDI = "__simdi__"            # güncellemede zaman alanı için: veritabanının now()'u
-    _KONTROL_ZAMANLARI = {"dosya_gonderildi", "karar_zamani", "son_hatirlatma", "gecikme_bildirildi", "patron_son_hatirlatma"}
+    _KONTROL_ZAMANLARI = {"dosya_gonderildi", "karar_zamani", "son_hatirlatma", "gecikme_bildirildi", "patron_son_hatirlatma",
+                          "zaman_asimi", "yeniden_acildi", "plan_degisti", "sure_baslangici"}
 
     def muhendis_numarasi(self) -> str | None:
         """Aktif mühendis kartı (rol = muhendis; birden çoksa ilk girilen). Yoksa None: bildirim gitmez, Patron'a söylenir."""
@@ -1184,6 +1195,47 @@ class Depo:
             return c.execute(self._KONTROL_SEC + "WHERE k.muhendis = %s AND k.durum IN ('bekliyor', 'duzeltme') "
                              "AND (%s::text IS NULL OR k.bekleyen = %s) ORDER BY coalesce(k.dosya_gonderildi, k.olusturuldu) DESC, k.id DESC LIMIT 1",
                              (str(numara), bekleyen, bekleyen)).fetchone()
+
+    def onceki_mesajdan_gecen(self, gonderen: str, mesaj_id: str) -> float | None:
+        """D-19 (b): bu mesajla göndericinin bir önceki mesajı arasındaki süre (sn; WhatsApp gönderim anları); önceki mesaj yoksa None."""
+        with self.baglan() as c:
+            r = c.execute("SELECT extract(epoch FROM m.wa_zamani - max(o.wa_zamani))::float8 AS sn FROM mesajlar m "
+                          "JOIN mesajlar o ON o.gonderen = m.gonderen AND o.id <> m.id AND o.wa_zamani <= m.wa_zamani "
+                          "WHERE m.id = %s AND m.gonderen = %s GROUP BY m.wa_zamani", (mesaj_id, gonderen)).fetchone()
+        return float(r["sn"]) if r and r["sn"] is not None else None
+
+    def muhendisin_son_karari(self, numara: str, en_cok_sn: float) -> dict | None:
+        """BK-10: mühendisin "Patron'a gönder" dediği en son kontrol (karar en_cok_sn içinde verildiyse; plan değişmediyse). Karardan sonra
+        gelen Excel buna bağlanır."""
+        with self.baglan() as c:
+            return c.execute(self._KONTROL_SEC + "WHERE k.muhendis = %s AND k.durum = 'patrona_gonderildi' AND k.plan_degisti IS NULL "
+                             "AND k.karar_zamani > now() - make_interval(secs => %s) ORDER BY k.karar_zamani DESC, k.id DESC LIMIT 1",
+                             (str(numara), float(en_cok_sn))).fetchone()
+
+    def projenin_kontrolleri(self, proje_id: int, rev: int) -> list[dict]:
+        """BK-10 (rehber §4: plan değişirse önceki onaylar düşer): projenin rev'den önceki revizyonlarına açılmış, plan değişikliği henüz
+        işlenmemiş kontroller."""
+        with self.baglan() as c:
+            return c.execute(self._KONTROL_SEC + "WHERE k.plan_degisti IS NULL AND k.rev < %s AND EXISTS (SELECT 1 FROM revizyonlar r "
+                             "WHERE r.proje_id = %s AND r.is_emri_no = k.is_emri_no AND r.rev = k.rev) ORDER BY k.id",
+                             (int(rev), int(proje_id))).fetchall()
+
+    def kontrol(self, kid: int) -> dict | None:
+        with self.baglan() as c:
+            return c.execute(self._KONTROL_SEC + "WHERE k.id = %s", (int(kid),)).fetchone()
+
+    def kontrol_yeniden_ac(self, kid: int, satir_uret) -> bool:
+        """BK-10 (D-19): Patron zaman aşımına düşen kontrolü panelden yeniden açar. Kontrol 'bekliyor'a döner, hatırlatma sayaçları sıfırlanır,
+        24 saat ve cevap süresi bu andan sayılır; mühendise bildirim şablonu bayinin onay mesajına bağlanır (satir_uret(kontrol) → satırlar).
+        Hepsi tek işlemde; kontrol zaman aşımında değilse (ya da plan değiştiyse) hiçbir şey yazılmaz."""
+        with self.baglan() as c, c.transaction():
+            k = c.execute(self._KONTROL_SEC + "WHERE k.id = %s FOR UPDATE", (int(kid),)).fetchone()
+            if k is None or k["durum"] != "zaman_asimi" or k["plan_degisti"] is not None or not k["muhendis"]:
+                return False
+            self._kontrol_guncelle(c, kid, {"durum": "bekliyor", "yeniden_acildi": self.SIMDI, "sure_baslangici": self.SIMDI,
+                                            "hatirlatma_sayisi": 0, "son_hatirlatma": None, "gecikme_bildirildi": None})
+            self._cipa_satir_yaz(c, k["onay_mesaj_id"], satir_uret(k))
+            return True
 
     def hatirlatma_adaylari(self) -> list[dict]:
         with self.baglan() as c:

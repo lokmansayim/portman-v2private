@@ -1042,6 +1042,10 @@ def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts
         ozet = kod_metni                                       # olsun"), plan değişmedi (geometri hakemi ikinci tur, K18): mesaj ve PDF
         ie["talep"]["metin"] = kod_metni                       # başlığı kodun metni
         ie["talep"]["metin_koddan"] = True
+    else:                                                      # BK-10: ilk planda da LLM özeti yazılmaz (K18); Ç8801K r01'de "netleştirmeniz
+        ozet = ""                                              # gerekiyor" mesaja ve PDF başlığına giriyordu, düğme seçiminde iç kod
+        ie["talep"]["metin"] = on_bilgi.strip().rstrip(".")    # ("YENI-… seçildi"). PDF başlığı kodun okuması: model, çatı, m², oda programı
+        ie["talep"]["metin_koddan"] = True
     gerekce = f"çelik aday {aday['kod']} (genel motor)" + (f"; değişiklik: {', '.join(d['op'] for d in yeni)}" if yeni else "")
     if kod_metni and aday.get("uretilen") and ly is not None and ly.get("durum") == "uygulanamadi" and ly.get("kurala_uymayan"):
         gerekce += f"; {KURALA_UYMADI}, plan aynen"            # bilgiyle yeniden çizimde de Patron'a bilgi (plan geometrisi aynen)
