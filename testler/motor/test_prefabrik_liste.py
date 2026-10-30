@@ -263,7 +263,7 @@ def _varyantlar(N: dict, pf: dict) -> dict:
     veranda (18 m²), WC ve hol türü: elektrik oda kuralının takımı ve kitaptan sayılan odaları; acik_mutfak: mutfağı ayrı mahal olmayan ev
     (mutfak koridor, banyo ıslak hacim türünde, ek lavabo): açık mutfak salona, ıslak hacim ve lavabo banyo, koridor hol gibi (BK-12 PR-2f);
     tasan: ilk açık kenar taşan verandanın dış kenarı sayılır (BK-14; kiriş kolonun dış yüzünden dış yüzüne, Lokman, kart 28 Ekim);
-    asma100: asma dizme tavan, 100'lük iç duvar (iç duvar üstü omegası ayrı satırda, sırtı kuraldan; Lokman, 29 Ekim 13:12, D-32)."""
+    asma100: asma dizme tavan, 100'lük iç duvar (iç duvar üstü 100'lük duvar omegasında; Lokman, 30 Ekim 07:04, D-32 ek)."""
     def tur(n, **d):
         n = copy.deepcopy(n)
         n.update(d)

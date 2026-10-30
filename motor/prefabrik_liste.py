@@ -56,7 +56,7 @@ ISARET_YOLU = KOK / "kurallar" / "liste" / "prefabrik_isaret.json"
 TEK_KAYNAK = "Tek kaynak (zayıf)"
 ISARETLI = ("pencere_u_h_gecen", "omega_kapak")   # satırı `zayif(...)` ile yazılan kurallar (BK-12 PR-2c)
 
-SURUM = "1.7 (29 Ekim 2026; baş makas omegası saçak ucundan saçak ucuna, taşan verandanın dış kirişindeki dahil; 100'lük iç duvarın üstü ayrı satırda, 60'lık ölçüde sırt 10,5 (Lokman 29 Ekim 13:12, D-32); 1.6, 28 Ekim: vitrifiye banyo başına (İE-13 PR-2; Lokman onayı 28 Ekim, PR-3); nişin ağzındaki kiriş (BK-14 ek); taşan verandanın dış kirişi kolonun dış yüzünden dış yüzüne (Lokman, kart 28 Ekim); 1.5, 22 Ekim: kör test üreteci 7.3, kurallar kural kitabında; orta iniş 9 m, kitapla farklı on yedi kalemde kitap; PK-07 hedef örnek; T76 cevapları; 100'lük duvar omegası kirişlerin de üstünde; elektrik oda kuralı)"
+SURUM = "1.8 (30 Ekim 2026; asma dizme tavanda da 100'lük iç duvarın üstü 100'lük duvar omegası, ayrı satır yok (Lokman 30 Ekim 07:04, D-32 ek); 1.7, 29 Ekim: baş makas omegası saçak ucundan saçak ucuna, taşan verandanın dış kirişindeki dahil (Lokman 29 Ekim 13:12, D-32); 1.6, 28 Ekim: vitrifiye banyo başına (İE-13 PR-2; Lokman onayı 28 Ekim, PR-3); nişin ağzındaki kiriş (BK-14 ek); taşan verandanın dış kirişi kolonun dış yüzünden dış yüzüne (Lokman, kart 28 Ekim); 1.5, 22 Ekim: kör test üreteci 7.3, kurallar kural kitabında; orta iniş 9 m, kitapla farklı on yedi kalemde kitap; PK-07 hedef örnek; T76 cevapları; 100'lük duvar omegası kirişlerin de üstünde; elektrik oda kuralı)"
 GRUPLAR = {"1001": "Panel", "1002": "Metal aksam", "1003": "Kapı ve pencere", "1004": "Tavan", "1005": "Makas", "1006": "Çatı",
            "1007": "Elektrik", "1008": "Vida", "1009": "Depo", "1010": "Sıhhi tesisat", "1011": "Dere", "1012": "Boya"}
 TAVAN = lambda x: int(math.ceil(x - 1e-9))
@@ -668,22 +668,19 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
              aday=TAVAN((L_hat + L_duvar) / to_b), aday_notu=f"Şablon B (PK-02): \"+{to['ek']}\" eklenmeden")
     else:
         L_hat, n_hat = omega_hatlari(N["kapali"], ASMA_OMEGA_ARALIK_M)
-        L_ic = 0.0 if ic_kal >= 100 else L_duvar                # D-32: 100'lük iç duvarın üstü ayrı satırda (60'lık ölçüde, sırtı geniş)
+        L_ic = 0.0 if ic_kal >= 100 else L_duvar                # D-32 ek: 100'lük iç duvarın üstü 100'lük duvar omegasında (aşağıda)
         ekle("1002", "60'lık duvar omegası (asma dizme tavan)", f"60 × {mm_m(pb('tavan_omegasi'))}", TAVAN((L_hat + L_ic) / to_b + to["ek"]), "Şablon formülü (Portatifev)",
              (f"(oda içi hatlar {od(L_hat)} m [{n_hat} hat, her {sy(ASMA_OMEGA_ARALIK_M * 100)} cm'de bir] + iç duvar üstleri {od(L_ic)} m) ÷ {sy(to_b)} + {to['ek']}"
-              if ic_kal < 100 else f"oda içi hatlar {od(L_hat)} m [{n_hat} hat, her {sy(ASMA_OMEGA_ARALIK_M * 100)} cm'de bir] ÷ {sy(to_b)} + {to['ek']} (iç duvar üstleri ayrı satırda)"),
+              if ic_kal < 100 else f"oda içi hatlar {od(L_hat)} m [{n_hat} hat, her {sy(ASMA_OMEGA_ARALIK_M * 100)} cm'de bir] ÷ {sy(to_b)} + {to['ek']} (iç duvar üstleri 100'lük duvar omegasında)"),
              "PK-01'de formül 21, girilen 8 (soru 1)", pafta=("duvar_omegasi_asma",), aday=TAVAN((L_hat + L_ic) / to_b),
              aday_notu=f"Şablon B (PK-02 16 ✓): \"+{to['ek']}\" eklenmeden")
-        if ic_kal >= 100:                                       # Lokman, 29 Ekim 13:12 (D-32): 60'lık omeganın ölçüsü, sırtı 100'lük omegalar gibi
-            sirt = r("ic_duvar_ustu_omegasi.sirt_cm")
-            ekle("1002", f"60'lık iç duvar üstü omegası (sırt {sy(sirt)})", f"60 × {mm_m(pb('tavan_omegasi'))}", TAVAN(L_duvar / to_b),
-                 "Kural (Lokman 29.10 13:12, D-32)", f"100'lük iç duvarların üstü {od(L_duvar)} m ÷ {sy(to_b)}",
-                 f"60'lık omega ölçüsünde, sırtı {sy(sirt)} cm (100'lük omegalar gibi)")
     # N2 (sürüm 6): veranda tavanının omegası ayrı satır değil — PK-01, PK-03 ve PK-06 listelerinde tek omega satırı var (PK-03 dersi 10, PK-06)
     # Lokman, 21 Ekim 16:22: çatının altında kalıp kenarına gelmeyen her şeyin üstü (BK-12 PR-2e). Kenardakiler saçak ya da baş makas omegası alır
     ic_kalan = N.get("ic_kalan_dis_duvar_m", 0.0)
     kiris_ic = sum(N.get("ic_kirisler_cm") or []) / 100
-    ust100 = L_duvar if ters and ic_kal >= 100 else 0.0        # O5: ters tavanda 100'lük iç duvarların üstü de 100'lük omega (PK-07 10); asmada ayrı satır (D-32)
+    # O5: 100'lük iç duvarların üstü de 100'lük duvar omegası (PK-07 10, ters tavan); asma dizme tavanda da (Lokman, 30 Ekim 07:04: "iç duvar
+    # üstü omegası diğer adı 100'lük duvar omegası"; D-32 ek). 60'lık tavan ya da duvar omegasında sayılmaz (GB-017'nin çift sayımı)
+    ust100 = L_duvar if ic_kal >= 100 else 0.0
     dob = r("duvar_omegasi_100_bolen_m")
     terim = " + ".join(t for t, v in ((f"çatı kenarına gelmeyen dış duvarlar {od(ic_kalan)} m", ic_kalan),
                                       (f"çatı kenarında olmayan kirişler {od(kiris_ic)} m", kiris_ic), (f"100'lük iç duvarlar {od(ust100)} m", ust100)) if v)

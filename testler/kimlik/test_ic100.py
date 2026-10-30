@@ -9,7 +9,8 @@
 - Kod kilidi: ilk 57 satır donar (K1–K3b'nin 51'i + bu altı), yeni kod sona eklenir.
 
 TK-02'nin uçtan uca testi (BK-18 main'e girdikten sonra): kart adetleri listeyle, "kural yok" TK-01'inkiyle aynı, paket ve rehber
-(iç duvar üstü omegası OM-02, sırtı kuraldan; baş makas omegası saçaktan saçağa; D-32).
+(iç duvar üstü omegası OM-02, sırtı kuraldan; baş makas omegası saçaktan saçağa; D-32). R1 ek 5 (D-32 ek, Lokman 30 Ekim 07:04): iç duvar
+üstü omegası 100'lük duvar omegasıdır; OM-02'nin adı ve satırı "100'lük duvar omegası", parçası 250'lik (kartlar sürüm 6).
 """
 from __future__ import annotations
 
@@ -197,7 +198,7 @@ def test_kod_kilidi_ic100(kartlar):
     assert tuple(list(ilk)[51:]) == YENI
     assert all(kilit[k] == kartlar[k]["ad"] for k in YENI)
     assert hashlib.sha256(json.dumps(ilk, ensure_ascii=False, sort_keys=True).encode()).hexdigest() == KILIT_IC100
-    assert _oku(KM.KARTLAR)["surum"] == "5"
+    assert _oku(KM.KARTLAR)["surum"] == "6"                               # R1 ek 5: OM-02'nin adı düzeltildi (D-32 ek)
 
 
 
@@ -218,7 +219,7 @@ def test_ic_duvar_kalinligi_tek_kaynak():
 
 # ----------------------------------------------------------------------------- TK-02 uçtan uca (BK-18 main'de)
 TK02 = KOK / "testler" / "motor" / "veri" / "TK02.json"
-IC_USTU = "60'lık iç duvar üstü omegası (sırt 10,5)"                     # D-32 madde 3
+DUVAR100 = "100'lük duvar omegası"                                       # D-32 ek: 100'lük iç duvarın üstü bu satırda
 
 
 def _kart_sayimi(ie: dict, klasor: Path, ad: str) -> dict:
@@ -239,15 +240,23 @@ def tk02(tmp_path_factory):
 
 def test_tk02_kart_adetleri_listeyle(tk02, kartlar):
     """TK-02 (TK-01 + iç 100, asma tavan): parça başına sayılan kartın adedi listedeki satırının adedi; iki kartın paylaştığı satırda (dış H
-    H-01/H-02, dış T H-08/H-09; dübelli & kulaklı ayrımı modelde) toplam. 60'lık iç kartlar 0. OM-02'nin parçaları iç duvar üstü satırını
-    verir (÷ 3,65, 60'lık omeganın böleni)."""
+    H-01/H-02, dış T H-08/H-09; dübelli & kulaklı ayrımı modelde) toplam. 60'lık iç kartlar 0. OM-02'nin parçaları (100'lük iç duvarların
+    üstü) "100'lük duvar omegası" satırının iç duvar terimini verir; satırın öteki terimi (çatı kenarına gelmeyen dış duvar, kiriş) modelde
+    yerleşmez. Parçalar duvar omegasının boyuyla (250) bölünür, kesim planı da 250'lik (D-32 ek)."""
     _, say, liste = tk02
     adet = {k["kod"]: k for k in say["kartlar"]}
     for grup in (["D-01"], ["D-06"], ["H-01", "H-02"], ["H-07"], ["H-08", "H-09"], ["H-10"], ["B-01"]):
         assert sum(adet[k]["adet"] for k in grup) == sum(liste[s] for s in kartlar[grup[0]]["liste"]["satirlar"]) > 0, grup
     assert all(adet[k]["adet"] == 0 for k in ("I-01", "I-02", "I-03", "H-03", "H-04", "H-05", "H-06"))
-    assert kartlar["OM-02"]["liste"]["satirlar"] == [IC_USTU] and liste[IC_USTU] > 0
-    assert math.ceil(adet["OM-02"]["metre"] / 3.65 - 1e-9) == liste[IC_USTU]
+    assert kartlar["OM-02"]["liste"]["satirlar"] == [DUVAR100]
+    s = next(x for x in PL.is_emrinden(copy.deepcopy(_oku(TK02)))["satirlar"] if x["kalem"] == DUVAR100)
+    terim = {ad.strip(): float(m.replace(",", ".")) for ad, m in re.findall(r"([^+÷]+?) ([\d,]+) m", s["formul"])}
+    assert set(terim) == {"çatı kenarına gelmeyen dış duvarlar", "100'lük iç duvarlar"}
+    assert abs(adet["OM-02"]["metre"] - terim["100'lük iç duvarlar"]) < 0.5
+    assert math.ceil((terim["çatı kenarına gelmeyen dış duvarlar"] + adet["OM-02"]["metre"]) / 2.5 - 1e-9) == liste[DUVAR100] == s["adet"]
+    om02 = [p for p in say["yerlesim"]["parcalar"] if p.get("kart") == "OM-02"]
+    assert om02 and max(p["boy_cm"] for p in om02) <= 250 and say["kesim_plani"]["OM-02"]["parca_boyu_cm"] == 250
+    assert not [k for k in liste if k.startswith("60'lık iç duvar üstü")]
 
 
 def test_tk02_kural_yok_tk01_ile_ayni(tk02, tmp_path):
@@ -262,8 +271,8 @@ def test_tk02_kural_yok_tk01_ile_ayni(tk02, tmp_path):
 
 def test_tk02_paket_ve_rehber(tk02, tmp_path):
     """`python -m araclar.paket TK-02 … --is-emri testler/motor/veri/TK02.json` (çizim masası): paket hatasız; rehberde iç duvar üstü
-    omegaları OM-02, sırtı kural dosyasından; baş makas omegalarının boyu listenin saçaktan saçağa boyu (D-32); genel listede yeni satır
-    listenin adediyle."""
+    omegaları OM-02, sırtı kural dosyasından, satırı "100'lük duvar omegası" (D-32 ek); baş makas omegalarının boyu listenin saçaktan
+    saçağa boyu (D-32); genel listede "100'lük duvar omegası" listenin adediyle, D-32'nin ayrı satırı yok."""
     from araclar.paket import uret as U
     _, _, liste = tk02
     cikti = tmp_path / "Modeller"
@@ -274,12 +283,14 @@ def test_tk02_paket_ve_rehber(tk02, tmp_path):
         assert f"| `TK-02_{ad}` | Var |" in bilgi, ad
     m = re.search(r'<script type="application/json" id="pafta">(.*?)</script>', (b / "TK-02_montaj_rehberi.html").read_text(encoding="utf-8"), re.S)
     d = json.loads(m.group(1).replace("<\\/", "</"))
-    sirt = PL.kurallari_oku()["prefabrik"]["kurallar"]["ic_duvar_ustu_omegasi"]["deger"]["sirt_cm"]
+    from motor import yerlesim as Y
+    sirt = Y.degerler(_oku(KM.YERLESIM), _oku(KM.LISTE_KURALLARI))["tavan_omegasi_yerlesimi"]["sirt_100"]
     ic = [o for o in d["omega_duvar"] if o["tur"] == "ic"]
-    assert ic and all(o["kart"] == "OM-02" and o["sirt"] == sirt for o in ic)
+    assert ic and all(o["kart"] == "OM-02" and o["sirt"] == sirt and o["liste"].startswith(f"{DUVAR100} 100 × 2500 · ") for o in ic)
     L = {s["kalem"]: s for s in PL.is_emrinden(_oku(TK02))["satirlar"]}
     bas_m = float(re.search(r"saçak ucundan saçak ucuna ([\d,]+) m", L["Baş makas omegası"]["formul"]).group(1).replace(",", "."))
     bas = [o for o in d["omega_duvar"] if o["tur"] == "bas"]
     assert len(bas) == 4 and round(sum(o["a1"] - o["a0"] for o in bas) / 100, 2) == bas_m
     genel = {r[1]: r[2] for r in d["genel"] if isinstance(r, list)}
-    assert genel[f"{IC_USTU} 60 × 3750"] == f"{liste[IC_USTU]} adet"
+    assert genel[f"{DUVAR100} 100 × 2500"] == f"{liste[DUVAR100]} adet"
+    assert not [k for k in genel if "iç duvar üstü omegası" in k]

@@ -1,13 +1,15 @@
-"""D-32 · Lokman, 29 Ekim 2026 13:12 (TK-02 montaj rehberi, 11. adım): baş makas omegası ve 100'lük iç duvarın üstü (İE-18 R1 ek 4).
+"""D-32 · Lokman, 29 Ekim 2026 13:12 (TK-02 montaj rehberi, 11. adım): baş makas omegası ve 100'lük iç duvarın üstü (İE-18 R1 ek 4);
+D-32 ek · Lokman, 30 Ekim 2026 07:04: "iç duvar üstü omegası diğer adı 100'lük duvar omegası yani listede var" (İE-18 R1 ek 5).
 
 - Baş makas omegası saçak ucundan saçak ucuna, baş makasın boyunca: her baş makasta açıklık + 2 × saçak. Taşan verandanın (BK-14) baş makası
   dış kirişe oturur (`kalkan_kirisli`), omegası veranda saçağından saçağına; kirişsiz açık çatı parçası sayılmaz (N1). Önceki kural (baş
   makasın altındaki duvar) aday sütununda.
 - Taşan verandaya bakan gövde duvarı ana çatının kenarındadır: "100'lük duvar omegası"nın çatı kenarına gelmeyen dış duvar terimine girmez.
-- Asma dizme tavanda 100'lük iç duvarın üstü ayrı satır: "60'lık iç duvar üstü omegası (sırt 10,5)", 60'lık omeganın böleniyle; ne 60'lık
-  duvar omegasında ne 100'lük duvar omegasında sayılır (GB-017'nin çift sayımı kapanır). Sırt kural dosyasından (`ic_duvar_ustu_omegasi`).
-  Ters tavanda 100'lük iç duvarın üstü bugünkü gibi 100'lük duvar omegasında (O5, PK-07); 60'lık iç duvarlı evde değişiklik yok.
-- Yerleşim katmanı 100'lük iç duvarın eksenindeki omega parçasına sırtı yazar (`Sirt_cm`); kart OM-02 o parçayı, OM-01 ötekileri alır.
+- 100'lük iç duvarın üstü 100'lük duvar omegasıdır, ters tavanda (O5, PK-07) olduğu gibi asma dizme tavanda da: "100'lük duvar omegası"
+  satırında, ÷ 2,5; 60'lık duvar omegasında sayılmaz (GB-017'nin çift sayımı kapalı kalır), ayrı satır yok (D-32'nin "60'lık iç duvar üstü
+  omegası" satırı kalktı). 60'lık iç duvarlı evde değişiklik yok.
+- Yerleşim katmanı asma tavanda 100'lük iç duvarın eksenindeki hattı duvar omegasının boyuyla (250, payısız) böler ve parçaya sırtı yazar
+  (`Sirt_cm`, yerleşim kuralından `sirt_100`; D-32'de liste kuralıydı); kart OM-02 (100'lük duvar omegası) o parçayı, OM-01 ötekileri alır; OM-02'nin kesim planı 250'lik boyla.
 """
 from __future__ import annotations
 
@@ -23,11 +25,12 @@ KOK = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(KOK))
 from motor import kart_model as KM  # noqa: E402
 from motor import prefabrik_liste as PL  # noqa: E402
+import motor.yerlesim as Y  # noqa: E402
 from motor.yerlesim import tavan  # noqa: E402
 from motor.yerlesim.girdi import Duvar  # noqa: E402
 
 VERI = KOK / "testler" / "motor" / "veri"
-YENI_SATIR = "60'lık iç duvar üstü omegası (sırt 10,5)"
+AYRI_SATIR = "60'lık iç duvar üstü omegası"                               # D-32'nin ayrı satırı; D-32 ekiyle kalktı
 
 
 def _oku(p: Path) -> dict:
@@ -98,31 +101,27 @@ def test_kirissiz_acik_parca_sayilmaz(pk01, kurallar):
 
 
 def test_ic_duvar_ustu_100_asma(pk01, kurallar):
-    """Asma tavan, iç duvar 100'lük: iç duvar üstleri ayrı satırda; 60'lık ve 100'lük duvar omegasından çıkar."""
+    """Asma tavan, iç duvar 100'lük: iç duvar üstleri 100'lük duvar omegasında (D-32 ek); 60'lık duvar omegasından çıkar, ayrı satır yok."""
     L60, L100 = _liste(pk01, kurallar), _liste(_ic100(pk01), kurallar)
     L_duvar = sum(p["boy"] for p in pk01["panolar"] if p["duvar"] == "ic") / 100
     L_hat, _n = PL.omega_hatlari(pk01["kapali"], 1.255)
-    assert YENI_SATIR not in L60
-    y = L100[YENI_SATIR]
-    assert (y["grup"], y["olcu"], y["adet"]) == ("1002", "60 × 3750", math.ceil(L_duvar / 3.65 - 1e-9))
+    assert not [k for k in list(L60) + list(L100) if k.startswith(AYRI_SATIR)]
     assert L100["60'lık duvar omegası (asma dizme tavan)"]["adet"] == math.ceil(L_hat / 3.65 + 5 - 1e-9)
-    assert "iç duvar üstleri ayrı satırda" in L100["60'lık duvar omegası (asma dizme tavan)"]["formul"]
-    assert L100["100'lük duvar omegası"]["adet"] == L60["100'lük duvar omegası"]["adet"]
-    assert "100'lük iç duvarlar" not in L100["100'lük duvar omegası"]["formul"]
+    assert "iç duvar üstleri 100'lük duvar omegasında" in L100["60'lık duvar omegası (asma dizme tavan)"]["formul"]
+    kenar = pk01["ic_kalan_dis_duvar_m"] + sum(pk01.get("ic_kirisler_cm") or []) / 100
+    y = L100["100'lük duvar omegası"]
+    assert (y["grup"], y["olcu"]) == ("1002", "100 × 2500") and f"100'lük iç duvarlar {PL.od(L_duvar)} m" in y["formul"]
+    assert y["adet"] == math.ceil((kenar + L_duvar) / 2.5 - 1e-9) > L60["100'lük duvar omegası"]["adet"] == math.ceil(kenar / 2.5 - 1e-9)
 
 
 def test_ic_duvar_ustu_100_ters_degismez(pk01, kurallar):
-    """Ters tavan, iç duvar 100'lük (O5, PK-07): iç duvar üstleri 100'lük duvar omegasında; yeni satır yok."""
+    """Ters tavan, iç duvar 100'lük (O5, PK-07): iç duvar üstleri 100'lük duvar omegasında; ayrı satır yok."""
     L = _liste(_ic100(pk01, Tavan="Ters tavan"), kurallar)
     L_duvar = sum(p["boy"] for p in pk01["panolar"] if p["duvar"] == "ic") / 100
-    assert YENI_SATIR not in L
+    assert not [k for k in L if k.startswith(AYRI_SATIR)]
     assert f"100'lük iç duvarlar {PL.od(L_duvar)} m" in L["100'lük duvar omegası"]["formul"]
 
 
-def test_sirt_kural_dosyasindan(pk01, kurallar):
-    k = copy.deepcopy(kurallar)
-    k["prefabrik"]["kurallar"]["ic_duvar_ustu_omegasi"]["deger"]["sirt_cm"] = 11.0
-    assert "60'lık iç duvar üstü omegası (sırt 11)" in _liste(_ic100(pk01), k)
 
 
 def _g(tavan_turu: str, h_ic: float) -> dict:
@@ -134,19 +133,25 @@ def _g(tavan_turu: str, h_ic: float) -> dict:
 
 @pytest.mark.parametrize("tavan_turu, h_ic, beklenen", [("asma", 5, [10.5]), ("asma", 3, [None]), ("ters", 5, []), ("ters", 3, [None])])
 def test_yerlesim_sirti(tavan_turu, h_ic, beklenen):
-    """Duvar eksenindeki hat: 100'lük iç duvarda sırt yazılır; ters tavanda 100'lük iç duvarın üstünde hat yok (O5)."""
+    """Duvar eksenindeki hat: 100'lük iç duvarda sırt yazılır; ters tavanda 100'lük iç duvarın üstünde hat yok (O5; tavan omegası değil)."""
     K = {"aralik_asma": 125.5, "aralik_ters": 60.0, "en_kisa": 10, "sirt_100": 10.5}
     h = [x for x in tavan.hatlar(_g(tavan_turu, h_ic), K) if x["yer"] == "duvar_ekseni"]
     assert [x.get("sirt") for x in h] == beklenen
 
 
 def test_om02_karti():
-    """Sırtı yazılı duvar ekseni parçası OM-02'ye, ötekiler OM-01'e; OM-02'nin satırı liste üretecinin yazdığı ad."""
+    """Sırtı yazılı duvar ekseni parçası OM-02'ye (100'lük duvar omegası, D-32 ek), ötekiler OM-01'e; OM-02'nin satırı listedeki
+    "100'lük duvar omegası", kesim boyu duvar omegasının böleni, payısız."""
     kartlar = KM._oku(KM.KARTLAR)
     p = lambda **b: {"kural": "tavan_omegasi_yerlesimi", "parca": "omega", "bilgi": {"Tavan": "asma", "Hat": 1, "Mahal": "", **b}}  # noqa: E731
     assert [k["kod"] for k in KM.yerlesim_kartlari(p(Yer="duvar_ekseni", Sirt_cm=10.5), kartlar)] == ["OM-02"]
     assert [k["kod"] for k in KM.yerlesim_kartlari(p(Yer="duvar_ekseni"), kartlar)] == ["OM-01"]
     assert [k["kod"] for k in KM.yerlesim_kartlari(p(Yer="ara"), kartlar)] == ["OM-01"]
     om02 = next(k for k in kartlar["kartlar"] if k["kod"] == "OM-02")
-    assert om02["liste"]["satirlar"] == [YENI_SATIR] and om02["ad"].startswith(YENI_SATIR)
-    assert om02["yerlesim"]["bilgi"]["Sirt_cm"] == PL.kurallari_oku()["prefabrik"]["kurallar"]["ic_duvar_ustu_omegasi"]["deger"]["sirt_cm"]
+    assert om02["liste"]["satirlar"] == ["100'lük duvar omegası"] and om02["ad"] == "100'lük duvar omegası L 2500"
+    k = PL.kurallari_oku()["prefabrik"]["kurallar"]
+    T = Y.degerler(KM._oku(KM.YERLESIM), KM._oku(KM.LISTE_KURALLARI))["tavan_omegasi_yerlesimi"]
+    assert om02["yerlesim"]["bilgi"]["Sirt_cm"] == T["sirt_100"] == 10.5
+    assert om02["yerlesim"]["kesim"] == {"parca_boyu": "parca_boyu_100", "pay": "pay_100"}
+    assert (T["parca_boyu_100"], T["pay_100"]) == (k["duvar_omegasi_100_bolen_m"]["deger"], 0.0) == (2.5, 0.0)
+    assert "ic_duvar_ustu_omegasi" not in k                                # sırt listeyi değiştirmez: yerleşim kuralı (D-32 ek)

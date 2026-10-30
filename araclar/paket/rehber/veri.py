@@ -660,11 +660,11 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         on = next((a for a in (KARTLAR.get(kod) or {}).get("liste", {}).get("satirlar", []) if satirlar(a)), None)
         return ls(on) if on else "listede satırı yok"
     for q in OMP:
-        if q["yer"] == "duvar_ekseni":                # kart ve sırt modelden: 100'lük iç duvarın üstü OM-02, sırt 10,5 (D-32)
+        if q["yer"] == "duvar_ekseni":                # kart ve sırt modelden: 100'lük iç duvarın üstü OM-02 (100'lük duvar omegası), sırt 10,5 (D-32 ve ek)
             omega_duvar.append({"tur": "ic", "o": "h" if q["eksen"] == "y" else "v", "perp": _r(q["s"]), "a0": _r(q["a0"]), "a1": _r(q["a1"]), "out": 1,
                                 "yer": f"iç duvar ({q['eksen']} = {fmtc(q['s'])})", "kart": q["kart"], "liste": kart_ls(q["kart"]),
                                 **({"sirt": q["sirt"]} if q["sirt"] else {})})
-    SIRT = next((q["sirt"] for q in OMP if q["yer"] == "duvar_ekseni" and q["sirt"]), None)   # 100'lük iç duvarın üstündeki omeganın sırtı
+    SIRT = next((q["sirt"] for q in OMP if q["yer"] == "duvar_ekseni" and q["sirt"]), None)   # 100'lük iç duvarın üstündeki 100'lük duvar omegasının sırtı
     omega = [{"yon": "y" if q["eksen"] == "x" else "x", "konum": _r(q["s"]), "bas": _r(q["a0"]), "son": _r(q["a1"]),
               "oda": KIM.get(BIRLES.get(q["mahal"], q["mahal"]), "veranda"), "boy": _r(q["boy"])} for q in OMP if q["yer"] != "duvar_ekseni"]
 
@@ -1087,11 +1087,11 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
               "betopanının gireceği 1 cm U yanak)" +
               ("; verandaların dış kirişlerine de baş makas omegası, veranda saçağının ucundan ucuna" if VR else "") +
               (f"; {'nişe' if GVK['nis'] else 'verandaya'} bakan gövde duvarlarına 100’lük duvar omegası" if GVK else "") +
-              (f". İç duvarların üstüne 60’lık ölçüde, sırtı {fmt(SIRT)} cm omega geçirilir (100’lük iç duvar); kapı üstlerinden kesintisiz geçer." if SIRT else
+              (f". 100’lük iç duvarların üstüne de 100’lük duvar omegası geçirilir (sırtı {fmt(SIRT)} cm, öteki ölçüleri 60’lık omeganın); kapı üstlerinden kesintisiz geçer." if SIRT else
                ". İç duvarların üstüne 60’lık omega geçirilir; kapı üstlerinden kesintisiz geçer."),
          "kamera": K([0, 2.3, 0.3], 0.62, 0.55, 15.5),
-         "rows": [x for x in (LR("100'lük saçak omegası"), LR("100'lük duvar omegası"), LR("Baş makas omegası"), LR("60'lık iç duvar üstü omegası"),
-                              R(None, f"60’lık omega (iç duvar üstü, sırt {fmt(SIRT)})" if SIRT else "60’lık omega (iç duvar üstü)",
+         "rows": [x for x in (LR("100'lük saçak omegası"), LR("100'lük duvar omegası"), LR("Baş makas omegası"),
+                              R(None, "100’lük duvar omegası (iç duvar üstü)" if SIRT else "60’lık omega (iç duvar üstü)",
                                 "{omega_ic_n} parça · {omega_ic_m} m", "model"), I("Sac", "1 mm")) if x]},
         {"ad": "Ana çatı" + (" ve veranda makasları" if VR else " makasları"), "t": "Ana çatı" + (" ve veranda makasları" if VR else " makasları"),
          "p": f"Ana çatı: {n_ana} makas (MKS01–{n_ana:02d}) {fmtc(SAYIM['makas_aralik_cm'])} cm aralıkla; iki uçta baş makas, arada {n_ana - 2} orta makas. "
@@ -1177,7 +1177,7 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         {"grp": "Ekler, köşeler ve veranda"}, {"pre": ["H-", "B-", "V-"], "adlar": ["Çektirme"]},
         {"grp": "Çatı"}, {"pre": ["MA-"], "adlar": ["Yavru makas"]},
         *[x for x in (LR("100'lük saçak omegası"), LR("100'lük duvar omegası"), LR("Baş makas omegası"), LR("Saçak sacı"), LR("Baş makas betopanı"),
-                      LR("Baş makas Z'si"), LR("60'lık duvar omegası"), LR("60'lık iç duvar üstü omegası"), LR("60'lık tavan omegası"), LR("Tavan H'ı"), LR("Tavan beyaz alçıpan"),
+                      LR("Baş makas Z'si"), LR("60'lık duvar omegası"), LR("60'lık tavan omegası"), LR("Tavan H'ı"), LR("Tavan beyaz alçıpan"),
                       LR("Tavan yeşil alçıpan"), LR("Aşık"), LR("Çatı şiltesi")) if x],
         *[LR(s["kalem"], s["olcu"]) for s in (TP or SP)],
         *[x for x in (LR("Metal kiremit mahyası"), LR("Alın sacı"), LR("Metal dere", "L 4000"), LR("Metal dere inişi aparatı"), LR("Çelik dübel")) if x],

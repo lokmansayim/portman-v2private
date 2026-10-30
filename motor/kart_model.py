@@ -318,6 +318,8 @@ def _k2(f, kartlar: dict, yerlesim: dict, liste_kurallari: dict, is_emri: dict, 
         boylar = [p["boy_cm"] for p in kp]
         if k["sayim"] == "boy_kesim" and boylar:
             R = D[k["yerlesim"]["kural"]]
+            if k["yerlesim"].get("kesim"):                             # kartın parça boyu ve payı kuralın başka değerlerinden (OM-02: D-32 ek)
+                R = {**R, **{a: R[v] for a, v in k["yerlesim"]["kesim"].items()}}
             cm = lambda m: round(m * 100, 6)
             if R.get("yontem") == "toplam":                            # K3b: liste üretecinin yolu, hatların toplamı (kesik hat bir kez)
                 hat = {}
