@@ -292,8 +292,9 @@ def _k2(f, kartlar: dict, yerlesim: dict, liste_kurallari: dict, is_emri: dict, 
             uyan = yerlesim_kartlari(p, kartlar)
             if len(uyan) > 1:
                 raise ValueError(f"{p['kural']} / {p['parca']}: iki karta uyuyor ({', '.join(k['kod'] for k in uyan)}); kart dosyası düzeltilmeli")
-            sira[p["parca"]] += 1
-            ad = f"{Y.PARCA_ADI[p['parca']]}_{sira[p['parca']]:03d}"
+            on = p.get("onek", "")                                     # K5b: taşan verandanın parçası `VERANDA_` önekli, kendi sırasıyla
+            sira[on, p["parca"]] += 1
+            ad = f"{on}{Y.PARCA_ADI[p['parca']]}_{sira[on, p['parca']]:03d}"
             if not uyan:
                 kural_yok.append({"parca": ad, "sinif": "—", "neden": f"{p['kural']} kuralının \"{p['parca']}\" parçasına uyan kart yok"})
                 continue
@@ -331,7 +332,7 @@ def _k2(f, kartlar: dict, yerlesim: dict, liste_kurallari: dict, is_emri: dict, 
             if R.get("yontem") == "toplam":                            # K3b: liste üretecinin yolu, hatların toplamı (kesik hat bir kez)
                 hat = {}
                 for p in kp:
-                    hat.setdefault(p["bilgi"].get("Hat", p["ad"]), p["bilgi"].get("HatBoyu_cm", p["boy_cm"]))
+                    hat.setdefault((p["bilgi"].get("Cati"), p["bilgi"].get("Hat", p["ad"])), p["bilgi"].get("HatBoyu_cm", p["boy_cm"]))
                 kesim_plani[k["kod"]] = kesim.toplam_karti(list(hat.values()), cm(R["parca_boyu"]), cm(R.get("bindirme", 0.0)), len(kp))
             elif R.get("yontem") == "kenar":                           # K3b: kenar başına
                 kesim_plani[k["kod"]] = kesim.kenar_karti(boylar, cm(R["parca_boyu"]))

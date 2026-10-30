@@ -11,6 +11,9 @@ yazar; sayfanın katmanı kurulmadıysa nedeni, yerleşimin uyarıları da ilgil
 Beşik dışı çatıda (İE-15 K5) çatı katmanları kurulmaz: kart modelinin IFC'si bugünkü IFC'nin kopyasıdır ve çatıyı hep beşik çizer; o
 makaslar sayılmadığı (kural yok) için çizilmez, çatı sayfalarında yerine çatının adı ve nedeni yazar. Yedinci sayfanın lejantında
 kurulmayan kart "kurulmadı", liste üretecinin yazmadığı liste "liste yazılmaz" (nedeniyle) yazar.
+
+Taşan verandanın çatısı (K5b) aynı sayfalarda: yavru makas makas ve dere planında, veranda kalkanının betopanı baş makasların altında,
+aşık, kaplama ve çatı kenarları ana çatınınkilerle birlikte. Dikey betopanda levhanın kenarı ve uçtaki artan betopan ayrı çizilir.
 """
 from __future__ import annotations
 
@@ -25,16 +28,19 @@ from shapely.geometry import MultiPoint
 
 PARCA_SETI = "PortatifEv_Parca"
 RENK = {"duvar": "#c9c9c9", "duvar_kenar": "#8a8a8a", "omega": {"duvar_ekseni": "#c0392b", "duvar_yuzu": "#8e44ad", "ara": "#e67e22"},
-        "makas": "#2c3e50", "dere": "#2e86c1", "inis": "#1b4f72", "asik": "#2471a3", "kaplama": ("#f4d03f", "#f9e79f"), "levha": "#e67e22"}
+        "makas": "#2c3e50", "yavru_makas": "#7e5109", "dere": "#2e86c1", "inis": "#1b4f72", "asik": "#2471a3", "kaplama": ("#f4d03f", "#f9e79f"), "levha": "#e67e22"}
 OMEGA_YER = {"duvar_ekseni": "iç duvar ekseninde", "duvar_yuzu": "duvar yüzünde", "ara": "arada"}
-YUZ = {"sol": "sol", "sag": "sağ"}
+YUZ = {"sol": "sol", "sag": "sağ", "iki": "iki"}
 # sayfanın katmanları: kural yokta katmanın adı (`motor.yerlesim`), parça adının öneki ve uyarının katmanı
-SAYFA = {1: (("tavan omegası",), ("OMEGA_",)), 2: (("dere ve iniş", "iniş"), ("DERE_", "INIS_")), 3: (("baş makas betopanı",), ("BETOPAN_",)),
-         4: (("aşık",), ("ASIK_",)), 5: (("çatı kaplaması",), ("KAPLAMA_",)),
+SAYFA = {1: (("tavan omegası",), ("OMEGA_",)),
+         2: (("dere ve iniş", "iniş"), ("DERE_", "INIS_", "VERANDA_DERE_", "VERANDA_INIS_", "VERANDA_YAVRU_MAKAS_", "iniş (", "veranda çatısı")),
+         3: (("baş makas betopanı",), ("BETOPAN_", "VERANDA_BETOPAN_", "baş makas betopanı (")),
+         4: (("aşık",), ("ASIK_", "VERANDA_ASIK_")), 5: (("çatı kaplaması",), ("KAPLAMA_", "VERANDA_KAPLAMA_")),
          6: (("elektrik", "elektrik noktaları", "kablo_priz", "kablo_aydinlatma"),
              ("DUY_", "GLOP_", "ANAHTAR_", "PRIZ_", "UYDU_", "ZIL_", "SIGORTA_", "KABLO_")),
          7: (("alt çerçeve", "saçak omegası", "saçak sacı", "alın sacı", "baş makas Z'si", "C kapama", "mahya", "alt çerçeve ve çatı kenarları"),
-             ("ALT_CERCEVE_", "SACAK_OMEGASI_", "SACAK_SACI_", "ALIN_SACI_", "BAS_MAKAS_Z_", "C_KAPAMA_", "MAHYA_"))}
+             ("ALT_CERCEVE_", "SACAK_OMEGASI_", "SACAK_SACI_", "ALIN_SACI_", "BAS_MAKAS_Z_", "C_KAPAMA_", "MAHYA_", "VERANDA_SACAK_",
+              "VERANDA_ALIN_SACI_", "VERANDA_MAHYA_"))}
 ELEKTRIK_RENK = {"EL-01": "#c0392b", "EL-02": "#c0392b", "EL-03": "#1e8449", "EL-04": "#1e8449", "EL-05": "#1f4e9c", "EL-06": "#1f4e9c",
                  "EL-07": "#7d3c98", "EL-08": "#ca6f1e", "EL-09": "#111111", "EL-10": "#1f4e9c", "EL-11": "#e67e22"}
 KENAR_RENK = {"AC-01": "#1f4e9c", "AC-02": "#e67e22", "CK-01": "#c0392b", "CK-02": "#85c1e9", "CK-03": "#ca6f1e", "CK-04": "#7d3c98",
@@ -74,6 +80,8 @@ def _model(yol: Path) -> dict:
     for a in f.by_type("IfcElementAssembly"):
         if ue.get_predefined_type(a) == "TRUSS":
             uye = [sek[u.GlobalId] for r in a.IsDecomposedBy for u in r.RelatedObjects if u.GlobalId in sek]
+            if not uye:                                         # kart modelinin yavru makası (MA-03, K5b) tek gövdedir; `k2`'de okunur
+                continue
             kalem = str(ue.get_psets(a).get("PortatifEv_Kapsam", {}).get("BOMKalem", ""))
             m["makas"][a.Name] = {"uyeler": uye, "bas": "(baş)" in kalem}
     for e in f.by_type("IfcProduct"):
@@ -198,6 +206,13 @@ def ciz(model_yolu: Path, say: dict, yol: Path, kod: str) -> Path:
             yatay = (x1 - x0) > (y1 - y0)
             ax.text(x1 + 40 if yatay else (x0 + x1) / 2, (y0 + y1) / 2 if yatay else y1 + 40, f"{ad} ({'baş' if mk['bas'] else 'orta'})",
                     fontsize=8, va="center", ha="left" if yatay else "center", rotation=0 if yatay else 90, color=RENK["makas"])
+        for p in m["k2"].get("MA-03", []):                     # yavru makas (K5b): taşan verandanın çatısı
+            iz = _iz(p["v"]); x, yy = iz.exterior.xy
+            ax.fill(x, yy, color=RENK["yavru_makas"], alpha=0.75, lw=0)
+            x0, y0, x1, y1 = iz.bounds
+            yatay = (x1 - x0) > (y1 - y0)
+            ax.text(x1 + 25 if yatay else (x0 + x1) / 2, (y0 + y1) / 2 if yatay else y0 - 25, f"Y{p['p']['Sira']}", fontsize=7,
+                    va="center" if yatay else "top", ha="left" if yatay else "center", color=RENK["yavru_makas"])
         for p in m["k2"].get("DR-01", []):
             iz = _iz(p["v"]); x, yy = iz.exterior.xy
             ax.fill(x, yy, color=RENK["dere"], alpha=0.7, lw=0)
@@ -211,7 +226,9 @@ def ciz(model_yolu: Path, say: dict, yol: Path, kod: str) -> Path:
             ax.add_patch(plt.Circle((cx, cy), 14, fc="white", ec=RENK["inis"], lw=1.6))
             ax.add_patch(plt.Circle((cx, cy), 5, color=RENK["inis"]))
         kd, ki = _kart(say, "DR-01"), _kart(say, "DR-02")
-        _lejant(fig, [f"MA-01 Makas (baş): {_kart(say, 'MA-01')['adet']}", f"MA-02 Makas (orta): {_kart(say, 'MA-02')['adet']}", "",
+        ym = _kart(say, "MA-03")
+        _lejant(fig, [f"MA-01 Makas (baş): {_kart(say, 'MA-01')['adet']}", f"MA-02 Makas (orta): {_kart(say, 'MA-02')['adet']}"]
+                + ([f"MA-03 Yavru makas: {ym['adet']} (Y; veranda çatısı)"] if ym["adet"] else []) + ["",
                      f"DR-01 Metal dere: {kd['adet']} hat, {_sayi(kd.get('metre', 0))} m"]
                 + ([f"   kesim: {kesim['DR-01']['stok']} boy L {kesim['DR-01']['parca_boyu_cm']:g}", f"   ({kesim['DR-01']['bindirme_cm']:g} cm bindirme)"]
                    if "DR-01" in kesim else [])
@@ -231,22 +248,44 @@ def ciz(model_yolu: Path, say: dict, yol: Path, kod: str) -> Path:
             ps = [p for p in levhalar if p["p"]["Makas"] == ad]
             v = np.vstack([p["v"] for p in ps]) if ps else np.zeros((1, 3))
             yatay = 0 if (v[:, 1].max() - v[:, 1].min()) < (v[:, 0].max() - v[:, 0].min()) else 1    # levhanın düzlemi x–z ya da y–z
-            if ad in m["makas"]:
-                for u in m["makas"][ad]["uyeler"]:
-                    x, z = _iz(u, (yatay, 2)).exterior.xy
-                    ax.fill(x, z, color=RENK["makas"], alpha=0.35, lw=0)
+            cati_ad = ps[0]["p"].get("Cati") if ps else None          # taşan verandanın kalkanı (K5b): altında dış kirişin yavru makası
+            uyeler = (m["makas"][ad]["uyeler"] if ad in m["makas"] else
+                      [p["v"] for p in m["k2"].get("MA-03", []) if cati_ad and p["p"].get("Cati") == cati_ad and p["p"].get("Yer") == "dış kiriş"])
+            for u in uyeler:
+                x, z = _iz(u, (yatay, 2)).exterior.xy
+                ax.fill(x, z, color=RENK["yavru_makas" if cati_ad else "makas"], alpha=0.35, lw=0)
             for p in ps:
                 iz = _iz(p["v"], (yatay, 2)); x, z = iz.exterior.xy
                 ax.fill(x, z, fc=RENK["levha"], alpha=0.75, ec="#7b3f00", lw=1.2)
-                c = iz.centroid
-                ax.text(c.x, c.y, f"{p['p']['Levha']}\n{p['p']['Levha_cm']}", ha="center", va="center", fontsize=8)
+                u0, u1 = p["p"].get("LevhaU0_cm"), p["p"].get("LevhaU1_cm")
+                lo, hi = iz.bounds[0], iz.bounds[2]
+                if u0 is not None:                                      # dikey levha: uçtaki artan betopan taralı, levhanın kenarı kesik
+                    from shapely.geometry import box
+                    _x0, z0_, _x1, z1_ = iz.bounds
+                    for uc in ([box(lo, z0_, u0, z1_)] if lo < u0 - 0.5 else []) + ([box(u1, z0_, hi, z1_)] if hi > u1 + 0.5 else []):
+                        q = iz.intersection(uc)
+                        if q.geom_type == "Polygon" and not q.is_empty:
+                            x, z = q.exterior.xy
+                            ax.fill(x, z, fc="#f5cba7", ec="#7b3f00", lw=0.8, ls="--", hatch="///")
+                    c = ((u0 + u1) / 2, (z0_ + z1_) / 2)
+                else:
+                    c = (iz.centroid.x, iz.centroid.y)
+                ax.text(*c, f"{p['p']['Levha']}\n{p['p']['Levha_cm']}", ha="center", va="center", fontsize=8)
             ax.set_aspect("equal"); ax.axis("off")
-            ax.set_title(f"{ad} (baş makas), dış yüzden görünüş" if ad else "" if cn else "baş makas yok", fontsize=11)
+            ax.set_title((f"{ad}, dış yüzden görünüş" if cati_ad else f"{ad} (baş makas), dış yüzden görünüş") if ad else "" if cn else "baş makas yok",
+                         fontsize=11)
             if cn:
                 _cati_yazisi(ax, cn)
         kb = _kart(say, "BT-01")
-        _lejant(fig, [f"BT-01 Baş makas betopanı 1250 × 2500", f"{kb['adet']} levha (makas başına {levhalar[0]['p']['LevhaAdedi'] if levhalar else 0})",
-                             "levha yerinde kesilir; sayı tam levha", "", f"SR-01 PVC plastik betopan H'ı: {say.get('sabit', {}).get('SR-01', {}).get('adet', '—')}",
+        basina = {}
+        for p in levhalar:
+            basina.setdefault(p["p"]["Makas"], p["p"]["LevhaAdedi"])
+        dikey = any(p["p"].get("Dizilim") == "dikey" for p in levhalar)
+        _lejant(fig, [f"BT-01 Baş makas betopanı 1250 × 2500",
+                      f"{kb['adet']} levha (makas başına {next(iter(basina.values()), 0)})" if len(set(basina.values())) <= 1
+                      else f"{kb['adet']} levha", *([f"   {a}: {n}" for a, n in basina.items()] if len(set(basina.values())) > 1 else []),
+                      "levha yerinde kesilir; sayı tam levha",
+                      *(["dikey: uçlar artan betopanla (kesik çizginin dışı)"] if dikey else []), "", f"SR-01 PVC plastik betopan H'ı: {say.get('sabit', {}).get('SR-01', {}).get('adet', '—')}",
                              "(sabit paket, liste kuralı; modelde yok)"])
         fig.suptitle(f"{kod} · BAŞ MAKAS BETOPAN YERLEŞİMİ", fontsize=15, fontweight="bold", x=0.02, ha="left", y=0.95 if say["kural_yok"] else 0.98)
         fig.text(0.02, 0.03, alt, fontsize=9, color="#444")
@@ -254,10 +293,11 @@ def ciz(model_yolu: Path, say: dict, yol: Path, kod: str) -> Path:
         pdf.savefig(fig); plt.close(fig)
 
         # 4 · aşık ve 5 · çatı kaplaması
-        for sayfa, kart, baslik in ((4, "AS-01", "AŞIK YERLEŞİM PLANI"), (5, "KP-01", "ÇATI KAPLAMASI YERLEŞİM PLANI")):
+        KP = [kk for kk in ("KP-01", "KP-02") if m["k2"].get(kk)] or ["KP-01"]   # sandviç ya da tek kat panel (K5b)
+        for sayfa, kart, baslik in ((4, "AS-01", "AŞIK YERLEŞİM PLANI"), (5, KP[0], "ÇATI KAPLAMASI YERLEŞİM PLANI")):
             fig, ax = plt.subplots(figsize=(16.54, 11.69))
             _duvarlar(ax, m, dolgu=False)
-            parcalar = m["k2"].get(kart, [])
+            parcalar = [p for kk in ([kart] if kart == "AS-01" else KP) for p in m["k2"].get(kk, [])]
             for i, p in enumerate(sorted(parcalar, key=lambda p: (p["p"].get("Yuz", ""), p["p"].get("Sira", p["p"].get("Serit", 0)), p["ad"]))):
                 iz = _iz(p["v"]); x0, y0, x1, y1 = iz.bounds
                 dik = (y1 - y0) > (x1 - x0)
@@ -275,10 +315,14 @@ def ciz(model_yolu: Path, say: dict, yol: Path, kod: str) -> Path:
                             fontsize=7, ha="center", va="center")
             ka = _kart(say, kart)
             if kart == "AS-01":
-                yuzler = sorted({p["p"]["Yuz"] for p in parcalar})
-                siralar = {yz: len({p["p"]["Sira"] for p in parcalar if p["p"]["Yuz"] == yz}) for yz in yuzler}
+                catilar = list(dict.fromkeys(p["p"].get("Cati", "") for p in sorted(parcalar, key=lambda p: p["p"].get("Cati", ""))))
+                sira_ = []
+                for c in catilar:
+                    yz_ = sorted({p["p"]["Yuz"] for p in parcalar if p["p"].get("Cati", "") == c})
+                    sira_.append(f"{c or 'ana çatı'}: " + ", ".join(
+                        f"{YUZ[yz]} {len({p['p']['Sira'] for p in parcalar if p['p'].get('Cati', '') == c and p['p']['Yuz'] == yz})}" for yz in yz_))
                 _lejant(fig, [f"AS-01 Aşık L 4200", f"{ka['adet']} parça, {_sayi(ka.get('metre', 0))} m",
-                             "sıralar: " + ", ".join(f"{YUZ[yz]} yüz {n}" for yz, n in siralar.items()), "mahyadan 60 cm, saçakta bir sıra (karar C)"]
+                             "sıralar (yüz başına):", *[f"   {x}" for x in sira_], "mahyadan 60 cm, saçakta bir sıra (karar C)"]
                         + ([f"kesim: {kesim['AS-01']['stok']} boy L {kesim['AS-01']['parca_boyu_cm']:g}", f"(tam parça {kesim['AS-01']['kullanilir_cm']:g}; yedek yok, karar D)"]
                            if "AS-01" in kesim else []))
             else:
@@ -287,10 +331,14 @@ def ciz(model_yolu: Path, say: dict, yol: Path, kod: str) -> Path:
                 for p in parcalar:
                     yuz[p["p"]["Yuz"]] = yuz.get(p["p"]["Yuz"], 0) + 1
                 tasma = sorted({p["p"].get("Tasma_cm", 0) for p in parcalar} - {0})
-                _lejant(fig, [f"KP-01 Sandviç panel (100 cm kapatır)",
+                genis = sorted({p["p"]["Genislik_cm"] for p in parcalar})
+                ka = {"adet": sum(_kart(say, kk)["adet"] for kk in KP), "ad": " + ".join(_kart(say, kk).get("ad", kk) for kk in KP)}
+                _lejant(fig, [f"{' + '.join(KP)} {ka['ad'] if ka['ad'] != 'KP-01' else 'Sandviç panel (100 cm kapatır)'}",
                              f"{ka['adet']} panel" + (f" ({', '.join(f'{YUZ[a]} yüz {n}' for a, n in sorted(yuz.items()))})" if yuz else ""),
+                             *([f"kapatır {', '.join(f'{b:g}' for b in genis)} cm"] if genis else []),
                              *([f"boy {', '.join(f'{b:g}' for b in boy)} cm (eğik boy + 5, 10 mm'ye yukarı)"] if boy else []),
-                             "son şerit yüzün ucundan taşar" + (f" ({', '.join(f'{x:g}' for x in tasma)} cm)" if tasma else "")])
+                             "son şerit yüzün ucundan taşar" + (f" ({', '.join(f'{x:g}' for x in tasma)} cm)" if tasma else ""),
+                             *(["iki: verandada iki yüzün artan şeritleri bir panelden"] if "iki" in yuz else [])])
             if cn:
                 _cati_yazisi(ax, cn)
             _cerceve(ax, f"{kod} · {baslik}", alt)
@@ -399,7 +447,9 @@ def _kenar_lejanti(fig, say: dict, plt) -> None:
         *([f"Liste üreteci: {say['kenar']['liste_yazilmaz']}."] if "liste_yazilmaz" in say["kenar"] else []),
         "Sayı listenin yöntemiyle, boy modelden (kesim planı); C kapama metreyle sayılır.",
         "Yer montaj rehberinden; teyit bekleyen maddeler varsayım (Lokman, 25 Ekim).",
-        "Saçak omegası rehberdeki gibi duvar boyunca; liste saçak boyunu sayar.")), fontsize=8.5, va="top", ha="left", color="#444")
+        "Saçak omegası rehberdeki gibi duvar boyunca (verandada kiriş boyunca); liste saçak boyunu sayar.",
+        *(["Veranda kalkanında C kapama var (rehberdeki gibi dört kalkanda), Z yok (liste O7'yi yalnız ana çatıda sayar)."]
+          if any(p.get("bilgi", {}).get("Cati") for p in say.get("yerlesim", {}).get("parcalar", [])) else []))), fontsize=8.5, va="top", ha="left", color="#444")
 
 
 def _elektrik(ax, m: dict, say: dict, plt) -> None:

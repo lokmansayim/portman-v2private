@@ -122,6 +122,9 @@ def kur(ie: dict, plan: dict, makaslar: list[dict]) -> dict:
         "odalar": [{"ad": o["ad"], "poligon": o["poligon"]} for o in plan["odalar"]],
         "acik": [{"ad": v["ad"], "poligon": v["poligon"]} for v in acik],
         "engeller": [x["rect"] for x in plan.get("baglantilar", []) if x["tur"] in ("veranda_profil", "dikme")],
+        # K5b: gövdeden taşan verandalar (BK-14) ve kirişleri; veranda çatısının çerçevesi `veranda.py`'de
+        "dis_verandalar": [{"ad": v["ad"], "cephe": v["cephe"], "rect": v["rect"], "cati": v["cati"]} for v in plan.get("dis_verandalar") or []],
+        "veranda_kirisleri": [x["rect"] for x in plan.get("baglantilar", []) if x["tur"] == "veranda_profil"],
         "ozellikler": oz,
         "tavan": tavan_turu(oz),
         "cati_tipi": (ie.get("cati") or {}).get("tip", "besik"),
