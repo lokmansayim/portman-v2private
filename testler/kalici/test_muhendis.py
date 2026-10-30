@@ -314,7 +314,7 @@ def test_muhendis_hatirlatmasi_saat_basi_mesaide_ve_uc_saatte_patron(depo, wa, g
     with depo.baglan() as c, c.transaction():
         c.execute("UPDATE muhendis_kontrolleri SET son_hatirlatma = to_timestamp(%s)", (saat(14, 12),))
     assert MH.hatirlatma_turu(depo, saat(14, 13, 1))["gecikme"] == 0                     # gecikme bir kez
-    assert MH.hatirlatma_turu(depo, saat(14, 21)) == {"muhendis": 0, "gecikme": 0, "patron": 0, "hata": 0}     # mesai dışı
+    assert MH.hatirlatma_turu(depo, saat(14, 21)) == {"muhendis": 0, "gecikme": 0, "patron": 0, "zaman_asimi": 0, "hata": 0}     # mesai dışı (BK-10: sayaçta zaman aşımı da)
 
 
 def test_gece_onayinda_hatirlatma_08den_sonra(depo, wa, genel_liste):
@@ -439,7 +439,7 @@ def test_aksam_onayinda_gecikme_ertesi_sabah_mesai_saatiyle(depo, wa, genel_list
     _kontrol_saati(depo, no, saat(14, 18, 30))
     assert MH.hatirlatma_turu(depo, saat(14, 19, 30))["muhendis"] == 1
     say = MH.hatirlatma_turu(depo, saat(15, 8, 0))
-    assert say == {"muhendis": 0, "gecikme": 0, "patron": 0, "hata": 0}                 # 1,5 mesai saati
+    assert say == {"muhendis": 0, "gecikme": 0, "patron": 0, "zaman_asimi": 0, "hata": 0}                 # 1,5 mesai saati
     assert MH.hatirlatma_turu(depo, saat(15, 8, 30))["muhendis"] == 1
     h = [s for s in _cipa(depo, rev) if s["_alici"] == "MUHENDIS"][-1]
     assert h["sablon"]["govde"] == [no, "2"]
@@ -460,7 +460,7 @@ def test_test_kartinin_kontrolu_hatirlatma_dogurmaz(depo, wa, genel_liste):
     rev = celik_onay(depo, wa); no = rev["is_emri_no"]
     depo.bayi_yaz(NUMARA_A, ad="Kuru koşu", kod="TEST", rol="test")
     _kontrol_saati(depo, no, saat(14, 9))
-    assert MH.hatirlatma_turu(depo, saat(14, 12)) == {"muhendis": 0, "gecikme": 0, "patron": 0, "hata": 0}
+    assert MH.hatirlatma_turu(depo, saat(14, 12)) == {"muhendis": 0, "gecikme": 0, "patron": 0, "zaman_asimi": 0, "hata": 0}
 
 
 def test_xlsx_calisma_kitabi_zip_sonunda_da_taninir(tmp_path):

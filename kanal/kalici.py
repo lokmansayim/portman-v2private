@@ -128,6 +128,62 @@ def _karar_ozeti(d_eski: dict | None, k: BellekKonusma, cikti: dict) -> dict:
             "onaylanan_rev": int(ie.get("revizyon") or 1) if onay else None}
 
 
+# ───────────────────────── D-19 (b): bayiden cevap beklenen açık iş 24 saatte kapanır ─────────────────────────
+ACIK_IS_SN = 24 * 3600              # D-19 (Lokman 30.10.2026): bayinin son mesajından 24 saat (WhatsApp'ın ücretsiz penceresiyle aynı)
+ACIK_IS_NOTU = ("Önceki talebiniz son mesajınızdan 24 saat geçtiği için kapandı (kayıtlarda duruyor); bu mesajınızı yeni talep olarak "
+                "alıyorum.")
+
+
+def acik_is(d: dict | None) -> str | None:
+    """Konuşmada bayiden cevap beklenen açık iş var mı: seçenek seti, onay bekleyen taslak, soru ya da toplanan taslak. Onaylanmış ya da
+    insana devredilmiş proje bayiden cevap beklemez (onaydan sonraki revizyon isteği "plan değişti" akışıyla aynı projede kalır)."""
+    d = d or {}
+    if d.get("asama") in ("onaylandi", "yonlendirildi"):
+        return None
+    if (d.get("secenek_seti") or {}).get("durum") == "acik":
+        return "seçenek seti"
+    if d.get("asama") == "onay_bekliyor":
+        return "onay bekleyen plan"
+    if d.get("son_soru_alani"):
+        return "soru"
+    if d.get("taslak") or d.get("son_is_emri"):
+        return "taslak"
+    return None
+
+
+def acik_is_kapanisi(depo: Depo, gelen: dict, d: dict | None) -> dict | None:
+    """D-19 (b): bayinin bu mesajı bir önceki mesajından en az 24 saat sonra yazıldıysa ve konuşmada açık iş varsa kapanış bilgisi; yoksa None.
+    Zaman WhatsApp'ın verdiği gönderim anıdır (`mesajlar.wa_zamani`): yeniden denenen iş aynı kararı verir. Kapanış için bayiye ücretli şablon
+    gitmez; bayi yeniden yazınca uygulanır (konuşma yeni talebe açılır, kayıtlar silinmez: `depo._isi_bitir`)."""
+    if (gelen.get("role") or "bayi") != "bayi":
+        return None
+    ne = acik_is(d)
+    if ne is None:
+        return None
+    gecen = depo.onceki_mesajdan_gecen(gelen["sender"], gelen["id"])
+    if gecen is None or gecen < ACIK_IS_SN:
+        return None
+    return {"ne": ne, "saat": round(gecen / 3600, 1), "proje_id": (d or {}).get("proje_id"),
+            "is_emri_no": ((d or {}).get("son_is_emri") or {}).get("is_emri_no")}
+
+
+def _on_not(cikti: dict, gelen: dict, metin: str) -> None:
+    """Bayiye giden ilk metin ya da düğmeli satırın başına not (yerinde); öyle satır yoksa ayrı metin satırı. Erken satır ("hazırlıyorum")
+    zaten gitmiş olabilir: atlanır."""
+    satirlar = cikti.setdefault("satirlar", [])
+    for s in satirlar:
+        if s.get("to") == gelen["sender"] and not s.get("erken") and s.get("kind") in ("text", "interactive"):
+            yeni = f"{metin}\n\n{s.get('body') or ''}".strip()
+            if s.get("kind") == "interactive":
+                s["body"] = yeni[:W.WA_GOVDE]
+                s["interactive"]["body"]["text"] = W._govde(yeni, W.WA_GOVDE)
+            else:
+                s["body"] = yeni[:4000]
+            return
+    sira = max([int(s.get("seq") or 0) for s in satirlar if int(s.get("seq") or 0) < Depo.ERKEN_SIRA] + [0]) + 1
+    satirlar.append(W.giden_metin(gelen, metin, sira))
+
+
 # ───────────────────────── işleme ─────────────────────────
 def bir_is(depo: Depo, settings: dict, sahip: str | None = None) -> dict | None:
     """Bir işi alır ve bitirir. None: sırada iş yok. Dönen sözlükte 'durum': bitti | basarisiz | cakisma | atildi."""
@@ -140,6 +196,12 @@ def bir_is(depo: Depo, settings: dict, sahip: str | None = None) -> dict | None:
     d, surum = depo.konusma_oku(gelen["sender"])
     k = BellekKonusma(gelen["sender"], d)
     d_eski = _kopya(d)
+    kapanis = acik_is_kapanisi(depo, gelen, d)       # D-19 (b): düğme ve LLM okuması kapanmış konuşmayla değil, yeni talep olarak
+    if kapanis:
+        k = BellekKonusma(gelen["sender"], None)
+        k.sifirlandi = True
+        k.not_dus("kural", f"D-19: açık iş ({kapanis['ne']}) bayinin son mesajından {kapanis['saat']} saat sonra kapandı; yeni talep")
+        d = _kopya(k.d)
     yazili = gelen.get("type") in W.GELEN_YAZILI and (bool((gelen.get("text") or "").strip()) or bool(gelen.get("reply_id")))
     cikarim = j.get("cikarim")
     muhendis_mu = (gelen.get("role") or "bayi") == "muhendis"      # İE-08 8b: mühendis kartının mesajı LLM'siz (kanal/muhendis.py)
@@ -201,6 +263,7 @@ def bir_is(depo: Depo, settings: dict, sahip: str | None = None) -> dict | None:
                     cikti = _red_ciktisi(gelen, k, cikarim["talep"], denetim)
                 cikti["sonuc"]["onay"] = {a: denetim.get(a) for a in ("kabul", "is_emri_no", "rev", "pdf_wamid", "alinti_id", "sinir", "neden")}
                 MH.onay_kancasi(depo, gelen, d, cikti)          # İE-08 8b: çelik onayı → mühendis kontrol kaydı ve bildirimi (aynı işlemde)
+            MH.plan_degisti_kancasi(depo, gelen, d, cikti)      # BK-10: onaydan sonra yeni revizyon → önceki kontroller kapanır (aynı işlemde)
     except Exception:
         hata = traceback.format_exc()[-2500:]
         k = BellekKonusma(gelen["sender"], d)       # yarım kalan durum değişikliği yazılmaz
@@ -211,6 +274,9 @@ def bir_is(depo: Depo, settings: dict, sahip: str | None = None) -> dict | None:
                      # İE-07 P4: Patron'un penceresi kapalıysa şablonla ulaşır (talep kimliği boş gitmez: T-<iz>)
                      S.patron_bildirim_satiri(gelen, 3, gelen.get("bayi"), None, ((d or {}).get("son_is_emri") or {}).get("is_emri_no"))]),
                  "sonuc": {"eylem": "hata", "gerekce": "beklenmeyen hata"}, "hata": hata}
+    if kapanis:                                     # hata yolunda da: kayıtlar kapanır, bayi neden yeni talep sayıldığını okur
+        cikti["acik_is_kapanisi"] = kapanis; cikti["sonuc"]["acik_is_kapanisi"] = kapanis
+        _on_not(cikti, gelen, ACIK_IS_NOTU)
     cikti["sonuc"]["worker"] = "kalici"; cikti["sonuc"]["sure_s"] = round(time.time() - t0, 1)
     yer = None
     try:

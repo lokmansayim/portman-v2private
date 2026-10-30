@@ -64,7 +64,9 @@ def coz(gelen: dict, d: dict | None, giden_bul=None) -> dict:
     if tur == "s":
         if st.get("id") != a or st.get("durum") != "acik":
             if st.get("id") == a and st.get("durum") == "secildi":
-                neden, mesaj = "set zaten seçilmiş", (f"Bu seçenek listesinden {st.get('secilen_kod')} zaten seçildi. "
+                secilen = next((x for x in st.get("adaylar") or [] if x.get("kod") == st.get("secilen_kod")), {})
+                ad = secilen.get("gosterim") or st.get("secilen_kod")          # BK-10: üretilen planın iç kodu (YENI-…) bayiye yazılmaz
+                neden, mesaj = "set zaten seçilmiş", (f"Bu seçenek listesinden {ad} zaten seçildi. "
                                                       + (f"Güncel plan {guncel[0]} r{guncel[1]:02d}. " if guncel[0] else "") + "Değişiklik isterseniz yazın.")
             elif st.get("durum") == "acik":
                 neden, mesaj = "eski seçenek seti", "Bu butonlar eski bir seçenek listesine ait; güncel listeyi az önce gönderdim, oradan seçin ya da kodu yazın."

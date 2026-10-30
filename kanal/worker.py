@@ -143,6 +143,17 @@ def _kes(m: str | None, n: int) -> str:
     return m if len(m) <= n else m[:n - 1] + "…"
 
 
+def _govde(m: str | None, n: int) -> str:
+    """Etkileşimli mesaj gövdesi: satır sonları kalır (BK-10 F), satır içi boşluk sadeleşir, ardışık boş satır teke iner."""
+    out: list[str] = []
+    for s in str(m or "").splitlines():
+        s = " ".join(s.split())
+        if s or (out and out[-1]):
+            out.append(s)
+    m = "\n".join(out).strip()
+    return m if len(m) <= n else m[:n - 1] + "…"
+
+
 def giden_gorsel(gelen: dict, dosya: Path, ad: str, aciklama: str, sira: int, sha: str, is_emri_no: str | None = None,
                  revizyon: int | None = None) -> dict:
     """Plan görseli (PNG/JPEG ≤5 MB) satırı; altyazı ≤1024."""
@@ -159,7 +170,7 @@ def giden_etkilesim(gelen: dict, metin: str, sira: int, butonlar: list[tuple[str
     | baglanti {"metin", "url"}. gorsel: {"file","filename","sha256","mime"} başlık görseli (buton ve bağlantı mesajında). Sınırlar kesilerek uygulanır;
     feature.php gönderimden önce yeniden denetler. Gövde metni 'body'de de durur (panel ve yedek)."""
     r = giden_metin(gelen, metin[:WA_GOVDE], sira, tur=tur)
-    i: dict = {"body": {"text": _kes(metin, WA_GOVDE)}}
+    i: dict = {"body": {"text": _govde(metin, WA_GOVDE)}}
     if altbilgi:
         i["footer"] = {"text": _kes(altbilgi, WA_ALTBILGI)}
     if liste:
