@@ -41,6 +41,10 @@ VARSAYILAN = {
     # (`talep_flow_id`, `revizyon_flow_id`; rakam). `taslak`: true iken form yayımlanmamış (taslak) kipte gönderilir, yalnız WhatsApp
     # Manager'daki test numaralarında açılır. Kapalıyken (ya da kimlik yokken) bugünkü metin; gelen form cevabı her durumda LLM'siz işlenir.
     "talep_formu": {"acik": False, "talep_flow_id": None, "revizyon_flow_id": None, "taslak": True},
+    # İE-22: WhatsApp'tan bayi kaydı (kanal/kayit.py; LLM yok). Açıkken kartı hiç olmayan numaraya ad ve firma sorulur, Patron'a [Onayla]
+    # [Reddet] gider; onayla kart açılır ve karşılama şablonu gider. `gunluk_en_cok`: 24 saatte açılan yeni talep tavanı (aşılırsa sabit
+    # cevap). Kapalıyken bugünkü sabit cevap (kayitsiz_cevap).
+    "bayi_kaydi": {"acik": False, "gunluk_en_cok": 10},
 }
 ANAHTARLAR = tuple(VARSAYILAN)
 SABLON_ANAHTARLARI = ("sablon_patron_bildirim", "sablon_bayi_dosyalar_hazir", "sablon_muhendis_kontrol", "sablon_muhendis_hatirlatma",
@@ -60,7 +64,7 @@ def oku(veri) -> dict:
         return a
     if isinstance(d, dict):
         for k, v in d.items():
-            if k in ("llm", "plan_uretimi", "llm_once_revizyon", "gorsel_okuma", "talep_formu") and isinstance(v, dict):
+            if k in ("llm", "plan_uretimi", "llm_once_revizyon", "gorsel_okuma", "talep_formu", "bayi_kaydi") and isinstance(v, dict):
                 a[k] = {**a[k], **v}
             else:
                 a[k] = v
