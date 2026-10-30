@@ -110,6 +110,21 @@ def test_dis_duvar_omegasi_pafta_disi(evler, kod):
         assert p["KartKodu"] == "OM-02" and p["PaftaAnahtari"] == "", e.Name
 
 
+@pytest.mark.parametrize("kod, mahal", [("TK01_r07", "GİRİŞ"), ("PK01", "VERANDA")])
+def test_acik_mahal_duvarinda_iki_omega(evler, kod, mahal):
+    """Beyan (geometri hakemi, K5b-2; Bilinen sınırlama): açık mahale bakan ve omegalara paralel dış duvarda iki omega var. Açık mahalin
+    ilk tavan omegası (OM-01) duvarın yüzünde (karar B; PK-01 paftasında "duvar yüzünde 1"), D-32'nin 100'lük duvar omegası (OM-02) duvarın
+    ekseninde; sırtları üst üste biner. Hangisinin kalacağı mühendise soruldu; değişirse bu test bilerek değişir."""
+    P = evler[kod]["katman"]["parcalar"]
+    def hat(p):                                                       # omegalara paralel (y boyunca) parçanın ekseni, değilse None
+        x0, y0, _, x1, y1, _ = p["geo"]["kutu"]
+        return round((x0 + x1) / 2, 4) if x1 - x0 < y1 - y0 else None
+    dis = {hat(p) for p in P if p["bilgi"].get("Duvar") == "dis"} - {None}
+    yuz = {hat(p) for p in P if p["parca"] == "omega" and p["bilgi"].get("Yer") == "duvar_yuzu" and p["bilgi"].get("Mahal") == mahal}
+    ust_uste = [(s, y) for s in dis for y in yuz if abs(abs(s - y) - 5) < 1e-6]          # duvar 10 cm: yüz eksenden 5 cm
+    assert len(ust_uste) == len(yuz) == 1, (dis, yuz)
+
+
 def test_nis_yoksa_dis_omega_yok(tmp_path):
     """TK-01'de giriş nişi yok, veranda taşan (BK-14; ona bakan duvar ana çatının kenarında): dış omega yok, liste de 0."""
     ie = _oku(MOTOR_VERI / "TK01.json")
@@ -234,8 +249,8 @@ def test_cizim_ve_katalog(evler):
     metin = [" ".join(p.get_text().split()) for p in pymupdf.open(d / "TK01_r07_yerlesim_planlari.pdf")]
     assert len(metin) == 7 and not any("EKSİK" in s for s in metin)
     assert "OM-02 100'lük duvar omegası L 2500 3 parça, 3,67 m" in metin[0] and "açık mahale bakan dış duvarda: 3" in metin[0]
-    assert ("H-11 Tavan H'ı L 1185: 91 (▬) AL-01 beyaz alçıpan: 96 göz → 22 levha AL-02 yeşil alçıpan: 16 göz → 3 levha "
-            "(levha 120 × 250, raflarla; yedek yok)") in metin[0]
+    assert ("H-11 Tavan H'ı L 1185: 91 parça (▬) AL-01 beyaz alçıpan: 96 göz → 22 levha AL-02 yeşil alçıpan: 16 göz → 3 levha "
+            "(levha 120 × 250, raflarla; yedek yok) AL-01: 28 göz levhadan geniş (en 122,25 cm; levha + şerit)") in metin[0]
     assert "IZ-01 Çatı izolasyonu: 7 şerit (İ), 76,30 m² → 8 paket (9,6 m²)" in metin[1]
     ws = openpyxl.load_workbook(d / "TK01_r07_kart_katalogu.xlsx")["Kesim planı"]
     satir = {r[0]: r for r in ws.iter_rows(values_only=True)}

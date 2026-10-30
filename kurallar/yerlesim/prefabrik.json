@@ -222,7 +222,7 @@
    "not": "Sütun eni ve göz ölçüsü parçada (`En_cm`, `Uzunluk_cm`); H'ın boyu parçada. Montaj rehberi bugün H'ı ve gözü kendisi çizer (oda dikdörtgenlerinden); model ondan iki yerde ayrılır: duvar kalınlığından kalan dar şerit göz almaz, gözün kenarı omeganın kendi sırtıyla (100'lük duvar omegasında 10,5)."
   },
   "cati_izolasyonu": {
-   "kural": "Çatı izolasyonu (cam yünü şilte) tavanın üstünde, aşıklardan önce serilir: ana çatının her makas aralığında bir şerit, dış duvarların iç yüzleri arasında (makasın uzandığı eksende), iki makasın arası (uç duvarların iç yüzüne kırpılır). Taşan verandanın çatısı şerit almaz (yavru makasları bugünkü IFC'de değil; rehberde de verandaların üstü açık). Paket: şeritlerin alanı toplamı ÷ paketin alanı, bir kez yukarı.",
+   "kural": "Çatı izolasyonu (cam yünü şilte) tavanın üstünde, aşıklardan önce serilir: ana çatının her makas aralığında bir şerit, dış dikdörtgenin dış duvarlarının iç yüzleri arasında (makasın uzandığı eksende), iki makasın arası (uç duvarların iç yüzüne kırpılır). Ana çatının altındaki gömme veranda ve niş şeridin içindedir: rehber rulonun sol duvardan sağ duvara serildiğini yazar, liste de brüt alandan sayar (geometri hakemi, K5b-2). Taşan verandanın çatısı şerit almaz (yavru makasları bugünkü IFC'de değil; rehberde de verandaların üstü açık). Paket: şeritlerin alanı toplamı ÷ paketin alanı, bir kez yukarı.",
    "paket_m2": {"okunan": "kitap › silte_adet_m2"},
    "cati_tipleri": ["besik"],
    "durum": "varsayim",

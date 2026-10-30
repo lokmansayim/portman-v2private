@@ -127,8 +127,10 @@ def _tavan_lejanti(say: dict, kesim: dict) -> list[str]:
     if not (th["adet"] or ab["adet"] or ay["adet"]):
         return []
     lev = lambda kk: f" → {kesim[kk]['stok']} levha" if kk in kesim else ""                    # noqa: E731
-    return (["", f"H-11 Tavan H'ı L 1185: {th['adet']} (▬)", f"AL-01 beyaz alçıpan: {ab['adet']} göz{lev('AL-01')}",
-             f"AL-02 yeşil alçıpan: {ay['adet']} göz{lev('AL-02')}", "(levha 120 × 250, raflarla; yedek yok)"])
+    genis = [x for kk in ("AL-01", "AL-02") if (g := kesim.get(kk, {}).get("genis"))       # geometri hakemi (K5b-2): sessiz kalmasın
+             for x in (f"{kk}: {g['goz']} göz levhadan geniş", f"   (en {_sayi(g['en_genis_cm'])} cm; levha + şerit)")]
+    return (["", f"H-11 Tavan H'ı L 1185: {th['adet']} parça (▬)", f"AL-01 beyaz alçıpan: {ab['adet']} göz{lev('AL-01')}",
+             f"AL-02 yeşil alçıpan: {ay['adet']} göz{lev('AL-02')}", "(levha 120 × 250, raflarla; yedek yok)", *genis])
 
 
 def _cati_notu(say: dict) -> str | None:

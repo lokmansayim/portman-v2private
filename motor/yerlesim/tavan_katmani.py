@@ -6,8 +6,9 @@ sütun (Motor'un oda çizgisinde duvar kalınlığından kalan şerit) göz alma
 sütunun iki H (ya da H ile oda kenarı) arasıdır: ıslak hacimde (liste kuralı `islak_hacim`) yeşil, ötekilerde beyaz alçıpan. Gözün levhaya
 kesimi kart modelindedir (`kesim.levha_karti`: raflarla, dar gözler yan yana). Ters tavanda H ve göz yoktur.
 
-Çatı izolasyonu ana çatının her makas aralığında bir şerittir: dış duvarların iç yüzleri arasında, makasa paralel (montaj rehberiyle
-aynı); paket sayısı kart modelinde (`kesim.paket_karti`). Taşan verandanın yavru makasları bugünkü IFC'de değildir, şerit almaz.
+Çatı izolasyonu ana çatının her makas aralığında bir şerittir: dış dikdörtgenin dış duvarlarının iç yüzleri arasında, makasa paralel;
+ana çatının altındaki gömme veranda ve niş şeridin içindedir (montaj rehberi ve liste gibi). Paket sayısı kart modelinde
+(`kesim.paket_karti`). Taşan verandanın yavru makasları bugünkü IFC'de değildir, şerit almaz.
 """
 from __future__ import annotations
 
