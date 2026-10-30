@@ -425,50 +425,28 @@ def _yazi_bulgulari(rapor: dict, gk: str) -> list[str]:
     return out
 
 
-YON_ADI = {"on": "ön", "arka": "arka", "sol": "sol", "sag": "sağ"}
-ALAN_ADI = {"brut_m2": "Toplam alan", "oda_programi": "Oda sayısı", "pencere": "Pencere sayısı", "kapi": "Kapı sayısı (dış + iç)",
-            "cati_tipi": "Çatı", "dis_olcu_cm": "Dış ölçü"}
-
-
-def tr_sayi(x) -> str:
-    """Sade cümleler için: 123.78 → "123,78", [1562, 802] (cm) → "15,62 × 8,02 m"."""
-    if isinstance(x, (list, tuple)):
-        return " × ".join(tr_sayi(round(float(y) / 100, 2)) for y in x) + " m"
-    return f"{x:g}".replace(".", ",") if isinstance(x, (int, float)) and not isinstance(x, bool) else str(x)
-
-
 def denetimler(kart: dict, t: dict, m: dict, v: dict, olcum: dict, yazi: list[str], kisa: list, banka_kok: Path) -> list[dict]:
-    """Otomatik denetimler: `ad`, `durum`, `ayrinti` (teknik; kayıt için) ve geçmeyende `sade` (Lokman'ın sayfasındaki düz cümle)."""
     d = []
 
-    def ekle(ad, durum, ayrinti="", sade=None):
-        d.append({"ad": ad, "durum": durum, "ayrinti": ayrinti, **({"sade": sade} if sade and durum != "geçti" else {})})
+    def ekle(ad, durum, ayrinti=""):
+        d.append({"ad": ad, "durum": durum, "ayrinti": ayrinti})
 
     ekle("Motor doğrulaması", "geçti" if m.get("passed") else "kaldı", "; ".join(v.get("errors") or []) or f"çıktılar {v['ciktilar']['var']}/{v['ciktilar']['beklenen']}"
-         + (" (perspektif yok: bu ortamda VTK yok)" if (v.get("perspektif") or {}).get("durum") != "TAMAM" else ""),
-         "Çizim tamamlanamadı; düzeltilip yeniden gönderilecek.")
+         + (" (perspektif yok: bu ortamda VTK yok)" if (v.get("perspektif") or {}).get("durum") != "TAMAM" else ""))
     ifc = v.get("ifc") or {}
-    ekle("IFC şema denetimi", "geçti" if ifc.get("sema_hatasi") == 0 else "kaldı", f"şema hatası {ifc.get('sema_hatasi')}",
-         "3B model dosyası bozuk çıktı; düzeltilecek.")
-    ekle("Yazı çakışması (bayiye giden 4 figür)", "geçti" if not yazi else "uyarı", "; ".join(yazi[:6]) or "bulgu yok",
-         f"Bayiye giden çizimlerde {len(yazi)} yerde yazı üst üste biniyor ya da çizgiyi kapatıyor.")
-    sayim: dict = {}
-    for x in kisa:
-        sayim[(x["zincir"], x["parca_cm"])] = sayim.get((x["zincir"], x["parca_cm"]), 0) + 1
+    ekle("IFC şema denetimi", "geçti" if ifc.get("sema_hatasi") == 0 else "kaldı", f"şema hatası {ifc.get('sema_hatasi')}")
+    ekle("Yazı çakışması (bayiye giden 4 figür)", "geçti" if not yazi else "uyarı", "; ".join(yazi[:6]) or "bulgu yok")
     ekle("15 cm ve daha kısa parçalar (bayi paftası)", "bilgi" if kisa else "geçti",
-         "; ".join(f"{x['zincir']} {x['parca_cm']:g} cm" for x in kisa[:6]) or "yok",
-         "Bayi paftasının ölçü çizgisinde 15 cm'den kısa parçalar yanındaki parçaya katıldı: "
-         + ", ".join(f"{YON_ADI.get(z, z)} cephede {tr_sayi(cm)} cm" + (f" ({n} yerde)" if n > 1 else "") for (z, cm), n in sayim.items())
-         + ". Mühendis bakar.")
+         "; ".join(f"{x['zincir']} {x['parca_cm']:g} cm" for x in kisa[:6]) or "yok")
     # kartla çizimin tutarlılığı (kaynak değerleri)
     kd = kart.get("kaynak_degerleri") or {}
-    farklar, sade = [], []
+    farklar = []
     for ad, x in (kd.get("odalar") or {}).items():
         c = olcum["odalar"].get(ad)
         if c is None:
-            farklar.append(f"{ad}: çizimde yok"); sade.append(f"{ad} projede var, çizimde yok")
+            farklar.append(f"{ad}: çizimde yok")
         elif abs(c - float(x["deger"])) > max(0.5, 0.03 * float(x["deger"])):
-            farklar.append(f"{ad}: çizim {c:g}, kaynak {x['deger']:g}"); sade.append(f"{ad}: çizimde {tr_sayi(c)} m², projede {tr_sayi(x['deger'])} m²")
+            farklar.append(f"{ad}: çizim {c:g}, kaynak {x['deger']:g}")
     for alan, cizim in (("brut_m2", olcum["oturum_m2"]), ("oda_programi", olcum["oda_programi"]), ("pencere", olcum["pencere"]),
                         ("kapi", olcum["kapi"]), ("cati_tipi", olcum["cati"]["tip"]), ("dis_olcu_cm", olcum["dis_olcu_cm"])):
         if alan not in kd or kd[alan].get("deger") is None:
@@ -478,21 +456,18 @@ def denetimler(kart: dict, t: dict, m: dict, v: dict, olcum: dict, yazi: list[st
             [round(float(x)) for x in cizim] == [round(float(x)) for x in k] if alan == "dis_olcu_cm" else str(cizim) == str(k))
         if not esit:
             farklar.append(f"{alan}: çizim {cizim}, kaynak {k}")
-            birim = " m²" if alan == "brut_m2" else ""
-            sade.append(f"{ALAN_ADI[alan]}: çizimde {tr_sayi(cizim)}{birim}, projede {tr_sayi(k)}{birim} yazıyor")
     ekle("Kartla çizimin tutarlılığı (m², oda programı, açıklık, çatı)", ("uyarı" if farklar else "geçti") if kd else "bilgi",
-         "; ".join(farklar) or ("kaynak değerleri çizimle aynı" if kd else "kaynak değeri girilmedi"),
-         ("; ".join(sade) + ".") if sade else None)
+         "; ".join(farklar) or ("kaynak değerleri çizimle aynı" if kd else "kaynak değeri girilmedi"))
     # bankada aynı kod ya da aynı plan
     tumu = tum_tanimlar(banka_kok, haric=kart["kod"])
     ayni_plan = sorted(k for k, x in tumu.items() if plan_izi(x) == plan_izi(t))
     ayni_cati = sorted(k for k in ayni_plan if kanonik_sha(tumu[k].get("cati")) == kanonik_sha(t.get("cati")))
     if ayni_cati:
-        ekle("Bankada aynı model", "kaldı", f"aynı plan ve aynı çatı: {', '.join(ayni_cati)}", f"Bankada bu evin aynısı var: {', '.join(ayni_cati)}.")
+        ekle("Bankada aynı model", "kaldı", f"aynı plan ve aynı çatı: {', '.join(ayni_cati)}")
     elif ayni_plan and kart.get("taban_model") and kart["taban_model"] in ayni_plan:
         ekle("Bankada aynı model", "geçti", f"aynı plan: {', '.join(ayni_plan)} (çatı varyantı; çatı farklı)")
     elif ayni_plan:
-        ekle("Bankada aynı model", "uyarı", f"aynı plan bankada var: {', '.join(ayni_plan)}", f"Bankada aynı planlı ev var: {', '.join(ayni_plan)}.")
+        ekle("Bankada aynı model", "uyarı", f"aynı plan bankada var: {', '.join(ayni_plan)}")
     else:
         ekle("Bankada aynı model", "geçti", "aynı kod ve aynı plan yok")
     return d
