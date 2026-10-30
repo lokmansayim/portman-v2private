@@ -87,7 +87,7 @@ def _sol(kart: dict) -> str:
         s.append("<p><b>Metraj kapısı: referans yok, koşulmadı.</b> Bu modelin gerçek yükleme listesi (Excel) yok; motorun çelik toplamı "
                  f"{sayi((o.get('liste') or {}).get('celik_kg'), 1)} kg hiçbir listeyle kıyaslanmadı. \"Kabul\" bu kapının yerine geçmez: kabul kaydına "
                  "\"metraj kapısı koşulmadı\" yazılır; gerçek liste gelince kıyas yapılır.</p>")
-    elif mt.get("hakem_sonucu") is None:                                  # tanım ölçümden sonra değişti, ölçüm bu tanım için geçerli değil
+    elif mt.get("tanim_degisti"):                                         # tanım ölçümden sonra değişti, ölçüm bu tanım için geçerli değil
         s.append(f"<p><span class='kaldi'>beklemede</span> · çelik hakemi (İE-16), proje {e(mt.get('proje'))}: {e(mt.get('neden'))}. "
                  "Model beklemede, kabul edilemez (<code>metraj --celik</code> ve <code>ciz</code> yeniden koşulmalı).</p>")
     else:

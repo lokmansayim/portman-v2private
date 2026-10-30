@@ -232,6 +232,10 @@ def test_aday_kabul_atolye_kodunu_tanir(monkeypatch, capsys):
     monkeypatch.setattr(B, "kayitlar", lambda *x, **k: [_sahte("Ç9902")])
     assert aday_kabul.main(["--kodlar", "Ç9902,Ç8801", "--tarih", "2026-10-17", "--kuru"]) == 0
     assert "2 kayıt yazılacak (Ç9902, Ç8801)" in capsys.readouterr().out
+    # bankanın çatı varyantı Katalog'da ayrı sunulmaz; kabul kaydı da yazılmaz (kod incelemesi, 30 Ekim)
+    monkeypatch.setattr(B, "kayitlar", lambda *x, **k: [_sahte("Ç9902"), _sahte("Ç8201V", taban="Ç8201")])
+    assert aday_kabul.main(["--kodlar", "Ç9902,Ç8201V", "--tarih", "2026-10-17", "--kuru"]) == 2
+    assert "çatı varyantı" in capsys.readouterr().out
 
 
 # ── metraj kapısı çelik hakeminden (İE-09 PR-1, D-28 madde 1): KT99 = ÇP-14'ün tanımı, kod ve ad dışında ────────────────────
@@ -289,6 +293,25 @@ def test_hakem_olcumu_git_okunamazsa_gecmez(hakemli, monkeypatch):
     monkeypatch.setattr(A, "_git", lambda *a: "")
     o, sorun = A.celik_olcumu("ÇP-14", hakemli["tanim"])
     assert o is None and "bugünkü listenin sonucu değil" in sorun
+
+
+def test_kabul_paketi_atolye_modelini_kendi_pimiyle_cizer(hakemli, monkeypatch, tmp_path):
+    # kabul paketi atölye modelini kontrol dosyasının ve onaylı çizimin kural setiyle üretir, güncel kural setiyle değil (kod incelemesi, 30 Ekim)
+    pytest.importorskip("openpyxl")                                                                   # paket Excel'siz durur
+    from araclar import kabul_paketi
+    from motor.genel import uret as U
+    cagri = {}
+
+    def sahte_uret(tanim, hedef, **kw):
+        cagri.update(kw, tanim=tanim)
+        raise RuntimeError("yalnız çağrı")
+    monkeypatch.setattr(U, "uret", sahte_uret)
+    monkeypatch.setattr(B, "BANKA_DIR", hakemli["banka"])
+    monkeypatch.setattr(B, "kayitlar", lambda *x, **k: [{**_sahte("KT99"), "tanim": str(hakemli["banka"] / "KT99" / "tanim.json")}])
+    with pytest.raises(RuntimeError, match="yalnız çağrı"):
+        kabul_paketi.main([str(tmp_path / "paket"), "--kodlar", "KT99", "--perspektifsiz"])
+    k = kart99(hakemli)
+    assert cagri["set_yolu"] == KOK / k["pim"]["kural_seti"]["yol"] and cagri["karkas_yolu"] == KOK / k["pim"]["karkas"]["yol"]
 
 
 def test_hakemli_kontrol_sayfasi(hakemli):
@@ -372,7 +395,7 @@ def test_hakemli_kabul_pim_ve_kontrol(hakemli, tmp_path, capsys):
     assert kos(banka, "kabul", "KT99", "--kapisiz", "--izsiz", "--tarih", "2026-10-29") == 0
     k = kart99(hakemli)
     assert k["durum"] == "kabul" and k["kabul"]["metraj_kapisi"] == "gecti" and k["kabul"]["metraj_proje"] == "ÇP-14"
-    assert k["kabul"]["kapisiz"] is True and k["kabul"]["izsiz"] is True                                 # gerçek bankada test_banka reddeder
+    assert k["kabul"]["kapi"] == "atlandi" and k["kabul"]["izsiz"] is True                               # gerçek bankada test_banka reddeder
     assert k["aday"]["kaynak"]["metin"].endswith("; düzeltme (c01 sonrası): pencere sürgülü olsun")      # açılış metni düzeltmeleri de anar
     assert "çelik hakemi, ÇP-14" in k["aday"]["kaynak"]["dogrulama"] and k["aday"]["musteri_projesi"] is True and k["aday"]["sunum"]["ad"] == ""
     kontrol = json.loads((banka / "KT99" / "kontrol.json").read_text(encoding="utf-8"))

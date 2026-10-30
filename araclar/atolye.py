@@ -29,7 +29,7 @@ Kurallar (İE-09; CIO kıyası 16.10, Patron onaylı):
   Açılmış listeler `KOR_TEST_ACIK`; AIPrefabrik'in bunun dışındaki her liste dosyası reddedilir (proje kodu okunamazsa da).
 - **Kaynak dosyalar depoya girmez:** karta yalnız etiket (sizin yazdığınız, kişi adı taşımayan), uzantı, boyut ve SHA-256 yazılır.
 - **Hakem değişmez:** `dondur` yalnız ayrı PR'da, gerekçe ve `KARARLAR/` altındaki bir kararla; model PR'ında koşulmaz.
-- **Kabul kapısı:** kabulde harness 22/22 ve `pytest testler` yeniden koşar (`--kapisiz` yalnız bu aracın kendi testinde); model bir
+- **Kabul kapısı:** kabulde harness 22/22 ve `pytest testler` yeniden koşar (`--kapisiz` yalnız bu aracın kendi testinde; kart `kabul.kapi`: kosuyor → gecti, `--kapisiz` atlandi); model bir
   sonucu değiştiriyorsa kabul durur ve kart `kontrolde` kalır.
 
 Çıktı: `ciz` çizim setini ve kontrol sayfasını (`<DOSYA>_kontrol_cNN.pdf`) `--cikti` altına yazar (varsayılan `cikti/atolye/`, git dışı).
@@ -484,7 +484,7 @@ def metraj_hesapla(kart: dict, t: dict) -> None:
         return
     sonuc, sorun = celik_olcumu(mt["proje"], t)
     if sorun:
-        kart["metraj_testi"] = {"durum": "beklemede", "kaynak": "celik_hakemi", "proje": mt["proje"], "hakem_sonucu": None,
+        kart["metraj_testi"] = {"durum": "beklemede", "kaynak": "celik_hakemi", "proje": mt["proje"], "hakem_sonucu": None, "tanim_degisti": True,
                                 "neden": f"tanım ölçümden sonra değişti; hakemin ölçümü bu tanım için geçerli değil ({sorun})",
                                 "tanim_kanonik": kanonik_sha(t), "zaman": simdi()}
     else:
@@ -506,8 +506,9 @@ def ciz(a) -> int:
     gk = U.kod_govde(t)
     no = 1 + sum(1 for x in kart.get("gecmis") or [] if x.get("olay") == "ciz")
     hedef = Path(a.cikti) / B.dosya_adi(kod) / f"c{no:02d}"
-    if hedef.exists() and any(hedef.iterdir()):
-        return dur(f"çıktı klasörü dolu: {hedef}")
+    while hedef.exists() and any(hedef.iterdir()):                       # yarıda kalan ya da başka çizim: ezilmez, sıradaki numara
+        no += 1
+        hedef = hedef.parent / f"c{no:02d}"
     # metraj kapısı çizimden önce: hakemin ölçümü pimi değiştirebilir; çizim kapının pimiyle yapılır ve o pim son çizime yazılır. Pimsiz
     # kart kontrol dosyasının donacağı setle (`pim_seti`) çizilir: Lokman'ın onayladığı çizim ile dondurulan kontrol aynı kural setinden
     metraj_hesapla(kart, t)
@@ -643,7 +644,8 @@ def celik_olcumu(proje: str, t: dict) -> tuple[dict | None, str | None]:
     yol = bl.relative_to(KOK).as_posix()
     oz = _git("hash-object", yol)                                         # git yoksa ya da okuyamazsa boş: denetim geçmez
     if (sonuc.get("bizim_liste") or {}).get("yol") != yol or not lc or not oz or _git("rev-parse", f"{lc}:{yol}") != oz:
-        return None, f"{proje}: hakemin sonucu bugünkü listenin sonucu değil (liste sonuçtan sonra değişmiş ya da commit yok)"
+        return None, (f"{proje}: hakemin sonucu bugünkü listenin sonucu değil (liste sonuçtan sonra değişmiş ya da commit yok; sığ klonda önce "
+                      "`git fetch --unshallow`)")
     # 3. pim: ölçümdeki kural seti ve karkas kuralı
     ks, s1 = _pim_kaydi(bizim.get("kural_seti"), "kural seti")
     kk, s2 = _pim_kaydi(bizim.get("karkas_kurali"), "karkas kuralı")
@@ -666,7 +668,8 @@ def celik_olcumu(proje: str, t: dict) -> tuple[dict | None, str | None]:
         kapi = {**kapi, "fark_yuzde": yeni.get("fark_yuzde"), "bizim_kapi_kg": yeni.get("bizim_kapi_kg"), "gercek_kapi_kg": yeni.get("gercek_kapi_kg")}
     durum = {"geçti": "gecti", "geçmedi": "beklemede"}.get(kapi.get("sonuc"), "beklemede")
     kayit = {"durum": durum, "kaynak": "celik_hakemi", "proje": proje, "hakem_sonucu": kapi.get("sonuc"),
-             "neden": None if durum == "gecti" else (kapi.get("neden") or "çelik kg farkı ±%3'ü aşıyor"),
+             "neden": None if durum == "gecti" else (kapi.get("neden") or ("çelik kg farkı ±%3'ü aşıyor" if kapi.get("sonuc") == "geçmedi"
+                                                                           else f"hakemin kapı sonucu yok ({kapi.get('sonuc')})")),
              "fark_yuzde": kapi.get("fark_yuzde"), "esik_yuzde": kapi.get("pay_yuzde") or METRAJ_ESIGI_YUZDE,
              "kapi_disi": kapi.get("kapi_disi") or [], "bizim_kapi_kg": kapi.get("bizim_kapi_kg"), "gercek_kapi_kg": kapi.get("gercek_kapi_kg"),
              "turler": turler, "muhur_durumu": (sonuc.get("muhur") or {}).get("durum"), "liste_sha256": (sonuc.get("muhur") or {}).get("sha256"),
@@ -800,17 +803,22 @@ def metraj_metni(mt: dict) -> str:
     return {"yok": "koşulmadı, referans yok"}.get(mt.get("durum"), str(mt.get("durum")))
 
 
-def kapilar() -> list[str]:
-    """Kabul kapısı: harness 22/22 ve pytest testler (model bankadayken). Bulgu listesi; boşsa geçti."""
+KAPI_ORTAMI = "PORTMAN_KABUL_KAPISI"          # kapı koşusunda kabul edilen kod: test_banka onun "kosuyor" kaydını yalnız bu koşuda kabul eder
+
+
+def kapilar(kod: str = "") -> list[str]:
+    """Kabul kapısı: harness 22/22 ve pytest testler (model bankadayken; kabul kaydı `kapi: kosuyor`). Bulgu listesi; boşsa geçti."""
+    ortam = {**os.environ, KAPI_ORTAMI: kod}
     bulgu = []
     with tempfile.TemporaryDirectory() as tmp:
-        kod = ("import sys; from pathlib import Path; from beyin import harness; "
-               f"ok, n = harness.main(durum_dir=Path({str(Path(tmp) / 'durum')!r}), sessiz=True, rapor_yaz=False); print(ok, n); sys.exit(0 if ok == n == 22 else 1)")
-        r = subprocess.run([sys.executable, "-c", kod], cwd=str(KOK), capture_output=True, text=True)
+        kod_ = ("import sys; from pathlib import Path; from beyin import harness; "
+                f"ok, n = harness.main(durum_dir=Path({str(Path(tmp) / 'durum')!r}), sessiz=True, rapor_yaz=False); print(ok, n); sys.exit(0 if ok == n == 22 else 1)")
+        r = subprocess.run([sys.executable, "-c", kod_], cwd=str(KOK), capture_output=True, text=True, env=ortam)
         if r.returncode != 0:
             bulgu.append(f"harness: {r.stdout.strip()[-200:]} {r.stderr.strip()[-300:]}")
     print("kabul kapısı: pytest testler koşuyor (birkaç dakika)…", file=sys.stderr)
-    r = subprocess.run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", "testler"], cwd=str(KOK), capture_output=True, text=True)
+    r = subprocess.run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", "testler"], cwd=str(KOK), capture_output=True, text=True,
+                       env=ortam)
     if r.returncode != 0:
         bulgu.append("pytest: " + " | ".join(x for x in r.stdout.splitlines() if x.startswith(("FAILED", "ERROR")) or " failed" in x)[-1500:])
     return bulgu
@@ -871,12 +879,14 @@ def kabul(a) -> int:
     kart["kabul"] = {"kim": a.kim, "tarih": a.tarih, "karar": "D-11" if a.kim == "Lokman" else None, "not": a.not_, "cizim": sc["no"],
                      "kural_seti": kontrol["kural_seti"], "metraj_kapisi": kart["metraj_testi"]["durum"],
                      "metraj_proje": kart["metraj_testi"].get("proje"),   # "yok": kabul metraj doğrulaması değildir
-                     **({"kapisiz": True} if a.kapisiz else {}), **({"izsiz": True} if a.izsiz else {})}   # yalnız testte; gerçek bankada test_banka reddeder
+                     # kapı: koşarken "kosuyor" (yarıda kesilirse öyle kalır, test_banka reddeder), geçince "gecti"; `--kapisiz` (yalnız
+                     # bu aracın testinde) "atlandi"; `--izsiz` tam izsiz kontrol dosyası; ikisini de gerçek bankada test_banka reddeder
+                     "kapi": "atlandi" if a.kapisiz else "kosuyor", **({"izsiz": True} if a.izsiz else {})}
     kart["aday"] = aday_kaydi(kart, tp, cizim, a.banka)
     olay(kart, "kabul", cizim=sc["no"])
     kart_yaz(kart, a.banka)
     sorun = [s for d, s in B.denetle(a.banka) if d == k.name]
-    bulgu = [f"banka: {'; '.join(x)}" for x in sorun] + ([] if a.kapisiz else kapilar())
+    bulgu = [f"banka: {'; '.join(x)}" for x in sorun] + ([] if a.kapisiz or sorun else kapilar(kart["kod"]))
     if bulgu:
         olay(yedek, "kabul_durdu", neden="; ".join(bulgu)[:500])
         kart_yaz(yedek, a.banka)
@@ -884,6 +894,9 @@ def kabul(a) -> int:
         for b in bulgu:
             print("  -", b)
         return 1
+    if not a.kapisiz:
+        kart["kabul"]["kapi"] = "gecti"
+        kart_yaz(kart, a.banka)
     print(f"{kart['gosterim']}: kabul (kim {a.kim[:1]}…, {a.tarih}, D-11) · kontrol dosyası {'hızlı + tam' if 'tam' in kontrol else 'hızlı'} · "
           f"kural seti pimi {kontrol['kural_seti']} · bayiye sunulma K-A10 kaydıyla (haftalık sürüm)")
     return 0

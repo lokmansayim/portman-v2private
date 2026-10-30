@@ -66,6 +66,9 @@ def main(argv: list[str] | None = None) -> int:
         from beyin import banka
         kodlar_var = {str(x["kod"]).upper() for x in adaylar}
         adaylar = adaylar + [x for x in banka.kayitlar() if str(x["kod"]).upper() not in kodlar_var]
+    varyant = sorted(str(x["kod"]) for x in adaylar if x.get("banka") and x.get("taban_model") and str(x["kod"]).upper() in kodlar)
+    if varyant:                                     # Katalog bankanın çatı varyantını ayrı model sunmaz (`beyin/banka.py`); çatı setine girmesi ayrı iş
+        print("DUR: model bankasının çatı varyantı bayiye ayrı model olarak sunulmaz, kabul kaydı yazılmaz:", ", ".join(varyant)); return 2
     kayitlar, yok = kabul_kayitlari(adaylar, kodlar, a.kim.strip(), a.tarih, a.not_.strip(), a.paket.strip())
     if yok:
         print("DUR: adaylar.json'da ve model bankasında olmayan kod:", ", ".join(yok)); return 2
