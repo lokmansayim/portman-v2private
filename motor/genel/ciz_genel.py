@@ -536,6 +536,14 @@ def cm_pt_tahmini(ax, span_cm: float) -> float:
     return span_cm / w_pt
 
 
+def surgulu_oku(k2) -> list[tuple[tuple[float, float], tuple[float, float]]]:
+    """Sürgülü pencerenin görünüşteki yön oku (sağ kanadın ortasında, sağa): gövde, kuyruk çentiği, iki uç; (u, z) cm çizgileri."""
+    us = [p[0] for p in k2]; zs = [p[1] for p in k2]
+    o, zm = (min(us) + max(us)) / 2, (min(zs) + max(zs)) / 2
+    ua, ub = o + (max(us) - o) * 0.25, o + (max(us) - o) * 0.75
+    return [((ua, zm), (ub, zm)), ((ua, zm - 4), (ua, zm + 4)), ((ub, zm), (ub - 6, zm + 4)), ((ub, zm), (ub - 6, zm - 4))]
+
+
 def gorunus_eksen(ax, S: list[dict], taraf: str, duvar_h: float, olculu: bool = True, sigdir: bool = False):
     """Görünüş: yüzeyler uzaktan yakına çizilir. Aynı düzlemdeki duvar yüzleri (duvar, korkuluk, kalkan) birleştirilir, böylece panel
     ekleri çizgi olarak görünmez; kapısız geçitler duvarda delik olur (arkası görünür). `olculu=False`: ölçü zincirleri basılmaz
@@ -574,6 +582,9 @@ def gorunus_eksen(ax, S: list[dict], taraf: str, duvar_h: float, olculu: bool = 
             us = [p[0] for p in s["k2"]]
             zs = [p[1] for p in s["k2"]]
             ax.plot([(min(us) + max(us)) / 2] * 2, [min(zs), max(zs)], color=CERCEVE, lw=0.7, zorder=2)
+        if s["tur"] == "pencere" and s.get("acilis") == "surgulu":        # sürgülü (Lokman, 30 Ekim 2026): sağ kanatta kırmızı yön oku
+            for (ua, za), (ub, zb) in surgulu_oku(s["k2"]):
+                ax.plot([ua, ub], [za, zb], color="#d62728", lw=0.8, zorder=2)
         i += 1
     us = [p[0] for s in yz for p in s["k2"]]
     zs = [p[1] for s in yz for p in s["k2"]]

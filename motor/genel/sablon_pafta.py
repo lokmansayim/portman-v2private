@@ -624,11 +624,26 @@ def tas_serit(sf: Sayfa, P, u0: float, u1: float):
         sf.cokgen(altigen, fc="none", ec=GRI, lw=0.5, z=4)
 
 
-def pencere_gorunus(sf: Sayfa, P, u0, u1, z0, z1, en):
+def pencere_gorunus(sf: Sayfa, P, u0, u1, z0, z1, en, acilis=None):
     def dort(ua, za, ub, zb, **kw):
         return sf.cokgen([P(ua, za), P(ub, za), P(ub, zb), P(ua, zb)], **kw)
     dort(u0, z0, u1, z1, fc="white", ec="black", lw=1.2, z=5)
     dort(u0 + 3, z0 + 3, u1 - 3, z1 - 3, fc="white", ec="black", lw=0.6, z=5)
+    if acilis == "surgulu":
+        # Sürgülü pencere (Lokman, 30 Ekim 2026, KT-04; prefabrikteki D-31 madde 11'in sembolü): ortada bindirmeli iki kanat, sabit
+        # kanatta (sol) cam işareti, sürülen kanatta (sağ) kırmızı yön oku; ölçü, plan simgesi ve liste değişmez.
+        o, c = (u0 + u1) / 2, 2.0
+        for a, b in ((u0 + 3, o + c), (o - c, u1 - 3)):
+            dort(a + 2.5, z0 + 6, b - 2.5, z1 - 6, fc="white", ec="black", lw=0.9, z=6)
+        um, zm = (u0 + 3 + o) / 2, (z0 + z1) / 2
+        for k_ in (-1, 0, 1):
+            (xa, ya), (xb, yb) = P(um - 6 + k_ * 3, zm - 8 + k_ * 3), P(um + 6 + k_ * 3, zm + 8 + k_ * 3)
+            sf.cizgi(xa, ya, xb, yb, "black", 0.5, z=7)
+        ua, ub = o + (u1 - 3 - o) * 0.25, o + (u1 - 3 - o) * 0.75
+        for q in (((ua, zm), (ub, zm)), ((ua, zm - 4), (ua, zm + 4)), ((ub, zm), (ub - 6, zm + 4)), ((ub, zm), (ub - 6, zm - 4))):
+            (xa, ya), (xb, yb) = P(*q[0]), P(*q[1])
+            sf.cizgi(xa, ya, xb, yb, KIRMIZI, 0.8, z=7)
+        return
     n = 2 if en >= 100 else 1; w = (u1 - u0 - 6) / n
     for i in range(n):
         a, b = u0 + 3 + i * w + 2.5, u0 + 3 + (i + 1) * w - 2.5
@@ -693,7 +708,7 @@ def gorunus_ciz(sf: Sayfa, P, S: list[dict], taraf: str, renk: str, u_kaydir: fl
         pts = k2(s)
         if s["tur"] == "pencere":
             us = [u for u, _ in pts]; zs = [z for _, z in pts]
-            pencere_gorunus(sf, P, min(us), max(us), min(zs), max(zs), s.get("en", 0))
+            pencere_gorunus(sf, P, min(us), max(us), min(zs), max(zs), s.get("en", 0), s.get("acilis"))
         elif s["tur"] == "kapi":
             us = [u for u, _ in pts]; zs = [z for _, z in pts]
             kapi_gorunus(sf, P, min(us), max(us), min(zs), max(zs))
