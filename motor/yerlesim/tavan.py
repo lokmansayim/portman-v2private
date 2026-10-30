@@ -58,7 +58,8 @@ def _sinir(duvarlar: list[Duvar], kosu: str, yuz: float, taraf: int, r_aralik: t
 
 
 def hatlar(g: dict, K: dict, uyarilar: list | None = None) -> list[dict]:
-    """Omega hatları: {yer, eksen (adım ekseni), s, r0, r1, mahal, not}. `K`: okunan değerler (`aralik_asma`, `aralik_ters`, `en_kisa`).
+    """Omega hatları: {yer, eksen (adım ekseni), s, r0, r1, mahal, not[, sirt]}. `K`: okunan değerler (`aralik_asma`, `aralik_ters`, `en_kisa`,
+    `sirt_100`: 100'lük iç duvarın üstündeki hattın sırtı, cm).
     Hat konmayan açık mahal parçası `uyarilar`'a yazılır."""
     uyarilar = uyarilar if uyarilar is not None else []
     kosu = "y" if g["cati"]["makas_ekseni"] == "x" else "x"         # mahyaya paralel
@@ -71,7 +72,9 @@ def hatlar(g: dict, K: dict, uyarilar: list | None = None) -> list[dict]:
     if duvar_hatti:
         for d in sorted((d for d in duvarlar if d.tur == "ic"), key=lambda d: (d.yon, d.c, d.a0)):
             out.append({"yer": "duvar_ekseni", "eksen": "x" if d.yon == "y" else "y", "s": d.c, "r0": d.a0, "r1": d.a1, "mahal": "",
-                        "not": f"iç duvar ekseni ({'x' if d.yon == 'y' else 'y'} = {d.c:g})"})
+                        "not": f"iç duvar ekseni ({'x' if d.yon == 'y' else 'y'} = {d.c:g})",
+                        # 100'lük iç duvarın üstü: 60'lık omeganın ölçüsünde, sırtı geniş (Lokman, 29 Ekim 13:12; D-32; ters tavanda hat yok)
+                        **({"sirt": K["sirt_100"]} if round(2 * d.h * 10) >= 100 and K.get("sirt_100") is not None else {})})
     en_kisa = K["en_kisa"]
     for oda in g["odalar"]:
         P = Polygon(oda["poligon"])

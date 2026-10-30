@@ -5,18 +5,18 @@
  "kip": "motor",
  "kapi": false,
  "not": "Gerçek listesi stoktan düşülmüş (Lokman, 18 Ekim 2026): sonuç bilgi için kaydedilir, hedef değil, kapıya girmez.",
- "tarih": "2026-10-24",
- "kiyas_commit": "a9b8cde1af5422a233d26440a93189a16d9ae136",
+ "tarih": "2026-10-29",
+ "kiyas_commit": "3b0c65e6fa30420a24543f2c60ed54b3026f55ce",
  "bizim_liste": {
   "yol": "testler/kor/projeler/PK01/bizim_liste.json",
-  "commit": "8f361f481ad711c3f71a0870a558ee5cbcc7ce4b",
-  "uretici_surum": "1.5 (22 Ekim 2026; kör test üreteci 7.3, kurallar kural kitabında; orta iniş 9 m, kitapla farklı on yedi kalemde kitap; PK-07 hedef örnek; T76 cevapları; 100'lük duvar omegası kirişlerin de üstünde; elektrik oda kuralı)"
+  "commit": "3b0c65e6fa30420a24543f2c60ed54b3026f55ce",
+  "uretici_surum": "1.7 (29 Ekim 2026; baş makas omegası saçak ucundan saçak ucuna, taşan verandanın dış kirişindeki dahil; 100'lük iç duvarın üstü ayrı satırda, 60'lık ölçüde sırt 10,5 (Lokman 29 Ekim 13:12, D-32); 1.6, 28 Ekim: vitrifiye banyo başına (İE-13 PR-2; Lokman onayı 28 Ekim, PR-3); nişin ağzındaki kiriş (BK-14 ek); taşan verandanın dış kirişi kolonun dış yüzünden dış yüzüne (Lokman, kart 28 Ekim); 1.5, 22 Ekim: kör test üreteci 7.3, kurallar kural kitabında; orta iniş 9 m, kitapla farklı on yedi kalemde kitap; PK-07 hedef örnek; T76 cevapları; 100'lük duvar omegası kirişlerin de üstünde; elektrik oda kuralı)"
  },
  "muhur": {
   "sha256": "17e43b888bd1a5dd5bfb06ebb38b620b1b0c3708c176a35d7ea576f1e948d106",
   "bayt": 196855,
   "durum": "acik",
-  "muhur_commit": "9f13755bf9f60ccd472260f9aa847af55b9688a5"
+  "muhur_commit": "9e2b9bedb98857f499ae6eeb7340eff053a5719c"
  },
  "sozluk": {
   "surum": "2 (23 Ekim 2026; açık sekiz projenin adlarıyla; yok gruplarında ölçü kümesi)",
@@ -24,10 +24,10 @@
   "acilistan_sonra_degisti": null
  },
  "sayilar": {
-  "aynı": 60,
+  "aynı": 59,
   "ayrım": 7,
   "pafta": 0,
-  "aday": 2,
+  "aday": 3,
   "farklı": 18,
   "bizde yok": 7,
   "bizde fazla": 16,
@@ -81,7 +81,7 @@
   {"grup": null, "ad": "100LÜK SAÇAK OMEGASI", "b_anahtar": "100X2500", "eslesme": "anahtar", "deger": 9, "sonuc": "aynı", "bizim": [{"kalem": "100'lük saçak omegası", "olcu": "100 × 2500"}]},
   {"grup": "Saçak sacı", "ad": null, "b_anahtar": null, "eslesme": "toplam", "deger": 10, "sonuc": "aynı", "bizim": [{"kalem": "Saçak sacı (30'luk, 3'ü menfezli)", "olcu": "300 × 2500"}]},
   {"grup": "Alın sacı", "ad": null, "b_anahtar": null, "eslesme": "toplam", "deger": 7, "sonuc": "aynı", "bizim": [{"kalem": "Alın sacı (30'luk)", "olcu": "300 × 2500"}]},
-  {"grup": null, "ad": "BAŞ MAKAS OMEGASI", "b_anahtar": "2500", "eslesme": "anahtar", "deger": 5, "sonuc": "aynı", "bizim": [{"kalem": "Baş makas omegası", "olcu": "L 2500"}]},
+  {"grup": null, "ad": "BAŞ MAKAS OMEGASI", "b_anahtar": "2500", "eslesme": "anahtar", "deger": 5, "sonuc": "aday", "bizim": [{"kalem": "Baş makas omegası", "olcu": "L 2500"}]},
   {"grup": null, "ad": "BAŞ MAKAS BETOPANI", "b_anahtar": "1250X2500", "eslesme": "anahtar", "deger": 4, "sonuc": "aynı", "bizim": [{"kalem": "Baş makas betopanı", "olcu": "1250 × 2500"}]},
   {"grup": null, "ad": "100LÜK ALT ÇERÇEVE", "b_anahtar": "100X3750", "eslesme": "anahtar", "deger": 9, "sonuc": "aynı", "bizim": [{"kalem": "100'lük alt çerçeve", "olcu": "100 × 3750"}]},
   {"grup": "Makas", "ad": null, "b_anahtar": null, "eslesme": "toplam", "deger": 9, "sonuc": "ayrım", "bizim": [{"kalem": "Makas (baş) · ana çatı", "olcu": "açıklık 6000"}, {"kalem": "Makas (orta) · ana çatı", "olcu": "açıklık 6000"}]},

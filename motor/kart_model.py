@@ -99,9 +99,20 @@ def _bosluk(e) -> str:
                            for r in getattr(e, "HasOpenings", ()) or ()))
 
 
-def _uyar(e, m: dict) -> bool:
-    """Eşlemenin sınıf, ad, özellik ve boşluk koşulları (yerleşim kuralı ayrı)."""
+def ic_duvar_cm(f: ifcopenshell.file) -> str:
+    """Evin iç duvar kalınlığı: bugünkü IFC'deki iç panoların (`IsExternal` değil) kalınlıkları, sıralı ve virgülle; iç duvarsız evde boş.
+    İş Emri'nde tek değerdir (`yapi.duvar_kalinligi_cm.ic`); BK-18'den beri 100'lük de olabilir."""
+    return ",".join(f"{k:g}" for k in sorted({float(ue.get_psets(w).get("PortatifEv_Pano", {}).get("Kalinlik_cm"))
+                                               for w in f.by_type("IfcWall")
+                                               if ue.get_psets(w).get("Pset_WallCommon", {}).get("IsExternal") is False
+                                               and ue.get_psets(w).get("PortatifEv_Pano", {}).get("Kalinlik_cm") is not None}))
+
+
+def _uyar(e, m: dict, ev: dict | None = None) -> bool:
+    """Eşlemenin sınıf, ad, özellik, boşluk ve ev (`ic_duvar_cm`: evin iç duvar kalınlığı) koşulları (yerleşim kuralı ayrı)."""
     if not e.is_a(m["sinif"]):
+        return False
+    if "ic_duvar_cm" in m and not re.search(m["ic_duvar_cm"], (ev or {}).get("ic_duvar_cm", "")):
         return False
     if m.get("ad") and not re.search(m["ad"], e.Name or ""):
         return False
@@ -175,8 +186,9 @@ def _cati_sinirlari(m: dict, yerlesim: dict) -> list[list[str]]:
 def siniflandir(f: ifcopenshell.file, kartlar: dict, yerlesim: dict, makas_aralik_cm: float, cati_tipi: str) -> list[dict]:
     """Her `IfcElement` için rol: kart, görünüm, bileşen, kartsız ya da kural yok. `cati_tipi` İş Emri'ndendir (bugünkü IFC hep beşik çizer)."""
     kutu = _Kutular()
+    ev = {"ic_duvar_cm": ic_duvar_cm(f)}
     elemanlar = sorted(f.by_type("IfcElement"), key=lambda e: (e.is_a(), e.Name or "", e.GlobalId))
-    h_adaylari = [e for e in elemanlar if any(_uyar(e, m) for k in kartlar["kartlar"] for m in k.get("bugunku_ifc", [])
+    h_adaylari = [e for e in elemanlar if any(_uyar(e, m, ev) for k in kartlar["kartlar"] for m in k.get("bugunku_ifc", [])
                                                if m.get("kural", {}).get("ad") == "h_turu")]
     hk = h_turleri(f, h_adaylari, yerlesim["kurallar"]["h_turu"], makas_aralik_cm, kutu) if h_adaylari else {}
     kural_sonucu = {"h_turu": lambda e: hk.get(e.id(), {}).get("tur")}
@@ -199,7 +211,7 @@ def siniflandir(f: ifcopenshell.file, kartlar: dict, yerlesim: dict, makas_arali
         uyan = []
         for k in kartlar["kartlar"]:
             for m in k.get("bugunku_ifc", []):
-                if _uyar(e, m) and (not m.get("kural") or kural_sonucu[m["kural"]["ad"]](e) == m["kural"]["deger"]):
+                if _uyar(e, m, ev) and (not m.get("kural") or kural_sonucu[m["kural"]["ad"]](e) == m["kural"]["deger"]):
                     uyan.append((k, m))
                     break
         if len(uyan) > 1:
@@ -366,15 +378,37 @@ def _tur_olustur(f, kart: dict, surum: str):
     return t
 
 
+def _pano_tipi_icerigi(tip) -> tuple:
+    """Pano tipinin ürün içeriği: katmanları (malzeme adı, kalınlık) ve `PortatifEv_PanoTipi` seti; tipin ve katman dizisinin adı hariç."""
+    m = ue.get_material(tip)
+    katman = tuple((x.Material.Name, x.LayerThickness) for x in m.MaterialLayers) if m is not None and m.is_a("IfcMaterialLayerSet") else m
+    return katman, tuple(sorted((k, v) for k, v in ue.get_psets(tip).get("PortatifEv_PanoTipi", {}).items() if k != "id"))
+
+
 def _duvar_turu_tasi(f, t, duvarlar: list) -> None:
-    """Duvar kartı eski pano tipinin katmanlarını ve `PortatifEv_PanoTipi` setini alır (parçanın özellikleri aynı kalır)."""
-    eski = {ue.get_type(w) for w in duvarlar} - {None}
-    if len(eski) != 1:
-        raise ValueError(f"{t.Tag}: parçaları {len(eski)} ayrı pano tipinden geliyor; kart iki katman dizisini taşıyamaz")
-    eski = eski.pop()
+    """Duvar kartı eski pano tipinin katmanlarını ve `PortatifEv_PanoTipi` setini alır (parçanın özellikleri aynı kalır).
+    İç duvarı 100'lük evde (BK-18) D kartının parçaları iki tipten gelir (`PE-DIS-100`, `PE-IC-100`); katmanları ve seti aynıysa kart
+    adı sıradaki ilk tipinkini alır. Öteki tipin parçalarının katman kullanımı (`IfcMaterialLayerSetUsage`) da kartın katman dizisini
+    gösterir (IFC4: kullanım türün dizisine bağlanır; yön ve kaçıklık aynı kalır, katmanlar aynı). İçerik farklıysa kart iki ürünü birden
+    taşıyamaz."""
+    eski = sorted({ue.get_type(w) for w in duvarlar} - {None}, key=lambda x: x.Name or "")
+    if not eski or len({_pano_tipi_icerigi(x) for x in eski}) != 1:
+        raise ValueError(f"{t.Tag}: parçaları {len(eski)} ayrı pano tipinden geliyor ({', '.join(x.Name or '?' for x in eski)}); "
+                         "katmanları ya da pano tipi bilgileri farklı, kart iki katman dizisini taşıyamaz")
+    eski = eski[0]
     malzeme = ue.get_material(eski)
     if malzeme is not None:
         _api("material.assign_material", f, products=[t], type=malzeme.is_a(), material=malzeme)
+    if malzeme is not None and malzeme.is_a("IfcMaterialLayerSet"):
+        kume = set(duvarlar)
+        for w in duvarlar:
+            u = ue.get_material(w, should_inherit=False)
+            if u is None or not u.is_a("IfcMaterialLayerSetUsage") or u.ForLayerSet == malzeme:
+                continue
+            kullanan = {o for r in f.get_inverse(u) if r.is_a("IfcRelAssociatesMaterial") for o in r.RelatedObjects}
+            if not kullanan <= kume:                                   # bugünkü IFC'de her duvarın kendi kullanımı var (ifc_uret)
+                raise ValueError(f"{t.Tag}: {w.Name} parçasının katman kullanımı bu kartın dışındaki parçalarla ortak; kart katman dizisini taşıyamaz")
+            u.ForLayerSet = malzeme
     pt = ue.get_psets(eski).get("PortatifEv_PanoTipi")
     if pt:
         ps = _api("pset.add_pset", f, product=t, name="PortatifEv_PanoTipi")

@@ -262,7 +262,8 @@ def _varyantlar(N: dict, pf: dict) -> dict:
     kenar boyunca kapalı çatı panelli ek yapı (Boardex şeridi birden çok levha: zayiat adedi değiştirir); genis: 15 m²'yi geçen salon (26 m²) ve
     veranda (18 m²), WC ve hol türü: elektrik oda kuralının takımı ve kitaptan sayılan odaları; acik_mutfak: mutfağı ayrı mahal olmayan ev
     (mutfak koridor, banyo ıslak hacim türünde, ek lavabo): açık mutfak salona, ıslak hacim ve lavabo banyo, koridor hol gibi (BK-12 PR-2f);
-    tasan: ilk açık kenar taşan verandanın dış kenarı sayılır (BK-14; kiriş kolonun dış yüzünden dış yüzüne, Lokman, kart 28 Ekim)."""
+    tasan: ilk açık kenar taşan verandanın dış kenarı sayılır (BK-14; kiriş kolonun dış yüzünden dış yüzüne, Lokman, kart 28 Ekim);
+    asma100: asma dizme tavan, 100'lük iç duvar (iç duvar üstü omegası ayrı satırda, sırtı kuraldan; Lokman, 29 Ekim 13:12, D-32)."""
     def tur(n, **d):
         n = copy.deepcopy(n)
         n.update(d)
@@ -309,6 +310,7 @@ def _varyantlar(N: dict, pf: dict) -> dict:
         "acik_mutfak": (tur(N, kapali=[dict(m, **{"mutfak": {"ad": "KORIDOR", "tur": "koridor"}, "banyo": {"tur": "islak"}}.get(m["tur"], {}))
                                        for m in N["kapali"]] + [{"ad": "LAVABO", "tur": "lavabo", "alan_m2": 2.0, "en_cm": 100.0, "derin_cm": 200.0}]), pf),
         "tasan": (tur(N, veranda_dis_kenar_sira=[0]), pf),
+        "asma100": (tur(N, panolar=[dict(p, kal_mm=100) if p["duvar"] == "ic" else p for p in N["panolar"]]), pf),
     }
 
 
