@@ -53,15 +53,10 @@ def asik(g: dict, K: dict, F: dict | None = None) -> list[dict]:
     """Karar C: her yüzde ilk sıra mahyada, sonra kitabın aralığıyla (eğik boyca); saçağa aralıktan az kalınca saçakta bir sıra daha;
     saçak sırasına `en_kisa`'dan yakın kalan sıra konmaz. Sıra boyu mahya boyu; dizilimin başladığı uçtan tam parçalar (parça boyu − pay),
     kalan son parçada; `en_kisa`'dan kısa kalan parçasız boşluk (omegadaki gibi)."""
+    from motor.prefabrik_liste import asik_mesafeleri                   # sıralar liste üretecinin sayısıyla tek kaynaktan (D-28 madde 1)
     F = F or cerceve(g)
     a, w = K["kesit_asik"]
-    d = []
-    k = 0
-    while k * K["aralik"] < F["egik"] - ESIK:
-        d.append(k * K["aralik"]); k += 1
-    if len(d) > 1 and F["egik"] - d[-1] < K["en_kisa"] - ESIK:          # saçak sırası son sıranın yerini alır
-        d.pop()
-    d.append(F["egik"])
+    d = asik_mesafeleri(F["egik"], K["aralik"], K["en_kisa"], ESIK)        # saçak sırası son sıranın yerini alabilir
     out = []
     for yuz, isaret in (("sol", -1), ("sag", 1)):
         for i, di in enumerate(d):

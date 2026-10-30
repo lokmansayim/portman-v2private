@@ -106,7 +106,7 @@
    "durum": "lokman",
    "tarih": "2026-10-24",
    "kaynak": "Karar C: Lokman, 24 Ekim 2026 06:17 kartı \"Mahyadan 60\". PK-01 aşık planı (s. 8): yüz başına 7 sıra (mahyadan 0, 60 … 300 ve saçakta 347).",
-   "not": "Kitabın aşık notundaki \"mahya aşığı 20 cm'de\" ve liste üretecinin sayım formülündeki mahya payı (`asik_mahya_payi_m`) PK-01 paftasında görülmedi (ilk sıra mahyada, son aralık 47 cm); model karar C'yi izler, liste üreteci değişmez (6e'nin dosyası)."
+   "not": "Kitabın aşık notundaki \"mahya aşığı 20 cm'de\" ve liste üretecinin eski sayım formülündeki mahya payı (`asik_mahya_payi_m`, 30 Ekim'de kalktı) PK-01 paftasında görülmedi (ilk sıra mahyada, son aralık 47 cm); model karar C'yi izler; liste üreteci de 30 Ekim'den beri (K5b TK-01 kıyası, CIO onayı 30 Ekim 14:20): sıralar tek koddan, `motor/prefabrik_liste.asik_mesafeleri`."
   },
   "cati_kaplamasi": {
    "kural": "Ana çatının her yüzü ⌈mahya boyu ÷ kapatma⌉ şerittir (liste üretecinin sayısı, O9); ilk şerit dizilimin başladığı uçtan, son şerit yüzün öteki ucundan taşar (kesilmez). Taşan verandanın çatısında (K5b) iki yüz birlikte ⌈iki yüz × mahya boyu ÷ kapatma⌉ (liste üretecinin ek çatı parçası sayısı): her yüzde dış kalkandan tam şeritler, iki yüzün artan şeritleri bir panele sığıyorsa (iki artan ≤ kapatma) bir panelden kesilir, sığmıyorsa her yüzün son şeridi gövde duvarında kesilir (ötesi ana çatının kalkan saçağı). Şerit mahyadan saçağa; boyu eğik boy + taşma, yuvarlamaya yukarı (liste üretecinin boyu). Kapatma kaplamaya göre.",
@@ -373,7 +373,7 @@
    "not": "Modelde saçak kenarı başına bir parça; stok boyları kesim planında. Saçak altının genişliği çatının saçağıdır (İş Emri; rehberde 30)."
   },
   "alin_saci_yerlesimi": {
-   "kural": "Alın sacı kalkanların iki eğik kenarında (her baş makasın iki kenarı), saçak ucundan mahyaya; ana çatıda tırnağı baş makas Z'sine girer (taşan verandanın dış kalkanında Z yok, tırnak betopanın üstünde; gösterim varsayım, K5b), makas üstünün 3 cm altından başlar, kalkan saçağının altını kapatır, alnı aşık uçlarının (C kapamanın) önünde; alt ucu derenin önüne iner. Sayı ⌈kenarların toplamı ÷ (parça boyu − bindirme)⌉ (liste üretecinin kuralı).",
+   "kural": "Alın sacı kalkanların iki eğik kenarında (her baş makasın iki kenarı), saçak ucundan mahyaya; tırnağı baş makas Z'sine girer (taşan verandanın kirişli dış kalkanında da Z var: kalkan betopanlı, D-32 madde 2; K5b TK-01 kıyası, 30 Ekim), makas üstünün 3 cm altından başlar, kalkan saçağının altını kapatır, alnı aşık uçlarının (C kapamanın) önünde; alt ucu derenin önüne iner. Sayı ⌈kenarların toplamı ÷ (parça boyu − bindirme)⌉ (liste üretecinin kuralı).",
    "parca_boyu": {"okunan": "kitap › parca_boyu_m.alin_saci"},
    "bindirme": {"okunan": "kitap › bindirme_m.alin_saci"},
    "yontem": {

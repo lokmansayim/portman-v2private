@@ -2,11 +2,11 @@
 `Kimlik_Karti_Modeli/K5_yeni_catilar_plani.md`; CIO onayı 27 Ekim 23:11).
 
 - Kabul (TK-01, `testler/motor/veri/TK01.json`): kart modeli ile liste üreteci yan yana. K5'teki sekiz farkın veranda çatısından gelen
-  yedisinde beşi kapanır (CK-02, CK-03, CK-06, DR-01, DR-02); ikisinin nedeni yazılır ve burada sınanır: aşıkta (AS-01) fark yalnız sıra
-  sayısıdır (karar C saçakta bir sıra ekler, liste P2 en yakına yuvarlar; liste sıra sayısıyla modelin sıralarının boyu listenin aşık
-  boyudur), saçak omegasında (CK-01) K3b'deki fark (model duvar ve kiriş boyunca, liste saçak boyunca; liste saçak sacının boyunu sayar).
-  "Kural yok" 0 (K5'te 8). Baş makas betopanı (BT-01) liste + veranda kalkanlarının levhası (liste N1 açık çatı parçasının kalkanını
-  saymaz; 6e'ye not). OM-01 veranda çatısından değil (kapsam dışı).
+  yedisinde beşi K5b-1'de kapandı (CK-02, CK-03, CK-06, DR-01, DR-02); AS-01, BT-01 ve veranda kalkanının Z'si (CK-04) liste PR'ında
+  (İE-09 hattının arkasında; CIO onayı 30 Ekim 14:20): aşık sırası beşikte karar C, tek koddan (`prefabrik_liste.asik_mesafeleri`); baş makas
+  betopanı ve Z kirişli veranda kalkanında da (D-32 madde 2). On üç kalem aynı. Saçak omegasında (CK-01) K3b'deki fark kalır ve burada
+  sınanır (model duvar ve kiriş boyunca, liste saçak boyunca: gerçek PK-01, PK-02, PK-03 listeleri saçak boyuyla tutuyor; karar Patron'da,
+  CIO 30 Ekim 17:28). "Kural yok" 0 (K5'te 8). OM-01 veranda çatısından değil (kapsam dışı).
 - Kör protokolü: gerçek liste açılmaz; kıyas liste üretecimizin çıktısıyla (CIO, 27 Ekim 22:02).
 - Kural birimleri: kaplamanın okunması (sandviç, tek kat, varsayılan tek kat ve uyarı, trapez ve kiremit "kural yok"); taşan veranda
   kaplaması iki yüz birlikte (⌈2 × mahya boyu ÷ kapatma⌉, artanlar bir panele sığarsa bir panelden, sığmazsa duvarda kesilir); dikey
@@ -40,7 +40,7 @@ from motor.yerlesim import cati, kesim, veranda  # noqa: E402
 
 MOTOR_VERI = KOK / "testler" / "motor" / "veri"
 TK01 = MOTOR_VERI / "TK01.json"
-ESIT = ("MA-01", "MA-02", "MA-03", "KP-02", "DR-01", "DR-02", "CK-02", "CK-03", "CK-04", "CK-06", "SR-01")
+ESIT = ("MA-01", "MA-02", "MA-03", "KP-02", "DR-01", "DR-02", "CK-02", "CK-03", "CK-04", "CK-06", "SR-01", "AS-01", "BT-01")
 
 
 def _oku(p: Path) -> dict:
@@ -94,38 +94,39 @@ def test_tk01_kural_yok_yok(tk01):
 
 
 def test_tk01_model_liste_ile_ayni(tk01):
-    """Veranda çatısından gelen yedi farkın beşi kapandı; makaslar, yavru makas, kaplama ve Z de listeyle aynı."""
+    """Veranda çatısından gelen farklar kapandı: makaslar, yavru makas, kaplama, aşık, betopan ve Z listeyle aynı; saçak omegası K3b farkı."""
     say, L = tk01["say"], tk01["liste"]
     kartlar = {k["kod"]: k for k in _oku(KM.KARTLAR)["kartlar"]}
     model = {k["kod"]: say["kesim_plani"][k["kod"]]["stok"] if k["kod"] in say["kesim_plani"] else k.get("sabit", k["adet"]) for k in say["kartlar"]}
-    liste = {kod: sum(s["adet"] for s in L[kartlar[kod]["liste"]["satirlar"][0]]) for kod in ESIT + ("AS-01", "BT-01", "CK-01")}
+    liste = {kod: sum(s["adet"] for s in L[kartlar[kod]["liste"]["satirlar"][0]]) for kod in ESIT + ("CK-01",)}
     assert {k: model[k] for k in ESIT} == {k: liste[k] for k in ESIT}
     assert {k: model[k] for k in ESIT} == {"MA-01": 2, "MA-02": 6, "MA-03": 5, "KP-02": 29, "DR-01": 7, "DR-02": 10, "CK-02": 12, "CK-03": 13,
-                                           "CK-04": 8, "CK-06": 6, "SR-01": 7}
+                                           "CK-04": 12, "CK-06": 6, "SR-01": 7, "AS-01": 56, "BT-01": 10}
+    assert (model["CK-01"], liste["CK-01"]) == (10, 11)
     assert [(s["kalem"], s["adet"]) for s in L["Yavru makas"]] == [("Yavru makas · ön veranda çatısı", 3), ("Yavru makas · arka veranda çatısı", 2)]
     assert {(p["bilgi"]["Cati"], p["bilgi"]["MakasAdedi"]) for p in _parcalar(say, "MA-03")} == {("ÖN VERANDA", 3), ("ARKA VERANDA", 2)}
     assert [s["adet"] for s in L["Tek kat çatı paneli"]] == [20, 5, 4]
     assert [len(_parcalar(say, "KP-02", c)) for c in (None, "ÖN VERANDA", "ARKA VERANDA")] == [20, 5, 4]
-    assert (model["AS-01"], liste["AS-01"], model["BT-01"], liste["BT-01"], model["CK-01"], liste["CK-01"]) == (56, 51, 10, 8, 10, 11)
 
 
-def test_tk01_asik_farki_sira_sayisi(tk01):
-    """AS-01'in farkı yalnız sıra sayısı: her çatıda modelin sırası karar C (mahyadan 60, saçakta bir sıra), listenin sırası P2 (yüz başına
-    (eğik − 20) ÷ 60 en yakın + 1). Listenin sıra sayısıyla modelin sıra boyları listenin aşık boyunu verir."""
+def test_tk01_asik_sirasi_tek_koddan(tk01):
+    """AS-01: listenin ve modelin sıraları aynı koddan (karar C: mahyadan 60, saçakta bir sıra; `prefabrik_liste.asik_mesafeleri`). Her çatıda
+    modelin sıraları o işlevin verdiği uzaklıklar; listenin aşık boyu modelin sıralarının boyu. %27,5'te ana çatı ve arka verandada saçak
+    sırası eski P2 formülüne göre bir sıra fazla (K5b'de yazılan fark)."""
     say, L = tk01["say"], tk01["liste"]
     satir = L["Aşık"][0]
-    assert "en yakın + 1 sıra" in satir["formul"]
+    assert "karar C" in satir["formul"] and "en yakın" not in satir["formul"]
     toplam, fark = 0.0, {}
     for c in (None, "ÖN VERANDA", "ARKA VERANDA"):
         A = _parcalar(say, "AS-01", c)
-        sira = {(p["bilgi"]["Yuz"], p["bilgi"]["Sira"]) for p in A}
         egik = max(p["bilgi"]["MahyadanEgik_cm"] for p in A)
+        d = PL.asik_mesafeleri(egik, 60, PL.asik_en_kisa_cm())
+        assert sorted({p["bilgi"]["MahyadanEgik_cm"] for p in A if p["bilgi"]["Yuz"] == "sol"}) == [round(x, 2) for x in d]
         boy = sum(p["boy_cm"] for p in A if p["bilgi"]["Yuz"] == "sol" and p["bilgi"]["Sira"] == 1)     # sıranın boyu (mahya boyu)
-        p2 = round((egik - 20) / 60) + 1
-        toplam += 2 * p2 * boy
-        fark[c] = len(sira) // 2 - p2
+        toplam += 2 * len(d) * boy
+        fark[c] = len(d) - (round((egik - 20) / 60) + 1)
     assert abs(toplam / 100 - _metre(satir["formul"], "aşık boyları")) < 0.06
-    assert fark == {None: 1, "ÖN VERANDA": 0, "ARKA VERANDA": 1}                  # %27,5'te ana çatı ve arka verandada saçak sırası
+    assert fark == {None: 1, "ÖN VERANDA": 0, "ARKA VERANDA": 1}
 
 
 def test_tk01_sacak_omegasi_farki(tk01):
@@ -141,23 +142,23 @@ def test_tk01_sacak_omegasi_farki(tk01):
 
 
 def test_tk01_betopan_veranda_kalkani(tk01):
-    """BT-01: ana kalkanlar dikey levhalarla H5 sayısı (liste 8); veranda kalkanlarında da H5 (kalkan başına 1, yatık). Liste N1 açık çatı
-    parçasının kalkanını saymaz (6e'ye not)."""
+    """BT-01: ana kalkanlar dikey levhalarla H5 sayısı (8); veranda kalkanlarında da H5 (kalkan başına 1, yatık). Liste kirişli veranda
+    kalkanını da sayar (D-32 madde 2): 8 + 2; kirişsiz açık parça N1 ile sayılmaz."""
     say, L = tk01["say"], tk01["liste"]
-    assert "N1" in L["Baş makas betopanı"][0]["formul"]
+    assert "dış kirişindeki dahil" in L["Baş makas betopanı"][0]["formul"]
     ana, ver = _parcalar(say, "BT-01", None), [p for p in _parcalar(say, "BT-01") if p["bilgi"].get("Cati")]
-    assert len(ana) == L["Baş makas betopanı"][0]["adet"] == 8 and all(p["bilgi"]["Dizilim"] == "dikey" for p in ana)
+    assert len(ana) == 8 and len(ana) + len(ver) == L["Baş makas betopanı"][0]["adet"] == 10 and all(p["bilgi"]["Dizilim"] == "dikey" for p in ana)
     assert sorted(p["bilgi"]["Makas"] for p in ver) == ["ARKA VERANDA kalkanı", "ÖN VERANDA kalkanı"]
     assert all("Dizilim" not in p["bilgi"] for p in ver)
 
 
 def test_tk01_kenarlar_verandada(tk01):
-    """Veranda kalkanında alın sacı ve C kapama var (rehberdeki gibi dört kalkanda; model atölyesi, 30 Ekim), Z yok (liste O7 yalnız ana
-    çatı); saçak sacı ve mahya saçak ucundan ucuna."""
+    """Veranda kalkanında alın sacı, Z ve C kapama var (rehberdeki gibi dört kalkanda; model atölyesi, 30 Ekim; Z kirişli kalkanda, liste
+    O7 de sayar); saçak sacı ve mahya saçak ucundan ucuna."""
     say = tk01["say"]
     for c, boy in (("ÖN VERANDA", 211), ("ARKA VERANDA", 160)):
         A, C = _parcalar(say, "CK-03", c), _parcalar(say, "CK-05", c)
-        assert len(A) == len(C) == 2 and not _parcalar(say, "CK-04", c)
+        assert len(A) == len(C) == len(_parcalar(say, "CK-04", c)) == 2
         assert sorted(p["bilgi"]["Yuz"] for p in C) == ["sag", "sol"] and {p["boy_cm"] for p in C} == {p["boy_cm"] for p in A}
         assert [p["boy_cm"] for p in _parcalar(say, "CK-02", c)] == [boy, boy] and [p["boy_cm"] for p in _parcalar(say, "CK-06", c)] == [boy]
     assert sorted(p["bilgi"]["Yer"] for p in _parcalar(say, "DR-02") if p["bilgi"].get("Cati")) == ["dış uç"] * 4
@@ -273,7 +274,7 @@ def test_cizim(tk01):
     assert "MA-03 Yavru makas: 5 (Y; veranda çatısı)" in metin[1]
     assert "ÖN VERANDA kalkanı, dış yüzden görünüş" in metin[2] and "MAKAS_01 (baş makas)" in metin[2] and "ÖN VERANDA kalkanı: 1" in metin[2]
     assert "KP-02 Tek kat çatı paneli" in metin[4] and "29 panel" in metin[4]
-    assert "Veranda kalkanında C kapama var" in metin[6] and "Z yok" in metin[6]
+    assert "Veranda kalkanında Z ve C kapama var" in metin[6] and "Z yok" not in metin[6]
 
 
 def test_pk01_veranda_yok(tmp_path):

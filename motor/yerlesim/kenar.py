@@ -16,9 +16,9 @@ her baş makasın iki eğik kenarında Z, alın sacı ve C kapama (boyu eğik bo
 planındadır. Kesitler yalnız gösterimdir (`kenar_gosterim`); sayı, boy ve metre onlardan çıkmaz.
 
 Taşan verandanın çatısında (K5b, `veranda.py`) aynı işlevler verandanın çerçevesiyle: saçak omegası yan kirişlerin üstünde kiriş boyunca,
-saçak sacı ve mahya saçak ucundan ucuna, dış kalkanın iki eğik kenarında alın sacı ve C kapama (montaj rehberi C kapamayı dört kalkanda
-yazar; model atölyesi doğru kabul etti, 30 Ekim); Z yok (liste üreteci O7'yi yalnız ana çatıda sayar). Parçalar `Cati` bilgisini ve
-`VERANDA_` önekini taşır.
+saçak sacı ve mahya saçak ucundan ucuna, dış kalkanın iki eğik kenarında alın sacı, Z ve C kapama (montaj rehberi C kapamayı dört kalkanda
+yazar; model atölyesi doğru kabul etti, 30 Ekim; Z: kalkan betopanlı, kenar detayı ana çatınınki, liste üreteci O7'yi kirişli kalkanda da
+sayar, K5b TK-01 kıyası). Parçalar `Cati` bilgisini ve `VERANDA_` önekini taşır.
 
 `katman(ie, g, D, kesit, K)` döner: {parcalar, kural_yok, uyarilar, hatlar}. Parçalar K2'ninkilerle aynı biçimdedir ({kural, parca, boy_cm, geo,
 bilgi, aciklama}); kartı kart modelinde bulunur (`motor/kart_model.py`).
@@ -282,7 +282,8 @@ def katman(ie: dict, g: dict, D: dict, kesit: dict, K: dict) -> dict:
                 vp += sacak_omegasi(g, G_, F)
             if "sacak_saci_yerlesimi" in kurulan:
                 vp += sacak_saci(g, G_, F)
-            vp += kalkan_kenarlari(g, G_, kesit, kurulan & {"alin_saci_yerlesimi", "c_kapama_yerlesimi"}, F, [veranda.kalkan(F, kesit["betopan"])])
+            vp += kalkan_kenarlari(g, G_, kesit, kurulan & {"alin_saci_yerlesimi", "bas_makas_z_yerlesimi", "c_kapama_yerlesimi"}, F,
+                                   [veranda.kalkan(F, kesit["betopan"])])
             if "mahya_yerlesimi" in kurulan:
                 vp += mahya(g, G_, kesit, F)
             parcalar += veranda.isaretle(vp, F)

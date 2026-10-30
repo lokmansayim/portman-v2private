@@ -245,11 +245,6 @@
    "durum": "aday",
    "kaynak": "Şablon B (PK-02, PK-03): 3."
   },
-  "asik_mahya_payi_m": {
-   "deger": 0.2,
-   "durum": "pafta",
-   "kaynak": "P2 ve O13: beşikte yüz başına (eğik − 0,20) ÷ aralık en yakın + 1 sıra (PK-06, PK-07 paftaları 8)."
-  },
   "asik_aday": {
    "deger": {
     "pay_m": 0.1,
@@ -622,7 +617,7 @@
    "kitap": "bas_makas_z.kenar_kenar",
    "tur": "kapsam",
    "karar_bekliyor": false,
-   "not": "Parça boyu (L 2800) kitaptan. Prefabrik yalnız ana çatının alın kenarlarına yazar (O7; PK-02, PK-06, PK-07 8), kitap her alın kenarına ayrı (uydurma)."
+   "not": "Parça boyu (L 2800) kitaptan. Prefabrik ana çatının alın kenarlarına yazar (O7; PK-02, PK-06, PK-07 8), kitap her alın kenarına ayrı (uydurma). 30 Ekim'den beri taşan verandanın kirişli kalkanında da (kalkan betopanlı, D-32 madde 2; K5b TK-01 kıyası, CIO onayı 30 Ekim 14:20); kirişsiz açık parça sayılmaz (N1)."
   },
   {
    "konu": "Çatı yüzeyi",

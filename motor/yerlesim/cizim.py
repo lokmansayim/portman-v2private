@@ -481,7 +481,7 @@ def _kenar_lejanti(fig, say: dict, plt) -> None:
         "Sayı listenin yöntemiyle, boy modelden (kesim planı); C kapama metreyle sayılır.",
         "Yer montaj rehberinden; teyit bekleyen maddeler varsayım (Lokman, 25 Ekim).",
         "Saçak omegası rehberdeki gibi duvar boyunca (verandada kiriş boyunca); liste saçak boyunu sayar.",
-        *(["Veranda kalkanında C kapama var (rehberdeki gibi dört kalkanda), Z yok (liste O7'yi yalnız ana çatıda sayar)."]
+        *(["Veranda kalkanında Z ve C kapama var (rehberdeki gibi dört kalkanda; kirişli kalkan betopanlı, liste de sayar)."]
           if any(p.get("bilgi", {}).get("Cati") for p in say.get("yerlesim", {}).get("parcalar", [])) else []))), fontsize=8.5, va="top", ha="left", color="#444")
 
 

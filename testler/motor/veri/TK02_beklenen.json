@@ -2337,13 +2337,13 @@
     "grup": "1002",
     "kalem": "Baş makas Z'si",
     "olcu": "L 2800",
-    "adet": 8
+    "adet": 12
    },
    {
     "grup": "1002",
     "kalem": "Baş makas betopanı",
     "olcu": "1250 × 2500",
-    "adet": 8
+    "adet": 10
    },
    {
     "grup": "1002",
@@ -2445,7 +2445,7 @@
     "grup": "1005",
     "kalem": "Aşık",
     "olcu": "L 4200",
-    "adet": 52
+    "adet": 56
    },
    {
     "grup": "1006",
