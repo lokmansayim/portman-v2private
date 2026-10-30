@@ -152,10 +152,13 @@ def test_tk01_betopan_veranda_kalkani(tk01):
 
 
 def test_tk01_kenarlar_verandada(tk01):
-    """Veranda kalkanında alın sacı var, Z ve C kapama yok (liste O7 yalnız ana çatı); saçak sacı ve mahya saçak ucundan ucuna."""
+    """Veranda kalkanında alın sacı ve C kapama var (rehberdeki gibi dört kalkanda; model atölyesi, 30 Ekim), Z yok (liste O7 yalnız ana
+    çatı); saçak sacı ve mahya saçak ucundan ucuna."""
     say = tk01["say"]
     for c, boy in (("ÖN VERANDA", 211), ("ARKA VERANDA", 160)):
-        assert len(_parcalar(say, "CK-03", c)) == 2 and not _parcalar(say, "CK-04", c) and not _parcalar(say, "CK-05", c)
+        A, C = _parcalar(say, "CK-03", c), _parcalar(say, "CK-05", c)
+        assert len(A) == len(C) == 2 and not _parcalar(say, "CK-04", c)
+        assert sorted(p["bilgi"]["Yuz"] for p in C) == ["sag", "sol"] and {p["boy_cm"] for p in C} == {p["boy_cm"] for p in A}
         assert [p["boy_cm"] for p in _parcalar(say, "CK-02", c)] == [boy, boy] and [p["boy_cm"] for p in _parcalar(say, "CK-06", c)] == [boy]
     assert sorted(p["bilgi"]["Yer"] for p in _parcalar(say, "DR-02") if p["bilgi"].get("Cati")) == ["dış uç"] * 4
 
@@ -270,7 +273,7 @@ def test_cizim(tk01):
     assert "MA-03 Yavru makas: 5 (Y; veranda çatısı)" in metin[1]
     assert "ÖN VERANDA kalkanı, dış yüzden görünüş" in metin[2] and "MAKAS_01 (baş makas)" in metin[2] and "ÖN VERANDA kalkanı: 1" in metin[2]
     assert "KP-02 Tek kat çatı paneli" in metin[4] and "29 panel" in metin[4]
-    assert "Veranda kalkanında Z ve C kapama yok" in metin[6]
+    assert "Veranda kalkanında C kapama var" in metin[6] and "Z yok" in metin[6]
 
 
 def test_pk01_veranda_yok(tmp_path):
