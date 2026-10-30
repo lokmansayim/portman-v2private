@@ -7,6 +7,10 @@ Her şekil modeldeki parçanın kendi geometrisinden (dünya koordinatı) ve öz
 değil modelden gelir. Sayılar (adet, metre, kesim) sayımdandır (`<kod>_kart_sayim.json`). Antet bizimdir; paftanın anteti ve adları
 çıktıya girmez. Paftayla kıyas hakemin işidir (`testler/kimlik/hakem/kiyas.py`). Sayımda "kural yok" varsa her sayfanın başında EKSİK
 yazar; sayfanın katmanı kurulmadıysa nedeni, yerleşimin uyarıları da ilgili sayfada yazar.
+
+Beşik dışı çatıda (İE-15 K5) çatı katmanları kurulmaz: kart modelinin IFC'si bugünkü IFC'nin kopyasıdır ve çatıyı hep beşik çizer; o
+makaslar sayılmadığı (kural yok) için çizilmez, çatı sayfalarında yerine çatının adı ve nedeni yazar. Yedinci sayfanın lejantında
+kurulmayan kart "kurulmadı", liste üretecinin yazmadığı liste "liste yazılmaz" (nedeniyle) yazar.
 """
 from __future__ import annotations
 
@@ -103,14 +107,31 @@ def _kart(say: dict, kod: str) -> dict:
     return next((k for k in say["kartlar"] if k["kod"] == kod), {"adet": 0})
 
 
+def _cati_notu(say: dict) -> str | None:
+    """Beşik dışı çatıda (K5) çatı katmanlarının yerine yazılan not; çatı tipinden kural yok yoksa None."""
+    if not any("cati" in x for x in say["kural_yok"]):
+        return None
+    from motor.yerlesim import girdi
+    t = say["cati_tipi"]
+    return "\n".join([f"Çatı: {girdi.cati_adi(t)} (İş Emri'nde \"{t}\")", "Çatı parçaları kurulmadı (kural yok):",
+                      *textwrap.wrap(girdi.cati_sonra(t) + ".", 52), "Bugünkü IFC çatıyı beşik çizer;", "o makaslar sayılmaz, çizilmez."])
+
+
+def _cati_yazisi(ax, not_: str) -> None:
+    ax.text(0.5, 0.5, not_, transform=ax.transAxes, ha="center", va="center", fontsize=12, color="#b03a2e", linespacing=1.5,
+            bbox={"boxstyle": "round,pad=0.8", "fc": "white", "ec": "#b03a2e", "alpha": 0.95})
+
+
 def _notlar(fig, say: dict, sayfa: int):
-    """Sayımda kural yok varsa sayfanın başında EKSİK; bu sayfanın katmanında kural yok ve uyarı varsa lejantın altında."""
+    """Sayımda kural yok varsa sayfanın başında EKSİK; bu sayfanın katmanında kural yok ve uyarı varsa lejantın altında. Çatı tipinden
+    kural yokta (K5) satır kısadır: nedeni sayfanın çatı notunda ve sayımdadır."""
+    from motor.yerlesim import girdi
     adlar, onekler = SAYFA[sayfa]
     if say["kural_yok"]:
         fig.text(0.02, 0.975, f"EKSİK · sayımda {len(say['kural_yok'])} parça \"kural yok\" (ayrıntı `_kart_sayim.json`); bu planlar tam değildir",
                  fontsize=11, color="#b03a2e", fontweight="bold", va="top")
-    satir = [f"Kurulmadı: {x['parca']}: {x['neden']}" for x in say["kural_yok"]
-             if x["parca"] in adlar or str(x["parca"]).startswith(onekler)]
+    satir = list(dict.fromkeys(f"Kurulmadı: {x['parca']}: " + (f"{girdi.cati_adi(x['cati'])} çatı" if "cati" in x else x["neden"])
+                               for x in say["kural_yok"] if x["parca"] in adlar or str(x["parca"]).startswith(onekler)))
     satir += [f"Uyarı: {u['metin']}" for u in say.get("yerlesim", {}).get("uyarilar", []) + say.get("elektrik", {}).get("uyarilar", [])
               + say.get("kenar", {}).get("uyarilar", []) if u["katman"] in adlar]
     if satir:
@@ -126,6 +147,9 @@ def ciz(model_yolu: Path, say: dict, yol: Path, kod: str) -> Path:
 
     m = _model(Path(model_yolu))
     y = say["yerlesim"]
+    cn = _cati_notu(say)
+    if cn:
+        m["makas"] = {}                                         # bugünkü IFC'nin beşik makasları sayılmadı (kural yok); çizilmez
     alt = (f"{kod} · kart modeli (İE-15 K2) · {Path(model_yolu).name} · kartlar sürüm {say['kartlar_surumu']}, yerleşim kuralları sürüm "
            f"{say['yerlesim_surumu']} · ölçüler cm · şekiller modeldeki parçalardan")
     kesim = say.get("kesim_plani", {})
@@ -192,6 +216,8 @@ def ciz(model_yolu: Path, say: dict, yol: Path, kod: str) -> Path:
                 + ([f"   kesim: {kesim['DR-01']['stok']} boy L {kesim['DR-01']['parca_boyu_cm']:g}", f"   ({kesim['DR-01']['bindirme_cm']:g} cm bindirme)"]
                    if "DR-01" in kesim else [])
                 + [f"DR-02 Dere inişi: {ki['adet']} (◎)"])
+        if cn:
+            _cati_yazisi(ax, cn)
         _cerceve(ax, f"{kod} · MAKAS VE DERE YERLEŞİM PLANI", alt)
         _notlar(fig, say, 2)
         pdf.savefig(fig); plt.close(fig)
@@ -215,12 +241,14 @@ def ciz(model_yolu: Path, say: dict, yol: Path, kod: str) -> Path:
                 c = iz.centroid
                 ax.text(c.x, c.y, f"{p['p']['Levha']}\n{p['p']['Levha_cm']}", ha="center", va="center", fontsize=8)
             ax.set_aspect("equal"); ax.axis("off")
-            ax.set_title(f"{ad} (baş makas), dış yüzden görünüş" if ad else "baş makas yok", fontsize=11)
+            ax.set_title(f"{ad} (baş makas), dış yüzden görünüş" if ad else "" if cn else "baş makas yok", fontsize=11)
+            if cn:
+                _cati_yazisi(ax, cn)
         kb = _kart(say, "BT-01")
         _lejant(fig, [f"BT-01 Baş makas betopanı 1250 × 2500", f"{kb['adet']} levha (makas başına {levhalar[0]['p']['LevhaAdedi'] if levhalar else 0})",
                              "levha yerinde kesilir; sayı tam levha", "", f"SR-01 PVC plastik betopan H'ı: {say.get('sabit', {}).get('SR-01', {}).get('adet', '—')}",
                              "(sabit paket, liste kuralı; modelde yok)"])
-        fig.suptitle(f"{kod} · BAŞ MAKAS BETOPAN YERLEŞİMİ", fontsize=15, fontweight="bold", x=0.02, ha="left")
+        fig.suptitle(f"{kod} · BAŞ MAKAS BETOPAN YERLEŞİMİ", fontsize=15, fontweight="bold", x=0.02, ha="left", y=0.95 if say["kural_yok"] else 0.98)
         fig.text(0.02, 0.03, alt, fontsize=9, color="#444")
         _notlar(fig, say, 3)
         pdf.savefig(fig); plt.close(fig)
@@ -263,6 +291,8 @@ def ciz(model_yolu: Path, say: dict, yol: Path, kod: str) -> Path:
                              f"{ka['adet']} panel" + (f" ({', '.join(f'{YUZ[a]} yüz {n}' for a, n in sorted(yuz.items()))})" if yuz else ""),
                              *([f"boy {', '.join(f'{b:g}' for b in boy)} cm (eğik boy + 5, 10 mm'ye yukarı)"] if boy else []),
                              "son şerit yüzün ucundan taşar" + (f" ({', '.join(f'{x:g}' for x in tasma)} cm)" if tasma else "")])
+            if cn:
+                _cati_yazisi(ax, cn)
             _cerceve(ax, f"{kod} · {baslik}", alt)
             _notlar(fig, say, sayfa)
             pdf.savefig(fig); plt.close(fig)
@@ -281,7 +311,10 @@ def ciz(model_yolu: Path, say: dict, yol: Path, kod: str) -> Path:
             fig = plt.figure(figsize=(16.54, 11.69))
             zemin, cati_ = fig.add_axes([0.02, 0.08, 0.35, 0.80]), fig.add_axes([0.39, 0.08, 0.35, 0.80])
             _kenar(zemin, cati_, m, plt)
-            fig.suptitle(f"{kod} · ALT ÇERÇEVE VE ÇATI KENARLARI YERLEŞİM PLANI", fontsize=15, fontweight="bold", x=0.02, ha="left")
+            if cn:
+                _cati_yazisi(cati_, cn)
+            fig.suptitle(f"{kod} · ALT ÇERÇEVE VE ÇATI KENARLARI YERLEŞİM PLANI", fontsize=15, fontweight="bold", x=0.02, ha="left",
+                         y=0.95 if say["kural_yok"] else 0.98)
             fig.text(0.02, 0.03, alt.replace("(İE-15 K2)", "(İE-15 K3b)"), fontsize=9, color="#444")
             _kenar_lejanti(fig, say, plt)
             _notlar(fig, say, 7)
@@ -344,22 +377,26 @@ def _kenar(zemin, cati_, m: dict, plt) -> None:
 
 
 def _kenar_lejanti(fig, say: dict, plt) -> None:
-    """Her kartın modeldeki sayısı (kesim planı: boy; C kapama metre) ve liste üretecinin aynı satırı yan yana."""
+    """Her kartın modeldeki sayısı (kesim planı: boy; C kapama metre) ve liste üretecinin aynı satırı yan yana. Kuralı kurulmayan kart
+    "kurulmadı", liste üretecinin yazmadığı liste "liste yazılmaz" (K5)."""
     from matplotlib.patches import Patch
-    kesim, liste = say.get("kesim_plani", {}), say["kenar"]["liste"]
+    from motor.kart_model import LISTE_YAZILMAZ
+    kesim, liste, kurulmadi = say.get("kesim_plani", {}), say["kenar"]["liste"], set(say["kenar"].get("kurulmadi", []))
     tutamak, yazi = [], []
     for k in say["kartlar"]:
         if k["kod"] not in KENAR_RENK:
             continue
         kp = kesim.get(k["kod"])
-        model = f"{kp['stok']} boy" if kp else f"{_sayi(k.get('metre', 0))} m"
+        model = "kurulmadı" if k["kod"] in kurulmadi else f"{kp['stok']} boy" if kp else f"{_sayi(k.get('metre', 0))} m"
         lst = liste.get(k["kod"])
-        lst = "listede yok" if lst is None else f"liste {lst}" + ("" if kp and kp["stok"] == lst else "  ≠")
+        lst = ("listede yok" if lst is None else "liste yazılmaz" if lst == LISTE_YAZILMAZ
+               else f"liste {lst}" + ("" if kp and kp["stok"] == lst else "  ≠"))
         tutamak.append(Patch(color=KENAR_RENK[k["kod"]]))
         yazi.append(f"{k['kod']} {k['ad']}\nmodel {model} · {lst}")
     fig.legend(tutamak, yazi, loc="upper left", bbox_to_anchor=(0.76, 0.90), fontsize=9, frameon=True, edgecolor="#999",
                title="model (kesim planı) · liste üreteci", title_fontsize=9, labelspacing=0.9)
     fig.text(0.76, 0.56, "\n".join(textwrap.fill(s, 48) for s in (
+        *([f"Liste üreteci: {say['kenar']['liste_yazilmaz']}."] if "liste_yazilmaz" in say["kenar"] else []),
         "Sayı listenin yöntemiyle, boy modelden (kesim planı); C kapama metreyle sayılır.",
         "Yer montaj rehberinden; teyit bekleyen maddeler varsayım (Lokman, 25 Ekim).",
         "Saçak omegası rehberdeki gibi duvar boyunca; liste saçak boyunu sayar.")), fontsize=8.5, va="top", ha="left", color="#444")

@@ -31,6 +31,7 @@ CATI_KENARLARI = (("sacak_omegasi_yerlesimi", "saçak omegası", "IfcMember"), (
                   ("alin_saci_yerlesimi", "alın sacı", "IfcCovering"), ("bas_makas_z_yerlesimi", "baş makas Z'si", "IfcMember"),
                   ("c_kapama_yerlesimi", "C kapama", "IfcCovering"), ("mahya_yerlesimi", "mahya", "IfcCovering"))
 KENAR = (ALT_CERCEVE,) + tuple(ad for ad, _a, _s in CATI_KENARLARI)
+CATI_ADI = {ad: adi for ad, adi, _s in CATI_KENARLARI}         # kural → kural yokta parçanın adı (kart modeli "kurulmadı" kartlarını bulur; K5)
 GOSTERIM = "kenar_gosterim"
 KATMAN = "alt çerçeve ve çatı kenarları"
 ESIK = 1e-6
@@ -237,8 +238,7 @@ def katman(ie: dict, g: dict, D: dict, kesit: dict, K: dict) -> dict:
     for ad, adi, sinif in CATI_KENARLARI:
         izin = K[ad].get("cati_tipleri")
         if izin and g["cati_tipi"] not in izin:
-            kural_yok.append({"parca": adi, "sinif": sinif, "neden": f"İş Emri'nin çatısı \"{g['cati_tipi']}\"; {ad} yalnız "
-                                                                      f"{', '.join(izin)} çatıda (bugünkü IFC çatıyı hep beşik çizer)"})
+            kural_yok.append({"parca": adi, "sinif": sinif, "neden": girdi.cati_disi(g["cati_tipi"], ad, izin), "cati": g["cati_tipi"]})
             continue
         if ad == "mahya_yerlesimi":
             yazili = girdi.kucuk(next((v for k, v in g["ozellikler"].items() if girdi.kucuk(k) == "çatı kaplaması"), ""))

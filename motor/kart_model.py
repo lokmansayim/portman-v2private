@@ -16,9 +16,10 @@
   aralığının yarısıdır; aralık `kurallar/liste/prefabrik.json`'dan okunur. İki makas aynı H'ye denk gelirse kayıt en yakınını yazar.
 - **Çatı tipi İş Emri'nden gelir:** bugünkü IFC çatıyı her zaman beşik çizer. Eşlemesi ya da kuralı `cati_tipleri` taşıyan parça (makaslar ve
   makasa bağlı dış H'ler) İş Emri'nin çatısı o tiplerden değilse "kural yok" yazar (ikisinde de yazılıysa ikisi de sağlanır); model makası
-  olmayan bir çatıdan tür türetmez.
+  olmayan bir çatıdan tür türetmez. Nedende çatının kodu ve adı (K5: İE-17'nin cumbalı beşiği ve kırması); çatı düzlemleri İE-17 PR-1b'de.
 - **Kartı olmayan parça sayılmaz:** hiçbir karta uymayan parça "kural yok" yazar; iki karta uyan parçada model üretilmez. Görünüm (üçlü H'nin
   yüz görünümü), bileşen (makasın çubukları) ve kartsız olduğu bildirilen parçalar (çatı yüzü, alın, zemin betonu, boşluk) ayrı listelenir.
+  Kart dosyasının `kural_yok` listesindeki parça (K5: taşan verandanın çatı yüzü ve alın dolgusu) yine "kural yok" yazar, nedeni oradan.
 - **K2, K3 ve K3b katmanları** (`motor/yerlesim/`): komut İş Emri'yle çatı ve tavan katmanlarını (K2), elektriği (K3) ve montaj rehberinin
   kartsız yedi parçasını (K3b: alt çerçeve ve çatı kenarları) de kurar; beşinci çıktı `<kod>_yerlesim_planlari.pdf` (beş çatı ve tavan planı,
   altıncı sayfa elektrik planı, yedinci sayfa alt çerçeve ve çatı kenarları).
@@ -49,6 +50,7 @@ KOK = Path(__file__).resolve().parents[1]
 KARTLAR = KOK / "kurallar" / "urun" / "kartlar.json"
 YERLESIM = KOK / "kurallar" / "yerlesim" / "prefabrik.json"
 LISTE_KURALLARI = KOK / "kurallar" / "liste" / "prefabrik.json"
+LISTE_YAZILMAZ = "yazılmaz"     # K5: liste üreteci bu İş Emri'nde liste yazmıyor (beşik dışı ana çatı); nedeni `kenar.liste_yazilmaz`
 KART_SETI, PARCA_SETI = "PortatifEv_Kart", "PortatifEv_Parca"
 TUR_AD_ALANI = uuid.UUID("5d1f6a52-6c2b-4b8e-9a51-0f1e2d3c4b5a")     # kart türünün GlobalId'si koddan türer (her üretimde aynı)
 
@@ -185,6 +187,7 @@ def _cati_sinirlari(m: dict, yerlesim: dict) -> list[list[str]]:
 
 def siniflandir(f: ifcopenshell.file, kartlar: dict, yerlesim: dict, makas_aralik_cm: float, cati_tipi: str) -> list[dict]:
     """Her `IfcElement` için rol: kart, görünüm, bileşen, kartsız ya da kural yok. `cati_tipi` İş Emri'ndendir (bugünkü IFC hep beşik çizer)."""
+    from motor.yerlesim import girdi
     kutu = _Kutular()
     ev = {"ic_duvar_cm": ic_duvar_cm(f)}
     elemanlar = sorted(f.by_type("IfcElement"), key=lambda e: (e.is_a(), e.Name or "", e.GlobalId))
@@ -220,8 +223,7 @@ def siniflandir(f: ifcopenshell.file, kartlar: dict, yerlesim: dict, makas_arali
             k, m = uyan[0]
             izin = next((x for x in _cati_sinirlari(m, yerlesim) if cati_tipi not in x), None)
             if izin:
-                out.append({"e": e, "rol": "kural_yok", "neden": f"İş Emri'nin çatısı \"{cati_tipi}\"; {k['kod']} eşlemesi yalnız "
-                                                                  f"{', '.join(izin)} çatıda geçerli (bugünkü IFC çatıyı hep beşik çizer)"})
+                out.append({"e": e, "rol": "kural_yok", "neden": girdi.cati_disi(cati_tipi, f"{k['kod']} eşlemesi", izin), "cati": cati_tipi})
                 continue
             kayit = {"e": e, "rol": "kart", "kart": k}
             if e.id() in hk:
@@ -229,7 +231,11 @@ def siniflandir(f: ifcopenshell.file, kartlar: dict, yerlesim: dict, makas_arali
             out.append(kayit)
             continue
         ks = next((k for k in kartlar.get("kartsiz", []) if _uyar(e, k)), None)
-        out.append({"e": e, "rol": "kartsiz", "neden": ks["neden"]} if ks else {"e": e, "rol": "kural_yok", "neden": "hiçbir karta uymuyor"})
+        if ks:
+            out.append({"e": e, "rol": "kartsiz", "neden": ks["neden"]})
+            continue
+        kb = next((k for k in kartlar.get("kural_yok", []) if _uyar(e, k)), None)      # K5: bilinen, kuralı sonraki adımda (nedeniyle)
+        out.append({"e": e, "rol": "kural_yok", "neden": kb["neden"] if kb else "hiçbir karta uymuyor"})
     return out
 
 
@@ -270,7 +276,8 @@ def _k2(f, kartlar: dict, yerlesim: dict, liste_kurallari: dict, is_emri: dict, 
     """Yerleşim katmanlarını (`motor/yerlesim/`) kart modeline ekler. Dönen: sınıflandırma kayıtları (rol "kart"), kural yok, kesim planı,
     sabit paketler ve yerleşimin özeti. `elektrik` ise K3'ün elektrik katmanı da eklenir (`motor/yerlesim/elektrik.py`); `kenar` ise K3b'nin
     alt çerçeve ve çatı kenarları (`motor/yerlesim/kenar.py`); özetleri ayrıdır. K3b'nin özetinde liste üretecinin aynı satırları da durur
-    (bilgi: model ile liste yan yana; liste değişmez)."""
+    (bilgi: model ile liste yan yana; liste değişmez). Beşik dışı ana çatıda liste üreteci liste yazmaz: satırların yerinde
+    `LISTE_YAZILMAZ`, nedeni `liste_yazilmaz`'da (K5)."""
     from motor import yerlesim as Y
     from motor.yerlesim import kesim, yaz
 
@@ -350,11 +357,18 @@ def _k2(f, kartlar: dict, yerlesim: dict, liste_kurallari: dict, is_emri: dict, 
         from motor import prefabrik_liste as PL
         kalem = {k["kod"]: (k["liste"]["satirlar"] or [None])[0] for k in kartlar["kartlar"] if k.get("yerlesim", {}).get("kural") in KE.KENAR}
         satir: dict[str, int] = {}
-        for x in PL.liste(PL.model_motor(copy.deepcopy(is_emri)))["satirlar"]:
+        try:                                                            # listeyle aynı yol (D-28); beşik dışı ana çatıda liste yazılmaz (K5)
+            L = PL.is_emrinden(copy.deepcopy(is_emri))
+        except PL.ListeYazilmaz as hata:
+            L, yazilmaz = None, hata.neden
+        for x in (L or {"satirlar": []})["satirlar"]:
             if x["kalem"] in kalem.values():                          # yalnız bu kartların satırları (başka satırın adedi boş olabilir)
                 satir[x["kalem"]] = satir.get(x["kalem"], 0) + x["adet"]
+        yok = {x["parca"] for x in KN["kural_yok"]}
+        kurulmadi = [k["kod"] for k in kartlar["kartlar"] if KE.CATI_ADI.get(k.get("yerlesim", {}).get("kural")) in yok]
         out["kenar"] = {"uyarilar": KN["uyarilar"], "hatlar": KN["hatlar"],
-                        "liste": {kod: (satir.get(ad, 0) if ad else None) for kod, ad in kalem.items()},
+                        "liste": {kod: (LISTE_YAZILMAZ if L is None else satir.get(ad, 0) if ad else None) for kod, ad in kalem.items()},
+                        **({"liste_yazilmaz": yazilmaz} if L is None else {}), **({"kurulmadi": kurulmadi} if kurulmadi else {}),
                         "parcalar": [{"parca": p["ad"], "kart": p["kart"]["kod"], "kural": p["kural"], "boy_cm": p["boy_cm"], "bilgi": p["bilgi"],
                                       "aciklama": p["aciklama"]} for p in kn_eslesen],
                         "degerler": {ad: D[ad] for ad in KE.KENAR + (KE.GOSTERIM,)}}
@@ -525,7 +539,8 @@ def sayim(sinif: list[dict], kartlar: dict, yerlesim: dict, makas_aralik_cm: flo
         "gorunum": [{"parca": s["e"].Name, "asil": s["asil"].Name} for s in sinif if s["rol"] == "gorunum"],
         "bilesen": dict(sorted(Counter(s["asil"].Name for s in sinif if s["rol"] == "bilesen").items())),
         "kartsiz": [{"parca": s["e"].Name, "sinif": s["e"].is_a(), "neden": s["neden"]} for s in sinif if s["rol"] == "kartsiz"],
-        "kural_yok": [{"parca": s["e"].Name, "sinif": s["e"].is_a(), "neden": s["neden"]} for s in sinif if s["rol"] == "kural_yok"]
+        "kural_yok": [{"parca": s["e"].Name, "sinif": s["e"].is_a(), "neden": s["neden"], **({"cati": s["cati"]} if "cati" in s else {})}
+                      for s in sinif if s["rol"] == "kural_yok"]
                      + (k2 or {}).get("kural_yok", []),
     }
     if k2 is not None:
@@ -596,14 +611,15 @@ def katalog_excel(kartlar: dict, say: dict | None, yol: Path) -> Path:
               + [[kod, f"sabit paket ({x['okunan']})", "—", "—", "—", x["adet"], "—"] for kod, x in say["sabit"].items()],
               [8, 40, 12, 8, 10, 10, 80])
     if say and "kenar" in say:
-        liste = say["kenar"]["liste"]
+        liste, kurulmadi = say["kenar"]["liste"], set(say["kenar"].get("kurulmadi", []))
         sayfa(wb.create_sheet("Alt çerçeve ve çatı kenarı"), ["Parça", "Kart", "Kural", "Boy (cm)", "Bilgi", "Açıklama"],
               [[p["parca"], p["kart"], p["kural"], p["boy_cm"], "; ".join(f"{a}: {v}" for a, v in p["bilgi"].items()), p["aciklama"]]
                for p in say["kenar"]["parcalar"]]
               + [[]] + [["Kart", "Model (kesim planı)", "Liste üreteci", "", "", ""]]
-              + [[kod, (say["kesim_plani"][kod]["stok"] if kod in say["kesim_plani"] else
+              + [[kod, ("kurulmadı" if kod in kurulmadi else say["kesim_plani"][kod]["stok"] if kod in say["kesim_plani"] else
                         f"{next(k.get('metre', 0) for k in say['kartlar'] if k['kod'] == kod):g} m"),
-                  "listede yok" if n is None else n, "", "", ""] for kod, n in liste.items()],
+                  "listede yok" if n is None else "liste yazılmaz" if n == LISTE_YAZILMAZ else n, "", "", ""] for kod, n in liste.items()]
+              + ([["Liste yazılmaz", "", say["kenar"]["liste_yazilmaz"], "", "", ""]] if "liste_yazilmaz" in say["kenar"] else []),
               [16, 8, 26, 10, 50, 50])
     yol = Path(yol)
     yol.parent.mkdir(parents=True, exist_ok=True)

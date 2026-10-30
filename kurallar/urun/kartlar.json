@@ -1,7 +1,7 @@
 {
  "sema": "portman.urun_kartlari/1",
- "surum": "6",
- "aciklama": "Ürün kimlik kartları (İE-15 K1, K2, K3 ve K3b, D-24). Kart bir ürünü tanımlar; modelde IFC tür nesnesidir, parça (örnek) türüne bağlanır. Okuyan `motor/kart_model.py`. Kod kalıcıdır: bir kod başka ürüne verilmez, ürün kalkarsa kod boş kalır (`testler/kimlik/veri/kart_kodlari.json` kilidi). Kart kodu boy ve projeyle değişmez; bugünkü malzeme kataloğunun kodu (D01, D09…) boya göre ve projede yeni boy çıktıkça verilir, parçada `KatalogKodu` olarak kalır. Bu yüzden kart kodu tirelidir (D-01). Ailelerin harfi katalogla aynıdır. Kartı düzeltmek için bu dosya düzeltilir, model yeniden üretilir; Bonsai'de yapılan değişiklik geri okunmaz.",
+ "surum": "7",
+ "aciklama": "Ürün kimlik kartları (İE-15 K1, K2, K3, K3b ve K5, D-24). Kart bir ürünü tanımlar; modelde IFC tür nesnesidir, parça (örnek) türüne bağlanır. Okuyan `motor/kart_model.py`. Kod kalıcıdır: bir kod başka ürüne verilmez, ürün kalkarsa kod boş kalır (`testler/kimlik/veri/kart_kodlari.json` kilidi). Kart kodu boy ve projeyle değişmez; bugünkü malzeme kataloğunun kodu (D01, D09…) boya göre ve projede yeni boy çıktıkça verilir, parçada `KatalogKodu` olarak kalır. Bu yüzden kart kodu tirelidir (D-01). Ailelerin harfi katalogla aynıdır. Kartı düzeltmek için bu dosya düzeltilir, model yeniden üretilir; Bonsai'de yapılan değişiklik geri okunmaz.",
  "alanlar": {
   "kod": "Kalıcı kod, `<aile>-<nn>`",
   "ad": "Ürünün adı; listedeki adı ya da ona en yakın ad",
@@ -834,7 +834,12 @@
   {"sinif": "IfcSlab", "ad": "^CATI_", "neden": "Çatı yüzü (bugünkü IFC'nin trapez sac gösterimi); kaplama K2'de kartlı parçalarla (KP-01), bu yüz sayılmaz"},
   {"sinif": "IfcPlate", "ad": "^ALIN_", "neden": "Çatı alın dolgusu (bugünkü IFC'nin gösterimi); baş makasın betopanı K2'de kartlı levhalarla (BT-01), bu dolgu sayılmaz"},
   {"sinif": "IfcSlab", "ad": "^ZEMIN_BETONU$", "neden": "Kapsam dışı (bayi ya da saha)"},
+  {"sinif": "IfcSlab", "ad": "^VERANDA_ZEMINI_\\d+$", "neden": "Kapsam dışı (bayi ya da saha); gövdeden taşan verandanın zemini (BK-14), ana zemin gibi (K5)"},
   {"sinif": "IfcRoof", "neden": "Çatının kabı; parçaları ayrı sayılır"},
   {"sinif": "IfcOpeningElement", "neden": "Boşluk; ürün değil, doğraması ayrı parça"}
+ ],
+ "kural_yok": [
+  {"sinif": "IfcSlab", "ad": "^VERANDA_CATI_\\d+_\\d+$", "neden": "Gövdeden taşan verandanın çatı yüzü (BK-14; bugünkü IFC'nin trapez sac gösterimi); veranda çatısının parçaları (kaplama, aşık, yavru makas, kenarlar, dere ve iniş) K5b'de BK-14'ün düzlemlerinden kurulur, bu yüz sayılmaz"},
+  {"sinif": "IfcPlate", "ad": "^VERANDA_ALIN_\\d+$", "neden": "Gövdeden taşan verandanın alın dolgusu (BK-14); kartı ve kuralı K5b'de, bu dolgu sayılmaz"}
  ]
 }
