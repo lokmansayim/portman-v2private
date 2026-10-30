@@ -293,7 +293,7 @@ def gorunus_ciz(C: _Cizer, S: list[dict], taraf: str, duvar_h: float, ox: float,
         katman = GORUNUS_KATMANI.get(tur, "duvar")
         kenar = geo.boundary
         C.geo(kenar if ortu.is_empty else kenar.difference(ortu.buffer(0.05)), katman, dx, dy)
-        if tur == "pencere" and s.get("en", 0) >= 100:             # kayıt (orta kayıt) çizgisi, görünüşteki gibi
+        if tur == "pencere" and (s.get("en", 0) >= 100 or s.get("acilis") == "surgulu"):   # kayıt (orta kayıt) çizgisi, görünüşteki gibi
             u_ = [p[0] for p in s["k2"]]; z_ = [p[1] for p in s["k2"]]
             orta = LineString([((min(u_) + max(u_)) / 2, min(z_)), ((min(u_) + max(u_)) / 2, max(z_))])
             C.geo(orta if ortu.is_empty else orta.difference(ortu.buffer(0.05)), "aciklik", dx, dy)

@@ -1,9 +1,10 @@
 """Genel motorda sürgülü pencere (Lokman, 30 Ekim 2026, KT-04 bayi paftası: "sürgülü"; prefabrikteki D-31 madde 11'in genel motordaki eşi).
 
 Yapı Tanımı'nda açıklığa isteğe bağlı `acilis: "surgulu"` yazılır (yalnız pencerede ve yalnız bu değer; prefabrik K21 gibi). Görünüşlerde
-sürgülü sembol: şablon paftasında ortada bindirmeli iki kanat, sabit kanatta cam işareti, sürülen kanatta kırmızı yön oku; çizim setinin ve
-DXF'in görünüşünde kırmızı yön oku. Ölçü, plan simgesi ve yükleme listesi değişmez. Anahtarı yazmayan tanımın çıktısı bayt bayt aynıdır
-(altın testler ve `dogrula.py` izleri bunu sınar; burada yalnız yeni davranış)."""
+sürgülü sembol: şablon paftasında ortada bindirmeli, çift çizgili iki kanat (prefabrikteki D-31 madde 11 bloğu gibi), sabit kanatta cam
+işareti, sürülen kanatta kırmızı yön oku; çizim setinin görünüşünde kırmızı, DXF'te ACIKLIK katmanında yön oku (üçü
+`ciz_genel.surgulu_oku`'dan). Ölçü, plan simgesi ve yükleme listesi değişmez. Vasistas yüksekliğindeki pencere sürgülü olamaz. Anahtarı
+yazmayan tanımın çıktısı bayt bayt aynıdır (altın testler ve `dogrula.py` izleri bunu sınar; burada yalnız yeni davranış)."""
 from __future__ import annotations
 
 import json
@@ -30,10 +31,12 @@ def _tanim(**acilis) -> dict:
 
 
 def test_acilis_yalniz_pencerede_ve_yalniz_surgulu():
-    with pytest.raises(SystemExit, match="surgulu"):
-        yapi.kur(_tanim(K2="surgulu"))
-    with pytest.raises(SystemExit, match="surgulu"):
-        yapi.kur(_tanim(P1="vasistas"))
+    for ad, deger in (("K2", "surgulu"), ("K1", "surgulu"), ("P1", "vasistas"), ("P1", "")):     # iç ve dış kapı, başka değer, boş dize
+        with pytest.raises(SystemExit, match="surgulu"):
+            yapi.kur(_tanim(**{ad: deger}))
+    with pytest.raises(SystemExit, match="Vasistas"):                       # P7 60×40: planda "V.", tabloda vasistas; sürgülü çizilmez
+        yapi.kur(_tanim(P7="surgulu"))
+    yapi.kur(_tanim(P2="surgulu"))                                          # 80 cm'lik pencere sürgülü olabilir (iki kanat çizilir)
 
 
 class _Kayit:
@@ -45,7 +48,7 @@ class _Kayit:
         self.cizgiler.append((renk, ls))
 
     def cokgen(self, pts, fc, ec="black", lw=0.72, z=2, ls="-"):
-        self.cokgenler.append(pts)
+        self.cokgenler.append([tuple(p) for p in pts])
 
 
 def test_sablon_paftasinda_surgulu_sembol():
@@ -57,7 +60,10 @@ def test_sablon_paftasinda_surgulu_sembol():
     duz = lambda k: [c for c in k.cizgiler if c[0] == sablon_pafta.KIRMIZI and c[1] == "-"]     # noqa: E731  sürgülünün yön oku
     assert len(kesik(acilir)) == 4 and not duz(acilir)
     assert not kesik(surgulu) and len(duz(surgulu)) == 4                     # gövde, kuyruk çentiği, iki uç
-    assert len(surgulu.cokgenler) == 4                                       # dış kasa, iç kasa, bindirmeli iki kanat
+    assert len([c for c in surgulu.cizgiler if c[0] == "black"]) == 2        # sabit kanatta iki çizgili cam işareti (prefabrik blok gibi)
+    assert len(surgulu.cokgenler) == 6                                       # dış kasa, iç kasa, iki kanat (her biri çift çizgi)
+    kanat = [(min(p[0] for p in c), max(p[0] for p in c)) for c in surgulu.cokgenler[2::2]]
+    assert kanat == [(6, 102), (98, 194)]                                    # ortada 2 × 2 cm bindirme (dxf_out._surgulu_blok gibi)
 
 
 def test_sahne_ogesi_acilisi_tasir_yoksa_ayni():
@@ -74,6 +80,12 @@ def test_sahne_ogesi_acilisi_tasir_yoksa_ayni():
 def test_yon_oku_sag_kanatta():
     ok = ciz_genel.surgulu_oku([(0, 10), (200, 10), (200, 190), (0, 190)])
     assert ok[0] == ((125.0, 100.0), (175.0, 100.0)) and len(ok) == 4
+    assert all(uc[0] == (175.0, 100.0) and uc[1][0] < 175.0 for uc in ok[2:])   # iki uç gövdenin sağ ucunda, sağa bakar
+    P = lambda u, z: (u, z)                                                  # noqa: E731
+    pafta = _Kayit()
+    pafta.cizgi = lambda x0, y0, x1, y1, renk="black", lw=0.72, ls="-", z=3, **k: pafta.cizgiler.append(((x0, y0), (x1, y1), renk))
+    sablon_pafta.pencere_gorunus(pafta, P, 0, 200, 10, 190, 200, "surgulu")
+    assert [c[:2] for c in pafta.cizgiler if c[2] == sablon_pafta.KIRMIZI] == ok   # şablon paftasının oku da aynı kaynaktan
 
 
 def test_uret_liste_ayni_gorunus_farkli(tmp_path):
@@ -93,3 +105,9 @@ def test_uret_liste_ayni_gorunus_farkli(tmp_path):
     assert oku("acilir", f"{gk}_plan.png") == oku("surgulu", f"{gk}_plan.png")
     assert oku("acilir", f"{gk}_gorunusler.png") != oku("surgulu", f"{gk}_gorunusler.png")
     assert oku("acilir", f"{gk}_pafta_sablon.png") != oku("surgulu", f"{gk}_pafta_sablon.png")
+    # DXF: üretildi (hatalı değil) ve görünüşlerde yön oku ACIKLIK katmanında; DUVAR katmanı aynı (geometri hakemi, 30 Ekim)
+    import ezdxf
+    for k in cikti:
+        assert (cikti[k] / f"{gk}_cizim.dxf").is_file() and not list(cikti[k].glob("*.HATALI.dxf")), k
+    say = lambda k, katman: len(ezdxf.readfile(cikti[k] / f"{gk}_cizim.dxf").modelspace().query(f"*[layer=='{katman}']"))   # noqa: E731
+    assert say("surgulu", "ACIKLIK") > say("acilir", "ACIKLIK") and say("surgulu", "DUVAR") == say("acilir", "DUVAR")

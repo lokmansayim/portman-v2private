@@ -578,7 +578,7 @@ def gorunus_eksen(ax, S: list[dict], taraf: str, duvar_h: float, olculu: bool = 
             continue
         fc, ec = RENK[s["tur"]]
         ax.add_patch(MplPolygon(s["k2"], closed=True, fc=fc, ec=ec, lw=0.8 if s["tur"] not in ("pencere", "kapi") else 1.0, zorder=2, joinstyle="round"))
-        if s["tur"] == "pencere" and s.get("en", 0) >= 100:
+        if s["tur"] == "pencere" and (s.get("en", 0) >= 100 or s.get("acilis") == "surgulu"):   # sürgülü hep iki kanat
             us = [p[0] for p in s["k2"]]
             zs = [p[1] for p in s["k2"]]
             ax.plot([(min(us) + max(us)) / 2] * 2, [min(zs), max(zs)], color=CERCEVE, lw=0.7, zorder=2)
