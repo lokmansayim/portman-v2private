@@ -1,5 +1,5 @@
 """İE-08 Adım 8 · Aday kabul kaydı (K-A10): `beyin/veri/adaylar.json`'daki adaylardan yalnız komut satırında verilen kodlar Postgres
-`adaylar` tablosuna `durum = gecerli` ve kabul kaydıyla `{kim, tarih, not, karar}` yazılır (sütun adı `muhendis_kabulu` kalır: göçler
+`adaylar` tablosuna (İE-09, D-20: atölyede kabul edilen `modeller/banka/` modelleri de, `beyin/banka.py`) `durum = gecerli` ve kabul kaydıyla `{kim, tarih, not, karar}` yazılır (sütun adı `muhendis_kabulu` kalır: göçler
 yalnız ekler). Kalıcı akış (`kanal/kalici.py`) yalnız bu kayıtları bayiye sunar (`depo.kabul_edilmis_adaylar`): kabul edilmeyen aday
 yazılmaz, sunulmaz.
 
@@ -62,9 +62,16 @@ def main(argv: list[str] | None = None) -> int:
         print("DUR: kabul edenin adı boş"); return 2
     kodlar = [kod_normalize(k) for k in a.kodlar.split(",") if k.strip()]
     adaylar = json.loads(Path(a.adaylar).read_text(encoding="utf-8"))
+    if Path(a.adaylar).resolve() == (KOK / "beyin" / "veri" / "adaylar.json").resolve():   # İE-09 (D-20): atölyede kabul edilen modeller de
+        from beyin import banka
+        kodlar_var = {str(x["kod"]).upper() for x in adaylar}
+        adaylar = adaylar + [x for x in banka.kayitlar() if str(x["kod"]).upper() not in kodlar_var]
+    varyant = sorted(str(x["kod"]) for x in adaylar if x.get("banka") and x.get("taban_model") and str(x["kod"]).upper() in kodlar)
+    if varyant:                                     # Katalog bankanın çatı varyantını ayrı model sunmaz (`beyin/banka.py`); çatı setine girmesi ayrı iş
+        print("DUR: model bankasının çatı varyantı bayiye ayrı model olarak sunulmaz, kabul kaydı yazılmaz:", ", ".join(varyant)); return 2
     kayitlar, yok = kabul_kayitlari(adaylar, kodlar, a.kim.strip(), a.tarih, a.not_.strip(), a.paket.strip())
     if yok:
-        print("DUR: adaylar.json'da olmayan kod:", ", ".join(yok)); return 2
+        print("DUR: adaylar.json'da ve model bankasında olmayan kod:", ", ".join(yok)); return 2
     if not kayitlar:
         print("DUR: kod verilmedi"); return 2
     kim_izi = a.kim.strip()[0] + "…"                 # ad çıktıya girmez (K09; kişisel veri)
