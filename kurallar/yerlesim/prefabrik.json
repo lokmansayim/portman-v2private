@@ -1,7 +1,7 @@
 {
  "sema": "portman.prefabrik_yerlesim/1",
- "surum": "4",
- "aciklama": "Prefabrik pano evinde parçaların yerleşim kuralları (İE-15). Okuyan `motor/kart_model.py` (K1: H türü) ve `motor/yerlesim/` (K2: tavan omegası, aşık, çatı kaplaması, baş makas betopanı, dere ve iniş; K3: elektrik; K3b: alt çerçeve ve çatı kenarları, montaj rehberinden). Yalnız kural kitabında ve `kurallar/liste/prefabrik.json`'da olmayan konum kuralları buraya yazılır; aynı anahtar iki dosyada olmaz (test). Oradaki değerler (makas aralığı, omega aralığı, aşık aralığı, parça boyları, levha) `okunan` ile gösterilir, burada yeniden yazılmaz: `kurallar/liste/prefabrik.json › kurallar.<ad>[.<alt>]` liste kuralının değeri, `kitap › <ad>[.<alt>]` liste kurallarının sabitlediği kural kitabı setinin (`kitap_seti`) değeri.",
+ "surum": "5",
+ "aciklama": "Prefabrik pano evinde parçaların yerleşim kuralları (İE-15). Okuyan `motor/kart_model.py` (K1: H türü) ve `motor/yerlesim/` (K2: tavan omegası, aşık, çatı kaplaması, baş makas betopanı, dere ve iniş; K3: elektrik; K3b: alt çerçeve ve çatı kenarları, montaj rehberinden; K5b: gövdeden taşan verandanın çatısı). Yalnız kural kitabında ve `kurallar/liste/prefabrik.json`'da olmayan konum kuralları buraya yazılır; aynı anahtar iki dosyada olmaz (test). Oradaki değerler (makas aralığı, omega aralığı, aşık aralığı, parça boyları, levha) `okunan` ile gösterilir, burada yeniden yazılmaz: `kurallar/liste/prefabrik.json › kurallar.<ad>[.<alt>]` liste kuralının değeri, `kitap › <ad>[.<alt>]` liste kurallarının sabitlediği kural kitabı setinin (`kitap_seti`) değeri.",
  "kurallar": {
   "h_turu": {
    "kural": "Dış duvarda, makasın oturduğu duvar çizgisinde makasa en yakın dış H (pano eki ya da 3'lü) dübelli & kulaklıdır; öteki dış H dübellidir. İç H standarttır (kartı ayrı).",
@@ -103,24 +103,37 @@
    "not": "Kitabın aşık notundaki \"mahya aşığı 20 cm'de\" ve liste üretecinin sayım formülündeki mahya payı (`asik_mahya_payi_m`) PK-01 paftasında görülmedi (ilk sıra mahyada, son aralık 47 cm); model karar C'yi izler, liste üreteci değişmez (6e'nin dosyası)."
   },
   "cati_kaplamasi": {
-   "kural": "Her çatı yüzü ⌈mahya boyu ÷ kapatma⌉ şerittir (liste üretecinin sayısı); ilk şerit dizilimin başladığı uçtan, son şerit yüzün öteki ucundan taşar (kesilmez). Şerit mahyadan saçağa; boyu eğik boy + taşma, yuvarlamaya yukarı (liste üretecinin boyu).",
+   "kural": "Ana çatının her yüzü ⌈mahya boyu ÷ kapatma⌉ şerittir (liste üretecinin sayısı, O9); ilk şerit dizilimin başladığı uçtan, son şerit yüzün öteki ucundan taşar (kesilmez). Taşan verandanın çatısında (K5b) iki yüz birlikte ⌈iki yüz × mahya boyu ÷ kapatma⌉ (liste üretecinin ek çatı parçası sayısı): her yüzde dış kalkandan tam şeritler, iki yüzün artan şeritleri bir panele sığıyorsa (iki artan ≤ kapatma) bir panelden kesilir, sığmıyorsa her yüzün son şeridi gövde duvarında kesilir (ötesi ana çatının kalkan saçağı). Şerit mahyadan saçağa; boyu eğik boy + taşma, yuvarlamaya yukarı (liste üretecinin boyu). Kapatma kaplamaya göre.",
    "kapatma": {"okunan": "kitap › sandvic_panel_kapatma_m"},
+   "kapatma_tek_kat": {"okunan": "kitap › tek_kat_panel_kapatma_m"},
    "tasma": {"okunan": "kitap › cati_kaplama_tasma_m"},
    "yuvarlama_mm": {"okunan": "kitap › panel_boyu_yuvarlama_mm"},
    "kaplamalar": {
-    "deger": {"sandvi": "sandviç panel"},
+    "deger": {"sandvi": "sandviç panel", "tek kat": "tek kat panel"},
     "durum": "varsayim",
-    "tarih": "2026-10-24",
-    "not": "İş Emri'nin \"Çatı Kaplaması\" özelliğinde aranan yazı; K2 yalnız sandviç paneli kurar (PK-01). Öteki kaplamaların kartı yok: \"kural yok\" yazar."
+    "tarih": "2026-10-30",
+    "not": "İş Emri'nin \"Çatı Kaplaması\" özelliğinde aranan yazı (sırayla) ve kaplamanın adı; anahtar kartın `yerlesim.bilgi.Kaplama`'sıdır (KP-01 sandviç, KP-02 tek kat; K5b). Sandviç K2'de (PK-01), tek kat panel K5b'de (TK-01)."
+   },
+   "kurulmayan": {
+    "deger": {"trapez": "trapez sac", "kiremit": "metal kiremit"},
+    "durum": "muhendis",
+    "tarih": "2026-10-30",
+    "not": "Liste üretecinin okuması (`motor/prefabrik_liste.py` › 1006 Çatı): bu yazılar geçiyorsa kaplama trapez sac ya da metal kiremittir; kartları yok, \"kural yok\" yazar."
+   },
+   "varsayilan": {
+    "deger": "tek kat",
+    "durum": "muhendis",
+    "tarih": "2026-10-30",
+    "not": "Liste üretecinin okuması: kaplama sandviç, trapez ya da kiremit değilse (yazılı değilse de) tek kat panel sayılır (kapatması `tek_kat_panel_kapatma_m`). Kart modeli aynı okur; kaplama yazılı değilse uyarı yazar (K5b)."
    },
    "cati_tipleri": ["besik"],
    "durum": "muhendis",
    "tarih": "2026-10-24",
-   "kaynak": "PK-01 çatı kaplaması planı (s. 9): yüz başına 11 × (350 × 100), son şerit yüzün ucundan taşar.",
+   "kaynak": "PK-01 çatı kaplaması planı (s. 9): yüz başına 11 × (350 × 100), son şerit yüzün ucundan taşar. Taşan veranda: liste üretecinin ek çatı parçası sayısı (P3, O9) ve İE-18 rehberi (TK-01 ön verandada iki yüzün 11'er cm'lik şeritleri bir levhadan).",
    "not": "Panel boyu kitabın kuralıyla 353 cm (3,475 + 0,05 m, 10 mm'ye yukarı; liste üretecinde de L 3530); PK-01 paftası 350 yazıyor. Kapıda yalnız adet sayılır. PK-01'de mahya boyu 1060: yüz başına 11 şerit, son şerit 40 cm taşar (paftada da 11 tam panel)."
   },
   "bas_makas_betopani_yerlesimi": {
-   "kural": "Her baş makasın dış yüzünde levhalar yatık (uzun kenar yatay), makasın alt başlığından başlayarak mahyaya ortalı, tek sıra yan yana. Levha sayısı liste kuralından (H5: makas başına ⌈katsayı × saçaklı üçgen ÷ levha⌉). Tek sıra yalnız üçgenin yüksekliği (alt başlıktan mahyada üst başlığın altına) levhanın kısa kenarını geçmezse örter; geçerse kural kapsamaz, \"kural yok\" yazar.",
+   "kural": "Her baş makasın dış yüzünde levhalar makasın alt başlığından başlar. Levha sayısı liste kuralından (H5: makas başına ⌈katsayı × saçaklı üçgen ÷ levha⌉). Üçgenin yüksekliği (alt başlıktan mahyada üst başlığın altına) levhanın kısa kenarını geçmezse levhalar yatık (uzun kenar yatay), mahyaya ortalı, tek sıra yan yana; uçlardaki ince üçgenler açık (PK-01). Kısa kenarı geçip uzun kenarı geçmezse levhalar dikey (K5b, PK-07 s. 10): mahyadan dışa, mahyanın iki yanına sırayla (önce sağ), çatı çizgisinde kesilir; kesilen parçalar (artan betopan) iki uçta kalan üçgeni kapatır, uçtaki levhanın parçası sayılır, sayıya eklenmez. Artanın alanı uçları örtmezse ya da üçgen uzun kenarı da geçerse kural kapsamaz, \"kural yok\" yazar. Taşan verandanın kalkanında (dış kirişin üstünde) aynı kural, kalkan başına (K5b).",
    "katsayi": {"okunan": "kurallar/liste/prefabrik.json › kurallar.bas_makas_betopani.katsayi"},
    "levha_m2": {"okunan": "kurallar/liste/prefabrik.json › kurallar.bas_makas_betopani.levha_m2"},
    "levha_cm": {
@@ -132,11 +145,11 @@
    "cati_tipleri": ["besik"],
    "durum": "muhendis",
    "tarih": "2026-10-24",
-   "kaynak": "PK-01 baş makas betopan yerleşimi (s. 5): makas başına 2 levha, mahyaya ortalı, uçlardaki ince üçgenler açık.",
-   "not": "PVC betopan H'ı (kart SR-01) levhaların birleşim yerlerine konur, ama sayısı her evde sabittir (Lokman, 20 Ekim; liste kuralı `pvc_betopan_h`); modelde parçası yok."
+   "kaynak": "PK-01 baş makas betopan yerleşimi (s. 5): makas başına 2 levha, mahyaya ortalı, uçlardaki ince üçgenler açık. PK-07 s. 10 (K5b; 845 cm makas, üçgen 125'ten yüksek): levhalar dikey 125 × 250, mahyada ek, çatı çizgisinin üstünde kesilen parçalar uçları kapatır (Lokman, 26 Ekim: \"baş makasların duvar dışındaki uçları artan betopanla kaplandı\"). Paftada mahyanın sağında ve solunda 3 + 1 ve 2 + 1 levha; iki yana sırayla dizilim varsayım, sayı H5.",
+   "not": "PVC betopan H'ı (kart SR-01) levhaların birleşim yerlerine konur, ama sayısı her evde sabittir (Lokman, 20 Ekim; liste kuralı `pvc_betopan_h`); modelde parçası yok. Liste üreteci açık çatı parçasının kalkanını saymaz (N1); taşan verandanın kalkanı dış kirişin üstündedir (baş makas omegası alır, D-32), modelde betopanı kurulur: fark 6e'ye not (K5b)."
   },
   "dere_hatti": {
-   "kural": "Beşikte her saçak kenarı boyunca bir dere hattı; boyu mahya boyu (bina boyu + iki saçak). İniş her hattın iki ucunda (köşe başına kitabın sayısı); eşiği geçen hattın ortasında bir iniş daha.",
+   "kural": "Beşikte her saçak kenarı boyunca bir dere hattı; boyu mahya boyu (bina boyu + iki saçak). İniş her hattın iki ucunda (köşe başına kitabın sayısı); eşiği geçen hattın ortasında bir iniş daha. Taşan verandanın çatısında (K5b) her saçak kenarı bir hat, saçak ucundan ucuna; iniş liste kuralıyla ek çatı parçası başına (hatlara eşit, dış uçta).",
    "orta_esik": {"okunan": "kitap › inis.orta_inis_esigi_m"},
    "orta_kurali": {
     "okunan": "kurallar/liste/prefabrik.json › kurallar.inis_orta",
@@ -150,10 +163,32 @@
    "durum": "muhendis",
    "tarih": "2026-10-24",
    "kaynak": "PK-01 makas ve dere planı (s. 7): 2 hat × 1059,8; 6 iniş (hat uçlarında 4, ortada 2). Köşe başına iniş Lokman'ın 13 Ekim kuralıyla aynı (liste `ana_cati_kose`).",
-   "not": "Modelde dere hat başına bir parçadır (pafta da hatları sayar); stok boyları kesim planındadır: hat başına ⌈(hat − bindirme) ÷ (parça boyu − bindirme)⌉."
+   "ek_cati_basina": {"okunan": "kurallar/liste/prefabrik.json › kurallar.ek_cati_parcasi_basina"},
+   "not": "Modelde dere hat başına bir parçadır (pafta da hatları sayar); stok boyları kesim planındadır: hat başına ⌈(hat − bindirme) ÷ (parça boyu − bindirme)⌉ parça (son parça kalan boy), parçalar stok boylarına en uzun önce, ilk sığan boy (K5b: aşık ve omegadaki gibi bir hattın artanı başka hatta kullanılır; PK-01'de değişmez, 6)."
+  },
+  "veranda_catisi": {
+   "kural": "Gövdeden taşan verandanın çatısı (BK-14) kendi çerçevesiyle kurulur: açıklık verandanın cephe boyunca eni, mahya derinlik boyunca (ana çatının mahyasına paralel), saçak ve eğim BK-14'ün düzlemlerinden; çatı yüzü ana çatınınki gibi saçak kotu + 10 cm. Parçalar ana çatının kurallarıyla: aşık (karar C), kaplama (iki yüz birlikte), dış kirişin üstündeki kalkanın betopanı, dere ve iniş, saçak omegası (yan kirişlerin üstünde, kiriş boyunca), saçak sacı, dış kalkanın iki eğik kenarında alın sacı, mahya. Yavru makas: sayı liste kuralından (J8: ⌈(derinlik − 2 × dış duvar) ÷ makas aralığı⌉ + 1), ilki dış kirişin ekseninde, sonuncusu gövde duvarının dış yüzünden yarım makas dışarıda, aralarında eşit aralık. Yalnız ana çatı beşikken ve veranda çatısı ana çatıya paralel beşikken; çapraz ya da tek yön veranda çatısı \"kural yok\" yazar (K6). Liste üreteci veranda kalkanında Z ve C kapama saymaz (O7 yalnız ana çatı); model de kurmaz.",
+   "makas_aralik": {"okunan": "kurallar/liste/prefabrik.json › kurallar.makas_aralik_cm"},
+   "makas_yarim_cm": {
+    "deger": 5,
+    "durum": "varsayim",
+    "tarih": "2026-10-30",
+    "not": "Duvar dibindeki yavru makasın ekseni gövde duvarının dış yüzünden bu kadar dışarıda (ana çatının baş makası da duvarın ekseninde, dış yüzden 5 cm içeride). Yalnız yer; sayı J8'den."
+   },
+   "kesit_cm": {
+    "deger": {"kalinlik": 5, "baslik": 10, "dikme": 6},
+    "durum": "varsayim",
+    "tarih": "2026-10-30",
+    "not": "Yalnız 3B gösterim: yavru makasın kalınlığı, başlıklarının ve orta dikmesinin kesiti (bugünkü IFC'nin ana makasıyla aynı: `motor/ifc_uret.py`). Sayı bunlardan çıkmaz."
+   },
+   "cati_tipleri": ["besik"],
+   "durum": "varsayim",
+   "tarih": "2026-10-30",
+   "kaynak": "CIO, 27 Ekim 23:11 (K5b planı, PF `Kimlik_Karti_Modeli/K5_yeni_catilar_plani.md`): taşan veranda çatıları BK-14'ün düzlemlerinden; liste üretecinin ek çatı parçası satırları (`motor/prefabrik_liste.py` › `_veranda_catilari`); yer İE-18 rehberindeki gibi.",
+   "not": "Saçak omegası duvar ve kiriş boyunca kurulur, liste saçak boyunu sayar (K3b'deki fark, veranda kirişinde de). Veranda zemini kartsız (K5). Arka verandanın sol yüzü ana çatının sol yüzünün devamı olabilir (TK-01): liste iki çatıyı ayrı sayar, model de ayrı kurar. İE-18 rehberi C kapamayı dört kalkanda yazar (kalkan başına iki kenar); liste üreteci ve model yalnız ana çatıda: fark 6e'ye ve rehbere not (K5b)."
   },
   "kesim_plani": {
-   "kural": "Boyla alınan kartta (omega, aşık) modelin parçaları stok boylara en uzun önce, ilk sığan boya yerleşir; bir boyun kullanılır uzunluğu parça boyu − pay (yerleşim kuralındaki tam parça). Dere hat başına bindirmeyle bölünür. K3b'nin kartlarında sayı liste üretecinin yoludur, boy modelden: hatların toplamı ya da kenar başına (kuralın `yontem`'i); C kapama metreyle. Yedek parça eklenmez (karar D açık).",
+   "kural": "Boyla alınan kartta (omega, aşık) modelin parçaları stok boylara en uzun önce, ilk sığan boya yerleşir; bir boyun kullanılır uzunluğu parça boyu − pay (yerleşim kuralındaki tam parça). Dere hat başına bindirmeyle bölünür, parçaları stok boylarına aynı yolla yerleşir (K5b). K3b'nin kartlarında sayı liste üretecinin yoludur, boy modelden: hatların toplamı ya da kenar başına (kuralın `yontem`'i); C kapama metreyle. Yedek parça eklenmez (karar D açık).",
    "durum": "varsayim",
    "tarih": "2026-10-24",
    "not": "Montaj paftası incelemesi (4 Ekim): tavan omegası en iyi yerleşim + 1, aşık en az boy + 0–2. Yedek (+1, 0–2) karar D'dir; cevaplanınca buraya yazılır."

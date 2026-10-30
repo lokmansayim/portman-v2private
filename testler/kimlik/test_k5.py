@@ -10,7 +10,8 @@
   üretecimizin çıktısıyla ve İE-17'nin İş Emri'siyle (CIO, 27 Ekim 22:02).
 - Çizim ve Excel: yedi sayfa; çatı sayfalarında bugünkü IFC'nin beşik makasları çizilmez, yerine çatının adı ve nedeni; yedinci sayfada
   "kurulmadı" ve "liste yazılmaz", "≠" yok. Excel'de aynısı ve nedeni. Komut 1 döner (kural yok).
-- BK-14'ün taşan verandası (TK-01): zemin kartsız (kapsam dışı), çatı yüzü ve alın dolgusu "kural yok" nedeniyle (K5b'de kurulur).
+- BK-14'ün taşan verandası (TK-01): zemin kartsız (kapsam dışı); çatı yüzü ve alın dolgusu K5'te "kural yok"tu, K5b'de kartsız (çatının
+  parçaları kartlı kuruldu; `test_k5b.py`).
 - Beşikte de kuralı kurulmayan çatı kenarı kartı "kurulmadı" yazar (trapez kaplamada mahya).
 - PK-01'in K1–K3b'si değişmez: öteki test dosyaları aynen geçer (K5'te yalnız Değişiklik (K5)'te yazılı üç vaka değişti).
 """
@@ -96,9 +97,10 @@ def test_catiya_bagli_olmayan_kartlar_ikizle_ayni(evler, ev):
 
 
 def test_catiya_bagli_kartlar():
-    """Çatıya bağlı kartlar veri dosyalarından: makaslar, makasa göre ayrılan dış H'ler, K2'nin dört çatı katmanı, K3b'nin altı çatı kenarı."""
+    """Çatıya bağlı kartlar veri dosyalarından: makaslar, makasa göre ayrılan dış H'ler, K2'nin dört çatı katmanı, K3b'nin altı çatı kenarı;
+    K5b'de tek kat panel (KP-02) ve yavru makas (MA-03)."""
     assert _catiya_bagli() == {"MA-01", "MA-02", "H-01", "H-02", "H-04", "H-05", "H-08", "H-09", "AS-01", "KP-01", "BT-01", "DR-01", "DR-02",
-                               *CATI_KENARI}
+                               "KP-02", "MA-03", *CATI_KENARI}
 
 
 @pytest.mark.parametrize("ev", list(TIP))
@@ -205,19 +207,20 @@ def test_komut_excel(komut):
 
 # ----------------------------------------------------------------------------- BK-14'ün taşan verandası
 def test_tasan_veranda_siniflanir(tmp_path):
-    """TK-01'in iki taşan verandası (BK-14): zemin kartsız (kapsam dışı, ana zemin gibi); çatı yüzü ve alın dolgusu "kural yok", nedeni kart
-    dosyasından (parçaları ve kartı K5b'de). Hiçbiri sayılmaz; "hiçbir karta uymuyor" kalmaz."""
+    """TK-01'in iki taşan verandası (BK-14): zemin kartsız (kapsam dışı, ana zemin gibi); çatı yüzü ve alın dolgusu K5'te "kural yok"tu,
+    K5b'de kartsız: çatının parçaları (kaplama, aşık, yavru makas, betopan, kenarlar, dere ve iniş) kartlı kuruldu, bugünkü IFC'nin
+    gösterimi sayılmaz (nedeni kart dosyasından). "Kural yok" kalmaz (K5'te 8: altı veranda parçası, tek kat kaplama, betopan)."""
     kartlar = _oku(KM.KARTLAR)
     say = _model(_oku(KOK / "testler" / "motor" / "veri" / "TK01.json"), tmp_path, "TK01")
     v = lambda alan: {x["parca"]: x["neden"] for x in say[alan] if x["parca"].startswith("VERANDA_")}
     zemin = next(k["neden"] for k in kartlar["kartsiz"] if "VERANDA_ZEMINI" in k.get("ad", ""))
     kab = next(k["neden"] for k in kartlar["kartsiz"] if k["sinif"] == "IfcRoof")
-    assert v("kartsiz") == {"VERANDA_CATISI_1": kab, "VERANDA_CATISI_2": kab, "VERANDA_ZEMINI_1": zemin, "VERANDA_ZEMINI_2": zemin}
-    yuz, alin = (k["neden"] for k in kartlar["kural_yok"])
-    assert v("kural_yok") == {**{f"VERANDA_CATI_{i}_{j}": yuz for i in (1, 2) for j in (1, 2)}, "VERANDA_ALIN_1": alin, "VERANDA_ALIN_2": alin}
+    yuz = next(k["neden"] for k in kartlar["kartsiz"] if "VERANDA_CATI_" in k.get("ad", ""))
+    alin = next(k["neden"] for k in kartlar["kartsiz"] if "VERANDA_ALIN_" in k.get("ad", ""))
+    assert v("kartsiz") == {"VERANDA_CATISI_1": kab, "VERANDA_CATISI_2": kab, "VERANDA_ZEMINI_1": zemin, "VERANDA_ZEMINI_2": zemin,
+                            **{f"VERANDA_CATI_{i}_{j}": yuz for i in (1, 2) for j in (1, 2)}, "VERANDA_ALIN_1": alin, "VERANDA_ALIN_2": alin}
     assert "K5b" in yuz and "K5b" in alin and "Kapsam dışı" in zemin
-    assert not any(x["neden"] == "hiçbir karta uymuyor" for x in say["kural_yok"])
-    assert {x["parca"] for x in say["kural_yok"] if not x["parca"].startswith("VERANDA_")} == {"çatı kaplaması", "baş makas betopanı"}
+    assert kartlar["kural_yok"] == [] and say["kural_yok"] == []
 
 
 # ----------------------------------------------------------------------------- beşikte "kurulmadı"

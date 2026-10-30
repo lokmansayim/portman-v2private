@@ -1,7 +1,7 @@
 {
  "sema": "portman.urun_kartlari/1",
- "surum": "7",
- "aciklama": "Ürün kimlik kartları (İE-15 K1, K2, K3, K3b ve K5, D-24). Kart bir ürünü tanımlar; modelde IFC tür nesnesidir, parça (örnek) türüne bağlanır. Okuyan `motor/kart_model.py`. Kod kalıcıdır: bir kod başka ürüne verilmez, ürün kalkarsa kod boş kalır (`testler/kimlik/veri/kart_kodlari.json` kilidi). Kart kodu boy ve projeyle değişmez; bugünkü malzeme kataloğunun kodu (D01, D09…) boya göre ve projede yeni boy çıktıkça verilir, parçada `KatalogKodu` olarak kalır. Bu yüzden kart kodu tirelidir (D-01). Ailelerin harfi katalogla aynıdır. Kartı düzeltmek için bu dosya düzeltilir, model yeniden üretilir; Bonsai'de yapılan değişiklik geri okunmaz.",
+ "surum": "8",
+ "aciklama": "Ürün kimlik kartları (İE-15 K1, K2, K3, K3b, K5 ve K5b, D-24). Kart bir ürünü tanımlar; modelde IFC tür nesnesidir, parça (örnek) türüne bağlanır. Okuyan `motor/kart_model.py`. Kod kalıcıdır: bir kod başka ürüne verilmez, ürün kalkarsa kod boş kalır (`testler/kimlik/veri/kart_kodlari.json` kilidi). Kart kodu boy ve projeyle değişmez; bugünkü malzeme kataloğunun kodu (D01, D09…) boya göre ve projede yeni boy çıktıkça verilir, parçada `KatalogKodu` olarak kalır. Bu yüzden kart kodu tirelidir (D-01). Ailelerin harfi katalogla aynıdır. Kartı düzeltmek için bu dosya düzeltilir, model yeniden üretilir; Bonsai'de yapılan değişiklik geri okunmaz.",
  "alanlar": {
   "kod": "Kalıcı kod, `<aile>-<nn>`",
   "ad": "Ürünün adı; listedeki adı ya da ona en yakın ad",
@@ -469,6 +469,19 @@
    "kaynak": {"durum": "muhendis", "tarih": "2026-10-19", "dayanak": "PK-01 gerçek listesinin satır adı (PR #28)"}
   },
   {
+   "kod": "MA-03",
+   "ad": "Yavru makas",
+   "liste": {"grup": "1005", "satirlar": ["Yavru makas"]},
+   "olcu": "Açıklık parçada (veranda çatısının açıklığı + iki saçak; TK-01 önde 4460, arkada 3260)",
+   "birim": "adet",
+   "nerede": "Gövdeden taşan verandanın çatısında (BK-14): ilki dış kirişin üstünde, sonuncusu gövde duvarının dibinde, aralarında eşit aralık (`veranda_catisi`); sayı liste kuralından (J8)",
+   "sayim": "yerlesen_adet",
+   "ifc": {"sinif": "IfcElementAssemblyType", "alt_tur": "TRUSS"},
+   "pafta": [],
+   "yerlesim": {"kural": "veranda_catisi", "parca": "yavru_makas", "sinif": "IfcElementAssembly"},
+   "kaynak": {"durum": "varsayim", "tarih": "2026-10-30", "dayanak": "Liste kuralı J8 (`motor/prefabrik_liste.py`: ek çatı parçasının pano koşusu ÷ 125,5 yukarı + 1; PK-03 yavru makas 3); yer montaj rehberindeki gibi dış kirişten duvara eşit aralık (İE-18, varsayım); kesit 3B gösterim"}
+  },
+  {
    "kod": "OM-01",
    "ad": "60'lık tavan omegası L 3750",
    "liste": {"grup": "1002", "satirlar": ["60'lık duvar omegası (asma dizme tavan)", "60'lık tavan omegası (ters tavan)"]},
@@ -524,6 +537,19 @@
    "pafta": ["sandvic_panel"],
    "yerlesim": {"kural": "cati_kaplamasi", "parca": "panel", "sinif": "IfcCovering", "bilgi": {"Kaplama": "sandvi"}},
    "kaynak": {"durum": "muhendis", "tarih": "2026-10-24", "dayanak": "PK-01 çatı kaplaması planı (s. 9, 22 panel); kapatma ve boy kural kitabından (Lokman 4 ve 7 Ekim)"}
+  },
+  {
+   "kod": "KP-02",
+   "ad": "Tek kat çatı paneli",
+   "liste": {"grup": "1006", "satirlar": ["Tek kat çatı paneli"]},
+   "olcu": "100 cm kapatır (kitap `tek_kat_panel_kapatma_m`); boy parçada (eğik boy + 5 cm, 10 mm'ye yukarı)",
+   "birim": "adet",
+   "nerede": "Çatı yüzünde mahyadan saçağa şeritler; ana çatıda yüz başına, taşan verandanın çatısında iki yüz birlikte, iki yüzün artan şeritleri bir panele sığıyorsa bir panelden (`cati_kaplamasi`)",
+   "sayim": "yerlesen_adet",
+   "ifc": {"sinif": "IfcCoveringType", "alt_tur": "ROOFING"},
+   "pafta": [],
+   "yerlesim": {"kural": "cati_kaplamasi", "parca": "panel", "sinif": "IfcCovering", "bilgi": {"Kaplama": "tek kat"}},
+   "kaynak": {"durum": "lokman", "tarih": "2026-10-30", "dayanak": "Liste kuralı P3, O9 (`motor/prefabrik_liste.py`: ana çatıda yüz başına ⌈mahya boyu ÷ kapatma⌉, ek çatı parçasında ⌈iki yüz × mahya boyu ÷ kapatma⌉); kapatma kitaptan (Lokman, 4 Ekim 15:18: tek kat panel 100 cm kapatır); İş Emri'nde kaplama yazılı değilse liste üretecinin okuması tek kat panel"}
   },
   {
    "kod": "BT-01",
@@ -835,11 +861,10 @@
   {"sinif": "IfcPlate", "ad": "^ALIN_", "neden": "Çatı alın dolgusu (bugünkü IFC'nin gösterimi); baş makasın betopanı K2'de kartlı levhalarla (BT-01), bu dolgu sayılmaz"},
   {"sinif": "IfcSlab", "ad": "^ZEMIN_BETONU$", "neden": "Kapsam dışı (bayi ya da saha)"},
   {"sinif": "IfcSlab", "ad": "^VERANDA_ZEMINI_\\d+$", "neden": "Kapsam dışı (bayi ya da saha); gövdeden taşan verandanın zemini (BK-14), ana zemin gibi (K5)"},
+  {"sinif": "IfcSlab", "ad": "^VERANDA_CATI_\\d+_\\d+$", "neden": "Gövdeden taşan verandanın çatı yüzü (BK-14; bugünkü IFC'nin trapez sac gösterimi); kaplama, aşık, yavru makas, kenarlar, dere ve iniş K5b'de kartlı parçalarla (BK-14'ün düzlemlerinden), bu yüz sayılmaz"},
+  {"sinif": "IfcPlate", "ad": "^VERANDA_ALIN_\\d+$", "neden": "Gövdeden taşan verandanın alın dolgusu (BK-14; bugünkü IFC'nin gösterimi); kalkanın betopanı K5b'de kartlı levhalarla (BT-01), bu dolgu sayılmaz"},
   {"sinif": "IfcRoof", "neden": "Çatının kabı; parçaları ayrı sayılır"},
   {"sinif": "IfcOpeningElement", "neden": "Boşluk; ürün değil, doğraması ayrı parça"}
  ],
- "kural_yok": [
-  {"sinif": "IfcSlab", "ad": "^VERANDA_CATI_\\d+_\\d+$", "neden": "Gövdeden taşan verandanın çatı yüzü (BK-14; bugünkü IFC'nin trapez sac gösterimi); veranda çatısının parçaları (kaplama, aşık, yavru makas, kenarlar, dere ve iniş) K5b'de BK-14'ün düzlemlerinden kurulur, bu yüz sayılmaz"},
-  {"sinif": "IfcPlate", "ad": "^VERANDA_ALIN_\\d+$", "neden": "Gövdeden taşan verandanın alın dolgusu (BK-14); kartı ve kuralı K5b'de, bu dolgu sayılmaz"}
- ]
+ "kural_yok": []
 }
