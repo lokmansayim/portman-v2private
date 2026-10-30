@@ -203,15 +203,19 @@ def plan_izi(t: dict) -> str:
 
 # ── ölçüm (hızlı yol: yapı, çatı, metraj, liste; çizim yok) ──────────────────────────────────────────────────────────────
 def liste_ozeti(liste: dict) -> dict:
-    """Grup grup satır ve kg; çelik kg yalnız "Çelik panel" grubunun malzeme satırları. Motorun grup sağlaması (`TOPLAM_SATIRI`) malzeme
-    değildir, sayılmaz (İE-09 PR-1: 17 Ekim'deki özet onu da topluyordu, Ç8801-D'nin "4990,5 kg"ı 2 × 2495,25'ti)."""
+    """Grup grup satır ve kg. Çelik kg motorun çelik grubundaki sağlama satırından okunur (`TOPLAM_SATIRI`; D-28 madde 1: aynı sayıyı
+    motor üretir, atölye okur); satır yoksa (çelik grubu yok) 0. Sağlama satırı grubun kg toplamına girmez (İE-09 PR-1: 17 Ekim'deki
+    özet onu da topluyordu, Ç8801-D'nin "4990,5 kg"ı 2 × 2495,25'ti)."""
     gruplar: dict[str, dict] = {}
+    toplam = None
     for s in liste.get("satirlar") or []:
         g = gruplar.setdefault(s.get("grup") or "?", {"satir": 0, "kg": 0.0})
         g["satir"] += 1
-        if s.get("kalem") != TOPLAM_SATIRI:
+        if s.get("kalem") == TOPLAM_SATIRI:
+            toplam = s if s.get("grup") == CELIK_GRUBU else toplam
+        else:
             g["kg"] += float(s.get("kg") or 0)
-    celik = round((gruplar.get(CELIK_GRUBU) or {}).get("kg", 0.0), 2)
+    celik = round(float((toplam or {}).get("kg") or 0), 2)
     return {"satir": len(liste.get("satirlar") or []), "celik_kg": celik, "iz": kanonik_sha(liste),
             "gruplar": {k: {"satir": v["satir"], "kg": round(v["kg"], 2)} for k, v in gruplar.items()}}
 
@@ -477,7 +481,7 @@ def denetimler(kart: dict, t: dict, m: dict, v: dict, olcum: dict, yazi: list[st
     return d
 
 
-def metraj_hesapla(kart: dict, olcum: dict, t: dict) -> None:
+def metraj_hesapla(kart: dict, t: dict) -> None:
     """Metraj kapısı çizimden değil, çelik hakeminin ölçümünden gelir (`metraj --celik`); ölçümü olmayan kartta "yok". Tanım ölçümden sonra
     değiştiyse (düzeltme) hakemin ölçümü bugünkü kuralla yeniden denetlenir: tutmazsa kart `beklemede` (eski "geçti" taşınmaz)."""
     mt = kart.get("metraj_testi") or {}
@@ -512,9 +516,14 @@ def ciz(a) -> int:
     hedef = Path(a.cikti) / B.dosya_adi(kod) / f"c{no:02d}"
     if hedef.exists() and any(hedef.iterdir()):
         return dur(f"çıktı klasörü dolu: {hedef}")
+    # metraj kapısı çizimden önce: hakemin ölçümü pimi değiştirebilir; çizim kapının pimiyle yapılır ve o pim son çizime yazılır. Pimsiz
+    # kart kontrol dosyasının donacağı setle (`pim_seti`) çizilir: Lokman'ın onayladığı çizim ile dondurulan kontrol aynı kural setinden
+    metraj_hesapla(kart, t)
     if (e := _pim_denetle(kart)):
         return dur(e)
+    pim = copy.deepcopy(kart.get("pim"))
     set_yolu, karkas_yolu = pim_yollari(kart)
+    set_yolu = set_yolu or pim_seti()
     rapor: dict = {}
     with yazi_denetimi(rapor), contextlib.redirect_stdout(sys.stderr):
         m = U.uret(tp, hedef, is_emri_no=None, revizyon=None, set_yolu=set_yolu, yontem="panel", perspektif=a.perspektif, bayi=True,
@@ -525,12 +534,12 @@ def ciz(a) -> int:
     ozet_p = hedef / f"{gk}_pafta_ozet.json"
     kisa = (json.loads(ozet_p.read_text(encoding="utf-8")).get("kontrol_notlari") or []) if ozet_p.exists() else []
     dn = denetimler(kart, t, m, v, olcum, _yazi_bulgulari(rapor, gk), kisa, a.banka)
-    metraj_hesapla(kart, olcum, t)
     kart["olcum"] = olcum
     kart["brut_m2"], kart["oda_programi"] = olcum["oturum_m2"], olcum["oda_programi"]
     kart["cati_tipi"] = t["cati"].get("tip")
     kart["cati_adi"] = cati_adi(t)
-    kart["son_cizim"] = {"no": no, "zaman": simdi(), "tanim_sha256": sha256(tp), "kural_seti": olcum["kural_seti"], "pim": kart.get("pim"),
+    kart["son_cizim"] = {"no": no, "zaman": simdi(), "tanim_sha256": sha256(tp), "kural_seti": olcum["kural_seti"],
+                         "kural_seti_sha256": sha256(set_yolu), "pim": pim,
                          "passed": bool(m.get("passed")),
                          "cikti": _goreli(hedef), "denetimler": dn, "sure_s": v.get("sure_s"), "perspektif": (v.get("perspektif") or {}).get("durum")}
     kart["durum"] = "beklemede" if kart["metraj_testi"]["durum"] == "beklemede" else "kontrolde"
@@ -640,7 +649,8 @@ def celik_olcumu(proje: str, t: dict) -> tuple[dict | None, str | None]:
     # 2. sonuç bu listenin sonucu mu (liste, sonucun yazıldığı commit'ten beri değişmedi)
     lc = (sonuc.get("bizim_liste") or {}).get("commit")
     yol = bl.relative_to(KOK).as_posix()
-    if (sonuc.get("bizim_liste") or {}).get("yol") != yol or not lc or _git("rev-parse", f"{lc}:{yol}") != _git("hash-object", yol):
+    oz = _git("hash-object", yol)                                         # git yoksa ya da okuyamazsa boş: denetim geçmez
+    if (sonuc.get("bizim_liste") or {}).get("yol") != yol or not lc or not oz or _git("rev-parse", f"{lc}:{yol}") != oz:
         return None, f"{proje}: hakemin sonucu bugünkü listenin sonucu değil (liste sonuçtan sonra değişmiş ya da commit yok)"
     # 3. pim: ölçümdeki kural seti ve karkas kuralı
     ks, s1 = _pim_kaydi(bizim.get("kural_seti"), "kural seti")
@@ -836,6 +846,14 @@ def kabul(a) -> int:
     mt = kart.get("metraj_testi") or {}
     if mt.get("kaynak") == "celik_hakemi" and mt.get("tanim_kanonik") != kanonik_sha(json.loads(tp.read_text(encoding="utf-8"))):
         return dur("tanım metraj ölçümünden sonra değişti: `metraj --celik` ve `ciz` yeniden koşulmalı")
+    if mt.get("kaynak") == "celik_hakemi":                                # hakemin bugünkü sonucu kartınkiyle aynı mı (ölçümden sonra değişmiş olabilir)
+        bugun_, sorun = celik_olcumu(mt["proje"], json.loads(tp.read_text(encoding="utf-8")))
+        alanlar = ("durum", "hakem_sonucu", "fark_yuzde", "liste_sha256", "sonuc_tarihi", "bizim_liste_commit")
+        if sorun or any(bugun_["metraj_testi"].get(x) != mt.get(x) for x in alanlar) or bugun_["pim"] != kart.get("pim"):
+            return dur(f"hakemin bugünkü sonucu kartınkiyle aynı değil ({sorun or 'sonuç ya da pim değişti'}): `metraj --celik` ve `ciz` yeniden koşulmalı")
+    set_k = pim_yollari(kart)[0] or pim_seti()
+    if sc.get("kural_seti_sha256") != sha256(set_k):
+        return dur(f"son çizim kontrol dosyasının donacağı kural setiyle ({_goreli(set_k)}) çizilmedi: yeniden çizin, kontrol sayfasını gösterin")
     kalan = [x for x in sc.get("denetimler") or [] if x["durum"] == "kaldı"]
     if kalan:
         return dur("denetim kaldı: " + "; ".join(f"{x['ad']} ({x['ayrinti']})" for x in kalan))
@@ -855,7 +873,8 @@ def kabul(a) -> int:
     kart["durum"] = "kabul"
     kart["kabul"] = {"kim": a.kim, "tarih": a.tarih, "karar": "D-11" if a.kim == "Lokman" else None, "not": a.not_, "cizim": sc["no"],
                      "kural_seti": kontrol["kural_seti"], "metraj_kapisi": kart["metraj_testi"]["durum"],
-                     "metraj_proje": kart["metraj_testi"].get("proje")}   # "yok": kabul metraj doğrulaması değildir
+                     "metraj_proje": kart["metraj_testi"].get("proje"),   # "yok": kabul metraj doğrulaması değildir
+                     **({"kapisiz": True} if a.kapisiz else {}), **({"izsiz": True} if a.izsiz else {})}   # yalnız testte; gerçek bankada test_banka reddeder
     kart["aday"] = aday_kaydi(kart, tp, cizim, a.banka)
     olay(kart, "kabul", cizim=sc["no"])
     kart_yaz(kart, a.banka)

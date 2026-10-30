@@ -35,6 +35,9 @@ def test_kartlar_gecerli_ve_yukleyiciden_gecer():
         assert (k.get("metraj_testi") or {}).get("durum") in ("yok", "gecti", "beklemede", "hesaplanmadi")
         if k["durum"] == "kabul":
             assert k["metraj_testi"]["durum"] in ("yok", "gecti"), "metraj kapısını geçmeyen model kabul edilmez"
+            # gerçek bankada kapısız (harness + pytest atlanmış) ya da izsiz (çizim izleri donmamış) kabul olmaz; bayraklar yalnız testte
+            assert not (k["kabul"].get("kapisiz") or k["kabul"].get("izsiz")), k["kod"]
+            assert "tam" in json.loads((k["_klasor"] / "kontrol.json").read_text(encoding="utf-8")), k["kod"]
     assert B.denetle() == []
     assert sorted(a["kod"] for a in B.kayitlar()) == sorted(k["kod"] for k in KABUL)
 

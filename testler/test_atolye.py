@@ -107,6 +107,22 @@ def test_kontrol_sayfasi(atolye):
         assert s not in metin, s
 
 
+def test_pimsiz_kart_kontrolun_setiyle_cizilir(atolye):
+    # pimsiz kart kontrol dosyasının donacağı setle (dondurulmuş setlerin en yenisi) çizilir: Lokman'ın onayladığı çizim ile dondurulan
+    # kontrol aynı kural setinden (D-28 madde 2; geometri hakemi, 30 Ekim)
+    sc = kart(atolye)["son_cizim"]
+    assert sc["kural_seti"] == A.pim_seti().name == "0.19.json" and sc["kural_seti_sha256"] == A.sha256(A.pim_seti())
+
+
+def test_liste_ozeti_celik_kg_motorun_saglama_satirindan():
+    # çelik kg'ı motor üretir, atölye okur (D-28 madde 1); sağlama satırı grubun kg toplamına girmez
+    satirlar = [{"grup": A.CELIK_GRUBU, "kalem": "Duvar paneli", "kg": 100.0}, {"grup": A.CELIK_GRUBU, "kalem": "Makas", "kg": 50.0},
+                {"grup": A.CELIK_GRUBU, "kalem": A.TOPLAM_SATIRI, "kg": 149.5}, {"grup": "Dış cephe", "kalem": "Taş yünü", "kg": 10.0}]
+    o = A.liste_ozeti({"satirlar": satirlar})
+    assert o["celik_kg"] == 149.5 and o["gruplar"][A.CELIK_GRUBU] == {"satir": 3, "kg": 150.0} and o["gruplar"]["Dış cephe"]["kg"] == 10.0
+    assert A.liste_ozeti({"satirlar": satirlar[3:]})["celik_kg"] == 0
+
+
 def test_metraj_kapisi_hakem_olcumu_olmayan_modelde_kosulmaz(atolye):
     # Ç8801Z'nin çelik hakemi ölçümü yok: başka projenin ölçümü ona yazılamaz (tanım hakemin ölçtüğü tanım değil); kart değişmez
     once = kart(atolye)
@@ -267,6 +283,13 @@ def test_hakem_olcumu_tanim_farkini_ve_gecmeyen_kapiyi_yakalar(hakemli):
     assert sorun is None and o["metraj_testi"]["durum"] == "beklemede" and o["metraj_testi"]["hakem_sonucu"] == "geçmedi"   # −%12,83
 
 
+def test_hakem_olcumu_git_okunamazsa_gecmez(hakemli, monkeypatch):
+    # liste sonuçtan sonra değişmedi mi denetimi git'ten; git okunamazsa iki boş dizge eşit sayılmaz (geometri hakemi, 30 Ekim)
+    monkeypatch.setattr(A, "_git", lambda *a: "")
+    o, sorun = A.celik_olcumu("ÇP-14", hakemli["tanim"])
+    assert o is None and "bugünkü listenin sonucu değil" in sorun
+
+
 def test_hakemli_kontrol_sayfasi(hakemli):
     import pymupdf
     pdf = Path(kart99(hakemli)["son_cizim"]["kontrol_pdf"])
@@ -311,6 +334,24 @@ def test_duzeltmeden_sonra_eski_metraj_tasinmaz(hakemli, tmp_path):
     assert "yeniden doğrulanmadan kabul edilemez" in metin and "uygun" not in metin.replace("uygunsa", "")
 
 
+def test_ciz_metraj_kapisinin_pimiyle_cizer(hakemli, tmp_path):
+    # metraj kapısı çizimden önce: hakemin ölçümü pimi değiştirirse çizim yeni pimle yapılır, son çizime o pim yazılır; kabulün "son
+    # çizim kartın pimiyle mi" denetimi gerçek pimi görür (geometri hakemi, 30 Ekim)
+    import shutil
+    kopya = tmp_path / "modeller" / "banka"
+    shutil.copytree(hakemli["banka"], kopya)
+    (tmp_path / "is_emri").mkdir()
+    kp = kopya / "KT99" / "kart.json"
+    k = json.loads(kp.read_text(encoding="utf-8"))
+    k["pim"], k["metraj_testi"]["tanim_kanonik"] = None, "eski"                                       # pimsiz, ölçüm eski tanımdan
+    kp.write_text(json.dumps(k, ensure_ascii=False), encoding="utf-8")
+    assert kos(kopya, "ciz", "KT99", "--cikti", tmp_path / "cikti") == 0
+    k = json.loads(kp.read_text(encoding="utf-8"))
+    pim = k["pim"]["kural_seti"]
+    assert k["metraj_testi"]["durum"] == "gecti" and k["son_cizim"]["pim"] == k["pim"]
+    assert k["son_cizim"]["kural_seti"] == Path(pim["yol"]).name and k["son_cizim"]["kural_seti_sha256"] == pim["sha256"]
+
+
 def test_hakemli_kabul_pim_ve_kontrol(hakemli, tmp_path):
     import shutil
     banka = hakemli["banka"]
@@ -320,12 +361,15 @@ def test_hakemli_kabul_pim_ve_kontrol(hakemli, tmp_path):
     (tmp_path / "is_emri").mkdir()
     k = kart99(hakemli)
     for degisik in ({**k, "durum": "beklemede", "metraj_testi": {**k["metraj_testi"], "durum": "beklemede"}},
-                    {**k, "son_cizim": {**k["son_cizim"], "pim": None}}):
+                    {**k, "son_cizim": {**k["son_cizim"], "pim": None}},
+                    {**k, "son_cizim": {**k["son_cizim"], "kural_seti_sha256": "0" * 64}},              # kontrolün setiyle çizilmedi
+                    {**k, "metraj_testi": {**k["metraj_testi"], "fark_yuzde": 0.5}}):                   # hakemin bugünkü sonucu başka
         (kopya / "KT99" / "kart.json").write_text(json.dumps(degisik, ensure_ascii=False), encoding="utf-8")
         assert kos(kopya, "kabul", "KT99", "--kapisiz", "--izsiz") == 2
     assert kos(banka, "kabul", "KT99", "--kapisiz", "--izsiz", "--tarih", "2026-10-29") == 0
     k = kart99(hakemli)
     assert k["durum"] == "kabul" and k["kabul"]["metraj_kapisi"] == "gecti" and k["kabul"]["metraj_proje"] == "ÇP-14"
+    assert k["kabul"]["kapisiz"] is True and k["kabul"]["izsiz"] is True                                 # gerçek bankada test_banka reddeder
     assert "çelik hakemi, ÇP-14" in k["aday"]["kaynak"]["dogrulama"] and k["aday"]["musteri_projesi"] is True and k["aday"]["sunum"]["ad"] == ""
     kontrol = json.loads((banka / "KT99" / "kontrol.json").read_text(encoding="utf-8"))
     assert kontrol["kural_seti"] == k["pim"]["kural_seti"]["yol"] and kontrol["karkas_kurali"] == k["pim"]["karkas"]["yol"]
