@@ -81,6 +81,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-29](D-29.md) | Prefabrik ön onay çiziminde Lokman'ın TK-02 notları Motor kuralı: taşan verandanın ön görünüşünde saçak altı ve topuk; oda ortasındaki pencerenin iki yanı tam pano varsa ve kayma 5 cm'ye kadarsa 62,75'lik yarım pano (D-15 daraltıldı); giriş nişinin kapı hattında köşe direği yerine 3'lü H (T); dış T'sindeki 3'lü H kutusu çizilmez; pencere yazısı alttan ya da sağdan okunur; özel pano ölçü yazıları üst üste binmez. P6001 kilit değil: düzeltme bütün prefabrik çizimlere uygulanır, referans kararla yeniden dondurulur | 29.10 (Lokman 07:44–08:22) |
 | [D-30](D-30.md) | Prefabrikte ölçüye kesimde son pano 122 cm ve üzeriyse kesilmez, dış ölçü tam panoya (125,5) büyür; eski son aks ve dış ölçü yenisine eşlenir, plan uyarısı yazılır. Bugün TK-01 ve TK-02 tetikler (898 × 888 → 898,5 × 888,5) | 29.10 (Lokman 10:48) |
 | [D-31](D-31.md) | Prefabrik ön onay çiziminin görünüş kuralları: beşikte de dört görünüş; taşan verandanın çatısı her görünüşte ana çatının küçüğü (saçak altı, topuk, iki eğim, % yazısı), kalkanın ayrı alın çerçevesi yok; "çatı profili - topuk ve saçak" kalktı; aks soluk gri ve veranda kirişi gibi kesik; 60×40 pencere vasistas; derz yalnız görünen ve cepheye değen duvardan. Lokman'ın çizim kuralları (D-29, D-30, D-31) `kurallar/prefabrik/cizim_kurallari.json`'da kararı, sözü, kod yeri ve testiyle (PC-01 … PC-15) | 29.10 (Lokman 11:07–11:23) |
+| [D-32](D-32.md) | Prefabrik listede ve montaj rehberinde baş makas omegası baş makasın uçtan uca altında, iki yandaki saçak payı dahil (açıklık + 2 × saçak, ÷ 2,5); taşan verandanın baş makası dış kirişe oturur, omegası da öyle. 100'lük iç duvarın üstündeki omega 100'lük duvar omegasıdır, asma tavanda da o satırda (Ek, 30.10; sırtı 10,5, öteki ölçüleri 60'lık omeganın; kart OM-02). Kör kayıtlar PK-07 ve PK-01 protokol adım 7 ile yeniden yazıldı | 29.10 (Lokman 13:12, 21:12); Ek 30.10 (Lokman 07:04) |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
 
@@ -107,7 +108,8 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-29 | prefabrik ön onay çiziminde Lokman'ın TK-02 notları (veranda topuğu, pencere yanı 62,75, niş T'si, dış H kutusu, pencere yazısı) ve P6001 kilit değil (29.10 07:44–08:22) | yazıldı (29.10; `claude/project-thread-5p2lsc`, BK-18, PR #79) |
 | D | D-30 | prefabrikte son pano 122 cm ve üzeriyse proje tam panoya tamamlanır (29.10 10:48) | yazıldı (29.10; `claude/project-thread-5p2lsc`, BK-18, PR #79) |
 | D | D-31 | prefabrik ön onay çiziminin görünüş kuralları ve kural listesi (29.10 11:07–11:23) | yazıldı (29.10; `claude/project-thread-5p2lsc`, BK-18, PR #79) |
-| D | **D-32** | — | **sıradaki boş** |
+| D | D-32 | baş makas omegası saçak ucundan saçak ucuna (veranda baş makası dahil); 100'lük iç duvarın üstündeki omega 100'lük duvar omegası, sırtı 10,5 (29.10 13:12; listede de, 21:12; Ek 30.10 07:04) | yazıldı (29.10, İE-18 R1 ek 4, PR #81; Ek 30.10, R1 ek 5) |
+| D | **D-33** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | `main`'e BK-12 ile (PR-1: motor ve bayi paftası; liste ve mühür kıyası sonraki PR'larda) |
@@ -120,7 +122,9 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | İE | İE-18 | her model için düzenli paket: canlı kurallarla çizim, montaj paftası, yükleme listesi, montaj rehberi, kıyas; proje kaydı = doğrulanmış örnek (prefabrik 28 ev, sonra AICelik; 28 ev çizimine bağlı) | alındı (27.10; CIO; `claude/project-thread-756g5a`) |
 | İE | İE-19 | altın set 100: bayi cümleleri, beklenen okuma ve karar, kör dilim (pano 51; bağlı 22 ve 92) | alındı (27.10; `claude/project-thread-ssawjb`) |
 | İE | İE-20 | görsel ve PDF ile talep, talep ve revizyon formu (WhatsApp Flow); pano satır 83, 110, 61 | alındı (27.10; `claude/project-thread-l5mh7r`) |
-| İE | **İE-21** | — | **sıradaki boş** |
+| İE | İE-21 | bayiye 3D sayfası ("3D'yi aç" düğmesi; pano 80) | alındı (27.10; CIO; `claude/project-thread-i09lws`, PR #61) |
+| İE | İE-22 | WhatsApp'tan bayi kaydı: kayıtsız numaraya ad ve firma, Patron'a [Onayla] [Reddet], kart ve karşılama (pano 111) | alındı (29.10; CIO; `claude/project-thread-cnk2nk`, PR #82) |
+| İE | **İE-23** | — | **sıradaki boş** |
 | BK | BK-01–BK-08 | bu depo; BK-08 8a sonrası temizlik (`bk-08-8a-temizlik`) | yazıldı |
 | BK | BK-09 | metin ve çizim düzeltmeleri, G1 (`bk-09-metin-cizim`, `bk-09-cizim-g1`) | alındı (14.10) |
 | BK | BK-10 | 8b sonrası düzeltmeler (DXF `.txt` notu, geç gelen Excel, Patron'a Excel bağlantısı, çelikte kapı değişikliği; `docs/devir/2026-10-14_IE-08_8b_Devri.md` › Sıradaki; CIO'nun Notion defterinde D-19 ile: 24 saat kapanış kuralı) | ayrıldı |

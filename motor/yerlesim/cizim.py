@@ -135,22 +135,30 @@ def ciz(model_yolu: Path, say: dict, yol: Path, kod: str) -> Path:
         # 1 · tavan omega
         fig, ax = plt.subplots(figsize=(16.54, 11.69))
         _duvarlar(ax, m)
-        for p in m["k2"].get("OM-01", []):
-            v, yer = p["v"], p["p"].get("Yer", "ara")
-            x0, y0 = v[:, :2].min(0); x1, y1 = v[:, :2].max(0)
-            dik = (y1 - y0) > (x1 - x0)
-            ax.add_patch(plt.Rectangle((x0, y0), x1 - x0, y1 - y0, color=RENK["omega"][yer], lw=0))
-            ax.plot([(x0 + x1) / 2] * 2 if dik else [x0, x1], [y0, y1] if dik else [(y0 + y1) / 2] * 2, color=RENK["omega"][yer], lw=2.2)
-            ax.text((x0 + x1) / 2 + (6 if dik else 0), (y0 + y1) / 2 + (0 if dik else 6), _sayi(p["p"]["Boy_cm"], 2).rstrip("0").rstrip(","),
-                    rotation=90 if dik else 0, fontsize=7.5, ha="left" if dik else "center", va="center" if dik else "bottom", color="#222")
-        k = _kart(say, "OM-01")
+        OMK = [kk for kk in ("OM-01", "OM-02") if m["k2"].get(kk)] or ["OM-01"]   # OM-02: 100'lük iç duvarın üstü, 100'lük duvar omegası (D-32 ek)
+        for kk in OMK:
+            for p in m["k2"].get(kk, []):
+                v, yer = p["v"], p["p"].get("Yer", "ara")
+                x0, y0 = v[:, :2].min(0); x1, y1 = v[:, :2].max(0)
+                dik = (y1 - y0) > (x1 - x0)
+                ax.add_patch(plt.Rectangle((x0, y0), x1 - x0, y1 - y0, color=RENK["omega"][yer], lw=0))
+                ax.plot([(x0 + x1) / 2] * 2 if dik else [x0, x1], [y0, y1] if dik else [(y0 + y1) / 2] * 2, color=RENK["omega"][yer], lw=2.2)
+                ax.text((x0 + x1) / 2 + (6 if dik else 0), (y0 + y1) / 2 + (0 if dik else 6), _sayi(p["p"]["Boy_cm"], 2).rstrip("0").rstrip(","),
+                        rotation=90 if dik else 0, fontsize=7.5, ha="left" if dik else "center", va="center" if dik else "bottom", color="#222")
         sayac = {}
-        for p in m["k2"].get("OM-01", []):
-            sayac[p["p"].get("Yer")] = sayac.get(p["p"].get("Yer"), 0) + 1
-        _lejant(fig, [f"OM-01 60'lık tavan omegası L 3750", f"{k['adet']} parça, {_sayi(k.get('metre', 0))} m", f"tavan: {y['tavan']}", ""]
+        for kk in OMK:
+            for p in m["k2"].get(kk, []):
+                sayac[p["p"].get("Yer")] = sayac.get(p["p"].get("Yer"), 0) + 1
+        lej = []
+        for kk in OMK:
+            k = _kart(say, kk)
+            ad = k.get("ad") or "60'lık tavan omegası L 3750"
+            lej += [f"{kk} {ad}", f"{k['adet']} parça, {_sayi(k.get('metre', 0))} m"]
+        _lejant(fig, lej + [f"tavan: {y['tavan']}", ""]
                 + [f"■ {OMEGA_YER[a]}: {n}" for a, n in sorted(sayac.items())]
-                + ([f"", f"kesim: {kesim['OM-01']['stok']} boy L {kesim['OM-01']['parca_boyu_cm']:g}", f"(tam parça {kesim['OM-01']['kullanilir_cm']:g}; yedek yok, karar D)"]
-                   if "OM-01" in kesim else []))
+                + [x for kk in OMK if kk in kesim for x in
+                   (f"", f"kesim{'' if len(OMK) == 1 else ' ' + kk}: {kesim[kk]['stok']} boy L {kesim[kk]['parca_boyu_cm']:g}",
+                    f"(tam parça {kesim[kk]['kullanilir_cm']:g}; yedek yok, karar D)")])
         _cerceve(ax, f"{kod} · TAVAN OMEGA YERLEŞİM PLANI", alt)
         _notlar(fig, say, 1)
         pdf.savefig(fig); plt.close(fig)

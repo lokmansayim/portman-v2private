@@ -140,7 +140,10 @@ def test_liste_100luk_ic_duvar():
     assert "H standart 100 (iç pano eki)" in k and "3'lü H standart 100 (iç T)" in k and "Çektirme U'su 100 (iç duvar)" in k
     assert adet("3'lü H 100 × 100 × 100 (dış duvar T'si)") == sum(h.tur == "dis" for h in plan.h_baglantilar)
     assert adet("10'luk köşe direği 100 × 100") == len(plan.koseler)                       # dış ve iç köşe hepsi 100'lük
-    assert "100'lük iç duvarlar" in formul("100'lük alt çerçeve") and "100'lük iç duvarlar" in formul("100'lük duvar omegası")
+    assert "100'lük iç duvarlar" in formul("100'lük alt çerçeve")
+    # D-32 ek (Lokman 30 Ekim 07:04): asma tavanda da 100'lük iç duvarın üstü 100'lük duvar omegası; 60'lık duvar omegasında değil, ayrı satır yok
+    assert "100'lük iç duvarlar" in formul("100'lük duvar omegası") and "iç duvar üstleri 100'lük duvar omegasında" in formul(
+        "60'lık duvar omegası (asma dizme tavan)") and not [x for x in k if x.startswith("60'lık iç duvar üstü")]
 
 
 def test_varsayilan_katman_adlari_degismez():

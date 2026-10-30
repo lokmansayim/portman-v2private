@@ -143,6 +143,7 @@ def bir_is(depo: Depo, settings: dict, sahip: str | None = None) -> dict | None:
     yazili = gelen.get("type") in W.GELEN_YAZILI and (bool((gelen.get("text") or "").strip()) or bool(gelen.get("reply_id")))
     cikarim = j.get("cikarim")
     muhendis_mu = (gelen.get("role") or "bayi") == "muhendis"      # İE-08 8b: mühendis kartının mesajı LLM'siz (kanal/muhendis.py)
+    kayit_mu = (gelen.get("role") or "bayi") == "patron" and str(gelen.get("reply_id") or "").startswith("kayit:")   # İE-22: kanal/kayit.py, LLM'siz
     if isinstance(gelen.get("form"), dict) and not muhendis_mu and "form" not in (cikarim or {}):
         # İE-20 PR-2: talep formu (ve eski, boş ya da yalnız dosyalı revizyon formu) LLM'siz çözülür; revizyon formunun açıklaması
         # (None) bayinin yazısı gibi aşağıda okunur
@@ -159,7 +160,7 @@ def bir_is(depo: Depo, settings: dict, sahip: str | None = None) -> dict | None:
                    if gelen.get("bayi") else {"durum": "atlandi", "neden": "kayıtsız gönderen"}}
         if not depo.cikarim_kaydet(j["id"], sahip, cikarim):
             return {"durum": "atildi", "is_id": j["id"], "neden": "kira kaybedildi (okuma kaydı)"}
-    if yazili and cikarim is None and not muhendis_mu:
+    if yazili and cikarim is None and not muhendis_mu and not kayit_mu:
         if gelen.get("reply_id"):                    # İE-04: buton/liste cevabı; LLM çağrılmaz, kimlik kayıtla doğrulanır
             etk = ET.coz(gelen, d, depo.giden_satiri)
             cikarim = {"etkilesim": etk, "talep": etk.get("talep"), "meta": {"backend": "etkilesim", "kimlik": etk.get("kimlik"), "gecerli": etk.get("gecerli")}}
@@ -176,6 +177,9 @@ def bir_is(depo: Depo, settings: dict, sahip: str | None = None) -> dict | None:
     try:
         if muhendis_mu:
             cikti = MH.isle(depo, gelen)                 # İE-08 8b: mühendisin düğmesi, Excel'i ya da notu (LLM'siz)
+        elif kayit_mu:
+            import kayit as KY                           # İE-22: kart, talep ve karşılama işle aynı işlemde (depo._isi_bitir › kayit_karari)
+            cikti = KY.isle(depo, gelen, settings)
         else:
             katalog = W.katalog_nesnesi(settings, kabul_edilmis=depo.kabul_edilmis_adaylar())      # K-A10: kabul kaydı olmayan 'gecerli' aday sunulmaz
             ekli = dict(cikarim or {})
