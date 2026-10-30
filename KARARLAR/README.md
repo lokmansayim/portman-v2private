@@ -122,7 +122,7 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | İE | İE-19 | altın set 100: bayi cümleleri, beklenen okuma ve karar, kör dilim (pano 51; bağlı 22 ve 92) | alındı (27.10; `claude/project-thread-ssawjb`) |
 | İE | İE-20 | görsel ve PDF ile talep, talep ve revizyon formu (WhatsApp Flow); pano satır 83, 110, 61 | alındı (27.10; `claude/project-thread-l5mh7r`) |
 | İE | İE-21 | bayiye 3D sayfası ("3D'yi aç" düğmesi; pano 80) | alındı (27.10; CIO; `claude/project-thread-i09lws`, PR #61) |
-| İE | İE-22 | WhatsApp'tan bayi kaydı: kayıtsız numaraya ad ve firma, Patron'a [Onayla] [Reddet], kart ve karşılama (pano 111) | alındı (29.10; CIO; `claude/project-thread-cnk2nk`) |
+| İE | İE-22 | WhatsApp'tan bayi kaydı: kayıtsız numaraya ad ve firma, Patron'a [Onayla] [Reddet], kart ve karşılama (pano 111) | alındı (29.10; CIO; `claude/project-thread-cnk2nk`, PR #82) |
 | İE | **İE-23** | — | **sıradaki boş** |
 | BK | BK-01–BK-08 | bu depo; BK-08 8a sonrası temizlik (`bk-08-8a-temizlik`) | yazıldı |
 | BK | BK-09 | metin ve çizim düzeltmeleri, G1 (`bk-09-metin-cizim`, `bk-09-cizim-g1`) | alındı (14.10) |
