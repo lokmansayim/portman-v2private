@@ -52,9 +52,9 @@
    },
    "pay_100": {
     "deger": 0.0,
-    "durum": "excel",
+    "durum": "varsayim",
     "tarih": "2026-10-30",
-    "not": "Liste 100'lük duvar omegasını payısız böler (÷ 2,5; `duvar_omegasi_100_bolen_m`)."
+    "not": "Kesimde pay yok varsayımı: liste 100'lük duvar omegasını payısız böler (÷ 2,5; `duvar_omegasi_100_bolen_m`), 60'lık tavan omegasındaki 10 cm'lik pay bu üründe yazılı değil."
    },
    "tavan_turu": {
     "okunan": "İş Emri › ozellikler.Tavan",
