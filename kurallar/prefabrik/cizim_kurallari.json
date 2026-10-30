@@ -676,6 +676,26 @@
     "testler/motor/test_d34_cizim.py::test_merdiven_agzi_duvarsiz",
     "testler/motor/test_d34_cizim.py::test_acik_sinir_parca_hatalari"
    ]
+  },
+  {
+   "kod": "PC-29",
+   "baslik": "Dış duvar panoları iç duvarın aksına dayanır (yatak odası 2, 780,6)",
+   "kural": "Paftada bir odanın dış duvar panoları ızgaradan değil bir iç duvarın aksından başlıyorsa İş Emri `yapi.dizilim.dis_pano_dayanagi` satırıyla yazar: aks (x ya da y; y Motor çerçevesinde, arkadan) ve aralık (`aralik_cm`), üçü de aks tablosunda (yoksa hata; K21). O aralıkta, aralığa düşen her dış duvarda ekler aks ± 125,5k ve aralığın iki ucudur; aralığın dışı ızgarada kalır, iç duvarlar değişmez. Odanın pencereli panosu dayanak aralığında oda ortasına çekilmez: pencereye yeten, ortası oda ortasına en yakın panoya girer. Çatının orta makası saçak duvarlarının eklerine oturduğundan (cati_serit) makas da dayanaklı eke gelir. Aks aralığın dışında, aralık boş, biçim bozuk ya da hiçbir dış duvara düşmüyorsa hata.",
+   "karar": "D-34",
+   "madde": 5,
+   "lokman": {
+    "tarih": "2026-10-30",
+    "saat": "15:33",
+    "soz": "onaylıyorum (soru: \"Yatak odası 2'nin ön duvar panoları paftadaki gibi banyo duvarının aksından (780,6) başlasın mı? Öyle olursa ana çatının orta makası da paftadaki yere oturur.\"); 15:34: \"çizim kurallarına kaydını yap\""
+   },
+   "kod_yeri": [
+    "motor/geometry.py::kur"
+   ],
+   "test": [
+    "testler/motor/test_d34_cizim.py::test_dis_pano_dayanagi_780_6",
+    "testler/motor/test_d34_cizim.py::test_dis_pano_dayanagi_hatalari",
+    "testler/motor/test_ie24_girinti.py::test_makaslar_paftadaki_yerde"
+   ]
   }
  ]
 }

@@ -1,6 +1,6 @@
 {
   "is_emri_no": "PM-TK03-87M2",
-  "revizyon": 3,
+  "revizyon": 4,
   "talep": {
     "bayi": {
       "kod": "TK03",
@@ -38,7 +38,16 @@
       "kapi": "mantik",
       "kose": "oda",
       "son_pano": "kosu",
-      "kapi_yeri": "mentese_ucu"
+      "kapi_yeri": "mentese_ucu",
+      "dis_pano_dayanagi": [
+        {
+          "x": 780.6,
+          "aralik_cm": [
+            548.5,
+            883.5
+          ]
+        }
+      ]
     },
     "ek_akslar_cm": {
       "x": [
@@ -360,6 +369,7 @@
     "Duvar eksenleri paftadan, 2 cm'ye kadar en yakın ızgara aksına yuvarlandı (318,69 → 318,75; 883,46 → 883,5; 1008,94 → 1009; 574,64 → 574,75; banyonun alt duvarı 200,3 → 198,25, balkon duvarıyla aynı aks). Izgara dışı duvarlar ek aks: x 548,5 · 780,6 · 831,95; y 175 · 359,75 · 523,85 · 636,3.",
     "Mutfak salona açık (paftada yeşil kesik çizgi, duvar yok).",
     "Kapılar paftada 80'lik kanat; Motor'un iç kapısı 82. Balkona çıkış 200/180 sürgülü (paftada pencere olarak yazılı).",
+    "Yatak odası 2'nin ön ve arka dış duvar panoları banyo duvarının aksına (780,6) dayalı, 548,5–883,5 arası (Lokman 30 Ekim 15:33, r03 onayıyla; D-34 madde 5, PC-29): `dizilim.dis_pano_dayanagi`. Ön [106,6 · 125,5 · 102,9], arka 548,5'te bölünür ve 655,1'de ek; pencere 655,1–780,6 panosunda; ana çatının orta makası 655,1'de (paftada 655,15).",
     "Makaslar (Lokman'ın işaretlediği akslar, 30 Ekim 14:07): 12 makas; soldaki kalkan duvarındaki MKS01 ve işaretli 11 aks (MKS02–MKS12).",
     "Kapı menteşeleri paftadaki uçta: salon–yatak odası 2 ve salon–yatak odası 3 kapısına menteşe yazıldı (gerçek çerçevede sol)."
   ]

@@ -75,11 +75,12 @@ def test_girintide_profil_ve_mahal_yok(plan):
     assert all(min(y0, y1) >= 675.05 - 1e-6 and max(x0, x1) <= 318.75 + 1e-6 for (x0, y0, x1, y1) in plan.acik_kenarlar)
 
 
-@pytest.mark.parametrize("ad", ["sol dış (salon)", "sağ dış", "arka-sağ girinti duvarı", "ön-sol girinti duvarı"])
+@pytest.mark.parametrize("ad", ["sol dış (salon)", "sağ dış", "arka-sağ girinti duvarı", "ön-sol girinti duvarı", "ön dış"])
 def test_pano_kosulari_paftayla_ayni(plan, pafta, ad):
-    """Tam ızgarada (hiza: tam_izgara) bu dört duvarın pano koşusu paftadakiyle 1,3 cm içinde aynı; öteki farklar `farklar`da."""
+    """Tam ızgarada (hiza: tam_izgara) bu beş duvarın pano koşusu paftadakiyle 1,3 cm içinde aynı; ön dış duvarda yatak odası 2'nin
+    panoları 780,6 aksına dayalı (D-34 madde 5). Arka dış `test_d34_cizim`de (ilk pano köşede farklı); öteki farklar `farklar`da."""
     duvar = {"sol dış (salon)": ("y", 5.0, 242.0), "sağ dış": ("y", 1231.7, 10.0), "arka-sağ girinti duvarı": ("x", 698.3, 780.6),
-             "ön-sol girinti duvarı": ("x", 237.0, 5.0)}[ad]
+             "ön-sol girinti duvarı": ("x", 237.0, 5.0), "ön dış": ("x", 5.0, 548.5)}[ad]
     boylar = [p.boy for p in sorted(_duvar(plan, *duvar).panolar, key=lambda p: p.a0)]
     beklenen = pafta["pano_kosulari"][ad]
     assert len(boylar) == len(beklenen) and all(abs(a - b) < 1.3 for a, b in zip(boylar, beklenen)), (boylar, beklenen)
@@ -164,8 +165,8 @@ def test_cati_seritleri_ana_ve_cumba(cati):
 
 def test_makaslar_paftadaki_yerde(cati, pafta):
     """12 makas: sol cumba 5 (baş dış uçta), ana 3 (iki baş), sağ cumba 4; cumbalarda iç uçta makas yok. Cumba makasları saçak duvarının
-    pano eklerinde, paftadakiyle 1,5 cm içinde; ana çatının baş makasları da. Ana çatının orta makası paftada ön duvarın 655,1'deki ekinde;
-    Motor'un ön duvarında orada ek yok (`farklar` › ön dış), eşit aralık ve uyarı."""
+    pano eklerinde, paftadakiyle 1,5 cm içinde; ana çatınınkiler de. Ana çatının orta makası ön ve arka duvarın 655,1'deki ekinde: yatak
+    odası 2'nin panoları banyo duvarının aksına (780,6) dayalı (D-34 madde 5, PC-29); r03'te eşit aralıkla 664,55'teydi."""
     pf = pafta["cati"]["makaslar_x"]
     p = {q["ad"]: q for q in cati["parcalar"]}
     assert sum(len(q["makaslar"]) for q in cati["parcalar"]) == 12
@@ -177,9 +178,8 @@ def test_makaslar_paftadaki_yerde(cati, pafta):
     assert [m["rol"] for m in p["sağ cumba"]["makaslar"]] == ["orta", "orta", "orta", "bas"]
     ana = [m["konum"] for m in p["ana çatı"]["makaslar"]]
     assert [m["rol"] for m in p["ana çatı"]["makaslar"]] == ["bas", "orta", "bas"]
-    assert abs(ana[0] - pf["ana çatı"][0]) < 1.5 and abs(ana[2] - pf["ana çatı"][2]) < 1.5
-    assert ana[1] == 664.55 and p["ana çatı"]["makas_yeri"] == "eşit aralık"
-    assert any("ana çatı" in u and "eşit aralıklı 3 makas" in u for u in cati["uyarilar"])
+    assert all(abs(a - b) < 1.5 for a, b in zip(ana, pf["ana çatı"])) and abs(ana[1] - 655.1) < 1e-6, ana
+    assert p["ana çatı"]["makas_yeri"] == "pano ekleri" and not any("eşit aralık" in u for u in cati["uyarilar"])
 
 
 def test_makas_profilleri_paftayla_ayni(cati, pafta):
