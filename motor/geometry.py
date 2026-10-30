@@ -91,7 +91,7 @@ def geometri_anahtari_var(is_emri: dict) -> bool:
     return any(k in yapi for k in YENI_ANAHTARLAR) or yapi.get("kisa_kenar", "x") != "x" \
         or any("konum_cm" in m for m in is_emri.get("mahaller", [])) \
         or any(("konum_cm" in a) or ("hizalama" in a) or ("duvar_ucu" in a) for a in is_emri.get("acikliklar", [])) \
-        or bool(is_emri.get("verandalar"))
+        or bool(is_emri.get("verandalar")) or bool(is_emri.get("girintiler"))
     # `acikliklar[].dograma` geometri anahtarı değildir (kod incelemesi D1): yalnız BOM işaretini etkiler, kendi varlığıyla çalışır
 
 
@@ -491,7 +491,7 @@ def _kur(is_emri: dict) -> Plan:
     if hiza not in ("kosu", "izgara", "tam_izgara"):        # İE-17: "tam_izgara" (ekler yalnız tam akslarda, iç duvar T'de bölünmez; AP paftaları)
         raise IsEmriHatasi(f"dizilim.hiza bilinmiyor: {hiza} (kosu | izgara | tam_izgara)")
     dis_t_bolme = bool(dizilim.get("dis_duvar_t_bolme", False))   # İE-11: dış duvar iç T'de bölünür, oraya dış üçlü H
-    konum_cm_var = any("konum_cm" in m for m in is_emri["mahaller"])
+    konum_cm_var = any("konum_cm" in m for m in is_emri["mahaller"]) or bool(is_emri.get("girintiler"))   # girinti cm sınırlı (aks tablosu)
     nx2, ny2 = aks_tablosu_kur(yapi.get("ek_akslar_cm"), nx2, ny2, zorunlu=ayna_y or konum_cm_var)
     tablo = _AKS["x"] is not None
     grid_nx, grid_ny = nx, ny                                 # İş Emri ızgarası (Plan.nx/ny, pafta yazısı, bayi görseli): ek akslarla değişmez
@@ -556,7 +556,23 @@ def _kur(is_emri: dict) -> Plan:
                 cell_owner[cell] = ad
                 mh.cells.add(cell)
         mahaller[ad] = mh
-    eksik = [(u / 2, v / 2) for u in range(nx2) for v in range(ny2) if (u, v) not in cell_owner]
+    # TK-03 (girintili gövde; Lokman'ın 87 m² paftası, 30 Ekim): `girintiler` ızgaranın bina dışında kalan dikdörtgenleridir (cm, `konum_cm`
+    # gibi akslarda ve aynı çerçevede). Hücreleri hiçbir mahalin değildir: komşu oda duvarı dış duvardır (köşeye gömülü verandanın duvarı gibi),
+    # girinti kenarında profil ve alan yoktur. Dış ölçü kutusu ve ızgara değişmez
+    dis_hucreler: set = set()
+    for r in is_emri.get("girintiler", []):
+        if len(r) != 4:
+            raise IsEmriHatasi(f"Girinti [x0, y0, x1, y1] (cm) olmalı: {r}")
+        rect = [aks_dizini(tamamla_cm(r[0], "x"), "x") / 2, aks_dizini(tamamla_cm(r[1], "y"), "y") / 2,
+                aks_dizini(tamamla_cm(r[2], "x"), "x") / 2, aks_dizini(tamamla_cm(r[3], "y"), "y") / 2]
+        for cell in _cells_of_rect(rect):
+            u, v = cell
+            if not (0 <= u < nx2 and 0 <= v < ny2):
+                raise IsEmriHatasi(f"Girinti grid dışına taşıyor: {r}")
+            if cell in cell_owner or cell in dis_hucreler:
+                raise IsEmriHatasi(f"Girinti {r} {cell_owner.get(cell, 'başka bir girinti')} ile çakışıyor (hücre {u/2},{v/2})")
+            dis_hucreler.add(cell)
+    eksik = [(u / 2, v / 2) for u in range(nx2) for v in range(ny2) if (u, v) not in cell_owner and (u, v) not in dis_hucreler]
     if eksik:
         raise IsEmriHatasi(f"Grid tamamen mahallere bölünmemiş; boş hücreler: {eksik[:8]}")
 
@@ -570,7 +586,7 @@ def _kur(is_emri: dict) -> Plan:
                 raise IsEmriHatasi(f"Açık sınırda bilinmeyen mahal: {n}")
 
     def owner(u, v):
-        return cell_owner[(u, v)] if (0 <= u < nx2 and 0 <= v < ny2) else OUT
+        return cell_owner.get((u, v), OUT) if (0 <= u < nx2 and 0 <= v < ny2) else OUT   # girinti hücresi bina dışı
 
     def is_out(name):
         return name == OUT or mahaller[name].acik

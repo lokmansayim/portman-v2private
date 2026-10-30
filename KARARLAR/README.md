@@ -124,7 +124,9 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | İE | İE-20 | görsel ve PDF ile talep, talep ve revizyon formu (WhatsApp Flow); pano satır 83, 110, 61 | alındı (27.10; `claude/project-thread-l5mh7r`) |
 | İE | İE-21 | bayiye 3D sayfası ("3D'yi aç" düğmesi; pano 80) | alındı (27.10; CIO; `claude/project-thread-i09lws`, PR #61) |
 | İE | İE-22 | WhatsApp'tan bayi kaydı: kayıtsız numaraya ad ve firma, Patron'a [Onayla] [Reddet], kart ve karşılama (pano 111) | alındı (29.10; CIO; `claude/project-thread-cnk2nk`, PR #82) |
-| İE | **İE-23** | — | **sıradaki boş** |
+| İE | İE-23 | yapı kimliği (model atölyesi; plan PF `Yapi_Kimligi/plan.md`) | ayrıldı (30.10; CIO; kendi dalında yazılır) |
+| İE | İE-24 | gerçek proje denemesi TK-03 (Lokman'ın 87,72 m² evinin 1. katı): girintili gövde (`girintiler`), sonra çatı, görünüş, liste; "sen dene, ben düzelte düzelte gideceğim" | alındı (30.10; `claude/project-thread-756g5a`) |
+| İE | **İE-25** | — | **sıradaki boş** |
 | BK | BK-01–BK-08 | bu depo; BK-08 8a sonrası temizlik (`bk-08-8a-temizlik`) | yazıldı |
 | BK | BK-09 | metin ve çizim düzeltmeleri, G1 (`bk-09-metin-cizim`, `bk-09-cizim-g1`) | alındı (14.10) |
 | BK | BK-10 | 8b sonrası küçük işler (DXF `.txt` notu, geç gelen Excel, panelden Excel, plan değişince kontrol kapanır, D-19 24 saat kuralı, düğmeli mesajda satır sonları, `YENI-` kodu ve ilk çelik planda LLM özeti bayiye gitmez, komut freni metni; pano satır 15; çelikte kapı değişikliği kapsam dışı) | alındı (30.10; `claude/project-thread-h64uz2`) |
