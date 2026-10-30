@@ -87,7 +87,8 @@ def katmanlar(ie: dict, plan: dict, makaslar: list[dict], yerlesim: dict, liste:
     T = D["tavan_omegasi_yerlesimi"]
     tam = _cm(T["parca_boyu"] - T["pay"])
     uyarilar = list(g["uyarilar"])
-    hatlar = tavan.hatlar(g, {"aralik_asma": _cm(T["aralik_asma"]), "aralik_ters": _cm(T["aralik_ters"]), "en_kisa": T["en_kisa_cm"]}, uyarilar)
+    hatlar = tavan.hatlar(g, {"aralik_asma": _cm(T["aralik_asma"]), "aralik_ters": _cm(T["aralik_ters"]), "en_kisa": T["en_kisa_cm"],
+                              "sirt_100": T.get("sirt_100")}, uyarilar)
     ow, oh = kesit["omega"]
     for i, h in enumerate(hatlar, 1):
         h["no"] = i
@@ -99,7 +100,7 @@ def katmanlar(ie: dict, plan: dict, makaslar: list[dict], yerlesim: dict, liste:
                     else [a, s - ow / 2, g["duvar_h"] - oh, b, s + ow / 2, g["duvar_h"]])
             parcalar.append({"kural": "tavan_omegasi_yerlesimi", "parca": "omega", "boy_cm": round(b - a, 4),
                              "geo": {"tip": "kutu", "kutu": kutu},
-                             "bilgi": {"Tavan": g["tavan"], "Yer": h["yer"], "Hat": i, "Mahal": h["mahal"]},
+                             "bilgi": {"Tavan": g["tavan"], "Yer": h["yer"], "Hat": i, "Mahal": h["mahal"], **({"Sirt_cm": h["sirt"]} if "sirt" in h else {})},
                              "aciklama": f"{h['eksen']} = {s:g}, {a:g}–{b:g}" + (f" ({h['mahal']})" if h["mahal"] else f" ({h['not']})")})
 
     # çatı: yalnız kuralın çatı tiplerinde

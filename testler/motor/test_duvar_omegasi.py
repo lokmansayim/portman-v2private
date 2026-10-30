@@ -174,8 +174,10 @@ def test_ic_kirisler_gecersiz(ik):
 
 
 def test_kaynak_yazilari(kurallar):
-    """CIO notu (PR #32 kıyası): baş makas omegasının kaynağı "kalkan" demez; duvar omegasının kaynağı kiriş terimini ve dayanağını söyler."""
+    """CIO notu (PR #32 kıyası): baş makas omegasının kaynağı "kalkan" demez; duvar omegasının kaynağı kiriş terimini ve dayanağını söyler.
+    D-32 (Lokman, 29 Ekim 13:12): baş makas omegası saçak ucundan saçak ucuna; kaynağın başı "altı"ndan "boyu"na döndü."""
     k = kurallar["prefabrik"]["kurallar"]
-    assert k["bas_makas_omegasi_bolen_m"]["kaynak"].startswith("Baş makasların altı ÷ 2,5")
+    assert k["bas_makas_omegasi_bolen_m"]["kaynak"].startswith("Baş makasların boyu saçak ucundan saçak ucuna ÷ 2,5")
+    assert "kalkan" not in k["bas_makas_omegasi_bolen_m"]["kaynak"] and "13:12" in k["bas_makas_omegasi_bolen_m"]["kaynak"]
     assert "kirişler" in k["duvar_omegasi_100_bolen_m"]["kaynak"] and "16:22" in k["duvar_omegasi_100_bolen_m"]["kaynak"]
     assert k["duvar_omegasi_100_bolen_m"]["deger"] == 2.5
