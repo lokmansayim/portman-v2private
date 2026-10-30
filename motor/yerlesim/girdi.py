@@ -131,4 +131,6 @@ def kur(ie: dict, plan: dict, makaslar: list[dict]) -> dict:
         "baslangic": {"x": "min", "y": "max" if baslangic.startswith("arka") else "min"},
         "makaslar": makaslar,
         "uyarilar": uyarilar,
+        # İE-24: girintili gövde (TK-03): dış çizgi ve çizimdeki çatı (`cati_serit`); çatı katmanları `serit.py`'de
+        **({"govde": plan["govde"], "cati_serit": plan["cati_serit"]} if plan.get("cati_serit") else {}),
     }

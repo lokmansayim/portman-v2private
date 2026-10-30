@@ -230,7 +230,7 @@ def test_girinti_duvari_gorunuste(plan):
 
 def test_cati_hatalari(plan, monkeypatch):
     """U gövde (bir şeritte iki parça) ve ana çatıya doğru komşusunun açıklığına sığmayan şerit (kademeli çatı) çizilmez, hata söylenir;
-    IFC girintili gövdenin çatısını kurmaz (dış ölçü kutusunu örterdi)."""
+    IFC de o çatıyı kurmaz (A4'ten beri girintili gövdenin çatısını `cati_serit`'ten kurar; dış ölçü kutusunu örtmez)."""
     from shapely.geometry import Polygon
     from motor import cati_serit, ifc_uret
     from motor.cati_prefabrik import PrefabrikCatiHatasi
@@ -242,9 +242,8 @@ def test_cati_hatalari(plan, monkeypatch):
     monkeypatch.setattr(cati_serit.G, "govde_cokgeni", lambda _p: kademe)
     with pytest.raises(PrefabrikCatiHatasi, match="kademeli çatı"):
         cati_serit.tanim(plan, ie)
-    monkeypatch.undo()
-    with pytest.raises(G.IsEmriHatasi, match="IFC'nin çatısı"):
-        ifc_uret.hazirla(ie)
+    with pytest.raises(PrefabrikCatiHatasi, match="kademeli çatı"):
+        ifc_uret.hazirla(_oku(TK03))
 
 
 def test_girintisiz_govde_kutu():

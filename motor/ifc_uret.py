@@ -60,9 +60,11 @@ def pano_sinifi(L, t):
 
 def hazirla(ie: dict) -> dict:
     plan = G.kur(ie)
-    if plan.girintili:                                # İE-24: çatı ve makaslar dış ölçü kutusundan kurulurdu (girintiyi de örterdi)
-        raise G.IsEmriHatasi("girintili gövde (İE-24): IFC'nin çatısı ve makasları henüz ana çatı + cumba çatısından (`cati_serit`) "
-                             "kurulmuyor; 3B ve kart modeli sonraki adım (yanlış çatı çizilmez)")
+    girinti = {}
+    if plan.girintili:                                # İE-24: çatı ve makaslar çizimdeki çatıdan (ana çatı + cumba), döşeme gövdenin dış çizgisinden
+        from . import cati_serit
+        girinti = {"govde": [[_r(x), _r(y)] for x, y in list(G.govde_cokgeni(plan).exterior.coords)[:-1]],
+                   "cati_serit": cati_serit.tanim(plan, ie)}           # kurulamazsa PrefabrikCatiHatasi (IsEmriHatasi): yanlış çatı çizilmez
     kat = Katalog()
     c = Cizici(plan, kat)
     c.ciz_plan(0.0, 0.0, "ANA", "", "")          # BOM kodlu INSERT'ler (yalnız ANA rolü)
@@ -153,7 +155,7 @@ def hazirla(ie: dict) -> dict:
                           "topuk": float(cati.get("topuk_cm", 10)), "makas_yonu": ("y (derinlik)" if cati.get("makas_ekseni") == "y" else "x (kısa kenar)"),
                           **({"makas_ekseni": cati["makas_ekseni"]} if "makas_ekseni" in cati else {}), "renk": "antrasit"}},
         "panolar": panolar, "acikliklar": acikliklar, "baglantilar": baglantilar, "odalar": odalar, "veranda": veranda, "tefris": [],
-        **({"pano_ekleri": pano_ekleri} if pano_ekleri else {}),
+        **({"pano_ekleri": pano_ekleri} if pano_ekleri else {}), **girinti,
         **({"dis_verandalar": [{"ad": v["ad"], "cephe": v["cephe"], "rect": [_r(t) for t in v["rect"]], "cati": VR.cati(v, ie),
                                 "net_m2": _r(plan.mahaller[v["ad"]].alan_m2, 4),
                                 "etiket_m2": etiket.get("".join(v["ad"].split()))}
@@ -410,7 +412,9 @@ class IfcUretici:
     def doseme(self):
         P = self.G["panolar"]; v = self.G["veranda"]
         Wd = max(p["rect"][2] for p in P); Hd = max(p["rect"][3] for p in P)
-        if v and v.get("tip") != "bina_ici":
+        if self.G.get("govde"):                       # İE-24: girintili gövde
+            taban = self.G["govde"]
+        elif v and v.get("tip") != "bina_ici":
             vx0, vy0 = v["poligon"][0]
             taban = [(0, 0), (vx0, 0), (vx0, vy0), (Wd, vy0), (Wd, Hd), (0, Hd)]
         else:
@@ -423,6 +427,8 @@ class IfcUretici:
 
     # ------------------------------------------------------------------ çatı, makas, veranda
     def cati(self):
+        if self.G.get("cati_serit"):                                 # İE-24: girintili gövde (ana çatı + paralel cumba)
+            return self._cati_serit()
         if self.G["bina"]["cati"].get("makas_ekseni", "x") == "y":   # makaslar derinliği geçer (derinlik kısa kenar)
             return self._cati_y()
         G = self.G; c = G["bina"]["cati"]; H0 = G["bina"]["duvar_h"]
@@ -562,6 +568,112 @@ class IfcUretici:
                 uyeler_e.append(m)
             api("aggregate.assign_object", self.f, relating_object=asm, products=uyeler_e)
         self.cati_ozet = {"mahya_cm": round(zm, 1), "makas": n, "cati_alan_m2": round(alan, 2), "makas_ekseni": "y", "aciklik_cm": round(Hd, 1), "makas_x_cm": [round(x, 2) for x in xs]}
+
+    def _egik_levha(self, cokgen, p0, u, egim, z0, t):
+        """Eğik çatı levhası: plan çokgeni (cm), saçak çizgisindeki bir nokta `p0`, planda yukarı yön `u` (birim), eğim; alt yüzü saçakta
+        `z0`, kalınlık `t`. Yerel x mahyaya paralel, yerel y eğim boyunca yukarı, yerel z yüzün normali (yukarı)."""
+        ux, uy = u; n = math.hypot(1.0, egim)
+        X = np.array([uy, -ux, 0.0]); Y = np.array([ux, uy, egim]) / n; Z = np.cross(X, Y)
+        yerel = [(((x - p0[0]) * uy - (y - p0[1]) * ux), ((x - p0[0]) * ux + (y - p0[1]) * uy) * n) for x, y in cokgen]
+        prof = self.sb.profile(self.sb.polyline([np.array([_m(a), _m(b)]) for a, b in yerel], closed=True))
+        return self.sb.extrude(prof, magnitude=_m(t), position=np.array([_m(p0[0]), _m(p0[1]), _m(z0)]), position_z_axis=Z, position_x_axis=X)
+
+    def _makas(self, ad, kalem, ozellik, b0, b1, konum, mahya_x, zs, eg, s):
+        """Beşik makası (`_cati_y` ile aynı çubuklar): b0..b1 dış yüzden dış yüze, saçaklar s; mahya x boyunca ise makas y–z düzleminde."""
+        H0 = self.G["bina"]["duvar_h"]; ym = (b0 + b1) / 2; zm = zs + (ym - b0 + s) * eg
+        zt = lambda y: zs + (min(y - b0, b1 - y) + s) * eg
+        q1, q3 = (b0 + ym) / 2, (ym + b1) / 2
+        uyeler = (("ALT_BASLIK", [(b0, H0), (b1, H0), (b1, H0 + 10), (b0, H0 + 10)]),
+                  ("UST_1", [(b0 - s, zs), (ym, zm), (ym, zm + 10), (b0 - s, zs + 10)]),
+                  ("UST_2", [(ym, zm), (b1 + s, zs), (b1 + s, zs + 10), (ym, zm + 10)]),
+                  ("DIKME_ORTA", [(ym - 3, H0 + 10), (ym + 3, H0 + 10), (ym + 3, zt(ym)), (ym - 3, zt(ym))]),
+                  ("DIKME_1", [(q1 - 3, H0 + 10), (q1 + 3, H0 + 10), (q1 + 3, zt(q1)), (q1 - 3, zt(q1))]),
+                  ("DIKME_2", [(q3 - 3, H0 + 10), (q3 + 3, H0 + 10), (q3 + 3, zt(q3)), (q3 - 3, zt(q3))]),
+                  ("CAPRAZ_1", [(q1 - 3, H0 + 10), (q1 + 5, H0 + 10), (ym - 3, zt(ym) - 8), (ym - 11, zt(ym) - 8)]),
+                  ("CAPRAZ_2", [(q3 - 5, H0 + 10), (q3 + 3, H0 + 10), (ym + 11, zt(ym) - 8), (ym + 3, zt(ym) - 8)]))
+        asm = self._urun("IfcElementAssembly", ad, predefined="TRUSS")
+        self._yerlestir(asm)
+        self._pset(asm, "PortatifEv_Kapsam", {"BOMKalem": kalem, **ozellik})
+        uyeler_e = []
+        for u_ad, k in uyeler:
+            m = self._urun("IfcMember", f"{ad}_{u_ad}", predefined="CHORD" if "BASLIK" in u_ad or "UST" in u_ad else "MEMBER", kapsa=False)
+            self._yerlestir(m)
+            self._temsil(m, self._prizma_yz(k, konum - 2.5, konum + 2.5) if mahya_x else self._prizma_xz(k, konum - 2.5, konum + 2.5), "galv")
+            uyeler_e.append(m)
+        api("aggregate.assign_object", self.f, relating_object=asm, products=uyeler_e)
+
+    def _cati_serit(self):
+        """İE-24: girintili gövdenin çatısı `cati_serit.tanim`'den (çizimdeki, görünüşlerdeki ve listedeki çatının aynısı). Her düzlem kendi
+        plan çokgeniyle eğik levha (aynı düzlemdeki ana çatı ve cumba yüzü tek levha); kalkan dolguları duvar üstünden (altında başka çatı
+        varsa onun yüzünden) çatının altına; makaslar parça parça tanımın makas yerlerinde, dış yüzden dış yüze. Ana çatının makasları
+        "Çatı makası (baş/orta)", cumbanınkiler "Cumba makası" (Lokman, 30 Ekim 2026 13:49; kartı kart modelinde)."""
+        from shapely.geometry import Polygon
+        G = self.G; T = G["cati_serit"]; H0 = G["bina"]["duvar_h"]
+        s, eg_, top = T["sacak"], G["bina"]["cati"]["egim"], T["topuk"]
+        zs = H0 + top; t = 4.0
+        D = {d["ad"]: d for d in T["duzlemler"]}
+
+        def p0(d):
+            return (d["sacak"].get("x", 0.0), d["sacak"].get("y", 0.0))
+
+        def kot(d, x, y):                                       # makas üst başlığının kotu (levhanın altı + 10)
+            (ox, oy), (ux, uy) = p0(d), d["yukari"]
+            return d["sacak_kotu"] + d["egim"] * ((x - ox) * ux + (y - oy) * uy)
+        roof = self._urun("IfcRoof", "ANA_CATI", predefined="GABLE_ROOF")
+        self._yerlestir(roof)
+        alan = sum(Polygon(d["plan"]).area * math.hypot(1.0, d["egim"]) for d in T["duzlemler"]) / 1e4
+        mahya = max(q["mahya_kotu"] for q in T["parcalar"])
+        self._pset(roof, "PortatifEv_Cati", {"Egim_yuzde": eg_ * 100, "Sacak_cm": s, "Topuk_cm": top, "Mahya_cm": round(mahya, 1),
+                                             "MakasYonu": "ana çatı + paralel cumba (İE-24)", "Ortu": "trapez sac antrasit", "OrtuAlani_m2": round(alan, 2)})
+        parcalar = []
+        for j, d in enumerate(T["duzlemler"]):
+            sl = self._urun("IfcSlab", f"CATI_{j + 1}", predefined="ROOF", kapsa=False)
+            self._yerlestir(sl)
+            self._temsil(sl, self._egik_levha(d["plan"], p0(d), d["yukari"], d["egim"], d["sacak_kotu"] + 10, t), "sac")
+            self._pset(sl, "PortatifEv_Kapsam", {"BOMKalem": "Trapez çatı sacı (antrasit) — yüzey", "Duzlem": d["ad"]})
+            parcalar.append(sl)
+        api("aggregate.assign_object", self.f, relating_object=roof, products=parcalar)
+        # kalkan dolguları: duvar üstünden (altında başka bir çatı varsa onun yüzünden) üstteki çatının altına; duvarın içinde 10 cm
+        for i, k in enumerate(T["kalkanlar"]):
+            y0, y1 = k["aralik"]; c = k["konum"]; ic = 1.0 if k["ic"] in ("dogu", "kuzey") else -1.0
+            yer = (lambda a: (c, a)) if k["eksen"] == "x" else (lambda a: (a, c))
+            ust, alt = [D[a] for a in k["ust"]], [D[a] for a in k.get("alt", [])]
+            kirik = {y0, y1}
+            for d1 in ust + alt:                                # kotların kırıldığı yerler: iki düzlemin kesiştiği nokta
+                for d2 in ust + alt:
+                    f0, f1 = kot(d1, *yer(0.0)) - kot(d2, *yer(0.0)), kot(d1, *yer(1.0)) - kot(d2, *yer(1.0))
+                    if abs(f1 - f0) > 1e-9 and y0 < -f0 / (f1 - f0) < y1:
+                        kirik.add(-f0 / (f1 - f0))
+            ys = sorted(kirik)
+
+            def alti(ds):                                       # kesitte düzlemlerin (gövdede en alçağı) altı, duvar üstüne kadar
+                return Polygon([(ys[0], H0)] + [(a, max(H0, min(kot(d, *yer(a)) for d in ds))) for a in ys] + [(ys[-1], H0)]).buffer(0)
+            g = alti(ust).difference(alti(alt)) if alt else alti(ust)
+            for n_, pg in enumerate(sorted(getattr(g, "geoms", [g]), key=lambda p_: p_.bounds)):
+                if pg.is_empty or pg.area < 1.0:
+                    continue
+                kesit = list(pg.simplify(0.01).exterior.coords)[:-1]
+                a0, a1 = sorted((c, c + 10 * ic))
+                pl = self._urun("IfcPlate", f"ALIN_{i + 1}" + (f"_{n_ + 1}" if n_ else ""), predefined="SHEET")
+                self._yerlestir(pl)
+                self._temsil(pl, self._prizma_yz(kesit, a0, a1) if k["eksen"] == "x" else self._prizma_xz(kesit, a0, a1), "fiber")
+                self._pset(pl, "PortatifEv_Kapsam", {"BOMKalem": "Çatı alın dolgusu (üçgen) — kural teyit edilecek", "Kalkan": k["ad"]})
+        # makaslar: parça parça tanımın makas yerlerinde (orta makaslar saçak duvarlarının pano eklerinde; cumbanın iç ucunda makas yok)
+        n, yerler = 0, []
+        for q in sorted(T["parcalar"], key=lambda q: q["rol"] != "ana"):
+            mahya_x = abs(q["mahya"][0][1] - q["mahya"][1][1]) < 1e-6
+            b0, b1 = q["b"]
+            for m in q["makaslar"]:
+                n += 1
+                if q["rol"] == "ana":
+                    kalem = "Çatı makası (baş)" if m["rol"] == "bas" else "Çatı makası (orta)"
+                else:
+                    kalem = f"Cumba makası · {q['ad']}"
+                self._makas(f"MAKAS_{n:02d}", kalem, {"Aciklik_cm": round(b1 - b0, 1), "CatiParcasi": q["ad"], "Rol": "baş" if m["rol"] == "bas" else "orta"},
+                            b0, b1, m["konum"], mahya_x, zs, eg_, s)
+                yerler.append({"parca": q["ad"], "rol": m["rol"], "konum_cm": round(m["konum"], 2)})
+        self.cati_ozet = {"mahya_cm": round(mahya, 1), "makas": n, "cati_alan_m2": round(alan, 2), "makaslar": yerler,
+                          **({"uyari": T["uyarilar"]} if T["uyarilar"] else {})}
 
     def veranda(self):
         v = self.G["veranda"]
