@@ -570,6 +570,112 @@
     "testler/motor/test_bk18_ic_100.py::test_iki_hedef_yalniz_ic_kalinlikta_ayrisir",
     "testler/motor/test_bk18_ic_100.py::test_ic_60_ile_dis_aciklik_ve_akslar_ayni"
    ]
+  },
+  {
+   "kod": "PC-25",
+   "baslik": "Görünüş ölçüsü mor çizgi, siyah yazı",
+   "kural": "Görünüşlerin ölçüleri (yatay ölçüler ve kot ölçüleri; ON_OLCU) beyaz sayfada belirgin mor çizgiyle (ACI 193; ölçü çizgisi, uzatma çizgisi ve uç işaretleri), yazısı planın genel ölçüsünün rengiyle (ACI 7, beyaz sayfada siyah). Önce açık maviydi (ACI 4). Planın dış parça ölçüsü (PC-26) de aynı renkte. Ölçülerin yeri, değeri ve sayısı değişmez.",
+   "karar": "D-34",
+   "madde": 1,
+   "lokman": {
+    "tarih": "2026-10-30",
+    "saat": "14:45",
+    "soz": "ön ve arka kot ölçü çizgilerini daha az belirgin başka renk yap yazılarında rengini değiştir beyaz sayfa üzerine daha belirgin bir renk yap mor ile çizdiğim yerleride ölçeklendir rengide mor olsun yazı rengi genel ölçü rengi olsun siyah olabilir"
+   },
+   "kod_yeri": [
+    "motor/dxf_out.py::OLCU_MOR",
+    "motor/dxf_out.py::OLCU_YAZI_RENGI",
+    "motor/dxf_out.py::MOR_OLCU_KATMANLARI",
+    "motor/dxf_out.py::LAYERS",
+    "motor/dxf_out.py::Cizici.dim"
+   ],
+   "sabitler": [
+    {
+     "yer": "motor/dxf_out.py::OLCU_MOR",
+     "deger": 193
+    },
+    {
+     "yer": "motor/dxf_out.py::OLCU_YAZI_RENGI",
+     "deger": 7
+    },
+    {
+     "yer": "motor/dxf_out.py::MOR_OLCU_KATMANLARI",
+     "deger": [
+      "ON_OLCU",
+      "DIS_PARCA_OLCU"
+     ]
+    }
+   ],
+   "test": [
+    "testler/motor/test_d34_cizim.py::test_gorunus_olculeri_mor_yazi_siyah"
+   ]
+  },
+  {
+   "kod": "PC-26",
+   "baslik": "Girintili gövdede her dış parça mor ölçüyle",
+   "kural": "Gövdesi dikdörtgen olmayan (girintili, İE-24) planda kapalı gövdenin dış çizgisinin (duvarların dış yüzü; balkon gibi açık mahal dışarıda) her düz parçası kendi dış yanında, duvarın dış yüzünden 30 cm uzakta mor ölçüyle ölçülür (DIS_PARCA_OLCU; yazı siyah, çizginin ortasında, duvarın yanındaki pencere yazısına binmez). Balkonun eni ve derinliği bu ölçülerdedir; açık mahalin aks ölçüsü bu planda yazılmaz (aynı yer iki kez ölçülmez). Dikdörtgen gövdede dış ölçü iki toplam ölçüdür: bu ölçü çizilmez, katmanı açılmaz. TK-03'te on değer paftanın dört ölçü zincirindekilerle aynı.",
+   "karar": "D-34",
+   "madde": 2,
+   "lokman": {
+    "tarih": "2026-10-30",
+    "saat": "14:45",
+    "soz": "mor ile çizdiğim yerleride ölçeklendir rengide mor olsun yazı rengi genel ölçü rengi olsun siyah olabilir"
+   },
+   "kod_yeri": [
+    "motor/geometry.py::kapali_govde_cokgeni",
+    "motor/dxf_out.py::Cizici._dis_parca_olculeri",
+    "motor/dxf_out.py::DIS_PARCA_PAYI",
+    "motor/dxf_out.py::Cizici.ciz_plan"
+   ],
+   "sabitler": [
+    {
+     "yer": "motor/dxf_out.py::DIS_PARCA_PAYI",
+     "deger": 30.0
+    }
+   ],
+   "test": [
+    "testler/motor/test_d34_cizim.py::test_dis_parca_olculeri_paftanin_zincirleri",
+    "testler/motor/test_d34_cizim.py::test_girintisiz_planda_dis_parca_olcusu_yok"
+   ]
+  },
+  {
+   "kod": "PC-27",
+   "baslik": "Cumbanın görünen saçak ucunda topuk",
+   "kural": "Çatı parçalarının (ana çatı, cumba) saçağının görünüşte görünen her ucunda topuk çizilir (duvar üstünden saçak kotuna, ON_TOPUK), taşan verandadaki gibi (PC-05). Bakışa dik saçağın ucu bakana yakın noktada, bakışa paralel saçağın iki ucu; birleşen düzlemde (ana çatı + cumba) saçak tek çizgidir. Önünde kalan kalkan, çatı düzlemi ya da yakın saçağın topuk bandı ucu örtüyorsa çizilmez. Dikdörtgen gövdede bütün saçak uçları görünüşün iki ucundadır (yalnız oradaki topuk).",
+   "karar": "D-34",
+   "madde": 3,
+   "lokman": {
+    "tarih": "2026-10-30",
+    "saat": "14:45",
+    "soz": "kuralda olan nasıl unutulur anlamadım kural motorunda yok mu veranda makasları topukları onlarıda ekle"
+   },
+   "kod_yeri": [
+    "motor/cephe_gorunus.py::_topuklar",
+    "motor/cephe_gorunus.py::cati_cizgileri",
+    "motor/dxf_out.py::Cizici.ciz_gorunusler"
+   ],
+   "test": [
+    "testler/motor/test_d34_cizim.py::test_cumba_sacak_ucunda_topuk"
+   ]
+  },
+  {
+   "kod": "PC-28",
+   "baslik": "Sınırın yalnız bir parçası duvarsız (merdiven ağzı)",
+   "kural": "İki mahalin sınırının yalnız bir parçası duvarsızsa (merdiven ağzı) İş Emri'nin `acik_sinirlar` satırı `parca_cm` ile o parçayı yazar: bir hat ve üstünde bir aralık, Motor çerçevesinde (`konum_cm` gibi), uçlar aks üstünde (yoksa hata; K21). O parçada pano ve kapısız geçiş yoktur; çizgisi açık sınır çizgisidir, duvar şeridi `serit` mahaline; sınırın kalanı duvar, duvar parçanın ucundan başlar. Aralığın tamamı iki mahalin arasındaki iç duvarda değilse hata.",
+   "karar": "D-34",
+   "madde": 4,
+   "lokman": {
+    "tarih": "2026-10-30",
+    "saat": "14:45",
+    "soz": "Burası yok (işaretli r02'de merdiven kovasının salona bakan köşesindeki kapısız geçiş panosu)"
+   },
+   "kod_yeri": [
+    "motor/geometry.py::kur"
+   ],
+   "test": [
+    "testler/motor/test_d34_cizim.py::test_merdiven_agzi_duvarsiz",
+    "testler/motor/test_d34_cizim.py::test_acik_sinir_parca_hatalari"
+   ]
   }
  ]
 }

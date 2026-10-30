@@ -1,6 +1,6 @@
 {
   "is_emri_no": "PM-TK03-87M2",
-  "revizyon": 2,
+  "revizyon": 3,
   "talep": {
     "bayi": {
       "kod": "TK03",
@@ -43,6 +43,7 @@
     "ek_akslar_cm": {
       "x": [
         548.5,
+        650.4,
         780.6,
         831.95
       ],
@@ -196,6 +197,20 @@
         "MUTFAK",
         "SALON"
       ]
+    },
+    {
+      "arasi": [
+        "MERDİVEN KOVASI",
+        "SALON"
+      ],
+      "parca_cm": {
+        "y": 359.75,
+        "x": [
+          548.5,
+          650.4
+        ]
+      },
+      "serit": "SALON"
     }
   ],
   "acikliklar": [
@@ -293,15 +308,6 @@
       ],
       "duvar_ucu": "sag",
       "mentese": "sol"
-    },
-    {
-      "tur": "gecis",
-      "olcu": 77,
-      "arasi": [
-        "SALON",
-        "MERDİVEN KOVASI"
-      ],
-      "pano": 2
     }
   ],
   "dikmeler": [],
@@ -349,6 +355,7 @@
     "Kaynak: Lokman'ın yüklediği 1. kat montaj paftası (21 sayfa), duvar panel montaj planı sayfasının vektör çiziminden ölçüldü (ölçek 1236,7 dış ölçüden). Oda adları ve alanları mimari plan sayfasından; ad ve antet yazılmadı.",
     "Ön ve arka Lokman'ın düzeltmesiyle (30 Ekim 14:07, işaretli mimari plan): mühendisin paftasında \"ön\" yazan cephe arkadır. Gerçek çerçeve: sol solda, ön altta; balkon, mutfak ve banyo arkada, yatak odaları önde. Pano ızgarası paftada arkadaki iç yüzden (10 + 125,5k), solda duvar ekseninden (5 + 125,5k): dizilim arka-sol, kisa_kenar y (makaslar derinliği geçer). `konum_cm`, `girintiler` ve y ek aksları Motor'un arka-sol çerçevesinde (y arkadan); pencere cephesi, kapının duvar ucu ve menteşe gerçek çerçevede.",
     "Merdiven, döşeme ve alttaki profiller yok sayıldı (Lokman 30 Ekim 13:08); merdiven boşluğu kapalı boş oda, salona merdiven ağzından açık (MERDİVEN KOVASI).",
+    "Merdiven ağzı (Lokman 30 Ekim 14:45, işaretli r02: \"Burası yok\"): salona bakan yüzde 548,5–650,4 arası duvarsız (paftada 551,6–650,4, pano yok); İş Emri'nde `acik_sinirlar` parçası (duvar şeridi salona, paftanın salon alanı gibi) ve 650,4 ek aksı; kapısız geçiş kaldırıldı.",
     "Girintiler (bina dışı): ön-sol 543,5 × 232 ve arka-sağ 451,1 × 170 (paftanın ölçü zincirleri). Girinti duvarı aksa ortalı 10'luk dış duvar (paftada 543,5–553,5 ve arkadan 169,9–180,2).",
     "Duvar eksenleri paftadan, 2 cm'ye kadar en yakın ızgara aksına yuvarlandı (318,69 → 318,75; 883,46 → 883,5; 1008,94 → 1009; 574,64 → 574,75; banyonun alt duvarı 200,3 → 198,25, balkon duvarıyla aynı aks). Izgara dışı duvarlar ek aks: x 548,5 · 780,6 · 831,95; y 175 · 359,75 · 523,85 · 636,3.",
     "Mutfak salona açık (paftada yeşil kesik çizgi, duvar yok).",

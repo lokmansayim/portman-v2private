@@ -47,7 +47,7 @@ def test_dis_olcu_ve_toplam_alan(plan, pafta):
 
 
 def test_oda_alanlari_paftaya_yakin(plan, pafta):
-    """Net alanlar paftanın yazısından en çok 0,45 m² farklı (salon 33,41 / 33,82: paftanın salonu duvar ekseninden; merdiven 4,39 / 4,26)."""
+    """Net alanlar paftanın yazısından en çok 0,45 m² farklı (salon 33,42 / 33,82: paftanın salonu duvar ekseninden; merdiven 4,39 / 4,26)."""
     for ad, beklenen in pafta["oda_alanlari_m2"].items():
         assert abs(plan.mahaller[ad].alan_m2 - beklenen) < 0.45, (ad, plan.mahaller[ad].alan_m2, beklenen)
     assert "GİRİNTİ" not in " ".join(plan.mahaller)
@@ -97,12 +97,16 @@ def test_kapilar_paftadaki_yerde(plan, pafta):
 
 
 def test_gecis_kapisiz_cizilir(monkeypatch, tmp_path):
-    """Merdiven ağzı kapısız geçiş: bayi görselinde kanat yayı yalnız dört oda kapısında (geçişe yay çizilmez)."""
+    """Kapısız geçiş: bayi görselinde kanat yayı yalnız dört oda kapısında (geçişe yay çizilmez). TK-03 r03'te merdiven ağzı duvarsız
+    (D-34); geçiş r02'deki yerinde, ağzın açık parçası kaldırılarak sınanır."""
     from motor import bayi_gorseli as BG
+    ie = _oku(TK03)
+    ie["acik_sinirlar"] = [s for s in ie["acik_sinirlar"] if "parca_cm" not in s]
+    ie["acikliklar"].append({"tur": "gecis", "olcu": 77, "arasi": ["SALON", "MERDİVEN KOVASI"], "pano": 2})
     yaylar = []
     gercek = BG.Arc
     monkeypatch.setattr(BG, "Arc", lambda *a, **k: (yaylar.append(a), gercek(*a, **k))[1])
-    BG.plan_gorseli(_oku(TK03), tmp_path / "plan.png")
+    BG.plan_gorseli(ie, tmp_path / "plan.png")
     assert len(yaylar) == 4
 
 

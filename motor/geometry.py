@@ -577,14 +577,25 @@ def _kur(is_emri: dict) -> Plan:
     if eksik:
         raise IsEmriHatasi(f"Grid tamamen mahallere bölünmemiş; boş hücreler: {eksik[:8]}")
 
-    acik_ciftler, strip_sahibi = set(), {}
+    acik_ciftler, strip_sahibi, acik_parcalar = set(), {}, {}
     for s in is_emri.get("acik_sinirlar", []):
         a, b = (s["arasi"] if isinstance(s, dict) else s)
         strip_sahibi[frozenset((a, b))] = (s.get("serit", a) if isinstance(s, dict) else a)
-        acik_ciftler.add(frozenset((a, b)))
         for n in (a, b):
             if n not in mahaller:
                 raise IsEmriHatasi(f"Açık sınırda bilinmeyen mahal: {n}")
+        parca = s.get("parca_cm") if isinstance(s, dict) else None
+        if not parca:
+            acik_ciftler.add(frozenset((a, b)))
+            continue
+        # D-34 (Lokman, 30 Ekim 2026 14:45, TK-03 merdiven ağzı "Burası yok"): sınırın yalnız bir parçası duvarsız. `parca_cm` bir hat ve
+        # üstünde bir aralık (Motor çerçevesinde, `konum_cm` gibi): {"y": 359.75, "x": [548.5, 650.4]}; uçlar aks üstünde (K21)
+        hat_yon = [k for k in ("x", "y") if not isinstance(parca.get(k), list)]
+        if sorted(parca) != ["x", "y"] or len(hat_yon) != 1:
+            raise IsEmriHatasi(f"Açık sınır {a}–{b}: parca_cm bir hat ve bir aralık ister (ör. {{'y': 359.75, 'x': [548.5, 650.4]}}): {parca}")
+        hy = hat_yon[0]; by = "x" if hy == "y" else "y"
+        lo, hi = sorted(aks_dizini(v, by) for v in parca[by])
+        acik_parcalar.setdefault(frozenset((a, b)), []).append(["x" if hy == "y" else "y", aks_dizini(parca[hy], hy), lo, hi, 0])
 
     def owner(u, v):
         return cell_owner.get((u, v), OUT) if (0 <= u < nx2 and 0 <= v < ny2) else OUT   # girinti hücresi bina dışı
@@ -607,15 +618,28 @@ def _kur(is_emri: dict) -> Plan:
             return "acik_sinir"
         return "ic"
 
+    def parca_acik(yon, hat, k, a, b):
+        for p in acik_parcalar.get(frozenset((a, b)), []):
+            if p[0] == yon and p[1] == hat and p[2] <= k < p[3]:
+                p[4] += 1
+                return True
+        return False
+
     edges = []
     for u in range(0, nx2 + 1):
         for v in range(0, ny2):
             a, b = owner(u - 1, v), owner(u, v); s = sinif(a, b)
+            if s == "ic" and parca_acik("y", u, v, a, b): s = "acik_sinir"
             if s: edges.append(("y", u, v, a, b, s))
     for v in range(0, ny2 + 1):
         for u in range(0, nx2):
             a, b = owner(u, v - 1), owner(u, v); s = sinif(a, b)
+            if s == "ic" and parca_acik("x", v, u, a, b): s = "acik_sinir"
             if s: edges.append(("x", v, u, a, b, s))
+    for pair, ps in acik_parcalar.items():
+        for p in ps:
+            if p[4] != p[3] - p[2]:
+                raise IsEmriHatasi(f"Açık sınır {'–'.join(sorted(pair))}: parca_cm aralığının bir kısmı iki mahalin arasındaki iç duvarda değil")
 
     # ---------------- duvar koşuları
     duvarlar: list[Duvar] = []
@@ -1222,6 +1246,14 @@ def govde_kutusu(plan: "Plan") -> tuple:
     """Gövdenin dış ölçü kutusu: duvarlar, köşeler, ızgara içindeki açık mahaller ve İş Emri dikmeleri; taşan veranda ve dikmeleri hariç
     (ana çatı bunu örter). Taşan veranda yoksa `sunum.sinirlar` ile aynı."""
     return _govde_birlesimi(plan).bounds
+
+
+def kapali_govde_cokgeni(plan: "Plan"):
+    """D-34: kapalı gövdenin plandaki dış çizgisi: duvarlar, köşeler ve kapalı mahaller; açık mahal (balkon, niş, veranda) dışarıda kalır.
+    Planın dış parça ölçüleri (`dxf_out.Cizici._dis_parca_olculeri`) bu çizginin düz parçalarıdır (TK-03: paftanın ölçü zincirleri)."""
+    g = unary_union([plan.footprint()] + [m.poly for m in plan.mahaller.values() if m.poly is not None and not m.acik])
+    en = max(getattr(g, "geoms", [g]), key=lambda p: p.area)
+    return Polygon(en.exterior.coords).simplify(0.01)
 
 
 def govde_cokgeni(plan: "Plan"):

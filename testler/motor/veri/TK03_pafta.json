@@ -27,7 +27,7 @@
     "ön dış": "paftada [106.6, 125.48, 102.71, 125.47, 125.75, 97.16] (yatak odası 2'nin pencereli panosu banyo duvarının eksenine, 780,6'ya dayalı); Motor tam ızgarada [84, 125.5, 125.5, 125.5, 125.5, 97.2]",
     "arka dış": "paftada mutfak–banyo T'sinde bölünür [57.74, 125.47, 41.64, 106.6, 125.48]; Motor tam ızgarada T'de bölmez",
     "mutfak–banyo": "paftada [125.47, 64.68]; Motor'da [125.5, 62.75]: banyonun salona bakan duvarı (paftada ekseni 200,3) balkon duvarının aksına (198,25) yuvarlandı",
-    "merdiven ağzı": "paftada merdiven boşluğunun salona bakan yüzü 551,6–650,4 arası duvarsız (98,8); Motor'da 81'lik panoda 77'lik kapısız geçiş"
+    "merdiven ağzı": "paftada merdiven boşluğunun salona bakan yüzü 551,6–650,4 arası duvarsız (98,8), kalan duvar 650,41'den [125.48, 56.07]; Motor'da 548,5–650,4 açık sınır parçası (D-34, PC-28; r02'deki 77'lik kapısız geçiş kalktı), kalan duvar tam ızgarada [107.6, 70.95]"
   },
   "pencereler": [
     {"mahal": "SALON", "duvar": "sol", "olcu": "120x120", "aralik_cm": [363.3, 483.3]},
