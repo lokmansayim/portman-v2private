@@ -285,6 +285,32 @@ def test_hakemli_kontrol_sayfasi(hakemli):
     assert all("sade" not in d for d in dn.values() if d["durum"] == "geçti")
 
 
+def test_duzeltmeden_sonra_eski_metraj_tasinmaz(hakemli, tmp_path):
+    # tanım ölçümden sonra değişirse (Lokman'ın düzeltmesi) eski "geçti" taşınmaz: çizimde hakemin ölçümü bugünkü kuralla yeniden
+    # denetlenir, tutmazsa kart beklemede, kabul edilemez; sayfa bunu sade dille söyler (gerçek bankanın kopyasında)
+    import pymupdf
+    import shutil
+    kopya = tmp_path / "modeller" / "banka"
+    shutil.copytree(hakemli["banka"], kopya)
+    (tmp_path / "is_emri").mkdir()
+    tp = kopya / "KT99" / "tanim.json"
+    t = json.loads(tp.read_text(encoding="utf-8"))
+    for a in t["acikliklar"]:
+        if a["ad"] == "K2":
+            a["mentese"] = "bas" if a.get("mentese", "bas") == "son" else "son"
+    tp.write_text(json.dumps(t, ensure_ascii=False), encoding="utf-8")
+    assert kos(kopya, "duzelt", "KT99", "--tur", "tercih", "--metin", "yatak odası 1 kapısı ters açılsın") == 0
+    assert kos(kopya, "ciz", "KT99", "--cikti", tmp_path / "cikti") == 0
+    k = json.loads((kopya / "KT99" / "kart.json").read_text(encoding="utf-8"))
+    mt = k["metraj_testi"]
+    assert k["durum"] == "beklemede" and mt["durum"] == "beklemede" and mt["hakem_sonucu"] is None and "farklı" in mt["neden"]
+    assert kos(kopya, "kabul", "KT99", "--kapisiz", "--izsiz") == 2
+    pdf = Path(k["son_cizim"]["kontrol_pdf"])
+    with pymupdf.open(pdf if pdf.is_absolute() else KOK / pdf) as d:
+        metin = " ".join(d[0].get_text().split())
+    assert "yeniden doğrulanmadan kabul edilemez" in metin and "uygun" not in metin.replace("uygunsa", "")
+
+
 def test_hakemli_kabul_pim_ve_kontrol(hakemli, tmp_path):
     import shutil
     banka = hakemli["banka"]

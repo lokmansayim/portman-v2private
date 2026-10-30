@@ -102,6 +102,9 @@ def _sol(kart: dict) -> str:
         s.append("<p>Bu modelin mühendis listesi yok; bizim çelik hesabımız "
                  f"({sayi((o.get('liste') or {}).get('celik_kg'), 1)} kg) hiçbir listeyle kıyaslanmadı. \"Kabul\"ünüz bu kıyasın yerine geçmez; "
                  "kayda \"kıyas yapılmadı\" yazılır. Mühendis listesi gelince kıyaslanır.</p>")
+    elif mt.get("hakem_sonucu") is None:
+        s.append("<p class='kaldi'>Bu çizim, mühendisin listesiyle kıyaslanan çizimden farklı (düzeltme yapıldı). Çelik kıyası bu çizim için "
+                 "yeniden doğrulanmadan kabul edilemez.</p>")
     else:
         esik = float(mt.get("esik_yuzde") or 3)
         sonuc = ("<span class='gecti'>uygun</span>" if mt.get("durum") == "gecti"

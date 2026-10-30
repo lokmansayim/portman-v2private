@@ -574,7 +574,8 @@
    "yuk": 180,
    "alt": 10,
    "mahal": "Yatak Odası 4",
-   "etiket": "200/180/10"
+   "etiket": "200/180/10",
+   "acilis": "surgulu"
   },
   {
    "ad": "P11",
@@ -585,7 +586,8 @@
    "yuk": 180,
    "alt": 10,
    "mahal": "Salon - Mutfak",
-   "etiket": "200/180/10"
+   "etiket": "200/180/10",
+   "acilis": "surgulu"
   },
   {
    "ad": "K1",
@@ -606,7 +608,7 @@
    "bas": 403.1,
    "en": 90,
    "yuk": 214,
-   "mentese": "son",
+   "mentese": "bas",
    "acilim": "sol",
    "kanat": [
     80,
@@ -622,7 +624,7 @@
    "bas": 285.2,
    "en": 90,
    "yuk": 214,
-   "mentese": "bas",
+   "mentese": "son",
    "acilim": "sol",
    "kanat": [
     80,

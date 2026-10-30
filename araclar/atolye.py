@@ -477,10 +477,22 @@ def denetimler(kart: dict, t: dict, m: dict, v: dict, olcum: dict, yazi: list[st
     return d
 
 
-def metraj_hesapla(kart: dict, olcum: dict) -> None:
-    """Metraj kapısı çizimden değil, çelik hakeminin ölçümünden gelir (`metraj --celik`); ölçümü olmayan kartta "yok"."""
-    if (kart.get("metraj_testi") or {}).get("kaynak") != "celik_hakemi":
+def metraj_hesapla(kart: dict, olcum: dict, t: dict) -> None:
+    """Metraj kapısı çizimden değil, çelik hakeminin ölçümünden gelir (`metraj --celik`); ölçümü olmayan kartta "yok". Tanım ölçümden sonra
+    değiştiyse (düzeltme) hakemin ölçümü bugünkü kuralla yeniden denetlenir: tutmazsa kart `beklemede` (eski "geçti" taşınmaz)."""
+    mt = kart.get("metraj_testi") or {}
+    if mt.get("kaynak") != "celik_hakemi":
         kart["metraj_testi"] = {"durum": "yok", "not": METRAJ_YOK}
+        return
+    if mt.get("tanim_kanonik") == kanonik_sha(t):
+        return
+    sonuc, sorun = celik_olcumu(mt["proje"], t)
+    if sorun:
+        kart["metraj_testi"] = {"durum": "beklemede", "kaynak": "celik_hakemi", "proje": mt["proje"], "hakem_sonucu": None,
+                                "neden": f"tanım ölçümden sonra değişti; hakemin ölçümü bu tanım için geçerli değil ({sorun})",
+                                "tanim_kanonik": kanonik_sha(t), "zaman": simdi()}
+    else:
+        kart.update(sonuc)
 
 
 def ciz(a) -> int:
@@ -513,7 +525,7 @@ def ciz(a) -> int:
     ozet_p = hedef / f"{gk}_pafta_ozet.json"
     kisa = (json.loads(ozet_p.read_text(encoding="utf-8")).get("kontrol_notlari") or []) if ozet_p.exists() else []
     dn = denetimler(kart, t, m, v, olcum, _yazi_bulgulari(rapor, gk), kisa, a.banka)
-    metraj_hesapla(kart, olcum)
+    metraj_hesapla(kart, olcum, t)
     kart["olcum"] = olcum
     kart["brut_m2"], kart["oda_programi"] = olcum["oturum_m2"], olcum["oda_programi"]
     kart["cati_tipi"] = t["cati"].get("tip")
@@ -657,7 +669,7 @@ def celik_olcumu(proje: str, t: dict) -> tuple[dict | None, str | None]:
              "kapi_disi": kapi.get("kapi_disi") or [], "bizim_kapi_kg": kapi.get("bizim_kapi_kg"), "gercek_kapi_kg": kapi.get("gercek_kapi_kg"),
              "turler": turler, "muhur_durumu": (sonuc.get("muhur") or {}).get("durum"), "liste_sha256": (sonuc.get("muhur") or {}).get("sha256"),
              "sonuc": sp.relative_to(KOK).as_posix(), "sonuc_tarihi": sonuc.get("tarih"), "kiyas_commit": sonuc.get("kiyas_commit"),
-             "bizim_liste_commit": lc, "yontem": bizim.get("yontem"), "zaman": simdi()}
+             "bizim_liste_commit": lc, "yontem": bizim.get("yontem"), "tanim_kanonik": kanonik_sha(t), "zaman": simdi()}
     return {"metraj_testi": {k: v for k, v in kayit.items() if v is not None}, "pim": {"kural_seti": ks, "karkas": kk}}, None
 
 
@@ -821,6 +833,9 @@ def kabul(a) -> int:
         return dur("son çizim kartın pimindeki kural setiyle çizilmedi: yeniden çizin, kontrol sayfasını gösterin")
     if (kart.get("metraj_testi") or {}).get("durum") == "beklemede":
         return dur("metraj kabul testi geçmedi: beklemede")
+    mt = kart.get("metraj_testi") or {}
+    if mt.get("kaynak") == "celik_hakemi" and mt.get("tanim_kanonik") != kanonik_sha(json.loads(tp.read_text(encoding="utf-8"))):
+        return dur("tanım metraj ölçümünden sonra değişti: `metraj --celik` ve `ciz` yeniden koşulmalı")
     kalan = [x for x in sc.get("denetimler") or [] if x["durum"] == "kaldı"]
     if kalan:
         return dur("denetim kaldı: " + "; ".join(f"{x['ad']} ({x['ayrinti']})" for x in kalan))

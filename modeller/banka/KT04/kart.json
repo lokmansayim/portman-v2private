@@ -22,7 +22,7 @@
    "kaynak": "projenin adında ve çatı paftasında (ÇATI M2: 120)"
   }
  },
- "durum": "kontrolde",
+ "durum": "taslak",
  "metraj_testi": {
   "durum": "gecti",
   "kaynak": "celik_hakemi",
@@ -268,7 +268,20 @@
   "perspektif": "ATLANDI",
   "kontrol_pdf": "/mnt/project-files/Portman_Proje_Dosyalari/IE-09_atolye/banka_hatti/KT04/c05/KT04_kontrol_c05.pdf"
  },
- "duzeltmeler": [],
+ "duzeltmeler": [
+  {
+   "zaman": "2026-10-30T15:02+0300",
+   "tur": "tercih",
+   "metin": "Yatak odası 1 ve yatak odası 4 kapılarının açılış yönü ters: menteşeler iki odanın ara duvarına yakın uca (Lokman, 30 Ekim 2026 14:56, bayi paftası üzerinde işaretli)",
+   "cizim": 5
+  },
+  {
+   "zaman": "2026-10-30T15:02+0300",
+   "tur": "tercih",
+   "metin": "Ön cephedeki iki 200×180 pencere (yatak odası 4 ve salon-mutfak) sürgülü (Lokman, 30 Ekim 2026 14:56); genel motorda sürgülü çizimi ayrı PR",
+   "cizim": 5
+  }
+ ],
  "gecmis": [
   {
    "zaman": "2026-10-30T02:05+0300",
@@ -332,6 +345,16 @@
    "no": 5,
    "durum": "kontrolde",
    "passed": true
+  },
+  {
+   "zaman": "2026-10-30T15:02+0300",
+   "olay": "duzelt",
+   "tur": "tercih"
+  },
+  {
+   "zaman": "2026-10-30T15:02+0300",
+   "olay": "duzelt",
+   "tur": "tercih"
   }
  ],
  "kabul": null,
