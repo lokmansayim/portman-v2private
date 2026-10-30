@@ -344,9 +344,9 @@ function serit(o, perp, out) {   // hat çerçevesi: yerel x hattan dışa, yere
 {
   let oo = 0;
   D.omega_duvar.forEach(sg => {
-    const ic = sg.tur === 'ic', PL = ic ? 375 : 250;
+    const ic = sg.tur === 'ic', PL = ic && !sg.sirt ? 375 : 250;   // 60'lık omega L 3750; 100'lük duvar omegası (iç duvar üstünde de) L 2500
     const bas = sg.tur === 'bas', S = serit(sg.o, sg.perp, sg.out), n = Math.ceil((sg.a1 - sg.a0) / PL - 1e-6);
-    const SR = ic ? (sg.sirt || 6.5) : OM100;   // iç duvar omegasının sırtı: 60'lıkta 6,5; 100'lük iç duvarda modelden (Lokman 29.10.2026: 10,5)
+    const SR = ic ? (sg.sirt || 6.5) : OM100;   // iç duvar omegasının sırtı: 60'lıkta 6,5; 100'lük iç duvarda modelden (100'lük duvar omegası; Lokman 29 ve 30.10.2026: 10,5)
     const [uI, uD] = ic ? [-SR / 2, SR / 2] : [5 + HS - OM100, 5 + HS];   // iç ve dış kanadın iç yüzü (yerel x dışa); 100'lükte dış kanat H kanadının dış yüzünde
     for (let k = 0; k < n; k++) {
       const a0 = sg.a0 + k * PL, a1 = Math.min(sg.a1, a0 + PL), [z0, z1] = [S.zOf(a0 + 0.2), S.zOf(a1 - 0.2)].sort((p, q) => p - q);
@@ -364,15 +364,15 @@ function serit(o, perp, out) {   // hat çerçevesi: yerel x hattan dışa, yere
         b(uI - SAC, uI, H - 3, H); b(uD, uD + SAC, H - 3, H); b(uI - 3, uI, H - 3 - SAC, H - 3); b(uD, uD + 3, H - 3 - SAC, H - 3);
       }
       else { b(uI - SAC, uI, H - 3, H); b(uD, uD + SAC, H - 3, H); }   // 100'lük duvar omegası: derinlik 3 cm
-      const ad = ic && sg.sirt ? `60’lık iç duvar üstü omegası (sırt ${fmt(sg.sirt)})`
+      const ad = ic && sg.sirt ? '100’lük duvar omegası (iç duvar üstü)'
         : { sacak: '100’lük saçak omegası', duvar: '100’lük duvar omegası', bas: 'Baş makas omegası', ic: '60’lık duvar omegası (iç duvar üstü)' }[sg.tur];
       const ls = sg.liste || M.omega_liste[sg.tur];
       const kesit = { sacak: 'üst 10,5 cm (2 + 100 + 2 mm H kanatları), dış kanat dışarıda tam yaslanır; içte 3 cm kanat + içe 3 cm ayak; dışta 3 cm kanat, ucunda yukarı ve dışa eğik dudak; içteki aralıklara silikonize mastik; sac 1 mm (Lokman çizimi, 25.10.2026; dudak ölçüsü yaklaşık)', duvar: 'üst 10,5 cm (2 + 100 + 2 mm H kanatları), dış kanat dışarıda tam yaslanır; iki yanda 3 cm kanat; içteki aralıklara silikonize mastik; sac 1 mm',
         bas: `üst 10,5 cm (2 + 100 + 2 mm H kanatları), dış kanat dışarıda tam yaslanır; derinlik ${BAS_KANAT} cm; içte 3 cm açık yanak; dışta ${BAS_U} cm U yanak: 8 mm baş makas betopanı bu U’ya girer, betopan makasa dayanır; makas dış kanatla aynı hizada; içteki aralığa silikonize mastik; sac 1 mm (Lokman, 25.10.2026; U dudağı ~${BAS_DUDAK} cm varsayım)`,
-        ic: sg.sirt ? `sırt ${fmt(sg.sirt)} cm (100’lük omegalar gibi), derinlik 3 cm, iki yanda 3 cm kulak: öteki ölçüleri 60’lık omeganın; kapı üstlerinden ve H’lardan kesintisiz geçer; sac 1 mm (Lokman, 29.10.2026)`
+        ic: sg.sirt ? `sırt ${fmt(sg.sirt)} cm (2 + 100 + 2 mm H kanatları + 1 mm), derinlik 3 cm, iki yanda 3 cm kulak: öteki ölçüleri 60’lık omeganın; kapı üstlerinden ve H’lardan kesintisiz geçer; sac 1 mm (Lokman, 29.10.2026)`
           : '6,5 cm açıklık (6 cm pano + iki yanda H sacı 2 + 2 mm), derinlik 3 cm, iki yanda 3 cm kulak; kapı üstlerinden ve H’lardan kesintisiz geçer; sac 1 mm (Lokman, 25.10.2026)' }[sg.tur];
-      const kod = sg.kart || KB('omega_' + sg.tur);   // iç duvar omegasının kartı modelden (OM-01; 100'lük iç duvarda OM-02)
-      add(AD.omega, g, oo++ * 0.6, { kod, ad, satir: [['Bu parça', `${sg.yer} · L ${fmtc(a1 - a0)} cm`], ['Kesit', kesit], ['Liste', ls], ...(ic ? [['Kaynak', sg.sirt ? `Lokman, 29.10.2026: 100’lük iç duvarın üstüne 60’lık omega, sırtı ${fmt(sg.sirt)} cm` : 'Lokman, 25.10.2026: iç duvarların üstüne 60’lık omega']] : []), ...kartSat(kod)] });
+      const kod = sg.kart || KB('omega_' + sg.tur);   // iç duvar omegasının kartı modelden (OM-01; 100'lük iç duvarda OM-02, 100'lük duvar omegası)
+      add(AD.omega, g, oo++ * 0.6, { kod, ad, satir: [['Bu parça', `${sg.yer} · L ${fmtc(a1 - a0)} cm`], ['Kesit', kesit], ['Liste', ls], ...(ic ? [['Kaynak', sg.sirt ? `Lokman, 30.10.2026: iç duvar üstü omegası 100’lük duvar omegasıdır; 29.10.2026: sırtı ${fmt(sg.sirt)} cm, öteki ölçüleri 60’lık omeganın` : 'Lokman, 25.10.2026: iç duvarların üstüne 60’lık omega']] : []), ...kartSat(kod)] });
     }
   });
 }
@@ -839,7 +839,7 @@ function cardRows(steps) {
    Yazılardaki {ad} yerleri modelden sayılır (SAY); oda adımlarının metni odanın kaydından (D.rooms[].metin). */
 const SAY = {
   N, alt_dis: fmt(D.alt_m.dis), alt_ic: fmt(D.alt_m.ic),
-  omega_ic_n: parts.filter(q => q.step === AD.omega && q.obj.userData.info.ad.startsWith('60’lık')).length,
+  omega_ic_n: parts.filter(q => q.step === AD.omega && q.obj.userData.info.ad.includes('(iç duvar üstü)')).length,
   omega_ic_m: fmt(D.omega_duvar.filter(o => o.tur === 'ic').reduce((a, o) => a + o.a1 - o.a0, 0) / 100),
   izo_n: parts.filter(q => q.step === AD.izo).length,
   izo_m2: fmt(parts.filter(q => q.step === AD.izo).reduce((t, q) => t + q.obj.children[0].geometry.parameters.width * q.obj.children[0].geometry.parameters.depth, 0), 0),

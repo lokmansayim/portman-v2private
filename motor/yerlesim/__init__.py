@@ -93,7 +93,9 @@ def katmanlar(ie: dict, plan: dict, makaslar: list[dict], yerlesim: dict, liste:
     for i, h in enumerate(hatlar, 1):
         h["no"] = i
         sondan = g["baslangic"]["y" if h["eksen"] == "x" else "x"] == "max"            # hattın koştuğu eksende dizilimin başladığı uç
-        h["parcalar"], h["bosluk_cm"] = tavan.parcala(h["r0"], h["r1"], tam, T["en_kisa_cm"], sondan)
+        # 100'lük iç duvarın üstü (sırtı yazılı hat) 100'lük duvar omegası: tam parçası duvar omegasının boyu (Lokman, 30 Ekim 07:04; D-32 ek)
+        tam_h = _cm(T["parca_boyu_100"] - T["pay_100"]) if "sirt" in h else tam
+        h["parcalar"], h["bosluk_cm"] = tavan.parcala(h["r0"], h["r1"], tam_h, T["en_kisa_cm"], sondan)
         for a, b in h["parcalar"]:
             s = h["s"]
             kutu = ([s - ow / 2, a, g["duvar_h"] - oh, s + ow / 2, b, g["duvar_h"]] if h["eksen"] == "x"

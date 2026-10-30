@@ -159,13 +159,6 @@
    "durum": "pafta",
    "kaynak": "J2, O5 ve Lokman 21 Ekim 16:22 (paftadaki yeşil kesikli profil): çatı kenarına gelmeyen dış duvarlar, çatı kenarında olmayan kirişler ve 100'lük iç duvarlar ÷ 2,5 (Portatifev E2, E3, E5, PK-07 elle tuttu; Şablon B bilgi: E1, E4, PK-06)."
   },
-  "ic_duvar_ustu_omegasi": {
-   "deger": {
-    "sirt_cm": 10.5
-   },
-   "durum": "lokman",
-   "kaynak": "Asma dizme tavanda 100'lük iç duvarın üstü: 60'lık omeganın ölçüsünde, sırtı 10,5 cm (100'lük omegalar gibi: 100 mm pano + iki yanda 2 mm H kanadı + 1 mm). Lokman, 29 Ekim 13:12: \"60'lık omega ile tüm ölçüleri doğru ama sırt genişliği 10.5 cm olacak diğer omegalar gibi\" (D-32). Ayrı satır; boyu iç duvar üstleri ÷ 3,65 (60'lık omeganın böleni). 60'lık iç duvarda 60'lık duvar omegasında kalır; ters tavanda 100'lük iç duvarın üstü 100'lük duvar omegasıdır (O5, PK-07)."
-  },
   "sacak_omegasi_bolen_m": {
    "deger": 2.5,
    "durum": "pafta",

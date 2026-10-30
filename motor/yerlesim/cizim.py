@@ -135,7 +135,7 @@ def ciz(model_yolu: Path, say: dict, yol: Path, kod: str) -> Path:
         # 1 · tavan omega
         fig, ax = plt.subplots(figsize=(16.54, 11.69))
         _duvarlar(ax, m)
-        OMK = [kk for kk in ("OM-01", "OM-02") if m["k2"].get(kk)] or ["OM-01"]   # OM-02: 100'lük iç duvarın üstü, sırt 10,5 (D-32)
+        OMK = [kk for kk in ("OM-01", "OM-02") if m["k2"].get(kk)] or ["OM-01"]   # OM-02: 100'lük iç duvarın üstü, 100'lük duvar omegası (D-32 ek)
         for kk in OMK:
             for p in m["k2"].get(kk, []):
                 v, yer = p["v"], p["p"].get("Yer", "ara")

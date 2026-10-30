@@ -1,6 +1,6 @@
 {
  "sema": "portman.urun_kartlari/1",
- "surum": "5",
+ "surum": "6",
  "aciklama": "Ürün kimlik kartları (İE-15 K1, K2, K3 ve K3b, D-24). Kart bir ürünü tanımlar; modelde IFC tür nesnesidir, parça (örnek) türüne bağlanır. Okuyan `motor/kart_model.py`. Kod kalıcıdır: bir kod başka ürüne verilmez, ürün kalkarsa kod boş kalır (`testler/kimlik/veri/kart_kodlari.json` kilidi). Kart kodu boy ve projeyle değişmez; bugünkü malzeme kataloğunun kodu (D01, D09…) boya göre ve projede yeni boy çıktıkça verilir, parçada `KatalogKodu` olarak kalır. Bu yüzden kart kodu tirelidir (D-01). Ailelerin harfi katalogla aynıdır. Kartı düzeltmek için bu dosya düzeltilir, model yeniden üretilir; Bonsai'de yapılan değişiklik geri okunmaz.",
  "alanlar": {
   "kod": "Kalıcı kod, `<aile>-<nn>`",
@@ -485,18 +485,19 @@
   },
   {
    "kod": "OM-02",
-   "ad": "60'lık iç duvar üstü omegası (sırt 10,5) L 3750",
-   "liste": {"grup": "1002", "satirlar": ["60'lık iç duvar üstü omegası (sırt 10,5)"]},
-   "olcu": "60 × 3750; 60'lık omeganın ölçüsünde, sırtı 10,5 cm (100 mm pano + iki yanda 2 mm H kanadı + 1 mm); parça boyu parçada (tam parça 365, kesim planında)",
+   "ad": "100'lük duvar omegası L 2500",
+   "liste": {"grup": "1002", "satirlar": ["100'lük duvar omegası"]},
+   "olcu": "100 × 2500; iç duvarın üstünde sırtı 10,5 cm (100 mm pano + iki yanda 2 mm H kanadı + 1 mm), öteki ölçüleri 60'lık omeganın; parça boyu parçada (tam parça 250, kesim planında)",
    "birim": "adet",
-   "nerede": "İç duvarı 100'lük evde, asma dizme tavanda iç duvarların ekseninde, duvar boyunca (60'lık evde OM-01; ters tavanda 100'lük iç duvarın üstü 100'lük duvar omegası)",
+   "nerede": "İç duvarı 100'lük evde, asma dizme tavanda iç duvarların ekseninde, duvar boyunca (60'lık evde OM-01). Listedeki satırı çatı kenarına gelmeyen dış duvarları ve kenarda olmayan kirişleri de sayar; o parçalar ve ters tavanda 100'lük iç duvarın üstü modelde yerleşmez",
    "sayim": "boy_kesim",
    "ifc": {"sinif": "IfcMemberType", "alt_tur": "MEMBER"},
    "pafta": [],
    "pafta_tavan": {"asma": "duvar_omegasi_asma", "ters": "tavan_omegasi"},
    "pafta_bilgi": {"alan": "Yer", "onek": "ayrinti.omega.konum"},
-   "yerlesim": {"kural": "tavan_omegasi_yerlesimi", "parca": "omega", "sinif": "IfcMember", "bilgi": {"Yer": "duvar_ekseni", "Sirt_cm": 10.5}},
-   "kaynak": {"durum": "lokman", "tarih": "2026-10-29", "dayanak": "Lokman, 29 Ekim 13:12 (TK-02 montaj rehberi, 11. adım): \"60'lık omega ile tüm ölçüleri doğru ama sırt genişliği 10.5 cm olacak diğer omegalar gibi\" (D-32). Sırt kuralı `kurallar/liste/prefabrik.json › ic_duvar_ustu_omegasi`; satır adı liste üretecinden; gerçek listede henüz yok"}
+   "yerlesim": {"kural": "tavan_omegasi_yerlesimi", "parca": "omega", "sinif": "IfcMember", "bilgi": {"Yer": "duvar_ekseni", "Sirt_cm": 10.5},
+                "kesim": {"parca_boyu": "parca_boyu_100", "pay": "pay_100"}},
+   "kaynak": {"durum": "lokman", "tarih": "2026-10-30", "dayanak": "Lokman, 30 Ekim 07:04: \"iç duvar üstü omegası diğer adı 100'lük duvar omegası yani listede var\" (D-32 ek; ad düzeltmesi, gerekçe İE-18 › R1 ek 5). Sırt: Lokman, 29 Ekim 13:12 \"60'lık omega ile tüm ölçüleri doğru ama sırt genişliği 10.5 cm olacak diğer omegalar gibi\" (D-32), kural `kurallar/yerlesim/prefabrik.json › tavan_omegasi_yerlesimi.sirt_100`; boy ve satır liste üretecinden (`duvar_omegasi_100_bolen_m`)"}
   },
   {
    "kod": "AS-01",

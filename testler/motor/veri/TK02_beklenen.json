@@ -2305,15 +2305,9 @@
    },
    {
     "grup": "1002",
-    "kalem": "60'lık iç duvar üstü omegası (sırt 10,5)",
-    "olcu": "60 × 3750",
-    "adet": 9
-   },
-   {
-    "grup": "1002",
     "kalem": "100'lük duvar omegası",
     "olcu": "100 × 2500",
-    "adet": 2
+    "adet": 15
    },
    {
     "grup": "1002",
