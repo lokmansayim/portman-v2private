@@ -11,6 +11,7 @@
 - Çizim ve Excel: yedi sayfa; çatı sayfalarında bugünkü IFC'nin beşik makasları çizilmez, yerine çatının adı ve nedeni; yedinci sayfada
   "kurulmadı" ve "liste yazılmaz", "≠" yok. Excel'de aynısı ve nedeni. Komut 1 döner (kural yok).
 - BK-14'ün taşan verandası (TK-01): zemin kartsız (kapsam dışı), çatı yüzü ve alın dolgusu "kural yok" nedeniyle (K5b'de kurulur).
+- Beşikte de kuralı kurulmayan çatı kenarı kartı "kurulmadı" yazar (trapez kaplamada mahya).
 - PK-01'in K1–K3b'si değişmez: öteki test dosyaları aynen geçer (K5'te yalnız Değişiklik (K5)'te yazılı üç vaka değişti).
 """
 from __future__ import annotations
@@ -28,9 +29,10 @@ from motor import ifc_uret  # noqa: E402
 from motor import kart_model as KM  # noqa: E402
 from motor import prefabrik_liste as PL  # noqa: E402
 from motor.cati_prefabrik import TIP_ADI  # noqa: E402
-from motor.yerlesim import girdi  # noqa: E402
+from motor.yerlesim import cizim, girdi  # noqa: E402
 
 EVLER = KOK / "testler" / "cizim" / "evler"
+MOTOR_VERI = KOK / "testler" / "motor" / "veri"
 TIP = {"AP13": "besik_cumba", "AP16": "besik_cumba", "AP01": "kirma"}
 CATI_KENARI = ("CK-01", "CK-02", "CK-03", "CK-04", "CK-05", "CK-06")
 
@@ -162,6 +164,8 @@ def test_komut_cizim(komut):
     assert all("Bugünkü IFC çatıyı beşik çizer; o makaslar sayılmaz, çizilmez." in metin[i] for i in (1, 2, 3, 4, 6))
     assert not any("Çatı:" in s for s in ikiz)
     assert "MAKAS_01 (baş)" in ikiz[1] and "MAKAS" not in metin[1].replace("MAKAS VE DERE", "")     # beşik makaslar çizilmez
+    ikiz_makas = _makas_dolgusu(komut["i"] / "AP13_yerlesim_planlari.pdf")
+    assert _makas_dolgusu(komut["c"] / "AP13_yerlesim_planlari.pdf") == [0] * 7 and ikiz_makas[1] and ikiz_makas[6]   # 2. ve 7. sayfa
     assert "baş makas yok" not in metin[2]
     for kod in ("AC-01", "AC-02"):
         assert f"model {_stok(komut, kod)} boy · liste yazılmaz" in metin[6]
@@ -172,6 +176,14 @@ def test_komut_cizim(komut):
     for i, ad in ((1, "dere ve iniş"), (2, "baş makas betopanı"), (3, "aşık"), (4, "çatı kaplaması")):
         assert f"Kurulmadı: {ad}: beşik + cumba çatı" in metin[i], ad
     assert all("EKSİK" in s for s in metin)
+
+
+def _makas_dolgusu(pdf: Path) -> list[int]:
+    """Sayfa başına makas rengindeki dolgu sayısı (makaslar ve baş makas üyeleri `cizim.RENK["makas"]` ile çizilir)."""
+    import pymupdf
+    r = tuple(int(cizim.RENK["makas"][i:i + 2], 16) / 255 for i in (1, 3, 5))
+    return [sum(1 for g in s.get_drawings() if g.get("fill") and all(abs(a - b) < 0.01 for a, b in zip(g["fill"], r)))
+            for s in pymupdf.open(pdf)]
 
 
 def _stok(komut, kod: str) -> int:
@@ -206,3 +218,23 @@ def test_tasan_veranda_siniflanir(tmp_path):
     assert "K5b" in yuz and "K5b" in alin and "Kapsam dışı" in zemin
     assert not any(x["neden"] == "hiçbir karta uymuyor" for x in say["kural_yok"])
     assert {x["parca"] for x in say["kural_yok"] if not x["parca"].startswith("VERANDA_")} == {"çatı kaplaması", "baş makas betopanı"}
+
+
+# ----------------------------------------------------------------------------- beşikte "kurulmadı"
+def test_besikte_kurulmayan_kenar_karti(tmp_path):
+    """Beşikte de kuralı kurulmayan çatı kenarı kartı "kurulmadı" yazar (trapez kaplamada mahya): sayımda `kenar.kurulmadi`, yedinci sayfanın
+    lejantında ve Excel'de; liste sütunu üretecin sayısı (beşikte liste yazılır). Sayılar değişmez."""
+    ie = _oku(MOTOR_VERI / "PK01.json")
+    ie["ozellikler"]["Çatı Kaplaması"] = "Trapez Sac"
+    (tmp_path / "trapez.json").write_text(json.dumps(ie, ensure_ascii=False), encoding="utf-8")
+    assert KM.main([str(tmp_path / "trapez.json"), str(tmp_path / "c"), "--kod", "T"]) == 1
+    say = _oku(tmp_path / "c" / "T_kart_sayim.json")
+    assert say["kenar"]["kurulmadi"] == ["CK-06"] and "liste_yazilmaz" not in say["kenar"] and isinstance(say["kenar"]["liste"]["CK-06"], int)
+    import pymupdf
+    metin = " ".join(pymupdf.open(tmp_path / "c" / "T_yerlesim_planlari.pdf")[6].get_text().split())
+    assert f"CK-06 Metal kiremit mahyası L 2800 model kurulmadı · liste {say['kenar']['liste']['CK-06']}" in metin
+    assert metin.count("model kurulmadı") == 1 and "liste yazılmaz" not in metin and "Çatı:" not in metin
+    from openpyxl import load_workbook
+    ws = load_workbook(tmp_path / "c" / "T_kart_katalogu.xlsx")["Alt çerçeve ve çatı kenarı"]
+    ozet = {r[0].value: r[1].value for r in ws.iter_rows() if r[0].value in ("AC-01", "CK-05", "CK-06")}
+    assert ozet == {"AC-01": 9, "CK-05": "13.9002 m", "CK-06": "kurulmadı"}
