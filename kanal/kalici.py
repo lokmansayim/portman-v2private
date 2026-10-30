@@ -157,6 +157,9 @@ def acik_is_kapanisi(depo: Depo, gelen: dict, d: dict | None) -> dict | None:
     gitmez; bayi yeniden yazınca uygulanır (konuşma yeni talebe açılır, kayıtlar silinmez: `depo._isi_bitir`)."""
     if (gelen.get("role") or "bayi") != "bayi":
         return None
+    import sablonlar as S
+    if str(gelen.get("reply_id") or "").startswith((S.DOSYA_YUK_ONEKI, "bilgi:")):
+        return None                                 # Patron'un şablonla ulaşmasına cevap ("Dosyaları gönder", "Bilgiyi gönder"): pencereyi Patron açtı
     ne = acik_is(d)
     if ne is None:
         return None

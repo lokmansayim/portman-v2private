@@ -377,3 +377,18 @@ def test_acik_is_tanimi():
     assert kalici.acik_is({"asama": "topluyor", "taslak": {"katalog_kodu": "P6001"}}) == "taslak"
     assert kalici.acik_is({"asama": "onaylandi", "son_soru_alani": "x", "son_is_emri": {}}) is None
     assert kalici.acik_is({"asama": "yonlendirildi", "taslak": {"x": 1}}) is None
+
+
+def test_patronun_sablonuna_cevap_acik_isi_kapatmaz(depo, wa, hizli_genel):
+    """Patron pencere kapalıyken "dosyalar hazır" şablonuyla ulaştı; bayinin "Dosyaları gönder" cevabı eski işe dönüş değil (pencereyi Patron açtı)."""
+    import sablonlar as S
+    rev = _celik_r01(depo, wa)
+    _gecmise_al(depo, 25)
+    g = buton(f"{S.DOSYA_YUK_ONEKI}{rev['is_emri_no']}"); g["type"] = "button"
+    assert depo.mesaj_kaydet(g)
+    [r] = isle_hepsi(depo)
+    assert r["gerekce"] == "şablon cevabı: dosya penceresi açıldı", r
+    [s] = [x for x in bayiye(depo) if x["inbound_id"] == g["id"]]
+    assert s["body"] == S.BAYI_DOSYA_CEVABI
+    assert tek(depo, "SELECT durum FROM revizyonlar WHERE id = %s", rev["id"])["durum"] == "onay_bekliyor"
+    assert depo.konusma_oku(NUMARA_A)[0]["son_is_emri"]["is_emri_no"] == rev["is_emri_no"]
