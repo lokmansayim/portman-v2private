@@ -11,7 +11,7 @@
 - Çizim ve Excel: yedi sayfa; çatı sayfalarında bugünkü IFC'nin beşik makasları çizilmez, yerine çatının adı ve nedeni; yedinci sayfada
   "kurulmadı" ve "liste yazılmaz", "≠" yok. Excel'de aynısı ve nedeni. Komut 1 döner (kural yok).
 - BK-14'ün taşan verandası (TK-01): zemin kartsız (kapsam dışı), çatı yüzü ve alın dolgusu "kural yok" nedeniyle (K5b'de kurulur).
-- PK-01'in K1–K3b'si değişmez: öteki test dosyaları aynen geçer (K5'te yalnız Değişiklik (K5)'te yazılı iki vaka değişti).
+- PK-01'in K1–K3b'si değişmez: öteki test dosyaları aynen geçer (K5'te yalnız Değişiklik (K5)'te yazılı üç vaka değişti).
 """
 from __future__ import annotations
 
