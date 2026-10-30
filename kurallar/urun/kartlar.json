@@ -804,7 +804,7 @@
    "liste": {"grup": "1002", "satirlar": ["Alın sacı (30'luk)"]},
    "olcu": "300 × 2500; saçak sacının profili ve kenar hadvesini kavrayan kıvrım, sac 1 mm (montaj rehberi; alt ucun kesimi varsayım); kenarın boyu parçada",
    "birim": "adet",
-   "nerede": "Kalkanların iki eğik kenarında (ana çatının baş makasları ve taşan verandanın dış kalkanı); tırnağı baş makas Z'sine girer, makas üstünün 3 cm altından başlar, alt ucu derenin önüne iner (`alin_saci_yerlesimi`)",
+   "nerede": "Kalkanların iki eğik kenarında (ana çatının baş makasları ve taşan verandanın dış kalkanı); ana çatıda tırnağı baş makas Z'sine girer, verandanın kalkanında Z yok, tırnak betopanın üstünde (gösterim varsayım; K5b); makas üstünün 3 cm altından başlar, alt ucu derenin önüne iner (`alin_saci_yerlesimi`)",
    "sayim": "boy_kesim",
    "ifc": {"sinif": "IfcCoveringType", "alt_tur": "CLADDING"},
    "pafta": [],
