@@ -65,6 +65,25 @@ def kucuk(x) -> str:
     return str(x).replace("İ", "i").replace("I", "ı").lower()
 
 
+def cati_adi(cati_tipi: str) -> str:
+    """Çatı tipinin okunur adı (İE-15 K5): İE-17'nin adları (`motor/cati_prefabrik.py` › `TIP_ADI`, yalnız okunur), beşik ve bilinmeyen kod."""
+    from motor.cati_prefabrik import TIP_ADI
+    return {"besik": "beşik", **TIP_ADI}.get(cati_tipi, cati_tipi)
+
+
+def cati_sonra(cati_tipi: str) -> str:
+    """Beşik dışı çatının parçaları neden kurulmadı, ne zaman gelir (İE-15 K5)."""
+    return {"besik_cumba": "cumbalı çatının parçaları çatı düzlemlerinden kurulunca gelir (İE-17 PR-1b, İE-15 K6)",
+            "kirma": "kırma çatıda prefabrik kitabında kural yok"}.get(cati_tipi, "bugünkü IFC çatıyı hep beşik çizer")
+
+
+def cati_disi(cati_tipi: str, ne: str, izin: list[str]) -> str:
+    """İş Emri'nin çatısı kuralın (ya da eşlemenin) çatı tiplerinden değilse "kural yok" nedeni (İE-15 K5): çatının kodu ve adı, neyin
+    hangi çatıda kurulduğu ve neden kurulmadığı. Bugünkü IFC çatıyı hep beşik çizer; beşik dışı çatının parçaları modelde yoktur."""
+    kod_adi = lambda t: f"\"{t}\" ({cati_adi(t)})" if cati_adi(t) != t else f"\"{t}\""
+    return f"İş Emri'nin çatısı {kod_adi(cati_tipi)}; {ne} yalnız {', '.join(map(kod_adi, izin))} çatıda; {cati_sonra(cati_tipi)}"
+
+
 def tavan_turu(ozellikler: dict) -> str:
     """Liste üreteciyle aynı okuma (`motor/prefabrik_liste.py`): özellikte "ters" geçiyorsa ters tavan, değilse asma dizme."""
     kucuk_ = {kucuk(k): kucuk(v) for k, v in (ozellikler or {}).items()}

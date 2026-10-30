@@ -109,8 +109,7 @@ def katmanlar(ie: dict, plan: dict, makaslar: list[dict], yerlesim: dict, liste:
     for ad, adi, sinif in CATI_KATMANLARI:
         izin = K[ad].get("cati_tipleri")
         if izin and g["cati_tipi"] not in izin:
-            kural_yok.append({"parca": adi, "sinif": sinif, "neden": f"İş Emri'nin çatısı \"{g['cati_tipi']}\"; {ad} yalnız "
-                                                                      f"{', '.join(izin)} çatıda (bugünkü IFC çatıyı hep beşik çizer)"})
+            kural_yok.append({"parca": adi, "sinif": sinif, "neden": girdi.cati_disi(g["cati_tipi"], ad, izin), "cati": g["cati_tipi"]})
             continue
         if ad == "asik_sirasi":
             A = D[ad]

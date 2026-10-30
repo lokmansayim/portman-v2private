@@ -198,7 +198,7 @@ def test_kod_kilidi_ic100(kartlar):
     assert tuple(list(ilk)[51:]) == YENI
     assert all(kilit[k] == kartlar[k]["ad"] for k in YENI)
     assert hashlib.sha256(json.dumps(ilk, ensure_ascii=False, sort_keys=True).encode()).hexdigest() == KILIT_IC100
-    assert _oku(KM.KARTLAR)["surum"] == "6"                               # R1 ek 5: OM-02'nin adı düzeltildi (D-32 ek)
+    assert _oku(KM.KARTLAR)["surum"] == "7"                               # R1 ek 5: OM-02'nin adı düzeltildi (D-32 ek); İE-15 K5: taşan veranda
 
 
 
@@ -266,7 +266,7 @@ def test_tk02_kural_yok_tk01_ile_ayni(tk02, tmp_path):
     from araclar.paket import uret as U
     ie1 = _oku(KOK / next(m for m in U.kayit()["modeller"] if m["kod"] == "TK-01")["is_emri"])
     ky = lambda s: sorted(x["parca"] for x in s["kural_yok"])                                       # noqa: E731
-    assert ky(say) == ky(_kart_sayimi(ie1, tmp_path, "TK01")) and len(ky(say)) == 10
+    assert ky(say) == ky(_kart_sayimi(ie1, tmp_path, "TK01")) and len(ky(say)) == 8     # İE-15 K5: taşan verandanın iki zemini kartsız (10 → 8)
 
 
 def test_tk02_paket_ve_rehber(tk02, tmp_path):
