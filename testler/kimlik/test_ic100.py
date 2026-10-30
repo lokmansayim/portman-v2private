@@ -198,7 +198,7 @@ def test_kod_kilidi_ic100(kartlar):
     assert tuple(list(ilk)[51:]) == YENI
     assert all(kilit[k] == kartlar[k]["ad"] for k in YENI)
     assert hashlib.sha256(json.dumps(ilk, ensure_ascii=False, sort_keys=True).encode()).hexdigest() == KILIT_IC100
-    assert _oku(KM.KARTLAR)["surum"] == "6"                               # R1 ek 5: OM-02'nin adı düzeltildi (D-32 ek)
+    assert _oku(KM.KARTLAR)["surum"] == "8"                               # R1 ek 5: OM-02'nin adı düzeltildi (D-32 ek); İE-15 K5: taşan veranda; K5b: KP-02, MA-03
 
 
 
@@ -260,13 +260,13 @@ def test_tk02_kart_adetleri_listeyle(tk02, kartlar):
 
 
 def test_tk02_kural_yok_tk01_ile_ayni(tk02, tmp_path):
-    """TK-02'de "kural yok" yalnız TK-01'dekiler (taşan veranda parçaları, tek kat panel kaplaması, baş makas betopanı): iç duvarın 100'lük
+    """TK-02'de "kural yok" TK-01'deki gibi yok (İE-15 K5b: taşan veranda çatısı, tek kat panel ve dikey betopan kuruldu): iç duvarın 100'lük
     olması kartsız parça bırakmaz."""
     _, say, _ = tk02
     from araclar.paket import uret as U
     ie1 = _oku(KOK / next(m for m in U.kayit()["modeller"] if m["kod"] == "TK-01")["is_emri"])
     ky = lambda s: sorted(x["parca"] for x in s["kural_yok"])                                       # noqa: E731
-    assert ky(say) == ky(_kart_sayimi(ie1, tmp_path, "TK01")) and len(ky(say)) == 10
+    assert ky(say) == ky(_kart_sayimi(ie1, tmp_path, "TK01")) and len(ky(say)) == 0     # İE-15 K5: 10 → 8 (iki zemin kartsız); K5b: 8 → 0
 
 
 def test_tk02_paket_ve_rehber(tk02, tmp_path):

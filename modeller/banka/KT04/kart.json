@@ -1,0 +1,366 @@
+{
+ "sema": "portman.model_karti/0.1",
+ "kod": "KT04",
+ "gosterim": "KT-04",
+ "ad": "Tek kat çelik, 4+1, verandalı, beşik + iki cumba",
+ "aile": "tek kat çelik",
+ "yapi_turu": "celik",
+ "kat": 1,
+ "musteri_projesi": true,
+ "taban_model": null,
+ "varyant_turu": null,
+ "varyantlar": [],
+ "kaynak": {
+  "tur": "proje",
+  "metin": "ÇP-14 (İE-16 çelik hattının açık ölçüm projesi; mühendisin projesi, mühürlü montaj paftası 934b2404…): tanım İE-16'nın ÇP-14 tanımının aynısı, yalnız kod ve ad farklı; bayiye adsız (KT dizisi). Hedef örnek: İE-09 PR-1 (CIO, 29 Ekim 2026)",
+  "proje": "ÇP-14",
+  "dosyalar": []
+ },
+ "kaynak_degerleri": {
+  "brut_m2": {
+   "deger": 120.0,
+   "kaynak": "projenin adında ve çatı paftasında (ÇATI M2: 120)"
+  }
+ },
+ "durum": "taslak",
+ "metraj_testi": {
+  "durum": "gecti",
+  "kaynak": "celik_hakemi",
+  "proje": "ÇP-14",
+  "hakem_sonucu": "geçti",
+  "fark_yuzde": 0.93,
+  "esik_yuzde": 3.0,
+  "kapi_disi": [
+   "c_profil"
+  ],
+  "bizim_kapi_kg": 3087.87,
+  "gercek_kapi_kg": 3059.29,
+  "turler": [
+   {
+    "tur": "duvar_paneli",
+    "ad": "Duvar paneli",
+    "harf": "D",
+    "bizim_adet": 36,
+    "gercek_adet": 37,
+    "bizim_kg": 2182.54,
+    "gercek_kg": 2053.3
+   },
+   {
+    "tur": "kolon_kiris",
+    "ad": "Kolon-kiriş paneli",
+    "harf": "K",
+    "bizim_adet": 6,
+    "gercek_adet": 6,
+    "bizim_kg": 124.04,
+    "gercek_kg": 145.78
+   },
+   {
+    "tur": "makas",
+    "ad": "Makas",
+    "harf": "M",
+    "bizim_adet": 24,
+    "gercek_adet": 26,
+    "bizim_kg": 640.09,
+    "gercek_kg": 690.95
+   },
+   {
+    "tur": "cati_paneli",
+    "ad": "Çatı paneli",
+    "harf": "C",
+    "bizim_adet": 5,
+    "gercek_adet": 5,
+    "bizim_kg": 141.2,
+    "gercek_kg": 169.26
+   },
+   {
+    "tur": "c_profil",
+    "ad": "Boy C profil",
+    "harf": null,
+    "bizim_adet": 6,
+    "gercek_adet": 6,
+    "bizim_kg": 30.0,
+    "gercek_kg": null
+   }
+  ],
+  "muhur_durumu": "acik",
+  "liste_sha256": "4b884c7c27bf3bd509f618c504ededb3611346fa15b5d4ee763742160c8bc406",
+  "sonuc": "testler/celik/projeler/CP14/sonuc.json",
+  "sonuc_tarihi": "2026-10-28",
+  "kiyas_commit": "49cdfb9f5da1797bcea4f17fd96f02f7ef08a467",
+  "bizim_liste_commit": "a2e013588893d7f0c45256438d7fcbb2f5edb2ec",
+  "yontem": {
+   "kod": "omega_asik",
+   "ad": "B · tavan omegası, aşık, alın sacı, saçak sacı (prefabrik yöntemi)"
+  },
+  "zaman": "2026-10-30T02:05+0300"
+ },
+ "pim": {
+  "kural_seti": {
+   "yol": "testler/celik/projeler/setler/a01cbf2a810c8e7f.json",
+   "sha256": "a01cbf2a810c8e7fcede59dcf2ed9b86c31b815977456b8753da8afbaae506ea",
+   "sema": "portman.yukleme_kurallari/0.20-taslak"
+  },
+  "karkas": {
+   "yol": "testler/celik/projeler/setler/4baf8aa0acb81d2f.json",
+   "sha256": "4baf8aa0acb81d2fa6f93a41bfdcd051d046a2b1a61e244e3a7842d688651060",
+   "sema": "portman.celik_karkas/0.1-taslak"
+  }
+ },
+ "olcum": {
+  "dis_olcu_cm": [
+   1562.0,
+   802.0
+  ],
+  "oturum_m2": 123.78,
+  "veranda_m2": 17.5,
+  "odalar": {
+   "Yatak Odası 1": 12.2,
+   "Banyo": 7.65,
+   "Yatak Odası 2": 9.66,
+   "Yatak Odası 3": 9.96,
+   "Salon - Mutfak": 28.45,
+   "Yatak Odası 4": 13.32,
+   "Hol": 11.27,
+   "Veranda": 17.5
+  },
+  "oda_programi": "4+1",
+  "pencere": 11,
+  "kapi": 7,
+  "acikliklar": [
+   "dis_kapi Hol",
+   "ic_kapi Banyo",
+   "ic_kapi Salon - Mutfak",
+   "ic_kapi Yatak Odası 1",
+   "ic_kapi Yatak Odası 2",
+   "ic_kapi Yatak Odası 3",
+   "ic_kapi Yatak Odası 4",
+   "pencere Banyo 50/50/170",
+   "pencere Hol 120/100/90",
+   "pencere Hol 120/100/90",
+   "pencere Salon - Mutfak 120/100/100",
+   "pencere Salon - Mutfak 120/100/100",
+   "pencere Salon - Mutfak 120/100/100",
+   "pencere Salon - Mutfak 200/180/10",
+   "pencere Yatak Odası 1 120/100/100",
+   "pencere Yatak Odası 2 120/100/100",
+   "pencere Yatak Odası 3 120/100/100",
+   "pencere Yatak Odası 4 200/180/10"
+  ],
+  "cati": {
+   "tip": "besik_cumba",
+   "duzlem": 11,
+   "yuzey_m2": 149.56,
+   "kenar_cm": {
+    "alin": 3241.0,
+    "duvar_dibi": 1868.1,
+    "mahya": 2608.0,
+    "sacak": 4048.0,
+    "vadi": 1401.3
+   }
+  },
+  "liste": {
+   "satir": 103,
+   "celik_kg": 4248.52,
+   "iz": "dad62ae56d15bd6a7a108e89fae8af9cbf3faa3971263c1f09c16242236662de",
+   "gruplar": {
+    "Çelik panel": {
+     "satir": 10,
+     "kg": 4248.52
+    },
+    "Metal aksam": {
+     "satir": 7,
+     "kg": 0.0
+    },
+    "Dış cephe kaplama": {
+     "satir": 2,
+     "kg": 0.0
+    },
+    "İç cephe kaplama": {
+     "satir": 6,
+     "kg": 0.0
+    },
+    "Çatı kaplamaları": {
+     "satir": 12,
+     "kg": 0.0
+    },
+    "Dere": {
+     "satir": 8,
+     "kg": 0.0
+    },
+    "Kapı ve pencere": {
+     "satir": 6,
+     "kg": 0.0
+    },
+    "Elektrik": {
+     "satir": 19,
+     "kg": 0.0
+    },
+    "Vida": {
+     "satir": 14,
+     "kg": 0.0
+    },
+    "Sıhhi tesisat": {
+     "satir": 12,
+     "kg": 0.0
+    },
+    "Boya": {
+     "satir": 7,
+     "kg": 0.0
+    }
+   }
+  },
+  "kural_seti": "a01cbf2a810c8e7f.json"
+ },
+ "son_cizim": {
+  "no": 5,
+  "zaman": "2026-10-30T11:18+0300",
+  "tanim_sha256": "ec4de5f622e9276c75cf74da316239abc71bca648d914e06dfa19a024b1d30dd",
+  "kural_seti": "a01cbf2a810c8e7f.json",
+  "pim": {
+   "kural_seti": {
+    "yol": "testler/celik/projeler/setler/a01cbf2a810c8e7f.json",
+    "sha256": "a01cbf2a810c8e7fcede59dcf2ed9b86c31b815977456b8753da8afbaae506ea",
+    "sema": "portman.yukleme_kurallari/0.20-taslak"
+   },
+   "karkas": {
+    "yol": "testler/celik/projeler/setler/4baf8aa0acb81d2f.json",
+    "sha256": "4baf8aa0acb81d2fa6f93a41bfdcd051d046a2b1a61e244e3a7842d688651060",
+    "sema": "portman.celik_karkas/0.1-taslak"
+   }
+  },
+  "passed": true,
+  "cikti": "/mnt/project-files/Portman_Proje_Dosyalari/IE-09_atolye/banka_hatti/KT04/c05",
+  "denetimler": [
+   {
+    "ad": "Motor doğrulaması",
+    "durum": "geçti",
+    "ayrinti": "çıktılar 8/15 (perspektif yok: bu ortamda VTK yok)"
+   },
+   {
+    "ad": "IFC şema denetimi",
+    "durum": "geçti",
+    "ayrinti": "şema hatası 0"
+   },
+   {
+    "ad": "Yazı çakışması (bayiye giden 4 figür)",
+    "durum": "geçti",
+    "ayrinti": "bulgu yok"
+   },
+   {
+    "ad": "15 cm ve daha kısa parçalar (bayi paftası)",
+    "durum": "bilgi",
+    "ayrinti": "on 3 cm; on 3 cm; sol 3 cm; sag 3 cm",
+    "sade": "Bayi paftasının ölçü çizgisinde 15 cm'den kısa parçalar yanındaki parçaya katıldı: ön cephede 3 cm (2 yerde), sol cephede 3 cm, sağ cephede 3 cm. Mühendis bakar."
+   },
+   {
+    "ad": "Kartla çizimin tutarlılığı (m², oda programı, açıklık, çatı)",
+    "durum": "uyarı",
+    "ayrinti": "brut_m2: çizim 123.78, kaynak 120.0",
+    "sade": "Toplam alan: çizimde 123,78 m², projede 120 m² yazıyor."
+   },
+   {
+    "ad": "Bankada aynı model",
+    "durum": "geçti",
+    "ayrinti": "aynı kod ve aynı plan yok"
+   }
+  ],
+  "sure_s": 74.9,
+  "perspektif": "ATLANDI",
+  "kontrol_pdf": "/mnt/project-files/Portman_Proje_Dosyalari/IE-09_atolye/banka_hatti/KT04/c05/KT04_kontrol_c05.pdf"
+ },
+ "duzeltmeler": [
+  {
+   "zaman": "2026-10-30T15:02+0300",
+   "tur": "tercih",
+   "metin": "Yatak odası 1 ve yatak odası 4 kapılarının açılış yönü ters: menteşeler iki odanın ara duvarına yakın uca (Lokman, 30 Ekim 2026 14:56, bayi paftası üzerinde işaretli)",
+   "cizim": 5
+  },
+  {
+   "zaman": "2026-10-30T15:02+0300",
+   "tur": "tercih",
+   "metin": "Ön cephedeki iki 200×180 pencere (yatak odası 4 ve salon-mutfak) sürgülü (Lokman, 30 Ekim 2026 14:56); genel motorda sürgülü çizimi ayrı PR",
+   "cizim": 5
+  }
+ ],
+ "gecmis": [
+  {
+   "zaman": "2026-10-30T02:05+0300",
+   "olay": "ac",
+   "kaynak": "ÇP-14 (İE-16 çelik hattının açık ölçüm projesi; mühendisin projesi, mühürlü montaj paftası 934b2404…): tanım İE-16'nın ÇP-14 tanımının aynısı, yalnız kod ve ad farklı; bayiye adsız (KT dizisi). Hedef örnek: İE-09 PR-1 (CIO, 29 Ekim 2026)"
+  },
+  {
+   "zaman": "2026-10-30T02:05+0300",
+   "olay": "metraj",
+   "durum": "gecti",
+   "proje": "ÇP-14",
+   "fark_yuzde": 0.93
+  },
+  {
+   "zaman": "2026-10-30T02:05+0300",
+   "olay": "kaynak",
+   "kaynak": "kaynak projenin adı ve çatı paftasındaki 'ÇATI M2: 120' (ÇP-14 montaj paftası, mühürlü 934b2404…); motorun alanı farklı olabilir, not"
+  },
+  {
+   "zaman": "2026-10-30T02:06+0300",
+   "olay": "ciz",
+   "no": 1,
+   "durum": "kontrolde",
+   "passed": true
+  },
+  {
+   "zaman": "2026-10-30T02:08+0300",
+   "olay": "ciz",
+   "no": 2,
+   "durum": "kontrolde",
+   "passed": true
+  },
+  {
+   "zaman": "2026-10-30T02:11+0300",
+   "olay": "kaynak",
+   "kaynak": "CIO, 29 Ekim 2026 (İE-09 PR-1 hedef örneği)",
+   "proje": "ÇP-14"
+  },
+  {
+   "zaman": "2026-10-30T02:12+0300",
+   "olay": "ciz",
+   "no": 3,
+   "durum": "kontrolde",
+   "passed": true
+  },
+  {
+   "zaman": "2026-10-30T02:13+0300",
+   "olay": "ciz",
+   "no": 4,
+   "durum": "kontrolde",
+   "passed": true
+  },
+  {
+   "zaman": "2026-10-30T11:16+0300",
+   "olay": "kaynak",
+   "kaynak": "projenin adında ve çatı paftasında (ÇATI M2: 120)"
+  },
+  {
+   "zaman": "2026-10-30T11:18+0300",
+   "olay": "ciz",
+   "no": 5,
+   "durum": "kontrolde",
+   "passed": true
+  },
+  {
+   "zaman": "2026-10-30T15:02+0300",
+   "olay": "duzelt",
+   "tur": "tercih"
+  },
+  {
+   "zaman": "2026-10-30T15:02+0300",
+   "olay": "duzelt",
+   "tur": "tercih"
+  }
+ ],
+ "kabul": null,
+ "aday": null,
+ "brut_m2": 123.78,
+ "oda_programi": "4+1",
+ "cati_tipi": "besik_cumba",
+ "cati_adi": "Beşik + cumba"
+}

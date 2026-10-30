@@ -367,15 +367,18 @@ def test_karti_olmayan_ve_iki_karta_uyan_parca(tmp_path):
 
 def test_makaslar_y_ekseninde(tmp_path):
     """Makaslar derinliği geçince (makas ekseni y) mahya x boyunca: aşık ve kaplama x yönünde, dere hatları y = −30 ve 1030'da. Açıklık
-    1000 cm'de üçgen 184,9 cm: tek sıra betopan örtmez, "kural yok" (öteki katmanlar kurulur)."""
+    1000 cm'de üçgen 184,9 cm: tek sıra betopan örtmez; K5b'den beri levhalar dikey (PK-07 s. 10), sayı H5 (K2'de "kural yok"tu)."""
     m = _model(_ie(cati__makas_ekseni="y"), tmp_path, "y")
-    assert [x["parca"] for x in m["say"]["kural_yok"]] == ["baş makas betopanı"] and ifc_uret.ozet(m["model"])["sema_hatasi"] == 0
+    assert m["say"]["kural_yok"] == [] and ifc_uret.ozet(m["model"])["sema_hatasi"] == 0
+    B = [p for p in m["say"]["yerlesim"]["parcalar"] if p["kart"] == "BT-01"]
+    assert B and all(p["bilgi"]["Dizilim"] == "dikey" and p["bilgi"]["Levha_cm"] == "125 × 250" for p in B)
+    assert len(B) == 2 * B[0]["bilgi"]["LevhaAdedi"] == _adet(m["say"])["BT-01"]
     A = _parcalar(m["model"], "AS-01")
     assert all(p["b"][0] - p["a"][0] > p["b"][1] - p["a"][1] for p in A)
     D = _parcalar(m["model"], "DR-01")
     assert sorted(round(p["b"][1] if p["b"][1] <= 0 else p["a"][1]) for p in D) == [-30, 1030]
     assert all(p["p"]["Boy_cm"] == pytest.approx(660) for p in D)
-    assert _adet(m["say"])["BT-01"] == 0 and _adet(m["say"])["DR-02"] == 4       # 660 cm < 9 m: orta iniş yok
+    assert _adet(m["say"])["DR-02"] == 4                                          # 660 cm < 9 m: orta iniş yok
 
 
 def _g_tavan(odalar, duvarlar, acik=(), engeller=(), tavan_="asma"):
@@ -415,13 +418,16 @@ def test_asma_en_kisa_ve_l_oda():
 
 
 def test_betopan_tek_sira_ortmezse_kural_yok(tmp_path):
-    """Üçgen (alt başlıktan mahyada üst başlığın altına) levhanın kısa kenarını geçerse tek sıra örtmez: baş makas betopanı "kural yok",
-    komut 1. PK-01'de üçgen 118,9 cm (%33); %40'ta 142 cm."""
+    """Üçgen (alt başlıktan mahyada üst başlığın altına) levhanın kısa kenarını geçerse tek sıra örtmez. K2'de "kural yok"tu; K5b'den beri
+    levhalar dikey (PK-07 s. 10). Uzun kenarı da geçerse "kural yok", komut 1. PK-01'de üçgen 118,9 cm (%33); %40'ta 142 cm (dikey),
+    %80'de 274 cm (kural yok)."""
     F = cati.cerceve(Y.girdi.kur(_ie(), ifc_uret.hazirla(_ie()), []))
     assert cati._ust(F, F["um"]) - 10 - 250 == pytest.approx(118.9)
     m = _model(_ie(cati__egim_yuzde=40), tmp_path, "dik")
+    assert not [x for x in m["say"]["kural_yok"] if x["parca"] == "baş makas betopanı"] and _adet(m["say"])["BT-01"] > 0
+    m = _model(_ie(cati__egim_yuzde=80), tmp_path, "cok_dik")
     k = [x for x in m["say"]["kural_yok"] if x["parca"] == "baş makas betopanı"]
-    assert len(k) == 1 and "tek sıra örtmez" in k[0]["neden"] and _adet(m["say"])["BT-01"] == 0
+    assert len(k) == 1 and "dikey levha da örtmez" in k[0]["neden"] and _adet(m["say"])["BT-01"] == 0
     assert _adet(m["say"])["AS-01"] > 0 and _adet(m["say"])["KP-01"] > 0
 
 
