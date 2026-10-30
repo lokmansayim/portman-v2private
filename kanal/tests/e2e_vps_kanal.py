@@ -1,7 +1,7 @@
 """İE-06 · uçtan uca YEREL test (B1): sahte Meta → webhook (kanal/webhook.py, WSGI, süreç içi) → Postgres → ajan (vps/agent.py,
 AYRI süreç, kayıtlı LLM çıkarımı) → gönderici (kanal/gonderici.py, süreç içi, sahte Graph API) → sahte Meta durum bildirimi →
 buton cevabı → onay zinciri; mesaj katmanı kapalıyken v1.2 davranışı; kayıtsız numara (sabit cevap, 24 saatte bir); gelen görsel
-(indirme, panelde dosya); panel; /saglik. Gerçek Postgres ve GERÇEK Motor; LLM, WhatsApp ve canlı yok.
+(indirme, panelde dosya); panel; /saglik; İE-22 WhatsApp'tan bayi kaydı (bölüm 13). Gerçek Postgres ve GERÇEK Motor; LLM, WhatsApp ve canlı yok.
 e2e_katman.py (İE-04, gerçek PHP hattı; kaldırıldı) ve kapı G senaryosunun tek sunucu karşılığıdır; ölçütler aynı tutuldu.
 
 Çalıştırma: PORTMAN_TEST_PG="host=127.0.0.1 port=55432 user=postgres" python3 kanal/tests/e2e_vps_kanal.py
@@ -33,6 +33,7 @@ import ayarlar as AY                  # noqa: E402
 import gonderici as G                 # noqa: E402
 import meta_api as M                  # noqa: E402
 import panel as PN                    # noqa: E402
+import kayit as KY                    # noqa: E402  (İE-22)
 import webhook as WH                  # noqa: E402
 from depo import Depo                 # noqa: E402
 from sahte_meta import SahteMeta      # noqa: E402
@@ -557,6 +558,79 @@ try:
        f"doğrulama raporu (gerçek motor): {dg12['ozet']}")
     say = gonder()
     ok(say.get("kabul_edildi") >= 2, "Meta: yeni planın bayi görseli + düğmeler ve PDF gitti")
+
+    print("13) İE-22 WhatsApp'tan bayi kaydı: kayıtsız numara → ad → firma → Patron'a [Onayla] [Reddet]; Patron penceresi kapalıyken ücretli şablon "
+          "→ panelden Onayla → kart + karşılama şablonu → 'Nasıl çalışır?' → PDF; pencere açıkken düğmeli mesaj → Reddet (ajan, LLM'siz)")
+    YENI, YENI2 = "900000000333", "900000000444"           # kartı olmayan numaralar (gerçek olmayan)
+    AY.yaz(VERI, "bayi_kaydi", {"acik": True, "gunluk_en_cok": 10}); AY.yaz(VERI, "sablon_bayi_karsilama", "portman_karsilama_v1")
+
+    def kayit_adimlari(numara: str, ad: str, firma: str) -> bool:
+        adimlar = [("merhaba, bayilik için yazıyorum", "kayit:ad+cevap"), (ad, "kayit:firma+cevap"), (firma, "kayit:onay_bekliyor+cevap")]
+        return all(webhook(yuk([metin(numara, m)]))[1].get("mesaj") == {b: 1} for m, b in adimlar)
+    ok(kayit_adimlari(YENI, "Ayşe Kaya", "Kaya Yapı"), "webhook: üç adım (ad, firma, onay bekliyor), iş açılmadı")
+    t13 = q("SELECT id, durum, ad, firma, son_mesaj_id FROM kayit_talepleri WHERE numara = %s", YENI)[0]
+    ok((t13["durum"], t13["ad"], t13["firma"]) == ("onay_bekliyor", "Ayşe Kaya", "Kaya Yapı") and not q("SELECT 1 FROM bayiler WHERE numara = %s", YENI),
+       "kayıt talebi onay bekliyor, kart yok")
+    once = len(sahte.gidenler())
+    gonder()
+    g13 = sahte.gidenler()[once:]
+    ok([y["text"]["body"] for y in g13 if y["to"] == YENI and y.get("type") == "text"] == [KY.SORU_AD, KY.SORU_FIRMA, KY.TESEKKUR],
+       "Meta: bayiye üç metin (ad sorusu, firma sorusu, teşekkür)")
+    p13 = q("SELECT kind, durum, hata FROM giden WHERE mesaj_id = %s AND alici = 'PATRON' ORDER BY sira", t13["son_mesaj_id"])
+    sb = [y for y in g13 if y["to"] == PATRON]
+    ok([r["kind"] for r in p13] == ["interactive", "template"] and p13[0]["hata"] == "Gönderilmedi: reply_window_closed" and p13[1]["durum"] == "kabul_edildi"
+       and len(sb) == 1 and sb[0]["type"] == "template" and sb[0]["template"]["name"] == "portman_patron_bekliyor_v1"
+       and sb[0]["template"]["components"][0]["parameters"] == [{"type": "text", "text": "B0333"}, {"type": "text", "text": f"KAYIT-{t13['id']}"}]
+       and sb[0]["template"]["components"][1]["parameters"] == [{"type": "text", "text": f"konusma/{YENI}"}],
+       "Patron penceresi kapalı: düğmeli mesaj düştü, Patron şablonu gitti (bayi kodu, KAYIT no, panel bağlantısı)")
+    kod, body, _ = istek(app_pn, "GET", f"/panel/konusma/{YENI}", cerez=cerez)
+    csrf13 = re.search(rb'name="csrf" value="([0-9a-f]+)"', body).group(1).decode()
+    ok(kod == 200 and f"/panel/konusma/{YENI}/kayit_onay".encode() in body and "Ayşe Kaya".encode() in body, "panel: kayıt talebi kartı, [Onayla] [Reddet]")
+    kod, body, _ = istek(app_pn, "POST", f"/panel/konusma/{YENI}/kayit_onay", urllib.parse.urlencode({"csrf": csrf13, "talep": t13["id"]}).encode(), cerez=cerez)
+    b13 = depo.bayi_oku(YENI)
+    ok(kod == 302 and b13 is not None and (b13["ad"], b13["firma"], b13["aktif"], b13["kaynak"]) == ("Ayşe Kaya", "Kaya Yapı", True, "whatsapp")
+       and q("SELECT karar_kaynagi FROM kayit_talepleri WHERE id = %s", t13["id"])[0]["karar_kaynagi"] == "panel",
+       "panelden Onayla: kart açıldı (aktif, kaynak whatsapp), karar kaynağı panel")
+    once = len(sahte.gidenler())
+    gonder()
+    k13 = [y for y in sahte.gidenler()[once:] if y["to"] == YENI]
+    ok(len(k13) == 1 and k13[0]["type"] == "template" and k13[0]["template"]["name"] == "portman_karsilama_v1"
+       and k13[0]["template"]["components"][0]["parameters"] == [{"type": "text", "text": "Ayşe Kaya"}], "Meta: bayiye karşılama şablonu ({{1}} ad)")
+    kw = q("SELECT dis_id FROM giden WHERE alici = %s AND kind = 'template'", YENI)[0]["dis_id"]
+    time.sleep(1.2)
+    nasil = {"from": YENI, "id": "wamid.E2EKY2", "timestamp": str(int(time.time())), "type": "button", "context": {"id": kw},
+             "button": {"text": "Nasıl çalışır?", "payload": "bilgi:nasil"}}
+    kod, c = webhook(yuk([nasil]))
+    ok(c.get("mesaj") == {"sahiplenildi": 1} and ajan() == 0, "bayinin 'Nasıl çalışır?' düğmesi sahiplenildi (kart aktif, mod kayıtlı) ve işlendi")
+    once = len(sahte.gidenler())
+    gonder()
+    ok([y.get("type") for y in sahte.gidenler()[once:] if y["to"] == YENI][:1] == ["document"], "Meta: bayiye 'Nasıl çalışır?' PDF'i")
+    kod, body, _ = istek(app_pn, "GET", f"/panel/konusma/{YENI}", cerez=cerez)
+    ok(kod == 200 and "Bayi: <b>Ayşe Kaya</b>".encode() in body and b"kayit_onay" not in body, "panel: kart görünür, karar düğmesi yok")
+    with depo.baglan() as c, c.transaction():
+        c.execute("UPDATE mesajlar SET wa_zamani = now() WHERE gonderen = %s", (PATRON,))     # Patron'un penceresi açık
+    ok(kayit_adimlari(YENI2, "Mehmet Demir", "Demir Ev"), "ikinci numara: üç adım")
+    t13b = q("SELECT id, son_mesaj_id FROM kayit_talepleri WHERE numara = %s", YENI2)[0]
+    once = len(sahte.gidenler())
+    gonder()
+    dm = [y for y in sahte.gidenler()[once:] if y.get("type") == "interactive" and y["to"] == PATRON]
+    ok(len(dm) == 1 and [b["reply"]["id"] for b in dm[0]["interactive"]["action"]["buttons"]] == [f"kayit:onay:{t13b['id']}", f"kayit:red:{t13b['id']}"]
+       and YENI2 not in dm[0]["interactive"]["body"]["text"], "Meta: Patron'a [Onayla] [Reddet] (pencere açık; numara metinde yok)")
+    p13b = q("SELECT durum, hata, dis_id FROM giden WHERE mesaj_id = %s AND alici = 'PATRON' ORDER BY sira", t13b["son_mesaj_id"])
+    ok(p13b[0]["durum"] == "kabul_edildi" and p13b[1]["durum"] == "gonderilmedi" and "sablon_gereksiz" in p13b[1]["hata"],
+       "Patron şablonu gereksiz (düğmeli mesaj gitti; ücretli şablon gitmedi)")
+    time.sleep(1.2)
+    kod, c = webhook(yuk([buton(PATRON, f"kayit:red:{t13b['id']}", "Reddet", p13b[0]["dis_id"], mid="wamid.E2EKY1")]))
+    ok(c.get("mesaj") == {"sahiplenildi": 1} and ajan() == 0, "ajan (ayrı süreç): Patron'un Reddet düğmesi işlendi")
+    i13 = q("SELECT sonuc, cikarim FROM isler WHERE mesaj_id = 'wamid.E2EKY1'")[0]
+    ok(i13["sonuc"]["gerekce"] == "kayıt reddedildi" and i13["cikarim"] is None and depo.bayi_oku(YENI2) is None
+       and q("SELECT durum, karar_kaynagi FROM kayit_talepleri WHERE id = %s", t13b["id"])[0] == {"durum": "reddedildi", "karar_kaynagi": "whatsapp"},
+       "talep reddedildi (karar kaynağı whatsapp), kart yok; LLM çıkarımı yok")
+    once = len(sahte.gidenler())
+    gonder()
+    r13 = sahte.gidenler()[once:]
+    ok([y["text"]["body"] for y in r13 if y["to"] == YENI2] == [KY.RED_BAYIYE] and [y["text"]["body"][:16] for y in r13 if y["to"] == PATRON] == ["Kayıt reddedildi"],
+       "Meta: bayiye red metni, Patron'a sonuç")
 finally:
     with psycopg.connect(ADMIN + " dbname=postgres", autocommit=True) as c:
         c.execute(f"DROP DATABASE IF EXISTS {dbad} WITH (FORCE)")

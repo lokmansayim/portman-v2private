@@ -555,7 +555,8 @@ if [ ! -f "$KOK/data/settings.json" ]; then
  "plan_uretimi": {"acik": false, "model": "claude-opus-5-5", "effort": "low", "en_cok_cagri": 2, "timeout_s": 60},
  "llm_once_revizyon": {"acik": false, "model": "claude-opus-5-5", "effort": "low", "timeout_s": 60},
  "gorsel_okuma": {"acik": false, "model": "claude-opus-5-5", "effort": "medium", "timeout_s": 180, "max_tokens": 8000, "bekle_sn": 60},
- "talep_formu": {"acik": false, "talep_flow_id": null, "revizyon_flow_id": null, "taslak": true}
+ "talep_formu": {"acik": false, "talep_flow_id": null, "revizyon_flow_id": null, "taslak": true},
+ "bayi_kaydi": {"acik": false, "gunluk_en_cok": 10}
 }
 EOF
   chmod 640 "$KOK/data/settings.json"
