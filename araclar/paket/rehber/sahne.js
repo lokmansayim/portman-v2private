@@ -591,8 +591,9 @@ if (AD.izo) {
   }
   // ek şeritler (62 m²: cumbanın altı, makas yönünde yatay, veranda tavanının üstüne; Lokman)
   (I.ek || []).forEach((e, j) => {
-    const w = e.y1 - e.y0;
-    serit(e.x, (e.y0 + e.y1) / 2, 'x', w, e.L, ANA.length - 1 + j, e.ad, [['Bu parça', yaz(e.bu, { w, L: e.L })], ['Serme', e.serme]]);
+    const w = e.yon === 'y' ? e.x1 - e.x0 : e.y1 - e.y0;   // İE-24: cumbada şerit y yönünde (makas aralığı x0…x1, ön duvardan)
+    if (e.yon === 'y') serit((e.x0 + e.x1) / 2, e.y, 'y', w, e.L, ANA.length - 1 + j, e.ad, [['Bu parça', yaz(e.bu, { w, L: e.L })], ['Serme', e.serme]]);
+    else serit(e.x, (e.y0 + e.y1) / 2, 'x', w, e.L, ANA.length - 1 + j, e.ad, [['Bu parça', yaz(e.bu, { w, L: e.L })], ['Serme', e.serme]]);
   });
 }
 function ackapaAyarla(L, a) {   // a: 0 kapalı → 1 açık
@@ -636,7 +637,7 @@ const RIB = (() => { const s = new THREE.Shape(), a = RIB_TABAN / 200, u = RIB_U
     const ribs = D.kaplama.hadve[Y.hadve].map(tAt);
     dizi(S.bas, S.son, S.yon).forEach(([v0, v1]) => {
       const [t0, t1] = [tAt(v0), tAt(v1)].sort((a, b) => a - b);
-      const Q = kirp(dikd(-1.35, Y.R.SL + 2, t0, t1), Y.P); if (!Q) return;
+      const Q = Y.icbukey ? kirp(Y.P, dikd(-1.35, Y.R.SL + 2, t0, t1)) : kirp(dikd(-1.35, Y.R.SL + 2, t0, t1), Y.P); if (!Q) return;   // içbükey yüz şeritle kırpılır (İE-24)
       const g = Y.grup(), m = mat('roof', AD.kaplama); g.add(levha(Q, TR0, TR1, m));
       ribs.forEach(tc => {
         if (tc < t0 - 0.01 || tc >= t1 - 0.01) return;   // levha sınırındaki hadve tek levhaya
@@ -714,7 +715,7 @@ D.dere.inisler.forEach((p, i) => {
     const k = mesh(new THREE.BoxGeometry(0.066, 0.02, 0.088), m); k.position.copy(V(wx, hh, zw)); w.add(k);
     w.add(lb(yuzU, wx - 3, hh - 1, hh + 1, zw - 1, zw + 1, m));
   });
-  add(AD.dere, w, 4 + i * 0.5, { kod: KB('inis'), ad: MI.ad, satir: [['Bu parça', `${h.ad} hattı · ${p.duvar} boyunca`], ['Ağız', kolon ? MI.agiz_kolon : (p.s < 17 || p.s > D.dis[p.dis] - 17) ? MI.agiz_kose : MI.agiz], ['Kesit', MI.kesit], ['Takım', MI.takim], ['Pafta', MI.pafta], ['Liste', MI.liste], ...kartSat(KB('inis'))] });
+  add(AD.dere, w, 4 + i * 0.5, { kod: KB('inis'), ad: MI.ad, satir: [['Bu parça', `${h.ad} hattı · ${p.duvar} boyunca`], ['Ağız', kolon ? MI.agiz_kolon : (p.kose !== undefined ? p.kose : p.s < 17 || p.s > D.dis[p.dis] - 17) ? MI.agiz_kose : MI.agiz], ['Kesit', MI.kesit], ['Takım', MI.takim], ['Pafta', MI.pafta], ['Liste', MI.liste], ...kartSat(KB('inis'))] });
 });
 
 /* İç kapılar (kanat yeri ve açılışı paftadan) */
