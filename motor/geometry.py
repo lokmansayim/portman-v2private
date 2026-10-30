@@ -416,6 +416,7 @@ class Plan:
     is_emri: dict
     arti_birlesimler: list = field(default_factory=list)   # BK-14: dört kollu birleşim noktaları (x, y; cm); profili kitapta yok, liste uyarır
     dis_verandalar: list = field(default_factory=list)     # BK-14: gövdeden taşan verandalar (İş Emri `verandalar`; `_dis_verandalar`)
+    girintili: bool = False                                 # İE-24: İş Emri'nde `girintiler` var (gövde dikdörtgen değil; `govde_cokgeni`)
 
     @property
     def panolar(self) -> list:
@@ -1091,7 +1092,7 @@ def _kur(is_emri: dict) -> Plan:
 
     profil = [(x0, y0, x1, y1) for (x0, y0, x1, y1, *_r) in acik_kenarlar]
     plan = Plan(grid_nx, grid_ny, W, H, mahaller, duvarlar, koseler, h_bag, dikmeler, profil, acik_sinir_cizgileri, uyarilar, is_emri,
-                arti_birlesimler=arti_noktalari)
+                arti_birlesimler=arti_noktalari, girintili=bool(dis_hucreler))
     if ayna_y:
         _aynala_y(plan, ny2)
     if kapi_kurali == "mantik":
@@ -1210,14 +1211,28 @@ def disari_yon(plan: "Plan", d) -> str | None:
     return None
 
 
+def _govde_birlesimi(plan: "Plan"):
+    dis = {v["ad"] for v in plan.dis_verandalar}
+    kolon = {r for v in plan.dis_verandalar for r in v["kolonlar"]}
+    return unary_union([plan.footprint()] + [m.poly for m in plan.mahaller.values() if m.poly is not None and m.ad not in dis]
+                       + [box(*r) for r in plan.dikmeler if r not in kolon])
+
+
 def govde_kutusu(plan: "Plan") -> tuple:
     """Gövdenin dış ölçü kutusu: duvarlar, köşeler, ızgara içindeki açık mahaller ve İş Emri dikmeleri; taşan veranda ve dikmeleri hariç
     (ana çatı bunu örter). Taşan veranda yoksa `sunum.sinirlar` ile aynı."""
-    dis = {v["ad"] for v in plan.dis_verandalar}
-    kolon = {r for v in plan.dis_verandalar for r in v["kolonlar"]}
-    g = unary_union([plan.footprint()] + [m.poly for m in plan.mahaller.values() if m.poly is not None and m.ad not in dis]
-                    + [box(*r) for r in plan.dikmeler if r not in kolon])
-    return g.bounds
+    return _govde_birlesimi(plan).bounds
+
+
+def govde_cokgeni(plan: "Plan"):
+    """İE-24: gövdenin plandaki dış çizgisi (çatının ayak izi; görünüşte duvarın önündeki gövde). Girintili gövdede (TK-03'ün Z gövdesi)
+    `govde_kutusu`'nun birleşiminin en büyük parçasının dış halkası, odalar dahil (delik yok); girintisiz planda dış ölçü kutusu (çıktılar
+    aynen)."""
+    if not plan.girintili:
+        return box(*govde_kutusu(plan))
+    g = _govde_birlesimi(plan)
+    en = max(getattr(g, "geoms", [g]), key=lambda p: p.area)
+    return Polygon(en.exterior.coords).simplify(0.01)
 
 
 def _aynala_y(plan: "Plan", ny2: int) -> None:

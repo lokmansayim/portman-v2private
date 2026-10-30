@@ -1,13 +1,13 @@
 {
   "is_emri_no": "PM-TK03-87M2",
-  "revizyon": 1,
+  "revizyon": 2,
   "talep": {
     "bayi": {
       "kod": "TK03",
       "ad": "Bayi TK-03"
     },
     "musteri_adi": "TK-03",
-    "metin": "Gerçek uygulanmış proje denemesi (Lokman 30 Ekim 2026): Lokman'ın 87,72 m² iki katlı evinin 1. katı. Merdiven, döşeme ve alttaki profiller şimdilik yok sayıldı; merdiven boş oda (MERDİVEN KOVASI). Gövde 1236,7 × 873,3 cm, iki köşesi girintili (ön-sağ 451,1 × 170, arka-sol 543,5 × 232), ön-solda balkon; duvar 250 cm, dış 100 / iç 60 mm pres panel, beşik çatı sandviç panel antrasit, ters tavan."
+    "metin": "Gerçek uygulanmış proje denemesi (Lokman 30 Ekim 2026): Lokman'ın 87,72 m² iki katlı evinin 1. katı. Merdiven, döşeme ve alttaki profiller şimdilik yok sayıldı; merdiven boş oda (MERDİVEN KOVASI). Gövde 1236,7 × 873,3 cm, iki köşesi girintili (ön-sol 543,5 × 232, arka-sağ 451,1 × 170), arka-solda balkon; duvar 250 cm, dış 100 / iç 60 mm pres panel, beşik çatı sandviç panel antrasit, ters tavan."
   },
   "yapi": {
     "sistem": "prefabrik",
@@ -31,7 +31,7 @@
     "giris_cephesi": "on",
     "dis_dusey_duvar": "cevre_aks_disinda",
     "dizilim": {
-      "baslangic": "on-sol",
+      "baslangic": "arka-sol",
       "hiza": "tam_izgara",
       "dis_duvar_t_bolme": false,
       "pencere": "oda_ortasi",
@@ -210,7 +210,7 @@
       "tur": "pencere",
       "olcu": "200x180",
       "mahal": "SALON",
-      "duvar": "on",
+      "duvar": "arka",
       "pano": 0,
       "acilis": "surgulu"
     },
@@ -218,14 +218,14 @@
       "tur": "pencere",
       "olcu": "120x120",
       "mahal": "SALON",
-      "duvar": "arka",
+      "duvar": "on",
       "pano": 1
     },
     {
       "tur": "pencere",
       "olcu": "120x100",
       "mahal": "MUTFAK",
-      "duvar": "on",
+      "duvar": "arka",
       "pano": 0,
       "acilis": "surgulu"
     },
@@ -247,13 +247,13 @@
       "tur": "pencere",
       "olcu": "120x120",
       "mahal": "YATAK ODASI 2",
-      "duvar": "arka"
+      "duvar": "on"
     },
     {
       "tur": "pencere",
       "olcu": "120x120",
       "mahal": "YATAK ODASI 3",
-      "duvar": "arka",
+      "duvar": "on",
       "pano": 1
     },
     {
@@ -272,7 +272,7 @@
         "SALON",
         "YATAK ODASI 1"
       ],
-      "duvar_ucu": "on"
+      "duvar_ucu": "arka"
     },
     {
       "tur": "ic_kapi",
@@ -281,7 +281,8 @@
         "SALON",
         "YATAK ODASI 2"
       ],
-      "pano": 0
+      "pano": 0,
+      "mentese": "sol"
     },
     {
       "tur": "ic_kapi",
@@ -291,7 +292,7 @@
         "YATAK ODASI 3"
       ],
       "duvar_ucu": "sag",
-      "mentese": "sag"
+      "mentese": "sol"
     },
     {
       "tur": "gecis",
@@ -346,11 +347,13 @@
   "pafta_uyarilari": [],
   "varsayimlar": [
     "Kaynak: Lokman'ın yüklediği 1. kat montaj paftası (21 sayfa), duvar panel montaj planı sayfasının vektör çiziminden ölçüldü (ölçek 1236,7 dış ölçüden). Oda adları ve alanları mimari plan sayfasından; ad ve antet yazılmadı.",
-    "Pafta ön üstte çizili; İş Emri'nde x soldan, y önden (paftadaki sol solda kalır, AP paftalarındaki gibi). Pano ızgarası paftada önde iç yüzden (10 + 125,5k), solda duvar ekseninden (5 + 125,5k): kisa_kenar y (makaslar derinliği geçer).",
+    "Ön ve arka Lokman'ın düzeltmesiyle (30 Ekim 14:07, işaretli mimari plan): mühendisin paftasında \"ön\" yazan cephe arkadır. Gerçek çerçeve: sol solda, ön altta; balkon, mutfak ve banyo arkada, yatak odaları önde. Pano ızgarası paftada arkadaki iç yüzden (10 + 125,5k), solda duvar ekseninden (5 + 125,5k): dizilim arka-sol, kisa_kenar y (makaslar derinliği geçer). `konum_cm`, `girintiler` ve y ek aksları Motor'un arka-sol çerçevesinde (y arkadan); pencere cephesi, kapının duvar ucu ve menteşe gerçek çerçevede.",
     "Merdiven, döşeme ve alttaki profiller yok sayıldı (Lokman 30 Ekim 13:08); merdiven boşluğu kapalı boş oda, salona merdiven ağzından açık (MERDİVEN KOVASI).",
-    "Girintiler (bina dışı): ön-sağ 451,1 × 170 ve arka-sol 543,5 × 232 (paftanın ölçü zincirleri). Girinti duvarı aksa ortalı 10'luk dış duvar (paftada 543,5–553,5 ve 169,9–180,2).",
+    "Girintiler (bina dışı): ön-sol 543,5 × 232 ve arka-sağ 451,1 × 170 (paftanın ölçü zincirleri). Girinti duvarı aksa ortalı 10'luk dış duvar (paftada 543,5–553,5 ve arkadan 169,9–180,2).",
     "Duvar eksenleri paftadan, 2 cm'ye kadar en yakın ızgara aksına yuvarlandı (318,69 → 318,75; 883,46 → 883,5; 1008,94 → 1009; 574,64 → 574,75; banyonun alt duvarı 200,3 → 198,25, balkon duvarıyla aynı aks). Izgara dışı duvarlar ek aks: x 548,5 · 780,6 · 831,95; y 175 · 359,75 · 523,85 · 636,3.",
     "Mutfak salona açık (paftada yeşil kesik çizgi, duvar yok).",
-    "Kapılar paftada 80'lik kanat; Motor'un iç kapısı 82. Balkona çıkış 200/180 sürgülü (paftada pencere olarak yazılı)."
+    "Kapılar paftada 80'lik kanat; Motor'un iç kapısı 82. Balkona çıkış 200/180 sürgülü (paftada pencere olarak yazılı).",
+    "Makaslar (Lokman'ın işaretlediği akslar, 30 Ekim 14:07): 12 makas; soldaki kalkan duvarındaki MKS01 ve işaretli 11 aks (MKS02–MKS12).",
+    "Kapı menteşeleri paftadaki uçta: salon–yatak odası 2 ve salon–yatak odası 3 kapısına menteşe yazıldı (gerçek çerçevede sol)."
   ]
 }

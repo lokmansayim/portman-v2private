@@ -46,14 +46,16 @@ def cepheye_deger(d, cephe_duvarlari) -> bool:
 
 def gorunur(plan: G.Plan, d, dis: str) -> bool:
     """`dis` yönüne bakan dış duvar o yandan görülüyor mu: önündeki şeritte (duvar yüzünden gövdenin kenarına) gövdenin kapalı kısmı duvarın
-    boyunu örtmüyorsa. Gövde = dış kutu − ızgaradaki açık mahaller (niş, köşe verandası). Öndeki giriş nişinin yan duvarları dışarı (nişe)
-    bakar ama yandan bakışta gövdenin ardında kalır; yan görünüşte derz ve doğrama vermez (D-31 madde 7)."""
+    boyunu örtmüyorsa. Gövde = dış kutu − ızgaradaki açık mahaller (niş, köşe verandası); girintili gövdede kutu yerine gövdenin dış çizgisi
+    (`G.govde_cokgeni`; İE-24: TK-03'ün girintideki duvarı ön görünüşte görünür). Öndeki giriş nişinin yan duvarları dışarı (nişe) bakar
+    ama yandan bakışta gövdenin ardında kalır; yan görünüşte derz ve doğrama vermez (D-31 madde 7)."""
     from shapely.geometry import box
     from shapely.ops import unary_union
     x0, y0, x1, y1 = G.govde_kutusu(plan)
     dis_v = {v["ad"] for v in plan.dis_verandalar}
     acik = [m.poly for m in plan.mahaller.values() if m.acik and m.poly is not None and m.ad not in dis_v]
-    govde = box(x0, y0, x1, y1).difference(unary_union(acik)) if acik else box(x0, y0, x1, y1)
+    govde = G.govde_cokgeni(plan)
+    govde = govde.difference(unary_union(acik)) if acik else govde
     yuz = d.c + d.h if dis[0] == "+" else d.c - d.h
     a, b = d.p0, d.p1
     if d.yon == "y":

@@ -60,6 +60,9 @@ def pano_sinifi(L, t):
 
 def hazirla(ie: dict) -> dict:
     plan = G.kur(ie)
+    if plan.girintili:                                # İE-24: çatı ve makaslar dış ölçü kutusundan kurulurdu (girintiyi de örterdi)
+        raise G.IsEmriHatasi("girintili gövde (İE-24): IFC'nin çatısı ve makasları henüz ana çatı + cumba çatısından (`cati_serit`) "
+                             "kurulmuyor; 3B ve kart modeli sonraki adım (yanlış çatı çizilmez)")
     kat = Katalog()
     c = Cizici(plan, kat)
     c.ciz_plan(0.0, 0.0, "ANA", "", "")          # BOM kodlu INSERT'ler (yalnız ANA rolü)
