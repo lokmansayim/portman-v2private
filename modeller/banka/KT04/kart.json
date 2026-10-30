@@ -19,7 +19,7 @@
  "kaynak_degerleri": {
   "brut_m2": {
    "deger": 120.0,
-   "kaynak": "kaynak projenin adı ve çatı paftasındaki 'ÇATI M2: 120' (ÇP-14 montaj paftası, mühürlü 934b2404…); motorun alanı farklı olabilir, not"
+   "kaynak": "projenin adında ve çatı paftasında (ÇATI M2: 120)"
   }
  },
  "durum": "kontrolde",
@@ -212,8 +212,8 @@
   "kural_seti": "a01cbf2a810c8e7f.json"
  },
  "son_cizim": {
-  "no": 4,
-  "zaman": "2026-10-30T02:13+0300",
+  "no": 5,
+  "zaman": "2026-10-30T11:18+0300",
   "tanim_sha256": "ec4de5f622e9276c75cf74da316239abc71bca648d914e06dfa19a024b1d30dd",
   "kural_seti": "a01cbf2a810c8e7f.json",
   "pim": {
@@ -229,7 +229,7 @@
    }
   },
   "passed": true,
-  "cikti": "/mnt/project-files/Portman_Proje_Dosyalari/IE-09_atolye/banka_hatti/KT04/c04",
+  "cikti": "/mnt/project-files/Portman_Proje_Dosyalari/IE-09_atolye/banka_hatti/KT04/c05",
   "denetimler": [
    {
     "ad": "Motor doğrulaması",
@@ -249,12 +249,14 @@
    {
     "ad": "15 cm ve daha kısa parçalar (bayi paftası)",
     "durum": "bilgi",
-    "ayrinti": "on 3 cm; on 3 cm; sol 3 cm; sag 3 cm"
+    "ayrinti": "on 3 cm; on 3 cm; sol 3 cm; sag 3 cm",
+    "sade": "Bayi paftasının ölçü çizgisinde 15 cm'den kısa parçalar yanındaki parçaya katıldı: ön cephede 3 cm (2 yerde), sol cephede 3 cm, sağ cephede 3 cm. Mühendis bakar."
    },
    {
     "ad": "Kartla çizimin tutarlılığı (m², oda programı, açıklık, çatı)",
     "durum": "uyarı",
-    "ayrinti": "brut_m2: çizim 123.78, kaynak 120.0"
+    "ayrinti": "brut_m2: çizim 123.78, kaynak 120.0",
+    "sade": "Toplam alan: çizimde 123,78 m², projede 120 m² yazıyor."
    },
    {
     "ad": "Bankada aynı model",
@@ -262,9 +264,9 @@
     "ayrinti": "aynı kod ve aynı plan yok"
    }
   ],
-  "sure_s": 54.4,
+  "sure_s": 74.9,
   "perspektif": "ATLANDI",
-  "kontrol_pdf": "/mnt/project-files/Portman_Proje_Dosyalari/IE-09_atolye/banka_hatti/KT04/c04/KT04_kontrol_c04.pdf"
+  "kontrol_pdf": "/mnt/project-files/Portman_Proje_Dosyalari/IE-09_atolye/banka_hatti/KT04/c05/KT04_kontrol_c05.pdf"
  },
  "duzeltmeler": [],
  "gecmis": [
@@ -316,6 +318,18 @@
    "zaman": "2026-10-30T02:13+0300",
    "olay": "ciz",
    "no": 4,
+   "durum": "kontrolde",
+   "passed": true
+  },
+  {
+   "zaman": "2026-10-30T11:16+0300",
+   "olay": "kaynak",
+   "kaynak": "projenin adında ve çatı paftasında (ÇATI M2: 120)"
+  },
+  {
+   "zaman": "2026-10-30T11:18+0300",
+   "olay": "ciz",
+   "no": 5,
    "durum": "kontrolde",
    "passed": true
   }

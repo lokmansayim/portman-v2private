@@ -99,8 +99,12 @@ def test_kontrol_sayfasi(atolye):
     with pymupdf.open(pdf if pdf.is_absolute() else KOK / pdf) as d:
         assert d.page_count == 5                                            # özet, çizim seti, bayi paftası (2), bayi görseli
         metin = d[0].get_text()
-    for s in ("Ç8801-Z", "Oda tablosu", "Yaşam Alanı", "21,34", "bankada Ç8801 kaydı", "Metraj kapısı: referans yok, koşulmadı", "kabul"):
+    for s in ("Ç8801-Z", "Bayiye ne gider", "bayiye ayrı seçenek olarak çıkmaz", "Odalar", "Yaşam Alanı", "21,34", "bankada Ç8801 kaydı",
+              "mühendis listesi yok", "kıyas yapılmadı", "kabul"):
         assert s in metin, s
+    # sayfa Lokman içindir: teknik terimler kayıtta kalır, sayfaya girmez (Lokman, 30 Ekim 2026)
+    for s in ("kural seti", "IFC", "Motor doğrulaması", "Metraj kapısı", "denetim", "iç kod"):
+        assert s not in metin, s
 
 
 def test_metraj_kapisi_hakem_olcumu_olmayan_modelde_kosulmaz(atolye):
@@ -268,10 +272,17 @@ def test_hakemli_kontrol_sayfasi(hakemli):
     pdf = Path(kart99(hakemli)["son_cizim"]["kontrol_pdf"])
     with pymupdf.open(pdf if pdf.is_absolute() else KOK / pdf) as d:
         metin = " ".join(d[0].get_text().split())
-    for s in ("KT-99", "gerçek proje ÇP-14", "çelik hakemi", "+%0,93", "Duvar paneli", "+%6,3", "Kolon-kiriş paneli", "−%14,9", "Makas",
-              "birbirini götürüyor", "panel"):
+    for s in ("KT-99", "Mühendisin projesi ÇP-14; aynı ev, yalnız kodu ve adı değişti", "mühendisin listesi", "+%0,93", "uygun",
+              "Duvar paneli", "+%6,3", "Kolon-kiriş paneli", "−%14,9", "Makas", "Onayınızı bu satırlara bakarak verin", "çelik panelle",
+              "Bayiye ne gider", "WhatsApp görselini (sayfa 5)", "bayi paftası (sayfa 3–4)",
+              "Bakmanız gerekenler", "Toplam alan: çizimde 123,78 m², projede 120 m² yazıyor", "ön cephede 3 cm (2 yerde)"):
         assert s in metin, s
     assert "%-" not in metin                                                                             # işaret yüzde imisinden önce
+    for s in ("çelik hakemi", "kural seti", "omega_asik", "c_profil", "İE-16", "metraj"):                 # teknik terim sayfaya girmez
+        assert s not in metin, s
+    dn = {d["ad"]: d for d in kart99(hakemli)["son_cizim"]["denetimler"]}                                # teknik kayıt kartta kalır
+    assert "brut_m2: çizim 123.78, kaynak 120.0" in dn["Kartla çizimin tutarlılığı (m², oda programı, açıklık, çatı)"]["ayrinti"]
+    assert all("sade" not in d for d in dn.values() if d["durum"] == "geçti")
 
 
 def test_hakemli_kabul_pim_ve_kontrol(hakemli, tmp_path):
