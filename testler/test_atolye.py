@@ -112,6 +112,10 @@ def test_pimsiz_kart_kontrolun_setiyle_cizilir(atolye):
     # kontrol aynı kural setinden (D-28 madde 2; geometri hakemi, 30 Ekim)
     sc = kart(atolye)["son_cizim"]
     assert sc["kural_seti"] == A.pim_seti().name == "0.19.json" and sc["kural_seti_sha256"] == A.sha256(A.pim_seti())
+    assert sc["karkas_sha256"] is None and sc["metraj_izi"] == A.metraj_izi(kart(atolye)["metraj_testi"])   # Ç8801 karkas kuralı istemez
+    t = {"karkas": "kural"}                                                                             # isteyen pimsiz tanım bugünkü kuralla pimlenir
+    from motor.genel import karkas
+    assert A.cizim_kurallari({"pim": None}, t) == (A.pim_seti(), karkas.KURAL) and A.cizim_kurallari({}, {})[1] is None
 
 
 def test_liste_ozeti_celik_kg_motorun_saglama_satirindan():
@@ -119,7 +123,7 @@ def test_liste_ozeti_celik_kg_motorun_saglama_satirindan():
     satirlar = [{"grup": A.CELIK_GRUBU, "kalem": "Duvar paneli", "kg": 100.0}, {"grup": A.CELIK_GRUBU, "kalem": "Makas", "kg": 50.0},
                 {"grup": A.CELIK_GRUBU, "kalem": A.TOPLAM_SATIRI, "kg": 149.5}, {"grup": "Dış cephe", "kalem": "Taş yünü", "kg": 10.0}]
     o = A.liste_ozeti({"satirlar": satirlar})
-    assert o["celik_kg"] == 149.5 and o["gruplar"][A.CELIK_GRUBU] == {"satir": 3, "kg": 150.0} and o["gruplar"]["Dış cephe"]["kg"] == 10.0
+    assert o["celik_kg"] == 149.5 and o["gruplar"][A.CELIK_GRUBU] == {"satir": 3, "kg": 149.5} and o["gruplar"]["Dış cephe"]["kg"] == 10.0
     assert A.liste_ozeti({"satirlar": satirlar[3:]})["celik_kg"] == 0
 
 
@@ -352,24 +356,34 @@ def test_ciz_metraj_kapisinin_pimiyle_cizer(hakemli, tmp_path):
     assert k["son_cizim"]["kural_seti"] == Path(pim["yol"]).name and k["son_cizim"]["kural_seti_sha256"] == pim["sha256"]
 
 
-def test_hakemli_kabul_pim_ve_kontrol(hakemli, tmp_path):
+def test_hakemli_kabul_pim_ve_kontrol(hakemli, tmp_path, capsys):
     import shutil
     banka = hakemli["banka"]
-    # beklemede ya da pimden başka setle çizilmiş kart kabul edilmez (gerçek bankanın kopyasında)
+    # kabulü durduran her denetim kendi nedeniyle: beklemede, başka pim ya da setle çizim, hakemin bugünkü sonucu, sayfadaki metraj kaydı
+    # (gerçek bankanın kopyasında)
     kopya = tmp_path / "modeller" / "banka"
     shutil.copytree(banka, kopya)
     (tmp_path / "is_emri").mkdir()
     k = kart99(hakemli)
-    for degisik in ({**k, "durum": "beklemede", "metraj_testi": {**k["metraj_testi"], "durum": "beklemede"}},
-                    {**k, "son_cizim": {**k["son_cizim"], "pim": None}},
-                    {**k, "son_cizim": {**k["son_cizim"], "kural_seti_sha256": "0" * 64}},              # kontrolün setiyle çizilmedi
-                    {**k, "metraj_testi": {**k["metraj_testi"], "fark_yuzde": 0.5}}):                   # hakemin bugünkü sonucu başka
+    eski_fark = {**k["metraj_testi"], "fark_yuzde": 0.5}                                                # hakemin bugünkü sonucu başka
+    for degisik, neden in (({**k, "durum": "beklemede", "metraj_testi": {**k["metraj_testi"], "durum": "beklemede"}}, "metraj kabul testi geçmedi"),
+                           ({**k, "son_cizim": {**k["son_cizim"], "pim": None}}, "kartın pimindeki kural setiyle çizilmedi"),
+                           ({**k, "son_cizim": {**k["son_cizim"], "kural_seti_sha256": "0" * 64}}, "kontrol dosyasının donacağı kural setiyle"),
+                           ({**k, "son_cizim": {**k["son_cizim"], "karkas_sha256": None}}, "kontrol dosyasının donacağı kural setiyle"),
+                           ({**k, "metraj_testi": eski_fark, "son_cizim": {**k["son_cizim"], "metraj_izi": A.metraj_izi(eski_fark)}},
+                            "hakemin bugünkü sonucu kartınkiyle aynı değil"),
+                           ({**k, "son_cizim": {**k["son_cizim"], "metraj_izi": "0" * 64}}, "metraj kaydı son çizimden sonra değişti")):
         (kopya / "KT99" / "kart.json").write_text(json.dumps(degisik, ensure_ascii=False), encoding="utf-8")
+        capsys.readouterr()
         assert kos(kopya, "kabul", "KT99", "--kapisiz", "--izsiz") == 2
+        assert neden in capsys.readouterr().out, neden
+    duzeltmeli = {**k, "duzeltmeler": [{"zaman": "2026-10-30T12:00+0300", "tur": "tercih", "metin": "pencere sürgülü olsun", "cizim": 1}]}
+    (banka / "KT99" / "kart.json").write_text(json.dumps(duzeltmeli, ensure_ascii=False), encoding="utf-8")
     assert kos(banka, "kabul", "KT99", "--kapisiz", "--izsiz", "--tarih", "2026-10-29") == 0
     k = kart99(hakemli)
     assert k["durum"] == "kabul" and k["kabul"]["metraj_kapisi"] == "gecti" and k["kabul"]["metraj_proje"] == "ÇP-14"
     assert k["kabul"]["kapisiz"] is True and k["kabul"]["izsiz"] is True                                 # gerçek bankada test_banka reddeder
+    assert k["aday"]["kaynak"]["metin"].endswith("; düzeltme (c01 sonrası): pencere sürgülü olsun")      # açılış metni düzeltmeleri de anar
     assert "çelik hakemi, ÇP-14" in k["aday"]["kaynak"]["dogrulama"] and k["aday"]["musteri_projesi"] is True and k["aday"]["sunum"]["ad"] == ""
     kontrol = json.loads((banka / "KT99" / "kontrol.json").read_text(encoding="utf-8"))
     assert kontrol["kural_seti"] == k["pim"]["kural_seti"]["yol"] and kontrol["karkas_kurali"] == k["pim"]["karkas"]["yol"]
