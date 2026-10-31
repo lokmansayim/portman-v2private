@@ -202,7 +202,7 @@ def _donustur(t: dict, f: _Donusum, y: dict) -> dict:
 def _germe(t: dict, y: dict, kimlik: dict, mahal: str, yon: str, kenarlar: list[dict], cm: int, buyut: bool) -> tuple[dict, dict]:
     eksen, s = YK.YON_EKSEN[yon], ISARET[yon]
     if any(e["durum"] == "duzey2" for e in kenarlar):           # PR-2b: ikincil çatı parçası yeniden hesaplanır
-        raise GermeHatasi(f"{YON_SOZU[yon]} büyümek yandaki küçük çatıyı (cumba ya da çıkma çatısı) yeniden hesaplamayı gerektiriyor; "
+        raise GermeHatasi(f"{_degisim(yon, buyut)} yandaki küçük çatıyı (cumba ya da çıkma çatısı) yeniden hesaplamayı gerektiriyor; "
                           "bu henüz otomatik değil")
     konum = [e["konum_cm"] for e in kenarlar]
     sinir = min(konum) if s > 0 else max(konum)               # kesit, kenarın berisinde (mahalin içinde)
@@ -506,16 +506,21 @@ def _yapi_nedeni(e: str, t: dict) -> str:
 
 
 # ── kilitli kenarın bayiye gerekçesi ─────────────────────────────────────────────────────────────────────────────────────
-def _kilit_nedeni(e: dict, mahal: str, yon: str) -> str:
+def _degisim(yon: str, buyut: bool) -> str:
+    """Bayi gerekçesinde isteğin anılışı: "arkaya büyümek" ya da "arkadan küçülmek"."""
+    return f"{YON_SOZU[yon]} büyümek" if buyut else f"{KUCULT_SOZU[yon]} küçülmek"
+
+
+def _kilit_nedeni(e: dict, mahal: str, yon: str, buyut: bool = True) -> str:
     n = e.get("neden") or ""
     if n.startswith("verandaya bakan"):
         return f"{mahal} {YAN_SOZU[yon]} yanında verandaya bakıyor; veranda ve çatısı otomatik değişmiyor"
     if n.startswith("verandanın kenarı"):
         return "veranda ve çatısı otomatik değişmiyor"
     if "verandayı da keser" in n:
-        return f"{YON_SOZU[yon]} büyürken veranda da değişirdi; veranda ve çatısı otomatik değişmiyor"
+        return (f"{YON_SOZU[yon]} büyürken" if buyut else f"{KUCULT_SOZU[yon]} küçülürken") + " veranda da değişirdi; veranda ve çatısı otomatik değişmiyor"
     if n.startswith("ana çatının"):
-        return f"{YON_SOZU[yon]} büyümek ana çatının genişliğini ve mahya yüksekliğini değiştirir; bu otomatik yapılmıyor"
+        return f"{_degisim(yon, buyut)} ana çatının genişliğini ve mahya yüksekliğini değiştirir; bu otomatik yapılmıyor"
     m = re.match(r"karşıdaki (.+?) bu kenarın ötesinde (.+?) yanında devam ediyor", n)
     if m:
         oteki = ", ".join({"dis": "dış cephe"}.get(x, x) for x in m.group(2).split(", "))       # iç kod bayiye gitmez
@@ -562,11 +567,11 @@ def oda_degistir(t: dict, mahal: str | None, yon: str | None, cm, buyut: bool = 
     else:
         kilitli = [e for e in uc if e["durum"] == "kilitli"]
         if kilitli:
-            raise GermeHatasi(_kilit_nedeni(kilitli[0], mahal, yon))
+            raise GermeHatasi(_kilit_nedeni(kilitli[0], mahal, yon, buyut))
         raise GermeHatasi(f"odanın {YAN_SOZU[yon]} yanında hem dış duvar hem başka oda var")
     kilitli = [e for e in kullanilan if e["durum"] == "kilitli"]
     if kilitli:
-        raise GermeHatasi(_kilit_nedeni(kilitli[0], mahal, yon))
+        raise GermeHatasi(_kilit_nedeni(kilitli[0], mahal, yon, buyut))
     t2, rapor = islem(t, y, k1, mahal, yon, kullanilan, cm, buyut)
     if t2.get("celik_modeli"):                                 # SKP karkas modeli gerilmiş eve uymaz: karkas kuraldan (TASLAK)
         t2.pop("celik_modeli")

@@ -129,6 +129,9 @@ def test_c8201_yatak_odasi_2_one_30_duvar_kayar_kapi_birlikte():
     # geometri hakemi ikinci tur: kayan duvarla kayan kapının öbür ayağı birleşen duvara 10 cm'den yakın kalmaz (`plan_derle` payı)
     ("modeller/C8801K.json", "Mutfak", "D", 20, True, "Yatak Odası 1 kapısı duvar köşesine 1,5 cm kalıyor (en az 10 cm olmalı)"),
     ("modeller/C8801.json", "Yatak Odası 2", "K", 20, True, "Banyo kapısı duvar köşesine 1,5 cm kalıyor (en az 10 cm olmalı)"),
+    # geometri hakemi üçüncü tur: küçültme gerekçesi isteği doğru anar
+    ("modeller/KT01.json", "Salon - Mutfak", "D", 50, False, "sağdan küçülmek ana çatının genişliğini ve mahya yüksekliğini değiştirir"),
+    ("modeller/banka/KT04/tanim.json", "Salon - Mutfak", "D", 50, False, "sağdan küçülmek yandaki küçük çatıyı"),
 ])
 def test_olumsuz_ornekler_gerekceli(yol, mahal, yon, cm, buyut, gerekce):
     t = _tanim(yol)
