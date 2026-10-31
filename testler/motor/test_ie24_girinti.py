@@ -130,6 +130,35 @@ def test_girinti_hatalari():
         G.kur(bicim)
 
 
+
+def test_avlu_ve_kopuk_govde_hata():
+    """Geometri hakemi (31 Ekim kapanışı): girinti gövdenin dış kenarından girer ve gövde tek parça kalır. İç avlu (dört yanı odalı
+    girinti; TK-03'ün merdiven kovası girinti yazılırsa) ve gövdeyi ikiye bölen girinti sessizce en büyük parçaya inmez, İş Emri hatası
+    olur. Açık sınırın `parca_cm`'i aks tablosu olmayan İş Emri'nde de tabloyla okunur (önce `TypeError`)."""
+    ie = _oku(TK03)
+    avlu = copy.deepcopy(ie)
+    m = next(m for m in avlu["mahaller"] if m["ad"] == "MERDİVEN KOVASI")
+    avlu["mahaller"].remove(m)
+    avlu["girintiler"] += m["konum_cm"]
+    avlu["acik_sinirlar"] = [a for a in avlu.get("acik_sinirlar", []) if m["ad"] not in (a["arasi"] if isinstance(a, dict) else a)]
+    with pytest.raises(G.IsEmriHatasi, match="iç avlu"):
+        G.kur(avlu)
+    altin = _oku(KOK / "is_emri" / "ALTIN_2plus1_6x8.json")
+    kopuk = copy.deepcopy(altin)
+    kopuk["mahaller"] = [m for m in kopuk["mahaller"] if m["ad"] not in ("SALON", "BANYO / WC")]
+    kopuk["acik_sinirlar"] = []
+    kopuk["acikliklar"] = [a for a in kopuk["acikliklar"] if not any(k in json.dumps(a, ensure_ascii=False) for k in ("SALON", "BANYO"))]
+    kopuk["girintiler"] = [[10, 381.5, 763, 632.5], [10, 256, 386.5, 381.5]]
+    with pytest.raises(G.IsEmriHatasi, match="birden çok parçaya"):
+        G.kur(kopuk)
+    parca = copy.deepcopy(altin)
+    parca["acik_sinirlar"] = [{"arasi": ["SALON", "MUTFAK"], "serit": "SALON", "parca_cm": {"x": 386.5, "y": [256.0, 381.5]}}]
+    G.kur(parca)
+    parca["acik_sinirlar"][0]["parca_cm"] = {"x": 386.5, "y": [251.0, 381.5]}
+    with pytest.raises(G.IsEmriHatasi, match="aks üstünde değil"):
+        G.kur(parca)
+
+
 def test_girintisiz_is_emri_anahtar_sayilmaz():
     """`girintiler` geometri anahtarıdır; anahtarsız İş Emri eski yoldan gider (boş liste de anahtar değil)."""
     ie = _oku(TK03)

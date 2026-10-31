@@ -641,7 +641,7 @@
   {
    "kod": "PC-27",
    "baslik": "Cumbanın görünen saçak ucunda topuk",
-   "kural": "Çatı parçalarının (ana çatı, cumba) saçağının görünüşte görünen her ucunda topuk çizilir (duvar üstünden saçak kotuna, ON_TOPUK), taşan verandadaki gibi (PC-05). Bakışa dik saçağın ucu bakana yakın noktada, bakışa paralel saçağın iki ucu; birleşen düzlemde (ana çatı + cumba) saçak tek çizgidir. Önünde kalan kalkan, çatı düzlemi ya da yakın saçağın topuk bandı ucu örtüyorsa çizilmez. Dikdörtgen gövdede bütün saçak uçları görünüşün iki ucundadır (yalnız oradaki topuk).",
+   "kural": "Çatı parçalarının (ana çatı, cumba) saçağının görünüşte görünen her ucunda topuk çizilir (duvar üstünden saçak kotuna, ON_TOPUK), taşan verandadaki gibi (PC-05). Bakışa dik saçağın ucu bakana yakın noktada, bakışa paralel saçağın iki ucu; birleşen düzlemde (ana çatı + cumba) saçak tek çizgidir. Önünde kalan kalkan, çatı düzlemi ya da yakın saçağın topuk bandı ucu örtüyorsa çizilmez. Dikdörtgen gövdede tek çatıda bütün saçak uçları görünüşün iki ucundadır (yalnız oradaki topuk); beşik + cumbada cumbanın görünen saçak ucu da topuk alır (AP-13 ve AP-16 ön görünüşünde 416,5).",
    "karar": "D-34",
    "madde": 3,
    "lokman": {

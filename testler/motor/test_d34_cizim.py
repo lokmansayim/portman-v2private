@@ -86,7 +86,9 @@ def test_girintisiz_planda_dis_parca_olcusu_yok(tmp_path):
 def test_cumba_sacak_ucunda_topuk(tk03):
     """PC-27: cumbanın (ve ana çatının) görünüşte görünen saçak ucunda topuk, taşan verandadaki gibi. TK-03: soldan bakışta sol cumbanın ön
     saçak ucu, sağdan bakışta sağ cumbanın arka saçak ucu (Lokman'ın işaretlediği iki yer), önden ve arkadan ana çatının saçak ucu; öteki
-    uçlar kalkanın ya da yakın saçağın arkasında. Dikdörtgen gövdede iki uçtakinden başka topuk yok."""
+    uçlar kalkanın ya da yakın saçağın arkasında. Dikdörtgen gövdede tek çatıda iki uçtakinden başka topuk yok; beşik + cumbalı girintisiz
+    evde (AP-13, AP-16: önde 0–386,5 cumba) ön görünüşte cumbanın sağ saçak ucunda (416,5) topuk, kuralın kendisi (geometri hakemi 31 Ekim:
+    bu fark kayda geçmemişti; D-34 Kapsam)."""
     ie = _oku(TK03)
     plan = G.kur(copy.deepcopy(ie))
     topuk = {t: CG.cati_cizgileri(plan, ie, t)["topuklar"] for t in CG.TARAFLAR}
@@ -97,6 +99,10 @@ def test_cumba_sacak_ucunda_topuk(tk03):
         ie = _oku(yol)
         p = G.kur(copy.deepcopy(ie))
         assert all(not CG.cati_cizgileri(p, ie, t)["topuklar"] for t in CG.TARAFLAR), yol.name
+    for kod in ("AP13", "AP16"):
+        ie = _oku(KOK / "testler" / "cizim" / "evler" / f"{kod}.json")
+        p = G.kur(copy.deepcopy(ie))
+        assert {t: CG.cati_cizgileri(p, ie, t)["topuklar"] for t in CG.TARAFLAR} == {"on": [416.5], "arka": [], "sol": [], "sag": []}, kod
 
 
 def test_merdiven_agzi_duvarsiz():

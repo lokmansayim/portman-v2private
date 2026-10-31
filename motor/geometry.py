@@ -494,7 +494,8 @@ def _kur(is_emri: dict) -> Plan:
     if hiza not in ("kosu", "izgara", "tam_izgara"):        # İE-17: "tam_izgara" (ekler yalnız tam akslarda, iç duvar T'de bölünmez; AP paftaları)
         raise IsEmriHatasi(f"dizilim.hiza bilinmiyor: {hiza} (kosu | izgara | tam_izgara)")
     dis_t_bolme = bool(dizilim.get("dis_duvar_t_bolme", False))   # İE-11: dış duvar iç T'de bölünür, oraya dış üçlü H
-    konum_cm_var = any("konum_cm" in m for m in is_emri["mahaller"]) or bool(is_emri.get("girintiler"))   # girinti cm sınırlı (aks tablosu)
+    konum_cm_var = any("konum_cm" in m for m in is_emri["mahaller"]) or bool(is_emri.get("girintiler")) \
+        or any(isinstance(s, dict) and s.get("parca_cm") for s in is_emri.get("acik_sinirlar", []))   # girinti ve sınır parçası cm (aks tablosu)
     nx2, ny2 = aks_tablosu_kur(yapi.get("ek_akslar_cm"), nx2, ny2, zorunlu=ayna_y or konum_cm_var)
     tablo = _AKS["x"] is not None
     grid_nx, grid_ny = nx, ny                                 # İş Emri ızgarası (Plan.nx/ny, pafta yazısı, bayi görseli): ek akslarla değişmez
@@ -595,6 +596,24 @@ def _kur(is_emri: dict) -> Plan:
     eksik = [(u / 2, v / 2) for u in range(nx2) for v in range(ny2) if (u, v) not in cell_owner and (u, v) not in dis_hucreler]
     if eksik:
         raise IsEmriHatasi(f"Grid tamamen mahallere bölünmemiş; boş hücreler: {eksik[:8]}")
+    if dis_hucreler:                                          # girinti gövdenin dış kenarından girer; gövde tek parça kalır (geometri hakemi,
+        def _parcalar(hucreler: set) -> list[set]:              # 31 Ekim: iç avlu ve kopuk gövde sessizce en büyük parçaya iniyordu)
+            kalan, out = set(hucreler), []
+            while kalan:
+                yigin = [kalan.pop()]; p_ = set(yigin)
+                while yigin:
+                    u, v = yigin.pop()
+                    for q in ((u + 1, v), (u - 1, v), (u, v + 1), (u, v - 1)):
+                        if q in kalan:
+                            kalan.discard(q); p_.add(q); yigin.append(q)
+                out.append(p_)
+            return out
+        for p_ in _parcalar(dis_hucreler):
+            if not any(u in (0, nx2 - 1) or v in (0, ny2 - 1) for u, v in p_):
+                u, v = min(p_)
+                raise IsEmriHatasi(f"Girinti gövdenin dış kenarına değmiyor (iç avlu, hücre {u / 2},{v / 2}): girinti dış kenardan girer")
+        if len(_parcalar(set(cell_owner))) > 1:
+            raise IsEmriHatasi("Girintiler gövdeyi birden çok parçaya bölüyor: gövde tek parça olmalı")
 
     acik_ciftler, strip_sahibi, acik_parcalar = set(), {}, {}
     for s in is_emri.get("acik_sinirlar", []):

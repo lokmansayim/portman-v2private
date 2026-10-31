@@ -63,7 +63,7 @@ def cerceveler(g: dict) -> dict[str, dict]:
         (a0, a1), (b0, b1) = q["a"], q["b"]
         if q["rol"] == "ana":
             v0, v1 = a0 - s, a1 + s
-        elif abs(a1 - ana["a"][0]) < 0.5:                             # cumba ana çatının solunda (önünde): iç ucu a1
+        elif a1 < ana["a"][0] + 0.5:                                  # cumba ana çatının solunda (önünde): iç ucu a1 (bir yanda iki cumbada dıştaki de)
             v0, v1 = a0 - s, a1
         else:
             v0, v1 = a0, a1 + s

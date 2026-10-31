@@ -261,7 +261,7 @@ def cati(HZ: dict, kitap: dict, IFC: dict, ASIK: dict, H: float, SC: float, TAN:
                    "serme": serme}, "ek": []}
     for q in (q for q in T["parcalar"] if q["rol"] != "ana"):
         a0, a1 = q["a"]
-        ic_uc = a1 if abs(a1 - ana["a"][0]) < 0.5 else a0              # cumbanın iç ucu ana çatının duvarında
+        ic_uc = a1 if a1 < ana["a"][0] + 0.5 else a0                   # cumbanın iç ucu ana çatıya (ya da iç komşu cumbaya) bakan uç
         ks = sorted((m["konum"], m["ad"]) for m in makas if m["R"] == anahtar[q["ad"]])
         uclar = sorted(ks + [(ic_uc, None)])
         for (u, ua), (v, va) in zip(uclar, uclar[1:]):

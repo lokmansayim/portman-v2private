@@ -414,7 +414,7 @@ def _serit_catilari(plan, ie: dict) -> tuple[list[dict], dict]:
                     "kalkan": bas, "capraz": False, "cumba": q["rol"] == "cumba", "makas_adet": len(q["makaslar"]),
                     "makas_yeri": q["makas_yeri"], "mahya_boy_cm": round(math.hypot(mx1 - mx0, my1 - my0), 2),
                     "sacak_hatlari_m": sacak[q["ad"]], "alin_kenarlari_m": alin[q["ad"]],
-                    "makas_kosu_cm": q["boy_cm"] - 2 * next(d.h for d in plan.duvarlar if d.tur == "dis"),
+                    "makas_kosu_cm": q["boy_cm"] - 2 * 2 * next(d.h for d in plan.duvarlar if d.tur == "dis"),   # boy − 2 × t_dis (h yarım kalınlık)
                     "not": "Motor (İE-24): girintili gövdenin " + ("ana çatısı" if q["rol"] == "ana" else "cumbası, ana çatıya paralel")})
     return out, t
 
