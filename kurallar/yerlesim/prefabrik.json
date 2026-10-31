@@ -191,7 +191,7 @@
    "durum": "varsayim",
    "tarih": "2026-10-30",
    "kaynak": "CIO, 27 Ekim 23:11 (K5b planı, PF `Kimlik_Karti_Modeli/K5_yeni_catilar_plani.md`): taşan veranda çatıları BK-14'ün düzlemlerinden; liste üretecinin ek çatı parçası satırları (`motor/prefabrik_liste.py` › `_veranda_catilari`); yer İE-18 rehberindeki gibi.",
-   "not": "Saçak omegası duvar ve kiriş boyunca kurulur, liste saçak boyunu sayar (K3b'deki fark, veranda kirişinde de). Veranda zemini kartsız (K5). Arka verandanın sol yüzü ana çatının sol yüzünün devamı olabilir (TK-01): liste iki çatıyı ayrı sayar, model de ayrı kurar. İE-18 rehberi C kapamayı dört kalkanda yazar (kalkan başına iki kenar); model atölyesi rehberi doğru kabul etti (CIO, 30 Ekim), model de dört kalkanda kurar (K5b)."
+   "not": "Saçak omegası duvar ve kiriş üstünde saçak ucundan ucuna kurulur, liste de saçak boyunu sayar (Lokman, 31 Ekim 13:40 \"gerçek listeye uy\"; K3b'deki fark kapandı, veranda kirişinde de). Veranda zemini kartsız (K5). Arka verandanın sol yüzü ana çatının sol yüzünün devamı olabilir (TK-01): liste iki çatıyı ayrı sayar, model de ayrı kurar. İE-18 rehberi C kapamayı dört kalkanda yazar (kalkan başına iki kenar); model atölyesi rehberi doğru kabul etti (CIO, 30 Ekim), model de dört kalkanda kurar (K5b)."
   },
   "dizme_tavan": {
    "kural": "Asma dizme tavanda her kapalı odanın tavanı duvarlarla ve mahyaya paralel omega hatlarıyla (omeganın sırtı genişliğinde) sütunlara bölünür; eni en kısa boydan (`tavan_omegasi_yerlesimi.en_kisa_cm`) dar sütun göz ve H almaz (Motor'un oda çizgisinde duvar kalınlığından kalan şerit). Her sütunda tavan H'ları omegalara dik, koşu ekseninin büyük ucundan (makas x yönündeyse odanın arka kenarı) H aralığıyla dizilir; son göz `son_en_kisa_cm`'den kısa kalacaksa o H konmaz. H'ın boyu sütunun enidir (omega sırtından sırtına ya da duvar yüzüne); en kısa boydan kısa H konmaz. Göz, sütunun iki H'ı (ya da H ile oda kenarı) arasıdır: ıslak hacimde (`islak`) yeşil, ötekilerde beyaz alçıpan. Gözler levhadan raflarla kesilir: göz levhanın eninden (levhanın eninden geniş gözün artan şeridi ayrı parça), dar parçalar bir rafta yan yana; raflar levhanın boyuna en uzun önce, ilk sığan levhaya. Ters tavanda H ve göz yoktur; ters tavanın ve açık mahalin (ana çatının altındaki veranda) tavan alçıpanı modelde yerleşmez (dizilim kuralı yok; liste alandan sayar).",
@@ -342,13 +342,13 @@
    "not": "Modelde parça hattın kapı boşlukları arasındaki kısmıdır (boyu `Qto_MemberBaseQuantities.Length`, metre bunun toplamı); `Hat` ve `HatBoyu_cm` hattın kendisi. Kesim planı hatların toplamıdır, parça parça yerleşim değildir (kesilen parça artık)."
   },
   "sacak_omegasi_yerlesimi": {
-   "kural": "100'lük saçak omegası iki saçak duvarının üstünde, makasın altında, duvar boyunca (binanın boyu); duvarın olmadığı yerde (verandanın tarafında) kirişin üstünde, hat kesintisiz. Sayı ⌈iki hattın toplamı ÷ parça boyu⌉, bir kez yukarı.",
+   "kural": "100'lük saçak omegası iki saçak duvarının üstünde, makasın altında, saçak ucundan ucuna (bina boyu + iki kalkan saçağı; liste üretecinin saçak kenarı); duvarın olmadığı yerde (verandanın tarafında) kirişin üstünde, veranda çatısının saçak ucundan ucuna, hat kesintisiz. Sayı ⌈iki hattın toplamı ÷ parça boyu⌉, bir kez yukarı.",
    "parca_boyu": {"okunan": "kurallar/liste/prefabrik.json › kurallar.sacak_omegasi_bolen_m"},
    "yontem": {
     "deger": "toplam",
     "durum": "lokman",
-    "tarih": "2026-10-25",
-    "not": "K3b planı §2 ve karttaki seçim (Lokman, 25 Ekim 17:47 \"Uygula\"): rehberdeki gibi duvar boyu. Liste üreteci saçak boyunu sayar (iki saçak kenarı, bina boyu + iki saçak; PK-01 21,20 m ÷ 2,5 → 9); model duvar boyunu (PK-01 20 m → 8). Liste 6e'nin dosyası; fark oraya not olarak gider."
+    "tarih": "2026-10-31",
+    "not": "Lokman, 31 Ekim 2026 13:40 (saçak omegası duvar boyu mu saçak boyu mu sorusuna): \"gerçek listeye uy\". Gerçek Portatifev listeleri saçak boyuyla tutuyor (PK-01 9, PK-02 7, PK-03 8; `testler/kor/projeler/*/sonuc.json`); model de saçak boyunu kurar (iki saçak kenarı, bina boyu + iki saçak; PK-01 21,20 m ÷ 2,5 → 9), liste üreteciyle aynı (BK-19). Önce (K3b planı §2; Lokman, 25 Ekim 17:47 \"Uygula\"): rehberdeki gibi duvar boyu (PK-01 20 m → 8), fark 6e'ye nottu."
    },
    "cati_tipleri": ["besik"],
    "durum": "varsayim",

@@ -4,9 +4,9 @@
 - Kabul (TK-01, `testler/motor/veri/TK01.json`): kart modeli ile liste üreteci yan yana. K5'teki sekiz farkın veranda çatısından gelen
   yedisinde beşi K5b-1'de kapandı (CK-02, CK-03, CK-06, DR-01, DR-02); AS-01, BT-01 ve veranda kalkanının Z'si (CK-04) liste PR'ında
   (İE-09 hattının arkasında; CIO onayı 30 Ekim 14:20): aşık sırası beşikte karar C, tek koddan (`prefabrik_liste.asik_mesafeleri`); baş makas
-  betopanı ve Z kirişli veranda kalkanında da (D-32 madde 2). On üç kalem aynı. Saçak omegasında (CK-01) K3b'deki fark kalır ve burada
-  sınanır (model duvar ve kiriş boyunca, liste saçak boyunca: gerçek PK-01, PK-02, PK-03 listeleri saçak boyuyla tutuyor; karar Patron'da,
-  CIO 30 Ekim 17:28). "Kural yok" 0 (K5'te 8). OM-01 veranda çatısından değil (kapsam dışı).
+  betopanı ve Z kirişli veranda kalkanında da (D-32 madde 2). Saçak omegası (CK-01) saçak ucundan ucuna, liste gibi (Lokman, 31 Ekim 13:40
+  "gerçek listeye uy": gerçek PK-01, PK-02, PK-03 listeleri saçak boyuyla tutuyor; K3b'deki fark kapandı). On dört kalem aynı. "Kural yok" 0
+  (K5'te 8). OM-01 veranda çatısından değil (kapsam dışı).
 - Kör protokolü: gerçek liste açılmaz; kıyas liste üretecimizin çıktısıyla (CIO, 27 Ekim 22:02).
 - Kural birimleri: kaplamanın okunması (sandviç, tek kat, varsayılan tek kat ve uyarı, trapez ve kiremit "kural yok"); taşan veranda
   kaplaması iki yüz birlikte (⌈2 × mahya boyu ÷ kapatma⌉, artanlar bir panele sığarsa bir panelden, sığmazsa duvarda kesilir); dikey
@@ -40,7 +40,7 @@ from motor.yerlesim import cati, kesim, veranda  # noqa: E402
 
 MOTOR_VERI = KOK / "testler" / "motor" / "veri"
 TK01 = MOTOR_VERI / "TK01.json"
-ESIT = ("MA-01", "MA-02", "MA-03", "KP-02", "DR-01", "DR-02", "CK-02", "CK-03", "CK-04", "CK-06", "SR-01", "AS-01", "BT-01")
+ESIT = ("MA-01", "MA-02", "MA-03", "KP-02", "DR-01", "DR-02", "CK-01", "CK-02", "CK-03", "CK-04", "CK-06", "SR-01", "AS-01", "BT-01")
 
 
 def _oku(p: Path) -> dict:
@@ -94,15 +94,14 @@ def test_tk01_kural_yok_yok(tk01):
 
 
 def test_tk01_model_liste_ile_ayni(tk01):
-    """Veranda çatısından gelen farklar kapandı: makaslar, yavru makas, kaplama, aşık, betopan ve Z listeyle aynı; saçak omegası K3b farkı."""
+    """Veranda çatısından gelen farklar kapandı: makaslar, yavru makas, kaplama, aşık, betopan ve Z listeyle aynı; saçak omegası da (saçak boyu)."""
     say, L = tk01["say"], tk01["liste"]
     kartlar = {k["kod"]: k for k in _oku(KM.KARTLAR)["kartlar"]}
     model = {k["kod"]: say["kesim_plani"][k["kod"]]["stok"] if k["kod"] in say["kesim_plani"] else k.get("sabit", k["adet"]) for k in say["kartlar"]}
-    liste = {kod: sum(s["adet"] for s in L[kartlar[kod]["liste"]["satirlar"][0]]) for kod in ESIT + ("CK-01",)}
+    liste = {kod: sum(s["adet"] for s in L[kartlar[kod]["liste"]["satirlar"][0]]) for kod in ESIT}
     assert {k: model[k] for k in ESIT} == {k: liste[k] for k in ESIT}
-    assert {k: model[k] for k in ESIT} == {"MA-01": 2, "MA-02": 6, "MA-03": 5, "KP-02": 29, "DR-01": 7, "DR-02": 10, "CK-02": 12, "CK-03": 13,
-                                           "CK-04": 12, "CK-06": 6, "SR-01": 7, "AS-01": 56, "BT-01": 10}
-    assert (model["CK-01"], liste["CK-01"]) == (10, 11)
+    assert {k: model[k] for k in ESIT} == {"MA-01": 2, "MA-02": 6, "MA-03": 5, "KP-02": 29, "DR-01": 7, "DR-02": 10, "CK-01": 11, "CK-02": 12,
+                                           "CK-03": 13, "CK-04": 12, "CK-06": 6, "SR-01": 7, "AS-01": 56, "BT-01": 10}
     assert [(s["kalem"], s["adet"]) for s in L["Yavru makas"]] == [("Yavru makas · ön veranda çatısı", 3), ("Yavru makas · arka veranda çatısı", 2)]
     assert {(p["bilgi"]["Cati"], p["bilgi"]["MakasAdedi"]) for p in _parcalar(say, "MA-03")} == {("ÖN VERANDA", 3), ("ARKA VERANDA", 2)}
     assert [s["adet"] for s in L["Tek kat çatı paneli"]] == [20, 5, 4]
@@ -129,16 +128,16 @@ def test_tk01_asik_sirasi_tek_koddan(tk01):
     assert fark == {None: 1, "ÖN VERANDA": 0, "ARKA VERANDA": 1}
 
 
-def test_tk01_sacak_omegasi_farki(tk01):
-    """CK-01: model saçak omegasını duvar ve kiriş boyunca kurar (montaj rehberi), liste saçak boyunca sayar (K3b'deki fark). Listenin saçak
-    boyu modelin saçak sacının boyudur (saçak ucundan ucuna)."""
+def test_tk01_sacak_omegasi_sacak_boyu(tk01):
+    """CK-01: model saçak omegasını saçak ucundan ucuna kurar, liste de saçak boyunca sayar (Lokman, 31 Ekim 13:40 "gerçek listeye uy";
+    gerçek PK-01, PK-02, PK-03 listeleri saçak boyuyla tutuyor). Listenin saçak boyu modelin saçak omegasının ve saçak sacının boyudur."""
     say, L = tk01["say"], tk01["liste"]
     m = {k["kod"]: k.get("metre") for k in say["kartlar"]}
     sacak = _metre(L["100'lük saçak omegası"][0]["formul"], "saçak kenarları")
-    assert abs(m["CK-02"] - sacak) < 0.01 and m["CK-01"] < sacak
-    on = _parcalar(say, "CK-01", "ÖN VERANDA")
-    assert len(on) == 2 and all(p["boy_cm"] == 181 for p in on)                  # yan kirişlerin boyu (derinlik)
-    assert say["kesim_plani"]["CK-01"]["stok"] == math.ceil(m["CK-01"] / 2.5 - 1e-9)
+    assert abs(m["CK-01"] - sacak) < 0.01 and abs(m["CK-02"] - sacak) < 0.01
+    for c in (None, "ÖN VERANDA", "ARKA VERANDA"):                             # her çatıda saçak omegası saçak sacıyla aynı boyda
+        assert sorted(p["boy_cm"] for p in _parcalar(say, "CK-01", c)) == sorted(p["boy_cm"] for p in _parcalar(say, "CK-02", c)), c
+    assert say["kesim_plani"]["CK-01"]["stok"] == math.ceil(m["CK-01"] / 2.5 - 1e-9) == L["100'lük saçak omegası"][0]["adet"] == 11
 
 
 def test_tk01_betopan_veranda_kalkani(tk01):

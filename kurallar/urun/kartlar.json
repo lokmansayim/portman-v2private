@@ -782,12 +782,12 @@
    "liste": {"grup": "1002", "satirlar": ["100'lük saçak omegası"]},
    "olcu": "Ters U: içte ~6 cm kanat ve 4 cm ayak, dışta eğik ~6 cm kanat, sac 1 mm (montaj rehberi, ölçüler yaklaşık); L 2500; hattın boyu parçada",
    "birim": "adet",
-   "nerede": "İki saçak duvarının üstünde, makasın altında; verandanın tarafında kirişin üstünde (`sacak_omegasi_yerlesimi`)",
+   "nerede": "İki saçak duvarının üstünde, makasın altında, saçak ucundan ucuna; verandanın tarafında kirişin üstünde (`sacak_omegasi_yerlesimi`)",
    "sayim": "boy_kesim",
    "ifc": {"sinif": "IfcMemberType", "alt_tur": "MEMBER"},
    "pafta": [],
    "yerlesim": {"kural": "sacak_omegasi_yerlesimi", "parca": "sacak_omegasi", "sinif": "IfcMember"},
-   "kaynak": {"durum": "varsayim", "tarih": "2026-10-25", "dayanak": "Montaj rehberi (Lokman, 24 Ekim çizimleri): yüz başına 4 × 250 cm, duvar boyu; Lokman 25 Ekim 17:47 \"Uygula\" (rehber). Liste üreteci saçak boyunu sayar (PK-01 9; model 8): fark 6e'ye not"}
+   "kaynak": {"durum": "varsayim", "tarih": "2026-10-25", "dayanak": "Montaj rehberi (Lokman, 24 Ekim çizimleri): kesit ve 250 cm parça; Lokman 25 Ekim 17:47 \"Uygula\" (rehber). Boy: Lokman, 31 Ekim 2026 13:40 \"gerçek listeye uy\": saçak ucundan ucuna, gerçek listeler ve liste üreteci gibi (PK-01 9; önce duvar boyu, 8)"}
   },
   {
    "kod": "CK-02",

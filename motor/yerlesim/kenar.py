@@ -11,11 +11,11 @@ liste üretecinin `dis_cevre_m`'si), iç hat bir iç duvarın bitişik panoları
 boşluklar arasındaki kısmıdır; hattın tamamı `HatBoyu_cm`'de, sayı hatların toplamından (kesilen parça artık).
 
 Çatı kenarları K2'nin çatısıyla aynı çerçevede (`cati.cerceve`) ve yalnız beşik çatıda; başka çatı tipinde "kural yok". Saçak omegası iki
-saçak duvarının üstünde binanın boyunca, saçak sacı saçak kenarında saçak ucundan ucuna, mahya kaplamanın üstünde saçak ucundan ucuna;
-her baş makasın iki eğik kenarında Z, alın sacı ve C kapama (boyu eğik boy). Parça hat ya da kenar başına birdir; stok boyları kesim
+saçak duvarının üstünde saçak ucundan ucuna (gerçek listeler gibi; Lokman, 31 Ekim), saçak sacı saçak kenarında saçak ucundan
+ucuna, mahya kaplamanın üstünde saçak ucundan ucuna; her baş makasın iki eğik kenarında Z, alın sacı ve C kapama (boyu eğik boy). Parça hat ya da kenar başına birdir; stok boyları kesim
 planındadır. Kesitler yalnız gösterimdir (`kenar_gosterim`); sayı, boy ve metre onlardan çıkmaz.
 
-Taşan verandanın çatısında (K5b, `veranda.py`) aynı işlevler verandanın çerçevesiyle: saçak omegası yan kirişlerin üstünde kiriş boyunca,
+Taşan verandanın çatısında (K5b, `veranda.py`) aynı işlevler verandanın çerçevesiyle: saçak omegası yan kirişlerin üstünde saçak ucundan ucuna,
 saçak sacı ve mahya saçak ucundan ucuna, dış kalkanın iki eğik kenarında alın sacı, Z ve C kapama (montaj rehberi C kapamayı dört kalkanda
 yazar; model atölyesi doğru kabul etti, 30 Ekim; Z: kalkan betopanlı, kenar detayı ana çatınınki, liste üreteci O7'yi kirişli kalkanda da
 sayar, K5b TK-01 kıyası). Parçalar `Cati` bilgisini ve `VERANDA_` önekini taşır.
@@ -149,16 +149,17 @@ def _bant(F: dict, u0: float, u1: float, dz0: float, dz1: float) -> list[list[fl
 
 
 def sacak_omegasi(g: dict, G_: dict, F: dict | None = None) -> list[dict]:
-    """Saçak duvarlarının üstünde binanın boyunca; taşan verandada (`F`, K5b) yan kirişlerin üstünde kiriş boyunca (`w0`..`w1`)."""
+    """Saçak duvarlarının üstünde, taşan verandada (`F`, K5b) yan kirişlerin üstünde; saçak ucundan ucuna (`v0`..`v1`), gerçek Portatifev
+    listelerindeki gibi (Lokman, 31 Ekim 2026 13:40 "gerçek listeye uy"; BK-19)."""
     F = F or cati.cerceve(g)
     w, h = G_["sacak_omegasi"]
-    v0, v1 = F.get("w0", 0.0), F.get("w1", F["boy"])
+    v0, v1 = F["v0"], F["v1"]
     ne = "kirişin" if "w0" in F else "duvarının"
     out = []
     for yuz, u0 in (("sol", 0.0), ("sag", F["aciklik"] - w)):
         out.append({"kural": "sacak_omegasi_yerlesimi", "parca": "sacak_omegasi", "boy_cm": _r(v1 - v0),
                     "geo": cati._prizma(F, _u(u0, u0 + w, g["duvar_h"], h, G_["sac"], ters=True), v0, v1),
-                    "bilgi": {"Yuz": yuz}, "aciklama": f"{yuz} saçak {ne} üstü, {v1 - v0:g} cm"})
+                    "bilgi": {"Yuz": yuz}, "aciklama": f"{yuz} saçak {ne} üstü, {v1 - v0:g} cm (saçak ucundan ucuna)"})
     return out
 
 
