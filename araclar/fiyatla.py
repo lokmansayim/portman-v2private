@@ -7,7 +7,8 @@ Liste: prefabrik Motor'un listesi (`motor/prefabrik_liste.py`, satırda `olcu`) 
 (`python -m motor.genel.uret` → `<kod>_yukleme.json`, satırda `boyut`); hat satırlardan anlaşılır. Anahtar defterdeki gibi
 "kalem | ölçü" (çelikte "kalem | boyut"). Önce birebir anahtar, yoksa (prefabrikte) pano eni bandı, o da yoksa boy kuralı (kesilen
 profilin ya da panelin tam boyunun fiyatından boyla orantılı; `boy_onerileri`; D-36'ten beri kutu profil ve tek kat çatı paneli
-onaylı). Birimi `kg` olan kalemde tutar satırın kg'ı × fiyat, öteki kalemlerde adet × fiyat.
+onaylı), o da yoksa makas kuralı (makasın kg'ı saçaktan saçağa boyuyla orantılı × kg fiyatı; `makas_kurali`; D-37). Birimi `kg` olan
+kalemde tutar satırın kg'ı × fiyat, öteki kalemlerde adet × fiyat.
 
 Fiyat uydurulmaz: defterde `onay: false` olan fiyat (yedek kaynaktan öneri) yalnız `--oneri` ile uygulanır ve "öneri" diye
 işaretlenir; fiyatı olmayan satır boş kalır, özette sayılır. Uygulanmayan önerinin birim fiyatı satırda `oneri_fiyat` olarak durur
@@ -82,6 +83,23 @@ def duzelt(L: dict, duzeltmeler: list[dict], hat: str) -> dict:
     return L
 
 
+def makas_bul(s: dict, kural: dict | None) -> tuple[dict, float, float] | None:
+    """Makas satırının (adı kuralın `kalem_baslar`'ından biriyle başlar) kg'ı ve birim fiyatı: (kural, fiyat, kg). Boy saçaktan saçağa:
+    "L <mm>" satırında L, "açıklık <mm>" satırında açıklık + 2 × `sacak_mm`. kg = `kg_m` × boy (kuruşa), fiyat = kg × `kg_fiyat`
+    (tam TL'ye yarım yukarı). D-37 (Lokman 31 Ekim): TK-03'ün gerçek listesinden makasın metresine 5,50 kg."""
+    if not kural:
+        return None
+    kalem, olcu = s.get("kalem") or "", (s.get("olcu") or "").strip()
+    if not any(kalem.startswith(b) for b in kural["kalem_baslar"]):
+        return None
+    m = re.fullmatch(r"(L|açıklık) (\d+(?:[.,]\d+)?)", olcu)
+    if not m:
+        return None
+    boy = float(m.group(2).replace(",", ".")) + (2 * kural["sacak_mm"] if m.group(1) == "açıklık" else 0)
+    kg = round(int(kural["kg_m"] * boy / 10 + 0.5) / 100, 2)
+    return kural, float(int(kg * kural["kg_fiyat"] + 0.5)), kg
+
+
 def fiyatla(L: dict, defter: dict, hat: str | None = None, oneri: bool = False) -> dict:
     """Her satıra fiyat, tutar ve kaynak; özet (toplam, grup toplamları, fiyatsız satırlar). Listeyi değiştirmez."""
     hat = hat or hat_bul(L)
@@ -112,6 +130,11 @@ def fiyatla(L: dict, defter: dict, hat: str | None = None, oneri: bool = False) 
                 fiyat, kaynak, durum = bo[1], bo[0]["kaynak"], ("onaylı boy" if bo[0]["onay"] else "öneri boy")
             else:
                 durum, oneri_fiyat = "öneri boy, onay bekliyor", bo[1]
+        elif hat == "prefabrik" and (mk := makas_bul(s, H.get("makas_kurali"))):
+            if mk[0]["onay"] or oneri:
+                fiyat, kaynak, durum = mk[1], mk[0]["kaynak"], ("onaylı makas kuralı" if mk[0]["onay"] else "öneri makas kuralı")
+            else:
+                durum, oneri_fiyat = "öneri makas kuralı, onay bekliyor", mk[1]
         else:
             durum = "defterde yok"
         miktar = s.get("kg") if birim == "kg" else s.get("adet")

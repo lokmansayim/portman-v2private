@@ -1,6 +1,6 @@
 {
  "sema": "portman.fiyat_defteri/1",
- "surum": "2026-10-31-r05",
+ "surum": "2026-10-31-r06",
  "aciklama": "Yükleme listesi × birim fiyat (İE-13, Z-10'un liste yöntemi). Anahtar Motor'un liste satırı: prefabrikte 'kalem | olcu' (motor/prefabrik_liste.py), çelikte 'kalem | boyut' (motor/genel yükleme listesi). Fiyat uydurulmaz: kaynağı olmayan kalemde fiyat boş kalır.",
  "para_birimi": "TL",
  "kdv": "kaynak listelerde yazmıyor",
@@ -805,46 +805,6 @@
      "durum": "eşleşti",
      "onay": true,
      "not": ""
-    },
-    "Makas (baş) · ana çatı | açıklık 8980": {
-     "fiyat": null,
-     "birim": "adet",
-     "kaynak": null,
-     "kaynak_satir": null,
-     "kaynak_kalem": "",
-     "durum": "kaynakta yok",
-     "onay": false,
-     "not": "87 m² listesinde: kaynakta makas kg ile (59/kg); TK-01 listesinde makas adetle, ağırlık yok; Haziran listesinde de makas kg ile (satır 188, 48/kg); Kaynaklar kg fiyatı veriyor (Ekim 59, Eyl 50, Haz 48 TL/kg); adet fiyatı için makas ağırlığı gerekir. Kıyas: 87 m² listede bütün makaslar 515 kg × 59 = 30.385 TL."
-    },
-    "Makas (orta) · ana çatı | açıklık 8980": {
-     "fiyat": null,
-     "birim": "adet",
-     "kaynak": null,
-     "kaynak_satir": null,
-     "kaynak_kalem": "",
-     "durum": "kaynakta yok",
-     "onay": false,
-     "not": "87 m² listesinde: kaynakta makas kg ile (59/kg); TK-01 listesinde makas adetle, ağırlık yok; Haziran listesinde de makas kg ile (satır 188, 48/kg); Kaynaklar kg fiyatı veriyor (Ekim 59, Eyl 50, Haz 48 TL/kg); adet fiyatı için makas ağırlığı gerekir. Kıyas: 87 m² listede bütün makaslar 515 kg × 59 = 30.385 TL."
-    },
-    "Yavru makas · ön veranda çatısı | L 4460": {
-     "fiyat": null,
-     "birim": "adet",
-     "kaynak": null,
-     "kaynak_satir": null,
-     "kaynak_kalem": "",
-     "durum": "kaynakta yok",
-     "onay": false,
-     "not": "87 m² listesinde: kaynakta makas kg ile (59/kg); TK-01 listesinde makas adetle, ağırlık yok; Haziran listesinde de makas kg ile (satır 188, 48/kg); Kaynaklar kg fiyatı veriyor (Ekim 59, Eyl 50, Haz 48 TL/kg); adet fiyatı için makas ağırlığı gerekir. Kıyas: 87 m² listede bütün makaslar 515 kg × 59 = 30.385 TL."
-    },
-    "Yavru makas · arka veranda çatısı | L 3210": {
-     "fiyat": null,
-     "birim": "adet",
-     "kaynak": null,
-     "kaynak_satir": null,
-     "kaynak_kalem": "",
-     "durum": "kaynakta yok",
-     "onay": false,
-     "not": "87 m² listesinde: kaynakta makas kg ile (59/kg); TK-01 listesinde makas adetle, ağırlık yok; Haziran listesinde de makas kg ile (satır 188, 48/kg); Kaynaklar kg fiyatı veriyor (Ekim 59, Eyl 50, Haz 48 TL/kg); adet fiyatı için makas ağırlığı gerekir. Kıyas: 87 m² listede bütün makaslar 515 kg × 59 = 30.385 TL."
     },
     "Aşık | L 4200": {
      "fiyat": 242,
@@ -1864,6 +1824,25 @@
      "dayanak": "Tek kat çatı paneli m² birim fiyatından, yani boyla orantılı (en 87 cm sabit), her çatı ve her boy (Lokman 31 Ekim 2026 15:26: \"Tek kat çatı paneli içinde aynısını yap m² birim fiyat üzerinden git\"; D-36). Haziran listesinde L 5450 1.650 TL; kuruşa yuvarlanır. Defterdeki 5100, 2400, 1750 bu yöntemle."
     }
    ],
+   "makas_kurali": {
+    "kalem_baslar": [
+     "Makas (baş) · ",
+     "Makas (orta) · ",
+     "Yavru makas · ",
+     "Cumba makası · "
+    ],
+    "kg_m": 5.5,
+    "kg_fiyat": 59,
+    "sacak_mm": 300,
+    "kaynak": "EKIM87",
+    "kaynak_satir": [
+     96
+    ],
+    "kaynak_kalem": "MAKAS | 80x45x08 | 514,72 kg | 59 TL/kg",
+    "onay": true,
+    "dayanak": "Makasın kg'ı makas boyuyla orantılı (Lokman 31 Ekim 2026 15:40: \"makas planı ve KG'mı olan projemiz var oradan 87 m² … boş kalan makas KG fiyatlarını çıkartabilir misin zaten oransal olarak aynı çıkıyor\"; D-37). 87 m² listesinde (TK-03) 12 makas 514,72 kg, makas boyları saçaktan saçağa 93,60 m (ana çatı 3 × (8733 + 2 × 300), sol cumba 5 × 7013, sağ cumba 4 × 7633; paftayla 1,5 cm içinde, İE-24): 5,50 kg makasın metresine; × 59 TL/kg (aynı satır). Boy: 'L <mm>' satırında L (saçaktan saçağa, Motor yazar), 'açıklık <mm>' satırında açıklık + 2 × saçak (30 cm; Motor'un prefabrik çatısı). kg kuruşa (iki basamak), fiyat tam TL'ye yarım yukarı. C profil 80 × 45 × 10 × 0,8: 1,11 kg/m (177 mm açılım; kurallar.json celik.profil_kg_m) → makasın metresine 4,95 m C profil.",
+    "not": "Alpha mini üretim dosyasında (0,8 mm, eğim ≈ %28) 5540 mm makas 21,19 m C profil = 4,25 kg/m, 2530 mm makas 7,00 m = 3,07 kg/m: kısa makas metresine daha hafif; tek oran kısa makasta biraz yukarıda kalır. Kubbe makası bu kurala girmez."
+   },
    "atla": []
   },
   "celik": {

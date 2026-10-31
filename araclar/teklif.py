@@ -50,6 +50,10 @@ def kaynak_durumu(s: dict, defter: dict, hat: str) -> tuple[str, dict | None]:
     if hat == "prefabrik" and (bo := F.boy_onerisi_bul(s, H.get("boy_onerileri") or [])):
         return "boy önerisi", {"fiyat": bo[1], "kaynak": bo[0]["kaynak"], "kaynak_satir": bo[0].get("kaynak_satir"),
                                "kaynak_kalem": bo[0].get("kaynak_kalem"), "onay": bo[0]["onay"], "not": bo[0].get("dayanak")}
+    if hat == "prefabrik" and (mk := F.makas_bul(s, H.get("makas_kurali"))):
+        return "makas kuralı", {"fiyat": mk[1], "kaynak": mk[0]["kaynak"], "kaynak_satir": mk[0].get("kaynak_satir"),
+                                "kaynak_kalem": mk[0].get("kaynak_kalem"), "onay": mk[0]["onay"],
+                                "not": f"{mk[2]:.2f} kg × {mk[0]['kg_fiyat']} TL/kg (makasın metresine {mk[0]['kg_m']} kg; D-37)"}
     return "defterde yok", None
 
 
@@ -109,10 +113,11 @@ def uyari(o: dict) -> str:
 
 def oneri_nedeni(f: dict, kayit: dict) -> str | None:
     """Fiyatı olmayan satırın Neden'i, onay bekleyen öneri varsa (sarı; toplama girmez): önerinin dayanağı defterdeki kaydın notu, boy
-    önerisinde yöntem, bantta bant."""
+    önerisinde ve makas kuralında yöntem, bantta bant."""
     if f.get("oneri_fiyat") is None:
         return None
     yol = (kayit.get("not") or "defterdeki öneri") if kayit else ("tam boyun fiyatından boyla orantılı" if f["durum"].startswith("öneri boy")
+                                                                  else "makasın kg'ı boyuyla orantılı × kg fiyatı" if f["durum"].startswith("öneri makas")
                                                                   else "pano eni bandı")
     return f"öneri birim fiyat {tl_yazi(f['oneri_fiyat'])} TL ({yol}); onay bekliyor, toplama girmedi"
 

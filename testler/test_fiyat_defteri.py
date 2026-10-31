@@ -58,6 +58,12 @@ def test_defter_bicimi(defter):
             assert ("kalem" in b) != ("kalem_baslar" in b) and b.get("yuvarlama", 1) > 0
             if b["onay"]:
                 assert defter["kaynaklar"][b["kaynak"]]["patron_verdi"] and "D-36" in b["dayanak"]
+        if (m := H.get("makas_kurali")) is not None:           # makas kuralı (D-37): kg makas boyuyla orantılı × kg fiyatı
+            assert m["kaynak"] in defter["kaynaklar"] and m["kg_m"] > 0 and m["kg_fiyat"] > 0 and m["sacak_mm"] >= 0
+            assert m["kalem_baslar"] and all(b.endswith(" · ") for b in m["kalem_baslar"]) and isinstance(m["onay"], bool)
+            if m["onay"]:
+                assert defter["kaynaklar"][m["kaynak"]]["patron_verdi"] and "D-37" in m["dayanak"]
+            assert not [k for k in H["kalemler"] if any(k.startswith(b) for b in m["kalem_baslar"])]   # kaydı olan anahtar kurala düşmez
 
 
 def test_defterde_kisisel_veri_yok():
@@ -187,6 +193,44 @@ def test_bant_onayi_ve_kayitli_anahtar(defter):
     assert (d["birim_fiyat"], d["durum"]) == (1050, "onaylı bant")
     b2 = F.fiyatla(L, D, oneri=True)["satirlar"][1]
     assert (b2["birim_fiyat"], b2["durum"]) == (2300, "öneri bant")
+
+
+@pytest.mark.parametrize("kalem,olcu,kg,fiyat", [
+    ("Makas (baş) · ana çatı", "açıklık 8985", 52.72, 3110.0),        # TK-01 r07 ve TK-02: 8985 + 2 × 300 = 9585 mm
+    ("Makas (orta) · ana çatı", "açıklık 8985", 52.72, 3110.0),
+    ("Makas (orta) · ana çatı", "açıklık 8980", 52.69, 3109.0),       # TK-01 İş Emri r05
+    ("Yavru makas · ön veranda çatısı", "L 4460", 24.53, 1447.0),     # L saçaktan saçağa, Motor yazar
+    ("Yavru makas · arka veranda çatısı", "L 3260", 17.93, 1058.0),
+    ("Yavru makas · arka veranda çatısı", "L 3210", 17.66, 1042.0),
+    ("Cumba makası · sol cumba", "L 7013", 38.57, 2276.0),            # TK-03'ün cumba makası (İE-24)
+    ("Makas (baş) · ana çatı", "açıklık 7392,5", 43.96, 2594.0),      # PK-02: virgüllü ölçü
+])
+def test_d37_makas_kurali(defter, kalem, olcu, kg, fiyat):
+    """D-37 (Lokman 31 Ekim 2026 15:40, kart 16:00 "TK-03 oranı, bütün makaslar"): makasın kg'ı saçaktan saçağa boyuyla orantılı, 87 m²
+    listesinin (TK-03) 12 makasından 5,50 kg/m × 59 TL/kg. Satır "onaylı makas kuralı"; teklifin kaynak sütunu da kuralı gösterir."""
+    kural = defter["hatlar"]["prefabrik"]["makas_kurali"]
+    _, f, k = F.makas_bul(_pre(kalem, olcu, 1, "1005"), kural)
+    assert (k, f) == (kg, fiyat)
+    s = F.fiyatla({"satirlar": [_pre(kalem, olcu, 2, "1005")]}, defter)["satirlar"][0]
+    assert (s["birim_fiyat"], s["tutar"], s["durum"], s["kaynak"]) == (fiyat, 2 * fiyat, "onaylı makas kuralı", "EKIM87"), s
+
+
+def test_d37_makas_kurali_tk03_ve_sinirlar(defter):
+    """Kural kaynağını geri verir: TK-03'ün 12 makası (ana 3 × açıklık 8733, cumba 5 × L 7013 ve 4 × L 7633) 514,76 kg ≈ listedeki
+    514,72. Kurala girmeyenler: kubbe makası, makas omegası/Z'si/betopanı, ölçüsü L ya da açıklık olmayan satır. Onaysız kural yalnız --oneri ile."""
+    kural = defter["hatlar"]["prefabrik"]["makas_kurali"]
+    kg = sum(n * F.makas_bul(_pre(k, o, 1), kural)[2] for k, o, n in [("Makas (baş) · ana çatı", "açıklık 8733", 3),
+             ("Cumba makası · sol cumba", "L 7013", 5), ("Cumba makası · sağ cumba", "L 7633", 4)])
+    assert round(kg, 2) == 514.76 and abs(kg - 514.72) < 0.1
+    for k, o in [("Kubbe makası", "80 × 0,8"), ("Baş makas omegası", "L 2500"), ("Baş makas Z'si", "L 2800"),
+                 ("Baş makas betopanı", "1250 × 2500"), ("Makas (baş) · ana çatı", "adet")]:
+        assert F.makas_bul(_pre(k, o, 1), kural) is None, (k, o)
+    d = copy.deepcopy(defter)
+    d["hatlar"]["prefabrik"]["makas_kurali"]["onay"] = False
+    s = F.fiyatla({"satirlar": [_pre("Yavru makas · ön veranda çatısı", "L 4460", 3, "1005")]}, d)["satirlar"][0]
+    assert (s["birim_fiyat"], s["oneri_fiyat"], s["durum"]) == (None, 1447.0, "öneri makas kuralı, onay bekliyor")
+    s = F.fiyatla({"satirlar": [_pre("Yavru makas · ön veranda çatısı", "L 4460", 3, "1005")]}, d, oneri=True)["satirlar"][0]
+    assert (s["birim_fiyat"], s["durum"]) == (1447.0, "öneri makas kuralı")
 
 
 def test_miktari_olmayan_fiyatli_satir(defter):
