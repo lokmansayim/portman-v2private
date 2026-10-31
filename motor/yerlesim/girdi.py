@@ -115,11 +115,13 @@ def kur(ie: dict, plan: dict, makaslar: list[dict]) -> dict:
         uyarilar.append({"katman": "tavan omegası", "metin": f"İş Emri'nde {len(acik_ie)} açık mahal, bugünkü IFC'nin planında {len(acik)}; "
                                                              f"{', '.join(kalan)} için omega kurulmadı"})
     koseler = [x for x in plan.get("baglantilar", []) if x["tur"] == "baglanti" and "iç köşe" in kucuk(x["kalem"])]
+    tur = {m.get("ad"): m.get("tur") for m in ie.get("mahaller", [])}
     return {
         "W": W, "H": H, "duvar_h": b["duvar_h"],
         "cati": {"tip": c["tip"], "egim": c["egim"], "sacak": c["sacak"], "topuk": c["topuk"], "makas_ekseni": c.get("makas_ekseni", "x")},
         "duvarlar": _duvarlar(P, koseler),
-        "odalar": [{"ad": o["ad"], "poligon": o["poligon"]} for o in plan["odalar"]],
+        # K5b-2: odanın türü İş Emri'nden (tavan alçıpanının rengi; liste üreteciyle aynı okuma, `islak_hacim`)
+        "odalar": [{"ad": o["ad"], "poligon": o["poligon"], "tur": tur.get(o["ad"])} for o in plan["odalar"]],
         "acik": [{"ad": v["ad"], "poligon": v["poligon"]} for v in acik],
         "engeller": [x["rect"] for x in plan.get("baglantilar", []) if x["tur"] in ("veranda_profil", "dikme")],
         # K5b: gövdeden taşan verandalar (BK-14) ve kirişleri; veranda çatısının çerçevesi `veranda.py`'de
