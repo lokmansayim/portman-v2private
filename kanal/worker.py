@@ -1169,7 +1169,8 @@ def llm_once_revizyon(k, talep, gelen: dict, etk, cikarim: dict | None, settings
     if not yeni_mi and mod == "acik":
         lo = onceki("degisiklik")
         if lo is None:
-            lo = {**degisiklik_oku(son_y, metin, katalog, lo_ayar, germe=bool((settings.get("banka_germe") or {}).get("acik"))), "_temel": temel}
+            germe = {"germe": True} if (settings.get("banka_germe") or {}).get("acik") else {}   # kapalıyken çağrı bugünküyle aynı
+            lo = {**degisiklik_oku(son_y, metin, katalog, lo_ayar, **germe), "_temel": temel}
             if ek_kaydet is not None:
                 ek_kaydet("degisiklik", lo)
         return None, lo

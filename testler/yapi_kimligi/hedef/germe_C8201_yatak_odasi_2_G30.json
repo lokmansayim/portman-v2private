@@ -16,6 +16,18 @@
    "P"
   ],
   "kayma_cm": -30,
+  "kayan_acikliklar": [
+   {
+    "ad": "K10",
+    "tur": "kapı",
+    "mahaller": [
+     "Hol",
+     "Yatak Odası 1"
+    ],
+    "cm": 30,
+    "yon": "G"
+   }
+  ],
   "mahal": "Yatak Odası 2",
   "yon": "G",
   "cm": 30,
@@ -45,7 +57,7 @@
    63.82
   ]
  },
- "anlatim": "Yatak Odası 2 öne 30 cm büyütüldü; Yatak Odası 2 11,92 → 12,91 m²; Yatak Odası 1 11,92 → 10,92 m²",
+ "anlatim": "Yatak Odası 2 öne 30 cm büyütüldü; Yatak Odası 2 11,92 → 12,91 m²; Yatak Odası 1 11,92 → 10,92 m²; Hol ile Yatak Odası 1 arasındaki kapı 30 cm öne kaydı",
  "sonuc": {
   "tanim_sha256": "2328bb8aaa519892d8d768526f42df5b8c1a6347c058f66b47d7d4a1e5b332df",
   "duvarlar": {

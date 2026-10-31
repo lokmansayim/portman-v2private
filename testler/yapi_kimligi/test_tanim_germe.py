@@ -103,6 +103,9 @@ def test_c8201_yatak_odasi_2_one_30_duvar_kayar_kapi_birlikte():
     assert r["dis_olcu"][0] == r["dis_olcu"][1] and r["kapali_m2"][0] == r["kapali_m2"][1]
     assert r["degisen"] == {"Yatak Odası 2": [11.92, 12.91], "Yatak Odası 1": [11.92, 10.92]}
     assert TG.kisa_anlatim(r) == "Yatak Odası 2 öne 30 cm büyütüldü"
+    # kayan kapı bayiye yazılır (K21; geometri hakemi 31.10 bulgu 5)
+    assert r["kayan_acikliklar"] == [{"ad": "K10", "tur": "kapı", "mahaller": ["Hol", "Yatak Odası 1"], "cm": 30, "yon": "G"}]
+    assert TG.anlatim(r).endswith("; Hol ile Yatak Odası 1 arasındaki kapı 30 cm öne kaydı")
 
 
 @pytest.mark.parametrize("yol,mahal,yon,cm,buyut,gerekce", [
@@ -119,6 +122,10 @@ def test_c8201_yatak_odasi_2_one_30_duvar_kayar_kapi_birlikte():
     ("modeller/banka/KT04/tanim.json", "Salon - Mutfak", "D", 50, True, "küçük çatıyı (cumba ya da çıkma çatısı)"),
     ("modeller/C8201.json", "Yatak Odası 1", "K", 301, True, "5–300 cm arasında tam sayı"),
     ("modeller/C8201.json", "Mutfak", "K", 30, True, "planda Mutfak adlı oda yok"),
+    # geometri hakemi 31.10: 15 cm parça (D-10; B ve R duvar eksenleri 10 cm arayla) ve karkas kuralında kurulamayan liste (KT-02 kiris_15)
+    ("modeller/C8201.json", "Hol", "D", 30, True, "duvarlar arasında 10 cm'lik bir kırık çıkıyor (çelikte 15 cm ve daha kısa parça yapılmaz)"),
+    ("modeller/KT02.json", "Yatak Odası 1", "K", 50, True, "bu modelin çelik listesi değişen ölçülere otomatik uyarlanamıyor"),
+    ("modeller/KT02.json", "Banyo", "G", 20, True, "bu modelin çelik listesi değişen ölçülere otomatik uyarlanamıyor"),
 ])
 def test_olumsuz_ornekler_gerekceli(yol, mahal, yon, cm, buyut, gerekce):
     t = _tanim(yol)
@@ -126,6 +133,17 @@ def test_olumsuz_ornekler_gerekceli(yol, mahal, yon, cm, buyut, gerekce):
         TG.oda_degistir(t, mahal, yon, cm, buyut, set_yolu=SET)
     assert gerekce in str(e.value), str(e.value)
     assert "İE-" not in str(e.value) and "duzey" not in str(e.value)                            # bayinin okuyacağı dil
+
+
+def test_ayni_duvarda_aciklik_ortusmesi_gecmez():
+    """Geometri hakemi 31.10 (bulgu 4): kayan açıklık aynı duvardaki öteki açıklığın üstüne binerse hakem geçirmez. Banka modellerinde
+    bugün çıkmıyor; Ç8201'in sol dış duvarına iki pencere eklenerek kurulur (140–240, 250–350; yatak odası 1'in yanındaki kayar)."""
+    t = _tanim("modeller/C8201.json")
+    t["acikliklar"] += [{"ad": "PX1", "tur": "pencere", "duvar": "DL", "bas": 140, "en": 100, "yuk": 120, "alt": 90, "mahal": "Yatak Odası 1"},
+                        {"ad": "PX2", "tur": "pencere", "duvar": "DL", "bas": 250, "en": 100, "yuk": 120, "alt": 90, "mahal": "Yatak Odası 1"}]
+    with pytest.raises(TG.GermeHatasi) as e:
+        TG.oda_degistir(t, "Yatak Odası 2", "G", 30, set_yolu=SET)
+    assert str(e.value) == "Yatak Odası 1 penceresi ile Yatak Odası 1 penceresi aynı duvarda üst üste biniyor"
 
 
 def test_belirlenimci_ve_varyant_ayni_tanim():
@@ -147,6 +165,13 @@ def test_kucultme_buyutmenin_tersi():
     assert [d["kutu"] for d in t3["duvarlar"]] == [d["kutu"] for d in t["duvarlar"]]
     assert [a["bas"] for a in t3["acikliklar"]] == [a["bas"] for a in t["acikliklar"]]
     assert [dz["plan"] for dz in t3["cati"]["duzlemler"]] == [dz["plan"] for dz in t["cati"]["duzlemler"]]
+    # makaslar: aralık tanımdaki en büyük aralığı aşmaz, en küçüğünden dar kalmaz (adet en az olmayabilir: 7 yerine 8; İE-23 › Sınırlar)
+    for ad, aile in t["cati"]["makaslar"].items():
+        if not isinstance(aile, dict) or not isinstance(aile.get("y"), list):
+            continue
+        a0, a3 = sorted(aile["y"]), sorted(t3["cati"]["makaslar"][ad]["y"])
+        g0, g3 = [b - a for a, b in zip(a0, a0[1:])], [b - a for a, b in zip(a3, a3[1:])]
+        assert (a3[0], a3[-1]) == (a0[0], a0[-1]) and max(g3) <= max(g0) + 0.01 and min(g3) >= min(g0) - 0.5, (ad, a0, a3)
 
 
 # ── okuma (germeli) ─────────────────────────────────────────────────────────────────────────────────────────────────────

@@ -56,10 +56,25 @@ def test_mutfak_saga_20_r02_fark_ve_taslak_notu(depo, wa, hizli_genel, tmp_path)
     assert [(d["op"], d["mahal"], d["yon"], d["cm"]) for d in y["degisiklikler"]] == [("oda_buyut", "Mutfak", "D", 20)]
     assert y["uygulanan"] == ["Mutfak sağa 20 cm büyütüldü"]
     govde = _son_govde(depo)
-    assert "Mutfak 10,05 → 10,82 m²; Yatak Odası 1 12,74 → 11,97 m²" in govde, govde
+    assert "Mutfak 10,05 → 10,82 m²; Yatak Odası 1 12,74 → 11,97 m²; Hol ile Yatak Odası 1 arasındaki kapı 20 cm sağa kaydı" in govde, govde
     assert "plan taslaktır; mühendis kontrolünde kesinleşir" in govde
     c = sorgu(depo, "SELECT cikarim FROM isler ORDER BY id DESC")[0]["cikarim"]
     assert c["degisiklik"]["durum"] == "tamam" and c["degisiklik"]["germe"] is True
+
+
+def test_ayni_mesajda_iki_oda_istegi_ikisi_de_uygulanir(depo, wa, hizli_genel, tmp_path):
+    """Geometri hakemi 31.10 (bulgu 2): tekilleştirme anahtarı oda ve yönü de içerir; ikinci oda isteği sessiz düşmez (K21)."""
+    _r01(depo)
+    ayar = _ayar(tmp_path, {"islemler": [_islem(tur="oda_buyut", mahal="Mutfak", yon="D", cm=20, alinti="mutfağı sağa 20"),
+                                         _islem(tur="oda_buyut", mahal="Banyo", yon="K", cm=50, alinti="banyoyu arkaya 50")]})
+    assert depo.mesaj_kaydet(mesaj("mutfağı sağa 20, banyoyu arkaya 50 cm büyütelim", talep("revizyon", ozet="mutfak ve banyo"), bayi=BAYI_KART))
+    [r] = isle_hepsi(depo, ayar)
+    assert r["eylem"] == "is_emri", r
+    y = son_rev(depo)["is_emri"]["yapi"]
+    assert [(d["mahal"], d["yon"], d["cm"]) for d in y["degisiklikler"]] == [("Mutfak", "D", 20), ("Banyo", "K", 50)]
+    assert y["uygulanan"] == ["Mutfak sağa 20 cm büyütüldü", "Banyo arkaya 50 cm büyütüldü"]
+    govde = _son_govde(depo)
+    assert "Mutfak 10,05 → 10,82 m²" in govde and "Banyo 4,68 → 5,91 m²; Yatak Odası 1 11,97 → 10,69 m²" in govde, govde
 
 
 def test_cizim_tanimi_ayni_germe(depo, wa, hizli_genel, tmp_path):

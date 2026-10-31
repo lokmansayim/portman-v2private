@@ -95,7 +95,8 @@ def tablo_metni(pencereler: list[dict], cati_secenekleri: list[dict], dis140: bo
 def oda_tablosu(odalar: list[dict]) -> list[str]:
     """İE-23 PR-2a: yapı kimliğinin mahalleri (`anlamsal.mahaller`): ad, işlev, net ölçü (en × derinlik), dış cepheler, verandaya bakan
     yanlar. Koordinat ve model kodu yok; kararı kod verir (kilitli kenar tabloda yazmaz)."""
-    satir = ["Odalar (ön: giriş cephesi; sol ve sağ, plana önden bakınca; ölçü net en × derinlik):"]
+    satir = ["Odalar (yönler bayinin planındaki gibi: ön planda ÖN yazan alt kenar, arka üst kenar, sol ve sağ plana önden bakınca; "
+             "ölçü net en × derinlik):"]
     for m in odalar:
         islev = ", ".join(str(i).replace("_", " ") for i in m.get("islev") or []) or m.get("sinif") or ""
         en, der = (m.get("olcu_cm") or [0, 0])[:2]
