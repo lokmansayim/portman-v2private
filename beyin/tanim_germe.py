@@ -237,13 +237,13 @@ def _kayma(t: dict, y: dict, kimlik: dict, mahal: str, yon: str, kenarlar: list[
                 continue
             ayni_hiza = abs(o[i] - m[i]) < TOL and abs(o[i + 2] - m[i + 2]) < TOL
             if ayni_hiza and (abs(o[j] - m[j + 2]) < TOL or abs(o[j + 2] - m[j]) < TOL):
-                raise GermeHatasi(f"duvar aynı hizada başka bir duvarla ({d['ad']}) devam ediyor; yalnız bir parçası kaydırılamaz")
+                raise GermeHatasi("duvar aynı hizada başka bir duvarla devam ediyor; yalnız bir parçası kaydırılamaz")
         for kr in t.get("kirisler") or []:                     # kayan duvarın hizasında kiriş (açıklığın kirişi duvarla birlikte durur)
             k = kr["kutu"]
             if (k[i + 2] - k[i]) > (k[j + 2] - k[j]):
                 continue                                       # dik kiriş: ucu aşağıda duvarla birlikte kayar
             if min(k[i + 2], m[i + 2]) - max(k[i], m[i]) > TOL and min(k[j + 2], m[j + 2]) - max(k[j], m[j]) > -TOL:
-                raise GermeHatasi(f"duvarın hizasında kiriş var ({kr['ad']}); duvar kayarsa kiriş de değişirdi")
+                raise GermeHatasi("duvarın hizasında kiriş var; duvar kayarsa kiriş de değişirdi")
     t2 = copy.deepcopy(t)
     adli = {d["ad"]: d for d in t2["duvarlar"]}
     for ad in tasinan:
@@ -415,7 +415,8 @@ def _kilit_nedeni(e: dict, mahal: str, yon: str) -> str:
         return f"{YON_SOZU[yon]} büyümek ana çatının genişliğini ve mahya yüksekliğini değiştirir; bu otomatik yapılmıyor"
     m = re.match(r"karşıdaki (.+?) bu kenarın ötesinde (.+?) yanında devam ediyor", n)
     if m:
-        return f"duvarın öbür yanındaki {m.group(1)} aynı hizada {m.group(2)} yanında da devam ediyor; duvar kayarsa o da değişirdi"
+        oteki = ", ".join({"dis": "dış cephe"}.get(x, x) for x in m.group(2).split(", "))       # iç kod bayiye gitmez
+        return f"duvarın öbür yanındaki {m.group(1)} aynı hizada {oteki} yanında da devam ediyor; duvar kayarsa o da değişirdi"
     if n.startswith("kenarın arkasında birden çok"):
         return f"odanın {YAN_SOZU[yon]} yanında hem dış duvar hem başka oda var"
     if n.startswith("kenarın arkası yok"):
