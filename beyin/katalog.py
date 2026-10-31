@@ -31,10 +31,13 @@ class Katalog:
     Aday kaydı (veri/adaylar.json): [{"kod", "durum": test|kosullu|gecerli, "sablon": "adaylar/<kod>.json", "referans_model",
     "oda_programi", "katalog_m2", "kapali_m2", "veranda_m2", "ozet": {...}, "kaynak": {...}, "gorsel": "adaylar/<kod>.png"}].
     Görünürlük: 'test' yalnız test_adaylari=True iken (yerel); 'gecerli' ancak kabul_edilmis verilmişse o kümede olanlar
-    (kalıcı mod: mühendis kabulü kayıtlı olanlar, K-A10), verilmemişse hepsi; 'kosullu' hiçbir zaman sunulmaz."""
+    (kalıcı mod: mühendis kabulü kayıtlı olanlar, K-A10), verilmemişse hepsi; 'kosullu' hiçbir zaman sunulmaz.
+    İE-09 (D-20): atölyede kabul edilen modeller (`beyin/banka.py`, `modeller/banka/`) adaylar.json'un ardından okunur; çekirdek bankayla
+    çakışan kod alınmaz. Atölye modeli yalnız kabul kümesinde açıkça varsa görünür (küme verilmediyse görünmez); çatı varyantı ayrı
+    model olarak hiç sunulmaz."""
 
     def __init__(self, path: Path = KATALOG_JSON, adaylar_path: Path = ADAYLAR_JSON, test_adaylari: bool = False,
-                 kabul_edilmis: set | None = None):
+                 kabul_edilmis: set | None = None, banka: bool = True):
         self.modeller = {m["code"].upper(): m for m in json.loads(path.read_text(encoding="utf-8"))}
         self.test_adaylari = bool(test_adaylari)
         self.kabul_edilmis = set(kabul_edilmis) if kabul_edilmis is not None else None
@@ -42,8 +45,15 @@ class Katalog:
         if self.test_adaylari and ADAYLAR_TEST_JSON.exists():          # test verisi ayrı dosyada; canlı pakette yüklenmez
             ham = list(ham) + [dict(a, durum="test") for a in json.loads(ADAYLAR_TEST_JSON.read_text(encoding="utf-8"))]
         self.adaylar = {str(a["kod"]).upper(): a for a in ham if isinstance(a, dict) and a.get("kod")}
+        if banka:
+            from beyin import banka as B
+            for a in B.kayitlar():
+                self.adaylar.setdefault(str(a["kod"]).upper(), a)
 
     def aday_gorunur(self, a: dict) -> bool:
+        if a.get("banka"):
+            return (not a.get("taban_model") and a.get("durum") == "gecerli" and self.kabul_edilmis is not None
+                    and str(a["kod"]).upper() in self.kabul_edilmis)
         d = a.get("durum")
         if d == "test":
             return self.test_adaylari
