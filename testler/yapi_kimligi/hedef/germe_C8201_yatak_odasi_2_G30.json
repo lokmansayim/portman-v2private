@@ -26,6 +26,16 @@
     ],
     "cm": 30,
     "yon": "G"
+   },
+   {
+    "ad": "K11",
+    "tur": "kapı",
+    "mahaller": [
+     "Hol",
+     "Yatak Odası 2"
+    ],
+    "cm": 30,
+    "yon": "G"
    }
   ],
   "mahal": "Yatak Odası 2",
@@ -57,9 +67,9 @@
    63.82
   ]
  },
- "anlatim": "Yatak Odası 2 öne 30 cm büyütüldü; Yatak Odası 2 11,92 → 12,91 m²; Yatak Odası 1 11,92 → 10,92 m²; Hol ile Yatak Odası 1 arasındaki kapı 30 cm öne kaydı",
+ "anlatim": "Yatak Odası 2 öne 30 cm büyütüldü; Yatak Odası 2 11,92 → 12,91 m²; Yatak Odası 1 11,92 → 10,92 m²; Hol ile Yatak Odası 1 arasındaki kapı 30 cm öne kaydı; Hol ile Yatak Odası 2 arasındaki kapı 30 cm öne kaydı",
  "sonuc": {
-  "tanim_sha256": "2328bb8aaa519892d8d768526f42df5b8c1a6347c058f66b47d7d4a1e5b332df",
+  "tanim_sha256": "c7d3407215eb418ca6c4e7d96632569a08aa944bedfac9381c99a73646006b0e",
   "duvarlar": {
    "P": [
     [
@@ -80,6 +90,10 @@
    "K10": [
     269.5,
     239.5
+   ],
+   "K11": [
+    390.5,
+    360.5
    ]
   },
   "mahal_noktalari": {},
@@ -89,9 +103,7 @@
   "kalkanlar": []
  },
  "onay": {
-  "durum": "onaylı",
-  "tarih": "2026-10-31",
-  "dayanak": "Lokman, 31 Ekim 2026 19:25 UTC, İE-23 thread'i: \"evet onaylıyorum güzel olmuş\" (önce–sonra görselleri PF Yapi_Kimligi/PR-2a/)",
-  "not": "Yeniden dondurma yalnız Lokman'ın onayı ve gerekçeli kararla (D-02)"
+  "durum": "aday",
+  "not": "İlk onay Lokman, 31 Ekim 2026 19:25 UTC. Lokman'ın 19:40 UTC düzeltmesiyle yeniden yazıldı (\"Ç8201 de iç tarafta yaptığın büyütmede kapıyıda kaydırman lazımdı YATAK ODASI 2'nin\"): yatak odası 2'nin kapısı (K11) da duvarla 30 cm öne kayar. Yeni görselin onayı bekleniyor"
  }
 }

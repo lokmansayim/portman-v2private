@@ -40,6 +40,9 @@ YAN_SOZU = {"G": "ön", "K": "arka", "B": "sol", "D": "sağ"}
 CM_ARALIK = (5, 300)                                       # `plan_islem.Islem.cm` ile aynı
 KISA_PARCA_CM = 15                                         # D-10: çelikte 15 cm (ve daha kısa) parça çıkmaz
 AYAK_CM = 10                                               # açıklık kenarı birleşen duvarın karkas yüzünden (`plan_derle` PAY_KOSE, PAY_BIRLESIM)
+KOSE_CM = 50                                               # köşeye bağlı açıklık: kayan duvarın yüzüne bu kadar yakın kenarlı açıklık duvarla
+                                                           # birlikte kayar (Lokman 31.10: büyüyen odanın kapısı da kayar). Banka modellerinde köşe
+                                                           # açıklıkları 5–44 cm, ortadakiler 60 cm'den başlar
 TOL = 0.01
 KESIT_DUVAR_SINIFLARI = ("dis", "ic", "ek")               # kesit yalnız bu sınıftaki duvarları uzatır (kolon, baca, korkuluk değil)
 ISLEV_KURAL_SIRA = ("salon", "yatak_odasi", "mutfak", "banyo", "hol", "depo")   # karma mahalde kural (salonla birlikte mutfak: salon kuralı)
@@ -235,6 +238,20 @@ def _germe(t: dict, y: dict, kimlik: dict, mahal: str, yon: str, kenarlar: list[
 
 
 # ── iç kenar: duvar kayar ────────────────────────────────────────────────────────────────────────────────────────────────
+def _ayak_obur(t: dict, ac: dict, w: list, i: int, j: int, haric: set[str]) -> float:
+    """Açıklığın, bulunduğu duvara (kutusu `w`, `i` ekseni boyunca uzanır) değen öteki duvarların (`haric` dışındakiler) karkas yüzüne en
+    yakın uzaklığı (cm, iki yanda da). `_ayaklar` ile aynı ölçü."""
+    a0, a1 = float(ac["bas"]), float(ac["bas"]) + float(ac["en"])
+    en_az = math.inf
+    for d in t["duvarlar"]:
+        q = d["kutu"]
+        if d["ad"] == ac["duvar"] or d["ad"] in haric or d.get("sinif") not in KESIT_DUVAR_SINIFLARI or q[j + 2] < w[j] - TOL or q[j] > w[j + 2] + TOL:
+            continue
+        g = a0 - q[i + 2] if q[i + 2] <= a0 + TOL else q[i] - a1 if q[i] >= a1 - TOL else 0.0
+        en_az = min(en_az, max(g, 0.0))
+    return en_az
+
+
 def _kayma(t: dict, y: dict, kimlik: dict, mahal: str, yon: str, kenarlar: list[dict], cm: int, buyut: bool) -> tuple[dict, dict]:
     eksen, s = YK.YON_EKSEN[yon], ISARET[yon]
     delta = s * cm * (1 if buyut else -1)
@@ -288,7 +305,11 @@ def _kayma(t: dict, y: dict, kimlik: dict, mahal: str, yon: str, kenarlar: list[
                 if m[i] - TOL <= k0[u] <= m[i + 2] + TOL:
                     kr["kutu"][u] = _sayi(k0[u] + delta, k0[u])
             kr["acik"] = [[_sayi(v + delta, v) if m[i] - TOL <= v <= m[i + 2] + TOL else v for v in a] for a in kr.get("acik") or []]
-    # kayan duvarın yolundaki açıklıklar (dik duvarda, küçülen yanda): duvarla birlikte kayar, köşeye uzaklık korunur; bayiye yazılır
+    # dik duvardaki açıklıklar duvarla birlikte kayar, köşeye uzaklıkları korunur; bayiye yazılır:
+    # - yolundakiler (küçülen yanda, duvarın süpürdüğü şeritte);
+    # - köşeye bağlı olanlar (iki yanda da: kenarı kayan duvarın yüzüne KOSE_CM'den yakın ve en yakın duvar o; Lokman 31.10: Ç8201'de
+    #   yatak odası 2 öne büyüyünce kendi kapısı da kayar). Öbür ucundaki duvara daha yakın açıklık o köşeye bağlıdır, yerinde kalır;
+    #   kayınca kendi duvarının dışına taşacak köşe açıklığı da yerinde kalır (yolundakinin taşması hakemde gerekçe olur)
     kayan = []
     for ac in t2.get("acikliklar") or []:
         if y["adli"][ac["duvar"]]["yon"] != eksen or ac["duvar"] in tasinan:
@@ -301,7 +322,12 @@ def _kayma(t: dict, y: dict, kimlik: dict, mahal: str, yon: str, kenarlar: list[
             a0, a1 = ac["bas"], ac["bas"] + ac["en"]
             yolda = (delta > 0 and a0 >= m[i + 2] - TOL and a0 < m[i + 2] + delta + YK.KESIT_PAYI) or \
                     (delta < 0 and a1 <= m[i] + TOL and a1 > m[i] + delta - YK.KESIT_PAYI)
-            if yolda:
+            ayak = a0 - m[i + 2] if a0 >= m[i + 2] - TOL else m[i] - a1 if a1 <= m[i] + TOL else math.inf
+            koseye_bagli = ayak <= KOSE_CM + TOL and ayak <= _ayak_obur(t, ac, w, i, j, set(tasinan)) + TOL
+            if koseye_bagli and not yolda:                     # köşe kuralı açıklığı kendi duvarının dışına taşıyorsa açıklık yerinde kalır
+                k2 = adli[ac["duvar"]]["kutu"]
+                koseye_bagli = k2[i] - TOL <= a0 + delta and a1 + delta <= k2[i + 2] + TOL
+            if yolda or koseye_bagli:
                 ac["bas"] = _sayi(ac["bas"] + delta, ac["bas"])
                 kayan.append(ac["ad"])
                 break

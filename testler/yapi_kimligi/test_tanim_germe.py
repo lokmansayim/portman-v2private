@@ -99,13 +99,30 @@ def test_c8201_yatak_odasi_2_one_30_duvar_kayar_kapi_birlikte():
     assert p["kutu"] == [9.25, 341, 343.5, 349]
     k10 = next(a for a in t2["acikliklar"] if a["ad"] == "K10")
     assert k10["bas"] == 239.5                                                                    # yolundaki kapı duvarla kaydı
-    assert next(a for a in t2["acikliklar"] if a["ad"] == "K11")["bas"] == 390.5                 # büyüyen yandaki kapı yerinde
+    # büyüyen yandaki köşeye bağlı kapı da duvarla kayar, köşeye 11,5 cm uzaklığı korunur (Lokman 31.10 19:40: "kapıyı da kaydırman lazımdı")
+    assert next(a for a in t2["acikliklar"] if a["ad"] == "K11")["bas"] == 360.5
     assert r["dis_olcu"][0] == r["dis_olcu"][1] and r["kapali_m2"][0] == r["kapali_m2"][1]
     assert r["degisen"] == {"Yatak Odası 2": [11.92, 12.91], "Yatak Odası 1": [11.92, 10.92]}
     assert TG.kisa_anlatim(r) == "Yatak Odası 2 öne 30 cm büyütüldü"
     # kayan kapı bayiye yazılır (K21; geometri hakemi 31.10 bulgu 5)
-    assert r["kayan_acikliklar"] == [{"ad": "K10", "tur": "kapı", "mahaller": ["Hol", "Yatak Odası 1"], "cm": 30, "yon": "G"}]
-    assert TG.anlatim(r).endswith("; Hol ile Yatak Odası 1 arasındaki kapı 30 cm öne kaydı")
+    assert r["kayan_acikliklar"] == [{"ad": "K10", "tur": "kapı", "mahaller": ["Hol", "Yatak Odası 1"], "cm": 30, "yon": "G"},
+                                     {"ad": "K11", "tur": "kapı", "mahaller": ["Hol", "Yatak Odası 2"], "cm": 30, "yon": "G"}]
+    assert TG.anlatim(r).endswith("; Hol ile Yatak Odası 1 arasındaki kapı 30 cm öne kaydı; Hol ile Yatak Odası 2 arasındaki kapı 30 cm öne kaydı")
+
+
+def test_kose_kurali_buyuyen_ve_kuculen_yanda_aciklik_duvarla_kayar():
+    """Lokman 31.10 19:40 ("kapıyıda kaydırman lazımdı"): iç duvar kayınca köşesine bağlı açıklık (kenarı duvar yüzüne 50 cm'den yakın,
+    en yakın duvar o) iki yanda da duvarla kayar, köşeye uzaklığı korunur. KT-01 yatak odası 2 soldan 30 küçülür: büyüyen banyonun
+    penceresi ve kapısı duvarla sağa kayar; köşeye uzak açıklıklar yerinde."""
+    t = _tanim("modeller/KT01.json")
+    t2, r = TG.oda_degistir(t, "Yatak Odası 2", "B", 30, False, set_yolu=SET)
+    assert [a["ad"] for a in r["kayan_acikliklar"]] == ["P5", "K5"]
+    assert TG.anlatim(r).endswith("; Banyo penceresi 30 cm sağa kaydı; Banyo ile Salon - Mutfak arasındaki kapı 30 cm sağa kaydı")
+    once = {a["ad"]: a["bas"] for a in t["acikliklar"]}
+    for a in t2["acikliklar"]:
+        assert a["bas"] == (once[a["ad"]] + 30 if a["ad"] in ("P5", "K5") else once[a["ad"]]), a["ad"]
+    ay0, ay1 = TG._ayaklar(t), TG._ayaklar(t2)
+    assert ay1["P5"] == ay0["P5"] and ay1["K5"] == ay0["K5"]                                      # köşeye uzaklık korunur
 
 
 @pytest.mark.parametrize("yol,mahal,yon,cm,buyut,gerekce", [
@@ -132,6 +149,8 @@ def test_c8201_yatak_odasi_2_one_30_duvar_kayar_kapi_birlikte():
     # geometri hakemi üçüncü tur: küçültme gerekçesi isteği doğru anar
     ("modeller/KT01.json", "Salon - Mutfak", "D", 50, False, "sağdan küçülmek ana çatının genişliğini ve mahya yüksekliğini değiştirir"),
     ("modeller/banka/KT04/tanim.json", "Salon - Mutfak", "D", 50, False, "sağdan küçülmek yandaki küçük çatıyı"),
+    # köşe kuralı (Lokman 31.10): kayınca kendi duvarının dışına taşacak köşe kapısı (Çocuk Odası K4) yerinde kalır; gerekçe oda kuralı
+    ("modeller/KT03.json", "Yatak Odası", "D", 50, False, "Yatak Odası 10,30 m²'ye iner (yatak odası için en az 10,5 m²)"),
 ])
 def test_olumsuz_ornekler_gerekceli(yol, mahal, yon, cm, buyut, gerekce):
     t = _tanim(yol)
