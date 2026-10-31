@@ -831,7 +831,12 @@ def anlatim(rapor: dict) -> str:
         if obur:
             ev += f" ({'uzayan' if buyut else 'kısalan'} öteki odalar: {', '.join(obur)})"
         k0, k1 = rapor["kapali_m2"]
-        return f"{ev}; kapalı alan {_tr(k0)} → {_tr(k1)} m²"
+        ek = ""
+        if rapor.get("ikincil_cati"):                          # düzey 2 (PR-2b): düzlem adı değil, sabit sözcük (bayiye iç ad gitmez)
+            tur = [w for w in ("cumba", "çıkma") if any(w in ad for ad in rapor["ikincil_cati"])]
+            ek = f"; {' ve '.join(tur) if tur else 'küçük çatı'} {'ortadan ' if isinstance(rapor.get('kesit_cm'), list) else ''}" \
+                 f"{'genişledi' if buyut else 'daraldı'}, {'çatıları' if len(tur) > 1 else 'çatısı'} yeni ölçüye göre kuruldu"
+        return f"{ev}; kapalı alan {_tr(k0)} → {_tr(k1)} m²{ek}"
     sira = [mahal] + [m for m in sorted(deg) if m != mahal]
     parca = [f"{m} {_tr(deg[m][0])} → {_tr(deg[m][1])} m²" for m in sira if m in deg]
     for a in rapor.get("kayan_acikliklar") or []:

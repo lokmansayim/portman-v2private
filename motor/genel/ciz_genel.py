@@ -427,70 +427,85 @@ def inis_kurali(c: dict, kur: dict, sacak_cm: float) -> tuple[list[tuple[float, 
 
 
 def cati_plani_eksen(ax, y: dict, c: dict, inisler=None, baslik: str | None = None, yazi_ayir: bool = False, yalin: bool = False,
-                     yazi_kutusu: tuple[float, float] = (55.0, 12.0)):
+                     yazi_kutusu: tuple[float, float] = (55.0, 12.0), yazi_denetle: bool = False):
     """Çatı planı. `baslik` verilmezse uzun başlık (çizim setindeki pafta); `yazi_ayir` ile üst üste binen eğim yazıları kaydırılır
     (İE-08 şablon paftası 2. sayfa; varsayılanlar çizim setinin baytlarını değiştirmez). `yalin` (bayi kartının küçük paneli, 13.10.2026):
-    mahya/kırma/vadi boy yazıları basılmaz (çizgiler kalır), eğim yazıları `yazi_kutusu` (yarı en, yarı boy; cm) ile sığdığı yere konur."""
+    mahya/kırma/vadi boy yazıları basılmaz (çizgiler kalır), eğim yazıları `yazi_kutusu` (yarı en, yarı boy; cm) ile sığdığı yere konur.
+    `yazi_denetle` (şablon paftası 2. sayfa; İE-23 PR-2b): yazılar sabit kutuyla (kenar ≈ 110 × 22 cm) yerleştikten sonra mürekkepleri
+    örtüşüyorsa (büyük evde yazı kutudan uzun: KT-04 "mahya 416" ⟂ "%43,0", Ç8801-D "mahya 220" ⟂ "%33,0") yazılar silinir ve bu ölçekteki
+    gerçek boylarıyla yeniden yerleşir; örtüşme yoksa çizim aynen kalır (referans paftaları aynı)."""
     for dz in sorted(c["duzlemler"], key=lambda d: max(k[2] for k in d["ucboyut"])):          # alçak düzlem önce
         ax.add_patch(MplPolygon(dz["plan"], closed=True, fc="#8a919c", ec="#2f343c", lw=1.0, zorder=1 + max(k[2] for k in dz["ucboyut"]) / 1000))
     for h in dis_hat(y):                                                                      # duvarların dış yüzü
         ax.plot([p[0] for p in h], [p[1] for p in h], color="white", lw=0.8, ls=(0, (5, 3)), zorder=3)
     yazi = {"mahya": "mahya", "kirma": "kırma", "vadi": "vadi"}
-    yerler: list[tuple[float, float, float, float]] = []                                       # yazı kutuları (x, y, yarı en, yarı boy; yazi_ayir)
     # eğim oklarının yerleri (yazi_ayir: yazı okun üstüne konmaz; 13.10.2026)
     oklar = [(m.x + ux * 20, m.y + uy * 20, m.x - ux * 40, m.y - uy * 40)
              for dz in c["duzlemler"] for m in [dz["cokgen"].representative_point()] for (ux, uy) in [dz["yukari"]]] if yazi_ayir else []
     ok_keser = lambda x, y_, kx, ky: any(box(x - kx, y_ - ky, x + kx, y_ + ky).intersects(LineString([(a, b), (c_, d)]).buffer(6)) for a, b, c_, d in oklar)
     cati_ici = unary_union([dz["cokgen"] for dz in c["duzlemler"]]).buffer(-8) if yazi_ayir else None   # kenar yazısı çatının içinde kalır (ölçülere binmez)
-    for e in c["kenarlar"]:
-        (px, py), (qx, qy) = e["p"], e["q"]
-        if e["tur"] in ("mahya", "kirma"):
-            ax.plot([px, qx], [py, qy], color="#1c1f24", lw=2.0, zorder=4)
-        elif e["tur"] == "vadi":
-            ax.plot([px, qx], [py, qy], color="#e8e8e8", lw=1.6, ls=(0, (4, 2)), zorder=4)
-        elif e["tur"] == "duvar_dibi":
-            ax.plot([px, qx], [py, qy], color="#f0b35a", lw=1.8, zorder=4)
-        if e["tur"] in yazi and e["boy"] > 150 and not yalin:
-            aci = math.degrees(math.atan2(qy - py, qx - px))
-            if aci > 90 or aci <= -90:
-                aci += 180
-            nx, ny = -math.sin(math.radians(aci)), math.cos(math.radians(aci))
-            ca, sa = abs(math.cos(math.radians(aci))), abs(math.sin(math.radians(aci)))      # yazı kutusu ≈ 110 × 22 cm, döndürülmüş
-            rx, ry = 55 * ca + 11 * sa, 55 * sa + 11 * ca
-            mx, my = (px + qx) / 2, (py + qy) / 2
-            tx, ty = mx + nx * 14, my + ny * 14
-            if yazi_ayir:                                                                      # kenar yazısı başka yazıya ve eğim okuna binmesin:
-                ex_, ey_ = (qx - px) / max(e["boy"], 1e-9), (qy - py) / max(e["boy"], 1e-9)   # kenar boyunca kayar, sığmazsa öbür yana, o da olmazsa atlanır
-                bos = lambda x, y_: (not any(abs(x - a) < r1 + rx and abs(y_ - b) < r2 + ry for a, b, r1, r2 in yerler) and not ok_keser(x, y_, rx, ry)
-                                     and cati_ici.contains(box(x - rx, y_ - ry, x + rx, y_ + ry)))
-                denemeler = [(mx + nx * 14 + ex_ * d, my + ny * 14 + ey_ * d) for d in (0, 40, -40, 80, -80, 120, -120)] + \
-                            [(mx - nx * 14 + ex_ * d, my - ny * 14 + ey_ * d) for d in (0, 40, -40, 80, -80)]
-                yer = next(((x, y_) for x, y_ in denemeler if bos(x, y_)), None)
+
+    def ciz(olcek: float | None, cizgiler: bool) -> list:
+        """Kenar ve eğim yazıları (cizgiler: kenar çizgileri ve eğim okları da). olcek (cm / pt) verilirse yazı kutusu yazının gerçek boyu."""
+        yerler: list[tuple[float, float, float, float]] = []                                   # yazı kutuları (x, y, yarı en, yarı boy; yazi_ayir)
+        metinler = []
+        for e in c["kenarlar"]:
+            (px, py), (qx, qy) = e["p"], e["q"]
+            if cizgiler:
+                if e["tur"] in ("mahya", "kirma"):
+                    ax.plot([px, qx], [py, qy], color="#1c1f24", lw=2.0, zorder=4)
+                elif e["tur"] == "vadi":
+                    ax.plot([px, qx], [py, qy], color="#e8e8e8", lw=1.6, ls=(0, (4, 2)), zorder=4)
+                elif e["tur"] == "duvar_dibi":
+                    ax.plot([px, qx], [py, qy], color="#f0b35a", lw=1.8, zorder=4)
+            if e["tur"] in yazi and e["boy"] > 150 and not yalin:
+                metin = f"{yazi[e['tur']]} {tr(e['boy'], 0)}"
+                aci = math.degrees(math.atan2(qy - py, qx - px))
+                if aci > 90 or aci <= -90:
+                    aci += 180
+                nx, ny = -math.sin(math.radians(aci)), math.cos(math.radians(aci))
+                ca, sa = abs(math.cos(math.radians(aci))), abs(math.sin(math.radians(aci)))      # yazı kutusu ≈ 110 × 22 cm, döndürülmüş
+                ye, yb = _yazi_yari(metin, olcek, 55, 11)
+                rx, ry = ye * ca + yb * sa, ye * sa + yb * ca
+                mx, my = (px + qx) / 2, (py + qy) / 2
+                tx, ty = mx + nx * 14, my + ny * 14
+                if yazi_ayir:                                                                      # kenar yazısı başka yazıya ve eğim okuna binmesin:
+                    ex_, ey_ = (qx - px) / max(e["boy"], 1e-9), (qy - py) / max(e["boy"], 1e-9)   # kenar boyunca kayar, sığmazsa öbür yana, o da olmazsa atlanır
+                    bos = lambda x, y_: (not any(abs(x - a) < r1 + rx and abs(y_ - b) < r2 + ry for a, b, r1, r2 in yerler) and not ok_keser(x, y_, rx, ry)
+                                         and cati_ici.contains(box(x - rx, y_ - ry, x + rx, y_ + ry)))
+                    denemeler = [(mx + nx * 14 + ex_ * d, my + ny * 14 + ey_ * d) for d in (0, 40, -40, 80, -80, 120, -120)] + \
+                                [(mx - nx * 14 + ex_ * d, my - ny * 14 + ey_ * d) for d in (0, 40, -40, 80, -80)]
+                    yer = next(((x, y_) for x, y_ in denemeler if bos(x, y_)), None)
+                    if yer is None:
+                        continue
+                    tx, ty = yer
+                metinler.append(ax.text(tx, ty, metin, ha="center", va="center", fontsize=7.2, color="white",
+                                        rotation=aci, rotation_mode="anchor", zorder=6))
+                yerler.append((tx, ty, rx, ry))
+        for dz in c["duzlemler"]:                                                                  # eğim okları
+            m = dz["cokgen"].representative_point()
+            ux, uy = dz["yukari"]
+            if cizgiler:
+                ax.annotate("", xy=(m.x - ux * 40, m.y - uy * 40), xytext=(m.x + ux * 20, m.y + uy * 20), arrowprops=dict(arrowstyle="->", color="white", lw=1.0), zorder=6)
+            tx, ty = m.x + ux * 42 + abs(uy) * 36, m.y + uy * 42
+            metin = f"%{tr(dz['egim'] * 100)}"
+            if yazi_ayir:                                                                          # yazı kutusu (≈110 × 24 cm) düzlemin içinde ve başka yazıya binmeden
+                kx, ky = _yazi_yari(metin, olcek, *yazi_kutusu)
+                cakisir = lambda x, y_: any(abs(x - a) < rx + kx and abs(y_ - b) < ry + ky for a, b, rx, ry in yerler) or ok_keser(x, y_, kx, ky)
+                ic = dz["cokgen"].buffer(-18)                                                      # sığmıyorsa yazı atlanır (ok kalır; eğim Bina Özellikleri'nde de yazar)
+                uygun = lambda x, y_: not cakisir(x, y_) and ic.contains(box(x - kx, y_ - ky, x + kx, y_ + ky))
+                cx, cy = dz["cokgen"].centroid.x, dz["cokgen"].centroid.y
+                denemeler = [(tx, ty), (m.x, m.y + uy * 42 + abs(ux) * 30), (cx, cy)] + [(tx - uy * d, ty + ux * d) for d in (32, -32, 64, -64, 96, -96)] \
+                    + [(tx + ux * d, ty + uy * d) for d in (40, -40, 80, -80)] + [(cx - uy * d, cy + ux * d) for d in (40, -40)]
+                yer = next(((x, y_) for x, y_ in denemeler if uygun(x, y_)), None)
                 if yer is None:
                     continue
                 tx, ty = yer
-            ax.text(tx, ty, f"{yazi[e['tur']]} {tr(e['boy'], 0)}", ha="center", va="center", fontsize=7.2, color="white",
-                    rotation=aci, rotation_mode="anchor", zorder=6)
-            yerler.append((tx, ty, rx, ry))
-    for dz in c["duzlemler"]:                                                                  # eğim okları
-        m = dz["cokgen"].representative_point()
-        ux, uy = dz["yukari"]
-        ax.annotate("", xy=(m.x - ux * 40, m.y - uy * 40), xytext=(m.x + ux * 20, m.y + uy * 20), arrowprops=dict(arrowstyle="->", color="white", lw=1.0), zorder=6)
-        tx, ty = m.x + ux * 42 + abs(uy) * 36, m.y + uy * 42
-        if yazi_ayir:                                                                          # yazı kutusu (≈110 × 24 cm) düzlemin içinde ve başka yazıya binmeden
-            kx, ky = yazi_kutusu
-            cakisir = lambda x, y_: any(abs(x - a) < rx + kx and abs(y_ - b) < ry + ky for a, b, rx, ry in yerler) or ok_keser(x, y_, kx, ky)
-            ic = dz["cokgen"].buffer(-18)                                                      # sığmıyorsa yazı atlanır (ok kalır; eğim Bina Özellikleri'nde de yazar)
-            uygun = lambda x, y_: not cakisir(x, y_) and ic.contains(box(x - kx, y_ - ky, x + kx, y_ + ky))
-            cx, cy = dz["cokgen"].centroid.x, dz["cokgen"].centroid.y
-            denemeler = [(tx, ty), (m.x, m.y + uy * 42 + abs(ux) * 30), (cx, cy)] + [(tx - uy * d, ty + ux * d) for d in (32, -32, 64, -64, 96, -96)] \
-                + [(tx + ux * d, ty + uy * d) for d in (40, -40, 80, -80)] + [(cx - uy * d, cy + ux * d) for d in (40, -40)]
-            yer = next(((x, y_) for x, y_ in denemeler if uygun(x, y_)), None)
-            if yer is None:
-                continue
-            tx, ty = yer
-            yerler.append((tx, ty, kx, ky))
-        ax.text(tx, ty, f"%{tr(dz['egim'] * 100)}", ha="center", va="center", fontsize=7.2, color="white", zorder=6)
+                yerler.append((tx, ty, kx, ky))
+            metinler.append(ax.text(tx, ty, metin, ha="center", va="center", fontsize=7.2, color="white", zorder=6))
+        return metinler
+
+    metinler = ciz(None, True)
     for ix, iy, _tur in (inisler or []):
         ax.plot([ix], [iy], marker="o", ms=6.5, mfc="#f2c744", mec="#1c1f24", mew=1.0, zorder=8)
     xs = [p[0] for dz in c["duzlemler"] for p in dz["plan"]]
@@ -507,6 +522,16 @@ def cati_plani_eksen(ax, y: dict, c: dict, inisler=None, baslik: str | None = No
     ax.set_ylim(min(ys) - 80, max(ys) + 30)
     ax.set_aspect("equal")
     ax.axis("off")
+    if yazi_denetle and yazi_ayir and not yalin and len(metinler) > 1:
+        from . import yazi_cakisma as YC
+        r = YC._renderer(ax.figure)                                                           # sınırlar ve eşit oran uygulanır
+        ink = [YC._murekkep(t, r, ax.figure.dpi)[0] for t in metinler]
+        if any(YC._gercek(a.intersection(b), YC.PAY_PX) > 0 for i, a in enumerate(ink) for b in ink[i + 1:]):
+            p0, p1 = ax.transData.transform((0.0, 0.0)), ax.transData.transform((100.0, 0.0))
+            olcek = (ax.figure.dpi / 72.0) / max((p1[0] - p0[0]) / 100.0, 1e-9)                  # cm / pt (çizilmiş eksenin gerçek ölçeği)
+            for t in metinler:
+                t.remove()
+            ciz(olcek, False)
 
 
 RENK = {"duvar": (DUVAR, "#555"), "korkuluk": (DUVAR, "#555"), "kalkan": (DUVAR, "#555"), "kolon": (KOLON, "#555"), "kiris": (KOLON, "#555"),
@@ -527,6 +552,16 @@ def _yama(g, fc, ec, lw=0.8, zorder=2):
 
 
 DUVAR_GIBI = ("duvar", "korkuluk", "kalkan")
+
+
+def _yazi_yari(metin: str, olcek: float | None, en0: float, boy0: float, pt: float = 7.2) -> tuple[float, float]:
+    """Çatı planı yazısının yarı eni ve yarı boyu (cm): ölçek yoksa (en0, boy0) (sabit kutu); varsa mürekkebin o ölçekteki boyu + 1,5 pt pay,
+    (en0, boy0)'dan küçük değil."""
+    if olcek is None:
+        return en0, boy0
+    from matplotlib.textpath import TextPath
+    e = TextPath((0, 0), metin, size=pt).get_extents()
+    return max(en0, (e.width / 2 + 1.5) * olcek), max(boy0, ((e.y1 - min(e.y0, 0.0)) / 2 + 1.5) * olcek)
 
 
 def cm_pt_tahmini(ax, span_cm: float) -> float:

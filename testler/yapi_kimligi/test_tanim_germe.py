@@ -85,6 +85,27 @@ def test_hedef_ornek(ad):
     assert simdi == hedef, f"{ad}: germe çıktısı hedef örnekten farklı (yeniden dondurma yalnız onayla, D-02)"
 
 
+
+@pytest.mark.parametrize("ad", sorted(HEDEFLER))
+def test_hedef_germe_ciktisinda_yazi_cakismaz(ad, tmp_path):
+    # PR-2a'nın kabul koşulu (ayar `banka_germe.acik` bundan önce açılmaz): bayiye giden dört figür (plan görseli, kartın alt sırası, şablon
+    # paftasının iki sayfası) germe çıktısında da yazı çakışmasız (D-16). KT-01 ve KT-04'te karkas kurala geçilir; duvar panelleri ve makas
+    # paftaları dosya adıyla ayrı sayılır, bayi paftası denetlenir (PR-2b'ye kadar onların sayfaları "pafta_sayfa" sanılıyordu)
+    from araclar.atolye import _yazi_bulgulari, yazi_denetimi
+    from motor.genel import uret
+    _, t2, _ = _uygula(*HEDEFLER[ad])
+    g = tmp_path / "girdi.json"
+    g.write_text(json.dumps(t2, ensure_ascii=False), encoding="utf-8")
+    rap: dict = {}
+    bilgi = {"bayi_adi": "Deneme Bayi", "sevk_adresi": "Deneme Mah. Deneme Sok. No 1 Deneme İlçesi / Deneme İli",
+             "ozel_istekler": ["çatı antrasit"], "ozellikler": {"Dış Boya Rengi": "krem"}}
+    with yazi_denetimi(rap):
+        m = uret.uret(g, tmp_path / "c", is_emri_no="PM-TEST-20261031-1", revizyon=2, set_yolu=SET, yontem="panel", perspektif=False,
+                      bayi=True, bilgi=bilgi)
+    assert m["passed"], m.get("warnings")
+    assert _yazi_bulgulari(rap, uret.kod_govde(t2)) == []
+    assert (t2.get("karkas") == "kural") == any(k.endswith("_duvar_panelleri.pdf#1") for k in rap), sorted(rap)
+
 def test_kt01_yatak_odasi_arkaya_50_ev_uzar():
     t, t2, r = _uygula(*HEDEFLER["germe_KT01_yatak_odasi_1_K50"])
     assert r["tur"] == "germe" and r["eksen"] == "y" and 682 < r["kesit_cm"] < 894

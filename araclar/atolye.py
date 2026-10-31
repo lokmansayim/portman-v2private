@@ -399,13 +399,21 @@ def yazi_denetimi(rapor: dict):
     asil_fig, asil_pdf = matplotlib.figure.Figure.savefig, PdfPages.savefig
 
     def fig_savefig(self, fname, *x, **k):
-        if not hasattr(fname, "write"):
+        if not hasattr(fname, "write") and not isinstance(fname, PdfPages):     # PdfPages sayfası aşağıda (sayfa adıyla) denetlenir
             rapor[Path(str(fname)).name] = YC.denetle(self, Path(str(fname)).name)
         return asil_fig(self, fname, *x, **k)
 
     def pdf_savefig(self, figure=None, **k):
-        n = sum(1 for r in rapor if r.startswith("pafta_sayfa_")) + 1
-        rapor[f"pafta_sayfa_{n}"] = YC.denetle(figure, f"pafta_sayfa_{n}")
+        # yalnız şablon paftasının (`<kod>_pafta.pdf`) sayfaları `pafta_sayfa_N` olur; karkas kuralı isteyen tanımda (KT-04, germede
+        # karkas kurala geçen model) duvar panelleri ve makas paftaları ondan önce kaydedilir ve sayaca girerse bayi paftası denetlenmez
+        # (İE-23 PR-2b): onlar dosya adıyla ayrı tutulur
+        dosya = Path(str(getattr(self, "_filename", "") or "")).name
+        if dosya and not dosya.endswith("_pafta.pdf"):
+            n = sum(1 for r in rapor if r.startswith(f"{dosya}#")) + 1
+            rapor[f"{dosya}#{n}"] = YC.denetle(figure, f"{dosya}#{n}")
+        else:
+            n = sum(1 for r in rapor if r.startswith("pafta_sayfa_")) + 1
+            rapor[f"pafta_sayfa_{n}"] = YC.denetle(figure, f"pafta_sayfa_{n}")
         return asil_pdf(self, figure, **k)
 
     matplotlib.figure.Figure.savefig, PdfPages.savefig = fig_savefig, pdf_savefig

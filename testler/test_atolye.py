@@ -140,7 +140,12 @@ def test_metraj_kapisi_hakem_olcumu_olmayan_modelde_kosulmaz(atolye):
 
 def test_yazi_cakismasi_kabulu_durdurur(tmp_path, capsys, monkeypatch):
     # D-16 banka modellerine de (CIO, 30 Ekim): bayiye giden figürlerde yazı çakışması "kaldı", çizim 1 döner, kabul durur. Gerçek
-    # örnek: Ç8801-D'nin çatısı pafta 2'de "%33,0" yazısını "mahya 220"ye bindirir (defterde açık kusur; 17 Ekim'de "uyarı" idi)
+    # örnek: Ç8801-D'nin çatısı pafta 2'de "%33,0" yazısını "mahya 220"ye bindirirdi (defterde 17 Ekim kusuru). İE-23 PR-2b'den beri
+    # çatı planı örtüşen yazıları gerçek boylarıyla yeniden yerleştirir (kusur kapandı); kapının durdurduğunu sınamak için yalnız o yeniden
+    # yerleşme kapatılır: çizim 17 Ekim'deki gibi, bulgu gerçek çizimden (gevşetme değil; gerekçe İE-23 › PR-2b)
+    from motor.genel import ciz_genel as CG
+    asil = CG.cati_plani_eksen
+    monkeypatch.setattr(CG, "cati_plani_eksen", lambda *a, **k: asil(*a, **{**k, "yazi_denetle": False}))
     monkeypatch.setattr(A, "KUSUR_DEFTERI", tmp_path / "kusurlar.md")
     banka = tmp_path / "modeller" / "banka"
     banka.mkdir(parents=True)
@@ -157,6 +162,26 @@ def test_yazi_cakismasi_kabulu_durdurur(tmp_path, capsys, monkeypatch):
     assert kos(banka, "kabul", "Ç8801W", "--kapisiz", "--izsiz") == 2
     assert "denetim kaldı: Yazı çakışması" in capsys.readouterr().out
     assert json.loads((banka / "C8801W" / "kart.json").read_text(encoding="utf-8"))["durum"] != "kabul"
+
+
+def test_yazi_denetimi_bayi_paftasini_dosya_adiyla_ayirir(tmp_path):
+    # İE-23 PR-2b: karkas kuralı isteyen tanımda (KT-04; germede karkas kurala geçen model) duvar panelleri ve makas paftaları şablon
+    # paftasından önce kaydedilir. Sayfaları "pafta_sayfa_N" sayılınca bayi paftası denetlenmiyordu (KT-04'te "geçti" yanlıştı)
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    from matplotlib.backends.backend_pdf import PdfPages
+    rap: dict = {}
+    with A.yazi_denetimi(rap):
+        for ad, n in (("X_duvar_panelleri.pdf", 2), ("X_makaslar.pdf", 1), ("X_pafta.pdf", 2)):
+            with PdfPages(tmp_path / ad) as pp:
+                for i in range(n):
+                    fig = plt.figure()
+                    fig.text(0.5, 0.5, f"{ad} {i}")
+                    pp.savefig(fig)
+                    plt.close(fig)
+    assert sorted(rap) == ["X_duvar_panelleri.pdf#1", "X_duvar_panelleri.pdf#2", "X_makaslar.pdf#1", "pafta_sayfa_1", "pafta_sayfa_2"]
+    assert all(rap[f"pafta_sayfa_{i}"]["yazi"] == 1 for i in (1, 2))
 
 
 def test_kabul_banka_kaydi_ve_kontrol(atolye):
