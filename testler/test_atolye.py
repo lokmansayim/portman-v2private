@@ -19,6 +19,11 @@ from beyin import banka as B  # noqa: E402
 
 CATI_D = json.loads((KOK / "modeller" / "banka" / "C8801D" / "tanim.json").read_text(encoding="utf-8"))["cati"]
 CATI_K = json.loads((KOK / "modeller" / "C8801K.json").read_text(encoding="utf-8"))["cati"]
+# deneme varyantının çatısı: K'nın planı %30 eğimle (bankada yok; çizimi D-16'dan temiz geçer). Ç8801-D'nin çatısı (ret) pafta 2'de eğim
+# yazısını mahya yazısına bindirir (motor kusurları defteri, 17 Ekim); D-16 banka modellerine uygulanınca o çatı kabul edilemez
+CATI_Z = dict(json.loads(json.dumps(CATI_K)), tip_adi="beşik + cumba %30: K'nın planı, deneme")
+for _d in CATI_Z["duzlemler"]:
+    _d["egim"], _d["ust_pay"] = 0.30, round(CATI_Z["panel_kalinligi"] * (1 + 0.30 ** 2) ** 0.5, 3)
 CEKIRDEK = {a["kod"]: a for a in json.loads((KOK / "beyin" / "veri" / "adaylar.json").read_text(encoding="utf-8"))}
 
 
@@ -34,7 +39,7 @@ def atolye(tmp_path_factory):
     banka = kok / "modeller" / "banka"
     banka.mkdir(parents=True)
     cati = kok / "cati.json"
-    cati.write_text(json.dumps(CATI_D, ensure_ascii=False), encoding="utf-8")
+    cati.write_text(json.dumps(CATI_Z, ensure_ascii=False), encoding="utf-8")
     defter = kok / "kusurlar.md"
     eski = A.KUSUR_DEFTERI
     A.KUSUR_DEFTERI = defter
@@ -89,6 +94,7 @@ def test_varyant_taban_tanimi_degistirmez_ve_kart_dolu(atolye):
     assert dn["Motor doğrulaması"]["durum"] == "geçti" and dn["IFC şema denetimi"]["durum"] == "geçti"
     assert dn["Kartla çizimin tutarlılığı (m², oda programı, açıklık, çatı)"]["durum"] == "geçti"      # taban kaydıyla aynı plan
     assert dn["Bankada aynı model"]["durum"] == "geçti" and "Ç8801K" in dn["Bankada aynı model"]["ayrinti"]
+    assert dn["Yazı çakışması (bayiye giden 4 figür)"]["durum"] == "geçti"                             # D-16: sıfır bulgu
     assert (Path(k["son_cizim"]["kontrol_pdf"]) if Path(k["son_cizim"]["kontrol_pdf"]).is_absolute() else KOK / k["son_cizim"]["kontrol_pdf"]).is_file()
 
 
@@ -132,6 +138,27 @@ def test_metraj_kapisi_hakem_olcumu_olmayan_modelde_kosulmaz(atolye):
     assert kart(atolye) == once and once["metraj_testi"]["durum"] == "yok" and once["durum"] == "kontrolde"
 
 
+def test_yazi_cakismasi_kabulu_durdurur(tmp_path, capsys, monkeypatch):
+    # D-16 banka modellerine de (CIO, 30 Ekim): bayiye giden figürlerde yazı çakışması "kaldı", çizim 1 döner, kabul durur. Gerçek
+    # örnek: Ç8801-D'nin çatısı pafta 2'de "%33,0" yazısını "mahya 220"ye bindirir (defterde açık kusur; 17 Ekim'de "uyarı" idi)
+    monkeypatch.setattr(A, "KUSUR_DEFTERI", tmp_path / "kusurlar.md")
+    banka = tmp_path / "modeller" / "banka"
+    banka.mkdir(parents=True)
+    (tmp_path / "is_emri").mkdir()
+    cati = tmp_path / "cati_d.json"
+    cati.write_text(json.dumps(CATI_D, ensure_ascii=False), encoding="utf-8")
+    assert kos(banka, "varyant", "Ç8801W", "--taban", "Ç8801", "--cati", cati, "--ad", "x", "--kaynak-metni", "D-16 testi") == 0
+    assert kos(banka, "ciz", "Ç8801W", "--cikti", tmp_path / "cikti") == 1
+    dn = {d["ad"]: d for d in json.loads((banka / "C8801W" / "kart.json").read_text(encoding="utf-8"))["son_cizim"]["denetimler"]}
+    yazi = dn["Yazı çakışması (bayiye giden 4 figür)"]
+    assert yazi["durum"] == "kaldı" and "mahya 220" in yazi["ayrinti"]
+    assert [d for d, x in dn.items() if x["durum"] == "kaldı"] == ["Yazı çakışması (bayiye giden 4 figür)"]
+    capsys.readouterr()
+    assert kos(banka, "kabul", "Ç8801W", "--kapisiz", "--izsiz") == 2
+    assert "denetim kaldı: Yazı çakışması" in capsys.readouterr().out
+    assert json.loads((banka / "C8801W" / "kart.json").read_text(encoding="utf-8"))["durum"] != "kabul"
+
+
 def test_kabul_banka_kaydi_ve_kontrol(atolye):
     banka = atolye["banka"]
     t_yol = banka / "C8801Z" / "tanim.json"
@@ -155,7 +182,7 @@ def test_kabul_banka_kaydi_ve_kontrol(atolye):
         assert a[alan] == c[alan], alan
     for alan in ("odalar", "pencere", "kapi", "dis_olcu_cm", "oturum_m2"):
         assert a["ozet"][alan] == c["ozet"][alan], alan
-    assert a["referans_model"] == "Ç8801" and a["varyantlar"] == [] and a["sunum"]["cati_adi"] == "Tam kırma"
+    assert a["referans_model"] == "Ç8801" and a["varyantlar"] == [] and a["sunum"]["cati_adi"] == "Beşik + cumba %30"
     # kabul donar: kontrol hızlı yoldan aynı; tanım değişirse kontrol düşer; düzeltme ve yeniden çizim reddedilir
     assert kos(banka, "kontrol") == 0
     t_yol.write_text(asil.replace('"Deneme (Ç8801 çatı varyantı Z)"', '"Deneme Z (değişti)"'), encoding="utf-8")

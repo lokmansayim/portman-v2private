@@ -437,7 +437,8 @@ def denetimler(kart: dict, t: dict, m: dict, v: dict, olcum: dict, yazi: list[st
          + (" (perspektif yok: bu ortamda VTK yok)" if (v.get("perspektif") or {}).get("durum") != "TAMAM" else ""))
     ifc = v.get("ifc") or {}
     ekle("IFC şema denetimi", "geçti" if ifc.get("sema_hatasi") == 0 else "kaldı", f"şema hatası {ifc.get('sema_hatasi')}")
-    ekle("Yazı çakışması (bayiye giden 4 figür)", "geçti" if not yazi else "uyarı", "; ".join(yazi[:6]) or "bulgu yok")
+    # D-16 (bayiye giden çıktıda sıfır yazı çakışması) banka modellerine de: bulgu ya da denetlenemeyen figür kabulü durdurur (CIO, 30 Ekim)
+    ekle("Yazı çakışması (bayiye giden 4 figür)", "geçti" if not yazi else "kaldı", "; ".join(yazi[:6]) or "bulgu yok")
     ekle("15 cm ve daha kısa parçalar (bayi paftası)", "bilgi" if kisa else "geçti",
          "; ".join(f"{x['zincir']} {x['parca_cm']:g} cm" for x in kisa[:6]) or "yok")
     # kartla çizimin tutarlılığı (kaynak değerleri)
