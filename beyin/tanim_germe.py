@@ -95,10 +95,25 @@ class _Donusum:
         return q
 
 
-def _makas_dizisi(aile: dict, f: _Donusum, ad: str) -> None:
+class _Bilesik:
+    """İki dönüşüm art arda (düzey 2'de sırtın iki yanındaki iki kesit)."""
+
+    def __init__(self, f1, f2):
+        self.f1, self.f2 = f1, f2
+        self.eksen, self.i, self.buyut, self.c = f1.eksen, f1.i, f1.buyut, f1.c
+
+    def __call__(self, v, ne: str = "öğe", serbest: bool = False):
+        return self.f2(self.f1(v, ne, serbest), ne, serbest)
+
+    def nokta(self, p: list, ne: str = "öğe", serbest: bool = False) -> list:
+        return self.f2.nokta(self.f1.nokta(p, ne, serbest), ne, serbest)
+
+
+def _makas_dizisi(aile: dict, f: _Donusum, ad: str, ikincil: bool = False) -> None:
     """Makas ailesi: `x` ve `y` listeleri (biri açıklık, öbürü makas yerleri; `eksen` varsa makasın uzandığı eksen). Kesit ekseninin
     listesi dönüşür. O liste makas yerleriyse ve bir aralık tanımdaki en büyük aralığı aştıysa araya eşit aralıkla makas eklenir;
-    küçültmede şeritte kalan makas çıkar, kesitte tanımdaki en küçük aralıktan yakın kalan iki makastan kesite yakın olanı da çıkar."""
+    küçültmede şeritte kalan makas çıkar, kesitte tanımdaki en küçük aralıktan yakın kalan iki makastan kesite yakın olanı da çıkar.
+    `ikincil` (düzey 2 kesiti): açıklığı kesiti kesen makas ikincil çatınındır (cumba, çıkma); açıklığı kesitle birlikte uzar."""
     k = f.eksen
     if not isinstance(aile.get(k), list):
         return
@@ -110,9 +125,9 @@ def _makas_dizisi(aile: dict, f: _Donusum, ad: str) -> None:
         diger = "y" if k == "x" else "x"
         yerler = adet is not None and len(eski) == adet and not (isinstance(aile.get(diger), list) and len(aile[diger]) == adet)
     if not yerler:                                          # açıklık (uç noktaları): kesiti kesiyorsa makas eğim yönünde uzar (düzey ≥ 2)
-        if len(eski) >= 2 and min(eski) < f.c < max(eski) and f.buyut:
-            raise GermeHatasi(f"{ad} makaslarının açıklığı kesiti kesiyor (çatı eğimi kesit yönünde)")
-        aile[k] = [f(v, f"{ad} makası") for v in aile[k]]
+        if len(eski) >= 2 and min(eski) < f.c < max(eski) and f.buyut and not ikincil:
+            raise GermeHatasi("kesit bir çatı makasını boyuna kesiyor (çatı eğimi kesit yönünde)")
+        aile[k] = [f(v, "bir çatı makası") for v in aile[k]]
         return
     azalan = len(eski) >= 2 and eski[0] > eski[-1]
     yeni: list[float] = []
@@ -145,7 +160,7 @@ def _makas_dizisi(aile: dict, f: _Donusum, ad: str) -> None:
         aile["adet"] = len(aile[k])
 
 
-def _donustur(t: dict, f: _Donusum, y: dict) -> dict:
+def _donustur(t: dict, f: _Donusum, y: dict, ikincil: bool = False) -> dict:
     """Tanımdaki eksen koordinatlarını dönüştürür (kopya). Kesiti kesen duvar ve kiriş uzar (küçültmede kısalır)."""
     t2 = copy.deepcopy(t)
     i = f.i
@@ -155,16 +170,16 @@ def _donustur(t: dict, f: _Donusum, y: dict) -> dict:
         kesiyor = (a < f.c - TOL and b > f.c + TOL) if f.buyut else (a <= f.lo + TOL and b >= f.hi - TOL)
         if kesiyor:
             if w["sinif"] not in KESIT_DUVAR_SINIFLARI or w["yon"] != f.eksen:
-                raise GermeHatasi(f"kesit {d['ad']} duvarından geçiyor")
+                raise GermeHatasi("kesit bir duvarın içinden geçiyor")
             if isinstance(d.get("yukseklik"), dict):
-                raise GermeHatasi(f"kesit üst kotu eğimli {d['ad']} duvarından geçiyor")
-        d["kutu"][i], d["kutu"][i + 2] = f(a, f"{d['ad']} duvarının ucu"), f(b, f"{d['ad']} duvarının ucu")
+                raise GermeHatasi("kesit üstü eğimli bir duvardan geçiyor; eğimli duvar otomatik uzatılamaz")
+        d["kutu"][i], d["kutu"][i + 2] = f(a, "bir duvarın ucu"), f(b, "bir duvarın ucu")
     for ac in t2.get("acikliklar") or []:
         if y["adli"][ac["duvar"]]["yon"] != f.eksen:
             continue
-        b0, b1 = f(ac["bas"], f"{ac.get('ad')} açıklığı"), f(ac["bas"] + ac["en"], f"{ac.get('ad')} açıklığı")
+        b0, b1 = f(ac["bas"], "bir kapı ya da pencere"), f(ac["bas"] + ac["en"], "bir kapı ya da pencere")
         if abs(float(b1) - float(b0) - ac["en"]) > TOL:
-            raise GermeHatasi(f"kesit {ac.get('ad')} açıklığından geçiyor")
+            raise GermeHatasi("kesit bir kapı ya da pencereden geçiyor")
         ac["bas"] = b0
     for m in t2["mahaller"]:
         if m.get("nokta"):
@@ -175,9 +190,9 @@ def _donustur(t: dict, f: _Donusum, y: dict) -> dict:
             m["poligon"] = [f.nokta(p, f"{m['ad']} köşesi") for p in m["poligon"]]
     for kr in t2.get("kirisler") or []:
         uzun = "x" if kr["kutu"][2] - kr["kutu"][0] >= kr["kutu"][3] - kr["kutu"][1] else "y"
-        kr["kutu"][i], kr["kutu"][i + 2] = f(kr["kutu"][i], f"{kr['ad']} kirişi"), f(kr["kutu"][i + 2], f"{kr['ad']} kirişi")
+        kr["kutu"][i], kr["kutu"][i + 2] = f(kr["kutu"][i], "bir kiriş"), f(kr["kutu"][i + 2], "bir kiriş")
         if uzun == f.eksen:
-            kr["acik"] = [[f(a, f"{kr['ad']} kirişi"), f(b, f"{kr['ad']} kirişi")] for a, b in kr.get("acik") or []]
+            kr["acik"] = [[f(a, "bir kiriş"), f(b, "bir kiriş")] for a, b in kr.get("acik") or []]
     c = t2["cati"]
     for dz in c.get("duzlemler") or []:
         dz["plan"] = [f.nokta(p, f"{dz['ad']} çatı köşesi") for p in dz["plan"]]
@@ -194,28 +209,163 @@ def _donustur(t: dict, f: _Donusum, y: dict) -> dict:
             k["aralik"] = [f(v, k.get("ad") or "kalkan") for v in k["aralik"]]
     for ad, aile in (c.get("makaslar") or {}).items():
         if isinstance(aile, dict):
-            _makas_dizisi(aile, f, ad)
+            _makas_dizisi(aile, f, ad, ikincil)
     el = (t2.get("elektrik") or {}).get("sigorta_kutusu")
     if isinstance(el, list) and len(el) == 2:
         t2["elektrik"]["sigorta_kutusu"] = f.nokta(el, "sigorta kutusu", serbest=True)
     return t2
 
 
+# ── düzey 2: ikincil çatı (cumba, çıkma) yeniden hesaplanır ─────────────────────────────────────────────────────────────────
+def _ikincil_cati(t0: dict, t2: dict, f: _Donusum, dik: list[str]) -> list[str]:
+    """Kesitin dik kestiği ikincil çatı düzlemleri (sırtı kesit eksenine dik iki yüzlü cumba ya da çıkma) gerilmiş tanımda yeniden kurulur:
+    iki yüzün saçakları dönüşümle yerini aldı; sırt iki saçağın ortasına gelir (yüzler aynı eğimde ve aynı saçak kotunda, sırt tanımda
+    ortada olmalı). Sırtın ana çatıya oturan ucu (vadilerin buluştuğu tepe) düzlemlerin kesişiminden yeniden hesaplanır; ana çatının
+    o köşesi de oraya taşınır. Dönen: yeniden kurulan parçaların düzlem adları. Uymayan biçimde `GermeHatasi`."""
+    from shapely.geometry import Polygon
+    i, ek = f.i, f.eksen
+    j, ej = 1 - f.i, ("y" if f.eksen == "x" else "x")
+    D0 = {d["ad"]: d for d in t0["cati"]["duzlemler"]}
+    D2 = {d["ad"]: d for d in t2["cati"]["duzlemler"]}
+    yon = {ad: float((d.get("yukari") or [0, 0])[i]) for ad, d in D0.items()}
+    kalan, yapilan, sirtlar = list(dik), [], {}
+    while kalan:
+        a = kalan.pop(0)
+        es = None
+        for b in D0:                                           # eşi: zıt yöne yükselen, sırtı ortak yüz (kesit onu kesmeyebilir)
+            if b == a or b in yapilan or yon[a] * yon[b] >= 0:
+                continue
+            ortak = Polygon(D0[a]["plan"]).boundary.intersection(Polygon(D0[b]["plan"]).boundary)
+            if ortak.length > 1:
+                es = b
+                break
+        if es is None:
+            raise GermeHatasi("küçük çatının iki yüzü bulunamadı; otomatik hesaplanamıyor")
+        if es in kalan:
+            kalan.remove(es)
+        art, aza = (a, es) if yon[a] > 0 else (es, a)          # art: eksen boyunca yükselen yüz (saçağı alt yanda)
+        A0, B0 = D0[art], D0[aza]
+        if A0.get("egim") != B0.get("egim") or A0.get("sacak_kotu") != B0.get("sacak_kotu") or \
+                not all(isinstance(d.get("sacak"), dict) and ek in d["sacak"] for d in (A0, B0)):
+            raise GermeHatasi("küçük çatının iki yüzü aynı eğimde değil; otomatik hesaplanamıyor")
+        ortak = Polygon(A0["plan"]).boundary.intersection(Polygon(B0["plan"]).boundary)
+        xb = ortak.bounds
+        sirt0 = xb[i]
+        sa0, sb0 = float(A0["sacak"][ek]), float(B0["sacak"][ek])
+        if abs(xb[i + 2] - sirt0) > TOL or abs(sirt0 - (sa0 + sb0) / 2) > 1.0:
+            raise GermeHatasi("küçük çatının sırtı ortada değil; otomatik hesaplanamıyor")
+        sa2, sb2 = float(D2[art]["sacak"][ek]), float(D2[aza]["sacak"][ek])
+        sirt_t = float(f(sirt0, "küçük çatının sırtı") if f.buyut else _sirt_donusumu(f, sirt0))
+        sirt2 = round((sa2 + sb2) / 2, 2)
+        sirtlar[(round(sirt0, 1), "")] = sirtlar.get((round(sirt0, 1), ""), []) + [sirt2]
+        yapilan += [art, aza]
+        if abs(sirt2 - sirt_t) < 0.005 and abs((sb2 - sa2) - (sb0 - sa0)) < 0.005:
+            continue                                           # parça ne genişledi ne kaydı (yalnız ötelendi)
+        egim, kot = float(A0["egim"]), float(A0["sacak_kotu"])
+        tepe0, tepe2 = kot + egim * (sirt0 - sa0), kot + egim * (sirt2 - sa2)
+        for uc in (xb[j], xb[j + 2]):                          # sırtın iki ucu; ana çatıya oturan uç (başka düzlemin köşesi) tepe olur
+            yeni_uc = uc
+            for d in t2["cati"]["duzlemler"]:
+                if d["ad"] in (art, aza) or abs(yon[d["ad"]]) > 1e-9:  # tepe: eğimi kesit ekseninde olmayan (ana çatının) düzlemde
+                    continue
+                if not any(abs(p[i] - sirt_t) < TOL and abs(p[j] - uc) < TOL for p in d["plan"]):
+                    continue
+                M = D0[d["ad"]]
+                sm = float((M.get("yukari") or [0, 0])[j])
+                if not (isinstance(M.get("sacak"), dict) and ej in M["sacak"]) or abs(sm) < 1e-9 or not M.get("egim"):
+                    raise GermeHatasi("küçük çatının ana çatıya oturduğu yer otomatik hesaplanamıyor")
+                y_s, em, km = float(M["sacak"][ej]), float(M["egim"]), float(M["sacak_kotu"])
+                if abs(y_s + (tepe0 - km) / (em * sm) - uc) > 1.5:
+                    raise GermeHatasi("küçük çatının vadileri tanımla uyuşmuyor; otomatik hesaplanamıyor")
+                yeni_uc = round(y_s + (tepe2 - km) / (em * sm), 2)
+                ust = [p[j] for p in Polygon(d["plan"]).exterior.coords]
+                if not (min(ust) + 1 < yeni_uc < max(ust) - 1):
+                    raise GermeHatasi("küçük çatı büyüyünce ana çatının mahyasını aşıyor")
+            for d in t2["cati"]["duzlemler"]:
+                for k in ("plan", "karkas"):
+                    for p in d.get(k) or []:
+                        if abs(p[i] - sirt_t) < TOL and abs(p[j] - uc) < TOL and (d["ad"] in (art, aza) or yeni_uc != uc):
+                            p[i], p[j] = _sayi(sirt2, p[i]), _sayi(yeni_uc, p[j])
+        for d in (D2[art], D2[aza]):                           # sırt boyunca öteki köşeler
+            for k in ("plan", "karkas"):
+                for p in d.get(k) or []:
+                    if abs(p[i] - sirt_t) < TOL:
+                        p[i] = _sayi(sirt2, p[i])
+    for v in sirtlar.values():                                 # aynı hizadaki sırtlar (cumba ve önündeki çıkma) hizada kalır
+        if max(v) - min(v) > 0.5:
+            raise GermeHatasi("kesit küçük çatıyla önündeki çıkma çatısını farklı geriyor")
+    return yapilan
+
+
+def _ikincil_aralik(t: dict, y: dict, eksen: str, dik: list[str]) -> tuple[float, float, frozenset]:
+    """Düzey 2 kesitinin konabileceği aralık: kestiği her ikincil çatı yüzünün saçağını taşıyan duvar kesitin saçakla aynı yanında kalır
+    (saçak taşması değişmez). Yüzün altındaki, kesit eksenine dik duvarlardan saçağa en yakını taşıyıcıdır. Dönen: (alt, üst, yeniden
+    kurulacak yüzlerin hepsi)."""
+    from shapely.geometry import Polygon
+    i = 0 if eksen == "x" else 1
+    j = 1 - i
+    D = {d["ad"]: d for d in t["cati"]["duzlemler"]}
+    lo, hi = -math.inf, math.inf
+    tum = set(dik)
+    for ad in dik:                                             # kesitin kesmediği öbür yüz de (ikisi birlikte yeniden kurulur)
+        yk = float((D[ad].get("yukari") or [0, 0])[i])
+        for b, d in D.items():
+            if b not in tum and yk * float((d.get("yukari") or [0, 0])[i]) < 0 and \
+                    Polygon(D[ad]["plan"]).boundary.intersection(Polygon(d["plan"]).boundary).length > 1:
+                tum.add(b)
+    for ad in sorted(tum):
+        d = D[ad]
+        if not (isinstance(d.get("sacak"), dict) and eksen in d["sacak"]):
+            raise GermeHatasi("küçük çatının saçağı tanımda yok; otomatik hesaplanamıyor")
+        sac = float(d["sacak"][eksen])
+        b = Polygon(d["plan"]).bounds
+        p0, p1, q0, q1 = b[i], b[i + 2], b[j], b[j + 2]
+        tasiyan = None
+        for w in t["duvarlar"]:
+            k = w["kutu"]
+            if w.get("sinif") not in KESIT_DUVAR_SINIFLARI or y["adli"][w["ad"]]["yon"] == eksen:
+                continue
+            if k[j + 2] <= q0 + TOL or k[j] >= q1 - TOL or k[i + 2] <= p0 - TOL or k[i] >= p1 + TOL:
+                continue
+            uzak = abs((k[i] + k[i + 2]) / 2 - sac)
+            if tasiyan is None or uzak < tasiyan[0]:
+                tasiyan = (uzak, k)
+        if tasiyan is None:
+            raise GermeHatasi("küçük çatının saçağı altında duvar yok; otomatik hesaplanamıyor")
+        k = tasiyan[1]
+        if sac <= k[i]:                                        # saçak alt yanda: kesit taşıyıcının üst yüzünün ötesinde
+            lo = max(lo, k[i + 2])
+        else:
+            hi = min(hi, k[i])
+    return lo, hi, frozenset(tum)
+
+
+def _sirt_donusumu(f: _Donusum, v: float) -> float:
+    """Küçültmede sırt şeritte kalabilir: şeridin kayan yanındaysa kayar, şeritteyse kesite iner (yeniden hesaplanacak)."""
+    return float(f(v, "küçük çatının sırtı", serbest=True))
+
+
 # ── dış kenar: germe ─────────────────────────────────────────────────────────────────────────────────────────────────────
 def _germe(t: dict, y: dict, kimlik: dict, mahal: str, yon: str, kenarlar: list[dict], cm: int, buyut: bool) -> tuple[dict, dict]:
     eksen, s = YK.YON_EKSEN[yon], ISARET[yon]
-    if any(e["durum"] == "duzey2" for e in kenarlar):           # PR-2b: ikincil çatı parçası yeniden hesaplanır
-        raise GermeHatasi(f"{_degisim(yon, buyut)} yandaki küçük çatıyı (cumba ya da çıkma çatısı) yeniden hesaplamayı gerektiriyor; "
-                          "bu henüz otomatik değil")
+    duzey = 2 if any(e["durum"] == "duzey2" for e in kenarlar) else 1   # düzey 2: ikincil çatı (cumba, çıkma) yeniden hesaplanır
     konum = [e["konum_cm"] for e in kenarlar]
     sinir = min(konum) if s > 0 else max(konum)               # kesit, kenarın berisinde (mahalin içinde)
     serit = 0.0 if buyut else float(cm)
     sinif = {m["ad"]: m["sinif"] for m in kimlik["anlamsal"]["mahaller"]}
-    adaylar = []
+    adaylar, on_hata, merkez = [], [], {}
     for g in kimlik["parametrik"]["germe"][eksen]:
-        if mahal not in g["mahaller"] or g["duzey"] != 1 or any(sinif.get(m) == "veranda" for m in g["mahaller"]):
+        if mahal not in g["mahaller"] or g["duzey"] != duzey or any(sinif.get(m) == "veranda" for m in g["mahaller"]):
             continue
         lo, hi = g["aralik"]
+        if duzey == 2:                                         # saçak taşmaları değişmesin: kesit küçük çatıların taşıyıcı duvarları arasında
+            try:
+                a0, a1, parcalar = _ikincil_aralik(t, y, eksen, g["dik"])
+            except GermeHatasi as e:
+                on_hata.append(str(e))
+                continue
+            lo, hi = max(lo, a0 + YK.KESIT_PAYI), min(hi, a1 - YK.KESIT_PAYI)
+            merkez[id(g)] = (parcalar, (a0 + a1) / 2)          # küçük çatının yüzleri ve ortası (sırt; iki yandaki taşıyıcı duvarların arası)
         hi = min(hi, sinir) if s > 0 else hi
         lo = max(lo, sinir) if s < 0 else lo
         if hi - lo < serit - TOL or hi - lo < 0:
@@ -223,17 +373,47 @@ def _germe(t: dict, y: dict, kimlik: dict, mahal: str, yon: str, kenarlar: list[
         orta = (lo + hi) / 2
         adaylar.append((len(g["mahaller"]), -(hi - lo), abs(sinir - orta), lo, hi, g))
     if not adaylar:
+        if on_hata:
+            raise GermeHatasi(on_hata[0])
         raise GermeHatasi("odanın içinden kesit geçecek boş yer yok" + (f" ({cm} cm genişliğinde)" if not buyut else ""))
     hatalar = []
+    if duzey == 2:                                             # küçük çatı ortasından simetrik genişler: sırtın iki yanında birer kesit, cm/2
+        for parcalar, m in sorted(set(merkez.values()), key=lambda v: (-len(v[0]), sorted(v[0]))):
+            yan = [[a for a in adaylar if merkez[id(a[5])][0] == parcalar and (a[4] <= m + TOL if k == 0 else a[3] >= m - TOL)
+                    and a[4] - a[3] >= (0.0 if buyut else cm / 2) - TOL] for k in (0, 1)]
+            if not all(yan):
+                continue
+            secilen = [min(v, key=lambda a: (-(a[4] - a[3]), a[3])) for v in yan]
+            try:
+                t2, f, kesitler = t, None, []
+                for _, _, _, lo, hi, g in secilen:
+                    orta = (lo + hi) / 2
+                    c = round(orta if buyut else orta - s * cm / 4, 2)
+                    c = float(f(c)) if f is not None else c
+                    fk = _Donusum(eksen, s, cm / 2, buyut, c)
+                    t2 = _donustur(t2, fk, y, ikincil=True)
+                    f = fk if f is None else _Bilesik(f, fk)
+                    kesitler.append(c)
+                ikincil = _ikincil_cati(t, t2, f, sorted({x for a in secilen for x in a[5]["dik"]}))
+            except GermeHatasi as e:
+                hatalar.append(str(e))
+                continue
+            return t2, {"tur": "germe", "eksen": eksen, "kesit_cm": kesitler, "mahaller": sorted({x for a in secilen for x in a[5]["mahaller"]}),
+                        "ikincil_cati": ikincil}
     for _, _, _, lo, hi, g in sorted(adaylar, key=lambda a: a[:4]):
         orta = round((lo + hi) / 2, 1)
         c = orta if buyut else round(orta - s * cm / 2, 1)     # küçültmede şerit [c, c + s·cm] bandın ortasında
         try:
-            t2 = _donustur(t, _Donusum(eksen, s, cm, buyut, c), y)
+            f = _Donusum(eksen, s, cm, buyut, c)
+            t2 = _donustur(t, f, y, ikincil=duzey == 2)
+            ikincil = _ikincil_cati(t, t2, f, g["dik"]) if duzey == 2 else []
         except GermeHatasi as e:
             hatalar.append(str(e))
             continue
-        return t2, {"tur": "germe", "eksen": eksen, "kesit_cm": c, "mahaller": list(g["mahaller"])}
+        r = {"tur": "germe", "eksen": eksen, "kesit_cm": c, "mahaller": list(g["mahaller"])}
+        if ikincil:
+            r["ikincil_cati"] = ikincil
+        return t2, r
     raise GermeHatasi(hatalar[0])
 
 
@@ -261,7 +441,7 @@ def _kayma(t: dict, y: dict, kimlik: dict, mahal: str, yon: str, kenarlar: list[
     ozgun = {d["ad"]: list(d["kutu"]) for d in t["duvarlar"]}
     for ad in tasinan:
         if y["adli"][ad]["yon"] == eksen or y["adli"][ad]["sinif"] != "ic":
-            raise GermeHatasi(f"{ad} duvarı kaydırılamaz")
+            raise GermeHatasi("o yandaki duvar kaydırılamaz")
     for ad in tasinan:                                         # aynı hizada bitişik devam eden (kaymayan) duvar
         m = ozgun[ad]
         for d in t["duvarlar"]:
@@ -455,7 +635,7 @@ def denetle(t_once: dict, t_sonra: dict, k_once: dict | None = None, set_yolu=No
         cati_genel.cati_kur(t_sonra["cati"], MK.oku())
         k2 = YK.tanimdan(t_sonra, set_yolu)
     except (SystemExit, ValueError, KeyError) as e:
-        raise GermeHatasi(f"çatı ya da metraj kurulamadı ({str(e)[:120]})") from None
+        raise GermeHatasi("çatı yeni ölçüye otomatik kurulamıyor") from None
     k1 = k_once or YK.tanimdan(t_once, set_yolu)
     if set(k2["topolojik"]["ulasilamayan"]) - set(k1["topolojik"]["ulasilamayan"]) or \
             set(k2["topolojik"]["eslesmeyen_acikliklar"]) - set(k1["topolojik"]["eslesmeyen_acikliklar"]):
@@ -464,7 +644,7 @@ def denetle(t_once: dict, t_sonra: dict, k_once: dict | None = None, set_yolu=No
     for ad, (tur, yan) in sorted(a1.items()):
         if a2.get(ad) != (tur, yan):
             ne = f"{yan[0]} penceresi" if tur == "pencere" else f"{' ile '.join(yan)} arasındaki kapı"
-            raise GermeHatasi(f"{ne} ({ad}) yerinde kalmıyor")
+            raise GermeHatasi(f"{ne} yerinde kalmıyor")
     kural = oda_kurallari()
     once = {m["ad"]: m for m in k1["anlamsal"]["mahaller"]}
     for m in k2["anlamsal"]["mahaller"]:
