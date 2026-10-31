@@ -64,7 +64,9 @@ CELIK_PROJELER = KOK / "testler" / "celik" / "projeler"             # çelik hak
 CELIK_CEVAPLAR = KOK / "testler" / "celik" / "veri"                 # açık projelerin hakem cevapları (İE-16 PR-1; yalnız okunur)
 CELIK_GRUBU = "Çelik panel"                                          # motorun yükleme listesindeki çelik grubu (motor/genel/yukleme.py)
 TOPLAM_SATIRI = "Toplam (adedi ve kg'ı bilinenler)"                  # motorun çelik grubundaki sağlama satırı (motor/genel/yukleme.py)
-TANIM_ESLIK_DISI = ("kod", "ad")                                     # bankadaki tanım hakemin ölçtüğü tanımdan yalnız bunlarda ayrılır
+TANIM_ESLIK_DISI = ("kod", "ad")                                     # bankadaki tanım hakemin ölçtüğü tanımdan serbestçe bunlarda ayrılır
+# öteki farklar (Lokman'ın düzeltmesi: kapı açılış yönü, sürgülü pencere) yalnız hakemin ölçtüğü yükleme listesini değiştirmiyorsa
+# (pimdeki kural seti, karkas kuralı ve sözlükle yeniden üretilen liste satır satır aynı) ölçümü düşürmez; değiştiriyorsa ölçüm geçmez
 # Mimari Rapor › 1.4 (14 Ekim): 28 AIPrefabrik projesinden yükleme listesi açılmış olanlar (AP-19 = PK-01, AP-08 = PK-07, AP-07 = TS-01,
 # AP-01…05 = E1–E5). Geri kalan 20'si kör test setidir: açılmaz.
 KOR_TEST_ACIK = frozenset({"AP-01", "AP-02", "AP-03", "AP-04", "AP-05", "AP-07", "AP-08", "AP-19"})
@@ -602,6 +604,44 @@ def _sadelestir(t: dict) -> dict:
     return {k: v for k, v in t.items() if k not in TANIM_ESLIK_DISI}
 
 
+def _tanim_farki(a, b, yol: str = "") -> list[str]:
+    """İki tanımın farklı alanları, okunur yolla (`acikliklar[K2].mentese`); liste öğesi adıyla anılır (adı yoksa sırasıyla)."""
+    if isinstance(a, dict) and isinstance(b, dict):
+        return [f for k in sorted(set(a) | set(b), key=str) if a.get(k) != b.get(k)
+                for f in _tanim_farki(a.get(k), b.get(k), f"{yol}.{k}" if yol else str(k))]
+    if isinstance(a, list) and isinstance(b, list) and len(a) == len(b):
+        return [f for i, (x, y) in enumerate(zip(a, b)) if x != y
+                for f in _tanim_farki(x, y, f"{yol}[{x.get('ad', i) if isinstance(x, dict) and x.get('ad') == y.get('ad') else i}]")]
+    return [yol]
+
+
+def _liste_esdegeri(t: dict, olculen: dict, bizim: dict) -> str | None:
+    """Bankadaki tanım (kodu ve adı ölçülen tanımınkiyle) hakemin ölçtüğü listeyi aynen veriyor mu: öneren listeyi (`liste_yap`) bizim
+    listenin pimleriyle (kural seti ve karkas kuralı kopyası, yöntem, sözlük) yeniden üretir, satırları mühürlü listeyle kıyaslar.
+    Hakem yalnız okunur (Z-03); geçici tanım `cikti/` altında (git dışı; `liste` tanım yolunu depo köküne göre yazar). Sorun ya da None."""
+    from testler.celik.projeler import liste_yap as L
+    sz, ks, kk = bizim.get("sozluk") or {}, bizim.get("kural_seti") or {}, bizim.get("karkas_kurali")
+    if sz.get("kopya"):
+        donmus = sz
+    elif sz.get("sha256") == sha256(L.SOZLUK):
+        donmus = None
+    else:
+        return "listenin sözlüğü bugünkü sözlük değil ve kopyası yok (liste yeniden üretilmeli)"
+    (KOK / "cikti").mkdir(exist_ok=True)
+    try:
+        with tempfile.TemporaryDirectory(dir=KOK / "cikti") as g:
+            tp = Path(g) / "tanim.json"
+            tp.write_text(json.dumps({**t, "kod": olculen["kod"], "ad": olculen.get("ad")}, ensure_ascii=False), encoding="utf-8")
+            y = L.motor(tp, Path(g) / "m", bizim["yontem"]["kod"], KOK / ks["kopya"], KOK / kk["kopya"] if kk else None)
+            yeni = L.liste(tp, y, bizim["yontem"]["kod"], ks, karkas_kaydi=kk, sozluk_donmus=donmus)
+    except SystemExit as e:
+        return f"liste yeniden üretilemedi ({str(e)[-300:]})"
+    if yeni["satirlar"] != bizim["satirlar"]:
+        a, b = ({json.dumps(s, ensure_ascii=False, sort_keys=True) for s in x["satirlar"]} for x in (bizim, yeni))
+        return f"yükleme listesi değişiyor ({len(a - b)} satır düştü, {len(b - a)} satır eklendi)"
+    return None
+
+
 def _pim_kaydi(kayit: dict | None, ne: str) -> tuple[dict | None, str | None]:
     """Hakemin listesindeki kural kaydından pim ({yol, sha256}; içerik adresli kopya): (pim, sorun)."""
     if not kayit:
@@ -623,7 +663,9 @@ def celik_olcumu(proje: str, t: dict) -> tuple[dict | None, str | None]:
     """Çelik hakeminin `proje`deki ölçümü bu tanım için geçerli mi; geçerliyse kartın metraj testi ve pimi: (kayıt, sorun).
 
     Hakem yalnız okunur (Z-03): kendi listemiz (`bizim_liste.json`), hakemin sonucu (`sonuc.json`; `kiyas --sonuc-yaz` yazar) ve açık
-    projede hakemin cevabı (`veri/<CPnn>_hakem_cevabi.json`). Açılan projede yeniden ölçüm klasörü (`acik/`) önceliklidir (İE-16 PR-6a)."""
+    projede hakemin cevabı (`veri/<CPnn>_hakem_cevabi.json`). Açılan projede yeniden ölçüm klasörü (`acik/`) önceliklidir (İE-16 PR-6a).
+    Tanım ölçülenden kod ve ad dışında da ayrılıyorsa (düzeltme) ölçüm yalnız liste aynı kalıyorsa geçerlidir (`_liste_esdegeri`); farklar
+    kayda (`tanim_farki`) yazılır."""
     from testler.celik import kiyas
     kok = CELIK_PROJELER / kiyas.kod_klasoru(proje)
     klasor_ = kok / kiyas.YENIDEN if (kok / kiyas.YENIDEN / "sonuc.json").is_file() else kok
@@ -633,12 +675,10 @@ def celik_olcumu(proje: str, t: dict) -> tuple[dict | None, str | None]:
     bizim, sonuc = json.loads(bl.read_text(encoding="utf-8")), json.loads(sp.read_text(encoding="utf-8"))
     if bizim.get("kod") != proje or sonuc.get("kod") != proje:
         return None, f"{proje}: listenin ya da sonucun kodu farklı"
-    # 1. ölçülen tanım bu tanım mı (kod ve ad dışında)
+    # 1. hakemin listesi depodaki ölçülen tanımdan mı
     tk = KOK / str((bizim.get("tanim") or {}).get("yol") or "")
     if not tk.is_file() or sha256(tk) != (bizim.get("tanim") or {}).get("sha256"):
         return None, f"{proje}: hakemin listesi bugünkü tanımdan üretilmemiş (liste yeniden üretilmeli)"
-    if _sadelestir(json.loads(tk.read_text(encoding="utf-8"))) != _sadelestir(t):
-        return None, f"{proje}: bankadaki tanım hakemin ölçtüğü tanımdan farklı (yalnız {', '.join(TANIM_ESLIK_DISI)} ayrılabilir)"
     # 2. sonuç bu listenin sonucu mu (liste, sonucun yazıldığı commit'ten beri değişmedi)
     lc = (sonuc.get("bizim_liste") or {}).get("commit")
     yol = bl.relative_to(KOK).as_posix()
@@ -651,8 +691,13 @@ def celik_olcumu(proje: str, t: dict) -> tuple[dict | None, str | None]:
     kk, s2 = _pim_kaydi(bizim.get("karkas_kurali"), "karkas kuralı")
     if s1 or s2 or ks is None:
         return None, f"{proje}: {s1 or s2 or 'kural seti kaydı yok'}"
+    # 4. ölçülen tanım bu tanım mı: kod ve ad dışında aynıysa evet; değilse yalnız hakemin ölçtüğü listeyi aynen veriyorsa (pimlerle)
+    olculen = json.loads(tk.read_text(encoding="utf-8"))
+    fark = _tanim_farki(_sadelestir(olculen), _sadelestir(t))
+    if fark and (sorun := _liste_esdegeri(t, olculen, bizim)):
+        return None, f"{proje}: bankadaki tanım hakemin ölçtüğü tanımdan farklı ({', '.join(fark[:6])}{' …' if len(fark) > 6 else ''}) ve {sorun}"
     kapi = sonuc.get("celik_kg_kapisi") or {}
-    # 4. açık projede kapı hakemin işlevleriyle yeniden hesaplanır; tür tür tablo
+    # 5. açık projede kapı hakemin işlevleriyle yeniden hesaplanır; tür tür tablo
     turler, cevap_yolu = None, CELIK_CEVAPLAR / f"{kiyas.kod_klasoru(proje)}_hakem_cevabi.json"
     if (sonuc.get("muhur") or {}).get("durum") == "acik" and cevap_yolu.is_file():
         cv = json.loads(cevap_yolu.read_text(encoding="utf-8"))
@@ -674,7 +719,8 @@ def celik_olcumu(proje: str, t: dict) -> tuple[dict | None, str | None]:
              "kapi_disi": kapi.get("kapi_disi") or [], "bizim_kapi_kg": kapi.get("bizim_kapi_kg"), "gercek_kapi_kg": kapi.get("gercek_kapi_kg"),
              "turler": turler, "muhur_durumu": (sonuc.get("muhur") or {}).get("durum"), "liste_sha256": (sonuc.get("muhur") or {}).get("sha256"),
              "sonuc": sp.relative_to(KOK).as_posix(), "sonuc_tarihi": sonuc.get("tarih"), "kiyas_commit": sonuc.get("kiyas_commit"),
-             "bizim_liste_commit": lc, "yontem": bizim.get("yontem"), "tanim_kanonik": kanonik_sha(t), "zaman": simdi()}
+             "bizim_liste_commit": lc, "yontem": bizim.get("yontem"), "tanim_farki": fark or None, "tanim_kanonik": kanonik_sha(t),
+             "zaman": simdi()}
     return {"metraj_testi": {k: v for k, v in kayit.items() if v is not None}, "pim": {"kural_seti": ks, "karkas": kk}}, None
 
 
