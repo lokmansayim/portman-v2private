@@ -263,6 +263,8 @@ def yerlesim_kartlari(p: dict, kartlar: dict) -> list[dict]:
 
 
 def _yerlesim_anahtarlari(kart: dict, p: dict, tavan: str) -> list[str]:
+    if kart.get("pafta_disi") and all(p["bilgi"].get(a) == v for a, v in kart["pafta_disi"]["bilgi"].items()):
+        return []                                                     # paftada sayılmayan parça (K5b-2: açık mahale bakan dış duvarın omegası)
     anahtarlar = list(kart.get("pafta", []))
     if kart.get("pafta_tavan"):
         anahtarlar.append(kart["pafta_tavan"][tavan])
@@ -280,6 +282,7 @@ def _k2(f, kartlar: dict, yerlesim: dict, liste_kurallari: dict, is_emri: dict, 
     `LISTE_YAZILMAZ`, nedeni `liste_yazilmaz`'da (K5)."""
     from motor import yerlesim as Y
     from motor.yerlesim import kesim, yaz
+    from motor.yerlesim import tavan_katmani as TK
 
     sonuc = Y.katmanlar(is_emri, plan, makaslar(f, _Kutular()), yerlesim, liste_kurallari)
     g, D = sonuc["girdi"], sonuc["degerler"]
@@ -339,6 +342,11 @@ def _k2(f, kartlar: dict, yerlesim: dict, liste_kurallari: dict, is_emri: dict, 
             else:
                 kesim_plani[k["kod"]] = (kesim.dere_karti(boylar, cm(R["parca_boyu"]), cm(R["bindirme"])) if "bindirme" in R
                                          else kesim.boy_karti(boylar, cm(R["parca_boyu"]), cm(R["pay"])))
+        kural = k.get("yerlesim", {}).get("kural")
+        if k["sayim"] == "alan" and kural in (TK.DIZME, TK.IZOLASYON) and (ka := [p for p in eslesen if p["kart"] is k]):     # K5b-2: gözler levhaya, şeritler pakete
+            R = D[kural]
+            kesim_plani[k["kod"]] = (kesim.levha_karti([(p["bilgi"]["En_cm"], p["bilgi"]["Uzunluk_cm"]) for p in ka], *R["levha_cm"])
+                                     if kural == TK.DIZME else kesim.paket_karti([p["alan_m2"] for p in ka], R["paket_m2"]))
         if k.get("sabit"):
             sabit[k["kod"]] = {"adet": Y.oku(k["sabit"]["okunan"], liste_kurallari, kitap), "okunan": k["sabit"]["okunan"]}
     ozet = {"tavan": g["tavan"], "cati_tipi": g["cati_tipi"], "baslangic": g["baslangic"], "uyarilar": sonuc["uyarilar"],
@@ -604,10 +612,15 @@ def katalog_excel(kartlar: dict, say: dict | None, yol: Path) -> Path:
               [[p["parca"], p["kart"], p["kural"], p.get("boy_cm", "—"), p.get("alan_m2", "—"),
                 "; ".join(f"{a}: {v}" for a, v in p["bilgi"].items()), p["aciklama"]] for p in say["yerlesim"]["parcalar"]],
               [14, 8, 28, 10, 10, 50, 40])
-        sayfa(wb.create_sheet("Kesim planı"), ["Kart", "Yöntem", "Stok boyu (cm)", "Parça", "Toplam (m)", "Stok adedi", "Dizilim / hat başına"],
-              [[kod, x["yontem"], x["parca_boyu_cm"], x["parca"], x["toplam_m"], x["stok"],
+        sayfa(wb.create_sheet("Kesim planı"), ["Kart", "Yöntem", "Stok boyu (cm)", "Parça", "Toplam (m; levha ve pakette m²)", "Stok adedi",
+                                                "Dizilim / hat başına"],
+              [[kod, x["yontem"],
+                x["parca_boyu_cm"] if "parca_boyu_cm" in x else (f"levha {x['levha_cm'][0]:g} × {x['levha_cm'][1]:g}" if "levha_cm" in x
+                                                                 else f"paket {x['paket_m2']:g} m²".replace(".", ",")),
+                x["parca"], x.get("toplam_m", x.get("alan_m2")), x["stok"],
                 " | ".join(" + ".join(f"{b:g}" for b in d) for d in x["dizilim"]) if "dizilim" in x
-                else ", ".join(map(str, x["hat_basina"])) if "hat_basina" in x else "hatlar " + " + ".join(f"{h:g}" for h in x["hatlar_cm"])]
+                else ", ".join(map(str, x["hat_basina"])) if "hat_basina" in x else "hatlar " + " + ".join(f"{h:g}" for h in x["hatlar_cm"])
+                if "hatlar_cm" in x else f"{x['parca']} şerit"]
                for kod, x in say["kesim_plani"].items()]
               + [[kod, f"sabit paket ({x['okunan']})", "—", "—", "—", x["adet"], "—"] for kod, x in say["sabit"].items()],
               [8, 40, 12, 8, 10, 10, 80])
