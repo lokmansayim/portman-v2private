@@ -95,3 +95,17 @@ def test_kose_balkonu(tk03):
     assert p.startswith("Balkon gövdenin köşesinde (313,75 × 193,25 cm), iki yanı açık") and "Dış köşeye 1 kolon" in p and "askıda kalmaz" in p
     yer = [o["yer"] for o in d["omega_duvar"]]
     assert yer.count("balkona bakan gövde duvarı") == 2 and any(y.endswith("ve balkon kirişi") for y in yer)
+
+
+def test_balkon_tavani(tk03):
+    """Lokman, 31 Ekim 2026 19:23: "verandayı yeşil alçıpan ile ters tavan yap". Balkonun tavanı ters tavan, yeşil alçıpan: kart modelinin
+    tavan omegaları (x yönünde, duvarın yüzünden 60 cm arayla) altına, kolon ve kirişlerin arasında (303,75 × 183,25). Liste aynı alanı
+    "Tavan yeşil alçıpan" satırında veranda tavanı olarak dış ölçüyle sayar (6,06 m²; kitap `veranda_tavani.prefabrik`)."""
+    d, _, L = tk03
+    assert d["tavan"]["tip"] == "ters"
+    assert d["tavan"]["acik"] == [{"ad": "Balkon", "yon": "x", "rects": [[10, 680.05, 313.75, 863.3]]}]
+    assert sorted(o["konum"] for o in d["omega"] if o["oda"] == "veranda") == [680.05, 740.05, 800.05]
+    p = next(a for a in d["adimlar"] if a.get("ad") == "Ters tavan alçıpanı")["p"]
+    assert "Balkon tavanı ters tavan: tavan omegalarının altına yeşil alçıpan" in p and "tavan yok" not in p
+    yesil = next(r for r in L if r["kalem"] == "Tavan yeşil alçıpan")
+    assert "veranda tavanı 6,06" in yesil["formul"], yesil["formul"]

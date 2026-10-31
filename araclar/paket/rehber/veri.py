@@ -588,7 +588,8 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
                        "liste": ls("Özel kutu profil (kolon)")} for i, b in enumerate(sorted(kol, key=lambda b: (b["rect"][1], b["rect"][0])))],
             "kiris": [gv_kiris(i, b) for i, b in enumerate(sorted(kir, key=lambda b: (b["rect"][1], b["rect"][0])))],
         })
-        GVK = {"vk": vk, "kol": len(kol), "kir": [kenar(b["rect"]) for b in kir], "m2": GV.get("net_m2"), "nis": nis, "iki_yan": iki_yan, "ad": gad, "Ad": Gad, "e": gad_e}
+        GVK = {"vk": vk, "kol": len(kol), "kir": [kenar(b["rect"]) for b in kir], "m2": GV.get("net_m2"), "nis": nis, "iki_yan": iki_yan, "ad": gad, "Ad": Gad, "e": gad_e,
+               "poligon": GV["poligon"], "engel": [b["rect"] for b in kol + kir]}
 
     # ---------- çatılar ----------
     if GIR:                                       # İE-24: girintili gövde; çatı çizimdeki çatıdan (ana çatı + cumbalar, `girinti.py`)
@@ -722,6 +723,24 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         tavan = {"tip": "asma", "h": th, "goz": goz, "h_aralik": f"{fmtc(TH)} cm (kural: tavan_h_aralik_m); omega hatlarına dik"}
     else:
         tavan = {"tip": "ters", "boardex": []}
+    # Açık mahalin tavanı (Lokman, 31 Ekim 2026 19:23: "verandayı yeşil alçıpan ile ters tavan yap"): ana çatının altındaki açık mahalde (gömme
+    # veranda, balkon, niş) kart modelinin tavan omegalarının altına yeşil alçıpan, kolon ve kirişlerin arasında; odaların tavanı asma da olsa
+    # burada ters tavan (açık mahalde H ve göz yok, `tavan_katmani.py`). Liste bu alanı "Tavan yeşil alçıpan" satırında veranda tavanı olarak sayar
+    # (kitap `veranda_tavani.prefabrik`). Taşan verandanın tavan omegası kart modelinde yok (`motor/yerlesim/tavan.py`, BK-14): modelde gösterilmez.
+    if GVK:
+        from shapely.geometry import Point as _Nk, Polygon as _Pg, box as _kutu
+        from shapely.ops import unary_union
+        alan = _Pg(GVK["poligon"]).difference(unary_union([_kutu(*r) for r in GVK["engel"]]))
+        icte = alan.buffer(1)
+        yon = {o["yon"] for o in omega if o["oda"] == "veranda"
+               and icte.contains(_Nk(((o["bas"] + o["son"]) / 2, o["konum"]) if o["yon"] == "x" else (o["konum"], (o["bas"] + o["son"]) / 2)))}
+        if len(yon) != 1:
+            raise Desteklenmiyor(f"{GVK['ad']}: kart modelinde tavan omegası {'yok' if not yon else 'iki yönde'}; ters tavanın alçıpanı omegalara vidalanır")
+        parca = [g for g in getattr(alan, "geoms", [alan]) if g.area > 1]
+        if any(g.interiors for g in parca):
+            raise Desteklenmiyor(f"{GVK['ad']}: kolon ya da kiriş mahalin içinde; tavan alanı delikli")
+        tavan["acik"] = [{"ad": GVK["Ad"], "yon": yon.pop(),
+                          "rects": [[_r(t) for t in q] for g in parca for q in dikdortgenler([list(c) for c in g.exterior.coords[:-1]])]}]
 
     # ---------- saçak sacı, kalkan, çatı yüzleri ----------
     if GIR:                                       # saçak hatları, kalkanlar ve yüzler çatının kendi kenar ve yüzlerinden (`girinti.py`)
@@ -1181,12 +1200,14 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
                               LR("Tavan H'ı"), I("Modelde H", f"{th_n} parça") if ASMA else None, LR("PVC omega kapak")) if x]},
         {"ad": "Asma tavan alçıpanı" if ASMA else "Ters tavan alçıpanı", "t": "Asma tavan alçıpanı" if ASMA else "Ters tavan alçıpanı",
          "p": "12,5 mm alçıpan levhalar (120 × 250) kesilip omega ve H gözlerine dizilir; banyolarda yeşil (ıslak hacim) alçıpan. Omegaların altı PVC omega kapakla kapatılır." +
-              (" Verandalarda tavan yok." if VR else ""),
+              (f" {GVK['Ad']} tavanı ters tavan: tavan omegalarının altına yeşil alçıpan, kolon ve kirişlerin arasında (listede yeşil alçıpan satırında, "
+               "veranda tavanı)." if tavan.get("acik") else "") +
+              (" Taşan verandaların tavanı da yeşil alçıpan (listede sayılı); tavan omegaları kart modelinde henüz yok, modelde gösterilmedi." if VR else ""),
          "kamera": K([0, 2.3, 0.3], 0.55, 1.28, 15),
          "extra": [x for x in (LR("Tavan beyaz alçıpan"), LR("Tavan yeşil alçıpan"), LR("Alçıpan vidası"), I("Modelde göz", f"{len(tavan.get('goz', []))} adet") if ASMA else None) if x]},
         {"ad": "Çatı izolasyonu", "t": "Çatı izolasyonu (10 cm rulo cam yünü)",
          "p": "Aşıklardan önce tavanın üstüne 10 cm rulo cam yünü serilir. Her makas aralığına bir şerit gelir: rulo sol duvarın üstünden başlar, açılarak sağ duvara kadar serilir." +
-              (" Verandaların üstü açık (tavan yok), izolasyon yalnız gövdede." if VR else ""),
+              (" Taşan verandaların çatısının altına izolasyon serilmez (liste şilteyi gövdenin brüt alanıyla sayar); izolasyon yalnız gövdede." if VR else ""),
          "kamera": K([W / 2, 2.6, DY / 2], 2.5, 0.95, 15, True),
          "extra": [x for x in (LR("Çatı şiltesi"), I("Modelde", "{izo_n} şerit · ≈ {izo_m2} m²")) if x]},
         {"ad": "Aşıklar", "t": "Omega aşıklar",

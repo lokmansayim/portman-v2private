@@ -528,6 +528,21 @@ if (D.tavan.tip === 'ters') {
       ['Malzeme', `12,5 mm ${yesil ? 'yeşil (ıslak hacim) ' : ''}alçıpan, 120 × 250 levhadan kesilir; omega ve tavan H'ı gözüne oturur`], ['Sıra', "tavan omegaları ve tavan H'larından sonra"],
       ['Liste', yesil ? M.alcipan_liste.yesil : M.alcipan_liste.beyaz]] }));
 }
+/* Açık mahalin tavanı (gömme veranda, balkon, niş): ters tavan, 12,5 mm yeşil alçıpan; tavan omegalarının altına, kolon ve kirişlerin arasında.
+   Odaların tavanı asma da olsa burada ters tavan (Lokman, 31.10.2026). Alan ve omega yönü veriden; levha 120 × 250, uzun kenarı omegalara dik. */
+let acO = parts.filter(p => p.step === AD.alcipan).reduce((a, p) => Math.max(a, p.order), -0.3);   // odaların levhalarından sonra
+(D.tavan.acik || []).forEach(a => a.rects.forEach(([x0, y0, x1, y1]) => {
+  const ux = a.yon === 'y', ex = ux ? 250 : 120, ey = ux ? 120 : 250;   // y yönündeki omegalara dik: uzun kenar x boyunca
+  for (let xa = x0; x1 - xa > 2; xa += ex) for (let ya = y0; y1 - ya > 2; ya += ey) {
+    const xb = Math.min(xa + ex, x1), yb = Math.min(ya + ey, y1), tam = xb - xa > ex - 0.1 && yb - ya > ey - 0.1;
+    add(AD.alcipan, bp(xa + 0.15, xb - 0.15, ya + 0.15, yb - 0.15, TAVAN_ALT - 1.25, TAVAN_ALT, mat('alcipan_y', AD.alcipan)), acO += 0.3, {
+      kod: null, ad: `${a.ad} tavanı · yeşil alçıpan (ters tavan)`, satir: [
+        ['Bu parça', `${a.ad} · ${tam ? `tam levha ${fmtc(ex)} × ${fmtc(ey)}` : `kesilmiş ${fmtc(xb - xa)} × ${fmtc(yb - ya)} cm`}`],
+        ['Malzeme', '12,5 mm yeşil alçıpan; tavan omegalarının altına, uzun kenarı omegalara dik, alçıpan vidasıyla (3,5 × 35)'],
+        ['Kural', `${a.ad.toLocaleLowerCase('tr')} tavanı ters tavan, yeşil alçıpan (Lokman, 31.10.2026)`],
+        ['Liste', M.alcipan_liste.yesil]] });
+  }
+}));
 
 /* Çatı yüzleri: yerel s (eğim boyunca, makas ucundan), t (saçak boyunca), n (aşık oturma yüzünden dik). Yüzler veriden (D.yuz):
    E saçak noktası, d eğim yönü (plan), R çatı, poly plan çokgeni (62 m²'de dere hattında kırpılmış), dere hattı (varsa). */
