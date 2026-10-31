@@ -1,6 +1,6 @@
 """İE-23 PR-1 · yapı kimliği (`beyin/yapi_kimligi.py`).
 
-Aday hedef örnek: Ç8801'in kimliği (`hedef/C8801.json`; kural seti 0.19 pimli). Kimliği üreten kod değişince bununla kıyaslanır (D-28 m.3);
+Hedef örnek: Ç8801'in kimliği (`hedef/C8801.json`; kural seti 0.19 pimli; Lokman'ın onayı 31 Ekim 2026, İE-23 › Üretim kuralı). Kimliği üreten kod değişince bununla kıyaslanır (D-28 m.3);
 bilerek değişirse yeniden dondurma İE-23 belgesindeki onayla, testi geçirmek için değil. Ayrıca: yedi banka modelinde bütün kapılar ve
 pencereler kimliğe girer ve her mahal girişten ulaşılır; imza addan ve aynadan bağımsızdır; plan sözleşmesinin kayıpsız olduğu modellerde
 tanım ve sözleşme aynı grafiği verir, kayıplı olduğu modellerde (dikdörtgene yaslanırken kısa bir duvar komşuluğu düşer) fark görünür
@@ -51,7 +51,7 @@ def _farklar(a, b, yol: str = "") -> list[str]:
 def test_c8801_hedefle_ayni():
     hedef = json.loads((HEDEF / "C8801.json").read_text(encoding="utf-8"))
     fark = _farklar(_kimlik("C8801"), hedef)
-    assert not fark, "Ç8801 kimliği aday hedeften farklı:\n" + "\n".join(fark[:20])
+    assert not fark, "Ç8801 kimliği hedeften farklı:\n" + "\n".join(fark[:20])
 
 
 def test_belirlenimci_ve_sema():
