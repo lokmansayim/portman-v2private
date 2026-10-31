@@ -1,0 +1,241 @@
+{
+ "sema": "portman.yapi_germe_hedef/0.1",
+ "girdi": {
+  "tanim": "modeller/KT01.json",
+  "tanim_sha256": "5ff3ab92e5ed4081b519c4ff081d7afa1965c95b047195b34c4754b551995019",
+  "op": "oda_buyut",
+  "mahal": "Yatak Odası 1",
+  "yon": "K",
+  "cm": 50,
+  "kural_seti": "0.19.json"
+ },
+ "rapor": {
+  "tur": "germe",
+  "eksen": "y",
+  "kesit_cm": 788.0,
+  "mahaller": [
+   "Banyo",
+   "Müştemilat",
+   "Yatak Odası 1",
+   "Yatak Odası 2"
+  ],
+  "karkas_kurala": true,
+  "mahal": "Yatak Odası 1",
+  "yon": "K",
+  "cm": 50,
+  "buyut": true,
+  "degisen": {
+   "Yatak Odası 1": [
+    10.53,
+    12.01
+   ],
+   "Banyo": [
+    3.81,
+    4.69
+   ],
+   "Yatak Odası 2": [
+    12.65,
+    14.54
+   ],
+   "Müştemilat": [
+    15.32,
+    16.87
+   ]
+  },
+  "dis_olcu": [
+   [
+    1221.0,
+    910.0
+   ],
+   [
+    1221.0,
+    960.0
+   ]
+  ],
+  "kapali_m2": [
+   87.27,
+   93.37
+  ]
+ },
+ "anlatim": "Yatak Odası 1 arkaya 50 cm büyütüldü; ev arkaya 50 cm uzadı (uzayan öteki odalar: Banyo, Müştemilat, Yatak Odası 2); kapalı alan 87,27 → 93,37 m²",
+ "sonuc": {
+  "tanim_sha256": "1811cbc3bfe61fcd5d02a2d4b3338f1cc4de1b623a38b3997efa6d148cb09dc5",
+  "duvarlar": {
+   "D2": [
+    [
+     324,
+     395.0,
+     332,
+     907.0
+    ],
+    [
+     324,
+     395.0,
+     332,
+     957.0
+    ]
+   ],
+   "D3": [
+    [
+     332,
+     899.0,
+     702,
+     907.0
+    ],
+    [
+     332,
+     949.0,
+     702,
+     957.0
+    ]
+   ],
+   "D4": [
+    [
+     702,
+     899.0,
+     1218,
+     907.0
+    ],
+    [
+     702,
+     949.0,
+     1218,
+     957.0
+    ]
+   ],
+   "D5": [
+    [
+     1210,
+     529.0,
+     1218,
+     899.0
+    ],
+    [
+     1210,
+     529.0,
+     1218,
+     949.0
+    ]
+   ],
+   "D13": [
+    [
+     632,
+     669.0,
+     640,
+     899.0
+    ],
+    [
+     632,
+     669.0,
+     640,
+     949.0
+    ]
+   ],
+   "D14": [
+    [
+     820,
+     551.0,
+     828,
+     899.0
+    ],
+    [
+     820,
+     551.0,
+     828,
+     949.0
+    ]
+   ],
+   "MD2": [
+    [
+     3,
+     399.0,
+     11,
+     899.0
+    ],
+    [
+     3,
+     399.0,
+     11,
+     949.0
+    ]
+   ],
+   "MD3": [
+    [
+     3,
+     899.0,
+     324,
+     907.0
+    ],
+    [
+     3,
+     949.0,
+     324,
+     957.0
+    ]
+   ]
+  },
+  "acikliklar": {},
+  "mahal_noktalari": {
+   "Banyo": [
+    [
+     730,
+     790
+    ],
+    [
+     730,
+     840
+    ]
+   ]
+  },
+  "karkas": "kural",
+  "celik_modeli": false,
+  "makaslar": {
+   "x": [
+    294.0,
+    1248.0
+   ],
+   "y": [
+    949.0,
+    861.5,
+    774.0,
+    649.0,
+    575.0,
+    501.0,
+    376.0,
+    251.0
+   ],
+   "kalinlik": 8,
+   "adet": 8
+  },
+  "kalkanlar": [
+   [
+    "kuzey kalkanı",
+    960.0,
+    [
+     294.0,
+     1248.0
+    ]
+   ],
+   [
+    "cumba kalkanı",
+    0.0,
+    [
+     294.0,
+     730.0
+    ]
+   ],
+   [
+    "güney kalkanı (alçak çatıların üstü)",
+    251.0,
+    [
+     294.0,
+     1248.0
+    ]
+   ]
+  ]
+ },
+ "onay": {
+  "durum": "aday",
+  "not": "Lokman'ın onayı bekleniyor (İE-23 PR-2a); onaylanınca tarih ve dayanak buraya yazılır"
+ }
+}

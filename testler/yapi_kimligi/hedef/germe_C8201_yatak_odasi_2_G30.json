@@ -1,0 +1,83 @@
+{
+ "sema": "portman.yapi_germe_hedef/0.1",
+ "girdi": {
+  "tanim": "modeller/C8201.json",
+  "tanim_sha256": "33784df2e60e2e693c0ec7314c2a58fd7a7ff68a3f5b877639f9fe2ce697697c",
+  "op": "oda_buyut",
+  "mahal": "Yatak Odası 2",
+  "yon": "G",
+  "cm": 30,
+  "kural_seti": "0.19.json"
+ },
+ "rapor": {
+  "tur": "kayma",
+  "eksen": "y",
+  "duvarlar": [
+   "P"
+  ],
+  "kayma_cm": -30,
+  "mahal": "Yatak Odası 2",
+  "yon": "G",
+  "cm": 30,
+  "buyut": true,
+  "degisen": {
+   "Yatak Odası 1": [
+    11.92,
+    10.92
+   ],
+   "Yatak Odası 2": [
+    11.92,
+    12.91
+   ]
+  },
+  "dis_olcu": [
+   [
+    1094.0,
+    750.0
+   ],
+   [
+    1094.0,
+    750.0
+   ]
+  ],
+  "kapali_m2": [
+   63.82,
+   63.82
+  ]
+ },
+ "anlatim": "Yatak Odası 2 öne 30 cm büyütüldü; Yatak Odası 2 11,92 → 12,91 m²; Yatak Odası 1 11,92 → 10,92 m²",
+ "sonuc": {
+  "tanim_sha256": "2328bb8aaa519892d8d768526f42df5b8c1a6347c058f66b47d7d4a1e5b332df",
+  "duvarlar": {
+   "P": [
+    [
+     9.25,
+     371,
+     343.5,
+     379
+    ],
+    [
+     9.25,
+     341,
+     343.5,
+     349
+    ]
+   ]
+  },
+  "acikliklar": {
+   "K10": [
+    269.5,
+    239.5
+   ]
+  },
+  "mahal_noktalari": {},
+  "karkas": null,
+  "celik_modeli": false,
+  "makaslar": null,
+  "kalkanlar": []
+ },
+ "onay": {
+  "durum": "aday",
+  "not": "Lokman'ın onayı bekleniyor (İE-23 PR-2a); onaylanınca tarih ve dayanak buraya yazılır"
+ }
+}

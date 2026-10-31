@@ -148,6 +148,8 @@ def _norm(s: str) -> str:
 #   {"op": "pencere_olcu", "aciklik": "P5", "en": 120, "yuk": 120}   pencere ölçüsü (merkez ve üst kot korunur)
 #   {"op": "cati_varyanti", "kod": "Ç8801L"}                          çatı varyantı: zarf tanım dosyasını değiştirir; burada yalnız teyit
 #   {"op": "dis_karkas_140"}                                          dış duvar karkası 140 (kurallar/model/secenekler/dis_karkas_140.json)
+# İE-23 PR-2a (banka germe; ayar `banka_germe.acik` arkasında okunur):
+#   {"op": "oda_buyut" | "oda_kucult", "mahal": "Yatak Odası 1", "yon": "K", "cm": 50}   dış kenar: ev o yöne uzar; iç kenar: duvar kayar
 KARKAS_140_CM = 14.0
 LENTO_VARSAYILAN = 70          # bilgi: Ç8801/Ç8201'de pencere üstü 270 − 70 = 200; pencere_olcu üst kotu tanımdan korur
 _TOL = 0.01
@@ -180,6 +182,9 @@ def tanim_uygula(t: dict, d: dict) -> dict:
         return cati_varyanti(t, d.get("kod"))
     elif op == "dis_karkas_140":
         t2 = dis_karkas_140(t)
+    elif op in ("oda_buyut", "oda_kucult"):                  # İE-23 PR-2a: germe / iç duvar kaydırma; hakemi kendi içinde (tanim_germe.denetle)
+        from beyin import tanim_germe
+        t2 = tanim_germe.uygula(t, d)
     else:
         raise VaryantHatasi(f"bilinmeyen değişiklik: {op}")
     aciklik_denetimi(t2, _kur(t2))

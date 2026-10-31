@@ -61,6 +61,7 @@ def isleme_ayari(ayar: dict) -> dict:
             "llm": dict(ayar.get("llm") or {}), "patron_teknik_not": ayar.get("patron_teknik_not", False) is True,
             "mesaj_katmani": ayar.get("mesaj_katmani") is True, "ucb_taban_url": ayar.get("ucb_taban_url") or None,
             "plan_uretimi": dict(ayar.get("plan_uretimi") or {}), "llm_once_revizyon": dict(ayar.get("llm_once_revizyon") or {}),   # İE-14 (D-18)
+            "banka_germe": dict(ayar.get("banka_germe") or {}),                    # İE-23 PR-2a: banka modelinde oda büyüt/küçült (kapalı)
             "gorsel_okuma": dict(ayar.get("gorsel_okuma") or {}),                  # İE-20: çizim okuma (kapalıyken bugünkü cevap)
             "talep_formu": dict(ayar.get("talep_formu") or {}),                    # İE-20 PR-2: talep ve revizyon formu (kapalıyken bugünkü metin)
             "kira_sn": KIRA_SN, "en_cok_deneme": EN_COK_DENEME}
