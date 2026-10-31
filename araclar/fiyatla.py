@@ -5,9 +5,9 @@
 
 Liste: prefabrik Motor'un listesi (`motor/prefabrik_liste.py`, satırda `olcu`) ya da genel motorun yükleme listesi
 (`python -m motor.genel.uret` → `<kod>_yukleme.json`, satırda `boyut`); hat satırlardan anlaşılır. Anahtar defterdeki gibi
-"kalem | ölçü" (çelikte "kalem | boyut"). Önce birebir anahtar, yoksa (prefabrikte) pano eni bandı, o da yoksa boy önerisi (kesilen
-profilin tam boyunun fiyatından boyla orantılı; `boy_onerileri`). Birimi `kg` olan kalemde tutar satırın kg'ı × fiyat, öteki kalemlerde
-adet × fiyat.
+"kalem | ölçü" (çelikte "kalem | boyut"). Önce birebir anahtar, yoksa (prefabrikte) pano eni bandı, o da yoksa boy kuralı (kesilen
+profilin ya da panelin tam boyunun fiyatından boyla orantılı; `boy_onerileri`; D-33'ten beri kutu profil ve tek kat çatı paneli
+onaylı). Birimi `kg` olan kalemde tutar satırın kg'ı × fiyat, öteki kalemlerde adet × fiyat.
 
 Fiyat uydurulmaz: defterde `onay: false` olan fiyat (yedek kaynaktan öneri) yalnız `--oneri` ile uygulanır ve "öneri" diye
 işaretlenir; fiyatı olmayan satır boş kalır, özette sayılır. Uygulanmayan önerinin birim fiyatı satırda `oneri_fiyat` olarak durur
@@ -56,15 +56,18 @@ def bant_bul(s: dict, bantlar: list[dict]) -> tuple[dict, dict] | None:
 
 
 def boy_onerisi_bul(s: dict, oneriler: list[dict]) -> tuple[dict, float] | None:
-    """Kesilen profilin boyu (ölçü "L <mm>"): kaydın tam boy fiyatından boyla orantılı birim fiyat, tam TL'ye yarım yukarı (kayıt, fiyat).
-    Defterdeki onaylı kiriş boyları (1200, 1710, 2510, 3760) bu yöntemle hesaplanmıştı; kaydı olmayan boy için yalnız öneridir."""
+    """Kesilen parçanın boyu (ölçü "L <mm>"): kaydın tam boy fiyatından boyla orantılı birim fiyat (kayıt, fiyat). Kayıt kalemi adıyla
+    (`kalem`) ya da adının başıyla (`kalem_baslar`; ör. her çatının tek kat paneli) eşler; yuvarlama `yuvarlama` adımına yarım yukarı
+    (varsayılan tam TL). Kaydın `onay`ını çağıran değerlendirir: D-33'ten beri (Lokman 31 Ekim) kutu profil ve tek kat çatı paneli
+    kuralı onaylı, her boy için."""
     olcu = (s.get("olcu") or "").strip()
     if not re.fullmatch(r"L \d+(?:[.,]\d+)?", olcu):
         return None
-    n = _sayilar(olcu)[0]
+    n, kalem = _sayilar(olcu)[0], s.get("kalem") or ""
     for b in oneriler:
-        if b["kalem"] == s.get("kalem"):
-            return b, float(int(b["fiyat"] * n / b["boy_mm"] + 0.5))
+        if b.get("kalem") == kalem or ("kalem_baslar" in b and kalem.startswith(b["kalem_baslar"])):
+            adim = b.get("yuvarlama", 1)
+            return b, float(round(int(b["fiyat"] * n / b["boy_mm"] / adim + 0.5) * adim, 2))
     return None
 
 

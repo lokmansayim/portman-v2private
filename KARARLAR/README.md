@@ -83,6 +83,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-30](D-30.md) | Prefabrikte ölçüye kesimde son pano 122 cm ve üzeriyse kesilmez, dış ölçü tam panoya (125,5) büyür; eski son aks ve dış ölçü yenisine eşlenir, plan uyarısı yazılır. Bugün TK-01 ve TK-02 tetikler (898 × 888 → 898,5 × 888,5) | 29.10 (Lokman 10:48) |
 | [D-31](D-31.md) | Prefabrik ön onay çiziminin görünüş kuralları: beşikte de dört görünüş; taşan verandanın çatısı her görünüşte ana çatının küçüğü (saçak altı, topuk, iki eğim, % yazısı), kalkanın ayrı alın çerçevesi yok; "çatı profili - topuk ve saçak" kalktı; aks soluk gri ve veranda kirişi gibi kesik; 60×40 pencere vasistas; derz yalnız görünen ve cepheye değen duvardan. Lokman'ın çizim kuralları (D-29, D-30, D-31) `kurallar/prefabrik/cizim_kurallari.json`'da kararı, sözü, kod yeri ve testiyle (PC-01 … PC-15) | 29.10 (Lokman 11:07–11:23) |
 | [D-32](D-32.md) | Prefabrik listede ve montaj rehberinde baş makas omegası baş makasın uçtan uca altında, iki yandaki saçak payı dahil (açıklık + 2 × saçak, ÷ 2,5); taşan verandanın baş makası dış kirişe oturur, omegası da öyle. 100'lük iç duvarın üstündeki omega 100'lük duvar omegasıdır, asma tavanda da o satırda (Ek, 30.10; sırtı 10,5, öteki ölçüleri 60'lık omeganın; kart OM-02). Kör kayıtlar PK-07 ve PK-01 protokol adım 7 ile yeniden yazıldı | 29.10 (Lokman 13:12, 21:12); Ek 30.10 (Lokman 07:04) |
+| [D-33](D-33.md) | Fiyat defteri r05: 100'lük iç eleman dıştaki 100'lük ile aynı fiyat (H 342, çektirme U'su 148, karkaslı pano 1070–1250 en 2.200); 100'lük 3'lü H 60'lık karşılığının fiyatı; kutu profil ve tek kat çatı paneli boyla orantılı, her boy onaylı; besleme kablo borusu 3 × 2,5 kablonun iki katı, kenar boyası iç cephe boyasının kg fiyatıyla, çırpı ipi boş | 31.10 (Lokman 15:25–15:27) |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
 
@@ -110,7 +111,8 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-30 | prefabrikte son pano 122 cm ve üzeriyse proje tam panoya tamamlanır (29.10 10:48) | yazıldı (29.10; `claude/project-thread-5p2lsc`, BK-18, PR #79) |
 | D | D-31 | prefabrik ön onay çiziminin görünüş kuralları ve kural listesi (29.10 11:07–11:23) | yazıldı (29.10; `claude/project-thread-5p2lsc`, BK-18, PR #79) |
 | D | D-32 | baş makas omegası saçak ucundan saçak ucuna (veranda baş makası dahil); 100'lük iç duvarın üstündeki omega 100'lük duvar omegası, sırtı 10,5 (29.10 13:12; listede de, 21:12; Ek 30.10 07:04) | yazıldı (29.10, İE-18 R1 ek 4, PR #81; Ek 30.10, R1 ek 5) |
-| D | **D-33** | — | **sıradaki boş** |
+| D | D-33 | fiyat defteri r05: iç 100 = dış 100, 3'lü H 100 = 60'lık karşılığı, kutu profil ve tek kat panel boyla orantılı, kablo borusu ve kenar boyası hesapla (31.10 15:25–15:27) | yazıldı (31.10; `claude/project-thread-5p2lsc`, İE-13 PR-4) |
+| D | **D-34** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | `main`'e BK-12 ile (PR-1: motor ve bayi paftası; liste ve mühür kıyası sonraki PR'larda) |

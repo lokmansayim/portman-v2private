@@ -1,6 +1,6 @@
 {
  "sema": "portman.fiyat_defteri/1",
- "surum": "2026-10-28-r04",
+ "surum": "2026-10-31-r05",
  "aciklama": "Yükleme listesi × birim fiyat (İE-13, Z-10'un liste yöntemi). Anahtar Motor'un liste satırı: prefabrikte 'kalem | olcu' (motor/prefabrik_liste.py), çelikte 'kalem | boyut' (motor/genel yükleme listesi). Fiyat uydurulmaz: kaynağı olmayan kalemde fiyat boş kalır.",
  "para_birimi": "TL",
  "kdv": "kaynak listelerde yazmıyor",
@@ -1099,14 +1099,16 @@
      "not": ""
     },
     "Besleme kablo borusu | metre": {
-     "fiyat": null,
+     "fiyat": 140,
      "birim": "m",
-     "kaynak": null,
-     "kaynak_satir": null,
-     "kaynak_kalem": "",
-     "durum": "kaynakta yok",
-     "onay": false,
-     "not": "87 m² listesinde: kaynakta satır fiyatsız; Haziran listesinde yok; Eylül tablosunda satır var, fiyat boş."
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      155
+     ],
+     "kaynak_kalem": "NYM KABLO (3 x 2.5) | METRE",
+     "durum": "hesap",
+     "onay": true,
+     "not": "NYM kablo 3 × 2,5'in metre fiyatının iki katı (Lokman 31 Ekim 2026 15:27: \"besleme kablosunu 3x2.5 metresi kaç para ise 2 katı ile çarp\"; D-33). Önceki not: 87 m² listesinde: kaynakta satır fiyatsız; Haziran listesinde yok; Eylül tablosunda satır var, fiyat boş."
     },
     "İzole bant | adet": {
      "fiyat": 12,
@@ -1214,7 +1216,7 @@
      "kaynak_kalem": "",
      "durum": "kaynakta yok",
      "onay": false,
-     "not": "87 m² listesinde: kaynakta satır fiyatsız; Haziran listesinde yok; Fiyat boş."
+     "not": "Fiyat verilmez, boş kalır (Lokman 31 Ekim 2026 15:27: \"çırpı ipine fiyat verme boş kalsın\"; D-33); bir daha sorulmaz. Önceki not: 87 m² listesinde: kaynakta satır fiyatsız; Haziran listesinde yok; Fiyat boş."
     },
     "8'lik trapez uç | adet": {
      "fiyat": 55,
@@ -1556,14 +1558,16 @@
      "not": ""
     },
     "Kenarlar için boya | 10 kg": {
-     "fiyat": null,
+     "fiyat": 2000.0,
      "birim": "adet",
-     "kaynak": null,
-     "kaynak_satir": null,
-     "kaynak_kalem": "",
-     "durum": "kaynakta yok",
-     "onay": false,
-     "not": "87 m² listesinde: kaynakta yalnız 2,5 kg beyaz yağlı boya (550); Haziran listesinde: yalnız 3 kg selülozik yağlı (satır 329, 200) ve metal aksam boyası (satır 328, 600); 10 kg yok; Haziran'da 3 kg selülozik yağlı boya 200, 3 kg metal aksam boyası 600."
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      192
+     ],
+     "kaynak_kalem": "İç Cephe Boya (Polisan - 6610/Cİ-6610 Yeni Kuğu) | Kova (17,5 KG)",
+     "durum": "hesap",
+     "onay": true,
+     "not": "iç cephe boyasının kg fiyatından (3.500 TL / 17,5 kg = 200 TL/kg) × 10 kg (Lokman 31 Ekim 2026 15:27: \"boyayıda aynı şekilde oranla ikiside iç ise KG mı kaça geliyorsa hesapla\"; D-33). Önceki not: 87 m² listesinde: kaynakta yalnız 2,5 kg beyaz yağlı boya (550); Haziran listesinde: yalnız 3 kg selülozik yağlı (satır 329, 200) ve metal aksam boyası (satır 328, 600); 10 kg yok; Haziran'da 3 kg selülozik yağlı boya 200, 3 kg metal aksam boyası 600."
     },
     "Tavan boya (17,5 kg kova) | kova": {
      "fiyat": 800,
@@ -1637,6 +1641,56 @@
      "durum": "öneri onaylı",
      "onay": true,
      "not": "kaynakta tavan omegası yok; aynı 60 × 3750 omega duvar omegası olarak 278; Patron 27 Ekim 22:08 \"evet uygula\""
+    },
+    "H standart 100 (iç pano eki) | 100 × 100 × 2500": {
+     "fiyat": 342.0,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      68,
+      69
+     ],
+     "kaynak_kalem": "H (DÜBELLİ&KULAKLI) | 100*100*2500; H (DÜBELLİ ) | 100*100*2500",
+     "durum": "eşdeğer",
+     "onay": true,
+     "not": "'H 100 (dış pano eki) | 100 × 100 × 2500' ile aynı fiyat; iç ve dış H 100'lükse aynı (Lokman 31 Ekim 2026 15:25: \"iç ve dış H'lar 100'lük ise aynı hiç fark etmiyor yani o da 342 TL\") (D-33)"
+    },
+    "Çektirme U'su 100 (iç duvar) | 100 × 2440": {
+     "fiyat": 148,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      75
+     ],
+     "kaynak_kalem": "ÇEKTİRME U'SU (100 LÜK) | 100*2440",
+     "durum": "eşdeğer",
+     "onay": true,
+     "not": "'Çektirme U'su 100 | 100 × 2440' ile aynı fiyat; iç olunca yapı elemanı ve fiyatı değişmez (Lokman 31 Ekim 2026 15:25: \"birebir dış malzeme ile aynı\") (D-33)"
+    },
+    "3'lü H 100 × 100 × 100 (dış duvar T'si) | L 2500": {
+     "fiyat": 427.25,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      71,
+      72
+     ],
+     "kaynak_kalem": "3 LÜ H (DÜBELLİ VE KULAKLI) | 100*100*60*2500; 3 LÜ H (DÜBELLİ) | 100*100*60*2500",
+     "durum": "eşdeğer",
+     "onay": true,
+     "not": "'3'lü H 100 × 100 × 60 (dış duvar T'si) | L 2500' ile aynı fiyat; 3'lü H'da 60'lık 3'lü H ile aynı fiyat (Lokman 31 Ekim 2026 15:25); dış T'nin karşılığı dış T (D-33)"
+    },
+    "3'lü H standart 100 (iç T) | L 2500": {
+     "fiyat": 389,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      73
+     ],
+     "kaynak_kalem": "3 LÜ H (STANDART) | 60*60*2500",
+     "durum": "eşdeğer",
+     "onay": true,
+     "not": "'3'lü H standart 60 (iç T) | L 2500' ile aynı fiyat; 3'lü H'da 60'lık 3'lü H ile aynı fiyat (Lokman 31 Ekim 2026 15:25); iç T'nin karşılığı iç T (D-33)"
     }
    },
    "bantlar": [
@@ -1733,6 +1787,42 @@
        "dayanak": "Ekim listesinde 1070–1250 en 2.550"
       }
      ]
+    },
+    {
+     "kalem": "100'lük karkaslı + kasalı pano",
+     "kalinlik_mm": 100,
+     "yukseklik_mm": 2500,
+     "kaynak": "HAZ",
+     "araliklar": [
+      {
+       "en_mm": [
+        1070,
+        1250
+       ],
+       "alt_haric": false,
+       "fiyat": 2200,
+       "onay": true,
+       "dayanak": "Haziran listesinde 100'lük karkaslı dolu çelik kapı panosu 100 × 1250 2.200; iç ve dış karkaslı pano aynı ölçüde aynı fiyat, 1250 ile 1200 aynı (Lokman 31 Ekim 2026 15:25, D-33); en aralığı 60'lık karkaslı panonun bandı gibi 1070–1250"
+      }
+     ]
+    },
+    {
+     "kalem": "Karkaslı çelik kapı panosu",
+     "kalinlik_mm": 100,
+     "yukseklik_mm": 2500,
+     "kaynak": "HAZ",
+     "araliklar": [
+      {
+       "en_mm": [
+        1070,
+        1250
+       ],
+       "alt_haric": false,
+       "fiyat": 2200,
+       "onay": true,
+       "dayanak": "Haziran listesinde 100'lük karkaslı dolu çelik kapı panosu 100 × 1250 2.200; iç ve dış karkaslı pano aynı ölçüde aynı fiyat, 1250 ile 1200 aynı (Lokman 31 Ekim 2026 15:25, D-33); en aralığı 60'lık karkaslı panonun bandı gibi 1070–1250"
+      }
+     ]
     }
    ],
    "boy_onerileri": [
@@ -1745,8 +1835,33 @@
       64
      ],
      "kaynak_kalem": "KUTU PROFİL (KİRİŞ) (4 MM) (TAM BOY) | 100*100*6000",
-     "onay": false,
-     "dayanak": "Kaydı olmayan kiriş boyu için öneri: 6 m tam boyun fiyatından boyla orantılı, tam TL'ye yarım yukarı. Defterdeki onaylı kiriş boyları bu yöntemle: 1200, 1710, 2510, 3760 (Patron 27 Ekim 22:08 \"evet uygula\"), 1255, 2610, 3860 (Patron 28 Ekim 13:27); onay kalemin kendisi içindir, yeni boy onay bekler (CIO, 28 Ekim: fiyatı olmayan kiriş sarı öneriyle gösterilsin)."
+     "onay": true,
+     "dayanak": "Kutu profil boyla orantılı, her boy (Lokman 31 Ekim 2026 15:25: \"kutu profilde bir kural koy oranlama yap cm si kaça geliyorsa o şekilde hesapla örneğin 100 cm 100 TL ise 150 cm 150 TL gibi\"; D-33): 6 m tam boyun fiyatından boyla orantılı, tam TL'ye yarım yukarı. Önceden (r03–r04) yalnız öneriydi; defterdeki kiriş boyları (1200, 1710, 2510, 3760, 1255, 2610, 3860) bu yöntemle."
+    },
+    {
+     "kalem": "Özel kutu profil (kolon) 100 × 100",
+     "boy_mm": 6000,
+     "fiyat": 5000,
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      64
+     ],
+     "kaynak_kalem": "KUTU PROFİL (KİRİŞ) (4 MM) (TAM BOY) | 100*100*6000",
+     "onay": true,
+     "dayanak": "Kolon da kutu profil: 6 m tam boyun fiyatından boyla orantılı (D-33 madde 3; defterdeki kolon L 2500 = 2.083 bu yöntemle)."
+    },
+    {
+     "kalem_baslar": "Tek kat çatı paneli · ",
+     "boy_mm": 5450,
+     "fiyat": 1650,
+     "yuvarlama": 0.01,
+     "kaynak": "HAZ",
+     "kaynak_satir": [
+      197
+     ],
+     "kaynak_kalem": "ÇG1 ANTRESİT GRİ TEK KAT PANEL(87 CM KAPATIR) * 1 | L=5450",
+     "onay": true,
+     "dayanak": "Tek kat çatı paneli m² birim fiyatından, yani boyla orantılı (en 87 cm sabit), her çatı ve her boy (Lokman 31 Ekim 2026 15:26: \"Tek kat çatı paneli içinde aynısını yap m² birim fiyat üzerinden git\"; D-33). Haziran listesinde L 5450 1.650 TL; kuruşa yuvarlanır. Defterdeki 5100, 2400, 1750 bu yöntemle."
     }
    ],
    "atla": []

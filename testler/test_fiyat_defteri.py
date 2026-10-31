@@ -18,7 +18,8 @@ from araclar import fiyatla as F  # noqa: E402
 
 DEFTER = KOK / "kurallar" / "fiyat" / "defter_2026-10.json"
 KOR = sorted((KOK / "testler" / "kor" / "projeler").glob("*/bizim_liste.json"))
-DURUMLAR = {"eşleşti", "bant", "öneri onaylı", "ikinci kaynak", "yedek öneri", "hesap", "kaynakta yok", "yakın", "TK-01 onaylı kalemle aynı"}
+DURUMLAR = {"eşleşti", "bant", "öneri onaylı", "ikinci kaynak", "yedek öneri", "hesap", "kaynakta yok", "yakın", "TK-01 onaylı kalemle aynı",
+            "eşdeğer"}
 BIRIMLER = {"adet", "metre", "m", "kg"}
 
 
@@ -52,8 +53,11 @@ def test_defter_bicimi(defter):
             assert b["kaynak"] in defter["kaynaklar"]
             for a in b["araliklar"]:
                 assert a["en_mm"][0] <= a["en_mm"][1] and a["fiyat"] > 0 and a["dayanak"]
-        for b in H.get("boy_onerileri") or []:                  # boy önerisi hep öneri: onay kalemin kendisi içindir
-            assert b["kaynak"] in defter["kaynaklar"] and b["boy_mm"] > 0 and b["fiyat"] > 0 and b["onay"] is False and b["dayanak"]
+        for b in H.get("boy_onerileri") or []:                  # boy kuralı: onaylıysa Patron'un kuralı (D-33), dayanağında sözü
+            assert b["kaynak"] in defter["kaynaklar"] and b["boy_mm"] > 0 and b["fiyat"] > 0 and isinstance(b["onay"], bool) and b["dayanak"]
+            assert ("kalem" in b) != ("kalem_baslar" in b) and b.get("yuvarlama", 1) > 0
+            if b["onay"]:
+                assert defter["kaynaklar"][b["kaynak"]]["patron_verdi"] and "D-33" in b["dayanak"]
 
 
 def test_defterde_kisisel_veri_yok():
@@ -104,9 +108,10 @@ def test_pano_eni_bandi(defter, olcu, fiyat):
 
 
 def test_kiris_boy_onerisi(defter):
-    """CIO, 28 Ekim: kaydı olmayan kiriş boyu 6 m tam boyun fiyatından boyla orantılı öneri alır (tam TL'ye yarım yukarı). Yöntem defterdeki
-    onaylı kiriş boylarını aynen verir (Patron 27 Ekim 22:08; 28 Ekim 13:27'de onaylanan 3860, 2610, 1255 dahil, defter r04); yeni boy onay
-    bekler, varsayılan toplama girmez, satırda ve özette durur."""
+    """Kaydı olmayan kiriş boyu 6 m tam boyun fiyatından boyla orantılı fiyat alır (tam TL'ye yarım yukarı). Yöntem defterdeki onaylı kiriş
+    boylarını aynen verir (Patron 27 Ekim 22:08; 28 Ekim 13:27'de onaylanan 3860, 2610, 1255 dahil). Defter r05'ten beri kural onaylı, her boy
+    için (Lokman 31 Ekim 15:25, D-33): yeni boy toplama girer. Onaysız boy kuralının gösterimi (CIO, 28 Ekim: öneri satırda ve özette durur,
+    varsayılan toplama girmez) defterin kuralı onaysız kopyasıyla sınanır (r03–r04 hâli)."""
     K = "Kutu profil (kiriş) 100 × 100"
     pre = defter["hatlar"]["prefabrik"]
     onayli = {k.split(" | ")[1]: g["fiyat"] for k, g in pre["kalemler"].items() if k.startswith(K + " | ")}
@@ -114,6 +119,11 @@ def test_kiris_boy_onerisi(defter):
     for olcu, fiyat in onayli.items():
         assert F.boy_onerisi_bul(_pre(K, olcu, 1), pre["boy_onerileri"])[1] == fiyat, olcu
     L = {"satirlar": [_pre(K, "L 3960", 1), _pre(K, "L 1355", 2), _pre(K, "L 3760", 1), _pre(K, "100 × 100", 1)]}
+    a, b, c, d = F.fiyatla(L, defter)["satirlar"]                # r05: kural onaylı
+    assert (a["birim_fiyat"], a["tutar"], a["durum"], b["tutar"], c["durum"], d["durum"]) == (3300.0, 3300.0, "onaylı boy", 2258.0, "onaylı", "defterde yok")
+    defter = copy.deepcopy(defter)                              # r03–r04 hâli: kural öneri
+    for k in defter["hatlar"]["prefabrik"]["boy_onerileri"]:
+        k["onay"] = False
     R = F.fiyatla(L, defter)
     a, b, c, d = R["satirlar"]
     assert (a["birim_fiyat"], a["tutar"], a["durum"], a["oneri_fiyat"]) == (None, None, "öneri boy, onay bekliyor", 3300.0)
@@ -124,6 +134,39 @@ def test_kiris_boy_onerisi(defter):
     assert [x["durum"] for x in R2["satirlar"][:2]] == ["öneri boy"] * 2 and R2["ozet"]["onerilerle"] == 3300 + 2 * 1129
     assert R2["ozet"]["oneri_bekleyen"] == {"satir": 0, "tutar": 0}
 
+
+
+@pytest.mark.parametrize("kalem,olcu,fiyat,durum", [
+    # iç 100'lük eleman dıştaki 100'lük ile birebir aynı (Lokman 31 Ekim 15:25)
+    ("H standart 100 (iç pano eki)", "100 × 100 × 2500", 342.0, "onaylı"),
+    ("Çektirme U'su 100 (iç duvar)", "100 × 2440", 148, "onaylı"),
+    ("100'lük karkaslı + kasalı pano", "100 × 1250 × 2500", 2200, "onaylı bant"),
+    ("100'lük karkaslı + kasalı pano", "100 × 1200 × 2500", 2200, "onaylı bant"),
+    ("Karkaslı çelik kapı panosu", "100 × 1150 × 2500", 2200, "onaylı bant"),
+    ("Karkaslı çelik kapı panosu", "100 × 1000 × 2500", None, "defterde yok"),        # bandın dışı: fiyat uydurulmaz
+    # 100'lük 3'lü H, 60'lık karşılığının fiyatı (15:25)
+    ("3'lü H 100 × 100 × 100 (dış duvar T'si)", "L 2500", 427.25, "onaylı"),
+    ("3'lü H standart 100 (iç T)", "L 2500", 389, "onaylı"),
+    # kutu profil ve tek kat çatı paneli boyla orantılı (15:25, 15:26; panel kuruşa)
+    ("Kutu profil (kiriş) 100 × 100", "L 2660", 2217.0, "onaylı boy"),
+    ("Özel kutu profil (kolon) 100 × 100", "L 3000", 2500.0, "onaylı boy"),
+    ("Tek kat çatı paneli · arka veranda çatısı", "L 1770", 535.87, "onaylı boy"),
+    ("Tek kat çatı paneli · yan veranda çatısı", "L 2000", 605.5, "onaylı boy"),
+    ("Tek kat çatı paneli · ana çatı", "L 5100", 1544.04, "onaylı"),                   # kaydı olan kendi kaydıyla, yöntem aynı
+    # besleme kablo borusu 3 × 2,5 kablonun iki katı, kenar boyası iç cephe boyasının kg fiyatıyla, çırpı ipi boş (15:27)
+    ("Besleme kablo borusu", "metre", 140, "onaylı"),
+    ("Kenarlar için boya", "10 kg", 2000.0, "onaylı"),
+    ("Çırpı ipi", "adet", None, "fiyat yok"),
+])
+def test_d33_fiyat_kurallari(defter, kalem, olcu, fiyat, durum):
+    """D-33 (Lokman 31 Ekim 2026 15:25–15:27): TK-02'nin (iç 100) fiyatsız satırları. Yöntem defterdeki eski fiyatları aynen verir: tek kat
+    panel 5100, 2400, 1750; kolon L 2500."""
+    s = F.fiyatla({"satirlar": [_pre(kalem, olcu, 1)]}, defter)["satirlar"][0]
+    assert (s["birim_fiyat"], s["durum"]) == (fiyat, durum), s
+    pre = defter["hatlar"]["prefabrik"]
+    for k in ("Tek kat çatı paneli · ön veranda çatısı | L 2400", "Tek kat çatı paneli · arka veranda çatısı | L 1750",
+              "Özel kutu profil (kolon) 100 × 100 | L 2500"):
+        assert F.boy_onerisi_bul(_pre(*k.split(" | "), 1), pre["boy_onerileri"])[1] == pre["kalemler"][k]["fiyat"], k
 
 def test_bant_onayi_ve_kayitli_anahtar(defter):
     D = copy.deepcopy(defter)
