@@ -2,8 +2,8 @@
 elle yazılmış LLM cevabı (manuel arka uç), sahte genel motor. LLM çağrısı yok.
 
 Ç8801K r01 üstünde:
-- "mutfağı sağa 20 cm büyütelim" → r02; işlem zarfta (`oda_buyut`, Mutfak, D, 20), mesajda kodun hesapladığı fark (Mutfak ve komşu
-  Yatak Odası 1 m²'leri) ve "plan taslaktır" notu;
+- "banyoyu arkaya 30 cm büyütelim" → r02; işlem zarfta (`oda_buyut`, Banyo, K, 30), mesajda kodun hesapladığı fark (Banyo ve komşu
+  Yatak Odası 1 m²'leri) ve "plan taslaktır" notu ("mutfağı sağa 20" geçmez: yatak odası 1 kapısı köşeye 1,5 cm kalır, hakem 31.10);
 - "salonu sağa 50 cm büyütelim" → hakem geçirmez (mutfak 9,5 m²'nin altına iner): gerekçeli soru, plan aynen (rev 1), sonra onaylanabilir;
 - yön yok → yön sorulur, plan aynen;
 - ölçü yok → 50 cm alınır ve bayiye yazılır (hakem geçirirse) ya da gerekçe;
@@ -44,19 +44,19 @@ def _son_govde(depo) -> str:
     return sorgu(depo, "SELECT govde FROM giden WHERE alici <> 'PATRON' ORDER BY olusturuldu DESC, sira")[0]["govde"]
 
 
-def test_mutfak_saga_20_r02_fark_ve_taslak_notu(depo, wa, hizli_genel, tmp_path):
+def test_banyo_arkaya_30_r02_fark_ve_taslak_notu(depo, wa, hizli_genel, tmp_path):
     ilk = _r01(depo)
-    ayar = _ayar(tmp_path, {"islemler": [_islem(tur="oda_buyut", mahal="Mutfak", yon="D", cm=20, alinti="mutfağı sağa 20 cm büyütelim")]})
-    assert depo.mesaj_kaydet(mesaj("mutfağı sağa 20 cm büyütelim", talep("revizyon", ozet="mutfak büyüsün"), bayi=BAYI_KART))
+    ayar = _ayar(tmp_path, {"islemler": [_islem(tur="oda_buyut", mahal="Banyo", yon="K", cm=30, alinti="banyoyu arkaya 30 cm büyütelim")]})
+    assert depo.mesaj_kaydet(mesaj("banyoyu arkaya 30 cm büyütelim", talep("revizyon", ozet="banyo büyüsün"), bayi=BAYI_KART))
     [r] = isle_hepsi(depo, ayar)
     assert r["eylem"] == "is_emri" and "oda_buyut" in r["gerekce"], r
     rev = son_rev(depo)
     y = rev["is_emri"]["yapi"]
     assert rev["rev"] == 2 and rev["proje_id"] == ilk["proje_id"]
-    assert [(d["op"], d["mahal"], d["yon"], d["cm"]) for d in y["degisiklikler"]] == [("oda_buyut", "Mutfak", "D", 20)]
-    assert y["uygulanan"] == ["Mutfak sağa 20 cm büyütüldü"]
+    assert [(d["op"], d["mahal"], d["yon"], d["cm"]) for d in y["degisiklikler"]] == [("oda_buyut", "Banyo", "K", 30)]
+    assert y["uygulanan"] == ["Banyo arkaya 30 cm büyütüldü"]
     govde = _son_govde(depo)
-    assert "Mutfak 10,05 → 10,82 m²; Yatak Odası 1 12,74 → 11,97 m²; Hol ile Yatak Odası 1 arasındaki kapı 20 cm sağa kaydı" in govde, govde
+    assert "Banyo 4,68 → 5,42 m²; Yatak Odası 1 12,74 → 11,97 m²" in govde, govde
     assert "plan taslaktır; mühendis kontrolünde kesinleşir" in govde
     c = sorgu(depo, "SELECT cikarim FROM isler ORDER BY id DESC")[0]["cikarim"]
     assert c["degisiklik"]["durum"] == "tamam" and c["degisiklik"]["germe"] is True
@@ -65,16 +65,16 @@ def test_mutfak_saga_20_r02_fark_ve_taslak_notu(depo, wa, hizli_genel, tmp_path)
 def test_ayni_mesajda_iki_oda_istegi_ikisi_de_uygulanir(depo, wa, hizli_genel, tmp_path):
     """Geometri hakemi 31.10 (bulgu 2): tekilleştirme anahtarı oda ve yönü de içerir; ikinci oda isteği sessiz düşmez (K21)."""
     _r01(depo)
-    ayar = _ayar(tmp_path, {"islemler": [_islem(tur="oda_buyut", mahal="Mutfak", yon="D", cm=20, alinti="mutfağı sağa 20"),
-                                         _islem(tur="oda_buyut", mahal="Banyo", yon="K", cm=50, alinti="banyoyu arkaya 50")]})
-    assert depo.mesaj_kaydet(mesaj("mutfağı sağa 20, banyoyu arkaya 50 cm büyütelim", talep("revizyon", ozet="mutfak ve banyo"), bayi=BAYI_KART))
+    ayar = _ayar(tmp_path, {"islemler": [_islem(tur="oda_buyut", mahal="Banyo", yon="K", cm=30, alinti="banyoyu arkaya 30 büyütelim"),
+                                         _islem(tur="oda_kucult", mahal="Yaşam Alanı", yon="D", cm=30, alinti="salonu sağdan 30 küçültelim")]})
+    assert depo.mesaj_kaydet(mesaj("banyoyu arkaya 30 büyütelim, salonu sağdan 30 küçültelim", talep("revizyon", ozet="banyo ve salon"), bayi=BAYI_KART))
     [r] = isle_hepsi(depo, ayar)
     assert r["eylem"] == "is_emri", r
     y = son_rev(depo)["is_emri"]["yapi"]
-    assert [(d["mahal"], d["yon"], d["cm"]) for d in y["degisiklikler"]] == [("Mutfak", "D", 20), ("Banyo", "K", 50)]
-    assert y["uygulanan"] == ["Mutfak sağa 20 cm büyütüldü", "Banyo arkaya 50 cm büyütüldü"]
+    assert [(d["mahal"], d["yon"], d["cm"]) for d in y["degisiklikler"]] == [("Banyo", "K", 30), ("Yaşam Alanı", "D", 30)]
+    assert y["uygulanan"] == ["Banyo arkaya 30 cm büyütüldü", "Yaşam Alanı sağdan 30 cm küçültüldü"]
     govde = _son_govde(depo)
-    assert "Mutfak 10,05 → 10,82 m²" in govde and "Banyo 4,68 → 5,91 m²; Yatak Odası 1 11,97 → 10,69 m²" in govde, govde
+    assert "Banyo 4,68 → 5,42 m²" in govde and "Yaşam Alanı 21,34 → 19,48 m²; Hol 7,38 → 8,05 m²; Mutfak 10,05 → 11,21 m²" in govde, govde
 
 
 def test_cizim_tanimi_ayni_germe(depo, wa, hizli_genel, tmp_path):
@@ -83,14 +83,14 @@ def test_cizim_tanimi_ayni_germe(depo, wa, hizli_genel, tmp_path):
     from beyin import tanim_germe as TG
     from beyin.yapi_kimligi import tanim_sha_icerik
     _r01(depo)
-    ayar = _ayar(tmp_path, {"islemler": [_islem(tur="oda_buyut", mahal="Mutfak", yon="D", cm=20, alinti="mutfağı sağa 20")]})
-    assert depo.mesaj_kaydet(mesaj("mutfağı sağa 20", talep("revizyon", ozet="mutfak"), bayi=BAYI_KART))
+    ayar = _ayar(tmp_path, {"islemler": [_islem(tur="oda_buyut", mahal="Banyo", yon="K", cm=30, alinti="banyoyu arkaya 30")]})
+    assert depo.mesaj_kaydet(mesaj("banyoyu arkaya 30", talep("revizyon", ozet="banyo"), bayi=BAYI_KART))
     [r] = isle_hepsi(depo, ayar)
     assert r["eylem"] == "is_emri", r
     y = son_rev(depo)["is_emri"]["yapi"]
     t = W._cizim_tanimi(y["tanim"], y["degisiklikler"])
     t0 = W._cizim_tanimi(y["tanim"], [])
-    beklenen, _ = TG.oda_degistir(t0, "Mutfak", "D", 20)
+    beklenen, _ = TG.oda_degistir(t0, "Banyo", "K", 30)
     assert tanim_sha_icerik(t) == tanim_sha_icerik(beklenen)
 
 
@@ -119,15 +119,15 @@ def test_salonu_saga_50_hakem_gecirmez_plan_aynen(depo, wa, hizli_genel, tmp_pat
 
 def test_yon_yoksa_sorulur_sonra_tam_istek_r02(depo, wa, hizli_genel, tmp_path):
     _r01(depo)
-    ayar = _ayar(tmp_path, {"islemler": [_islem(tur="oda_buyut", mahal="Mutfak", cm=20, alinti="mutfağı 20 cm büyütelim")]})
-    assert depo.mesaj_kaydet(mesaj("mutfağı 20 cm büyütelim", talep("revizyon", ozet="mutfak"), bayi=BAYI_KART))
+    ayar = _ayar(tmp_path, {"islemler": [_islem(tur="oda_buyut", mahal="Banyo", cm=30, alinti="banyoyu 30 cm büyütelim")]})
+    assert depo.mesaj_kaydet(mesaj("banyoyu 30 cm büyütelim", talep("revizyon", ozet="banyo"), bayi=BAYI_KART))
     [r] = isle_hepsi(depo, ayar)
     assert r["eylem"] == "sor" and r["gerekce"] == "banka germe: yön yok", r
-    assert "\"mutfağı 20 cm büyütelim\" için yönü yazar mısınız: öne, arkaya, sola ya da sağa?" in _son_govde(depo)
+    assert "\"banyoyu 30 cm büyütelim\" için yönü yazar mısınız: öne, arkaya, sola ya da sağa?" in _son_govde(depo)
     assert son_rev(depo)["rev"] == 1
     time.sleep(1.1)
-    ayar = _ayar(tmp_path, {"islemler": [_islem(tur="oda_buyut", mahal="Mutfak", yon="D", cm=20, alinti="mutfağı sağa 20")]})
-    assert depo.mesaj_kaydet(mesaj("mutfağı sağa 20", talep("revizyon", ozet="mutfak"), bayi=BAYI_KART))
+    ayar = _ayar(tmp_path, {"islemler": [_islem(tur="oda_buyut", mahal="Banyo", yon="K", cm=30, alinti="banyoyu arkaya 30")]})
+    assert depo.mesaj_kaydet(mesaj("banyoyu arkaya 30", talep("revizyon", ozet="banyo"), bayi=BAYI_KART))
     [r2] = isle_hepsi(depo, ayar)
     assert r2["eylem"] == "is_emri" and son_rev(depo)["rev"] == 2, r2
 

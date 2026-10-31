@@ -22,6 +22,7 @@ from pydantic import BaseModel, Field
 from beyin import llm, numara
 
 YON_SOZU = {"G": "öne", "K": "arkaya", "B": "sola", "D": "sağa"}
+KUCULT_SOZU = {"G": "önden", "K": "arkadan", "B": "soldan", "D": "sağdan"}
 YAN_SOZU = {"G": "ön", "K": "arka", "B": "sol", "D": "sağ"}
 ODA_CM = (5, 300)
 ODA_CM_VARSAYILAN = 50
@@ -206,7 +207,7 @@ def _oda_islemi(i: dict, odalar: list[str] | None) -> dict | str:
     if i.get("yon") not in YON_SOZU:
         return "yon"
     o = {"op": tur, "mahal": ad, "yon": i["yon"], "cm": cm,
-         "aciklama": f"{ad} {YON_SOZU[i['yon']]} {cm} cm {'büyütme' if tur == 'oda_buyut' else 'küçültme'}"}
+         "aciklama": f"{ad} {(YON_SOZU if tur == 'oda_buyut' else KUCULT_SOZU)[i['yon']]} {cm} cm {'büyütme' if tur == 'oda_buyut' else 'küçültme'}"}
     if varsayilan:
         o["cm_varsayilan"] = True
     return o

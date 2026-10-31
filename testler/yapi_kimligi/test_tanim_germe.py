@@ -126,6 +126,9 @@ def test_c8201_yatak_odasi_2_one_30_duvar_kayar_kapi_birlikte():
     ("modeller/C8201.json", "Hol", "D", 30, True, "duvarlar arasında 10 cm'lik bir kırık çıkıyor (çelikte 15 cm ve daha kısa parça yapılmaz)"),
     ("modeller/KT02.json", "Yatak Odası 1", "K", 50, True, "bu modelin çelik listesi değişen ölçülere otomatik uyarlanamıyor"),
     ("modeller/KT02.json", "Banyo", "G", 20, True, "bu modelin çelik listesi değişen ölçülere otomatik uyarlanamıyor"),
+    # geometri hakemi ikinci tur: kayan duvarla kayan kapının öbür ayağı birleşen duvara 10 cm'den yakın kalmaz (`plan_derle` payı)
+    ("modeller/C8801K.json", "Mutfak", "D", 20, True, "Yatak Odası 1 kapısı duvar köşesine 1,5 cm kalıyor (en az 10 cm olmalı)"),
+    ("modeller/C8801.json", "Yatak Odası 2", "K", 20, True, "Banyo kapısı duvar köşesine 1,5 cm kalıyor (en az 10 cm olmalı)"),
 ])
 def test_olumsuz_ornekler_gerekceli(yol, mahal, yon, cm, buyut, gerekce):
     t = _tanim(yol)
@@ -204,7 +207,7 @@ def test_denetle_oda_islemleri():
     d = DO.denetle(lo, [], set(), odalar=odalar)
     assert d["ops"] == [{"op": "oda_buyut", "mahal": "Yaşam Alanı", "yon": "D", "cm": 50, "aciklama": "Yaşam Alanı sağa 50 cm büyütme",
                          "cm_varsayilan": True},
-                        {"op": "oda_kucult", "mahal": "Mutfak", "yon": "K", "cm": 30, "aciklama": "Mutfak arkaya 30 cm küçültme"}]
+                        {"op": "oda_kucult", "mahal": "Mutfak", "yon": "K", "cm": 30, "aciklama": "Mutfak arkadan 30 cm küçültme"}]
     assert d["uygulanamaz"] == [] and d["yon_sor"] == []
     d = DO.denetle({"islemler": [_islem(tur="oda_buyut", mahal="Mutfak", yon=None, cm=40, alinti="mutfağı büyüt")]}, [], set(), odalar=odalar)
     assert d["ops"] == [] and d["yon_sor"] == ["mutfağı büyüt"]

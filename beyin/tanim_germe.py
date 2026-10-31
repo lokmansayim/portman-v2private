@@ -16,7 +16,8 @@ kesit bantları. Karar hakemindir: uygulayıcı önerir, hakem değişmez (Z-03)
 - **Kilitli kenar** (veranda, ana çatının açıklığı = düzey 3, karşı komşunun başka hizada devam etmesi …) → `GermeHatasi`, gerekçe
   bayinin okuyacağı Türkçeyle (K21: sessiz düşme yok). Düzey 2 (ikincil çatı yeniden hesabı) bu PR'da yok: gerekçesiyle yapılmaz.
 
-Hakem (`denetle`): `yapi.kur` + `aciklik_denetimi` (varyant), aynı duvarda açıklık örtüşmesi ve 15 cm parça (D-10; yalnız yeni çıkan),
+Hakem (`denetle`): `yapi.kur` + `aciklik_denetimi` (varyant), aynı duvarda açıklık örtüşmesi, açıklık kenarının birleşen duvara en az 10 cm
+uzaklığı (`plan_derle` payı) ve 15 cm parça (D-10) (üçü de yalnız yeni çıkan),
 `cati_genel.cati_kur`, metraj (kimlik), yükleme listesinin girdisi (`girdi_genel.girdi`, yöntem panel), açıklık–mahal ilişkisi değişmez
 (her kapı aynı iki mahal arasında, her pencere aynı mahalde), değişen mahallerde oda en küçükleri (`kurallar/plan/oda_kurallari.json`:
 net m², dar kenar, kol; yalnız kötüleşen ölçü). Karkas modeli (`celik_modeli`, SKP) gerilmiş eve uymaz: karkas kurala geçer
@@ -34,9 +35,11 @@ from beyin.varyant import VaryantHatasi, _kur, aciklik_denetimi
 
 ISARET = {"G": -1, "K": 1, "B": -1, "D": 1}               # yanın eksendeki yönü (+y kuzey, +x doğu)
 YON_SOZU = {"G": "öne", "K": "arkaya", "B": "sola", "D": "sağa"}
+KUCULT_SOZU = {"G": "önden", "K": "arkadan", "B": "soldan", "D": "sağdan"}   # küçültmede yan: "Mutfak arkadan 30 cm küçültüldü"
 YAN_SOZU = {"G": "ön", "K": "arka", "B": "sol", "D": "sağ"}
 CM_ARALIK = (5, 300)                                       # `plan_islem.Islem.cm` ile aynı
 KISA_PARCA_CM = 15                                         # D-10: çelikte 15 cm (ve daha kısa) parça çıkmaz
+AYAK_CM = 10                                               # açıklık kenarı birleşen duvarın karkas yüzünden (`plan_derle` PAY_KOSE, PAY_BIRLESIM)
 TOL = 0.01
 KESIT_DUVAR_SINIFLARI = ("dis", "ic", "ek")               # kesit yalnız bu sınıftaki duvarları uzatır (kolon, baca, korkuluk değil)
 ISLEV_KURAL_SIRA = ("salon", "yatak_odasi", "mutfak", "banyo", "hol", "depo")   # karma mahalde kural (salonla birlikte mutfak: salon kuralı)
@@ -378,6 +381,30 @@ def _ortusen_acikliklar(t: dict) -> set[tuple[str, str]]:
     return out
 
 
+def _ayaklar(t: dict) -> dict[str, float]:
+    """Açıklık adı → kenarından, bulunduğu duvara değen (birleşen ya da devam eden) en yakın duvarın karkas yüzüne uzaklık (cm, duvar
+    boyunca). Açıklığın karşısına düşen duvar 0 verir."""
+    duvar = {d["ad"]: d for d in t["duvarlar"]}
+    out: dict[str, float] = {}
+    for ac in t.get("acikliklar") or []:
+        w = duvar.get(ac.get("duvar"))
+        if w is None:
+            continue
+        k = w["kutu"]
+        i = 0 if k[2] - k[0] >= k[3] - k[1] else 1
+        j = 1 - i
+        a0, a1 = float(ac["bas"]), float(ac["bas"]) + float(ac["en"])
+        en_az = math.inf
+        for d in t["duvarlar"]:
+            q = d["kutu"]
+            if d["ad"] == w["ad"] or d.get("sinif") not in KESIT_DUVAR_SINIFLARI or q[j + 2] < k[j] - TOL or q[j] > k[j + 2] + TOL:
+                continue
+            g = a0 - q[i + 2] if q[i + 2] <= a0 + TOL else q[i] - a1 if q[i] >= a1 - TOL else 0.0
+            en_az = min(en_az, max(g, 0.0))
+        out[ac["ad"]] = en_az
+    return out
+
+
 def _aciklik_sozu(t: dict, ad: str) -> str:
     ac = next((a for a in t.get("acikliklar") or [] if a.get("ad") == ad), {})
     mahaller = {m["ad"] for m in t.get("mahaller") or []}
@@ -442,6 +469,10 @@ def denetle(t_once: dict, t_sonra: dict, k_once: dict | None = None, set_yolu=No
     if yeni_ortusme:
         a, b = yeni_ortusme[0]
         raise GermeHatasi(f"{_aciklik_sozu(t_sonra, a)} ile {_aciklik_sozu(t_sonra, b)} aynı duvarda üst üste biniyor")
+    ayak0, ayak1 = _ayaklar(t_once), _ayaklar(t_sonra)
+    for ad, g in sorted(ayak1.items()):
+        if g < AYAK_CM - TOL and g < ayak0.get(ad, math.inf) - TOL:
+            raise GermeHatasi(f"{_aciklik_sozu(t_sonra, ad)} duvar köşesine {_tr(g, 1)} cm kalıyor (en az {AYAK_CM} cm olmalı)")
     yeni_kisa = sorted(_kisa_parcalar(t_sonra) - _kisa_parcalar(t_once))
     if yeni_kisa:
         raise GermeHatasi(f"duvarlar arasında {yeni_kisa[0][1]:g} cm'lik bir kırık çıkıyor (çelikte {KISA_PARCA_CM} cm ve daha kısa parça yapılmaz)")
@@ -574,7 +605,8 @@ def uygula(t: dict, d: dict) -> dict:
 
 def kisa_anlatim(rapor: dict) -> str:
     """Uygulanan işlem (bayi mesajındaki "Uygulanan", önce–sonra görselinin başlığı, PDF açıklaması): "Yatak Odası 1 arkaya 50 cm büyütüldü"."""
-    return f"{rapor['mahal']} {YON_SOZU[rapor['yon']]} {rapor['cm']} cm {'büyütüldü' if rapor['buyut'] else 'küçültüldü'}"
+    yon = (YON_SOZU if rapor["buyut"] else KUCULT_SOZU)[rapor["yon"]]
+    return f"{rapor['mahal']} {yon} {rapor['cm']} cm {'büyütüldü' if rapor['buyut'] else 'küçültüldü'}"
 
 
 def anlatim(rapor: dict) -> str:
@@ -584,7 +616,7 @@ def anlatim(rapor: dict) -> str:
     deg = rapor.get("degisen") or {}
     if rapor["tur"] == "germe":
         obur = [m for m in sorted(deg) if m != mahal]
-        ev = f"ev {YON_SOZU[yon]} {cm} cm {'uzadı' if buyut else 'kısaldı'}"
+        ev = f"ev {(YON_SOZU if buyut else KUCULT_SOZU)[yon]} {cm} cm {'uzadı' if buyut else 'kısaldı'}"
         if obur:
             ev += f" ({'uzayan' if buyut else 'kısalan'} öteki odalar: {', '.join(obur)})"
         k0, k1 = rapor["kapali_m2"]
@@ -608,4 +640,6 @@ def _aciklik_adi(a: dict) -> str:
 
 def istek_sozu(d: dict) -> str:
     """Uygulanamayan isteğin bayiye anılışı: "Salon - Mutfak sağa 50 cm büyütme"."""
-    return f"{d.get('mahal')} {YON_SOZU.get(d.get('yon'), '')} {d.get('cm')} cm {'büyütme' if d.get('op') == 'oda_buyut' else 'küçültme'}".replace("  ", " ")
+    buyut = d.get("op") == "oda_buyut"
+    yon = (YON_SOZU if buyut else KUCULT_SOZU).get(d.get("yon"), "")
+    return f"{d.get('mahal')} {yon} {d.get('cm')} cm {'büyütme' if buyut else 'küçültme'}".replace("  ", " ")
