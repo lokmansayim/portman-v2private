@@ -902,13 +902,18 @@ def _llm_degisiklikler(k: Konusma, katalog: Katalog, aday: dict, t: dict, onceki
     except varyant.VaryantHatasi:
         y = None
     pencereler = CO.pencere_adaylari(t, y)
-    d = DO.denetle(lo, pencereler, _cati_kodlari(katalog, aday))
+    germe = bool(lo.get("germe"))                               # İE-23 PR-2a: okuma germeli yapıldıysa (ayar banka_germe) oda işlemleri
+    d = DO.denetle(lo, pencereler, _cati_kodlari(katalog, aday), odalar=[m["ad"] for m in t.get("mahaller", [])] if germe else None)
     k.not_dus("kural", f"LLM-önce okuma: {len(d['ops'])} işlem, {len(d['uygulanamaz'])} uygulanamaz" + (", soru" if d["sor"] else ""))
     if d["uygulanamaz"]:
         alinti = "; ".join(f"\"{numara.maskele(x)[:80]}\"" for x in d["uygulanamaz"][:3])
         return _bitir(k, Karar(eylem="yonlendir", gerekce=f"LLM-önce okuma: {len(d['uygulanamaz'])} istek otomatik uygulanamıyor",
                                 mesaj=f"{alinti} isteğini otomatik uygulayamadım. Otomatik yapabildiklerim: pencere ölçüsü, çatı seçeneği, dış duvarlar "
-                                      "140'lık karkas. " + YONLENDIRME))
+                                      "140'lık karkas" + (", oda büyütme ve küçültme" if germe else "") + ". " + YONLENDIRME))
+    if d.get("yon_sor"):                                        # İE-23 PR-2a: oda büyütmede yön yok; plan bayide kalır, soru sorulur
+        soz = numara.maskele(str(d["yon_sor"][0]))[:80]
+        return _yeni_plan_sorusu(k, f"\"{soz}\" için yönü yazar mısınız: öne, arkaya, sola ya da sağa? (örn. \"salonu sağa 50 cm büyüt\") "
+                                    + _BASKA_DEGISIKLIK, "banka germe: yön yok")
     zaten140 = _zaten_140(t, onceki)
     ops = [o for o in d["ops"] if o["op"] != "cati_varyanti" and not (o["op"] == "dis_karkas_140" and zaten140)]   # kural yoluyla aynı: yinelenmez
     okunan = {{"pencere_olcu": "pencere", "dis_karkas_140": "dis140"}.get(o["op"], o["op"]) for o in ops}
@@ -1000,7 +1005,7 @@ def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts
     yeni, okunan = sonuc
     tekil: dict[str, dict] = {}
     for d in yeni:                                             # aynı pencereye iki değişiklik (saklanan istek + seçim mesajı): sonuncusu geçerli
-        tekil[f"{d.get('op')}:{d.get('aciklik') or ''}"] = d
+        tekil[f"{d.get('op')}:{d.get('aciklik') or ''}:{d.get('mahal') or ''}:{d.get('yon') or ''}"] = d   # İE-23: oda işlemi odası ve yönüyle
     yeni = list(tekil.values())
     if ayni_proje and str(son_y.get("kod")).upper() != str(aday["kod"]).upper():          # çatı varyantı değişti: zarf tanım dosyasını değiştirir
         yeni.append({"op": "cati_varyanti", "kod": aday["kod"], "aciklama": f"çatı {aday.get('gosterim') or aday['kod']}"}); okunan.add("cati")
@@ -1011,9 +1016,22 @@ def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts
                 k.d["asama"] = "onay_bekliyor"                 # plan değişmedi, bayide: mesajın dediği gibi Onayla çalışır (dördüncü tur)
             return kr
         return _soru(k, "okuma_metin", _NEYI_DEGISTIRELIM)   # aynı plan yeniden çizilip revizyon hakkı harcanmaz
+    from . import tanim_germe as TG
     try:
         for d in yeni:
-            t = varyant.tanim_uygula(t, d)
+            if d.get("op") in ("oda_buyut", "oda_kucult"):        # İE-23 PR-2a: kodun hesapladığı fark bayiye ve görsele
+                t, rapor = TG.oda_degistir(t, d.get("mahal"), d.get("yon"), d.get("cm"), buyut=d["op"] == "oda_buyut")
+                d["aciklama"] = TG.kisa_anlatim(rapor)
+                d["fark"] = TG.anlatim(rapor) + (" (ölçü yazılmadığı için 50 cm aldım)" if d.get("cm_varsayilan") else "")
+            else:
+                t = varyant.tanim_uygula(t, d)
+    except TG.GermeHatasi as e:                                # Lokman 15.10 (karar 3) kuralı: plan aynen, onaylanabilir; sessiz düşme yok
+        istek = next((x for x in yeni if x.get("op") in ("oda_buyut", "oda_kucult") and not x.get("fark")), {})
+        ne = TG.istek_sozu(istek) if istek else "değişiklik"
+        obur = " Bu mesajdaki öteki değişiklikleri de uygulamadım." if len(yeni) > 1 else ""
+        k.not_dus("kural", f"banka germe uygulanamadı: {e}")
+        return _yeni_plan_sorusu(k, f"{ne} isteğinizi otomatik uygulayamadım: {e}.{obur} Planınız aynen geçerli. " + _BASKA_DEGISIKLIK,
+                                 "banka germe: hakem geçirmedi, plan aynen")
     except varyant.VaryantHatasi as e:
         k.not_dus("kural", f"değişiklik uygulanamadı: {e}")
         return _bitir(k, Karar(eylem="yonlendir", gerekce=f"çelik değişikliği uygulanamadı: {e}",
@@ -1035,6 +1053,9 @@ def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts
     on_not = ts.pop("_on_not", "")                             # düşen pencere sorusu notu (prefabrikle aynı)
     on_bilgi = f"{celik.kaynak_notu(aday)}" + (f" · {_m2(aday.get('katalog_m2'))} m², {aday.get('oda_programi')}" if isinstance(aday.get("katalog_m2"), (int, float)) else "") + ". "
     uyg = ("Uygulanan: " + "; ".join(CO.aciklama(d) for d in yeni) + ". ") if yeni else ""
+    fark = [d["fark"] for d in yeni if d.get("fark")]
+    if fark:                                                   # İE-23 PR-2a: kodun hesapladığı fark; ölçü değişti, plan taslak
+        uyg += " ".join(f[0].upper() + f[1:] + "." for f in fark) + " Ölçüler değiştiği için plan taslaktır; mühendis kontrolünde kesinleşir. "
     if yeni:                                                   # BK-09 M1: kod değişiklik uyguladıysa LLM özeti yazılmaz (K18); özetin
         ozet = ""                                              # "teyit etmemiz gerekiyor" sorusu "Uygulanan"la çelişiyordu (14.10 canlı)
         ie["talep"]["metin"] = uyg.strip()                     # PDF açıklaması da kodun okuması (`worker`, `ozet_baslik`)
