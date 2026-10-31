@@ -46,6 +46,7 @@ VERI = KOK / "testler" / "kimlik" / "veri"
 MOTOR_VERI = KOK / "testler" / "motor" / "veri"
 PROJE = KOK / "testler" / "kimlik" / "hakem" / "projeler" / "PK01.json"
 K2_KODLARI = ("OM-01", "AS-01", "KP-01", "BT-01", "DR-01", "DR-02")
+K5B2 = {"OM-02": 3, "H-11": 72, "AL-01": 76, "AL-02": 8, "IZ-01": 8}      # İE-15 K5b-2: verandaya bakan dış duvarın omegası, tavan H'ı ve gözleri, çatı izolasyonu
 KILIT_K2 = "21476fe2de4d20ca5d111694f90de7f8ce203fe6c6dadc65d4b6d2710f4ac6e0"   # K1'in 25 ve K2'nin 7 kodu (bu PR)
 
 
@@ -116,19 +117,23 @@ def test_hakem_k2_kapisi_gecer(pk01):
 
 
 def test_k1_kapisi_ve_sayimi_aynen(pk01):
-    """K2 modeli K1'in sayımını değiştirmez: K1 kartlarının adedi, H türleri, görünüm, bileşen ve kartsızlar aynı; adımsız Kapı 1 geçer."""
+    """K2 modeli K1'in sayımını değiştirmez: K1 kartlarının adedi, H türleri, görünüm, bileşen ve kartsızlar aynı; adımsız Kapı 1 geçer.
+    Yerleşim katmanı K5b-2'den beri tavan katmanını ve verandaya bakan dış duvarın omegasını (OM-02) da ekler."""
     a, b = pk01["say_k1"], pk01["say"]
     k1 = {k["kod"]: k["adet"] for k in a["kartlar"]}
     k2 = _adet(b)
-    assert {k: v for k, v in k2.items() if k not in K2_KODLARI} == {k: v for k, v in k1.items() if k not in K2_KODLARI}
-    assert [k2[k] for k in K2_KODLARI] == [24, 42, 22, 4, 2, 6] and all(k1[k] == 0 for k in K2_KODLARI)
+    katman = K2_KODLARI + tuple(K5B2)
+    assert {k: v for k, v in k2.items() if k not in katman} == {k: v for k, v in k1.items() if k not in katman}
+    assert [k2[k] for k in K2_KODLARI] == [24, 42, 22, 4, 2, 6] and all(k1[k] == 0 for k in katman)
+    assert {k: k2[k] for k in K5B2} == K5B2
     for alan in ("h_turu", "gorunum", "bilesen", "kartsiz"):
         assert a[alan] == b[alan], alan
     assert KY.kiyasla(pk01["model"], _oku(VERI / "PK01_pafta_katmani.json"), _oku(PROJE))["kapi_1"] == "geçer"
 
 
 def test_k1_parcalari_aynen_tasinir(pk01):
-    """K2 yalnız ekler: K1 modelinin her parçası K2 modelinde aynı sınıf, ad, yer, geometri ve setlerle; yeni 100 parça K2 kartlarından."""
+    """K2 yalnız ekler: K1 modelinin her parçası K2 modelinde aynı sınıf, ad, yer, geometri ve setlerle; yeni 100 parça K2 kartlarından,
+    167'si K5b-2'nin (dış duvar omegası, tavan H'ı ve gözleri, izolasyon şeritleri)."""
     a, b = ifcopenshell.open(str(pk01["k1"])), ifcopenshell.open(str(pk01["model"]))
     A = {e.GlobalId: e for e in a.by_type("IfcProduct")}
     B = {e.GlobalId: e for e in b.by_type("IfcProduct")}
@@ -142,9 +147,9 @@ def test_k1_parcalari_aynen_tasinir(pk01):
         assert {k: {x: y for x, y in v.items() if x != "id"} for k, v in pa.items()} == \
                {k: {x: y for x, y in v.items() if x != "id"} for k, v in pb.items()}, e.Name
     yeni = [B[g] for g in set(B) - set(A)]
-    assert len(yeni) == 100
+    assert len(yeni) == 100 + 167
     assert Counter(ue.get_psets(e)[KM.PARCA_SETI]["KartKodu"] for e in yeni) == {"OM-01": 24, "AS-01": 42, "KP-01": 22, "BT-01": 4, "DR-01": 2,
-                                                                                  "DR-02": 6}
+                                                                                  "DR-02": 6} | K5B2
     for e in yeni:
         t = ue.get_type(e)
         assert t is not None and t.Tag == ue.get_psets(e)[KM.PARCA_SETI]["KartKodu"] and e.ContainedInStructure, e.Name
@@ -485,7 +490,8 @@ def test_kesim_plani(pk01):
 
 def test_gosterim_sayiyi_degistirmez(pk01, tmp_path):
     y = _oku(KM.YERLESIM)
-    y["kurallar"]["gosterim"]["kesit_cm"]["deger"] = {"omega": [10, 8], "asik": [8, 12], "dere": [20, 15], "inis": 14, "kaplama": 10, "betopan": 3}
+    y["kurallar"]["gosterim"]["kesit_cm"]["deger"] = {"omega": [10, 8], "asik": [8, 12], "dere": [20, 15], "inis": 14, "kaplama": 10, "betopan": 3,
+                                                      "tavan_h": [3, 4], "alcipan": 2, "izolasyon": 12}      # K5b-2'nin kesitleri
     m = _model(_ie(), tmp_path, "gosterim", yerlesim=y)
     a, b = pk01["say"], m["say"]
     assert [(k["kod"], k["adet"], k.get("metre")) for k in a["kartlar"]] == [(k["kod"], k["adet"], k.get("metre")) for k in b["kartlar"]]
@@ -508,6 +514,6 @@ def test_komut_yerlesim_planlari(tmp_path):
     assert "son şerit yüzün ucundan taşar (40 cm)" in " ".join(metin[4].split())
     from openpyxl import load_workbook
     wb = load_workbook(tmp_path / "PK01_kart_katalogu.xlsx")
-    assert wb["Çatı ve tavan"].max_row == 100 + 1 and wb["Kesim planı"].max_row == 3 + 7 + 1 + 1      # K3b: alt çerçeve ve çatı kenarı 7 kart
+    assert wb["Çatı ve tavan"].max_row == 100 + 167 + 1 and wb["Kesim planı"].max_row == 3 + 7 + 1 + 1 + 4      # K3b: alt çerçeve ve çatı kenarı 7 kart; K5b-2: OM-02, AL-01, AL-02, IZ-01
     k = KY.kiyasla(tmp_path / "PK01_model.ifc", _oku(VERI / "PK01_pafta_katmani.json"), _oku(PROJE), adim="K2")
     assert k["kapi_1"] == "geçer"

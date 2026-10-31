@@ -98,9 +98,9 @@ def test_catiya_bagli_olmayan_kartlar_ikizle_ayni(evler, ev):
 
 def test_catiya_bagli_kartlar():
     """Çatıya bağlı kartlar veri dosyalarından: makaslar, makasa göre ayrılan dış H'ler, K2'nin dört çatı katmanı, K3b'nin altı çatı kenarı;
-    K5b'de tek kat panel (KP-02) ve yavru makas (MA-03)."""
+    K5b'de tek kat panel (KP-02) ve yavru makas (MA-03); K5b-2'de çatı izolasyonu (IZ-01)."""
     assert _catiya_bagli() == {"MA-01", "MA-02", "H-01", "H-02", "H-04", "H-05", "H-08", "H-09", "AS-01", "KP-01", "BT-01", "DR-01", "DR-02",
-                               "KP-02", "MA-03", *CATI_KENARI}
+                               "KP-02", "MA-03", "IZ-01", *CATI_KENARI}
 
 
 @pytest.mark.parametrize("ev", list(TIP))

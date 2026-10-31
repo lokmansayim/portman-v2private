@@ -5,12 +5,14 @@ hat ve her kapalı odada başlangıç sınırından asma aralığıyla ara hatla
 kitabın aralığıyla. Açık mahalde (ana çatının altındaki veranda) hat duvarın yüzünden kitabın aralığıyla başlar. Odanın öteki sınırına en
 kısa boydan yakın hat ya da hattın o kısmı konmaz (L biçimli odada her kol kendi sınırıyla). Her hat dizilimin başladığı uçtan tam
 parçalara (parça boyu − pay), kalanı son parçaya bölünür; en kısa boydan kısa kalan parçasız boşluktur.
+
+K5b-2: açık mahale bakan dış duvarın üstündeki 100'lük duvar omegası (kart OM-02) `dis_duvar_hatlari`'ndadır.
 """
 from __future__ import annotations
 
 from shapely.affinity import translate
 from shapely.geometry import LineString, Polygon, box
-from shapely.ops import unary_union
+from shapely.ops import linemerge, unary_union
 
 from .girdi import YAPISMA_CM, Duvar
 
@@ -132,6 +134,35 @@ def hatlar(g: dict, K: dict, uyarilar: list | None = None) -> list[dict]:
                 out.append({"yer": "duvar_yuzu" if k == 0 and duvarli else "ara", "eksen": adim, "s": round(s, 4), "r0": r0, "r1": r1,
                             "mahal": v["ad"], "not": "açık mahal"})
             k += 1
+    return out
+
+
+def dis_duvar_hatlari(g: dict, K: dict) -> list[dict]:
+    """Çatı kenarına gelmeyen dış duvarların 100'lük duvar omegası (kart OM-02; Lokman, 21 Ekim; D-32): kapalı kısmın açık mahalle (ana çatının
+    altındaki veranda, giriş nişi) ortak sınırındaki dış duvarın ekseninde, ortak sınır boyunca; ucu köşeye bir duvar kalınlığından yakınsa
+    duvarın ucuna (panolar gibi). Tavanın türüne bakılmaz. Taşan veranda (BK-14) `g["acik"]`'ta değildir: ona bakan duvar ana çatının
+    kenarındadır. Hat: {yer: duvar_ekseni, dis: True, eksen, s, r0, r1, mahal, not, sirt}."""
+    out = []
+    for v in g["acik"]:
+        sinir = Polygon(v["poligon"]).boundary
+        for d in sorted((d for d in g["duvarlar"] if d.tur == "dis"), key=lambda d: (d.yon, d.c, d.a0)):
+            for yuz in d.yuzler:
+                cizgi = LineString([(d.a0, yuz), (d.a1, yuz)] if d.yon == "x" else [(yuz, d.a0), (yuz, d.a1)])
+                k = cizgi.intersection(sinir)
+                cizgiler = [q for q in getattr(k, "geoms", [k]) if q.geom_type == "LineString" and q.length > ESIK]
+                if not cizgiler:
+                    continue
+                k = linemerge(cizgiler)                                 # sınırdaki ara köşeler ortak sınırı bölmesin
+                for p in getattr(k, "geoms", [k]):
+                    if p.length < K["en_kisa"] - ESIK:
+                        continue
+                    r = [c[0] if d.yon == "x" else c[1] for c in p.coords]
+                    r0, r1 = min(r), max(r)
+                    r0 = d.a0 if r0 - d.a0 <= 2 * d.h + YAPISMA_CM else r0
+                    r1 = d.a1 if d.a1 - r1 <= 2 * d.h + YAPISMA_CM else r1
+                    e = "x" if d.yon == "y" else "y"
+                    out.append({"yer": "duvar_ekseni", "dis": True, "eksen": e, "s": d.c, "r0": r0, "r1": r1, "mahal": v["ad"], "sirt": K["sirt_100"],
+                                "not": f"dış duvar ekseni ({e} = {d.c:g}), {v['ad']} mahaline bakar"})
     return out
 
 
