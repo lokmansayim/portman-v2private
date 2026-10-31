@@ -1,7 +1,7 @@
 """İE-24 · TK-03 montaj rehberi (A4): girintili gövdenin rehberi 62 m² şablonundan, çatısı çizimdeki ve listedeki çatının aynısından
 (`araclar/paket/rehber/girinti.py`: `cati_serit.tanim`, kart modelinin aşık ve inişleri). Ana çatının makasları "Çatı makası (baş/orta)"
-kartıyla, cumbanınkiler "Cumba makası" (kartı henüz yok; Lokman, 30 Ekim 2026 13:49). Balkon gövdenin köşesinde, iki yanı açık, kolonsuz:
-niş değil; iki açık kenarına birer kiriş, listede dış ölçüyle (Lokman, karar kartı 31 Ekim, D-35). Girintisiz evlerin rehberi değişmez (`test_paket.py`, `test_rehber.py`)."""
+kartıyla, cumbanınkiler "Cumba makası" (kartı henüz yok; Lokman, 30 Ekim 2026 13:49). Balkon gövdenin köşesinde, iki yanı açık:
+köşesine Motor kolon koyar, kirişler kolonu gövdeye bağlar (Lokman, 31 Ekim 15:08: kirişler askıda kalmaz; D-36). Girintisiz evlerin rehberi değişmez (`test_paket.py`, `test_rehber.py`)."""
 from __future__ import annotations
 
 import copy
@@ -82,14 +82,16 @@ def test_asik_dere_ve_inisler_kart_modeliyle_ayni(tk03):
 
 
 def test_kose_balkonu(tk03):
-    """Balkon köşede (313,75 × 193,25), iki açık kenarında birer kiriş (duvardan köşeye, plandaki profil), kolon yok. Kirişin kartı listedeki
-    satırı okur: boyu açık kenarın dış ölçüsü (D-35; L 3137,5 ve 1932,5, yarım milimetre listenin yazımıyla)."""
+    """Balkon köşede (313,75 × 193,25), iki açık kenarında birer kiriş, dış köşede kolon (D-36: kirişler askıda kalmaz). Kolonun ve kirişin
+    kartı listedeki satırı okur: kiriş açık kenarın dış ölçüsü − 10 (kolonlu verandanın kuralı; L 3037,5 ve 1832,5, yarım milimetre
+    listenin yazımıyla)."""
     d, _, _ = tk03
     v = d["verandalar"]
-    assert len(v) == 1 and v[0]["kolon"] == [] and len(v[0]["kiris"]) == 2
-    assert sorted(k["bu"].split(":")[0] for k in v[0]["kiris"]) == ["balkon · arka kiriş · L 313,75 cm", "balkon · sol yan kiriş · L 193,25 cm"]
-    assert sorted(k["liste"] for k in v[0]["kiris"]) == ["Kutu profil (kiriş) 100 × 100 L 1932,5 · 1 adet", "Kutu profil (kiriş) 100 × 100 L 3137,5 · 1 adet"]
+    assert len(v) == 1 and len(v[0]["kolon"]) == 1 and len(v[0]["kiris"]) == 2
+    assert v[0]["kolon"][0]["rect"] == [0, 863.3, 10, 873.3] and v[0]["kolon"][0]["liste"] == "Özel kutu profil (kolon) 100 × 100 L 2500 · 1 adet"
+    assert sorted(k["bu"].split(":")[0] for k in v[0]["kiris"]) == ["balkon · arka kiriş · L 303,75 cm", "balkon · sol yan kiriş · L 183,25 cm"]
+    assert sorted(k["liste"] for k in v[0]["kiris"]) == ["Kutu profil (kiriş) 100 × 100 L 1832,5 · 1 adet", "Kutu profil (kiriş) 100 × 100 L 3037,5 · 1 adet"]
     p = next(a for a in d["adimlar"] if a.get("ad") == "Balkon")["p"]
-    assert p.startswith("Balkon gövdenin köşesinde (313,75 × 193,25 cm), iki yanı açık") and "köşede kolon yok" in p
+    assert p.startswith("Balkon gövdenin köşesinde (313,75 × 193,25 cm), iki yanı açık") and "Dış köşeye 1 kolon" in p and "askıda kalmaz" in p
     yer = [o["yer"] for o in d["omega_duvar"]]
     assert yer.count("balkona bakan gövde duvarı") == 2 and any(y.endswith("ve balkon kirişi") for y in yer)

@@ -249,7 +249,7 @@ def model_motor(ie: dict) -> dict:
         x0, y0, x1, y1 = m.poly.bounds
         en, derin = ((y1 - y0), (x1 - x0)) if mx else ((x1 - x0), (y1 - y0))
         return {"ad": m.ad, "tur": m.tur, "alan_m2": m.alan_m2, "en_cm": en, "derin_cm": derin}
-    kirisler, nis_agizlari, kose_kirisleri = [], [], []
+    kirisler, nis_agizlari = [], []
     for v in acik:
         if v.ad in dis_ad:
             continue                                           # BK-14: taşan verandanın üç açık kenarı aşağıda, kenar kenar
@@ -262,17 +262,6 @@ def model_motor(ie: dict) -> dict:
             # BK-14 ek: tek yüzü açık, dikmesiz açık mahal giriş nişidir (geometrinin tanımı: yanı da açık köşe verandası niş değil);
             # ağzı duvardan duvara, kiriş aks arası; plandaki öteki dikmelerden bağımsız
             nis_agizlari.append(round(birlesik.length, 2))
-            continue
-        kose_hat = {("x", round(g_.coords[0][1], 2)) if abs(g_.coords[0][1] - g_.coords[-1][1]) < 1e-6 else ("y", round(g_.coords[0][0], 2))
-                    for g_ in agiz}
-        if (len(kose_hat) == 2 and {yon_k for yon_k, _c in kose_hat} == {"x", "y"}
-                and not any(v.poly.buffer(11.0).intersects(box(*k)) for k in plan.dikmeler)):
-            # İE-24 (Lokman, karar kartı 31 Ekim, D-35): iki yüzü açık, kolonsuz köşe açık mahal (TK-03 balkonu, P6001'in verandası); her açık
-            # kenarına bir kiriş, boyu mahalin o kenardaki dış ölçüsü (planın profili); iki kiriş köşede birleşir. Önce kirişsizdi (BK-14 ek)
-            vx0, vy0, vx1, vy1 = v.poly.bounds
-            for yon_k, c_k in sorted(kose_hat):
-                cizgi = LineString([(vx0 - 1, c_k), (vx1 + 1, c_k)] if yon_k == "x" else [(c_k, vy0 - 1), (c_k, vy1 + 1)])
-                kose_kirisleri.append(round(v.poly.exterior.intersection(cizgi).length, 2))
             continue
         if not plan.dikmeler:
             continue
@@ -312,9 +301,9 @@ def model_motor(ie: dict) -> dict:
         en_uzak = {"m": math.hypot(fx1 - fx0, fy1 - fy0) / 100, "nereden": "giriş kapısı yok: kapalı kısmın köşegeni"}
     return {"kaynak": "Motor", "H0": float(y.get("duvar_yuksekligi_cm", 250)), "W": W, "D": D, "brut_m2": round(brut / 1e4, 3),
             "dis_cevre_m": dis_duvar_m, "ic_kalan_dis_duvar_m": ic_kalan_m, "ic_kirisler_cm": ic_kirisler, "t_dis": t_dis, "panolar": panolar, "ekler": ekler,
-            "koseler": dict(Counter("dis" if kk.tur == "dis" else "ic" for kk in plan.koseler)), "dikmeler": len(plan.dikmeler),
+            "koseler": dict(Counter("dis" if kk.tur == "dis" else "ic" for kk in plan.koseler)), "dikmeler": len(plan.dikmeler), **({"kose_kolonlari": len(plan.kose_kolonlari)} if plan.kose_kolonlari else {}),
             "veranda_kenarlari_cm": kirisler, **({"veranda_dis_kenar_sira": dis_kenar_sira} if dis_kenar_sira else {}),
-            **({"nis_agizlari_cm": nis_agizlari} if nis_agizlari else {}), **({"kose_kirisleri_cm": kose_kirisleri} if kose_kirisleri else {}),
+            **({"nis_agizlari_cm": nis_agizlari} if nis_agizlari else {}),
             "kapali": [oda(m) for m in kapali], "acik": [{**oda(m), "tur": "veranda"} for m in acik],
             "sigorta_en_uzak": en_uzak,
             **({"cati_tanimi": serit[1]} if serit else {}),
@@ -672,7 +661,9 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
          aday=r("kosebent_aday"), aday_notu=f"Şablon B sabit {r('kosebent_aday')} (PK-02 3, PK-03 ve PK-05 5)")
     if N["dikmeler"]:
         for L_k, n_k in sorted(Counter(N.get("kolon_boylari_cm") or [H0] * N["dikmeler"]).items(), reverse=True):   # O4: kolon boyu paftadan
-            ekle("1002", "Özel kutu profil (kolon) 100 × 100", f"L {mm(L_k)}", n_k, "Sayım", "veranda dikmesi" + (" (boy paftadan, O4)" if N.get("kolon_boylari_cm") else ""))
+            ekle("1002", "Özel kutu profil (kolon) 100 × 100", f"L {mm(L_k)}", n_k, "Sayım", "veranda dikmesi" + (" (boy paftadan, O4)" if N.get("kolon_boylari_cm") else "")
+                 + (f"; {N['kose_kolonlari']} tanesi açık mahalin iki açık kenarının birleştiği köşede, Motor kuralı" if N.get("kose_kolonlari") else ""),
+                 "Lokman, 31 Ekim 15:08: kirişlerin birleştiği yerde kolon gelir, kirişler askıda kalmaz (D-36)" if N.get("kose_kolonlari") else "")
         # profil vidalama aparatı yazılmaz: kolonlu beş Portatifev listesinde yok, yalnız PK-01'de 2 ("ekstradan ekledik"; BK-12 PR-2c)
     kirisler = N.get("veranda_kirisleri_cm")
     if kirisler is not None:
@@ -692,11 +683,6 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
     for L_ in N.get("nis_agizlari_cm") or []:                  # BK-14 ek: giriş nişinin ağzı; dikmesi yok, kiriş duvardan duvara
         ekle("1002", "Kutu profil (kiriş) 100 × 100", f"L {mm(L_)}", 1, "Liste kuralı", "nişin ağzı, duvardan duvara (aks arası)",
              "duvarsız açıklığa kiriş gelir, aks arası (Lokman, kart 22 Ekim); nişe uygulanması yorum (BK-14 ek)")
-    for L_ in N.get("kose_kirisleri_cm") or []:                 # İE-24 (D-35): kolonsuz köşe açık mahalin iki açık kenarı; kolon yok, köşede birleşir
-        e = r("kose_kirisi_eksik_cm")
-        ekle("1002", "Kutu profil (kiriş) 100 × 100", f"L {mm(L_ - e)}", 1, "Liste kuralı",
-             "kolonsuz köşe açık mahalin (balkon, köşe verandası) açık kenarı, dış ölçü" + (f" − {mm(e)}" if e else "") + "; köşede kolon yok",
-             "Lokman, karar kartı 31 Ekim: kolonsuz köşe balkonunun iki açık kenarına kiriş (D-35)")
     for L_ in N.get("ic_kirisler_cm") or []:                    # paftadaki yeşil kesikli profil (Lokman, 21 Ekim 16:22); Motor'da duvarsız sınır
         ekle("1002", "Kutu profil (kiriş) 100 × 100", f"L {mm(L_)}", 1, "Liste kuralı",
              "duvarsız sınırın boyu (İş Emri'nde açık sınır, aks arası)" if N["kaynak"] == "Motor" else "paftadan okunan kiriş boyu (çatı kenarında değil: duvarsız açıklık)",

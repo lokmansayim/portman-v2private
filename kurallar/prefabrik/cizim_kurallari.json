@@ -696,6 +696,36 @@
     "testler/motor/test_d34_cizim.py::test_dis_pano_dayanagi_hatalari",
     "testler/motor/test_ie24_girinti.py::test_makaslar_paftadaki_yerde"
    ]
+  },
+  {
+   "kod": "PC-30",
+   "baslik": "Kirişler askıda kalmaz: açık mahalin köşesinde kolon",
+   "kural": "Gövdenin içindeki açık mahalin (balkon, köşe verandası) birbirine dik iki açık kenarı bir köşede birleşiyorsa Motor o köşeye 10 × 10 dikme koyar; dış yüzleri mahalin dış ölçüsüyle aynı hizada (PK-01'in köşe dikmesi gibi). İş Emri'nde köşeye 11 cm'den yakın bir dikme yazılıysa yenisi eklenmez. Dikme planın dikmeleridir: çizimde VERANDA_DIKME, teknik paftanın BOM'unda veranda dikmesi, listede kolon satırı, 3B modelde ve rehberde kolon. Kirişler kolonlu verandanın kuralıyla (açık kenar dış ölçüsü − 10). Tek yüzü açık niş ve taşan veranda (kendi kolonları) bu kurala girmez.",
+   "karar": "D-36",
+   "madde": 1,
+   "lokman": {
+    "tarih": "2026-10-31",
+    "saat": "15:08",
+    "soz": "şuan 9. adım olan Balkon adımı açık ama tam kirişlerin birleştiği yerde kolon gelir önceki yaptığımız tüm verandalı modellerde bu vardı yine kural olarak ekle hiç bir zaman kirişler askıda kalmaz"
+   },
+   "kod_yeri": [
+    "motor/geometry.py::_kose_kolonlari",
+    "motor/geometry.py::KOSE_KOLONU_YAKIN_CM"
+   ],
+   "sabitler": [
+    {
+     "yer": "motor/geometry.py::KOSE_KOLONU_YAKIN_CM",
+     "deger": 11.0
+    },
+    {
+     "yer": "motor/geometry.py::VERANDA_KOLON_CM",
+     "deger": 10.0
+    }
+   ],
+   "test": [
+    "testler/motor/test_veranda.py::test_kose_kolonu",
+    "testler/paket/test_ie24_rehber.py::test_kose_balkonu"
+   ]
   }
  ]
 }

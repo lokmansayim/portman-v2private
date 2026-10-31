@@ -418,6 +418,7 @@ class Plan:
     arti_birlesimler: list = field(default_factory=list)   # BK-14: dört kollu birleşim noktaları (x, y; cm); profili kitapta yok, liste uyarır
     dis_verandalar: list = field(default_factory=list)     # BK-14: gövdeden taşan verandalar (İş Emri `verandalar`; `_dis_verandalar`)
     girintili: bool = False                                 # İE-24: İş Emri'nde `girintiler` var (gövde dikdörtgen değil; `govde_cokgeni`)
+    kose_kolonlari: list = field(default_factory=list)     # D-36: açık mahalin iki açık kenarının birleştiği köşeye Motor'un koyduğu dikmeler
 
     @property
     def panolar(self) -> list:
@@ -1160,8 +1161,52 @@ def _kur(is_emri: dict) -> Plan:
         _aynala_y(plan, ny2)
     if kapi_kurali == "mantik":
         _kapi_mantigi(plan, kapi_yeri, kapi_yeri_yazili="kapi_yeri" in dizilim)
+    _kose_kolonlari(plan)
     _dis_verandalar(plan, is_emri)
     return plan
+
+
+KOSE_KOLONU_YAKIN_CM = 11.0   # D-36: köşeye bu uzaklıktan yakın bir dikme varsa (İş Emri'nde yazılı) yenisi eklenmez
+KOSE_HIZA_CM = 6.0            # açık kenar çizgisinin mahalin dış ölçüsüne uzaklığı (ağız aksta, dış yüz 5 cm dışarıda)
+
+
+def _kose_kolonlari(plan: "Plan") -> None:
+    """D-36 (Lokman, 31 Ekim 2026 15:08): "kirişlerin birleştiği yerde kolon gelir ... hiçbir zaman kirişler askıda kalmaz". Gövdenin içindeki
+    açık mahalin (balkon, köşe verandası) birbirine dik iki açık kenarı bir köşede birleşiyorsa o köşeye 10 × 10 dikme konur; dış yüzleri
+    mahalin dış ölçüsüyle aynı hizada (PK-01'in ve katalog evlerinin köşe dikmesi gibi). İş Emri'nde o köşede dikme yazılıysa yenisi eklenmez.
+    Taşan veranda kendi kolonlarıyla gelir (`_dis_verandalar`). Dikme planın `dikmeler`'ine girer: çizim, liste, 3B model ve rehber oradan okur."""
+    from shapely.geometry import Point
+    k = VERANDA_KOLON_CM
+    for m in plan.mahaller.values():
+        if not m.acik or m.poly is None or m.poly.is_empty:
+            continue
+        ic = m.poly.buffer(1.0)
+        yatay, dusey = {}, {}                                   # açık kenar çizgisi → kapladığı aralık
+        for (x0, y0, x1, y1) in plan.acik_kenarlar:
+            if not ic.contains(Point((x0 + x1) / 2, (y0 + y1) / 2)):
+                continue
+            if abs(y0 - y1) < 1e-6:
+                a = yatay.setdefault(round(y0, 6), [math.inf, -math.inf]); a[0], a[1] = min(a[0], x0, x1), max(a[1], x0, x1)
+            elif abs(x0 - x1) < 1e-6:
+                a = dusey.setdefault(round(x0, 6), [math.inf, -math.inf]); a[0], a[1] = min(a[0], y0, y1), max(a[1], y0, y1)
+        vx0, vy0, vx1, vy1 = m.poly.bounds
+        for cx, (dy0, dy1) in sorted(dusey.items()):
+            for cy, (dx0, dx1) in sorted(yatay.items()):
+                X = vx0 if abs(cx - vx0) <= abs(cx - vx1) else vx1
+                Y = vy0 if abs(cy - vy0) <= abs(cy - vy1) else vy1
+                if abs(cx - X) > KOSE_HIZA_CM or abs(cy - Y) > KOSE_HIZA_CM:
+                    continue                                    # açık kenar mahalin dış çizgisinde değil
+                if min(abs(dx0 - X), abs(dx1 - X)) > k + KOSE_HIZA_CM or min(abs(dy0 - Y), abs(dy1 - Y)) > k + KOSE_HIZA_CM:
+                    continue                                    # iki açık kenar bu köşeye ulaşmıyor
+                x0 = X if X == vx0 else X - k
+                y0 = Y if Y == vy0 else Y - k
+                kutu = (x0, y0, x0 + k, y0 + k)
+                if not m.poly.buffer(0.5).contains(box(*kutu)):
+                    continue                                    # köşe mahalin içinde değil
+                if any(box(*d).distance(Point(X, Y)) < KOSE_KOLONU_YAKIN_CM for d in plan.dikmeler):
+                    continue                                    # İş Emri'nde köşede dikme var
+                plan.dikmeler.append(kutu)
+                plan.kose_kolonlari.append(kutu)
 
 
 VERANDA_KOLON_CM = 10.0      # veranda dikmesi 10 × 10 (DXF bloğu VERANDA_DIKME_100x100; liste "Özel kutu profil (kolon) 100 × 100")

@@ -469,12 +469,14 @@ function rake(G, end, m, uzat = 0) {
     // "baş makasların uçlarında hâlâ kaplanmamış alan var; saçak sacı ile alın sacının birleştiği yerin boş kalmasının sebebi o")
     ['A', 'B'].forEach(end => {
       if (G.ucKapali && G.ucKapali[end]) return;   // uç veranda çatısının altında kalır (yüz ana çatının devamı)
-      const sE = G.uc[end], dir = Math.sign(G.sm - sE), a = G.duvar[end], b = sE + dir * 0.2, yt = s => (G.h(s) - 0.2) / 100, alt = (TB - 0.05 - SAC) / 100;
+      // alt ucu duvar üstündeki parçalar gibi baş makas omegasının dış U yanağında: omega saçak ucundan saçak ucuna (D-32); önce saçak sacının
+      // saçak altındaydı, omeganın 3 cm üstünde kalıyordu (Lokman, 31.10.2026: "baş makas omegasının tam arasına girmeli, uçlarda yukarıda kalmış")
+      const sE = G.uc[end], dir = Math.sign(G.sm - sE), a = G.duvar[end], b = sE + dir * 0.2, yt = s => (G.h(s) - 0.2) / 100, alt = (H - BAS_KANAT) / 100;
       const sh = new THREE.Shape(); sh.moveTo(a / 100, alt); sh.lineTo(b / 100, alt); sh.lineTo(b / 100, yt(b)); sh.lineTo(a / 100, yt(a)); sh.closePath();
       const o = mesh(new THREE.ExtrudeGeometry(sh, { depth: BET_T / 100, bevelEnabled: false }), mat('betopan', AD.kalkan));
       o.position.z = G.oT / 100;
       const w = cerceve(G.r, ...G.O); w.add(o);
-      add(AD.kalkan, w, bo++ * 0.5, { kod: null, ad: 'Baş makas betopanı · saçak ucu', satir: [['Bu parça', `${fmtc(Math.abs(b - a))} cm · ${G.ad}, ${end === 'A' ? 'ön/sol' : 'arka/sağ'} uç: makasın duvar dışında kalan ucu`], ['Oturma', 'altı saçak sacının saçak altında, üstü makasın üst başlığında; dışında baş makas Z’si ve alın sacı'], ['Malzeme', '125 × 250 betopanların artanından; 8 mm'], ['Görev', 'saçak sacı ile alın sacının birleştiği köşeyi kapatır'], ['Kaynak', 'Lokman, 26.10.2026']] });
+      add(AD.kalkan, w, bo++ * 0.5, { kod: null, ad: 'Baş makas betopanı · saçak ucu', satir: [['Bu parça', `${fmtc(Math.abs(b - a))} cm · ${G.ad}, ${end === 'A' ? 'ön/sol' : 'arka/sağ'} uç: makasın duvar dışında kalan ucu`], ['Oturma', 'alt ucu baş makas omegasının dış U yanağında (omega saçak ucuna kadar), üstü makasın üst başlığında; dışında baş makas Z’si ve alın sacı (Lokman, 31.10.2026)'], ['Malzeme', '125 × 250 betopanların artanından; 8 mm'], ['Görev', 'saçak sacı ile alın sacının birleştiği köşeyi kapatır'], ['Kaynak', 'Lokman, 26.10.2026']] });
     });
     ['A', 'B'].forEach(end => {   // Baş makas Z'si: makas ve betopan üstünden geçer, betopanın dış yüzünden 3 cm iner, altta 3 cm dışarı kıvrılır
       const K = rake(G, end, mat('frame', AD.kalkan));

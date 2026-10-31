@@ -544,11 +544,13 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         if not kir:
             raise Desteklenmiyor("gömme verandanın kirişi planda yok")
         # Kolonsuz gömme veranda giriş nişidir (TK-01 r06): iki yanı ve arkası gövde duvarı, açık kenarındaki kiriş iki yandaki duvarı bağlar.
-        # İki yanı açık kolonsuz köşe (TK-03 balkonu, İE-24) niş değil: kirişler duvardan köşeye, köşede birleşir; listede kirişin boyu açık
-        # kenarın dış ölçüsü (Lokman, karar kartı 31 Ekim, D-35)
-        kosede = not kol and len({(b["rect"][2] - b["rect"][0]) > (b["rect"][3] - b["rect"][1]) for b in kir}) == 2
-        nis = not kol and not kosede
-        gad = "giriş nişi" if nis else kucuk(GV.get("ad") or "veranda") if kosede else "veranda"
+        # İki yanı açık köşede kolon var: Motor koyar (D-36; Lokman, 31 Ekim 15:08: kirişler askıda kalmaz). Adı İş Emri'nden (TK-03: balkon)
+        iki_yan = len({(b["rect"][2] - b["rect"][0]) > (b["rect"][3] - b["rect"][1]) for b in kir}) == 2
+        nis = not kol
+        if nis and iki_yan:
+            raise Desteklenmiyor("iki yanı açık gömme verandanın köşesinde kolon yok (Motor koyar, D-36)")
+        gad = "giriş nişi" if nis else kucuk(GV.get("ad") or "veranda")
+        Gad = gad[:1].upper() + gad[1:]
         gad_e = "nişe" if nis else gad + ("y" if gad[-1] in "aeıioöuü" else "") + ("a" if [c for c in gad if c in "aeıioöuü"][-1] in "aıou" else "e")
         if nis:                                 # nişin ağzındaki kiriş aks arası (liste üreteci, BK-14 ek: duvarsız açıklığa kiriş, aks arası)
             uz = []
@@ -578,19 +580,15 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
             r = b["rect"]
             Lc = max(r[2] - r[0], r[3] - r[1])
             Lk, lst, fark = kiris_boyu(None if not kol else Lc, Lc)
-            if kosede:
-                return {"rect": [_r(t) for t in r], "order": o0 + i, "liste": lst,
-                        "bu": f"{gad} · {kenar(r)} · L {fmtc(Lk)} cm: duvardan köşeye, köşede öteki kirişle birleşir (kolon yok), duvar üstü "
-                              f"kotunda; üstüne omega ve çatının makasları gelir{fark}"}
             return {"rect": [_r(t) for t in r], "order": o0 + len(kol) + i, "liste": lst,
                     "bu": f"{gad} · {kenar(r)} · L {fmtc(Lk)} cm: {'iki yandaki duvarı bağlar' if nis else 'kolonu gövdeye bağlar'}, duvar üstü kotunda; "
-                          f"üstüne omega ve ana çatının makasları gelir{fark}"}
+                          f"üstüne omega ve {'çatının' if GIR else 'ana çatının'} makasları gelir{fark}"}
         verandalar.append({
-            "kolon": [{"rect": [_r(t) for t in b["rect"]], "order": o0 + i, "bu": f"veranda · {kose(b['rect'])} kolonu · 100 × 100 × {fmt(H * 10)}",
+            "kolon": [{"rect": [_r(t) for t in b["rect"]], "order": o0 + i, "bu": f"{gad} · {kose(b['rect'])} kolonu · 100 × 100 × {fmt(H * 10)}",
                        "liste": ls("Özel kutu profil (kolon)")} for i, b in enumerate(sorted(kol, key=lambda b: (b["rect"][1], b["rect"][0])))],
             "kiris": [gv_kiris(i, b) for i, b in enumerate(sorted(kir, key=lambda b: (b["rect"][1], b["rect"][0])))],
         })
-        GVK = {"vk": vk, "kol": len(kol), "kir": [kenar(b["rect"]) for b in kir], "m2": GV.get("net_m2"), "nis": nis, "kose": kosede, "ad": gad, "e": gad_e}
+        GVK = {"vk": vk, "kol": len(kol), "kir": [kenar(b["rect"]) for b in kir], "m2": GV.get("net_m2"), "nis": nis, "iki_yan": iki_yan, "ad": gad, "Ad": Gad, "e": gad_e}
 
     # ---------- çatılar ----------
     if GIR:                                       # İE-24: girintili gövde; çatı çizimdeki çatıdan (ana çatı + cumbalar, `girinti.py`)
@@ -673,11 +671,9 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
             for r in (k["rect"] for k in verandalar[-1]["kiris"]):
                 yat = r[2] - r[0] > r[3] - r[1]
                 if (o["o"] == "h") == yat and abs(o["perp"] - ((r[1] + r[3]) / 2 if yat else (r[0] + r[2]) / 2)) < 0.6:
-                    if not GVK["kose"]:
-                        o["yer"] = o["yer"].replace(" duvar", " duvar ve veranda kirişi", 1)
-                    elif " duvar" in o["yer"]:
-                        o["yer"] = o["yer"].replace(" duvar", f" duvar ve {GVK['ad']} kirişi", 1)
-                    else:                                       # girintili gövdenin kalkan hattı (baş makas omegası)
+                    if " duvar" in o["yer"]:
+                        o["yer"] = o["yer"].replace(" duvar", f" duvar ve {'veranda' if GVK['nis'] else GVK['ad']} kirişi", 1)
+                    elif GIR:                                   # girintili gövdenin kalkan hattı (baş makas omegası)
                         o["yer"] += f", {GVK['ad']} kirişinin üstünde"
     OMP = []                                       # kart modelinin tavan omegası parçaları
     for p in SAYIM["yerlesim"]["parcalar"]:
@@ -983,11 +979,11 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
     kaplama_txt = f"{kucuk(kap_ad)}{' (' + renk + ')' if renk else ''}"
     ver_ozet = ", ".join([f"{'önde' if v['on'] else 'arkada'} {fmtc(v['rect'][2] - v['rect'][0])} × {fmtc(v['rect'][3] - v['rect'][1])} cm" for v in VR] +
                          ([f"gövdenin içinde {fmtc(GVK['vk'][2] - GVK['vk'][0])} × {fmtc(GVK['vk'][3] - GVK['vk'][1])} cm (ana çatının altında)"]
-                          if GVK and not GVK["nis"] and not GVK["kose"] else []))
+                          if GVK and not GVK["nis"] and GVK["ad"] == "veranda" else []))
     nis_ozet = (f"; gövdenin içinde {fmtc(GVK['vk'][2] - GVK['vk'][0])} × {fmtc(GVK['vk'][3] - GVK['vk'][1])} cm giriş nişi (ana çatının altında)"
                 if GVK and GVK["nis"] else
-                f"; gövdenin köşesinde {fmtc(GVK['vk'][2] - GVK['vk'][0])} × {fmtc(GVK['vk'][3] - GVK['vk'][1])} cm {GVK['ad']} (iki yanı açık, çatının altında)"
-                if GVK and GVK["kose"] else "")
+                f"; gövdenin {'köşesinde' if GVK['iki_yan'] else 'içinde'} {fmtc(GVK['vk'][2] - GVK['vk'][0])} × {fmtc(GVK['vk'][3] - GVK['vk'][1])} cm "
+                f"{GVK['ad']} ({'iki yanı açık, ' if GVK['iki_yan'] else ''}çatının altında)" if GVK and GVK["ad"] != "veranda" else "")
     oda_listesi = ", ".join(kucuk(t) for _, _, t, _ in ODA)
     h_oda = defaultdict(lambda: defaultdict(int))
     for p in panels:
@@ -1121,19 +1117,19 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
     nis_metin = (f"Giriş nişi gövdenin içinde ({gv_olcu}), önü açık; iki yanı ve arkası gövde duvarı, dış kapı arkadaki duvarda. Açık kenarına "
                  f"{len(GVK['kir'])} kiriş ({', '.join(GVK['kir'])}) duvar üstü kotunda iki yandaki duvarı bağlar ve duvarın yerini tutar: üstüne baş makas "
                  "omegası, sonra ana çatının makasları gelir.") if GVK and GVK["nis"] else ""
-    if GVK and GVK["kose"]:                     # İE-24: iki yanı açık kolonsuz köşe (TK-03 balkonu)
-        nis_metin = (f"{oda_adi(GVK['ad'], [])} gövdenin köşesinde ({gv_olcu}), iki yanı açık; öteki iki yanı gövde duvarı. Açık kenarlarına "
-                     f"{len(GVK['kir'])} kiriş ({', '.join(GVK['kir'])}) duvar üstü kotunda duvardan köşeye uzanır, köşede birleşir ve duvarın yerini "
-                     "tutar; planda köşede kolon yok. Üstlerine omega, sonra çatının makasları gelir.")
-    if GVK and VR and not GVK["nis"] and not GVK["kose"]:
+    if GVK and not GVK["nis"] and GVK["ad"] != "veranda" and GVK["iki_yan"]:   # İE-24: köşedeki açık mahal (TK-03 balkonu; kolon D-36)
+        nis_metin = (f"{GVK['Ad']} gövdenin köşesinde ({gv_olcu}), iki yanı açık; öteki iki yanı gövde duvarı. Dış köşeye {GVK['kol']} kolon (100 × 100) "
+                     f"dikilir: kirişler hiçbir zaman askıda kalmaz. Açık kenarlarına {len(GVK['kir'])} kiriş ({', '.join(GVK['kir'])}) duvar üstü kotunda "
+                     f"kolonu gövdeye bağlar ve duvarın yerini tutar. Üstlerine omega, sonra {'çatının' if GIR else 'ana çatının'} makasları gelir.")
+    if GVK and VR and not GVK["nis"]:
         raise Desteklenmiyor("hem gövdeden taşan hem gövdenin içinde kolonlu veranda; rehber ikisini bir adımda kurmuyor")
     if GVK and not VR:
-        adim.append({"ad": "Giriş nişi" if GVK["nis"] else oda_adi(GVK["ad"], []) if GVK["kose"] else "Veranda",
-                     "t": "Giriş nişinin kirişi" if GVK["nis"] else f"{oda_adi(GVK['ad'], [])} kirişleri" if GVK["kose"] else "Veranda kolon ve kirişleri",
-                     "p": nis_metin or (f"Veranda gövdenin içinde ({gv_olcu}), ana çatının altında: "
+        adim.append({"ad": "Giriş nişi" if GVK["nis"] else GVK["Ad"],
+                     "t": "Giriş nişinin kirişi" if GVK["nis"] else f"{GVK['Ad']} kolon ve kirişleri",
+                     "p": nis_metin or (f"{GVK['Ad']} gövdenin içinde ({gv_olcu}), ana çatının altında: "
                           f"{GVK['kol']} kolon ve {len(GVK['kir'])} kiriş ({', '.join(GVK['kir'])}). Kolon (100 × 100) dış köşeye dikilir; kirişler duvar "
                           "üstü kotunda kolonu gövdeye bağlar ve duvarın yerini tutar: üstlerine saçak ve baş makas omegası, sonra ana çatının makasları gelir."),
-                     "kamera": K([(GVK["vk"][0] + GVK["vk"][2]) / 2, 1.5, (GVK["vk"][1] + GVK["vk"][3]) / 2], -2.3, 0.5, 11, True) if GVK["kose"] else
+                     "kamera": K([(GVK["vk"][0] + GVK["vk"][2]) / 2, 1.5, (GVK["vk"][1] + GVK["vk"][3]) / 2], -2.3, 0.5, 11, True) if GIR else
                      K([0, 1.2, 0], 0.9, 0.45, 15)})
     if VR:
         adim.append({"ad": "Verandalar" if len(VR) > 1 else "Veranda", "t": "Veranda kolon ve kirişleri",
@@ -1143,7 +1139,7 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
     adim += [
         {"ad": "Saçak, duvar ve baş makas omegası", "t": "Saçak, duvar ve baş makas omegası",
          "p": "Makasların oturacağı hatlara omega geçirilir. 100’lük omegalar 10,5 cm’dir (100 mm pano + iki yanda 2 mm H kanadı): dış kanat dışarıda tam yaslanır, "
-              "içte kalan aralıklara silikonize mastik sıkılır. Sol ve sağ duvarın (saçak duvarları)" + (" ve veranda yan kirişlerinin" if VR or (GVK and not GVK["nis"] and not GVK["kose"]) else "") +
+              "içte kalan aralıklara silikonize mastik sıkılır. Sol ve sağ duvarın (saçak duvarları)" + (" ve veranda yan kirişlerinin" if VR or (GVK and not GVK["nis"]) else "") +
               " üstüne 100’lük saçak omegası; "
               "ön ve arka duvarın üstüne baş makas omegası, baş makasın boyunca saçak ucundan saçak ucuna (fabrikada hazırlanır: dışta baş makas "
               "betopanının gireceği 1 cm U yanak)" +
@@ -1307,9 +1303,9 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
     kabuk = {
         "proje": f"{kod} prefabrik", "kisa": kod, "chip": f"{fmt(m2, 2)} m² · motordan",
         "spec": [f"{fmtc(W)} × {fmtc(DY)} cm", "tek kat prefabrik", f"duvar {fmtc(H)} cm", f"beşik %{fmt(TAN * 100)} · {fmt(EGIM_D, 1)}°", kaplama_txt,
-                 (f"{len(VR)} veranda" if VR else "gömme veranda" if GVK and not GVK["nis"] and not GVK["kose"] else
-                  f"köşede {GVK['ad']}" if GVK and GVK["kose"] else "verandasız") +
-                 (" · giriş nişi" if GVK and GVK["nis"] else f" · köşede {GVK['ad']}" if GVK and GVK["kose"] and VR else "")],
+                 (f"{len(VR)} veranda" if VR else "gömme veranda" if GVK and not GVK["nis"] and GVK["ad"] == "veranda" else
+                  f"{'köşede' if GVK['iki_yan'] else 'gövdede'} {GVK['ad']}" if GVK and not GVK["nis"] else "verandasız") +
+                 (" · giriş nişi" if GVK and GVK["nis"] else "")],
         "note": (f"Kaynak: İş Emri {ie.get('is_emri_no')} r{int(ie.get('revizyon', 1)):02d} → motorun planı (pano, açıklık, köşe direği, H, oda, veranda kolon ve "
                  "kirişleri) ve kimlik kartlı modeli (kartlar, H türleri, makas, aşık, iniş ve tavan omegası yerleri); adetler yükleme listesinden. "
                  "Yapım ayrıntıları (pano katmanları, köşe direği, omegalar, saçak ve alın sacı, Z, C kapama, dere, iniş) 62 m² rehberindeki Lokman çizimlerinden; "

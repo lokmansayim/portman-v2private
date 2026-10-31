@@ -104,17 +104,12 @@
   "veranda_kirisi_eksik_cm": {
    "deger": 10,
    "durum": "pafta",
-   "kaynak": "Veranda kirişi açık kenarın dış ölçüsü − 10 cm (PK-01'de tuttu). Taşan verandanın (BK-14) iki kolon arasındaki dış kirişi bu kurala değil `tasan_veranda_dis_kirisi_eksik_cm`'ye uyar; yan kirişleri buna uyar."
+   "kaynak": "Veranda kirişi açık kenarın dış ölçüsü − 10 cm (PK-01'de tuttu). Taşan verandanın (BK-14) iki kolon arasındaki dış kirişi bu kurala değil `tasan_veranda_dis_kirisi_eksik_cm`'ye uyar; yan kirişleri buna uyar. D-36 (Lokman, 31 Ekim 2026 15:08: \"kirişlerin birleştiği yerde kolon gelir … hiçbir zaman kirişler askıda kalmaz\"): gövdenin içindeki açık mahalin (balkon, köşe verandası) iki açık kenarının birleştiği köşeye Motor dikme koyar (`geometry._kose_kolonlari`), kirişleri de bu kuralla sayılır (TK-03 balkonu L 3037,5 ve 1832,5; P6001 verandası L 4292,5 ve 2410). D-35'in kolonsuz köşe kirişi (`kose_kirisi_eksik_cm` 0, dış ölçü) kalktı."
   },
   "tasan_veranda_dis_kirisi_eksik_cm": {
    "deger": 0,
    "durum": "lokman",
    "kaynak": "Lokman, 28 Ekim 2026, kart \"Veranda kirişi kolona nasıl oturuyor\": A, dış yüzden dış yüze. Taşan verandanın (BK-14) iki kolon arasındaki dış kirişi kolonların dış yüzünden dış yüzüne uzanır, açık kenar boyu kadar (TK-01: 386 ve 261 cm). Verandanın iki yan kirişi ve gövdenin içindeki veranda `veranda_kirisi_eksik_cm`'de kalır (PK-01'in gerçek listesi 324 ve 190)."
-  },
-  "kose_kirisi_eksik_cm": {
-   "deger": 0,
-   "durum": "lokman",
-   "kaynak": "Lokman, 31 Ekim 2026, karar kartı \"Kolonsuz köşe balkonunun iki açık kenarına kiriş gelir mi?\": \"Gelir, iki kiriş\" (D-35). İki yüzü açık, kolonsuz köşe açık mahalin (TK-03 balkonu, P6001'in verandası) her açık kenarına bir kiriş; boyu mahalin o kenardaki dış ölçüsü (planın profili; TK-03: 313,75 ve 193,25 cm), kolon olmadığından eksik yok; iki kiriş köşede birleşir. Önce kirişsizdi (BK-14 ek)."
   },
   "cektirme_u_100": {
    "deger": 2,
