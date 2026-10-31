@@ -1,0 +1,301 @@
+diff --git a/.claude/agents/geometri-hakemi.md b/.claude/agents/geometri-hakemi.md
+--- a/.claude/agents/geometri-hakemi.md
++++ b/.claude/agents/geometri-hakemi.md
+@@ -17,7 +17,7 @@
+ ## Nasıl çalışırsın
+ 1. `git diff <temel>...HEAD -- motor/ is_emri/ beyin/varyant.py ref_katalog/ ref_yan/` ile değişikliği al (temel verilmediyse `origin/main`).
+ 2. Her değişen fonksiyon için sor: pano modülünü bozuyor mu, yuvarlama ekliyor mu, doğrulamayı atlıyor ya da gevşetiyor mu, altın sayıları değiştiriyor mu, referans girdiye dokunuyor mu, testi geçirmek için beklentiyi mi değiştiriyor.
+-3. Gerekirse salt okunur komut koştur (`python -m beyin.harness`, `python3 testler/referans/dogrula.py --hizli`); dosya değiştirme, dondurma yapma, ağ kullanma.
++3. Gerekirse salt okunur komut koştur: `python3 testler/referans/dogrula.py --hizli`; harness'i `python3 -c "from beyin import harness; harness.main(durum_dir='/tmp/hakem_durum', rapor_yaz=False)"` ile (çıplak `python -m beyin.harness` izlenen `beyin/testler/` dosyalarını yazar). Dosya değiştirme, dondurma yapma, ağ kullanma.
+ 
+ ## Çıktı (Türkçe)
+ - **Bulgular** — yalnız doğruluğu ya da kuralı etkileyenler; her biri `dosya:satır`, kural numarası, bir cümle etki. Üslup ve tercih yorumu yazma.
+diff --git a/.claude/rules/beyin.md b/.claude/rules/beyin.md
+--- a/.claude/rules/beyin.md
++++ b/.claude/rules/beyin.md
+@@ -9,9 +9,9 @@
+ - Kural, bayinin **kendi mesajını** okur, LLM özetini değil (K18). Belirsizlikte sessizce değiştirmez, sorar (K21); sözcük sınırı korunur ("bekle" ≠ "ekle").
+ - Harness (`beyin/harness.py`, `beyin/testler/`) eylemin yanında İş Emri içeriğini de sınar: pencere ve kapı sayısı, oda konumu (K22). 22 vaka sırayla ve değişmeden durur; yeni vaka yalnız sona eklenir; kayıtlı LLM çıkarımı olmadan vaka eklenmez. Harness `Katalog()`'u kabul kümesiz kurar: `beyin/veri/adaylar.json`'daki `gecerli` adaylar (İE-08: yedi çelik model) harness'te görünür; 22 vakanın hiçbiri alan + oda programıyla çelik adaya düşmez (vaka 2 60 m², vaka 7 dış ölçü/pano, vaka 12 oda programı yok) — yeni çelik aday eklerken bu denetlenir. Ayrıca `secenek.uygun_adaylar` yapı türü "çelik" denmedikçe çelik adayı süzer: "88 m² 2+1" (tür yok) prefabrik dalında kalır, çelik seti yalnız "çelik" sözüyle ya da kodla (Ç8801, KT-01) açılır (geometri hakemi 12.10; `test_celik_akisi.py`).
+ - Taslak 2 saatten eskiyse ve mesaj model koduyla başlıyorsa sistem sorar (D-01; `beyin/konusma.py`).
+-- **Çelik revizyonu (İE-08 A4):** değişiklik bayinin kendi sözünden **cümle cümle** okunur (`beyin/celik_okuma.py`; LLM'in pencere/varyant alanları yalnız ipucu, yalnız bu mesajınki, konuşma kaydına yazılmaz). Her cümle tanıdığı sözcüklerle sınıflanır: pencere · çatı · dış 140 · boş · belirsiz · başka; tanınmayan sözcük taşıyan cümle hiçbir türe zorlanmaz ("dış kapı 140" dış 140, "mutfak kapısı 90x200" pencere, "veranda L olsun" çatı değildir). Revizyonda "başka" cümle yönlendirilir (antet/tablo bilgisi hariç: renk, malzeme, müşteri adı, sevk adresi, sayısız), ilk planda talep bilgisidir. Pencere için aday 0 → soru, 1 → uygula, 2 → görselli "1 / 2 / Hiçbiri", ≥ 3 → numaralı soru (cevap: numara, "1 ve 3", "ikisi de", "hepsi"); ölçü sorusu ölçü sorusu olarak yinelenir; sorudan önce okunan öteki değişiklikler soruyla bekler ve cevapta uygulanır; soru ilk planda da cevaplanır. Olumsuz/soru biçimi belirsizdir; ekleme/kaldırma yönlendirilir; revizyonda hiçbir şey okunmadıysa aynı plan yeniden çizilmez. Değişiklik tanıma uygulanabildiği karar anında denenir (`varyant.tanim_uygula`; her işlemden sonra iki yanlı açıklık denetimi, üst kot korunur, dış 140'ta duvarlar örtüşmez; olmazsa yönlendirme), aynı projede birikir (`yapi.degisiklikler`). Çelik seçenek setinde seçim yalnız bu mesajın sözünden: kod, çatı cümlesi ("L olsun"), numara ("3"); set sunulurken mesajdaki istek saklanıp seçilen plana işlenir; revizyonda çatı son plandan. Çatı seçenekleri cümle cümle sayılır (K, L, katalog çatısı; `celik_okuma.cati_secenekleri`): değişimin kaynağı seçenek değildir ("K'dan L'ye", "Ç8801K yerine Ç8801L" → L); tek seçenek seçimdir, iki seçenek ("K mı L mi", "Ç8801K mi katalog çatısı mı") kararsızlıktır — revizyonda sorulur, ilk planda çatı seti sunulur, set açıkken seçim sayılmaz; şekil sözlü harf ("L tipi mutfak") çatı değildir (geometri hakemi dördüncü tur). Çatı seçeneği taşıyan olumsuz cümle ("Ç8801L olmasın", "… geçmeyelim") da kararsızlıktır: koddan çatı seçilmez. Revizyonda okunan çatı pencere sorusuyla bekler ve cevapta uygulanır ("Not aldım: çatı …"). Harfsiz "çatı" cümlesi yalnız renk/malzeme sözüyle bilgidir; şekil/eğim sözüyle yönlendirilir (beşinci tur). Çizimden hesaplanan tablo satırları (`celik.HESAPLANAN_SATIRLAR`: yükseklik, duvarlar, çatı şekli/eğimi/kaplaması, kapılar, pencereler) bayinin değeriyle ezilmez, özel isteğe yazılır; revizyonda geometri satırı bilgi sayılmaz. "ve" ile bağlı tarif parçası ("salonun sol duvarı", "büyük banyo": sıfat önde) cümleden bölünmez; yüklemli istek ("odalar geniş olsun", "salon aynı kalsın") ve oda adından sonra sıfat gelen eksiltili istek ("odalar geniş", "banyo daha büyük") ayrı cümledir; ölçü devamı ("boyu 180", "yüksekliği 300") ayrı değildir. Çatı varyantı olmayan modele çatı isteği söylenir ya da yönlendirilir (altıncı tur). Olumsuz sınıfı açık fiiller ve yeterlik olumsuzudur; "-maz/-mez" sıfatı ("su geçirmez", "paslanmaz") olumsuz değildir; ekleme yönelme hâlini ekten önceki gövdeyle okur ("tuvalete", "WC'ye"), çoğul "pencereler" ve "iki pencere daha" eklemedir (yedinci tur). **Lokman'ın kuralı (13.10):** ilk planda da revizyonda da değişiklik isteği taşıyan hiçbir cümle sessizce düşmez; okunamayan istek revizyonda yönlendirilir, ilk planda bayiye "… isteğini otomatik uygulayamadım; plan okuyabildiklerimle çizilir" diye yazılır (çatı seçimi, bilgi, soru, olumsuz ve "kalsın" cümlesi yazılmaz). Hakem döngüsü yedinci turda kapandı; açık okuma bulguları `docs/is_emirleri/IE-08.md` › "Bilinen sınırlama · canlı dönüşüyle düzeltilir" (S1–S7) — yeni okuma kuralı bunları kötüleştirmez. Çelik yönlendirmelerinde gerekçeye bayinin cümlesi yazılmaz (gerekçe günlüğe gider; cümle yalnız bayiye giden mesajda). Çelikte soru bütçesi (MAX_SORU) revizyon başınadır; prefabrik B1 makinesi ve prefabrik setler çelik kurallarına girmez. `prompt.md` ve `sema.py` değişmedi (harness 22/22).
++- **Çelik revizyonu (İE-08 A4; `beyin/celik_okuma.py`; testler `testler/test_celik_okuma.py`, `testler/test_celik_revizyon_karar.py`, `testler/kalici/test_celik_akisi.py`):** değişiklik bayinin kendi sözünden **cümle cümle** okunur; LLM'in pencere/varyant alanları yalnız bu mesaj için ipucudur, konuşma kaydına yazılmaz. Her cümle tanıdığı sözcüklerle sınıflanır: pencere · çatı · dış 140 · boş · belirsiz · başka; tanınmayan sözcük taşıyan cümle hiçbir türe zorlanmaz. Revizyonda "başka" cümle yönlendirilir (antet/tablo bilgisi hariç: renk, malzeme, müşteri adı, sevk adresi), ilk planda talep bilgisidir. Pencere için aday 0 → soru, 1 → uygula, 2 → görselli "1 / 2 / Hiçbiri", ≥ 3 → numaralı soru; ölçü sorusu ölçü sorusu olarak yinelenir; sorudan önce okunan değişiklikler soruyla bekler ve cevapta uygulanır; soru ilk planda da cevaplanır. Olumsuz ya da soru biçimli cümle belirsizdir; ekleme/kaldırma yönlendirilir; revizyonda hiçbir şey okunmadıysa aynı plan yeniden çizilmez. Değişiklik tanıma karar anında uygulanır (`varyant.tanim_uygula`; her işlemden sonra iki yanlı açıklık denetimi, üst kot korunur, dış 140'ta duvarlar örtüşmez; olmazsa yönlendirme) ve aynı projede birikir (`yapi.degisiklikler`). Çelik seçenek setinde seçim yalnız bu mesajın sözünden (kod, çatı cümlesi, numara); set sunulurken mesajdaki istek saklanıp seçilen plana işlenir; revizyonda çatı son plandan. Çatı seçenekleri cümle cümle sayılır (`celik_okuma.cati_secenekleri`): tek seçenek seçimdir; iki seçenek ya da seçenek taşıyan olumsuz cümle kararsızlıktır (revizyonda sorulur, ilk planda çatı seti sunulur, set açıkken seçim sayılmaz); şekil sözlü harf ("L tipi mutfak") çatı değildir; harfsiz "çatı" cümlesi renk/malzeme sözüyle bilgi, şekil/eğim sözüyle yönlendirmedir. Çizimden hesaplanan tablo satırları (`celik.HESAPLANAN_SATIRLAR`) bayinin değeriyle ezilmez, özel isteğe yazılır; revizyonda geometri satırı bilgi sayılmaz. Cümle bölme, olumsuzluk ve ekleme okumasının ayrıntılı kuralları koddadır ve yukarıdaki testlerle kilitlidir; yeni okuma kuralı `docs/is_emirleri/IE-08.md` › "Bilinen sınırlama" (S1–S7) listesini kötüleştirmez. **Lokman'ın kuralı (13.10):** ilk planda da revizyonda da değişiklik isteği taşıyan hiçbir cümle sessizce düşmez; okunamayan istek revizyonda yönlendirilir, ilk planda bayiye "… isteğini otomatik uygulayamadım; plan okuyabildiklerimle çizilir" diye yazılır (çatı seçimi, bilgi, soru, olumsuz ve "kalsın" cümlesi yazılmaz). Çelik yönlendirmelerinde gerekçeye bayinin cümlesi yazılmaz (gerekçe günlüğe gider; cümle yalnız bayiye giden mesajda). Çelikte soru bütçesi (MAX_SORU) revizyon başınadır; prefabrik B1 makinesi ve prefabrik setler çelik kurallarına girmez.
+ - Olumsuz ya da soru biçimli kısa cevaba "Anlayamadım" bilinen pilot sınırlamasıdır; düzeltmesi İE-03'ün kapsamıdır, geçiştirilmez.
+ - Sırlar LLM'e ve günlüğe gitmez (`llm.py` anahtarları `[GIZLI]` yapar); mesaj metni şu an LLM'e olduğu gibi gidiyor, takma ad (Z-08) açık iştir — yeni kod bunu kötüleştirmez.
+ - Model geçidi arkasında birincil model Claude Opus 5.5 (Z-05); model değişikliği ücretli deneme sayılır, Lokman'ın onayıyla.
+ - `beyin/prompt.md` ve `beyin/sema.py` değişince harness tam koşulur; vaka sonuçları değişiyorsa iş emrinde vaka vaka yazılır.
+-- **İE-14 · talepten plana (D-18, 14.10.2026; r3 gece): LLM koordinat yazmaz.** Üretim sırası (`beyin/plan_uretici.uret`): bankadan en yakın model (bugünkü seçenek yolu) → oda programı (`plan_program`; koddan, tanınmayan serbest istek için 1 çağrı, LLM oda sayısını değiştiremez) → bankadan uyarlama (`plan_uyarlama`; model kaynağı iç kayıttır, bayiye ve LLM'e adı gitmez) ve deterministik çözücü (`plan_cozucu`; aynı program aynı plan) puanla, en iyi 2 → ikisi de boşsa en son en çok 2 çağrı `plan_program.yeniden` (LLM programı ve yerleşim ipucunu önerir; oda programı ve ±%10 alanı kod korur; değişen her şey koddan hesaplanıp bayiye yazılır). LLM'e giden gerçek plan örnekleri adsız özettir (`ornek_ozetleri`: Örnek A/B, işlev, alan; kod, model ve mahal adı yok; `test_plan_uretici` denetler). Geçerliliğe kod karar verir (`plan_denetim.denetle`; ihlaller kalem kalem: sözleşme, geometri, ölçü-program, çatı). Yeni planın revizyonu koordinatsız işlemlerle (`plan_islem`: oda büyüt/küçült, kapı, pencere, çatı tipi, dış 140; kod uygular). Banka modelinin revizyonunda karar `celik_okuma`'nındır; LLM-önce okuma `llm_once_revizyon.mod` ile: `kapali` (varsayılan) · `golge` (LLM yalnız kayda, `okuma_kiyas`, göç 008) · `acik`. `celik_okuma.py` silinmez ve küçülmez: geçiş kararı gerçek bayi cümleleriyle kıyastan sonra Lokman'ın. Ortak plan sözleşmesi `plan_sema.PlanSozlesmesi` (`portman.plan/0.1`), adaptörler `plan_adaptor` (iki motor birleşmez), çok durumlu doğrulama raporu `plan_dogrulama` (GECTI/KALDI/DOGRULANMADI/YAPILMADI; bayiye gitmez). Ölçümlerde hedef yok: önce ölçülür (`docs/raporlar/2026-10-14_IE14_Olcum.md`). `prompt.md` ve `sema.py` değişmedi (harness 22/22). Üretilen planın tanımı zarfta gömülüdür (`celik.tanim_oku`/`tanim_dogrula`); bankaya girmez (D-07, K-A10 dışında). **Kapanış incelemesi (15.10, K1–K5):** kodun bayinin sözünden saptığı her yer bayiye yazılır — ölçüyü tutmayan aday (`plan_uretici.olcu_notu`), 5 cm yuvarlama (`PlanProgrami.varsayimlar`; ham ölçü üç basamak), çözücünün varsayımları, son basamakta değişen her alan (`program_farki`), ölçüsüz büyütmede 50 cm. Talep şemasında en/boy kısa/uzun kenardır: ön cephe okunmaz, iki yön de ölçüyü tutar. Dış 140 yalnız "dış" sözüyle (ya da cümle başında "karkas"). Yeni plan revizyonunda işlem çıkmazsa konuşma kapanmaz: soru (`yeni_plan_degisiklik`, aşama `onay_bekliyor`; cevap yine düzenleyiciye), "planda zaten var", ya da bilgiyle gelen bilgi dışı cümle yönlendirilir (`_bilgi_disi_cumle`). L ve cumba çatı derleyiciye bağlanmaz (Lokman 15.10): istenirse "otomatik uygulayamadım", plan beşik ya da kırma; bankadaki Ç8801 ve Ç8801-L seçenek olarak kalır. Yeni plan revizyonunda anlaşılıp uygulanamayan istek (`plan_islem` durum `uygulanamadi`) adıyla yazılır, plan aynen ve onaylanabilir kalır (yönlendirme yok). Canlı öncesi (16.10): aynı mesajdaki bilgi düşmez (plan antetle yeniden; mesaj ve PDF başlığı kodun metni, LLM özeti değil); işlemler birlikte denetimden geçmezse tek tek denenir (`_sirayla`), geçmeyen adıyla ve kısa gerekçesiyle yazılır. Lokman 16.10 (canlı deneme G): hiçbiri geçmezse de konuşma kapanmaz (`uygulanamadi` + `kurala_uymayan`; plan aynen ve onaylanabilir, Patron'a bilgi). Bayiye giden fark Türkçe (`plan_farki`: "çatı kırma", "pencere ölçüsü: … sol 120/120 → 120/180"), m² kartla aynı (`karar._m2`), revizyonda çatı adı revizyon planından.
++- **İE-14 · talepten plana (D-18, 14.10.2026; r3 gece): LLM koordinat yazmaz.** Üretim sırası (`beyin/plan_uretici.uret`): bankadan en yakın model (bugünkü seçenek yolu) → oda programı (`plan_program`; koddan, tanınmayan serbest istek için 1 çağrı, LLM oda sayısını değiştiremez) → bankadan uyarlama (`plan_uyarlama`; model kaynağı iç kayıttır, bayiye ve LLM'e adı gitmez) ve deterministik çözücü (`plan_cozucu`; aynı program aynı plan) puanla, en iyi 2 → ikisi de boşsa en son en çok 2 çağrı `plan_program.yeniden` (LLM programı ve yerleşim ipucunu önerir; oda programı ve ±%10 alanı kod korur; değişen her şey koddan hesaplanıp bayiye yazılır). LLM'e giden gerçek plan örnekleri adsız özettir (`ornek_ozetleri`: Örnek A/B, işlev, alan; kod, model ve mahal adı yok; `test_plan_uretici` denetler). Geçerliliğe kod karar verir (`plan_denetim.denetle`; ihlaller kalem kalem: sözleşme, geometri, ölçü-program, çatı). Yeni planın revizyonu koordinatsız işlemlerle (`plan_islem`: oda büyüt/küçült, kapı, pencere, çatı tipi, dış 140; kod uygular). Banka modelinin revizyonunda karar `celik_okuma`'nındır; LLM-önce okuma `llm_once_revizyon.mod` ile: `kapali` (varsayılan) · `golge` (LLM yalnız kayda, `okuma_kiyas`, göç 008) · `acik`. `celik_okuma.py` silinmez ve küçülmez: geçiş kararı gerçek bayi cümleleriyle kıyastan sonra Lokman'ın. Ortak plan sözleşmesi `plan_sema.PlanSozlesmesi` (`portman.plan/0.1`), adaptörler `plan_adaptor` (iki motor birleşmez), çok durumlu doğrulama raporu `plan_dogrulama` (GECTI/KALDI/DOGRULANMADI/YAPILMADI; bayiye gitmez). Ölçümlerde hedef yok: önce ölçülür (`docs/raporlar/2026-10-14_IE14_Olcum.md`). Üretilen planın tanımı zarfta gömülüdür (`celik.tanim_oku`/`tanim_dogrula`); bankaya girmez (D-07, K-A10 dışında). **Kapanış incelemesi (15.10, K1–K5):** kodun bayinin sözünden saptığı her yer bayiye yazılır — ölçüyü tutmayan aday (`plan_uretici.olcu_notu`), 5 cm yuvarlama (`PlanProgrami.varsayimlar`; ham ölçü üç basamak), çözücünün varsayımları, son basamakta değişen her alan (`program_farki`), ölçüsüz büyütmede 50 cm. Talep şemasında en/boy kısa/uzun kenardır: ön cephe okunmaz, iki yön de ölçüyü tutar. Dış 140 yalnız "dış" sözüyle (ya da cümle başında "karkas"). Yeni plan revizyonunda işlem çıkmazsa konuşma kapanmaz: soru (`yeni_plan_degisiklik`, aşama `onay_bekliyor`; cevap yine düzenleyiciye), "planda zaten var", ya da bilgiyle gelen bilgi dışı cümle yönlendirilir (`_bilgi_disi_cumle`). L ve cumba çatı derleyiciye bağlanmaz (Lokman 15.10): istenirse "otomatik uygulayamadım", plan beşik ya da kırma; bankadaki Ç8801 ve Ç8801-L seçenek olarak kalır. Yeni plan revizyonunda anlaşılıp uygulanamayan istek (`plan_islem` durum `uygulanamadi`) adıyla yazılır, plan aynen ve onaylanabilir kalır (yönlendirme yok). Canlı öncesi (16.10): aynı mesajdaki bilgi düşmez (plan antetle yeniden; mesaj ve PDF başlığı kodun metni, LLM özeti değil); işlemler birlikte denetimden geçmezse tek tek denenir (`_sirayla`), geçmeyen adıyla ve kısa gerekçesiyle yazılır. Lokman 16.10 (canlı deneme G): hiçbiri geçmezse de konuşma kapanmaz (`uygulanamadi` + `kurala_uymayan`; plan aynen ve onaylanabilir, Patron'a bilgi). Bayiye giden fark Türkçe (`plan_farki`: "çatı kırma", "pencere ölçüsü: … sol 120/120 → 120/180"), m² kartla aynı (`karar._m2`), revizyonda çatı adı revizyon planından.
+diff --git a/.claude/rules/kanal-vps.md b/.claude/rules/kanal-vps.md
+--- a/.claude/rules/kanal-vps.md
++++ b/.claude/rules/kanal-vps.md
+@@ -22,4 +22,4 @@
+ - Testler: `testler/kalici/` (gerçek Postgres; sahte Graph API `sahte_meta.py`; betikler `PM_*` ile sahte dizinlerde), `kanal/tests/e2e_vps_kanal.py` (uçtan uca, gerçek Motor; 7 bölüm 42 kontrol + İE-07 bölüm 8 + İE-08 bölüm 9 çelik A2–A3 + bölüm 10 çelik A4). Gerçek Meta ve LLM yalnız canlı kapılarda, ayrı onayla.
+ - **Çelik hattı (İE-08 8a PR-2a; D-08, D-09, D-10):** zarfın `yapi.sistem = celik` ise `worker.motor_sec` genel motoru seçer (`cizim_genel`: tanım `modeller/`den, sha doğrulanır, `hedef/tanim.json`, `motor.genel.uret` perspektifli ve güncel `kurallar.json` ile; VTK düşerse görsel perspektifsiz, iş düşmez); pano Motor'u `dxf_out.uret` aynen (çağrı anında bakılır, testler sahte üretici takar). Bayiye giden: Onayla/Revize et mesajının başlık görseli `<kod>_bayi_gorsel.png`, PDF `<kod>_pafta.pdf` görünen adı `Portman_<no>_rNN.pdf`; IFC ekte, yükleme listesi klasörde kalır (bayiye gitmez), 3D sayfası yok. Antet (`bilgi`): bayinin adı ve **kart numarası** (`depo.gelen_bayisi` → `bayi["numara"]`; yalnız `rol = bayi` ve gönderenle aynıysa; gönderici kimliği ve LLM'in `musteri.telefon`'u asla), LLM bağlamına (`baglam_ozeti`) ve `isler.sonuc`'a numara girmez; hata iletileri, `failure.json` ve Patron metinleri (bayi mesajı alıntısı dahil) `maske_numaralar` ile maskeli; desen `beyin/numara.py` (BK-08: bitişik 10–15 hanenin yanında boşluklu, tireli, parantezli, `+90`'lı ve bölünmez boşluklu biçimler; paftaya giden alanlarda `celik.numarasiz` aynı deseni kullanır). `*_pafta_sablon.png` önizlemesi satıra bağlanmaz. Çelik adaylar (`beyin/veri/adaylar.json`, motor `genel`) canlıda yalnız K-A10 kabul kaydıyla görünür: `araclar/aday_kabul.py` / `vps/ie08_adaylar.sh` (kabul eden kabul paketini görür, yalnız kabul ettiği kodlar yazılır; geliştirme döneminde kabul eden Lokman, `--kim` varsayılanı, kayıtta `karar: D-11`; çıktıda adın yalnız ilk harfi; bayi onayından sonraki 8b mühendis adımı ayrı ve aynen). **A4 (PR-2b):** çelik r02+ Onayla/Revize et başlık görseli önce–sonra (`okuma_gorseli.once_sonra`; `ekler.gorsel` kaynak `once_sonra`, kart `ekler.kart`); belirsiz okumada görselli "1 / 2 / Hiçbiri" (`q:okuma:1|2|0`); **hak düşmez**: çelik çizim düşerse `worker._cizim_hatasi` konuşmayı karar öncesine döndürür, `eylem cizim_hatasi` (revizyon satırı yok, eski düğmeler geçerli, `isler.sonuc.denenen` antetsiz), bayiye önceki planın geçerli olduğu, Patron'a maskeli metin + şablon; prefabrik çizim hatası bugünkü yol (A5). Düzenlenebilir DXF (D-11) `ekler.dxf`, bayiye gitmez.
+ - Tarihli kayıt olarak duran, koşmayan betikler: `vps/kapi_*`, `pg_kurulum.sh`, `anthropic_anahtar.py`, `canli_kontrol.sh`, `api_denetim.py`, `anahtar_yenile.py`, `kanal/depo_aktar.py`, `arsiv_al.sh` (Kapı 0 yapılmadı, 9.10). Bu dosyalara dokunulmaz; `vps/kapi_d_dogrula.sh:25`'teki parola deseni yanlış pozitifi `denetim/kos.py`'de beklenen bulgu olarak tutulur (İE-08, 12.10), dosya değiştirilmez.
+-- **İE-14 (D-18; r3):** ayarlar `plan_uretimi` ({acik, model, effort low, en_cok_cagri 2, timeout_s 60}; kapalı; yapısal talepte LLM çağrısı yok) ve `llm_once_revizyon` ({acik, mod: kapali|golge|acik, model, effort, timeout_s}; kapalı; `mod` yoksa `acik: true` → acik) — `vps/agent.isleme_ayari` ikisini de worker'a geçirir; `backend: manuel` + `hazir_dosya` yalnız yerel test (`uretim`/`duzenleme` anahtarlarıyla; e2e bölüm 12). Seçenek seti en çok 2 yeni plan + bankadan en yakın (görsel ve düğme en çok 3); her yeni planın kartı ve `dogrulama.json`'ı hazırlıkta (bayiye gitmez). Göç 007 `plan_uretimleri` (yol, puan, süre, program, adaylar ve doğrulama, değişen; seçilince `is_emri_no` ve seçilen `plan_kodu`), göç 008 `okuma_kiyaslari` (gölge okuma; mesaj metni yok). Açmak ücretli canlı değişikliktir (Lokman'ın onayı); gölge kipi her revizyonda 1 ek ücretli çağrıdır. "Hazırlıyorum" iş sürerken ayrı işlemde yazılır (`depo.ara_satir_yaz`, kira denetimiyle) ve ayrılmış sırayı alır (`Depo.ERKEN_SIRA` = 99; ajan satırları 1..n, hata yolu 1–3, panel ≥ 101, çapa ≥ 201): yeniden denenen iş başka karar verse de kayıt çakışmaz; gönderim sırası `olusturuldu, sira`. Göç 008'e cümle parçası yazılmaz (`okuma_kiyas.kayit_ozeti`: yapısal öğe ve sayı). Lokman 15.10: gölge okuma canlıya kapalı çıkar, pilotla ve ücret onayıyla açılır; mühendisin dosya mesajına yalnız yeni üretilen planda (`YENI-`) tek satır doğrulama özeti (`muhendis.dogrulama_satiri`; onaylanan revizyonun tanımı ve çizim kaydından; mühendis kabulü satırda yok; 1024'e sığmazsa ayrı metin). Lokman 16.10 (canlı deneme G): yeni plan revizyonunda `kurala_uymayan` istek konuşmayı kapatmaz; worker Patron'a bilgi verir (metin + şablon, numara maskeli; Patron kartında gönderilmez). Canlı: `v2026.10.15` (16.10), `plan_uretimi.acik = true`.
++- **İE-14 (D-18; r3):** ayarlar `plan_uretimi` ({acik, model, effort low, en_cok_cagri 2, timeout_s 60}; kapalı; yapısal talepte LLM çağrısı yok) ve `llm_once_revizyon` ({acik, mod: kapali|golge|acik, model, effort, timeout_s}; kapalı; `mod` yoksa `acik: true` → acik) — `vps/agent.isleme_ayari` ikisini de worker'a geçirir; `backend: manuel` + `hazir_dosya` yalnız yerel test (`uretim`/`duzenleme` anahtarlarıyla; e2e bölüm 12). Seçenek seti en çok 2 yeni plan + bankadan en yakın (görsel ve düğme en çok 3); her yeni planın kartı ve `dogrulama.json`'ı hazırlıkta (bayiye gitmez). Göç 007 `plan_uretimleri` (yol, puan, süre, program, adaylar ve doğrulama, değişen; seçilince `is_emri_no` ve seçilen `plan_kodu`), göç 008 `okuma_kiyaslari` (gölge okuma; mesaj metni yok). Açmak ücretli canlı değişikliktir (Lokman'ın onayı); gölge kipi her revizyonda 1 ek ücretli çağrıdır. "Hazırlıyorum" iş sürerken ayrı işlemde yazılır (`depo.ara_satir_yaz`, kira denetimiyle) ve ayrılmış sırayı alır (`Depo.ERKEN_SIRA` = 99; ajan satırları 1..n, hata yolu 1–3, panel ≥ 101, çapa ≥ 201): yeniden denenen iş başka karar verse de kayıt çakışmaz; gönderim sırası `olusturuldu, sira`. Göç 008'e cümle parçası yazılmaz (`okuma_kiyas.kayit_ozeti`: yapısal öğe ve sayı). Lokman 15.10: gölge okuma canlıya kapalı çıkar, pilotla ve ücret onayıyla açılır; mühendisin dosya mesajına yalnız yeni üretilen planda (`YENI-`) tek satır doğrulama özeti (`muhendis.dogrulama_satiri`; onaylanan revizyonun tanımı ve çizim kaydından; mühendis kabulü satırda yok; 1024'e sığmazsa ayrı metin). Lokman 16.10 (canlı deneme G): yeni plan revizyonunda `kurala_uymayan` istek konuşmayı kapatmaz; worker Patron'a bilgi verir (metin + şablon, numara maskeli; Patron kartında gönderilmez). Canlı sürüm ve açık ayarlar durum eklerinde (`docs/durum/`) yazar.
+diff --git a/.claude/rules/motor-cizim.md b/.claude/rules/motor-cizim.md
+--- a/.claude/rules/motor-cizim.md
++++ b/.claude/rules/motor-cizim.md
+@@ -14,7 +14,7 @@
+ - İş Emri koordinatsız ve pano birimlidir; kural kaynağı prefabrik çizim kuralları v1.4.3 (K02). Pano aksı 125,5 cm (`motor/geometry.py` `MOD`). P6001 ve prefabrik katalog planları bu Motor'da kalır.
+ - **K16 kapandı, (b) (Lokman 11.10.2026; D-08):** çelik ve modül dışı planlar **serbest aksla genel motorda** (`motor/genel/`; Yapı Tanımı 0.5, cm; `python -m motor.genel.uret`). İki motor yan yana yaşar; hangisinin koşacağını aday kaydındaki `motor` alanı ve İş Emri zarfındaki `yapi.sistem` söyler. Genel motorun davranışı kural kitabına bağlıdır (`kurallar/`; yeni davranış her zaman bir kural anahtarına bağlanır, anahtar yoksa eski davranış sürer; kural değişikliği yeni set sürümü). Altın adımlar kural seti 0.19 pimiyle koşar (`kurallar/liste/setler/0.19.json`); `kurallar.json` ilerleyince referans değişmez.
+ - **Genel motor altın testleri değişmez:** Ç8801 @0.19 plan/görünüşler/pafta PNG ve liste JSON bayt bayt, IFC ve şablon PDF'i içerikçe (`modeller/altin.json`; `testler/referans/` zinciri `genel_parmak_izleri.txt`); tam koşuda yedi modelin çizim setleri ve 0.12–0.19 liste matrisi. Bayi görselinde ve paftada m² brüt oturumdur (`girdi_genel.metraj` `oturum_m2`, listedeki `bina_m2` ile aynı; sınır kutusu değil, D-08 K-A1). Doğrulama geçmezse teslim adıyla PDF yoktur (`.HATALI.pdf`, K23 genel motorda da). Çizim baytları matplotlib'e bağlıdır (`uret.matplotlib_sabitle`: DejaVu Sans, varsayılan hinting; matplotlib sürümü değişirse yeniden dondurma kararı). Toplama sırası her Python sürümünde 3.11 gibi (`motor/genel/toplam.py`). Perspektifler altın değildir (VTK; boyut ve geometri sayıları).
+-- **Bayi paftası "Örnek Şablon"un aynısıdır** (Lokman, 6.10.2026 19:46; `docs/sartname/plan_paftasi_sablonu.md`; `motor/genel/sablon_pafta.py`): A4 yatay, plan + sol yan + ön görünüş, bina özellikleri, özel istekler, antet; 2. sayfa dört görünüş ve çatı planı; bilinmeyen değer "...", uydurulmaz (K21); koda bağlı seçimler (vasistas eşiği, çatı tipi adları, yazı boyu, TASLAK ibaresi, en kısa zincir parçası) `kurallar/cizim/pafta_sablonu.json` anahtarlarıyla; yazı tipleri depodan (`motor/genel/font/`: Comic Relief, Liberation Sans; makineye bağlı değil). Antette Çizen/Kontrol/Onay "Portman"; İLGİLİ KİŞİ-TELEFON'a yalnız bayinin adı ve bayi kartındaki telefonu (D-09; `uret(bilgi=)` → `pafta_pdf(bilgi=)`; başka kimsenin numarası yazılmaz, LLM'e gitmez, günlükte ve hata iletisinde maskeli; `*_pafta_sablon.png` önizlemesi numarayı taşır, yalnız bayiye gider, kanıta ve referansa girmez). **8b mühendis kabulüne kadar 1. sayfada antetin üstünde küçük TASLAK** (D-10; `taslak_ibaresi`). Ölçüler dış yüzden, parçaların toplamı genel ölçüye eşit; **15 cm ve daha kısa parçalar komşusuna katılır ve `pafta_ozet.json › kontrol_notlari`'na mühendis notu düşer** (D-10, "Çelikte 15 cm parça çıkmaz"). Mahal adı tanımdaki `etiket_yeri`'ne; önündeki çatı düzleminin arkasında kalan baca görünüşte çatının altına çizilir (KT-03 ön görünüş; D-10 madde 4). **Bayi plan görseli** (`plan_bayi.png`): yön etiketleri en dıştaki ölçünün dışında, çizimden sonra ölçülerek yerleşir; 15 cm kuralı burada da (`plan_eksen(en_kisa_parca=)`); mahal adı/m² aralığı ölçeğe göre; kartın çatı planı yalın, VTK yoksa görünüşler ölçüsüz (D-10 ek 7). **Yazı çakışma denetimi** (`motor/genel/yazi_cakisma.py`; `testler/genel/test_yazi_cakismasi.py`, yedi model, dört çıktı, sıfır bulgu): bayiye giden üç çıktıda yazıların **mürekkep kutuları** binmez, yazı ölçü okunu/çentiğini kapatmaz (yerleşim kutusu örtüşmesi yanlış alarmdır; eğim oku ölçü değildir). Bayiye giden çizimde yeni bir yazı eklerken bu test koşulur. Şablon paftası: sarılan satırlar mürekkep aralığıyla, `ozellik_yazi_pt_mutlak` (D-10 ek 9); dar parça sayısı içeri sırada; 2. sayfa `gorunus_eksen(sigdir=True)`, `cati_plani_eksen(yazi_ayir=True)`. `plan_eksen`, `cati_plani_eksen`, `gorunus_eksen` yeni parametreleri varsayılanla çizim setinin baytlarını değiştirmez. Üçüncü bayi çıktısı `<kod>_bayi_gorsel.png` (plan + çatı planı + ön-sağ ve arka-sağ perspektif tek görselde; VTK yoksa ön ve sağ görünüş; aday kartı ve r01'in Onayla/Revize et başlık görseli; r02 ve sonrasında çelikte başlık görseli önce–sonradır, `okuma_gorseli.once_sonra`, İE-08 A4). **Bilinen açık (G1, İE-08 › Son geometri turu):** `ciz_genel.zincirler` iç duvarın cepheye ulaşmasını sabit 12,5 cm eşikle arar; dış 140'ta (ve KT-03'te) iç duvar uçları bu eşiğin dışında kalır, zincirde iç bölmeler görünmez. Düzeltme ayrı küçük PR'da (Lokman, 13.10 16:35: eşik + KT-03 yeniden dondurma, D-02). Genel motorun `pafta.png`'si mühendis paftasıdır, sette kalır. **Düzenlenebilir DXF (D-11, 13.10.2026):** `<kod>_cizim.dxf` — plan ve dört görünüş, katmanlar DUVAR/ACIKLIK/OLCU/YAZI (+ CATI, varsayım), cm, DIMENSION, görünüşte gizli çizgi yok (`motor/genel/dxf_genel.py`; `kurallar/cizim/duzenlenebilir.json › dxf` yoksa üretilmez); çizim setinin dosya listesine girmez, yeniden açılıp denetlenir (geçmezse `.HATALI.dxf`, manifestte yok), bayiye gitmez. Yükleme listesinin Excel'i (`excel_liste.py`) kabul paketinde ve İE-08 8b'den beri her çelik çizimde sunucuda (D-17; `kanal/worker.liste_exceli`, `uret`'in dışında: altın ve referans izleri değişmez); bayi onaylayınca mühendise gider, bayiye gitmez. **DXF ve Excel çıktıdır, kaynak değil:** düzeltme tanıma (yeni dosya/sürüm, D-07) ya da kural kitabına işlenir, yeniden üretilir. Model tanımları `modeller/` altındadır: var olan tanım değiştirilmez, yeni dosya ya da sürüm eklenir (D-07); KT'ler müşteri projesidir, bayiye adsız.
++- **Bayi paftası "Örnek Şablon"un aynısıdır** (Lokman, 6.10.2026 19:46; `docs/sartname/plan_paftasi_sablonu.md`; `motor/genel/sablon_pafta.py`): A4 yatay, plan + sol yan + ön görünüş, bina özellikleri, özel istekler, antet; 2. sayfa dört görünüş ve çatı planı; bilinmeyen değer "...", uydurulmaz (K21); koda bağlı seçimler (vasistas eşiği, çatı tipi adları, yazı boyu, TASLAK ibaresi, en kısa zincir parçası) `kurallar/cizim/pafta_sablonu.json` anahtarlarıyla; yazı tipleri depodan (`motor/genel/font/`: Comic Relief, Liberation Sans; makineye bağlı değil). Antette Çizen/Kontrol/Onay "Portman"; İLGİLİ KİŞİ-TELEFON'a yalnız bayinin adı ve bayi kartındaki telefonu (D-09; `uret(bilgi=)` → `pafta_pdf(bilgi=)`; başka kimsenin numarası yazılmaz, LLM'e gitmez, günlükte ve hata iletisinde maskeli; `*_pafta_sablon.png` önizlemesi numarayı taşır, yalnız bayiye gider, kanıta ve referansa girmez). **8b mühendis kabulüne kadar 1. sayfada antetin üstünde küçük TASLAK** (D-10; `taslak_ibaresi`). Ölçüler dış yüzden, parçaların toplamı genel ölçüye eşit; **15 cm ve daha kısa parçalar komşusuna katılır ve `pafta_ozet.json › kontrol_notlari`'na mühendis notu düşer** (D-10, "Çelikte 15 cm parça çıkmaz"). Mahal adı tanımdaki `etiket_yeri`'ne; önündeki çatı düzleminin arkasında kalan baca görünüşte çatının altına çizilir (KT-03 ön görünüş; D-10 madde 4). **Bayi plan görseli** (`plan_bayi.png`): yön etiketleri en dıştaki ölçünün dışında, çizimden sonra ölçülerek yerleşir; 15 cm kuralı burada da (`plan_eksen(en_kisa_parca=)`); mahal adı/m² aralığı ölçeğe göre; kartın çatı planı yalın, VTK yoksa görünüşler ölçüsüz (D-10 ek 7). **Yazı çakışma denetimi** (`motor/genel/yazi_cakisma.py`; `testler/genel/test_yazi_cakismasi.py`, yedi model, dört çıktı, sıfır bulgu): bayiye giden üç çıktıda yazıların **mürekkep kutuları** binmez, yazı ölçü okunu/çentiğini kapatmaz (yerleşim kutusu örtüşmesi yanlış alarmdır; eğim oku ölçü değildir). Bayiye giden çizimde yeni bir yazı eklerken bu test koşulur. Şablon paftası: sarılan satırlar mürekkep aralığıyla, `ozellik_yazi_pt_mutlak` (D-10 ek 9); dar parça sayısı içeri sırada; 2. sayfa `gorunus_eksen(sigdir=True)`, `cati_plani_eksen(yazi_ayir=True)`. `plan_eksen`, `cati_plani_eksen`, `gorunus_eksen` yeni parametreleri varsayılanla çizim setinin baytlarını değiştirmez. Üçüncü bayi çıktısı `<kod>_bayi_gorsel.png` (plan + çatı planı + ön-sağ ve arka-sağ perspektif tek görselde; VTK yoksa ön ve sağ görünüş; aday kartı ve r01'in Onayla/Revize et başlık görseli; r02 ve sonrasında çelikte başlık görseli önce–sonradır, `okuma_gorseli.once_sonra`, İE-08 A4). Genel motorun `pafta.png`'si mühendis paftasıdır, sette kalır. **Düzenlenebilir DXF (D-11, 13.10.2026):** `<kod>_cizim.dxf` — plan ve dört görünüş, katmanlar DUVAR/ACIKLIK/OLCU/YAZI (+ CATI, varsayım), cm, DIMENSION, görünüşte gizli çizgi yok (`motor/genel/dxf_genel.py`; `kurallar/cizim/duzenlenebilir.json › dxf` yoksa üretilmez); çizim setinin dosya listesine girmez, yeniden açılıp denetlenir (geçmezse `.HATALI.dxf`, manifestte yok), bayiye gitmez. Yükleme listesinin Excel'i (`excel_liste.py`) kabul paketinde ve İE-08 8b'den beri her çelik çizimde sunucuda (D-17; `kanal/worker.liste_exceli`, `uret`'in dışında: altın ve referans izleri değişmez); bayi onaylayınca mühendise gider, bayiye gitmez. **DXF ve Excel çıktıdır, kaynak değil:** düzeltme tanıma (yeni dosya/sürüm, D-07) ya da kural kitabına işlenir, yeniden üretilir. Model tanımları `modeller/` altındadır: var olan tanım değiştirilmez, yeni dosya ya da sürüm eklenir (D-07); KT'ler müşteri projesidir, bayiye adsız.
+ - **BK-09 (D-16, 14.10.2026):** ölçü zincirinde iç duvarın cepheye ulaşma eşiği `max(12,5; dış kaplama + en kalın dış duvar + 1)` cm (`ciz_genel.zincir_esigi`; 80'likte 12,5, 140'lıkta 1,25 kaplamayla 16,25, KT-03'te 3 cm kaplamayla 18; yapı için tek eşik — dış 140'ta ve KT-03'te iç bölmeler zincirde). Kapı açılım yayı `gid="kapi_yay"`; yayı kesen mahal etiketi (tanımda `etiket_yeri` yoksa) çizimden sonra ölçülerek oda içinde kaydırılır (`ciz_genel.etiket_yaydan_kacir`; bayi paftası ve bayi plan görseli; mühendis planı aynen). Paftanın 2. sayfasında TASLAK sağ üstte ayrı yazı; uzun başlık parantezli açıklamasını düşürür, yine sığmazsa küçülür. Çizgide kalan dar sayı uçtaki çentiğe değerse ikinci iç sıraya. KT başlıklarında (çizim seti, liste adı) m² koddan (`girdi_genel.baslik_adi`, brüt oturum; model dosyası aynen, D-07).
+ - Katalog planları çıkarıcıyla okunur (`motor/cikarici.py`), elle kodlanmaz; artıklar raporlanır, sessiz yuvarlama yoktur (K16).
+ - DXF yeniden açılıp doğrulanmadan PDF yoktur. Doğrulama geçmezse teslim PDF'i üretilmez; yalnız tanı için `.HATALI.pdf` yazılır (K23, `motor/dxf_out.py`).
+diff --git a/.claude/skills/kapanis/SKILL.md b/.claude/skills/kapanis/SKILL.md
+--- a/.claude/skills/kapanis/SKILL.md
++++ b/.claude/skills/kapanis/SKILL.md
+@@ -1,6 +1,6 @@
+ ---
+ name: kapanis
+-description: İş emrini kapatır — doğrulama, kanıt, DURUM.md, commit/push, bağımsız inceleme ve PR özeti. Merge etmez; main'e birleştirme Lokman'ın onayıyla.
++description: İş emrini kapatır — doğrulama, kanıt, durum eki (docs/durum/), commit/push, bağımsız inceleme ve PR özeti. Merge etmez; main'e birleştirme Lokman'ın onayıyla.
+ disable-model-invocation: true
+ argument-hint: [KOD]
+ ---
+@@ -14,8 +14,8 @@
+ - Dal doğru mu (`git rev-parse --abbrev-ref HEAD` = iş dalı; `main` ise dur).
+ 
+ ## 2. Doğrulama
+-- `motor/`, `beyin/` ya da `kanal/` değiştiyse **tam**: `bash araclar/ortam_kur.sh --dogrula` (~9 dk; arka planda koşturup bekleyebilirsin).
+-- Yalnız belge/ayar/`.claude/` değiştiyse **hızlı**: `python3 testler/referans/dogrula.py --hizli` (~45 sn) ve `bash -n` / `py_compile` zaten hook'ta.
++- `motor/`, `beyin/`, `kanal/` ya da `kurallar/` değiştiyse **tam**: `bash araclar/ortam_kur.sh --dogrula` (~9 dk; arka planda koşturup bekleyebilirsin).
++- Yalnız belge/ayar/`.claude/` değiştiyse **hızlı**: `python3 testler/referans/dogrula.py --hizli` (~60 sn) ve `bash -n` / `py_compile` zaten hook'ta.
+ - Beklenen fark yok: `dogrula.py` "SONUÇ: fark yok" demeli (İE-08, 12.10'dan beri `kapi_d_dogrula.sh:25` yanlış pozitifi `kos.py`'de beklenen). Herhangi bir FARKLI varsa iş kapanmaz; kaynağını bul.
+ - Harness sonucu (22/22), referans (AYNI), pytest (N geçti) sayılarını not et.
+ 
+diff --git a/.claude/skills/sahip-ozeti/SKILL.md b/.claude/skills/sahip-ozeti/SKILL.md
+--- a/.claude/skills/sahip-ozeti/SKILL.md
++++ b/.claude/skills/sahip-ozeti/SKILL.md
+@@ -13,7 +13,7 @@
+ 1. **Canlıda ne var** — bayi/Patron hattında bugün ne çalışıyor, hangi modda.
+ 2. **Açık iş** — kod, dal, kullanıcı adımlarının durumu (Çalışmıyor / Kısmen / Yerelde / Canlıda).
+ 3. **Senin onayını bekleyenler** — merge, silme, ücretli deneme, canlı değişiklik; her biri için bir evet/hayır sorusu.
+-4. **Senin kararını bekleyenler** — açık kararlar (K16, K3/K4, Z-03/Z-06 vb.) ve her birinin neyi tıkadığı.
++4. **Senin kararını bekleyenler** — açık kararlar (`KARARLAR/README.md` › "Açık kararlar") ve her birinin neyi tıkadığı.
+ 5. **Açık riskler** — tarihli (anahtar son kullanma, sunucu erişimi, imzasız paket, kişisel veri kopyaları).
+ 6. **Son kanıt** — en son doğrulamanın tarihi ve sayıları (harness, referans, test).
+ 7. **Ölçüm** — varsa gerçek veriyle ölçülmüş son sonuç (ör. yükleme listesi eşleşmesi); "kural görmemiş veriyle" olup olmadığını belirt.
+diff --git a/AGENTS.md b/AGENTS.md
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -45,12 +45,12 @@
+ 
+ | Yol | İçerik |
+ |---|---|
+-| `beyin/`, `motor/`, `kanal/`, `vps/` | Canlıdaki kod (v1.1.1 ağacı ve İE-02 eklemeleri). Canlı paket `DURUM.md`'de yazar |
++| `beyin/`, `motor/`, `kanal/`, `vps/` | Canlıdaki kod (v1.1.1 ağacı ve İE-02 eklemeleri). Canlı sürüm etiketi `docs/durum/` eklerinde yazar (28 Ekim 2026'dan öncesi `DURUM.md`'de) |
+ | `motor/genel/` | Genel motor (serbest aks; çelik ve modül dışı planlar; D-08, İE-08): Yapı Tanımı → çizim seti, IFC, yükleme listesi, bayi görseli, Örnek Şablon paftası ve düzenlenebilir DXF (D-11) (`python -m motor.genel.uret`). Pano birimli Motor (`motor/*.py`) P6001 ve prefabrik için aynen durur |
+ | `kurallar/` | Kural kitabı (İE-05): yükleme listesi kuralları (`liste/kurallar.json`, güncel; dondurulmuş setler `liste/setler/0.12–0.19.json`), çizim seti, seçenekler, bayi örneği. Sürümle sunucuya gider; eski set eski çıktıyı bayt bayt verir |
+ | `modeller/` | Genel motor model tanımları (Ç8201, Ç8801 ve çatı varyantları, KT-01/02/03) + `altin.json` ve KT pafta sayımları. Sürümle gider; tanım değişirse yeni dosya ya da sürüm (D-07) |
+ | `modeller/banka/` | Model atölyesinin bankası (İE-09, D-20): her model kendi klasöründe `tanim.json`, `kart.json`, `kontrol.json`, `kart.png`. Referans zincirine girmez; her kabul modeli kendi kontrol dosyasıyla korunur. Okuyan `beyin/banka.py` (yalnız `kabul` kartlar): Katalog (K-A10 kaydı açıkça varsa), `aday_kabul.py`, `kabul_paketi.py`; İE-14 uyarlaması okumaz (İE-09 PR-1). Metraj kapısı çelik hakeminin (İE-16) sonucundan. Ayrıntı `modeller/banka/README.md` |
+-| `is_emri/`, `ref_katalog/`, `ref_yan/`, `beyin/veri/` | Dondurulmuş referans girdiler (23 dosya); değiştirilmez, yeni dosya eklenebilir. İE-08'den beri `modeller/*.json` ve `kurallar/` (setler, cizim, secenekler, bayi) da referans girdisidir |
++| `is_emri/`, `ref_katalog/`, `ref_yan/`, `ref_prefabrik/`, `beyin/veri/`, `kanal/ref_*` | Dondurulmuş referans girdiler (kalıplar `testler/referans/dogrula.py` › `GIRDI_KALIPLARI`); var olan dosya değiştirilmez, yeni dosya eklenebilir. İE-08'den beri `modeller/*.json` ve `kurallar/` (setler, çizim, seçenekler, bayi örneği) da referans girdisidir |
+ | `docs/is_emirleri/` | İş emirleri (İE: ürün işi, BK: bakım); her birinin kabul koşulu içinde |
+ | `docs/raporlar/`, `docs/notlar/` | Tarihli raporlar ve notlar |
+ | `docs/devir/` | Oturum devir notları |
+@@ -59,7 +59,6 @@
+ | `testler/` | Referans (dondurulmuş), kalıcı akış (Postgres) ve bilinen hata testleri |
+ | `deneme/` | Tarihli denemeler; canlıda değil |
+ | `araclar/` | Yerel ortam kurulumu (`ortam_kur.sh`); aday araçları (İE-04/İE-08): `aday_kaydet.py` (prefabrik İş Emri ya da `--motor genel` Yapı Tanımı → `beyin/veri/adaylar.json` + `is_emri/adaylar/<kod>.png`), `kabul_paketi.py` (kabul edene yedi modelin paftası, çizim seti, listesi, kısa parça notları; D-11'den beri DXF ve Excel liste), `aday_kabul.py` (K-A10 kabul kaydı; sunucuda `vps/ie08_adaylar.sh`); `paket/` (İE-18: `python -m araclar.paket <KOD|hepsi> <çıktı>`, her modelin paketi PF `Modeller/` düzeninde: canlı çizim, liste, kimlik kartlı model, montaj paftası, montaj rehberi, kıyas, `bilgi.md`, `ozet.xlsx`; kayıt `paket/modeller.json`); model atölyesi (İE-09): `atolye.py` (kart, çizim, kontrol sayfası, düzeltme, metraj kapısı çelik hakeminin sonucundan, kabul, gün sonu; tarif `/atolye`) ve `atolye_sayfa.py` (kontrol PDF'i) |
+-| `hosting/` | Hosting'teki canlı dosyaların kayıt kopyası; pakete girmez |
+ | `.claude/` | Ajan ayarları: `rules/` (alan kuralları), `skills/` (komutlar), `agents/` (hakemler), `hooks/` (frenler), `settings.json` (izinler) |
+ 
+ ## Komutlar
+@@ -69,7 +68,7 @@
+ - **Genel motor:** `python -m motor.genel.uret modeller/C8801.json <çıktı> [--set kurallar/liste/setler/0.19.json] [--yontem panel|omega_asik] [--perspektifsiz] [--bayisiz]` — çizim seti, IFC, yükleme listesi, bayi görseli ve Örnek Şablon paftası; LLM yok. Altın test `pytest -q testler/genel`.
+ - **Harness:** `python -m beyin.harness` — 22 vaka, kayıtlı LLM çıkarımlarıyla; LLM çağrısı yok.
+ - **Testler:** `pytest -q testler` (Postgres yoksa kalıcı akış testleri atlanır).
+-- **Referans farkı beklenmez.** `dogrula.py` "SONUÇ: fark yok" demeli. (12 Ekim 2026, İE-08'e kadar sır taraması `vps/kapi_d_dogrula.sh:25`'i işaretliyordu ve "2 kontrolde fark" beklenirdi; o yanlış pozitif artık `denetim/kos.py`'de beklenen bulgu, telefon deseni ondalık sayıları numara sanmıyor.) Herhangi bir FARKLI satırı incelenir.
++- **Referans farkı beklenmez.** `dogrula.py` "SONUÇ: fark yok" demeli; herhangi bir FARKLI satırı incelenir. Sır taramasının `vps/kapi_d_dogrula.sh:25` parola deseni yanlış pozitifi `denetim/kos.py`'de beklenen bulgudur, telefon deseni ondalık sayıları numara saymaz (`testler/test_sir_taramasi.py`).
+ 
+ ## Değişiklik disiplini
+ 
+diff --git a/beyin/degisiklik_okuyucu.py b/beyin/degisiklik_okuyucu.py
+--- a/beyin/degisiklik_okuyucu.py
++++ b/beyin/degisiklik_okuyucu.py
+@@ -18,7 +18,7 @@
+ from beyin import llm, numara
+ 
+ ARAC_ADI = "degisiklik_kaydet"
+-ARAC_ACIKLAMA = "Bayinin revizyon isteğini planın tablosuna göre değişiklik işlemlerine çevir. Yalnız bu araçla cevap ver."
++ARAC_ACIKLAMA = "Bayinin revizyon isteğini planın tablosuna göre değişiklik işlemlerine çevir."
+ PROMPT = """Sen PortatifEv'in çelik ev planlarında bayinin revizyon isteğini okuyan yardımcısın. Karar vermezsin: isteği, açık planın
+ tablosundaki öğelere bağlı değişiklik işlemlerine çevirirsin; kod denetler ve uygular.
+ 
+diff --git a/beyin/gorsel_okuma.py b/beyin/gorsel_okuma.py
+--- a/beyin/gorsel_okuma.py
++++ b/beyin/gorsel_okuma.py
+@@ -30,9 +30,9 @@
+ 
+ KAYNAK = "cizim-okuma"                  # İş Emri `talep.kaynak`: plan bayinin çiziminden okundu (revizyon da okumadan sürer)
+ ARAC_ADI = "cizim_oku"
+-ARAC_ACIKLAMA = "Bayinin plan çiziminden okuduklarını kaydet. Yalnız bu araçla cevap ver."
++ARAC_ACIKLAMA = "Bayinin plan çiziminden okuduklarını kaydet."
+ DUZELTME_ARACI = "okuma_duzelt"
+-DUZELTME_ACIKLAMA = "Bayinin düzeltmesini ya da revizyon isteğini önceki okumaya işle. Yalnız bu araçla cevap ver."
++DUZELTME_ACIKLAMA = "Bayinin düzeltmesini ya da revizyon isteğini önceki okumaya işle."
+ KENARLAR = ("ust", "alt", "sol", "sag")
+ ISLEVLER = ("salon", "mutfak", "yatak_odasi", "banyo", "wc", "hol", "antre", "depo", "calisma", "giyinme")
+ GORSEL_MIME = ("image/jpeg", "image/png", "image/webp", "image/gif")
+diff --git a/beyin/llm.py b/beyin/llm.py
+--- a/beyin/llm.py
++++ b/beyin/llm.py
+@@ -3,10 +3,11 @@
+ Arka uçlar:
+ - "openai_chat": Chat Completions + response_format json_schema (hosting'deki sohbet botunun kullandığı, kanıtlı API yolu).
+ - "openai":      Responses API, json_schema çıktı.
+-- "anthropic":   Messages API, zorunlu araç çağrısıyla şema.
++- "anthropic":   Messages API, araç çağrısıyla şema (tool_choice auto + istemde "yalnız bu aracı bir kez çağır"; zorunlu araç seçimi
++                 Opus 5.5 ve Sonnet 5.5'te HTTP 400 verir, İE-19).
+ - "manuel":      hazır çıktı sözlüğü (test koşumu; LLM çağrısı yok).
+ Anahtar: çağıranın verdiği `anahtar` → ortam değişkeni (OPENAI_API_KEY / ANTHROPIC_API_KEY) → PORTMAN_AYARLAR_JSON dosyası.
+-Bu sürümde canlı anahtarla yalnız manuel yol test edildi; openai_chat/openai/anthropic yolları kurulum öz-testinde denenecek.
++Canlı arka uç `anthropic` (K10; Claude Opus 5.5); openai yolları yedektir ve bu dosyada eski biçimiyle durur.
+ """
+ from __future__ import annotations
+ import json, os, re, time, urllib.request, urllib.error
+@@ -15,7 +16,8 @@
+ from .sema import Talep, json_schema
+ 
+ PROMPT = (Path(__file__).resolve().parent / "prompt.md").read_text(encoding="utf-8")
+-VARSAYILAN_MODEL = {"openai_chat": "gpt-4o-mini", "openai": "gpt-4o-mini", "anthropic": "claude-haiku-4-5-20251001"}
++JSON_NOTU = "\nÇıktı yalnız şemaya uyan JSON'dur; başka metin yazma."      # yalnız JSON kipli openai yolları; anthropic yolu araç çağırır
++VARSAYILAN_MODEL = {"openai_chat": "gpt-4o-mini", "openai": "gpt-4o-mini", "anthropic": "claude-opus-5-5"}   # ayar model vermezse (K10)
+ 
+ 
+ class LLMHatasi(RuntimeError):
+@@ -68,8 +70,10 @@
+ 
+ 
+ def cikar_detayli(mesaj: str, baglam: str = "", backend: str = "manuel", model: str | None = None, hazir: dict | None = None,
+-                  anahtar: str | None = None, ayarlar_json: str | None = None, timeout: int = 60) -> tuple[Talep, dict]:
+-    """Bayi mesajını Talep'e çevirir; ikinci değer ölçüm: {backend, model, girdi_token, cikti_token, sure_ms}."""
++                  anahtar: str | None = None, ayarlar_json: str | None = None, timeout: int = 60,
++                  effort: str | None = "low") -> tuple[Talep, dict]:
++    """Bayi mesajını Talep'e çevirir; ikinci değer ölçüm: {backend, model, girdi_token, cikti_token, sure_ms}.
++    `effort` yalnız anthropic yolunda (`output_config.effort`); None verilirse gönderilmez."""
+     t0 = time.time()
+     if backend == "manuel":
+         if hazir is None:
+@@ -85,7 +89,7 @@
+         key = anahtar_bul(backend, anahtar, ayarlar_json)
+         out = _post("https://api.openai.com/v1/chat/completions", {"Authorization": f"Bearer {key}"},
+                     {"model": model, "temperature": 0,
+-                     "messages": [{"role": "system", "content": PROMPT}, {"role": "user", "content": kullanici}],
++                     "messages": [{"role": "system", "content": PROMPT + JSON_NOTU}, {"role": "user", "content": kullanici}],
+                      "response_format": {"type": "json_schema", "json_schema": {"name": "talep", "schema": schema, "strict": False}}},
+                     timeout)
+         secim = (out.get("choices") or [{}])[0]
+@@ -98,7 +102,7 @@
+     elif backend == "openai":
+         key = anahtar_bul(backend, anahtar, ayarlar_json)
+         out = _post("https://api.openai.com/v1/responses", {"Authorization": f"Bearer {key}"},
+-                    {"model": model, "instructions": PROMPT, "input": kullanici,
++                    {"model": model, "instructions": PROMPT + JSON_NOTU, "input": kullanici,
+                      "text": {"format": {"type": "json_schema", "name": "talep", "schema": schema, "strict": False}}}, timeout)
+         metin = "".join(c.get("text", "") for o in out.get("output", []) for c in o.get("content", []) if c.get("type") == "output_text")
+         kullanim = out.get("usage") or {}
+@@ -106,28 +110,27 @@
+         talep = Talep.model_validate(_json_ayikla(metin))
+     elif backend == "anthropic":
+         key = anahtar_bul(backend, anahtar, ayarlar_json)
+-        opus55 = model == "claude-opus-5-5"
+-        govde = {"model": model, "max_tokens": 4096 if opus55 else 1500,
+-                 "system": PROMPT + ("\nTalebi yalnız talep_kaydet aracını bir kez çağırarak bildir." if opus55 else ""),
+-                 "tools": [{"name": "talep_kaydet", "description": "Yapılandırılmış talep", "input_schema": schema}],
+-                 "tool_choice": {"type": "auto", "disable_parallel_tool_use": True} if opus55 else {"type": "tool", "name": "talep_kaydet"},
++        # Tek yol, modele göre dallanma yok: zorunlu araç seçimi (tool_choice "tool") Opus 5.5 ve Sonnet 5.5'te 400 verir (İE-19);
++        # aracı istem adlandırır, çağrı sayısını kod denetler. max_tokens düşünme payını da kapsar (düşünme açık modellerde sayılır).
++        govde = {"model": model, "max_tokens": 4096,
++                 "system": PROMPT + "\nTalebi yalnız talep_kaydet aracını bir kez çağırarak bildir.",
++                 "tools": [{"name": "talep_kaydet",
++                            "description": "Bayinin mesajından okunan yapılandırılmış talebi kaydeder. Mesaj başına bir kez çağrılır. "
++                                           "Mesajda geçmeyen alanlar null kalır (listeler boş); yalnız şemadaki izinli değerler kullanılır; "
++                                           "ölçü, adet ve fiyat hesaplanmaz, karar verilmez. Kayıt kural katmanına gider, bayiye dönmez.",
++                            "input_schema": schema}],
++                 "tool_choice": {"type": "auto", "disable_parallel_tool_use": True},
+                  "messages": [{"role": "user", "content": kullanici}]}
+-        if opus55:
+-            govde["output_config"] = {"effort": "low"}
++        if effort:
++            govde["output_config"] = {"effort": effort}
+         out = _post("https://api.anthropic.com/v1/messages",
+                     {"x-api-key": key, "anthropic-version": "2023-06-01"}, govde, timeout)
+-        if opus55:
+-            calls = [b for b in out.get("content", []) if b.get("type") == "tool_use"]
+-            if out.get("stop_reason") != "tool_use" or len(calls) != 1 or calls[0].get("name") != "talep_kaydet":
+-                raise LLMHatasi("Opus talep yanıtı tamamlanmadı veya beklenen araç çağrısı dönmedi")
++        calls = [b for b in out.get("content", []) if b.get("type") == "tool_use"]
++        if out.get("stop_reason") != "tool_use" or len(calls) != 1 or calls[0].get("name") != "talep_kaydet":
++            raise LLMHatasi(f"talep_kaydet çağrısı dönmedi (stop_reason {out.get('stop_reason')})")
+         kullanim = out.get("usage") or {}
+         meta.update(model=out.get("model") or model, girdi_token=kullanim.get("input_tokens"), cikti_token=kullanim.get("output_tokens"))
+-        talep = None
+-        for blok in out.get("content", []):
+-            if blok.get("type") == "tool_use":
+-                talep = Talep.model_validate(blok["input"]); break
+-        if talep is None:
+-            raise LLMHatasi("araç çağrısı dönmedi")
++        talep = Talep.model_validate(calls[0].get("input") or {})
+     else:
+         raise ValueError(f"bilinmeyen arka uç: {backend}")
+     meta["sure_ms"] = int((time.time() - t0) * 1000)
+@@ -144,7 +147,7 @@
+         if backend == "manuel":
+             raise
+         hata = "; ".join(f"{'.'.join(str(x) for x in h['loc'])}: {h['msg']}" for h in e.errors()[:4])[:400]
+-        ek = (baglam + " | " if baglam else "") + f"ÖNCEKİ ÇIKTIN ŞEMAYA UYMADI ({hata}); yalnız şemadaki izinli değerleri kullan, uymayanı null bırak ve belirsizliklere yaz"
++        ek = (baglam + " | " if baglam else "") + f"Önceki çıktı şemaya uymadı ({hata}); yalnız şemadaki izinli değerleri kullan, uymayan değeri null bırak ve belirsizliklere yaz."
+         talep, meta = cikar_detayli(mesaj, ek, backend, model, hazir, **kw)
+         meta["tekrar"] = 1; meta["ilk_hata"] = hata
+         return talep, meta
+diff --git a/beyin/plan_islem.py b/beyin/plan_islem.py
+--- a/beyin/plan_islem.py
++++ b/beyin/plan_islem.py
+@@ -27,7 +27,7 @@
+ from beyin.plan_uyarlama import _kesitler, _komsu_mu, _yeniden_ac, uzat
+ 
+ ARAC_ADI = "plan_islemleri_kaydet"
+-ARAC_ACIKLAMA = "Bayinin yeni plan revizyon isteğini koordinatsız işlemlere çevir. Yalnız bu araçla cevap ver."
++ARAC_ACIKLAMA = "Bayinin yeni plan revizyon isteğini koordinatsız işlemlere çevir."
+ VARSAYILAN_AYAR = {"backend": "anthropic", "model": "claude-opus-5-5", "effort": "low", "timeout_s": 60, "max_tokens": 2000}
+ YONLER = {"G": (1, -1), "K": (1, 1), "B": (0, -1), "D": (0, 1)}       # (eksen indisi, yön)
+ YON_SOZU = {"G": "ön", "K": "arka", "B": "sol", "D": "sağ"}           # bayiye giden gerekçede (PROMPT'taki sözcükler)
+diff --git a/beyin/plan_program.py b/beyin/plan_program.py
+--- a/beyin/plan_program.py
++++ b/beyin/plan_program.py
+@@ -23,7 +23,7 @@
+ from beyin.plan_denetim import program_coz
+ 
+ ARAC_ADI = "program_kaydet"
+-ARAC_ACIKLAMA = "Tek kat çelik ev talebinin oda programını kaydet (koordinatsız). Yalnız bu araçla cevap ver."
++ARAC_ACIKLAMA = "Tek kat çelik ev talebinin oda programını kaydet (koordinatsız)."
+ VARSAYILAN_AYAR = {"backend": "anthropic", "model": "claude-opus-5-5", "effort": "low", "timeout_s": 60, "max_tokens": 2000}
+ 
+ 
+diff --git a/beyin/plan_sema.py b/beyin/plan_sema.py
+--- a/beyin/plan_sema.py
++++ b/beyin/plan_sema.py
+@@ -134,7 +134,7 @@
+ 
+ 
+ ARAC_ADI = "plan_kaydet"
+-ARAC_ACIKLAMA = "Tek kat çelik plan taslağını kaydet (İE-14 plan şeması). Yalnız bu araçla cevap ver."
++ARAC_ACIKLAMA = "Tek kat çelik plan taslağını kaydet (İE-14 plan şeması)."
+ 
+ 
+ def sema() -> dict:
+diff --git a/beyin/prompt.md b/beyin/prompt.md
+--- a/beyin/prompt.md
++++ b/beyin/prompt.md
+@@ -25,5 +25,3 @@
+ 9. `guven`: bütün kritik alanlar (ne istendiği + kod veya ölçü/alan) netse `yuksek`; bir kritik alan yorum gerektiriyorsa
+    `orta`; mesaj kısa/anlaşılmazsa `dusuk`.
+ 10. `ozet`: bayiye geri okunacak tek cümle, Türkçe, örn. "P6001 modelinin aynalanmış hali için ön onay planı istiyorsunuz."
+-
+-Çıktı yalnız şemaya uyan JSON'dur; başka metin yazma.
