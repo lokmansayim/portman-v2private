@@ -1,6 +1,6 @@
 """İE-23 PR-2a · banka modelinde oda büyütme / küçültme (`beyin/tanim_germe.py`) ve okuma (`beyin/degisiklik_okuyucu.py`, germeli).
 
-Hedef örnekler (`hedef/germe_*.json`, aday; Lokman'ın onayı İE-23 › PR-2a): KT-01 "yatak odası 1'i arkaya 50 cm" (dış kenar, düzey 1:
+Hedef örnekler (`hedef/germe_*.json`; Lokman onayladı, 31 Ekim 2026, İE-23 › PR-2a): KT-01 "yatak odası 1'i arkaya 50 cm" (dış kenar, düzey 1:
 ev arkaya uzar) ve Ç8201 "yatak odası 2'yi öne 30 cm" (iç duvar kayar, yatak odası 1 küçülür, yolundaki kapı duvarla kayar). Kıyas:
 girdi, rapor, gerilmiş tanımın kanonik sha'sı ve değişen duvar, açıklık, mahal özetleri. Yeniden yazma yalnız onayla:
 `python testler/yapi_kimligi/test_tanim_germe.py --hedef-yaz`. Olumsuz örnekler gerekçesiyle (oda kuralı, kapı sığmıyor, ana çatı = düzey 3,
