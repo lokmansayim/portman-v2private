@@ -97,6 +97,9 @@ def _sol(kart: dict) -> str:
                  f"{e(mt.get('sonuc_tarihi'))} · toplam çelik: bizim {sayi(mt.get('bizim_kapi_kg'), 1)} kg, gerçek liste {sayi(mt.get('gercek_kapi_kg'), 1)} kg, "
                  f"fark <b>{yuzde_html(mt.get('fark_yuzde'))}</b> (eşik ±%{sayi(mt.get('esik_yuzde'))})"
                  + (f" · kapı dışı: {e(', '.join(mt['kapi_disi']))} (gerçek listede kg yazılmamış)" if mt.get("kapi_disi") else "") + "</p>")
+        if mt.get("tanim_farki"):                                         # düzeltme: tanım ölçülenden ayrılıyor, liste aynı
+            s.append(f"<p>Tanım ölçülen tanımdan kod ve ad dışında da ayrılıyor ({e(', '.join(mt['tanim_farki']))}); hakemin ölçtüğü yükleme listesi "
+                     "pimlerle yeniden üretildi, satır satır aynı: ölçüm bu tanım için geçerli.</p>")
         if mt.get("turler"):
             s.append("<table><tr><th>Tür</th><th class='sag'>Bizim adet</th><th class='sag'>Liste adet</th><th class='sag'>Bizim kg</th>"
                      "<th class='sag'>Liste kg</th><th class='sag'>Fark</th></tr>")
