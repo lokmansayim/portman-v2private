@@ -19,6 +19,11 @@ from beyin import banka as B  # noqa: E402
 
 CATI_D = json.loads((KOK / "modeller" / "banka" / "C8801D" / "tanim.json").read_text(encoding="utf-8"))["cati"]
 CATI_K = json.loads((KOK / "modeller" / "C8801K.json").read_text(encoding="utf-8"))["cati"]
+# deneme varyantının çatısı: K'nın planı %30 eğimle (bankada yok; çizimi D-16'dan temiz geçer). Ç8801-D'nin çatısı (ret) pafta 2'de eğim
+# yazısını mahya yazısına bindirir (motor kusurları defteri, 17 Ekim); D-16 banka modellerine uygulanınca o çatı kabul edilemez
+CATI_Z = dict(json.loads(json.dumps(CATI_K)), tip_adi="beşik + cumba %30: K'nın planı, deneme")
+for _d in CATI_Z["duzlemler"]:
+    _d["egim"], _d["ust_pay"] = 0.30, round(CATI_Z["panel_kalinligi"] * (1 + 0.30 ** 2) ** 0.5, 3)
 CEKIRDEK = {a["kod"]: a for a in json.loads((KOK / "beyin" / "veri" / "adaylar.json").read_text(encoding="utf-8"))}
 
 
@@ -34,7 +39,7 @@ def atolye(tmp_path_factory):
     banka = kok / "modeller" / "banka"
     banka.mkdir(parents=True)
     cati = kok / "cati.json"
-    cati.write_text(json.dumps(CATI_D, ensure_ascii=False), encoding="utf-8")
+    cati.write_text(json.dumps(CATI_Z, ensure_ascii=False), encoding="utf-8")
     defter = kok / "kusurlar.md"
     eski = A.KUSUR_DEFTERI
     A.KUSUR_DEFTERI = defter
@@ -89,6 +94,7 @@ def test_varyant_taban_tanimi_degistirmez_ve_kart_dolu(atolye):
     assert dn["Motor doğrulaması"]["durum"] == "geçti" and dn["IFC şema denetimi"]["durum"] == "geçti"
     assert dn["Kartla çizimin tutarlılığı (m², oda programı, açıklık, çatı)"]["durum"] == "geçti"      # taban kaydıyla aynı plan
     assert dn["Bankada aynı model"]["durum"] == "geçti" and "Ç8801K" in dn["Bankada aynı model"]["ayrinti"]
+    assert dn["Yazı çakışması (bayiye giden 4 figür)"]["durum"] == "geçti"                             # D-16: sıfır bulgu
     assert (Path(k["son_cizim"]["kontrol_pdf"]) if Path(k["son_cizim"]["kontrol_pdf"]).is_absolute() else KOK / k["son_cizim"]["kontrol_pdf"]).is_file()
 
 
@@ -132,6 +138,27 @@ def test_metraj_kapisi_hakem_olcumu_olmayan_modelde_kosulmaz(atolye):
     assert kart(atolye) == once and once["metraj_testi"]["durum"] == "yok" and once["durum"] == "kontrolde"
 
 
+def test_yazi_cakismasi_kabulu_durdurur(tmp_path, capsys, monkeypatch):
+    # D-16 banka modellerine de (CIO, 30 Ekim): bayiye giden figürlerde yazı çakışması "kaldı", çizim 1 döner, kabul durur. Gerçek
+    # örnek: Ç8801-D'nin çatısı pafta 2'de "%33,0" yazısını "mahya 220"ye bindirir (defterde açık kusur; 17 Ekim'de "uyarı" idi)
+    monkeypatch.setattr(A, "KUSUR_DEFTERI", tmp_path / "kusurlar.md")
+    banka = tmp_path / "modeller" / "banka"
+    banka.mkdir(parents=True)
+    (tmp_path / "is_emri").mkdir()
+    cati = tmp_path / "cati_d.json"
+    cati.write_text(json.dumps(CATI_D, ensure_ascii=False), encoding="utf-8")
+    assert kos(banka, "varyant", "Ç8801W", "--taban", "Ç8801", "--cati", cati, "--ad", "x", "--kaynak-metni", "D-16 testi") == 0
+    assert kos(banka, "ciz", "Ç8801W", "--cikti", tmp_path / "cikti") == 1
+    dn = {d["ad"]: d for d in json.loads((banka / "C8801W" / "kart.json").read_text(encoding="utf-8"))["son_cizim"]["denetimler"]}
+    yazi = dn["Yazı çakışması (bayiye giden 4 figür)"]
+    assert yazi["durum"] == "kaldı" and "mahya 220" in yazi["ayrinti"]
+    assert [d for d, x in dn.items() if x["durum"] == "kaldı"] == ["Yazı çakışması (bayiye giden 4 figür)"]
+    capsys.readouterr()
+    assert kos(banka, "kabul", "Ç8801W", "--kapisiz", "--izsiz") == 2
+    assert "denetim kaldı: Yazı çakışması" in capsys.readouterr().out
+    assert json.loads((banka / "C8801W" / "kart.json").read_text(encoding="utf-8"))["durum"] != "kabul"
+
+
 def test_kabul_banka_kaydi_ve_kontrol(atolye):
     banka = atolye["banka"]
     t_yol = banka / "C8801Z" / "tanim.json"
@@ -155,7 +182,7 @@ def test_kabul_banka_kaydi_ve_kontrol(atolye):
         assert a[alan] == c[alan], alan
     for alan in ("odalar", "pencere", "kapi", "dis_olcu_cm", "oturum_m2"):
         assert a["ozet"][alan] == c["ozet"][alan], alan
-    assert a["referans_model"] == "Ç8801" and a["varyantlar"] == [] and a["sunum"]["cati_adi"] == "Tam kırma"
+    assert a["referans_model"] == "Ç8801" and a["varyantlar"] == [] and a["sunum"]["cati_adi"] == "Beşik + cumba %30"
     # kabul donar: kontrol hızlı yoldan aynı; tanım değişirse kontrol düşer; düzeltme ve yeniden çizim reddedilir
     assert kos(banka, "kontrol") == 0
     t_yol.write_text(asil.replace('"Deneme (Ç8801 çatı varyantı Z)"', '"Deneme Z (değişti)"'), encoding="utf-8")
@@ -279,9 +306,27 @@ def test_hakem_olcumu_kapi_tur_tablosu_ve_pim(hakemli):
     assert k["son_cizim"]["pim"] == k["pim"]                                                            # çizim ölçümdeki kural setiyle
 
 
+def _pencere_dar(t: dict) -> dict:
+    """Yükleme listesini değiştiren düzeltme: P10 200 → 120 cm (lento gibi listeyi değiştirmeyen fark artık ölçümü düşürmez)."""
+    t = json.loads(json.dumps(t))
+    for a in t["acikliklar"]:
+        if a["ad"] == "P10":
+            a["en"] = 120
+    return t
+
+
+def _kapi_ters(t: dict) -> dict:
+    """Yükleme listesini değiştirmeyen düzeltme (Lokman, 30 Ekim): K2 kapısı öbür ucundan açılır."""
+    t = json.loads(json.dumps(t))
+    for a in t["acikliklar"]:
+        if a["ad"] == "K2":
+            a["mentese"] = "bas" if a.get("mentese", "bas") == "son" else "son"
+    return t
+
+
 def test_hakem_olcumu_tanim_farkini_ve_gecmeyen_kapiyi_yakalar(hakemli):
-    t = dict(hakemli["tanim"], lento=hakemli["tanim"]["lento"] + 5)
-    assert A.celik_olcumu("ÇP-14", t)[0] is None and "farklı" in A.celik_olcumu("ÇP-14", t)[1]
+    o, sorun = A.celik_olcumu("ÇP-14", _pencere_dar(hakemli["tanim"]))
+    assert o is None and "farklı (acikliklar[P10].en)" in sorun and "yükleme listesi değişiyor" in sorun
     olculen = json.loads((KOK / "testler" / "celik" / "projeler" / "CP06" / "bizim_liste.json").read_text(encoding="utf-8"))["tanim"]["yol"]
     t06 = dict(json.loads((KOK / olculen).read_text(encoding="utf-8")), kod="KT98", ad="x")             # hedef örneğin karkas kurallı tanımı
     o, sorun = A.celik_olcumu("ÇP-06", t06)
@@ -325,29 +370,43 @@ def test_hakemli_kontrol_sayfasi(hakemli):
     assert "%-" not in metin                                                                             # işaret yüzde imisinden önce
 
 
-def test_duzeltmeden_sonra_eski_metraj_tasinmaz(hakemli, tmp_path):
-    # tanım ölçümden sonra değişirse (Lokman'ın düzeltmesi) eski "geçti" taşınmaz: çizimde hakemin ölçümü bugünkü kuralla yeniden
-    # denetlenir, tutmazsa kart beklemede, kabul edilemez; sayfa bunu sade dille söyler (gerçek bankanın kopyasında)
+def _kopyada_duzelt(hakemli, tmp_path, degistir, metin: str) -> tuple[Path, dict, str]:
+    """Gerçek bankanın kopyasında tanımı düzelt ve yeniden çiz: (kopya banka, kart, kontrol sayfasının ilk sayfası)."""
     import pymupdf
     import shutil
     kopya = tmp_path / "modeller" / "banka"
     shutil.copytree(hakemli["banka"], kopya)
     (tmp_path / "is_emri").mkdir()
     tp = kopya / "KT99" / "tanim.json"
-    t = json.loads(tp.read_text(encoding="utf-8"))
-    for a in t["acikliklar"]:
-        if a["ad"] == "K2":
-            a["mentese"] = "bas" if a.get("mentese", "bas") == "son" else "son"
-    tp.write_text(json.dumps(t, ensure_ascii=False), encoding="utf-8")
-    assert kos(kopya, "duzelt", "KT99", "--tur", "tercih", "--metin", "yatak odası 1 kapısı ters açılsın") == 0
+    tp.write_text(json.dumps(degistir(json.loads(tp.read_text(encoding="utf-8"))), ensure_ascii=False), encoding="utf-8")
+    assert kos(kopya, "duzelt", "KT99", "--tur", "tercih", "--metin", metin) == 0
     assert kos(kopya, "ciz", "KT99", "--cikti", tmp_path / "cikti") == 0
     k = json.loads((kopya / "KT99" / "kart.json").read_text(encoding="utf-8"))
-    mt = k["metraj_testi"]
-    assert k["durum"] == "beklemede" and mt["durum"] == "beklemede" and mt["hakem_sonucu"] is None and "farklı" in mt["neden"]
-    assert kos(kopya, "kabul", "KT99", "--kapisiz", "--izsiz") == 2
     pdf = Path(k["son_cizim"]["kontrol_pdf"])
     with pymupdf.open(pdf if pdf.is_absolute() else KOK / pdf) as d:
-        metin = " ".join(d[0].get_text().split())
+        return kopya, k, " ".join(d[0].get_text().split())
+
+
+def test_listeyi_degistirmeyen_duzeltme_olcumu_dusurmez(hakemli, tmp_path):
+    # kapı açılış yönü yükleme listesini değiştirmez: hakemin ölçümü (pimlerle yeniden üretilen liste satır satır aynı) geçerli kalır,
+    # fark kayda ve sayfaya yazılır; kart kabul edilebilir
+    kopya, k, metin = _kopyada_duzelt(hakemli, tmp_path, _kapi_ters, "yatak odası 1 kapısı ters açılsın")
+    mt = k["metraj_testi"]
+    assert k["durum"] == "kontrolde" and mt["durum"] == "gecti" and mt["hakem_sonucu"] == "geçti" and mt["fark_yuzde"] == 0.93
+    assert mt["tanim_farki"] == ["acikliklar[K2].mentese"] and mt["tanim_kanonik"] == A.kanonik_sha(_kapi_ters(hakemli["tanim"]))
+    for s in ("kod ve ad dışında da ayrılıyor", "K2", "satır satır aynı", "ölçüm bu tanım için geçerli", "+%0,93"):
+        assert s in metin, s
+    assert kos(kopya, "kabul", "KT99", "--kapisiz", "--izsiz") == 0
+
+
+def test_duzeltmeden_sonra_eski_metraj_tasinmaz(hakemli, tmp_path):
+    # tanım ölçümden sonra listeyi değiştirecek biçimde değişirse eski "geçti" taşınmaz: çizimde hakemin ölçümü bugünkü kuralla yeniden
+    # denetlenir, tutmazsa kart beklemede, kabul edilemez; sayfa bunu söyler (gerçek bankanın kopyasında)
+    kopya, k, metin = _kopyada_duzelt(hakemli, tmp_path, _pencere_dar, "salon penceresi 120 olsun")
+    mt = k["metraj_testi"]
+    assert k["durum"] == "beklemede" and mt["durum"] == "beklemede" and mt["hakem_sonucu"] is None and "farklı" in mt["neden"]
+    assert mt["tanim_degisti"] is True and "yükleme listesi değişiyor" in mt["neden"]
+    assert kos(kopya, "kabul", "KT99", "--kapisiz", "--izsiz") == 2
     assert "hakemin ölçümü bu tanım için geçerli değil" in metin and "kabul edilemez" in metin and "+%0,93" not in metin
 
 

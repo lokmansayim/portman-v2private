@@ -85,6 +85,8 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-32](D-32.md) | Prefabrik listede ve montaj rehberinde baş makas omegası baş makasın uçtan uca altında, iki yandaki saçak payı dahil (açıklık + 2 × saçak, ÷ 2,5); taşan verandanın baş makası dış kirişe oturur, omegası da öyle. 100'lük iç duvarın üstündeki omega 100'lük duvar omegasıdır, asma tavanda da o satırda (Ek, 30.10; sırtı 10,5, öteki ölçüleri 60'lık omeganın; kart OM-02). Kör kayıtlar PK-07 ve PK-01 protokol adım 7 ile yeniden yazıldı | 29.10 (Lokman 13:12, 21:12); Ek 30.10 (Lokman 07:04) |
 | [D-34](D-34.md) | Prefabrik ön onay çiziminde Lokman'ın TK-03 notları Motor kuralı: görünüş ölçüsü mor çizgi, yazısı siyah; girintili gövdede kapalı gövdenin her dış parçası mor ölçüyle (balkonun eni ve derinliği dahil); cumbanın (ve ana çatının) görünen saçak ucunda topuk, taşan verandadaki gibi; sınırın yalnız bir parçası duvarsız (`acik_sinirlar` › `parca_cm`, merdiven ağzı); dış duvar panoları iç duvarın aksına dayanır (`dizilim.dis_pano_dayanagi`, madde 5, 15:33). PC-25 … PC-29; hedef izleri ve referans renk farkıyla yeniden donduruldu | 30.10 (Lokman 14:45) |
 | [D-35](D-35.md) | Kolonsuz köşe açık mahalin (balkon, köşe verandası) iki açık kenarına kutu profil kiriş; boyu mahalin o kenardaki dış ölçüsü, kolon olmadığından eksik yok (`kose_kirisi_eksik_cm` 0); planın BOM'undaki profillerle aynı. TK-03 balkonu L 3137,5 ve 1932,5; P6001 verandası L 4392,5 ve 2510 (önce kirişsiz). BK-14 ekinin köşe verandası satırını değiştirir | 31.10 (Lokman 13:34, karar kartı) |
+| [D-36](D-36.md) | Fiyat defteri r05: 100'lük iç eleman dıştaki 100'lük ile aynı fiyat (H 342, çektirme U'su 148, karkaslı pano 1070–1250 en 2.200); 100'lük 3'lü H 60'lık karşılığının fiyatı; kutu profil ve tek kat çatı paneli boyla orantılı, her boy onaylı; besleme kablo borusu 3 × 2,5 kablonun iki katı, kenar boyası iç cephe boyasının kg fiyatıyla, çırpı ipi boş | 31.10 (Lokman 15:25–15:27) |
+| [D-37](D-37.md) | Fiyat defteri r06: makasın fiyatı kg'ından (59 TL/kg), kg'ı saçaktan saçağa boyuyla orantılı, TK-03'ün gerçek listesinden 5,50 kg/m; bütün makaslar (ana, yavru, cumba) tek oranla | 31.10 (Lokman 15:40–16:00) |
 | [D-38](D-38.md) | Kirişler askıda kalmaz: gövdenin içindeki açık mahalin iki açık kenarının birleştiği köşeye Motor 10 × 10 dikme koyar (PC-30); kirişler kolonlu verandanın kuralıyla (dış ölçü − 10). TK-03 balkonu L 3037,5 ve 1832,5, P6001 verandası L 4292,5 ve 2410, ikisinde de kolon. Rehberde baş makas betopanının uçtaki parçası da omeganın U yanağına iner. D-35'in kolonsuz köşe kirişini kaldırır | 31.10 (Lokman 15:08, 15:13) |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
@@ -116,9 +118,11 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-33 | müşteri adı herkeste görünür (Lokman 30.10 13:24; D-08'in "KT bayiye adsız" kuralı değişir) | ayrıldı (CIO; model atölyesi sıralı yolunun sonunda ayrı PR) |
 | D | D-34 | prefabrik ön onay çiziminde TK-03 notları: görünüş ölçüsü mor, girintili gövdede dış parça ölçüleri, cumbanın saçak ucunda topuk, sınırın bir parçası duvarsız (30.10 14:45), dış pano dayanağı (15:33) | yazıldı (30.10; `claude/project-thread-756g5a`, İE-24, PR #87) |
 | D | D-35 | kolonsuz köşe balkonunun ve verandasının iki açık kenarına kiriş, boyu dış ölçü (Lokman 31.10 13:34, karar kartı; TK-03 balkonu, P6001 verandası) | yazıldı (31.10; İE-24, `claude/project-thread-756g5a`, PR #87) |
-| D | D-36, D-37 | İE-13 PR-4: fiyat kuralları (Lokman 31.10 15:25) ve makas oranı (16:04) | alındı (PR #93, fiyat defteri thread'i) |
+| D | D-36 | fiyat defteri r05: iç 100 = dış 100, 3'lü H 100 = 60'lık karşılığı, kutu profil ve tek kat panel boyla orantılı, kablo borusu ve kenar boyası hesapla (31.10 15:25–15:27) | yazıldı (31.10; `claude/project-thread-5p2lsc`, İE-13 PR-4, PR #93) |
+| D | D-37 | fiyat defteri r06: makas kg'ı saçaktan saçağa boyuyla orantılı, TK-03'ten 5,50 kg/m × 59 TL/kg (31.10 15:40–16:00) | yazıldı (31.10; `claude/project-thread-5p2lsc`, İE-13 PR-4, PR #93) |
 | D | D-38 | kirişler askıda kalmaz: açık mahalin köşesinde Motor kolonu (PC-30); rehberde baş makas betopanı uçta da omeganın içinde (Lokman 31.10 15:08, 15:13) | yazıldı (31.10; İE-24, `claude/project-thread-756g5a`, PR #87) |
-| D | **D-39** | — | **sıradaki boş** |
+| D | D-39 | BK-19: prefabrik liste = kart modeli (aşıkta saçak eşiği 30 cm, saçak omegası betopanda kesilir) | ayrıldı (31.10; `claude/project-thread-rhjgzv`) |
+| D | **D-40** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | `main`'e BK-12 ile (PR-1: motor ve bayi paftası; liste ve mühür kıyası sonraki PR'larda) |
@@ -133,7 +137,7 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | İE | İE-20 | görsel ve PDF ile talep, talep ve revizyon formu (WhatsApp Flow); pano satır 83, 110, 61 | alındı (27.10; `claude/project-thread-l5mh7r`) |
 | İE | İE-21 | bayiye 3D sayfası ("3D'yi aç" düğmesi; pano 80) | alındı (27.10; CIO; `claude/project-thread-i09lws`, PR #61) |
 | İE | İE-22 | WhatsApp'tan bayi kaydı: kayıtsız numaraya ad ve firma, Patron'a [Onayla] [Reddet], kart ve karşılama (pano 111) | alındı (29.10; CIO; `claude/project-thread-cnk2nk`, PR #82) |
-| İE | İE-23 | yapı kimliği (model atölyesi; plan PF `Yapi_Kimligi/plan.md`) | ayrıldı (30.10; CIO; kendi dalında yazılır) |
+| İE | İE-23 | yapı kimliği: banka modellerine koddan kimlik (anlamsal, topolojik, parametrik, sayısal); PR-1 kimlik, PR-2 banka modelinde germe, PR-3 benzerlik ve olağan aralıklar | alındı (30.10; CIO; `claude/project-thread-2bptdw`) |
 | İE | İE-24 | gerçek proje denemesi TK-03 (Lokman'ın 87,72 m² evinin 1. katı): girintili gövde (`girintiler`), sonra çatı, görünüş, liste; "sen dene, ben düzelte düzelte gideceğim" | alındı (30.10; `claude/project-thread-756g5a`) |
 | İE | **İE-25** | — | **sıradaki boş** |
 | BK | BK-01–BK-08 | bu depo; BK-08 8a sonrası temizlik (`bk-08-8a-temizlik`) | yazıldı |
