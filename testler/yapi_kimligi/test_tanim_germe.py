@@ -209,6 +209,22 @@ def test_hakem_kucuk_catinin_bozuklugunu_yakalar():
         t2["cati"]["makaslar"]["dogu_cumba_vadi"]["x"][1] += 25
     assert _kt04_bozuk(vadi_makasi) == "küçük çatının makası vadiye oturmuyor"
 
+    def yerinde_mahyanin_penceresi(t2):                                                           # batı çıkmanın mahyası bu istekte yerinde
+        next(a for a in t2["acikliklar"] if a["ad"] == "P10")["bas"] += 15                       # (2. tur not 2: istisna yalnız kaymada)
+    assert _kt04_bozuk(yerinde_mahyanin_penceresi).endswith("penceresi çatının ortasında kalmıyor")
+
+
+def test_tek_kesit_cumba_ekseninde_ic_kapiyi_kaydirmaz():
+    # yalnız cumba alnındaki (dış duvardaki) açıklık sırtla kayar; cumbanın ekseninde duran iç kapı çatıya bağlı değil
+    # (geometri hakemi 31.10, PR-2b 2. tur not 1: Ç8801'de banyo–yatak odası 2 kapısı cumba ortasına alınınca 25 cm kayıyordu)
+    t = _tanim("modeller/C8801.json")
+    k5 = next(a for a in t["acikliklar"] if a["ad"] == "K5")
+    p9 = next(a for a in t["acikliklar"] if a["ad"] == "P9")
+    k5["bas"] = p9["bas"] + p9["en"] / 2 - k5["en"] / 2                                           # kapının ortası = cumba sırtı
+    t2, r = TG.oda_degistir(t, "Banyo", "D", 50, True, set_yolu=SET)
+    assert [a["ad"] for a in r["kayan_acikliklar"]] == ["P9"]
+    assert next(a for a in t2["acikliklar"] if a["ad"] == "K5")["bas"] == k5["bas"]
+
 
 def test_c8801_banyo_saga_tek_kesit_cumbanin_penceresi_ortada_kalir():
     # tek kesitli düzey 2 (banyo cumbanın bir yanında: iki yarım kesit banyodan geçmez): cumba tek yandan genişler, sırt 25 cm sağa gider;

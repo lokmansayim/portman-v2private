@@ -303,8 +303,8 @@ def _ikincil_cati(t0: dict, t2: dict, f: _Donusum, dik: list[str]) -> list[str]:
 
 def _ortada_tut(t0: dict, t2: dict, f, eksen: str, parcalar, aralik: tuple[float, float]) -> list[list]:
     """Tek kesitli düzey 2: küçük çatı tek yandan genişler, sırtı yeni ortaya (cm/2) gider. Eski ortasında duran açıklık (cumbanın alnındaki
-    pencere: kesit eksenindeki duvarda, ortası taşıyıcı duvarların ortasında, ±2 cm) yeni ortaya kayar (hakem ortada kaldığını ayrıca
-    denetler). Dönen: [[ad, kayma (cm, işaretli)]]."""
+    pencere: kesit eksenindeki dış duvarda, ortası taşıyıcı duvarların ortasında, ±2 cm) yeni ortaya kayar (hakem ortada kaldığını ayrıca
+    denetler). İç duvardaki açıklık çatıya bağlı değildir, kaymaz. Dönen: [[ad, kayma (cm, işaretli)]]."""
     i = 0 if eksen == "x" else 1
     j = 1 - i
     a0, a1 = aralik
@@ -314,7 +314,7 @@ def _ortada_tut(t0: dict, t2: dict, f, eksen: str, parcalar, aralik: tuple[float
     if not noktalar or abs(m1 - m0) < TOL:
         return []
     lo, hi = min(p[j] for p in noktalar) - 60, max(p[j] for p in noktalar) + 60
-    duvar0 = {d["ad"]: d["kutu"] for d in t0["duvarlar"]}
+    duvar0 = {d["ad"]: d["kutu"] for d in t0["duvarlar"] if d.get("sinif") == "dis"}
     out = []
     for a0_, a2 in zip(t0["acikliklar"], t2["acikliklar"]):
         k = duvar0.get(a0_["duvar"])
@@ -699,9 +699,9 @@ def _mahya_anahtari(e: dict) -> tuple:
 
 
 def _mahya_altindakiler(t: dict, c: dict) -> dict[str, set]:
-    """Bir mahyanın tam altında (ortasında, ±2 cm) duran açıklıklar ve altında durdukları mahyalar: duvarı mahyaya dik, ortası mahyanın
-    hizasında, duvarı mahyanın ucundan en çok 150 cm ötede (alın ya da cumba alnı)."""
-    duvar = {w["ad"]: w["kutu"] for w in t["duvarlar"]}
+    """Bir mahyanın tam altında (ortasında, ±2 cm) duran açıklıklar ve altında durdukları mahyalar: dış duvarda, duvarı mahyaya dik,
+    ortası mahyanın hizasında, duvarı mahyanın ucundan en çok 150 cm ötede (alın ya da cumba alnı)."""
+    duvar = {w["ad"]: w["kutu"] for w in t["duvarlar"] if w.get("sinif") == "dis"}
     mahyalar = [e for e in c["kenarlar"] if e["tur"] == "mahya"]
     out: dict[str, set] = {}
     for a in t.get("acikliklar") or []:
@@ -742,8 +742,8 @@ def _cati_hakemi(t1: dict, c1: dict, t2: dict, c2: dict) -> None:
     - yüzlerin birleşimi: kenar türleri (mahya, kırma, vadi, saçak, alın …) ve her birinin hangi yüzler arasında olduğu (kotu tutmayan iki
       yüz ortak kenar sayılmaz: tepe ya da sırt yanlış yerdeyse birleşim değişir);
     - her yüzün saçağının altındaki dış duvara taşması;
-    - mahyanın ortasında duran açıklık (cumba alnındaki pencere) yine bir mahyanın ortasında; mahyası yerinde duruyorsa (çatı orada
-      değişmedi) açıklığı kaydıran çatı değil plan kuralıdır (köşe kuralı, Lokman 31.10; KT-01 banyo penceresi), hakem karışmaz;
+    - mahyanın ortasında duran açıklık (cumba alnındaki pencere) yine bir mahyanın ortasında; çatı hiç değişmediyse (iç duvar kayması)
+      açıklığı kaydıran çatı değil plan kuralıdır (köşe kuralı, Lokman 31.10; KT-01 banyo penceresi), hakem karışmaz;
     - vadiye oturan makas uçları vadide."""
     imza = lambda c: collections.Counter((e["tur"], tuple(sorted(e["duzlemler"]))) for e in c["kenarlar"])
     if imza(c1) != imza(c2):
@@ -752,10 +752,9 @@ def _cati_hakemi(t1: dict, c1: dict, t2: dict, c2: dict) -> None:
         p2 = _sacak_payi(t2, dz, duvar)
         if p2 is None or abs(p2 - pay) > 0.5:
             raise GermeHatasi("çatının saçak taşması değişiyor")
-    o1, o2 = _mahya_altindakiler(t1, c1), _mahya_altindakiler(t2, c2)
-    mahyalar2 = {_mahya_anahtari(e) for e in c2["kenarlar"] if e["tur"] == "mahya"}
-    for ad in sorted(set(o1) - set(o2)):
-        if not o1[ad] <= mahyalar2:
+    kenarlar = lambda c: sorted((e["tur"], _mahya_anahtari(e)) for e in c["kenarlar"])
+    if kenarlar(c1) != kenarlar(c2):
+        for ad in sorted(set(_mahya_altindakiler(t1, c1)) - set(_mahya_altindakiler(t2, c2))):
             raise GermeHatasi(f"{_aciklik_sozu(t2, ad)} çatının ortasında kalmıyor")
     v1, v2 = _vadi_uclari(t1, c1), _vadi_uclari(t2, c2)
     if any(v2[a] < n for a, n in v1.items()):
