@@ -198,7 +198,7 @@ def test_kod_kilidi_ic100(kartlar):
     assert tuple(list(ilk)[51:]) == YENI
     assert all(kilit[k] == kartlar[k]["ad"] for k in YENI)
     assert hashlib.sha256(json.dumps(ilk, ensure_ascii=False, sort_keys=True).encode()).hexdigest() == KILIT_IC100
-    assert _oku(KM.KARTLAR)["surum"] == "10"                              # R1 ek 5: OM-02'nin adı düzeltildi (D-32 ek); İE-15 K5: taşan veranda; K5b: KP-02, MA-03; K5b-2: H-11, AL-01, AL-02, IZ-01; BK-19: CK-01, CK-03, CK-04 "nerede"
+    assert _oku(KM.KARTLAR)["surum"] == "10"                              # R1 ek 5: OM-02'nin adı düzeltildi (D-32 ek); İE-15 K5: taşan veranda; K5b: KP-02, MA-03; K5b-2: H-11, AL-01, AL-02, IZ-01; BK-19: AS-01, CK-01, CK-03, CK-04 "nerede"
 
 
 

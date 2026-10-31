@@ -11,7 +11,8 @@ liste üretecinin `dis_cevre_m`'si), iç hat bir iç duvarın bitişik panoları
 boşluklar arasındaki kısmıdır; hattın tamamı `HatBoyu_cm`'de, sayı hatların toplamından (kesilen parça artık).
 
 Çatı kenarları K2'nin çatısıyla aynı çerçevede (`cati.cerceve`) ve yalnız beşik çatıda; başka çatı tipinde "kural yok". Saçak omegası iki
-saçak duvarının üstünde saçak ucundan ucuna (gerçek listeler gibi; Lokman, 31 Ekim), saçak sacı saçak kenarında saçak ucundan
+saçak duvarının üstünde saçak ucundan ucuna (gerçek listeler gibi; Lokman, 31 Ekim; baş makas betopanında ve aynı hatta devam eden
+veranda omegasında kesilir, sayı hattın tamamından), saçak sacı saçak kenarında saçak ucundan
 ucuna, mahya kaplamanın üstünde saçak ucundan ucuna; her baş makasın iki eğik kenarında Z, alın sacı ve C kapama (boyu eğik boy). Parça hat ya da kenar başına birdir; stok boyları kesim
 planındadır. Kesitler yalnız gösterimdir (`kenar_gosterim`); sayı, boy ve metre onlardan çıkmaz.
 
@@ -148,18 +149,40 @@ def _bant(F: dict, u0: float, u1: float, dz0: float, dz1: float) -> list[list[fl
     return [[u0, cati._ust(F, u0) + dz0], [u1, cati._ust(F, u1) + dz0], [u1, cati._ust(F, u1) + dz1], [u0, cati._ust(F, u0) + dz1]]
 
 
-def sacak_omegasi(g: dict, G_: dict, F: dict | None = None) -> list[dict]:
+def kesen_araliklar(engeller: list[dict], geo: dict) -> list[tuple[float, float]]:
+    """Kesiti (`u`–`z`) `geo`'nun kesitinin zarfıyla kesişen engellerin (prizma ya da çoklu prizma) `v` aralıkları. Saçak omegası baş makas
+    betopanında kesilir, levha geçer (CIO onayı 31 Ekim 2026 16:58, seçenek a; geometri hakemi BK-19: dikey levhanın ucu omeganın kesitine
+    iner); ana çatının omegası, aynı hatta devam eden taşan veranda omegasının üstüne binmez (kalkan saçağında iki omega üst üste düşmez)."""
+    P = Polygon(geo["noktalar"]).envelope
+    out = []
+    for p in engeller:
+        for q in p["geo"]["parcalar"] if p["geo"]["tip"] == "coklu" else [p["geo"]]:
+            if q["tip"] == "prizma" and q["duzlem"] == geo["duzlem"] and Polygon(q["noktalar"]).intersection(P).area > ESIK:
+                out.append((q["a0"], q["a1"]))
+    return out
+
+
+def sacak_omegasi(g: dict, G_: dict, F: dict | None = None, engeller: list[dict] | None = None) -> list[dict]:
     """Saçak duvarlarının üstünde, taşan verandada (`F`, K5b) yan kirişlerin üstünde; saçak ucundan ucuna (`v0`..`v1`), gerçek Portatifev
-    listelerindeki gibi (Lokman, 31 Ekim 2026 13:40 "gerçek listeye uy"; BK-19)."""
+    listelerindeki gibi (Lokman, 31 Ekim 2026 13:40 "gerçek listeye uy"; BK-19). Kesitine baş makas betopanı ya da verandanın omegası
+    (`engeller`) iniyorsa hat orada kesilir (`kesen_araliklar`); parçalar hattın (`Hat`, `HatBoyu_cm`) parçasıdır, sayı hattın tamamından
+    (liste gibi: kesik ve üst üste binen kısım listede de saçak boyunun içinde)."""
     F = F or cati.cerceve(g)
     w, h = G_["sacak_omegasi"]
     v0, v1 = F["v0"], F["v1"]
     ne = "kirişin" if "w0" in F else "duvarının"
     out = []
     for yuz, u0 in (("sol", 0.0), ("sag", F["aciklik"] - w)):
-        out.append({"kural": "sacak_omegasi_yerlesimi", "parca": "sacak_omegasi", "boy_cm": _r(v1 - v0),
-                    "geo": cati._prizma(F, _u(u0, u0 + w, g["duvar_h"], h, G_["sac"], ters=True), v0, v1),
-                    "bilgi": {"Yuz": yuz}, "aciklama": f"{yuz} saçak {ne} üstü, {v1 - v0:g} cm (saçak ucundan ucuna)"})
+        uz = _u(u0, u0 + w, g["duvar_h"], h, G_["sac"], ters=True)
+        kes = _kesikler(v0, v1, kesen_araliklar(engeller or [], cati._prizma(F, uz, v0, v1)))
+        kesik = len(kes) != 1 or abs(kes[0][0] - v0) > ESIK or abs(kes[0][1] - v1) > ESIK      # uçtan kesilen tek parça da kesik hattır
+        for j, (a0, a1) in enumerate(kes, 1):
+            bilgi = {"Yuz": yuz, "Hat": yuz, "HatBoyu_cm": _r(v1 - v0), "Parca": j} if kesik else {"Yuz": yuz}
+            aciklama = f"{yuz} saçak {ne} üstü, {v1 - v0:g} cm (saçak ucundan ucuna)"
+            if kesik:
+                aciklama += f", {j}. parça {a0:g}–{a1:g} (hat kesik)"
+            out.append({"kural": "sacak_omegasi_yerlesimi", "parca": "sacak_omegasi", "boy_cm": _r(a1 - a0),
+                        "geo": cati._prizma(F, uz, a0, a1), "bilgi": bilgi, "aciklama": aciklama})
     return out
 
 
@@ -244,6 +267,17 @@ def kalkan_kenarlari(g: dict, G_: dict, kesit: dict, kurallar: set[str], F: dict
     return out
 
 
+def _levhalar(g: dict, D: dict, kesit: dict, K: dict, F: dict | None = None) -> list[dict]:
+    """Çatı katmanının kurduğu baş makas betopanı levhaları (ana çatı ya da taşan verandanın dış kalkanı; aynı işlev ve değerler,
+    `cati.betopan_degerleri`); kural o çatı tipinde yoksa ya da levha kurulamıyorsa ("kural yok") boş."""
+    ad = "bas_makas_betopani_yerlesimi"
+    izin = K[ad].get("cati_tipleri")
+    if izin and g["cati_tipi"] not in izin:
+        return []
+    kalkanlar = [veranda.kalkan(F, kesit["betopan"])] if F else None
+    return cati.betopan(g, cati.betopan_degerleri(D[ad], kesit), F, kalkanlar)[0]
+
+
 def katman(ie: dict, g: dict, D: dict, kesit: dict, K: dict) -> dict:
     """K3b'nin parçaları. `g`: yerleşimin girdisi (`girdi.kur`; makaslar kart modelinden); `D`: bütün kuralların değerleri
     (`motor.yerlesim.degerler`); `kesit`: K2'nin gösterim kesitleri (aşığın yüksekliği, kaplama ve betopan kalınlığı); `K`: yerleşim
@@ -268,24 +302,24 @@ def katman(ie: dict, g: dict, D: dict, kesit: dict, K: dict) -> dict:
             kural_yok.append({"parca": adi, "sinif": sinif, "neden": f"{ad}: bugünkü IFC'de baş makas yok (kalkan kenarı kurulamaz)"})
             continue
         kurulan.add(ad)
+    verandalar = veranda.cerceveler(g)[0] if g["dis_verandalar"] and g["cati_tipi"] in K[veranda.KURAL]["cati_tipleri"] else []
+    levhalar = _levhalar(g, D, kesit, K) + [q for F in verandalar for q in _levhalar(g, D, kesit, K, F)]
+    v_omega = [sacak_omegasi(g, G_, F, levhalar) if "sacak_omegasi_yerlesimi" in kurulan else [] for F in verandalar]
     if "sacak_omegasi_yerlesimi" in kurulan:
-        parcalar += sacak_omegasi(g, G_)
+        parcalar += sacak_omegasi(g, G_, engeller=levhalar + [q for vo in v_omega for q in vo])
     if "sacak_saci_yerlesimi" in kurulan:
         parcalar += sacak_saci(g, G_)
     parcalar += kalkan_kenarlari(g, G_, kesit, kurulan)
     if "mahya_yerlesimi" in kurulan:
         parcalar += mahya(g, G_, kesit)
     # K5b: taşan verandaların çatı kenarları (çerçeveyi kuramayan verandanın "kural yok"u yerleşimin çatı katmanlarında yazılı)
-    if g["dis_verandalar"] and g["cati_tipi"] in K[veranda.KURAL]["cati_tipleri"]:
-        for F in veranda.cerceveler(g)[0]:
-            vp = []
-            if "sacak_omegasi_yerlesimi" in kurulan:
-                vp += sacak_omegasi(g, G_, F)
-            if "sacak_saci_yerlesimi" in kurulan:
-                vp += sacak_saci(g, G_, F)
-            vp += kalkan_kenarlari(g, G_, kesit, kurulan & {"alin_saci_yerlesimi", "bas_makas_z_yerlesimi", "c_kapama_yerlesimi"}, F,
-                                   [veranda.kalkan(F, kesit["betopan"])])
-            if "mahya_yerlesimi" in kurulan:
-                vp += mahya(g, G_, kesit, F)
-            parcalar += veranda.isaretle(vp, F)
+    for F, vo in zip(verandalar, v_omega):
+        vp = list(vo)
+        if "sacak_saci_yerlesimi" in kurulan:
+            vp += sacak_saci(g, G_, F)
+        vp += kalkan_kenarlari(g, G_, kesit, kurulan & {"alin_saci_yerlesimi", "bas_makas_z_yerlesimi", "c_kapama_yerlesimi"}, F,
+                               [veranda.kalkan(F, kesit["betopan"])])
+        if "mahya_yerlesimi" in kurulan:
+            vp += mahya(g, G_, kesit, F)
+        parcalar += veranda.isaretle(vp, F)
     return {"parcalar": parcalar, "kural_yok": kural_yok, "uyarilar": uyarilar, "hatlar": hatlar}

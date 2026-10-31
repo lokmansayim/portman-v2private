@@ -53,7 +53,6 @@ KOK = Path(__file__).resolve().parents[1]
 KURAL_YOLU = KOK / "kurallar" / "liste" / "prefabrik.json"
 DUVAR_TIPLERI = KOK / "kurallar" / "model" / "duvar_tipleri.json"
 ISARET_YOLU = KOK / "kurallar" / "liste" / "prefabrik_isaret.json"
-YERLESIM_YOLU = KOK / "kurallar" / "yerlesim" / "prefabrik.json"     # kart modelinin kuralları (karar C'nin en kısa boyu)
 TEK_KAYNAK = "Tek kaynak (zayıf)"
 ISARETLI = ("pencere_u_h_gecen", "omega_kapak")   # satırı `zayif(...)` ile yazılan kurallar (BK-12 PR-2c)
 
@@ -412,24 +411,19 @@ def cati_olculeri(c: dict) -> dict:
     return {"sac": sac, "eg": eg, "egik": egik, "yuz": yuz, "sacak_hat": sacak_hat, "mahya_boy": mahya_boy, "hatlar": hatlar}
 
 
-def asik_mesafeleri(egik_cm: float, aralik_cm: float, en_kisa_cm: float, esik: float = 1e-6) -> list[float]:
+def asik_mesafeleri(egik_cm: float, aralik_cm: float, sacak_esigi_cm: float, esik: float = 1e-6) -> list[float]:
     """Karar C (Lokman, 24 Ekim 2026 "Mahyadan 60"; `kurallar/yerlesim/prefabrik.json › asik_sirasi`): bir beşik yüzünde aşık sıralarının
-    mahyadan eğik uzaklıkları (cm). İlk sıra mahyada, sonra aralıkla; saçağa aralıktan az kalınca saçakta bir sıra daha; saçak sırasına
-    `en_kisa_cm`'den yakın kalan sıra konmaz, saçak sırası onun yerini alır. Liste üretecinin sıra sayısı ve kart modelinin sıraları
-    (`motor/yerlesim/cati.asik`) buradan (D-28 madde 1)."""
+    mahyadan eğik uzaklıkları (cm). İlk sıra mahyada, sonra aralıkla; saçağa aralıktan az kalınca saçakta bir sıra daha; saçağa
+    `sacak_esigi_cm`'den az kalan sıra konmaz, saçak sırası onun yerini alır (liste kuralı `asik_sacak_esigi_m`, dört aşık planından).
+    Liste üretecinin sıra sayısı ve kart modelinin sıraları (`motor/yerlesim/cati.asik`) buradan (D-28 madde 1)."""
     d, k = [], 0
     while k * aralik_cm < egik_cm - esik:
         d.append(k * aralik_cm)
         k += 1
-    if len(d) > 1 and egik_cm - d[-1] < en_kisa_cm - esik:
+    if len(d) > 1 and egik_cm - d[-1] < sacak_esigi_cm - esik:
         d.pop()
     d.append(egik_cm)
     return d
-
-
-def asik_en_kisa_cm() -> float:
-    """Karar C'nin en kısa boyu: kart modelinin kuralından (`asik_sirasi.en_kisa_cm`; tek kaynak)."""
-    return float(json.loads(YERLESIM_YOLU.read_text(encoding="utf-8"))["kurallar"]["asik_sirasi"]["en_kisa_cm"]["deger"])
 
 
 # kitabın oda kuralındaki nokta adı → pafta katmanındaki elektrik sayımının adı (`prefabrik.json › elektrik`)
@@ -912,7 +906,7 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
     # ── 1005 Makas ──────────────────────────────────────────────────────────
     makas_ara = r("makas_aralik_cm")
     n_makas_top, asik_top = 0, 0
-    asik_ara, asik_kisa, tek_yon_asik = _ortak(k, "asik", "aralik_m"), asik_en_kisa_cm(), False
+    asik_ara, asik_esik, tek_yon_asik = _ortak(k, "asik", "aralik_m"), r("asik_sacak_esigi_m"), False
     for c, o in C:
         ad = c.get("ad", "çatı")
         if c.get("makas_yok"):
@@ -931,7 +925,7 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
                  f"saçak duvarının pano koşusu {mm(c['makas_kosu_cm'])} ÷ {mm(makas_ara)} yukarı + 1 = {n_m}" + (f", − {c['kalkan']} baş" if c["kalkan"] else ""),
                  "baş ve orta toplamı PK-01 9, PK-02 7, PK-03 9 tuttu", pafta=("makas_orta",))
         if o["yuz"] == 2:                                       # beşik: karar C (kart modeliyle aynı sıralar)
-            sira = len(asik_mesafeleri(o["egik"] * 100, asik_ara * 100, asik_kisa))
+            sira = len(asik_mesafeleri(o["egik"] * 100, asik_ara * 100, asik_esik * 100))
         else:                                                   # tek yön: P2 (karar C beşikte; tek yönde kart modeli "kural yok", K6)
             sira = int(math.floor(o["egik"] / asik_ara + 0.5)) + 1
             tek_yon_asik = True
@@ -939,9 +933,9 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
         asik_top += asik_boy
     aa, az_, ap_ = r("asik_aday"), 1 + _ortak(k, "asik", "zayiat"), pb("asik")
     ab_ = round(ap_ - aa["pay_m"], 4)                              # şablonun 4,1'i: parça boyu − pay
-    ekle("1005", "Aşık", f"L {mm_m(ap_)}", TAVAN(asik_top * az_ / ap_), "Kural (P2)",
+    ekle("1005", "Aşık", f"L {mm_m(ap_)}", TAVAN(asik_top * az_ / ap_), "Kural (karar C" + ("; tek yönde P2)" if tek_yon_asik else ")"),
          f"aşık boyları {od(asik_top, 1)} m × {sy(az_)} ÷ {sy(ap_)} (beşikte yüz başına karar C: ilk sıra mahyada, {sy(asik_ara)} arayla, saçakta "
-         f"bir sıra" + (f"; tek yönde eğik ÷ {sy(asik_ara)} en yakın + 1 sıra" if tek_yon_asik else "") + ")",
+         f"bir sıra, saçağa {sy(asik_esik)} m'den az kalan sıra konmaz" + (f"; tek yönde eğik ÷ {sy(asik_ara)} en yakın + 1 sıra" if tek_yon_asik else "") + ")",
          "PK-01 36 (elle), PK-02 35; sıralar PK-01 aşık planıyla (karar C, Lokman 24.10)",
          pafta=("asik",), aday=TAVAN(asik_top / ab_ + aa["ek"]), aday_notu=f"Portatifev kaba hesabı: ÷ {sy(ab_)} + {aa['ek']}")
 

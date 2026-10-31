@@ -447,12 +447,17 @@ def _kenar(zemin, cati_, m: dict, plt) -> None:
                    rotation=90 if dik else 0, fontsize=6.5, ha=("left" if ic > 0 else "right") if dik else "center",
                    va="center" if dik else ("bottom" if ic > 0 else "top"), color=KENAR_RENK["CK-04"])
     for kod, ad in (("CK-02", "saçak sacı"), ("CK-01", "saçak omegası"), ("CK-06", "mahya")):
-        for p in m["k2"].get(kod, []):
+        hat: dict = {}                                          # kesik hattın (saçak omegası betopanda kesilir, BK-19) yazısı bir kez,
+        for p in m["k2"].get(kod, []):                          # en uzun parçasında, hattın boyuyla
+            a = (p["p"].get("Cati"), p["p"].get("Hat", p["ad"]))
+            if a not in hat or p["p"]["Boy_cm"] > hat[a]["p"]["Boy_cm"]:
+                hat[a] = p
+        for p in hat.values():
             x0, y0, x1, y1 = _iz(p["v"]).bounds
             dik = (y1 - y0) > (x1 - x0)
             cati_.text((x0 + x1) / 2 if dik else (3 * x0 + x1) / 4, (3 * y0 + y1) / 4 if dik else (y0 + y1) / 2,
-                       f"{ad} {p['p']['Boy_cm']:g}", rotation=90 if dik else 0, fontsize=6.5, ha="center", va="center", color="#1b2631",
-                       bbox={"boxstyle": "round,pad=0.1", "fc": "white", "ec": "none", "alpha": 0.8})
+                       f"{ad} {p['p'].get('HatBoyu_cm', p['p']['Boy_cm']):g}", rotation=90 if dik else 0, fontsize=6.5, ha="center", va="center",
+                       color="#1b2631", bbox={"boxstyle": "round,pad=0.1", "fc": "white", "ec": "none", "alpha": 0.8})
     cati_.set_aspect("equal"); cati_.axis("off"); cati_.set_anchor("N")
     cati_.set_title("Çatı · saçak, mahya ve kalkan kenarları (boylar cm)", fontsize=11, loc="left")
 

@@ -245,6 +245,11 @@
    "durum": "aday",
    "kaynak": "Şablon B (PK-02, PK-03): 3."
   },
+  "asik_sacak_esigi_m": {
+   "deger": 0.3,
+   "durum": "pafta",
+   "kaynak": "Karar C'nin saçak sırası (Lokman, 24 Ekim 2026 \"Mahyadan 60\"): son aralık sırasından saçağa bu boydan az kalırsa o sıra konmaz, saçak sırası onun yerini alır. Dört aşık planının yedi çatısı 0,30 m ile tutuyor: PK-01 ana çatı 7 sıra (eğik 347,5 cm, saçağa 47,5 kalıyor), PK-03 ana çatı 8 (434,9; 14,9) ve veranda 6 (308,6; 8,6), PK-06 ana çatı 8 (439,9; 19,9) ve veranda 4 (207,2; 27,2), PK-07 ana çatı 8 (444,8; 24,8) ve cumba 5 (237,7; 57,7) (`testler/kor/projeler/*/pafta_katmani.json › asik.not`, PK-01 s. 8). Eşik 27,2 ile 47,5 cm arasında; 0,30 aralığın yarısıdır. 0,10 m'de (kart modelinin parça artığı `en_kisa_cm`'si) yedi çatının dördü bir sıra fazla çıkıyordu (geometri hakemi, BK-19, 31 Ekim 2026). Beşikte liste üretecinin ve kart modelinin sıraları bu değerle aynı işlevden (`prefabrik_liste.asik_mesafeleri`)."
+  },
   "asik_aday": {
    "deger": {
     "pay_m": 0.1,
