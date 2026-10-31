@@ -168,6 +168,61 @@ def test_kt04_salon_saga_50_kucuk_cati_ortadan_simetrik_genisler():
     assert max(y - x for x, y in zip(a, a[1:])) <= max(y - x for x, y in zip(a0, a0[1:])) + 0.01   # ana makas aralığı tanımdakini aşmaz
 
 
+
+def _kt04_bozuk(fn) -> str:
+    """KT-04 sağa 50'nin çıktısını bozar, yalnız çatı hakemine verir (öneren koddan bağımsız; geometri hakemi 31.10, PR-2b 1. tur bulgu 2)."""
+    from motor.genel import cati_genel, kural as MK
+    t, t2, _ = _uygula(*HEDEFLER["germe_KT04_salon_mutfak_D50"])
+    fn(t2)
+    with pytest.raises(TG.GermeHatasi) as e:
+        TG._cati_hakemi(t, cati_genel.cati_kur(t["cati"], MK.oku()), t2, cati_genel.cati_kur(t2["cati"], MK.oku()))
+    return str(e.value)
+
+
+def _nokta_degistir(t2, eski, yeni, ad_basi=""):
+    for d in t2["cati"]["duzlemler"]:
+        if d["ad"].startswith(ad_basi):
+            for p in d["plan"]:
+                if p == eski:
+                    p[:] = yeni
+
+
+def test_hakem_kucuk_catinin_bozuklugunu_yakalar():
+    # öneren kod düzey 2'de tepeyi yeniden hesaplamasaydı, sırtı ortaya almasaydı, saçağı kısaltsaydı hakem `cati_kur`un kurabildiği çatıyı
+    # kabul ediyordu. Şimdi: yüzlerin birleşimi (kotu tutmayan yüzler ortak kenar sayılmaz), saçak taşması, mahyanın ortasındaki pencere,
+    # vadideki makas ucu değişmez
+    oturmuyor = "çatı yüzleri birbirine oturmuyor"
+    assert oturmuyor in _kt04_bozuk(lambda t2: _nokta_degistir(t2, [1374.0, 491.0], [1374.0, 466.0]))          # tepe eski yükseklikte
+    assert oturmuyor in _kt04_bozuk(lambda t2: (_nokta_degistir(t2, [1374.0, 50.0], [1349.0, 50.0], "doğu cumba"),
+                                                 _nokta_degistir(t2, [1374.0, 491.0], [1349.0, 466.0])))         # sırt ortada değil
+
+    def duvar_kayar(t2):                                                                          # çatı tutarlı, altındaki duvar kayık
+        w = next(d for d in t2["duvarlar"] if d["ad"] == "W03")
+        w["kutu"] = [w["kutu"][0] - 25, w["kutu"][1], w["kutu"][2] - 25, w["kutu"][3]]
+    assert _kt04_bozuk(duvar_kayar) == "çatının saçak taşması değişiyor"
+
+    def pencere_kayar(t2):
+        next(a for a in t2["acikliklar"] if a["ad"] == "P11")["bas"] += 25
+    assert _kt04_bozuk(pencere_kayar) == "Salon - Mutfak penceresi çatının ortasında kalmıyor"
+
+    def vadi_makasi(t2):
+        t2["cati"]["makaslar"]["dogu_cumba_vadi"]["x"][1] += 25
+    assert _kt04_bozuk(vadi_makasi) == "küçük çatının makası vadiye oturmuyor"
+
+
+def test_c8801_banyo_saga_tek_kesit_cumbanin_penceresi_ortada_kalir():
+    # tek kesitli düzey 2 (banyo cumbanın bir yanında: iki yarım kesit banyodan geçmez): cumba tek yandan genişler, sırt 25 cm sağa gider;
+    # cumba alnındaki pencere de 25 cm kayar, sırtın altında kalır ve bayiye yazılır (geometri hakemi 31.10, PR-2b 1. tur not 5)
+    from motor.genel import cati_genel, kural as MK
+    t = _tanim("modeller/C8801.json")
+    t2, r = TG.oda_degistir(t, "Banyo", "D", 50, True, set_yolu=SET)
+    assert isinstance(r["kesit_cm"], float) and r["ikincil_cati"] == ["cumba batı", "cumba doğu"]
+    assert r["kayan_acikliklar"] == [{"ad": "P9", "tur": "pencere", "mahaller": ["Yatak Odası 2"], "cm": 25.0, "yon": "D"}]
+    p9 = next(a for a in t2["acikliklar"] if a["ad"] == "P9")
+    mahya = [e for e in cati_genel.cati_kur(t2["cati"], MK.oku())["kenarlar"] if e["tur"] == "mahya" and e["p"][0] == e["q"][0]]
+    assert p9["bas"] + p9["en"] / 2 == mahya[0]["p"][0] == 849.0 and next(a for a in t["acikliklar"] if a["ad"] == "P9")["bas"] == 764
+    assert TG.anlatim(r).endswith("; cumba genişledi, çatısı yeni ölçüye göre kuruldu; Yatak Odası 2 penceresi 25 cm sağa kaydı (ortada kaldı)")
+
 def test_kt04_kucuk_cati_ana_cati_mahyasini_asamaz():
     t = _tanim("testler/yapi_kimligi/girdi/KT04_tanim_2026-10-31.json")
     TG.oda_degistir(t, "Salon - Mutfak", "D", 120, True, set_yolu=SET)                             # tepe 526 < mahya 527,5
