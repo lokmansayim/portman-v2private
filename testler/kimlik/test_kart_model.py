@@ -58,6 +58,7 @@ K3_KARTLARI = {f"EL-{i:02d}": 0 for i in range(1, 12)}    # K3 (elektrik) de İ�
 K3B_KARTLARI = {k: 0 for k in ("AC-01", "AC-02", "CK-01", "CK-02", "CK-03", "CK-04", "CK-05", "CK-06")}    # K3b (alt çerçeve, çatı kenarı) de
 IC100_KARTLARI = {k: 0 for k in ("D-06", "D-07", "H-07", "H-08", "H-09", "H-10", "OM-02")}    # İE-18 R1 ek 4 ve D-32: iç duvarı 100'lük evin kartları; PK-01 60'lık
 K5B_KARTLARI = {k: 0 for k in ("KP-02", "MA-03")}    # K5b: tek kat çatı paneli ve yavru makas; PK-01 sandviç ve verandasız
+K5B2_KARTLARI = {k: 0 for k in ("H-11", "AL-01", "AL-02", "IZ-01")}    # K5b-2: tavan katmanı ve çatı izolasyonu (yerleşim katmanında; K1 modelinde 0)
 KILIT_K1 = "94c253954968d2dee4023c097e47326281fe57998c92e347e2b48d24762e4d23"   # K1'de çıkan 25 kodun adlarıyla SHA'sı (PR #31)
 
 
@@ -173,7 +174,7 @@ def test_her_parca_kartli(pk01, kartlar):
     adet = {k["kod"]: k["adet"] for k in s["kartlar"]}
     assert adet == {"D-01": 23, "D-02": 3, "D-03": 2, "D-04": 1, "D-05": 1, "I-01": 15, "I-02": 5, "I-03": 0,
                     "K-01": 5, "K-02": 1, "P-01": 3, "P-02": 2, "P-03": 1, "B-01": 6, "B-02": 1, "V-01": 1, "V-02": 2,
-                    "H-01": 12, "H-02": 7, "H-03": 10, "H-04": 2, "H-05": 3, "H-06": 4, "MA-01": 2, "MA-02": 7} | K2_KARTLARI | K3_KARTLARI | K3B_KARTLARI | IC100_KARTLARI | K5B_KARTLARI
+                    "H-01": 12, "H-02": 7, "H-03": 10, "H-04": 2, "H-05": 3, "H-06": 4, "MA-01": 2, "MA-02": 7} | K2_KARTLARI | K3_KARTLARI | K3B_KARTLARI | IC100_KARTLARI | K5B_KARTLARI | K5B2_KARTLARI
     assert len(s["gorunum"]) == 9 and all(g["asil"].startswith("BAGLANTI_B0") for g in s["gorunum"])
     assert s["bilesen"] == {f"MAKAS_{i:02d}": 8 for i in range(1, 10)}
     assert Counter(k["sinif"] for k in s["kartsiz"]) == {"IfcOpeningElement": 12, "IfcSlab": 3, "IfcPlate": 2, "IfcRoof": 1}
@@ -281,7 +282,8 @@ def test_komut_kirma_catida_1_doner(tmp_path):
     (tmp_path / "PK01_kirma.json").write_text(json.dumps(ie, ensure_ascii=False), encoding="utf-8")
     assert KM.main([str(tmp_path / "PK01_kirma.json"), str(tmp_path / "cikti")]) == 1
     say = _oku(tmp_path / "cikti" / "PK01_kirma_kart_sayim.json")
-    assert say["cati_tipi"] == "kirma" and len(say["kural_yok"]) == 33 + 4 + 6   # K2: dört çatı katmanı (aşık, kaplama, betopan, dere ve iniş); K3b: altı çatı kenarı
+    assert say["cati_tipi"] == "kirma" and len(say["kural_yok"]) == 33 + 4 + 6 + 1   # K2: dört çatı katmanı (aşık, kaplama, betopan, dere ve iniş); K3b: altı çatı kenarı; K5b-2: çatı izolasyonu
+    assert [x["cati"] for x in say["kural_yok"] if x["parca"] == "çatı izolasyonu"] == ["kirma"]
     from openpyxl import load_workbook
     bilesen = {r[0]: r[3] for r in load_workbook(tmp_path / "cikti" / "PK01_kirma_kart_katalogu.xlsx")["Kartsız"].iter_rows(values_only=True)
                if r[2] == "bileşen"}
