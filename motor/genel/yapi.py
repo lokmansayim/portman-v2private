@@ -274,6 +274,13 @@ def kur(tanim: dict) -> dict:
         a0, a1 = ac["bas"], ac["bas"] + ac["en"]
         if a0 < d["_bas"] - TOL or a1 > d["_son"] + TOL:
             raise SystemExit(f"Açıklık duvarın dışına taşıyor: {ac.get('ad')} ({a0}–{a1}; {d['ad']} {d['_bas']}–{d['_son']})")
+        if ac.get("acilis") not in (None, "surgulu") or (ac.get("acilis") and ac["tur"] != "pencere"):
+            raise SystemExit(f"Açıklıkta acilis yalnız pencerede ve \"surgulu\" olabilir: {ac.get('ad')} ({ac.get('acilis')!r})")   # prefabrik K21 gibi
+        if ac.get("acilis") == "surgulu":                                # vasistas sürgülü çizilmez (planda "V.", Bina Özellikleri'nde vasistas)
+            from .sablon_pafta import sablon_kurallari
+            esik = ((sablon_kurallari().get("vasistas_en_cok_yukseklik_cm") or {}).get("deger") or 60)
+            if ac["yuk"] <= esik:
+                raise SystemExit(f"Vasistas yüksekliğindeki pencere sürgülü olamaz: {ac.get('ad')} ({ac['yuk']} ≤ {esik} cm)")
         z0 = ac.get("alt", 0.0)
         acikliklar.append(dict(ac, a0=a0, a1=a1, z0=z0, z1=z0 + ac["yuk"], alan_m2=ac["en"] * ac["yuk"] / 1e4))
 
