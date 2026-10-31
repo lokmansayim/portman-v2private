@@ -52,7 +52,7 @@ def test_tk01_toplamlar(T):
     panolar (1245, 620, 1195) tam boya (1250, 625, 1200) ve makas açıklığı 8980 → 8985: asma 128 → 124, ters 126 → 122 satır; defterde
     kesik boyla tam boyun fiyatı aynı (bant), toplam değişmedi. D-32 (Lokman 29 Ekim 13:12): baş makas omegası saçaktan saçağa ve taşan
     verandaların dış kirişinde 8 → 11, taşan verandaya bakan duvarın 100'lük duvar omegası 3 → 0; toplam +3 TL (asma 419.838,13 →
-    419.841,13, ters 418.567,13 → 418.570,13). D-33 (Lokman 31 Ekim 15:27, defter r05): besleme kablo borusu metresi 3 × 2,5 kablonun iki
+    419.841,13, ters 418.567,13 → 418.570,13). D-36 (Lokman 31 Ekim 15:27, defter r05): besleme kablo borusu metresi 3 × 2,5 kablonun iki
     katı (140 × 5 m = 700), kenarlar için boya iç cephe boyasının kg fiyatıyla (10 kg 2.000); toplam +2.700 (asma 422.541,13, ters
     421.270,13), fiyatsız 8 → 6 (çırpı ipi bilerek boş)."""
     assert T["kod"] == "TK-01" and T["is_emri_no"] == "PM-TK01-80M2" and T["revizyon"] == 5
@@ -196,7 +196,7 @@ def test_ozet_ve_kosullar(cikti, T, tmp_path):
 def test_oneri_gosterimi(tmp_path):
     """CIO, 28 Ekim: onay bekleyen öneri sarı ve toplama girmez, Özet'teki uyarı onu da söyler. Defter r04'te TK-01'in önerileri onaylı
     (Lokman 28 Ekim 13:27); gösterim, defterin r03 hâliyle sınanır: üç kiriş boyunun kalemi yok, ikili kaçak akım rölesi öneri, boy
-    kuralı öneri ve D-33'ün (r05) besleme kablo borusu ile kenar boyası fiyatsız. `--oneri` ile toplam r04'ün onaylı toplamıyla aynı (onay,
+    kuralı öneri ve D-36'ün (r05) besleme kablo borusu ile kenar boyası fiyatsız. `--oneri` ile toplam r04'ün onaylı toplamıyla aynı (onay,
     önerinin fiyatını değiştirmedi)."""
     d = _oku(KOK / "kurallar" / "fiyat" / "defter_2026-10.json")
     K = d["hatlar"]["prefabrik"]["kalemler"]

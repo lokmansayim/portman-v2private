@@ -53,11 +53,11 @@ def test_defter_bicimi(defter):
             assert b["kaynak"] in defter["kaynaklar"]
             for a in b["araliklar"]:
                 assert a["en_mm"][0] <= a["en_mm"][1] and a["fiyat"] > 0 and a["dayanak"]
-        for b in H.get("boy_onerileri") or []:                  # boy kuralı: onaylıysa Patron'un kuralı (D-33), dayanağında sözü
+        for b in H.get("boy_onerileri") or []:                  # boy kuralı: onaylıysa Patron'un kuralı (D-36), dayanağında sözü
             assert b["kaynak"] in defter["kaynaklar"] and b["boy_mm"] > 0 and b["fiyat"] > 0 and isinstance(b["onay"], bool) and b["dayanak"]
             assert ("kalem" in b) != ("kalem_baslar" in b) and b.get("yuvarlama", 1) > 0
             if b["onay"]:
-                assert defter["kaynaklar"][b["kaynak"]]["patron_verdi"] and "D-33" in b["dayanak"]
+                assert defter["kaynaklar"][b["kaynak"]]["patron_verdi"] and "D-36" in b["dayanak"]
 
 
 def test_defterde_kisisel_veri_yok():
@@ -110,7 +110,7 @@ def test_pano_eni_bandi(defter, olcu, fiyat):
 def test_kiris_boy_onerisi(defter):
     """Kaydı olmayan kiriş boyu 6 m tam boyun fiyatından boyla orantılı fiyat alır (tam TL'ye yarım yukarı). Yöntem defterdeki onaylı kiriş
     boylarını aynen verir (Patron 27 Ekim 22:08; 28 Ekim 13:27'de onaylanan 3860, 2610, 1255 dahil). Defter r05'ten beri kural onaylı, her boy
-    için (Lokman 31 Ekim 15:25, D-33): yeni boy toplama girer. Onaysız boy kuralının gösterimi (CIO, 28 Ekim: öneri satırda ve özette durur,
+    için (Lokman 31 Ekim 15:25, D-36): yeni boy toplama girer. Onaysız boy kuralının gösterimi (CIO, 28 Ekim: öneri satırda ve özette durur,
     varsayılan toplama girmez) defterin kuralı onaysız kopyasıyla sınanır (r03–r04 hâli)."""
     K = "Kutu profil (kiriş) 100 × 100"
     pre = defter["hatlar"]["prefabrik"]
@@ -158,8 +158,8 @@ def test_kiris_boy_onerisi(defter):
     ("Kenarlar için boya", "10 kg", 2000.0, "onaylı"),
     ("Çırpı ipi", "adet", None, "fiyat yok"),
 ])
-def test_d33_fiyat_kurallari(defter, kalem, olcu, fiyat, durum):
-    """D-33 (Lokman 31 Ekim 2026 15:25–15:27): TK-02'nin (iç 100) fiyatsız satırları. Yöntem defterdeki eski fiyatları aynen verir: tek kat
+def test_d36_fiyat_kurallari(defter, kalem, olcu, fiyat, durum):
+    """D-36 (Lokman 31 Ekim 2026 15:25–15:27): TK-02'nin (iç 100) fiyatsız satırları. Yöntem defterdeki eski fiyatları aynen verir: tek kat
     panel 5100, 2400, 1750; kolon L 2500."""
     s = F.fiyatla({"satirlar": [_pre(kalem, olcu, 1)]}, defter)["satirlar"][0]
     assert (s["birim_fiyat"], s["durum"]) == (fiyat, durum), s

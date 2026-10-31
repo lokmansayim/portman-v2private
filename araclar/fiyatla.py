@@ -6,7 +6,7 @@
 Liste: prefabrik Motor'un listesi (`motor/prefabrik_liste.py`, satırda `olcu`) ya da genel motorun yükleme listesi
 (`python -m motor.genel.uret` → `<kod>_yukleme.json`, satırda `boyut`); hat satırlardan anlaşılır. Anahtar defterdeki gibi
 "kalem | ölçü" (çelikte "kalem | boyut"). Önce birebir anahtar, yoksa (prefabrikte) pano eni bandı, o da yoksa boy kuralı (kesilen
-profilin ya da panelin tam boyunun fiyatından boyla orantılı; `boy_onerileri`; D-33'ten beri kutu profil ve tek kat çatı paneli
+profilin ya da panelin tam boyunun fiyatından boyla orantılı; `boy_onerileri`; D-36'ten beri kutu profil ve tek kat çatı paneli
 onaylı). Birimi `kg` olan kalemde tutar satırın kg'ı × fiyat, öteki kalemlerde adet × fiyat.
 
 Fiyat uydurulmaz: defterde `onay: false` olan fiyat (yedek kaynaktan öneri) yalnız `--oneri` ile uygulanır ve "öneri" diye
@@ -58,7 +58,7 @@ def bant_bul(s: dict, bantlar: list[dict]) -> tuple[dict, dict] | None:
 def boy_onerisi_bul(s: dict, oneriler: list[dict]) -> tuple[dict, float] | None:
     """Kesilen parçanın boyu (ölçü "L <mm>"): kaydın tam boy fiyatından boyla orantılı birim fiyat (kayıt, fiyat). Kayıt kalemi adıyla
     (`kalem`) ya da adının başıyla (`kalem_baslar`; ör. her çatının tek kat paneli) eşler; yuvarlama `yuvarlama` adımına yarım yukarı
-    (varsayılan tam TL). Kaydın `onay`ını çağıran değerlendirir: D-33'ten beri (Lokman 31 Ekim) kutu profil ve tek kat çatı paneli
+    (varsayılan tam TL). Kaydın `onay`ını çağıran değerlendirir: D-36'ten beri (Lokman 31 Ekim) kutu profil ve tek kat çatı paneli
     kuralı onaylı, her boy için."""
     olcu = (s.get("olcu") or "").strip()
     if not re.fullmatch(r"L \d+(?:[.,]\d+)?", olcu):
