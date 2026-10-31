@@ -6,6 +6,8 @@ Kurallar `kurallar/yerlesim/prefabrik.json`'dadır; oradaki değerlerin çoğu b
 K3'ün elektrik katmanı `elektrik.py`'dedir (kural `elektrik_yerlesimi`; kart modeli yalnız istenince kurar). K3b'nin alt çerçeve ve çatı
 kenarları katmanı `kenar.py`'dedir (montaj rehberinin kartsız yedi parçası; kuralları `kenar.KENAR` ve `kenar_gosterim`; o da istenince).
 K5b'nin taşan veranda çatısı `veranda.py`'dedir (kural `veranda_catisi`): yavru makas ve ana çatının katmanları verandanın çerçevesiyle.
+K5b-2'nin tavan katmanı `tavan_katmani.py`'dedir (kurallar `dizme_tavan` ve `cati_izolasyonu`): asma dizme tavanın H'ı ve alçıpan gözleri,
+çatı izolasyonunun şeritleri; açık mahale bakan dış duvarın 100'lük duvar omegası `tavan.dis_duvar_hatlari`'nda.
 
 `katmanlar(ie, plan, makaslar, yerlesim, liste)` parçaları döner: {kural, parca, boy_cm?, geo, bilgi, aciklama}. Parçanın kartı kart
 modelinde bulunur (`motor/kart_model.py`; kartın `yerlesim` alanı). Kuralı uygulanamayan katman (çatı tipi, kaplama, iniş kuralı, tek sıra
@@ -16,21 +18,24 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from . import cati, girdi, tavan, veranda
+from . import cati, girdi, tavan, tavan_katmani, veranda
 
 KOK = Path(__file__).resolve().parents[2]
 LISTE_DOSYASI = "kurallar/liste/prefabrik.json"
-KURALLAR = ("tavan_omegasi_yerlesimi", "asik_sirasi", "cati_kaplamasi", "bas_makas_betopani_yerlesimi", "dere_hatti", "veranda_catisi", "kesim_plani",
-            "gosterim")
+KURALLAR = ("tavan_omegasi_yerlesimi", "asik_sirasi", "cati_kaplamasi", "bas_makas_betopani_yerlesimi", "dere_hatti", "veranda_catisi", "dizme_tavan",
+            "cati_izolasyonu", "kesim_plani", "gosterim")
 PARCA_ADI = {"omega": "OMEGA", "asik": "ASIK", "panel": "KAPLAMA", "levha": "BETOPAN", "dere": "DERE", "inis": "INIS",    # modelde parçanın adı
              "tavan_armaturu": "DUY", "glop": "GLOP", "anahtar_tekli": "ANAHTAR", "anahtar_cift": "ANAHTAR_CIFT", "priz_tekli": "PRIZ",
              "priz_cift": "PRIZ_CIFT", "uydu_prizi": "UYDU", "zil": "ZIL", "sigorta_kutusu": "SIGORTA", "kablo_priz": "KABLO_PRIZ",
              "kablo_aydinlatma": "KABLO_AYDINLATMA",
              "alt_cerceve": "ALT_CERCEVE", "sacak_omegasi": "SACAK_OMEGASI", "sacak_saci": "SACAK_SACI", "alin_saci": "ALIN_SACI",
-             "bas_makas_z": "BAS_MAKAS_Z", "c_kapama": "C_KAPAMA", "mahya": "MAHYA", "yavru_makas": "YAVRU_MAKAS"}
+             "bas_makas_z": "BAS_MAKAS_Z", "c_kapama": "C_KAPAMA", "mahya": "MAHYA", "yavru_makas": "YAVRU_MAKAS",
+             "tavan_h": "TAVAN_H", "goz": "ALCIPAN", "serit": "IZOLASYON"}
+DIS_DUVAR = "DIS_DUVAR_"                                            # K5b-2: açık mahale bakan dış duvarın omegası (rehber tavan omegalarını adıyla okur)
 ELEKTRIK = "elektrik_yerlesimi"                                     # K3 (`elektrik.py`); K2'nin katmanlarından ayrı, istenince kurulur
 CATI_KATMANLARI = (("asik_sirasi", "aşık", "IfcMember"), ("cati_kaplamasi", "çatı kaplaması", "IfcCovering"),
-                   ("bas_makas_betopani_yerlesimi", "baş makas betopanı", "IfcPlate"), ("dere_hatti", "dere ve iniş", "IfcPipeSegment"))
+                   ("bas_makas_betopani_yerlesimi", "baş makas betopanı", "IfcPlate"), ("dere_hatti", "dere ve iniş", "IfcPipeSegment"),
+                   ("cati_izolasyonu", "çatı izolasyonu", "IfcCovering"))
 
 
 def kitap_oku(liste: dict) -> dict:
@@ -155,6 +160,7 @@ def katmanlar(ie: dict, plan: dict, makaslar: list[dict], yerlesim: dict, liste:
     uyarilar = list(g["uyarilar"])
     hatlar = tavan.hatlar(g, {"aralik_asma": _cm(T["aralik_asma"]), "aralik_ters": _cm(T["aralik_ters"]), "en_kisa": T["en_kisa_cm"],
                               "sirt_100": T.get("sirt_100")}, uyarilar)
+    hatlar += tavan.dis_duvar_hatlari(g, {"en_kisa": T["en_kisa_cm"], "sirt_100": T["sirt_100"]})       # K5b-2 (D-32)
     ow, oh = kesit["omega"]
     for i, h in enumerate(hatlar, 1):
         h["no"] = i
@@ -168,8 +174,17 @@ def katmanlar(ie: dict, plan: dict, makaslar: list[dict], yerlesim: dict, liste:
                     else [a, s - ow / 2, g["duvar_h"] - oh, b, s + ow / 2, g["duvar_h"]])
             parcalar.append({"kural": "tavan_omegasi_yerlesimi", "parca": "omega", "boy_cm": round(b - a, 4),
                              "geo": {"tip": "kutu", "kutu": kutu},
-                             "bilgi": {"Tavan": g["tavan"], "Yer": h["yer"], "Hat": i, "Mahal": h["mahal"], **({"Sirt_cm": h["sirt"]} if "sirt" in h else {})},
-                             "aciklama": f"{h['eksen']} = {s:g}, {a:g}–{b:g}" + (f" ({h['mahal']})" if h["mahal"] else f" ({h['not']})")})
+                             "bilgi": {"Tavan": g["tavan"], "Yer": h["yer"], "Hat": i, "Mahal": h["mahal"], **({"Sirt_cm": h["sirt"]} if "sirt" in h else {}),
+                                       **({"Duvar": "dis"} if h.get("dis") else {})},
+                             "aciklama": f"{h['eksen']} = {s:g}, {a:g}–{b:g}" + (f" ({h['not']})" if h.get("dis") else f" ({h['mahal']})" if h["mahal"]
+                                                                                 else f" ({h['not']})"),
+                             **({"onek": DIS_DUVAR} if h.get("dis") else {})})
+
+    # tavan katmanı (K5b-2): asma dizme tavanın H'ı ve alçıpan gözleri
+    Z = D["dizme_tavan"]
+    parcalar += tavan_katmani.gozler(g, hatlar, {"aralik": _cm(Z["aralik"]), "son_en_kisa": Z["son_en_kisa_cm"], "en_kisa": T["en_kisa_cm"],
+                                                 "sirt_60": Z["sirt_60"], "islak": Z["islak"], "kesit_h": kesit["tavan_h"],
+                                                 "kalinlik": kesit["alcipan"], "omega_h": oh})
 
     # çatı: yalnız kuralın çatı tiplerinde
     for ad, adi, sinif in CATI_KATMANLARI:
@@ -189,6 +204,8 @@ def katmanlar(ie: dict, plan: dict, makaslar: list[dict], yerlesim: dict, liste:
             for p in cati.kaplama(g, kaplama_degerleri(D[ad], tur, kesit)):
                 p["bilgi"]["Kaplama"] = tur
                 parcalar.append(p)
+        elif ad == "cati_izolasyonu":
+            parcalar += tavan_katmani.izolasyon(g, {"kalinlik": kesit["izolasyon"]})
         elif ad == "bas_makas_betopani_yerlesimi":
             B = D[ad]
             levhalar, neden = cati.betopan(g, {"katsayi": B["katsayi"], "levha_m2": B["levha_m2"], "levha_cm": B["levha_cm"],

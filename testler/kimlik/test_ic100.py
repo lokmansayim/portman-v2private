@@ -198,7 +198,7 @@ def test_kod_kilidi_ic100(kartlar):
     assert tuple(list(ilk)[51:]) == YENI
     assert all(kilit[k] == kartlar[k]["ad"] for k in YENI)
     assert hashlib.sha256(json.dumps(ilk, ensure_ascii=False, sort_keys=True).encode()).hexdigest() == KILIT_IC100
-    assert _oku(KM.KARTLAR)["surum"] == "8"                               # R1 ek 5: OM-02'nin adı düzeltildi (D-32 ek); İE-15 K5: taşan veranda; K5b: KP-02, MA-03
+    assert _oku(KM.KARTLAR)["surum"] == "9"                               # R1 ek 5: OM-02'nin adı düzeltildi (D-32 ek); İE-15 K5: taşan veranda; K5b: KP-02, MA-03; K5b-2: H-11, AL-01, AL-02, IZ-01
 
 
 
@@ -240,9 +240,9 @@ def tk02(tmp_path_factory):
 
 def test_tk02_kart_adetleri_listeyle(tk02, kartlar):
     """TK-02 (TK-01 + iç 100, asma tavan): parça başına sayılan kartın adedi listedeki satırının adedi; iki kartın paylaştığı satırda (dış H
-    H-01/H-02, dış T H-08/H-09; dübelli & kulaklı ayrımı modelde) toplam. 60'lık iç kartlar 0. OM-02'nin parçaları (100'lük iç duvarların
-    üstü) "100'lük duvar omegası" satırının iç duvar terimini verir; satırın öteki terimi (çatı kenarına gelmeyen dış duvar, kiriş) modelde
-    yerleşmez. Parçalar duvar omegasının boyuyla (250) bölünür, kesim planı da 250'lik (D-32 ek)."""
+    H-01/H-02, dış T H-08/H-09; dübelli & kulaklı ayrımı modelde) toplam. 60'lık iç kartlar 0. OM-02'nin parçaları "100'lük duvar omegası"
+    satırının iki terimini verir: 100'lük iç duvarların üstü ve (İE-15 K5b-2, D-32) girişin nişine bakan dış duvar (`Duvar: dis`); kesim
+    planının stoğu satırın adedi. Parçalar duvar omegasının boyuyla (250) bölünür, kesim planı da 250'lik (D-32 ek)."""
     _, say, liste = tk02
     adet = {k["kod"]: k for k in say["kartlar"]}
     for grup in (["D-01"], ["D-06"], ["H-01", "H-02"], ["H-07"], ["H-08", "H-09"], ["H-10"], ["B-01"]):
@@ -252,9 +252,11 @@ def test_tk02_kart_adetleri_listeyle(tk02, kartlar):
     s = next(x for x in PL.is_emrinden(copy.deepcopy(_oku(TK02)))["satirlar"] if x["kalem"] == DUVAR100)
     terim = {ad.strip(): float(m.replace(",", ".")) for ad, m in re.findall(r"([^+÷]+?) ([\d,]+) m", s["formul"])}
     assert set(terim) == {"çatı kenarına gelmeyen dış duvarlar", "100'lük iç duvarlar"}
-    assert abs(adet["OM-02"]["metre"] - terim["100'lük iç duvarlar"]) < 0.5
-    assert math.ceil((terim["çatı kenarına gelmeyen dış duvarlar"] + adet["OM-02"]["metre"]) / 2.5 - 1e-9) == liste[DUVAR100] == s["adet"]
     om02 = [p for p in say["yerlesim"]["parcalar"] if p.get("kart") == "OM-02"]
+    metre = {d: sum(p["boy_cm"] for p in om02 if (p["bilgi"].get("Duvar") == "dis") == d) / 100 for d in (False, True)}
+    assert abs(metre[False] - terim["100'lük iç duvarlar"]) < 0.5 and abs(metre[True] - terim["çatı kenarına gelmeyen dış duvarlar"]) < 0.05
+    assert abs(adet["OM-02"]["metre"] - sum(metre.values())) < 1e-6
+    assert math.ceil(adet["OM-02"]["metre"] / 2.5 - 1e-9) == say["kesim_plani"]["OM-02"]["stok"] == liste[DUVAR100] == s["adet"]
     assert om02 and max(p["boy_cm"] for p in om02) <= 250 and say["kesim_plani"]["OM-02"]["parca_boyu_cm"] == 250
     assert not [k for k in liste if k.startswith("60'lık iç duvar üstü")]
 

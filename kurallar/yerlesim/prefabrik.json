@@ -1,7 +1,7 @@
 {
  "sema": "portman.prefabrik_yerlesim/1",
- "surum": "5",
- "aciklama": "Prefabrik pano evinde parçaların yerleşim kuralları (İE-15). Okuyan `motor/kart_model.py` (K1: H türü) ve `motor/yerlesim/` (K2: tavan omegası, aşık, çatı kaplaması, baş makas betopanı, dere ve iniş; K3: elektrik; K3b: alt çerçeve ve çatı kenarları, montaj rehberinden; K5b: gövdeden taşan verandanın çatısı). Yalnız kural kitabında ve `kurallar/liste/prefabrik.json`'da olmayan konum kuralları buraya yazılır; aynı anahtar iki dosyada olmaz (test). Oradaki değerler (makas aralığı, omega aralığı, aşık aralığı, parça boyları, levha) `okunan` ile gösterilir, burada yeniden yazılmaz: `kurallar/liste/prefabrik.json › kurallar.<ad>[.<alt>]` liste kuralının değeri, `kitap › <ad>[.<alt>]` liste kurallarının sabitlediği kural kitabı setinin (`kitap_seti`) değeri.",
+ "surum": "6",
+ "aciklama": "Prefabrik pano evinde parçaların yerleşim kuralları (İE-15). Okuyan `motor/kart_model.py` (K1: H türü) ve `motor/yerlesim/` (K2: tavan omegası, aşık, çatı kaplaması, baş makas betopanı, dere ve iniş; K3: elektrik; K3b: alt çerçeve ve çatı kenarları, montaj rehberinden; K5b: gövdeden taşan verandanın çatısı; K5b-2: asma dizme tavanın H'ı ve alçıpan gözleri, çatı izolasyonu). Yalnız kural kitabında ve `kurallar/liste/prefabrik.json`'da olmayan konum kuralları buraya yazılır; aynı anahtar iki dosyada olmaz (test). Oradaki değerler (makas aralığı, omega aralığı, aşık aralığı, parça boyları, levha) `okunan` ile gösterilir, burada yeniden yazılmaz: `kurallar/liste/prefabrik.json › kurallar.<ad>[.<alt>]` liste kuralının değeri, `kitap › <ad>[.<alt>]` liste kurallarının sabitlediği kural kitabı setinin (`kitap_seti`) değeri.",
  "kurallar": {
   "h_turu": {
    "kural": "Dış duvarda, makasın oturduğu duvar çizgisinde makasa en yakın dış H (pano eki ya da 3'lü) dübelli & kulaklıdır; öteki dış H dübellidir. İç H standarttır (kartı ayrı).",
@@ -32,7 +32,7 @@
    "not": "Kuralın cümlesi mühendisin (PK-07 lejantı); onu uygulamak için seçilen üç değer (`makasin_oturdugu_duvar`, `duvar_cizgisi_payi_cm`, `denk_gelme_payi`) K1'in varsayımıdır, her biri kendi durumunu taşır. Bir duvar çizgisinde iki makas aynı H'ye denk gelirse kayıt en yakın makası yazar. `cati_tipleri`: makasların yeri bugünkü IFC'den okunur ve bugünkü IFC çatıyı her zaman beşik çizer (`motor/ifc_uret.py`); İş Emri'nin çatısı başka tipteyse makasa bağlı parçalar \"kural yok\" yazar. Bugünkü IFC makasları pano eklerine koyar (BK-12 PR-R): baş makaslar uç duvarların ekseninde, orta makaslar boydan boya koşan saçak duvarının eklerinde; PK-01'de paftadaki MK01–MK09 yerleri. PK-01'de her makasın H'si ektedir, sonuç paya bağlı değildir; pay, makasın ekle çakışmadığı evler içindir."
   },
   "tavan_omegasi_yerlesimi": {
-   "kural": "Tavan omegası tavan türüne göre dizilir (karar B); ara hatlar mahyaya paraleldir (makasa dik), duvar eksenindeki hatlar duvarın yönündedir. Asma dizme tavanda: her iç duvarın ekseninde bir hat, duvarın panoları ve iç köşe bağlantısı boyunca (T'de gövde duvarın hattı karşı duvarın yüzünde biter, panolar gibi); her kapalı odada odanın başlangıç sınırından asma aralığıyla ara hatlar (sınır iç duvarda eksen, dış duvarda iç yüz); odanın öteki sınırına (iç duvarda eksenine) en kısa boydan yakın düşen hat ya da hattın o kısmı konmaz (L biçimli odada her kol kendi sınırıyla); ara hattı çıkmayan odaya ortasında bir hat. Ters tavanda: her kapalı odada hat başlangıç duvarının yüzünden başlar, kitabın aralığıyla dizilir, karşı yüze en kısa boydan yakın hat konmaz; iç duvar 100'lükse duvar üstleri bu kartta değil (100'lük duvar omegası), 60'lıksa asmadaki gibi duvar ekseninde hat. Asma dizme tavanda iç duvar 100'lükse duvar eksenindeki hat 100'lük duvar omegasıdır (kart OM-02; Lokman, 30 Ekim 07:04; D-32 ek): sırtı geniştir (`sirt_100`; Lokman, 29 Ekim 13:12; D-32), tam parçası duvar omegasının boyu (`parca_boyu_100`; payın olmadığı varsayımdır, `pay_100`). Açık mahalde (ana çatının altındaki veranda) hat duvarın yüzünden başlar, kitabın aralığıyla; profil ve dikmenin altı sayılmaz (profil mahali bölerse hat en büyük parçaya konur, öteki parçalar uyarı yazar). Her hat dizilimin başladığı uçtan tam parçalara (parça boyu − pay) bölünür, kalan son parçadır; en kısa boydan kısa kalan parçasız boşluktur.",
+   "kural": "Tavan omegası tavan türüne göre dizilir (karar B); ara hatlar mahyaya paraleldir (makasa dik), duvar eksenindeki hatlar duvarın yönündedir. Asma dizme tavanda: her iç duvarın ekseninde bir hat, duvarın panoları ve iç köşe bağlantısı boyunca (T'de gövde duvarın hattı karşı duvarın yüzünde biter, panolar gibi); her kapalı odada odanın başlangıç sınırından asma aralığıyla ara hatlar (sınır iç duvarda eksen, dış duvarda iç yüz); odanın öteki sınırına (iç duvarda eksenine) en kısa boydan yakın düşen hat ya da hattın o kısmı konmaz (L biçimli odada her kol kendi sınırıyla); ara hattı çıkmayan odaya ortasında bir hat. Ters tavanda: her kapalı odada hat başlangıç duvarının yüzünden başlar, kitabın aralığıyla dizilir, karşı yüze en kısa boydan yakın hat konmaz; iç duvar 100'lükse duvar üstleri bu kartta değil (100'lük duvar omegası), 60'lıksa asmadaki gibi duvar ekseninde hat. Asma dizme tavanda iç duvar 100'lükse duvar eksenindeki hat 100'lük duvar omegasıdır (kart OM-02; Lokman, 30 Ekim 07:04; D-32 ek): sırtı geniştir (`sirt_100`; Lokman, 29 Ekim 13:12; D-32), tam parçası duvar omegasının boyu (`parca_boyu_100`; payın olmadığı varsayımdır, `pay_100`). Kapalı kısmın açık mahalle (ana çatının altındaki veranda, giriş nişi) ortak sınırındaki dış duvarın üstünde de 100'lük duvar omegası vardır (kart OM-02, `dis_duvar`): hat duvarın ekseninde, ortak sınır boyunca, ucu köşeye bir duvar kalınlığından yakınsa duvarın ucuna (panolar gibi); tavanın türüne bakılmaz; taşan veranda (BK-14) ana çatının kenarındadır, ona bakan duvar almaz (D-32). Bu parçanın adı `DIS_DUVAR_` önekli (montaj rehberi tavan omegalarını adıyla okur, nişe bakan duvarın omegasını kendisi çizer) ve pafta anahtarı yoktur (PK-01 paftasının tavan omega planında yok). Açık mahalde (ana çatının altındaki veranda) hat duvarın yüzünden başlar, kitabın aralığıyla; profil ve dikmenin altı sayılmaz (profil mahali bölerse hat en büyük parçaya konur, öteki parçalar uyarı yazar). Her hat dizilimin başladığı uçtan tam parçalara (parça boyu − pay) bölünür, kalan son parçadır; en kısa boydan kısa kalan parçasız boşluktur.",
    "aralik_asma": {"okunan": "kurallar/liste/prefabrik.json › kurallar.tavan_omegasi_aralik_m.asma"},
    "aralik_ters": {"okunan": "kitap › tavan_omegasi_aralik_m"},
    "parca_boyu": {"okunan": "kitap › parca_boyu_m.tavan_omegasi"},
@@ -71,6 +71,12 @@
     "durum": "varsayim",
     "tarih": "2026-10-24",
     "not": "PK-01'de 368,5 cm'lik hatlarda 365'lik parça ve parçasız 3,5 cm (KH-2 okuması). 10 cm okuyucunun ok başsız ölçü sınırıyla aynı; hem en kısa parça hem bir hattın odanın öteki sınırına en yakın yeri."
+   },
+   "dis_duvar": {
+    "deger": "acik_mahal_siniri",
+    "durum": "lokman",
+    "tarih": "2026-10-21",
+    "not": "Çatı kenarına gelmeyen dış duvar 100'lük duvar omegası alır: kapalı kısmın açık mahallerle ortak sınırı (Lokman, 21 Ekim 16:22; BK-12 PR-2e; liste üretecinde `ic_kalan_dis_duvar_m`, PK-01 3,34 + 2,00 m, TK-01 r07 giriş nişi 3,67 m). Taşan verandaya bakan duvar ana çatının kenarındadır (baş makas ya da saçak omegası; Lokman, 29 Ekim 13:12; D-32). Model atölyesi 30 Ekim: giriş nişine bakan duvar modele eklenir (K5b-2). Modelde hat duvarın ekseninde (iç duvarın hattı gibi); liste ortak sınırın boyunu sayar, köşede fark duvar kalınlığı kadardır."
    },
    "orta_hat": {
     "durum": "muhendis",
@@ -187,6 +193,43 @@
    "kaynak": "CIO, 27 Ekim 23:11 (K5b planı, PF `Kimlik_Karti_Modeli/K5_yeni_catilar_plani.md`): taşan veranda çatıları BK-14'ün düzlemlerinden; liste üretecinin ek çatı parçası satırları (`motor/prefabrik_liste.py` › `_veranda_catilari`); yer İE-18 rehberindeki gibi.",
    "not": "Saçak omegası duvar ve kiriş boyunca kurulur, liste saçak boyunu sayar (K3b'deki fark, veranda kirişinde de). Veranda zemini kartsız (K5). Arka verandanın sol yüzü ana çatının sol yüzünün devamı olabilir (TK-01): liste iki çatıyı ayrı sayar, model de ayrı kurar. İE-18 rehberi C kapamayı dört kalkanda yazar (kalkan başına iki kenar); model atölyesi rehberi doğru kabul etti (CIO, 30 Ekim), model de dört kalkanda kurar (K5b)."
   },
+  "dizme_tavan": {
+   "kural": "Asma dizme tavanda her kapalı odanın tavanı duvarlarla ve mahyaya paralel omega hatlarıyla (omeganın sırtı genişliğinde) sütunlara bölünür; eni en kısa boydan (`tavan_omegasi_yerlesimi.en_kisa_cm`) dar sütun göz ve H almaz (Motor'un oda çizgisinde duvar kalınlığından kalan şerit). Her sütunda tavan H'ları omegalara dik, koşu ekseninin büyük ucundan (makas x yönündeyse odanın arka kenarı) H aralığıyla dizilir; son göz `son_en_kisa_cm`'den kısa kalacaksa o H konmaz. H'ın boyu sütunun enidir (omega sırtından sırtına ya da duvar yüzüne); en kısa boydan kısa H konmaz. Göz, sütunun iki H'ı (ya da H ile oda kenarı) arasıdır: ıslak hacimde (`islak`) yeşil, ötekilerde beyaz alçıpan. Gözler levhadan raflarla kesilir: göz levhanın eninden (levhanın eninden geniş gözün artan şeridi ayrı parça), dar parçalar bir rafta yan yana; raflar levhanın boyuna en uzun önce, ilk sığan levhaya. Ters tavanda H ve göz yoktur; ters tavanın ve açık mahalin (ana çatının altındaki veranda) tavan alçıpanı modelde yerleşmez (dizilim kuralı yok; liste alandan sayar).",
+   "aralik": {"okunan": "kurallar/liste/prefabrik.json › kurallar.tavan_h_aralik_m"},
+   "son_en_kisa_cm": {
+    "deger": 5,
+    "durum": "varsayim",
+    "tarih": "2026-10-30",
+    "not": "Montaj rehberinin dizilimi (`araclar/paket/rehber/veri.py`, asma tavanın H'ı ve gözü): H'lar koşu ekseninin büyük ucundan aralıkla, oda kenarına 5 cm'den yakın H konmaz."
+   },
+   "sirt_60": {
+    "deger": 6.5,
+    "durum": "lokman",
+    "tarih": "2026-10-25",
+    "not": "60'lık omeganın sırtı, cm: 6 cm pano + iki yanda 2 mm H sacı (kart OM-01 \"üst 65\"; montaj rehberindeki Lokman çizimi, 25 Ekim). Sırtı yazılı hat (100'lük duvar omegası, `tavan_omegasi_yerlesimi.sirt_100`) kendi sırtıyla. Gözün kenarı omeganın sırtıdır (rehberle aynı)."
+   },
+   "islak": {"okunan": "kurallar/liste/prefabrik.json › kurallar.islak_hacim", "not": "Odanın türü İş Emri'nden (liste üreteciyle aynı okuma)."},
+   "levha_m2": {"okunan": "kitap › levha_m2.alcipan"},
+   "levha_cm": {
+    "deger": [120, 250],
+    "durum": "lokman",
+    "tarih": "2026-10-30",
+    "not": "Tavan alçıpanının levhası 1200 × 2500 (liste üretecinin satırı; kitapta `levha_m2.alcipan` 3 m², \"1,2 × 2,5\"). Gözün eni (omegalara dik, ~119) levhanın enine, uzunluğu (H aralığı 62,5) levhanın boyuna: levha başına 4 göz. Dış duvarın yanındaki sütun 122,25 cm (dış duvarın iç yüzünden ilk omegaya 125,5): levhanın eninden geniş (levhanın eni + 2,25 cm'lik şerit, şerit başka rafın artanından), H'ı da 118,5'ten uzun; mühendise soru (İE-15 K5b-2)."
+   },
+   "durum": "varsayim",
+   "tarih": "2026-10-30",
+   "kaynak": "CIO, 27 Ekim 23:11 (K5b planı): \"tavan H'ı (omega hatları × 62,5), dizme alçıpan gözleri\"; PF `Kimlik_Karti_Modeli/K5b2_tavan_plani.md`. Dizilim montaj rehberinden (asma tavanın H'ı ve gözü; Lokman'ın onayladığı 62 m² rehberi ters tavandır, asma tavanın dizilimi varsayım). Liste üreteci H'ı ve alçıpanı alandan sayar (H: net tavan ÷ (1,255 × 0,625) + 5; alçıpan: alan × 1,05 ÷ 3 + 2 / + 1, aşağı); model gözden: fark yazılır, liste değişmez.",
+   "not": "Sütun eni ve göz ölçüsü parçada (`En_cm`, `Uzunluk_cm`); H'ın boyu parçada. Montaj rehberi bugün H'ı ve gözü kendisi çizer (oda dikdörtgenlerinden); model ondan iki yerde ayrılır: duvar kalınlığından kalan dar şerit göz almaz, gözün kenarı omeganın kendi sırtıyla (100'lük duvar omegasında 10,5)."
+  },
+  "cati_izolasyonu": {
+   "kural": "Çatı izolasyonu (cam yünü şilte) tavanın üstünde, aşıklardan önce serilir: ana çatının her makas aralığında bir şerit, dış dikdörtgenin dış duvarlarının iç yüzleri arasında (makasın uzandığı eksende), iki makasın arası (uç duvarların iç yüzüne kırpılır). Ana çatının altındaki gömme veranda ve niş şeridin içindedir: rehber rulonun sol duvardan sağ duvara serildiğini yazar, liste de brüt alandan sayar (geometri hakemi, K5b-2). Taşan verandanın çatısı şerit almaz (yavru makasları bugünkü IFC'de değil; rehberde de verandaların üstü açık). Paket: şeritlerin alanı toplamı ÷ paketin alanı, bir kez yukarı.",
+   "paket_m2": {"okunan": "kitap › silte_adet_m2"},
+   "cati_tipleri": ["besik"],
+   "durum": "varsayim",
+   "tarih": "2026-10-30",
+   "kaynak": "CIO, 27 Ekim 23:11 (K5b planı): \"çatı cam yünü (makas aralığı başına)\". Montaj rehberi (`araclar/paket/rehber/veri.py`, izolasyon): \"Her makas aralığına bir şerit gelir: rulo sol duvarın üstünden başlar, açılarak sağ duvara kadar serilir\"; 62 m² rehberinde de şerit duvardan duvara (10 … 590). Liste üreteci brüt alandan sayar (brüt bina ÷ 9,6; aday: saçaklı çatı tabanı); model şeritlerden: fark yazılır, liste değişmez.",
+   "not": "Şilte kalınlığı kitapta 80 mm (Lokman, 7 Ekim); rehber 10 cm yazar, gösterim kalınlığı `gosterim.kesit_cm.izolasyon`. Beşik dışı çatıda makaslar bugünkü IFC'nin beşiğinden olduğu için kurulmaz (kural yok)."
+  },
   "kesim_plani": {
    "kural": "Boyla alınan kartta (omega, aşık) modelin parçaları stok boylara en uzun önce, ilk sığan boya yerleşir; bir boyun kullanılır uzunluğu parça boyu − pay (yerleşim kuralındaki tam parça). Dere hat başına bindirmeyle bölünür, parçaları stok boylarına aynı yolla yerleşir (K5b). K3b'nin kartlarında sayı liste üretecinin yoludur, boy modelden: hatların toplamı ya da kenar başına (kuralın `yontem`'i); C kapama metreyle. Yedek parça eklenmez (karar D açık).",
    "durum": "varsayim",
@@ -201,11 +244,14 @@
      "dere": [15, 11.4],
      "inis": [8, 6],
      "kaplama": 6,
-     "betopan": 1.2
+     "betopan": 1.2,
+     "tavan_h": [2.5, 2.5],
+     "alcipan": 1.25,
+     "izolasyon": 8
     },
     "durum": "varsayim",
     "tarih": "2026-10-25",
-    "not": "Yalnız 3B gösterim: omega [genişlik, yükseklik], aşık [yükseklik, genişlik], dere [genişlik, yükseklik], iniş [dere boyunca, dereye dik] (tek sayıysa kare), kaplama ve betopan kalınlığı. Sayı, boy ve metre bunlardan çıkmaz. K3b (25 Ekim): montaj rehberinin kesitleri (Lokman'ın 24 Ekim çizimleri; tavan omegası 110 × 35 mm, aşık omega 87 × 30 mm, dere K kesit ~15 × 11,4 cm, iniş ~8 × 6 cm, betopan 12 mm); teyit bekleyen maddeler Lokman'ın 25 Ekim 09:10 kararıyla (\"Varsayım kalsın\") varsayım. Önceki değerler (K2): omega 6 × 3, aşık 5 × 5, dere 15 × 10, iniş 10, betopan 1,6."
+    "not": "Yalnız 3B gösterim: omega [genişlik, yükseklik], aşık [yükseklik, genişlik], dere [genişlik, yükseklik], iniş [dere boyunca, dereye dik] (tek sayıysa kare), kaplama ve betopan kalınlığı; K5b-2: tavan H'ı [en, yükseklik], tavan alçıpanı ve çatı izolasyonu kalınlığı (şilte 80 mm, kitap). Sayı, boy ve metre bunlardan çıkmaz. K3b (25 Ekim): montaj rehberinin kesitleri (Lokman'ın 24 Ekim çizimleri; tavan omegası 110 × 35 mm, aşık omega 87 × 30 mm, dere K kesit ~15 × 11,4 cm, iniş ~8 × 6 cm, betopan 12 mm); teyit bekleyen maddeler Lokman'ın 25 Ekim 09:10 kararıyla (\"Varsayım kalsın\") varsayım. Önceki değerler (K2): omega 6 × 3, aşık 5 × 5, dere 15 × 10, iniş 10, betopan 1,6."
    },
    "durum": "varsayim",
    "tarih": "2026-10-24",

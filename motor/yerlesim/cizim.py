@@ -14,6 +14,9 @@ kurulmayan kart "kurulmadı", liste üretecinin yazmadığı liste "liste yazıl
 
 Taşan verandanın çatısı (K5b) aynı sayfalarda: yavru makas makas ve dere planında, veranda kalkanının betopanı baş makasların altında,
 aşık, kaplama ve çatı kenarları ana çatınınkilerle birlikte. Dikey betopanda levhanın kenarı ve uçtaki artan betopan ayrı çizilir.
+
+Tavan katmanı (K5b-2) tavan omega planında: asma dizme tavanın gözleri (beyaz ve yeşil alçıpan) ve H'ları omegaların altında, açık
+mahale bakan dış duvarın omegası ayrı renkte; çatı izolasyonunun şeritleri makas ve dere planında makasların altında.
 """
 from __future__ import annotations
 
@@ -27,13 +30,16 @@ import numpy as np
 from shapely.geometry import MultiPoint
 
 PARCA_SETI = "PortatifEv_Parca"
-RENK = {"duvar": "#c9c9c9", "duvar_kenar": "#8a8a8a", "omega": {"duvar_ekseni": "#c0392b", "duvar_yuzu": "#8e44ad", "ara": "#e67e22"},
-        "makas": "#2c3e50", "yavru_makas": "#7e5109", "dere": "#2e86c1", "inis": "#1b4f72", "asik": "#2471a3", "kaplama": ("#f4d03f", "#f9e79f"), "levha": "#e67e22"}
-OMEGA_YER = {"duvar_ekseni": "iç duvar ekseninde", "duvar_yuzu": "duvar yüzünde", "ara": "arada"}
+RENK = {"duvar": "#c9c9c9", "duvar_kenar": "#8a8a8a",
+        "omega": {"duvar_ekseni": "#c0392b", "duvar_yuzu": "#8e44ad", "ara": "#e67e22", "dis_duvar": "#1a5276"},
+        "makas": "#2c3e50", "yavru_makas": "#7e5109", "dere": "#2e86c1", "inis": "#1b4f72", "asik": "#2471a3", "kaplama": ("#f4d03f", "#f9e79f"), "levha": "#e67e22",
+        "goz": {"AL-01": "#f4f6f6", "AL-02": "#abebc6"}, "goz_kenar": "#aab7b8", "tavan_h": "#566573", "izolasyon": ("#f9e79f", "#fcf3cf")}
+OMEGA_YER = {"duvar_ekseni": "iç duvar ekseninde", "duvar_yuzu": "duvar yüzünde", "ara": "arada", "dis_duvar": "açık mahale bakan dış duvarda"}
 YUZ = {"sol": "sol", "sag": "sağ", "iki": "iki"}
 # sayfanın katmanları: kural yokta katmanın adı (`motor.yerlesim`), parça adının öneki ve uyarının katmanı
-SAYFA = {1: (("tavan omegası",), ("OMEGA_",)),
-         2: (("dere ve iniş", "iniş"), ("DERE_", "INIS_", "VERANDA_DERE_", "VERANDA_INIS_", "VERANDA_YAVRU_MAKAS_", "iniş (", "veranda çatısı")),
+SAYFA = {1: (("tavan omegası", "tavan H'ı ve gözler"), ("OMEGA_", "DIS_DUVAR_OMEGA_", "TAVAN_H_", "ALCIPAN_")),
+         2: (("dere ve iniş", "iniş", "çatı izolasyonu"), ("DERE_", "INIS_", "VERANDA_DERE_", "VERANDA_INIS_", "VERANDA_YAVRU_MAKAS_", "iniş (", "veranda çatısı",
+                                                          "IZOLASYON_")),
          3: (("baş makas betopanı",), ("BETOPAN_", "VERANDA_BETOPAN_", "baş makas betopanı (")),
          4: (("aşık",), ("ASIK_", "VERANDA_ASIK_")), 5: (("çatı kaplaması",), ("KAPLAMA_", "VERANDA_KAPLAMA_")),
          6: (("elektrik", "elektrik noktaları", "kablo_priz", "kablo_aydinlatma"),
@@ -115,6 +121,18 @@ def _kart(say: dict, kod: str) -> dict:
     return next((k for k in say["kartlar"] if k["kod"] == kod), {"adet": 0})
 
 
+def _tavan_lejanti(say: dict, kesim: dict) -> list[str]:
+    """K5b-2: asma dizme tavanın H'ı ve gözleri (lejantın tavan omega satırlarının altında); ters tavanda boş."""
+    th, ab, ay = _kart(say, "H-11"), _kart(say, "AL-01"), _kart(say, "AL-02")
+    if not (th["adet"] or ab["adet"] or ay["adet"]):
+        return []
+    lev = lambda kk: f" → {kesim[kk]['stok']} levha" if kk in kesim else ""                    # noqa: E731
+    genis = [x for kk in ("AL-01", "AL-02") if (g := kesim.get(kk, {}).get("genis"))       # geometri hakemi (K5b-2): sessiz kalmasın
+             for x in (f"{kk}: {g['goz']} göz levhadan geniş", f"   (en {_sayi(g['en_genis_cm'])} cm; levha + şerit)")]
+    return (["", f"H-11 Tavan H'ı L 1185: {th['adet']} parça (▬)", f"AL-01 beyaz alçıpan: {ab['adet']} göz{lev('AL-01')}",
+             f"AL-02 yeşil alçıpan: {ay['adet']} göz{lev('AL-02')}", "(levha 120 × 250, raflarla; yedek yok)", *genis])
+
+
 def _cati_notu(say: dict) -> str | None:
     """Beşik dışı çatıda (K5) çatı katmanlarının yerine yazılan not; çatı tipinden kural yok yoksa None."""
     if not any("cati" in x for x in say["kural_yok"]):
@@ -167,10 +185,18 @@ def ciz(model_yolu: Path, say: dict, yol: Path, kod: str) -> Path:
         # 1 · tavan omega
         fig, ax = plt.subplots(figsize=(16.54, 11.69))
         _duvarlar(ax, m)
+        for kk in ("AL-01", "AL-02"):                           # K5b-2: asma dizme tavanın gözleri ve H'ları, omegaların altında
+            for p in m["k2"].get(kk, []):
+                x0, y0 = p["v"][:, :2].min(0); x1, y1 = p["v"][:, :2].max(0)
+                ax.add_patch(plt.Rectangle((x0, y0), x1 - x0, y1 - y0, fc=RENK["goz"][kk], ec=RENK["goz_kenar"], lw=0.3))
+        for p in m["k2"].get("H-11", []):
+            x0, y0 = p["v"][:, :2].min(0); x1, y1 = p["v"][:, :2].max(0)
+            ax.add_patch(plt.Rectangle((x0, y0), x1 - x0, y1 - y0, color=RENK["tavan_h"], lw=0))
         OMK = [kk for kk in ("OM-01", "OM-02") if m["k2"].get(kk)] or ["OM-01"]   # OM-02: 100'lük iç duvarın üstü, 100'lük duvar omegası (D-32 ek)
+        yer_ = lambda p: "dis_duvar" if p["p"].get("Duvar") == "dis" else p["p"].get("Yer", "ara")     # noqa: E731  (K5b-2: dış duvar)
         for kk in OMK:
             for p in m["k2"].get(kk, []):
-                v, yer = p["v"], p["p"].get("Yer", "ara")
+                v, yer = p["v"], yer_(p)
                 x0, y0 = v[:, :2].min(0); x1, y1 = v[:, :2].max(0)
                 dik = (y1 - y0) > (x1 - x0)
                 ax.add_patch(plt.Rectangle((x0, y0), x1 - x0, y1 - y0, color=RENK["omega"][yer], lw=0))
@@ -180,7 +206,7 @@ def ciz(model_yolu: Path, say: dict, yol: Path, kod: str) -> Path:
         sayac = {}
         for kk in OMK:
             for p in m["k2"].get(kk, []):
-                sayac[p["p"].get("Yer")] = sayac.get(p["p"].get("Yer"), 0) + 1
+                sayac[yer_(p)] = sayac.get(yer_(p), 0) + 1
         lej = []
         for kk in OMK:
             k = _kart(say, kk)
@@ -190,7 +216,8 @@ def ciz(model_yolu: Path, say: dict, yol: Path, kod: str) -> Path:
                 + [f"■ {OMEGA_YER[a]}: {n}" for a, n in sorted(sayac.items())]
                 + [x for kk in OMK if kk in kesim for x in
                    (f"", f"kesim{'' if len(OMK) == 1 else ' ' + kk}: {kesim[kk]['stok']} boy L {kesim[kk]['parca_boyu_cm']:g}",
-                    f"(tam parça {kesim[kk]['kullanilir_cm']:g}; yedek yok, karar D)")])
+                    f"(tam parça {kesim[kk]['kullanilir_cm']:g}; yedek yok, karar D)")]
+                + _tavan_lejanti(say, kesim))
         _cerceve(ax, f"{kod} · TAVAN OMEGA YERLEŞİM PLANI", alt)
         _notlar(fig, say, 1)
         pdf.savefig(fig); plt.close(fig)
@@ -198,6 +225,10 @@ def ciz(model_yolu: Path, say: dict, yol: Path, kod: str) -> Path:
         # 2 · makas ve dere
         fig, ax = plt.subplots(figsize=(16.54, 11.69))
         _duvarlar(ax, m, dolgu=False)
+        for p in sorted(m["k2"].get("IZ-01", []), key=lambda p: p["p"]["Aralik"]):     # K5b-2: çatı izolasyonu, makas aralığı başına şerit
+            x0, y0 = p["v"][:, :2].min(0); x1, y1 = p["v"][:, :2].max(0)
+            ax.add_patch(plt.Rectangle((x0, y0), x1 - x0, y1 - y0, fc=RENK["izolasyon"][p["p"]["Aralik"] % 2], ec="#d4ac0d", lw=0.5))
+            ax.text(x0 + 8, (y0 + y1) / 2, f"İ{p['p']['Aralik']}", fontsize=7.5, va="center", ha="left", color="#9a7d0a")
         for ad, mk in sorted(m["makas"].items()):
             iz = _iz(np.vstack(mk["uyeler"]))
             x, yy = iz.exterior.xy
@@ -232,7 +263,9 @@ def ciz(model_yolu: Path, say: dict, yol: Path, kod: str) -> Path:
                      f"DR-01 Metal dere: {kd['adet']} hat, {_sayi(kd.get('metre', 0))} m"]
                 + ([f"   kesim: {kesim['DR-01']['stok']} boy L {kesim['DR-01']['parca_boyu_cm']:g}", f"   ({kesim['DR-01']['bindirme_cm']:g} cm bindirme)"]
                    if "DR-01" in kesim else [])
-                + [f"DR-02 Dere inişi: {ki['adet']} (◎)"])
+                + [f"DR-02 Dere inişi: {ki['adet']} (◎)"]
+                + ([f"", f"IZ-01 Çatı izolasyonu: {iz['adet']} şerit (İ),", f"   {_sayi(kesim['IZ-01']['alan_m2'])} m² → {kesim['IZ-01']['stok']} paket "
+                    f"({_sayi(kesim['IZ-01']['paket_m2'], 1)} m²)"] if (iz := _kart(say, "IZ-01"))["adet"] and "IZ-01" in kesim else []))
         if cn:
             _cati_yazisi(ax, cn)
         _cerceve(ax, f"{kod} · MAKAS VE DERE YERLEŞİM PLANI", alt)
