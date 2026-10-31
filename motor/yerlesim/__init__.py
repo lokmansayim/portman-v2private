@@ -16,7 +16,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from . import cati, girdi, tavan, veranda
+from . import cati, girdi, serit, tavan, veranda
 
 KOK = Path(__file__).resolve().parents[2]
 LISTE_DOSYASI = "kurallar/liste/prefabrik.json"
@@ -140,6 +140,34 @@ def _verandalar(g: dict, D: dict, K: dict, kesit: dict, kural_yok: list, uyarila
     return out
 
 
+def _serit_katmani(ad: str, adi: str, sinif: str, g: dict, D: dict, kitap: dict, kesit: dict, kural_yok: list, uyarilar: list) -> list[dict]:
+    """İE-24: girintili gövdenin çatı katmanı (`serit.py`): liste üretecinin saydığı çatıdan (kitabın çok düzlemli çatısı)."""
+    from motor.genel import cati_genel
+    ck = cati_genel.cati_kur(g["cati_serit"], kitap)
+    if ad == "asik_sirasi":
+        A = D[ad]
+        return serit.asik(g, ck, {"kesit_asik": kesit["asik"], "tam": _cm(A["parca_boyu"] - A["pay"]), "en_kisa": A["en_kisa_cm"]})
+    if ad == "cati_kaplamasi":
+        tur, neden = kaplama_turu(g, D[ad], uyarilar)
+        if neden or tur != "sandvi":
+            kural_yok.append({"parca": adi, "sinif": sinif, "neden": neden or "girintili gövdede tek kat panelin çok düzlemli dizilimi yok "
+                                                                               "(liste üreteci de parça parça sayar; İE-24)"})
+            return []
+        out = serit.kaplama(g, ck, kitap, kaplama_degerleri(D[ad], tur, kesit), "sandvic_panel")
+        for p in out:
+            p["bilgi"]["Kaplama"] = tur
+        return out
+    if ad == "bas_makas_betopani_yerlesimi":
+        B = D[ad]
+        levhalar, nedenler = serit.betopan(g, {"katsayi": B["katsayi"], "levha_m2": B["levha_m2"], "levha_cm": B["levha_cm"],
+                                               "kalinlik_betopan": kesit["betopan"]}, kesit["betopan"])
+        kural_yok += [{"parca": adi, "sinif": sinif, "neden": f"{ad}: {n}"} for n in nedenler]
+        return levhalar
+    R = D[ad]
+    return serit.dere(g, ck, {"kesit_dere": kesit["dere"], "kesit_inis": kesit["inis"], "orta_esik_cm": _cm(R["orta_esik"]),
+                              "kose_basina": R["kose_basina"]})
+
+
 def katmanlar(ie: dict, plan: dict, makaslar: list[dict], yerlesim: dict, liste: dict) -> dict:
     """K2'nin parçaları. `plan`: `motor.ifc_uret.hazirla(ie)`; `makaslar`: kart modelindeki makasların yeri ({ad, rol, konum})."""
     kitap = kitap_oku(liste)
@@ -176,6 +204,9 @@ def katmanlar(ie: dict, plan: dict, makaslar: list[dict], yerlesim: dict, liste:
         izin = K[ad].get("cati_tipleri")
         if izin and g["cati_tipi"] not in izin:
             kural_yok.append({"parca": adi, "sinif": sinif, "neden": girdi.cati_disi(g["cati_tipi"], ad, izin), "cati": g["cati_tipi"]})
+            continue
+        if g.get("cati_serit"):                                     # İE-24: girintili gövde (ana çatı + paralel cumba; `serit.py`)
+            parcalar += _serit_katmani(ad, adi, sinif, g, D, kitap, kesit, kural_yok, uyarilar)
             continue
         if ad == "asik_sirasi":
             A = D[ad]
