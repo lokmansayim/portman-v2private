@@ -493,11 +493,11 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         """(kartta yazan boy, Liste satırı, ek not). `acik`: açık kenarın dış ölçüsü (None: nişin kirişi, aks arası); `cizim`: çizimdeki boy (cm).
         Önce çizimdeki boyun satırı, yoksa açık kenar − kitabın eksiği."""
         for L_ in [cizim] + ([] if acik is None else [acik - EKSIK]):
-            olcu = f"L {round(L_ * 10)}"
+            olcu = f"L {LU.mm(L_)}"                      # listenin yazımı (yarım milimetre: L 3137,5)
             if satirlar("Kutu profil (kiriş)", olcu):
                 fark = "" if abs(L_ - cizim) < 0.6 else f"; boy listeden (kural kitabı: açık kenar dış ölçüsü − {fmtc(EKSIK)} cm), çizimde {fmtc(cizim)} cm"
                 return L_, ls("Kutu profil (kiriş)", olcu), fark
-        return cizim, f"listede kiriş L {round(cizim * 10)} satırı yok", ""
+        return cizim, f"listede kiriş L {LU.mm(cizim)} satırı yok", ""
 
     verandalar, VR, GVK = [], [], None          # VR: çatı ve yerleşim için taşan veranda kaydı; GVK: gömme veranda
     for vi, v in enumerate(VER):
@@ -544,8 +544,8 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         if not kir:
             raise Desteklenmiyor("gömme verandanın kirişi planda yok")
         # Kolonsuz gömme veranda giriş nişidir (TK-01 r06): iki yanı ve arkası gövde duvarı, açık kenarındaki kiriş iki yandaki duvarı bağlar.
-        # İki yanı açık kolonsuz köşe (TK-03 balkonu, İE-24) niş değil: kirişler duvardan köşeye, köşede birleşir; liste köşe verandası gibi
-        # dikmesiz planda kiriş saymaz (BK-14 ek, P6001)
+        # İki yanı açık kolonsuz köşe (TK-03 balkonu, İE-24) niş değil: kirişler duvardan köşeye, köşede birleşir; listede kirişin boyu açık
+        # kenarın dış ölçüsü (Lokman, karar kartı 31 Ekim, D-35)
         kosede = not kol and len({(b["rect"][2] - b["rect"][0]) > (b["rect"][3] - b["rect"][1]) for b in kir}) == 2
         nis = not kol and not kosede
         gad = "giriş nişi" if nis else kucuk(GV.get("ad") or "veranda") if kosede else "veranda"
