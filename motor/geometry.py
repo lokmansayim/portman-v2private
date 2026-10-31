@@ -418,7 +418,7 @@ class Plan:
     arti_birlesimler: list = field(default_factory=list)   # BK-14: dört kollu birleşim noktaları (x, y; cm); profili kitapta yok, liste uyarır
     dis_verandalar: list = field(default_factory=list)     # BK-14: gövdeden taşan verandalar (İş Emri `verandalar`; `_dis_verandalar`)
     girintili: bool = False                                 # İE-24: İş Emri'nde `girintiler` var (gövde dikdörtgen değil; `govde_cokgeni`)
-    kose_kolonlari: list = field(default_factory=list)     # D-36: açık mahalin iki açık kenarının birleştiği köşeye Motor'un koyduğu dikmeler
+    kose_kolonlari: list = field(default_factory=list)     # D-38: açık mahalin iki açık kenarının birleştiği köşeye Motor'un koyduğu dikmeler
 
     @property
     def panolar(self) -> list:
@@ -1166,12 +1166,12 @@ def _kur(is_emri: dict) -> Plan:
     return plan
 
 
-KOSE_KOLONU_YAKIN_CM = 11.0   # D-36: köşeye bu uzaklıktan yakın bir dikme varsa (İş Emri'nde yazılı) yenisi eklenmez
+KOSE_KOLONU_YAKIN_CM = 11.0   # D-38: köşeye bu uzaklıktan yakın bir dikme varsa (İş Emri'nde yazılı) yenisi eklenmez
 KOSE_HIZA_CM = 6.0            # açık kenar çizgisinin mahalin dış ölçüsüne uzaklığı (ağız aksta, dış yüz 5 cm dışarıda)
 
 
 def _kose_kolonlari(plan: "Plan") -> None:
-    """D-36 (Lokman, 31 Ekim 2026 15:08): "kirişlerin birleştiği yerde kolon gelir ... hiçbir zaman kirişler askıda kalmaz". Gövdenin içindeki
+    """D-38 (Lokman, 31 Ekim 2026 15:08): "kirişlerin birleştiği yerde kolon gelir ... hiçbir zaman kirişler askıda kalmaz". Gövdenin içindeki
     açık mahalin (balkon, köşe verandası) birbirine dik iki açık kenarı bir köşede birleşiyorsa o köşeye 10 × 10 dikme konur; dış yüzleri
     mahalin dış ölçüsüyle aynı hizada (PK-01'in ve katalog evlerinin köşe dikmesi gibi). İş Emri'nde o köşede dikme yazılıysa yenisi eklenmez.
     Taşan veranda kendi kolonlarıyla gelir (`_dis_verandalar`). Dikme planın `dikmeler`'ine girer: çizim, liste, 3B model ve rehber oradan okur."""

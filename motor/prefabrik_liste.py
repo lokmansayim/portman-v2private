@@ -663,7 +663,7 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
         for L_k, n_k in sorted(Counter(N.get("kolon_boylari_cm") or [H0] * N["dikmeler"]).items(), reverse=True):   # O4: kolon boyu paftadan
             ekle("1002", "Özel kutu profil (kolon) 100 × 100", f"L {mm(L_k)}", n_k, "Sayım", "veranda dikmesi" + (" (boy paftadan, O4)" if N.get("kolon_boylari_cm") else "")
                  + (f"; {N['kose_kolonlari']} tanesi açık mahalin iki açık kenarının birleştiği köşede, Motor kuralı" if N.get("kose_kolonlari") else ""),
-                 "Lokman, 31 Ekim 15:08: kirişlerin birleştiği yerde kolon gelir, kirişler askıda kalmaz (D-36)" if N.get("kose_kolonlari") else "")
+                 "Lokman, 31 Ekim 15:08: kirişlerin birleştiği yerde kolon gelir, kirişler askıda kalmaz (D-38)" if N.get("kose_kolonlari") else "")
         # profil vidalama aparatı yazılmaz: kolonlu beş Portatifev listesinde yok, yalnız PK-01'de 2 ("ekstradan ekledik"; BK-12 PR-2c)
     kirisler = N.get("veranda_kirisleri_cm")
     if kirisler is not None:

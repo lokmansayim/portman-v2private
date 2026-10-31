@@ -1,7 +1,7 @@
 """İE-24 · TK-03 montaj rehberi (A4): girintili gövdenin rehberi 62 m² şablonundan, çatısı çizimdeki ve listedeki çatının aynısından
 (`araclar/paket/rehber/girinti.py`: `cati_serit.tanim`, kart modelinin aşık ve inişleri). Ana çatının makasları "Çatı makası (baş/orta)"
 kartıyla, cumbanınkiler "Cumba makası" (kartı henüz yok; Lokman, 30 Ekim 2026 13:49). Balkon gövdenin köşesinde, iki yanı açık:
-köşesine Motor kolon koyar, kirişler kolonu gövdeye bağlar (Lokman, 31 Ekim 15:08: kirişler askıda kalmaz; D-36). Girintisiz evlerin rehberi değişmez (`test_paket.py`, `test_rehber.py`)."""
+köşesine Motor kolon koyar, kirişler kolonu gövdeye bağlar (Lokman, 31 Ekim 15:08: kirişler askıda kalmaz; D-38). Girintisiz evlerin rehberi değişmez (`test_paket.py`, `test_rehber.py`)."""
 from __future__ import annotations
 
 import copy
@@ -82,7 +82,7 @@ def test_asik_dere_ve_inisler_kart_modeliyle_ayni(tk03):
 
 
 def test_kose_balkonu(tk03):
-    """Balkon köşede (313,75 × 193,25), iki açık kenarında birer kiriş, dış köşede kolon (D-36: kirişler askıda kalmaz). Kolonun ve kirişin
+    """Balkon köşede (313,75 × 193,25), iki açık kenarında birer kiriş, dış köşede kolon (D-38: kirişler askıda kalmaz). Kolonun ve kirişin
     kartı listedeki satırı okur: kiriş açık kenarın dış ölçüsü − 10 (kolonlu verandanın kuralı; L 3037,5 ve 1832,5, yarım milimetre
     listenin yazımıyla)."""
     d, _, _ = tk03

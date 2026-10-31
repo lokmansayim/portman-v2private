@@ -1,13 +1,13 @@
 # Referans · 2026-10-31
 
-Gerekçe: D-36 (Lokman, 31 Ekim 2026 15:08: kirişler askıda kalmaz): gövdenin içindeki açık mahalin iki açık kenarının birleştiği köşeye Motor 10 × 10 dikme koyar (geometry._kose_kolonlari, PC-30). Köşesinde İş Emri dikmesi olmayan köşe verandalı Altın 6×8 ve P6001'in (katalog, çıkarıcı) çizimlerine veranda dikmesi girer; BOM'da veranda dikmesi 1 adet. Başka değişiklik beklenmez: sayılar, harness, genel motor izleri aynı.
+Gerekçe: D-38 (Lokman, 31 Ekim 2026 15:08: kirişler askıda kalmaz): gövdenin içindeki açık mahalin iki açık kenarının birleştiği köşeye Motor 10 × 10 dikme koyar (geometry._kose_kolonlari, PC-30). Köşesinde İş Emri dikmesi olmayan köşe verandalı Altın 6×8, P6001 ve çıkarıcının katalog planlarının çizimlerine veranda dikmesi girer; BOM'da veranda dikmesi 1 adet. Başka değişiklik beklenmez: sayılar, harness, genel motor izleri aynı. (İlk dondurmada D-36 numarasıyla yazılmıştı; numara İE-13 PR-4'e verildiği için D-38.)
 
-- Dondurulduğu kod: `b2288c7` üzerine kaydedilmemiş değişiklikler
+- Dondurulduğu kod: `a15eb8b` üzerine kaydedilmemiş değişiklikler
 - Ortam: Python 3.11.17, ezdxf 1.4.4, shapely 2.2.0, pydantic 2.14.1, numpy 2.4.6, PyMuPDF 1.28.2
 - Önceki referans: 2026-10-30
 - İçerik: 78 girdi dosyası, 22 Beyin vakası, 18 DXF, 18 PDF, 173 genel motor izi
 
-Karar: D-36
+Karar: D-38
 
 ## Önceki referansa göre değişen ya da eklenen
 
@@ -42,7 +42,7 @@ Karar: D-36
 
 ## Dosya özetleri
 
-- `denetim_kosum.json`: 437035954c10bd9f19d56a792b9a47c960e4aa3f143fda59ecfe1b579358bfae
+- `denetim_kosum.json`: 4452f82edc18178df5d3e8c352a9d7b975ea8c20febeb008b45bd0b5a4ee1a22
 - `dxf_parmak_izleri.txt`: a9a235986cafe6cdb999a2af0fa42ed64480b064b74207b506fe2b16dc2b99f8
 - `pdf_parmak_izleri.txt`: b6c9f1f77ecac0533d9e20f33ca7ac550e7e5b56b76e8f9117ef3cd251f49401
 - `referans_girdiler.json`: b3fd9c6c22d2ba7006e6b32abb4905e418ffa5f8af41da3e7fd74b1bb469bdba

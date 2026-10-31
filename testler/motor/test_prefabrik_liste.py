@@ -264,7 +264,7 @@ def _varyantlar(N: dict, pf: dict) -> dict:
     (mutfak koridor, banyo ıslak hacim türünde, ek lavabo): açık mutfak salona, ıslak hacim ve lavabo banyo, koridor hol gibi (BK-12 PR-2f);
     tasan: ilk açık kenar taşan verandanın dış kenarı sayılır (BK-14; kiriş kolonun dış yüzünden dış yüzüne, Lokman, kart 28 Ekim);
     asma100: asma dizme tavan, 100'lük iç duvar (iç duvar üstü 100'lük duvar omegasında; Lokman, 30 Ekim 07:04, D-32 ek).
-    D-35'in kolonsuz köşe kirişi türevi (`kose`) D-36 ile kalktı: köşeye Motor kolon koyar, kirişler kolonlu verandanın kuralıyla."""
+    D-35'in kolonsuz köşe kirişi türevi (`kose`) D-38 ile kalktı: köşeye Motor kolon koyar, kirişler kolonlu verandanın kuralıyla."""
     def tur(n, **d):
         n = copy.deepcopy(n)
         n.update(d)

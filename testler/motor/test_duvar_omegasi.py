@@ -76,7 +76,7 @@ def test_motor_pk01(N, kurallar):
 def test_motor_duvarsiz_sinir_kiris(N, kurallar):
     """ALTIN 6×8'de salonla mutfak arası duvarsız, L biçimli (125,5 + 125,5 cm): iki kiriş satırı ve duvar omegası 3 → 4. TEST02'de hol–salon
     üç düz parça (5,02 m). PK-01'de duvarsız sınır yok. Pafta biçimine taşınınca aynı adet, uyarı yok. Köşe verandasının iki kirişi (köşesine
-    Motor kolon koyar, D-36; kolonlu verandanın kuralıyla L 3715 ve 2410) çatının kenarında: duvar omegasına girmez."""
+    Motor kolon koyar, D-38; kolonlu verandanın kuralıyla L 3715 ve 2410) çatının kenarında: duvar omegasına girmez."""
     N6 = PL.model_motor(_oku(KOK / "is_emri" / "ALTIN_2plus1_6x8.json"))
     L = PL.liste(copy.deepcopy(N6), kurallar)
     s = _satir(L, OMEGA)

@@ -544,11 +544,11 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         if not kir:
             raise Desteklenmiyor("gömme verandanın kirişi planda yok")
         # Kolonsuz gömme veranda giriş nişidir (TK-01 r06): iki yanı ve arkası gövde duvarı, açık kenarındaki kiriş iki yandaki duvarı bağlar.
-        # İki yanı açık köşede kolon var: Motor koyar (D-36; Lokman, 31 Ekim 15:08: kirişler askıda kalmaz). Adı İş Emri'nden (TK-03: balkon)
+        # İki yanı açık köşede kolon var: Motor koyar (D-38; Lokman, 31 Ekim 15:08: kirişler askıda kalmaz). Adı İş Emri'nden (TK-03: balkon)
         iki_yan = len({(b["rect"][2] - b["rect"][0]) > (b["rect"][3] - b["rect"][1]) for b in kir}) == 2
         nis = not kol
         if nis and iki_yan:
-            raise Desteklenmiyor("iki yanı açık gömme verandanın köşesinde kolon yok (Motor koyar, D-36)")
+            raise Desteklenmiyor("iki yanı açık gömme verandanın köşesinde kolon yok (Motor koyar, D-38)")
         gad = "giriş nişi" if nis else kucuk(GV.get("ad") or "veranda")
         Gad = gad[:1].upper() + gad[1:]
         gad_e = "nişe" if nis else gad + ("y" if gad[-1] in "aeıioöuü" else "") + ("a" if [c for c in gad if c in "aeıioöuü"][-1] in "aıou" else "e")
@@ -1117,7 +1117,7 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
     nis_metin = (f"Giriş nişi gövdenin içinde ({gv_olcu}), önü açık; iki yanı ve arkası gövde duvarı, dış kapı arkadaki duvarda. Açık kenarına "
                  f"{len(GVK['kir'])} kiriş ({', '.join(GVK['kir'])}) duvar üstü kotunda iki yandaki duvarı bağlar ve duvarın yerini tutar: üstüne baş makas "
                  "omegası, sonra ana çatının makasları gelir.") if GVK and GVK["nis"] else ""
-    if GVK and not GVK["nis"] and GVK["ad"] != "veranda" and GVK["iki_yan"]:   # İE-24: köşedeki açık mahal (TK-03 balkonu; kolon D-36)
+    if GVK and not GVK["nis"] and GVK["ad"] != "veranda" and GVK["iki_yan"]:   # İE-24: köşedeki açık mahal (TK-03 balkonu; kolon D-38)
         nis_metin = (f"{GVK['Ad']} gövdenin köşesinde ({gv_olcu}), iki yanı açık; öteki iki yanı gövde duvarı. Dış köşeye {GVK['kol']} kolon (100 × 100) "
                      f"dikilir: kirişler hiçbir zaman askıda kalmaz. Açık kenarlarına {len(GVK['kir'])} kiriş ({', '.join(GVK['kir'])}) duvar üstü kotunda "
                      f"kolonu gövdeye bağlar ve duvarın yerini tutar. Üstlerine omega, sonra {'çatının' if GIR else 'ana çatının'} makasları gelir.")
