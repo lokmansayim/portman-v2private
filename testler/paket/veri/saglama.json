@@ -16,7 +16,7 @@
   "kartlar": {
    "AC-01": 9,
    "AC-02": 16,
-   "AS-01": 79,
+   "AS-01": 72,
    "B-01": 6,
    "B-02": 2,
    "BT-01": 20,
@@ -59,6 +59,7 @@
   "r05_farki": "r05'li rehberden (28 Ekim, R1) fark giriş nişinden (dış kapı bir pano içeride): 100'lük pano D-01 23 → 25, 60'lık pano I-01 21 → 19, köşe direği B-01 4 → 8, alt çerçeve AC-01 5 → 9, H-05 5 → 3, H-03 15 → 13, OM-01 28 → 30, kiriş V-02 6 → 7 (nişin ağız kirişi, L 125,5). Adım 22, oda sırası ve yavru makaslar aynı; adetler kart modeliyle aynı.",
   "d29_farki": "D-29 (Lokman 29 Ekim, TK-02 notları): giriş nişinin kapı hattında köşe direği yerine 3'lü H; köşe direği B-01 8 → 6, dış duvar T'si 3'lü H H-05 3 → 5 (sayfa izi ve veri, 29 Ekim 2026, three.js 0.160.0). Öteki kartlar aynı.",
   "d30_farki": "D-30 (Lokman 29 Ekim 10:48, son pano 122 ve üzeri tam panoya): dış ölçü 898 × 888 → 898,5 × 888,5; makaslar 125,5 aralıkla akslara oturdu (dış T'lerine uzaklık 0,21–0,36 → 0), makasın oturduğu iki duvardaki iki dış T'si daha makasa denk geldi: H-04 3 → 5, H-05 5 → 3. Öteki kartlar aynı.",
+  "d39_farki": "D-39 (BK-19, 31 Ekim 2026; Lokman 24 Ekim karar C, saçak eşiği 30 cm dört aşık planından): rehber ana çatının aşığını kart modelinden okur; kart modelinde saçağa 30 cm'den az kalan sıra konmaz, ana çatıda yüz başına 10 → 9 sıra (24,7 cm kalıyor; P2 ve liste de 9), arka verandanın sol yüzü 5 → 4 (sağ yüzle aynı): AS-01 79 → 72 (sayfa izi, 31 Ekim 2026, three.js 0.160.0). Öteki kartlar aynı.",
   "r04_farki": "27 Ekim rehberi (r04, kendi sahnesi): ANTRE ve ANTRE–HOL iç kapısı çıktı → K-01 8 → 7, I-02 8 → 7, H-03 13 → 15, H-06 6 → 4, AC-02 18 → 16, OM-01 30 → 28. Çatı parçaları 62'nin şablonuyla sayılır: saçak omegası, saçak ve alın sacı, Z, C kapama, mahya ve dere hat başına değil parça başına; aşık veranda çatılarıyla 79 (ana çatı 60, kart modeli); betopan 20 (ana kalkan 125'ten yüksek: dik şerit)."
  },
  "AP-19": {
