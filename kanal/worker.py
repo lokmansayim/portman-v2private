@@ -1169,7 +1169,8 @@ def llm_once_revizyon(k, talep, gelen: dict, etk, cikarim: dict | None, settings
     if not yeni_mi and mod == "acik":
         lo = onceki("degisiklik")
         if lo is None:
-            lo = {**degisiklik_oku(son_y, metin, katalog, lo_ayar), "_temel": temel}
+            germe = {"germe": True} if (settings.get("banka_germe") or {}).get("acik") else {}   # kapalıyken çağrı bugünküyle aynı
+            lo = {**degisiklik_oku(son_y, metin, katalog, lo_ayar, **germe), "_temel": temel}
             if ek_kaydet is not None:
                 ek_kaydet("degisiklik", lo)
         return None, lo
@@ -1230,9 +1231,10 @@ def plan_duzenle(plan: dict, metin: str, talep: dict, ayar: dict) -> dict:
     return s
 
 
-def degisiklik_oku(son_y: dict, metin: str, katalog, ayar: dict) -> dict:
+def degisiklik_oku(son_y: dict, metin: str, katalog, ayar: dict, germe: bool = False) -> dict:
     """İE-14 PR-3: banka modelinin revizyonu LLM-önce (`degisiklik_okuyucu.oku`; 1 çağrı). Tablo: son planın pencereleri (değişikliklerle),
-    modelin çatı seçenekleri, dış karkas. İstisna fırlatmaz."""
+    modelin çatı seçenekleri, dış karkas. İE-23 PR-2a (`germe`, ayar `banka_germe.acik`): son planın yapı kimliğinden odalar da (oda
+    büyütme / küçültme). İstisna fırlatmaz."""
     from beyin import celik_okuma as CO, degisiklik_okuyucu as DO, varyant
     try:
         t = _cizim_tanimi(son_y["tanim"], son_y.get("degisiklikler"))
@@ -1243,8 +1245,12 @@ def degisiklik_oku(son_y: dict, metin: str, katalog, ayar: dict) -> dict:
         catilar = [{"kod": x["kod"], "ad": (x.get("sunum") or {}).get("cati_adi") or ""} for x in
                    [kat] + [katalog.aday(v) for v in kat.get("varyantlar") or []] if x] if kat.get("varyantlar") else []
         dis140 = "140" in str((t.get("duvar_siniflari") or {}).get("dis", {}).get("profil", ""))
+        odalar = None
+        if germe:
+            from beyin import yapi_kimligi as YK
+            odalar = YK.tanimdan(t)["anlamsal"]["mahaller"]
         return DO.oku(metin, pencereler, catilar, dis140, ayar={a: ayar[a] for a in ("model", "effort", "timeout_s", "backend") if a in ayar},
-                      hazir=_hazir(ayar))
+                      hazir=_hazir(ayar), odalar=odalar)
     except Exception as e:
         return {"durum": "hata", "islemler": [], "bilgi": [], "cagri": 0, "hata": maske_numaralar(f"{type(e).__name__}: {str(e)[:200]}")}
 

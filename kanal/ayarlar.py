@@ -33,6 +33,10 @@ VARSAYILAN = {
     # verir; LLM aynı mesajı gölgede okur, iki okuma okuma_kiyaslari'na yazılır; mesaj başına 1 ücretli çağrı) · "acik" (LLM-önce karar).
     # Geriye uyum: `acik: true` ve `mod` yoksa "acik".
     "llm_once_revizyon": {"acik": False, "model": "claude-opus-5-5", "effort": "low", "timeout_s": 60},   # `mod` yok = kapali (inceleme C5)
+    # İE-23 PR-2a: banka modelinde oda büyütme / küçültme (LLM-önce yol `llm_once_revizyon.mod = "acik"` iken; ek çağrı yok, aynı okuma
+    # kimlikten oda tablosuyla). Kod uygular (beyin/tanim_germe.py), hakem karar verir; geçmeyen istek gerekçesiyle bayiye yazılır, plan
+    # aynen kalır. Kapalıyken bugünkü okuma (oda büyütme "otomatik uygulayamadım").
+    "banka_germe": {"acik": False},
     # İE-20: bayinin plan resmi, el çizimi ya da PDF'i okunur (LLM yalnız okur; çizim başına 1, her düzeltme 1 ücretli çağrı); okunan
     # bayiye [Doğru] [Düzelt] ile gösterilir. `bekle_sn`: gönderici dosyayı indirene kadar ajanın beklediği en uzun süre. Kapalıyken bugünkü
     # cevap ("yalnız yazılı talepleri işleyebiliyorum").
@@ -64,7 +68,7 @@ def oku(veri) -> dict:
         return a
     if isinstance(d, dict):
         for k, v in d.items():
-            if k in ("llm", "plan_uretimi", "llm_once_revizyon", "gorsel_okuma", "talep_formu", "bayi_kaydi") and isinstance(v, dict):
+            if k in ("llm", "plan_uretimi", "llm_once_revizyon", "banka_germe", "gorsel_okuma", "talep_formu", "bayi_kaydi") and isinstance(v, dict):
                 a[k] = {**a[k], **v}
             else:
                 a[k] = v
