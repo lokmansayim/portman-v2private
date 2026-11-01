@@ -119,3 +119,9 @@ def test_adi_yazili_olmayan_kt_bugunku_gibi():
     s1, s2 = r["pafta_sayfa_1"][0], r["pafta_sayfa_2"][0]
     assert any(x.startswith("KT-01 · ") and x.split("   —   ")[0].count("·") == 1 for x in s2)   # "KT-01 · 99 m²"
     assert any(x.startswith("KT-01 · ") and "M² ÇELİK KONUT" in x for x in s1)
+
+
+def test_kt04_sahibinin_adi_tanimda():
+    # Lokman, 1 Kasım 2026 05:26 UTC: KT-04'ün sahibinin adı (D-33 › Sonraki); başlıkta m² kodun brüt oturumundan (K-A1)
+    t = json.loads((KOK / "modeller" / "banka" / "KT04" / "tanim.json").read_text(encoding="utf-8"))
+    assert t.get("musteri_adi") and sahip_adi(t) == t["musteri_adi"] and not any(c.isdigit() for c in t["musteri_adi"])
