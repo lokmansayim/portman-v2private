@@ -96,6 +96,7 @@ def cati_izi(plan: G.Plan, ie: dict | None = None):
 
 
 MAHAL_CATI_ALANLARI = {"mahal", "tip", "egim_yuzde", "yuksek_yan", "sacak_cm"}
+KIRIS_CM = 10.0      # mahal çatısının kirişi 10 × 10 (dikme gibi; `veranda.KIRIS_CM`)
 _YAN_YON = {"on": (0, -1), "arka": (0, 1), "sol": (-1, 0), "sag": (1, 0)}      # yanın dışarı yönü (gerçek çerçeve: ön y = 0)
 
 
@@ -105,16 +106,22 @@ def mahal_catilari_var(ie: dict) -> bool:
 
 def mahal_catilari(plan: G.Plan, ie: dict) -> list[dict]:
     """`cati.mahal_catilari` → [{"ad", "mahal", "kutu" (mahalin dış kutusu, cm), "yuksek_yan", "duzlem" (genel motorun düzlem biçimi), "egim",
-    "ust_kot" (yüksek kenar: duvar üstü), "alt_kot" (alçak kenar), "kolonlar" [(x0, y0, x1, y1, üst kot)] (mahalin dikmeleri), "kirisler"
-    [(x0, y0, x1, y1, z0, z1)]}].
-    Denetim: mahal ızgarada açık mahal; yüksek yanı boyunca kapalı gövdeye bitişik, karşı yanı açık; tanınmayan alan yok sayılmaz."""
+    "ust_kot" (yüksek kenar: duvar üstü), "alt_kot" (alçak kenar, saçak ucunda), "kolonlar" [(x0, y0, x1, y1, üst kot)] (mahalin dikmeleri),
+    "kirisler" [(x0, y0, x1, y1, z0, z1)] (alçak kenarda, yatay), "egik_kirisler" [(x0, y0, x1, y1)] (eğim boyunca açık yanda; üstü çatının
+    kotu, `kiris_kotu`)}]. Kirişin üstü çatının o kirişin üstündeki en alçak kotu, altı 10 aşağısı; serbest dikme kirişin altına, gövdenin
+    duvar ucundaki dikme duvar üstüne.
+    Denetim: mahal ızgarada açık mahal ve dikdörtgen; yüksek yanı boyunca kapalı gövdeye bitişik, karşı yanı açık, öteki yanları ya açık ya
+    kapalı (kısmen değil). Kapalı gövde gövdenin çokgeninden bütün açık mahaller düşülerek (girintiye ya da öteki açık mahale bakan yan açık
+    sayılır; geometri hakemi, 1 Kasım). Tanınmayan alan yok sayılmaz."""
     lst = (ie.get("cati") or {}).get("mahal_catilari") or []
     if not lst:
         return []
     if not isinstance(lst, list):
         raise PrefabrikCatiHatasi("cati.mahal_catilari bir liste olur")
+    if (ie.get("cati") or {}).get("tip", "besik") != "besik":
+        raise PrefabrikCatiHatasi("cati.mahal_catilari yalnız beşik ana çatıyla çizilir (kırma ve beşik + cumbada yok; yok sayılmaz)")
+    from .veranda import kot
     H0 = float((ie.get("yapi") or {}).get("duvar_yuksekligi_cm", 250))
-    kutu_g = box(*G.govde_kutusu(plan))
     acik = {m.ad: m for m in plan.mahaller.values() if m.acik and m.poly is not None and not m.poly.is_empty}
     dis_v = {v["ad"] for v in plan.dis_verandalar}
     kutular = []
@@ -128,7 +135,7 @@ def mahal_catilari(plan: G.Plan, ie: dict) -> list[dict]:
         if ad not in acik or ad in dis_v:
             raise PrefabrikCatiHatasi(f"mahal çatısı: '{ad}' ızgaradaki açık mahal değil (taşan veranda kendi çatısıyla `verandalar`'da)")
         kutular.append(acik[ad].poly.bounds)
-    kapali = kutu_g.difference(unary_union([box(*k) for k in kutular]))
+    kapali = G.govde_cokgeni(plan).difference(unary_union([m.poly for m in acik.values()]))
     out = []
     for g, (x0, y0, x1, y1) in zip(lst, kutular):
         ad = g["mahal"]
@@ -158,6 +165,11 @@ def mahal_catilari(plan: G.Plan, ie: dict) -> list[dict]:
             raise PrefabrikCatiHatasi(f"mahal çatısı ({ad}): yüksek yanı ({yan}) boyunca kapalı gövde yok; çatı dayanmaz")
         if bitisik(karsi) > 0.01:
             raise PrefabrikCatiHatasi(f"mahal çatısı ({ad}): alçak yanı ({karsi}) kapalı gövdeye bitişik; su duvara iner")
+        for y_ in _YAN_YON:
+            if 0.01 <= bitisik(y_) < 0.99:
+                raise PrefabrikCatiHatasi(f"mahal çatısı ({ad}): {y_} yanı kısmen kapalı gövdeye bitişik; çatının kenarı belirsiz")
+        if abs(acik[ad].poly.area - (x1 - x0) * (y1 - y0)) > 1.0:
+            raise PrefabrikCatiHatasi(f"mahal çatısı ({ad}): mahal dikdörtgen değil; tek eğimli panel çatı dikdörtgen mahale çizilir")
         ac = {y_: bitisik(y_) < 0.01 for y_ in _YAN_YON}                   # açık yan: saçak orada
         X0, Y0, X1, Y1 = x0 - s * ac["sol"], y0 - s * ac["on"], x1 + s * ac["sag"], y1 + s * ac["arka"]
         ux, uy = _YAN_YON[yan]                                             # yukarı yönü: yüksek yana doğru
@@ -166,16 +178,26 @@ def mahal_catilari(plan: G.Plan, ie: dict) -> list[dict]:
         sacak = {"on": {"y": Y1}, "arka": {"y": Y0}, "sol": {"x": X1}, "sag": {"x": X0}}[yan]     # alçak kenar
         dz = {"ad": f"{ad} çatısı", "plan": [[X0, Y0], [X1, Y0], [X1, Y1], [X0, Y1]], "yukari": [ux, uy], "egim": eg, "sacak_kotu": alt,
               "sacak": sacak, "ust_yapi": "cati_paneli"}
-        K = 10.0                                                           # alçak kenarda kiriş (mahalin boyunca), üstü çatının alt kenarı
+        K = KIRIS_CM
+        ust = lambda r: min(kot(dz, x, y) for x in (r[0], r[2]) for y in (r[1], r[3]))   # çatının kirişin ya da dikmenin üstündeki en alçak kotu
         kiris = [(x0, y0, x1, y0 + K) if uy > 0 else (x0, y1 - K, x1, y1) if uy < 0 else (x0, y0, x0 + K, y1) if ux > 0 else (x1 - K, y0, x1, y1)]
-        kiris = [(*k, alt - K, alt) for k in kiris]
+        kiris = [(*k, round(ust(k) - K, 4), round(ust(k), 4)) for k in kiris]  # alçak kenarda, mahalin boyunca; saçak varsa çatı kirişin üstünde
+        egik = [r for y_, r in (("sol", (x0, y0, x0 + K, y1)), ("sag", (x1 - K, y0, x1, y1)), ("on", (x0, y0, x1, y0 + K)),
+                                ("arka", (x0, y1 - K, x1, y1))) if ac[y_] and (ux != 0) == (y_ in ("on", "arka"))]   # eğim boyunca açık yan
         kolon = []                                                         # dikme: gövdenin duvar ucundaki profil (AP-09 paftası A) duvar üstüne,
         for d in plan.dikmeler:                                            # serbest dikme kirişin altına
             if box(*d).distance(acik[ad].poly) < 0.5:
-                kolon.append((*d, H0 if kapali.intersection(box(*d)).area > 1e-6 else alt - K))
+                kolon.append((*d, H0 if kapali.intersection(box(*d)).area > 1e-6 else round(ust(d) - K, 4)))
         out.append({"ad": dz["ad"], "mahal": ad, "kutu": (x0, y0, x1, y1), "yuksek_yan": yan, "duzlem": dz, "egim": eg, "sacak": s,
-                    "ust_kot": H0, "alt_kot": round(alt, 4), "kolonlar": kolon, "kirisler": kiris})
+                    "ust_kot": H0, "alt_kot": round(alt, 4), "kolonlar": kolon, "kirisler": kiris, "egik_kirisler": egik})
     return out
+
+
+def kiris_kotu(m: dict, x: float, y: float) -> tuple[float, float]:
+    """Mahal çatısının eğik kirişinin (x, y)'deki altı ve üstü: üstü çatının kotu, altı 10 aşağısı."""
+    from .veranda import kot
+    z = kot(m["duzlem"], x, y)
+    return z - KIRIS_CM, z
 
 
 def _mahal_cati_denetle(mc: list[dict], duzlemler: list[dict]) -> None:

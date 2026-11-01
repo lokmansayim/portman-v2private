@@ -782,6 +782,9 @@ class IfcUretici:
                 if kx0 - 0.5 <= x0 and x1 <= kx1 + 0.5 and ky0 - 0.5 <= y0 and y1 <= ky1 + 0.5:
                     return min(kot(m["duzlem"], x, y) for x in (x0, x1) for y in (y0, y1))
             return H0
+
+        def egik(rect):                                          # açık yandaki eğik kiriş (geometri hakemi, 1 Kasım): çatının altında, eğimle
+            return next((m for m in mc for r in m.get("egik_kirisler", []) if all(abs(a - b) < 0.5 for a, b in zip(r, rect))), None)
         for i, b in enumerate(self.G.get("baglantilar", [])):
             x0, y0, x1, y1 = b["rect"]
             ayak = [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
@@ -789,6 +792,18 @@ class IfcUretici:
                 e = self._urun("IfcColumn", f"DIKME_{b['kod']}_{i:02d}", predefined="COLUMN")
                 z1 = next((z for cx, cy, z in kolon_ust if abs(cx - (x0 + x1) / 2) < 1 and abs(cy - (y0 + y1) / 2) < 1), H0)
                 z0, z1, malz = 0.0, z1, "profil"
+            elif b["tur"] == "veranda_profil" and egik(b["rect"]):
+                m = egik(b["rect"]); d = m["duzlem"]
+                from .cati_serit import kiris_kotu
+                e = self._urun("IfcBeam", f"VERANDA_PROFIL_{b['kod']}_{i:02d}", predefined="BEAM")
+                kotlar = [z for x, y in ayak for z in kiris_kotu(m, x, y)]
+                self._yerlestir(e)               # altı çatının 10 altında; kalınlık yüzün normali boyunca (düşeyde 10)
+                self._temsil(e, self._egik_levha(ayak, (d["sacak"].get("x", 0.0), d["sacak"].get("y", 0.0)), d["yukari"], d["egim"],
+                                                  d["sacak_kotu"] - 10, 10 / math.hypot(1.0, d["egim"])), "profil")
+                self._pset(e, "PortatifEv_Kapsam", {"BOMKalem": b["kalem"], "BOMKod": b["kod"], "Blok": b.get("blok", ""),
+                                                    "Kot_cm": f"{min(kotlar):.0f}–{max(kotlar):.0f}", "KesimBoyuTanimli": False,
+                                                    "Not": "Kot varsayım (profil kotu kaynakta tanımlı değil); çatının eğimiyle"})
+                continue
             elif b["tur"] == "veranda_profil":
                 e = self._urun("IfcBeam", f"VERANDA_PROFIL_{b['kod']}_{i:02d}", predefined="BEAM")
                 z1 = profil_ust(x0, y0, x1, y1)

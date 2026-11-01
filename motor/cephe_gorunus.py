@@ -242,10 +242,12 @@ def _mahal_catisi(plan: G.Plan, m: dict, taraf: str, u, d, ortu):
 
 def mahal_cati_parcalari(plan: G.Plan, ie: dict, taraf: str) -> list[dict]:
     """Açık mahalin kendi çatısının dikme ve kirişi bu görünüşte (`veranda.gorunus_parcalari`'nın biçimi: {"tur": kolon | kiris, "u": [(u, z)],
-    "derinlik"}): dikme zeminden kendi üst kotuna, kiriş alçak kenarda (`cati_serit.mahal_catilari`). Kapalı gövdenin ardında kalan çizilmez;
-    üst üste düşen bir kez."""
-    from shapely.geometry import box
-    from . import sunum
+    "derinlik"}): dikme zeminden kendi üst kotuna, kiriş alçak kenarda yatay, açık yandaki eğik kiriş çatının altında eğimle
+    (`cati_serit.mahal_catilari`). Eğik kiriş yandan bakışta paralelkenar; boyuna bakışta alçak yandan yalnız ucu görünür (ardı çatının
+    altında kalır), yüksek yandan bütün izdüşümü. Kapalı gövdenin ardında kalan çizilmez; bakana daha yakın ya da aynı derinlikte bir kirişin
+    yüzünün içinde kalan kiriş yüzü (köşede birleşen iki kirişin ucu) bir kez çizilir."""
+    from shapely.geometry import MultiPoint, Polygon as P_, box
+    from . import cati_serit, sunum
     if (ie.get("cati") or {}).get("tip", "besik") != "besik":
         return []
     mc = (sunum.cati_tanimi(plan, ie) or {}).get("mahal_catilari") or []
@@ -253,7 +255,7 @@ def mahal_cati_parcalari(plan: G.Plan, ie: dict, taraf: str) -> list[dict]:
         return []
     golge = kapali_golge(plan, taraf)
     u, d, _ = eksen(plan, taraf)
-    out, gorulen = [], set()
+    adaylar = []
     for m in mc:
         kutular = [("kolon", r[:4], 0.0, r[4]) for r in m["kolonlar"]] + [("kiris", k[:4], k[4], k[5]) for k in m["kirisler"]]
         for tur, (x0, y0, x1, y1), z0, z1 in kutular:
@@ -262,12 +264,37 @@ def mahal_cati_parcalari(plan: G.Plan, ie: dict, taraf: str) -> list[dict]:
                 continue
             gx0, gy0, gx1, gy1 = g.bounds
             us = sorted({round(u(x, y), 4) for x in (gx0, gx1) for y in (gy0, gy1)})
-            imza = (tur, us[0], us[-1], z0, z1)
-            if imza in gorulen:
+            adaylar.append({"tur": tur, "u": [(us[0], z0), (us[-1], z0), (us[-1], z1), (us[0], z1)],
+                            "derinlik": min(d(x, y) for x in (gx0, gx1) for y in (gy0, gy1)), "mahal": m["mahal"]})
+        ux, uy = m["duzlem"]["yukari"]
+        boyuna = d(ux, uy) - d(0, 0)                                       # > 0: bakan alçak yanda, < 0: yüksek yanda, 0: yandan bakış
+        for r in m.get("egik_kirisler") or []:
+            g = box(*r).difference(golge)
+            if g.is_empty or g.area < 1:
                 continue
-            gorulen.add(imza)
-            out.append({"tur": tur, "u": [(us[0], z0), (us[-1], z0), (us[-1], z1), (us[0], z1)],
-                        "derinlik": min(d(x, y) for x in (gx0, gx1) for y in (gy0, gy1)), "mahal": m["mahal"]})
+            kose = [(x, y) for x in (g.bounds[0], g.bounds[2]) for y in (g.bounds[1], g.bounds[3])]
+            if boyuna > 1e-9:                                              # alçak yandan: yalnız yakın ucunun yüzü
+                dmin = min(d(x, y) for x, y in kose)
+                kose = [(x, y) for x, y in kose if abs(d(x, y) - dmin) < 1e-6]
+            nok = [(round(u(x, y), 4), round(z, 4)) for x, y in kose for z in cati_serit.kiris_kotu(m, x, y)]
+            hull = MultiPoint(nok).convex_hull
+            if hull.geom_type != "Polygon" or hull.area < 1:
+                continue
+            adaylar.append({"tur": "kiris", "u": [(round(a, 4), round(b, 4)) for a, b in list(P_(hull.exterior.coords).exterior.coords)[:-1]],
+                            "derinlik": min(d(x, y) for x, y in kose), "mahal": m["mahal"]})
+    from shapely.ops import unary_union
+    out, kirisler = [p for p in adaylar if p["tur"] != "kiris"], []
+    for p in (p for p in adaylar if p["tur"] == "kiris"):                # aynı derinlikte değen kiriş yüzleri tek çizgi (köşede birleşen iki kiriş)
+        pp, es = P_(p["u"]), [k for k in kirisler if k["mahal"] == p["mahal"] and abs(k["derinlik"] - p["derinlik"]) < 1e-6
+                              and k["poly"].buffer(0.01).intersects(P_(p["u"]))]
+        for k in es:
+            kirisler.remove(k)
+        kirisler.append({**p, "poly": unary_union([pp] + [k["poly"] for k in es])})
+    for k in kirisler:
+        if any(q is not k and q["derinlik"] < k["derinlik"] - 1e-6 and k["poly"].within(q["poly"].buffer(0.01)) for q in kirisler):
+            continue                                                       # bakana daha yakın kirişin ardında
+        halka = P_(k["poly"].exterior.coords).simplify(0.01)
+        out.append({**{a: b for a, b in k.items() if a != "poly"}, "u": [(round(a, 4), round(b, 4)) for a, b in list(halka.exterior.coords)[:-1]]})
     return out
 
 

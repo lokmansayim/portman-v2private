@@ -79,7 +79,7 @@ def pencere_yazisi(olcu: str) -> str:
 
 YENI_ANAHTARLAR = ("duvar_kalinligi_cm", "dis_olcu_cm", "dizilim", "ek_akslar_cm")   # İE-11 (6 Ekim denemesi + genişletme)
 DIZILIM_ANAHTARLARI = frozenset({"baslangic", "hiza", "dis_duvar_t_bolme", "pencere", "kapi", "kose", "kapi_yeri", "son_pano",
-                                 "dis_pano_dayanagi"})   # İE-11, İE-17, D-34 madde 5
+                                 "dis_pano_dayanagi", "genis_pencere"})   # İE-11, İE-17, D-34 madde 5, İE-17 PR-2
 
 
 PANO_YUKSEKLIKLERI_CM = (250.0, 280.0, 300.0)   # Lokman 13.10.2026 07:28: %80 / %19 / %1; başka ölçü yok (kurallar/model/duvar_tipleri.json PE-DIS-100.pano)
@@ -530,6 +530,9 @@ def _kur(is_emri: dict) -> Plan:
     son_pano = dizilim.get("son_pano", "kosu")             # İE-17: "kosu" (koşu başından 125,5; kalan son parça) | "son_aks" (kesilmiş son pano
     if son_pano not in ("kosu", "son_aks"):                 # ızgaranın sondan bir önceki aksından başlar, gerekirse önünde yarım pano; montaj paftası)
         raise IsEmriHatasi(f"dizilim.son_pano bilinmiyor: {son_pano} (kosu | son_aks)")
+    genis_pencere = dizilim.get("genis_pencere", "komsu")   # İE-17 PR-2: panodan geniş pencere "komsu" (BK-13: komşu tam panoyla 251; yoksa hata) |
+    if genis_pencere not in ("komsu", "yarim_pano"):        # "yarim_pano" (komşu yoksa odanın duvar parçası 62,75 + pencereli + 62,75; AP-09 paftası)
+        raise IsEmriHatasi(f"dizilim.genis_pencere bilinmiyor: {genis_pencere} (komsu | yarim_pano)")
     # D-34 madde 5 (TK-03; Lokman 30 Ekim 2026 15:33, PC-29): dış duvarın panoları bir aralıkta ızgara yerine bir iç duvarın aksına dayanır
     # (yatak odası 2'nin ön ve arka duvarı banyo duvarının aksına, 780,6). Aralıkta ekler aks ± 125,5k ve aralığın iki ucu; aralığın dışı ızgarada.
     # Aks ve uçlar aks tablosunda (K21); x aksı x boyunca uzanan dış duvarlara, y aksı (Motor çerçevesinde, arkadan) y boyuncakilere.
@@ -1120,7 +1123,7 @@ def _kur(is_emri: dict) -> Plan:
     # panosunu alır, sonuç yazılış sırasından bağımsızdır (geometri hakemi, 23 Ekim).
     genis_pencereler.sort(key=lambda t: (t[0].id, -next(k for k, q in enumerate(t[0].panolar) if q is t[1])))
     for d, p, aralik, ac in genis_pencereler:
-        yeni = _genis_pencere_panosu(d, p, aralik, ac)
+        yeni = _genis_pencere_panosu(d, p, aralik, ac, yarim_pano=genis_pencere == "yarim_pano")
         if yeni.acilim.genislik > yeni.boy - 4:
             raise IsEmriHatasi(f"Açıklık panodan geniş: {ac} (pano {yeni.boy})")
 
@@ -1197,9 +1200,21 @@ def _kur(is_emri: dict) -> Plan:
         _kapi_mantigi(plan, kapi_yeri, kapi_yeri_yazili="kapi_yeri" in dizilim)
     _kose_kolonlari(plan)
     # İE-17 PR-2 (AP-09 paftası): verandanın açık kenarı gövdenin dış köşesinde bitiyorsa o köşedeki dikme köşe parçasının yerini alır;
-    # paftada orada yalnız kolon var. Dikmenin tamamen örttüğü köşe parçası çizilmez, sayılmaz (net alanlar yukarıda hesaplandı, değişmez)
-    plan.koseler = [k for k in plan.koseler if not any(d[0] - 0.5 <= k.rect[0] and k.rect[2] <= d[2] + 0.5 and d[1] - 0.5 <= k.rect[1]
-                                                       and k.rect[3] <= d[3] + 0.5 for d in plan.dikmeler)]
+    # paftada orada yalnız kolon var. Dikmenin tamamen örttüğü köşe parçası çizilmez, sayılmaz (net alanlar yukarıda hesaplandı, değişmez).
+    # O köşede biten duvar dikmenin yüzünden başlar (geometri hakemi, 1 Kasım: AP-09'un salon–oda 2 duvarı dikmeyle 5 cm çakışıyordu; paftada
+    # ilk pano 10,1–60,6). Yalnız düşen köşenin dikmesi kırpar: bugüne kadar hiçbir planda dikme köşe parçasını örtmüyordu, var olanlar değişmez
+    ortu = lambda k, d: d[0] - 0.5 <= k.rect[0] and k.rect[2] <= d[2] + 0.5 and d[1] - 0.5 <= k.rect[1] and k.rect[3] <= d[3] + 0.5
+    kirpan = [d for d in plan.dikmeler if any(ortu(k, d) for k in plan.koseler)]
+    plan.koseler = [k for k in plan.koseler if not any(ortu(k, d) for d in plan.dikmeler)]
+    for d in plan.duvarlar:
+        for dk in kirpan:
+            e0, e1, k0, k1 = (dk[1], dk[3], dk[0], dk[2]) if d.yon == "y" else (dk[0], dk[2], dk[1], dk[3])   # duvar boyunca, kalınlıkta
+            if not (k0 - 0.5 <= d.c - d.h and d.c + d.h <= k1 + 0.5):
+                continue
+            if e0 - 0.5 <= d.p0 < e1 - 1e-6 and d.panolar[0].a1 > e1 + 1e-6:
+                d.p0 = d.panolar[0].a0 = e1
+            if e0 + 1e-6 < d.p1 <= e1 + 0.5 and d.panolar[-1].a0 < e0 - 1e-6:
+                d.p1 = d.panolar[-1].a1 = e0
     _dis_verandalar(plan, is_emri)
     return plan
 
@@ -1566,11 +1581,11 @@ def _kapi_mantigi(plan: "Plan", kapi_yeri: str = "mentese_ucu", kapi_yeri_yazili
                     acl.kayma = (s - KAPI_YASLAMA_CM) if uc == 1 else -(s - KAPI_YASLAMA_CM)
 
 
-def _genis_pencere_panosu(d: "Duvar", p: Pano, aralik: Optional[tuple], ac: dict) -> Pano:
+def _genis_pencere_panosu(d: "Duvar", p: Pano, aralik: Optional[tuple], ac: dict, yarim_pano: bool = False) -> Pano:
     """BK-13 (Lokman, kart 23 Ekim 06:23 "251'lik pano"): panodan geniş pencerenin panosu aynı duvardaki komşu tam panoyla birleşir.
     Komşu önce dizilim yönünde sonraki pano (+x ya da +y; arka-sol başlangıçta y duvarında arkadan öne), olmazsa önceki; ikisi de tam boy
-    (125,5), komşu açıklıksız ve odanın duvar aralığında olmalı. Komşu yoksa (İE-17 PR-2) odanın duvar parçası 62,75 + pencereli pano +
-    62,75 olur (aşağıda); o da olmazsa açık hata. Her koşuda aynı komşu seçilir."""
+    (125,5), komşu açıklıksız ve odanın duvar aralığında olmalı. Komşu yoksa açık hata; yalnız `dizilim.genis_pencere: yarim_pano` yazılıysa
+    (İE-17 PR-2) odanın duvar parçası 62,75 + pencereli pano + 62,75 olur (aşağıda), o da olmazsa yine hata. Her koşuda aynı komşu seçilir."""
     i = next(k for k, q in enumerate(d.panolar) if q is p)
     tam = lambda q: abs(q.boy - MOD) < 1e-6
     if tam(p) and aralik is not None:
@@ -1586,8 +1601,9 @@ def _genis_pencere_panosu(d: "Duvar", p: Pano, aralik: Optional[tuple], ac: dict
                 return yeni
     # İE-17 PR-2 (AP-09 paftası, ön duvardaki 170/180): yanında tam pano yoksa (odanın o duvarı 251'lik panoya göre kesik) pencere odanın
     # duvar parçasına ortalanır; parçanın iki ucu 62,75'lik yarım pano, ortası pencereli pano (paftada 62,75 + 213 + 62,75). Parçadaki öteki
-    # panolar açıklıksız olmalı; pencereli pano 251'i aşmaz. Bugüne kadar bu durum hata veriyordu: var olan çizimler değişmez
-    if aralik is not None:
+    # panolar açıklıksız olmalı; pencereli pano 251'i aşmaz. Yalnız anahtarla (geometri hakemi, 1 Kasım: sessiz geri dönüş olmaz, BK-13 hata
+    # ister); anahtarsız İş Emri'nde eskisi gibi hata, var olan çizimler değişmez
+    if yarim_pano and aralik is not None:
         lo, hi = max(aralik[0], d.p0), min(aralik[1], d.p1)
         ic = [k for k, q in enumerate(d.panolar) if q.a0 >= lo - 1e-6 and q.a1 <= hi + 1e-6]
         orta = hi - lo - MOD
@@ -1597,7 +1613,8 @@ def _genis_pencere_panosu(d: "Duvar", p: Pano, aralik: Optional[tuple], ac: dict
             yeni = Pano(d, lo + MOD / 2, hi - MOD / 2, p.acilim)
             d.panolar[ic[0]:ic[-1] + 1] = [Pano(d, lo, lo + MOD / 2), yeni, Pano(d, hi - MOD / 2, hi)]
             return yeni
-    raise IsEmriHatasi(f"Panodan geniş pencere için yanında tam pano yok (sonraki ya da önceki pano 125,5, açıklıksız ve aynı odada olmalı): {ac}")
+    raise IsEmriHatasi(f"Panodan geniş pencere için yanında tam pano yok (sonraki ya da önceki pano 125,5, açıklıksız ve aynı odada olmalı"
+                       f"{'; odanın duvar parçası 62,75 + pencereli pano + 62,75 olmuyor' if yarim_pano else ''}): {ac}")
 
 
 def _edges_of_room_side(duvarlar, mahal, normal):
