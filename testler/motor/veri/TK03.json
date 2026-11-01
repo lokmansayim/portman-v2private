@@ -1,0 +1,376 @@
+{
+  "is_emri_no": "PM-TK03-87M2",
+  "revizyon": 4,
+  "talep": {
+    "bayi": {
+      "kod": "TK03",
+      "ad": "Bayi TK-03"
+    },
+    "musteri_adi": "TK-03",
+    "metin": "Gerçek uygulanmış proje denemesi (Lokman 30 Ekim 2026): Lokman'ın 87,72 m² iki katlı evinin 1. katı. Merdiven, döşeme ve alttaki profiller şimdilik yok sayıldı; merdiven boş oda (MERDİVEN KOVASI). Gövde 1236,7 × 873,3 cm, iki köşesi girintili (ön-sol 543,5 × 232, arka-sağ 451,1 × 170), arka-solda balkon; duvar 250 cm, dış 100 / iç 60 mm pres panel, beşik çatı sandviç panel antrasit, ters tavan."
+  },
+  "yapi": {
+    "sistem": "prefabrik",
+    "kat_sayisi": 1,
+    "duvar_yuksekligi_cm": 250,
+    "duvar_kalinligi_cm": {
+      "dis": 10,
+      "ic": 6
+    },
+    "olcu_kaynagi": "dis_olcu",
+    "dis_olcu_cm": {
+      "x": 1236.7,
+      "y": 873.3
+    },
+    "referans_model": "TK-03",
+    "grid": {
+      "x_pano": 10,
+      "y_pano": 7
+    },
+    "kisa_kenar": "y",
+    "giris_cephesi": "on",
+    "dis_dusey_duvar": "cevre_aks_disinda",
+    "dizilim": {
+      "baslangic": "arka-sol",
+      "hiza": "tam_izgara",
+      "dis_duvar_t_bolme": false,
+      "pencere": "oda_ortasi",
+      "kapi": "mantik",
+      "kose": "oda",
+      "son_pano": "kosu",
+      "kapi_yeri": "mentese_ucu",
+      "dis_pano_dayanagi": [
+        {
+          "x": 780.6,
+          "aralik_cm": [
+            548.5,
+            883.5
+          ]
+        }
+      ]
+    },
+    "ek_akslar_cm": {
+      "x": [
+        548.5,
+        650.4,
+        780.6,
+        831.95
+      ],
+      "y": [
+        175,
+        359.75,
+        523.85,
+        636.3
+      ]
+    }
+  },
+  "mahaller": [
+    {
+      "ad": "BALKON",
+      "tur": "balkon",
+      "konum_cm": [
+        [
+          5,
+          10,
+          318.75,
+          198.25
+        ]
+      ]
+    },
+    {
+      "ad": "MUTFAK",
+      "tur": "mutfak",
+      "konum_cm": [
+        [
+          318.75,
+          10,
+          548.5,
+          198.25
+        ]
+      ]
+    },
+    {
+      "ad": "BANYO",
+      "tur": "banyo",
+      "konum_cm": [
+        [
+          548.5,
+          10,
+          780.6,
+          198.25
+        ]
+      ]
+    },
+    {
+      "ad": "SALON",
+      "tur": "salon",
+      "konum_cm": [
+        [
+          5,
+          198.25,
+          548.5,
+          636.3
+        ],
+        [
+          548.5,
+          198.25,
+          1009,
+          359.75
+        ],
+        [
+          780.6,
+          175,
+          1009,
+          198.25
+        ],
+        [
+          831.95,
+          359.75,
+          1009,
+          523.85
+        ]
+      ]
+    },
+    {
+      "ad": "MERDİVEN KOVASI",
+      "tur": "antre_hol",
+      "konum_cm": [
+        [
+          548.5,
+          359.75,
+          831.95,
+          523.85
+        ]
+      ]
+    },
+    {
+      "ad": "YATAK ODASI 1",
+      "tur": "yatak_odasi",
+      "konum_cm": [
+        [
+          1009,
+          175,
+          1231.7,
+          574.75
+        ]
+      ]
+    },
+    {
+      "ad": "YATAK ODASI 2",
+      "tur": "yatak_odasi",
+      "konum_cm": [
+        [
+          548.5,
+          523.85,
+          883.5,
+          863.3
+        ]
+      ]
+    },
+    {
+      "ad": "YATAK ODASI 3",
+      "tur": "yatak_odasi",
+      "konum_cm": [
+        [
+          883.5,
+          523.85,
+          1009,
+          574.75
+        ],
+        [
+          883.5,
+          574.75,
+          1231.7,
+          863.3
+        ]
+      ]
+    }
+  ],
+  "girintiler": [
+    [
+      780.6,
+      10,
+      1231.7,
+      175
+    ],
+    [
+      5,
+      636.3,
+      548.5,
+      863.3
+    ]
+  ],
+  "acik_sinirlar": [
+    {
+      "arasi": [
+        "MUTFAK",
+        "SALON"
+      ]
+    },
+    {
+      "arasi": [
+        "MERDİVEN KOVASI",
+        "SALON"
+      ],
+      "parca_cm": {
+        "y": 359.75,
+        "x": [
+          548.5,
+          650.4
+        ]
+      },
+      "serit": "SALON"
+    }
+  ],
+  "acikliklar": [
+    {
+      "tur": "pencere",
+      "olcu": "120x120",
+      "mahal": "SALON",
+      "duvar": "sol",
+      "pano": 1
+    },
+    {
+      "tur": "pencere",
+      "olcu": "200x180",
+      "mahal": "SALON",
+      "duvar": "arka",
+      "pano": 0,
+      "acilis": "surgulu"
+    },
+    {
+      "tur": "pencere",
+      "olcu": "120x120",
+      "mahal": "SALON",
+      "duvar": "on",
+      "pano": 1
+    },
+    {
+      "tur": "pencere",
+      "olcu": "120x100",
+      "mahal": "MUTFAK",
+      "duvar": "arka",
+      "pano": 0,
+      "acilis": "surgulu"
+    },
+    {
+      "tur": "pencere",
+      "olcu": "60x40",
+      "mahal": "BANYO",
+      "duvar": "sag",
+      "pano": 0
+    },
+    {
+      "tur": "pencere",
+      "olcu": "120x120",
+      "mahal": "YATAK ODASI 1",
+      "duvar": "sag",
+      "pano": 1
+    },
+    {
+      "tur": "pencere",
+      "olcu": "120x120",
+      "mahal": "YATAK ODASI 2",
+      "duvar": "on"
+    },
+    {
+      "tur": "pencere",
+      "olcu": "120x120",
+      "mahal": "YATAK ODASI 3",
+      "duvar": "on",
+      "pano": 1
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "SALON",
+        "BANYO"
+      ],
+      "duvar_ucu": "sag"
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "SALON",
+        "YATAK ODASI 1"
+      ],
+      "duvar_ucu": "arka"
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "SALON",
+        "YATAK ODASI 2"
+      ],
+      "pano": 0,
+      "mentese": "sol"
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "SALON",
+        "YATAK ODASI 3"
+      ],
+      "duvar_ucu": "sag",
+      "mentese": "sol"
+    }
+  ],
+  "dikmeler": [],
+  "cati": {
+    "tip": "besik",
+    "egim_yuzde": 32.88,
+    "sacak_cm": 30,
+    "topuk_cm": 10,
+    "makas_yonu": "kisa_kenar",
+    "makas_ekseni": "y"
+  },
+  "cikti": {
+    "pdf": true,
+    "dxf": true,
+    "pafta": "A2",
+    "icerik": [
+      "aksli_plan",
+      "alanli_kopya",
+      "montaj_kopyasi",
+      "on_gorunus",
+      "cati_profili",
+      "ozellik_tablosu"
+    ]
+  },
+  "ozellikler": {
+    "Çatı Şekli": "Beşik",
+    "Çatı Kaplaması": "Sandviç Panel",
+    "Çatı Kaplama Rengi": "Antrasit Gri",
+    "Tavan": "Ters",
+    "Dış Kapı": "Çelik Standart",
+    "İç Kapılar": "Standart Amerikan",
+    "Pencere Rengi": "Altın Meşe",
+    "Saçak ve Alın Rengi": "Antrasit Gri",
+    "Panel Türü": "Pres Panel",
+    "Dış Cephe Boya": "Polisan 4840 / CD-8110 Köpük Beyazı",
+    "İç Cephe Boya": "Polisan 6610 / Cİ-6610 Yeni Kuğu"
+  },
+  "teklif": {
+    "tavan": [
+      "ters"
+    ]
+  },
+  "pafta_uyarilari": [],
+  "varsayimlar": [
+    "Kaynak: Lokman'ın yüklediği 1. kat montaj paftası (21 sayfa), duvar panel montaj planı sayfasının vektör çiziminden ölçüldü (ölçek 1236,7 dış ölçüden). Oda adları ve alanları mimari plan sayfasından; ad ve antet yazılmadı.",
+    "Ön ve arka Lokman'ın düzeltmesiyle (30 Ekim 14:07, işaretli mimari plan): mühendisin paftasında \"ön\" yazan cephe arkadır. Gerçek çerçeve: sol solda, ön altta; balkon, mutfak ve banyo arkada, yatak odaları önde. Pano ızgarası paftada arkadaki iç yüzden (10 + 125,5k), solda duvar ekseninden (5 + 125,5k): dizilim arka-sol, kisa_kenar y (makaslar derinliği geçer). `konum_cm`, `girintiler` ve y ek aksları Motor'un arka-sol çerçevesinde (y arkadan); pencere cephesi, kapının duvar ucu ve menteşe gerçek çerçevede.",
+    "Merdiven, döşeme ve alttaki profiller yok sayıldı (Lokman 30 Ekim 13:08); merdiven boşluğu kapalı boş oda, salona merdiven ağzından açık (MERDİVEN KOVASI).",
+    "Merdiven ağzı (Lokman 30 Ekim 14:45, işaretli r02: \"Burası yok\"): salona bakan yüzde 548,5–650,4 arası duvarsız (paftada 551,6–650,4, pano yok); İş Emri'nde `acik_sinirlar` parçası (duvar şeridi salona, paftanın salon alanı gibi) ve 650,4 ek aksı; kapısız geçiş kaldırıldı.",
+    "Girintiler (bina dışı): ön-sol 543,5 × 232 ve arka-sağ 451,1 × 170 (paftanın ölçü zincirleri). Girinti duvarı aksa ortalı 10'luk dış duvar (paftada 543,5–553,5 ve arkadan 169,9–180,2).",
+    "Duvar eksenleri paftadan, 2 cm'ye kadar en yakın ızgara aksına yuvarlandı (318,69 → 318,75; 883,46 → 883,5; 1008,94 → 1009; 574,64 → 574,75; banyonun alt duvarı 200,3 → 198,25, balkon duvarıyla aynı aks). Izgara dışı duvarlar ek aks: x 548,5 · 780,6 · 831,95; y 175 · 359,75 · 523,85 · 636,3.",
+    "Mutfak salona açık (paftada yeşil kesik çizgi, duvar yok).",
+    "Kapılar paftada 80'lik kanat; Motor'un iç kapısı 82. Balkona çıkış 200/180 sürgülü (paftada pencere olarak yazılı).",
+    "Yatak odası 2'nin ön ve arka dış duvar panoları banyo duvarının aksına (780,6) dayalı, 548,5–883,5 arası (Lokman 30 Ekim 15:33, r03 onayıyla; D-34 madde 5, PC-29): `dizilim.dis_pano_dayanagi`. Ön [106,6 · 125,5 · 102,9], arka 548,5'te bölünür ve 655,1'de ek; pencere 655,1–780,6 panosunda; ana çatının orta makası 655,1'de (paftada 655,15).",
+    "Makaslar (Lokman'ın işaretlediği akslar, 30 Ekim 14:07): 12 makas; soldaki kalkan duvarındaki MKS01 ve işaretli 11 aks (MKS02–MKS12).",
+    "Kapı menteşeleri paftadaki uçta: salon–yatak odası 2 ve salon–yatak odası 3 kapısına menteşe yazıldı (gerçek çerçevede sol)."
+  ]
+}

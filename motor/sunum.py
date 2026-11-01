@@ -325,6 +325,9 @@ def cati_tanimi(plan: G.Plan, ie: dict) -> dict | None:
     c = ie.get("cati") or {}
     if c.get("tip", "besik") != "besik":
         return None
+    if plan.girintili:                                         # İE-24: girintili gövdede ana çatı + paralel cumbalar (`cati_serit`)
+        from . import cati_serit
+        return cati_serit.tanim(plan, ie)
     s = float(c.get("sacak_cm", 30)); eg = float(c.get("egim_yuzde", 33)) / 100.0; top = float(c.get("topuk_cm", 10))
     H0 = float(ie.get("yapi", {}).get("duvar_yuksekligi_cm", 250))
     zs = H0 + top
@@ -368,10 +371,15 @@ def cati_plani_ciz(ax, plan: G.Plan, ie: dict, yazi: float = 1.0) -> bool:
     for v in plan.dis_verandalar:
         vx0, vy0, vx1, vy1 = v["rect"]
         ax.plot([vx0, vx1, vx1, vx0, vx0], [vy0, vy0, vy1, vy1, vy0], color="white", lw=0.5, ls=(0, (4, 2.5)), zorder=0.9)
-    ortak = sorted({tuple(p) for p in dz[0]["plan"]} & {tuple(p) for p in dz[1]["plan"]})       # mahya: iki düzlemin ortak kenarı
-    (mx0, my0), (mx1, my1) = ortak[0], ortak[-1]
-    ax.plot([mx0, mx1], [my0, my1], color="#1c1f24", lw=1.4, zorder=4)
-    boy = math.hypot(mx1 - mx0, my1 - my0)
+    if tanim.get("parcalar"):                                          # İE-24: ana çatı + cumbalar, her şeridin görünen mahyası
+        mahyalar = [p["mahya"] for p in tanim["parcalar"]]
+        boy = next(math.hypot(q[1][0] - q[0][0], q[1][1] - q[0][1]) for p, q in zip(tanim["parcalar"], mahyalar) if p["rol"] == "ana")
+    else:
+        ortak = sorted({tuple(p) for p in dz[0]["plan"]} & {tuple(p) for p in dz[1]["plan"]})   # mahya: iki düzlemin ortak kenarı
+        mahyalar = [(ortak[0], ortak[-1])]
+        boy = math.hypot(ortak[-1][0] - ortak[0][0], ortak[-1][1] - ortak[0][1])
+    for (mx0, my0), (mx1, my1) in mahyalar:
+        ax.plot([mx0, mx1], [my0, my1], color="#1c1f24", lw=1.4, zorder=4)
     for d in dz:
         ux, uy = d["yukari"]
         xs_, ys_ = [p[0] for p in d["plan"]], [p[1] for p in d["plan"]]
