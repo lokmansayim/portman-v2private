@@ -531,8 +531,9 @@ def test_kose_kirmasi_mahyayi_asmaz():
         sunum.cati_tanimi(_kur(ie), ie)
 
 
-def _sentetik_kirma(X1: float, yanlar: dict, engel: list | None = None):
-    """AP-03'ün ana çatısı ölçüsünde elle kurulmuş yüzler; veranda x 637,5–X1 (geometri hakeminin denemesi, 1 Kasım)."""
+def _sentetik_kirma(X1: float, yanlar: dict, engel: list | None = None, y0: float = 0.0, cumba_x1: float | None = None):
+    """AP-03'ün ana çatısı ölçüsünde elle kurulmuş yüzler; veranda x 637,5–X1, y y0–835,75; y0 > 0 ise önünde cumba (arka yüzü x 637,5–
+    `cumba_x1`, verilmezse veranda saçağına kadar) (geometri hakeminin denemesi, 1 Kasım)."""
     from motor import cati_serit as CS
     e = 0.3288
 
@@ -540,10 +541,14 @@ def _sentetik_kirma(X1: float, yanlar: dict, engel: list | None = None):
         return {"ad": ad, "plan": plan, "yukari": yuk, "egim": e, "sacak_kotu": 260.0, "sacak": sac}
     duz = [dz("ana çatı ön", [[-30, -30], [667.5, -30], [667.5, 417.875], [-30, 417.875]], [0, 1], {"y": -30.0}),
            dz("ana çatı arka", [[-30, 417.875], [667.5, 417.875], [667.5, 865.75], [-30, 865.75]], [0, -1], {"y": 865.75})]
+    if y0 > 0:
+        cx1 = X1 + 30 if cumba_x1 is None else cumba_x1
+        duz.insert(0, dz("cumba arka", [[637.5, y0 / 2], [cx1, y0 / 2], [cx1, y0 + 30], [637.5, y0 + 30]], [0, -1], {"y": y0 + 30.0}))
     if engel:
         duz.append(dz("engel", engel, [0, -1], {"y": 865.75}))
-    P = dz("VERANDA çatısı", [[637.5, -30], [X1 + 30, -30], [X1 + 30, 865.75], [637.5, 865.75]], [-1, 0], {"x": X1 + 30.0})
-    m = {"mahal": "VERANDA", "kutu": (637.5, 0, X1, 835.75), "sacak": 30.0, "yuksek_yan": "sol", "duzlem": P, "yanlar": yanlar}
+    Y0 = y0 - (30 if yanlar["on"] == "acik" else 0)
+    P = dz("VERANDA çatısı", [[637.5, Y0], [X1 + 30, Y0], [X1 + 30, 865.75], [637.5, 865.75]], [-1, 0], {"x": X1 + 30.0})
+    m = {"mahal": "VERANDA", "kutu": (637.5, y0, X1, 835.75), "sacak": 30.0, "yuksek_yan": "sol", "duzlem": P, "yanlar": yanlar}
     kal = [{"ad": "ana çatı sağ kalkanı", "eksen": "x", "konum": 637.5, "ic": "bati", "ust": ["ana çatı ön", "ana çatı arka"],
             "aralik": [0.0, 835.75]}]
     return CS._kirma(m, duz, kal, box(-30, -30, 667.5, 865.75)), duz, kal
@@ -562,3 +567,55 @@ def test_kose_kirmasi_uzayan_yuz_sinirli():
         _sentetik_kirma(1300.0, {"on": "acik", "arka": "acik"})                    # eskiden ön ve arka yüz 5,98 m² üst üste
     with pytest.raises(CP.PrefabrikCatiHatasi, match="ana çatı arka yüzü kırmaya uzarken engel yüzüne biniyor"):
         _sentetik_kirma(763.0, {"on": "acik", "arka": "acik"}, engel=[[700, 800], [793, 800], [793, 865.75], [700, 865.75]])
+
+
+def test_kose_kirmasi_dar_komsu_yuz_ve_duvar():
+    # geometri hakemi 2. tur (N2): kapalı yandaki yüz verandanın eğim aralığını örtmüyorsa ve iki kırma duvardan önce kesişiyorsa hata
+    from motor import cati_prefabrik as CP
+    AC = {"on": "kapali", "arka": "acik"}
+    hatlar, _d, _k = _sentetik_kirma(763.0, AC, y0=391.5)                         # AP-03 ölçüsü: çizilir
+    assert sorted(h["tur"] for h in hatlar) == ["dere", "kirma"]
+    with pytest.raises(CP.PrefabrikCatiHatasi, match="dere yanında cumba arka yüzünün dışına taşıyor"):
+        _sentetik_kirma(763.0, AC, y0=391.5, cumba_x1=720.0)                    # cumbanın arka yüzü 720'de bitiyor, veranda 793'e
+    _sentetik_kirma(637.5 + 417.875, {"on": "acik", "arka": "acik"})               # veranda eni = ana çatının yarı açıklığı: mahyada buluşur
+    with pytest.raises(CP.PrefabrikCatiHatasi, match="duvara değmiyor"):
+        _sentetik_kirma(637.5 + 419.0, {"on": "acik", "arka": "acik"})             # mahyayı 0,37 aşar (payın içi): kırmalar duvardan önce kesişir
+
+
+def _genis_veranda(ayna: bool) -> dict:
+    """AP-03'ten: veranda 251 × 130,5 (eğim yönünde derinliğinden geniş), yanında ODA 3; `ayna` ön ↔ arka (geometri hakemi 2. tur)."""
+    ie = _ie("AP03")
+    for m in ie["mahaller"]:
+        if m["ad"] == "VERANDA":
+            m["konum_cm"] = [[507, 10, 758, 135.5]]
+        if m["ad"] == "SALON+MUTFAK":
+            m["konum_cm"] = [[5, 10, 507, 449.25]]
+    ie["mahaller"].append({"ad": "ODA 3", "tur": "yatak_odasi", "konum_cm": [[507, 135.5, 758, 449.25]]})
+    ie["acikliklar"] = [a for a in ie["acikliklar"] if a["tur"] == "dis_kapi"]
+    if ayna:
+        H = 835.75
+        for m in ie["mahaller"]:
+            m["konum_cm"] = [[r[0], round(H - r[3], 4), r[2], round(H - r[1], 4)] for r in m["konum_cm"]]
+        ie["dikmeler"] = [[d[0], round(H - 10 - d[1], 4)] for d in ie["dikmeler"]]
+        for a in ie["acikliklar"]:
+            if "duvar_ucu" in a:
+                a["duvar_ucu"] = {"on": "arka", "arka": "on"}.get(a["duvar_ucu"], a["duvar_ucu"])
+        for d in ie["yapi"]["dizilim"].get("dis_pano_dayanagi", []):
+            if "y" in d:
+                d["y"] = round(H - d["y"], 4)
+                d["aralik_cm"] = sorted(round(H - v, 4) for v in d["aralik_cm"])
+    return ie
+
+
+def test_kose_kirmasi_ayna_ayni_cati():
+    # geometri hakemi 2. tur (B1): binme denetimi yanların sırasına bağlıydı; açık yan önde (ayna) iken uzayan ana çatı yüzü cumbanın
+    # dereyle kesilmemiş planıyla kıyaslanıp "biniyor" hatası alıyordu. Şimdi denetim bütün yüzlerin son planına: ayna aynı çatıyı verir
+    from motor import sunum
+    hat = {}
+    for ayna in (False, True):
+        ie = _genis_veranda(ayna)
+        t = sunum.cati_tanimi(_kur(ie), ie)
+        hat[ayna] = {(h["tur"], *sorted([tuple(h["p"]), tuple(h["q"])])) for h in t["hatlar"]}
+    assert hat[False] == {("dere", (542.0, 484.25), (793.0, 735.25)), ("kirma", (542.0, 614.75), (793.0, 865.75))}
+    aynala = lambda q: (q[0], round(835.75 - q[1], 2))                         # noqa: E731
+    assert hat[True] == {(tur, *sorted([aynala(p), aynala(q)])) for tur, p, q in hat[False]}
