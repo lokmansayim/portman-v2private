@@ -109,7 +109,8 @@ def kart(tmp_path_factory):
     from motor import kart_model
     yol = tmp_path_factory.mktemp("tk03_kart")
     kart_model.uret(_oku(VERI / "TK03.json"), yol, "TK03")
-    return {k["kod"]: k for k in _oku(yol / "TK03_kart_sayim.json")["kartlar"]}
+    say = _oku(yol / "TK03_kart_sayim.json")
+    return {**{k["kod"]: k for k in say["kartlar"]}, "_sayim": say}
 
 
 def test_kart_modelinin_catisi_listeyle_ayni(kart):
@@ -129,4 +130,15 @@ def test_kart_modelinin_catisi_listeyle_ayni(kart):
     for kk in ("CK-03", "CK-04", "CK-05"):
         assert abs(kart[kk]["metre"] - 27.36) < 0.01 and kart[kk]["adet"] == 8, kk          # sekiz görünen alın kenarı
     assert abs(kart["CK-06"]["metre"] - 12.97) < 0.01 and kart["CK-06"]["adet"] == 3       # üç parçanın görünen mahyası
-    assert abs(kart["CK-01"]["metre"] - 24.73) < 0.01                                       # saçak hatlarının altındaki duvarlar
+    # CK-01 saçak ucundan ucuna, dikdörtgen gövdedeki gibi (D-39; BK-19'da girintili gövdede geçici olarak saçak hattının altındaki duvarlar
+    # boyuncaydı, 24,73 m): hat başına bir saçak kenarı, hatların toplamı listenin saçak boyu; baş makas betopanında kesik
+    kp = kart["_sayim"]["kesim_plani"]["CK-01"]
+    assert "26,53 m" in formul("100'lük saçak omegası") and abs(kp["toplam_m"] - 26.534) < 0.001
+    assert kp["hat"] == 4 and kp["stok"] == say("100'lük saçak omegası") == 11
+    om = [p for p in kart["_sayim"]["kenar"]["parcalar"] if p["kart"] == "CK-01"]
+    hat = {(p["bilgi"]["Cati"], p["bilgi"]["Hat"]): p["bilgi"]["HatBoyu_cm"] for p in om}
+    assert sorted(hat.values()) == sorted(p["boy_cm"] for p in kart["_sayim"]["kenar"]["parcalar"] if p["kart"] == "CK-02") == [481.1, 573.5, 753.2, 845.6]
+    assert [(p["bilgi"]["Cati"], p["bilgi"]["Yuz"], p["boy_cm"]) for p in om] == [
+        ("sol cumba", "sol", 28.8), ("sol cumba", "sol", 542.3), ("sağ cumba", "sag", 449.9), ("sağ cumba", "sag", 28.8),
+        ("ana çatı", "sol", 28.8), ("ana çatı", "sol", 242.1), ("ana çatı", "sol", 449.9), ("ana çatı", "sol", 28.8),
+        ("ana çatı", "sag", 28.8), ("ana çatı", "sag", 542.3), ("ana çatı", "sag", 242.1), ("ana çatı", "sag", 28.8)]

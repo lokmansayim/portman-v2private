@@ -372,7 +372,7 @@ function serit(o, perp, out) {   // hat çerçevesi: yerel x hattan dışa, yere
         ic: sg.sirt ? `sırt ${fmt(sg.sirt)} cm (2 + 100 + 2 mm H kanatları + 1 mm), derinlik 3 cm, iki yanda 3 cm kulak: öteki ölçüleri 60’lık omeganın; kapı üstlerinden ve H’lardan kesintisiz geçer; sac 1 mm (Lokman, 29.10.2026)`
           : '6,5 cm açıklık (6 cm pano + iki yanda H sacı 2 + 2 mm), derinlik 3 cm, iki yanda 3 cm kulak; kapı üstlerinden ve H’lardan kesintisiz geçer; sac 1 mm (Lokman, 25.10.2026)' }[sg.tur];
       const kod = sg.kart || KB('omega_' + sg.tur);   // iç duvar omegasının kartı modelden (OM-01; 100'lük iç duvarda OM-02, 100'lük duvar omegası)
-      add(AD.omega, g, oo++ * 0.6, { kod, ad, satir: [['Bu parça', `${sg.yer} · L ${fmtc(a1 - a0)} cm`], ['Kesit', kesit], ['Liste', ls], ...(ic ? [['Kaynak', sg.sirt ? `Lokman, 30.10.2026: iç duvar üstü omegası 100’lük duvar omegasıdır; 29.10.2026: sırtı ${fmt(sg.sirt)} cm, öteki ölçüleri 60’lık omeganın` : 'Lokman, 25.10.2026: iç duvarların üstüne 60’lık omega']] : []), ...kartSat(kod)] });
+      add(AD.omega, g, oo++ * 0.6, { kod, ad, satir: [['Bu parça', `${sg.yer} · L ${fmtc(a1 - a0)} cm`], ...(sg.hat ? [['Hat', sg.hat]] : []), ['Kesit', kesit], ['Liste', ls], ...(ic ? [['Kaynak', sg.sirt ? `Lokman, 30.10.2026: iç duvar üstü omegası 100’lük duvar omegasıdır; 29.10.2026: sırtı ${fmt(sg.sirt)} cm, öteki ölçüleri 60’lık omeganın` : 'Lokman, 25.10.2026: iç duvarların üstüne 60’lık omega']] : []), ...kartSat(kod)] });
     }
   });
 }
@@ -449,7 +449,8 @@ function rake(G, end, m, uzat = 0) {
   const sE = G.uc[end], dir = Math.sign(G.sm - sE), sT = sE - dir * (0.2 + uzat), sm = (sT + G.sm) / 2, Ls = Math.abs(G.sm - sT) / G.R.cos;
   const w = cerceve(G.r, ...G.O), g = new THREE.Group(); w.add(g);
   g.position.set(sm / 100, G.h(sm) / 100, 0); g.rotation.z = dir * G.R.th;
-  const lev = (o0, o1, p0, p1) => { const b = mesh(new THREE.BoxGeometry(Ls / 100, (p1 - p0) / 100, Math.abs(o1 - o0) / 100), m); b.position.set(0, (p0 + p1) / 200, (o0 + o1) / 200); g.add(b); };
+  // x0, x1: parçanın eğik kenar boyunca yeri (yerel x, ortadan; verilmezse kenarın tamamı)
+  const lev = (o0, o1, p0, p1, x0 = -Ls / 2, x1 = Ls / 2) => { const b = mesh(new THREE.BoxGeometry((x1 - x0) / 100, (p1 - p0) / 100, Math.abs(o1 - o0) / 100), m); b.position.set((x0 + x1) / 200, (p0 + p1) / 200, (o0 + o1) / 200); g.add(b); };
   const egik = (o0, p0, o1, p1) => { const dz = (o1 - o0) / 100, dy = (p1 - p0) / 100, b = mesh(new THREE.BoxGeometry(Ls / 100, SAC / 100, Math.hypot(dz, dy)), m); b.position.set(0, (p0 + p1) / 200, (o0 + o1) / 200); b.rotation.x = Math.atan2(-dy, dz); g.add(b); };
   return { w, Ls, lev, egik, dir };
 }
@@ -479,9 +480,22 @@ function rake(G, end, m, uzat = 0) {
       add(AD.kalkan, w, bo++ * 0.5, { kod: null, ad: 'Baş makas betopanı · saçak ucu', satir: [['Bu parça', `${fmtc(Math.abs(b - a))} cm · ${G.ad}, ${end === 'A' ? 'ön/sol' : 'arka/sağ'} uç: makasın duvar dışında kalan ucu`], ['Oturma', 'alt ucu baş makas omegasının dış U yanağında (omega saçak ucuna kadar), üstü makasın üst başlığında; dışında baş makas Z’si ve alın sacı (Lokman, 31.10.2026)'], ['Malzeme', '125 × 250 betopanların artanından; 8 mm'], ['Görev', 'saçak sacı ile alın sacının birleştiği köşeyi kapatır'], ['Kaynak', 'Lokman, 26.10.2026']] });
     });
     ['A', 'B'].forEach(end => {   // Baş makas Z'si: makas ve betopan üstünden geçer, betopanın dış yüzünden 3 cm iner, altta 3 cm dışarı kıvrılır
-      const K = rake(G, end, mat('frame', AD.kalkan));
-      K.lev(G.oT - 8, G.ob + 0.1, -SAC, 0); K.lev(G.ob, G.ob + SAC, -3, 0); K.lev(G.ob, G.ob + 3.1, -3, -3 + SAC);
-      add(AD.kalkan, K.w, 20 + bo++ * 0.5, { kod: KB('z'), ad: "Baş makas Z'si", satir: [['Bu parça', `${G.ad} · ${end === 'A' ? 'ön/sol' : 'arka/sağ'} yüz · L ${Math.round(K.Ls)} cm`], ['Kesit', 'üst kanat makas ve betopan üstünde · 3 cm çentik · 3 cm dış kanat; sac 1 mm'], ['Liste', M.z_liste], ['Kaynak', 'Lokman çizimi (24.10.2026, PK-01 kalkan kesiti)'], ...kartSat(KB('z'))] });
+      const zl = (K, x0, x1) => { K.lev(G.oT - 8, G.ob + 0.1, -SAC, 0, x0, x1); K.lev(G.ob, G.ob + SAC, -3, 0, x0, x1); K.lev(G.ob, G.ob + 3.1, -3, -3 + SAC, x0, x1); };
+      const satir = (bu, ek = []) => [['Bu parça', bu], ...ek, ['Kesit', 'üst kanat makas ve betopan üstünde · 3 cm çentik · 3 cm dış kanat; sac 1 mm'], ['Liste', M.z_liste], ['Kaynak', 'Lokman çizimi (24.10.2026, PK-01 kalkan kesiti)'], ...kartSat(KB('z'))];
+      const yz = `${G.ad} · ${end === 'A' ? 'ön/sol' : 'arka/sağ'} yüz`;
+      if (!G.z_parca) {   // 62 m²: kenar başına tek parça
+        const K = rake(G, end, mat('frame', AD.kalkan)); zl(K);
+        add(AD.kalkan, K.w, 20 + bo++ * 0.5, { kod: KB('z'), ad: "Baş makas Z'si", satir: satir(`${yz} · L ${Math.round(K.Ls)} cm`) });
+        return;
+      }
+      // kenarın parça sayısı kart modelinden (o kenardaki Z, ⌈eğik ÷ parça boyu⌉; liste de böyle sayar, D-39): saçak ucundan mahyaya, son parça kalan
+      const n = G.z_n[end];
+      for (let k = 0; k < n; k++) {
+        const K = rake(G, end, mat('frame', AD.kalkan)), uc = -K.dir * K.Ls / 2, a = k * G.z_parca, b = k === n - 1 ? K.Ls : (k + 1) * G.z_parca;
+        const [x0, x1] = [uc + K.dir * (a + (k ? 0.1 : 0)), uc + K.dir * (b - (k < n - 1 ? 0.1 : 0))].sort((p, q) => p - q);
+        zl(K, x0, x1);
+        add(AD.kalkan, K.w, 20 + bo++ * 0.5, { kod: KB('z'), ad: "Baş makas Z'si", satir: satir(`${yz} · ${k + 1}/${n}. parça · L ${Math.round(b - a)} cm`, [['Kenar', `L ${Math.round(K.Ls)} cm · ${n} parça (kart modelinde bu kenarın Z’si ${fmtc(G.z_kart[end])} cm: ⌈${fmtc(G.z_kart[end])} ÷ ${fmtc(G.z_parca)}⌉ = ${n}; liste de böyle sayar)`]]) });
+      }
     });
   });
 }

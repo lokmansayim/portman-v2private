@@ -163,8 +163,7 @@ def _serit_katmani(ad: str, adi: str, sinif: str, g: dict, D: dict, kitap: dict,
         return out
     if ad == "bas_makas_betopani_yerlesimi":
         B = D[ad]
-        levhalar, nedenler = serit.betopan(g, {"katsayi": B["katsayi"], "levha_m2": B["levha_m2"], "levha_cm": B["levha_cm"],
-                                               "kalinlik_betopan": kesit["betopan"]}, kesit["betopan"])
+        levhalar, nedenler = serit.betopan(g, cati.betopan_degerleri(B, kesit), kesit["betopan"])     # kenar katmanı aynı levhalarda keser
         kural_yok += [{"parca": adi, "sinif": sinif, "neden": f"{ad}: {n}"} for n in nedenler]
         return levhalar
     if ad == "cati_izolasyonu":                 # K5b-2'nin şeritleri dış ölçü kutusundan ve tek makas dizisinden; girintili gövdede yok (beyan)
