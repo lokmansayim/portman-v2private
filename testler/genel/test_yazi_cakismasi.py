@@ -36,8 +36,10 @@ def raporlar(model: str) -> dict[str, dict]:
         return asil_fig(self, fname, *a, **k)
 
     def pdf_savefig(self, figure=None, **k):
-        n = sum(1 for x in r if x.startswith("pafta_sayfa_")) + 1
-        r[f"pafta_sayfa_{n}"] = YC.denetle(figure, f"pafta_sayfa_{n}")
+        dosya = Path(str(getattr(self, "_filename", "") or "")).name      # yalnız şablon paftası "pafta_sayfa_N" (İE-23 PR-2b: karkas ve
+        on = "pafta_sayfa_" if not dosya or dosya.endswith("_pafta.pdf") else f"{dosya}#"   # makas paftaları ondan önce kaydedilebilir)
+        n = sum(1 for x in r if x.startswith(on)) + 1
+        r[f"{on}{n}"] = YC.denetle(figure, f"{on}{n}")
         return asil_pdf(self, figure, **k)
 
     matplotlib.figure.Figure.savefig, PdfPages.savefig = fig_savefig, pdf_savefig

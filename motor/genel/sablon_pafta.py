@@ -172,11 +172,17 @@ def _centik(x: float, y: float):
     return LineString([(x - 4.2, y + 4.2), (x + 4.2, y - 4.2)]).buffer(0.78 + 0.5)
 
 
+UZAK_PT = (-2.5, -3.5)     # çentiğe değen sığan sayı: çizgiden ek uzaklık (pt; `Sayfa.olcu` ust/sol tarafında eksi = çizgiden uzak)
+
+
 def _dar_sayilari_yerlestir(parcalar: list[tuple], metinler: list[str], dar: list[bool], kaydir: list[float], taraf: str,
                             genel_cizgi: tuple, genel_metin: str, plan_kutu, adaylar: tuple[float, ...]) -> list[float]:
     """BK-09: dönüşümlü sırada çizgide kalan (kaydırmasız) dar sayı uçtaki eğik çentiğe değiyorsa (G1'den sonra KT-03 sağ zincirde "35")
     `adaylar` sırayla denenir (önce zincirin dış yanı, sonra ikinci iç sıra): kutusu çentiklere, genel ölçünün çizgisine ve sayısına, plan
-    alanına ve öteki sayılara değmeyen ilk yer seçilir; hiçbiri boş değilse sayı ilk adaya gider. Başka sayıya dokunulmaz."""
+    alanına ve öteki sayılara değmeyen ilk yer seçilir; hiçbiri boş değilse sayı ilk adaya gider. Başka sayıya dokunulmaz.
+    İE-23 PR-2b: parçaya sığan (dar olmayan) sayı da parçayı neredeyse dolduruyorsa bir uçtaki eğik çentiğin kolu yazıya değer (KT-04 "65",
+    "62"; germede Ç8201 "45"): önce çizgiden biraz uzağa (`UZAK_PT`; çentiğin kolu çizgiden 4,2 pt çıkar), olmazsa `adaylar`; hiçbiri boş
+    değilse yerinde kalır. Çentiğe değmeyen sayı yerinde kalır (referans paftaları aynı)."""
     from shapely.geometry import LineString
     kaydir = list(kaydir)
     uclar = [(p[0], p[1]) for p in parcalar] + [(p[2], p[3]) for p in parcalar] + [genel_cizgi[:2], genel_cizgi[2:]]
@@ -185,11 +191,11 @@ def _dar_sayilari_yerlestir(parcalar: list[tuple], metinler: list[str], dar: lis
     sabit = unary_union([centik, plan_kutu, _olcu_yazi_kutusu(*genel_cizgi, genel_metin, taraf),
                          LineString([genel_cizgi[:2], genel_cizgi[2:]]).buffer(0.36 + 0.5)])
     for i in range(len(parcalar)):
-        if not dar[i] or kaydir[i] != 0 or not kutular[i].intersects(centik):
+        if kaydir[i] != 0 or not kutular[i].intersects(centik):
             continue
         engel = unary_union([sabit] + [k for j, k in enumerate(kutular) if j != i])
-        secilen = adaylar[0]
-        for aday in adaylar:
+        secilen = adaylar[0] if dar[i] else 0.0
+        for aday in (adaylar if dar[i] else UZAK_PT + tuple(adaylar)):
             if not _olcu_yazi_kutusu(*parcalar[i], metinler[i], taraf, aday).intersects(engel):
                 secilen = aday
                 break
@@ -803,7 +809,7 @@ def pafta_pdf(t: dict, hedef: Path, kod: str, is_emri_no: str | None = None, rev
     gs = GridSpec(2, 3, figure=fig2, left=0.03, right=0.985, top=0.9, bottom=0.04, hspace=0.18, wspace=0.08)
     inis, _ = ciz_genel.inis_kurali(c, kur, t["cati"].get("sacak", 30))
     # başlık kısa (uzun başlık dar sütundan sayfa dışına taşıyordu), açıklama sayfanın altında; üst üste binen eğim yazıları ayrılır (Lokman, 12.10)
-    ciz_genel.cati_plani_eksen(fig2.add_subplot(gs[:, 0]), y, c, inis, baslik="ÇATI PLANI", yazi_ayir=True)
+    ciz_genel.cati_plani_eksen(fig2.add_subplot(gs[:, 0]), y, c, inis, baslik="ÇATI PLANI", yazi_ayir=True, yazi_denetle=True)
     fig2.text(0.03, 0.012, "Çatı planı: eğim okları ve yüzdeleri · sarı nokta: dere inişi" + (f" ({len(inis)} adet)" if inis else "") +
               " · turuncu: duvara dayanan kenar · beyaz kesik çizgi: duvar dış yüzü · ölçüler cm", fontsize=7.2, ha="left", va="bottom", color="#333")
     for ax, taraf in zip((fig2.add_subplot(gs[0, 1]), fig2.add_subplot(gs[0, 2]), fig2.add_subplot(gs[1, 1]), fig2.add_subplot(gs[1, 2])), ("on", "arka", "sol", "sag")):
