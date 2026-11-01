@@ -467,12 +467,12 @@
       "eylem": "secenek",
       "secenek": [
        "Ç8801",
-       "Ç8801K",
-       "Ç8801L"
+       "KT02",
+       "KT03"
       ]
      },
      "anlam": "yeni talep: çelik, 2+1, 88 m²",
-     "not": "Kat ve çatı yazılmadı; çatı seti bunları kapsıyor (canlıda kabul, 14 Ekim)."
+     "not": "İE-25 (Lokman, 1 Kasım 2026: çatı plan seçildikten sonra, elimizdeki modellerle): alan setinde her plan bir kez, Ç8801 seçilince çatı seti (katalog, K, L). 14 Ekim'de canlıda kabul edilen düzen (Ç8801'in üç çatısı setin üç seçeneği) bu kararla değişti."
     },
     {
      "id": "A09",
@@ -518,7 +518,7 @@
       "plan_uretimi": true
      },
      "anlam": "çelik, tek kat, 3+1, 95 m²: dört bilgi tam; çatı plan seçildikten sonra",
-     "not": "İE-25 (Lokman, 1 Kasım 2026, karar kartı \"Plan seçildikten sonra\"): çatı plandan önce sorulmaz. Bankada 3+1 yok: yeni plan üretimi (D-18); plan seçilince Beşik / Kırma seti gelir. Karar kipinde üretim oynatılmaz; seçim ve çatı adımı testler/test_cati_secimi.py'de. Önceki beklenti (rehber §1 \"beş bilgi\", çatı sorusu) bu kararla değişti."
+     "not": "İE-25 (Lokman, 1 Kasım 2026, karar kartı \"Plan seçildikten sonra\"): çatı plandan önce sorulmaz. Bankada 3+1 yok: yeni plan üretimi (D-18). Yeni çizilen plana çatı seçimi şimdilik yok (Lokman 1 Kasım: önce elimizdeki modeller ve kendi çatıları); plan kodun varsayılan çatısıyla gelir. Önceki beklenti (rehber §1 \"beş bilgi\", çatı sorusu) bu kararla değişti."
     }
    ]
   },
@@ -782,7 +782,7 @@
       "plan_uretimi": true
      },
      "anlam": "çelik, tek kat, 3+1, ~90 m²: dört bilgi tam (il ilk taslakta gerekmez); çatı plan seçildikten sonra",
-     "not": "İE-25 (Lokman, 1 Kasım 2026): rehberin \"Çatı nasıl olsun?\" sorusu plandan sonraya alındı; bugün doğrudan yeni plan üretimi, plan seçilince \"Çatı seçin\" (Beşik / Kırma)."
+     "not": "İE-25 (Lokman, 1 Kasım 2026): rehberin \"Çatı nasıl olsun?\" sorusu plandan önce sorulmaz; çatı seçimi elimizdeki modellerde plan seçildikten sonra gelir (Ç8801: katalog, K, L). Bugün doğrudan yeni plan üretimi."
     },
     {
      "id": "E02",
@@ -806,7 +806,7 @@
       ]
      },
      "anlam": "çatı kırma",
-     "not": "3+1 bankada yok: yeni plan üretimi; sonuç (yeni plan + bankadan en yakınlar) seçenek olarak gelir (D-18). İE-25'ten önce çatı sorusunun cevabıydı; bugün bayi çatıyı kendiliğinden yazar ve talep kırmayla yeniden plana gider (çatı yazıldığı için plan seçilince çatı seti gelmez)."
+     "not": "3+1 bankada yok: yeni plan üretimi; sonuç (yeni plan + bankadan en yakınlar) seçenek olarak gelir (D-18). İE-25'ten önce çatı sorusunun cevabıydı; bugün bayi çatıyı kendiliğinden yazar ve talep kırmayla yeniden plana gider."
     }
    ]
   },
@@ -1234,13 +1234,13 @@
       "eylem": "secenek"
      },
      "anlam": "dört bilgi tam: prefabrik 120 m² 3+1; çatı plan seçildikten sonra",
-     "not": "İE-25 (Lokman, 1 Kasım 2026): çatı sorulmaz; rehber §2 (T14 gibi) yakın projede en çok üç seçenek. Bugün prefabrik seçenek seti aday vermiyor (pano 70, 115): katalog önerisini yazıyla sunup modeli ya da ölçüyü soruyor, bu adımı karşılamıyor. Prefabrikte çatı adımı o set gelince açılır."
+     "not": "İE-25 (Lokman, 1 Kasım 2026): çatı sorulmaz; rehber §2 (T14 gibi) yakın projede en çok üç seçenek. Bugün prefabrik seçenek seti aday vermiyor (pano 70, 115): katalog önerisini yazıyla sunup modeli ya da ölçüyü soruyor, bu adımı karşılamıyor. Prefabrikte çatı seçimi, modellerin kendi çatıları geliştirilip seçenek seti gelince açılır."
     }
    ]
   },
   {
    "id": "T1",
-   "ad": "Ç8801 kırma: seçim \"2\", olumsuz cümle",
+   "ad": "88 m² kırma çatı: seçim \"2\", olumsuz cümle (İE-25: çatı plandan sonra)",
    "adimlar": [
     {
      "id": "T01",
@@ -1260,10 +1260,11 @@
      "karar": {
       "eylem": "secenek",
       "secenek_icerir": [
-       "Ç8801K"
+       "Ç8801"
       ]
      },
-     "anlam": "beş bilgi tam: çelik, tek kat, 2+1, 88 m², kırma"
+     "anlam": "beş bilgi tam: çelik, tek kat, 2+1, 88 m², kırma",
+     "not": "İE-25 (Lokman, 1 Kasım 2026): alan setinde her plan bir kez; Ç8801'in çatıları (katalog, K, L) plan seçilince gelir."
     },
     {
      "id": "T02",
@@ -1275,7 +1276,7 @@
      },
      "karar": {
       "eylem": "is_emri",
-      "plan_kodu": "Ç8801K",
+      "plan_kodu": "KT02",
       "revizyon": 1
      },
      "okuma_kabul": {
@@ -1284,7 +1285,8 @@
        "revizyon"
       ]
      },
-     "anlam": "setten 2. seçenek (Ç8801-K)"
+     "anlam": "setten 2. seçenek (Ç8801-K)",
+     "not": "İE-25: setin ikincisi KT-02 (kırma çatılı, çatı seçeneği yok) → r01. İE-25'ten önce ikinci seçenek Ç8801-K'ydı."
     },
     {
      "id": "T03",

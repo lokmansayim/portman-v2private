@@ -496,7 +496,7 @@ class Depo:
             if yeni is not None and yeni.get("id") == acik["id"] and yeni.get("durum") in ("secildi", "dustu", "eskidi"):
                 kapanis = yeni["durum"]
             elif yeni is not None and yeni.get("id") != acik["id"] and yeni.get("durum") == "acik":
-                # İE-25: setten seçim aynı işte yeni bir set açtıysa (yeni plan seçildi → çatı seti) eski set konuşmanın `eski_setler`inde
+                # İE-25: setten seçim aynı işte yeni bir set açtıysa (alan setinden Ç8801 seçildi → çatı seti) eski set konuşmanın `eski_setler`inde
                 # "secildi" durur; kayıtta da seçilen kodla kapanır ("eskidi" değil)
                 kapanan = next((s for s in d_yeni.get("eski_setler") or [] if s.get("id") == acik["id"] and s.get("durum") == "secildi"), None)
                 kapanis = "secildi" if kapanan else "eskidi"

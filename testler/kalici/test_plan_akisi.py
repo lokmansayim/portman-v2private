@@ -18,7 +18,7 @@ from pathlib import Path
 import pytest
 
 from conftest import AYAR, NUMARA_A, mesaj, sorgu, talep, tek
-from test_celik_akisi import BAYI_KART, YEDI, buton, hizli_genel, isle_hepsi, kabul, set_satiri, son_rev  # noqa: F401 (fikstür)
+from test_celik_akisi import BAYI_KART, YEDI, buton, hizli_genel, isle_hepsi, kabul, son_rev  # noqa: F401 (fikstür)
 
 import worker as W
 from psycopg.types.json import Jsonb
@@ -855,79 +855,3 @@ def test_soru3_revizyonda_l_cati_uygulayamadim_plan_onaylanabilir(depo, wa, hizl
     assert depo.mesaj_kaydet(buton(f"o:{rev['is_emri_no']}:1"))
     [r5] = isle_hepsi(depo, URETIM)
     assert r5["gerekce"] == "plan onaylandı", r5
-
-
-# ───────────────────────── İE-25 · çatı plan seçildikten sonra (pano 41; Lokman 1.11 karar kartı) ─────────────────────────
-T95_CATISIZ = talep(ozet="95 m² 3+1 tek kat çelik", alan_m2=95, oda_programi="3+1", yapi_turu="celik", kat_sayisi=1)
-
-
-def _cati_seti(depo, uretici):
-    """Çatısız talep → yeni plan seti → yeni plan seçilir → çatı seti (kartlar sahte genel motorla)."""
-    kabul(depo, YEDI)
-    assert depo.mesaj_kaydet(mesaj("95 m² 3+1 tek kat çelik", T95_CATISIZ, bayi=BAYI_KART))
-    [r] = isle_hepsi(depo, URETIM)
-    assert r["eylem"] == "secenek" and uretici["talep"]["cati"]["tip"] is None, r          # çatı sorulmaz
-    st = sorgu(depo, "SELECT id, adaylar FROM secenek_setleri")[0]
-    yeni = st["adaylar"][0]["kod"]
-    assert depo.mesaj_kaydet(buton(f"s:{st['id']}:{yeni}"))
-    [r] = isle_hepsi(depo, URETIM)
-    return r, yeni
-
-
-def test_ie25_cati_seti_gorseli_dugmeleri_ve_kaydi(depo, wa, hizli_genel, uretici):
-    r, yeni = _cati_seti(depo, uretici)
-    assert r["eylem"] == "secenek" and uretici["cagri"] == 1, r                              # seçim üretimi yeniden çağırmaz
-    setler = sorgu(depo, "SELECT id, durum, secilen_kod, adaylar FROM secenek_setleri ORDER BY olusturuldu")
-    assert [(x["durum"], x["secilen_kod"]) for x in setler] == [("secildi", yeni), ("acik", None)]     # yeni plan seti "seçildi" (eskidi değil)
-    cs = setler[1]
-    assert [a["kod"] for a in cs["adaylar"]] == [f"{yeni}-B", f"{yeni}-K"] and all(a["tanim"] is None for a in cs["adaylar"])
-    s = set_satiri(depo)
-    assert [b["reply"]["title"] for b in s["interactive"]["action"]["buttons"]] == ["1. Beşik", "2. Kırma"]
-    assert s["body"].startswith("Yeni plan için 2 çatı seçeneği. Plan ikisinde aynı (95 m², 3+1); fark çatıda.") and "YENI-" not in s["body"]
-    assert s["interactive"]["header"]["type"] == "image"                                    # iki kart tek görselde
-    d, _ = depo.konusma_oku(NUMARA_A)
-    kartlar = [v["gorsel"] for v in d["cati_secenekleri"]["adaylar"]]
-    assert all(k and Path(k).is_file() and "/projects/CATI-" in k for k in kartlar) and kartlar[0] != kartlar[1]
-    assert [a["gorsel"] for a in d["secenek_seti"]["adaylar"]] == kartlar                   # konuşmadaki yollar taşınan yerde
-    assert [a["gorsel"] for a in cs["adaylar"]] == kartlar
-    for v, tip in zip(d["cati_secenekleri"]["adaylar"], ("besik", "kirma")):
-        assert v["tanim"]["cati"]["tip"] == tip and v["tanim"]["kod"] == yeni               # kart bu tanımdan (sahte motor kodu yazar)
-        assert yeni.replace("-", "") in Path(v["gorsel"]).read_bytes().decode("latin-1")
-
-
-def test_ie25_cati_secimi_r01_ve_uretime_baglanir(depo, wa, hizli_genel, uretici):
-    from beyin import celik as C
-    _cati_seti(depo, uretici)
-    cs = sorgu(depo, "SELECT id, adaylar FROM secenek_setleri WHERE durum = 'acik'")[0]
-    assert depo.mesaj_kaydet(buton(f"s:{cs['id']}:{cs['adaylar'][1]['kod']}"))
-    [r] = isle_hepsi(depo, URETIM)
-    assert r["eylem"] == "is_emri", r
-    rev = son_rev(depo)
-    y = rev["is_emri"]["yapi"]
-    yeni = cs["adaylar"][1]["kod"].rsplit("-", 1)[0]
-    assert y["kod"] == yeni and y["tanim"]["cati"]["tip"] == "kirma" and C.tanim_dogrula(y) and rev["rev"] == 1
-    assert sorgu(depo, "SELECT durum, secilen_kod FROM secenek_setleri WHERE id = %s", cs["id"])[0] == {"durum": "secildi", "secilen_kod": f"{yeni}-K"}
-    assert sorgu(depo, "SELECT is_emri_no FROM plan_uretimleri")[0]["is_emri_no"] == rev["is_emri_no"]     # r01 üretime bağlandı
-    govde = sorgu(depo, "SELECT govde FROM giden WHERE kind = 'interactive' ORDER BY olusturuldu DESC")[0]["govde"]
-    assert govde.startswith("Yeni plan (kırma") and "3+1" in govde
-    d, _ = depo.konusma_oku(NUMARA_A)
-    assert "cati_secenekleri" not in d and d["uretilen_plan"]["plan"]["cati"]["tip"] == "kirma"
-
-
-def test_ie25_numara_ile_cati_secimi_ve_yeniden_sunumda_kart_yeniden_cizilmez(depo, wa, hizli_genel, uretici):
-    _cati_seti(depo, uretici)
-    d0, _ = depo.konusma_oku(NUMARA_A)
-    kartlar = [v["gorsel"] for v in d0["cati_secenekleri"]["adaylar"]]
-    assert depo.mesaj_kaydet(mesaj("bilmiyorum", talep("diger", "bilmiyorum"), bayi=BAYI_KART))
-    [r] = isle_hepsi(depo, URETIM)
-    assert r["eylem"] == "cevapla", r                                                        # anlaşılmadı: set açık kalır
-    assert depo.mesaj_kaydet(mesaj("dış duvarlar 140 olsun", talep(ozet="dış 140"), bayi=BAYI_KART))
-    [r] = isle_hepsi(depo, URETIM)
-    assert r["eylem"] == "secenek" and "Önce çatıyı seçin" in set_satiri(depo)["body"], r
-    d, _ = depo.konusma_oku(NUMARA_A)
-    assert [v["gorsel"] for v in d["cati_secenekleri"]["adaylar"]] == kartlar                # var olan kart yeniden çizilmez
-    assert depo.mesaj_kaydet(mesaj("1", talep("diger", "kısa cevap"), bayi=BAYI_KART))
-    [r] = isle_hepsi(depo, URETIM)
-    assert r["eylem"] == "is_emri", r
-    y = son_rev(depo)["is_emri"]["yapi"]
-    assert y["tanim"]["cati"]["tip"] == "besik" and [x["op"] for x in y["degisiklikler"]] == ["dis_karkas_140"]

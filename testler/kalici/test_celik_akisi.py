@@ -1,7 +1,7 @@
 """İE-08 8a PR-2a · çelik bayi akışı A2–A3 (kalıcı akış, gerçek Postgres, kayıtlı LLM çıkarımı, sahte WhatsApp).
 
 A2: "Ç8801" → tek görselde üç çatı seçeneği (katalog, K, L; öncelik sorusu yok; set türü cati_varyanti); "88 m² 2+1 çelik" → alan seti
-(soru yok; görselde Ç8801 üçlüsü); "95 m² 3+1 tek kat çelik" → bugünkü davranış (katalog önerisi); dış ölçü → alan yolu (GRID yok);
+(soru yok; her plan bir kez, Ç8801 seçilince çatı seti: İE-25); "95 m² 3+1 tek kat çelik" → bugünkü davranış (katalog önerisi); dış ölçü → alan yolu (GRID yok);
 kabul kaydı yokken aday sunulmaz (K-A10). A3: seçim düğmesi → r01 genel motordan (zarf yapi.sistem celik, tanım gömülmez, sha; satırlar
 etkileşim + belge; PDF adı Portman_<no>_rNN.pdf; CTA yok); gerçek motor: PDF 2 sayfa, 1. sayfada TASLAK, antette bayinin adı ve kart
 numarası (D-09); Patron kartı numara yazdırmaz; LLM bağlamı ve iş sonucu ham numara taşımaz.
@@ -109,17 +109,38 @@ def test_c8801_uc_cati_seti_oncelik_sorusu_yok(depo, wa, hizli_genel):
     assert sorgu(depo, "SELECT count(*) AS n FROM giden WHERE kind = 'interactive'")[0]["n"] == 1                 # öncelik sorusu sorulmadı
 
 
-def test_88_m2_2arti1_celik_soru_yok_gorselde_c8801_uclusu(depo, wa, hizli_genel):
+def test_88_m2_2arti1_celik_soru_yok_her_plan_bir_kez_cati_sonra(depo, wa, hizli_genel):
+    # İE-25 (Lokman 1 Kasım 2026: çatı plan seçildikten sonra, elimizdeki modellerle): alan setinde her plan bir kez; Ç8801'in K ve L'si
+    # setten çıktı (önceden görselin üç kartı Ç8801, Ç8801-K, Ç8801-L'ydi, 6 aday). Ç8801 seçilince çatı seti, çatı seçilince r01.
     kabul(depo, YEDI)
     assert depo.mesaj_kaydet(mesaj("88 m² 2+1 çelik", talep(ozet="88 m² 2+1 çelik", alan_m2=88, oda_programi="2+1", yapi_turu="celik"), bayi=BAYI_KART))
     [r] = isle_hepsi(depo)
-    assert r["eylem"] == "secenek" and "6 aday" in r["gerekce"]                   # Ç8801/K/L 88, KT-02 92, KT-03 94, Ç8201 82 (±%10 brüt oturum, K-A1)
-    st = sorgu(depo, "SELECT adaylar FROM secenek_setleri")[0]["adaylar"]
-    assert [a["kod"] for a in st[:3]] == ["Ç8801", "Ç8801K", "Ç8801L"] and all(a["puan"] == 100 for a in st[:3]) and len(st) == 6
+    assert r["eylem"] == "secenek" and "4 aday" in r["gerekce"]                   # Ç8801 88, KT-02 92, KT-03 94, Ç8201 82 (±%10 brüt oturum, K-A1)
+    st = sorgu(depo, "SELECT id, adaylar FROM secenek_setleri")[0]
+    assert [a["kod"] for a in st["adaylar"]] == ["Ç8801", "KT02", "KT03", "Ç8201"] and st["adaylar"][0]["puan"] == 100
     d, _ = depo.konusma_oku(NUMARA_A)
     assert d["secenek_seti"]["tur"] == "alan" and "oncelik_soruldu" not in d["taslak"]
     kinds = [r["kind"] for r in sorgu(depo, "SELECT kind FROM giden ORDER BY sira")]
-    assert kinds == ["interactive", "interactive"]                                 # görsel + 3 düğme, sonra tam liste (6 aday)
+    assert kinds == ["interactive", "interactive"]                                 # görsel + 3 düğme, sonra tam liste (4 aday)
+    kalici.gonder(depo, wa)
+    dis = sorgu(depo, "SELECT dis_id FROM giden WHERE kind = 'interactive' ORDER BY sira")[0]["dis_id"]
+    assert depo.mesaj_kaydet(buton(f"s:{st['id']}:Ç8801", context_id=dis))
+    [r2] = isle_hepsi(depo)
+    assert r2["eylem"] == "secenek" and "3 aday" in r2["gerekce"]
+    setler = {x["id"]: x for x in sorgu(depo, "SELECT id, durum, secilen_kod, adaylar FROM secenek_setleri")}
+    assert setler[st["id"]]["durum"] == "secildi" and setler[st["id"]]["secilen_kod"] == "Ç8801"          # "eskidi" değil
+    [cs] = [x for x in setler.values() if x["durum"] == "acik"]
+    assert [a["kod"] for a in cs["adaylar"]] == ["Ç8801", "Ç8801K", "Ç8801L"]
+    satir = set_satiri(depo)
+    assert [b["reply"]["id"] for b in satir["interactive"]["action"]["buttons"]] == [f"s:{cs['id']}:{c}" for c in ("Ç8801", "Ç8801K", "Ç8801L")]
+    assert satir.get("file") and Path(satir["file"]).is_file() and "fark çatıda" in satir["body"]
+    assert not sorgu(depo, "SELECT count(*) AS n FROM revizyonlar")[0]["n"]                                  # çatı seçilmeden plan yok
+    kalici.gonder(depo, wa)
+    dis2 = sorgu(depo, "SELECT dis_id FROM giden WHERE kind = 'interactive' ORDER BY olusturuldu DESC, sira")[0]["dis_id"]
+    assert depo.mesaj_kaydet(buton(f"s:{cs['id']}:Ç8801K", context_id=dis2))
+    [r3] = isle_hepsi(depo)
+    assert r3["eylem"] == "is_emri" and "Ç8801K" in r3["gerekce"]
+    assert sorgu(depo, "SELECT durum, secilen_kod FROM secenek_setleri WHERE id = %s", cs["id"])[0] == {"durum": "secildi", "secilen_kod": "Ç8801K"}
 
 
 def test_yapi_turu_soylenmeden_celik_aday_sunulmaz(depo, wa, hizli_genel):
@@ -152,7 +173,7 @@ def test_dis_olcu_celikte_alan_yolu_grid_yok(depo, wa, hizli_genel):
     kabul(depo, YEDI)
     assert depo.mesaj_kaydet(mesaj("9x10 m 2+1 çelik", talep(ozet="9x10 2+1 çelik", dis_olcu={"en_m": 9, "boy_m": 10}, oda_programi="2+1", yapi_turu="celik"), bayi=BAYI_KART))
     [r] = isle_hepsi(depo)
-    assert r["eylem"] == "secenek" and "7 aday" in r["gerekce"]                   # 90 m² ±%10: yedisi de; GRID_SABLON'a girmedi
+    assert r["eylem"] == "secenek" and "5 aday" in r["gerekce"]                   # 90 m² ±%10: beş plan (Ç8801'in K ve L'si plan seçilince, İE-25); GRID_SABLON'a girmedi
 
 
 # ───────────────────────── A3 ─────────────────────────

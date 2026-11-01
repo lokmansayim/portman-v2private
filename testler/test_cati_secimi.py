@@ -1,289 +1,208 @@
-"""İE-25 · yeni planın çatısı plan seçildikten sonra (pano 41; Lokman, 1 Kasım 2026 karar kartı "Plan seçildikten sonra").
+"""İE-25 · çatı plan seçildikten sonra, elimizdeki modellerle (pano 41; Lokman 1 Kasım 2026: karar kartı "Plan seçildikten sonra" ve
+"var olan modeller üzerinden gidelim"). Karar katmanı: LLM yok, Postgres yok, çizim yok (`karar_ver` İş Emri'ni kurar, motor koşmaz).
 
-Karar katmanı: LLM yok, Postgres yok, çizim yok. Talep elle kurulur (kayıtlı okuma gibi), plan gerçek üreticiyle kör üretilir
-(`plan_uretici.uret`, LLM kapalı; worker'ın yaptığı gibi `plan_sonucu`na verilir), düğmeler `kanal/etkilesim.coz`'dan geçer.
-A1 çatısız talep → plan üretimi (çatı sorulmaz); A2 yeni plan seçimi → "Çatı seçin" (1. Beşik 2. Kırma); A3 düğme, numara ya da
-"kırma olsun" → r01 o çatıyla; A4 çatı altında veranda → set yok, kırma ve nedeni; A5 talepte çatı → set yok; A6 çizilmeyen çatı →
-set başında söylenir; A7 revizyon bugünkü gibi. Kanal (kartlar, kayıt) `testler/kalici/test_plan_akisi.py`'de.
+- Alan setinde her plan bir kez: banka modelinin çatı varyantları (Ç8801K, Ç8801L) setten çıkar (`secenek.tek_plan`).
+- Çatı varyantlı model setten seçilince (düğme, numara, kod) modelin çatı seti gelir (katalog çatısı, K, L; İE-08 A2'nin seti).
+- Plan ve çatı aynı istekte yazıldıysa ("Ç8801 çatı L olsun"; set sunulurken saklanan "çatı K olsun") çatı seti atlanır.
+- Çatı varyantı olmayan model (KT-02) setten seçilince bugünkü gibi r01.
+- Çatı seti açıkken gelen yeni ölçü ya da oda sessizce düşmez: talep yeniden okunur (geometri hakemi İE-25 bulgu 5).
 """
 from __future__ import annotations
 
-import copy
-import json
 import sys
-from functools import lru_cache
 from pathlib import Path
 
 import pytest
 
 KOK = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(KOK))
-from beyin import celik, celik_okuma as CO, karar as K, plan_uretici as PU, secenek as SC  # noqa: E402
+for p in (KOK, KOK / "kanal"):
+    if str(p) not in sys.path:
+        sys.path.insert(0, str(p))
+
+from beyin import karar as K, secenek as SC  # noqa: E402
 from beyin.katalog import Katalog  # noqa: E402
 from beyin.konusma import Konusma  # noqa: E402
 from beyin.sema import Talep  # noqa: E402
 from kanal import etkilesim as ET  # noqa: E402
 
-BAYI = {"kod": "B01", "ad": "Deneme Bayi A", "rol": "bayi", "numara": "900000000101"}
-TALEP = {"alan_m2": 95, "oda_programi": "3+1", "yapi_turu": "celik", "kat_sayisi": 1}
+NUMARA = "900000000101"                        # gerçek olmayan deneme numarası
+BAYI = {"kod": "B01", "ad": "Deneme Bayi A", "rol": "bayi", "numara": NUMARA}
+T88 = {"alan_m2": 88, "oda_programi": "2+1", "yapi_turu": "celik", "kat_sayisi": 1}
 
 
-@lru_cache(maxsize=None)
-def _uretim(talep_json: str) -> str:
-    return json.dumps(PU.uret(json.loads(talep_json), ayar={"acik": False}), ensure_ascii=False)
+@pytest.fixture(scope="module")
+def kat():
+    return Katalog(kabul_edilmis=None)                     # yedi çelik aday görünür (harness ve altın set gibi)
 
 
 class Sohbet:
-    """Bir bayinin konuşması: yazı (`yaz`) ya da düğme (`dugme`); plan üretimi istenirse worker'ın yaptığı gibi kör üretilir."""
+    def __init__(self, kat, tmp_path):
+        self.kat, self.k, self.n = kat, Konusma(NUMARA, kok=tmp_path), 0
 
-    def __init__(self, kok: Path):
-        self.k = Konusma("900000000101", kok=kok)
-        self.kat = Katalog(kabul_edilmis=None)
-        self.n = 0
-
-    def _hazirla(self):
+    def yaz(self, metin: str, **talep):
         self.n += 1
         self.k.son_mesaj_id = f"wamid.CATI{self.n:03d}"
-        self.k.plan_uretimi = True
+        t = Talep.model_validate({"niyet": "yeni_talep", "guven": "yuksek", "ozet": metin, **talep})
+        return K.karar_ver(t, self.k, BAYI, self.kat, metin)
 
-    def _uret(self, r):
-        if r.gerekce == K.PLAN_URETIMI and self.k.d.get("plan_istegi"):
-            pu = json.loads(_uretim(json.dumps(self.k.d["plan_istegi"]["talep"], sort_keys=True)))
-            return K.plan_sonucu(self.k, self.kat, pu, [None, None]), True
-        return r, False
-
-    def yaz(self, metin: str, uret: bool = True, **alan):
-        self._hazirla()
-        alan.setdefault("niyet", "revizyon" if self.k.d.get("son_is_emri") else "yeni_talep")
-        t = Talep(guven="yuksek", ozet=alan.pop("ozet", metin[:80]), **alan)
-        r = K.karar_ver(t, self.k, BAYI, self.kat, metin)
-        return self._uret(r)[0] if uret else r
-
-    def dugme(self, kod: str):
-        self._hazirla()
-        st = self.k.d.get("secenek_seti") or {}
-        etk = ET.coz({"reply_id": f"s:{st.get('id')}:{kod}", "type": "interactive"}, self.k.d)
-        assert etk.get("gecerli"), etk
-        return K.karar_ver(Talep.model_validate(etk["talep"]), self.k, BAYI, self.kat, etk["metin"])
+    def bas(self, kod: str, baslik: str):
+        st = self.k.d["secenek_seti"]
+        self.n += 1
+        g = {"id": f"wamid.CATI{self.n:03d}", "type": "interactive", "reply_id": f"s:{st['id']}:{kod}", "text": baslik}
+        e = ET.coz(g, self.k.d)
+        self.k.son_mesaj_id = g["id"]
+        return K.karar_ver(Talep.model_validate(e["talep"]), self.k, BAYI, self.kat, e["metin"])
 
     @property
     def set(self) -> dict:
         return self.k.d.get("secenek_seti") or {}
 
-    @property
-    def yeni(self) -> str:
-        return next(a["kod"] for a in self.set["adaylar"] if a.get("durum") == "uretilen")
+    def kodlar(self) -> list[str]:
+        return [a["kod"] for a in self.set.get("adaylar") or []]
+
+    def sira(self, kod: str) -> int:
+        return next(a["sira"] for a in self.set["adaylar"] if a["kod"] == kod)
 
 
 @pytest.fixture
-def s(tmp_path) -> Sohbet:
-    return Sohbet(tmp_path)
+def s(kat, tmp_path):
+    return Sohbet(kat, tmp_path)
 
 
-def cati_seti(s: Sohbet, mesaj: str = "95 m² 3+1 tek kat çelik", **alan):
-    """A1 + A2: çatısız talep → yeni plan seti → yeni plan seçilir → çatı seti."""
-    r = s.yaz(mesaj, **{**TALEP, **alan})
-    assert r.eylem == "secenek" and s.set["tur"] == "yeni_plan", r
-    yeni = s.yeni
-    r = s.dugme(yeni)
-    return r, yeni
+def _plan(r) -> str | None:
+    return ((r.is_emri or {}).get("yapi") or {}).get("kod")
 
 
-# ── A1, A2 ────────────────────────────────────────────────────────────────────────────────────────────────────────────
-def test_a1_catisiz_talep_cati_sorulmaz_plan_uretilir(s):
-    r = s.yaz("95 m² 3+1 tek kat çelik", uret=False, **TALEP)
-    assert r.eylem == "cevapla" and r.gerekce == K.PLAN_URETIMI and "çatı" not in r.mesaj.lower()
-    assert s.k.d["plan_istegi"]["talep"]["cati"]["tip"] is None
+# ── süzgeç ──────────────────────────────────────────────────────────────────────────────────────────────────────────────
+def test_tek_plan_varyanti_tabani_listedeyse_cikarir():
+    a = [{"kod": "Ç8801", "varyantlar": ["Ç8801K", "Ç8801L"]}, {"kod": "Ç8801K", "varyantlar": []}, {"kod": "Ç8801L"}, {"kod": "KT02"}]
+    assert [x["kod"] for x in SC.tek_plan(a)] == ["Ç8801", "KT02"]
+    yalniz = [{"kod": "Ç8801K", "varyantlar": []}, {"kod": "KT02"}]          # tabanı listede yok: varyant kalır
+    assert [x["kod"] for x in SC.tek_plan(yalniz)] == ["Ç8801K", "KT02"]
 
 
-def test_a2_yeni_plan_secilince_cati_seti(s):
-    r, yeni = cati_seti(s)
-    assert r.eylem == "secenek" and r.soru_alani == "secenek", r
-    st = s.set
-    assert st["tur"] == "cati_secimi" and st["durum"] == "acik"
-    assert [a["kod"] for a in st["adaylar"]] == [f"{yeni}-B", f"{yeni}-K"]
-    assert [b["baslik"] for b in r.butonlar] == ["1. Beşik", "2. Kırma"]
-    assert [b["id"] for b in r.butonlar] == [f"s:{st['id']}:{yeni}-B", f"s:{st['id']}:{yeni}-K"]
-    assert r.mesaj.startswith("Yeni plan için 2 çatı seçeneği. Plan ikisinde aynı (95 m², 3+1); fark çatıda.")
-    assert "1. Beşik\n2. Kırma" in r.mesaj and "kırma olsun" in r.mesaj and "YENI-" not in r.mesaj
-    assert all(a["tanim"] is None and a["motor"] == "genel" for a in st["adaylar"])          # set kaydı tanım taşımaz; konuşmada
-    cs = s.k.d["cati_secenekleri"]
-    assert cs["plan_kodu"] == yeni
-    for v, tip in zip(cs["adaylar"], ("besik", "kirma")):
-        assert v["cati_tipi"] == tip and v["tanim"]["kod"] == yeni and v["tanim"]["cati"]["tip"] == tip
-        assert v["plan"]["cati"]["tip"] == tip and celik.tanim_dogrula(v)
-        assert (v["sunum"] or {}).get("cati_adi", "").startswith(K.CATI_SOZU[tip])
-    eski = s.k.d["eski_setler"][-1]                                                        # yeni plan seti planın seçimiyle kapandı
-    assert eski["tur"] == "yeni_plan" and eski["durum"] == "secildi" and eski["secilen_kod"] == yeni
-    assert s.k.d["taslak"]["katalog_kodu"] == yeni and s.k.d["uretilen_plan"]["kod"] == yeni
-    assert not s.k.d.get("son_is_emri")                                                     # henüz plan çizilmedi
+def test_alan_setinde_her_plan_bir_kez(s):
+    r = s.yaz("88 m² 2+1 tek kat çelik", **T88)
+    assert r.eylem == "secenek" and s.set["tur"] == "alan"
+    assert s.kodlar() == ["Ç8801", "KT02", "KT03", "Ç8201"]
+    assert "Ç8801K" not in r.mesaj and "Ç8801-K" not in r.mesaj
+    assert [b["id"].rsplit(":", 1)[1] for b in r.butonlar] == ["Ç8801", "KT02", "KT03"]
 
 
-# ── A3 ──────────────────────────────────────────────────────────────────────────────────────────────────────────────
-def _r01(s: Sohbet, r, yeni: str, tip: str):
-    assert r.eylem == "is_emri" and r.revizyon == 1, r
-    y = r.is_emri["yapi"]
-    assert y["kod"] == yeni and y["gosterim"] == "Yeni plan" and y["sistem"] == "celik"                 # planın kendi kodu
-    assert y["tanim"]["kod"] == yeni and y["tanim"]["cati"]["tip"] == tip and celik.tanim_dogrula(y)
-    assert f"Yeni plan ({K.CATI_SOZU[tip]}" in r.mesaj and "YENI-" not in r.mesaj
-    assert s.set["durum"] == "secildi" and s.set["secilen_kod"] == f"{yeni}-{K.CATI_EKI[tip]}"
-    assert "cati_secenekleri" not in s.k.d and s.k.d["taslak"]["katalog_kodu"] == yeni
-    assert s.k.d["uretilen_plan"]["kod"] == yeni and s.k.d["uretilen_plan"]["plan"]["cati"]["tip"] == tip      # revizyon bu plandan sürer
-    assert s.k.d["taslak"]["cati"]["tip"] == tip
+# ── plan seçildi, çatı sonra ───────────────────────────────────────────────────────────────────────────────────────────
+def test_dugmeyle_plan_sonra_cati_seti_sonra_r01(s):
+    s.yaz("88 m² 2+1 tek kat çelik", **T88)
+    alan_id = s.set["id"]
+    r = s.bas("Ç8801", "1. Ç8801")
+    assert r.eylem == "secenek" and s.set["tur"] == "cati_varyanti" and s.set["durum"] == "acik"
+    assert s.kodlar() == ["Ç8801", "Ç8801K", "Ç8801L"] and all(a.get("puan") is None for a in s.set["adaylar"])
+    assert r.mesaj.startswith("Ç8801 için 3 çatı seçeneği. Plan üçünde aynı (88 m², 2+1); fark çatıda.")
+    assert [b["baslik"] for b in r.butonlar] == ["1. Ç8801", "2. Ç8801-K", "3. Ç8801-L"]
+    eski = s.k.d["eski_setler"][-1]                                        # alan seti "seçildi" (kayıtta da: depo._set_kaydi)
+    assert eski["id"] == alan_id and eski["durum"] == "secildi" and eski["secilen_kod"] == "Ç8801"
+    assert s.k.d["taslak"]["katalog_kodu"] == "Ç8801" and not s.k.d.get("son_is_emri")
+    r = s.bas("Ç8801K", "2. Ç8801-K")
+    assert r.eylem == "is_emri" and _plan(r) == "Ç8801K" and r.is_emri["revizyon"] == 1
+    assert s.set["durum"] == "secildi" and s.set["secilen_kod"] == "Ç8801K"
 
 
-@pytest.mark.parametrize("tip", ["besik", "kirma"])
-def test_a3_dugmeyle_secim_r01(s, tip):
-    _, yeni = cati_seti(s)
-    _r01(s, s.dugme(f"{yeni}-{K.CATI_EKI[tip]}"), yeni, tip)
+def test_numarayla_plan_sonra_cati_sozuyle(s):
+    s.yaz("88 m² 2+1 tek kat çelik", **T88)
+    r = s.yaz(str(s.sira("Ç8801")))
+    assert r.eylem == "secenek" and s.set["tur"] == "cati_varyanti"
+    r = s.yaz("L olsun")
+    assert r.eylem == "is_emri" and _plan(r) == "Ç8801L"
 
 
-@pytest.mark.parametrize("metin,tip", [("2", "kirma"), ("1", "besik"), ("kırma olsun", "kirma"), ("Beşik çatı yapalım lütfen", "besik"),
-                                       ("çatı kırmalı olsun, başka değişiklik yok", "kirma")])
-def test_a3_numara_ya_da_soz_ile_secim(s, metin, tip):
-    _, yeni = cati_seti(s)
-    _r01(s, s.yaz(metin), yeni, tip)
+def test_numarayla_katalog_catisi(s):
+    s.yaz("88 m² 2+1 tek kat çelik", **T88)
+    s.yaz(str(s.sira("Ç8801")))
+    r = s.yaz("1")
+    assert r.eylem == "is_emri" and _plan(r) == "Ç8801"
 
 
-def test_a3_llm_cati_degisikligi_varyanti_yonlendirmez(s):
-    """Bayi "kırma olsun" yazınca LLM çatıyı değişiklik (cati_degistir) diye de okuyabilir: çatıyı kod seçti, istek düşmez ve
-    "otomatik yapılamıyor" denmez."""
-    _, yeni = cati_seti(s)
-    r = s.yaz("kırma olsun", cati={"tip": "kirma"}, varyantlar=[{"tur": "cati_degistir", "aciklama": "çatı kırma", "parametreler": {"tip": "kirma"}}])
-    _r01(s, r, yeni, "kirma")
-    assert "uygulayamadım" not in r.mesaj
+def test_plan_ve_cati_ayni_mesajda_set_atlanir(s):
+    s.yaz("88 m² 2+1 tek kat çelik", **T88)
+    r = s.yaz("Ç8801 çatı L olsun", katalog_kodu="Ç8801")
+    assert r.eylem == "is_emri" and _plan(r) == "Ç8801L"
 
 
-@pytest.mark.parametrize("metin", ["kırma olmasın", "beşik mi kırma mı?", "kırmaya gerek yok", "beşik değil kırma", "kırma olur mu?",
-                                   "tamam"])
-def test_a3_secim_olmayan_mesaj_seti_yeniden_sunar(s, metin):
-    _, yeni = cati_seti(s)
-    ilk = s.set["id"]
-    r = s.yaz(metin)
-    assert r.eylem == "secenek" and s.set["tur"] == "cati_secimi" and s.set["id"] != ilk, r
-    assert [a["kod"] for a in s.set["adaylar"]] == [f"{yeni}-B", f"{yeni}-K"]
-    assert "Önce çatıyı seçin (numara ya da düğme)." in r.mesaj and not s.k.d.get("son_is_emri")
-    assert s.k.d["eski_setler"][-1]["id"] == ilk and s.k.d["eski_setler"][-1]["durum"] == "eskidi"
+def test_talepte_yazilan_cati_plan_secilince_islenir(s):
+    r = s.yaz("88 m² 2+1 tek kat çelik, çatı K olsun", **T88)
+    assert r.eylem == "secenek" and s.set["tur"] == "alan" and s.k.d.get("celik_istek")
+    r = s.bas("Ç8801", "1. Ç8801")
+    assert r.eylem == "is_emri" and _plan(r) == "Ç8801K"
 
 
-def test_a3_set_acikken_yazilan_istek_secilen_catiya_islenir(s):
-    _, yeni = cati_seti(s)
-    r = s.yaz("dış duvarlar 140 olsun")
-    assert r.eylem == "secenek" and K.CELIK_ISTEK_NOTU in r.mesaj
-    r = s.dugme(f"{yeni}-K")
-    _r01(s, r, yeni, "kirma")
-    assert [d["op"] for d in r.is_emri["yapi"]["degisiklikler"]] == ["dis_karkas_140"]
+@pytest.mark.parametrize("metin", ["88 m² 2+1 tek kat çelik, çatı K mı L mi bilemedim", "88 m² 2+1 tek kat çelik, Ç8801L olmasın"])
+def test_talepte_kararsiz_ya_da_olumsuz_cati_secim_degil(s, metin):
+    s.yaz(metin, **T88)
+    r = s.bas("Ç8801", "1. Ç8801")
+    assert r.eylem == "secenek" and s.set["tur"] == "cati_varyanti"
 
 
-def test_a3_eski_cati_dugmesi_secimden_sonra(s):
-    _, yeni = cati_seti(s)
-    st = dict(s.set)
-    s.dugme(f"{yeni}-K")
-    etk = ET.coz({"reply_id": f"s:{st['id']}:{yeni}-B", "type": "interactive"}, s.k.d)
-    assert not etk["gecerli"] and etk["neden"] == "set zaten seçilmiş" and "Kırma zaten seçildi" in etk["mesaj"] and "YENI-" not in etk["mesaj"]
+def test_cati_varyanti_olmayan_model_dogrudan_r01(s):
+    s.yaz("88 m² 2+1 tek kat çelik", **T88)
+    r = s.bas("KT02", "2. KT-02")
+    assert r.eylem == "is_emri" and _plan(r) == "KT02"
 
 
-# ── A4, A5, A6 ──────────────────────────────────────────────────────────────────────────────────────────────────────
-def test_a4_cati_altinda_veranda_set_yok_kirma_ve_nedeni(s):
-    r = s.yaz("95 m² 3+1 tek kat çelik, ön verandalı", **TALEP, veranda={"istiyor": True, "konum": "on"})
-    assert r.eylem == "secenek" and s.set["tur"] == "yeni_plan"
-    yeni = s.yeni
-    r = s.dugme(yeni)
-    assert r.eylem == "is_emri" and r.is_emri["yapi"]["tanim"]["cati"]["tip"] == "kirma", r
-    assert r.mesaj.startswith("Veranda çatı altında olduğu için beşik çatı bu planda kurallara uymuyor; plan kırma çatıyla çizildi. ")
-    assert s.set["tur"] == "yeni_plan" and s.set["durum"] == "secildi" and s.set["secilen_kod"] == yeni
+def test_yeni_plan_setinden_banka_modeli_de_cati_sonra(s):
+    s.yaz("88 m² 2+1 tek kat çelik", **T88)
+    s.k.d["secenek_seti"]["tur"] = "yeni_plan"                            # İE-14 setinin banka seçeneği: aynı dal
+    r = s.bas("Ç8801", "2. Ç8801")
+    assert r.eylem == "secenek" and s.set["tur"] == "cati_varyanti"
 
 
-@pytest.mark.parametrize("tip", ["kirma", "besik"])
-def test_a5_talepte_cati_varsa_set_sunulmaz(s, tip):
-    r = s.yaz(f"95 m² 3+1 tek kat çelik, {K.CATI_SOZU[tip]} çatı", **TALEP, cati={"tip": tip})
-    assert r.eylem == "secenek" and s.set["tur"] == "yeni_plan"
-    yeni = s.yeni
-    r = s.dugme(yeni)
-    assert r.eylem == "is_emri" and r.is_emri["yapi"]["tanim"]["cati"]["tip"] == tip and r.is_emri["yapi"]["kod"] == yeni, r
-    assert "kurallara uymuyor" not in r.mesaj
+def test_cati_seti_acikken_kararsiz_cumle_yeniden_sunulur(s):
+    s.yaz("88 m² 2+1 tek kat çelik", **T88)
+    s.bas("Ç8801", "1. Ç8801")
+    r = s.yaz("çatı K mı L mi bilemedim")
+    assert r.eylem == "secenek" and s.set["tur"] == "cati_varyanti" and "Önce listeden seçin" in r.mesaj
 
 
-def test_a5_secim_mesajinda_yazilan_cati_plana_islenir(s):
-    """Plan çatısız üretildi (beşik); bayi seçerken "kırma" da yazdı: set sunulmaz, plan kırmayla kurulur (kod denetler)."""
-    s.yaz("95 m² 3+1 tek kat çelik", **TALEP)
-    yeni = s.yeni
-    r = s.yaz("yeni planı seçiyorum, kırma çatı olsun", katalog_kodu=yeni, cati={"tip": "kirma"})
-    assert r.eylem == "is_emri" and r.is_emri["yapi"]["tanim"]["cati"]["tip"] == "kirma" and r.is_emri["yapi"]["kod"] == yeni, r
-    assert "uygulayamadım" not in r.mesaj
+# ── çatı seti açıkken yeni talep (hakem bulgu 5) ──────────────────────────────────────────────────────────────────────
+def test_cati_seti_acikken_yeni_olcu_sessizce_dusmez(s):
+    s.yaz("88 m² 2+1 tek kat çelik", **T88)
+    s.bas("Ç8801", "1. Ç8801")
+    cati_id = s.set["id"]
+    r = s.yaz("100 m² 2+1 tek kat çelik olsun", **{**T88, "alan_m2": 100})
+    assert r.eylem == "secenek" and s.set["tur"] == "alan" and "100 m²" in r.mesaj
+    assert "Ç8801" not in s.kodlar()                                       # 100 m² ±%10: KT-01, KT-03, KT-02
+    assert any(e["id"] == cati_id and e["durum"] == "eskidi" for e in s.k.d["eski_setler"])
 
 
-def test_a5_yazilan_cati_kurallara_uymazsa_soylenir(s):
-    """Veranda çatı altında (kırma çizildi), bayi seçerken beşik yazdı: beşik geçmez, plan kırmayla ve nedeni yazılarak (sessiz düşmez)."""
-    s.yaz("95 m² 3+1 tek kat çelik, ön verandalı", **TALEP, veranda={"istiyor": True, "konum": "on"})
-    yeni = s.yeni
-    r = s.yaz("yeni plan olsun, beşik çatı", katalog_kodu=yeni, cati={"tip": "besik"})
-    assert r.eylem == "is_emri" and r.is_emri["yapi"]["tanim"]["cati"]["tip"] == "kirma", r
-    assert r.mesaj.startswith("Veranda çatı altında olduğu için beşik çatı bu planda kurallara uymuyor; plan kırma çatıyla çizildi. ")
+def test_cati_seti_acikken_llm_eski_bilgiyi_yinelerse_secim_bozulmaz(s):
+    s.yaz("88 m² 2+1 tek kat çelik", **T88)
+    s.bas("Ç8801", "1. Ç8801")
+    r = s.yaz("K olsun", **{**T88, "alan_m2": 88.0})                       # aynı değer (int/float) yeni talep değildir
+    assert r.eylem == "is_emri" and _plan(r) == "Ç8801K"
 
 
-@pytest.mark.parametrize("tip,soz", [("tek_egimli", "Tek eğimli"), ("teras", "Teras")])
-def test_a6_cizilmeyen_cati_set_basinda_soylenir(s, tip, soz):
-    r, yeni = cati_seti(s, f"95 m² 3+1 tek kat çelik, {soz.lower()} çatı", cati={"tip": tip})
-    assert r.eylem == "secenek" and s.set["tur"] == "cati_secimi", r
-    assert r.mesaj.startswith(f"{soz} çatı bu sürümde çizilmiyor; beşik ya da kırma seçin. Yeni plan için 2 çatı seçeneği.")
-    _r01(s, s.dugme(f"{yeni}-B"), yeni, "besik")
+# ── değişmeyenler ──────────────────────────────────────────────────────────────────────────────────────────────────────
+def test_model_kodu_yazilinca_cati_seti_bugunku_gibi(s):
+    r = s.yaz("Ç8801 olsun", katalog_kodu="Ç8801", yapi_turu="celik")
+    assert r.eylem == "secenek" and s.set["tur"] == "cati_varyanti" and s.kodlar() == ["Ç8801", "Ç8801K", "Ç8801L"]
+    assert not s.k.d.get("eski_setler")
 
 
-# ── A7 ──────────────────────────────────────────────────────────────────────────────────────────────────────────────
-def test_a7_revizyon_ayni_plan_cati_korunur(s):
-    _, yeni = cati_seti(s)
-    s.dugme(f"{yeni}-K")
-    r = s.yaz("dışlar 140 olsun")
-    assert r.eylem == "is_emri" and r.revizyon == 2 and r.is_emri["yapi"]["kod"] == yeni, r
-    assert r.is_emri["yapi"]["tanim"]["cati"]["tip"] == "kirma" and s.set["tur"] == "cati_secimi" and s.set["durum"] == "secildi"
-    assert [d["op"] for d in r.is_emri["yapi"]["degisiklikler"]] == ["dis_karkas_140"]
+def test_varyant_kodu_yazilinca_dogrudan_r01(s):
+    r = s.yaz("Ç8801K olsun", katalog_kodu="Ç8801K", yapi_turu="celik")
+    assert r.eylem == "is_emri" and _plan(r) == "Ç8801K"
 
 
-def test_ikinci_yeni_plan_secilirse_cati_seti_onun_icin(s):
-    s.yaz("95 m² 3+1 tek kat çelik", **TALEP)
-    ikinci = [a["kod"] for a in s.set["adaylar"] if a.get("durum") == "uretilen"][1]
-    r = s.dugme(ikinci)
-    assert r.eylem == "secenek" and [a["kod"] for a in s.set["adaylar"]] == [f"{ikinci}-B", f"{ikinci}-K"]
-    assert r.mesaj.startswith("Yeni plan 2 için 2 çatı seçeneği.")
-    _r01_kod = s.dugme(f"{ikinci}-K")
-    assert _r01_kod.is_emri["yapi"]["kod"] == ikinci and _r01_kod.is_emri["yapi"]["gosterim"] == "Yeni plan 2"
+def test_revizyonda_cati_seti_gelmez(s):
+    s.yaz("88 m² 2+1 tek kat çelik", **T88)
+    s.bas("Ç8801", "1. Ç8801")
+    s.bas("Ç8801L", "3. Ç8801-L")
+    s.n += 1
+    s.k.son_mesaj_id = f"wamid.CATI{s.n:03d}"
+    t = Talep.model_validate({"niyet": "revizyon", "guven": "yuksek", "ozet": "dış duvarlar 140 olsun"})
+    r = K.karar_ver(t, s.k, BAYI, s.kat, "dış duvarlar 140 olsun")
+    assert r.eylem == "is_emri" and _plan(r) == "Ç8801L" and r.is_emri["revizyon"] == 2
 
 
-def test_banka_modeli_cati_adimi_degismez(s):
-    """Ç8801 (çatı varyantlı banka modeli) ve Ç8201 (çatı seçeneği yok) bugünkü gibi: yeni çatı adımı yalnız yeni planda."""
-    r = s.yaz("Ç8201 istiyorum", katalog_kodu="Ç8201", yapi_turu="celik")
-    assert r.eylem == "is_emri" and "cati_secenekleri" not in s.k.d
-
-
-# ── yardımcılar ────────────────────────────────────────────────────────────────────────────────────────────────────
-def test_taban_kod_yeni_plan_cati_eki():
-    assert Katalog.taban_kod("YENI-1A2B3C-K") == "YENI-1A2B3C" == Katalog.taban_kod("YENI-1A2B3C-B") == Katalog.taban_kod("YENI-1A2B3C")
-    assert Katalog.taban_kod("Ç8801K") == "Ç8801" and Katalog.taban_kod("P6001") == "P6001" and Katalog.taban_kod("KT-03") == "KT03"
-    assert Katalog.taban_kod("YENI-1A2B3C-L") == "YENI-1A2B3C-L"                 # yalnız beşik ve kırma eki
-
-
-@pytest.mark.parametrize("metin,tip", [
-    ("kırma olsun", "kirma"), ("beşik", "besik"), ("Beşik çatılı olsun", "besik"), ("kırmalı yapalım", "kirma"), ("KIRMA", "kirma"),
-    ("kırma olsun başka değişiklik yok", "kirma"), ("beşiğe dönelim", "besik"),
-    ("kırma olmasın", None), ("beşik istemiyoruz", None), ("kırma yok", None), ("kırmaya gerek yok", None), ("beşik mi kırma mı?", None),
-    ("beşik değil kırma", None), ("kırma olur mu?", None), ("beşik olsun. kırma da olur", None), ("çatı olsun", None), ("", None),
-    ("kırmızı olsun", None)])
-def test_cati_tipi_secimi_okumasi(metin, tip):
-    assert CO.cati_tipi_secimi(metin) == tip
-
-
-def test_cati_secimi_mesaji_turkce_m2():
-    a = [{"kod": "YENI-AAAAAA-B", "gosterim": "Beşik", "sira": 1}, {"kod": "YENI-AAAAAA-K", "gosterim": "Kırma", "sira": 2}]
-    m = SC.cati_secimi_mesaji(a, {"kod": "YENI-AAAAAA", "gosterim": "Yeni plan", "katalog_m2": 95.06, "oda_programi": "3+1"})
-    assert m == ("Yeni plan için 2 çatı seçeneği. Plan ikisinde aynı (95,1 m², 3+1); fark çatıda.\n\n1. Beşik\n2. Kırma\n\n"
-                 "Birini seçin ya da yazın (örn. \"kırma olsun\").")
-    assert "(88 m², 2+1)" in SC.cati_secimi_mesaji(a, {"kod": "x", "gosterim": "Yeni plan", "katalog_m2": 88.0, "oda_programi": "2+1"})
-
-
-def test_set_kaydi_konusmada_kucuk_kalir(s):
-    """Set kaydı (secenek_setleri tablosuna giden) tanım ve plan taşımaz; çatı tanımları konuşmada, seçimle silinir."""
-    _, yeni = cati_seti(s)
-    assert len(json.dumps(s.set, ensure_ascii=False)) < 4000
-    s.dugme(f"{yeni}-B")
-    assert "cati_secenekleri" not in s.k.d and copy.deepcopy(s.k.d)
+def test_model_koduyla_acilan_cati_setinde_llm_baglam_bilgisi_secimi_bozmaz(s):
+    s.yaz("Ç8801 olsun", katalog_kodu="Ç8801", yapi_turu="celik")
+    r = s.yaz("K olsun", oda_programi="2+1", yapi_turu="celik", kat_sayisi=1)    # taslakta olmayan alan değişiklik sayılmaz
+    assert r.eylem == "is_emri" and _plan(r) == "Ç8801K"

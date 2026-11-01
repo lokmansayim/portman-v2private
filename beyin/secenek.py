@@ -108,6 +108,14 @@ def celik_seti_mi(adaylar: list[dict]) -> bool:
     return bool(adaylar) and all(a.get("yapi_turu") == "celik" for a in adaylar)
 
 
+def tek_plan(adaylar: list[dict]) -> list[dict]:
+    """İE-25 (Lokman, 1.11.2026: çatı plan seçildikten sonra, elimizdeki modellerle): alan setinde her plan bir kez. Banka modelinin
+    çatı varyantları (Ç8801K, Ç8801L) listeden çıkar; taban model seçilince çatı setinde gelir. Tabanı listede olmayan varyant kalır
+    (yeni plan setinin banka süzgeciyle aynı ilke, `karar.plan_sonucu`)."""
+    varyant = {str(v).upper() for a in adaylar for v in (a.get("varyantlar") or [])}
+    return [a for a in adaylar if str(a["kod"]).upper() not in varyant]
+
+
 def cati_seti(adaylar: list[dict]) -> list[dict]:
     """Katalog modelinin çatı seçenekleri (katalog çatısı, K, L …) numaralı, puansız (İE-05 devir §3.1 kural 5)."""
     out = []
@@ -117,8 +125,7 @@ def cati_seti(adaylar: list[dict]) -> list[dict]:
 
 
 def set_kaydi(kaynak_mesaj_id: str, siralanmis: list[dict], ts: dict, tur: str = "alan") -> dict:
-    """Konuşma durumuna ve secenek_setleri tablosuna yazılan set (şablon yolu ve büyük alanlar hariç). tur: alan | cati_varyanti | yeni_plan |
-    cati_secimi (İE-25)."""
+    """Konuşma durumuna ve secenek_setleri tablosuna yazılan set (şablon yolu ve büyük alanlar hariç). tur: alan | cati_varyanti."""
     return {"id": set_id(kaynak_mesaj_id), "durum": "acik", "kaynak_mesaj_id": kaynak_mesaj_id, "tur": tur,
             "oncelik": ts.get("oncelik"), "agirliklar": dict(AGIRLIKLAR),
             "adaylar": [{k: a.get(k) for k in ("kod", "sira", "puan", "hesap", "referans_model", "oda_programi", "katalog_m2",
@@ -158,19 +165,6 @@ def cati_mesaji(siralanmis: list[dict], referans: dict) -> str:
     govde = (f"{g} için {len(siralanmis)} çatı seçeneği. Plan {'üçünde' if len(siralanmis) == 3 else 'hepsinde'} aynı"
              + (f" ({m2:g} m², {oda})" if isinstance(m2, (int, float)) else "") + "; fark çatıda.\n\n" + "\n".join(satirlar)
              + "\n\nBirini seçin ya da yazın (örn. \"çatı K olsun\").")
-    return govde[:1024]
-
-
-def cati_secimi_mesaji(siralanmis: list[dict], referans: dict) -> str:
-    """İE-25 · yeni planın çatı seti (plan seçildikten sonra; Lokman 1.11): 'Yeni plan için 2 çatı seçeneği. Plan ikisinde aynı (95 m², 3+1);
-    fark çatıda. 1. Beşik 2. Kırma …'. m² Türkçe biçimde (plan kartıyla aynı)."""
-    m2 = referans.get("katalog_m2"); oda = referans.get("oda_programi") or ""
-    m2s = (f"{float(m2):.1f}".replace(".", ",").removesuffix(",0") + " m²") if isinstance(m2, (int, float)) else ""
-    olcu = ", ".join(x for x in (m2s, oda) if x)
-    n = len(siralanmis)
-    govde = (f"{gosterim(referans)} için {n} çatı seçeneği. Plan {'ikisinde' if n == 2 else 'hepsinde'} aynı" + (f" ({olcu})" if olcu else "")
-             + "; fark çatıda.\n\n" + "\n".join(f"{a['sira']}. {gosterim(a)}" for a in siralanmis)
-             + "\n\nBirini seçin ya da yazın (örn. \"kırma olsun\").")
     return govde[:1024]
 
 

@@ -1,13 +1,14 @@
-"""İE-25 · çatı setinin örneği (D-28 hedef örneği): "95 m² 3+1 tek kat çelik" → yeni plan 1 seçilir → "Çatı seçin" (1. Beşik 2. Kırma).
+"""İE-25 · çatı seçiminin örneği (D-28 hedef örneği): "88 m² 2+1 tek kat çelik" → alan seti (her plan bir kez) → Ç8801 seçilir →
+"Çatı seçin" (1. Ç8801 katalog çatısı, 2. Ç8801-K, 3. Ç8801-L) → seçilen çatıyla r01.
 
-Canlıdaki kodla üretir, LLM ve WhatsApp yok: talep kayıtlı okuma gibi elle (`TALEP`), plan gerçek üreticiyle kör (`plan_uretici.uret`,
-LLM kapalı; worker'ın `plan_sonucu` yolu), yeni plan seçimi worker'ın kendisiyle (`kanal/worker.isle`, düğme `s:<set>:<kod>`): çatı
-setinin kararı, iki kart (`plan_karti`, genel motor, perspektifsiz) ve bayiye giden bileşik görsel (`secenek_satirlari`). Seçilen
-çatıyla r01: düğme yine `worker.isle`'den, çizim gerçek genel motorla (`--r01`; yavaş, kıyasa girmez: kıyas r01'in tanım izini tutar).
+Main'deki kodla üretir, LLM ve WhatsApp yok: talep kayıtlı okuma gibi elle (`TALEP`), alan setinin görseli worker'ın üreticisiyle
+(`worker.secenek_satirlari`), plan seçimi worker'ın kendisiyle (`kanal/worker.isle`, düğme `s:<set>:<kod>`): çatı setinin kararı ve bayiye
+giden bileşik görsel (banka modellerinin kart görselleri; tek görsel, üç düğme). Seçilen çatıyla r01: düğme yine `worker.isle`'den, çizim
+gerçek genel motorla (`--r01`; yavaş, kıyasa girmez: kıyas her çatının r01 kararını ve tanım izini tutar).
 
     python -m testler.cati_secimi.ornek <çıktı klasörü> [--r01]
 
-Çıktı: `ozet.json` (mesaj, düğmeler, kartların ve bileşik görselin içerik izleri, iki çatının r01 tanım izi) ve görseller. Kıyas
+Çıktı: `ozet.json` (iki setin mesajı, düğmeleri ve bileşik görsellerinin içerik izleri, üç çatının r01 özeti) ve görseller. Kıyas
 `testler/cati_secimi/test_cati_seti_hedef.py`: `ozet.json` ↔ `hedef.json` (Lokman'ın onayıyla donar; D-02).
 """
 from __future__ import annotations
@@ -24,10 +25,12 @@ for p in (KOK, KOK / "kanal"):
 
 NUMARA = "900000000101"                        # gerçek olmayan deneme numarası
 BAYI = {"kod": "B01", "ad": "Deneme Bayi A", "rol": "bayi", "numara": NUMARA}
-MESAJ = "95 m² 3+1 tek kat çelik"
-TALEP = {"niyet": "yeni_talep", "guven": "yuksek", "ozet": MESAJ, "alan_m2": 95, "oda_programi": "3+1", "yapi_turu": "celik", "kat_sayisi": 1}
-AYAR = {"llm": {"backend": "manuel"}, "patron_teknik_not": False, "mesaj_katmani": True, "plan_uretimi": {"acik": True}}
-KIMLIK = ("wamid.CATIORNEK001", "wamid.CATIORNEK002", "wamid.CATIORNEK003")      # sabit: yeni planın kodu ve set kimliği bundan türer
+MESAJ = "88 m² 2+1 tek kat çelik"
+TALEP = {"niyet": "yeni_talep", "guven": "yuksek", "ozet": MESAJ, "alan_m2": 88, "oda_programi": "2+1", "yapi_turu": "celik", "kat_sayisi": 1}
+AYAR = {"llm": {"backend": "manuel"}, "patron_teknik_not": False, "mesaj_katmani": True}
+KIMLIK = ("wamid.CATIORNEK001", "wamid.CATIORNEK002", "wamid.CATIORNEK003")      # sabit: set kimlikleri bundan türer
+PLAN = "Ç8801"
+CATILAR = (("Ç8801", "1. Ç8801"), ("Ç8801K", "2. Ç8801-K"), ("Ç8801L", "3. Ç8801-L"))
 
 
 def _gelen(mid: str, metin: str, reply_id: str | None = None) -> dict:
@@ -42,67 +45,63 @@ def _iz(yol) -> str | None:
     return iz.dosya_izi(Path(yol)) if yol and Path(yol).is_file() else None
 
 
-def uret(cikti: Path, r01: bool = False) -> dict:
+def _set_ozeti(satir: dict, st: dict) -> dict:
+    return {"tur": st["tur"], "adaylar": [a["kod"] for a in st["adaylar"]], "mesaj": satir["interactive"]["body"]["text"],
+            "dugmeler": [[b["reply"]["id"].replace(st["id"], "{set}"), b["reply"]["title"]] for b in satir["interactive"]["action"]["buttons"]],
+            "gorsel_izi": _iz(satir.get("file"))}
+
+
+def uret(cikti: Path, r01: bool = False, r01_cati: str = "Ç8801K") -> dict:
     """Örneği `cikti`ya üretir ve özetini döner (ayrıca `cikti/ozet.json`)."""
     import worker as W
-    from beyin import celik, karar as K, plan_uretici as PU
+    from beyin import karar as K
     from beyin.katalog import Katalog
     from beyin.konusma import Konusma
     from beyin.sema import Talep
+    from kanal import etkilesim as ET
     cikti = Path(cikti); cikti.mkdir(parents=True, exist_ok=True)
     hazirlik = cikti / "projeler"
     kat = Katalog(kabul_edilmis=None)                                       # yedi çelik aday görünür (harness gibi)
     k = Konusma(NUMARA, kok=cikti / "durum")
-    # 1) talep → yeni plan seti (üretim kör; kartsız: yeni plan setinin görseli bu örneğin konusu değil)
-    k.son_mesaj_id, k.plan_uretimi = KIMLIK[0], True
+    # 1) talep → alan seti (her plan bir kez) ve görseli (worker'ın üreticisi)
+    k.son_mesaj_id = KIMLIK[0]
     r = K.karar_ver(Talep.model_validate(TALEP), k, BAYI, kat, MESAJ)
-    assert r.gerekce == K.PLAN_URETIMI, r
-    pu = PU.uret(k.d["plan_istegi"]["talep"], ayar={"acik": False})
-    r = K.plan_sonucu(k, kat, pu, [None, None])
-    assert r.eylem == "secenek", r
-    yeni = next(a["kod"] for a in k.d["secenek_seti"]["adaylar"] if a.get("durum") == "uretilen")
-    # 2) yeni plan seçilir → çatı seti (worker: karar, kartlar, bileşik görsel, satırlar)
-    g = _gelen(KIMLIK[1], "1. Yeni plan", f"s:{k.d['secenek_seti']['id']}:{yeni}")         # metin: düğmenin başlığı (meta_api)
+    assert r.eylem == "secenek" and k.d["secenek_seti"]["tur"] == "alan", r
+    st1 = k.d["secenek_seti"]
+    [s1] = [x for x in W.secenek_satirlari(_gelen(KIMLIK[0], MESAJ), r, kat, r.mesaj, hazirlik) if x.get("kind") == "interactive"
+            and (x["interactive"].get("action") or {}).get("buttons")]
+    ozet = {"talep": MESAJ, "alan_seti": _set_ozeti(s1, st1)}
+    dosyalar = {"alan_seti.png": s1.get("file")}
+    # 2) plan seçilir (düğme) → çatı seti (worker: karar ve bileşik görsel)
+    g = _gelen(KIMLIK[1], f"1. {PLAN}", f"s:{st1['id']}:{PLAN}")           # metin: düğmenin başlığı (meta_api)
     s = W.isle(g, AYAR, k=k, proje_koku=hazirlik, katalog=kat)
     assert s["sonuc"]["eylem"] == "secenek", s["sonuc"]
-    [satir] = [x for x in s["satirlar"] if x.get("kind") == "interactive"]
-    st = k.d["secenek_seti"]
-
-    def yerel(x):                                  # kalıcı akış kartı projects/'e taşır; konuşma oradaki yolu tutar (`kart_son_yeri`)
-        return str(hazirlik / Path(x).relative_to(W.KANAL / "projects")) if x and str(x).startswith(str(W.KANAL / "projects")) else x
-    kartlar = [yerel(v["gorsel"]) for v in k.d["cati_secenekleri"]["adaylar"]]
-    ozet = {"talep": MESAJ, "yeni_plan": "Yeni plan (1)", "set_turu": st["tur"],
-            "mesaj": satir["interactive"]["body"]["text"],
-            "dugmeler": [[b["reply"]["id"].replace(st["id"], "{set}").replace(yeni, "{plan}"), b["reply"]["title"]]
-                         for b in satir["interactive"]["action"]["buttons"]],
-            "kartlar": {v["gosterim"]: {"cati": v["cati_tipi"], "cati_adi": v["sunum"]["cati_adi"], "kart_izi": _iz(yerel(v["gorsel"])),
-                                        "tanim_izi": celik.tanim_sha_icerik({**v["tanim"], "kod": "{plan}"})}
-                        for v in k.d["cati_secenekleri"]["adaylar"]},
-            "secenekler_izi": _iz(satir["file"]) if satir.get("file") else None}
-    dosyalar = {"secenekler.png": satir.get("file"), **{f"kart_{Path(x).parent.parent.name[-1]}.png": x for x in kartlar}}
-    # 3) seçilen çatıyla r01: her çatı için konuşmanın kopyasında düğme (kıyas tanımı tutar; --r01 kırmayı çizer)
+    [s2] = [x for x in s["satirlar"] if x.get("kind") == "interactive"]
+    st2 = k.d["secenek_seti"]
+    ozet["cati_seti"] = _set_ozeti(s2, st2)
+    ozet["alan_seti_kapanis"] = next(({"durum": e["durum"], "secilen_kod": e.get("secilen_kod")} for e in k.d.get("eski_setler") or []
+                                      if e.get("id") == st1["id"]), None)
+    dosyalar["cati_seti.png"] = s2.get("file")
+    # 3) seçilen çatıyla r01: her çatı için konuşmanın kopyasında düğme (kıyas kararı tutar; --r01 seçilen çatıyı çizer)
     ozet["r01"] = {}
-    for tip in ("besik", "kirma"):
-        kk = Konusma(NUMARA, kok=cikti / f"durum_{tip}")
+    for kod, baslik in CATILAR:
+        kk = Konusma(NUMARA, kok=cikti / f"durum_{kod}")
         kk.d = copy.deepcopy(k.d)
-        kod = f"{yeni}-{K.CATI_EKI[tip]}"
-        g3 = _gelen(KIMLIK[2], f"{'1. Beşik' if tip == 'besik' else '2. Kırma'}", f"s:{st['id']}:{kod}")
-        if r01 and tip == "kirma":
+        g3 = _gelen(KIMLIK[2], baslik, f"s:{st2['id']}:{kod}")
+        if r01 and kod == r01_cati:
             s3 = W.isle(g3, AYAR, k=kk, proje_koku=hazirlik, katalog=kat)
             ie = kk.d["son_is_emri"]
             gorsel = next((x.get("file") for x in s3["satirlar"] if x.get("kind") == "interactive" and x.get("file")), None)
             pdf = next((x.get("file") for x in s3["satirlar"] if x.get("kind") == "document"), None)
-            dosyalar.update({"r01_kirma_gorsel.png": gorsel, "r01_kirma.pdf": pdf})
+            dosyalar.update({f"r01_{kod}_gorsel.png": gorsel, f"r01_{kod}.pdf": pdf})
             mesaj = next(x["interactive"]["body"]["text"] for x in s3["satirlar"] if x.get("kind") == "interactive")
         else:
-            from kanal import etkilesim as ET
             etk = ET.coz(g3, kk.d)
-            kk.son_mesaj_id, kk.plan_uretimi = KIMLIK[2], True
+            kk.son_mesaj_id = KIMLIK[2]
             r3 = K.karar_ver(Talep.model_validate(etk["talep"]), kk, BAYI, kat, etk["metin"])
             ie, mesaj = r3.is_emri, r3.mesaj
         y = ie["yapi"]
-        ozet["r01"][tip] = {"kod": "{plan}" if y["kod"] == yeni else y["kod"], "revizyon": ie["revizyon"], "cati": y["tanim"]["cati"]["tip"],
-                            "tanim_izi": celik.tanim_sha_icerik({**y["tanim"], "kod": "{plan}"}),
+        ozet["r01"][kod] = {"kod": y["kod"], "revizyon": ie["revizyon"], "tanim": y["tanim"], "tanim_sha256": y["tanim_sha256"],
                             "mesaj": mesaj.replace(ie.get("is_emri_no") or "-", "{is_emri}")}
     (cikti / "ozet.json").write_text(json.dumps(ozet, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     ozet["_dosyalar"] = {a: b for a, b in dosyalar.items() if b}

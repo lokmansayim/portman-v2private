@@ -455,32 +455,6 @@ def cati_olumsuz(metin: str | None, mahaller: list[dict] | None = None) -> bool:
     return False
 
 
-# ── İE-25 · yeni planın çatı tipi (beşik / kırma), plan seçildikten sonra ─────────────────────────────────────────────────────────────
-_CATI_TIPI_T = (("besik", _S(r"besik\w*", r"besig\w*")), ("kirma", _S(r"kirma\w*")))
-
-
-def cati_tipi_secimi(metin: str | None) -> str | None:
-    """Yeni planın çatı seti açıkken bayinin sözünden çatı tipi: "kırma olsun", "beşik çatı", "kırmalı yapalım" → "kirma" / "besik".
-    Seçim yalnız tek tipin olumlu geçtiği mesajdır: iki tip ("beşik mi kırma mı?", "beşik değil kırma"), olumsuz ("kırma olmasın", "beşik
-    istemiyoruz", "kırma yok", "kırmaya gerek yok") ya da soru biçimli ("kırma olur mu?") çatı cümlesi seçim değildir; set yeniden sunulur
-    (`cati_olumsuz` ilkesi: ters çatı sorulmadan seçilmez). "yok" yalnız çatı sözünün ya da onun "gerek"inin ardındaysa olumsuzdur
-    ("kırma olsun başka değişiklik yok" seçimdir)."""
-    tipler: set[str] = set()
-    for p in _parcalar(metin):
-        soz = norm(p).split()
-        yer = {i: t for i, w in enumerate(soz) for t, rx in _CATI_TIPI_T if rx.fullmatch(w)}
-        if not yer:
-            continue
-        olumsuz = any(_OLUMSUZ_FIIL_T.fullmatch(w) for w in soz) or "?" in p or any(_SORU_T.fullmatch(w) for w in soz)
-        for i, w in enumerate(soz):
-            if w == "yok" and i > 0 and (i - 1 in yer or (soz[i - 1].startswith(("gerek", "ihtiyac", "lazim")) and i - 2 in yer)):
-                olumsuz = True
-        if olumsuz:
-            return None
-        tipler |= set(yer.values())
-    return next(iter(tipler)) if len(tipler) == 1 else None
-
-
 def _secenek_kodu(s: str, katalog_aday: dict | None) -> str | None:
     """Tek çatı seçeneğinin aday kodu: "katalog" → katalog modeli, "k"/"l" → o harfle biten varyant."""
     if not katalog_aday or not katalog_aday.get("varyantlar"):
