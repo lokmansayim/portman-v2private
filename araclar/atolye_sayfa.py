@@ -78,7 +78,7 @@ def _sol(kart: dict) -> str:
                 ("Oda programı", o.get("oda_programi")), ("Dış ölçü", f"{sayi(o.get('dis_olcu_cm'))} cm"),
                 ("Çatı", f"{kart.get('cati_adi')} · tip {cati.get('tip')} · {cati.get('duzlem')} düzlem · yüzey {sayi(cati.get('yuzey_m2'))} m²"),
                 ("Çatı kenarları", ", ".join(f"{a} {sayi(v / 100)} m" for a, v in (cati.get("kenar_cm") or {}).items()) or "…"),
-                ("Müşteri projesi", "evet (bayiye adsız)" if kart.get("musteri_projesi") else "hayır"),
+                ("Müşteri projesi", "evet (tarif yazılmaz; tanımda sahibinin adı varsa çizimde o görünür, D-33)" if kart.get("musteri_projesi") else "hayır"),
                 ("Durum", kart.get("durum"))]
     s = ["<h2>Model kartı</h2><table>"] + [f"<tr><th>{e(a)}</th><td>{e(b)}</td></tr>" for a, b in satirlar] + ["</table>"]
     mt = kart.get("metraj_testi") or {}
