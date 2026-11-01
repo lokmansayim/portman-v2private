@@ -549,7 +549,8 @@ def ciz(a) -> int:
     kart["durum"] = "beklemede" if kart["metraj_testi"]["durum"] == "beklemede" else "kontrolde"
     from araclar import atolye_sayfa
     pdf = hedef / f"{B.dosya_adi(kod)}_kontrol_c{no:02d}.pdf"
-    atolye_sayfa.kontrol_pdf(kart, hedef, gk, pdf)
+    from motor.genel.bayi_gorseli import musteri_projesi, sahip_adi
+    atolye_sayfa.kontrol_pdf(kart, hedef, gk, pdf, sahip_adi(t) if musteri_projesi(t) else "")   # motorun koşulu: sayfa çizimle aynı (D-33)
     kart["son_cizim"]["kontrol_pdf"] = _goreli(pdf)
     olay(kart, "ciz", no=no, durum=kart["durum"], passed=bool(m.get("passed")))
     kart_yaz(kart, a.banka)
