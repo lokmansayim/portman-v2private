@@ -1,0 +1,631 @@
+{
+ "sema": "portman.muhurlu_konular/1",
+ "aciklama": "Mühürlü konular (BK-20, D-42; AGENTS.md › Mühürlü konular). Lokman'ın mühürlediği bir konu, Lokman yeni bir değişiklik verene kadar değiştirilmez ve yorumlanmaz. Her kilit, kuralı sabitleyen bir yerdir (kural kitabının anahtarı, hedef örnek ya da testin kendisi); iz, içeriğin sha256'sının ilk 16 hanesi. Biçim ve kipler `.claude/hooks/muhur_koruma.py`'nin başında. Fren: düzenleme (PreToolUse) ve komut (PreToolUse/PostToolUse Bash) hook'ları, oturum başında liste (SessionStart), CI'da kilit testi (`testler/test_muhurlu_konular.py`). Açma yalnız Lokman'ın açık sözüyle (`ac`), kapama yeni kararla (`kapat`); ikisi de `gecmis`'e yazılır. Yeni mühür ve yeni kilit eklemek serbesttir (izleri `kilitle` doldurur); var olan mühür kayıttan silinmez.",
+ "cekirdek": [
+  ".claude/hooks/muhur_koruma.py",
+  "KARARLAR/muhurlu.json",
+  "testler/test_muhurlu_konular.py"
+ ],
+ "muhurler": [
+  {
+   "kod": "M-01",
+   "konu": "Saçak omegası",
+   "kural": "100'lük saçak omegası saçak duvarının üstünde duvar boyunca (taşan verandada yan kirişin üstünde kiriş boyunca); saçağa uzamaz, saçaktan saçağa yalnız baş makas omegası gider. Adedi saçak boyundan, gerçek listeler gibi (PK-01 9, TK-01 11, TK-03 11).",
+   "kararlar": [
+    "D-41"
+   ],
+   "pr": [
+    106,
+    107
+   ],
+   "lokman": [
+    {
+     "tarih": "2026-11-01 15:19",
+     "soz": "hiç bir zaman saçak omegalarının dışarı 30 cm uzayacağını söylemedim sadece baş makas omegasını söyledim"
+    },
+    {
+     "tarih": "2026-11-01 15:28",
+     "soz": "sadece saçak omegalarını başlardan 30'ar santim kısalt ... en sonki düzgün halinden ben düzeltme yapmadan bozma"
+    },
+    {
+     "tarih": "2026-11-01 20:16",
+     "soz": "tamam bir daha değişmemek üzere bu konuyu mühürle taki ben yeni bir değişiklik verene kadar sen yorumlama",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPPXFT39Fka3UbxZCQQCKAN3L"
+    }
+   ],
+   "kilitler": [
+    {
+     "yer": "kurallar/yerlesim/prefabrik.json#kurallar.sacak_omegasi_yerlesimi",
+     "iz": "0e8c3c74a85f1e65"
+    },
+    {
+     "yer": "kurallar/urun/kartlar.json#kartlar[kod=CK-01].nerede",
+     "iz": "1e267cfccd98ba49"
+    },
+    {
+     "yer": "kurallar/liste/prefabrik.json#kurallar.sacak_omegasi_bolen_m",
+     "iz": "b831c6e027489051"
+    },
+    {
+     "yer": "testler/paket/veri/saglama.json#TK-01.kartlar.CK-01",
+     "iz": "6b51d431df5d7f14"
+    },
+    {
+     "yer": "testler/paket/veri/saglama.json#TK-01.d41_farki",
+     "iz": "752ff27dee9482d9"
+    },
+    {
+     "yer": "testler/motor/veri/TK02_beklenen.json#iz.liste[kalem=100'lük saçak omegası]",
+     "iz": "97112032d5dc4f78"
+    },
+    {
+     "yer": "testler/motor/veri/TK01_r07_beklenen.json#iz.liste[kalem=100'lük saçak omegası]",
+     "iz": "97112032d5dc4f78"
+    },
+    {
+     "yer": "testler/kimlik/test_k5b.py::test_tk01_sacak_omegasi_sacak_boyu",
+     "iz": "a71a2f3236aedfe2"
+    },
+    {
+     "yer": "testler/kimlik/test_k5b.py::test_sacak_omegasi_betopanla_ve_omegayla_cakismaz",
+     "iz": "8c894f80c1de6ec4"
+    },
+    {
+     "yer": "testler/kimlik/test_k3b.py::test_cati_kenarlari_yerleri",
+     "iz": "7fdd23afc560b8e5"
+    },
+    {
+     "yer": "testler/motor/test_ie24_3b.py::test_kart_modelinin_catisi_listeyle_ayni",
+     "iz": "0c057c5b86f6d716"
+    },
+    {
+     "yer": "testler/paket/test_ie24_rehber.py::test_sacak_omegasi_ve_z_kart_modelinden",
+     "iz": "01d44ddd5af4d477"
+    },
+    {
+     "yer": "testler/paket/test_paket.py::test_sacak_omegasi_z_ve_veranda_asigi_kart_modelinden",
+     "iz": "4296f875cfab4205"
+    }
+   ],
+   "durum": "mühürlü",
+   "gecmis": []
+  },
+  {
+   "kod": "M-02",
+   "konu": "Prefabrik ön onay çizimi (TK-02 r09 düzeni)",
+   "kural": "Tek sayfa dikey A4: üstte ön ve arka, altta sol ve sağ görünüş, ortada pano ölçüsüz kat planı; çatı profili ve detay yok; veranda çatısı ana çatının küçüğü (eğim ve topuk aynı); aks soluk kesik; ıslak hacimde vasistas tek kanat; verandaya açılan pencere sürgülü; son pano 122 cm ve üzeriyse tam panoya tamamlanır; PC-01…PC-29 kuralları. Prefabrik çıktı motor/dxf_out.py ve motor/bayi_gorseli.py'den; çeliğin Örnek Şablon paftası prefabrikte kullanılmaz (Lokman, 27 Ekim 2026 21:13). Hedef örnekler TK-02 ve TK-01 r07.",
+   "kararlar": [
+    "D-29",
+    "D-30",
+    "D-31",
+    "D-34"
+   ],
+   "pr": [
+    79,
+    87
+   ],
+   "lokman": [
+    {
+     "tarih": "2026-10-29 11:12",
+     "soz": "var olan çizim kurallarını güncelliyoruz aman bir daha başa dönmeyelim"
+    },
+    {
+     "tarih": "2026-10-29 12:24",
+     "soz": "tamamdır %100 onaylıyorum ... artık bu noktadan hareket edeceğiz"
+    }
+   ],
+   "kilitler": [
+    {
+     "yer": "kurallar/prefabrik/cizim_kurallari.json#ayri",
+     "iz": "a24d9d09e9ceb3a6"
+    },
+    {
+     "yer": "kurallar/prefabrik/cizim_kurallari.json#kurallar[karar=D-29].kural",
+     "iz": "46262c9da27f61c1"
+    },
+    {
+     "yer": "kurallar/prefabrik/cizim_kurallari.json#kurallar[karar=D-30].kural",
+     "iz": "b1f57b7a6077f474"
+    },
+    {
+     "yer": "kurallar/prefabrik/cizim_kurallari.json#kurallar[karar=D-31].kural",
+     "iz": "602be97cd3de8983"
+    },
+    {
+     "yer": "kurallar/prefabrik/cizim_kurallari.json#kurallar[karar=D-34].kural",
+     "iz": "b707a64b15e9c43f"
+    },
+    {
+     "yer": "testler/motor/veri/TK02_beklenen.json#onay",
+     "iz": "a5cb90adc7df8dae"
+    },
+    {
+     "yer": "testler/motor/veri/TK02_beklenen.json#iz.dogrulama",
+     "iz": "6611a7a0c05f56df"
+    },
+    {
+     "yer": "testler/motor/veri/TK02_beklenen.json#iz.bom",
+     "iz": "115308ea32544366"
+    },
+    {
+     "yer": "testler/motor/veri/TK02_beklenen.json#iz.gorunusler",
+     "iz": "06bc733cc090670b"
+    },
+    {
+     "yer": "testler/motor/veri/TK02_beklenen.json#iz.pdf_izi",
+     "iz": "95c061141ee6c921"
+    },
+    {
+     "yer": "testler/motor/veri/TK02_beklenen.json#iz.dxf_izi",
+     "iz": "cd197c0143e17ae1"
+    },
+    {
+     "yer": "testler/motor/veri/TK01_r07_beklenen.json#onay",
+     "iz": "d1e4cd9e2c010d7f"
+    },
+    {
+     "yer": "testler/motor/veri/TK01_r07_beklenen.json#iz.dogrulama",
+     "iz": "952df656c1c67cae"
+    },
+    {
+     "yer": "testler/motor/veri/TK01_r07_beklenen.json#iz.bom",
+     "iz": "348ab4dcd7a7110f"
+    },
+    {
+     "yer": "testler/motor/veri/TK01_r07_beklenen.json#iz.gorunusler",
+     "iz": "06bc733cc090670b"
+    },
+    {
+     "yer": "testler/motor/veri/TK01_r07_beklenen.json#iz.pdf_izi",
+     "iz": "21e3d5b48004a066"
+    },
+    {
+     "yer": "testler/motor/veri/TK01_r07_beklenen.json#iz.dxf_izi",
+     "iz": "dd87176d3417e0f9"
+    },
+    {
+     "yer": "testler/motor/veri/TK02.json",
+     "iz": "4835aa8e530e6e09"
+    },
+    {
+     "yer": "testler/motor/veri/TK01_r07.json",
+     "iz": "3c0d4d9a4bea2b95"
+    },
+    {
+     "yer": "testler/motor/test_d29_tk02_yorumlari.py",
+     "iz": "346d601ae5330537"
+    },
+    {
+     "yer": "testler/motor/test_d30_tam_pano.py",
+     "iz": "f665ab355881f6e7"
+    },
+    {
+     "yer": "testler/motor/test_d31_gorunus.py",
+     "iz": "d064a29d05fca766"
+    },
+    {
+     "yer": "testler/motor/test_d34_cizim.py",
+     "iz": "2467d706ab672bf7"
+    }
+   ],
+   "durum": "mühürlü",
+   "gecmis": []
+  },
+  {
+   "kod": "M-03",
+   "konu": "Baş makas omegası saçaktan saçağa",
+   "kural": "Baş makas omegası baş makasın boyunca saçak ucundan saçak ucuna; taşan verandanın baş makası (dış kiriş) da aynı. Listede her baş makasta açıklık + 2 × saçak, toplam ÷ 2,5. Kirişsiz açık çatı parçası sayılmaz.",
+   "kararlar": [
+    "D-32"
+   ],
+   "pr": [
+    81
+   ],
+   "lokman": [
+    {
+     "tarih": "2026-10-29 13:12",
+     "soz": "11. adımdaki baş makas omegalarını saçağın sonuna kadar uzat hem ana makas hem veranda makaslar aynı şekilde"
+    },
+    {
+     "tarih": "2026-10-29 21:12",
+     "soz": "baş makasların altına tamamen baş makas omegası geliyor yani sadece duvara gelen makas kısımlarına değil baş makasların uçtan uca baş makas omegası gelir"
+    }
+   ],
+   "kilitler": [
+    {
+     "yer": "kurallar/liste/prefabrik.json#kurallar.bas_makas_omegasi_bolen_m",
+     "iz": "ea08c0e16fbf80e9"
+    },
+    {
+     "yer": "testler/motor/veri/TK02_beklenen.json#iz.liste[kalem=Baş makas omegası]",
+     "iz": "1fcee06607e53662"
+    },
+    {
+     "yer": "testler/motor/veri/TK01_r07_beklenen.json#iz.liste[kalem=Baş makas omegası]",
+     "iz": "1fcee06607e53662"
+    },
+    {
+     "yer": "testler/motor/test_d32_omega.py::test_bas_makas_omegasi_sacaktan_sacaga",
+     "iz": "c9ce90ce8108b52a"
+    },
+    {
+     "yer": "testler/motor/test_d32_omega.py::test_tasan_veranda_bas_makasi_kiriste",
+     "iz": "33603093d7bd68ad"
+    },
+    {
+     "yer": "testler/motor/test_d32_omega.py::test_kirissiz_acik_parca_sayilmaz",
+     "iz": "74e45aa70f67aacf"
+    }
+   ],
+   "durum": "mühürlü",
+   "gecmis": []
+  },
+  {
+   "kod": "M-04",
+   "konu": "İç duvar üstü omegası",
+   "kural": "100'lük iç duvarın üstündeki omega 100'lük duvar omegasıdır: listede \"100'lük duvar omegası\" satırında (÷ 2,5), ayrı satır yok; 60'lık duvar omegasında sayılmaz. Ölçüsü 60'lık omeganınki, sırtı 10,5 cm (kart OM-02).",
+   "kararlar": [
+    "D-32"
+   ],
+   "pr": [
+    83
+   ],
+   "lokman": [
+    {
+     "tarih": "2026-10-29 13:12",
+     "soz": "iç duvar omegaların yani duvar üstü omegalarını 60'lık almışsın aslında 60'lık omega ile tüm ölçüleri doğru ama sırt genişliği 10.5 cm olacak"
+    },
+    {
+     "tarih": "2026-10-30 07:04",
+     "soz": "iç duvar üstü omegası diğer adı 100'lük duvar omegası yani listede var"
+    }
+   ],
+   "kilitler": [
+    {
+     "yer": "kurallar/yerlesim/prefabrik.json#kurallar.tavan_omegasi_yerlesimi.sirt_100",
+     "iz": "0edbe53de7849800"
+    },
+    {
+     "yer": "kurallar/yerlesim/prefabrik.json#kurallar.tavan_omegasi_yerlesimi.parca_boyu_100",
+     "iz": "2f39d414c9c7d197"
+    },
+    {
+     "yer": "kurallar/liste/prefabrik.json#kurallar.duvar_omegasi_100_bolen_m",
+     "iz": "6a55c7fa6bd9f193"
+    },
+    {
+     "yer": "kurallar/urun/kartlar.json#kartlar[kod=OM-02].ad",
+     "iz": "5d3667d728ec65a8"
+    },
+    {
+     "yer": "kurallar/urun/kartlar.json#kartlar[kod=OM-02].liste",
+     "iz": "434378bddd875fbb"
+    },
+    {
+     "yer": "testler/motor/veri/TK02_beklenen.json#iz.liste[kalem=100'lük duvar omegası]",
+     "iz": "7c1f1880ab4326d0"
+    },
+    {
+     "yer": "testler/motor/test_d32_omega.py::AYRI_SATIR",
+     "iz": "7c3da3910f7fa499"
+    },
+    {
+     "yer": "testler/motor/test_d32_omega.py::test_ic_duvar_ustu_100_asma",
+     "iz": "77866a4bb3015ea1"
+    },
+    {
+     "yer": "testler/motor/test_d32_omega.py::test_ic_duvar_ustu_100_ters_degismez",
+     "iz": "4ac311fa6f1b7e00"
+    },
+    {
+     "yer": "testler/motor/test_d32_omega.py::test_yerlesim_sirti",
+     "iz": "9320c87ca2a48759"
+    },
+    {
+     "yer": "testler/motor/test_d32_omega.py::test_om02_karti",
+     "iz": "9a1f588d9655d9be"
+    }
+   ],
+   "durum": "mühürlü",
+   "gecmis": []
+  },
+  {
+   "kod": "M-05",
+   "konu": "Kirişler askıda kalmaz",
+   "kural": "Gövdenin içindeki açık mahalin (balkon, köşe verandası) iki açık kenarının birleştiği köşeye Motor 10 × 10 kolon koyar (PC-30); kirişler kolonlu verandanın kuralıyla (dış ölçü − 10). Montaj rehberinde baş makas betopanı uçta da baş makas omegasının U'sunun içinde.",
+   "kararlar": [
+    "D-38"
+   ],
+   "pr": [
+    87
+   ],
+   "lokman": [
+    {
+     "tarih": "2026-10-31 15:08",
+     "soz": "tam kirişlerin birleştiği yerde kolon gelir önceki yaptığımız tüm verandalı modellerde bu vardı yine kural olarak ekle hiç bir zaman kirişler askıda kalmaz"
+    },
+    {
+     "tarih": "2026-10-31 15:13",
+     "soz": "baş makas betopanları baş makas Omegasının tam arasına girmeli yukarıda kalmamalı özellikle uçlarda daha fazla yukarıda kalmış"
+    }
+   ],
+   "kilitler": [
+    {
+     "yer": "kurallar/prefabrik/cizim_kurallari.json#kurallar[kod=PC-30].kural",
+     "iz": "879a374a301d103f"
+    },
+    {
+     "yer": "testler/motor/test_veranda.py::test_kose_kolonu",
+     "iz": "5b790a0c4afc831b"
+    },
+    {
+     "yer": "testler/motor/test_veranda.py::test_nis_agzi_yalniz_tek_yuzu_acik_mahalde",
+     "iz": "e509b9836b0c961f"
+    },
+    {
+     "yer": "testler/motor/test_duvar_omegasi.py::test_motor_duvarsiz_sinir_kiris",
+     "iz": "8170e01f7aab2030"
+    },
+    {
+     "yer": "testler/paket/test_ie24_rehber.py::test_kose_balkonu",
+     "iz": "3ae0c34804d86ba7"
+    }
+   ],
+   "durum": "mühürlü",
+   "gecmis": []
+  },
+  {
+   "kod": "M-06",
+   "konu": "Sandviç panelli çatı",
+   "kural": "Sandviç panelde (100 cm kapatır, 5 hadve) çatı kaplaması tek kat panele göre kalınlaşır ve alın sacının alnı o kadar genişler; başka hiçbir parçanın yeri, boyu ya da sayısı değişmez; liste, teklif ve çizim değişmez.",
+   "kararlar": [
+    "D-40"
+   ],
+   "pr": [
+    101
+   ],
+   "lokman": [
+    {
+     "tarih": "2026-11-01 10:23",
+     "soz": "şayet çatı sandviç panel ise çatı kaplaması kalınlaşır ve doğal olarak alın sacı alnı da genişler başka hiç bir yerde değişiklik olmaz"
+    }
+   ],
+   "kilitler": [
+    {
+     "yer": "kurallar/yerlesim/prefabrik.json#kurallar.cati_kaplamasi.profil",
+     "iz": "1db077b2a0c9a354"
+    },
+    {
+     "yer": "testler/kimlik/test_d40_sandvic.py",
+     "iz": "812ea39993cae503"
+    },
+    {
+     "yer": "testler/paket/test_ie24_rehber.py::test_sandvic_panel_kalinlasir",
+     "iz": "adfe4de4ebd12f6e"
+    }
+   ],
+   "durum": "mühürlü",
+   "gecmis": []
+  },
+  {
+   "kod": "M-07",
+   "konu": "Dört evin kat planı ve çatısı (AP-15, AP-09, AP-03, AP-22)",
+   "kural": "İE-17 PR-2'de onaylanan dört evin İş Emri'leri, ön onay çizimleri (dört görünüş, çatı satırı, tepe ölçüsü) ve çatıları: AP-15 girintili gövdenin beşiği, AP-22 çapraz cumba, AP-09 ana çatı verandayı örtmez (veranda %10 tek eğim), AP-03 verandada köşe kırması (ana çatıyla 45° kırma, cumbayla dere).",
+   "kararlar": [
+    "İE-17"
+   ],
+   "pr": [
+    100,
+    103
+   ],
+   "lokman": [
+    {
+     "tarih": "2026-11-01 10:07",
+     "soz": "üçüne de baktım sorun yok onaylıyorum birleştirmeye geçebilirsin"
+    },
+    {
+     "tarih": "2026-11-01 11:20",
+     "soz": "tamamdır onaylıyorum olmuş"
+    }
+   ],
+   "kilitler": [
+    {
+     "yer": "testler/cizim/evler/AP15.json",
+     "iz": "abb76b2b504aaaf2"
+    },
+    {
+     "yer": "testler/cizim/evler/AP09.json",
+     "iz": "60d9d69960eb0e95"
+    },
+    {
+     "yer": "testler/cizim/evler/AP03.json",
+     "iz": "a23333a1b5b3bfcb"
+    },
+    {
+     "yer": "testler/cizim/evler/AP22.json",
+     "iz": "b037abe1f0763436"
+    },
+    {
+     "yer": "testler/cizim/pafta_olcu.json#AP15",
+     "iz": "263f681446b199e1"
+    },
+    {
+     "yer": "testler/cizim/pafta_olcu.json#AP09",
+     "iz": "439570fca7246888"
+    },
+    {
+     "yer": "testler/cizim/pafta_olcu.json#AP03",
+     "iz": "8339946387e7166f"
+    },
+    {
+     "yer": "testler/cizim/pafta_olcu.json#AP22",
+     "iz": "88adafe74014047d"
+    },
+    {
+     "yer": "testler/cizim/test_acilan_evler.py::BEKLENEN[AP15]",
+     "iz": "27eff439e611a6d0"
+    },
+    {
+     "yer": "testler/cizim/test_acilan_evler.py::BEKLENEN[AP09]",
+     "iz": "aadacd7338f72ded"
+    },
+    {
+     "yer": "testler/cizim/test_acilan_evler.py::BEKLENEN[AP03]",
+     "iz": "1301a78f6fb9dcd2"
+    },
+    {
+     "yer": "testler/cizim/test_acilan_evler.py::BEKLENEN[AP22]",
+     "iz": "c9f13f36c8a395c0"
+    },
+    {
+     "yer": "testler/cizim/test_acilan_evler.py::EK_SATIR",
+     "iz": "8f8a7648b5664853"
+    },
+    {
+     "yer": "testler/motor/test_ie17_pr2.py",
+     "iz": "7eed8d8173f64f76"
+    }
+   ],
+   "durum": "mühürlü",
+   "gecmis": []
+  },
+  {
+   "kod": "M-08",
+   "konu": "Çatı seçenek adımı",
+   "kural": "Talepte çatı yoksa önce sorulmaz; plan seçilince \"Çatı seçin\" görseli gelir, elimizdeki modellerin kendi çatılarıyla (Ç8801 üç çatı). Hedef örnek çatı seti görseli (testler/cati_secimi/hedef.json).",
+   "kararlar": [
+    "İE-25"
+   ],
+   "pr": [
+    105
+   ],
+   "lokman": [
+    {
+     "tarih": "2026-11-01 10:56",
+     "soz": "Plan seçildikten sonra (karar kartı: Talepte çatı yazılmamışsa Portman çatıyı ne zaman sorsun?)"
+    },
+    {
+     "tarih": "2026-11-01 11:54",
+     "soz": "var olan modeller üzerinden gidelim"
+    },
+    {
+     "tarih": "2026-11-01 12:18",
+     "soz": "onaylıyorum",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPPV6DaRxoejgtwBbbusVqjrR"
+    }
+   ],
+   "kilitler": [
+    {
+     "yer": "testler/cati_secimi/hedef.json",
+     "iz": "071b8aec757df32e"
+    },
+    {
+     "yer": "testler/cati_secimi/test_cati_seti_hedef.py",
+     "iz": "9603e6c37ba91a7c"
+    },
+    {
+     "yer": "testler/test_cati_secimi.py",
+     "iz": "90718963d758cbd3"
+    }
+   ],
+   "durum": "mühürlü",
+   "gecmis": []
+  },
+  {
+   "kod": "M-09",
+   "konu": "Çelik duvar paneli oda bölmesinde biter",
+   "kural": "Çelikte duvar paneli her oda bölmesinde biter: koşu ona dik bağlanan her dış, iç ve ek duvarın ekseninde bölünür; T ile bağlanan iç duvarda da iki panele bölünür; bölmesiz koşu 516 cm'yi aşarsa eşit bölünür (İE-16 A1, A5).",
+   "kararlar": [
+    "İE-16"
+   ],
+   "pr": [
+    49,
+    77
+   ],
+   "lokman": [
+    {
+     "tarih": "2026-10-27 10:33",
+     "soz": "bölmeleri ise çelikte genellikle duvar panelini her bir oda bölmesinde bitiririz"
+    },
+    {
+     "tarih": "2026-10-28 13:14",
+     "soz": "iki panele bölünür"
+    }
+   ],
+   "kilitler": [
+    {
+     "yer": "kurallar/karkas/celik_karkas.json#bolme.deger",
+     "iz": "706cd94174839bbc"
+    },
+    {
+     "yer": "testler/genel/test_karkas.py::test_panel_oda_bolmesinde_biter",
+     "iz": "1f01456d1a8cac69"
+    },
+    {
+     "yer": "testler/genel/test_karkas.py::test_bolmesiz_kosu_en_uzun_516_esit_panel",
+     "iz": "deea6cc2a5f7c496"
+    }
+   ],
+   "durum": "mühürlü",
+   "gecmis": []
+  },
+  {
+   "kod": "M-10",
+   "konu": "Çelik çizim seti (Örnek Şablon paftası)",
+   "kural": "Çelik hattının çizim seti bugünkü hâliyle: plan, çatı planı, dört görünüş, Örnek Şablon paftası, perspektifler, bayi görseli ve düzenlenebilir DXF (kurallar/cizim/cizim_seti.json, pafta_sablonu.json, duzenlenebilir.json); yedi modelin çizim izleri son referanstaki gibi (PNG, PDF, DXF); bayiye giden çıktılarda yazı çakışması sıfır.",
+   "kararlar": [
+    "D-10",
+    "D-11",
+    "D-16"
+   ],
+   "pr": [
+    18,
+    19,
+    102
+   ],
+   "lokman": [
+    {
+     "tarih": "2026-10-07 07:45",
+     "soz": "Çizimlerin bu halini çok beğendim burada kalalım sadece açıklamalar kısmını düzelteceğiz"
+    },
+    {
+     "tarih": "2026-11-01 20:32",
+     "soz": "Evet, bugünkü hâliyle mühürle (karar kartı: Çelik çizim setini (Örnek Şablon paftası) de mühürleyeyim mi?)",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPPJLDUhrt86PxDARsVg5BxTw"
+    }
+   ],
+   "kilitler": [
+    {
+     "yer": "kurallar/cizim/cizim_seti.json",
+     "iz": "682ff561a8696af9"
+    },
+    {
+     "yer": "kurallar/cizim/pafta_sablonu.json",
+     "iz": "a2823a137daca004"
+    },
+    {
+     "yer": "kurallar/cizim/duzenlenebilir.json",
+     "iz": "b9d31dbef398fb03"
+    },
+    {
+     "yer": "{son_referans}/genel_parmak_izleri.txt@\\.(png|pdf|dxf)$",
+     "iz": "68ef7b5157b344a5"
+    },
+    {
+     "yer": "testler/genel/test_yazi_cakismasi.py",
+     "iz": "62988e4b7095baca"
+    },
+    {
+     "yer": "testler/genel/test_bk09_cizim.py",
+     "iz": "334950d4227a5743"
+    },
+    {
+     "yer": "testler/genel/test_duzenlenebilir.py",
+     "iz": "e7ebac88b28e33f1"
+    }
+   ],
+   "durum": "mühürlü",
+   "gecmis": []
+  }
+ ]
+}

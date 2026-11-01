@@ -78,6 +78,12 @@
             "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/sir_koruma.py\"",
             "timeout": 20,
             "statusMessage": "Sır ve dondurulmuş dosya denetimi"
+          },
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/muhur_koruma.py\" duzenleme",
+            "timeout": 20,
+            "statusMessage": "Mühürlü konular denetimi"
           }
         ]
       },
@@ -89,6 +95,12 @@
             "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/komut_koruma.py\"",
             "timeout": 20,
             "statusMessage": "Komut freni"
+          },
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/muhur_koruma.py\" komut",
+            "timeout": 20,
+            "statusMessage": "Mühürlü konular denetimi"
           }
         ]
       }
@@ -102,6 +114,29 @@
             "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/hizli_kontrol.py\"",
             "timeout": 60,
             "statusMessage": "Sözdizimi denetimi"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/muhur_koruma.py\" komut_sonu",
+            "timeout": 20,
+            "statusMessage": "Mühürlü konular denetimi"
+          }
+        ],
+        "matcher": "Bash"
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/muhur_koruma.py\" oturum",
+            "timeout": 20,
+            "statusMessage": "Mühürlü konular listesi"
           }
         ]
       }
