@@ -287,13 +287,18 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
             and not any(v.tur.startswith("pencere") for v in t.varyantlar):
         k.d["taslak"].pop("pencereler", None); k.d["son_soru_alani"] = None
         dusen_not = "Önceki pencere değişikliğini netleştirmediğiniz için uygulamadım; isterseniz sonra ekleriz. "
-    # İE-25 (geometri hakemi bulgu 5): çatı seti açıkken gelen yeni ölçü ya da oda (yeni talep) sessizce düşmez: seçilen model bırakılır,
-    # talep yeni bilgisiyle yeniden okunur (yeni alan seti açılınca çatı seti "eskidi" olur). Çatı seçimi ve model kodu bunun dışında.
+    # İE-25 (geometri hakemi bulgu 5; ikinci tur 1–2): çatı seti açıkken gelen m², dış ölçü, oda, kat ya da yapı türü değişikliği sessizce
+    # düşmez: çatı seti "eskidi" kapanır (eski düğmesi geçmez), seçilen model bırakılır, talep yeni bilgisiyle yeniden okunur (yeni set, soru
+    # ya da plan üretimi). Çatı seçimi ve model kodu bunun dışında.
     st0 = k.d.get("secenek_seti") or {}
-    if st0.get("durum") == "acik" and st0.get("tur") == "cati_varyanti" and t.niyet == "yeni_talep" and not t.katalog_kodu \
-            and _talep_bilgisi_degisti(k.d["taslak"], t):
-        k.d["taslak"].pop("katalog_kodu", None)
-        k.not_dus("kural", "çatı seti açıkken yeni ölçü/oda: talep yeniden okundu")
+    if st0.get("durum") == "acik" and st0.get("tur") == "cati_varyanti" and t.niyet in ("yeni_talep", "revizyon") and not t.katalog_kodu:
+        taban0 = katalog.aday(next((a.get("kod") for a in st0.get("adaylar") or [] if a.get("sira") == 1), None))
+        if _talep_bilgisi_degisti(k.d["taslak"], t, taban0):
+            st0["durum"] = "eskidi"
+            k.d.setdefault("eski_setler", []).append(st0)
+            k.d["eski_setler"] = k.d["eski_setler"][-5:]
+            k.d["taslak"].pop("katalog_kodu", None)
+            k.not_dus("kural", "çatı seti açıkken talep bilgisi değişti: set eskidi, talep yeniden okundu")
     t = _pencere_varyantlarina_soz_isle(t, metin)    # G-3/G-4 (29.09): pencere değişikliği tek yoldan, B1 kurallarıyla
     k.birlestir(t.model_dump())
     k.d["asama"] = "topluyor"
@@ -502,21 +507,34 @@ def _celik_dali(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts: dict) 
 CELIK_ISTEK_NOTU = "Mesajınızdaki değişiklik isteğini seçtiğiniz plana işleyeceğim."
 
 
-def _talep_bilgisi_degisti(ts: dict, t: Talep) -> bool:
-    """Bu mesajın okuması taslakta zaten olan talep bilgisini (m², dış ölçü, oda, kat) başka bir değerle değiştiriyor mu. Taslakta olmayan
-    alan değişiklik sayılmaz (LLM'in bağlamdan doldurduğu oda ya da yapı türü, "Ç8801 olsun" → "K olsun", seçimi bozmasın)."""
-    for a in ("alan_m2", "oda_programi", "kat_sayisi"):
-        v, e = getattr(t, a, None), ts.get(a)
-        if v in (None, "") or e in (None, ""):
-            continue
-        if isinstance(v, (int, float)) and isinstance(e, (int, float)):
-            if abs(float(v) - float(e)) > 1e-6:
-                return True
-        elif str(v) != str(e):
+def _talep_bilgisi_degisti(ts: dict, t: Talep, model: dict | None) -> bool:
+    """Bu mesajın okuması talebi değiştiriyor mu (çatı seti açıkken): m², dış ölçü, oda, kat ya da yapı türü yeni bir değer taşıyor. Kıyas
+    taslaktaki değerle; taslakta yoksa seçilen modelinkiyle (Ç8801: 88 m², 2+1, tek kat, çelik), m² modelin setteki toleransıyla (±%10).
+    LLM'in bağlamdan yinelediği aynı değer değişiklik değildir ("Ç8801 olsun" → "K olsun", oda 2+1, kat 1)."""
+    model = model or {}
+    km2 = model.get("katalog_m2") if isinstance(model.get("katalog_m2"), (int, float)) else None
+
+    def m2_farkli(v: float) -> bool:
+        e = ts.get("alan_m2")
+        if isinstance(e, (int, float)):
+            return abs(float(v) - float(e)) > 1e-6
+        return km2 is not None and abs(float(v) - km2) > SC.ALAN_TOLERANS * float(v)
+
+    if isinstance(t.alan_m2, (int, float)) and m2_farkli(t.alan_m2):
+        return True
+    beklenen = {"oda_programi": ts.get("oda_programi") or model.get("oda_programi"), "kat_sayisi": ts.get("kat_sayisi") or model.get("kat"),
+                "yapi_turu": ts.get("yapi_turu") or model.get("yapi_turu")}
+    for a, e in beklenen.items():
+        v = getattr(t, a, None)
+        if v not in (None, "") and e not in (None, "") and str(v) != str(e):
             return True
-    d = t.dis_olcu.model_dump() if getattr(t, "dis_olcu", None) is not None else None
-    e = ts.get("dis_olcu")
-    return bool(d and e and (d.get("en_m"), d.get("boy_m")) != (e.get("en_m"), e.get("boy_m")))
+    d = t.dis_olcu.model_dump() if getattr(t, "dis_olcu", None) is not None else {}
+    if d.get("en_m") and d.get("boy_m"):
+        e = ts.get("dis_olcu") or {}
+        if e.get("en_m") and e.get("boy_m"):
+            return sorted([float(d["en_m"]), float(d["boy_m"])]) != sorted([float(e["en_m"]), float(e["boy_m"])])
+        return m2_farkli(float(d["en_m"]) * float(d["boy_m"]))
+    return False
 
 
 def _cati_varyant_seti(k: Konusma, bayi: dict, katalog: Katalog, taban: dict, ts: dict) -> Karar:
@@ -534,6 +552,7 @@ def _cati_varyant_seti(k: Konusma, bayi: dict, katalog: Katalog, taban: dict, ts
         k.d["eski_setler"] = k.d["eski_setler"][-5:]
     saklandi = _celik_istek_sakla(k)
     k.not_dus("kural", f"plan seçildi, çatı sonra: {taban['kod']} çatı seti")
+    k.d["soru_sayisi"] = max(0, int(k.d.get("soru_sayisi") or 0) - 1)   # çatı seti planın seçimiyle aynı soru (hakem ikinci tur 3: MAX_SORU)
     return _secenekler(k, katalog, ts, uygun=SC.cati_seti(uygun), tur="cati_varyanti", referans=taban,
                        ek_not=CELIK_ISTEK_NOTU if saklandi else "")
 

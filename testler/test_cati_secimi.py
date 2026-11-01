@@ -206,3 +206,52 @@ def test_model_koduyla_acilan_cati_setinde_llm_baglam_bilgisi_secimi_bozmaz(s):
     s.yaz("Ç8801 olsun", katalog_kodu="Ç8801", yapi_turu="celik")
     r = s.yaz("K olsun", oda_programi="2+1", yapi_turu="celik", kat_sayisi=1)    # taslakta olmayan alan değişiklik sayılmaz
     assert r.eylem == "is_emri" and _plan(r) == "Ç8801K"
+
+
+# ── geometri hakemi ikinci tur ────────────────────────────────────────────────────────────────────────────────────────────
+@pytest.mark.parametrize("metin,talep,beklenen", [
+    ("iki katlı olsun", {"kat_sayisi": 2}, "kat"),                                    # taslakta kat yoktu: modelinkiyle (tek kat) kıyas
+    ("prefabrik olsun", {"yapi_turu": "prefabrik"}, "yapi"),
+    ("3+1 olsun", {"oda_programi": "3+1"}, "oda"),
+])
+def test_cati_seti_acikken_talep_degisikligi_seti_eskitir(s, metin, talep, beklenen):
+    s.yaz("88 m² 2+1 çelik", alan_m2=88, oda_programi="2+1", yapi_turu="celik")
+    s.bas("Ç8801", "1. Ç8801")
+    cati = dict(s.set)
+    r = s.yaz(metin, **talep)
+    assert any(e["id"] == cati["id"] and e["durum"] == "eskidi" for e in s.k.d["eski_setler"]), r
+    assert not (s.set.get("id") == cati["id"] and s.set.get("durum") == "acik")
+    assert s.k.d["taslak"].get("katalog_kodu") != "Ç8801" and not s.k.d.get("son_is_emri")
+    # eski çatı düğmesi artık geçmez (plan eski bilgiyle çizilmez)
+    g = {"id": "wamid.ESKI", "type": "interactive", "reply_id": f"s:{cati['id']}:Ç8801K", "text": "2. Ç8801-K"}
+    assert ET.coz(g, s.k.d)["gecerli"] is False
+
+
+def test_dis_olcuyle_baslayan_talepte_m2_degisikligi(s):
+    s.yaz("9x10 m 2+1 tek kat çelik", dis_olcu={"en_m": 9, "boy_m": 10}, oda_programi="2+1", yapi_turu="celik", kat_sayisi=1)
+    s.bas("Ç8801", "1. Ç8801")
+    r = s.yaz("100 m² olsun", alan_m2=100)
+    assert r.eylem == "secenek" and s.set["tur"] == "alan" and "Ç8801" not in s.kodlar()
+
+
+def test_revizyon_niyetli_olcu_degisikligi_de_dusmez(s):
+    s.yaz("88 m² 2+1 tek kat çelik", **T88)
+    s.bas("Ç8801", "1. Ç8801")
+    s.n += 1
+    s.k.son_mesaj_id = f"wamid.CATI{s.n:03d}"
+    t = Talep.model_validate({"niyet": "revizyon", "guven": "yuksek", "ozet": "100 m² olsun", "alan_m2": 100})
+    r = K.karar_ver(t, s.k, BAYI, s.kat, "100 m² olsun")
+    assert r.eylem == "secenek" and s.set["tur"] == "alan" and "100 m²" in r.mesaj
+
+
+def test_cati_seti_soru_butcesinden_yemez(s):
+    s.yaz("çelik ev istiyorum", yapi_turu="celik")
+    s.yaz("2+1", oda_programi="2+1")
+    s.yaz("88 m²", alan_m2=88)
+    assert s.set.get("tur") == "alan"
+    s.bas("Ç8801", "1. Ç8801")
+    assert s.set["tur"] == "cati_varyanti"
+    r = s.yaz("mutfak penceresi 120x120 olsun")
+    assert r.eylem != "yonlendir" and s.set["durum"] == "acik"                  # set yeniden sunulur, istek saklanır
+    r = s.bas("Ç8801K", "2. Ç8801-K")
+    assert r.eylem == "is_emri" and _plan(r) == "Ç8801K"
