@@ -141,7 +141,8 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | İE | İE-22 | WhatsApp'tan bayi kaydı: kayıtsız numaraya ad ve firma, Patron'a [Onayla] [Reddet], kart ve karşılama (pano 111) | alındı (29.10; CIO; `claude/project-thread-cnk2nk`, PR #82) |
 | İE | İE-23 | yapı kimliği: banka modellerine koddan kimlik (anlamsal, topolojik, parametrik, sayısal); PR-1 kimlik, PR-2 banka modelinde germe, PR-3 benzerlik ve olağan aralıklar | alındı (30.10; CIO; `claude/project-thread-2bptdw`) |
 | İE | İE-24 | gerçek proje denemesi TK-03 (Lokman'ın 87,72 m² evinin 1. katı): girintili gövde (`girintiler`), sonra çatı, görünüş, liste; "sen dene, ben düzelte düzelte gideceğim" | alındı (30.10; `claude/project-thread-756g5a`) |
-| İE | **İE-25** | — | **sıradaki boş** |
+| İE | İE-25 | çatı seçenek adımı: çatı plan seçildikten sonra (pano 41; Lokman 1.11 karar kartı "Plan seçildikten sonra"); çelik yeni planda Beşik / Kırma seti, altın B01, E01, X08 | alındı (1.11; `claude/project-thread-91gav7`) |
+| İE | **İE-26** | — | **sıradaki boş** |
 | BK | BK-01–BK-08 | bu depo; BK-08 8a sonrası temizlik (`bk-08-8a-temizlik`) | yazıldı |
 | BK | BK-09 | metin ve çizim düzeltmeleri, G1 (`bk-09-metin-cizim`, `bk-09-cizim-g1`) | alındı (14.10) |
 | BK | BK-10 | 8b sonrası küçük işler (DXF `.txt` notu, geç gelen Excel, panelden Excel, plan değişince kontrol kapanır, D-19 24 saat kuralı, düğmeli mesajda satır sonları, `YENI-` kodu ve ilk çelik planda LLM özeti bayiye gitmez, komut freni metni; pano satır 15; çelikte kapı değişikliği kapsam dışı) | alındı (30.10; `claude/project-thread-h64uz2`) |
