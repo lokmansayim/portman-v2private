@@ -1,4 +1,4 @@
-"""İE-17 · Paftaya uygunluk: açılan üç evin Motor planı, montaj paftasından ölçülen değerlerle (`pafta_olcu.json`).
+"""İE-17 · Paftaya uygunluk: açılan evlerin (PR-1 üç, PR-2 dört) Motor planı, montaj paftasından ölçülen değerlerle (`pafta_olcu.json`).
 
 Bu bir Motor kilidi değil, pafta sayılarıdır (test politikası; İE-11'deki PK-01 testleri gibi): paftanın vektör çiziminden okunan duvar
 parçaları, pencere ve kapı boşlukları, köşe parçaları (ad ve antet okunmadı). Pafta kendi ölçeğiyle çizilmiş (dış kutusu 762 × 917 gibi,
@@ -19,7 +19,7 @@ from motor import geometry as G  # noqa: E402
 
 EVLER = KOK / "testler" / "cizim" / "evler"
 PAFTA = json.loads((KOK / "testler" / "cizim" / "pafta_olcu.json").read_text(encoding="utf-8"))
-EV = ("AP01", "AP13", "AP16")
+EV = ("AP01", "AP13", "AP16", "AP15", "AP09", "AP03", "AP22")
 DERZ_PAYI = 2.0          # cm: paftanın okunuşu ve ölçeği (eşdeğer derz)
 
 # Paftada olup Motor'un çizmediği duvar parçaları: (yön, eksen)
@@ -40,12 +40,46 @@ BILINEN_DERZ = {
         ("x", 218.25): ([569.75, 695.25], []),        # mutfağın veranda penceresi paftada 251'lik tek pencereli panoda (D-29: Motor'da iki yanı
                                                       # 62,75, ekler 1 cm kaydı; önceden 568,75 / 694,25)
     },
+    # PR-2 (1 Kasım 2026)
+    "AP15": {
+        ("y", 381.5): ([], [348.53]),                 # salon–yatak odası 2 bölmesi: paftada 57,75 + 59,75 + 62,75, Motor'da 57,75 + 125,5
+        ("y", 758.0): ([602.5, 728.0], []),           # yatak odası 2'nin sağ penceresi paftada 251'lik tek pencereli panoda (D-29: iki yanı 62,75)
+    },
+    "AP09": {
+        ("x", 249.25): ([261.0], []),                 # veranda–salon duvarı paftada eksiz tek parça (150'lik sürgülü + kapı); Motor'da 251 + kapılı pano
+        ("y", 5.0): ([437.5], []),                    # salonun sol penceresi (120/70) paftada 251'lik panoda, ortada değil; Motor'da iki tam pano
+        ("y", 735.0): ([], [248.9]),                  # sağ duvar: paftada veranda hizasında iki yarım pano, Motor'da tam pano
+    },
+    "AP03": {
+        ("y", 632.5): ([512.0], [516.97]),            # veranda–salon duvarı: dış kapılı pano paftada köşenin yüzünden 125,5, Motor'da aksından
+                                                      # (duvar_ucu: 120,5 + 62,75; paftada 125,5 + 57,75)
+    },
+    "AP22": {},
 }
 # Köşe parçası farkları (Motor, pafta; yuvarlak cm): iç L köşelerde 1–5 cm; paftadaki tesisat kutusunun köşesi
 BILINEN_KOSE = {
     "AP01": ([(628, 295, 632, 305)], [(173, 476, 179, 479), (627, 300, 637, 305)]),    # veranda iç köşesi: paftada parça 10 × 5 (Motor 5 × 10)
     "AP13": ([], []),
     "AP16": ([(253, 658, 259, 660), (378, 466, 384, 469)], [(256, 655, 259, 660), (382, 466, 385, 472)]),   # iki iç L köşe, 3 cm
+    "AP15": ([(378, 414, 384, 417), (504, 348, 510, 352)], [(378, 411, 382, 417), (504, 349, 507, 354)]),   # iki iç L köşe, 3 cm
+    "AP09": ([(384, 560, 390, 563), (386, 244, 392, 254)], [(381, 249, 392, 254), (384, 560, 392, 566)]),   # iç L köşe 3 cm; veranda iç
+                                                                                                          # köşesi: paftada 10 × 5
+    "AP03": ([(758, 382, 763, 392)], [(753, 387, 763, 391)]),         # veranda arka köşesi: paftada parça 10 × 5 (Motor 5 × 10)
+    "AP22": ([(378, 572, 384, 575)], [(379, 572, 382, 578)]),         # iç L köşe, 3 cm
+}
+# Paftadaki yerinden PAY'dan uzak açıklıklar: (tür, yön, Motor duvar ekseni) → [(Motor orta, pafta orta)]; cm. Motor pencereyi pano ortasına,
+# kapıyı kapı kuralıyla koyar; paftada pano ortasında olmayanlar burada
+BILINEN_ACIKLIK = {
+    "AP09": {
+        ("pencere", "x", 939.5): [(323.75, 319.97)],     # banyo 60/40: paftada pano ortasından 3,8
+        ("pencere", "x", 249.25): [(135.5, 155.04)],     # 150/180 sürgülü: paftada eksiz duvarda, Motor'da 251'lik panonun ortasında (BK-13)
+        ("pencere", "y", 5.0): [(500.25, 466.2)],        # 120/70 sürgülü: paftada 251'lik panoda ortadan 29 cm kaçık, Motor'da pano ortasında
+        ("kapi", "y", 261.0): [(625.75, 632.3)],         # oda 1 kapısı: paftada pano ortasından 6,55 (PAY 6,5)
+        ("kapi", "y", 386.5): [(625.75, 632.3)],         # oda 2 kapısı: aynı
+    },
+    "AP22": {
+        ("pencere", "x", 830.75): [(569.75, 577.42)],    # banyo 50/50: paftada pano ortasından 7,7
+    },
 }
 PAY = {"pencere": 3.0, "kapi": 6.5}   # paftadaki yerine en çok (cm); paftada kapı panonun ortasından ±6 (AP-01 yatak odası 3: 6,0)
 
@@ -114,9 +148,11 @@ def test_derzler_paftayla(ev):
 
 
 def test_acikliklar_paftadaki_yerde(ev):
-    # her pencere ve kapı paftadaki eşinin yerinde (pencere en çok 3, kapı 6,5 cm); paftada eşsiz açıklık yok
+    # her pencere ve kapı paftadaki eşinin yerinde (pencere en çok 3, kapı 6,5 cm; kalanlar bilinen listede, tam olarak); paftada eşsiz
+    # açıklık yok
     ad, plan, pafta = ev
     kalan = list(pafta["acikliklar"])
+    fark = {}
     for d in plan.duvarlar:
         for p in d.panolar:
             a = p.acilim
@@ -127,9 +163,16 @@ def test_acikliklar_paftadaki_yerde(ev):
             aday = [x for x in kalan if x[0] == tur and x[1] == d.yon and abs(x[2] - d.c) <= 6]
             assert aday, (ad, tur, d.id, m)
             x = min(aday, key=lambda x: abs(x[3] - m))
-            assert abs(x[3] - m) <= PAY[tur], (ad, tur, d.id, round(m, 2), round(x[3], 2))
+            if abs(x[3] - m) > PAY[tur]:
+                fark.setdefault((tur, d.yon, round(d.c, 2)), []).append((round(m, 2), round(x[3], 2)))
             kalan.remove(x)
     assert kalan == [], ad
+    beklenen = BILINEN_ACIKLIK.get(ad, {})
+    assert sorted(fark) == sorted(beklenen), (ad, fark)
+    for k, v in fark.items():
+        assert len(v) == len(beklenen[k]), (ad, k, v)
+        for (m, p), (bm, bp) in zip(sorted(v), sorted(beklenen[k])):
+            assert m == pytest.approx(bm) and p == pytest.approx(bp, abs=0.6), (ad, k, v)
 
 
 def test_koseler_paftayla(ev):

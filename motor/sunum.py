@@ -325,9 +325,9 @@ def cati_tanimi(plan: G.Plan, ie: dict) -> dict | None:
     c = ie.get("cati") or {}
     if c.get("tip", "besik") != "besik":
         return None
-    if plan.girintili:                                         # İE-24: girintili gövdede ana çatı + paralel cumbalar (`cati_serit`)
-        from . import cati_serit
-        return cati_serit.tanim(plan, ie)
+    from . import cati_serit
+    if plan.girintili or cati_serit.mahal_catilari_var(ie):    # İE-24: girintili gövdede ana çatı + paralel cumbalar (`cati_serit`); İE-17
+        return cati_serit.tanim(plan, ie)                      # PR-2: kendi çatısı olan açık mahal ana çatıdan çıkar (AP-09)
     s = float(c.get("sacak_cm", 30)); eg = float(c.get("egim_yuzde", 33)) / 100.0; top = float(c.get("topuk_cm", 10))
     H0 = float(ie.get("yapi", {}).get("duvar_yuksekligi_cm", 250))
     zs = H0 + top
@@ -355,6 +355,7 @@ def cati_plani_ciz(ax, plan: G.Plan, ie: dict, yazi: float = 1.0) -> bool:
         return False
     dz = tanim["duzlemler"]
     vc = [VR.cati(v, ie) for v in plan.dis_verandalar]                # BK-14: taşan verandaların kendi çatısı, ana çatının altında
+    vc += [{"duzlemler": [m["duzlem"]], "mahya": None} for m in tanim.get("mahal_catilari") or []]   # İE-17 PR-2: ızgaradaki verandanın çatısı
     xs = [p[0] for d in dz + [d for c_ in vc for d in c_["duzlemler"]] for p in d["plan"]]
     ys = [p[1] for d in dz + [d for c_ in vc for d in c_["duzlemler"]] for p in d["plan"]]
     X0, X1, Y0, Y1 = min(xs), max(xs), min(ys), max(ys)

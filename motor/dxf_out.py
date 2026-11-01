@@ -106,6 +106,20 @@ LAYERS = [
 ]
 
 
+AKS_KADEME_CM = 22.0   # İE-17 PR-2: birbirine yazı boyundan yakın iki aksın ikincisinin adı bu kadar dışarıda (AP-15 ve AP-22'de 5 cm arayla
+                       # ek aks; TK-03'te 1,2 cm: "2" ile "1′" üst üste biniyordu)
+AKS_YAKIN_CM = 18.0
+
+
+def _kademe(akslar) -> list[int]:
+    """Aks adlarının kademesi: önceki aksa `AKS_YAKIN_CM`'den yakın aksın adı bir kademe dışarı (önceki kademedeyse içeri). Yakın aks yoksa
+    hepsi 0 (çizim aynen)."""
+    out = []
+    for i, v in enumerate(akslar):
+        out.append(1 - out[-1] if i and v - akslar[i - 1] < AKS_YAKIN_CM else 0)
+    return out
+
+
 def sha256(p) -> str:
     return hashlib.sha256(Path(p).read_bytes()).hexdigest()
 
@@ -496,12 +510,12 @@ class Cizici:
             else:                                           # D-31 madde 15 (Patron 13:21): akslı kat planında da her bölmenin adının altında net m²;
                 yerlesecek.append((ad, m, poly, cx, cy, h, rot))   # yazılar planın sonunda, ölçülere binmeyecek yere (`_mahal_etiketleri`)
         if aks and G.ana_akslar("x") is not None:          # İE-11: aks tablosu → ana akslar (tam pano + ek aks + uç); ek aks "2′" gibi, numara kaydırmaz
-            for x, ad in zip(G.ana_akslar("x"), G.ana_aks_etiketleri("x")):
+            for x, ad, k in zip(G.ana_akslar("x"), G.ana_aks_etiketleri("x"), _kademe(G.ana_akslar("x"))):
                 msp.add_line((x + ox, -35 - alt + oy), (x + ox, H + 41 + ust + oy), dxfattribs={"layer": "AKS"})
-                self.text(ad, (x + ox, H + 60 + ust + oy), 14, "AKS_YAZI")
-            for y, ad in zip(G.ana_akslar("y"), G.ana_aks_etiketleri("y")):
+                self.text(ad, (x + ox, H + 60 + AKS_KADEME_CM * k + ust + oy), 14, "AKS_YAZI")
+            for y, ad, k in zip(G.ana_akslar("y"), G.ana_aks_etiketleri("y"), _kademe(G.ana_akslar("y"))):
                 msp.add_line((-35 - sol + ox, y + oy), (W + 35 + sag + ox, y + oy), dxfattribs={"layer": "AKS"})
-                self.text(ad, (-53 - sol + ox, y + oy), 14, "AKS_YAZI")
+                self.text(ad, (-53 - AKS_KADEME_CM * k - sol + ox, y + oy), 14, "AKS_YAZI")
         elif aks:
             for i in range(int(plan.nx * 2) + 1):
                 if i % 2: continue
@@ -963,7 +977,7 @@ class Cizici:
         for k, taraf in enumerate(CG.TARAFLAR):
             n0 = len(msp)
             g, r = CG.cephe(plan, taraf), CG.cati_cizgileri(plan, ie, taraf)
-            vp = self._veranda_gorunusu(taraf, r)
+            vp = self._veranda_gorunusu(taraf, r) + CG.mahal_cati_parcalari(plan, ie, taraf)    # İE-17 PR-2: ızgaradaki verandanın dikme ve kirişi
             sol_uc = min([r["u0"]] + [u for p in vp for u, _z in p["u"]])
             if k:
                 ox = sag_uc + 360.0 - sol_uc
@@ -1205,6 +1219,8 @@ def uret(is_emri: dict, cikti_dir: Path, ad_govde: str | None = None, pdf_hatada
            ("Sistem", "Prefabrik panel (8 mm fibercement)"), ("Duvar yüksekliği", f"{fmt(hy)} cm"), ("Dış duvar / iç duvar", f"{G._mm(G.T_DIS)} mm / {G._mm(G.T_IC)} mm"),
            ("Pano modülü", "125,5 cm (isteğe bağlı yarım pano 62,75 cm)"),
            ("Çatı", f"{_cati_adi(cati)} — %{fmt(float(cati.get('egim_yuzde',33)))} eğim, {fmt(float(cati.get('sacak_cm',30)))} cm saçak, {fmt(float(cati.get('topuk_cm',10)))} cm topuk"),
+           *[(f"{g['mahal'].capitalize()} çatısı", f"Tek eğim panel çatı — %{fmt(float(g['egim_yuzde']))} eğim")      # İE-17 PR-2 (AP-09)
+             for g in cati.get("mahal_catilari") or []],
            ("Pencereler", "PVC doğrama; katalog 120×120 / 120×180 / 60×40" if _olculer <= set(G.PENCERE_OLCULERI) else _pencere_satiri),
            ("Kapılar", "Dış: çelik kapı; iç: Amerikan panel kapı"),
            ("Kat sayısı", str(yapi.get("kat_sayisi", 1))), ("Revizyon", f"r{int(is_emri.get('revizyon',1)):02d}")]

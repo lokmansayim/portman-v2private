@@ -16,8 +16,9 @@ Tipler:
 - `besik`: bu modülde değil; `sunum.cati_tanimi` aynen (P6001 ve bugünkü paftalar).
 - `besik_cumba`: ana beşik ve ona dik küçük beşik (çapraz cumba; AP-13, 16, 22). `cumbalar`: bir giriş {cephe on | arka | sol | sag,
   `bas_cm`–`bit_cm` cephe boyunca dış yüzden (on / arka: x, sol / sag: y; taşan verandayla aynı), `cikinti_cm` 0, `egim_yuzde` yazılırsa
-  ana çatınınki}. Cumba ana mahyaya paralel cephede olur; alnı o cephenin duvarında. Çıkıntılı cumba ve paralel cumba (AP-15, 09) PR-2;
-  farklı eğimli cumba (PK-03) kapsam dışı.
+  ana çatınınki}. Cumba ana mahyaya paralel cephede olur; alnı o cephenin duvarında. Çıkıntılı cumba (İE-17 PR-2, AP-22): `cikinti_cm`
+  kadar gövdeden taşar; gövde girintili olur ve dış çizgisi ana çatı ile cumbanın birleşimidir (denetlenir). Paralel cumba girintili
+  gövdenin beşiğinde (`cati_serit`, AP-15); farklı eğimli cumba (PK-03) kapsam dışı.
 - `kirma`: dört düzlem, kalkan yok; mahya uzun kenar boyunca (AP-01). Uçtaki iki kırma yüzünün eğimi paftada ana yüzlerden farklıysa
   `kirma_egimleri` {sol, sag} (mahya x boyunca) ya da {on, arka} (mahya y boyunca), yüzde: kırma çizgileri 45° olmaz, mahya o yana kayar
   (AP-01: ana %33, sol %32,5, sağ %36,2). Verilmezse eşit eğim (`genel.cati_kirma`, kırmalar 45°).
@@ -39,8 +40,10 @@ class PrefabrikCatiHatasi(G.IsEmriHatasi):
     pass
 
 
-def _cumba(c: dict, kutu: tuple) -> list[float]:
-    """`cumbalar`'ın tek girişi → cumba dikdörtgeni (çıkıntı 0: ana gövdenin kenarında sıfır derinlikli şerit)."""
+def _cumba(c: dict, kutu: tuple) -> tuple[list[float], list[float]]:
+    """`cumbalar`'ın tek girişi → (ana çatının dikdörtgeni, cumba dikdörtgeni). Çıkıntı 0: ana çatı gövdenin kutusu, cumba onun kenarında
+    sıfır derinlikli şerit. Çıkıntılı cumba (İE-17 PR-2, AP-22: veranda ve üstündeki cumba gövdeden 62,75 öne taşar): ana çatı kutunun o
+    cephesinden `cikinti_cm` geride, cumba kutunun kenarından ana çatıya kadar (gövdenin girintisiyle denetlenir, `cati`)."""
     x0, y0, x1, y1 = kutu
     cs = c.get("cumbalar") or []
     if len(cs) != 1:
@@ -56,20 +59,22 @@ def _cumba(c: dict, kutu: tuple) -> list[float]:
     cephe = u.get("cephe")
     if cephe not in CEPHE_YAN:
         raise PrefabrikCatiHatasi(f"cumba cephesi on, arka, sol ya da sag olur: {cephe}")
-    if float(u.get("cikinti_cm", 0)) != 0:
-        raise PrefabrikCatiHatasi("çıkıntılı cumba bu sürümde çizilmez (İE-17 PR-2)")
+    cik = float(u.get("cikinti_cm", 0))
     yon = "x" if cephe in ("on", "arka") else "y"               # D-30: tam panoya tamamlanan yönde eski köşe yenisine
     a, b = G.tamamla_gercek_cm(u["bas_cm"], yon), G.tamamla_gercek_cm(u["bit_cm"], yon)
     boy = (x1 - x0) if cephe in ("on", "arka") else (y1 - y0)
+    derin = (y1 - y0) if cephe in ("on", "arka") else (x1 - x0)
     if not 0 <= a < b <= boy + 1e-6:
         raise PrefabrikCatiHatasi(f"cumba {cephe} cephesinde {a:g}–{b:g} cm; cephe {boy:g} cm")
+    if not 0 <= cik < derin / 2:
+        raise PrefabrikCatiHatasi(f"cumbanın çıkıntısı {cik:g} cm: 0 ya da gövdenin derinliğinin yarısından az olur")
     if cephe == "on":
-        return [x0 + a, y0, x0 + b, y0]
+        return [x0, y0 + cik, x1, y1], [x0 + a, y0, x0 + b, y0 + cik]
     if cephe == "arka":
-        return [x0 + a, y1, x0 + b, y1]
+        return [x0, y0, x1, y1 - cik], [x0 + a, y1 - cik, x0 + b, y1]
     if cephe == "sol":
-        return [x0, y0 + a, x0, y0 + b]
-    return [x1, y0 + a, x1, y0 + b]
+        return [x0 + cik, y0, x1, y1], [x0, y0 + a, x0 + cik, y0 + b]
+    return [x0, y0, x1 - cik, y1], [x1 - cik, y0 + a, x1, y0 + b]
 
 
 def _kirma_farkli(kutu: tuple, mahya: str, e: float, uc: dict, b: dict, k: dict) -> list[dict]:
@@ -134,7 +139,16 @@ def cati(plan: G.Plan, ie: dict) -> dict:
             u["duzlemler"] = _kirma_farkli(kutu, mahya, round(float(c["egim_yuzde"]) / 100, 5), dict(c["kirma_egimleri"]),
                                            CO.baglam(k, round(float(c["egim_yuzde"]) / 100, 5), H0), k)
     else:
-        ayak = [list(kutu), _cumba(c, kutu)]
+        ana, cumba = _cumba(c, kutu)
+        if ana != list(kutu) or plan.girintili:                   # çıkıntılı cumba: gövde = ana çatı + cumba (girinti cumbanın yanında)
+            from shapely.geometry import box
+            from .cati_serit import cati_izi
+            fark = cati_izi(plan).symmetric_difference(box(*ana).union(box(*cumba))).area
+            if fark > 1.0:
+                raise PrefabrikCatiHatasi(f"{'çıkıntılı cumba' if ana != list(kutu) else 'beşik + cumba (girintili gövde)'}: gövdenin dış "
+                                          f"çizgisi ana çatı ile cumbanın birleşimi değil ({fark:.0f} cm² fark; çıkıntı ve cumbanın yeri gövdenin "
+                                          "girintisiyle aynı olmalı)")
+        ayak = [ana, cumba]
         try:
             u = CU.uret(ayak, "cumba", mahya=mahya, egim_yuzde=float(c["egim_yuzde"]), duvar_ustu=H0, kural=k)
         except CU.CatiHatasi as e:

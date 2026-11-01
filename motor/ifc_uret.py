@@ -61,10 +61,12 @@ def pano_sinifi(L, t):
 def hazirla(ie: dict) -> dict:
     plan = G.kur(ie)
     girinti = {}
+    from . import cati_serit
     if plan.girintili:                                # İE-24: çatı ve makaslar çizimdeki çatıdan (ana çatı + cumba), döşeme gövdenin dış çizgisinden
-        from . import cati_serit
         girinti = {"govde": [[_r(x), _r(y)] for x, y in list(G.govde_cokgeni(plan).exterior.coords)[:-1]],
                    "cati_serit": cati_serit.tanim(plan, ie)}           # kurulamazsa PrefabrikCatiHatasi (IsEmriHatasi): yanlış çatı çizilmez
+    elif cati_serit.mahal_catilari_var(ie):           # İE-17 PR-2 (AP-09): kendi çatısı olan açık mahal ana çatıdan çıkar; çatı çizimdekinin aynısı
+        girinti = {"cati_serit": cati_serit.tanim(plan, ie)}
     kat = Katalog()
     c = Cizici(plan, kat)
     c.ciz_plan(0.0, 0.0, "ANA", "", "")          # BOM kodlu INSERT'ler (yalnız ANA rolü)
@@ -632,6 +634,13 @@ class IfcUretici:
             self._temsil(sl, self._egik_levha(d["plan"], p0(d), d["yukari"], d["egim"], d["sacak_kotu"] + 10, t), "sac")
             self._pset(sl, "PortatifEv_Kapsam", {"BOMKalem": "Trapez çatı sacı (antrasit) — yüzey", "Duzlem": d["ad"]})
             parcalar.append(sl)
+        for j, m in enumerate(T.get("mahal_catilari", [])):        # İE-17 PR-2: açık mahalin kendi panel çatısı (dikme ve profil `baglantilar`)
+            d = m["duzlem"]
+            sl = self._urun("IfcSlab", f"MAHAL_CATI_{j + 1}", predefined="ROOF", kapsa=False)
+            self._yerlestir(sl)
+            self._temsil(sl, self._egik_levha(d["plan"], p0(d), d["yukari"], d["egim"], d["sacak_kotu"], 10.0), "sac")
+            self._pset(sl, "PortatifEv_Kapsam", {"BOMKalem": "Çatı paneli (sandviç) — açık mahalin kendi çatısı", "Duzlem": d["ad"], "Mahal": m["mahal"]})
+            parcalar.append(sl)
         api("aggregate.assign_object", self.f, relating_object=roof, products=parcalar)
         # kalkan dolguları: duvar üstünden (altında başka bir çatı varsa onun yüzünden) üstteki çatının altına; duvarın içinde 10 cm
         for i, k in enumerate(T["kalkanlar"]):
@@ -763,15 +772,42 @@ class IfcUretici:
         """Köşe / üçlü H / veranda dikmesi / veranda profili (Motor DXF BOM bloklarının plan kutusu).
         Bağlantı ve dikmelerde 250 cm yalnız 3B gösterimdir (kesim boyu değil). Veranda profili: kot varsayım (duvar üstü 10 cm bant)."""
         H0 = self.G["bina"]["duvar_h"]
+        mc = (self.G.get("cati_serit") or {}).get("mahal_catilari", [])          # İE-17 PR-2: kendi çatısı olan mahalde dikme kendi kotuna (serbest
+        kolon_ust = [((r[0] + r[2]) / 2, (r[1] + r[3]) / 2, r[4]) for m in mc for r in m["kolonlar"]]   # dikme kirişin altına), profil çatının altına
+
+        def profil_ust(x0, y0, x1, y1):
+            from .veranda import kot
+            for m in mc:
+                kx0, ky0, kx1, ky1 = m["kutu"]
+                if kx0 - 0.5 <= x0 and x1 <= kx1 + 0.5 and ky0 - 0.5 <= y0 and y1 <= ky1 + 0.5:
+                    return min(kot(m["duzlem"], x, y) for x in (x0, x1) for y in (y0, y1))
+            return H0
+
+        def egik(rect):                                          # açık yandaki eğik kiriş (geometri hakemi, 1 Kasım): çatının altında, eğimle
+            return next((m for m in mc for r in m.get("egik_kirisler", []) if all(abs(a - b) < 0.5 for a, b in zip(r, rect))), None)
         for i, b in enumerate(self.G.get("baglantilar", [])):
             x0, y0, x1, y1 = b["rect"]
             ayak = [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
             if b["tur"] == "dikme":
                 e = self._urun("IfcColumn", f"DIKME_{b['kod']}_{i:02d}", predefined="COLUMN")
-                z0, z1, malz = 0.0, H0, "profil"
+                z1 = next((z for cx, cy, z in kolon_ust if abs(cx - (x0 + x1) / 2) < 1 and abs(cy - (y0 + y1) / 2) < 1), H0)
+                z0, z1, malz = 0.0, z1, "profil"
+            elif b["tur"] == "veranda_profil" and egik(b["rect"]):
+                m = egik(b["rect"]); d = m["duzlem"]
+                from .cati_serit import kiris_kotu
+                e = self._urun("IfcBeam", f"VERANDA_PROFIL_{b['kod']}_{i:02d}", predefined="BEAM")
+                kotlar = [z for x, y in ayak for z in kiris_kotu(m, x, y)]
+                self._yerlestir(e)               # altı çatının 10 altında; kalınlık yüzün normali boyunca (düşeyde 10)
+                self._temsil(e, self._egik_levha(ayak, (d["sacak"].get("x", 0.0), d["sacak"].get("y", 0.0)), d["yukari"], d["egim"],
+                                                  d["sacak_kotu"] - 10, 10 / math.hypot(1.0, d["egim"])), "profil")
+                self._pset(e, "PortatifEv_Kapsam", {"BOMKalem": b["kalem"], "BOMKod": b["kod"], "Blok": b.get("blok", ""),
+                                                    "Kot_cm": f"{min(kotlar):.0f}–{max(kotlar):.0f}", "KesimBoyuTanimli": False,
+                                                    "Not": "Kot varsayım (profil kotu kaynakta tanımlı değil); çatının eğimiyle"})
+                continue
             elif b["tur"] == "veranda_profil":
                 e = self._urun("IfcBeam", f"VERANDA_PROFIL_{b['kod']}_{i:02d}", predefined="BEAM")
-                z0, z1, malz = H0 - 10, H0, "profil"
+                z1 = profil_ust(x0, y0, x1, y1)
+                z0, z1, malz = z1 - 10, z1, "profil"
             else:
                 e = self._urun("IfcMember", f"BAGLANTI_{b['kod']}_{i:02d}", predefined="STUD")
                 z0, z1, malz = 0.0, H0, "galv"

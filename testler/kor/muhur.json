@@ -274,7 +274,8 @@
    "uzanti": ".pdf",
    "bayt": 176407,
    "sha256": "b51874749775ee07d5ebab5fda596eb9c704db49fda7185d6918d0cc299c8da5",
-   "durum": "kor"
+   "durum": "kor",
+   "not": "çizim için pafta görüldü (İE-17 PR-2, 1 Kasım 2026: montaj paftası kat planı, çatı ve görünüş çizimine kaynak); liste kapalı, açılmadı"
   },
   {
    "kod": [
@@ -396,7 +397,8 @@
    "uzanti": ".pdf",
    "bayt": 250892,
    "sha256": "a8fb316b2e8aac04bba8f897ea9f7402f03432c2ef2f16486c49286d63ae8724",
-   "durum": "kor"
+   "durum": "kor",
+   "not": "çizim için pafta görüldü (İE-17 PR-2, 1 Kasım 2026: montaj paftası kat planı, çatı ve görünüş çizimine kaynak); liste kapalı, açılmadı"
   },
   {
    "kod": [
@@ -547,7 +549,8 @@
    "uzanti": ".pdf",
    "bayt": 232216,
    "sha256": "379c4fb14d4abaa04c780a1148fb4652c2b42b4a6989e55063ee3bf18959f981",
-   "durum": "kor"
+   "durum": "kor",
+   "not": "çizim için pafta görüldü (İE-17 PR-2, 1 Kasım 2026: montaj paftası kat planı, çatı ve görünüş çizimine kaynak); liste kapalı, açılmadı"
   },
   {
    "kod": [
