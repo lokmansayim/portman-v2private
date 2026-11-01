@@ -17,7 +17,7 @@ Araç: `python3 araclar/atolye.py …` (tarif `.claude/skills/atolye/SKILL.md`).
 |---|---|
 | `kod`, `gosterim`, `ad`, `aile`, `yapi_turu`, `kat` | Kimlik. Kod çekirdek bankayla çakışmaz. |
 | `taban_model`, `varyant_turu` | Çatı varyantıysa taban modelin kodu ve `cati`. Çatı varyantı bayiye ayrı model olarak sunulmaz. |
-| `musteri_projesi` | Müşteri projesi bayiye adsızdır. |
+| `musteri_projesi` | Müşteri projesi (KT-xx): çıktılarda modelin tarifi yazılmaz. Tanımda `musteri_adi` (projenin sahibinin adı) varsa çıktılarda o görünür; yoksa kod ve m² görünür (D-33; D-08'in "bayiye adsız" kuralını değiştirdi). |
 | `kaynak` | `tur` (istek, proje, varyant), `metin` (Lokman'ın sözü, tarihle), `proje` (AP-NN ya da ÇP-NN; `ac --proje` ya da `kaynak --proje`), `dosyalar` (etiket, uzantı, boyut, SHA-256; dosyanın kendisi ve adı depoya girmez), varyantta taban tanım ve özeti. |
 | `kaynak_degerleri` | Kaynakta yazan değerler ve nereden geldikleri (kod, DXF, görsel okuma, Lokman): odalar, brüt m², oda programı, pencere, kapı, dış ölçü, çatı tipi. Kontrol sayfasında çizimle yan yana. |
 | `durum` | `taslak` → `kontrolde` → `kabul` ya da `ret`; metraj kapısı geçmezse `beklemede` (kabul edilemez). |

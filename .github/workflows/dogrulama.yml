@@ -126,8 +126,10 @@ jobs:
               R "$PY" -c "import sys; from araclar.paket.rehber import iz; h = iz.hazir(); print('-- rehber izi:', h or 'hazır'); sys.exit(1 if h else 0)" \
                 || { echo "DUR: rehber izi için three.js ya da Playwright yok; 62 m² kıyası atlanırdı"; exit 1; }
             fi
+            # PORTMAN_BANKA_TAM=1: bankanın kabul edilmiş modelleri çizim setinin içerik izleriyle de kıyaslanır (`testler/genel/test_banka.py`;
+            # model başına ~30 sn; D-28 A11, İE-09 PR-7, KT-04). Yalnız o test okur.
             # shellcheck disable=SC2086
-            R PORTMAN_TEST_PG="$PG" "$PY" -m pytest -q -rfE -p no:cacheprovider $YOLLAR
+            R PORTMAN_TEST_PG="$PG" PORTMAN_BANKA_TAM=1 "$PY" -m pytest -q -rfE -p no:cacheprovider $YOLLAR
           fi
 
       # Testler root ile koştu; işin sonundaki checkout temizliği .git/index'i okuyabilsin (yoksa sarı uyarı düşer).

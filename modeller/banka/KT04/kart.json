@@ -22,7 +22,7 @@
    "kaynak": "projenin adında ve çatı paftasında (ÇATI M2: 120)"
   }
  },
- "durum": "kontrolde",
+ "durum": "kabul",
  "metraj_testi": {
   "durum": "gecti",
   "kaynak": "celik_hakemi",
@@ -392,10 +392,76 @@
    "no": 7,
    "durum": "kontrolde",
    "passed": true
+  },
+  {
+   "zaman": "2026-11-01T14:46+0300",
+   "olay": "kabul",
+   "cizim": 7
   }
  ],
- "kabul": null,
- "aday": null,
+ "kabul": {
+  "kim": "Lokman",
+  "tarih": "2026-11-01",
+  "karar": "D-11",
+  "not": "Lokman, 1 Kasım 2026 11:45 UTC, karar kartı \"KT-04'ü bu kontrol sayfasıyla kabul ediyor musunuz?\": Kabul (kontrol sayfası c07)",
+  "cizim": 7,
+  "kural_seti": "testler/celik/projeler/setler/a01cbf2a810c8e7f.json",
+  "metraj_kapisi": "gecti",
+  "metraj_proje": "ÇP-14",
+  "kapi": "gecti"
+ },
+ "aday": {
+  "kod": "KT04",
+  "gosterim": "KT-04",
+  "durum": "gecerli",
+  "motor": "genel",
+  "tanim": "modeller/banka/KT04/tanim.json",
+  "tanim_sha256": "9ff2f05bb7e6fb0c2545790b2a9486f68fa9f8b9830c2b1e726ef39366cc8405",
+  "gorsel": "../modeller/banka/KT04/kart.png",
+  "referans_model": "KT04",
+  "yapi_turu": "celik",
+  "kat": 1,
+  "oda_programi": "4+1",
+  "katalog_m2": 124.0,
+  "kapali_m2": 106.28,
+  "veranda_m2": 17.5,
+  "varyantlar": [],
+  "musteri_projesi": true,
+  "sunum": {
+   "cati_adi": "Beşik + cumba",
+   "ad": "Lüksban, Yunus Bey"
+  },
+  "ozet": {
+   "dis_olcu_cm": [
+    1562.0,
+    802.0
+   ],
+   "oturum_m2": 123.78,
+   "odalar": {
+    "Yatak Odası 1": 12.2,
+    "Banyo": 7.65,
+    "Yatak Odası 2": 9.66,
+    "Yatak Odası 3": 9.96,
+    "Salon - Mutfak": 28.45,
+    "Yatak Odası 4": 13.32,
+    "Hol": 11.27,
+    "Veranda": 17.5
+   },
+   "pencere": 11,
+   "kapi": 7,
+   "cati": "besik_cumba",
+   "liste_satir": 103,
+   "kural_seti": "a01cbf2a810c8e7f.json",
+   "perspektif": "ATLANDI"
+  },
+  "kaynak": {
+   "metin": "ÇP-14 (İE-16 çelik hattının açık ölçüm projesi; mühendisin projesi, mühürlü montaj paftası 934b2404…): tanım İE-16'nın ÇP-14 tanımının aynısı, yalnız kod ve ad farklı; bayiye adsız (KT dizisi). Hedef örnek: İE-09 PR-1 (CIO, 29 Ekim 2026); düzeltme (c05 sonrası): Yatak odası 1 ve yatak odası 4 kapılarının açılış yönü ters: menteşeler iki odanın ara duvarına yakın uca (Lokman, 30 Ekim 2026 14:56, bayi paftası üzerinde işaretli); düzeltme (c05 sonrası): Ön cephedeki iki 200×180 pencere (yatak odası 4 ve salon-mutfak) sürgülü (Lokman, 30 Ekim 2026 14:56); genel motorda sürgülü çizimi ayrı PR",
+   "dosya": "modeller/banka/KT04/tanim.json",
+   "dogrulama": "İE-09 atölyesi, kontrol sayfası c07 (2026-11-01); metraj kapısı: geçti (çelik hakemi, ÇP-14, fark +%0.93, ±%3)",
+   "karar": "D-20; D-11"
+  },
+  "not": "Lokman, 1 Kasım 2026 11:45 UTC, karar kartı \"KT-04'ü bu kontrol sayfasıyla kabul ediyor musunuz?\": Kabul (kontrol sayfası c07)"
+ },
  "brut_m2": 123.78,
  "oda_programi": "4+1",
  "cati_tipi": "besik_cumba",
