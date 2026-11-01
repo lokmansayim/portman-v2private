@@ -3,7 +3,7 @@
 Hedef örnekler (`hedef/germe_*.json`; Lokman onayladı, 31 Ekim 2026, İE-23 › PR-2a): KT-01 "yatak odası 1'i arkaya 50 cm" (dış kenar, düzey 1:
 ev arkaya uzar) ve Ç8201 "yatak odası 2'yi öne 30 cm" (iç duvar kayar, yatak odası 1 küçülür, yolundaki ve köşesindeki kapılar duvarla kayar).
 PR-2b: KT-04 "salonu sağa 50 cm" (düzey 2: cumba ve önündeki çıkma çatısı ortadan simetrik genişler; girdi `girdi/` altında dondurulmuş kopya,
-banka modeli atölyede değişebilir). Kıyas:
+banka modeli atölyede değişebilir; Lokman onayladı, 1 Kasım 2026). Kıyas:
 girdi, rapor, gerilmiş tanımın kanonik sha'sı ve değişen duvar, açıklık, mahal özetleri. Yeniden yazma yalnız onayla:
 `python testler/yapi_kimligi/test_tanim_germe.py --hedef-yaz`. Olumsuz örnekler gerekçesiyle (oda kuralı, kapı sığmıyor, ana çatı = düzey 3,
 veranda, kiriş). Germe belirlenimcidir ve `varyant.tanim_uygula` aynı tanımı verir."""

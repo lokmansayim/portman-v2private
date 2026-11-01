@@ -620,7 +620,9 @@
   }
  },
  "onay": {
-  "durum": "aday",
-  "not": "Lokman'ın onayı bekleniyor (İE-23); onaylanınca tarih ve dayanak buraya yazılır"
+  "durum": "onaylı",
+  "tarih": "2026-11-01",
+  "dayanak": "Lokman, 1 Kasım 2026 04:28 UTC, İE-23 thread'i: \"onaylıyorum\" (önce–sonra görseli PF Yapi_Kimligi/PR-2b/KT04_salon_saga50_once_sonra.png, 31 Ekim 23:05 UTC sunuldu)",
+  "not": "Yeniden dondurma yalnız Lokman'ın onayı ve gerekçeli kararla (D-02)"
  }
 }
