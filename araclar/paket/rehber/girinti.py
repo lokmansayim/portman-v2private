@@ -151,12 +151,8 @@ def cati(HZ: dict, kitap: dict, IFC: dict, ASIK: dict, H: float, SC: float, TAN:
               "f1": _r(h["a1"]), "t0": _r(h["t0"]), "t1": _r(h["t1"]), "R": anahtar[h["q"]["ad"]]} for h in hatlar]
     dere_hat = [{"ad": h["ad"], "yon": "x", "a0": h["a0"], "a1": h["a1"], "kenar": _r(h["ys"] - h["ic"] * 0.2), "out": -h["ic"]} for h in hatlar]
 
-    # ---------- duvar üstü omegaları: saçak omegası saçak duvarlarında, baş makas omegası baş makasın boyunca saçaktan saçağa (D-32) ----------
+    # ---------- duvar üstü omegaları: baş makas omegası baş makasın boyunca saçaktan saçağa (D-32); saçak omegası kart modelinden (`veri.py`, D-39) ----------
     omega_duvar = []
-    for h in hatlar:
-        for w0, w1 in h["duvar"]:
-            omega_duvar.append({"tur": "sacak", "o": "h", "perp": _r(h["yd"] + h["ic"] * 5), "a0": _r(w0), "a1": _r(w1), "out": -h["ic"],
-                                "yer": f"{h['ad']} saçağının altındaki duvar"})
     kalkan, ucu = [], []
     for k, q, rol in yer:
         if rol != "bas":
@@ -288,4 +284,5 @@ def cati(HZ: dict, kitap: dict, IFC: dict, ASIK: dict, H: float, SC: float, TAN:
     aralik = sorted({round(b["konum"] - a["konum"], 1) for a, b in zip(makas, makas[1:]) if a["R"] == b["R"]})
     return {"RF": RF, "makas": makas, "MAD": dict(MAD), "omega_duvar": omega_duvar, "sacak": sacak, "kalkan": kalkan, "yuz": yuz,
             "hadve_ar": hadve_ar, "asik": asik, "mahya": mahya, "izo": izo, "dere_hat": dere_hat, "inisler": inisler, "tepe": tepe,
-            "aralik": aralik, "ucu": ucu, "hatlar": [h["ad"] for h in hatlar], "parcalar": T["parcalar"], "anahtar": anahtar}
+            "aralik": aralik, "ucu": ucu, "hatlar": [h["ad"] for h in hatlar], "parcalar": T["parcalar"], "anahtar": anahtar,
+            "sacak_hatlari": [{"ad": h["ad"], "perp": _r(h["yd"] + h["ic"] * 5), "a0": _r(h["a0"]), "a1": _r(h["a1"])} for h in hatlar]}

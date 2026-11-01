@@ -161,11 +161,12 @@ def _cakisir(p: dict, q: dict) -> bool:
 
 
 @pytest.mark.parametrize("ad, yol", [("TK01", TK01), ("PK01", MOTOR_VERI / "PK01.json"), ("ALTIN", KOK / "is_emri" / "ALTIN_2plus1_6x8.json"),
-                                     ("YAN_VERANDALI", KOK / "is_emri" / "YAN_VERANDALI_2plus1_6x8p5.json")])
+                                     ("YAN_VERANDALI", KOK / "is_emri" / "YAN_VERANDALI_2plus1_6x8p5.json"), ("TK03", MOTOR_VERI / "TK03.json")])
 def test_sacak_omegasi_betopanla_ve_omegayla_cakismaz(ad, yol, tmp_path):
     """Saçak omegası saçak ucuna uzayınca (BK-19) dikey betopan levhasının ucu omeganın kesitine iner: hat levhada kesilir, levha geçer
     (CIO onayı 31 Ekim 16:58, seçenek a; geometri hakemi BK-19). Ana çatının omegası aynı hatta devam eden veranda omegasının üstüne binmez.
-    Kesik hattın parçaları hattın boyunu taşır: hatların toplamı saçak boyu (liste), kesik kısım da içinde."""
+    Kesik hattın parçaları hattın boyunu taşır: hatların toplamı saçak boyu (liste), kesik kısım da içinde. Girintili gövdede (TK-03, İE-24)
+    de: dört saçak kenarı dört hat, her parçanın baş makas betopanında kesik."""
     ie = _oku(yol)
     S = _katmanlar(ie, tmp_path, ad)
     y, liste = _oku(KM.YERLESIM), _oku(KM.LISTE_KURALLARI)

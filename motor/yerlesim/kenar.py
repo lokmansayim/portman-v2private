@@ -162,17 +162,16 @@ def kesen_araliklar(engeller: list[dict], geo: dict) -> list[tuple[float, float]
     return out
 
 
-def sacak_omegasi(g: dict, G_: dict, F: dict | None = None, engeller: list[dict] | None = None,
-                  aralik: tuple[float, float] | None = None) -> list[dict]:
+def sacak_omegasi(g: dict, G_: dict, F: dict | None = None, engeller: list[dict] | None = None) -> list[dict]:
     """Saçak duvarlarının üstünde, taşan verandada (`F`, K5b) yan kirişlerin üstünde; saçak ucundan ucuna (`v0`..`v1`), gerçek Portatifev
     listelerindeki gibi (Lokman, 31 Ekim 2026 13:40 "gerçek listeye uy"; BK-19). Kesitine baş makas betopanı ya da verandanın omegası
     (`engeller`) iniyorsa hat orada kesilir (`kesen_araliklar`); parçalar hattın (`Hat`, `HatBoyu_cm`) parçasıdır, sayı hattın tamamından
-    (liste gibi: kesik ve üst üste binen kısım listede de saçak boyunun içinde). `aralik` verilirse omega yalnız o `v` aralığındadır:
-    girintili gövdenin şerit çatısı (`serit.py`, İE-24) bugün saçak hattının altındaki duvar parçalarını böyle verir (D-39 › Bilinen)."""
+    (liste gibi: kesik ve üst üste binen kısım listede de saçak boyunun içinde). Girintili gövdenin şerit çatısında (`serit.py`, İE-24) `F`
+    saçak kenarının çerçevesidir (`v0`..`v1` kenarın uçları)."""
     F = F or cati.cerceve(g)
     w, h = G_["sacak_omegasi"]
-    v0, v1 = aralik if aralik else (F["v0"], F["v1"])
-    ne = "kirişin" if "w0" in F else "duvarının"
+    v0, v1 = F["v0"], F["v1"]
+    ne = "kirişin" if "kiris" in F else "duvarının"                    # taşan verandanın çerçevesinde dış kiriş var (`veranda.cerceveler`)
     out = []
     for yuz, u0 in (("sol", 0.0), ("sag", F["aciklik"] - w)):
         uz = _u(u0, u0 + w, g["duvar_h"], h, G_["sac"], ters=True)
@@ -180,7 +179,7 @@ def sacak_omegasi(g: dict, G_: dict, F: dict | None = None, engeller: list[dict]
         kesik = len(kes) != 1 or abs(kes[0][0] - v0) > ESIK or abs(kes[0][1] - v1) > ESIK      # uçtan kesilen tek parça da kesik hattır
         for j, (a0, a1) in enumerate(kes, 1):
             bilgi = {"Yuz": yuz, "Hat": yuz, "HatBoyu_cm": _r(v1 - v0), "Parca": j} if kesik else {"Yuz": yuz}
-            aciklama = f"{yuz} saçak {ne} üstü, {v1 - v0:g} cm" + ("" if aralik else " (saçak ucundan ucuna)")
+            aciklama = f"{yuz} saçak {ne} üstü, {v1 - v0:g} cm (saçak ucundan ucuna)"
             if kesik:
                 aciklama += f", {j}. parça {a0:g}–{a1:g} (hat kesik)"
             out.append({"kural": "sacak_omegasi_yerlesimi", "parca": "sacak_omegasi", "boy_cm": _r(a1 - a0),
@@ -278,6 +277,9 @@ def _levhalar(g: dict, D: dict, kesit: dict, K: dict, F: dict | None = None) -> 
     izin = K[ad].get("cati_tipleri")
     if izin and g["cati_tipi"] not in izin:
         return []
+    if g.get("cati_serit") and F is None:                           # İE-24: girintili gövdenin her parçasının baş makasları (`serit.betopan`)
+        from . import serit
+        return serit.betopan(g, cati.betopan_degerleri(D[ad], kesit), kesit["betopan"])[0]
     kalkanlar = [veranda.kalkan(F, kesit["betopan"])] if F else None
     return cati.betopan(g, cati.betopan_degerleri(D[ad], kesit), F, kalkanlar)[0]
 
@@ -309,13 +311,13 @@ def katman(ie: dict, g: dict, D: dict, kesit: dict, K: dict) -> dict:
     verandalar = veranda.cerceveler(g)[0] if g["dis_verandalar"] and g["cati_tipi"] in K[veranda.KURAL]["cati_tipleri"] else []
     omega = "sacak_omegasi_yerlesimi" in kurulan
     serit_ = g.get("cati_serit")
+    # D-39: saçak omegası betopan levhasında ve devam eden veranda omegasında kesilir (`kesen_araliklar`); girintili gövdede de
+    levhalar = (_levhalar(g, D, kesit, K) + [q for F in verandalar for q in _levhalar(g, D, kesit, K, F)]) if omega else []
     if serit_:                                                       # İE-24: girintili gövde (ana çatı + paralel cumba; `serit.py`)
         from motor.genel import cati_genel
 
         from . import serit
-        parcalar += serit.kenarlar(g, cati_genel.cati_kur(serit_), G_, kesit, kurulan)
-    # D-39: saçak omegası betopan levhasında ve devam eden veranda omegasında kesilir (`kesen_araliklar`)
-    levhalar = (([] if serit_ else _levhalar(g, D, kesit, K)) + [q for F in verandalar for q in _levhalar(g, D, kesit, K, F)]) if omega else []
+        parcalar += serit.kenarlar(g, cati_genel.cati_kur(serit_), G_, kesit, kurulan, levhalar)
     v_omega = [sacak_omegasi(g, G_, F, levhalar) if omega else [] for F in verandalar]
     if not serit_:
         if omega:
