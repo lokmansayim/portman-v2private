@@ -35,12 +35,16 @@ KAPLAMA_ADI = {"sandvic_panel": "sandviç panel", "tek_kat_panel": "tek kat pane
 
 
 def baslik_adi(t: dict, oturum_m2: float) -> str:
-    """Başlıktaki "kod · ad". Müşteri projesinde (KT-xx) addaki m² koddan hesaplanan brüt oturumla yazılır, bayi paftasıyla aynı sayı
-    (BK-09 M7; Görev 2: KT-02/03 başlığında 90 / 80 m², bayi PDF'inde 92 / 94). Model dosyası değişmez (D-07); katalog adları aynen."""
+    """Başlıktaki "kod · ad" (çizim seti ve yükleme listesi). Müşteri projesinde (KT-xx) addaki m² koddan hesaplanan brüt oturumla
+    yazılır, bayi paftasıyla aynı sayı (BK-09 M7; Görev 2: KT-02/03 başlığında 90 / 80 m², bayi PDF'inde 92 / 94). Model dosyası
+    değişmez (D-07); katalog adları aynen. Müşteri projesinde sahibinin adı yazılıysa tarif yerine "kod · sahibinin adı · m²" yazılır,
+    bayi paftasının başlığıyla aynı (D-33); adı yazılı olmayan modelin başlığı değişmez."""
     import re
-    from .bayi_gorseli import musteri_projesi
+    from .bayi_gorseli import musteri_projesi, sahip_adi
     ad = t["ad"]
     if musteri_projesi(t):
+        if sahip := sahip_adi(t):
+            return f"{t['kod']} · {sahip} · {oturum_m2:.0f} m²"
         ad = re.sub(r"\d+(?:[.,]\d+)?\s*m²", f"{oturum_m2:.0f} m²", ad, count=1)
     return f"{t['kod']} · {ad}"
 
