@@ -99,10 +99,20 @@ def kaplama_turu(g: dict, C: dict, uyarilar: list | None = None) -> tuple[str | 
     return vars_, None
 
 
+def kaplama_kalinlasma(C: dict, tur: str | None) -> float:
+    """Kaplamanın tek kat panele (varsayılan kaplama) göre kalınlaşması, cm (D-40; Lokman, 1 Kasım 2026 10:23): profilin (yalıtım + hadve)
+    farkı (`cati_kaplamasi.profil`), sandviç panelde 4,8. Kart modelinde kaplama ve alın sacının alnı bu kadar artar; başka parça değişmez.
+    Kaplama kurulmuyorsa (`tur` yok) 0."""
+    if tur is None:
+        return 0.0
+    P = C["profil"]
+    return round((P[tur]["yalitim"] + P[tur]["hadve"]) - (P[C["varsayilan"]]["yalitim"] + P[C["varsayilan"]]["hadve"]), 6)
+
+
 def kaplama_degerleri(C: dict, tur: str, kesit: dict) -> dict:
     kapatma = C["kapatma_tek_kat"] if tur == "tek kat" else C["kapatma"]
-    return {"kesit_asik": kesit["asik"], "kalinlik_kaplama": kesit["kaplama"], "tasma_m": C["tasma"], "yuvarlama_mm": C["yuvarlama_mm"],
-            "kapatma_cm": _cm(kapatma)}
+    return {"kesit_asik": kesit["asik"], "kalinlik_kaplama": kesit["kaplama"] + kaplama_kalinlasma(C, tur), "tasma_m": C["tasma"],
+            "yuvarlama_mm": C["yuvarlama_mm"], "kapatma_cm": _cm(kapatma)}
 
 
 def _verandalar(g: dict, D: dict, K: dict, kesit: dict, kural_yok: list, uyarilar: list) -> list[dict]:

@@ -26,7 +26,10 @@ const ysR = (R, s) => TB + HEEL + (s <= R.M ? s - R.L : R.R - s) * R.tan;   // �
 // OSB ve nem bariyeri yok (Lokman, 25.10.2026). Kaplamanın kesiti veriden (D.kaplama.profil; 62 m²: trapez 27/200-6, 100 cm kapatır, 0,5 mm).
 const KP = D.kaplama.profil;
 const RIBH = KP.hadve, RIB_UST = KP.tepe, RIB_TABAN = KP.taban, RIB_KENAR = KP.kenar;   // RIB_KENAR: kalkan kenarındaki hadvenin ekseni, levha kenarından
-const AH = 3.0 + SAC, TM0 = AH + 0.02, TM1 = TM0 + 0.1, TR0 = TM1 + 0.02, TR1 = TR0 + 0.05, PTOP = TR1 + RIBH + 0.1;   // kaplama 0,5 mm
+// Sandviç panel (D-40; Lokman, 1.11.2026): alt sac, yalıtım (verideki `yalitim`), üst sac ve hadveler; tek kat panelde (62 m²) yalıtım yok.
+const YAL = KP.yalitim || 0;
+const AH = 3.0 + SAC, TM0 = AH + 0.02, TM1 = TM0 + 0.1, TR0 = TM1 + 0.02, TR1 = TR0 + 0.05;   // kaplama 0,5 mm
+const TU1 = YAL ? TR1 + YAL + 0.05 : TR1, PTOP = TU1 + RIBH + 0.1;   // TU1: hadvelerin tabanı (sandviçte üst sacın üstü)
 // Cephe fugası (62 m² paftası: fugalı duvar detayı): alttan 6 × 38 cm betopan + 2 cm fuga, üstte 10 cm bant; oluk 5 mm derin. Fugasız evde boş.
 const FUGA = D.fuga ? D.fuga.bant : [], FUGA_H = 2, FUGA_D = 0.5;
 const N = D.N, AD = D.S;   // adım sayısı ve adımların yeri (62 m²: Lokman'ın sırası, 26.10.2026)
@@ -104,6 +107,7 @@ const BASE = {
   boardex:  { color: 0xd7d4cb, roughness: 0.92 },
   izocam:   { color: 0xe3c158, roughness: 1.0 },
   roof:    { color: 0x4b535b, roughness: 0.5, metalness: 0.4 },
+  kopuk:    { color: 0xeccf6e, roughness: 0.95, polygonOffset: true, polygonOffsetFactor: 2, polygonOffsetUnits: 2 },   // poliüretan (sarı); üst sacın altında kalır (derinlik çakışması yok)
   ridge:    { color: 0x3f464d, roughness: 0.5, metalness: 0.45 },
   trim:     { color: 0x474f57, roughness: 0.55, metalness: 0.4 },
   gutter:   { color: 0x3f464e, roughness: 0.45, metalness: 0.4 },
@@ -643,6 +647,13 @@ function sermeAyarla(S, e) {   // e: 0 → 1 serilen oran
 
 /* Ters mahya, kaplama ve mahya (kaplama doğrudan aşıkların üstünde; 62 m²: trapez sac) */
 const RIB = (() => { const s = new THREE.Shape(), a = RIB_TABAN / 200, u = RIB_UST / 200; s.moveTo(-a, 0); s.lineTo(a, 0); s.lineTo(u, RIBH / 100); s.lineTo(-u, RIBH / 100); s.closePath(); return s; })();
+// Sandviç panelde hadvenin içi poliüretan dolu (Lokman, 1.11.2026 10:46, görsel): üst sac hadvenin üstünde 0,5 mm'lik kabuk (RIB_SAC), içi sarı (RIB_IC)
+const [RIB_SAC, RIB_IC] = (() => {
+  const a = RIB_TABAN / 200, u = RIB_UST / 200, h = RIBH / 100, k = 0.0005, d = k * Math.hypot(a - u, h) / h;   // d: yan kenarda 0,5 mm'lik yatay pay
+  const dis = [[-a, 0], [-u, h], [u, h], [a, 0]], ic = [[a - d, 0], [u - d * u / a, h - k], [-u + d * u / a, h - k], [-a + d, 0]];
+  const sekil = P => { const s = new THREE.Shape(); P.forEach(([x, y], i) => i ? s.lineTo(x, y) : s.moveTo(x, y)); s.closePath(); return s; };
+  return [sekil([...dis, ...ic]), sekil([...ic].reverse())];
+})();
 {
   let ro = 0;
   // Ters mahya (dere hattı sacı): dere (vadi) hatlarında, her iki yüzde 20 cm, aşıkların üstünde, kaplamanın altında
@@ -670,11 +681,13 @@ const RIB = (() => { const s = new THREE.Shape(), a = RIB_TABAN / 200, u = RIB_U
       const [t0, t1] = [tAt(v0), tAt(v1)].sort((a, b) => a - b);
       const Q = Y.icbukey ? kirp(Y.P, dikd(-1.35, Y.R.SL + 2, t0, t1)) : kirp(dikd(-1.35, Y.R.SL + 2, t0, t1), Y.P); if (!Q) return;   // içbükey yüz şeritle kırpılır (İE-24)
       const g = Y.grup(), m = mat('roof', AD.kaplama); g.add(levha(Q, TR0, TR1, m));
+      if (YAL) { g.add(levha(Q, TR1, TR1 + YAL, mat('kopuk', AD.kaplama))); g.add(levha(Q, TR1 + YAL, TU1, m)); }   // sandviç: yalıtım ve üst sac
       ribs.forEach(tc => {
         if (tc < t0 - 0.01 || tc >= t1 - 0.01) return;   // levha sınırındaki hadve tek levhaya
         const iv = aralik(Q, 1, Math.min(Math.max(tc, t0 + 0.05), t1 - 0.05)); if (!iv || iv[1] - iv[0] < 4) return;
-        const rb = mesh(new THREE.ExtrudeGeometry(RIB, { depth: (iv[1] - iv[0]) / 100, bevelEnabled: false }), m);
-        rb.rotation.y = Math.PI / 2; rb.position.set(iv[0] / 100, TR1 / 100, tc / 100); g.add(rb);
+        const hadveKoy = (sekil, mm) => { const rb = mesh(new THREE.ExtrudeGeometry(sekil, { depth: (iv[1] - iv[0]) / 100, bevelEnabled: false }), mm);
+          rb.rotation.y = Math.PI / 2; rb.position.set(iv[0] / 100, TU1 / 100, tc / 100); g.add(rb); };
+        if (YAL) { hadveKoy(RIB_SAC, m); hadveKoy(RIB_IC, mat('kopuk', AD.kaplama)); } else hadveKoy(RIB, m);   // sandviç: sac kabuk + sarı dolgu
       });
       const en = Math.abs(v1 - v0), kes = kirp(dikd(-1.35, Y.R.SL + 2, t0, t1), [[-1e4, -1e4], [1e4, -1e4], [1e4, 1e4], [-1e4, 1e4]]);
       const acili = Math.abs(Math.abs(alan(Q)) - Math.abs(alan(kes))) > 450, oran = Math.abs(alan(Q)) / (KW * (Y.R.SL + 3.35));
@@ -705,7 +718,7 @@ KALKAN.forEach(G => ['A', 'B'].forEach(end => {
   KU.lev(ot, ot + SAC, ALIN_ALT, PTOP);                      // alın: saçak altının 6 cm altından kaplamanın kenar hadvesinin üstüne; köşede dereyi de içine alır
   const k1 = RIB_KENAR + RIB_UST / 2 - 0.2, k2 = RIB_KENAR + RIB_TABAN / 2 - 0.1;   // kenar hadvesinin tepe ve taban iç kenarı (alın yüzünden)
   KU.lev(ot - k1, ot + SAC, PTOP - 0.1, PTOP);             // kıvrım: kenar hadvesinin tepesinin üstünden içeri
-  KU.egik(ot - k1, PTOP - 0.1, ot - k2, TR1 + 0.5);        // hadveyi kavrayan kıvrım: hadvenin iç yüzü boyunca aşağı
+  KU.egik(ot - k1, PTOP - 0.1, ot - k2, TU1 + 0.5);        // hadveyi kavrayan kıvrım: hadvenin iç yüzü boyunca aşağı
   const nm = `${G.ad} · ${end === 'A' ? 'ön/sol' : 'arka/sağ'} yüz`;
   add(AD.alin, KU.w, to++ * 0.5, { kod: KB('alin'), ad: MA.ad, satir: [['Bu parça', `${nm} · alın ve üst kıvrımlar${uz ? '; köşede derenin ucunu da içine alacak kadar uzar' : ''}`], ['Alın', yaz(MA.alin, { h: ALIN_H })], ['Kaynak', MA.kaynak], ...kartSat(KB('alin'))] });
   add(AD.alin, K.w, to++ * 0.5, { kod: KB('alin'), ad: MA.ad, satir: [['Bu parça', `${nm} · L ${Math.round(K.Ls)} cm`], ['Profil', MA.profil], ['Uçta', MA.uc], ['Bu proje', yaz(MA.proje, { h: ALIN_H })], ['Liste', MA.liste], ...kartSat(KB('alin'))] });

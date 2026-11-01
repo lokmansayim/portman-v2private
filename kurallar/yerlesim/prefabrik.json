@@ -1,6 +1,6 @@
 {
  "sema": "portman.prefabrik_yerlesim/1",
- "surum": "7",
+ "surum": "8",
  "aciklama": "Prefabrik pano evinde parçaların yerleşim kuralları (İE-15). Okuyan `motor/kart_model.py` (K1: H türü) ve `motor/yerlesim/` (K2: tavan omegası, aşık, çatı kaplaması, baş makas betopanı, dere ve iniş; K3: elektrik; K3b: alt çerçeve ve çatı kenarları, montaj rehberinden; K5b: gövdeden taşan verandanın çatısı; K5b-2: asma dizme tavanın H'ı ve alçıpan gözleri, çatı izolasyonu). Yalnız kural kitabında ve `kurallar/liste/prefabrik.json`'da olmayan konum kuralları buraya yazılır; aynı anahtar iki dosyada olmaz (test). Oradaki değerler (makas aralığı, omega aralığı, aşık aralığı, parça boyları, levha) `okunan` ile gösterilir, burada yeniden yazılmaz: `kurallar/liste/prefabrik.json › kurallar.<ad>[.<alt>]` liste kuralının değeri, `kitap › <ad>[.<alt>]` liste kurallarının sabitlediği kural kitabı setinin (`kitap_seti`) değeri.",
  "kurallar": {
   "h_turu": {
@@ -135,6 +135,16 @@
     "durum": "muhendis",
     "tarih": "2026-10-30",
     "not": "Liste üretecinin okuması: kaplama sandviç, trapez ya da kiremit değilse (yazılı değilse de) tek kat panel sayılır (kapatması `tek_kat_panel_kapatma_m`). Kart modeli aynı okur; kaplama yazılı değilse uyarı yazar (K5b)."
+   },
+   "profil": {
+    "deger": {
+     "tek kat": {"hadve_sayisi": 5, "hadve_araligi": 20, "hadve": 2.7, "tepe": 4.2, "taban": 7.4, "kenar": 4.5, "yalitim": 0},
+     "sandvi": {"hadve_sayisi": 5, "hadve_araligi": 25, "hadve": 3.5, "tepe": 4.2, "taban": 7.4, "kenar": 4.5, "yalitim": 4}
+    },
+    "durum": "varsayim",
+    "tarih": "2026-11-01",
+    "kaynak": "Lokman, 1 Kasım 2026 10:23: \"şayet çatı sandviç panel ise çatı kaplaması kalınlaşır ve doğal olarak alın sacı alnı da genişler başka hiç bir yerde değişiklik olmaz ... 100cm kapatır olan ve 5 hadveli olan\" (verdiği ürün: İzocam Tekiz SPÇ 1000 5H; üreticinin tablosunda faydalı genişlik 1000 mm, 5 hadve, hadve yüksekliği 35 mm, poliüretan yalıtım 35–120 mm, satıcıda stok standart 40 mm, sac 0,40 / 0,40). Tek kat panel: 62 m² rehberinin 27/200 trapez profili (İE-18, varsayım). Lokman, 1 Kasım 2026 10:46 (görsel): \"sadece görsellik açısından sandviç panellerin hadvelerinin içide poliüretan (yani dolu sarı) oluyor altı düz birde ölçülü çizdin 5 hadve sık olmuş gibi 4 hadve yapabilir misin?\"; 10:50: \"internette küçükdevecioğlu dışında da bu ürünü satanlar var ... ölçüleri oralardan alabilirsin bir hata olmasın\". Başka üreticiler: 5 hadveli çatı panelinde hadveler 250 mm arayla, biri yandaki panele binen bindirme hadvesi, çatının 1 metresinde 4 hadve (Teknopanel çatı ve cephe paneli broşürü RP-5H; 3 hadvelide 500 mm); faydalı genişlik 1000 mm (Teknopanel, Mekpan, Nuhpanel, İrden), poliüretan 40 mm'den (Teknopanel, Mekpan, İrden; Tekiz 35 mm'den), hadve yüksekliği 32–40 mm (Tekiz 35, Teknopanel 32/40).",
+    "not": "Durum varsayım: Lokman'ın verdiği 100 cm kapatma, 5 hadve ve kalınlaşma kuralıdır (D-40); hadve yüksekliği ve aralığı üreticilerin ölçüsü, yalıtımın 40 mm'si, hadvenin tepe ve taban genişliği ve tek kat panelin 27/200 profili varsayımdır. Yalnız gösterim (cm): ürünün hadve sayısı ve hadve aralığı, hadve yüksekliği, hadvenin tepe ve taban genişliği, kalkan kenarındaki hadvenin levha kenarından ekseni, yalıtım kalınlığı (tek kat panelde 0). Kaplamanın kalınlaşması tek kat panele göre (yalıtım + hadve) farkıdır, sandviç panelde 4,8 cm: kart modelinde kaplama ve alın sacının alnı bu kadar artar, montaj rehberi paneli yalıtımıyla çizer ve alın sacı kendiliğinden genişler; başka hiçbir parça değişmez, mahya kaplamanın üstünde kalır (D-40). Sandviç panelin tepe ve taban genişliği ile yalıtımın 40 mm'si varsayımdır (başka kalınlık sipariş edilirse burada değişir). Sayı, boy ve metre bunlardan çıkmaz. `hadve_sayisi` ürünün hadve sayısıdır (sandviç panelde biri bindirme hadvesi), `hadve_araligi` hadve eksenleri arası (cm): tek kat panelde 20 (27/200), sandviç panelde 25, çatının 1 metresinde 4 hadve (Lokman 10:46 \"4 hadve\"; üreticilerin ölçüsü). Rehber sandviç panelin hadvelerinin içini poliüretanla dolu, altını düz çizer (Lokman, 1 Kasım 10:46; D-40 ek)."
    },
    "cati_tipleri": ["besik"],
    "durum": "muhendis",
