@@ -56,7 +56,7 @@ ISARET_YOLU = KOK / "kurallar" / "liste" / "prefabrik_isaret.json"
 TEK_KAYNAK = "Tek kaynak (zayıf)"
 ISARETLI = ("pencere_u_h_gecen", "omega_kapak")   # satırı `zayif(...)` ile yazılan kurallar (BK-12 PR-2c)
 
-SURUM = "1.8 (30 Ekim 2026; asma dizme tavanda da 100'lük iç duvarın üstü 100'lük duvar omegası, ayrı satır yok (Lokman 30 Ekim 07:04, D-32 ek); 1.7, 29 Ekim: baş makas omegası saçak ucundan saçak ucuna, taşan verandanın dış kirişindeki dahil (Lokman 29 Ekim 13:12, D-32); 1.6, 28 Ekim: vitrifiye banyo başına (İE-13 PR-2; Lokman onayı 28 Ekim, PR-3); nişin ağzındaki kiriş (BK-14 ek); taşan verandanın dış kirişi kolonun dış yüzünden dış yüzüne (Lokman, kart 28 Ekim); 1.5, 22 Ekim: kör test üreteci 7.3, kurallar kural kitabında; orta iniş 9 m, kitapla farklı on yedi kalemde kitap; PK-07 hedef örnek; T76 cevapları; 100'lük duvar omegası kirişlerin de üstünde; elektrik oda kuralı)"
+SURUM = "1.9 (30 Ekim 2026; K5b TK-01 kıyası (CIO onayı 30 Ekim 14:20): aşık sırası beşikte karar C (Lokman 24 Ekim); baş makas betopanı ve Z'si taşan verandanın kirişli kalkanında da (D-32 madde 2); 1.8, 30 Ekim: asma dizme tavanda da 100'lük iç duvarın üstü 100'lük duvar omegası, ayrı satır yok (Lokman 30 Ekim 07:04, D-32 ek); 1.7, 29 Ekim: baş makas omegası saçak ucundan saçak ucuna, taşan verandanın dış kirişindeki dahil (Lokman 29 Ekim 13:12, D-32); 1.6, 28 Ekim: vitrifiye banyo başına (İE-13 PR-2; Lokman onayı 28 Ekim, PR-3); nişin ağzındaki kiriş (BK-14 ek); taşan verandanın dış kirişi kolonun dış yüzünden dış yüzüne (Lokman, kart 28 Ekim); 1.5, 22 Ekim: kör test üreteci 7.3, kurallar kural kitabında; orta iniş 9 m, kitapla farklı on yedi kalemde kitap; PK-07 hedef örnek; T76 cevapları; 100'lük duvar omegası kirişlerin de üstünde; elektrik oda kuralı)"
 GRUPLAR = {"1001": "Panel", "1002": "Metal aksam", "1003": "Kapı ve pencere", "1004": "Tavan", "1005": "Makas", "1006": "Çatı",
            "1007": "Elektrik", "1008": "Vida", "1009": "Depo", "1010": "Sıhhi tesisat", "1011": "Dere", "1012": "Boya"}
 TAVAN = lambda x: int(math.ceil(x - 1e-9))
@@ -475,6 +475,21 @@ def cati_olculeri(c: dict) -> dict:
     return {"sac": sac, "eg": eg, "egik": egik, "yuz": yuz, "sacak_hat": sacak_hat, "mahya_boy": mahya_boy, "hatlar": hatlar}
 
 
+def asik_mesafeleri(egik_cm: float, aralik_cm: float, sacak_esigi_cm: float, esik: float = 1e-6) -> list[float]:
+    """Karar C (Lokman, 24 Ekim 2026 "Mahyadan 60"; `kurallar/yerlesim/prefabrik.json › asik_sirasi`): bir beşik yüzünde aşık sıralarının
+    mahyadan eğik uzaklıkları (cm). İlk sıra mahyada, sonra aralıkla; saçağa aralıktan az kalınca saçakta bir sıra daha; saçağa
+    `sacak_esigi_cm`'den az kalan sıra konmaz, saçak sırası onun yerini alır (liste kuralı `asik_sacak_esigi_m`, dört aşık planından).
+    Liste üretecinin sıra sayısı ve kart modelinin sıraları (`motor/yerlesim/cati.asik`) buradan (D-28 madde 1)."""
+    d, k = [], 0
+    while k * aralik_cm < egik_cm - esik:
+        d.append(k * aralik_cm)
+        k += 1
+    if len(d) > 1 and egik_cm - d[-1] < sacak_esigi_cm - esik:
+        d.pop()
+    d.append(egik_cm)
+    return d
+
+
 # kitabın oda kuralındaki nokta adı → pafta katmanındaki elektrik sayımının adı (`prefabrik.json › elektrik`)
 ELEKTRIK_NOKTALARI = {"tijli_duy": "tavan_armaturu", "glop": "glop", "tekli_anahtar": "anahtar_tekli", "cift_anahtar": "anahtar_cift",
                       "tekli_priz": "priz_tekli", "cift_priz": "priz_cift", "uydu_prizi": "uydu_prizi"}
@@ -817,16 +832,21 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
              f"çatının görünen alın kenarları ({len(z_k)} kenar: ana çatının ve cumbaların baş makasları) × ⌈eğik ÷ {sy(bzb)}⌉, kenar başına",
              "PK-07 8, PK-06 8, PK-02 8 tuttu; PK-01'de 0; girintili gövdede kenarlar çatının kendi kenarlarından (İE-24)")
     else:
-        ekle("1002", "Baş makas Z'si", f"L {mm_m(bzb)}", kk(ana) * (2 if ana["tip"] == "besik" else 1) * TAVAN(ao["egik"] / bzb), "Kural (O7)",
-             f"ana çatının alın kenarları (beşikte her baş makasın iki eğik kenarı, tek yönde bir) × ⌈eğik ÷ {sy(bzb)}⌉",
+        # ana çatı ve taşan verandanın kirişli kalkanı (kalkan betopanlı, kenar detayı ana çatınınki; D-31 veranda çatısı ana çatının küçüğü)
+        z_ver = [(c, o) for c, o in C if c is not ana and c.get("kalkan_kirisli")]
+        z = sum(kb(c) * (2 if c["tip"] == "besik" else 1) * TAVAN(o["egik"] / bzb) for c, o in [(ana, ao), *z_ver])
+        ekle("1002", "Baş makas Z'si", f"L {mm_m(bzb)}", z, "Kural (O7)",
+             f"ana çatının alın kenarları (beşikte her baş makasın iki eğik kenarı, tek yönde bir) × ⌈eğik ÷ {sy(bzb)}⌉"
+             + (" (taşan verandanın kirişli kalkanı dahil)" if z_ver else ""),
              "PK-07 8, PK-06 8, PK-02 8 tuttu; PK-01'de 0")
     bmb = r("bas_makas_betopani")
     bet = 0
+    # taşan verandanın kirişli kalkanı da betopanlıdır: dış kiriş omegası "betopanın gireceği U yanaklı" (D-32 madde 2; K5b TK-01 kıyası)
     for c, o in C:
-        if kk(c):
+        if kb(c):
             yuks = (c["aciklik_cm"] / (200 if c["tip"] == "besik" else 100) + o["sac"] * (1 if c["tip"] == "besik" else 2)) * o["eg"]
-            bet += kk(c) * TAVAN(bmb["katsayi"] * 0.5 * (c["aciklik_cm"] / 100 + 2 * o["sac"]) * yuks / bmb["levha_m2"])
-    ekle("1002", "Baş makas betopanı", levha("1250 × 2500", bmb["levha_m2"]), bet, "Kural (H5)", f"baş makas başına ⌈{sy(bmb['katsayi'])} × saçaklı üçgen ÷ {sy(bmb['levha_m2'])}⌉" + acik_not, "PK-01 4, PK-02 6, PK-06 6")
+            bet += kb(c) * TAVAN(bmb["katsayi"] * 0.5 * (c["aciklik_cm"] / 100 + 2 * o["sac"]) * yuks / bmb["levha_m2"])
+    ekle("1002", "Baş makas betopanı", levha("1250 × 2500", bmb["levha_m2"]), bet, "Kural (H5)", f"baş makas başına ⌈{sy(bmb['katsayi'])} × saçaklı üçgen ÷ {sy(bmb['levha_m2'])}⌉" + bm_not, "PK-01 4, PK-02 6, PK-06 6")
     acb = r("alt_cerceve_bolen_m")
     if ic_kal >= 100:                                           # O8: iç duvar 100 → tek satır (PK-07 16)
         ekle("1002", "100'lük alt çerçeve", f"100 × {mm_m(acb)}", TAVAN((N["dis_cevre_m"] + L_duvar) / acb), "Şablon formülü (H4, O8)",
@@ -959,6 +979,7 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
     # ── 1005 Makas ──────────────────────────────────────────────────────────
     makas_ara = r("makas_aralik_cm")
     n_makas_top, asik_top = 0, 0
+    asik_ara, asik_esik, tek_yon_asik = _ortak(k, "asik", "aralik_m"), r("asik_sacak_esigi_m"), False
     for c, o in C:
         ad = c.get("ad", "çatı")
         if c.get("makas_yok"):
@@ -982,12 +1003,19 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
             ekle("1005", f"Makas (orta) · {ad}", f"açıklık {mm(c['aciklik_cm'])}", n_m - c["kalkan"], "Kural (P1)",
                  yer + (f", − {c['kalkan']} baş" if c["kalkan"] else ""),
                  "baş ve orta toplamı PK-01 9, PK-02 7, PK-03 9 tuttu", pafta=("makas_orta",))
-        sira = int(math.floor((o["egik"] - (r("asik_mahya_payi_m") if o["yuz"] == 2 else 0)) / _ortak(k, "asik", "aralik_m") + 0.5)) + 1   # O13: en yakın
+        if o["yuz"] == 2:                                       # beşik: karar C (kart modeliyle aynı sıralar)
+            sira = len(asik_mesafeleri(o["egik"] * 100, asik_ara * 100, asik_esik * 100))
+        else:                                                   # tek yön: P2 (karar C beşikte; tek yönde kart modeli "kural yok", K6)
+            sira = int(math.floor(o["egik"] / asik_ara + 0.5)) + 1
+            tek_yon_asik = True
         asik_boy = o["yuz"] * sira * o["mahya_boy"]
         asik_top += asik_boy
     aa, az_, ap_ = r("asik_aday"), 1 + _ortak(k, "asik", "zayiat"), pb("asik")
     ab_ = round(ap_ - aa["pay_m"], 4)                              # şablonun 4,1'i: parça boyu − pay
-    sira_notu = (f"yüz başına (eğik − {sy(r('asik_mahya_payi_m'))}; beşikte) ÷ {sy(_ortak(k, 'asik', 'aralik_m'))} en yakın + 1 sıra")
+    asik_dayanak = "Kural (karar C" + ("; tek yönde P2)" if tek_yon_asik else ")")
+    sira_notu = (f"beşikte yüz başına karar C: ilk sıra mahyada, {sy(asik_ara)} arayla, saçakta bir sıra, saçağa {sy(asik_esik)} m'den az kalan sıra konmaz"
+                 + (f"; tek yönde eğik ÷ {sy(asik_ara)} en yakın + 1 sıra" if tek_yon_asik else ""))
+    asik_kaynak = "PK-01 36 (elle), PK-02 35; sıralar PK-01 aşık planıyla (karar C, Lokman 24.10)"
     ck_ = None
     if N.get("cati_tanimi"):                                    # İE-24: girintili gövdede çatının gerçek yüzleri (aynı düzlemdeki ana çatı ve
         from .genel import cati_genel                           # cumba tek yüz); kitabın çok düzlemli çatı kuralı (`cok_duzlemli_cati`)
@@ -996,8 +1024,9 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
         asik_top = sum(x["boy"] for x in sr_) / 100
         sira_notu = (f"çok düzlemli çatı: {len(ck_['asik'])} yüzde {len(sr_)} sıra, saçaktan {sy(_ortak(k, 'asik', 'aralik_m'))} aralıkla, sıranın "
                      "boyu yüzün o yükseklikteki genişliği; aynı düzlemdeki ana çatı ve cumba tek yüz")
-    ekle("1005", "Aşık", f"L {mm_m(ap_)}", TAVAN(asik_top * az_ / ap_), "Kural (P2)",
-         f"aşık boyları {od(asik_top, 1)} m × {sy(az_)} ÷ {sy(ap_)} ({sira_notu})", "PK-01 36 (elle), PK-02 35",
+        asik_dayanak, asik_kaynak = "Kural (P2)", "PK-01 36 (elle), PK-02 35"
+    ekle("1005", "Aşık", f"L {mm_m(ap_)}", TAVAN(asik_top * az_ / ap_), asik_dayanak,
+         f"aşık boyları {od(asik_top, 1)} m × {sy(az_)} ÷ {sy(ap_)} ({sira_notu})", asik_kaynak,
          pafta=("asik",), aday=TAVAN(asik_top / ab_ + aa["ek"]), aday_notu=f"Portatifev kaba hesabı: ÷ {sy(ab_)} + {aa['ek']}")
 
     if kubbeler:

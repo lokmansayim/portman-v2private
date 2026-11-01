@@ -88,6 +88,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-36](D-36.md) | Fiyat defteri r05: 100'lük iç eleman dıştaki 100'lük ile aynı fiyat (H 342, çektirme U'su 148, karkaslı pano 1070–1250 en 2.200); 100'lük 3'lü H 60'lık karşılığının fiyatı; kutu profil ve tek kat çatı paneli boyla orantılı, her boy onaylı; besleme kablo borusu 3 × 2,5 kablonun iki katı, kenar boyası iç cephe boyasının kg fiyatıyla, çırpı ipi boş | 31.10 (Lokman 15:25–15:27) |
 | [D-37](D-37.md) | Fiyat defteri r06: makasın fiyatı kg'ından (59 TL/kg), kg'ı saçaktan saçağa boyuyla orantılı, TK-03'ün gerçek listesinden 5,50 kg/m; bütün makaslar (ana, yavru, cumba) tek oranla | 31.10 (Lokman 15:40–16:00) |
 | [D-38](D-38.md) | Kirişler askıda kalmaz: gövdenin içindeki açık mahalin iki açık kenarının birleştiği köşeye Motor 10 × 10 dikme koyar (PC-30); kirişler kolonlu verandanın kuralıyla (dış ölçü − 10). TK-03 balkonu L 3037,5 ve 1832,5, P6001 verandası L 4292,5 ve 2410, ikisinde de kolon. Rehberde baş makas betopanının uçtaki parçası da omeganın U yanağına iner. D-35'in kolonsuz köşe kirişini kaldırır | 31.10 (Lokman 15:08, 15:13) |
+| [D-39](D-39.md) | Prefabrik listesi kart modeliyle aynı sayar: aşıkta karar C, saçağa 30 cm'den az kalan sıra konmaz (ayrı liste kuralı, dört aşık planından); kirişli veranda kalkanında betopan ve Z; saçak omegası saçak ucundan ucuna, kart modelinde betopanda kesilir (sayı hattın tamamından). TK-01 r07, TK-02, PK-01 kilidi, kural kilidi, TK-01 teklifi (+2.068 TL) ve TK-01 rehberinin sağlaması (aşık 79 → 72) yeniden donduruldu | 24.10 (karar C), 31.10 (Lokman 13:40; CIO 16:58) |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
 
@@ -121,7 +122,7 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-36 | fiyat defteri r05: iç 100 = dış 100, 3'lü H 100 = 60'lık karşılığı, kutu profil ve tek kat panel boyla orantılı, kablo borusu ve kenar boyası hesapla (31.10 15:25–15:27) | yazıldı (31.10; `claude/project-thread-5p2lsc`, İE-13 PR-4, PR #93) |
 | D | D-37 | fiyat defteri r06: makas kg'ı saçaktan saçağa boyuyla orantılı, TK-03'ten 5,50 kg/m × 59 TL/kg (31.10 15:40–16:00) | yazıldı (31.10; `claude/project-thread-5p2lsc`, İE-13 PR-4, PR #93) |
 | D | D-38 | kirişler askıda kalmaz: açık mahalin köşesinde Motor kolonu (PC-30); rehberde baş makas betopanı uçta da omeganın içinde (Lokman 31.10 15:08, 15:13) | yazıldı (31.10; İE-24, `claude/project-thread-756g5a`, PR #87) |
-| D | D-39 | BK-19: prefabrik liste = kart modeli (aşıkta saçak eşiği 30 cm, saçak omegası betopanda kesilir) | ayrıldı (31.10; `claude/project-thread-rhjgzv`) |
+| D | D-39 | BK-19: liste ve kart modeli aynı sayar (aşık karar C ve 30 cm saçak eşiği, veranda kalkanında betopan ve Z, saçak omegası saçak ucundan ucuna; yeniden dondurma) | yazıldı (31.10; `claude/project-thread-rhjgzv`, BK-19) |
 | D | **D-40** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |

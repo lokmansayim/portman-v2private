@@ -124,13 +124,12 @@ def _verandalar(g: dict, D: dict, K: dict, kesit: dict, kural_yok: list, uyarila
     for F in cerceveler:
         p = veranda.yavru_makaslar(g, F, Vd)
         p += cati.asik(g, {"kesit_asik": kesit["asik"], "aralik": _cm(A["aralik"]), "tam": _cm(A["parca_boyu"] - A["pay"]),
-                           "en_kisa": A["en_kisa_cm"]}, F)
+                           "en_kisa": A["en_kisa_cm"], "sacak_esigi": _cm(A["sacak_esigi"])}, F)
         if not neden:
             for q in cati.kaplama(g, kaplama_degerleri(D["cati_kaplamasi"], tur, kesit), F, iki_yuz=True):
                 q["bilgi"]["Kaplama"] = tur
                 p.append(q)
-        levhalar, neden_b = cati.betopan(g, {"katsayi": B["katsayi"], "levha_m2": B["levha_m2"], "levha_cm": B["levha_cm"],
-                                             "kalinlik_betopan": kesit["betopan"]}, F, kalkanlar=[veranda.kalkan(F, kesit["betopan"])])
+        levhalar, neden_b = cati.betopan(g, cati.betopan_degerleri(B, kesit), F, kalkanlar=[veranda.kalkan(F, kesit["betopan"])])
         if neden_b:
             kural_yok.append({"parca": f"baş makas betopanı ({F['ad']})", "sinif": "IfcPlate", "neden": f"bas_makas_betopani_yerlesimi: {neden_b}"})
         p += levhalar
@@ -232,7 +231,7 @@ def katmanlar(ie: dict, plan: dict, makaslar: list[dict], yerlesim: dict, liste:
         if ad == "asik_sirasi":
             A = D[ad]
             parcalar += cati.asik(g, {"kesit_asik": kesit["asik"], "aralik": _cm(A["aralik"]), "tam": _cm(A["parca_boyu"] - A["pay"]),
-                                      "en_kisa": A["en_kisa_cm"]})
+                                      "en_kisa": A["en_kisa_cm"], "sacak_esigi": _cm(A["sacak_esigi"])})
         elif ad == "cati_kaplamasi":
             tur, neden = kaplama_turu(g, D[ad], uyarilar)
             if neden:
@@ -245,8 +244,7 @@ def katmanlar(ie: dict, plan: dict, makaslar: list[dict], yerlesim: dict, liste:
             parcalar += tavan_katmani.izolasyon(g, {"kalinlik": kesit["izolasyon"]})
         elif ad == "bas_makas_betopani_yerlesimi":
             B = D[ad]
-            levhalar, neden = cati.betopan(g, {"katsayi": B["katsayi"], "levha_m2": B["levha_m2"], "levha_cm": B["levha_cm"],
-                                               "kalinlik_betopan": kesit["betopan"]})
+            levhalar, neden = cati.betopan(g, cati.betopan_degerleri(B, kesit))
             if neden:
                 kural_yok.append({"parca": adi, "sinif": sinif, "neden": f"{ad}: {neden}"})
             parcalar += levhalar

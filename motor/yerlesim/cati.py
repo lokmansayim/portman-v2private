@@ -51,17 +51,12 @@ def _prizma(F: dict, uz: list, v0: float, v1: float) -> dict:
 
 def asik(g: dict, K: dict, F: dict | None = None) -> list[dict]:
     """Karar C: her yüzde ilk sıra mahyada, sonra kitabın aralığıyla (eğik boyca); saçağa aralıktan az kalınca saçakta bir sıra daha;
-    saçak sırasına `en_kisa`'dan yakın kalan sıra konmaz. Sıra boyu mahya boyu; dizilimin başladığı uçtan tam parçalar (parça boyu − pay),
+    saçağa `sacak_esigi`'nden az kalan sıra konmaz (liste kuralı `asik_sacak_esigi_m`; BK-19). Sıra boyu mahya boyu; dizilimin başladığı uçtan tam parçalar (parça boyu − pay),
     kalan son parçada; `en_kisa`'dan kısa kalan parçasız boşluk (omegadaki gibi)."""
+    from motor.prefabrik_liste import asik_mesafeleri                   # sıralar liste üretecinin sayısıyla tek kaynaktan (D-28 madde 1)
     F = F or cerceve(g)
     a, w = K["kesit_asik"]
-    d = []
-    k = 0
-    while k * K["aralik"] < F["egik"] - ESIK:
-        d.append(k * K["aralik"]); k += 1
-    if len(d) > 1 and F["egik"] - d[-1] < K["en_kisa"] - ESIK:          # saçak sırası son sıranın yerini alır
-        d.pop()
-    d.append(F["egik"])
+    d = asik_mesafeleri(F["egik"], K["aralik"], K["sacak_esigi"], ESIK)        # saçak sırası son sıranın yerini alabilir
     out = []
     for yuz, isaret in (("sol", -1), ("sag", 1)):
         for i, di in enumerate(d):
@@ -130,6 +125,12 @@ def kaplama(g: dict, K: dict, F: dict | None = None, iki_yuz: bool = False) -> l
 
 def _uz(k) -> list[tuple[float, float]]:
     return [(round(u, 4), round(z, 4)) for u, z in k.exterior.coords[:-1]]
+
+
+def betopan_degerleri(B: dict, kesit: dict) -> dict:
+    """`bas_makas_betopani_yerlesimi`'nin okunan değerleri → `betopan`'ın `K`'sı (çatı katmanı ve kenar katmanı aynı levhaları kurar;
+    saçak omegası levhada kesilir, `kenar.sacak_omegasi`)."""
+    return {"katsayi": B["katsayi"], "levha_m2": B["levha_m2"], "levha_cm": B["levha_cm"], "kalinlik_betopan": kesit["betopan"]}
 
 
 def betopan(g: dict, K: dict, F: dict | None = None, kalkanlar: list[dict] | None = None) -> tuple[list[dict], str | None]:

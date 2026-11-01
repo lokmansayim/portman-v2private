@@ -256,7 +256,7 @@ def test_degerler_okunur():
     D = Y.degerler(y, liste)
     T, A, C, B, R = (D[k] for k in ("tavan_omegasi_yerlesimi", "asik_sirasi", "cati_kaplamasi", "bas_makas_betopani_yerlesimi", "dere_hatti"))
     assert (T["aralik_asma"], T["aralik_ters"], T["parca_boyu"], T["pay"], T["en_kisa_cm"]) == (1.255, 0.6, 3.75, 0.1, 10)
-    assert (A["aralik"], A["parca_boyu"], A["pay"]) == (0.6, 4.2, 0.1)
+    assert (A["aralik"], A["parca_boyu"], A["pay"], A["sacak_esigi"], A["en_kisa_cm"]) == (0.6, 4.2, 0.1, 0.3, 10)   # eşik liste kuralından (BK-19)
     assert (C["kapatma"], C["tasma"], C["yuvarlama_mm"]) == (1.0, 0.05, 10)
     assert (B["katsayi"], B["levha_m2"], B["levha_cm"]) == (1.5, 3.125, [250, 125])
     assert (R["orta_esik"], R["orta_kurali"], R["kose_basina"], R["parca_boyu"], R["bindirme"]) == (9.0, "esik", 1, 4.0, 0.2)
@@ -297,11 +297,12 @@ def test_ters_tavan(pk01, tmp_path):
 
 
 def test_asik_saçak_sirasi():
-    """Karar C: sıra mahyadan aralıkla; saçağa aralıktan az kalınca saçakta bir sıra. Eğik boy aralığın katıysa son sıra saçakta (çift sıra yok)."""
+    """Karar C: sıra mahyadan aralıkla; saçağa aralıktan az kalınca saçakta bir sıra. Eğik boy aralığın katıysa son sıra saçakta (çift sıra yok).
+    Saçağa saçak eşiğinden (liste kuralı `asik_sacak_esigi_m`, 30 cm; BK-19, dört aşık planından) az kalan sıra konmaz."""
     def g(aciklik_cm, egim):
         return {"W": aciklik_cm, "H": 500, "duvar_h": 250, "cati": {"tip": "besik", "egim": egim, "sacak": 30, "topuk": 10, "makas_ekseni": "x"},
                 "baslangic": {"x": "min", "y": "max"}, "makaslar": []}
-    K = {"kesit_asik": [5, 5], "aralik": 60.0, "tam": 410.0, "en_kisa": 10.0}
+    K = {"kesit_asik": [5, 5], "aralik": 60.0, "tam": 410.0, "en_kisa": 10.0, "sacak_esigi": 30.0}
     for aciklik, egim in ((600, 0.33), (500, 0.30), (840, 0.0)):
         F = cati.cerceve(g(aciklik, egim))
         d = sorted({p["bilgi"]["MahyadanEgik_cm"] for p in cati.asik(g(aciklik, egim), K)})
@@ -310,9 +311,9 @@ def test_asik_saçak_sirasi():
     F = cati.cerceve(g(1140, 0.0))                                       # eğik 600: 0 … 540 ve 600, saçakta tek sıra
     assert F["egik"] == pytest.approx(600)
     assert sorted({p["bilgi"]["MahyadanEgik_cm"] for p in cati.asik(g(1140, 0.0), K)}) == [60.0 * i for i in range(11)]
-    for aciklik, son in ((1141, 600.5), (1158, 609.0), (1160, 610.0)):  # saçak sırasına 10 cm'den yakın sıra konmaz (10 cm dahil kalır)
+    for aciklik, son in ((1141, 600.5), (1198, 629.0), (1200, 630.0)):  # saçağa 30 cm'den az kalan sıra konmaz (30 cm dahil kalır)
         d = sorted({p["bilgi"]["MahyadanEgik_cm"] for p in cati.asik(g(aciklik, 0.0), K)})
-        assert d[-1] == pytest.approx(son) and (d[-2] == 540 if son - 600 < 10 else d[-2] == 600) and d[-1] - d[-2] <= 70 + 1e-6
+        assert d[-1] == pytest.approx(son) and (d[-2] == 540 if son - 600 < 30 else d[-2] == 600) and d[-1] - d[-2] <= 90 + 1e-6
     def boylar(H):                                                       # mahya boyu H + 60; kalan 10 cm'den kısaysa parçasız
         gg = dict(g(600, 0.33), H=H)
         return sorted({p["boy_cm"] for p in cati.asik(gg, K)})
