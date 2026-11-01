@@ -249,7 +249,8 @@ def test_acik_mahal_tavani(paketler, kod):
 def test_sacak_omegasi_z_ve_veranda_asigi_kart_modelinden(paketler):
     """D-39 rehbere (BK-19'un İE-18'e bıraktığı üç iş; 1 Kasım 2026): saçak omegası kart modelinin CK-01 parçaları (saçak ucundan ucuna;
     ana kalkan saçağında, baş makas betopanında ve aynı hatta devam eden veranda omegasında kesik); Z'nin parça boyu kart modelinden, 3B'de
-    kenar başına ⌈eğik ÷ 2,8⌉ parça (liste ve kart modeli 12; sayfa izi `test_rehber_izi`); veranda aşığının sıraları kart modelinden,
+    kenar başına ⌈eğik ÷ 2,8⌉ parça, sayı kart modelinin o kenardaki Z'sinden (liste ve kart modeli 12; sayfa izi `test_rehber_izi`); veranda
+    aşığının sıraları kart modelinden,
     listenin ortak işleviyle (`prefabrik_liste.asik_mesafeleri`, saçak eşiği 30 cm)."""
     from motor.prefabrik_liste import _pr, asik_mesafeleri, kurallari_oku
     kok, gec, _ = paketler
@@ -263,6 +264,7 @@ def test_sacak_omegasi_z_ve_veranda_asigi_kart_modelinden(paketler):
                                       "arka veranda sol yan kirişi", "arka veranda sol saçağı, kalkan saçağı", "arka veranda sağ yan kirişi",
                                       "arka veranda sağ saçağı, kalkan saçağı"]
     assert {k["z_parca"] for k in d["kalkan"]} == {280} and say["kenar"]["liste"]["CK-04"] == SAGLAMA["TK-01"]["kartlar"]["CK-04"] == 12
+    assert [k["z_n"] for k in d["kalkan"]] == [{"A": 2, "B": 2}, {"A": 2, "B": 2}, {"A": 1, "B": 1}, {"A": 1, "B": 1}]   # ön, arka, iki veranda
     esik = _pr(kurallari_oku()["prefabrik"], "asik_sacak_esigi_m") * 100
     for R, cati_ in (("V1", "ÖN VERANDA"), ("V2", "ARKA VERANDA")):
         for yan, yuz in (("L", "sol"), ("R", "sag")):

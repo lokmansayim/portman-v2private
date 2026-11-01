@@ -488,13 +488,13 @@ function rake(G, end, m, uzat = 0) {
         add(AD.kalkan, K.w, 20 + bo++ * 0.5, { kod: KB('z'), ad: "Baş makas Z'si", satir: satir(`${yz} · L ${Math.round(K.Ls)} cm`) });
         return;
       }
-      // kenar başına ⌈eğik ÷ parça boyu⌉ parça (kart modeli ve liste; D-39): saçak ucundan mahyaya, son parça kalan
-      const n = Math.ceil(Math.abs(G.sm - G.uc[end]) / G.R.cos / G.z_parca - 1e-6);   // eğik boy saçak ucundan (çizimdeki 0,2 cm uzatma sayılmaz)
+      // kenarın parça sayısı kart modelinden (o kenardaki Z, ⌈eğik ÷ parça boyu⌉; liste de böyle sayar, D-39): saçak ucundan mahyaya, son parça kalan
+      const n = G.z_n[end];
       for (let k = 0; k < n; k++) {
-        const K = rake(G, end, mat('frame', AD.kalkan)), uc = -K.dir * K.Ls / 2, a = k * G.z_parca, b = Math.min(K.Ls, (k + 1) * G.z_parca);
+        const K = rake(G, end, mat('frame', AD.kalkan)), uc = -K.dir * K.Ls / 2, a = k * G.z_parca, b = k === n - 1 ? K.Ls : (k + 1) * G.z_parca;
         const [x0, x1] = [uc + K.dir * (a + (k ? 0.1 : 0)), uc + K.dir * (b - (k < n - 1 ? 0.1 : 0))].sort((p, q) => p - q);
         zl(K, x0, x1);
-        add(AD.kalkan, K.w, 20 + bo++ * 0.5, { kod: KB('z'), ad: "Baş makas Z'si", satir: satir(`${yz} · ${k + 1}/${n}. parça · L ${Math.round(b - a)} cm`, [['Kenar', `L ${Math.round(K.Ls)} cm · ${n} parça (parça boyu ${fmtc(G.z_parca)} cm; kenar başına ⌈eğik ÷ ${fmtc(G.z_parca)}⌉, liste ve kart modeli gibi)`]]) });
+        add(AD.kalkan, K.w, 20 + bo++ * 0.5, { kod: KB('z'), ad: "Baş makas Z'si", satir: satir(`${yz} · ${k + 1}/${n}. parça · L ${Math.round(b - a)} cm`, [['Kenar', `L ${Math.round(K.Ls)} cm · ${n} parça (kart modelinde bu kenarın Z’si ${fmtc(G.z_kart[end])} cm: ⌈${fmtc(G.z_kart[end])} ÷ ${fmtc(G.z_parca)}⌉ = ${n}; liste de böyle sayar)`]]) });
       }
     });
   });

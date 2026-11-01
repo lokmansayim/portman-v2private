@@ -114,7 +114,8 @@ def test_balkon_tavani(tk03):
 def test_sacak_omegasi_ve_z_kart_modelinden(tk03):
     """D-39 rehbere (BK-19'un bıraktığı iş; 1 Kasım 2026): saçak omegası kart modelinin CK-01 parçaları, saçak ucundan ucuna (dört saçak
     hattı; kalkan saçağının altında da, baş makas betopanında kesik), liste gibi hatların toplamı 26,53 m. Z her eğik kenarda
-    ⌈eğik ÷ 2,8⌉ parça (kart modelinin parça boyu); adımın yazısı bunu söyler."""
+    ⌈eğik ÷ 2,8⌉ parça; parça boyu ve kenar başına sayı kart modelinden (D-28 madde 1: rehber sayıyı yeniden hesaplamaz), toplam kart
+    modeli ve liste gibi 14; adımın yazısı bunu söyler."""
     d, say, L = tk03
     om = [o for o in d["omega_duvar"] if o["tur"] == "sacak"]
     kp = [p for p in say["kenar"]["parcalar"] if p["kart"] == "CK-01"]
@@ -125,5 +126,9 @@ def test_sacak_omegasi_ve_z_kart_modelinden(tk03):
                                                                  "ana çatı ve sol cumba arka": 4}
     assert sum(o["yer"].endswith("kalkan saçağı") for o in om) == 6 and all("saçak ucundan ucuna" in o["hat"] for o in om)
     assert {k["z_parca"] for k in d["kalkan"]} == {280}
+    zk = sorted(p["boy_cm"] for p in say["kenar"]["parcalar"] if p["parca"].startswith("BAS_MAKAS_Z_"))
+    assert sorted(b for k in d["kalkan"] for b in k["z_kart"].values()) == [round(b, 2) for b in zk]
+    z_liste = sum(s["adet"] for s in L if s["kalem"].startswith("Baş makas Z"))
+    assert sum(n for k in d["kalkan"] for n in k["z_n"].values()) == say["kenar"]["liste"]["CK-04"] == z_liste == 14
     p = next(a for a in d["adimlar"] if a.get("ad") == "Baş makas betopanı ve Z")["p"]
     assert "Z 2,8 m’lik parçalardır: her eğik kenara ⌈eğik boy ÷ 2,8⌉ parça" in p and "veranda" not in p

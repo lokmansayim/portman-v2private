@@ -9,7 +9,7 @@ yazıları kurulur; şema 62'nin verisiyle aynı (`testler/paket/rehber62/donust
 - **Plan** (`motor.geometry.kur`, `motor.ifc_uret.hazirla`): pano, açıklık, köşe direği, H (pano ekleri), oda poligonları, veranda
   kolon ve kirişleri, veranda çatıları. Pafta çerçevesi: x sol dış yüzden sağa, y ön dış yüzden arkaya (cm).
 - **Kart modeli** (`python -m motor.kart_model`): kartlar ve katalog kodları, H türleri (kulaklı / kulaksız), makas, aşık (taşan verandanın
-  çatısında da) ve iniş yerleri, saçak omegası parçaları (`<kod>_model.ifc`), tavan omegası parçaları ve Z'nin parça boyu
+  çatısında da) ve iniş yerleri, saçak omegası parçaları (`<kod>_model.ifc`), tavan omegası parçaları, Z'nin parça boyu ve kenar başına Z parçaları
   (`<kod>_kart_sayim.json`). Saçak omegası saçak ucundan ucuna, betopanda kesik; aşıkta saçağa 30 cm'den az kalan sıra konmaz (D-39).
 - **Yükleme listesi**: adetler ve listedeki satırlar (adım satırları, kimlik kartlarındaki "Liste" satırı).
 - **Kural** (motorun modelinde olmayanlar): yavru makasın yeri (derinlik boyunca eşit aralık), asma tavanın H'ı ve gözü (`tavan_h_aralik_m`), kalkan betopanının dizilimi (125 cm'ye sığan
@@ -246,9 +246,10 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         if v["cephe"] not in ("on", "arka") or c.get("tip") != "besik" or c["mahya"][0][0] != c["mahya"][1][0]:
             raise Desteklenmiyor(f"{v['ad']}: cephe {v['cephe']}, çatı {c.get('tip')}; rehber ön ve arka cephede ana çatıya paralel beşiği kurar")
     # kart modelinin IFC'sinden okunan parçalar: makas alt başlıkları, aşıklar, inişler; taşan verandanın aşıkları (K5b); saçak omegası (CK-01; D-39)
-    DESEN = {"IFC": r"MAKAS_\d+_ALT_BASLIK|ASIK_\d+|INIS_\d+", "VASIK": r"VERANDA_ASIK_\d+", "SOM": r"(?:VERANDA_)?SACAK_OMEGASI_\d+"}
+    DESEN = {"IFC": r"MAKAS_\d+_ALT_BASLIK|ASIK_\d+|INIS_\d+", "VASIK": r"VERANDA_ASIK_\d+", "SOM": r"(?:VERANDA_)?SACAK_OMEGASI_\d+",
+             "Z": r"(?:VERANDA_)?BAS_MAKAS_Z_\d+"}
     IFC_ = ifc_kutulari(kart / f"{kart_kodu}_model.ifc", "^(?:" + "|".join(DESEN.values()) + ")$")
-    IFC, VASIK, SOM = ({n: k for n, k in IFC_.items() if re.fullmatch(DESEN[a], n)} for a in ("IFC", "VASIK", "SOM"))
+    IFC, VASIK, SOM, ZB = ({n: k for n, k in IFC_.items() if re.fullmatch(DESEN[a], n)} for a in ("IFC", "VASIK", "SOM", "Z"))
     PARCA = ifc_parcalar(kart / f"{kart_kodu}_model.ifc", r"^(H_PANO_EKI_IC_\d+|BAGLANTI_B\d+_\d+|ALT_CERCEVE_\d+)$")
     KART_IFC = {ad: ps["KartKodu"] for ad, ps in PARCA.items()}                         # iç H'ların kartı modelden
     ALT_KART = defaultdict(set)                                                         # alt çerçevenin kartı modelden (duvar → kart)
@@ -848,14 +849,13 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
     # betopan (125 × 250): kalkan 125 cm'ye sığıyorsa 62 m²'deki gibi yatay levhalar, mahyadan iki yana 250'lik; sığmıyorsa 125'lik dik
     # şeritler. Levhanın yarısından kısa kalan uç "makas ucu" dolgusu (artandan), uzunu kesilmiş levha.
     KA_dik = []
-    # Z'nin parça boyu kart modelinin kuralından (`bas_makas_z_yerlesimi`, kenar başına ⌈eğik ÷ parça boyu⌉; liste de böyle sayar): 3B'de her
-    # eğik kenar o boyda parçalar (62 m²'nin verisinde yok, orada kenar başına tek parça)
+    # Z'nin parça boyu kart modelinin kuralından (`bas_makas_z_yerlesimi`, kenar başına ⌈eğik ÷ parça boyu⌉; liste de böyle sayar), kenarın
+    # parça sayısı kart modelinin o kenardaki Z'sinden (aşağıda): 3B'de her eğik kenar o boyda parçalar (62 m²'nin verisinde yok, orada kenar
+    # başına tek parça)
     ZP = ((SAYIM.get("kenar") or {}).get("degerler") or {}).get("bas_makas_z_yerlesimi", {}).get("parca_boyu")
-    ZM = ((f" Z {fmt(ZP, 1)} m’lik parçalardır: her eğik kenara ⌈eğik boy ÷ {fmt(ZP, 1)}⌉ parça (liste ve kart modeli gibi)" +
-           (", verandanın kirişli kalkanında da." if VR else ".")) if ZP else "")
+    ZM = ((f" Z {fmt(ZP, 1)} m’lik parçalardır: her eğik kenara ⌈eğik boy ÷ {fmt(ZP, 1)}⌉ parça (sayı kart modelinin o kenardaki Z’sinden; "
+           "liste de böyle sayar)" + (", verandanın kirişli kalkanında da." if VR else ".")) if ZP else "")
     for KA in kalkan:
-        if ZP:
-            KA["z_parca"] = _r(ZP * 100)
         a, b, sm = KA["duvar"]["A"], KA["duvar"]["B"], KA["sm"]
         tan_k = RF[KA["R"]]["tan"]
         KA_yuk = max(abs(sm - a), abs(sm - b)) * tan_k + 13
@@ -875,6 +875,34 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         KA["parca"], KA["dolgu"] = parca, dolgu
         KA["uc"] = {k: _r(t) for k, t in KA["uc"].items()}
         KA["sm"] = _r(sm)
+    if ZP:                                        # Z kart modelinden (D-28 madde 1): kalkan ucunun eğik kenarı, kart modelinin o kenardaki Z'si
+        P, ZK, eslesen = ZP * 100, [p for p in ((SAYIM.get("kenar") or {}).get("parcalar") or []) if re.fullmatch(DESEN["Z"], p["parca"])], set()
+        for p in ZK:
+            if p["parca"] not in ZB:
+                raise Desteklenmiyor(f"kart modelinin IFC'sinde {p['parca']} yok")
+        for KA in kalkan:
+            ex = abs(math.cos(KA["r"])) > 0.5                          # kalkan x boyunca (r 0 ya da π), değilse y boyunca (±π/2)
+            sg = round(math.cos(KA["r"]) if ex else math.sin(KA["r"]))  # yerel eksen → plan
+            duz, mah = (KA["O"][1] if ex else KA["O"][0]), KA["sm"] * sg  # kalkanın düzlemi ve mahyası (plan)
+            cos_k = 1 / math.hypot(1, RF[KA["R"]]["tan"])
+            KA["z_parca"], KA["z_n"], KA["z_kart"] = _r(P), {}, {}
+            for u in ("A", "B"):                                         # A: planda küçük uç (sol ya da ön), B: büyük uç
+                es = []
+                for p in ZK:
+                    x0, y0, _z0, x1, y1, _z1 = ZB[p["parca"]]
+                    d_, b_ = ((y0 + y1) / 2, (x0 + x1) / 2) if ex else ((x0 + x1) / 2, (y0 + y1) / 2)
+                    if abs(d_ - duz) < 30 and (b_ < mah) == (u == "A"):
+                        es.append(p)
+                yan = "ön/sol" if u == "A" else "arka/sağ"
+                if len(es) != 1:
+                    raise Desteklenmiyor(f"{KA['ad']} {yan} eğik kenarı: kart modelinde {len(es)} Z kenarı")
+                n, Ls = math.ceil(es[0]["boy_cm"] / P - 1e-6), abs(KA["sm"] - KA["uc"][u]) / cos_k
+                if not (n - 1) * P < Ls - 1 or Ls > n * P + 1:          # rehberin kenarı kart modelinin parçalarını taşımıyor
+                    raise Desteklenmiyor(f"{KA['ad']} {yan} eğik kenarı {fmtc(Ls)} cm, kart modelinde {fmtc(es[0]['boy_cm'])} cm ({n} Z parçası)")
+                eslesen.add(es[0]["parca"])
+                KA["z_n"][u], KA["z_kart"][u] = n, _r(es[0]["boy_cm"])
+        if eslesen != {p["parca"] for p in ZK}:
+            raise Desteklenmiyor(f"kart modelinin Z'si rehberin kalkanlarında yok: {sorted({p['parca'] for p in ZK} - eslesen)}")
 
     # ---------- aşıklar ----------
     if GIR:                                       # kart modelinin aşıkları, yüz ve sıra bilgisiyle (`girinti.py`)
