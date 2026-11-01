@@ -634,7 +634,8 @@ class IfcUretici:
             self._temsil(sl, self._egik_levha(d["plan"], p0(d), d["yukari"], d["egim"], d["sacak_kotu"] + 10, t), "sac")
             self._pset(sl, "PortatifEv_Kapsam", {"BOMKalem": "Trapez çatı sacı (antrasit) — yüzey", "Duzlem": d["ad"]})
             parcalar.append(sl)
-        for j, m in enumerate(T.get("mahal_catilari", [])):        # İE-17 PR-2: açık mahalin kendi panel çatısı (dikme ve profil `baglantilar`)
+        for j, m in enumerate(m for m in T.get("mahal_catilari", []) if m["tip"] != "kirma"):   # İE-17 PR-2: açık mahalin kendi panel çatısı
+                                                                    # (dikme ve profil `baglantilar`; köşe kırması yukarıda ana çatının levhası)
             d = m["duzlem"]
             sl = self._urun("IfcSlab", f"MAHAL_CATI_{j + 1}", predefined="ROOF", kapsa=False)
             self._yerlestir(sl)
@@ -777,7 +778,7 @@ class IfcUretici:
 
         def profil_ust(x0, y0, x1, y1):
             from .veranda import kot
-            for m in mc:
+            for m in (m for m in mc if m["tip"] != "kirma"):     # köşe kırmasında makas kirişe oturur: profil duvar üstünün 10 altından (BK-14)
                 kx0, ky0, kx1, ky1 = m["kutu"]
                 if kx0 - 0.5 <= x0 and x1 <= kx1 + 0.5 and ky0 - 0.5 <= y0 and y1 <= ky1 + 0.5:
                     return min(kot(m["duzlem"], x, y) for x in (x0, x1) for y in (y0, y1))

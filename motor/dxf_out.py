@@ -1219,7 +1219,8 @@ def uret(is_emri: dict, cikti_dir: Path, ad_govde: str | None = None, pdf_hatada
            ("Sistem", "Prefabrik panel (8 mm fibercement)"), ("Duvar yüksekliği", f"{fmt(hy)} cm"), ("Dış duvar / iç duvar", f"{G._mm(G.T_DIS)} mm / {G._mm(G.T_IC)} mm"),
            ("Pano modülü", "125,5 cm (isteğe bağlı yarım pano 62,75 cm)"),
            ("Çatı", f"{_cati_adi(cati)} — %{fmt(float(cati.get('egim_yuzde',33)))} eğim, {fmt(float(cati.get('sacak_cm',30)))} cm saçak, {fmt(float(cati.get('topuk_cm',10)))} cm topuk"),
-           *[(f"{g['mahal'].capitalize()} çatısı", f"Tek eğim panel çatı — %{fmt(float(g['egim_yuzde']))} eğim")      # İE-17 PR-2 (AP-09)
+           *[(f"{g['mahal'].capitalize()} çatısı", f"Ana çatıyla köşe kırması — %{fmt(float(cati.get('egim_yuzde', 33)))} eğim"   # AP-03
+              if g.get("tip") == "kirma" else f"Tek eğim panel çatı — %{fmt(float(g['egim_yuzde']))} eğim")      # İE-17 PR-2 (AP-09)
              for g in cati.get("mahal_catilari") or []],
            ("Pencereler", "PVC doğrama; katalog 120×120 / 120×180 / 60×40" if _olculer <= set(G.PENCERE_OLCULERI) else _pencere_satiri),
            ("Kapılar", "Dış: çelik kapı; iç: Amerikan panel kapı"),

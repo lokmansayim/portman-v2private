@@ -355,7 +355,8 @@ def cati_plani_ciz(ax, plan: G.Plan, ie: dict, yazi: float = 1.0) -> bool:
         return False
     dz = tanim["duzlemler"]
     vc = [VR.cati(v, ie) for v in plan.dis_verandalar]                # BK-14: taşan verandaların kendi çatısı, ana çatının altında
-    vc += [{"duzlemler": [m["duzlem"]], "mahya": None} for m in tanim.get("mahal_catilari") or []]   # İE-17 PR-2: ızgaradaki verandanın çatısı
+    vc += [{"duzlemler": [m["duzlem"]], "mahya": None} for m in tanim.get("mahal_catilari") or []   # İE-17 PR-2: ızgaradaki verandanın çatısı
+           if m["tip"] != "kirma"]                                     # (köşe kırması ana çatının düzlemlerinde)
     xs = [p[0] for d in dz + [d for c_ in vc for d in c_["duzlemler"]] for p in d["plan"]]
     ys = [p[1] for d in dz + [d for c_ in vc for d in c_["duzlemler"]] for p in d["plan"]]
     X0, X1, Y0, Y1 = min(xs), max(xs), min(ys), max(ys)
@@ -379,15 +380,16 @@ def cati_plani_ciz(ax, plan: G.Plan, ie: dict, yazi: float = 1.0) -> bool:
         ortak = sorted({tuple(p) for p in dz[0]["plan"]} & {tuple(p) for p in dz[1]["plan"]})   # mahya: iki düzlemin ortak kenarı
         mahyalar = [(ortak[0], ortak[-1])]
         boy = math.hypot(ortak[-1][0] - ortak[0][0], ortak[-1][1] - ortak[0][1])
-    for (mx0, my0), (mx1, my1) in mahyalar:
+    for (mx0, my0), (mx1, my1) in mahyalar + [(h["p"], h["q"]) for h in tanim.get("hatlar") or []]:    # İE-17 PR-2: kırma ve dere hatları
         ax.plot([mx0, mx1], [my0, my1], color="#1c1f24", lw=1.4, zorder=4)
+    etiketler = []
     for d in dz:
         ux, uy = d["yukari"]
         xs_, ys_ = [p[0] for p in d["plan"]], [p[1] for p in d["plan"]]
         cx, cy = (min(xs_) + max(xs_)) / 2, (min(ys_) + max(ys_)) / 2
         ax.annotate("", xy=(cx - ux * 45, cy - uy * 45), xytext=(cx + ux * 45, cy + uy * 45), arrowprops=dict(arrowstyle="->", color="white", lw=0.9), zorder=6)
         tx, ty = (cx, cy + 60) if ux != 0 else (cx + 70, cy)          # yüzde okun yanında, oka binmeden (okun dik yönünde)
-        ax.text(tx, ty, f"%{d['egim'] * 100:g}", ha="center", va="center", fontsize=5.8 * yazi, color="white", zorder=6)
+        etiketler.append(ax.text(tx, ty, f"%{d['egim'] * 100:g}", ha="center", va="center", fontsize=5.8 * yazi, color="white", zorder=6))
     CG.olcu(ax, (X0, Y0 - 34), (X1, Y0 - 34), _f(X1 - X0), -3, fs=5.6 * yazi)
     CG.olcu(ax, (X0 - 34, Y0), (X0 - 34, Y1), _f(Y1 - Y0), -4, yatay=False, fs=5.6 * yazi)
     ax.text((X0 + X1) / 2, Y0 - 110, f"mahya {_f(boy)} · saçak {_f(tanim['sacak'])}", ha="center", va="center", fontsize=5.4 * yazi, color="#333")
@@ -396,6 +398,19 @@ def cati_plani_ciz(ax, plan: G.Plan, ie: dict, yazi: float = 1.0) -> bool:
     ax.set_aspect("equal")
     ax.set_anchor("N")
     ax.axis("off")
+    # İE-17 PR-2 (AP-03): dar yüzün (dereyle kesilen cumba yüzü) eğim yazısı çatının dışına taşıyorsa: aynı eğim başka yüzde yazılıysa
+    # yazılmaz (ok kalır), değilse içeri çekilir. Taşmayan yazı yerinde kalır (öteki evlerin paftası aynı).
+    ax.apply_aspect()
+    r = ax.figure.canvas.get_renderer()
+    for t in list(etiketler):
+        bb = t.get_window_extent(renderer=r).transformed(ax.transData.inverted())
+        dx = max(0.0, X0 - bb.x0) - max(0.0, bb.x1 - X1)
+        if abs(dx) < 1e-6:
+            continue
+        if any(o is not t and o.get_text() == t.get_text() for o in etiketler):
+            t.remove(); etiketler.remove(t)
+        else:
+            t.set_x(t.get_position()[0] + dx)
     return True
 
 

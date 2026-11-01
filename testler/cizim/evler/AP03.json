@@ -234,7 +234,14 @@
     "sacak_cm": 30,
     "topuk_cm": 10,
     "makas_yonu": "uzun_kenar",
-    "makas_ekseni": "y"
+    "makas_ekseni": "y",
+    "mahal_catilari": [
+      {
+        "mahal": "VERANDA",
+        "tip": "kirma",
+        "yuksek_yan": "sol"
+      }
+    ]
   },
   "cikti": {
     "pdf": true,
@@ -254,9 +261,7 @@
     "Gövde 763 × 835,75 dikdörtgen; veranda gövdenin içinde sağ arkada (125,5 × 444; paftanın üstü arka sayıldı, öteki açılan evlerle aynı), arka ve sağ açık; arka-sağ köşede 10 × 10 dikme (paftada).",
     "Pencereler paftadaki panoda; çocuk odasının penceresi paftada iki yanı yarım pano (D-29 kuralı, Motor'da aynı). Verandaya açılan salon penceresi sürgülü (TK-02 r09 başlangıcı).",
     "Kapılar: salon–hol kapısı paftadaki gibi salona açılır; dış kapı ve salon–hol kapısı ortak duvarın ucundaki kavşaktan tam panoda (duvar_ucu; paftada 125,5); holden açılan üç kapı menteşe ucunda (kapi_yeri: mentese_ucu; paftada kavşaktan 11–13 cm). Kapı genişlikleri paftada yazılı değil: dış kapı 90, iç kapı 82 (Motor'un ölçüsü).",
-    "Çatı (PR-2b'de çizilir): ana beşik makas y'yi geçer, mahya x boyunca (157,25 = 10 topuk + 447,9 × 0,3288); sağ öndeki yatak odası bölümünün üstünde paralel cumba (paftanın sağ kesiti 456,5, mahya 85,04); veranda köşesinin çatısı paftada kısa makaslar MK9–12 ve köşede çapraz MK13: biçimi paftadan okunamadı, Lokman'a sorulacak. Paftanın başlığındaki \"Beşik + Kubbe\" yazısı: paftada kubbe yok (kubbesiz)."
+    "Çatı (paftanın s. 7 makas ve s. 9 aşık planı): ana beşik makas y'yi geçer, mahya x boyunca (157,25 = 10 topuk + 447,9 × 0,3288; Motor'da ana çatı salonun sağ duvarına kadar, şeritlerden); sağ öndeki yatak odası bölümünün üstünde paralel cumba (paftanın sağ kesiti 456,5, mahya 85,04; Motor'da 451,5 duvarın dış yüzünden). Veranda köşesi: Lokman'ın kararı (1 Kasım 2026 10:17, karar kartı \"Paftadaki gibi köşe kırma\") — veranda çatısı ana çatının eğimi ve saçağıyla sağa iner (MK9–12 kısa makaslar), arkada ana çatının arka yüzüyle 45° kırma (MK13 çapraz makas), önde cumbanın arka yüzüyle dere (`cati.mahal_catilari` tip kirma). Aşık planıyla aynı: veranda yüzü paralelkenar, aşık 444,25; ana çatının arka yüzü 823; cumbanın arka yüzünde aşık 155,5. Paftanın başlığındaki \"Beşik + Kubbe\" yazısı: paftada kubbe yok (kubbesiz)."
   ],
-  "eksikler": [
-    "Veranda köşesinin çatı biçimi (MK9–13) Lokman'a sorulacak (PR-2b)."
-  ]
+  "eksikler": []
 }

@@ -176,8 +176,8 @@ def cati_cizgileri(plan: G.Plan, ie: dict, taraf: str) -> dict:
     tepe = max(noktalar, key=lambda p: p[1])
     u0, u1 = min(p[0] for p in noktalar), max(p[0] for p in noktalar)
     sacak_kotu = min(p[1] for p in noktalar)
-    for m in mc:                                                         # açık mahalin kendi çatısı (AP-09): ana çatının altında; saçak uçları,
-        e_, c_ = _mahal_catisi(plan, m, taraf, u, d, ortu)               # tepe ve saçak kotu ana çatıdan
+    for m in (m for m in mc if m["tip"] != "kirma"):                     # açık mahalin kendi çatısı (AP-09): ana çatının altında; saçak uçları,
+        e_, c_ = _mahal_catisi(plan, m, taraf, u, d, ortu)               # tepe ve saçak kotu ana çatıdan (köşe kırması ana çatının düzlemlerinde)
         egimler += e_
         cizgi += c_
     return {"cizgiler": cizgi, "egimler": sorted(egimler), "u0": u0, "u1": u1, "tepe": tepe, "sacak_kotu": sacak_kotu,
