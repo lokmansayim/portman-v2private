@@ -255,3 +255,61 @@ def test_cati_seti_soru_butcesinden_yemez(s):
     assert r.eylem != "yonlendir" and s.set["durum"] == "acik"                  # set yeniden sunulur, istek saklanır
     r = s.bas("Ç8801K", "2. Ç8801-K")
     assert r.eylem == "is_emri" and _plan(r) == "Ç8801K"
+
+
+# ── geometri hakemi üçüncü tur ────────────────────────────────────────────────────────────────────────────────────────────
+def _eskidi(s, set_id: str) -> bool:
+    return any(e["id"] == set_id and e["durum"] == "eskidi" for e in s.k.d.get("eski_setler") or [])
+
+
+@pytest.mark.parametrize("metin,talep,mesajda", [
+    ("3+1 olsun", {"oda_programi": "3+1"}, "3+1"),
+    ("100 m² olsun", {"alan_m2": 100}, "100 m²"),
+])
+def test_llm_baglamdaki_kodu_yinelerse_degisiklik_gizlenmez(s, metin, talep, mesajda):
+    """Bulgu 1: çatı seti açıkken taslakta Ç8801 var, LLM bağlamdan "Ç8801"i yineler (mesajda kod yok): değişiklik yine okunur."""
+    s.yaz("88 m² 2+1 tek kat çelik", **T88)
+    s.bas("Ç8801", "1. Ç8801")
+    cati_id = s.set["id"]
+    r = s.yaz(metin, katalog_kodu="Ç8801", **talep)
+    assert _eskidi(s, cati_id) and r.eylem != "is_emri" and not s.k.d.get("son_is_emri")
+    assert s.k.d["taslak"].get("katalog_kodu") is None and mesajda in r.mesaj
+
+
+@pytest.mark.parametrize("metin,oda", [("1+1 olsun", "1+1"), ("1+1", "1+1"), ("2+2 olsun", "2+2")])
+def test_oda_programi_set_numarasi_degil(s, metin, oda):
+    """Bulgu 2: "1+1 olsun" setin 1. seçeneği değildir; oda değişikliğidir (çatı seti eskir, plan çizilmez)."""
+    s.yaz("88 m² 2+1 tek kat çelik", **T88)
+    s.bas("Ç8801", "1. Ç8801")
+    cati_id = s.set["id"]
+    r = s.yaz(metin, oda_programi=oda)
+    assert _eskidi(s, cati_id) and r.eylem != "is_emri" and not s.k.d.get("son_is_emri")
+    assert oda in r.mesaj                                                     # bayiye yeni oda programıyla döner
+
+
+def test_m2_ile_baslayan_talepte_dis_olcu_degisikligi_yeni_alanla(s):
+    """Bulgu 3: 88 m² talebinde "dış ölçü 10x10" taslaktaki eski m²'nin yerine geçer; yeni set 100 m²'yle kurulur."""
+    s.yaz("88 m² 2+1 tek kat çelik", **T88)
+    s.bas("Ç8801", "1. Ç8801")
+    cati_id = s.set["id"]
+    r = s.yaz("dış ölçü 10x10 m olsun", dis_olcu={"en_m": 10, "boy_m": 10})
+    assert _eskidi(s, cati_id) and r.eylem == "secenek" and s.set["tur"] == "alan"
+    assert "100 m²" in r.mesaj and "Ç8801" not in s.kodlar() and "alan_m2" not in s.k.d["taslak"]
+
+
+def test_tek_kenarli_dis_olcu_degisikligi(s):
+    """Bulgu 4: yalnız bir kenar gelirse taslaktakiyle birleşir (9x10 → 7x10, 70 m²); Ç8801'in çatı seti eskir."""
+    s.yaz("9x10 m 2+1 tek kat çelik", dis_olcu={"en_m": 9, "boy_m": 10}, oda_programi="2+1", yapi_turu="celik", kat_sayisi=1)
+    s.bas("Ç8801", "1. Ç8801")
+    cati_id = s.set["id"]
+    r = s.yaz("kısa kenar 7 metre olsun", dis_olcu={"en_m": 7})
+    assert _eskidi(s, cati_id) and r.eylem != "is_emri" and not s.k.d.get("son_is_emri")
+    assert s.k.d["taslak"]["dis_olcu"] == {"en_m": 7.0, "boy_m": 10.0}
+
+
+def test_m2_ile_baslayan_talepte_tek_kenar_sorulur(s):
+    s.yaz("88 m² 2+1 tek kat çelik", **T88)
+    s.bas("Ç8801", "1. Ç8801")
+    cati_id = s.set["id"]
+    r = s.yaz("kısa kenar 7 metre olsun", dis_olcu={"en_m": 7})
+    assert _eskidi(s, cati_id) and r.eylem == "sor" and r.soru_alani == "dis_olcu" and not s.k.d.get("son_is_emri")

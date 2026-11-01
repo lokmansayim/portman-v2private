@@ -25,6 +25,7 @@ YONLENDIRME = "Bu konuyu Lokman Bey'e iletiyorum; en kısa sürede dönüş yap�
 ESKI_TASLAK_SORUSU = "yeni_mi_degisiklik"      # D-01
 ESKI_TASLAK_EN_COK = 3                         # cevapsız kalırsa en çok bu kadar sorulur, sonra insana devredilir
 ESKI_SORU_SN = 24 * 3600                       # D-01 sorusu bu süreden sonra cevaplanırsa yok sayılır, mesaj normal işlenir
+_ODA_PROGRAMI = re.compile(r"\d\s*\+\s*\d")    # "2+1", "3 + 1": set numarası değil (İE-25)
 
 
 def bayileri_yukle() -> dict:
@@ -168,8 +169,9 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
         t = t.model_copy(update={"niyet": "revizyon" if k.d.get("son_is_emri") else "yeni_talep"})
         k.not_dus("kural", "okuma_metin cevabı: çelik revizyon isteği")
     # İE-08 A2 (kapanış incelemesi 13.10): açık çelik seçenek setine yazılı numara ("3", "üçüncü") düğmeyle aynıdır; LLM'in bu kısa
-    # cevaba verdiği içerik yok sayılır. Prefabrik setler değişmez (A5).
-    if k.d.get("son_soru_alani") == "secenek" and _celik_seti_acik(k):
+    # cevaba verdiği içerik yok sayılır. Prefabrik setler değişmez (A5). İE-25 (geometri hakemi üçüncü tur 2): oda programı ("1+1 olsun",
+    # "3+1") numara değildir; talep değişikliğidir, aşağıda okunur.
+    if k.d.get("son_soru_alani") == "secenek" and _celik_seti_acik(k) and not _ODA_PROGRAMI.search(metin or ""):
         st = k.d["secenek_seti"]
         no = CO.okuma_cevabi(metin, {"tur": "secim", "adaylar": st.get("adaylar") or []})
         if no and len(no.get("secimler") or []) == 1:
@@ -289,15 +291,25 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
         dusen_not = "Önceki pencere değişikliğini netleştirmediğiniz için uygulamadım; isterseniz sonra ekleriz. "
     # İE-25 (geometri hakemi bulgu 5; ikinci tur 1–2): çatı seti açıkken gelen m², dış ölçü, oda, kat ya da yapı türü değişikliği sessizce
     # düşmez: çatı seti "eskidi" kapanır (eski düğmesi geçmez), seçilen model bırakılır, talep yeni bilgisiyle yeniden okunur (yeni set, soru
-    # ya da plan üretimi). Çatı seçimi ve model kodu bunun dışında.
+    # ya da plan üretimi). Çatı seçimi ve bayinin yazdığı model kodu bunun dışında. Üçüncü tur: LLM'in bağlamdan yinelediği kod (mesajda
+    # yazılı değil; K18, `_celik_dali` ilkesi) değişikliği gizlemez ve taslağa geri yazılmaz (1); yeni dış ölçü taslaktaki eski m²'nin,
+    # yeni m² eski dış ölçünün yerine geçer (3); tek kenar da değişikliktir (4).
     st0 = k.d.get("secenek_seti") or {}
-    if st0.get("durum") == "acik" and st0.get("tur") == "cati_varyanti" and t.niyet in ("yeni_talep", "revizyon") and not t.katalog_kodu:
+    if st0.get("durum") == "acik" and st0.get("tur") == "cati_varyanti" and t.niyet in ("yeni_talep", "revizyon") \
+            and not _model_kodlari_ve_kalan(metin, katalog)[0]:
         taban0 = katalog.aday(next((a.get("kod") for a in st0.get("adaylar") or [] if a.get("sira") == 1), None))
         if _talep_bilgisi_degisti(k.d["taslak"], t, taban0):
             st0["durum"] = "eskidi"
             k.d.setdefault("eski_setler", []).append(st0)
             k.d["eski_setler"] = k.d["eski_setler"][-5:]
-            k.d["taslak"].pop("katalog_kodu", None)
+            ts0 = k.d["taslak"]
+            ts0.pop("katalog_kodu", None)
+            yeni_olcu = t.dis_olcu is not None and bool(t.dis_olcu.en_m or t.dis_olcu.boy_m)
+            if yeni_olcu and t.alan_m2 is None:
+                ts0.pop("alan_m2", None)
+            elif t.alan_m2 is not None and not yeni_olcu:
+                ts0.pop("dis_olcu", None)
+            t = t.model_copy(update={"katalog_kodu": None})
             k.not_dus("kural", "çatı seti açıkken talep bilgisi değişti: set eskidi, talep yeniden okundu")
     t = _pencere_varyantlarina_soz_isle(t, metin)    # G-3/G-4 (29.09): pencere değişikliği tek yoldan, B1 kurallarıyla
     k.birlestir(t.model_dump())
@@ -529,11 +541,14 @@ def _talep_bilgisi_degisti(ts: dict, t: Talep, model: dict | None) -> bool:
         if v not in (None, "") and e not in (None, "") and str(v) != str(e):
             return True
     d = t.dis_olcu.model_dump() if getattr(t, "dis_olcu", None) is not None else {}
-    if d.get("en_m") and d.get("boy_m"):
+    if d.get("en_m") or d.get("boy_m"):
         e = ts.get("dis_olcu") or {}
+        yeni = [d.get("en_m") or e.get("en_m"), d.get("boy_m") or e.get("boy_m")]     # tek kenar taslaktakiyle birleşir (`birlestir`)
         if e.get("en_m") and e.get("boy_m"):
-            return sorted([float(d["en_m"]), float(d["boy_m"])]) != sorted([float(e["en_m"]), float(e["boy_m"])])
-        return m2_farkli(float(d["en_m"]) * float(d["boy_m"]))
+            return sorted(map(float, yeni)) != sorted([float(e["en_m"]), float(e["boy_m"])])
+        if all(yeni):
+            return m2_farkli(float(yeni[0]) * float(yeni[1]))
+        return True                     # m²'yle başlayan talepte tek kenar: alan bilinmez, talep yeniden okunur (eksik kenar sorulur)
     return False
 
 
