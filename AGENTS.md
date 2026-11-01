@@ -11,6 +11,7 @@ Bu dosya her ajanın okuduğu ortak kuraldır. Claude'a özgü oturum akışı `
 
 - **Gizli bilgi yazdırılmaz.** Anahtar, token ve parola çıktıya, belgeye, commit'e ya da sohbete girmez.
 - **Kişisel veri maskelenir.** Telefon numaraları maskelenir. Dışarı aktarımlarda kişi adları da maskelenir, bayi adları dahil.
+  - **İstisna: projenin sahibinin adı (D-33).** Lokman bu istisnayı 30 Ekim 2026'da koydu ve 1 Kasım'daki karar kartıyla teyit etti. Müşterinin adı bayiye, mühendise ve Lokman'a giden çıktılarda görünür; bu çıktılar çizim, liste, teklif ve rehberdir. Ad, banka modelinin tanımına da yazılabilir. Telefon numarası her yerde maskelenir.
 - **Ayrı onay gerekenler.** Her biri için Lokman'ın açık onayı gerekir:
   - sunucu ya da canlı değişiklik;
   - ücretli deneme (LLM çağrısı, WhatsApp mesajı);

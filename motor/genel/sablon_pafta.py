@@ -349,6 +349,7 @@ def ozellikler(t: dict, y: dict, c: dict, kur: dict, bilgi: dict) -> dict:
 
 
 def cerceveler(sf: Sayfa, t: dict, oz: dict, bilgi: dict, oturum_m2: float):
+    from .bayi_gorseli import sahip_adi
     x0, y0, x1, y1 = DIS
     sf.kutu(x0, y0, x1, y1, lw=1.3, z=4)
     sf.yuvarlak_kutu(ANA)
@@ -408,7 +409,9 @@ def cerceveler(sf: Sayfa, t: dict, oz: dict, bilgi: dict, oturum_m2: float):
     # `bayi_adi` ve `bayi_telefonu`yu bayi kartından doldurur, başka rakam dizisi reddedilir.
     ilgili = " · ".join(str(x).strip() for x in (bilgi.get("bayi_adi"), bilgi.get("bayi_telefonu")) if x) or "..."
     orta = [("PROJE KODU", f"{no} r{rev:02d}"), ("İLGİLİ KİŞİ-TELEFON", ilgili),
-            ("SEVK ADRESİ", bilgi.get("sevk_adresi") or "..."), ("PROJE ADI & M²", bilgi.get("proje_adi") or f"{t['kod']} · {oturum_m2:.0f} M² {tur} KONUT")]
+            ("SEVK ADRESİ", bilgi.get("sevk_adresi") or "..."),
+            ("PROJE ADI & M²", bilgi.get("proje_adi") or " · ".join(x for x in (sahip_adi(t, bilgi), f"{t['kod']} · {oturum_m2:.0f} M² {tur} KONUT") if x))]
+    # PROJE ADI: projenin sahibinin adı (bayinin mesajındaki müşteri, yoksa banka modelinin sahibi), herkeste görünür (D-33)
     for (ad, v), ya, yb in zip(orta, sat, sat[1:]):
         sf.yazi(287.0, (ya + yb) / 2 + 0.4, ad, 7.3)
         sf.yazi(431.0, (ya + yb) / 2 + (0.4 if v != "..." else -1.4), v, 7.3 if v != "..." else 12.0)
@@ -751,7 +754,7 @@ def pafta_pdf(t: dict, hedef: Path, kod: str, is_emri_no: str | None = None, rev
               yontem: str | None = None, bilgi: dict | None = None) -> dict:
     """Şablon paftası: `<kod>_pafta.pdf` (2 sayfa) ve `<kod>_pafta_sablon.png`. `bilgi`: antet, özellik ve özel istek alanları (zarftan)."""
     from . import cati_genel, ciz_genel, girdi_genel, kural, sahne as sahne_m, yapi
-    from .bayi_gorseli import musteri_projesi
+    from .bayi_gorseli import musteri_projesi, sahip_adi
     import matplotlib.pyplot as plt
     fontlari_hazirla()
     bilgi = dict(bilgi or {}); bilgi.setdefault("is_emri_no", is_emri_no); bilgi.setdefault("revizyon", revizyon)
@@ -815,7 +818,9 @@ def pafta_pdf(t: dict, hedef: Path, kod: str, is_emri_no: str | None = None, rev
     for ax, taraf in zip((fig2.add_subplot(gs[0, 1]), fig2.add_subplot(gs[0, 2]), fig2.add_subplot(gs[1, 1]), fig2.add_subplot(gs[1, 2])), ("on", "arka", "sol", "sag")):
         ciz_genel.gorunus_eksen(ax, S, taraf, t["kat_yuksekligi"], sigdir=True)      # küçük panelde iki düşey ölçü şeridi ölçeğe göre açılır (13.10)
     no = bilgi.get("is_emri_no") or t["kod"]
-    ad = f"{t['kod']} · {oturum_m2:.0f} m²" if musteri_projesi(t) else f"{t['kod']} · {t['ad']}"     # müşteri projeleri bayiye adsız (D-08)
+    sahip = sahip_adi(t) if musteri_projesi(t) else ""
+    ad = (" · ".join(x for x in (t["kod"], sahip, f"{oturum_m2:.0f} m²") if x) if musteri_projesi(t)   # müşteri projesinde tarif yok,
+          else f"{t['kod']} · {t['ad']}")                                                                # sahibinin adı varsa o (D-33)
     # BK-09 M6: TASLAK başlıktan ayrı, sağ üstte (yedi modelde aynı yer); uzun katalog adı (Ç8801-K/L'nin parantezli açıklaması) TASLAK'a
     # yetişirse parantez düşer, yine sığmazsa punto küçülür — başlık sayfa dışına ve TASLAK'ın üstüne taşmaz (yazı çakışma testi `sayfa_disi`)
     taslak = fig2.text(0.985, 0.965, "TASLAK", fontsize=10.5, weight="bold", ha="right", va="top", color=KOYU_KIRMIZI)

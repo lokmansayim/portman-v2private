@@ -85,7 +85,7 @@ def genel(a) -> int:
     if not a.tanim:
         print("DUR: --motor genel için --tanim gerekir"); return 2
     from motor.genel import uret as U, yapi, cati_genel, kural, girdi_genel
-    from motor.genel.bayi_gorseli import oda_programi, musteri_projesi
+    from motor.genel.bayi_gorseli import oda_programi, musteri_projesi, sahip_adi
     tanim_yolu = Path(a.tanim)
     if not tanim_yolu.is_absolute():
         tanim_yolu = KOK / tanim_yolu
@@ -131,7 +131,7 @@ def genel(a) -> int:
                  "yapi_turu": "celik", "kat": int(a.kat if a.kat is not None else (1 if str(t.get("kat", "zemin")) in ("zemin", "1") else 2)),
                  "oda_programi": oda_programi(t), "katalog_m2": bina, "kapali_m2": round(oturum - veranda, 2), "veranda_m2": veranda,
                  "varyantlar": varyantlar, "musteri_projesi": bool(a.musteri_projesi or musteri_projesi(t)),
-                 "sunum": {"cati_adi": cati_adi, "ad": "" if (a.musteri_projesi or musteri_projesi(t)) else t.get("ad", "")},
+                 "sunum": {"cati_adi": cati_adi, "ad": sahip_adi(t) if (a.musteri_projesi or musteri_projesi(t)) else t.get("ad", "")},   # D-33
                  "ozet": {"dis_olcu_cm": [round(x, 1) for x in girdi_genel.metraj(y, c, kur)["dis_olcu_cm"]], "oturum_m2": oturum, "odalar": odalar,
                           "pencere": sum(1 for x in acl if x["tur"] == "pencere"), "kapi": sum(1 for x in acl if x["tur"] in ("dis_kapi", "ic_kapi")),
                           "cati": t.get("cati", {}).get("tip"), "liste_satir": v.get("liste_satir"), "kural_seti": Path(v.get("set", "")).name,

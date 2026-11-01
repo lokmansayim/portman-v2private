@@ -818,7 +818,7 @@ def aday_kaydi(kart: dict, tp: Path, cizim: Path, banka_kok: Path) -> dict:
     """`aday_kaydet.genel` ile aynı alanlar (Katalog, karar, worker ve aday_kabul aynı kaydı okur); yol depo köküne göre, görsel `is_emri/`e göre."""
     t = json.loads(tp.read_text(encoding="utf-8"))
     from motor.genel import uret as U
-    from motor.genel.bayi_gorseli import oda_programi, musteri_projesi
+    from motor.genel.bayi_gorseli import oda_programi, musteri_projesi, sahip_adi
     gk = U.kod_govde(t)
     girdi = json.loads((cizim / f"{gk}_girdi.json").read_text(encoding="utf-8"))
     v = json.loads((cizim / "validation.json").read_text(encoding="utf-8"))
@@ -834,7 +834,7 @@ def aday_kaydi(kart: dict, tp: Path, cizim: Path, banka_kok: Path) -> dict:
     return {"kod": kart["kod"], "gosterim": kart["gosterim"], "durum": "gecerli", "motor": "genel", "tanim": gorece, "tanim_sha256": sha256(tp),
             "gorsel": gorsel, "referans_model": kart.get("taban_model") or kart["kod"], "yapi_turu": "celik", "kat": int(kart.get("kat") or 1),
             "oda_programi": oda_programi(t), "katalog_m2": bina, "kapali_m2": round(oturum - veranda, 2), "veranda_m2": veranda, "varyantlar": [],
-            "musteri_projesi": mp, "sunum": {"cati_adi": cati_adi(t), "ad": "" if mp else t.get("ad", "")},
+            "musteri_projesi": mp, "sunum": {"cati_adi": cati_adi(t), "ad": sahip_adi(t) if mp else t.get("ad", "")},   # D-33
             "ozet": {"dis_olcu_cm": o["dis_olcu_cm"], "oturum_m2": oturum, "odalar": o["odalar"], "pencere": o["pencere"], "kapi": o["kapi"],
                      "cati": t["cati"].get("tip"), "liste_satir": v.get("liste_satir"), "kural_seti": Path(v.get("set", "")).name,
                      "perspektif": (v.get("perspektif") or {}).get("durum")},

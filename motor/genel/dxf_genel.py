@@ -320,14 +320,15 @@ def ciz(t: dict, kur: dict, cikti: Path, K: dict | None = None) -> dict:
     """Plan + dört görünüş → `cikti` (DXF). Dönen: {dosya, denetim_hatasi, katmanlar: {ad: varlık sayısı}, olcu}."""
     import ezdxf
     from . import cati_genel, sahne as sahne_m, yapi
-    from .bayi_gorseli import musteri_projesi
+    from .bayi_gorseli import musteri_projesi, sahip_adi
     K = K or katmanlar(kurallar())
     y = yapi.kur(t)
     c = cati_genel.cati_kur(t["cati"], kur)
     S = sahne_m.sahne_kur(y, c)
     doc = _belge(K)
     C = _Cizer(doc.modelspace(), K)
-    ad = "" if musteri_projesi(t) else f" · {t.get('ad', '')}"            # müşteri projesi adsız (D-08)
+    ad = ((f" · {s}" if (s := sahip_adi(t)) else "") if musteri_projesi(t)      # müşteri projesinde tarif yok, sahibinin adı varsa o (D-33)
+          else f" · {t.get('ad', '')}")
     px0, py0, px1, _ = plan_ciz(C, y, [f"PLAN · {t['kod']}{ad}",
                                        "Ölçüler cm · TASLAK, üretim projesi değildir · DXF çıktıdır, kaynak değil: düzeltme tanıma ya da kural kitabına işlenir, yeniden üretilir (D-11)"])
     # görünüşler planın altında 2 × 2: üstte ön ve arka, altta sol ve sağ
