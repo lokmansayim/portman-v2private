@@ -28,10 +28,12 @@ TK02 = VERI / "TK02.json"
 HEDEFLER = {   # girdi, beklenen iz, onay dayanağı
     "TK02": (TK02, VERI / "TK02_beklenen.json",
              "TK-02 (iç 100) ön onay çizimi. Lokman 29 Ekim 2026: 11:01 kat planı, 12:24 r09 \"%100 onaylıyorum ... artık bu noktadan hareket "
-             "edeceğiz\"; 13:13–13:21 madde 14–15 notları (r12); 13:48 \"sen onayla PR birleştir\" (D-31)."),
+             "edeceğiz\"; 13:13–13:21 madde 14–15 notları (r12); 13:48 \"sen onayla PR birleştir\" (D-31). 30 Ekim 2026 14:45 görünüş ölçüsü mor, "
+             "yazısı siyah (D-34, PC-25; TK-03 notu, bütün prefabrik çizimlerde): iz yalnız ölçü rengiyle yeniden donduruldu."),
     "TK01_r07": (VERI / "TK01_r07.json", VERI / "TK01_r07_beklenen.json",
                  "TK-01 r07 (aynı proje, iç 60, standart) ön onay çizimi. Lokman 29 Ekim 2026: 13:41 \"ikiside çizim motorunda kurallar halinde "
-                 "olsun\", 13:47 kat planı \"60'lık versiyonunda onaylıyorum\", 13:48 görünüşler \"sen onayla\" (D-31 madde 16)."),
+                 "olsun\", 13:47 kat planı \"60'lık versiyonunda onaylıyorum\", 13:48 görünüşler \"sen onayla\" (D-31 madde 16). 30 Ekim 2026 "
+                 "14:45 görünüş ölçüsü mor, yazısı siyah (D-34, PC-25): iz yalnız ölçü rengiyle yeniden donduruldu."),
 }
 
 

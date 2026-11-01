@@ -121,15 +121,47 @@ def test_veranda_giris_nisinin_onunde(tmp_path):
 
 def test_nis_agzi_yalniz_tek_yuzu_acik_mahalde():
     """Listede niş, geometrinin tanımıyla: tek yüzü açık, dikmesiz açık mahal (geometri hakemi 2. tur, 28 Ekim). Katalogdaki köşe
-    verandası (iki yüzü açık) taşan veranda eklenince de verandanın kuralıyla sayılır; nişin ağız kirişi plandaki dikmelerden bağımsız."""
+    verandası (iki yüzü açık) taşan veranda eklenince de verandanın kuralıyla sayılır: köşesine Motor kolon koyar (D-38,
+    `test_kose_kolonu`; D-35'te burada kolonsuz köşe kirişiydi); nişin ağız kirişi plandaki dikmelerden bağımsız."""
     ie = _oku(KOK / "is_emri" / "P6001_2plus1_6x6.json")
     ie["verandalar"] = [{"ad": "V", "cephe": "arka", "bas_cm": 0, "bit_cm": 300, "derinlik_cm": 150}]
     N = PL.model_motor(ie)
-    assert "nis_agizlari_cm" not in N and N["veranda_kenarlari_cm"] == [439.25, 251.0, 300.0, 150.0, 150.0]   # L 4292,5 ve 2410, eskisi gibi
+    assert "nis_agizlari_cm" not in N and N["veranda_kenarlari_cm"] == [439.25, 251.0, 300.0, 150.0, 150.0] and N["kose_kolonlari"] == 1
     nis = _nisli()
     del nis["verandalar"]
     N = PL.model_motor(nis)
     assert N["veranda_kenarlari_cm"] == [] and N["nis_agizlari_cm"] == [125.5]
+
+
+def test_kose_kolonu(tmp_path):
+    """D-38 (Lokman, 31 Ekim 15:08: "tam kirişlerin birleştiği yerde kolon gelir ... hiçbir zaman kirişler askıda kalmaz"): gövdenin içindeki
+    açık mahalin iki açık kenarı köşede birleşiyorsa Motor o köşeye 10 × 10 dikme koyar, dış yüzleri mahalin dış ölçüsüyle aynı hizada (PK-01'in
+    köşe dikmesi gibi). Kirişler kolonlu verandanın kuralıyla: açık kenar dış ölçüsü − 10 (P6001 L 4292,5 ve 2410; TK-03 balkonu L 3037,5 ve
+    1832,5); listede kolon satırı. D-35'in kolonsuz köşe kirişi (dış ölçü) kalktı. İş Emri'nde köşesinde dikme olan veranda (PK-01, taşan
+    verandalı TK-02) ve tek yüzü açık niş kolon almaz."""
+    ie = _oku(KOK / "is_emri" / "P6001_2plus1_6x6.json")
+    p = G.kur(ie)
+    assert p.kose_kolonlari == [(0.0, 0.0, 10.0, 10.0)] and p.dikmeler == p.kose_kolonlari
+    N = PL.model_motor(ie)
+    assert N["veranda_kenarlari_cm"] == [439.25, 251.0] and N["dikmeler"] == N["kose_kolonlari"] == 1 and "nis_agizlari_cm" not in N
+    L = PL.liste(N)["satirlar"]
+    kiris = [s for s in L if s["kalem"].startswith("Kutu profil (kiriş)")]
+    assert [(s["olcu"], s["adet"]) for s in kiris] == [("L 4292,5", 1), ("L 2410", 1)]
+    kolon = [s for s in L if s["kalem"].startswith("Özel kutu profil (kolon)")]
+    assert [(s["olcu"], s["adet"]) for s in kolon] == [("L 2500", 1)] and "D-38" in kolon[0]["kaynak"] and "köşede" in kolon[0]["formul"]
+    dxf_out.uret(ie, tmp_path, pdf_hatada=False)
+    bom = _oku(tmp_path / "bom.json")["kalemler"]
+    assert [k["adet"] for k in bom if k["malzeme"] == "Veranda dikmesi"] == [1]                # teknik paftada da (PK-01 gibi)
+    N3 = PL.model_motor(_oku(KOK / "testler" / "motor" / "veri" / "TK03.json"))
+    assert N3["kose_kolonlari"] == 1 and N3["veranda_kenarlari_cm"] == [313.75, 193.25]
+    assert G.kur(_oku(KOK / "testler" / "motor" / "veri" / "TK03.json")).kose_kolonlari == [(0.0, 863.3, 10.0, 873.3)]
+    kiris3 = [s["olcu"] for s in PL.liste(N3)["satirlar"] if s["kalem"].startswith("Kutu profil (kiriş)") and "açık kenar" in s["formul"]]
+    assert kiris3 == ["L 3037,5", "L 1832,5"]
+    for dosya in ("PK01.json", "TK02.json"):
+        assert G.kur(_oku(KOK / "testler" / "motor" / "veri" / dosya)).kose_kolonlari == []
+    nis = _nisli()
+    del nis["verandalar"]
+    assert G.kur(nis).kose_kolonlari == []
 
 
 @pytest.mark.parametrize("girdi, v", [

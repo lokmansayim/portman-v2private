@@ -1,0 +1,61 @@
+{
+  "kaynak": "TK-03 (Lokman'ın 87,72 m² iki katlı evi, 1. kat; Lokman'ın 30 Ekim 2026'da yüklediği 21 sayfalık montaj paftası). Duvar panel montaj planı sayfasının vektör çiziminden ölçüldü (ölçek 1236,7 dış ölçüden). Çerçeve Lokman'ın düzeltmesiyle (30 Ekim 14:07, işaretli mimari plan): mühendisin \"ön\" yazdığı cephe arkadır; burada x soldan, y gerçek önden. Oda alanları mimari plan sayfasının yazısından. Ad ve antet yazılmadı; pafta depoya girmez (müşteri adı antette).",
+  "dis_olcu_cm": {"x": 1236.7, "y": 873.3},
+  "olcu_zincirleri": {"on": [543.5, 693.2], "arka": [313.75, 471.85, 451.1], "sol": [232, 448.05, 193.25], "sag": [703.3, 170]},
+  "toplam_alan_m2": 87.72,
+  "oda_alanlari_m2": {
+    "BALKON": 6.06,
+    "MUTFAK": 4.28,
+    "BANYO": 4.19,
+    "SALON": 33.82,
+    "MERDİVEN KOVASI": 4.26,
+    "YATAK ODASI 1": 8.34,
+    "YATAK ODASI 2": 11.0,
+    "YATAK ODASI 3": 10.38
+  },
+  "girinti_duvarlari": {
+    "on_sol_dusey": {"yuzler_x": [543.54, 553.53], "y": [10.24, 232.04]},
+    "arka_sag_yatay": {"yuzler_y": [693.14, 703.41], "x": [780.61, 1231.7]}
+  },
+  "pano_kosulari": {
+    "sol dış (salon)": [119.37, 125.47, 125.47, 57.74],
+    "sağ dış": [100.22, 125.47, 125.48, 125.47, 125.47, 80.79],
+    "arka-sağ girinti duvarı": [102.71, 125.47, 125.75, 97.16],
+    "ön-sol girinti duvarı": [125.47, 125.48, 125.47, 125.47, 41.64],
+    "ön dış": [106.6, 125.48, 102.71, 125.47, 125.75, 97.16],
+    "arka dış": [57.74, 125.47, 41.64, 106.6, 125.48]
+  },
+  "farklar": {
+    "arka dış": "ekler paftadakiyle aynı yerde (yatak odası 2'nin panoları 780,6'ya dayalı, 548,5'te bölünür; D-34 madde 5); ilk pano paftada balkon duvarının iç yüzünden 57,74, Motor'da duvar ekseninden 62,75 (köşede arka duvar balkon duvarının eksenine uzanır)",
+    "mutfak–banyo": "paftada [125.47, 64.68]; Motor'da [125.5, 62.75]: banyonun salona bakan duvarı (paftada ekseni 200,3) balkon duvarının aksına (198,25) yuvarlandı",
+    "merdiven ağzı": "paftada merdiven boşluğunun salona bakan yüzü 551,6–650,4 arası duvarsız (98,8), kalan duvar 650,41'den [125.48, 56.07]; Motor'da 548,5–650,4 açık sınır parçası (D-34, PC-28; r02'deki 77'lik kapısız geçiş kalktı), kalan duvar tam ızgarada [107.6, 70.95]"
+  },
+  "pencereler": [
+    {"mahal": "SALON", "duvar": "sol", "olcu": "120x120", "aralik_cm": [363.3, 483.3]},
+    {"mahal": "SALON", "duvar": "arka", "olcu": "200x180 sürgülü", "aralik_cm": [66.9, 266.8]},
+    {"mahal": "SALON", "duvar": "on", "olcu": "120x120", "aralik_cm": [132.1, 252.1]},
+    {"mahal": "MUTFAK", "duvar": "arka", "olcu": "120x100 sürgülü", "aralik_cm": [383.9, 503.8]},
+    {"mahal": "BANYO", "duvar": "sag", "olcu": "60x40", "aralik_cm": [768.9, 829.2]},
+    {"mahal": "YATAK ODASI 1", "duvar": "sag", "olcu": "120x120", "aralik_cm": [364.2, 484.1]},
+    {"mahal": "YATAK ODASI 2", "duvar": "on", "olcu": "120x120", "aralik_cm": [658.2, 778.1]},
+    {"mahal": "YATAK ODASI 3", "duvar": "on", "olcu": "120x120", "aralik_cm": [1011.8, 1131.8]}
+  ],
+  "kapilar": [
+    {"arasi": ["SALON", "BANYO"], "aralik_cm": [677.9, 758.1], "mentese": "x 758,1"},
+    {"arasi": ["SALON", "YATAK ODASI 1"], "aralik_cm": [602.9, 682.9], "mentese": "y 682,9"},
+    {"arasi": ["SALON", "YATAK ODASI 2"], "aralik_cm": [254.0, 333.9], "mentese": "y 333,9"},
+    {"arasi": ["SALON", "YATAK ODASI 3"], "aralik_cm": [909.7, 989.9], "mentese": "x 989,9"}
+  ],
+  "cati": {
+    "kaynak": "makas ve dere yerleşim planı (MKS01–12), çatı makas profilleri ve aşık yerleşim planı; Lokman'ın işaretli aksları (30 Ekim 14:07: 12 makas, MKS01 sol kalkan duvarında)",
+    "egim": "18,2° = %32,88; saçak 30, topuk 10",
+    "makaslar_x": {"sol cumba": [4.05, 130.5, 256.05, 381.55, 506.95], "ana çatı": [547.5, 655.15, 780.75], "sağ cumba": [883.65, 1009.05, 1134.7, 1232.8]},
+    "makas_profilleri": {"ana çatı": {"taban": 933.3, "ust_boy": 491.22, "yukseklik": 163.43}, "sol cumba": {"taban": 701.3, "ust_boy": 369.12, "yukseklik": 125.29}, "sağ cumba": {"taban": 763.3, "ust_boy": 401.75, "yukseklik": 135.48}},
+    "sacak_hatlari": {"arka (sol cumba + ana çatı)": [-30, 815.6], "ön (ana çatı + sağ cumba)": [513.5, 1266.7], "sol cumba ön": [-30, 543.5], "sağ cumba arka": [785.6, 1266.7]},
+    "liste": {"kaynak": "paftanın aşık yerleşim planı (72 ölçü), çatı kaplaması yerleşim planı ve başmakas betopan yerleşimi sayfaları",
+              "sandvic_panel": {"375": 11, "500": 6, "405": 10}, "asik_m": 213.19, "asik_sira": {"sol cumba ön": 7, "sağ cumba arka": 8},
+              "bas_makas_betopani": 10,
+              "fark": "sandviç panel Motor'da 28 (ana 8 · sağ cumba 9 · sol cumba 11), paftada 27 (6 · 10 · 11): ana çatıyla cumbanın aynı düzlemdeki yüzünde Motor şeritleri saçağın ucundan dizer (kitabın çok düzlemli çatı kuralı), ana çatının 2,1 cm'lik payı ana boyda bir şerit daha alır; paftada arka yüzde 845,6 cm'ye 8 panel çizili (çizimde boşluk var). Aşık Motor'da 207,1 m (34 sıra), paftada 213,2 m: ön yüzde paftada 8 tam sıra (753,2), Motor'da 7 tam sıra ve cumba mahyasının hizasında bir kısa sıra (451,1); ana çatının üst kısmında paftada 5, Motor'da 4 kısa sıra (302,1). Betopan Motor'da 13 (baş makas başına tam üçgen), paftada 10"},
+    "not": "ana çatının orta makası paftada 655,15: ön ve arka duvarın pano eki (yatak odası 2'nin panoları banyo duvarının aksına, 780,6'ya dayalı; İş Emri `dizilim.dis_pano_dayanagi`, D-34 madde 5); r03'te Motor'da orada ek yoktu, makaslar eşit aralıkla 664,55'teydi"
+  }
+}

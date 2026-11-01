@@ -1,7 +1,7 @@
 {
  "aciklama": "BK-18 · ön onay çiziminin hedef örneği (D-28 madde 2): A4 PDF ve DXF içerik izi, doğrulama özeti, pano BOM'u, görünüş çizgileri ve yükleme listesi satırları.",
  "girdi": "testler/motor/veri/TK01_r07.json",
- "onay": "TK-01 r07 (aynı proje, iç 60, standart) ön onay çizimi. Lokman 29 Ekim 2026: 13:41 \"ikiside çizim motorunda kurallar halinde olsun\", 13:47 kat planı \"60'lık versiyonunda onaylıyorum\", 13:48 görünüşler \"sen onayla\" (D-31 madde 16).",
+ "onay": "TK-01 r07 (aynı proje, iç 60, standart) ön onay çizimi. Lokman 29 Ekim 2026: 13:41 \"ikiside çizim motorunda kurallar halinde olsun\", 13:47 kat planı \"60'lık versiyonunda onaylıyorum\", 13:48 görünüşler \"sen onayla\" (D-31 madde 16). 30 Ekim 2026 14:45 görünüş ölçüsü mor, yazısı siyah (D-34, PC-25): iz yalnız ölçü rengiyle yeniden donduruldu.",
  "iz": {
   "dogrulama": {
    "passed": true,
@@ -2884,7 +2884,7 @@
     "adet": 2
    }
   ],
-  "pdf_izi": "20ec8daded00924ca28f78d9468ea9894359b53d25869eed1e74ea2072af954a",
-  "dxf_izi": "53a93c9246b85c9f08bdfe45242b7b95af99db80295d98abd674e864bbac8624"
+  "pdf_izi": "0e7b25aecd4a76f80f20aaf2295de43e751e113fc3c478d3e8a6b5ac0f67266d",
+  "dxf_izi": "a9ef0f102b127b7d4307ae339a5a053843f90c69c45e59273e65a8eadcaba633"
  }
 }
