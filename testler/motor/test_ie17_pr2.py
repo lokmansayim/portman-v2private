@@ -14,6 +14,9 @@ Paftaya uygunluk `testler/cizim/test_pafta_kiyasi.py`'de (paftadan ölçülen de
 - Açık mahalin kendi çatısı (`cati.mahal_catilari`, AP-09): ana çatı verandayı örtmez (kalan gövdenin ana çatısı ve paralel cumbası paftanın
   ölçüsüyle), veranda tek eğimli panel çatı, ana çatının ve cumbanın saçağının altında; alçak kenarda kiriş, açık yanda eğik kiriş;
   görünüşte çatı, dikme ve kirişler, IFC'de panel ve eğik profil. Denetim kapalı gövdeyle (girinti ve açık mahal kapalı sayılmaz).
+- Köşe kırması (`tip` kirma, AP-03; Lokman, 1 Kasım 2026 10:17): veranda yüzü ana çatının eğimi ve saçak kotuyla sağa iner, arkada ana
+  çatının arka yüzüyle 45° kırma, önde cumbanın arka yüzüyle dere; ölçüler paftanın aşık planıyla. Kalkan veranda yüzünün üstünde, kiriş ve
+  dikme taşan verandadaki gibi; IFC'de sac levha; liste yazılmaz (PR-1b/K7).
 """
 from __future__ import annotations
 import copy
@@ -308,7 +311,7 @@ def test_verandanin_catisi_ifc_ve_liste(tmp_path):
 
 
 @pytest.mark.parametrize("degis, mesaj", [
-    (lambda g: g.update(tip="besik"), "yalnız tek_yon"),
+    (lambda g: g.update(tip="besik"), "tek_yon .*ya da kirma.*'besik' yok"),
     (lambda g: g.pop("egim_yuzde"), "eğim paftadan yazılır"),
     (lambda g: g.update(yuksek_yan="on"), "yüksek yanı \\(on\\) boyunca kapalı gövde yok"),
     (lambda g: g.update(yuksek_yan="sol"), "yüksek yanı \\(sol\\) boyunca kapalı gövde yok"),
@@ -397,3 +400,222 @@ def test_verandanin_catisi_dikdortgen_mahale():
     m.poly = m.poly.difference(box(300, 200, 381.5, 244.25))                     # L biçimli mahal: kutusu aynı, çatı kutuya çizilmez
     with pytest.raises(CP.PrefabrikCatiHatasi, match="dikdörtgen değil"):
         CS.mahal_catilari(plan, ie)
+
+
+# ─────────────────────────────────────────── AP-03: verandanın köşe kırması (Lokman, 1 Kasım 2026 10:17, "Paftadaki gibi köşe kırma")
+def test_kose_kirmasi_paftanin_asik_planiyla():
+    # AP-03 paftası s. 7 (makas planı: MK9–12 kısa makaslar sağa, MK13 arka köşeden 45° çapraz) ve s. 9 (aşık planı, eğik boylar): veranda yüzü
+    # kırma ile dere arasında paralelkenar, sağ saçakta 865,75 − 421,5 = 444,25 (paftada aşık 410 + 34,25); ana çatının arka yüzü saçakta
+    # −30 → 793: 823 (paftada 823), salon duvarının saçağında 697,5 (paftada 695,5; duvar yüzü 2 cm farkı), kırma oradan saçağa 125,5
+    # (paftada 127,5); cumbanın arka yüzünde aşık 155,5 (paftada 155,5). Eğim ve saçak kotu ana çatınınki: kırmanın salon duvarındaki ucunda
+    # iki yüz aynı kotta (311,13 = 260 + 155,5 × 0,3288)
+    from shapely.geometry import Polygon
+    from motor import cati_serit as CS, sunum
+    from motor.genel import cati_genel
+    ie = _ie("AP03")
+    plan = _kur(ie)
+    t = sunum.cati_tanimi(plan, ie)
+    D = {d["ad"]: d for d in t["duzlemler"]}
+    assert list(D) == ["VERANDA çatısı", "sağ cumba arka", "ana çatı ön", "ana çatı arka"]       # veranda yüzü altta çizilir
+    v = D["VERANDA çatısı"]
+    assert Polygon(v["plan"]).equals(Polygon([(637.5, 266.0), (793.0, 421.5), (793.0, 865.75), (637.5, 710.25)]))
+    assert (v["yukari"], v["sacak"], v["sacak_kotu"], v["egim"]) == ([-1, 0], {"x": 793.0}, 260.0, pytest.approx(0.3288))
+    assert Polygon(D["sağ cumba arka"]["plan"]).equals(Polygon([(637.5, 195.75), (793.0, 195.75), (793.0, 421.5), (637.5, 266.0)]))
+    arka = Polygon(D["ana çatı arka"]["plan"])
+    assert arka.equals(Polygon([(-30.0, 417.875), (667.5, 417.875), (667.5, 740.25), (793.0, 865.75), (-30.0, 865.75)]))
+    assert [h["tur"] for h in t["hatlar"]] == ["dere", "kirma"]
+    dere, kirma = t["hatlar"]
+    assert (dere["p"], dere["q"]) == ([667.5, 296.0], [793.0, 421.5])          # ana çatının saçağının altında kalan kısım görünmez
+    assert (kirma["p"], kirma["q"]) == ([793.0, 865.75], [667.5, 740.25])
+    from motor.veranda import kot
+    assert kot(v, 637.5, 710.25) == pytest.approx(kot(D["ana çatı arka"], 637.5, 710.25)) == pytest.approx(260 + 155.5 * 0.3288)
+    assert kot(v, 637.5, 266.0) == pytest.approx(kot(D["sağ cumba arka"], 637.5, 266.0))
+    k = {(e["tur"], tuple(sorted(e["duzlemler"]))) for e in cati_genel.cati_kur(t)["kenarlar"] if e["tur"] in ("kirma", "vadi")}
+    assert k == {("kirma", ("VERANDA çatısı", "ana çatı arka")), ("vadi", ("VERANDA çatısı", "sağ cumba arka"))}
+    # salonun sağ kalkanı: cumbanın üstünde dereye kadar, sonra veranda yüzünün üstünde (kırmanın ötesinde ana çatı yüzü geçer: kalkan yok)
+    sag = [(k_["ad"], k_["aralik"], k_.get("alt")) for k_ in t["kalkanlar"] if k_["konum"] == 637.5]
+    assert sag == [("ana çatı sağ kalkanı (0–266)", [0.0, 266.0], ["sağ cumba arka"]),
+                   ("ana çatı sağ kalkanı (266–835.75, VERANDA çatısı üstü)", [266.0, 835.75], ["VERANDA çatısı"])]
+    (m,) = t["mahal_catilari"]
+    assert (m["tip"], m["yuksek_yan"], m["yanlar"], m["egik_kirisler"]) == ("kirma", "sol", {"on": "kapali", "arka": "acik"}, [])
+    # kiriş ve dikme taşan verandadaki gibi (BK-14): açık iki yanda yatay kiriş duvar üstünün 10 altından duvar üstüne, dikme kirişin altına
+    assert m["kirisler"] == [(753.0, 391.5, 763.0, 835.75, 240.0, 250.0), (637.5, 825.75, 763.0, 835.75, 240.0, 250.0)]
+    assert m["kolonlar"] == [(753.0, 825.75, 763.0, 835.75, 240.0)]
+    # paftanın parçaları: ana çatı ve cumba aynen (kırma onlara dokunmaz)
+    assert [(q["ad"], q["aciklik_cm"], round(q["mahya_kotu"] - 250, 2)) for q in t["parcalar"]] == [
+        ("ana çatı", 835.75, 157.26), ("sağ cumba", 391.5, 84.23)]
+    assert CS.seritler(CS.cati_izi(plan, ie), ie) == [[0.0, 637.5, 0.0, 835.75], [637.5, 763.0, 0.0, 391.5]]
+
+
+def test_kose_kirmasi_gorunuste():
+    # sağdan veranda yüzü dönük (üst kenarı salon duvarında 311,13, kırmadan dereye); arkadan kırma ana çatının arka yüzünün kenarı, üstünde
+    # cumbanın arka yüzü mahyasına kadar görünür; dikme ve kirişler arkadan ve sağdan, önden ve soldan gövdenin ardında
+    from motor import cephe_gorunus as CG
+    ie = _ie("AP03")
+    plan = _kur(ie)
+    sag = CG.cati_cizgileri(plan, ie, "sag")
+    assert [(266.0, 311.1284), (421.5, 260.0), (865.75, 260.0), (710.25, 311.1284), (266.0, 311.1284)] in sag["cizgiler"]
+    arka = CG.cati_cizgileri(plan, ie, "arka")
+    assert [(95.5, 301.2644), (-30.0, 260.0), (793.0, 260.0), (793.0, 407.2613), (95.5, 407.2613), (95.5, 301.2644)] in arka["cizgiler"]
+    assert [(95.45, 334.2266), (-30.0, 334.2266), (-30.0, 260.0526)] in arka["cizgiler"]
+    assert CG.cati_cizgileri(plan, ie, "on")["cizgiler"] == [
+        [(793.0, 334.2266), (667.5, 334.2266), (667.5, 407.2613), (-30.0, 407.2613), (-30.0, 260.0), (793.0, 260.0), (793.0, 334.2266)]]
+    assert [(p["tur"], p["u"]) for p in CG.mahal_cati_parcalari(plan, ie, "sag")] == [
+        ("kolon", [(825.75, 0.0), (835.75, 0.0), (835.75, 240.0), (825.75, 240.0)]),
+        ("kiris", [(391.5, 240.0), (391.5, 250.0), (835.75, 250.0), (835.75, 240.0)])]
+    assert [p["tur"] for p in CG.mahal_cati_parcalari(plan, ie, "arka")] == ["kolon", "kiris"]
+    assert CG.mahal_cati_parcalari(plan, ie, "on") == [] and CG.mahal_cati_parcalari(plan, ie, "sol") == []
+
+
+def test_kose_kirmasi_ifc_ve_liste(tmp_path):
+    # IFC: veranda yüzü ana çatının sac levhalarından biri (panel değil); profiller duvar üstünün 10 altından duvar üstüne, dikme kirişin
+    # altına; salonun sağ kalkanı iki dolgu. Veranda makasları (MK9–13) ve liste PR-1b/K7'de: liste yazılmaz
+    import ifcopenshell
+    from motor import ifc_uret, prefabrik_liste as PL
+    ie = _ie("AP03")
+    o = ifc_uret.uret(copy.deepcopy(ie), tmp_path / "AP03.ifc")
+    assert o["sema_hatasi"] == 0 and o["cati"]["mahya_cm"] == pytest.approx(407.3)
+    f = ifcopenshell.open(str(tmp_path / "AP03.ifc"))
+
+    def ps(e, ad):
+        return next((q.NominalValue.wrappedValue for r in e.IsDefinedBy if r.is_a("IfcRelDefinesByProperties")
+                     for q in r.RelatingPropertyDefinition.HasProperties if q.Name == ad), None)
+    assert [ps(e, "Duzlem") for e in f.by_type("IfcSlab") if e.Name.startswith("CATI_")] == [
+        "VERANDA çatısı", "sağ cumba arka", "ana çatı ön", "ana çatı arka"]
+    assert not [e for e in f.by_type("IfcSlab") if e.Name.startswith("MAHAL_CATI")]
+    assert [ps(e, "Kot_cm") for e in f.by_type("IfcColumn")] == ["0–240"]
+    assert sorted(ps(e, "Kot_cm") for e in f.by_type("IfcBeam")) == ["240–250", "240–250"]
+    assert [ps(e, "Kalkan") for e in f.by_type("IfcPlate") if e.Name.startswith("ALIN")] == [
+        "ana çatı sol kalkanı", "ana çatı sağ kalkanı (0–266)", "ana çatı sağ kalkanı (266–835.75, VERANDA çatısı üstü)", "sağ cumba sağ kalkanı"]
+    with pytest.raises(PL.ListeYazilmaz, match="köşe kırması"):
+        PL.model_motor(copy.deepcopy(ie))
+
+
+@pytest.mark.parametrize("degis, mesaj", [
+    (lambda g: g.update(egim_yuzde=20), "egim_yuzde yazılmaz"),
+    (lambda g: g.update(sacak_cm=20), "sacak_cm yazılmaz"),
+    (lambda g: g.update(yuksek_yan="on"), "kalkan yüzüne dayanır"),             # mahyaya paralel yan: kırma kurulmaz
+    (lambda g: g.update(yuksek_yan="sag"), "yüksek yanı \\(sag\\) boyunca kapalı gövde yok"),
+])
+def test_kose_kirmasi_denetlenir(degis, mesaj):
+    from motor import cati_prefabrik as CP, sunum
+    ie = _ie("AP03"); degis(ie["cati"]["mahal_catilari"][0])
+    with pytest.raises(CP.PrefabrikCatiHatasi, match=mesaj):
+        sunum.cati_tanimi(_kur(ie), ie)
+
+
+@pytest.mark.parametrize("dus, mesaj", [
+    ("ana çatı arka", "arka yanında o yöne inen ve saçağı mahalin saçağında biten ana çatı yüzü yok; kırma kurulmaz"),
+    ("sağ cumba arka", "on yanında mahala inen çatı yüzü yok .*dere kurulamaz"),
+])
+def test_kose_kirmasi_komsu_yuz_ister(dus, mesaj):
+    # kırmanın açık yanında o yöne inen ana çatı yüzü, kapalı yanında mahala inen yüz yoksa çatı çizilmez (yanlış çatı çizilmez)
+    from motor import cati_prefabrik as CP, cati_serit as CS, sunum
+    ie2 = _ie("AP03")
+    plan = _kur(ie2)
+    (m,) = CS.mahal_catilari(plan, ie2)
+    ie2_t = {**ie2, "cati": {**ie2["cati"], "mahal_catilari": [{**ie2["cati"]["mahal_catilari"][0], "tip": "tek_yon", "egim_yuzde": 10}]}}
+    t = sunum.cati_tanimi(plan, ie2_t)                                       # aynı şeritler, kırmasız düzlemler
+    duz = [copy.deepcopy(d) for d in t["duzlemler"] if d["ad"] != dus]
+    with pytest.raises(CP.PrefabrikCatiHatasi, match=mesaj):
+        CS._kirma(m, duz, copy.deepcopy(t["kalkanlar"]), box(-30, -30, 667.5, 865.75))
+
+
+def test_kose_kirmasi_mahyayi_asmaz():
+    # geometri hakemi (1 Kasım, `848f32b`): AP-09'un verandası makas x'ken kırma yazılırsa veranda yüzü duvarda (350,17) cumbanın
+    # mahyasından (328,8) yüksek; dere mahyayı geçer, eskiden kırpılıp 21 cm basamaklı çatı hatasız PDF'e gidiyordu → hata
+    from motor import cati_prefabrik as CP, sunum
+    ie = _ie("AP09")
+    ie["cati"]["mahal_catilari"] = [{"mahal": "VERANDA", "tip": "kirma", "yuksek_yan": "arka"}]
+    with pytest.raises(CP.PrefabrikCatiHatasi, match=r"duvarda 350\.17 kotunda, ön cumba sol yüzünün mahyası 328\.80; dere mahyayı aşar"):
+        sunum.cati_tanimi(_kur(ie), ie)
+
+
+def _sentetik_kirma(X1: float, yanlar: dict, engel: list | None = None, y0: float = 0.0, cumba_x1: float | None = None):
+    """AP-03'ün ana çatısı ölçüsünde elle kurulmuş yüzler; veranda x 637,5–X1, y y0–835,75; y0 > 0 ise önünde cumba (arka yüzü x 637,5–
+    `cumba_x1`, verilmezse veranda saçağına kadar) (geometri hakeminin denemesi, 1 Kasım)."""
+    from motor import cati_serit as CS
+    e = 0.3288
+
+    def dz(ad, plan, yuk, sac):
+        return {"ad": ad, "plan": plan, "yukari": yuk, "egim": e, "sacak_kotu": 260.0, "sacak": sac}
+    duz = [dz("ana çatı ön", [[-30, -30], [667.5, -30], [667.5, 417.875], [-30, 417.875]], [0, 1], {"y": -30.0}),
+           dz("ana çatı arka", [[-30, 417.875], [667.5, 417.875], [667.5, 865.75], [-30, 865.75]], [0, -1], {"y": 865.75})]
+    if y0 > 0:
+        cx1 = X1 + 30 if cumba_x1 is None else cumba_x1
+        duz.insert(0, dz("cumba arka", [[637.5, y0 / 2], [cx1, y0 / 2], [cx1, y0 + 30], [637.5, y0 + 30]], [0, -1], {"y": y0 + 30.0}))
+    if engel:
+        duz.append(dz("engel", engel, [0, -1], {"y": 865.75}))
+    Y0 = y0 - (30 if yanlar["on"] == "acik" else 0)
+    P = dz("VERANDA çatısı", [[637.5, Y0], [X1 + 30, Y0], [X1 + 30, 865.75], [637.5, 865.75]], [-1, 0], {"x": X1 + 30.0})
+    m = {"mahal": "VERANDA", "kutu": (637.5, y0, X1, 835.75), "sacak": 30.0, "yuksek_yan": "sol", "duzlem": P, "yanlar": yanlar}
+    kal = [{"ad": "ana çatı sağ kalkanı", "eksen": "x", "konum": 637.5, "ic": "bati", "ust": ["ana çatı ön", "ana çatı arka"],
+            "aralik": [0.0, 835.75]}]
+    return CS._kirma(m, duz, kal, box(-30, -30, 667.5, 865.75)), duz, kal
+
+
+def test_kose_kirmasi_uzayan_yuz_sinirli():
+    # geometri hakemi (1 Kasım): kırma yanında uzatılan ana çatı yüzü kendi mahyasını geçmez, başka yüze binmez
+    from shapely.geometry import Polygon
+    from motor import cati_prefabrik as CP
+    hatlar, duz, kal = _sentetik_kirma(763.0, {"on": "acik", "arka": "acik"})          # iki açık yan: iki kırma, mahyada buluşmaz
+    on, arka = (Polygon(d["plan"]) for d in duz if d["ad"] in ("ana çatı ön", "ana çatı arka"))
+    assert on.intersection(arka).area < 1.0
+    assert sorted(h["tur"] for h in hatlar) == ["kirma", "kirma"]
+    assert [k["ad"] for k in kal] == ["ana çatı sağ kalkanı (0–835.75, VERANDA çatısı üstü)"]
+    with pytest.raises(CP.PrefabrikCatiHatasi, match=r"duvarda 487\.69 kotunda, ana çatı ön yüzünün mahyası 407\.26; kırma mahyayı aşar"):
+        _sentetik_kirma(1300.0, {"on": "acik", "arka": "acik"})                    # eskiden ön ve arka yüz 5,98 m² üst üste
+    with pytest.raises(CP.PrefabrikCatiHatasi, match="ana çatı arka yüzü kırmaya uzarken engel yüzüne biniyor"):
+        _sentetik_kirma(763.0, {"on": "acik", "arka": "acik"}, engel=[[700, 800], [793, 800], [793, 865.75], [700, 865.75]])
+
+
+def test_kose_kirmasi_dar_komsu_yuz_ve_duvar():
+    # geometri hakemi 2. tur (N2): kapalı yandaki yüz verandanın eğim aralığını örtmüyorsa ve iki kırma duvardan önce kesişiyorsa hata
+    from motor import cati_prefabrik as CP
+    AC = {"on": "kapali", "arka": "acik"}
+    hatlar, _d, _k = _sentetik_kirma(763.0, AC, y0=391.5)                         # AP-03 ölçüsü: çizilir
+    assert sorted(h["tur"] for h in hatlar) == ["dere", "kirma"]
+    with pytest.raises(CP.PrefabrikCatiHatasi, match="dere yanında cumba arka yüzünün dışına taşıyor"):
+        _sentetik_kirma(763.0, AC, y0=391.5, cumba_x1=720.0)                    # cumbanın arka yüzü 720'de bitiyor, veranda 793'e
+    _sentetik_kirma(637.5 + 417.875, {"on": "acik", "arka": "acik"})               # veranda eni = ana çatının yarı açıklığı: mahyada buluşur
+    with pytest.raises(CP.PrefabrikCatiHatasi, match="duvara değmiyor"):
+        _sentetik_kirma(637.5 + 419.0, {"on": "acik", "arka": "acik"})             # mahyayı 0,37 aşar (payın içi): kırmalar duvardan önce kesişir
+
+
+def _genis_veranda(ayna: bool) -> dict:
+    """AP-03'ten: veranda 251 × 130,5 (eğim yönünde derinliğinden geniş), yanında ODA 3; `ayna` ön ↔ arka (geometri hakemi 2. tur)."""
+    ie = _ie("AP03")
+    for m in ie["mahaller"]:
+        if m["ad"] == "VERANDA":
+            m["konum_cm"] = [[507, 10, 758, 135.5]]
+        if m["ad"] == "SALON+MUTFAK":
+            m["konum_cm"] = [[5, 10, 507, 449.25]]
+    ie["mahaller"].append({"ad": "ODA 3", "tur": "yatak_odasi", "konum_cm": [[507, 135.5, 758, 449.25]]})
+    ie["acikliklar"] = [a for a in ie["acikliklar"] if a["tur"] == "dis_kapi"]
+    if ayna:
+        H = 835.75
+        for m in ie["mahaller"]:
+            m["konum_cm"] = [[r[0], round(H - r[3], 4), r[2], round(H - r[1], 4)] for r in m["konum_cm"]]
+        ie["dikmeler"] = [[d[0], round(H - 10 - d[1], 4)] for d in ie["dikmeler"]]
+        for a in ie["acikliklar"]:
+            if "duvar_ucu" in a:
+                a["duvar_ucu"] = {"on": "arka", "arka": "on"}.get(a["duvar_ucu"], a["duvar_ucu"])
+        for d in ie["yapi"]["dizilim"].get("dis_pano_dayanagi", []):
+            if "y" in d:
+                d["y"] = round(H - d["y"], 4)
+                d["aralik_cm"] = sorted(round(H - v, 4) for v in d["aralik_cm"])
+    return ie
+
+
+def test_kose_kirmasi_ayna_ayni_cati():
+    # geometri hakemi 2. tur (B1): binme denetimi yanların sırasına bağlıydı; açık yan önde (ayna) iken uzayan ana çatı yüzü cumbanın
+    # dereyle kesilmemiş planıyla kıyaslanıp "biniyor" hatası alıyordu. Şimdi denetim bütün yüzlerin son planına: ayna aynı çatıyı verir
+    from motor import sunum
+    hat = {}
+    for ayna in (False, True):
+        ie = _genis_veranda(ayna)
+        t = sunum.cati_tanimi(_kur(ie), ie)
+        hat[ayna] = {(h["tur"], *sorted([tuple(h["p"]), tuple(h["q"])])) for h in t["hatlar"]}
+    assert hat[False] == {("dere", (542.0, 484.25), (793.0, 735.25)), ("kirma", (542.0, 614.75), (793.0, 865.75))}
+    aynala = lambda q: (q[0], round(835.75 - q[1], 2))                         # noqa: E731
+    assert hat[True] == {(tur, *sorted([aynala(p), aynala(q)])) for tur, p, q in hat[False]}
