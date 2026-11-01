@@ -58,7 +58,8 @@
     "sacak_cm": 30,
     "topuk_cm": 10,
     "makas_yonu": "kisa_kenar",
-    "makas_ekseni": "x"
+    "makas_ekseni": "x",
+    "mahal_catilari": [{"mahal": "VERANDA", "tip": "tek_yon", "egim_yuzde": 10, "yuksek_yan": "arka", "sacak_cm": 0}]
   },
   "cikti": {
     "pdf": true,
@@ -71,7 +72,7 @@
     "Gövde 740 × 944,5 dikdörtgen; veranda gövdenin içinde ön-solda (paftada 382 × 244), sol ve ön açık, ön iki köşesinde 10 × 10 dikme paftadaki yerinde (dikmeler, gerçek çerçevede; sağdaki salon duvarının hizasında, 381,5–391,5). Paftanın mimari sayfasında salon ve mutfak tek mahal (32,51 m²): arka odaların önündeki hol ve sağ öndeki bölüm salonun parçası; aralarında duvar yok.",
     "Pencereler paftadaki panoda; verandaya ve öne bakan 150/180 ile 170/180 ve soldaki 120/70 paftada sürgülü yazılı. Paftanın standart dışı pencereli panoları (veranda arka duvarında 371,5'lik, ön duvarda 213'lük, sol duvarda pencereye ortalı olmayan 251'lik) Motor'da pencere kuralıyla (251'lik pano ızgarada): bu üç pencere paftadakinden kayık (kıyas testinde bilinen fark).",
     "Kapılar panoda ortada (dizilim.kapi_yeri: ortada; holdeki iki oda kapısı paftada panonun ortasından 5 cm kayık); banyo kapısı menteşe ucunda (kapi_yeri: mentese_ucu, paftada kavşaktan 10 cm). Kapı genişlikleri paftada yazılı değil: dış kapı 90, iç kapı 82 (Motor'un ölçüsü).",
-    "Çatı (PR-2b'de çizilir): ana beşik makas x'i geçer, mahya y boyunca (141,51 = 10 topuk + 400 × 0,3288), veranda hattına kadar; sağ öndeki bölümün üstünde paralel cumba (açıklık 359, kesit 418,5, mahya 78,8); verandada tek yön panel çatı (paftada P1); eğim %32,88 (18,2°; paftanın kesitinde 18,2°), topuk 10, saçak 30."
+    "Çatı (paftanın makas, aşık ve kaplama sayfaları): ana beşik makas x'i geçer, mahya y boyunca (141,51 = 10 topuk + 400 × 0,3288), verandanın arka duvarından arkaya (kaplama 421,07 × 760,26); sağ öndeki bölümün üstünde paralel cumba (açıklık 358,5, kaplama 220,27 × 273,75, mahya 78,8); eğim %32,88 (18,2°; paftanın kesitinde 18,2°), topuk 10, saçak 30. Verandada kendi çatısı (`mahal_catilari`): paftada P1 panel 381,5 × 245,48, eğim yazılı değil; panelin boyundan %10 (244,25 × √1,01 = 245,47), saçaksız, arka duvara dayanır. Kotları paftada yok: yüksek kenarı duvar üstünde (250), alçak kenarı öne 24,4 iner (225,6; paftanın A profilinde veranda profilinin vidası 213'te, profilin üstü 223), ana çatının ve cumbanın saçağının (260) altında. Makas: ana çatıda 7 (paftada M1–M7, aynı); cumbada Motor 2 eşit aralık (uyarıyla), paftada M8–M11 dört makas: liste aşamasında (PR-1b/K7) bakılır."
   ],
   "eksikler": []
 }

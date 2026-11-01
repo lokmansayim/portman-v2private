@@ -977,7 +977,7 @@ class Cizici:
         for k, taraf in enumerate(CG.TARAFLAR):
             n0 = len(msp)
             g, r = CG.cephe(plan, taraf), CG.cati_cizgileri(plan, ie, taraf)
-            vp = self._veranda_gorunusu(taraf, r)
+            vp = self._veranda_gorunusu(taraf, r) + CG.mahal_cati_parcalari(plan, ie, taraf)    # İE-17 PR-2: ızgaradaki verandanın dikme ve kirişi
             sol_uc = min([r["u0"]] + [u for p in vp for u, _z in p["u"]])
             if k:
                 ox = sag_uc + 360.0 - sol_uc
@@ -1219,6 +1219,8 @@ def uret(is_emri: dict, cikti_dir: Path, ad_govde: str | None = None, pdf_hatada
            ("Sistem", "Prefabrik panel (8 mm fibercement)"), ("Duvar yüksekliği", f"{fmt(hy)} cm"), ("Dış duvar / iç duvar", f"{G._mm(G.T_DIS)} mm / {G._mm(G.T_IC)} mm"),
            ("Pano modülü", "125,5 cm (isteğe bağlı yarım pano 62,75 cm)"),
            ("Çatı", f"{_cati_adi(cati)} — %{fmt(float(cati.get('egim_yuzde',33)))} eğim, {fmt(float(cati.get('sacak_cm',30)))} cm saçak, {fmt(float(cati.get('topuk_cm',10)))} cm topuk"),
+           *[(f"{g['mahal'].capitalize()} çatısı", f"Tek eğim panel çatı — %{fmt(float(g['egim_yuzde']))} eğim")      # İE-17 PR-2 (AP-09)
+             for g in cati.get("mahal_catilari") or []],
            ("Pencereler", "PVC doğrama; katalog 120×120 / 120×180 / 60×40" if _olculer <= set(G.PENCERE_OLCULERI) else _pencere_satiri),
            ("Kapılar", "Dış: çelik kapı; iç: Amerikan panel kapı"),
            ("Kat sayısı", str(yapi.get("kat_sayisi", 1))), ("Revizyon", f"r{int(is_emri.get('revizyon',1)):02d}")]

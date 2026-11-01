@@ -9,6 +9,8 @@ Paftaya uygunluk `testler/cizim/test_pafta_kiyasi.py`'de (paftadan ölçülen de
 - İş Emri dikmesinin tamamen örttüğü köşe parçası çizilmez (AP-09: verandanın açık kenarı gövde köşesinde biter; paftada orada kolon).
 - Çatı: girintili gövdenin beşiğinin izi verandayı dikmeleriyle içine alır (`cati_serit.cati_izi`, AP-15); çıkıntılı çapraz cumba
   (`cati_prefabrik`, AP-22) gövdenin girintisiyle denetlenir. Ön onay PDF'inde yakın aksların adları kademeli (`dxf_out._kademe`).
+- Açık mahalin kendi çatısı (`cati.mahal_catilari`, AP-09): ana çatı verandayı örtmez (kalan gövdenin ana çatısı ve paralel cumbası paftanın
+  ölçüsüyle), veranda tek eğimli panel çatı, ana çatının ve cumbanın saçağının altında; görünüşte çatı, dikme ve kiriş, IFC'de panel.
 """
 from __future__ import annotations
 import copy
@@ -196,3 +198,90 @@ def test_aks_adlari_kademeli():
     assert dxf_out._kademe([10.0, 67.75, 72.75, 130.5]) == [0, 0, 1, 0]
     assert dxf_out._kademe([0.0, 1.2, 10.0, 200.0]) == [0, 1, 0, 0]
     assert dxf_out._kademe([5.0, 130.5, 256.0]) == [0, 0, 0]
+
+
+def test_verandanin_kendi_catisi():
+    # AP-09 (paftanın çatı kaplama sayfası): ana çatı yarısı 421,07 × 760,26 (verandanın arka duvarından arkaya), sağ öndeki cumba 220,27 ×
+    # 273,75 (açıklık 358,5), verandada P1 381,5 × 245,48 (eğim %10: 244,25 × √1,01 = 245,47). Veranda çatısı arka duvar üstünden (250) öne
+    # 24,4 iner; kiriş alçak kenarda, serbest dikme kirişin altına, cumbanın duvar ucundaki dikme (paftanın A profili) duvar üstüne
+    from motor import cati_serit as CS, sunum
+    ie = _ie("AP09")
+    plan = _kur(ie)
+    assert CS.seritler(CS.cati_izi(plan, ie), ie) == [[0.0, 244.25, 381.5, 740.0], [244.25, 944.5, 0.0, 740.0]]
+    t = sunum.cati_tanimi(plan, ie)
+    assert [(q["ad"], q["aciklik_cm"], q["makas_ust_boy_cm"], round(q["mahya_kotu"] - 250, 2)) for q in t["parcalar"]] == [
+        ("ön cumba", 358.5, 220.27, 78.8), ("ana çatı", 740.0, 421.07, 141.52)]
+    ana = [d for d in t["duzlemler"] if d["ad"].startswith("ana çatı")]
+    assert min(p[1] for d in ana for p in d["plan"] if p[0] < 351.5) == pytest.approx(214.25)    # ana çatı 214,25–974,5: 760,25
+    (m,) = t["mahal_catilari"]
+    assert m["kutu"] == (0.0, 0.0, 381.5, 244.25) and m["yuksek_yan"] == "arka" and m["egim"] == pytest.approx(0.1)
+    assert (m["ust_kot"], m["alt_kot"]) == (250.0, pytest.approx(225.575))
+    assert round(244.25 * (1 + 0.1 ** 2) ** 0.5, 2) == pytest.approx(245.47)
+    assert m["kirisler"] == [(0.0, 0.0, 381.5, 10.0, pytest.approx(215.575), pytest.approx(225.575))]
+    assert m["kolonlar"] == [(0.0, 0.0, 10.0, 10.0, pytest.approx(215.575)), (381.5, 0.0, 391.5, 10.0, 250.0)]
+    assert "mahal_catilari" not in sunum.cati_tanimi(_kur(_ie("AP15")), _ie("AP15"))   # anahtarsız evde çatı tanımı aynen
+
+
+def test_verandanin_catisi_gorunuste():
+    # önden: veranda çatısı bant (225,6–250), iki dikme ve kiriş; soldan: eğik çizgi ve %10; arkadan ve sağdan gövdenin ardında
+    from motor import cephe_gorunus as CG
+    ie = _ie("AP09")
+    plan = _kur(ie)
+    on = CG.cati_cizgileri(plan, ie, "on")
+    assert any({round(z, 3) for _u, z in c} == {225.575, 250.0} for c in on["cizgiler"])
+    assert [q["tur"] for q in CG.mahal_cati_parcalari(plan, ie, "on")] == ["kolon", "kolon", "kiris"]
+    sol = CG.cati_cizgileri(plan, ie, "sol")
+    assert [round(e, 3) for _u, _z, e in sol["egimler"]] == [0.1]                  # ana çatı soldan dönük: eğimi önde yazılı
+    assert [(pytest.approx(944.5), pytest.approx(225.575)), (pytest.approx(700.25), pytest.approx(250.0))] in sol["cizgiler"]
+    for t in ("arka", "sag"):
+        assert CG.mahal_cati_parcalari(plan, ie, t) == []
+        assert all(min(z for _u, z in c) >= 260 - 1e-6 for c in CG.cati_cizgileri(plan, ie, t)["cizgiler"])
+    assert on["tepe"] == (370.0, pytest.approx(391.52)) and on["u0"] == -30.0 and on["u1"] == 770.0      # saçak uçları ana çatıdan
+
+
+def test_verandanin_catisi_ifc_ve_liste(tmp_path):
+    # IFC'de panel levhası ve dikme ile profiller veranda çatısının altında; yükleme listesi bu çatıyı bilmiyor: yazılmaz (PR-1b/K7)
+    import ifcopenshell
+    from motor import ifc_uret, prefabrik_liste as PL
+    ie = _ie("AP09")
+    o = ifc_uret.uret(copy.deepcopy(ie), tmp_path / "AP09.ifc")
+    assert o["sema_hatasi"] == 0 and o["cati"]["mahya_cm"] == pytest.approx(391.5)
+    f = ifcopenshell.open(str(tmp_path / "AP09.ifc"))
+    assert [e.Name for e in f.by_type("IfcSlab") if e.Name.startswith("MAHAL_CATI")] == ["MAHAL_CATI_1"]
+
+    def kot(e):
+        return next(q.NominalValue.wrappedValue for r in e.IsDefinedBy if r.is_a("IfcRelDefinesByProperties")
+                    for q in r.RelatingPropertyDefinition.HasProperties if q.Name == "Kot_cm")
+    assert sorted(kot(e) for e in f.by_type("IfcColumn")) == ["0–216", "0–250"]
+    assert {kot(e) for e in f.by_type("IfcBeam")} == {"216–226"}
+    with pytest.raises(PL.ListeYazilmaz, match="açık mahalin kendi çatısı"):
+        PL.model_motor(copy.deepcopy(ie))
+
+
+@pytest.mark.parametrize("degis, mesaj", [
+    (lambda g: g.update(tip="besik"), "yalnız tek_yon"),
+    (lambda g: g.pop("egim_yuzde"), "eğim paftadan yazılır"),
+    (lambda g: g.update(yuksek_yan="on"), "yüksek yanı \\(on\\) boyunca kapalı gövde yok"),
+    (lambda g: g.update(yuksek_yan="sol"), "yüksek yanı \\(sol\\) boyunca kapalı gövde yok"),
+    (lambda g: g.update(mahal="SALON+MUTFAK"), "açık mahal değil"),
+    (lambda g: g.update(renk="antrasit"), "tanınmayan alan: renk"),
+    (lambda g: g.update(sacak_cm=-5), "saçak -5 cm olmaz"),
+])
+def test_verandanin_catisi_denetlenir(degis, mesaj):
+    from motor import cati_prefabrik as CP, sunum
+    ie = _ie("AP09"); degis(ie["cati"]["mahal_catilari"][0])
+    with pytest.raises(CP.PrefabrikCatiHatasi, match=mesaj):
+        sunum.cati_tanimi(_kur(ie), ie)
+
+
+def test_verandanin_catisi_ana_catinin_altinda_kalir():
+    # saçak kotu duvar üstünün altındaysa (topuk −15: ana çatının ve cumbanın saçağı 245) veranda çatısının arka ucu (250) üstüne çıkar: çizilmez.
+    # Yüksek yanı sağ (cumbanın duvarı) da kurulur: eğim x boyunca, alçak kenar solda
+    from motor import cati_prefabrik as CP, sunum
+    ie = _ie("AP09"); ie["cati"]["topuk_cm"] = -15
+    with pytest.raises(CP.PrefabrikCatiHatasi, match="saçağının altında kalmalı"):
+        sunum.cati_tanimi(_kur(ie), ie)
+    ie = _ie("AP09"); ie["cati"]["mahal_catilari"][0]["yuksek_yan"] = "sag"
+    (m,) = sunum.cati_tanimi(_kur(ie), ie)["mahal_catilari"]
+    assert m["duzlem"]["yukari"] == [1, 0] and m["alt_kot"] == pytest.approx(250 - 38.15)
+    assert m["kirisler"] == [(0.0, 0.0, 10.0, 244.25, pytest.approx(201.85), pytest.approx(211.85))]

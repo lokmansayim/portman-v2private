@@ -32,11 +32,14 @@ BEKLENEN = {
     # cumba (kesit 147,34 ölçülerden %32,98; %32,88 ile 146,95; cumbanın kesiti 114,36, Motor 114,35)
     "AP15": ("Besik — %32,88 eğim, 30 cm saçak, 10 cm topuk", 145.29),
     "AP22": ("Beşik + Cumba — %32,88 eğim, 30 cm saçak, 10 cm topuk", 146.95),
+    # AP-09: ana çatı verandayı örtmez (kesit 141,51; Motor 141,52), sağ önde paralel cumba; verandanın kendi tek eğimli panel çatısı %10
+    "AP09": ("Besik — %32,88 eğim, 30 cm saçak, 10 cm topuk", 141.52),
 }
+EK_SATIR = {"AP09": ("Veranda çatısı", "Tek eğim panel çatı — %10 eğim")}      # özellik tablosunda açık mahalin kendi çatısı
 PK01 = ("Besik — %33 eğim, 30 cm saçak, 10 cm topuk", 118.9)      # beşikte çatı adı canlıdaki yazımla (`dxf_out._cati_adi`)
 # İE-17 PR-2 (1 Kasım 2026): kat planı aşamasında (sıra kuralı: önce kat planı → Lokman'ın onayı → çatı ve görünüşler). Planları
 # `test_pafta_kiyasi.py` ve `testler/motor/test_ie17_pr2.py` denetler; çatıları gelince ön onay PDF'iyle `BEKLENEN`'e geçerler
-PLAN_ASAMASI = ("AP03", "AP09")
+PLAN_ASAMASI = ("AP03",)
 
 
 def _ie(ad: str) -> dict:
@@ -81,7 +84,7 @@ def test_on_onay_pdf(cizim):
     assert m["validation_passed"] is True and m["pdf"] and (cikti / m["pdf"]).stat().st_size > 0
     yazi = _yazilar(msp)
     satir, mahya = PK01 if ad == "PK01" else BEKLENEN[ad]
-    for s in BASLIK + [satir]:
+    for s in BASLIK + [satir, *EK_SATIR.get(ad, ())]:
         assert yazi.count(s) == 1, s
     assert not [s for s in yazi if "PROFİLİ" in s or "cm'yi geçer" in s or " çatı | " in s]     # D-31: profil ve alt yazısı yok
     assert not [e for e in msp if e.dxf.layer.startswith("CATI_")]
