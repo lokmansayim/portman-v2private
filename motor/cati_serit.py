@@ -35,7 +35,9 @@ açık yanda o yöne inen ana çatı yüzü mahalin üstüne uzar ve iki yüz e�
 salon duvarındaki ucu arka yüzden 155,5 içeride); kapalı yanda o yandaki çatının (paftada cumba) mahala inen yüzüyle dere. Aşık planı
 bunu verir: veranda yüzü kırma ile dere arasında paralelkenar (aşık 444,25 = 865,75 − 421,5), cumbanın arka yüzü dereyle kesilir, ana
 çatının arka yüzü kırmaya kadar 823. Kiriş ve dikme taşan verandanınki gibi (BK-14): açık yanlarda yatay kiriş duvar üstünün 10 altından
-duvar üstüne, serbest dikme kirişin altına; makas kirişe oturur. Makaslar (MK9–13) ve liste PR-1b/K7'de.
+duvar üstüne, serbest dikme kirişin altına; makas kirişe oturur. Makaslar (MK9–13) ve liste PR-1b/K7'de. Mahalin yüzü duvarda komşu
+yüzün mahyasından yüksekse kırma ya da dere mahyayı aşar; kırmaya uzayan yüz başka yüze binerse; ikisinde de çatı çizilmez (geometri hakemi,
+1 Kasım: makas x'li AP-09 verandasında kırma 21 cm basamaklı çatı veriyordu).
 """
 from __future__ import annotations
 
@@ -277,6 +279,7 @@ def _kirma(m: dict, duzlemler: list[dict], kalkanlar: list[dict], ana_iz) -> lis
     kapalı yandaki çatının mahala inen yüzünü dereyle keser; yüksek yandaki kalkan mahalin yüzüne değdiği aralıkta onun üstünde kalır.
     `duzlemler` ve `kalkanlar` yerinde değişir; mahalin yüzü `duzlemler`'in başına girer (çizimde altta). Döner: kırma ve dere hatlarının
     planda görünen kısmı (ana çatının saçağının altında kalan kısım atılır) [{"tur": kirma | dere, "p", "q"}]."""
+    from .veranda import kot
     x0, y0, x1, y1 = m["kutu"]
     s, yan, P = m["sacak"], m["yuksek_yan"], dict(m["duzlem"])
     egim_x = yan in ("sol", "sag")                                      # eğim x boyunca; yanlar on ve arka
@@ -288,6 +291,7 @@ def _kirma(m: dict, duzlemler: list[dict], kalkanlar: list[dict], ana_iz) -> lis
     lat = {"on": y0, "arka": y1, "sol": x0, "sag": x1}
     yon = {"on": -1.0, "arka": 1.0, "sol": -1.0, "sag": 1.0}
     adli = {d["ad"]: d for d in duzlemler}
+    p_ust = kot(P, yuksek, y0) if egim_x else kot(P, x0, yuksek)        # mahalin yüzünün duvardaki (yüksek yan) kotu
     sinir, kesik, eski = serit, {}, {}
     lo_hi = []
     for L, durum in m["yanlar"].items():
@@ -304,6 +308,10 @@ def _kirma(m: dict, duzlemler: list[dict], kalkanlar: list[dict], ana_iz) -> lis
                 "o yöne inen ve saçağı mahalin saçağında biten ana çatı yüzü yok; kırma kurulmaz" if durum == "acik" else
                 "mahala inen çatı yüzü yok (saçağı mahalin içinde değil); dere kurulamaz"))
         eski[D["ad"]] = Polygon(D["plan"])
+        d_ust = max(kot(D, px, py) for px, py in D["plan"])            # D'nin mahyası; mahalin yüzü duvarda bunu aşarsa hat mahyayı geçer
+        if p_ust > d_ust + 0.5:
+            raise PrefabrikCatiHatasi(f"köşe kırması ({m['mahal']}): mahalin yüzü duvarda {p_ust:.2f} kotunda, {D['ad']} yüzünün mahyası "
+                                      f"{d_ust:.2f}; {'kırma' if durum == 'acik' else 'dere'} mahyayı aşar, çatı çizilmez (geometri hakemi, 1 Kasım)")
         if durum == "acik":
             sinir = sinir.intersection(_yari(D, P))                     # mahalin yüzü ana çatı yüzünün altında kalan yanda
             lo_hi.append(hedef)
@@ -324,13 +332,20 @@ def _kirma(m: dict, duzlemler: list[dict], kalkanlar: list[dict], ana_iz) -> lis
         D = adli[ad]
         yeni = _tek(unary_union([eski[ad], g]) if is_ == "ekle" else eski[ad].difference(g), f"{ad} yüzü")
         if is_ == "cikar" and pp.difference(unary_union([alan, eski[ad]])).area > 1.0:
-            raise PrefabrikCatiHatasi(f"köşe kırması ({m['mahal']}): dere {ad} yüzünün dışına taşıyor (mahya aşılıyor); çatı çizilmez")
+            raise PrefabrikCatiHatasi(f"köşe kırması ({m['mahal']}): mahalin yüzü dere yanında {ad} yüzünün dışına taşıyor; çatı çizilmez")
+        if is_ == "ekle":                                               # uzatılan kısım başka yüzün planına girmez
+            ek = yeni.difference(eski[ad])
+            for o in (o for o in duzlemler if o["ad"] != ad):
+                if ek.intersection(Polygon(o["plan"])).area > 1.0:
+                    raise PrefabrikCatiHatasi(f"köşe kırması ({m['mahal']}): {ad} yüzü kırmaya uzarken {o['ad']} yüzüne biniyor; çatı çizilmez")
         D["plan"] = [[round(x, 4), round(y, 4)] for x, y in yeni.exterior.coords[:-1]]
     P["plan"] = [[round(x, 4), round(y, 4)] for x, y in pp.exterior.coords[:-1]]
     duzlemler.insert(0, P)
     # kalkan: yüksek yandaki kalkan, mahalin yüzünün değdiği aralıkta (dereden kırma yanındaki mahal kenarına) yüzün üstünde
     hat = LineString([(yuksek, -B_), (yuksek, B_)] if egim_x else [(-B_, yuksek), (B_, yuksek)])
     temas = pp.intersection(hat.buffer(0.01))
+    if temas.is_empty:                                                  # mahyayı aşma denetiminden sonra olmaz; olursa kalkan belirsiz
+        raise PrefabrikCatiHatasi(f"köşe kırması ({m['mahal']}): mahalin yüzü yüksek yandaki duvara değmiyor; çatı çizilmez")
     t0, t1 = (temas.bounds[1], temas.bounds[3]) if egim_x else (temas.bounds[0], temas.bounds[2])
     for L, durum in m["yanlar"].items():                               # kırma yanında ana çatı yüzü mahalin üstünden geçer: kalkan yok
         if durum == "acik":

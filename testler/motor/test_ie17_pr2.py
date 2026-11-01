@@ -519,3 +519,46 @@ def test_kose_kirmasi_komsu_yuz_ister(dus, mesaj):
     duz = [copy.deepcopy(d) for d in t["duzlemler"] if d["ad"] != dus]
     with pytest.raises(CP.PrefabrikCatiHatasi, match=mesaj):
         CS._kirma(m, duz, copy.deepcopy(t["kalkanlar"]), box(-30, -30, 667.5, 865.75))
+
+
+def test_kose_kirmasi_mahyayi_asmaz():
+    # geometri hakemi (1 Kasım, `848f32b`): AP-09'un verandası makas x'ken kırma yazılırsa veranda yüzü duvarda (350,17) cumbanın
+    # mahyasından (328,8) yüksek; dere mahyayı geçer, eskiden kırpılıp 21 cm basamaklı çatı hatasız PDF'e gidiyordu → hata
+    from motor import cati_prefabrik as CP, sunum
+    ie = _ie("AP09")
+    ie["cati"]["mahal_catilari"] = [{"mahal": "VERANDA", "tip": "kirma", "yuksek_yan": "arka"}]
+    with pytest.raises(CP.PrefabrikCatiHatasi, match=r"duvarda 350\.17 kotunda, ön cumba sol yüzünün mahyası 328\.80; dere mahyayı aşar"):
+        sunum.cati_tanimi(_kur(ie), ie)
+
+
+def _sentetik_kirma(X1: float, yanlar: dict, engel: list | None = None):
+    """AP-03'ün ana çatısı ölçüsünde elle kurulmuş yüzler; veranda x 637,5–X1 (geometri hakeminin denemesi, 1 Kasım)."""
+    from motor import cati_serit as CS
+    e = 0.3288
+
+    def dz(ad, plan, yuk, sac):
+        return {"ad": ad, "plan": plan, "yukari": yuk, "egim": e, "sacak_kotu": 260.0, "sacak": sac}
+    duz = [dz("ana çatı ön", [[-30, -30], [667.5, -30], [667.5, 417.875], [-30, 417.875]], [0, 1], {"y": -30.0}),
+           dz("ana çatı arka", [[-30, 417.875], [667.5, 417.875], [667.5, 865.75], [-30, 865.75]], [0, -1], {"y": 865.75})]
+    if engel:
+        duz.append(dz("engel", engel, [0, -1], {"y": 865.75}))
+    P = dz("VERANDA çatısı", [[637.5, -30], [X1 + 30, -30], [X1 + 30, 865.75], [637.5, 865.75]], [-1, 0], {"x": X1 + 30.0})
+    m = {"mahal": "VERANDA", "kutu": (637.5, 0, X1, 835.75), "sacak": 30.0, "yuksek_yan": "sol", "duzlem": P, "yanlar": yanlar}
+    kal = [{"ad": "ana çatı sağ kalkanı", "eksen": "x", "konum": 637.5, "ic": "bati", "ust": ["ana çatı ön", "ana çatı arka"],
+            "aralik": [0.0, 835.75]}]
+    return CS._kirma(m, duz, kal, box(-30, -30, 667.5, 865.75)), duz, kal
+
+
+def test_kose_kirmasi_uzayan_yuz_sinirli():
+    # geometri hakemi (1 Kasım): kırma yanında uzatılan ana çatı yüzü kendi mahyasını geçmez, başka yüze binmez
+    from shapely.geometry import Polygon
+    from motor import cati_prefabrik as CP
+    hatlar, duz, kal = _sentetik_kirma(763.0, {"on": "acik", "arka": "acik"})          # iki açık yan: iki kırma, mahyada buluşmaz
+    on, arka = (Polygon(d["plan"]) for d in duz if d["ad"] in ("ana çatı ön", "ana çatı arka"))
+    assert on.intersection(arka).area < 1.0
+    assert sorted(h["tur"] for h in hatlar) == ["kirma", "kirma"]
+    assert [k["ad"] for k in kal] == ["ana çatı sağ kalkanı (0–835.75, VERANDA çatısı üstü)"]
+    with pytest.raises(CP.PrefabrikCatiHatasi, match=r"duvarda 487\.69 kotunda, ana çatı ön yüzünün mahyası 407\.26; kırma mahyayı aşar"):
+        _sentetik_kirma(1300.0, {"on": "acik", "arka": "acik"})                    # eskiden ön ve arka yüz 5,98 m² üst üste
+    with pytest.raises(CP.PrefabrikCatiHatasi, match="ana çatı arka yüzü kırmaya uzarken engel yüzüne biniyor"):
+        _sentetik_kirma(763.0, {"on": "acik", "arka": "acik"}, engel=[[700, 800], [793, 800], [793, 865.75], [700, 865.75]])
