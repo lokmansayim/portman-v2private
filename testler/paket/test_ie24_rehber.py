@@ -112,19 +112,19 @@ def test_balkon_tavani(tk03):
 
 
 def test_sacak_omegasi_ve_z_kart_modelinden(tk03):
-    """D-39 rehbere (BK-19'un bıraktığı iş; 1 Kasım 2026): saçak omegası kart modelinin CK-01 parçaları, saçak ucundan ucuna (dört saçak
-    hattı; kalkan saçağının altında da, baş makas betopanında kesik), liste gibi hatların toplamı 26,53 m. Z her eğik kenarda
+    """D-39 rehbere (BK-19'un bıraktığı iş; 1 Kasım 2026): saçak omegası kart modelinin CK-01 parçaları, saçak hattının altındaki
+    duvarların üstünde, saçağa uzamaz (D-41), baş makas betopanında kesik; sayı liste gibi dört saçak hattının toplamından, 26,53 m. Z her eğik kenarda
     ⌈eğik ÷ 2,8⌉ parça; parça boyu ve kenar başına sayı kart modelinden (D-28 madde 1: rehber sayıyı yeniden hesaplamaz), toplam kart
     modeli ve liste gibi 14; adımın yazısı bunu söyler."""
     d, say, L = tk03
     om = [o for o in d["omega_duvar"] if o["tur"] == "sacak"]
     kp = [p for p in say["kenar"]["parcalar"] if p["kart"] == "CK-01"]
-    assert len(om) == len(kp) == 12 and [round(o["a1"] - o["a0"], 1) for o in om] == [p["boy_cm"] for p in kp]
+    assert len(om) == len(kp) == 6 and [round(o["a1"] - o["a0"], 1) for o in om] == [p["boy_cm"] for p in kp]
     hat = {(p["bilgi"]["Cati"], p["bilgi"]["Hat"]): p["bilgi"]["HatBoyu_cm"] for p in kp}
     assert abs(sum(hat.values()) / 100 - 26.534) < 0.001 and "26,53 m" in next(s["formul"] for s in L if s["kalem"] == "100'lük saçak omegası")
-    assert Counter(o["yer"].split(" saçağ")[0] for o in om) == {"sol cumba ön": 2, "sağ cumba arka": 2, "ana çatı ve sağ cumba ön": 4,
-                                                                 "ana çatı ve sol cumba arka": 4}
-    assert sum(o["yer"].endswith("kalkan saçağı") for o in om) == 6 and all("saçak ucundan ucuna" in o["hat"] for o in om)
+    assert Counter(o["yer"].split(" saçağ")[0] for o in om) == {"sol cumba ön": 1, "sağ cumba arka": 1, "ana çatı ve sağ cumba ön": 2,
+                                                                 "ana çatı ve sol cumba arka": 2}
+    assert not any(o["yer"].endswith("kalkan saçağı") for o in om) and all("saçağa uzamaz" in o["hat"] for o in om)
     assert {k["z_parca"] for k in d["kalkan"]} == {280}
     zk = sorted(p["boy_cm"] for p in say["kenar"]["parcalar"] if p["parca"].startswith("BAS_MAKAS_Z_"))
     assert sorted(b for k in d["kalkan"] for b in k["z_kart"].values()) == [round(b, 2) for b in zk]

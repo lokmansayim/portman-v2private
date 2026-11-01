@@ -1,6 +1,6 @@
 {
  "sema": "portman.prefabrik_yerlesim/1",
- "surum": "8",
+ "surum": "9",
  "aciklama": "Prefabrik pano evinde parçaların yerleşim kuralları (İE-15). Okuyan `motor/kart_model.py` (K1: H türü) ve `motor/yerlesim/` (K2: tavan omegası, aşık, çatı kaplaması, baş makas betopanı, dere ve iniş; K3: elektrik; K3b: alt çerçeve ve çatı kenarları, montaj rehberinden; K5b: gövdeden taşan verandanın çatısı; K5b-2: asma dizme tavanın H'ı ve alçıpan gözleri, çatı izolasyonu). Yalnız kural kitabında ve `kurallar/liste/prefabrik.json`'da olmayan konum kuralları buraya yazılır; aynı anahtar iki dosyada olmaz (test). Oradaki değerler (makas aralığı, omega aralığı, aşık aralığı, parça boyları, levha) `okunan` ile gösterilir, burada yeniden yazılmaz: `kurallar/liste/prefabrik.json › kurallar.<ad>[.<alt>]` liste kuralının değeri, `kitap › <ad>[.<alt>]` liste kurallarının sabitlediği kural kitabı setinin (`kitap_seti`) değeri.",
  "kurallar": {
   "h_turu": {
@@ -205,7 +205,7 @@
    "durum": "varsayim",
    "tarih": "2026-10-30",
    "kaynak": "CIO, 27 Ekim 23:11 (K5b planı, PF `Kimlik_Karti_Modeli/K5_yeni_catilar_plani.md`): taşan veranda çatıları BK-14'ün düzlemlerinden; liste üretecinin ek çatı parçası satırları (`motor/prefabrik_liste.py` › `_veranda_catilari`); yer İE-18 rehberindeki gibi.",
-   "not": "Saçak omegası duvar ve kiriş üstünde saçak ucundan ucuna kurulur, liste de saçak boyunu sayar (Lokman, 31 Ekim 13:40 \"gerçek listeye uy\"; K3b'deki fark kapandı, veranda kirişinde de). Veranda zemini kartsız (K5). Arka verandanın sol yüzü ana çatının sol yüzünün devamı olabilir (TK-01): liste iki çatıyı ayrı sayar (ana çatının kalkan saçağı dahil), model de iki hattı ayrı sayar; ana çatının omegası verandanın omegasının üstüne binmez, orada kesilir (sayı hattın tamamından; BK-19). İE-18 rehberi C kapamayı dört kalkanda yazar (kalkan başına iki kenar); model atölyesi rehberi doğru kabul etti (CIO, 30 Ekim), model de dört kalkanda kurar (K5b)."
+   "not": "Saçak omegası duvar ve kiriş üstünde, duvar ya da kiriş boyunca kurulur (D-41); sayı saçak boyundan, liste gibi (Lokman, 31 Ekim 13:40 \"gerçek listeye uy\"; K3b'deki fark kapandı, veranda kirişinde de). Veranda zemini kartsız (K5). Arka verandanın sol yüzü ana çatının sol yüzünün devamı olabilir (TK-01): liste iki çatıyı ayrı sayar (ana çatının kalkan saçağı dahil), model de iki hattı ayrı sayar; ana çatının omegası verandanın omegasının üstüne binmez, orada kesilir (sayı hattın tamamından; BK-19). İE-18 rehberi C kapamayı dört kalkanda yazar (kalkan başına iki kenar); model atölyesi rehberi doğru kabul etti (CIO, 30 Ekim), model de dört kalkanda kurar (K5b)."
   },
   "dizme_tavan": {
    "kural": "Asma dizme tavanda her kapalı odanın tavanı duvarlarla ve mahyaya paralel omega hatlarıyla (omeganın sırtı genişliğinde) sütunlara bölünür; eni en kısa boydan (`tavan_omegasi_yerlesimi.en_kisa_cm`) dar sütun göz ve H almaz (Motor'un oda çizgisinde duvar kalınlığından kalan şerit). Her sütunda tavan H'ları omegalara dik, koşu ekseninin büyük ucundan (makas x yönündeyse odanın arka kenarı) H aralığıyla dizilir; son göz `son_en_kisa_cm`'den kısa kalacaksa o H konmaz. H'ın boyu sütunun enidir (omega sırtından sırtına ya da duvar yüzüne); en kısa boydan kısa H konmaz. Göz, sütunun iki H'ı (ya da H ile oda kenarı) arasıdır: ıslak hacimde (`islak`) yeşil, ötekilerde beyaz alçıpan. Gözler levhadan raflarla kesilir: göz levhanın eninden (levhanın eninden geniş gözün artan şeridi ayrı parça), dar parçalar bir rafta yan yana; raflar levhanın boyuna en uzun önce, ilk sığan levhaya. Ters tavanda H ve göz yoktur; ters tavanın ve açık mahalin (ana çatının altındaki veranda) tavan alçıpanı modelde yerleşmez (dizilim kuralı yok; liste alandan sayar).",
@@ -356,19 +356,19 @@
    "not": "Modelde parça hattın kapı boşlukları arasındaki kısmıdır (boyu `Qto_MemberBaseQuantities.Length`, metre bunun toplamı); `Hat` ve `HatBoyu_cm` hattın kendisi. Kesim planı hatların toplamıdır, parça parça yerleşim değildir (kesilen parça artık)."
   },
   "sacak_omegasi_yerlesimi": {
-   "kural": "100'lük saçak omegası iki saçak duvarının üstünde, makasın altında, saçak ucundan ucuna (bina boyu + iki kalkan saçağı; liste üretecinin saçak kenarı); duvarın olmadığı yerde (verandanın tarafında) kirişin üstünde, veranda çatısının saçak ucundan ucuna. Hat baş makas betopanında kesilir, levha geçer (dikey levhanın ucu omeganın kesitine indiğinde; CIO onayı 31 Ekim 2026 16:58, geometri hakemi BK-19); ana çatının omegası aynı hatta devam eden veranda omegasının üstüne binmez, orada kesilir. Sayı ⌈hatların toplamı ÷ parça boyu⌉, bir kez yukarı; hat kesik de olsa tamamı sayılır (liste gibi).",
+   "kural": "100'lük saçak omegası iki saçak duvarının üstünde, makasın altında, duvar boyunca; saçağa uzamaz, saçaktan saçağa yalnız baş makas omegası gider (Lokman, 1 Kasım 2026 15:19; D-41). Duvarın olmadığı yerde (verandanın tarafında) kirişin üstünde, kiriş boyunca; girintili gövdede saçak hattının altındaki duvarların üstünde. Hat baş makas betopanında kesilir, levha geçer (dikey levhanın ucu omeganın kesitine indiğinde; CIO onayı 31 Ekim 2026 16:58, geometri hakemi BK-19); ana çatının omegası aynı hatta devam eden veranda omegasının üstüne binmez, orada kesilir. Sayı ⌈hatların toplamı ÷ parça boyu⌉, bir kez yukarı; hat saçak hattının boyudur (bina boyu + iki kalkan saçağı; liste üretecinin saçak kenarı, gerçek listeler gibi), duvarın dışında kalan kısım ve kesik fire.",
    "parca_boyu": {"okunan": "kurallar/liste/prefabrik.json › kurallar.sacak_omegasi_bolen_m"},
    "yontem": {
     "deger": "toplam",
     "durum": "lokman",
     "tarih": "2026-10-31",
-    "not": "Lokman, 31 Ekim 2026 13:40 (saçak omegası duvar boyu mu saçak boyu mu sorusuna): \"gerçek listeye uy\". Gerçek Portatifev listeleri saçak boyuyla tutuyor (PK-01 9, PK-02 7, PK-03 8; `testler/kor/projeler/*/sonuc.json`); model de saçak boyunu kurar (iki saçak kenarı, bina boyu + iki saçak; PK-01 21,20 m ÷ 2,5 → 9), liste üreteciyle aynı (BK-19). Önce (K3b planı §2; Lokman, 25 Ekim 17:47 \"Uygula\"): rehberdeki gibi duvar boyu (PK-01 20 m → 8), fark 6e'ye nottu."
+    "not": "Lokman, 31 Ekim 2026 13:40 (saçak omegası duvar boyu mu saçak boyu mu sorusuna): \"gerçek listeye uy\". Gerçek Portatifev listeleri saçak boyuyla tutuyor (PK-01 9, PK-02 7, PK-03 8; `testler/kor/projeler/*/sonuc.json`); sayı saçak boyundan (iki saçak kenarı, bina boyu + iki saçak; PK-01 21,20 m ÷ 2,5 → 9), liste üreteciyle aynı (BK-19). Yer: duvar boyu (Lokman, 1 Kasım 15:19: \"hiç bir zaman saçak omegalarının dışarı 30 cm uzayacağını söylemedim sadece baş makas omegasını söyledim\"; D-41); BK-19'daki saçak ucundan ucuna kurulum bu sözün yanlış okunmasıydı. Önce (K3b planı §2; Lokman, 25 Ekim 17:47 \"Uygula\"): rehberdeki gibi duvar boyu (PK-01 20 m → 8), fark 6e'ye nottu."
    },
    "cati_tipleri": ["besik"],
    "durum": "varsayim",
    "tarih": "2026-10-25",
    "kaynak": "Montaj rehberi (Lokman'ın 24 Ekim çizimleri): saçak omegası yüz başına 4 × 250 cm, duvarın üstünde, makasın altında; kesit ters U (içte ~6 cm kanat ve 4 cm ayak, dışta eğik ~6 cm kanat). Teyit bekleyen maddeler varsayım (Lokman, 25 Ekim 09:10).",
-   "not": "Modelde saçak hattı başına bir parça (saçak ucundan ucuna); betopanda ya da veranda omegasında kesilen hat birkaç parça, `Hat` ve `HatBoyu_cm` ile hattın parçası; stok boyları kesim planında."
+   "not": "Modelde saçak hattı başına bir parça (duvar ya da kiriş boyunca); betopanda ya da veranda omegasında kesilen hat birkaç parça. Her parça `Hat` ve `HatBoyu_cm` (saçak hattının boyu) ile hattın parçası; stok boyları kesim planında."
   },
   "sacak_saci_yerlesimi": {
    "kural": "Saçak sacı iki saçak kenarı boyunca, saçak ucundan ucuna (mahya boyu: bina boyu + iki saçak); tırnağı saçak omegasının üstüne girer ve makasın altında sıkışır, saçağın altını kapatır, alnı saçak ucunda. Sayı ⌈iki kenarın toplamı ÷ (parça boyu − bindirme)⌉ (liste üretecinin kuralı).",

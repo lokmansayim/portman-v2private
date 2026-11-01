@@ -247,8 +247,8 @@ def test_acik_mahal_tavani(paketler, kod):
 
 
 def test_sacak_omegasi_z_ve_veranda_asigi_kart_modelinden(paketler):
-    """D-39 rehbere (BK-19'un İE-18'e bıraktığı üç iş; 1 Kasım 2026): saçak omegası kart modelinin CK-01 parçaları (saçak ucundan ucuna;
-    ana kalkan saçağında, baş makas betopanında ve aynı hatta devam eden veranda omegasında kesik); Z'nin parça boyu kart modelinden, 3B'de
+    """D-39 rehbere (BK-19'un İE-18'e bıraktığı üç iş; 1 Kasım 2026): saçak omegası kart modelinin CK-01 parçaları (duvar ve kiriş
+    boyunca, saçağa uzamaz, D-41; sayı saçak boyundan); Z'nin parça boyu kart modelinden, 3B'de
     kenar başına ⌈eğik ÷ 2,8⌉ parça, sayı kart modelinin o kenardaki Z'sinden (liste ve kart modeli 12; sayfa izi `test_rehber_izi`); veranda
     aşığının sıraları kart modelinden,
     listenin ortak işleviyle (`prefabrik_liste.asik_mesafeleri`, saçak eşiği 30 cm)."""
@@ -258,11 +258,9 @@ def test_sacak_omegasi_z_ve_veranda_asigi_kart_modelinden(paketler):
     say = json.loads(next(gec.glob("TK-01_*/kart/*_kart_sayim.json")).read_text(encoding="utf-8"))
     om = [o for o in d["omega_duvar"] if o["tur"] == "sacak"]
     kp = [p for p in say["kenar"]["parcalar"] if p["kart"] == "CK-01"]
-    assert len(om) == len(kp) == 11 and [round(o["a1"] - o["a0"], 1) for o in om] == [p["boy_cm"] for p in kp]
-    assert [o["yer"] for o in om] == ["sol saçak, ön kalkan saçağı", "sol duvar", "sağ saçak, ön kalkan saçağı", "sağ duvar",
-                                      "sağ saçak, arka kalkan saçağı", "ön veranda sol yan kirişi", "ön veranda sağ yan kirişi",
-                                      "arka veranda sol yan kirişi", "arka veranda sol saçağı, kalkan saçağı", "arka veranda sağ yan kirişi",
-                                      "arka veranda sağ saçağı, kalkan saçağı"]
+    assert len(om) == len(kp) == 6 and [round(o["a1"] - o["a0"], 1) for o in om] == [p["boy_cm"] for p in kp]
+    assert [o["yer"] for o in om] == ["sol duvar", "sağ duvar", "ön veranda sol yan kirişi", "ön veranda sağ yan kirişi",
+                                      "arka veranda sol yan kirişi", "arka veranda sağ yan kirişi"]
     assert {k["z_parca"] for k in d["kalkan"]} == {280} and say["kenar"]["liste"]["CK-04"] == SAGLAMA["TK-01"]["kartlar"]["CK-04"] == 12
     assert [k["z_n"] for k in d["kalkan"]] == [{"A": 2, "B": 2}, {"A": 2, "B": 2}, {"A": 1, "B": 1}, {"A": 1, "B": 1}]   # ön, arka, iki veranda
     # D-40: tek kat panelin kesiti kart modelinin kuralından, yalıtımsız (62 m²'nin 27/200 trapezi; sandviç panelde kalınlaşır)

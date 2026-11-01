@@ -1,6 +1,6 @@
 {
  "sema": "portman.urun_kartlari/1",
- "surum": "10",
+ "surum": "11",
  "aciklama": "Ürün kimlik kartları (İE-15 K1, K2, K3, K3b, K5, K5b ve K5b-2, D-24). Kart bir ürünü tanımlar; modelde IFC tür nesnesidir, parça (örnek) türüne bağlanır. Okuyan `motor/kart_model.py`. Kod kalıcıdır: bir kod başka ürüne verilmez, ürün kalkarsa kod boş kalır (`testler/kimlik/veri/kart_kodlari.json` kilidi). Kart kodu boy ve projeyle değişmez; bugünkü malzeme kataloğunun kodu (D01, D09…) boya göre ve projede yeni boy çıktıkça verilir, parçada `KatalogKodu` olarak kalır. Bu yüzden kart kodu tirelidir (D-01). Ailelerin harfi katalogla aynıdır. Kartı düzeltmek için bu dosya düzeltilir, model yeniden üretilir; Bonsai'de yapılan değişiklik geri okunmaz.",
  "alanlar": {
   "kod": "Kalıcı kod, `<aile>-<nn>`",
@@ -782,12 +782,12 @@
    "liste": {"grup": "1002", "satirlar": ["100'lük saçak omegası"]},
    "olcu": "Ters U: içte ~6 cm kanat ve 4 cm ayak, dışta eğik ~6 cm kanat, sac 1 mm (montaj rehberi, ölçüler yaklaşık); L 2500; hattın boyu parçada",
    "birim": "adet",
-   "nerede": "İki saçak duvarının üstünde, makasın altında, saçak ucundan ucuna; verandanın tarafında kirişin üstünde; baş makas betopanında kesilir (`sacak_omegasi_yerlesimi`)",
+   "nerede": "İki saçak duvarının üstünde, makasın altında, duvar boyunca (saçağa uzamaz); verandanın tarafında kirişin üstünde; baş makas betopanında kesilir (`sacak_omegasi_yerlesimi`)",
    "sayim": "boy_kesim",
    "ifc": {"sinif": "IfcMemberType", "alt_tur": "MEMBER"},
    "pafta": [],
    "yerlesim": {"kural": "sacak_omegasi_yerlesimi", "parca": "sacak_omegasi", "sinif": "IfcMember"},
-   "kaynak": {"durum": "varsayim", "tarih": "2026-10-25", "dayanak": "Montaj rehberi (Lokman, 24 Ekim çizimleri): kesit ve 250 cm parça; Lokman 25 Ekim 17:47 \"Uygula\" (rehber). Boy: Lokman, 31 Ekim 2026 13:40 \"gerçek listeye uy\": saçak ucundan ucuna, gerçek listeler ve liste üreteci gibi (PK-01 9; önce duvar boyu, 8)"}
+   "kaynak": {"durum": "varsayim", "tarih": "2026-10-25", "dayanak": "Montaj rehberi (Lokman, 24 Ekim çizimleri): kesit ve 250 cm parça; Lokman 25 Ekim 17:47 \"Uygula\" (rehber). Sayı: Lokman, 31 Ekim 2026 13:40 \"gerçek listeye uy\": saçak boyundan, gerçek listeler ve liste üreteci gibi (PK-01 9). Yer: duvar boyu, saçağa uzamaz (Lokman, 1 Kasım 2026 15:19; D-41)"}
   },
   {
    "kod": "CK-02",

@@ -11,12 +11,12 @@ liste üretecinin `dis_cevre_m`'si), iç hat bir iç duvarın bitişik panoları
 boşluklar arasındaki kısmıdır; hattın tamamı `HatBoyu_cm`'de, sayı hatların toplamından (kesilen parça artık).
 
 Çatı kenarları K2'nin çatısıyla aynı çerçevede (`cati.cerceve`) ve yalnız beşik çatıda; başka çatı tipinde "kural yok". Saçak omegası iki
-saçak duvarının üstünde saçak ucundan ucuna (gerçek listeler gibi; Lokman, 31 Ekim; baş makas betopanında ve aynı hatta devam eden
-veranda omegasında kesilir, sayı hattın tamamından), saçak sacı saçak kenarında saçak ucundan
-ucuna, mahya kaplamanın üstünde saçak ucundan ucuna; her baş makasın iki eğik kenarında Z, alın sacı ve C kapama (boyu eğik boy). Parça hat ya da kenar başına birdir; stok boyları kesim
+saçak duvarının üstünde duvar boyunca, dışarı uzamaz (Lokman, 25 Ekim 17:47 ve 1 Kasım 15:19; D-41); baş makas betopanında ve aynı hatta
+devam eden veranda omegasında kesilir; sayı saçak boyundan, gerçek listeler gibi (Lokman, 31 Ekim "gerçek listeye uy"; duvarın dışında kalan
+kısım fire). Saçak sacı saçak kenarında saçak ucundan ucuna, mahya kaplamanın üstünde saçak ucundan ucuna; her baş makasın iki eğik kenarında Z, alın sacı ve C kapama (boyu eğik boy). Parça hat ya da kenar başına birdir; stok boyları kesim
 planındadır. Kesitler yalnız gösterimdir (`kenar_gosterim`); sayı, boy ve metre onlardan çıkmaz.
 
-Taşan verandanın çatısında (K5b, `veranda.py`) aynı işlevler verandanın çerçevesiyle: saçak omegası yan kirişlerin üstünde saçak ucundan ucuna,
+Taşan verandanın çatısında (K5b, `veranda.py`) aynı işlevler verandanın çerçevesiyle: saçak omegası yan kirişlerin üstünde kiriş boyunca,
 saçak sacı ve mahya saçak ucundan ucuna, dış kalkanın iki eğik kenarında alın sacı, Z ve C kapama (montaj rehberi C kapamayı dört kalkanda
 yazar; model atölyesi doğru kabul etti, 30 Ekim; Z: kalkan betopanlı, kenar detayı ana çatınınki, liste üreteci O7'yi kirişli kalkanda da
 sayar, K5b TK-01 kıyası). Parçalar `Cati` bilgisini ve `VERANDA_` önekini taşır.
@@ -162,28 +162,31 @@ def kesen_araliklar(engeller: list[dict], geo: dict) -> list[tuple[float, float]
     return out
 
 
-def sacak_omegasi(g: dict, G_: dict, F: dict | None = None, engeller: list[dict] | None = None, yuz_: str | None = None) -> list[dict]:
-    """Saçak duvarlarının üstünde, taşan verandada (`F`, K5b) yan kirişlerin üstünde; saçak ucundan ucuna (`v0`..`v1`), gerçek Portatifev
-    listelerindeki gibi (Lokman, 31 Ekim 2026 13:40 "gerçek listeye uy"; BK-19). Kesitine baş makas betopanı ya da verandanın omegası
-    (`engeller`) iniyorsa hat orada kesilir (`kesen_araliklar`); parçalar hattın (`Hat`, `HatBoyu_cm`) parçasıdır, sayı hattın tamamından
-    (liste gibi: kesik ve üst üste binen kısım listede de saçak boyunun içinde). Girintili gövdenin şerit çatısında (`serit.py`, İE-24) `F`
-    saçak kenarının çerçevesidir (`v0`..`v1` kenarın uçları) ve `yuz_` o kenarın yüzü (öteki yüz kurulmaz)."""
+def sacak_omegasi(g: dict, G_: dict, F: dict | None = None, engeller: list[dict] | None = None, yuz_: str | None = None,
+                  duvar: list[tuple[float, float]] | None = None) -> list[dict]:
+    """Saçak duvarlarının üstünde duvar boyunca (ana çatıda `0`..`boy`), taşan verandada (`F`, K5b) yan kirişlerin üstünde kiriş boyunca
+    (`w0`..`w1`); saçağa uzamaz, saçaktan saçağa yalnız baş makas omegası gider (Lokman, 25 Ekim 17:47 "duvar boyu" ve 1 Kasım 2026 15:19;
+    D-41). Sayı saçak boyundan (`v0`..`v1`), gerçek Portatifev listeleri gibi (Lokman, 31 Ekim 13:40 "gerçek listeye uy"; D-39): her parça
+    hattın (`Hat`, `HatBoyu_cm` = saçak boyu) parçasıdır, duvarın dışında kalan kısım fire. Kesitine baş makas betopanı ya da verandanın
+    omegası (`engeller`) iniyorsa hat orada kesilir (`kesen_araliklar`). Girintili gövdenin şerit çatısında (`serit.py`, İE-24) `F` saçak
+    kenarının çerçevesidir (`v0`..`v1` kenarın uçları), `duvar` kenarın altındaki duvar aralıkları ve `yuz_` o kenarın yüzü (öteki yüz
+    kurulmaz)."""
     F = F or cati.cerceve(g)
     w, h = G_["sacak_omegasi"]
     v0, v1 = F["v0"], F["v1"]
+    duvar = duvar or [(F.get("w0", 0.0), F.get("w1", F["boy"]))]
     ne = "kirişin" if "kiris" in F else "duvarının"                    # taşan verandanın çerçevesinde dış kiriş var (`veranda.cerceveler`)
     out = []
     for yuz, u0 in (("sol", 0.0), ("sag", F["aciklik"] - w)):
         if yuz_ is not None and yuz != yuz_:
             continue
         uz = _u(u0, u0 + w, g["duvar_h"], h, G_["sac"], ters=True)
-        kes = _kesikler(v0, v1, kesen_araliklar(engeller or [], cati._prizma(F, uz, v0, v1)))
-        kesik = len(kes) != 1 or abs(kes[0][0] - v0) > ESIK or abs(kes[0][1] - v1) > ESIK      # uçtan kesilen tek parça da kesik hattır
+        kes = [k for d0, d1 in duvar for k in _kesikler(d0, d1, kesen_araliklar(engeller or [], cati._prizma(F, uz, d0, d1)))]
         for j, (a0, a1) in enumerate(kes, 1):
-            bilgi = {"Yuz": yuz, "Hat": yuz, "HatBoyu_cm": _r(v1 - v0), "Parca": j} if kesik else {"Yuz": yuz}
-            aciklama = f"{yuz} saçak {ne} üstü, {v1 - v0:g} cm (saçak ucundan ucuna)"
-            if kesik:
-                aciklama += f", {j}. parça {a0:g}–{a1:g} (hat kesik)"
+            bilgi = {"Yuz": yuz, "Hat": yuz, "HatBoyu_cm": _r(v1 - v0), "Parca": j}
+            aciklama = f"{yuz} saçak {ne} üstü, {a1 - a0:g} cm ({'kiriş' if 'kiris' in F else 'duvar'} boyunca; sayı saçak boyundan, {v1 - v0:g} cm)"
+            if len(kes) > 1:
+                aciklama += f", {j}. parça {a0:g}–{a1:g}"
             out.append({"kural": "sacak_omegasi_yerlesimi", "parca": "sacak_omegasi", "boy_cm": _r(a1 - a0),
                         "geo": cati._prizma(F, uz, a0, a1), "bilgi": bilgi, "aciklama": aciklama})
     return out

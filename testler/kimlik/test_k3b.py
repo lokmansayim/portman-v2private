@@ -2,13 +2,13 @@
 25 Ekim 17:47 "Uygula"; kurallar `kurallar/yerlesim/prefabrik.json`, kod `motor/yerlesim/kenar.py`).
 
 - Sayı = liste üretecinin yöntemi × modelin boyu: dokuz İş Emri'nde (PK01, ALTIN, P6001 ve iki aynası, yan verandalı, TEST01–03) alt çerçeve
-  (100'lük, 60'lık), saçak omegası, saçak sacı, alın sacı, baş makas Z'si ve mahya liste üretecinin satırıyla aynı. Saçak omegası saçak
-  ucundan ucuna, gerçek listeler ve liste üreteci gibi (Lokman, 31 Ekim 13:40 "gerçek listeye uy"; BK-19; önce rehberdeki gibi duvar
-  boyuydu: PK01 8 / 9, yan verandalı 9 / 10). C kapama listede yok; metresi dört eğik kenar.
+  (100'lük, 60'lık), saçak omegası, saçak sacı, alın sacı, baş makas Z'si ve mahya liste üretecinin satırıyla aynı. Saçak omegasının sayısı
+  saçak boyundan, gerçek listeler ve liste üreteci gibi (Lokman, 31 Ekim 13:40 "gerçek listeye uy"; BK-19); yeri duvar boyu, saçağa
+  uzamaz (Lokman, 25 Ekim ve 1 Kasım; D-41). C kapama listede yok; metresi dört eğik kenar.
   Kesim planının yukarı yuvarlaması liste üretecininki (1e-9).
 - Kurallar ve değerler: `okunan` çözülür (liste kuralları ve kitap), seçimler kendi durumunu taşır; kartlar (sekiz kod, kilitte ilk 51 satır).
 - Yer (montaj rehberi; teyit bekleyenler varsayım): alt çerçeve duvarların altında, kesilen kapı boşlukları açık, dış hatlar dış sınırın
-  kenarları (toplam dış çevre), iç hatlar iç duvarın bitişik panoları, dokuz evde her kapı ve geçiş kesik; saçak omegası saçak duvarının üstünde makasın altında saçak ucundan ucuna;
+  kenarları (toplam dış çevre), iç hatlar iç duvarın bitişik panoları, dokuz evde her kapı ve geçiş kesik; saçak omegası saçak duvarının üstünde makasın altında duvar boyunca (D-41);
   saçak sacı ve mahya saçak ucundan ucuna; her baş makasın iki eğik kenarında Z betopanın dış yüzünde, C kapama aşık uçlarında, alın sacı
   C'nin önünde. Gösterim kesitleri sayıyı ve boyu değiştirmez.
 - Kural yok: beşik olmayan çatıda altı çatı parçası, trapez kaplamada mahya, baş makas yoksa kalkan kenarları; alt çerçeve yine kurulur.
@@ -298,8 +298,8 @@ def test_cati_kenarlari_yerleri(pk01):
     assert Counter(p["kod"] for p in P) == {"CK-01": 2, "CK-02": 2, "CK-03": 4, "CK-04": 4, "CK-05": 4, "CK-06": 1}
     for p in P:
         u0, u1, v0, v1, z0, z1 = _uv(F, p["a"], p["b"])
-        if p["kod"] == "CK-01":                                            # saçak duvarının üstünde, makasın altında, saçak ucundan ucuna
-            assert yakin(v0, F["v0"]) and yakin(v1, F["v1"]) and yakin(z0, g["duvar_h"]) and z1 <= F["zs"] + 1e-6, p["ad"]
+        if p["kod"] == "CK-01":                                            # saçak duvarının üstünde, makasın altında, duvar boyunca (D-41)
+            assert yakin(v0, 0) and yakin(v1, F["boy"]) and yakin(z0, g["duvar_h"]) and z1 <= F["zs"] + 1e-6, p["ad"]
             assert (yakin(u0, 0) and u1 <= 10 + 1e-6) if p["p"]["Yuz"] == "sol" else (yakin(u1, F["aciklik"]) and u0 >= F["aciklik"] - 10 - 1e-6)
         elif p["kod"] in ("CK-02", "CK-06"):                               # saçak ucundan ucuna
             assert yakin(v0, F["v0"]) and yakin(v1, F["v1"]) and yakin(p["p"]["Boy_cm"], F["v1"] - F["v0"]), p["ad"]
