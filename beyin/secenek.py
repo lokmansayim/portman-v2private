@@ -108,6 +108,14 @@ def celik_seti_mi(adaylar: list[dict]) -> bool:
     return bool(adaylar) and all(a.get("yapi_turu") == "celik" for a in adaylar)
 
 
+def tek_plan(adaylar: list[dict]) -> list[dict]:
+    """İE-25 (Lokman, 1.11.2026: çatı plan seçildikten sonra, elimizdeki modellerle): alan setinde her plan bir kez. Banka modelinin
+    çatı varyantları (Ç8801K, Ç8801L) listeden çıkar; taban model seçilince çatı setinde gelir. Tabanı listede olmayan varyant kalır
+    (yeni plan setinin banka süzgeciyle aynı ilke, `karar.plan_sonucu`)."""
+    varyant = {str(v).upper() for a in adaylar for v in (a.get("varyantlar") or [])}
+    return [a for a in adaylar if str(a["kod"]).upper() not in varyant]
+
+
 def cati_seti(adaylar: list[dict]) -> list[dict]:
     """Katalog modelinin çatı seçenekleri (katalog çatısı, K, L …) numaralı, puansız (İE-05 devir §3.1 kural 5)."""
     out = []
