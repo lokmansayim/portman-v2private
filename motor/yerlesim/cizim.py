@@ -405,7 +405,7 @@ def ciz(model_yolu: Path, say: dict, yol: Path, kod: str) -> Path:
 
 def _kenar(zemin, cati_, m: dict, plt) -> None:
     """Solda zemin: alt çerçeve parçaları (100'lük ve 60'lık ayrı renk; kesilen kapı boşlukları açık), her hattın numarası ve boyu.
-    Sağda çatı planı: saçak omegası duvarın üstünde, saçak sacı saçakta, mahya mahyada, her baş makasın iki eğik kenarında Z (duvarın
+    Sağda çatı planı: saçak omegası duvarın üstünde saçak ucundan ucuna, saçak sacı saçakta, mahya mahyada, her baş makasın iki eğik kenarında Z (duvarın
     dış yüzünde), C kapama (aşık uçlarında) ve alın sacı (C'nin önünde). Şekiller modeldeki parçaların plan izidir."""
     _duvarlar(zemin, m, dolgu=True)
     hatlar = {}
@@ -447,12 +447,17 @@ def _kenar(zemin, cati_, m: dict, plt) -> None:
                    rotation=90 if dik else 0, fontsize=6.5, ha=("left" if ic > 0 else "right") if dik else "center",
                    va="center" if dik else ("bottom" if ic > 0 else "top"), color=KENAR_RENK["CK-04"])
     for kod, ad in (("CK-02", "saçak sacı"), ("CK-01", "saçak omegası"), ("CK-06", "mahya")):
-        for p in m["k2"].get(kod, []):
+        hat: dict = {}                                          # kesik hattın (saçak omegası betopanda kesilir, BK-19) yazısı bir kez,
+        for p in m["k2"].get(kod, []):                          # en uzun parçasında, hattın boyuyla
+            a = (p["p"].get("Cati"), p["p"].get("Hat", p["ad"]))
+            if a not in hat or p["p"]["Boy_cm"] > hat[a]["p"]["Boy_cm"]:
+                hat[a] = p
+        for p in hat.values():
             x0, y0, x1, y1 = _iz(p["v"]).bounds
             dik = (y1 - y0) > (x1 - x0)
             cati_.text((x0 + x1) / 2 if dik else (3 * x0 + x1) / 4, (3 * y0 + y1) / 4 if dik else (y0 + y1) / 2,
-                       f"{ad} {p['p']['Boy_cm']:g}", rotation=90 if dik else 0, fontsize=6.5, ha="center", va="center", color="#1b2631",
-                       bbox={"boxstyle": "round,pad=0.1", "fc": "white", "ec": "none", "alpha": 0.8})
+                       f"{ad} {p['p'].get('HatBoyu_cm', p['p']['Boy_cm']):g}", rotation=90 if dik else 0, fontsize=6.5, ha="center", va="center",
+                       color="#1b2631", bbox={"boxstyle": "round,pad=0.1", "fc": "white", "ec": "none", "alpha": 0.8})
     cati_.set_aspect("equal"); cati_.axis("off"); cati_.set_anchor("N")
     cati_.set_title("Çatı · saçak, mahya ve kalkan kenarları (boylar cm)", fontsize=11, loc="left")
 
@@ -480,8 +485,8 @@ def _kenar_lejanti(fig, say: dict, plt) -> None:
         *([f"Liste üreteci: {say['kenar']['liste_yazilmaz']}."] if "liste_yazilmaz" in say["kenar"] else []),
         "Sayı listenin yöntemiyle, boy modelden (kesim planı); C kapama metreyle sayılır.",
         "Yer montaj rehberinden; teyit bekleyen maddeler varsayım (Lokman, 25 Ekim).",
-        "Saçak omegası rehberdeki gibi duvar boyunca (verandada kiriş boyunca); liste saçak boyunu sayar.",
-        *(["Veranda kalkanında C kapama var (rehberdeki gibi dört kalkanda), Z yok (liste O7'yi yalnız ana çatıda sayar)."]
+        "Saçak omegası saçak ucundan ucuna, gerçek listelerdeki gibi (Lokman, 31 Ekim); liste de saçak boyunu sayar.",
+        *(["Veranda kalkanında Z ve C kapama var (rehberdeki gibi dört kalkanda; kirişli kalkan betopanlı, liste de sayar)."]
           if any(p.get("bilgi", {}).get("Cati") for p in say.get("yerlesim", {}).get("parcalar", [])) else []))), fontsize=8.5, va="top", ha="left", color="#444")
 
 

@@ -86,7 +86,7 @@ def test_tasan_veranda_bas_makasi_kiriste(tk01, kurallar):
     assert L["Baş makas omegası"]["adet"] == math.ceil(boy / 100 / 2.5 - 1e-9)
     assert "taşan verandanın dış kirişindeki dahil" in L["Baş makas omegası"]["formul"]
     assert L["100'lük duvar omegası"]["adet"] == 0
-    assert L["Baş makas betopanı"]["formul"].endswith("(açık çatı parçası sayılmaz, N1)")      # betopan bu işte değişmedi
+    assert L["Baş makas betopanı"]["formul"].endswith("(taşan verandanın dış kirişindeki dahil)")   # kirişli kalkan betopanlı (D-32 m.2; liste PR, 30 Ekim)
 
 
 def test_kirissiz_acik_parca_sayilmaz(pk01, kurallar):

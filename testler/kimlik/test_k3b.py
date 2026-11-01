@@ -2,12 +2,13 @@
 25 Ekim 17:47 "Uygula"; kurallar `kurallar/yerlesim/prefabrik.json`, kod `motor/yerlesim/kenar.py`).
 
 - Sayı = liste üretecinin yöntemi × modelin boyu: dokuz İş Emri'nde (PK01, ALTIN, P6001 ve iki aynası, yan verandalı, TEST01–03) alt çerçeve
-  (100'lük, 60'lık), saçak sacı, alın sacı, baş makas Z'si ve mahya liste üretecinin satırıyla aynı. Saçak omegası rehberdeki gibi duvar
-  boyunca (liste saçak boyunu sayar): PK01 8 / 9, yan verandalı 9 / 10, ötekiler aynı. C kapama listede yok; metresi dört eğik kenar.
+  (100'lük, 60'lık), saçak omegası, saçak sacı, alın sacı, baş makas Z'si ve mahya liste üretecinin satırıyla aynı. Saçak omegası saçak
+  ucundan ucuna, gerçek listeler ve liste üreteci gibi (Lokman, 31 Ekim 13:40 "gerçek listeye uy"; BK-19; önce rehberdeki gibi duvar
+  boyuydu: PK01 8 / 9, yan verandalı 9 / 10). C kapama listede yok; metresi dört eğik kenar.
   Kesim planının yukarı yuvarlaması liste üretecininki (1e-9).
 - Kurallar ve değerler: `okunan` çözülür (liste kuralları ve kitap), seçimler kendi durumunu taşır; kartlar (sekiz kod, kilitte ilk 51 satır).
 - Yer (montaj rehberi; teyit bekleyenler varsayım): alt çerçeve duvarların altında, kesilen kapı boşlukları açık, dış hatlar dış sınırın
-  kenarları (toplam dış çevre), iç hatlar iç duvarın bitişik panoları, dokuz evde her kapı ve geçiş kesik; saçak omegası saçak duvarının üstünde makasın altında binanın boyunca;
+  kenarları (toplam dış çevre), iç hatlar iç duvarın bitişik panoları, dokuz evde her kapı ve geçiş kesik; saçak omegası saçak duvarının üstünde makasın altında saçak ucundan ucuna;
   saçak sacı ve mahya saçak ucundan ucuna; her baş makasın iki eğik kenarında Z betopanın dış yüzünde, C kapama aşık uçlarında, alın sacı
   C'nin önünde. Gösterim kesitleri sayıyı ve boyu değiştirmez.
 - Kural yok: beşik olmayan çatıda altı çatı parçası, trapez kaplamada mahya, baş makas yoksa kalkan kenarları; alt çerçeve yine kurulur.
@@ -56,11 +57,10 @@ IS_EMIRLERI = {"PK01": MOTOR_VERI / "PK01.json", "ALTIN": KOK / "is_emri" / "ALT
 K3B_KODLARI = ("AC-01", "AC-02", "CK-01", "CK-02", "CK-03", "CK-04", "CK-05", "CK-06")
 STOKLU = ("AC-01", "AC-02", "CK-01", "CK-02", "CK-03", "CK-04", "CK-06")
 KILIT_K3B = "9c7fc8895fed7f98eddb8f41dc5ba529bd7ce09f50507ce04479b6d94a59425d"   # K1 25, K2 7, K3 11 ve K3b'nin 8 kodu (bu PR)
-# modelin stok adedi (kesim planı), yukarıdaki sırayla; liste üreteciyle farkı yalnız saçak omegasında (rehber duvar boyu, liste saçak boyu)
-MODEL = {"PK01": (9, 6, 8, 10, 7, 8, 5), "ALTIN": (10, 5, 9, 10, 8, 8, 5), "P6001": (9, 3, 7, 8, 8, 8, 4), "P6001_ayna_x": (9, 3, 7, 8, 8, 8, 4),
-         "P6001_ayna_y": (9, 3, 7, 8, 8, 8, 4), "YAN_VERANDALI": (10, 7, 9, 10, 8, 8, 5), "TEST01": (11, 6, 8, 9, 10, 12, 4),
+# modelin stok adedi (kesim planı), yukarıdaki sırayla; liste üreteciyle aynı (BK-19'dan beri saçak omegası da: PK01 8 → 9, yan verandalı 9 → 10)
+MODEL = {"PK01": (9, 6, 9, 10, 7, 8, 5), "ALTIN": (10, 5, 9, 10, 8, 8, 5), "P6001": (9, 3, 7, 8, 8, 8, 4), "P6001_ayna_x": (9, 3, 7, 8, 8, 8, 4),
+         "P6001_ayna_y": (9, 3, 7, 8, 8, 8, 4), "YAN_VERANDALI": (10, 7, 10, 10, 8, 8, 5), "TEST01": (11, 6, 8, 9, 10, 12, 4),
          "TEST02": (11, 5, 10, 11, 9, 8, 5), "TEST03": (11, 6, 8, 9, 10, 12, 4)}
-SACAK_OMEGASI_LISTE = {"PK01": 9, "YAN_VERANDALI": 10}
 
 
 def _oku(p: Path) -> dict:
@@ -190,7 +190,7 @@ def test_model_liste_ile_ayni(dokuz, ad):
     kesim, liste = say["kesim_plani"], say["kenar"]["liste"]
     assert tuple(kesim[k]["stok"] for k in STOKLU) == MODEL[ad]
     for k in STOKLU:
-        assert liste[k] == (SACAK_OMEGASI_LISTE.get(ad, kesim[k]["stok"]) if k == "CK-01" else kesim[k]["stok"]), (ad, k)
+        assert liste[k] == kesim[k]["stok"], (ad, k)
     assert liste["CK-05"] is None
     # liste üretecinin aynı satırları (özetteki liste bilgidir; burada üreteçten yeniden okunur)
     satir = Counter()
@@ -298,8 +298,8 @@ def test_cati_kenarlari_yerleri(pk01):
     assert Counter(p["kod"] for p in P) == {"CK-01": 2, "CK-02": 2, "CK-03": 4, "CK-04": 4, "CK-05": 4, "CK-06": 1}
     for p in P:
         u0, u1, v0, v1, z0, z1 = _uv(F, p["a"], p["b"])
-        if p["kod"] == "CK-01":                                            # saçak duvarının üstünde, makasın altında, binanın boyunca
-            assert yakin(v0, 0) and yakin(v1, F["boy"]) and yakin(z0, g["duvar_h"]) and z1 <= F["zs"] + 1e-6, p["ad"]
+        if p["kod"] == "CK-01":                                            # saçak duvarının üstünde, makasın altında, saçak ucundan ucuna
+            assert yakin(v0, F["v0"]) and yakin(v1, F["v1"]) and yakin(z0, g["duvar_h"]) and z1 <= F["zs"] + 1e-6, p["ad"]
             assert (yakin(u0, 0) and u1 <= 10 + 1e-6) if p["p"]["Yuz"] == "sol" else (yakin(u1, F["aciklik"]) and u0 >= F["aciklik"] - 10 - 1e-6)
         elif p["kod"] in ("CK-02", "CK-06"):                               # saçak ucundan ucuna
             assert yakin(v0, F["v0"]) and yakin(v1, F["v1"]) and yakin(p["p"]["Boy_cm"], F["v1"] - F["v0"]), p["ad"]
@@ -443,7 +443,7 @@ def test_komut_yedinci_sayfa_ve_excel(komut):
     metin = " ".join(d[6].get_text().split())
     assert "PK01 · ALT ÇERÇEVE VE ÇATI KENARLARI YERLEŞİM PLANI" in metin and "(İE-15 K3b)" in metin
     for s in ("AC-01 100'lük alt çerçeve L 3750 model 9 boy · liste 9", "AC-02 60'lık alt çerçeve L 3750 model 6 boy · liste 6",
-              "CK-01 100'lük saçak omegası L 2500 model 8 boy · liste 9 ≠", "CK-02 Saçak sacı (30'luk) L 2500 model 10 boy · liste 10",
+              "CK-01 100'lük saçak omegası L 2500 model 9 boy · liste 9", "CK-02 Saçak sacı (30'luk) L 2500 model 10 boy · liste 10",
               "CK-03 Alın sacı (30'luk) L 2500 model 7 boy · liste 7", "CK-04 Baş makas Z'si L 2800 model 8 boy · liste 8",
               "CK-05 C kapama model 13,90 m · listede yok", "CK-06 Metal kiremit mahyası L 2800 model 5 boy · liste 5",
               "2 · 334", "4 · 1000", "9 · 182,25", "MAKAS_01 sol: 347,5"):
@@ -457,7 +457,7 @@ def test_komut_yedinci_sayfa_ve_excel(komut):
     rows = list(ws.iter_rows(min_row=2, values_only=True))
     assert len(rows) == 35 + 1 + 1 + 8
     yan = {r[0]: (r[1], r[2]) for r in rows[-8:]}
-    assert yan == {"AC-01": (9, 9), "AC-02": (6, 6), "CK-01": (8, 9), "CK-02": (10, 10), "CK-03": (7, 7), "CK-04": (8, 8),
+    assert yan == {"AC-01": (9, 9), "AC-02": (6, 6), "CK-01": (9, 9), "CK-02": (10, 10), "CK-03": (7, 7), "CK-04": (8, 8),
                    "CK-05": ("13.9002 m", "listede yok"), "CK-06": (5, 5)}
     kartlar = {r[0]: r for r in wb["Kartlar"].iter_rows(min_row=2, values_only=True)}
     assert kartlar["CK-05"][3] == "(listede yok)"

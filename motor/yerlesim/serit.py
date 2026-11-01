@@ -264,7 +264,7 @@ def kenarlar(g: dict, ck: dict, G_: dict, kesit: dict, kurulan: set[str]) -> lis
                 if seg.is_empty or seg.length < 1.0:
                     continue
                 w0, w1 = sorted(p[ax] for p in (seg.coords[0], seg.coords[-1]))
-                out += [p for p in kenar.sacak_omegasi(g, G_, dict(F, w0=w0, w1=w1)) if p["bilgi"]["Yuz"] == yuz]
+                out += [p for p in kenar.sacak_omegasi(g, G_, dict(F, w0=w0, w1=w1), aralik=(w0, w1)) if p["bilgi"]["Yuz"] == yuz]
         if "sacak_saci_yerlesimi" in kurulan:
             out += [p for p in kenar.sacak_saci(g, G_, dict(F, v0=r0, v1=r1)) if p["bilgi"]["Yuz"] == yuz]
     if "mahya_yerlesimi" in kurulan:

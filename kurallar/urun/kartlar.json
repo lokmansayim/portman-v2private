@@ -1,6 +1,6 @@
 {
  "sema": "portman.urun_kartlari/1",
- "surum": "9",
+ "surum": "10",
  "aciklama": "Ürün kimlik kartları (İE-15 K1, K2, K3, K3b, K5, K5b ve K5b-2, D-24). Kart bir ürünü tanımlar; modelde IFC tür nesnesidir, parça (örnek) türüne bağlanır. Okuyan `motor/kart_model.py`. Kod kalıcıdır: bir kod başka ürüne verilmez, ürün kalkarsa kod boş kalır (`testler/kimlik/veri/kart_kodlari.json` kilidi). Kart kodu boy ve projeyle değişmez; bugünkü malzeme kataloğunun kodu (D01, D09…) boya göre ve projede yeni boy çıktıkça verilir, parçada `KatalogKodu` olarak kalır. Bu yüzden kart kodu tirelidir (D-01). Ailelerin harfi katalogla aynıdır. Kartı düzeltmek için bu dosya düzeltilir, model yeniden üretilir; Bonsai'de yapılan değişiklik geri okunmaz.",
  "alanlar": {
   "kod": "Kalıcı kod, `<aile>-<nn>`",
@@ -522,7 +522,7 @@
    "liste": {"grup": "1005", "satirlar": ["Aşık"]},
    "olcu": "L 4200; parça boyu parçada (tam parça 410, kesim planında); omega kesit 87 × 30 mm, üst 35, sac 1 mm (montaj rehberi)",
    "birim": "adet",
-   "nerede": "Çatı yüzünde mahyaya paralel sıralar: mahyadan 60 cm arayla, saçağa 60'tan az kalınca saçakta bir sıra (`asik_sirasi`, karar C)",
+   "nerede": "Çatı yüzünde mahyaya paralel sıralar: mahyadan 60 cm arayla, saçağa 60'tan az kalınca saçakta bir sıra, saçağa 30 cm'den az kalan sıra konmaz (`asik_sirasi`, karar C)",
    "sayim": "boy_kesim",
    "ifc": {"sinif": "IfcMemberType", "alt_tur": "PURLIN"},
    "pafta": ["asik"],
@@ -782,12 +782,12 @@
    "liste": {"grup": "1002", "satirlar": ["100'lük saçak omegası"]},
    "olcu": "Ters U: içte ~6 cm kanat ve 4 cm ayak, dışta eğik ~6 cm kanat, sac 1 mm (montaj rehberi, ölçüler yaklaşık); L 2500; hattın boyu parçada",
    "birim": "adet",
-   "nerede": "İki saçak duvarının üstünde, makasın altında; verandanın tarafında kirişin üstünde (`sacak_omegasi_yerlesimi`)",
+   "nerede": "İki saçak duvarının üstünde, makasın altında, saçak ucundan ucuna; verandanın tarafında kirişin üstünde; baş makas betopanında kesilir (`sacak_omegasi_yerlesimi`)",
    "sayim": "boy_kesim",
    "ifc": {"sinif": "IfcMemberType", "alt_tur": "MEMBER"},
    "pafta": [],
    "yerlesim": {"kural": "sacak_omegasi_yerlesimi", "parca": "sacak_omegasi", "sinif": "IfcMember"},
-   "kaynak": {"durum": "varsayim", "tarih": "2026-10-25", "dayanak": "Montaj rehberi (Lokman, 24 Ekim çizimleri): yüz başına 4 × 250 cm, duvar boyu; Lokman 25 Ekim 17:47 \"Uygula\" (rehber). Liste üreteci saçak boyunu sayar (PK-01 9; model 8): fark 6e'ye not"}
+   "kaynak": {"durum": "varsayim", "tarih": "2026-10-25", "dayanak": "Montaj rehberi (Lokman, 24 Ekim çizimleri): kesit ve 250 cm parça; Lokman 25 Ekim 17:47 \"Uygula\" (rehber). Boy: Lokman, 31 Ekim 2026 13:40 \"gerçek listeye uy\": saçak ucundan ucuna, gerçek listeler ve liste üreteci gibi (PK-01 9; önce duvar boyu, 8)"}
   },
   {
    "kod": "CK-02",
@@ -808,7 +808,7 @@
    "liste": {"grup": "1002", "satirlar": ["Alın sacı (30'luk)"]},
    "olcu": "300 × 2500; saçak sacının profili ve kenar hadvesini kavrayan kıvrım, sac 1 mm (montaj rehberi; alt ucun kesimi varsayım); kenarın boyu parçada",
    "birim": "adet",
-   "nerede": "Kalkanların iki eğik kenarında (ana çatının baş makasları ve taşan verandanın dış kalkanı); ana çatıda tırnağı baş makas Z'sine girer, verandanın kalkanında Z yok, tırnak betopanın üstünde (gösterim varsayım; K5b); makas üstünün 3 cm altından başlar, alt ucu derenin önüne iner (`alin_saci_yerlesimi`)",
+   "nerede": "Kalkanların iki eğik kenarında (ana çatının baş makasları ve taşan verandanın dış kalkanı); tırnağı baş makas Z'sine girer (verandanın kirişli kalkanında da; 30 Ekim); makas üstünün 3 cm altından başlar, alt ucu derenin önüne iner (`alin_saci_yerlesimi`)",
    "sayim": "boy_kesim",
    "ifc": {"sinif": "IfcCoveringType", "alt_tur": "CLADDING"},
    "pafta": [],
@@ -821,7 +821,7 @@
    "liste": {"grup": "1002", "satirlar": ["Baş makas Z'si"]},
    "olcu": "Z: üst kanat makas ve betopan üstünde, 3 cm çentik, 3 cm dış kanat, sac 1 mm (montaj rehberi); L 2800; kenarın boyu parçada",
    "birim": "adet",
-   "nerede": "Ana çatının her baş makasının iki eğik kenarında, betopanın üstünden geçer (`bas_makas_z_yerlesimi`); taşan verandanın kalkanında yok (liste O7 yalnız ana çatı)",
+   "nerede": "Ana çatının her baş makasının ve taşan verandanın kirişli dış kalkanının iki eğik kenarında, betopanın üstünden geçer (`bas_makas_z_yerlesimi`; verandada kalkan betopanlı, D-32 madde 2; K5b TK-01 kıyası, 30 Ekim)",
    "sayim": "boy_kesim",
    "ifc": {"sinif": "IfcMemberType", "alt_tur": "MEMBER"},
    "pafta": [],

@@ -56,12 +56,15 @@ def test_tk01_toplamlar(T):
     katı (140 × 5 m = 700), kenarlar için boya iç cephe boyasının kg fiyatıyla (10 kg 2.000); toplam +2.700 (asma 422.541,13, ters
     421.270,13), fiyatsız 8 → 6 (çırpı ipi bilerek boş). D-37 (Lokman 31 Ekim 16:00, defter r06): makasın kg'ı saçaktan saçağa boyuyla
     orantılı (TK-03'ün 87 m² listesinden 5,50 kg/m × 59 TL/kg): 8 ana makas açıklık 8985 × 3.110, ön yavru makas L 4460 3 × 1.447, arka
-    L 3210 2 × 1.042; toplam +31.305 (asma 453.846,13, ters 452.575,13), fiyatsız 6 → 2 (120 × 180 özel pencere karkası, çırpı ipi)."""
+    L 3210 2 × 1.042; toplam +31.305 (asma 453.846,13, ters 452.575,13), fiyatsız 6 → 2 (120 × 180 özel pencere karkası, çırpı ipi).
+    BK-19 (D-39; liste kart modeliyle aynı sayar): aşık sırası beşikte karar C (Lokman 24 Ekim) ve saçak eşiği 0,30 m (dört aşık
+    planından) 51 → 52 (+242 TL), baş makas betopanı ve Z'si taşan verandaların kirişli kalkanında da (D-32 madde 2) 8 → 10 (+1.334 TL)
+    ve 8 → 12 (+492 TL): toplam +2.068 TL (asma 453.846,13 → 455.914,13, ters 452.575,13 → 454.643,13)."""
     assert T["kod"] == "TK-01" and T["is_emri_no"] == "PM-TK01-80M2" and T["revizyon"] == 5
     assert T["defter_surumu"] == "2026-10-31-r06" and not T["oneri_dahil"]
     ozet = {s["ad"]: s["fiyat"]["ozet"] for s in T["secenekler"]}
     assert list(ozet) == ["Asma tavan", "Ters tavan"]
-    assert ozet["Asma tavan"]["toplam"] == 453846.13 and ozet["Ters tavan"]["toplam"] == 452575.13
+    assert ozet["Asma tavan"]["toplam"] == 455914.13 and ozet["Ters tavan"]["toplam"] == 454643.13
     assert (ozet["Asma tavan"]["satir"], ozet["Asma tavan"]["fiyatli"], len(ozet["Asma tavan"]["fiyatsiz"])) == (124, 122, 2)
     assert (ozet["Ters tavan"]["satir"], ozet["Ters tavan"]["fiyatli"], len(ozet["Ters tavan"]["fiyatsiz"])) == (122, 120, 2)
     makas = [(x["kalem"], x["olcu"], x["adet"], x["birim_fiyat"], x["durum"]) for x in T["secenekler"][0]["fiyat"]["satirlar"] if "akas" in x["kalem"]
@@ -181,7 +184,7 @@ def test_ozet_ve_kosullar(cikti, T, tmp_path):
     rows = {r[0].value: r for r in oz.iter_rows() if r[0].value}
     for k in ("Teslim süresi", "Ödeme şekli"):
         assert rows[k][1].value is None and rows[k][1].fill.fgColor.rgb.endswith("FFF2A8") and rows[k][3].value == "Patron'dan"
-    assert rows["Asma tavan"][1].value == 453846.13 and rows["Ters tavan"][1].value == 452575.13
+    assert rows["Asma tavan"][1].value == 455914.13 and rows["Ters tavan"][1].value == 454643.13
     for k in ("Asma tavan", "Ters tavan"):                  # CIO, 28 Ekim: toplamın yanında belirgin uyarı
         u = rows[k][4]
         assert u.value == "2 satır fiyatsız, toplam eksik"
@@ -220,7 +223,7 @@ def test_oneri_gosterimi(tmp_path):
     assert TK.main([str(IE), str(tmp_path / "a"), "--tavan", "asma,ters", "--defter", str(tmp_path / "r03.json")]) == 0
     J = _oku(tmp_path / "a" / "TK01_teklif.json")
     ozet = {s["ad"]: s["fiyat"]["ozet"] for s in J["secenekler"]}
-    assert ozet["Asma tavan"]["toplam"] == 412449.13 and ozet["Ters tavan"]["toplam"] == 411178.13
+    assert ozet["Asma tavan"]["toplam"] == 414517.13 and ozet["Ters tavan"]["toplam"] == 413246.13
     oneri = {f["anahtar"]: f["oneri_fiyat"] for f in ozet["Asma tavan"]["fiyatsiz"] if "oneri_fiyat" in f}
     assert oneri == {"Kutu profil (kiriş) 100 × 100 | L 3860": 3217, "Kutu profil (kiriş) 100 × 100 | L 2610": 2175, "Kaçak akım rölesi (ikili) | adet": 2000}
     assert ozet["Asma tavan"]["oneri_bekleyen"] == ozet["Ters tavan"]["oneri_bekleyen"] == {"satir": 3, "tutar": 7392}
@@ -231,7 +234,7 @@ def test_oneri_gosterimi(tmp_path):
     assert sari["Kutu profil (kiriş) 100 × 100 · L 3860"].startswith("öneri birim fiyat 3.217 TL (tam boyun fiyatından boyla orantılı)")
     assert sari["Kaçak akım rölesi (ikili) · adet"].startswith("öneri birim fiyat 2.000 TL (87 m² listesinde") and len(sari) == 3
     assert TK.main([str(IE), str(tmp_path / "b"), "--tavan", "asma,ters", "--defter", str(tmp_path / "r03.json"), "--oneri"]) == 0
-    assert [s["fiyat"]["ozet"]["toplam"] for s in _oku(tmp_path / "b" / "TK01_teklif.json")["secenekler"]] == [419841.13, 418570.13]
+    assert [s["fiyat"]["ozet"]["toplam"] for s in _oku(tmp_path / "b" / "TK01_teklif.json")["secenekler"]] == [421909.13, 420638.13]
 
 
 def test_is_emrindeki_teklif_bolumu(tmp_path):
@@ -243,7 +246,7 @@ def test_is_emrindeki_teklif_bolumu(tmp_path):
     assert TK.main([str(tmp_path / "ie.json"), str(tmp_path / "a")]) == 0
     J = _oku(tmp_path / "a" / "TK01_teklif.json")
     assert [s["ad"] for s in J["secenekler"]] == ["Asma tavan", "Ters tavan"]
-    assert [s["fiyat"]["ozet"]["toplam"] for s in J["secenekler"]] == [453846.13, 452575.13]      # Motor teklif bölümünü okumaz
+    assert [s["fiyat"]["ozet"]["toplam"] for s in J["secenekler"]] == [455914.13, 454643.13]      # Motor teklif bölümünü okumaz
     assert J["kosullar"] == {"Teslim süresi": None, "Ödeme şekli": "DENEME İE"}
     (tmp_path / "k.json").write_text(json.dumps({"kosullar": {"Ödeme şekli": "DENEME DOSYA"}}, ensure_ascii=False), encoding="utf-8")
     assert TK.main([str(tmp_path / "ie.json"), str(tmp_path / "b"), "--tavan", "ters", "--kosullar", str(tmp_path / "k.json")]) == 0
