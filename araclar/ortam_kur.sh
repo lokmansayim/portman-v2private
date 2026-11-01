@@ -93,7 +93,8 @@ if [[ $DOGRULA == 1 ]]; then
   if [[ $PG_OK == 1 ]]; then export PORTMAN_TEST_PG="host=127.0.0.1 port=$PORT user=postgres"; fi
   # BK-08 madde 10: kırmızı testin adı ekrana gelir (-rfE), tam çıktı geçici günlükte kalır (depoya girmez), çıkış kodu korunur.
   GUNLUK="$(mktemp "${TMPDIR:-/tmp}/portman-pytest.XXXXXX")" || { say "DUR: geçici günlük açılamadı (TMPDIR)"; exit 1; }
-  "$VENV/bin/python" -m pytest -q -rfE -p no:cacheprovider testler > "$GUNLUK" 2>&1
+  # PORTMAN_BANKA_TAM=1: bankanın kabul modelleri çizim izleriyle de kıyaslanır, CI ile aynı (İE-09 PR-7, D-28 A11).
+  PORTMAN_BANKA_TAM=1 "$VENV/bin/python" -m pytest -q -rfE -p no:cacheprovider testler > "$GUNLUK" 2>&1
   TEST_RC=$?
   grep -E "^(FAILED|ERROR) " "$GUNLUK" | sed 's/^/-- testler: /'
   grep -E "passed|failed|error" "$GUNLUK" | tail -1 | sed 's/^/-- testler: /'
