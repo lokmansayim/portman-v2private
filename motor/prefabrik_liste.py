@@ -285,6 +285,10 @@ def model_motor(ie: dict) -> dict:
         GW, GD = W, D
     aciklik, bina_boyu = (GW, GD) if mx else (GD, GW)
     serit = None
+    from . import cati_serit as _cs
+    if _cs.mahal_catilari_var(ie):                             # İE-17 PR-2: açık mahalin kendi panel çatısı listede yok (PR-1b/K7); yanlış liste yazılmaz
+        raise ListeYazilmaz("açık mahalin kendi çatısı (cati.mahal_catilari, AP-09) yükleme listesinde yok: ana çatının ve panel çatının "
+                            "kalemleri İE-17 PR-1b/K7'de")
     if plan.girintili:                                         # İE-24: brüt gövdenin dış çizgisi (açık mahal dahil); girinti gözleri sayılmaz
         brut = G.govde_cokgeni(plan).area
         serit = _serit_catilari(plan, ie)                      # (çatı parçaları, çatı tanımı)

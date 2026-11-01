@@ -1,0 +1,262 @@
+{
+  "is_emri_no": "IE17-AP03",
+  "revizyon": 1,
+  "talep": {
+    "bayi": {
+      "kod": "AP03",
+      "ad": "Bayi AP-03"
+    },
+    "musteri_adi": "AP-03",
+    "metin": "İE-17 PR-2 açılan ev: AP-03 (64 m², beşik + paralel cumba, veranda köşesinde ek çatı) montaj paftasından okundu (1 Kasım 2026). Konumlar cm, aks; x sol dış yüzden; dizilim arka-sol olduğundan mahallerin y'si arka dış yüzden (Motor'un kuralı), açıklıkların cepheleri gerçek çerçevede (paftanın üstü arka)."
+  },
+  "yapi": {
+    "sistem": "prefabrik",
+    "kat_sayisi": 1,
+    "duvar_yuksekligi_cm": 250,
+    "duvar_kalinligi_cm": {
+      "dis": 10,
+      "ic": 6
+    },
+    "olcu_kaynagi": "dis_olcu",
+    "dis_olcu_cm": {
+      "x": 763,
+      "y": 835.75
+    },
+    "referans_model": "AP-03",
+    "grid": {
+      "x_pano": 6,
+      "y_pano": 6.5
+    },
+    "kisa_kenar": "y",
+    "giris_cephesi": "on",
+    "dis_dusey_duvar": "cevre_aks_disinda",
+    "dizilim": {
+      "baslangic": "arka-sol",
+      "hiza": "tam_izgara",
+      "dis_duvar_t_bolme": false,
+      "pencere": "oda_ortasi",
+      "kapi": "mantik",
+      "kose": "oda",
+      "son_pano": "son_aks",
+      "kapi_yeri": "ortada",
+      "dis_pano_dayanagi": [
+        {
+          "y": 449.25,
+          "aralik_cm": [
+            323.75,
+            825.75
+          ],
+          "ic_duvarlar": true
+        }
+      ]
+    },
+    "ek_akslar_cm": {
+      "x": [],
+      "y": []
+    }
+  },
+  "mahaller": [
+    {
+      "ad": "SALON+MUTFAK",
+      "tur": "salon",
+      "konum_cm": [
+        [
+          5,
+          10,
+          632.5,
+          449.25
+        ]
+      ]
+    },
+    {
+      "ad": "VERANDA",
+      "tur": "veranda",
+      "konum_cm": [
+        [
+          632.5,
+          10,
+          758,
+          449.25
+        ]
+      ]
+    },
+    {
+      "ad": "ÇOCUK ODASI",
+      "tur": "yatak_odasi",
+      "konum_cm": [
+        [
+          5,
+          449.25,
+          256,
+          825.75
+        ]
+      ]
+    },
+    {
+      "ad": "HOL",
+      "tur": "antre_hol",
+      "konum_cm": [
+        [
+          256,
+          449.25,
+          444.25,
+          574.75
+        ]
+      ]
+    },
+    {
+      "ad": "BANYO",
+      "tur": "banyo",
+      "konum_cm": [
+        [
+          256,
+          574.75,
+          444.25,
+          825.75
+        ]
+      ]
+    },
+    {
+      "ad": "YATAK ODASI",
+      "tur": "yatak_odasi",
+      "konum_cm": [
+        [
+          444.25,
+          449.25,
+          758,
+          825.75
+        ]
+      ]
+    }
+  ],
+  "acik_sinirlar": [],
+  "acikliklar": [
+    {
+      "tur": "pencere",
+      "olcu": "120x120",
+      "mahal": "SALON+MUTFAK",
+      "duvar": "arka",
+      "pano": 1
+    },
+    {
+      "tur": "pencere",
+      "olcu": "120x120",
+      "mahal": "SALON+MUTFAK",
+      "duvar": "arka",
+      "pano": 3
+    },
+    {
+      "tur": "pencere",
+      "olcu": "120x120",
+      "mahal": "SALON+MUTFAK",
+      "duvar": "sag",
+      "pano": 1,
+      "acilis": "surgulu"
+    },
+    {
+      "tur": "pencere",
+      "olcu": "120x120",
+      "mahal": "ÇOCUK ODASI",
+      "duvar": "on"
+    },
+    {
+      "tur": "pencere",
+      "olcu": "60x40",
+      "mahal": "BANYO",
+      "duvar": "on",
+      "pano": 0
+    },
+    {
+      "tur": "pencere",
+      "olcu": "120x120",
+      "mahal": "YATAK ODASI",
+      "duvar": "on",
+      "pano": 0
+    },
+    {
+      "tur": "dis_kapi",
+      "olcu": 90,
+      "arasi": [
+        "VERANDA",
+        "SALON+MUTFAK"
+      ],
+      "duvar_ucu": "on"
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "HOL",
+        "SALON+MUTFAK"
+      ],
+      "duvar_ucu": "sag"
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "HOL",
+        "BANYO"
+      ],
+      "pano": 0,
+      "kapi_yeri": "mentese_ucu"
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "HOL",
+        "ÇOCUK ODASI"
+      ],
+      "pano": 0,
+      "kapi_yeri": "mentese_ucu"
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "HOL",
+        "YATAK ODASI"
+      ],
+      "pano": 0,
+      "kapi_yeri": "mentese_ucu"
+    }
+  ],
+  "dikmeler": [
+    [
+      753,
+      825.75
+    ]
+  ],
+  "cati": {
+    "tip": "besik",
+    "egim_yuzde": 32.88,
+    "sacak_cm": 30,
+    "topuk_cm": 10,
+    "makas_yonu": "uzun_kenar",
+    "makas_ekseni": "y"
+  },
+  "cikti": {
+    "pdf": true,
+    "dxf": true,
+    "pafta": "A2",
+    "icerik": [
+      "aksli_plan",
+      "alanli_kopya",
+      "montaj_kopyasi",
+      "on_gorunus",
+      "cati_profili",
+      "ozellik_tablosu"
+    ]
+  },
+  "varsayimlar": [
+    "Köşe ve ızgara (İE-17 kuralı; paftada aynı): makas y'yi geçer (ana kesit 895,75 = 835,75 + 2 × 30 saçak), kısa kenar y. Makasın oturduğu ön ve arka duvar köşeden geçer, x ızgarası duvar ekseninden (5 + 125,5k); yan duvarlar araya girer, y ızgarası iç yüzden (10 + 125,5k).",
+    "Gövde 763 × 835,75 dikdörtgen; veranda gövdenin içinde sağ arkada (125,5 × 444; paftanın üstü arka sayıldı, öteki açılan evlerle aynı), arka ve sağ açık; arka-sağ köşede 10 × 10 dikme (paftada).",
+    "Pencereler paftadaki panoda; çocuk odasının penceresi paftada iki yanı yarım pano (D-29 kuralı, Motor'da aynı). Verandaya açılan salon penceresi sürgülü (TK-02 r09 başlangıcı).",
+    "Kapılar: salon–hol kapısı paftadaki gibi salona açılır; dış kapı ve salon–hol kapısı ortak duvarın ucundaki kavşaktan tam panoda (duvar_ucu; paftada 125,5); holden açılan üç kapı menteşe ucunda (kapi_yeri: mentese_ucu; paftada kavşaktan 11–13 cm). Kapı genişlikleri paftada yazılı değil: dış kapı 90, iç kapı 82 (Motor'un ölçüsü).",
+    "Çatı (PR-2b'de çizilir): ana beşik makas y'yi geçer, mahya x boyunca (157,25 = 10 topuk + 447,9 × 0,3288); sağ öndeki yatak odası bölümünün üstünde paralel cumba (paftanın sağ kesiti 456,5, mahya 85,04); veranda köşesinin çatısı paftada kısa makaslar MK9–12 ve köşede çapraz MK13: biçimi paftadan okunamadı, Lokman'a sorulacak. Paftanın başlığındaki \"Beşik + Kubbe\" yazısı: paftada kubbe yok (kubbesiz)."
+  ],
+  "eksikler": [
+    "Veranda köşesinin çatı biçimi (MK9–13) Lokman'a sorulacak (PR-2b)."
+  ]
+}
