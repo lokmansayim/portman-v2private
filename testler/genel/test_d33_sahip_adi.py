@@ -146,4 +146,6 @@ def test_kontrol_sayfasinda_sahibinin_adi():
     kart = {"gosterim": "KT-09", "kod": "KT09", "musteri_projesi": True}
     assert "sahibi Tanım Sahibi" in atolye_sayfa._sol(kart, "Tanım Sahibi")
     assert "evet (tarif yazılmaz;" in atolye_sayfa._sol(kart) and "evet · sahibi" not in atolye_sayfa._sol(kart)
-    assert ">hayır<" in atolye_sayfa._sol({"gosterim": "Ç8801", "kod": "Ç8801"}, "Tanım Sahibi")
+    assert ">hayır<" in atolye_sayfa._sol({"gosterim": "Ç8801", "kod": "Ç8801"})
+    # satır sayfaya verilen ada uyar (`atolye.ciz` adı motorun `musteri_projesi` koşuluyla verir): sayfa çizimle çelişmez
+    assert "evet · sahibi Tanım Sahibi" in atolye_sayfa._sol({"gosterim": "Ç8801", "kod": "Ç8801"}, "Tanım Sahibi")

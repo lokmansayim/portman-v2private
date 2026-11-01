@@ -78,8 +78,8 @@ def _sol(kart: dict, sahip: str = "") -> str:
                 ("Oda programı", o.get("oda_programi")), ("Dış ölçü", f"{sayi(o.get('dis_olcu_cm'))} cm"),
                 ("Çatı", f"{kart.get('cati_adi')} · tip {cati.get('tip')} · {cati.get('duzlem')} düzlem · yüzey {sayi(cati.get('yuzey_m2'))} m²"),
                 ("Çatı kenarları", ", ".join(f"{a} {sayi(v / 100)} m" for a, v in (cati.get("kenar_cm") or {}).items()) or "…"),
-                ("Müşteri projesi", (f"evet · sahibi {sahip} (çizimlerde ve listede tarif yerine bu ad yazılır, D-33)" if sahip
-                                     else "evet (tarif yazılmaz; tanımda sahibinin adı varsa çizimde o görünür, D-33)") if kart.get("musteri_projesi") else "hayır"),
+                ("Müşteri projesi", f"evet · sahibi {sahip} (çizimlerde ve listede tarif yerine bu ad yazılır, D-33)" if sahip
+                 else "evet (tarif yazılmaz; tanımda sahibinin adı varsa çizimde o görünür, D-33)" if kart.get("musteri_projesi") else "hayır"),
                 ("Durum", kart.get("durum"))]
     s = ["<h2>Model kartı</h2><table>"] + [f"<tr><th>{e(a)}</th><td>{e(b)}</td></tr>" for a, b in satirlar] + ["</table>"]
     mt = kart.get("metraj_testi") or {}
@@ -178,8 +178,8 @@ def _gorsel_sayfa(doc, yol: Path, baslik: str, alt: str = "") -> None:
 
 
 def kontrol_pdf(kart: dict, cizim: Path, gk: str, hedef: Path, sahip: str = "") -> Path:
-    """Kontrol sayfasını yazar; `cizim` motorun çıktı klasörü, `gk` dosya gövdesi (C8801D), `sahip` müşteri projesinde tanımdaki sahibinin
-    adı (D-33; `motor.genel.bayi_gorseli.sahip_adi`)."""
+    """Kontrol sayfasını yazar; `cizim` motorun çıktı klasörü, `gk` dosya gövdesi (C8801D), `sahip` motorun çizimlere yazdığı sahibinin adı
+    (D-33; `motor.genel.bayi_gorseli.sahip_adi`, motorun `musteri_projesi` koşuluyla): verilirse satır onu gösterir, sayfa çizimle çelişmez."""
     import pymupdf
     sc = kart.get("son_cizim") or {}
     doc = pymupdf.open()
