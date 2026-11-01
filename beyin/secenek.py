@@ -117,7 +117,8 @@ def cati_seti(adaylar: list[dict]) -> list[dict]:
 
 
 def set_kaydi(kaynak_mesaj_id: str, siralanmis: list[dict], ts: dict, tur: str = "alan") -> dict:
-    """Konuşma durumuna ve secenek_setleri tablosuna yazılan set (şablon yolu ve büyük alanlar hariç). tur: alan | cati_varyanti."""
+    """Konuşma durumuna ve secenek_setleri tablosuna yazılan set (şablon yolu ve büyük alanlar hariç). tur: alan | cati_varyanti | yeni_plan |
+    cati_secimi (İE-25)."""
     return {"id": set_id(kaynak_mesaj_id), "durum": "acik", "kaynak_mesaj_id": kaynak_mesaj_id, "tur": tur,
             "oncelik": ts.get("oncelik"), "agirliklar": dict(AGIRLIKLAR),
             "adaylar": [{k: a.get(k) for k in ("kod", "sira", "puan", "hesap", "referans_model", "oda_programi", "katalog_m2",
@@ -157,6 +158,19 @@ def cati_mesaji(siralanmis: list[dict], referans: dict) -> str:
     govde = (f"{g} için {len(siralanmis)} çatı seçeneği. Plan {'üçünde' if len(siralanmis) == 3 else 'hepsinde'} aynı"
              + (f" ({m2:g} m², {oda})" if isinstance(m2, (int, float)) else "") + "; fark çatıda.\n\n" + "\n".join(satirlar)
              + "\n\nBirini seçin ya da yazın (örn. \"çatı K olsun\").")
+    return govde[:1024]
+
+
+def cati_secimi_mesaji(siralanmis: list[dict], referans: dict) -> str:
+    """İE-25 · yeni planın çatı seti (plan seçildikten sonra; Lokman 1.11): 'Yeni plan için 2 çatı seçeneği. Plan ikisinde aynı (95 m², 3+1);
+    fark çatıda. 1. Beşik 2. Kırma …'. m² Türkçe biçimde (plan kartıyla aynı)."""
+    m2 = referans.get("katalog_m2"); oda = referans.get("oda_programi") or ""
+    m2s = (f"{float(m2):.1f}".replace(".", ",").removesuffix(",0") + " m²") if isinstance(m2, (int, float)) else ""
+    olcu = ", ".join(x for x in (m2s, oda) if x)
+    n = len(siralanmis)
+    govde = (f"{gosterim(referans)} için {n} çatı seçeneği. Plan {'ikisinde' if n == 2 else 'hepsinde'} aynı" + (f" ({olcu})" if olcu else "")
+             + "; fark çatıda.\n\n" + "\n".join(f"{a['sira']}. {gosterim(a)}" for a in siralanmis)
+             + "\n\nBirini seçin ya da yazın (örn. \"kırma olsun\").")
     return govde[:1024]
 
 

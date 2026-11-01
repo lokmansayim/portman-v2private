@@ -63,6 +63,7 @@ def karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, met
     Kural katmanı bu mesajın yerine bekletilen bir mesajı işlediyse (D-01), o talep Karar.kullanilan_talep'te döner."""
     k.kullanilan_talep, k.bekleyen_not = None, ""
     k.son_llm = None                                # İE-08 A4: bu mesajın LLM ipuçları (yalnız bu çağrıda; `_karar_ver` doldurur)
+    k.cati_secimi = None                            # İE-25: bu çağrıda yeni planın çatısını kod belirlediyse tipi (`_cati_secimi`)
     k.rev0 = int(k.d.get("revizyon") or 0)          # G-2: _bitir, plan üretmeyen turda sayacı buna geri alır
     karar = _karar_ver(talep, k, bayi, katalog, metin)
     if k.kullanilan_talep is not None:
@@ -399,10 +400,8 @@ def _celik_dali(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts: dict) 
     st = k.d.get("secenek_seti")
     kod = str(aday["kod"]).upper()
     metin = k.d.get("son_metin")
-    if aday.get("uretilen"):                                   # İE-14: yeni plan çatı varyantı taşımaz; setten seçim ya da revizyon → plan
-        _seti_kapat(k, aday["kod"])
-        k.d["uretilen_plan"] = aday                            # r3: setteki iki yeni plandan seçilen; revizyon ondan sürer
-        return _celik_is_emri_uret(k, bayi, katalog, aday, ts)
+    if aday.get("uretilen"):                                   # İE-14: setten seçim ya da revizyon → plan; İE-25: ilk planda önce çatı
+        return _uretilen_secimi(k, bayi, katalog, aday, ts)
     taban = katalog.aday(aday.get("referans_model")) if aday.get("referans_model") and not aday.get("varyantlar") else None
     kat_aday = taban if (taban and taban.get("varyantlar")) else aday
     # Kapanış incelemesi (13.10): seçim ve çatı yalnız BU mesajın sözünden (bayinin yazdığı kod, düğme metni, çatı cümlesi). Taslakta kalan
@@ -484,6 +483,138 @@ def _celik_dali(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts: dict) 
 CELIK_ISTEK_NOTU = "Mesajınızdaki değişiklik isteğini seçtiğiniz plana işleyeceğim."
 
 
+# ── İE-25 · yeni planın çatısı, plan seçildikten sonra (pano 41; Lokman 1.11.2026 karar kartı "Plan seçildikten sonra") ───────────────
+CATI_EKI = {"besik": "B", "kirma": "K"}
+CATI_GOSTERIM = {"besik": "Beşik", "kirma": "Kırma"}
+CATI_SOZU = {"besik": "beşik", "kirma": "kırma", "tek_egimli": "tek eğimli", "teras": "teras"}
+
+
+def _uretilen_secimi(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts: dict) -> Karar:
+    """İE-14 yeni planın seçimi ya da revizyonu. İE-25: ilk planda (bu plandan r01 yok) çatı önce seçilir (`_cati_secimi`): set sunulur
+    ya da çatı belli olur; seçilen çatının tanımı planın kendi koduna yazılır (revizyon, onay ve mühendis kaydı aynı plandan sürer)."""
+    son_y = (k.d.get("son_is_emri") or {}).get("yapi") or {}
+    ayni = son_y.get("sistem") == "celik" and Katalog.taban_kod(son_y.get("kod")) == Katalog.taban_kod(aday["kod"])
+    if not ayni:
+        sec = _cati_secimi(k, katalog, aday, ts)
+        if isinstance(sec, Karar):
+            return sec
+        aday = sec
+    _seti_kapat(k, aday["kod"])
+    k.d["uretilen_plan"] = aday                                # r3: setteki iki yeni plandan seçilen; revizyon ondan sürer
+    return _celik_is_emri_uret(k, bayi, katalog, aday, ts)
+
+
+def _cati_adayi(temel: dict, tip: str) -> dict:
+    """Yeni planın beşik ya da kırma çatılı hâli; kod kurar ve denetler (`plan_islem.uygula` + `plan_denetim.denetle`; LLM yok). Planın
+    kendi çatısı üretimdeki tanımla aynen kalır. Dönen: aday kaydı (`kod` `<plan kodu>-B|K`, tanımın kodu planın kodu) ya da
+    {"gecerli": False, "ihlaller": […]}."""
+    from .plan_denetim import denetle
+    from .plan_islem import uygula
+    plan = temel.get("plan") or {}
+    if (plan.get("cati") or {}).get("tip") == tip:
+        q, t = plan, temel["tanim"]
+    else:
+        q, _ = uygula(plan, [{"op": "cati_tipi", "tip": tip}])
+        d = denetle(q, {"oda_programi": temel.get("oda_programi")}, kod=temel["kod"])
+        if not d["gecerli"] or not d.get("tanim"):
+            return {"gecerli": False, "tip": tip, "ihlaller": list(d.get("ihlaller") or [])}
+        t = d["tanim"]
+    return {**temel, "kod": f"{temel['kod']}-{CATI_EKI[tip]}", "gosterim": CATI_GOSTERIM[tip], "cati_tipi": tip, "gecerli": True,
+            "tanim": t, "tanim_sha256": celik.tanim_sha_icerik(t), "plan": q, "gorsel": None,
+            "sunum": {**(temel.get("sunum") or {}), "cati_adi": (t.get("cati") or {}).get("tip_adi")}}
+
+
+def _cati_plani(temel: dict, v: dict) -> dict:
+    """Seçilen çatının aday kaydı planın kendi koduyla (YENI-…): seçim, revizyon ve onay aynı plandan sürer."""
+    return {**{a: b for a, b in v.items() if a not in ("cati_tipi", "gecerli")}, "kod": temel["kod"], "gosterim": temel.get("gosterim"),
+            "gorsel": temel.get("gorsel")}
+
+
+def _cati_notu(olmayan: dict, cizilen: str) -> str:
+    """Bayiye: istenen ya da sunulamayan çatı bu planda kurallara uymuyor, plan öteki çatıyla çizildi; nedeni denetçinin kuralından
+    (çatı altındaki veranda yalnız kırmayla), LLM'den değil. Sessiz düşme yok (A4, A5)."""
+    veranda = any(str(x).startswith("çatı altındaki veranda") for x in olmayan.get("ihlaller") or [])
+    cumle = f"{CATI_SOZU[olmayan['tip']]} çatı bu planda kurallara uymuyor; plan {CATI_SOZU[cizilen]} çatıyla çizildi. "
+    return ("Veranda çatı altında olduğu için " + cumle) if veranda else cumle[0].upper() + cumle[1:]
+
+
+def _cati_secimi(k: Konusma, katalog: Katalog, aday: dict, ts: dict) -> dict | Karar:
+    """İE-25 · yeni planın çatısı (çelik; plan seçildikten sonra). Dönen: çizilecek aday (planın kodu, seçilen çatının tanımı) ya da Karar
+    (çatı seti). Sıra:
+    1. Çatı seti açıkken: düğme ya da numara (`<plan kodu>-B|K`) ya da bu mesajda "beşik" / "kırma" sözü (`CO.cati_tipi_secimi`; olumsuz,
+       soru biçimli ya da iki çatılı cümle seçim değildir) → o çatı. Seçim yoksa set yeniden sunulur, istek saklanır (seçilen çatıya işlenir).
+    2. Talepte beşik ya da kırma yazılmışsa (A5) set sunulmaz: plan o çatıyla (planınki başkaysa kurulur; kurallara uymazsa planın çatısı
+       kalır ve bayiye nedeniyle yazılır, sessiz düşmez).
+    3. İki çatı da kurallardan geçerse çatı seti (tür `cati_secimi`, 1. Beşik 2. Kırma); yalnız biri geçerse (çatı altında veranda: beşik
+       geçmez) plan onunla, nedeni bayiye (A4). Talepteki tek eğimli ya da teras çatı (çizilmiyor) setin başında söylenir (A6)."""
+    taban = str(Katalog.taban_kod(aday["kod"]))
+    temel = aday if aday["kod"] == taban else (_aday_bul(k, katalog, taban) or aday)
+    cs = k.d.get("cati_secenekleri") or {}
+    st = k.d.get("secenek_seti") or {}
+    set_acik = st.get("durum") == "acik" and st.get("tur") == "cati_secimi" and cs.get("plan_kodu") == taban
+    secilen = None
+    if aday["kod"] != taban and cs.get("plan_kodu") == taban:   # düğme ya da numara
+        secilen = next((v for v in cs.get("adaylar") or [] if v["kod"] == aday["kod"]), None)
+    elif set_acik:
+        tip = CO.cati_tipi_secimi(k.d.get("son_metin"))
+        secilen = next((v for v in cs.get("adaylar") or [] if v.get("cati_tipi") == tip), None) if tip else None
+        if secilen is not None:
+            k.not_dus("kural", f"çatı setinde bayinin sözünden seçim: {tip}")
+    if secilen is not None:
+        k.cati_secimi = secilen["cati_tipi"]
+        _seti_kapat(k, secilen["kod"])
+        k.d.pop("cati_secenekleri", None)
+        k.d["taslak"]["katalog_kodu"] = taban
+        k.d["taslak"]["cati"] = {**(k.d["taslak"].get("cati") or {}), "tip": secilen["cati_tipi"]}
+        return _cati_plani(temel, secilen)
+    if set_acik:                                               # seçim yok ya da kararsız: istek saklanır, set yeniden sunulur
+        saklandi = _celik_istek_sakla(k)
+        uygun = SC.cati_seti([{**v, "tanim": None, "plan": None} for v in cs.get("adaylar") or []])
+        return _secenekler(k, katalog, ts, uygun=uygun, tur="cati_secimi", referans=temel,
+                           ek_not="Önce çatıyı seçin (numara ya da düğme)." + (" " + CELIK_ISTEK_NOTU if saklandi else ""))
+    plan_tipi = ((temel.get("plan") or {}).get("cati") or {}).get("tip")
+    if plan_tipi not in CATI_EKI:                               # plan kaydı yok (eski konuşma): plan üretimdeki çatısıyla
+        return temel
+    talep_tipi = (ts.get("cati") or {}).get("tip")
+    if talep_tipi in CATI_EKI:                                 # A5: çatı yazılmıştı
+        k.cati_secimi = talep_tipi                             # yazılan çatı burada işlenir (uygulanır ya da nedeniyle söylenir)
+        if talep_tipi == plan_tipi:
+            return temel
+        v = _cati_adayi(temel, talep_tipi)
+        if v["gecerli"]:
+            k.not_dus("kural", f"talepteki çatı seçilen plana işlendi: {talep_tipi}")
+            return _cati_plani(temel, v)
+        k.not_dus("kural", f"talepteki çatı bu planda geçmedi: {talep_tipi}")
+        k.bekleyen_not = (k.bekleyen_not or "") + _cati_notu(v, plan_tipi)
+        return temel
+    secenekler = {tip: _cati_adayi(temel, tip) for tip in CATI_EKI}
+    gecerli = [v for v in secenekler.values() if v["gecerli"]]
+    if not gecerli:                                            # planın kendi çatısı bile geçmiyor (kural değişti): üretimdeki tanımla
+        k.not_dus("kural", "çatı seçeneği kurulamadı: plan üretimdeki çatısıyla")
+        return temel
+    if len(gecerli) == 1:                                      # A4: tek çatı geçer (çatı altında veranda → kırma)
+        v = gecerli[0]
+        k.cati_secimi = v["cati_tipi"]
+        olmayan = next(x for x in secenekler.values() if not x["gecerli"])
+        k.not_dus("kural", f"çatı seçeneği yok: yalnız {v['cati_tipi']} geçti")
+        k.bekleyen_not = (k.bekleyen_not or "") + _cati_notu(olmayan, v["cati_tipi"])
+        return temel if v["cati_tipi"] == plan_tipi else _cati_plani(temel, v)
+    _seti_kapat(k, temel["kod"])                               # yeni plan seti planın seçimiyle kapanır (kayıtta "seçildi")
+    eski = k.d.get("secenek_seti")
+    if eski and eski.get("durum") == "secildi":
+        k.d.setdefault("eski_setler", []).append(eski)
+        k.d["eski_setler"] = k.d["eski_setler"][-5:]
+    k.d["uretilen_plan"] = temel
+    k.d["taslak"]["katalog_kodu"] = taban
+    k.d["cati_secenekleri"] = {"plan_kodu": taban, "adaylar": gecerli}
+    if talep_tipi in CATI_SOZU:                                # A6: yazılan çatı çizilmiyor; set başında söylenir
+        k.bekleyen_not = (k.bekleyen_not or "") + f"{CATI_SOZU[talep_tipi].capitalize()} çatı bu sürümde çizilmiyor; beşik ya da kırma seçin. "
+    saklandi = _celik_istek_sakla(k)
+    k.not_dus("kural", f"çatı seti: {temel['kod']} beşik + kırma")
+    return _secenekler(k, katalog, ts, uygun=SC.cati_seti([{**v, "tanim": None, "plan": None} for v in gecerli]), tur="cati_secimi", referans=temel,
+                       ek_not=CELIK_ISTEK_NOTU if saklandi else "")
+
+
 def _aday_mahalleri(aday: dict) -> list[dict]:
     """Çelik adayın oda adları (cümle bölme oda adlarını tanısın); tanım okunamazsa boş (zarf aşaması tanımı ayrıca doğrular)."""
     try:
@@ -539,9 +670,9 @@ def _aday_bul(k: Konusma, katalog: Katalog, kod: str | None) -> dict | None:
     """Banka adayı ya da bu konuşmada üretilen plan (`k.d['uretilen_plan']`; r3: setteki öteki üretilen plan `uretilen_planlar`'da). Seçilen
     üretilen plan `_celik_dali`'da `uretilen_plan` olur (revizyon ondan sürer); burada yan etki yok (set galerisi her adayı arar)."""
     if kod:
-        for u in [k.d.get("uretilen_plan")] + list(k.d.get("uretilen_planlar") or []):
+        for u in [k.d.get("uretilen_plan")] + list(k.d.get("uretilen_planlar") or []) + list((k.d.get("cati_secenekleri") or {}).get("adaylar") or []):
             if u and str(kod).strip().upper() == str(u.get("kod")).upper():
-                return u
+                return u                                       # İE-25: çatı setinin seçenekleri (`<plan kodu>-B|K`) de
     return katalog.aday(kod)
 
 
@@ -796,7 +927,11 @@ def _celik_degisiklikler(k: Konusma, katalog: Katalog, aday: dict, t: dict, once
     #     kalır). Çatı seçimi (kod, K/L, katalog) sayılmaz: onu kod ya da set belirler ("Ç8801L müşterimiz için" çatıyı uygular). Soru ve
     #     olumsuz cümlede uygulanacak bir şey yoktur (olumsuz pencere/dış 140 aşağıda sorulur).
     if not ayni_proje:
+        sec = getattr(k, "cati_secimi", None)
+
         def _istek(p: dict) -> bool:
+            if sec and CO.cati_tipi_secimi(p["metin"]) == sec:
+                return False                                    # İE-25: yeni planın çatısı bu sözle seçildi (çatı seti ya da talep)
             i = p.get("isaret") or {}
             degisiklik = i.get("pencere") or i.get("dis140") or i.get("ekle") or i.get("cati_sekil") or p.get("oda_istegi")
             return not p["olumsuz"] and ((p["tur"] == "baska" and bool(degisiklik))
@@ -811,8 +946,8 @@ def _celik_degisiklikler(k: Konusma, katalog: Katalog, aday: dict, t: dict, once
         if tur.startswith("pencere") or tur == "diger":
             continue
         if tur == "cati_degistir":
-            if r["cati"]:
-                continue                                        # çatı cümlesi okundu (katalog/K/L); `_celik_dali` seçti
+            if r["cati"] or getattr(k, "cati_secimi", None):
+                continue                                        # çatı cümlesi okundu (katalog/K/L; İE-25: yeni planda beşik/kırma); `_celik_dali` seçti
             return _bitir(k, Karar(eylem="yonlendir", gerekce=f"çelikte varyant henüz desteklenmiyor: {tur}",
                                     mesaj=f"\"{v.get('aciklama', '')}\" değişikliği çelik modelde otomatik yapılamıyor"
                                           + ("; çatı için katalog çatısı, K ya da L seçilebilir. " if kat_aday.get("varyantlar") else ". ") + YONLENDIRME))
@@ -1520,7 +1655,8 @@ def _secenekler(k: Konusma, katalog: Katalog, ts: dict, uygun: list[dict] | None
         k.d["eski_setler"] = k.d["eski_setler"][-5:]
     k.d["secenek_seti"] = st
     test_var = any(a.get("durum") == "test" for a in st["adaylar"])
-    mesaj = SC.cati_mesaji(sirali, referans or sirali[0]) if tur == "cati_varyanti" else SC.mesaj_metni(sirali, ts)
+    mesaj = SC.cati_mesaji(sirali, referans or sirali[0]) if tur == "cati_varyanti" else \
+        SC.cati_secimi_mesaji(sirali, referans or sirali[0]) if tur == "cati_secimi" else SC.mesaj_metni(sirali, ts)
     if test_var:
         mesaj = "[TEST VERİSİ — gerçek seçenek değildir] " + mesaj
     if ek_not:

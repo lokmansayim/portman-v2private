@@ -492,14 +492,18 @@ class Depo:
         acik = c.execute("SELECT * FROM secenek_setleri WHERE gonderen = %s AND durum = 'acik' FOR UPDATE", (gelen["sender"],)).fetchone()
         yeni = d_yeni.get("secenek_seti") or None
         if acik is not None and (yeni is None or yeni.get("id") != acik["id"] or yeni.get("durum") != "acik"):
+            kapanan = yeni
             if yeni is not None and yeni.get("id") == acik["id"] and yeni.get("durum") in ("secildi", "dustu", "eskidi"):
                 kapanis = yeni["durum"]
             elif yeni is not None and yeni.get("id") != acik["id"] and yeni.get("durum") == "acik":
-                kapanis = "eskidi"
+                # İE-25: setten seçim aynı işte yeni bir set açtıysa (yeni plan seçildi → çatı seti) eski set konuşmanın `eski_setler`inde
+                # "secildi" durur; kayıtta da seçilen kodla kapanır ("eskidi" değil)
+                kapanan = next((s for s in d_yeni.get("eski_setler") or [] if s.get("id") == acik["id"] and s.get("durum") == "secildi"), None)
+                kapanis = "secildi" if kapanan else "eskidi"
             else:
                 kapanis = "dustu"
             c.execute("UPDATE secenek_setleri SET durum = %s, secilen_kod = %s, secim_mesaj_id = %s, kapandi = now() WHERE id = %s",
-                      (kapanis, (yeni or {}).get("secilen_kod") if kapanis == "secildi" else None, gelen["id"] if kapanis == "secildi" else None, acik["id"]))
+                      (kapanis, (kapanan or {}).get("secilen_kod") if kapanis == "secildi" else None, gelen["id"] if kapanis == "secildi" else None, acik["id"]))
             acik = None
         if yeni is not None and yeni.get("durum") == "acik" and acik is None:
             c.execute("INSERT INTO secenek_setleri (id, gonderen, proje_id, kaynak_mesaj_id, adaylar, agirliklar) VALUES (%s, %s, %s, %s, %s, %s) "

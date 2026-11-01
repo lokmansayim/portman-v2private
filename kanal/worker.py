@@ -531,6 +531,7 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
         ekle(metin + "\n\nSeçmek için kodunu yazın.")
         sonuc["secenek_seti"] = {"id": karar.secenek_seti["id"], "adaylar": [a["kod"] for a in karar.secenek_seti["adaylar"]]}
     elif karar.eylem == "secenek" and karar.secenek_seti:
+        cati_kartlari(k, karar, gelen, proje_koku)                 # İE-25: çatı setinin kartları (yeni plan, beşik ve kırma)
         for r in secenek_satirlari(gelen, karar, katalog, metin, proje_koku):
             ekle_satir(r)
         kart_son_yeri(k, proje_koku)
@@ -711,8 +712,9 @@ def secenek_satirlari(gelen: dict, karar, katalog, metin: str, proje_koku: Path 
         kok = (Path(proje_koku) if proje_koku else KANAL / "projects") / f"SECENEK-{st['id']}" / "r01"
         kok.mkdir(parents=True, exist_ok=True)
         celik = any(a.get("motor") == "genel" for a in adaylar)      # İE-08: çelik kartı (plan + çatı planı + perspektif) daha geniş panelde okunur
+        baslik = "Çatı seçin: plan aynı, fark çatıda" if st.get("tur") == "cati_secimi" else f"{gelen.get('text') or ''}"[:60]   # İE-25
         yol = BG.bilesik_gorsel([{**a, "gorsel_yolu": (KT_KOK() / a["gorsel"]) if a.get("gorsel") else None} for a in adaylar[:SC.EN_COK_GORSEL]],
-                                kok / "secenekler.png", baslik=f"{gelen.get('text') or ''}"[:60], panel_px=600 if celik else 460)
+                                kok / "secenekler.png", baslik=baslik, panel_px=600 if celik else 460)
         if yol:
             gorsel = {"file": str(yol), "filename": yol.name, "sha256": _sha(yol), "mime": "image/png"}
     except Exception as e:      # görsel üretilemezse metinli buton mesajı gider; akış durmaz
@@ -1260,7 +1262,8 @@ def kart_son_yeri(k, proje_koku: Path | None) -> None:
     yollar (sonraki set sunumları; r3: iki yeni plan) taşınan yere çevrilir."""
     if not proje_koku:
         return
-    planlar = [k.d.get("uretilen_plan") or {}] + list(k.d.get("uretilen_planlar") or [])
+    planlar = [k.d.get("uretilen_plan") or {}] + list(k.d.get("uretilen_planlar") or []) + \
+        list((k.d.get("cati_secenekleri") or {}).get("adaylar") or [])                      # İE-25: çatı setinin kartları
     for u in planlar:
         g = u.get("gorsel")
         if not (g and str(g).startswith(str(proje_koku))):
@@ -1271,14 +1274,14 @@ def kart_son_yeri(k, proje_koku: Path | None) -> None:
                 x["gorsel"] = son
 
 
-def plan_karti(tanim: dict | None, gelen: dict, proje_koku: Path | None, sira: int = 1) -> str | None:
+def plan_karti(tanim: dict | None, gelen: dict, proje_koku: Path | None, sira: int = 1, ad: str | None = None) -> str | None:
     """İE-14: yeni planın seçenek kartı (`<kod>_bayi_gorsel.png`, perspektifsiz; genel motor). Üretilemezse None (set görselsiz gider).
-    r3: ikinci yeni planın klasörü `-2` ekiyle."""
+    r3: ikinci yeni planın klasörü `-2` ekiyle. İE-25: çatı setinin kartı kendi klasöründe (`ad`)."""
     if not tanim:
         return None
     try:
         from motor.genel import uret as U
-        kok = (Path(proje_koku) if proje_koku else KANAL / "projects") / (f"YENI-{satir_id(gelen['id'], 0)[4:16]}" + ("" if sira == 1 else f"-{sira}"))
+        kok = (Path(proje_koku) if proje_koku else KANAL / "projects") / (ad or (f"YENI-{satir_id(gelen['id'], 0)[4:16]}" + ("" if sira == 1 else f"-{sira}")))
         kok.mkdir(parents=True, exist_ok=True)
         yol = kok / "tanim.json"
         yol.write_text(json.dumps(tanim, ensure_ascii=False), encoding="utf-8")
@@ -1288,6 +1291,24 @@ def plan_karti(tanim: dict | None, gelen: dict, proje_koku: Path | None, sira: i
     except Exception as e:
         log("yeni plan kartı üretilemedi:", maske_numaralar(f"{type(e).__name__}: {str(e)[:160]}"))
         return None
+
+
+def cati_kartlari(k, karar, gelen: dict, proje_koku: Path | None) -> None:
+    """İE-25: yeni planın çatı setinde (tür `cati_secimi`) her çatının kartı bugünkü yeni plan kartının üreticisiyle (`plan_karti`;
+    plan + çatı planı + görünüşler, perspektifsiz). Yol konuşmadaki çatı seçeneklerine ve sete yazılır; set yeniden sunulunca var olan kart
+    yeniden çizilmez. Çizilemeyen kart görselsiz kalır (set metinle gider; bugünkü kural)."""
+    st = karar.secenek_seti or {}
+    if st.get("tur") != "cati_secimi":
+        return
+    cs = k.d.get("cati_secenekleri") or {}
+    for v in cs.get("adaylar") or []:
+        if v.get("gorsel") and Path(str(v["gorsel"])).is_file():
+            continue
+        v["gorsel"] = plan_karti(v.get("tanim"), gelen, proje_koku, ad=f"CATI-{satir_id(gelen['id'], 0)[4:16]}-{str(v['kod'])[-1]}")
+    gorsel = {v.get("kod"): v.get("gorsel") for v in cs.get("adaylar") or []}
+    for x in list(st.get("adaylar") or []) + list((k.d.get("secenek_seti") or {}).get("adaylar") or []):
+        if x.get("kod") in gorsel:
+            x["gorsel"] = gorsel[x["kod"]]
 
 
 def KT_KOK() -> Path:

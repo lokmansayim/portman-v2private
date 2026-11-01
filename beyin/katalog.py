@@ -91,11 +91,11 @@ class Katalog:
     @staticmethod
     def taban_kod(s: str | None) -> str | None:
         """Çelik varyantın taban modeli: Ç8801K → Ç8801 (aynı tabandaki varyant başka model değildir; seçenek setinden seçim konuşmayı
-        sıfırlamaz). Prefabrik ve KT kodu olduğu gibi."""
+        sıfırlamaz). Prefabrik ve KT kodu olduğu gibi. İE-25: yeni planın çatı seçeneği de (YENI-1A2B3C-K → YENI-1A2B3C)."""
         k = Katalog.kod_normalize(s)
         if not k:
             return None
-        m = re.fullmatch(r"(Ç\d{4})[A-Z]?", k)
+        m = re.fullmatch(r"(Ç\d{4})[A-Z]?", k) or re.fullmatch(r"(YENI-[0-9A-F]{6})-[BK]", k)
         return m.group(1) if m else k
 
     def bul(self, kod: str | None) -> dict | None:

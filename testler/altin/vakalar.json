@@ -499,11 +499,11 @@
   },
   {
    "id": "B",
-   "ad": "3+1 çelik, çatı yazılmadı",
+   "ad": "3+1 çelik, çatı yazılmadı (çatı plandan sonra; İE-25)",
    "adimlar": [
     {
      "id": "B01",
-     "adim": "eksik_bilgi",
+     "adim": "bilgi_tam",
      "mesaj": "95 m² 3+1 tek kat çelik",
      "kaynak": "canlı WhatsApp · 16 Ekim (İE-14, T1)",
      "okuma": {
@@ -514,11 +514,11 @@
       "alan_m2": 95
      },
      "karar": {
-      "eylem": "sor",
-      "soru_alani": "cati"
+      "eylem": "cevapla",
+      "plan_uretimi": true
      },
-     "anlam": "çelik, tek kat, 3+1, 95 m²; çatı eksik",
-     "not": "Rehber: beş bilgiden eksik olanı sorar (çatı). Canlıda bugün doğrudan yeni plan üretimine gidiyor (D-18)."
+     "anlam": "çelik, tek kat, 3+1, 95 m²: dört bilgi tam; çatı plan seçildikten sonra",
+     "not": "İE-25 (Lokman, 1 Kasım 2026, karar kartı \"Plan seçildikten sonra\"): çatı plandan önce sorulmaz. Bankada 3+1 yok: yeni plan üretimi (D-18); plan seçilince Beşik / Kırma seti gelir. Karar kipinde üretim oynatılmaz; seçim ve çatı adımı testler/test_cati_secimi.py'de. Önceki beklenti (rehber §1 \"beş bilgi\", çatı sorusu) bu kararla değişti."
     }
    ]
   },
@@ -763,11 +763,11 @@
   },
   {
    "id": "E",
-   "ad": "rehber §3: 3+1 çelik, çatı sorusu, kırma",
+   "ad": "rehber §3: 3+1 çelik, çatı plandan sonra (İE-25)",
    "adimlar": [
     {
      "id": "E01",
-     "adim": "eksik_bilgi",
+     "adim": "bilgi_tam",
      "mesaj": "Tek kat çelik, 3+1, 90 m² civarı. Muğla.",
      "kaynak": "rehber §3 örnek konuşma",
      "okuma": {
@@ -778,11 +778,11 @@
       "alan_m2": 90
      },
      "karar": {
-      "eylem": "sor",
-      "soru_alani": "cati"
+      "eylem": "cevapla",
+      "plan_uretimi": true
      },
-     "anlam": "çelik, tek kat, 3+1, ~90 m²; çatı eksik (il ilk taslakta gerekmez)",
-     "not": "Rehber: \"Çatı nasıl olsun?\" [Beşik] [Kırma]. Bugün doğrudan yeni plan üretimine gidiyor."
+     "anlam": "çelik, tek kat, 3+1, ~90 m²: dört bilgi tam (il ilk taslakta gerekmez); çatı plan seçildikten sonra",
+     "not": "İE-25 (Lokman, 1 Kasım 2026): rehberin \"Çatı nasıl olsun?\" sorusu plandan sonraya alındı; bugün doğrudan yeni plan üretimi, plan seçilince \"Çatı seçin\" (Beşik / Kırma)."
     },
     {
      "id": "E02",
@@ -806,7 +806,7 @@
       ]
      },
      "anlam": "çatı kırma",
-     "not": "3+1 bankada yok: yeni plan üretimi; sonuç (yeni plan + bankadan en yakınlar) seçenek olarak gelir (D-18)."
+     "not": "3+1 bankada yok: yeni plan üretimi; sonuç (yeni plan + bankadan en yakınlar) seçenek olarak gelir (D-18). İE-25'ten önce çatı sorusunun cevabıydı; bugün bayi çatıyı kendiliğinden yazar ve talep kırmayla yeniden plana gider (çatı yazıldığı için plan seçilince çatı seti gelmez)."
     }
    ]
   },
@@ -1216,13 +1216,13 @@
   },
   {
    "id": "X8",
-   "ad": "eksik: prefabrikte çatı",
+   "ad": "prefabrik 120 m², çatı yazılmadı (İE-25)",
    "adimlar": [
     {
      "id": "X08",
-     "adim": "eksik_bilgi",
+     "adim": "bilgi_tam",
      "mesaj": "120 m² 3+1 prefabrik, tek kat",
-     "kaynak": "yazılmış (rehber §1: beş bilgi)",
+     "kaynak": "yazılmış (rehber §1)",
      "okuma": {
       "niyet": "yeni_talep",
       "yapi_turu": "prefabrik",
@@ -1231,10 +1231,10 @@
       "alan_m2": 120
      },
      "karar": {
-      "eylem": "sor",
-      "soru_alani": "cati"
+      "eylem": "secenek"
      },
-     "anlam": "çatı eksik"
+     "anlam": "dört bilgi tam: prefabrik 120 m² 3+1; çatı plan seçildikten sonra",
+     "not": "İE-25 (Lokman, 1 Kasım 2026): çatı sorulmaz; rehber §2 (T14 gibi) yakın projede en çok üç seçenek. Bugün prefabrik seçenek seti aday vermiyor (pano 70, 115): katalog önerisini yazıyla sunup modeli ya da ölçüyü soruyor, bu adımı karşılamıyor. Prefabrikte çatı adımı o set gelince açılır."
     }
    ]
   },
