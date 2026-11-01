@@ -162,14 +162,16 @@ def kesen_araliklar(engeller: list[dict], geo: dict) -> list[tuple[float, float]
     return out
 
 
-def sacak_omegasi(g: dict, G_: dict, F: dict | None = None, engeller: list[dict] | None = None) -> list[dict]:
+def sacak_omegasi(g: dict, G_: dict, F: dict | None = None, engeller: list[dict] | None = None,
+                  aralik: tuple[float, float] | None = None) -> list[dict]:
     """Saçak duvarlarının üstünde, taşan verandada (`F`, K5b) yan kirişlerin üstünde; saçak ucundan ucuna (`v0`..`v1`), gerçek Portatifev
     listelerindeki gibi (Lokman, 31 Ekim 2026 13:40 "gerçek listeye uy"; BK-19). Kesitine baş makas betopanı ya da verandanın omegası
     (`engeller`) iniyorsa hat orada kesilir (`kesen_araliklar`); parçalar hattın (`Hat`, `HatBoyu_cm`) parçasıdır, sayı hattın tamamından
-    (liste gibi: kesik ve üst üste binen kısım listede de saçak boyunun içinde)."""
+    (liste gibi: kesik ve üst üste binen kısım listede de saçak boyunun içinde). `aralik` verilirse omega yalnız o `v` aralığındadır:
+    girintili gövdenin şerit çatısı (`serit.py`, İE-24) bugün saçak hattının altındaki duvar parçalarını böyle verir (D-39 › Bilinen)."""
     F = F or cati.cerceve(g)
     w, h = G_["sacak_omegasi"]
-    v0, v1 = F["v0"], F["v1"]
+    v0, v1 = aralik if aralik else (F["v0"], F["v1"])
     ne = "kirişin" if "w0" in F else "duvarının"
     out = []
     for yuz, u0 in (("sol", 0.0), ("sag", F["aciklik"] - w)):
@@ -178,7 +180,7 @@ def sacak_omegasi(g: dict, G_: dict, F: dict | None = None, engeller: list[dict]
         kesik = len(kes) != 1 or abs(kes[0][0] - v0) > ESIK or abs(kes[0][1] - v1) > ESIK      # uçtan kesilen tek parça da kesik hattır
         for j, (a0, a1) in enumerate(kes, 1):
             bilgi = {"Yuz": yuz, "Hat": yuz, "HatBoyu_cm": _r(v1 - v0), "Parca": j} if kesik else {"Yuz": yuz}
-            aciklama = f"{yuz} saçak {ne} üstü, {v1 - v0:g} cm (saçak ucundan ucuna)"
+            aciklama = f"{yuz} saçak {ne} üstü, {v1 - v0:g} cm" + ("" if aralik else " (saçak ucundan ucuna)")
             if kesik:
                 aciklama += f", {j}. parça {a0:g}–{a1:g} (hat kesik)"
             out.append({"kural": "sacak_omegasi_yerlesimi", "parca": "sacak_omegasi", "boy_cm": _r(a1 - a0),
