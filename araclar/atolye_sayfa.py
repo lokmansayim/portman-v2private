@@ -64,7 +64,7 @@ def yuzde_html(x, basamak: int = 2) -> str:
     return f"<span class='nw'>{yuzde(x, basamak)}</span>"
 
 
-def _sol(kart: dict) -> str:
+def _sol(kart: dict, sahip: str = "") -> str:
     o = kart.get("olcum") or {}
     k = kart.get("kaynak") or {}
     dosyalar = ", ".join(f"{d['etiket']} ({d['uzanti']}, {d['sha256'][:12]})" for d in k.get("dosyalar") or []) or "yok"
@@ -78,7 +78,8 @@ def _sol(kart: dict) -> str:
                 ("Oda programı", o.get("oda_programi")), ("Dış ölçü", f"{sayi(o.get('dis_olcu_cm'))} cm"),
                 ("Çatı", f"{kart.get('cati_adi')} · tip {cati.get('tip')} · {cati.get('duzlem')} düzlem · yüzey {sayi(cati.get('yuzey_m2'))} m²"),
                 ("Çatı kenarları", ", ".join(f"{a} {sayi(v / 100)} m" for a, v in (cati.get("kenar_cm") or {}).items()) or "…"),
-                ("Müşteri projesi", "evet (tarif yazılmaz; tanımda sahibinin adı varsa çizimde o görünür, D-33)" if kart.get("musteri_projesi") else "hayır"),
+                ("Müşteri projesi", (f"evet · sahibi {sahip} (çizimlerde ve listede tarif yerine bu ad yazılır, D-33)" if sahip
+                                     else "evet (tarif yazılmaz; tanımda sahibinin adı varsa çizimde o görünür, D-33)") if kart.get("musteri_projesi") else "hayır"),
                 ("Durum", kart.get("durum"))]
     s = ["<h2>Model kartı</h2><table>"] + [f"<tr><th>{e(a)}</th><td>{e(b)}</td></tr>" for a, b in satirlar] + ["</table>"]
     mt = kart.get("metraj_testi") or {}
@@ -176,8 +177,9 @@ def _gorsel_sayfa(doc, yol: Path, baslik: str, alt: str = "") -> None:
     s.insert_image(pymupdf.Rect(20, 40, A4[0] - 20, A4[1] - 16), filename=str(yol), keep_proportion=True)
 
 
-def kontrol_pdf(kart: dict, cizim: Path, gk: str, hedef: Path) -> Path:
-    """Kontrol sayfasını yazar; `cizim` motorun çıktı klasörü, `gk` dosya gövdesi (C8801D)."""
+def kontrol_pdf(kart: dict, cizim: Path, gk: str, hedef: Path, sahip: str = "") -> Path:
+    """Kontrol sayfasını yazar; `cizim` motorun çıktı klasörü, `gk` dosya gövdesi (C8801D), `sahip` müşteri projesinde tanımdaki sahibinin
+    adı (D-33; `motor.genel.bayi_gorseli.sahip_adi`)."""
     import pymupdf
     sc = kart.get("son_cizim") or {}
     doc = pymupdf.open()
@@ -188,7 +190,7 @@ def kontrol_pdf(kart: dict, cizim: Path, gk: str, hedef: Path) -> Path:
            "<div class='kutu'><p><b>Cevabınız:</b> uygunsa <b>kabul</b> yazın. Değilse düzeltmeyi düz cümleyle yazın (ör. \"mutfak penceresi "
            "120x120\", \"çatı eğimi %30\"); model yeniden çizilir ve yeni kontrol sayfası gelir.</p></div>")
     s.insert_htmlbox(pymupdf.Rect(24, 16, A4[0] - 24, 92), ust, css=CSS)
-    s.insert_htmlbox(pymupdf.Rect(24, 96, 404, A4[1] - 16), _sol(kart), css=CSS)
+    s.insert_htmlbox(pymupdf.Rect(24, 96, 404, A4[1] - 16), _sol(kart, sahip), css=CSS)
     s.insert_htmlbox(pymupdf.Rect(416, 96, A4[0] - 24, A4[1] - 16), _sag(kart), css=CSS)
     pafta_png = cizim / f"{gk}_pafta.png"
     if pafta_png.exists():

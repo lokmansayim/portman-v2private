@@ -75,6 +75,11 @@ def _uret(model: str, ek: dict, bilgi: dict) -> dict:
                           bayi=True, bilgi=bilgi)
             assert m["passed"], m.get("warnings")
             kod = uret.kod_govde(t)
+            c = Path(tmp, "c")
+            r["yukleme"] = (json.loads((c / f"{kod}_yukleme.json").read_text(encoding="utf-8")).get("ad"), {})
+            import ifcopenshell
+            f = ifcopenshell.open(str(c / f"{kod}.ifc"))
+            r["ifc"] = ([f.by_type("IfcProject")[0].Name, f.by_type("IfcBuilding")[0].Name], {})
             r["dxf"] = (Path(tmp, "c", f"{kod}.dxf").read_text(encoding="utf-8", errors="replace") if Path(tmp, "c", f"{kod}.dxf").exists()
                         else "\n".join(p.read_text(encoding="utf-8", errors="replace") for p in Path(tmp, "c").glob("*.dxf")), {})
     finally:
@@ -102,6 +107,12 @@ def test_kt_sahibinin_adi_cizimlerde_tarif_yok(kt01_adli):
     tarif = json.loads((KOK / "modeller" / "KT01.json").read_text(encoding="utf-8"))["ad"]
     assert not any("kör test" in x or tarif in x for d in (plan, s1, s2) for x in d)    # modelin tarifi bayiye gitmez
     assert SAHIP in r["dxf"][0]                                                          # düzenlenebilir DXF antedi
+    # mühendis çizim seti (plan, pafta, görünüşler), yükleme listesi ve IFC: tarif yerine "kod · sahibinin adı · m²" (D-33 tamamlama)
+    for d in (f"{kod}_plan.png", f"{kod}_pafta.png", f"{kod}_gorunusler.png"):
+        assert any(x.startswith(f"KT-01 · {SAHIP} · ") and "m²" in x for x in r[d][0]), d
+        assert not any("kör test" in x or tarif in x for x in r[d][0]), d
+    assert r["yukleme"][0].startswith(f"KT-01 · {SAHIP} · ") and r["yukleme"][0].endswith(" m²")
+    assert r["ifc"][0] == [f"Portman — KT-01 · {SAHIP}", SAHIP]
     for d in (f"{kod}_plan_bayi.png", "pafta_sayfa_1", "pafta_sayfa_2"):                 # uzun ad yazı çakışması doğurmaz (D-16)
         assert _cakisma(r[d][1]) == [], (d, _cakisma(r[d][1]))
 
@@ -119,9 +130,20 @@ def test_adi_yazili_olmayan_kt_bugunku_gibi():
     s1, s2 = r["pafta_sayfa_1"][0], r["pafta_sayfa_2"][0]
     assert any(x.startswith("KT-01 · ") and x.split("   —   ")[0].count("·") == 1 for x in s2)   # "KT-01 · 99 m²"
     assert any(x.startswith("KT-01 · ") and "M² ÇELİK KONUT" in x for x in s1)
+    tarif = json.loads((KOK / "modeller" / "KT01.json").read_text(encoding="utf-8"))["ad"]
+    assert r["yukleme"][0].startswith("KT-01 · Tek kat çelik") and r["ifc"][0][1] == tarif   # çizim seti, liste ve IFC tarifle (BK-09 M7)
 
 
 def test_kt04_sahibinin_adi_tanimda():
     # Lokman, 1 Kasım 2026 05:26 UTC: KT-04'ün sahibinin adı (D-33 › Sonraki); başlıkta m² kodun brüt oturumundan (K-A1)
     t = json.loads((KOK / "modeller" / "banka" / "KT04" / "tanim.json").read_text(encoding="utf-8"))
     assert t.get("musteri_adi") and sahip_adi(t) == t["musteri_adi"] and not any(c.isdigit() for c in t["musteri_adi"])
+
+
+def test_kontrol_sayfasinda_sahibinin_adi():
+    # atölyenin kontrol sayfası (Lokman'a): müşteri projesinin satırında sahibinin adı görünür, adı yoksa bugünkü satır
+    from araclar import atolye_sayfa
+    kart = {"gosterim": "KT-09", "kod": "KT09", "musteri_projesi": True}
+    assert "sahibi Tanım Sahibi" in atolye_sayfa._sol(kart, "Tanım Sahibi")
+    assert "evet (tarif yazılmaz;" in atolye_sayfa._sol(kart) and "evet · sahibi" not in atolye_sayfa._sol(kart)
+    assert ">hayır<" in atolye_sayfa._sol({"gosterim": "Ç8801", "kod": "Ç8801"}, "Tanım Sahibi")
