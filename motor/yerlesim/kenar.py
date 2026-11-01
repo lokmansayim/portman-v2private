@@ -291,6 +291,11 @@ def katman(ie: dict, g: dict, D: dict, kesit: dict, K: dict) -> dict:
     (`motor.yerlesim.degerler`); `kesit`: K2'nin gösterim kesitleri (aşığın yüksekliği, kaplama ve betopan kalınlığı); `K`: yerleşim
     kuralları (`cati_tipleri` kuralın kendisinden okunur, K2'deki gibi: yazılı değilse her çatı)."""
     G_ = D[GOSTERIM]["kesit_cm"]
+    from . import kaplama_kalinlasma, kaplama_turu
+    dk = kaplama_kalinlasma(D["cati_kaplamasi"], kaplama_turu(g, D["cati_kaplamasi"])[0])
+    if dk:                                      # D-40: sandviç panelde kaplama kalınlaşır, alın sacının alnı o kadar genişler; başka parça değişmez
+        kesit = {**kesit, "kaplama": kesit["kaplama"] + dk}
+        G_ = {**G_, "alin_saci": {**G_["alin_saci"], "alin": G_["alin_saci"]["alin"] + dk}}
     parcalar, kural_yok, uyarilar = [], [], []
     ac, hatlar = alt_cerceve(ie, D[ALT_CERCEVE], G_)
     parcalar += ac

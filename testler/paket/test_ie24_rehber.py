@@ -132,3 +132,41 @@ def test_sacak_omegasi_ve_z_kart_modelinden(tk03):
     assert sum(n for k in d["kalkan"] for n in k["z_n"].values()) == say["kenar"]["liste"]["CK-04"] == z_liste == 14
     p = next(a for a in d["adimlar"] if a.get("ad") == "Baş makas betopanı ve Z")["p"]
     assert "Z 2,8 m’lik parçalardır: her eğik kenara ⌈eğik boy ÷ 2,8⌉ parça" in p and "veranda" not in p
+
+
+def test_sandvic_panel_kalinlasir(tk03):
+    """D-40 (Lokman, 1 Kasım 2026 10:23): TK-03'ün çatısı sandviç panel; rehber kaplamanın kesitini kart modelinin kuralından okur
+    (100 cm kapatır, 5 hadve, hadve 3,5 cm, yalıtım 4 cm) ve paneli yalıtımıyla çizer; alın sacının alnı kaplamanın kenar hadvesine kadar
+    uzandığı için 4,8 cm genişler. Kart modelinde kaplama ve alın sacı aynı kuralla (`test_d40_sandvic.py`)."""
+    d, say, L = tk03
+    assert {p["bilgi"]["Kaplama"] for p in say["yerlesim"]["parcalar"] if "Kaplama" in p["bilgi"]} == {"sandvi"}
+    assert any(s["kalem"].startswith("Sandviç panel") for s in L)
+    assert d["kaplama"]["profil"] == {"hadve": 3.5, "tepe": 4.2, "taban": 7.4, "kenar": 4.5, "kapatir": 100, "yalitim": 4}
+    # kartta varsayım varsayım diye yazılır (geometri hakemi, 1.11): Lokman'ın verdiği kapatma ve hadve sayısı, yalıtımın 40 mm'si varsayım
+    assert d["kaplama"]["metin"]["profil"].startswith("100 cm kapatır, 5 hadveli (Lokman, 1.11.2026); hadve 35 mm (üretici tablosu); "
+                                                      "yalıtım 40 mm (satıcının stok standardı, varsayım)")
+    assert d["metin"]["alin"]["proje"].endswith("kesin ölçü teyit bekler")
+    assert "4,8 cm kalın, alın sacının alnı o kadar geniş (D-40)" in d["kaplama"]["metin"]["profil"]
+    assert "sandviç panelin kalınlaşması kadar" in d["metin"]["alin"]["proje"]
+    # Lokman 10:46 ("5 hadve sık olmuş gibi 4 hadve") ve 10:50 ("ölçüleri oralardan alabilirsin"): hadveler 25 cm arayla, 1 metrede 4 hadve
+    assert "hadveler 25 cm arayla, biri yandaki panele binen bindirme hadvesi, çatının 1 metresinde 4 hadve" in d["kaplama"]["metin"]["profil"]
+    assert "hadvelerin içi poliüretan dolu, panelin altı düz" in d["kaplama"]["metin"]["profil"]
+    ara = [b - a for h in d["kaplama"]["hadve"].values() for a, b in zip(h, h[1:])]
+    assert ara and all(22.5 <= x <= 27.5 for x in ara), sorted(ara)[:3] + sorted(ara)[-3:]
+
+
+def test_girintili_tek_kat_panel_rehberi_kurulur(tmp_path):
+    """Girintili gövdede tek kat panelli çatıyı kart modeli kurmaz (liste parça parça sayar; İE-24); rehber kaplamanın türünü o zaman
+    listeden alır ve 62 m²'nin trapezini çizer (geometri hakemi, 1.11: D-40'ın kapısı bu evi rehbersiz bırakmasın)."""
+    from motor import kart_model, prefabrik_liste as PL
+    from araclar.paket.rehber import veri
+    ie = _oku(VERI / "TK03.json")
+    ie["ozellikler"]["Çatı Kaplaması"] = "Tek Kat Panel"
+    kart_model.uret(copy.deepcopy(ie), tmp_path, "TK03")
+    say = _oku(tmp_path / "TK03_kart_sayim.json")
+    assert not any("Kaplama" in p["bilgi"] for p in say["yerlesim"]["parcalar"])
+    L = PL.is_emrinden(copy.deepcopy(ie))["satirlar"]
+    assert any(s["kalem"].startswith("Tek kat çatı paneli") for s in L)
+    d = veri.kur(copy.deepcopy(ie), tmp_path, "TK03", L, "TK-03")
+    assert d["kaplama"]["profil"] == {"hadve": 2.7, "tepe": 4.2, "taban": 7.4, "kenar": 4.5, "kapatir": 100}
+    assert "sandviç" not in d["metin"]["alin"]["proje"]
