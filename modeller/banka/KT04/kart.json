@@ -22,7 +22,7 @@
    "kaynak": "projenin adında ve çatı paftasında (ÇATI M2: 120)"
   }
  },
- "durum": "taslak",
+ "durum": "kontrolde",
  "metraj_testi": {
   "durum": "gecti",
   "kaynak": "celik_hakemi",
@@ -92,7 +92,15 @@
    "kod": "omega_asik",
    "ad": "B · tavan omegası, aşık, alın sacı, saçak sacı (prefabrik yöntemi)"
   },
-  "zaman": "2026-10-30T02:05+0300"
+  "tanim_farki": [
+   "acikliklar[P10].acilis",
+   "acikliklar[P11].acilis",
+   "acikliklar[K2].mentese",
+   "acikliklar[K3].mentese",
+   "musteri_adi"
+  ],
+  "tanim_kanonik": "c6da5ae3dbf3e78d6ad846d218235da3fd7dc4bed2404847a234db9ea574e701",
+  "zaman": "2026-11-01T14:26+0300"
  },
  "pim": {
   "kural_seti": {
@@ -161,7 +169,7 @@
   "liste": {
    "satir": 103,
    "celik_kg": 4248.52,
-   "iz": "dad62ae56d15bd6a7a108e89fae8af9cbf3faa3971263c1f09c16242236662de",
+   "iz": "4b386f7a650e470ce001162c03954c742ee91cef5fbddcde4fc5654e9bec184b",
    "gruplar": {
     "Çelik panel": {
      "satir": 10,
@@ -212,10 +220,12 @@
   "kural_seti": "a01cbf2a810c8e7f.json"
  },
  "son_cizim": {
-  "no": 5,
-  "zaman": "2026-10-30T11:18+0300",
-  "tanim_sha256": "ec4de5f622e9276c75cf74da316239abc71bca648d914e06dfa19a024b1d30dd",
+  "no": 7,
+  "zaman": "2026-11-01T14:26+0300",
+  "tanim_sha256": "9ff2f05bb7e6fb0c2545790b2a9486f68fa9f8b9830c2b1e726ef39366cc8405",
   "kural_seti": "a01cbf2a810c8e7f.json",
+  "kural_seti_sha256": "a01cbf2a810c8e7fcede59dcf2ed9b86c31b815977456b8753da8afbaae506ea",
+  "karkas_sha256": "4baf8aa0acb81d2fa6f93a41bfdcd051d046a2b1a61e244e3a7842d688651060",
   "pim": {
    "kural_seti": {
     "yol": "testler/celik/projeler/setler/a01cbf2a810c8e7f.json",
@@ -228,8 +238,9 @@
     "sema": "portman.celik_karkas/0.1-taslak"
    }
   },
+  "metraj_izi": "9968797f6b02f51ca8f6cf4f4449745d727aa1a472e4dbc7a9c7adc09c0a761c",
   "passed": true,
-  "cikti": "/mnt/project-files/Portman_Proje_Dosyalari/IE-09_atolye/banka_hatti/KT04/c05",
+  "cikti": "/mnt/project-files/Portman_Proje_Dosyalari/IE-09_atolye/banka_hatti/KT04/c07",
   "denetimler": [
    {
     "ad": "Motor doğrulaması",
@@ -249,14 +260,12 @@
    {
     "ad": "15 cm ve daha kısa parçalar (bayi paftası)",
     "durum": "bilgi",
-    "ayrinti": "on 3 cm; on 3 cm; sol 3 cm; sag 3 cm",
-    "sade": "Bayi paftasının ölçü çizgisinde 15 cm'den kısa parçalar yanındaki parçaya katıldı: ön cephede 3 cm (2 yerde), sol cephede 3 cm, sağ cephede 3 cm. Mühendis bakar."
+    "ayrinti": "on 3 cm; on 3 cm; sol 3 cm; sag 3 cm"
    },
    {
     "ad": "Kartla çizimin tutarlılığı (m², oda programı, açıklık, çatı)",
     "durum": "uyarı",
-    "ayrinti": "brut_m2: çizim 123.78, kaynak 120.0",
-    "sade": "Toplam alan: çizimde 123,78 m², projede 120 m² yazıyor."
+    "ayrinti": "brut_m2: çizim 123.78, kaynak 120.0"
    },
    {
     "ad": "Bankada aynı model",
@@ -264,9 +273,9 @@
     "ayrinti": "aynı kod ve aynı plan yok"
    }
   ],
-  "sure_s": 74.9,
+  "sure_s": 40.7,
   "perspektif": "ATLANDI",
-  "kontrol_pdf": "/mnt/project-files/Portman_Proje_Dosyalari/IE-09_atolye/banka_hatti/KT04/c05/KT04_kontrol_c05.pdf"
+  "kontrol_pdf": "/mnt/project-files/Portman_Proje_Dosyalari/IE-09_atolye/banka_hatti/KT04/c07/KT04_kontrol_c07.pdf"
  },
  "duzeltmeler": [
   {
@@ -355,6 +364,34 @@
    "zaman": "2026-10-30T15:02+0300",
    "olay": "duzelt",
    "tur": "tercih"
+  },
+  {
+   "zaman": "2026-11-01T13:11+0300",
+   "olay": "metraj",
+   "durum": "gecti",
+   "proje": "ÇP-14",
+   "fark_yuzde": 0.93
+  },
+  {
+   "zaman": "2026-11-01T13:12+0300",
+   "olay": "ciz",
+   "no": 6,
+   "durum": "kontrolde",
+   "passed": true
+  },
+  {
+   "zaman": "2026-11-01T14:26+0300",
+   "olay": "metraj",
+   "durum": "gecti",
+   "proje": "ÇP-14",
+   "fark_yuzde": 0.93
+  },
+  {
+   "zaman": "2026-11-01T14:26+0300",
+   "olay": "ciz",
+   "no": 7,
+   "durum": "kontrolde",
+   "passed": true
   }
  ],
  "kabul": null,
