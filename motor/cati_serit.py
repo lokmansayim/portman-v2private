@@ -62,6 +62,26 @@ def seritler(cokgen, ie: dict) -> list[list[float]]:
     return out
 
 
+def cati_izi(plan: G.Plan):
+    """Çatının ayak izi: gövdenin dış çizgisi (`G.govde_cokgeni`); açık mahalin (veranda) dikmeleriyle birlikte dış kutusu da içinde.
+    İE-17 PR-2 (AP-15 paftası, 1 Kasım 2026): verandanın sağ kenarı köşe dikmesinden yatak odası 2'nin köşesine 17,75 açık; gövde çizgisi
+    orada dikmenin dış yüzünden 5 cm içeri girer ve şeritleri böler. Paftada cumba 0–386,5, dikmenin dış yüzüne kadar. Dikmesiz açık mahal
+    ve dikmesi kutusunu büyütmeyen mahal izi değiştirmez (TK-03)."""
+    g = G.govde_cokgeni(plan)
+    ekler = []
+    for m in plan.mahaller.values():
+        if not m.acik or m.poly is None or m.poly.is_empty:
+            continue
+        dk = [box(*d) for d in plan.dikmeler if box(*d).distance(m.poly) < 0.5]
+        if dk:
+            ekler.append(box(*unary_union([m.poly, *dk]).bounds))
+    if not ekler:
+        return g
+    u = unary_union([g, *ekler])
+    en = max(getattr(u, "geoms", [u]), key=lambda p: p.area)
+    return Polygon(en.exterior.coords).simplify(TOL)
+
+
 def _ekler(plan: G.Plan, serit, eksen: str, h: float) -> list[float]:
     """Şeridin saçak duvarlarının (b0 ve b1 yüzündeki dış duvarlar) pano ekleri, mahya boyunca (a)."""
     a0, a1, b0, b1 = serit
@@ -113,7 +133,7 @@ def tanim(plan: G.Plan, ie: dict) -> dict:
     zs = H0 + top
     P, _K, eksen = _eksen(ie)
     h = next(d.h for d in plan.duvarlar if d.tur == "dis")
-    sr = seritler(G.govde_cokgeni(plan), ie)
+    sr = seritler(cati_izi(plan), ie)
     k = max(range(len(sr)), key=lambda i: (round(sr[i][3] - sr[i][2], 2), round(sr[i][1] - sr[i][0], 2), -i))
     for i in range(len(sr)):                                            # cumba ana çatıya doğru komşusunun açıklığı içinde
         if i == k:

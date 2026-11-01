@@ -28,11 +28,15 @@ BEKLENEN = {
     "AP13": ("Beşik + Cumba — %32,88 eğim, 30 cm saçak, 10 cm topuk", 149.4),
     "AP16": ("Beşik + Cumba — %32,88 eğim, 30 cm saçak, 10 cm topuk", 170.86),
     "AP01": ("Kırma — %33 eğim, 30 cm saçak, 10 cm topuk", 184.9),
+    # İE-17 PR-2: AP-15 girintili gövdenin beşiği (ana çatı + öndeki paralel cumba; kesit 145,29, cumba 83,4); AP-22 öne 62,75 taşan çapraz
+    # cumba (kesit 147,34 ölçülerden %32,98; %32,88 ile 146,95; cumbanın kesiti 114,36, Motor 114,35)
+    "AP15": ("Besik — %32,88 eğim, 30 cm saçak, 10 cm topuk", 145.29),
+    "AP22": ("Beşik + Cumba — %32,88 eğim, 30 cm saçak, 10 cm topuk", 146.95),
 }
 PK01 = ("Besik — %33 eğim, 30 cm saçak, 10 cm topuk", 118.9)      # beşikte çatı adı canlıdaki yazımla (`dxf_out._cati_adi`)
 # İE-17 PR-2 (1 Kasım 2026): kat planı aşamasında (sıra kuralı: önce kat planı → Lokman'ın onayı → çatı ve görünüşler). Planları
 # `test_pafta_kiyasi.py` ve `testler/motor/test_ie17_pr2.py` denetler; çatıları gelince ön onay PDF'iyle `BEKLENEN`'e geçerler
-PLAN_ASAMASI = ("AP03", "AP09", "AP15", "AP22")
+PLAN_ASAMASI = ("AP03", "AP09")
 
 
 def _ie(ad: str) -> dict:
@@ -107,5 +111,8 @@ def test_gorunuste_acikliklar_plandan(cizim):
     plan = G.kur(copy.deepcopy(_ie(ad)))
     ac = [a for t in CG.TARAFLAR for a in CG.cephe(plan, t)["acikliklar"]]
     bloklar = [e.dxf.name for e in msp.query("INSERT") if e.dxf.layer == "ON_DOGRAMA"]
-    assert len(bloklar) == len(ac) and set(bloklar) <= {"kaynak-on-pencere", "kaynak-on-kapi", dxf_out.VASISTAS_BLOK[0]}
+    assert len(bloklar) == len(ac) and set(bloklar) <= {"kaynak-on-pencere", "kaynak-on-kapi", dxf_out.VASISTAS_BLOK[0], dxf_out.SURGULU_BLOK[0]}
+    surgulu = sum(1 for d in G.kur(copy.deepcopy(_ie(ad))).duvarlar for p in d.panolar if p.acilim and p.acilim.acilis == "surgulu"
+                  and p.acilim.tur == "pencere")
+    assert bloklar.count(dxf_out.SURGULU_BLOK[0]) == surgulu                 # D-31 madde 11: sürgülü pencere görünüşte sürgülü (AP-15, AP-22)
     assert bloklar.count(dxf_out.VASISTAS_BLOK[0]) == sum(a["olcu"] in dxf_out.VASISTAS_OLCULERI for a in ac)

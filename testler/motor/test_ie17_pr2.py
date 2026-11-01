@@ -7,6 +7,8 @@ Paftaya uygunluk `testler/cizim/test_pafta_kiyasi.py`'de (paftadan ölçülen de
 - Panodan geniş pencerenin yanında tam pano yoksa (AP-09 ön duvar, 170/180): odanın duvar parçası 62,75 + pencereli pano + 62,75.
 - `dizilim.dis_pano_dayanagi[].ic_duvarlar: true` (AP-03): aralıktaki iç duvarlar da aynı akslara dayanır.
 - İş Emri dikmesinin tamamen örttüğü köşe parçası çizilmez (AP-09: verandanın açık kenarı gövde köşesinde biter; paftada orada kolon).
+- Çatı: girintili gövdenin beşiğinin izi verandayı dikmeleriyle içine alır (`cati_serit.cati_izi`, AP-15); çıkıntılı çapraz cumba
+  (`cati_prefabrik`, AP-22) gövdenin girintisiyle denetlenir. Ön onay PDF'inde yakın aksların adları kademeli (`dxf_out._kademe`).
 """
 from __future__ import annotations
 import copy
@@ -141,3 +143,56 @@ def test_dikmenin_ortugu_kose_cizilmez():
     assert [tuple(k.rect) for k in yok.koseler if ic(k, kolon)] == [(381.5, 0.0, 391.5, 5.0)]
     assert len(yok.koseler) == len(plan.koseler) + 1
     assert {m: v.alan_m2 for m, v in yok.mahaller.items()} == {m: v.alan_m2 for m, v in plan.mahaller.items()}   # net alan değişmez
+
+
+# ---------------- çatı (PR-2'nin ikinci aşaması)
+
+def test_cati_izi_veranda_dikmesiyle():
+    # AP-15: verandanın sağ kenarı dikmeden yatak odası 2'nin köşesine açık; gövde çizgisi orada 5 cm içeri girer. Çatının izi veranda ve
+    # dikmeleriyle: iki şerit, öndeki cumba 0–386,5 (paftanın cumba kesiti), ana çatı 0–763. TK-03'ün izi değişmez
+    from motor import cati_serit as CS
+    ie = _ie("AP15")
+    plan = _kur(ie)
+    assert CS.seritler(G.govde_cokgeni(plan), ie) == [[0.0, 10.0, 0.0, 386.5], [10.0, 27.75, 0.0, 381.5], [27.75, 800.75, 0.0, 763.0]]
+    assert CS.seritler(CS.cati_izi(plan), ie) == [[0.0, 27.75, 0.0, 386.5], [27.75, 800.75, 0.0, 763.0]]
+    t = CS.tanim(plan, ie)
+    assert [(p["ad"], p["aciklik_cm"], round(p["mahya_kotu"] - 250, 2)) for p in t["parcalar"]] == [("ön cumba", 386.5, 83.4),
+                                                                                                    ("ana çatı", 763.0, 145.3)]
+    tk03 = json.loads((KOK / "testler" / "motor" / "veri" / "TK03.json").read_text(encoding="utf-8"))
+    p3 = _kur(tk03)
+    assert CS.seritler(CS.cati_izi(p3), tk03) == CS.seritler(G.govde_cokgeni(p3), tk03)
+
+
+def test_cikintili_cumba():
+    # AP-22: ana çatı gövdenin 62,75 gerisinden (0–1014 × 62,75–835,75), cumba 439,25–1014 ve öne kadar; mahyalar ana 1074, cumba 380,12
+    from motor import cati_prefabrik as CP, cephe_gorunus as CG
+    ie = _ie("AP22")
+    plan = _kur(ie)
+    c = CP.cati(plan, ie)
+    ana = next(d for d in c["duzlemler"] if d["ad"] == "ana kuzey")
+    assert [min(p[1] for p in ana["plan"]), max(p[1] for p in ana["plan"])] == pytest.approx([449.25, 865.75])
+    cumba = [d for d in c["duzlemler"] if d["ad"].startswith("cumba")]
+    assert min(p[1] for d in cumba for p in d["plan"]) == pytest.approx(-30.0)
+    assert {round(p[0], 2) for d in cumba for p in d["plan"]} >= {409.25, 1044.0}
+    assert CG.mahya_boylari(plan, ie) == [1074.0, 380.12]
+
+
+@pytest.mark.parametrize("degis, mesaj", [
+    (lambda ie: ie["cati"]["cumbalar"][0].update(cikinti_cm=0), "girintili gövde"),       # girinti var, cumba taşmıyor
+    (lambda ie: ie["cati"]["cumbalar"][0].update(bas_cm=200), "çıkıntılı cumba: gövdenin dış çizgisi"),
+    (lambda ie: ie["cati"]["cumbalar"][0].update(cikinti_cm=40), "çıkıntılı cumba: gövdenin dış çizgisi"),
+    (lambda ie: ie["cati"]["cumbalar"][0].update(cikinti_cm=500), "gövdenin derinliğinin yarısından az"),
+])
+def test_cikintili_cumba_govdeyle_denetlenir(degis, mesaj):
+    from motor import cati_prefabrik as CP
+    ie = _ie("AP22"); degis(ie)
+    with pytest.raises(CP.PrefabrikCatiHatasi, match=mesaj):
+        CP.cati(_kur(ie), ie)
+
+
+def test_aks_adlari_kademeli():
+    # yazı boyundan yakın iki aksın ikincisinin adı dışarıda (AP-22: 1′ 67,75, 2 72,75); yakın aks yoksa hepsi aynı hizada
+    from motor import dxf_out
+    assert dxf_out._kademe([10.0, 67.75, 72.75, 130.5]) == [0, 0, 1, 0]
+    assert dxf_out._kademe([0.0, 1.2, 10.0, 200.0]) == [0, 1, 0, 0]
+    assert dxf_out._kademe([5.0, 130.5, 256.0]) == [0, 0, 0]
