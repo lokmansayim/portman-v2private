@@ -29,6 +29,7 @@ Hakemler (`.claude/agents/`): `geometri-hakemi` (Motor/İş Emri değişiklikler
 - `sir_koruma.py` — sır ve canlı durum dosyaları ile dondurulmuş kayıtlar düzenlenemez; sır içeren yazım engellenir; telefon numarasına benzeyen içerik sorar.
 - `komut_koruma.py` — `ssh/scp/sftp/rsync`, `vps_komut`, `main`'e push ve zorla push engellenir; `main`'deyken birleştirme engellenir; silme, ağ ve veritabanı komutları sorar.
 - `hizli_kontrol.py` — her `.py/.sh/.json` düzenlemesinden sonra sözdizimi denetimi; hata varsa düzeltmeden devam edilmez.
+- `muhur_koruma.py` — mühürlü konular (`AGENTS.md` › Mühürlü konular, `KARARLAR/muhurlu.json`): oturum başında listeyi okutur; mühürlü bir kilidi değiştiren düzenleme ve komut "Patron onayı gerekir" diye engellenir; komuttan sonra kilitler denetlenir; mühür açma (`ac`) Lokman'a sorar.
 
 Hook'lar talimat değil koddur: kuralı yorumlayarak aşılamaz. Bir hook'u değiştirmek ya da kapatmak Lokman'ın onayını gerektirir.
 
