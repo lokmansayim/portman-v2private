@@ -7,8 +7,8 @@ Paftaya uygunluk `testler/cizim/test_pafta_kiyasi.py`'de (paftadan ölçülen de
 - Panodan geniş pencerenin yanında tam pano yoksa (AP-09 ön duvar, 170/180) ve `dizilim.genis_pencere: yarim_pano` yazılıysa: odanın
   duvar parçası 62,75 + pencereli pano + 62,75; anahtarsız eskisi gibi hata (BK-13).
 - `dizilim.dis_pano_dayanagi[].ic_duvarlar: true` (AP-03): aralıktaki iç duvarlar da aynı akslara dayanır.
-- İş Emri dikmesinin tamamen örttüğü köşe parçası çizilmez (AP-09: verandanın açık kenarı gövde köşesinde biter; paftada orada kolon);
-  o köşede biten duvar dikmenin yüzünden başlar.
+- Açık kenardaki köşe parçasını İş Emri dikmesi tamamen örtüyorsa köşe çizilmez (AP-09: verandanın açık kenarı gövde köşesinde biter;
+  paftada orada kolon); o köşede biten duvar dikmenin yüzünden başlar. Kapalı odanın köşesindeki dikme köşeyi ve duvarı değiştirmez.
 - Çatı: girintili gövdenin beşiğinin izi verandayı dikmeleriyle içine alır (`cati_serit.cati_izi`, AP-15); çıkıntılı çapraz cumba
   (`cati_prefabrik`, AP-22) gövdenin girintisiyle denetlenir. Ön onay PDF'inde yakın aksların adları kademeli (`dxf_out._kademe`).
 - Açık mahalin kendi çatısı (`cati.mahal_catilari`, AP-09): ana çatı verandayı örtmez (kalan gövdenin ana çatısı ve paralel cumbası paftanın
@@ -162,6 +162,22 @@ def test_dikmenin_ortugu_kose_cizilmez():
     assert (d_yok.p0, d_yok.panolar[0].a0) == (5.0, 5.0)
     assert not [(q.rect(), dk) for w in plan.duvarlar for q in w.panolar for dk in plan.dikmeler
                 if box(*q.rect()).intersection(box(*dk)).area > 1e-6]                 # hiçbir pano dikmeyle çakışmaz
+    # kırpılan uç panoda açıklık olmaz (boyu ve kayması yeniden kurulmaz; geometri hakemi, 2. tur)
+    x = copy.deepcopy(ie)
+    x["acikliklar"].append({"tur": "pencere", "olcu": "50x50", "mahal": "SALON+MUTFAK", "duvar": "sol", "pano": 5})
+    with pytest.raises(G.IsEmriHatasi, match="uç panosunda açıklık var"):
+        G.kur(x)
+
+
+def test_kapali_odanin_kosesindeki_dikme_degistirmez():
+    # yalnız açık kenardaki köşe düşer (geometri hakemi, 2. tur): TK-02'nin sağ ön köşesindeki dikme (kapalı mutfağın köşesi) köşe parçasını
+    # örtse de köşe ve duvarlar dikmesiz planla aynı (main'de dikme köşeye ve duvara hiç dokunmuyordu)
+    tk = json.loads((KOK / "testler" / "motor" / "veri" / "TK02.json").read_text(encoding="utf-8"))
+    x = copy.deepcopy(tk); x["dikmeler"] = [[888, 0], [256, 0]]
+    ozet = lambda p: ([tuple(k.rect) for k in p.koseler], [(w.id, w.p0, w.p1, [(q.a0, q.a1) for q in w.panolar]) for w in p.duvarlar])  # noqa: E731
+    p = G.kur(x)
+    assert p.dikmeler[:2] == [(888.5, 0.0, 898.5, 10.0), (256.0, 0.0, 266.0, 10.0)]
+    assert (888.5, 0.0, 898.5, 5.0) in ozet(p)[0] and ozet(p) == ozet(G.kur(copy.deepcopy(tk)))
 
 
 # ---------------- çatı (PR-2'nin ikinci aşaması)
@@ -358,6 +374,19 @@ def test_verandanin_catisi_yalniz_besikle():
         CS.mahal_catilari(_kur(ie), ie)
     with pytest.raises(CP.PrefabrikCatiHatasi, match="tanınmayan alan: mahal_catilari"):
         CP.cati(_kur(ie), ie)
+
+
+def test_verandanin_catisi_acik_yani_dis_olcude(monkeypatch):
+    # açık yanın kirişi planın ve IFC'nin veranda profilidir; profil yalnız dış ölçüdeki kenarda (`dxf_out`): girintiye bakan açık yan hata
+    # (geometri hakemi, 2. tur, N4). Girinti yapay: veranda 20 cm sağa daraltılır, solundaki şerit gövdeden çıkarılır
+    from motor import cati_prefabrik as CP, cati_serit as CS
+    ie = _ie("AP09")
+    plan = _kur(ie)
+    plan.mahaller["VERANDA"].poly = box(20, 0, 381.5, 244.25)
+    govde = G.govde_cokgeni(plan).difference(box(0, 0, 20, 244.25))
+    monkeypatch.setattr(G, "govde_cokgeni", lambda _p: govde)
+    with pytest.raises(CP.PrefabrikCatiHatasi, match="açık sol yanı dış ölçüde değil"):
+        CS.mahal_catilari(plan, ie)
 
 
 def test_verandanin_catisi_dikdortgen_mahale():

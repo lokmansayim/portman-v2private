@@ -1200,21 +1200,32 @@ def _kur(is_emri: dict) -> Plan:
         _kapi_mantigi(plan, kapi_yeri, kapi_yeri_yazili="kapi_yeri" in dizilim)
     _kose_kolonlari(plan)
     # İE-17 PR-2 (AP-09 paftası): verandanın açık kenarı gövdenin dış köşesinde bitiyorsa o köşedeki dikme köşe parçasının yerini alır;
-    # paftada orada yalnız kolon var. Dikmenin tamamen örttüğü köşe parçası çizilmez, sayılmaz (net alanlar yukarıda hesaplandı, değişmez).
-    # O köşede biten duvar dikmenin yüzünden başlar (geometri hakemi, 1 Kasım: AP-09'un salon–oda 2 duvarı dikmeyle 5 cm çakışıyordu; paftada
-    # ilk pano 10,1–60,6). Yalnız düşen köşenin dikmesi kırpar: bugüne kadar hiçbir planda dikme köşe parçasını örtmüyordu, var olanlar değişmez
+    # paftada orada yalnız kolon var. Açık kenarın üstündeki köşe parçasını dikme tamamen örtüyorsa köşe çizilmez, sayılmaz (net alanlar
+    # yukarıda hesaplandı, değişmez) ve o köşede biten duvar dikmenin yüzünden başlar (geometri hakemi, 1 Kasım: AP-09'un salon–veranda duvarı
+    # dikmeyle 5 cm çakışıyordu; paftada ilk pano 10,1–60,6). Yalnız açık kenardaki köşe (geometri hakemi, 2. tur: kapalı odanın köşesindeki
+    # dikme, ör. TK-02'nin sağ ön köşesi, köşeyi ve duvarı değiştirmez); kırpılan panoda açıklık varsa hata (boyu ve kayması yeniden kurulmaz)
+    from shapely.geometry import LineString
+    aciklar = [LineString([(x0, y0), (x1, y1)]) for (x0, y0, x1, y1, *_r) in plan.acik_kenarlar]
     ortu = lambda k, d: d[0] - 0.5 <= k.rect[0] and k.rect[2] <= d[2] + 0.5 and d[1] - 0.5 <= k.rect[1] and k.rect[3] <= d[3] + 0.5
-    kirpan = [d for d in plan.dikmeler if any(ortu(k, d) for k in plan.koseler)]
-    plan.koseler = [k for k in plan.koseler if not any(ortu(k, d) for d in plan.dikmeler)]
-    for d in plan.duvarlar:
-        for dk in kirpan:
-            e0, e1, k0, k1 = (dk[1], dk[3], dk[0], dk[2]) if d.yon == "y" else (dk[0], dk[2], dk[1], dk[3])   # duvar boyunca, kalınlıkta
-            if not (k0 - 0.5 <= d.c - d.h and d.c + d.h <= k1 + 0.5):
+    dusen = [(k, d) for k in plan.koseler for d in plan.dikmeler
+             if ortu(k, d) and any(a.intersection(box(*k.rect)).length > 1e-6 for a in aciklar)]
+    plan.koseler = [k for k in plan.koseler if not any(k is k_ for k_, _d in dusen)]
+    for w in plan.duvarlar:
+        for _k, dk in dusen:
+            e0, e1, k0, k1 = (dk[1], dk[3], dk[0], dk[2]) if w.yon == "y" else (dk[0], dk[2], dk[1], dk[3])   # duvar boyunca, kalınlıkta
+            if not (k0 - 0.5 <= w.c - w.h and w.c + w.h <= k1 + 0.5):
                 continue
-            if e0 - 0.5 <= d.p0 < e1 - 1e-6 and d.panolar[0].a1 > e1 + 1e-6:
-                d.p0 = d.panolar[0].a0 = e1
-            if e0 + 1e-6 < d.p1 <= e1 + 0.5 and d.panolar[-1].a0 < e0 - 1e-6:
-                d.p1 = d.panolar[-1].a1 = e0
+            for uc, p in ((0, w.panolar[0]), (1, w.panolar[-1])):
+                kirp = (e0 - 0.5 <= w.p0 < e1 - 1e-6 and p.a1 > e1 + 1e-6) if uc == 0 else (e0 + 1e-6 < w.p1 <= e1 + 0.5 and p.a0 < e0 - 1e-6)
+                if not kirp:
+                    continue
+                if p.acilim is not None:
+                    raise IsEmriHatasi(f"Dikmenin yüzünden başlayan duvarın uç panosunda açıklık var (pano {p.a0:g}–{p.a1:g}, dikme {dk}); "
+                                       "açıklık başka panoya yazılır")
+                if uc == 0:
+                    w.p0 = p.a0 = e1
+                else:
+                    w.p1 = p.a1 = e0
     _dis_verandalar(plan, is_emri)
     return plan
 

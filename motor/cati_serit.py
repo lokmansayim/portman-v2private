@@ -111,7 +111,7 @@ def mahal_catilari(plan: G.Plan, ie: dict) -> list[dict]:
     kotu, `kiris_kotu`)}]. Kirişin üstü çatının o kirişin üstündeki en alçak kotu, altı 10 aşağısı; serbest dikme kirişin altına, gövdenin
     duvar ucundaki dikme duvar üstüne.
     Denetim: mahal ızgarada açık mahal ve dikdörtgen; yüksek yanı boyunca kapalı gövdeye bitişik, karşı yanı açık, öteki yanları ya açık ya
-    kapalı (kısmen değil). Kapalı gövde gövdenin çokgeninden bütün açık mahaller düşülerek (girintiye ya da öteki açık mahale bakan yan açık
+    kapalı (kısmen değil); açık yanlar dış ölçüde (kirişleri planın ve IFC'nin veranda profilleri). Kapalı gövde gövdenin çokgeninden bütün açık mahaller düşülerek (girintiye ya da öteki açık mahale bakan yan açık
     sayılır; geometri hakemi, 1 Kasım). Tanınmayan alan yok sayılmaz."""
     lst = (ie.get("cati") or {}).get("mahal_catilari") or []
     if not lst:
@@ -171,6 +171,9 @@ def mahal_catilari(plan: G.Plan, ie: dict) -> list[dict]:
         if abs(acik[ad].poly.area - (x1 - x0) * (y1 - y0)) > 1.0:
             raise PrefabrikCatiHatasi(f"mahal çatısı ({ad}): mahal dikdörtgen değil; tek eğimli panel çatı dikdörtgen mahale çizilir")
         ac = {y_: bitisik(y_) < 0.01 for y_ in _YAN_YON}                   # açık yan: saçak orada
+        dis = {"sol": abs(x0) < 1e-6, "sag": abs(x1 - plan.W) < 1e-6, "on": abs(y0) < 1e-6, "arka": abs(y1 - plan.H) < 1e-6}
+        for y_ in (y_ for y_ in _YAN_YON if ac[y_] and not dis[y_]):      # kirişi planın veranda profilidir (`dxf_out`, IFC): dış ölçüde olur
+            raise PrefabrikCatiHatasi(f"mahal çatısı ({ad}): açık {y_} yanı dış ölçüde değil; kirişinin planda profili yok (geometri hakemi, 1 Kasım)")
         X0, Y0, X1, Y1 = x0 - s * ac["sol"], y0 - s * ac["on"], x1 + s * ac["sag"], y1 + s * ac["arka"]
         ux, uy = _YAN_YON[yan]                                             # yukarı yönü: yüksek yana doğru
         derin = (Y1 - Y0) if uy else (X1 - X0)
