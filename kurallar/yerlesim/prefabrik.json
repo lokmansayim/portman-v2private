@@ -1,6 +1,6 @@
 {
  "sema": "portman.prefabrik_yerlesim/1",
- "surum": "7",
+ "surum": "8",
  "aciklama": "Prefabrik pano evinde parçaların yerleşim kuralları (İE-15). Okuyan `motor/kart_model.py` (K1: H türü) ve `motor/yerlesim/` (K2: tavan omegası, aşık, çatı kaplaması, baş makas betopanı, dere ve iniş; K3: elektrik; K3b: alt çerçeve ve çatı kenarları, montaj rehberinden; K5b: gövdeden taşan verandanın çatısı; K5b-2: asma dizme tavanın H'ı ve alçıpan gözleri, çatı izolasyonu). Yalnız kural kitabında ve `kurallar/liste/prefabrik.json`'da olmayan konum kuralları buraya yazılır; aynı anahtar iki dosyada olmaz (test). Oradaki değerler (makas aralığı, omega aralığı, aşık aralığı, parça boyları, levha) `okunan` ile gösterilir, burada yeniden yazılmaz: `kurallar/liste/prefabrik.json › kurallar.<ad>[.<alt>]` liste kuralının değeri, `kitap › <ad>[.<alt>]` liste kurallarının sabitlediği kural kitabı setinin (`kitap_seti`) değeri.",
  "kurallar": {
   "h_turu": {
@@ -135,6 +135,16 @@
     "durum": "muhendis",
     "tarih": "2026-10-30",
     "not": "Liste üretecinin okuması: kaplama sandviç, trapez ya da kiremit değilse (yazılı değilse de) tek kat panel sayılır (kapatması `tek_kat_panel_kapatma_m`). Kart modeli aynı okur; kaplama yazılı değilse uyarı yazar (K5b)."
+   },
+   "profil": {
+    "deger": {
+     "tek kat": {"hadve_sayisi": 5, "hadve": 2.7, "tepe": 4.2, "taban": 7.4, "kenar": 4.5, "yalitim": 0},
+     "sandvi": {"hadve_sayisi": 5, "hadve": 3.5, "tepe": 4.2, "taban": 7.4, "kenar": 4.5, "yalitim": 4}
+    },
+    "durum": "lokman",
+    "tarih": "2026-11-01",
+    "kaynak": "Lokman, 1 Kasım 2026 10:23: \"şayet çatı sandviç panel ise çatı kaplaması kalınlaşır ve doğal olarak alın sacı alnı da genişler başka hiç bir yerde değişiklik olmaz ... 100cm kapatır olan ve 5 hadveli olan\" (verdiği ürün: İzocam Tekiz SPÇ 1000 5H; üreticinin tablosunda faydalı genişlik 1000 mm, 5 hadve, hadve yüksekliği 35 mm, poliüretan yalıtım 35–120 mm, satıcıda stok standart 40 mm, sac 0,40 / 0,40). Tek kat panel: 62 m² rehberinin 27/200 trapez profili (İE-18, varsayım).",
+    "not": "Yalnız gösterim (cm): 100 cm kapatmadaki hadve sayısı, hadve yüksekliği, hadvenin tepe ve taban genişliği, kalkan kenarındaki hadvenin levha kenarından ekseni, yalıtım kalınlığı (tek kat panelde 0). Kaplamanın kalınlaşması tek kat panele göre (yalıtım + hadve) farkıdır, sandviç panelde 4,8 cm: kart modelinde kaplama ve alın sacının alnı bu kadar artar, montaj rehberi paneli yalıtımıyla çizer ve alın sacı kendiliğinden genişler; başka hiçbir parça değişmez, mahya kaplamanın üstünde kalır (D-40). Sandviç panelin tepe ve taban genişliği ile yalıtımın 40 mm'si varsayımdır (başka kalınlık sipariş edilirse burada değişir). Sayı, boy ve metre bunlardan çıkmaz."
    },
    "cati_tipleri": ["besik"],
    "durum": "muhendis",

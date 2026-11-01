@@ -132,3 +132,16 @@ def test_sacak_omegasi_ve_z_kart_modelinden(tk03):
     assert sum(n for k in d["kalkan"] for n in k["z_n"].values()) == say["kenar"]["liste"]["CK-04"] == z_liste == 14
     p = next(a for a in d["adimlar"] if a.get("ad") == "Baş makas betopanı ve Z")["p"]
     assert "Z 2,8 m’lik parçalardır: her eğik kenara ⌈eğik boy ÷ 2,8⌉ parça" in p and "veranda" not in p
+
+
+def test_sandvic_panel_kalinlasir(tk03):
+    """D-40 (Lokman, 1 Kasım 2026 10:23): TK-03'ün çatısı sandviç panel; rehber kaplamanın kesitini kart modelinin kuralından okur
+    (100 cm kapatır, 5 hadve, hadve 3,5 cm, yalıtım 4 cm) ve paneli yalıtımıyla çizer; alın sacının alnı kaplamanın kenar hadvesine kadar
+    uzandığı için 4,8 cm genişler. Kart modelinde kaplama ve alın sacı aynı kuralla (`test_d40_sandvic.py`)."""
+    d, say, L = tk03
+    assert {p["bilgi"]["Kaplama"] for p in say["yerlesim"]["parcalar"] if "Kaplama" in p["bilgi"]} == {"sandvi"}
+    assert any(s["kalem"].startswith("Sandviç panel") for s in L)
+    assert d["kaplama"]["profil"] == {"hadve": 3.5, "tepe": 4.2, "taban": 7.4, "kenar": 4.5, "kapatir": 100, "yalitim": 4}
+    assert d["kaplama"]["metin"]["profil"].startswith("100 cm kapatır, 5 hadveli, hadve 35 mm, yalıtım 40 mm")
+    assert "4,8 cm kalın, alın sacının alnı o kadar geniş (D-40)" in d["kaplama"]["metin"]["profil"]
+    assert "sandviç panelin kalınlaşması kadar" in d["metin"]["alin"]["proje"]

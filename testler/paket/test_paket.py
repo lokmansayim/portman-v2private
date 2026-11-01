@@ -265,6 +265,8 @@ def test_sacak_omegasi_z_ve_veranda_asigi_kart_modelinden(paketler):
                                       "arka veranda sağ saçağı, kalkan saçağı"]
     assert {k["z_parca"] for k in d["kalkan"]} == {280} and say["kenar"]["liste"]["CK-04"] == SAGLAMA["TK-01"]["kartlar"]["CK-04"] == 12
     assert [k["z_n"] for k in d["kalkan"]] == [{"A": 2, "B": 2}, {"A": 2, "B": 2}, {"A": 1, "B": 1}, {"A": 1, "B": 1}]   # ön, arka, iki veranda
+    # D-40: tek kat panelin kesiti kart modelinin kuralından, yalıtımsız (62 m²'nin 27/200 trapezi; sandviç panelde kalınlaşır)
+    assert d["kaplama"]["profil"] == {"hadve": 2.7, "tepe": 4.2, "taban": 7.4, "kenar": 4.5, "kapatir": 100}
     esik = _pr(kurallari_oku()["prefabrik"], "asik_sacak_esigi_m") * 100
     for R, cati_ in (("V1", "ÖN VERANDA"), ("V2", "ARKA VERANDA")):
         for yan, yuz in (("L", "sol"), ("R", "sag")):

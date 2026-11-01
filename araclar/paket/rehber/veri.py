@@ -961,11 +961,18 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         raise Desteklenmiyor("listede çatı kaplaması (tek kat panel ya da sandviç panel) satırı yok")
     if GIR:                                       # girintili gövdede panel boyu çatı parçası başına (liste: "· ana çatı", "· sol cumba")
         boy = {kucuk(s["kalem"].split(" · ")[1]): s["olcu"] for s in (TP or SP) if " · " in s["kalem"]}
+    # kaplamanın kesiti kart modelinin kuralından (`cati_kaplamasi.profil`; D-40): türü kart modelinin kaplama parçalarından, liste satırıyla aynı
+    KAP = (SAYIM.get("yerlesim") or {}).get("degerler", {}).get("cati_kaplamasi", {})
+    kap_tur = {p["bilgi"]["Kaplama"] for p in (SAYIM.get("yerlesim") or {}).get("parcalar", []) if "Kaplama" in p.get("bilgi", {})}
+    if kap_tur != {"tek kat" if TP else "sandvi"} or "profil" not in KAP:
+        raise Desteklenmiyor(f"kart modelinin kaplaması {sorted(kap_tur) or 'yok'}, listede {kap_ad.lower()}" +
+                             ("" if "profil" in KAP else "; kart modelinin kuralında kaplama profili yok"))
+    KPR = KAP["profil"][next(iter(kap_tur))]
     renk = kucuk(OZ.get("çatı kaplama rengi", "") or "")
-    hadve = {}
+    hadve, HA = {}, 100 / KPR["hadve_sayisi"]     # hadve aralığı: 100 cm kapatmada hadve sayısı
     for k, (lo_, hi_) in hadve_ar.items():
-        n = max(1, round((hi_ - lo_ - 9) / 20))
-        hadve[k] = [_r(lo_ + 4.5 + i * (hi_ - lo_ - 9) / n, 3) for i in range(n + 1)]
+        n = max(1, round((hi_ - lo_ - 2 * KPR["kenar"]) / HA))
+        hadve[k] = [_r(lo_ + KPR["kenar"] + i * (hi_ - lo_ - 2 * KPR["kenar"]) / n, 3) for i in range(n + 1)]
     if GIR:                                       # levhalar kitabın çok düzlemli diziliminin ilk şeridinden (liste ve kart modeli aynı)
         for Y in yuz.values():
             Y["serit"] = {"ad": " · ".join(f"{boy.get(p_, '')} ({p_})" for p_ in Y.pop("_parcalar")), "bas": _r(Y.pop("_bas")),
@@ -988,10 +995,15 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
             lo_, hi_ = hadve_ar[f"H{v['R']}{'R' if v['sag_devam'] and not v['sol_devam'] else 'L'}"]
             mahya.append({"R": v["R"], "topR": v["R"], "r": 0, "O": [0, 0], "s0": v["M"], "z": [_r(-hi_), _r(-lo_)], "ad": f"{kucuk(v['ad'])} mahyası"})
     kaplama = {
-        "profil": {"hadve": 2.7, "tepe": 4.2, "taban": 7.4, "kenar": 4.5, "kapatir": 100},
+        "profil": {"hadve": KPR["hadve"], "tepe": KPR["tepe"], "taban": KPR["taban"], "kenar": KPR["kenar"], "kapatir": 100,
+                   **({"yalitim": KPR["yalitim"]} if KPR["yalitim"] else {})},
         "hadve": hadve, "mahya": mahya,
         "metin": {"ad": f"{kap_ad} {{ad}}", "kesim": f"{kap_ad} · kesim parçası", "say_onek": kap_ad,
-                  "profil": "100 cm kapatır; kesit kartta yazılı değil, çizimde 62 m²’deki 27/200 trapez profili gösterildi (varsayım)",
+                  "profil": (f"100 cm kapatır, {KPR['hadve_sayisi']} hadveli, hadve {fmtc(KPR['hadve'] * 10)} mm, yalıtım {fmtc(KPR['yalitim'] * 10)} mm "
+                             "(Lokman, 1.11.2026); sandviç panel tek kat panelden "
+                             f"{fmtc(KPR['yalitim'] + KPR['hadve'] - KAP['profil'][KAP['varsayilan']]['yalitim'] - KAP['profil'][KAP['varsayilan']]['hadve'])} cm "
+                             "kalın, alın sacının alnı o kadar geniş (D-40)" if KPR["yalitim"] else
+                             "100 cm kapatır; kesit kartta yazılı değil, çizimde 62 m²’deki 27/200 trapez profili gösterildi (varsayım)"),
                   "dizilim": "kalkan kenarından başlayarak, her levha 100 cm kapatır; boy eğim boyunca (liste kuralı)",
                   "renk": renk or "—",
                   "liste": "; ".join(f"{s['kalem']} {s['olcu']} · {s['adet']} adet" for s in (TP or SP)),
@@ -1166,7 +1178,8 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
                  "kaynak": "Lokman çizimleri (24.10.2026)",
                  "profil": "tırnak 3 (baş makas Z'sine) → saçak altı 30 → alın → hadve üstünden kıvrım → hadveyi kavrayan kıvrım",
                  "uc": "saçak altı kolu makasın topuğuna dayanır, orada kesilir; alın yüzü ve üst kıvrım derenin ucunu kapatmak için devam eder (Lokman, 26.10.2026)",
-                 "proje": "alın ~{h} cm: 62 m² rehberindeki gibi; kesin ölçü teyit bekler",
+                 "proje": ("alın ~{h} cm: sandviç panelin kalınlaşması kadar 62 m² rehberindekinden geniş (Lokman, 1.11.2026; D-40)" if KPR["yalitim"] else
+                           "alın ~{h} cm: 62 m² rehberindeki gibi; kesin ölçü teyit bekler"),
                  "liste": ls("Alın sacı")},
         "dere": {"ad": "Metal dere", "kesit": "K profil, 15 × 11,4 cm (38’lik açınım), çatı renginde",
                  "pafta": f"motorun kart modeli: ana çatıda 2 hat; verandalarda {2 * len(VR)} hat (kural)",
