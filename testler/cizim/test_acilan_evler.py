@@ -30,6 +30,9 @@ BEKLENEN = {
     "AP01": ("Kırma — %33 eğim, 30 cm saçak, 10 cm topuk", 184.9),
 }
 PK01 = ("Besik — %33 eğim, 30 cm saçak, 10 cm topuk", 118.9)      # beşikte çatı adı canlıdaki yazımla (`dxf_out._cati_adi`)
+# İE-17 PR-2 (1 Kasım 2026): kat planı aşamasında (sıra kuralı: önce kat planı → Lokman'ın onayı → çatı ve görünüşler). Planları
+# `test_pafta_kiyasi.py` ve `testler/motor/test_ie17_pr2.py` denetler; çatıları gelince ön onay PDF'iyle `BEKLENEN`'e geçerler
+PLAN_ASAMASI = ("AP03", "AP09", "AP15", "AP22")
 
 
 def _ie(ad: str) -> dict:
@@ -50,7 +53,15 @@ def _yazilar(msp) -> list[str]:
 
 
 def test_evler_listesi():
-    assert sorted(p.stem for p in EVLER.glob("*.json")) == sorted(BEKLENEN)
+    assert sorted(p.stem for p in EVLER.glob("*.json")) == sorted([*BEKLENEN, *PLAN_ASAMASI])
+
+
+@pytest.mark.parametrize("ad", PLAN_ASAMASI)
+def test_plan_asamasindaki_evler(ad):
+    # kat planı kurulur; kişi ve bayi adı yok (talep yer tutucuyla, paftanın anteti İş Emri'ne girmez)
+    ie = _ie(ad)
+    G.kur(copy.deepcopy(ie))
+    assert ie["talep"]["bayi"] == {"kod": ad, "ad": f"Bayi {ad[:2]}-{ad[2:]}"} and ie["talep"]["musteri_adi"] == f"{ad[:2]}-{ad[2:]}"
 
 
 @pytest.mark.parametrize("ad", sorted(BEKLENEN))
