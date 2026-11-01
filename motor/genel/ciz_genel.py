@@ -427,21 +427,25 @@ def inis_kurali(c: dict, kur: dict, sacak_cm: float) -> tuple[list[tuple[float, 
 
 
 def cati_plani_eksen(ax, y: dict, c: dict, inisler=None, baslik: str | None = None, yazi_ayir: bool = False, yalin: bool = False,
-                     yazi_kutusu: tuple[float, float] = (55.0, 12.0)):
+                     yazi_kutusu: tuple[float, float] = (55.0, 12.0), yazi_denetle: bool = False):
     """Çatı planı. `baslik` verilmezse uzun başlık (çizim setindeki pafta); `yazi_ayir` ile üst üste binen eğim yazıları kaydırılır
     (İE-08 şablon paftası 2. sayfa; varsayılanlar çizim setinin baytlarını değiştirmez). `yalin` (bayi kartının küçük paneli, 13.10.2026):
-    mahya/kırma/vadi boy yazıları basılmaz (çizgiler kalır), eğim yazıları `yazi_kutusu` (yarı en, yarı boy; cm) ile sığdığı yere konur."""
+    mahya/kırma/vadi boy yazıları basılmaz (çizgiler kalır), eğim yazıları `yazi_kutusu` (yarı en, yarı boy; cm) ile sığdığı yere konur.
+    `yazi_denetle` (şablon paftası 2. sayfa; İE-23 PR-2b): yazılar sabit kutuyla (kenar ≈ 110 × 22 cm) yerleştikten sonra mürekkebi
+    örtüşen çiftin yalnız biri gerçek boyuyla başka yere taşınır (`_yazilari_ayir`); örtüşme yoksa çizim aynen kalır (referans paftaları aynı)."""
     for dz in sorted(c["duzlemler"], key=lambda d: max(k[2] for k in d["ucboyut"])):          # alçak düzlem önce
         ax.add_patch(MplPolygon(dz["plan"], closed=True, fc="#8a919c", ec="#2f343c", lw=1.0, zorder=1 + max(k[2] for k in dz["ucboyut"]) / 1000))
     for h in dis_hat(y):                                                                      # duvarların dış yüzü
         ax.plot([p[0] for p in h], [p[1] for p in h], color="white", lw=0.8, ls=(0, (5, 3)), zorder=3)
     yazi = {"mahya": "mahya", "kirma": "kırma", "vadi": "vadi"}
-    yerler: list[tuple[float, float, float, float]] = []                                       # yazı kutuları (x, y, yarı en, yarı boy; yazi_ayir)
     # eğim oklarının yerleri (yazi_ayir: yazı okun üstüne konmaz; 13.10.2026)
     oklar = [(m.x + ux * 20, m.y + uy * 20, m.x - ux * 40, m.y - uy * 40)
              for dz in c["duzlemler"] for m in [dz["cokgen"].representative_point()] for (ux, uy) in [dz["yukari"]]] if yazi_ayir else []
     ok_keser = lambda x, y_, kx, ky: any(box(x - kx, y_ - ky, x + kx, y_ + ky).intersects(LineString([(a, b), (c_, d)]).buffer(6)) for a, b, c_, d in oklar)
     cati_ici = unary_union([dz["cokgen"] for dz in c["duzlemler"]]).buffer(-8) if yazi_ayir else None   # kenar yazısı çatının içinde kalır (ölçülere binmez)
+
+    etiketler: list[dict] = []                                                                 # yazi_ayir: yerleşen yazılar ve aday yerleri (yazi_denetle)
+    yerler: list[tuple[float, float, float, float]] = []                                       # yazı kutuları (x, y, yarı en, yarı boy; yazi_ayir)
     for e in c["kenarlar"]:
         (px, py), (qx, qy) = e["p"], e["q"]
         if e["tur"] in ("mahya", "kirma"):
@@ -469,8 +473,12 @@ def cati_plani_eksen(ax, y: dict, c: dict, inisler=None, baslik: str | None = No
                 if yer is None:
                     continue
                 tx, ty = yer
-            ax.text(tx, ty, f"{yazi[e['tur']]} {tr(e['boy'], 0)}", ha="center", va="center", fontsize=7.2, color="white",
-                    rotation=aci, rotation_mode="anchor", zorder=6)
+                ek_yer = [(mx + sg * nx * 14 + ex_ * d, my + sg * ny * 14 + ey_ * d) for d in range(-240, 241, 20) for sg in (1, -1)]
+                etiketler.append({"aci": aci, "ic": cati_ici, "tur": "kenar", "denemeler": denemeler + sorted(ek_yer, key=lambda q: math.hypot(q[0] - mx, q[1] - my))})
+            t_ = ax.text(tx, ty, f"{yazi[e['tur']]} {tr(e['boy'], 0)}", ha="center", va="center", fontsize=7.2, color="white",
+                         rotation=aci, rotation_mode="anchor", zorder=6)
+            if yazi_ayir:
+                etiketler[-1]["t"] = t_
             yerler.append((tx, ty, rx, ry))
     for dz in c["duzlemler"]:                                                                  # eğim okları
         m = dz["cokgen"].representative_point()
@@ -488,9 +496,16 @@ def cati_plani_eksen(ax, y: dict, c: dict, inisler=None, baslik: str | None = No
             yer = next(((x, y_) for x, y_ in denemeler if uygun(x, y_)), None)
             if yer is None:
                 continue
+            x0_, y0_ = tx, ty
             tx, ty = yer
             yerler.append((tx, ty, kx, ky))
-        ax.text(tx, ty, f"%{tr(dz['egim'] * 100)}", ha="center", va="center", fontsize=7.2, color="white", zorder=6)
+            bx0, by0, bx1, by1 = ic.bounds
+            izgara = [(bx0 + 10 * a, by0 + 10 * b) for a in range(int((bx1 - bx0) / 10) + 1) for b in range(int((by1 - by0) / 10) + 1)]
+            etiketler.append({"aci": 0.0, "ic": ic, "tur": "egim",
+                              "denemeler": denemeler + sorted(izgara, key=lambda q: math.hypot(q[0] - x0_, q[1] - y0_))})
+        t_ = ax.text(tx, ty, f"%{tr(dz['egim'] * 100)}", ha="center", va="center", fontsize=7.2, color="white", zorder=6)
+        if yazi_ayir:
+            etiketler[-1]["t"] = t_
     for ix, iy, _tur in (inisler or []):
         ax.plot([ix], [iy], marker="o", ms=6.5, mfc="#f2c744", mec="#1c1f24", mew=1.0, zorder=8)
     xs = [p[0] for dz in c["duzlemler"] for p in dz["plan"]]
@@ -507,6 +522,8 @@ def cati_plani_eksen(ax, y: dict, c: dict, inisler=None, baslik: str | None = No
     ax.set_ylim(min(ys) - 80, max(ys) + 30)
     ax.set_aspect("equal")
     ax.axis("off")
+    if yazi_denetle and yazi_ayir and not yalin and len(etiketler) > 1:
+        _yazilari_ayir(ax, etiketler, oklar)
 
 
 RENK = {"duvar": (DUVAR, "#555"), "korkuluk": (DUVAR, "#555"), "kalkan": (DUVAR, "#555"), "kolon": (KOLON, "#555"), "kiris": (KOLON, "#555"),
@@ -527,6 +544,53 @@ def _yama(g, fc, ec, lw=0.8, zorder=2):
 
 
 DUVAR_GIBI = ("duvar", "korkuluk", "kalkan")
+
+
+def _yazilari_ayir(ax, etiketler: list[dict], oklar: list[tuple], tur_sayisi: int = 3) -> None:
+    """Çatı planı yazıları (şablon paftası 2. sayfa; İE-23 PR-2b): sabit kutuyla yerleşen yazıların mürekkebi eksen kurulunca örtüşüyorsa
+    (büyük evde yazı kutudan uzun: KT-04 "mahya 416" ⟂ "%43,0", Ç8801-D "mahya 220" ⟂ "%33,0") yalnız örtüşen çiftin biri (eğim yazısı,
+    yoksa sonraki) taşınır: aday yerleri (yerleşmedekiler, sonra kenar boyunca ya da düzlemin içinde yakından uzağa) gerçek boyuyla denenir;
+    başka yazıya, eğim okuna değmeyen ve çatının (eğimde düzlemin) içinde kalan ilk yer. Hiçbiri yoksa yalnız o yazı düşer. Örtüşme yoksa
+    hiçbir şey değişmez (referans paftaları aynı)."""
+    from matplotlib.textpath import TextPath
+    from shapely import affinity
+    from shapely.geometry import LineString, Polygon, box as sbox
+    from . import yazi_cakisma as YC
+    fig = ax.figure
+    oklar_ = [LineString([(a, b), (c_, d)]).buffer(6) for a, b, c_, d in oklar]
+    for _ in range(tur_sayisi):
+        r = YC._renderer(fig)                                                                  # sınırlar ve eşit oran uygulanır
+        canli = [e for e in etiketler if e.get("t") is not None]
+        px = [YC._murekkep(e["t"], r, fig.dpi)[0] for e in canli]
+        tasi = set()
+        for i in range(len(canli)):
+            for j in range(i + 1, len(canli)):
+                if YC._gercek(px[i].intersection(px[j]), YC.PAY_PX) > 0:
+                    tasi.add(i if canli[i]["tur"] == "egim" and canli[j]["tur"] != "egim" else j)
+        if not tasi:
+            return
+        a = ax.transData.inverted().get_affine().get_matrix()
+        veri = [affinity.affine_transform(g, [a[0, 0], a[0, 1], a[1, 0], a[1, 1], a[0, 2], a[1, 2]]) for g in px]
+        p0, p1 = ax.transData.transform((0.0, 0.0)), ax.transData.transform((100.0, 0.0))
+        olcek = (fig.dpi / 72.0) / max((p1[0] - p0[0]) / 100.0, 1e-9)                          # cm / pt
+        for k in sorted(tasi):
+            e = canli[k]
+            ex = TextPath((0, 0), e["t"].get_text(), size=e["t"].get_fontsize(), prop=e["t"].get_fontproperties()).get_extents()
+            hw, hh = (ex.width / 2 + 1.0) * olcek, ((ex.y1 - min(ex.y0, 0.0)) / 2 + 1.0) * olcek
+            engel = [g for i, g in enumerate(veri) if i != k]
+            secilen = None
+            for x, y_ in e["denemeler"]:
+                g = affinity.rotate(sbox(x - hw, y_ - hh, x + hw, y_ + hh), e["aci"], origin=(x, y_))
+                if e["ic"].contains(g) and not any(g.intersects(o) for o in engel) and not any(g.intersects(o) for o in oklar_):
+                    secilen = (x, y_, g)
+                    break
+            if secilen is None:
+                e["t"].remove()
+                e["t"] = None
+                veri[k] = Polygon()
+            else:
+                e["t"].set_position(secilen[:2])
+                veri[k] = secilen[2]
 
 
 def cm_pt_tahmini(ax, span_cm: float) -> float:

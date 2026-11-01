@@ -1,14 +1,17 @@
-"""İE-23 PR-2a · banka modelinde oda büyütme / küçültme (`beyin/tanim_germe.py`) ve okuma (`beyin/degisiklik_okuyucu.py`, germeli).
+"""İE-23 PR-2a/2b · banka modelinde oda büyütme / küçültme (`beyin/tanim_germe.py`) ve okuma (`beyin/degisiklik_okuyucu.py`, germeli).
 
 Hedef örnekler (`hedef/germe_*.json`; Lokman onayladı, 31 Ekim 2026, İE-23 › PR-2a): KT-01 "yatak odası 1'i arkaya 50 cm" (dış kenar, düzey 1:
-ev arkaya uzar) ve Ç8201 "yatak odası 2'yi öne 30 cm" (iç duvar kayar, yatak odası 1 küçülür, yolundaki kapı duvarla kayar). Kıyas:
+ev arkaya uzar) ve Ç8201 "yatak odası 2'yi öne 30 cm" (iç duvar kayar, yatak odası 1 küçülür, yolundaki ve köşesindeki kapılar duvarla kayar).
+PR-2b: KT-04 "salonu sağa 50 cm" (düzey 2: cumba ve önündeki çıkma çatısı ortadan simetrik genişler; girdi `girdi/` altında dondurulmuş kopya,
+banka modeli atölyede değişebilir; Lokman onayladı, 1 Kasım 2026). Kıyas:
 girdi, rapor, gerilmiş tanımın kanonik sha'sı ve değişen duvar, açıklık, mahal özetleri. Yeniden yazma yalnız onayla:
 `python testler/yapi_kimligi/test_tanim_germe.py --hedef-yaz`. Olumsuz örnekler gerekçesiyle (oda kuralı, kapı sığmıyor, ana çatı = düzey 3,
-ikincil çatı = düzey 2 bu PR'da yok, veranda, kiriş). Germe belirlenimcidir ve `varyant.tanim_uygula` aynı tanımı verir."""
+veranda, kiriş). Germe belirlenimcidir ve `varyant.tanim_uygula` aynı tanımı verir."""
 from __future__ import annotations
 
 import copy
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -26,6 +29,7 @@ HEDEF = Path(__file__).resolve().parent / "hedef"
 HEDEFLER = {
     "germe_KT01_yatak_odasi_1_K50": ("modeller/KT01.json", "Yatak Odası 1", "K", 50, True),
     "germe_C8201_yatak_odasi_2_G30": ("modeller/C8201.json", "Yatak Odası 2", "G", 30, True),
+    "germe_KT04_salon_mutfak_D50": ("testler/yapi_kimligi/girdi/KT04_tanim_2026-10-31.json", "Salon - Mutfak", "D", 50, True),
 }
 
 
@@ -51,7 +55,7 @@ def ozet(ad: str) -> dict:
     once = {d["ad"]: d["kutu"] for d in t["duvarlar"]}
     ac0 = {a["ad"]: a["bas"] for a in t["acikliklar"]}
     m0 = {m["ad"]: m.get("nokta") for m in t["mahaller"]}
-    return {"sema": "portman.yapi_germe_hedef/0.1",
+    out = {"sema": "portman.yapi_germe_hedef/0.1",
             "girdi": {"tanim": yol, "tanim_sha256": tanim_sha_icerik(t), "op": "oda_buyut" if buyut else "oda_kucult", "mahal": mahal,
                       "yon": yon, "cm": cm, "kural_seti": SET.name},
             "rapor": r, "anlatim": TG.kisa_anlatim(r) + "; " + TG.anlatim(r),
@@ -62,7 +66,14 @@ def ozet(ad: str) -> dict:
                       "karkas": t2.get("karkas"), "celik_modeli": "celik_modeli" in t2,
                       "makaslar": (t2["cati"].get("makaslar") or {}).get("tam"),
                       "kalkanlar": [[k["ad"], k["konum"], k["aralik"]] for k in t2["cati"].get("kalkanlar") or []]},
-            "onay": {"durum": "aday", "not": "Lokman'ın onayı bekleniyor (İE-23 PR-2a); onaylanınca tarih ve dayanak buraya yazılır"}}
+            "onay": {"durum": "aday", "not": "Lokman'ın onayı bekleniyor (İE-23); onaylanınca tarih ve dayanak buraya yazılır"}}
+    if r.get("ikincil_cati"):                                  # düzey 2: yeniden kurulan çatı düzlemleri ve makas aileleri
+        d0 = {d["ad"]: d["plan"] for d in t["cati"]["duzlemler"]}
+        out["sonuc"]["cati_duzlemleri"] = {d["ad"]: [d0[d["ad"]], d["plan"]] for d in t2["cati"]["duzlemler"] if d["plan"] != d0[d["ad"]]}
+        m0 = t["cati"].get("makaslar") or {}
+        out["sonuc"]["makas_aileleri"] = {ad: [{k: m0[ad].get(k) for k in ("x", "y", "adet")}, {k: a.get(k) for k in ("x", "y", "adet")}]
+                                          for ad, a in (t2["cati"].get("makaslar") or {}).items() if isinstance(a, dict) and a != m0.get(ad)}
+    return out
 
 
 @pytest.mark.parametrize("ad", sorted(HEDEFLER))
@@ -73,6 +84,27 @@ def test_hedef_ornek(ad):
     hedef.pop("onay", None), simdi.pop("onay", None)
     assert simdi == hedef, f"{ad}: germe çıktısı hedef örnekten farklı (yeniden dondurma yalnız onayla, D-02)"
 
+
+
+@pytest.mark.parametrize("ad", sorted(HEDEFLER))
+def test_hedef_germe_ciktisinda_yazi_cakismaz(ad, tmp_path):
+    # PR-2a'nın kabul koşulu (ayar `banka_germe.acik` bundan önce açılmaz): bayiye giden dört figür (plan görseli, kartın alt sırası, şablon
+    # paftasının iki sayfası) germe çıktısında da yazı çakışmasız (D-16). KT-01 ve KT-04'te karkas kurala geçilir; duvar panelleri ve makas
+    # paftaları dosya adıyla ayrı sayılır, bayi paftası denetlenir (PR-2b'ye kadar onların sayfaları "pafta_sayfa" sanılıyordu)
+    from araclar.atolye import _yazi_bulgulari, yazi_denetimi
+    from motor.genel import uret
+    _, t2, _ = _uygula(*HEDEFLER[ad])
+    g = tmp_path / "girdi.json"
+    g.write_text(json.dumps(t2, ensure_ascii=False), encoding="utf-8")
+    rap: dict = {}
+    bilgi = {"bayi_adi": "Deneme Bayi", "sevk_adresi": "Deneme Mah. Deneme Sok. No 1 Deneme İlçesi / Deneme İli",
+             "ozel_istekler": ["çatı antrasit"], "ozellikler": {"Dış Boya Rengi": "krem"}}
+    with yazi_denetimi(rap):
+        m = uret.uret(g, tmp_path / "c", is_emri_no="PM-TEST-20261031-1", revizyon=2, set_yolu=SET, yontem="panel", perspektif=False,
+                      bayi=True, bilgi=bilgi)
+    assert m["passed"], m.get("warnings")
+    assert _yazi_bulgulari(rap, uret.kod_govde(t2)) == []
+    assert (t2.get("karkas") == "kural") == any(k.endswith("_duvar_panelleri.pdf#1") for k in rap), sorted(rap)
 
 def test_kt01_yatak_odasi_arkaya_50_ev_uzar():
     t, t2, r = _uygula(*HEDEFLER["germe_KT01_yatak_odasi_1_K50"])
@@ -110,6 +142,110 @@ def test_c8201_yatak_odasi_2_one_30_duvar_kayar_kapi_birlikte():
     assert TG.anlatim(r).endswith("; Hol ile Yatak Odası 1 arasındaki kapı 30 cm öne kaydı; Hol ile Yatak Odası 2 arasındaki kapı 30 cm öne kaydı")
 
 
+def test_kt04_salon_saga_50_kucuk_cati_ortadan_simetrik_genisler():
+    """PR-2b (düzey 2): KT-04 salonu sağa 50 cm. Ev sağa uzar; salonun önündeki cumba ve çıkma çatısı ortadan simetrik genişler (sırtın
+    iki yanında 25'er cm kesit): sırt yeni ortada, vadilerin buluştuğu tepe düzlemlerin kesişiminden, saçak taşmaları aynı, çıkmanın
+    penceresi ortada kalır."""
+    t, t2, r = _uygula(*HEDEFLER["germe_KT04_salon_mutfak_D50"])
+    assert r["tur"] == "germe" and r["eksen"] == "x" and len(r["kesit_cm"]) == 2
+    assert r["ikincil_cati"] == ["doğu cumba batı", "doğu cumba doğu", "doğu çıkma batı", "doğu çıkma doğu"]
+    assert TG.kisa_anlatim(r) == "Salon - Mutfak sağa 50 cm büyütüldü" and r["kapali_m2"] == [106.28, 110.29]
+    D = {d["ad"]: d["plan"] for d in t2["cati"]["duzlemler"]}
+    assert D["doğu cumba batı"] == [[1112.0, 50.0], [1374.0, 50.0], [1374.0, 491.0], [1112.0, 229.0]]
+    assert D["doğu cumba doğu"] == [[1374.0, 50.0], [1636.0, 50.0], [1636.0, 229.0], [1374.0, 491.0]]
+    assert [1374.0, 491.0] in D["güney"] and [1349.0, 466.0] not in D["güney"]                    # vadilerin tepesi 45° (eğimler eşit)
+    assert D["doğu çıkma batı"][1][0] == D["doğu çıkma doğu"][0][0] == 1374.0
+    w = {d["ad"]: d["kutu"] for d in t2["duvarlar"]}
+    w0 = {d["ad"]: d["kutu"] for d in t["duvarlar"]}
+    assert (w["W13"][0] + w["W15"][2]) / 2 == 1374.0                                                # çıkmanın ortası = sırt
+    p11 = next(a for a in t2["acikliklar"] if a["ad"] == "P11")
+    assert p11["bas"] + p11["en"] / 2 == 1373.8 and next(a for a in t["acikliklar"] if a["ad"] == "P11")["bas"] + 100 == 1348.8   # pencere ortada
+    assert 1636.0 - w["W03"][2] == 1586.0 - w0["W03"][2] == 30                                    # saçak taşmaları aynı
+    assert 1571.0 - w["W15"][2] == 1521.0 - w0["W15"][2] == 30 and w["W13"] == w0["W13"]
+    m = t2["cati"]["makaslar"]
+    assert m["dogu_cumba"]["x"] == [1112.0, 1636.0] and m["dogu_cumba_vadi"]["x"] == [1228.6, 1520.2] and m["dogu_cikma"]["x"] == [1177.4, 1571.3]
+    a, a0 = sorted(m["ana"]["x"]), sorted(t["cati"]["makaslar"]["ana"]["x"])
+    assert max(y - x for x, y in zip(a, a[1:])) <= max(y - x for x, y in zip(a0, a0[1:])) + 0.01   # ana makas aralığı tanımdakini aşmaz
+
+
+
+def _kt04_bozuk(fn) -> str:
+    """KT-04 sağa 50'nin çıktısını bozar, yalnız çatı hakemine verir (öneren koddan bağımsız; geometri hakemi 31.10, PR-2b 1. tur bulgu 2)."""
+    from motor.genel import cati_genel, kural as MK
+    t, t2, _ = _uygula(*HEDEFLER["germe_KT04_salon_mutfak_D50"])
+    fn(t2)
+    with pytest.raises(TG.GermeHatasi) as e:
+        TG._cati_hakemi(t, cati_genel.cati_kur(t["cati"], MK.oku()), t2, cati_genel.cati_kur(t2["cati"], MK.oku()))
+    return str(e.value)
+
+
+def _nokta_degistir(t2, eski, yeni, ad_basi=""):
+    for d in t2["cati"]["duzlemler"]:
+        if d["ad"].startswith(ad_basi):
+            for p in d["plan"]:
+                if p == eski:
+                    p[:] = yeni
+
+
+def test_hakem_kucuk_catinin_bozuklugunu_yakalar():
+    # öneren kod düzey 2'de tepeyi yeniden hesaplamasaydı, sırtı ortaya almasaydı, saçağı kısaltsaydı hakem `cati_kur`un kurabildiği çatıyı
+    # kabul ediyordu. Şimdi: yüzlerin birleşimi (kotu tutmayan yüzler ortak kenar sayılmaz), saçak taşması, mahyanın ortasındaki pencere,
+    # vadideki makas ucu değişmez
+    oturmuyor = "çatı yüzleri birbirine oturmuyor"
+    assert oturmuyor in _kt04_bozuk(lambda t2: _nokta_degistir(t2, [1374.0, 491.0], [1374.0, 466.0]))          # tepe eski yükseklikte
+    assert oturmuyor in _kt04_bozuk(lambda t2: (_nokta_degistir(t2, [1374.0, 50.0], [1349.0, 50.0], "doğu cumba"),
+                                                 _nokta_degistir(t2, [1374.0, 491.0], [1349.0, 466.0])))         # sırt ortada değil
+
+    def duvar_kayar(t2):                                                                          # çatı tutarlı, altındaki duvar kayık
+        w = next(d for d in t2["duvarlar"] if d["ad"] == "W03")
+        w["kutu"] = [w["kutu"][0] - 25, w["kutu"][1], w["kutu"][2] - 25, w["kutu"][3]]
+    assert _kt04_bozuk(duvar_kayar) == "çatının saçak taşması değişiyor"
+
+    def pencere_kayar(t2):
+        next(a for a in t2["acikliklar"] if a["ad"] == "P11")["bas"] += 25
+    assert _kt04_bozuk(pencere_kayar) == "Salon - Mutfak penceresi çatının ortasında kalmıyor"
+
+    def vadi_makasi(t2):
+        t2["cati"]["makaslar"]["dogu_cumba_vadi"]["x"][1] += 25
+    assert _kt04_bozuk(vadi_makasi) == "küçük çatının makası vadiye oturmuyor"
+
+    def yerinde_mahyanin_penceresi(t2):                                                           # batı çıkmanın mahyası bu istekte yerinde
+        next(a for a in t2["acikliklar"] if a["ad"] == "P10")["bas"] += 15                       # (2. tur not 2: istisna yalnız kaymada)
+    assert _kt04_bozuk(yerinde_mahyanin_penceresi).endswith("penceresi çatının ortasında kalmıyor")
+
+
+def test_tek_kesit_cumba_ekseninde_ic_kapiyi_kaydirmaz():
+    # yalnız cumba alnındaki (dış duvardaki) açıklık sırtla kayar; cumbanın ekseninde duran iç kapı çatıya bağlı değil
+    # (geometri hakemi 31.10, PR-2b 2. tur not 1: Ç8801'de banyo–yatak odası 2 kapısı cumba ortasına alınınca 25 cm kayıyordu)
+    t = _tanim("modeller/C8801.json")
+    k5 = next(a for a in t["acikliklar"] if a["ad"] == "K5")
+    p9 = next(a for a in t["acikliklar"] if a["ad"] == "P9")
+    k5["bas"] = p9["bas"] + p9["en"] / 2 - k5["en"] / 2                                           # kapının ortası = cumba sırtı
+    t2, r = TG.oda_degistir(t, "Banyo", "D", 50, True, set_yolu=SET)
+    assert [a["ad"] for a in r["kayan_acikliklar"]] == ["P9"]
+    assert next(a for a in t2["acikliklar"] if a["ad"] == "K5")["bas"] == k5["bas"]
+
+
+def test_c8801_banyo_saga_tek_kesit_cumbanin_penceresi_ortada_kalir():
+    # tek kesitli düzey 2 (banyo cumbanın bir yanında: iki yarım kesit banyodan geçmez): cumba tek yandan genişler, sırt 25 cm sağa gider;
+    # cumba alnındaki pencere de 25 cm kayar, sırtın altında kalır ve bayiye yazılır (geometri hakemi 31.10, PR-2b 1. tur not 5)
+    from motor.genel import cati_genel, kural as MK
+    t = _tanim("modeller/C8801.json")
+    t2, r = TG.oda_degistir(t, "Banyo", "D", 50, True, set_yolu=SET)
+    assert isinstance(r["kesit_cm"], float) and r["ikincil_cati"] == ["cumba batı", "cumba doğu"]
+    assert r["kayan_acikliklar"] == [{"ad": "P9", "tur": "pencere", "mahaller": ["Yatak Odası 2"], "cm": 25.0, "yon": "D"}]
+    p9 = next(a for a in t2["acikliklar"] if a["ad"] == "P9")
+    mahya = [e for e in cati_genel.cati_kur(t2["cati"], MK.oku())["kenarlar"] if e["tur"] == "mahya" and e["p"][0] == e["q"][0]]
+    assert p9["bas"] + p9["en"] / 2 == mahya[0]["p"][0] == 849.0 and next(a for a in t["acikliklar"] if a["ad"] == "P9")["bas"] == 764
+    assert TG.anlatim(r).endswith("; cumba genişledi, çatısı yeni ölçüye göre kuruldu; Yatak Odası 2 penceresi 25 cm sağa kaydı (ortada kaldı)")
+
+def test_kt04_kucuk_cati_ana_cati_mahyasini_asamaz():
+    t = _tanim("testler/yapi_kimligi/girdi/KT04_tanim_2026-10-31.json")
+    TG.oda_degistir(t, "Salon - Mutfak", "D", 120, True, set_yolu=SET)                             # tepe 526 < mahya 527,5
+    with pytest.raises(TG.GermeHatasi, match="ana çatının mahyasını aşıyor"):
+        TG.oda_degistir(t, "Salon - Mutfak", "D", 150, True, set_yolu=SET)
+
+
 def test_kose_kurali_buyuyen_ve_kuculen_yanda_aciklik_duvarla_kayar():
     """Lokman 31.10 19:40 ("kapıyıda kaydırman lazımdı"): iç duvar kayınca köşesine bağlı açıklık (kenarı duvar yüzüne 50 cm'den yakın,
     en yakın duvar o) iki yanda da duvarla kayar, köşeye uzaklığı korunur. KT-01 yatak odası 2 soldan 30 küçülür: büyüyen banyonun
@@ -136,7 +272,6 @@ def test_kose_kurali_buyuyen_ve_kuculen_yanda_aciklik_duvarla_kayar():
     ("modeller/KT02.json", "Yaşama Mekanı", "K", 20, True, "Hol dar kenarda 117 cm kalır (hol için en az 130 cm)"),
     ("modeller/KT03.json", "Mutfak", "D", 30, True, "duvarın hizasında kiriş var"),
     ("modeller/banka/KT04/tanim.json", "Yatak Odası 2", "K", 50, True, "ana çatının genişliğini ve mahya yüksekliğini"),
-    ("modeller/banka/KT04/tanim.json", "Salon - Mutfak", "D", 50, True, "küçük çatıyı (cumba ya da çıkma çatısı)"),
     ("modeller/C8201.json", "Yatak Odası 1", "K", 301, True, "5–300 cm arasında tam sayı"),
     ("modeller/C8201.json", "Mutfak", "K", 30, True, "planda Mutfak adlı oda yok"),
     # geometri hakemi 31.10: 15 cm parça (D-10; B ve R duvar eksenleri 10 cm arayla) ve karkas kuralında kurulamayan liste (KT-02 kiris_15)
@@ -148,7 +283,10 @@ def test_kose_kurali_buyuyen_ve_kuculen_yanda_aciklik_duvarla_kayar():
     ("modeller/C8801.json", "Yatak Odası 2", "K", 20, True, "Banyo kapısı duvar köşesine 1,5 cm kalıyor (en az 10 cm olmalı)"),
     # geometri hakemi üçüncü tur: küçültme gerekçesi isteği doğru anar
     ("modeller/KT01.json", "Salon - Mutfak", "D", 50, False, "sağdan küçülmek ana çatının genişliğini ve mahya yüksekliğini değiştirir"),
-    ("modeller/banka/KT04/tanim.json", "Salon - Mutfak", "D", 50, False, "sağdan küçülmek yandaki küçük çatıyı"),
+    # PR-2b: düzey 2 açıldıktan sonra KT-01 müştemilatın sol yanındaki kesit üstü eğimli duvardan geçer (gerekçede duvar kodu yok)
+    ("modeller/KT01.json", "Müştemilat", "B", 30, True, "kesit üstü eğimli bir duvardan geçiyor"),
+    # PR-2b: küçük çatı ortadan simetrik daralır (sırtın iki yanında 25'er cm şerit); çıkmanın içinde o kadar yer yok
+    ("modeller/banka/KT04/tanim.json", "Salon - Mutfak", "D", 50, False, "odanın içinden kesit geçecek boş yer yok (50 cm genişliğinde)"),
     # köşe kuralı (Lokman 31.10): kayınca kendi duvarının dışına taşacak köşe kapısı (Çocuk Odası K4) yerinde kalır; gerekçe oda kuralı
     ("modeller/KT03.json", "Yatak Odası", "D", 50, False, "Yatak Odası 10,30 m²'ye iner (yatak odası için en az 10,5 m²)"),
 ])
@@ -158,6 +296,7 @@ def test_olumsuz_ornekler_gerekceli(yol, mahal, yon, cm, buyut, gerekce):
         TG.oda_degistir(t, mahal, yon, cm, buyut, set_yolu=SET)
     assert gerekce in str(e.value), str(e.value)
     assert "İE-" not in str(e.value) and "duzey" not in str(e.value)                            # bayinin okuyacağı dil
+    assert not re.search(r"\b[A-ZÇĞİÖŞÜ]{1,4}\d+\b|_", str(e.value)), str(e.value)               # duvar, açıklık, makas kodu yok
 
 
 def test_ayni_duvarda_aciklik_ortusmesi_gecmez():
@@ -243,5 +382,12 @@ def test_denetle_oda_islemleri():
 
 if __name__ == "__main__" and "--hedef-yaz" in sys.argv:          # yalnız onayla (D-02): aday hedefleri yazar
     for ad in sorted(HEDEFLER):
-        (HEDEF / f"{ad}.json").write_text(json.dumps(ozet(ad), ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+        yol, yeni = HEDEF / f"{ad}.json", ozet(ad)
+        if yol.exists():                                                # içeriği aynı kalan hedefin onayı korunur
+            eski = json.loads(yol.read_text(encoding="utf-8"))
+            onay = eski.pop("onay", None)
+            if eski == {k: v for k, v in json.loads(json.dumps(yeni, ensure_ascii=False)).items() if k != "onay"}:
+                print("aynı:", ad)
+                continue
+        yol.write_text(json.dumps(yeni, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
         print("yazıldı:", ad)
