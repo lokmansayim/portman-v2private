@@ -489,7 +489,7 @@ function rake(G, end, m, uzat = 0) {
         return;
       }
       // kenar başına ⌈eğik ÷ parça boyu⌉ parça (kart modeli ve liste; D-39): saçak ucundan mahyaya, son parça kalan
-      const n = Math.ceil(rake(G, end, null).Ls / G.z_parca - 1e-6);
+      const n = Math.ceil(Math.abs(G.sm - G.uc[end]) / G.R.cos / G.z_parca - 1e-6);   // eğik boy saçak ucundan (çizimdeki 0,2 cm uzatma sayılmaz)
       for (let k = 0; k < n; k++) {
         const K = rake(G, end, mat('frame', AD.kalkan)), uc = -K.dir * K.Ls / 2, a = k * G.z_parca, b = Math.min(K.Ls, (k + 1) * G.z_parca);
         const [x0, x1] = [uc + K.dir * (a + (k ? 0.1 : 0)), uc + K.dir * (b - (k < n - 1 ? 0.1 : 0))].sort((p, q) => p - q);

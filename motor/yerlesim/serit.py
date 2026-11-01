@@ -252,7 +252,7 @@ def kenarlar(g: dict, ck: dict, G_: dict, kesit: dict, kurulan: set[str], engell
     (`engeller`, `betopan`) iniyorsa orada kesilir. Hat, kenarın düzleminin parçasına yazılır (`Cati`; aynı düzlemdeki ana çatı ve cumba yüzü
     tek hat, liste üreteci gibi)."""
     Fs = cerceveler(g)
-    out = []
+    out, sayac = [], {}
     gorunen = [e for e in ck["kenarlar"] if e["tur"] in ("sacak", "alin") and not _ortulu(ck, e)]
     for e in (e for e in ck["kenarlar"] if e["tur"] == "sacak"):          # dere hattı gibi: saçak kenarının tamamı (altta kalan uç dahil)
         F, yuz = _sacak_cercevesi(Fs, e)
@@ -260,10 +260,12 @@ def kenarlar(g: dict, ck: dict, G_: dict, kesit: dict, kurulan: set[str], engell
         r0, r1 = sorted((e["p"][ax], e["q"][ax]))
         if "sacak_omegasi_yerlesimi" in kurulan:
             cati_ = e["duzlemler"][0].rsplit(" ", 1)[0]
-            for p in kenar.sacak_omegasi(g, G_, dict(F, v0=r0, v1=r1), engeller):
-                if p["bilgi"]["Yuz"] == yuz:
-                    p["bilgi"] = {"Cati": cati_, **p["bilgi"]}
-                    out.append(p)
+            k = sayac[(cati_, yuz)] = sayac.get((cati_, yuz), 0) + 1    # aynı çatının aynı yüzündeki ikinci saçak kenarı ayrı hat
+            for p in kenar.sacak_omegasi(g, G_, dict(F, v0=r0, v1=r1), engeller, yuz):
+                if "Hat" in p["bilgi"] and k > 1:
+                    p["bilgi"]["Hat"] = f"{yuz} {k}"
+                p["bilgi"] = {"Cati": cati_, **p["bilgi"]}
+                out.append(p)
         if "sacak_saci_yerlesimi" in kurulan:
             out += [p for p in kenar.sacak_saci(g, G_, dict(F, v0=r0, v1=r1)) if p["bilgi"]["Yuz"] == yuz]
     if "mahya_yerlesimi" in kurulan:

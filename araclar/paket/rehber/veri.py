@@ -245,10 +245,10 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         c = v["cati"]
         if v["cephe"] not in ("on", "arka") or c.get("tip") != "besik" or c["mahya"][0][0] != c["mahya"][1][0]:
             raise Desteklenmiyor(f"{v['ad']}: cephe {v['cephe']}, çatı {c.get('tip')}; rehber ön ve arka cephede ana çatıya paralel beşiği kurar")
-    IFC_ = ifc_kutulari(kart / f"{kart_kodu}_model.ifc", r"^(MAKAS_\d+_ALT_BASLIK|ASIK_\d+|INIS_\d+|VERANDA_ASIK_\d+|(VERANDA_)?SACAK_OMEGASI_\d+)$")
-    IFC = {n: k for n, k in IFC_.items() if re.match(r"^(MAKAS_\d+_ALT_BASLIK|ASIK_\d+|INIS_\d+)$", n)}
-    VASIK = {n: k for n, k in IFC_.items() if n.startswith("VERANDA_ASIK_")}            # taşan verandanın aşıkları (K5b)
-    SOM = {n: k for n, k in IFC_.items() if "SACAK_OMEGASI_" in n}                      # saçak omegası (CK-01; D-39)
+    # kart modelinin IFC'sinden okunan parçalar: makas alt başlıkları, aşıklar, inişler; taşan verandanın aşıkları (K5b); saçak omegası (CK-01; D-39)
+    DESEN = {"IFC": r"MAKAS_\d+_ALT_BASLIK|ASIK_\d+|INIS_\d+", "VASIK": r"VERANDA_ASIK_\d+", "SOM": r"(?:VERANDA_)?SACAK_OMEGASI_\d+"}
+    IFC_ = ifc_kutulari(kart / f"{kart_kodu}_model.ifc", "^(?:" + "|".join(DESEN.values()) + ")$")
+    IFC, VASIK, SOM = ({n: k for n, k in IFC_.items() if re.fullmatch(DESEN[a], n)} for a in ("IFC", "VASIK", "SOM"))
     PARCA = ifc_parcalar(kart / f"{kart_kodu}_model.ifc", r"^(H_PANO_EKI_IC_\d+|BAGLANTI_B\d+_\d+|ALT_CERCEVE_\d+)$")
     KART_IFC = {ad: ps["KartKodu"] for ad, ps in PARCA.items()}                         # iç H'ların kartı modelden
     ALT_KART = defaultdict(set)                                                         # alt çerçevenin kartı modelden (duvar → kart)
@@ -652,21 +652,31 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
     # saçak omegası kart modelinden (D-39; Lokman, 31 Ekim 2026 13:40 "gerçek listeye uy"): saçak ucundan ucuna, kalkan saçağının altına da
     # uzanır; baş makas betopanı levhasında ve aynı hatta devam eden veranda omegasında kesik. Hat başına parçalar; liste hattın tamamını sayar.
     govde_p = Polygon(HZ["govde"]) if GIR else box(0, 0, W, DY)
-    KP_SOM = [p for p in SAYIM["kenar"]["parcalar"] if p["kart"] == "CK-01"]
-    hat_n = defaultdict(int)
-    for p in KP_SOM:
-        hat_n[(p["bilgi"].get("Cati"), p["bilgi"].get("Hat", p["parca"]))] += 1
-    oms = []
+    KP_SOM = [p for p in ((SAYIM.get("kenar") or {}).get("parcalar") or []) if p["kart"] == "CK-01"]
+    hat_k = lambda p: (p["bilgi"].get("Cati"), p["bilgi"].get("Hat", p["parca"]))
+    hat_n, hat_dik = defaultdict(int), {}
     for p in KP_SOM:
         if p["parca"] not in SOM:
             raise Desteklenmiyor(f"kart modelinin IFC'sinde {p['parca']} yok")
+        hat_n[hat_k(p)] += 1
         x0, y0, _z0, x1, y1, _z1 = SOM[p["parca"]]
-        b, dik = p["bilgi"], y1 - y0 > x1 - x0                          # dik: hat y boyunca (plan çerçevesinde dikey)
+        ex, ey = abs(x1 - x0 - p["boy_cm"]) < 0.5, abs(y1 - y0 - p["boy_cm"]) < 0.5    # parçanın boyu kutunun hangi kenarı
+        if ex != ey:
+            if hat_dik.setdefault(hat_k(p), ey) != ey:
+                raise Desteklenmiyor(f"kart modelinin saçak omegası hattı {hat_k(p)} iki yönde")
+    oms = []
+    for p in KP_SOM:
+        x0, y0, _z0, x1, y1, _z1 = SOM[p["parca"]]
+        if hat_k(p) not in hat_dik:                                      # boyu kesitin eniyle aynı, hattında da yönü belli parça yok
+            raise Desteklenmiyor(f"kart modelinin saçak omegası {p['parca']}: yönü kutusundan okunamıyor")
+        b, dik = p["bilgi"], hat_dik[hat_k(p)]                          # dik: hat y boyunca (plan çerçevesinde dikey)
         yuz = "sol" if b["Yuz"] == "sol" else "sağ"
         perp, a0, a1 = ((x0 + x1) / 2, y0, y1) if dik else ((y0 + y1) / 2, x0, x1)
         orta = Point(perp, (a0 + a1) / 2) if dik else Point((a0 + a1) / 2, perp)
         if p["parca"].startswith("VERANDA_"):                            # taşan verandanın yan kirişi (K5b)
-            v = next(v for v in VR if kucuk(v["ad"]) == kucuk(b["Cati"]))
+            v = next((v for v in VR if kucuk(v["ad"]) == kucuk(b.get("Cati", ""))), None)
+            if v is None:
+                raise Desteklenmiyor(f"kart modelinin saçak omegası {p['parca']}: çatısı ({b.get('Cati')}) taşan verandalarda yok")
             yer = (f"{kucuk(v['ad'])} {yuz} yan kirişi" if any(box(*r).buffer(0.5).contains(orta) for r in v["yan_k"])
                    else f"{kucuk(v['ad'])} {yuz} saçağı, kalkan saçağı")
         elif GIR:                                                        # girintili gövde: saçak hattının adı çatı tanımından (`girinti.py`)
@@ -676,14 +686,14 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
             yer = f"{h['ad']} saçağının altındaki duvar" if govde_p.contains(orta) else f"{h['ad']} saçağı, kalkan saçağı"
         else:
             yer = f"{yuz} duvar" if govde_p.contains(orta) else f"{yuz} saçak, {'ön' if a1 < DY / 2 else 'arka'} kalkan saçağı"
-        n_ = hat_n[(b.get("Cati"), b.get("Hat", p["parca"]))]
+        n_ = hat_n[hat_k(p)]
         hat_ = (f"{fmtc(b.get('HatBoyu_cm', p['boy_cm']))} cm, saçak ucundan ucuna" +
                 (f"; {n_} parça, baş makas betopanında ya da aynı hatta devam eden veranda omegasında kesik" if "Hat" in b else "") +
                 " (kart modeli; liste hattın tamamını sayar, D-39)")
         oms.append({"tur": "sacak", "o": "v" if dik else "h", "perp": _r(perp), "a0": _r(a0), "a1": _r(a1), "out": -1 if b["Yuz"] == "sol" else 1,
                     "yer": yer, "hat": hat_})
-    if not oms and satirlar("100'lük saçak omegası"):
-        raise Desteklenmiyor("listede saçak omegası var, kart modelinde yok")
+    if bool(oms) != bool(satirlar("100'lük saçak omegası")):
+        raise Desteklenmiyor("saçak omegası " + ("kart modelinde var, listede yok" if oms else "listede var, kart modelinde yok"))
     omega_duvar = oms + omega_duvar
     if GVK:                                       # gömme veranda: verandaya bakan gövde duvarları 100'lük duvar omegası (kapı üstünden geçer)
         vx, vy = (GVK["vk"][0] + GVK["vk"][2]) / 2, (GVK["vk"][1] + GVK["vk"][3]) / 2

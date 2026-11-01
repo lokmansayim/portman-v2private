@@ -162,18 +162,20 @@ def kesen_araliklar(engeller: list[dict], geo: dict) -> list[tuple[float, float]
     return out
 
 
-def sacak_omegasi(g: dict, G_: dict, F: dict | None = None, engeller: list[dict] | None = None) -> list[dict]:
+def sacak_omegasi(g: dict, G_: dict, F: dict | None = None, engeller: list[dict] | None = None, yuz_: str | None = None) -> list[dict]:
     """Saçak duvarlarının üstünde, taşan verandada (`F`, K5b) yan kirişlerin üstünde; saçak ucundan ucuna (`v0`..`v1`), gerçek Portatifev
     listelerindeki gibi (Lokman, 31 Ekim 2026 13:40 "gerçek listeye uy"; BK-19). Kesitine baş makas betopanı ya da verandanın omegası
     (`engeller`) iniyorsa hat orada kesilir (`kesen_araliklar`); parçalar hattın (`Hat`, `HatBoyu_cm`) parçasıdır, sayı hattın tamamından
     (liste gibi: kesik ve üst üste binen kısım listede de saçak boyunun içinde). Girintili gövdenin şerit çatısında (`serit.py`, İE-24) `F`
-    saçak kenarının çerçevesidir (`v0`..`v1` kenarın uçları)."""
+    saçak kenarının çerçevesidir (`v0`..`v1` kenarın uçları) ve `yuz_` o kenarın yüzü (öteki yüz kurulmaz)."""
     F = F or cati.cerceve(g)
     w, h = G_["sacak_omegasi"]
     v0, v1 = F["v0"], F["v1"]
     ne = "kirişin" if "kiris" in F else "duvarının"                    # taşan verandanın çerçevesinde dış kiriş var (`veranda.cerceveler`)
     out = []
     for yuz, u0 in (("sol", 0.0), ("sag", F["aciklik"] - w)):
+        if yuz_ is not None and yuz != yuz_:
+            continue
         uz = _u(u0, u0 + w, g["duvar_h"], h, G_["sac"], ters=True)
         kes = _kesikler(v0, v1, kesen_araliklar(engeller or [], cati._prizma(F, uz, v0, v1)))
         kesik = len(kes) != 1 or abs(kes[0][0] - v0) > ESIK or abs(kes[0][1] - v1) > ESIK      # uçtan kesilen tek parça da kesik hattır
