@@ -313,3 +313,16 @@ def test_m2_ile_baslayan_talepte_tek_kenar_sorulur(s):
     cati_id = s.set["id"]
     r = s.yaz("kısa kenar 7 metre olsun", dis_olcu={"en_m": 7})
     assert _eskidi(s, cati_id) and r.eylem == "sor" and r.soru_alani == "dis_olcu" and not s.k.d.get("son_is_emri")
+
+
+@pytest.mark.parametrize("metin,talep,mesajda", [
+    ("Ç8801 olmasın, 3+1 olsun", {"oda_programi": "3+1"}, "3+1"),
+    ("Ç8801 yerine 100 m² olsun", {"alan_m2": 100}, "100 m²"),
+])
+def test_kaynak_ya_da_olumsuz_kodla_gelen_degisiklik_dusmez(s, metin, talep, mesajda):
+    """Dördüncü tur: değişimin kaynağı ya da olumsuz cümledeki kod seçim değildir; talep değişikliği çatı setini eskitir."""
+    s.yaz("88 m² 2+1 tek kat çelik", **T88)
+    s.bas("Ç8801", "1. Ç8801")
+    cati_id = s.set["id"]
+    r = s.yaz(metin, **talep)
+    assert _eskidi(s, cati_id) and r.eylem != "is_emri" and not s.k.d.get("son_is_emri") and mesajda in r.mesaj

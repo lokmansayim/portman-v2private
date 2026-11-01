@@ -292,11 +292,12 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
     # İE-25 (geometri hakemi bulgu 5; ikinci tur 1–2): çatı seti açıkken gelen m², dış ölçü, oda, kat ya da yapı türü değişikliği sessizce
     # düşmez: çatı seti "eskidi" kapanır (eski düğmesi geçmez), seçilen model bırakılır, talep yeni bilgisiyle yeniden okunur (yeni set, soru
     # ya da plan üretimi). Çatı seçimi ve bayinin yazdığı model kodu bunun dışında. Üçüncü tur: LLM'in bağlamdan yinelediği kod (mesajda
-    # yazılı değil; K18, `_celik_dali` ilkesi) değişikliği gizlemez ve taslağa geri yazılmaz (1); yeni dış ölçü taslaktaki eski m²'nin,
+    # yazılı değil; K18, `_celik_dali` ilkesi) değişikliği gizlemez ve taslağa geri yazılmaz (1); değişimin kaynağı ya da olumsuz cümledeki
+    # kod da seçim değildir ("Ç8801 yerine 100 m² olsun", "Ç8801 olmasın, 3+1 olsun"; dördüncü tur); yeni dış ölçü taslaktaki eski m²'nin,
     # yeni m² eski dış ölçünün yerine geçer (3); tek kenar da değişikliktir (4).
     st0 = k.d.get("secenek_seti") or {}
     if st0.get("durum") == "acik" and st0.get("tur") == "cati_varyanti" and t.niyet in ("yeni_talep", "revizyon") \
-            and not _model_kodlari_ve_kalan(metin, katalog)[0]:
+            and not _secim_kodlari(metin, katalog):
         taban0 = katalog.aday(next((a.get("kod") for a in st0.get("adaylar") or [] if a.get("sira") == 1), None))
         if _talep_bilgisi_degisti(k.d["taslak"], t, taban0):
             st0["durum"] = "eskidi"
@@ -517,6 +518,15 @@ def _celik_dali(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts: dict) 
 
 
 CELIK_ISTEK_NOTU = "Mesajınızdaki değişiklik isteğini seçtiğiniz plana işleyeceğim."
+
+
+def _secim_kodlari(metin: str | None, katalog: Katalog) -> list[str]:
+    """Bayinin bu mesajda seçim olarak yazdığı model kodları (`_celik_dali` ilkesi): değişimin kaynağı olan kod ("Ç8801 yerine …") ve
+    olumsuz çatı cümlesindeki kod ("Ç8801 olmasın") seçim değildir."""
+    if CO.cati_olumsuz(metin):
+        return []
+    kaynak = {str(Katalog.kod_normalize(c) or "").upper() for c in CO.cati_kaynak_kodlari(metin)}
+    return [c for c in (str(Katalog.kod_normalize(x) or "").upper() for x in _model_kodlari_ve_kalan(metin, katalog)[0]) if c not in kaynak]
 
 
 def _talep_bilgisi_degisti(ts: dict, t: Talep, model: dict | None) -> bool:
