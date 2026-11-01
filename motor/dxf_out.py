@@ -9,7 +9,7 @@ Blok düzeni Yan Verandalı 6×8,5 (v1.4.3) örneğiyle aynıdır:
 Kaynak doğrama blokları (Güncel Şablon 2024) onaylı referans DXF'ten aktarılır; ölçeklenmez.
 """
 from __future__ import annotations
-import json, time, hashlib, csv
+import json, math, time, hashlib, csv
 from collections import Counter
 from pathlib import Path
 
@@ -84,6 +84,14 @@ KOT_GORUNUSLERI = ("on", "sag")
 # D-31 madde 5 (Lokman, 29 Ekim 2026 11:14): aks çizgisi soluk gri (ACI 9) ve veranda kirişi gibi kesik (`VERANDA_KESIK`); okunabilirlik
 AKS_KATMANI = ("AKS", 9, "VERANDA_KESIK")
 
+# D-34 (Lokman, 30 Ekim 2026 14:45: "ölçü çizgilerini … beyaz sayfa üzerine daha belirgin bir renk yap", "rengi de mor olsun, yazı rengi genel
+# ölçü rengi olsun, siyah olabilir"): görünüşlerin ölçüsü (ON_OLCU; önce açık mavi, ACI 4) ve girintili gövdenin dış parça ölçüsü
+# (DIS_PARCA_OLCU) mor çizgiyle (ACI 193; ölçü çizgisi ve uzatma çizgisi de, `dim`), yazısı genel ölçününki (OLCULER, ACI 7: beyaz sayfada siyah).
+OLCU_MOR = 193
+OLCU_YAZI_RENGI = 7
+MOR_OLCU_KATMANLARI = ("ON_OLCU", "DIS_PARCA_OLCU")
+DIS_PARCA_PAYI = 30.0            # cm: dış parça ölçüsünün duvarın dış yüzünden uzaklığı (aks harfleri ve genel ölçünün içinde)
+
 LAYERS = [
     AKS_KATMANI, ("AKS_YAZI", 4, "Continuous"), ("DIS_DUVAR_100", 30, "Continuous"), ("IC_DUVAR_60", 30, "Continuous"),
     ("KOSE_PROFIL_100", 8, "Continuous"), ("KOSE_PROFIL_60", 8, "Continuous"), ("IC_UCLU_H_60", 3, "Continuous"),
@@ -92,7 +100,7 @@ LAYERS = [
     ("ACIK_SINIR", 8, "DASHED"), ("NET_ALAN_GEOMETRISI", 6, "Continuous"),
     ("MONTAJ_STANDART", 7, "Continuous"), ("MONTAJ_OZEL_PANO", 6, "Continuous"), ("MONTAJ_OZEL_OLCU", 6, "Continuous"), ("MONTAJ_YAZI", 4, "Continuous"),
     ("ON_GORUNUS", 7, "Continuous"), ("ON_DERZ", 8, "Continuous"), ("ON_DOGRAMA", 4, "Continuous"), ("ON_CATI", 7, "Continuous"),
-    ("ON_TOPUK", 1, "Continuous"), ("ON_OLCU", 4, "Continuous"), ("ON_YAZI", 7, "Continuous"),
+    ("ON_TOPUK", 1, "Continuous"), ("ON_OLCU", OLCU_MOR, "Continuous"), ("ON_YAZI", 7, "Continuous"),
     ("CATI_GORUNUS", 7, "Continuous"), ("CATI_OLCU", 4, "Continuous"), ("CATI_YAZI", 7, "Continuous"),
     ("PORTMAN_INFO", 7, "Continuous"), ("OZELLIK_TABLOSU", 7, "Continuous"),
 ]
@@ -524,6 +532,8 @@ class Cizici:
             zincir_h = {e.dxf.handle for e in list(msp)[n_z:]}
             if aks:
                 self._bolge("aks_zinciri", n_z)                   # D-31 madde 13: A4 sayfasının planında yok
+            if plan.girintili:                                  # D-34: kapalı gövdenin her dış parçası mor ölçüyle
+                self._dis_parca_olculeri(ox, oy)
             for v in plan.dis_verandalar:                   # BK-14: taşan verandanın eni ve derinliği
                 vx0, vy0, vx1, vy1 = v["rect"]
                 if v["cephe"] in ("on", "arka"):
@@ -540,6 +550,7 @@ class Cizici:
                     self._ozel_olcu(d, p.rect(), W, H, ox, oy, "OZEL_PANEL_OLCU_CM", dolu)
             for ad, m in plan.mahaller.items():
                 if not m.acik or not m.cells: continue      # taşan veranda (BK-14) yukarıda ölçülü
+                if plan.girintili: continue                 # D-34: açık mahalin eni ve derinliği dış parça ölçüsünde (aynı yer iki kez ölçülmez)
                 us = [u for u, v in m.cells]; vs = [v for u, v in m.cells]
                 x0, x1 = G.X(min(us) / 2), G.X((max(us) + 1) / 2); y0, y1 = G.Y(min(vs) / 2), G.Y((max(vs) + 1) / 2)
                 # dar açık mahalde (tek pano şeridi) ölçü çizgisi plan dışına alınır; yazılarla çakışmasın
@@ -757,10 +768,34 @@ class Cizici:
             yd = r[3] + u if ic > 0 else r[1] - u; yk = r[1] if ic > 0 else r[3]
             self.dim((r[0] + ox, yk + oy), (r[2] + ox, yk + oy), (0, yd + oy), 0, layer)
 
+    def _dis_parca_olculeri(self, ox: float, oy: float) -> None:
+        """D-34 (Lokman, 30 Ekim 2026 14:45: "mor ile çizdiğim yerleri de ölçeklendir rengi de mor olsun"): girintili gövdede (İE-24) kapalı
+        gövdenin dış çizgisinin (`G.kapali_govde_cokgeni`: duvarların dış yüzü; balkon gibi açık mahal dışarıda) her düz parçası kendi dış
+        yanında, yüzden `DIS_PARCA_PAYI` uzakta ölçülür (DIS_PARCA_OLCU; mor çizgi, siyah yazı çizginin ortasında, `dim`). Açık mahalin (balkon)
+        aks ölçüsü bu planda yazılmaz: eni ve derinliği bu ölçülerde (`ciz_plan`). Dikdörtgen gövdede dış ölçü iki toplam
+        ölçüdür; bu ölçü çizilmez (katman da açılmaz, eski çizimler aynen)."""
+        from shapely.geometry.polygon import orient
+        if "DIS_PARCA_OLCU" not in self.doc.layers:
+            self.doc.layers.add("DIS_PARCA_OLCU", color=OLCU_MOR, linetype="Continuous")
+        halka = list(orient(G.kapali_govde_cokgeni(self.plan), 1.0).exterior.coords)
+        for (xa, ya), (xb, yb) in zip(halka, halka[1:]):
+            if math.hypot(xb - xa, yb - ya) < 1.0:
+                continue
+            if abs(yb - ya) < 1e-6:                           # yatay parça; saat yönü tersinde dışarısı (0, −dx)
+                y = ya - math.copysign(DIS_PARCA_PAYI, xb - xa)
+                self.dim((min(xa, xb) + ox, ya + oy), (max(xa, xb) + ox, ya + oy), (0, y + oy), 0, "DIS_PARCA_OLCU")
+            else:                                             # düşey parça; dışarısı (dy, 0)
+                x = xa + math.copysign(DIS_PARCA_PAYI, yb - ya)
+                self.dim((xa + ox, min(ya, yb) + oy), (xa + ox, max(ya, yb) + oy), (x + ox, 0), 90, "DIS_PARCA_OLCU")
+
     def dim(self, p1, p2, base, angle, layer="OLCULER"):
         base = (p1[0], base[1]) if angle == 0 else (base[0], p1[1])
-        d = self.msp.add_linear_dim(base=base, p1=p1, p2=p2, angle=angle, dimstyle="PORTMAN", dxfattribs={"layer": layer},
-                                    override={"dimtxt": 14, "dimasz": 9, "dimexe": 6, "dimexo": 5, "dimdec": 2, "dimzin": 8, "dimdsep": ord(",")})
+        ozel = {"dimtxt": 14, "dimasz": 9, "dimexe": 6, "dimexo": 5, "dimdec": 2, "dimzin": 8, "dimdsep": ord(",")}
+        if layer in MOR_OLCU_KATMANLARI:                          # D-34: çizgiler mor (ölçü bloğunun çizgileri 0 katmanında; renk açık yazılır), yazı siyah
+            ozel.update(dimclrd=OLCU_MOR, dimclre=OLCU_MOR, dimclrt=OLCU_YAZI_RENGI)
+        if layer == "DIS_PARCA_OLCU":                             # yazı çizginin ortasında: duvarın yanındaki pencere yazısına binmez
+            ozel["dimtad"] = 0
+        d = self.msp.add_linear_dim(base=base, p1=p1, p2=p2, angle=angle, dimstyle="PORTMAN", dxfattribs={"layer": layer}, override=ozel)
         d.render()
 
     # ------------------------------------------------------------------ ön görünüş / çatı / tablo
@@ -945,6 +980,8 @@ class Cizici:
             xl, xr = r["u0"] + ox, r["u1"] + ox
             msp.add_line((xl, top), (xr, top), dxfattribs={"layer": "ON_CATI"})
             msp.add_line((xl, top), (xl, top + topuk), dxfattribs={"layer": "ON_TOPUK"}); msp.add_line((xr, top), (xr, top + topuk), dxfattribs={"layer": "ON_TOPUK"})
+            for ut in r["topuklar"]:                              # D-34: cumbanın görünen saçak ucunda da topuk (taşan verandadaki gibi)
+                msp.add_line((ut + ox, top), (ut + ox, top + topuk), dxfattribs={"layer": "ON_TOPUK"})
             for c in r["cizgiler"]:
                 msp.add_lwpolyline([(u + ox, bot + z) for u, z in c], dxfattribs={"layer": "ON_CATI"})
             for p in vp:

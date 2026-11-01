@@ -199,12 +199,13 @@ def ana_kalkanlar(g: dict, F: dict, kesit: dict) -> list[dict]:
 
 
 def kalkan_kenarlari(g: dict, G_: dict, kesit: dict, kurallar: set[str], F: dict | None = None,
-                     kalkanlar: list[dict] | None = None) -> list[dict]:
+                     kalkanlar: list[dict] | None = None, yuzler: list[tuple] | None = None) -> list[dict]:
     """Her baş makasın iki eğik kenarında (saçak ucundan mahyaya) Z, alın sacı ve C kapama. Kalkanın dışı uç duvarın dış yüzündeki
     betopanın dışıdır; kalkan saçağı oradan saçak ucuna (aşık uçlarına). Z makasın üstünden betopanın dışına iner; alın sacının saçak altı
     makas üstünün `makas_ustunden` altında, tırnağı Z'de; C kapama aşık uçlarında aşığın üstünden alın sacının saçak altına; alın sacının
     alnı en önde, kıvrımı kaplamanın kenarını kavrar. `kalkanlar` ({ad, on, v_dis, v_uc}) verilmezse ana çatının baş makasları
-    (`ana_kalkanlar`); taşan verandada dış kalkan (`veranda.kalkan`, K5b)."""
+    (`ana_kalkanlar`); taşan verandada dış kalkan (`veranda.kalkan`, K5b). `yuzler` ([(yüz, u0, u1)]) verilirse yalnız o eğik kenar parçaları
+    (İE-24, girintili gövde: ana çatının cumba üstünde kalan kısa alın kenarı; boyu u aralığının eğik boyu); verilmezse iki eğik kenarın tamamı."""
     F = F or cati.cerceve(g)
     t = G_["sac"]
     Z, A, C = G_["bas_makas_z"], G_["alin_saci"], G_["c_kapama"]
@@ -216,22 +217,23 @@ def kalkan_kenarlari(g: dict, G_: dict, kesit: dict, kurallar: set[str], F: dict
 
         def v(a_, b_):                                                        # dışarı yönde a_..b_ (v_dis'ten ölçü değil, mutlak)
             return min(a_, b_), max(a_, b_)
-        for yuz, u0, u1 in (("sol", -F["s"], F["um"]), ("sag", F["um"], F["aciklik"] + F["s"])):
+        for yuz, u0, u1 in (yuzler or (("sol", -F["s"], F["um"]), ("sag", F["um"], F["aciklik"] + F["s"]))):
             bilgi = {"Makas": m["ad"], "Yuz": yuz}
-            ortak = {"boy_cm": _r(F["egik"]), "bilgi": bilgi}
+            egik = F["egik"] if yuzler is None else (u1 - u0) / F["kos"]
+            ortak = {"boy_cm": _r(egik), "bilgi": bilgi}
             if "bas_makas_z_yerlesimi" in kurallar:
                 kes = [(_bant(F, u0, u1, 0.0, t), *v(v_dis, v_dis - s * Z["ust_kanat"])),
                        (_bant(F, u0, u1, -Z["centik"], t), *v(v_dis, v_dis + s * t)),
                        (_bant(F, u0, u1, -Z["centik"], -Z["centik"] + t), *v(v_dis, v_dis + s * Z["dis_kanat"]))]
                 out.append({"kural": "bas_makas_z_yerlesimi", "parca": "bas_makas_z", "geo": _coklu(F, kes), **ortak,
-                            "aciklama": f"{m['ad']}, {yuz} eğik kenar, {F['egik']:.1f} cm"})
+                            "aciklama": f"{m['ad']}, {yuz} eğik kenar, {egik:.1f} cm"})
             if "c_kapama_yerlesimi" in kurallar:
                 z0 = a - C["govde"]
                 kes = [(_bant(F, u0, u1, z0, a), *v(v_uc, v_uc + s * t)),
                        (_bant(F, u0, u1, a - t, a), *v(v_uc + s * t, v_uc - s * C["kanat"])),
                        (_bant(F, u0, u1, z0, z0 + t), *v(v_uc + s * t, v_uc - s * C["kanat"]))]
                 out.append({"kural": "c_kapama_yerlesimi", "parca": "c_kapama", "geo": _coklu(F, kes), **ortak,
-                            "aciklama": f"{m['ad']}, {yuz} eğik kenar, aşık uçlarında, {F['egik']:.1f} cm"})
+                            "aciklama": f"{m['ad']}, {yuz} eğik kenar, aşık uçlarında, {egik:.1f} cm"})
             if "alin_saci_yerlesimi" in kurallar:
                 z0 = -A["makas_ustunden"]
                 on_yuz = v_uc + s * t                                         # C kapamanın önü
@@ -239,7 +241,7 @@ def kalkan_kenarlari(g: dict, G_: dict, kesit: dict, kurallar: set[str], F: dict
                        (_bant(F, u0, u1, z0, z0 + A["alin"]), *v(on_yuz, on_yuz + s * t)),
                        (_bant(F, u0, u1, z0 + A["alin"] - t, z0 + A["alin"]), *v(on_yuz + s * t, on_yuz + s * t - s * A["kivrim"]))]
                 out.append({"kural": "alin_saci_yerlesimi", "parca": "alin_saci", "geo": _coklu(F, kes), **ortak,
-                            "aciklama": f"{m['ad']}, {yuz} eğik kenar, {F['egik']:.1f} cm"})
+                            "aciklama": f"{m['ad']}, {yuz} eğik kenar, {egik:.1f} cm"})
     return out
 
 
@@ -267,13 +269,19 @@ def katman(ie: dict, g: dict, D: dict, kesit: dict, K: dict) -> dict:
             kural_yok.append({"parca": adi, "sinif": sinif, "neden": f"{ad}: bugünkü IFC'de baş makas yok (kalkan kenarı kurulamaz)"})
             continue
         kurulan.add(ad)
-    if "sacak_omegasi_yerlesimi" in kurulan:
-        parcalar += sacak_omegasi(g, G_)
-    if "sacak_saci_yerlesimi" in kurulan:
-        parcalar += sacak_saci(g, G_)
-    parcalar += kalkan_kenarlari(g, G_, kesit, kurulan)
-    if "mahya_yerlesimi" in kurulan:
-        parcalar += mahya(g, G_, kesit)
+    if g.get("cati_serit"):                                          # İE-24: girintili gövde (ana çatı + paralel cumba; `serit.py`)
+        from motor.genel import cati_genel
+
+        from . import serit
+        parcalar += serit.kenarlar(g, cati_genel.cati_kur(g["cati_serit"]), G_, kesit, kurulan)
+    else:
+        if "sacak_omegasi_yerlesimi" in kurulan:
+            parcalar += sacak_omegasi(g, G_)
+        if "sacak_saci_yerlesimi" in kurulan:
+            parcalar += sacak_saci(g, G_)
+        parcalar += kalkan_kenarlari(g, G_, kesit, kurulan)
+        if "mahya_yerlesimi" in kurulan:
+            parcalar += mahya(g, G_, kesit)
     # K5b: taşan verandaların çatı kenarları (çerçeveyi kuramayan verandanın "kural yok"u yerleşimin çatı katmanlarında yazılı)
     if g["dis_verandalar"] and g["cati_tipi"] in K[veranda.KURAL]["cati_tipleri"]:
         for F in veranda.cerceveler(g)[0]:

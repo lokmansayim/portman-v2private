@@ -110,7 +110,7 @@ def _maskele(ie: dict, kod: str) -> dict:
 def kimlik(ie: dict) -> dict:
     """Model satırının kimlik alanları İş Emri'nden ve Motor'un planından (D-28 madde 1: ölçü ve m² Motor'un; `dis_olcu_cm` isteğe
     bağlı, ızgara İş Emri'sinde yok): gövde kutusu (`geometry.govde_kutusu`, taşan veranda hariç), taşan veranda (cephe, en, derinlik),
-    gömme açık mahaller (m²), çatı (tip, eğim, kaplama). Motor kuramazsa gövde yerine nedeni yazar; paket Motor'un hatasını ayrıca yazar."""
+    gömme açık mahaller (m²), çatı (tip, eğim, kaplama); girintili gövdede m² gövdenin dış çizgisinden (İE-24). Motor kuramazsa gövde yerine nedeni yazar; paket Motor'un hatasını ayrıca yazar."""
     from motor import geometry as G
     from motor.cati_prefabrik import TIP_ADI
     c, oz = ie.get("cati") or {}, ie.get("ozellikler") or {}
@@ -131,7 +131,8 @@ def kimlik(ie: dict) -> dict:
     dis = {v["ad"] for v in plan.dis_verandalar}
     gomme = [f"{m.alan_m2:.1f}".replace(".", ",") for m in plan.mahaller.values() if m.acik and m.ad not in dis]
     ver = (["taşan: " + ", ".join(tasan)] if tasan else []) + (["gömme " + ", ".join(gomme) + " m²"] if gomme else [])
-    return out | {"m2": f"{gx * gy / 1e4:.0f}", "govde": f"dış ölçü {sy(gx)} × {sy(gy)}", "veranda": "; ".join(ver) or "yok"}
+    m2 = G.govde_cokgeni(plan).area / 1e4 if plan.girintili else gx * gy / 1e4     # İE-24: girintili gövdede dış çizgiden (kutudan değil)
+    return out | {"m2": f"{m2:.0f}", "govde": f"dış ölçü {sy(gx)} × {sy(gy)}", "veranda": "; ".join(ver) or "yok"}
 
 
 def talep_modeli(kod: str, yol: Path, tavan: list[str] | None, kayit_: dict) -> tuple[dict, dict]:
