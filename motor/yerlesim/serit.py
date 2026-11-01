@@ -11,8 +11,8 @@ bir beşik, aynı düzlemdeki ana çatı ve cumba yüzü tek yüz. Çatı katman
   (bir panelden kesilen iki parça tek parçadır). Tek kat panelin çok düzlemli dizilimi listede de yok: "kural yok".
 - **Baş makas betopanı** her parçanın baş makaslarında, parçanın kendi çerçevesiyle (`cati.betopan`; sayı liste kuralı H5, baş makas başına).
 - **Dere** her saçak hattında (`cati_kur` › `dere`), **iniş** hattın iki ucunda ve eşiği geçen hattın ortasında (K2'nin kuralı).
-- **Çatı kenarları** (K3b): saçak omegası ve saçak sacı saçak hattı boyunca (omega baş makas betopanında kesilir; D-39), mahya her parçanın
-  görünen mahyası boyunca, Z, alın sacı ve C kapama her görünen alın kenarında (başka bir çatının altında kalan kenar sayılmaz; ana çatının
+- **Çatı kenarları** (K3b): saçak omegası saçak hattının altındaki duvarların üstünde (saçağa uzamaz, sayı saçak hattının boyundan; D-41;
+  baş makas betopanında kesilir; D-39), saçak sacı saçak hattı boyunca, mahya her parçanın görünen mahyası boyunca, Z, alın sacı ve C kapama her görünen alın kenarında (başka bir çatının altında kalan kenar sayılmaz; ana çatının
   cumba üstündeki kısa kenarı sayılır). Kesitler K3b'ninkiler (`kenar.py`).
 
 Parçaların çerçevesi (`cerceve`): K2'nin `cati.cerceve` anahtarları; `u` makas ekseni, `ou` yerel `u`'nun dünyadaki başı (parçanın dış yüzü),
@@ -248,10 +248,11 @@ def _alin_cercevesi(Fs: dict, e: dict) -> tuple[dict, bool]:
 
 def kenarlar(g: dict, ck: dict, G_: dict, kesit: dict, kurulan: set[str], engeller: list[dict] | None = None) -> list[dict]:
     """K3b'nin çatı kenarları girintili gövdede (kurallar `kurulan`): saçak omegası, saçak sacı, mahya, Z, alın sacı, C kapama. Saçak omegası
-    saçak kenarının ucundan ucuna, dikdörtgen gövdedeki gibi (D-39; liste de saçak kenarlarının boyunu sayar); kesitine baş makas betopanı
-    (`engeller`, `betopan`) iniyorsa orada kesilir. Hat, kenarın düzleminin parçasına yazılır (`Cati`; aynı düzlemdeki ana çatı ve cumba yüzü
+    kenarın altındaki duvarların üstünde (gövdenin o hattaki kısmı; saçağa uzamaz, D-41), sayı saçak kenarının boyundan, dikdörtgen gövdedeki
+    gibi (D-39; liste de saçak kenarlarının boyunu sayar); kesitine baş makas betopanı (`engeller`, `betopan`) iniyorsa orada kesilir. Hat, kenarın düzleminin parçasına yazılır (`Cati`; aynı düzlemdeki ana çatı ve cumba yüzü
     tek hat, liste üreteci gibi)."""
     Fs = cerceveler(g)
+    govde = Polygon(g["govde"])
     out, sayac = [], {}
     gorunen = [e for e in ck["kenarlar"] if e["tur"] in ("sacak", "alin") and not _ortulu(ck, e)]
     for e in (e for e in ck["kenarlar"] if e["tur"] == "sacak"):          # dere hattı gibi: saçak kenarının tamamı (altta kalan uç dahil)
@@ -261,7 +262,11 @@ def kenarlar(g: dict, ck: dict, G_: dict, kesit: dict, kurulan: set[str], engell
         if "sacak_omegasi_yerlesimi" in kurulan:
             cati_ = e["duzlemler"][0].rsplit(" ", 1)[0]
             k = sayac[(cati_, yuz)] = sayac.get((cati_, yuz), 0) + 1    # aynı çatının aynı yüzündeki ikinci saçak kenarı ayrı hat
-            for p in kenar.sacak_omegasi(g, G_, dict(F, v0=r0, v1=r1), engeller, yuz):
+            ic = F["ou"] + 0.5 if yuz == "sol" else F["ou"] + F["aciklik"] - 0.5      # kenarın altındaki duvarlar: gövdenin o hattaki kısmı
+            kes = govde.intersection(LineString([(r0, ic), (r1, ic)] if ax == 0 else [(ic, r0), (ic, r1)]))
+            duvar = sorted(tuple(sorted(q[ax] for q in (s.coords[0], s.coords[-1]))) for s in getattr(kes, "geoms", [kes])
+                           if not s.is_empty and s.length >= 1.0)
+            for p in (kenar.sacak_omegasi(g, G_, dict(F, v0=r0, v1=r1), engeller, yuz, duvar) if duvar else []):
                 if "Hat" in p["bilgi"] and k > 1:
                     p["bilgi"]["Hat"] = f"{yuz} {k}"
                 p["bilgi"] = {"Cati": cati_, **p["bilgi"]}

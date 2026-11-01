@@ -4,7 +4,7 @@
 - Kabul (TK-01, `testler/motor/veri/TK01.json`): kart modeli ile liste üreteci yan yana. K5'teki sekiz farkın veranda çatısından gelen
   yedisinde beşi K5b-1'de kapandı (CK-02, CK-03, CK-06, DR-01, DR-02); AS-01, BT-01 ve veranda kalkanının Z'si (CK-04) liste PR'ında
   (İE-09 hattının arkasında; CIO onayı 30 Ekim 14:20): aşık sırası beşikte karar C, tek koddan (`prefabrik_liste.asik_mesafeleri`); baş makas
-  betopanı ve Z kirişli veranda kalkanında da (D-32 madde 2). Saçak omegası (CK-01) saçak ucundan ucuna, liste gibi (Lokman, 31 Ekim 13:40
+  betopanı ve Z kirişli veranda kalkanında da (D-32 madde 2). Saçak omegası (CK-01) duvar boyunca (D-41), sayısı saçak boyundan, liste gibi (Lokman, 31 Ekim 13:40
   "gerçek listeye uy": gerçek PK-01, PK-02, PK-03 listeleri saçak boyuyla tutuyor; K3b'deki fark kapandı). On dört kalem aynı. "Kural yok" 0
   (K5'te 8). OM-01 veranda çatısından değil (kapsam dışı).
 - Kör protokolü: gerçek liste açılmaz; kıyas liste üretecimizin çıktısıyla (CIO, 27 Ekim 22:02).
@@ -130,10 +130,10 @@ def test_tk01_asik_sirasi_tek_koddan(tk01):
 
 
 def test_tk01_sacak_omegasi_sacak_boyu(tk01):
-    """CK-01: model saçak omegasını saçak ucundan ucuna kurar, liste de saçak boyunca sayar (Lokman, 31 Ekim 13:40 "gerçek listeye uy";
-    gerçek PK-01, PK-02, PK-03 listeleri saçak boyuyla tutuyor). Listenin saçak boyu modelin saçak omegası hatlarının ve saçak sacının
-    boyudur. Hat baş makas betopanında ve aynı hatta devam eden veranda omegasında kesilir (CIO onayı 31 Ekim 16:58, seçenek a): parçalar
-    hattın parçası, sayı hattın tamamından."""
+    """CK-01: sayı saçak boyundan, liste gibi (Lokman, 31 Ekim 13:40 "gerçek listeye uy"; gerçek PK-01, PK-02, PK-03 listeleri saçak
+    boyuyla tutuyor): listenin saçak boyu modelin saçak omegası hatlarının ve saçak sacının boyudur. Yer duvar ya da kiriş boyunca, saçağa
+    uzamaz (Lokman, 1 Kasım 2026 15:19 ve 15:28 "saçak omegalarını başlardan 30'ar santim kısalt"; D-41): her parça hattın parçası, duvarın
+    dışındaki kısım fire."""
     say, L = tk01["say"], tk01["liste"]
     m = {k["kod"]: k.get("metre") for k in say["kartlar"]}
     sacak = _metre(L["100'lük saçak omegası"][0]["formul"], "saçak kenarları")
@@ -142,10 +142,10 @@ def test_tk01_sacak_omegasi_sacak_boyu(tk01):
     for c in (None, "ÖN VERANDA", "ARKA VERANDA"):                             # her çatıda saçak omegası hattı saçak sacıyla aynı boyda
         hat = {p["bilgi"].get("Hat", i): p["bilgi"].get("HatBoyu_cm", p["boy_cm"]) for i, p in enumerate(_parcalar(say, "CK-01", c))}
         assert sorted(hat.values()) == sorted(p["boy_cm"] for p in _parcalar(say, "CK-02", c)), c
-    kesik = [p for p in _parcalar(say, "CK-01") if "Hat" in p["bilgi"]]
-    assert [(p["bilgi"].get("Cati"), p["bilgi"]["Yuz"], p["boy_cm"]) for p in kesik] == [
-        (None, "sol", 28.8), (None, "sol", 888.5), (None, "sag", 28.8), (None, "sag", 888.5), (None, "sag", 28.8),
-        ("ÖN VERANDA", "sol", 209.8), ("ÖN VERANDA", "sag", 209.8), ("ARKA VERANDA", "sol", 128.8), ("ARKA VERANDA", "sol", 28.8), ("ARKA VERANDA", "sag", 128.8), ("ARKA VERANDA", "sag", 28.8)]
+    om = _parcalar(say, "CK-01")                                                   # D-41: duvar (888,5) ve kiriş boyunca, saçağa uzamaz
+    assert [(p["bilgi"].get("Cati"), p["bilgi"]["Yuz"], p["boy_cm"]) for p in om] == [
+        (None, "sol", 888.5), (None, "sag", 888.5), ("ÖN VERANDA", "sol", 179.8), ("ÖN VERANDA", "sag", 179.8),
+        ("ARKA VERANDA", "sol", 128.8), ("ARKA VERANDA", "sag", 128.8)]
     assert kp["stok"] == math.ceil(kp["toplam_m"] / 2.5 - 1e-9) == L["100'lük saçak omegası"][0]["adet"] == 11 and kp["hat"] == 6
 
 
@@ -163,8 +163,8 @@ def _cakisir(p: dict, q: dict) -> bool:
 @pytest.mark.parametrize("ad, yol", [("TK01", TK01), ("PK01", MOTOR_VERI / "PK01.json"), ("ALTIN", KOK / "is_emri" / "ALTIN_2plus1_6x8.json"),
                                      ("YAN_VERANDALI", KOK / "is_emri" / "YAN_VERANDALI_2plus1_6x8p5.json"), ("TK03", MOTOR_VERI / "TK03.json")])
 def test_sacak_omegasi_betopanla_ve_omegayla_cakismaz(ad, yol, tmp_path):
-    """Saçak omegası saçak ucuna uzayınca (BK-19) dikey betopan levhasının ucu omeganın kesitine iner: hat levhada kesilir, levha geçer
-    (CIO onayı 31 Ekim 16:58, seçenek a; geometri hakemi BK-19). Ana çatının omegası aynı hatta devam eden veranda omegasının üstüne binmez.
+    """Dikey betopan levhasının ucu omeganın kesitine inerse hat levhada kesilir, levha geçer (CIO onayı 31 Ekim 16:58, seçenek a; geometri
+    hakemi BK-19); omega duvar boyunca, saçağa uzamaz (D-41). Ana çatının omegası aynı hatta devam eden veranda omegasının üstüne binmez.
     Kesik hattın parçaları hattın boyunu taşır: hatların toplamı saçak boyu (liste), kesik kısım da içinde. Girintili gövdede (TK-03, İE-24)
     de: dört saçak kenarı dört hat, her parçanın baş makas betopanında kesik."""
     ie = _oku(yol)
@@ -180,7 +180,7 @@ def test_sacak_omegasi_betopanla_ve_omegayla_cakismaz(ad, yol, tmp_path):
     hat = {(p["bilgi"].get("Cati"), p["bilgi"].get("Hat", i)): p["bilgi"].get("HatBoyu_cm", p["boy_cm"]) for i, p in enumerate(om)}
     sac = [p for p in N["parcalar"] if p["parca"] == "sacak_saci"]
     assert sorted(hat.values()) == sorted(p["boy_cm"] for p in sac)
-    assert any("Hat" in p["bilgi"] for p in om) == (ad != "PK01")             # PK-01'in levhaları yatık, mahyaya ortalı: omegaya inmez
+    assert all("Hat" in p["bilgi"] and "HatBoyu_cm" in p["bilgi"] for p in om)  # D-41: her parça hattın parçası, sayı saçak boyundan
 
 
 def test_tk01_betopan_veranda_kalkani(tk01):

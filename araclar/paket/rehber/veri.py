@@ -10,7 +10,8 @@ yazıları kurulur; şema 62'nin verisiyle aynı (`testler/paket/rehber62/donust
   kolon ve kirişleri, veranda çatıları. Pafta çerçevesi: x sol dış yüzden sağa, y ön dış yüzden arkaya (cm).
 - **Kart modeli** (`python -m motor.kart_model`): kartlar ve katalog kodları, H türleri (kulaklı / kulaksız), makas, aşık (taşan verandanın
   çatısında da) ve iniş yerleri, saçak omegası parçaları (`<kod>_model.ifc`), tavan omegası parçaları, Z'nin parça boyu ve kenar başına Z parçaları
-  (`<kod>_kart_sayim.json`). Saçak omegası saçak ucundan ucuna, betopanda kesik; aşıkta saçağa 30 cm'den az kalan sıra konmaz (D-39).
+  (`<kod>_kart_sayim.json`). Saçak omegası duvar boyunca, saçağa uzamaz (D-41), betopanda kesik, sayısı saçak boyundan; aşıkta saçağa 30 cm'den
+  az kalan sıra konmaz (D-39).
 - **Yükleme listesi**: adetler ve listedeki satırlar (adım satırları, kimlik kartlarındaki "Liste" satırı).
 - **Kural** (motorun modelinde olmayanlar): yavru makasın yeri (derinlik boyunca eşit aralık), asma tavanın H'ı ve gözü (`tavan_h_aralik_m`), kalkan betopanının dizilimi (125 cm'ye sığan
   kalkanda 62 m²'deki gibi mahyadan iki yana 250'lik yatay levhalar, yüksek kalkanda 125'lik dik şeritler). Kartlarında kaynağı yazar.
@@ -650,8 +651,8 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
                                     "out": -1 if v["on"] else 1, "yer": f"{kucuk(v['ad'])} dış kirişi (veranda baş makasının altı)"})
         omega_duvar += [{"tur": "bas", "o": "h", "perp": 5, "a0": _r(-SC), "a1": _r(W + SC), "out": -1, "yer": "ön duvar (ön baş makasın altı)"},
                         {"tur": "bas", "o": "h", "perp": _r(DY - 5), "a0": _r(-SC), "a1": _r(W + SC), "out": 1, "yer": "arka duvar (arka baş makasın altı)"}]
-    # saçak omegası kart modelinden (D-39; Lokman, 31 Ekim 2026 13:40 "gerçek listeye uy"): saçak ucundan ucuna, kalkan saçağının altına da
-    # uzanır; baş makas betopanı levhasında ve aynı hatta devam eden veranda omegasında kesik. Hat başına parçalar; liste hattın tamamını sayar.
+    # saçak omegası kart modelinden: duvar ya da kiriş boyunca, saçağa uzamaz (Lokman, 1 Kasım 2026 15:19; D-41); baş makas betopanı levhasında
+    # ve aynı hatta devam eden veranda omegasında kesik. Sayı saçak hattının boyundan, liste ve gerçek listeler gibi (Lokman, 31 Ekim; D-39).
     govde_p = Polygon(HZ["govde"]) if GIR else box(0, 0, W, DY)
     KP_SOM = [p for p in ((SAYIM.get("kenar") or {}).get("parcalar") or []) if p["kart"] == "CK-01"]
     hat_k = lambda p: (p["bilgi"].get("Cati"), p["bilgi"].get("Hat", p["parca"]))
@@ -688,9 +689,9 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         else:
             yer = f"{yuz} duvar" if govde_p.contains(orta) else f"{yuz} saçak, {'ön' if a1 < DY / 2 else 'arka'} kalkan saçağı"
         n_ = hat_n[hat_k(p)]
-        hat_ = (f"{fmtc(b.get('HatBoyu_cm', p['boy_cm']))} cm, saçak ucundan ucuna" +
-                (f"; {n_} parça, baş makas betopanında ya da aynı hatta devam eden veranda omegasında kesik" if "Hat" in b else "") +
-                " (kart modeli; liste hattın tamamını sayar, D-39)")
+        hat_ = (f"{fmtc(p['boy_cm'])} cm, {'kiriş' if p['parca'].startswith('VERANDA_') else 'duvar'} boyunca, saçağa uzamaz (D-41)" +
+                (f"; hattında {n_} parça, baş makas betopanında ya da aynı hatta devam eden veranda omegasında kesik" if n_ > 1 else "") +
+                f"; sayı saçak hattının boyundan, {fmtc(b.get('HatBoyu_cm', p['boy_cm']))} cm (kart modeli ve liste, gerçek listeler gibi; D-39)")
         oms.append({"tur": "sacak", "o": "v" if dik else "h", "perp": _r(perp), "a0": _r(a0), "a1": _r(a1), "out": -1 if b["Yuz"] == "sol" else 1,
                     "yer": yer, "hat": hat_})
     if bool(oms) != bool(satirlar("100'lük saçak omegası")):
@@ -1252,8 +1253,8 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         {"ad": "Saçak, duvar ve baş makas omegası", "t": "Saçak, duvar ve baş makas omegası",
          "p": "Makasların oturacağı hatlara omega geçirilir. 100’lük omegalar 10,5 cm’dir (100 mm pano + iki yanda 2 mm H kanadı): dış kanat dışarıda tam yaslanır, "
               "içte kalan aralıklara silikonize mastik sıkılır. Sol ve sağ duvarın (saçak duvarları)" + (" ve veranda yan kirişlerinin" if VR or (GVK and not GVK["nis"]) else "") +
-              " üstüne 100’lük saçak omegası, saçak ucundan ucuna (kalkan saçağının altına da uzanır; baş makas betopanında kesilir, gerçek listelerdeki "
-              "gibi saçak boyunca sayılır); "
+              " üstüne 100’lük saçak omegası, duvar boyunca (saçağa uzamaz; baş makas betopanında kesilir; sayısı gerçek listelerdeki "
+              "gibi saçak boyundan); "
               "ön ve arka duvarın üstüne baş makas omegası, baş makasın boyunca saçak ucundan saçak ucuna (fabrikada hazırlanır: dışta baş makas "
               "betopanının gireceği 1 cm U yanak)" +
               ("; verandaların dış kirişlerine de baş makas omegası, veranda saçağının ucundan ucuna" if VR else "") +

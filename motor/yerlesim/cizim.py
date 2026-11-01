@@ -405,7 +405,7 @@ def ciz(model_yolu: Path, say: dict, yol: Path, kod: str) -> Path:
 
 def _kenar(zemin, cati_, m: dict, plt) -> None:
     """Solda zemin: alt çerçeve parçaları (100'lük ve 60'lık ayrı renk; kesilen kapı boşlukları açık), her hattın numarası ve boyu.
-    Sağda çatı planı: saçak omegası duvarın üstünde saçak ucundan ucuna, saçak sacı saçakta, mahya mahyada, her baş makasın iki eğik kenarında Z (duvarın
+    Sağda çatı planı: saçak omegası duvarın üstünde duvar boyunca (D-41), saçak sacı saçakta, mahya mahyada, her baş makasın iki eğik kenarında Z (duvarın
     dış yüzünde), C kapama (aşık uçlarında) ve alın sacı (C'nin önünde). Şekiller modeldeki parçaların plan izidir."""
     _duvarlar(zemin, m, dolgu=True)
     hatlar = {}
@@ -485,7 +485,7 @@ def _kenar_lejanti(fig, say: dict, plt) -> None:
         *([f"Liste üreteci: {say['kenar']['liste_yazilmaz']}."] if "liste_yazilmaz" in say["kenar"] else []),
         "Sayı listenin yöntemiyle, boy modelden (kesim planı); C kapama metreyle sayılır.",
         "Yer montaj rehberinden; teyit bekleyen maddeler varsayım (Lokman, 25 Ekim).",
-        "Saçak omegası saçak ucundan ucuna, gerçek listelerdeki gibi (Lokman, 31 Ekim); liste de saçak boyunu sayar.",
+        "Saçak omegası duvar boyunca, saçağa uzamaz (Lokman, 1 Kasım; D-41); sayı saçak boyundan, gerçek listelerdeki gibi (Lokman, 31 Ekim).",
         *(["Veranda kalkanında Z ve C kapama var (rehberdeki gibi dört kalkanda; kirişli kalkan betopanlı, liste de sayar)."]
           if any(p.get("bilgi", {}).get("Cati") for p in say.get("yerlesim", {}).get("parcalar", [])) else []))), fontsize=8.5, va="top", ha="left", color="#444")
 
