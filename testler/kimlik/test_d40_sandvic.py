@@ -24,12 +24,18 @@ def _kurallar() -> dict:
 
 def test_profil_ve_kalinlasma():
     """Profil Lokman'ın verdiği panelden (100 cm kapatır, 5 hadve, hadve 35 mm; yalıtım 40 mm stok standart); tek kat panel 62 m²
-    rehberinin 27/200 trapezi. Kalınlaşma (yalıtım + hadve) farkı: sandviç 4,8, tek kat 0, kurulmayan kaplama 0."""
+    rehberinin 27/200 trapezi. Hadve aralığı (Lokman 10:46 "4 hadve", 10:50 "ölçüleri oralardan alabilirsin"): sandviç panelde 25 cm
+    (5 hadvenin biri bindirme hadvesi, üreticilerin 250 mm'si), tek kat panelde 20 cm. Kalınlaşma (yalıtım + hadve) farkı: sandviç 4,8,
+    tek kat 0, kurulmayan kaplama 0; hadve aralığı kalınlaşmayı değiştirmez."""
     C = _kurallar()["kurallar"]["cati_kaplamasi"]
-    assert C["profil"]["durum"] == "lokman" and "10:23" in C["profil"]["kaynak"]
+    # durum varsayım (geometri hakemi, 1.11): Lokman'ın verdiği kapatma, hadve sayısı ve kalınlaşma kuralı; yalıtımın 40 mm'si, hadvenin
+    # tepe/taban genişliği ve tek kat panelin profili varsayım
+    assert C["profil"]["durum"] == "varsayim" and "10:23" in C["profil"]["kaynak"] and "10:46" in C["profil"]["kaynak"]
     P = C["profil"]["deger"]
-    assert P["sandvi"] == {"hadve_sayisi": 5, "hadve": 3.5, "tepe": 4.2, "taban": 7.4, "kenar": 4.5, "yalitim": 4}
-    assert P["tek kat"] == {"hadve_sayisi": 5, "hadve": 2.7, "tepe": 4.2, "taban": 7.4, "kenar": 4.5, "yalitim": 0}
+    assert P["sandvi"] == {"hadve_sayisi": 5, "hadve_araligi": 25, "hadve": 3.5, "tepe": 4.2, "taban": 7.4, "kenar": 4.5,
+                            "yalitim": 4}
+    assert P["tek kat"] == {"hadve_sayisi": 5, "hadve_araligi": 20, "hadve": 2.7, "tepe": 4.2, "taban": 7.4, "kenar": 4.5,
+                             "yalitim": 0}
     D = {"profil": P, "varsayilan": C["varsayilan"]["deger"]}
     assert yerlesim.kaplama_kalinlasma(D, "sandvi") == 4.8
     assert yerlesim.kaplama_kalinlasma(D, "tek kat") == 0 and yerlesim.kaplama_kalinlasma(D, None) == 0

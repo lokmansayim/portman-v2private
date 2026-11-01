@@ -107,7 +107,7 @@ const BASE = {
   boardex:  { color: 0xd7d4cb, roughness: 0.92 },
   izocam:   { color: 0xe3c158, roughness: 1.0 },
   roof:    { color: 0x4b535b, roughness: 0.5, metalness: 0.4 },
-  kopuk:    { color: 0xe6d9a8, roughness: 0.95, polygonOffset: true, polygonOffsetFactor: 2, polygonOffsetUnits: 2 },   // üst sacın altında kalır (derinlik çakışması yok)
+  kopuk:    { color: 0xeccf6e, roughness: 0.95, polygonOffset: true, polygonOffsetFactor: 2, polygonOffsetUnits: 2 },   // poliüretan (sarı); üst sacın altında kalır (derinlik çakışması yok)
   ridge:    { color: 0x3f464d, roughness: 0.5, metalness: 0.45 },
   trim:     { color: 0x474f57, roughness: 0.55, metalness: 0.4 },
   gutter:   { color: 0x3f464e, roughness: 0.45, metalness: 0.4 },
@@ -647,6 +647,13 @@ function sermeAyarla(S, e) {   // e: 0 → 1 serilen oran
 
 /* Ters mahya, kaplama ve mahya (kaplama doğrudan aşıkların üstünde; 62 m²: trapez sac) */
 const RIB = (() => { const s = new THREE.Shape(), a = RIB_TABAN / 200, u = RIB_UST / 200; s.moveTo(-a, 0); s.lineTo(a, 0); s.lineTo(u, RIBH / 100); s.lineTo(-u, RIBH / 100); s.closePath(); return s; })();
+// Sandviç panelde hadvenin içi poliüretan dolu (Lokman, 1.11.2026 10:46, görsel): üst sac hadvenin üstünde 0,5 mm'lik kabuk (RIB_SAC), içi sarı (RIB_IC)
+const [RIB_SAC, RIB_IC] = (() => {
+  const a = RIB_TABAN / 200, u = RIB_UST / 200, h = RIBH / 100, k = 0.0005, d = k * Math.hypot(a - u, h) / h;   // d: yan kenarda 0,5 mm'lik yatay pay
+  const dis = [[-a, 0], [-u, h], [u, h], [a, 0]], ic = [[a - d, 0], [u - d * u / a, h - k], [-u + d * u / a, h - k], [-a + d, 0]];
+  const sekil = P => { const s = new THREE.Shape(); P.forEach(([x, y], i) => i ? s.lineTo(x, y) : s.moveTo(x, y)); s.closePath(); return s; };
+  return [sekil([...dis, ...ic]), sekil([...ic].reverse())];
+})();
 {
   let ro = 0;
   // Ters mahya (dere hattı sacı): dere (vadi) hatlarında, her iki yüzde 20 cm, aşıkların üstünde, kaplamanın altında
@@ -678,8 +685,9 @@ const RIB = (() => { const s = new THREE.Shape(), a = RIB_TABAN / 200, u = RIB_U
       ribs.forEach(tc => {
         if (tc < t0 - 0.01 || tc >= t1 - 0.01) return;   // levha sınırındaki hadve tek levhaya
         const iv = aralik(Q, 1, Math.min(Math.max(tc, t0 + 0.05), t1 - 0.05)); if (!iv || iv[1] - iv[0] < 4) return;
-        const rb = mesh(new THREE.ExtrudeGeometry(RIB, { depth: (iv[1] - iv[0]) / 100, bevelEnabled: false }), m);
-        rb.rotation.y = Math.PI / 2; rb.position.set(iv[0] / 100, TU1 / 100, tc / 100); g.add(rb);
+        const hadveKoy = (sekil, mm) => { const rb = mesh(new THREE.ExtrudeGeometry(sekil, { depth: (iv[1] - iv[0]) / 100, bevelEnabled: false }), mm);
+          rb.rotation.y = Math.PI / 2; rb.position.set(iv[0] / 100, TU1 / 100, tc / 100); g.add(rb); };
+        if (YAL) { hadveKoy(RIB_SAC, m); hadveKoy(RIB_IC, mat('kopuk', AD.kaplama)); } else hadveKoy(RIB, m);   // sandviç: sac kabuk + sarı dolgu
       });
       const en = Math.abs(v1 - v0), kes = kirp(dikd(-1.35, Y.R.SL + 2, t0, t1), [[-1e4, -1e4], [1e4, -1e4], [1e4, 1e4], [-1e4, 1e4]]);
       const acili = Math.abs(Math.abs(alan(Q)) - Math.abs(alan(kes))) > 450, oran = Math.abs(alan(Q)) / (KW * (Y.R.SL + 3.35));

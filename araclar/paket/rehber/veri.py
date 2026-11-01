@@ -963,13 +963,16 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         boy = {kucuk(s["kalem"].split(" · ")[1]): s["olcu"] for s in (TP or SP) if " · " in s["kalem"]}
     # kaplamanın kesiti kart modelinin kuralından (`cati_kaplamasi.profil`; D-40): türü kart modelinin kaplama parçalarından, liste satırıyla aynı
     KAP = (SAYIM.get("yerlesim") or {}).get("degerler", {}).get("cati_kaplamasi", {})
+    # (kart modeli kaplamayı kurmadıysa, ör. girintili gövdede tek kat panel, tür listeden; ayrışırsa rehber kurulmaz)
     kap_tur = {p["bilgi"]["Kaplama"] for p in (SAYIM.get("yerlesim") or {}).get("parcalar", []) if "Kaplama" in p.get("bilgi", {})}
+    kap_tur = kap_tur or {"tek kat" if TP else "sandvi"}
     if kap_tur != {"tek kat" if TP else "sandvi"} or "profil" not in KAP:
         raise Desteklenmiyor(f"kart modelinin kaplaması {sorted(kap_tur) or 'yok'}, listede {kap_ad.lower()}" +
                              ("" if "profil" in KAP else "; kart modelinin kuralında kaplama profili yok"))
     KPR = KAP["profil"][next(iter(kap_tur))]
     renk = kucuk(OZ.get("çatı kaplama rengi", "") or "")
-    hadve, HA = {}, 100 / KPR["hadve_sayisi"]     # hadve aralığı: 100 cm kapatmada hadve sayısı
+    # hadve aralığı kuraldan: tek kat panelde 20 cm (27/200), sandviç panelde 25 cm (5 hadvenin biri bindirme hadvesi; Lokman 1.11.2026 10:46)
+    hadve, HA = {}, KPR["hadve_araligi"]
     for k, (lo_, hi_) in hadve_ar.items():
         n = max(1, round((hi_ - lo_ - 2 * KPR["kenar"]) / HA))
         hadve[k] = [_r(lo_ + KPR["kenar"] + i * (hi_ - lo_ - 2 * KPR["kenar"]) / n, 3) for i in range(n + 1)]
@@ -999,8 +1002,11 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
                    **({"yalitim": KPR["yalitim"]} if KPR["yalitim"] else {})},
         "hadve": hadve, "mahya": mahya,
         "metin": {"ad": f"{kap_ad} {{ad}}", "kesim": f"{kap_ad} · kesim parçası", "say_onek": kap_ad,
-                  "profil": (f"100 cm kapatır, {KPR['hadve_sayisi']} hadveli, hadve {fmtc(KPR['hadve'] * 10)} mm, yalıtım {fmtc(KPR['yalitim'] * 10)} mm "
-                             "(Lokman, 1.11.2026); sandviç panel tek kat panelden "
+                  "profil": (f"100 cm kapatır, {KPR['hadve_sayisi']} hadveli (Lokman, 1.11.2026); hadve {fmtc(KPR['hadve'] * 10)} mm (üretici tablosu); "
+                             f"yalıtım {fmtc(KPR['yalitim'] * 10)} mm (satıcının stok standardı, varsayım); hadveler {fmtc(KPR['hadve_araligi'])} cm arayla, "
+                             f"biri yandaki panele binen bindirme hadvesi, çatının 1 metresinde {fmtc(100 / KPR['hadve_araligi'])} hadve (üreticilerin ölçüsü); "
+                             "hadvenin tepe ve taban genişliği tek kat paneldeki gibi (varsayım); hadvelerin içi poliüretan dolu, panelin altı düz; "
+                             "sandviç panel tek kat panelden "
                              f"{fmtc(KPR['yalitim'] + KPR['hadve'] - KAP['profil'][KAP['varsayilan']]['yalitim'] - KAP['profil'][KAP['varsayilan']]['hadve'])} cm "
                              "kalın, alın sacının alnı o kadar geniş (D-40)" if KPR["yalitim"] else
                              "100 cm kapatır; kesit kartta yazılı değil, çizimde 62 m²’deki 27/200 trapez profili gösterildi (varsayım)"),
@@ -1178,7 +1184,8 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
                  "kaynak": "Lokman çizimleri (24.10.2026)",
                  "profil": "tırnak 3 (baş makas Z'sine) → saçak altı 30 → alın → hadve üstünden kıvrım → hadveyi kavrayan kıvrım",
                  "uc": "saçak altı kolu makasın topuğuna dayanır, orada kesilir; alın yüzü ve üst kıvrım derenin ucunu kapatmak için devam eder (Lokman, 26.10.2026)",
-                 "proje": ("alın ~{h} cm: sandviç panelin kalınlaşması kadar 62 m² rehberindekinden geniş (Lokman, 1.11.2026; D-40)" if KPR["yalitim"] else
+                 "proje": ("alın ~{h} cm: sandviç panelin kalınlaşması kadar 62 m² rehberindekinden geniş (Lokman, 1.11.2026; D-40); kesin ölçü teyit bekler"
+                           if KPR["yalitim"] else
                            "alın ~{h} cm: 62 m² rehberindeki gibi; kesin ölçü teyit bekler"),
                  "liste": ls("Alın sacı")},
         "dere": {"ad": "Metal dere", "kesit": "K profil, 15 × 11,4 cm (38’lik açınım), çatı renginde",
