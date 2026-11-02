@@ -58,6 +58,33 @@ def _bilgisiz(metin: str, bilgi: dict | None) -> str:
     return metin
 
 
+def zarfin_adiyla(t: dict, bilgi: dict | None) -> dict:
+    """D-33 (İE-09 PR-6c): müşteri projesinde zarfın adı (`bilgi.musteri_adi`, bayinin mesajındaki müşteri) tanımdakinin önüne her
+    çıktıda geçer. Bayi görseli, pafta başlığı, DXF, mühendis çizim seti, yükleme listesi ve IFC adı tanımın `musteri_adi`'sından okur;
+    antet zarftan okur. Ad tanıma (numarası maskeli, `sahip_adi`) yazılınca hepsi aynı adı yazar, antetle iki ayrı ad çıkmaz.
+    Zarfta ad yoksa, ad tanımdakiyle aynıysa ya da model katalog modeliyse (D-33 madde 2: katalogda tarif yazılır, zarfın adı yalnız
+    antette) tanım aynen döner; o çıktılar bayt bayt aynıdır."""
+    from .bayi_gorseli import musteri_projesi, sahip_adi
+    if not musteri_projesi(t) or not str((bilgi or {}).get("musteri_adi") or "").strip():
+        return t
+    ad = sahip_adi(t, bilgi)
+    return t if ad == sahip_adi(t) else {**t, "musteri_adi": ad}
+
+
+@contextlib.contextmanager
+def tanim_dosyasi(tanim_yolu: Path, t: dict, t_dosya: dict):
+    """Dosyadan okuyan adımlar (çizim seti, IFC, DXF, liste) için tanımın yolu: tanım değişmediyse kendisi; zarfın adı yazıldıysa
+    (`zarfin_adiyla`) geçici klasörde aynı adla bir kopya (liste kaynağındaki dosya adı aynı kalır). Kopya çıktı klasörüne yazılmaz."""
+    if t is t_dosya:
+        yield tanim_yolu
+        return
+    import tempfile
+    with tempfile.TemporaryDirectory(prefix="portman_tanim_") as d:
+        yol = Path(d) / tanim_yolu.name
+        yol.write_text(json.dumps(t, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+        yield yol
+
+
 def _main(mod, argv: list[str], gunluk: io.StringIO) -> int:
     """Modülün main()'ini argv ile, stdout'u günlüğe yönlendirerek çağırır; SystemExit kodunu döner."""
     eski = sys.argv
@@ -141,18 +168,21 @@ def uret(tanim_yolu: Path, hedef: Path, is_emri_no: str | None = None, revizyon:
     (kör testlerin listeleri böyle üretildi: `sonuc/KT0x_pafta_sayimi.json`). Katalog modellerinde yok.
     `yalniz_liste`: yalnız girdi ve yükleme listesi (çizim, IFC, perspektif ve bayi çıktıları yok; eski kural setleriyle altın liste matrisi).
     `bilgi`: bayi paftasının antet, özellik ve özel istek alanları (İş Emri zarfından: `bayi_adi`, `bayi_telefonu` (D-09), `sevk_adresi`,
-    `ozellikler`, `ozel_istekler`); verilmezse "..." (katalog ve altın üretim). Değerleri manifest'e ve günlüğe yazılmaz (yalnız `bilgi_var`).
+    `ozellikler`, `ozel_istekler`, `musteri_adi`); verilmezse "..." (katalog ve altın üretim). Değerleri manifest'e ve günlüğe yazılmaz
+    (yalnız `bilgi_var`). Müşteri projesinde `musteri_adi` tanımdakinin önüne her çıktıda geçer (`zarfin_adiyla`, D-33).
     `karkas_yolu`: karkas kuralının dosyası (İE-16 PR-3a; yalnız tanım `karkas: kural` isterse okunur; verilmezse kurallar/karkas/celik_karkas.json)."""
     matplotlib_sabitle()
     from . import ciz_genel, girdi_genel, ifc_genel, yukleme
     t0 = time.time()
     tanim_yolu, hedef = Path(tanim_yolu), Path(hedef)
     hedef.mkdir(parents=True, exist_ok=True)
-    t = json.loads(tanim_yolu.read_text(encoding="utf-8"))
+    t_dosya = json.loads(tanim_yolu.read_text(encoding="utf-8"))
+    t = zarfin_adiyla(t_dosya, bilgi)                 # D-33: müşteri projesinde zarfın adı bütün çıktılarda (İE-09 PR-6c)
     kod = kod_govde(t)
     gunluk = io.StringIO(); hatalar: list[str] = []; uyarilar: list[str] = []
     ek = ["--yontem", yontem] if yontem else []
-    with kural_seti(set_yolu), karkas_kurali(karkas_yolu):
+    # dosyadan okuyan adımlar `t`'nin kopyasını okur (zarfın adı yazıldıysa geçici kopya, aynı dosya adı; yoksa tanımın kendisi)
+    with kural_seti(set_yolu), karkas_kurali(karkas_yolu), tanim_dosyasi(tanim_yolu, t, t_dosya) as tanim_yolu:
         from . import kural
         set_kullanilan = str(kural.yol())
         ifc = hedef / f"{kod}.ifc"; ozet: dict = {}
@@ -258,7 +288,7 @@ def uret(tanim_yolu: Path, hedef: Path, is_emri_no: str | None = None, revizyon:
                   "liste_satir": liste_satir, "elektrik_sayimi": str(elektrik_sayimi) if elektrik_sayimi else None,
                   "perspektif": pers, "sure_s": round(time.time() - t0, 1)}
     (hedef / "validation.json").write_text(json.dumps(validation, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
-    (hedef / "uret.log").write_text(gunluk.getvalue(), encoding="utf-8")
+    (hedef / "uret.log").write_text(_bilgisiz(gunluk.getvalue(), bilgi), encoding="utf-8")   # zarfın adı listenin günlük satırına da girer (PR-6c)
     manifest = {"motor": "genel", "kod": t["kod"], "is_emri_no": is_emri_no, "revizyon": revizyon, "passed": passed, "warnings": uyarilar,
                 "pdf": pafta_pdf.name if pafta_pdf.exists() else None, "pdf_sha256": sha256(pafta_pdf) if pafta_pdf.exists() else None,
                 "hatali_pdf": hatali_pdf.name if hatali_pdf.exists() else None,
