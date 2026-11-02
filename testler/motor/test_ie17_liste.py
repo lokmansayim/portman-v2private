@@ -58,11 +58,11 @@ def test_ap15_makaslar_pano_eklerinde(listeler, catilar):
 
 
 def test_ap15_cumbanin_gorunen_sacagi(catilar):
-    """AP-15'in cumbası 27,75 cm çıkıyor; saçağının ortası ana çatının 30'luk kalkan saçağının altına düşer. Kenar atılmaz, görünen kısmı
-    (27,75 cm) sayılır; cumbanın öteki yanı ana çatının saçağıyla tek hat (8,607 m ana çatıda)."""
+    """AP-15'in cumbası 27,75 cm çıkıyor; saçağının ortası ana çatının 30'luk kalkan saçağının altına düşer. Kenar bütünüyle örtülü
+    değil: TK-03'teki gibi bütün boyuyla (57,75 cm) sayılır; cumbanın öteki yanı ana çatının saçağıyla tek hat (8,607 m ana çatıda)."""
     c = catilar["AP15"]
     assert c["ana çatı"]["sacak_hatlari_m"] == [8.607, 8.33]
-    assert c["ön cumba"]["sacak_hatlari_m"] == [0.278]
+    assert c["ön cumba"]["sacak_hatlari_m"] == [0.578]
 
 
 def test_ap09_cumba_ve_panel_cati(listeler):

@@ -453,13 +453,12 @@ def _serit_catilari(plan, ie: dict) -> tuple[list[dict], dict]:
             hat[sahip][e["tur"]].append(round(e["boy"] / 100, 3))
             continue
         if e["tur"] == "sacak":
-            # ortası başka çatının altında olmayan saçak kenarı bütün boyuyla sayılır (cumbanın saçağı ana çatının kalkan saçağının
-            # altında da sürer; TK-03). Ortası başka çatının altına düşen kenarın yalnız görünen kısmı sayılır: AP-15'te cumba 27,75 cm
-            # çıkıyor, saçağının ortası ana çatının 30'luk kalkan saçağının altında; görünen 27,75 cm (eski kod bu kenarı atıp yerine
-            # cumbanın boyunu iki kez sayıyordu).
-            g_ = gorunen_sacak(e) if ortulu(e) else e["plan_boy"]
-            if g_ > 1.0:
-                sacak[parca_adi(e["duzlemler"][0])].append(round(g_ / 100, 3))
+            # saçak kenarı bütünüyle başka çatının altındaysa sayılmaz; bir kısmı görünüyorsa bütün boyuyla sayılır: cumbanın saçağı ana
+            # çatının kalkan saçağının altında da sürer, dere ve saç duvara kadar (TK-03'ün 26,53 m'si, M-01'in testleri). Tek ölçü: kenarın
+            # ortasının nereye düştüğü sonucu değiştirmez (AP-15'te cumba 27,75 cm çıkıyor, saçağının ortası ana çatının 30'luk kalkan
+            # saçağının altında; saçak 57,75 cm sayılır. Eski kod bu kenarı atıp yerine cumbanın boyunu iki kez sayıyordu)
+            if gorunen_sacak(e) > 1.0:
+                sacak[parca_adi(e["duzlemler"][0])].append(round(e["plan_boy"] / 100, 3))
             continue
         if e["tur"] != "alin" or ortulu(e):
             continue                                            # mahya, üst uç ve başka çatının altında kalan kenar
