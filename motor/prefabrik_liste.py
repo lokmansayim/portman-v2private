@@ -288,7 +288,7 @@ def model_motor(ie: dict) -> dict:
     from . import cati_serit as _cs
     if plan.girintili:                                         # İE-24: brüt gövdenin dış çizgisi (açık mahal dahil); girinti gözleri sayılmaz
         brut = G.govde_cokgeni(plan).area
-    if c.get("tip") == "besik_cumba":                          # İE-17 PR-1b/K7: beşik + çapraz cumba (AP-13, 16, 22), çizimdeki çatıdan
+    if c.get("tip") == "besik_cumba":                          # İE-17 PR-1b/K7: beşik + çıkıntılı çapraz cumba (AP-22), çizimdeki çatıdan
         serit = _capraz_cumba_catilari(plan, ie)
     elif plan.girintili or _cs.mahal_catilari_var(ie):         # İE-24 girintili gövde; İE-17 PR-1b/K7 açık mahalin kendi çatısı (AP-09, AP-03)
         serit = _serit_catilari(plan, ie)                      # (çatı parçaları, çatı tanımı)
@@ -518,21 +518,30 @@ def _serit_catilari(plan, ie: dict) -> tuple[list[dict], dict]:
 
 
 def _capraz_cumba_catilari(plan, ie: dict) -> tuple[list[dict], dict]:
-    """İE-17 PR-1b/K7: beşik + çapraz cumba (`cati_prefabrik`, `cumbalar`; AP-13, 16, 22), çizimdeki çatının aynısından. Ana çatı beşik:
+    """İE-17 PR-1b/K7: beşik + çıkıntılı çapraz cumba (`cati_prefabrik`, `cumbalar`; AP-22), çizimdeki çatının aynısından. Ana çatı beşik:
     açıklık ve boy kendi dikdörtgeninden, makas kitabın kuralıyla (pano koşusu ÷ 125,5 yukarı + 1; AP-22 paftası MK01–09). Cumba ana
     çatıya dik küçük beşik, taşan verandanın çapraz beşiği gibi (BK-14; PK-03): kalkanı dış ucunda, iki deresi ana çatının yüzüyle (ters
     mahya; vadi kenarları), mahyası dereler birleşene kadar. Cumba makası (yavru makas) dış ucundaki kalkan duvarının ekseninden başlar,
     125,5 arayla, derelerin birleştiği yere kadar (AP-22 paftası MK10–12: 3). Saçak, alın, mahya, vadi kenarları çatının kendi
-    kenarlarından (`cati_genel.cati_kur`). Dönen: (parçalar, çatı tanımı; aşık ve kaplama yüz yüz ondan)."""
+    kenarlarından (`cati_genel.cati_kur`). Çıkıntısız cumba (AP-13, AP-16; kör, makas planı kıyaslanmadı) ve birden çok cumba: liste
+    yazılmaz. Dönen: (parçalar, çatı tanımı; aşık ve kaplama yüz yüz ondan)."""
     from . import cati_prefabrik as CP
     from . import geometry as G
     from .genel import cati_genel
     MOD_CM = G.MOD
+    c = ie.get("cati") or {}
+    cumbalar = c.get("cumbalar") or []
+    if len(cumbalar) != 1:
+        raise ListeYazilmaz(f"beşik + cumba: {len(cumbalar)} cumba; liste tek çapraz cumbayı sayar, liste yazılmaz")
+    if not float(cumbalar[0].get("cikinti_cm", 0)):
+        # çıkıntısız cumbanın (alnı ana çatının saçak duvarında; AP-13, AP-16) makasları paftanın makas planıyla kıyaslanmadı (iki ev kör)
+        raise ListeYazilmaz("beşik + cumba ana çatının çatı satırları bu sürümde yok: çıkıntısız çapraz cumbanın (alnı ana çatının saçak "
+                            "duvarında) makasları paftanın makas planıyla kıyaslanmadı (İE-17 PR-1b/K7: yalnız çıkıntılı cumba, AP-22); "
+                            "liste yazılmaz")
     try:
         t = CP.cati(plan, ie)
     except CP.PrefabrikCatiHatasi as e:
         raise ListeYazilmaz(f"beşik + cumba çatı kurulmadı: {e}") from None
-    c = ie.get("cati") or {}
     s, eg = float(t["sacak"]), float(c["egim_yuzde"])
     ana_k, cb_k = CP._cumba(c, tuple(float(v) for v in G.govde_kutusu(plan)))
     ck = cati_genel.cati_kur(t)
