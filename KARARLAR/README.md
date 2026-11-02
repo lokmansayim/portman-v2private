@@ -94,6 +94,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-41](D-41.md) | Saçak omegası duvar ve kiriş boyunca, saçağa uzamaz; saçaktan saçağa yalnız baş makas omegası; sayısı saçak boyundan, liste ve gerçek listeler gibi (D-39 madde 4'ün düzeltmesi). **Mühürlü** (Lokman 1.11 20:16; `AGENTS.md` › Mühürlü konular) | 1.11 (Lokman 15:19, 15:28, 20:16) |
 | [D-42](D-42.md) | Mühürlü konular: kayıt `KARARLAR/muhurlu.json` (M-01…M-10), Claude Code hook freni (düzenleme ve komut "Patron onayı gerekir" diye durur, oturum başında liste) ve CI kilit testi; açma yalnız Lokman'ın sözüyle | 1.11 (Lokman 20:16, 20:25, 20:32 kartı) |
 | [D-43](D-43.md) | Lokman'ın birleştirme onayı verdiği PR, doğrulama yeşil olunca beklemeden birleşir; kırmızıda sohbet kendisi düzeltip yeniden koşturur; onaysız PR'da birleştirme açıkça sorulur. Canlı, ücretli deneme, silme ve mühürlü konular kapsam dışı | 2.11 (Lokman 16:29 "evet yaz", 16:30) |
+| [D-44](D-44.md) | Dört evin mühürü (M-07) liste için açıldı ve yeniden mühürlendi: makas sayısı paftanın makas planıyla (AP-15 ana çatı 7, AP-09 cumbası 3; cumbanın iç ucunda makas yok), dört evin yükleme listesi çizimdeki çatıdan yazılır; çizim ve çatı değişmedi | 2.11 (Lokman 16:50 ve 18:21 kartları) |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
 
@@ -132,7 +133,8 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-41 | saçak omegası duvar boyunca, saçağa uzamaz; sayısı saçak boyundan (Lokman 1.11 15:19, 15:28; D-39 madde 4'ün düzeltmesi) | yazıldı (1.11; İE-24, `claude/project-thread-756g5a`) |
 | D | D-42 | mühürlü konular: kayıt, hook freni, CI kilit testi (Lokman 1.11 20:16, 20:25; 20:32 kartı çelik çizim seti) | yazıldı (1.11; BK-20, `claude/project-thread-evp64h`) |
 | D | D-43 | onaylı PR yeşilde beklemeden birleşir; kırmızıda sohbet düzeltir; onaysız PR'da sorulur (Lokman 2.11 16:29 "evet yaz"; pano 134) | yazıldı (2.11; İE-17 PR-1b/K7, `claude/project-thread-i19mbz`) |
-| D | **D-44** | — | **sıradaki boş** |
+| D | D-44 | M-07 liste için açıldı ve yeniden mühürlendi: makas sayısı paftadaki gibi, dört evin listesi yazılır (Lokman 2.11 18:21 kartı) | yazıldı (2.11; İE-17 PR-1b/K7, `claude/project-thread-i19mbz`) |
+| D | **D-45** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | `main`'e BK-12 ile (PR-1: motor ve bayi paftası; liste ve mühür kıyası sonraki PR'larda) |

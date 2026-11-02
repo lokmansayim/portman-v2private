@@ -112,3 +112,12 @@ def test_kirma_ana_cati_yazilmaz():
     """Kırma ana çatının (AP-01) prefabrik kuralı kitapta yok: liste yazılmaz."""
     with pytest.raises(PL.ListeYazilmaz, match="kırmada kitapta prefabrik kural yok"):
         PL.is_emrinden(_ie("AP01"))
+
+
+def test_m07_makas_sayilari(listeler):
+    """M-07 kilidi (D-44; Lokman 2 Kasım 18:21, kart "Aç, paftadaki gibi olsun"): dört evin makas sayısı paftanın makas planıyla.
+    AP-15 ana çatı 7 + cumba 1; AP-09 ana çatı 7 + cumba 3; AP-22 ana çatı 9 + yavru 3; AP-03 ana çatı 6 + cumba 1 + kısa 4 + çapraz 1
+    (cumbanın iç ucunda makas yok, Lokman 2 Kasım 16:50)."""
+    assert {k: sum(_makaslar(L).values()) for k, L in listeler.items()} == {"AP15": 8, "AP09": 10, "AP03": 12, "AP22": 12}
+    assert {k: _makaslar(L)["Makas (baş) · ana çatı"] + _makaslar(L)["Makas (orta) · ana çatı"] for k, L in listeler.items()} == {
+        "AP15": 7, "AP09": 7, "AP03": 6, "AP22": 9}

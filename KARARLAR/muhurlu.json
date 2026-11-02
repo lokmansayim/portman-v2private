@@ -412,7 +412,8 @@
    "konu": "Dört evin kat planı ve çatısı (AP-15, AP-09, AP-03, AP-22)",
    "kural": "İE-17 PR-2'de onaylanan dört evin İş Emri'leri, ön onay çizimleri (dört görünüş, çatı satırı, tepe ölçüsü) ve çatıları: AP-15 girintili gövdenin beşiği, AP-22 çapraz cumba, AP-09 ana çatı verandayı örtmez (veranda %10 tek eğim), AP-03 verandada köşe kırması (ana çatıyla 45° kırma, cumbayla dere).",
    "kararlar": [
-    "İE-17"
+    "İE-17",
+    "D-44"
    ],
    "pr": [
     100,
@@ -483,11 +484,23 @@
     },
     {
      "yer": "testler/motor/test_ie17_pr2.py",
-     "iz": "7eed8d8173f64f76"
+     "iz": "220b2f59df94ac92"
+    },
+    {
+     "yer": "testler/motor/test_ie17_liste.py::test_m07_makas_sayilari",
+     "iz": "f73f55699cbc0630"
     }
    ],
    "durum": "mühürlü",
-   "gecmis": []
+   "gecmis": [
+    {
+     "tarih": "2026-11-02 18:21",
+     "soz": "Karar kartı \"Dört evin mührünü liste için açayım mı? Makas sayıları paftaya uyacak.\" → \"Aç, paftadaki gibi olsun\"",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPP1HT6fkd4ZrccEk1EX9iBc8",
+     "kapanis": "2026-11-02T18:23Z",
+     "karar": "D-44"
+    }
+   ]
   },
   {
    "kod": "M-08",
