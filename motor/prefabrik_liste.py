@@ -408,15 +408,14 @@ def _serit_catilari(plan, ie: dict) -> tuple[list[dict], dict]:
         return any(a not in e["duzlemler"]
                    for a in ortulu_nokta((e["p"][0] + e["q"][0]) / 2, (e["p"][1] + e["q"][1]) / 2, sum(e["kot"]) / 2, pay))
 
-    def gorunen_sacak(e) -> float:
-        """Saçak kenarının (yatay) başka çatının altında kalmayan plan boyu: kenar, öteki düzlemlerin planlarının sınırlarında bölünür;
-        ortası o düzlemin planında olan ve o düzlemin orada kenardan yüksek olduğu parça o çatının altındadır."""
-        z = sum(e["kot"]) / 2
-        pay = -0.5 if e["duzlemler"][0] in mahal else 0.5
-        hat_ = LineString([tuple(e["p"][:2]), tuple(e["q"][:2])])
+    def gorunen(p_a, p_b, za, zb, kendi, pay=0.5) -> float:
+        """Kenarın başka çatının altında kalmayan plan boyu: kenar, öteki düzlemlerin planlarının sınırlarında bölünür; ortası o düzlemin
+        planında olan ve o düzlemin orada kenardan (kenarın o noktadaki kotu) yüksek olduğu parça o çatının altındadır."""
+        hat_ = LineString([tuple(p_a[:2]), tuple(p_b[:2])])
+        L0 = hat_.length
         alt = []
         for d in ck["duzlemler"]:
-            if d["ad"] in e["duzlemler"]:
+            if d["ad"] in kendi:
                 continue
             ic = d["cokgen"].buffer(-0.5)
             kes = hat_.intersection(d["cokgen"])
@@ -424,9 +423,14 @@ def _serit_catilari(plan, ie: dict) -> tuple[list[dict], dict]:
                 if p_.geom_type != "LineString" or p_.length < 1e-6:
                     continue
                 o = p_.interpolate(0.5, normalized=True)
-                if ic.contains(o) and d["kot"]((o.x, o.y)) > z + pay:
+                z_o = za + (zb - za) * (hat_.project(o) / L0 if L0 else 0.0)
+                if ic.contains(o) and d["kot"]((o.x, o.y)) > z_o + pay:
                     alt.append(p_)
-        return hat_.difference(unary_union(alt)).length if alt else e["plan_boy"]
+        return hat_.difference(unary_union(alt)).length if alt else L0
+
+    def gorunen_sacak(e) -> float:
+        """Saçak kenarının (yatay) başka çatının altında kalmayan plan boyu."""
+        return gorunen(e["p"], e["q"], e["kot"][0], e["kot"][1], e["duzlemler"], -0.5 if e["duzlemler"][0] in mahal else 0.5)
     parcalar = sorted(t["parcalar"], key=lambda q: q["rol"] != "ana")              # liste ana çatıyı ilk sırada bekler
     mahya_x = {q["ad"]: abs(q["mahya"][0][1] - q["mahya"][1][1]) < 1e-6 for q in parcalar}
     ana_ad = parcalar[0]["ad"]
@@ -496,13 +500,14 @@ def _serit_catilari(plan, ie: dict) -> tuple[list[dict], dict]:
         if (m["duzlem"].get("ust_yapi") or "cati_paneli") != "cati_paneli":
             raise ListeYazilmaz(f"{ad}: açık mahalin kendi çatısının üst yapısı ({m['duzlem'].get('ust_yapi')}) listede yok")
         D_ = m["duzlem"]
-        # panel çatı: kenarlar düzlemin planından; alçak kenar saçak, iki yan eğik kenar (başka çatının altındaysa sayılmaz), yüksek kenar duvar dibi
+        # panel çatı: kenarlar düzlemin planından; alçak kenar saçak, iki yan eğik kenar (bütünüyle başka çatının altındaysa sayılmaz, bir
+        # kısmı görünüyorsa bütün boyuyla; çatının saçak kenarlarıyla aynı kural), yüksek kenar duvar dibi
         pl = D_["plan"]
         yan_k, sac_k = [], []
         for (ax, ay), (bx, by) in zip(pl, pl[1:] + pl[:1]):
             za, zb = kot(D_, ax, ay), kot(D_, bx, by)
-            if ortulu_nokta((ax + bx) / 2, (ay + by) / 2, (za + zb) / 2):
-                continue
+            if gorunen((ax, ay), (bx, by), za, zb, (ad,)) <= 1.0:
+                continue                                        # bütünüyle başka çatının altında (saçak kenarıyla aynı kural)
             L_ = math.hypot(bx - ax, by - ay)
             if abs(za - zb) < 1e-6:
                 if abs(za - m["alt_kot"]) < 1e-6:
