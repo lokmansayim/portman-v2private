@@ -229,7 +229,9 @@ def test_kiris_boyu_listeden(paketler, kod):
         assert not any("çizimde" in k["bu"] for v in d["verandalar"] for k in v["kiris"])
 
 
-ACIK_TAVAN = {"TK-01": ([{"ad": "Giriş nişi", "yon": "y", "rects": [[391.5, 10, 507, 125.5]]}], 1),
+ACIK_TAVAN = {"TK-01": ([{"ad": "Giriş nişi", "yon": "y", "rects": [[391.5, 10, 507, 125.5]]},
+                         {"ad": "Ön veranda", "yon": "y", "rects": [[266, -171, 632, 0]]},             # taşan verandalar: kolon ve kirişlerin arası
+                         {"ad": "Arka veranda", "yon": "y", "rects": [[10, 888.5, 251, 1008.5]]}], 6),
               "AP-19": ([{"ad": "Veranda", "yon": "y", "rects": [[266, 10, 590, 200]]}], 4)}
 
 
@@ -237,13 +239,19 @@ ACIK_TAVAN = {"TK-01": ([{"ad": "Giriş nişi", "yon": "y", "rects": [[391.5, 10
 def test_acik_mahal_tavani(paketler, kod):
     """Lokman, 31 Ekim 2026 19:23 ("verandayı yeşil alçıpan ile ters tavan yap"): ana çatının altındaki açık mahalin (AP-19 gömme verandası,
     TK-01 nişi) tavanı ters tavan, yeşil alçıpan; odaların tavanı asma olsa da. Alan mahal eksi kolon ve kirişler, omega yönü kart modelinden.
-    Taşan verandanın tavan omegası kart modelinde yok: tavanı modelde gösterilmez, metin bunu söyler."""
+    Taşan verandada da (İE-24, pano 73.5): kart modeli tavan omegasını yavru makasların altına, kolon ve kirişlerin arasına koyar (TK-01
+    önde 6, arkada 4 hat); rehber alçıpanı altına serer, "kart modelinde yok" notu kalktı."""
     kok, _, _ = paketler
     d = _rehber_verisi(kok / "prefabrik" / kod / f"{kod}_montaj_rehberi.html")
     assert d["tavan"]["tip"] == "asma" and d["tavan"]["acik"] == ACIK_TAVAN[kod][0]
     p = next(a for a in d["adimlar"] if a.get("ad") == "Asma tavan alçıpanı")["p"]
-    assert f"{ACIK_TAVAN[kod][0][0]['ad']} tavanı ters tavan: tavan omegalarının altına yeşil alçıpan" in p and "tavan yok" not in p
-    assert ("Taşan verandaların tavanı da yeşil alçıpan" in p) == (kod == "TK-01")
+    adlar = {"TK-01": "Giriş nişi, ön veranda ve arka veranda", "AP-19": "Veranda"}[kod]
+    assert f"{adlar} tavanı ters tavan: tavan omegalarının altına yeşil alçıpan" in p and "tavan yok" not in p
+    assert "Taşan verandaların tavanı da yeşil alçıpan" not in p and "kart modelinde yok" not in p
+    om = next(a for a in d["adimlar"] if a.get("ad") == "Tavan omegaları ve H’lar")["p"]
+    assert ("Ön veranda ve arka veranda tavanı ters tavan: tavan omegaları yavru makasların altında" in om) == (kod == "TK-01")
+    v = [o for o in d["omega"] if o["oda"] == "veranda" and (o["bas"] < 0 or o["son"] > 888.5)]   # taşan verandaların omegası (kart modelinden)
+    assert len(v) == (10 if kod == "TK-01" else 0) and all(o["yon"] == "y" for o in v)
 
 
 def test_sacak_omegasi_z_ve_veranda_asigi_kart_modelinden(paketler):
@@ -281,7 +289,8 @@ def test_sacak_omegasi_z_ve_veranda_asigi_kart_modelinden(paketler):
 @pytest.mark.parametrize("kod", ["TK-01", "AP-19"])
 def test_rehber_izi(paketler, tmp_path, kod):
     """Sayfa hatasız açılır; sahnedeki parçalar kart başına sağlamayla aynı (AP-19'da 24 Ekim rehberiyle birebir). Açık mahalin tavanı yeşil
-    alçıpan levhalar, omegalara dik (AP-19: 324 × 190 → 2 × 2; TK-01 nişi: 115,5 × 115,5 → 1)."""
+    alçıpan levhalar, omegalara dik (AP-19: 324 × 190 → 2 × 2; TK-01 nişi: 115,5 × 115,5 → 1, ön veranda 366 × 171 → 2 × 2, arka veranda
+    241 × 120 → 1)."""
     kok, _, _ = paketler
     z = iz.al(kok / "prefabrik" / kod / f"{kod}_montaj_rehberi.html", tmp_path / "iz.json")
     assert z["hatalar"] == []

@@ -115,9 +115,8 @@ def cati(HZ: dict, kitap: dict, IFC: dict, ASIK: dict, H: float, SC: float, TAN:
         mk = {"ad": ad, "aile": "ana" if q["rol"] == "ana" else "cumba", "rol": rol, "konum": _r(k), "bas": _r(b0 - SC), "son": _r(b1 + SC),
               "R": anahtar[q["ad"]], "yon": "y", "wl": [_r(b0 + 2.7), _r(b1 - 2.7)], "NB": nb(b1 - b0 + 2 * SC), "T0": 38.9, "cati": cati_yazi(q)}
         if q["rol"] != "ana":
-            mk.update(kod=None, kart_ad="Cumba makası",
-                      kaynak=f"yer ve açıklık çatı tanımından (çizim, liste ve 3B modelle aynı); {ls('Cumba makası · ' + q['ad'])}; "
-                             "kartı henüz yok (İE-15)")
+            mk.update(kod="MA-04",                     # kartı kart modelinden (İE-24; sayısı `veri.py`'de kart modeliyle denetlenir)
+                      kaynak=f"yer ve açıklık çatı tanımından (çizim, liste ve 3B modelle aynı); {ls('Cumba makası · ' + q['ad'])}")
         makas.append(mk)
 
     def mks(q, x):
