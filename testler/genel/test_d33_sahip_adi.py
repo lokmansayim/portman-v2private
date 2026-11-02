@@ -79,6 +79,7 @@ def _uret(model: str, ek: dict, bilgi: dict) -> dict:
             r["yukleme"] = (json.loads((c / f"{kod}_yukleme.json").read_text(encoding="utf-8")).get("ad"), {})
             r["kaynak"] = (json.loads((c / f"{kod}_girdi.json").read_text(encoding="utf-8")).get("kaynak"), {})
             r["dosyalar"] = (sorted(p.name for p in c.iterdir()), {})
+            r["log"] = ((c / "uret.log").read_text(encoding="utf-8"), {})
             import ifcopenshell
             f = ifcopenshell.open(str(c / f"{kod}.ifc"))
             r["ifc"] = ([f.by_type("IfcProject")[0].Name, f.by_type("IfcBuilding")[0].Name], {})
@@ -185,5 +186,6 @@ def test_zarfin_adi_butun_ciktilarda():
     assert r["ifc"][0] == [f"Portman — KT-01 · {ZARF}", ZARF]                                           # IFC proje ve bina adı
     assert r["kaynak"][0] == "Yapı Tanımı 0.5 (KT01.json)"                                              # listenin kaynağı asıl dosyanın adı
     assert "KT01.json" not in r["dosyalar"][0] and not any("tanim" in d for d in r["dosyalar"][0])    # tanımın kopyası çıktıya girmez
+    assert ZARF not in r["log"][0] and SAHIP not in r["log"][0] and "portman_tanim_" not in r["log"][0]  # günlüğe zarfın değerleri girmez (D-09)
     for d in (f"{kod}_plan_bayi.png", "pafta_sayfa_1", "pafta_sayfa_2"):
         assert _cakisma(r[d][1]) == [], (d, _cakisma(r[d][1]))

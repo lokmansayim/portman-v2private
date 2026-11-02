@@ -288,7 +288,7 @@ def uret(tanim_yolu: Path, hedef: Path, is_emri_no: str | None = None, revizyon:
                   "liste_satir": liste_satir, "elektrik_sayimi": str(elektrik_sayimi) if elektrik_sayimi else None,
                   "perspektif": pers, "sure_s": round(time.time() - t0, 1)}
     (hedef / "validation.json").write_text(json.dumps(validation, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
-    (hedef / "uret.log").write_text(gunluk.getvalue(), encoding="utf-8")
+    (hedef / "uret.log").write_text(_bilgisiz(gunluk.getvalue(), bilgi), encoding="utf-8")   # zarfın adı listenin günlük satırına da girer (PR-6c)
     manifest = {"motor": "genel", "kod": t["kod"], "is_emri_no": is_emri_no, "revizyon": revizyon, "passed": passed, "warnings": uyarilar,
                 "pdf": pafta_pdf.name if pafta_pdf.exists() else None, "pdf_sha256": sha256(pafta_pdf) if pafta_pdf.exists() else None,
                 "hatali_pdf": hatali_pdf.name if hatali_pdf.exists() else None,
