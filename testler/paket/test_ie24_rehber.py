@@ -1,6 +1,6 @@
 """İE-24 · TK-03 montaj rehberi (A4): girintili gövdenin rehberi 62 m² şablonundan, çatısı çizimdeki ve listedeki çatının aynısından
 (`araclar/paket/rehber/girinti.py`: `cati_serit.tanim`, kart modelinin aşık ve inişleri). Ana çatının makasları "Çatı makası (baş/orta)"
-kartıyla, cumbanınkiler "Cumba makası" (kartı henüz yok; Lokman, 30 Ekim 2026 13:49). Balkon gövdenin köşesinde, iki yanı açık:
+kartıyla, cumbanınkiler "Cumba makası" (Lokman, 30 Ekim 2026 13:49; kartı MA-04, kart modelinden). Balkon gövdenin köşesinde, iki yanı açık:
 köşesine Motor kolon koyar, kirişler kolonu gövdeye bağlar (Lokman, 31 Ekim 15:08: kirişler askıda kalmaz; D-38). Girintisiz evlerin rehberi değişmez (`test_paket.py`, `test_rehber.py`)."""
 from __future__ import annotations
 
@@ -41,12 +41,13 @@ def test_adimlar(tk03):
 
 
 def test_makaslar_paftadaki_yerde(tk03):
-    """12 makas: ana çatıda 2 baş + 1 orta (MA-01/MA-02), sol cumbada 5, sağ cumbada 4 (kartsız, adı listeden). Yerleri paftanın makas
+    """12 makas: ana çatıda 2 baş + 1 orta (MA-01/MA-02), sol cumbada 5, sağ cumbada 4 (kartı MA-04, kart modelinde 9). Yerleri paftanın makas
     planıyla aynı (baş makas duvarın 3,7 cm içinde, öteki makaslar eksende)."""
     d, _, L = tk03
     m = d["makas"]
     assert Counter((x["aile"], x["R"]) for x in m) == {("cumba", "C1"): 5, ("ana", "AN"): 3, ("cumba", "C2"): 4}
-    assert all(x.get("kod") is None and x["kart_ad"] == "Cumba makası" for x in m if x["aile"] == "cumba")
+    assert all(x.get("kod") == "MA-04" for x in m if x["aile"] == "cumba")
+    assert d["cards"]["MA-04"]["ad"] == "Cumba makası" and "kimlik kartı MA-04" in next(a for a in d["adimlar"] if a.get("ad") == "Ana çatı ve cumba makasları")["p"]
     assert all("kod" not in x for x in m if x["aile"] == "ana") and sum(x["rol"] == "bas" for x in m if x["aile"] == "ana") == 2
     pafta = _oku(VERI / "TK03_pafta.json")["cati"]["makaslar_x"]
     x = sorted(y["konum"] for y in m)

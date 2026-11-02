@@ -141,3 +141,13 @@ def test_kart_modelinin_catisi_listeyle_ayni(kart):
     assert [(p["bilgi"]["Cati"], p["bilgi"]["Yuz"], p["boy_cm"]) for p in om] == [
         ("sol cumba", "sol", 542.3), ("sağ cumba", "sag", 449.9), ("ana çatı", "sol", 242.1), ("ana çatı", "sol", 449.9),
         ("ana çatı", "sag", 542.3), ("ana çatı", "sag", 242.1)]
+
+
+def test_cumba_makasi_karti(kart):
+    """MA-04 (İE-24, pano 116): cumbanın makasları kart modelinde "Cumba makası" kartıyla; adet listedeki cumba makası satırlarının toplamı
+    (sol cumba 5 + sağ cumba 4), ana çatının makasları MA-01/MA-02'de kalır; hiçbir makas "kural yok" yazmaz."""
+    from motor import prefabrik_liste as PL
+    L = PL.is_emrinden(_oku(VERI / "TK03.json"))["satirlar"]
+    assert kart["MA-04"]["adet"] == sum(s["adet"] for s in L if s["kalem"].startswith("Cumba makası ·")) == 9
+    assert kart["MA-01"]["adet"] == 2 and kart["MA-02"]["adet"] == 1
+    assert not [x for x in kart["_sayim"]["kural_yok"] if x["parca"].startswith("MAKAS_")]

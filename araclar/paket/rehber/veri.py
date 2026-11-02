@@ -603,6 +603,9 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         GC = girinti.cati(HZ, kurallari_oku()["ortak"], IFC, ifc_parcalar(kart / f"{kart_kodu}_model.ifc", r"^ASIK_\d+$"), H, SC, TAN, COS,
                           SAYIM["yerlesim"]["baslangic"], ls, PI, Desteklenmiyor, _r, fmt, fmtc, kucuk, ASMA)
         RF, makas, omega_duvar, tepe = GC["RF"], GC["makas"], GC["omega_duvar"], GC["tepe"]
+        n_ma04 = sum(k["adet"] for k in SAYIM["kartlar"] if k["kod"] == "MA-04")      # cumba makasının kartı (MA-04) kart modelinden
+        if n_ma04 != sum(m["aile"] == "cumba" for m in makas):
+            raise Desteklenmiyor(f"kart modelinde {n_ma04} cumba makası (MA-04), çatı tanımında {sum(m['aile'] == 'cumba' for m in makas)}")
         konum = alt_bas = [m["konum"] for m in makas if m["aile"] == "ana"]
     else:
         RF = {"AN": {"L": -SC, "R": W + SC, "M": W / 2, "tan": TAN}}
@@ -725,7 +728,7 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
     for p in SAYIM["yerlesim"]["parcalar"]:
         if not p["parca"].startswith("OMEGA"):
             continue
-        m = re.match(r"^(x|y) = ([\d.]+), ([\d.]+)–([\d.]+)", p["aciklama"])
+        m = re.match(r"^(x|y) = (-?[\d.]+), (-?[\d.]+)–(-?[\d.]+)", p["aciklama"])      # taşan verandada y < 0
         OMP.append({"eksen": m.group(1), "s": float(m.group(2)), "a0": float(m.group(3)), "a1": float(m.group(4)), "yer": p["bilgi"]["Yer"],
                     "mahal": p["bilgi"].get("Mahal") or "", "boy": p["boy_cm"], "tavan": p["bilgi"].get("Tavan"), "kart": p.get("kart"),
                     "sirt": p["bilgi"].get("Sirt_cm")})
@@ -771,21 +774,38 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
     # Açık mahalin tavanı (Lokman, 31 Ekim 2026 19:23: "verandayı yeşil alçıpan ile ters tavan yap"): ana çatının altındaki açık mahalde (gömme
     # veranda, balkon, niş) kart modelinin tavan omegalarının altına yeşil alçıpan, kolon ve kirişlerin arasında; odaların tavanı asma da olsa
     # burada ters tavan (açık mahalde H ve göz yok, `tavan_katmani.py`). Liste bu alanı "Tavan yeşil alçıpan" satırında veranda tavanı olarak sayar
-    # (kitap `veranda_tavani.prefabrik`). Taşan verandanın tavan omegası kart modelinde yok (`motor/yerlesim/tavan.py`, BK-14): modelde gösterilmez.
-    if GVK:
-        from shapely.geometry import Point as _Nk, Polygon as _Pg, box as _kutu
-        from shapely.ops import unary_union
-        alan = _Pg(GVK["poligon"]).difference(unary_union([_kutu(*r) for r in GVK["engel"]]))
+    # (kitap `veranda_tavani.prefabrik`). Taşan verandada da (BK-14): kart modeli tavan omegasını yavru makasların altına, kolon ve kirişlerin
+    # arasına koyar (`motor/yerlesim/tavan.py`); alçıpan onların altına. Omegası olmayan taşan verandanın tavanı gösterilmez, metin söyler.
+    from shapely.geometry import Point as _Nk, Polygon as _Pg, box as _kutu
+    from shapely.ops import unary_union
+
+    def acik_tavan(ad, Ad, poligon, engel, zorunlu):
+        """Açık mahalin tavanı: alan (mahal − kolon ve kiriş izleri) ve omega yönü kart modelinin o alandaki tavan omegalarından."""
+        alan = _Pg(poligon).difference(unary_union([_kutu(*r) for r in engel]))
         icte = alan.buffer(1)
         yon = {o["yon"] for o in omega if o["oda"] == "veranda"
                and icte.contains(_Nk(((o["bas"] + o["son"]) / 2, o["konum"]) if o["yon"] == "x" else (o["konum"], (o["bas"] + o["son"]) / 2)))}
+        if not yon and not zorunlu:
+            return None
         if len(yon) != 1:
-            raise Desteklenmiyor(f"{GVK['ad']}: kart modelinde tavan omegası {'yok' if not yon else 'iki yönde'}; ters tavanın alçıpanı omegalara vidalanır")
+            raise Desteklenmiyor(f"{ad}: kart modelinde tavan omegası {'yok' if not yon else 'iki yönde'}; ters tavanın alçıpanı omegalara vidalanır")
         parca = [g for g in getattr(alan, "geoms", [alan]) if g.area > 1]
         if any(g.interiors for g in parca):
-            raise Desteklenmiyor(f"{GVK['ad']}: kolon ya da kiriş mahalin içinde; tavan alanı delikli")
-        tavan["acik"] = [{"ad": GVK["Ad"], "yon": yon.pop(),
-                          "rects": [[_r(t) for t in q] for g in parca for q in dikdortgenler([list(c) for c in g.exterior.coords[:-1]])]}]
+            raise Desteklenmiyor(f"{ad}: kolon ya da kiriş mahalin içinde; tavan alanı delikli")
+        return {"ad": Ad, "yon": yon.pop(), "rects": [[_r(t) for t in q] for g in parca for q in dikdortgenler([list(c) for c in g.exterior.coords[:-1]])]}
+    if GVK:
+        tavan["acik"] = [acik_tavan(GVK["ad"], GVK["Ad"], GVK["poligon"], GVK["engel"], True)]
+    VR_TAVAN = []                                 # tavanı kurulan taşan verandaların adı
+
+    def sirala(adlar):
+        return adlar[0] if len(adlar) == 1 else ", ".join(adlar[:-1]) + " ve " + adlar[-1]
+    for v in VR:
+        x0_, y0_, x1_, y1_ = v["rect"]
+        a_ = acik_tavan(v["ad"], v["ad"][:1].upper() + v["ad"][1:], [(x0_, y0_), (x1_, y0_), (x1_, y1_), (x0_, y1_)], v["kolon"] + v["bas_k"] + v["yan_k"],
+                        False)
+        if a_:
+            tavan.setdefault("acik", []).append(a_)
+            VR_TAVAN.append(v["ad"])
 
     # ---------- saçak sacı, kalkan, çatı yüzleri ----------
     if GIR:                                       # saçak hatları, kalkanlar ve yüzler çatının kendi kenar ve yüzlerinden (`girinti.py`)
@@ -1288,17 +1308,20 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
          "kamera": K([W / 2, 3.0, 0], 0.4, 0.2, 15, True),
          "rows": [x for x in (LR("Baş makas betopanı"), LR("Baş makas Z'si")) if x]},
         {"ad": "Tavan omegaları ve H’lar" if ASMA else "Tavan omegaları", "t": "Asma tavan omegaları ve tavan H’ları" if ASMA else "Tavan omegaları",
-         "p": (f"Asma dizme tavan: odalarda 60’lık omegalar mahyaya paralel uzanır (iç duvarların üstündekiler bir önceki adımda). Omegaların arasına "
+         "p": ((f"Asma dizme tavan: odalarda 60’lık omegalar mahyaya paralel uzanır (iç duvarların üstündekiler bir önceki adımda). Omegaların arasına "
                f"{fmtc(_pr(kurallari_oku()['prefabrik'], 'tavan_h_aralik_m') * 100)} cm’de bir tavan H’ı takılır; alçıpan levhalar bu gözlere dizilecek. "
-               "Omegalar motorun kart modelinden; H’lar kuralın aralığıyla yerleştirildi.") if ASMA else "Tavan omegaları motorun kart modelinden.",
+               "Omegalar motorun kart modelinden; H’lar kuralın aralığıyla yerleştirildi.") if ASMA else "Tavan omegaları motorun kart modelinden.") +
+              (f" {sirala([kucuk(a_) for a_ in VR_TAVAN]).capitalize()} tavanı ters tavan: tavan omegaları yavru makasların altında, kolon ve kirişlerin "
+               "arasında, kitabın aralığıyla (kart modelinden)." if VR_TAVAN else ""),
          "kamera": K([0, 2.3, 0.3], 0.55, 1.28, 15),
          "rows": [x for x in (R("OM-01", "Tavan omegası (oda içi)", f"{len(omega)} parça", "model"), LR("60'lık duvar omegası"), LR("60'lık tavan omegası"),
                               LR("Tavan H'ı"), I("Modelde H", f"{th_n} parça") if ASMA else None, LR("PVC omega kapak")) if x]},
         {"ad": "Asma tavan alçıpanı" if ASMA else "Ters tavan alçıpanı", "t": "Asma tavan alçıpanı" if ASMA else "Ters tavan alçıpanı",
          "p": "12,5 mm alçıpan levhalar (120 × 250) kesilip omega ve H gözlerine dizilir; banyolarda yeşil (ıslak hacim) alçıpan. Omegaların altı PVC omega kapakla kapatılır." +
-              (f" {GVK['Ad']} tavanı ters tavan: tavan omegalarının altına yeşil alçıpan, kolon ve kirişlerin arasında (listede yeşil alçıpan satırında, "
-               "veranda tavanı)." if tavan.get("acik") else "") +
-              (" Taşan verandaların tavanı da yeşil alçıpan (listede sayılı); tavan omegaları kart modelinde henüz yok, modelde gösterilmedi." if VR else ""),
+              (f" {sirala([a_['ad'] if i_ == 0 else kucuk(a_['ad']) for i_, a_ in enumerate(tavan['acik'])])} tavanı ters tavan: tavan omegalarının altına yeşil alçıpan, kolon ve kirişlerin "
+               "arasında (listede yeşil alçıpan satırında, veranda tavanı)." if tavan.get("acik") else "") +
+              (" Taşan verandaların tavanı da yeşil alçıpan (listede sayılı); tavan omegaları kart modelinde yok, modelde gösterilmedi."
+               if any(v["ad"] not in VR_TAVAN for v in VR) else ""),
          "kamera": K([0, 2.3, 0.3], 0.55, 1.28, 15),
          "extra": [x for x in (LR("Tavan beyaz alçıpan"), LR("Tavan yeşil alçıpan"), LR("Alçıpan vidası"), I("Modelde göz", f"{len(tavan.get('goz', []))} adet") if ASMA else None) if x]},
         {"ad": "Çatı izolasyonu", "t": "Çatı izolasyonu (10 cm rulo cam yünü)",
@@ -1369,7 +1392,7 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
                                                          f"{fmtc(q['b'][1] - q['b'][0] + 2 * SC)} cm" for q in cumbalar) +
                    ". Cumbanın dış ucunda baş makas var; iç ucu ana çatının kalkan duvarında biter, orada makas yok. Makaslar saçak duvarlarındaki kulaklı "
                    "H’ların hizasına oturur; 10 cm topuk, duvar hizasında dikme, Warren zikzak. Yerler çatı tanımından (çizim, liste ve 3B modelle aynı); "
-                   "cumba makasının kimlik kartı henüz yok, adı ve adedi listeden.")
+                   "cumba makasının kimlik kartı MA-04.")
         mk["extra"] = [I("Ana çatı", f"açıklık {fmtc(AA)} cm · %{fmt(TAN * 100)} · tepe ≈ {fmt(tepe)} cm"),
                        I("Makas aralığı", " · ".join(fmtc(a_) for a_ in GC["aralik"]) + " cm")] + \
                       [x for x in (LR("Makas (baş)"), LR("Makas (orta)"), *(LR(f"Cumba makası · {q['ad']}") for q in cumbalar)) if x]

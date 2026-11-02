@@ -1,6 +1,6 @@
 {
  "sema": "portman.urun_kartlari/1",
- "surum": "11",
+ "surum": "12",
  "aciklama": "Ürün kimlik kartları (İE-15 K1, K2, K3, K3b, K5, K5b ve K5b-2, D-24). Kart bir ürünü tanımlar; modelde IFC tür nesnesidir, parça (örnek) türüne bağlanır. Okuyan `motor/kart_model.py`. Kod kalıcıdır: bir kod başka ürüne verilmez, ürün kalkarsa kod boş kalır (`testler/kimlik/veri/kart_kodlari.json` kilidi). Kart kodu boy ve projeyle değişmez; bugünkü malzeme kataloğunun kodu (D01, D09…) boya göre ve projede yeni boy çıktıkça verilir, parçada `KatalogKodu` olarak kalır. Bu yüzden kart kodu tirelidir (D-01). Ailelerin harfi katalogla aynıdır. Kartı düzeltmek için bu dosya düzeltilir, model yeniden üretilir; Bonsai'de yapılan değişiklik geri okunmaz.",
  "alanlar": {
   "kod": "Kalıcı kod, `<aile>-<nn>`",
@@ -490,7 +490,7 @@
    "liste": {"grup": "1002", "satirlar": ["60'lık duvar omegası (asma dizme tavan)", "60'lık tavan omegası (ters tavan)"]},
    "olcu": "60 × 3750; parça boyu parçada (tam parça 365, kesim planında); kesit 110 × 35 mm, üst 65, sac 1 mm (montaj rehberi)",
    "birim": "adet",
-   "nerede": "Tavanda mahyaya paralel hatlar: asma dizme tavanda iç duvarların ekseninde ve odada ~125 cm arayla, ters tavanda bir duvar yüzünden 60 cm arayla (`kurallar/yerlesim/prefabrik.json › tavan_omegasi_yerlesimi`, karar B)",
+   "nerede": "Tavanda mahyaya paralel hatlar: asma dizme tavanda iç duvarların ekseninde ve odada ~125 cm arayla, ters tavanda bir duvar yüzünden 60 cm arayla; açık mahalde ve gövdeden taşan verandada kolon ve kirişlerin arasında (ters tavan; İE-24) (`kurallar/yerlesim/prefabrik.json › tavan_omegasi_yerlesimi`, karar B)",
    "sayim": "boy_kesim",
    "ifc": {"sinif": "IfcMemberType", "alt_tur": "MEMBER"},
    "pafta": [],
@@ -905,6 +905,19 @@
    "pafta": [],
    "yerlesim": {"kural": "cati_izolasyonu", "parca": "serit", "sinif": "IfcCovering"},
    "kaynak": {"durum": "varsayim", "tarih": "2026-10-30", "dayanak": "Liste satırı (brüt bina ÷ 9,6; aday: saçaklı çatı tabanı ÷ 9,6); şerit montaj rehberinden (\"her makas aralığına bir şerit\"), İE-15 K5b planı (CIO, 27 Ekim: \"çatı cam yünü (makas aralığı başına)\")"}
+  },
+  {
+   "kod": "MA-04",
+   "ad": "Cumba makası",
+   "liste": {"grup": "1005", "satirlar": ["Cumba makası"]},
+   "olcu": "Açıklık parçada (cumbanın açıklığı + iki saçak; TK-03 sol cumbada 7013, sağ cumbada 7633)",
+   "birim": "adet",
+   "nerede": "Girintili gövdenin cumba çatısında (İE-24): dış ucunda baş makas, aralarda pano eklerinde; iç ucu ana çatının kalkan duvarında biter, orada makas yok. Yer ve sayı çatı tanımından (`motor/cati_serit.py`; çizim, liste, 3B model ve montaj rehberi aynı)",
+   "sayim": "yerlesen_adet",
+   "ifc": {"sinif": "IfcElementAssemblyType", "alt_tur": "TRUSS"},
+   "pafta": [],
+   "bugunku_ifc": [{"sinif": "IfcElementAssembly", "kosul": [["PortatifEv_Kapsam", "BOMKalem", "^Cumba makası"]], "cati_tipleri": ["besik"]}],
+   "kaynak": {"durum": "lokman", "tarih": "2026-10-30", "dayanak": "Lokman, 30 Ekim 2026 13:49: \"en uzun makasları ana makas kabul et, diğer makasları cumba makası kabul et\" (`motor/cati_serit.py`); listedeki satır \"Cumba makası · <cumba>\" (`motor/prefabrik_liste.py`). Kesit kartta yazılı değil (MA-01, MA-02 gibi). Kart İE-15'le anlaşılan sırayla sona eklendi (İE-24, pano 116)"}
   }
  ],
  "gorunum": [
