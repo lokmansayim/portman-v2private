@@ -1,0 +1,13 @@
+{
+ "kod": "AP-09",
+ "ap": "AP-09",
+ "kip": "motor",
+ "girdi": {
+  "is_emri": "testler/kor/projeler/AP09/is_emri.json"
+ },
+ "bizim_liste": "bizim_liste.json",
+ "liste_sha256": "b51874749775ee07d5ebab5fda596eb9c704db49fda7185d6918d0cc299c8da5",
+ "sayfa": null,
+ "kapi": true,
+ "not": "İE-26 kör ölçümü. Geometri İE-17 PR-2'nin İş Emri'si (M-07; pafta çizim için görüldü, muhur.json notu); özellikler paftanın tablosundan. Tasarımı AP-08 (PK-07) ile aynı değil (740 × 944,5; PK-07 785 × 900)."
+}

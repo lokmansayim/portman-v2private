@@ -1,0 +1,13 @@
+{
+ "kod": "AP-15",
+ "ap": "AP-15",
+ "kip": "motor",
+ "girdi": {
+  "is_emri": "testler/kor/projeler/AP15/is_emri.json"
+ },
+ "bizim_liste": "bizim_liste.json",
+ "liste_sha256": "a8fb316b2e8aac04bba8f897ea9f7402f03432c2ef2f16486c49286d63ae8724",
+ "sayfa": null,
+ "kapi": true,
+ "not": "İE-26 kör ölçümü. Geometri İE-17 PR-2'nin İş Emri'si (M-07; pafta çizim için görüldü, muhur.json notu); özellikler paftanın tablosundan."
+}

@@ -1,0 +1,13 @@
+{
+ "kod": "AP-11",
+ "ap": "AP-11",
+ "kip": "motor",
+ "girdi": {
+  "is_emri": "testler/kor/projeler/AP11/is_emri.json"
+ },
+ "bizim_liste": "bizim_liste.json",
+ "liste_sha256": "317f6a74387aa9a576c0c050960fbf513c7de1f7a88111c35cfb101698ad9c7d",
+ "sayfa": null,
+ "kapi": true,
+ "not": "İE-26 kör ölçümü: İş Emri montaj paftasından (varsayımları İş Emri'nde)."
+}

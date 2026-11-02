@@ -108,3 +108,12 @@ O zamana kadar her yeni proje kör testtir; sonra katalog modellerine geçilir (
   stoktan düşülmüş (Lokman, 18 Ekim): sonucu bilgi içindir, gerileme kapısına girmez. PK-04 seriden çıktı (çelik karkas).
 - Bugünkü Motor'la doğru toplam ve TS-01'in satır satır raporu proje klasöründe (`IE-09_atolye/BK-12_PR-3/`).
 - Kör 19 kapalı; açılışları ayrı Patron kararı. AP-01…05'in paftaları okunmadı (BK-12 PR-4, hedef AP-01).
+
+## Durum (2 Kasım 2026, İE-26)
+
+- Patron'un kararıyla (karar kartı 2 Kasım 2026 21:48:56 UTC, "Hepsi açılsın") Motor'un liste yazabildiği on kör ev açıldı: AP-09, 11, 14,
+  15, 18, 21, 22, 25, 26, 28. Kendi listelerimiz `d675641`'de, açılış kayıtları `cca87fa`'da; mühür kayıtları `kor` kaldı. On evin tutan
+  satırları gerileme kapısında.
+- Sonuç: doğru 600 / 1295 (%46,3; ev başına %36,6–66,4). Tablo ve satır raporları proje dosyalarında (`Prefabrik_28_Olcum/IE-26_kor/`);
+  iş emri `docs/is_emirleri/IE-26.md`.
+- Açılmayanlar: AP-06, 12, 13, 16, 17, 23, 24, 27 (Motor bu çatıların listesini yazmıyor) ve AP-20 (çift kat). Listeleri kör.
