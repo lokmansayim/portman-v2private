@@ -306,8 +306,8 @@ def test_verandanin_catisi_ifc_ve_liste(tmp_path):
     v = np.array(ifcopenshell.geom.create_shape(ayar, v05).geometry.verts).reshape(-1, 3) * 100
     for y, z0 in ((0.0, 215.575), (244.25, 240.0)):                                   # altı çatının 10 altında, iki ucunda
         assert v[np.abs(v[:, 1] - y) < 0.5][:, 2].min() == pytest.approx(z0, abs=0.01)
-    with pytest.raises(PL.ListeYazilmaz, match="açık mahalin kendi çatısı"):
-        PL.model_motor(copy.deepcopy(ie))
+    # PR-1b/K7 (D-44; Lokman 2.11 18:21 kart "Aç, paftadaki gibi olsun"): liste bu çatıyı parça olarak okur (`test_ie17_liste.py`)
+    assert [c["ad"] for c in PL.model_motor(copy.deepcopy(ie))["cati"]] == ["ana çatı", "ön cumba", "VERANDA çatısı"]
 
 
 @pytest.mark.parametrize("degis, mesaj", [
@@ -487,8 +487,8 @@ def test_kose_kirmasi_ifc_ve_liste(tmp_path):
     assert sorted(ps(e, "Kot_cm") for e in f.by_type("IfcBeam")) == ["240–250", "240–250"]
     assert [ps(e, "Kalkan") for e in f.by_type("IfcPlate") if e.Name.startswith("ALIN")] == [
         "ana çatı sol kalkanı", "ana çatı sağ kalkanı (0–266)", "ana çatı sağ kalkanı (266–835.75, VERANDA çatısı üstü)", "sağ cumba sağ kalkanı"]
-    with pytest.raises(PL.ListeYazilmaz, match="köşe kırması"):
-        PL.model_motor(copy.deepcopy(ie))
+    # PR-1b/K7 (D-44; Lokman 2.11 18:21 kart "Aç, paftadaki gibi olsun"): liste köşe kırmasını parça olarak okur (`test_ie17_liste.py`)
+    assert [c["ad"] for c in PL.model_motor(copy.deepcopy(ie))["cati"]] == ["ana çatı", "sağ cumba", "VERANDA çatısı"]
 
 
 @pytest.mark.parametrize("degis, mesaj", [

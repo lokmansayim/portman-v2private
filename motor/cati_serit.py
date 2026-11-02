@@ -15,9 +15,10 @@ hat; sağ cumbanın arka yüzü ana çatının arka yüzünün devamı). Kalkanl
 
 Makaslar (paftanın makas planı MKS01–12; sayfa 9: makaslar dış duvarın H'larına gelir): ana çatıda iki baş makas iki kalkan duvarının
 ekseninde, cumbada tek baş makas dış uçtaki duvarın ekseninde; orta makaslar şeridin saçak duvarlarının pano eklerinde, en çok 125,5 arayla
-(baştan başlayarak en uzaktaki ek). Cumbanın iç ucunda makas yoktur: son açıklık komşunun baş makasına kadardır. Sayı açıklıkların
-125,5'i aşmamasından: ana ⌈eksenler arası ÷ 125,5⌉ + 1, cumba ⌈dış eksenden komşunun eksenine ÷ 125,5⌉. Ekler bu sayıyı vermiyorsa eşit
-aralık ve uyarı (K16).
+(baştan başlayarak en uzaktaki ek). Cumbanın iç ucunda makas yoktur: son açıklık komşunun baş makasına kadardır. Uçtaki açıklık
+125,5 + duvarın yarı kalınlığına kadar (kalkan duvarının yanında saçak duvarının panosu iç yüzden başlar: AP-15 paftası); ekler en az
+sayıdan fazla makas verse de açıklıklar sınırı aşmıyorsa makaslar eklerdedir (AP-09 cumbası; İE-17 PR-1b/K7). Ekler sınırı aşıyorsa eşit
+aralık, en az sayıyla (ana ⌈eksenler arası ÷ 125,5⌉ + 1, cumba ⌈dış eksenden komşunun eksenine ÷ 125,5⌉) ve uyarı (K16).
 
 Açık mahalin kendi çatısı (İE-17 PR-2, AP-09 paftası, 1 Kasım 2026): `cati.mahal_catilari` [{`mahal` (ızgaradaki açık mahal: veranda),
 `tip` tek_yon, `egim_yuzde` (paftadan; varsayılan yok), `yuksek_yan` on | arka | sol | sag (çatının dayandığı, kapalı gövdeye bitişik yan),
@@ -35,7 +36,8 @@ açık yanda o yöne inen ana çatı yüzü mahalin üstüne uzar ve iki yüz e�
 salon duvarındaki ucu arka yüzden 155,5 içeride); kapalı yanda o yandaki çatının (paftada cumba) mahala inen yüzüyle dere. Aşık planı
 bunu verir: veranda yüzü kırma ile dere arasında paralelkenar (aşık 444,25 = 865,75 − 421,5), cumbanın arka yüzü dereyle kesilir, ana
 çatının arka yüzü kırmaya kadar 823. Kiriş ve dikme taşan verandanınki gibi (BK-14): açık yanlarda yatay kiriş duvar üstünün 10 altından
-duvar üstüne, serbest dikme kirişin altına; makas kirişe oturur. Makaslar (MK9–13) ve liste PR-1b/K7'de. Mahalin yüzü duvarda komşu
+duvar üstüne, serbest dikme kirişin altına; makas kirişe oturur. Makaslar (`makaslar`, PR-1b/K7): kiriş boyunca eşit aralıkla en çok
+125,5, ⌈yan ÷ 125,5⌉ + 1; açık yandaki uçta çapraz makas (MK13), öteki uçta ve arada kısa makas (MK9–12). Mahalin yüzü duvarda komşu
 yüzün mahyasından yüksekse kırma ya da dere mahyayı aşar; kırmaya uzayan yüz başka yüze binerse; ikisinde de çatı çizilmez (geometri hakemi,
 1 Kasım: makas x'li AP-09 verandasında kırma 21 cm basamaklı çatı veriyordu).
 """
@@ -390,6 +392,20 @@ def _kirma(m: dict, duzlemler: list[dict], kalkanlar: list[dict], ana_iz) -> lis
                 (ax_, ay_), (bx_, by_) = oturt(h.coords[0]), oturt(h.coords[-1])
                 hatlar.append({"tur": "kirma" if is_ == "ekle" else "dere", "duzlemler": [P["ad"], ad],
                                "p": [round(ax_, 2), round(ay_, 2)], "q": [round(bx_, 2), round(by_, 2)]})
+    # makaslar (İE-17 PR-1b/K7; AP-03 paftası s. 7, MK9–13): yüksek yana dik, alçak kenardaki kirişe oturur; kiriş boyunca (mahalin yanı)
+    # eşit aralıkla, en çok 125,5: sayı ⌈yan ÷ 125,5⌉ + 1 (taşan verandanın makası gibi). Açık yandaki uçta kırma hattında çapraz makas
+    # (MK13; eşit eğimde 45°, boyu yanın √2 katı), öteki uçta ve arada kısa makas (MK9–12). Liste sayıyı buradan okur
+    lo_, hi_ = (y0, y1) if egim_x else (x0, x1)
+    uc_yan = ("on", "arka") if egim_x else ("sol", "sag")
+    n_ = math.ceil((hi_ - lo_) / MOD - 1e-6)
+    kosu = abs(alcak - yuksek)                                          # duvardan saçak ucuna (plan)
+    mk = []
+    for i in range(n_ + 1):
+        yan_ = uc_yan[0] if i == 0 else uc_yan[1] if i == n_ else None
+        capraz = yan_ is not None and m["yanlar"].get(yan_) == "acik"
+        mk.append({"konum": round(lo_ + (hi_ - lo_) * i / n_, 2), "rol": "capraz" if capraz else "kisa",
+                   "plan_boy_cm": round(kosu * (math.sqrt(2) if capraz else 1.0), 2)})
+    m["makaslar"] = mk
     return hatlar
 
 
@@ -427,21 +443,27 @@ def _ekler(plan: G.Plan, serit, eksen: str, h: float) -> list[float]:
     return sorted(out)
 
 
-def _makas_yerleri(bas: float, son: float, son_makas: bool, ekler: list[float]) -> tuple[list[float], bool]:
-    """`bas` (baş makas) → `son` (öteki baş makas ya da komşunun ekseni) arasında makaslar. Döner: (yerler, eklerde mi)."""
+def _makas_yerleri(bas: float, son: float, son_makas: bool, ekler: list[float], h: float = 0.0) -> tuple[list[float], bool]:
+    """`bas` (baş makas) → `son` (öteki baş makas ya da komşunun ekseni) arasında makaslar. Döner: (yerler, eklerde mi).
+
+    Orta açıklık en çok 125,5. Uçtaki açıklık (baş makastan ilk eke, son ekten `son`'a) en çok 125,5 + `h` (duvarın yarı kalınlığı):
+    kalkan duvarının yanında saçak duvarının panosu duvarın iç yüzünden başlarsa ilk ek eksenden 125,5 + h'dedir (AP-15, köşe paftadan;
+    paftada uçlarda 130,5, ana çatıda 7 makas). Ekler en az sayıdan fazla makas verse de hiçbir açıklık sınırı aşmıyorsa makaslar eklerdedir
+    (AP-09 cumbası: saçak duvarında 56 + 125,5 + 57,75'lik panolar, paftada da eklerde); ekler sınırı aşıyorsa eşit aralık (İE-17 PR-1b/K7)."""
     yon = 1.0 if son > bas else -1.0
     L = abs(son - bas)
     n = math.ceil(L / MOD - 1e-6)
-    beklenen = n + (1 if son_makas else 0)
+    uc = MOD + h + 1e-6
     aday = [e for e in ekler if TOL < (e - bas) * yon < L - TOL]
     xs, cur = [bas], bas
-    while abs(son - cur) > MOD + 1e-6:
-        uygun = [e for e in aday if 1e-6 < (e - cur) * yon <= MOD + 1e-6]
+    while abs(son - cur) > uc:
+        sinir = uc if len(xs) == 1 else MOD + 1e-6
+        uygun = [e for e in aday if 1e-6 < (e - cur) * yon <= sinir]
         if not uygun:
             break
         cur = max(uygun, key=lambda e: (e - cur) * yon)
         xs.append(cur)
-    if abs(son - cur) <= MOD + 1e-6 and len(xs) + (1 if son_makas else 0) == beklenen:
+    if abs(son - cur) <= uc:
         return xs + ([son] if son_makas else []), True
     esit = [bas + yon * L * i / n for i in range(n + 1)]
     return (esit if son_makas else esit[:-1]), False
@@ -501,13 +523,13 @@ def tanim(plan: G.Plan, ie: dict) -> dict:
         # makaslar
         ekler = _ekler(plan, sr[i], eksen, h)
         if i == k:
-            yer, duzenli = _makas_yerleri(a0 + h, a1 - h, True, ekler)
+            yer, duzenli = _makas_yerleri(a0 + h, a1 - h, True, ekler, h)
             roller = ["bas"] + ["orta"] * (len(yer) - 2) + ["bas"]
         elif i < k:
-            yer, duzenli = _makas_yerleri(a0 + h, a1 + h, False, ekler)
+            yer, duzenli = _makas_yerleri(a0 + h, a1 + h, False, ekler, h)
             roller = ["bas"] + ["orta"] * (len(yer) - 1)
         else:
-            yer, duzenli = _makas_yerleri(a1 - h, a0 - h, False, ekler)
+            yer, duzenli = _makas_yerleri(a1 - h, a0 - h, False, ekler, h)
             roller = ["bas"] + ["orta"] * (len(yer) - 1)
         if not duzenli:
             uyarilar.append(f"makas yeri ({adlar[i]}): saçak duvarlarının pano ekleri makasları 125,5 arayla vermiyor; eşit aralıklı {len(yer)} makas")
