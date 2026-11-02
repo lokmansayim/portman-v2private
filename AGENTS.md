@@ -42,6 +42,14 @@ Bağlayıcıdır; her iş, her oturum ve her ajan için geçerlidir.
 
 Bugün bu dört maddeyi karşılamayan yerler `KARARLAR/D-28.md` › "Bugünkü açıklar" tablosundadır. Bir çıktı türü bu dört maddeyi karşılamadan onun için "çalışıyor" yazılmaz; açığı kapatan iş tablodaki satırı günceller.
 
+## Mühürlü konular (Lokman)
+
+Lokman'ın mühürlediği bir konu, Lokman yeni bir değişiklik verene kadar değiştirilmez ve yorumlanmaz. Eski sohbetlerdeki sözlere, başka bir konunun kararına ya da bir ajanın okumasına dayanılarak açılmaz. Bir iş mühürlü bir konuya dokunacaksa önce Lokman'a tek satırla sorulur ve onun cevabı beklenir. Mühürlü davranışı aşağıdaki testler sabitler: o testlerin beklentisini değiştirmek mühürü açmak demektir, yalnız Lokman'ın yeni sözüyle yapılır ve yeni bir kararla kaydedilir.
+
+| Konu | Mühür | Kural | Sabitleyen testler |
+|---|---|---|---|
+| Saçak omegası | D-41; Lokman, 1 Kasım 2026 20:16 | 100'lük saçak omegası saçak duvarının üstünde duvar boyunca (taşan verandada yan kirişin üstünde kiriş boyunca); saçağa uzamaz. Saçaktan saçağa yalnız baş makas omegası gider. Adedi saçak boyundan, gerçek listeler gibi (PK-01 9, TK-01 11, TK-03 11). | `testler/kimlik/test_k5b.py`, `testler/kimlik/test_k3b.py`, `testler/motor/test_ie24_3b.py`, `testler/paket/test_paket.py`, `testler/paket/test_ie24_rehber.py`, `testler/paket/veri/saglama.json` |
+
 ## Depo düzeni
 
 | Yol | İçerik |
