@@ -77,6 +77,96 @@
   "AP-01…05": {
    "tarih": "2026-10-13",
    "dayanak": "kör test değil: listeler örnek olarak okundu (E1–E5); paftaları okunmadı"
+  },
+  "AP-09": {
+   "karar": "Patron (Lokman), karar kartı 2 Kasım 2026 21:48:56 UTC: \"Hepsi açılsın\" (soru: \"Kör 19 evin gerçek listeleri bu ölçümde açılsın mı?\"; AP-20 çift kat, ölçüm dışı). Görev: pano 70, prefabrik kör ölçümü (İE-26, PR-4)",
+   "tarih": "2026-11-02",
+   "sha256": "b51874749775ee07d5ebab5fda596eb9c704db49fda7185d6918d0cc299c8da5",
+   "liste_commit": "d675641",
+   "liste_commit_saati": "22:28:49",
+   "sozluk_commit": "9f13755",
+   "dayanak": "İE-26: kendi listemiz ve İş Emri önce commit'lendi ve dala gönderildi, sonra bu açılış kaydı (ayrı commit), sonra mühür denetimi ve kıyas"
+  },
+  "AP-11": {
+   "karar": "Patron (Lokman), karar kartı 2 Kasım 2026 21:48:56 UTC: \"Hepsi açılsın\" (soru: \"Kör 19 evin gerçek listeleri bu ölçümde açılsın mı?\"; AP-20 çift kat, ölçüm dışı). Görev: pano 70, prefabrik kör ölçümü (İE-26, PR-4)",
+   "tarih": "2026-11-02",
+   "sha256": "317f6a74387aa9a576c0c050960fbf513c7de1f7a88111c35cfb101698ad9c7d",
+   "liste_commit": "d675641",
+   "liste_commit_saati": "22:28:49",
+   "sozluk_commit": "9f13755",
+   "dayanak": "İE-26: kendi listemiz ve İş Emri önce commit'lendi ve dala gönderildi, sonra bu açılış kaydı (ayrı commit), sonra mühür denetimi ve kıyas"
+  },
+  "AP-14": {
+   "karar": "Patron (Lokman), karar kartı 2 Kasım 2026 21:48:56 UTC: \"Hepsi açılsın\" (soru: \"Kör 19 evin gerçek listeleri bu ölçümde açılsın mı?\"; AP-20 çift kat, ölçüm dışı). Görev: pano 70, prefabrik kör ölçümü (İE-26, PR-4)",
+   "tarih": "2026-11-02",
+   "sha256": "a55033adbf63642d5a5a47eac19724f51766f53554a7a2fd16edb7d561ace2fd",
+   "liste_commit": "d675641",
+   "liste_commit_saati": "22:28:49",
+   "sozluk_commit": "9f13755",
+   "dayanak": "İE-26: kendi listemiz ve İş Emri önce commit'lendi ve dala gönderildi, sonra bu açılış kaydı (ayrı commit), sonra mühür denetimi ve kıyas"
+  },
+  "AP-15": {
+   "karar": "Patron (Lokman), karar kartı 2 Kasım 2026 21:48:56 UTC: \"Hepsi açılsın\" (soru: \"Kör 19 evin gerçek listeleri bu ölçümde açılsın mı?\"; AP-20 çift kat, ölçüm dışı). Görev: pano 70, prefabrik kör ölçümü (İE-26, PR-4)",
+   "tarih": "2026-11-02",
+   "sha256": "a8fb316b2e8aac04bba8f897ea9f7402f03432c2ef2f16486c49286d63ae8724",
+   "liste_commit": "d675641",
+   "liste_commit_saati": "22:28:49",
+   "sozluk_commit": "9f13755",
+   "dayanak": "İE-26: kendi listemiz ve İş Emri önce commit'lendi ve dala gönderildi, sonra bu açılış kaydı (ayrı commit), sonra mühür denetimi ve kıyas"
+  },
+  "AP-18": {
+   "karar": "Patron (Lokman), karar kartı 2 Kasım 2026 21:48:56 UTC: \"Hepsi açılsın\" (soru: \"Kör 19 evin gerçek listeleri bu ölçümde açılsın mı?\"; AP-20 çift kat, ölçüm dışı). Görev: pano 70, prefabrik kör ölçümü (İE-26, PR-4)",
+   "tarih": "2026-11-02",
+   "sha256": "52a6494c673e9adba86269f1fa360ad95eb2187e443b4f12a38bd6af60c8c010",
+   "liste_commit": "d675641",
+   "liste_commit_saati": "22:28:49",
+   "sozluk_commit": "9f13755",
+   "dayanak": "İE-26: kendi listemiz ve İş Emri önce commit'lendi ve dala gönderildi, sonra bu açılış kaydı (ayrı commit), sonra mühür denetimi ve kıyas"
+  },
+  "AP-21": {
+   "karar": "Patron (Lokman), karar kartı 2 Kasım 2026 21:48:56 UTC: \"Hepsi açılsın\" (soru: \"Kör 19 evin gerçek listeleri bu ölçümde açılsın mı?\"; AP-20 çift kat, ölçüm dışı). Görev: pano 70, prefabrik kör ölçümü (İE-26, PR-4)",
+   "tarih": "2026-11-02",
+   "sha256": "71d0f698ae51cd7f9257374b0c91d44657be2763cef0d170fe2b480863dcd737",
+   "liste_commit": "d675641",
+   "liste_commit_saati": "22:28:49",
+   "sozluk_commit": "9f13755",
+   "dayanak": "İE-26: kendi listemiz ve İş Emri önce commit'lendi ve dala gönderildi, sonra bu açılış kaydı (ayrı commit), sonra mühür denetimi ve kıyas"
+  },
+  "AP-22": {
+   "karar": "Patron (Lokman), karar kartı 2 Kasım 2026 21:48:56 UTC: \"Hepsi açılsın\" (soru: \"Kör 19 evin gerçek listeleri bu ölçümde açılsın mı?\"; AP-20 çift kat, ölçüm dışı). Görev: pano 70, prefabrik kör ölçümü (İE-26, PR-4)",
+   "tarih": "2026-11-02",
+   "sha256": "379c4fb14d4abaa04c780a1148fb4652c2b42b4a6989e55063ee3bf18959f981",
+   "liste_commit": "d675641",
+   "liste_commit_saati": "22:28:49",
+   "sozluk_commit": "9f13755",
+   "dayanak": "İE-26: kendi listemiz ve İş Emri önce commit'lendi ve dala gönderildi, sonra bu açılış kaydı (ayrı commit), sonra mühür denetimi ve kıyas"
+  },
+  "AP-25": {
+   "karar": "Patron (Lokman), karar kartı 2 Kasım 2026 21:48:56 UTC: \"Hepsi açılsın\" (soru: \"Kör 19 evin gerçek listeleri bu ölçümde açılsın mı?\"; AP-20 çift kat, ölçüm dışı). Görev: pano 70, prefabrik kör ölçümü (İE-26, PR-4)",
+   "tarih": "2026-11-02",
+   "sha256": "1fb37530d24494cbc56c183ac11c6105d81ca68bdaa25530e3d343e93cdbc430",
+   "liste_commit": "d675641",
+   "liste_commit_saati": "22:28:49",
+   "sozluk_commit": "9f13755",
+   "dayanak": "İE-26: kendi listemiz ve İş Emri önce commit'lendi ve dala gönderildi, sonra bu açılış kaydı (ayrı commit), sonra mühür denetimi ve kıyas"
+  },
+  "AP-26": {
+   "karar": "Patron (Lokman), karar kartı 2 Kasım 2026 21:48:56 UTC: \"Hepsi açılsın\" (soru: \"Kör 19 evin gerçek listeleri bu ölçümde açılsın mı?\"; AP-20 çift kat, ölçüm dışı). Görev: pano 70, prefabrik kör ölçümü (İE-26, PR-4)",
+   "tarih": "2026-11-02",
+   "sha256": "6d9b40e64634aa11beed47269642b61d1a6fe04c5958ada7bcb1e8a7e50302dc",
+   "liste_commit": "d675641",
+   "liste_commit_saati": "22:28:49",
+   "sozluk_commit": "9f13755",
+   "dayanak": "İE-26: kendi listemiz ve İş Emri önce commit'lendi ve dala gönderildi, sonra bu açılış kaydı (ayrı commit), sonra mühür denetimi ve kıyas"
+  },
+  "AP-28": {
+   "karar": "Patron (Lokman), karar kartı 2 Kasım 2026 21:48:56 UTC: \"Hepsi açılsın\" (soru: \"Kör 19 evin gerçek listeleri bu ölçümde açılsın mı?\"; AP-20 çift kat, ölçüm dışı). Görev: pano 70, prefabrik kör ölçümü (İE-26, PR-4)",
+   "tarih": "2026-11-02",
+   "sha256": "169b60a7087f8cc2db4835b38640a40b35e76ed3cda19989e784a4cca04491a6",
+   "liste_commit": "d675641",
+   "liste_commit_saati": "22:28:49",
+   "sozluk_commit": "9f13755",
+   "dayanak": "İE-26: kendi listemiz ve İş Emri önce commit'lendi ve dala gönderildi, sonra bu açılış kaydı (ayrı commit), sonra mühür denetimi ve kıyas"
   }
  },
  "dosyalar": [
