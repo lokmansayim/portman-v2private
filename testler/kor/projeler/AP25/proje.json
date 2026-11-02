@@ -1,0 +1,13 @@
+{
+ "kod": "AP-25",
+ "ap": "AP-25",
+ "kip": "motor",
+ "girdi": {
+  "is_emri": "testler/kor/projeler/AP25/is_emri.json"
+ },
+ "bizim_liste": "bizim_liste.json",
+ "liste_sha256": "1fb37530d24494cbc56c183ac11c6105d81ca68bdaa25530e3d343e93cdbc430",
+ "sayfa": null,
+ "kapi": true,
+ "not": "İE-26 kör ölçümü: İş Emri montaj paftasından (varsayımları İş Emri'nde)."
+}

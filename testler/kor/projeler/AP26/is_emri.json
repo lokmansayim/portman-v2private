@@ -1,0 +1,85 @@
+{
+  "is_emri_no": "KOR-AP26",
+  "revizyon": 1,
+  "talep": {
+    "bayi": {"kod": "AP26", "ad": "Bayi AP-26"},
+    "musteri_adi": "AP-26",
+    "metin": "İE-26 kör ölçüm: AP-26 (beşik, önde ve arkada taşan teras) montaj paftasından okundu (2 Kasım 2026). Konumlar cm, aks; x sol dış yüzden; dizilim arka-sol olduğundan mahallerin y'si arka dış yüzden (Motor'un kuralı), açıklıkların cepheleri ve dikmeler gerçek çerçevede (ön: giriş cephesi)."
+  },
+  "yapi": {
+    "sistem": "prefabrik",
+    "kat_sayisi": 1,
+    "duvar_yuksekligi_cm": 250,
+    "duvar_kalinligi_cm": {"dis": 10, "ic": 6},
+    "olcu_kaynagi": "dis_olcu",
+    "dis_olcu_cm": {"x": 689.58, "y": 1319.02},
+    "referans_model": "AP-26",
+    "grid": {"x_pano": 5.5, "y_pano": 10.5},
+    "kisa_kenar": "y",
+    "giris_cephesi": "on",
+    "dis_dusey_duvar": "cevre_aks_disinda",
+    "dizilim": {
+      "baslangic": "arka-sol",
+      "hiza": "tam_izgara",
+      "dis_duvar_t_bolme": false,
+      "pencere": "pano",
+      "kapi": "mantik",
+      "kose": "oda",
+      "son_pano": "kosu",
+      "kapi_yeri": "ortada"
+    },
+    "ek_akslar_cm": {"x": [], "y": []}
+  },
+  "mahaller": [
+    {"ad": "YATAK ODASI 1", "tur": "yatak_odasi", "konum_cm": [[5, 10, 381.5, 386.5]]},
+    {"ad": "YATAK ODASI 2", "tur": "yatak_odasi", "konum_cm": [[381.5, 10, 684.58, 512]]},
+    {"ad": "ANTRE", "tur": "antre_hol", "konum_cm": [[5, 386.5, 381.5, 512], [5, 512, 130.5, 1309.02]]},
+    {"ad": "BANYO WC", "tur": "banyo", "konum_cm": [[130.5, 512, 444.25, 700.25]]},
+    {"ad": "EBV WC", "tur": "banyo", "konum_cm": [[444.25, 512, 684.58, 700.25]]},
+    {"ad": "MUTFAK", "tur": "mutfak", "konum_cm": [[130.5, 700.25, 684.58, 951.25]]},
+    {"ad": "SALON", "tur": "salon", "konum_cm": [[130.5, 951.25, 684.58, 1309.02]]}
+  ],
+  "acik_sinirlar": [],
+  "acikliklar": [
+    {"tur": "dis_kapi", "olcu": 90, "arasi": ["__DIS__", "ANTRE"], "duvar": "on", "pano": 0},
+    {"tur": "dis_kapi", "olcu": 90, "arasi": ["__DIS__", "YATAK ODASI 1"], "duvar": "arka", "pano": 2},
+    {"tur": "pencere", "olcu": "240x180", "mahal": "SALON", "duvar": "on", "acilis": "surgulu", "pano": 2},
+    {"tur": "pencere", "olcu": "200x180", "mahal": "YATAK ODASI 2", "duvar": "arka", "acilis": "surgulu", "pano": 0},
+    {"tur": "pencere", "olcu": "120x120", "mahal": "YATAK ODASI 1", "duvar": "arka", "pano": 1},
+    {"tur": "pencere", "olcu": "50x50", "mahal": "EBV WC", "duvar": "sag", "pano": 0},
+    {"tur": "pencere", "olcu": "120x120", "mahal": "MUTFAK", "duvar": "sag", "pano": 0},
+    {"tur": "pencere", "olcu": "120x120", "mahal": "SALON", "duvar": "sag", "pano": 0},
+    {"tur": "ic_kapi", "olcu": 82, "arasi": ["ANTRE", "YATAK ODASI 1"], "pano": 2},
+    {"tur": "ic_kapi", "olcu": 82, "arasi": ["ANTRE", "YATAK ODASI 2"], "pano": 0},
+    {"tur": "ic_kapi", "olcu": 82, "arasi": ["ANTRE", "BANYO WC"], "pano": 2},
+    {"tur": "ic_kapi", "olcu": 82, "arasi": ["YATAK ODASI 2", "EBV WC"], "pano": 0},
+    {"tur": "ic_kapi", "olcu": 82, "arasi": ["ANTRE", "MUTFAK"], "duvar_ucu": "on"},
+    {"tur": "ic_kapi", "olcu": 82, "arasi": ["ANTRE", "SALON"], "duvar_ucu": "arka"}
+  ],
+  "dikmeler": [],
+  "cati": {
+    "tip": "besik",
+    "egim_yuzde": 18.36,
+    "sacak_cm": 30,
+    "topuk_cm": 10,
+    "makas_yonu": "uzun_kenar",
+    "makas_ekseni": "y"
+  },
+  "ozellikler": {"Panel Türü": "Pres Panel", "Çatı Şekli": "Beşik", "Çatı Kaplaması": "Trapez Kaplama", "Çatı Kaplama Rengi": "Antrasit Gri", "Dış Kapı": "Çelik Standart", "İç Kapılar": "Standart Amerikan", "Dış Cephe Boya": "?", "İç Cephe Boya": "?", "Pencere Rengi": "Beyaz", "Tavan": "Ters", "Saçak ve Alın Rengi": "Antrasit Gri", "Açıklama": "1- Dış Cephe Panelleri: Betopan + Alçıpan 2- İç Cephe Panelleri: Alçıpan + Betopan + Alçıpan 3- Mineral Yün (80mm)"},
+  "alici_ait": {"kalemler": [], "kaynak": "paftanın özellik tablosu ve açıklaması: alıcıya ait kalem yazılmamış"},
+  "cikti": {
+    "pdf": true,
+    "dxf": true,
+    "pafta": "A2",
+    "icerik": ["aksli_plan", "alanli_kopya", "montaj_kopyasi", "on_gorunus", "cati_profili", "ozellik_tablosu"]
+  },
+  "varsayimlar": [
+    "Köşe ve ızgara (İE-17 kuralı; paftada aynı): makas y'yi geçer (makas planı MKS 1–14, yedi hat, her hatta iki parça; aşık 749,58 = 689,58 + 2 × 30), kısa kenar y. Ön ve arka duvar köşeden geçer, x ızgarası duvar ekseninden (5 + 125,5k); yan duvarlar araya girer, y ızgarası arka iç yüzden.",
+    "Ön ve arka zemin terası gövdeden taşan veranda (verandalar): önde sağda 479,58 × 110, arkada sağda 438,58 × 110; üstleri tek eğim (paftada P1, P2: trapez 150'lik); eğim paftada yazılı değil, ana çatınınki alındı.",
+    "Pencereler ve kapılar paftadaki yerine en yakın Motor panosunda (pano dizini). Paftadaki 280×210 ve 200/210 sürgülüler Motor'un pencere sınırına göre (en çok 247 × 180) 240x180 ve 200x180 sürgülü yazıldı. Arka terastan yatak odası 1'e açılan kapı dış kapı sayıldı. Kapı genişlikleri paftada yazılı değil: dış kapı 90, iç kapı 82 (Motor'un ölçüsü).",
+    "Oda adları ve alanları paftanın planından (yatak odaları 13,76 / 14,72, banyo 5,6, ebeveyn banyosu 4,23, mutfak 13,37, salon 19,37, antre 13,80 m²).",
+    "Çatı: beşik, makas y'yi geçer, eğim 10,4° (%18,36; paftada yazılı), saçak 30 (aşık boyu ve 700'lük trapez), topuk 10. Özellikler paftanın özellik tablosundan ve açıklamasından."
+  ],
+  "eksikler": [],
+  "verandalar": [{"ad": "ÖN TERAS", "cephe": "on", "bas_cm": 210, "bit_cm": 689.58, "derinlik_cm": 110, "cati": {"tip": "tek_yon", "egim_yuzde": 18.36}}, {"ad": "ARKA TERAS", "cephe": "arka", "bas_cm": 251, "bit_cm": 689.58, "derinlik_cm": 110, "cati": {"tip": "tek_yon", "egim_yuzde": 18.36}}]
+}

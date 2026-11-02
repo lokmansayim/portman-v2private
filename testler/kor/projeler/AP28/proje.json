@@ -1,0 +1,13 @@
+{
+ "kod": "AP-28",
+ "ap": "AP-28",
+ "kip": "motor",
+ "girdi": {
+  "is_emri": "testler/kor/projeler/AP28/is_emri.json"
+ },
+ "bizim_liste": "bizim_liste.json",
+ "liste_sha256": "169b60a7087f8cc2db4835b38640a40b35e76ed3cda19989e784a4cca04491a6",
+ "sayfa": null,
+ "kapi": true,
+ "not": "İE-26 kör ölçümü. Verandanın gövdeden 173 cm taşan parçası Motor'da yok (iki yanı açık köşe verandasına taşan veranda bağlanmıyor); İş Emri'nin varsayımlarında."
+}

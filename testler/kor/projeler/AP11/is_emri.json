@@ -1,0 +1,84 @@
+{
+  "is_emri_no": "KOR-AP11",
+  "revizyon": 1,
+  "talep": {
+    "bayi": {"kod": "AP11", "ad": "Bayi AP-11"},
+    "musteri_adi": "AP-11",
+    "metin": "İE-26 kör ölçüm: AP-11 (beşik, gömme veranda 627,5 × 204) montaj paftasından okundu (2 Kasım 2026). Konumlar cm, aks; x sol dış yüzden; dizilim arka-sol olduğundan mahallerin y'si arka dış yüzden (Motor'un kuralı), açıklıkların cepheleri ve dikmeler gerçek çerçevede (ön: giriş cephesi)."
+  },
+  "yapi": {
+    "sistem": "prefabrik",
+    "kat_sayisi": 1,
+    "duvar_yuksekligi_cm": 250,
+    "duvar_kalinligi_cm": {"dis": 10, "ic": 6},
+    "olcu_kaynagi": "dis_olcu",
+    "dis_olcu_cm": {"x": 1166, "y": 726},
+    "referans_model": "AP-11",
+    "grid": {"x_pano": 9.5, "y_pano": 6},
+    "kisa_kenar": "y",
+    "giris_cephesi": "on",
+    "dis_dusey_duvar": "cevre_aks_disinda",
+    "dizilim": {
+      "baslangic": "arka-sol",
+      "hiza": "tam_izgara",
+      "dis_duvar_t_bolme": false,
+      "pencere": "oda_ortasi",
+      "kapi": "mantik",
+      "kose": "oda",
+      "son_pano": "kosu",
+      "kapi_yeri": "ortada",
+      "dis_pano_dayanagi": [{"y": 716, "aralik_cm": [512, 716]}]
+    },
+    "ek_akslar_cm": {"x": [], "y": [517, 452.25]}
+  },
+  "mahaller": [
+    {"ad": "SALON+MUTFAK", "tur": "salon", "konum_cm": [[5, 10, 381.5, 517]]},
+    {"ad": "YATAK ODASI 1", "tur": "yatak_odasi", "konum_cm": [[381.5, 10, 695.25, 323.75]]},
+    {"ad": "BANYO", "tur": "banyo", "konum_cm": [[695.25, 10, 883.5, 323.75]]},
+    {"ad": "YATAK ODASI 2", "tur": "yatak_odasi", "konum_cm": [[883.5, 10, 1161, 452.25]]},
+    {"ad": "HOL", "tur": "antre_hol", "konum_cm": [[381.5, 323.75, 883.5, 452.25], [381.5, 452.25, 632.5, 517]]},
+    {"ad": "YATAK ODASI 3", "tur": "yatak_odasi", "konum_cm": [[632.5, 452.25, 1161, 716]]},
+    {"ad": "VERANDA", "tur": "veranda", "konum_cm": [[5, 517, 632.5, 716]]}
+  ],
+  "acik_sinirlar": [],
+  "acikliklar": [
+    {"tur": "dis_kapi", "olcu": 90, "arasi": ["VERANDA", "HOL"], "pano": 1},
+    {"tur": "pencere", "olcu": "180x180", "mahal": "SALON+MUTFAK", "duvar": "on", "acilis": "surgulu", "pano": 0},
+    {"tur": "pencere", "olcu": "120x180", "mahal": "SALON+MUTFAK", "duvar": "sol"},
+    {"tur": "pencere", "olcu": "120x180", "mahal": "YATAK ODASI 1", "duvar": "arka", "pano": 1},
+    {"tur": "pencere", "olcu": "60x40", "mahal": "BANYO", "duvar": "arka", "pano": 0},
+    {"tur": "pencere", "olcu": "120x180", "mahal": "YATAK ODASI 2", "duvar": "sag", "pano": 1},
+    {"tur": "pencere", "olcu": "120x180", "mahal": "YATAK ODASI 3", "duvar": "sol", "pano": 0},
+    {"tur": "pencere", "olcu": "120x180", "mahal": "YATAK ODASI 3", "duvar": "on", "pano": 2},
+    {"tur": "ic_kapi", "olcu": 82, "arasi": ["HOL", "SALON+MUTFAK"], "pano": 0},
+    {"tur": "ic_kapi", "olcu": 82, "arasi": ["HOL", "YATAK ODASI 1"], "duvar_ucu": "sag"},
+    {"tur": "ic_kapi", "olcu": 82, "arasi": ["HOL", "BANYO"], "duvar_ucu": "sol"},
+    {"tur": "ic_kapi", "olcu": 82, "arasi": ["HOL", "YATAK ODASI 2"], "duvar_ucu": "arka"},
+    {"tur": "ic_kapi", "olcu": 82, "arasi": ["HOL", "YATAK ODASI 3"], "pano": 0}
+  ],
+  "dikmeler": [[0, 0]],
+  "cati": {
+    "tip": "besik",
+    "egim_yuzde": 32.88,
+    "sacak_cm": 30,
+    "topuk_cm": 10,
+    "makas_yonu": "kisa_kenar",
+    "makas_ekseni": "y"
+  },
+  "ozellikler": {"Panel Türü": "Pres Panel", "Çatı Şekli": "Beşik", "Çatı Kaplaması": "OSB + Nem Bariyeri + Trapez Kaplama", "Çatı Kaplama Rengi": "Antrasit Gri", "Dış Kapı": "Çelik Standart", "İç Kapılar": "Standart Amerikan", "Dış Cephe Boya": "?", "İç Cephe Boya": "?", "Pencere Rengi": "Beyaz", "Tavan": "Ters", "Saçak ve Alın Rengi": "Antrasit Gri", "Açıklama": "1- İç cephe alçıpan kaplama olacak. 2- Çatı izolasyon Knauf Earthwool. 3- Vitrifiye ve armatür alıcıya ait."},
+  "alici_ait": {"kalemler": ["vitrifiye"], "kaynak": "paftanın açıklaması: vitrifiye ve armatür alıcıya ait"},
+  "cikti": {
+    "pdf": true,
+    "dxf": true,
+    "pafta": "A2",
+    "icerik": ["aksli_plan", "alanli_kopya", "montaj_kopyasi", "on_gorunus", "cati_profili", "ozellik_tablosu"]
+  },
+  "varsayimlar": [
+    "Köşe ve ızgara (İE-17 kuralı; paftada aynı): makas y'yi geçer (makas planı M1–M11 boyuna dizili), kısa kenar y. Ön ve arka duvar köşeden geçer, x ızgarası duvar ekseninden (5 + 125,5k; 381,5, 883,5 ve 1009 paftada ek); yan duvarlar araya girer, y ızgarası arka iç yüzden.",
+    "Veranda sol önde, gömme (627,5 × 204), ön ve sol açık; sol ön köşede 10 × 10 dikme (paftada D tipi kutu profil, önde E tipi kiriş). Verandanın arka duvarı (Motor çerçevesinde y 517) ve yatak odası 2'nin ön duvarı (y 452,25) ek aks.",
+    "Pencereler: salonun sol penceresi odanın ortasında (dizilim.pencere: oda_ortasi; paftada 62,75 + 125,5 + 62,75); ötekiler paftadaki yerine en yakın Motor panosunda (pano dizini). 180/200 sürgülü: Motor'un pencere boyu en çok 180, 180x180 sürgülü yazıldı (paftada odaya ortalı 251'lik pano; Motor'da ızgaradaki iki pano). 120/180 çift açılır: Motor'da açılış yazılmaz (yalnız sürgülü), ölçü aynı.",
+    "Kapılar paftadaki duvarda ve panoda; koridordan yatak odası 1, banyo ve yatak odası 2'ye açılan kapılar paftadaki gibi duvarın kavşak ucunda (duvar_ucu); verandaya bakan yatak odası 3 duvarının panoları ön dış yüzün aksından (dis_pano_dayanagi, pencere 125,5'lik panoda); genişlikler paftada yazılı değil: dış kapı 90, iç kapı 82 (Motor'un ölçüsü). Oda adları ve alanları paftanın elektrik planından (salon + mutfak 18,49, yatak odaları 9,56 / 11,75 / 13,68, banyo 5,66, hol 7,53 m²).",
+    "Çatı: beşik, makas y'yi geçer; paftada eğim ve saçak yazılı değil: eğim 18,2° (%32,88, prefabrik evlerin eğimi), saçak 30 (paftanın çatı alanı 101 m² ve 3 × 410'luk aşık sırası 1226 = 1166 + 2 × 30 ile), topuk 10. Kaplama paftanın kaplama sayfasından: OSB + nem bariyeri + trapez."
+  ],
+  "eksikler": []
+}
